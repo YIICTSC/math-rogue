@@ -32,17 +32,19 @@ export interface CoopStartPayload {
   roomCode: string;
   participants: CoopParticipantPayload[];
   battleMode: 'TURN_BASED' | 'REALTIME';
+  visualTheme?: 'elementary' | 'high-school';
 }
 
 interface CoopSetupScreenProps {
   player: Player;
   onStart: (payload: CoopStartPayload) => void;
   onClose: () => void;
+  visualTheme: 'elementary' | 'high-school';
 }
 
 const MAX_COOP_PLAYERS = 4;
 
-const CoopSetupScreen: React.FC<CoopSetupScreenProps> = ({ player, onStart, onClose }) => {
+const CoopSetupScreen: React.FC<CoopSetupScreenProps> = ({ player, onStart, onClose, visualTheme }) => {
   const [mode, setMode] = useState<'SELECT' | 'HOST' | 'JOIN'>('SELECT');
   const [myName, setMyName] = useState('');
   const [roomCode, setRoomCode] = useState('');
@@ -111,7 +113,8 @@ const CoopSetupScreen: React.FC<CoopSetupScreenProps> = ({ player, onStart, onCl
           name: myName.trim(),
           roomCode: data.roomCode || roomCode,
           participants: (data.participants && data.participants.length > 0) ? data.participants : latestParticipants,
-          battleMode: data.battleMode === 'REALTIME' ? 'REALTIME' : 'TURN_BASED'
+          battleMode: data.battleMode === 'REALTIME' ? 'REALTIME' : 'TURN_BASED',
+          visualTheme: data.visualTheme
         });
       }
     };
@@ -192,12 +195,13 @@ const CoopSetupScreen: React.FC<CoopSetupScreenProps> = ({ player, onStart, onCl
       name: myName.trim(),
       roomCode,
       participants: currentParticipants,
-      battleMode
+      battleMode,
+      visualTheme
     };
     startTriggeredRef.current = true;
     onStart(payload);
     try {
-      p2pService.send({ type: 'COOP_START', roomCode, participants: startParticipants, battleMode });
+      p2pService.send({ type: 'COOP_START', roomCode, participants: startParticipants, battleMode, visualTheme });
     } catch (err) {
       console.warn('Failed to broadcast COOP_START, but local coop session was started.', err);
     }

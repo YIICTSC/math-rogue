@@ -41,7 +41,7 @@ const DifficultySelectionScreen: React.FC<DifficultySelectionScreenProps> = ({
           onClick={onBack}
           className="mb-2 flex w-fit items-center gap-2 rounded border border-slate-600 bg-slate-900 px-3 py-2 text-sm font-bold text-slate-200 hover:bg-slate-800 sm:mb-4"
         >
-          <ArrowLeft size={16} /> {trans('もどる', languageMode)}
+          <ArrowLeft size={16} /> {trans('戻る', languageMode)}
         </button>
 
         <div className="mb-3 text-center sm:mb-6">
@@ -78,8 +78,8 @@ const DifficultySelectionScreen: React.FC<DifficultySelectionScreenProps> = ({
               >
                 <div className="mb-2 flex items-center justify-between sm:mb-3">
                   <div>
-                    <div className="text-[10px] font-black text-amber-300 sm:text-xs">難易度 {config.level === 10 ? 'A' : config.level}</div>
-                    <div className="text-xl font-black text-white sm:text-2xl">{config.name}</div>
+                    <div className="text-[10px] font-black text-amber-300 sm:text-xs">{trans('難易度', languageMode)} {config.level === 10 ? 'A' : config.level}</div>
+                    <div className="text-xl font-black text-white sm:text-2xl">{trans(config.name, languageMode)}</div>
                   </div>
                   {locked ? (
                     <Lock className="text-slate-500" size={24} />
@@ -92,11 +92,11 @@ const DifficultySelectionScreen: React.FC<DifficultySelectionScreenProps> = ({
                 <div className="flex flex-wrap gap-2">
                   {features.map(feature => (
                     <span key={feature} className="rounded border border-slate-700 bg-black/30 px-2 py-0.5 text-[10px] font-bold text-slate-200 sm:py-1 sm:text-[11px]">
-                      {feature}
+                      {trans(feature, languageMode)}
                     </span>
                   ))}
                 </div>
-                {locked && <div className="mt-2 text-[10px] font-bold text-slate-500 sm:mt-3 sm:text-xs">前の難易度をクリアすると解禁</div>}
+                {locked && <div className="mt-2 text-[10px] font-bold text-slate-500 sm:mt-3 sm:text-xs">{trans('前の難易度をクリアすると解禁', languageMode)}</div>}
               </button>
             );
           })}

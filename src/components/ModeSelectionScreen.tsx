@@ -405,12 +405,14 @@ const getCategoryClasses = (color: string) => {
 };
 
 const getDisplayGradeLabel = (grade: number, languageMode: LanguageMode) =>
-  languageMode === 'JAPANESE'
-    ? (grade <= 6 ? `${grade}年` : `中${grade - 6}`)
-    : (grade <= 6 ? `${grade}ねん` : `ちゅう${grade - 6}`);
+  languageMode === 'ENGLISH'
+    ? (grade <= 6 ? `Grade ${grade}` : `JH ${grade - 6}`)
+    : languageMode === 'JAPANESE'
+      ? (grade <= 6 ? `${grade}年` : `中${grade - 6}`)
+      : (grade <= 6 ? `${grade}ねん` : `ちゅう${grade - 6}`);
 
 const getDisplayTermLabel = (term: number, languageMode: LanguageMode) =>
-  languageMode === 'JAPANESE' ? `${term}学期` : `${term}がっき`;
+  languageMode === 'ENGLISH' ? `Term ${term}` : languageMode === 'JAPANESE' ? `${term}学期` : `${term}がっき`;
 
 const getKanjiGradeMode = (grade: number): string => `KANJI_${grade}`;
 
@@ -489,7 +491,7 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
 
   const isMastered = (mode: string) => !!modeMasteryMap[mode];
   const getCategoryLabel = (id: SubjectCategoryType) => transProblemSubjectName(CATEGORY_LABELS[id] || id, languageMode);
-  const getSubLabel = (id: string, fallback: string) => trans(SUBMODE_LABELS[id] || fallback, languageMode);
+  const getSubLabel = (_id: string, fallback: string) => fallback;
   const getUnitCorrectCount = (unit: { mode?: string; modes?: string[] }) => {
     if (unit.modes && unit.modes.length > 0) {
       return unit.modes.reduce((total, mode) => total + (modeCorrectCounts[mode] || 0), 0);
@@ -574,7 +576,7 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
         return {
           mode: GameMode.ENGLISH_MIXED as string,
           canStart: true,
-          label: `${getCategoryLabel(selectedCategory.id)} / ${trans('ミックス', languageMode)}`,
+          label: `${getCategoryLabel(selectedCategory.id)} / ミックス`,
         };
       }
     }
@@ -665,7 +667,7 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
                     }}
                     className={`relative w-full p-1.5 pr-12 sm:p-2 sm:pr-14 rounded-lg border text-left text-[10px] sm:text-xs font-bold leading-snug transition-colors ${isSelected ? `${theme.bg} border-white text-white` : 'bg-slate-700 border-slate-600 text-gray-200 hover:border-slate-400'}`}
                   >
-                    <span className="block">{unit.name}</span>
+                    <span className="block" data-allow-japanese="true">{unit.name}</span>
                     <span className="absolute right-1 top-1 rounded-full bg-black/45 border border-white/15 px-1 py-0.5 text-[7px] sm:right-1.5 sm:top-1.5 sm:px-1.5 sm:text-[8px] font-mono leading-none text-white/90">
                       {getUnitCorrectCount(unit)}問
                     </span>
@@ -713,7 +715,7 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
           </div>
           {selectedCategory.id === 'SOCIAL' && (
             <div>
-              <div className="text-[10px] text-gray-400 mb-1">{languageMode === 'JAPANESE' ? '単独モード' : 'たんどく モード'}</div>
+              <div className="text-[10px] text-gray-400 mb-1">{trans('単独モード', languageMode)}</div>
               <div className="grid grid-cols-3 gap-1.5">
                 {selectedCategory.subModes.filter((sub) => !sub.id.includes('SO')).map((sub) => (
                   <button
@@ -724,7 +726,7 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
                     }}
                     className={`p-1.5 rounded border text-[10px] font-bold transition-colors ${selectedSubModeId === sub.id ? `${theme.bg} border-white text-white` : 'bg-slate-700 border-slate-600 text-gray-300 hover:bg-slate-600'}`}
                   >
-                    {getSubLabel(sub.id, sub.name)}
+                    <span data-allow-japanese="true">{getSubLabel(sub.id, sub.name)}</span>
                   </button>
                 ))}
               </div>
@@ -740,7 +742,7 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
       return (
         <div className="space-y-3">
           <div>
-            <div className="text-[10px] text-gray-400 mb-1">{languageMode === 'JAPANESE' ? '単語' : 'たんご'}</div>
+            <div className="text-[10px] text-gray-400 mb-1">{trans('単語', languageMode)}</div>
             <div className="grid grid-cols-2 gap-1.5">
               {words.map((sub) => (
                 <button
@@ -748,13 +750,13 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
                   onClick={() => { setSelectedSubModeId(sub.id); audioService.playSound('select'); }}
                   className={`p-2 rounded-lg border text-[10px] font-bold transition-colors ${selectedSubModeId === sub.id ? `${theme.bg} border-white text-white` : 'bg-slate-700 border-slate-600 text-gray-300 hover:bg-slate-600'}`}
                 >
-                  {getSubLabel(sub.id, sub.name)}
+                  <span data-allow-japanese="true">{getSubLabel(sub.id, sub.name)}</span>
                 </button>
               ))}
             </div>
           </div>
           <div>
-            <div className="text-[10px] text-gray-400 mb-1">{languageMode === 'JAPANESE' ? '会話' : 'かいわ'}</div>
+            <div className="text-[10px] text-gray-400 mb-1">{trans('会話', languageMode)}</div>
             <div className="grid grid-cols-3 gap-1.5">
               {convs.map((sub) => (
                 <button
@@ -762,14 +764,14 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
                   onClick={() => { setSelectedSubModeId(sub.id); audioService.playSound('select'); }}
                   className={`p-2 rounded-lg border text-[10px] font-bold transition-colors ${selectedSubModeId === sub.id ? `${theme.bg} border-white text-white` : 'bg-slate-700 border-slate-600 text-gray-300 hover:bg-slate-600'}`}
                 >
-                  {getSubLabel(sub.id, sub.name)}
+                  <span data-allow-japanese="true">{getSubLabel(sub.id, sub.name)}</span>
                 </button>
               ))}
               <button
                 onClick={() => { setSelectedSubModeId('ENGLISH_MIXED'); audioService.playSound('select'); }}
                 className={`p-2 rounded-lg border text-[10px] font-bold transition-colors ${selectedSubModeId === 'ENGLISH_MIXED' ? `${theme.bg} border-white text-white` : 'bg-slate-700 border-slate-600 text-gray-300 hover:bg-slate-600'}`}
               >
-                {trans('ミックス', languageMode)}
+                <span data-allow-japanese="true">ミックス</span>
               </button>
             </div>
           </div>
@@ -791,7 +793,7 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
               className={`p-2 rounded-lg border text-left text-[10px] md:text-xs font-bold transition-colors ${selectedSubModeId === sub.id ? `${theme.bg} border-white text-white` : 'bg-slate-700 border-slate-600 text-gray-300 hover:bg-slate-600'}`}
             >
               {renderMasteryPrefix(sub.mode)}
-              {getSubLabel(sub.id, sub.name)}
+              <span data-allow-japanese="true">{getSubLabel(sub.id, sub.name)}</span>
             </button>
           ))}
         </div>
@@ -814,7 +816,7 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
                 className="bg-slate-800 border border-slate-600 p-1.5 rounded hover:border-white transition-colors text-[10px] md:text-xs font-bold truncate"
               >
                 {renderMasteryPrefix(sub.mode)}
-                {getSubLabel(sub.id, sub.name)}
+                <span data-allow-japanese="true">{getSubLabel(sub.id, sub.name)}</span>
               </button>
             ))}
           </div>
@@ -903,7 +905,7 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
                     }}
                     className={`relative w-full p-1.5 pr-12 sm:pr-14 rounded text-[10px] md:text-xs font-bold leading-snug border text-left transition-colors ${selectedMathUnitIds.includes(unit.id) ? `${theme.bg} border-white text-white` : 'bg-slate-700 border-slate-600 text-gray-300 hover:border-slate-400'}`}
                   >
-                    <span className="block">{unit.name}</span>
+                    <span className="block" data-allow-japanese="true">{unit.name}</span>
                     <span className="absolute right-1 top-1 rounded-full bg-black/45 border border-white/15 px-1 py-0.5 text-[7px] sm:right-1.5 sm:top-1.5 sm:px-1.5 sm:text-[8px] md:text-[9px] font-mono leading-none text-white/90">
                       {getUnitCorrectCount(unit)}問
                     </span>
@@ -941,7 +943,7 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
             {words.map(sub => (
               <button key={sub.id} onClick={() => handleSelect(sub.mode)} className="bg-slate-800 border border-slate-600 p-1.5 rounded hover:border-indigo-400 text-[10px] font-bold">
                 {renderMasteryPrefix(sub.mode)}
-                {getSubLabel(sub.id, sub.name)}
+                <span data-allow-japanese="true">{getSubLabel(sub.id, sub.name)}</span>
               </button>
             ))}
           </div>
@@ -950,12 +952,12 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
             {convs.map(sub => (
               <button key={sub.id} onClick={() => handleSelect(sub.mode)} className="bg-pink-900/40 border border-pink-500/50 p-1 rounded hover:bg-pink-800 text-[10px] font-bold">
                 {renderMasteryPrefix(sub.mode)}
-                {getSubLabel(sub.id, sub.name)}
+                <span data-allow-japanese="true">{getSubLabel(sub.id, sub.name)}</span>
               </button>
             ))}
             <button onClick={() => handleSelect(GameMode.ENGLISH_MIXED)} className="bg-indigo-900/60 border border-indigo-500 p-1 rounded hover:bg-indigo-800 text-[10px] font-bold">
               {renderMasteryPrefix(GameMode.ENGLISH_MIXED)}
-              ミックス
+              <span data-allow-japanese="true">ミックス</span>
             </button>
           </div>
         </div>
@@ -1006,7 +1008,7 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
           <div className="lg:col-span-3 flex flex-col gap-3 overflow-y-auto custom-scrollbar shrink-0">
             <div className="bg-black/40 rounded-xl border border-slate-800 p-3">
               <div className="text-[10px] uppercase tracking-[0.2em] text-slate-500 mb-2">{trans('選択中', languageMode)}</div>
-              <div className="text-sm font-bold text-yellow-300">{selectionPreview.label}</div>
+              <div className="text-sm font-bold text-yellow-300" data-allow-japanese="true">{selectionPreview.label}</div>
             </div>
             {isUnitCategory && (
               <div className="bg-black/40 rounded-xl border border-slate-800 p-3 text-xs text-slate-300">

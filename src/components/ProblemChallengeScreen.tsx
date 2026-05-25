@@ -195,9 +195,11 @@ interface ActiveChallengeConfig {
 }
 
 const getGradeLabel = (grade: number, languageMode: LanguageMode) =>
-  languageMode === 'JAPANESE'
-    ? (grade <= 6 ? `小${grade}` : `中${grade - 6}`)
-    : (grade <= 6 ? `しょう${grade}` : `ちゅう${grade - 6}`);
+  languageMode === 'ENGLISH'
+    ? (grade <= 6 ? `Grade ${grade}` : `JH ${grade - 6}`)
+    : languageMode === 'JAPANESE'
+      ? (grade <= 6 ? `小${grade}` : `中${grade - 6}`)
+      : (grade <= 6 ? `しょう${grade}` : `ちゅう${grade - 6}`);
 
 const getMathGradeMode = (grade: number): GameMode => {
   switch (grade) {
@@ -502,12 +504,13 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
   const [records, setRecords] = useState<Record<string, number>>({});
   const [isQuitting, setIsQuitting] = useState(false);
   const isUnitCategory = selectedCategory.id === 'MATH_GRADES' || selectedCategory.id === 'KOKUGO_GRADES' || selectedCategory.id === 'ENGLISH' || selectedCategory.id === 'SCIENCE' || selectedCategory.id === 'SOCIAL' || selectedCategory.id === 'SUMMARY';
+  const problemLanguageMode: LanguageMode = languageMode === 'ENGLISH' ? 'JAPANESE' : languageMode;
   const canSelectAnswerMode = selectedCategory.id === 'MATH' || selectedCategory.id === 'KANJI' || selectedCategory.id === 'KANKEN' || selectedCategory.id === 'HARD_KANJI';
   
   // Voice feature control
   const [voiceEnabled, setVoiceEnabled] = useState(() => storageService.getEnglishVoiceEnabled());
   const getCategoryLabel = (name: string) => transProblemSubjectName(name, languageMode);
-  const getSubLabel = (sub: SubModeConfig) => trans(sub.name, languageMode);
+  const getSubLabel = (sub: SubModeConfig) => sub.name;
 
   useEffect(() => {
     audioService.init();
@@ -681,6 +684,7 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
     
     return (
       <div
+        data-allow-japanese="true"
         className="w-full h-full relative bg-black bg-cover bg-center flex flex-col"
         style={{ backgroundImage: `url(${assetUrl('sprites/backgrounds/learning-rogue/compendium-library.webp')})` }}
       >
@@ -698,7 +702,7 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
             onClick={handleFinish}
             className="bg-red-900/60 hover:bg-red-800 border border-red-500 px-4 py-1 rounded text-xs font-bold transition-colors flex items-center gap-1"
           >
-            <LogOut size={14}/> 終了
+            <LogOut size={14}/> {trans('終了', problemLanguageMode)}
           </button>
         </div>
 
@@ -755,9 +759,9 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
             <div className="absolute inset-0 bg-black/90 z-[100] flex items-center justify-center animate-in fade-in duration-300">
                 <div className="text-center">
                     <Trophy size={64} className="text-yellow-400 mx-auto mb-4 animate-bounce" />
-                    <h3 className="text-2xl font-bold text-white mb-2">チャレンジ終了！</h3>
-                    <p className="text-gray-400">今回の記録: <span className="text-yellow-400 text-xl font-bold">{streak}</span> 問</p>
-                    <p className="text-green-400 text-xs mt-4 animate-pulse">※累計正解数に加算されました</p>
+                    <h3 className="text-2xl font-bold text-white mb-2">{trans('チャレンジ終了！', problemLanguageMode)}</h3>
+                    <p className="text-gray-400">{trans('今回の記録', problemLanguageMode)}: <span className="text-yellow-400 text-xl font-bold">{streak}</span> {trans('問', problemLanguageMode)}</p>
+                    <p className="text-green-400 text-xs mt-4 animate-pulse">{trans('※累計正解数に加算されました', problemLanguageMode)}</p>
                 </div>
             </div>
         )}
@@ -862,9 +866,9 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
                               onClick={() => toggleMathUnit(unit.id)}
                               className={`relative w-full p-1.5 pr-12 sm:p-2 sm:pr-14 rounded-lg border text-left text-[10px] sm:text-xs font-bold leading-snug transition-colors ${isSelected ? `${theme.bg} border-white text-white` : 'bg-slate-700 border-slate-600 text-gray-200 hover:border-slate-400'}`}
                             >
-                              <span className="block">{unit.name}</span>
+                              <span className="block" data-allow-japanese="true">{unit.name}</span>
                               <span className="absolute right-1 top-1 rounded-full bg-black/45 border border-white/15 px-1 py-0.5 text-[7px] sm:right-1.5 sm:top-1.5 sm:px-1.5 sm:text-[8px] font-mono leading-none text-white/90">
-                                {getUnitCorrectCount(unit)}問
+                                {getUnitCorrectCount(unit)}{trans('問', languageMode)}
                               </span>
                             </button>
                           );
@@ -873,7 +877,7 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
                     </div>
 
                     <div className="bg-black/40 px-2 py-1 rounded border border-slate-700 text-[10px] text-slate-300">
-                      {trans('出題範囲', languageMode)}: {previewSelection?.subMode.name}
+                      {trans('出題範囲', languageMode)}: <span data-allow-japanese="true">{previewSelection ? previewSelection.subMode.name : ''}</span>
                     </div>
                     {selectedMathUnitIds.length === 0 && (
                       <div className="text-[10px] text-amber-300">
@@ -897,7 +901,7 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
                             className={`p-2 rounded-lg border text-left text-[10px] md:text-xs font-bold transition-colors ${isSelected ? `${theme.bg} border-white text-white` : 'bg-slate-700 border-slate-600 text-gray-300 hover:bg-slate-600'}`}
                           >
                             <div className="flex justify-between items-center mb-1 w-full truncate gap-2">
-                                <span className={isSelected ? 'text-white' : ''}>{getSubLabel(sub)}</span>
+                                <span className={isSelected ? 'text-white' : ''} data-allow-japanese="true">{getSubLabel(sub)}</span>
                                 {isSelected && <CheckCircle size={12} className="text-white animate-pulse shrink-0" />}
                             </div>
                             <div className="bg-black/40 px-1.5 rounded text-[8px] md:text-[9px] font-mono text-white/90 border border-white/10 w-fit">
@@ -916,11 +920,11 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
           <div className="lg:col-span-3 flex flex-col gap-3 overflow-y-auto custom-scrollbar shrink-0">
              <div className="bg-black/40 rounded-xl border border-slate-800 p-3">
               <div className="text-[10px] uppercase tracking-[0.2em] text-slate-500 mb-2">{trans('選択中', languageMode)}</div>
-              <div className="text-xs font-bold text-emerald-400">{getCategoryLabel(selectedCategory.name)} / {footerSelectionLabel}</div>
+              <div className="text-xs font-bold text-emerald-400">{getCategoryLabel(selectedCategory.name)} / <span data-allow-japanese="true">{footerSelectionLabel}</span></div>
             </div>
             {canSelectAnswerMode && (
               <div className="bg-black/40 rounded-xl border border-slate-800 p-3 text-xs text-slate-300">
-                答え方: <span className="font-bold text-white">{answerMode === 'CHOICE' ? '4択' : '入力'}</span>
+                {trans('答え方', languageMode)}: <span className="font-bold text-white">{trans(answerMode === 'CHOICE' ? '4択' : '入力', languageMode)}</span>
               </div>
             )}
             
@@ -953,7 +957,7 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
                 >
                   {BGM_OPTIONS.map(bgm => (
                     <option key={bgm.id} value={bgm.id}>
-                      {bgm.name}
+                      {trans(bgm.name, languageMode)}
                     </option>
                   ))}
                 </select>
@@ -962,7 +966,7 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
             {selectedCategory.id === 'ENGLISH' && (
                 <div className="flex flex-col shrink-0">
                     <h3 className="text-[10px] md:text-xs font-bold text-gray-400 mb-1.5 flex items-center gap-2 uppercase tracking-tight">
-                    <Volume2 size={10} className="text-emerald-500"/> 読み上げ
+                    <Volume2 size={10} className="text-emerald-500"/> {trans('読み上げ', languageMode)}
                     </h3>
                     <button 
                         onClick={toggleVoice}
@@ -970,7 +974,7 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
                     >
                         <div className="flex items-center gap-2">
                             {voiceEnabled ? <Volume2 size={14} className="text-cyan-400"/> : <VolumeX size={14}/>}
-                            <span className="text-[10px]">{voiceEnabled ? 'オン' : 'オフ'}</span>
+                            <span className="text-[10px]">{trans(voiceEnabled ? 'オン' : 'オフ', languageMode)}</span>
                         </div>
                         <div className={`w-7 h-3.5 rounded-full relative transition-colors ${voiceEnabled ? 'bg-cyan-500' : 'bg-gray-600'}`}>
                             <div className={`absolute top-0.5 w-2.5 h-2.5 bg-white rounded-full transition-all ${voiceEnabled ? 'left-4' : 'left-0.5'}`}></div>
@@ -980,7 +984,7 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
             )}
             
             <button onClick={onBack} className="mt-auto text-slate-400 hover:text-white flex items-center gap-2 transition-colors py-1 text-xs">
-              <ArrowLeft size={14} /> もどる
+              <ArrowLeft size={14} /> {trans('戻る', languageMode)}
             </button>
           </div>
         </div>

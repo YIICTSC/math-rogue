@@ -54,7 +54,7 @@ import { generateDungeonMap } from './services/mapGenerator';
 import { storageService } from './services/storageService';
 import { generateEvent, generateLegacyEvent } from './services/eventService';
 import { getUpgradedCard, synthesizeCards } from './utils/cardUtils';
-import { trans } from './utils/textUtils';
+import { sanitizeEnglishText, trans } from './utils/textUtils';
 import { assetUrl } from './utils/assetPaths';
 import { getDifficultyConfig } from './config/difficulty';
 import { CARD_ERASER_TEMPLATE_ID, CARD_ERASER_NAME, eraseCardEffect, getErasableEffectOptions } from './utils/cardEraser';
@@ -548,7 +548,7 @@ const App: React.FC = () => {
         return Object.values(CARDS_LIBRARY).filter(c => {
             // Basic type filtering
             if (c.type === CardType.STATUS || c.type === CardType.CURSE) return false;
-            if (visualTheme !== 'high-school' && c.visualTheme === 'high-school') return false;
+            if (coopSyncedVisualTheme !== 'high-school' && c.visualTheme === 'high-school') return false;
 
             const cleanName = c.name.trim();
 
@@ -703,10 +703,61 @@ const App: React.FC = () => {
     }, []);
 
     const [languageMode, setLanguageMode] = useState<LanguageMode>(() => storageService.getLanguageMode() || 'JAPANESE');
+    useEffect(() => {
+        if (languageMode !== 'ENGLISH' || typeof document === 'undefined') return;
+
+        const shouldSkip = (element: Element | null) => {
+            if (!element) return true;
+            const tagName = element.tagName.toLowerCase();
+            return tagName === 'script' || tagName === 'style' || tagName === 'textarea' || tagName === 'input' || Boolean(element.closest('[data-allow-japanese]'));
+        };
+
+        const sanitizeTextNode = (node: Node) => {
+            if (node.nodeType !== Node.TEXT_NODE || shouldSkip(node.parentElement)) return;
+            const next = sanitizeEnglishText(node.textContent || '');
+            if (next !== node.textContent) node.textContent = next;
+        };
+
+        const sanitizeTree = (root: ParentNode) => {
+            const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
+            let node = walker.nextNode();
+            while (node) {
+                sanitizeTextNode(node);
+                node = walker.nextNode();
+            }
+        };
+
+        const run = () => sanitizeTree(document.body);
+        const frame = window.requestAnimationFrame(run);
+        const observer = new MutationObserver((mutations) => {
+            mutations.forEach((mutation) => {
+                if (mutation.type === 'characterData') {
+                    sanitizeTextNode(mutation.target);
+                    return;
+                }
+                mutation.addedNodes.forEach((node) => {
+                    if (node.nodeType === Node.TEXT_NODE) {
+                        sanitizeTextNode(node);
+                    } else if (node.nodeType === Node.ELEMENT_NODE) {
+                        sanitizeTree(node as Element);
+                    }
+                });
+            });
+        });
+        observer.observe(document.body, { childList: true, characterData: true, subtree: true });
+
+        return () => {
+            window.cancelAnimationFrame(frame);
+            observer.disconnect();
+        };
+    }, [languageMode]);
     const [visualTheme, setVisualTheme] = useState<VisualThemeId>(() =>
         window.localStorage.getItem('learning-rogue-visual-theme') === 'high-school' ? 'high-school' : 'elementary'
     );
-    const themedCharacters = useMemo(() => getThemedCharacters(CHARACTERS, visualTheme), [visualTheme]);
+    const coopSyncedVisualTheme: VisualThemeId = gameState.challengeMode === 'COOP'
+        ? (gameState.visualTheme || visualTheme)
+        : visualTheme;
+    const themedCharacters = useMemo(() => getThemedCharacters(CHARACTERS, coopSyncedVisualTheme), [coopSyncedVisualTheme]);
     const [currentNarrative, setCurrentNarrative] = useState<string>("...");
     const [currentBattleBackgroundId, setCurrentBattleBackgroundId] = useState<string>('classroom');
     const [turnLog, setTurnLog] = useState<string>("あなたのターン");
@@ -727,9 +778,9 @@ const App: React.FC = () => {
         void audioService.setBgmTheme(visualTheme);
     }, [visualTheme]);
     const getRandomCurrentStoryIndex = useCallback(() => {
-        const storyCount = visualTheme === 'high-school' ? HIGH_SCHOOL_STORIES.length : GAME_STORIES.length;
+        const storyCount = coopSyncedVisualTheme === 'high-school' ? HIGH_SCHOOL_STORIES.length : GAME_STORIES.length;
         return Math.floor(Math.random() * storyCount);
-    }, [visualTheme]);
+    }, [coopSyncedVisualTheme]);
     const [unlockCheckStartMathCorrect, setUnlockCheckStartMathCorrect] = useState<number>(0);
     const [debugMenuStartClearCount, setDebugMenuStartClearCount] = useState<number>(0);
     const [debugMenuStartMathCorrect, setDebugMenuStartMathCorrect] = useState<number>(0);
@@ -2834,7 +2885,10 @@ const App: React.FC = () => {
     };
 
     const toggleLanguage = () => {
-        const nextMode = languageMode === 'JAPANESE' ? 'HIRAGANA' : 'JAPANESE';
+        const nextMode: LanguageMode =
+            languageMode === 'JAPANESE' ? 'HIRAGANA' :
+            languageMode === 'HIRAGANA' ? 'ENGLISH' :
+            'JAPANESE';
         setLanguageMode(nextMode);
         storageService.saveLanguageMode(nextMode);
         audioService.playSound('select');
@@ -5631,12 +5685,15 @@ const App: React.FC = () => {
                                         name: e.name,
                                         textureRef: randomCardTemplate.textureRef,
                                         enemyIllustrationName: e.name,
+                                        enemyIllustrationEnemyType: e.enemyType,
+                                        enemyIllustrationPhase: e.phase,
                                         enemyIllustrationNames: Array.from(new Set([
                                             e.name,
                                             e.enemyType,
                                             e.phase === 2 ? `${e.enemyType}_2` : undefined,
                                             e.enemyType === 'THE_HEART' && e.phase === 2 ? 'THE_HEART_PHASE2' : undefined,
                                         ].filter(Boolean) as string[])),
+                                        visualTheme: stateRef.current.visualTheme || visualTheme,
                                         rarity: 'SPECIAL',
                                         exhaust: true,
 
@@ -9576,6 +9633,9 @@ const App: React.FC = () => {
             }
 
             if (data.type === 'COOP_STATE_SYNC' && !coopSession.isHost) {
+                if (data.state.visualTheme) {
+                    setVisualTheme(data.state.visualTheme);
+                }
                 if (data.aux) {
                     setShopCards(data.aux.shopCards || []);
                     setShopRelics(data.aux.shopRelics || []);
@@ -10475,7 +10535,7 @@ const App: React.FC = () => {
                                 title="言語切替"
                             >
                                 <Languages size={13} className="mr-1 shrink-0" />
-                                {languageMode === 'JAPANESE' ? 'にほんご' : '日本語'}
+                                {languageMode === 'JAPANESE' ? '日本語' : languageMode === 'HIRAGANA' ? 'ひらがな' : 'English'}
                             </button>
                             <button
                                 onClick={() => setShowSettingsModal(true)}
@@ -11366,7 +11426,7 @@ const App: React.FC = () => {
 
                 {gameState.screen === GameScreen.COMPENDIUM && (
                     <div className="absolute inset-0">
-                        <CompendiumScreen unlockedCardNames={unlockedCardNames} onBack={returnToTitle} languageMode={languageMode} isDebug={isDebugHpOne} visualTheme={visualTheme} />
+                        <CompendiumScreen unlockedCardNames={unlockedCardNames} onBack={returnToTitle} languageMode={languageMode} isDebug={isDebugHpOne} visualTheme={coopSyncedVisualTheme} />
                     </div>
                 )}
 
@@ -11399,7 +11459,7 @@ const App: React.FC = () => {
                             selectionHoldMs={raceEffects.shoeLaceUntil > raceEffectNow ? 400 : 0}
                             selectionDisabled={(gameState.challengeMode === 'COOP' && !!coopSession?.isHost && !coopCanDecide) || coopMapSelectionPending}
                             selectionDisabledMessage={gameState.challengeMode === 'COOP' ? coopMapPendingMessage : undefined}
-                            visualTheme={visualTheme}
+                            visualTheme={coopSyncedVisualTheme}
                         />
                         {gameState.challengeMode === 'COOP' && coopSession?.isHost && coopNeedsInitialMapSync && (
                             <div className="absolute left-1/2 -translate-x-1/2 top-[72px] z-30">
@@ -11468,7 +11528,7 @@ const App: React.FC = () => {
                                 hideEnemyIntents={raceEffects.hideEnemyIntentsOnce}
                                 onOpenSettings={() => setShowSettingsModal(true)}
                                 battleBackgroundId={currentBattleBackgroundId}
-                                visualTheme={visualTheme}
+                                visualTheme={coopSyncedVisualTheme}
                             />
                         ) : (
                             <BattleScene
@@ -11480,7 +11540,7 @@ const App: React.FC = () => {
                                 hideEnemyIntents={raceEffects.hideEnemyIntentsOnce}
                                 onOpenSettings={() => setShowSettingsModal(true)}
                                 battleBackgroundId={currentBattleBackgroundId}
-                                visualTheme={visualTheme}
+                                visualTheme={coopSyncedVisualTheme}
                             />
                         )}
                     </div>
@@ -11497,7 +11557,7 @@ const App: React.FC = () => {
                 )}
 
                 {gameState.screen === GameScreen.MATH_CHALLENGE && (
-                    <div className="absolute inset-0">
+                    <div className="absolute inset-0" data-allow-japanese="true">
                         <MathChallengeScreen
                             mode={gameState.mode}
                             answerMode={gameState.answerMode || 'CHOICE'}
@@ -11510,7 +11570,7 @@ const App: React.FC = () => {
                 )}
 
                 {gameState.screen === GameScreen.KANJI_CHALLENGE && (
-                    <div className="absolute inset-0">
+                    <div className="absolute inset-0" data-allow-japanese="true">
                         <KanjiChallengeScreen
                             mode={gameState.mode}
                             answerMode={gameState.answerMode || 'CHOICE'}
@@ -11523,7 +11583,7 @@ const App: React.FC = () => {
                 )}
 
                 {gameState.screen === GameScreen.ENGLISH_CHALLENGE && (
-                    <div className="absolute inset-0">
+                    <div className="absolute inset-0" data-allow-japanese="true">
                         <EnglishChallengeScreen
                             mode={gameState.mode}
                             onComplete={handleMathChallengeComplete}
@@ -11534,7 +11594,7 @@ const App: React.FC = () => {
                 )}
 
                 {gameState.screen === GameScreen.GENERAL_CHALLENGE && (
-                    <div className="absolute inset-0">
+                    <div className="absolute inset-0" data-allow-japanese="true">
                         <GeneralChallengeScreen
                             mode={gameState.mode}
                             modePool={gameState.modePool}
@@ -11559,7 +11619,10 @@ const App: React.FC = () => {
                         ) : (
                             <CoopSetupScreen
                                 player={gameState.player}
+                                visualTheme={visualTheme}
                                 onStart={(payload: CoopStartPayload) => {
+                                    const hostVisualTheme = payload.visualTheme || visualTheme;
+                                    setVisualTheme(hostVisualTheme);
                                     setCoopSession({
                                         isHost: payload.isHost,
                                         name: payload.name,
@@ -11571,6 +11634,7 @@ const App: React.FC = () => {
                                     });
                                     setGameState(prev => ({
                                         ...prev,
+                                        visualTheme: hostVisualTheme,
                                         challengeMode: 'COOP',
                                         screen: GameScreen.MODE_SELECTION
                                     }));
@@ -11684,7 +11748,7 @@ const App: React.FC = () => {
                             description={trans(eventData.description, languageMode)}
                             options={eventData.options.map((o: any, idx: number) => ({ ...o, action: () => handleCoopEventOptionSelect(idx), label: trans(o.label, languageMode), text: trans(o.text, languageMode) }))}
                             imageKey={eventData.imageKey ?? eventData.title}
-                            image={visualTheme === 'high-school' ? undefined : gameState.player.imageData}
+                            image={coopSyncedVisualTheme === 'high-school' ? undefined : gameState.player.imageData}
                             resultLog={eventResultLog ? trans(eventResultLog, languageMode) : null}
                             onContinue={handleEventComplete}
                             typingMode={gameState.challengeMode === 'TYPING'}
@@ -11694,6 +11758,7 @@ const App: React.FC = () => {
                             interactionDisabledMessage={gameState.challengeMode === 'COOP'
                                 ? '他のプレイヤーの結果を待っています'
                                 : coopInteractionDisabledMessage}
+                            languageMode={languageMode}
                         />
                     </div>
                 )}
@@ -12132,8 +12197,8 @@ const App: React.FC = () => {
                         <div className="absolute inset-0 bg-amber-950/62 pointer-events-none" />
                         <div className="relative z-10 my-auto w-full max-w-2xl py-8">
                             <Trophy size={80} className="text-yellow-400 mx-auto mb-6 animate-pulse shrink-0" />
-                            <h1 className="text-4xl md:text-6xl mb-4 font-bold text-yellow-200 shrink-0">ゲームクリア！</h1>
-                            <p className="mb-8 text-lg md:text-xl shrink-0">あなたは校長先生をせっとくし、<br />でんせつの しょうがくせいとして かたりつがれることでしょう。</p>
+                            <h1 className="text-4xl md:text-6xl mb-4 font-bold text-yellow-200 shrink-0">{trans("ゲームクリア！", languageMode)}</h1>
+                            <p className="mb-8 text-lg md:text-xl shrink-0 whitespace-pre-line">{trans("あなたは校長先生をせっとくし、\nでんせつの しょうがくせいとして かたりつがれることでしょう。", languageMode)}</p>
 
                             {/* Newly Unlocked Card Section */}
                             {newlyUnlockedCard && (
@@ -12145,14 +12210,14 @@ const App: React.FC = () => {
                                         <div className="scale-100">
                                             <Card card={newlyUnlockedCard} onClick={() => { }} disabled={false} languageMode={languageMode} />
                                         </div>
-                                        <p className="text-sm text-yellow-100 font-bold">新しい学習の成果が、次回の冒険から現れるようになります！</p>
+                                        <p className="text-sm text-yellow-100 font-bold">{trans("新しい学習の成果が、次回の冒険から現れるようになります！", languageMode)}</p>
                                     </div>
                                 </div>
                             )}
 
                             {getDifficultyConfig(gameState.difficultyLevel).legacyCardAllowed && !legacyCardSelected ? (
                                 <div className="mb-8 shrink-0">
-                                    <p className="mb-4 text-sm text-yellow-100 font-bold">次回の冒険に持っていくカードを1枚選んでください</p>
+                                    <p className="mb-4 text-sm text-yellow-100 font-bold">{trans("次回の冒険に持っていくカードを1枚選んでください", languageMode)}</p>
                                     <div className="flex flex-wrap justify-center gap-2 max-h-60 overflow-y-auto custom-scrollbar p-2 bg-black/30 rounded border border-yellow-700/50">
                                         {gameState.player.deck.map(card => (
                                             <div key={card.id} className="scale-75 cursor-pointer hover:scale-90 transition-transform" onClick={() => handleLegacyCardSelect(card)}>
@@ -12163,16 +12228,16 @@ const App: React.FC = () => {
                                 </div>
                             ) : getDifficultyConfig(gameState.difficultyLevel).legacyCardAllowed ? (
                                 <div className="mb-8 p-4 bg-green-900/50 border-green-500 rounded-lg animate-in zoom-in duration-150 shrink-0">
-                                    <p className="text-green-400 font-bold text-xl">カードを継承しました！</p>
-                                    <p className="text-sm text-green-200 mt-1">次の冒険の初期デッキに追加されます。</p>
+                                    <p className="text-green-400 font-bold text-xl">{trans("カードを継承しました！", languageMode)}</p>
+                                    <p className="text-sm text-green-200 mt-1">{trans("次の冒険の初期デッキに追加されます。", languageMode)}</p>
                                 </div>
                             ) : null}
                             <div className="flex flex-col gap-4 items-center mt-4 pb-8 shrink-0">
                                 <button onClick={startEndlessMode} className="bg-purple-900 border-4 border-purple-500 px-8 py-4 cursor-pointer text-xl hover:bg-purple-800 font-bold w-full max-sm shadow-[0_0_20px_rgba(168,85,247,0.5)] transform transition-transform hover:scale-105 active:scale-95 flex items-center justify-center animate-pulse">
-                                    <Infinity className="mr-2" /> エンドレスモードへ (Act {gameState.act + 1})
+                                    <Infinity className="mr-2" /> {trans("エンドレスモードへ", languageMode)} (Act {gameState.act + 1})
                                 </button>
                                 <button onClick={returnToTitle} className="bg-blue-600 border-2 border-white px-8 py-4 cursor-pointer text-xl hover:bg-blue-500 font-bold w-full max-sm shadow-lg transform transition-transform hover:scale-105 active:scale-95">
-                                    伝説となる ({trans("タイトルへ戻る", languageMode)})
+                                    {trans("伝説となる", languageMode)} ({trans("タイトルへ戻る", languageMode)})
                                 </button>
                             </div>
                         </div>

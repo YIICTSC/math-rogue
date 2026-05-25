@@ -164,7 +164,7 @@ const TreasureScreen: React.FC<TreasureScreenProps> = ({
                 >
                     <Archive size={128} className="text-yellow-600 fill-yellow-900" />
                     {hasCursedKey && (
-                        <div className="absolute -top-4 -right-4 bg-purple-900 border border-purple-500 rounded-full p-2 animate-bounce" title="呪いの鍵: 呪いが入っています">
+                        <div className="absolute -top-4 -right-4 bg-purple-900 border border-purple-500 rounded-full p-2 animate-bounce" title={trans("呪いの鍵: 呪いが入っています", languageMode)}>
                             <Key size={32} className="text-purple-400" />
                         </div>
                     )}

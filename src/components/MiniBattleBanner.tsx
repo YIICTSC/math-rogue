@@ -28,6 +28,7 @@ interface CutInDisplayCard {
   id: string;
   name: string;
   artTokens: string[];
+  card: BattleCard;
 }
 
 type CutInLayout = 'stack_left' | 'stack_right' | 'strips' | 'grid' | 'tiles' | 'bars';
@@ -65,6 +66,7 @@ const buildCutInDisplayCards = (sources: CutInSourceCard[]): CutInDisplayCard[] 
       id: `${cumulative.id}-${index}`,
       name: cumulative.name,
       artTokens: toIllustrationTokens(cumulative),
+      card: cumulative,
     });
   });
 
@@ -95,7 +97,7 @@ const toIllustrationTokens = (card: BattleCard): string[] => {
   return [`card:${card.name}`];
 };
 
-const CutInArtToken: React.FC<{ token: string; fallbackName: string }> = ({ token, fallbackName }) => {
+const CutInArtToken: React.FC<{ token: string; fallbackName: string; card: BattleCard }> = ({ token, fallbackName, card }) => {
   const [pathIndex, setPathIndex] = useState(0);
   const [failed, setFailed] = useState(false);
   const mode = token.startsWith('enemy:') ? 'enemy' : token.startsWith('pixel:') ? 'pixel' : 'card';
@@ -111,7 +113,17 @@ const CutInArtToken: React.FC<{ token: string; fallbackName: string }> = ({ toke
   }, [token, fallbackName]);
 
   if (mode === 'enemy') {
-    return <EnemyIllustration name={tokenValue} seed={`${fallbackName}-${tokenValue}`} className="h-full w-full" size={16} />;
+    return (
+      <EnemyIllustration
+        name={tokenValue}
+        seed={`${fallbackName}-${tokenValue}`}
+        visualTheme={card.visualTheme}
+        enemyType={card.enemyIllustrationEnemyType}
+        phase={card.enemyIllustrationPhase}
+        className="h-full w-full"
+        size={16}
+      />
+    );
   }
 
   if (failed) {
@@ -143,7 +155,7 @@ const CutInArtToken: React.FC<{ token: string; fallbackName: string }> = ({ toke
 const CardCutInArt: React.FC<{ card: CutInDisplayCard }> = ({ card }) => {
   const tokens = card.artTokens.length > 0 ? card.artTokens.slice(0, 4) : [`card:${card.name}`];
   if (tokens.length === 1) {
-    return <CutInArtToken token={tokens[0]} fallbackName={card.name} />;
+    return <CutInArtToken token={tokens[0]} fallbackName={card.name} card={card.card} />;
   }
 
   const cols = tokens.length >= 4 ? 2 : tokens.length === 3 ? 2 : 2;
@@ -151,7 +163,7 @@ const CardCutInArt: React.FC<{ card: CutInDisplayCard }> = ({ card }) => {
     <div className="grid h-full w-full" style={{ gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))` }}>
       {tokens.map((token, index) => (
         <div key={`${token}-${index}`} className="overflow-hidden border border-black/10">
-          <CutInArtToken token={token} fallbackName={card.name} />
+          <CutInArtToken token={token} fallbackName={card.name} card={card.card} />
         </div>
       ))}
     </div>

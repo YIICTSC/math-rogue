@@ -2,10 +2,11 @@
 import { Card as CardType, CardType as EnumCardType, LanguageMode } from '../types';
 import PixelSprite from './PixelSprite';
 import EnemyIllustration from './EnemyIllustration';
-import { trans } from '../utils/textUtils';
+import { buildEnglishCardDescription, trans } from '../utils/textUtils';
 import { getCardIllustrationPaths } from '../utils/cardIllustration';
 import { getStatusCategoryLabel, getStatusCategoryClass } from '../utils/cardUtils';
 import { assetUrl } from '../utils/assetPaths';
+import type { VisualThemeId } from '../data/visualThemes';
 
 interface CardProps {
   card: CardType;
@@ -46,7 +47,14 @@ const extractCompositeIllustrationRefs = (card: CardType): string[] => {
   return [];
 };
 
-const CompositeArtPiece: React.FC<{ refToken: string; seed: string; languageMode: LanguageMode }> = ({ refToken, seed, languageMode }) => {
+const CompositeArtPiece: React.FC<{
+  refToken: string;
+  seed: string;
+  languageMode: LanguageMode;
+  visualTheme?: VisualThemeId;
+  enemyType?: string;
+  phase?: number;
+}> = ({ refToken, seed, languageMode, visualTheme = 'elementary', enemyType, phase }) => {
   const [failed, setFailed] = useState(false);
   const [imageIndex, setImageIndex] = useState(0);
 
@@ -57,7 +65,7 @@ const CompositeArtPiece: React.FC<{ refToken: string; seed: string; languageMode
 
   if (refToken.startsWith('enemy:')) {
     const name = refToken.substring('enemy:'.length);
-    return <EnemyIllustration name={name} seed={seed} className="w-full h-full" size={16} />;
+    return <EnemyIllustration name={name} seed={seed} visualTheme={visualTheme} enemyType={enemyType} phase={phase} className="w-full h-full" size={16} />;
   }
 
   if (refToken.startsWith('pixel:')) {
@@ -198,13 +206,37 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled, onInspect, languag
       );
     }
 
-    if (card.visualTheme === 'high-school' && imageIndex < imageCandidates.length) {
+    if (compositeIllustrationRefs.length > 1) {
+      const sliceWidth = `${100 / compositeIllustrationRefs.length}%`;
       return (
-        <img
-          src={imageCandidates[imageIndex]}
-          alt={translatedCardName}
-          className="w-full h-full object-cover opacity-95 drop-shadow-md"
-          onError={() => setImageIndex((prev) => prev + 1)}
+        <div className="w-full h-full flex overflow-hidden">
+          {compositeIllustrationRefs.map((token, idx) => (
+            <div key={`${token}-${idx}`} className="h-full border-r border-white/20 last:border-r-0" style={{ width: sliceWidth }}>
+              <CompositeArtPiece
+                refToken={token}
+                seed={`${card.id}-mix-${idx}`}
+                languageMode={languageMode}
+                visualTheme={card.visualTheme}
+                enemyType={card.enemyIllustrationEnemyType}
+                phase={card.enemyIllustrationPhase}
+              />
+            </div>
+          ))}
+        </div>
+      );
+    }
+
+    if (enemyIllustrationNames.length > 0) {
+      return (
+        <EnemyIllustration
+          name={enemyIllustrationNames[0]}
+          seed={`${card.id}-enemy`}
+          aliases={enemyIllustrationNames.slice(1)}
+          visualTheme={card.visualTheme}
+          enemyType={card.enemyIllustrationEnemyType}
+          phase={card.enemyIllustrationPhase}
+          className="w-full h-full"
+          size={16}
         />
       );
     }
@@ -219,27 +251,13 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled, onInspect, languag
       );
     }
 
-    if (compositeIllustrationRefs.length > 1) {
-      const sliceWidth = `${100 / compositeIllustrationRefs.length}%`;
+    if (card.visualTheme === 'high-school' && imageIndex < imageCandidates.length) {
       return (
-        <div className="w-full h-full flex overflow-hidden">
-          {compositeIllustrationRefs.map((token, idx) => (
-            <div key={`${token}-${idx}`} className="h-full border-r border-white/20 last:border-r-0" style={{ width: sliceWidth }}>
-              <CompositeArtPiece refToken={token} seed={`${card.id}-mix-${idx}`} languageMode={languageMode} />
-            </div>
-          ))}
-        </div>
-      );
-    }
-
-    if (enemyIllustrationNames.length > 0) {
-      return (
-        <EnemyIllustration
-          name={enemyIllustrationNames[0]}
-          seed={`${card.id}-enemy`}
-          aliases={enemyIllustrationNames.slice(1)}
-          className="w-full h-full"
-          size={16}
+        <img
+          src={imageCandidates[imageIndex]}
+          alt={translatedCardName}
+          className="w-full h-full object-cover opacity-95 drop-shadow-md"
+          onError={() => setImageIndex((prev) => prev + 1)}
         />
       );
     }
@@ -263,7 +281,7 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled, onInspect, languag
   };
 
   const renderDescription = () => {
-    const desc = trans(card.description, languageMode);
+    const desc = languageMode === 'ENGLISH' ? buildEnglishCardDescription(card) : trans(card.description, languageMode);
     return <span className={card.upgraded ? 'text-green-300 font-bold' : ''}>{desc}</span>;
   };
 

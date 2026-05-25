@@ -45,7 +45,7 @@ export type P2PEvent =
         }>,
         decisionOwnerIndex?: number
     }
-    | { type: 'COOP_START', roomCode?: string, battleMode?: 'TURN_BASED' | 'REALTIME', participants?: Array<{
+    | { type: 'COOP_START', roomCode?: string, battleMode?: 'TURN_BASED' | 'REALTIME', visualTheme?: 'elementary' | 'high-school', participants?: Array<{
         peerId: string,
         name: string,
         imageData?: string,

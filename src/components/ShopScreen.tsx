@@ -287,7 +287,7 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics =
            <div className="flex items-center gap-2">
                 <div className="flex items-center bg-yellow-900 px-3 py-1 rounded-full border border-yellow-500">
                     <Coins className="text-yellow-400 mr-1" size={16}/>
-                    <span className="text-sm font-bold">{player.gold}円</span>
+                    <span className="text-sm font-bold">{player.gold} {trans("円", languageMode)}</span>
                 </div>
                 <button onClick={interactionDisabled ? undefined : onLeave} disabled={interactionDisabled} className="bg-red-600 hover:bg-red-500 px-3 py-1 rounded font-bold border-2 border-white cursor-pointer text-xs disabled:cursor-not-allowed disabled:opacity-50">
                     {trans("出る", languageMode)}{typingMode && ' [Enter]'}
@@ -332,7 +332,7 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics =
        <div className="z-10 flex-grow flex flex-col items-center overflow-hidden relative">
            {interactionDisabled && (
                 <div className="mx-4 mt-4 w-[calc(100%-2rem)] rounded-lg border border-cyan-500/50 bg-cyan-950/30 px-4 py-3 text-center text-sm font-bold text-cyan-100">
-                    {interactionDisabledMessage ?? '他のプレイヤーの選択を待っています'}
+                    {interactionDisabledMessage ? trans(interactionDisabledMessage, languageMode) : trans('他のプレイヤーの選択を待っています', languageMode)}
                 </div>
            )}
            
@@ -349,12 +349,12 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics =
                     disabled={removed || player.gold < getPrice(removeCost ?? (player.relics.find(r => r.id === 'SMILING_MASK') ? 50 : REMOVE_COST))}
                     className={`flex-1 py-2 rounded border-2 flex items-center justify-center gap-1 cursor-pointer text-sm ${viewMode === 'REMOVE' ? 'bg-red-600 border-white' : 'bg-gray-800 border-gray-600 text-gray-400'} ${removed ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
-                    <Trash2 size={14}/> {trans("カード削除", languageMode)} ({getPrice(removeCost ?? (player.relics.find(r => r.id === 'SMILING_MASK') ? 50 : REMOVE_COST))} 円){typingMode && ' [0]'}
+                    <Trash2 size={14}/> {trans("カード削除", languageMode)} ({getPrice(removeCost ?? (player.relics.find(r => r.id === 'SMILING_MASK') ? 50 : REMOVE_COST))} {trans("円", languageMode)}){typingMode && ' [0]'}
                 </button>
            </div>
            {typingMode && (
                 <div className="mb-3 text-center text-[10px] font-bold text-cyan-300">
-                    1-9, QWERTY...: 選択 / 0: 購入・削除切替 / Enter: 店を出る
+                    {languageMode === 'ENGLISH' ? '1-9, QWERTY...: Select / 0: Buy-Remove Toggle / Enter: Leave Shop' : '1-9, QWERTY...: 選択 / 0: 購入・削除切替 / Enter: 店を出る'}
                 </div>
            )}
 
@@ -395,7 +395,7 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics =
                                                 disabled={!canAfford}
                                                 className={`px-2 py-0.5 rounded-full font-bold text-xs shadow-lg border border-white ${canAfford ? 'bg-yellow-600 hover:bg-yellow-500 text-white cursor-pointer' : 'bg-gray-600 text-gray-400 cursor-not-allowed'}`}
                                             >
-                                                {price} 円
+                                                {price} {trans("円", languageMode)}
                                             </button>
                                         )}
                                         {isSold && <div className="text-red-500 font-bold rotate-12 text-xs">{trans("売切れ", languageMode)}</div>}
@@ -436,7 +436,7 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics =
                                                 disabled={!canAfford}
                                                 className={`px-2 py-0.5 rounded-full font-bold text-xs shadow-lg border border-white ${canAfford ? 'bg-yellow-600 hover:bg-yellow-500 text-white cursor-pointer' : 'bg-gray-600 text-gray-400 cursor-not-allowed'}`}
                                             >
-                                                {isFull ? `${price} 円 (${trans("入替", languageMode)})` : `${price} 円`}
+                                                {isFull ? `${price} ${trans("円", languageMode)} (${trans("入替", languageMode)})` : `${price} ${trans("円", languageMode)}`}
                                             </button>
                                         )}
                                         {isSold && <div className="text-red-500 font-bold rotate-12 text-xs">{trans("売切れ", languageMode)}</div>}
@@ -477,7 +477,7 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics =
                                                     ${canAfford ? 'bg-yellow-600 hover:bg-yellow-500 text-white cursor-pointer' : 'bg-gray-600 text-gray-400 cursor-not-allowed'}
                                                 `}
                                             >
-                                                {price} 円
+                                                {price} {trans("円", languageMode)}
                                             </button>
                                         </div>
                                     )}

@@ -1,5 +1,5 @@
 
-import { LanguageMode } from '../types';
+import { LanguageMode, type Card } from '../types';
 import { EVENT_DICTIONARY } from './textUtils2';
 
 const BASE_DICTIONARY: Record<string, string> = {
@@ -2652,6 +2652,2019 @@ const DICTIONARY: Record<string, string> = {
     ...EVENT_TEXT_PATCH_DICTIONARY
 };
 
+const ENGLISH_DICTIONARY: Record<string, string> = {
+    "学習ローグ": "Learning Rogue",
+    "つづきから": "Continue",
+    "冒険を始める": "Start Adventure",
+    "問題": "Problems",
+    "モード選択": "Mode Select",
+    "問題チャレンジ": "Problem Challenge",
+    "学期": "Term",
+    "学年": "Grade",
+    "まとめ": "Summary",
+    "総まとめ（全教科+漢字）": "Full Review (All Subjects + Kanji)",
+    "年": "Grade",
+    "対戦": "Battle",
+    "1A1Dモード": "1A1D Mode",
+    "1A1D": "1A1D",
+    "VS": "VS",
+    "協力": "Co-op",
+    "レース": "Race",
+    "タイピングモード": "Typing Mode",
+    "ミニゲーム": "Minigames",
+    "デバッグメニュー": "Debug Menu",
+    "図鑑": "Compendium",
+    "記録": "Records",
+    "遊び方": "Help",
+    "戻る": "Back",
+    "もどる": "Back",
+    "進む": "Next",
+    "選択": "Select",
+    "選択解除": "Clear Selection",
+    "選択中": "Selected",
+    "未選択": "Not Selected",
+    "獲得": "Gain",
+    "決定": "Confirm",
+    "閉じる": "Close",
+    "はい": "Yes",
+    "いいえ": "No",
+    "やめる": "Cancel",
+    "再挑戦": "Retry",
+    "タイトルへ戻る": "Back to Title",
+    "計算": "Arithmetic",
+    "算数・数学": "Math",
+    "国語": "Japanese",
+    "漢字": "Kanji",
+    "英語": "English",
+    "生活・理科": "Life / Science",
+    "生活": "Life",
+    "理科": "Science",
+    "社会": "Social Studies",
+    "漢検": "Kanji Exam",
+    "漢検・難読": "Kanji Exam / Advanced",
+    "難読漢字": "Advanced Kanji",
+    "地図・日本": "Map / Japan",
+    "ICT・情報": "ICT / Information",
+    "単元": "Unit",
+    "種目": "Category",
+    "出題範囲": "Question Range",
+    "単独モード": "Single Mode",
+    "種目を選択": "Choose Category",
+    "ミニゲーム解放カウント対象": "Minigame Unlock Status",
+    "チャレンジ開始！": "Start Challenge!",
+    "答え方": "Answer Type",
+    "4択": "Multiple Choice",
+    "入力": "Input",
+    "読み上げ": "Voice",
+    "オン": "On",
+    "オフ": "Off",
+    "終了": "Quit",
+    "チャレンジ終了！": "Challenge Complete!",
+    "今回の記録": "This Run",
+    "※累計正解数に加算されました": "Added to total correct answers.",
+    "単語": "Words",
+    "会話": "Conversation",
+    "ミックス": "Mixed",
+    "たし算": "Addition",
+    "ひき算": "Subtraction",
+    "かけ算": "Multiplication",
+    "わり算": "Division",
+    "1ケタのたし算": "1-Digit Addition",
+    "1けたのたし算": "1-Digit Addition",
+    "たし算（くりあがり）": "Addition with Carrying",
+    "1ケタのひき算": "1-Digit Subtraction",
+    "1けたのひき算": "1-Digit Subtraction",
+    "ひき算（くりさがり）": "Subtraction with Borrowing",
+    "2ケタのたし算": "2-Digit Addition",
+    "2けたのたし算": "2-Digit Addition",
+    "2ケタのひき算": "2-Digit Subtraction",
+    "2けたのひき算": "2-Digit Subtraction",
+    "かけ算九九": "Multiplication Table",
+    "小1漢字": "Grade 1 Kanji",
+    "小2漢字": "Grade 2 Kanji",
+    "小3漢字": "Grade 3 Kanji",
+    "小4漢字": "Grade 4 Kanji",
+    "小5漢字": "Grade 5 Kanji",
+    "小6漢字": "Grade 6 Kanji",
+    "中1漢字": "JH 1 Kanji",
+    "中2漢字": "JH 2 Kanji",
+    "中3漢字": "JH 3 Kanji",
+    "高校基礎": "High School Basics",
+    "高校標準": "High School Standard",
+    "高校発展": "High School Advanced",
+    "漢検10級": "Kanji Exam Grade 10",
+    "10級": "Grade 10",
+    "漢検9級": "Kanji Exam Grade 9",
+    "9級": "Grade 9",
+    "漢検8級": "Kanji Exam Grade 8",
+    "8級": "Grade 8",
+    "漢検7級": "Kanji Exam Grade 7",
+    "7級": "Grade 7",
+    "漢検6級": "Kanji Exam Grade 6",
+    "6級": "Grade 6",
+    "漢検5級": "Kanji Exam Grade 5",
+    "5級": "Grade 5",
+    "漢検4級": "Kanji Exam Grade 4",
+    "4級": "Grade 4",
+    "漢検3級": "Kanji Exam Grade 3",
+    "3級": "Grade 3",
+    "漢検準2級": "Kanji Exam Pre-2",
+    "準2級": "Pre-2",
+    "漢検2級": "Kanji Exam Grade 2",
+    "2級": "Grade 2",
+    "漢検準1級": "Kanji Exam Pre-1",
+    "準1級": "Pre-1",
+    "漢検1級": "Kanji Exam Grade 1",
+    "1級": "Grade 1",
+    "超難読 熟字訓": "Advanced Special Readings",
+    "動植物 極": "Advanced Flora and Fauna",
+    "当て字・外来語 極": "Advanced Phonetic Kanji",
+    "地名・国名 難読": "Difficult Place Names",
+    "国字・和製漢字": "Japanese-Made Kanji",
+    "仏教・神道・古典語": "Religion and Classical Terms",
+    "四字熟語 極": "Advanced Four-Character Idioms",
+    "古典表記・歴史語彙": "Classical and Historical Terms",
+    "小学校英語": "Elementary English",
+    "中1英語": "JH 1 English",
+    "中2英語": "JH 2 English",
+    "中3英語": "JH 3 English",
+    "会話 Lv1": "Conversation Lv1",
+    "会話 Lv2": "Conversation Lv2",
+    "会話 Lv3": "Conversation Lv3",
+    "会話 Lv4": "Conversation Lv4",
+    "会話 Lv5": "Conversation Lv5",
+    "地図記号": "Map Symbols",
+    "都道府県": "Prefectures",
+    "県庁所在地": "Prefectural Capitals",
+    "スマホ・ネット": "Smartphones / Internet",
+    "情報リテラシー": "Information Literacy",
+    "プログラミング": "Programming",
+    "モラル・セキュリティ": "Digital Ethics / Security",
+    "ランダム (自動切替)": "Random (Auto)",
+    "BGMなし": "No BGM",
+    "一般教室 (風来1)": "Classroom (Style 1)",
+    "体育館 (風来2)": "Gym (Style 2)",
+    "理科室 (風来3)": "Science Room (Style 3)",
+    "音楽室 (風来4)": "Music Room (Style 4)",
+    "図書室 (風来5)": "Library (Style 5)",
+    "屋上 (風来6)": "Rooftop (Style 6)",
+    "ボス戦 (風来)": "Boss Battle (Style)",
+    "通常バトル (本編)": "Normal Battle (Main)",
+    "ボス戦 (本編)": "Boss Battle (Main)",
+    "エリート戦 (本編)": "Elite Battle (Main)",
+    "最終決戦 (本編)": "Final Battle (Main)",
+    "購買部 (ポーカー)": "Shop (Poker)",
+    "勝負中 (ポーカー)": "Playing (Poker)",
+    "校庭サバイバー": "Schoolyard Survivor",
+    "格納庫 (紙飛行機)": "Hangar (Paper Plane)",
+    "空中戦 (紙飛行機)": "Dogfight (Paper Plane)",
+    "休暇中 (紙飛行機)": "Vacation (Paper Plane)",
+    "メインメニュー": "Main Menu",
+    "マップ移動": "Map Travel",
+    "ショップ": "Shop",
+    "報酬獲得": "Reward Gain",
+    "学習タイム": "Study Time",
+    "勝利ファンファーレ": "Victory Fanfare",
+    "ゲームオーバー": "Game Over",
+    "ゲームクリア！": "Game Clear!",
+    "あなたは校長先生をせっとくし、\nでんせつの しょうがくせいとして かたりつがれることでしょう。": "You persuaded the principal and will be remembered as a legendary student.",
+    "新しい学習の成果が、次回の冒険から現れるようになります！": "Your new learning achievement will appear in future adventures!",
+    "次回の冒険に持っていくカードを1枚選んでください": "Choose one card to carry into your next adventure.",
+    "カードを継承しました！": "Card inherited!",
+    "次の冒険の初期デッキに追加されます。": "It will be added to your starting deck next adventure.",
+    "エンドレスモードへ": "Go to Endless Mode",
+    "伝説となる": "Become a Legend",
+    "最後の覚醒": "Final Awakening",
+    "決戦に持ち込む『最後の力』を一つだけ選んでください。": "Choose one final power to bring into the decisive battle.",
+    "友情の絆": "Bond of Friendship",
+    "HPを全回復し、最大HP+10": "Heal to full HP and gain Max HP +10",
+    "猛勉強の成果": "Results of Intense Study",
+    "デッキの全カードをアップグレード": "Upgrade every card in your deck",
+    "わんぱくの極み": "Peak Mischief",
+    "戦闘開始時にムキムキ+3を得る": "Gain Strength +3 at the start of battle",
+    "この条件で開始": "Start with These Settings",
+    "この単元ミックスで開始": "Start Unit Mix",
+    "単元を選択してください": "Select a Unit",
+    "単元を1つ以上選ぶと開始できます": "Select at Least One Unit to Start",
+    "この学年の単元はまだ未実装です": "Units for This Grade Are Not Ready Yet",
+    "開始条件を確認してください": "Check Start Conditions",
+    "ミックス選択": "Mixed Selection",
+    "単元未選択": "No Unit Selected",
+    "選択単元数": "Selected Units",
+    "勝利": "Victory",
+    "死亡": "Defeat",
+    "逃げる": "Run",
+    "ターン終了": "End Turn",
+    "あなたのターン": "Your Turn",
+    "敵のターン": "Enemy Turn",
+    "ダンジョンマップ": "Dungeon Map",
+    "宝箱を発見！": "Treasure Chest!",
+    "開ける": "Open",
+    "中には何が入っているだろうか？": "What could be inside?",
+    "主人公選択": "Choose Character",
+    "初期レリック": "Starting Relic",
+    "初期デッキ": "Starting Deck",
+    "たびのはじまり": "The Journey Begins",
+    "旅の始まり": "The Journey Begins",
+    "冒険の助けとなる遺物（レリック）を1つ選んでください": "Choose one relic to help your adventure.",
+    "冒険に挑むキャラクターを選んでください": "Choose a character for the adventure.",
+    "固有ギミック": "Unique Mechanic",
+    "初期装備": "Starting Gear",
+    "クリア回数": "Clears",
+    "回で解放": " clears to unlock",
+    "選択する": "Select",
+    "購入": "Buy",
+    "商品購入": "Shop",
+    "カード削除": "Remove Card",
+    "店を出る": "Leave Shop",
+    "売り切れ": "Sold Out",
+    "売切れ": "Sold Out",
+    "所持金": "Gold",
+    "デッキ": "Deck",
+    "レリック": "Relics",
+    "ポーション": "Potions",
+    "休憩": "Rest",
+    "鍛冶": "Upgrade",
+    "出発する": "Depart",
+    "購買部": "Shop",
+    "収集率": "Collection",
+    "未発見": "Undiscovered",
+    "危険度": "Danger",
+    "レアリティ": "Rarity",
+    "エラーが発生しました": "An error occurred",
+    "生成中...": "Generating...",
+    "読み込み中...": "Loading...",
+    "じゅんびちゅう...": "Preparing...",
+    "これ以上受け取らずに進む": "Continue Without Taking More",
+    "続きデータがあります": "Saved Adventure Found",
+    "冒険を最初から始めると、": "If you start a new adventure,",
+    "今の続きデータは上書きされます。": "your current save will be overwritten.",
+    "本当に新しく始めますか？": "Start a new adventure anyway?",
+    "続きから遊ぶ": "Continue Saved Adventure",
+    "最初から始める": "Start New Adventure",
+    "冒険が始まった。": "The adventure begins.",
+    "続きから再開しました。": "Resumed from save.",
+    "旅の支度をしている...": "Preparing for the journey...",
+    "冒険が始まる...": "The adventure is starting...",
+    "小学生編": "Elementary",
+    "高校編": "High School",
+    "次のミニゲーム開放まで": "Next minigame unlock",
+    "問正解": "correct answers",
+    "累計正解数": "Total correct answers",
+    "問": " questions",
+    "全ミニゲーム開放済み！": "All minigames unlocked!",
+    "※ゲームがフリーズする場合、冒険を始めるからやり直してください": "If the game freezes, restart from Start Adventure.",
+    "ブロック": "Block",
+    "ダメージ": "Damage",
+    "エナジー": "Energy",
+    "捨て札": "Discard",
+    "山札": "Draw Pile",
+    "残り": "Remaining ",
+    "枚": " cards",
+    "コスト": "Cost",
+    "廃棄": "Exhaust",
+    "敵": "Enemy",
+    "自分": "You",
+    "筋力": "Strength",
+    "弱体": "Weak",
+    "脆弱": "Vulnerable",
+    "ドクドク": "Poison",
+    "キラキラ": "Artifact",
+    "回復": "Heal",
+    "付与": "Apply",
+    "を使用": " used",
+    "を倒した！": " defeated!",
+    "BGM: 学習": "BGM: Study",
+    "BGM: MP3": "BGM: MP3",
+    "BGM: 電子音": "BGM: Chiptune",
+    "音声": "Audio",
+    "表示": "Display",
+    "通信": "Communication",
+    "BGMモード": "BGM Mode",
+    "BGM音量": "BGM Volume",
+    "SE音量": "SE Volume",
+    "マイク": "Microphone",
+    "マイクON": "Microphone On",
+    "入力デバイス": "Input Device",
+    "既定デバイス": "Default Device",
+    "ノイズ抑制": "Noise Suppression",
+    "エコーキャンセル": "Echo Cancellation",
+    "自動ゲイン調整": "Auto Gain Control",
+    "画面揺れ軽減": "Reduce Screen Shake",
+    "文字サイズ": "Font Size",
+    "標準": "Normal",
+    "大": "Large",
+    "スクリーン": "Screen",
+    "フルスクリーン": "Fullscreen",
+    "画面サイズを初期化": "Reset Window Size",
+    "相手音量": "Remote Volume",
+    "部屋参加時ミュート開始": "Join Muted",
+    "低データ通信モード": "Low Data Mode",
+    "音声を初期化": "Reset Audio",
+    "全設定を初期化": "Reset All Settings",
+    "じぶんの ステータス": "Your Status",
+    "HPが 0になると まけてしまいます。": "If your HP reaches 0, you lose.",
+    "ブロックを つかえば、てきの こうげきを ふせげます！": "Use Block to prevent enemy attacks!",
+    "ブロックは ターンがおわると 0になります。": "Block becomes 0 at the end of the turn.",
+    "つぎへ": "Next",
+    "ワックスの匂いが残る廊下で、逃げ道はまっすぐ後ろだけだ。": "In a hallway still smelling of floor wax, the only escape route is straight behind you.",
+    "消しゴムのカス": "Eraser Crumbs",
+    "勉強の怨念が集合して生まれた存在。": "A creature born from gathered study grudges.",
+    "野良犬": "Stray Dog",
+    "意地悪なカラス": "Mean Crow",
+    "グレムリン": "Mischief Gremlin",
+    "スズメバチ": "Hornet",
+    "掃除サボり魔": "Cleaning Slacker",
+    "迷子の幽霊": "Lost Ghost",
+    "暴走した三輪車": "Runaway Tricycle",
+    "凶暴なハムスター": "Feral Hamster",
+    "画鋲の妖精": "Thumbtack Fairy",
+    "埃の塊": "Dust Clump",
+    "放置された傘": "Abandoned Umbrella",
+    "裏庭のミミズ": "Backyard Worm",
+    "給食の残りカス": "Lunch Leftovers",
+    "校庭の雑草": "Schoolyard Weed",
+    "ちぎれたノート": "Torn Notebook",
+    "さまよう上履き": "Wandering Indoor Shoe",
+    "水槽の金魚": "Aquarium Goldfish",
+    "リコーダー": "Recorder",
+    "実験失敗スライム": "Failed Experiment Slime",
+    "廊下のワックス魔": "Hallway Wax Fiend",
+    "忘れ去られた教科書": "Forgotten Textbook",
+    "チョークの精": "Chalk Sprite",
+    "算数セットの怪": "Math Kit Apparition",
+    "ちびた鉛筆": "Tiny Pencil",
+    "名札の亡霊": "Name Tag Ghost",
+    "筆箱の魔物": "Pencil Case Monster",
+    "連絡帳のストーカー": "Contact Notebook Stalker",
+    "休み時間を奪う時計": "Recess-Stealing Clock",
+    "テストの端切れ": "Test Scrap",
+    "予備校の亡霊": "Prep School Ghost",
+    "風紀委員の騎士": "Disciplinary Committee Knight",
+    "模試答案の怪物": "Mock Exam Answer Monster",
+    "噂話の影": "Rumor Shadow",
+    "部活主将の残像": "Club Captain Afterimage",
+    "スマホの幽鬼": "Smartphone Wraith",
+    "化学室の異常体": "Chemistry Room Anomaly",
+    "奨学金の死神": "Scholarship Reaper",
+    "期末試験の覇王": "Final Exam Overlord",
+    "進路相談の小鬼": "Career Counseling Imp",
+    "宿題運搬ロボ": "Homework Delivery Robot",
+    "保健室の鏡怪": "Infirmary Mirror Apparition",
+    "補習時間の亡霊": "Remedial Lesson Ghost",
+    "赤点竜": "Failing Grade Dragon",
+    "購買機の魔物": "Vending Machine Monster",
+    "黒板鳥": "Blackboard Bird",
+    "居残りの影": "Detention Shadow",
+    "終業ベルの番人": "Final Bell Guardian",
+    "監督官の先輩": "Senior Proctor",
+    "剣道部の風紀委員": "Kendo Disciplinary Officer",
+    "白衣の査問官": "Lab-Coat Examiner",
+    "禁書管理の書記": "Forbidden Book Secretary",
+    "銀髪の審査員": "Silver-Haired Judge",
+    "鎖の執行部員": "Chain-Wielding Enforcer",
+    "赤章の副会長": "Red-Badge Vice President",
+    "実験区画の主任": "Experiment Wing Chief",
+    "表彰台の王子": "Podium Prince",
+    "紅衣の監察官": "Red-Robed Inspector",
+    "冬制服の支配者": "Winter Uniform Ruler",
+    "紫扇の評議員": "Purple-Fan Councilor",
+    "黒翼の番長": "Black-Winged Boss",
+    "卒業審査の理事": "Graduation Review Director",
+    "進路指導室の総裁": "Career Guidance Chancellor",
+    "卒業審査の深層": "Depths of Graduation Review",
+    "進路指導室の支配者": "Ruler of Career Guidance",
+    "ノートで防御": "Notebook Guard",
+    "ブロックを5得る。": "Gain 5 Block.",
+    "往復ビンタ": "Double Slap",
+    "5ダメージを2回与える。": "Deal 5 damage 2 times.",
+    "ランドセルタックル": "Backpack Tackle",
+    "8ダメージ。対象にびくびく2を与える。": "Deal 8 damage. Apply 2 Vulnerable.",
+    "えんぴつ攻撃": "Pencil Attack",
+    "6ダメージを与える。": "Deal 6 damage.",
+    "泣き叫ぶ": "Cry Out",
+    "敵全体にムキムキダウン1を与える。廃棄。": "Apply Strength Down 1 to all enemies. Exhaust.",
+    "二足歩行ロボット": "Bipedal Robot",
+    "ターン終了時、ブロック5を得る。": "Gain 5 Block at the end of your turn.",
+    "スキル": "Skill",
+    "攻撃": "Attack",
+    "わんぱく小学生": "Energetic Student",
+    "飼育委員": "Animal Caretaker",
+    "転校生": "Transfer Student",
+    "理科クラブ部長": "Science Club Leader",
+    "ドッジボールのエース": "Dodgeball Ace",
+    "放送委員": "Broadcast Committee Member",
+    "図書委員": "Library Committee Member",
+    "給食当番リーダー": "Lunch Duty Leader",
+    "園芸委員": "Gardening Committee Member",
+    "反逆の高校生": "Rebellious High Schooler",
+    "生物部の先輩": "Biology Club Senior",
+    "謎めく転入生": "Mysterious Transfer Student",
+    "化学研究会長": "Chemistry Research President",
+    "バスケ部エース": "Basketball Ace",
+    "放送部ディレクター": "Broadcast Club Director",
+    "文芸部書記": "Literary Club Secretary",
+    "学食の料理長": "Cafeteria Head Chef",
+    "園芸部部長": "Gardening Club Captain",
+    "【攻撃タイプ】強力な物理攻撃と自己回復で戦うバランス型。初心者におすすめ。": "Attack type. A balanced fighter with strong physical attacks and self-healing. Recommended for beginners.",
+    "【捕獲タイプ】「捕獲網」で倒した敵をカード化して仲間にできる。動物たちの力を借りて戦う。": "Capture type. Turn defeated enemies into ally cards with Capture Net and fight with animal support.",
+    "【テクニカル】毒による継続ダメージが得意。わんぱく小学生が最初からパートナーとして参戦する。": "Technical type. Specializes in ongoing poison damage. The Energetic Student joins as a partner from the start.",
+    "【実験タイプ】3枚のカードを合成して超強力な「キメラカード」を作成できる。低コストスキルの連打も得意。": "Experiment type. Fuse three cards into a powerful chimera card. Also excels at chaining low-cost skills.",
+    "【スピード】カードを捨てることで効果を発揮する。ドッジボールでの先制攻撃が可能。": "Speed type. Gains effects by discarding cards and can open battles with a dodgeball strike.",
+    "【デバフ・反射】敵を弱体化させ、タイミングよく答える「応答（パリィ）」で攻撃を跳ね返す。": "Debuff and reflect type. Weaken enemies and parry attacks with well-timed responses.",
+    "【戦略・保留】カードを手札に残す「保留」が得意。「物語」の力で戦局をコントロールする。": "Strategy and retain type. Keeps cards in hand and controls the battle with story cards.",
+    "【パワー】筋力を高めて一撃で粉砕する。開始時に「これまでに解放したカード」から献立を自由に組める。": "Power type. Builds Strength for crushing hits and can freely build a starting menu from unlocked cards.",
+    "【育成タイプ】専用の「種」を菜園で育て、超強力な植物へと成長させて戦う大器晩成型。": "Growth type. Plants special seeds in the garden and grows them into powerful plant cards.",
+    "戦闘後の体力回復による高い生存能力。": "High survival through HP recovery after battles.",
+    "倒した敵を仲間の攻撃カードとして「捕獲」。": "Capture defeated enemies as ally attack cards.",
+    "毒による固定ダメージ。初期相棒との共闘。": "Fixed poison damage and teamwork with a starting partner.",
+    "理科室での「3枚合成」。3つの効果を併せ持つ最強のキメラを作成可能。": "Three-card fusion in the Science Room creates powerful chimeras with three effects.",
+    "ドロー＆ディスカード。ミニゲームでの敵撃破。": "Draw and discard tactics, plus enemy takedowns in the minigame.",
+    "デバフ管理と、敵の攻撃を反射する「応答」。": "Debuff control and Response parries that reflect enemy attacks.",
+    "手札の「保留」と、強力な物語カードの活用。": "Retain cards in hand and use powerful story cards.",
+    "献立（初期デッキ）の自由にカスタマイズ。": "Freely customize your menu, which becomes the starting deck.",
+    "菜園での種まきと強力な植物カードへの進化。": "Plant seeds in the garden and evolve them into powerful plant cards.",
+    "給食の余り": "Leftover Lunch",
+    "戦闘終了時、HPを6回復する。": "Heal 6 HP at the end of battle.",
+    "秘密のメモ帳": "Secret Notebook",
+    "戦闘開始時、追加で2枚カードを引く。": "Draw 2 extra cards at the start of battle.",
+    "スポーツドリンク": "Sports Drink",
+    "戦闘開始時、エナジーを1得る。": "Gain 1 Energy at the start of battle.",
+    "校内放送マイク": "School PA Microphone",
+    "戦闘開始時、敵全体をびくびく1にする。": "Apply 1 Vulnerable to all enemies at the start of battle.",
+    "必勝ハチマキ": "Victory Headband",
+    "戦闘開始時、カチカチ1を得る。": "Gain 1 Dexterity at the start of battle.",
+    "図書室のしおり": "Library Bookmark",
+    "ターン終了時、カードを1枚保留する。": "Retain 1 card at the end of each turn.",
+    "巨大なお玉": "Giant Ladle",
+    "戦闘開始時、最大HP+4(一時的)を得る。": "Gain temporary Max HP +4 at the start of battle.",
+    "先生の笛": "Teacher's Whistle",
+    "戦闘開始時、ランダムな攻撃カード(コスト0)を1枚手札に加える。": "Add a random 0-cost attack card to your hand at the start of battle.",
+    "謎の種": "Mysterious Seeds",
+    "戦闘開始時、トゲトゲ3を得る。": "Gain 3 Thorns at the start of battle.",
+    "計算機": "Calculator",
+    "算数チャレンジで1問正解するごとにHPを2回復する。": "Heal 2 HP for each correct math challenge answer.",
+    "金の定規": "Golden Ruler",
+    "戦闘開始時、ムキムキ1を得る。": "Gain 1 Strength at the start of battle.",
+    "重いランドセル": "Heavy Backpack",
+    "1ターン目の開始時、ブロック10を得る。": "Gain 10 Block at the start of turn 1.",
+    "予習セット": "Prep Set",
+    "戦闘開始時、追加で2枚引く。": "Draw 2 extra cards at the start of battle.",
+    "保健室の飴": "Infirmary Candy",
+    "戦闘開始時、HPを2回復する。": "Heal 2 HP at the start of battle.",
+    "懐中電灯": "Flashlight",
+    "放課後の水筒": "After-School Canteen",
+    "休憩場所に着いた時、次の戦闘開始時にE+2。": "When you reach a rest site, gain Energy +2 at the start of the next battle.",
+    "アサガオ": "Morning Glory",
+    "3ターンごとにエナジーを1得る。": "Gain 1 Energy every 3 turns.",
+    "すごいペン先": "Amazing Pen Nib",
+    "攻撃を10回プレイする度、その攻撃のダメージが倍になる。": "Every 10 attacks played, that attack deals double damage.",
+    "犬のフン": "Dog Dropping",
+    "スコア計算時に1点減点される。": "Subtracts 1 point from your score.",
+    "理科室の標本札": "Science Room Specimen Tag",
+    "毒を与える時、その数値が+1される。": "Whenever you apply Poison, increase it by 1.",
+    "予習かばん": "Prep Bag",
+    "小物入れ": "Tiny Case",
+    "？マスを4回通るごとに宝箱イベントが発生する。": "After every 4 question-mark spaces, trigger a treasure chest event.",
+    "ゲーム難易度選択": "Choose Game Difficulty",
+    "ゲーム難易度": "Game Difficulty",
+    "難易度": "Difficulty",
+    "学習問題の難しさとは別に、冒険の厳しさを選びます。クリアすると次の難易度が解禁されます。": "Choose how tough the adventure will be separately from the study problem difficulty. Clearing a difficulty unlocks the next one.",
+    "前とび": "Forward Jump",
+    "後ろとび": "Backward Jump",
+    "あやとび": "Crisscross Jump",
+    "交差とび": "Cross Jump",
+    "二重とび": "Double Under",
+    "三重とび": "Triple Under",
+    "はやぶさ返し": "Falcon Return",
+    "校庭ワープとび": "Schoolyard Warp Jump",
+    "銀河はやぶさ": "Galaxy Falcon",
+    "校長先生ブラックホール": "Principal Black Hole",
+    "敵HP": "Enemy HP",
+    "休憩時理科室なし": "No Science Room at rest sites",
+    "休憩時理科室": "Science Room at rest sites",
+    "引継ぎあり": "Inheritance allowed",
+    "引継ぎなし": "No inheritance",
+    "カード消しゴム出現": "Card eraser appears",
+    "削除費固定": "Fixed removal cost",
+    "削除費": "Removal cost",
+    "前の難易度をクリアすると解禁": "Clear the previous difficulty to unlock",
+    "結果": "Result",
+    "報酬": "Reward",
+    "ゴールド": "Gold",
+    "呪い": "Curse",
+    "他のプレイヤーの選択を待っています": "Waiting for other players to choose.",
+    "他のプレイヤーの結果を待っています": "Waiting for other players' results.",
+    "他のプレイヤーの報酬完了を待っています": "Waiting for other players to finish rewards.",
+    "ホストが報酬を確定するまで待っています": "Waiting for the host to confirm rewards.",
+    "欲しい報酬を選択してください": "Choose a reward.",
+    "ゴールドを獲得": "Gain Gold",
+    "ポーションがいっぱいです": "Potion slots are full",
+    "どれを捨てて入れ替えますか？": "Which potion do you want to discard and replace?",
+    "ダミー報酬": "Dummy Reward",
+    "プリントが混ざっていて選べません。": "A worksheet got mixed in, so this cannot be chosen.",
+    "選択不可": "Unavailable",
+    "カード選択:": "Card Select:",
+    "戻る:": "Back:",
+    "ランダム合成:": "Random Fusion:",
+    "確認:": "Confirm:",
+    "キャンセル:": "Cancel:",
+    "放課後の探索": "After-School Exploration",
+    "放課後の校舎だ。どこへ行こう？": "The after-school building is quiet. Where should you go?",
+    "保健室": "Infirmary",
+    "図工室": "Art Room",
+    "理科室": "Science Room",
+    "保健室のベッドで仮眠をとった。": "You took a nap in the infirmary bed.",
+    "図工室だ。どの道具（カード）を改良する？": "This is the art room. Which tool (card) will you improve?",
+    "理科室だ。混ぜ合わせたいカードを2枚選んでね。": "This is the science room. Choose 2 cards to mix.",
+    "理科室だ。混ぜ合わせたいカードを3枚選んでね。\n(理科クラブ部長特典：3枚合成！)": "This is the science room. Choose 3 cards to mix.\nScience Club Leader bonus: 3-card fusion!",
+    "混ぜ合わせたいカードを2枚選んでね。": "Choose 2 cards to mix.",
+    "混ぜ合わせたいカードを3枚選んでね。": "Choose 3 cards to mix.",
+    "どのカードを改良する？": "Which card will you improve?",
+    "このカードを改良しますか？": "Improve this card?",
+    "実験成功！新たな力が生まれた！": "Experiment successful! A new power was born!",
+    "自習": "Self Study",
+    "不要効果を削除": "Remove unwanted effect",
+    "消せる効果があるカードがない...": "There are no cards with removable effects.",
+    "自習だ。カード消しゴムで、どのカードの不要な効果を消す？": "Self study. Which card should the card eraser remove an unwanted effect from?",
+    "消したい効果を選んでください。カード消しゴムは使用後に除外されます。": "Choose the effect to remove. The card eraser will be removed after use.",
+    "カード消しゴムは使い切った。": "The card eraser was used up.",
+    "カード強化": "Upgrade Card",
+    "カード合成": "Fuse Cards",
+    "鍵がかかってる": "Locked",
+    "3枚合成": "3-Card Fusion",
+    "強化できるカードがない...": "No cards can be upgraded...",
+    "強化前": "Before Upgrade",
+    "強化後": "After Upgrade",
+    "改良する": "Improve",
+    "実験開始！": "Start Experiment!",
+    "実験中...": "Experimenting...",
+    "ランダムな2枚を選ぶ": "Choose 2 random cards",
+    "ランダムな3枚を選ぶ": "Choose 3 random cards",
+    "いいもの揃ってるよ...": "We've got the good stuff...",
+    "出る": "Leave",
+    "やっぱりやめる": "Cancel",
+    "円": "yen",
+    "入替": "Replace",
+    "宝を発見！": "Treasure Found!",
+    "人数分の宝があります。誰でも先に取った宝を獲得できます。": "There is treasure for everyone. Anyone can claim an available treasure first.",
+    "あなたが宝を取ると呪いが入ります": "Taking treasure will add a curse.",
+    "他のプレイヤーが宝を確認するのを待っています": "Waiting for other players to check the treasure.",
+    "宝の確認を終えました": "Treasure confirmed.",
+    "未取得": "Unclaimed",
+    "取得済み": "Claimed",
+    "この宝を取る": "Claim This Treasure",
+    "待機": "Waiting",
+    "確認完了": "Confirmed",
+    "獲得！": "Obtained!",
+    "呪いの鍵: 呪いが入っています": "Cursed Key: a curse is inside.",
+    "休憩を入れる": "Take a break",
+    "窓を開ける": "Open the window",
+    "別案も聞く": "Hear another idea",
+    "黒板を消す": "Erase the blackboard",
+    "休憩を促す": "Encourage a break",
+    "HPを10回復する": "Heal 10 HP",
+    "スキルカードを1枚得る": "Gain 1 skill card",
+    "カードを1枚強化する": "Upgrade 1 card"
+};
+
+const JAPANESE_TEXT_PATTERN = /[ぁ-んァ-ン一-龠々]/;
+
+const ENGLISH_CARD_NAME_DICTIONARY: Record<string, string> = {
+    "あがく": "Struggle",
+    "おこづかい帳": "Allowance Ledger",
+    "お弁当箱": "Lunch Box",
+    "きびだんご": "Millet Dumpling",
+    "ごほうびシール": "Reward Sticker",
+    "イケメン": "Heartthrob",
+    "エースストライカー": "Ace Striker",
+    "オカルト雑誌": "Occult Magazine",
+    "オーラ写真": "Aura Photo",
+    "カード消しゴム": "Card Eraser",
+    "ガラス": "Glass",
+    "ガラス細工": "Glasswork",
+    "ガラス職人": "Glass Artisan",
+    "ガリ勉君": "Study Grind",
+    "キャンプファイヤー": "Campfire",
+    "キラキラシール": "Sparkle Sticker",
+    "クローン実験": "Clone Experiment",
+    "ケガ": "Injury",
+    "コックリさん": "Ouija Board",
+    "コピー機": "Copy Machine",
+    "コピー用紙": "Copy Paper",
+    "コレクター": "Collector",
+    "サイドスロー": "Side Throw",
+    "スタートダッシュ": "Quick Start",
+    "スチール": "Steel",
+    "ステップイン": "Step In",
+    "ストレート": "Straight",
+    "ストレートフラッシュ": "Straight Flush",
+    "ストーン": "Stone",
+    "スリーカード": "Three of a Kind",
+    "ダイヤの粉": "Diamond Dust",
+    "チャイム砂時計": "Chime Hourglass",
+    "ツーペア": "Two Pair",
+    "ノート交換": "Notebook Swap",
+    "ハイカード": "High Card",
+    "ハンマー投げ": "Hammer Throw",
+    "ハーフパンツ": "Gym Shorts",
+    "パニック": "Panic",
+    "パレット": "Palette",
+    "ファイブカード": "Five of a Kind",
+    "フィボナッチ": "Fibonacci",
+    "フェイントレポート": "Feint Report",
+    "フォーカード": "Four of a Kind",
+    "フラッシュ": "Flush",
+    "フラッシュハウス": "Flush House",
+    "フラッシュファイブ": "Flush Five",
+    "フルハウス": "Full House",
+    "ブラックホール": "Black Hole",
+    "ペンブレード": "Pen Blade",
+    "ホログラムシール": "Hologram Sticker",
+    "ボーナス": "Bonus",
+    "マジックハンド": "Grabber Arm",
+    "マラソンランナー": "Marathon Runner",
+    "マルチ": "Mult",
+    "ミニマリスト": "Minimalist",
+    "ミニ校舎模型": "Mini School Model",
+    "メトロノーム": "Metronome",
+    "ヤンキー": "Delinquent",
+    "ラストスパート": "Last Sprint",
+    "ラッキーセブン": "Lucky Seven",
+    "リサイクル箱": "Recycle Bin",
+    "ロイヤルストレートフラッシュ": "Royal Straight Flush",
+    "ワイルド": "Wild",
+    "ワンペア": "One Pair",
+    "下駄箱": "Shoe Locker",
+    "主役": "Lead Role",
+    "予備の上履き": "Spare Indoor Shoes",
+    "交換日記": "Exchange Diary",
+    "代筆": "Ghostwriter",
+    "体育のしおり": "PE Guidebook",
+    "体育会系": "Athletic Type",
+    "偶数君": "Even-Number Kid",
+    "優等生": "Honor Student",
+    "出席簿": "Attendance Ledger",
+    "剣道部": "Kendo Club",
+    "卒業アルバム": "Graduation Album",
+    "単語カード": "Vocabulary Cards",
+    "参考書ガード": "Reference Book Guard",
+    "双子": "Twins",
+    "反復プリント": "Repetition Worksheet",
+    "反響チューニング": "Echo Tuning",
+    "吸血鬼": "Vampire",
+    "呪箱": "Cursed Box",
+    "図工の魚皿": "Art Room Fish Plate",
+    "園芸部": "Gardening Club",
+    "在庫処分": "Overstock Sale",
+    "地理の地図帳": "Geography Atlas",
+    "執行部": "Executive Committee",
+    "大盛り給食": "Extra-Large Lunch",
+    "天文学書": "Astronomy Book",
+    "奇数ちゃん": "Odd-Number Girl",
+    "始業ベル": "School Bell",
+    "学級委員長": "Class President",
+    "学習塾": "Cram School",
+    "宇宙人": "Alien",
+    "安全ヘルメット": "Safety Helmet",
+    "宝の地図": "Treasure Map",
+    "実験スパーク": "Experiment Spark",
+    "帰宅部": "Go-Home Club",
+    "御曹司": "Heir",
+    "徹夜組": "All-Nighter Group",
+    "怪鐘": "Strange Bell",
+    "投資信託": "Investment Fund",
+    "担任の先生": "Homeroom Teacher",
+    "掲示板": "Bulletin Board",
+    "放課後フォーカス": "After-School Focus",
+    "放送部": "Broadcast Club",
+    "文化祭実行委員": "Festival Committee",
+    "文房具セット": "Stationery Set",
+    "時間飛ばし": "Time Skip",
+    "校旗": "School Flag",
+    "校章ブレイク": "School Emblem Break",
+    "模試対策集": "Mock Exam Prep Book",
+    "歴史年表": "History Timeline",
+    "死神のノート": "Reaper Notebook",
+    "水泳部": "Swim Club",
+    "流星群": "Meteor Shower",
+    "添削名人": "Master Proofreader",
+    "溶けたアイス": "Melted Ice Cream",
+    "演劇部": "Drama Club",
+    "演習ノート": "Practice Notebook",
+    "漢字ドリル": "Kanji Drill",
+    "激落ち消しゴム": "Heavy-Duty Eraser",
+    "焼却": "Incinerate",
+    "特訓問題集": "Special Training Workbook",
+    "王者の参考書": "Champion's Reference Book",
+    "珠算部": "Abacus Club",
+    "理科実験集": "Science Experiment Book",
+    "生徒会長": "Student Council President",
+    "白チョーク": "White Chalk",
+    "皆勤賞": "Perfect Attendance Award",
+    "石像マニア": "Statue Fanatic",
+    "社会科資料集": "Social Studies Sourcebook",
+    "神話の絵本": "Myth Picture Book",
+    "禁書の栞": "Forbidden Book Bookmark",
+    "福引き係": "Raffle Helper",
+    "窓側の席": "Window Seat",
+    "筆箱": "Pencil Case",
+    "算数ドリル": "Math Drill",
+    "節約部": "Savings Club",
+    "終礼": "End-of-Day Homeroom",
+    "給食のおばちゃん": "Lunch Lady",
+    "給食の大鍋": "Big Lunch Pot",
+    "絵の具セット": "Paint Set",
+    "緑ペン": "Green Pen",
+    "美術の教科書": "Art Textbook",
+    "美術室": "Art Room",
+    "職員室の鍵": "Staff Room Key",
+    "自由研究ノート": "Independent Study Notebook",
+    "色彩図鑑": "Color Encyclopedia",
+    "苦学生": "Struggling Student",
+    "英単語帳": "English Vocabulary Book",
+    "茶道部": "Tea Ceremony Club",
+    "虚無ノート": "Void Notebook",
+    "虹チョーク": "Rainbow Chalk",
+    "虹色ペン": "Rainbow Pen",
+    "裏攻略本": "Secret Strategy Guide",
+    "裏番長": "Hidden Boss",
+    "補習組": "Remedial Class Group",
+    "貯金箱": "Piggy Bank",
+    "買い食い": "Snack Run",
+    "資料係": "Archivist",
+    "購買券": "Shop Voucher",
+    "赤ペン": "Red Pen",
+    "赤白帽": "Red-and-White Cap",
+    "迷路名人": "Maze Master",
+    "通学バス": "School Bus",
+    "遠足の小銭入れ": "Field Trip Coin Purse",
+    "部員勧誘": "Club Recruitment",
+    "部活スタンプ": "Club Stamp",
+    "野球部": "Baseball Club",
+    "金スプレー": "Gold Spray",
+    "鉄のメンタル": "Nerves of Steel",
+    "鉄の定規": "Iron Ruler",
+    "鉄の校則": "Iron School Rule",
+    "鉄板ヒート": "Hot Plate Heat",
+    "銀河ノート": "Galaxy Notebook",
+    "錬金術師": "Alchemist",
+    "閉店セール": "Clearance Sale",
+    "陸上部": "Track Club",
+    "階段部": "Stair Club",
+    "隠れた才能": "Hidden Talent",
+    "青ペン": "Blue Pen",
+    "音楽の教科書": "Music Textbook",
+    "音楽室": "Music Room",
+    "風紀委員": "Disciplinary Committee Member",
+    "飛び級": "Grade Skip",
+    "飼育小屋のえさ皿": "Animal Shed Food Dish",
+    "高級文房具": "Premium Stationery",
+    "黒リボン拘束": "Black Ribbon Bind",
+    "黒板アート": "Blackboard Art"
+};
+
+const ENGLISH_TOKEN_DICTIONARY: Record<string, string> = {
+    "小学生編": "Elementary",
+    "高校編": "High School",
+    "次のミニゲーム開放まで": "Next minigame unlock",
+    "問正解": "correct answers",
+    "累計正解数": "Total correct answers",
+    "問": " questions",
+    "全ミニゲーム開放済み": "All minigames unlocked!",
+    "ゲームがフリーズする場合": "If the game freezes",
+    "冒険を始めるからやり直してください": "restart from Start Adventure",
+    "時間切れ": "Time is up!",
+    "本日の冒険時間は終了しました": "Today's adventure time is over.",
+    "勉強の時間です": "Time to study!",
+    "脳を鍛えましょう": "Train your brain.",
+    "わかった": "OK",
+    "セッティング": "Settings",
+    "ゲームをとじる": "Quit Game",
+    "データ移行": "Data Transfer",
+    "デバッグ": "Debug",
+    "けいさん": "Arithmetic",
+    "ミニゲームぜんかいほう": "All Minigames Unlocked",
+    "てきHP": "Enemy HP",
+    "ぜんかいほう": "All Unlocked",
+    "開放": "Unlock",
+    "開放済み": "Unlocked",
+    "正解": "Correct",
+    "不正解": "Incorrect",
+    "冒険": "Adventure",
+    "戦闘": "Battle",
+    "報酬": "Reward",
+    "宝": "Treasure",
+    "宝箱": "Treasure Chest",
+    "敵": "Enemy",
+    "自分": "You",
+    "他のプレイヤー": "Other Player",
+    "全員": "Everyone",
+    "あなた": "You",
+    "選択しています": "is choosing",
+    "選択を待っています": "waiting for a choice",
+    "進行先": "destination",
+    "ホスト承認待ち": "Waiting for host approval",
+    "敵の行動": "Enemy Action",
+    "みんなのターン": "Everyone's Turn",
+    "小": "Grade ",
+    "中": "JH ",
+    "学期": "Term",
+    "単元": "Unit",
+    "単語": "Words",
+    "会話": "Conversation",
+    "単独モード": "Single Mode",
+    "カード": "Card",
+    "カード一覧": "Card List",
+    "カードを": "Card ",
+    "手札": "Hand",
+    "山札": "Draw Pile",
+    "捨て札": "Discard Pile",
+    "廃棄": "Exhaust",
+    "強化": "Upgrade",
+    "削除": "Remove",
+    "回復": "Heal",
+    "ゴールド": "Gold",
+    "入手": "Gain",
+    "獲得": "Gain",
+    "使用": "Use",
+    "戻る": "Back",
+    "進む": "Next",
+    "閉じる": "Close",
+    "決定": "Confirm",
+    "選択": "Select",
+    "やめる": "Cancel",
+    "待機": "Waiting",
+    "確認完了": "Confirm",
+    "取得済み": "Claimed",
+    "未取得": "Unclaimed",
+    "取得者": "Claimed by",
+    "人数分の宝があります": "There is treasure for each player.",
+    "誰でも先に取った宝を獲得できます": "Anyone can claim an available treasure first.",
+    "あなたが宝を取ると呪いが入ります": "Taking treasure will add a curse.",
+    "他のプレイヤーが宝を確認するのを待っています": "Waiting for other players to check treasure.",
+    "宝の確認を終えました": "Treasure confirmed.",
+    "この宝を取る": "Claim This Treasure",
+    "イラストがありません": "No illustration available",
+    "タッチでイラスト拡大": "Tap to enlarge art",
+    "コスト": "Cost",
+    "ダメージ": "Damage",
+    "ブロック": "Block",
+    "エナジー": "Energy",
+    "ムキムキ": "Strength",
+    "カチカチ": "Dexterity",
+    "びくびく": "Vulnerable",
+    "へろへろ": "Weak",
+    "ドクドク": "Poison",
+    "キラキラ": "Artifact",
+    "トゲトゲ": "Thorns",
+    "枚": " cards",
+    "回": " times",
+    "章": "Act",
+    "第": "Act ",
+    "残り": "Remaining ",
+    "現在": "Current",
+    "初回": "First Run",
+    "初期": "Starting",
+    "主人公": "Character",
+    "レリック": "Relic",
+    "ポーション": "Potion",
+    "購買部": "Shop",
+    "休憩": "Rest",
+    "鍛冶": "Upgrade",
+    "図鑑": "Compendium",
+    "記録": "Records",
+    "遊び方": "Help",
+    "設定": "Settings",
+    "保存": "Save",
+    "読み込み": "Load",
+    "生成中": "Generating",
+    "読み込み中": "Loading",
+    "イベント": "Event",
+    "ストーリー": "Story",
+    "ログ": "Log",
+    "マップ": "Map",
+    "ボス": "Boss",
+    "強敵": "Elite",
+    "通常": "Normal",
+    "状態異常": "Status",
+    "呪い": "Curse",
+    "アタック": "Attack",
+    "スキル": "Skill",
+    "パワー": "Power",
+    "召喚": "Summon",
+    "火炎": "Fire",
+    "毒": "Poison",
+    "弱": "Weak",
+    "脆": "Vulnerable",
+    "力": "Strength",
+    "混沌": "Chaos",
+    "復活": "Revive"
+};
+
+const ENGLISH_CARD_ID_DICTIONARY: Record<string, string> = {
+    SHIV: "Pencil Shavings",
+    WOUND: "Injury",
+    DAZED: "Dazed",
+    VOID: "Void",
+    BURN: "Burn",
+    SLIMED: "Runny Nose",
+    KIBI_DANGO: "Millet Dumpling",
+    PAIN: "Stomachache",
+    REGRET: "Regret",
+    DOUBT: "Anxiety",
+    SHAME: "Shame",
+    WRITHE: "Worry",
+    NORMALITY: "Boredom",
+    INJURY: "Fracture",
+    PARASITE: "Parasite",
+    DECAY: "Cavity",
+    CLUMSINESS: "Clumsiness",
+    INFLAME: "Motivation Switch",
+};
+
+const ENGLISH_GENERATED_CARD_NAME_DICTIONARY: Record<string, string> = {
+    "めまい": "Dazed",
+    "虚無": "Void",
+    "やけど": "Burn",
+    "鼻水": "Slimed",
+    "腹痛": "Pain",
+    "後悔": "Regret",
+    "不安": "Doubt",
+    "恥": "Shame",
+    "悩み": "Writhe",
+    "退屈": "Normality",
+    "骨折": "Injury",
+    "寄生虫": "Parasite",
+    "虫歯": "Decay",
+    "ドジ": "Clumsiness",
+    "つまみ食い": "Bite",
+    "透明人間": "Apparition",
+    "牛乳一気飲み": "J A X",
+    "ごんぎつね": "Gon Gitsune",
+    "ごんの栗": "Gon Kuru",
+    "兵十の火縄銃": "Hyoju Rifle",
+    "走れメロス": "Hashire Melos",
+    "邪智暴虐": "Jachi Bogyaku",
+    "メロスの信実": "Melos Trust",
+    "蜘蛛の糸": "Kumo No Ito",
+    "極楽の蓮": "Gokuraku Hasu",
+    "山月記": "Sangetsuki",
+    "虎咆": "Tora Ho",
+    "ボッコちゃん": "Bokko Chan",
+    "おーい、でてこい": "Oi Detekoi",
+    "殺し屋ですのよ": "Koroshiya",
+    "星のプレゼント": "Hoshi Present",
+    "鏡 (星新一)": "Kagami Hoshi",
+    "宇宙のあいさつ": "Space Greeting",
+    "かいけつゾロリ": "Kaiketsu Zorori",
+    "銭天堂": "Zeniten Do",
+    "星の王子さま": "Hoshi No Oji",
+    "モモ": "Momo Time",
+    "時間どろぼう": "Time Thief",
+    "はてしない物語": "Neverending Story",
+    "窓ぎわのトットちゃん": "Totto Chan",
+    "銀河鉄道の夜": "Galaxy Express",
+    "よだかの星": "Yodaka No Hoshi",
+    "注文の多い料理店": "Many Orders",
+    "手袋を買いに": "Buy Gloves",
+    "セロ弾きのゴーシュ": "Gauche Cello",
+    "トロッコ (芥川)": "Mine Blast G",
+    "羅生門": "Rashomon",
+    "カンダタの叫び": "Kumo No Ito D",
+    "人間失格": "Osamu Night",
+    "こころ": "Kokoro Soseki",
+    "坊っちゃん": "Botchan",
+    "吾輩は猫である": "Wagahai Neko",
+    "どっこいしょ": "Dokko Chan",
+    "きてんの窓": "Kitsune No Mado",
+    "かちかち山": "Kachikachi Yama",
+    "浦島太郎": "Urashima Taro",
+    "桃太郎": "Momotaro",
+    "かぐや姫": "Kaguya Hime",
+    "花咲かじいさん": "Hanasaka Jiisan",
+    "かさじぞう": "Kasa Jizo",
+    "一寸法師": "Issun Boshi",
+    "鶴の恩返し": "Tsuru Ongaeshi",
+    "おむすびころりん": "Omusubi Kororin",
+    "ねずみの嫁入り": "Nezumi No Yomeiri",
+    "ヒマワリの種": "Sunflower Seed",
+    "サボテンの種": "Cactus Seed",
+    "バラの種": "Rose Seed",
+    "ツルの種": "Vine Seed",
+    "マンドレイクの種": "Mandrake Seed",
+    "エンドウ豆の種": "Pea Seed",
+    "トマトの種": "Tomato Seed",
+    "カボチャの種": "Pumpkin Seed",
+    "トウガラシの種": "Chili Seed",
+    "ハスの種": "Lotus Seed",
+    "クローバーの種": "Clover Seed",
+    "アイビーの種": "Ivy Seed",
+    "チューリップの種": "Tulip Seed",
+    "竹の種": "Bamboo Seed",
+    "さくらの種": "Sakura Seed",
+    "マツの種": "Pine Seed",
+    "モミジの種": "Maple Seed",
+    "ニンニクの種": "Garlic Seed",
+    "ショウガの種": "Ginger Seed",
+    "ラベンダーの種": "Lavender Seed",
+    "カシの種": "Oak Seed",
+    "アジサイの種": "Hydrangea Seed",
+    "ブルーベルの種": "Bluebell Seed",
+    "リンゴの種": "Apple Seed",
+    "オレンジの種": "Orange Seed",
+    "ブドウの種": "Grape Seed",
+    "キャベツの種": "Cabbage Seed",
+    "ダイコンの種": "Daikon Seed",
+    "キノコの胞子": "Mushroom Spore",
+    "ユリの種": "Lily Seed",
+    "ツバキの種": "Camellia Seed",
+    "コスモスの種": "Cosmos Seed",
+    "タンポポの種": "Dandelion Seed",
+    "イチョウの種": "Ginkgo Seed",
+    "ワサビの種": "Wasabi Seed",
+    "シイタケの胞子": "Shiitake Spore",
+    "カキの種": "Persimmon Seed",
+    "ウメの種": "Plum Seed",
+    "コーヒーの豆": "Coffee Bean",
+    "カカオの豆": "Cacao Bean",
+    "コショウの種": "Pepper Seed",
+    "ヤナギの種": "Willow Seed",
+    "ヒノキの種": "Cypress Seed",
+    "アロエの種": "Aloe Seed",
+    "ミントの種": "Mint Seed",
+    "ジャスミンの種": "Jasmine Seed",
+    "松の盆栽の種": "Bonsai Seed",
+    "世界樹の種": "World Tree Seed",
+    "ヒマワリ": "Sunflower",
+    "サボテン": "Cactus",
+    "バラ": "Rose",
+    "マンドレイク": "Mandrake Root",
+    "豆鉄砲": "Pea Shooter",
+    "完熟トマト": "Ripe Tomato",
+    "鉄壁カボチャ": "Iron Pumpkin",
+    "激辛トウガラシ": "Hot Chili",
+    "聖なるハス": "Sacred Lotus",
+    "四つ葉のクローバー": "Lucky Clover",
+    "魅惑のチューリップ": "Tulip Draw",
+    "剛健な竹": "Sturdy Bamboo",
+    "さくら吹雪": "Sakura Storm",
+    "不老長寿のマツ": "Eternal Pine",
+    "真紅のモミジ": "Crimson Maple",
+    "癒やしのショウガ": "Healing Ginger",
+    "安らぎのラベンダー": "Calm Lavender",
+    "七変化のアジサイ": "Rainbow Hydrangea",
+    "響き渡る鈴蘭": "Echo Bluebell",
+    "禁断のリンゴ": "Forbidden Apple",
+    "太陽のオレンジ": "Solar Orange",
+    "芳醇なブドウ": "Rich Grape",
+    "幾重のキャベツ": "Layered Cabbage",
+    "斬鉄ダイコン": "Sword Daikon",
+    "幻覚キノコ": "Mystic Mushroom",
+    "純白のユリ": "Sacred Lily",
+    "冬枯れのツバキ": "Winter Camellia",
+    "秋空のコスモス": "Autumn Cosmos",
+    "綿毛のタンポポ": "Fluffy Dandelion",
+    "知恵のイチョウ": "Wisdom Ginkgo",
+    "豊穣のカキ": "Bounty Persimmon",
+    "早咲きのウメ": "Early Plum",
+    "覚醒のコーヒー": "Awake Coffee",
+    "魅惑のカカオ": "Sweet Cacao",
+    "爆炎のコショウ": "Explosive Pepper",
+    "柳に風": "Willow Wind",
+    "鉄壁のヒノキ": "Iron Cypress",
+    "清涼のミント": "Refresh Mint",
+    "香華のジャスミン": "Fragrant Jasmine",
+    "至高の盆栽": "Ultimate Bonsai",
+    "ユグドラシル": "Yggdrasil",
+    "四字熟語": "Japanese Syukugo",
+    "ことわざの知恵": "Japanese Kotowaza",
+    "五感の表現": "Japanese Gokan",
+    "万葉の歌": "Japanese Manyo",
+    "観察日記": "Japanese Nikki",
+    "止め・跳ね・払い": "Japanese Syodo",
+    "精神統一": "Japanese Syuji",
+    "言の葉": "Japanese Kotonoha",
+    "五七五": "Japanese Haiku",
+    "主語と述語": "Japanese Bunpo",
+    "朗読": "Japanese Rodoku",
+    "五光": "Japanese Goko",
+    "読書感想文": "Japanese Sakubun",
+    "文字の嵐": "Japanese Moji",
+    "行間を読む": "Japanese Yomitoki",
+    "天礼": "Japanese Tenrei",
+    "暗算": "Math Calc Speed",
+    "三角定規": "Math Triangle",
+    "九九の連鎖": "Math Kuku",
+    "そろばん": "Math Soroban",
+    "割り算": "Math Division",
+    "倍々ゲーム": "Math Multiplication",
+    "ゼロの発見": "Math Zero",
+    "パーセント増量": "Math Percent",
+    "幾何学模様": "Math Geometry",
+    "単位変換": "Math Unit",
+    "方眼紙の盾": "Math Grid",
+    "論理パズル": "Math Logic",
+    "分数の壁": "Math Fraction",
+    "珠算十段": "Math Abacus Master",
+    "試験管の爆発": "Science Experimental",
+    "顕微鏡": "Science Microscope",
+    "光合成": "Science Photosynthesis",
+    "太陽系の公転": "Science Planets",
+    "マグマの噴火": "Science Volcano",
+    "リトマス試験紙": "Science Litmus",
+    "静電気ショック": "Science Electric",
+    "皆既日食": "Science Eclipse",
+    "生命の進化": "Science Evolution",
+    "細菌の増殖": "Science Bacteria",
+    "虹のプリズム": "Science Rainbow",
+    "アンモナイト": "Science Fossil",
+    "人体模型": "Science Anatomy",
+    "天気予報": "Science Weather",
+    "アルコールランプ": "Science Alcohol",
+    "日本地図": "Social Studies Geography",
+    "校則遵守": "Social Studies Law",
+    "バザーの掘り出し物": "Social Studies Market",
+    "未来都市": "Social Studies City",
+    "交換留学生": "Social Studies Trade",
+    "学級委員選挙": "Social Studies Vote",
+    "町工場": "Social Studies Factory",
+    "古い寺院": "Social Studies Temple",
+    "豊作の秋": "Social Studies Rice",
+    "探検隊": "Social Studies Explorer",
+    "お城の守り": "Social Studies Castle",
+    "校内ニュース": "Social Studies News",
+    "産業革命": "Social Studies Revolution",
+    "世界一周": "Social Studies Global",
+    "伝統文化": "Social Studies Culture",
+    "世界遺産登録": "Social Studies Heritage",
+    "縄跳び": "P.E. Jump",
+    "ドッジボール投球": "P.E. Ball",
+    "二人三脚": "P.E. Team",
+    "応援合戦": "P.E. Cheer",
+    "マット運動": "P.E. Gym Mat",
+    "給食の当番": "Event Lunch",
+    "鉄棒の逆上がり": "P.E. Horizontal Bar",
+    "持久走": "P.E. Marathon",
+    "フォークダンス": "P.E. Dance",
+    "朝の会": "Event Morning",
+    "帰りの会": "Event Home",
+    "スポーツ王": "P.E. Champion",
+    "公園のブランコ": "Outdoor Park Swing",
+    "超高速すべり台": "Outdoor Park Slide",
+    "空き地の秘密基地": "Outdoor Secret Base",
+    "駄菓子屋の全買い": "Outdoor Dagashi All",
+    "立ちこぎ坂道": "Outdoor Bicycle Dash",
+    "夏祭りの打ち上げ花火": "Outdoor Festival Fire",
+    "本気の雪合戦": "Outdoor Snowball War",
+    "最強のキックボード": "Outdoor Kickboard",
+    "かぶとむし狩り": "Outdoor Bug Catch",
+    "路地裏の野良猫": "Outdoor Stray Cat",
+    "アニメ一気見": "Outdoor Anime Binge",
+    "伝説のかくれんぼ": "Outdoor Park Hide",
+    "ガチャの神引き": "Outdoor Gacha Luck",
+    "泥まみれの決闘": "Outdoor Mud Fight",
+    "図書室での昼寝": "Outdoor Library Sleep",
+    "ゲーセンの達人": "Outdoor Arcade Master",
+    "プラモデル製作": "Outdoor Model Build",
+    "極楽の銭湯": "Outdoor Bath Time",
+    "満天の星空": "Outdoor Starry Sky",
+    "蚊との死闘": "Outdoor Mosquito War",
+    "最後の宿題": "Outdoor Summer Homework",
+    "ジャングルジムの頂上": "Outdoor Jungle Gym",
+    "出前ピザパーティー": "Outdoor Pizza Party",
+    "水たまりジャンプ": "Outdoor Rain Puddle",
+    "お正月の凧揚げ": "Outdoor Kite Flying",
+    "消防署見学": "Outdoor Fire Truck",
+    "工事現場の重機": "Outdoor Construction",
+    "夜の怖い話": "Outdoor Ghost Story",
+    "おじいちゃんの教え": "Outdoor Grandpa Wisdom",
+    "カぶとむし相撲": "Outdoor Kabuto Wrestle",
+    "綿菓子の雲": "Outdoor Candy Sugar",
+    "風船割り": "Outdoor Balloon Pop",
+    "初詣の願い事": "Outdoor Shrine Pray",
+    "壁への落書き": "Outdoor Crayon Wall",
+    "鳥になった気分": "Outdoor Bird Watch",
+    "ラジコン操作": "Outdoor Radio Control",
+    "アイス食べ放題": "Outdoor Ice Cream Binge",
+    "街頭パフォーマンス": "Outdoor Street Perform",
+    "戦隊ヒーローのポーズ": "Outdoor Super Hero Pose",
+    "川での魚つかみ": "Outdoor Fish Catch",
+    "秘密の近道": "Outdoor Hidden Shortcut",
+    "将来の夢": "Outdoor Dream Future",
+    "夏休みの工作": "Outdoor Wood Craft",
+    "スタンプラリー": "Outdoor Stamp Collect",
+    "心霊写真": "Outdoor Ghost Photo",
+    "公園の噴水": "Outdoor Park Fountain",
+    "ローラーシューズ": "Outdoor Roller Blade",
+    "七五三の晴れ着": "Outdoor Kimono Dress",
+    "シロツメクサの冠": "Outdoor Flower Crown",
+    "天体観測": "Outdoor Telescope",
+    "最強の紙飛行機": "Outdoor Paper Plane Ultra",
+    "虫かごの秘密": "Outdoor Bug Box",
+    "夜道の街灯": "Outdoor Street Light",
+    "おじいちゃんの古民家": "Outdoor Old House",
+    "パチパチキャンディ": "Outdoor Candy Bomb",
+    "究極の泥団子": "Outdoor Mud Dumpling",
+    "秘密のラブレター": "Outdoor Secret Letter",
+    "海賊ごっこ": "Outdoor Pirate Play",
+    "砂浜の城": "Outdoor Sand Castle",
+    "虹を追いかけて": "Outdoor Rainbow Chase",
+    "木登り名人": "Outdoor Climbing Tree",
+    "神社の龍神様": "Outdoor Dragon God",
+    "屋台の焼きそば": "Outdoor Yakisoba",
+    "金魚すくい": "Outdoor Gold Fish",
+    "縁日のお面": "Outdoor Mask Hero",
+    "田んぼのかかし": "Outdoor Scare Crow",
+    "手持ち花火": "Outdoor Sparkler",
+    "休日の二度寝": "Outdoor Sleep In",
+    "博物館の恐竜": "Outdoor Museum Trip",
+    "真夏の肝試し": "Outdoor Kimodameshi",
+    "落ち葉の絨毯": "Outdoor Fall Leaves",
+    "冬のこたつ": "Outdoor Kotatsu",
+    "初日の出": "Outdoor First Sun",
+    "路地のストリートサッカー": "Outdoor Soccer Street",
+    "地元のラジオ局": "Outdoor Radio Station",
+    "水族館のサメ": "Outdoor Aquarium",
+    "夢のおもちゃ屋": "Outdoor Toy Store",
+    "傘チャンバラ": "Outdoor Umbrella Sword",
+    "夕焼けのチャイム": "Outdoor Evening Chime",
+    "僕だけのヒーロー": "Outdoor My Hero",
+    "親友との約束": "Outdoor Friend Forever",
+    "おばあちゃんの手作りケーキ": "Outdoor Grandma Cake",
+    "公園の決戦": "Outdoor Last Battle",
+    "いつかの卒業式": "Outdoor Graduation Day",
+    "ドラグニル・バースト": "Boys Dragon Buster",
+    "虚空の断罪": "Boys Void Slash",
+    "雷神の鉄拳": "Boys Thunder Fist",
+    "影縫いの太刀": "Boys Shadow Bind",
+    "電脳世界へのダイブ": "Boys Mecha Dive",
+    "暗黒の特異点": "Boys Black Hole",
+    "侍の魂": "Boys Samurai Spirit",
+    "忍法・隠れ身": "Boys Ninja Vanish",
+    "フルドライブ": "Boys Robot Boost",
+    "無尽蔵の剣線": "Boys Blade Storm",
+    "紅蓮爆華": "Boys Volcano Crash",
+    "電磁障壁": "Boys Cyber Shield",
+    "創世の光線": "Boys Genesis Ray",
+    "鉄血の誓い": "Boys Iron Blood",
+    "超電磁加速砲": "Boys Railgun",
+    "守護騎士の盾": "Boys Knight Guard",
+    "神速の連撃": "Boys Strike God",
+    "次元跳躍": "Boys Space Warp",
+    "戦意高揚": "Boys Samurai Aura",
+    "流星の鉄槌": "Boys Meteor",
+    "リベンジ・バースト": "Boys Revenge",
+    "影分身の術": "Boys Shadow Clone",
+    "修羅の構え": "Boys Battle Stance",
+    "プラズマ・ブレード": "Boys Cyber Blade",
+    "竜の眼光": "Boys Dragon Eye",
+    "虚無の鎧": "Boys Void Armor",
+    "雷鳴の轟き": "Boys Thunder Storm",
+    "賞金稼ぎ": "Boys Soldier Hunt",
+    "鉄壁の陣": "Boys Iron Wall",
+    "焔の突撃": "Boys Flame Drive",
+    "次元地雷": "Boys Space Mine",
+    "真の勇者覚醒": "Boys Hero Awaken",
+    "オメガ・キャノン": "Boys Omega Cannon",
+    "暗影の歩法": "Boys Shadow Step",
+    "烈火拳": "Boys Blazing Fist",
+    "音速の波動": "Boys Sonic Wave",
+    "巨神の盾": "Boys Titan Shield",
+    "狂戦士の咆哮": "Boys Berserk Mode",
+    "終焉の審判": "Boys Judgement",
+    "幻影の刃": "Boys Phantom Edge",
+    "コア・ストライク": "Boys Core Strike",
+    "自動防衛システム": "Boys Defence Sys",
+    "無限の剣舞": "Boys Infinite Blade",
+    "マッスル・ビルド": "Boys Strength Up",
+    "孤狼の群れ": "Boys Wolf Pack",
+    "オーバーロード": "Boys Overload",
+    "ラスト・ファンタジー": "Boys Final Fantasy",
+    "スターライト・シンフォニー": "Girls Star Symphony",
+    "ハートフル・ブルーム": "Girls Heart Bloom",
+    "恋するマカロン・ヒール": "Girls Macaron Heal",
+    "ミラクル・ステッキ": "Girls Magic Wand",
+    "夢見るリボン・バインド": "Girls Ribbon Bind",
+    "おやすみスウィート": "Girls Sweet Dream",
+    "ジュエル・シャイン": "Girls Jewel Shine",
+    "花咲く乙女の庭": "Girls Flower Garden",
+    "憧れのドレスアップ": "Girls Princess Dress",
+    "キャンディ・ポップ・ウェーブ": "Girls Candy Wave",
+    "月光のセレナーデ": "Girls Moon Serenade",
+    "天使の羽ばたき": "Girls Angel Wings",
+    "さくらんぼのワルツ": "Girls Cherry Blossom",
+    "ドリーム・キャッチャー": "Girls Dream Catcher",
+    "一角獣の突進": "Girls Unicorn Strike",
+    "なないろマジック": "Girls Rainbow Magic",
+    "デコレーション・ケーキ": "Girls Cake Topper",
+    "おとぎ話の扉": "Girls Fairy Tale",
+    "輝くティアラの守り": "Girls Tiara Shield",
+    "流星の願い": "Girls Star Rain",
+    "お茶会の時間": "Girls Tea Party",
+    "内緒の噂話": "Girls Gossip Girl",
+    "お人形遊び": "Girls Doll House",
+    "本命チョコ": "Girls Choco Valentine",
+    "夢色メロディ": "Girls Melody Line",
+    "ひらひら蝶々": "Girls Butterfly",
+    "雪の結晶": "Girls Snow Flake",
+    "秘密のプレゼント": "Girls Gift Box",
+    "人魚の歌声": "Girls Mermaid Song",
+    "ひまわりスマイル": "Girls Sun Flower",
+    "ラブリー・キッス": "Girls Lovely Kiss",
+    "お菓子の行進": "Girls Sweet Parade",
+    "ムーンライト・ステップ": "Girls Moon Light",
+    "カラフル・レインボー": "Girls Colorful Rain",
+    "天使の祈り": "Girls Angel Heal",
+    "ずっと友達だよ": "Girls Friendship",
+    "純真な心": "Girls Pure Heart",
+    "華麗な舞": "Girls Ballerina",
+    "いちごの奇跡": "Girls Strawberry",
+    "飴玉の嵐": "Girls Candy Shower",
+    "奇跡のリボン": "Girls Miracle Ribbon",
+    "星屑のきらめき": "Girls Star Dust",
+    "お姫様の呼び声": "Girls Princess Call",
+    "永遠の約束": "Girls Eternal Love",
+    "百花繚乱": "Girls Flower Bomb",
+    "むしゃくしゃ": "Yatsuatari",
+    "早退": "Expulsion",
+    "えんぴつの削りかす": "Shiv",
+    "捕獲網": "Capture Net",
+    "先生に報告": "Neutralize",
+    "上履きキック": "Iron Wave",
+    "頭突き": "Headbutt",
+    "ラリアット": "Clothesline",
+    "チョーク投げ": "Dagger Throw",
+    "定規で叩く": "Pommel Strike",
+    "雑巾がけ": "Cleave",
+    "早弁": "Quick Slash",
+    "ひっかく": "Slice",
+    "レーザーポインター": "Beam Cell",
+    "寒いギャグ": "Cold Snap",
+    "静電気": "Ball Lightning",
+    "ブーメラン": "Sword Boomerang",
+    "ボディスラム": "Body Slam",
+    "暴れる": "Wild Strike",
+    "キレる": "Anger",
+    "飛び膝蹴り": "Flying Knee",
+    "グーパンチ": "Empty Fist",
+    "掃除の時間": "Consecrate",
+    "列に割り込む": "Cut Through",
+    "口喧嘩": "Clash",
+    "消しゴム投げ": "Dagger Spray",
+    "カンチョー": "Sucker Punch",
+    "追い打ち": "Bane",
+    "雄叫び": "Warcry",
+    "知らんぷり": "Shrug It Off",
+    "充電": "Charge Battery",
+    "ジャンプ": "Leap",
+    "装備点検": "Armaments",
+    "側転": "Acrobatics",
+    "バック転": "Backflip",
+    "準備": "Prepared",
+    "カンニング": "Hologram",
+    "予習": "Third Eye",
+    "瞑想": "Empty Body",
+    "土下座": "Prostrate",
+    "先読み": "Scry",
+    "速読": "Skim",
+    "カフェイン": "Turbo",
+    "目隠し": "Blind",
+    "足払い": "Trip",
+    "深呼吸": "Deep Breath",
+    "アッパー": "Uppercut",
+    "げんこつ": "Bludgeon",
+    "給食当番": "Reaper",
+    "いただきます": "Feed",
+    "重いバット": "Heavy Blade",
+    "宿題宿題": "Die Die Die",
+    "廊下ダッシュ": "Dash",
+    "目からビーム": "Hyperbeam",
+    "ビリビリに破る": "Sunder",
+    "日曜の夜": "Doom And Gloom",
+    "夜ふかし": "Core Surge",
+    "台風": "Ragnarok",
+    "ひらめき": "Brilliance",
+    "袋叩き": "Carnage",
+    "やられたらやり返す": "Blood For Blood",
+    "断捨離": "Sever Soul",
+    "グルグルバット": "Whirlwind",
+    "ヘッドロック": "Choke",
+    "フルスイング": "All Outdoor Strike",
+    "かかと落とし": "Heel Hook",
+    "終わりのチャイム": "Finisher",
+    "炭酸ジュース": "Melter",
+    "知恵熱": "Hemokinesis",
+    "画鋲投げ": "Flechettes",
+    "穴だらけ": "Riddle With Holes",
+    "卒業式": "Grand Finale",
+    "一夜漬け": "Mind Blast",
+    "衝撃波": "Shockwave",
+    "鉄壁": "Impervious",
+    "パシリ": "Offering",
+    "興奮": "Seeing Red",
+    "かまくら": "Glacier",
+    "再起動": "Reboot",
+    "バリア": "Force Field",
+    "武器奪取": "Disarm",
+    "二刀流": "Dual Wield",
+    "見張り": "Sentinel",
+    "恐怖": "Terror",
+    "衝撃のうわさ": "Corpse Explosion",
+    "不快感": "Malaise",
+    "バースト": "Burst",
+    "錬金術": "Alchemize",
+    "指切りげんまん": "Offering Blood",
+    "工作の時間": "Blade Dance",
+    "隠し芸": "Cloak And Dagger",
+    "山勘": "Calculated Gamble",
+    "化学反応": "Catalyst",
+    "発見": "Discovery",
+    "カンニングペーパー": "Strategist",
+    "覚醒": "Apotheosis",
+    "やる気スイッチ": "Inflame",
+    "反抗期": "Demon Form",
+    "予習復習": "Echo Form",
+    "秘密基地": "Barricade",
+    "賞味期限": "Corruption",
+    "成長痛": "Rupture",
+    "進級": "Evolve",
+    "異臭騒ぎ": "Noxious Fumes",
+    "反復横跳び": "After Image",
+    "千本ノック": "Thousand Cuts",
+    "整理整頓": "Tools Of The Trade",
+    "悪口": "Envenom",
+    "摩擦熱": "Static Discharge",
+    "心の壁": "Buffer",
+    "自由研究": "Creative AI",
+    "模範解答": "Master Reality",
+    "逆ギレ": "Berserk",
+};
+
+const ENGLISH_ITEM_NAME_DICTIONARY: Record<string, string> = {
+    "竹とんぼ": "Bamboo Copter",
+    "二宮金次郎像": "Kinjiro Statue",
+    "高級羽毛布団": "Luxury Down Futon",
+    "上履き": "Indoor Shoes",
+    "お道具箱": "Toolbox",
+    "冷凍ミカン": "Frozen Mandarin",
+    "折り紙の手裏剣": "Origami Shuriken",
+    "紙飛行機": "Paper Airplane",
+    "下敷き": "Desk Mat",
+    "習字セット": "Calligraphy Set",
+    "画鋲": "Thumbtack",
+    "コンパス": "Compass",
+    "溶けないアイス": "Unmelting Ice Cream",
+    "揚げパン": "Fried Bread",
+    "ラムネ": "Ramune Candy",
+    "持ち込み禁止令": "No-Outside-Items Rule",
+    "謎の石": "Mysterious Stone",
+    "制服のカラー": "Uniform Collar",
+    "ぐるぐるメガネ": "Swirly Glasses",
+    "トロフィー": "Trophy",
+    "成長期": "Growth Spurt",
+    "曲がったスプーン": "Bent Spoon",
+    "禁断の参考書": "Forbidden Reference Book",
+    "分厚い辞書": "Thick Dictionary",
+    "秘密の攻略本": "Secret Strategy Guide",
+    "合わせ鏡": "Facing Mirrors",
+    "観察メモ": "Observation Notes",
+    "インク瓶": "Ink Bottle",
+    "厚紙シールド": "Cardboard Shield",
+    "星座早見盤": "Star Chart",
+    "相談室の整理券": "Counseling Room Ticket",
+    "赤点答案": "Failing Test Paper",
+    "スマイルシール": "Smile Sticker",
+    "コーラ": "Cola",
+    "牛乳": "Milk",
+    "プロテイン": "Protein Shake",
+    "変なジュース": "Strange Juice",
+    "墨汁": "India Ink",
+    "フルーツポンチ": "Fruit Punch",
+    "工作のり": "Craft Glue",
+    "お守り": "Charm",
+    "闇鍋ジュース": "Mystery Stew Juice",
+    "サイダー": "Cider",
+    "朝練ジュース": "Morning Practice Juice",
+    "部活プロテイン": "Club Protein Shake",
+    "うがいシロップ": "Gargle Syrup",
+    "チョークダスト": "Chalk Dust",
+    "時間割エリクサー": "Timetable Elixir",
+};
+
+const ENGLISH_ENEMY_NAME_DICTIONARY: Record<string, string> = {
+    "裏返しの給食エプロン": "Inside-Out Lunch Apron",
+    "トイレの太郎くん": "Bathroom Taro",
+    "カビたコッペパン": "Moldy Bread Roll",
+    "テカテカの廊下": "Over-Waxed Hallway",
+    "裏庭のツチノコ（偽）": "Fake Backyard Tsuchinoko",
+    "給食泥棒": "Lunch Thief",
+    "トイレの花子さん": "Bathroom Hanako",
+    "イジワルな上級生": "Mean Upperclassman",
+    "家庭科室の包丁": "Home Economics Knife",
+    "図書室の禁書": "Forbidden Library Book",
+    "体育館の不気味なボール": "Creepy Gym Ball",
+    "落書きされた机": "Graffiti-Covered Desk",
+    "給食のパンの耳": "Lunch Bread Crust",
+    "掃除用具入れの主": "Cleaning Closet Master",
+    "チョーク・ゴーレム": "Chalk Golem",
+    "跳び箱ミミック": "Vaulting Box Mimic",
+    "図書室の主": "Library Master",
+    "プールサイドの影": "Poolside Shadow",
+    "体育館のバスケットボール": "Gym Basketball",
+    "地獄のチャイム公爵": "Duke of the Infernal Chime",
+    "宿題忘れの言い訳王": "King of Forgotten Homework Excuses",
+    "破れた体育館マット": "Torn Gym Mat",
+    "遅刻確定の踏切": "Definitely-Late Railroad Crossing",
+    "誰もいないプールの水音": "Pool Sounds with No One There",
+    "逆上がりができない子供の影": "Shadow of a Child Who Cannot Kick Over",
+    "消えた給食のデザート": "Vanished Lunch Dessert",
+    "地獄の教育実習生": "Infernal Student Teacher",
+    "冷徹な教頭代理": "Cold Acting Vice Principal",
+    "宿題の権化": "Embodiment of Homework",
+    "校則の縛鎖": "Chains of School Rules",
+    "赤点の王": "King of Failing Grades",
+    "深夜の校長室の影": "Midnight Principal's Office Shadow",
+    "教育委員会の尖兵": "Board of Education Vanguard",
+    "内申点の亡霊": "Report-Score Ghost",
+    "校門の守衛ロボ": "School Gate Guard Robot",
+    "思い出の残滓": "Residue of Memories",
+    "終わらない夏休み": "Endless Summer Vacation",
+    "体育の先生": "P.E. Teacher",
+    "教頭先生": "Vice Principal",
+    "終わらない宿題": "Endless Homework",
+    "伝説の不良": "Legendary Delinquent",
+    "激怒した用務員さん": "Enraged Custodian",
+    "校門の守護者": "School Gate Guardian",
+    "期末テストの化身": "Final Exam Incarnate",
+    "無限の廊下": "Infinite Hallway",
+    "通知表の悪夢": "Report Card Nightmare",
+    "闇の教育委員会": "Dark Board of Education",
+    "伝説の用務員": "Legendary Custodian",
+    "禁断の参考書": "Forbidden Reference Book",
+    "校舎の古龍": "Ancient Schoolhouse Dragon",
+    "逆立ちする二宮金次郎": "Handstanding Kinjiro",
+    "インク切れのペン": "Out-of-Ink Pen",
+    "通知表の「がんばりましょう」": "Report Card's Needs Improvement",
+    "三者面談の空気感": "Parent-Teacher Conference Tension",
+    "校長先生": "Principal",
+};
+
+const buildEnglishTokenPhrase = (text: string): string | null => {
+    let result = text;
+    Object.keys({ ...ENGLISH_DICTIONARY, ...ENGLISH_ENEMY_NAME_DICTIONARY, ...ENGLISH_ITEM_NAME_DICTIONARY, ...ENGLISH_GENERATED_CARD_NAME_DICTIONARY, ...ENGLISH_CARD_NAME_DICTIONARY, ...ENGLISH_TOKEN_DICTIONARY })
+        .sort((a, b) => b.length - a.length)
+        .forEach(key => {
+            if (result.includes(key)) {
+                const escapedKey = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                result = result.replace(new RegExp(escapedKey, 'g'), ` ${ENGLISH_TOKEN_DICTIONARY[key] || ENGLISH_CARD_NAME_DICTIONARY[key] || ENGLISH_GENERATED_CARD_NAME_DICTIONARY[key] || ENGLISH_ITEM_NAME_DICTIONARY[key] || ENGLISH_ENEMY_NAME_DICTIONARY[key] || ENGLISH_DICTIONARY[key]} `);
+            }
+        });
+
+    result = result
+        .replace(/[ぁ-んァ-ン一-龠々]+/g, " ")
+        .replace(/[、。！？：]/g, " ")
+        .replace(/[（）]/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+
+    if (!/[A-Za-z]/.test(result)) return null;
+    return result
+        .replace(/\s+([.,!?;:])/g, "$1")
+        .replace(/\bHp\b/g, "HP")
+        .replace(/\bG\b/g, "G");
+};
+
+const ENGLISH_TEXT_PATTERNS: Array<[RegExp, string]> = [
+    [/第\s*(\d+)\s*章/g, "Act $1"],
+    [/(\d+)\s*学期/g, "Term $1"],
+    [/小\s*(\d+)/g, "Grade $1"],
+    [/中\s*(\d+)/g, "JH $1"],
+    [/(\d+)\s*問正解/g, "$1 correct answers"],
+    [/残り\s*(\d+)\s*枚/g, "$1 cards remaining"],
+    [/(\d+)\s*枚/g, "$1 cards"],
+    [/HPが?(\d+)回復/g, "Heal $1 HP"],
+    [/HP-(\d+)/g, "HP -$1"],
+    [/HP\+(\d+)/g, "HP +$1"],
+    [/(\d+)Gを?得た/g, "Gain $1G"],
+    [/(\d+)G入手/g, "Gain $1G"],
+    [/(\d+)G獲得/g, "Gain $1G"],
+    [/最大HP\+(\d+)/g, "Max HP +$1"],
+    [/ムキムキ\+(\d+)/g, "Strength +$1"],
+    [/ブロック(\d+)/g, "Block $1"],
+    [/ドクドク(\d+)/g, "Poison $1"],
+    [/へろへろ(\d+)/g, "Weak $1"],
+    [/びくびく(\d+)/g, "Vulnerable $1"],
+    [/(\d+)ダメージ/g, "$1 Damage"],
+    [/(.+?)のターン/g, "$1's Turn"],
+    [/(.+?)を使用/g, "Use $1"],
+    [/(.+?)を倒した/g, "$1 defeated"],
+    [/(.+?)を入手/g, "Gained $1"],
+    [/(.+?)を獲得/g, "Gained $1"],
+    [/(.+?)を選んだ/g, "Selected $1"],
+    [/(.+?)を取り除いた/g, "Removed $1"],
+    [/(.+?)を強化/g, "Upgraded $1"],
+];
+
+const ENGLISH_FALLBACK_BY_HINT: Array<[RegExp, string]> = [
+    [/フリーズ|固ま|動かな/, "If the game freezes, restart from Start Adventure."],
+    [/時間切れ|冒険時間|プレイ制限/, "Today's adventure time is over."],
+    [/ミニゲーム|開放|解放/, "Minigame unlock status"],
+    [/続き|セーブ|保存データ/, "Saved adventure"],
+    [/冒険|旅|ダンジョン/, "Adventure"],
+    [/戦闘|敵|ボス|ターン/, "Battle"],
+    [/報酬|獲得|入手|宝/, "Reward"],
+    [/カード|デッキ|手札|山札|捨て札/, "Card"],
+    [/レリック|遺物/, "Relic"],
+    [/ポーション|薬/, "Potion"],
+    [/問題|正解|不正解|学習|勉強/, "Learning challenge"],
+    [/設定|音量|BGM|セッティング/, "Settings"],
+    [/イベント|ストーリー/, "Story event"],
+    [/マップ|目的地|進行先/, "Map"],
+];
+
+const buildEnglishEffectSummary = (text: string): string | null => {
+    const effects: string[] = [];
+
+    const damageMatch = text.match(/(\d+)ダメージ/);
+    if (damageMatch) {
+        const hitsMatch = text.match(/(\d+)回/);
+        effects.push(hitsMatch ? `Deal ${damageMatch[1]} damage ${hitsMatch[1]} times` : `Deal ${damageMatch[1]} damage`);
+    } else if (/全体.*ダメージ|敵全体.*ダメージ/.test(text)) {
+        effects.push("Deal damage to all enemies");
+    }
+
+    const blockMatch = text.match(/ブロック(\d+)|(\d+)ブロック/);
+    if (blockMatch) effects.push(`Gain ${blockMatch[1] || blockMatch[2]} Block`);
+    if (/ブロック.*倍|倍にする/.test(text)) effects.push("Double your current Block");
+
+    const drawMatch = text.match(/カードを?(\d+)枚引く|(\d+)枚引く|追加で(\d+)枚引く/);
+    if (drawMatch) effects.push(`Draw ${drawMatch[1] || drawMatch[2] || drawMatch[3]} card(s)`);
+    if (/手札を.*捨て|手札をすべて捨て/.test(text)) effects.push("Discard cards from your hand");
+    if (/手札を.*入れ替え|手札を交換/.test(text)) effects.push("Replace your hand");
+    if (/捨て札.*山札/.test(text)) effects.push("Shuffle the discard pile into the draw pile");
+
+    const energyMatch = text.match(/エナジー(\d+)|エナジー\+(\d+)/);
+    if (energyMatch) effects.push(`Gain ${energyMatch[1] || energyMatch[2]} Energy`);
+
+    const healMatch = text.match(/HPを?(\d+)回復|HPが?(\d+)回復/);
+    if (healMatch) effects.push(`Heal ${healMatch[1] || healMatch[2]} HP`);
+    if (/全回復/.test(text)) effects.push("Heal to full HP");
+    const maxHpMatch = text.match(/最大HP\+?(\d+)/);
+    if (maxHpMatch) effects.push(`Increase max HP by ${maxHpMatch[1]}`);
+
+    const strengthMatch = text.match(/ムキムキ\+?(\d+)|ムキムキ(\d+)/);
+    if (strengthMatch) effects.push(`Gain ${strengthMatch[1] || strengthMatch[2]} Strength`);
+    const dexMatch = text.match(/カチカチ\+?(\d+)|カチカチ(\d+)/);
+    if (dexMatch) effects.push(`Gain ${dexMatch[1] || dexMatch[2]} Dexterity`);
+    const poisonMatch = text.match(/ドクドク\+?(\d+)|ドクドク(\d+)|どく\+?(\d+)/);
+    if (poisonMatch) effects.push(`Apply ${poisonMatch[1] || poisonMatch[2] || poisonMatch[3]} Poison`);
+    const weakMatch = text.match(/へろへろ\+?(\d+)|へろへろ(\d+)/);
+    if (weakMatch) effects.push(`Apply ${weakMatch[1] || weakMatch[2]} Weak`);
+    const vulnMatch = text.match(/びくびく\+?(\d+)|びくびく(\d+)/);
+    if (vulnMatch) effects.push(`Apply ${vulnMatch[1] || vulnMatch[2]} Vulnerable`);
+    const artifactMatch = text.match(/キラキラ\+?(\d+)|キラキラ(\d+)/);
+    if (artifactMatch) effects.push(`Gain ${artifactMatch[1] || artifactMatch[2]} Artifact`);
+
+    if (/敵全体/.test(text) && effects.length > 0) effects[0] = effects[0].replace(/^Apply /, "Apply to all enemies ").replace(/^Deal /, "Deal to all enemies ");
+    if (/廃棄/.test(text)) effects.push("Exhaust");
+    if (/次のターン|次ターン/.test(text)) effects.push("takes effect next turn");
+    if (/ランダム/.test(text)) effects.push("randomly");
+    if (/強化/.test(text)) effects.push("Upgrade card(s)");
+    if (/デバフ.*解除|全デバフ/.test(text)) effects.push("Remove all debuffs");
+    if (/ポーション/.test(text)) effects.push("Gain a potion");
+    if (/ゴールド/.test(text)) effects.push("Gain gold");
+
+    return effects.length > 0 ? `${effects.join(". ")}.` : null;
+};
+
+const buildEnglishNarrativeSummary = (text: string): string | null => {
+    if (/HP.*0|ブロック.*ターン|てきの こうげき|じぶんの ステータス/.test(text)) {
+        return "Your Status. If your HP reaches 0, you lose. Use Block to prevent enemy attacks. Block becomes 0 at the end of the turn.";
+    }
+    if (text.length < 12) return null;
+    if (/校長|学校|校舎|生徒|教室|放課後|試験|宿題|答案|進路/.test(text)) {
+        const themes: string[] = [];
+        if (/校長/.test(text)) themes.push("the principal");
+        if (/学校|校舎|教室/.test(text)) themes.push("the school");
+        if (/試験|テスト|答案|問題/.test(text)) themes.push("exams");
+        if (/宿題|課題/.test(text)) themes.push("assignments");
+        if (/進路|未来|夢/.test(text)) themes.push("the students' future");
+        if (/噂|SNS|通知/.test(text)) themes.push("rumors");
+        if (/時間|時計|永遠/.test(text)) themes.push("time itself");
+        const subject = themes.length > 0 ? themes.slice(0, 3).join(", ") : "the school";
+        return `A strange incident involving ${subject} unfolds. Keep going and prepare to confront the source of the trouble.`;
+    }
+    if (/選んで|選択|一つだけ/.test(text)) return "Choose one option to continue.";
+    if (/待って|待機/.test(text)) return "Waiting for the next action.";
+    return null;
+};
+
+const plural = (count: number, word: string) => `${count} ${word}${count === 1 ? "" : "s"}`;
+
+const getEnglishCardReference = (cardName: string): string => (
+    ENGLISH_CARD_ID_DICTIONARY[cardName] || trans(cardName, 'ENGLISH')
+);
+
+const KATAKANA_ROMAJI: Record<string, string> = {
+    ア: "a", イ: "i", ウ: "u", エ: "e", オ: "o",
+    カ: "ka", キ: "ki", ク: "ku", ケ: "ke", コ: "ko",
+    サ: "sa", シ: "shi", ス: "su", セ: "se", ソ: "so",
+    タ: "ta", チ: "chi", ツ: "tsu", テ: "te", ト: "to",
+    ナ: "na", ニ: "ni", ヌ: "nu", ネ: "ne", ノ: "no",
+    ハ: "ha", ヒ: "hi", フ: "fu", ヘ: "he", ホ: "ho",
+    マ: "ma", ミ: "mi", ム: "mu", メ: "me", モ: "mo",
+    ヤ: "ya", ユ: "yu", ヨ: "yo",
+    ラ: "ra", リ: "ri", ル: "ru", レ: "re", ロ: "ro",
+    ワ: "wa", ヲ: "o", ン: "n",
+    ガ: "ga", ギ: "gi", グ: "gu", ゲ: "ge", ゴ: "go",
+    ザ: "za", ジ: "ji", ズ: "zu", ゼ: "ze", ゾ: "zo",
+    ダ: "da", ヂ: "ji", ヅ: "zu", デ: "de", ド: "do",
+    バ: "ba", ビ: "bi", ブ: "bu", ベ: "be", ボ: "bo",
+    パ: "pa", ピ: "pi", プ: "pu", ペ: "pe", ポ: "po",
+    ヴ: "v", ァ: "a", ィ: "i", ゥ: "u", ェ: "e", ォ: "o",
+};
+
+const romanizeKatakana = (text: string): string => {
+    let result = "";
+    for (const char of text) {
+        if (char === "ー") {
+            result += result.match(/[aeiou]$/)?.[0] || "";
+        } else {
+            result += KATAKANA_ROMAJI[char] || "";
+        }
+    }
+    return result ? result.charAt(0).toUpperCase() + result.slice(1) : "";
+};
+
+const getEnglishFamiliarName = (name: string): string => {
+    if (!JAPANESE_TEXT_PATTERN.test(name)) return name;
+    const katakanaName = name.match(/[ァ-ヶー]+$/)?.[0];
+    if (katakanaName) return romanizeKatakana(katakanaName) || "Familiar";
+    return "Familiar";
+};
+
+const getPowerEffectEnglish = (id: string | undefined, amount: number): string | null => {
+    switch (id) {
+        case 'DEXTERITY':
+            return `Gain ${amount} Dexterity`;
+        case 'ARTIFACT':
+            return `Gain ${amount} Artifact`;
+        case 'THORNS':
+            return `Gain ${amount} Thorns`;
+        case 'METALLICIZE':
+            return `Gain ${amount} Block at the end of your turn`;
+        case 'DRAW_POWER':
+            return `Draw ${amount} extra card${amount === 1 ? "" : "s"} at the start of each turn`;
+        case 'DRAW_POWER_2':
+            return `Draw ${amount} extra cards at the start of each turn`;
+        case 'DEMON_FORM':
+            return `Gain ${amount} Strength at the start of each turn`;
+        case 'BERSERK_POWER':
+            return `Gain ${amount} Energy at the start of each turn`;
+        case 'ENERGY_DRAW_POWER':
+            return `Gain ${amount} Energy and draw ${amount} card${amount === 1 ? "" : "s"} at the start of each turn`;
+        case 'STATIC_DISCHARGE':
+            return `When you take damage, deal ${5 * amount} damage to a random enemy`;
+        case 'BUFFER':
+            return `Prevent the next ${plural(amount, "HP damage instance")}`;
+        case 'EVOLVE':
+            return `Draw ${amount} card${amount === 1 ? "" : "s"} whenever you draw a status card`;
+        case 'CLEAR_DEBUFFS':
+            return "Remove all debuffs";
+        case 'INTANGIBLE':
+            return `Become Intangible for ${plural(amount, "turn")}`;
+        case 'MERCURY_HOURGLASS':
+            return `Deal ${amount} damage to all enemies at the end of your turn`;
+        case 'BARRICADE':
+            return "Block is not removed at the end of your turn";
+        case 'COST_REDUCTION':
+            return `At the start of each turn, reduce all card costs by ${amount}`;
+        case 'CORRUPTION':
+            return "Skills cost 0 and Exhaust when played";
+        case 'ECHO_FORM':
+            return `Play the first card you use each turn ${amount + 1} times`;
+        case 'FEEL_NO_PAIN':
+            return `Gain ${amount} Block whenever a card is Exhausted`;
+        case 'RUPTURE':
+            return `Gain ${amount} Strength whenever you lose HP`;
+        case 'NOXIOUS_FUMES':
+            return `Apply ${amount} Poison to all enemies each turn`;
+        case 'AFTER_IMAGE':
+            return `Gain ${amount} Block whenever you play a card`;
+        case 'THOUSAND_CUTS':
+            return `Deal ${amount} damage to all enemies whenever you play a card`;
+        case 'TOOLS_OF_THE_TRADE':
+            return `At the start of each turn, draw ${amount} card and discard ${amount} card`;
+        case 'ENVENOM':
+            return `Whenever an attack deals unblocked damage, apply ${amount} Poison`;
+        case 'CREATIVE_AI':
+            return "Create a random Power card each turn";
+        case 'DEVA_FORM':
+            return "Gain increasing Energy at the start of each turn";
+        case 'MASTER_REALITY':
+            return "Cards you create are upgraded";
+        case 'INFINITE_BLADES':
+            return `Add ${amount} Shiv to your hand each turn`;
+        case 'ACCURACY':
+            return `Shivs deal +${amount} damage`;
+        case 'ICE_CREAM':
+            return "Save unused Energy for the next turn";
+        case 'BURST':
+            return `Your next Skill is played ${amount + 1} times`;
+        case 'HEAL_ON_PLAY':
+            return `Heal ${amount} HP whenever you play a card`;
+        case 'SKILL_BLOCK':
+            return `Gain ${amount} Block whenever you play a Skill`;
+        case 'LIZARD_TAIL':
+            return "Revive once at 50% HP when defeated";
+        case 'LOSE_STRENGTH':
+            return `Lose ${amount} Strength at the end of this turn`;
+        case 'STRENGTH_DOWN':
+            return `Reduce the target's Strength by ${amount}`;
+        case 'CORPSE_EXPLOSION':
+            return "When the target dies, deal its max HP as damage to all enemies";
+        case 'DAMAGE':
+            return `Deal ${amount} damage to a random enemy`;
+        case 'RANDOM_HITS':
+            return `Deal 1 damage to random enemies ${amount} times`;
+        case 'AOE_DAMAGE':
+            return `Deal ${amount} damage to all enemies`;
+        case 'BLOCK':
+            return `Gain ${amount} Block`;
+        case 'HEAL':
+            return `Heal ${amount} HP`;
+        case 'DRAW':
+            return `Draw ${plural(amount, "card")}`;
+        case 'ENERGY_NEXT':
+            return `Gain ${amount} Energy next turn`;
+        case 'POISON':
+            return `Apply ${amount} Poison to a random enemy`;
+        case 'AOE_POISON':
+            return `Apply ${amount} Poison to all enemies`;
+        case 'WEAK':
+            return `Apply ${amount} Weak to all enemies`;
+        case 'VULNERABLE':
+            return `Apply ${amount} Vulnerable to all enemies`;
+        case 'STRENGTH':
+            return `Gain ${amount} Strength`;
+        case 'GOLD':
+            return `Gain ${amount} Gold`;
+        case 'CHAOS_SURGE':
+            return `Draw ${plural(amount, "card")}, gain ${amount} Strength, and gain Energy next turn`;
+        default:
+            return null;
+    }
+};
+
+export const buildEnglishCardDescription = (card: Card): string => {
+    const parts: string[] = [];
+    const allEnemies = card.target === 'ALL_ENEMIES';
+    const randomEnemy = card.target === 'RANDOM_ENEMY';
+    const targetText = allEnemies ? " to all enemies" : randomEnemy ? " to a random enemy" : "";
+
+    if (card.unplayable) parts.push("Unplayable");
+
+    if (card.damage !== undefined && card.damage > 0) {
+        const hits = (card.playCopies ?? 0) + 1;
+        const hitText = hits > 1 ? ` ${hits} times` : "";
+        parts.push(`Deal ${card.damage} damage${targetText}${hitText}`);
+    }
+    if (card.damagePerAttackPlayed) parts.push(`Deal extra damage for each Attack played this turn`);
+    if (card.hitsPerAttackPlayed) parts.push(`Hit once for each Attack played this turn`);
+    if (card.hitsPerSkillInHand) parts.push(`Hit once for each Skill in your hand`);
+    if (card.damagePerCardInHand) parts.push(`Deal damage for each card in your hand`);
+    if (card.damagePerCardInDraw) parts.push(`Deal damage for each card in your draw pile`);
+    if (card.damageBasedOnBlock) parts.push("Deal damage equal to your current Block");
+
+    if (card.block !== undefined && card.block > 0) parts.push(`Gain ${card.block} Block`);
+    if (card.doubleBlock) parts.push("Double your current Block");
+    if (card.blockMultiplier) parts.push(`Multiply your current Block by ${card.blockMultiplier}`);
+
+    if (card.draw) parts.push(`Draw ${plural(card.draw, "card")}`);
+    if (card.promptsDiscard) parts.push(`Discard ${plural(card.promptsDiscard, "card")}`);
+    if (card.promptsCopy) parts.push(`Copy ${plural(card.promptsCopy, "card")}`);
+    if (card.promptsExhaust) parts.push(card.promptsExhaust >= 90 ? "Exhaust all matching cards from your hand" : `Exhaust ${plural(card.promptsExhaust, "card")} from your hand`);
+    if (card.shuffleHandToDraw) parts.push("Shuffle your discard pile into your draw pile");
+
+    if (card.energy) parts.push(`Gain ${card.energy} Energy`);
+    if (card.nextTurnEnergy) parts.push(card.nextTurnEnergy > 0 ? `Gain ${card.nextTurnEnergy} Energy next turn` : `Set next turn's Energy to 0`);
+    if (card.nextTurnDraw) parts.push(`Draw ${plural(card.nextTurnDraw, "extra card")} next turn`);
+    if (card.heal) parts.push(`Heal ${card.heal} HP`);
+    if (card.selfDamage) parts.push(`Lose ${card.selfDamage} HP`);
+    if (card.lifesteal) parts.push("Heal HP equal to unblocked damage dealt");
+    if (card.gold) parts.push(`Gain ${card.gold} Gold`);
+    if (card.addPotion) parts.push("Gain a random potion");
+
+    if (card.strength) parts.push(card.strength > 0 ? `Gain ${card.strength} Strength` : `Reduce the target's Strength by ${Math.abs(card.strength)}`);
+    if (card.weak) parts.push(`Apply ${card.weak} Weak${allEnemies ? " to all enemies" : ""}`);
+    if (card.vulnerable) parts.push(`Apply ${card.vulnerable} Vulnerable${allEnemies ? " to all enemies" : ""}`);
+    if (card.poison) parts.push(`Apply ${card.poison} Poison${allEnemies ? " to all enemies" : ""}`);
+    if (card.poisonMultiplier) parts.push(`Multiply the target's Poison by ${card.poisonMultiplier}`);
+    if (card.applyPower) {
+        const powerText = getPowerEffectEnglish(card.applyPower.id, card.applyPower.amount);
+        if (powerText) parts.push(powerText);
+    }
+    if (card.doubleStrength) parts.push("Double your Strength");
+    if (card.strengthScaling) parts.push(`Gain scaling Strength`);
+
+    if (card.upgradeHand) parts.push("Upgrade all cards in your hand");
+    if (card.upgradeDeck) parts.push("Upgrade all cards for this combat");
+    if (card.fatalEnergy) parts.push(`If this defeats an enemy, gain ${card.fatalEnergy} Energy`);
+    if (card.fatalMaxHp) parts.push(`If this defeats an enemy or resolves, increase max HP by ${card.fatalMaxHp}`);
+    if (card.fatalPermanentDamage) parts.push(`If this defeats an enemy, permanently increase this card's damage by ${card.fatalPermanentDamage}`);
+    if (card.capture) parts.push("If this defeats an enemy, capture it as a card");
+
+    if (card.addCardToHand) parts.push(`Add ${card.addCardToHand.count} ${getEnglishCardReference(card.addCardToHand.cardName)} to your hand${card.addCardToHand.cost0 ? " at 0 cost" : ""}`);
+    if (card.addCardToDraw) parts.push(`Add ${card.addCardToDraw.count} ${getEnglishCardReference(card.addCardToDraw.cardName)} to your draw pile`);
+    if (card.addCardToDiscard) parts.push(`Add ${card.addCardToDiscard.count} ${getEnglishCardReference(card.addCardToDiscard.cardName)} to your discard pile`);
+
+    if (card.playCondition === 'DRAW_PILE_EMPTY') parts.push("Can only be played when your draw pile is empty");
+    if (card.playCondition === 'HAND_ONLY_ATTACKS') parts.push("Can only be played when your hand contains only Attacks");
+    if (card.isSeed && card.growthRequired) parts.push(`Seed. Grows after ${plural(card.growthRequired, "turn")}`);
+    if (card.familiarSummon) {
+        const effect = card.familiarSummon.effect;
+        const triggerMap: Record<string, string> = {
+            END_TURN: "at the end of every turn",
+            ONCE_END_TURN: "once at the end of this turn",
+            EVERY_OTHER_TURN: "every other turn",
+            LOW_HP_END_TURN: "at end of turn while HP is half or lower",
+            NO_BLOCK_END_TURN: "at end of turn if you have 0 Block"
+        };
+        parts.push(`Lose ${card.familiarSummon.hpCost} HP to summon ${getEnglishFamiliarName(card.familiarSummon.name)}`);
+        parts.push(`Its effect triggers ${triggerMap[card.familiarSummon.trigger] || "during battle"}`);
+        const familiarPower = getPowerEffectEnglish(effect.kind, effect.amount);
+        if (familiarPower) parts.push(familiarPower);
+    }
+
+    if (card.exhaust) parts.push("Exhaust");
+    if (card.innate) parts.push("Innate");
+    if (card.eraserOnly) parts.push("Can only be used at rest sites to remove one unwanted card effect");
+
+    if (parts.length === 0) return trans(card.description, 'ENGLISH');
+    return `${parts.join(". ")}.`;
+};
+
+export const sanitizeEnglishText = (text: string): string => {
+    if (!text || !JAPANESE_TEXT_PATTERN.test(text)) return text;
+
+    const familiarContract = text.match(/^(.+)の契約$/);
+    if (familiarContract) return `${getEnglishFamiliarName(familiarContract[1])} Contract`;
+
+    let result = ENGLISH_DICTIONARY[text] || ENGLISH_CARD_NAME_DICTIONARY[text] || ENGLISH_GENERATED_CARD_NAME_DICTIONARY[text] || ENGLISH_ITEM_NAME_DICTIONARY[text] || ENGLISH_ENEMY_NAME_DICTIONARY[text] || text;
+
+    Object.keys({ ...ENGLISH_DICTIONARY, ...ENGLISH_ENEMY_NAME_DICTIONARY, ...ENGLISH_ITEM_NAME_DICTIONARY, ...ENGLISH_GENERATED_CARD_NAME_DICTIONARY, ...ENGLISH_CARD_NAME_DICTIONARY, ...ENGLISH_TOKEN_DICTIONARY })
+        .sort((a, b) => b.length - a.length)
+        .forEach(key => {
+            if (result.includes(key)) {
+                const escapedKey = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                result = result.replace(new RegExp(escapedKey, 'g'), ENGLISH_TOKEN_DICTIONARY[key] || ENGLISH_CARD_NAME_DICTIONARY[key] || ENGLISH_GENERATED_CARD_NAME_DICTIONARY[key] || ENGLISH_ITEM_NAME_DICTIONARY[key] || ENGLISH_ENEMY_NAME_DICTIONARY[key] || ENGLISH_DICTIONARY[key]);
+            }
+        });
+
+    ENGLISH_TEXT_PATTERNS.forEach(([pattern, replacement]) => {
+        result = result.replace(pattern, replacement);
+    });
+
+    result = result
+        .replace(/「/g, '"')
+        .replace(/」/g, '"')
+        .replace(/『/g, '"')
+        .replace(/』/g, '"')
+        .replace(/（/g, '(')
+        .replace(/）/g, ')')
+        .replace(/、/g, ', ')
+        .replace(/。/g, '.')
+        .replace(/！/g, '!')
+        .replace(/？/g, '?')
+        .replace(/：/g, ': ')
+        .replace(/・/g, ' / ');
+
+    const effectSummary = buildEnglishEffectSummary(text);
+    if (effectSummary) return effectSummary;
+
+    const narrativeSummary = buildEnglishNarrativeSummary(text);
+    if (narrativeSummary) return narrativeSummary;
+
+    if (!JAPANESE_TEXT_PATTERN.test(result)) return result;
+
+    const hint = ENGLISH_FALLBACK_BY_HINT.find(([pattern]) => pattern.test(text));
+    if (hint) return hint[1];
+
+    const englishRemainder = result
+        .replace(/[ぁ-んァ-ン一-龠々]+/g, " ")
+        .replace(/\s+/g, " ")
+        .trim();
+    if (/[A-Za-z0-9]/.test(englishRemainder)) return englishRemainder;
+
+    const tokenPhrase = buildEnglishTokenPhrase(text);
+    if (tokenPhrase) return tokenPhrase;
+
+    if (/敵|生徒|犬|カラス|幽霊|魔|妖精|怪|スライム|時計|鉛筆|ノート|教科書|リコーダー/.test(text)) return "School Foe";
+    if (text.length <= 8) return "School Label";
+    return "School Message";
+};
+
 // 置換用キーワードのリスト（長い順にソートして置換ミスを防ぐ）
 const KEYWORDS = Object.keys(DICTIONARY).sort((a, b) => b.length - a.length);
 
@@ -2667,9 +4680,47 @@ const PROBLEM_SUBJECT_HIRAGANA_MAP: Record<string, string> = {
     "ICT・情報": "ICT・じょうほう",
 };
 
+const PROBLEM_SUBJECT_ENGLISH_MAP: Record<string, string> = {
+    "計算": "Arithmetic",
+    "算数・数学": "Math",
+    "国語": "Japanese",
+    "漢字": "Kanji",
+    "英語": "English",
+    "生活・理科": "Life / Science",
+    "生活": "Life",
+    "理科": "Science",
+    "社会": "Social Studies",
+    "漢検": "Kanji Exam",
+    "漢検・難読": "Kanji Exam / Advanced",
+    "難読漢字": "Advanced Kanji",
+    "まとめ": "Summary",
+    "地図・日本": "Map / Japan",
+    "ICT・情報": "ICT / Information",
+};
+
 export const trans = (text: string, mode: LanguageMode): string => {
     if (!text) return "";
     if (mode === 'JAPANESE') return text;
+    if (mode === 'ENGLISH') {
+        if (ENGLISH_DICTIONARY[text]) return ENGLISH_DICTIONARY[text];
+        if (ENGLISH_CARD_NAME_DICTIONARY[text]) return ENGLISH_CARD_NAME_DICTIONARY[text];
+        if (ENGLISH_GENERATED_CARD_NAME_DICTIONARY[text]) return ENGLISH_GENERATED_CARD_NAME_DICTIONARY[text];
+        if (ENGLISH_ITEM_NAME_DICTIONARY[text]) return ENGLISH_ITEM_NAME_DICTIONARY[text];
+        if (ENGLISH_ENEMY_NAME_DICTIONARY[text]) return ENGLISH_ENEMY_NAME_DICTIONARY[text];
+
+        let result = text;
+        Object.keys({ ...ENGLISH_DICTIONARY, ...ENGLISH_ENEMY_NAME_DICTIONARY, ...ENGLISH_ITEM_NAME_DICTIONARY, ...ENGLISH_GENERATED_CARD_NAME_DICTIONARY, ...ENGLISH_CARD_NAME_DICTIONARY })
+            .sort((a, b) => b.length - a.length)
+            .forEach(key => {
+                if (result.includes(key)) {
+                    const escapedKey = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                    const regex = new RegExp(escapedKey.replace(/[。\.]$/, '[。\\.]?'), 'g');
+                    result = result.replace(regex, ENGLISH_CARD_NAME_DICTIONARY[key] || ENGLISH_GENERATED_CARD_NAME_DICTIONARY[key] || ENGLISH_ITEM_NAME_DICTIONARY[key] || ENGLISH_ENEMY_NAME_DICTIONARY[key] || ENGLISH_DICTIONARY[key]);
+                }
+            });
+
+        return sanitizeEnglishText(result);
+    }
 
     // 辞書に完全一致がある場合はそれを返す
     if (DICTIONARY[text]) return DICTIONARY[text];
@@ -2702,5 +4753,6 @@ export const trans = (text: string, mode: LanguageMode): string => {
 export const transProblemSubjectName = (text: string, mode: LanguageMode): string => {
     if (!text) return "";
     if (mode === 'JAPANESE') return text;
+    if (mode === 'ENGLISH') return PROBLEM_SUBJECT_ENGLISH_MAP[text] || trans(text, mode);
     return PROBLEM_SUBJECT_HIRAGANA_MAP[text] || trans(text, mode);
 };

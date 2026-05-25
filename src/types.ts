@@ -66,6 +66,8 @@ export interface Card {
   illustrationRefWriteIndex?: number;
   enemyIllustrationName?: string;
   enemyIllustrationNames?: string[];
+  enemyIllustrationEnemyType?: string;
+  enemyIllustrationPhase?: number;
   visualTheme?: 'elementary' | 'high-school';
   highSchoolCardArtIndex?: number;
   familiarSummon?: FamiliarSummonSpec;
@@ -464,7 +466,7 @@ export enum GameMode {
   IT_SECURITY = 'IT_SECURITY'
 }
 
-export type LanguageMode = 'JAPANESE' | 'HIRAGANA';
+export type LanguageMode = 'JAPANESE' | 'HIRAGANA' | 'ENGLISH';
 export type AnswerMode = 'CHOICE' | 'INPUT';
 
 export enum NodeType {

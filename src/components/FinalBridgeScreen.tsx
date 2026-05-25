@@ -84,7 +84,7 @@ const FinalBridgeScreen: React.FC<FinalBridgeScreenProps> = ({ player, onComplet
             <h2 className="text-3xl font-bold text-yellow-400 mb-8 tracking-widest drop-shadow-[0_0_10px_rgba(250,204,21,0.5)]">
               <span style={{ color: "white" }}>{trans("最後の覚醒", languageMode)}</span>
             </h2>
-            <p className="text-gray-300 mb-12 text-sm">決戦に持ち込む『最後の力』を一つだけ選んでください。</p>
+            <p className="text-gray-300 mb-12 text-sm">{trans("決戦に持ち込む『最後の力』を一つだけ選んでください。", languageMode)}</p>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
               <button 

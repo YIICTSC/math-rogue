@@ -1,7 +1,7 @@
 
 
 import React, { useEffect } from 'react';
-import { Relic } from '../types';
+import { LanguageMode, Relic } from '../types';
 import { Gem, MousePointer2 } from 'lucide-react';
 import { trans } from '../utils/textUtils';
 import { assetUrl } from '../utils/assetPaths';
@@ -11,7 +11,7 @@ import { RelicIcon } from './ItemIcon';
 interface RelicSelectionScreenProps {
   relics: Relic[];
   onSelect: (relic: Relic) => void;
-  languageMode: 'JAPANESE' | 'HIRAGANA';
+  languageMode: LanguageMode;
   typingMode?: boolean;
 }
 

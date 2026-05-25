@@ -235,7 +235,7 @@ const RewardScreen: React.FC<RewardScreenProps> = ({ rewards, onSelectReward, on
       <div className="z-10 text-center mb-4 shrink-0 pt-4">
         {interactionDisabled && (
           <div className="mx-auto mb-4 max-w-xl rounded-lg border border-cyan-500/50 bg-cyan-950/30 px-4 py-3 text-center text-sm font-bold text-cyan-100">
-            {interactionDisabledMessage ?? '他のプレイヤーの選択を待っています'}
+            {interactionDisabledMessage ? trans(interactionDisabledMessage, languageMode) : trans('他のプレイヤーの選択を待っています', languageMode)}
           </div>
         )}
         <h2 className="text-3xl md:text-4xl text-amber-100 font-bold mb-2 flex items-center justify-center animate-pulse drop-shadow-[0_2px_4px_rgba(0,0,0,0.95)] [text-shadow:0_0_10px_rgba(120,53,15,0.95)]">
@@ -293,7 +293,7 @@ const RewardScreen: React.FC<RewardScreenProps> = ({ rewards, onSelectReward, on
                     </div>
                     <div className="text-center mb-auto flex flex-col justify-center h-full">
                         <div className="text-yellow-100 font-bold text-2xl mb-2">{reward.value} G</div>
-                        <div className="text-xs text-gray-400">ゴールドを{trans("獲得", languageMode)}</div>
+                        <div className="text-xs text-gray-400">{trans("ゴールドを獲得", languageMode)}</div>
                     </div>
                     <button disabled={interactionDisabled} className="bg-yellow-600 px-6 py-2 text-sm font-bold rounded border hover:bg-yellow-500 w-full mt-2 disabled:cursor-not-allowed disabled:opacity-50">{trans("獲得", languageMode)}</button>
                 </div>
@@ -364,10 +364,10 @@ const RewardScreen: React.FC<RewardScreenProps> = ({ rewards, onSelectReward, on
                 <X size={40} className="text-slate-400" />
               </div>
               <div className="text-center mb-auto w-full">
-                <div className="text-slate-100 font-bold text-lg mb-2">ダミー報酬</div>
-                <div className="text-xs text-slate-400 leading-tight h-16 overflow-hidden">プリントが混ざっていて選べません。</div>
+                <div className="text-slate-100 font-bold text-lg mb-2">{trans("ダミー報酬", languageMode)}</div>
+                <div className="text-xs text-slate-400 leading-tight h-16 overflow-hidden">{trans("プリントが混ざっていて選べません。", languageMode)}</div>
               </div>
-              <button className="bg-slate-700 px-6 py-2 text-sm font-bold rounded border w-full mt-2">選択不可</button>
+              <button className="bg-slate-700 px-6 py-2 text-sm font-bold rounded border w-full mt-2">{trans("選択不可", languageMode)}</button>
             </div>
           </div>
         ))}
@@ -375,13 +375,13 @@ const RewardScreen: React.FC<RewardScreenProps> = ({ rewards, onSelectReward, on
 
       {skipDisabled && rewards.length === 0 && (
         <div className="z-10 mb-4 rounded-lg border border-yellow-500/40 bg-yellow-950/20 px-4 py-3 text-center text-sm font-bold text-yellow-100">
-          {skipDisabledMessage ?? '他のプレイヤーの報酬完了を待っています'}
+          {skipDisabledMessage ? trans(skipDisabledMessage, languageMode) : trans('他のプレイヤーの報酬完了を待っています', languageMode)}
         </div>
       )}
 
       <div className="z-10">
         {skipDisabled && skipDisabledMessage && (
-          <div className="mb-2 text-center text-xs font-bold text-yellow-300">{skipDisabledMessage}</div>
+          <div className="mb-2 text-center text-xs font-bold text-yellow-300">{trans(skipDisabledMessage, languageMode)}</div>
         )}
         <button 
           onClick={interactionDisabled || skipDisabled ? undefined : onSkip}
@@ -390,7 +390,7 @@ const RewardScreen: React.FC<RewardScreenProps> = ({ rewards, onSelectReward, on
         >
           {isLoading ? trans("読み込み中...", languageMode) : `${trans("これ以上受け取らずに進む", languageMode)} >>`}
         </button>
-        {typingMode && <div className="mt-2 text-center text-[10px] font-bold text-cyan-300">1-9: 選択 / 0 or Enter: 進む</div>}
+        {typingMode && <div className="mt-2 text-center text-[10px] font-bold text-cyan-300">{languageMode === 'ENGLISH' ? '1-9: Select / 0 or Enter: Continue' : '1-9: 選択 / 0 or Enter: 進む'}</div>}
       </div>
     </div>
   );

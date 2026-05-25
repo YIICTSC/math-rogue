@@ -2,6 +2,8 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { HelpCircle, ArrowRight } from 'lucide-react';
 import { assetUrl } from '../utils/assetPaths';
+import { LanguageMode } from '../types';
+import { trans } from '../utils/textUtils';
 
 
 const HIGH_SCHOOL_EVENT_IMAGE_POSITION: Partial<Record<number, string>> = {
@@ -42,9 +44,10 @@ interface EventScreenProps {
     typingMode?: boolean;
     interactionDisabled?: boolean;
     interactionDisabledMessage?: string;
+    languageMode: LanguageMode;
 }
 
-const EventScreen: React.FC<EventScreenProps> = ({ title, description, options, imageKey, image, resultLog, onContinue, typingMode = false, interactionDisabled = false, interactionDisabledMessage }) => {
+const EventScreen: React.FC<EventScreenProps> = ({ title, description, options, imageKey, image, resultLog, onContinue, typingMode = false, interactionDisabled = false, interactionDisabledMessage, languageMode }) => {
   const highSchoolEventIndex = useMemo(() => {
     const match = imageKey?.match(/^high-school-event-(\d+)$/);
     return match ? Number(match[1]) : null;
@@ -140,7 +143,7 @@ const EventScreen: React.FC<EventScreenProps> = ({ title, description, options, 
         <div className="z-10 my-auto w-full max-w-2xl rounded-lg border-2 border-gray-600 bg-gray-800 p-4 shadow-2xl sm:p-8">
             {interactionDisabled && (
                 <div className="mb-4 rounded-lg border border-cyan-500/50 bg-cyan-950/30 px-4 py-3 text-center text-sm font-bold text-cyan-100">
-                    {interactionDisabledMessage ?? '他のプレイヤーの選択を待っています'}
+                    {interactionDisabledMessage ? trans(interactionDisabledMessage, languageMode) : trans('他のプレイヤーの選択を待っています', languageMode)}
                 </div>
             )}
             <div className="mb-4 flex items-center border-b border-gray-700 pb-3 sm:mb-6 sm:pb-4">
@@ -171,7 +174,7 @@ const EventScreen: React.FC<EventScreenProps> = ({ title, description, options, 
             <div className="mb-6 min-h-[6rem] whitespace-pre-wrap text-base leading-relaxed text-gray-300 sm:mb-8 sm:text-lg">
                 {resultLog ? (
                     <div className="animate-in fade-in duration-500">
-                        <p className="text-yellow-300 font-bold mb-2">結果:</p>
+                        <p className="text-yellow-300 font-bold mb-2">{trans("結果", languageMode)}:</p>
                         {resultLog}
                     </div>
                 ) : (
@@ -203,7 +206,7 @@ const EventScreen: React.FC<EventScreenProps> = ({ title, description, options, 
                         disabled={continueInputLocked}
                         className="w-full text-center p-4 bg-blue-900/40 hover:bg-blue-800/60 border border-blue-500 hover:border-blue-300 rounded transition-colors flex items-center justify-center font-bold text-xl animate-bounce disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-blue-900/40 disabled:hover:border-blue-500"
                     >
-                        進む <ArrowRight className="ml-2" />
+                        {trans("進む", languageMode)} <ArrowRight className="ml-2" />
                         {typingMode && <span className="ml-3 rounded-full border border-cyan-300 bg-cyan-950/95 px-2 py-0.5 text-[10px] font-black text-cyan-200">Enter</span>}
                     </button>
                 )}

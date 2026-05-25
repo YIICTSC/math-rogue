@@ -964,16 +964,24 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                         {tutorialStep === 1 && (
                             <div className="absolute top-[160px] left-1/2 -translate-x-1/2 w-full max-w-xl bg-slate-800 border-2 border-green-500 p-4 rounded-xl shadow-[0_0_20px_rgba(34,197,94,0.5)] animate-in zoom-in-95 pointer-events-auto">
                                 <div className="flex items-center gap-2 text-green-400 font-bold mb-2">
-                                    <Heart size={20} className="fill-current" /> じぶんの ステータス
+                                    <Heart size={20} className="fill-current" /> {trans("じぶんの ステータス", languageMode)}
                                 </div>
-                                <p className="text-white text-sm leading-relaxed mb-4 text-center">
-                                    <span className="text-red-400 font-bold">HP</span>が 0になると まけてしまいます。<br />
-                                    <span className="text-blue-400 font-bold">ブロック</span>を つかえば、てきの こうげきを ふせげます！<br />
-                                    <span className="text-blue-400 font-bold">ブロック</span>は ターンがおわると 0になります。
-                                </p>
+                                {languageMode === 'ENGLISH' ? (
+                                    <p className="text-white text-sm leading-relaxed mb-4 text-center">
+                                        If your HP reaches 0, you lose.<br />
+                                        Use Block to prevent enemy attacks.<br />
+                                        Block becomes 0 at the end of the turn.
+                                    </p>
+                                ) : (
+                                    <p className="text-white text-sm leading-relaxed mb-4 text-center">
+                                        <span className="text-red-400 font-bold">HP</span>が 0になると まけてしまいます。<br />
+                                        <span className="text-blue-400 font-bold">ブロック</span>を つかえば、てきの こうげきを ふせげます！<br />
+                                        <span className="text-blue-400 font-bold">ブロック</span>は ターンがおわると 0になります。
+                                    </p>
+                                )}
                                 <div className="flex justify-between items-center">
                                     <div className="text-[10px] text-gray-400">Step 1/5</div>
-                                    <button onClick={nextTutorialStep} className="bg-green-600 hover:bg-green-500 text-white px-4 py-1 rounded font-bold text-sm flex items-center gap-1">つぎへ <ArrowRight size={14} /></button>
+                                    <button onClick={nextTutorialStep} className="bg-green-600 hover:bg-green-500 text-white px-4 py-1 rounded font-bold text-sm flex items-center gap-1">{trans("つぎへ", languageMode)} <ArrowRight size={14} /></button>
                                 </div>
                                 <div className="absolute -bottom-4 left-20 -translate-x-1/2 w-0 h-0 border-l-[10px] border-l-transparent border-r-[10px] border-r-transparent border-t-[15px] border-t-green-500"></div>
                             </div>
@@ -983,15 +991,22 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                         {tutorialStep === 2 && (
                             <div className="absolute top-[160px] left-1/2 -translate-x-1/2 w-full max-w-xl bg-slate-800 border-2 border-red-500 p-4 rounded-xl shadow-[0_0_20px_rgba(239,68,68,0.5)] animate-in zoom-in-95 pointer-events-auto">
                                 <div className="flex items-center gap-2 text-red-400 font-bold mb-2">
-                                    <Skull size={20} className="fill-current" /> てきの こうどう
+                                    <Skull size={20} className="fill-current" /> {languageMode === 'ENGLISH' ? 'Enemy Intent' : 'てきの こうどう'}
                                 </div>
-                                <p className="text-white text-sm leading-relaxed mb-4 text-center">
-                                    てきの あたまのうえに マークが でます。<br />
-                                    <span className="text-red-400 font-bold">ドクロ</span>は こうげき、<span className="text-blue-400 font-bold">たて</span>は ぼうぎょの しるしです。
-                                </p>
+                                {languageMode === 'ENGLISH' ? (
+                                    <p className="text-white text-sm leading-relaxed mb-4 text-center">
+                                        Icons appear above enemies.<br />
+                                        A skull means attack, and a shield means defense.
+                                    </p>
+                                ) : (
+                                    <p className="text-white text-sm leading-relaxed mb-4 text-center">
+                                        てきの あたまのうえに マークが でます。<br />
+                                        <span className="text-red-400 font-bold">ドクロ</span>は こうげき、<span className="text-blue-400 font-bold">たて</span>は ぼうぎょの しるしです。
+                                    </p>
+                                )}
                                 <div className="flex justify-between items-center">
                                     <div className="text-[10px] text-gray-400">Step 2/5</div>
-                                    <button onClick={nextTutorialStep} className="bg-red-600 hover:bg-red-500 text-white px-4 py-1 rounded font-bold text-sm flex items-center gap-1">なるほど <ArrowRight size={14} /></button>
+                                    <button onClick={nextTutorialStep} className="bg-red-600 hover:bg-red-500 text-white px-4 py-1 rounded font-bold text-sm flex items-center gap-1">{languageMode === 'ENGLISH' ? 'Got it' : 'なるほど'} <ArrowRight size={14} /></button>
                                 </div>
                                 <div className="absolute -top-4 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[10px] border-l-transparent border-r-[10px] border-r-transparent border-b-[15px] border-b-red-500"></div>
                             </div>
@@ -1001,15 +1016,22 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                         {tutorialStep === 3 && (
                             <div className="absolute top-[160px] left-1/2 -translate-x-1/2 w-full max-w-xl bg-slate-800 border-2 border-yellow-500 p-4 rounded-xl shadow-[0_0_20px_rgba(234,179,8,0.5)] animate-in zoom-in-95 pointer-events-auto">
                                 <div className="flex items-center gap-2 text-yellow-400 font-bold mb-2">
-                                    <Zap size={20} className="fill-current" /> エナジーと カード
+                                    <Zap size={20} className="fill-current" /> {languageMode === 'ENGLISH' ? 'Energy and Cards' : 'エナジーと カード'}
                                 </div>
-                                <p className="text-white text-sm leading-relaxed mb-4 text-center">
-                                    カードを つかうには <span className="text-yellow-400 font-bold">エナジー</span>が ひつようです。<br />
-                                    やまふだが なくなると、すてふだが シャッフルされて もどってきます。
-                                </p>
+                                {languageMode === 'ENGLISH' ? (
+                                    <p className="text-white text-sm leading-relaxed mb-4 text-center">
+                                        Playing cards costs Energy.<br />
+                                        When your draw pile runs out, your discard pile is shuffled back in.
+                                    </p>
+                                ) : (
+                                    <p className="text-white text-sm leading-relaxed mb-4 text-center">
+                                        カードを つかうには <span className="text-yellow-400 font-bold">エナジー</span>が ひつようです。<br />
+                                        やまふだが なくなると、すてふだが シャッフルされて もどってきます。
+                                    </p>
+                                )}
                                 <div className="flex justify-between items-center">
                                     <div className="text-[10px] text-gray-400">Step 3/5</div>
-                                    <button onClick={nextTutorialStep} className="bg-yellow-600 hover:bg-yellow-500 text-white px-4 py-1 rounded font-bold text-sm flex items-center gap-1">つぎへ <ArrowRight size={14} /></button>
+                                    <button onClick={nextTutorialStep} className="bg-yellow-600 hover:bg-yellow-500 text-white px-4 py-1 rounded font-bold text-sm flex items-center gap-1">{trans("つぎへ", languageMode)} <ArrowRight size={14} /></button>
                                 </div>
                                 <div className="absolute -bottom-4 left-12 -translate-x-1/2 w-0 h-0 border-l-[10px] border-l-transparent border-r-[10px] border-r-transparent border-t-[15px] border-t-yellow-500"></div>
                             </div>
@@ -1019,15 +1041,22 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                         {tutorialStep === 4 && (
                             <div className="absolute top-[160px] left-1/2 -translate-x-1/2 w-full max-w-xl bg-slate-800 border-2 border-blue-500 p-4 rounded-xl shadow-[0_0_20px_rgba(59,130,246,0.5)] animate-in zoom-in-95 pointer-events-auto">
                                 <div className="flex items-center gap-2 text-blue-400 font-bold mb-2">
-                                    <MousePointer2 size={20} className="fill-current" /> カードを つかおう
+                                    <MousePointer2 size={20} className="fill-current" /> {languageMode === 'ENGLISH' ? 'Play Cards' : 'カードを つかおう'}
                                 </div>
-                                <p className="text-white text-sm leading-relaxed mb-4 text-center">
-                                    てふだを タップすると カードを つかえます。<br />
-                                    ながおしで、カードの くわしい せつめいを よめるよ！
-                                </p>
+                                {languageMode === 'ENGLISH' ? (
+                                    <p className="text-white text-sm leading-relaxed mb-4 text-center">
+                                        Tap a card in your hand to play it.<br />
+                                        Long-press a card to read its details.
+                                    </p>
+                                ) : (
+                                    <p className="text-white text-sm leading-relaxed mb-4 text-center">
+                                        てふだを タップすると カードを つかえます。<br />
+                                        ながおしで、カードの くわしい せつめいを よめるよ！
+                                    </p>
+                                )}
                                 <div className="flex justify-between items-center">
                                     <div className="text-[10px] text-gray-400">Step 4/5</div>
-                                    <button onClick={nextTutorialStep} className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-1 rounded font-bold text-sm flex items-center gap-1">わかった <ArrowRight size={14} /></button>
+                                    <button onClick={nextTutorialStep} className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-1 rounded font-bold text-sm flex items-center gap-1">{trans("わかった", languageMode)} <ArrowRight size={14} /></button>
                                 </div>
                                 <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 w-0 h-0 border-l-[10px] border-l-transparent border-r-[10px] border-r-transparent border-t-[15px] border-t-blue-500"></div>
                             </div>
@@ -1037,15 +1066,22 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                         {tutorialStep === 5 && (
                             <div className="absolute top-[160px] left-1/2 -translate-x-1/2 w-full max-w-xl bg-slate-800 border-2 border-red-400 p-4 rounded-xl shadow-[0_0_20px_rgba(239,68,68,0.5)] animate-in zoom-in-95 pointer-events-auto">
                                 <div className="flex items-center gap-2 text-red-400 font-bold mb-2">
-                                    <ChevronsRight size={20} /> ターンを おわらせる
+                                    <ChevronsRight size={20} /> {languageMode === 'ENGLISH' ? 'End Your Turn' : 'ターンを おわらせる'}
                                 </div>
-                                <p className="text-white text-sm leading-relaxed mb-4 text-center">
-                                    エナジーを つかいきったら、<span className="text-red-400 font-bold">ターンしゅうりょう</span> ボタンを おしましょう。<br />
-                                    さあ、ぼうけんを はじめよう！
-                                </p>
+                                {languageMode === 'ENGLISH' ? (
+                                    <p className="text-white text-sm leading-relaxed mb-4 text-center">
+                                        When you are done spending Energy, press End Turn.<br />
+                                        Now your adventure begins!
+                                    </p>
+                                ) : (
+                                    <p className="text-white text-sm leading-relaxed mb-4 text-center">
+                                        エナジーを つかいきったら、<span className="text-red-400 font-bold">ターンしゅうりょう</span> ボタンを おしましょう。<br />
+                                        さあ、ぼうけんを はじめよう！
+                                    </p>
+                                )}
                                 <div className="flex justify-between items-center">
                                     <div className="text-[10px] text-gray-400">Final Step</div>
-                                    <button onClick={closeTutorial} className="bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded font-bold text-sm animate-pulse">ぼうけんを はじめる！</button>
+                                    <button onClick={closeTutorial} className="bg-red-600 hover:bg-red-500 text-white px-4 py-2 rounded font-bold text-sm animate-pulse">{languageMode === 'ENGLISH' ? 'Start Adventure!' : 'ぼうけんを はじめる！'}</button>
                                 </div>
                                 <div className="absolute -bottom-4 right-8 -translate-x-1/2 w-0 h-0 border-l-[10px] border-l-transparent border-r-[10px] border-r-transparent border-t-[15px] border-t-red-400"></div>
                             </div>
@@ -2144,7 +2180,7 @@ const extractIllustrationTokens = (card: ICard): string[] => {
     return [];
 };
 
-const FinisherArtPiece: React.FC<{ token: string; seed: string; languageMode: LanguageMode }> = ({ token, seed, languageMode }) => {
+const FinisherArtPiece: React.FC<{ token: string; seed: string; languageMode: LanguageMode; card: ICard }> = ({ token, seed, languageMode, card }) => {
     const [imageIndex, setImageIndex] = useState(0);
     const [failed, setFailed] = useState(false);
     const normalized = token.startsWith('enemy:') || token.startsWith('card:') || token.startsWith('pixel:') ? token : `card:${token}`;
@@ -2156,7 +2192,17 @@ const FinisherArtPiece: React.FC<{ token: string; seed: string; languageMode: La
 
     if (normalized.startsWith('enemy:')) {
         const name = normalized.substring('enemy:'.length);
-        return <EnemyIllustration name={name} seed={seed} className="w-full h-full" size={32} />;
+        return (
+            <EnemyIllustration
+                name={name}
+                seed={seed}
+                visualTheme={card.visualTheme}
+                enemyType={card.enemyIllustrationEnemyType}
+                phase={card.enemyIllustrationPhase}
+                className="w-full h-full"
+                size={32}
+            />
+        );
     }
 
     if (normalized.startsWith('pixel:')) {
@@ -2362,7 +2408,7 @@ export const BattleFinisherCutinOverlay: React.FC<{ card: ICard; languageMode: L
                                     className="absolute inset-0 border-[2px] border-white/95 shadow-[inset_0_0_0_1px_rgba(0,0,0,0.2)] bg-black"
                                     style={{ transform: `translate(0%, 0%) scale(${panel.scale}) rotate(${panel.rot}deg)` }}
                                 >
-                                    <FinisherArtPiece token={panel.token} seed={`${card.id}-collage-${panel.index}`} languageMode={languageMode} />
+                                    <FinisherArtPiece token={panel.token} seed={`${card.id}-collage-${panel.index}`} languageMode={languageMode} card={card} />
                                 </div>
                             </div>
                         ))}
@@ -2399,7 +2445,7 @@ export const BattleFinisherCutinOverlay: React.FC<{ card: ICard; languageMode: L
                                         }`}
                                     style={{ animationDelay: `${panelDelays[idx] ?? idx * delayStepMs}ms` }}
                                 >
-                                    <FinisherArtPiece token={entry.token} seed={`${card.id}-stack-${idx}`} languageMode={languageMode} />
+                                    <FinisherArtPiece token={entry.token} seed={`${card.id}-stack-${idx}`} languageMode={languageMode} card={card} />
                                 </div>
                             </div>
                         );
@@ -2432,7 +2478,7 @@ export const BattleFinisherCutinOverlay: React.FC<{ card: ICard; languageMode: L
                                     }}
                                 >
                                     <div className="absolute inset-0 border-l border-r border-white/90 bg-black/60 shadow-[inset_0_0_16px_rgba(255,255,255,0.35)]" />
-                                    <FinisherArtPiece token={entry.token} seed={`${card.id}-strip-${idx}`} languageMode={languageMode} />
+                                    <FinisherArtPiece token={entry.token} seed={`${card.id}-strip-${idx}`} languageMode={languageMode} card={card} />
                                 </div>
                             );
                         })}
@@ -2463,7 +2509,7 @@ export const BattleFinisherCutinOverlay: React.FC<{ card: ICard; languageMode: L
                                     }}
                                 >
                                     <div className="w-full h-full rounded-2xl overflow-hidden border-4 border-cyan-200/80 bg-black/35 shadow-[0_0_42px_rgba(34,211,238,0.35)]">
-                                        <FinisherArtPiece token={entry.token} seed={`${card.id}-radial-${idx}`} languageMode={languageMode} />
+                                        <FinisherArtPiece token={entry.token} seed={`${card.id}-radial-${idx}`} languageMode={languageMode} card={card} />
                                     </div>
                                 </div>
                             );
@@ -2504,7 +2550,7 @@ export const BattleFinisherCutinOverlay: React.FC<{ card: ICard; languageMode: L
                                     }}
                                 >
                                     <div className="absolute inset-0 border-[2px] border-cyan-200/90 bg-black/45 shadow-[inset_0_0_20px_rgba(34,211,238,0.35)]" />
-                                    <FinisherArtPiece token={entry.token} seed={`${card.id}-grid-${idx}`} languageMode={languageMode} />
+                                    <FinisherArtPiece token={entry.token} seed={`${card.id}-grid-${idx}`} languageMode={languageMode} card={card} />
                                 </div>
                             );
                         })}
@@ -2544,7 +2590,7 @@ export const BattleFinisherCutinOverlay: React.FC<{ card: ICard; languageMode: L
                                     }}
                                 >
                                     <div className="absolute inset-0 border-[2px] border-fuchsia-200/80 bg-black/35 shadow-[0_0_24px_rgba(232,121,249,0.38)]" />
-                                    <FinisherArtPiece token={entry.token} seed={`${card.id}-diagonal-${idx}`} languageMode={languageMode} />
+                                    <FinisherArtPiece token={entry.token} seed={`${card.id}-diagonal-${idx}`} languageMode={languageMode} card={card} />
                                 </div>
                             );
                         })}
@@ -2574,7 +2620,7 @@ export const BattleFinisherCutinOverlay: React.FC<{ card: ICard; languageMode: L
                                     }}
                                 >
                                     <div className="w-full h-full rounded-2xl overflow-hidden border-4 border-amber-200/80 bg-black/35 shadow-[0_0_35px_rgba(251,191,36,0.42)]">
-                                        <FinisherArtPiece token={entry.token} seed={`${card.id}-burst-${idx}`} languageMode={languageMode} />
+                                        <FinisherArtPiece token={entry.token} seed={`${card.id}-burst-${idx}`} languageMode={languageMode} card={card} />
                                     </div>
                                 </div>
                             );
@@ -2611,7 +2657,7 @@ export const BattleFinisherCutinOverlay: React.FC<{ card: ICard; languageMode: L
                                     }}
                                 >
                                     <div className="absolute inset-0 border-l border-r border-sky-100/90 bg-black/45 shadow-[inset_0_0_18px_rgba(125,211,252,0.35)]" />
-                                    <FinisherArtPiece token={entry.token} seed={`${card.id}-wave-${idx}`} languageMode={languageMode} />
+                                    <FinisherArtPiece token={entry.token} seed={`${card.id}-wave-${idx}`} languageMode={languageMode} card={card} />
                                 </div>
                             );
                         })}
@@ -2620,7 +2666,7 @@ export const BattleFinisherCutinOverlay: React.FC<{ card: ICard; languageMode: L
             ) : (
                 <div className="absolute inset-0 flex items-center">
                     <div className="w-[78vw] max-w-[920px] h-[42vh] max-h-[360px] animate-finish-cutin rounded-r-2xl overflow-hidden border-y-4 border-r-4 border-orange-300/70 shadow-[0_0_50px_rgba(251,146,60,0.45)] bg-black/30">
-                        <FinisherArtPiece token={illustrationTokens[0] || `card:${card.name}`} seed={`${card.id}-finisher`} languageMode={languageMode} />
+                        <FinisherArtPiece token={illustrationTokens[0] || `card:${card.name}`} seed={`${card.id}-finisher`} languageMode={languageMode} card={card} />
                     </div>
                 </div>
             )}
@@ -2766,6 +2812,9 @@ const FullscreenCardArtModal: React.FC<{ card: ICard; languageMode: LanguageMode
                             name={enemyIllustrationNames[0]}
                             seed={`${card.id}-enemy-fullscreen`}
                             aliases={enemyIllustrationNames.slice(1)}
+                            visualTheme={card.visualTheme}
+                            enemyType={card.enemyIllustrationEnemyType}
+                            phase={card.enemyIllustrationPhase}
                             className="w-full h-full"
                             size={32}
                         />

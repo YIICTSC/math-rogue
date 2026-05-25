@@ -124,7 +124,9 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
       if (interactionDisabled) return;
       onRest();
       setMode('DONE');
-      setMessage(`保健室のベッドで仮眠をとった。HPが ${healAmount} 回復した！`);
+      setMessage(languageMode === 'ENGLISH'
+          ? `You took a nap in the infirmary bed. Healed ${healAmount} HP!`
+          : `保健室のベッドで仮眠をとった。HPが ${healAmount} 回復した！`);
   };
 
   const handleSmithChoice = () => {
@@ -190,7 +192,9 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
       if (interactionDisabled || !selectedCard) return;
       onSelfStudy(selectedCard, effectId);
       setMode('DONE');
-      setMessage(`${trans(selectedCard.name, languageMode)} の不要な効果を消した！カード消しゴムは使い切った。`);
+      setMessage(languageMode === 'ENGLISH'
+          ? `Removed an unwanted effect from ${trans(selectedCard.name, languageMode)}! The card eraser was used up.`
+          : `${trans(selectedCard.name, languageMode)} の不要な効果を消した！カード消しゴムは使い切った。`);
       setSelectedCard(null);
   };
 
@@ -209,7 +213,9 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
       if (selectedCard) {
           onUpgrade(selectedCard);
           setMode('DONE');
-          setMessage(`${trans(selectedCard.name, languageMode)} が強化された！切れ味が増したようだ。`);
+          setMessage(languageMode === 'ENGLISH'
+              ? `${trans(selectedCard.name, languageMode)} was upgraded! It feels sharper now.`
+              : `${trans(selectedCard.name, languageMode)} が強化された！切れ味が増したようだ。`);
           setSelectedCard(null);
       }
   };
@@ -250,7 +256,7 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
         <div className="z-10 bg-black p-6 md:p-8 border-4 border-orange-800 rounded-lg max-w-4xl w-full text-center shadow-2xl flex flex-col max-h-[90vh]">
             {interactionDisabled && (
                 <div className="mb-4 rounded-lg border border-cyan-500/50 bg-cyan-950/30 px-4 py-3 text-center text-sm font-bold text-cyan-100">
-                    {interactionDisabledMessage ?? '他のプレイヤーの選択を待っています'}
+                    {interactionDisabledMessage ? trans(interactionDisabledMessage, languageMode) : trans('他のプレイヤーの選択を待っています', languageMode)}
                 </div>
             )}
             <h2 className="text-3xl md:text-4xl text-orange-500 font-bold mb-4 flex items-center justify-center shrink-0">

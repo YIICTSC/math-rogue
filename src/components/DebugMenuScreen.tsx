@@ -294,11 +294,11 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
                             <div className="space-y-4">
                                 <div className="flex flex-wrap gap-2 items-center bg-black/30 p-2 rounded-lg border border-gray-700 sticky top-0 z-10 backdrop-blur-md">
                                     <button
-                                        onClick={() => setDebugLanguageMode(prev => prev === 'JAPANESE' ? 'HIRAGANA' : 'JAPANESE')}
-                                        className={`px-4 py-1.5 rounded-full font-bold text-xs flex items-center gap-2 border-2 transition-all ${debugLanguageMode === 'HIRAGANA' ? 'bg-emerald-600 border-white text-white shadow-lg' : 'bg-gray-800 border-gray-600 text-gray-400'}`}
+                                        onClick={() => setDebugLanguageMode(prev => prev === 'JAPANESE' ? 'HIRAGANA' : prev === 'HIRAGANA' ? 'ENGLISH' : 'JAPANESE')}
+                                        className={`px-4 py-1.5 rounded-full font-bold text-xs flex items-center gap-2 border-2 transition-all ${debugLanguageMode !== 'JAPANESE' ? 'bg-emerald-600 border-white text-white shadow-lg' : 'bg-gray-800 border-gray-600 text-gray-400'}`}
                                     >
                                         <Languages size={14} />
-                                        {debugLanguageMode === 'JAPANESE' ? '日本語 モード' : 'ひらがな モード'}
+                                        {debugLanguageMode === 'JAPANESE' ? '日本語 モード' : debugLanguageMode === 'HIRAGANA' ? 'ひらがな モード' : 'English Mode'}
                                     </button>
                                     <div className="h-4 w-px bg-gray-700 mx-2"></div>
                                     <button onClick={() => setTransSubTab('STORY')} className={`px-3 py-1 rounded text-xs font-bold flex items-center gap-1 ${transSubTab === 'STORY' ? 'bg-white text-black' : 'text-gray-400'}`}><BookOpen size={12} /> ストーリー</button>
