@@ -245,7 +245,7 @@ const MapScreen: React.FC<MapScreenProps> = ({ nodes, currentNodeId, onNodeSelec
                         <button
                             onClick={onOpenSettings}
                             className="flex h-7 w-7 md:h-9 md:w-9 items-center justify-center border-2 border-slate-500 bg-slate-800 text-slate-200 shadow-[2px_2px_0_0_rgba(15,23,42,0.95)] transition-all hover:bg-slate-700 active:translate-x-[1px] active:translate-y-[1px] active:shadow-none"
-                            title="セッティング"
+                            title={trans("セッティング", languageMode)}
                         >
                             <Settings size={14} className="md:size-4" />
                         </button>

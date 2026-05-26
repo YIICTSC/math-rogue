@@ -820,7 +820,7 @@ const TypingBattleScene: React.FC<TypingBattleSceneProps> = ({
                     <div className="mb-0.5 truncate text-xs font-bold leading-snug text-green-400 drop-shadow-md">
                         <span className="mr-2 animate-pulse">&gt;&gt;</span> {trans(narrative, languageMode)}
                     </div>
-                    <div className="truncate text-[10px] leading-snug text-gray-200">{statusMessage}</div>
+                    <div className="truncate text-[10px] leading-snug text-gray-200">{trans(statusMessage, languageMode)}</div>
                 </div>
                 <div className="absolute right-2 top-2 flex flex-col items-end gap-1">
                     <div className="rounded border border-yellow-700 bg-gray-900/80 px-2 py-0.5 text-[10px] font-bold text-yellow-400">{trans(turnLog, languageMode)}</div>
@@ -832,7 +832,7 @@ const TypingBattleScene: React.FC<TypingBattleSceneProps> = ({
                                 onOpenSettings();
                             }}
                             className="flex items-center gap-1 border-2 border-slate-500 bg-slate-800 px-2 py-1 text-[10px] font-black text-slate-100 shadow-[2px_2px_0_0_rgba(15,23,42,0.95)] transition-all hover:bg-slate-700 active:translate-x-[1px] active:translate-y-[1px] active:shadow-none"
-                            title="セッティング"
+                            title={trans("セッティング", languageMode)}
                         >
                             <Settings size={10} /> SET
                         </button>

@@ -1,5 +1,7 @@
 import React from 'react';
 import { Settings, X, Volume2, Mic, Monitor, Wifi } from 'lucide-react';
+import { LanguageMode } from '../types';
+import { trans } from '../utils/textUtils';
 
 export type BgmMode = 'STUDY' | 'MP3' | 'OSCILLATOR';
 export type SettingsTab = 'AUDIO' | 'DISPLAY' | 'COMM';
@@ -36,6 +38,7 @@ type Props = {
   onResetWindowState?: () => void;
   onQuitApp?: () => void;
   showCommunication?: boolean;
+  languageMode: LanguageMode;
 };
 
 const tabs: Array<{ key: SettingsTab; label: string; icon: React.ReactNode }> = [
@@ -59,7 +62,8 @@ const SettingsModal: React.FC<Props> = ({
   onToggleFullScreen,
   onResetWindowState,
   onQuitApp,
-  showCommunication = true
+  showCommunication = true,
+  languageMode
 }) => {
   if (!open) return null;
   const visibleTabs = showCommunication ? tabs : tabs.filter(t => t.key !== 'COMM');
@@ -68,14 +72,14 @@ const SettingsModal: React.FC<Props> = ({
     <div className="fixed inset-0 z-[10020] bg-black/70 backdrop-blur-sm flex items-center justify-center p-3" onClick={onClose}>
       <div className="w-full max-w-2xl max-h-[90dvh] overflow-y-auto rounded-xl border-2 border-cyan-500/50 bg-slate-900 text-white" onClick={(e) => e.stopPropagation()}>
         <div className="sticky top-0 bg-slate-900/95 border-b border-slate-700 px-4 py-3 flex items-center justify-between">
-          <h2 className="font-black flex items-center gap-2"><Settings size={16} /> セッティング</h2>
+          <h2 className="font-black flex items-center gap-2"><Settings size={16} /> {trans("セッティング", languageMode)}</h2>
           <button onClick={onClose} className="p-1 rounded hover:bg-slate-700"><X size={16} /></button>
         </div>
 
         <div className="px-3 pt-3 flex gap-2 flex-wrap">
           {visibleTabs.map(t => (
             <button key={t.key} onClick={() => onChangeTab(t.key)} className={`px-3 py-1 rounded border text-xs font-bold flex items-center gap-1 ${tab === t.key ? 'bg-cyan-700 border-cyan-300' : 'bg-slate-800 border-slate-600'}`}>
-              {t.icon}{t.label}
+              {t.icon}{trans(t.label, languageMode)}
             </button>
           ))}
         </div>
@@ -84,52 +88,52 @@ const SettingsModal: React.FC<Props> = ({
           {tab === 'AUDIO' && (
             <>
               <div className="rounded border border-slate-700 p-3 space-y-2">
-                <div className="font-bold">BGMモード</div>
+                <div className="font-bold">{trans("BGMモード", languageMode)}</div>
                 <div className="flex gap-2 flex-wrap">
                   {(['STUDY','MP3','OSCILLATOR'] as BgmMode[]).map(mode => (
                     <button key={mode} onClick={() => onChange('bgmMode', mode)} className={`px-3 py-1 rounded border ${settings.bgmMode === mode ? 'border-cyan-300 bg-cyan-700' : 'border-slate-600 bg-slate-800'}`}>{mode}</button>
                   ))}
                 </div>
               </div>
-              <label className="block">BGM音量: {Math.round(settings.bgmVolume * 100)}%
+              <label className="block">{trans("BGM音量", languageMode)}: {Math.round(settings.bgmVolume * 100)}%
                 <input className="w-full" type="range" min={0} max={100} value={Math.round(settings.bgmVolume * 100)} onChange={e => onChange('bgmVolume', Number(e.target.value) / 100)} />
               </label>
-              <label className="block">SE音量: {Math.round(settings.seVolume * 100)}%
+              <label className="block">{trans("SE音量", languageMode)}: {Math.round(settings.seVolume * 100)}%
                 <input className="w-full" type="range" min={0} max={100} value={Math.round(settings.seVolume * 100)} onChange={e => onChange('seVolume', Number(e.target.value) / 100)} />
               </label>
               <div className="rounded border border-slate-700 p-3 space-y-2">
-                <div className="font-bold flex items-center gap-1"><Mic size={14} /> マイク</div>
-                <label className="flex items-center gap-2"><input type="checkbox" checked={settings.micEnabled} onChange={e => onChange('micEnabled', e.target.checked)} />マイクON</label>
-                <label className="block">入力デバイス
+                <div className="font-bold flex items-center gap-1"><Mic size={14} /> {trans("マイク", languageMode)}</div>
+                <label className="flex items-center gap-2"><input type="checkbox" checked={settings.micEnabled} onChange={e => onChange('micEnabled', e.target.checked)} />{trans("マイクON", languageMode)}</label>
+                <label className="block">{trans("入力デバイス", languageMode)}
                   <select className="w-full bg-slate-800 rounded border border-slate-600 p-1" value={settings.selectedInputDeviceId} onChange={e => onChange('selectedInputDeviceId', e.target.value)}>
-                    <option value="">既定デバイス</option>
-                    {inputDevices.map(d => <option key={d.deviceId} value={d.deviceId}>{d.label || 'マイク'}</option>)}
+                    <option value="">{trans("既定デバイス", languageMode)}</option>
+                    {inputDevices.map(d => <option key={d.deviceId} value={d.deviceId}>{d.label || trans('マイク', languageMode)}</option>)}
                   </select>
                 </label>
-                <label className="flex items-center gap-2"><input type="checkbox" checked={settings.noiseSuppression} onChange={e => onChange('noiseSuppression', e.target.checked)} />ノイズ抑制</label>
-                <label className="flex items-center gap-2"><input type="checkbox" checked={settings.echoCancellation} onChange={e => onChange('echoCancellation', e.target.checked)} />エコーキャンセル</label>
-                <label className="flex items-center gap-2"><input type="checkbox" checked={settings.autoGainControl} onChange={e => onChange('autoGainControl', e.target.checked)} />自動ゲイン調整</label>
+                <label className="flex items-center gap-2"><input type="checkbox" checked={settings.noiseSuppression} onChange={e => onChange('noiseSuppression', e.target.checked)} />{trans("ノイズ抑制", languageMode)}</label>
+                <label className="flex items-center gap-2"><input type="checkbox" checked={settings.echoCancellation} onChange={e => onChange('echoCancellation', e.target.checked)} />{trans("エコーキャンセル", languageMode)}</label>
+                <label className="flex items-center gap-2"><input type="checkbox" checked={settings.autoGainControl} onChange={e => onChange('autoGainControl', e.target.checked)} />{trans("自動ゲイン調整", languageMode)}</label>
               </div>
             </>
           )}
 
           {tab === 'DISPLAY' && (
             <>
-              <label className="flex items-center gap-2"><input type="checkbox" checked={settings.reduceScreenShake} onChange={e => onChange('reduceScreenShake', e.target.checked)} />画面揺れ軽減</label>
-              <label className="block">文字サイズ
+              <label className="flex items-center gap-2"><input type="checkbox" checked={settings.reduceScreenShake} onChange={e => onChange('reduceScreenShake', e.target.checked)} />{trans("画面揺れ軽減", languageMode)}</label>
+              <label className="block">{trans("文字サイズ", languageMode)}
                 <select className="w-full bg-slate-800 rounded border border-slate-600 p-1" value={settings.fontSize} onChange={e => onChange('fontSize', e.target.value as AppSettings['fontSize'])}>
-                  <option value="normal">標準</option><option value="large">大</option>
+                  <option value="normal">{trans("標準", languageMode)}</option><option value="large">{trans("大", languageMode)}</option>
                 </select>
               </label>
               {isElectron && (
                 <div className="rounded border border-slate-700 p-3 space-y-2">
-                  <div className="font-bold">スクリーン</div>
+                  <div className="font-bold">{trans("スクリーン", languageMode)}</div>
                   <label className="flex items-center gap-2">
                     <input type="checkbox" checked={isFullScreen} onChange={e => onToggleFullScreen?.(e.target.checked)} />
-                    フルスクリーン
+                    {trans("フルスクリーン", languageMode)}
                   </label>
                   <button onClick={onResetWindowState} className="px-3 py-1 text-xs rounded border border-slate-500 bg-slate-800 hover:bg-slate-700">
-                    画面サイズを初期化
+                    {trans("画面サイズを初期化", languageMode)}
                   </button>
                 </div>
               )}
@@ -138,11 +142,11 @@ const SettingsModal: React.FC<Props> = ({
 
           {showCommunication && tab === 'COMM' && (
             <>
-              <label className="block">相手音量: {Math.round(settings.remoteVoiceVolume * 100)}%
+              <label className="block">{trans("相手音量", languageMode)}: {Math.round(settings.remoteVoiceVolume * 100)}%
                 <input className="w-full" type="range" min={0} max={100} value={Math.round(settings.remoteVoiceVolume * 100)} onChange={e => onChange('remoteVoiceVolume', Number(e.target.value) / 100)} />
               </label>
-              <label className="flex items-center gap-2"><input type="checkbox" checked={settings.joinMuted} onChange={e => onChange('joinMuted', e.target.checked)} />部屋参加時ミュート開始</label>
-              <label className="flex items-center gap-2"><input type="checkbox" checked={settings.lowDataMode} onChange={e => onChange('lowDataMode', e.target.checked)} />低データ通信モード</label>
+              <label className="flex items-center gap-2"><input type="checkbox" checked={settings.joinMuted} onChange={e => onChange('joinMuted', e.target.checked)} />{trans("部屋参加時ミュート開始", languageMode)}</label>
+              <label className="flex items-center gap-2"><input type="checkbox" checked={settings.lowDataMode} onChange={e => onChange('lowDataMode', e.target.checked)} />{trans("低データ通信モード", languageMode)}</label>
             </>
           )}
 
@@ -150,15 +154,15 @@ const SettingsModal: React.FC<Props> = ({
 
         <div className="sticky bottom-0 bg-slate-900/95 border-t border-slate-700 p-3 flex justify-between">
           <div className="flex gap-2">
-            <button onClick={onResetAudio} className="px-3 py-1 text-xs rounded border border-amber-400/70 bg-amber-600/30">音声を初期化</button>
-            <button onClick={onResetAll} className="px-3 py-1 text-xs rounded border border-red-400/70 bg-red-600/30">全設定を初期化</button>
+            <button onClick={onResetAudio} className="px-3 py-1 text-xs rounded border border-amber-400/70 bg-amber-600/30">{trans("音声を初期化", languageMode)}</button>
+            <button onClick={onResetAll} className="px-3 py-1 text-xs rounded border border-red-400/70 bg-red-600/30">{trans("全設定を初期化", languageMode)}</button>
             {isElectron && (
               <button onClick={onQuitApp} className="px-3 py-1 text-xs rounded border border-red-400/70 bg-red-900/50 hover:bg-red-800/70">
-                ゲームをとじる
+                {trans("ゲームをとじる", languageMode)}
               </button>
             )}
           </div>
-          <button onClick={onClose} className="px-4 py-1 rounded bg-cyan-600 hover:bg-cyan-500 font-bold">閉じる</button>
+          <button onClick={onClose} className="px-4 py-1 rounded bg-cyan-600 hover:bg-cyan-500 font-bold">{trans("閉じる", languageMode)}</button>
         </div>
       </div>
     </div>

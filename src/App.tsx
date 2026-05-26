@@ -10366,7 +10366,7 @@ const App: React.FC = () => {
                     <button
                         onClick={() => setShowSettingsModal(true)}
                         className="absolute top-2 right-2 z-[10010] bg-black/60 hover:bg-black/85 text-white border border-white/50 p-2 rounded-lg shadow-lg"
-                        title="セッティング"
+                        title={trans("セッティング", languageMode)}
                     >
                         <Settings size={16} />
                     </button>
@@ -10540,7 +10540,7 @@ const App: React.FC = () => {
                             <button
                                 onClick={() => setShowSettingsModal(true)}
                                 className="flex h-9 w-9 items-center justify-center border-t-2 border-l-2 border-r-4 border-b-4 border-t-slate-200 border-l-slate-200 border-r-slate-700 border-b-slate-700 bg-slate-900/95 text-slate-100 shadow-[0_0_0_1px_rgba(0,0,0,0.45)] transition-all active:translate-x-[2px] active:translate-y-[2px] active:border-r-2 active:border-b-2"
-                                title="セッティング"
+                                title={trans("セッティング", languageMode)}
                             >
                                 <Settings size={16} />
                             </button>
@@ -11331,6 +11331,7 @@ const App: React.FC = () => {
                             onBack={returnToTitle}
                             problemMode={miniGameProblemMode}
                             problemModePool={miniGameProblemModePool}
+                            languageMode={languageMode}
                         />
                     </div>
                 )}
@@ -12260,6 +12261,7 @@ const App: React.FC = () => {
                     onResetWindowState={resetWindowState}
                     onQuitApp={quitApp}
                     showCommunication={!OFFLINE_DISTRIBUTABLE}
+                    languageMode={languageMode}
                 />
             </div>
         </div>

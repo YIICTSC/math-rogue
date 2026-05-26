@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { GameMode, GameScreen } from '../types';
+import { GameMode, GameScreen, LanguageMode } from '../types';
 import PokerGameScreen from './PokerGameScreen';
 import SchoolyardSurvivorScreen from './SchoolyardSurvivorScreen';
 import SchoolDungeonRPG from './SchoolDungeonRPG';
@@ -14,12 +14,14 @@ interface MiniGameRouterProps {
     onBack: () => void;
     problemMode: GameMode;
     problemModePool?: string[];
+    languageMode?: LanguageMode;
 }
 
 export interface MiniGameComponentProps {
     onBack: () => void;
     problemMode: GameMode;
     problemModePool?: string[];
+    languageMode?: LanguageMode;
 }
 
 /**
@@ -36,7 +38,7 @@ const MINI_GAME_MAP: Partial<Record<GameScreen, React.ComponentType<MiniGameComp
     [GameScreen.MINI_GAME_GO_HOME]: GoHomeDash,
 };
 
-const MiniGameRouter: React.FC<MiniGameRouterProps> = ({ screen, onBack, problemMode, problemModePool }) => {
+const MiniGameRouter: React.FC<MiniGameRouterProps> = ({ screen, onBack, problemMode, problemModePool, languageMode }) => {
     const Component = MINI_GAME_MAP[screen];
 
     if (!Component) {
@@ -49,7 +51,7 @@ const MiniGameRouter: React.FC<MiniGameRouterProps> = ({ screen, onBack, problem
         );
     }
 
-    return <Component onBack={onBack} problemMode={problemMode} problemModePool={problemModePool} />;
+    return <Component onBack={onBack} problemMode={problemMode} problemModePool={problemModePool} languageMode={languageMode} />;
 };
 
 export default MiniGameRouter;
