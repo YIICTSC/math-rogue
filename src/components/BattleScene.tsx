@@ -1190,7 +1190,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                             <button
                                 onClick={onOpenSettings}
                                 className="flex items-center gap-1 px-2 py-1 rounded text-[10px] font-bold border transition-colors bg-black/50 border-gray-600 text-gray-400 hover:text-white hover:border-gray-400"
-                                title="セッティング"
+                                title={trans("セッティング", languageMode)}
                             >
                                 <Settings size={10} /> SET
                             </button>
@@ -1250,8 +1250,8 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                 {/* Codex Selection Modal */}
                 {codexOptions && (
                     <div className="fixed inset-0 z-[100] bg-black/80 flex flex-col items-center justify-center p-4 animate-in fade-in duration-200">
-                        <h3 className="text-2xl font-bold text-yellow-400 mb-4 drop-shadow-[0_0_10px_rgba(250,204,21,0.5)]">秘密の攻略本</h3>
-                        <p className="text-gray-300 mb-6 text-sm">手札に加えるカードを1枚選んでください</p>
+                        <h3 className="text-2xl font-bold text-yellow-400 mb-4 drop-shadow-[0_0_10px_rgba(250,204,21,0.5)]">{trans("秘密の攻略本", languageMode)}</h3>
+                        <p className="text-gray-300 mb-6 text-sm">{trans("手札に加えるカードを1枚選んでください", languageMode)}</p>
                         <div className="flex flex-wrap justify-center gap-4 mb-8">
                             {codexOptions.map((card) => (
                                 <div key={card.id} className="scale-100 hover:scale-105 transition-transform cursor-pointer" onClick={() => onCodexSelect(card)}>
@@ -1263,7 +1263,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                             onClick={() => onCodexSelect(null)}
                             className="bg-gray-600 hover:bg-green-500 text-white px-8 py-2 rounded font-bold border border-gray-400"
                         >
-                            スキップ
+                            {trans("スキップ", languageMode)}
                         </button>
                     </div>
                 )}

@@ -4,7 +4,7 @@ import { ArrowLeft, X, Club, Diamond, Heart, Spade, ShoppingBag, BarChart3, Arro
 import { audioService } from '../services/audioService';
 import PixelSprite from './PixelSprite';
 import { 
-    PokerCard, PokerRunState, PokerBlind, PokerSupporter, PokerConsumable, PokerSuit, PokerRank, PokerScoringContext, PokerPack, PokerVoucher, GameMode
+    PokerCard, PokerRunState, PokerBlind, PokerSupporter, PokerConsumable, PokerSuit, PokerRank, PokerScoringContext, PokerPack, PokerVoucher, GameMode, LanguageMode
 } from '../types';
 import { POKER_HAND_LEVELS, SUPPORTERS_LIBRARY, CONSUMABLES_LIBRARY, PACK_LIBRARY, POKER_ENHANCEMENTS, VOUCHERS_LIBRARY, EXPANDED_SUPPORTER_IDS } from '../constants';
 import { storageService } from '../services/storageService';
@@ -320,6 +320,60 @@ const HAND_EXAMPLES: Record<string, { desc: string, cards: {r: string, s: PokerS
     }
 };
 
+type PokerTutorialFocus = 'goal' | 'tools' | 'supporters' | 'hand' | 'actions';
+type PokerTutorialPlacement = 'top' | 'bottom';
+type PokerTutorialStep = { title: string; body: string; focus: PokerTutorialFocus; placement: PokerTutorialPlacement };
+type PokerTutorialLabels = {
+    heading: string;
+    closeLabel: string;
+    previous: string;
+    later: string;
+    next: string;
+    done: string;
+    button: string;
+};
+
+const POKER_TUTORIAL_STEPS_JA: PokerTutorialStep[] = [
+    { title: '目標スコアを越えよう', body: 'ラウンドごとに目標スコアが決まっています。手数がなくなる前に現在スコアを目標以上にすると勝利です。', focus: 'goal', placement: 'bottom' },
+    { title: '困ったら情報を確認', body: 'ルール、山札、役のレベルは右上のボタンから確認できます。チュートリアルもここから何度でも開けます。', focus: 'tools', placement: 'bottom' },
+    { title: 'サポーターと消費アイテム', body: '上段の枠にはサポーターと消費アイテムが並びます。クリックや長押しで効果を確認し、得点を伸ばしましょう。', focus: 'supporters', placement: 'bottom' },
+    { title: '手札を選ぶ', body: 'カードをクリック、またはなぞって選択します。最大5枚まで選べるので、強い役を作れる組み合わせを探してください。', focus: 'hand', placement: 'top' },
+    { title: '出すか、捨てるか', body: 'PLAY HANDで選んだカードを出して得点します。DISCARDはカードを入れ替える操作で、残り捨札数がある時だけ使えます。', focus: 'actions', placement: 'top' },
+    { title: '勝ったらデッキを育てる', body: 'ラウンド勝利後は購買でカード、サポーター、パックを購入できます。次の相手に合わせてデッキを強化しましょう。', focus: 'supporters', placement: 'bottom' }
+];
+
+const POKER_TUTORIAL_STEPS_EN: PokerTutorialStep[] = [
+    { title: 'Beat the score goal', body: 'Each round has a target score. Reach it before you run out of hands to win the round.', focus: 'goal', placement: 'bottom' },
+    { title: 'Check the table info', body: 'Use the buttons in the top-right to review the rules, draw pile, and hand levels. You can reopen this tutorial from there anytime.', focus: 'tools', placement: 'bottom' },
+    { title: 'Use supporters and consumables', body: 'Supporters and consumables sit in the upper row. Click or long-press them to inspect effects and plan bigger scores.', focus: 'supporters', placement: 'bottom' },
+    { title: 'Select cards from your hand', body: 'Click cards, or drag across them, to select up to five cards. Look for a set that forms the strongest poker hand.', focus: 'hand', placement: 'top' },
+    { title: 'Play or discard', body: 'PLAY HAND scores the selected cards. DISCARD replaces selected cards and can only be used while you have discards remaining.', focus: 'actions', placement: 'top' },
+    { title: 'Upgrade after winning', body: 'After a round win, spend money at the shop on cards, supporters, and packs to strengthen the deck for the next rival.', focus: 'supporters', placement: 'bottom' }
+];
+
+const POKER_TUTORIAL_LABELS_JA: PokerTutorialLabels = {
+    heading: '放課後ポーカー講座',
+    closeLabel: 'チュートリアルを閉じる',
+    previous: '戻る',
+    later: 'あとで',
+    next: '次へ',
+    done: '完了',
+    button: '講座'
+};
+
+const POKER_TUTORIAL_LABELS_EN: PokerTutorialLabels = {
+    heading: 'After-School Poker Tutorial',
+    closeLabel: 'Close tutorial',
+    previous: 'Back',
+    later: 'Later',
+    next: 'Next',
+    done: 'Done',
+    button: 'Guide'
+};
+
+const getPokerTutorialSteps = (languageMode?: LanguageMode) => languageMode === 'ENGLISH' ? POKER_TUTORIAL_STEPS_EN : POKER_TUTORIAL_STEPS_JA;
+const getPokerTutorialLabels = (languageMode?: LanguageMode) => languageMode === 'ENGLISH' ? POKER_TUTORIAL_LABELS_EN : POKER_TUTORIAL_LABELS_JA;
+
 const getBlindConfig = (ante: number, index: number, rivalId?: string, excludeRivalId?: string): PokerBlind => {
     const rival = ante > 8
         ? (getPokerRivalById(rivalId) || getRandomEndlessRival(excludeRivalId))
@@ -586,6 +640,7 @@ interface PokerGameScreenProps {
   onBack: () => void;
   problemMode?: GameMode;
   problemModePool?: string[];
+  languageMode?: LanguageMode;
 }
 
 type ScoreAnimationState = {
@@ -610,7 +665,9 @@ type ScoreBreakdownEntry = {
   accent?: 'chips' | 'mult' | 'special';
 };
 
-const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode = GameMode.MIXED, problemModePool }) => {
+const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode = GameMode.MIXED, problemModePool, languageMode }) => {
+  const pokerTutorialSteps = useMemo(() => getPokerTutorialSteps(languageMode), [languageMode]);
+  const pokerTutorialLabels = useMemo(() => getPokerTutorialLabels(languageMode), [languageMode]);
   const expandedSupporterUnlockCount = Math.min(
       storageService.getPokerExpandedSupporterUnlockCount(),
       EXPANDED_SUPPORTER_IDS.length
@@ -718,6 +775,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
   const [showHandList, setShowHandList] = useState(false);
   const [showDeckList, setShowDeckList] = useState(false);
   const [showRulesModal, setShowRulesModal] = useState(false);
+  const [tutorialStepIndex, setTutorialStepIndex] = useState<number | null>(null);
   
   // Consumable Usage
   const [selectedConsumable, setSelectedConsumable] = useState<PokerConsumable | null>(null);
@@ -736,6 +794,42 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
 
   const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
   const formatPokerCardLabel = (card: PokerCard) => `${getRankDisplay(card.rank)}${card.suit === 'SPADE' ? '♠' : card.suit === 'HEART' ? '♥' : card.suit === 'DIAMOND' ? '♦' : '♣'}`;
+  const tutorialStep = tutorialStepIndex === null ? null : pokerTutorialSteps[tutorialStepIndex];
+  const getPokerTutorialHighlightClass = (focus: PokerTutorialFocus) => tutorialStep?.focus === focus
+      ? 'relative z-[65] ring-4 ring-yellow-300 ring-offset-2 ring-offset-slate-950 shadow-[0_0_28px_rgba(250,204,21,0.55)]'
+      : '';
+  const getPokerTutorialPanelClass = () => {
+      const base = 'absolute left-1/2 w-[min(92vw,440px)] -translate-x-1/2 rounded-lg border-4 border-yellow-400 bg-slate-950 p-4 text-white shadow-2xl pointer-events-auto';
+      return tutorialStep?.placement === 'bottom'
+          ? `${base} bottom-3 md:bottom-5`
+          : `${base} top-3 md:top-5`;
+  };
+  const openPokerTutorial = (stepIndex = 0) => {
+      setShowRulesModal(false);
+      setShowDeckList(false);
+      setShowHandList(false);
+      setTutorialStepIndex(Math.min(Math.max(stepIndex, 0), pokerTutorialSteps.length - 1));
+      audioService.playSound('select');
+  };
+  const closePokerTutorial = () => {
+      setTutorialStepIndex(null);
+      storageService.saveSeenPokerTutorial();
+      audioService.playSound('select');
+  };
+  const goToNextPokerTutorialStep = () => {
+      if (tutorialStepIndex === null) return;
+      if (tutorialStepIndex >= pokerTutorialSteps.length - 1) {
+          closePokerTutorial();
+          return;
+      }
+      setTutorialStepIndex(tutorialStepIndex + 1);
+      audioService.playSound('select');
+  };
+  const goToPreviousPokerTutorialStep = () => {
+      if (tutorialStepIndex === null || tutorialStepIndex === 0) return;
+      setTutorialStepIndex(tutorialStepIndex - 1);
+      audioService.playSound('select');
+  };
   const animateScoreValue = useCallback((from: number, to: number, duration: number, onUpdate: (value: number) => void) => {
       if (scoreAnimationFrameRef.current) cancelAnimationFrame(scoreAnimationFrameRef.current);
       if (duration <= 0 || from === to) {
@@ -766,6 +860,12 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
           if (scoreAnimationFrameRef.current) cancelAnimationFrame(scoreAnimationFrameRef.current);
       };
   }, []);
+
+  useEffect(() => {
+      if (phase === 'PLAY' && !storageService.getSeenPokerTutorial()) {
+          setTutorialStepIndex(0);
+      }
+  }, [phase]);
 
   const currentHandInfo = useMemo(() => {
       if (selectedCards.length === 0) return null;
@@ -2238,8 +2338,41 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
             </div>
         )}
 
+        {tutorialStep && (
+            <div className="fixed inset-0 z-[55] pointer-events-none">
+                <div className="absolute inset-0 bg-black/55" />
+                <div className={getPokerTutorialPanelClass()}>
+                    <div className="mb-2 flex items-center justify-between gap-3">
+                        <div className="flex items-center gap-2 text-xs font-black uppercase text-yellow-300">
+                            <Sparkles size={16} />
+                            {pokerTutorialLabels.heading}
+                        </div>
+                        <button onClick={closePokerTutorial} className="rounded bg-slate-800 p-1 text-slate-300 hover:bg-slate-700 hover:text-white" aria-label={pokerTutorialLabels.closeLabel}>
+                            <X size={18} />
+                        </button>
+                    </div>
+                    <div className="mb-2 text-[11px] font-bold text-slate-400">
+                        {tutorialStepIndex! + 1} / {pokerTutorialSteps.length}
+                    </div>
+                    <h2 className="mb-2 text-lg font-black text-white">{tutorialStep.title}</h2>
+                    <p className="text-sm leading-relaxed text-slate-200">{tutorialStep.body}</p>
+                    <div className="mt-4 flex items-center justify-between gap-2">
+                        <button onClick={goToPreviousPokerTutorialStep} disabled={tutorialStepIndex === 0} className="rounded border border-slate-600 px-3 py-2 text-xs font-bold text-slate-200 disabled:opacity-40 hover:bg-slate-800">
+                            {pokerTutorialLabels.previous}
+                        </button>
+                        <button onClick={closePokerTutorial} className="rounded border border-slate-700 px-3 py-2 text-xs font-bold text-slate-300 hover:bg-slate-800">
+                            {pokerTutorialLabels.later}
+                        </button>
+                        <button onClick={goToNextPokerTutorialStep} className="rounded bg-yellow-400 px-4 py-2 text-xs font-black text-slate-950 hover:bg-yellow-300">
+                            {tutorialStepIndex === pokerTutorialSteps.length - 1 ? pokerTutorialLabels.done : pokerTutorialLabels.next}
+                        </button>
+                    </div>
+                </div>
+            </div>
+        )}
+
         <div className="flex flex-col md:flex-row justify-between items-stretch md:items-start p-2 md:p-4 bg-black/60 z-20 shadow-md shrink-0 gap-2">
-            <div className="flex gap-2 w-full md:w-auto">
+            <div className={`flex gap-2 w-full md:w-auto ${getPokerTutorialHighlightClass('goal')}`}>
                 <div className="w-16 md:w-20 shrink-0 rounded border border-yellow-500 bg-slate-900/90 p-1 flex flex-col items-center justify-center shadow-lg">
                     <div className="w-10 h-10 md:w-12 md:h-12 bg-no-repeat bg-contain" style={currentRivalPortraitStyle} title={currentRivalName} />
                     <div className="mt-0.5 w-full truncate text-center text-[8px] md:text-[9px] font-bold text-yellow-100 leading-tight">{currentRivalName}</div>
@@ -2253,7 +2386,8 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
                 <div className="bg-slate-800 p-2 rounded border border-yellow-500 flex flex-col items-center justify-center w-20 md:hidden shrink-0"><div className="text-[10px] text-yellow-400 uppercase">所持金</div><div className="text-lg font-bold text-yellow-400">${runState.money}</div></div>
             </div>
             <div className="flex items-center justify-between md:justify-end gap-2 w-full md:w-auto">
-                <div className="flex gap-2">
+                <div className={`flex gap-2 ${getPokerTutorialHighlightClass('tools')}`}>
+                    <button onClick={() => openPokerTutorial(0)} className="bg-yellow-600 hover:bg-yellow-500 p-1 md:p-2 rounded border border-yellow-300 text-slate-950 flex flex-col items-center justify-center w-12 h-12 md:w-14 md:h-14"><BookOpen size={18} className="md:w-5 md:h-5"/><span className="text-[8px] md:text-[9px] font-black leading-none mt-1">{pokerTutorialLabels.button}</span></button>
                     <button onClick={() => { setShowRulesModal(true); audioService.playSound('select'); }} className="bg-slate-700 hover:bg-slate-600 p-1 md:p-2 rounded border border-slate-500 text-white flex flex-col items-center justify-center w-12 h-12 md:w-14 md:h-14"><HelpCircle size={18} className="md:w-5 md:h-5 text-yellow-400"/><span className="text-[9px] md:text-[10px] leading-none mt-1">ルール</span></button>
                     <button onClick={() => { setShowDeckList(true); audioService.playSound('select'); }} className="bg-slate-700 hover:bg-slate-600 p-1 md:p-2 rounded border border-slate-500 text-white flex flex-col items-center justify-center w-12 h-12 md:w-14 md:h-14"><Layers size={18} className="md:w-5 md:h-5"/><span className="text-[9px] md:text-[10px] leading-none mt-1">山札</span></button>
                     <button onClick={() => { setShowHandList(true); audioService.playSound('select'); }} className="bg-slate-700 hover:bg-slate-600 p-1 md:p-2 rounded border border-slate-500 text-white flex flex-col items-center justify-center w-12 h-12 md:w-14 md:h-14"><BarChart3 size={18} className="md:w-5 md:h-5"/><span className="text-[9px] md:text-[10px] leading-none mt-1">役</span></button>
@@ -2266,7 +2400,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
             </div>
         </div>
 
-        <div className="w-full bg-black/40 border-b border-black/50 p-2 flex justify-between items-center z-10 shrink-0 min-h-[64px]">
+        <div className={`w-full bg-black/40 border-b border-black/50 p-2 flex justify-between items-center z-10 shrink-0 min-h-[64px] ${getPokerTutorialHighlightClass('supporters')}`}>
             <div className="flex gap-2 items-center flex-1 justify-center">
                 {runState.supporters.map((s, i) => (
                     <div 
@@ -2314,7 +2448,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
             )}
         </div>
 
-        <div className="h-40 md:h-56 w-full flex justify-center items-end pb-4 gap-[-20px] touch-none select-none shrink-0" onPointerLeave={handlePointerUp} onPointerUp={handlePointerUp} onPointerMove={handlePointerMove}>
+        <div className={`h-40 md:h-56 w-full flex justify-center items-end pb-4 gap-[-20px] touch-none select-none shrink-0 ${getPokerTutorialHighlightClass('hand')}`} onPointerLeave={handlePointerUp} onPointerUp={handlePointerUp} onPointerMove={handlePointerMove}>
             {runState.hand.map((card, idx) => {
                 const isSelected = selectedCards.includes(card.id);
                 return (
@@ -2339,7 +2473,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
             <button onClick={sortHandSuit} className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-full font-bold text-xs flex items-center shadow-lg border-2 border-blue-800"><LayoutList size={16} className="mr-1"/> Suit</button>
         </div>
 
-        <div className="bg-slate-800 p-2 md:p-4 flex justify-center gap-4 z-20 shadow-up shrink-0">
+        <div className={`bg-slate-800 p-2 md:p-4 flex justify-center gap-4 z-20 shadow-up shrink-0 ${getPokerTutorialHighlightClass('actions')}`}>
             <button onClick={playHand} disabled={animating || selectedCards.length === 0} className="bg-orange-600 hover:bg-orange-500 disabled:bg-gray-600 text-white font-bold py-2 px-8 rounded-lg text-lg md:text-xl shadow-lg border-b-4 border-orange-800 active:border-0 active:translate-y-1 transition-all">PLAY HAND</button>
             <button onClick={discardHand} disabled={animating || selectedCards.length === 0 || runState.discardsRemaining <= 0} className="bg-red-700 hover:bg-red-600 disabled:bg-gray-600 text-white font-bold py-2 px-6 rounded-lg text-sm md:text-base shadow-lg border-b-4 border-red-900 active:border-0 active:translate-y-1 transition-all">DISCARD</button>
         </div>
