@@ -11303,6 +11303,7 @@ const App: React.FC = () => {
                             onBack={returnToTitle}
                             totalMathCorrect={totalMathCorrect}
                             isDebug={isDebugHpOne || isMiniGameDebugUnlocked}
+                            languageMode={languageMode}
                         />
                     </div>
                 )}
@@ -11432,7 +11433,7 @@ const App: React.FC = () => {
 
                 {gameState.screen === GameScreen.RANKING && (
                     <div className="absolute inset-0">
-                        <RankingScreen onBack={returnToTitle} />
+                        <RankingScreen onBack={returnToTitle} languageMode={languageMode} />
                     </div>
                 )}
 

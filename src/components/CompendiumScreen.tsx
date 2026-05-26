@@ -181,7 +181,7 @@ const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, 
                         disabled={unlockedCardsForShowcase.length === 0}
                         className={`px-3 py-1 rounded text-sm font-bold flex items-center ${unlockedCardsForShowcase.length === 0 ? 'bg-gray-800 text-gray-500 cursor-not-allowed' : 'bg-cyan-700 text-white hover:bg-cyan-600'}`}
                     >
-                        <Music size={14} className="mr-1" /> BGMモード
+                        <Music size={14} className="mr-1" /> {trans("BGMモード", languageMode)}
                     </button>
                 </div>
 
@@ -453,6 +453,9 @@ const CompendiumBgmModeModal: React.FC<{ cards: ICard[]; languageMode: LanguageM
     const activeCard = cards[cardIndex] || cards[0];
     const activeTrack = bgmTracks[trackIndex] || bgmTracks[0];
     const translated = trans(activeCard.name, languageMode);
+    const familiarActionSrc = activeCard.familiarSummon
+        ? assetUrl(`sprites/high-school/familiars-action/${activeCard.familiarSummon.imageIndex}.webp`)
+        : null;
     const imageCandidates = useMemo(
         () => getCardIllustrationPaths(activeCard.id, translated, [activeCard.name]),
         [activeCard.id, activeCard.name, translated]
@@ -627,7 +630,17 @@ const CompendiumBgmModeModal: React.FC<{ cards: ICard[]; languageMode: LanguageM
         <div className="fixed inset-0 z-[80] bg-black flex flex-col">
             <div className="absolute inset-0 overflow-hidden">
                 <div key={transitionKey} className={`${transitionClass} flex h-full w-full items-center justify-center`}>
-                    {imageIndex < imageCandidates.length ? (
+                    {familiarActionSrc ? (
+                        <div className="relative h-full w-full overflow-hidden bg-[radial-gradient(circle_at_55%_45%,rgba(236,72,153,0.34),rgba(15,23,42,0.78)_55%,rgba(0,0,0,0.96))]">
+                            <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(248,250,252,0.18),transparent_28%,rgba(239,68,68,0.22)_52%,transparent_70%)]" />
+                            <img
+                                src={familiarActionSrc}
+                                alt={activeCard.familiarSummon?.name || translated}
+                                className="absolute left-1/2 top-[18%] h-[205%] w-[205%] -translate-x-1/2 -translate-y-1/2 object-contain opacity-100 drop-shadow-[0_0_24px_rgba(244,114,182,0.85)]"
+                                style={{ transform: 'translate(-50%, -50%)' }}
+                            />
+                        </div>
+                    ) : imageIndex < imageCandidates.length ? (
                         <img
                             src={imageCandidates[imageIndex]}
                             alt={translated}
@@ -659,7 +672,7 @@ const CompendiumBgmModeModal: React.FC<{ cards: ICard[]; languageMode: LanguageM
                 <div className="flex items-start justify-between gap-4">
                     <div className="flex flex-wrap items-center gap-2 sm:gap-3">
                         <div className="rounded-full border border-cyan-300/30 bg-cyan-500/10 px-3 py-1 text-[10px] font-black tracking-[0.24em] text-cyan-200 sm:px-4 sm:text-xs sm:tracking-[0.3em]">
-                            BGM MODE
+                            {trans("BGMモード", languageMode)}
                         </div>
                         <div className="rounded-full border border-white/15 bg-slate-950/30 px-3 py-1.5 text-[11px] font-bold text-white/85 backdrop-blur-sm sm:px-4 sm:py-2 sm:text-sm">
                             {'\u266B'} {activeTrack}
@@ -668,7 +681,7 @@ const CompendiumBgmModeModal: React.FC<{ cards: ICard[]; languageMode: LanguageM
                             onClick={handleTogglePlayOrder}
                             className="rounded-full border border-white/15 bg-slate-950/30 px-3 py-1.5 text-[11px] font-bold text-white/85 backdrop-blur-sm hover:bg-white/10 sm:px-4 sm:py-2 sm:text-sm"
                         >
-                            {playOrder === 'sorted' ? '曲順: 名前順' : '曲順: シャッフル'}
+                            {playOrder === 'sorted' ? trans('曲順: 名前順', languageMode) : trans('曲順: シャッフル', languageMode)}
                         </button>
                     </div>
                 </div>
@@ -684,7 +697,7 @@ const CompendiumBgmModeModal: React.FC<{ cards: ICard[]; languageMode: LanguageM
                     </div>
                     <div className="flex flex-wrap items-center justify-between gap-2 sm:gap-3">
                         <div className="text-[11px] text-slate-300 sm:text-sm">
-                            {cardIndex + 1} / {cards.length} ・ スライドショー
+                            {cardIndex + 1} / {cards.length} ・ {trans('スライドショー', languageMode)}
                         </div>
                         <div className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2">
                             <button onClick={handlePrevTrack} className="rounded-full bg-white/10 p-2 text-white hover:bg-white/20 sm:p-3">
@@ -705,7 +718,7 @@ const CompendiumBgmModeModal: React.FC<{ cards: ICard[]; languageMode: LanguageM
                             >
                                 <Repeat size={16} className="sm:w-[18px] sm:h-[18px]" />
                             </button>
-                            <button onClick={handleNextCard} className="rounded-full bg-white/10 p-2 text-white hover:bg-white/20 sm:p-3" title="次のカード">
+                            <button onClick={handleNextCard} className="rounded-full bg-white/10 p-2 text-white hover:bg-white/20 sm:p-3" title={trans("次のカード", languageMode)}>
                                 <ArrowLeft className="rotate-180 sm:w-[18px] sm:h-[18px]" size={16} />
                             </button>
                         </div>

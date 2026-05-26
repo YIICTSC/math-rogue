@@ -1,14 +1,16 @@
 
 import React, { useState, useEffect } from 'react';
 import { ArrowLeft, ScrollText, Calendar, Skull, Trophy, Club, Swords, Timer, Zap, Compass, Mountain, Send, Crown, Users, User, ArrowRight, Rocket } from 'lucide-react';
-import { RankingEntry, PokerScoreEntry, SurvivorScoreEntry, DungeonScoreEntry, KochoScoreEntry, PaperPlaneScoreEntry, VSRecord, GoHomeScoreEntry } from '../types';
+import { RankingEntry, PokerScoreEntry, SurvivorScoreEntry, DungeonScoreEntry, KochoScoreEntry, PaperPlaneScoreEntry, VSRecord, GoHomeScoreEntry, LanguageMode } from '../types';
 import { storageService } from '../services/storageService';
+import { trans } from '../utils/textUtils';
 
 interface RankingScreenProps {
   onBack: () => void;
+  languageMode: LanguageMode;
 }
 
-const RankingScreen: React.FC<RankingScreenProps> = ({ onBack }) => {
+const RankingScreen: React.FC<RankingScreenProps> = ({ onBack, languageMode }) => {
   const [activeTab, setActiveTab] = useState<'ADVENTURE' | 'VS' | 'POKER' | 'SURVIVOR' | 'DUNGEON' | 'DUNGEON_2' | 'KOCHO' | 'PLANE' | 'GO_HOME'>('ADVENTURE');
   const [adventureData, setAdventureData] = useState<RankingEntry[]>([]);
   const [vsData, setVsData] = useState<VSRecord[]>([]);
@@ -52,7 +54,7 @@ const RankingScreen: React.FC<RankingScreenProps> = ({ onBack }) => {
         <div className="z-10 bg-black border-b-2 border-gray-600 p-4 flex flex-col md:flex-row justify-between items-center shrink-0 gap-4">
             <div className="flex items-center">
                 <ScrollText size={24} className="text-gray-400 mr-2" />
-                <h2 className="text-xl font-bold text-gray-100">記録 (Records)</h2>
+                <h2 className="text-xl font-bold text-gray-100">{trans('記録', languageMode)}</h2>
             </div>
             
             <div className="flex bg-gray-800 rounded p-1 overflow-x-auto max-w-full custom-scrollbar">
@@ -116,7 +118,7 @@ const RankingScreen: React.FC<RankingScreenProps> = ({ onBack }) => {
                 onClick={onBack}
                 className="flex items-center bg-gray-700 hover:bg-gray-600 border border-gray-400 px-4 py-2 rounded text-white transition-colors text-sm"
             >
-                <ArrowLeft size={16} className="mr-2" /> 戻る
+                <ArrowLeft size={16} className="mr-2" /> {trans('戻る', languageMode)}
             </button>
         </div>
 
@@ -126,7 +128,7 @@ const RankingScreen: React.FC<RankingScreenProps> = ({ onBack }) => {
                 adventureData.length === 0 ? (
                     <div className="flex flex-col items-center justify-center h-64 text-gray-500">
                         <ScrollText size={48} className="mb-4 opacity-50" />
-                        <p>まだ冒険の記録はありません。</p>
+                        <p>{trans('まだ冒険の記録はありません。', languageMode)}</p>
                     </div>
                 ) : (
                     <div className="max-w-4xl mx-auto space-y-3">
@@ -158,10 +160,10 @@ const RankingScreen: React.FC<RankingScreenProps> = ({ onBack }) => {
                                 {/* Middle: Character Info */}
                                 <div className="flex-grow mb-2 md:mb-0 px-0 md:px-4">
                                     <div className="text-lg font-bold text-white">
-                                        {entry.characterName || '不明な冒険者'}
+                                        {entry.characterName || trans('不明な冒険者', languageMode)}
                                     </div>
                                     <div className="text-xs text-gray-400">
-                                        到達: Act {entry.act} - Floor {entry.floor}
+                                        {trans('到達', languageMode)}: Act {entry.act} - Floor {entry.floor}
                                     </div>
                                     {entry.challengeMode && <div className="text-[10px] text-red-400 font-bold border border-red-500 px-1 inline-block rounded mt-1">1A1D Mode</div>}
                                 </div>
@@ -183,7 +185,7 @@ const RankingScreen: React.FC<RankingScreenProps> = ({ onBack }) => {
                 vsData.length === 0 ? (
                     <div className="flex flex-col items-center justify-center h-64 text-gray-500">
                         <Users size={48} className="mb-4 opacity-50" />
-                        <p>対戦の記録はありません。</p>
+                        <p>{trans('対戦の記録はありません。', languageMode)}</p>
                     </div>
                 ) : (
                     <div className="max-w-4xl mx-auto space-y-3">
@@ -243,7 +245,7 @@ const RankingScreen: React.FC<RankingScreenProps> = ({ onBack }) => {
                 pokerData.length === 0 ? (
                     <div className="flex flex-col items-center justify-center h-64 text-gray-500">
                         <Club size={48} className="mb-4 opacity-50" />
-                        <p>ポーカーの記録はありません。</p>
+                        <p>{trans('ポーカーの記録はありません。', languageMode)}</p>
                     </div>
                 ) : (
                     <div className="max-w-4xl mx-auto space-y-3">
@@ -270,7 +272,7 @@ const RankingScreen: React.FC<RankingScreenProps> = ({ onBack }) => {
 
                                 {/* Middle: Money */}
                                 <div className="flex-grow mb-2 md:mb-0 px-0 md:px-4">
-                                    <div className="text-sm text-gray-400">最終所持金</div>
+                                    <div className="text-sm text-gray-400">{trans('最終所持金', languageMode)}</div>
                                     <div className="text-lg font-bold text-yellow-400">
                                         ${entry.money.toLocaleString()}
                                     </div>
@@ -293,7 +295,7 @@ const RankingScreen: React.FC<RankingScreenProps> = ({ onBack }) => {
                 survivorData.length === 0 ? (
                     <div className="flex flex-col items-center justify-center h-64 text-gray-500">
                         <Skull size={48} className="mb-4 opacity-50" />
-                        <p>サバイバーの記録はありません。</p>
+                        <p>{trans('サバイバーの記録はありません。', languageMode)}</p>
                     </div>
                 ) : (
                     <div className="max-w-4xl mx-auto space-y-3">
@@ -326,7 +328,7 @@ const RankingScreen: React.FC<RankingScreenProps> = ({ onBack }) => {
                                     <div className="text-xs text-gray-400 flex flex-wrap gap-1">
                                         {entry.weapons && entry.weapons.length > 0 ? entry.weapons.map(w => (
                                             <span key={w} className="bg-gray-700 px-1 rounded text-[10px]">{w}</span>
-                                        )) : 'No Weapons'}
+                                        )) : trans('武器なし', languageMode)}
                                     </div>
                                 </div>
 
@@ -344,7 +346,7 @@ const RankingScreen: React.FC<RankingScreenProps> = ({ onBack }) => {
                 goHomeData.length === 0 ? (
                     <div className="flex flex-col items-center justify-center h-64 text-gray-500">
                         <Rocket size={48} className="mb-4 opacity-50 text-orange-500" />
-                        <p>帰宅ダッシュの記録はありません。</p>
+                        <p>{trans('帰宅ダッシュの記録はありません。', languageMode)}</p>
                     </div>
                 ) : (
                     <div className="max-w-4xl mx-auto space-y-3">
@@ -393,7 +395,7 @@ const RankingScreen: React.FC<RankingScreenProps> = ({ onBack }) => {
                 dungeonData.length === 0 ? (
                     <div className="flex flex-col items-center justify-center h-64 text-gray-500">
                         <Compass size={48} className="mb-4 opacity-50" />
-                        <p>風来の小学生の記録はありません。</p>
+                        <p>{trans('風来の小学生の記録はありません。', languageMode)}</p>
                     </div>
                 ) : (
                     <div className="max-w-4xl mx-auto space-y-3">
@@ -445,7 +447,7 @@ const RankingScreen: React.FC<RankingScreenProps> = ({ onBack }) => {
                 dungeon2Data.length === 0 ? (
                     <div className="flex flex-col items-center justify-center h-64 text-gray-500">
                         <Mountain size={48} className="mb-4 opacity-50 text-cyan-800" />
-                        <p>風来の小学生2の記録はありません。</p>
+                        <p>{trans('風来の小学生2の記録はありません。', languageMode)}</p>
                     </div>
                 ) : (
                     <div className="max-w-4xl mx-auto space-y-3">
@@ -497,7 +499,7 @@ const RankingScreen: React.FC<RankingScreenProps> = ({ onBack }) => {
                 kochoData.length === 0 ? (
                     <div className="flex flex-col items-center justify-center h-64 text-gray-500">
                         <Crown size={48} className="mb-4 opacity-50 text-indigo-400" />
-                        <p>校長対決の記録はありません。</p>
+                        <p>{trans('校長対決の記録はありません。', languageMode)}</p>
                     </div>
                 ) : (
                     <div className="max-w-4xl mx-auto space-y-3">
@@ -546,7 +548,7 @@ const RankingScreen: React.FC<RankingScreenProps> = ({ onBack }) => {
                 planeData.length === 0 ? (
                     <div className="flex flex-col items-center justify-center h-64 text-gray-500">
                         <Send size={48} className="mb-4 opacity-50 text-sky-400" />
-                        <p>紙飛行機バトルの記録はありません。</p>
+                        <p>{trans('紙飛行機バトルの記録はありません。', languageMode)}</p>
                     </div>
                 ) : (
                     <div className="max-w-4xl mx-auto space-y-3">
@@ -595,7 +597,7 @@ const RankingScreen: React.FC<RankingScreenProps> = ({ onBack }) => {
         
         {/* Footer */}
         <div className="p-2 text-center text-[10px] text-gray-600 bg-black border-t border-gray-800">
-            最新の50件まで表示されます。
+            {trans('最新の50件まで表示されます。', languageMode)}
         </div>
     </div>
   );
