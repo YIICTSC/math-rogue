@@ -35,6 +35,8 @@ interface SelectableUnitOption {
   modes?: string[];
 }
 
+const UNIT_MASTERY_TARGET = 100;
+
 const KOKUGO_GRADE_UNITS: Record<number, MathUnitOption[]> = {
   1: [
     { id: 'J1_U01', name: 'ひらがな', mode: 'KOKUGO_G1_U01' },
@@ -656,6 +658,8 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
             <div className="grid grid-cols-2 gap-1.5 sm:gap-2 max-h-[48vh] overflow-y-auto custom-scrollbar pr-1">
               {gradeUnits.map((unit) => {
                 const isSelected = selectedMathUnitIds.includes(unit.id);
+                const correctCount = getUnitCorrectCount(unit);
+                const progressPercent = Math.min(100, Math.max(0, (correctCount / UNIT_MASTERY_TARGET) * 100));
                 return (
                   <button
                     key={unit.id}
@@ -665,11 +669,23 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
                         : [...prev, unit.id]);
                       audioService.playSound('select');
                     }}
-                    className={`relative w-full p-1.5 pr-12 sm:p-2 sm:pr-14 rounded-lg border text-left text-[10px] sm:text-xs font-bold leading-snug transition-colors ${isSelected ? `${theme.bg} border-white text-white` : 'bg-slate-700 border-slate-600 text-gray-200 hover:border-slate-400'}`}
+                    className={`group relative min-h-[3.1rem] w-full overflow-hidden rounded-lg border px-2 py-1.5 pr-14 text-left text-[10px] font-bold leading-snug transition-colors sm:min-h-[3.4rem] sm:px-2.5 sm:py-2 sm:pr-16 sm:text-xs ${isSelected ? `${theme.bg} border-white text-white` : 'bg-slate-800 border-slate-600 text-gray-200 hover:border-slate-400'}`}
                   >
-                    <span className="block" data-allow-japanese="true">{unit.name}</span>
-                    <span className="absolute right-1 top-1 rounded-full bg-black/45 border border-white/15 px-1 py-0.5 text-[7px] sm:right-1.5 sm:top-1.5 sm:px-1.5 sm:text-[8px] font-mono leading-none text-white/90">
-                      {getUnitCorrectCount(unit)}問
+                    <span
+                      className={`absolute inset-y-0 left-0 transition-[width] duration-300 ${isSelected ? 'bg-white/18' : 'bg-emerald-500/30 group-hover:bg-emerald-400/35'}`}
+                      style={{ width: `${progressPercent}%` }}
+                      aria-hidden="true"
+                    />
+                    <span className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,rgba(255,255,255,0.08),transparent_36%,rgba(0,0,0,0.22))]" aria-hidden="true" />
+                    <span className="relative z-10 block pr-1" data-allow-japanese="true">{unit.name}</span>
+                    <span className="absolute bottom-1.5 left-2 z-10 h-1 w-[calc(100%-4.5rem)] overflow-hidden rounded-full bg-black/45 sm:left-2.5 sm:w-[calc(100%-5rem)]">
+                      <span
+                        className={`block h-full rounded-full ${progressPercent >= 100 ? 'bg-yellow-300' : 'bg-emerald-300'}`}
+                        style={{ width: `${progressPercent}%` }}
+                      />
+                    </span>
+                    <span className="absolute right-1 top-1 z-10 rounded-full bg-black/55 border border-white/15 px-1 py-0.5 text-[7px] sm:right-1.5 sm:top-1.5 sm:px-1.5 sm:text-[8px] font-mono leading-none text-white/90">
+                      {correctCount}/{UNIT_MASTERY_TARGET}
                     </span>
                   </button>
                 );
@@ -892,25 +908,42 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
                 </button>
               </div>
               <div className="grid grid-cols-2 gap-1.5 max-h-44 overflow-y-auto custom-scrollbar pr-1">
-                {gradeUnits.map(unit => (
-                  <button
-                    key={unit.id}
-                    onClick={() => {
-                      setSelectedMathUnitIds((prev) => {
-                        if (prev.includes(unit.id)) {
-                          return prev.filter((id) => id !== unit.id);
-                        }
-                        return [...prev, unit.id];
-                      });
-                    }}
-                    className={`relative w-full p-1.5 pr-12 sm:pr-14 rounded text-[10px] md:text-xs font-bold leading-snug border text-left transition-colors ${selectedMathUnitIds.includes(unit.id) ? `${theme.bg} border-white text-white` : 'bg-slate-700 border-slate-600 text-gray-300 hover:border-slate-400'}`}
-                  >
-                    <span className="block" data-allow-japanese="true">{unit.name}</span>
-                    <span className="absolute right-1 top-1 rounded-full bg-black/45 border border-white/15 px-1 py-0.5 text-[7px] sm:right-1.5 sm:top-1.5 sm:px-1.5 sm:text-[8px] md:text-[9px] font-mono leading-none text-white/90">
-                      {getUnitCorrectCount(unit)}問
-                    </span>
-                  </button>
-                ))}
+                {gradeUnits.map(unit => {
+                  const isSelected = selectedMathUnitIds.includes(unit.id);
+                  const correctCount = getUnitCorrectCount(unit);
+                  const progressPercent = Math.min(100, Math.max(0, (correctCount / UNIT_MASTERY_TARGET) * 100));
+                  return (
+                    <button
+                      key={unit.id}
+                      onClick={() => {
+                        setSelectedMathUnitIds((prev) => {
+                          if (prev.includes(unit.id)) {
+                            return prev.filter((id) => id !== unit.id);
+                          }
+                          return [...prev, unit.id];
+                        });
+                      }}
+                      className={`group relative min-h-[3.1rem] w-full overflow-hidden rounded border px-2 py-1.5 pr-14 text-left text-[10px] font-bold leading-snug transition-colors md:text-xs sm:pr-16 ${isSelected ? `${theme.bg} border-white text-white` : 'bg-slate-800 border-slate-600 text-gray-300 hover:border-slate-400'}`}
+                    >
+                      <span
+                        className={`absolute inset-y-0 left-0 transition-[width] duration-300 ${isSelected ? 'bg-white/18' : 'bg-emerald-500/30 group-hover:bg-emerald-400/35'}`}
+                        style={{ width: `${progressPercent}%` }}
+                        aria-hidden="true"
+                      />
+                      <span className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,rgba(255,255,255,0.08),transparent_36%,rgba(0,0,0,0.22))]" aria-hidden="true" />
+                      <span className="relative z-10 block pr-1" data-allow-japanese="true">{unit.name}</span>
+                      <span className="absolute bottom-1.5 left-2 z-10 h-1 w-[calc(100%-4.5rem)] overflow-hidden rounded-full bg-black/45 sm:w-[calc(100%-5rem)]">
+                        <span
+                          className={`block h-full rounded-full ${progressPercent >= 100 ? 'bg-yellow-300' : 'bg-emerald-300'}`}
+                          style={{ width: `${progressPercent}%` }}
+                        />
+                      </span>
+                      <span className="absolute right-1 top-1 z-10 rounded-full bg-black/55 border border-white/15 px-1 py-0.5 text-[7px] sm:right-1.5 sm:top-1.5 sm:px-1.5 sm:text-[8px] md:text-[9px] font-mono leading-none text-white/90">
+                        {correctCount}/{UNIT_MASTERY_TARGET}
+                      </span>
+                    </button>
+                  );
+                })}
               </div>
             </div>
             <button
