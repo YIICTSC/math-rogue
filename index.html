@@ -6,8 +6,18 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>学習ローグ</title>
     <style>
+      @font-face {
+        font-family: 'DotGothic16';
+        font-style: normal;
+        font-weight: 400;
+        font-display: swap;
+        src: url('/fonts/DotGothic16-Regular.ttf') format('truetype');
+      }
+      :root {
+        --pixel-font: 'DotGothic16', 'MS Gothic', monospace;
+      }
       body {
-        font-family: 'DotGothic16', sans-serif;
+        font-family: var(--pixel-font);
         background-color: #202020;
         /* Prevent selection and tap highlights for app-like feel */
         -webkit-user-select: none;
