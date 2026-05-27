@@ -393,7 +393,7 @@ export const TRUE_BOSS = {
 export const STATUS_CARDS: Record<string, Omit<Card, 'id'>> = {
     WOUND: { name: 'ケガ', cost: 0, type: CardType.STATUS, description: '【即時痛み型】使用不可。', unplayable: true, rarity: 'SPECIAL', textureRef: 'SLIME|赤|STATUS' },
     DAZED: { name: 'めまい', cost: 0, type: CardType.STATUS, description: '【手札阻害型】使用不可。ターン終了時廃棄。', unplayable: true, exhaust: true, rarity: 'SPECIAL', textureRef: 'GHOST|紫|STATUS' },
-    VOID: { name: '虚無', cost: 0, type: CardType.STATUS, description: '【手札阻害型】使用不可。引いた時E1失う。', unplayable: true, exhaust: true, rarity: 'SPECIAL', textureRef: 'SLIME|黒|STATUS' },
+    VOID: { name: '虚無', cost: 0, type: CardType.STATUS, description: '【手札阻害型】使用不可。引いた時E1失う。', unplayable: true, rarity: 'SPECIAL', textureRef: 'SLIME|黒|STATUS' },
     BURN: { name: 'やけど', cost: 0, type: CardType.STATUS, description: '【即時痛み型】使用不可。ターン終了時2ダメージ。', unplayable: true, rarity: 'SPECIAL', textureRef: 'FLAME|赤|STATUS' },
     SLIMED: { name: '鼻水', cost: 1, type: CardType.STATUS, description: '【即時痛み型】使用すると廃棄される。', exhaust: true, rarity: 'SPECIAL', textureRef: 'SLIME|緑|STATUS' },
     KIBI_DANGO: { name: 'きびだんご', cost: 0, type: CardType.SKILL, target: TargetType.SELF, description: 'ブロック5を得る。廃棄。', block: 5, exhaust: true, rarity: 'SPECIAL', textureRef: 'GEM|桃|SKILL' }
@@ -552,7 +552,7 @@ export const CARDS_LIBRARY: Record<string, Omit<Card, 'id'>> = {
     HYPERBEAM: { name: '目からビーム', cost: 3, type: CardType.ATTACK, target: TargetType.ALL_ENEMIES, description: '全体26ダメージ。', damage: 26, rarity: 'RARE', textureRef: 'EYE|赤|ATTACK' },
     SUNDER: { name: 'ビリビリに破る', cost: 3, type: CardType.ATTACK, target: TargetType.ENEMY, description: '24ダメージ。たおせばE3回復。', damage: 24, fatalEnergy: 3, rarity: 'RARE', textureRef: 'FIST|赤|ATTACK' },
     DOOM_AND_GLOOM: { name: '日曜の夜', cost: 2, type: CardType.ATTACK, target: TargetType.ALL_ENEMIES, description: '全体10ダメージ。', damage: 10, rarity: 'RARE', textureRef: 'GHOST|黒|ATTACK' },
-    CORE_SURGE: { name: '夜ふかし', cost: 1, type: CardType.ATTACK, target: TargetType.ENEMY, description: '11ダメージ。キラキラ1を得る。', damage: 11, exhaust: true, applyPower: { id: 'ARTIFACT', amount: 1 }, rarity: 'RARE', textureRef: 'LIGHTNING|赤|ATTACK' },
+    CORE_SURGE: { name: '夜ふかし', cost: 1, type: CardType.ATTACK, target: TargetType.ENEMY, description: '11ダメージ。キラキラ1を得る。', damage: 11, applyPower: { id: 'ARTIFACT', amount: 1 }, rarity: 'RARE', textureRef: 'LIGHTNING|赤|ATTACK' },
     RAGNAROK: { name: '台風', cost: 3, type: CardType.ATTACK, target: TargetType.RANDOM_ENEMY, description: '5ダメージを5回与える。', damage: 5, playCopies: 4, rarity: 'RARE', textureRef: 'FLAME|赤|ATTACK' },
     LESSON_LEARNED: { name: '学習', cost: 1, type: CardType.ATTACK, target: TargetType.ENEMY, description: '10ダメージ。たおすと最大HPが恒久的に2増加する。廃棄。', damage: 10, fatalMaxHp: 2, exhaust: true, rarity: 'RARE', textureRef: 'NOTEBOOK|黄|ATTACK' },
     BRILLIANCE: { name: 'ひらめき', cost: 1, type: CardType.ATTACK, target: TargetType.ALL_ENEMIES, description: '12ダメージ。HP2回復。', damage: 12, heal: 2, rarity: 'RARE', textureRef: 'LIGHTNING|黄|ATTACK' },
@@ -601,7 +601,7 @@ export const CARDS_LIBRARY: Record<string, Omit<Card, 'id'>> = {
     CLOAK_AND_DAGGER: { name: '隠し芸', cost: 1, type: CardType.SKILL, target: TargetType.SELF, description: 'ブロック6。えんぴつの削りかす1枚得る。', block: 6, addCardToHand: { cardName: 'SHIV', count: 1, cost0: true }, rarity: 'COMMON', textureRef: 'SHIELD|灰|SKILL' },
     CALCULATED_GAMBLE: { name: '山勘', cost: 0, type: CardType.SKILL, target: TargetType.SELF, description: '手札を全て捨て、同じ枚数引く。', rarity: 'UNCOMMON', textureRef: 'NOTEBOOK|黄|SKILL' },
     CATALYST: { name: '化学反応', cost: 1, type: CardType.SKILL, target: TargetType.ENEMY, description: 'ドクドクを2倍にする。廃棄。', poisonMultiplier: 2, exhaust: true, rarity: 'UNCOMMON', textureRef: 'POTION|緑|SKILL' },
-    DISCOVERY: { name: '発見', cost: 1, type: CardType.SKILL, target: TargetType.SELF, description: 'ランダムなカード3枚を手札に加える。', exhaust: true, rarity: 'UNCOMMON', textureRef: 'NOTEBOOK|白|SKILL' },
+    DISCOVERY: { name: '発見', cost: 1, type: CardType.SKILL, target: TargetType.SELF, description: 'ランダムなカード3枚を手札に加える。', rarity: 'UNCOMMON', textureRef: 'NOTEBOOK|白|SKILL' },
     STRATEGIST: { name: 'カンニングペーパー', cost: 0, type: CardType.SKILL, target: TargetType.SELF, description: '使用不可。捨てられた時、次のターンにE2を得る。', unplayable: true, rarity: 'UNCOMMON', textureRef: 'NOTEBOOK|青|SKILL' },
     APOTHEOSIS: { name: '覚醒', cost: 2, type: CardType.SKILL, target: TargetType.SELF, description: 'この戦闘中、全カードを強化。廃棄。', upgradeDeck: true, exhaust: true, rarity: 'RARE', textureRef: 'FLAME|白|SKILL' },
     INFLAME: { name: 'やる気スイッチ', cost: 1, type: CardType.POWER, target: TargetType.SELF, description: 'ムキムキを2得る。', strength: 2, rarity: 'RARE', textureRef: 'FLAME|赤|POWER' },
@@ -1106,7 +1106,7 @@ export const VOUCHERS_LIBRARY: PokerVoucher[] = [
 export const UPDATED_CARDS: Record<string, Omit<Card, 'id'>> = {
     HOLOGRAM: { name: 'カンニング', cost: 1, type: CardType.SKILL, target: TargetType.SELF, description: '手札の攻撃カードを1枚コピーする。', promptsCopy: 1, rarity: 'UNCOMMON', textureRef: 'NOTEBOOK|青|SKILL' },
     BERSERK: { name: '逆ギレ', cost: 0, type: CardType.POWER, target: TargetType.SELF, description: '自分にびくびく2を与える。毎ターンエナジー1を得る。', applyPower: { id: 'BERSERK_POWER', amount: 1 }, vulnerable: 2, rarity: 'RARE', textureRef: 'FLAME|赤|POWER' },
-    DISCOVERY: { name: '発見', cost: 1, type: CardType.SKILL, target: TargetType.SELF, description: 'ランダムなカード3枚を手札に加える。', exhaust: true, rarity: 'UNCOMMON', textureRef: 'NOTEBOOK|白|SKILL' },
+    DISCOVERY: { name: '発見', cost: 1, type: CardType.SKILL, target: TargetType.SELF, description: 'ランダムなカード3枚を手札に加える。', rarity: 'UNCOMMON', textureRef: 'NOTEBOOK|白|SKILL' },
 };
 
 // Merge Update
