@@ -2,8 +2,20 @@
 @tailwind components;
 @tailwind utilities;
 
+@font-face {
+  font-family: 'DotGothic16';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/DotGothic16-Regular.ttf') format('truetype');
+}
+
+:root {
+  --pixel-font: 'DotGothic16', 'MS Gothic', monospace;
+}
+
 body {
-  font-family: 'DotGothic16', sans-serif;
+  font-family: var(--pixel-font);
   background-color: #202020;
   -webkit-user-select: none;
   -moz-user-select: none;
