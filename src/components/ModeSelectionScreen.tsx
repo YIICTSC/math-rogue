@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { AnswerMode, GameMode, LanguageMode } from '../types';
 import {
   Brain, Book, Languages, FlaskConical, Globe, MapPin,
@@ -36,6 +36,7 @@ interface SelectableUnitOption {
 }
 
 const UNIT_MASTERY_TARGET = 100;
+const UPPER_KANJI_SUB_MODE_IDS = new Set(['K10', 'K11', 'K12']);
 
 const KOKUGO_GRADE_UNITS: Record<number, MathUnitOption[]> = {
   1: [
@@ -480,9 +481,36 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
   const [selectedTerm, setSelectedTerm] = useState<number>(1);
   const [selectedMathGrade, setSelectedMathGrade] = useState<number>(1);
   const [selectedMathUnitIds, setSelectedMathUnitIds] = useState<string[]>([]);
+  const [showUpperProblems, setShowUpperProblems] = useState(false);
+  const displayedCategories = useMemo<SubjectCategoryConfig[]>(() => {
+    const kanjiCategory = SUBJECT_CATEGORIES.find((cat) => cat.id === 'KANJI');
+    if (showUpperProblems) {
+      return kanjiCategory
+        ? [{ ...kanjiCategory, subModes: kanjiCategory.subModes.filter((sub) => UPPER_KANJI_SUB_MODE_IDS.has(sub.id)) }]
+        : [];
+    }
+    return SUBJECT_CATEGORIES.map((cat) => (
+      cat.id === 'KANJI'
+        ? { ...cat, subModes: cat.subModes.filter((sub) => !UPPER_KANJI_SUB_MODE_IDS.has(sub.id)) }
+        : cat
+    ));
+  }, [showUpperProblems]);
+  const defaultDisplayedCategory = displayedCategories[0] || SUBJECT_CATEGORIES[0];
   const isUnitCategory = selectedCategory.id === 'MATH_GRADES' || selectedCategory.id === 'KOKUGO_GRADES' || selectedCategory.id === 'ENGLISH' || selectedCategory.id === 'LIFE' || selectedCategory.id === 'SCIENCE' || selectedCategory.id === 'SOCIAL' || selectedCategory.id === 'SUMMARY';
   const [answerMode, setAnswerMode] = useState<AnswerMode>('CHOICE');
   const canSelectAnswerMode = selectedCategory.id === 'MATH' || selectedCategory.id === 'KANJI' || selectedCategory.id === 'KANKEN' || selectedCategory.id === 'HARD_KANJI';
+
+  useEffect(() => {
+    const nextCategory = displayedCategories.find((cat) => cat.id === selectedCategory.id) || defaultDisplayedCategory;
+    if (nextCategory !== selectedCategory) {
+      setSelectedCategory(nextCategory);
+      setSelectedSubModeId(nextCategory.subModes[0]?.id || '');
+      return;
+    }
+    if (!nextCategory.subModes.some((sub) => sub.id === selectedSubModeId)) {
+      setSelectedSubModeId(nextCategory.subModes[0]?.id || '');
+    }
+  }, [defaultDisplayedCategory, displayedCategories, selectedCategory, selectedSubModeId]);
 
   const handleSelect = (mode: string, modePool?: string[]) => {
     audioService.playSound('select');
@@ -1007,13 +1035,31 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
     >
       <div className="absolute inset-0 bg-slate-950/65 pointer-events-none" />
       <div className="relative z-10 w-full max-w-6xl mx-auto flex flex-col flex-1 min-h-0 overflow-hidden">
+        <button
+          type="button"
+          onClick={() => {
+            setShowUpperProblems((prev) => !prev);
+            audioService.playSound('select');
+          }}
+          className={`absolute left-3 top-3 z-20 flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-[10px] font-black shadow-lg transition-colors sm:left-4 sm:top-4 sm:text-xs ${
+            showUpperProblems
+              ? 'border-yellow-300 bg-yellow-500 text-slate-950 hover:bg-yellow-400'
+              : 'border-cyan-300/60 bg-slate-900/85 text-cyan-100 hover:border-cyan-200 hover:bg-cyan-950'
+          }`}
+        >
+          <GraduationCap size={14} />
+          {showUpperProblems ? '通常問題へ' : '高校以上'}
+        </button>
         <div className="text-center border-b border-slate-800 p-4 shrink-0">
           <h2 className="text-2xl md:text-3xl font-bold text-yellow-400 tracking-widest">{trans('モード選択', languageMode)}</h2>
+          {showUpperProblems && (
+            <div className="mt-1 text-[10px] font-bold text-cyan-200">高校以上の問題</div>
+          )}
         </div>
 
         <div className="flex-grow grid grid-cols-1 lg:grid-cols-12 gap-4 p-4 overflow-hidden min-h-0">
           <div className="lg:col-span-2 grid grid-cols-3 sm:grid-cols-5 lg:flex lg:flex-col gap-1 lg:gap-1.5 pb-1 lg:pb-0 overflow-y-auto lg:overflow-x-visible custom-scrollbar shrink-0">
-            {SUBJECT_CATEGORIES.map((cat) => (
+            {displayedCategories.map((cat) => (
               <button
                 key={cat.id}
                 onClick={() => handleCategorySelect(cat)}
