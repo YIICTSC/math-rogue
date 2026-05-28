@@ -5,6 +5,7 @@ import { audioService } from '../services/audioService';
 import { AnswerMode, GameMode } from '../types';
 import { storageService } from '../services/storageService';
 import { resolveAnswerMode } from '../utils/answerMode';
+import RewardHintBanner from './RewardHintBanner';
 
 interface MathProblem {
   question: string;
@@ -12,7 +13,7 @@ interface MathProblem {
   answer: number;
 }
 
-const MathChallengeScreen: React.FC<MathChallengeScreenProps> = ({ onComplete, mode, answerMode = 'CHOICE', useSavedAnswerMode = false, debugSkip, isChallenge, streak = 0 }) => {
+const MathChallengeScreen: React.FC<MathChallengeScreenProps> = ({ onComplete, mode, answerMode = 'CHOICE', useSavedAnswerMode = false, debugSkip, isChallenge, streak = 0, rewardHint }) => {
   const resolvedAnswerMode = resolveAnswerMode(answerMode, useSavedAnswerMode);
   const [problems, setProblems] = useState<MathProblem[]>([]);
   const [currentProblemIndex, setCurrentProblemIndex] = useState(0);
@@ -217,6 +218,7 @@ const MathChallengeScreen: React.FC<MathChallengeScreenProps> = ({ onComplete, m
   return (
     <div className="flex flex-col h-full w-full bg-emerald-950 text-white relative items-center justify-center p-8 font-mono">
         <div className="absolute inset-0 texture-blackboard opacity-20 pointer-events-none"></div>
+        <RewardHintBanner text={rewardHint} />
         
         <div className="z-10 w-full max-w-md text-center">
             <div className="bg-black/40 border-4 border-white p-8 rounded-lg mb-8 shadow-2xl relative overflow-hidden flex items-center justify-center min-h-[160px]">
@@ -287,4 +289,5 @@ interface MathChallengeScreenProps {
   debugSkip?: boolean;
   isChallenge?: boolean;
   streak?: number;
+  rewardHint?: string;
 }
