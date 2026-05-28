@@ -11456,7 +11456,7 @@ const App: React.FC = () => {
 
                 {gameState.screen === GameScreen.COMPENDIUM && (
                     <div className="absolute inset-0">
-                        <CompendiumScreen unlockedCardNames={unlockedCardNames} onBack={returnToTitle} languageMode={languageMode} isDebug={isDebugHpOne} visualTheme={coopSyncedVisualTheme} />
+                        <CompendiumScreen unlockedCardNames={unlockedCardNames} onBack={returnToTitle} languageMode={languageMode} isDebug={isDebugHpOne} visualTheme={visualTheme} />
                     </div>
                 )}
 

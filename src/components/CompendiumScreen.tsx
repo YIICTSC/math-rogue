@@ -29,6 +29,7 @@ type CompendiumEnemy = {
     tier: 1 | 2 | 3;
     collectionKey: string;
     imagePath?: string;
+    schoolVariant?: 'elementary' | 'high-school';
 };
 
 const shuffleList = <T,>(items: T[]) => {
@@ -45,6 +46,7 @@ const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, 
     const [unlockedRelics, setUnlockedRelics] = useState<string[]>([]);
     const [unlockedPotions, setUnlockedPotions] = useState<string[]>([]);
     const [defeatedEnemies, setDefeatedEnemies] = useState<string[]>([]);
+    const [enemyListMode, setEnemyListMode] = useState<'ALL' | 'HIGH_SCHOOL'>('ALL');
 
     const [selectedItem, setSelectedItem] = useState<{
         type: 'CARD' | 'RELIC' | 'POTION' | 'ENEMY';
@@ -95,7 +97,7 @@ const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, 
     const allEnemies = useMemo<CompendiumEnemy[]>(() => {
         const baseEnemies = Object.values(ENEMY_LIBRARY)
             .sort((a, b) => a.tier - b.tier)
-            .map(enemy => ({ ...enemy, collectionKey: enemy.name }));
+            .map(enemy => ({ ...enemy, collectionKey: enemy.name, schoolVariant: 'elementary' as const }));
 
         if (visualTheme !== 'high-school') return baseEnemies;
 
@@ -106,6 +108,7 @@ const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, 
                 tier: (enemy.imageIndex >= 36 ? 3 : enemy.imageIndex >= 18 ? 2 : 1) as 1 | 2 | 3,
                 collectionKey: `high-school-enemy-${enemy.imageIndex}`,
                 imagePath: assetUrl(`sprites/high-school/enemies/${enemy.imageIndex}.png`),
+                schoolVariant: 'high-school',
             })),
             ...HIGH_SCHOOL_HUMANOID_ENEMY_VARIANTS.map(enemy => ({
                 name: enemy.name,
@@ -113,6 +116,7 @@ const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, 
                 tier: (enemy.imageIndex >= 35 ? 3 : enemy.imageIndex >= 15 ? 2 : 1) as 1 | 2 | 3,
                 collectionKey: `high-school-humanoid-enemy-${enemy.imageIndex}`,
                 imagePath: assetUrl(`sprites/high-school/humanoid-enemies/${enemy.imageIndex}.png`),
+                schoolVariant: 'high-school',
             })),
         ];
 
@@ -123,6 +127,12 @@ const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, 
         : visualTheme === 'high-school'
         ? getHighSchoolEnemyVariant({ name: enemy.name, enemyType: 'GENERIC', phase: undefined }).name
         : enemy.name;
+    const displayEnemies = useMemo(() => {
+        if (visualTheme === 'high-school' && enemyListMode === 'HIGH_SCHOOL') {
+            return allEnemies.filter(enemy => enemy.schoolVariant === 'high-school');
+        }
+        return allEnemies;
+    }, [allEnemies, enemyListMode, visualTheme]);
     const unlockedCardsForShowcase = useMemo(() => {
         const visibleNames = isDebug ? allCards.map(card => card.name) : unlockedCardNames;
         const uniqueNames = Array.from(new Set(visibleNames));
@@ -162,8 +172,8 @@ const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, 
     const unlockedPotionsCount = isDebug ? totalPotions : unlockedPotions.length;
     const potionsPercentage = Math.floor((unlockedPotionsCount / totalPotions) * 100);
 
-    const totalEnemies = allEnemies.length;
-    const defeatedEnemiesCount = defeatedEnemySet.size;
+    const totalEnemies = displayEnemies.length;
+    const defeatedEnemiesCount = displayEnemies.filter(enemy => defeatedEnemySet.has(enemy.collectionKey) || defeatedEnemySet.has(enemy.name)).length;
     const enemiesPercentage = Math.floor((defeatedEnemiesCount / totalEnemies) * 100);
 
     const handleItemClick = (type: 'CARD' | 'RELIC' | 'POTION' | 'ENEMY', data: any, unlocked: boolean) => {
@@ -312,8 +322,28 @@ const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, 
                 )}
 
                 {activeTab === 'ENEMIES' && (
+                    <>
+                    {visualTheme === 'high-school' && (
+                        <div className="mb-4 flex flex-wrap items-center gap-2">
+                            <button
+                                onClick={() => setEnemyListMode('ALL')}
+                                className={`px-3 py-1.5 rounded text-xs font-bold border ${enemyListMode === 'ALL' ? 'bg-amber-600 border-amber-300 text-white' : 'bg-black/50 border-gray-700 text-gray-300'}`}
+                            >
+                                すべて
+                            </button>
+                            <button
+                                onClick={() => setEnemyListMode('HIGH_SCHOOL')}
+                                className={`px-3 py-1.5 rounded text-xs font-bold border ${enemyListMode === 'HIGH_SCHOOL' ? 'bg-red-700 border-red-300 text-white' : 'bg-black/50 border-gray-700 text-gray-300'}`}
+                            >
+                                高校編の敵一覧
+                            </button>
+                            <span className="text-xs text-gray-300">
+                                高校編専用: {HIGH_SCHOOL_ENEMY_VARIANTS.length + HIGH_SCHOOL_HUMANOID_ENEMY_VARIANTS.length}体
+                            </span>
+                        </div>
+                    )}
                     <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-4">
-                        {allEnemies.map((enemy, idx) => {
+                        {displayEnemies.map((enemy, idx) => {
                             const isUnlocked = defeatedEnemySet.has(enemy.collectionKey) || defeatedEnemySet.has(enemy.name);
                             return (
                                 <div
@@ -337,6 +367,7 @@ const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, 
                             );
                         })}
                     </div>
+                    </>
                 )}
             </div>
 
