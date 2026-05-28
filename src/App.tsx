@@ -4084,14 +4084,19 @@ const App: React.FC = () => {
 
         if (char.id === 'ASSASSIN') {
             const warrior = themedCharacters.find(c => c.id === 'WARRIOR');
+            const isHighSchoolTheme = visualTheme === 'high-school';
+            const partnerName = warrior?.name ?? (isHighSchoolTheme ? '反逆の高校生' : 'わんぱく小学生');
 
             const specialEvent = {
-                title: "放課後の勧誘",
-                description: "新しい学校、知らないクラスメート...。\n不安な気持ちで校庭の隅に立っていると、赤い帽子の少年が走ってきた。\n\n「よう！ お前、転校生だろ？\n俺と組んで『伝説の小学生』を目指さないか？」\n\n強引だが、悪い気はしない。彼の目は冒険への期待で輝いている。",
+                title: isHighSchoolTheme ? "夕暮れの共闘宣言" : "放課後の勧誘",
+                description: isHighSchoolTheme
+                    ? "転入初日の放課後。昇降口を出るころには、校舎も空も赤く染まっていた。\n\n靴箱の前で足を止めると、黒い制服の少年が校門にもたれて笑う。\n\n「謎めく転入生、って噂になってるぜ。\n一人で目立つより、俺と組んだ方が面白い。どうだ？」\n\n差し出された手は乱暴そうで、けれどまっすぐだった。この学校での最初の味方になるかもしれない。"
+                    : "新しい学校、知らないクラスメート...。\n不安な気持ちで校庭の隅に立っていると、赤い帽子の少年が走ってきた。\n\n「よう！ お前、転校生だろ？\n俺と組んで『伝説の小学生』を目指さないか？」\n\n強引だが、悪い気はしない。彼の目は冒険への期待で輝いている。",
+                imageKey: isHighSchoolTheme ? 'high-school-event-54' : undefined,
                 options: [
                     {
-                        label: "手を取る",
-                        text: "わんぱく小学生と友達になる",
+                        label: isHighSchoolTheme ? "握手する" : "手を取る",
+                        text: isHighSchoolTheme ? `${partnerName}と組む` : `${partnerName}と友達になる`,
                         action: () => {
                             const newPartner = warrior ? {
                                 id: 'WARRIOR',
@@ -4123,7 +4128,7 @@ const App: React.FC = () => {
                                 screen: GameScreen.RELIC_SELECTION,
                                 player: { ...prev.player, partner: newPartner },
                                 narrativeLog: [
-                                    trans("わんぱく小学生がパートナーになった！", languageMode),
+                                    trans(`${partnerName}がパートナーになった！`, languageMode),
                                     trans("【TIPS】種類が同じカードを2枚選ぶと『友情コンボ』が発動します！", languageMode)
                                 ]
                             }));
