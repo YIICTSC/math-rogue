@@ -68,6 +68,38 @@ export const HIGH_SCHOOL_ENEMY_VARIANTS = [
   { name: '黒板鳥', imageIndex: 15 },
   { name: '居残りの影', imageIndex: 16 },
   { name: '終業ベルの番人', imageIndex: 17 },
+  { name: '答案紙の魔人', imageIndex: 18 },
+  { name: 'スマホ依存の影', imageIndex: 19 },
+  { name: 'ロッカーの亡霊', imageIndex: 20 },
+  { name: '購買パンの怪物', imageIndex: 21 },
+  { name: 'チョーク粉の雲', imageIndex: 22 },
+  { name: '内申点の秤', imageIndex: 23 },
+  { name: '黒板消しゴーレム', imageIndex: 24 },
+  { name: '模試時計の悪霊', imageIndex: 25 },
+  { name: '進路プリントの渦', imageIndex: 26 },
+  { name: '赤ペンの槍兵', imageIndex: 27 },
+  { name: '実験フラスコ怪', imageIndex: 28 },
+  { name: '体育倉庫のマット', imageIndex: 29 },
+  { name: '弁当箱ミミック', imageIndex: 30 },
+  { name: '補習ベルの亡霊', imageIndex: 31 },
+  { name: 'コピー機の怨念', imageIndex: 32 },
+  { name: '掲示板ピンの群れ', imageIndex: 33 },
+  { name: '雨傘の影武者', imageIndex: 34 },
+  { name: '成績表スライム', imageIndex: 35 },
+  { name: '体育館ライトの怪', imageIndex: 36 },
+  { name: '化学薬品の泡', imageIndex: 37 },
+  { name: '古い参考書の壁', imageIndex: 38 },
+  { name: '部室のラジカセ', imageIndex: 39 },
+  { name: '階段踊り場の影', imageIndex: 40 },
+  { name: '卒業証書の亡霊', imageIndex: 41 },
+  { name: '昼休みチャイム獣', imageIndex: 42 },
+  { name: '校則ファイルの魔物', imageIndex: 43 },
+  { name: 'USBメモリの怪', imageIndex: 44 },
+  { name: 'ロボ掃除機の反乱', imageIndex: 45 },
+  { name: '欠席届の怨霊', imageIndex: 46 },
+  { name: '文化祭看板の魔物', imageIndex: 47 },
+  { name: '試験監視カメラ', imageIndex: 48 },
+  { name: '放課後ノイズ', imageIndex: 49 },
 ] as const;
 
 const HIGH_SCHOOL_HUMANOID_ENEMY_VARIANTS = [
@@ -86,6 +118,26 @@ const HIGH_SCHOOL_HUMANOID_ENEMY_VARIANTS = [
   { name: '黒翼の番長', imageIndex: 12 },
   { name: '卒業審査の理事', imageIndex: 13 },
   { name: '進路指導室の総裁', imageIndex: 14 },
+  { name: '新米風紀委員', imageIndex: 15 },
+  { name: '竹刀の体育係', imageIndex: 16 },
+  { name: '赤ペン監督生', imageIndex: 17 },
+  { name: '図書委員の番人', imageIndex: 18 },
+  { name: '購買部の用心棒', imageIndex: 19 },
+  { name: '軽音部の刺客', imageIndex: 20 },
+  { name: 'バスケ部の壁', imageIndex: 21 },
+  { name: '化学部の実験兵', imageIndex: 22 },
+  { name: '新聞部の追跡者', imageIndex: 23 },
+  { name: '生徒会の斥候', imageIndex: 24 },
+  { name: '剣道場の門番', imageIndex: 25 },
+  { name: '応援団の番長', imageIndex: 26 },
+  { name: '保健委員の執行者', imageIndex: 27 },
+  { name: '美術部の幻術師', imageIndex: 28 },
+  { name: '吹奏楽部の号令手', imageIndex: 29 },
+  { name: '放送部の支配者', imageIndex: 30 },
+  { name: '進路指導の補佐', imageIndex: 31 },
+  { name: '数学研究会の刺客', imageIndex: 32 },
+  { name: '白手袋の監察員', imageIndex: 33 },
+  { name: '文化祭実行委員', imageIndex: 34 },
 ] as const;
 
 const getStableIndex = (text: string, size: number) => {
@@ -112,13 +164,16 @@ export const getHighSchoolHumanoidEnemyVariant = (enemy: Pick<Enemy, 'name' | 'e
       : HIGH_SCHOOL_HUMANOID_ENEMY_VARIANTS[13];
   }
   if (enemy.enemyType === 'GUARDIAN') {
-    return HIGH_SCHOOL_HUMANOID_ENEMY_VARIANTS[10 + getStableIndex(enemy.name, 3)];
+    return HIGH_SCHOOL_HUMANOID_ENEMY_VARIANTS[20 + getStableIndex(enemy.name, 10)];
   }
   if (enemy.enemyType === 'ELITE_FORCE') {
-    return HIGH_SCHOOL_HUMANOID_ENEMY_VARIANTS[5 + getStableIndex(enemy.name, 5)];
+    return HIGH_SCHOOL_HUMANOID_ENEMY_VARIANTS[5 + getStableIndex(enemy.name, 15)];
   }
   if (enemy.enemyType === 'TEACHER') {
-    return HIGH_SCHOOL_HUMANOID_ENEMY_VARIANTS[getStableIndex(enemy.name, 5)];
+    return HIGH_SCHOOL_HUMANOID_ENEMY_VARIANTS[getStableIndex(enemy.name, 15)];
+  }
+  if (enemy.enemyType === 'GENERIC' && getStableIndex(enemy.name, 3) === 0) {
+    return HIGH_SCHOOL_HUMANOID_ENEMY_VARIANTS[15 + getStableIndex(enemy.name, 20)];
   }
   return null;
 };
