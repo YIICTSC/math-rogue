@@ -1,12 +1,15 @@
 ﻿import React, { useState, useEffect, useRef } from 'react';
-import { Player, Card as ICard, CardType, TargetType, LanguageMode, VSRecord, VisualEffectInstance } from '../types';
+import { Player, Card as ICard, CardType, TargetType, LanguageMode, VSRecord, VisualEffectInstance, AttackEffectKey } from '../types';
 import Card from './Card';
+import AttackEffectSprite from './AttackEffectSprite';
+import StatusEffectSprite from './StatusEffectSprite';
 import { trans } from '../utils/textUtils';
 import { audioService } from '../services/audioService';
 import { storageService } from '../services/storageService';
 import { p2pService, P2PEvent } from '../services/p2pService';
 import { CHARACTERS, CARDS_LIBRARY } from '../constants';
 import { getUpgradedCard } from '../utils/cardUtils';
+import { getStatusEffectKeyForVfx } from '../data/statusEffects';
 import { Heart, Shield, Zap, Swords, Trophy, Skull, Home, AlertCircle, TrendingDown, Droplets, Sword, Hexagon, Radiation, Activity, ShieldPlus, Flame, Wifi, WifiOff, Layers, X, Sparkles } from 'lucide-react';
 
 interface P2PVSBattleSceneProps {
@@ -35,88 +38,53 @@ interface SelectionState {
 const VFXOverlay: React.FC<{ effects: VisualEffectInstance[], targetId: string }> = ({ effects, targetId }) => {
     const activeOnThisTarget = effects.filter(e => e.targetId === targetId);
     if (activeOnThisTarget.length === 0) return null;
+    const getAttackEffectKeyForVfx = (vfx: VisualEffectInstance): AttackEffectKey | null => {
+        if (vfx.type === 'ATTACK_SPRITE') return vfx.attackEffectKey || 'slash';
+        if (vfx.type === 'SLASH') return 'slash';
+        if (vfx.type === 'FIRE') return 'fire';
+        if (vfx.type === 'EXPLOSION') return 'explosion';
+        if (vfx.type === 'LIGHTNING') return 'lightning';
+        if (vfx.type === 'CRITICAL') return 'critical';
+        if (vfx.type === 'SHOCKWAVE') return 'shockwave';
+        if (vfx.type === 'FLASH') return 'flash';
+        return null;
+    };
 
     return (
         <div className="absolute inset-0 z-40 flex items-center justify-center pointer-events-none overflow-visible">
             {activeOnThisTarget.map(vfx => (
                 <div key={vfx.id} className="absolute inset-0 flex items-center justify-center">
-                    {vfx.type === 'SLASH' && (
+                    {getAttackEffectKeyForVfx(vfx) && (
                         <div
-                            className="w-40 md:w-48 h-2 bg-gradient-to-r from-transparent via-white to-transparent animate-slash-vfx shadow-[0_0_20px_rgba(255,255,255,0.8)]"
+                            className="animate-attack-sprite-vfx drop-shadow-[0_0_18px_rgba(255,255,255,0.45)]"
                             style={{
-                                transform: `rotate(${vfx.rotation !== undefined ? vfx.rotation : 45}deg)`,
                                 animationDelay: `${vfx.delay || 0}ms`,
-                                animationFillMode: 'both'
+                                animationFillMode: 'both',
+                                transform: `rotate(${vfx.rotation || 0}deg)`,
                             }}
-                        ></div>
+                        >
+                            <AttackEffectSprite effectKey={getAttackEffectKeyForVfx(vfx)!} size={168} fixedFrame={vfx.attackEffectFrame} />
+                        </div>
                     )}
                     {vfx.type === 'BLOCK' && (
-                        <div
-                            className="relative flex items-center justify-center"
-                            style={{ animationDelay: `${vfx.delay || 0}ms`, animationFillMode: 'both' }}
-                        >
-                            <div className="absolute w-24 md:w-32 h-24 md:h-32 border-4 border-blue-400 rounded-full animate-pulse-expand opacity-0"></div>
-                            <div className="animate-block-vfx p-3 md:p-4 bg-blue-500/30 border-2 border-blue-300 rounded-lg shadow-[0_0_20px_rgba(59,130,246,0.6)]">
-                                <Shield size={40} className="text-blue-100 fill-blue-500/50" />
-                            </div>
+                        <div className="animate-status-sprite-vfx drop-shadow-[0_0_18px_rgba(125,211,252,0.5)]" style={{ animationDelay: `${vfx.delay || 0}ms`, animationFillMode: 'both' }}>
+                            <StatusEffectSprite effectKey={vfx.statusEffectKey || 'block'} size={160} />
                         </div>
                     )}
                     {vfx.type === 'BUFF' && (
-                        <div className="animate-buff-vfx p-2" style={{ animationDelay: `${vfx.delay || 0}ms`, animationFillMode: 'both' }}>
-                            <Sparkles size={48} className="text-yellow-400 drop-shadow-[0_0_15px_rgba(250,204,21,0.8)]" />
+                        <div className="animate-status-sprite-vfx drop-shadow-[0_0_18px_rgba(250,204,21,0.5)]" style={{ animationDelay: `${vfx.delay || 0}ms`, animationFillMode: 'both' }}>
+                            <StatusEffectSprite effectKey={vfx.statusEffectKey || 'buff'} size={160} />
                         </div>
                     )}
                     {vfx.type === 'DEBUFF' && (
-                        <div className="animate-debuff-vfx p-2" style={{ animationDelay: `${vfx.delay || 0}ms`, animationFillMode: 'both' }}>
-                            <Skull size={48} className="text-purple-400 drop-shadow-[0_0_15px_rgba(168,85,247,0.8)]" />
+                        <div className="animate-status-sprite-vfx drop-shadow-[0_0_18px_rgba(168,85,247,0.5)]" style={{ animationDelay: `${vfx.delay || 0}ms`, animationFillMode: 'both' }}>
+                            <StatusEffectSprite effectKey={vfx.statusEffectKey || getStatusEffectKeyForVfx(vfx.type)} size={160} />
                         </div>
                     )}
                     {vfx.type === 'HEAL' && (
-                        <div className="animate-heal-vfx" style={{ animationDelay: `${vfx.delay || 0}ms`, animationFillMode: 'both' }}>
-                            <Heart size={48} className="text-green-300 fill-green-500/50 drop-shadow-[0_0_15px_rgba(34,197,94,0.8)]" />
+                        <div className="animate-status-sprite-vfx drop-shadow-[0_0_18px_rgba(74,222,128,0.5)]" style={{ animationDelay: `${vfx.delay || 0}ms`, animationFillMode: 'both' }}>
+                            <StatusEffectSprite effectKey={vfx.statusEffectKey || 'heal'} size={160} />
                         </div>
-                    )}
-                    {vfx.type === 'FIRE' && (
-                        <div className="relative flex items-center justify-center" style={{ animationDelay: `${vfx.delay || 0}ms`, animationFillMode: 'both' }}>
-                            <div className="absolute w-20 h-20 bg-orange-500/40 blur-xl animate-ping rounded-full"></div>
-                            <div className="animate-fire-vfx">
-                                <Flame size={56} className="text-orange-400 fill-orange-600/50 drop-shadow-[0_0_20px_rgba(249,115,22,0.8)]" />
-                            </div>
-                        </div>
-                    )}
-                    {vfx.type === 'EXPLOSION' && (
-                        <div
-                            className="w-24 h-24 md:w-32 md:h-32 bg-orange-500 rounded-full animate-explosion-vfx shadow-[0_0_40px_orange]"
-                            style={{ animationDelay: `${vfx.delay || 0}ms`, animationFillMode: 'both' }}
-                        ></div>
-                    )}
-                    {vfx.type === 'LIGHTNING' && (
-                        <div
-                            className="w-3 md:w-4 h-48 md:h-64 bg-cyan-200 animate-lightning-vfx shadow-[0_0_30px_cyan]"
-                            style={{
-                                animationDelay: `${vfx.delay || 0}ms`,
-                                transform: `rotate(${vfx.rotation || 0}deg)`,
-                                animationFillMode: 'both'
-                            }}
-                        ></div>
-                    )}
-                    {vfx.type === 'CRITICAL' && (
-                        <div
-                            className="w-40 h-40 md:w-64 md:h-64 border-8 border-yellow-400 rounded-full animate-critical-vfx"
-                            style={{ animationDelay: `${vfx.delay || 0}ms`, animationFillMode: 'both' }}
-                        ></div>
-                    )}
-                    {vfx.type === 'SHOCKWAVE' && (
-                        <div
-                            className="w-12 h-12 md:w-16 md:h-16 border-4 border-white/50 rounded-full animate-shockwave-vfx"
-                            style={{ animationDelay: `${vfx.delay || 0}ms`, animationFillMode: 'both' }}
-                        ></div>
-                    )}
-                    {vfx.type === 'FLASH' && (
-                        <div
-                            className="absolute w-[200vw] h-[200vh] bg-white animate-flash-vfx"
-                            style={{ animationDelay: `${vfx.delay || 0}ms`, animationFillMode: 'both' }}
-                        ></div>
                     )}
                 </div>
             ))}
@@ -126,6 +94,18 @@ const VFXOverlay: React.FC<{ effects: VisualEffectInstance[], targetId: string }
                         0% { transform: rotate(45deg) scaleX(0) translateX(-100%); opacity: 0; }
                         20% { transform: rotate(45deg) scaleX(1.8) translateX(0); opacity: 1; }
                         100% { transform: rotate(45deg) scaleX(2.5) translateX(100%); opacity: 0; }
+                    }
+                    @keyframes attack-sprite-vfx {
+                        0% { transform: scale(0.55); opacity: 0; filter: brightness(1.6); }
+                        12% { transform: scale(1.08); opacity: 1; filter: brightness(1.25); }
+                        65% { transform: scale(1.18); opacity: 1; filter: brightness(1); }
+                        100% { transform: scale(1.38); opacity: 0; filter: brightness(0.8); }
+                    }
+                    .animate-attack-sprite-vfx {
+                        animation: attack-sprite-vfx 420ms ease-out forwards;
+                    }
+                    .animate-status-sprite-vfx {
+                        animation: attack-sprite-vfx 520ms ease-out forwards;
                     }
                     @keyframes block-vfx {
                         0% { transform: scale(0.4); opacity: 0; }

@@ -1199,6 +1199,9 @@ class AudioService {
           wind: () => this.playSound('buff'),
           plant: () => this.playSound('buff'),
           graduation: () => this.playSound('finisher_explosion'),
+          explosion: () => this.playSound('explosion'),
+          critical: () => this.playSound('finisher_slash'),
+          flash: () => this.playSound('buff'),
       };
       this.init();
       if (!this.ctx || !this.sfxGain || this.isMuted) return;

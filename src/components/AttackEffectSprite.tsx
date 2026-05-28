@@ -46,7 +46,13 @@ const AttackEffectSprite: React.FC<AttackEffectSpriteProps> = ({
         return () => window.clearInterval(timer);
     }, [definition.frameMs, definition.frames, effectKey, fixedFrame, loop, paused, playToken]);
 
-    const shouldUseFittedStrip = effectKey === 'multihit' || effectKey === 'wind' || effectKey === 'plant' || effectKey === 'graduation';
+    const shouldUseFittedStrip = effectKey === 'multihit'
+        || effectKey === 'wind'
+        || effectKey === 'plant'
+        || effectKey === 'graduation'
+        || effectKey === 'explosion'
+        || effectKey === 'critical'
+        || effectKey === 'flash';
     // Legacy attack strips still use a slight zoom to hide old edge bleed. Newly recut strips are already fitted.
     const zoom = shouldUseFittedStrip ? 1 : 1.3;
     const bgWidth = size * ATTACK_EFFECT_COLUMNS * zoom;

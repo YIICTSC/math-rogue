@@ -753,7 +753,7 @@ export interface ParryState {
   result?: 'perfect' | 'good' | 'miss';
 }
 
-export type AttackEffectKey = 'slash' | 'impact' | 'projectile' | 'fire' | 'lightning' | 'poison' | 'shockwave' | 'multihit' | 'drain' | 'finisher' | 'laser' | 'soundwave' | 'wind' | 'plant' | 'graduation';
+export type AttackEffectKey = 'slash' | 'impact' | 'projectile' | 'fire' | 'lightning' | 'poison' | 'shockwave' | 'multihit' | 'drain' | 'finisher' | 'laser' | 'soundwave' | 'wind' | 'plant' | 'graduation' | 'explosion' | 'critical' | 'flash';
 export type StatusEffectKey = 'block' | 'heal' | 'buff' | 'strength' | 'debuff' | 'weak' | 'vulnerable' | 'poison';
 
 export type VFXType = 'SLASH' | 'BLOCK' | 'BUFF' | 'DEBUFF' | 'HEAL' | 'FIRE' | 'EXPLOSION' | 'LIGHTNING' | 'CRITICAL' | 'SHOCKWAVE' | 'FLASH' | 'ATTACK_SPRITE';

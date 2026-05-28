@@ -1,5 +1,5 @@
 
-import { Enemy, Player, Card as ICard, CardType, SelectionState, Potion, FloatingText, EnemyIntentType, LanguageMode, ParryState, VisualEffectInstance, CoopSupportCard } from '../types';
+import { Enemy, Player, Card as ICard, CardType, SelectionState, Potion, FloatingText, EnemyIntentType, LanguageMode, ParryState, VisualEffectInstance, CoopSupportCard, AttackEffectKey } from '../types';
 import Card, { KEYWORD_DEFINITIONS } from './Card';
 import { Heart, Shield, Zap, Skull, Layers, X, Sword, AlertCircle, TrendingDown, Droplets, Hexagon, Gem, FlaskConical, Info, FileText, MoreHorizontal, Users, Sparkles, MessageCircle, Mic, ArrowRight, MousePointer2, ChevronsRight, ChevronDown, Flame, RotateCcw, Triangle, Settings } from 'lucide-react';
 import PixelSprite from './PixelSprite';
@@ -131,6 +131,17 @@ export const VFXOverlay: React.FC<{ effects: VisualEffectInstance[], targetId: s
         return 'border-white/50';
     };
     const hasMultihitSequence = activeOnThisTarget.some(effect => effect.type === 'ATTACK_SPRITE' && effect.attackEffectKey === 'multihit');
+    const getAttackEffectKeyForVfx = (vfx: VisualEffectInstance): AttackEffectKey | null => {
+        if (vfx.type === 'ATTACK_SPRITE') return vfx.attackEffectKey || 'slash';
+        if (vfx.type === 'SLASH') return 'slash';
+        if (vfx.type === 'FIRE') return 'fire';
+        if (vfx.type === 'EXPLOSION') return 'explosion';
+        if (vfx.type === 'LIGHTNING') return 'lightning';
+        if (vfx.type === 'CRITICAL') return 'critical';
+        if (vfx.type === 'SHOCKWAVE') return 'shockwave';
+        if (vfx.type === 'FLASH') return 'flash';
+        return null;
+    };
     const MAX_SIMULTANEOUS_VFX = hasMultihitSequence ? 40 : 6;
     const prioritizedEffects = [...activeOnThisTarget]
         .sort((a, b) => {
@@ -160,17 +171,7 @@ export const VFXOverlay: React.FC<{ effects: VisualEffectInstance[], targetId: s
                                 }}
                             ></div>
                         )}
-                        {vfx.type === 'SLASH' && (
-                            <div
-                                className="w-48 h-2 bg-gradient-to-r from-transparent via-white to-transparent animate-slash-vfx shadow-[0_0_20px_rgba(255,255,255,0.8)]"
-                                style={{
-                                    transform: `rotate(${vfx.rotation !== undefined ? vfx.rotation : 45}deg)`,
-                                    animationDelay: `${totalDelay}ms`,
-                                    animationFillMode: 'both'
-                                }}
-                            ></div>
-                        )}
-                        {vfx.type === 'ATTACK_SPRITE' && (
+                        {getAttackEffectKeyForVfx(vfx) && (
                             <div
                                 className="animate-attack-sprite-vfx drop-shadow-[0_0_18px_rgba(255,255,255,0.45)]"
                                 style={{
@@ -179,7 +180,7 @@ export const VFXOverlay: React.FC<{ effects: VisualEffectInstance[], targetId: s
                                     transform: `rotate(${vfx.rotation || 0}deg)`
                                 }}
                             >
-                                <AttackEffectSprite effectKey={vfx.attackEffectKey || 'slash'} size={176} fixedFrame={vfx.attackEffectFrame} />
+                                <AttackEffectSprite effectKey={getAttackEffectKeyForVfx(vfx)!} size={176} fixedFrame={vfx.attackEffectFrame} />
                             </div>
                         )}
                         {vfx.type === 'BLOCK' && (
@@ -204,48 +205,6 @@ export const VFXOverlay: React.FC<{ effects: VisualEffectInstance[], targetId: s
                             <div className="animate-status-sprite-vfx drop-shadow-[0_0_18px_rgba(74,222,128,0.5)]" style={{ animationDelay: `${totalDelay}ms`, animationFillMode: 'both' }}>
                                 <StatusEffectSprite effectKey={vfx.statusEffectKey || 'heal'} size={168} />
                             </div>
-                        )}
-                        {vfx.type === 'FIRE' && (
-                            <div className="relative flex items-center justify-center" style={{ animationDelay: `${totalDelay}ms`, animationFillMode: 'both' }}>
-                                <div className="absolute w-24 h-24 bg-orange-500/40 blur-xl animate-ping rounded-full"></div>
-                                <div className="animate-fire-vfx">
-                                    <Flame size={64} className="text-orange-400 fill-orange-600/50 drop-shadow-[0_0_20px_rgba(249,115,22,0.8)]" />
-                                </div>
-                            </div>
-                        )}
-                        {vfx.type === 'EXPLOSION' && (
-                            <div
-                                className="w-32 h-32 bg-orange-500 rounded-full animate-explosion-vfx shadow-[0_0_40px_orange]"
-                                style={{ animationDelay: `${totalDelay}ms`, animationFillMode: 'both' }}
-                            ></div>
-                        )}
-                        {vfx.type === 'LIGHTNING' && (
-                            <div
-                                className="w-4 h-64 bg-cyan-200 animate-lightning-vfx shadow-[0_0_30px_cyan]"
-                                style={{
-                                    animationDelay: `${totalDelay}ms`,
-                                    transform: `rotate(${vfx.rotation || 0}deg)`,
-                                    animationFillMode: 'both'
-                                }}
-                            ></div>
-                        )}
-                        {vfx.type === 'CRITICAL' && (
-                            <div
-                                className="w-64 h-64 border-8 border-yellow-400 rounded-full animate-critical-vfx"
-                                style={{ animationDelay: `${totalDelay}ms`, animationFillMode: 'both' }}
-                            ></div>
-                        )}
-                        {vfx.type === 'SHOCKWAVE' && (
-                            <div
-                                className="w-16 h-16 border-4 border-white/50 rounded-full animate-shockwave-vfx"
-                                style={{ animationDelay: `${totalDelay}ms`, animationFillMode: 'both' }}
-                            ></div>
-                        )}
-                        {vfx.type === 'FLASH' && (
-                            <div
-                                className="absolute w-[200vw] h-[200vh] bg-white animate-flash-vfx"
-                                style={{ animationDelay: `${totalDelay}ms`, animationFillMode: 'both' }}
-                            ></div>
                         )}
                     </div>
                 )

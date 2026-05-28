@@ -26,6 +26,9 @@ export const ATTACK_EFFECTS: Record<AttackEffectKey, AttackEffectDefinition> = {
     wind: { key: 'wind', label: '風/掃除', row: 12, frames: 4, frameMs: 80 },
     plant: { key: 'plant', label: '植物', row: 13, frames: 4, frameMs: 85 },
     graduation: { key: 'graduation', label: '卒業/伝説', row: 14, frames: 4, frameMs: 85 },
+    explosion: { key: 'explosion', label: '爆発', row: 15, frames: 4, frameMs: 80 },
+    critical: { key: 'critical', label: '会心', row: 16, frames: 4, frameMs: 70 },
+    flash: { key: 'flash', label: '閃光', row: 17, frames: 4, frameMs: 65 },
 };
 
 export const ATTACK_EFFECT_LIST = Object.values(ATTACK_EFFECTS);
