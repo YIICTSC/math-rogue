@@ -12,6 +12,7 @@ interface MiniGameProblemChallengeProps {
   onComplete: (correctCount: number) => void;
   isChallenge?: boolean;
   streak?: number;
+  rewardHint?: string;
 }
 
 const MiniGameProblemChallenge: React.FC<MiniGameProblemChallengeProps> = ({
@@ -20,15 +21,16 @@ const MiniGameProblemChallenge: React.FC<MiniGameProblemChallengeProps> = ({
   onComplete,
   isChallenge = false,
   streak = 0,
+  rewardHint,
 }) => {
   const challengeScreen = getChallengeScreenForMode(mode);
 
   if (challengeScreen === GameScreen.KANJI_CHALLENGE) {
-    return <KanjiChallengeScreen mode={mode} onComplete={onComplete} isChallenge={isChallenge} streak={streak} />;
+    return <KanjiChallengeScreen mode={mode} onComplete={onComplete} isChallenge={isChallenge} streak={streak} rewardHint={rewardHint} />;
   }
 
   if (challengeScreen === GameScreen.ENGLISH_CHALLENGE) {
-    return <EnglishChallengeScreen mode={mode} onComplete={onComplete} isChallenge={isChallenge} streak={streak} />;
+    return <EnglishChallengeScreen mode={mode} onComplete={onComplete} isChallenge={isChallenge} streak={streak} rewardHint={rewardHint} />;
   }
 
   if (challengeScreen === GameScreen.GENERAL_CHALLENGE) {
@@ -39,11 +41,12 @@ const MiniGameProblemChallenge: React.FC<MiniGameProblemChallengeProps> = ({
         onComplete={onComplete}
         isChallenge={isChallenge}
         streak={streak}
+        rewardHint={rewardHint}
       />
     );
   }
 
-  return <MathChallengeScreen mode={mode} onComplete={onComplete} isChallenge={isChallenge} streak={streak} />;
+  return <MathChallengeScreen mode={mode} onComplete={onComplete} isChallenge={isChallenge} streak={streak} rewardHint={rewardHint} />;
 };
 
 export default MiniGameProblemChallenge;

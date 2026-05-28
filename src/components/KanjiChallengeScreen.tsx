@@ -5,6 +5,7 @@ import { AnswerMode, GameMode } from '../types';
 import { storageService } from '../services/storageService';
 import { HARD_KANJI_DATA, KANJI_DATA, KANKEN_DATA, KanjiProblem } from '../data/kanjiData';
 import { resolveAnswerMode } from '../utils/answerMode';
+import RewardHintBanner from './RewardHintBanner';
 
 interface KanjiChallengeScreenProps {
   onComplete: (correctCount: number) => void;
@@ -14,13 +15,14 @@ interface KanjiChallengeScreenProps {
   debugSkip?: boolean;
   isChallenge?: boolean;
   streak?: number;
+  rewardHint?: string;
 }
 
 interface ExtendedKanjiProblem extends KanjiProblem {
   actualCorrectAnswer: string;
 }
 
-const KanjiChallengeScreen: React.FC<KanjiChallengeScreenProps> = ({ onComplete, mode, answerMode = 'CHOICE', useSavedAnswerMode = false, debugSkip, isChallenge, streak = 0 }) => {
+const KanjiChallengeScreen: React.FC<KanjiChallengeScreenProps> = ({ onComplete, mode, answerMode = 'CHOICE', useSavedAnswerMode = false, debugSkip, isChallenge, streak = 0, rewardHint }) => {
   const resolvedAnswerMode = resolveAnswerMode(answerMode, useSavedAnswerMode);
   const [problems, setProblems] = useState<ExtendedKanjiProblem[]>([]);
   const [currentProblemIndex, setCurrentProblemIndex] = useState(0);
@@ -167,6 +169,7 @@ const KanjiChallengeScreen: React.FC<KanjiChallengeScreenProps> = ({ onComplete,
   return (
     <div className="flex flex-col h-full w-full bg-cyan-950 text-white relative items-center justify-center p-8 font-mono">
         <div className="absolute inset-0 texture-dark-matter opacity-20 pointer-events-none"></div>
+        <RewardHintBanner text={rewardHint} />
         
         <div className="z-10 w-full max-w-md text-center">
             <div className="bg-black/40 border-4 border-white p-8 rounded-lg mb-8 shadow-2xl relative overflow-hidden flex flex-col items-center justify-center min-h-[260px]">

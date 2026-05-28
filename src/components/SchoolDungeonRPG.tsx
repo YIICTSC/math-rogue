@@ -2851,7 +2851,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
         {/* Math Challenge Overlay (Full Screen) */}
         {showMathChallenge && (
              <div className="fixed inset-0 z-[100] w-full h-full pointer-events-auto">
-                 <MiniGameProblemChallenge mode={problemMode} modePool={problemModePool} onComplete={handleMathComplete} />
+                 <MiniGameProblemChallenge mode={problemMode} modePool={problemModePool} onComplete={handleMathComplete} rewardHint="3問全問正解で満腹度+10。回答後は次の階へ進みます" />
              </div>
         )}
 

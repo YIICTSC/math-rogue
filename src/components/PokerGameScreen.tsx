@@ -1954,7 +1954,8 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
               mode={problemMode}
               modePool={problemModePool}
               onComplete={handleMathComplete}
-          />
+              rewardHint="正解1問につき$1。次のショップで使えるお金が増えます"
+            />
       );
   }
 

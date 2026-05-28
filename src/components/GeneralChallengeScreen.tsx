@@ -6,6 +6,7 @@ import { GameMode } from '../types';
 import { storageService } from '../services/storageService';
 import { SUBJECT_DATA, GeneralProblem } from '../data/subjectData';
 import { MAP_SYMBOL_ASSET_MAP } from './mapSymbolImageMap';
+import RewardHintBanner from './RewardHintBanner';
 
 interface GeneralChallengeScreenProps {
   onComplete: (correctCount: number) => void;
@@ -15,6 +16,7 @@ interface GeneralChallengeScreenProps {
   debugSkip?: boolean;
   isChallenge?: boolean;
   streak?: number;
+  rewardHint?: string;
 }
 
 // 内部的に正解を保持するための拡張型
@@ -59,7 +61,7 @@ const isEnglishSpeakingReviewMode = (mode: string) =>
   /^ENGLISH_G8_U(11|12|13)$/.test(mode) ||
   /^ENGLISH_G9_U(12|13|14)$/.test(mode);
 
-const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onComplete, mode, modePool, onModeCorrect, debugSkip, isChallenge, streak = 0 }) => {
+const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onComplete, mode, modePool, onModeCorrect, debugSkip, isChallenge, streak = 0, rewardHint }) => {
   const [problems, setProblems] = useState<ExtendedGeneralProblem[]>([]);
   const [currentProblemIndex, setCurrentProblemIndex] = useState(0);
   const [correctCount, setCorrectCount] = useState(0);
@@ -1480,6 +1482,7 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
   return (
     <div className={`flex flex-col h-full w-full ${bgClass} text-white relative items-center justify-center p-2 sm:p-3 md:p-8 font-mono overflow-y-auto overflow-x-hidden`}>
         <div className="absolute inset-0 texture-dark-matter opacity-20 pointer-events-none"></div>
+        <RewardHintBanner text={rewardHint} />
         
         <div className="z-10 w-full max-w-md text-center flex flex-col py-2 md:py-0 min-w-0">
             {isEnglishSpeakingReviewMode(mode) && !isChallenge && (

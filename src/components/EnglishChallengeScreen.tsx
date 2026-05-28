@@ -5,6 +5,7 @@ import { audioService } from '../services/audioService';
 import { GameMode } from '../types';
 import { storageService } from '../services/storageService';
 import { ENGLISH_DATA, EnglishProblem } from '../data/englishData';
+import RewardHintBanner from './RewardHintBanner';
 
 interface EnglishChallengeScreenProps {
   onComplete: (correctCount: number) => void;
@@ -12,13 +13,14 @@ interface EnglishChallengeScreenProps {
   debugSkip?: boolean;
   isChallenge?: boolean;
   streak?: number;
+  rewardHint?: string;
 }
 
 interface ExtendedEnglishProblem extends EnglishProblem {
   actualCorrectAnswer: string;
 }
 
-const EnglishChallengeScreen: React.FC<EnglishChallengeScreenProps> = ({ onComplete, mode, debugSkip, isChallenge, streak = 0 }) => {
+const EnglishChallengeScreen: React.FC<EnglishChallengeScreenProps> = ({ onComplete, mode, debugSkip, isChallenge, streak = 0, rewardHint }) => {
   const [problems, setProblems] = useState<ExtendedEnglishProblem[]>([]);
   const [currentProblemIndex, setCurrentProblemIndex] = useState(0);
   const [correctCount, setCorrectCount] = useState(0);
@@ -154,6 +156,7 @@ const EnglishChallengeScreen: React.FC<EnglishChallengeScreenProps> = ({ onCompl
   return (
     <div className="flex flex-col h-full w-full bg-indigo-950 text-white relative items-center justify-center p-4 md:p-8 font-mono">
         <div className="absolute inset-0 texture-dark-matter opacity-20 pointer-events-none"></div>
+        <RewardHintBanner text={rewardHint} />
         
         {/* Header with Voice Toggle */}
         <div className="absolute top-4 right-4 z-50">

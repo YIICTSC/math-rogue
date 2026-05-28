@@ -71,6 +71,9 @@ import { getThemedCharacters, type VisualThemeId } from './data/visualThemes';
 
 const PARRY_WINDOW_MS = 650;
 const PARRY_PERFECT_MS = 220;
+const CROWDFUNDING_BANNER_URL = 'https://camp-fire.jp/projects/954165/view?utm_campaign=cp_po_share_c_msg_mypage_projects_open';
+const CROWDFUNDING_BANNER_IMAGE = assetUrl('banners/campfire-crowdfunding.png');
+const CROWDFUNDING_BANNER_END_AT = new Date('2026-06-20T23:59:59+09:00').getTime();
 
 const calculateScore = (state: GameState, victory: boolean): number => {
     let score = 0;
@@ -501,6 +504,7 @@ const App: React.FC = () => {
         ? ((window as Window & { learningRogue?: LearningRogueElectronApi }).learningRogue)
         : undefined;
     const isElectronApp = Boolean(electronApi?.isElectron);
+    const shouldShowCrowdfundingBanner = Date.now() <= CROWDFUNDING_BANNER_END_AT;
 
     const detectMobilePortrait = () => {
         if (typeof window === 'undefined') return false;
@@ -10791,6 +10795,23 @@ const App: React.FC = () => {
                                     <Terminal size={10} /> v1.0.4 YUSUKE ISHIGE
                                 </button>
                             </div>
+
+                            {shouldShowCrowdfundingBanner && (
+                                <a
+                                    href={CROWDFUNDING_BANNER_URL}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    aria-label="クラウドファンディング詳細ページを開く"
+                                    className="mt-4 block w-[min(92vw,500px)] max-w-full border-2 border-yellow-400/70 bg-black/45 p-1 shadow-[0_0_18px_rgba(250,204,21,0.22)] transition-transform hover:scale-[1.01] hover:border-yellow-200 focus:outline-none focus:ring-2 focus:ring-yellow-300"
+                                >
+                                    <img
+                                        src={CROWDFUNDING_BANNER_IMAGE}
+                                        alt="学習ローグ クラウドファンディング実施中"
+                                        className="block h-auto w-full"
+                                        draggable={false}
+                                    />
+                                </a>
+                            )}
                         </div>
                     </div>
                 )}
@@ -11574,6 +11595,7 @@ const App: React.FC = () => {
                             onComplete={handleMathChallengeComplete}
                             debugSkip={isMathDebugSkipped}
                             isChallenge={false}
+                            rewardHint="正解数に応じてボーナスゴールド。3問正解で50G獲得できます"
                         />
                     </div>
                 )}
@@ -11587,6 +11609,7 @@ const App: React.FC = () => {
                             onComplete={handleMathChallengeComplete}
                             debugSkip={isMathDebugSkipped}
                             isChallenge={false}
+                            rewardHint="正解数に応じてボーナスゴールド。3問正解で50G獲得できます"
                         />
                     </div>
                 )}
@@ -11598,6 +11621,7 @@ const App: React.FC = () => {
                             onComplete={handleMathChallengeComplete}
                             debugSkip={isMathDebugSkipped}
                             isChallenge={false}
+                            rewardHint="正解数に応じてボーナスゴールド。3問正解で50G獲得できます"
                         />
                     </div>
                 )}
@@ -11611,6 +11635,7 @@ const App: React.FC = () => {
                             onComplete={handleMathChallengeComplete}
                             debugSkip={isMathDebugSkipped}
                             isChallenge={false}
+                            rewardHint="正解数に応じてボーナスゴールド。3問正解で50G獲得できます"
                         />
                     </div>
                 )}
