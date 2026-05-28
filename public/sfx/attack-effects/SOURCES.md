@@ -18,4 +18,6 @@ License summary on source page: free for commercial use, no report required.
 - wind: 強風2 (https://www.springin.org/wp-content/uploads/2022/06/強風2.mp3)
 - plant: 上昇2 (https://www.springin.org/wp-content/uploads/2022/06/上昇2.mp3)
 - graduation: ジャジャーン2 (https://www.springin.org/wp-content/uploads/2022/06/ジャジャーン2.mp3)
-
+- explosion: 爆発2 (https://www.springin.org/wp-content/uploads/2022/06/爆発2.mp3)
+- critical: 会心の一撃1 (https://www.springin.org/wp-content/uploads/2022/06/会心の一撃1.mp3)
+- flash: 上昇1 (https://www.springin.org/wp-content/uploads/2022/06/上昇1.mp3)
