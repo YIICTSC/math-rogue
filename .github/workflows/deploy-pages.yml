@@ -61,6 +61,9 @@ jobs:
           walk(root);
           NODE
 
+      - name: Remove source sprite sheets from Pages artifact
+        run: rm -rf dist/sprites/high-school/sheets
+
       - name: Upload Pages artifact
         uses: actions/upload-pages-artifact@v3
         with:
