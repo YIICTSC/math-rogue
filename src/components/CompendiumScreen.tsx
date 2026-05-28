@@ -13,7 +13,7 @@ import { assetUrl } from '../utils/assetPaths';
 import { getCardIllustrationPaths } from '../utils/cardIllustration';
 import { ENEMY_ILLUSTRATION_SIZE_CLASS } from '../constants/uiSizing';
 import { PotionIcon, RelicIcon } from './ItemIcon';
-import { getHighSchoolEnemyVariant, type VisualThemeId } from '../data/visualThemes';
+import { HIGH_SCHOOL_ENEMY_VARIANTS, HIGH_SCHOOL_HUMANOID_ENEMY_VARIANTS, getHighSchoolEnemyVariant, type VisualThemeId } from '../data/visualThemes';
 
 interface CompendiumScreenProps {
     unlockedCardNames: string[];
@@ -22,6 +22,14 @@ interface CompendiumScreenProps {
     isDebug?: boolean;
     visualTheme?: VisualThemeId;
 }
+
+type CompendiumEnemy = {
+    name: string;
+    description: string;
+    tier: 1 | 2 | 3;
+    collectionKey: string;
+    imagePath?: string;
+};
 
 const shuffleList = <T,>(items: T[]) => {
     const next = [...items];
@@ -84,8 +92,35 @@ const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, 
 
     const allRelics = useMemo(() => Object.values(RELIC_LIBRARY), []);
     const allPotions = useMemo(() => Object.values(POTION_LIBRARY), []);
-    const allEnemies = useMemo(() => Object.values(ENEMY_LIBRARY).sort((a, b) => a.tier - b.tier), []);
-    const getEnemyDisplayName = (enemy: { name: string }) => visualTheme === 'high-school'
+    const allEnemies = useMemo<CompendiumEnemy[]>(() => {
+        const baseEnemies = Object.values(ENEMY_LIBRARY)
+            .sort((a, b) => a.tier - b.tier)
+            .map(enemy => ({ ...enemy, collectionKey: enemy.name }));
+
+        if (visualTheme !== 'high-school') return baseEnemies;
+
+        const highSchoolEnemies: CompendiumEnemy[] = [
+            ...HIGH_SCHOOL_ENEMY_VARIANTS.map(enemy => ({
+                name: enemy.name,
+                description: '高校編に登場する敵。校舎に染みついた不安や試験の圧力が形を持った存在。',
+                tier: (enemy.imageIndex >= 36 ? 3 : enemy.imageIndex >= 18 ? 2 : 1) as 1 | 2 | 3,
+                collectionKey: `high-school-enemy-${enemy.imageIndex}`,
+                imagePath: assetUrl(`sprites/high-school/enemies/${enemy.imageIndex}.png`),
+            })),
+            ...HIGH_SCHOOL_HUMANOID_ENEMY_VARIANTS.map(enemy => ({
+                name: enemy.name,
+                description: '高校編に登場する人型敵。部活や委員会、進路指導の緊張感をまとって立ちはだかる。',
+                tier: (enemy.imageIndex >= 35 ? 3 : enemy.imageIndex >= 15 ? 2 : 1) as 1 | 2 | 3,
+                collectionKey: `high-school-humanoid-enemy-${enemy.imageIndex}`,
+                imagePath: assetUrl(`sprites/high-school/humanoid-enemies/${enemy.imageIndex}.png`),
+            })),
+        ];
+
+        return [...baseEnemies, ...highSchoolEnemies].sort((a, b) => a.tier - b.tier || a.name.localeCompare(b.name));
+    }, [visualTheme]);
+    const getEnemyDisplayName = (enemy: { name: string; imagePath?: string }) => enemy.imagePath
+        ? enemy.name
+        : visualTheme === 'high-school'
         ? getHighSchoolEnemyVariant({ name: enemy.name, enemyType: 'GENERIC', phase: undefined }).name
         : enemy.name;
     const unlockedCardsForShowcase = useMemo(() => {
@@ -99,11 +134,19 @@ const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, 
     }, [allCards, isDebug, unlockedCardNames]);
     const defeatedEnemySet = useMemo(() => {
         if (isDebug) {
-            return new Set(allEnemies.map(enemy => enemy.name));
+            return new Set(allEnemies.map(enemy => enemy.collectionKey));
         }
-        const knownNames = new Set(allEnemies.map(enemy => enemy.name));
-        return new Set(defeatedEnemies.filter(name => knownNames.has(name)));
-    }, [allEnemies, defeatedEnemies, isDebug]);
+        const knownNames = new Set(allEnemies.map(enemy => enemy.collectionKey));
+        if (visualTheme === 'high-school') {
+            allEnemies
+                .filter(enemy => enemy.imagePath)
+                .forEach(enemy => knownNames.add(enemy.collectionKey));
+        }
+        return new Set([
+            ...defeatedEnemies.filter(name => knownNames.has(name)),
+            ...(visualTheme === 'high-school' ? allEnemies.filter(enemy => enemy.imagePath).map(enemy => enemy.collectionKey) : []),
+        ]);
+    }, [allEnemies, defeatedEnemies, isDebug, visualTheme]);
 
     const totalCards = allCards.length;
     const currentLibraryUnlockedCount = isDebug
@@ -271,7 +314,7 @@ const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, 
                 {activeTab === 'ENEMIES' && (
                     <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-4">
                         {allEnemies.map((enemy, idx) => {
-                            const isUnlocked = defeatedEnemySet.has(enemy.name);
+                            const isUnlocked = defeatedEnemySet.has(enemy.collectionKey) || defeatedEnemySet.has(enemy.name);
                             return (
                                 <div
                                     key={idx}
@@ -282,7 +325,11 @@ const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, 
                                     className={`bg-black/60 border ${isUnlocked ? 'border-red-900 hover:border-red-500' : 'border-gray-800'} p-2 rounded flex flex-col items-center text-center cursor-pointer transition-colors aspect-square justify-center relative overflow-hidden`}
                                 >
                                     <div className={`${ENEMY_ILLUSTRATION_SIZE_CLASS.compendiumGrid} mb-2 bg-gray-900 rounded relative ${!isUnlocked ? 'brightness-0 opacity-20' : ''}`}>
-                                        <EnemyIllustration name={enemy.name} seed={enemy.name} className="w-full h-full" size={16} visualTheme={visualTheme} />
+                                        {enemy.imagePath ? (
+                                            <img src={enemy.imagePath} alt={enemy.name} className="absolute inset-0 w-full h-full object-contain" draggable={false} />
+                                        ) : (
+                                            <EnemyIllustration name={enemy.name} seed={enemy.name} className="w-full h-full" size={16} visualTheme={visualTheme} />
+                                        )}
                                     </div>
                                     <div className={`font-bold text-[10px] truncate w-full ${isUnlocked ? 'text-red-200' : 'text-gray-600'}`}>{isUnlocked ? trans(getEnemyDisplayName(enemy), languageMode) : '???'}</div>
                                     {!isUnlocked && <Lock size={16} className="absolute top-2 right-2 text-gray-600" />}
@@ -336,10 +383,13 @@ const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, 
                             )}
                             {selectedItem.type === 'ENEMY' && (
                                 <div className={`${ENEMY_ILLUSTRATION_SIZE_CLASS.compendiumDetail} bg-black rounded border border-gray-600 relative`}>
-                                    {selectedItem.unlocked ?
-                                        <EnemyIllustration name={selectedItem.data.name} seed={selectedItem.data.name} className="w-full h-full" size={16} visualTheme={visualTheme} />
-                                        : <div className="w-full h-full flex items-center justify-center text-gray-700 text-4xl">?</div>
-                                    }
+                                    {selectedItem.unlocked ? (
+                                        selectedItem.data.imagePath ? (
+                                            <img src={selectedItem.data.imagePath} alt={selectedItem.data.name} className="absolute inset-0 w-full h-full object-contain" draggable={false} />
+                                        ) : (
+                                            <EnemyIllustration name={selectedItem.data.name} seed={selectedItem.data.name} className="w-full h-full" size={16} visualTheme={visualTheme} />
+                                        )
+                                    ) : <div className="w-full h-full flex items-center justify-center text-gray-700 text-4xl">?</div>}
                                 </div>
                             )}
                         </div>

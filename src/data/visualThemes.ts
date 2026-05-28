@@ -102,7 +102,7 @@ export const HIGH_SCHOOL_ENEMY_VARIANTS = [
   { name: '放課後ノイズ', imageIndex: 49 },
 ] as const;
 
-const HIGH_SCHOOL_HUMANOID_ENEMY_VARIANTS = [
+export const HIGH_SCHOOL_HUMANOID_ENEMY_VARIANTS = [
   { name: '監督官の先輩', imageIndex: 0 },
   { name: '剣道部の風紀委員', imageIndex: 1 },
   { name: '白衣の査問官', imageIndex: 2 },

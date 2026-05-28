@@ -13,7 +13,7 @@ import { audioService } from '../services/audioService';
 import { trans } from '../utils/textUtils';
 import { ATTACK_EFFECT_LIST } from '../data/attackEffects';
 import { STATUS_EFFECT_LIST } from '../data/statusEffects';
-import { HIGH_SCHOOL_EVENT_THEMES } from '../data/visualThemes';
+import { HIGH_SCHOOL_EVENT_THEMES, HIGH_SCHOOL_HUMANOID_ENEMY_VARIANTS, type HighSchoolEnemyAction } from '../data/visualThemes';
 import { assetUrl } from '../utils/assetPaths';
 import React, { useMemo, useState, useCallback } from 'react';
 
@@ -49,6 +49,12 @@ const EVENT_SAMPLES = [
     { title: "図書室の静寂", description: "放課後の図書室はとても静かだ。心地よい眠気が襲ってくる...", options: [{ label: "寝る", text: "HP20回復。", result: "ぐっすり眠れた。HPが20回復した。" }, { label: "勉強", text: "「先読み」カード入手。", result: "集中して勉強した。「先読み」のカードを習得した。" }] },
 ];
 
+const HIGH_SCHOOL_HUMANOID_ACTIONS: { key: HighSchoolEnemyAction; label: string; folder: string }[] = [
+    { key: 'idle', label: 'IDLE', folder: 'humanoid-enemies' },
+    { key: 'attack', label: 'ATTACK', folder: 'humanoid-enemies-attack' },
+    { key: 'skill', label: 'SKILL', folder: 'humanoid-enemies-skill' },
+];
+
 const TranslationRow = React.memo(({ original, context, debugLanguageMode, isInline = false }: { original: string, context?: string, debugLanguageMode: LanguageMode, isInline?: boolean }) => {
     const translated = trans(original, debugLanguageMode);
     const isMissing = debugLanguageMode === 'HIRAGANA' && translated === original && original.match(/[一-龠]/);
@@ -82,7 +88,7 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
     nextMiniGameThreshold,
     languageMode: initialLanguageMode
 }) => {
-    const [activeTab, setActiveTab] = useState<'CARDS' | 'RELICS' | 'POTIONS' | 'SYNTHESIS' | 'SYSTEM' | 'EFFECTS' | 'EVENTS' | 'TRANSLATION'>('CARDS');
+    const [activeTab, setActiveTab] = useState<'CARDS' | 'RELICS' | 'POTIONS' | 'SYNTHESIS' | 'SYSTEM' | 'EFFECTS' | 'EVENTS' | 'HUMANOID_SPRITES' | 'TRANSLATION'>('CARDS');
     const [searchTerm, setSearchTerm] = useState("");
     const [debugLanguageMode, setDebugLanguageMode] = useState<LanguageMode>(initialLanguageMode);
     const [transSubTab, setTransSubTab] = useState<'STORY' | 'FLAVOR' | 'CARD' | 'EVENT' | 'ENEMY' | 'MISSING'>('STORY');
@@ -271,6 +277,7 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
                         <button onClick={() => setActiveTab('SYSTEM')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'SYSTEM' ? 'bg-indigo-900 text-white' : 'text-indigo-400 hover:bg-gray-750'}`}>システム</button>
                         <button onClick={() => setActiveTab('EFFECTS')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'EFFECTS' ? 'bg-orange-900 text-white' : 'text-orange-400 hover:bg-gray-750'}`}>エフェクト</button>
                         <button onClick={() => setActiveTab('EVENTS')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'EVENTS' ? 'bg-cyan-900 text-white' : 'text-cyan-400 hover:bg-gray-750'}`}>高校編イベント</button>
+                        <button onClick={() => setActiveTab('HUMANOID_SPRITES')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'HUMANOID_SPRITES' ? 'bg-rose-900 text-white' : 'text-rose-400 hover:bg-gray-750'}`}>高校人型敵</button>
                         <button onClick={() => setActiveTab('TRANSLATION')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'TRANSLATION' ? 'bg-emerald-900 text-white' : 'text-emerald-400 hover:bg-gray-750'}`}>翻訳確認</button>
                     </div>
 
@@ -537,6 +544,45 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
                                                 <div className="text-xs text-cyan-400 font-bold">#{event.imageIndex}</div>
                                                 <div className="font-bold text-white">{event.title}</div>
                                                 <div className="text-xs text-gray-300 leading-relaxed">{event.description}</div>
+                                            </div>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        )}
+
+                        {activeTab === 'HUMANOID_SPRITES' && (
+                            <div className="space-y-4">
+                                <div className="flex items-center justify-between gap-3 border-b border-rose-700/60 pb-3">
+                                    <h3 className="text-rose-300 font-bold flex items-center">
+                                        <Skull size={18} className="mr-2" /> 高校編 人型敵スプライト確認
+                                    </h3>
+                                    <div className="text-xs text-gray-400">{HIGH_SCHOOL_HUMANOID_ENEMY_VARIANTS.length}体 / idle・attack・skill</div>
+                                </div>
+                                <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+                                    {HIGH_SCHOOL_HUMANOID_ENEMY_VARIANTS.map(enemy => (
+                                        <div key={enemy.imageIndex} className="bg-black/35 border border-gray-700 rounded-lg p-3">
+                                            <div className="flex items-center justify-between gap-3 mb-3">
+                                                <div className="min-w-0">
+                                                    <div className="text-xs text-rose-400 font-bold">#{enemy.imageIndex}</div>
+                                                    <div className="font-bold text-white truncate">{enemy.name}</div>
+                                                </div>
+                                                <div className="text-[10px] text-gray-500 font-mono shrink-0">high-school humanoid</div>
+                                            </div>
+                                            <div className="grid grid-cols-3 gap-2">
+                                                {HIGH_SCHOOL_HUMANOID_ACTIONS.map(action => (
+                                                    <div key={action.key} className="bg-slate-950/80 border border-gray-800 rounded p-2">
+                                                        <div className="aspect-square bg-[linear-gradient(45deg,#111827_25%,#0f172a_25%,#0f172a_50%,#111827_50%,#111827_75%,#0f172a_75%)] bg-[length:16px_16px] rounded relative overflow-hidden">
+                                                            <img
+                                                                src={assetUrl(`sprites/high-school/${action.folder}/${enemy.imageIndex}.png`)}
+                                                                alt={`${enemy.name} ${action.label}`}
+                                                                className="absolute inset-0 w-full h-full object-contain"
+                                                                draggable={false}
+                                                            />
+                                                        </div>
+                                                        <div className="mt-1 text-center text-[10px] font-bold text-gray-300">{action.label}</div>
+                                                    </div>
+                                                ))}
                                             </div>
                                         </div>
                                     ))}
