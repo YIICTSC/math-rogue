@@ -138,6 +138,24 @@ const HIGH_SCHOOL_HUMANOID_ENEMY_VARIANTS = [
   { name: '数学研究会の刺客', imageIndex: 32 },
   { name: '白手袋の監察員', imageIndex: 33 },
   { name: '文化祭実行委員', imageIndex: 34 },
+  { name: '風紀委員副隊長', imageIndex: 35 },
+  { name: '剣道部の主将', imageIndex: 36 },
+  { name: '赤ペン試験官', imageIndex: 37 },
+  { name: '禁書庫の司書', imageIndex: 38 },
+  { name: '購買部の番人', imageIndex: 39 },
+  { name: '軽音部ギタリスト', imageIndex: 40 },
+  { name: 'バスケ部エース', imageIndex: 41 },
+  { name: '化学部の白衣兵', imageIndex: 42 },
+  { name: '新聞部カメラマン', imageIndex: 43 },
+  { name: '生徒会の策士', imageIndex: 44 },
+  { name: '茶道部の令嬢', imageIndex: 45 },
+  { name: '弓道部の射手', imageIndex: 46 },
+  { name: '陸上部の疾走者', imageIndex: 47 },
+  { name: '演劇部の仮面役者', imageIndex: 48 },
+  { name: '電算部ハッカー', imageIndex: 49 },
+  { name: '天文部の予言者', imageIndex: 50 },
+  { name: '園芸委員の剪定者', imageIndex: 51 },
+  { name: '試験女王', imageIndex: 52 },
 ] as const;
 
 const getStableIndex = (text: string, size: number) => {
@@ -164,16 +182,16 @@ export const getHighSchoolHumanoidEnemyVariant = (enemy: Pick<Enemy, 'name' | 'e
       : HIGH_SCHOOL_HUMANOID_ENEMY_VARIANTS[13];
   }
   if (enemy.enemyType === 'GUARDIAN') {
-    return HIGH_SCHOOL_HUMANOID_ENEMY_VARIANTS[20 + getStableIndex(enemy.name, 10)];
+    return HIGH_SCHOOL_HUMANOID_ENEMY_VARIANTS[20 + getStableIndex(enemy.name, 33)];
   }
   if (enemy.enemyType === 'ELITE_FORCE') {
-    return HIGH_SCHOOL_HUMANOID_ENEMY_VARIANTS[5 + getStableIndex(enemy.name, 15)];
+    return HIGH_SCHOOL_HUMANOID_ENEMY_VARIANTS[5 + getStableIndex(enemy.name, 48)];
   }
   if (enemy.enemyType === 'TEACHER') {
-    return HIGH_SCHOOL_HUMANOID_ENEMY_VARIANTS[getStableIndex(enemy.name, 15)];
+    return HIGH_SCHOOL_HUMANOID_ENEMY_VARIANTS[getStableIndex(enemy.name, 25)];
   }
   if (enemy.enemyType === 'GENERIC' && getStableIndex(enemy.name, 3) === 0) {
-    return HIGH_SCHOOL_HUMANOID_ENEMY_VARIANTS[15 + getStableIndex(enemy.name, 20)];
+    return HIGH_SCHOOL_HUMANOID_ENEMY_VARIANTS[15 + getStableIndex(enemy.name, 38)];
   }
   return null;
 };
