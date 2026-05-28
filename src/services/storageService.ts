@@ -47,6 +47,7 @@ const STORAGE_KEY_GO_HOME_RANKING = 'pixel_spire_go_home_ranking_v1';
 const STORAGE_KEY_SEEN_BATTLE_TUTORIAL = 'pixel_spire_seen_battle_tutorial_v1';
 const STORAGE_KEY_SEEN_PARRY_TUTORIAL = 'pixel_spire_seen_parry_tutorial_v1';
 const STORAGE_KEY_SEEN_EXHAUST_CARD_HINT = 'pixel_spire_seen_exhaust_card_hint_v1';
+const STORAGE_KEY_SEEN_FRIENDSHIP_COMBO_TUTORIAL = 'pixel_spire_seen_friendship_combo_tutorial_v1';
 const STORAGE_KEY_SEEN_POKER_TUTORIAL = 'pixel_spire_seen_poker_tutorial_v1';
 
 // --- ENGLISH VOICE FLAG ---
@@ -754,6 +755,14 @@ export const storageService = {
 
   saveSeenExhaustCardHint: () => {
       localStorage.setItem(STORAGE_KEY_SEEN_EXHAUST_CARD_HINT, 'true');
+  },
+
+  getSeenFriendshipComboTutorial: (): boolean => {
+      return localStorage.getItem(STORAGE_KEY_SEEN_FRIENDSHIP_COMBO_TUTORIAL) === 'true';
+  },
+
+  saveSeenFriendshipComboTutorial: () => {
+      localStorage.setItem(STORAGE_KEY_SEEN_FRIENDSHIP_COMBO_TUTORIAL, 'true');
   },
 
   getSeenPokerTutorial: (): boolean => {
