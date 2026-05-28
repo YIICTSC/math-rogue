@@ -10600,7 +10600,7 @@ const App: React.FC = () => {
                                 </span>
                             </h1>
 
-                            {!isShortMobilePortrait && (
+                            {!isShortMobilePortrait && !shouldShowCrowdfundingBanner && (
                                 <div
                                     className="mb-6 bg-black/40 px-4 py-2 rounded-lg border border-gray-600 cursor-pointer select-none"
                                     onClick={handleMiniGameUnlockClick}
