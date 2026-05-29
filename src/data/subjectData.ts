@@ -65,6 +65,7 @@ import { HIGH_SCHOOL_PRACTICAL_SUBJECT_DATA } from './subjects/high_school_pract
 import { HIGH_SCHOOL_DEEP_UNIT_DATA } from './subjects/high_school_deep_units';
 import { HIGH_SCHOOL_MASSIVE_UNIT_DATA } from './subjects/high_school_massive_units';
 import { HIGH_SCHOOL_ULTRA_UNIT_DATA } from './subjects/high_school_ultra_units';
+import { HIGH_SCHOOL_GIGA_UNIT_DATA } from './subjects/high_school_giga_units';
 
 export type { GeneralProblem };
 
@@ -161,6 +162,7 @@ const RAW_SUBJECT_DATA: Record<string, GeneralProblem[]> = {
     ...HIGH_SCHOOL_DEEP_UNIT_DATA,
     ...HIGH_SCHOOL_MASSIVE_UNIT_DATA,
     ...HIGH_SCHOOL_ULTRA_UNIT_DATA,
+    ...HIGH_SCHOOL_GIGA_UNIT_DATA,
 };
 
 export const SUBJECT_DATA: Record<string, GeneralProblem[]> = Object.fromEntries(
