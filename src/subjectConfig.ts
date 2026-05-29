@@ -1,7 +1,7 @@
 
 import { GameMode, GameScreen } from './types';
 
-export type SubjectCategoryType = 'MATH' | 'MATH_GRADES' | 'KOKUGO_GRADES' | 'KANJI' | 'KANKEN' | 'HARD_KANJI' | 'LIFE' | 'SCIENCE' | 'SOCIAL' | 'ENGLISH' | 'SUMMARY' | 'MAP_PREF' | 'IT_INFO';
+export type SubjectCategoryType = 'MATH' | 'MATH_GRADES' | 'KOKUGO_GRADES' | 'KANJI' | 'KANKEN' | 'HARD_KANJI' | 'LIFE' | 'SCIENCE' | 'SOCIAL' | 'ENGLISH' | 'SUMMARY' | 'MAP_PREF' | 'IT_INFO' | 'UPPER_MODERN' | 'UPPER_CLASSICS' | 'UPPER_ENGLISH' | 'UPPER_INFORMATION' | 'UPPER_TRIVIA';
 
 export interface SubModeConfig {
     id: string;
@@ -108,6 +108,11 @@ const MODE_TO_SCREEN: Record<string, GameScreen> = {
     [GameMode.HARD_KANJI_YOJUKUGO]: GameScreen.KANJI_CHALLENGE,
     [GameMode.HARD_KANJI_HISTORY]: GameScreen.KANJI_CHALLENGE,
     [GameMode.HARD_KANJI_MIXED]: GameScreen.KANJI_CHALLENGE,
+    [GameMode.UPPER_MODERN_VOCAB]: GameScreen.GENERAL_CHALLENGE,
+    [GameMode.UPPER_CLASSICS]: GameScreen.GENERAL_CHALLENGE,
+    [GameMode.UPPER_ENGLISH]: GameScreen.GENERAL_CHALLENGE,
+    [GameMode.UPPER_INFORMATION]: GameScreen.GENERAL_CHALLENGE,
+    [GameMode.UPPER_TRIVIA]: GameScreen.GENERAL_CHALLENGE,
     
     // 英語系
     [GameMode.ENGLISH_ES]: GameScreen.ENGLISH_CHALLENGE,

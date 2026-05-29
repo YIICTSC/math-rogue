@@ -37,6 +37,43 @@ interface SelectableUnitOption {
 
 const UNIT_MASTERY_TARGET = 100;
 const UPPER_KANJI_SUB_MODE_IDS = new Set(['K10', 'K11', 'K12']);
+const UPPER_PROBLEM_CATEGORIES: SubjectCategoryConfig[] = [
+  {
+    id: 'UPPER_MODERN',
+    name: '現代文・語彙',
+    color: 'cyan',
+    uiType: 'grid',
+    subModes: [{ id: 'UPPER_MODERN_VOCAB', name: '評論語彙・読解語', mode: GameMode.UPPER_MODERN_VOCAB }],
+  },
+  {
+    id: 'UPPER_CLASSICS',
+    name: '古典',
+    color: 'amber',
+    uiType: 'grid',
+    subModes: [{ id: 'UPPER_CLASSICS', name: '古文・漢文基礎', mode: GameMode.UPPER_CLASSICS }],
+  },
+  {
+    id: 'UPPER_ENGLISH',
+    name: '英語',
+    color: 'indigo',
+    uiType: 'grid',
+    subModes: [{ id: 'UPPER_ENGLISH', name: '高校英語基礎', mode: GameMode.UPPER_ENGLISH }],
+  },
+  {
+    id: 'UPPER_INFORMATION',
+    name: '情報',
+    color: 'emerald',
+    uiType: 'grid',
+    subModes: [{ id: 'UPPER_INFORMATION', name: '情報I・ネット活用', mode: GameMode.UPPER_INFORMATION }],
+  },
+  {
+    id: 'UPPER_TRIVIA',
+    name: '雑学',
+    color: 'rose',
+    uiType: 'grid',
+    subModes: [{ id: 'UPPER_TRIVIA', name: '一般常識・科学雑学', mode: GameMode.UPPER_TRIVIA }],
+  },
+];
 
 const KOKUGO_GRADE_UNITS: Record<number, MathUnitOption[]> = {
   1: [
@@ -309,6 +346,11 @@ const CATEGORY_LABELS: Record<SubjectCategoryType, string> = {
   SUMMARY: 'まとめ',
   MAP_PREF: '地図・日本',
   IT_INFO: 'ICT・情報',
+  UPPER_MODERN: '現代文・語彙',
+  UPPER_CLASSICS: '古典',
+  UPPER_ENGLISH: '英語',
+  UPPER_INFORMATION: '情報',
+  UPPER_TRIVIA: '雑学',
 };
 
 const SUBMODE_LABELS: Record<string, string> = {
@@ -376,6 +418,11 @@ const SUBMODE_LABELS: Record<string, string> = {
   IT_LIT: '情報リテラシー',
   IT_PROG: 'プログラミング',
   IT_SEC: 'モラル・セキュリティ',
+  UPPER_MODERN_VOCAB: '評論語彙・読解語',
+  UPPER_CLASSICS: '古文・漢文基礎',
+  UPPER_ENGLISH: '高校英語基礎',
+  UPPER_INFORMATION: '情報I・ネット活用',
+  UPPER_TRIVIA: '一般常識・科学雑学',
 };
 
 const getCategoryIcon = (id: SubjectCategoryType) => {
@@ -386,6 +433,11 @@ const getCategoryIcon = (id: SubjectCategoryType) => {
     case 'KANKEN': return <Book size={20} />;
     case 'HARD_KANJI': return <Book size={20} />;
     case 'ENGLISH': return <Languages size={20} />;
+    case 'UPPER_ENGLISH': return <Languages size={20} />;
+    case 'UPPER_MODERN': return <Book size={20} />;
+    case 'UPPER_CLASSICS': return <Book size={20} />;
+    case 'UPPER_INFORMATION': return <Brain size={20} />;
+    case 'UPPER_TRIVIA': return <GraduationCap size={20} />;
     case 'LIFE': return <Home size={20} />;
     case 'SCIENCE': return <FlaskConical size={20} />;
     case 'SOCIAL': return <Globe size={20} />;
@@ -486,8 +538,11 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
     const kanjiCategory = SUBJECT_CATEGORIES.find((cat) => cat.id === 'KANJI');
     if (showUpperProblems) {
       return kanjiCategory
-        ? [{ ...kanjiCategory, subModes: kanjiCategory.subModes.filter((sub) => UPPER_KANJI_SUB_MODE_IDS.has(sub.id)) }]
-        : [];
+        ? [
+            { ...kanjiCategory, subModes: kanjiCategory.subModes.filter((sub) => UPPER_KANJI_SUB_MODE_IDS.has(sub.id)) },
+            ...UPPER_PROBLEM_CATEGORIES,
+          ]
+        : UPPER_PROBLEM_CATEGORIES;
     }
     return SUBJECT_CATEGORIES.map((cat) => (
       cat.id === 'KANJI'
@@ -1048,12 +1103,12 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
           }`}
         >
           <GraduationCap size={14} />
-          {showUpperProblems ? '通常問題へ' : '高校以上'}
+          {showUpperProblems ? '通常問題へ' : '高校生以上'}
         </button>
         <div className="text-center border-b border-slate-800 p-4 shrink-0">
           <h2 className="text-2xl md:text-3xl font-bold text-yellow-400 tracking-widest">{trans('モード選択', languageMode)}</h2>
           {showUpperProblems && (
-            <div className="mt-1 text-[10px] font-bold text-cyan-200">高校以上の問題</div>
+            <div className="mt-1 text-[10px] font-bold text-cyan-200">高校生以上の問題</div>
           )}
         </div>
 

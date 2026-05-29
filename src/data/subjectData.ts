@@ -56,6 +56,7 @@ import { IT_INTERNET_DATA } from './subjects/it_internet';
 import { IT_LITERACY_DATA } from './subjects/it_literacy';
 import { IT_PROGRAMMING_DATA } from './subjects/it_programming';
 import { IT_SECURITY_DATA } from './subjects/it_security';
+import { HIGH_SCHOOL_UPPER_SUBJECT_DATA } from './subjects/high_school_upper';
 
 export type { GeneralProblem };
 
@@ -143,6 +144,7 @@ const RAW_SUBJECT_DATA: Record<string, GeneralProblem[]> = {
     ...GENERALIZED_KANJI_DATA,
     ...DEDICATED_SCIENCE_UNIT_DATA,
     ...DEDICATED_SOCIAL_UNIT_DATA,
+    ...HIGH_SCHOOL_UPPER_SUBJECT_DATA,
 };
 
 export const SUBJECT_DATA: Record<string, GeneralProblem[]> = Object.fromEntries(
