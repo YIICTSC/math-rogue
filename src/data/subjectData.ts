@@ -57,6 +57,11 @@ import { IT_LITERACY_DATA } from './subjects/it_literacy';
 import { IT_PROGRAMMING_DATA } from './subjects/it_programming';
 import { IT_SECURITY_DATA } from './subjects/it_security';
 import { HIGH_SCHOOL_UPPER_SUBJECT_DATA } from './subjects/high_school_upper';
+import { HIGH_SCHOOL_MATH_SUBJECT_DATA } from './subjects/high_school_math';
+import { HIGH_SCHOOL_SCIENCE_SUBJECT_DATA } from './subjects/high_school_science';
+import { HIGH_SCHOOL_SOCIETY_SUBJECT_DATA } from './subjects/high_school_society';
+import { HIGH_SCHOOL_ESSAY_SUBJECT_DATA } from './subjects/high_school_essay';
+import { HIGH_SCHOOL_PRACTICAL_SUBJECT_DATA } from './subjects/high_school_practical';
 
 export type { GeneralProblem };
 
@@ -145,6 +150,11 @@ const RAW_SUBJECT_DATA: Record<string, GeneralProblem[]> = {
     ...DEDICATED_SCIENCE_UNIT_DATA,
     ...DEDICATED_SOCIAL_UNIT_DATA,
     ...HIGH_SCHOOL_UPPER_SUBJECT_DATA,
+    ...HIGH_SCHOOL_MATH_SUBJECT_DATA,
+    ...HIGH_SCHOOL_SCIENCE_SUBJECT_DATA,
+    ...HIGH_SCHOOL_SOCIETY_SUBJECT_DATA,
+    ...HIGH_SCHOOL_ESSAY_SUBJECT_DATA,
+    ...HIGH_SCHOOL_PRACTICAL_SUBJECT_DATA,
 };
 
 export const SUBJECT_DATA: Record<string, GeneralProblem[]> = Object.fromEntries(

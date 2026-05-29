@@ -73,6 +73,66 @@ const UPPER_PROBLEM_CATEGORIES: SubjectCategoryConfig[] = [
     uiType: 'grid',
     subModes: [{ id: 'UPPER_TRIVIA', name: '一般常識・科学雑学', mode: GameMode.UPPER_TRIVIA }],
   },
+  {
+    id: 'UPPER_MATH',
+    name: '数学',
+    color: 'cyan',
+    uiType: 'grid',
+    subModes: [
+      { id: 'UPPER_MATH_NUM_EXPR', name: '数と式', mode: GameMode.UPPER_MATH_NUM_EXPR },
+      { id: 'UPPER_MATH_QUADRATIC', name: '二次関数', mode: GameMode.UPPER_MATH_QUADRATIC },
+      { id: 'UPPER_MATH_GEOMETRY', name: '図形と計量', mode: GameMode.UPPER_MATH_GEOMETRY },
+      { id: 'UPPER_MATH_PROB_STATS', name: '確率・統計', mode: GameMode.UPPER_MATH_PROB_STATS },
+    ],
+  },
+  {
+    id: 'UPPER_SCIENCE',
+    name: '理科',
+    color: 'emerald',
+    uiType: 'grid',
+    subModes: [
+      { id: 'UPPER_SCIENCE_PHYSICS', name: '物理基礎', mode: GameMode.UPPER_SCIENCE_PHYSICS },
+      { id: 'UPPER_SCIENCE_CHEMISTRY', name: '化学基礎', mode: GameMode.UPPER_SCIENCE_CHEMISTRY },
+      { id: 'UPPER_SCIENCE_BIOLOGY', name: '生物基礎', mode: GameMode.UPPER_SCIENCE_BIOLOGY },
+      { id: 'UPPER_SCIENCE_EARTH', name: '地学基礎', mode: GameMode.UPPER_SCIENCE_EARTH },
+    ],
+  },
+  {
+    id: 'UPPER_SOCIETY',
+    name: '地歴・公民',
+    color: 'amber',
+    uiType: 'grid',
+    subModes: [
+      { id: 'UPPER_SOCIETY_JAPAN_HISTORY', name: '日本史基礎', mode: GameMode.UPPER_SOCIETY_JAPAN_HISTORY },
+      { id: 'UPPER_SOCIETY_WORLD_HISTORY', name: '世界史基礎', mode: GameMode.UPPER_SOCIETY_WORLD_HISTORY },
+      { id: 'UPPER_SOCIETY_GEOGRAPHY', name: '地理基礎', mode: GameMode.UPPER_SOCIETY_GEOGRAPHY },
+      { id: 'UPPER_SOCIETY_CIVICS', name: '公民・政治経済', mode: GameMode.UPPER_SOCIETY_CIVICS },
+    ],
+  },
+  {
+    id: 'UPPER_ESSAY',
+    name: '小論文・探究',
+    color: 'indigo',
+    uiType: 'grid',
+    subModes: [
+      { id: 'UPPER_ESSAY_VOCAB', name: '小論文語彙', mode: GameMode.UPPER_ESSAY_VOCAB },
+      { id: 'UPPER_ESSAY_LOGIC', name: '論点整理', mode: GameMode.UPPER_ESSAY_LOGIC },
+      { id: 'UPPER_ESSAY_DATA_READING', name: '資料読解', mode: GameMode.UPPER_ESSAY_DATA_READING },
+      { id: 'UPPER_ESSAY_RESEARCH', name: '探究・研究法', mode: GameMode.UPPER_ESSAY_RESEARCH },
+    ],
+  },
+  {
+    id: 'UPPER_PRACTICAL',
+    name: '生活実用',
+    color: 'rose',
+    uiType: 'grid',
+    subModes: [
+      { id: 'UPPER_PRACTICAL_MONEY', name: 'お金・金融', mode: GameMode.UPPER_PRACTICAL_MONEY },
+      { id: 'UPPER_PRACTICAL_LAW', name: '法律・契約', mode: GameMode.UPPER_PRACTICAL_LAW },
+      { id: 'UPPER_PRACTICAL_HEALTH', name: '健康・医療リテラシー', mode: GameMode.UPPER_PRACTICAL_HEALTH },
+      { id: 'UPPER_PRACTICAL_SAFETY', name: '防災・安全', mode: GameMode.UPPER_PRACTICAL_SAFETY },
+    ],
+  },
 ];
 
 const KOKUGO_GRADE_UNITS: Record<number, MathUnitOption[]> = {
@@ -351,6 +411,11 @@ const CATEGORY_LABELS: Record<SubjectCategoryType, string> = {
   UPPER_ENGLISH: '英語',
   UPPER_INFORMATION: '情報',
   UPPER_TRIVIA: '雑学',
+  UPPER_MATH: '数学',
+  UPPER_SCIENCE: '理科',
+  UPPER_SOCIETY: '地歴・公民',
+  UPPER_ESSAY: '小論文・探究',
+  UPPER_PRACTICAL: '生活実用',
 };
 
 const SUBMODE_LABELS: Record<string, string> = {
@@ -423,6 +488,26 @@ const SUBMODE_LABELS: Record<string, string> = {
   UPPER_ENGLISH: '高校英語基礎',
   UPPER_INFORMATION: '情報I・ネット活用',
   UPPER_TRIVIA: '一般常識・科学雑学',
+  UPPER_MATH_NUM_EXPR: '数と式',
+  UPPER_MATH_QUADRATIC: '二次関数',
+  UPPER_MATH_GEOMETRY: '図形と計量',
+  UPPER_MATH_PROB_STATS: '確率・統計',
+  UPPER_SCIENCE_PHYSICS: '物理基礎',
+  UPPER_SCIENCE_CHEMISTRY: '化学基礎',
+  UPPER_SCIENCE_BIOLOGY: '生物基礎',
+  UPPER_SCIENCE_EARTH: '地学基礎',
+  UPPER_SOCIETY_JAPAN_HISTORY: '日本史基礎',
+  UPPER_SOCIETY_WORLD_HISTORY: '世界史基礎',
+  UPPER_SOCIETY_GEOGRAPHY: '地理基礎',
+  UPPER_SOCIETY_CIVICS: '公民・政治経済',
+  UPPER_ESSAY_VOCAB: '小論文語彙',
+  UPPER_ESSAY_LOGIC: '論点整理',
+  UPPER_ESSAY_DATA_READING: '資料読解',
+  UPPER_ESSAY_RESEARCH: '探究・研究法',
+  UPPER_PRACTICAL_MONEY: 'お金・金融',
+  UPPER_PRACTICAL_LAW: '法律・契約',
+  UPPER_PRACTICAL_HEALTH: '健康・医療リテラシー',
+  UPPER_PRACTICAL_SAFETY: '防災・安全',
 };
 
 const getCategoryIcon = (id: SubjectCategoryType) => {
@@ -438,6 +523,11 @@ const getCategoryIcon = (id: SubjectCategoryType) => {
     case 'UPPER_CLASSICS': return <Book size={20} />;
     case 'UPPER_INFORMATION': return <Brain size={20} />;
     case 'UPPER_TRIVIA': return <GraduationCap size={20} />;
+    case 'UPPER_MATH': return <Brain size={20} />;
+    case 'UPPER_SCIENCE': return <FlaskConical size={20} />;
+    case 'UPPER_SOCIETY': return <Globe size={20} />;
+    case 'UPPER_ESSAY': return <Book size={20} />;
+    case 'UPPER_PRACTICAL': return <Home size={20} />;
     case 'LIFE': return <Home size={20} />;
     case 'SCIENCE': return <FlaskConical size={20} />;
     case 'SOCIAL': return <Globe size={20} />;
