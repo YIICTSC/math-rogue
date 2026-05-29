@@ -11638,6 +11638,7 @@ const App: React.FC = () => {
                             selectionDisabled={(gameState.challengeMode === 'COOP' && !!coopSession?.isHost && !coopCanDecide) || coopMapSelectionPending}
                             selectionDisabledMessage={gameState.challengeMode === 'COOP' ? coopMapPendingMessage : undefined}
                             visualTheme={coopSyncedVisualTheme}
+                            highSchoolStoryId={coopSyncedVisualTheme === 'high-school' ? HIGH_SCHOOL_STORIES[gameState.currentStoryIndex || 0]?.id : undefined}
                         />
                         {gameState.challengeMode === 'COOP' && coopSession?.isHost && coopNeedsInitialMapSync && (
                             <div className="absolute left-1/2 -translate-x-1/2 top-[72px] z-30">

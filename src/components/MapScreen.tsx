@@ -24,9 +24,10 @@ interface MapScreenProps {
     selectionDisabled?: boolean;
     selectionDisabledMessage?: string;
     visualTheme?: VisualThemeId;
+    highSchoolStoryId?: string;
 }
 
-const MapScreen: React.FC<MapScreenProps> = ({ nodes, currentNodeId, onNodeSelect, onReturnToTitle, onOpenSettings, player, languageMode, narrative, act, floor, typingMode = false, selectionHoldMs = 0, selectionDisabled = false, selectionDisabledMessage, visualTheme = 'elementary' }) => {
+const MapScreen: React.FC<MapScreenProps> = ({ nodes, currentNodeId, onNodeSelect, onReturnToTitle, onOpenSettings, player, languageMode, narrative, act, floor, typingMode = false, selectionHoldMs = 0, selectionDisabled = false, selectionDisabledMessage, visualTheme = 'elementary', highSchoolStoryId }) => {
     const scrollRef = useRef<HTMLDivElement>(null);
     const [showDeck, setShowDeck] = useState(false);
     const holdTimerRef = useRef<number | null>(null);
@@ -194,8 +195,11 @@ const MapScreen: React.FC<MapScreenProps> = ({ nodes, currentNodeId, onNodeSelec
         assetUrl('sprites/backgrounds/learning-rogue/map-indoor.webp'),
         assetUrl('sprites/backgrounds/learning-rogue/map-festival.webp')
     ];
+    const highSchoolMapAct = highSchoolStoryId === 'HS_CHERRY_BLOSSOM_LOOP'
+        ? 1
+        : Math.min(4, Math.max(1, act));
     const mapBackground = visualTheme === 'high-school'
-        ? assetUrl('sprites/backgrounds/learning-rogue/high-school-map.webp')
+        ? assetUrl(`sprites/backgrounds/learning-rogue/high-school-map-act${highSchoolMapAct}.webp`)
         : mapBackgrounds[(Math.max(1, act) - 1) % mapBackgrounds.length];
 
     return (
