@@ -18,6 +18,9 @@
     "directories": {
       "output": "release"
     },
+    "toolsets": {
+      "winCodeSign": "1.1.0"
+    },
     "files": [
       "dist/**/*",
       "electron/**/*",
@@ -25,6 +28,7 @@
     ],
     "asar": true,
     "win": {
+      "signAndEditExecutable": false,
       "target": [
         {
           "target": "nsis",
