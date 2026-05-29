@@ -37,7 +37,35 @@ interface SelectableUnitOption {
 
 const UNIT_MASTERY_TARGET = 100;
 const UPPER_KANJI_SUB_MODE_IDS = new Set(['K10', 'K11', 'K12']);
+const HARD_KANJI_SUB_MODE_IDS = new Set([
+  'HK_JUKUJIKUN',
+  'HK_FLORA',
+  'HK_ATEJI',
+  'HK_PLACE',
+  'HK_KOKUJI',
+  'HK_CLASSICS',
+  'HK_YOJI',
+  'HK_HISTORY',
+  'HK_MIXED',
+]);
 const UPPER_PROBLEM_CATEGORIES: SubjectCategoryConfig[] = [
+  {
+    id: 'HARD_KANJI',
+    name: '難読漢字',
+    color: 'cyan',
+    uiType: 'grid',
+    subModes: [
+      { id: 'HK_JUKUJIKUN', name: '超難読 熟字訓', mode: GameMode.HARD_KANJI_JUKUJIKUN },
+      { id: 'HK_FLORA', name: '動植物 極', mode: GameMode.HARD_KANJI_FLORA_FAUNA },
+      { id: 'HK_ATEJI', name: '当て字・外来語 極', mode: GameMode.HARD_KANJI_ATEJI },
+      { id: 'HK_PLACE', name: '地名・国名 難読', mode: GameMode.HARD_KANJI_PLACE_NAMES },
+      { id: 'HK_KOKUJI', name: '国字・和製漢字', mode: GameMode.HARD_KANJI_KOKUJI },
+      { id: 'HK_CLASSICS', name: '仏教・神道・古典語', mode: GameMode.HARD_KANJI_CLASSICS },
+      { id: 'HK_YOJI', name: '四字熟語 極', mode: GameMode.HARD_KANJI_YOJUKUGO },
+      { id: 'HK_HISTORY', name: '古典表記・歴史語彙', mode: GameMode.HARD_KANJI_HISTORY },
+      { id: 'HK_MIXED', name: 'ミックス', mode: GameMode.HARD_KANJI_MIXED },
+    ],
+  },
   {
     id: 'UPPER_MODERN',
     name: '現代文・語彙',
@@ -827,6 +855,8 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
     return SUBJECT_CATEGORIES.map((cat) => (
       cat.id === 'KANJI'
         ? { ...cat, subModes: cat.subModes.filter((sub) => !UPPER_KANJI_SUB_MODE_IDS.has(sub.id)) }
+        : cat.id === 'KANKEN'
+        ? { ...cat, name: '漢検', subModes: cat.subModes.filter((sub) => !HARD_KANJI_SUB_MODE_IDS.has(sub.id)) }
         : cat
     ));
   }, [showUpperProblems]);
