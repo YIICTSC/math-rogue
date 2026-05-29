@@ -15,6 +15,9 @@ const word = (en: string, jp: string, scene: string, exampleEn?: string, example
   exampleJp,
 });
 
+const words = (scene: string, entries: Array<[string, string]>): EnglishWordItem[] =>
+  entries.map(([en, jp]) => word(en, jp, scene));
+
 const buildVocabularyUnit = (items: EnglishWordItem[], label: string): GeneralProblem[] => {
   const words = uniqueEnglishWordItems(items);
   return cycleProblems([
@@ -291,6 +294,177 @@ const G9_WORDS: EnglishWordItem[] = [
   word('respect', '尊重する', '中3 スピーチ', 'We should respect each other.', '私たちは互いを尊重すべきです。'),
 ];
 
+const G3_REQUIRED_SUPPLEMENT = [
+  ...words('小3 必修相当 あいさつ・教室', [
+    ['good morning', 'おはよう'], ['good afternoon', 'こんにちは'], ['good night', 'おやすみ'],
+    ['please', 'どうぞ'], ['sorry', 'ごめんなさい'], ['okay', 'だいじょうぶ'], ['nice', 'すてきな'],
+    ['name', '名前'], ['teacher', '先生'], ['student', '児童'], ['school', '学校'], ['class', '授業'],
+  ]),
+  ...words('小3 必修相当 色・形・身近な物', [
+    ['pink', 'ピンク'], ['orange', 'オレンジ色'], ['brown', '茶色'], ['purple', '紫'],
+    ['circle', '円'], ['triangle', '三角形'], ['square', '正方形'], ['star', '星'],
+    ['book', '本'], ['bag', 'かばん'], ['desk', '机'], ['chair', 'いす'], ['box', '箱'],
+  ]),
+  ...words('小3 必修相当 動物・食べ物・体', [
+    ['lion', 'ライオン'], ['tiger', 'トラ'], ['elephant', 'ゾウ'], ['monkey', 'サル'],
+    ['horse', '馬'], ['cow', '牛'], ['pig', 'ブタ'], ['chicken', 'ニワトリ'],
+    ['mandarin orange', 'ミカン'], ['grape', 'ブドウ'], ['peach', 'モモ'], ['water', '水'],
+    ['mouth', '口'], ['nose', '鼻'], ['ear', '耳'], ['leg', '脚'], ['arm', '腕'],
+  ]),
+  ...words('小3 必修相当 数・動作', [
+    ['eleven', '11'], ['twelve', '12'], ['thirteen', '13'], ['fourteen', '14'], ['fifteen', '15'],
+    ['sixteen', '16'], ['seventeen', '17'], ['eighteen', '18'], ['nineteen', '19'], ['twenty', '20'],
+    ['walk', '歩く'], ['stop', '止まる'], ['look', '見る'], ['touch', 'さわる'], ['clap', '手をたたく'],
+  ]),
+];
+
+const G4_REQUIRED_SUPPLEMENT = [
+  ...words('小4 必修相当 生活・時刻', [
+    ['today', '今日'], ['tomorrow', '明日'], ['yesterday', '昨日'], ['time', '時刻'],
+    ['hour', '時間'], ['minute', '分'], ["o'clock", 'ちょうどの時刻'], ['wake up', '起きる'],
+    ['go home', '家に帰る'], ['take a bath', '風呂に入る'], ['sleep', '眠る'],
+  ]),
+  ...words('小4 必修相当 教科・学校', [
+    ['English', '英語'], ['Japanese', '国語'], ['social studies', '社会'], ['P.E.', '体育'],
+    ['home economics', '家庭科'], ['calligraphy', '書写'], ['computer', 'コンピューター'],
+    ['playground', '校庭'], ['schoolyard', '運動場'], ['music room', '音楽室'], ['science room', '理科室'],
+  ]),
+  ...words('小4 必修相当 場所・町', [
+    ['store', '店'], ['restaurant', 'レストラン'], ['post office', '郵便局'], ['bank', '銀行'],
+    ['police box', '交番'], ['bus stop', 'バス停'], ['zoo', '動物園'], ['pool', 'プール'],
+  ]),
+  ...words('小4 必修相当 食べ物・文化', [
+    ['curry', 'カレー'], ['noodle', 'めん'], ['egg', '卵'], ['meat', '肉'], ['grilled fish', '焼き魚'],
+    ['vegetable', '野菜'], ['cake', 'ケーキ'], ['ice cream', 'アイスクリーム'], ['juice', 'ジュース'],
+    ['chopsticks', 'はし'], ['drum', '太鼓'], ['fireworks', '花火'], ['tea ceremony', '茶道'],
+  ]),
+];
+
+const G5_REQUIRED_SUPPLEMENT = [
+  ...words('小5 必修相当 家族・人物', [
+    ['father', '父'], ['mother', '母'], ['brother', '兄弟'], ['sister', '姉妹'],
+    ['grandfather', '祖父'], ['grandmother', '祖母'], ['uncle', 'おじ'], ['aunt', 'おば'],
+    ['cousin', 'いとこ'], ['neighbor', '近所の人'],
+  ]),
+  ...words('小5 必修相当 学校生活・持ち物', [
+    ['subject', '教科'], ['test', 'テスト'], ['question', '質問'], ['answer', '答え'],
+    ['lesson', '授業'], ['schedule', '予定'], ['calendar', 'カレンダー'], ['marker', 'マーカー'],
+    ['scissors', 'はさみ'], ['glue', 'のり'], ['dictionary', '辞書'], ['map', '地図'],
+  ]),
+  ...words('小5 必修相当 動作・能力', [
+    ['ride', '乗る'], ['skate', 'スケートをする'], ['ski', 'スキーをする'], ['draw', '描く'],
+    ['paint', '絵の具で描く'], ['make', '作る'], ['use', '使う'], ['clean', '掃除する'],
+    ['wash', '洗う'], ['carry', '運ぶ'], ['try', '試す'], ['practice', '練習する'],
+  ]),
+  ...words('小5 必修相当 国・地域', [
+    ['America', 'アメリカ'], ['China', '中国'], ['Korea', '韓国'], ['India', 'インド'],
+    ['Italy', 'イタリア'], ['Spain', 'スペイン'], ['Germany', 'ドイツ'], ['the United Kingdom', 'イギリス'],
+  ]),
+];
+
+const G6_REQUIRED_SUPPLEMENT = [
+  ...words('小6 必修相当 職業・将来', [
+    ['dentist', '歯医者'], ['farmer', '農家'], ['firefighter', '消防士'], ['florist', '花屋'],
+    ['singer', '歌手'], ['writer', '作家'], ['carpenter', '大工'], ['scientist', '科学者'],
+    ['athlete', '運動選手'], ['astronaut', '宇宙飛行士'], ['designer', 'デザイナー'], ['programmer', 'プログラマー'],
+  ]),
+  ...words('小6 必修相当 行事・思い出', [
+    ['ceremony', '式'], ['graduation', '卒業'], ['entrance ceremony', '入学式'], ['sports day', '運動会'],
+    ['school festival', '文化祭'], ['concert', '演奏会'], ['contest', 'コンテスト'], ['speech', 'スピーチ'],
+    ['photo', '写真'], ['album', 'アルバム'], ['team', 'チーム'], ['winner', '勝者'],
+  ]),
+  ...words('小6 必修相当 世界・文化', [
+    ['foreign', '外国の'], ['international', '国際的な'], ['traditional food', '伝統料理'], ['heritage', '遺産'],
+    ['capital', '首都'], ['island', '島'], ['mountain', '山'], ['river', '川'],
+    ['lake', '湖'], ['ocean', '海洋'], ['season', '季節'], ['holiday', '休日'],
+  ]),
+  ...words('小6 必修相当 形容詞・動詞', [
+    ['popular', '人気のある'], ['useful', '役に立つ'], ['kind', '親切な'], ['friendly', '友好的な'],
+    ['exciting', 'わくわくする'], ['wonderful', 'すばらしい'], ['remember', '覚えている'], ['forget', '忘れる'],
+    ['invite', '招待する'], ['join', '参加する'], ['send', '送る'], ['receive', '受け取る'],
+  ]),
+];
+
+const G7_REQUIRED_SUPPLEMENT = [
+  ...words('中1 必修相当 基本名詞', [
+    ['thing', 'もの'], ['place', '場所'], ['people', '人々'], ['city', '市'], ['town', '町'],
+    ['village', '村'], ['street', '通り'], ['room', '部屋'], ['window', '窓'], ['door', 'ドア'],
+    ['picture', '絵'], ['letter', '手紙'], ['email', 'メール'], ['phone', '電話'], ['movie', '映画'],
+    ['song', '歌'], ['sport', 'スポーツ'], ['game', '試合'], ['season', '季節'], ['weekend', '週末'],
+  ]),
+  ...words('中1 必修相当 基本動詞', [
+    ['have', '持っている'], ['want', '欲しい'], ['like', '好む'], ['love', '大好きである'],
+    ['know', '知っている'], ['think', '思う'], ['come', '来る'], ['go', '行く'], ['take', '取る'],
+    ['give', '与える'], ['buy', '買う'], ['meet', '会う'], ['live', '住む'], ['work', '働く'],
+    ['start', '始める'], ['end', '終わる'], ['ask', '尋ねる'], ['tell', '伝える'], ['call', '呼ぶ'],
+  ]),
+  ...words('中1 必修相当 形容詞・副詞', [
+    ['big', '大きい'], ['small', '小さい'], ['long', '長い'], ['short', '短い'],
+    ['new', '新しい'], ['old', '古い'], ['young', '若い'], ['high', '高い'], ['low', '低い'],
+    ['fast', '速い'], ['slow', '遅い'], ['easy', '簡単な'], ['hard', '難しい'], ['busy', '忙しい'],
+    ['free', 'ひまな'], ['again', '再び'], ['together', '一緒に'], ['here', 'ここに'], ['there', 'そこに'],
+  ]),
+  ...words('中1 必修相当 機能語', [
+    ['and', 'そして'], ['or', 'または'], ['but', 'しかし'], ['with', '一緒に'], ['from', 'から'],
+    ['about', 'について'], ['before', '前に'], ['after', '後に'], ['in front of', '前に'], ['next to', '隣に'],
+  ]),
+];
+
+const G8_REQUIRED_SUPPLEMENT = [
+  ...words('中2 必修相当 動詞・熟語', [
+    ['arrive', '到着する'], ['leave', '去る'], ['bring', '持ってくる'], ['borrow', '借りる'], ['lend', '貸す'],
+    ['choose', '選ぶ'], ['collect', '集める'], ['continue', '続ける'], ['follow', '従う'], ['happen', '起こる'],
+    ['invite', '招待する'], ['lose', '失う'], ['move', '動く'], ['return', '戻る'], ['save', '救う'],
+    ['share', '共有する'], ['spend', '費やす'], ['teach', '教える'], ['wear', '身につける'], ['win', '勝つ'],
+  ]),
+  ...words('中2 必修相当 社会・自然', [
+    ['nature', '自然'], ['energy', 'エネルギー'], ['earth', '地球'], ['plant', '植物'], ['animal', '動物'],
+    ['forest', '森林'], ['desert', '砂漠'], ['air', '空気'], ['light', '光'], ['sound', '音'],
+    ['peace', '平和'], ['war', '戦争'], ['rule', '規則'], ['law', '法律'], ['service', 'サービス'],
+    ['news', 'ニュース'], ['article', '記事'], ['Internet', 'インターネット'], ['website', 'ウェブサイト'], ['robot', 'ロボット'],
+  ]),
+  ...words('中2 必修相当 表現・程度', [
+    ['almost', 'ほとんど'], ['enough', '十分な'], ['perhaps', 'おそらく'], ['probably', 'たぶん'],
+    ['especially', '特に'], ['finally', 'ついに'], ['suddenly', '突然'], ['carefully', '注意深く'],
+    ['clearly', '明確に'], ['strongly', '強く'], ['weak', '弱い'], ['rich', '豊かな'], ['poor', '貧しい'],
+    ['safe', '安全な'], ['dangerous', '危険な'], ['necessary', '必要な'],
+  ]),
+];
+
+const G9_REQUIRED_SUPPLEMENT = [
+  ...words('中3 必修相当 抽象語・論理', [
+    ['fact', '事実'], ['truth', '真実'], ['idea', '考え'], ['thought', '考え'], ['view', '見方'],
+    ['point', '要点'], ['purpose', '目的'], ['goal', '目標'], ['result', '結果'], ['effect', '影響'],
+    ['cause', '原因'], ['case', '場合'], ['problem', '問題'], ['issue', '論点'], ['topic', '話題'],
+    ['choice', '選択'], ['change', '変化'], ['difference', '違い'], ['similarity', '類似点'], ['relationship', '関係'],
+  ]),
+  ...words('中3 必修相当 社会・環境', [
+    ['culture shock', 'カルチャーショック'], ['generation', '世代'], ['government', '政府'], ['industry', '産業'],
+    ['medicine', '医学'], ['pollution', '汚染'], ['plastic', 'プラスチック'], ['waste', '廃棄物'],
+    ['reduction', '削減'], ['disaster', '災害'], ['earthquake', '地震'], ['flood', '洪水'],
+    ['refugee', '難民'], ['poverty', '貧困'], ['hunger', '飢餓'], ['healthcare', '医療'],
+  ]),
+  ...words('中3 必修相当 発信・読解', [
+    ['argue', '主張する'], ['agree', '賛成する'], ['disagree', '反対する'], ['describe', '描写する'],
+    ['discuss', '議論する'], ['express', '表現する'], ['include', '含む'], ['mean', '意味する'],
+    ['produce', '生産する'], ['provide', '提供する'], ['realize', '気づく'], ['reduce', '減らす'],
+    ['support', '支える'], ['understand', '理解する'], ['wonder', '疑問に思う'], ['achieve', '達成する'],
+  ]),
+  ...words('中3 必修相当 形容詞・副詞', [
+    ['active', '積極的な'], ['common', '共通の'], ['complete', '完全な'], ['correct', '正しい'],
+    ['different', '異なる'], ['modern', '現代の'], ['natural', '自然な'], ['personal', '個人的な'],
+    ['possible', '可能な'], ['public', '公共の'], ['special', '特別な'], ['serious', '深刻な'],
+  ]),
+];
+
+const G3_REQUIRED_WORDS = [...G3_WORDS, ...G3_REQUIRED_SUPPLEMENT];
+const G4_REQUIRED_WORDS = [...G4_WORDS, ...G4_REQUIRED_SUPPLEMENT];
+const G5_REQUIRED_WORDS = [...G5_WORDS, ...G5_REQUIRED_SUPPLEMENT];
+const G6_REQUIRED_WORDS = [...G6_WORDS, ...G6_REQUIRED_SUPPLEMENT];
+const G7_REQUIRED_WORDS = [...G7_WORDS, ...G7_REQUIRED_SUPPLEMENT];
+const G8_REQUIRED_WORDS = [...G8_WORDS, ...G8_REQUIRED_SUPPLEMENT];
+const G9_REQUIRED_WORDS = [...G9_WORDS, ...G9_REQUIRED_SUPPLEMENT];
+
 const upper = (items: EnglishWordItem[], category: string, level: string, scene: string): EnglishWordItem[] =>
   items.map((item) => ({ ...item, hint: `カテゴリ: ${category} / 難易度: ${level} / 活用場面: ${scene}` }));
 
@@ -401,23 +575,23 @@ const UPPER_TRAVEL = upper([
 ], '旅行・文化', '基礎〜標準', '旅行会話・異文化理解');
 
 export const ENGLISH_GRADE_WORD_BANKS: Record<number, EnglishWordItem[]> = {
-  3: G3_WORDS,
-  4: G4_WORDS,
-  5: G5_WORDS,
-  6: G6_WORDS,
-  7: G7_WORDS,
-  8: G8_WORDS,
-  9: G9_WORDS,
+  3: G3_REQUIRED_WORDS,
+  4: G4_REQUIRED_WORDS,
+  5: G5_REQUIRED_WORDS,
+  6: G6_REQUIRED_WORDS,
+  7: G7_REQUIRED_WORDS,
+  8: G8_REQUIRED_WORDS,
+  9: G9_REQUIRED_WORDS,
 };
 
 export const ENGLISH_GRADE_WORD_UNIT_DATA: Record<string, GeneralProblem[]> = {
-  ENGLISH_G3_WORDS: buildVocabularyUnit(G3_WORDS, '小3英単語'),
-  ENGLISH_G4_WORDS: buildVocabularyUnit(G4_WORDS, '小4英単語'),
-  ENGLISH_G5_WORDS: buildVocabularyUnit(G5_WORDS, '小5英単語'),
-  ENGLISH_G6_WORDS: buildVocabularyUnit(G6_WORDS, '小6英単語'),
-  ENGLISH_G7_WORDS: buildVocabularyUnit(G7_WORDS, '中1英単語'),
-  ENGLISH_G8_WORDS: buildVocabularyUnit(G8_WORDS, '中2英単語'),
-  ENGLISH_G9_WORDS: buildVocabularyUnit(G9_WORDS, '中3英単語'),
+  ENGLISH_G3_WORDS: buildVocabularyUnit(G3_REQUIRED_WORDS, '小3英単語'),
+  ENGLISH_G4_WORDS: buildVocabularyUnit(G4_REQUIRED_WORDS, '小4英単語'),
+  ENGLISH_G5_WORDS: buildVocabularyUnit(G5_REQUIRED_WORDS, '小5英単語'),
+  ENGLISH_G6_WORDS: buildVocabularyUnit(G6_REQUIRED_WORDS, '小6英単語'),
+  ENGLISH_G7_WORDS: buildVocabularyUnit(G7_REQUIRED_WORDS, '中1英単語'),
+  ENGLISH_G8_WORDS: buildVocabularyUnit(G8_REQUIRED_WORDS, '中2英単語'),
+  ENGLISH_G9_WORDS: buildVocabularyUnit(G9_REQUIRED_WORDS, '中3英単語'),
 };
 
 const UPPER_ALL_WORDS = uniqueEnglishWordItems([
