@@ -682,10 +682,63 @@ const G9_MEXT_SCALE_SUPPLEMENT = [
   ]),
 ];
 
+const G5_MEXT_SCALE_SUPPLEMENT = [
+  ...numberWords(21, 30, '小5 指導語数補填 数'),
+  ...nounForms('小5 指導語数補填 身近な名詞', [
+    ['ball', 'ボール'], ['bat', 'バット'], ['bed', 'ベッド'], ['bench', 'ベンチ'], ['bike', '自転車'],
+    ['boat', 'ボート'], ['bus', 'バス'], ['car', '車'], ['clock', '時計'], ['coin', '硬貨'],
+    ['cup', 'カップ'], ['door', 'ドア'], ['drum', '太鼓'], ['flower', '花'], ['gift', '贈り物'],
+    ['glass', 'コップ'], ['hat', '帽子'], ['house', '家'], ['key', '鍵'], ['letter', '手紙'],
+    ['light', '明かり'], ['line', '線'], ['mail', '郵便'], ['pen', 'ペン'], ['photo', '写真'],
+    ['plane', '飛行機'], ['plate', '皿'], ['river', '川'], ['rock', '岩'], ['room', '部屋'],
+  ]),
+  ...verbForms('小5 指導語数補填 基本動作', [
+    ['catch', '捕まえる'], ['close', '閉める'], ['cut', '切る'], ['drink', '飲む'], ['eat', '食べる'],
+    ['find', '見つける'], ['fly', '飛ぶ'], ['give', '与える'], ['go', '行く'], ['have', '持つ'],
+    ['hear', '聞こえる'], ['hold', '持つ'], ['kick', 'ける'], ['meet', '会う'], ['put', '置く'],
+    ['see', '見る'], ['sell', '売る'], ['take', '取る'], ['throw', '投げる'], ['want', '欲しい'],
+  ]),
+  ...adjectiveForms('小5 指導語数補填 基本形容詞', [
+    ['bad', '悪い'], ['big', '大きい'], ['cold', '冷たい'], ['fast', '速い'], ['good', 'よい'],
+    ['great', 'すばらしい'], ['hard', 'かたい'], ['high', '高い'], ['hot', '熱い'], ['long', '長い'],
+    ['new', '新しい'], ['old', '古い'], ['rich', '豊かな'], ['small', '小さい'], ['young', '若い'],
+  ]),
+];
+
+const G6_MEXT_SCALE_SUPPLEMENT = [
+  ...nounForms('小6 指導語数補填 学校・地域・自然', [
+    ['airport', '空港'], ['bank', '銀行'], ['bridge', '橋'], ['castle', '城'], ['city', '市'],
+    ['club member', 'クラブ員'], ['coast', '海岸'], ['country', '国'], ['factory', '工場'], ['forest', '森'],
+    ['guide', '案内人'], ['harbor', '港'], ['hill', '丘'], ['hotel', 'ホテル'], ['library card', '図書カード'],
+    ['market', '市場'], ['monument', '記念碑'], ['palace', '宮殿'], ['passport', '旅券'], ['path', '小道'],
+    ['port', '港'], ['program', '番組'], ['schedule', '予定表'], ['shopkeeper', '店員'], ['stadium', '競技場'],
+    ['theater', '劇場'], ['tower', '塔'], ['train', '電車'], ['visitor', '訪問者'], ['volunteer', 'ボランティア'],
+  ]),
+  ...verbForms('小6 指導語数補填 生活・交流動詞', [
+    ['arrive', '到着する'], ['begin', '始まる'], ['build', '建てる'], ['call', '電話する'], ['choose', '選ぶ'],
+    ['collect', '集める'], ['come', '来る'], ['decide', '決める'], ['finish', '終える'], ['follow', '従う'],
+    ['grow', '育つ'], ['guide', '案内する'], ['hope', '望む'], ['leave', '出発する'], ['listen', '聞く'],
+    ['look for', '探す'], ['move', '動く'], ['need', '必要とする'], ['open', '開く'], ['plan', '計画する'],
+    ['read', '読む'], ['show', '見せる'], ['stay', '滞在する'], ['talk', '話す'], ['work', '働く'],
+  ]),
+  ...adjectiveForms('小6 指導語数補填 表現形容詞', [
+    ['careful', '注意深い'], ['colorful', '色鮮やかな'], ['cool', '涼しい'], ['different', '異なる'],
+    ['early', '早い'], ['easy', '簡単な'], ['famous', '有名な'], ['favorite', 'お気に入りの'],
+    ['foreign', '外国の'], ['important', '重要な'], ['large', '大きい'], ['local', '地元の'],
+    ['necessary', '必要な'], ['popular', '人気のある'], ['special', '特別な'], ['useful', '役に立つ'],
+  ]),
+  ...words('小6 指導語数補填 時・順序・表現', [
+    ['after school', '放課後'], ['at home', '家で'], ['by bus', 'バスで'], ['every day', '毎日'],
+    ['for example', '例えば'], ['from Japan', '日本から'], ['in summer', '夏に'], ['in the future', '将来'],
+    ['last year', '昨年'], ['next week', '来週'], ['on foot', '徒歩で'], ['this morning', '今朝'],
+    ['three times', '3回'], ['with friends', '友だちと'], ['would like', 'したい'],
+  ]),
+];
+
 const G3_REQUIRED_WORDS = [...G3_WORDS, ...G3_REQUIRED_SUPPLEMENT];
 const G4_REQUIRED_WORDS = [...G4_WORDS, ...G4_REQUIRED_SUPPLEMENT];
-const G5_REQUIRED_WORDS = [...G5_WORDS, ...G5_REQUIRED_SUPPLEMENT];
-const G6_REQUIRED_WORDS = [...G6_WORDS, ...G6_REQUIRED_SUPPLEMENT];
+const G5_REQUIRED_WORDS = [...G5_WORDS, ...G5_REQUIRED_SUPPLEMENT, ...G5_MEXT_SCALE_SUPPLEMENT];
+const G6_REQUIRED_WORDS = [...G6_WORDS, ...G6_REQUIRED_SUPPLEMENT, ...G6_MEXT_SCALE_SUPPLEMENT];
 const G7_REQUIRED_WORDS = [...G7_WORDS, ...G7_REQUIRED_SUPPLEMENT, ...G7_MEXT_SCALE_SUPPLEMENT];
 const G8_REQUIRED_WORDS = [...G8_WORDS, ...G8_REQUIRED_SUPPLEMENT, ...G8_MEXT_SCALE_SUPPLEMENT];
 const G9_REQUIRED_WORDS = [...G9_WORDS, ...G9_REQUIRED_SUPPLEMENT, ...G9_MEXT_SCALE_SUPPLEMENT];
@@ -799,6 +852,59 @@ const UPPER_TRAVEL = upper([
   word('local cuisine', '郷土料理', '', 'Try the local cuisine.', '郷土料理を試しなさい。'),
 ], '旅行・文化', '基礎〜標準', '旅行会話・異文化理解');
 
+const UPPER_MEXT_SCALE_SUPPLEMENT = [
+  ...nounForms('高校以上 指導語数補填 学術・論説名詞', [
+    ['analysis', '分析'], ['approach', '手法'], ['argument', '議論'], ['assumption', '仮定'], ['background', '背景'],
+    ['benefit', '利益'], ['bias', '偏り'], ['capacity', '能力'], ['circumstance', '状況'], ['claim', '主張'],
+    ['conclusion', '結論'], ['conflict', '対立'], ['consequence', '結果'], ['context', '文脈'], ['criticism', '批判'],
+    ['data', 'データ'], ['debate', '討論'], ['definition', '定義'], ['demand', '需要'], ['detail', '詳細'],
+    ['evidence', '証拠'], ['factor', '要因'], ['feature', '特徴'], ['framework', '枠組み'], ['function', '機能'],
+    ['impact', '影響'], ['inference', '推論'], ['insight', '洞察'], ['interaction', '相互作用'], ['interpretation', '解釈'],
+    ['issue', '論点'], ['limitation', '限界'], ['measure', '手段'], ['outcome', '結果'], ['perspective', '観点'],
+    ['phenomenon', '現象'], ['principle', '原理'], ['process', '過程'], ['proposal', '提案'], ['purpose', '目的'],
+    ['reaction', '反応'], ['reference', '参照'], ['response', '反応'], ['role', '役割'], ['source', '情報源'],
+    ['strategy', '戦略'], ['structure', '構造'], ['tendency', '傾向'], ['theory', '理論'], ['trend', '傾向'],
+  ]),
+  ...verbForms('高校以上 指導語数補填 読解・表現動詞', [
+    ['analyze', '分析する'], ['assess', '評価する'], ['assume', '仮定する'], ['clarify', '明確にする'], ['classify', '分類する'],
+    ['compare', '比較する'], ['conclude', '結論づける'], ['confirm', '確認する'], ['construct', '構築する'], ['criticize', '批判する'],
+    ['define', '定義する'], ['demonstrate', '示す'], ['derive', '導き出す'], ['determine', '決定する'], ['emphasize', '強調する'],
+    ['evaluate', '評価する'], ['examine', '調べる'], ['expand', '拡大する'], ['identify', '特定する'], ['illustrate', '説明する'],
+    ['imply', '暗示する'], ['indicate', '示す'], ['infer', '推論する'], ['interpret', '解釈する'], ['investigate', '調査する'],
+    ['justify', '正当化する'], ['maintain', '維持する'], ['obtain', '得る'], ['predict', '予測する'], ['propose', '提案する'],
+    ['refer', '言及する'], ['reflect', '反映する'], ['reject', '拒否する'], ['reveal', '明らかにする'], ['summarize', '要約する'],
+  ]),
+  ...adjectiveForms('高校以上 指導語数補填 論説形容詞', [
+    ['abstract', '抽象的な'], ['accurate', '正確な'], ['appropriate', '適切な'], ['available', '利用可能な'], ['beneficial', '有益な'],
+    ['complex', '複雑な'], ['consistent', '一貫した'], ['critical', '批判的な'], ['current', '現在の'], ['effective', '効果的な'],
+    ['efficient', '効率的な'], ['essential', '不可欠な'], ['evident', '明白な'], ['flexible', '柔軟な'], ['fundamental', '根本的な'],
+    ['independent', '独立した'], ['logical', '論理的な'], ['objective', '客観的な'], ['potential', '潜在的な'], ['practical', '実用的な'],
+    ['previous', '以前の'], ['relevant', '関連した'], ['reliable', '信頼できる'], ['significant', '重要な'], ['specific', '具体的な'],
+  ]),
+  ...words('高校以上 指導語数補填 社会・科学・IT・生活', [
+    ['biodiversity', '生物多様性'], ['carbon dioxide', '二酸化炭素'], ['climate change', '気候変動'], ['conservation', '保全'],
+    ['emission', '排出'], ['fossil fuel', '化石燃料'], ['renewable energy', '再生可能エネルギー'], ['sustainability', '持続可能性'],
+    ['artificial intelligence', '人工知能'], ['automation', '自動化'], ['cybersecurity', 'サイバーセキュリティ'], ['digital divide', 'デジタル格差'],
+    ['innovation', '革新'], ['machine learning', '機械学習'], ['online platform', 'オンライン基盤'], ['privacy policy', '個人情報方針'],
+    ['democracy', '民主主義'], ['diplomacy', '外交'], ['diversity', '多様性'], ['globalization', 'グローバル化'],
+    ['human rights', '人権'], ['inequality', '不平等'], ['migration', '移住'], ['public opinion', '世論'],
+    ['application form', '申込書'], ['appointment', '予約'], ['budgeting', '予算管理'], ['contract', '契約'],
+    ['insurance', '保険'], ['invoice', '請求書'], ['scholarship', '奨学金'], ['workplace', '職場'],
+    ['academic essay', '学術的作文'], ['career path', '進路'], ['entrance examination', '入学試験'], ['field research', '現地調査'],
+    ['presentation skill', '発表技能'], ['research question', '研究課題'], ['source material', '資料'], ['survey result', '調査結果'],
+  ]),
+  ...words('高校以上 指導語数補填 論理接続・慣用表現', [
+    ['above all', 'とりわけ'], ['as a consequence', '結果として'], ['as opposed to', 'とは対照的に'],
+    ['by contrast', '対照的に'], ['due to', 'が原因で'], ['even so', 'それでも'], ['in accordance with', 'に従って'],
+    ['in comparison with', 'と比較して'], ['in terms of', 'の観点から'], ['in the long run', '長期的には'],
+    ['on behalf of', 'を代表して'], ['regardless of', 'に関係なく'], ['so as to', 'するために'], ['to some extent', 'ある程度'],
+    ['with regard to', 'に関して'],
+  ]),
+  ...words('高校以上 指導語数補填 探究・研究', [
+    ['peer review', '査読'], ['statistical significance', '統計的有意性'],
+  ]),
+];
+
 export const ENGLISH_GRADE_WORD_BANKS: Record<number, EnglishWordItem[]> = {
   3: G3_REQUIRED_WORDS,
   4: G4_REQUIRED_WORDS,
@@ -828,6 +934,7 @@ const UPPER_ALL_WORDS = uniqueEnglishWordItems([
   ...UPPER_EXAM,
   ...UPPER_SOCIAL,
   ...UPPER_TRAVEL,
+  ...UPPER_MEXT_SCALE_SUPPLEMENT,
 ]);
 
 export const UPPER_ENGLISH_WORD_UNIT_DATA: Record<string, GeneralProblem[]> = {
