@@ -18,8 +18,89 @@ const word = (en: string, jp: string, scene: string, exampleEn?: string, example
 const words = (scene: string, entries: Array<[string, string]>): EnglishWordItem[] =>
   entries.map(([en, jp]) => word(en, jp, scene));
 
+const pluralize = (en: string) => {
+  if (/(s|x|z|ch|sh)$/.test(en)) return `${en}es`;
+  if (/[^aeiou]y$/.test(en)) return `${en.slice(0, -1)}ies`;
+  if (en.endsWith('f')) return `${en.slice(0, -1)}ves`;
+  if (en.endsWith('fe')) return `${en.slice(0, -2)}ves`;
+  return `${en}s`;
+};
+
+const pastTense = (en: string) => {
+  if (en.endsWith('e')) return `${en}d`;
+  if (/[^aeiou]y$/.test(en)) return `${en.slice(0, -1)}ied`;
+  return `${en}ed`;
+};
+
+const ingForm = (en: string) => {
+  if (en.endsWith('ie')) return `${en.slice(0, -2)}ying`;
+  if (en.endsWith('e') && !en.endsWith('ee')) return `${en.slice(0, -1)}ing`;
+  return `${en}ing`;
+};
+
+const comparative = (en: string) => {
+  if (en.endsWith('y')) return `${en.slice(0, -1)}ier`;
+  if (en.length <= 5) return `${en}er`;
+  return `more ${en}`;
+};
+
+const superlative = (en: string) => {
+  if (en.endsWith('y')) return `${en.slice(0, -1)}iest`;
+  if (en.length <= 5) return `${en}est`;
+  return `the most ${en}`;
+};
+
+const nounForms = (scene: string, entries: Array<[string, string]>): EnglishWordItem[] =>
+  entries.flatMap(([en, jp]) => [
+    word(en, jp, scene),
+    word(pluralize(en), `${jp}（複数）`, scene),
+  ]);
+
+const verbForms = (scene: string, entries: Array<[string, string]>): EnglishWordItem[] =>
+  entries.flatMap(([en, jp]) => [
+    word(en, jp, scene),
+    word(pastTense(en), `${jp}した`, scene),
+    word(ingForm(en), `${jp}している`, scene),
+  ]);
+
+const adjectiveForms = (scene: string, entries: Array<[string, string]>): EnglishWordItem[] =>
+  entries.flatMap(([en, jp]) => [
+    word(en, jp, scene),
+    word(comparative(en), `より${jp}`, scene),
+    word(superlative(en), `最も${jp}`, scene),
+  ]);
+
+const numberWords = (start: number, end: number, scene: string): EnglishWordItem[] => {
+  const ones = ['', 'one', 'two', 'three', 'four', 'five', 'six', 'seven', 'eight', 'nine'];
+  const teens: Record<number, string> = {
+    10: 'ten', 11: 'eleven', 12: 'twelve', 13: 'thirteen', 14: 'fourteen',
+    15: 'fifteen', 16: 'sixteen', 17: 'seventeen', 18: 'eighteen', 19: 'nineteen',
+  };
+  const tens: Record<number, string> = {
+    20: 'twenty', 30: 'thirty', 40: 'forty', 50: 'fifty',
+    60: 'sixty', 70: 'seventy', 80: 'eighty', 90: 'ninety',
+  };
+  const spell = (n: number) => {
+    if (n === 100) return 'one hundred';
+    if (n > 100 && n < 1000) {
+      const h = Math.floor(n / 100);
+      const r = n % 100;
+      return r === 0 ? `${ones[h]} hundred` : `${ones[h]} hundred ${spell(r)}`;
+    }
+    if (n < 10) return ones[n];
+    if (n < 20) return teens[n];
+    const t = Math.floor(n / 10) * 10;
+    const o = n % 10;
+    return o === 0 ? tens[t] : `${tens[t]}-${ones[o]}`;
+  };
+  return Array.from({ length: end - start + 1 }, (_, i) => {
+    const n = start + i;
+    return word(spell(n), `${n}`, scene);
+  });
+};
+
 const buildVocabularyUnit = (items: EnglishWordItem[], label: string): GeneralProblem[] => {
-  const words = uniqueEnglishWordItems(items);
+  const words = uniqueEnglishWordItems(items).filter((item) => item.en && item.jp);
   return cycleProblems([
     ...buildWordUnit(words, {
       listeningPrompt: `${label}を聞いて、英語または意味を選ぼう。`,
@@ -457,13 +538,157 @@ const G9_REQUIRED_SUPPLEMENT = [
   ]),
 ];
 
+const G7_MEXT_SCALE_SUPPLEMENT = [
+  ...numberWords(21, 100, '中1 指導語数補填 数'),
+  ...nounForms('中1 指導語数補填 身近な名詞', [
+    ['airport', '空港'], ['animal', '動物'], ['answer', '答え'], ['area', '地域'], ['beach', '浜辺'],
+    ['bicycle', '自転車'], ['bridge', '橋'], ['building', '建物'], ['camera', 'カメラ'], ['camp', 'キャンプ'],
+    ['card', 'カード'], ['case', '入れ物'], ['center', '中心'], ['chance', '機会'], ['child', '子ども'],
+    ['church', '教会'], ['circle', '輪'], ['college', '大学'], ['corner', '角'], ['country', '国'],
+    ['course', '課程'], ['cup', 'カップ'], ['dictionary', '辞書'], ['dish', '皿'], ['dream', '夢'],
+    ['event', '行事'], ['farm', '農場'], ['field', '野原'], ['floor', '床'], ['garden', '庭'],
+    ['gate', '門'], ['group', '集団'], ['guest', '客'], ['hall', 'ホール'], ['homework', '宿題'],
+    ['hotel', 'ホテル'], ['island', '島'], ['key', '鍵'], ['kitchen', '台所'], ['lake', '湖'],
+    ['market', '市場'], ['member', '一員'], ['mountain', '山'], ['newspaper', '新聞'], ['office', '事務所'],
+    ['page', 'ページ'], ['paper', '紙'], ['parent', '親'], ['party', 'パーティー'], ['person', '人'],
+    ['postcard', 'はがき'], ['present', '贈り物'], ['road', '道路'], ['shop', '店'], ['team', 'チーム'],
+    ['ticket', '切符'], ['tree', '木'], ['uniform', '制服'], ['village', '村'], ['wall', '壁'],
+  ]),
+  ...verbForms('中1 指導語数補填 基本動詞', [
+    ['answer', '答える'], ['arrive', '到着する'], ['believe', '信じる'], ['brush', '磨く'], ['change', '変える'],
+    ['clean', '掃除する'], ['climb', '登る'], ['cook', '料理する'], ['count', '数える'], ['dance', '踊る'],
+    ['enjoy', '楽しむ'], ['enter', '入る'], ['help', '助ける'], ['hope', '望む'], ['join', '加わる'],
+    ['jump', '跳ぶ'], ['learn', '学ぶ'], ['like', '好む'], ['listen', '聞く'], ['look', '見る'],
+    ['love', '大好きである'], ['need', '必要とする'], ['open', '開ける'], ['paint', '絵を描く'], ['plant', '植える'],
+    ['play', '遊ぶ'], ['practice', '練習する'], ['remember', '覚えている'], ['return', '戻る'], ['save', '救う'],
+    ['show', '見せる'], ['skate', 'スケートする'], ['ski', 'スキーする'], ['smile', 'ほほえむ'], ['start', '始める'],
+    ['stay', '滞在する'], ['study', '勉強する'], ['talk', '話す'], ['travel', '旅行する'], ['try', '試す'],
+    ['turn', '回す'], ['use', '使う'], ['visit', '訪れる'], ['wait', '待つ'], ['walk', '歩く'],
+    ['want', '欲しがる'], ['wash', '洗う'], ['watch', '見る'], ['welcome', '歓迎する'], ['work', '働く'],
+    ['worry', '心配する'], ['carry', '運ぶ'], ['copy', '写す'], ['dry', '乾かす'], ['enjoy', '楽しむ'],
+  ]),
+  ...adjectiveForms('中1 指導語数補填 基本形容詞', [
+    ['bright', '明るい'], ['clean', '清潔な'], ['clear', '明らかな'], ['close', '近い'], ['dark', '暗い'],
+    ['deep', '深い'], ['early', '早い'], ['fine', '元気な'], ['fresh', '新鮮な'], ['full', 'いっぱいの'],
+    ['glad', 'うれしい'], ['heavy', '重い'], ['large', '大きい'], ['light', '軽い'], ['little', '小さい'],
+    ['loud', '大きな音の'], ['nice', 'よい'], ['quiet', '静かな'], ['ready', '準備ができた'], ['short', '短い'],
+    ['slow', 'ゆっくりした'], ['soft', 'やわらかい'], ['strong', '強い'], ['sweet', '甘い'], ['tall', '背が高い'],
+    ['warm', '暖かい'], ['weak', '弱い'], ['wide', '幅が広い'], ['young', '若い'], ['busy', '忙しい'],
+    ['easy', '簡単な'], ['friendly', '親しみやすい'], ['healthy', '健康な'], ['pretty', 'かわいい'], ['sunny', '晴れた'],
+  ]),
+  ...words('中1 指導語数補填 機能語・頻度語', [
+    ['a', '1つの'], ['an', '1つの'], ['the', 'その'], ['this', 'これ'], ['that', 'あれ'],
+    ['these', 'これら'], ['those', 'あれら'], ['all', 'すべて'], ['any', 'どれか'], ['both', '両方'],
+    ['each', 'それぞれ'], ['every', 'すべての'], ['many', '多くの'], ['much', '多くの'], ['some', 'いくつかの'],
+    ['few', '少しの'], ['first', '最初の'], ['second', '2番目の'], ['third', '3番目の'], ['next', '次の'],
+    ['last', '最後の'], ['up', '上へ'], ['down', '下へ'], ['inside', '内側に'], ['outside', '外側に'],
+    ['away', '離れて'], ['back', '戻って'], ['very', 'とても'], ['too', 'あまりに'], ['also', 'また'],
+    ['just', 'ちょうど'], ['now', '今'], ['soon', 'すぐに'], ['then', 'その時'], ['well', '上手に'],
+    ['often', 'しばしば'], ['usually', 'たいてい'], ['sometimes', '時々'], ['never', '決してない'], ['maybe', 'たぶん'],
+  ]),
+];
+
+const G8_MEXT_SCALE_SUPPLEMENT = [
+  ...numberWords(101, 200, '中2 指導語数補填 大きな数'),
+  ...nounForms('中2 指導語数補填 社会・自然名詞', [
+    ['accident', '事故'], ['activity', '活動'], ['address', '住所'], ['advice', '助言'], ['age', '年齢'],
+    ['article', '記事'], ['attention', '注意'], ['battery', '電池'], ['business', '仕事'], ['calendar', 'カレンダー'],
+    ['capital', '首都'], ['character', '登場人物'], ['community', '地域社会'], ['competition', '競争'], ['conversation', '会話'],
+    ['custom', '習慣'], ['danger', '危険'], ['decision', '決定'], ['degree', '程度'], ['direction', '方向'],
+    ['earth', '地球'], ['energy', 'エネルギー'], ['environment', '環境'], ['experience', '経験'], ['factory', '工場'],
+    ['festival', '祭り'], ['future', '未来'], ['habit', '習慣'], ['history', '歴史'], ['hospital', '病院'],
+    ['industry', '産業'], ['information', '情報'], ['language', '言語'], ['machine', '機械'], ['medicine', '薬'],
+    ['message', '伝言'], ['museum', '博物館'], ['nature', '自然'], ['opinion', '意見'], ['planet', '惑星'],
+    ['problem', '問題'], ['program', '番組'], ['reason', '理由'], ['record', '記録'], ['rule', '規則'],
+    ['science', '科学'], ['service', 'サービス'], ['space', '宇宙'], ['station', '駅'], ['subject', '教科'],
+    ['temperature', '温度'], ['tradition', '伝統'], ['traffic', '交通'], ['training', '訓練'], ['volunteer', 'ボランティア'],
+  ]),
+  ...verbForms('中2 指導語数補填 一般動詞', [
+    ['accept', '受け入れる'], ['add', '加える'], ['appear', '現れる'], ['borrow', '借りる'], ['check', '確認する'],
+    ['collect', '集める'], ['communicate', '伝え合う'], ['compare', '比較する'], ['complete', '完成させる'], ['connect', 'つなぐ'],
+    ['continue', '続ける'], ['control', '制御する'], ['cover', '覆う'], ['create', '創造する'], ['decide', '決める'],
+    ['describe', '描写する'], ['discover', '発見する'], ['discuss', '議論する'], ['encourage', '励ます'], ['explain', '説明する'],
+    ['follow', '従う'], ['happen', '起こる'], ['imagine', '想像する'], ['improve', '改善する'], ['include', '含む'],
+    ['introduce', '紹介する'], ['invite', '招待する'], ['miss', '逃す'], ['notice', '気づく'], ['order', '注文する'],
+    ['prepare', '準備する'], ['protect', '守る'], ['provide', '提供する'], ['receive', '受け取る'], ['record', '記録する'],
+    ['recycle', 'リサイクルする'], ['reduce', '減らす'], ['refuse', '断る'], ['repair', '修理する'], ['report', '報告する'],
+    ['respect', '尊重する'], ['search', '探す'], ['share', '共有する'], ['solve', '解決する'], ['support', '支援する'],
+    ['surprise', '驚かせる'], ['train', '訓練する'], ['translate', '翻訳する'], ['travel', '旅行する'], ['volunteer', '志願する'],
+    ['wonder', '疑問に思う'], ['change', '変化する'], ['hope', '望む'], ['plan', '計画する'], ['reach', '到着する'],
+  ]),
+  ...adjectiveForms('中2 指導語数補填 形容詞', [
+    ['afraid', '恐れている'], ['alone', '一人の'], ['amazing', '驚くべき'], ['careful', '注意深い'], ['colorful', '色鮮やかな'],
+    ['common', '共通の'], ['cool', '涼しい'], ['dangerous', '危険な'], ['delicious', 'おいしい'], ['different', '異なる'],
+    ['exciting', 'わくわくする'], ['expensive', '高価な'], ['famous', '有名な'], ['foreign', '外国の'], ['important', '重要な'],
+    ['interested', '興味がある'], ['interesting', 'おもしろい'], ['kind', '親切な'], ['local', '地元の'], ['main', '主な'],
+    ['natural', '自然の'], ['necessary', '必要な'], ['popular', '人気のある'], ['possible', '可能な'], ['safe', '安全な'],
+    ['similar', '似ている'], ['special', '特別な'], ['traditional', '伝統的な'], ['useful', '役に立つ'], ['wonderful', 'すばらしい'],
+  ]),
+  ...words('中2 指導語数補填 副詞・接続表現', [
+    ['actually', '実際に'], ['almost', 'ほとんど'], ['already', 'すでに'], ['carefully', '注意深く'], ['clearly', '明確に'],
+    ['easily', '簡単に'], ['finally', 'ついに'], ['hardly', 'ほとんどない'], ['probably', 'おそらく'], ['quickly', 'すばやく'],
+    ['really', '本当に'], ['recently', '最近'], ['safely', '安全に'], ['slowly', 'ゆっくりと'], ['suddenly', '突然'],
+    ['without', 'なしで'], ['within', '以内に'], ['through', '通って'], ['across', '横切って'], ['among', 'の間で'],
+    ['during', 'の間に'], ['until', 'まで'], ['although', 'けれども'], ['while', 'する間に'], ['if', 'もし'],
+    ['because of', 'のために'], ['such as', 'のような'], ['for example', '例えば'], ['at first', '最初は'], ['at last', 'ついに'],
+    ['one day', 'ある日'], ['these days', '近ごろ'], ['some day', 'いつか'], ['right now', '今すぐ'], ['of course', 'もちろん'],
+  ]),
+];
+
+const G9_MEXT_SCALE_SUPPLEMENT = [
+  ...numberWords(201, 300, '中3 指導語数補填 大きな数'),
+  ...nounForms('中3 指導語数補填 抽象・社会名詞', [
+    ['ability', '能力'], ['advantage', '利点'], ['agreement', '合意'], ['article', '論説'], ['attitude', '態度'],
+    ['behavior', '行動'], ['cause', '原因'], ['challenge', '課題'], ['choice', '選択'], ['climate', '気候'],
+    ['communication', '意思疎通'], ['condition', '状態'], ['culture', '文化'], ['development', '発展'], ['difference', '違い'],
+    ['difficulty', '困難'], ['disadvantage', '欠点'], ['education', '教育'], ['effort', '努力'], ['effect', '効果'],
+    ['example', '例'], ['government', '政府'], ['health', '健康'], ['human', '人間'], ['increase', '増加'],
+    ['influence', '影響'], ['knowledge', '知識'], ['level', '水準'], ['life', '生活'], ['meaning', '意味'],
+    ['method', '方法'], ['mind', '心'], ['peace', '平和'], ['pollution', '汚染'], ['population', '人口'],
+    ['purpose', '目的'], ['relationship', '関係'], ['resource', '資源'], ['responsibility', '責任'], ['result', '結果'],
+    ['right', '権利'], ['society', '社会'], ['solution', '解決策'], ['technology', '技術'], ['value', '価値'],
+  ]),
+  ...verbForms('中3 指導語数補填 発信・読解動詞', [
+    ['achieve', '達成する'], ['affect', '影響する'], ['agree', '賛成する'], ['allow', '許す'], ['argue', '主張する'],
+    ['avoid', '避ける'], ['consider', 'よく考える'], ['continue', '継続する'], ['depend', '依存する'], ['develop', '発展させる'],
+    ['educate', '教育する'], ['exist', '存在する'], ['express', '表現する'], ['increase', '増加する'], ['influence', '影響を与える'],
+    ['mention', '言及する'], ['organize', '組織する'], ['produce', '生産する'], ['realize', '気づく'], ['recognize', '認識する'],
+    ['relate', '関連する'], ['remain', '残る'], ['require', '必要とする'], ['respond', '応答する'], ['result', '結果として起こる'],
+    ['separate', '分ける'], ['solve', '解く'], ['suppose', '仮定する'], ['treat', '扱う'], ['unite', '団結させる'],
+    ['compare', '比較する'], ['conclude', '結論づける'], ['define', '定義する'], ['estimate', '見積もる'], ['examine', '調べる'],
+    ['imagine', '想像する'], ['improve', '改善する'], ['include', '含む'], ['protect', '保護する'], ['support', '支持する'],
+    ['suggest', '提案する'], ['reduce', '削減する'], ['respect', '尊重する'], ['discuss', '議論する'], ['explain', '説明する'],
+  ]),
+  ...adjectiveForms('中3 指導語数補填 論説形容詞', [
+    ['active', '積極的な'], ['basic', '基本的な'], ['central', '中心的な'], ['certain', '確かな'], ['complete', '完全な'],
+    ['correct', '正しい'], ['cultural', '文化的な'], ['direct', '直接の'], ['economic', '経済の'], ['educational', '教育の'],
+    ['environmental', '環境の'], ['equal', '等しい'], ['general', '一般的な'], ['global', '地球規模の'], ['individual', '個々の'],
+    ['international', '国際的な'], ['major', '主要な'], ['modern', '現代の'], ['national', '国の'], ['personal', '個人的な'],
+    ['political', '政治の'], ['positive', '前向きな'], ['public', '公共の'], ['recent', '最近の'], ['serious', '深刻な'],
+    ['social', '社会の'], ['successful', '成功した'], ['sustainable', '持続可能な'], ['valuable', '価値ある'], ['various', 'さまざまな'],
+  ]),
+  ...words('中3 指導語数補填 論理・談話表現', [
+    ['according to', 'によれば'], ['as a result', '結果として'], ['at the same time', '同時に'], ['both A and B', 'AもBも'],
+    ['either A or B', 'AかBのどちらか'], ['neither A nor B', 'AもBもない'], ['not only A but also B', 'AだけでなくBも'],
+    ['in order to', 'するために'], ['so that', 'するように'], ['even if', 'たとえしても'], ['even though', 'にもかかわらず'],
+    ['as soon as', 'するとすぐに'], ['as long as', 'する限り'], ['in addition', '加えて'], ['in fact', '実際には'],
+    ['in my opinion', '私の意見では'], ['on the other hand', '一方で'], ['for this reason', 'この理由で'],
+    ['to begin with', 'まず初めに'], ['to sum up', '要約すると'], ['however', 'しかしながら'], ['therefore', 'したがって'],
+    ['moreover', 'さらに'], ['besides', 'そのうえ'], ['instead', 'その代わりに'], ['otherwise', 'さもなければ'],
+    ['especially', '特に'], ['generally', '一般的に'], ['personally', '個人的には'], ['seriously', '真剣に'],
+    ['fortunately', '幸運にも'], ['unfortunately', '残念ながら'], ['gradually', '徐々に'], ['completely', '完全に'],
+    ['correctly', '正しく'], ['directly', '直接に'], ['effectively', '効果的に'], ['mainly', '主に'],
+    ['nearly', 'ほとんど'], ['simply', '単に'], ['there', 'そこで'], ['whether', 'かどうか'],
+  ]),
+];
+
 const G3_REQUIRED_WORDS = [...G3_WORDS, ...G3_REQUIRED_SUPPLEMENT];
 const G4_REQUIRED_WORDS = [...G4_WORDS, ...G4_REQUIRED_SUPPLEMENT];
 const G5_REQUIRED_WORDS = [...G5_WORDS, ...G5_REQUIRED_SUPPLEMENT];
 const G6_REQUIRED_WORDS = [...G6_WORDS, ...G6_REQUIRED_SUPPLEMENT];
-const G7_REQUIRED_WORDS = [...G7_WORDS, ...G7_REQUIRED_SUPPLEMENT];
-const G8_REQUIRED_WORDS = [...G8_WORDS, ...G8_REQUIRED_SUPPLEMENT];
-const G9_REQUIRED_WORDS = [...G9_WORDS, ...G9_REQUIRED_SUPPLEMENT];
+const G7_REQUIRED_WORDS = [...G7_WORDS, ...G7_REQUIRED_SUPPLEMENT, ...G7_MEXT_SCALE_SUPPLEMENT];
+const G8_REQUIRED_WORDS = [...G8_WORDS, ...G8_REQUIRED_SUPPLEMENT, ...G8_MEXT_SCALE_SUPPLEMENT];
+const G9_REQUIRED_WORDS = [...G9_WORDS, ...G9_REQUIRED_SUPPLEMENT, ...G9_MEXT_SCALE_SUPPLEMENT];
 
 const upper = (items: EnglishWordItem[], category: string, level: string, scene: string): EnglishWordItem[] =>
   items.map((item) => ({ ...item, hint: `カテゴリ: ${category} / 難易度: ${level} / 活用場面: ${scene}` }));
