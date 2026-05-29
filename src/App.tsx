@@ -8802,6 +8802,10 @@ const App: React.FC = () => {
     const applyTreasureRewardsToPlayer = useCallback((player: Player, rewards: RewardItem[], addCurse: boolean): Player => {
         const nextPlayer = { ...player, relicCounters: { ...player.relicCounters } };
         rewards.forEach(item => {
+            if (item.type === 'CARD' && item.value) {
+                addCardToDeckWithRelics(nextPlayer, item.value, { addToDiscard: true });
+                return;
+            }
             if (item.type === 'GOLD') {
                 nextPlayer.gold += item.value;
                 return;
@@ -8828,6 +8832,18 @@ const App: React.FC = () => {
             addCardToDeckWithRelics(nextPlayer, curse, { addToDiscard: true });
         }
         return nextPlayer;
+    }, []);
+    const buildTreasurePenaltyReward = useCallback((): RewardItem => {
+        const penaltyCards = [
+            ...Object.values(STATUS_CARDS).filter(card => card.type === CardType.STATUS && card.unplayable),
+            ...Object.values(CURSE_CARDS),
+        ];
+        const penaltyCard = shuffle([...penaltyCards])[0];
+        return {
+            type: 'CARD',
+            value: { ...penaltyCard, id: `treasure-penalty-card-${Date.now()}-${Math.random().toString(36).slice(2, 8)}` },
+            id: `treasure-penalty-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        };
     }, []);
     const buildTreasureRewardBundle = useCallback((): RewardItem[] => {
         const rewards: RewardItem[] = [];
@@ -8894,12 +8910,16 @@ const App: React.FC = () => {
         if (gameState.challengeMode === 'COOP') return;
         if (treasureOpened) return;
         const hasCursedKey = !!gameState.player.relics.find(r => r.id === 'CURSED_KEY');
+        const resolvedRewards = Math.random() < 0.1
+            ? [...treasureRewards, buildTreasurePenaltyReward()]
+            : treasureRewards;
+        setTreasureRewards(resolvedRewards);
         setTreasureOpened(true);
         setGameState(prev => ({
             ...prev,
-            player: applyTreasureRewardsToPlayer(prev.player, treasureRewards, hasCursedKey)
+            player: applyTreasureRewardsToPlayer(prev.player, resolvedRewards, hasCursedKey)
         }));
-    }, [applyTreasureRewardsToPlayer, gameState.challengeMode, gameState.player.relics, treasureOpened, treasureRewards]);
+    }, [applyTreasureRewardsToPlayer, buildTreasurePenaltyReward, gameState.challengeMode, gameState.player.relics, treasureOpened, treasureRewards]);
     const handleTreasureClaim = useCallback((poolId: string) => {
         if (gameState.challengeMode !== 'COOP' || !coopSession) return;
         if (!coopSession.isHost) {
