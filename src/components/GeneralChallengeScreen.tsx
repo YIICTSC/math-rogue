@@ -36,6 +36,7 @@ type BrowserSpeechRecognition = {
   onend: (() => void) | null;
   start: () => void;
   stop: () => void;
+  abort?: () => void;
 };
 
 declare global {
@@ -76,6 +77,8 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
   const visualCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const recognitionRef = useRef<BrowserSpeechRecognition | null>(null);
+  const speechSynthSettlingTimerRef = useRef<number | null>(null);
+  const speechStartInProgressRef = useRef(false);
   const [mapSymbolImageFailed, setMapSymbolImageFailed] = useState(false);
   const currentProblem = problems[currentProblemIndex];
   const mapSymbolAsset =
@@ -240,16 +243,69 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
     return false;
   }, []);
 
+  const stopSpeechSynthesis = useCallback((settleMs = 0) => new Promise<void>((resolve) => {
+    if (!('speechSynthesis' in window)) {
+      resolve();
+      return;
+    }
+
+    window.speechSynthesis.cancel();
+
+    if (speechSynthSettlingTimerRef.current) {
+      window.clearTimeout(speechSynthSettlingTimerRef.current);
+      speechSynthSettlingTimerRef.current = null;
+    }
+
+    const start = Date.now();
+    const waitUntilQuiet = () => {
+      if (!window.speechSynthesis.speaking && !window.speechSynthesis.pending) {
+        speechSynthSettlingTimerRef.current = window.setTimeout(() => {
+          speechSynthSettlingTimerRef.current = null;
+          resolve();
+        }, settleMs);
+        return;
+      }
+
+      if (Date.now() - start > 900) {
+        resolve();
+        return;
+      }
+
+      speechSynthSettlingTimerRef.current = window.setTimeout(waitUntilQuiet, 50);
+    };
+
+    waitUntilQuiet();
+  }), []);
+
+  const primeMicrophonePermission = useCallback(async () => {
+    if (!navigator.mediaDevices?.getUserMedia) return true;
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: {
+          echoCancellation: true,
+          noiseSuppression: true,
+          autoGainControl: false,
+        },
+        video: false,
+      });
+      stream.getTracks().forEach((track) => track.stop());
+      return true;
+    } catch (error) {
+      console.warn('Microphone permission check failed:', error);
+      return false;
+    }
+  }, []);
+
   const speakPrompt = useCallback((text: string, lang = 'ja-JP') => {
-    if (!('speechSynthesis' in window) || !text) return;
+    if (!('speechSynthesis' in window) || !text || isListening) return;
     window.speechSynthesis.cancel();
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = lang;
     utterance.rate = 0.82;
     utterance.pitch = 1.0;
-    utterance.volume = 1.0;
+    utterance.volume = 0.78;
     window.speechSynthesis.speak(utterance);
-  }, []);
+  }, [isListening]);
 
   useEffect(() => {
     if (debugSkip) {
@@ -307,10 +363,18 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
   useEffect(() => {
     return () => {
       if (recognitionRef.current) {
-        recognitionRef.current.stop();
+        try {
+          recognitionRef.current.abort?.();
+          recognitionRef.current.stop();
+        } catch (error) {
+          console.warn('Failed to stop speech recognition:', error);
+        }
       }
       if ('speechSynthesis' in window) {
         window.speechSynthesis.cancel();
+      }
+      if (speechSynthSettlingTimerRef.current) {
+        window.clearTimeout(speechSynthSettlingTimerRef.current);
       }
     };
   }, []);
@@ -389,16 +453,35 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
     }
   }, [answerMode, currentProblem, inputAnswer, isAnswered, submitAnswerResult]);
 
-  const startSpeechRecognition = useCallback(() => {
-    if (!currentProblem?.speechPrompt || isAnswered || isListening) return;
+  const startSpeechRecognition = useCallback(async () => {
+    if (!currentProblem?.speechPrompt || isAnswered || isListening || speechStartInProgressRef.current) return;
     const RecognitionCtor = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!RecognitionCtor) {
       setSpeechError('このブラウザでは はつわ判定が つかえません');
       return;
     }
 
+    speechStartInProgressRef.current = true;
     setSpeechError('');
     setSpeechTranscript('');
+    setIsListening(true);
+
+    await stopSpeechSynthesis(180);
+    const microphoneReady = await primeMicrophonePermission();
+    if (!microphoneReady) {
+      setSpeechError('マイクの許可を確認してください');
+      setIsListening(false);
+      speechStartInProgressRef.current = false;
+      return;
+    }
+
+    await new Promise<void>((resolve) => window.setTimeout(resolve, 120));
+
+    if (!currentProblem?.speechPrompt || isAnswered) {
+      setIsListening(false);
+      speechStartInProgressRef.current = false;
+      return;
+    }
 
     const recognition = new RecognitionCtor();
     recognition.lang = currentProblem.speechPrompt.lang || 'en-US';
@@ -429,11 +512,18 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
     };
     recognition.onend = () => {
       setIsListening(false);
+      speechStartInProgressRef.current = false;
     };
     recognitionRef.current = recognition;
-    setIsListening(true);
-    recognition.start();
-  }, [currentProblem, isAnswered, isListening, submitAnswerResult]);
+    try {
+      recognition.start();
+    } catch (error) {
+      console.warn('Speech recognition failed to start:', error);
+      setSpeechError('マイクを開始できませんでした。もう一度押してください');
+      setIsListening(false);
+      speechStartInProgressRef.current = false;
+    }
+  }, [currentProblem, isAnswered, isListening, matchesSpeechPrompt, primeMicrophonePermission, stopSpeechSynthesis, submitAnswerResult]);
 
   useEffect(() => {
     const canvas = visualCanvasRef.current;
@@ -1553,6 +1643,7 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
                     <button
                         type="button"
                         onClick={() => speakPrompt(currentProblem.audioPrompt!.text, currentProblem.audioPrompt!.lang || 'ja-JP')}
+                        disabled={isListening}
                         className="mb-4 inline-flex items-center gap-2 rounded-full border border-cyan-300/50 bg-cyan-500/15 px-4 py-2 text-sm font-bold text-cyan-100 hover:bg-cyan-500/25"
                     >
                         <Volume2 size={18} />

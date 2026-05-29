@@ -46,6 +46,7 @@ const EnglishChallengeScreen: React.FC<EnglishChallengeScreenProps> = ({ onCompl
     const utterance = new SpeechSynthesisUtterance(word);
     utterance.lang = 'en-US';
     utterance.rate = 0.85; 
+    utterance.volume = 0.78;
     window.speechSynthesis.speak(utterance);
   }, []);
 
@@ -106,6 +107,14 @@ const EnglishChallengeScreen: React.FC<EnglishChallengeScreenProps> = ({ onCompl
       return () => clearTimeout(timer);
     }
   }, [currentProblemIndex, problems, speakWord, isAnswered, voiceEnabled]);
+
+  useEffect(() => {
+    return () => {
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel();
+      }
+    };
+  }, []);
 
   const handleAnswer = (option: string) => {
     if (isAnswered) return;
