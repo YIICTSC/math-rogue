@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { CheckCircle, XCircle, Volume2, Mic } from 'lucide-react';
 import { audioService } from '../services/audioService';
-import { GameMode } from '../types';
+import { AnswerMode, GameMode } from '../types';
 import { storageService } from '../services/storageService';
 import { SUBJECT_DATA, GeneralProblem } from '../data/subjectData';
 import { MAP_SYMBOL_ASSET_MAP } from './mapSymbolImageMap';
@@ -13,6 +13,7 @@ interface GeneralChallengeScreenProps {
   mode: GameMode;
   modePool?: string[];
   onModeCorrect?: (mode: string, correctCount: number) => void;
+  answerMode?: AnswerMode;
   debugSkip?: boolean;
   isChallenge?: boolean;
   streak?: number;
@@ -61,17 +62,19 @@ const isEnglishSpeakingReviewMode = (mode: string) =>
   /^ENGLISH_G8_U(11|12|13)$/.test(mode) ||
   /^ENGLISH_G9_U(12|13|14)$/.test(mode);
 
-const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onComplete, mode, modePool, onModeCorrect, debugSkip, isChallenge, streak = 0, rewardHint }) => {
+const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onComplete, mode, modePool, onModeCorrect, answerMode = 'CHOICE', debugSkip, isChallenge, streak = 0, rewardHint }) => {
   const [problems, setProblems] = useState<ExtendedGeneralProblem[]>([]);
   const [currentProblemIndex, setCurrentProblemIndex] = useState(0);
   const [correctCount, setCorrectCount] = useState(0);
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
+  const [inputAnswer, setInputAnswer] = useState('');
   const [isAnswered, setIsAnswered] = useState(false);
   const [feedback, setFeedback] = useState<'CORRECT' | 'WRONG' | null>(null);
   const [isListening, setIsListening] = useState(false);
   const [speechTranscript, setSpeechTranscript] = useState('');
   const [speechError, setSpeechError] = useState('');
   const visualCanvasRef = useRef<HTMLCanvasElement | null>(null);
+  const inputRef = useRef<HTMLInputElement | null>(null);
   const recognitionRef = useRef<BrowserSpeechRecognition | null>(null);
   const [mapSymbolImageFailed, setMapSymbolImageFailed] = useState(false);
   const currentProblem = problems[currentProblemIndex];
@@ -203,6 +206,15 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
       .toLowerCase()
       .trim();
   };
+
+  const normalizeNumberInput = (value: string) => String(value || '')
+    .replace(/[０-９]/g, (char) => String.fromCharCode(char.charCodeAt(0) - 0xFEE0))
+    .replace(/[－ー―]/g, '-')
+    .replace(/[，,]/g, '')
+    .replace(/[\s　]+/g, '')
+    .trim();
+
+  const isNumericAnswer = (value: string) => /^-?\d+$/.test(normalizeNumberInput(value));
 
   const matchesSpeechPrompt = useCallback((transcript: string, speechPrompt: NonNullable<GeneralProblem['speechPrompt']>) => {
     const normalizedTranscript = normalize(transcript);
@@ -338,6 +350,7 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
       } else if (currentProblemIndex < problems.length - 1) {
         setCurrentProblemIndex(prev => prev + 1);
         setSelectedOption(null);
+        setInputAnswer('');
         setIsAnswered(false);
         setFeedback(null);
       } else {
@@ -350,6 +363,31 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
     const isCorrect = normalize(option) === normalize(problems[currentProblemIndex].actualCorrectAnswer);
     submitAnswerResult(isCorrect, option);
   };
+
+  const handleInputSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (!currentProblem || !isNumericAnswer(currentProblem.actualCorrectAnswer)) return;
+    const normalized = normalizeNumberInput(inputAnswer);
+    if (!normalized) return;
+    submitAnswerResult(
+      Number(normalized) === Number(normalizeNumberInput(currentProblem.actualCorrectAnswer)),
+      inputAnswer,
+    );
+  };
+
+  useEffect(() => {
+    if (!isAnswered && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [isAnswered, currentProblemIndex]);
+
+  useEffect(() => {
+    if (!currentProblem || isAnswered || answerMode !== 'INPUT' || !isNumericAnswer(currentProblem.actualCorrectAnswer)) return;
+    const normalized = normalizeNumberInput(inputAnswer);
+    if (normalized && Number(normalized) === Number(normalizeNumberInput(currentProblem.actualCorrectAnswer))) {
+      submitAnswerResult(true, inputAnswer);
+    }
+  }, [answerMode, currentProblem, inputAnswer, isAnswered, submitAnswerResult]);
 
   const startSpeechRecognition = useCallback(() => {
     if (!currentProblem?.speechPrompt || isAnswered || isListening) return;
@@ -1587,7 +1625,30 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
                 )}
             </div>
 
-            {!currentProblem.speechPrompt?.freeResponse && (
+            {!currentProblem.speechPrompt?.freeResponse && answerMode === 'INPUT' && isNumericAnswer(currentProblem.actualCorrectAnswer) && (
+            <form onSubmit={handleInputSubmit} className="w-full space-y-3">
+                <input
+                    ref={inputRef}
+                    value={inputAnswer}
+                    onChange={(event) => setInputAnswer(event.target.value)}
+                    disabled={isAnswered}
+                    autoFocus
+                    inputMode="numeric"
+                    pattern="[-0-9０-９－ー―,，\s]*"
+                    className={`w-full rounded-xl border-4 bg-white px-4 py-4 text-center text-3xl font-black text-slate-950 outline-none transition-colors ${isAnswered ? 'border-slate-400 opacity-80' : 'border-emerald-400 focus:border-yellow-300'}`}
+                    placeholder="答えを入力"
+                />
+                <button
+                    type="submit"
+                    disabled={isAnswered || normalizeNumberInput(inputAnswer) === ''}
+                    className="w-full rounded-xl border-b-4 border-emerald-950 bg-emerald-600 py-3 text-xl font-bold transition-all hover:bg-emerald-500 active:translate-y-1 active:border-b-0 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                    決定
+                </button>
+            </form>
+            )}
+
+            {!currentProblem.speechPrompt?.freeResponse && !(answerMode === 'INPUT' && isNumericAnswer(currentProblem.actualCorrectAnswer)) && (
             <div className="w-full grid grid-cols-2 gap-2 md:gap-3 min-w-0">
                 {currentProblem.options.map((opt, idx) => (
                     <button

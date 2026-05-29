@@ -1,5 +1,5 @@
 import React from 'react';
-import { GameMode, GameScreen } from '../types';
+import { AnswerMode, GameMode, GameScreen } from '../types';
 import { getChallengeScreenForMode } from '../subjectConfig';
 import MathChallengeScreen from './MathChallengeScreen';
 import KanjiChallengeScreen from './KanjiChallengeScreen';
@@ -9,6 +9,7 @@ import GeneralChallengeScreen from './GeneralChallengeScreen';
 interface MiniGameProblemChallengeProps {
   mode: GameMode;
   modePool?: string[];
+  answerMode?: AnswerMode;
   onComplete: (correctCount: number) => void;
   isChallenge?: boolean;
   streak?: number;
@@ -18,6 +19,7 @@ interface MiniGameProblemChallengeProps {
 const MiniGameProblemChallenge: React.FC<MiniGameProblemChallengeProps> = ({
   mode,
   modePool,
+  answerMode = 'CHOICE',
   onComplete,
   isChallenge = false,
   streak = 0,
@@ -38,6 +40,7 @@ const MiniGameProblemChallenge: React.FC<MiniGameProblemChallengeProps> = ({
       <GeneralChallengeScreen
         mode={mode}
         modePool={modePool}
+        answerMode={answerMode}
         onComplete={onComplete}
         isChallenge={isChallenge}
         streak={streak}

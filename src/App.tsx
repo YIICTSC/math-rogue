@@ -11636,6 +11636,7 @@ const App: React.FC = () => {
                         <GeneralChallengeScreen
                             mode={gameState.mode}
                             modePool={gameState.modePool}
+                            answerMode={gameState.answerMode || 'CHOICE'}
                             onModeCorrect={handleModeCorrectProgress}
                             onComplete={handleMathChallengeComplete}
                             debugSkip={isMathDebugSkipped}

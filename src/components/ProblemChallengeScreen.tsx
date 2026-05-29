@@ -506,7 +506,7 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
   const [isQuitting, setIsQuitting] = useState(false);
   const isUnitCategory = selectedCategory.id === 'MATH_GRADES' || selectedCategory.id === 'KOKUGO_GRADES' || selectedCategory.id === 'ENGLISH' || selectedCategory.id === 'SCIENCE' || selectedCategory.id === 'SOCIAL' || selectedCategory.id === 'SUMMARY';
   const problemLanguageMode: LanguageMode = languageMode === 'ENGLISH' ? 'JAPANESE' : languageMode;
-  const canSelectAnswerMode = selectedCategory.id === 'MATH' || selectedCategory.id === 'KANJI' || selectedCategory.id === 'KANKEN' || selectedCategory.id === 'HARD_KANJI';
+  const canSelectAnswerMode = selectedCategory.id === 'MATH' || selectedCategory.id === 'UPPER_MATH' || selectedCategory.id === 'KANJI' || selectedCategory.id === 'KANKEN' || selectedCategory.id === 'HARD_KANJI';
   
   // Voice feature control
   const [voiceEnabled, setVoiceEnabled] = useState(() => storageService.getEnglishVoiceEnabled());
@@ -748,6 +748,7 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
               key={streak}
               mode={challengeSubMode.mode}
               modePool={challengeModePool}
+              answerMode={challengeAnswerMode}
               onModeCorrect={onCorrectAnswers}
               onComplete={handleCompleteOne} 
               isChallenge={true}

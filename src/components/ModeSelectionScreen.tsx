@@ -833,7 +833,7 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
   const defaultDisplayedCategory = displayedCategories[0] || SUBJECT_CATEGORIES[0];
   const isUnitCategory = selectedCategory.id === 'MATH_GRADES' || selectedCategory.id === 'KOKUGO_GRADES' || selectedCategory.id === 'ENGLISH' || selectedCategory.id === 'LIFE' || selectedCategory.id === 'SCIENCE' || selectedCategory.id === 'SOCIAL' || selectedCategory.id === 'SUMMARY';
   const [answerMode, setAnswerMode] = useState<AnswerMode>('CHOICE');
-  const canSelectAnswerMode = selectedCategory.id === 'MATH' || selectedCategory.id === 'KANJI' || selectedCategory.id === 'KANKEN' || selectedCategory.id === 'HARD_KANJI';
+  const canSelectAnswerMode = selectedCategory.id === 'MATH' || selectedCategory.id === 'UPPER_MATH' || selectedCategory.id === 'KANJI' || selectedCategory.id === 'KANKEN' || selectedCategory.id === 'HARD_KANJI';
 
   useEffect(() => {
     const nextCategory = displayedCategories.find((cat) => cat.id === selectedCategory.id) || defaultDisplayedCategory;
