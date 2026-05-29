@@ -44,6 +44,7 @@ import { ENGLISH_G6_DATA } from './subjects/english_g6';
 import { ENGLISH_G7_DATA } from './subjects/english_g7';
 import { ENGLISH_G8_DATA } from './subjects/english_g8';
 import { ENGLISH_G9_DATA } from './subjects/english_g9';
+import { ENGLISH_GRADE_WORD_UNIT_DATA, UPPER_ENGLISH_WORD_UNIT_DATA } from './subjects/english_word_banks';
 import { SCIENCE_GRADE_UNITS } from '../scienceUnitConfig';
 import { SCIENCE_UNIT_DATA as DEDICATED_SCIENCE_UNIT_DATA } from './subjects/science_units';
 import { SOCIAL_GRADE_UNITS } from '../socialUnitConfig';
@@ -96,6 +97,7 @@ const BASE_SUBJECT_DATA: Record<string, GeneralProblem[]> = {
     ...ENGLISH_G7_DATA,
     ...ENGLISH_G8_DATA,
     ...ENGLISH_G9_DATA,
+    ...ENGLISH_GRADE_WORD_UNIT_DATA,
     ...LIFE_G1_DATA,
     ...LIFE_G2_DATA,
     ...SCIENCE_G3_DATA,
@@ -160,6 +162,7 @@ const RAW_SUBJECT_DATA: Record<string, GeneralProblem[]> = {
     ...HIGH_SCHOOL_SOCIETY_SUBJECT_DATA,
     ...HIGH_SCHOOL_ESSAY_SUBJECT_DATA,
     ...HIGH_SCHOOL_PRACTICAL_SUBJECT_DATA,
+    ...UPPER_ENGLISH_WORD_UNIT_DATA,
     ...HIGH_SCHOOL_DEEP_UNIT_DATA,
     ...HIGH_SCHOOL_MASSIVE_UNIT_DATA,
     ...HIGH_SCHOOL_ULTRA_UNIT_DATA,
