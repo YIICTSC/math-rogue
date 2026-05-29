@@ -138,6 +138,8 @@ const shouldClearAllCardRewards = (item: RewardItem) => item.type === 'CARD';
 const LEGACY_VERCEL_HOST = 'math-rogue.vercel.app';
 const PRIMARY_SITE_URL = 'https://yiictsc.github.io/math-rogue/';
 const COOP_VFX_DEBUG_STORAGE_KEY = 'mr.coopVfxDebug';
+const COOP_REALTIME_END_TURN_RESEND_MS = 1200;
+const COOP_REALTIME_AUTO_ADVANCE_MS = 10000;
 const COOP_FINISHER_DISPLAY_MS = 1800;
 
 type LearningRogueElectronApi = {
@@ -882,6 +884,8 @@ const App: React.FC = () => {
     const coopLastBattleActionSignatureRef = useRef<string | null>(null);
     const coopPendingVoiceSyncRef = useRef<boolean | null>(null);
     const coopPendingEndTurnKeyRef = useRef<string | null>(null);
+    const coopEndTurnResendTimerRef = useRef<number | null>(null);
+    const coopRealtimeAutoAdvanceTimerRef = useRef<number | null>(null);
     const coopRemoteFinisherShownAtRef = useRef<number | null>(null);
     const coopRemoteFinisherClearTimerRef = useRef<number | null>(null);
     const coopRemoteEffectClearTimerRef = useRef<number | null>(null);
@@ -913,6 +917,14 @@ const App: React.FC = () => {
             if (coopRemoteEffectClearTimerRef.current) {
                 window.clearTimeout(coopRemoteEffectClearTimerRef.current);
                 coopRemoteEffectClearTimerRef.current = null;
+            }
+            if (coopEndTurnResendTimerRef.current) {
+                window.clearInterval(coopEndTurnResendTimerRef.current);
+                coopEndTurnResendTimerRef.current = null;
+            }
+            if (coopRealtimeAutoAdvanceTimerRef.current) {
+                window.clearTimeout(coopRealtimeAutoAdvanceTimerRef.current);
+                coopRealtimeAutoAdvanceTimerRef.current = null;
             }
         };
     }, []);
@@ -1361,6 +1373,18 @@ const App: React.FC = () => {
         return activeCoopTurnSlot.type !== 'ENEMY' && activeCoopTurnSlot.peerId === coopSelfPeerId;
     }, [activeCoopTurnSlot, coopBattleState, coopSelfPeerId, gameState.challengeMode, gameState.screen]);
     const isCoopHost = gameState.challengeMode === 'COOP' && !!coopSession?.isHost;
+    const getRequiredRealtimeEndPeerIds = useCallback((battleState: CoopBattleState) => {
+        const alivePeerIds = battleState.players
+            .filter(entry => entry.player.currentHp > 0)
+            .map(entry => entry.peerId);
+        if (!coopSession?.isHost) return alivePeerIds;
+        const connectedPeerIds = new Set([
+            ...(coopSelfPeerId ? [coopSelfPeerId] : []),
+            ...p2pService.getConnectedPeerIds()
+        ]);
+        const connectedAlivePeerIds = alivePeerIds.filter(peerId => connectedPeerIds.has(peerId));
+        return connectedAlivePeerIds.length > 0 ? connectedAlivePeerIds : alivePeerIds;
+    }, [coopSelfPeerId, coopSession?.isHost]);
     const coopBattleTurnOwnerLabel = activeCoopTurnSlot?.type === 'ENEMY'
         ? '敵の行動'
         : (coopBattleState?.battleMode === 'REALTIME' ? 'みんなのターン' : activeCoopTurnSlot?.label || '');
@@ -1455,6 +1479,14 @@ const App: React.FC = () => {
         if (gameState.challengeMode === 'COOP') return;
         p2pService.setVoiceEnabled(false).catch(() => undefined);
         coopPendingEndTurnKeyRef.current = null;
+        if (coopEndTurnResendTimerRef.current) {
+            window.clearInterval(coopEndTurnResendTimerRef.current);
+            coopEndTurnResendTimerRef.current = null;
+        }
+        if (coopRealtimeAutoAdvanceTimerRef.current) {
+            window.clearTimeout(coopRealtimeAutoAdvanceTimerRef.current);
+            coopRealtimeAutoAdvanceTimerRef.current = null;
+        }
     }, [gameState.challengeMode]);
     useEffect(() => {
         if (gameState.challengeMode !== 'COOP' || gameState.screen !== GameScreen.BATTLE || gameState.coopBattleState?.battleMode !== 'REALTIME') {
@@ -1465,8 +1497,19 @@ const App: React.FC = () => {
         const turnKey = `${battleState.battleKey}:${battleState.turnCursor}:${battleState.enemyTurnCursor}`;
         if (coopPendingEndTurnKeyRef.current && coopPendingEndTurnKeyRef.current !== turnKey) {
             coopPendingEndTurnKeyRef.current = null;
+            if (coopEndTurnResendTimerRef.current) {
+                window.clearInterval(coopEndTurnResendTimerRef.current);
+                coopEndTurnResendTimerRef.current = null;
+            }
         }
-    }, [gameState.challengeMode, gameState.coopBattleState, gameState.screen]);
+        if (coopSelfPeerId && (battleState.roundEndedPeerIds || []).includes(coopSelfPeerId)) {
+            coopPendingEndTurnKeyRef.current = null;
+            if (coopEndTurnResendTimerRef.current) {
+                window.clearInterval(coopEndTurnResendTimerRef.current);
+                coopEndTurnResendTimerRef.current = null;
+            }
+        }
+    }, [coopSelfPeerId, gameState.challengeMode, gameState.coopBattleState, gameState.screen]);
     useEffect(() => {
         if (!coopSession || !coopSelfPeerId || coopSession.isHost) return;
         const selfParticipant = coopSession.participants.find(participant => participant.peerId === coopSelfPeerId);
@@ -7358,6 +7401,49 @@ const App: React.FC = () => {
         }
         await executeEndTurn();
     }, [broadcastCoopBattleState, coopBattlePlan.enemyActions, coopBattlePlan.nextCursor, coopBattleState, coopSession, gameState.challengeMode, setCoopBattleState]);
+
+    useEffect(() => {
+        if (coopRealtimeAutoAdvanceTimerRef.current) {
+            window.clearTimeout(coopRealtimeAutoAdvanceTimerRef.current);
+            coopRealtimeAutoAdvanceTimerRef.current = null;
+        }
+        if (
+            gameState.challengeMode !== 'COOP' ||
+            gameState.screen !== GameScreen.BATTLE ||
+            !coopSession?.isHost ||
+            !coopBattleState ||
+            coopBattleState.battleMode !== 'REALTIME'
+        ) {
+            return;
+        }
+        const activeSlot = coopBattleState.turnQueue[coopBattleState.turnCursor];
+        if (!activeSlot || activeSlot.type === 'ENEMY') return;
+        const endedPeerIds = coopBattleState.roundEndedPeerIds || [];
+        if (endedPeerIds.length === 0) return;
+        const requiredPeerIds = getRequiredRealtimeEndPeerIds(coopBattleState);
+        if (requiredPeerIds.length === 0 || requiredPeerIds.every(peerId => endedPeerIds.includes(peerId))) {
+            coopRealtimeAutoAdvanceTimerRef.current = window.setTimeout(() => {
+                coopRealtimeAutoAdvanceTimerRef.current = null;
+                const latest = stateRef.current.coopBattleState;
+                const latestSlot = latest?.turnQueue[latest.turnCursor];
+                if (!latest || latest.battleMode !== 'REALTIME' || latestSlot?.type === 'ENEMY') return;
+                void executeQueuedTurnTransition();
+            }, 0);
+            return;
+        }
+        const turnKey = `${coopBattleState.battleKey}:${coopBattleState.turnCursor}:${coopBattleState.enemyTurnCursor}`;
+        coopRealtimeAutoAdvanceTimerRef.current = window.setTimeout(() => {
+            coopRealtimeAutoAdvanceTimerRef.current = null;
+            const latest = stateRef.current.coopBattleState;
+            const latestSlot = latest?.turnQueue[latest.turnCursor];
+            if (!latest || latest.battleMode !== 'REALTIME' || latestSlot?.type === 'ENEMY') return;
+            const latestTurnKey = `${latest.battleKey}:${latest.turnCursor}:${latest.enemyTurnCursor}`;
+            if (latestTurnKey !== turnKey) return;
+            if ((latest.roundEndedPeerIds || []).length === 0) return;
+            void executeQueuedTurnTransition();
+        }, COOP_REALTIME_AUTO_ADVANCE_MS);
+    }, [coopBattleState, coopSession?.isHost, executeQueuedTurnTransition, gameState.challengeMode, gameState.screen, getRequiredRealtimeEndPeerIds]);
+
     useEffect(() => {
         if (gameState.challengeMode !== 'COOP' || gameState.screen !== GameScreen.BATTLE || !coopBattleState || !activeCoopTurnSlot) return;
         const turnKey = `${coopBattleState.battleKey}:${coopBattleState.turnCursor}:${coopBattleState.enemyTurnCursor}:${activeCoopTurnSlot.id}`;
@@ -7393,6 +7479,43 @@ const App: React.FC = () => {
                     return;
                 }
                 coopPendingEndTurnKeyRef.current = turnKey;
+                if (coopEndTurnResendTimerRef.current) {
+                    window.clearInterval(coopEndTurnResendTimerRef.current);
+                }
+                coopEndTurnResendTimerRef.current = window.setInterval(() => {
+                    const latestBattleState = stateRef.current.coopBattleState;
+                    if (
+                        stateRef.current.challengeMode !== 'COOP' ||
+                        stateRef.current.screen !== GameScreen.BATTLE ||
+                        !latestBattleState ||
+                        latestBattleState.battleMode !== 'REALTIME'
+                    ) {
+                        coopPendingEndTurnKeyRef.current = null;
+                        if (coopEndTurnResendTimerRef.current) {
+                            window.clearInterval(coopEndTurnResendTimerRef.current);
+                            coopEndTurnResendTimerRef.current = null;
+                        }
+                        return;
+                    }
+                    const latestTurnKey = `${latestBattleState.battleKey}:${latestBattleState.turnCursor}:${latestBattleState.enemyTurnCursor}`;
+                    if (
+                        latestTurnKey !== turnKey ||
+                        (coopSelfPeerId && (latestBattleState.roundEndedPeerIds || []).includes(coopSelfPeerId))
+                    ) {
+                        coopPendingEndTurnKeyRef.current = null;
+                        if (coopEndTurnResendTimerRef.current) {
+                            window.clearInterval(coopEndTurnResendTimerRef.current);
+                            coopEndTurnResendTimerRef.current = null;
+                        }
+                        return;
+                    }
+                    p2pService.send({
+                        type: 'COOP_END_TURN',
+                        player: stateRef.current.player,
+                        selectedEnemyId: stateRef.current.selectedEnemyId,
+                        battleState: latestBattleState
+                    });
+                }, COOP_REALTIME_END_TURN_RESEND_MS);
             }
             p2pService.send({
                 type: 'COOP_END_TURN',
@@ -7408,7 +7531,7 @@ const App: React.FC = () => {
                 const nextEnded = [...(gameState.coopBattleState.roundEndedPeerIds || []), coopSelfPeerId];
                 const nextBattleState: CoopBattleState = { ...gameState.coopBattleState, roundEndedPeerIds: nextEnded };
                 setCoopBattleState(nextBattleState);
-                const alivePeerIds = nextBattleState.players.filter(entry => entry.player.currentHp > 0).map(entry => entry.peerId);
+                const alivePeerIds = getRequiredRealtimeEndPeerIds(nextBattleState);
                 const allEnded = alivePeerIds.every(peerId => nextEnded.includes(peerId));
                 if (allEnded) {
                     window.setTimeout(() => {
@@ -9598,7 +9721,7 @@ const App: React.FC = () => {
                 const nextEnded = Array.from(new Set([...(nextBattleState.roundEndedPeerIds || []), fromPeerId]));
                 const updatedBattleState: CoopBattleState = { ...nextBattleState, roundEndedPeerIds: nextEnded };
                 setCoopBattleState(updatedBattleState);
-                const alivePeerIds = updatedBattleState.players.filter(entry => entry.player.currentHp > 0).map(entry => entry.peerId);
+                const alivePeerIds = getRequiredRealtimeEndPeerIds(updatedBattleState);
                 const allEnded = alivePeerIds.every(peerId => nextEnded.includes(peerId));
                 if (allEnded) {
                     window.setTimeout(() => {
@@ -9633,7 +9756,7 @@ const App: React.FC = () => {
                 actingEnemyId: payload.actingEnemyId ?? null
             });
         }
-    }, [appendCoopVfxDebugLog, battleFinisherCutinCard, broadcastCoopBattleState, executeQueuedTurnTransition, gameState.activeEffects, gameState.coopBattleState, gameState.combatLog, gameState.enemies, gameState.selectedEnemyId, inferRemoteCoopBattleEffects, registerCoopChain, resolveBattleVictory, setCoopBattleState, upsertCoopPlayerSnapshot]);
+    }, [appendCoopVfxDebugLog, battleFinisherCutinCard, broadcastCoopBattleState, executeQueuedTurnTransition, gameState.activeEffects, gameState.coopBattleState, gameState.combatLog, gameState.enemies, gameState.selectedEnemyId, getRequiredRealtimeEndPeerIds, inferRemoteCoopBattleEffects, registerCoopChain, resolveBattleVictory, setCoopBattleState, upsertCoopPlayerSnapshot]);
     useEffect(() => {
         if (!coopSession || gameState.challengeMode !== 'COOP' || gameState.screen === GameScreen.COOP_SETUP) return;
 
