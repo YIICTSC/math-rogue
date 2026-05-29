@@ -36,7 +36,7 @@ interface SelectableUnitOption {
 }
 
 const UNIT_MASTERY_TARGET = 100;
-const UPPER_KANJI_SUB_MODE_IDS = new Set(['K10', 'K11', 'K12']);
+export const UPPER_KANJI_SUB_MODE_IDS = new Set(['K10', 'K11', 'K12']);
 const HARD_KANJI_SUB_MODE_IDS = new Set([
   'HK_JUKUJIKUN',
   'HK_FLORA',
@@ -48,7 +48,7 @@ const HARD_KANJI_SUB_MODE_IDS = new Set([
   'HK_HISTORY',
   'HK_MIXED',
 ]);
-const UPPER_PROBLEM_CATEGORIES: SubjectCategoryConfig[] = [
+export const UPPER_PROBLEM_CATEGORIES: SubjectCategoryConfig[] = [
   {
     id: 'HARD_KANJI',
     name: '難読漢字',

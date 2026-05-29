@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { AnswerMode, GameMode, LanguageMode, GameScreen } from '../types';
 import { storageService } from '../services/storageService';
 import { audioService } from '../services/audioService';
@@ -16,6 +16,7 @@ import { SOCIAL_GRADE_UNITS, getSocialGradeMode } from '../socialUnitConfig';
 import { trans, transProblemSubjectName } from '../utils/textUtils';
 import { assetUrl } from '../utils/assetPaths';
 import { saveAnswerModePreference } from '../utils/answerMode';
+import { UPPER_KANJI_SUB_MODE_IDS, UPPER_PROBLEM_CATEGORIES } from './ModeSelectionScreen';
 
 interface ProblemChallengeScreenProps {
   onBack: () => void;
@@ -501,13 +502,35 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
   const [selectedMathUnitIds, setSelectedMathUnitIds] = useState<string[]>([]);
   const [selectedBgmId, setSelectedBgmId] = useState('random');
   const [answerMode, setAnswerMode] = useState<AnswerMode>('CHOICE');
+  const [showUpperProblems, setShowUpperProblems] = useState(false);
+  const [continueOnWrong, setContinueOnWrong] = useState(false);
+  const [challengeStep, setChallengeStep] = useState(0);
   const [streak, setStreak] = useState(0);
   const [records, setRecords] = useState<Record<string, number>>({});
   const [isQuitting, setIsQuitting] = useState(false);
+  const displayedCategories = useMemo<SubjectCategoryConfig[]>(() => {
+    const kanjiCategory = SUBJECT_CATEGORIES.find((cat) => cat.id === 'KANJI');
+    if (showUpperProblems) {
+      return kanjiCategory
+        ? [
+            { ...kanjiCategory, subModes: kanjiCategory.subModes.filter((sub) => UPPER_KANJI_SUB_MODE_IDS.has(sub.id)) },
+            ...UPPER_PROBLEM_CATEGORIES,
+          ]
+        : UPPER_PROBLEM_CATEGORIES;
+    }
+    return SUBJECT_CATEGORIES.map((cat) => (
+      cat.id === 'KANJI'
+        ? { ...cat, subModes: cat.subModes.filter((sub) => !UPPER_KANJI_SUB_MODE_IDS.has(sub.id)) }
+        : cat.id === 'KANKEN'
+        ? { ...cat, name: '漢検', subModes: cat.subModes.filter((sub) => !sub.id.startsWith('HK_')) }
+        : cat
+    ));
+  }, [showUpperProblems]);
+  const defaultDisplayedCategory = displayedCategories[0] || SUBJECT_CATEGORIES[0];
   const isUnitCategory = selectedCategory.id === 'MATH_GRADES' || selectedCategory.id === 'KOKUGO_GRADES' || selectedCategory.id === 'ENGLISH' || selectedCategory.id === 'SCIENCE' || selectedCategory.id === 'SOCIAL' || selectedCategory.id === 'SUMMARY';
   const problemLanguageMode: LanguageMode = languageMode === 'ENGLISH' ? 'JAPANESE' : languageMode;
   const canSelectAnswerMode = selectedCategory.id === 'MATH' || selectedCategory.id === 'UPPER_MATH' || selectedCategory.id === 'KANJI' || selectedCategory.id === 'KANKEN' || selectedCategory.id === 'HARD_KANJI';
-  
+
   // Voice feature control
   const [voiceEnabled, setVoiceEnabled] = useState(() => storageService.getEnglishVoiceEnabled());
   const getCategoryLabel = (name: string) => transProblemSubjectName(name, languageMode);
@@ -518,9 +541,22 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
     setRecords(storageService.getChallengeRecords());
   }, []);
 
+  useEffect(() => {
+    const nextCategory = displayedCategories.find((cat) => cat.id === selectedCategory.id) || defaultDisplayedCategory;
+    if (nextCategory !== selectedCategory) {
+      setSelectedCategory(nextCategory);
+      setSelectedSubMode(nextCategory.subModes[0]);
+      setSelectedMathUnitIds([]);
+      return;
+    }
+    if (!nextCategory.subModes.some((sub) => sub.id === selectedSubMode.id)) {
+      setSelectedSubMode(nextCategory.subModes[0]);
+    }
+  }, [defaultDisplayedCategory, displayedCategories, selectedCategory, selectedSubMode.id]);
+
   const getCombinedSelection = (): ActiveChallengeConfig => {
     const allUnits = getAllSelectableUnits();
-    
+
     const selectedUnits = allUnits.filter((u) => selectedMathUnitIds.includes(u.id));
     const modePool = Array.from(new Set(selectedUnits.flatMap((u) => u.modes || (u.mode ? [u.mode] : []))));
 
@@ -531,13 +567,13 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
       : selectedUnits.length > 0
       ? `${trans('ミックス選択', languageMode)} (${selectedUnits.length}${trans('単元', languageMode)})`
       : trans('単元未選択', languageMode);
-      
+
     const subModeId = `COMBINED_MIX_${selectedUnits.map((u) => u.id).sort().join('_') || 'NONE'}`;
 
     return {
-      subMode: { 
-        id: subModeId, 
-        name: label, 
+      subMode: {
+        id: subModeId,
+        name: label,
         mode: representativeMode
       },
       modePool,
@@ -572,7 +608,7 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
 
   const handleCategorySelect = (cat: SubjectCategoryConfig) => {
       setSelectedCategory(cat);
-      setSelectedSubMode(cat.subModes[0]); 
+      setSelectedSubMode(cat.subModes[0]);
       setActiveChallenge(null);
       if (cat.id === 'ENGLISH' && selectedMathGrade < 3) {
         setSelectedMathGrade(3);
@@ -584,7 +620,7 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
     if (isUnitCategory && selectedMathUnitIds.length === 0) {
       return;
     }
-    const challengeConfig = isUnitCategory 
+    const challengeConfig = isUnitCategory
       ? getCombinedSelection()
       : { subMode: selectedSubMode, answerMode: canSelectAnswerMode ? answerMode : 'CHOICE' };
 
@@ -592,7 +628,8 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
     setActiveChallenge(challengeConfig);
     setPhase('CHALLENGE');
     setStreak(0);
-    
+    setChallengeStep(0);
+
     if (selectedBgmId === 'random') {
       audioService.playRandomBGM();
     } else if (selectedBgmId === 'none') {
@@ -605,6 +642,7 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
   const handleCompleteOne = (correctCount: number) => {
     const challengeSubMode = activeChallenge?.subMode ?? selectedSubMode;
     const challengeModePool = activeChallenge?.modePool;
+    setChallengeStep(prev => prev + 1);
 
     if (correctCount > 0) {
       if (!challengeModePool || challengeModePool.length === 0) {
@@ -612,14 +650,16 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
       }
       const newStreak = streak + correctCount;
       setStreak(newStreak);
-      
+
       const recordKey = `${selectedCategory.id}_${challengeSubMode.id}`;
       if (!records[recordKey] || newStreak > records[recordKey]) {
           storageService.saveChallengeRecord(recordKey, newStreak);
           setRecords(prev => ({ ...prev, [recordKey]: newStreak }));
       }
     } else {
-      handleFinish();
+      if (!continueOnWrong) {
+        handleFinish();
+      }
     }
   };
 
@@ -682,7 +722,7 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
     const challengeModePool = activeChallenge?.modePool;
     const challengeAnswerMode = activeChallenge?.answerMode || 'CHOICE';
     const ChallengeScreen = getChallengeScreenForMode(challengeSubMode.mode);
-    
+
     return (
       <div
         data-allow-japanese="true"
@@ -699,7 +739,7 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
               {challengeSubMode.name} ベスト: <span className="text-white font-mono">{records[`${selectedCategory.id}_${challengeSubMode.id}`] || 0}</span> 問
             </div>
           </div>
-          <button 
+          <button
             onClick={handleFinish}
             className="bg-red-900/60 hover:bg-red-800 border border-red-500 px-4 py-1 rounded text-xs font-bold transition-colors flex items-center gap-1"
           >
@@ -713,44 +753,44 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
 
         <div className="relative z-10 flex-1 min-h-0">
           {ChallengeScreen === GameScreen.MATH_CHALLENGE && (
-            <MathChallengeScreen 
-              key={streak} 
-              mode={challengeSubMode.mode} 
+            <MathChallengeScreen
+              key={`${streak}-${challengeStep}`}
+              mode={challengeSubMode.mode}
               answerMode={challengeAnswerMode}
               useSavedAnswerMode
-              onComplete={handleCompleteOne} 
+              onComplete={handleCompleteOne}
               isChallenge={true}
               streak={streak}
             />
           )}
           {ChallengeScreen === GameScreen.KANJI_CHALLENGE && (
-            <KanjiChallengeScreen 
-              key={streak}
-              mode={challengeSubMode.mode} 
+            <KanjiChallengeScreen
+              key={`${streak}-${challengeStep}`}
+              mode={challengeSubMode.mode}
               answerMode={challengeAnswerMode}
               useSavedAnswerMode
-              onComplete={handleCompleteOne} 
+              onComplete={handleCompleteOne}
               isChallenge={true}
               streak={streak}
             />
           )}
           {ChallengeScreen === GameScreen.ENGLISH_CHALLENGE && (
-            <EnglishChallengeScreen 
-              key={streak}
-              mode={challengeSubMode.mode} 
-              onComplete={handleCompleteOne} 
+            <EnglishChallengeScreen
+              key={`${streak}-${challengeStep}`}
+              mode={challengeSubMode.mode}
+              onComplete={handleCompleteOne}
               isChallenge={true}
               streak={streak}
             />
           )}
           {ChallengeScreen === GameScreen.GENERAL_CHALLENGE && (
-            <GeneralChallengeScreen 
-              key={streak}
+            <GeneralChallengeScreen
+              key={`${streak}-${challengeStep}`}
               mode={challengeSubMode.mode}
               modePool={challengeModePool}
               answerMode={challengeAnswerMode}
               onModeCorrect={onCorrectAnswers}
-              onComplete={handleCompleteOne} 
+              onComplete={handleCompleteOne}
               isChallenge={true}
               streak={streak}
             />
@@ -786,7 +826,7 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
     >
       <div className="absolute inset-0 bg-slate-950/65 pointer-events-none"></div>
       <div className="absolute inset-0 texture-dark-matter opacity-30 pointer-events-none"></div>
-      
+
       <div className="z-10 w-full max-w-6xl mx-auto flex flex-col flex-1 min-h-0 overflow-hidden">
         {/* Header - Fixed */}
         <div className="text-center border-b border-slate-800 p-3 shrink-0">
@@ -796,14 +836,26 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
           <div className="flex items-center justify-center gap-1 text-yellow-500 font-bold text-[9px] uppercase tracking-wider">
             <Star size={8} fill="currentColor"/> {trans('ミニゲーム解放カウント対象', languageMode)} <Star size={8} fill="currentColor"/>
           </div>
+          <button
+            type="button"
+            onClick={() => {
+              setShowUpperProblems(prev => !prev);
+              setSelectedMathUnitIds([]);
+              audioService.playSound('select');
+            }}
+            className={`mt-2 inline-flex items-center gap-2 rounded-lg border px-3 py-1.5 text-xs font-black transition-colors ${showUpperProblems ? 'border-yellow-300 bg-yellow-500 text-slate-950' : 'border-slate-600 bg-slate-900/80 text-slate-200 hover:border-yellow-300'}`}
+          >
+            <GraduationCap size={14} />
+            {showUpperProblems ? '通常問題へ' : '高校生以上'}
+          </button>
         </div>
 
         {/* Main Selection Area - Flexible with Scrollbars */}
         <div className="flex-grow grid grid-cols-1 lg:grid-cols-12 gap-4 p-4 overflow-hidden min-h-0">
-          
+
           {/* Left: Category Selector - Grid on mobile, vertically flex on PC */}
           <div className="lg:col-span-2 grid grid-cols-3 sm:grid-cols-5 lg:flex lg:flex-col gap-1 lg:gap-1.5 pb-1 lg:pb-0 overflow-y-auto lg:overflow-x-visible custom-scrollbar shrink-0">
-            {SUBJECT_CATEGORIES.map(cat => (
+            {displayedCategories.map(cat => (
               <button
                 key={cat.id}
                 onClick={() => handleCategorySelect(cat)}
@@ -909,7 +961,7 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
                         const recordKey = `${selectedCategory.id}_${sub.id}`;
                         const isSelected = selectedSubMode.id === sub.id;
                         const theme = getCategoryClasses(selectedCategory.color);
-                        
+
                         return (
                           <button
                             key={sub.id}
@@ -943,8 +995,21 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
                 {trans('答え方', languageMode)}: <span className="font-bold text-white">{trans(answerMode === 'CHOICE' ? '4択' : '入力', languageMode)}</span>
               </div>
             )}
-            
-            <button 
+            <button
+              type="button"
+              onClick={() => {
+                setContinueOnWrong(prev => !prev);
+                audioService.playSound('select');
+              }}
+              className={`flex items-center justify-between rounded-xl border p-3 text-left transition-colors ${continueOnWrong ? 'border-emerald-400 bg-emerald-900/45 text-white' : 'border-slate-700 bg-black/40 text-slate-300 hover:border-slate-500'}`}
+            >
+              <span className="text-xs font-bold">不正解でも続行</span>
+              <span className={`relative h-4 w-8 rounded-full transition-colors ${continueOnWrong ? 'bg-emerald-400' : 'bg-slate-600'}`}>
+                <span className={`absolute top-0.5 h-3 w-3 rounded-full bg-white transition-all ${continueOnWrong ? 'left-4' : 'left-0.5'}`} />
+              </span>
+            </button>
+
+            <button
               onClick={handleStart}
               disabled={!canStart}
               className={`w-full py-3 rounded-xl font-bold text-base transition-all flex items-center justify-center gap-3 ${canStart ? 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-[0_4px_0_rgb(5,150,105)] active:translate-y-1 active:shadow-none animate-pulse' : 'bg-slate-700 text-slate-400 opacity-60 cursor-not-allowed'}`}
@@ -984,7 +1049,7 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
                     <h3 className="text-[10px] md:text-xs font-bold text-gray-400 mb-1.5 flex items-center gap-2 uppercase tracking-tight">
                     <Volume2 size={10} className="text-emerald-500"/> {trans('読み上げ', languageMode)}
                     </h3>
-                    <button 
+                    <button
                         onClick={toggleVoice}
                         className={`flex items-center justify-between px-3 py-2 rounded-xl border-2 font-bold transition-all ${voiceEnabled ? 'bg-cyan-900/40 border-cyan-500 text-white' : 'bg-gray-800 border-gray-600 text-gray-500'}`}
                     >
@@ -998,7 +1063,7 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
                     </button>
                 </div>
             )}
-            
+
             <button onClick={onBack} className="mt-auto text-slate-400 hover:text-white flex items-center gap-2 transition-colors py-1 text-xs">
               <ArrowLeft size={14} /> {trans('戻る', languageMode)}
             </button>
