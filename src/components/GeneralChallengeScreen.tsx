@@ -1538,6 +1538,12 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
                         <div className="text-[11px] md:text-xs text-gray-100 leading-relaxed text-left">{currentProblem.hint}</div>
                     </div>
                 )}
+
+                {currentProblem.unitLabel && (
+                    <div className="mb-2 max-w-full rounded-full border border-cyan-300/40 bg-cyan-400/10 px-3 py-1 text-[10px] sm:text-xs font-bold text-cyan-100 leading-none break-words">
+                        {currentProblem.unitLabel}
+                    </div>
+                )}
                 
                 <h3 className="text-[clamp(1.25rem,4vw,1.875rem)] font-bold text-white leading-tight mb-4 break-words w-full min-w-0">
                     {currentProblem.question}

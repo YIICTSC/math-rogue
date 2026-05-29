@@ -21,6 +21,7 @@ export interface GeneralProblem {
     answer: string;
     options: string[];
     hint?: string;
+    unitLabel?: string;
     visual?: ProblemVisual;
     audioPrompt?: {
         text: string;
@@ -47,6 +48,12 @@ export const d = (ans: string, ...others: string[]) => [ans, ...others];
 
 export const normalizeProblemQuestionText = (question: string): string =>
     question
+        .replace(/^【[^】]+】\s*/, '')
+        .replace(/^(?:確認|復習)\s*\d+\s*の\s*/g, '')
+        .replace(/^(?:確認|復習)\s*\d+\s*で\s*/g, '')
+        .replace(/^(?:確認|復習)\s*\d+\s*を\s*/g, '')
+        .replace(/^(?:確認|復習)\s*\d+\s*([にへと])\s*/g, '$1 ')
+        .replace(/^(?:確認|復習)\s*\d+\s*/g, '')
         .replace(/【([^】]+)】\s*(?:確認|復習)\s*\d+\s*の\s*/g, '$1の学習の')
         .replace(/【([^】]+)】\s*(?:確認|復習)\s*\d+\s*で\s*/g, '$1の学習で ')
         .replace(/【([^】]+)】\s*(?:確認|復習)\s*\d+\s*を\s*/g, '$1を ')
@@ -65,11 +72,17 @@ export const stripReviewStepLabel = (label: string): string =>
         .replace(/\s{2,}/g, ' ')
         .trim();
 
+export const extractProblemUnitLabel = (question: string): string | null => {
+    const match = question.match(/^【([^】]+)】/);
+    return match ? stripReviewStepLabel(match[1]) : null;
+};
+
 export const normalizeProblemQuestionLabels = (problem: GeneralProblem): GeneralProblem => {
+    const unitLabel = problem.unitLabel ?? extractProblemUnitLabel(problem.question) ?? undefined;
     const normalizedQuestion = normalizeProblemQuestionText(problem.question);
-    return normalizedQuestion === problem.question
+    return normalizedQuestion === problem.question && unitLabel === problem.unitLabel
         ? problem
-        : { ...problem, question: normalizedQuestion };
+        : { ...problem, question: normalizedQuestion, unitLabel };
 };
 
 const problemSignature = (problem: GeneralProblem): string =>
@@ -78,6 +91,7 @@ const problemSignature = (problem: GeneralProblem): string =>
         answer: problem.answer,
         options: problem.options,
         hint: problem.hint,
+        unitLabel: problem.unitLabel,
         visual: problem.visual,
         audioPrompt: problem.audioPrompt,
         speechPrompt: problem.speechPrompt,
