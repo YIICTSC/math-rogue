@@ -827,7 +827,24 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
       <div className="absolute inset-0 bg-slate-950/65 pointer-events-none"></div>
       <div className="absolute inset-0 texture-dark-matter opacity-30 pointer-events-none"></div>
 
-      <div className="z-10 w-full max-w-6xl mx-auto flex flex-col flex-1 min-h-0 overflow-hidden">
+      <div className="relative z-10 w-full max-w-6xl mx-auto flex flex-col flex-1 min-h-0 overflow-hidden">
+        <button
+          type="button"
+          onClick={() => {
+            setShowUpperProblems(prev => !prev);
+            setSelectedMathUnitIds([]);
+            audioService.playSound('select');
+          }}
+          className={`absolute left-3 top-3 z-20 flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-[10px] font-black shadow-lg transition-colors sm:left-4 sm:top-4 sm:text-xs ${
+            showUpperProblems
+              ? 'border-yellow-300 bg-yellow-500 text-slate-950 hover:bg-yellow-400'
+              : 'border-emerald-300/60 bg-slate-900/85 text-emerald-100 hover:border-emerald-200 hover:bg-emerald-950'
+          }`}
+        >
+          <GraduationCap size={14} />
+          {showUpperProblems ? '通常問題へ' : '高校生以上'}
+        </button>
+
         {/* Header - Fixed */}
         <div className="text-center border-b border-slate-800 p-3 shrink-0">
           <h2 className="text-xl md:text-2xl font-bold text-emerald-400 tracking-widest mb-1">
@@ -836,18 +853,9 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
           <div className="flex items-center justify-center gap-1 text-yellow-500 font-bold text-[9px] uppercase tracking-wider">
             <Star size={8} fill="currentColor"/> {trans('ミニゲーム解放カウント対象', languageMode)} <Star size={8} fill="currentColor"/>
           </div>
-          <button
-            type="button"
-            onClick={() => {
-              setShowUpperProblems(prev => !prev);
-              setSelectedMathUnitIds([]);
-              audioService.playSound('select');
-            }}
-            className={`mt-2 inline-flex items-center gap-2 rounded-lg border px-3 py-1.5 text-xs font-black transition-colors ${showUpperProblems ? 'border-yellow-300 bg-yellow-500 text-slate-950' : 'border-slate-600 bg-slate-900/80 text-slate-200 hover:border-yellow-300'}`}
-          >
-            <GraduationCap size={14} />
-            {showUpperProblems ? '通常問題へ' : '高校生以上'}
-          </button>
+          {showUpperProblems && (
+            <div className="mt-1 text-[10px] font-bold text-emerald-200">高校生以上の問題</div>
+          )}
         </div>
 
         {/* Main Selection Area - Flexible with Scrollbars */}
