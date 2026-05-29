@@ -905,6 +905,8 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
     if (unit.mode) return modeCorrectCounts[unit.mode] || 0;
     return 0;
   };
+  const getModeCorrectCount = (mode: string) => modeCorrectCounts[mode] || 0;
+  const getProgressPercent = (correctCount: number) => Math.min(100, Math.max(0, (correctCount / UNIT_MASTERY_TARGET) * 100));
 
   const clearSelectedUnits = () => {
     setSelectedMathUnitIds([]);
@@ -914,6 +916,53 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
   const renderMasteryPrefix = (mode: string) => {
     if (!isMastered(mode)) return null;
     return <span className="text-red-500 font-black font-sans mr-1">◎</span>;
+  };
+
+  const renderProgressSubModeButton = (
+    sub: { id: string; name: string; mode: string },
+    options: {
+      selected?: boolean;
+      onClick: () => void;
+      className?: string;
+      theme?: ReturnType<typeof getCategoryClasses>;
+    },
+  ) => {
+    const correctCount = getModeCorrectCount(sub.mode);
+    const progressPercent = getProgressPercent(correctCount);
+    const isSelected = !!options.selected;
+    const selectedClass = options.theme && isSelected
+      ? `${options.theme.bg} border-white text-white`
+      : '';
+
+    return (
+      <button
+        key={sub.id}
+        onClick={options.onClick}
+        className={`group relative min-h-[3.1rem] w-full overflow-hidden rounded-lg border px-2 py-1.5 pr-14 text-left text-[10px] font-bold leading-snug transition-colors md:text-xs sm:pr-16 ${
+          selectedClass || options.className || 'bg-slate-700 border-slate-600 text-gray-300 hover:bg-slate-600'
+        }`}
+      >
+        <span
+          className={`absolute inset-y-0 left-0 transition-[width] duration-300 ${isSelected ? 'bg-white/18' : 'bg-emerald-500/30 group-hover:bg-emerald-400/35'}`}
+          style={{ width: `${progressPercent}%` }}
+          aria-hidden="true"
+        />
+        <span className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,rgba(255,255,255,0.08),transparent_36%,rgba(0,0,0,0.22))]" aria-hidden="true" />
+        <span className="relative z-10 block pr-1" data-allow-japanese="true">
+          {renderMasteryPrefix(sub.mode)}
+          {getSubLabel(sub.id, sub.name)}
+        </span>
+        <span className="absolute bottom-1.5 left-2 z-10 h-1 w-[calc(100%-4.5rem)] overflow-hidden rounded-full bg-black/45 sm:w-[calc(100%-5rem)]">
+          <span
+            className={`block h-full rounded-full ${progressPercent >= 100 ? 'bg-yellow-300' : 'bg-emerald-300'}`}
+            style={{ width: `${progressPercent}%` }}
+          />
+        </span>
+        <span className="absolute right-1 top-1 z-10 rounded-full bg-black/55 border border-white/15 px-1 py-0.5 text-[7px] sm:right-1.5 sm:top-1.5 sm:px-1.5 sm:text-[8px] md:text-[9px] font-mono leading-none text-white/90">
+          {correctCount}/{UNIT_MASTERY_TARGET}
+        </span>
+      </button>
+    );
   };
 
   const handleCategorySelect = (cat: SubjectCategoryConfig) => {
@@ -1138,16 +1187,14 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
               <div className="text-[10px] text-gray-400 mb-1">{trans('単独モード', languageMode)}</div>
               <div className="grid grid-cols-3 gap-1.5">
                 {selectedCategory.subModes.filter((sub) => !sub.id.includes('SO')).map((sub) => (
-                  <button
-                    key={sub.id}
-                    onClick={() => {
+                  renderProgressSubModeButton(sub, {
+                    selected: selectedSubModeId === sub.id,
+                    theme,
+                    onClick: () => {
                       setSelectedSubModeId(sub.id);
                       audioService.playSound('select');
-                    }}
-                    className={`p-1.5 rounded border text-[10px] font-bold transition-colors ${selectedSubModeId === sub.id ? `${theme.bg} border-white text-white` : 'bg-slate-700 border-slate-600 text-gray-300 hover:bg-slate-600'}`}
-                  >
-                    <span data-allow-japanese="true">{getSubLabel(sub.id, sub.name)}</span>
-                  </button>
+                    },
+                  })
                 ))}
               </div>
             </div>
@@ -1203,19 +1250,14 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
       <div className="space-y-3">
         {renderAnswerModeSelector()}
         <div className={`grid ${selectedCategory.id === 'KANJI' || selectedCategory.id === 'KANKEN' || selectedCategory.id === 'HARD_KANJI' ? 'grid-cols-3' : 'grid-cols-2'} gap-2`}>
-          {selectedCategory.subModes.map((sub) => (
-            <button
-              key={sub.id}
-              onClick={() => {
-                setSelectedSubModeId(sub.id);
-                audioService.playSound('select');
-              }}
-              className={`p-2 rounded-lg border text-left text-[10px] md:text-xs font-bold transition-colors ${selectedSubModeId === sub.id ? `${theme.bg} border-white text-white` : 'bg-slate-700 border-slate-600 text-gray-300 hover:bg-slate-600'}`}
-            >
-              {renderMasteryPrefix(sub.mode)}
-              <span data-allow-japanese="true">{getSubLabel(sub.id, sub.name)}</span>
-            </button>
-          ))}
+          {selectedCategory.subModes.map((sub) => renderProgressSubModeButton(sub, {
+            selected: selectedSubModeId === sub.id,
+            theme,
+            onClick: () => {
+              setSelectedSubModeId(sub.id);
+              audioService.playSound('select');
+            },
+          }))}
         </div>
       </div>
     );

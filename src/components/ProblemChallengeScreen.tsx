@@ -687,6 +687,8 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
     if (unit.mode) return modeCorrectCounts[unit.mode] || 0;
     return 0;
   };
+  const getModeCorrectCount = (mode: string) => modeCorrectCounts[mode] || 0;
+  const getProgressPercent = (correctCount: number) => Math.min(100, Math.max(0, (correctCount / UNIT_MASTERY_TARGET) * 100));
 
   const renderAnswerModeSelector = () => {
     if (!canSelectAnswerMode) return null;
@@ -969,18 +971,35 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
                         const recordKey = `${selectedCategory.id}_${sub.id}`;
                         const isSelected = selectedSubMode.id === sub.id;
                         const theme = getCategoryClasses(selectedCategory.color);
+                        const correctCount = getModeCorrectCount(sub.mode);
+                        const progressPercent = getProgressPercent(correctCount);
 
                         return (
                           <button
                             key={sub.id}
                             onClick={() => { setSelectedSubMode(sub); audioService.playSound('select'); }}
-                            className={`p-2 rounded-lg border text-left text-[10px] md:text-xs font-bold transition-colors ${isSelected ? `${theme.bg} border-white text-white` : 'bg-slate-700 border-slate-600 text-gray-300 hover:bg-slate-600'}`}
+                            className={`group relative min-h-[3.2rem] overflow-hidden rounded-lg border px-2 py-1.5 pr-14 text-left text-[10px] font-bold leading-snug transition-colors md:text-xs sm:pr-16 ${isSelected ? `${theme.bg} border-white text-white` : 'bg-slate-700 border-slate-600 text-gray-300 hover:bg-slate-600'}`}
                           >
-                            <div className="flex justify-between items-center mb-1 w-full truncate gap-2">
+                            <span
+                              className={`absolute inset-y-0 left-0 transition-[width] duration-300 ${isSelected ? 'bg-white/18' : 'bg-emerald-500/30 group-hover:bg-emerald-400/35'}`}
+                              style={{ width: `${progressPercent}%` }}
+                              aria-hidden="true"
+                            />
+                            <span className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,rgba(255,255,255,0.08),transparent_36%,rgba(0,0,0,0.22))]" aria-hidden="true" />
+                            <div className="relative z-10 flex justify-between items-start mb-2 w-full gap-2">
                                 <span className={isSelected ? 'text-white' : ''} data-allow-japanese="true">{getSubLabel(sub)}</span>
                                 {isSelected && <CheckCircle size={12} className="text-white animate-pulse shrink-0" />}
                             </div>
-                            <div className="bg-black/40 px-1.5 rounded text-[8px] md:text-[9px] font-mono text-white/90 border border-white/10 w-fit">
+                            <span className="absolute bottom-1.5 left-2 z-10 h-1 w-[calc(100%-4.5rem)] overflow-hidden rounded-full bg-black/45 sm:w-[calc(100%-5rem)]">
+                              <span
+                                className={`block h-full rounded-full ${progressPercent >= 100 ? 'bg-yellow-300' : 'bg-emerald-300'}`}
+                                style={{ width: `${progressPercent}%` }}
+                              />
+                            </span>
+                            <span className="absolute right-1 top-1 z-10 rounded-full bg-black/55 border border-white/15 px-1 py-0.5 text-[7px] sm:right-1.5 sm:top-1.5 sm:px-1.5 sm:text-[8px] md:text-[9px] font-mono leading-none text-white/90">
+                              {correctCount}/{UNIT_MASTERY_TARGET}
+                            </span>
+                            <div className="relative z-10 bg-black/40 px-1.5 rounded text-[8px] md:text-[9px] font-mono text-white/90 border border-white/10 w-fit">
                               BEST: {records[recordKey] || 0}
                             </div>
                           </button>
