@@ -1,5 +1,5 @@
 
-import { Enemy, Player, Card as ICard, CardType, SelectionState, Potion, FloatingText, EnemyIntentType, LanguageMode, ParryState, VisualEffectInstance, CoopSupportCard } from '../types';
+import { Enemy, Player, Card as ICard, CardType, SelectionState, Potion, FloatingText, EnemyIntentType, LanguageMode, ParryState, VisualEffectInstance, CoopSupportCard, AttackEffectKey } from '../types';
 import Card, { KEYWORD_DEFINITIONS } from './Card';
 import { Heart, Shield, Zap, Skull, Layers, X, Sword, AlertCircle, TrendingDown, Droplets, Hexagon, Gem, FlaskConical, Info, FileText, MoreHorizontal, Users, Sparkles, MessageCircle, Mic, ArrowRight, MousePointer2, ChevronsRight, ChevronDown, Flame, RotateCcw, Triangle, Settings } from 'lucide-react';
 import PixelSprite from './PixelSprite';
@@ -131,6 +131,17 @@ export const VFXOverlay: React.FC<{ effects: VisualEffectInstance[], targetId: s
         return 'border-white/50';
     };
     const hasMultihitSequence = activeOnThisTarget.some(effect => effect.type === 'ATTACK_SPRITE' && effect.attackEffectKey === 'multihit');
+    const getAttackEffectKeyForVfx = (vfx: VisualEffectInstance): AttackEffectKey | null => {
+        if (vfx.type === 'ATTACK_SPRITE') return vfx.attackEffectKey || 'slash';
+        if (vfx.type === 'SLASH') return 'slash';
+        if (vfx.type === 'FIRE') return 'fire';
+        if (vfx.type === 'EXPLOSION') return 'explosion';
+        if (vfx.type === 'LIGHTNING') return 'lightning';
+        if (vfx.type === 'CRITICAL') return 'critical';
+        if (vfx.type === 'SHOCKWAVE') return 'shockwave';
+        if (vfx.type === 'FLASH') return 'flash';
+        return null;
+    };
     const MAX_SIMULTANEOUS_VFX = hasMultihitSequence ? 40 : 6;
     const prioritizedEffects = [...activeOnThisTarget]
         .sort((a, b) => {
@@ -160,17 +171,7 @@ export const VFXOverlay: React.FC<{ effects: VisualEffectInstance[], targetId: s
                                 }}
                             ></div>
                         )}
-                        {vfx.type === 'SLASH' && (
-                            <div
-                                className="w-48 h-2 bg-gradient-to-r from-transparent via-white to-transparent animate-slash-vfx shadow-[0_0_20px_rgba(255,255,255,0.8)]"
-                                style={{
-                                    transform: `rotate(${vfx.rotation !== undefined ? vfx.rotation : 45}deg)`,
-                                    animationDelay: `${totalDelay}ms`,
-                                    animationFillMode: 'both'
-                                }}
-                            ></div>
-                        )}
-                        {vfx.type === 'ATTACK_SPRITE' && (
+                        {getAttackEffectKeyForVfx(vfx) && (
                             <div
                                 className="animate-attack-sprite-vfx drop-shadow-[0_0_18px_rgba(255,255,255,0.45)]"
                                 style={{
@@ -179,7 +180,7 @@ export const VFXOverlay: React.FC<{ effects: VisualEffectInstance[], targetId: s
                                     transform: `rotate(${vfx.rotation || 0}deg)`
                                 }}
                             >
-                                <AttackEffectSprite effectKey={vfx.attackEffectKey || 'slash'} size={176} fixedFrame={vfx.attackEffectFrame} />
+                                <AttackEffectSprite effectKey={getAttackEffectKeyForVfx(vfx)!} size={176} fixedFrame={vfx.attackEffectFrame} />
                             </div>
                         )}
                         {vfx.type === 'BLOCK' && (
@@ -204,48 +205,6 @@ export const VFXOverlay: React.FC<{ effects: VisualEffectInstance[], targetId: s
                             <div className="animate-status-sprite-vfx drop-shadow-[0_0_18px_rgba(74,222,128,0.5)]" style={{ animationDelay: `${totalDelay}ms`, animationFillMode: 'both' }}>
                                 <StatusEffectSprite effectKey={vfx.statusEffectKey || 'heal'} size={168} />
                             </div>
-                        )}
-                        {vfx.type === 'FIRE' && (
-                            <div className="relative flex items-center justify-center" style={{ animationDelay: `${totalDelay}ms`, animationFillMode: 'both' }}>
-                                <div className="absolute w-24 h-24 bg-orange-500/40 blur-xl animate-ping rounded-full"></div>
-                                <div className="animate-fire-vfx">
-                                    <Flame size={64} className="text-orange-400 fill-orange-600/50 drop-shadow-[0_0_20px_rgba(249,115,22,0.8)]" />
-                                </div>
-                            </div>
-                        )}
-                        {vfx.type === 'EXPLOSION' && (
-                            <div
-                                className="w-32 h-32 bg-orange-500 rounded-full animate-explosion-vfx shadow-[0_0_40px_orange]"
-                                style={{ animationDelay: `${totalDelay}ms`, animationFillMode: 'both' }}
-                            ></div>
-                        )}
-                        {vfx.type === 'LIGHTNING' && (
-                            <div
-                                className="w-4 h-64 bg-cyan-200 animate-lightning-vfx shadow-[0_0_30px_cyan]"
-                                style={{
-                                    animationDelay: `${totalDelay}ms`,
-                                    transform: `rotate(${vfx.rotation || 0}deg)`,
-                                    animationFillMode: 'both'
-                                }}
-                            ></div>
-                        )}
-                        {vfx.type === 'CRITICAL' && (
-                            <div
-                                className="w-64 h-64 border-8 border-yellow-400 rounded-full animate-critical-vfx"
-                                style={{ animationDelay: `${totalDelay}ms`, animationFillMode: 'both' }}
-                            ></div>
-                        )}
-                        {vfx.type === 'SHOCKWAVE' && (
-                            <div
-                                className="w-16 h-16 border-4 border-white/50 rounded-full animate-shockwave-vfx"
-                                style={{ animationDelay: `${totalDelay}ms`, animationFillMode: 'both' }}
-                            ></div>
-                        )}
-                        {vfx.type === 'FLASH' && (
-                            <div
-                                className="absolute w-[200vw] h-[200vh] bg-white animate-flash-vfx"
-                                style={{ animationDelay: `${totalDelay}ms`, animationFillMode: 'both' }}
-                            ></div>
                         )}
                     </div>
                 )
@@ -481,6 +440,9 @@ const BattleScene: React.FC<BattleSceneProps> = ({
 
     // --- BATTLE TUTORIAL STATE ---
     const [tutorialStep, setTutorialStep] = useState<number | null>(null);
+    const [showFriendshipComboTutorial, setShowFriendshipComboTutorial] = useState(false);
+    const [friendshipComboEnabled, setFriendshipComboEnabled] = useState(true);
+    const isDualMode = !!player.partner && player.partner.currentHp > 0;
 
     useEffect(() => {
         const updateViewportMode = () => {
@@ -502,6 +464,20 @@ const BattleScene: React.FC<BattleSceneProps> = ({
             setTutorialStep(1);
         }
     }, []);
+
+    useEffect(() => {
+        if (!isDualMode || tutorialStep !== null || storageService.getSeenFriendshipComboTutorial()) return;
+        setShowFriendshipComboTutorial(true);
+        storageService.saveSeenFriendshipComboTutorial();
+    }, [isDualMode, tutorialStep]);
+
+    useEffect(() => {
+        if (!friendshipComboEnabled) {
+            setSelectedCardIds([]);
+            setSynthesizedCard(null);
+            setIsComboing(false);
+        }
+    }, [friendshipComboEnabled]);
 
     const closeTutorial = () => {
         setTutorialStep(null);
@@ -551,9 +527,6 @@ const BattleScene: React.FC<BattleSceneProps> = ({
     const [selectedCardIds, setSelectedCardIds] = useState<string[]>([]);
     const [isComboing, setIsComboing] = useState(false);
     const [synthesizedCard, setSynthesizedCard] = useState<ICard | null>(null);
-
-    // Check if dual mode is active
-    const isDualMode = !!player.partner && player.partner.currentHp > 0;
 
     // Get latest 2 logs
     const latestLogs = [...combatLog].reverse().slice(0, 2);
@@ -893,6 +866,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
     };
 
     const executeDualTurn = async () => {
+        if (!friendshipComboEnabled) return;
         if (selectedCardIds.length === 0) return;
 
         if (selectedCardIds.length === 1) {
@@ -913,7 +887,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
 
         if (!c1 || !c2) return;
 
-        const isCombo = c1.type === c2.type && !c1.familiarSummon && !c2.familiarSummon;
+        const isCombo = friendshipComboEnabled && c1.type === c2.type && !c1.familiarSummon && !c2.familiarSummon;
         const comboCost = Math.max(c1.cost, c2.cost);
         const totalCost = c1.cost + c2.cost;
         const requiredCost = isCombo ? comboCost : totalCost;
@@ -1108,6 +1082,35 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                             className="w-full rounded border-2 border-cyan-100 bg-cyan-600 px-4 py-2 text-sm font-black text-white shadow-[2px_2px_0_rgba(0,0,0,1)] transition hover:bg-cyan-500 active:translate-x-[2px] active:translate-y-[2px] active:shadow-none"
                         >
                             わかった、応答する！
+                        </button>
+                    </div>
+                </div>
+            )}
+
+            {showFriendshipComboTutorial && (
+                <div className="fixed inset-0 z-[210] flex items-center justify-center bg-black/75 p-4 animate-in fade-in duration-200">
+                    <div className="w-full max-w-lg rounded-lg border-2 border-indigo-300 bg-slate-950 p-4 shadow-[0_0_32px_rgba(129,140,248,0.55)]">
+                        <div className="mb-3 flex items-center gap-2 text-indigo-100 font-black">
+                            <Users size={22} className="text-indigo-300" />
+                            友情コンボ
+                        </div>
+                        <p className="mb-3 text-sm leading-relaxed text-slate-100">
+                            パートナーがいる戦闘では、手札からカードを2枚まで選べます。同じ種類のカードを2枚選んで<span className="font-bold text-yellow-300">友情コンボ</span>を押すと、2枚を合成した強力なカードとして発動します。
+                        </p>
+                        <div className="mb-4 rounded border border-indigo-400/40 bg-indigo-950/35 p-3 text-xs leading-relaxed text-indigo-50">
+                            発動条件: パートナーが生存中 / 2枚のカード種別が同じ / 召喚カード以外。消費エナジーは2枚の合計ではなく、2枚のうち高い方のコストです。
+                        </div>
+                        <p className="mb-4 text-xs leading-relaxed text-slate-300">
+                            使わないときは友情コンボボタン右側の切替をOFFにすると、通常モードと同じくカードを1枚ずつクリックで使用できます。
+                        </p>
+                        <button
+                            onClick={() => {
+                                setShowFriendshipComboTutorial(false);
+                                audioService.playSound('select');
+                            }}
+                            className="w-full rounded border-2 border-indigo-100 bg-indigo-600 px-4 py-2 text-sm font-black text-white shadow-[2px_2px_0_rgba(0,0,0,1)] transition hover:bg-indigo-500 active:translate-x-[2px] active:translate-y-[2px] active:shadow-none"
+                        >
+                            わかった
                         </button>
                     </div>
                 </div>
@@ -1619,7 +1622,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                     </div>
 
                                     {!isFinisherActive && (
-                                        <div className={`${isTrueBossPhase2 ? 'w-32 md:w-48' : isFinalBoss ? 'w-32 md:w-44' : 'w-24 md:w-28'} ${isFinalBoss ? 'md:shrink-0 md:self-center' : ''} bg-black/90 border-2 px-1 py-0.5 text-white text-[9px] md:text-[10px] transition-all shadow-md rounded relative z-10 ${isSelected ? 'border-yellow-400 ring-1 ring-yellow-400/50' : 'border-gray-600'} ${isTrueBossPhase2 ? 'border-purple-500 shadow-[0_0_18px_rgba(168,85,247,0.35)]' : isFinalBoss ? 'border-red-500 shadow-[0_0_14px_rgba(239,68,68,0.25)]' : ''}`}>
+                                        <div className={`battle-enemy-stats ${isTrueBossPhase2 ? 'w-32 md:w-48' : isFinalBoss ? 'w-32 md:w-44' : 'w-24 md:w-28'} ${isFinalBoss ? 'md:shrink-0 md:self-center' : ''} bg-black/90 border-2 px-1 py-0.5 text-white text-[9px] md:text-[10px] transition-all shadow-md rounded relative z-10 ${isSelected ? 'border-yellow-400 ring-1 ring-yellow-400/50' : 'border-gray-600'} ${isTrueBossPhase2 ? 'border-purple-500 shadow-[0_0_18px_rgba(168,85,247,0.35)]' : isFinalBoss ? 'border-red-500 shadow-[0_0_14px_rgba(239,68,68,0.25)]' : ''}`}>
                                             <div className="flex items-center justify-between mb-0.5 h-4 w-full overflow-hidden">
                                                 <div className="flex-1 min-w-0 overflow-hidden relative h-full">
                                                     {enemyNameNeedsScroll ? (
@@ -1970,16 +1973,33 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                 </div>
 
                 {isDualMode && (
-                    <button
-                        onClick={executeDualTurn}
-                        disabled={!!actingEnemyId || selectionState.active || selectedCardIds.length === 0}
-                        className={`
-                    bg-indigo-600 border-2 border-indigo-300 px-4 py-1.5 text-xs font-bold shadow-lg transition-all rounded flex items-center gap-1 mx-2
-                    ${!actingEnemyId && !selectionState.active && selectedCardIds.length > 0 ? 'hover:bg-indigo-500 animate-pulse cursor-pointer' : 'opacity-50 cursor-not-allowed grayscale'}
-                  `}
-                    >
-                        <Users size={12} /> {trans("GO!", languageMode)}
-                    </button>
+                    <div className="mx-2 flex items-center gap-1">
+                        <button
+                            onClick={executeDualTurn}
+                            disabled={!friendshipComboEnabled || !!actingEnemyId || selectionState.active || selectedCardIds.length === 0}
+                            className={`
+                                bg-indigo-600 border-2 border-indigo-300 px-3 py-1.5 text-xs font-bold shadow-lg transition-all rounded flex items-center gap-1
+                                ${friendshipComboEnabled && !actingEnemyId && !selectionState.active && selectedCardIds.length > 0 ? 'hover:bg-indigo-500 animate-pulse cursor-pointer' : 'opacity-50 cursor-not-allowed grayscale'}
+                            `}
+                        >
+                            <Users size={12} /> 友情コンボ
+                        </button>
+                        <button
+                            type="button"
+                            onClick={() => {
+                                setFriendshipComboEnabled(prev => !prev);
+                                audioService.playSound('select');
+                            }}
+                            className={`min-w-[3.25rem] rounded border-2 px-2 py-1.5 text-[10px] font-black shadow-lg transition-all ${
+                                friendshipComboEnabled
+                                    ? 'border-indigo-200 bg-indigo-500 text-white hover:bg-indigo-400'
+                                    : 'border-gray-400 bg-gray-700 text-gray-100 hover:bg-gray-600'
+                            }`}
+                            title="友情コンボの使用を切り替える"
+                        >
+                            {friendshipComboEnabled ? 'ON' : 'OFF'}
+                        </button>
+                    </div>
                 )}
 
                 {!coopCanAct && coopTurnOwnerLabel && (
@@ -2040,7 +2060,8 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                         const isChokerDisabled = player.relics.some(r => r.id === 'VELVET_CHOKER') && player.cardsPlayedThisTurn >= 6;
                         const isNormalityDisabled = player.hand.some(c => c.name === '退屈' || c.name === 'NORMALITY') && player.cardsPlayedThisTurn >= 3;
 
-                        const isSelectedDual = isDualMode && selectedCardIds.includes(card.id);
+                        const isFriendshipComboSelectionMode = isDualMode && friendshipComboEnabled;
+                        const isSelectedDual = isFriendshipComboSelectionMode && selectedCardIds.includes(card.id);
                         const isSelectedActive = selectionState.active;
 
                         const specialDisabled = isClashDisabled || isGrandFinaleDisabled || isChokerDisabled || isNormalityDisabled;
@@ -2102,7 +2123,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                                 if (selectionState.active) {
                                                     onHandSelection(card);
                                                 } else {
-                                                    if (isDualMode) {
+                                                    if (isFriendshipComboSelectionMode) {
                                                         handleCardClickDual(card, specialDisabled);
                                                     } else {
                                                         if (!specialDisabled) onPlayCard(card);
@@ -2114,7 +2135,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                             disabled={
                                                 selectionState.active
                                                     ? false
-                                                    : (isDualMode
+                                                    : (isFriendshipComboSelectionMode
                                                         ? (!!actingEnemyId || card.unplayable || specialDisabled || selfDown || !coopCanAct)
                                                         : (player.currentEnergy < displayCard.cost || !!actingEnemyId || card.unplayable || specialDisabled || selfDown || !coopCanAct)
                                                     )
