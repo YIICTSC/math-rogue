@@ -4,7 +4,16 @@ import { LanguageMode } from '../types';
 import { trans } from '../utils/textUtils';
 
 export type BgmMode = 'STUDY' | 'MP3' | 'OSCILLATOR';
-export type SettingsTab = 'AUDIO' | 'DISPLAY' | 'COMM';
+export type SettingsTab = 'AUDIO' | 'DISPLAY' | 'BATTLE' | 'COMM';
+
+export type BattleUiSettings = {
+  handAreaHeightRem: number;
+  enemyScale: number;
+  playerScale: number;
+  enemyOffsetY: number;
+  playerOffsetY: number;
+  statsScale: number;
+};
 
 export type AppSettings = {
   bgmMode: BgmMode;
@@ -19,6 +28,7 @@ export type AppSettings = {
   joinMuted: boolean;
   reduceScreenShake: boolean;
   fontSize: 'normal' | 'large';
+  battleUi: BattleUiSettings;
   lowDataMode: boolean;
 };
 
@@ -44,8 +54,35 @@ type Props = {
 const tabs: Array<{ key: SettingsTab; label: string; icon: React.ReactNode }> = [
   { key: 'AUDIO', label: '音声', icon: <Volume2 size={14} /> },
   { key: 'DISPLAY', label: '表示', icon: <Monitor size={14} /> },
+  { key: 'BATTLE', label: '戦闘UI', icon: <Monitor size={14} /> },
   { key: 'COMM', label: '通信', icon: <Wifi size={14} /> }
 ];
+
+const BattleSlider: React.FC<{
+  label: string;
+  value: number;
+  min: number;
+  max: number;
+  step: number;
+  unit?: string;
+  onChange: (value: number) => void;
+}> = ({ label, value, min, max, step, unit = '', onChange }) => (
+  <label className="block">
+    <div className="mb-1 flex items-center justify-between gap-2">
+      <span>{label}</span>
+      <span className="font-mono text-xs text-cyan-200">{value}{unit}</span>
+    </div>
+    <input
+      className="w-full"
+      type="range"
+      min={min}
+      max={max}
+      step={step}
+      value={value}
+      onChange={e => onChange(Number(e.target.value))}
+    />
+  </label>
+);
 
 const SettingsModal: React.FC<Props> = ({
   open,
@@ -138,6 +175,68 @@ const SettingsModal: React.FC<Props> = ({
                 </div>
               )}
             </>
+          )}
+
+          {tab === 'BATTLE' && (
+            <div className="rounded border border-slate-700 p-3 space-y-3">
+              <div>
+                <div className="font-bold">{trans("戦闘画面のUI調整", languageMode)}</div>
+                <p className="mt-1 text-xs text-slate-400">
+                  {trans("戦闘中にこの設定を開くと、変更が画面へすぐ反映されます。", languageMode)}
+                </p>
+              </div>
+              <BattleSlider
+                label={trans("手札エリアの高さ", languageMode)}
+                value={settings.battleUi.handAreaHeightRem}
+                min={9}
+                max={17}
+                step={0.25}
+                unit="rem"
+                onChange={value => onChange('battleUi', { ...settings.battleUi, handAreaHeightRem: value })}
+              />
+              <BattleSlider
+                label={trans("敵キャラサイズ", languageMode)}
+                value={settings.battleUi.enemyScale}
+                min={0.6}
+                max={1.6}
+                step={0.05}
+                onChange={value => onChange('battleUi', { ...settings.battleUi, enemyScale: value })}
+              />
+              <BattleSlider
+                label={trans("味方キャラサイズ", languageMode)}
+                value={settings.battleUi.playerScale}
+                min={0.6}
+                max={1.6}
+                step={0.05}
+                onChange={value => onChange('battleUi', { ...settings.battleUi, playerScale: value })}
+              />
+              <BattleSlider
+                label={trans("敵キャラ上下位置", languageMode)}
+                value={settings.battleUi.enemyOffsetY}
+                min={-80}
+                max={80}
+                step={2}
+                unit="px"
+                onChange={value => onChange('battleUi', { ...settings.battleUi, enemyOffsetY: value })}
+              />
+              <BattleSlider
+                label={trans("味方キャラ上下位置", languageMode)}
+                value={settings.battleUi.playerOffsetY}
+                min={-80}
+                max={80}
+                step={2}
+                unit="px"
+                onChange={value => onChange('battleUi', { ...settings.battleUi, playerOffsetY: value })}
+              />
+              <BattleSlider
+                label={trans("ステータス表示サイズ", languageMode)}
+                value={settings.battleUi.statsScale}
+                min={0.75}
+                max={1.35}
+                step={0.05}
+                onChange={value => onChange('battleUi', { ...settings.battleUi, statsScale: value })}
+              />
+            </div>
           )}
 
           {showCommunication && tab === 'COMM' && (

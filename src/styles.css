@@ -871,3 +871,23 @@ textarea {
   border: 1px solid rgba(226, 232, 240, 0.42) !important;
   box-shadow: 0 10px 24px rgba(0, 0, 0, 0.32) !important;
 }
+
+.battle-scene-root.battle-ui-custom .battle-hand-area {
+  height: var(--battle-ui-hand-height, 12.75rem) !important;
+}
+
+.battle-scene-root.battle-ui-custom .battle-enemies-area > * {
+  transform: translateY(var(--battle-ui-enemy-offset-y, 0px)) scale(var(--battle-ui-enemy-scale, 1)) !important;
+  transform-origin: center bottom !important;
+}
+
+.battle-scene-root.battle-ui-custom .battle-player-area > div {
+  transform: translateY(var(--battle-ui-player-offset-y, 0px)) scale(var(--battle-ui-player-scale, 1)) !important;
+  transform-origin: left bottom !important;
+}
+
+.battle-scene-root.battle-ui-custom .battle-enemy-stats,
+.battle-scene-root.battle-ui-custom .battle-player-stats {
+  transform: scale(var(--battle-ui-stats-scale, 1)) !important;
+  transform-origin: center bottom !important;
+}

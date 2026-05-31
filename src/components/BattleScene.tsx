@@ -19,6 +19,7 @@ import { getBattleBackgroundSceneById } from '../data/battleBackgrounds';
 import { getStatusEffectKeyForVfx } from '../data/statusEffects';
 import { getHighSchoolCharacterSpritePath, getHighSchoolEnemyVariant, getHighSchoolHumanoidEnemyVariant, getThemedEnemyDisplayName, type HighSchoolEnemyAction, type HighSchoolHeroAction, type VisualThemeId } from '../data/visualThemes';
 import { assetUrl } from '../utils/assetPaths';
+import type { BattleUiSettings } from './SettingsModal';
 
 const POWER_DEFINITIONS: Record<string, { name: string, desc: string }> = {
     WEAK: { name: "へろへろ", desc: "攻撃で与えるダメージが25%減っちゃう。" },
@@ -353,6 +354,7 @@ interface BattleSceneProps {
     onOpenSettings?: () => void;
     battleBackgroundId?: string;
     visualTheme?: VisualThemeId;
+    battleUiSettings?: BattleUiSettings;
 }
 
 type DrawEntryAnimation = {
@@ -362,10 +364,18 @@ type DrawEntryAnimation = {
 
 const BattleScene: React.FC<BattleSceneProps> = ({
     player, companions = [], coopSelfPeerId, coopEffectOwnerPeerId, coopTurnQueue = [], coopCanAct = true, coopTurnOwnerLabel, coopSupportCards = [], onUseCoopSupport, selfDown = false, enemies, selectedEnemyId, onSelectEnemy, onPlayCard, onPlaySynthesizedCard, onEndTurn, turnLog, narrative, lastActionTime, lastActionType, actingEnemyId,
-    selectionState, onHandSelection, onCancelSelection, onUsePotion, combatLog, languageMode, codexOptions, onCodexSelect, parryState, onParry, showParryTutorial = false, onCloseParryTutorial, activeEffects, finisherCutinCard, hideEnemyIntents = false, onOpenSettings, battleBackgroundId, visualTheme = 'elementary'
+    selectionState, onHandSelection, onCancelSelection, onUsePotion, combatLog, languageMode, codexOptions, onCodexSelect, parryState, onParry, showParryTutorial = false, onCloseParryTutorial, activeEffects, finisherCutinCard, hideEnemyIntents = false, onOpenSettings, battleBackgroundId, visualTheme = 'elementary', battleUiSettings
 }) => {
     const isCoopBattleView = !!coopSelfPeerId || companions.length > 0;
     const battleBackgroundScene = getBattleBackgroundSceneById(battleBackgroundId);
+    const battleUiStyle = battleUiSettings ? {
+        '--battle-ui-hand-height': `${battleUiSettings.handAreaHeightRem}rem`,
+        '--battle-ui-enemy-scale': battleUiSettings.enemyScale,
+        '--battle-ui-player-scale': battleUiSettings.playerScale,
+        '--battle-ui-enemy-offset-y': `${battleUiSettings.enemyOffsetY}px`,
+        '--battle-ui-player-offset-y': `${battleUiSettings.playerOffsetY}px`,
+        '--battle-ui-stats-scale': battleUiSettings.statsScale
+    } as React.CSSProperties : undefined;
     const shouldRenderPlayerScopedVfxOnSelf = isCoopBattleView
         ? !!coopSelfPeerId && !!coopEffectOwnerPeerId && coopEffectOwnerPeerId === coopSelfPeerId
         : true;
@@ -924,7 +934,10 @@ const BattleScene: React.FC<BattleSceneProps> = ({
     };
 
     return (
-        <div className={`battle-scene-root ${visualTheme === 'high-school' ? 'battle-high-school' : ''} flex flex-col h-full w-full bg-gray-900 text-white relative overflow-hidden ${forceLandscapeSplit || isPcBrowserViewport ? 'battle-force-split battle-pc-split' : ''} ${isShaking ? 'animate-screen-shake' : ''}`}>
+        <div
+            className={`battle-scene-root battle-ui-custom ${visualTheme === 'high-school' ? 'battle-high-school' : ''} flex flex-col h-full w-full bg-gray-900 text-white relative overflow-hidden ${forceLandscapeSplit || isPcBrowserViewport ? 'battle-force-split battle-pc-split' : ''} ${isShaking ? 'animate-screen-shake' : ''}`}
+            style={battleUiStyle}
+        >
             {finisherCutinCard && (
                 <BattleFinisherCutinOverlay card={finisherCutinCard} languageMode={languageMode} />
             )}

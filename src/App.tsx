@@ -237,6 +237,14 @@ const DEFAULT_APP_SETTINGS: AppSettings = {
     joinMuted: true,
     reduceScreenShake: false,
     fontSize: 'normal',
+    battleUi: {
+        handAreaHeightRem: 12.75,
+        enemyScale: 1,
+        playerScale: 1,
+        enemyOffsetY: 0,
+        playerOffsetY: 0,
+        statsScale: 1
+    },
     lowDataMode: false
 };
 
@@ -807,7 +815,14 @@ const App: React.FC = () => {
     const [isFullScreen, setIsFullScreen] = useState(false);
     const [appSettings, setAppSettings] = useState<AppSettings>(() => {
         const saved = storageService.getAppSettings<AppSettings>();
-        const merged = { ...DEFAULT_APP_SETTINGS, ...(saved || {}) };
+        const merged = {
+            ...DEFAULT_APP_SETTINGS,
+            ...(saved || {}),
+            battleUi: {
+                ...DEFAULT_APP_SETTINGS.battleUi,
+                ...(saved?.battleUi || {})
+            }
+        };
         return storageService.getBgmMode() ? merged : { ...merged, bgmMode: 'MP3' };
     });
     const [totalMathCorrect, setTotalMathCorrect] = useState<number>(0);
@@ -11708,6 +11723,7 @@ const App: React.FC = () => {
                                 onOpenSettings={() => setShowSettingsModal(true)}
                                 battleBackgroundId={currentBattleBackgroundId}
                                 visualTheme={coopSyncedVisualTheme}
+                                battleUiSettings={appSettings.battleUi}
                             />
                         ) : (
                             <BattleScene
