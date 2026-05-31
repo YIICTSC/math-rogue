@@ -735,6 +735,126 @@ textarea {
   }
 }
 
+@media (orientation: portrait) and (max-width: 540px) and (max-height: 820px) {
+  .battle-scene-root .battle-view {
+    gap: 0.25rem !important;
+    padding: 0.25rem 0.375rem !important;
+  }
+
+  .battle-scene-root .battle-hand-area {
+    height: 12.75rem !important;
+  }
+
+  .battle-scene-root .battle-actors {
+    justify-content: space-between !important;
+  }
+
+  .battle-scene-root .battle-enemies-area {
+    align-items: flex-start !important;
+    flex: 1 1 auto !important;
+    gap: 0.25rem !important;
+    min-height: 0 !important;
+    padding-top: 0.75rem !important;
+  }
+
+  .battle-scene-root .battle-enemy-sprite {
+    height: 4.75rem !important;
+    width: 4.75rem !important;
+  }
+
+  .battle-scene-root .battle-enemy-sprite.battle-final-boss-sprite {
+    height: 8rem !important;
+    width: 8rem !important;
+  }
+
+  .battle-scene-root .battle-enemy-sprite.battle-true-boss-sprite {
+    height: 9rem !important;
+    width: 9rem !important;
+  }
+
+  .battle-scene-root .battle-enemy-sprite.battle-humanoid-enemy-sprite {
+    height: 7rem !important;
+    width: 7rem !important;
+  }
+
+  .battle-scene-root .battle-enemy-intent {
+    top: -0.25rem !important;
+    transform: translateX(-50%) scale(0.9) !important;
+  }
+
+  .battle-scene-root .battle-enemy-stats {
+    font-size: 0.62rem !important;
+    line-height: 1 !important;
+    width: 7.75rem !important;
+  }
+
+  .battle-scene-root .battle-player-area {
+    align-items: flex-end !important;
+    margin-top: 0.125rem !important;
+    min-height: 0 !important;
+    padding: 0 0.25rem 0.25rem !important;
+  }
+
+  .battle-scene-root .battle-player-area > div {
+    align-items: flex-end !important;
+  }
+
+  .battle-scene-root .battle-player-sprite {
+    height: 3.25rem !important;
+    margin-right: 0.25rem !important;
+    width: 3.25rem !important;
+  }
+
+  .battle-scene-root.battle-high-school .battle-player-sprite {
+    height: 5.75rem !important;
+    width: 5.75rem !important;
+  }
+
+  .battle-scene-root .battle-player-stats {
+    font-size: 0.62rem !important;
+    line-height: 1 !important;
+    margin-bottom: 0.125rem !important;
+    padding: 0.2rem !important;
+    width: 7.75rem !important;
+  }
+}
+
+@media (orientation: portrait) and (max-width: 540px) and (max-height: 700px) {
+  .battle-scene-root .battle-hand-area {
+    height: 11.5rem !important;
+  }
+
+  .battle-scene-root .battle-enemies-area {
+    padding-top: 0.5rem !important;
+  }
+
+  .battle-scene-root .battle-enemy-sprite {
+    height: 4.25rem !important;
+    width: 4.25rem !important;
+  }
+
+  .battle-scene-root .battle-enemy-sprite.battle-humanoid-enemy-sprite {
+    height: 6.25rem !important;
+    width: 6.25rem !important;
+  }
+
+  .battle-scene-root .battle-player-sprite {
+    height: 2.875rem !important;
+    width: 2.875rem !important;
+  }
+
+  .battle-scene-root.battle-high-school .battle-player-sprite {
+    height: 4.75rem !important;
+    width: 4.75rem !important;
+  }
+
+  .battle-scene-root .battle-player-stats,
+  .battle-scene-root .battle-enemy-stats {
+    font-size: 0.58rem !important;
+    width: 7.25rem !important;
+  }
+}
+
 .battle-scene-root .battle-enemies-area,
 .battle-scene-root .battle-player-area {
   background: transparent !important;
