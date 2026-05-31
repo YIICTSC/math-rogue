@@ -815,7 +815,7 @@ const App: React.FC = () => {
     const [isFullScreen, setIsFullScreen] = useState(false);
     const [appSettings, setAppSettings] = useState<AppSettings>(() => {
         const saved = storageService.getAppSettings<AppSettings>();
-        const savedBattleUi = saved?.battleUi as (Partial<AppSettings['battleUi']> & { handAreaHeightRem?: number }) | undefined;
+        const savedBattleUi = saved?.battleUi as Partial<AppSettings['battleUi']> | undefined;
         const merged = {
             ...DEFAULT_APP_SETTINGS,
             ...(saved || {}),
@@ -823,7 +823,6 @@ const App: React.FC = () => {
                 ...DEFAULT_APP_SETTINGS.battleUi,
                 ...(savedBattleUi || {}),
                 controlBarHeightRem: savedBattleUi?.controlBarHeightRem
-                    ?? savedBattleUi?.handAreaHeightRem
                     ?? DEFAULT_APP_SETTINGS.battleUi.controlBarHeightRem
             }
         };

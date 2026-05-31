@@ -875,6 +875,8 @@ textarea {
 .battle-scene-root.battle-ui-custom .battle-control-bar {
   height: var(--battle-ui-control-bar-height, 3rem) !important;
   min-height: var(--battle-ui-control-bar-height, 3rem) !important;
+  flex: 0 0 var(--battle-ui-control-bar-height, 3rem) !important;
+  box-sizing: border-box !important;
 }
 
 .battle-scene-root.battle-ui-custom .battle-enemies-area > * {

@@ -79,6 +79,7 @@ const BattleSlider: React.FC<{
       max={max}
       step={step}
       value={value}
+      onInput={e => onChange(Number(e.currentTarget.value))}
       onChange={e => onChange(Number(e.target.value))}
     />
   </label>
@@ -106,9 +107,9 @@ const SettingsModal: React.FC<Props> = ({
   const visibleTabs = showCommunication ? tabs : tabs.filter(t => t.key !== 'COMM');
 
   return (
-    <div className="fixed inset-0 z-[10020] bg-black/70 backdrop-blur-sm flex items-center justify-center p-3" onClick={onClose}>
-      <div className="w-full max-w-2xl max-h-[90dvh] overflow-y-auto rounded-xl border-2 border-cyan-500/50 bg-slate-900 text-white" onClick={(e) => e.stopPropagation()}>
-        <div className="sticky top-0 bg-slate-900/95 border-b border-slate-700 px-4 py-3 flex items-center justify-between">
+    <div className="fixed inset-0 z-[10020] bg-black/25 backdrop-blur-[1px] flex items-center justify-center p-3" onClick={onClose}>
+      <div className="w-full max-w-2xl max-h-[90dvh] overflow-y-auto rounded-xl border-2 border-cyan-500/50 bg-slate-900/65 text-white shadow-2xl backdrop-blur-sm" onClick={(e) => e.stopPropagation()}>
+        <div className="sticky top-0 bg-slate-900/70 border-b border-slate-700 px-4 py-3 flex items-center justify-between backdrop-blur-sm">
           <h2 className="font-black flex items-center gap-2"><Settings size={16} /> {trans("セッティング", languageMode)}</h2>
           <button onClick={onClose} className="p-1 rounded hover:bg-slate-700"><X size={16} /></button>
         </div>
@@ -188,8 +189,8 @@ const SettingsModal: React.FC<Props> = ({
               <BattleSlider
                 label={trans("手札上部バーの高さ", languageMode)}
                 value={settings.battleUi.controlBarHeightRem}
-                min={2.5}
-                max={5.5}
+                min={1.8}
+                max={9}
                 step={0.1}
                 unit="rem"
                 onChange={value => onChange('battleUi', { ...settings.battleUi, controlBarHeightRem: value })}
@@ -251,7 +252,7 @@ const SettingsModal: React.FC<Props> = ({
 
         </div>
 
-        <div className="sticky bottom-0 bg-slate-900/95 border-t border-slate-700 p-3 flex justify-between">
+        <div className="sticky bottom-0 bg-slate-900/70 border-t border-slate-700 p-3 flex justify-between backdrop-blur-sm">
           <div className="flex gap-2">
             <button onClick={onResetAudio} className="px-3 py-1 text-xs rounded border border-amber-400/70 bg-amber-600/30">{trans("音声を初期化", languageMode)}</button>
             <button onClick={onResetAll} className="px-3 py-1 text-xs rounded border border-red-400/70 bg-red-600/30">{trans("全設定を初期化", languageMode)}</button>
