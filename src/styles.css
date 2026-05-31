@@ -878,6 +878,7 @@ textarea {
 
 .battle-scene-root.battle-ui-custom {
   --battle-ui-hand-area-base-height: 15rem;
+  --battle-ui-player-scale-baseline: 1;
 }
 
 .battle-scene-root.battle-ui-custom .battle-hand-area {
@@ -933,13 +934,25 @@ textarea {
   }
 }
 
+@media (orientation: portrait) and (max-width: 540px) and (max-height: 820px) {
+  .battle-scene-root.battle-ui-custom {
+    --battle-ui-player-scale-baseline: 1.35;
+  }
+}
+
+@media (orientation: portrait) and (max-width: 540px) and (max-height: 700px) {
+  .battle-scene-root.battle-ui-custom {
+    --battle-ui-player-scale-baseline: 1.35;
+  }
+}
+
 .battle-scene-root.battle-ui-custom .battle-enemies-area > * {
   transform: translateY(var(--battle-ui-enemy-offset-y, 0px)) scale(var(--battle-ui-enemy-scale, 1)) !important;
   transform-origin: center bottom !important;
 }
 
 .battle-scene-root.battle-ui-custom .battle-player-area > div {
-  transform: translateY(var(--battle-ui-player-offset-y, 0px)) scale(var(--battle-ui-player-scale, 1)) !important;
+  transform: translateY(var(--battle-ui-player-offset-y, 0px)) scale(var(--battle-ui-player-scale, 1)) scale(var(--battle-ui-player-scale-baseline, 1)) !important;
   transform-origin: left bottom !important;
 }
 
