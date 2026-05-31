@@ -369,7 +369,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
     const isCoopBattleView = !!coopSelfPeerId || companions.length > 0;
     const battleBackgroundScene = getBattleBackgroundSceneById(battleBackgroundId);
     const battleUiStyle = battleUiSettings ? {
-        '--battle-ui-hand-height': `${battleUiSettings.handAreaHeightRem}rem`,
+        '--battle-ui-control-bar-height': `${battleUiSettings.controlBarHeightRem}rem`,
         '--battle-ui-enemy-scale': battleUiSettings.enemyScale,
         '--battle-ui-player-scale': battleUiSettings.playerScale,
         '--battle-ui-enemy-offset-y': `${battleUiSettings.enemyOffsetY}px`,
@@ -1973,7 +1973,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
             )}
 
             {/* 3. Control Bar */}
-            <div className="h-12 bg-gray-800 border-t-2 border-white flex items-center justify-between px-2 shrink-0 z-20 shadow-lg">
+            <div className="battle-control-bar h-12 bg-gray-800 border-t-2 border-white flex items-center justify-between px-2 shrink-0 z-20 shadow-lg">
                 <div className="flex items-center">
                     <div className={`bg-black border-2 border-yellow-500 text-yellow-400 px-2 py-0.5 rounded-full flex items-center shadow-lg mr-2 ${tutorialStep === 3 ? 'ring-4 ring-yellow-400 ring-offset-2 ring-offset-transparent animate-pulse' : ''} ${selfDown ? 'opacity-60' : ''}`} onClick={() => showInfo(trans("エナジー", languageMode), trans("カードを使用するために必要。ターン毎に回復する。", languageMode))}>
                         <Zap size={14} className="mr-1 fill-yellow-400" />

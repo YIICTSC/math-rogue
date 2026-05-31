@@ -872,8 +872,9 @@ textarea {
   box-shadow: 0 10px 24px rgba(0, 0, 0, 0.32) !important;
 }
 
-.battle-scene-root.battle-ui-custom .battle-hand-area {
-  height: var(--battle-ui-hand-height, 12.75rem) !important;
+.battle-scene-root.battle-ui-custom .battle-control-bar {
+  height: var(--battle-ui-control-bar-height, 3rem) !important;
+  min-height: var(--battle-ui-control-bar-height, 3rem) !important;
 }
 
 .battle-scene-root.battle-ui-custom .battle-enemies-area > * {

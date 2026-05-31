@@ -7,7 +7,7 @@ export type BgmMode = 'STUDY' | 'MP3' | 'OSCILLATOR';
 export type SettingsTab = 'AUDIO' | 'DISPLAY' | 'BATTLE' | 'COMM';
 
 export type BattleUiSettings = {
-  handAreaHeightRem: number;
+  controlBarHeightRem: number;
   enemyScale: number;
   playerScale: number;
   enemyOffsetY: number;
@@ -70,7 +70,7 @@ const BattleSlider: React.FC<{
   <label className="block">
     <div className="mb-1 flex items-center justify-between gap-2">
       <span>{label}</span>
-      <span className="font-mono text-xs text-cyan-200">{value}{unit}</span>
+      <span className="min-w-[4.75rem] rounded border border-cyan-500/40 bg-slate-950 px-2 py-0.5 text-right font-mono text-sm tabular-nums text-cyan-100">{value}{unit}</span>
     </div>
     <input
       className="w-full"
@@ -186,13 +186,13 @@ const SettingsModal: React.FC<Props> = ({
                 </p>
               </div>
               <BattleSlider
-                label={trans("手札エリアの高さ", languageMode)}
-                value={settings.battleUi.handAreaHeightRem}
-                min={9}
-                max={17}
-                step={0.25}
+                label={trans("手札上部バーの高さ", languageMode)}
+                value={settings.battleUi.controlBarHeightRem}
+                min={2.5}
+                max={5.5}
+                step={0.1}
                 unit="rem"
-                onChange={value => onChange('battleUi', { ...settings.battleUi, handAreaHeightRem: value })}
+                onChange={value => onChange('battleUi', { ...settings.battleUi, controlBarHeightRem: value })}
               />
               <BattleSlider
                 label={trans("敵キャラサイズ", languageMode)}
