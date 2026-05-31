@@ -234,7 +234,8 @@ textarea {
     height: 100% !important;
     justify-content: center !important;
     left: auto !important;
-    max-width: none !important;
+    justify-self: center !important;
+    max-width: min(100%, 30rem) !important;
     min-height: 0 !important;
     overflow-x: auto !important;
     overflow-y: visible !important;
@@ -244,9 +245,10 @@ textarea {
     top: auto !important;
     transform: none !important;
     z-index: 10 !important;
-    background: rgba(15, 23, 42, 0.44) !important;
-    border: 1px solid rgba(148, 163, 184, 0.35) !important;
-    border-radius: 0.5rem !important;
+    background: transparent !important;
+    background-color: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
   }
 
   .battle-scene-root.battle-force-split .battle-enemies-area > * {
@@ -258,8 +260,8 @@ textarea {
   }
 
   .battle-scene-root.battle-force-split .battle-enemy-sprite {
-    width: 5.25rem !important;
-    height: 5.25rem !important;
+    width: 7.75rem !important;
+    height: 7.75rem !important;
   }
 
   .battle-scene-root.battle-force-split .battle-enemy-intent {
@@ -268,9 +270,10 @@ textarea {
 
   .battle-scene-root.battle-force-split .battle-player-area {
     align-items: flex-end !important;
-    background: rgba(2, 6, 23, 0.58) !important;
-    border: 1px solid rgba(148, 163, 184, 0.35) !important;
-    border-radius: 0.5rem !important;
+    background: transparent !important;
+    background-color: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
     bottom: auto !important;
     display: flex !important;
     grid-column: 1 !important;
@@ -304,8 +307,8 @@ textarea {
   }
 
   .battle-scene-root.battle-force-split .battle-enemy-sprite.battle-humanoid-enemy-sprite {
-    width: 9.5rem !important;
-    height: 9.5rem !important;
+    width: 11.5rem !important;
+    height: 11.5rem !important;
   }
 
   .battle-scene-root.battle-force-split .battle-player-stats {
@@ -350,7 +353,8 @@ textarea {
     height: 100% !important;
     justify-content: center !important;
     left: auto !important;
-    max-width: none !important;
+    justify-self: center !important;
+    max-width: min(100%, 30rem) !important;
     min-height: 0 !important;
     overflow-x: auto !important;
     overflow-y: visible !important;
@@ -360,9 +364,10 @@ textarea {
     top: auto !important;
     transform: none !important;
     z-index: 10 !important;
-    background: rgba(15, 23, 42, 0.44) !important;
-    border: 1px solid rgba(148, 163, 184, 0.35) !important;
-    border-radius: 0.5rem !important;
+    background: transparent !important;
+    background-color: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
   }
 
   .battle-scene-root .battle-enemies-area > * {
@@ -374,8 +379,8 @@ textarea {
   }
 
   .battle-scene-root .battle-enemy-sprite {
-    width: 5.25rem !important;
-    height: 5.25rem !important;
+    width: 7.75rem !important;
+    height: 7.75rem !important;
   }
 
   .battle-scene-root .battle-enemy-sprite.battle-final-boss-sprite {
@@ -394,9 +399,10 @@ textarea {
 
   .battle-scene-root .battle-player-area {
     align-items: flex-end !important;
-    background: rgba(2, 6, 23, 0.58) !important;
-    border: 1px solid rgba(148, 163, 184, 0.35) !important;
-    border-radius: 0.5rem !important;
+    background: transparent !important;
+    background-color: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
     bottom: auto !important;
     display: flex !important;
     grid-column: 1 !important;
@@ -430,8 +436,8 @@ textarea {
   }
 
   .battle-scene-root .battle-enemy-sprite.battle-humanoid-enemy-sprite {
-    width: 9.5rem !important;
-    height: 9.5rem !important;
+    width: 11.5rem !important;
+    height: 11.5rem !important;
   }
 
   .battle-scene-root .battle-player-stats {
@@ -476,7 +482,8 @@ textarea {
     height: 100% !important;
     justify-content: center !important;
     left: auto !important;
-    max-width: none !important;
+    justify-self: center !important;
+    max-width: min(100%, 30rem) !important;
     min-height: 0 !important;
     overflow-x: auto !important;
     overflow-y: visible !important;
@@ -486,9 +493,10 @@ textarea {
     top: auto !important;
     transform: none !important;
     z-index: 10 !important;
-    background: rgba(15, 23, 42, 0.44) !important;
-    border: 1px solid rgba(148, 163, 184, 0.35) !important;
-    border-radius: 0.5rem !important;
+    background: transparent !important;
+    background-color: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
   }
 
   .battle-scene-root .battle-enemies-area > * {
@@ -500,8 +508,8 @@ textarea {
   }
 
   .battle-scene-root .battle-enemy-sprite {
-    width: 5.25rem !important;
-    height: 5.25rem !important;
+    width: 7.75rem !important;
+    height: 7.75rem !important;
   }
 
   .battle-scene-root .battle-enemy-sprite.battle-final-boss-sprite {
@@ -520,9 +528,10 @@ textarea {
 
   .battle-scene-root .battle-player-area {
     align-items: flex-end !important;
-    background: rgba(2, 6, 23, 0.58) !important;
-    border: 1px solid rgba(148, 163, 184, 0.35) !important;
-    border-radius: 0.5rem !important;
+    background: transparent !important;
+    background-color: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
     bottom: auto !important;
     display: flex !important;
     grid-column: 1 !important;
@@ -556,8 +565,8 @@ textarea {
   }
 
   .battle-scene-root .battle-enemy-sprite.battle-humanoid-enemy-sprite {
-    width: 9.5rem !important;
-    height: 9.5rem !important;
+    width: 11.5rem !important;
+    height: 11.5rem !important;
   }
 
   .battle-scene-root .battle-player-stats {
@@ -595,8 +604,8 @@ textarea {
   }
 
   .battle-scene-root .battle-enemy-sprite {
-    width: 4.5rem !important;
-    height: 4.5rem !important;
+    width: 6.25rem !important;
+    height: 6.25rem !important;
   }
 
   .battle-scene-root .battle-enemy-sprite.battle-final-boss-sprite {
@@ -629,8 +638,8 @@ textarea {
   }
 
   .battle-scene-root .battle-enemy-sprite.battle-humanoid-enemy-sprite {
-    width: 7.75rem !important;
-    height: 7.75rem !important;
+    width: 9.5rem !important;
+    height: 9.5rem !important;
   }
 
   .battle-scene-root .battle-player-stats {
@@ -687,8 +696,8 @@ textarea {
   }
 
   .battle-scene-root .battle-enemy-sprite {
-    width: 4rem !important;
-    height: 4rem !important;
+    width: 5.25rem !important;
+    height: 5.25rem !important;
   }
 
   .battle-scene-root .battle-enemy-sprite.battle-final-boss-sprite {
@@ -716,12 +725,28 @@ textarea {
   }
 
   .battle-scene-root .battle-enemy-sprite.battle-humanoid-enemy-sprite {
-    width: 7rem !important;
-    height: 7rem !important;
+    width: 8rem !important;
+    height: 8rem !important;
   }
 
   .battle-scene-root .battle-player-stats {
     width: 8rem !important;
     font-size: 0.6rem !important;
   }
+}
+
+.battle-scene-root .battle-enemies-area,
+.battle-scene-root .battle-player-area {
+  background: transparent !important;
+  background-color: transparent !important;
+  border: none !important;
+  box-shadow: none !important;
+}
+
+.battle-scene-root .battle-enemy-stats,
+.battle-scene-root .battle-player-stats {
+  background: rgba(2, 6, 23, 0.78) !important;
+  background-color: rgba(2, 6, 23, 0.78) !important;
+  border: 1px solid rgba(226, 232, 240, 0.42) !important;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.32) !important;
 }

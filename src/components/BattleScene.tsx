@@ -1622,7 +1622,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                     </div>
 
                                     {!isFinisherActive && (
-                                        <div className={`${isTrueBossPhase2 ? 'w-32 md:w-48' : isFinalBoss ? 'w-32 md:w-44' : 'w-24 md:w-28'} ${isFinalBoss ? 'md:shrink-0 md:self-center' : ''} bg-black/90 border-2 px-1 py-0.5 text-white text-[9px] md:text-[10px] transition-all shadow-md rounded relative z-10 ${isSelected ? 'border-yellow-400 ring-1 ring-yellow-400/50' : 'border-gray-600'} ${isTrueBossPhase2 ? 'border-purple-500 shadow-[0_0_18px_rgba(168,85,247,0.35)]' : isFinalBoss ? 'border-red-500 shadow-[0_0_14px_rgba(239,68,68,0.25)]' : ''}`}>
+                                        <div className={`battle-enemy-stats ${isTrueBossPhase2 ? 'w-32 md:w-48' : isFinalBoss ? 'w-32 md:w-44' : 'w-24 md:w-28'} ${isFinalBoss ? 'md:shrink-0 md:self-center' : ''} bg-black/90 border-2 px-1 py-0.5 text-white text-[9px] md:text-[10px] transition-all shadow-md rounded relative z-10 ${isSelected ? 'border-yellow-400 ring-1 ring-yellow-400/50' : 'border-gray-600'} ${isTrueBossPhase2 ? 'border-purple-500 shadow-[0_0_18px_rgba(168,85,247,0.35)]' : isFinalBoss ? 'border-red-500 shadow-[0_0_14px_rgba(239,68,68,0.25)]' : ''}`}>
                                             <div className="flex items-center justify-between mb-0.5 h-4 w-full overflow-hidden">
                                                 <div className="flex-1 min-w-0 overflow-hidden relative h-full">
                                                     {enemyNameNeedsScroll ? (
