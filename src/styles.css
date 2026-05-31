@@ -876,6 +876,15 @@ textarea {
   transform: translateY(var(--battle-ui-control-bar-offset-y, 0px)) !important;
 }
 
+.battle-scene-root.battle-ui-custom {
+  --battle-ui-hand-area-base-height: 15rem;
+}
+
+.battle-scene-root.battle-ui-custom .battle-hand-area {
+  height: calc(var(--battle-ui-hand-area-base-height) - var(--battle-ui-control-bar-offset-y, 0px)) !important;
+  margin-top: var(--battle-ui-control-bar-offset-y, 0px) !important;
+}
+
 .battle-scene-root.battle-ui-custom .battle-hand-card {
   width: calc(7rem * var(--battle-ui-hand-card-scale, 1)) !important;
   height: calc(11rem * var(--battle-ui-hand-card-scale, 1)) !important;
@@ -886,6 +895,10 @@ textarea {
 }
 
 @media (min-width: 768px) {
+  .battle-scene-root.battle-ui-custom {
+    --battle-ui-hand-area-base-height: 16rem;
+  }
+
   .battle-scene-root.battle-ui-custom .battle-hand-card {
     width: calc(8rem * var(--battle-ui-hand-card-scale, 1)) !important;
     height: calc(12rem * var(--battle-ui-hand-card-scale, 1)) !important;
@@ -893,6 +906,30 @@ textarea {
 
   .battle-scene-root.battle-ui-custom .battle-hand-card-inner {
     transform: scale(var(--battle-ui-hand-card-scale, 1)) !important;
+  }
+}
+
+@media (orientation: landscape) {
+  .battle-scene-root.battle-ui-custom {
+    --battle-ui-hand-area-base-height: 13rem;
+  }
+}
+
+@media (min-width: 900px) {
+  .battle-scene-root.battle-ui-custom {
+    --battle-ui-hand-area-base-height: 13rem;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 560px) {
+  .battle-scene-root.battle-ui-custom {
+    --battle-ui-hand-area-base-height: 11.5rem;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 430px) {
+  .battle-scene-root.battle-ui-custom {
+    --battle-ui-hand-area-base-height: 10rem;
   }
 }
 
