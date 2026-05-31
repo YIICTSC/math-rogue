@@ -7,7 +7,8 @@ export type BgmMode = 'STUDY' | 'MP3' | 'OSCILLATOR';
 export type SettingsTab = 'AUDIO' | 'DISPLAY' | 'BATTLE' | 'COMM';
 
 export type BattleUiSettings = {
-  controlBarHeightRem: number;
+  controlBarOffsetY: number;
+  handCardScale: number;
   enemyScale: number;
   playerScale: number;
   enemyOffsetY: number;
@@ -187,13 +188,21 @@ const SettingsModal: React.FC<Props> = ({
                 </p>
               </div>
               <BattleSlider
-                label={trans("手札上部バーの高さ", languageMode)}
-                value={settings.battleUi.controlBarHeightRem}
-                min={1.8}
-                max={9}
-                step={0.1}
-                unit="rem"
-                onChange={value => onChange('battleUi', { ...settings.battleUi, controlBarHeightRem: value })}
+                label={trans("手札上部バー上下位置", languageMode)}
+                value={settings.battleUi.controlBarOffsetY}
+                min={-140}
+                max={40}
+                step={2}
+                unit="px"
+                onChange={value => onChange('battleUi', { ...settings.battleUi, controlBarOffsetY: value })}
+              />
+              <BattleSlider
+                label={trans("手札カードサイズ", languageMode)}
+                value={settings.battleUi.handCardScale}
+                min={0.65}
+                max={1.35}
+                step={0.05}
+                onChange={value => onChange('battleUi', { ...settings.battleUi, handCardScale: value })}
               />
               <BattleSlider
                 label={trans("敵キャラサイズ", languageMode)}

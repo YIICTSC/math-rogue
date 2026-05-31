@@ -873,10 +873,27 @@ textarea {
 }
 
 .battle-scene-root.battle-ui-custom .battle-control-bar {
-  height: var(--battle-ui-control-bar-height, 3rem) !important;
-  min-height: var(--battle-ui-control-bar-height, 3rem) !important;
-  flex: 0 0 var(--battle-ui-control-bar-height, 3rem) !important;
-  box-sizing: border-box !important;
+  transform: translateY(var(--battle-ui-control-bar-offset-y, 0px)) !important;
+}
+
+.battle-scene-root.battle-ui-custom .battle-hand-card {
+  width: calc(7rem * var(--battle-ui-hand-card-scale, 1)) !important;
+  height: calc(11rem * var(--battle-ui-hand-card-scale, 1)) !important;
+}
+
+.battle-scene-root.battle-ui-custom .battle-hand-card-inner {
+  transform: scale(calc(0.95 * var(--battle-ui-hand-card-scale, 1))) !important;
+}
+
+@media (min-width: 768px) {
+  .battle-scene-root.battle-ui-custom .battle-hand-card {
+    width: calc(8rem * var(--battle-ui-hand-card-scale, 1)) !important;
+    height: calc(12rem * var(--battle-ui-hand-card-scale, 1)) !important;
+  }
+
+  .battle-scene-root.battle-ui-custom .battle-hand-card-inner {
+    transform: scale(var(--battle-ui-hand-card-scale, 1)) !important;
+  }
 }
 
 .battle-scene-root.battle-ui-custom .battle-enemies-area > * {

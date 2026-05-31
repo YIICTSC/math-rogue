@@ -369,7 +369,8 @@ const BattleScene: React.FC<BattleSceneProps> = ({
     const isCoopBattleView = !!coopSelfPeerId || companions.length > 0;
     const battleBackgroundScene = getBattleBackgroundSceneById(battleBackgroundId);
     const battleUiStyle = battleUiSettings ? {
-        '--battle-ui-control-bar-height': `${battleUiSettings.controlBarHeightRem}rem`,
+        '--battle-ui-control-bar-offset-y': `${battleUiSettings.controlBarOffsetY}px`,
+        '--battle-ui-hand-card-scale': battleUiSettings.handCardScale,
         '--battle-ui-enemy-scale': battleUiSettings.enemyScale,
         '--battle-ui-player-scale': battleUiSettings.playerScale,
         '--battle-ui-enemy-offset-y': `${battleUiSettings.enemyOffsetY}px`,

@@ -4541,6 +4541,8 @@ Object.assign(ENGLISH_DICTIONARY, {
     "戦闘画面のUI調整": "Battle Screen UI Adjustment",
     "戦闘中にこの設定を開くと、変更が画面へすぐ反映されます。": "Open these settings during battle to preview changes immediately.",
     "手札上部バーの高さ": "Top Hand Bar Height",
+    "手札上部バー上下位置": "Top Hand Bar Vertical Position",
+    "手札カードサイズ": "Hand Card Size",
     "敵キャラサイズ": "Enemy Character Size",
     "味方キャラサイズ": "Player Character Size",
     "敵キャラ上下位置": "Enemy Vertical Position",

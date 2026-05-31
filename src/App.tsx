@@ -238,7 +238,8 @@ const DEFAULT_APP_SETTINGS: AppSettings = {
     reduceScreenShake: false,
     fontSize: 'normal',
     battleUi: {
-        controlBarHeightRem: 3,
+        controlBarOffsetY: 0,
+        handCardScale: 1,
         enemyScale: 1,
         playerScale: 1,
         enemyOffsetY: 0,
@@ -815,15 +816,17 @@ const App: React.FC = () => {
     const [isFullScreen, setIsFullScreen] = useState(false);
     const [appSettings, setAppSettings] = useState<AppSettings>(() => {
         const saved = storageService.getAppSettings<AppSettings>();
-        const savedBattleUi = saved?.battleUi as Partial<AppSettings['battleUi']> | undefined;
+        const savedBattleUi = saved?.battleUi as (Partial<AppSettings['battleUi']> & { controlBarHeightRem?: number }) | undefined;
         const merged = {
             ...DEFAULT_APP_SETTINGS,
             ...(saved || {}),
             battleUi: {
                 ...DEFAULT_APP_SETTINGS.battleUi,
                 ...(savedBattleUi || {}),
-                controlBarHeightRem: savedBattleUi?.controlBarHeightRem
-                    ?? DEFAULT_APP_SETTINGS.battleUi.controlBarHeightRem
+                controlBarOffsetY: savedBattleUi?.controlBarOffsetY
+                    ?? DEFAULT_APP_SETTINGS.battleUi.controlBarOffsetY,
+                handCardScale: savedBattleUi?.handCardScale
+                    ?? DEFAULT_APP_SETTINGS.battleUi.handCardScale
             }
         };
         return storageService.getBgmMode() ? merged : { ...merged, bgmMode: 'MP3' };
