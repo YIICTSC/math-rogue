@@ -11739,6 +11739,7 @@ const App: React.FC = () => {
                                 onOpenSettings={() => setShowSettingsModal(true)}
                                 battleBackgroundId={currentBattleBackgroundId}
                                 visualTheme={coopSyncedVisualTheme}
+                                battleUiSettings={appSettings.battleUi}
                             />
                         )}
                     </div>
