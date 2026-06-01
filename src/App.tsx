@@ -10574,16 +10574,16 @@ const App: React.FC = () => {
                 )}
 
                 {isPreloadingGameAssets && (
-                    <div className="fixed inset-0 z-[10030] flex items-center justify-center bg-black/70 text-white backdrop-blur-sm">
-                        <div className="rounded border border-cyan-300/70 bg-slate-950/90 px-5 py-4 text-center shadow-[0_0_24px_rgba(34,211,238,0.25)]">
+                    <div className="app-modal-overlay fixed inset-0 z-[10030] flex items-center justify-center bg-black/70 text-white backdrop-blur-sm">
+                        <div className="app-modal-panel app-loading-modal rounded border border-cyan-300/70 bg-slate-950/90 px-5 py-4 text-center shadow-[0_0_24px_rgba(34,211,238,0.25)]">
                             <div className="text-sm font-black text-cyan-100">{trans("ゲーム素材を読み込み中...", languageMode)}</div>
                         </div>
                     </div>
                 )}
 
                 {showTimeLimitModal && (
-                    <div className="fixed inset-0 z-[10000] bg-black/90 flex items-center justify-center p-4 animate-in fade-in duration-300">
-                        <div className="bg-gray-900 border-4 border-red-600 p-8 rounded-2xl max-sm w-full shadow-[0_0_50px_rgba(220,38,38,0.5)] text-center transform scale-110">
+                    <div className="app-modal-overlay app-time-limit-modal-overlay fixed inset-0 z-[10000] bg-black/90 flex items-center justify-center p-4 animate-in fade-in duration-300">
+                        <div className="app-modal-panel app-time-limit-modal bg-gray-900 border-4 border-red-600 p-8 rounded-2xl max-sm w-full shadow-[0_0_50px_rgba(220,38,38,0.5)] text-center transform scale-110">
                             <TimerOff size={64} className="text-red-500 mx-auto mb-6 animate-pulse" />
                             <h2 className="text-3xl font-black text-white mb-4 tracking-tighter">時間切れ！</h2>
                             <p className="text-gray-300 mb-8 leading-relaxed font-bold">
@@ -10602,8 +10602,8 @@ const App: React.FC = () => {
                 )}
 
                 {showStartOverConfirm && (
-                    <div className="fixed inset-0 z-[10000] bg-black/90 flex items-center justify-center p-4 animate-in fade-in duration-300">
-                        <div className="bg-gray-900 border-4 border-yellow-500 p-8 rounded-2xl max-sm w-full max-w-md shadow-[0_0_50px_rgba(234,179,8,0.35)] text-center">
+                    <div className="app-modal-overlay app-start-over-modal-overlay fixed inset-0 z-[10000] bg-black/90 flex items-center justify-center p-4 animate-in fade-in duration-300">
+                        <div className="app-modal-panel app-start-over-modal bg-gray-900 border-4 border-yellow-500 p-8 rounded-2xl max-sm w-full max-w-md shadow-[0_0_50px_rgba(234,179,8,0.35)] text-center">
                             <AlertTriangle size={64} className="text-yellow-400 mx-auto mb-6 animate-pulse" />
                             <h2 className="text-3xl font-black text-white mb-4 tracking-tighter">{trans("続きデータがあります", languageMode)}</h2>
                             <p className="text-gray-300 mb-8 leading-relaxed font-bold">
@@ -10651,9 +10651,9 @@ const App: React.FC = () => {
                         <div className="absolute inset-0 bg-slate-950/55" />
                         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(15,23,42,0.12),rgba(2,6,23,0.72))]" />
                         {isLegacyVercelHost && showMigrationNotice && (
-                            <div className="fixed inset-0 z-[10001] bg-black/80 flex items-center justify-center p-3 sm:p-4">
+                            <div className="app-modal-overlay app-migration-modal-overlay fixed inset-0 z-[10001] bg-black/80 flex items-center justify-center p-3 sm:p-4">
                                 <div
-                                    className="w-full max-w-lg max-h-[92dvh] overflow-y-auto rounded-2xl border-4 border-cyan-400 bg-slate-950 text-center shadow-[0_0_60px_rgba(34,211,238,0.3)] overscroll-contain"
+                                    className="app-modal-panel app-migration-modal w-full max-w-lg max-h-[92dvh] overflow-y-auto rounded-2xl border-4 border-cyan-400 bg-slate-950 text-center shadow-[0_0_60px_rgba(34,211,238,0.3)] overscroll-contain"
                                     style={{ WebkitOverflowScrolling: 'touch' }}
                                     onClick={e => e.stopPropagation()}
                                 >
@@ -11017,8 +11017,8 @@ const App: React.FC = () => {
                 )}
 
                 {showDataTransferModal && (
-                    <div className="fixed inset-0 z-[10001] bg-black/90 flex items-center justify-center p-4" onClick={() => setShowDataTransferModal(false)}>
-                        <div className="w-full max-w-5xl rounded-2xl border-2 border-cyan-500 bg-slate-950 p-5 shadow-[0_0_30px_rgba(34,211,238,0.25)] max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
+                    <div className="app-modal-overlay app-data-transfer-modal-overlay fixed inset-0 z-[10001] bg-black/90 flex items-center justify-center p-4" onClick={() => setShowDataTransferModal(false)}>
+                        <div className="app-modal-panel app-data-transfer-modal w-full max-w-5xl rounded-2xl border-2 border-cyan-500 bg-slate-950 p-5 shadow-[0_0_30px_rgba(34,211,238,0.25)] max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
                             <div className="flex items-start justify-between gap-4 mb-5">
                                 <div>
                                     <h2 className="text-2xl font-black text-white">{trans("データ移行", languageMode)}</h2>
@@ -11130,8 +11130,8 @@ const App: React.FC = () => {
                 )}
 
                 {showDebugLog && (
-                    <div className="fixed inset-0 z-[10020] bg-black/90 flex items-center justify-center p-4" onClick={() => setShowDebugLog(false)}>
-                        <div className="bg-gray-900 border-2 border-green-500 p-6 rounded-lg max-w-lg w-full shadow-[0_0_20px_rgba(34,197,94,0.3)]" onClick={e => e.stopPropagation()}>
+                    <div className="app-modal-overlay app-debug-modal-overlay fixed inset-0 z-[10020] bg-black/90 flex items-center justify-center p-4" onClick={() => setShowDebugLog(false)}>
+                        <div className="app-modal-panel app-debug-modal bg-gray-900 border-2 border-green-500 p-6 rounded-lg max-w-lg w-full shadow-[0_0_20px_rgba(34,197,94,0.3)]" onClick={e => e.stopPropagation()}>
                             <h2
                                 className="text-xl font-bold mb-4 text-green-400 font-mono border-b border-green-800 pb-2 select-none active:text-green-200"
                                 onClick={handleLogClick}
@@ -12034,8 +12034,8 @@ const App: React.FC = () => {
                 )}
 
                 {masteryRewardModal && (
-                    <div className="fixed inset-0 z-[2147483647] bg-black/80 flex items-center justify-center p-4 pointer-events-auto">
-                        <div className="w-full max-w-md bg-slate-900 border-2 border-yellow-400 rounded-xl p-6 text-center">
+                    <div className="app-modal-overlay app-mastery-reward-modal-overlay fixed inset-0 z-[2147483647] bg-black/80 flex items-center justify-center p-4 pointer-events-auto">
+                        <div className="app-modal-panel app-mastery-reward-modal w-full max-w-md bg-slate-900 border-2 border-yellow-400 rounded-xl p-6 text-center">
                             <div className="text-2xl font-black text-yellow-300 mb-3">◎ マスター達成</div>
                             <div className="text-white font-bold leading-relaxed mb-5">
                                 この種類の問題のマスターおめでとう！<br />
@@ -12052,8 +12052,8 @@ const App: React.FC = () => {
                 )}
 
                 {(newlyUnlockedCharacters.length > 0 || newlyUnlockedMiniGames.length > 0) && (
-                    <div className="fixed inset-0 z-[2147483646] bg-black/80 flex items-center justify-center p-4">
-                        <div className="flex max-h-[min(88vh,960px)] w-full max-w-4xl flex-col rounded-2xl border-2 border-yellow-400 bg-slate-900 p-4 sm:p-6 text-center shadow-[0_0_40px_rgba(250,204,21,0.25)]">
+                    <div className="app-modal-overlay app-unlocks-modal-overlay fixed inset-0 z-[2147483646] bg-black/80 flex items-center justify-center p-4">
+                        <div className="app-modal-panel app-unlocks-modal flex max-h-[min(88vh,960px)] w-full max-w-4xl flex-col rounded-2xl border-2 border-yellow-400 bg-slate-900 p-4 sm:p-6 text-center shadow-[0_0_40px_rgba(250,204,21,0.25)]">
                             <div className="mb-4 flex items-center justify-center gap-2 text-yellow-300 font-black text-2xl shrink-0">
                                 <Sparkles size={24} />
                                 NEW UNLOCKS
@@ -12105,8 +12105,8 @@ const App: React.FC = () => {
                 )}
 
                 {weatherScryModal && (
-                    <div className="fixed inset-0 z-[230] bg-black/70 flex items-center justify-center p-4">
-                        <div className="w-full max-w-lg rounded-xl border-2 border-cyan-400 bg-slate-900 text-white p-4">
+                    <div className="app-modal-overlay app-weather-scry-modal-overlay fixed inset-0 z-[230] bg-black/70 flex items-center justify-center p-4">
+                        <div className="app-modal-panel app-card-choice-modal app-weather-scry-modal w-full max-w-lg rounded-xl border-2 border-cyan-400 bg-slate-900 text-white p-4">
                             <h3 className="text-xl font-bold mb-2">{trans("天気予報", languageMode)}</h3>
                             <p className="text-sm text-slate-300 mb-3">山札に戻すか、捨て札に送るかを選択してください</p>
                             <div className="space-y-2 max-h-[50vh] overflow-y-auto pr-1">
@@ -12144,8 +12144,8 @@ const App: React.FC = () => {
                 )}
 
                 {galaxyExpressModal && (
-                    <div className="fixed inset-0 z-[231] bg-black/70 flex items-center justify-center p-4">
-                        <div className="w-full max-w-2xl rounded-xl border-2 border-sky-400 bg-slate-950 text-white p-4">
+                    <div className="app-modal-overlay app-galaxy-express-modal-overlay fixed inset-0 z-[231] bg-black/70 flex items-center justify-center p-4">
+                        <div className="app-modal-panel app-card-choice-modal app-galaxy-express-modal w-full max-w-2xl rounded-xl border-2 border-sky-400 bg-slate-950 text-white p-4">
                             <h3 className="text-xl font-bold mb-2">{trans("銀河鉄道の夜", languageMode)}</h3>
                             <p className="text-sm text-slate-300 mb-3">1枚選んで手札に加え、残りは捨て札に送ります</p>
                             <div className="grid gap-2 sm:grid-cols-2 max-h-[60vh] overflow-y-auto pr-1">
@@ -12166,8 +12166,8 @@ const App: React.FC = () => {
                 )}
 
                 {goldFishModal && (
-                    <div className="fixed inset-0 z-[231] bg-black/70 flex items-center justify-center p-4">
-                        <div className="w-full max-w-xl rounded-xl border-2 border-rose-400 bg-slate-950 text-white p-4">
+                    <div className="app-modal-overlay app-gold-fish-modal-overlay fixed inset-0 z-[231] bg-black/70 flex items-center justify-center p-4">
+                        <div className="app-modal-panel app-card-choice-modal app-gold-fish-modal w-full max-w-xl rounded-xl border-2 border-rose-400 bg-slate-950 text-white p-4">
                             <h3 className="text-xl font-bold mb-2">{trans(goldFishModal.title, languageMode)}</h3>
                             <p className="text-sm text-slate-300 mb-3">{goldFishModal.description}</p>
                             <div className="space-y-2 max-h-[55vh] overflow-y-auto pr-1">
@@ -12187,8 +12187,8 @@ const App: React.FC = () => {
                 )}
 
                 {dreamCatcherModal && (
-                    <div className="fixed inset-0 z-[231] bg-black/70 flex items-center justify-center p-4">
-                        <div className="w-full max-w-2xl rounded-xl border-2 border-violet-400 bg-slate-950 text-white p-4">
+                    <div className="app-modal-overlay app-dream-catcher-modal-overlay fixed inset-0 z-[231] bg-black/70 flex items-center justify-center p-4">
+                        <div className="app-modal-panel app-card-choice-modal app-dream-catcher-modal w-full max-w-2xl rounded-xl border-2 border-violet-400 bg-slate-950 text-white p-4">
                             <h3 className="text-xl font-bold mb-2">{trans(dreamCatcherModal.title, languageMode)}</h3>
                             <p className="text-sm text-slate-300 mb-3">{dreamCatcherModal.description}</p>
                             <div className="grid gap-2 sm:grid-cols-2 max-h-[60vh] overflow-y-auto pr-1">
@@ -12208,8 +12208,8 @@ const App: React.FC = () => {
                 )}
 
                 {orreryModal && (
-                    <div className="fixed inset-0 z-[231] bg-black/70 flex items-center justify-center p-4">
-                        <div className="w-full max-w-2xl rounded-xl border-2 border-amber-400 bg-slate-950 text-white p-4">
+                    <div className="app-modal-overlay app-orrery-modal-overlay fixed inset-0 z-[231] bg-black/70 flex items-center justify-center p-4">
+                        <div className="app-modal-panel app-card-choice-modal app-orrery-modal w-full max-w-2xl rounded-xl border-2 border-amber-400 bg-slate-950 text-white p-4">
                             <h3 className="text-xl font-bold mb-2">{trans(orreryModal.title, languageMode)}</h3>
                             <p className="text-sm text-slate-300 mb-3">{orreryModal.description}</p>
                             <div className="grid gap-2 sm:grid-cols-2 max-h-[60vh] overflow-y-auto pr-1">
@@ -12229,8 +12229,8 @@ const App: React.FC = () => {
                 )}
 
                 {peacePipeModal && (
-                    <div className="fixed inset-0 z-[231] bg-black/70 flex items-center justify-center p-4">
-                        <div className="w-full max-w-2xl rounded-xl border-2 border-emerald-400 bg-slate-950 text-white p-4">
+                    <div className="app-modal-overlay app-peace-pipe-modal-overlay fixed inset-0 z-[231] bg-black/70 flex items-center justify-center p-4">
+                        <div className="app-modal-panel app-card-choice-modal app-peace-pipe-modal w-full max-w-2xl rounded-xl border-2 border-emerald-400 bg-slate-950 text-white p-4">
                             <h3 className="text-xl font-bold mb-2">{trans(peacePipeModal.title, languageMode)}</h3>
                             <p className="text-sm text-slate-300 mb-3">{peacePipeModal.description}</p>
                             <div className="grid gap-2 sm:grid-cols-2 max-h-[60vh] overflow-y-auto pr-1">

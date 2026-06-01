@@ -248,7 +248,7 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
 
   return (
     <div
-      className="flex flex-col h-full w-full bg-gray-900 bg-cover bg-center text-white relative items-center justify-center p-4 md:p-8"
+      className="main-rest-screen flex flex-col h-full w-full bg-gray-900 bg-cover bg-center text-white relative items-center justify-center p-4 md:p-8"
       style={{ backgroundImage: `url(${assetUrl('sprites/backgrounds/learning-rogue/rest-infirmary.webp')})` }}
     >
         <div className="absolute inset-0 bg-slate-950/58 pointer-events-none" />

@@ -165,15 +165,15 @@ const CharacterSelectionScreen: React.FC<CharacterSelectionScreenProps> = ({ cha
 
   return (
     <div
-      className="flex flex-col h-full w-full bg-gray-900 bg-cover bg-center text-white relative overflow-hidden"
+      className="main-character-screen flex flex-col h-full w-full bg-gray-900 bg-cover bg-center text-white relative overflow-hidden"
       style={{ backgroundImage: `url(${assetUrl('sprites/backgrounds/learning-rogue/selection-entrance.webp')})` }}
     >
       <div className="absolute inset-0 bg-slate-950/60 pointer-events-none" />
       
       {/* Camera Modal */}
       {showCamera && (
-        <div className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-4 backdrop-blur-sm animate-in fade-in duration-300">
-          <div className="bg-gray-800 border-4 border-white p-6 rounded-3xl w-full max-w-sm shadow-[0_0_50px_rgba(255,255,255,0.3)] relative flex flex-col items-center">
+        <div className="app-modal-overlay fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-4 backdrop-blur-sm animate-in fade-in duration-300">
+          <div className="app-modal-panel app-camera-modal bg-gray-800 border-4 border-white p-6 rounded-3xl w-full max-w-sm shadow-[0_0_50px_rgba(255,255,255,0.3)] relative flex flex-col items-center">
             <button onClick={handleCloseCamera} className="absolute -top-4 -right-4 bg-red-600 border-2 border-white p-2 rounded-full hover:bg-red-500 transition-colors">
               <X size={24} />
             </button>

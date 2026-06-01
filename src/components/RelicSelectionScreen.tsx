@@ -41,7 +41,7 @@ const RelicSelectionScreen: React.FC<RelicSelectionScreenProps> = ({ relics, onS
 
   return (
     <div
-      className="flex flex-col h-full w-full bg-gray-900 bg-cover bg-center text-white relative overflow-y-auto custom-scrollbar"
+      className="main-relic-screen flex flex-col h-full w-full bg-gray-900 bg-cover bg-center text-white relative overflow-y-auto custom-scrollbar"
       style={{ backgroundImage: `url(${assetUrl('sprites/backgrounds/learning-rogue/selection-entrance.webp')})` }}
     >
       <div className="absolute inset-0 bg-slate-950/60 pointer-events-none" />

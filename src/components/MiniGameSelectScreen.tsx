@@ -150,7 +150,7 @@ const MiniGameSelectScreen: React.FC<MiniGameSelectScreenProps> = ({ onSelect, o
 
   return (
     <div
-      className="flex flex-col h-full w-full bg-gray-900 bg-cover bg-center text-white relative"
+      className="main-mini-game-select-screen flex flex-col h-full w-full bg-gray-900 bg-cover bg-center text-white relative"
       style={{ backgroundImage: `url(${assetUrl('sprites/backgrounds/learning-rogue/selection-entrance.webp')})` }}
     >
       <div className="absolute inset-0 bg-slate-950/64 pointer-events-none" />
@@ -158,8 +158,8 @@ const MiniGameSelectScreen: React.FC<MiniGameSelectScreenProps> = ({ onSelect, o
       
       {/* Delete Confirmation Modal */}
       {deleteTarget && (
-        <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4 animate-in fade-in duration-200">
-          <div className="bg-gray-800 border-2 border-red-500 p-6 rounded-lg max-w-sm w-full shadow-2xl text-center">
+        <div className="app-modal-overlay fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4 animate-in fade-in duration-200">
+          <div className="app-modal-panel app-delete-confirm-modal bg-gray-800 border-2 border-red-500 p-6 rounded-lg max-w-sm w-full shadow-2xl text-center">
             <AlertTriangle size={48} className="text-red-500 mx-auto mb-4 animate-bounce" />
             <h3 className="text-xl font-bold text-white mb-2">{trans('セーブデータを削除しますか？', languageMode)}</h3>
             <p className="text-sm text-gray-300 mb-6">

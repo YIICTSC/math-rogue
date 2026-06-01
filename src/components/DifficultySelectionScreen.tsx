@@ -35,7 +35,7 @@ const DifficultySelectionScreen: React.FC<DifficultySelectionScreenProps> = ({
   }, [maxUnlockedDifficulty, onBack, onSelectDifficulty]);
 
   return (
-    <div className="h-full w-full overflow-y-auto bg-slate-950 p-2 text-white custom-scrollbar sm:p-4">
+    <div className="main-difficulty-screen h-full w-full overflow-y-auto bg-slate-950 p-2 text-white custom-scrollbar sm:p-4">
       <div className="mx-auto flex min-h-full max-w-5xl flex-col py-2 sm:py-6">
         <button
           onClick={onBack}

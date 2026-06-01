@@ -90,7 +90,7 @@ const TreasureScreen: React.FC<TreasureScreenProps> = ({
 
   return (
     <div
-      className="flex h-full w-full flex-col items-center justify-center overflow-y-auto bg-gray-900 bg-cover bg-center p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] text-white relative sm:p-8"
+      className="main-treasure-screen flex h-full w-full flex-col items-center justify-center overflow-y-auto bg-gray-900 bg-cover bg-center p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] text-white relative sm:p-8"
       style={{ backgroundImage: `url(${assetUrl('sprites/backgrounds/learning-rogue/treasure-storage.webp')})` }}
     >
       <div className="absolute inset-0 bg-slate-950/60 pointer-events-none" />

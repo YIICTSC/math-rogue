@@ -11,7 +11,7 @@ interface HelpScreenProps {
 
 const HelpScreen: React.FC<HelpScreenProps> = ({ onBack, languageMode = 'JAPANESE' }) => {
   return (
-    <div className="flex flex-col h-full w-full bg-gray-900 text-white relative">
+    <div className="main-help-screen flex flex-col h-full w-full bg-gray-900 text-white relative">
         {/* Header */}
         <div className="z-10 bg-black border-b-2 border-gray-600 p-4 flex justify-between items-center shrink-0">
             <div className="flex items-center">

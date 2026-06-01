@@ -54,7 +54,7 @@ const TypingModeSelectionScreen: React.FC<TypingModeSelectionScreenProps> = ({
     }, [onSelect, onBack]);
 
     return (
-        <div className="flex h-full w-full flex-col bg-slate-950 text-white">
+        <div className="main-typing-mode-screen flex h-full w-full flex-col bg-slate-950 text-white">
             <div className="border-b border-slate-700 bg-black/60 px-4 py-3">
                 <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-4">
                     <button

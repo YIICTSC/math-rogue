@@ -203,7 +203,7 @@ const MapScreen: React.FC<MapScreenProps> = ({ nodes, currentNodeId, onNodeSelec
         : mapBackgrounds[(Math.max(1, act) - 1) % mapBackgrounds.length];
 
     return (
-        <div className="flex flex-col h-full w-full bg-slate-950 relative overflow-hidden">
+        <div className="main-map-screen flex flex-col h-full w-full bg-slate-950 relative overflow-hidden">
             {/* 背景テクスチャ（黒板風） */}
             <div className="absolute inset-0 texture-dark-matter opacity-40 pointer-events-none"></div>
             <div className="absolute inset-0 bg-gradient-to-b from-transparent via-slate-900/50 to-black pointer-events-none"></div>
@@ -448,8 +448,8 @@ const MapScreen: React.FC<MapScreenProps> = ({ nodes, currentNodeId, onNodeSelec
 
             {/* デッキ確認用モーダル */}
             {showDeck && (
-                <div className="fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-300" onClick={() => setShowDeck(false)}>
-                    <div className="bg-slate-900 border-4 border-slate-700 w-full max-w-4xl h-[85vh] flex flex-col relative shadow-[0_0_50px_rgba(0,0,0,1)] rounded-xl" onClick={e => e.stopPropagation()}>
+                <div className="app-modal-overlay fixed inset-0 z-50 bg-black/90 backdrop-blur-md flex items-center justify-center p-4 animate-in fade-in duration-300" onClick={() => setShowDeck(false)}>
+                    <div className="app-modal-panel app-deck-modal bg-slate-900 border-4 border-slate-700 w-full max-w-4xl h-[85vh] flex flex-col relative shadow-[0_0_50px_rgba(0,0,0,1)] rounded-xl" onClick={e => e.stopPropagation()}>
                         <div className="bg-black/50 border-b-2 border-slate-700 p-5 flex justify-between items-center">
                             <div className="flex flex-col">
                                 <h2 className="text-white text-2xl font-black flex items-center tracking-tighter">

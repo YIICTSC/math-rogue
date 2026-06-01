@@ -1,7 +1,8 @@
 
 import React, { useEffect, useMemo, useState, useRef } from 'react';
 import { Player, Card as ICard, Relic, Potion, LanguageMode } from '../types';
-import Card, { KEYWORD_DEFINITIONS } from './Card';
+import Card from './Card';
+import CardInspectionModal from './CardInspectionModal';
 import { ShoppingBag, Trash2, Coins, Gem, FlaskConical, X } from 'lucide-react';
 import { trans } from '../utils/textUtils';
 import { assetUrl } from '../utils/assetPaths';
@@ -196,49 +197,29 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics =
       return () => window.removeEventListener('keydown', handleKeyDown);
   }, [typingMode, inspectedItem, potionToBuy, player.potions, viewMode, buyShortcutItems, removeShortcutItems, onLeave, purchasedIds, player.gold, removed, interactionDisabled]);
 
-  const getCardKeywords = (card: ICard) => {
-      const keywords = [];
-      if (card.exhaust) keywords.push(KEYWORD_DEFINITIONS.EXHAUST);
-      if (card.strength || card.description.includes('ムキムキ')) keywords.push(KEYWORD_DEFINITIONS.STRENGTH);
-      if (card.vulnerable || card.description.includes('びくびく')) keywords.push(KEYWORD_DEFINITIONS.VULNERABLE);
-      if (card.weak || card.description.includes('へろへろ')) keywords.push(KEYWORD_DEFINITIONS.WEAK);
-      if (card.block || card.description.includes('ブロック')) keywords.push(KEYWORD_DEFINITIONS.BLOCK);
-      if (card.draw || card.description.includes('引く')) keywords.push(KEYWORD_DEFINITIONS.DRAW);
-      return keywords;
-  };
-
-  const getProcessedDescription = (card: ICard) => {
-      let desc = trans(card.description, languageMode);
-      if (card.damage !== undefined) desc = desc.replace(/(\d+)ダメージ/g, `${card.damage}${trans("ダメージ", languageMode)}`);
-      if (card.block !== undefined) desc = desc.replace(/ブロック(\d+)/g, `${trans("ブロック", languageMode)}${card.block}`);
-      if (card.poison !== undefined) desc = desc.replace(/ドクドク(\d+)/g, `${trans("ドクドク", languageMode)}${card.poison}`);
-      if (card.weak !== undefined) desc = desc.replace(/へろへろ(\d+)/g, `${trans("へろへろ", languageMode)}${card.weak}`);
-      if (card.vulnerable !== undefined) desc = desc.replace(/びくびく(\d+)/g, `${trans("びくびく", languageMode)}${card.vulnerable}`);
-      if (card.strength !== undefined) desc = desc.replace(/ムキムキ(\d+)/g, `${trans("ムキムキ", languageMode)}${card.strength}`);
-      return desc;
-  };
-
   return (
     <div
-      className="flex flex-col h-full w-full bg-gray-900 bg-cover bg-center text-white relative"
+      className="main-shop-screen flex flex-col h-full w-full bg-gray-900 bg-cover bg-center text-white relative"
       style={{ backgroundImage: `url(${assetUrl('sprites/backgrounds/learning-rogue/shop-store.webp')})` }}
     >
        <div className="absolute inset-0 bg-slate-950/60 pointer-events-none" />
        
        {/* Inspection Modal */}
-       {inspectedItem && (
-            <div className="fixed inset-0 z-[100] bg-black/90 flex flex-col items-center justify-center p-4 animate-in fade-in duration-200" onClick={() => setInspectedItem(null)}>
-                <div className="bg-gray-800 border-2 border-white p-6 rounded-lg max-w-sm w-full shadow-2xl relative" onClick={(e) => e.stopPropagation()}>
+       {inspectedItem?.type === 'CARD' && (
+            <CardInspectionModal
+                card={inspectedItem.data}
+                languageMode={languageMode}
+                onClose={() => setInspectedItem(null)}
+            />
+        )}
+       {inspectedItem && inspectedItem.type !== 'CARD' && (
+            <div className="app-modal-overlay fixed inset-0 z-[100] bg-black/90 flex flex-col items-center justify-center p-4 animate-in fade-in duration-200" onClick={() => setInspectedItem(null)}>
+                <div className="app-modal-panel app-item-inspection-modal bg-gray-800 border-2 border-white p-6 rounded-lg max-w-sm w-full shadow-2xl relative" onClick={(e) => e.stopPropagation()}>
                     <button onClick={() => setInspectedItem(null)} className="absolute top-2 right-2 text-gray-400 hover:text-white p-2">
                         <X size={24} />
                     </button>
                     
                     <div className="flex flex-col items-center mb-4">
-                        {inspectedItem.type === 'CARD' && (
-                            <div className="scale-100 mb-4">
-                                <Card card={inspectedItem.data} onClick={() => {}} disabled={false} languageMode={languageMode}/>
-                            </div>
-                        )}
                         {inspectedItem.type === 'RELIC' && (
                             <div className="w-20 h-20 bg-gray-800 border-4 border-yellow-600 rounded-full flex items-center justify-center mb-4 shadow-lg p-3">
                                 <RelicIcon id={inspectedItem.data.id} alt={inspectedItem.data.name} />
@@ -256,20 +237,8 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics =
                     </div>
 
                     <div className="text-lg text-white mb-6 leading-relaxed whitespace-pre-wrap font-bold bg-black/30 p-3 rounded text-center">
-                        {inspectedItem.type === 'CARD' ? getProcessedDescription(inspectedItem.data) : trans(inspectedItem.data.description, languageMode)}
+                        {trans(inspectedItem.data.description, languageMode)}
                     </div>
-                    
-                    {/* Keywords List for Cards */}
-                    {inspectedItem.type === 'CARD' && (
-                        <div className="space-y-2">
-                            {getCardKeywords(inspectedItem.data).map((k, idx) => (
-                                <div key={idx} className="flex flex-col text-left text-sm bg-gray-700/50 p-2 rounded">
-                                    <span className="font-bold text-yellow-300 mb-0.5">{trans(k.title, languageMode)}</span>
-                                    <span className="text-gray-300 text-xs">{trans(k.desc, languageMode)}</span>
-                                </div>
-                            ))}
-                        </div>
-                    )}
                 </div>
             </div>
         )}
@@ -297,8 +266,8 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics =
 
        {/* Potion Replacement Modal */}
        {potionToBuy && (
-           <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4" onClick={() => setPotionToBuy(null)}>
-               <div className="bg-gray-900 border-2 border-white p-6 rounded shadow-2xl max-sm w-full text-center animate-in fade-in zoom-in duration-200" onClick={e => e.stopPropagation()}>
+           <div className="app-modal-overlay fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4" onClick={() => setPotionToBuy(null)}>
+               <div className="app-modal-panel app-potion-replace-modal bg-gray-900 border-2 border-white p-6 rounded shadow-2xl max-sm w-full text-center animate-in fade-in zoom-in duration-200" onClick={e => e.stopPropagation()}>
                    <div className="absolute top-2 right-2 cursor-pointer" onClick={() => setPotionToBuy(null)}>
                        <X size={24} className="text-gray-400 hover:text-white" />
                    </div>

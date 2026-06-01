@@ -135,7 +135,7 @@ const EventScreen: React.FC<EventScreenProps> = ({ title, description, options, 
 
   return (
     <div
-      className="flex h-full w-full flex-col items-center justify-start overflow-y-auto bg-gray-900 bg-cover bg-center p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] text-white relative custom-scrollbar sm:justify-center sm:p-8"
+      className="main-event-screen flex h-full w-full flex-col items-center justify-start overflow-y-auto bg-gray-900 bg-cover bg-center p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] text-white relative custom-scrollbar sm:justify-center sm:p-8"
       style={{ backgroundImage: `url(${assetUrl('sprites/backgrounds/learning-rogue/event-hallway.webp')})` }}
     >
         <div className="absolute inset-0 bg-slate-950/60 pointer-events-none" />

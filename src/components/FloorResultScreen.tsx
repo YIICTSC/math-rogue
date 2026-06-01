@@ -83,7 +83,7 @@ const FloorResultScreen: React.FC<FloorResultScreenProps> = ({ act, stats, story
   }, [typingMode, isTyping, currentPart, languageMode]);
 
   return (
-    <div className="w-full h-full bg-[#0a0a0a] flex flex-col items-center justify-center p-3 sm:p-6 md:p-8 lg:p-10 relative overflow-hidden font-mono">
+    <div className="main-floor-result-screen w-full h-full bg-[#0a0a0a] flex flex-col items-center justify-center p-3 sm:p-6 md:p-8 lg:p-10 relative overflow-hidden font-mono">
       {/* Background decoration */}
       <div className="absolute inset-0 opacity-10 pointer-events-none flex items-center justify-center">
         <BookOpen className="text-gray-500 w-[200px] h-[200px] sm:w-[400px] sm:h-[400px]" />

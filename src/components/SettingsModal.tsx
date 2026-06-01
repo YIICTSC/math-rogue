@@ -108,8 +108,8 @@ const SettingsModal: React.FC<Props> = ({
   const visibleTabs = showCommunication ? tabs : tabs.filter(t => t.key !== 'COMM');
 
   return (
-    <div className="fixed inset-0 z-[10020] bg-black/25 backdrop-blur-[1px] flex items-center justify-center p-3" onClick={onClose}>
-      <div className="w-full max-w-2xl max-h-[90dvh] overflow-y-auto rounded-xl border-2 border-cyan-500/50 bg-slate-900/65 text-white shadow-2xl backdrop-blur-sm" onClick={(e) => e.stopPropagation()}>
+    <div className="app-modal-overlay app-settings-modal-overlay fixed inset-0 z-[10020] bg-black/25 backdrop-blur-[1px] flex items-center justify-center p-3" onClick={onClose}>
+      <div className="app-modal-panel app-settings-modal w-full max-w-2xl max-h-[90dvh] overflow-y-auto rounded-xl border-2 border-cyan-500/50 bg-slate-900/65 text-white shadow-2xl backdrop-blur-sm" onClick={(e) => e.stopPropagation()}>
         <div className="sticky top-0 bg-slate-900/70 border-b border-slate-700 px-4 py-3 flex items-center justify-between backdrop-blur-sm">
           <h2 className="font-black flex items-center gap-2"><Settings size={16} /> {trans("セッティング", languageMode)}</h2>
           <button onClick={onClose} className="p-1 rounded hover:bg-slate-700"><X size={16} /></button>

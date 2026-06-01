@@ -47,7 +47,7 @@ const FinalBridgeScreen: React.FC<FinalBridgeScreenProps> = ({ player, onComplet
   };
 
   return (
-    <div className="w-full h-full bg-black flex flex-col items-center justify-center p-8 relative overflow-hidden font-mono">
+    <div className="main-final-bridge-screen w-full h-full bg-black flex flex-col items-center justify-center p-8 relative overflow-hidden font-mono">
       {/* Background Parallax Stars Effect */}
       <div className="absolute inset-0 opacity-30 pointer-events-none">
         {[...Array(50)].map((_, i) => (

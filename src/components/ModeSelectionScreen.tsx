@@ -1448,7 +1448,7 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
 
   return (
     <div
-      className="w-full h-full bg-slate-950 bg-cover bg-center flex flex-col text-white overflow-hidden relative"
+      className="main-mode-selection-screen w-full h-full bg-slate-950 bg-cover bg-center flex flex-col text-white overflow-hidden relative"
       style={{ backgroundImage: `url(${assetUrl('sprites/backgrounds/learning-rogue/selection-entrance.webp')})` }}
     >
       <div className="absolute inset-0 bg-slate-950/65 pointer-events-none" />

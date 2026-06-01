@@ -47,7 +47,7 @@ const GardenScreen: React.FC<GardenScreenProps> = ({ player, onPlant, onHarvest,
   const seedsInDeck = player.deck.filter(c => c.isSeed);
 
   return (
-    <div className="flex flex-col h-full w-full bg-[#2d1b0e] text-white font-mono relative overflow-hidden">
+    <div className="main-garden-screen flex flex-col h-full w-full bg-[#2d1b0e] text-white font-mono relative overflow-hidden">
       {/* Background Texture */}
       <div className="absolute inset-0 texture-dark-matter opacity-20 pointer-events-none"></div>
 

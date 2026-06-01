@@ -224,8 +224,8 @@ const CoopSetupScreen: React.FC<CoopSetupScreenProps> = ({ player, onStart, onCl
   };
 
   return (
-    <div className="fixed inset-0 z-[200] bg-slate-950/95 flex items-center justify-center p-4 text-white">
-      <div className="bg-slate-900 border-2 border-emerald-500 rounded-2xl w-full max-w-lg p-6 relative">
+    <div className="main-p2p-setup-screen fixed inset-0 z-[200] bg-slate-950/95 flex items-center justify-center p-4 text-white">
+      <div className="main-p2p-setup-panel bg-slate-900 border-2 border-emerald-500 rounded-2xl w-full max-w-lg p-6 relative">
         <button onClick={handleBack} className="absolute top-3 right-3 text-gray-400 hover:text-white">
           <X size={22} />
         </button>

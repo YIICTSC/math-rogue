@@ -1,6 +1,7 @@
 
 import { Enemy, Player, Card as ICard, CardType, SelectionState, Potion, FloatingText, EnemyIntentType, LanguageMode, ParryState, VisualEffectInstance, CoopSupportCard, AttackEffectKey } from '../types';
-import Card, { KEYWORD_DEFINITIONS } from './Card';
+import Card from './Card';
+import CardInspectionModal from './CardInspectionModal';
 import { Heart, Shield, Zap, Skull, Layers, X, Sword, AlertCircle, TrendingDown, Droplets, Hexagon, Gem, FlaskConical, Info, FileText, MoreHorizontal, Users, Sparkles, MessageCircle, Mic, ArrowRight, MousePointer2, ChevronsRight, ChevronDown, Flame, RotateCcw, Triangle, Settings } from 'lucide-react';
 import PixelSprite from './PixelSprite';
 import EnemyIllustration from './EnemyIllustration';
@@ -553,23 +554,10 @@ const BattleScene: React.FC<BattleSceneProps> = ({
         };
 
         const syncLandscapeSplit = () => {
-            setForceLandscapeSplit((prev) => {
+            setForceLandscapeSplit(() => {
                 if (!isLandscapeViewport()) return false;
                 if (isDesktopLandscapeViewport()) return true;
-                if (prev) return true;
-                const battleView = battleViewRef.current;
-                if (!battleView) return false;
-                const hasBattleOverflow = battleView.scrollHeight > battleView.clientHeight + 8;
-                const isManuallyScrolledForBattle = battleView.scrollTop > 4;
-                const playerTargets = [playerAreaRef.current, playerGroupRef.current, playerSpriteRef.current].filter(Boolean) as HTMLDivElement[];
-                const isPlayerClipped = (() => {
-                    const viewRect = battleView.getBoundingClientRect();
-                    return playerTargets.some((target) => {
-                        const targetRect = target.getBoundingClientRect();
-                        return targetRect.top < viewRect.top - 2 || targetRect.bottom > viewRect.bottom + 2;
-                    });
-                })();
-                return hasBattleOverflow || isManuallyScrolledForBattle || isPlayerClipped;
+                return true;
             });
         };
 
@@ -795,36 +783,6 @@ const BattleScene: React.FC<BattleSceneProps> = ({
             default:
                 return '次の行動は不明';
         }
-    };
-
-    const getProcessedDescription = (card: ICard) => {
-        // 数値置換の前に、まず文章全体をtransにかける
-        let desc = trans(card.description, languageMode);
-
-        // 動的数値の再適用（trans内でもある程度処理するが、確実を期す）
-        if (card.damage !== undefined) desc = desc.replace(/(\d+)ダメージ/g, `${card.damage}${trans("ダメージ", languageMode)}`);
-        if (card.block !== undefined) desc = desc.replace(/ブロック(\d+)/g, `${trans("ブロック", languageMode)}${card.block}`);
-        if (card.poison !== undefined) desc = desc.replace(/ドクドク(\d+)/g, `${trans("ドクドク", languageMode)}${card.poison}`);
-        if (card.weak !== undefined) desc = desc.replace(/へろへろ(\d+)/g, `${trans("へろへろ", languageMode)}${card.weak}`);
-        if (card.vulnerable !== undefined) desc = desc.replace(/びくびく(\d+)/g, `${trans("びくびく", languageMode)}${card.vulnerable}`);
-        if (card.strength !== undefined) desc = desc.replace(/ムキムキ(\d+)/g, `${trans("ムキムキ", languageMode)}${card.strength}`);
-
-        return (
-            <span className={card.upgraded ? "text-green-300 font-bold" : ""}>
-                {desc}
-            </span>
-        );
-    };
-
-    const getCardKeywords = (card: ICard) => {
-        const keywords = [];
-        if (card.exhaust) keywords.push(KEYWORD_DEFINITIONS.EXHAUST);
-        if (card.strength || card.description.includes('ムキムキ')) keywords.push(KEYWORD_DEFINITIONS.STRENGTH);
-        if (card.vulnerable || card.description.includes('びくびく')) keywords.push(KEYWORD_DEFINITIONS.VULNERABLE);
-        if (card.weak || card.description.includes('へろへろ')) keywords.push(KEYWORD_DEFINITIONS.WEAK);
-        if (card.block || card.description.includes('ブロック')) keywords.push(KEYWORD_DEFINITIONS.BLOCK);
-        if (card.draw || card.description.includes('引く')) keywords.push(KEYWORD_DEFINITIONS.DRAW);
-        return keywords;
     };
 
     const findRelic = (relicId: string) => player.relics.find(r => r.id === relicId);
@@ -1079,8 +1037,8 @@ const BattleScene: React.FC<BattleSceneProps> = ({
             )}
 
             {showParryTutorial && (
-                <div className="fixed inset-0 z-[210] flex items-center justify-center bg-black/75 p-4 animate-in fade-in duration-200">
-                    <div className="w-full max-w-md rounded-lg border-2 border-cyan-300 bg-slate-950 p-4 shadow-[0_0_32px_rgba(34,211,238,0.55)]">
+                <div className="app-modal-overlay fixed inset-0 z-[210] flex items-center justify-center bg-black/75 p-4 animate-in fade-in duration-200">
+                    <div className="app-modal-panel app-battle-info-modal w-full max-w-md rounded-lg border-2 border-cyan-300 bg-slate-950 p-4 shadow-[0_0_32px_rgba(34,211,238,0.55)]">
                         <div className="mb-3 flex items-center gap-2 text-cyan-200 font-black">
                             <Mic size={22} className="text-cyan-300" />
                             応答パリィ
@@ -1102,8 +1060,8 @@ const BattleScene: React.FC<BattleSceneProps> = ({
             )}
 
             {showFriendshipComboTutorial && (
-                <div className="fixed inset-0 z-[210] flex items-center justify-center bg-black/75 p-4 animate-in fade-in duration-200">
-                    <div className="w-full max-w-lg rounded-lg border-2 border-indigo-300 bg-slate-950 p-4 shadow-[0_0_32px_rgba(129,140,248,0.55)]">
+                <div className="app-modal-overlay fixed inset-0 z-[210] flex items-center justify-center bg-black/75 p-4 animate-in fade-in duration-200">
+                    <div className="app-modal-panel app-battle-info-modal w-full max-w-lg rounded-lg border-2 border-indigo-300 bg-slate-950 p-4 shadow-[0_0_32px_rgba(129,140,248,0.55)]">
                         <div className="mb-3 flex items-center gap-2 text-indigo-100 font-black">
                             <Users size={22} className="text-indigo-300" />
                             友情コンボ
@@ -1131,8 +1089,8 @@ const BattleScene: React.FC<BattleSceneProps> = ({
             )}
 
             {showExhaustCardHint && (
-                <div className="fixed inset-0 z-[210] flex items-end justify-center bg-black/35 p-4 pb-28 md:items-center md:pb-4 animate-in fade-in duration-200">
-                    <div className="w-full max-w-md rounded-xl border-2 border-fuchsia-400 bg-slate-900/95 p-4 text-white shadow-[0_0_24px_rgba(217,70,239,0.45)]">
+                <div className="app-modal-overlay fixed inset-0 z-[210] flex items-end justify-center bg-black/35 p-4 pb-28 md:items-center md:pb-4 animate-in fade-in duration-200">
+                    <div className="app-modal-panel app-battle-info-modal w-full max-w-md rounded-xl border-2 border-fuchsia-400 bg-slate-900/95 p-4 text-white shadow-[0_0_24px_rgba(217,70,239,0.45)]">
                         <div className="mb-2 flex items-center gap-2 text-fuchsia-200">
                             <Sparkles size={20} className="fill-current" />
                             <h3 className="text-lg font-black">{trans("廃棄カード", languageMode)}</h3>
@@ -1156,28 +1114,31 @@ const BattleScene: React.FC<BattleSceneProps> = ({
             )}
 
             {/* 1. Top Bar: Narrative & Logs */}
-            <div className="shrink-0 bg-black border-b-2 border-gray-700 p-2 z-30 relative min-h-[4rem] flex flex-col justify-center shadow-md">
-                <div className="flex flex-col w-full pr-24 overflow-hidden">
-                    <div className="text-xs text-green-400 truncate leading-snug mb-0.5 font-bold shadow-black drop-shadow-md">
+            <div className="battle-top-log-bar shrink-0 bg-black border-b-2 border-gray-700 p-2 z-30 relative min-h-[4rem] flex flex-col justify-center shadow-md">
+                <div className="battle-flavor-log flex flex-col w-full pr-24 overflow-hidden">
+                    <div className="battle-mobile-flavor-line hidden text-xs text-green-400 truncate leading-snug font-bold shadow-black drop-shadow-md">
+                        <span className="animate-pulse mr-2">&gt;&gt;</span> {latestLogs.length > 0 ? renderBattleLog(latestLogs[0]) : trans(narrative, languageMode)}
+                    </div>
+                    <div className="battle-narrative-line text-xs text-green-400 truncate leading-snug mb-0.5 font-bold shadow-black drop-shadow-md">
                         <span className="animate-pulse mr-2">&gt;&gt;</span> {trans(narrative, languageMode)}
                     </div>
                     {latestLogs.length > 0 ? (
                         <>
-                            <div className="text-[10px] text-gray-200 truncate leading-snug">
+                            <div className="battle-latest-log text-[10px] text-gray-200 truncate leading-snug">
                                 {renderBattleLog(latestLogs[0])}
                             </div>
                             {latestLogs.length > 1 && (
-                                <div className="text-[10px] text-gray-500 truncate leading-snug">
+                                <div className="battle-older-log text-[10px] text-gray-500 truncate leading-snug">
                                     {renderBattleLog(latestLogs[1])}
                                 </div>
                             )}
                         </>
                     ) : (
-                        <div className="text-[10px] text-gray-600 italic leading-snug">...</div>
+                        <div className="battle-empty-log text-[10px] text-gray-600 italic leading-snug">...</div>
                     )}
                 </div>
 
-                <div className="absolute top-2 right-2 flex flex-col items-end gap-1">
+                <div className="battle-top-controls absolute top-2 right-2 flex flex-col items-end gap-1">
                     <div className="text-yellow-400 text-[10px] font-bold bg-gray-900/80 px-2 py-0.5 rounded border border-yellow-700 shadow-sm">
                         {trans(turnLog, languageMode)}
                     </div>
@@ -1266,7 +1227,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
 
                 {/* Codex Selection Modal */}
                 {codexOptions && (
-                    <div className="fixed inset-0 z-[100] bg-black/80 flex flex-col items-center justify-center p-4 animate-in fade-in duration-200">
+                    <div className="app-modal-overlay fixed inset-0 z-[100] bg-black/80 flex flex-col items-center justify-center p-4 animate-in fade-in duration-200">
                         <h3 className="text-2xl font-bold text-yellow-400 mb-4 drop-shadow-[0_0_10px_rgba(250,204,21,0.5)]">{trans("秘密の攻略本", languageMode)}</h3>
                         <p className="text-gray-300 mb-6 text-sm">{trans("手札に加えるカードを1枚選んでください", languageMode)}</p>
                         <div className="flex flex-wrap justify-center gap-4 mb-8">
@@ -1348,40 +1309,15 @@ const BattleScene: React.FC<BattleSceneProps> = ({
 
                 {/* Card Inspection Modal */}
                 {inspectedCard && (
-                    <div className="fixed inset-0 z-[100] bg-black/90 flex flex-col items-center justify-center p-4 animate-in fade-in duration-200" onClick={() => { setInspectedCard(null); setFullscreenArtCard(null); }}>
-                        <div
-                            className="scale-125 md:scale-[1.85] mb-10 transform transition-transform cursor-zoom-in"
-                            onClick={(e) => {
-                                e.stopPropagation();
-                                setFullscreenArtCard(inspectedCard);
-                            }}
-                            title={trans("タッチでイラスト拡大", languageMode)}
-                        >
-                            <Card card={inspectedCard} onClick={() => { }} disabled={false} languageMode={languageMode} />
-                        </div>
-                        <div className="bg-gray-800 border-2 border-white p-4 md:p-6 rounded-lg max-w-sm w-full shadow-2xl relative max-h-[50vh] overflow-y-auto custom-scrollbar" onClick={(e) => e.stopPropagation()}>
-                            <button onClick={() => setInspectedCard(null)} className="absolute top-2 right-2 text-gray-400 hover:text-white p-2">
-                                <X size={24} />
-                            </button>
-                            <h3 className="text-2xl font-bold text-yellow-400 mb-2 border-b border-gray-600 pb-2">{trans(inspectedCard.name, languageMode)}</h3>
-                            <div className="flex gap-2 mb-4 text-xs text-gray-400 font-mono">
-                                <span className="bg-blue-900/50 px-2 py-1 rounded border border-blue-500/30">{trans("コスト", languageMode)}: {inspectedCard.cost}</span>
-                                <span className="bg-purple-900/50 px-2 py-1 rounded border border-purple-500/30">{trans(inspectedCard.type, languageMode)}</span>
-                            </div>
-                            <p className="text-lg text-white mb-6 leading-relaxed whitespace-pre-wrap font-bold bg-black/30 p-3 rounded">
-                                {getProcessedDescription(inspectedCard)}
-                            </p>
-
-                            <div className="space-y-2">
-                                {getCardKeywords(inspectedCard).map((k, idx) => (
-                                    <div key={idx} className="flex flex-col text-left text-sm bg-gray-700/50 p-2 rounded border border-gray-600">
-                                        <span className="font-bold text-yellow-300 mb-0.5">{trans(k.title, languageMode)}</span>
-                                        <span className="text-gray-300 text-xs">{trans(k.desc, languageMode)}</span>
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                    </div>
+                    <CardInspectionModal
+                        card={inspectedCard}
+                        languageMode={languageMode}
+                        onClose={() => {
+                            setInspectedCard(null);
+                            setFullscreenArtCard(null);
+                        }}
+                        onOpenArt={setFullscreenArtCard}
+                    />
                 )}
                 {fullscreenArtCard && (
                     <FullscreenCardArtModal
@@ -1393,8 +1329,8 @@ const BattleScene: React.FC<BattleSceneProps> = ({
 
                 {/* Relic List Modal */}
                 {showRelicList && (
-                    <div className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-4 animate-in fade-in duration-200" onClick={() => setShowRelicList(false)}>
-                        <div className="bg-gray-800 border-2 border-white rounded-lg p-4 w-full max-w-lg max-h-[80vh] flex flex-col shadow-2xl relative" onClick={(e) => e.stopPropagation()}>
+                    <div className="app-modal-overlay fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-4 animate-in fade-in duration-200" onClick={() => setShowRelicList(false)}>
+                        <div className="app-modal-panel app-relic-list-modal bg-gray-800 border-2 border-white rounded-lg p-4 w-full max-w-lg max-h-[80vh] flex flex-col shadow-2xl relative" onClick={(e) => e.stopPropagation()}>
                             <div className="flex justify-between items-center mb-4 border-b border-gray-600 pb-2">
                                 <h3 className="text-xl font-bold text-yellow-400 flex items-center">
                                     <Gem className="mr-2" /> {trans("所持レリック一覧", languageMode)} ({player.relics.length})
@@ -1445,8 +1381,8 @@ const BattleScene: React.FC<BattleSceneProps> = ({
 
                 {/* Tooltip Modal Overlay */}
                 {tooltip && (
-                    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-4" onClick={() => setTooltip(null)}>
-                        <div className="bg-black border-2 border-white p-4 rounded max-w-xs shadow-2xl animate-in fade-in zoom-in duration-200" onClick={e => e.stopPropagation()}>
+                    <div className="app-modal-overlay fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-4" onClick={() => setTooltip(null)}>
+                        <div className="app-modal-panel app-tooltip-modal bg-black border-2 border-white p-4 rounded max-w-xs shadow-2xl animate-in fade-in zoom-in duration-200" onClick={e => e.stopPropagation()}>
                             <h3 className="text-yellow-400 font-bold mb-2 text-lg border-b border-gray-600 pb-1">{trans(tooltip.title, languageMode)}</h3>
                             <p className="text-white text-sm whitespace-pre-wrap">{trans(tooltip.msg, languageMode)}</p>
                             <button onClick={() => setTooltip(null)} className="mt-4 w-full bg-gray-700 hover:bg-gray-600 text-white text-xs py-2 rounded">{trans("閉じる", languageMode)}</button>
@@ -1456,8 +1392,8 @@ const BattleScene: React.FC<BattleSceneProps> = ({
 
                 {/* Potion Confirmation Modal */}
                 {potionConfirmation && (
-                    <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-4" onClick={() => setPotionConfirmation(null)}>
-                        <div className="bg-gray-900 border-2 border-white p-6 rounded shadow-2xl max-xs w-full text-center animate-in fade-in zoom-in duration-200" onClick={e => e.stopPropagation()}>
+                    <div className="app-modal-overlay fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-4" onClick={() => setPotionConfirmation(null)}>
+                        <div className="app-modal-panel app-potion-confirm-modal bg-gray-900 border-2 border-white p-6 rounded shadow-2xl max-xs w-full text-center animate-in fade-in zoom-in duration-200" onClick={e => e.stopPropagation()}>
                             <div className="mb-4 flex justify-center">
                                 <div className="w-16 h-16 bg-gray-800 rounded-full border-2 border-white flex items-center justify-center p-2">
                                     <PotionIcon id={potionConfirmation.templateId} alt={potionConfirmation.name} />
@@ -2166,8 +2102,8 @@ const BattleScene: React.FC<BattleSceneProps> = ({
             </div>
 
             {showDeck && (
-                <div className="fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4" onClick={() => setShowDeck(false)}>
-                    <div className="bg-gray-800 border-4 border-white w-full max-w-md h-[80vh] flex flex-col relative shadow-2xl" onClick={e => e.stopPropagation()}>
+                <div className="app-modal-overlay fixed inset-0 z-[100] bg-black/80 backdrop-blur-sm flex items-center justify-center p-4" onClick={() => setShowDeck(false)}>
+                    <div className="app-modal-panel app-battle-deck-modal bg-gray-800 border-4 border-white w-full max-w-md h-[80vh] flex flex-col relative shadow-2xl" onClick={e => e.stopPropagation()}>
                         <div className="bg-black border-b-2 border-gray-600 p-4 flex justify-between items-center">
                             <h2 className="text-white text-xl font-bold flex items-center">
                                 <Layers className="mr-2" /> {trans("山札", languageMode)} ({trans("残り", languageMode)}{player.drawPile.length}{trans("枚", languageMode)})

@@ -167,7 +167,7 @@ const KanjiChallengeScreen: React.FC<KanjiChallengeScreenProps> = ({ onComplete,
   const currentProblem = problems[currentProblemIndex];
 
   return (
-    <div className="flex flex-col h-full w-full bg-cyan-950 text-white relative items-center justify-center p-8 font-mono">
+    <div className="main-challenge-screen flex flex-col h-full w-full bg-cyan-950 text-white relative items-center justify-center p-8 font-mono">
         <div className="absolute inset-0 texture-dark-matter opacity-20 pointer-events-none"></div>
         <RewardHintBanner text={rewardHint} />
         

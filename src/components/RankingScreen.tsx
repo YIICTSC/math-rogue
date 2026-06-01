@@ -49,7 +49,7 @@ const RankingScreen: React.FC<RankingScreenProps> = ({ onBack, languageMode }) =
   };
 
   return (
-    <div className="flex flex-col h-full w-full bg-gray-900 text-white relative">
+    <div className="main-ranking-screen flex flex-col h-full w-full bg-gray-900 text-white relative">
         {/* Header */}
         <div className="z-10 bg-black border-b-2 border-gray-600 p-4 flex flex-col md:flex-row justify-between items-center shrink-0 gap-4">
             <div className="flex items-center">
