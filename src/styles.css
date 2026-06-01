@@ -3265,6 +3265,50 @@ textarea {
 }
 
 @media (orientation: portrait) and (max-width: 540px) and (max-height: 980px) {
+  .start-menu-typing-button {
+    display: none !important;
+  }
+
+  .start-menu-actions > .grid {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    gap: 0.25rem !important;
+  }
+
+  .start-menu-actions > .grid button {
+    min-width: 0 !important;
+    padding: 0.35rem 0.15rem !important;
+    font-size: 0.58rem !important;
+    line-height: 1 !important;
+    white-space: nowrap !important;
+  }
+
+  .start-menu-actions > .grid button svg {
+    width: 0.68rem !important;
+    height: 0.68rem !important;
+    margin-right: 0.08rem !important;
+  }
+
+  .start-menu-utility-row {
+    display: grid !important;
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    gap: 0.25rem !important;
+  }
+
+  .start-menu-utility-row button {
+    min-width: 0 !important;
+    height: 2.45rem !important;
+    padding: 0.25rem 0.1rem !important;
+    font-size: 0.58rem !important;
+    line-height: 1 !important;
+    white-space: nowrap !important;
+  }
+
+  .start-menu-utility-row button svg {
+    width: 0.8rem !important;
+    height: 0.8rem !important;
+    margin-bottom: 0.1rem !important;
+  }
+
   .battle-scene-root.battle-ui-custom .battle-enemy-sprite > div.relative:first-child {
     transform: scale(1.4) !important;
     transform-origin: center bottom !important;

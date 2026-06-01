@@ -10974,7 +10974,7 @@ const App: React.FC = () => {
                                     </button>
                                 )}
 
-                                <div className="flex gap-2 w-full justify-between">
+                                <div className="start-menu-utility-row flex gap-2 w-full justify-between">
                                     <button onClick={() => setGameState(prev => ({ ...prev, screen: GameScreen.COMPENDIUM }))} className="flex-1 bg-gray-800 text-amber-500 text-xs font-bold border-b-4 border-r-4 border-gray-600 hover:border-amber-500 hover:bg-gray-700 cursor-pointer flex flex-col items-center justify-center h-14 rounded">
                                         <BookOpen className="mb-1" size={20} /> {trans("図鑑", languageMode)}
                                     </button>
@@ -10984,11 +10984,10 @@ const App: React.FC = () => {
                                     <button onClick={() => setGameState(prev => ({ ...prev, screen: GameScreen.HELP }))} className="flex-1 bg-gray-800 text-blue-400 text-xs font-bold border-b-4 border-r-4 border-gray-600 border-blue-500 hover:bg-gray-700 cursor-pointer flex flex-col items-center justify-center h-14 rounded">
                                         <HelpCircle className="mb-1" size={20} /> {trans("遊び方", languageMode)}
                                     </button>
+                                    <button onClick={openDataTransferModal} className="flex-1 bg-gray-800 text-cyan-300 text-xs font-bold border-b-4 border-r-4 border-gray-600 border-cyan-500 hover:bg-gray-700 cursor-pointer flex flex-col items-center justify-center h-14 rounded">
+                                        <Globe className="mb-1" size={20} /> {trans("データ移行", languageMode)}
+                                    </button>
                                 </div>
-
-                                <button onClick={openDataTransferModal} className="w-full bg-gray-800 text-cyan-300 py-2 text-sm font-bold border-b-4 border-r-4 border-gray-600 border-cyan-500 hover:bg-gray-700 cursor-pointer flex items-center justify-center rounded">
-                                    <Globe className="mr-2" size={18} /> {trans("データ移行", languageMode)}
-                                </button>
 
                                     <button onClick={() => setShowDebugLog(true)} className="start-menu-version text-gray-600 text-[10px] hover:text-gray-400 flex items-center justify-center gap-1 opacity-50 hover:opacity-100 transition-opacity">
                                         <Terminal size={10} /> v1.0.4 YUSUKE ISHIGE
