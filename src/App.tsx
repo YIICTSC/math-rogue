@@ -837,6 +837,17 @@ const App: React.FC = () => {
     const battleFinisherCutinCardRef = useRef<ICard | null>(null);
     const [showParryTutorial, setShowParryTutorial] = useState(false);
     const parryTutorialResolverRef = useRef<(() => void) | null>(null);
+    const [isPreloadingGameAudio, setIsPreloadingGameAudio] = useState(false);
+    const gameAudioPreloadPromiseRef = useRef<Promise<void> | null>(null);
+    const preloadGameAudio = useCallback(async () => {
+        if (!gameAudioPreloadPromiseRef.current) {
+            setIsPreloadingGameAudio(true);
+            gameAudioPreloadPromiseRef.current = audioService.preloadEssentialSfx()
+                .catch(() => undefined)
+                .finally(() => setIsPreloadingGameAudio(false));
+        }
+        await gameAudioPreloadPromiseRef.current;
+    }, []);
 
     const [isMathDebugSkipped, setIsMathDebugSkipped] = useState<boolean>(false);
     const [isDebugHpOne, setIsDebugHpOne] = useState<boolean>(false);
@@ -3821,13 +3832,14 @@ const App: React.FC = () => {
         setGameState(prev => ({ ...prev, screen: GameScreen.MINI_GAME_MODE_SELECTION }));
     };
 
-    const handleMiniGameModeSelect = (mode: GameMode, modePool?: string[]) => {
+    const handleMiniGameModeSelect = async (mode: GameMode, modePool?: string[]) => {
         if (isDailyLimitReached) {
             audioService.playSound('wrong');
             setShowTimeLimitModal(true);
             return;
         }
         audioService.playSound('select');
+        await preloadGameAudio();
         const nextScreen = pendingMiniGameScreen || GameScreen.MINI_GAME_SELECT;
         setMiniGameProblemMode(mode);
         setMiniGameProblemModePool(modePool);
@@ -4023,8 +4035,9 @@ const App: React.FC = () => {
         setTurnLog(getSelfTurnLogLabel());
     };
 
-    const handleCharacterSelect = (char: Character) => {
+    const handleCharacterSelect = async (char: Character) => {
         audioService.playSound('select');
+        await preloadGameAudio();
         setSelectedCharName(char.name);
         setUnlockCheckStartMathCorrect(totalMathCorrect);
 
@@ -4251,7 +4264,8 @@ const App: React.FC = () => {
         if (shouldSkipStarterRelic) audioService.playBGM('map');
     };
 
-    const handleChefDeckSelection = (selectedCards: ICard[]) => {
+    const handleChefDeckSelection = async (selectedCards: ICard[]) => {
+        await preloadGameAudio();
         const cardNames = selectedCards.map(c => c.name);
         storageService.saveUnlockedCards(cardNames);
 
@@ -4269,8 +4283,9 @@ const App: React.FC = () => {
         if (shouldSkipStarterRelic) audioService.playBGM('map');
     };
 
-    const handleRelicSelect = (relic: Relic) => {
+    const handleRelicSelect = async (relic: Relic) => {
         audioService.playSound('buff');
+        await preloadGameAudio();
         if (gameState.challengeMode === 'COOP' && coopSession && !coopSession.isHost) {
             setCoopAwaitingMapSync(true);
             setGameState(prev => ({
@@ -10550,6 +10565,14 @@ const App: React.FC = () => {
                     >
                         <Settings size={16} />
                     </button>
+                )}
+
+                {isPreloadingGameAudio && (
+                    <div className="fixed inset-0 z-[10030] flex items-center justify-center bg-black/70 text-white backdrop-blur-sm">
+                        <div className="rounded border border-cyan-300/70 bg-slate-950/90 px-5 py-4 text-center shadow-[0_0_24px_rgba(34,211,238,0.25)]">
+                            <div className="text-sm font-black text-cyan-100">{trans("効果音を読み込み中...", languageMode)}</div>
+                        </div>
+                    </div>
                 )}
 
                 {showTimeLimitModal && (

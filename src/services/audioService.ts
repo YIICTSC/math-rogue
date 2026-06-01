@@ -1041,6 +1041,48 @@ class AudioService {
       return buffer;
   }
 
+  public async preloadSfx(names: string[]) {
+      this.init();
+      if (!this.ctx) return;
+      if (this.ctx.state === 'suspended') {
+          await this.ctx.resume().catch(() => undefined);
+      }
+      await Promise.all(names.map(name => this.loadSfxBuffer(name).catch(() => null)));
+  }
+
+  public async preloadEssentialSfx() {
+      await this.preloadSfx([
+          'attack-effects/slash',
+          'attack-effects/impact',
+          'attack-effects/projectile',
+          'attack-effects/explosion',
+          'attack-effects/fire',
+          'attack-effects/lightning',
+          'attack-effects/poison',
+          'attack-effects/shockwave',
+          'attack-effects/multihit',
+          'attack-effects/drain',
+          'attack-effects/finisher',
+          'attack-effects/laser',
+          'attack-effects/soundwave',
+          'attack-effects/wind',
+          'attack-effects/plant',
+          'attack-effects/graduation',
+          'attack-effects/critical',
+          'attack-effects/flash',
+          'status-effects/block',
+          'status-effects/buff',
+          'status-effects/debuff',
+          'status-effects/heal',
+          'status-effects/strength',
+          'status-effects/weak',
+          'status-effects/vulnerable',
+          'status-effects/poison',
+          'finisher-slash',
+          'finisher-explosion',
+      ]);
+  }
+
   private stopActiveSfx(name: string) {
       const sources = this.activeSfxSources.get(name);
       if (sources) {
@@ -1147,22 +1189,17 @@ class AudioService {
       const overlap = options?.overlap ?? false;
       const generation = (this.sfxPlaybackGenerations.get(name) ?? 0) + 1;
       this.sfxPlaybackGenerations.set(name, generation);
-      const baseUrl = (import.meta as any).env.BASE_URL;
-      const paths = [`${baseUrl}sfx/${name}.mp3`, `/sfx/${name}.mp3`, `sfx/${name}.mp3`];
+
+      const cached = this.sfxBuffers[name];
+      if (cached) {
+          if (!this.startSfxSource(name, cached, maxDurationMs, overlap)) fallback();
+          return;
+      }
+
+      fallback();
 
       void (async () => {
-          if (await this.playHtmlSfx(name, paths, maxDurationMs, overlap, generation)) return;
-          if (!overlap && this.sfxPlaybackGenerations.get(name) !== generation) return;
-
-          const cached = this.sfxBuffers[name];
-          if (cached) {
-              if (!this.startSfxSource(name, cached, maxDurationMs, overlap)) fallback();
-              return;
-          }
-
-          const buffer = await this.loadSfxBuffer(name);
-          if (!overlap && this.sfxPlaybackGenerations.get(name) !== generation) return;
-          if (!buffer || !this.startSfxSource(name, buffer, maxDurationMs, overlap)) fallback();
+          await this.loadSfxBuffer(name);
       })();
   }
 
