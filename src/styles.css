@@ -10,6 +10,287 @@
   src: url('/fonts/DotGothic16-Regular.ttf') format('truetype');
 }
 
+@media (orientation: landscape) and (max-height: 520px) and (max-width: 950px) {
+  .mini-game-dungeon-screen {
+    flex-direction: row !important;
+    align-items: stretch !important;
+    justify-content: center !important;
+    gap: 0.35rem !important;
+    padding: 0.35rem !important;
+  }
+
+  .mini-game-dungeon-screen .dungeon-landscape-dpad-panel,
+  .mini-game-dungeon-screen .dungeon-landscape-action-panel {
+    display: flex !important;
+    width: clamp(6.75rem, 18vw, 8.25rem) !important;
+    min-width: 0 !important;
+    padding: 0.35rem !important;
+    border-radius: 0.625rem !important;
+  }
+
+  .mini-game-dungeon-screen .dungeon-landscape-dpad-panel > .w-40 {
+    width: clamp(6rem, 15vw, 7.25rem) !important;
+    height: clamp(6rem, 15vw, 7.25rem) !important;
+  }
+
+  .mini-game-dungeon-screen .dungeon-landscape-dpad-panel .w-10.h-10,
+  .mini-game-dungeon-screen .dungeon-landscape-dpad-panel .w-8.h-8 {
+    width: 1.65rem !important;
+    height: 1.65rem !important;
+  }
+
+  .mini-game-dungeon-screen .dungeon-landscape-dpad-panel .w-10.h-16 {
+    width: 1.65rem !important;
+    height: 2.6rem !important;
+  }
+
+  .mini-game-dungeon-screen .dungeon-landscape-dpad-panel .w-16.h-10 {
+    width: 2.6rem !important;
+    height: 1.65rem !important;
+  }
+
+  .mini-game-dungeon-screen .dungeon-landscape-dpad-panel .mt-8 {
+    margin-top: 0.45rem !important;
+    font-size: 0.55rem !important;
+  }
+
+  .mini-game-dungeon-screen .dungeon-game-panel {
+    flex: 1 1 auto !important;
+    max-width: none !important;
+    gap: 0.25rem !important;
+  }
+
+  .mini-game-dungeon-screen .dungeon-game-panel > .aspect-\[4\/3\] {
+    aspect-ratio: auto !important;
+    flex: 1 1 auto !important;
+    max-height: none !important;
+    min-height: 0 !important;
+  }
+
+  .mini-game-dungeon-screen .dungeon-game-panel > .h-16 {
+    height: 2.1rem !important;
+    margin-bottom: 0 !important;
+    font-size: 0.55rem !important;
+    line-height: 1.15 !important;
+  }
+
+  .mini-game-dungeon-screen .dungeon-landscape-action-panel {
+    justify-content: space-between !important;
+  }
+
+  .mini-game-dungeon-screen .dungeon-landscape-action-panel .mt-20 {
+    margin-top: 2.2rem !important;
+    gap: 0.8rem !important;
+  }
+
+  .mini-game-dungeon-screen .dungeon-landscape-action-panel .gap-8 {
+    gap: 0.8rem !important;
+  }
+
+  .mini-game-dungeon-screen .dungeon-landscape-action-panel button.w-20,
+  .mini-game-dungeon-screen .dungeon-landscape-action-panel button.w-16,
+  .mini-game-dungeon-screen .dungeon-landscape-action-panel button.w-14,
+  .mini-game-dungeon-screen .dungeon-landscape-action-panel button.w-12 {
+    width: clamp(2.7rem, 7.5vw, 3.4rem) !important;
+    height: clamp(2.7rem, 7.5vw, 3.4rem) !important;
+    font-size: 1rem !important;
+  }
+
+  .mini-game-dungeon-screen .dungeon-landscape-action-panel span {
+    font-size: 0.55rem !important;
+    margin-top: 0.15rem !important;
+  }
+
+  .mini-game-dungeon-screen .dungeon-landscape-action-panel .max-h-\[25vh\] {
+    max-height: 5.25rem !important;
+    gap: 0.25rem !important;
+  }
+
+  .mini-game-dungeon-screen .dungeon-landscape-action-panel .w-9.h-9 {
+    width: 1.65rem !important;
+    height: 1.65rem !important;
+  }
+
+  .mini-game-poker-screen > .p-2,
+  .mini-game-poker-screen > .p-4 {
+    padding: 0.35rem !important;
+  }
+
+  .mini-game-poker-screen > .flex.flex-col.md\:flex-row {
+    flex-direction: row !important;
+    align-items: center !important;
+    gap: 0.35rem !important;
+    padding: 0.35rem !important;
+  }
+
+  .mini-game-poker-screen .min-h-\[64px\] {
+    min-height: 2.5rem !important;
+    padding: 0.25rem 0.4rem !important;
+  }
+
+  .mini-game-poker-screen .h-40 {
+    height: 6.4rem !important;
+    padding-bottom: 0.25rem !important;
+  }
+
+  .mini-game-poker-screen .w-20.h-32 {
+    width: 3.4rem !important;
+    height: 5.4rem !important;
+    padding: 0.3rem !important;
+    margin-left: -0.7rem !important;
+  }
+
+  .mini-game-poker-screen .text-xl,
+  .mini-game-poker-screen .text-2xl,
+  .mini-game-poker-screen .text-3xl {
+    font-size: 1rem !important;
+  }
+
+  .mini-game-poker-screen .shadow-up {
+    padding: 0.35rem !important;
+    gap: 0.5rem !important;
+  }
+
+  .mini-game-poker-screen .shadow-up button {
+    padding: 0.45rem 1rem !important;
+    font-size: 0.85rem !important;
+  }
+
+  .mini-game-paper-plane-screen {
+    padding: 0.35rem !important;
+  }
+
+  .mini-game-paper-plane-screen .h-12 {
+    height: 2.25rem !important;
+    padding-left: 0.5rem !important;
+    padding-right: 0.5rem !important;
+  }
+
+  .mini-game-paper-plane-screen .flex-1.relative.bg-\[\#1a1a24\] {
+    min-height: 0 !important;
+    overflow: hidden !important;
+  }
+
+  .mini-game-paper-plane-screen .min-h-\[400px\] {
+    min-height: 15rem !important;
+    padding-top: 0.25rem !important;
+    padding-bottom: 0.25rem !important;
+  }
+
+  .mini-game-paper-plane-screen .h-44 {
+    height: 7.6rem !important;
+    padding: 0.35rem !important;
+  }
+
+  .mini-game-paper-plane-screen .w-16.h-24,
+  .mini-game-paper-plane-screen .w-12.h-16 {
+    width: 2.8rem !important;
+    height: 4rem !important;
+  }
+
+  .mini-game-paper-plane-screen .grid.grid-cols-2 {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 0.4rem !important;
+    padding-bottom: 0.25rem !important;
+  }
+
+  .mini-game-paper-plane-screen .min-h-\[120px\] {
+    min-height: 4.7rem !important;
+    padding: 0.4rem !important;
+  }
+
+  .mini-game-go-home-screen {
+    padding: 0.45rem !important;
+  }
+
+  .mini-game-go-home-screen > .z-10 {
+    margin-bottom: 0.25rem !important;
+  }
+
+  .mini-game-go-home-screen .w-48 {
+    width: 8.5rem !important;
+  }
+
+  .mini-game-go-home-screen canvas {
+    max-height: 56vh !important;
+    object-fit: contain !important;
+  }
+
+  .mini-game-go-home-screen .mt-4 {
+    margin-top: 0.35rem !important;
+  }
+
+  .mini-game-go-home-screen h2 {
+    font-size: 2.5rem !important;
+    margin-bottom: 0.5rem !important;
+  }
+
+  .mini-game-go-home-screen .mb-10 {
+    margin-bottom: 1rem !important;
+  }
+
+  .mini-game-dodgeball-screen .top-10 {
+    top: 0.5rem !important;
+  }
+
+  .mini-game-dodgeball-screen h2 {
+    font-size: 1.35rem !important;
+  }
+
+  .mini-game-dodgeball-screen p,
+  .mini-game-dodgeball-screen .text-\[10px\] {
+    margin-top: 0.25rem !important;
+  }
+
+  .mini-game-dodgeball-screen .h-64 {
+    height: min(13.5rem, 58vh) !important;
+    max-width: 78vw !important;
+  }
+
+  .mini-game-dodgeball-screen .bottom-10 {
+    bottom: 0.5rem !important;
+  }
+
+  .mini-game-survivor-screen > .absolute.top-0 {
+    padding: 0.35rem !important;
+  }
+
+  .mini-game-survivor-screen .text-xl {
+    font-size: 0.95rem !important;
+  }
+
+  .mini-game-survivor-screen .text-3xl {
+    font-size: 1.4rem !important;
+  }
+
+  .mini-game-survivor-screen .w-8.h-8,
+  .mini-game-survivor-screen .w-7.h-7 {
+    width: 1.45rem !important;
+    height: 1.45rem !important;
+  }
+
+  .mini-game-survivor-screen .rounded-xl {
+    border-radius: 0.5rem !important;
+  }
+
+  .mini-game-survivor-screen .p-2 {
+    padding: 0.35rem !important;
+  }
+
+  .mini-game-survivor-screen .text-5xl {
+    font-size: 2rem !important;
+    margin-bottom: 0.75rem !important;
+  }
+
+  .mini-game-survivor-screen .max-h-\[70vh\] {
+    max-height: 70dvh !important;
+  }
+
+  .mini-game-survivor-screen .border-4 {
+    border-width: 2px !important;
+  }
+}
+
 @media (orientation: portrait) and (max-width: 540px) and (max-height: 980px),
        (orientation: landscape) and (max-width: 1024px) and (max-height: 560px) {
   .battle-scene-root.battle-ui-custom .battle-enemies-area {

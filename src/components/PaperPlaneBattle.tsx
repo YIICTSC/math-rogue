@@ -3918,7 +3918,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         const buffGrid = calculateBuffGrid(player.parts);
 
         return (
-            <div className="w-full h-full bg-slate-900 text-white p-2 md:p-4 font-mono relative overflow-hidden flex flex-col">
+            <div className="mini-game-paper-plane-screen w-full h-full bg-slate-900 text-white p-2 md:p-4 font-mono relative overflow-hidden flex flex-col">
                 <PaperPlaneSceneBackdrop sprite={PAPER_PLANE_SCENE_BACKGROUNDS.vacation} alpha={0.2} />
                 <RenderTooltip />
                 {/* Pool Overlay */}
@@ -4048,7 +4048,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     }
 
     return (
-        <div className="w-full h-full bg-[#101018] text-white flex flex-col font-mono relative overflow-hidden">
+        <div className="mini-game-paper-plane-screen w-full h-full bg-[#101018] text-white flex flex-col font-mono relative overflow-hidden">
             <PaperPlaneSceneBackdrop sprite={PAPER_PLANE_SCENE_BACKGROUNDS.battle} alpha={0.16} />
             <RenderTooltip />
             {/* Pool Overlay */}

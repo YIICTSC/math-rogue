@@ -1124,7 +1124,7 @@ const GoHomeDash: React.FC<{ onBack: () => void; problemMode?: GameMode; problem
     };
 
     return (
-        <div className="w-full h-full bg-slate-950 text-white font-mono flex flex-col items-center p-4 relative overflow-hidden touch-none select-none" 
+        <div className="mini-game-go-home-screen w-full h-full bg-slate-950 text-white font-mono flex flex-col items-center p-4 relative overflow-hidden touch-none select-none"
             onPointerDown={handlePointerDown} onPointerUp={handlePointerUp} onPointerLeave={handlePointerUp}>
             
             <div className="w-full flex justify-between items-start z-10 pointer-events-none mb-2">

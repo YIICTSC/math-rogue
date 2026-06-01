@@ -121,7 +121,7 @@ const DodgeballShooting: React.FC<DodgeballShootingProps> = ({ enemy, playerImag
 
     return (
         <div 
-            className="w-full h-full bg-slate-800 flex flex-col items-center justify-center relative cursor-crosshair overflow-hidden"
+            className="mini-game-dodgeball-screen w-full h-full bg-slate-800 flex flex-col items-center justify-center relative cursor-crosshair overflow-hidden"
             onClick={handleThrow}
         >
             <div className="absolute inset-0 texture-dark-matter opacity-20 pointer-events-none"></div>

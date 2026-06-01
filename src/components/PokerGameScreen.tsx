@@ -2301,7 +2301,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
   ) : null;
 
   return (
-    <div className="flex flex-col h-full w-full bg-green-900 text-white font-mono relative overflow-hidden" style={pokerTableBackgroundStyle}>
+    <div className="mini-game-poker-screen flex flex-col h-full w-full bg-green-900 text-white font-mono relative overflow-hidden" style={pokerTableBackgroundStyle}>
         {renderInspectionModal()}
         {showRulesModal && (
             <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4" onClick={() => setShowRulesModal(false)}>
