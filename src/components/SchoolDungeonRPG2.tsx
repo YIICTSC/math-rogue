@@ -1813,7 +1813,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
             </div>
         )}
         
-        {showMathChallenge && (<div className="fixed inset-0 z-[100] w-full h-full pointer-events-auto"><MiniGameProblemChallenge mode={problemMode} modePool={problemModePool} onComplete={handleMathComplete} rewardHint="3問全問正解で満腹度+10。回答後は次の階へ進みます" /></div>)}
+        {showMathChallenge && (<div className="fixed inset-0 z-[100] w-full h-full pointer-events-auto"><MiniGameProblemChallenge mode={problemMode} modePool={problemModePool} onComplete={handleMathComplete} rewardHint="全問正解で満腹度+10" /></div>)}
 
         {showDeck && (
             <div className="absolute inset-0 z-50 flex items-center justify-center p-4" style={{ backgroundColor: `${C0}F2` }} onClick={() => setShowDeck(false)}>

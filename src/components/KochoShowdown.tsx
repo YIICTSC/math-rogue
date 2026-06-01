@@ -2442,7 +2442,7 @@ const KochoShowdown: React.FC<{ onBack: () => void; problemMode?: GameMode; prob
             {/* Math Challenge Overlay */}
             {gameState.phase === 'MATH' && (
                  <div className="absolute inset-0 z-[100] w-full h-full pointer-events-auto">
-                     <MiniGameProblemChallenge mode={problemMode} modePool={problemModePool} onComplete={handleMathComplete} rewardHint="3問全問正解でHP+1。次の報酬やショップへ進みます" />
+                     <MiniGameProblemChallenge mode={problemMode} modePool={problemModePool} onComplete={handleMathComplete} rewardHint="全問正解でHP+1" />
                  </div>
             )}
 

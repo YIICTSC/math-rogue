@@ -1168,7 +1168,7 @@ const GoHomeDash: React.FC<{ onBack: () => void; problemMode?: GameMode; problem
 
             {gameState === 'CHALLENGE' && (
                 <div className="absolute inset-0 z-[100] w-full h-full pointer-events-auto">
-                    <MiniGameProblemChallenge mode={problemMode} modePool={problemModePool} onComplete={handleChallengeComplete} isChallenge={false} streak={0} rewardHint="3問全問正解でHP+1。クリア後は強化を選べます" />
+                    <MiniGameProblemChallenge mode={problemMode} modePool={problemModePool} onComplete={handleChallengeComplete} isChallenge={false} streak={0} rewardHint="全問正解でHP+1" />
                 </div>
             )}
 

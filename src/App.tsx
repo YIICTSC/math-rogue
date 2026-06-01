@@ -11767,7 +11767,7 @@ const App: React.FC = () => {
                             onComplete={handleMathChallengeComplete}
                             debugSkip={isMathDebugSkipped}
                             isChallenge={false}
-                            rewardHint="正解数に応じてボーナスゴールド。3問正解で50G獲得できます"
+                            rewardHint="正解するとゴールド獲得"
                         />
                     </div>
                 )}
@@ -11781,7 +11781,7 @@ const App: React.FC = () => {
                             onComplete={handleMathChallengeComplete}
                             debugSkip={isMathDebugSkipped}
                             isChallenge={false}
-                            rewardHint="正解数に応じてボーナスゴールド。3問正解で50G獲得できます"
+                            rewardHint="正解するとゴールド獲得"
                         />
                     </div>
                 )}
@@ -11793,7 +11793,7 @@ const App: React.FC = () => {
                             onComplete={handleMathChallengeComplete}
                             debugSkip={isMathDebugSkipped}
                             isChallenge={false}
-                            rewardHint="正解数に応じてボーナスゴールド。3問正解で50G獲得できます"
+                            rewardHint="正解するとゴールド獲得"
                         />
                     </div>
                 )}
@@ -11808,7 +11808,7 @@ const App: React.FC = () => {
                             onComplete={handleMathChallengeComplete}
                             debugSkip={isMathDebugSkipped}
                             isChallenge={false}
-                            rewardHint="正解数に応じてボーナスゴールド。3問正解で50G獲得できます"
+                            rewardHint="正解するとゴールド獲得"
                         />
                     </div>
                 )}
