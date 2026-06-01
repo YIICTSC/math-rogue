@@ -10949,7 +10949,7 @@ const App: React.FC = () => {
                                 {!isMobilePortrait && (
                                     <button
                                         onClick={startTypingGame}
-                                        className="w-full py-2 px-4 text-sm font-bold border-b-4 border-r-4 rounded-none transition-all shadow-md flex items-center justify-center bg-amber-900/80 text-amber-100 border-amber-500 hover:bg-amber-800 hover:shadow-amber-900/50"
+                                        className="start-menu-typing-button w-full py-2 px-4 text-sm font-bold border-b-4 border-r-4 rounded-none transition-all shadow-md flex items-center justify-center bg-amber-900/80 text-amber-100 border-amber-500 hover:bg-amber-800 hover:shadow-amber-900/50"
                                     >
                                         <Keyboard className="mr-2" size={18} /> {trans("タイピングモード", languageMode)}
                                     </button>

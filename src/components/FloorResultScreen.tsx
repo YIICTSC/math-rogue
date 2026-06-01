@@ -91,7 +91,7 @@ const FloorResultScreen: React.FC<FloorResultScreenProps> = ({ act, stats, story
 
       <div className="z-10 w-full max-w-2xl md:max-w-5xl bg-black/90 border-2 sm:border-4 border-gray-700 p-4 sm:p-8 md:p-6 rounded-xl shadow-2xl animate-in fade-in zoom-in duration-500 max-h-[95vh] flex flex-col overflow-y-auto md:overflow-hidden custom-scrollbar">
         <div className="text-center mb-4 sm:mb-6 md:mb-4 shrink-0">
-          <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-gray-100 mb-2 tracking-tighter italic">
+          <h2 className="floor-result-heading text-3xl sm:text-4xl md:text-5xl font-black text-gray-100 mb-2 tracking-tighter italic">
             ACT {act} <span className="text-gray-500 not-italic text-2xl sm:text-4xl">CLEARED</span>
           </h2>
           <div className="h-1 w-24 sm:w-32 bg-gray-500 mx-auto rounded-full"></div>
@@ -143,8 +143,8 @@ const FloorResultScreen: React.FC<FloorResultScreenProps> = ({ act, stats, story
                 </div>
 
                 {/* Story Section */}
-                <div className="bg-gray-800/30 border-2 border-gray-700 p-4 sm:p-6 md:p-4 rounded-lg mb-4 min-h-[8rem] md:min-h-0 relative flex-grow flex flex-col justify-center overflow-hidden">
-                    <div className="absolute -top-3 left-4 sm:left-6 bg-gray-700 px-2 sm:px-3 py-0.5 rounded text-[8px] sm:text-[9px] font-bold text-gray-300 uppercase tracking-widest z-10">
+                <div className="floor-result-story-panel bg-gray-800/30 border-2 border-gray-700 p-4 sm:p-6 md:p-4 rounded-lg mb-4 min-h-[8rem] md:min-h-0 relative flex-grow flex flex-col justify-center overflow-hidden">
+                    <div className="floor-result-story-title absolute -top-3 left-4 sm:left-6 bg-gray-700 px-2 sm:px-3 py-0.5 rounded text-[8px] sm:text-[9px] font-bold text-gray-300 uppercase tracking-widest z-10">
                         {trans(currentPart.title, languageMode)}
                     </div>
                     <div className="overflow-y-auto custom-scrollbar h-full max-h-[150px] md:max-h-none pr-1">

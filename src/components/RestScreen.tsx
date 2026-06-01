@@ -383,14 +383,14 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
             )}
 
             {mode === 'PREVIEW_UPGRADE' && selectedCard && (
-                <div className="flex flex-col items-center">
-                    <div className="flex items-center justify-center gap-4 md:gap-8 mb-8">
-                        <div className="scale-90 md:scale-100">
+                <div className="rest-upgrade-preview flex flex-col items-center">
+                    <div className="rest-upgrade-preview-cards flex items-center justify-center gap-4 md:gap-8 mb-8">
+                        <div className="rest-upgrade-before scale-90 md:scale-100">
                              <Card card={selectedCard} onClick={() => {}} disabled={false} languageMode={languageMode}/>
                              <div className="text-center mt-2 text-gray-400">{trans("強化前", languageMode)}</div>
                         </div>
                         <ArrowRight size={32} className="text-yellow-500 animate-pulse" />
-                        <div className="scale-100 md:scale-110">
+                        <div className="rest-upgrade-after scale-100 md:scale-110">
                              <Card card={getUpgradedCard(selectedCard)} onClick={() => {}} disabled={false} languageMode={languageMode}/>
                              <div className="text-center mt-2 text-green-400 font-bold">{trans("強化後", languageMode)}</div>
                         </div>
@@ -400,7 +400,7 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
                             {trans("確認:", languageMode)} 1 / Enter ・ {trans("キャンセル:", languageMode)} 0 / Esc
                         </div>
                     )}
-                    <div className="flex gap-4">
+                    <div className="rest-upgrade-actions flex gap-4">
                         <button onClick={confirmUpgrade} className="bg-green-600 hover:bg-green-500 text-white px-8 py-2 rounded font-bold border border-white">
                             {trans("改良する", languageMode)}{typingMode && ' [1]'}
                         </button>
