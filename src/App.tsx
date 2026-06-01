@@ -10636,7 +10636,7 @@ const App: React.FC = () => {
                 )}
 
                 {gameState.screen === GameScreen.START_MENU && (
-                    <div className="w-full h-full bg-gray-900 flex items-center justify-center relative overflow-hidden">
+                    <div className={`w-full h-full bg-gray-900 flex items-center justify-center relative overflow-hidden ${visualTheme === 'high-school' ? 'start-menu-high-school' : ''}`}>
                         <div
                             className={`absolute inset-0 bg-cover bg-[position:38%_center] md:bg-center transition-all duration-700 ease-out ${visualTheme === 'high-school' ? 'opacity-0 scale-105 blur-sm' : 'opacity-100 scale-100 blur-0'}`}
                             style={{ backgroundImage: `url(${assetUrl('sprites/learning-rogue-title-background.webp')})` }}
@@ -10783,7 +10783,7 @@ const App: React.FC = () => {
                                     draggable={false}
                                 />
                                 <span
-                                    className="relative z-10 text-[3rem] font-black text-transparent md:text-[4rem]"
+                                    className={`start-menu-title-text relative z-10 whitespace-nowrap text-[3rem] font-black text-transparent md:text-[4rem] ${languageMode === 'HIRAGANA' ? 'start-menu-title-text-hiragana' : ''}`}
                                     style={{
                                         WebkitTextStroke: '1.5px rgba(255,255,255,0.78)',
                                         backgroundImage: 'linear-gradient(180deg, #fff7cc 8%, #f6c453 36%, #7dd3fc 62%, #1d4ed8 92%)',

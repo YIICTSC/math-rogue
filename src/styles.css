@@ -205,6 +205,112 @@ textarea {
   line-height: 1;
 }
 
+.start-menu-high-school .start-menu-theme-switch {
+  border-color: rgba(248, 250, 252, 0.86);
+  background: rgba(2, 6, 23, 0.78);
+  box-shadow: 5px 5px 0 rgba(220, 38, 38, 0.88), 0 0 0 1px rgba(0, 0, 0, 0.9);
+  transform: skewX(-8deg);
+}
+
+.start-menu-high-school .start-menu-theme-switch > button {
+  transform: skewX(8deg);
+}
+
+.start-menu-high-school .start-menu-actions {
+  filter: drop-shadow(8px 8px 0 rgba(0, 0, 0, 0.72));
+}
+
+.start-menu-high-school .start-menu-actions button:not(.start-menu-version) {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  border: 2px solid rgba(248, 113, 113, 0.92);
+  border-right-width: 6px;
+  border-bottom-width: 6px;
+  border-radius: 0;
+  background: linear-gradient(115deg, rgba(2, 6, 23, 0.98) 0 62%, rgba(185, 28, 28, 0.96) 63% 74%, rgba(30, 41, 59, 0.98) 75% 100%);
+  color: #f8fafc;
+  clip-path: polygon(0 0, 97% 0, 100% 28%, 100% 100%, 3% 100%, 0 72%);
+  text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.95), 0 0 8px rgba(220, 38, 38, 0.5);
+  text-transform: uppercase;
+  white-space: nowrap;
+  transition: transform 120ms ease, filter 120ms ease, box-shadow 120ms ease;
+}
+
+.start-menu-high-school .start-menu-actions button:not(.start-menu-version)::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    linear-gradient(104deg, transparent 0 55%, rgba(248, 113, 113, 0.72) 56% 58%, transparent 59% 100%),
+    linear-gradient(90deg, rgba(248, 113, 113, 0.18), transparent 35%);
+  opacity: 0;
+  transform: translateX(-18%);
+  transition: opacity 140ms ease, transform 140ms ease;
+}
+
+.start-menu-high-school .start-menu-actions button:not(.start-menu-version):hover {
+  filter: brightness(1.08) contrast(1.12);
+  transform: translate(-2px, -2px);
+  box-shadow: 7px 7px 0 rgba(220, 38, 38, 0.86);
+}
+
+.start-menu-high-school .start-menu-actions button:not(.start-menu-version):hover::before {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.start-menu-high-school .start-menu-actions button:not(.start-menu-version):active {
+  transform: translate(2px, 2px);
+  box-shadow: 2px 2px 0 rgba(220, 38, 38, 0.78);
+}
+
+.start-menu-high-school .start-menu-actions button:not(.start-menu-version):disabled,
+.start-menu-high-school .start-menu-actions button:not(.start-menu-version).opacity-70 {
+  background: linear-gradient(115deg, rgba(31, 41, 55, 0.95), rgba(15, 23, 42, 0.95));
+  color: rgba(203, 213, 225, 0.78);
+  filter: grayscale(0.35);
+}
+
+.start-menu-high-school .start-menu-actions button:not(.start-menu-version) svg {
+  color: #f87171;
+  filter: drop-shadow(2px 2px 0 rgba(0, 0, 0, 0.8));
+}
+
+.start-menu-high-school .start-menu-actions .grid button:not(.start-menu-version),
+.start-menu-high-school .start-menu-actions .flex.gap-2 button:not(.start-menu-version) {
+  background: linear-gradient(115deg, rgba(15, 23, 42, 0.98) 0 56%, rgba(127, 29, 29, 0.98) 57% 69%, rgba(2, 6, 23, 0.98) 70% 100%);
+  color: #fee2e2;
+  border-color: rgba(239, 68, 68, 0.92);
+  text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.95), 0 0 8px rgba(239, 68, 68, 0.45);
+}
+
+.start-menu-high-school .start-menu-actions .grid button:not(.start-menu-version) {
+  font-size: 0.75rem;
+}
+
+.start-menu-high-school .start-menu-actions .grid button:not(.start-menu-version) svg,
+.start-menu-high-school .start-menu-actions .flex.gap-2 button:not(.start-menu-version) svg {
+  color: #fecaca;
+  filter: drop-shadow(2px 2px 0 rgba(127, 29, 29, 0.95));
+}
+
+.start-menu-high-school .start-menu-actions .start-menu-version {
+  color: rgba(248, 250, 252, 0.62);
+  text-shadow: 2px 2px 0 rgba(0, 0, 0, 0.9);
+}
+
+.start-menu-title-text-hiragana {
+  font-size: 2.35rem;
+}
+
+@media (min-width: 768px) {
+  .start-menu-title-text-hiragana {
+    font-size: 3.15rem;
+  }
+}
+
 @media (min-width: 900px) and (orientation: landscape) {
   .start-menu-content {
     position: absolute;
@@ -232,8 +338,12 @@ textarea {
     margin: 0 auto;
   }
 
-  .start-menu-title span {
+  .start-menu-title .start-menu-title-text {
     font-size: clamp(3.2rem, 6.2vw, 5rem);
+  }
+
+  .start-menu-title .start-menu-title-text-hiragana {
+    font-size: clamp(2.55rem, 4.8vw, 4rem);
   }
 
   .start-menu-playtime {
