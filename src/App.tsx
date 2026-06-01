@@ -49,6 +49,7 @@ import ModeSelectionScreen from './components/ModeSelectionScreen';
 import SettingsModal, { AppSettings, SettingsTab } from './components/SettingsModal';
 import Card from './components/Card';
 import { audioService } from './services/audioService';
+import { assetPreloadService } from './services/assetPreloadService';
 import { generateEnemyName } from './services/geminiService';
 import { generateDungeonMap } from './services/mapGenerator';
 import { storageService } from './services/storageService';
@@ -837,17 +838,22 @@ const App: React.FC = () => {
     const battleFinisherCutinCardRef = useRef<ICard | null>(null);
     const [showParryTutorial, setShowParryTutorial] = useState(false);
     const parryTutorialResolverRef = useRef<(() => void) | null>(null);
-    const [isPreloadingGameAudio, setIsPreloadingGameAudio] = useState(false);
-    const gameAudioPreloadPromiseRef = useRef<Promise<void> | null>(null);
-    const preloadGameAudio = useCallback(async () => {
-        if (!gameAudioPreloadPromiseRef.current) {
-            setIsPreloadingGameAudio(true);
-            gameAudioPreloadPromiseRef.current = audioService.preloadEssentialSfx()
+    const [isPreloadingGameAssets, setIsPreloadingGameAssets] = useState(false);
+    const gameAssetPreloadPromisesRef = useRef<Partial<Record<VisualThemeId, Promise<void>>>>({});
+    const preloadGameAssets = useCallback(async () => {
+        const preloadKey = visualTheme;
+        if (!gameAssetPreloadPromisesRef.current[preloadKey]) {
+            setIsPreloadingGameAssets(true);
+            gameAssetPreloadPromisesRef.current[preloadKey] = Promise.all([
+                audioService.preloadEssentialSfx(),
+                assetPreloadService.preloadEssentialGameAssets(preloadKey),
+            ])
+                .then(() => undefined)
                 .catch(() => undefined)
-                .finally(() => setIsPreloadingGameAudio(false));
+                .finally(() => setIsPreloadingGameAssets(false));
         }
-        await gameAudioPreloadPromiseRef.current;
-    }, []);
+        await gameAssetPreloadPromisesRef.current[preloadKey];
+    }, [visualTheme]);
 
     const [isMathDebugSkipped, setIsMathDebugSkipped] = useState<boolean>(false);
     const [isDebugHpOne, setIsDebugHpOne] = useState<boolean>(false);
@@ -3839,7 +3845,7 @@ const App: React.FC = () => {
             return;
         }
         audioService.playSound('select');
-        await preloadGameAudio();
+        await preloadGameAssets();
         const nextScreen = pendingMiniGameScreen || GameScreen.MINI_GAME_SELECT;
         setMiniGameProblemMode(mode);
         setMiniGameProblemModePool(modePool);
@@ -4037,7 +4043,7 @@ const App: React.FC = () => {
 
     const handleCharacterSelect = async (char: Character) => {
         audioService.playSound('select');
-        await preloadGameAudio();
+        await preloadGameAssets();
         setSelectedCharName(char.name);
         setUnlockCheckStartMathCorrect(totalMathCorrect);
 
@@ -4265,7 +4271,7 @@ const App: React.FC = () => {
     };
 
     const handleChefDeckSelection = async (selectedCards: ICard[]) => {
-        await preloadGameAudio();
+        await preloadGameAssets();
         const cardNames = selectedCards.map(c => c.name);
         storageService.saveUnlockedCards(cardNames);
 
@@ -4285,7 +4291,7 @@ const App: React.FC = () => {
 
     const handleRelicSelect = async (relic: Relic) => {
         audioService.playSound('buff');
-        await preloadGameAudio();
+        await preloadGameAssets();
         if (gameState.challengeMode === 'COOP' && coopSession && !coopSession.isHost) {
             setCoopAwaitingMapSync(true);
             setGameState(prev => ({
@@ -10567,10 +10573,10 @@ const App: React.FC = () => {
                     </button>
                 )}
 
-                {isPreloadingGameAudio && (
+                {isPreloadingGameAssets && (
                     <div className="fixed inset-0 z-[10030] flex items-center justify-center bg-black/70 text-white backdrop-blur-sm">
                         <div className="rounded border border-cyan-300/70 bg-slate-950/90 px-5 py-4 text-center shadow-[0_0_24px_rgba(34,211,238,0.25)]">
-                            <div className="text-sm font-black text-cyan-100">{trans("効果音を読み込み中...", languageMode)}</div>
+                            <div className="text-sm font-black text-cyan-100">{trans("ゲーム素材を読み込み中...", languageMode)}</div>
                         </div>
                     </div>
                 )}
