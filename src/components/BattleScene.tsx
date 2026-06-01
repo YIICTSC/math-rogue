@@ -1432,7 +1432,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                 ? getHighSchoolEnemyVariant(enemy)
                                 : null;
                             const enemyName = trans(themedEnemy?.name ?? enemy.name, languageMode);
-                            const enemyNameNeedsScroll = enemyName.length > 5;
+                            const enemyNameNeedsScroll = enemyName.length > 8;
                             const isTrueBossPhase2 = enemy.enemyType === 'THE_HEART' && enemy.phase === 2;
                             const isFinalBoss = enemy.enemyType === 'THE_HEART';
                             const humanoidEnemy = visualTheme === 'high-school'
@@ -1454,7 +1454,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                     onClick={() => {
                                         if (!isFinisherActive && coopCanAct) onSelectEnemy(enemy.id);
                                     }}
-                                    className={`battle-enemy-unit flex flex-col items-center z-10 transition-all duration-200 cursor-pointer relative ${isFinalBoss ? 'md:flex-row md:items-center md:gap-3' : ''} ${isSelected && !actionClass ? 'scale-105 z-20' : ''} ${!isSelected && !actionClass ? 'hover:scale-105' : ''} ${actionClass} ${isTrueBossPhase2 ? 'sinister-aura' : ''} ${tutorialStep === 2 ? 'ring-4 ring-red-500 ring-offset-4 ring-offset-transparent animate-pulse rounded-lg' : ''} ${isParryTarget ? 'ring-4 ring-cyan-300 ring-offset-4 ring-offset-slate-900 rounded-lg shadow-[0_0_30px_rgba(34,211,238,0.75)] z-[60]' : ''} ${isFinisherActive ? '!z-[300]' : ''}`}
+                                    className={`battle-enemy-unit ${humanoidEnemy ? 'battle-humanoid-enemy-unit' : ''} flex flex-col items-center z-10 transition-all duration-200 cursor-pointer relative ${isFinalBoss ? 'md:flex-row md:items-center md:gap-3' : ''} ${isSelected && !actionClass ? 'scale-105 z-20' : ''} ${!isSelected && !actionClass ? 'hover:scale-105' : ''} ${actionClass} ${isTrueBossPhase2 ? 'sinister-aura' : ''} ${tutorialStep === 2 ? 'ring-4 ring-red-500 ring-offset-4 ring-offset-transparent animate-pulse rounded-lg' : ''} ${isParryTarget ? 'ring-4 ring-cyan-300 ring-offset-4 ring-offset-slate-900 rounded-lg shadow-[0_0_30px_rgba(34,211,238,0.75)] z-[60]' : ''} ${isFinisherActive ? '!z-[300]' : ''}`}
                                 >
                                     {isParryTarget && (
                                         <div className="absolute -inset-5 rounded-full border-2 border-cyan-300/70 animate-ping pointer-events-none"></div>

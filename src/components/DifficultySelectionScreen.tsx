@@ -73,7 +73,7 @@ const DifficultySelectionScreen: React.FC<DifficultySelectionScreenProps> = ({
                 className={`relative rounded-lg border-2 p-3 text-left shadow-lg transition-all sm:p-4 ${
                   locked
                     ? 'border-slate-800 bg-slate-900/60 text-slate-500'
-                    : 'border-slate-600 bg-slate-900 hover:border-amber-300 hover:bg-slate-800'
+                    : 'selectable-difficulty border-amber-300/80 bg-slate-800 text-white shadow-[0_0_18px_rgba(250,204,21,0.16)] hover:border-amber-200 hover:bg-slate-700'
                 }`}
               >
                 <div className="mb-2 flex items-center justify-between sm:mb-3">
