@@ -205,6 +205,94 @@ textarea {
   line-height: 1;
 }
 
+@media (min-width: 900px) and (orientation: landscape) {
+  .start-menu-content {
+    position: absolute;
+    inset: 0;
+    display: block;
+    padding: 1rem 1.5rem 1.25rem;
+    text-align: left;
+  }
+
+  .start-menu-title {
+    position: absolute;
+    top: 1rem;
+    left: 1.5rem;
+    width: min(45vw, 640px);
+    max-width: 640px;
+    min-height: 120px;
+    margin: 0;
+    justify-content: center;
+  }
+
+  .start-menu-title img {
+    inset-inline: 0;
+    max-width: min(43vw, 600px);
+    height: 8rem;
+    margin: 0 auto;
+  }
+
+  .start-menu-title span {
+    font-size: clamp(3.2rem, 6.2vw, 5rem);
+  }
+
+  .start-menu-playtime {
+    top: auto;
+    bottom: auto;
+    left: 1.5rem;
+  }
+
+  .start-menu-progress {
+    position: absolute;
+    top: 9.75rem;
+    left: 1.5rem;
+    width: min(38vw, 360px);
+    margin: 0;
+    text-align: center;
+  }
+
+  .start-menu-debug-toggle {
+    position: relative;
+    top: 15rem;
+    left: 0;
+  }
+
+  .start-menu-debug-spacer {
+    display: none;
+  }
+
+  .start-menu-button-panel {
+    position: absolute;
+    right: 1.5rem;
+    bottom: 1.25rem;
+    width: min(320px, 30vw);
+    align-items: stretch;
+  }
+
+  .start-menu-theme-switch {
+    align-self: center;
+    margin-bottom: 0.75rem;
+  }
+
+  .start-menu-actions {
+    width: 100%;
+    max-width: none;
+  }
+
+  .start-menu-crowdfunding {
+    position: absolute;
+    left: 1.5rem;
+    bottom: 3.85rem;
+    width: min(44vw, 500px);
+    margin: 0;
+  }
+
+  .start-menu-crowdfunding + .start-menu-playtime,
+  .start-menu-playtime {
+    bottom: 1.25rem;
+  }
+}
+
 @media (orientation: landscape) {
   .battle-scene-root.battle-force-split .battle-view {
     gap: 0.5rem;

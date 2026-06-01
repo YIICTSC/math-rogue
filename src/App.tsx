@@ -10764,16 +10764,16 @@ const App: React.FC = () => {
                             )}
                         </div>
 
-                        <div className="absolute bottom-2 left-2 z-9999 text-gray-500 text-[10px] font-mono flex flex-col gap-0.5">
+                        <div className="start-menu-playtime absolute bottom-2 left-2 z-9999 text-gray-500 text-[10px] font-mono flex flex-col gap-0.5">
                             <div>TOTAL TIME: {formatTime(totalPlaySeconds)}</div>
                             <div className={isDailyLimitReached ? "text-red-500 font-bold" : ""}>
                                 DAILY: {formatTime(dailyPlaySeconds)} / {formatTime(PLAY_LIMIT_SECONDS)}
                             </div>
                         </div>
 
-                        <div className="relative z-10 text-center p-8 w-full flex flex-col items-center">
+                        <div className="start-menu-content relative z-10 text-center p-8 w-full flex flex-col items-center">
                             <h1
-                                className="relative mb-7 flex min-h-[104px] w-full max-w-[560px] cursor-pointer select-none items-center justify-center leading-none"
+                                className="start-menu-title relative mb-7 flex min-h-[104px] w-full max-w-[560px] cursor-pointer select-none items-center justify-center leading-none"
                                 onClick={handleTitleClick}
                             >
                                 <img
@@ -10800,7 +10800,7 @@ const App: React.FC = () => {
 
                             {!isShortMobilePortrait && !shouldShowCrowdfundingBanner && (
                                 <div
-                                    className="mb-6 bg-black/40 px-4 py-2 rounded-lg border border-gray-600 cursor-pointer select-none"
+                                    className="start-menu-progress mb-6 bg-black/40 px-4 py-2 rounded-lg border border-gray-600 cursor-pointer select-none"
                                     onClick={handleMiniGameUnlockClick}
                                 >
                                 {isDailyLimitReached ? (
@@ -10822,7 +10822,7 @@ const App: React.FC = () => {
                                 <button
                                     type="button"
                                     onClick={disableMathDebugSkip}
-                                    className={`text-red-500 font-bold ${isMiniGameDebugUnlocked ? 'mb-1' : 'mb-6'} text-sm bg-black/50 px-2 py-1 inline-block rounded border border-red-500 animate-pulse cursor-pointer`}
+                                    className={`start-menu-debug-toggle text-red-500 font-bold ${isMiniGameDebugUnlocked ? 'mb-1' : 'mb-6'} text-sm bg-black/50 px-2 py-1 inline-block rounded border border-red-500 animate-pulse cursor-pointer`}
                                 >
                                     {trans("(デバッグ: けいさん スキップ ON)", languageMode)}
                                 </button>
@@ -10831,7 +10831,7 @@ const App: React.FC = () => {
                                 <button
                                     type="button"
                                     onClick={disableDebugHpOne}
-                                    className="text-red-500 font-bold mb-1 text-sm bg-black/50 px-2 py-1 inline-block rounded border border-red-500 animate-pulse cursor-pointer"
+                                    className="start-menu-debug-toggle text-red-500 font-bold mb-1 text-sm bg-black/50 px-2 py-1 inline-block rounded border border-red-500 animate-pulse cursor-pointer"
                                 >
                                     {trans("(デバッグ: てきHP1 & ぜんかいほう ON)", languageMode)}
                                 </button>
@@ -10840,34 +10840,35 @@ const App: React.FC = () => {
                                 <button
                                     type="button"
                                     onClick={disableMiniGameDebugUnlock}
-                                    className="text-red-500 font-bold mb-6 text-sm bg-black/50 px-2 py-1 inline-block rounded border border-red-500 animate-pulse cursor-pointer"
+                                    className="start-menu-debug-toggle text-red-500 font-bold mb-6 text-sm bg-black/50 px-2 py-1 inline-block rounded border border-red-500 animate-pulse cursor-pointer"
                                 >
                                     {trans("(デバッグ: ミニゲームぜんかいほう ON)", languageMode)}
                                 </button>
                             )}
-                            {(!isMathDebugSkipped && !isDebugHpOne && !isMiniGameDebugUnlocked) && <div className="mb-2 h-2"></div>}
+                            {(!isMathDebugSkipped && !isDebugHpOne && !isMiniGameDebugUnlocked) && <div className="start-menu-debug-spacer mb-2 h-2"></div>}
 
-                            <div className="mb-4 inline-flex overflow-hidden border-2 border-slate-500 bg-black/55 shadow-lg">
-                                {([
-                                    { id: 'elementary', label: '小学生編' },
-                                    { id: 'high-school', label: '高校編' },
-                                ] as const).map((theme) => (
-                                    <button
-                                        key={theme.id}
-                                        type="button"
-                                        onClick={() => setVisualTheme(theme.id)}
-                                        className={`px-4 py-2 text-sm font-black transition-colors ${
-                                            visualTheme === theme.id
-                                                ? 'bg-amber-300 text-slate-950'
-                                                : 'bg-slate-950/70 text-slate-300 hover:bg-slate-800'
-                                        }`}
-                                    >
-                                        {theme.label}
-                                    </button>
-                                ))}
-                            </div>
+                            <div className="start-menu-button-panel flex w-full flex-col items-center">
+                                <div className="start-menu-theme-switch mb-4 inline-flex overflow-hidden border-2 border-slate-500 bg-black/55 shadow-lg">
+                                    {([
+                                        { id: 'elementary', label: '小学生編' },
+                                        { id: 'high-school', label: '高校編' },
+                                    ] as const).map((theme) => (
+                                        <button
+                                            key={theme.id}
+                                            type="button"
+                                            onClick={() => setVisualTheme(theme.id)}
+                                            className={`px-4 py-2 text-sm font-black transition-colors ${
+                                                visualTheme === theme.id
+                                                    ? 'bg-amber-300 text-slate-950'
+                                                    : 'bg-slate-950/70 text-slate-300 hover:bg-slate-800'
+                                            }`}
+                                        >
+                                            {theme.label}
+                                        </button>
+                                    ))}
+                                </div>
 
-                            <div className="start-menu-actions flex flex-col gap-2 items-center w-full max-w-[320px]">
+                                <div className="start-menu-actions flex flex-col gap-2 items-center w-full max-w-[320px]">
                                 {hasSave && (
                                     <>
                                         <div className="text-[10px] text-red-400 font-bold animate-pulse mb-[-8px]">
@@ -10989,9 +10990,10 @@ const App: React.FC = () => {
                                     <Globe className="mr-2" size={18} /> {trans("データ移行", languageMode)}
                                 </button>
 
-                                <button onClick={() => setShowDebugLog(true)} className="start-menu-version text-gray-600 text-[10px] hover:text-gray-400 flex items-center justify-center gap-1 opacity-50 hover:opacity-100 transition-opacity">
-                                    <Terminal size={10} /> v1.0.4 YUSUKE ISHIGE
-                                </button>
+                                    <button onClick={() => setShowDebugLog(true)} className="start-menu-version text-gray-600 text-[10px] hover:text-gray-400 flex items-center justify-center gap-1 opacity-50 hover:opacity-100 transition-opacity">
+                                        <Terminal size={10} /> v1.0.4 YUSUKE ISHIGE
+                                    </button>
+                                </div>
                             </div>
 
                             {shouldShowCrowdfundingBanner && (
@@ -11000,7 +11002,7 @@ const App: React.FC = () => {
                                     target="_blank"
                                     rel="noopener noreferrer"
                                     aria-label="クラウドファンディング詳細ページを開く"
-                                    className="mt-4 block w-[min(92vw,500px)] max-w-full border-2 border-yellow-400/70 bg-black/45 p-1 shadow-[0_0_18px_rgba(250,204,21,0.22)] transition-transform hover:scale-[1.01] hover:border-yellow-200 focus:outline-none focus:ring-2 focus:ring-yellow-300"
+                                    className="start-menu-crowdfunding mt-4 block w-[min(92vw,500px)] max-w-full border-2 border-yellow-400/70 bg-black/45 p-1 shadow-[0_0_18px_rgba(250,204,21,0.22)] transition-transform hover:scale-[1.01] hover:border-yellow-200 focus:outline-none focus:ring-2 focus:ring-yellow-300"
                                 >
                                     <img
                                         src={CROWDFUNDING_BANNER_IMAGE}
