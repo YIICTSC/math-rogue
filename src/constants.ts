@@ -670,17 +670,6 @@ export const CHARACTERS: Character[] = [
         imageData: `data:image/svg+xml;base64,${btoa(ASSASSIN_SVG)}`
     },
     {
-        id: 'MAGE',
-        name: '理科クラブ部長',
-        description: '【実験タイプ】3枚のカードを合成して超強力な「キメラカード」を作成できる。低コストスキルの連打も得意。',
-        maxHp: 65,
-        gold: 100,
-        startingRelicId: 'HOLY_WATER',
-        color: 'blue',
-        deckTemplate: ['STRIKE', 'STRIKE', 'STRIKE', 'STRIKE', 'DEFEND', 'DEFEND', 'DEFEND', 'DEFEND', 'BEAM_CELL', 'BALL_LIGHTNING'],
-        imageData: `data:image/svg+xml;base64,${btoa(MAGE_SVG)}`
-    },
-    {
         id: 'DODGEBALL',
         name: 'ドッジボールのエース',
         description: '【スピード】カードを捨てることで効果を発揮する。ドッジボールでの先制攻撃が可能。',
@@ -734,6 +723,17 @@ export const CHARACTERS: Character[] = [
         color: 'lime',
         deckTemplate: ['STRIKE', 'STRIKE', 'STRIKE', 'DEFEND', 'DEFEND', 'DEFEND', 'SUNFLOWER_SEED', 'CACTUS_SEED', 'ROSE_SEED', 'IRON_WAVE'],
         imageData: `data:image/svg+xml;base64,${btoa(GARDENER_SVG)}`
+    },
+    {
+        id: 'MAGE',
+        name: '理科クラブ部長',
+        description: '【実験タイプ】3枚のカードを合成して超強力な「キメラカード」を作成できる。低コストスキルの連打も得意。',
+        maxHp: 65,
+        gold: 100,
+        startingRelicId: 'HOLY_WATER',
+        color: 'blue',
+        deckTemplate: ['STRIKE', 'STRIKE', 'STRIKE', 'STRIKE', 'DEFEND', 'DEFEND', 'DEFEND', 'DEFEND', 'BEAM_CELL', 'BALL_LIGHTNING'],
+        imageData: `data:image/svg+xml;base64,${btoa(MAGE_SVG)}`
     }
 ];
 

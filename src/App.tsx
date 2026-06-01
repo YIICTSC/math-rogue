@@ -11921,27 +11921,30 @@ const App: React.FC = () => {
                             onPlant={handlePlantSeed}
                             onHarvest={handleHarvestPlant}
                             onLeave={() => {
+                                const shouldDropSeed = Math.random() < 0.3;
                                 const seedKeys = Object.keys(GARDEN_SEEDS);
                                 const randomKey = seedKeys[Math.floor(Math.random() * seedKeys.length)];
                                 const seedTemplate = GARDEN_SEEDS[randomKey];
-                                const newSeed: ICard = {
+                                const newSeed: ICard | null = shouldDropSeed ? {
                                     ...seedTemplate,
                                     id: `seed-drop-${Date.now()}`
-                                };
-                                const msg = trans(`新しい種「${newSeed.name}」を手に入れた！`, languageMode);
+                                } : null;
+                                const msg = newSeed ? trans(`新しい種「${newSeed.name}」を手に入れた！`, languageMode) : null;
                                 setGameState(prev => {
                                     return {
                                         ...prev,
                                         screen: GameScreen.MAP,
                                         player: {
                                             ...prev.player,
-                                            deck: [...prev.player.deck, newSeed]
+                                            deck: newSeed ? [...prev.player.deck, newSeed] : prev.player.deck
                                         },
-                                        narrativeLog: [...prev.narrativeLog, msg]
+                                        narrativeLog: msg ? [...prev.narrativeLog, msg] : prev.narrativeLog
                                     };
                                 });
-                                setCurrentNarrative(msg);
-                                audioService.playSound('buff');
+                                if (msg) {
+                                    setCurrentNarrative(msg);
+                                    audioService.playSound('buff');
+                                }
                             }}
                             languageMode={languageMode}
                         />
