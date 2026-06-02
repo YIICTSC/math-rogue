@@ -90,6 +90,7 @@ const buildEssentialAssetPaths = (visualTheme: VisualThemeId): string[] => {
 class AssetPreloadService {
     private imagePromises = new Map<string, Promise<void>>();
     private essentialPromises = new Map<VisualThemeId, Promise<void>>();
+    private readonly preloadConcurrency = 4;
 
     preloadEssentialGameAssets(visualTheme: VisualThemeId): Promise<void> {
         const cached = this.essentialPromises.get(visualTheme);
@@ -102,7 +103,26 @@ class AssetPreloadService {
 
     private preloadImages(paths: string[]): Promise<void> {
         const sources = Array.from(new Set(paths.map(path => assetUrl(path))));
-        return Promise.all(sources.map(src => this.preloadImage(src))).then(() => undefined);
+        return this.preloadImagesInBackgroundBatches(sources);
+    }
+
+    private async preloadImagesInBackgroundBatches(sources: string[]): Promise<void> {
+        for (let index = 0; index < sources.length; index += this.preloadConcurrency) {
+            const batch = sources.slice(index, index + this.preloadConcurrency);
+            await Promise.all(batch.map(src => this.preloadImage(src)));
+            await this.yieldToMainThread();
+        }
+    }
+
+    private yieldToMainThread(): Promise<void> {
+        return new Promise(resolve => {
+            const requestIdle = (window as any).requestIdleCallback as ((callback: () => void, options?: { timeout: number }) => number) | undefined;
+            if (requestIdle) {
+                requestIdle(() => resolve(), { timeout: 250 });
+                return;
+            }
+            window.setTimeout(resolve, 0);
+        });
     }
 
     private preloadImage(src: string): Promise<void> {
@@ -115,10 +135,19 @@ class AssetPreloadService {
 
         const promise = new Promise<void>(resolve => {
             const image = new Image();
+            const timeoutId = window.setTimeout(() => {
+                image.onload = null;
+                image.onerror = null;
+                resolve();
+            }, 15000);
+            const finish = () => {
+                window.clearTimeout(timeoutId);
+                resolve();
+            };
             image.decoding = 'async';
             image.loading = 'eager';
-            image.onload = () => resolve();
-            image.onerror = () => resolve();
+            image.onload = finish;
+            image.onerror = finish;
             image.src = src;
         });
 

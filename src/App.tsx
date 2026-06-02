@@ -840,7 +840,7 @@ const App: React.FC = () => {
     const parryTutorialResolverRef = useRef<(() => void) | null>(null);
     const [isPreloadingGameAssets, setIsPreloadingGameAssets] = useState(false);
     const gameAssetPreloadPromisesRef = useRef<Partial<Record<VisualThemeId, Promise<void>>>>({});
-    const preloadGameAssets = useCallback(async () => {
+    const startGameAssetPreload = useCallback(() => {
         const preloadKey = visualTheme;
         if (!gameAssetPreloadPromisesRef.current[preloadKey]) {
             setIsPreloadingGameAssets(true);
@@ -852,8 +852,12 @@ const App: React.FC = () => {
                 .catch(() => undefined)
                 .finally(() => setIsPreloadingGameAssets(false));
         }
-        await gameAssetPreloadPromisesRef.current[preloadKey];
     }, [visualTheme]);
+
+    useEffect(() => {
+        if (gameState.screen === GameScreen.START_MENU) return;
+        startGameAssetPreload();
+    }, [gameState.screen, startGameAssetPreload]);
 
     const [isMathDebugSkipped, setIsMathDebugSkipped] = useState<boolean>(false);
     const [isDebugHpOne, setIsDebugHpOne] = useState<boolean>(false);
@@ -3845,7 +3849,7 @@ const App: React.FC = () => {
             return;
         }
         audioService.playSound('select');
-        await preloadGameAssets();
+        startGameAssetPreload();
         const nextScreen = pendingMiniGameScreen || GameScreen.MINI_GAME_SELECT;
         setMiniGameProblemMode(mode);
         setMiniGameProblemModePool(modePool);
@@ -4043,7 +4047,6 @@ const App: React.FC = () => {
 
     const handleCharacterSelect = async (char: Character) => {
         audioService.playSound('select');
-        await preloadGameAssets();
         setSelectedCharName(char.name);
         setUnlockCheckStartMathCorrect(totalMathCorrect);
 
@@ -4249,6 +4252,7 @@ const App: React.FC = () => {
                 activeEffects: []
             }));
             audioService.playBGM('event');
+            startGameAssetPreload();
             return;
         }
 
@@ -4268,10 +4272,10 @@ const App: React.FC = () => {
             activeEffects: []
         }));
         if (shouldSkipStarterRelic) audioService.playBGM('map');
+        startGameAssetPreload();
     };
 
     const handleChefDeckSelection = async (selectedCards: ICard[]) => {
-        await preloadGameAssets();
         const cardNames = selectedCards.map(c => c.name);
         storageService.saveUnlockedCards(cardNames);
 
@@ -4287,11 +4291,11 @@ const App: React.FC = () => {
             }
         }));
         if (shouldSkipStarterRelic) audioService.playBGM('map');
+        startGameAssetPreload();
     };
 
     const handleRelicSelect = async (relic: Relic) => {
         audioService.playSound('buff');
-        await preloadGameAssets();
         if (gameState.challengeMode === 'COOP' && coopSession && !coopSession.isHost) {
             setCoopAwaitingMapSync(true);
             setGameState(prev => ({
@@ -4301,11 +4305,13 @@ const App: React.FC = () => {
                     relics: [...prev.player.relics, relic]
                 }
             }));
+            startGameAssetPreload();
             return;
         }
         if (gameState.challengeMode === 'COOP' && coopSession?.isHost) {
             setCoopNeedsInitialMapSync(true);
         }
+        startGameAssetPreload();
         const map = generateDungeonMap(gameState.difficultyLevel || 1);
         const unlockedCards = storageService.getUnlockedCards();
 
@@ -10574,9 +10580,9 @@ const App: React.FC = () => {
                 )}
 
                 {isPreloadingGameAssets && (
-                    <div className="app-modal-overlay fixed inset-0 z-[10030] flex items-center justify-center bg-black/70 text-white backdrop-blur-sm">
-                        <div className="app-modal-panel app-loading-modal rounded border border-cyan-300/70 bg-slate-950/90 px-5 py-4 text-center shadow-[0_0_24px_rgba(34,211,238,0.25)]">
-                            <div className="text-sm font-black text-cyan-100">{trans("ゲーム素材を読み込み中...", languageMode)}</div>
+                    <div className="pointer-events-none fixed bottom-3 right-3 z-[10030] text-white">
+                        <div className="rounded border border-cyan-300/60 bg-slate-950/85 px-3 py-2 text-center shadow-[0_0_18px_rgba(34,211,238,0.2)]">
+                            <div className="text-[10px] font-black text-cyan-100">{trans("素材をバックグラウンド読み込み中", languageMode)}</div>
                         </div>
                     </div>
                 )}
