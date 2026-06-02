@@ -192,6 +192,21 @@ export const getUpgradedCard = (card: Card): Card => {
     return newCard;
 };
 
+export const createHolographicCard = (card: Card): Card => {
+    if (card.holographic) return card;
+    const boostedCard = getUpgradedCard({
+        ...card,
+        upgraded: false,
+        holographic: false,
+    });
+
+    return {
+        ...boostedCard,
+        upgraded: false,
+        holographic: true,
+    };
+};
+
 export const synthesizeCards = (c1: Card, c2: Card, c3?: Card): Card => {
     // 1. Name Synthesis
     const len1 = Math.floor(Math.random() * 3) + 2;

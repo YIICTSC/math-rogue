@@ -282,13 +282,21 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled, onInspect, languag
 
   const renderDescription = () => {
     const desc = languageMode === 'ENGLISH' ? buildEnglishCardDescription(card) : trans(card.description, languageMode);
-    return <span className={card.upgraded ? 'text-green-300 font-bold' : ''}>{desc}</span>;
+    return <span className={card.holographic ? 'text-cyan-100 font-bold' : card.upgraded ? 'text-green-300 font-bold' : ''}>{desc}</span>;
   };
 
   const displayName = translatedCardName + (card.upgraded ? '+' : '');
   const needsScroll = displayName.length > 6;
   const statusCategoryLabel = getStatusCategoryLabel(card);
   const statusCategoryClass = getStatusCategoryClass(card);
+  const cardFrameClass = card.holographic
+    ? 'card-holographic border-cyan-200 shadow-[0_0_18px_rgba(103,232,249,0.65)]'
+    : '';
+  const nameColorClass = card.holographic
+    ? 'text-cyan-100'
+    : card.upgraded
+      ? 'text-green-400'
+      : 'text-white';
 
   return (
     <div
@@ -302,24 +310,31 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled, onInspect, languag
         relative w-32 h-48 border-[3px] rounded-lg p-2 flex flex-col overflow-visible
         transition-all duration-200 select-none group touch-manipulation
         ${getTypeColor(card.type)}
+        ${cardFrameClass}
         ${disabled ? 'opacity-50 cursor-not-allowed grayscale' : 'cursor-pointer hover:-translate-y-4 hover:shadow-[0_0_15px_rgba(255,255,255,0.4)] hover:z-50'}
       `}
     >
+      {card.holographic && (
+        <>
+          <div className="card-holographic-sheen pointer-events-none absolute inset-0 z-[12] rounded-lg" />
+          <div className="card-holographic-sparkles pointer-events-none absolute inset-0 z-[13] rounded-lg" />
+        </>
+      )}
       {/* Header: fixed */}
       <div className="flex items-center relative z-30 mb-1 h-6 overflow-hidden shrink-0">
-        <div className={`w-6 h-6 flex items-center justify-center rounded text-[11px] border border-white font-bold shrink-0 shadow-sm mr-1 ${card.upgraded && card.cost < 99 ? 'bg-green-600 text-white' : 'bg-blue-600 text-white'}`}>
+        <div className={`w-6 h-6 flex items-center justify-center rounded text-[11px] border border-white font-bold shrink-0 shadow-sm mr-1 ${card.holographic ? 'bg-cyan-300 text-slate-950' : card.upgraded && card.cost < 99 ? 'bg-green-600 text-white' : 'bg-blue-600 text-white'}`}>
           {card.cost}
         </div>
 
         {needsScroll ? (
           <div className="flex-1 overflow-hidden relative text-[13px] font-bold drop-shadow-md min-w-0">
-            <div className={`flex w-max animate-marquee-scroll ${card.upgraded ? 'text-green-400' : 'text-white'}`}>
+            <div className={`flex w-max animate-marquee-scroll ${nameColorClass}`}>
               <span className="pr-4">{displayName}</span>
               <span className="pr-4">{displayName}</span>
             </div>
           </div>
         ) : (
-          <span className={`text-[13px] font-bold truncate flex-1 drop-shadow-md ${card.upgraded ? 'text-green-400' : 'text-white'}`}>
+          <span className={`text-[13px] font-bold truncate flex-1 drop-shadow-md ${nameColorClass}`}>
             {displayName}
           </span>
         )}
@@ -341,8 +356,8 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled, onInspect, languag
       </div>
 
       {/* Art: position unchanged */}
-      <div className="relative z-10 mb-1.5">
-        <div className="w-[calc(100%+10px)] -ml-[5px] h-[68px] rounded-md border border-white/20 bg-black/35 overflow-hidden flex items-center justify-center">
+      <div className="relative z-40 mb-1.5">
+        <div className="card-art-frame w-[calc(100%+10px)] -ml-[5px] h-[68px] rounded-md border border-white/20 bg-black/95 overflow-hidden flex items-center justify-center">
           {renderCardArt()}
         </div>
       </div>

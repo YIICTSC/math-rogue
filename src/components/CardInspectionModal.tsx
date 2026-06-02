@@ -56,7 +56,7 @@ const CardInspectionModal: React.FC<CardInspectionModalProps> = ({ card, languag
         <X size={24} />
       </button>
       <h3 className="text-2xl font-bold text-yellow-400 mb-2 border-b border-gray-600 pb-2">
-        {trans(card.name, languageMode)}
+        {card.holographic ? 'キラ ' : ''}{trans(card.name, languageMode)}{card.upgraded ? '+' : ''}
       </h3>
       <div className="flex gap-2 mb-4 text-xs text-gray-400 font-mono">
         <span className="bg-blue-900/50 px-2 py-1 rounded border border-blue-500/30">
@@ -65,6 +65,11 @@ const CardInspectionModal: React.FC<CardInspectionModalProps> = ({ card, languag
         <span className="bg-purple-900/50 px-2 py-1 rounded border border-purple-500/30">
           {trans(card.type, languageMode)}
         </span>
+        {card.holographic && (
+          <span className="bg-cyan-900/60 px-2 py-1 rounded border border-cyan-300/50 text-cyan-100">
+            キラ
+          </span>
+        )}
       </div>
       <p className="text-lg text-white mb-6 leading-relaxed whitespace-pre-wrap font-bold bg-black/30 p-3 rounded">
         {getProcessedDescription(card, languageMode)}

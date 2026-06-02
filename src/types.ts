@@ -41,6 +41,7 @@ export interface Card {
   vulnerable?: number;
   weak?: number;
   upgraded?: boolean;
+  holographic?: boolean;
   unplayable?: boolean;
 
   // Advanced Effects

@@ -54,7 +54,7 @@ import { generateEnemyName } from './services/geminiService';
 import { generateDungeonMap } from './services/mapGenerator';
 import { storageService } from './services/storageService';
 import { generateEvent, generateLegacyEvent } from './services/eventService';
-import { getUpgradedCard, synthesizeCards } from './utils/cardUtils';
+import { createHolographicCard, getUpgradedCard, synthesizeCards } from './utils/cardUtils';
 import { sanitizeEnglishText, trans } from './utils/textUtils';
 import { assetUrl } from './utils/assetPaths';
 import { getDifficultyConfig } from './config/difficulty';
@@ -75,6 +75,7 @@ const PARRY_PERFECT_MS = 220;
 const CROWDFUNDING_BANNER_URL = 'https://camp-fire.jp/projects/954165/view?utm_campaign=cp_po_share_c_msg_mypage_projects_open';
 const CROWDFUNDING_BANNER_IMAGE = assetUrl('banners/campfire-crowdfunding.png');
 const CROWDFUNDING_BANNER_END_AT = new Date('2026-06-20T23:59:59+09:00').getTime();
+const HOLOGRAPHIC_REWARD_CARD_CHANCE = 0.05;
 
 const calculateScore = (state: GameState, victory: boolean): number => {
     let score = 0;
@@ -8683,6 +8684,9 @@ const App: React.FC = () => {
         const familiarRewardSlot = isHighSchoolReward && familiarCards.length > 0 && Math.random() < 0.55
             ? Math.floor(Math.random() * 3)
             : -1;
+        const holographicRewardSlot = Math.random() < HOLOGRAPHIC_REWARD_CARD_CHANCE
+            ? Math.floor(Math.random() * 3)
+            : -1;
 
         for (let i = 0; i < 3; i++) {
             if (baseRewardCards.length === 0 && !(isLibrarian && i === 0) && !(isGardener && i === 0)) break;
@@ -8721,7 +8725,11 @@ const App: React.FC = () => {
                             : allPossibleCards;
             const candidate = pickSource[Math.floor(Math.random() * pickSource.length)];
             pickedCardTemplateIds.add(getRewardCardTemplateKey(candidate));
-            rewards.push({ type: 'CARD', value: { ...candidate, id: `${rewardPrefix}-card-value-${i}` }, id: `${rewardPrefix}-card-${i}` });
+            const cardRewardBase = { ...candidate, id: `${rewardPrefix}-card-value-${i}` };
+            const cardRewardValue = i === holographicRewardSlot
+                ? createHolographicCard(cardRewardBase)
+                : cardRewardBase;
+            rewards.push({ type: 'CARD', value: cardRewardValue, id: `${rewardPrefix}-card-${i}` });
         }
         if (getDifficultyConfig(stateRef.current.difficultyLevel).cardEraserEnabled && Math.random() < 0.25) {
             const replaceIndex = rewards.findIndex(reward => reward.type === 'CARD');

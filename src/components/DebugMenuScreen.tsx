@@ -6,8 +6,8 @@ import { AttackEffectKey, StatusEffectKey, Card as ICard, Relic, Potion, CardTyp
 import Card from './Card';
 import AttackEffectSprite from './AttackEffectSprite';
 import StatusEffectSprite from './StatusEffectSprite';
-import { ArrowRight, Trash2, Plus, Gem, FlaskConical, Swords, Shield, Zap, Search, Beaker, RotateCcw, Skull, Clock, History, Languages, FileText, BookOpen, MessageSquare, HelpCircle, AlertCircle, Copy, Check, X, Volume2 } from 'lucide-react';
-import { synthesizeCards } from '../utils/cardUtils';
+import { ArrowRight, Trash2, Plus, Gem, FlaskConical, Swords, Shield, Zap, Search, Beaker, RotateCcw, Skull, Clock, History, Languages, FileText, BookOpen, MessageSquare, HelpCircle, AlertCircle, Copy, Check, X, Volume2, Sparkles } from 'lucide-react';
+import { createHolographicCard, synthesizeCards } from '../utils/cardUtils';
 import { storageService } from '../services/storageService';
 import { audioService } from '../services/audioService';
 import { trans } from '../utils/textUtils';
@@ -97,6 +97,7 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
     const [playingEffectKey, setPlayingEffectKey] = useState<AttackEffectKey | null>(null);
     const [statusPreviewTokens, setStatusPreviewTokens] = useState<Record<StatusEffectKey, number>>({} as Record<StatusEffectKey, number>);
     const [playingStatusKey, setPlayingStatusKey] = useState<StatusEffectKey | null>(null);
+    const [addHolographicCards, setAddHolographicCards] = useState(false);
 
     const [selectedDeck, setSelectedDeck] = useState<ICard[]>([]);
     const [selectedRelics, setSelectedRelics] = useState<Relic[]>([]);
@@ -117,14 +118,15 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
     ), [allCards, searchTerm]);
 
     const handleAddCard = useCallback((template: any) => {
-        const newCard: ICard = { ...template, id: `debug-${Date.now()}-${Math.random()}` };
+        const baseCard: ICard = { ...template, id: `debug-${Date.now()}-${Math.random()}` };
+        const newCard = addHolographicCards ? createHolographicCard(baseCard) : baseCard;
         if (activeTab === 'SYNTHESIS') {
             if (!synthSlot1) setSynthSlot1(newCard);
             else if (!synthSlot2) setSynthSlot2(newCard);
         } else {
             setSelectedDeck(prev => [...prev, newCard]);
         }
-    }, [activeTab, synthSlot1, synthSlot2]);
+    }, [activeTab, addHolographicCards, synthSlot1, synthSlot2]);
 
     const handleRemoveCard = useCallback((index: number) => {
         setSelectedDeck(prev => {
@@ -132,6 +134,14 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
             next.splice(index, 1);
             return next;
         });
+    }, []);
+
+    const toggleDeckCardHolographic = useCallback((index: number) => {
+        setSelectedDeck(prev => prev.map((card, cardIndex) => {
+            if (cardIndex !== index) return card;
+            if (card.holographic) return card;
+            return createHolographicCard(card);
+        }));
     }, []);
 
     const toggleRelic = useCallback((relic: Relic) => {
@@ -283,15 +293,24 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
 
                     {(activeTab === 'CARDS' || activeTab === 'SYNTHESIS') && (
                         <div className="p-2 bg-gray-800/80 border-b border-gray-700 shrink-0">
-                            <div className="relative">
-                                <Search className="absolute left-3 top-2 text-gray-400" size={14} />
-                                <input
-                                    type="text"
-                                    placeholder="検索..."
-                                    className="w-full bg-black border border-gray-600 rounded pl-9 p-1.5 text-sm text-white focus:border-blue-500 outline-none"
-                                    value={searchTerm}
-                                    onChange={(e) => setSearchTerm(e.target.value)}
-                                />
+                            <div className="flex flex-col md:flex-row gap-2">
+                                <div className="relative flex-1">
+                                    <Search className="absolute left-3 top-2 text-gray-400" size={14} />
+                                    <input
+                                        type="text"
+                                        placeholder="検索..."
+                                        className="w-full bg-black border border-gray-600 rounded pl-9 p-1.5 text-sm text-white focus:border-blue-500 outline-none"
+                                        value={searchTerm}
+                                        onChange={(e) => setSearchTerm(e.target.value)}
+                                    />
+                                </div>
+                                <button
+                                    onClick={() => setAddHolographicCards(prev => !prev)}
+                                    className={`px-3 py-1.5 rounded border text-xs font-black flex items-center justify-center gap-1 ${addHolographicCards ? 'bg-cyan-400 text-slate-950 border-white shadow-[0_0_12px_rgba(103,232,249,0.65)]' : 'bg-slate-900 text-cyan-200 border-cyan-700/60'}`}
+                                >
+                                    <Sparkles size={14} />
+                                    追加時キラ
+                                </button>
                             </div>
                         </div>
                     )}
@@ -714,12 +733,21 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
                             <div className="space-y-1">
                                 {selectedDeck.map((c, idx) => (
                                     <div key={idx} className="flex justify-between items-center bg-gray-800 p-1 rounded border border-gray-700 group">
-                                        <span className={`truncate text-[10px] ${c.type === CardType.ATTACK ? 'text-red-300' : c.type === CardType.SKILL ? 'text-blue-300' : 'text-yellow-300'}`}>
-                                            {trans(c.name, initialLanguageMode)}
+                                        <span className={`truncate text-[10px] ${c.holographic ? 'text-cyan-200' : c.type === CardType.ATTACK ? 'text-red-300' : c.type === CardType.SKILL ? 'text-blue-300' : 'text-yellow-300'}`}>
+                                            {c.holographic ? 'キラ ' : ''}{trans(c.name, initialLanguageMode)}{c.upgraded ? '+' : ''}
                                         </span>
-                                        <button onClick={() => handleRemoveCard(idx)} className="text-gray-500 hover:text-red-500 ml-1 shrink-0">
-                                            <Trash2 size={12} />
-                                        </button>
+                                        <div className="flex items-center gap-1 ml-1 shrink-0">
+                                            <button
+                                                onClick={() => toggleDeckCardHolographic(idx)}
+                                                className={`${c.holographic ? 'text-cyan-200' : 'text-gray-500'} hover:text-cyan-100`}
+                                                title="キラ切替"
+                                            >
+                                                <Sparkles size={12} />
+                                            </button>
+                                            <button onClick={() => handleRemoveCard(idx)} className="text-gray-500 hover:text-red-500">
+                                                <Trash2 size={12} />
+                                            </button>
+                                        </div>
                                     </div>
                                 ))}
                             </div>
