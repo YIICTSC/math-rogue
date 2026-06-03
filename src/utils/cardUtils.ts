@@ -207,6 +207,63 @@ export const createHolographicCard = (card: Card): Card => {
     };
 };
 
+const appendSentence = (description: string, sentence: string): string => {
+    const trimmed = description.trim();
+    if (trimmed.includes(sentence)) return trimmed;
+    return `${trimmed}${trimmed.endsWith('。') ? '' : '。'}${sentence}`;
+};
+
+const getTripleBoostedCard = (card: Card): Card => {
+    let boosted = { ...card, upgraded: false, holographic: false };
+    for (let i = 0; i < 3; i += 1) {
+        boosted = getUpgradedCard({ ...boosted, upgraded: false });
+    }
+    return boosted;
+};
+
+export const createAssignmentRewardCard = (card: Card): Card => {
+    const boostedCard = getTripleBoostedCard(card);
+    const variant = Math.floor(Math.random() * 6);
+    const next: Card = {
+        ...boostedCard,
+        id: `assignment-reward-card-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        upgraded: false,
+        holographic: true,
+        rewardCard: true,
+        rarity: 'SPECIAL',
+    };
+
+    switch (variant) {
+        case 0:
+            next.exhaust = true;
+            next.description = appendSentence(next.description, '廃棄。');
+            break;
+        case 1:
+            next.selfDamage = (next.selfDamage || 0) + 2;
+            next.description = appendSentence(next.description, '自分に2ダメージ。');
+            break;
+        case 2:
+            next.cost = Math.max(0, next.cost + 1);
+            next.description = appendSentence(next.description, 'コストが1重い。');
+            break;
+        case 3:
+            next.promptsDiscard = (next.promptsDiscard || 0) + 1;
+            next.description = appendSentence(next.description, '手札を1枚捨てる。');
+            break;
+        case 4:
+            next.innate = true;
+            next.exhaust = true;
+            next.description = appendSentence(appendSentence(next.description, '最初から手札に入る。'), '廃棄。');
+            break;
+        default:
+            next.selfDamage = (next.selfDamage || 0) + 1;
+            next.description = appendSentence(next.description, '自分に1ダメージ。');
+            break;
+    }
+
+    return next;
+};
+
 export const synthesizeCards = (c1: Card, c2: Card, c3?: Card): Card => {
     // 1. Name Synthesis
     const len1 = Math.floor(Math.random() * 3) + 2;

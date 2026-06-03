@@ -526,7 +526,7 @@ const MATH_GRADE_UNITS: Record<number, MathUnitOption[]> = {
   ],
 };
 
-const CATEGORY_LABELS: Record<SubjectCategoryType, string> = {
+export const CATEGORY_LABELS: Record<SubjectCategoryType, string> = {
   MATH: '計算',
   MATH_GRADES: '算数・数学',
   KOKUGO_GRADES: '国語',
@@ -809,7 +809,7 @@ const getGradeSummaryUnit = (grade: number): SelectableUnitOption => ({
   modes: getGradeSummaryModes(grade),
 });
 
-const getCurrentUnitsForCategory = (categoryId: SubjectCategoryType, grade: number): SelectableUnitOption[] => {
+export const getCurrentUnitsForCategory = (categoryId: SubjectCategoryType, grade: number): SelectableUnitOption[] => {
   if (categoryId === 'SUMMARY') {
     const summaryUnit = getGradeSummaryUnit(grade);
     return summaryUnit.modes && summaryUnit.modes.length > 0 ? [summaryUnit] : [];
@@ -823,7 +823,7 @@ const getCurrentUnitsForCategory = (categoryId: SubjectCategoryType, grade: numb
   return [];
 };
 
-const getAllSelectableUnits = (): SelectableUnitOption[] => [
+export const getAllSelectableUnits = (): SelectableUnitOption[] => [
   ...Array.from({ length: 9 }, (_, index) => getGradeSummaryUnit(index + 1)),
   ...Object.values(ENGLISH_GRADE_UNITS).flat().map((unit) => ({ ...unit, modes: [unit.mode] })),
   ...Object.values(SCIENCE_GRADE_UNITS).flat().map((unit) => ({ ...unit, modes: [unit.mode] })),
@@ -832,7 +832,7 @@ const getAllSelectableUnits = (): SelectableUnitOption[] => [
   ...Object.values(MATH_GRADE_UNITS).flat().map((unit) => ({ ...unit, modes: unit.modes || (unit.mode ? [unit.mode] : []) })),
 ];
 
-const getSelectableGrades = (categoryId: SubjectCategoryType): number[] => {
+export const getSelectableGrades = (categoryId: SubjectCategoryType): number[] => {
   if (categoryId === 'LIFE') return [1, 2];
   if (categoryId === 'SCIENCE') return [3, 4, 5, 6, 7, 8, 9];
   if (categoryId === 'ENGLISH' || categoryId === 'SOCIAL') return [3, 4, 5, 6, 7, 8, 9];

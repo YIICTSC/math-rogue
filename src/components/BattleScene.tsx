@@ -2170,6 +2170,7 @@ const FinisherArtPiece: React.FC<{ token: string; seed: string; languageMode: La
                 visualTheme={card.visualTheme}
                 enemyType={card.enemyIllustrationEnemyType}
                 phase={card.enemyIllustrationPhase}
+                action={card.capture && card.visualTheme === 'high-school' ? 'attack' : 'idle'}
                 className="w-full h-full"
                 size={32}
             />
@@ -2786,6 +2787,7 @@ const FullscreenCardArtModal: React.FC<{ card: ICard; languageMode: LanguageMode
                             visualTheme={card.visualTheme}
                             enemyType={card.enemyIllustrationEnemyType}
                             phase={card.enemyIllustrationPhase}
+                            action={card.capture && card.visualTheme === 'high-school' ? 'attack' : 'idle'}
                             className="w-full h-full"
                             size={32}
                         />

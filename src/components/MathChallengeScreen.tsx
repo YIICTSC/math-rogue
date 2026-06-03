@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { CheckCircle, XCircle } from 'lucide-react';
 import { audioService } from '../services/audioService';
 import { AnswerMode, GameMode } from '../types';
@@ -13,13 +13,14 @@ interface MathProblem {
   answer: number;
 }
 
-const MathChallengeScreen: React.FC<MathChallengeScreenProps> = ({ onComplete, mode, answerMode = 'CHOICE', useSavedAnswerMode = false, debugSkip, isChallenge, streak = 0, rewardHint }) => {
+const MathChallengeScreen: React.FC<MathChallengeScreenProps> = ({ onComplete, mode, answerMode = 'CHOICE', useSavedAnswerMode = false, debugSkip, isChallenge, streak = 0, rewardHint, onAnswerResult }) => {
   const resolvedAnswerMode = resolveAnswerMode(answerMode, useSavedAnswerMode);
   const [problems, setProblems] = useState<MathProblem[]>([]);
   const [currentProblemIndex, setCurrentProblemIndex] = useState(0);
   const [correctCount, setCorrectCount] = useState(0);
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [inputAnswer, setInputAnswer] = useState('');
+  const questionStartedAtRef = useRef(Date.now());
   const [isAnswered, setIsAnswered] = useState(false);
   const [feedback, setFeedback] = useState<'CORRECT' | 'WRONG' | null>(null);
   const inputRef = React.useRef<HTMLInputElement>(null);
@@ -140,6 +141,10 @@ const MathChallengeScreen: React.FC<MathChallengeScreenProps> = ({ onComplete, m
     setProblems(generatedProblems);
   }, [mode, debugSkip, isChallenge]);
 
+  useEffect(() => {
+    questionStartedAtRef.current = Date.now();
+  }, [currentProblemIndex]);
+
   const normalizeNumberInput = (value: string) => value
     .replace(/[０-９]/g, (char) => String.fromCharCode(char.charCodeAt(0) - 0xFEE0))
     .replace(/[，,]/g, '')
@@ -153,6 +158,11 @@ const MathChallengeScreen: React.FC<MathChallengeScreenProps> = ({ onComplete, m
     setIsAnswered(true);
     
     const isCorrect = option === problems[currentProblemIndex].answer;
+    onAnswerResult?.({
+      mode,
+      correct: isCorrect,
+      elapsedMs: Date.now() - questionStartedAtRef.current,
+    });
     if (isCorrect) {
       setCorrectCount(prev => prev + 1);
       setFeedback('CORRECT');
@@ -290,4 +300,5 @@ interface MathChallengeScreenProps {
   isChallenge?: boolean;
   streak?: number;
   rewardHint?: string;
+  onAnswerResult?: (result: { mode: string; correct: boolean; elapsedMs: number }) => void;
 }

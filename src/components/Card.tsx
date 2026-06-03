@@ -65,7 +65,7 @@ const CompositeArtPiece: React.FC<{
 
   if (refToken.startsWith('enemy:')) {
     const name = refToken.substring('enemy:'.length);
-    return <EnemyIllustration name={name} seed={seed} visualTheme={visualTheme} enemyType={enemyType} phase={phase} className="w-full h-full" size={16} />;
+    return <EnemyIllustration name={name} seed={seed} visualTheme={visualTheme} enemyType={enemyType} phase={phase} action={visualTheme === 'high-school' ? 'attack' : 'idle'} className="w-full h-full" size={16} />;
   }
 
   if (refToken.startsWith('pixel:')) {
@@ -235,6 +235,7 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled, onInspect, languag
           visualTheme={card.visualTheme}
           enemyType={card.enemyIllustrationEnemyType}
           phase={card.enemyIllustrationPhase}
+          action={card.capture && card.visualTheme === 'high-school' ? 'attack' : 'idle'}
           className="w-full h-full"
           size={16}
         />
@@ -347,7 +348,7 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled, onInspect, languag
       )}
 
       {/* Description: layer, bottom position */}
-      <div className="absolute bottom-5 left-2 right-2 z-20 pointer-events-none">
+      <div className="absolute bottom-5 left-2 right-2 z-[60] pointer-events-none">
         <div className="bg-black/75 p-1 rounded border border-white/10 backdrop-blur-[1px] w-full min-h-[42px] overflow-visible">
           <div className="text-[9px] text-white leading-tight text-left whitespace-pre-wrap break-words w-full font-bold">
             {renderDescription()}

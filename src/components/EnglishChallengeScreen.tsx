@@ -14,13 +14,14 @@ interface EnglishChallengeScreenProps {
   isChallenge?: boolean;
   streak?: number;
   rewardHint?: string;
+  onAnswerResult?: (result: { mode: string; correct: boolean; elapsedMs: number }) => void;
 }
 
 interface ExtendedEnglishProblem extends EnglishProblem {
   actualCorrectAnswer: string;
 }
 
-const EnglishChallengeScreen: React.FC<EnglishChallengeScreenProps> = ({ onComplete, mode, debugSkip, isChallenge, streak = 0, rewardHint }) => {
+const EnglishChallengeScreen: React.FC<EnglishChallengeScreenProps> = ({ onComplete, mode, debugSkip, isChallenge, streak = 0, rewardHint, onAnswerResult }) => {
   const [problems, setProblems] = useState<ExtendedEnglishProblem[]>([]);
   const [currentProblemIndex, setCurrentProblemIndex] = useState(0);
   const [correctCount, setCorrectCount] = useState(0);
@@ -30,6 +31,7 @@ const EnglishChallengeScreen: React.FC<EnglishChallengeScreenProps> = ({ onCompl
   
   // Voice feature control
   const [voiceEnabled, setVoiceEnabled] = useState(() => storageService.getEnglishVoiceEnabled());
+  const questionStartedAtRef = React.useRef(Date.now());
 
   const normalize = (s: string) => {
     if (!s) return "";
@@ -100,6 +102,10 @@ const EnglishChallengeScreen: React.FC<EnglishChallengeScreenProps> = ({ onCompl
   }, [mode, debugSkip, isChallenge]);
 
   useEffect(() => {
+    questionStartedAtRef.current = Date.now();
+  }, [currentProblemIndex]);
+
+  useEffect(() => {
     if (problems.length > 0 && !isAnswered && voiceEnabled) {
       const timer = setTimeout(() => {
         speakWord(problems[currentProblemIndex].question);
@@ -123,6 +129,11 @@ const EnglishChallengeScreen: React.FC<EnglishChallengeScreenProps> = ({ onCompl
     setIsAnswered(true);
     
     const isCorrect = normalize(option) === normalize(problems[currentProblemIndex].actualCorrectAnswer);
+    onAnswerResult?.({
+      mode,
+      correct: isCorrect,
+      elapsedMs: Date.now() - questionStartedAtRef.current,
+    });
     if (isCorrect) {
       setCorrectCount(prev => prev + 1);
       setFeedback('CORRECT');

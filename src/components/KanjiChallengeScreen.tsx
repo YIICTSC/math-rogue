@@ -16,13 +16,14 @@ interface KanjiChallengeScreenProps {
   isChallenge?: boolean;
   streak?: number;
   rewardHint?: string;
+  onAnswerResult?: (result: { mode: string; correct: boolean; elapsedMs: number }) => void;
 }
 
 interface ExtendedKanjiProblem extends KanjiProblem {
   actualCorrectAnswer: string;
 }
 
-const KanjiChallengeScreen: React.FC<KanjiChallengeScreenProps> = ({ onComplete, mode, answerMode = 'CHOICE', useSavedAnswerMode = false, debugSkip, isChallenge, streak = 0, rewardHint }) => {
+const KanjiChallengeScreen: React.FC<KanjiChallengeScreenProps> = ({ onComplete, mode, answerMode = 'CHOICE', useSavedAnswerMode = false, debugSkip, isChallenge, streak = 0, rewardHint, onAnswerResult }) => {
   const resolvedAnswerMode = resolveAnswerMode(answerMode, useSavedAnswerMode);
   const [problems, setProblems] = useState<ExtendedKanjiProblem[]>([]);
   const [currentProblemIndex, setCurrentProblemIndex] = useState(0);
@@ -32,12 +33,17 @@ const KanjiChallengeScreen: React.FC<KanjiChallengeScreenProps> = ({ onComplete,
   const [isAnswered, setIsAnswered] = useState(false);
   const [feedback, setFeedback] = useState<'CORRECT' | 'WRONG' | null>(null);
   const inputRef = React.useRef<HTMLInputElement>(null);
+  const questionStartedAtRef = React.useRef(Date.now());
 
   useEffect(() => {
     if (!isAnswered && inputRef.current) {
       inputRef.current.focus();
     }
   }, [isAnswered, currentProblemIndex]);
+
+  useEffect(() => {
+    questionStartedAtRef.current = Date.now();
+  }, [currentProblemIndex]);
 
   // 表記のゆらぎ（スペース、括弧内の補足、全角半角など）を排除して比較する関数
   const normalize = (s: string) => {
@@ -109,6 +115,11 @@ const KanjiChallengeScreen: React.FC<KanjiChallengeScreenProps> = ({ onComplete,
     
     // 選択された文字列と、保持していた正解文字列を正規化して比較
     const isCorrect = normalize(option) === normalize(problems[currentProblemIndex].actualCorrectAnswer);
+    onAnswerResult?.({
+      mode,
+      correct: isCorrect,
+      elapsedMs: Date.now() - questionStartedAtRef.current,
+    });
     
     if (isCorrect) {
       setCorrectCount(prev => prev + 1);

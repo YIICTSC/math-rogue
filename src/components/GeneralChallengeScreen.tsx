@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { CheckCircle, XCircle, Volume2, Mic } from 'lucide-react';
 import { audioService } from '../services/audioService';
-import { AnswerMode, GameMode } from '../types';
+import { AnswerMode, AssignmentCustomProblem, GameMode } from '../types';
 import { storageService } from '../services/storageService';
 import { SUBJECT_DATA, GeneralProblem } from '../data/subjectData';
 import { MAP_SYMBOL_ASSET_MAP } from './mapSymbolImageMap';
@@ -18,12 +18,49 @@ interface GeneralChallengeScreenProps {
   isChallenge?: boolean;
   streak?: number;
   rewardHint?: string;
+  onAnswerResult?: (result: { mode: string; correct: boolean; elapsedMs: number; problemId?: string }) => void;
+  customProblems?: AssignmentCustomProblem[];
+  problemOffset?: number;
 }
+
+const EMPTY_CUSTOM_PROBLEMS: AssignmentCustomProblem[] = [];
+
+const buildCustomProblemOptions = (answer: string, providedOptions: string[] = []): string[] => {
+  const correct = answer.trim();
+  const options = Array.from(new Set([correct, ...providedOptions.map((option) => option.trim()).filter(Boolean)]));
+  const numericAnswer = Number(correct);
+
+  if (Number.isFinite(numericAnswer) && correct !== '') {
+    const offsets = [1, -1, 2, -2, 5, -5, 10, -10];
+    for (const offset of offsets) {
+      if (options.length >= 4) break;
+      options.push(String(numericAnswer + offset));
+    }
+  }
+
+  const textSeeds = [
+    `${correct}？`,
+    `${correct}ではない`,
+    correct.length > 1 ? correct.slice(0, -1) : `${correct}1`,
+    `${correct}の一つ前`,
+    `${correct}の一つ後`,
+  ];
+  for (const seed of textSeeds) {
+    const candidate = seed.trim();
+    if (options.length >= 4) break;
+    if (candidate && candidate !== correct && !options.includes(candidate)) {
+      options.push(candidate);
+    }
+  }
+
+  return Array.from(new Set(options)).slice(0, 4);
+};
 
 // 内部的に正解を保持するための拡張型
 interface ExtendedGeneralProblem extends GeneralProblem {
   actualCorrectAnswer: string;
   sourceMode: string;
+  assignmentProblemId?: string;
 }
 
 type BrowserSpeechRecognition = {
@@ -63,7 +100,7 @@ const isEnglishSpeakingReviewMode = (mode: string) =>
   /^ENGLISH_G8_U(11|12|13)$/.test(mode) ||
   /^ENGLISH_G9_U(12|13|14)$/.test(mode);
 
-const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onComplete, mode, modePool, onModeCorrect, answerMode = 'CHOICE', debugSkip, isChallenge, streak = 0, rewardHint }) => {
+const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onComplete, mode, modePool, onModeCorrect, answerMode = 'CHOICE', debugSkip, isChallenge, streak = 0, rewardHint, onAnswerResult, customProblems = EMPTY_CUSTOM_PROBLEMS, problemOffset = 0 }) => {
   const [problems, setProblems] = useState<ExtendedGeneralProblem[]>([]);
   const [currentProblemIndex, setCurrentProblemIndex] = useState(0);
   const [correctCount, setCorrectCount] = useState(0);
@@ -79,6 +116,7 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
   const recognitionRef = useRef<BrowserSpeechRecognition | null>(null);
   const speechSynthSettlingTimerRef = useRef<number | null>(null);
   const speechStartInProgressRef = useRef(false);
+  const questionStartedAtRef = useRef(Date.now());
   const [mapSymbolImageFailed, setMapSymbolImageFailed] = useState(false);
   const currentProblem = problems[currentProblemIndex];
   const mapSymbolAsset =
@@ -324,16 +362,37 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
     let problemPool: Array<GeneralProblem & { sourceMode: string }> = [];
     if (modePool && modePool.length > 0) {
       problemPool = modePool.flatMap((m) => (SUBJECT_DATA[m] || []).map((p) => ({ ...p, sourceMode: m })));
-    } else {
+    } else if (!modePool) {
       problemPool = (SUBJECT_DATA[mode] || []).map((p) => ({ ...p, sourceMode: mode }));
+    }
+    if (customProblems.length > 0) {
+      const customProblemPool = customProblems.map((problem) => ({
+        question: problem.question,
+        answer: problem.answer,
+        options: buildCustomProblemOptions(problem.answer, problem.options),
+        unitLabel: 'オリジナル問題',
+        sourceMode: 'ASSIGNMENT_CUSTOM',
+        assignmentProblemId: problem.id,
+      }));
+      const offset = customProblemPool.length > 0 ? problemOffset % customProblemPool.length : 0;
+      const rotatedCustomProblemPool = [
+        ...customProblemPool.slice(offset),
+        ...customProblemPool.slice(0, offset),
+      ];
+      problemPool = [
+        ...rotatedCustomProblemPool,
+        ...problemPool,
+      ];
     }
     if (problemPool.length === 0) {
       problemPool = SUBJECT_DATA.MAP_SYMBOLS.map((p) => ({ ...p, sourceMode: 'MAP_SYMBOLS' }));
     }
     
     const count = isChallenge ? 1 : 3;
-    const shuffled = [...problemPool]
-        .sort(() => Math.random() - 0.5)
+    const orderedPool = customProblems.length > 0
+      ? [...problemPool]
+      : [...problemPool].sort(() => Math.random() - 0.5);
+    const shuffled = orderedPool
         .slice(0, count)
         .map(p => {
             // 指示通り、options[0]を絶対的な正解として保持する
@@ -346,7 +405,7 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
         });
         
     setProblems(shuffled);
-  }, [mode, modePool, debugSkip, isChallenge]);
+  }, [mode, modePool, debugSkip, isChallenge, customProblems, problemOffset]);
 
   const attemptedCount = currentProblemIndex + (isAnswered ? 1 : 0);
   const accuracy = attemptedCount > 0 ? Math.round((correctCount / attemptedCount) * 100) : 0;
@@ -384,6 +443,7 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
     setSpeechError('');
     setIsListening(false);
     setMapSymbolImageFailed(false);
+    questionStartedAtRef.current = Date.now();
   }, [currentProblemIndex]);
 
   const submitAnswerResult = useCallback((isCorrect: boolean, selected: string) => {
@@ -407,6 +467,12 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
       audioService.playSound('wrong');
       storageService.saveHintStreak(problems[currentProblemIndex].sourceMode, 0);
     }
+    onAnswerResult?.({
+      mode: problems[currentProblemIndex].sourceMode,
+      correct: isCorrect,
+      elapsedMs: Date.now() - questionStartedAtRef.current,
+      problemId: problems[currentProblemIndex].assignmentProblemId,
+    });
 
     setTimeout(() => {
       if (isChallenge) {
@@ -421,7 +487,7 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
         onComplete(isCorrect ? correctCount + 1 : correctCount);
       }
     }, 1200);
-  }, [correctCount, currentProblemIndex, isAnswered, isChallenge, onComplete, onModeCorrect, problems]);
+  }, [correctCount, currentProblemIndex, isAnswered, isChallenge, onAnswerResult, onComplete, onModeCorrect, problems]);
 
   const handleAnswer = (option: string) => {
     const isCorrect = normalize(option) === normalize(problems[currentProblemIndex].actualCorrectAnswer);

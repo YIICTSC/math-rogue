@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import {
     GameState, GameScreen, Enemy, Card as ICard, ActiveFamiliar,
-    CardType, TargetType, EnemyIntentType, NodeType, MapNode, RewardItem, Relic, Potion, Player, EnemyIntent, Character, FloatingText, RankingEntry, GameMode, LanguageMode, AnswerMode, VisualEffectInstance, GardenSlot, VFXType, ActStats, RaceTrickCard, RaceTrickEffectId, CoopSupportCard, CoopBattleState, CoopBattleTurnSlot, CoopBattlePlayerState, CoopSharedState, CoopTreasurePool
+    CardType, TargetType, EnemyIntentType, NodeType, MapNode, RewardItem, Relic, Potion, Player, EnemyIntent, Character, FloatingText, RankingEntry, GameMode, LanguageMode, AnswerMode, VisualEffectInstance, GardenSlot, VFXType, ActStats, RaceTrickCard, RaceTrickEffectId, CoopSupportCard, CoopBattleState, CoopBattleTurnSlot, CoopBattlePlayerState, CoopSharedState, CoopTreasurePool, AssignmentPayload, StudentProfile
 } from './types';
 import {
     INITIAL_HP, INITIAL_ENERGY, HAND_SIZE,
@@ -38,6 +38,9 @@ import { MINI_GAMES } from './miniGameConfig'; // Added
 import DodgeballShooting from './components/DodgeballShooting';
 import FinalBridgeScreen from './components/FinalBridgeScreen';
 import ProblemChallengeScreen from './components/ProblemChallengeScreen';
+import AssignmentCreateScreen from './components/AssignmentCreateScreen';
+import SubmissionScreen from './components/SubmissionScreen';
+import RewardCardAlbumScreen from './components/RewardCardAlbumScreen';
 import ChefDeckSelectionScreen from './components/ChefDeckSelectionScreen';
 import GardenScreen from './components/GardenScreen';
 import P2PBattleSetup from './components/P2PBattleSetup';
@@ -54,12 +57,14 @@ import { generateEnemyName } from './services/geminiService';
 import { generateDungeonMap } from './services/mapGenerator';
 import { storageService } from './services/storageService';
 import { generateEvent, generateLegacyEvent } from './services/eventService';
-import { createHolographicCard, getUpgradedCard, synthesizeCards } from './utils/cardUtils';
+import { createAssignmentRewardCard, createHolographicCard, getUpgradedCard, synthesizeCards } from './utils/cardUtils';
 import { sanitizeEnglishText, trans } from './utils/textUtils';
 import { assetUrl } from './utils/assetPaths';
+import { getAssignmentFromUrl, getAssignmentModePool, getAssignmentRepresentativeMode } from './utils/assignmentUtils';
+import { STUDENT_GRADE_OPTIONS, createDailyAssignment, getCurrentSchoolYear, isAdultProfile, promoteStudentProfileForSchoolYear } from './utils/dailyAssignmentUtils';
 import { getDifficultyConfig } from './config/difficulty';
 import { CARD_ERASER_TEMPLATE_ID, CARD_ERASER_NAME, eraseCardEffect, getErasableEffectOptions } from './utils/cardEraser';
-import { RotateCcw, Home, BookOpen, Coins, Trophy, HelpCircle, Infinity, Play, ScrollText, Plus, Minus, X as MultiplyIcon, Divide, Shuffle, Send, Swords, Terminal, Club, Zap, Gamepad2, Brain, Languages, Music, Book, MessageSquare, GraduationCap, Clock, AlertTriangle, TimerOff, X, Check, FlaskConical, Globe, MapPin, ChevronDown, ArrowLeft, Sparkles, Wifi, Flag, Keyboard, Users, Mic, MicOff, Settings } from 'lucide-react';
+import { RotateCcw, Home, BookOpen, Coins, Trophy, HelpCircle, Infinity, Play, ScrollText, Plus, Minus, X as MultiplyIcon, Divide, Shuffle, Send, Swords, Terminal, Club, Zap, Gamepad2, Brain, Languages, Music, Book, MessageSquare, GraduationCap, Clock, AlertTriangle, TimerOff, X, Check, FlaskConical, Globe, MapPin, ChevronDown, ArrowLeft, Sparkles, Wifi, Flag, Keyboard, Users, Mic, MicOff, Settings, ClipboardList, FileText } from 'lucide-react';
 import { applyAdditionalCardLogic } from './services/cardEffectLogic';
 import { p2pService } from './services/p2pService';
 import { TypingLessonId } from './data/typingLessonConfig';
@@ -803,6 +808,25 @@ const App: React.FC = () => {
     const [debugMenuStartMathCorrect, setDebugMenuStartMathCorrect] = useState<number>(0);
     const [showDebugLog, setShowDebugLog] = useState<boolean>(false);
     const [showDataTransferModal, setShowDataTransferModal] = useState<boolean>(false);
+    const [modeCorrectCounts, setModeCorrectCounts] = useState<Record<string, number>>(() => storageService.getModeCorrectCounts());
+    const [studentProfile, setStudentProfile] = useState<StudentProfile>(() => {
+        const promoted = promoteStudentProfileForSchoolYear(storageService.getStudentProfile());
+        if (promoted.grade) storageService.saveStudentProfile(promoted);
+        return promoted;
+    });
+    const [showStudentGradeSurvey, setShowStudentGradeSurvey] = useState<boolean>(() => !storageService.getStudentProfile().grade);
+    const [currentAssignment, setCurrentAssignment] = useState<AssignmentPayload | null>(() => storageService.getCurrentAssignment());
+    const [assignmentProgressVersion, setAssignmentProgressVersion] = useState(0);
+    const [assignmentProgressNotice, setAssignmentProgressNotice] = useState<{
+        type: 'UNIT_COMPLETE' | 'ASSIGNMENT_COMPLETE';
+        unitName?: string;
+        remainingUnitNames: string[];
+        rewardCard?: ICard;
+    } | null>(null);
+    const [showAssignmentLetter, setShowAssignmentLetter] = useState(false);
+    const [dismissedDailyAssignmentId, setDismissedDailyAssignmentId] = useState<string | null>(null);
+    const [rewardCardAlbumVersion, setRewardCardAlbumVersion] = useState(0);
+    const [pendingStarterRelic, setPendingStarterRelic] = useState<Relic | null>(null);
     const [transferExportText, setTransferExportText] = useState<string>('');
     const [transferExportCount, setTransferExportCount] = useState<number>(0);
     const [transferImportText, setTransferImportText] = useState<string>('');
@@ -860,6 +884,113 @@ const App: React.FC = () => {
         startGameAssetPreload();
     }, [gameState.screen, startGameAssetPreload]);
 
+    useEffect(() => {
+        const assignment = getAssignmentFromUrl();
+        if (!assignment) return;
+        storageService.saveCurrentAssignment(assignment);
+        setCurrentAssignment(assignment);
+        setShowAssignmentLetter(true);
+        setGameState(prev => ({ ...prev, screen: GameScreen.START_MENU }));
+        const url = new URL(window.location.href);
+        url.searchParams.delete('assignment');
+        window.history.replaceState({}, '', url.toString());
+    }, []);
+
+    const dailyAssignment = useMemo(
+        () => currentAssignment ? null : createDailyAssignment(studentProfile, modeCorrectCounts),
+        [currentAssignment, modeCorrectCounts, studentProfile]
+    );
+    const effectiveAssignment = currentAssignment || dailyAssignment;
+    const isTeacherAssignmentActive = !!currentAssignment;
+
+    const isAssignmentWithinDeadline = useMemo(() => {
+        if (!effectiveAssignment) return false;
+        if (!effectiveAssignment.dueAt) return true;
+        const dueTime = new Date(effectiveAssignment.dueAt).getTime();
+        return Number.isNaN(dueTime) ? true : Date.now() <= dueTime;
+    }, [effectiveAssignment]);
+    const currentAssignmentAnswers = useMemo(() => {
+        if (!effectiveAssignment) return [];
+        return storageService.getAssignmentAnswers().filter(answer => answer.assignmentId === effectiveAssignment.id);
+    }, [assignmentProgressVersion, effectiveAssignment]);
+    const getAssignmentUnitCorrectCount = useCallback((unit: AssignmentPayload['units'][number]) => (
+        currentAssignmentAnswers.filter(answer => answer.correct && unit.modes.includes(answer.mode)).length
+    ), [currentAssignmentAnswers]);
+    const correctCustomAssignmentProblemIds = useMemo(() => new Set(
+        currentAssignmentAnswers
+            .filter(answer => answer.correct && answer.mode === 'ASSIGNMENT_CUSTOM' && answer.problemId)
+            .map(answer => answer.problemId as string)
+    ), [currentAssignmentAnswers]);
+    const remainingAssignmentUnits = useMemo(() => {
+        if (!effectiveAssignment) return [];
+        return effectiveAssignment.units.filter(unit => getAssignmentUnitCorrectCount(unit) < Math.max(1, Number(unit.targetCorrect || 10)));
+    }, [effectiveAssignment, getAssignmentUnitCorrectCount]);
+    const remainingAssignmentCustomProblems = useMemo(() => {
+        if (!effectiveAssignment) return [];
+        return (effectiveAssignment.customProblems || []).filter(problem => !correctCustomAssignmentProblemIds.has(problem.id));
+    }, [correctCustomAssignmentProblemIds, effectiveAssignment]);
+    const isCurrentAssignmentComplete = !!effectiveAssignment
+        && (effectiveAssignment.units.length > 0 || (effectiveAssignment.customProblems || []).length > 0)
+        && remainingAssignmentUnits.length === 0
+        && remainingAssignmentCustomProblems.length === 0;
+    const activeAssignment = useMemo<AssignmentPayload | null>(() => {
+        if (!effectiveAssignment || isCurrentAssignmentComplete) return null;
+        return {
+            ...effectiveAssignment,
+            units: remainingAssignmentUnits,
+            customProblems: remainingAssignmentCustomProblems,
+        };
+    }, [effectiveAssignment, isCurrentAssignmentComplete, remainingAssignmentCustomProblems, remainingAssignmentUnits]);
+    const isAssignmentChallengeOnlyLocked = activeAssignment?.gameMode === 'CHALLENGE_ONLY' && isAssignmentWithinDeadline;
+    const rewardCardAlbum = useMemo(() => storageService.getRewardCardAlbum(), [rewardCardAlbumVersion]);
+
+    useEffect(() => {
+        if (showStudentGradeSurvey || currentAssignment || !dailyAssignment) return;
+        if (dismissedDailyAssignmentId === dailyAssignment.id) return;
+        if (gameState.screen !== GameScreen.START_MENU) return;
+        setShowAssignmentLetter(true);
+    }, [currentAssignment, dailyAssignment, dismissedDailyAssignmentId, gameState.screen, showStudentGradeSurvey]);
+
+    const saveStudentGrade = useCallback((grade: string) => {
+        const nextProfile = {
+            ...studentProfile,
+            grade,
+            schoolYear: getCurrentSchoolYear(),
+        };
+        setStudentProfile(nextProfile);
+        storageService.saveStudentProfile(nextProfile);
+        setShowStudentGradeSurvey(false);
+        setDismissedDailyAssignmentId(null);
+    }, [studentProfile]);
+
+    const createRewardCardForAssignment = useCallback((): ICard | null => {
+        const pool = Object.values(CARDS_LIBRARY).filter(card =>
+            card.type !== CardType.STATUS &&
+            card.type !== CardType.CURSE &&
+            card.rarity !== 'SPECIAL' &&
+            !card.eraserOnly
+        );
+        const template = pool[Math.floor(Math.random() * pool.length)];
+        if (!template) return null;
+        return createAssignmentRewardCard({
+            ...template,
+            id: `assignment-reward-base-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        });
+    }, []);
+
+    const redirectToAssignmentChallengeIfLocked = useCallback(() => {
+        if (!isAssignmentChallengeOnlyLocked) return false;
+        audioService.playSound('select');
+        setShowAssignmentLetter(false);
+        setUnlockCheckStartMathCorrect(totalMathCorrect);
+        setGameState(prev => ({
+            ...prev,
+            screen: GameScreen.PROBLEM_CHALLENGE,
+            challengeMode: undefined,
+        }));
+        return true;
+    }, [isAssignmentChallengeOnlyLocked, totalMathCorrect]);
+
     const [isMathDebugSkipped, setIsMathDebugSkipped] = useState<boolean>(false);
     const [isDebugHpOne, setIsDebugHpOne] = useState<boolean>(false);
     const [isMiniGameDebugUnlocked, setIsMiniGameDebugUnlocked] = useState<boolean>(false);
@@ -888,6 +1019,12 @@ const App: React.FC = () => {
     const [maxUnlockedDifficulty, setMaxUnlockedDifficulty] = useState<number>(() => storageService.getMaxUnlockedDifficulty());
     const [raceSession, setRaceSession] = useState<RaceSession | null>(null);
     const [coopSession, setCoopSession] = useState<CoopSession | null>(null);
+
+    useEffect(() => {
+        if (gameState.screen !== GameScreen.RELIC_SELECTION || starterRelics.length > 0) return;
+        const commonRelics = Object.values(RELIC_LIBRARY).filter(r => r.rarity === 'COMMON' && r.id !== 'SPIRIT_POOP');
+        setStarterRelics(shuffle(commonRelics).slice(0, 3));
+    }, [gameState.screen, starterRelics.length]);
     const [raceResultOpen, setRaceResultOpen] = useState(false);
     const [raceMaxDamage, setRaceMaxDamage] = useState(0);
     const [raceGameOverCount, setRaceGameOverCount] = useState(0);
@@ -2193,7 +2330,6 @@ const App: React.FC = () => {
 
     const [totalPlaySeconds, setTotalPlaySeconds] = useState(() => storageService.getTotalPlayTime());
     const [dailyPlaySeconds, setDailyPlaySeconds] = useState(() => storageService.getDailyPlayTime());
-    const [modeCorrectCounts, setModeCorrectCounts] = useState<Record<string, number>>(() => storageService.getModeCorrectCounts());
     const [masteredModes, setMasteredModes] = useState<string[]>(() => storageService.getMasteredModes());
     const [masteryRewardModal, setMasteryRewardModal] = useState<{ mode: string } | null>(null);
     const [showTimeLimitModal, setShowTimeLimitModal] = useState(false);
@@ -2283,7 +2419,9 @@ const App: React.FC = () => {
                     if (next >= PLAY_LIMIT_SECONDS) {
                         setGameState(curr => {
                             if (curr.screen === GameScreen.START_MENU) return curr;
-                            storageService.saveGame(curr);
+                            if (curr.screen !== GameScreen.ASSIGNMENT_CREATE && curr.screen !== GameScreen.SUBMISSION && curr.screen !== GameScreen.REWARD_CARD_ALBUM) {
+                                storageService.saveGame(curr);
+                            }
                             audioService.playBGM('menu');
                             setShowTimeLimitModal(true);
                             return { ...curr, screen: GameScreen.START_MENU };
@@ -2306,7 +2444,9 @@ const App: React.FC = () => {
         if (gameState.challengeMode === 'RACE' || gameState.challengeMode === 'COOP') {
             return;
         }
-        if (gameState.screen !== GameScreen.START_MENU &&
+        const isAssignmentUtilityScreen = gameState.screen === GameScreen.ASSIGNMENT_CREATE || gameState.screen === GameScreen.SUBMISSION || gameState.screen === GameScreen.REWARD_CARD_ALBUM;
+        if (!isAssignmentUtilityScreen &&
+            gameState.screen !== GameScreen.START_MENU &&
             gameState.screen !== GameScreen.GAME_OVER &&
             gameState.screen !== GameScreen.ENDING &&
             gameState.screen !== GameScreen.VICTORY &&
@@ -3552,6 +3692,7 @@ const App: React.FC = () => {
     }, [addLog, eventData, gameState.screen, languageMode]);
 
     const continueGame = async () => {
+        if (redirectToAssignmentChallengeIfLocked()) return;
         if (isDailyLimitReached) {
             audioService.playSound('wrong');
             setShowTimeLimitModal(true);
@@ -3562,6 +3703,12 @@ const App: React.FC = () => {
         if (saved) {
             const savedVisualTheme = saved.visualTheme === 'high-school' || (!saved.visualTheme && visualTheme === 'high-school') ? 'high-school' : 'elementary';
             setVisualTheme(savedVisualTheme);
+            if (saved.screen === GameScreen.ASSIGNMENT_CREATE || saved.screen === GameScreen.SUBMISSION || saved.screen === GameScreen.REWARD_CARD_ALBUM) {
+                storageService.clearSave();
+                setHasSave(false);
+                addLog("課題画面のセーブデータを削除しました。", "yellow");
+                return;
+            }
             // セーブ破損対策: HPが0以下ならセーブを無効化
             if (saved.player.currentHp <= 0) {
                 storageService.clearSave();
@@ -3611,18 +3758,23 @@ const App: React.FC = () => {
     };
 
     const launchNewAdventure = () => {
+        if (redirectToAssignmentChallengeIfLocked()) return;
         if (isDailyLimitReached) {
             audioService.playSound('wrong');
             setShowTimeLimitModal(true);
             return;
         }
+        const assignmentModePool = activeAssignment?.gameMode === 'FREE' ? getAssignmentModePool(activeAssignment) : undefined;
+        const assignmentHasCustomProblems = activeAssignment?.gameMode === 'FREE' && activeAssignment.customProblems.length > 0;
+        const initialMode = assignmentHasCustomProblems ? GameMode.UPPER_TRIVIA : assignmentModePool ? getAssignmentRepresentativeMode(activeAssignment) : GameMode.MULTIPLICATION;
         audioService.playSound('select');
         setIsLoading(false); // Ensure loading is reset
         setGameState({
-            screen: GameScreen.MODE_SELECTION,
-            mode: GameMode.MULTIPLICATION,
+            screen: activeAssignment?.gameMode === 'FREE' ? GameScreen.DIFFICULTY_SELECTION : GameScreen.MODE_SELECTION,
+            mode: initialMode,
+            modePool: assignmentHasCustomProblems ? (assignmentModePool || []) : assignmentModePool,
             visualTheme,
-            answerMode: 'CHOICE',
+            answerMode: activeAssignment?.answerMode || 'CHOICE',
             difficultyLevel: 1,
             shopRemoveCount: 0,
             act: 1,
@@ -3672,6 +3824,7 @@ const App: React.FC = () => {
     };
 
     const startChallengeGame = () => {
+        if (redirectToAssignmentChallengeIfLocked()) return;
         if (isDailyLimitReached) {
             audioService.playSound('wrong');
             setShowTimeLimitModal(true);
@@ -3734,6 +3887,7 @@ const App: React.FC = () => {
     };
 
     const startGame = () => {
+        if (redirectToAssignmentChallengeIfLocked()) return;
         if (hasSave) {
             audioService.playSound('wrong');
             setShowStartOverConfirm(true);
@@ -3743,6 +3897,7 @@ const App: React.FC = () => {
     };
 
     const confirmStartOver = () => {
+        if (redirectToAssignmentChallengeIfLocked()) return;
         storageService.clearSave();
         setHasSave(false);
         setShowStartOverConfirm(false);
@@ -3750,6 +3905,7 @@ const App: React.FC = () => {
     };
 
     const startTypingGame = () => {
+        if (redirectToAssignmentChallengeIfLocked()) return;
         audioService.playSound('select');
         setIsLoading(false);
         setGameState({
@@ -3808,6 +3964,7 @@ const App: React.FC = () => {
     };
 
     const handleTypingLessonSelect = (lessonId: TypingLessonId) => {
+        if (redirectToAssignmentChallengeIfLocked()) return;
         audioService.playSound('select');
         setGameState(prev => ({
             ...prev,
@@ -3828,6 +3985,7 @@ const App: React.FC = () => {
     };
 
     const handleMiniGameSelect = (screen: GameScreen) => {
+        if (redirectToAssignmentChallengeIfLocked()) return;
         if (isDailyLimitReached) {
             audioService.playSound('wrong');
             setShowTimeLimitModal(true);
@@ -3844,6 +4002,7 @@ const App: React.FC = () => {
     };
 
     const handleMiniGameModeSelect = async (mode: GameMode, modePool?: string[]) => {
+        if (redirectToAssignmentChallengeIfLocked()) return;
         if (isDailyLimitReached) {
             audioService.playSound('wrong');
             setShowTimeLimitModal(true);
@@ -3852,8 +4011,10 @@ const App: React.FC = () => {
         audioService.playSound('select');
         startGameAssetPreload();
         const nextScreen = pendingMiniGameScreen || GameScreen.MINI_GAME_SELECT;
-        setMiniGameProblemMode(mode);
-        setMiniGameProblemModePool(modePool);
+        const assignmentModePool = activeAssignment?.gameMode === 'FREE' ? getAssignmentModePool(activeAssignment) : undefined;
+        const assignmentHasCustomProblems = activeAssignment?.gameMode === 'FREE' && activeAssignment.customProblems.length > 0;
+        setMiniGameProblemMode(assignmentHasCustomProblems ? GameMode.UPPER_TRIVIA : assignmentModePool ? getAssignmentRepresentativeMode(activeAssignment) : mode);
+        setMiniGameProblemModePool(assignmentHasCustomProblems ? (assignmentModePool || []) : (assignmentModePool || modePool));
         setPendingMiniGameScreen(null);
         setGameState(prev => ({ ...prev, screen: nextScreen }));
     };
@@ -3878,27 +4039,33 @@ const App: React.FC = () => {
     };
 
     const handleModeSelect = (mode: GameMode, modePool?: string[], answerMode: AnswerMode = 'CHOICE') => {
+        if (redirectToAssignmentChallengeIfLocked()) return;
         if (isDailyLimitReached) {
             audioService.playSound('wrong');
             setShowTimeLimitModal(true);
             return;
         }
+        const assignmentModePool = activeAssignment?.gameMode === 'FREE' ? getAssignmentModePool(activeAssignment) : undefined;
+        const assignmentHasCustomProblems = activeAssignment?.gameMode === 'FREE' && activeAssignment.customProblems.length > 0;
+        const effectiveMode = assignmentHasCustomProblems ? GameMode.UPPER_TRIVIA : assignmentModePool ? getAssignmentRepresentativeMode(activeAssignment) : mode;
+        const effectiveModePool = assignmentHasCustomProblems ? (assignmentModePool || []) : (assignmentModePool || modePool);
+        const effectiveAnswerMode = activeAssignment?.answerMode || answerMode;
         if (gameState.challengeMode === 'RACE' && raceSession && !raceSession.isHost) {
             return;
         }
         audioService.playSound('select');
         if (gameState.challengeMode === 'RACE' && raceSession?.isHost) {
-            p2pService.send({ type: 'RACE_MODE_SET', mode });
+            p2pService.send({ type: 'RACE_MODE_SET', mode: effectiveMode });
         }
         if (gameState.challengeMode === 'COOP') {
             if (coopSession && !coopSession.isHost) {
                 return;
             }
             if (coopSession?.isHost) {
-                p2pService.send({ type: 'COOP_MODE_SET', mode });
+                p2pService.send({ type: 'COOP_MODE_SET', mode: effectiveMode });
             }
         }
-        setGameState(prev => ({ ...prev, mode, modePool, answerMode, screen: GameScreen.DIFFICULTY_SELECTION }));
+        setGameState(prev => ({ ...prev, mode: effectiveMode, modePool: effectiveModePool, answerMode: effectiveAnswerMode, screen: GameScreen.DIFFICULTY_SELECTION }));
     };
 
     const handleDifficultySelect = (level: number) => {
@@ -4295,26 +4462,16 @@ const App: React.FC = () => {
         startGameAssetPreload();
     };
 
-    const handleRelicSelect = async (relic: Relic) => {
-        audioService.playSound('buff');
-        if (gameState.challengeMode === 'COOP' && coopSession && !coopSession.isHost) {
-            setCoopAwaitingMapSync(true);
-            setGameState(prev => ({
-                ...prev,
-                player: {
-                    ...prev.player,
-                    relics: [...prev.player.relics, relic]
-                }
-            }));
-            startGameAssetPreload();
-            return;
-        }
-        if (gameState.challengeMode === 'COOP' && coopSession?.isHost) {
-            setCoopNeedsInitialMapSync(true);
-        }
+    const startAdventureAfterRelic = async (relic: Relic, rewardCard?: ICard | null) => {
+        setPendingStarterRelic(null);
         startGameAssetPreload();
         const map = generateDungeonMap(gameState.difficultyLevel || 1);
-        const unlockedCards = storageService.getUnlockedCards();
+        const starterRewardCard = rewardCard
+            ? { ...rewardCard, id: `starter-reward-card-${Date.now()}-${Math.random().toString(36).slice(2, 8)}` }
+            : null;
+        const starterRewardLog = starterRewardCard
+            ? [trans(`${starterRewardCard.name}をカード帳から持ってきた。`, languageMode)]
+            : [];
 
         const difficulty = getDifficultyConfig(gameState.difficultyLevel);
         const legacyCard = (gameState.challengeMode === 'RACE' || gameState.challengeMode === 'COOP' || !difficulty.legacyCardAllowed)
@@ -4347,9 +4504,10 @@ const App: React.FC = () => {
                 map: map,
                 player: {
                     ...prev.player,
-                    relics: [...prev.player.relics, relic]
+                    relics: [...prev.player.relics, relic],
+                    deck: starterRewardCard ? [...prev.player.deck, starterRewardCard] : prev.player.deck
                 },
-                narrativeLog: [...prev.narrativeLog, trans("冒険が始まった。", languageMode)]
+                narrativeLog: [...prev.narrativeLog, ...starterRewardLog, trans("冒険が始まった。", languageMode)]
             }));
             audioService.playBGM('event');
         } else {
@@ -4359,12 +4517,38 @@ const App: React.FC = () => {
                 map: map,
                 player: {
                     ...prev.player,
-                    relics: [...prev.player.relics, relic]
+                    relics: [...prev.player.relics, relic],
+                    deck: starterRewardCard ? [...prev.player.deck, starterRewardCard] : prev.player.deck
                 },
-                narrativeLog: [...prev.narrativeLog, trans("冒険が始まった。", languageMode)]
+                narrativeLog: [...prev.narrativeLog, ...starterRewardLog, trans("冒険が始まった。", languageMode)]
             }));
             audioService.playBGM('map');
         }
+    };
+
+    const handleRelicSelect = async (relic: Relic) => {
+        audioService.playSound('buff');
+        if (gameState.challengeMode === 'COOP' && coopSession && !coopSession.isHost) {
+            setCoopAwaitingMapSync(true);
+            setGameState(prev => ({
+                ...prev,
+                player: {
+                    ...prev.player,
+                    relics: [...prev.player.relics, relic]
+                }
+            }));
+            startGameAssetPreload();
+            return;
+        }
+        if (gameState.challengeMode === 'COOP' && coopSession?.isHost) {
+            setCoopNeedsInitialMapSync(true);
+        }
+        if (rewardCardAlbum.length > 0 && gameState.challengeMode !== 'RACE' && gameState.challengeMode !== 'COOP') {
+            setPendingStarterRelic(relic);
+            setGameState(prev => ({ ...prev, screen: GameScreen.REWARD_CARD_ALBUM }));
+            return;
+        }
+        await startAdventureAfterRelic(relic);
     };
 
     const handleNodeSelect = async (node: MapNode, allowRemoteCoopSelection = false) => {
@@ -5756,7 +5940,8 @@ const App: React.FC = () => {
 
                                     const allPossibleCards = Object.values(CARDS_LIBRARY).filter(c => {
                                         // 基本フィルタ
-                                        if (c.type === CardType.CURSE || c.type === CardType.STATUS || c.type === CardType.SUMMON || c.rarity === 'SPECIAL') return false;
+                                        if (c.type === CardType.CURSE || c.type === CardType.STATUS || c.rarity === 'SPECIAL') return false;
+                                        if (c.type === CardType.SUMMON || c.familiarSummon) return false;
                                         if (c.cost > 3) return false;
 
                                         // 除外カードフィルタ
@@ -5777,14 +5962,22 @@ const App: React.FC = () => {
                                     const pool = allPossibleCards.length > 0 ? allPossibleCards : fallbackPool;
 
                                     const randomCardTemplate = pool[Math.floor(Math.random() * pool.length)];
+                                    const {
+                                        familiarSummon: _removedFamiliarSummon,
+                                        highSchoolCardArtIndex: _removedHighSchoolCardArtIndex,
+                                        ...capturedEffectTemplate
+                                    } = randomCardTemplate;
                                     const captureVisualTheme = stateRef.current.visualTheme || visualTheme;
-                                    const capturedDisplayName = getThemedEnemyDisplayName(e, captureVisualTheme);
+                                    const capturedDisplayName = getThemedEnemyDisplayName(
+                                        { name: e.name, enemyType: e.enemyType, phase: e.phase },
+                                        captureVisualTheme
+                                    );
 
                                     // 3. ハイブリッドカードの作成
                                     const totalDamage = (randomCardTemplate.damage || 0) + damageVal;
 
                                     const captured: ICard = {
-                                        ...randomCardTemplate, // ランダムカードのプロパティをベースにする
+                                        ...capturedEffectTemplate, // ランダムカードのプロパティをベースにする
                                         id: `captured-${e.id}-${Date.now()}`,
                                         name: capturedDisplayName,
                                         textureRef: randomCardTemplate.textureRef,
@@ -5793,14 +5986,15 @@ const App: React.FC = () => {
                                         enemyIllustrationPhase: e.phase,
                                         enemyIllustrationNames: Array.from(new Set([
                                             e.name,
+                                            capturedDisplayName,
                                             e.enemyType,
                                             e.phase === 2 ? `${e.enemyType}_2` : undefined,
                                             e.enemyType === 'THE_HEART' && e.phase === 2 ? 'THE_HEART_PHASE2' : undefined,
                                         ].filter(Boolean) as string[])),
                                         visualTheme: captureVisualTheme,
-                                        familiarSummon: undefined,
                                         rarity: 'SPECIAL',
                                         exhaust: true,
+                                        familiarSummon: undefined,
 
                                         // ダメージを追加 (元々攻撃カードなら加算、そうでなければ新規設定)
                                         damage: totalDamage,
@@ -8812,6 +9006,98 @@ const App: React.FC = () => {
         }
     };
 
+    const handleAssignmentAnswerResult = useCallback((result: { mode: string; correct: boolean; elapsedMs: number; problemId?: string }) => {
+        const assignment = effectiveAssignment;
+        const assignmentModePool = getAssignmentModePool(assignment);
+        const assignmentUnit = assignment?.units.find((unit) => unit.modes.includes(result.mode));
+        const isCustomAssignmentAnswer = result.mode === 'ASSIGNMENT_CUSTOM' && (assignment?.customProblems.length || 0) > 0;
+        const isAssignmentAnswer = !!assignment && (isCustomAssignmentAnswer || !assignmentModePool || assignmentModePool.includes(result.mode));
+        storageService.saveAssignmentAnswer({
+            assignmentId: isAssignmentAnswer ? assignment?.id : undefined,
+            mode: result.mode,
+            unitName: isCustomAssignmentAnswer ? 'オリジナル問題' : assignmentUnit?.name,
+            problemId: result.problemId,
+            correct: result.correct,
+            elapsedMs: Math.max(0, result.elapsedMs || 0),
+            answeredAt: new Date().toISOString(),
+        });
+        if (isAssignmentAnswer) {
+            setAssignmentProgressVersion(prev => prev + 1);
+        }
+        if (!assignment || !result.correct || !isAssignmentAnswer) return;
+
+        if (isCustomAssignmentAnswer) {
+            const customProblems = assignment.customProblems || [];
+            const prevCorrectProblemIds = new Set(
+                currentAssignmentAnswers
+                    .filter(answer => answer.correct && answer.mode === 'ASSIGNMENT_CUSTOM' && answer.problemId)
+                    .map(answer => answer.problemId as string)
+            );
+            if (result.problemId) {
+                prevCorrectProblemIds.add(result.problemId);
+            }
+            const remainingCustomAfter = customProblems.filter(problem => !prevCorrectProblemIds.has(problem.id));
+            if (remainingCustomAfter.length === 0) {
+                const remainingUnitsAfter = assignment.units.filter(unit => {
+                    const unitCorrect = currentAssignmentAnswers.filter(answer => answer.correct && unit.modes.includes(answer.mode)).length;
+                    return unitCorrect < Math.max(1, Number(unit.targetCorrect || 10));
+                });
+                const isAssignmentComplete = remainingUnitsAfter.length === 0;
+                let rewardCard: ICard | undefined;
+                if (isAssignmentComplete && !storageService.hasClaimedAssignmentRewardCard(assignment.id)) {
+                    const createdRewardCard = createRewardCardForAssignment();
+                    if (createdRewardCard) {
+                        storageService.saveRewardCardToAlbum(createdRewardCard);
+                        storageService.markAssignmentRewardCardClaimed(assignment.id);
+                        setRewardCardAlbumVersion(prev => prev + 1);
+                        rewardCard = createdRewardCard;
+                    }
+                }
+                setAssignmentProgressNotice({
+                    type: isAssignmentComplete ? 'ASSIGNMENT_COMPLETE' : 'UNIT_COMPLETE',
+                    unitName: 'オリジナル問題',
+                    remainingUnitNames: remainingUnitsAfter.map(unit => unit.name),
+                    rewardCard,
+                });
+            }
+            return;
+        }
+
+        if (!assignmentUnit) return;
+
+        const prevCorrect = currentAssignmentAnswers.filter(answer => answer.correct && assignmentUnit.modes.includes(answer.mode)).length;
+        const nextCorrect = prevCorrect + 1;
+        const targetCorrect = Math.max(1, Number(assignmentUnit.targetCorrect || 10));
+        if (prevCorrect < targetCorrect && nextCorrect >= targetCorrect) {
+            const remainingAfter = assignment.units.filter(unit => {
+                if (unit.id === assignmentUnit.id) return false;
+                const unitCorrect = currentAssignmentAnswers.filter(answer => answer.correct && unit.modes.includes(answer.mode)).length;
+                return unitCorrect < Math.max(1, Number(unit.targetCorrect || 10));
+            });
+            const remainingCustomAfter = (assignment.customProblems || []).filter(problem => !correctCustomAssignmentProblemIds.has(problem.id));
+            const isAssignmentComplete = remainingAfter.length === 0 && remainingCustomAfter.length === 0;
+            let rewardCard: ICard | undefined;
+            if (isAssignmentComplete && !storageService.hasClaimedAssignmentRewardCard(assignment.id)) {
+                const createdRewardCard = createRewardCardForAssignment();
+                if (createdRewardCard) {
+                    storageService.saveRewardCardToAlbum(createdRewardCard);
+                    storageService.markAssignmentRewardCardClaimed(assignment.id);
+                    setRewardCardAlbumVersion(prev => prev + 1);
+                    rewardCard = createdRewardCard;
+                }
+            }
+            setAssignmentProgressNotice({
+                type: isAssignmentComplete ? 'ASSIGNMENT_COMPLETE' : 'UNIT_COMPLETE',
+                unitName: assignmentUnit.name,
+                remainingUnitNames: [
+                    ...remainingAfter.map(unit => unit.name),
+                    ...(remainingCustomAfter.length > 0 ? [`オリジナル問題 残り${remainingCustomAfter.length}問`] : []),
+                ],
+                rewardCard,
+            });
+        }
+    }, [correctCustomAssignmentProblemIds, createRewardCardForAssignment, currentAssignmentAnswers, effectiveAssignment]);
+
     const removeRewardFromList = useCallback((rewards: RewardItem[], item: RewardItem) => {
         if (shouldClearAllCardRewards(item)) {
             return rewards.filter(reward => reward.type !== 'CARD');
@@ -10732,6 +11018,91 @@ const App: React.FC = () => {
                             </div>
                         )}
 
+                        {showStudentGradeSurvey && gameState.screen === GameScreen.START_MENU && (
+                            <div className="fixed inset-0 z-[10035] flex items-center justify-center bg-black/85 p-4">
+                                <div className="w-full max-w-2xl rounded-2xl border-4 border-cyan-300 bg-slate-950 p-5 text-white shadow-[0_0_40px_rgba(34,211,238,0.32)]">
+                                    <div className="mb-2 text-center text-xs font-black tracking-[0.3em] text-cyan-300">PROFILE</div>
+                                    <h2 className="mb-3 text-center text-2xl font-black">現在の学年を選んでください</h2>
+                                    <p className="mb-4 text-center text-sm font-bold leading-6 text-slate-300">
+                                        学年に合わせて、毎日の課題と提出レポートの学年欄を用意します。あとから提出画面で訂正できます。
+                                    </p>
+                                    <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                                        {STUDENT_GRADE_OPTIONS.map((grade) => (
+                                            <button
+                                                key={grade}
+                                                onClick={() => saveStudentGrade(grade)}
+                                                className="rounded-xl border border-cyan-500/50 bg-slate-900 px-3 py-3 text-sm font-black text-cyan-50 hover:bg-cyan-900/70"
+                                            >
+                                                {grade}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                        {effectiveAssignment && showAssignmentLetter && (
+                            <div className="fixed inset-0 z-[10030] flex items-center justify-center bg-black/80 p-4">
+                                <div className="w-full max-w-xl rounded-2xl border-4 border-amber-300 bg-[#fff7d6] p-5 text-slate-900 shadow-[0_0_40px_rgba(250,204,21,0.35)]">
+                                    <div className="mb-2 text-center text-xs font-black tracking-[0.3em] text-amber-700">{isTeacherAssignmentActive ? 'TEACHER LETTER' : 'DAILY LETTER'}</div>
+                                    <h2 className="mb-3 text-center text-2xl font-black">{effectiveAssignment.title}</h2>
+                                    <div className="mb-4 rounded-xl border-2 border-amber-300 bg-white/70 p-4 text-sm font-bold leading-7">
+                                        <div>{isTeacherAssignmentActive ? '先生から課題が届きました。' : '今日の学習課題です。'}</div>
+                                        <div>期限: {effectiveAssignment.dueAt ? new Date(effectiveAssignment.dueAt).toLocaleString('ja-JP') : '未設定'}</div>
+                                        <div>形式: {effectiveAssignment.gameMode === 'FREE' ? 'フリー' : '問題チャレンジのみ'}</div>
+                                        <div className="mt-2 text-xs text-slate-700">
+                                            {effectiveAssignment.units.map(unit => `${unit.name} (${unit.targetCorrect || 10}問)`).join(' / ') || 'オリジナル問題'}
+                                        </div>
+                                    </div>
+                                    <div className="grid gap-2 sm:grid-cols-3">
+                                        <button
+                                            onClick={() => {
+                                                setShowAssignmentLetter(false);
+                                                setGameState(prev => ({ ...prev, screen: activeAssignment?.gameMode === 'CHALLENGE_ONLY' ? GameScreen.PROBLEM_CHALLENGE : GameScreen.START_MENU }));
+                                            }}
+                                            className="rounded-xl bg-amber-400 px-4 py-3 text-sm font-black text-slate-950 hover:bg-amber-300"
+                                        >
+                                            課題を始める
+                                        </button>
+                                        <button
+                                            onClick={() => {
+                                                if (!isTeacherAssignmentActive && effectiveAssignment) {
+                                                    setDismissedDailyAssignmentId(effectiveAssignment.id);
+                                                }
+                                                setShowAssignmentLetter(false);
+                                            }}
+                                            className="rounded-xl border border-slate-500 bg-white px-4 py-3 text-sm font-black text-slate-800 hover:bg-slate-100"
+                                        >
+                                            あとで
+                                        </button>
+                                        {isTeacherAssignmentActive ? (
+                                            <button
+                                                onClick={() => {
+                                                    storageService.clearCurrentAssignment();
+                                                    setCurrentAssignment(null);
+                                                    setShowAssignmentLetter(false);
+                                                }}
+                                                className="rounded-xl border border-red-400 bg-red-50 px-4 py-3 text-sm font-black text-red-700 hover:bg-red-100"
+                                            >
+                                                課題解除
+                                            </button>
+                                        ) : (
+                                            <button
+                                                onClick={() => {
+                                                    setDismissedDailyAssignmentId(effectiveAssignment.id);
+                                                    setShowAssignmentLetter(false);
+                                                    setGameState(prev => ({ ...prev, screen: GameScreen.SUBMISSION }));
+                                                }}
+                                                className="rounded-xl border border-emerald-400 bg-emerald-50 px-4 py-3 text-sm font-black text-emerald-700 hover:bg-emerald-100"
+                                            >
+                                                進捗を見る
+                                            </button>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
                         <div className="absolute top-2 right-2 z-[10010] flex items-center gap-1.5 sm:gap-2">
                             <div className="relative">
                                 <button
@@ -10835,6 +11206,15 @@ const App: React.FC = () => {
                                 </div>
                             )}
 
+                            {isAssignmentChallengeOnlyLocked && activeAssignment && (
+                                <div className="mb-3 w-full max-w-[360px] rounded-lg border border-emerald-400 bg-emerald-950/80 px-3 py-2 text-center text-xs font-black text-emerald-100 shadow-lg">
+                                    課題期限内のため「問題チャレンジのみ」利用できます
+                                    <div className="mt-1 text-[10px] font-bold text-emerald-200">
+                                        {activeAssignment.title}
+                                    </div>
+                                </div>
+                            )}
+
                             {isMathDebugSkipped && (
                                 <button
                                     type="button"
@@ -10865,11 +11245,21 @@ const App: React.FC = () => {
                             {(!isMathDebugSkipped && !isDebugHpOne && !isMiniGameDebugUnlocked) && <div className="start-menu-debug-spacer mb-2 h-2"></div>}
 
                             <div className="start-menu-button-panel flex w-full flex-col items-center">
-                                <div className="start-menu-theme-switch mb-4 inline-flex overflow-hidden border-2 border-slate-500 bg-black/55 shadow-lg">
-                                    {([
-                                        { id: 'elementary', label: '小学生編' },
-                                        { id: 'high-school', label: '高校編' },
-                                    ] as const).map((theme) => (
+                                <div className="mb-4 flex items-stretch justify-center gap-2">
+                                    {effectiveAssignment && isAssignmentWithinDeadline && (
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowAssignmentLetter(true)}
+                                            className="h-10 rounded-none border-2 border-amber-300 bg-amber-950/85 px-3 text-xs font-black text-amber-100 shadow-lg transition-colors hover:bg-amber-900"
+                                        >
+                                            {isTeacherAssignmentActive ? '課題レター' : '今日の課題'}
+                                        </button>
+                                    )}
+                                    <div className="start-menu-theme-switch inline-flex overflow-hidden border-2 border-slate-500 bg-black/55 shadow-lg">
+                                        {([
+                                            { id: 'elementary', label: '小学生編' },
+                                            { id: 'high-school', label: '高校編' },
+                                        ] as const).map((theme) => (
                                         <button
                                             key={theme.id}
                                             type="button"
@@ -10882,7 +11272,8 @@ const App: React.FC = () => {
                                         >
                                             {theme.label}
                                         </button>
-                                    ))}
+                                        ))}
+                                    </div>
                                 </div>
 
                                 <div className="start-menu-actions flex flex-col gap-2 items-center w-full max-w-[320px]">
@@ -10892,26 +11283,28 @@ const App: React.FC = () => {
                                             ※ゲームがフリーズする場合、冒険を始めるからやり直してください
                                         </div>
                                         <button
+                                            disabled={isAssignmentChallengeOnlyLocked}
                                             onClick={continueGame}
-                                            className={`w-full py-2 px-4 text-lg font-bold border-b-4 border-r-4 rounded-none cursor-pointer flex items-center justify-center shadow-lg relative group overflow-hidden animate-in fade-in ${isDailyLimitReached ? 'bg-gray-800 border-gray-700 text-gray-500 grayscale opacity-70' : 'bg-blue-900 text-white border-blue-400 hover:bg-blue-800'}`}
+                                            className={`w-full py-2 px-4 text-lg font-bold border-b-4 border-r-4 rounded-none flex items-center justify-center shadow-lg relative group overflow-hidden animate-in fade-in ${isDailyLimitReached || isAssignmentChallengeOnlyLocked ? 'bg-gray-800 border-gray-700 text-gray-500 grayscale opacity-70 cursor-not-allowed' : 'bg-blue-900 text-white border-blue-400 hover:bg-blue-800 cursor-pointer'}`}
                                         >
-                                            {!isDailyLimitReached && <div className="absolute inset-0 bg-blue-600 opacity-0 group-hover:opacity-20 transition-opacity"></div>}
+                                            {!isDailyLimitReached && !isAssignmentChallengeOnlyLocked && <div className="absolute inset-0 bg-blue-600 opacity-0 group-hover:opacity-20 transition-opacity"></div>}
                                             <Play className="mr-2 fill-current" /> {trans("つづきから", languageMode)}
                                         </button>
                                     </>
                                 )}
                                 <button
                                     onClick={startGame}
-                                    disabled={isLoading}
-                                    className={`w-full py-2 px-4 text-lg font-bold border-b-4 border-r-4 rounded-none transition-all shadow-lg flex items-center justify-center ${isDailyLimitReached ? 'bg-gray-800 border-gray-700 text-gray-500 grayscale opacity-70' : 'bg-gray-100 text-black border-gray-500 hover:bg-white hover:border-gray-400 hover:translate-x-[1px] hover:translate-y-[1px] active:border-0 active:translate-y-[4px] active:translate-x-[4px]'}`}
+                                    disabled={isLoading || isAssignmentChallengeOnlyLocked}
+                                    className={`w-full py-2 px-4 text-lg font-bold border-b-4 border-r-4 rounded-none transition-all shadow-lg flex items-center justify-center ${isDailyLimitReached || isAssignmentChallengeOnlyLocked ? 'bg-gray-800 border-gray-700 text-gray-500 grayscale opacity-70 cursor-not-allowed' : 'bg-gray-100 text-black border-gray-500 hover:bg-white hover:border-gray-400 hover:translate-x-[1px] hover:translate-y-[1px] active:border-0 active:translate-y-[4px] active:translate-x-[4px]'}`}
                                 >
                                     {isLoading ? trans("じゅんびちゅう...", languageMode) : trans("冒険を始める", languageMode)}
                                 </button>
 
                                 <div className={`grid w-full ${OFFLINE_DISTRIBUTABLE ? 'grid-cols-1 gap-2' : isMobilePortrait ? 'grid-cols-4 gap-1' : 'grid-cols-2 sm:grid-cols-4 gap-2'}`}>
                                     <button
+                                        disabled={isAssignmentChallengeOnlyLocked}
                                         onClick={startChallengeGame}
-                                        className={`min-w-0 border-b-4 border-r-4 rounded-none transition-all shadow-md flex items-center justify-center ${isMobilePortrait ? 'py-1.5 px-0.5 text-[10px]' : 'py-2 px-1 text-xs'} font-bold ${isDailyLimitReached ? 'bg-gray-800 border-gray-700 text-gray-500 grayscale opacity-70' : 'bg-red-900/80 text-red-100 border-red-500 hover:bg-red-800 hover:shadow-red-900/50'}`}
+                                        className={`min-w-0 border-b-4 border-r-4 rounded-none transition-all shadow-md flex items-center justify-center ${isMobilePortrait ? 'py-1.5 px-0.5 text-[10px]' : 'py-2 px-1 text-xs'} font-bold ${isDailyLimitReached || isAssignmentChallengeOnlyLocked ? 'bg-gray-800 border-gray-700 text-gray-500 grayscale opacity-70 cursor-not-allowed' : 'bg-red-900/80 text-red-100 border-red-500 hover:bg-red-800 hover:shadow-red-900/50'}`}
                                     >
                                         <Swords className={isMobilePortrait ? 'mr-0.5' : 'mr-1'} size={isMobilePortrait ? 12 : 14} /> {trans("1A1D", languageMode)}
                                     </button>
@@ -10919,7 +11312,9 @@ const App: React.FC = () => {
                                     {!OFFLINE_DISTRIBUTABLE && (
                                         <>
                                             <button
+                                                disabled={isAssignmentChallengeOnlyLocked}
                                                 onClick={() => {
+                                                    if (redirectToAssignmentChallengeIfLocked()) return;
                                                     if (isDailyLimitReached) {
                                                         audioService.playSound('wrong');
                                                         setShowTimeLimitModal(true);
@@ -10927,13 +11322,15 @@ const App: React.FC = () => {
                                                     }
                                                     setGameState(prev => ({ ...prev, screen: GameScreen.VS_SETUP }));
                                                 }}
-                                                className={`min-w-0 border-b-4 border-r-4 rounded-none bg-indigo-600/80 text-white border-indigo-400 flex items-center justify-center shadow-md ${isMobilePortrait ? 'py-1.5 px-0.5 text-[10px]' : 'py-2 px-1 text-xs'} font-bold ${isDailyLimitReached ? 'grayscale opacity-70 cursor-not-allowed' : 'hover:bg-indigo-700 cursor-pointer'}`}
+                                                className={`min-w-0 border-b-4 border-r-4 rounded-none flex items-center justify-center shadow-md ${isMobilePortrait ? 'py-1.5 px-0.5 text-[10px]' : 'py-2 px-1 text-xs'} font-bold ${isDailyLimitReached || isAssignmentChallengeOnlyLocked ? 'bg-gray-800 border-gray-700 text-gray-500 grayscale opacity-70 cursor-not-allowed' : 'bg-indigo-600/80 text-white border-indigo-400 hover:bg-indigo-700 cursor-pointer'}`}
                                             >
                                                 <Wifi className={isMobilePortrait ? 'mr-0.5' : 'mr-1'} size={isMobilePortrait ? 12 : 14} /> {trans("VS", languageMode)}
                                             </button>
 
                                             <button
+                                                disabled={isAssignmentChallengeOnlyLocked}
                                                 onClick={() => {
+                                                    if (redirectToAssignmentChallengeIfLocked()) return;
                                                     if (isDailyLimitReached) {
                                                         audioService.playSound('wrong');
                                                         setShowTimeLimitModal(true);
@@ -10941,13 +11338,15 @@ const App: React.FC = () => {
                                                     }
                                                     setGameState(prev => ({ ...prev, screen: GameScreen.COOP_SETUP }));
                                                 }}
-                                                className={`min-w-0 border-b-4 border-r-4 rounded-none bg-emerald-700/80 text-emerald-100 border-emerald-400 flex items-center justify-center shadow-md ${isMobilePortrait ? 'py-1.5 px-0.5 text-[10px]' : 'py-2 px-1 text-xs'} font-bold ${isDailyLimitReached ? 'grayscale opacity-70 cursor-not-allowed' : 'hover:bg-emerald-700 cursor-pointer'}`}
+                                                className={`min-w-0 border-b-4 border-r-4 rounded-none flex items-center justify-center shadow-md ${isMobilePortrait ? 'py-1.5 px-0.5 text-[10px]' : 'py-2 px-1 text-xs'} font-bold ${isDailyLimitReached || isAssignmentChallengeOnlyLocked ? 'bg-gray-800 border-gray-700 text-gray-500 grayscale opacity-70 cursor-not-allowed' : 'bg-emerald-700/80 text-emerald-100 border-emerald-400 hover:bg-emerald-700 cursor-pointer'}`}
                                             >
                                                 <Users className={isMobilePortrait ? 'mr-0.5' : 'mr-1'} size={isMobilePortrait ? 12 : 14} /> {trans("協力", languageMode)}
                                             </button>
 
                                             <button
+                                                disabled={isAssignmentChallengeOnlyLocked}
                                                 onClick={() => {
+                                                    if (redirectToAssignmentChallengeIfLocked()) return;
                                                     if (isDailyLimitReached) {
                                                         audioService.playSound('wrong');
                                                         setShowTimeLimitModal(true);
@@ -10955,7 +11354,7 @@ const App: React.FC = () => {
                                                     }
                                                     setGameState(prev => ({ ...prev, screen: GameScreen.RACE_SETUP }));
                                                 }}
-                                                className={`min-w-0 border-b-4 border-r-4 rounded-none bg-cyan-700/80 text-cyan-100 border-cyan-400 flex items-center justify-center shadow-md ${isMobilePortrait ? 'py-1.5 px-0.5 text-[10px]' : 'py-2 px-1 text-xs'} font-bold ${isDailyLimitReached ? 'grayscale opacity-70 cursor-not-allowed' : 'hover:bg-cyan-700 cursor-pointer'}`}
+                                                className={`min-w-0 border-b-4 border-r-4 rounded-none flex items-center justify-center shadow-md ${isMobilePortrait ? 'py-1.5 px-0.5 text-[10px]' : 'py-2 px-1 text-xs'} font-bold ${isDailyLimitReached || isAssignmentChallengeOnlyLocked ? 'bg-gray-800 border-gray-700 text-gray-500 grayscale opacity-70 cursor-not-allowed' : 'bg-cyan-700/80 text-cyan-100 border-cyan-400 hover:bg-cyan-700 cursor-pointer'}`}
                                             >
                                                 <Flag className={isMobilePortrait ? 'mr-0.5' : 'mr-1'} size={isMobilePortrait ? 12 : 14} /> {trans("レース", languageMode)}
                                             </button>
@@ -10965,8 +11364,9 @@ const App: React.FC = () => {
 
                                 {!isMobilePortrait && (
                                     <button
+                                        disabled={isAssignmentChallengeOnlyLocked}
                                         onClick={startTypingGame}
-                                        className="start-menu-typing-button w-full py-2 px-4 text-sm font-bold border-b-4 border-r-4 rounded-none transition-all shadow-md flex items-center justify-center bg-amber-900/80 text-amber-100 border-amber-500 hover:bg-amber-800 hover:shadow-amber-900/50"
+                                        className={`start-menu-typing-button w-full py-2 px-4 text-sm font-bold border-b-4 border-r-4 rounded-none transition-all shadow-md flex items-center justify-center ${isAssignmentChallengeOnlyLocked ? 'bg-gray-800 border-gray-700 text-gray-500 grayscale opacity-70 cursor-not-allowed' : 'bg-amber-900/80 text-amber-100 border-amber-500 hover:bg-amber-800 hover:shadow-amber-900/50'}`}
                                     >
                                         <Keyboard className="mr-2" size={18} /> {trans("タイピングモード", languageMode)}
                                     </button>
@@ -10978,10 +11378,37 @@ const App: React.FC = () => {
                                     </button>
 
                                     <button
-                                        onClick={() => setGameState(prev => ({ ...prev, screen: GameScreen.MINI_GAME_SELECT }))}
-                                        className={`flex-1 py-2 px-2 text-sm font-bold border-b-4 border-r-4 rounded-none transition-all shadow-md flex items-center justify-center ${isDailyLimitReached ? 'bg-gray-800 border-gray-700 text-gray-500 grayscale opacity-70' : 'bg-indigo-900/80 text-indigo-100 border-indigo-500 hover:bg-indigo-800 hover:shadow-indigo-900/50'}`}
+                                        disabled={isAssignmentChallengeOnlyLocked}
+                                        onClick={() => {
+                                            if (redirectToAssignmentChallengeIfLocked()) return;
+                                            setGameState(prev => ({ ...prev, screen: GameScreen.MINI_GAME_SELECT }));
+                                        }}
+                                        className={`flex-1 py-2 px-2 text-sm font-bold border-b-4 border-r-4 rounded-none transition-all shadow-md flex items-center justify-center ${isDailyLimitReached || isAssignmentChallengeOnlyLocked ? 'bg-gray-800 border-gray-700 text-gray-500 grayscale opacity-70 cursor-not-allowed' : 'bg-indigo-900/80 text-indigo-100 border-indigo-500 hover:bg-indigo-800 hover:shadow-indigo-900/50'}`}
                                     >
                                         <Gamepad2 className="mr-1.5" size={18} /> {trans("ミニゲーム", languageMode)}
+                                    </button>
+                                </div>
+
+                                <div className="flex gap-2 w-full">
+                                    {isAdultProfile(studentProfile) && (
+                                        <button
+                                            onClick={() => setGameState(prev => ({ ...prev, screen: GameScreen.ASSIGNMENT_CREATE }))}
+                                            className="flex-1 py-2 px-1 text-xs font-bold border-b-4 border-r-4 rounded-none bg-cyan-900/80 text-cyan-100 border-cyan-500 hover:bg-cyan-800 cursor-pointer flex items-center justify-center shadow-md"
+                                        >
+                                            <ClipboardList className="mr-1" size={16} /> 課題送信
+                                        </button>
+                                    )}
+                                    <button
+                                        onClick={() => setGameState(prev => ({ ...prev, screen: GameScreen.REWARD_CARD_ALBUM }))}
+                                        className="flex-1 py-2 px-1 text-xs font-bold border-b-4 border-r-4 rounded-none bg-cyan-950/80 text-cyan-100 border-cyan-300 hover:bg-cyan-900 cursor-pointer flex items-center justify-center shadow-md"
+                                    >
+                                        <Sparkles className="mr-1" size={16} /> カード帳
+                                    </button>
+                                    <button
+                                        onClick={() => setGameState(prev => ({ ...prev, screen: GameScreen.SUBMISSION }))}
+                                        className="flex-1 py-2 px-1 text-xs font-bold border-b-4 border-r-4 rounded-none bg-slate-800/90 text-slate-100 border-slate-500 hover:bg-slate-700 cursor-pointer flex items-center justify-center shadow-md"
+                                    >
+                                        <FileText className="mr-1" size={16} /> 提出
                                     </button>
                                 </div>
 
@@ -11130,6 +11557,76 @@ const App: React.FC = () => {
                     </div>
                 )}
 
+                {assignmentProgressNotice && effectiveAssignment && (
+                    <div className="fixed inset-0 z-[10040] flex items-center justify-center bg-black/80 p-4">
+                        <div className="w-full max-w-lg rounded-2xl border-4 border-emerald-300 bg-slate-950 p-5 text-white shadow-[0_0_40px_rgba(52,211,153,0.35)]">
+                            <div className="mb-2 text-center text-xs font-black tracking-[0.3em] text-emerald-300">
+                                {assignmentProgressNotice.type === 'ASSIGNMENT_COMPLETE' ? 'ASSIGNMENT CLEAR' : 'UNIT CLEAR'}
+                            </div>
+                            <h2 className="mb-3 text-center text-2xl font-black">
+                                {assignmentProgressNotice.type === 'ASSIGNMENT_COMPLETE' ? '課題をクリアしました' : '単元をクリアしました'}
+                            </h2>
+                            {assignmentProgressNotice.unitName && (
+                                <div className="mb-3 rounded-xl border border-emerald-500/40 bg-emerald-950/40 px-3 py-2 text-center text-sm font-black text-emerald-100">
+                                    {assignmentProgressNotice.unitName}
+                                </div>
+                            )}
+                            {assignmentProgressNotice.remainingUnitNames.length > 0 ? (
+                                <div className="mb-4 rounded-xl border border-slate-700 bg-slate-900 p-3">
+                                    <div className="mb-2 text-xs font-black text-slate-400">残りの単元</div>
+                                    <div className="space-y-1 text-sm font-bold text-slate-100">
+                                        {assignmentProgressNotice.remainingUnitNames.map(name => (
+                                            <div key={name}>{name}</div>
+                                        ))}
+                                    </div>
+                                </div>
+                            ) : (
+                                <div className="mb-4 rounded-xl border border-yellow-400/50 bg-yellow-950/30 p-3 text-sm font-bold leading-6 text-yellow-100">
+                                    すべての目標を達成しました。提出画面でPDFを用意してください。
+                                </div>
+                            )}
+                            {assignmentProgressNotice.rewardCard && (
+                                <div className="mb-4 rounded-xl border border-cyan-300/50 bg-cyan-950/25 p-3">
+                                    <div className="mb-3 text-center text-sm font-black text-cyan-100">ご褒美カードを獲得しました</div>
+                                    <div className="flex justify-center">
+                                        <div className="scale-90">
+                                            <Card
+                                                card={assignmentProgressNotice.rewardCard}
+                                                onClick={() => {}}
+                                                disabled={false}
+                                                languageMode={languageMode}
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                            <div className="grid gap-2 sm:grid-cols-2">
+                                <button
+                                    onClick={() => {
+                                        const completed = assignmentProgressNotice.type === 'ASSIGNMENT_COMPLETE';
+                                        setAssignmentProgressNotice(null);
+                                        if (completed) {
+                                            setGameState(prev => ({ ...prev, screen: GameScreen.START_MENU, challengeMode: undefined }));
+                                        }
+                                    }}
+                                    className="rounded-xl border border-slate-600 bg-slate-800 px-4 py-3 text-sm font-black text-slate-100 hover:bg-slate-700"
+                                >
+                                    続ける
+                                </button>
+                                <button
+                                    onClick={() => {
+                                        setAssignmentProgressNotice(null);
+                                        setGameState(prev => ({ ...prev, screen: GameScreen.SUBMISSION }));
+                                    }}
+                                    className="rounded-xl bg-emerald-400 px-4 py-3 text-sm font-black text-slate-950 hover:bg-emerald-300"
+                                >
+                                    提出PDFを用意
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
                 {gameState.screen === GameScreen.FLOOR_RESULT && (
                     <div className="absolute inset-0">
                         <FloorResultScreen
@@ -11191,6 +11688,50 @@ const App: React.FC = () => {
                     </div>
                 )}
 
+                {gameState.screen === GameScreen.REWARD_CARD_ALBUM && (
+                    <div className="absolute inset-0">
+                        <RewardCardAlbumScreen
+                            cards={rewardCardAlbum}
+                            onBack={() => {
+                                if (pendingStarterRelic) {
+                                    setGameState(prev => ({ ...prev, screen: GameScreen.RELIC_SELECTION }));
+                                } else {
+                                    returnToTitle();
+                                }
+                            }}
+                            onSelect={pendingStarterRelic ? ((card) => {
+                                const relic = pendingStarterRelic;
+                                startAdventureAfterRelic(relic, card);
+                            }) : undefined}
+                            onDelete={(cardId) => {
+                                storageService.deleteRewardCardFromAlbum(cardId);
+                                setRewardCardAlbumVersion(prev => prev + 1);
+                            }}
+                            languageMode={languageMode}
+                        />
+                    </div>
+                )}
+
+                {gameState.screen === GameScreen.ASSIGNMENT_CREATE && (
+                    <div className="absolute inset-0">
+                        <AssignmentCreateScreen
+                            onBack={returnToTitle}
+                            languageMode={languageMode}
+                        />
+                    </div>
+                )}
+
+                {gameState.screen === GameScreen.SUBMISSION && (
+                    <div className="absolute inset-0">
+                        <SubmissionScreen
+                            onBack={returnToTitle}
+                            assignment={effectiveAssignment}
+                            languageMode={languageMode}
+                            onProfileChange={setStudentProfile}
+                        />
+                    </div>
+                )}
+
                 {gameState.screen === GameScreen.PROBLEM_CHALLENGE && (
                     <div className="absolute inset-0">
                         <ProblemChallengeScreen
@@ -11198,6 +11739,8 @@ const App: React.FC = () => {
                             languageMode={languageMode}
                             onCorrectAnswers={handleModeCorrectProgress}
                             modeCorrectCounts={modeCorrectCounts}
+                            assignment={activeAssignment}
+                            onAnswerResult={handleAssignmentAnswerResult}
                         />
                     </div>
                 )}
@@ -11812,6 +12355,7 @@ const App: React.FC = () => {
                             answerMode={gameState.answerMode || 'CHOICE'}
                             useSavedAnswerMode
                             onComplete={handleMathChallengeComplete}
+                            onAnswerResult={handleAssignmentAnswerResult}
                             debugSkip={isMathDebugSkipped}
                             isChallenge={false}
                             rewardHint="正解するとゴールド獲得"
@@ -11826,6 +12370,7 @@ const App: React.FC = () => {
                             answerMode={gameState.answerMode || 'CHOICE'}
                             useSavedAnswerMode
                             onComplete={handleMathChallengeComplete}
+                            onAnswerResult={handleAssignmentAnswerResult}
                             debugSkip={isMathDebugSkipped}
                             isChallenge={false}
                             rewardHint="正解するとゴールド獲得"
@@ -11838,6 +12383,7 @@ const App: React.FC = () => {
                         <EnglishChallengeScreen
                             mode={gameState.mode}
                             onComplete={handleMathChallengeComplete}
+                            onAnswerResult={handleAssignmentAnswerResult}
                             debugSkip={isMathDebugSkipped}
                             isChallenge={false}
                             rewardHint="正解するとゴールド獲得"
@@ -11853,6 +12399,8 @@ const App: React.FC = () => {
                             answerMode={gameState.answerMode || 'CHOICE'}
                             onModeCorrect={handleModeCorrectProgress}
                             onComplete={handleMathChallengeComplete}
+                            onAnswerResult={handleAssignmentAnswerResult}
+                            customProblems={activeAssignment?.gameMode === 'FREE' ? activeAssignment.customProblems : undefined}
                             debugSkip={isMathDebugSkipped}
                             isChallenge={false}
                             rewardHint="正解するとゴールド獲得"

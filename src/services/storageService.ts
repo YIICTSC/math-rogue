@@ -1,5 +1,5 @@
 
-import { GameState, GameScreen, RankingEntry, Card, PokerScoreEntry, SurvivorScoreEntry, DungeonScoreEntry, PokerRunState, KochoScoreEntry, PaperPlaneScoreEntry, VSRecord, LanguageMode, GoHomeScoreEntry } from '../types';
+import { AssignmentAnswerRecord, AssignmentPayload, GameState, GameScreen, RankingEntry, Card, PokerScoreEntry, SurvivorScoreEntry, DungeonScoreEntry, PokerRunState, KochoScoreEntry, PaperPlaneScoreEntry, VSRecord, LanguageMode, GoHomeScoreEntry, StudentProfile } from '../types';
 
 const STORAGE_KEY_UNLOCKED_CARDS = 'pixel_spire_unlocked_cards_v1';
 const STORAGE_KEY_UNLOCKED_RELICS = 'pixel_spire_unlocked_relics_v1';
@@ -68,6 +68,11 @@ const STORAGE_KEY_MODE_CORRECT_COUNTS = 'pixel_spire_mode_correct_counts_v1';
 const STORAGE_KEY_MASTERED_MODES = 'pixel_spire_mastered_modes_v1';
 const STORAGE_KEY_TYPING_WEAK_KEYS = 'pixel_spire_typing_weak_keys_v1';
 const STORAGE_KEY_HINT_STREAKS = 'pixel_spire_hint_streaks_v1';
+const STORAGE_KEY_CURRENT_ASSIGNMENT = 'pixel_spire_current_assignment_v1';
+const STORAGE_KEY_ASSIGNMENT_ANSWERS = 'pixel_spire_assignment_answers_v1';
+const STORAGE_KEY_STUDENT_PROFILE = 'pixel_spire_student_profile_v1';
+const STORAGE_KEY_REWARD_CARD_ALBUM = 'pixel_spire_reward_card_album_v1';
+const STORAGE_KEY_REWARD_CARD_CLAIMED_ASSIGNMENTS = 'pixel_spire_reward_card_claimed_assignments_v1';
 
 // --- CUSTOM CHARACTER IMAGES ---
 const STORAGE_KEY_CUSTOM_IMAGES = 'pixel_spire_custom_images_v1';
@@ -197,6 +202,130 @@ const normalizeBurnGameState = (state: GameState): GameState => ({
 });
 
 export const storageService = {
+  getCurrentAssignment: (): AssignmentPayload | null => {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY_CURRENT_ASSIGNMENT);
+      if (!stored) return null;
+      const assignment = JSON.parse(stored) as AssignmentPayload;
+      return {
+        ...assignment,
+        units: (assignment.units || []).map((unit) => ({
+          ...unit,
+          targetCorrect: Math.max(1, Number(unit.targetCorrect || 10)),
+        })),
+        customProblems: (assignment.customProblems || []).map((problem) => ({
+          ...problem,
+          question: String(problem.question || ''),
+          answer: String(problem.answer || ''),
+          options: Array.isArray(problem.options) ? problem.options.map((option) => String(option || '')) : [],
+        })),
+      };
+    } catch (e) {
+      return null;
+    }
+  },
+
+  saveCurrentAssignment: (assignment: AssignmentPayload) => {
+    try {
+      localStorage.setItem(STORAGE_KEY_CURRENT_ASSIGNMENT, JSON.stringify(assignment));
+    } catch (e) {
+      console.warn("Failed to save current assignment", e);
+    }
+  },
+
+  clearCurrentAssignment: () => {
+    try {
+      localStorage.removeItem(STORAGE_KEY_CURRENT_ASSIGNMENT);
+    } catch (e) {
+      console.warn("Failed to clear current assignment", e);
+    }
+  },
+
+  getAssignmentAnswers: (): AssignmentAnswerRecord[] => {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY_ASSIGNMENT_ANSWERS);
+      return stored ? JSON.parse(stored) : [];
+    } catch (e) {
+      return [];
+    }
+  },
+
+  saveAssignmentAnswer: (record: AssignmentAnswerRecord) => {
+    try {
+      const current = storageService.getAssignmentAnswers();
+      localStorage.setItem(STORAGE_KEY_ASSIGNMENT_ANSWERS, JSON.stringify([...current, record]));
+    } catch (e) {
+      console.warn("Failed to save assignment answer", e);
+    }
+  },
+
+  getStudentProfile: (): StudentProfile => {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY_STUDENT_PROFILE);
+      return stored ? { grade: '', className: '', number: '', name: '', schoolYear: undefined, ...JSON.parse(stored) } : { grade: '', className: '', number: '', name: '', schoolYear: undefined };
+    } catch (e) {
+      return { grade: '', className: '', number: '', name: '', schoolYear: undefined };
+    }
+  },
+
+  saveStudentProfile: (profile: StudentProfile) => {
+    try {
+      localStorage.setItem(STORAGE_KEY_STUDENT_PROFILE, JSON.stringify(profile));
+    } catch (e) {
+      console.warn("Failed to save student profile", e);
+    }
+  },
+
+  getRewardCardAlbum: (): Card[] => {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY_REWARD_CARD_ALBUM);
+      return stored ? JSON.parse(stored).map((card: Card) => normalizeBurnCard(card)) : [];
+    } catch (e) {
+      return [];
+    }
+  },
+
+  saveRewardCardToAlbum: (card: Card) => {
+    try {
+      const current = storageService.getRewardCardAlbum();
+      localStorage.setItem(STORAGE_KEY_REWARD_CARD_ALBUM, JSON.stringify([...current, card]));
+    } catch (e) {
+      console.warn("Failed to save reward card", e);
+    }
+  },
+
+  deleteRewardCardFromAlbum: (cardId: string) => {
+    try {
+      const next = storageService.getRewardCardAlbum().filter(card => card.id !== cardId);
+      localStorage.setItem(STORAGE_KEY_REWARD_CARD_ALBUM, JSON.stringify(next));
+    } catch (e) {
+      console.warn("Failed to delete reward card", e);
+    }
+  },
+
+  hasClaimedAssignmentRewardCard: (assignmentId: string): boolean => {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY_REWARD_CARD_CLAIMED_ASSIGNMENTS);
+      const ids = stored ? JSON.parse(stored) : [];
+      return Array.isArray(ids) && ids.includes(assignmentId);
+    } catch (e) {
+      return false;
+    }
+  },
+
+  markAssignmentRewardCardClaimed: (assignmentId: string) => {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY_REWARD_CARD_CLAIMED_ASSIGNMENTS);
+      const ids = stored ? JSON.parse(stored) : [];
+      const next = Array.isArray(ids) ? ids : [];
+      if (!next.includes(assignmentId)) {
+        localStorage.setItem(STORAGE_KEY_REWARD_CARD_CLAIMED_ASSIGNMENTS, JSON.stringify([...next, assignmentId]));
+      }
+    } catch (e) {
+      console.warn("Failed to mark assignment reward card", e);
+    }
+  },
+
   // --- Custom Character Images ---
   saveCustomImage: (charId: string, dataUrl: string) => {
     try {
@@ -951,6 +1080,7 @@ export const storageService = {
           GameScreen.START_MENU, GameScreen.GAME_OVER, GameScreen.ENDING,
           GameScreen.VICTORY, GameScreen.COMPENDIUM, GameScreen.HELP,
           GameScreen.CHARACTER_SELECTION, GameScreen.DIFFICULTY_SELECTION, GameScreen.RANKING, GameScreen.PROBLEM_CHALLENGE,
+          GameScreen.ASSIGNMENT_CREATE, GameScreen.SUBMISSION, GameScreen.REWARD_CARD_ALBUM,
           GameScreen.MINI_GAME_SELECT, GameScreen.MINI_GAME_MODE_SELECTION,
           GameScreen.MINI_GAME_POKER, GameScreen.MINI_GAME_SURVIVOR,
           GameScreen.MINI_GAME_DUNGEON, GameScreen.MINI_GAME_DUNGEON_2, GameScreen.MINI_GAME_KOCHO,
@@ -969,7 +1099,12 @@ export const storageService = {
     try {
       const stored = localStorage.getItem(STORAGE_KEY_GAME_STATE);
       if (!stored) return null;
-      return normalizeBurnGameState(JSON.parse(stored));
+      const parsed = JSON.parse(stored);
+      if (parsed?.screen === GameScreen.ASSIGNMENT_CREATE || parsed?.screen === GameScreen.SUBMISSION || parsed?.screen === GameScreen.REWARD_CARD_ALBUM) {
+        localStorage.removeItem(STORAGE_KEY_GAME_STATE);
+        return null;
+      }
+      return normalizeBurnGameState(parsed);
     } catch (e) {
       console.warn("Failed to load game state", e);
       return null;
@@ -977,7 +1112,19 @@ export const storageService = {
   },
 
   hasSaveFile: (): boolean => {
-      return !!localStorage.getItem(STORAGE_KEY_GAME_STATE);
+      try {
+        const stored = localStorage.getItem(STORAGE_KEY_GAME_STATE);
+        if (!stored) return false;
+        const parsed = JSON.parse(stored);
+        if (parsed?.screen === GameScreen.ASSIGNMENT_CREATE || parsed?.screen === GameScreen.SUBMISSION || parsed?.screen === GameScreen.REWARD_CARD_ALBUM) {
+          localStorage.removeItem(STORAGE_KEY_GAME_STATE);
+          return false;
+        }
+        return true;
+      } catch (e) {
+        console.warn("Failed to inspect game save", e);
+        return false;
+      }
   },
 
   clearSave: () => {

@@ -1,6 +1,6 @@
 
-import React, { useState, useEffect, useMemo } from 'react';
-import { AnswerMode, GameMode, LanguageMode, GameScreen } from '../types';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
+import { AnswerMode, AssignmentPayload, GameMode, LanguageMode, GameScreen } from '../types';
 import { storageService } from '../services/storageService';
 import { audioService } from '../services/audioService';
 import MathChallengeScreen from './MathChallengeScreen';
@@ -23,6 +23,8 @@ interface ProblemChallengeScreenProps {
   languageMode: LanguageMode;
   onCorrectAnswers?: (mode: string, correctCount: number) => void;
   modeCorrectCounts?: Record<string, number>;
+  assignment?: AssignmentPayload | null;
+  onAnswerResult?: (result: { mode: string; correct: boolean; elapsedMs: number; problemId?: string }) => void;
 }
 
 const BGM_OPTIONS = [
@@ -493,6 +495,8 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
   languageMode,
   onCorrectAnswers,
   modeCorrectCounts = {},
+  assignment,
+  onAnswerResult,
 }) => {
   const [phase, setPhase] = useState<'SELECT' | 'CHALLENGE'>('SELECT');
   const [selectedCategory, setSelectedCategory] = useState<SubjectCategoryConfig>(SUBJECT_CATEGORIES[0]);
@@ -508,6 +512,7 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
   const [streak, setStreak] = useState(0);
   const [records, setRecords] = useState<Record<string, number>>({});
   const [isQuitting, setIsQuitting] = useState(false);
+  const appliedAssignmentSignatureRef = useRef('');
   const displayedCategories = useMemo<SubjectCategoryConfig[]>(() => {
     const kanjiCategory = SUBJECT_CATEGORIES.find((cat) => cat.id === 'KANJI');
     if (showUpperProblems) {
@@ -530,6 +535,7 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
   const isUnitCategory = selectedCategory.id === 'MATH_GRADES' || selectedCategory.id === 'KOKUGO_GRADES' || selectedCategory.id === 'ENGLISH' || selectedCategory.id === 'SCIENCE' || selectedCategory.id === 'SOCIAL' || selectedCategory.id === 'SUMMARY';
   const problemLanguageMode: LanguageMode = languageMode === 'ENGLISH' ? 'JAPANESE' : languageMode;
   const canSelectAnswerMode = selectedCategory.id === 'MATH' || selectedCategory.id === 'UPPER_MATH' || selectedCategory.id === 'KANJI' || selectedCategory.id === 'KANKEN' || selectedCategory.id === 'HARD_KANJI';
+  const shouldContinueOnWrong = !!assignment || continueOnWrong;
 
   // Voice feature control
   const [voiceEnabled, setVoiceEnabled] = useState(() => storageService.getEnglishVoiceEnabled());
@@ -540,6 +546,37 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
     audioService.init();
     setRecords(storageService.getChallengeRecords());
   }, []);
+
+  useEffect(() => {
+    if (!assignment) return;
+    const customProblems = assignment.customProblems || [];
+    const modePool = Array.from(new Set(assignment.units.flatMap((unit) => unit.modes)));
+    if (modePool.length === 0 && customProblems.length === 0) return;
+    const assignmentSignature = [
+      assignment.id,
+      assignment.units.map((unit) => unit.id).join(','),
+      customProblems.map((problem) => problem.id).join(','),
+    ].join('|');
+    if (appliedAssignmentSignatureRef.current === assignmentSignature) return;
+    appliedAssignmentSignatureRef.current = assignmentSignature;
+    const hasCustomProblems = customProblems.length > 0;
+    const representativeMode = (hasCustomProblems ? GameMode.UPPER_TRIVIA : (modePool[0] || GameMode.UPPER_TRIVIA)) as GameMode;
+    setActiveChallenge({
+      subMode: {
+        id: `ASSIGNMENT_${assignment.id}`,
+        name: assignment.title,
+        mode: representativeMode,
+      },
+      modePool: modePool.length > 0 ? modePool : [],
+      answerMode: assignment.answerMode || 'CHOICE',
+    });
+    if (phase === 'SELECT') {
+      setPhase('CHALLENGE');
+    }
+    setContinueOnWrong(true);
+    setStreak(0);
+    setChallengeStep(0);
+  }, [assignment, phase]);
 
   useEffect(() => {
     const nextCategory = displayedCategories.find((cat) => cat.id === selectedCategory.id) || defaultDisplayedCategory;
@@ -657,13 +694,17 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
           setRecords(prev => ({ ...prev, [recordKey]: newStreak }));
       }
     } else {
-      if (!continueOnWrong) {
+      if (!shouldContinueOnWrong) {
         handleFinish();
       }
     }
   };
 
   const handleFinish = () => {
+    if (assignment) {
+      onBack();
+      return;
+    }
     setIsQuitting(true);
     setTimeout(() => {
         setPhase('SELECT');
@@ -761,6 +802,7 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
               answerMode={challengeAnswerMode}
               useSavedAnswerMode
               onComplete={handleCompleteOne}
+              onAnswerResult={onAnswerResult}
               isChallenge={true}
               streak={streak}
             />
@@ -772,6 +814,7 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
               answerMode={challengeAnswerMode}
               useSavedAnswerMode
               onComplete={handleCompleteOne}
+              onAnswerResult={onAnswerResult}
               isChallenge={true}
               streak={streak}
             />
@@ -781,6 +824,7 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
               key={`${streak}-${challengeStep}`}
               mode={challengeSubMode.mode}
               onComplete={handleCompleteOne}
+              onAnswerResult={onAnswerResult}
               isChallenge={true}
               streak={streak}
             />
@@ -793,6 +837,9 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
               answerMode={challengeAnswerMode}
               onModeCorrect={onCorrectAnswers}
               onComplete={handleCompleteOne}
+              onAnswerResult={onAnswerResult}
+              customProblems={assignment?.customProblems}
+              problemOffset={challengeStep}
               isChallenge={true}
               streak={streak}
             />

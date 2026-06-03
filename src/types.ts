@@ -42,6 +42,7 @@ export interface Card {
   weak?: number;
   upgraded?: boolean;
   holographic?: boolean;
+  rewardCard?: boolean;
   unplayable?: boolean;
 
   // Advanced Effects
@@ -353,6 +354,9 @@ export enum GameScreen {
   MINI_GAME_PAPER_PLANE = 'MINI_GAME_PAPER_PLANE',
   MINI_GAME_GO_HOME = 'MINI_GAME_GO_HOME',
   PROBLEM_CHALLENGE = 'PROBLEM_CHALLENGE',
+  ASSIGNMENT_CREATE = 'ASSIGNMENT_CREATE',
+  SUBMISSION = 'SUBMISSION',
+  REWARD_CARD_ALBUM = 'REWARD_CARD_ALBUM',
   TYPING_MODE_SELECTION = 'TYPING_MODE_SELECTION',
   GARDEN = 'GARDEN',
   FLOOR_RESULT = 'FLOOR_RESULT'
@@ -624,6 +628,49 @@ export interface SelectionState {
   type: 'DISCARD' | 'COPY' | 'EXHAUST';
   amount: number;
   originCardId?: string;
+}
+
+export interface AssignmentUnit {
+  id: string;
+  name: string;
+  modes: string[];
+  targetCorrect: number;
+}
+
+export interface AssignmentCustomProblem {
+  id: string;
+  question: string;
+  answer: string;
+  options: string[];
+}
+
+export interface AssignmentPayload {
+  id: string;
+  title: string;
+  units: AssignmentUnit[];
+  customProblems: AssignmentCustomProblem[];
+  dueAt: string;
+  gameMode: 'FREE' | 'CHALLENGE_ONLY';
+  answerMode: AnswerMode;
+  createdAt: string;
+}
+
+export interface AssignmentAnswerRecord {
+  assignmentId?: string;
+  mode: string;
+  unitName?: string;
+  problemId?: string;
+  correct: boolean;
+  answeredAt: string;
+  elapsedMs: number;
+}
+
+export interface StudentProfile {
+  grade: string;
+  className: string;
+  number: string;
+  name: string;
+  schoolYear?: number;
 }
 
 export type RaceTrickEffectId =
