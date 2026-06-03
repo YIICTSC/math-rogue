@@ -1,6 +1,6 @@
 import { AssignmentPayload, AssignmentUnit, StudentProfile } from '../types';
 import { UPPER_PROBLEM_CATEGORIES, getCurrentUnitsForCategory } from '../components/ModeSelectionScreen';
-import { CURRICULUM_WEEKLY_PLANS } from '../data/dailyCurriculumPlan';
+import { CURRICULUM_WEEKLY_PLANS, UPPER_CURRICULUM_WEEKLY_PLANS } from '../data/dailyCurriculumPlan';
 import type { SubjectCategoryType } from '../subjectConfig';
 
 export const STUDENT_GRADE_OPTIONS = [
@@ -103,6 +103,19 @@ const getUpperUnits = (adult: boolean) => {
   })));
 };
 
+const getUpperCategoryUnits = (categoryId: SubjectCategoryType, adult: boolean) => {
+  const allowedCategories = adult
+    ? UPPER_PROBLEM_CATEGORIES.filter((category) => ['UPPER_PRACTICAL', 'UPPER_INFORMATION', 'UPPER_ESSAY', 'UPPER_ENGLISH', 'UPPER_SOCIETY', 'UPPER_MATH'].includes(category.id))
+    : UPPER_PROBLEM_CATEGORIES;
+  const category = allowedCategories.find((item) => item.id === categoryId);
+  if (!category) return [];
+  return category.subModes.map((subMode) => ({
+    id: `${category.id}:${subMode.id}`,
+    name: `${category.name} / ${subMode.name}`,
+    modes: [subMode.mode],
+  }));
+};
+
 const getGradeCategoryUnits = (gradeNumber: number, categoryId: SubjectCategoryType | 'KANJI') => {
   if (categoryId === 'KANJI') {
     return [{
@@ -150,13 +163,25 @@ export const createDailyAssignment = (
 
   const dateId = getLocalDateId(date);
   const schoolYearWeekIndex = getSchoolYearWeekIndex(date);
-  const weeklyPlan = gradeNumber ? CURRICULUM_WEEKLY_PLANS[gradeNumber]?.[schoolYearWeekIndex] : undefined;
-  const weeklyUnits = weeklyPlan && gradeNumber
-    ? getGradeCategoryUnits(gradeNumber, weeklyPlan.categoryId)
+  const weeklyPlan = gradeNumber
+    ? CURRICULUM_WEEKLY_PLANS[gradeNumber]?.[schoolYearWeekIndex]
+    : UPPER_CURRICULUM_WEEKLY_PLANS[adult ? 'adult' : 'upper']?.[schoolYearWeekIndex];
+  const weeklyUnits = weeklyPlan
+    ? gradeNumber
+      ? getGradeCategoryUnits(gradeNumber, weeklyPlan.categoryId)
+      : weeklyPlan.categoryId === 'KANJI' || weeklyPlan.categoryId === 'SUMMARY'
+        ? []
+        : getUpperCategoryUnits(weeklyPlan.categoryId, adult)
     : [];
-  const seasonalBase = weeklyUnits.length > 0
+  const plannedUnit = weeklyUnits.length > 0
     ? weeklyUnits[weeklyPlan!.unitOffset % weeklyUnits.length]
     : baseUnits[schoolYearWeekIndex % baseUnits.length];
+  const seasonalBase = weeklyPlan
+    ? {
+      ...plannedUnit,
+      name: `${weeklyPlan.label}: ${plannedUnit.name}`,
+    }
+    : plannedUnit;
   const challengeBase = [...baseUnits]
     .filter((unit) => unit.id !== seasonalBase.id)
     .sort((a, b) => {

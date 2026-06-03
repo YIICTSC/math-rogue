@@ -129,11 +129,11 @@ const EnglishChallengeScreen: React.FC<EnglishChallengeScreenProps> = ({ onCompl
     setIsAnswered(true);
     
     const isCorrect = normalize(option) === normalize(problems[currentProblemIndex].actualCorrectAnswer);
-    onAnswerResult?.({
+    const answerResult = {
       mode,
       correct: isCorrect,
       elapsedMs: Date.now() - questionStartedAtRef.current,
-    });
+    };
     if (isCorrect) {
       setCorrectCount(prev => prev + 1);
       setFeedback('CORRECT');
@@ -150,6 +150,7 @@ const EnglishChallengeScreen: React.FC<EnglishChallengeScreenProps> = ({ onCompl
     }
 
     setTimeout(() => {
+      onAnswerResult?.(answerResult);
       if (isChallenge) {
           onComplete(isCorrect ? 1 : 0);
       } else if (currentProblemIndex < problems.length - 1) {

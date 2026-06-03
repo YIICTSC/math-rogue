@@ -467,14 +467,15 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
       audioService.playSound('wrong');
       storageService.saveHintStreak(problems[currentProblemIndex].sourceMode, 0);
     }
-    onAnswerResult?.({
+    const answerResult = {
       mode: problems[currentProblemIndex].sourceMode,
       correct: isCorrect,
       elapsedMs: Date.now() - questionStartedAtRef.current,
       problemId: problems[currentProblemIndex].assignmentProblemId,
-    });
+    };
 
     setTimeout(() => {
+      onAnswerResult?.(answerResult);
       if (isChallenge) {
           onComplete(isCorrect ? 1 : 0);
       } else if (currentProblemIndex < problems.length - 1) {

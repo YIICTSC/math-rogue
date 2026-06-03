@@ -897,18 +897,27 @@ const App: React.FC = () => {
     }, []);
 
     const dailyAssignment = useMemo(
-        () => currentAssignment ? null : createDailyAssignment(studentProfile, modeCorrectCounts),
-        [currentAssignment, modeCorrectCounts, studentProfile]
+        () => currentAssignment ? null : createDailyAssignment(studentProfile, storageService.getModeCorrectCounts()),
+        [currentAssignment, studentProfile.grade, studentProfile.schoolYear]
     );
-    const effectiveAssignment = currentAssignment || dailyAssignment;
+    const isDailyAssignmentDismissed = !!dailyAssignment && dismissedDailyAssignmentId === dailyAssignment.id;
+    const assignmentLetter = currentAssignment || dailyAssignment;
+    const effectiveAssignment = currentAssignment || (isDailyAssignmentDismissed ? null : dailyAssignment);
     const isTeacherAssignmentActive = !!currentAssignment;
 
-    const isAssignmentWithinDeadline = useMemo(() => {
-        if (!effectiveAssignment) return false;
-        if (!effectiveAssignment.dueAt) return true;
-        const dueTime = new Date(effectiveAssignment.dueAt).getTime();
+    const isAssignmentDeadlineActive = useCallback((assignment: AssignmentPayload | null | undefined) => {
+        if (!assignment) return false;
+        if (!assignment.dueAt) return true;
+        const dueTime = new Date(assignment.dueAt).getTime();
         return Number.isNaN(dueTime) ? true : Date.now() <= dueTime;
-    }, [effectiveAssignment]);
+    }, []);
+
+    const isAssignmentWithinDeadline = useMemo(() => {
+        return isAssignmentDeadlineActive(effectiveAssignment);
+    }, [effectiveAssignment, isAssignmentDeadlineActive]);
+    const isAssignmentLetterWithinDeadline = useMemo(() => (
+        isAssignmentDeadlineActive(assignmentLetter)
+    ), [assignmentLetter, isAssignmentDeadlineActive]);
     const currentAssignmentAnswers = useMemo(() => {
         if (!effectiveAssignment) return [];
         return storageService.getAssignmentAnswers().filter(answer => answer.assignmentId === effectiveAssignment.id);
@@ -11041,24 +11050,27 @@ const App: React.FC = () => {
                             </div>
                         )}
 
-                        {effectiveAssignment && showAssignmentLetter && (
+                        {assignmentLetter && showAssignmentLetter && (
                             <div className="fixed inset-0 z-[10030] flex items-center justify-center bg-black/80 p-4">
                                 <div className="w-full max-w-xl rounded-2xl border-4 border-amber-300 bg-[#fff7d6] p-5 text-slate-900 shadow-[0_0_40px_rgba(250,204,21,0.35)]">
                                     <div className="mb-2 text-center text-xs font-black tracking-[0.3em] text-amber-700">{isTeacherAssignmentActive ? 'TEACHER LETTER' : 'DAILY LETTER'}</div>
-                                    <h2 className="mb-3 text-center text-2xl font-black">{effectiveAssignment.title}</h2>
+                                    <h2 className="mb-3 text-center text-2xl font-black">{assignmentLetter.title}</h2>
                                     <div className="mb-4 rounded-xl border-2 border-amber-300 bg-white/70 p-4 text-sm font-bold leading-7">
                                         <div>{isTeacherAssignmentActive ? '先生から課題が届きました。' : '今日の学習課題です。'}</div>
-                                        <div>期限: {effectiveAssignment.dueAt ? new Date(effectiveAssignment.dueAt).toLocaleString('ja-JP') : '未設定'}</div>
-                                        <div>形式: {effectiveAssignment.gameMode === 'FREE' ? 'フリー' : '問題チャレンジのみ'}</div>
+                                        <div>期限: {assignmentLetter.dueAt ? new Date(assignmentLetter.dueAt).toLocaleString('ja-JP') : '未設定'}</div>
+                                        <div>形式: {assignmentLetter.gameMode === 'FREE' ? 'フリー' : '問題チャレンジのみ'}</div>
                                         <div className="mt-2 text-xs text-slate-700">
-                                            {effectiveAssignment.units.map(unit => `${unit.name} (${unit.targetCorrect || 10}問)`).join(' / ') || 'オリジナル問題'}
+                                            {assignmentLetter.units.map(unit => `${unit.name} (${unit.targetCorrect || 10}問)`).join(' / ') || 'オリジナル問題'}
                                         </div>
                                     </div>
                                     <div className="grid gap-2 sm:grid-cols-3">
                                         <button
                                             onClick={() => {
                                                 setShowAssignmentLetter(false);
-                                                setGameState(prev => ({ ...prev, screen: activeAssignment?.gameMode === 'CHALLENGE_ONLY' ? GameScreen.PROBLEM_CHALLENGE : GameScreen.START_MENU }));
+                                                if (!isTeacherAssignmentActive && assignmentLetter) {
+                                                    setDismissedDailyAssignmentId(null);
+                                                }
+                                                setGameState(prev => ({ ...prev, screen: assignmentLetter.gameMode === 'CHALLENGE_ONLY' ? GameScreen.PROBLEM_CHALLENGE : GameScreen.START_MENU }));
                                             }}
                                             className="rounded-xl bg-amber-400 px-4 py-3 text-sm font-black text-slate-950 hover:bg-amber-300"
                                         >
@@ -11066,8 +11078,8 @@ const App: React.FC = () => {
                                         </button>
                                         <button
                                             onClick={() => {
-                                                if (!isTeacherAssignmentActive && effectiveAssignment) {
-                                                    setDismissedDailyAssignmentId(effectiveAssignment.id);
+                                                if (!isTeacherAssignmentActive && assignmentLetter) {
+                                                    setDismissedDailyAssignmentId(assignmentLetter.id);
                                                 }
                                                 setShowAssignmentLetter(false);
                                             }}
@@ -11089,7 +11101,7 @@ const App: React.FC = () => {
                                         ) : (
                                             <button
                                                 onClick={() => {
-                                                    setDismissedDailyAssignmentId(effectiveAssignment.id);
+                                                    setDismissedDailyAssignmentId(assignmentLetter.id);
                                                     setShowAssignmentLetter(false);
                                                     setGameState(prev => ({ ...prev, screen: GameScreen.SUBMISSION }));
                                                 }}
@@ -11246,7 +11258,7 @@ const App: React.FC = () => {
 
                             <div className="start-menu-button-panel flex w-full flex-col items-center">
                                 <div className="mb-4 flex items-stretch justify-center gap-2">
-                                    {effectiveAssignment && isAssignmentWithinDeadline && (
+                                    {assignmentLetter && isAssignmentLetterWithinDeadline && (
                                         <button
                                             type="button"
                                             onClick={() => setShowAssignmentLetter(true)}

@@ -115,11 +115,11 @@ const KanjiChallengeScreen: React.FC<KanjiChallengeScreenProps> = ({ onComplete,
     
     // 選択された文字列と、保持していた正解文字列を正規化して比較
     const isCorrect = normalize(option) === normalize(problems[currentProblemIndex].actualCorrectAnswer);
-    onAnswerResult?.({
+    const answerResult = {
       mode,
       correct: isCorrect,
       elapsedMs: Date.now() - questionStartedAtRef.current,
-    });
+    };
     
     if (isCorrect) {
       setCorrectCount(prev => prev + 1);
@@ -137,6 +137,7 @@ const KanjiChallengeScreen: React.FC<KanjiChallengeScreenProps> = ({ onComplete,
     }
 
     setTimeout(() => {
+      onAnswerResult?.(answerResult);
       if (isChallenge) {
           onComplete(isCorrect ? 1 : 0);
       } else if (currentProblemIndex < problems.length - 1) {

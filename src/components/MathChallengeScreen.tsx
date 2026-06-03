@@ -158,11 +158,11 @@ const MathChallengeScreen: React.FC<MathChallengeScreenProps> = ({ onComplete, m
     setIsAnswered(true);
     
     const isCorrect = option === problems[currentProblemIndex].answer;
-    onAnswerResult?.({
+    const answerResult = {
       mode,
       correct: isCorrect,
       elapsedMs: Date.now() - questionStartedAtRef.current,
-    });
+    };
     if (isCorrect) {
       setCorrectCount(prev => prev + 1);
       setFeedback('CORRECT');
@@ -175,6 +175,7 @@ const MathChallengeScreen: React.FC<MathChallengeScreenProps> = ({ onComplete, m
     }
 
     setTimeout(() => {
+      onAnswerResult?.(answerResult);
       if (isChallenge) {
           // チャレンジモードは1問ごとに結果を返す（不正解なら0、正解なら1）
           onComplete(isCorrect ? 1 : 0);
