@@ -825,6 +825,7 @@ const App: React.FC = () => {
     } | null>(null);
     const [showAssignmentLetter, setShowAssignmentLetter] = useState(false);
     const [dismissedDailyAssignmentId, setDismissedDailyAssignmentId] = useState<string | null>(null);
+    const [completedDailyAssignmentIds, setCompletedDailyAssignmentIds] = useState<string[]>(() => storageService.getCompletedDailyAssignmentIds());
     const [rewardCardAlbumVersion, setRewardCardAlbumVersion] = useState(0);
     const [pendingStarterRelic, setPendingStarterRelic] = useState<Relic | null>(null);
     const [transferExportText, setTransferExportText] = useState<string>('');
@@ -896,9 +897,23 @@ const App: React.FC = () => {
         window.history.replaceState({}, '', url.toString());
     }, []);
 
-    const dailyAssignment = useMemo(
+    const markDailyAssignmentCompleted = useCallback((assignmentId: string | undefined) => {
+        if (!assignmentId || !assignmentId.startsWith('daily-')) return;
+        storageService.markDailyAssignmentCompleted(assignmentId);
+        setCompletedDailyAssignmentIds(prev => prev.includes(assignmentId) ? prev : [...prev, assignmentId]);
+        if (dismissedDailyAssignmentId === assignmentId) setDismissedDailyAssignmentId(null);
+        setShowAssignmentLetter(false);
+    }, [dismissedDailyAssignmentId]);
+
+    const generatedDailyAssignment = useMemo(
         () => currentAssignment ? null : createDailyAssignment(studentProfile, storageService.getModeCorrectCounts()),
         [currentAssignment, studentProfile.grade, studentProfile.schoolYear]
+    );
+    const dailyAssignment = useMemo(
+        () => generatedDailyAssignment && !completedDailyAssignmentIds.includes(generatedDailyAssignment.id)
+            ? generatedDailyAssignment
+            : null,
+        [completedDailyAssignmentIds, generatedDailyAssignment]
     );
     const isDailyAssignmentDismissed = !!dailyAssignment && dismissedDailyAssignmentId === dailyAssignment.id;
     const assignmentLetter = currentAssignment || dailyAssignment;
@@ -9174,6 +9189,9 @@ const App: React.FC = () => {
                         rewardCard = createdRewardCard;
                     }
                 }
+                if (isAssignmentComplete && !currentAssignment) {
+                    markDailyAssignmentCompleted(assignment.id);
+                }
                 setAssignmentProgressNotice({
                     type: isAssignmentComplete ? 'ASSIGNMENT_COMPLETE' : 'UNIT_COMPLETE',
                     unitName: 'オリジナル問題',
@@ -9207,6 +9225,9 @@ const App: React.FC = () => {
                     rewardCard = createdRewardCard;
                 }
             }
+            if (isAssignmentComplete && !currentAssignment) {
+                markDailyAssignmentCompleted(assignment.id);
+            }
             setAssignmentProgressNotice({
                 type: isAssignmentComplete ? 'ASSIGNMENT_COMPLETE' : 'UNIT_COMPLETE',
                 unitName: assignmentUnit.name,
@@ -9217,7 +9238,7 @@ const App: React.FC = () => {
                 rewardCard,
             });
         }
-    }, [correctCustomAssignmentProblemIds, createRewardCardForAssignment, currentAssignmentAnswers, effectiveAssignment]);
+    }, [correctCustomAssignmentProblemIds, createRewardCardForAssignment, currentAssignment, currentAssignmentAnswers, effectiveAssignment, markDailyAssignmentCompleted]);
 
     const removeRewardFromList = useCallback((rewards: RewardItem[], item: RewardItem) => {
         if (shouldClearAllCardRewards(item)) {
@@ -11681,7 +11702,7 @@ const App: React.FC = () => {
                     </div>
                 )}
 
-                {assignmentProgressNotice && effectiveAssignment && (
+                {assignmentProgressNotice && (
                     <div className="fixed inset-0 z-[10040] flex items-center justify-center bg-black/80 p-4">
                         <div className="w-full max-w-lg rounded-2xl border-4 border-emerald-300 bg-slate-950 p-5 text-white shadow-[0_0_40px_rgba(52,211,153,0.35)]">
                             <div className="mb-2 text-center text-xs font-black tracking-[0.3em] text-emerald-300">

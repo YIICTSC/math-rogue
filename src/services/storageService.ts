@@ -73,6 +73,7 @@ const STORAGE_KEY_ASSIGNMENT_ANSWERS = 'pixel_spire_assignment_answers_v1';
 const STORAGE_KEY_STUDENT_PROFILE = 'pixel_spire_student_profile_v1';
 const STORAGE_KEY_REWARD_CARD_ALBUM = 'pixel_spire_reward_card_album_v1';
 const STORAGE_KEY_REWARD_CARD_CLAIMED_ASSIGNMENTS = 'pixel_spire_reward_card_claimed_assignments_v1';
+const STORAGE_KEY_COMPLETED_DAILY_ASSIGNMENTS = 'pixel_spire_completed_daily_assignments_v1';
 
 // --- CUSTOM CHARACTER IMAGES ---
 const STORAGE_KEY_CUSTOM_IMAGES = 'pixel_spire_custom_images_v1';
@@ -256,6 +257,25 @@ export const storageService = {
       localStorage.setItem(STORAGE_KEY_ASSIGNMENT_ANSWERS, JSON.stringify([...current, record]));
     } catch (e) {
       console.warn("Failed to save assignment answer", e);
+    }
+  },
+
+  getCompletedDailyAssignmentIds: (): string[] => {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY_COMPLETED_DAILY_ASSIGNMENTS);
+      return stored ? JSON.parse(stored) : [];
+    } catch (e) {
+      return [];
+    }
+  },
+
+  markDailyAssignmentCompleted: (assignmentId: string) => {
+    try {
+      const current = storageService.getCompletedDailyAssignmentIds();
+      const next = Array.from(new Set([...current, assignmentId])).slice(-60);
+      localStorage.setItem(STORAGE_KEY_COMPLETED_DAILY_ASSIGNMENTS, JSON.stringify(next));
+    } catch (e) {
+      console.warn("Failed to save completed daily assignment", e);
     }
   },
 
