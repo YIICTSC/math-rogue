@@ -68,7 +68,7 @@ import { getRandomCoopSupportCard } from './coopSupportCards';
 import { chooseBattleBackgroundScene, getBattleBackgroundFlavor } from './data/battleBackgrounds';
 import { OFFLINE_DISTRIBUTABLE, OFFLINE_NETWORK_FEATURE_MESSAGE } from './config/runtime';
 import { getAttackEffectKeyForCard, getMultihitFrameSequence } from './data/attackEffects';
-import { getThemedCharacters, type VisualThemeId } from './data/visualThemes';
+import { getThemedCharacters, getThemedEnemyDisplayName, type VisualThemeId } from './data/visualThemes';
 
 const PARRY_WINDOW_MS = 650;
 const PARRY_PERFECT_MS = 220;
@@ -5756,7 +5756,7 @@ const App: React.FC = () => {
 
                                     const allPossibleCards = Object.values(CARDS_LIBRARY).filter(c => {
                                         // 基本フィルタ
-                                        if (c.type === CardType.CURSE || c.type === CardType.STATUS || c.rarity === 'SPECIAL') return false;
+                                        if (c.type === CardType.CURSE || c.type === CardType.STATUS || c.type === CardType.SUMMON || c.rarity === 'SPECIAL') return false;
                                         if (c.cost > 3) return false;
 
                                         // 除外カードフィルタ
@@ -5777,6 +5777,8 @@ const App: React.FC = () => {
                                     const pool = allPossibleCards.length > 0 ? allPossibleCards : fallbackPool;
 
                                     const randomCardTemplate = pool[Math.floor(Math.random() * pool.length)];
+                                    const captureVisualTheme = stateRef.current.visualTheme || visualTheme;
+                                    const capturedDisplayName = getThemedEnemyDisplayName(e, captureVisualTheme);
 
                                     // 3. ハイブリッドカードの作成
                                     const totalDamage = (randomCardTemplate.damage || 0) + damageVal;
@@ -5784,7 +5786,7 @@ const App: React.FC = () => {
                                     const captured: ICard = {
                                         ...randomCardTemplate, // ランダムカードのプロパティをベースにする
                                         id: `captured-${e.id}-${Date.now()}`,
-                                        name: e.name,
+                                        name: capturedDisplayName,
                                         textureRef: randomCardTemplate.textureRef,
                                         enemyIllustrationName: e.name,
                                         enemyIllustrationEnemyType: e.enemyType,
@@ -5795,7 +5797,8 @@ const App: React.FC = () => {
                                             e.phase === 2 ? `${e.enemyType}_2` : undefined,
                                             e.enemyType === 'THE_HEART' && e.phase === 2 ? 'THE_HEART_PHASE2' : undefined,
                                         ].filter(Boolean) as string[])),
-                                        visualTheme: stateRef.current.visualTheme || visualTheme,
+                                        visualTheme: captureVisualTheme,
+                                        familiarSummon: undefined,
                                         rarity: 'SPECIAL',
                                         exhaust: true,
 
@@ -5839,7 +5842,7 @@ const App: React.FC = () => {
                                     p.deck.push(captured);
                                     p.discardPile.push(captured);
                                     e.floatingText = { id: `cap-${Date.now()}`, text: 'GET!', color: 'text-yellow-400' };
-                                    currentLogs.push(`${trans(e.name, languageMode)}を${trans("捕獲した！", languageMode)} (${trans(randomCardTemplate.name, languageMode)}の効果付与)`);
+                                    currentLogs.push(`${trans(capturedDisplayName, languageMode)}を${trans("捕獲した！", languageMode)} (${trans(randomCardTemplate.name, languageMode)}の効果付与)`);
                                     nextActiveEffects.push({ id: `vfx-cap-${Date.now()}`, type: 'BUFF', targetId: 'player', delay: hitDelay });
                                 }
                                 if (card.name === '羅生門' || (card.id && card.id.includes('RASHOMON'))) {
