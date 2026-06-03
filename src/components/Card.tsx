@@ -4,7 +4,7 @@ import PixelSprite from './PixelSprite';
 import EnemyIllustration from './EnemyIllustration';
 import { buildEnglishCardDescription, trans } from '../utils/textUtils';
 import { getCardIllustrationPaths } from '../utils/cardIllustration';
-import { getStatusCategoryLabel, getStatusCategoryClass } from '../utils/cardUtils';
+import { createEnemyIllustrationRef, getStatusCategoryLabel, getStatusCategoryClass, parseEnemyIllustrationRef } from '../utils/cardUtils';
 import { assetUrl } from '../utils/assetPaths';
 import type { VisualThemeId } from '../data/visualThemes';
 
@@ -53,10 +53,10 @@ const extractCompositeIllustrationRefs = (card: CardType): string[] => {
     ...(card.enemyIllustrationNames || []),
     ...(card.enemyIllustrationName ? [card.enemyIllustrationName] : []),
   ].filter(Boolean) as string[];
-  if (enemyNames.length > 0) return [`enemy:${enemyNames[0]}`];
+  if (enemyNames.length > 0) return [createEnemyIllustrationRef(card, enemyNames[0])];
 
   if (card.capture && card.textureRef && !card.textureRef.includes('|')) {
-    return [`enemy:${card.textureRef}`];
+    return [createEnemyIllustrationRef(card, card.textureRef)];
   }
 
   if (card.name) return [`card:${card.name}`];
@@ -81,8 +81,20 @@ const CompositeArtPiece: React.FC<{
   }, [refToken]);
 
   if (refToken.startsWith('enemy:')) {
-    const name = refToken.substring('enemy:'.length);
-    return <EnemyIllustration name={name} seed={seed} visualTheme={visualTheme} enemyType={enemyType} phase={phase} action={visualTheme === 'high-school' ? 'attack' : 'idle'} className="w-full h-full" size={16} />;
+    const enemyRef = parseEnemyIllustrationRef(refToken);
+    const resolvedVisualTheme = enemyRef?.visualTheme || visualTheme;
+    return (
+      <EnemyIllustration
+        name={enemyRef?.name || refToken.substring('enemy:'.length)}
+        seed={seed}
+        visualTheme={resolvedVisualTheme}
+        enemyType={enemyRef?.enemyType || enemyType}
+        phase={enemyRef?.phase ?? phase}
+        action={resolvedVisualTheme === 'high-school' ? 'attack' : 'idle'}
+        className="w-full h-full"
+        size={16}
+      />
+    );
   }
 
   if (refToken.startsWith('pixel:')) {

@@ -1,8 +1,43 @@
 const { app, BrowserWindow, ipcMain } = require('electron');
 const path = require('path');
 
-const createWindow = () => {
-  const mainWindow = new BrowserWindow({
+const ASSIGNMENT_PROTOCOL = 'learning-rogue';
+let mainWindow = null;
+let pendingAssignmentParam = null;
+
+const getAssignmentParamFromArgv = (argv) => {
+  const protocolArg = argv.find((arg) => typeof arg === 'string' && arg.startsWith(`${ASSIGNMENT_PROTOCOL}://`));
+  if (!protocolArg) return null;
+  try {
+    const url = new URL(protocolArg);
+    return url.searchParams.get('assignment');
+  } catch (e) {
+    return null;
+  }
+};
+
+const loadApp = (win, assignmentParam) => {
+  const loadOptions = assignmentParam ? { query: { assignment: assignmentParam } } : undefined;
+  win.loadFile(path.join(__dirname, '..', 'dist', 'index.html'), loadOptions);
+};
+
+const openAssignmentUrl = (assignmentParam) => {
+  if (!assignmentParam) return;
+  pendingAssignmentParam = assignmentParam;
+  if (!app.isReady()) return;
+  if (!mainWindow || mainWindow.isDestroyed()) {
+    createWindow(assignmentParam);
+    pendingAssignmentParam = null;
+    return;
+  }
+  loadApp(mainWindow, assignmentParam);
+  pendingAssignmentParam = null;
+  if (mainWindow.isMinimized()) mainWindow.restore();
+  mainWindow.focus();
+};
+
+const createWindow = (assignmentParam = null) => {
+  mainWindow = new BrowserWindow({
     width: 1280,
     height: 800,
     minWidth: 960,
@@ -19,14 +54,39 @@ const createWindow = () => {
     },
   });
 
-  mainWindow.loadFile(path.join(__dirname, '..', 'dist', 'index.html'));
+  loadApp(mainWindow, assignmentParam);
+  return mainWindow;
 };
 
+if (process.defaultApp && process.argv.length >= 2) {
+  app.setAsDefaultProtocolClient(ASSIGNMENT_PROTOCOL, process.execPath, [path.resolve(process.argv[1])]);
+} else {
+  app.setAsDefaultProtocolClient(ASSIGNMENT_PROTOCOL);
+}
+
+const gotLock = app.requestSingleInstanceLock();
+if (!gotLock) {
+  app.quit();
+}
+
+app.on('second-instance', (_event, argv) => {
+  const assignmentParam = getAssignmentParamFromArgv(argv);
+  openAssignmentUrl(assignmentParam);
+});
+
+app.on('open-url', (event, url) => {
+  event.preventDefault();
+  openAssignmentUrl(getAssignmentParamFromArgv([url]));
+});
+
 app.whenReady().then(() => {
-  createWindow();
+  mainWindow = createWindow(pendingAssignmentParam || getAssignmentParamFromArgv(process.argv));
+  pendingAssignmentParam = null;
 
   app.on('activate', () => {
-    if (BrowserWindow.getAllWindows().length === 0) createWindow();
+    if (BrowserWindow.getAllWindows().length === 0) {
+      mainWindow = createWindow();
+    }
   });
 });
 

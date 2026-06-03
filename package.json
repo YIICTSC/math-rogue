@@ -26,6 +26,14 @@
       "electron/**/*",
       "package.json"
     ],
+    "protocols": [
+      {
+        "name": "Learning Rogue Assignment",
+        "schemes": [
+          "learning-rogue"
+        ]
+      }
+    ],
     "asar": true,
     "win": {
       "signAndEditExecutable": false,

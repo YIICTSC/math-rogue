@@ -60,7 +60,7 @@ import { generateEvent, generateLegacyEvent } from './services/eventService';
 import { createAssignmentRewardCard, createHolographicCard, getUpgradedCard, synthesizeCards } from './utils/cardUtils';
 import { sanitizeEnglishText, trans } from './utils/textUtils';
 import { assetUrl } from './utils/assetPaths';
-import { getAssignmentFromUrl, getAssignmentModePool, getAssignmentRepresentativeMode } from './utils/assignmentUtils';
+import { getAssignmentEncodedFromUrl, getAssignmentFromUrl, getAssignmentModePool, getAssignmentRepresentativeMode, tryOpenOfflineAssignmentApp } from './utils/assignmentUtils';
 import { STUDENT_GRADE_OPTIONS, createDailyAssignment, getCurrentSchoolYear, isAdultProfile, promoteStudentProfileForSchoolYear } from './utils/dailyAssignmentUtils';
 import { getDifficultyConfig } from './config/difficulty';
 import { CARD_ERASER_TEMPLATE_ID, CARD_ERASER_NAME, eraseCardEffect, getErasableEffectOptions } from './utils/cardEraser';
@@ -886,8 +886,12 @@ const App: React.FC = () => {
     }, [gameState.screen, startGameAssetPreload]);
 
     useEffect(() => {
+        const encodedAssignment = getAssignmentEncodedFromUrl();
         const assignment = getAssignmentFromUrl();
         if (!assignment) return;
+        if (encodedAssignment && !isElectronApp) {
+            tryOpenOfflineAssignmentApp(encodedAssignment);
+        }
         storageService.saveCurrentAssignment(assignment);
         setCurrentAssignment(assignment);
         setShowAssignmentLetter(true);
@@ -895,7 +899,7 @@ const App: React.FC = () => {
         const url = new URL(window.location.href);
         url.searchParams.delete('assignment');
         window.history.replaceState({}, '', url.toString());
-    }, []);
+    }, [isElectronApp]);
 
     const markDailyAssignmentCompleted = useCallback((assignmentId: string | undefined) => {
         if (!assignmentId || !assignmentId.startsWith('daily-')) return;
@@ -905,9 +909,30 @@ const App: React.FC = () => {
         setShowAssignmentLetter(false);
     }, [dismissedDailyAssignmentId]);
 
+    const currentUrlAssignmentAnswers = useMemo(() => {
+        if (!currentAssignment) return [];
+        return storageService.getAssignmentAnswers().filter(answer => answer.assignmentId === currentAssignment.id);
+    }, [assignmentProgressVersion, currentAssignment]);
+    const isCurrentUrlAssignmentComplete = useMemo(() => {
+        if (!currentAssignment) return false;
+        const hasTargets = currentAssignment.units.length > 0 || (currentAssignment.customProblems || []).length > 0;
+        if (!hasTargets) return false;
+        const completedUnits = currentAssignment.units.every((unit) => {
+            const correctCount = currentUrlAssignmentAnswers.filter(answer => answer.correct && unit.modes.includes(answer.mode)).length;
+            return correctCount >= Math.max(1, Number(unit.targetCorrect || 10));
+        });
+        const correctCustomProblemIds = new Set(
+            currentUrlAssignmentAnswers
+                .filter(answer => answer.correct && answer.mode === 'ASSIGNMENT_CUSTOM' && answer.problemId)
+                .map(answer => answer.problemId as string)
+        );
+        const completedCustomProblems = (currentAssignment.customProblems || []).every(problem => correctCustomProblemIds.has(problem.id));
+        return completedUnits && completedCustomProblems;
+    }, [currentAssignment, currentUrlAssignmentAnswers]);
+    const shouldPrioritizeCurrentAssignment = !!currentAssignment && !isCurrentUrlAssignmentComplete;
     const generatedDailyAssignment = useMemo(
-        () => currentAssignment ? null : createDailyAssignment(studentProfile, storageService.getModeCorrectCounts()),
-        [currentAssignment, studentProfile.grade, studentProfile.schoolYear]
+        () => shouldPrioritizeCurrentAssignment ? null : createDailyAssignment(studentProfile, storageService.getModeCorrectCounts()),
+        [shouldPrioritizeCurrentAssignment, studentProfile.grade, studentProfile.schoolYear]
     );
     const dailyAssignment = useMemo(
         () => generatedDailyAssignment && !completedDailyAssignmentIds.includes(generatedDailyAssignment.id)
@@ -916,9 +941,9 @@ const App: React.FC = () => {
         [completedDailyAssignmentIds, generatedDailyAssignment]
     );
     const isDailyAssignmentDismissed = !!dailyAssignment && dismissedDailyAssignmentId === dailyAssignment.id;
-    const assignmentLetter = currentAssignment || dailyAssignment;
-    const effectiveAssignment = currentAssignment || (isDailyAssignmentDismissed ? null : dailyAssignment);
-    const isTeacherAssignmentActive = !!currentAssignment;
+    const assignmentLetter = shouldPrioritizeCurrentAssignment ? currentAssignment : dailyAssignment;
+    const effectiveAssignment = shouldPrioritizeCurrentAssignment ? currentAssignment : (isDailyAssignmentDismissed ? null : dailyAssignment);
+    const isTeacherAssignmentActive = shouldPrioritizeCurrentAssignment;
 
     const isAssignmentDeadlineActive = useCallback((assignment: AssignmentPayload | null | undefined) => {
         if (!assignment) return false;
@@ -969,11 +994,17 @@ const App: React.FC = () => {
     const rewardCardAlbum = useMemo(() => storageService.getRewardCardAlbum(), [rewardCardAlbumVersion]);
 
     useEffect(() => {
-        if (showStudentGradeSurvey || currentAssignment || !dailyAssignment) return;
+        if (showStudentGradeSurvey || shouldPrioritizeCurrentAssignment || !dailyAssignment) return;
         if (dismissedDailyAssignmentId === dailyAssignment.id) return;
-        if (gameState.screen !== GameScreen.START_MENU) return;
+        const shouldAnnounceDailyAssignment = [
+            GameScreen.MODE_SELECTION,
+            GameScreen.MINI_GAME_MODE_SELECTION,
+            GameScreen.PROBLEM_CHALLENGE,
+            GameScreen.TYPING_MODE_SELECTION,
+        ].includes(gameState.screen);
+        if (!shouldAnnounceDailyAssignment) return;
         setShowAssignmentLetter(true);
-    }, [currentAssignment, dailyAssignment, dismissedDailyAssignmentId, gameState.screen, showStudentGradeSurvey]);
+    }, [dailyAssignment, dismissedDailyAssignmentId, gameState.screen, shouldPrioritizeCurrentAssignment, showStudentGradeSurvey]);
 
     const saveStudentGrade = useCallback((grade: string) => {
         const nextProfile = {
@@ -11185,10 +11216,14 @@ const App: React.FC = () => {
 
                         {assignmentLetter && showAssignmentLetter && (
                             <div className="fixed inset-0 z-[10030] flex items-center justify-center bg-black/80 p-4">
-                                <div className="w-full max-w-xl rounded-2xl border-4 border-amber-300 bg-[#fff7d6] p-5 text-slate-900 shadow-[0_0_40px_rgba(250,204,21,0.35)]">
-                                    <div className="mb-2 text-center text-xs font-black tracking-[0.3em] text-amber-700">{isTeacherAssignmentActive ? 'TEACHER LETTER' : 'DAILY LETTER'}</div>
+                                <div className={`w-full max-w-xl rounded-2xl border-4 p-5 text-slate-900 ${
+                                    isTeacherAssignmentActive
+                                        ? 'border-amber-300 bg-[#fff7d6] shadow-[0_0_40px_rgba(250,204,21,0.35)]'
+                                        : 'border-lime-300 bg-[#f3ffd4] shadow-[0_0_40px_rgba(163,230,53,0.35)]'
+                                }`}>
+                                    <div className={`mb-2 text-center text-xs font-black tracking-[0.3em] ${isTeacherAssignmentActive ? 'text-amber-700' : 'text-lime-700'}`}>{isTeacherAssignmentActive ? 'TEACHER LETTER' : 'DAILY LETTER'}</div>
                                     <h2 className="mb-3 text-center text-2xl font-black">{assignmentLetter.title}</h2>
-                                    <div className="mb-4 rounded-xl border-2 border-amber-300 bg-white/70 p-4 text-sm font-bold leading-7">
+                                    <div className={`mb-4 rounded-xl border-2 bg-white/70 p-4 text-sm font-bold leading-7 ${isTeacherAssignmentActive ? 'border-amber-300' : 'border-lime-300'}`}>
                                         <div>{isTeacherAssignmentActive ? '先生から課題が届きました。' : '今日の学習課題です。'}</div>
                                         <div>期限: {assignmentLetter.dueAt ? new Date(assignmentLetter.dueAt).toLocaleString('ja-JP') : '未設定'}</div>
                                         <div>形式: {assignmentLetter.gameMode === 'FREE' ? 'フリー' : '問題チャレンジのみ'}</div>
@@ -11203,9 +11238,16 @@ const App: React.FC = () => {
                                                 if (!isTeacherAssignmentActive && assignmentLetter) {
                                                     setDismissedDailyAssignmentId(null);
                                                 }
-                                                setGameState(prev => ({ ...prev, screen: assignmentLetter.gameMode === 'CHALLENGE_ONLY' ? GameScreen.PROBLEM_CHALLENGE : GameScreen.START_MENU }));
+                                                setGameState(prev => ({
+                                                    ...prev,
+                                                    screen: assignmentLetter.gameMode === 'CHALLENGE_ONLY'
+                                                        ? GameScreen.PROBLEM_CHALLENGE
+                                                        : isTeacherAssignmentActive
+                                                            ? GameScreen.START_MENU
+                                                            : prev.screen,
+                                                }));
                                             }}
-                                            className="rounded-xl bg-amber-400 px-4 py-3 text-sm font-black text-slate-950 hover:bg-amber-300"
+                                            className={`rounded-xl px-4 py-3 text-sm font-black text-slate-950 ${isTeacherAssignmentActive ? 'bg-amber-400 hover:bg-amber-300' : 'bg-lime-400 hover:bg-lime-300'}`}
                                         >
                                             課題を始める
                                         </button>
@@ -11395,7 +11437,11 @@ const App: React.FC = () => {
                                         <button
                                             type="button"
                                             onClick={() => setShowAssignmentLetter(true)}
-                                            className="h-10 rounded-none border-2 border-amber-300 bg-amber-950/85 px-3 text-xs font-black text-amber-100 shadow-lg transition-colors hover:bg-amber-900"
+                                            className={`h-10 rounded-none border-2 px-3 text-xs font-black shadow-lg transition-colors ${
+                                                isTeacherAssignmentActive
+                                                    ? 'border-amber-300 bg-amber-950/85 text-amber-100 hover:bg-amber-900'
+                                                    : 'border-lime-300 bg-lime-950/85 text-lime-100 hover:bg-lime-900'
+                                            }`}
                                         >
                                             {isTeacherAssignmentActive ? '課題レター' : '今日の課題'}
                                         </button>

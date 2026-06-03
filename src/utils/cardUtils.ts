@@ -3,6 +3,55 @@ import { Card, CardType, TargetType } from '../types';
 
 const MAX_ILLUSTRATION_REFS = 8;
 
+const safeDecodeURIComponent = (value: string) => {
+    try {
+        return decodeURIComponent(value);
+    } catch (e) {
+        return value;
+    }
+};
+
+export const createEnemyIllustrationRef = (card: Card, name: string): string => {
+    const parts = [`enemy:${encodeURIComponent(name)}`];
+    if (card.visualTheme) parts.push(`theme:${card.visualTheme}`);
+    if (card.enemyIllustrationEnemyType) parts.push(`type:${encodeURIComponent(card.enemyIllustrationEnemyType)}`);
+    if (card.enemyIllustrationPhase !== undefined) parts.push(`phase:${card.enemyIllustrationPhase}`);
+    return parts.join('|');
+};
+
+export const parseEnemyIllustrationRef = (refToken: string): {
+    name: string;
+    visualTheme?: Card['visualTheme'];
+    enemyType?: string;
+    phase?: number;
+} | null => {
+    if (!refToken.startsWith('enemy:')) return null;
+    const [namePart, ...metaParts] = refToken.substring('enemy:'.length).split('|');
+    const parsed: {
+        name: string;
+        visualTheme?: Card['visualTheme'];
+        enemyType?: string;
+        phase?: number;
+    } = { name: safeDecodeURIComponent(namePart) };
+
+    metaParts.forEach((part) => {
+        const separatorIndex = part.indexOf(':');
+        if (separatorIndex <= 0) return;
+        const key = part.substring(0, separatorIndex);
+        const value = part.substring(separatorIndex + 1);
+        if (key === 'theme' && (value === 'elementary' || value === 'high-school')) {
+            parsed.visualTheme = value;
+        } else if (key === 'type') {
+            parsed.enemyType = safeDecodeURIComponent(value);
+        } else if (key === 'phase') {
+            const phase = Number(value);
+            if (Number.isFinite(phase)) parsed.phase = phase;
+        }
+    });
+
+    return parsed;
+};
+
 const toIllustrationRefs = (card: Card): string[] => {
     if (card.illustrationRefs && card.illustrationRefs.length > 0) {
         return card.illustrationRefs.filter(Boolean).slice(0, MAX_ILLUSTRATION_REFS);
@@ -13,11 +62,11 @@ const toIllustrationRefs = (card: Card): string[] => {
         ...(card.enemyIllustrationName ? [card.enemyIllustrationName] : [])
     ].filter(Boolean) as string[];
     if (enemyNames.length > 0) {
-        return [`enemy:${enemyNames[0]}`];
+        return [createEnemyIllustrationRef(card, enemyNames[0])];
     }
 
     if (card.capture && card.textureRef && !card.textureRef.includes('|')) {
-        return [`enemy:${card.textureRef}`];
+        return [createEnemyIllustrationRef(card, card.textureRef)];
     }
 
     if (card.name) {
