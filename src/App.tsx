@@ -11,7 +11,7 @@ import { ADDITIONAL_CARDS } from './constants1';
 import { GAME_STORIES } from './data/stories';
 import { HIGH_SCHOOL_STORIES } from './data/highSchoolStories';
 import { getChallengeScreenForMode } from './subjectConfig'; // New Utility
-import BattleScene from './components/BattleScene';
+import BattleScene, { BattleFinisherCutinOverlay } from './components/BattleScene';
 import TypingBattleScene from './components/TypingBattleScene';
 import RewardScreen from './components/RewardScreen';
 import FloorResultScreen from './components/FloorResultScreen';
@@ -73,7 +73,7 @@ import { getRandomCoopSupportCard } from './coopSupportCards';
 import { chooseBattleBackgroundScene, getBattleBackgroundFlavor } from './data/battleBackgrounds';
 import { OFFLINE_DISTRIBUTABLE, OFFLINE_NETWORK_FEATURE_MESSAGE } from './config/runtime';
 import { getAttackEffectKeyForCard, getMultihitFrameSequence } from './data/attackEffects';
-import { getThemedCharacters, getThemedEnemyDisplayName, type VisualThemeId } from './data/visualThemes';
+import { getHighSchoolEnemyVariant, getThemedCharacters, getThemedEnemyDisplayName, type VisualThemeId } from './data/visualThemes';
 
 const PARRY_WINDOW_MS = 650;
 const PARRY_PERFECT_MS = 220;
@@ -3280,6 +3280,28 @@ const App: React.FC = () => {
         return card ? { ...card } : null;
     };
 
+    const createFamiliarFinisherCard = (familiar: ActiveFamiliar): ICard => ({
+        id: `familiar-finisher-${familiar.instanceId}-${Date.now()}`,
+        name: familiar.name,
+        cost: 0,
+        type: CardType.SUMMON,
+        target: TargetType.SELF,
+        description: `${familiar.name}のフィニッシュ。`,
+        rarity: 'SPECIAL',
+        visualTheme: 'high-school',
+        highSchoolCardArtIndex: familiar.imageIndex,
+        textureRef: `FAMILIAR|${familiar.imageIndex}|FINISHER`,
+        familiarSummon: {
+            id: familiar.id,
+            name: familiar.name,
+            hpCost: familiar.hpCost,
+            imageIndex: familiar.imageIndex,
+            duration: familiar.duration,
+            trigger: familiar.trigger,
+            effect: { ...familiar.effect },
+        },
+    });
+
     const resolveHighSchoolFamiliars = (player: Player, enemies: Enemy[], logs: string[], effects: VisualEffectInstance[]) => {
         const nextFamiliars: ActiveFamiliar[] = [];
         const actionQueue: ActiveFamiliar[] = [];
@@ -3305,6 +3327,7 @@ const App: React.FC = () => {
                 const actionPulse = Date.now() + actionQueue.length * 720;
                 actionQueue.push({ ...familiar, actionPulse });
                 const amount = familiar.effect.amount;
+                const livingBeforeAction = livingEnemies().length;
                 switch (familiar.effect.kind) {
                     case 'DAMAGE':
                         hitRandomEnemy(amount);
@@ -3396,6 +3419,9 @@ const App: React.FC = () => {
                         break;
                     default:
                         break;
+                }
+                if (livingBeforeAction > 0 && livingEnemies().length === 0) {
+                    lastPlayedCardRef.current = createFamiliarFinisherCard(familiar);
                 }
                 logs.push(`${familiar.name}が行動した`);
             }
@@ -6618,9 +6644,15 @@ const App: React.FC = () => {
                     let shouldExhaust = c.exhaust;
                     if (c.type === CardType.SKILL && p.powers['CORRUPTION']) shouldExhaust = true;
 
-                    if (!shouldExhaust && !(c.type === CardType.POWER) && !(c.promptsExhaust === 99)) {
+                    const isConsumedOnUse = !!c.consumedOnUse;
+                    if (isConsumedOnUse) {
+                        p.deck = p.deck.filter(deckCard => deckCard.id !== c.id);
+                        currentLogs.push(`${trans(c.name, languageMode)}は使い切った。`);
+                    }
+
+                    if (!isConsumedOnUse && !shouldExhaust && !(c.type === CardType.POWER) && !(c.promptsExhaust === 99)) {
                         p.discardPile.push(c);
-                    } else if (shouldExhaust || c.promptsExhaust === 99) {
+                    } else if (!isConsumedOnUse && (shouldExhaust || c.promptsExhaust === 99)) {
                         if (p.powers['FEEL_NO_PAIN']) p.block += p.powers['FEEL_NO_PAIN'];
                     }
                 });
@@ -6633,9 +6665,14 @@ const App: React.FC = () => {
                     currentLogs.push("むしゃくしゃの怒りが増した！");
                     nextActiveEffects.push({ id: `vfx-metric-${Date.now()}`, type: 'FIRE', targetId: 'player' });
                 }
-                if (!shouldExhaust && !(card.type === CardType.POWER) && !(card.promptsExhaust === 99)) {
+                const isConsumedOnUse = !!card.consumedOnUse;
+                if (isConsumedOnUse) {
+                    p.deck = p.deck.filter(deckCard => deckCard.id !== card.id);
+                    currentLogs.push(`${trans(card.name, languageMode)}は使い切った。`);
+                }
+                if (!isConsumedOnUse && !shouldExhaust && !(card.type === CardType.POWER) && !(card.promptsExhaust === 99)) {
                     p.discardPile.push(card);
-                } else if (shouldExhaust || card.promptsExhaust === 99) {
+                } else if (!isConsumedOnUse && (shouldExhaust || card.promptsExhaust === 99)) {
                     if (p.powers['FEEL_NO_PAIN']) p.block += p.powers['FEEL_NO_PAIN'];
                 }
                 if (card.promptsDiscard) nextSelectionState = { active: true, type: 'DISCARD', amount: card.promptsDiscard, originCardId: card.id };
@@ -7156,6 +7193,7 @@ const App: React.FC = () => {
             const enemy = stateRef.current.enemies.find(e => e.id === enemyTemplate.id);
             if (!enemy || enemy.currentHp <= 0) continue;
             setActingEnemyId(enemy.id);
+            lastActingEnemyRef.current = { ...enemy };
             const isBard = stateRef.current.player.id === 'BARD';
             const isAttackIntent =
                 enemy.nextIntent.type === EnemyIntentType.ATTACK ||
@@ -7436,6 +7474,9 @@ const App: React.FC = () => {
                             enemy.floatingText = { id: `phase-evo-${Date.now()}`, text: '本気モード！', color: 'text-yellow-500' };
                             newLogs.push("校長先生が真の姿を現した！");
                             nextActiveEffects.push({ id: `vfx-evo2-${Date.now()}`, type: 'BUFF', targetId: e.id });
+                        }
+                        if (didHpDamage && p.currentHp <= 0) {
+                            lastLethalEnemyRef.current = { ...e };
                         }
                     }
                     if (intent.type === EnemyIntentType.DEFEND || intent.type === EnemyIntentType.ATTACK_DEFEND) {
@@ -8337,7 +8378,11 @@ const App: React.FC = () => {
     const stateRef = useRef(gameState);
     const lastPlayedCardRef = useRef<ICard | null>(null);
     const victorySequenceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const defeatSequenceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const battleVictoryResolvingRef = useRef(false);
+    const battleDefeatResolvingRef = useRef(false);
+    const lastActingEnemyRef = useRef<Enemy | null>(null);
+    const lastLethalEnemyRef = useRef<Enemy | null>(null);
     useEffect(() => { stateRef.current = gameState; }, [gameState]);
 
     const resolveBattleVictory = useCallback(() => {
@@ -8390,9 +8435,69 @@ const App: React.FC = () => {
         });
     }, [coopSelfPeerId, coopSession, selectedCharName, unlockRandomAdditionalCard]);
 
+    const createEnemyFinisherCard = useCallback((enemy: Enemy): ICard => {
+        const storedTheme = typeof window !== 'undefined'
+            ? window.localStorage.getItem('learning-rogue-visual-theme')
+            : null;
+        const finisherTheme: VisualThemeId =
+            stateRef.current.visualTheme === 'high-school' || visualTheme === 'high-school' || storedTheme === 'high-school'
+                ? 'high-school'
+                : 'elementary';
+        const finisherEnemyName = finisherTheme === 'high-school'
+            ? getHighSchoolEnemyVariant(enemy).name
+            : enemy.name;
+
+        return {
+            id: `enemy-finisher-${enemy.id}-${Date.now()}`,
+            name: `${finisherEnemyName}のフィニッシュ`,
+            cost: 0,
+            type: CardType.ATTACK,
+            target: TargetType.SELF,
+            description: `${finisherEnemyName}の決定打。`,
+            damage: 0,
+            rarity: 'SPECIAL',
+            capture: true,
+            enemyIllustrationName: finisherEnemyName,
+            enemyIllustrationEnemyType: enemy.enemyType,
+            enemyIllustrationPhase: enemy.phase,
+            visualTheme: finisherTheme,
+            textureRef: finisherEnemyName,
+        };
+    }, [visualTheme]);
+
+    const resolveBattleDefeat = useCallback(() => {
+        storageService.clearSave();
+        setNewlyUnlockedCard(null);
+        setLegacyCardSelected(false);
+        audioService.playSound('lose');
+        audioService.playBGM('game_over');
+        const currentState = stateRef.current;
+        const score = calculateScore(currentState, false);
+        storageService.saveScore({
+            id: `run-${Date.now()}`,
+            playerName: 'Player',
+            characterName: selectedCharName,
+            score: score,
+            act: currentState.act,
+            floor: currentState.floor,
+            victory: false,
+            date: Date.now(),
+            challengeMode: currentState.challengeMode
+        });
+        setGameState(prev => ({
+            ...prev,
+            player: clearBattleOnlyCardState(clearBigLadleTemp(prev.player)),
+            screen: GameScreen.GAME_OVER,
+            newlyUnlockedCardName: undefined
+        }));
+    }, [selectedCharName]);
+
     useEffect(() => {
         if (gameState.screen !== GameScreen.BATTLE) {
             battleVictoryResolvingRef.current = false;
+            battleDefeatResolvingRef.current = false;
+            lastActingEnemyRef.current = null;
+            lastLethalEnemyRef.current = null;
         }
         if (gameState.screen === GameScreen.BATTLE) {
             if (gameState.challengeMode === 'COOP' && coopSession && !coopSession.isHost) {
@@ -8422,6 +8527,8 @@ const App: React.FC = () => {
                 const ghostPotIndex = gameState.player.potions.findIndex(p => p.templateId === 'GHOST_IN_JAR');
                 const revivedPlayer = reviveWithTailEffect(gameState.player);
                 if (revivedPlayer) {
+                    lastActingEnemyRef.current = null;
+                    lastLethalEnemyRef.current = null;
                     audioService.playSound('buff');
                     setGameState(prev => ({
                         ...prev,
@@ -8430,6 +8537,8 @@ const App: React.FC = () => {
                     return;
                 }
                 if (ghostPotIndex !== -1) {
+                    lastActingEnemyRef.current = null;
+                    lastLethalEnemyRef.current = null;
                     audioService.playSound('buff');
                     setGameState(prev => ({
                         ...prev,
@@ -8448,39 +8557,39 @@ const App: React.FC = () => {
                         participant => participant.peerId !== coopSelfPeerId && (participant.currentHp ?? participant.maxHp ?? 0) > 0
                     );
                     if (aliveCompanions.length > 0) {
+                        lastActingEnemyRef.current = null;
+                        lastLethalEnemyRef.current = null;
                         return;
                     }
                 }
 
-                // --- FIXED: Immediate save deletion to prevent repeat unlocks ---
-                storageService.clearSave();
-
-                setNewlyUnlockedCard(null);
-
-                setLegacyCardSelected(false);
-                audioService.playSound('lose');
-                audioService.playBGM('game_over');
-                const score = calculateScore(gameState, false);
-                storageService.saveScore({
-                    id: `run-${Date.now()}`,
-                    playerName: 'Player',
-                    characterName: selectedCharName,
-                    score: score,
-                    act: gameState.act,
-                    floor: gameState.floor,
-                    victory: false,
-                    date: Date.now(),
-                    challengeMode: gameState.challengeMode
-                });
-                setGameState(prev => ({
-                    ...prev,
-                    player: clearBattleOnlyCardState(clearBigLadleTemp(prev.player)),
-                    screen: GameScreen.GAME_OVER,
-                    newlyUnlockedCardName: undefined
-                }));
+                if (battleDefeatResolvingRef.current) return;
+                battleDefeatResolvingRef.current = true;
+                const lethalEnemy = lastLethalEnemyRef.current
+                    || lastActingEnemyRef.current
+                    || stateRef.current.enemies.find(enemy => enemy.currentHp > 0)
+                    || stateRef.current.enemies[0]
+                    || null;
+                if (lethalEnemy) {
+                    const finisherCard = createEnemyFinisherCard(lethalEnemy);
+                    setBattleFinisherCutinCard(finisherCard);
+                    audioService.playSound('finisher_slash');
+                    if (defeatSequenceTimerRef.current) {
+                        clearTimeout(defeatSequenceTimerRef.current);
+                    }
+                    defeatSequenceTimerRef.current = setTimeout(() => {
+                        setBattleFinisherCutinCard(null);
+                        lastActingEnemyRef.current = null;
+                        lastLethalEnemyRef.current = null;
+                        resolveBattleDefeat();
+                        defeatSequenceTimerRef.current = null;
+                    }, COOP_FINISHER_DISPLAY_MS);
+                } else {
+                    resolveBattleDefeat();
+                }
             }
         }
-    }, [gameState.enemies, gameState.player.currentHp, gameState.screen, gameState.act, gameState.challengeMode, coopSession, unlockRandomAdditionalCard, battleFinisherCutinCard, resolveBattleVictory]);
+    }, [gameState.enemies, gameState.player.currentHp, gameState.screen, gameState.act, gameState.challengeMode, coopSession, unlockRandomAdditionalCard, battleFinisherCutinCard, resolveBattleVictory, createEnemyFinisherCard, resolveBattleDefeat]);
 
     useEffect(() => {
         if (gameState.challengeMode !== 'COOP') return;
@@ -8506,6 +8615,9 @@ const App: React.FC = () => {
         return () => {
             if (victorySequenceTimerRef.current) {
                 clearTimeout(victorySequenceTimerRef.current);
+            }
+            if (defeatSequenceTimerRef.current) {
+                clearTimeout(defeatSequenceTimerRef.current);
             }
         };
     }, []);
@@ -12944,6 +13056,12 @@ const App: React.FC = () => {
                                 );
                             })()}
                         </div>
+                    </div>
+                )}
+
+                {battleFinisherCutinCard && gameState.screen !== GameScreen.BATTLE && (
+                    <div className="fixed inset-0 z-[300] pointer-events-none overflow-hidden">
+                        <BattleFinisherCutinOverlay card={battleFinisherCutinCard} languageMode={languageMode} />
                     </div>
                 )}
 

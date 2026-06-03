@@ -57,6 +57,12 @@ const mergeIllustrationRefsCircular = (c1: Card, c2: Card, c3?: Card): { refs: s
 const STATUS_PAIN_IDS = new Set(['BURN', 'INJURY', 'SLIMED', 'WOUND', 'PAIN', 'DECAY']);
 const STATUS_HAND_LOCK_IDS = new Set(['DAZED', 'NORMALITY', 'VOID', 'CLUMSINESS']);
 const STATUS_DECK_POLLUTION_IDS = new Set(['REGRET', 'SHAME', 'DOUBT', 'WRITHE', 'PARASITE']);
+const HOLOGRAPHIC_VARIANT_BY_CARD_TYPE: Partial<Record<CardType, NonNullable<Card['holographicVariant']>>> = {
+    [CardType.ATTACK]: 'red',
+    [CardType.POWER]: 'yellow',
+    [CardType.SKILL]: 'blue',
+    [CardType.SUMMON]: 'purple',
+};
 
 export type StatusCategoryKey = 'PAIN' | 'HAND_LOCK' | 'DECK_POLLUTION';
 
@@ -192,18 +198,89 @@ export const getUpgradedCard = (card: Card): Card => {
     return newCard;
 };
 
+const getHolographicVariantForCard = (card: Card): NonNullable<Card['holographicVariant']> => {
+    return HOLOGRAPHIC_VARIANT_BY_CARD_TYPE[card.type] || card.holographicVariant || 'blue';
+};
+
+const boostHolographicValue = (value: number, minimum = 1): number => {
+    return value + Math.max(minimum, Math.ceil(value * 0.25));
+};
+
+const boostHolographicDecimal = (value: number): number => {
+    return Math.round((value + Math.max(0.25, value * 0.15)) * 100) / 100;
+};
+
+const syncHolographicNumber = (description: string, oldValue: number | undefined, newValue: number | undefined, patterns: RegExp[]): string => {
+    if (oldValue === undefined || newValue === undefined || oldValue === newValue) return description;
+    const escapedOldValue = String(oldValue).replace('.', '\\.');
+    let synced = description;
+    for (const pattern of patterns) {
+        const next = synced.replace(pattern, (...args) => args[0].replace(new RegExp(escapedOldValue), String(newValue)));
+        if (next !== synced) return next;
+    }
+    return synced;
+};
+
+const applyHolographicBonus = (card: Card): Card => {
+    const base = { ...card };
+    const next: Card = { ...card };
+
+    if (next.heal !== undefined && next.heal > 0) next.heal = boostHolographicValue(next.heal, 2);
+    if (next.gold !== undefined && next.gold > 0) next.gold = boostHolographicValue(next.gold, 5);
+    if (next.blockMultiplier !== undefined && next.blockMultiplier > 0) next.blockMultiplier = boostHolographicDecimal(next.blockMultiplier);
+    if (next.strengthScaling !== undefined && next.strengthScaling > 0) next.strengthScaling = boostHolographicValue(next.strengthScaling);
+    if (next.fatalEnergy !== undefined && next.fatalEnergy > 0) next.fatalEnergy = boostHolographicValue(next.fatalEnergy);
+    if (next.fatalPermanentDamage !== undefined && next.fatalPermanentDamage > 0) next.fatalPermanentDamage = boostHolographicValue(next.fatalPermanentDamage);
+    if (next.fatalMaxHp !== undefined && next.fatalMaxHp > 0) next.fatalMaxHp = boostHolographicValue(next.fatalMaxHp);
+    if (next.nextTurnEnergy !== undefined && next.nextTurnEnergy > 0) next.nextTurnEnergy = boostHolographicValue(next.nextTurnEnergy);
+    if (next.nextTurnDraw !== undefined && next.nextTurnDraw > 0) next.nextTurnDraw = boostHolographicValue(next.nextTurnDraw);
+    if (next.promptsCopy !== undefined && next.promptsCopy > 0) next.promptsCopy = boostHolographicValue(next.promptsCopy);
+    if (next.damagePerAttackPlayed !== undefined && next.damagePerAttackPlayed > 0) next.damagePerAttackPlayed = boostHolographicValue(next.damagePerAttackPlayed);
+    if (next.damagePerCardInHand !== undefined && next.damagePerCardInHand > 0) next.damagePerCardInHand = boostHolographicValue(next.damagePerCardInHand);
+    if (next.damagePerStrike !== undefined && next.damagePerStrike > 0) next.damagePerStrike = boostHolographicValue(next.damagePerStrike);
+    if (next.damagePerCardInDraw !== undefined && next.damagePerCardInDraw > 0) next.damagePerCardInDraw = boostHolographicValue(next.damagePerCardInDraw);
+    if (next.playCopies !== undefined && next.playCopies > 0) next.playCopies = boostHolographicValue(next.playCopies);
+    if (next.hitsPerSkillInHand !== undefined && next.hitsPerSkillInHand > 0) next.hitsPerSkillInHand = boostHolographicValue(next.hitsPerSkillInHand);
+    if (next.hitsPerAttackPlayed !== undefined && next.hitsPerAttackPlayed > 0) next.hitsPerAttackPlayed = boostHolographicValue(next.hitsPerAttackPlayed);
+    if (next.addCardToHand) next.addCardToHand = { ...next.addCardToHand, count: boostHolographicValue(next.addCardToHand.count) };
+    if (next.addCardToDraw) next.addCardToDraw = { ...next.addCardToDraw, count: boostHolographicValue(next.addCardToDraw.count) };
+    if (next.addCardToDiscard) next.addCardToDiscard = { ...next.addCardToDiscard, count: boostHolographicValue(next.addCardToDiscard.count) };
+
+    let syncedDesc = next.description;
+    syncedDesc = syncHolographicNumber(syncedDesc, base.heal, next.heal, [/HPを?\d+回復/, /HP\d+回復/]);
+    syncedDesc = syncHolographicNumber(syncedDesc, base.gold, next.gold, [/\d+ゴールド/]);
+    syncedDesc = syncHolographicNumber(syncedDesc, base.blockMultiplier, next.blockMultiplier, [/ブロックを\d+(?:\.\d+)?倍/, /ブロック\d+(?:\.\d+)?倍/]);
+    syncedDesc = syncHolographicNumber(syncedDesc, base.fatalEnergy, next.fatalEnergy, [/倒すとE\d+/, /撃破時.*?E\d+/]);
+    syncedDesc = syncHolographicNumber(syncedDesc, base.fatalPermanentDamage, next.fatalPermanentDamage, [/永久に\d+ダメージ/, /撃破時.*?\d+ダメージ/]);
+    syncedDesc = syncHolographicNumber(syncedDesc, base.fatalMaxHp, next.fatalMaxHp, [/最大HP[+＋]\d+/, /最大HPを?\d+増/]);
+    syncedDesc = syncHolographicNumber(syncedDesc, base.nextTurnEnergy, next.nextTurnEnergy, [/次(?:の)?ターン.*?(?:E|エナジー|エネルギー)[+＋]?\d+/]);
+    syncedDesc = syncHolographicNumber(syncedDesc, base.nextTurnDraw, next.nextTurnDraw, [/次(?:の)?ターン.*?\d+枚引く/, /次(?:の)?ターン.*?ドロー[+＋]?\d+/]);
+    syncedDesc = syncHolographicNumber(syncedDesc, base.promptsCopy, next.promptsCopy, [/\d+枚コピー/]);
+    syncedDesc = syncHolographicNumber(syncedDesc, base.damagePerAttackPlayed, next.damagePerAttackPlayed, [/攻撃.*?\d+ダメージ/]);
+    syncedDesc = syncHolographicNumber(syncedDesc, base.damagePerCardInHand, next.damagePerCardInHand, [/手札.*?\d+ダメージ/]);
+    syncedDesc = syncHolographicNumber(syncedDesc, base.damagePerStrike, next.damagePerStrike, [/ストライク.*?\d+ダメージ/]);
+    syncedDesc = syncHolographicNumber(syncedDesc, base.damagePerCardInDraw, next.damagePerCardInDraw, [/山札.*?\d+ダメージ/]);
+    syncedDesc = syncHolographicNumber(syncedDesc, base.addCardToHand?.count, next.addCardToHand?.count, [/\d+枚手札に加える/, /」を\d+枚手札に加える/]);
+    syncedDesc = syncHolographicNumber(syncedDesc, base.addCardToDraw?.count, next.addCardToDraw?.count, [/\d+枚山札に加える/, /」を\d+枚山札に加える/]);
+    syncedDesc = syncHolographicNumber(syncedDesc, base.addCardToDiscard?.count, next.addCardToDiscard?.count, [/\d+枚捨て札に加える/, /」を\d+枚捨て札に加える/]);
+    next.description = syncedDesc;
+
+    return next;
+};
+
 export const createHolographicCard = (card: Card): Card => {
     if (card.holographic) return card;
-    const boostedCard = getUpgradedCard({
+    const boostedCard = applyHolographicBonus(getUpgradedCard({
         ...card,
         upgraded: false,
         holographic: false,
-    });
+    }));
 
     return {
         ...boostedCard,
         upgraded: false,
         holographic: true,
+        holographicVariant: getHolographicVariantForCard(boostedCard),
     };
 };
 
@@ -222,13 +299,14 @@ const getTripleBoostedCard = (card: Card): Card => {
 };
 
 export const createAssignmentRewardCard = (card: Card): Card => {
-    const boostedCard = getTripleBoostedCard(card);
+    const boostedCard = applyHolographicBonus(getTripleBoostedCard(card));
     const variant = Math.floor(Math.random() * 6);
     const next: Card = {
         ...boostedCard,
         id: `assignment-reward-card-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
         upgraded: false,
         holographic: true,
+        holographicVariant: getHolographicVariantForCard(boostedCard),
         rewardCard: true,
         rarity: 'SPECIAL',
     };

@@ -972,7 +972,10 @@ const P2PVSBattleScene: React.FC<P2PVSBattleSceneProps> = ({ player1, player2, i
         }
 
         const shouldExhaust = card.exhaust || (card.type === CardType.SKILL && nextCurrent.powers['CORRUPTION']);
-        if (shouldExhaust || card.promptsExhaust === 99) {
+        if (card.consumedOnUse) {
+            nextCurrent.deck = nextCurrent.deck.filter(deckCard => deckCard.id !== card.id);
+            nextCurrent.discardPile = nextCurrent.discardPile.filter(c => c.id !== card.id);
+        } else if (shouldExhaust || card.promptsExhaust === 99) {
             nextCurrent.discardPile = nextCurrent.discardPile.filter(c => c.id !== card.id);
             if (nextCurrent.powers['FEEL_NO_PAIN']) nextCurrent.block += nextCurrent.powers['FEEL_NO_PAIN'];
         } else if (card.type !== CardType.POWER) {

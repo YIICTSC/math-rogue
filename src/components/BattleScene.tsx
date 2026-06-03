@@ -398,7 +398,8 @@ const BattleScene: React.FC<BattleSceneProps> = ({
     const themedEnemyNameMapRef = useRef<Map<string, string>>(new Map());
     const [selectedSupportCard, setSelectedSupportCard] = useState<CoopSupportCard | null>(null);
     const [coopSupportHudOpen, setCoopSupportHudOpen] = useState(false);
-    const isFinisherActive = !!finisherCutinCard;
+    const isEnemyFinisherActive = !!finisherCutinCard?.id?.startsWith('enemy-finisher-');
+    const isFinisherActive = !!finisherCutinCard && !isEnemyFinisherActive;
     const visualEnemies = isFinisherActive && enemies.length === 0 ? lastVisibleEnemies : enemies;
     const playerHpPercent = (player.currentHp / player.maxHp) * 100;
     const supportNeedsTarget = (card: CoopSupportCard) => (
@@ -2132,6 +2133,10 @@ const BattleScene: React.FC<BattleSceneProps> = ({
 const MAX_ILLUSTRATION_REFS = 8;
 
 const extractIllustrationTokens = (card: ICard): string[] => {
+    if (card.familiarSummon) {
+        return [`familiar:${card.familiarSummon.imageIndex}`];
+    }
+
     if (card.illustrationRefs && card.illustrationRefs.length > 0) {
         return card.illustrationRefs.filter(Boolean).slice(0, MAX_ILLUSTRATION_REFS);
     }
@@ -2154,7 +2159,7 @@ const extractIllustrationTokens = (card: ICard): string[] => {
 const FinisherArtPiece: React.FC<{ token: string; seed: string; languageMode: LanguageMode; card: ICard }> = ({ token, seed, languageMode, card }) => {
     const [imageIndex, setImageIndex] = useState(0);
     const [failed, setFailed] = useState(false);
-    const normalized = token.startsWith('enemy:') || token.startsWith('card:') || token.startsWith('pixel:') ? token : `card:${token}`;
+    const normalized = token.startsWith('enemy:') || token.startsWith('card:') || token.startsWith('pixel:') || token.startsWith('familiar:') ? token : `card:${token}`;
 
     useEffect(() => {
         setImageIndex(0);
@@ -2174,6 +2179,20 @@ const FinisherArtPiece: React.FC<{ token: string; seed: string; languageMode: La
                 className="w-full h-full"
                 size={32}
             />
+        );
+    }
+
+    if (normalized.startsWith('familiar:')) {
+        const familiarImageIndex = Number(normalized.substring('familiar:'.length));
+        return (
+            <div className="relative w-full h-full overflow-hidden bg-[radial-gradient(circle_at_55%_42%,rgba(217,70,239,0.38),rgba(15,23,42,0.72)_52%,rgba(0,0,0,0.95))]">
+                <div className="absolute inset-0 bg-[linear-gradient(115deg,transparent_0%,rgba(255,255,255,0.12)_32%,rgba(236,72,153,0.3)_52%,transparent_74%)]" />
+                <img
+                    src={assetUrl(`sprites/high-school/familiars-action/${familiarImageIndex}.webp`)}
+                    alt={card.familiarSummon?.name || card.name}
+                    className="absolute left-1/2 top-1/2 h-[150%] w-[150%] -translate-x-1/2 -translate-y-1/2 object-contain drop-shadow-[0_0_24px_rgba(217,70,239,0.95)]"
+                />
+            </div>
         );
     }
 

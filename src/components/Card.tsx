@@ -18,6 +18,7 @@ interface CardProps {
 
 export const KEYWORD_DEFINITIONS: Record<string, { title: string; desc: string }> = {
   EXHAUST: { title: '廃棄', desc: '使用後、この戦闘中はデッキから除外される。' },
+  CONSUMED_ON_USE: { title: '使い切り', desc: '使用後、このゲーム中のデッキから除外される。カード消しゴムでは消せない。' },
   STRENGTH: { title: 'ムキムキ', desc: '攻撃ダメージがその数値分アップ！' },
   VULNERABLE: { title: 'びくびく', desc: '攻撃から受けるダメージが50%増えちゃう！' },
   WEAK: { title: 'へろへろ', desc: '攻撃で与えるダメージが25%減っちゃう...' },
@@ -26,6 +27,22 @@ export const KEYWORD_DEFINITIONS: Record<string, { title: string; desc: string }
 };
 
 const MAX_ILLUSTRATION_REFS = 8;
+const HOLOGRAPHIC_PRISM_ASSETS: Record<NonNullable<CardType['holographicVariant']>, string> = {
+  red: 'card-illustrations/holographic-prism-red.png',
+  yellow: 'card-illustrations/holographic-prism-yellow.png',
+  blue: 'card-illustrations/holographic-prism-blue.png',
+  purple: 'card-illustrations/holographic-prism-purple.png',
+};
+const HOLOGRAPHIC_VARIANT_BY_CARD_TYPE: Partial<Record<EnumCardType, NonNullable<CardType['holographicVariant']>>> = {
+  [EnumCardType.ATTACK]: 'red',
+  [EnumCardType.POWER]: 'yellow',
+  [EnumCardType.SKILL]: 'blue',
+  [EnumCardType.SUMMON]: 'purple',
+};
+
+const getStableHolographicVariant = (card: CardType): NonNullable<CardType['holographicVariant']> => {
+  return HOLOGRAPHIC_VARIANT_BY_CARD_TYPE[card.type] || card.holographicVariant || 'blue';
+};
 
 const extractCompositeIllustrationRefs = (card: CardType): string[] => {
   if (card.illustrationRefs && card.illustrationRefs.length > 0) {
@@ -293,6 +310,8 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled, onInspect, languag
   const cardFrameClass = card.holographic
     ? 'card-holographic border-cyan-200 shadow-[0_0_18px_rgba(103,232,249,0.65)]'
     : '';
+  const holographicVariant = getStableHolographicVariant(card);
+  const holographicPrismPath = HOLOGRAPHIC_PRISM_ASSETS[holographicVariant];
   const nameColorClass = card.holographic
     ? 'text-cyan-100'
     : card.upgraded
@@ -317,6 +336,10 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled, onInspect, languag
     >
       {card.holographic && (
         <>
+          <div
+            className={`card-holographic-prism card-holographic-prism-${holographicVariant} pointer-events-none absolute inset-0 z-[11] rounded-lg`}
+            style={{ backgroundImage: `url(${assetUrl(holographicPrismPath)})` }}
+          />
           <div className="card-holographic-sheen pointer-events-none absolute inset-0 z-[12] rounded-lg" />
           <div className="card-holographic-sparkles pointer-events-none absolute inset-0 z-[13] rounded-lg" />
         </>

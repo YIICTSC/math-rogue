@@ -28,7 +28,7 @@ export const getErasableEffectOptions = (card: Card): ErasableEffectOption[] => 
   if (card.name === CARD_ERASER_NAME || card.originalNames?.includes(CARD_ERASER_NAME)) return [];
   const options: ErasableEffectOption[] = [];
 
-  if (card.exhaust) {
+  if (card.exhaust && !card.consumedOnUse) {
     options.push({ id: 'exhaust', label: '廃棄を削除', description: '使用後に廃棄されなくなる。' });
   }
   if ((card.selfDamage || 0) > 0) {

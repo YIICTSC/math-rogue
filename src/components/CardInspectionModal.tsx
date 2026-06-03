@@ -13,7 +13,8 @@ interface CardInspectionModalProps {
 
 const getCardKeywords = (card: ICard) => {
   const keywords = [];
-  if (card.exhaust) keywords.push(KEYWORD_DEFINITIONS.EXHAUST);
+  if (card.consumedOnUse) keywords.push(KEYWORD_DEFINITIONS.CONSUMED_ON_USE);
+  if (card.exhaust && !card.consumedOnUse) keywords.push(KEYWORD_DEFINITIONS.EXHAUST);
   if (card.strength || card.description.includes('ムキムキ')) keywords.push(KEYWORD_DEFINITIONS.STRENGTH);
   if (card.vulnerable || card.description.includes('びくびく')) keywords.push(KEYWORD_DEFINITIONS.VULNERABLE);
   if (card.weak || card.description.includes('へろへろ')) keywords.push(KEYWORD_DEFINITIONS.WEAK);

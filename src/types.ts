@@ -37,11 +37,13 @@ export interface Card {
 
   // Basic Mechanics
   exhaust?: boolean;
+  consumedOnUse?: boolean;
   strength?: number;
   vulnerable?: number;
   weak?: number;
   upgraded?: boolean;
   holographic?: boolean;
+  holographicVariant?: 'red' | 'yellow' | 'blue' | 'purple';
   rewardCard?: boolean;
   unplayable?: boolean;
 

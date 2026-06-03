@@ -58,6 +58,9 @@ const getGradeNumber = (grade: string): number | null => {
   return null;
 };
 
+const getDisplayGradeName = (gradeNumber: number) =>
+  gradeNumber <= 6 ? `${gradeNumber}年生` : `中学${gradeNumber - 6}年生`;
+
 const getEndOfToday = (date: Date) => {
   const due = new Date(date);
   due.setHours(23, 59, 0, 0);
@@ -80,6 +83,9 @@ const getSchoolYearWeekIndex = (date: Date) => {
   const elapsedDays = Math.max(0, Math.floor((date.getTime() - schoolYearStart.getTime()) / 86400000));
   return Math.min(51, Math.floor(elapsedDays / 7));
 };
+
+const getDailySummaryGradeNumber = (gradeNumber: number, schoolYearWeekIndex: number) =>
+  schoolYearWeekIndex < 26 ? Math.max(1, gradeNumber - 1) : gradeNumber;
 
 const toAssignmentUnit = (
   unit: { id: string; name: string; mode?: string; modes?: string[] },
@@ -124,6 +130,13 @@ const getGradeCategoryUnits = (gradeNumber: number, categoryId: SubjectCategoryT
       modes: [`KANJI_${gradeNumber}`],
     }];
   }
+  if (categoryId === 'SUMMARY') {
+    return getCurrentUnitsForCategory(categoryId, gradeNumber).map((unit) => ({
+      id: `${categoryId}:${unit.id}`,
+      name: `総まとめ（${getDisplayGradeName(gradeNumber)}）`,
+      modes: unit.modes || (unit.mode ? [unit.mode] : []),
+    })).filter((unit) => unit.modes.length > 0);
+  }
   return getCurrentUnitsForCategory(categoryId, gradeNumber).map((unit) => ({
     id: `${categoryId}:${unit.id}`,
     name: unit.name,
@@ -134,7 +147,7 @@ const getGradeCategoryUnits = (gradeNumber: number, categoryId: SubjectCategoryT
   })).filter((unit) => unit.modes.length > 0);
 };
 
-const getGradeUnits = (gradeNumber: number) => {
+const getGradeUnits = (gradeNumber: number, summaryGradeNumber = gradeNumber) => {
   const categoryIds = [
     'MATH_GRADES',
     'KOKUGO_GRADES',
@@ -144,7 +157,9 @@ const getGradeUnits = (gradeNumber: number) => {
     'SUMMARY',
   ] as Array<SubjectCategoryType | 'KANJI'>;
 
-  return categoryIds.flatMap((categoryId) => getGradeCategoryUnits(gradeNumber, categoryId));
+  return categoryIds.flatMap((categoryId) =>
+    getGradeCategoryUnits(categoryId === 'SUMMARY' ? summaryGradeNumber : gradeNumber, categoryId)
+  );
 };
 
 const getCorrectCountForUnit = (unit: { modes: string[] }, modeCorrectCounts: Record<string, number>) =>
@@ -158,17 +173,18 @@ export const createDailyAssignment = (
   if (!profile.grade) return null;
   const gradeNumber = getGradeNumber(profile.grade);
   const adult = profile.grade === '大人';
-  const baseUnits = gradeNumber ? getGradeUnits(gradeNumber) : getUpperUnits(adult);
-  if (baseUnits.length === 0) return null;
-
   const dateId = getLocalDateId(date);
   const schoolYearWeekIndex = getSchoolYearWeekIndex(date);
+  const summaryGradeNumber = gradeNumber ? getDailySummaryGradeNumber(gradeNumber, schoolYearWeekIndex) : null;
+  const baseUnits = gradeNumber ? getGradeUnits(gradeNumber, summaryGradeNumber || gradeNumber) : getUpperUnits(adult);
+  if (baseUnits.length === 0) return null;
+
   const weeklyPlan = gradeNumber
     ? CURRICULUM_WEEKLY_PLANS[gradeNumber]?.[schoolYearWeekIndex]
     : UPPER_CURRICULUM_WEEKLY_PLANS[adult ? 'adult' : 'upper']?.[schoolYearWeekIndex];
   const weeklyUnits = weeklyPlan
     ? gradeNumber
-      ? getGradeCategoryUnits(gradeNumber, weeklyPlan.categoryId)
+      ? getGradeCategoryUnits(weeklyPlan.categoryId === 'SUMMARY' ? (summaryGradeNumber || gradeNumber) : gradeNumber, weeklyPlan.categoryId)
       : weeklyPlan.categoryId === 'KANJI' || weeklyPlan.categoryId === 'SUMMARY'
         ? []
         : getUpperCategoryUnits(weeklyPlan.categoryId, adult)
