@@ -1142,6 +1142,7 @@ const App: React.FC = () => {
     const coopEndTurnResendTimerRef = useRef<number | null>(null);
     const coopRealtimeAutoAdvanceTimerRef = useRef<number | null>(null);
     const coopRemoteFinisherShownAtRef = useRef<number | null>(null);
+    const coopRemoteFinisherCardIdRef = useRef<string | null>(null);
     const coopRemoteFinisherClearTimerRef = useRef<number | null>(null);
     const coopRemoteEffectClearTimerRef = useRef<number | null>(null);
     const coopLastBattleCardEventAtRef = useRef<number | null>(null);
@@ -2777,16 +2778,15 @@ const App: React.FC = () => {
         ]);
 
         if (!syncableScreens.has(gameState.screen)) return;
-        if (
-            gameState.challengeMode === 'COOP' &&
-            coopNeedsInitialMapSync &&
-            prevScreenRef.current === GameScreen.RELIC_SELECTION &&
-            gameState.screen === GameScreen.MAP
-        ) {
-            return;
-        }
         const timeout = window.setTimeout(() => {
             sendCoopStateSync();
+            if (
+                gameState.challengeMode === 'COOP' &&
+                coopNeedsInitialMapSync &&
+                gameState.screen === GameScreen.MAP
+            ) {
+                setCoopNeedsInitialMapSync(false);
+            }
         }, 80);
 
         return () => window.clearTimeout(timeout);
@@ -2883,6 +2883,7 @@ const App: React.FC = () => {
             coopLastBattleActionSignatureRef.current = null;
             coopProcessedHostActionIdsRef.current.clear();
             coopPendingHostActionRef.current = null;
+            coopRemoteFinisherCardIdRef.current = null;
         }
     }, [gameState.screen]);
 
@@ -4725,6 +4726,12 @@ const App: React.FC = () => {
                     coopMapPendingTimerRef.current = null;
                 }, 2500);
                 p2pService.send({ type: 'COOP_NODE_SELECT', nodeId: node.id });
+                audioService.playSound('select');
+                return;
+            }
+            if (coopNeedsInitialMapSync && !allowRemoteCoopSelection) {
+                sendCoopStateSync();
+                setCoopNeedsInitialMapSync(false);
                 audioService.playSound('select');
                 return;
             }
@@ -10734,6 +10741,7 @@ const App: React.FC = () => {
                     queuedCoopBattleEventRef.current = null;
                     setCoopBattleState(null);
                     setBattleFinisherCutinCard(null);
+                    coopRemoteFinisherCardIdRef.current = null;
                     coopRemoteFinisherShownAtRef.current = null;
                     setGameState(prev => ({
                         ...prev,
@@ -10800,8 +10808,11 @@ const App: React.FC = () => {
                         window.clearTimeout(coopRemoteFinisherClearTimerRef.current);
                         coopRemoteFinisherClearTimerRef.current = null;
                     }
-                    coopRemoteFinisherShownAtRef.current = Date.now();
-                    setBattleFinisherCutinCard(data.finisherCutinCard);
+                    if (coopRemoteFinisherCardIdRef.current !== data.finisherCutinCard.id) {
+                        coopRemoteFinisherCardIdRef.current = data.finisherCutinCard.id;
+                        coopRemoteFinisherShownAtRef.current = Date.now();
+                        setBattleFinisherCutinCard(data.finisherCutinCard);
+                    }
                 } else if (battleFinisherCutinCardRef.current && coopRemoteFinisherShownAtRef.current) {
                     const elapsed = Date.now() - coopRemoteFinisherShownAtRef.current;
                     const remainingMs = Math.max(0, COOP_FINISHER_DISPLAY_MS - elapsed);
@@ -10811,14 +10822,17 @@ const App: React.FC = () => {
                         }
                         coopRemoteFinisherClearTimerRef.current = window.setTimeout(() => {
                             coopRemoteFinisherClearTimerRef.current = null;
+                            coopRemoteFinisherCardIdRef.current = null;
                             coopRemoteFinisherShownAtRef.current = null;
                             setBattleFinisherCutinCard(null);
                         }, remainingMs);
                     } else {
+                        coopRemoteFinisherCardIdRef.current = null;
                         coopRemoteFinisherShownAtRef.current = null;
                         setBattleFinisherCutinCard(null);
                     }
                 } else {
+                    coopRemoteFinisherCardIdRef.current = null;
                     coopRemoteFinisherShownAtRef.current = null;
                     setBattleFinisherCutinCard(null);
                 }
@@ -12853,22 +12867,16 @@ const App: React.FC = () => {
                             floor={gameState.floor}
                             typingMode={gameState.challengeMode === 'TYPING'}
                             selectionHoldMs={raceEffects.shoeLaceUntil > raceEffectNow ? 400 : 0}
-                            selectionDisabled={(gameState.challengeMode === 'COOP' && !!coopSession?.isHost && !coopCanDecide) || coopMapSelectionPending}
-                            selectionDisabledMessage={gameState.challengeMode === 'COOP' ? coopMapPendingMessage : undefined}
+                            selectionDisabled={(gameState.challengeMode === 'COOP' && !!coopSession?.isHost && (!coopCanDecide || coopNeedsInitialMapSync)) || coopMapSelectionPending}
+                            selectionDisabledMessage={gameState.challengeMode === 'COOP' ? (coopNeedsInitialMapSync ? '参加者へ初回マップを同期しています...' : coopMapPendingMessage) : undefined}
                             visualTheme={coopSyncedVisualTheme}
                             highSchoolStoryId={coopSyncedVisualTheme === 'high-school' ? HIGH_SCHOOL_STORIES[gameState.currentStoryIndex || 0]?.id : undefined}
                         />
                         {gameState.challengeMode === 'COOP' && coopSession?.isHost && coopNeedsInitialMapSync && (
                             <div className="absolute left-1/2 -translate-x-1/2 top-[72px] z-30">
-                                <button
-                                    onClick={() => {
-                                        sendCoopStateSync();
-                                        setCoopNeedsInitialMapSync(false);
-                                    }}
-                                    className="bg-emerald-600 hover:bg-emerald-500 text-white font-black px-4 py-2 rounded-lg shadow-lg border border-emerald-300"
-                                >
-                                    参加者にマップを同期
-                                </button>
+                                <div className="bg-emerald-700 text-white font-black px-4 py-2 rounded-lg shadow-lg border border-emerald-300">
+                                    参加者へ初回マップを同期中...
+                                </div>
                             </div>
                         )}
                         {raceSession && !raceSession.ended && (
