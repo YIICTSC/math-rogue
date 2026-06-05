@@ -1141,6 +1141,8 @@ const App: React.FC = () => {
     const coopPendingEndTurnKeyRef = useRef<string | null>(null);
     const coopEndTurnResendTimerRef = useRef<number | null>(null);
     const coopRealtimeAutoAdvanceTimerRef = useRef<number | null>(null);
+    const coopHostStartedTurnKeysRef = useRef<Set<string>>(new Set());
+    const coopHostPreparedInitialTurnPeerIdsRef = useRef<Set<string>>(new Set());
     const coopRemoteFinisherShownAtRef = useRef<number | null>(null);
     const coopRemoteFinisherCardIdRef = useRef<string | null>(null);
     const coopRemoteFinisherClearTimerRef = useRef<number | null>(null);
@@ -2883,6 +2885,8 @@ const App: React.FC = () => {
             coopLastBattleActionSignatureRef.current = null;
             coopProcessedHostActionIdsRef.current.clear();
             coopPendingHostActionRef.current = null;
+            coopHostStartedTurnKeysRef.current.clear();
+            coopHostPreparedInitialTurnPeerIdsRef.current.clear();
             coopRemoteFinisherCardIdRef.current = null;
         }
     }, [gameState.screen]);
@@ -8015,6 +8019,29 @@ const App: React.FC = () => {
             }, 0);
             return;
         }
+        if (coopSession?.isHost && coopBattleState.battleMode !== 'REALTIME') {
+            const actorPeerId = activeCoopTurnSlot.peerId;
+            if (!actorPeerId) return;
+            const hostTurnKey = `${turnKey}:host-start:${actorPeerId}`;
+            if (coopHostStartedTurnKeysRef.current.has(hostTurnKey)) return;
+            coopHostStartedTurnKeysRef.current.add(hostTurnKey);
+            coopStartedTurnSlotRef.current = turnKey;
+            const actorEntry = coopBattleState.players.find(entry => entry.peerId === actorPeerId);
+            const shouldKeepInitialPreparedHand =
+                !coopHostPreparedInitialTurnPeerIdsRef.current.has(actorPeerId) &&
+                !!actorEntry?.player.hand.length &&
+                actorEntry.player.cardsPlayedThisTurn === 0;
+            coopHostPreparedInitialTurnPeerIdsRef.current.add(actorPeerId);
+            if (!shouldKeepInitialPreparedHand) {
+                if (actorPeerId === coopSelfPeerId) {
+                    startPlayerTurn();
+                } else {
+                    startPlayerTurn(actorPeerId);
+                }
+            }
+            return;
+        }
+        if (!coopSession?.isHost && coopBattleState.battleMode !== 'REALTIME') return;
         if (coopBattleState.battleMode !== 'REALTIME' && activeCoopTurnSlot.peerId !== coopSelfPeerId) return;
         if (coopStartedTurnSlotRef.current === turnKey) return;
         if (gameState.turn === 1 && gameState.player.hand.length > 0 && coopStartedTurnSlotRef.current === null) {
