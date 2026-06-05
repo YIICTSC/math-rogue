@@ -12,6 +12,7 @@ import GoHomeDash from './GoHomeDash';
 interface MiniGameRouterProps {
     screen: GameScreen;
     onBack: () => void;
+    onFinish?: (result: 'WIN' | 'LOSE') => void;
     problemMode: GameMode;
     problemModePool?: string[];
     languageMode?: LanguageMode;
@@ -19,6 +20,7 @@ interface MiniGameRouterProps {
 
 export interface MiniGameComponentProps {
     onBack: () => void;
+    onFinish?: (result: 'WIN' | 'LOSE') => void;
     problemMode: GameMode;
     problemModePool?: string[];
     languageMode?: LanguageMode;
@@ -38,7 +40,7 @@ const MINI_GAME_MAP: Partial<Record<GameScreen, React.ComponentType<MiniGameComp
     [GameScreen.MINI_GAME_GO_HOME]: GoHomeDash,
 };
 
-const MiniGameRouter: React.FC<MiniGameRouterProps> = ({ screen, onBack, problemMode, problemModePool, languageMode }) => {
+const MiniGameRouter: React.FC<MiniGameRouterProps> = ({ screen, onBack, onFinish, problemMode, problemModePool, languageMode }) => {
     const Component = MINI_GAME_MAP[screen];
 
     if (!Component) {
@@ -51,7 +53,7 @@ const MiniGameRouter: React.FC<MiniGameRouterProps> = ({ screen, onBack, problem
         );
     }
 
-    return <Component onBack={onBack} problemMode={problemMode} problemModePool={problemModePool} languageMode={languageMode} />;
+    return <Component onBack={onBack} onFinish={onFinish} problemMode={problemMode} problemModePool={problemModePool} languageMode={languageMode} />;
 };
 
 export default MiniGameRouter;

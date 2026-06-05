@@ -152,12 +152,13 @@ export type P2PEvent =
     | { type: 'COOP_BATTLE_SELECT_ENEMY', enemyId: string }
     | {
         type: 'COOP_BATTLE_PLAY_CARD',
+        actionId?: string,
+        battleKey?: string,
+        turnCursor?: number,
+        enemyTurnCursor?: number,
         cardId: string,
         playedCard?: any,
-        player: any,
-        enemies: any[],
         selectedEnemyId?: string | null,
-        combatLog?: string[],
         turnLog?: string,
         actingEnemyId?: string | null,
         battleState?: {
@@ -178,15 +179,15 @@ export type P2PEvent =
             turnCursor: number,
             enemyTurnCursor: number
         } | null,
-        activeEffects?: any[]
     }
     | {
         type: 'COOP_BATTLE_USE_POTION',
+        actionId?: string,
+        battleKey?: string,
+        turnCursor?: number,
+        enemyTurnCursor?: number,
         potionId: string,
-        player: any,
-        enemies: any[],
         selectedEnemyId?: string | null,
-        combatLog?: string[],
         turnLog?: string,
         actingEnemyId?: string | null,
         battleState?: {
@@ -207,40 +208,20 @@ export type P2PEvent =
             turnCursor: number,
             enemyTurnCursor: number
         } | null,
-        activeEffects?: any[]
     }
     | {
         type: 'COOP_BATTLE_TURN_START' | 'COOP_BATTLE_SELECTION_STATE' | 'COOP_BATTLE_MODAL_RESOLVE' | 'COOP_BATTLE_CODEX_SELECT',
-        player: any,
-        enemies: any[],
+        actionId?: string,
+        battleKey?: string,
+        turnCursor?: number,
+        enemyTurnCursor?: number,
+        selectedCardId?: string,
+        selectionCancelled?: boolean,
+        modalType?: 'WEATHER_SCRY' | 'GALAXY_EXPRESS' | 'GOLD_FISH' | 'DREAM_CATCHER',
+        keepMap?: Record<string, boolean>,
         selectedEnemyId?: string | null,
-        combatLog?: string[],
         turnLog?: string,
         actingEnemyId?: string | null,
-        battleState?: {
-            battleKey: string,
-            players: Array<{
-                peerId: string,
-                name: string,
-                player: any,
-                selectedEnemyId?: string | null,
-                isDown?: boolean
-            }>,
-            turnQueue: Array<{
-                id: string,
-                type: 'SELF' | 'ALLY' | 'ENEMY',
-                label: string,
-                peerId?: string
-            }>,
-            turnCursor: number,
-            enemyTurnCursor: number
-        } | null,
-        activeEffects?: any[]
-    }
-    | {
-        type: 'COOP_END_TURN',
-        player: any,
-        selectedEnemyId?: string | null,
         battleState?: {
             battleKey: string,
             players: Array<{
@@ -259,6 +240,14 @@ export type P2PEvent =
             turnCursor: number,
             enemyTurnCursor: number
         } | null
+    }
+    | {
+        type: 'COOP_END_TURN',
+        actionId?: string,
+        battleKey?: string,
+        turnCursor?: number,
+        enemyTurnCursor?: number,
+        selectedEnemyId?: string | null,
     }
     | { type: 'COOP_NODE_SELECT', nodeId: string }
     | { type: 'COOP_REWARD_SYNC', rewards: any[] }
