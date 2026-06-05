@@ -17,6 +17,7 @@ import { SOCIAL_G7_DATA } from './subjects/social_g7';
 import { SOCIAL_G8_DATA } from './subjects/social_g8';
 import { SOCIAL_G9_DATA } from './subjects/social_g9';
 import { MAP_PREF_DATA } from './subjects/map_pref';
+import { PREFECTURE_QUIZ_DATA } from './subjects/prefecture_quiz';
 
 // 算数・数学のインポート
 import { MATH_G1_DATA } from './subjects/math_g1';
@@ -68,6 +69,7 @@ import { HIGH_SCHOOL_MASSIVE_UNIT_DATA } from './subjects/high_school_massive_un
 import { HIGH_SCHOOL_ULTRA_UNIT_DATA } from './subjects/high_school_ultra_units';
 import { HIGH_SCHOOL_GIGA_UNIT_DATA } from './subjects/high_school_giga_units';
 import { HIGH_SCHOOL_MATH_GENERATED_DATA } from './subjects/high_school_math_generated';
+import { HOBBY_KNOWLEDGE_DATA } from './subjects/hobby_knowledge';
 
 export type { GeneralProblem };
 
@@ -115,6 +117,7 @@ const BASE_SUBJECT_DATA: Record<string, GeneralProblem[]> = {
     ...SOCIAL_G8_DATA,
     ...SOCIAL_G9_DATA,
     ...MAP_PREF_DATA,
+    ...PREFECTURE_QUIZ_DATA,
     // IT・情報
     ...IT_TABLET_DATA,
     IT_INTERNET: IT_INTERNET_DATA,
@@ -167,6 +170,7 @@ const RAW_SUBJECT_DATA: Record<string, GeneralProblem[]> = {
     ...HIGH_SCHOOL_MASSIVE_UNIT_DATA,
     ...HIGH_SCHOOL_ULTRA_UNIT_DATA,
     ...HIGH_SCHOOL_GIGA_UNIT_DATA,
+    ...HOBBY_KNOWLEDGE_DATA,
 };
 
 const AUGMENTED_SUBJECT_DATA: Record<string, GeneralProblem[]> = Object.fromEntries(
