@@ -36,6 +36,7 @@ export type P2PEvent =
             quizResolved?: boolean,
             quizCorrectCount?: number,
             eventResolved?: boolean,
+            relicResolved?: boolean,
             restResolved?: boolean,
             shopResolved?: boolean,
             rewardResolved?: boolean,
@@ -60,6 +61,7 @@ export type P2PEvent =
         quizResolved?: boolean,
         quizCorrectCount?: number,
         eventResolved?: boolean,
+        relicResolved?: boolean,
         restResolved?: boolean,
         shopResolved?: boolean,
         rewardResolved?: boolean,
@@ -68,7 +70,7 @@ export type P2PEvent =
     }> }
     | { type: 'COOP_MODE_SET', mode: any }
     | { type: 'COOP_DIFFICULTY_SET', difficultyLevel: number }
-    | { type: 'COOP_CHARACTER_SELECT', characterId: string, name: string, imageData: string, maxHp: number, currentHp: number }
+    | { type: 'COOP_CHARACTER_SELECT', characterId: string, name: string, imageData: string, maxHp: number, currentHp: number, relicResolved?: boolean }
     | { type: 'COOP_QUIZ_RESULT', correctCount: number }
     | { type: 'COOP_PLAYER_SNAPSHOT', player: any }
     | {
@@ -86,6 +88,7 @@ export type P2PEvent =
         quizResolved?: boolean,
         quizCorrectCount?: number,
         eventResolved?: boolean,
+        relicResolved?: boolean,
         restResolved?: boolean,
         shopResolved?: boolean,
         rewardResolved?: boolean,

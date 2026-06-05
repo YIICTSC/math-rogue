@@ -1138,6 +1138,7 @@ const App: React.FC = () => {
     const coopApplyingRemoteBattleSyncRef = useRef(false);
     const coopLastBattleActionSignatureRef = useRef<string | null>(null);
     const coopPendingVoiceSyncRef = useRef<boolean | null>(null);
+    const coopPendingSkipStarterRelicRef = useRef(false);
     const coopPendingEndTurnKeyRef = useRef<string | null>(null);
     const coopEndTurnResendTimerRef = useRef<number | null>(null);
     const coopRealtimeAutoAdvanceTimerRef = useRef<number | null>(null);
@@ -1582,6 +1583,9 @@ const App: React.FC = () => {
     const coopMapPendingMessage = coopMapSelectionPending
         ? 'ホスト承認待ち...'
         : `${coopDecisionOwner?.name || '他のプレイヤー'} が進行先を選択しています`;
+    const coopAllStarterRelicsResolved = gameState.challengeMode === 'COOP' && !!coopSession && coopSession.participants.length > 0
+        ? coopSession.participants.every(participant => !!participant.relicResolved)
+        : false;
     const coopSelfDisplayName = useMemo(() => {
         if (!coopSession) return selectedCharName || 'あなた';
         return coopSession.participants.find(participant => participant.peerId === coopSelfPeerId)?.name
@@ -2752,13 +2756,6 @@ const App: React.FC = () => {
 
         p2pService.sendTo(peerId, { type: 'COOP_REWARD_SYNC', rewards: rewardSet });
     }, [coopRewardSets, coopSession, gameState.challengeMode, gameState.screen]);
-    const requestCoopStateSync = useCallback(() => {
-        if (!coopSession || coopSession.isHost || gameState.challengeMode !== 'COOP') return;
-        p2pService.send({ type: 'COOP_STATE_SYNC_REQUEST' });
-        if (gameState.screen === GameScreen.REWARD) {
-            p2pService.send({ type: 'COOP_REWARD_SYNC_REQUEST' });
-        }
-    }, [coopSession, gameState.challengeMode, gameState.screen]);
     useEffect(() => {
         if (!isCoopHost) return;
         if (gameState.screen === GameScreen.COOP_SETUP || gameState.screen === GameScreen.START_MENU) return;
@@ -2780,19 +2777,28 @@ const App: React.FC = () => {
         ]);
 
         if (!syncableScreens.has(gameState.screen)) return;
+        if (
+            gameState.challengeMode === 'COOP' &&
+            coopNeedsInitialMapSync &&
+            gameState.screen === GameScreen.MAP &&
+            !coopAllStarterRelicsResolved
+        ) {
+            return;
+        }
         const timeout = window.setTimeout(() => {
             sendCoopStateSync();
             if (
                 gameState.challengeMode === 'COOP' &&
                 coopNeedsInitialMapSync &&
-                gameState.screen === GameScreen.MAP
+                gameState.screen === GameScreen.MAP &&
+                coopAllStarterRelicsResolved
             ) {
                 setCoopNeedsInitialMapSync(false);
             }
         }, 80);
 
         return () => window.clearTimeout(timeout);
-    }, [coopNeedsInitialMapSync, gameState.challengeMode, gameState.screen, isCoopHost, sendCoopStateSync]);
+    }, [coopAllStarterRelicsResolved, coopNeedsInitialMapSync, gameState.challengeMode, gameState.screen, isCoopHost, sendCoopStateSync]);
     useEffect(() => {
         if (!coopSession?.isHost || gameState.challengeMode !== 'COOP') return;
         if (prevScreenRef.current !== GameScreen.BATTLE || gameState.screen === GameScreen.BATTLE) return;
@@ -4380,6 +4386,37 @@ const App: React.FC = () => {
         setTurnLog(getSelfTurnLogLabel());
     };
 
+    const advanceCoopAfterCharacterReady = useCallback((participantsOverride?: CoopParticipant[]) => {
+        if (gameState.challengeMode !== 'COOP' || !coopSession?.isHost) return;
+        const participants = participantsOverride ?? coopSession.participants;
+        if (!participants.length || !participants.every(participant => !!participant.selectedCharacterId)) return;
+        const shouldSkipStarterRelic = coopPendingSkipStarterRelicRef.current;
+        if (shouldSkipStarterRelic) {
+            const resolvedParticipants = participants.map(participant => ({ ...participant, relicResolved: true }));
+            setCoopSession(prev => {
+                if (!prev) return prev;
+                p2pService.send({ type: 'COOP_PARTICIPANTS', participants: resolvedParticipants, decisionOwnerIndex: prev.decisionOwnerIndex });
+                return { ...prev, participants: resolvedParticipants };
+            });
+            setCoopNeedsInitialMapSync(true);
+            setGameState(prev => ({
+                ...prev,
+                screen: GameScreen.MAP,
+                map: prev.map.length > 0 ? prev.map : generateDungeonMap(prev.difficultyLevel || 1),
+                narrativeLog: prev.narrativeLog.some(log => log.includes('初回のため、レリックなしで冒険を開始した'))
+                    ? prev.narrativeLog
+                    : [...prev.narrativeLog, trans("初回のため、レリックなしで冒険を開始した。", languageMode)]
+            }));
+            audioService.playBGM('map');
+        } else {
+            setGameState(prev => ({
+                ...prev,
+                screen: prev.screen === GameScreen.CHARACTER_SELECTION ? GameScreen.RELIC_SELECTION : prev.screen
+            }));
+        }
+        startGameAssetPreload();
+    }, [coopSession, gameState.challengeMode, languageMode, startGameAssetPreload]);
+
     const handleCharacterSelect = async (char: Character) => {
         audioService.playSound('select');
         setSelectedCharName(char.name);
@@ -4452,28 +4489,26 @@ const App: React.FC = () => {
                 coopSession.participants.find(participant => participant.peerId === coopSelfPeerId)?.name ||
                 coopSession.name ||
                 char.name;
+            coopPendingSkipStarterRelicRef.current = shouldSkipStarterRelic;
             const nextSelfParticipant: CoopParticipant = {
                 peerId: coopSelfPeerId,
                 name: participantDisplayName,
                 imageData: char.imageData,
                 selectedCharacterId: char.id,
                 maxHp: char.maxHp,
-                currentHp: char.maxHp
+                currentHp: char.maxHp,
+                relicResolved: shouldSkipStarterRelic
             };
+            const nextParticipants = coopSession.participants.some(participant => participant.peerId === coopSelfPeerId)
+                ? coopSession.participants.map(participant => participant.peerId === coopSelfPeerId ? { ...participant, ...nextSelfParticipant } : participant)
+                : [...coopSession.participants, nextSelfParticipant];
 
             setCoopSession(prev => {
                 if (!prev) return prev;
-                const exists = prev.participants.some(participant => participant.peerId === coopSelfPeerId);
-                const nextParticipants = exists
-                    ? prev.participants.map(participant => participant.peerId === coopSelfPeerId ? { ...participant, ...nextSelfParticipant } : participant)
-                    : [...prev.participants, nextSelfParticipant];
                 return { ...prev, participants: nextParticipants };
             });
 
             if (coopSession.isHost) {
-                const nextParticipants = coopSession.participants.some(participant => participant.peerId === coopSelfPeerId)
-                    ? coopSession.participants.map(participant => participant.peerId === coopSelfPeerId ? { ...participant, ...nextSelfParticipant } : participant)
-                    : [...coopSession.participants, nextSelfParticipant];
                 p2pService.send({ type: 'COOP_PARTICIPANTS', participants: nextParticipants, decisionOwnerIndex: coopSession.decisionOwnerIndex });
             } else {
                 p2pService.send({
@@ -4482,8 +4517,25 @@ const App: React.FC = () => {
                     name: participantDisplayName,
                     imageData: char.imageData,
                     maxHp: char.maxHp,
-                    currentHp: char.maxHp
+                    currentHp: char.maxHp,
+                    relicResolved: shouldSkipStarterRelic
                 });
+            }
+            if (!coopSession.isHost || !nextParticipants.every(participant => !!participant.selectedCharacterId)) {
+                setGameState(prev => ({
+                    ...prev,
+                    act: 1,
+                    floor: 0,
+                    turn: 0,
+                    map: [],
+                    currentMapNodeId: null,
+                    combatLog: [],
+                    player: initialPlayerState,
+                    narrativeLog: logs,
+                    activeEffects: []
+                }));
+                startGameAssetPreload();
+                return;
             }
         }
 
@@ -4704,11 +4756,26 @@ const App: React.FC = () => {
                     relics: [...prev.player.relics, relic]
                 }
             }));
+            setCoopSession(prev => prev ? {
+                ...prev,
+                participants: prev.participants.map(participant =>
+                    participant.peerId === coopSelfPeerId ? { ...participant, relicResolved: true } : participant
+                )
+            } : prev);
+            p2pService.send({ type: 'COOP_SELF_STATE', relicResolved: true });
             startGameAssetPreload();
             return;
         }
         if (gameState.challengeMode === 'COOP' && coopSession?.isHost) {
             setCoopNeedsInitialMapSync(true);
+            setCoopSession(prev => {
+                if (!prev) return prev;
+                const nextParticipants = prev.participants.map(participant =>
+                    participant.peerId === coopSelfPeerId ? { ...participant, relicResolved: true } : participant
+                );
+                p2pService.send({ type: 'COOP_PARTICIPANTS', participants: nextParticipants, decisionOwnerIndex: prev.decisionOwnerIndex });
+                return { ...prev, participants: nextParticipants };
+            });
         }
         if (rewardCardAlbum.length > 0 && gameState.challengeMode !== 'RACE' && gameState.challengeMode !== 'COOP') {
             setPendingStarterRelic(relic);
@@ -4734,8 +4801,10 @@ const App: React.FC = () => {
                 return;
             }
             if (coopNeedsInitialMapSync && !allowRemoteCoopSelection) {
-                sendCoopStateSync();
-                setCoopNeedsInitialMapSync(false);
+                if (coopAllStarterRelicsResolved) {
+                    sendCoopStateSync();
+                    setCoopNeedsInitialMapSync(false);
+                }
                 audioService.playSound('select');
                 return;
             }
@@ -9024,7 +9093,11 @@ const App: React.FC = () => {
                     ...participant,
                     quizResolved: false,
                     quizCorrectCount: 0,
-                    rewardResolved: false
+                    rewardResolved: false,
+                    restResolved: false,
+                    shopResolved: false,
+                    eventResolved: false,
+                    treasureResolved: false
                 }));
                 const next = {
                     ...prev,
@@ -9070,6 +9143,10 @@ const App: React.FC = () => {
                     buffer: 0,
                     revivedThisBattle: false,
                     rewardResolved: false,
+                    restResolved: false,
+                    shopResolved: false,
+                    eventResolved: false,
+                    treasureResolved: false,
                     floatingText: null
                 }));
                 if (prev.isHost) {
@@ -9191,6 +9268,22 @@ const App: React.FC = () => {
             if (coopAwaitingMapSync) setCoopAwaitingMapSync(false);
         }
     }, [coopAwaitingMapSync, coopSession, gameState.challengeMode, gameState.screen]);
+    useEffect(() => {
+        if (
+            gameState.challengeMode !== 'COOP' ||
+            gameState.screen !== GameScreen.MAP ||
+            !coopSession?.isHost ||
+            !coopNeedsInitialMapSync ||
+            !coopAllStarterRelicsResolved
+        ) {
+            return;
+        }
+        const timeout = window.setTimeout(() => {
+            sendCoopStateSync();
+            setCoopNeedsInitialMapSync(false);
+        }, 80);
+        return () => window.clearTimeout(timeout);
+    }, [coopAllStarterRelicsResolved, coopNeedsInitialMapSync, coopSession, gameState.challengeMode, gameState.screen, sendCoopStateSync]);
     useEffect(() => {
         if (gameState.screen !== GameScreen.MAP) {
             clearCoopMapPending();
@@ -10564,7 +10657,7 @@ const App: React.FC = () => {
                 }
                 setGameState(prev => {
                     const shouldReleaseInitialMapWait =
-                        coopAwaitingMapSync &&
+                        (coopAwaitingMapSync || data.state.screen === GameScreen.MAP) &&
                         COOP_LOCAL_SETUP_SCREEN_SET.has(prev.screen) &&
                         !COOP_LOCAL_SETUP_SCREEN_SET.has(data.state.screen);
                     const preserveLocalScreen =
@@ -10636,6 +10729,14 @@ const App: React.FC = () => {
 
             if (data.type === 'COOP_PARTICIPANTS') {
                 setCoopSession(prev => prev ? { ...prev, participants: data.participants, decisionOwnerIndex: data.decisionOwnerIndex ?? prev.decisionOwnerIndex } : prev);
+                if (!coopSession.isHost && gameState.screen === GameScreen.CHARACTER_SELECTION && coopSelfPeerId) {
+                    const selfParticipant = data.participants.find(participant => participant.peerId === coopSelfPeerId);
+                    const allCharactersSelected = data.participants.length > 0 && data.participants.every(participant => !!participant.selectedCharacterId);
+                    const allRelicsResolved = data.participants.length > 0 && data.participants.every(participant => !!participant.relicResolved);
+                    if (selfParticipant?.selectedCharacterId && allCharactersSelected && !allRelicsResolved) {
+                        setGameState(prev => ({ ...prev, screen: GameScreen.RELIC_SELECTION }));
+                    }
+                }
                 return;
             }
 
@@ -10671,15 +10772,19 @@ const App: React.FC = () => {
                         participant.peerId === fromPeerId
                             ? {
                                 ...participant,
-                                selectedCharacterId: data.characterId,
-                                name: data.name,
-                                imageData: data.imageData,
-                                maxHp: data.maxHp,
-                                currentHp: data.currentHp
-                            }
+                            selectedCharacterId: data.characterId,
+                            name: data.name,
+                            imageData: data.imageData,
+                            maxHp: data.maxHp,
+                            currentHp: data.currentHp,
+                            relicResolved: data.relicResolved ?? participant.relicResolved
+                        }
                             : participant
                     );
                     p2pService.send({ type: 'COOP_PARTICIPANTS', participants: nextParticipants, decisionOwnerIndex: prev.decisionOwnerIndex });
+                    if (nextParticipants.every(participant => !!participant.selectedCharacterId)) {
+                        window.setTimeout(() => advanceCoopAfterCharacterReady(nextParticipants), 0);
+                    }
                     return { ...prev, participants: nextParticipants };
                 });
                 return;
@@ -10706,6 +10811,7 @@ const App: React.FC = () => {
                             quizResolved: data.quizResolved ?? participant.quizResolved,
                             quizCorrectCount: data.quizCorrectCount ?? participant.quizCorrectCount,
                             eventResolved: data.eventResolved ?? participant.eventResolved,
+                            relicResolved: data.relicResolved ?? participant.relicResolved,
                             restResolved: data.restResolved ?? participant.restResolved,
                             shopResolved: data.shopResolved ?? participant.shopResolved,
                             rewardResolved: data.rewardResolved ?? participant.rewardResolved,
@@ -11268,7 +11374,7 @@ const App: React.FC = () => {
         return () => {
             p2pService.onData = previousOnData;
         };
-    }, [applyCoopPlayerStateToPeer, applyCoopSharedState, applyCoopSupportEffect, applyHostCoopBattleSnapshot, applyRestAction, applyRewardToLocalPlayer, applySynthesizeCard, applyTreasureRewardsToPlayer, applyUpgradeCard, broadcastCoopBattleState, claimCoopTreasurePoolForPeer, coopPlayerSnapshots, coopRewardSets, coopSelfPeerId, coopSession, eventData, executeQueuedTurnTransition, gameState.challengeMode, gameState.coopBattleState, gameState.map, gameState.player, gameState.rewards, gameState.screen, handleNodeComplete, handleNodeSelect, handleShopBuyCard, handleShopBuyPotion, handleShopBuyRelic, handleShopLeave, handleShopRemoveCard, handleTreasureOpen, preserveLocalBattleCardZones, preserveLocalPlayerInCoopBattleState, removeRewardFromList, resolveBattleVictory, resolveCoopEventOptionForPlayer, sendCoopRewardSyncToPeer, sendCoopStateSync, setCoopBattleState, shopCards, shopPotions, shopRelics, treasurePools, turnLog, upsertCoopPlayerSnapshot]);
+    }, [advanceCoopAfterCharacterReady, applyCoopPlayerStateToPeer, applyCoopSharedState, applyCoopSupportEffect, applyHostCoopBattleSnapshot, applyRestAction, applyRewardToLocalPlayer, applySynthesizeCard, applyTreasureRewardsToPlayer, applyUpgradeCard, broadcastCoopBattleState, claimCoopTreasurePoolForPeer, coopPlayerSnapshots, coopRewardSets, coopSelfPeerId, coopSession, eventData, executeQueuedTurnTransition, gameState.challengeMode, gameState.coopBattleState, gameState.map, gameState.player, gameState.rewards, gameState.screen, handleNodeComplete, handleNodeSelect, handleShopBuyCard, handleShopBuyPotion, handleShopBuyRelic, handleShopLeave, handleShopRemoveCard, handleTreasureOpen, preserveLocalBattleCardZones, preserveLocalPlayerInCoopBattleState, removeRewardFromList, resolveBattleVictory, resolveCoopEventOptionForPlayer, sendCoopRewardSyncToPeer, sendCoopStateSync, setCoopBattleState, shopCards, shopPotions, shopRelics, treasurePools, turnLog, upsertCoopPlayerSnapshot]);
 
     const goToFloorResult = () => {
         // 未解放のカードがあれば1枚解放する
@@ -12487,18 +12593,6 @@ const App: React.FC = () => {
                             <div className="text-center text-[10px] font-bold tracking-wide text-cyan-200">参加コード</div>
                             <div className="text-center text-lg font-black tracking-widest tabular-nums">{raceSession.roomCode}</div>
                         </div>
-                    </div>
-                )}
-
-                {gameState.challengeMode === 'COOP' && coopSession && COOP_PARTY_HUD_SCREEN_SET.has(gameState.screen) && (
-                    <div className="absolute left-1/2 top-[60px] sm:top-[72px] z-30 -translate-x-1/2">
-                        <button
-                            onClick={coopSession.isHost ? sendCoopStateSync : requestCoopStateSync}
-                            className="rounded-md border border-slate-300/40 bg-slate-900/80 px-2 py-1 text-[10px] sm:text-xs font-bold text-slate-100 shadow-lg hover:bg-slate-800/90"
-                            title={coopSession.isHost ? '参加者へ現在のゲーム状態を再送信します' : 'ホストへ最新のゲーム状態を再受信します'}
-                        >
-                            {coopSession.isHost ? '状態を送信' : '状態を受信'}
-                        </button>
                     </div>
                 )}
 

@@ -20,6 +20,7 @@ export interface CoopParticipantPayload {
   quizResolved?: boolean;
   quizCorrectCount?: number;
   eventResolved?: boolean;
+  relicResolved?: boolean;
   restResolved?: boolean;
   shopResolved?: boolean;
   rewardResolved?: boolean;
