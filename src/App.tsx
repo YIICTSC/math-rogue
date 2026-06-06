@@ -553,6 +553,34 @@ const App: React.FC = () => {
         });
     };
 
+    const createInitialPlayer = (): Player => ({
+        maxHp: INITIAL_HP,
+        currentHp: INITIAL_HP,
+        maxEnergy: INITIAL_ENERGY,
+        currentEnergy: INITIAL_ENERGY,
+        block: 0,
+        strength: 0,
+        gold: 99,
+        deck: createDeck(),
+        hand: [],
+        discardPile: [],
+        drawPile: [],
+        relics: [],
+        potions: [],
+        powers: {},
+        echoes: 0,
+        cardsPlayedThisTurn: 0,
+        attacksPlayedThisTurn: 0,
+        typesPlayedThisTurn: [],
+        relicCounters: {},
+        turnFlags: {},
+        imageData: HERO_IMAGE_DATA,
+        floatingText: null,
+        nextTurnEnergy: 0,
+        nextTurnDraw: 0,
+        codexBuffer: []
+    });
+
     const shuffle = (array: any[]) => {
         return array.sort(() => Math.random() - 0.5);
     };
@@ -643,33 +671,7 @@ const App: React.FC = () => {
         turn: 0,
         map: [],
         currentMapNodeId: null,
-        player: {
-            maxHp: INITIAL_HP,
-            currentHp: INITIAL_HP,
-            maxEnergy: INITIAL_ENERGY,
-            currentEnergy: INITIAL_ENERGY,
-            block: 0,
-            strength: 0,
-            gold: 99,
-            deck: createDeck(),
-            hand: [],
-            discardPile: [],
-            drawPile: [],
-            relics: [],
-            potions: [],
-            powers: {},
-            echoes: 0,
-            cardsPlayedThisTurn: 0,
-            attacksPlayedThisTurn: 0,
-            typesPlayedThisTurn: [],
-            relicCounters: {},
-            turnFlags: {},
-            imageData: HERO_IMAGE_DATA,
-            floatingText: null,
-            nextTurnEnergy: 0,
-            nextTurnDraw: 0,
-            codexBuffer: []
-        },
+        player: createInitialPlayer(),
         enemies: [],
         selectedEnemyId: null,
         narrativeLog: [],
@@ -8088,6 +8090,29 @@ const App: React.FC = () => {
             }, 0);
             return;
         }
+        if (coopSession?.isHost && coopBattleState.battleMode === 'REALTIME') {
+            coopStartedTurnSlotRef.current = turnKey;
+            coopBattleState.players
+                .filter(entry => entry.player.currentHp > 0)
+                .forEach(entry => {
+                    const actorPeerId = entry.peerId;
+                    const hostTurnKey = `${turnKey}:host-start:${actorPeerId}`;
+                    if (coopHostStartedTurnKeysRef.current.has(hostTurnKey)) return;
+                    coopHostStartedTurnKeysRef.current.add(hostTurnKey);
+                    const shouldKeepInitialPreparedHand =
+                        !coopHostPreparedInitialTurnPeerIdsRef.current.has(actorPeerId) &&
+                        entry.player.hand.length > 0 &&
+                        entry.player.cardsPlayedThisTurn === 0;
+                    coopHostPreparedInitialTurnPeerIdsRef.current.add(actorPeerId);
+                    if (shouldKeepInitialPreparedHand) return;
+                    if (actorPeerId === coopSelfPeerId) {
+                        startPlayerTurn();
+                    } else {
+                        startPlayerTurn(actorPeerId);
+                    }
+                });
+            return;
+        }
         if (coopSession?.isHost && coopBattleState.battleMode !== 'REALTIME') {
             const actorPeerId = activeCoopTurnSlot.peerId;
             if (!actorPeerId) return;
@@ -11128,6 +11153,23 @@ const App: React.FC = () => {
                     }
                     coopProcessedHostActionIdsRef.current.add(actionKey);
                 }
+                const hostTurnKey = `${gameState.coopBattleState?.battleKey}:${gameState.coopBattleState?.turnCursor}:${gameState.coopBattleState?.enemyTurnCursor}:${activeTurn.id}:host-start:${fromPeerId}`;
+                if (coopHostStartedTurnKeysRef.current.has(hostTurnKey)) {
+                    broadcastCoopBattleState(gameState.coopBattleState ?? null);
+                    return;
+                }
+                coopHostStartedTurnKeysRef.current.add(hostTurnKey);
+                const actorEntry = gameState.coopBattleState?.players.find(entry => entry.peerId === fromPeerId);
+                const shouldKeepInitialPreparedHand =
+                    !!actorEntry &&
+                    !coopHostPreparedInitialTurnPeerIdsRef.current.has(fromPeerId) &&
+                    actorEntry.player.hand.length > 0 &&
+                    actorEntry.player.cardsPlayedThisTurn === 0;
+                coopHostPreparedInitialTurnPeerIdsRef.current.add(fromPeerId);
+                if (shouldKeepInitialPreparedHand) {
+                    broadcastCoopBattleState(gameState.coopBattleState ?? null);
+                    return;
+                }
                 startPlayerTurn(fromPeerId);
                 return;
             }
@@ -13161,6 +13203,17 @@ const App: React.FC = () => {
                                 onStart={(payload: CoopStartPayload) => {
                                     const hostVisualTheme = payload.visualTheme || visualTheme;
                                     setVisualTheme(hostVisualTheme);
+                                    setCoopPlayerSnapshots({});
+                                    setCoopRewardSets({});
+                                    setCoopAwaitingRewardSync(false);
+                                    setCoopAwaitingMapSync(false);
+                                    setCoopNeedsInitialMapSync(false);
+                                    setCoopMapPendingNodeId(null);
+                                    setCoopBattleQueue([]);
+                                    setCoopBattleKey(null);
+                                    setCoopEnemyTurnCursor(0);
+                                    setCoopSupportCards([]);
+                                    setTreasurePools([]);
                                     setCoopSession({
                                         isHost: payload.isHost,
                                         name: payload.name,
@@ -13174,7 +13227,23 @@ const App: React.FC = () => {
                                         ...prev,
                                         visualTheme: hostVisualTheme,
                                         challengeMode: 'COOP',
-                                        screen: GameScreen.MODE_SELECTION
+                                        screen: GameScreen.MODE_SELECTION,
+                                        player: createInitialPlayer(),
+                                        act: 1,
+                                        floor: 0,
+                                        turn: 0,
+                                        map: [],
+                                        currentMapNodeId: null,
+                                        enemies: [],
+                                        selectedEnemyId: null,
+                                        narrativeLog: [],
+                                        combatLog: [],
+                                        rewards: [],
+                                        selectionState: { active: false, type: 'DISCARD', amount: 0 },
+                                        activeEffects: [],
+                                        coopBattleState: null,
+                                        currentStoryIndex: getRandomCurrentStoryIndex(),
+                                        actStats: { enemiesDefeated: 0, goldGained: 0, mathCorrect: 0 }
                                     }));
                                 }}
                                 onClose={returnToTitle}
