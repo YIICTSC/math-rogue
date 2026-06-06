@@ -8814,25 +8814,25 @@ const App: React.FC = () => {
             stateRef.current.visualTheme === 'high-school' || visualTheme === 'high-school' || storedTheme === 'high-school'
                 ? 'high-school'
                 : 'elementary';
-        const finisherEnemyName = finisherTheme === 'high-school'
+        const finisherDisplayName = finisherTheme === 'high-school'
             ? getHighSchoolEnemyVariant(enemy).name
             : enemy.name;
 
         return {
             id: `enemy-finisher-${enemy.id}-${Date.now()}`,
-            name: `${finisherEnemyName}のフィニッシュ`,
+            name: `${finisherDisplayName}のフィニッシュ`,
             cost: 0,
             type: CardType.ATTACK,
             target: TargetType.SELF,
-            description: `${finisherEnemyName}の決定打。`,
+            description: `${finisherDisplayName}の決定打。`,
             damage: 0,
             rarity: 'SPECIAL',
             capture: true,
-            enemyIllustrationName: finisherEnemyName,
+            enemyIllustrationName: enemy.name,
             enemyIllustrationEnemyType: enemy.enemyType,
             enemyIllustrationPhase: enemy.phase,
             visualTheme: finisherTheme,
-            textureRef: finisherEnemyName,
+            textureRef: enemy.name,
         };
     }, [visualTheme]);
 

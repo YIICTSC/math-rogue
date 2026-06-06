@@ -2227,6 +2227,7 @@ export const BattleFinisherCutinOverlay: React.FC<{ card: ICard; languageMode: L
         () => extractIllustrationTokens(card),
         [card]
     );
+    const isEnemyFinisher = card.id.startsWith('enemy-finisher-');
     const isComposite = illustrationTokens.length > 1;
     const randomDirectionPool = ['left', 'right', 'up', 'down'] as const;
     const shuffledDirections = useMemo(() => {
@@ -2372,9 +2373,15 @@ export const BattleFinisherCutinOverlay: React.FC<{ card: ICard; languageMode: L
 
     return (
         <div className="absolute inset-0 z-[160] pointer-events-none overflow-hidden">
-            <div className="absolute inset-0 bg-gradient-to-r from-black/80 via-black/40 to-transparent animate-finish-dim"></div>
+            <div className={`absolute inset-0 ${isEnemyFinisher ? 'bg-gradient-to-l from-black/80 via-black/45 to-transparent' : 'bg-gradient-to-r from-black/80 via-black/40 to-transparent'} animate-finish-dim`}></div>
 
-            {isComposite && compositeStyleMode === 'collage' ? (
+            {isEnemyFinisher ? (
+                <div className="absolute inset-0 flex items-center justify-end">
+                    <div className="w-[78vw] max-w-[920px] h-[46vh] max-h-[390px] animate-finish-cutin-enemy rounded-l-2xl overflow-hidden border-y-4 border-l-4 border-red-300/75 shadow-[0_0_54px_rgba(248,113,113,0.48)] bg-black/35">
+                        <FinisherArtPiece token={illustrationTokens[0] || `enemy:${card.enemyIllustrationName || card.textureRef || card.name}`} seed={`${card.id}-enemy-finisher`} languageMode={languageMode} card={card} />
+                    </div>
+                </div>
+            ) : isComposite && compositeStyleMode === 'collage' ? (
                 <div className="absolute inset-0 flex items-center justify-center">
                     <div className="relative w-[112vw] h-[112vh] border-4 border-white/90 bg-black/25 overflow-hidden shadow-[0_0_60px_rgba(0,0,0,0.75)]">
                         {collagePanels.map((panel) => (
@@ -2667,7 +2674,7 @@ export const BattleFinisherCutinOverlay: React.FC<{ card: ICard; languageMode: L
                 <div className="text-white text-2xl md:text-4xl font-black drop-shadow-[0_0_18px_rgba(0,0,0,1)]">{translated}</div>
             </div>
 
-            <div className="absolute inset-0 flex items-center justify-center">
+            <div className={`absolute ${isEnemyFinisher ? 'left-[13%] bottom-[28%] md:left-[12%] md:bottom-[30%]' : 'inset-0 flex items-center justify-center'}`}>
                 <div className="w-20 h-20 md:w-32 md:h-32 rounded-full bg-orange-500/90 shadow-[0_0_80px_rgba(249,115,22,0.95)] animate-finish-explosion"></div>
                 <div className="absolute w-32 h-32 md:w-52 md:h-52 rounded-full border-4 border-yellow-200/90 animate-finish-shockwave"></div>
             </div>
@@ -2678,6 +2685,11 @@ export const BattleFinisherCutinOverlay: React.FC<{ card: ICard; languageMode: L
                         0% { transform: translateX(-110%) skewX(-10deg); opacity: 0; }
                         20% { transform: translateX(-6%) skewX(-6deg); opacity: 1; }
                         100% { transform: translateX(0) skewX(0deg); opacity: 1; }
+                    }
+                    @keyframes finish-cutin-enemy {
+                        0% { transform: translateX(110%) skewX(10deg); opacity: 0; filter: blur(2px); }
+                        20% { transform: translateX(6%) skewX(6deg); opacity: 1; filter: blur(0); }
+                        100% { transform: translateX(0) skewX(0deg); opacity: 1; filter: blur(0); }
                     }
                     @keyframes finish-cutin-stack-left {
                         0% { transform: translate(-90px, -24px) scale(0.84); opacity: 0; filter: blur(2px); }
@@ -2741,6 +2753,7 @@ export const BattleFinisherCutinOverlay: React.FC<{ card: ICard; languageMode: L
                         100% { transform: scale(4.5); opacity: 0; border-width: 1px; }
                     }
                     .animate-finish-cutin { animation: finish-cutin 0.55s cubic-bezier(.2,.8,.2,1) forwards; }
+                    .animate-finish-cutin-enemy { animation: finish-cutin-enemy 0.55s cubic-bezier(.2,.8,.2,1) forwards; }
                     .animate-finish-cutin-stack-left { animation: finish-cutin-stack-left 0.62s cubic-bezier(.2,.8,.2,1) forwards; }
                     .animate-finish-cutin-stack-right { animation: finish-cutin-stack-right 0.62s cubic-bezier(.2,.8,.2,1) forwards; }
                     .animate-finish-cutin-stack-up { animation: finish-cutin-stack-up 0.62s cubic-bezier(.2,.8,.2,1) forwards; }
