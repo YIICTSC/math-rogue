@@ -8090,29 +8090,6 @@ const App: React.FC = () => {
             }, 0);
             return;
         }
-        if (coopSession?.isHost && coopBattleState.battleMode === 'REALTIME') {
-            coopStartedTurnSlotRef.current = turnKey;
-            coopBattleState.players
-                .filter(entry => entry.player.currentHp > 0)
-                .forEach(entry => {
-                    const actorPeerId = entry.peerId;
-                    const hostTurnKey = `${turnKey}:host-start:${actorPeerId}`;
-                    if (coopHostStartedTurnKeysRef.current.has(hostTurnKey)) return;
-                    coopHostStartedTurnKeysRef.current.add(hostTurnKey);
-                    const shouldKeepInitialPreparedHand =
-                        !coopHostPreparedInitialTurnPeerIdsRef.current.has(actorPeerId) &&
-                        entry.player.hand.length > 0 &&
-                        entry.player.cardsPlayedThisTurn === 0;
-                    coopHostPreparedInitialTurnPeerIdsRef.current.add(actorPeerId);
-                    if (shouldKeepInitialPreparedHand) return;
-                    if (actorPeerId === coopSelfPeerId) {
-                        startPlayerTurn();
-                    } else {
-                        startPlayerTurn(actorPeerId);
-                    }
-                });
-            return;
-        }
         if (coopSession?.isHost && coopBattleState.battleMode !== 'REALTIME') {
             const actorPeerId = activeCoopTurnSlot.peerId;
             if (!actorPeerId) return;
