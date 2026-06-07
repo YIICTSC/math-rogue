@@ -8095,6 +8095,12 @@ const App: React.FC = () => {
             }, 0);
             return;
         }
+        if (
+            coopBattleState.battleMode === 'REALTIME' &&
+            (coopBattleState.roundEndedPeerIds || []).length > 0
+        ) {
+            return;
+        }
         if (coopSession?.isHost && coopBattleState.battleMode === 'REALTIME') {
             const startActorForRealtimeRound = (actorPeerId: string, fallbackDelayMs = 0) => {
                 const hostTurnKey = `${turnKey}:host-start:${actorPeerId}`;
