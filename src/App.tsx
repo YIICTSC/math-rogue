@@ -7415,6 +7415,19 @@ const App: React.FC = () => {
             const p = { ...prev.player };
             const newLogs: string[] = [];
             const nextActiveEffects: VisualEffectInstance[] = [];
+            const clonePlayerForEndTurn = (player: Player): Player => ({
+                ...player,
+                hand: [...player.hand],
+                drawPile: [...player.drawPile],
+                discardPile: [...player.discardPile],
+                powers: { ...player.powers },
+                relicCounters: { ...player.relicCounters },
+                turnFlags: { ...player.turnFlags },
+                typesPlayedThisTurn: [...player.typesPlayedThisTurn],
+                codexBuffer: [...(player.codexBuffer || [])],
+                familiars: [...(player.familiars || [])],
+                familiarActionQueue: [...(player.familiarActionQueue || [])]
+            });
             const tickPlayerDebuffs = (target: Player, label?: string) => {
                 if (target.powers['WEAK'] > 0) {
                     target.powers['WEAK']--;
@@ -7463,14 +7476,19 @@ const App: React.FC = () => {
                                 isDown: p.currentHp <= 0
                             };
                         }
-                        const nextPlayer = {
-                            ...entry.player,
-                            powers: { ...entry.player.powers }
-                        };
+                        const nextPlayer = clonePlayerForEndTurn(entry.player);
                         tickPlayerDebuffs(nextPlayer, entry.name);
+                        if ((nextPlayer.familiars || []).length > 0) {
+                            const familiarEffects: VisualEffectInstance[] = [];
+                            nextEnemies = resolveHighSchoolFamiliars(nextPlayer, nextEnemies, newLogs, familiarEffects);
+                            nextActiveEffects.push(...attachCoopEffectOwner(familiarEffects, entry.peerId));
+                        }
                         updateCoopParticipantState(entry.peerId, current => ({
                             ...current,
+                            currentHp: nextPlayer.currentHp,
                             block: nextPlayer.block,
+                            nextTurnEnergy: nextPlayer.nextTurnEnergy,
+                            strength: nextPlayer.strength,
                             buffer: nextPlayer.powers['BUFFER'] || 0
                         }));
                         return {
@@ -9038,10 +9056,11 @@ const App: React.FC = () => {
                 }
 
                 if (gameState.challengeMode === 'COOP' && coopSession) {
-                    const aliveCompanions = coopSession.participants.filter(
-                        participant => participant.peerId !== coopSelfPeerId && (participant.currentHp ?? participant.maxHp ?? 0) > 0
-                    );
-                    if (aliveCompanions.length > 0) {
+                    const coopBattlePlayers = gameState.coopBattleState?.players || [];
+                    const hasAliveCoopPlayer = coopBattlePlayers.length > 0
+                        ? coopBattlePlayers.some(entry => entry.player.currentHp > 0)
+                        : coopSession.participants.some(participant => (participant.currentHp ?? participant.maxHp ?? 0) > 0);
+                    if (hasAliveCoopPlayer) {
                         lastActingEnemyRef.current = null;
                         lastLethalEnemyRef.current = null;
                         return;
