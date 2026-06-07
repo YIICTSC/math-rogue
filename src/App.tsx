@@ -1368,15 +1368,19 @@ const App: React.FC = () => {
         return coopSession.participants
             .filter(participant => participant.peerId !== coopSelfPeerId)
             .slice(0, 3)
-            .map(participant => ({
-                id: participant.peerId,
-                name: participant.name,
-                maxHp: participant.maxHp || 100,
-                currentHp: participant.currentHp ?? participant.maxHp ?? 100,
-                imageData: participant.imageData || HERO_IMAGE_DATA,
-                floatingText: null
-            }));
-    }, [coopSession, coopSelfPeerId]);
+            .map(participant => {
+                const battleEntry = gameState.coopBattleState?.players.find(entry => entry.peerId === participant.peerId);
+                return {
+                    id: participant.peerId,
+                    name: participant.name,
+                    maxHp: battleEntry?.player.maxHp || participant.maxHp || 100,
+                    currentHp: battleEntry?.player.currentHp ?? participant.currentHp ?? participant.maxHp ?? 100,
+                    imageData: battleEntry?.player.imageData || participant.imageData || HERO_IMAGE_DATA,
+                    floatingText: battleEntry?.player.floatingText || null,
+                    familiarActionQueue: battleEntry?.player.familiarActionQueue || []
+                };
+            });
+    }, [coopSession, coopSelfPeerId, gameState.coopBattleState]);
     const coopEffectOwnerPeerId = useMemo(() => {
         if (gameState.challengeMode !== 'COOP' || gameState.screen !== GameScreen.BATTLE || !gameState.coopBattleState) return null;
         if (gameState.coopBattleState.battleMode === 'REALTIME') {

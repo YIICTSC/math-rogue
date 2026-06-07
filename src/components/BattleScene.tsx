@@ -1,5 +1,5 @@
 
-import { Enemy, Player, Card as ICard, CardType, SelectionState, Potion, FloatingText, EnemyIntentType, LanguageMode, ParryState, VisualEffectInstance, CoopSupportCard, AttackEffectKey } from '../types';
+import { Enemy, Player, Card as ICard, CardType, SelectionState, Potion, FloatingText, EnemyIntentType, LanguageMode, ParryState, VisualEffectInstance, CoopSupportCard, AttackEffectKey, ActiveFamiliar } from '../types';
 import Card from './Card';
 import CardInspectionModal from './CardInspectionModal';
 import { Heart, Shield, Zap, Skull, Layers, X, Sword, AlertCircle, TrendingDown, Droplets, Hexagon, Gem, FlaskConical, Info, FileText, MoreHorizontal, Users, Sparkles, MessageCircle, Mic, ArrowRight, MousePointer2, ChevronsRight, ChevronDown, Flame, RotateCcw, Triangle, Settings } from 'lucide-react';
@@ -317,7 +317,7 @@ export const VFXOverlay: React.FC<{ effects: VisualEffectInstance[], targetId: s
 
 interface BattleSceneProps {
     player: Player;
-    companions?: Array<{ id: string; name: string; maxHp: number; currentHp: number; imageData: string; floatingText: FloatingText | null; }>;
+    companions?: Array<{ id: string; name: string; maxHp: number; currentHp: number; imageData: string; floatingText: FloatingText | null; familiarActionQueue?: ActiveFamiliar[]; }>;
     coopSelfPeerId?: string;
     coopEffectOwnerPeerId?: string | null;
     coopTurnQueue?: Array<{ id: string; type: 'SELF' | 'ALLY' | 'ENEMY'; label: string }>;
@@ -722,6 +722,18 @@ const BattleScene: React.FC<BattleSceneProps> = ({
     const displayedPlayerSpriteKey = mobileActiveFamiliar
         ? `${mobileActiveFamiliar.instanceId}-${mobileFamiliarPresentation?.phase}`
         : `hero-${player.id}-${highSchoolHeroAction}`;
+    const getActiveFamiliarDisplay = (queue?: ActiveFamiliar[]) => {
+        if (visualTheme !== 'high-school') return null;
+        const now = Date.now();
+        const active = (queue || [])
+            .filter(familiar => familiar.actionPulse && now - familiar.actionPulse < 1200)
+            .sort((a, b) => (b.actionPulse || 0) - (a.actionPulse || 0))[0];
+        if (!active) return null;
+        return {
+            familiar: active,
+            src: assetUrl(`sprites/high-school/familiars-action/${active.imageIndex}.webp`)
+        };
+    };
     useEffect(() => {
         if (visualTheme !== 'high-school') {
             themedEnemyNameMapRef.current.clear();
@@ -1699,6 +1711,8 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                     {companions.map((companion) => {
                                         const hpPercent = Math.max(0, Math.min(100, (companion.currentHp / Math.max(1, companion.maxHp)) * 100));
                                         const isDown = companion.currentHp <= 0;
+                                        const activeFamiliarDisplay = getActiveFamiliarDisplay(companion.familiarActionQueue);
+                                        const companionImageSrc = activeFamiliarDisplay?.src || companion.imageData;
                                         return (
                                             <div
                                                 key={companion.id}
@@ -1714,10 +1728,11 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                             >
                                                 <div className={`w-14 h-14 md:w-16 md:h-16 relative rounded-lg border border-white/10 bg-black/35 overflow-hidden ${isDown ? 'grayscale opacity-55' : ''} ${selectedSupportCard ? 'ring-2 ring-emerald-300/80' : ''}`}>
                                                     <img
-                                                        src={companion.imageData}
-                                                        alt={companion.name}
-                                                        className="w-full h-full pixel-art"
-                                                        style={{ imageRendering: 'pixelated' }}
+                                                        key={activeFamiliarDisplay ? `${activeFamiliarDisplay.familiar.instanceId}-${activeFamiliarDisplay.familiar.actionPulse}` : companion.id}
+                                                        src={companionImageSrc}
+                                                        alt={activeFamiliarDisplay?.familiar.name || companion.name}
+                                                        className={`w-full h-full transition-all duration-300 ease-out animate-in fade-in zoom-in-95 ${activeFamiliarDisplay ? 'object-contain drop-shadow-[0_0_12px_rgba(217,70,239,0.95)] animate-pulse' : `pixel-art ${visualTheme === 'high-school' ? '-scale-x-100' : ''}`}`}
+                                                        style={activeFamiliarDisplay ? undefined : { imageRendering: 'pixelated' }}
                                                     />
                                                     <FloatingTextOverlay data={companion.floatingText} languageMode={languageMode} offset="-top-2 -right-1" />
                                                     <VFXOverlay effects={getPlayerScopedEffectsForPeer(companion.id)} targetId={companion.id} />
