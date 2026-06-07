@@ -8095,6 +8095,53 @@ const App: React.FC = () => {
             }, 0);
             return;
         }
+        if (coopSession?.isHost && coopBattleState.battleMode === 'REALTIME') {
+            const startActorForRealtimeRound = (actorPeerId: string, fallbackDelayMs = 0) => {
+                const hostTurnKey = `${turnKey}:host-start:${actorPeerId}`;
+                if (coopHostStartedTurnKeysRef.current.has(hostTurnKey)) return;
+                window.setTimeout(() => {
+                    const latestBattleState = stateRef.current.coopBattleState;
+                    const latestSlot = latestBattleState?.turnQueue[latestBattleState.turnCursor];
+                    const latestTurnKey = latestBattleState && latestSlot
+                        ? `${latestBattleState.battleKey}:${latestBattleState.turnCursor}:${latestBattleState.enemyTurnCursor}:${latestSlot.id}`
+                        : null;
+                    if (
+                        !latestBattleState ||
+                        latestBattleState.battleMode !== 'REALTIME' ||
+                        latestSlot?.type === 'ENEMY' ||
+                        latestTurnKey !== turnKey ||
+                        coopHostStartedTurnKeysRef.current.has(hostTurnKey)
+                    ) {
+                        return;
+                    }
+                    coopHostStartedTurnKeysRef.current.add(hostTurnKey);
+                    const actorEntry = latestBattleState.players.find(entry => entry.peerId === actorPeerId);
+                    const shouldKeepInitialPreparedHand =
+                        !!actorEntry &&
+                        !coopHostPreparedInitialTurnPeerIdsRef.current.has(actorPeerId) &&
+                        actorEntry.player.hand.length > 0 &&
+                        actorEntry.player.cardsPlayedThisTurn === 0;
+                    coopHostPreparedInitialTurnPeerIdsRef.current.add(actorPeerId);
+                    if (shouldKeepInitialPreparedHand) {
+                        broadcastCoopBattleState(latestBattleState);
+                        return;
+                    }
+                    if (actorPeerId === coopSelfPeerId) {
+                        startPlayerTurn();
+                    } else {
+                        startPlayerTurn(actorPeerId);
+                    }
+                }, fallbackDelayMs);
+            };
+
+            coopStartedTurnSlotRef.current = turnKey;
+            coopBattleState.players
+                .filter(entry => entry.player.currentHp > 0)
+                .forEach(entry => {
+                    startActorForRealtimeRound(entry.peerId, entry.peerId === coopSelfPeerId ? 0 : 350);
+                });
+            return;
+        }
         if (coopSession?.isHost && coopBattleState.battleMode !== 'REALTIME') {
             const actorPeerId = activeCoopTurnSlot.peerId;
             if (!actorPeerId) return;
