@@ -424,7 +424,9 @@ const BattleScene: React.FC<BattleSceneProps> = ({
         if (coopSupportCards.length === 0) {
             setCoopSupportHudOpen(false);
             setSelectedSupportCard(null);
+            return;
         }
+        setCoopSupportHudOpen(true);
     }, [coopSupportCards.length]);
 
     const [isActing, setIsActing] = useState(false);
@@ -1848,14 +1850,14 @@ const BattleScene: React.FC<BattleSceneProps> = ({
             </style>
 
             {coopSupportCards.length > 0 && onUseCoopSupport && (
-                <div className="absolute left-2 bottom-14 md:bottom-16 z-40 w-[min(320px,calc(100vw-16px))] md:w-[min(360px,calc(100vw-24px))]">
-                    <div className="bg-slate-950/88 border border-emerald-500/70 rounded-xl shadow-2xl backdrop-blur px-3 py-2 text-white">
+                <div className="absolute left-2 top-16 z-50 w-[min(330px,calc(100vw-16px))] md:left-4 md:top-20 md:w-[min(380px,calc(100vw-24px))]">
+                    <div className="bg-slate-950/95 border-2 border-emerald-400/80 rounded-xl shadow-2xl shadow-emerald-950/40 backdrop-blur px-3 py-2 text-white">
                         <button
                             onClick={() => setCoopSupportHudOpen(prev => !prev)}
                             className="w-full flex items-center justify-between text-left"
                         >
                             <div>
-                                <div className="text-[10px] uppercase tracking-[0.25em] text-emerald-200">Coop Support</div>
+                                <div className="text-[10px] uppercase tracking-[0.25em] text-emerald-200">Coop Item</div>
                                 <div className="text-sm font-black">支援カード {coopSupportCards.length} 枚</div>
                             </div>
                             <ChevronDown className={`transition-transform ${coopSupportHudOpen ? 'rotate-180' : ''}`} size={16} />
