@@ -2119,14 +2119,14 @@ const App: React.FC = () => {
             setGameState(prev => ({ ...prev, player }));
         }
     }, [coopSelfPeerId, updateCoopParticipantState, upsertCoopPlayerSnapshot]);
-    const queueCoopBattleEvent = useCallback((event: { type: 'COOP_BATTLE_PLAY_CARD' | 'COOP_BATTLE_USE_POTION' | 'COOP_BATTLE_TURN_START' | 'COOP_BATTLE_SELECTION_STATE' | 'COOP_BATTLE_MODAL_RESOLVE' | 'COOP_BATTLE_CODEX_SELECT', actionId?: string, cardId?: string, potionId?: string, playedCard?: ICard, selectedCardId?: string, selectionCancelled?: boolean, modalType?: 'WEATHER_SCRY' | 'GALAXY_EXPRESS' | 'GOLD_FISH' | 'DREAM_CATCHER', keepMap?: Record<string, boolean> }) => {
+    const queueCoopBattleEvent = useCallback((event: { type: 'COOP_BATTLE_PLAY_CARD' | 'COOP_BATTLE_USE_POTION' | 'COOP_BATTLE_TURN_START' | 'COOP_BATTLE_SELECTION_STATE' | 'COOP_BATTLE_MODAL_RESOLVE' | 'COOP_BATTLE_CODEX_SELECT', actionId?: string, battleKey?: string, turnCursor?: number, enemyTurnCursor?: number, cardId?: string, potionId?: string, playedCard?: ICard, selectedCardId?: string, selectionCancelled?: boolean, modalType?: 'WEATHER_SCRY' | 'GALAXY_EXPRESS' | 'GOLD_FISH' | 'DREAM_CATCHER', keepMap?: Record<string, boolean> }) => {
         const latestState = stateRef.current;
         const nextEvent = {
             ...event,
             actionId: event.actionId ?? `coop-action-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
-            battleKey: latestState.coopBattleState?.battleKey,
-            turnCursor: latestState.coopBattleState?.turnCursor,
-            enemyTurnCursor: latestState.coopBattleState?.enemyTurnCursor
+            battleKey: event.battleKey ?? latestState.coopBattleState?.battleKey,
+            turnCursor: event.turnCursor ?? latestState.coopBattleState?.turnCursor,
+            enemyTurnCursor: event.enemyTurnCursor ?? latestState.coopBattleState?.enemyTurnCursor
         };
         if (nextEvent.type === 'COOP_BATTLE_PLAY_CARD' || nextEvent.type === 'COOP_BATTLE_USE_POTION') {
             coopPendingHostActionRef.current = JSON.stringify({
@@ -7106,7 +7106,12 @@ const App: React.FC = () => {
     const startPlayerTurn = (coopActorPeerId?: string) => {
         const isCoopHostRemoteAction = !!coopActorPeerId && gameState.challengeMode === 'COOP' && !!coopSession?.isHost;
         if (!isCoopHostRemoteAction && gameState.challengeMode === 'COOP' && coopSession && !coopSession.isHost && gameState.screen === GameScreen.BATTLE) {
-            queueCoopBattleEvent({ type: 'COOP_BATTLE_TURN_START' });
+            queueCoopBattleEvent({
+                type: 'COOP_BATTLE_TURN_START',
+                battleKey: gameState.coopBattleState?.battleKey,
+                turnCursor: gameState.coopBattleState?.turnCursor,
+                enemyTurnCursor: gameState.coopBattleState?.enemyTurnCursor
+            });
             return;
         }
         if (!isCoopHostRemoteAction) setTurnLog(getSelfTurnLogLabel());
