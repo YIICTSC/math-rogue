@@ -1798,15 +1798,17 @@ const App: React.FC = () => {
         if (!battleState || !coopSelfPeerId) return battleState;
         const currentPlayer = stateRef.current.player;
         const currentSelectedEnemyId = stateRef.current.selectedEnemyId;
+        const currentBattleKey = stateRef.current.coopBattleState?.battleKey;
+        const shouldMergeCurrentPlayer = currentBattleKey === battleState.battleKey;
         return {
             ...battleState,
             players: battleState.players.map(entry =>
                 entry.peerId === coopSelfPeerId
                     ? {
                         ...entry,
-                        player: currentPlayer,
-                        selectedEnemyId: currentSelectedEnemyId,
-                        isDown: currentPlayer.currentHp <= 0
+                        player: shouldMergeCurrentPlayer ? currentPlayer : entry.player,
+                        selectedEnemyId: shouldMergeCurrentPlayer ? currentSelectedEnemyId : entry.selectedEnemyId,
+                        isDown: shouldMergeCurrentPlayer ? currentPlayer.currentHp <= 0 : entry.player.currentHp <= 0
                     }
                     : entry
             )
@@ -2268,7 +2270,10 @@ const App: React.FC = () => {
             }, enemySlot]
             : [...randomizedPlayerSlots, enemySlot];
         const battlePlayers: CoopBattlePlayerState[] = coopSession.participants.map(participant => {
-            const snapshot = coopPlayerSnapshots[participant.peerId] || (participant.peerId === coopSelfPeerId ? gameState.player : null);
+            const isSelf = participant.peerId === coopSelfPeerId;
+            const snapshot = isSelf
+                ? gameState.player
+                : coopPlayerSnapshots[participant.peerId];
             const basePlayer = snapshot ? { ...snapshot } : {
                 ...gameState.player,
                 id: participant.selectedCharacterId || gameState.player.id,
@@ -2281,10 +2286,25 @@ const App: React.FC = () => {
                 drawPile: [],
                 codexBuffer: []
             };
-            const player = preparePlayerForBattle(
-                basePlayer,
-                (gameState.map.find(node => node.id === gameState.currentMapNodeId)?.type || NodeType.COMBAT)
-            );
+            const player = isSelf
+                ? {
+                    ...basePlayer,
+                    deck: [...basePlayer.deck],
+                    hand: [...basePlayer.hand],
+                    discardPile: [...basePlayer.discardPile],
+                    drawPile: [...basePlayer.drawPile],
+                    relicCounters: { ...basePlayer.relicCounters },
+                    powers: { ...basePlayer.powers },
+                    turnFlags: { ...basePlayer.turnFlags },
+                    typesPlayedThisTurn: [...basePlayer.typesPlayedThisTurn],
+                    codexBuffer: [...(basePlayer.codexBuffer || [])],
+                    familiars: [...(basePlayer.familiars || [])],
+                    familiarActionQueue: [...(basePlayer.familiarActionQueue || [])]
+                }
+                : preparePlayerForBattle(
+                    basePlayer,
+                    (gameState.map.find(node => node.id === gameState.currentMapNodeId)?.type || NodeType.COMBAT)
+                );
             return {
                 peerId: participant.peerId,
                 name: participant.name,
@@ -4957,7 +4977,8 @@ const App: React.FC = () => {
                     combatLog: eventBattleLogs,
                     turn: 1,
                     parryState: { active: false, enemyId: null, success: false },
-                    activeEffects: []
+                    activeEffects: [],
+                    coopBattleState: null
                 };
 
                 if (p.id === 'DODGEBALL' && (node.type === NodeType.COMBAT || node.type === NodeType.START)) {
