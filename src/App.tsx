@@ -8023,10 +8023,45 @@ const App: React.FC = () => {
 
     const executeQueuedTurnTransition = useCallback(async () => {
         if (gameState.challengeMode === 'COOP' && coopBattleState) {
+            const latestBeforeTransition = stateRef.current.coopBattleState || coopBattleState;
+            const currentSlot = latestBeforeTransition.turnQueue[latestBeforeTransition.turnCursor];
+            const realtimeEnemyCursor = latestBeforeTransition.turnQueue.findIndex(slot => slot.type === 'ENEMY');
+            let realtimeEnemyPhaseState: CoopBattleState | null = null;
+            const shouldEnterRealtimeEnemyPhase =
+                !!coopSession?.isHost &&
+                latestBeforeTransition.battleMode === 'REALTIME' &&
+                currentSlot?.type !== 'ENEMY' &&
+                coopBattlePlan.enemyActions > 0 &&
+                realtimeEnemyCursor >= 0;
+            if (shouldEnterRealtimeEnemyPhase) {
+                const enemyPhaseState: CoopBattleState = {
+                    ...latestBeforeTransition,
+                    turnCursor: realtimeEnemyCursor,
+                    roundEndedPeerIds: latestBeforeTransition.roundEndedPeerIds || []
+                };
+                const enemySlot = enemyPhaseState.turnQueue[enemyPhaseState.turnCursor];
+                coopStartedTurnSlotRef.current = `${enemyPhaseState.battleKey}:${enemyPhaseState.turnCursor}:${enemyPhaseState.enemyTurnCursor}:${enemySlot.id}`;
+                realtimeEnemyPhaseState = enemyPhaseState;
+                setCoopBattleState(enemyPhaseState);
+                broadcastCoopBattleState(enemyPhaseState);
+            }
             await executeEndTurn(coopBattlePlan.enemyActions);
             if (coopSession?.isHost) {
-                const latestBattleState = stateRef.current.coopBattleState || coopBattleState;
-                const nextCursor = coopBattlePlan.nextCursor;
+                const latestBattleState = stateRef.current.coopBattleState || realtimeEnemyPhaseState || coopBattleState;
+                let nextCursor = coopBattlePlan.nextCursor;
+                if (shouldEnterRealtimeEnemyPhase && latestBattleState.battleMode === 'REALTIME') {
+                    const queue = latestBattleState.turnQueue;
+                    const cursorForNextAlly = latestBattleState.turnQueue[latestBattleState.turnCursor]?.type === 'ENEMY'
+                        ? latestBattleState.turnCursor
+                        : realtimeEnemyCursor;
+                    nextCursor = queue.findIndex((slot, index) => index > cursorForNextAlly && slot.type !== 'ENEMY');
+                    if (nextCursor < 0) {
+                        nextCursor = queue.findIndex(slot => slot.type !== 'ENEMY');
+                    }
+                    if (nextCursor < 0) {
+                        nextCursor = coopBattlePlan.nextCursor;
+                    }
+                }
                 const nextSlot = latestBattleState.turnQueue[nextCursor];
                 const nextBattleState: CoopBattleState = {
                     ...latestBattleState,
