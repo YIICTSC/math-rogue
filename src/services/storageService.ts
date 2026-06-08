@@ -14,6 +14,7 @@ const STORAGE_KEY_SURVIVOR_RANKING = 'pixel_spire_survivor_ranking_v1';
 const STORAGE_KEY_DUNGEON_RANKING = 'pixel_spire_dungeon_ranking_v1';
 const STORAGE_KEY_VS_RANKING = 'pixel_spire_vs_ranking_v1';
 const STORAGE_KEY_LEGACY_CARD = 'pixel_spire_legacy_card_v1';
+const STORAGE_KEY_COOP_LEGACY_CARD = 'pixel_spire_coop_legacy_card_v1';
 const STORAGE_KEY_DEBUG_MATH_SKIP = 'pixel_spire_debug_math_skip_v1';
 const STORAGE_KEY_DEBUG_HP_ONE = 'pixel_spire_debug_hp_one_v1';
 const STORAGE_KEY_DEBUG_MINI_GAME_UNLOCK = 'pixel_spire_debug_mini_game_unlock_v1';
@@ -1152,25 +1153,25 @@ export const storageService = {
   },
 
   // --- Legacy Card (Inheritance) ---
-  saveLegacyCard: (card: Card) => {
+  saveLegacyCard: (card: Card, scope: 'NORMAL' | 'COOP' = 'NORMAL') => {
       try {
-          localStorage.setItem(STORAGE_KEY_LEGACY_CARD, JSON.stringify(card));
+          localStorage.setItem(scope === 'COOP' ? STORAGE_KEY_COOP_LEGACY_CARD : STORAGE_KEY_LEGACY_CARD, JSON.stringify(card));
       } catch (e) {
           console.warn("Failed to save legacy card", e);
       }
   },
 
-  getLegacyCard: (): Card | null => {
+  getLegacyCard: (scope: 'NORMAL' | 'COOP' = 'NORMAL'): Card | null => {
       try {
-          const stored = localStorage.getItem(STORAGE_KEY_LEGACY_CARD);
+          const stored = localStorage.getItem(scope === 'COOP' ? STORAGE_KEY_COOP_LEGACY_CARD : STORAGE_KEY_LEGACY_CARD);
           return stored ? JSON.parse(stored) : null;
       } catch (e) {
           return null;
       }
   },
 
-  clearLegacyCard: () => {
-      localStorage.removeItem(STORAGE_KEY_LEGACY_CARD);
+  clearLegacyCard: (scope: 'NORMAL' | 'COOP' = 'NORMAL') => {
+      localStorage.removeItem(scope === 'COOP' ? STORAGE_KEY_COOP_LEGACY_CARD : STORAGE_KEY_LEGACY_CARD);
   },
 
   // --- Debug Settings ---

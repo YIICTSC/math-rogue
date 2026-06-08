@@ -1912,6 +1912,50 @@ const App: React.FC = () => {
         setCoopBattleKey(normalizedBattleState?.battleKey || null);
         setCoopEnemyTurnCursor(normalizedBattleState?.enemyTurnCursor || 0);
     }, [coopSession?.isHost, mergeLocalPeerIntoCoopBattleState]);
+    const healCoopPartyToFull = useCallback((selfPlayer?: Player) => {
+        if (gameState.challengeMode !== 'COOP' || !coopSession?.isHost) return;
+        const selfPeerId = coopSelfPeerId;
+        setCoopSession(prev => {
+            if (!prev) return prev;
+            const nextParticipants = prev.participants.map(participant => {
+                const maxHp = participant.maxHp ?? (participant.peerId === selfPeerId ? (selfPlayer?.maxHp ?? stateRef.current.player.maxHp) : participant.currentHp ?? 1);
+                return {
+                    ...participant,
+                    maxHp,
+                    currentHp: maxHp,
+                    block: 0,
+                    revivedThisBattle: false
+                };
+            });
+            p2pService.send({ type: 'COOP_PARTICIPANTS', participants: nextParticipants, decisionOwnerIndex: prev.decisionOwnerIndex });
+            return { ...prev, participants: nextParticipants };
+        });
+        setCoopPlayerSnapshots(prev => {
+            const next = { ...prev };
+            Object.entries(next).forEach(([peerId, player]) => {
+                next[peerId] = { ...player, currentHp: player.maxHp, block: 0 };
+            });
+            if (selfPeerId && selfPlayer) {
+                next[selfPeerId] = { ...selfPlayer, currentHp: selfPlayer.maxHp, block: 0 };
+            }
+            return next;
+        });
+        const latestBattleState = stateRef.current.coopBattleState;
+        if (latestBattleState) {
+            setCoopBattleState({
+                ...latestBattleState,
+                players: latestBattleState.players.map(entry => ({
+                    ...entry,
+                    player: {
+                        ...entry.player,
+                        currentHp: entry.player.maxHp,
+                        block: 0
+                    },
+                    isDown: false
+                }))
+            });
+        }
+    }, [coopSelfPeerId, coopSession?.isHost, gameState.challengeMode, setCoopBattleState]);
     const buildCoopSharedState = useCallback((state: GameState): CoopSharedState => ({
         screen: state.screen,
         mode: state.mode,
@@ -4226,6 +4270,10 @@ const App: React.FC = () => {
 
     const startEndlessMode = () => {
         audioService.playSound('select');
+        if (gameState.challengeMode === 'COOP') {
+            const healedSelf = { ...stateRef.current.player, currentHp: stateRef.current.player.maxHp, block: 0 };
+            healCoopPartyToFull(healedSelf);
+        }
         setGameState(prev => ({
             ...prev,
             act: prev.act + 1,
@@ -4727,7 +4775,7 @@ const App: React.FC = () => {
         const difficulty = getDifficultyConfig(gameState.difficultyLevel);
         const legacyCard = (gameState.challengeMode === 'RACE' || !difficulty.legacyCardAllowed)
             ? null
-            : storageService.getLegacyCard();
+            : storageService.getLegacyCard(gameState.challengeMode === 'COOP' ? 'COOP' : 'NORMAL');
         if (legacyCard) {
             const ev = generateLegacyEvent(
                 legacyCard,
@@ -8630,7 +8678,7 @@ const App: React.FC = () => {
 
         let regeneratedEvent = null as ReturnType<typeof generateEvent> | ReturnType<typeof generateLegacyEvent> | null;
         if (eventData.title === '忘れ物') {
-            const legacyCard = storageService.getLegacyCard();
+            const legacyCard = storageService.getLegacyCard(gameState.challengeMode === 'COOP' ? 'COOP' : 'NORMAL');
             if (legacyCard) {
                 regeneratedEvent = generateLegacyEvent(
                     legacyCard,
@@ -8696,7 +8744,7 @@ const App: React.FC = () => {
     }, [applyCoopPlayerStateToPeer, coopSelfPeerId, coopSession, eventData, gameState.challengeMode, gameState.player, resolveCoopEventOptionForPlayer]);
 
     const handleLegacyCardSelect = (card: ICard) => {
-        storageService.saveLegacyCard(card);
+        storageService.saveLegacyCard(card, gameState.challengeMode === 'COOP' ? 'COOP' : 'NORMAL');
         setLegacyCardSelected(true);
     };
 
@@ -9317,6 +9365,9 @@ const App: React.FC = () => {
                     const newMap = generateDungeonMap(prev.difficultyLevel || 1);
                     audioService.playBGM('map');
                     const isGardener = nextPlayer.id === 'GARDENER';
+                    if (prev.challengeMode === 'COOP') {
+                        healCoopPartyToFull({ ...nextPlayer, currentHp: nextPlayer.maxHp, block: 0 });
+                    }
 
                     return {
                         ...prev,
@@ -10557,6 +10608,9 @@ const App: React.FC = () => {
             const newMap = generateDungeonMap(prev.difficultyLevel || 1);
             audioService.playBGM('map');
             const isGardener = prev.player.id === 'GARDENER';
+            if (prev.challengeMode === 'COOP') {
+                healCoopPartyToFull({ ...prev.player, currentHp: prev.player.maxHp, block: 0 });
+            }
             return {
                 ...prev,
                 act: nextAct,
@@ -11006,6 +11060,33 @@ const App: React.FC = () => {
 
             if (data.type === 'COOP_PARTICIPANTS') {
                 setCoopSession(prev => prev ? { ...prev, participants: data.participants, decisionOwnerIndex: data.decisionOwnerIndex ?? prev.decisionOwnerIndex } : prev);
+                if (!coopSession.isHost && coopSelfPeerId) {
+                    const selfParticipant = data.participants.find(participant => participant.peerId === coopSelfPeerId);
+                    if (selfParticipant && (selfParticipant.currentHp !== undefined || selfParticipant.maxHp !== undefined || selfParticipant.block !== undefined)) {
+                        setGameState(prev => ({
+                            ...prev,
+                            player: {
+                                ...prev.player,
+                                maxHp: selfParticipant.maxHp ?? prev.player.maxHp,
+                                currentHp: selfParticipant.currentHp ?? prev.player.currentHp,
+                                block: selfParticipant.block ?? prev.player.block
+                            }
+                        }));
+                        setCoopPlayerSnapshots(prev => {
+                            const current = prev[coopSelfPeerId];
+                            if (!current) return prev;
+                            return {
+                                ...prev,
+                                [coopSelfPeerId]: {
+                                    ...current,
+                                    maxHp: selfParticipant.maxHp ?? current.maxHp,
+                                    currentHp: selfParticipant.currentHp ?? current.currentHp,
+                                    block: selfParticipant.block ?? current.block
+                                }
+                            };
+                        });
+                    }
+                }
                 if (!coopSession.isHost && gameState.screen === GameScreen.CHARACTER_SELECTION && coopSelfPeerId) {
                     const selfParticipant = data.participants.find(participant => participant.peerId === coopSelfPeerId);
                     const allCharactersSelected = data.participants.length > 0 && data.participants.every(participant => !!participant.selectedCharacterId);
