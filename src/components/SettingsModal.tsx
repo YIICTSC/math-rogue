@@ -1,5 +1,5 @@
 import React from 'react';
-import { Settings, X, Volume2, Mic, Monitor, Wifi } from 'lucide-react';
+import { Settings, X, Volume2, Monitor, Wifi } from 'lucide-react';
 import { LanguageMode } from '../types';
 import { trans } from '../utils/textUtils';
 
@@ -20,13 +20,6 @@ export type AppSettings = {
   bgmMode: BgmMode;
   bgmVolume: number;
   seVolume: number;
-  micEnabled: boolean;
-  selectedInputDeviceId: string;
-  noiseSuppression: boolean;
-  echoCancellation: boolean;
-  autoGainControl: boolean;
-  remoteVoiceVolume: number;
-  joinMuted: boolean;
   reduceScreenShake: boolean;
   fontSize: 'normal' | 'large';
   battleUi: BattleUiSettings;
@@ -37,7 +30,6 @@ type Props = {
   open: boolean;
   tab: SettingsTab;
   settings: AppSettings;
-  inputDevices: MediaDeviceInfo[];
   onClose: () => void;
   onChangeTab: (tab: SettingsTab) => void;
   onChange: <K extends keyof AppSettings>(key: K, value: AppSettings[K]) => void;
@@ -90,7 +82,6 @@ const SettingsModal: React.FC<Props> = ({
   open,
   tab,
   settings,
-  inputDevices,
   onClose,
   onChangeTab,
   onChange,
@@ -140,19 +131,6 @@ const SettingsModal: React.FC<Props> = ({
               <label className="block">{trans("SE音量", languageMode)}: {Math.round(settings.seVolume * 100)}%
                 <input className="w-full" type="range" min={0} max={100} value={Math.round(settings.seVolume * 100)} onChange={e => onChange('seVolume', Number(e.target.value) / 100)} />
               </label>
-              <div className="rounded border border-slate-700 p-3 space-y-2">
-                <div className="font-bold flex items-center gap-1"><Mic size={14} /> {trans("マイク", languageMode)}</div>
-                <label className="flex items-center gap-2"><input type="checkbox" checked={settings.micEnabled} onChange={e => onChange('micEnabled', e.target.checked)} />{trans("マイクON", languageMode)}</label>
-                <label className="block">{trans("入力デバイス", languageMode)}
-                  <select className="w-full bg-slate-800 rounded border border-slate-600 p-1" value={settings.selectedInputDeviceId} onChange={e => onChange('selectedInputDeviceId', e.target.value)}>
-                    <option value="">{trans("既定デバイス", languageMode)}</option>
-                    {inputDevices.map(d => <option key={d.deviceId} value={d.deviceId}>{d.label || trans('マイク', languageMode)}</option>)}
-                  </select>
-                </label>
-                <label className="flex items-center gap-2"><input type="checkbox" checked={settings.noiseSuppression} onChange={e => onChange('noiseSuppression', e.target.checked)} />{trans("ノイズ抑制", languageMode)}</label>
-                <label className="flex items-center gap-2"><input type="checkbox" checked={settings.echoCancellation} onChange={e => onChange('echoCancellation', e.target.checked)} />{trans("エコーキャンセル", languageMode)}</label>
-                <label className="flex items-center gap-2"><input type="checkbox" checked={settings.autoGainControl} onChange={e => onChange('autoGainControl', e.target.checked)} />{trans("自動ゲイン調整", languageMode)}</label>
-              </div>
             </>
           )}
 
@@ -251,10 +229,6 @@ const SettingsModal: React.FC<Props> = ({
 
           {showCommunication && tab === 'COMM' && (
             <>
-              <label className="block">{trans("相手音量", languageMode)}: {Math.round(settings.remoteVoiceVolume * 100)}%
-                <input className="w-full" type="range" min={0} max={100} value={Math.round(settings.remoteVoiceVolume * 100)} onChange={e => onChange('remoteVoiceVolume', Number(e.target.value) / 100)} />
-              </label>
-              <label className="flex items-center gap-2"><input type="checkbox" checked={settings.joinMuted} onChange={e => onChange('joinMuted', e.target.checked)} />{trans("部屋参加時ミュート開始", languageMode)}</label>
               <label className="flex items-center gap-2"><input type="checkbox" checked={settings.lowDataMode} onChange={e => onChange('lowDataMode', e.target.checked)} />{trans("低データ通信モード", languageMode)}</label>
             </>
           )}
