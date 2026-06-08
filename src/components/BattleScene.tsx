@@ -426,6 +426,9 @@ const BattleScene: React.FC<BattleSceneProps> = ({
             setSelectedSupportCard(null);
             return;
         }
+        const isPhonePortrait = typeof window !== 'undefined'
+            && window.matchMedia('(max-width: 767px) and (orientation: portrait)').matches;
+        if (isPhonePortrait) return;
         setCoopSupportHudOpen(true);
     }, [coopSupportCards.length]);
 
@@ -1850,17 +1853,23 @@ const BattleScene: React.FC<BattleSceneProps> = ({
             </style>
 
             {coopSupportCards.length > 0 && onUseCoopSupport && (
-                <div className="absolute left-2 top-16 z-50 w-[min(330px,calc(100vw-16px))] md:left-4 md:top-20 md:w-[min(380px,calc(100vw-24px))]">
-                    <div className="bg-slate-950/95 border-2 border-emerald-400/80 rounded-xl shadow-2xl shadow-emerald-950/40 backdrop-blur px-3 py-2 text-white">
+                <div className={`absolute left-2 top-16 z-50 md:left-4 md:top-20 ${coopSupportHudOpen ? 'w-[min(330px,calc(100vw-16px))] md:w-[min(380px,calc(100vw-24px))]' : 'w-auto'}`}>
+                    <div className={`${coopSupportHudOpen ? 'bg-slate-950/95 border-2 border-emerald-400/80 rounded-xl shadow-2xl shadow-emerald-950/40 px-3 py-2' : 'bg-black/50 border border-emerald-500/70 rounded px-0 py-0'} backdrop-blur text-white`}>
                         <button
                             onClick={() => setCoopSupportHudOpen(prev => !prev)}
-                            className="w-full flex items-center justify-between text-left"
+                            className={`${coopSupportHudOpen ? 'w-full justify-between text-left' : 'w-auto gap-1 px-2 py-1 text-[10px]'} flex items-center rounded font-bold transition-colors ${coopSupportHudOpen ? '' : 'text-emerald-200 hover:text-white hover:border-emerald-300'}`}
                         >
-                            <div>
-                                <div className="text-[10px] uppercase tracking-[0.25em] text-emerald-200">Coop Item</div>
-                                <div className="text-sm font-black">支援カード {coopSupportCards.length} 枚</div>
-                            </div>
-                            <ChevronDown className={`transition-transform ${coopSupportHudOpen ? 'rotate-180' : ''}`} size={16} />
+                            {coopSupportHudOpen ? (
+                                <div>
+                                    <div className="text-[10px] uppercase tracking-[0.25em] text-emerald-200">Coop Item</div>
+                                    <div className="text-sm font-black">支援カード {coopSupportCards.length} 枚</div>
+                                </div>
+                            ) : (
+                                <>
+                                    <Sparkles size={10} /> ITEM {coopSupportCards.length}
+                                </>
+                            )}
+                            <ChevronDown className={`transition-transform ${coopSupportHudOpen ? 'rotate-180' : ''}`} size={coopSupportHudOpen ? 16 : 10} />
                         </button>
                         {coopSupportHudOpen && (
                             <div className="mt-3 space-y-2 max-h-[36vh] overflow-y-auto custom-scrollbar pr-1">
