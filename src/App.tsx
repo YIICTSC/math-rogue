@@ -7130,12 +7130,13 @@ const App: React.FC = () => {
     };
 
     const startPlayerTurn = (coopActorPeerId?: string) => {
-        const isCoopHostRemoteAction = !!coopActorPeerId && gameState.challengeMode === 'COOP' && !!coopSession?.isHost;
-        const latestCoopBattleState = stateRef.current.coopBattleState || gameState.coopBattleState;
+        const currentState = stateRef.current;
+        const isCoopHostRemoteAction = !!coopActorPeerId && currentState.challengeMode === 'COOP' && !!coopSession?.isHost;
+        const latestCoopBattleState = currentState.coopBattleState || gameState.coopBattleState;
         const latestCoopTurnSlot = latestCoopBattleState?.turnQueue[latestCoopBattleState.turnCursor];
         if (
-            gameState.challengeMode === 'COOP' &&
-            gameState.screen === GameScreen.BATTLE &&
+            currentState.challengeMode === 'COOP' &&
+            currentState.screen === GameScreen.BATTLE &&
             latestCoopBattleState?.battleMode === 'REALTIME' &&
             (coopRealtimeEnemyPhaseResolvingRef.current || latestCoopTurnSlot?.type === 'ENEMY')
         ) {
@@ -11366,15 +11367,23 @@ const App: React.FC = () => {
             }
 
             if (data.type === 'COOP_BATTLE_TURN_START' && coopSession.isHost && fromPeerId && gameState.screen === GameScreen.BATTLE) {
-                const activeTurn = gameState.coopBattleState?.turnQueue[gameState.coopBattleState.turnCursor];
-                const isRealtimeTurn = gameState.coopBattleState?.battleMode === 'REALTIME' && activeTurn?.type !== 'ENEMY';
-                if (!activeTurn || activeTurn.type === 'ENEMY' || (!isRealtimeTurn && activeTurn.peerId !== fromPeerId)) {
+                const latestState = stateRef.current;
+                const latestBattleState = latestState.coopBattleState;
+                const activeTurn = latestBattleState?.turnQueue[latestBattleState.turnCursor];
+                const isRealtimeTurn = latestBattleState?.battleMode === 'REALTIME' && activeTurn?.type !== 'ENEMY';
+                if (
+                    latestState.screen !== GameScreen.BATTLE ||
+                    !activeTurn ||
+                    activeTurn.type === 'ENEMY' ||
+                    coopRealtimeEnemyPhaseResolvingRef.current ||
+                    (!isRealtimeTurn && activeTurn.peerId !== fromPeerId)
+                ) {
                     return;
                 }
                 if (
-                    (data.battleKey && data.battleKey !== gameState.coopBattleState?.battleKey) ||
-                    (data.turnCursor !== undefined && data.turnCursor !== gameState.coopBattleState?.turnCursor) ||
-                    (data.enemyTurnCursor !== undefined && data.enemyTurnCursor !== gameState.coopBattleState?.enemyTurnCursor)
+                    (data.battleKey && data.battleKey !== latestBattleState?.battleKey) ||
+                    (data.turnCursor !== undefined && data.turnCursor !== latestBattleState?.turnCursor) ||
+                    (data.enemyTurnCursor !== undefined && data.enemyTurnCursor !== latestBattleState?.enemyTurnCursor)
                 ) {
                     return;
                 }
@@ -11385,13 +11394,13 @@ const App: React.FC = () => {
                     }
                     coopProcessedHostActionIdsRef.current.add(actionKey);
                 }
-                const hostTurnKey = `${gameState.coopBattleState?.battleKey}:${gameState.coopBattleState?.turnCursor}:${gameState.coopBattleState?.enemyTurnCursor}:${activeTurn.id}:host-start:${fromPeerId}`;
+                const hostTurnKey = `${latestBattleState?.battleKey}:${latestBattleState?.turnCursor}:${latestBattleState?.enemyTurnCursor}:${activeTurn.id}:host-start:${fromPeerId}`;
                 if (coopHostStartedTurnKeysRef.current.has(hostTurnKey)) {
-                    broadcastCoopBattleState(gameState.coopBattleState ?? null);
+                    broadcastCoopBattleState(latestBattleState ?? null);
                     return;
                 }
                 coopHostStartedTurnKeysRef.current.add(hostTurnKey);
-                const actorEntry = gameState.coopBattleState?.players.find(entry => entry.peerId === fromPeerId);
+                const actorEntry = latestBattleState?.players.find(entry => entry.peerId === fromPeerId);
                 const shouldKeepInitialPreparedHand =
                     !!actorEntry &&
                     !coopHostPreparedInitialTurnPeerIdsRef.current.has(fromPeerId) &&
@@ -11399,7 +11408,7 @@ const App: React.FC = () => {
                     actorEntry.player.cardsPlayedThisTurn === 0;
                 coopHostPreparedInitialTurnPeerIdsRef.current.add(fromPeerId);
                 if (shouldKeepInitialPreparedHand) {
-                    broadcastCoopBattleState(gameState.coopBattleState ?? null);
+                    broadcastCoopBattleState(latestBattleState ?? null);
                     return;
                 }
                 startPlayerTurn(fromPeerId);
