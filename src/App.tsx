@@ -1144,6 +1144,7 @@ const App: React.FC = () => {
     const coopPendingEndTurnKeyRef = useRef<string | null>(null);
     const coopEndTurnResendTimerRef = useRef<number | null>(null);
     const coopRealtimeAutoAdvanceTimerRef = useRef<number | null>(null);
+    const coopRealtimeEnemyPhaseResolvingRef = useRef(false);
     const coopHostStartedTurnKeysRef = useRef<Set<string>>(new Set());
     const coopHostPreparedInitialTurnPeerIdsRef = useRef<Set<string>>(new Set());
     const coopRemoteFinisherShownAtRef = useRef<number | null>(null);
@@ -7130,6 +7131,16 @@ const App: React.FC = () => {
 
     const startPlayerTurn = (coopActorPeerId?: string) => {
         const isCoopHostRemoteAction = !!coopActorPeerId && gameState.challengeMode === 'COOP' && !!coopSession?.isHost;
+        const latestCoopBattleState = stateRef.current.coopBattleState || gameState.coopBattleState;
+        const latestCoopTurnSlot = latestCoopBattleState?.turnQueue[latestCoopBattleState.turnCursor];
+        if (
+            gameState.challengeMode === 'COOP' &&
+            gameState.screen === GameScreen.BATTLE &&
+            latestCoopBattleState?.battleMode === 'REALTIME' &&
+            (coopRealtimeEnemyPhaseResolvingRef.current || latestCoopTurnSlot?.type === 'ENEMY')
+        ) {
+            return;
+        }
         if (!isCoopHostRemoteAction && gameState.challengeMode === 'COOP' && coopSession && !coopSession.isHost && gameState.screen === GameScreen.BATTLE) {
             queueCoopBattleEvent({
                 type: 'COOP_BATTLE_TURN_START',
@@ -8084,36 +8095,46 @@ const App: React.FC = () => {
                 };
                 const enemySlot = enemyPhaseState.turnQueue[enemyPhaseState.turnCursor];
                 coopStartedTurnSlotRef.current = `${enemyPhaseState.battleKey}:${enemyPhaseState.turnCursor}:${enemyPhaseState.enemyTurnCursor}:${enemySlot.id}`;
+                coopRealtimeEnemyPhaseResolvingRef.current = true;
                 realtimeEnemyPhaseState = enemyPhaseState;
                 setCoopBattleState(enemyPhaseState);
                 broadcastCoopBattleState(enemyPhaseState);
             }
-            await executeEndTurn(coopBattlePlan.enemyActions);
-            if (coopSession?.isHost) {
-                const latestBattleState = stateRef.current.coopBattleState || realtimeEnemyPhaseState || coopBattleState;
-                let nextCursor = coopBattlePlan.nextCursor;
-                if (shouldEnterRealtimeEnemyPhase && latestBattleState.battleMode === 'REALTIME') {
-                    const queue = latestBattleState.turnQueue;
-                    const cursorForNextAlly = latestBattleState.turnQueue[latestBattleState.turnCursor]?.type === 'ENEMY'
-                        ? latestBattleState.turnCursor
-                        : realtimeEnemyCursor;
-                    nextCursor = queue.findIndex((slot, index) => index > cursorForNextAlly && slot.type !== 'ENEMY');
-                    if (nextCursor < 0) {
-                        nextCursor = queue.findIndex(slot => slot.type !== 'ENEMY');
+            try {
+                await executeEndTurn(coopBattlePlan.enemyActions);
+                if (coopSession?.isHost) {
+                    const latestBattleState = stateRef.current.coopBattleState || realtimeEnemyPhaseState || coopBattleState;
+                    let nextCursor = coopBattlePlan.nextCursor;
+                    if (shouldEnterRealtimeEnemyPhase && latestBattleState.battleMode === 'REALTIME') {
+                        const queue = latestBattleState.turnQueue;
+                        const cursorForNextAlly = latestBattleState.turnQueue[latestBattleState.turnCursor]?.type === 'ENEMY'
+                            ? latestBattleState.turnCursor
+                            : realtimeEnemyCursor;
+                        nextCursor = queue.findIndex((slot, index) => index > cursorForNextAlly && slot.type !== 'ENEMY');
+                        if (nextCursor < 0) {
+                            nextCursor = queue.findIndex(slot => slot.type !== 'ENEMY');
+                        }
+                        if (nextCursor < 0) {
+                            nextCursor = coopBattlePlan.nextCursor;
+                        }
                     }
-                    if (nextCursor < 0) {
-                        nextCursor = coopBattlePlan.nextCursor;
+                    const nextSlot = latestBattleState.turnQueue[nextCursor];
+                    const nextBattleState: CoopBattleState = {
+                        ...latestBattleState,
+                        turnCursor: nextCursor,
+                        enemyTurnCursor: latestBattleState.enemyTurnCursor + coopBattlePlan.enemyActions,
+                        roundEndedPeerIds: nextSlot?.type === 'ENEMY' ? (latestBattleState.roundEndedPeerIds || []) : []
+                    };
+                    if (shouldEnterRealtimeEnemyPhase) {
+                        coopRealtimeEnemyPhaseResolvingRef.current = false;
                     }
+                    setCoopBattleState(nextBattleState);
+                    broadcastCoopBattleState(nextBattleState);
                 }
-                const nextSlot = latestBattleState.turnQueue[nextCursor];
-                const nextBattleState: CoopBattleState = {
-                    ...latestBattleState,
-                    turnCursor: nextCursor,
-                    enemyTurnCursor: latestBattleState.enemyTurnCursor + coopBattlePlan.enemyActions,
-                    roundEndedPeerIds: nextSlot?.type === 'ENEMY' ? (latestBattleState.roundEndedPeerIds || []) : []
-                };
-                setCoopBattleState(nextBattleState);
-                broadcastCoopBattleState(nextBattleState);
+            } finally {
+                if (shouldEnterRealtimeEnemyPhase) {
+                    coopRealtimeEnemyPhaseResolvingRef.current = false;
+                }
             }
             return;
         }
