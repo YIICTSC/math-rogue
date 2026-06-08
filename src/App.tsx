@@ -7138,7 +7138,11 @@ const App: React.FC = () => {
             currentState.challengeMode === 'COOP' &&
             currentState.screen === GameScreen.BATTLE &&
             latestCoopBattleState?.battleMode === 'REALTIME' &&
-            (coopRealtimeEnemyPhaseResolvingRef.current || latestCoopTurnSlot?.type === 'ENEMY')
+            (
+                coopRealtimeEnemyPhaseResolvingRef.current ||
+                latestCoopTurnSlot?.type === 'ENEMY' ||
+                (latestCoopBattleState.roundEndedPeerIds || []).length > 0
+            )
         ) {
             return;
         }
@@ -11390,6 +11394,7 @@ const App: React.FC = () => {
                     !activeTurn ||
                     activeTurn.type === 'ENEMY' ||
                     coopRealtimeEnemyPhaseResolvingRef.current ||
+                    (isRealtimeTurn && (latestBattleState?.roundEndedPeerIds || []).length > 0) ||
                     (!isRealtimeTurn && activeTurn.peerId !== fromPeerId)
                 ) {
                     return;
