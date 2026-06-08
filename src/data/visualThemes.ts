@@ -116,8 +116,8 @@ export const HIGH_SCHOOL_HUMANOID_ENEMY_VARIANTS = [
   { name: '冬制服の支配者', imageIndex: 10 },
   { name: '紫扇の評議員', imageIndex: 11 },
   { name: '黒翼の番長', imageIndex: 12 },
-  { name: '卒業審査の理事', imageIndex: 13 },
-  { name: '進路指導室の総裁', imageIndex: 14 },
+  { name: '校長', imageIndex: 13 },
+  { name: '真・校長', imageIndex: 14 },
   { name: '新米風紀委員', imageIndex: 15 },
   { name: '竹刀の体育係', imageIndex: 16 },
   { name: '赤ペン監督生', imageIndex: 17 },
@@ -169,8 +169,8 @@ export const getHighSchoolEnemyVariant = (enemy: Pick<Enemy, 'name' | 'enemyType
   if (humanoid) return humanoid;
   if (enemy.enemyType === 'THE_HEART') {
     return enemy.phase === 2
-      ? { name: '卒業審査の深層', imageIndex: 8 }
-      : { name: '進路指導室の支配者', imageIndex: 8 };
+      ? { name: '真・校長', imageIndex: 8 }
+      : { name: '校長', imageIndex: 8 };
   }
   return HIGH_SCHOOL_ENEMY_VARIANTS[getStableIndex(enemy.name, HIGH_SCHOOL_ENEMY_VARIANTS.length)];
 };

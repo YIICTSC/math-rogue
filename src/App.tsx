@@ -14022,8 +14022,17 @@ const App: React.FC = () => {
                         <div className="absolute inset-0 bg-amber-950/62 pointer-events-none" />
                         <div className="relative z-10 my-auto w-full max-w-2xl py-8">
                             <Trophy size={80} className="text-yellow-400 mx-auto mb-6 animate-pulse shrink-0" />
-                            <h1 className="text-4xl md:text-6xl mb-4 font-bold text-yellow-200 shrink-0">{trans("ゲームクリア！", languageMode)}</h1>
-                            <p className="mb-8 text-lg md:text-xl shrink-0 whitespace-pre-line">{trans("あなたは校長先生をせっとくし、\nでんせつの しょうがくせいとして かたりつがれることでしょう。", languageMode)}</p>
+                            <h1 className="text-4xl md:text-6xl mb-4 font-bold text-yellow-200 shrink-0">
+                                {trans(coopSyncedVisualTheme === 'high-school' ? "卒業おめでとう！" : "ゲームクリア！", languageMode)}
+                            </h1>
+                            <p className="mb-8 text-lg md:text-xl shrink-0 whitespace-pre-line">
+                                {trans(
+                                    coopSyncedVisualTheme === 'high-school'
+                                        ? "あなたは真・校長の支配を打ち破り、\nこの学園に自分たちの明日を取り戻しました。\n反逆の卒業生として、その名は校内伝説に刻まれるでしょう。"
+                                        : "あなたは校長先生をせっとくし、\nでんせつの しょうがくせいとして かたりつがれることでしょう。",
+                                    languageMode
+                                )}
+                            </p>
 
                             {/* Newly Unlocked Card Section */}
                             {newlyUnlockedCard && (
@@ -14035,14 +14044,28 @@ const App: React.FC = () => {
                                         <div className="scale-100">
                                             <Card card={newlyUnlockedCard} onClick={() => { }} disabled={false} languageMode={languageMode} />
                                         </div>
-                                        <p className="text-sm text-yellow-100 font-bold">{trans("新しい学習の成果が、次回の冒険から現れるようになります！", languageMode)}</p>
+                                        <p className="text-sm text-yellow-100 font-bold">
+                                            {trans(
+                                                coopSyncedVisualTheme === 'high-school'
+                                                    ? "新しい学園での成果が、次回の挑戦から現れるようになります！"
+                                                    : "新しい学習の成果が、次回の冒険から現れるようになります！",
+                                                languageMode
+                                            )}
+                                        </p>
                                     </div>
                                 </div>
                             )}
 
                             {getDifficultyConfig(gameState.difficultyLevel).legacyCardAllowed && !legacyCardSelected ? (
                                 <div className="mb-8 shrink-0">
-                                    <p className="mb-4 text-sm text-yellow-100 font-bold">{trans("次回の冒険に持っていくカードを1枚選んでください", languageMode)}</p>
+                                    <p className="mb-4 text-sm text-yellow-100 font-bold">
+                                        {trans(
+                                            coopSyncedVisualTheme === 'high-school'
+                                                ? "次回の学園攻略に持っていくカードを1枚選んでください"
+                                                : "次回の冒険に持っていくカードを1枚選んでください",
+                                            languageMode
+                                        )}
+                                    </p>
                                     <div className="flex flex-wrap justify-center gap-2 max-h-60 overflow-y-auto custom-scrollbar p-2 bg-black/30 rounded border border-yellow-700/50">
                                         {gameState.player.deck.map(card => (
                                             <div key={card.id} className="scale-75 cursor-pointer hover:scale-90 transition-transform" onClick={() => handleLegacyCardSelect(card)}>
@@ -14054,7 +14077,14 @@ const App: React.FC = () => {
                             ) : getDifficultyConfig(gameState.difficultyLevel).legacyCardAllowed ? (
                                 <div className="mb-8 p-4 bg-green-900/50 border-green-500 rounded-lg animate-in zoom-in duration-150 shrink-0">
                                     <p className="text-green-400 font-bold text-xl">{trans("カードを継承しました！", languageMode)}</p>
-                                    <p className="text-sm text-green-200 mt-1">{trans("次の冒険の初期デッキに追加されます。", languageMode)}</p>
+                                    <p className="text-sm text-green-200 mt-1">
+                                        {trans(
+                                            coopSyncedVisualTheme === 'high-school'
+                                                ? "次の学園攻略の初期デッキに追加されます。"
+                                                : "次の冒険の初期デッキに追加されます。",
+                                            languageMode
+                                        )}
+                                    </p>
                                 </div>
                             ) : null}
                             <div className="flex flex-col gap-4 items-center mt-4 pb-8 shrink-0">
