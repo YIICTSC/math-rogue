@@ -448,6 +448,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
     const [drawEntryAnimations, setDrawEntryAnimations] = useState<DrawEntryAnimation[]>([]);
     const [pendingExhaustCardHint, setPendingExhaustCardHint] = useState(false);
     const [showExhaustCardHint, setShowExhaustCardHint] = useState(false);
+    const isTrueBossPhase2SpecialLayout = isTrueBossPhase2Active && !isTouchPortraitViewport;
     const battleViewRef = useRef<HTMLDivElement>(null);
     const playerAreaRef = useRef<HTMLDivElement>(null);
     const playerGroupRef = useRef<HTMLDivElement>(null);
@@ -1438,13 +1439,13 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                 )}
 
                 {/* Enemies + Player Area */}
-                <div className={isTrueBossPhase2Active ? "battle-actors relative min-h-[220px] md:min-h-[320px] pt-2 md:pt-4" : "battle-actors flex flex-col flex-1 min-h-0"}>
+                <div className={isTrueBossPhase2SpecialLayout ? "battle-actors relative min-h-[220px] md:min-h-[320px] pt-2 md:pt-4" : "battle-actors flex flex-col flex-1 min-h-0"}>
 
                     {/* Enemies Area */}
-                    <div className={isTrueBossPhase2Active ? `battle-enemies-area absolute right-2 md:left-1/2 md:-translate-x-1/2 bottom-0 flex justify-end md:justify-center items-end gap-2 min-h-0 shrink-0 ${isFinisherActive ? 'z-[280]' : 'z-10'}` : `battle-enemies-area flex justify-center items-start pt-8 md:pt-14 gap-2 min-h-[180px] shrink-0 ${isFinisherActive ? 'z-[280]' : ''}`}>
+                    <div className={isTrueBossPhase2SpecialLayout ? `battle-enemies-area absolute right-2 md:left-1/2 md:-translate-x-1/2 bottom-0 flex justify-end md:justify-center items-end gap-2 min-h-0 shrink-0 ${isFinisherActive ? 'z-[280]' : 'z-10'}` : `battle-enemies-area flex justify-center items-start pt-8 md:pt-14 gap-2 min-h-[180px] shrink-0 ${isFinisherActive ? 'z-[280]' : ''}`}>
                         {visualEnemies.map((enemy) => {
                             const enemyHpPercent = (enemy.currentHp / enemy.maxHp) * 100;
-                            const isSelected = !isFinisherActive && selectedEnemyId === enemy.id;
+                            const isSelected = !isFinisherActive && (selectedEnemyId === enemy.id || (!selectedEnemyId && visualEnemies.length === 1));
                             const actionClass = getEnemyActionClass(enemy);
                             const themedEnemy = visualTheme === 'high-school'
                                 ? getHighSchoolEnemyVariant(enemy)
@@ -1590,7 +1591,15 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                     </div>
 
                                     {!isFinisherActive && (
-                                        <div className={`battle-enemy-stats ${isTrueBossPhase2 ? 'w-32 md:w-48' : isFinalBoss ? 'w-32 md:w-44' : 'w-24 md:w-28'} ${isFinalBoss ? 'md:shrink-0 md:self-center' : ''} bg-black/90 border-2 px-1 py-0.5 text-white text-[9px] md:text-[10px] transition-all shadow-md rounded relative z-10 ${isSelected ? 'border-yellow-400 ring-1 ring-yellow-400/50' : 'border-gray-600'} ${isTrueBossPhase2 ? 'border-purple-500 shadow-[0_0_18px_rgba(168,85,247,0.35)]' : isFinalBoss ? 'border-red-500 shadow-[0_0_14px_rgba(239,68,68,0.25)]' : ''}`}>
+                                        <div className={`battle-enemy-stats ${isTrueBossPhase2 ? 'w-32 md:w-48' : isFinalBoss ? 'w-32 md:w-44' : 'w-24 md:w-28'} ${isFinalBoss ? 'md:shrink-0 md:self-center' : ''} bg-black/90 border-2 px-1 py-0.5 text-white text-[9px] md:text-[10px] transition-all shadow-md rounded relative z-10 border-gray-600 ${isTrueBossPhase2 ? 'border-purple-500 shadow-[0_0_18px_rgba(168,85,247,0.35)]' : isFinalBoss ? 'border-red-500 shadow-[0_0_14px_rgba(239,68,68,0.25)]' : ''}`}>
+                                            {isSelected && (
+                                                <div
+                                                    aria-hidden="true"
+                                                    className="pointer-events-none absolute -left-1 -top-2 text-base font-black leading-none text-yellow-300 drop-shadow-[0_0_6px_rgba(250,204,21,0.9)]"
+                                                >
+                                                    ▼
+                                                </div>
+                                            )}
                                             <div className="flex items-center justify-between mb-0.5 h-4 w-full overflow-hidden">
                                                 <div className="flex-1 min-w-0 overflow-hidden relative h-full">
                                                     {enemyNameNeedsScroll ? (
@@ -1642,10 +1651,10 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                     </div>
 
                     {/* Player Area */}
-                    <div ref={playerAreaRef} className={isTrueBossPhase2Active ? "battle-player-area relative z-20 flex items-end pl-2 pb-2 shrink-0" : "battle-player-area flex items-end pl-2 pb-2 shrink-0 mt-auto"}>
-                        <div ref={playerGroupRef} className={isTrueBossPhase2Active ? "flex flex-col items-start md:flex-row md:items-end relative max-w-[48vw] md:max-w-none" : "flex items-end relative"}>
+                    <div ref={playerAreaRef} className={isTrueBossPhase2SpecialLayout ? "battle-player-area relative z-20 flex items-end pl-2 pb-2 shrink-0" : "battle-player-area flex items-end pl-2 pb-2 shrink-0 mt-auto"}>
+                        <div ref={playerGroupRef} className={isTrueBossPhase2SpecialLayout ? "flex flex-col items-start md:flex-row md:items-end relative max-w-[48vw] md:max-w-none" : "flex items-end relative"}>
 
-                            <div ref={playerSpriteRef} className={`battle-player-sprite order-1 ${visualTheme === 'high-school' ? 'w-40 h-40 md:w-48 md:h-48' : 'w-20 h-20 md:w-24 md:h-24'} relative transition-all duration-150 ease-out ${isTrueBossPhase2Active ? 'mr-0 md:mr-2 mb-1 md:mb-0' : 'mr-2'} ${getActionClass()} ${selectedSupportCard ? 'ring-2 ring-emerald-300 rounded-lg cursor-pointer' : ''}`} onClick={() => {
+                            <div ref={playerSpriteRef} className={`battle-player-sprite order-1 ${visualTheme === 'high-school' ? 'w-40 h-40 md:w-48 md:h-48' : 'w-20 h-20 md:w-24 md:h-24'} relative transition-all duration-150 ease-out ${isTrueBossPhase2SpecialLayout ? 'mr-0 md:mr-2 mb-1 md:mb-0' : 'mr-2'} ${getActionClass()} ${selectedSupportCard ? 'ring-2 ring-emerald-300 rounded-lg cursor-pointer' : ''}`} onClick={() => {
                                 if (selectedSupportCard && onUseCoopSupport) {
                                     onUseCoopSupport(selectedSupportCard);
                                     setSelectedSupportCard(null);
@@ -1696,7 +1705,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                             </div>
 
                             {player.partner && player.partner.currentHp > 0 && (
-                                <div className={`order-3 w-16 h-16 md:w-20 md:h-20 relative transition-all duration-150 ease-out ${isTrueBossPhase2Active ? 'mr-0 md:mr-2 -ml-3 md:-ml-6 mb-1 md:mb-0' : 'mr-2 -ml-6'} z-0 ${getActionClass()}`} onClick={() => showInfo(trans(player.partner!.name, languageMode), trans("パートナー。\n倒れるとデッキが1枚しか使えなくなります。", languageMode))}>
+                                <div className={`order-3 w-16 h-16 md:w-20 md:h-20 relative transition-all duration-150 ease-out ${isTrueBossPhase2SpecialLayout ? 'mr-0 md:mr-2 -ml-3 md:-ml-6 mb-1 md:mb-0' : 'mr-2 -ml-6'} z-0 ${getActionClass()}`} onClick={() => showInfo(trans(player.partner!.name, languageMode), trans("パートナー。\n倒れるとデッキが1枚しか使えなくなります。", languageMode))}>
                                     <img
                                         src={player.partner.imageData}
                                         alt="Partner"
@@ -1751,7 +1760,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                 </div>
                             )}
 
-                            <div className={`battle-player-stats order-2 bg-black/80 border-2 border-white p-1 text-white text-xs ${isTrueBossPhase2Active ? 'w-28 md:w-40' : 'w-36 md:w-40'} mb-2 shadow-lg rounded z-20 ${tutorialStep === 1 ? 'ring-4 ring-green-500 ring-offset-4 ring-offset-transparent animate-pulse' : ''}`}>
+                            <div className={`battle-player-stats order-2 bg-black/80 border-2 border-white p-1 text-white text-xs ${isTrueBossPhase2SpecialLayout ? 'w-28 md:w-40' : 'w-36 md:w-40'} mb-2 shadow-lg rounded z-20 ${tutorialStep === 1 ? 'ring-4 ring-green-500 ring-offset-4 ring-offset-transparent animate-pulse' : ''}`}>
                                 <div className="flex items-center justify-between mb-1">
                                     <span className="text-red-400 flex items-center font-bold" onClick={() => showInfo("HP", trans("ヒットポイント。0になると死亡する。", languageMode))}><Heart size={12} className="mr-1" /> {player.currentHp}/{player.maxHp}</span>
                                     <span className="text-blue-400 flex items-center font-bold" onClick={() => showInfo(trans("ブロック", languageMode), trans("次のターン開始時までダメージを防ぐ。", languageMode))}><Shield size={12} className="mr-1" /> {player.block}</span>

@@ -10,6 +10,8 @@ import { AlertCircle, FlaskConical, Gem, Heart, Keyboard, Shield, Skull, Triangl
 import { getTypingLessonDefinition, TypingLessonId } from '../data/typingLessonConfig';
 import { PotionIcon, RelicIcon } from './ItemIcon';
 import { getBattleBackgroundSceneById } from '../data/battleBackgrounds';
+import { getHighSchoolCharacterSpritePath, getThemedEnemyDisplayName, type HighSchoolEnemyAction, type VisualThemeId } from '../data/visualThemes';
+import type { BattleUiSettings } from './SettingsModal';
 
 interface TypingBattleSceneProps {
     player: Player;
@@ -36,6 +38,8 @@ interface TypingBattleSceneProps {
     hideEnemyIntents?: boolean;
     onOpenSettings?: () => void;
     battleBackgroundId?: string;
+    visualTheme?: VisualThemeId;
+    battleUiSettings?: BattleUiSettings;
 }
 
 type FingerId =
@@ -586,7 +590,9 @@ const TypingBattleScene: React.FC<TypingBattleSceneProps> = ({
     onAbort,
     hideEnemyIntents = false,
     onOpenSettings,
-    battleBackgroundId
+    battleBackgroundId,
+    visualTheme = 'elementary',
+    battleUiSettings
 }) => {
     const inputRef = useRef<HTMLInputElement>(null);
     const autoEndTimerRef = useRef<number | null>(null);
@@ -612,6 +618,16 @@ const TypingBattleScene: React.FC<TypingBattleSceneProps> = ({
     }, [player.hand]);
     const queuedHandCards = useMemo(() => player.hand.slice(1), [player.hand]);
     const normalizedAnswers = useMemo(() => getAcceptedAnswersForPrompt(prompt), [prompt]);
+    const battleUiStyle = battleUiSettings ? {
+        '--typing-battle-enemy-scale': battleUiSettings.enemyScale,
+        '--typing-battle-player-scale': battleUiSettings.playerScale,
+        '--typing-battle-enemy-offset-y': `${battleUiSettings.enemyOffsetY}px`,
+        '--typing-battle-player-offset-y': `${battleUiSettings.playerOffsetY}px`,
+        '--typing-battle-stats-scale': battleUiSettings.statsScale
+    } as React.CSSProperties : undefined;
+    const playerSpriteSource = visualTheme === 'high-school'
+        ? getHighSchoolCharacterSpritePath(player.id, 'idle')
+        : player.imageData;
     const getRelicCounter = (relicId: string) => {
         if (relicId === 'KUNAI' || relicId === 'SHURIKEN' || relicId === 'ORNAMENTAL_FAN') {
             return player.relicCounters['ATTACK_COUNT'];
@@ -801,7 +817,7 @@ const TypingBattleScene: React.FC<TypingBattleSceneProps> = ({
     const battleBackgroundScene = getBattleBackgroundSceneById(battleBackgroundId);
 
     return (
-        <div className={`flex h-full w-full flex-col overflow-hidden bg-gray-950 text-white ${isShaking ? 'animate-screen-shake' : ''}`} onClick={focusInput}>
+        <div className={`flex h-full w-full flex-col overflow-hidden bg-gray-950 text-white ${isShaking ? 'animate-screen-shake' : ''}`} style={battleUiStyle} onClick={focusInput}>
             <input
                 ref={inputRef}
                 value={input}
@@ -842,15 +858,23 @@ const TypingBattleScene: React.FC<TypingBattleSceneProps> = ({
 
             <div className="relative flex min-h-0 flex-1 flex-col justify-between gap-2 overflow-y-auto bg-gray-800/50 p-2 custom-scrollbar">
                 <div
-                    className="pointer-events-none absolute inset-0 bg-cover bg-center opacity-76"
+                    className="pointer-events-none absolute inset-0 z-0 bg-cover bg-center opacity-76"
                     style={{ backgroundImage: `url(${battleBackgroundScene.image})` }}
                 />
-                <div className="pointer-events-none absolute inset-0 bg-slate-950/45" />
-                <div className="flex min-h-[118px] shrink-0 items-start justify-center gap-2 pt-6 md:min-h-[140px] md:pt-8">
+                <div className="pointer-events-none absolute inset-0 z-0 bg-slate-950/45" />
+                <div className="relative z-10 flex min-h-[150px] shrink-0 items-start justify-center gap-3 pt-7 md:min-h-[210px] md:pt-10">
                     {visualEnemies.map(enemy => {
                         const enemyHpPercent = Math.max(0, (enemy.currentHp / enemy.maxHp) * 100);
-                        const isSelected = !isFinisherActive && selectedEnemyId === enemy.id;
-                        const enemyName = trans(enemy.name, languageMode);
+                        const isSelected = !isFinisherActive && (selectedEnemyId === enemy.id || (!selectedEnemyId && visualEnemies.length === 1));
+                        const enemyName = trans(getThemedEnemyDisplayName(enemy, visualTheme), languageMode);
+                        const highSchoolEnemyAction: HighSchoolEnemyAction = actingEnemyId !== enemy.id
+                            ? 'idle'
+                            : ['ATTACK', 'ATTACK_DEBUFF', 'ATTACK_DEFEND', 'PIERCE_ATTACK'].includes(enemy.nextIntent.type)
+                                ? 'attack'
+                                : 'skill';
+                        const enemySvgAliases = enemy.enemyType === 'THE_HEART' && enemy.phase === 2
+                            ? ['THE_HEART_PHASE2', '真ボス2形態目', '真ボス_2', '真ボス第二形態', `${enemy.enemyType}_2`]
+                            : [];
                         return (
                             <div
                                 key={enemy.id}
@@ -858,6 +882,7 @@ const TypingBattleScene: React.FC<TypingBattleSceneProps> = ({
                                     if (!isFinisherActive) onSelectEnemy(enemy.id);
                                 }}
                                 className={`relative z-10 flex flex-col items-center transition-all duration-200 ${isFinisherActive ? '!z-[300]' : ''} ${isSelected ? 'z-20 scale-105 cursor-pointer' : !isFinisherActive ? 'cursor-pointer hover:scale-105' : ''}`}
+                                style={{ transform: `translateY(var(--typing-battle-enemy-offset-y, 0px)) scale(var(--typing-battle-enemy-scale, 1))` }}
                             >
                                 {!isFinisherActive && (
                                     <div className="absolute -top-5 left-1/2 z-30 flex min-w-[36px] -translate-x-1/2 items-center justify-center rounded border-2 border-red-600 bg-white px-1 py-0.5 text-[10px] font-extrabold text-black shadow-xl">
@@ -865,14 +890,31 @@ const TypingBattleScene: React.FC<TypingBattleSceneProps> = ({
                                     </div>
                                 )}
 
-                                <div className="relative mb-1 h-20 w-20 transition-all duration-300 md:h-24 md:w-24">
-                                    <EnemyIllustration name={enemy.name} seed={enemy.id} className="relative z-10 h-full w-full drop-shadow-lg" />
+                                <div className="relative mb-1 h-28 w-28 transition-all duration-300 md:h-40 md:w-40">
+                                    <EnemyIllustration
+                                        name={enemy.name}
+                                        seed={enemy.id}
+                                        aliases={enemySvgAliases}
+                                        visualTheme={visualTheme}
+                                        enemyType={enemy.enemyType}
+                                        phase={enemy.phase}
+                                        action={highSchoolEnemyAction}
+                                        className="relative z-10 h-full w-full drop-shadow-lg"
+                                    />
                                     {!isFinisherActive && <StandardFloatingTextOverlay data={enemy.floatingText} languageMode={languageMode} />}
                                     {!isFinisherActive && <StandardVFXOverlay effects={activeEffects} targetId={enemy.id} />}
                                 </div>
 
                                 {!isFinisherActive && (
-                                    <div className={`relative z-10 w-20 rounded border-2 bg-black/90 px-1 py-0.5 text-[8px] text-white shadow-md md:w-24 md:text-[9px] ${isSelected ? 'border-yellow-400 ring-1 ring-yellow-400/50' : 'border-gray-600'}`}>
+                                    <div className="relative z-10 w-28 rounded border-2 border-gray-600 bg-black/90 px-1.5 py-1 text-[9px] text-white shadow-md md:w-36 md:text-[10px]" style={{ transform: `scale(var(--typing-battle-stats-scale, 1))` }}>
+                                        {isSelected && (
+                                            <div
+                                                aria-hidden="true"
+                                                className="pointer-events-none absolute -left-1 -top-2 text-base font-black leading-none text-yellow-300 drop-shadow-[0_0_6px_rgba(250,204,21,0.9)]"
+                                            >
+                                                ▼
+                                            </div>
+                                        )}
                                         <div className="mb-0.5 flex h-4 w-full items-center justify-between overflow-hidden">
                                             <div className="min-w-0 flex-1 truncate font-bold text-red-200">{enemyName}</div>
                                             {enemy.block > 0 && (
@@ -906,14 +948,14 @@ const TypingBattleScene: React.FC<TypingBattleSceneProps> = ({
                     })}
                 </div>
 
-                <div className="mt-auto flex items-start justify-between gap-2">
-                    <div className="flex min-h-[124px] min-w-0 flex-1 items-start p-1.5">
-                        <div className="relative mr-2 h-24 w-24 shrink-0">
-                            <img src={player.imageData} alt="Hero" className="h-full w-full pixel-art" style={{ imageRendering: 'pixelated' }} />
+                <div className="absolute bottom-2 left-2 right-2 z-20 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+                    <div className="flex min-h-[136px] min-w-0 flex-1 items-end gap-2 p-1.5">
+                        <div className="relative h-28 w-28 shrink-0 md:h-36 md:w-36" style={{ transform: `translateY(var(--typing-battle-player-offset-y, 0px)) scale(var(--typing-battle-player-scale, 1))` }}>
+                            <img src={playerSpriteSource} alt="Hero" className="h-full w-full pixel-art drop-shadow-lg" style={{ imageRendering: 'pixelated' }} />
                             <StandardVFXOverlay effects={activeEffects} targetId="player" />
                             <StandardFloatingTextOverlay data={player.floatingText} languageMode={languageMode} />
                         </div>
-                        <div className="flex h-[124px] min-w-0 w-44 flex-col rounded border-2 border-white bg-black/80 p-1.5 text-xs text-white shadow-lg">
+                        <div className="flex min-h-[124px] w-[min(52vw,240px)] min-w-[170px] flex-col rounded border-2 border-white bg-black/85 p-1.5 text-xs text-white shadow-lg" style={{ transform: `scale(var(--typing-battle-stats-scale, 1))`, transformOrigin: 'bottom left' }}>
                             <div className="mb-1 text-[10px] font-black uppercase tracking-wider text-slate-200">Player</div>
                             <div className="mb-1 flex items-center justify-between">
                                 <span className="flex items-center font-bold text-red-400"><Heart size={12} className="mr-1" /> {player.currentHp}/{player.maxHp}</span>
@@ -968,7 +1010,7 @@ const TypingBattleScene: React.FC<TypingBattleSceneProps> = ({
                         </div>
                     </div>
 
-                    <div className="flex h-[124px] min-w-[128px] max-w-[180px] shrink-0 flex-col items-center p-1.5">
+                    <div className="flex h-[132px] min-w-[128px] max-w-[180px] shrink-0 flex-col items-center self-end p-1.5">
                         <div className="mb-1 text-[10px] font-black uppercase tracking-wider text-emerald-300">Next Card</div>
                         <div className="flex h-full w-full items-center justify-center p-1">
                             {currentCard ? (
@@ -1024,7 +1066,7 @@ const TypingBattleScene: React.FC<TypingBattleSceneProps> = ({
                 )}
             </div>
 
-            <div className="relative flex h-16 shrink-0 items-center justify-between border-t-2 border-white bg-gray-800 px-2 shadow-lg">
+            <div className="relative flex h-32 shrink-0 items-center justify-between border-t-2 border-white bg-gray-800 px-2 shadow-lg">
                 <div className="flex min-w-[150px] items-center gap-2">
                     <div className="flex items-center rounded-full border-2 border-yellow-500 bg-black px-2 py-0.5 text-yellow-400 shadow-lg">
                         <Zap size={14} className="mr-1 fill-yellow-400" />
