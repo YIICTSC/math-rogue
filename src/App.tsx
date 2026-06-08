@@ -7588,7 +7588,11 @@ const App: React.FC = () => {
             )
         }));
         for (const enemyTemplate of enemiesToAct) {
-            if (stateRef.current.player.currentHp <= 0) break;
+            const hasLivingCoopTarget =
+                stateRef.current.challengeMode === 'COOP' &&
+                !!coopSession?.isHost &&
+                (stateRef.current.coopBattleState?.players || []).some(entry => entry.player.currentHp > 0);
+            if (stateRef.current.player.currentHp <= 0 && !hasLivingCoopTarget) break;
             const enemy = stateRef.current.enemies.find(e => e.id === enemyTemplate.id);
             if (!enemy || enemy.currentHp <= 0) continue;
             setActingEnemyId(enemy.id);
@@ -10956,6 +10960,9 @@ const App: React.FC = () => {
                     const isRealtimeRound =
                         normalizedSharedBattleState?.battleMode === 'REALTIME' &&
                         normalizedSharedBattleState?.turnQueue[normalizedSharedBattleState.turnCursor]?.type !== 'ENEMY';
+                    const isRealtimeEnemyPhase =
+                        normalizedSharedBattleState?.battleMode === 'REALTIME' &&
+                        normalizedSharedBattleState?.turnQueue[normalizedSharedBattleState.turnCursor]?.type === 'ENEMY';
                     const isLocalPlayersTurn =
                         data.state.screen === GameScreen.BATTLE &&
                         !!normalizedSharedBattleState &&
@@ -10969,7 +10976,9 @@ const App: React.FC = () => {
                                 ? (isSameBattle && isLocalPlayersTurn
                                     ? prev.player
                                     : preserveLocalBattleCardZones(selfBattleEntry.player, prev.player, { preserveZones: !!isSameBattle }))
-                                : selfBattleEntry.player)
+                                : (isSameBattle && isRealtimeEnemyPhase
+                                    ? preserveLocalBattleCardZones(selfBattleEntry.player, prev.player, { preserveZones: true })
+                                    : selfBattleEntry.player))
                             : prev.player;
                     return {
                         ...nextSharedState,
@@ -11237,6 +11246,9 @@ const App: React.FC = () => {
                         const isRealtimeRound =
                             normalizedBattleState?.battleMode === 'REALTIME' &&
                             normalizedBattleState?.turnQueue[normalizedBattleState.turnCursor]?.type !== 'ENEMY';
+                        const isRealtimeEnemyPhase =
+                            normalizedBattleState?.battleMode === 'REALTIME' &&
+                            normalizedBattleState?.turnQueue[normalizedBattleState.turnCursor]?.type === 'ENEMY';
                         const enemyActing = data.actingEnemyId !== undefined && data.actingEnemyId !== null;
                         const isLocalPlayersTurn =
                             !!normalizedBattleState &&
@@ -11254,7 +11266,9 @@ const App: React.FC = () => {
                                 ? (canKeepQueuedLocalPlayer
                                     ? prev.player
                                     : preserveLocalBattleCardZones(selfBattlePlayer.player, prev.player, { preserveZones: isSameBattle }))
-                                : selfBattlePlayer.player;
+                                : (isSameBattle && (enemyActing || isRealtimeEnemyPhase)
+                                    ? preserveLocalBattleCardZones(selfBattlePlayer.player, prev.player, { preserveZones: true })
+                                    : selfBattlePlayer.player);
                             return {
                                 ...prev,
                                 player: mergedLocalPlayer,
