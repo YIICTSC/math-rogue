@@ -1902,7 +1902,12 @@ const App: React.FC = () => {
         const normalizedBattleState = coopSession?.isHost
             ? mergeLocalPeerIntoCoopBattleState(battleState)
             : battleState;
-        setGameState(prev => ({ ...prev, coopBattleState: normalizedBattleState }));
+        stateRef.current = { ...stateRef.current, coopBattleState: normalizedBattleState };
+        setGameState(prev => {
+            const nextState = { ...prev, coopBattleState: normalizedBattleState };
+            stateRef.current = nextState;
+            return nextState;
+        });
         setCoopBattleQueue(normalizedBattleState?.turnQueue || []);
         setCoopBattleKey(normalizedBattleState?.battleKey || null);
         setCoopEnemyTurnCursor(normalizedBattleState?.enemyTurnCursor || 0);
@@ -8358,11 +8363,12 @@ const App: React.FC = () => {
             });
             return;
         }
-        if (isRealtimeCoopTurn && coopSession?.isHost && coopSelfPeerId && gameState.coopBattleState) {
-            const alreadyEnded = (gameState.coopBattleState.roundEndedPeerIds || []).includes(coopSelfPeerId);
+        if (isRealtimeCoopTurn && coopSession?.isHost && coopSelfPeerId && (stateRef.current.coopBattleState || gameState.coopBattleState)) {
+            const latestBattleState = stateRef.current.coopBattleState || gameState.coopBattleState!;
+            const alreadyEnded = (latestBattleState.roundEndedPeerIds || []).includes(coopSelfPeerId);
             if (!alreadyEnded) {
-                const nextEnded = [...(gameState.coopBattleState.roundEndedPeerIds || []), coopSelfPeerId];
-                const nextBattleState: CoopBattleState = { ...gameState.coopBattleState, roundEndedPeerIds: nextEnded };
+                const nextEnded = [...(latestBattleState.roundEndedPeerIds || []), coopSelfPeerId];
+                const nextBattleState: CoopBattleState = { ...latestBattleState, roundEndedPeerIds: nextEnded };
                 setCoopBattleState(nextBattleState);
                 const alivePeerIds = getRequiredRealtimeEndPeerIds(nextBattleState);
                 const allEnded = alivePeerIds.every(peerId => nextEnded.includes(peerId));
