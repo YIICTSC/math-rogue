@@ -4719,7 +4719,7 @@ const App: React.FC = () => {
             : [];
 
         const difficulty = getDifficultyConfig(gameState.difficultyLevel);
-        const legacyCard = (gameState.challengeMode === 'RACE' || gameState.challengeMode === 'COOP' || !difficulty.legacyCardAllowed)
+        const legacyCard = (gameState.challengeMode === 'RACE' || !difficulty.legacyCardAllowed)
             ? null
             : storageService.getLegacyCard();
         if (legacyCard) {
@@ -8999,6 +8999,98 @@ const App: React.FC = () => {
         }));
     }, [selectedCharName]);
 
+    const applyCoopAutoRevives = useCallback(() => {
+        const currentState = stateRef.current;
+        const battleState = currentState.coopBattleState;
+        if (
+            currentState.challengeMode !== 'COOP' ||
+            currentState.screen !== GameScreen.BATTLE ||
+            !coopSession?.isHost ||
+            !battleState
+        ) {
+            return false;
+        }
+
+        let revived = false;
+        const revivedPeerIds = new Set<string>();
+        const logs: string[] = [];
+        const effects: VisualEffectInstance[] = [];
+        const nextPlayers = battleState.players.map(entry => {
+            if (entry.player.currentHp > 0) return entry;
+
+            const tailRevived = reviveWithTailEffect(entry.player);
+            if (tailRevived) {
+                revived = true;
+                revivedPeerIds.add(entry.peerId);
+                logs.push(`${entry.name}がレリック効果で復活した！`);
+                effects.push({ id: `vfx-coop-tail-revive-${Date.now()}-${entry.peerId}`, type: 'HEAL', targetId: 'player', ownerPeerId: entry.peerId });
+                return {
+                    ...entry,
+                    player: tailRevived,
+                    isDown: false
+                };
+            }
+
+            const ghostPotIndex = entry.player.potions.findIndex(potion => potion.templateId === 'GHOST_IN_JAR');
+            if (ghostPotIndex !== -1) {
+                revived = true;
+                revivedPeerIds.add(entry.peerId);
+                const ghostRevivedPlayer: Player = {
+                    ...entry.player,
+                    potions: entry.player.potions.filter((_, index) => index !== ghostPotIndex),
+                    currentHp: Math.max(1, Math.floor(entry.player.maxHp * 0.1)),
+                    floatingText: { id: `coop-ghost-revive-${Date.now()}-${entry.peerId}`, text: 'お守り！', color: 'text-yellow-400', iconType: 'heart' }
+                };
+                logs.push(`${entry.name}がお守りで復活した！`);
+                effects.push({ id: `vfx-coop-ghost-revive-${Date.now()}-${entry.peerId}`, type: 'HEAL', targetId: 'player', ownerPeerId: entry.peerId });
+                return {
+                    ...entry,
+                    player: ghostRevivedPlayer,
+                    isDown: false
+                };
+            }
+
+            return entry;
+        });
+
+        if (!revived) return false;
+
+        const nextBattleState: CoopBattleState = {
+            ...battleState,
+            players: nextPlayers
+        };
+        const selfEntry = coopSelfPeerId
+            ? nextPlayers.find(entry => entry.peerId === coopSelfPeerId)
+            : null;
+
+        audioService.playSound('buff');
+        setCoopBattleState(nextBattleState);
+        setCoopSession(prev => prev ? {
+            ...prev,
+            participants: prev.participants.map(participant => {
+                const battleEntry = nextPlayers.find(entry => entry.peerId === participant.peerId);
+                if (!battleEntry) return participant;
+                return {
+                    ...participant,
+                    currentHp: battleEntry.player.currentHp,
+                    block: battleEntry.player.block,
+                    nextTurnEnergy: battleEntry.player.nextTurnEnergy,
+                    strength: battleEntry.player.strength,
+                    buffer: battleEntry.player.powers['BUFFER'] || 0,
+                    revivedThisBattle: participant.revivedThisBattle || revivedPeerIds.has(participant.peerId)
+                };
+            })
+        } : prev);
+        setGameState(prev => ({
+            ...prev,
+            player: selfEntry ? selfEntry.player : prev.player,
+            coopBattleState: nextBattleState,
+            combatLog: [...prev.combatLog, ...logs].slice(-100),
+            activeEffects: [...prev.activeEffects, ...effects]
+        }));
+        return true;
+    }, [coopSelfPeerId, coopSession, setCoopBattleState]);
+
     useEffect(() => {
         if (gameState.screen !== GameScreen.BATTLE) {
             battleVictoryResolvingRef.current = false;
@@ -9008,6 +9100,11 @@ const App: React.FC = () => {
         }
         if (gameState.screen === GameScreen.BATTLE) {
             if (gameState.challengeMode === 'COOP' && coopSession && !coopSession.isHost) {
+                return;
+            }
+            if (gameState.challengeMode === 'COOP' && applyCoopAutoRevives()) {
+                lastActingEnemyRef.current = null;
+                lastLethalEnemyRef.current = null;
                 return;
             }
             const isHeartTransforming = gameState.enemies.some(e => e.enemyType === 'THE_HEART' && e.phase === 1 && e.currentHp <= 0);
@@ -9097,7 +9194,7 @@ const App: React.FC = () => {
                 }
             }
         }
-    }, [gameState.enemies, gameState.player.currentHp, gameState.screen, gameState.act, gameState.challengeMode, coopSession, unlockRandomAdditionalCard, battleFinisherCutinCard, resolveBattleVictory, createEnemyFinisherCard, resolveBattleDefeat]);
+    }, [applyCoopAutoRevives, gameState.enemies, gameState.player.currentHp, gameState.coopBattleState, gameState.screen, gameState.act, gameState.challengeMode, coopSession, unlockRandomAdditionalCard, battleFinisherCutinCard, resolveBattleVictory, createEnemyFinisherCard, resolveBattleDefeat]);
 
     useEffect(() => {
         if (gameState.challengeMode !== 'COOP') return;
