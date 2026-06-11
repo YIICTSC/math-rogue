@@ -79,6 +79,7 @@ const PARRY_WINDOW_MS = 650;
 const PARRY_PERFECT_MS = 220;
 const CROWDFUNDING_BANNER_URL = 'https://camp-fire.jp/projects/954165/view?utm_campaign=cp_po_share_c_msg_mypage_projects_open';
 const CROWDFUNDING_BANNER_IMAGE = assetUrl('banners/campfire-crowdfunding.png');
+const ASSIGNMENT_INTRO_BANNER_IMAGE = assetUrl('banners/daily-assignment-reward-intro.png');
 const CROWDFUNDING_BANNER_END_AT = new Date('2026-06-20T23:59:59+09:00').getTime();
 const HOLOGRAPHIC_REWARD_CARD_CHANCE = 0.05;
 
@@ -11944,7 +11945,7 @@ const App: React.FC = () => {
                                     <div className={`mb-3 overflow-hidden rounded-xl border-2 bg-slate-950/90 ${isTeacherAssignmentActive ? 'border-amber-300' : 'border-lime-300'}`}>
                                         <div className="relative">
                                             <img
-                                                src="/banners/daily-assignment-reward-intro.png"
+                                                src={ASSIGNMENT_INTRO_BANNER_IMAGE}
                                                 alt="デイリー課題とご褒美カードの紹介"
                                                 className="aspect-[3/1] w-full object-cover"
                                                 draggable={false}
@@ -12418,7 +12419,7 @@ const App: React.FC = () => {
                             <div className={`mb-3 overflow-hidden rounded-xl border-2 bg-slate-950/90 ${isTeacherAssignmentActive ? 'border-amber-300' : 'border-lime-300'}`}>
                                 <div className="relative">
                                     <img
-                                        src="/banners/daily-assignment-reward-intro.png"
+                                        src={ASSIGNMENT_INTRO_BANNER_IMAGE}
                                         alt="デイリー課題とご褒美カードの紹介"
                                         className="aspect-[3/1] w-full object-cover"
                                         draggable={false}
