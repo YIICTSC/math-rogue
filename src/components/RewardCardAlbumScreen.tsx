@@ -34,9 +34,9 @@ const RewardCardAlbumScreen: React.FC<RewardCardAlbumScreenProps> = ({
   return (
     <div
       className="main-reward-card-album-screen h-full w-full overflow-y-auto bg-slate-950 bg-cover bg-center text-white custom-scrollbar"
-      style={{ backgroundImage: `url(${assetUrl('sprites/backgrounds/learning-rogue/reward-rooftop.webp')})` }}
+      style={{ backgroundImage: `url(${assetUrl('banners/reward-card-album-background.png')})` }}
     >
-      <div className="min-h-full bg-slate-950/72 p-4">
+      <div className="min-h-full bg-slate-950/58 p-4">
         {inspectedCard && (
           <CardInspectionModal
             card={inspectedCard}

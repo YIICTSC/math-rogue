@@ -11931,15 +11931,33 @@ const App: React.FC = () => {
                         )}
 
                         {assignmentLetter && showAssignmentLetter && (
-                            <div className="fixed inset-0 z-[10030] flex items-center justify-center bg-black/80 p-4">
-                                <div className={`w-full max-w-xl rounded-2xl border-4 p-5 text-slate-900 ${
+                            <div className="fixed inset-0 z-[10030] flex items-center justify-center bg-black/80 p-2 sm:p-4">
+                                <div className={`w-full max-w-2xl max-h-[96vh] overflow-y-auto rounded-2xl border-4 p-3 text-slate-900 sm:p-4 ${
                                     isTeacherAssignmentActive
                                         ? 'border-amber-300 bg-[#fff7d6] shadow-[0_0_40px_rgba(250,204,21,0.35)]'
                                         : 'border-lime-300 bg-[#f3ffd4] shadow-[0_0_40px_rgba(163,230,53,0.35)]'
                                 }`}>
-                                    <div className={`mb-2 text-center text-xs font-black tracking-[0.3em] ${isTeacherAssignmentActive ? 'text-amber-700' : 'text-lime-700'}`}>{isTeacherAssignmentActive ? 'TEACHER LETTER' : 'DAILY LETTER'}</div>
-                                    <h2 className="mb-3 text-center text-2xl font-black">{assignmentLetter.title}</h2>
-                                    <div className={`mb-4 rounded-xl border-2 bg-white/70 p-4 text-sm font-bold leading-7 ${isTeacherAssignmentActive ? 'border-amber-300' : 'border-lime-300'}`}>
+                                    <div className={`mb-1 text-center text-[10px] font-black tracking-[0.3em] ${isTeacherAssignmentActive ? 'text-amber-700' : 'text-lime-700'}`}>{isTeacherAssignmentActive ? 'TEACHER LETTER' : 'DAILY LETTER'}</div>
+                                    <h2 className="mb-2 text-center text-xl font-black sm:text-2xl">{assignmentLetter.title}</h2>
+                                    <div className={`mb-3 overflow-hidden rounded-xl border-2 bg-slate-950/90 ${isTeacherAssignmentActive ? 'border-amber-300' : 'border-lime-300'}`}>
+                                        <div className="relative">
+                                            <img
+                                                src="/banners/daily-assignment-reward-intro.png"
+                                                alt="デイリー課題とご褒美カードの紹介"
+                                                className="aspect-[3/1] w-full object-cover"
+                                                draggable={false}
+                                            />
+                                            <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950/95 via-slate-950/75 to-transparent p-2">
+                                                <div className="mb-1 text-xs font-black text-lime-100 sm:text-sm">今日の課題を達成して、ご褒美カードをゲットしよう！</div>
+                                                <div className="grid grid-cols-3 gap-1 text-[10px] font-black text-slate-100 sm:text-[11px]">
+                                                    <div className="rounded-md border border-lime-300/50 bg-lime-300/15 px-2 py-1">課題に挑戦</div>
+                                                    <div className="rounded-md border border-cyan-300/50 bg-cyan-300/15 px-2 py-1">目標達成</div>
+                                                    <div className="rounded-md border border-fuchsia-300/50 bg-fuchsia-300/15 px-2 py-1">カード保存</div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className={`mb-3 rounded-xl border-2 bg-white/70 p-3 text-xs font-bold leading-6 sm:text-sm ${isTeacherAssignmentActive ? 'border-amber-300' : 'border-lime-300'}`}>
                                         <div>{isTeacherAssignmentActive ? '先生から課題が届きました。' : '今日の学習課題です。'}</div>
                                         <div>期限: {assignmentLetter.dueAt ? new Date(assignmentLetter.dueAt).toLocaleString('ja-JP') : '未設定'}</div>
                                         <div>形式: {assignmentLetter.gameMode === 'FREE' ? 'フリー' : '問題チャレンジのみ'}</div>
@@ -12015,7 +12033,7 @@ const App: React.FC = () => {
                                                 }}
                                                 className="rounded-xl border border-emerald-400 bg-emerald-50 px-4 py-3 text-sm font-black text-emerald-700 hover:bg-emerald-100"
                                             >
-                                                進捗を見る
+                                                結果を見る
                                             </button>
                                         )}
                                     </div>
@@ -12387,15 +12405,33 @@ const App: React.FC = () => {
                 )}
 
                 {gameState.screen !== GameScreen.START_MENU && assignmentLetter && showAssignmentLetter && (
-                    <div className="fixed inset-0 z-[10030] flex items-center justify-center bg-black/80 p-4">
-                        <div className={`w-full max-w-xl rounded-2xl border-4 p-5 text-slate-900 ${
+                            <div className="fixed inset-0 z-[10030] flex items-center justify-center bg-black/80 p-2 sm:p-4">
+                        <div className={`w-full max-w-2xl max-h-[96vh] overflow-y-auto rounded-2xl border-4 p-3 text-slate-900 sm:p-4 ${
                             isTeacherAssignmentActive
                                 ? 'border-amber-300 bg-[#fff7d6] shadow-[0_0_40px_rgba(250,204,21,0.35)]'
                                 : 'border-lime-300 bg-[#f3ffd4] shadow-[0_0_40px_rgba(163,230,53,0.35)]'
                         }`}>
-                            <div className={`mb-2 text-center text-xs font-black tracking-[0.3em] ${isTeacherAssignmentActive ? 'text-amber-700' : 'text-lime-700'}`}>{isTeacherAssignmentActive ? 'TEACHER LETTER' : 'DAILY LETTER'}</div>
-                            <h2 className="mb-3 text-center text-2xl font-black">{assignmentLetter.title}</h2>
-                            <div className={`mb-4 rounded-xl border-2 bg-white/70 p-4 text-sm font-bold leading-7 ${isTeacherAssignmentActive ? 'border-amber-300' : 'border-lime-300'}`}>
+                            <div className={`mb-1 text-center text-[10px] font-black tracking-[0.3em] ${isTeacherAssignmentActive ? 'text-amber-700' : 'text-lime-700'}`}>{isTeacherAssignmentActive ? 'TEACHER LETTER' : 'DAILY LETTER'}</div>
+                            <h2 className="mb-2 text-center text-xl font-black sm:text-2xl">{assignmentLetter.title}</h2>
+                            <div className={`mb-3 overflow-hidden rounded-xl border-2 bg-slate-950/90 ${isTeacherAssignmentActive ? 'border-amber-300' : 'border-lime-300'}`}>
+                                <div className="relative">
+                                    <img
+                                        src="/banners/daily-assignment-reward-intro.png"
+                                        alt="デイリー課題とご褒美カードの紹介"
+                                        className="aspect-[3/1] w-full object-cover"
+                                        draggable={false}
+                                    />
+                                    <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950/95 via-slate-950/75 to-transparent p-2">
+                                        <div className="mb-1 text-xs font-black text-lime-100 sm:text-sm">今日の課題を達成して、ご褒美カードをゲットしよう！</div>
+                                        <div className="grid grid-cols-3 gap-1 text-[10px] font-black text-slate-100 sm:text-[11px]">
+                                            <div className="rounded-md border border-lime-300/50 bg-lime-300/15 px-2 py-1">課題に挑戦</div>
+                                            <div className="rounded-md border border-cyan-300/50 bg-cyan-300/15 px-2 py-1">目標達成</div>
+                                            <div className="rounded-md border border-fuchsia-300/50 bg-fuchsia-300/15 px-2 py-1">カード保存</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div className={`mb-3 rounded-xl border-2 bg-white/70 p-3 text-xs font-bold leading-6 sm:text-sm ${isTeacherAssignmentActive ? 'border-amber-300' : 'border-lime-300'}`}>
                                 <div>{isTeacherAssignmentActive ? '先生から課題が届きました。' : '今日の学習課題です。'}</div>
                                 <div>期限: {assignmentLetter.dueAt ? new Date(assignmentLetter.dueAt).toLocaleString('ja-JP') : '未設定'}</div>
                                 <div>形式: {assignmentLetter.gameMode === 'FREE' ? 'フリー' : '問題チャレンジのみ'}</div>
