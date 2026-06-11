@@ -325,10 +325,13 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled, onInspect, languag
   const holographicVariant = getStableHolographicVariant(card);
   const holographicPrismPath = HOLOGRAPHIC_PRISM_ASSETS[holographicVariant];
   const nameColorClass = card.holographic
-    ? 'text-cyan-100'
+    ? 'text-black'
     : card.upgraded
       ? 'text-green-400'
       : 'text-white';
+  const nameShadowClass = card.holographic
+    ? 'drop-shadow-[0_1px_0_rgba(255,255,255,0.85)]'
+    : 'drop-shadow-md';
 
   return (
     <div
@@ -363,14 +366,14 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled, onInspect, languag
         </div>
 
         {needsScroll ? (
-          <div className="flex-1 overflow-hidden relative text-[13px] font-bold drop-shadow-md min-w-0">
+          <div className={`flex-1 overflow-hidden relative text-[13px] font-bold min-w-0 ${nameShadowClass}`}>
             <div className={`flex w-max animate-marquee-scroll ${nameColorClass}`}>
               <span className="pr-4">{displayName}</span>
               <span className="pr-4">{displayName}</span>
             </div>
           </div>
         ) : (
-          <span className={`text-[13px] font-bold truncate flex-1 drop-shadow-md ${nameColorClass}`}>
+          <span className={`text-[13px] font-bold truncate flex-1 ${nameShadowClass} ${nameColorClass}`}>
             {displayName}
           </span>
         )}
