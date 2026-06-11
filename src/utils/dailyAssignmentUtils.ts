@@ -23,6 +23,61 @@ const DAILY_TOTAL_TARGET_CORRECT = 50;
 const CHALLENGE_TARGET_CORRECT = DAILY_TOTAL_TARGET_CORRECT - DAILY_TARGET_CORRECT;
 const CHALLENGE_PICK_THRESHOLD = 50;
 
+const ADULT_CHALLENGE_WEEKLY_ROTATION: Array<{ categoryId: SubjectCategoryType; unitOffset: number }> = [
+  { categoryId: 'HARD_KANJI', unitOffset: 0 },
+  { categoryId: 'UPPER_TRIVIA', unitOffset: 1 },
+  { categoryId: 'UPPER_ENGLISH', unitOffset: 3 },
+  { categoryId: 'UPPER_PRACTICAL', unitOffset: 3 },
+  { categoryId: 'HARD_KANJI', unitOffset: 2 },
+  { categoryId: 'UPPER_TRIVIA', unitOffset: 4 },
+  { categoryId: 'UPPER_SOCIETY', unitOffset: 3 },
+  { categoryId: 'UPPER_INFORMATION', unitOffset: 0 },
+  { categoryId: 'UPPER_TRIVIA', unitOffset: 8 },
+  { categoryId: 'HARD_KANJI', unitOffset: 3 },
+  { categoryId: 'UPPER_ENGLISH', unitOffset: 4 },
+  { categoryId: 'UPPER_MATH', unitOffset: 17 },
+  { categoryId: 'UPPER_TRIVIA', unitOffset: 14 },
+  { categoryId: 'UPPER_SOCIETY', unitOffset: 10 },
+  { categoryId: 'HARD_KANJI', unitOffset: 6 },
+  { categoryId: 'UPPER_PRACTICAL', unitOffset: 8 },
+  { categoryId: 'UPPER_TRIVIA', unitOffset: 15 },
+  { categoryId: 'UPPER_ENGLISH', unitOffset: 9 },
+  { categoryId: 'HARD_KANJI', unitOffset: 1 },
+  { categoryId: 'UPPER_TRIVIA', unitOffset: 20 },
+  { categoryId: 'UPPER_ESSAY', unitOffset: 6 },
+  { categoryId: 'UPPER_PRACTICAL', unitOffset: 12 },
+  { categoryId: 'UPPER_TRIVIA', unitOffset: 22 },
+  { categoryId: 'UPPER_SOCIETY', unitOffset: 14 },
+  { categoryId: 'HARD_KANJI', unitOffset: 7 },
+  { categoryId: 'UPPER_TRIVIA', unitOffset: 5 },
+  { categoryId: 'UPPER_ENGLISH', unitOffset: 1 },
+  { categoryId: 'UPPER_PRACTICAL', unitOffset: 15 },
+  { categoryId: 'UPPER_TRIVIA', unitOffset: 6 },
+  { categoryId: 'HARD_KANJI', unitOffset: 4 },
+  { categoryId: 'UPPER_MATH', unitOffset: 22 },
+  { categoryId: 'UPPER_TRIVIA', unitOffset: 11 },
+  { categoryId: 'UPPER_SOCIETY', unitOffset: 18 },
+  { categoryId: 'UPPER_ENGLISH', unitOffset: 5 },
+  { categoryId: 'HARD_KANJI', unitOffset: 5 },
+  { categoryId: 'UPPER_TRIVIA', unitOffset: 13 },
+  { categoryId: 'UPPER_ESSAY', unitOffset: 9 },
+  { categoryId: 'UPPER_PRACTICAL', unitOffset: 18 },
+  { categoryId: 'UPPER_TRIVIA', unitOffset: 17 },
+  { categoryId: 'HARD_KANJI', unitOffset: 8 },
+  { categoryId: 'UPPER_INFORMATION', unitOffset: 0 },
+  { categoryId: 'UPPER_TRIVIA', unitOffset: 21 },
+  { categoryId: 'UPPER_SOCIETY', unitOffset: 20 },
+  { categoryId: 'UPPER_ENGLISH', unitOffset: 7 },
+  { categoryId: 'UPPER_TRIVIA', unitOffset: 23 },
+  { categoryId: 'UPPER_PRACTICAL', unitOffset: 20 },
+  { categoryId: 'HARD_KANJI', unitOffset: 0 },
+  { categoryId: 'UPPER_TRIVIA', unitOffset: 24 },
+  { categoryId: 'UPPER_ESSAY', unitOffset: 12 },
+  { categoryId: 'UPPER_SOCIETY', unitOffset: 21 },
+  { categoryId: 'UPPER_TRIVIA', unitOffset: 18 },
+  { categoryId: 'UPPER_PRACTICAL', unitOffset: 22 },
+];
+
 export const getCurrentSchoolYear = (date = new Date()) => {
   const year = date.getFullYear();
   return date.getMonth() >= 3 ? year : year - 1;
@@ -111,7 +166,16 @@ const getUpperUnits = (adult: boolean) => {
 
 const getUpperCategoryUnits = (categoryId: SubjectCategoryType, adult: boolean) => {
   const allowedCategories = adult
-    ? UPPER_PROBLEM_CATEGORIES.filter((category) => ['UPPER_PRACTICAL', 'UPPER_INFORMATION', 'UPPER_ESSAY', 'UPPER_ENGLISH', 'UPPER_SOCIETY', 'UPPER_MATH'].includes(category.id))
+    ? UPPER_PROBLEM_CATEGORIES.filter((category) => [
+      'HARD_KANJI',
+      'UPPER_TRIVIA',
+      'UPPER_PRACTICAL',
+      'UPPER_INFORMATION',
+      'UPPER_ESSAY',
+      'UPPER_ENGLISH',
+      'UPPER_SOCIETY',
+      'UPPER_MATH',
+    ].includes(category.id))
     : UPPER_PROBLEM_CATEGORIES;
   const category = allowedCategories.find((item) => item.id === categoryId);
   if (!category) return [];
@@ -165,6 +229,18 @@ const getGradeUnits = (gradeNumber: number, summaryGradeNumber = gradeNumber) =>
 const getCorrectCountForUnit = (unit: { modes: string[] }, modeCorrectCounts: Record<string, number>) =>
   unit.modes.reduce((total, mode) => total + Math.max(0, Number(modeCorrectCounts[mode] || 0)), 0);
 
+const getAdultChallengeUnit = (schoolYearWeekIndex: number, seasonalUnitId: string) => {
+  if (ADULT_CHALLENGE_WEEKLY_ROTATION.length === 0) return null;
+  for (let step = 0; step < ADULT_CHALLENGE_WEEKLY_ROTATION.length; step += 1) {
+    const plan = ADULT_CHALLENGE_WEEKLY_ROTATION[(schoolYearWeekIndex + step) % ADULT_CHALLENGE_WEEKLY_ROTATION.length];
+    const units = getUpperCategoryUnits(plan.categoryId, true);
+    if (units.length === 0) continue;
+    const unit = units[plan.unitOffset % units.length];
+    if (unit && unit.id !== seasonalUnitId) return unit;
+  }
+  return null;
+};
+
 export const createDailyAssignment = (
   profile: StudentProfile,
   modeCorrectCounts: Record<string, number>,
@@ -198,7 +274,7 @@ export const createDailyAssignment = (
       name: `${weeklyPlan.label}: ${plannedUnit.name}`,
     }
     : plannedUnit;
-  const challengeBase = [...baseUnits]
+  const progressChallengeBase = [...baseUnits]
     .filter((unit) => unit.id !== seasonalBase.id)
     .sort((a, b) => {
       const aCount = getCorrectCountForUnit(a, modeCorrectCounts);
@@ -209,6 +285,9 @@ export const createDailyAssignment = (
       if (aActive && bActive) return bCount - aCount;
       return aCount - bCount;
     })[0] || seasonalBase;
+  const challengeBase = adult
+    ? getAdultChallengeUnit(schoolYearWeekIndex, seasonalBase.id) || progressChallengeBase
+    : progressChallengeBase;
 
   const units = [
     toAssignmentUnit(seasonalBase, 'daily', DAILY_TARGET_CORRECT),
