@@ -5,7 +5,7 @@ import { HERO_IMAGE_DATA } from '../constants';
 import PixelSprite, { SPRITE_TEMPLATES, createPixelSpriteCanvas } from './PixelSprite';
 import { audioService } from '../services/audioService';
 import { storageService } from '../services/storageService';
-import { GameMode } from '../types';
+import { AnswerMode, AssignmentPayload, GameMode } from '../types';
 import MiniGameProblemChallenge from './MiniGameProblemChallenge';
 import { assetUrl } from '../utils/assetPaths';
 
@@ -490,6 +490,9 @@ interface SchoolyardSurvivorScreenProps {
     onBack: () => void;
     problemMode?: GameMode;
     problemModePool?: string[];
+    answerMode?: AnswerMode;
+    assignment?: AssignmentPayload | null;
+    onAnswerResult?: (result: { mode: string; correct: boolean; elapsedMs: number; problemId?: string }) => void;
 }
 
 // --- UTILS ---
@@ -528,7 +531,7 @@ const createSchoolyardBackground = (): HTMLCanvasElement => {
     return c;
 };
 
-const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onBack, problemMode = GameMode.MIXED, problemModePool }) => {
+const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onBack, problemMode = GameMode.MIXED, problemModePool, answerMode = 'CHOICE', assignment, onAnswerResult }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
     const bgCanvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -1634,7 +1637,7 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
                 <div className="w-1/3 flex flex-col items-end gap-1 opacity-90 pt-2"><div className="flex flex-wrap justify-end gap-1 max-w-[160px]">{(Object.keys(weapons) as WeaponType[]).map((k) => { const v = weapons[k]; return v && (<div key={k} className={`w-8 h-8 bg-slate-800 border-2 ${v.level>=8?'border-yellow-400 shadow-[0_0_5px_rgba(250,204,21,0.5)]':'border-gray-600'} flex items-center justify-center relative p-1 rounded-lg`}><PixelSprite seed={k} name={`${WEAPONS[k].sprite.template}|${WEAPONS[k].sprite.color}`} className="w-full h-full"/><div className="absolute -bottom-1 -right-1 text-[8px] bg-black px-1 rounded-full leading-none text-white border border-gray-700 font-bold">{v.level}</div></div>)})}</div><div className="flex flex-wrap justify-end gap-1 max-w-[160px] mt-1">{(Object.keys(passives) as PassiveType[]).map((k) => { const v = passives[k]; return v > 0 && (<div key={k} className="w-7 h-7 bg-slate-900/80 border border-gray-700 flex items-center justify-center relative p-1 rounded-lg"><PixelSprite seed={k} name={`${PASSIVES[k].sprite.template}|${PASSIVES[k].sprite.color}`} className="w-full h-full"/><div className="absolute -bottom-1 -right-1 text-[8px] bg-blue-900 px-1 rounded-full leading-none text-white border border-blue-400 font-bold">{v}</div></div>)})}</div></div>
             </div>
             <canvas ref={canvasRef} width={viewSize.width} height={viewSize.height} className="block w-full h-full bg-[#020617]" style={{ imageRendering: 'pixelated' }} />
-            {gameState.current === 'MATH_CHALLENGE' && (<div className="absolute inset-0 z-30 pointer-events-auto"><MiniGameProblemChallenge mode={problemMode} modePool={problemModePool} onComplete={handleMathComplete} rewardHint="全問正解でHP15回復" /></div>)}
+            {gameState.current === 'MATH_CHALLENGE' && (<div className="absolute inset-0 z-30 pointer-events-auto"><MiniGameProblemChallenge mode={problemMode} modePool={problemModePool} answerMode={answerMode} assignment={assignment} onAnswerResult={onAnswerResult} onComplete={handleMathComplete} rewardHint="全問正解でHP15回復" /></div>)}
             {gameState.current === 'LEVEL_UP' && (
                 <div className="absolute inset-0 bg-slate-950/90 flex flex-col items-center justify-center z-20 animate-in zoom-in duration-250 pointer-events-auto p-4">
                     <h2 className="text-5xl font-black text-transparent bg-clip-text bg-gradient-to-b from-yellow-200 to-orange-500 mb-8 animate-pulse italic">LEVEL UP!</h2>

@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { GameMode, GameScreen, LanguageMode } from '../types';
+import { AnswerMode, AssignmentPayload, GameMode, GameScreen, LanguageMode } from '../types';
 import PokerGameScreen from './PokerGameScreen';
 import SchoolyardSurvivorScreen from './SchoolyardSurvivorScreen';
 import SchoolDungeonRPG from './SchoolDungeonRPG';
@@ -15,6 +15,9 @@ interface MiniGameRouterProps {
     onFinish?: (result: 'WIN' | 'LOSE') => void;
     problemMode: GameMode;
     problemModePool?: string[];
+    answerMode?: AnswerMode;
+    assignment?: AssignmentPayload | null;
+    onAnswerResult?: (result: { mode: string; correct: boolean; elapsedMs: number; problemId?: string }) => void;
     languageMode?: LanguageMode;
 }
 
@@ -23,6 +26,9 @@ export interface MiniGameComponentProps {
     onFinish?: (result: 'WIN' | 'LOSE') => void;
     problemMode: GameMode;
     problemModePool?: string[];
+    answerMode?: AnswerMode;
+    assignment?: AssignmentPayload | null;
+    onAnswerResult?: (result: { mode: string; correct: boolean; elapsedMs: number; problemId?: string }) => void;
     languageMode?: LanguageMode;
 }
 
@@ -40,7 +46,7 @@ const MINI_GAME_MAP: Partial<Record<GameScreen, React.ComponentType<MiniGameComp
     [GameScreen.MINI_GAME_GO_HOME]: GoHomeDash,
 };
 
-const MiniGameRouter: React.FC<MiniGameRouterProps> = ({ screen, onBack, onFinish, problemMode, problemModePool, languageMode }) => {
+const MiniGameRouter: React.FC<MiniGameRouterProps> = ({ screen, onBack, onFinish, problemMode, problemModePool, answerMode, assignment, onAnswerResult, languageMode }) => {
     const Component = MINI_GAME_MAP[screen];
 
     if (!Component) {
@@ -53,7 +59,18 @@ const MiniGameRouter: React.FC<MiniGameRouterProps> = ({ screen, onBack, onFinis
         );
     }
 
-    return <Component onBack={onBack} onFinish={onFinish} problemMode={problemMode} problemModePool={problemModePool} languageMode={languageMode} />;
+    return (
+        <Component
+            onBack={onBack}
+            onFinish={onFinish}
+            problemMode={problemMode}
+            problemModePool={problemModePool}
+            answerMode={answerMode}
+            assignment={assignment}
+            onAnswerResult={onAnswerResult}
+            languageMode={languageMode}
+        />
+    );
 };
 
 export default MiniGameRouter;

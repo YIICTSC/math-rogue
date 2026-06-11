@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { ArrowLeft, Play, X, RotateCcw, Swords, Shield, RefreshCw, Zap, Trophy, Skull, ChevronsRight, ChevronLeft, ChevronRight, Clock, Ghost, ArrowRightLeft, Gift, ShoppingBag, Hammer, Coins, Plus, Crosshair, Heart, Move, AlertTriangle, Hourglass, Maximize2, Minimize2, Wind, Anchor, Flame, Activity, ArrowUp, Dna, Shuffle, Star, HelpCircle, Book, AlertCircle, Flag, Music, Mic, Milk, Battery, ShieldCheck, Bomb, Utensils, PenTool, Circle, ArrowRight, Target, Package } from 'lucide-react';
 import { audioService } from '../services/audioService';
 import { storageService } from '../services/storageService';
-import { GameMode } from '../types';
+import { AnswerMode, AssignmentPayload, GameMode } from '../types';
 import MiniGameProblemChallenge from './MiniGameProblemChallenge';
 import { assetUrl } from '../utils/assetPaths';
 
@@ -575,7 +575,14 @@ const getInitialState = (): KochoGameState => ({
 });
 
 // --- COMPONENT ---
-const KochoShowdown: React.FC<{ onBack: () => void; problemMode?: GameMode; problemModePool?: string[] }> = ({ onBack, problemMode = GameMode.MIXED, problemModePool }) => {
+const KochoShowdown: React.FC<{
+    onBack: () => void;
+    problemMode?: GameMode;
+    problemModePool?: string[];
+    answerMode?: AnswerMode;
+    assignment?: AssignmentPayload | null;
+    onAnswerResult?: (result: { mode: string; correct: boolean; elapsedMs: number; problemId?: string }) => void;
+}> = ({ onBack, problemMode = GameMode.MIXED, problemModePool, answerMode = 'CHOICE', assignment, onAnswerResult }) => {
     
     // State
     const [gameState, setGameState] = useState<KochoGameState>(() => {
@@ -2442,7 +2449,7 @@ const KochoShowdown: React.FC<{ onBack: () => void; problemMode?: GameMode; prob
             {/* Math Challenge Overlay */}
             {gameState.phase === 'MATH' && (
                  <div className="absolute inset-0 z-[100] w-full h-full pointer-events-auto">
-                     <MiniGameProblemChallenge mode={problemMode} modePool={problemModePool} onComplete={handleMathComplete} rewardHint="全問正解でHP+1" />
+                     <MiniGameProblemChallenge mode={problemMode} modePool={problemModePool} answerMode={answerMode} assignment={assignment} onAnswerResult={onAnswerResult} onComplete={handleMathComplete} rewardHint="全問正解でHP+1" />
                  </div>
             )}
 

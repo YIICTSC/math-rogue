@@ -3,8 +3,8 @@ import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react'
 import { ArrowLeft, X, Club, Diamond, Heart, Spade, ShoppingBag, BarChart3, ArrowDownWideNarrow, ArrowUpNarrowWide, LayoutList, Layers, HelpCircle, BookOpen, Flag, Calculator, ArrowRight, Sparkles, Package, Ghost, Trophy, RotateCcw, Play, DollarSign, Info, Coins, Check, AlertTriangle } from 'lucide-react';
 import { audioService } from '../services/audioService';
 import PixelSprite from './PixelSprite';
-import { 
-    PokerCard, PokerRunState, PokerBlind, PokerSupporter, PokerConsumable, PokerSuit, PokerRank, PokerScoringContext, PokerPack, PokerVoucher, GameMode, LanguageMode
+import {
+    AnswerMode, AssignmentPayload, PokerCard, PokerRunState, PokerBlind, PokerSupporter, PokerConsumable, PokerSuit, PokerRank, PokerScoringContext, PokerPack, PokerVoucher, GameMode, LanguageMode
 } from '../types';
 import { POKER_HAND_LEVELS, SUPPORTERS_LIBRARY, CONSUMABLES_LIBRARY, PACK_LIBRARY, POKER_ENHANCEMENTS, VOUCHERS_LIBRARY, EXPANDED_SUPPORTER_IDS } from '../constants';
 import { storageService } from '../services/storageService';
@@ -640,6 +640,9 @@ interface PokerGameScreenProps {
   onBack: () => void;
   problemMode?: GameMode;
   problemModePool?: string[];
+  answerMode?: AnswerMode;
+  assignment?: AssignmentPayload | null;
+  onAnswerResult?: (result: { mode: string; correct: boolean; elapsedMs: number; problemId?: string }) => void;
   languageMode?: LanguageMode;
 }
 
@@ -665,7 +668,7 @@ type ScoreBreakdownEntry = {
   accent?: 'chips' | 'mult' | 'special';
 };
 
-const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode = GameMode.MIXED, problemModePool, languageMode }) => {
+const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode = GameMode.MIXED, problemModePool, answerMode = 'CHOICE', assignment, onAnswerResult, languageMode }) => {
   const pokerTutorialSteps = useMemo(() => getPokerTutorialSteps(languageMode), [languageMode]);
   const pokerTutorialLabels = useMemo(() => getPokerTutorialLabels(languageMode), [languageMode]);
   const expandedSupporterUnlockCount = Math.min(
@@ -1953,6 +1956,9 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
           <MiniGameProblemChallenge
               mode={problemMode}
               modePool={problemModePool}
+              answerMode={answerMode}
+              assignment={assignment}
+              onAnswerResult={onAnswerResult}
               onComplete={handleMathComplete}
               rewardHint="正解すると$1獲得"
             />

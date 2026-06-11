@@ -1,5 +1,5 @@
 ﻿import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { GameMode, Player } from '../types';
+import { AnswerMode, GameMode, Player } from '../types';
 import { p2pService, P2PEvent } from '../services/p2pService';
 import { X, Wifi, Users, Loader, AlertCircle, Copy, Check } from 'lucide-react';
 import { audioService } from '../services/audioService';
@@ -11,6 +11,8 @@ interface RaceStartPayload {
     durationSec: number;
     endAt: number;
     mode?: GameMode;
+    modePool?: string[];
+    answerMode?: AnswerMode;
     difficultyLevel?: number;
     participants: Array<{ peerId: string; name: string; imageData?: string }>;
 }
@@ -33,6 +35,8 @@ const P2PRaceSetup: React.FC<P2PRaceSetupProps> = ({ player, onRaceStart, onClos
     const [joinSent, setJoinSent] = useState(false);
     const [inviteUrlCopied, setInviteUrlCopied] = useState(false);
     const [hostSelectedMode, setHostSelectedMode] = useState<GameMode | undefined>(undefined);
+    const [hostSelectedModePool, setHostSelectedModePool] = useState<string[] | undefined>(undefined);
+    const [hostSelectedAnswerMode, setHostSelectedAnswerMode] = useState<AnswerMode | undefined>(undefined);
     const joinInFlightRef = useRef(false);
 
     const canStart = useMemo(() => mode === 'HOST' && status === 'CONNECTED' && participants.length >= 1, [mode, status, participants.length]);
@@ -70,6 +74,8 @@ const P2PRaceSetup: React.FC<P2PRaceSetupProps> = ({ player, onRaceStart, onClos
 
             if (data.type === 'RACE_MODE_SET' && mode === 'JOIN') {
                 setHostSelectedMode(data.mode as GameMode);
+                setHostSelectedModePool(data.modePool);
+                setHostSelectedAnswerMode(data.answerMode as AnswerMode | undefined);
             }
 
             if (data.type === 'RACE_START') {
@@ -80,6 +86,8 @@ const P2PRaceSetup: React.FC<P2PRaceSetupProps> = ({ player, onRaceStart, onClos
                     durationSec: data.durationSec,
                     endAt: data.endAt,
                     mode: (data.mode as GameMode | undefined) ?? hostSelectedMode,
+                    modePool: data.modePool ?? hostSelectedModePool,
+                    answerMode: (data.answerMode as AnswerMode | undefined) ?? hostSelectedAnswerMode,
                     difficultyLevel: data.difficultyLevel,
                     participants
                 });
@@ -102,7 +110,7 @@ const P2PRaceSetup: React.FC<P2PRaceSetupProps> = ({ player, onRaceStart, onClos
             p2pService.onClose = null;
             p2pService.onError = null;
         };
-    }, [mode, myName, onRaceStart, participants, battleCode, hostSelectedMode]);
+    }, [mode, myName, onRaceStart, participants, battleCode, hostSelectedMode, hostSelectedModePool, hostSelectedAnswerMode]);
 
     useEffect(() => {
         if (mode === 'JOIN' && status === 'CONNECTED' && myName.trim() && !joinSent) {

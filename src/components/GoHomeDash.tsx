@@ -3,7 +3,7 @@ import { Heart, Star, Skull, Brain, Book, Flame, Wind, Target, RotateCcw, ArrowL
 import { audioService } from '../services/audioService';
 import { SPRITE_TEMPLATES } from './PixelSprite';
 import { storageService } from '../services/storageService';
-import { GameMode, LanguageMode } from '../types';
+import { AnswerMode, AssignmentPayload, GameMode, LanguageMode } from '../types';
 import MiniGameProblemChallenge from './MiniGameProblemChallenge';
 import { assetUrl } from '../utils/assetPaths';
 
@@ -156,7 +156,14 @@ const drawSpriteCell = (
     return true;
 };
 
-const GoHomeDash: React.FC<{ onBack: () => void; problemMode?: GameMode; problemModePool?: string[] }> = ({ onBack, problemMode = GameMode.MIXED, problemModePool }) => {
+const GoHomeDash: React.FC<{
+    onBack: () => void;
+    problemMode?: GameMode;
+    problemModePool?: string[];
+    answerMode?: AnswerMode;
+    assignment?: AssignmentPayload | null;
+    onAnswerResult?: (result: { mode: string; correct: boolean; elapsedMs: number; problemId?: string }) => void;
+}> = ({ onBack, problemMode = GameMode.MIXED, problemModePool, answerMode = 'CHOICE', assignment, onAnswerResult }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
     const playerSpriteRef = useRef<HTMLImageElement | null>(null);
@@ -1168,7 +1175,7 @@ const GoHomeDash: React.FC<{ onBack: () => void; problemMode?: GameMode; problem
 
             {gameState === 'CHALLENGE' && (
                 <div className="absolute inset-0 z-[100] w-full h-full pointer-events-auto">
-                    <MiniGameProblemChallenge mode={problemMode} modePool={problemModePool} onComplete={handleChallengeComplete} isChallenge={false} streak={0} rewardHint="全問正解でHP+1" />
+                    <MiniGameProblemChallenge mode={problemMode} modePool={problemModePool} answerMode={answerMode} assignment={assignment} onAnswerResult={onAnswerResult} onComplete={handleChallengeComplete} isChallenge={false} streak={0} rewardHint="全問正解でHP+1" />
                 </div>
             )}
 

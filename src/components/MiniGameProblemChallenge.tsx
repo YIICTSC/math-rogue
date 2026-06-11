@@ -1,12 +1,12 @@
 import React from 'react';
-import { AnswerMode, GameMode, GameScreen } from '../types';
+import { AnswerMode, AssignmentPayload, GameMode, GameScreen } from '../types';
 import { getChallengeScreenForMode } from '../subjectConfig';
 import MathChallengeScreen from './MathChallengeScreen';
 import KanjiChallengeScreen from './KanjiChallengeScreen';
 import EnglishChallengeScreen from './EnglishChallengeScreen';
 import GeneralChallengeScreen from './GeneralChallengeScreen';
 import { storageService } from '../services/storageService';
-import { getAssignmentModePool } from '../utils/assignmentUtils';
+import { getAssignmentModePool, getAssignmentRepresentativeMode } from '../utils/assignmentUtils';
 
 interface MiniGameProblemChallengeProps {
   mode: GameMode;
@@ -16,6 +16,8 @@ interface MiniGameProblemChallengeProps {
   isChallenge?: boolean;
   streak?: number;
   rewardHint?: string;
+  assignment?: AssignmentPayload | null;
+  onAnswerResult?: (result: { mode: string; correct: boolean; elapsedMs: number; problemId?: string }) => void;
 }
 
 const MiniGameProblemChallenge: React.FC<MiniGameProblemChallengeProps> = ({
@@ -26,10 +28,28 @@ const MiniGameProblemChallenge: React.FC<MiniGameProblemChallengeProps> = ({
   isChallenge = false,
   streak = 0,
   rewardHint,
+  assignment: assignmentOverride,
+  onAnswerResult,
 }) => {
-  const challengeScreen = getChallengeScreenForMode(mode);
-  const assignment = storageService.getCurrentAssignment();
+  const assignment = assignmentOverride ?? storageService.getCurrentAssignment();
+  const assignmentModePoolForPlay = assignment?.gameMode === 'FREE' ? getAssignmentModePool(assignment) : undefined;
+  const assignmentHasCustomProblems = assignment?.gameMode === 'FREE' && assignment.customProblems.length > 0;
+  const effectiveMode = assignmentHasCustomProblems
+    ? GameMode.UPPER_TRIVIA
+    : assignmentModePoolForPlay && assignmentModePoolForPlay.length > 0
+      ? getAssignmentRepresentativeMode(assignment!)
+      : mode;
+  const effectiveModePool = assignmentHasCustomProblems
+    ? (assignmentModePoolForPlay || [])
+    : (assignmentModePoolForPlay || modePool);
+  const effectiveAnswerMode = assignment?.answerMode || answerMode;
+  const effectiveCustomProblems = assignment?.gameMode === 'FREE' ? assignment.customProblems : undefined;
+  const challengeScreen = getChallengeScreenForMode(effectiveMode);
   const handleAnswerResult = (result: { mode: string; correct: boolean; elapsedMs: number; problemId?: string }) => {
+    if (onAnswerResult) {
+      onAnswerResult(result);
+      return;
+    }
     const assignmentModePool = getAssignmentModePool(assignment);
     const assignmentUnit = assignment?.units.find((unit) => unit.modes.includes(result.mode));
     const isCustomAssignmentAnswer = result.mode === 'ASSIGNMENT_CUSTOM' && (assignment?.customProblems.length || 0) > 0;
@@ -46,30 +66,30 @@ const MiniGameProblemChallenge: React.FC<MiniGameProblemChallengeProps> = ({
   };
 
   if (challengeScreen === GameScreen.KANJI_CHALLENGE) {
-    return <KanjiChallengeScreen mode={mode} onComplete={onComplete} isChallenge={isChallenge} streak={streak} rewardHint={rewardHint} onAnswerResult={handleAnswerResult} />;
+    return <KanjiChallengeScreen mode={effectiveMode} answerMode={effectiveAnswerMode} onComplete={onComplete} isChallenge={isChallenge} streak={streak} rewardHint={rewardHint} onAnswerResult={handleAnswerResult} />;
   }
 
   if (challengeScreen === GameScreen.ENGLISH_CHALLENGE) {
-    return <EnglishChallengeScreen mode={mode} onComplete={onComplete} isChallenge={isChallenge} streak={streak} rewardHint={rewardHint} onAnswerResult={handleAnswerResult} />;
+    return <EnglishChallengeScreen mode={effectiveMode} onComplete={onComplete} isChallenge={isChallenge} streak={streak} rewardHint={rewardHint} onAnswerResult={handleAnswerResult} />;
   }
 
   if (challengeScreen === GameScreen.GENERAL_CHALLENGE) {
     return (
       <GeneralChallengeScreen
-        mode={mode}
-        modePool={modePool}
-        answerMode={answerMode}
+        mode={effectiveMode}
+        modePool={effectiveModePool}
+        answerMode={effectiveAnswerMode}
         onComplete={onComplete}
         isChallenge={isChallenge}
         streak={streak}
         rewardHint={rewardHint}
         onAnswerResult={handleAnswerResult}
-        customProblems={assignment?.gameMode === 'FREE' ? assignment.customProblems : undefined}
+        customProblems={effectiveCustomProblems}
       />
     );
   }
 
-  return <MathChallengeScreen mode={mode} onComplete={onComplete} isChallenge={isChallenge} streak={streak} rewardHint={rewardHint} onAnswerResult={handleAnswerResult} />;
+  return <MathChallengeScreen mode={effectiveMode} answerMode={effectiveAnswerMode} onComplete={onComplete} isChallenge={isChallenge} streak={streak} rewardHint={rewardHint} onAnswerResult={handleAnswerResult} />;
 };
 
 export default MiniGameProblemChallenge;

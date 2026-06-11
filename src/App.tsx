@@ -681,6 +681,7 @@ const App: React.FC = () => {
     const [pendingMiniGameScreen, setPendingMiniGameScreen] = useState<GameScreen | null>(null);
     const [miniGameProblemMode, setMiniGameProblemMode] = useState<GameMode>(GameMode.MIXED);
     const [miniGameProblemModePool, setMiniGameProblemModePool] = useState<string[] | undefined>(undefined);
+    const [miniGameAnswerMode, setMiniGameAnswerMode] = useState<AnswerMode>('CHOICE');
     const [isMobilePortrait, setIsMobilePortrait] = useState(false);
     const [isShortMobilePortrait, setIsShortMobilePortrait] = useState(false);
     const previousScreenRef = useRef<GameScreen>(GameScreen.START_MENU);
@@ -2608,8 +2609,8 @@ const App: React.FC = () => {
                         : [...prev.entries, { peerId: fromPeerId, name: data.name, imageData: data.imageData, floor: 0, maxDamage: 0, gameOverCount: 0, score: 0, updatedAt: Date.now() }];
                     const sortedEntries = [...nextEntries].sort(compareRaceEntries);
                     p2pService.sendTo(fromPeerId, { type: 'RACE_PARTICIPANTS', participants: nextParticipants });
-                    p2pService.sendTo(fromPeerId, { type: 'RACE_START', endAt: prev.endAt, durationSec: prev.durationSec, mode: gameState.mode, difficultyLevel: gameState.difficultyLevel });
-                    p2pService.sendTo(fromPeerId, { type: 'RACE_MODE_SET', mode: gameState.mode });
+                    p2pService.sendTo(fromPeerId, { type: 'RACE_START', endAt: prev.endAt, durationSec: prev.durationSec, mode: gameState.mode, modePool: gameState.modePool, answerMode: gameState.answerMode, difficultyLevel: gameState.difficultyLevel });
+                    p2pService.sendTo(fromPeerId, { type: 'RACE_MODE_SET', mode: gameState.mode, modePool: gameState.modePool, answerMode: gameState.answerMode });
                     p2pService.sendTo(fromPeerId, { type: 'RACE_DIFFICULTY_SET', difficultyLevel: gameState.difficultyLevel || 1 });
                     p2pService.sendTo(fromPeerId, { type: 'RACE_LEADERBOARD', entries: sortedEntries });
                     if (prev.ended) {
@@ -2621,7 +2622,7 @@ const App: React.FC = () => {
             }
 
             if (data.type === 'RACE_MODE_SET' && !raceSession.isHost) {
-                setGameState(prev => ({ ...prev, mode: data.mode, screen: GameScreen.DIFFICULTY_SELECTION }));
+                setGameState(prev => ({ ...prev, mode: data.mode, modePool: data.modePool, answerMode: data.answerMode || prev.answerMode || 'CHOICE', screen: GameScreen.DIFFICULTY_SELECTION }));
                 return;
             }
 
@@ -4175,6 +4176,7 @@ const App: React.FC = () => {
         const assignmentHasCustomProblems = activeAssignment?.gameMode === 'FREE' && activeAssignment.customProblems.length > 0;
         setMiniGameProblemMode(assignmentHasCustomProblems ? GameMode.UPPER_TRIVIA : assignmentModePool ? getAssignmentRepresentativeMode(activeAssignment) : mode);
         setMiniGameProblemModePool(assignmentHasCustomProblems ? (assignmentModePool || []) : (assignmentModePool || modePool));
+        setMiniGameAnswerMode(activeAssignment?.answerMode || 'CHOICE');
         setPendingMiniGameScreen(null);
         setGameState(prev => ({ ...prev, screen: nextScreen }));
     };
@@ -4219,14 +4221,14 @@ const App: React.FC = () => {
         }
         audioService.playSound('select');
         if (gameState.challengeMode === 'RACE' && raceSession?.isHost) {
-            p2pService.send({ type: 'RACE_MODE_SET', mode: effectiveMode });
+            p2pService.send({ type: 'RACE_MODE_SET', mode: effectiveMode, modePool: effectiveModePool, answerMode: effectiveAnswerMode });
         }
         if (gameState.challengeMode === 'COOP') {
             if (coopSession && !coopSession.isHost) {
                 return;
             }
             if (coopSession?.isHost) {
-                p2pService.send({ type: 'COOP_MODE_SET', mode: effectiveMode });
+                p2pService.send({ type: 'COOP_MODE_SET', mode: effectiveMode, modePool: effectiveModePool, answerMode: effectiveAnswerMode });
             }
         }
         setGameState(prev => ({ ...prev, mode: effectiveMode, modePool: effectiveModePool, answerMode: effectiveAnswerMode, screen: GameScreen.DIFFICULTY_SELECTION }));
@@ -11013,7 +11015,7 @@ const App: React.FC = () => {
                     if (prev.screen === GameScreen.GAME_OVER || prev.screen === GameScreen.ENDING) {
                         return prev;
                     }
-                    return { ...prev, mode: data.mode, screen: GameScreen.DIFFICULTY_SELECTION };
+                    return { ...prev, mode: data.mode, modePool: data.modePool, answerMode: data.answerMode || prev.answerMode || 'CHOICE', screen: GameScreen.DIFFICULTY_SELECTION };
                 });
                 return;
             }
@@ -12877,6 +12879,8 @@ const App: React.FC = () => {
                                         ...prev,
                                         challengeMode: 'RACE',
                                         mode: payload.mode ?? prev.mode,
+                                        modePool: payload.modePool ?? prev.modePool,
+                                        answerMode: payload.answerMode ?? prev.answerMode ?? 'CHOICE',
                                         difficultyLevel: payload.difficultyLevel ?? prev.difficultyLevel,
                                         screen: payload.mode
                                             ? (payload.difficultyLevel ? GameScreen.CHARACTER_SELECTION : GameScreen.DIFFICULTY_SELECTION)
@@ -13147,6 +13151,9 @@ const App: React.FC = () => {
                             onBack={returnToTitle}
                             problemMode={miniGameProblemMode}
                             problemModePool={miniGameProblemModePool}
+                            answerMode={miniGameAnswerMode}
+                            assignment={activeAssignment}
+                            onAnswerResult={handleAssignmentAnswerResult}
                             languageMode={languageMode}
                         />
                     </div>
