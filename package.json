@@ -7,9 +7,9 @@
   "scripts": {
     "dev": "vite --host 0.0.0.0 --port 5173",
     "build": "vite build",
-    "build:offline": "VITE_OFFLINE_DISTRIBUTABLE=true vite build",
+    "build:offline": "node scripts/build-offline.mjs",
     "build:icons": "node scripts/generate-icons.mjs",
-    "dist:offline": "node scripts/generate-icons.mjs && VITE_OFFLINE_DISTRIBUTABLE=true vite build && electron-builder --win nsis:x64",
+    "dist:offline": "node scripts/generate-icons.mjs && node scripts/build-offline.mjs && electron-builder --win nsis:x64",
     "preview": "vite preview --host 0.0.0.0 --port 4173"
   },
   "build": {
