@@ -680,6 +680,7 @@ const App: React.FC = () => {
         actStats: { enemiesDefeated: 0, goldGained: 0, mathCorrect: 0 }
     });
     const [pendingMiniGameScreen, setPendingMiniGameScreen] = useState<GameScreen | null>(null);
+    const [pendingAssignmentStartScreen, setPendingAssignmentStartScreen] = useState<GameScreen | null>(null);
     const [miniGameProblemMode, setMiniGameProblemMode] = useState<GameMode>(GameMode.MIXED);
     const [miniGameProblemModePool, setMiniGameProblemModePool] = useState<string[] | undefined>(undefined);
     const [miniGameAnswerMode, setMiniGameAnswerMode] = useState<AnswerMode>('CHOICE');
@@ -1001,6 +1002,19 @@ const App: React.FC = () => {
             answerMode: assignment?.answerMode,
         };
     }, []);
+    const localAssignmentProblemConfig = useMemo(() => (
+        activeAssignment?.gameMode === 'FREE' && isAssignmentWithinDeadline
+            ? getAssignmentProblemConfig(activeAssignment)
+            : null
+    ), [activeAssignment, getAssignmentProblemConfig, isAssignmentWithinDeadline]);
+    const applyMiniGameAssignmentConfig = useCallback((screen: GameScreen, assignment: AssignmentPayload | null | undefined) => {
+        const assignmentConfig = getAssignmentProblemConfig(assignment);
+        setMiniGameProblemMode(assignmentConfig.mode || GameMode.UPPER_TRIVIA);
+        setMiniGameProblemModePool(assignmentConfig.modePool);
+        setMiniGameAnswerMode(assignmentConfig.answerMode || 'CHOICE');
+        setPendingMiniGameScreen(null);
+        setGameState(prev => ({ ...prev, screen }));
+    }, [getAssignmentProblemConfig]);
     const isAssignmentChallengeOnlyLocked = activeAssignment?.gameMode === 'CHALLENGE_ONLY' && isAssignmentWithinDeadline;
     const rewardCardAlbum = useMemo(() => storageService.getRewardCardAlbum(), [rewardCardAlbumVersion]);
 
@@ -2623,7 +2637,13 @@ const App: React.FC = () => {
             }
 
             if (data.type === 'RACE_MODE_SET' && !raceSession.isHost) {
-                setGameState(prev => ({ ...prev, mode: data.mode, modePool: data.modePool, answerMode: data.answerMode || prev.answerMode || 'CHOICE', screen: GameScreen.DIFFICULTY_SELECTION }));
+                setGameState(prev => ({
+                    ...prev,
+                    mode: localAssignmentProblemConfig?.mode || data.mode,
+                    modePool: localAssignmentProblemConfig?.mode ? localAssignmentProblemConfig.modePool : data.modePool,
+                    answerMode: localAssignmentProblemConfig?.answerMode || data.answerMode || prev.answerMode || 'CHOICE',
+                    screen: GameScreen.DIFFICULTY_SELECTION
+                }));
                 return;
             }
 
@@ -2721,7 +2741,7 @@ const App: React.FC = () => {
         return () => {
             p2pService.onData = previousOnData;
         };
-    }, [raceSession, gameState.challengeMode, gameState.screen, gameState.mode, applyRaceTrickEffectLocal, applyRaceGoldDelta, showRaceToast, raceSelfPeerId]);
+    }, [raceSession, gameState.challengeMode, gameState.screen, gameState.mode, gameState.modePool, gameState.answerMode, localAssignmentProblemConfig, applyRaceTrickEffectLocal, applyRaceGoldDelta, showRaceToast, raceSelfPeerId]);
 
     const sendCoopStateSync = useCallback(() => {
         if (!isCoopHost) return;
@@ -4158,8 +4178,14 @@ const App: React.FC = () => {
             setGameState(prev => ({ ...prev, screen }));
             return;
         }
-        showDailyAssignmentNoticeForProblemSelection();
         setPendingMiniGameScreen(screen);
+        if (showDailyAssignmentNoticeForProblemSelection()) {
+            return;
+        }
+        if (activeAssignment?.gameMode === 'FREE' && isAssignmentWithinDeadline) {
+            applyMiniGameAssignmentConfig(screen, activeAssignment);
+            return;
+        }
         setGameState(prev => ({ ...prev, screen: GameScreen.MINI_GAME_MODE_SELECTION }));
     };
 
@@ -8933,11 +8959,11 @@ const App: React.FC = () => {
                 if (prev.challengeMode === 'TYPING') {
                     return { ...prev, player: nextPlayer, screen: GameScreen.REWARD, rewards: [] };
                 }
-                const challengeScreen = getChallengeScreenForMode(prev.mode);
+                const challengeScreen = getChallengeScreenForMode(localAssignmentProblemConfig?.mode || prev.mode);
                 return { ...prev, player: nextPlayer, screen: challengeScreen };
             }
         });
-    }, [coopSelfPeerId, coopSession, selectedCharName, unlockRandomAdditionalCard]);
+    }, [coopSelfPeerId, coopSession, localAssignmentProblemConfig, selectedCharName, unlockRandomAdditionalCard]);
 
     const createEnemyFinisherCard = useCallback((enemy: Enemy): ICard => {
         const storedTheme = typeof window !== 'undefined'
@@ -10921,6 +10947,10 @@ const App: React.FC = () => {
                         return prev;
                     }
                     const nextSharedState = applyCoopSharedState(prev, data.state);
+                    const localAssignmentScreen =
+                        CHALLENGE_SCREEN_SET.has(data.state.screen) && localAssignmentProblemConfig?.mode
+                            ? getChallengeScreenForMode(localAssignmentProblemConfig.mode)
+                            : data.state.screen;
                     const normalizedSharedBattleState =
                         data.state.screen === GameScreen.BATTLE
                             ? (coopSession.isHost
@@ -10962,7 +10992,7 @@ const App: React.FC = () => {
                         player: nextPlayer,
                         selectedEnemyId: selfBattleEntry?.selectedEnemyId ?? nextSharedState.selectedEnemyId,
                         coopBattleState: normalizedSharedBattleState,
-                        screen: preserveLocalScreen ? prev.screen : data.state.screen,
+                        screen: preserveLocalScreen ? prev.screen : localAssignmentScreen,
                         rewards: (preserveLocalScreen || preserveLocalRewards)
                             ? prev.rewards
                             : (data.state.screen === GameScreen.REWARD ? prev.rewards : [])
@@ -11016,7 +11046,13 @@ const App: React.FC = () => {
                     if (prev.screen === GameScreen.GAME_OVER || prev.screen === GameScreen.ENDING) {
                         return prev;
                     }
-                    return { ...prev, mode: data.mode, modePool: data.modePool, answerMode: data.answerMode || prev.answerMode || 'CHOICE', screen: GameScreen.DIFFICULTY_SELECTION };
+                    return {
+                        ...prev,
+                        mode: localAssignmentProblemConfig?.mode || data.mode,
+                        modePool: localAssignmentProblemConfig?.mode ? localAssignmentProblemConfig.modePool : data.modePool,
+                        answerMode: localAssignmentProblemConfig?.answerMode || data.answerMode || prev.answerMode || 'CHOICE',
+                        screen: GameScreen.DIFFICULTY_SELECTION
+                    };
                 });
                 return;
             }
@@ -11675,7 +11711,7 @@ const App: React.FC = () => {
         return () => {
             p2pService.onData = previousOnData;
         };
-    }, [advanceCoopAfterCharacterReady, applyCoopPlayerStateToPeer, applyCoopSharedState, applyCoopSupportEffect, applyHostCoopBattleSnapshot, applyRestAction, applyRewardToLocalPlayer, applySynthesizeCard, applyTreasureRewardsToPlayer, applyUpgradeCard, broadcastCoopBattleState, claimCoopTreasurePoolForPeer, coopPlayerSnapshots, coopRewardSets, coopSelfPeerId, coopSession, eventData, executeQueuedTurnTransition, gameState.challengeMode, gameState.coopBattleState, gameState.map, gameState.player, gameState.rewards, gameState.screen, handleNodeComplete, handleNodeSelect, handleShopBuyCard, handleShopBuyPotion, handleShopBuyRelic, handleShopLeave, handleShopRemoveCard, handleTreasureOpen, preserveLocalBattleCardZones, preserveLocalPlayerInCoopBattleState, removeRewardFromList, resolveBattleVictory, resolveCoopEventOptionForPlayer, sendCoopRewardSyncToPeer, sendCoopStateSync, setCoopBattleState, shopCards, shopPotions, shopRelics, treasurePools, turnLog, upsertCoopPlayerSnapshot]);
+    }, [advanceCoopAfterCharacterReady, applyCoopPlayerStateToPeer, applyCoopSharedState, applyCoopSupportEffect, applyHostCoopBattleSnapshot, applyRestAction, applyRewardToLocalPlayer, applySynthesizeCard, applyTreasureRewardsToPlayer, applyUpgradeCard, broadcastCoopBattleState, claimCoopTreasurePoolForPeer, coopPlayerSnapshots, coopRewardSets, coopSelfPeerId, coopSession, eventData, executeQueuedTurnTransition, gameState.challengeMode, gameState.coopBattleState, gameState.map, gameState.player, gameState.rewards, gameState.screen, handleNodeComplete, handleNodeSelect, handleShopBuyCard, handleShopBuyPotion, handleShopBuyRelic, handleShopLeave, handleShopRemoveCard, handleTreasureOpen, localAssignmentProblemConfig, preserveLocalBattleCardZones, preserveLocalPlayerInCoopBattleState, removeRewardFromList, resolveBattleVictory, resolveCoopEventOptionForPlayer, sendCoopRewardSyncToPeer, sendCoopStateSync, setCoopBattleState, shopCards, shopPotions, shopRelics, treasurePools, turnLog, upsertCoopPlayerSnapshot]);
 
     const goToFloorResult = () => {
         // 未解放のカードがあれば1枚解放する
@@ -11976,9 +12012,19 @@ const App: React.FC = () => {
                                                     setDismissedDailyAssignmentId(null);
                                                     setStartedDailyAssignmentId(assignmentLetter.id);
                                                 }
+                                                const resumeMiniGameScreen = pendingMiniGameScreen;
+                                                const resumeAssignmentScreen = pendingAssignmentStartScreen;
+                                                if (assignmentLetter.gameMode === 'FREE' && resumeMiniGameScreen) {
+                                                    const assignmentConfig = getAssignmentProblemConfig(assignmentLetter);
+                                                    setMiniGameProblemMode(assignmentConfig.mode || GameMode.UPPER_TRIVIA);
+                                                    setMiniGameProblemModePool(assignmentConfig.modePool);
+                                                    setMiniGameAnswerMode(assignmentConfig.answerMode || 'CHOICE');
+                                                }
+                                                setPendingMiniGameScreen(null);
+                                                setPendingAssignmentStartScreen(null);
                                                 setGameState(prev => ({
                                                     ...prev,
-                                                    ...(assignmentLetter.gameMode === 'FREE' && !isTeacherAssignmentActive
+                                                    ...(assignmentLetter.gameMode === 'FREE'
                                                         ? (() => {
                                                             const assignmentConfig = getAssignmentProblemConfig(assignmentLetter);
                                                             return {
@@ -11990,6 +12036,10 @@ const App: React.FC = () => {
                                                         : {}),
                                                     screen: assignmentLetter.gameMode === 'CHALLENGE_ONLY'
                                                         ? GameScreen.PROBLEM_CHALLENGE
+                                                        : resumeMiniGameScreen
+                                                            ? resumeMiniGameScreen
+                                                            : resumeAssignmentScreen
+                                                                ? resumeAssignmentScreen
                                                         : isTeacherAssignmentActive
                                                             ? GameScreen.START_MENU
                                                             : prev.screen === GameScreen.MODE_SELECTION
@@ -12007,6 +12057,8 @@ const App: React.FC = () => {
                                                     setDismissedDailyAssignmentId(assignmentLetter.id);
                                                     setStartedDailyAssignmentId(null);
                                                 }
+                                                setPendingMiniGameScreen(null);
+                                                setPendingAssignmentStartScreen(null);
                                                 setShowAssignmentLetter(false);
                                             }}
                                             className="rounded-xl border border-slate-500 bg-white px-4 py-3 text-sm font-black text-slate-800 hover:bg-slate-100"
@@ -12284,6 +12336,9 @@ const App: React.FC = () => {
                                                         setShowTimeLimitModal(true);
                                                         return;
                                                     }
+                                                    setPendingAssignmentStartScreen(GameScreen.COOP_SETUP);
+                                                    if (showDailyAssignmentNoticeForProblemSelection()) return;
+                                                    setPendingAssignmentStartScreen(null);
                                                     setGameState(prev => ({ ...prev, screen: GameScreen.COOP_SETUP }));
                                                 }}
                                                 className={`min-w-0 border-b-4 border-r-4 rounded-none flex items-center justify-center shadow-md ${isMobilePortrait ? 'py-1.5 px-0.5 text-[10px]' : 'py-2 px-1 text-xs'} font-bold ${isDailyLimitReached || isAssignmentChallengeOnlyLocked ? 'bg-gray-800 border-gray-700 text-gray-500 grayscale opacity-70 cursor-not-allowed' : 'bg-emerald-700/80 text-emerald-100 border-emerald-400 hover:bg-emerald-700 cursor-pointer'}`}
@@ -12300,6 +12355,9 @@ const App: React.FC = () => {
                                                         setShowTimeLimitModal(true);
                                                         return;
                                                     }
+                                                    setPendingAssignmentStartScreen(GameScreen.RACE_SETUP);
+                                                    if (showDailyAssignmentNoticeForProblemSelection()) return;
+                                                    setPendingAssignmentStartScreen(null);
                                                     setGameState(prev => ({ ...prev, screen: GameScreen.RACE_SETUP }));
                                                 }}
                                                 className={`min-w-0 border-b-4 border-r-4 rounded-none flex items-center justify-center shadow-md ${isMobilePortrait ? 'py-1.5 px-0.5 text-[10px]' : 'py-2 px-1 text-xs'} font-bold ${isDailyLimitReached || isAssignmentChallengeOnlyLocked ? 'bg-gray-800 border-gray-700 text-gray-500 grayscale opacity-70 cursor-not-allowed' : 'bg-cyan-700/80 text-cyan-100 border-cyan-400 hover:bg-cyan-700 cursor-pointer'}`}
@@ -12450,9 +12508,19 @@ const App: React.FC = () => {
                                             setDismissedDailyAssignmentId(null);
                                             setStartedDailyAssignmentId(assignmentLetter.id);
                                         }
+                                        const resumeMiniGameScreen = pendingMiniGameScreen;
+                                        const resumeAssignmentScreen = pendingAssignmentStartScreen;
+                                        if (assignmentLetter.gameMode === 'FREE' && resumeMiniGameScreen) {
+                                            const assignmentConfig = getAssignmentProblemConfig(assignmentLetter);
+                                            setMiniGameProblemMode(assignmentConfig.mode || GameMode.UPPER_TRIVIA);
+                                            setMiniGameProblemModePool(assignmentConfig.modePool);
+                                            setMiniGameAnswerMode(assignmentConfig.answerMode || 'CHOICE');
+                                        }
+                                        setPendingMiniGameScreen(null);
+                                        setPendingAssignmentStartScreen(null);
                                         setGameState(prev => ({
                                             ...prev,
-                                            ...(assignmentLetter.gameMode === 'FREE' && !isTeacherAssignmentActive
+                                            ...(assignmentLetter.gameMode === 'FREE'
                                                 ? (() => {
                                                     const assignmentConfig = getAssignmentProblemConfig(assignmentLetter);
                                                     return {
@@ -12464,6 +12532,10 @@ const App: React.FC = () => {
                                                 : {}),
                                             screen: assignmentLetter.gameMode === 'CHALLENGE_ONLY'
                                                 ? GameScreen.PROBLEM_CHALLENGE
+                                                : resumeMiniGameScreen
+                                                    ? resumeMiniGameScreen
+                                                    : resumeAssignmentScreen
+                                                        ? resumeAssignmentScreen
                                                 : isTeacherAssignmentActive
                                                     ? GameScreen.START_MENU
                                                     : prev.screen === GameScreen.MODE_SELECTION
@@ -12481,6 +12553,8 @@ const App: React.FC = () => {
                                             setDismissedDailyAssignmentId(assignmentLetter.id);
                                             setStartedDailyAssignmentId(null);
                                         }
+                                        setPendingMiniGameScreen(null);
+                                        setPendingAssignmentStartScreen(null);
                                         setShowAssignmentLetter(false);
                                     }}
                                     className="rounded-xl border border-slate-500 bg-white px-4 py-3 text-sm font-black text-slate-800 hover:bg-slate-100"
@@ -12876,14 +12950,23 @@ const App: React.FC = () => {
                                     setRaceEffects(EMPTY_RACE_EFFECTS);
                                     setRaceHudOpen(false);
                                     setRaceRewardDummyDisplay(0);
+                                    const assignmentConfig = activeAssignment?.gameMode === 'FREE' && isAssignmentWithinDeadline
+                                        ? getAssignmentProblemConfig(activeAssignment)
+                                        : null;
+                                    const raceMode = assignmentConfig?.mode ?? payload.mode;
+                                    const raceModePool = assignmentConfig?.mode ? assignmentConfig.modePool : payload.modePool;
+                                    const raceAnswerMode = assignmentConfig?.mode ? assignmentConfig.answerMode : payload.answerMode;
+                                    if (payload.isHost && assignmentConfig?.mode) {
+                                        p2pService.send({ type: 'RACE_MODE_SET', mode: assignmentConfig.mode, modePool: assignmentConfig.modePool, answerMode: assignmentConfig.answerMode });
+                                    }
                                     setGameState(prev => ({
                                         ...prev,
                                         challengeMode: 'RACE',
-                                        mode: payload.mode ?? prev.mode,
-                                        modePool: payload.modePool ?? prev.modePool,
-                                        answerMode: payload.answerMode ?? prev.answerMode ?? 'CHOICE',
+                                        mode: raceMode ?? prev.mode,
+                                        modePool: raceModePool ?? prev.modePool,
+                                        answerMode: raceAnswerMode ?? prev.answerMode ?? 'CHOICE',
                                         difficultyLevel: payload.difficultyLevel ?? prev.difficultyLevel,
-                                        screen: payload.mode
+                                        screen: raceMode
                                             ? (payload.difficultyLevel ? GameScreen.CHARACTER_SELECTION : GameScreen.DIFFICULTY_SELECTION)
                                             : GameScreen.MODE_SELECTION
                                     }));
@@ -13382,8 +13465,8 @@ const App: React.FC = () => {
                 {gameState.screen === GameScreen.MATH_CHALLENGE && (
                     <div className="absolute inset-0" data-allow-japanese="true">
                         <MathChallengeScreen
-                            mode={gameState.mode}
-                            answerMode={gameState.answerMode || 'CHOICE'}
+                            mode={localAssignmentProblemConfig?.mode || gameState.mode}
+                            answerMode={localAssignmentProblemConfig?.answerMode || gameState.answerMode || 'CHOICE'}
                             useSavedAnswerMode
                             onComplete={handleMathChallengeComplete}
                             onAnswerResult={handleAssignmentAnswerResult}
@@ -13397,8 +13480,8 @@ const App: React.FC = () => {
                 {gameState.screen === GameScreen.KANJI_CHALLENGE && (
                     <div className="absolute inset-0" data-allow-japanese="true">
                         <KanjiChallengeScreen
-                            mode={gameState.mode}
-                            answerMode={gameState.answerMode || 'CHOICE'}
+                            mode={localAssignmentProblemConfig?.mode || gameState.mode}
+                            answerMode={localAssignmentProblemConfig?.answerMode || gameState.answerMode || 'CHOICE'}
                             useSavedAnswerMode
                             onComplete={handleMathChallengeComplete}
                             onAnswerResult={handleAssignmentAnswerResult}
@@ -13412,7 +13495,7 @@ const App: React.FC = () => {
                 {gameState.screen === GameScreen.ENGLISH_CHALLENGE && (
                     <div className="absolute inset-0" data-allow-japanese="true">
                         <EnglishChallengeScreen
-                            mode={gameState.mode}
+                            mode={localAssignmentProblemConfig?.mode || gameState.mode}
                             onComplete={handleMathChallengeComplete}
                             onAnswerResult={handleAssignmentAnswerResult}
                             debugSkip={isMathDebugSkipped}
@@ -13425,13 +13508,13 @@ const App: React.FC = () => {
                 {gameState.screen === GameScreen.GENERAL_CHALLENGE && (
                     <div className="absolute inset-0" data-allow-japanese="true">
                         <GeneralChallengeScreen
-                            mode={gameState.mode}
-                            modePool={gameState.modePool}
-                            answerMode={gameState.answerMode || 'CHOICE'}
+                            mode={localAssignmentProblemConfig?.mode || gameState.mode}
+                            modePool={localAssignmentProblemConfig?.mode ? localAssignmentProblemConfig.modePool : gameState.modePool}
+                            answerMode={localAssignmentProblemConfig?.answerMode || gameState.answerMode || 'CHOICE'}
                             onModeCorrect={handleModeCorrectProgress}
                             onComplete={handleMathChallengeComplete}
                             onAnswerResult={handleAssignmentAnswerResult}
-                            customProblems={activeAssignment?.gameMode === 'FREE' ? activeAssignment.customProblems : undefined}
+                            customProblems={localAssignmentProblemConfig?.mode && activeAssignment?.gameMode === 'FREE' ? activeAssignment.customProblems : undefined}
                             debugSkip={isMathDebugSkipped}
                             isChallenge={false}
                             rewardHint="正解するとゴールド獲得"
@@ -13476,11 +13559,24 @@ const App: React.FC = () => {
                                         participants: payload.participants,
                                         decisionOwnerIndex: 0
                                     });
+                                    const assignmentConfig = activeAssignment?.gameMode === 'FREE' && isAssignmentWithinDeadline
+                                        ? getAssignmentProblemConfig(activeAssignment)
+                                        : null;
+                                    if (payload.isHost && assignmentConfig?.mode) {
+                                        p2pService.send({ type: 'COOP_MODE_SET', mode: assignmentConfig.mode, modePool: assignmentConfig.modePool, answerMode: assignmentConfig.answerMode });
+                                    }
                                     setGameState(prev => ({
                                         ...prev,
                                         visualTheme: hostVisualTheme,
                                         challengeMode: 'COOP',
-                                        screen: GameScreen.MODE_SELECTION,
+                                        ...(assignmentConfig?.mode
+                                            ? {
+                                                mode: assignmentConfig.mode,
+                                                modePool: assignmentConfig.modePool,
+                                                answerMode: assignmentConfig.answerMode || prev.answerMode || 'CHOICE',
+                                            }
+                                            : {}),
+                                        screen: assignmentConfig?.mode ? GameScreen.DIFFICULTY_SELECTION : GameScreen.MODE_SELECTION,
                                         player: createInitialPlayer(),
                                         act: 1,
                                         floor: 0,
