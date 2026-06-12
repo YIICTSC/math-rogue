@@ -12053,8 +12053,12 @@ const App: React.FC = () => {
                                         </button>
                                         <button
                                             onClick={() => {
-                                                if (!isTeacherAssignmentActive && assignmentLetter && assignmentLetterSource === 'selection') {
-                                                    setDismissedDailyAssignmentId(assignmentLetter.id);
+                                                if (!isTeacherAssignmentActive && assignmentLetter) {
+                                                    if (assignmentLetterSource === 'selection') {
+                                                        setDismissedDailyAssignmentId(assignmentLetter.id);
+                                                    } else {
+                                                        setDismissedDailyAssignmentId(null);
+                                                    }
                                                     setStartedDailyAssignmentId(null);
                                                 }
                                                 setPendingMiniGameScreen(null);
@@ -12549,8 +12553,12 @@ const App: React.FC = () => {
                                 </button>
                                 <button
                                     onClick={() => {
-                                        if (!isTeacherAssignmentActive && assignmentLetter && assignmentLetterSource === 'selection') {
-                                            setDismissedDailyAssignmentId(assignmentLetter.id);
+                                        if (!isTeacherAssignmentActive && assignmentLetter) {
+                                            if (assignmentLetterSource === 'selection') {
+                                                setDismissedDailyAssignmentId(assignmentLetter.id);
+                                            } else {
+                                                setDismissedDailyAssignmentId(null);
+                                            }
                                             setStartedDailyAssignmentId(null);
                                         }
                                         setPendingMiniGameScreen(null);
