@@ -12,6 +12,7 @@ import { SOCIAL_GRADE_UNITS, getSocialGradeMode } from '../socialUnitConfig';
 import { trans, transProblemSubjectName } from '../utils/textUtils';
 import { assetUrl } from '../utils/assetPaths';
 import { saveAnswerModePreference } from '../utils/answerMode';
+import type { VisualThemeId } from '../data/visualThemes';
 
 interface ModeSelectionScreenProps {
   onSelectMode: (mode: GameMode, modePool?: string[], answerMode?: AnswerMode) => void;
@@ -19,6 +20,7 @@ interface ModeSelectionScreenProps {
   languageMode: LanguageMode;
   modeMasteryMap?: Record<string, boolean>;
   modeCorrectCounts?: Record<string, number>;
+  visualTheme?: VisualThemeId;
 }
 
 interface MathUnitOption {
@@ -897,6 +899,7 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
   languageMode,
   modeMasteryMap = {},
   modeCorrectCounts = {},
+  visualTheme = 'elementary',
 }) => {
   const [selectedCategory, setSelectedCategory] = useState<SubjectCategoryConfig>(SUBJECT_CATEGORIES[0]);
   const [selectedSubModeId, setSelectedSubModeId] = useState<string>(SUBJECT_CATEGORIES[0].subModes[0]?.id || '');
@@ -1501,7 +1504,11 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
   return (
     <div
       className="main-mode-selection-screen w-full h-full bg-slate-950 bg-cover bg-center flex flex-col text-white overflow-hidden relative"
-      style={{ backgroundImage: `url(${assetUrl('sprites/backgrounds/learning-rogue/selection-entrance.webp')})` }}
+      style={{
+        backgroundImage: `url(${assetUrl(visualTheme === 'magic'
+          ? 'sprites/backgrounds/learning-rogue/magic-selection-entrance.webp'
+          : 'sprites/backgrounds/learning-rogue/selection-entrance.webp')})`
+      }}
     >
       <div className="absolute inset-0 bg-slate-950/65 pointer-events-none" />
       <div className="relative z-10 w-full max-w-6xl mx-auto flex flex-col flex-1 min-h-0 overflow-hidden">

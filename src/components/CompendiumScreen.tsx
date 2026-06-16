@@ -198,7 +198,11 @@ const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, 
     return (
         <div
             className="main-compendium-screen flex flex-col h-full w-full bg-gray-900 bg-cover bg-center text-white relative"
-            style={{ backgroundImage: `url(${assetUrl('sprites/backgrounds/learning-rogue/compendium-library.webp')})` }}
+            style={{
+                backgroundImage: `url(${assetUrl(visualTheme === 'magic'
+                    ? 'sprites/backgrounds/learning-rogue/magic-compendium-library.webp'
+                    : 'sprites/backgrounds/learning-rogue/compendium-library.webp')})`
+            }}
         >
             <div className="absolute inset-0 bg-slate-950/62 pointer-events-none" />
 

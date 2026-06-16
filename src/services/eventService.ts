@@ -6,7 +6,7 @@ import { trans } from '../utils/textUtils';
 import { LanguageMode } from '../types';
 import { getUpgradedCard } from '../utils/cardUtils';
 import { ADDITIONAL_CARDS } from '../constants1';
-import { getHighSchoolEventTheme, getHighSchoolEventThemeByTitle, type HighSchoolEventTheme, type VisualThemeId } from '../data/visualThemes';
+import { getVisualThemeEventTheme, getVisualThemeEventThemeByTitle, type ThemedEventTheme, type VisualThemeId } from '../data/visualThemes';
 
 interface EventOption {
     label: string;
@@ -230,10 +230,8 @@ export const generateEvent = (
 ): GameEvent => {
     let activeEventTitle: string | null = null;
     const finalizeEvent = (event: GameEvent): GameEvent => {
-        const themedEvent = visualTheme === 'high-school'
-            ? getHighSchoolEventTheme(event.title, currentAct, currentFloor)
-            : null;
-        if (themedEvent) return buildHighSchoolEvent(themedEvent);
+        const themedEvent = getVisualThemeEventTheme(visualTheme, event.title, currentAct, currentFloor);
+        if (themedEvent) return buildThemedEvent(themedEvent, visualTheme);
         return {
         ...event,
         options: event.options.map(option => ({
@@ -618,11 +616,11 @@ export const generateEvent = (
         }
     };
 
-    const buildHighSchoolEvent = (theme: HighSchoolEventTheme): GameEvent => {
+    const buildThemedEvent = (theme: ThemedEventTheme, themeId: VisualThemeId): GameEvent => {
         return {
             title: theme.title,
             description: theme.description,
-            imageKey: `high-school-event-${theme.imageIndex}`,
+            imageKey: `${themeId}-event-${theme.imageIndex}`,
             options: highSchoolChoices[theme.imageIndex].map(choice => ({
                 label: choice.label,
                 text: choice.text,
@@ -6313,9 +6311,9 @@ export const generateEvent = (
     );
 
     if (preferredEventTitle) {
-        if (visualTheme === 'high-school') {
-            const matchedTheme = getHighSchoolEventThemeByTitle(preferredEventTitle);
-            if (matchedTheme) return buildHighSchoolEvent(matchedTheme);
+        if (visualTheme !== 'elementary') {
+            const matchedTheme = getVisualThemeEventThemeByTitle(visualTheme, preferredEventTitle);
+            if (matchedTheme) return buildThemedEvent(matchedTheme, visualTheme);
         }
         const matched = potentialEvents.find(e =>
             e.title === preferredEventTitle

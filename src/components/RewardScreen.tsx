@@ -7,6 +7,7 @@ import { Gift, Gem, Coins, FlaskConical, X, Flag, Sparkles, Users } from 'lucide
 import { trans } from '../utils/textUtils';
 import { assetUrl } from '../utils/assetPaths';
 import { PotionIcon, RelicIcon } from './ItemIcon';
+import type { VisualThemeId } from '../data/visualThemes';
 
 interface RewardScreenProps {
   rewards: RewardItem[];
@@ -23,13 +24,15 @@ interface RewardScreenProps {
   skipDisabledMessage?: string;
   interactionDisabled?: boolean;
   interactionDisabledMessage?: string;
+  visualTheme?: VisualThemeId;
 }
 
-const RewardScreen: React.FC<RewardScreenProps> = ({ rewards, onSelectReward, onSkip, isLoading, currentPotions = [], potionCapacity = 3, languageMode, typingMode = false, dummyRewards = 0, autoSkipWhenEmpty = true, skipDisabled = false, skipDisabledMessage, interactionDisabled = false, interactionDisabledMessage }) => {
+const RewardScreen: React.FC<RewardScreenProps> = ({ rewards, onSelectReward, onSkip, isLoading, currentPotions = [], potionCapacity = 3, languageMode, typingMode = false, dummyRewards = 0, autoSkipWhenEmpty = true, skipDisabled = false, skipDisabledMessage, interactionDisabled = false, interactionDisabledMessage, visualTheme = 'elementary' }) => {
   const [replaceReward, setReplaceReward] = useState<RewardItem | null>(null);
   const [inspectedItem, setInspectedItem] = useState<{ type: 'CARD' | 'RELIC' | 'POTION', data: any } | null>(null);
   const longPressTimer = useRef<any>(null);
   const startPos = useRef({ x: 0, y: 0 });
+  const currencyLabel = visualTheme === 'magic' ? '魔晶' : 'ゴールド';
 
   const handlePointerDown = (e: React.PointerEvent, itemType: 'RELIC' | 'POTION', data: any) => {
       startPos.current = { x: e.clientX, y: e.clientY };
@@ -124,7 +127,11 @@ const RewardScreen: React.FC<RewardScreenProps> = ({ rewards, onSelectReward, on
   return (
     <div
       className="main-reward-screen flex flex-col items-center justify-center h-full w-full bg-gray-900 bg-cover bg-center text-white relative p-4"
-      style={{ backgroundImage: `url(${assetUrl('sprites/backgrounds/learning-rogue/reward-rooftop.webp')})` }}
+      style={{
+        backgroundImage: `url(${assetUrl(visualTheme === 'magic'
+          ? 'sprites/backgrounds/learning-rogue/magic-reward-sanctuary.webp'
+          : 'sprites/backgrounds/learning-rogue/reward-rooftop.webp')})`
+      }}
     >
       <div className="absolute inset-0 bg-slate-950/58 pointer-events-none" />
       
@@ -207,9 +214,9 @@ const RewardScreen: React.FC<RewardScreenProps> = ({ rewards, onSelectReward, on
           </div>
         )}
         <h2 className="text-3xl md:text-4xl text-amber-100 font-bold mb-2 flex items-center justify-center animate-pulse drop-shadow-[0_2px_4px_rgba(0,0,0,0.95)] [text-shadow:0_0_10px_rgba(120,53,15,0.95)]">
-          <Gift className="mr-3" size={32} /> {trans("勝利", languageMode)}
+          <Gift className="mr-3" size={32} /> {trans(visualTheme === 'magic' ? "魔力回収" : "勝利", languageMode)}
         </h2>
-        <p className="text-white text-sm font-bold drop-shadow-[0_2px_3px_rgba(0,0,0,0.95)] [text-shadow:0_0_8px_rgba(15,23,42,0.9)]">{trans("欲しい報酬を選択してください", languageMode)}</p>
+        <p className="text-white text-sm font-bold drop-shadow-[0_2px_3px_rgba(0,0,0,0.95)] [text-shadow:0_0_8px_rgba(15,23,42,0.9)]">{trans(visualTheme === 'magic' ? "結界に残った魔力から、次に持ち込む力を選んでください" : "欲しい報酬を選択してください", languageMode)}</p>
       </div>
 
       <div className={`z-10 flex flex-row items-center gap-8 w-full overflow-x-auto md:justify-center landscape:justify-center custom-scrollbar px-4 pt-20 pb-8 min-h-[420px] snap-x ${isLoading ? 'opacity-50 pointer-events-none' : ''}`}>
@@ -261,7 +268,7 @@ const RewardScreen: React.FC<RewardScreenProps> = ({ rewards, onSelectReward, on
                     </div>
                     <div className="text-center mb-auto flex flex-col justify-center h-full">
                         <div className="text-yellow-100 font-bold text-2xl mb-2">{reward.value} G</div>
-                        <div className="text-xs text-gray-400">{trans("ゴールドを獲得", languageMode)}</div>
+                        <div className="text-xs text-gray-400">{trans(`${currencyLabel}を獲得`, languageMode)}</div>
                     </div>
                     <button disabled={interactionDisabled} className="bg-yellow-600 px-6 py-2 text-sm font-bold rounded border hover:bg-yellow-500 w-full mt-2 disabled:cursor-not-allowed disabled:opacity-50">{trans("獲得", languageMode)}</button>
                 </div>

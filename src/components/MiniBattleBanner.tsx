@@ -120,7 +120,7 @@ const CutInArtToken: React.FC<{ token: string; fallbackName: string; card: Battl
         visualTheme={card.visualTheme}
         enemyType={card.enemyIllustrationEnemyType}
         phase={card.enemyIllustrationPhase}
-        action={card.capture && card.visualTheme === 'high-school' ? 'attack' : 'idle'}
+        action={card.capture && card.visualTheme && card.visualTheme !== 'elementary' ? 'attack' : 'idle'}
         className="h-full w-full"
         size={16}
       />

@@ -72,8 +72,15 @@ export interface Card {
   enemyIllustrationNames?: string[];
   enemyIllustrationEnemyType?: string;
   enemyIllustrationPhase?: number;
-  visualTheme?: 'elementary' | 'high-school';
+  visualTheme?: 'elementary' | 'high-school' | 'magic';
   highSchoolCardArtIndex?: number;
+  magicCardArtIndex?: number;
+  magicRuleCardIndex?: number;
+  magicRuleCardIndices?: number[];
+  magicRuleCardArt?: boolean;
+  magicBasicCardArt?: 'strike' | 'guard' | 'focus';
+  magicHeroId?: string;
+  transformedOnly?: boolean;
   familiarSummon?: FamiliarSummonSpec;
 
   nextTurnEnergy?: number;
@@ -212,6 +219,7 @@ export interface Relic {
   rarity: 'STARTER' | 'COMMON' | 'UNCOMMON' | 'RARE' | 'BOSS' | 'SHOP';
   price?: number;
   effectType?: 'START_BATTLE' | 'END_TURN' | 'END_BATTLE' | 'PASSIVE';
+  magicRelicHeroId?: string;
 }
 
 export interface Potion {
@@ -234,6 +242,8 @@ export interface Character {
   deckTemplate: string[];
   color: string;
   imageData: string;
+  magicProtagonistId?: string;
+  magicProtagonistGender?: 'female' | 'male';
 }
 
 export interface Partner {
@@ -251,8 +261,25 @@ export interface GardenSlot {
   maxGrowth: number;
 }
 
+export interface MagicRomanceProgress {
+  affection: Record<string, number>;
+  stages: Record<string, number>;
+  selectedCounts: Record<string, number>;
+  completedEventIds: string[];
+}
+
+export interface MagicRuleState {
+  ruleId: string;
+  value: number;
+  secondaryValue: number;
+  sequence: CardType[];
+  slots: string[];
+}
+
 export interface Player {
   id?: string;
+  magicProtagonistId?: string;
+  magicProtagonistGender?: 'female' | 'male';
   maxHp: number;
   currentHp: number;
   maxEnergy: number;
@@ -282,6 +309,10 @@ export interface Player {
   garden?: GardenSlot[];
   codexBuffer?: Card[]; // 秘密の攻略本用
   familiarActionQueue?: ActiveFamiliar[];
+  magicTransformed?: boolean;
+  magicTransformedThisBattle?: boolean;
+  magicRomance?: MagicRomanceProgress;
+  magicRuleState?: MagicRuleState;
 }
 
 export interface CoopBattlePlayerState {
@@ -318,6 +349,7 @@ export interface ActStats {
 export enum GameScreen {
   START_MENU = 'START_MENU',
   DEBUG_MENU = 'DEBUG_MENU',
+  MAGIC_EVENT_SIMULATION = 'MAGIC_EVENT_SIMULATION',
   MODE_SELECTION = 'MODE_SELECTION',
   DIFFICULTY_SELECTION = 'DIFFICULTY_SELECTION',
   CHARACTER_SELECTION = 'CHARACTER_SELECTION',
@@ -341,6 +373,7 @@ export enum GameScreen {
   SHOP = 'SHOP',
   EVENT = 'EVENT',
   FINAL_BRIDGE = 'FINAL_BRIDGE',
+  MAGIC_ROMANCE_ENDING = 'MAGIC_ROMANCE_ENDING',
   COMPENDIUM = 'COMPENDIUM',
   ENDING = 'ENDING',
   HELP = 'HELP',
@@ -1026,7 +1059,7 @@ export interface VisualEffectInstance {
 export interface GameState {
   screen: GameScreen;
   mode: GameMode;
-  visualTheme?: 'elementary' | 'high-school';
+  visualTheme?: 'elementary' | 'high-school' | 'magic';
   modePool?: string[];
   answerMode?: AnswerMode;
   difficultyLevel?: number;
@@ -1062,7 +1095,7 @@ export interface GameState {
 export interface CoopSharedState {
   screen: GameScreen;
   mode: GameMode;
-  visualTheme?: 'elementary' | 'high-school';
+  visualTheme?: 'elementary' | 'high-school' | 'magic';
   modePool?: string[];
   answerMode?: AnswerMode;
   difficultyLevel?: number;

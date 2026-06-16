@@ -39,7 +39,7 @@ export const parseEnemyIllustrationRef = (refToken: string): {
         if (separatorIndex <= 0) return;
         const key = part.substring(0, separatorIndex);
         const value = part.substring(separatorIndex + 1);
-        if (key === 'theme' && (value === 'elementary' || value === 'high-school')) {
+        if (key === 'theme' && (value === 'elementary' || value === 'high-school' || value === 'magic')) {
             parsed.visualTheme = value;
         } else if (key === 'type') {
             parsed.enemyType = safeDecodeURIComponent(value);
@@ -55,6 +55,18 @@ export const parseEnemyIllustrationRef = (refToken: string): {
 const toIllustrationRefs = (card: Card): string[] => {
     if (card.illustrationRefs && card.illustrationRefs.length > 0) {
         return card.illustrationRefs.filter(Boolean).slice(0, MAX_ILLUSTRATION_REFS);
+    }
+
+    if (card.magicRuleCardArt && card.magicHeroId && card.magicRuleCardIndex !== undefined) {
+        return [`magic-rule:${card.magicHeroId}:${card.magicRuleCardIndex}`];
+    }
+
+    if (card.magicBasicCardArt && card.magicHeroId) {
+        return [`magic-basic:${card.magicHeroId}:${card.magicBasicCardArt}`];
+    }
+
+    if (card.magicCardArtIndex !== undefined) {
+        return [`magic-card:${card.magicCardArtIndex}`];
     }
 
     const enemyNames = [
@@ -512,6 +524,20 @@ export const synthesizeCards = (c1: Card, c2: Card, c3?: Card): Card => {
 
     const newAddCardToDraw = c1.addCardToDraw || c2.addCardToDraw || c3?.addCardToDraw;
     const newAddCardToDiscard = c1.addCardToDiscard || c2.addCardToDiscard || c3?.addCardToDiscard;
+    const sourceCards = [c1, c2, c3].filter(Boolean) as Card[];
+    const magicSource = sourceCards.find(c => c.magicHeroId && ((c.magicRuleCardIndices?.length ?? 0) > 0 || c.magicRuleCardIndex !== undefined));
+    const magicRuleCardIndices = sourceCards.flatMap(c => {
+        if (c.magicHeroId && c.magicHeroId !== magicSource?.magicHeroId) return [];
+        if (c.magicRuleCardIndices?.length) return c.magicRuleCardIndices;
+        return c.magicRuleCardIndex !== undefined ? [c.magicRuleCardIndex] : [];
+    });
+    const hasMagicSource = sourceCards.some(c =>
+        c.visualTheme === 'magic' ||
+        c.magicHeroId ||
+        c.magicCardArtIndex !== undefined ||
+        c.magicRuleCardIndex !== undefined ||
+        c.magicBasicCardArt
+    );
 
     // Play Condition
     let newPlayCondition = undefined;
@@ -651,9 +677,13 @@ export const synthesizeCards = (c1: Card, c2: Card, c3?: Card): Card => {
         c.originalNames?.forEach(checkName);
     };
 
-    [c1, c2, c3].forEach(c => { if (c) checkAndAddSpecialDesc(c); });
+    sourceCards.forEach(checkAndAddSpecialDesc);
 
     parts.push(...Array.from(addedSpecialDescs));
+    if (magicSource?.magicHeroId && magicRuleCardIndices.length > 0) {
+        const stepLabels = magicRuleCardIndices.map(index => `${index + 1}枚目`).join('→');
+        parts.push(`専用ルールを素材順に進める(${stepLabels}扱い)`);
+    }
 
     let description = parts.join("。") + (parts.length > 0 ? "。" : "");
     if (parts.length === 0) description = "効果なし。";
@@ -748,6 +778,11 @@ export const synthesizeCards = (c1: Card, c2: Card, c3?: Card): Card => {
 
         textureRef: newTextureRef,
         illustrationRefs: mergedIllustrationRefs,
-        illustrationRefWriteIndex
+        illustrationRefWriteIndex,
+        visualTheme: hasMagicSource ? 'magic' : c1.visualTheme,
+        magicHeroId: magicSource?.magicHeroId,
+        magicRuleCardIndex: magicRuleCardIndices[0],
+        magicRuleCardIndices: magicRuleCardIndices.length > 0 ? magicRuleCardIndices : undefined,
+        magicRuleCardArt: magicSource ? false : undefined
     };
 };

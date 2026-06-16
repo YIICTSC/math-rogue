@@ -7,15 +7,17 @@ import { trans } from '../utils/textUtils';
 import { assetUrl } from '../utils/assetPaths';
 import { audioService } from '../services/audioService';
 import { RelicIcon } from './ItemIcon';
+import type { VisualThemeId } from '../data/visualThemes';
 
 interface RelicSelectionScreenProps {
   relics: Relic[];
   onSelect: (relic: Relic) => void;
   languageMode: LanguageMode;
   typingMode?: boolean;
+  visualTheme?: VisualThemeId;
 }
 
-const RelicSelectionScreen: React.FC<RelicSelectionScreenProps> = ({ relics, onSelect, languageMode, typingMode = false }) => {
+const RelicSelectionScreen: React.FC<RelicSelectionScreenProps> = ({ relics, onSelect, languageMode, typingMode = false, visualTheme = 'elementary' }) => {
   useEffect(() => {
     // Play "relic_select" theme for selection phase
     audioService.playBGM('relic_select');
@@ -42,16 +44,20 @@ const RelicSelectionScreen: React.FC<RelicSelectionScreenProps> = ({ relics, onS
   return (
     <div
       className="main-relic-screen flex flex-col h-full w-full bg-gray-900 bg-cover bg-center text-white relative overflow-y-auto custom-scrollbar"
-      style={{ backgroundImage: `url(${assetUrl('sprites/backgrounds/learning-rogue/selection-entrance.webp')})` }}
+      style={{
+        backgroundImage: `url(${assetUrl(visualTheme === 'magic'
+          ? 'sprites/backgrounds/learning-rogue/magic-selection-entrance.webp'
+          : 'sprites/backgrounds/learning-rogue/selection-entrance.webp')})`
+      }}
     >
       <div className="absolute inset-0 bg-slate-950/60 pointer-events-none" />
       
       <div className="z-10 flex flex-col items-center min-h-full justify-start p-4 py-12">
         <div className="text-center mb-8 shrink-0">
             <h2 className="text-3xl md:text-4xl text-yellow-400 font-bold mb-2 md:mb-4 flex items-center justify-center animate-pulse">
-            <Gem className="mr-3" size={32} /> {trans("旅の始まり", languageMode)}
+            <Gem className="mr-3" size={32} /> {trans(visualTheme === 'magic' ? "契約の始まり" : "旅の始まり", languageMode)}
             </h2>
-            <p className="text-sm md:text-xl text-gray-300">{trans("冒険の助けとなる遺物（レリック）を1つ選んでください", languageMode)}</p>
+            <p className="text-sm md:text-xl text-gray-300">{trans(visualTheme === 'magic' ? "最初に共鳴する護符（レリック）を1つ選んでください" : "冒険の助けとなる遺物（レリック）を1つ選んでください", languageMode)}</p>
         </div>
 
         <div className="flex flex-wrap justify-center gap-4 md:gap-8 pb-8">

@@ -7,14 +7,16 @@ interface ItemIconProps {
   alt?: string;
 }
 
-const iconClass = (className = '') =>
-  `block h-full w-full object-contain [image-rendering:pixelated] ${className}`;
+const iconClass = (className = '', pixelated = true) =>
+  `block h-full w-full object-contain ${pixelated ? '[image-rendering:pixelated]' : ''} ${className}`;
 
 export const RelicIcon: React.FC<ItemIconProps> = ({ id, className, alt = '' }) => (
   <img
-    src={assetUrl(`sprites/relic-icons/${id}.webp`)}
+    src={assetUrl(id.startsWith('MAGIC_RELIC_')
+      ? `sprites/magic/relics/${id.replace('MAGIC_RELIC_', '')}.webp`
+      : `sprites/relic-icons/${id}.webp`)}
     alt={alt}
-    className={iconClass(className)}
+    className={iconClass(className, !id.startsWith('MAGIC_RELIC_'))}
     draggable={false}
   />
 );

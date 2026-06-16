@@ -4,12 +4,13 @@ import { Player, LanguageMode } from '../types';
 import { trans } from '../utils/textUtils';
 import { audioService } from '../services/audioService';
 import { ChevronRight, Sparkles, BookOpen, Heart } from 'lucide-react';
+import { assetUrl } from '../utils/assetPaths';
 
 interface FinalBridgeScreenProps {
   player: Player;
   onComplete: (upgradeType: 'HEAL' | 'APOTHEOSIS' | 'STRENGTH') => void;
   languageMode: LanguageMode;
-  visualTheme?: 'elementary' | 'high-school';
+  visualTheme?: 'elementary' | 'high-school' | 'magic';
 }
 
 const FinalBridgeScreen: React.FC<FinalBridgeScreenProps> = ({ player, onComplete, languageMode, visualTheme = 'elementary' }) => {
@@ -30,7 +31,18 @@ const FinalBridgeScreen: React.FC<FinalBridgeScreenProps> = ({ player, onComplet
     "「自由な選択は混乱を生む。だから私が、全員の正解を決める」",
     "その言葉に従えば安全かもしれない。けれど、自分の答えを選ぶために、最後の準備を整えよう。"
   ];
-  const storyTexts = visualTheme === 'high-school' ? highSchoolStoryTexts : elementaryStoryTexts;
+  const magicStoryTexts = [
+    "星の神殿へ続く渡り廊下に、九つの魔法陣が静かに灯っている。",
+    "背後には、授業、?マスでの出会い、恋と友情、そして変身して越えた戦いの記憶が残っている。",
+    "前方の結界の奥には、学園の魔力を束ねようとする『大魔女校長』が待っている。",
+    "「あなたの願いも恋も、すべて私の秩序の中に封じましょう」",
+    "答えはカードと学びの中にある。最後の準備を整えよう。"
+  ];
+  const storyTexts = visualTheme === 'high-school'
+    ? highSchoolStoryTexts
+    : visualTheme === 'magic'
+      ? magicStoryTexts
+      : elementaryStoryTexts;
 
   useEffect(() => {
     audioService.playBGM('event');
@@ -47,7 +59,11 @@ const FinalBridgeScreen: React.FC<FinalBridgeScreenProps> = ({ player, onComplet
   };
 
   return (
-    <div className="main-final-bridge-screen w-full h-full bg-black flex flex-col items-center justify-center p-8 relative overflow-hidden font-mono">
+    <div
+      className="main-final-bridge-screen w-full h-full bg-black bg-cover bg-center flex flex-col items-center justify-center p-8 relative overflow-hidden font-mono"
+      style={visualTheme === 'magic' ? { backgroundImage: `url(${assetUrl('sprites/backgrounds/learning-rogue/magic-final-bridge.webp')})` } : undefined}
+    >
+      {visualTheme === 'magic' && <div className="absolute inset-0 bg-slate-950/45 pointer-events-none" />}
       {/* Background Parallax Stars Effect */}
       <div className="absolute inset-0 opacity-30 pointer-events-none">
         {[...Array(50)].map((_, i) => (

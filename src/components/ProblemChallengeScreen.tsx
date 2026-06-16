@@ -17,6 +17,7 @@ import { trans, transProblemSubjectName } from '../utils/textUtils';
 import { assetUrl } from '../utils/assetPaths';
 import { saveAnswerModePreference } from '../utils/answerMode';
 import { UPPER_KANJI_SUB_MODE_IDS, UPPER_PROBLEM_CATEGORIES } from './ModeSelectionScreen';
+import type { VisualThemeId } from '../data/visualThemes';
 
 interface ProblemChallengeScreenProps {
   onBack: () => void;
@@ -25,6 +26,7 @@ interface ProblemChallengeScreenProps {
   modeCorrectCounts?: Record<string, number>;
   assignment?: AssignmentPayload | null;
   onAnswerResult?: (result: { mode: string; correct: boolean; elapsedMs: number; problemId?: string }) => void;
+  visualTheme?: VisualThemeId;
 }
 
 const BGM_OPTIONS = [
@@ -497,6 +499,7 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
   modeCorrectCounts = {},
   assignment,
   onAnswerResult,
+  visualTheme = 'elementary',
 }) => {
   const [phase, setPhase] = useState<'SELECT' | 'CHALLENGE'>('SELECT');
   const [selectedCategory, setSelectedCategory] = useState<SubjectCategoryConfig>(SUBJECT_CATEGORIES[0]);
@@ -770,7 +773,11 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
       <div
         data-allow-japanese="true"
         className="w-full h-full relative bg-black bg-cover bg-center flex flex-col"
-        style={{ backgroundImage: `url(${assetUrl('sprites/backgrounds/learning-rogue/compendium-library.webp')})` }}
+        style={{
+          backgroundImage: `url(${assetUrl(visualTheme === 'magic'
+            ? 'sprites/backgrounds/learning-rogue/magic-compendium-library.webp'
+            : 'sprites/backgrounds/learning-rogue/compendium-library.webp')})`
+        }}
       >
         <div className="absolute inset-0 bg-slate-950/62 pointer-events-none" />
         <div className="bg-black/80 border-b-2 border-gray-700 p-2 flex justify-between items-center z-50 shrink-0">
@@ -871,7 +878,11 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
   return (
     <div
       className="main-problem-challenge-screen w-full h-full bg-slate-950 bg-cover bg-center flex flex-col relative overflow-hidden"
-      style={{ backgroundImage: `url(${assetUrl('sprites/backgrounds/learning-rogue/selection-entrance.webp')})` }}
+      style={{
+        backgroundImage: `url(${assetUrl(visualTheme === 'magic'
+          ? 'sprites/backgrounds/learning-rogue/magic-selection-entrance.webp'
+          : 'sprites/backgrounds/learning-rogue/selection-entrance.webp')})`
+      }}
     >
       <div className="absolute inset-0 bg-slate-950/65 pointer-events-none"></div>
       <div className="absolute inset-0 texture-dark-matter opacity-30 pointer-events-none"></div>

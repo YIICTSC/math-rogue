@@ -1,5 +1,5 @@
 
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useMemo } from 'react';
 import { Character, LanguageMode } from '../types';
 import { Lock, Heart, Coins, Gem, ArrowRight, Swords, Shield, Zap, Sparkles, Brain, GraduationCap, Camera, X, RefreshCw, AlertCircle, Keyboard } from 'lucide-react';
 import { RELIC_LIBRARY, CARDS_LIBRARY, CHARACTER_ACCESSORIES } from '../constants';
@@ -8,6 +8,20 @@ import { assetUrl } from '../utils/assetPaths';
 import { audioService } from '../services/audioService';
 import { storageService } from '../services/storageService';
 import { RelicIcon } from './ItemIcon';
+import type { VisualThemeId } from '../data/visualThemes';
+import { MAGIC_MALE_PROTAGONISTS } from '../data/magicHeroes';
+import { getMagicRuleConfig } from '../data/magicLoadouts';
+
+const MAGIC_MALE_CHARACTER_IDS = [
+  'WARRIOR',
+  'CARETAKER',
+  'ASSASSIN',
+  'MAGE',
+  'DODGEBALL',
+  'BARD',
+  'LIBRARIAN',
+  'CHEF',
+];
 
 interface CharacterSelectionScreenProps {
   characters: Character[];
@@ -23,16 +37,33 @@ interface CharacterSelectionScreenProps {
   }>;
   coopSelfPeerId?: string;
   coopDecisionOwnerPeerId?: string;
+  visualTheme?: VisualThemeId;
 }
 
-const CharacterSelectionScreen: React.FC<CharacterSelectionScreenProps> = ({ characters, unlockedCount, onSelect, challengeMode, languageMode, coopParticipants = [], coopSelfPeerId, coopDecisionOwnerPeerId }) => {
+const CharacterSelectionScreen: React.FC<CharacterSelectionScreenProps> = ({ characters, unlockedCount, onSelect, challengeMode, languageMode, coopParticipants = [], coopSelfPeerId, coopDecisionOwnerPeerId, visualTheme = 'elementary' }) => {
   const [customImages, setCustomImages] = useState<Record<string, string>>({});
   const [showCamera, setShowCamera] = useState(false);
   const [activeCharId, setActiveCharId] = useState<string | null>(null);
   const [cameraError, setCameraError] = useState<string | null>(null);
+  const [magicGender, setMagicGender] = useState<'female' | 'male'>('female');
   
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const displayedCharacters = useMemo(() => visualTheme === 'magic' && magicGender === 'male'
+    ? MAGIC_MALE_CHARACTER_IDS.flatMap((characterId, index) => {
+        const baseCharacter = characters.find((character) => character.id === characterId);
+        const protagonist = MAGIC_MALE_PROTAGONISTS[index];
+        if (!baseCharacter || !protagonist) return [];
+        return [{
+          ...baseCharacter,
+          name: protagonist.name,
+          description: `【${protagonist.role}】${protagonist.personality}。${protagonist.specialty}を得意とする魔法騎士。`,
+          imageData: assetUrl(`sprites/magic/male-characters/${protagonist.assetId}-before.png`),
+          magicProtagonistId: protagonist.id,
+          magicProtagonistGender: 'male' as const,
+        }];
+      })
+    : characters, [characters, magicGender, visualTheme]);
 
   // 初回マウント時に保存されている画像を読み込む
   useEffect(() => {
@@ -42,7 +73,7 @@ const CharacterSelectionScreen: React.FC<CharacterSelectionScreenProps> = ({ cha
 
   useEffect(() => {
     if (challengeMode !== 'TYPING' || showCamera) return;
-    const unlockedCharacters = characters.filter((_, index) => index < unlockedCount);
+    const unlockedCharacters = displayedCharacters.filter((_, index) => index < unlockedCount);
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key >= '1' && e.key <= '9') {
         const char = unlockedCharacters[Number(e.key) - 1];
@@ -57,7 +88,7 @@ const CharacterSelectionScreen: React.FC<CharacterSelectionScreenProps> = ({ cha
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [challengeMode, showCamera, characters, unlockedCount, customImages]);
+  }, [challengeMode, showCamera, displayedCharacters, unlockedCount, customImages]);
 
   // カメラを停止する
   const stopCamera = () => {
@@ -166,7 +197,11 @@ const CharacterSelectionScreen: React.FC<CharacterSelectionScreenProps> = ({ cha
   return (
     <div
       className="main-character-screen flex flex-col h-full w-full bg-gray-900 bg-cover bg-center text-white relative overflow-hidden"
-      style={{ backgroundImage: `url(${assetUrl('sprites/backgrounds/learning-rogue/selection-entrance.webp')})` }}
+      style={{
+        backgroundImage: `url(${assetUrl(visualTheme === 'magic'
+          ? 'sprites/backgrounds/learning-rogue/magic-selection-entrance.webp'
+          : 'sprites/backgrounds/learning-rogue/selection-entrance.webp')})`
+      }}
     >
       <div className="absolute inset-0 bg-slate-950/60 pointer-events-none" />
       
@@ -256,6 +291,30 @@ const CharacterSelectionScreen: React.FC<CharacterSelectionScreenProps> = ({ cha
             ) : (
                 <p className="text-sm text-gray-400">{trans("冒険に挑むキャラクターを選んでください", languageMode)}</p>
             )}
+            {visualTheme === 'magic' && (
+              <div className="mt-5 inline-flex rounded-full border border-fuchsia-300/60 bg-slate-950/80 p-1 shadow-lg">
+                {([
+                  ['female', '女子主人公'],
+                  ['male', '男子主人公'],
+                ] as const).map(([gender, label]) => (
+                  <button
+                    key={gender}
+                    type="button"
+                    onClick={() => {
+                      setMagicGender(gender);
+                      audioService.playSound('select');
+                    }}
+                    className={`rounded-full px-5 py-2 text-sm font-black transition-colors ${
+                      magicGender === gender
+                        ? 'bg-fuchsia-600 text-white'
+                        : 'text-fuchsia-100 hover:bg-fuchsia-950/70'
+                    }`}
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            )}
         </div>
 
         {challengeMode === 'COOP' && coopParticipants.length > 0 && (
@@ -264,7 +323,7 @@ const CharacterSelectionScreen: React.FC<CharacterSelectionScreenProps> = ({ cha
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               {coopParticipants.map((participant) => {
                 const selectedChar = participant.selectedCharacterId
-                  ? characters.find((char) => char.id === participant.selectedCharacterId)
+                  ? displayedCharacters.find((char) => char.id === participant.selectedCharacterId)
                   : null;
                 const isSelf = participant.peerId === coopSelfPeerId;
                 const isDecisionOwner = participant.peerId === coopDecisionOwnerPeerId;
@@ -302,11 +361,16 @@ const CharacterSelectionScreen: React.FC<CharacterSelectionScreenProps> = ({ cha
         )}
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-6xl pb-20">
-            {characters.map((char, index) => {
+            {displayedCharacters.map((char, index) => {
                 const isUnlocked = index < unlockedCount;
-                const relic = RELIC_LIBRARY[char.startingRelicId];
+                const relic = visualTheme === 'magic' && char.magicProtagonistId
+                    ? getMagicRuleConfig(char.magicProtagonistId).relic
+                    : RELIC_LIBRARY[char.startingRelicId];
                 const charImage = customImages[char.id] || char.imageData;
                 const isCustom = !!customImages[char.id];
+                const isMagicMalePortrait = visualTheme === 'magic'
+                    && magicGender === 'male'
+                    && !isCustom;
                 
                 const colorMap: Record<string, string> = {
                     'red': 'border-red-600 bg-red-950/40 hover:bg-red-900/60 shadow-red-900/20',
@@ -348,10 +412,10 @@ const CharacterSelectionScreen: React.FC<CharacterSelectionScreenProps> = ({ cha
                              <img 
                                 src={charImage} 
                                 alt={char.name} 
-                                className={`w-full h-full ${isCustom ? 'rounded-xl' : 'pixel-art'}`} 
-                                style={{ imageRendering: isCustom ? 'auto' : 'pixelated' }}
+                                className={`w-full h-full ${isCustom ? 'rounded-xl object-cover' : isMagicMalePortrait ? 'object-contain' : 'pixel-art'}`}
+                                style={{ imageRendering: isCustom || isMagicMalePortrait ? 'auto' : 'pixelated' }}
                              />
-                             {isUnlocked && (
+                             {isUnlocked && visualTheme !== 'magic' && (
                                 <button 
                                   onClick={(e) => { e.stopPropagation(); startCamera(char.id); }}
                                   className="absolute -bottom-2 -right-2 bg-indigo-600 p-1.5 rounded-full border-2 border-white shadow-lg hover:bg-indigo-500 transition-colors"

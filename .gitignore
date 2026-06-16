@@ -8,6 +8,8 @@ release/
 .env.*
 !.env.example
 coverage/
+tmp/
+.codex-logs/
 
 # Local iOS app work. Keep the GitHub repo focused on the web game.
 ios/

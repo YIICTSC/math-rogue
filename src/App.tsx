@@ -32,11 +32,14 @@ import KanjiChallengeScreen from './components/KanjiChallengeScreen';
 import EnglishChallengeScreen from './components/EnglishChallengeScreen';
 import GeneralChallengeScreen from './components/GeneralChallengeScreen';
 import DebugMenuScreen from './components/DebugMenuScreen';
+import MagicEventSimulationScreen from './components/MagicEventSimulationScreen';
 import MiniGameSelectScreen from './components/MiniGameSelectScreen';
 import MiniGameRouter from './components/MiniGameRouter'; // Added
 import { MINI_GAMES } from './miniGameConfig'; // Added
 import DodgeballShooting from './components/DodgeballShooting';
 import FinalBridgeScreen from './components/FinalBridgeScreen';
+import MagicRomanceEndingScreen from './components/MagicRomanceEndingScreen';
+import { hasMagicEnding } from './services/magicEndingService';
 import ProblemChallengeScreen from './components/ProblemChallengeScreen';
 import AssignmentCreateScreen from './components/AssignmentCreateScreen';
 import SubmissionScreen from './components/SubmissionScreen';
@@ -51,7 +54,7 @@ import CoopSetupScreen, { CoopParticipantPayload, CoopStartPayload } from './com
 import ModeSelectionScreen from './components/ModeSelectionScreen';
 import SettingsModal, { AppSettings, SettingsTab } from './components/SettingsModal';
 import Card from './components/Card';
-import { audioService } from './services/audioService';
+import { audioService, type BgmThemeId } from './services/audioService';
 import { assetPreloadService } from './services/assetPreloadService';
 import { generateEnemyName } from './services/geminiService';
 import { generateDungeonMap } from './services/mapGenerator';
@@ -73,7 +76,11 @@ import { getRandomCoopSupportCard } from './coopSupportCards';
 import { chooseBattleBackgroundScene, getBattleBackgroundFlavor } from './data/battleBackgrounds';
 import { OFFLINE_DISTRIBUTABLE, OFFLINE_NETWORK_FEATURE_MESSAGE } from './config/runtime';
 import { getAttackEffectKeyForCard, getMultihitFrameSequence } from './data/attackEffects';
-import { getHighSchoolEnemyVariant, getThemedCharacters, getThemedEnemyDisplayName, type VisualThemeId } from './data/visualThemes';
+import { getThemedCharacters, getThemedEnemyDisplayName, MAGIC_HERO_ID_BY_CHARACTER_ID, type VisualThemeId } from './data/visualThemes';
+import { getMagicCardsForHero } from './data/magicCards';
+import { createMagicRuleState, createMagicStartingDeck, getMagicRuleConfig } from './data/magicLoadouts';
+import { generateMagicRomanceSelectionEvent } from './services/magicRomanceEventService';
+import { applyMagicRuleOnCardPlay } from './services/magicRuleService';
 
 const PARRY_WINDOW_MS = 650;
 const PARRY_PERFECT_MS = 220;
@@ -82,6 +89,42 @@ const CROWDFUNDING_BANNER_IMAGE = assetUrl('banners/campfire-crowdfunding.png');
 const ASSIGNMENT_INTRO_BANNER_IMAGE = assetUrl('banners/daily-assignment-reward-intro.png');
 const CROWDFUNDING_BANNER_END_AT = new Date('2026-06-20T23:59:59+09:00').getTime();
 const HOLOGRAPHIC_REWARD_CARD_CHANCE = 0.05;
+const VISUAL_THEMES: VisualThemeId[] = ['elementary', 'high-school', 'magic'];
+const getMagicProtagonistId = (player: Pick<Player, 'id' | 'magicProtagonistId'>) =>
+    player.magicProtagonistId ?? MAGIC_HERO_ID_BY_CHARACTER_ID[player.id ?? 'WARRIOR'] ?? 'AKARI';
+const getBgmThemeForPlayer = (
+    theme: VisualThemeId,
+    player?: Pick<Player, 'magicProtagonistGender'>
+): BgmThemeId => {
+    if (theme !== 'magic') return theme;
+    if (player?.magicProtagonistGender === 'female') return 'magic-female';
+    if (player?.magicProtagonistGender === 'male') return 'magic-male';
+    return theme;
+};
+const MAGIC_TRANSFORMATION_QUOTES: Record<string, string> = {
+    AKARI: 'あかり「星冠展開！みんなの願い、ここでつなぐよ！」',
+    SHIZUKU: 'しずく「月鏡同期。感情ではなく、覚悟で勝ちます」',
+    HIYORI: 'ひより「命花開花。傷つけるためじゃなく、守るために」',
+    TSUBASA: 'つばさ「神鍛点火！真正面から、ぜんぶ打ち砕く！」',
+    REI: 'れい「影札結界、解放。弱き者へ刃は向けさせない」',
+    MADOKA: 'まどか「時環再起動。失敗した時間ごと、私が進める」',
+    KOHARU: 'こはる「翠嵐招来。風よ、迷う心を運んで」',
+    MIRAI: 'みらい「夢幻開演。悪夢だって、私の舞台で塗り替える」',
+    SERA: 'セラ「星界接続。二つの世界に、朝を届けます」',
+    REN: '蓮「蒼風展開。俺が先に道を開く、ついてこい！」',
+    SOMA: '颯真「氷律起動。私が責任を持って勝利へ導く」',
+    MINATO: '湊「清流共鳴。今度はぼくが、みんなを守ります！」',
+    RIKU: '理玖「時詠接続。未来は見るものじゃない、選ぶものだ」',
+    YAMATO: '大和「紅蓮装甲。俺の前で、誰にも手ぇ出させねえ！」',
+    LEON: 'レオン「幻奏開演。最高の勝利を僕が演出しよう！」',
+    ELLIOT: 'エリオット「星界記録、戦闘形態へ移行します」',
+    SAKUYA: '朔夜「宵闇解放。私が選んだ道は、誰にも閉ざさせない」',
+};
+const readStoredVisualTheme = (): VisualThemeId => {
+    if (typeof window === 'undefined') return 'elementary';
+    const stored = window.localStorage.getItem('learning-rogue-visual-theme');
+    return VISUAL_THEMES.includes(stored as VisualThemeId) ? stored as VisualThemeId : 'elementary';
+};
 
 const calculateScore = (state: GameState, victory: boolean): number => {
     let score = 0;
@@ -656,7 +699,7 @@ const App: React.FC = () => {
     const [gameState, setGameState] = useState<GameState>({
         screen: GameScreen.START_MENU,
         mode: GameMode.MULTIPLICATION,
-        visualTheme: window.localStorage.getItem('learning-rogue-visual-theme') === 'high-school' ? 'high-school' : 'elementary',
+        visualTheme: readStoredVisualTheme(),
         answerMode: 'CHOICE',
         difficultyLevel: 1,
         shopRemoveCount: 0,
@@ -771,9 +814,7 @@ const App: React.FC = () => {
             observer.disconnect();
         };
     }, [languageMode]);
-    const [visualTheme, setVisualTheme] = useState<VisualThemeId>(() =>
-        window.localStorage.getItem('learning-rogue-visual-theme') === 'high-school' ? 'high-school' : 'elementary'
-    );
+    const [visualTheme, setVisualTheme] = useState<VisualThemeId>(() => readStoredVisualTheme());
     const coopSyncedVisualTheme: VisualThemeId = gameState.challengeMode === 'COOP'
         ? (gameState.visualTheme || visualTheme)
         : visualTheme;
@@ -795,8 +836,12 @@ const App: React.FC = () => {
 
     useEffect(() => {
         window.localStorage.setItem('learning-rogue-visual-theme', visualTheme);
-        void audioService.setBgmTheme(visualTheme);
-    }, [visualTheme]);
+        void audioService.setBgmTheme(getBgmThemeForPlayer(visualTheme, gameState.player));
+    }, [visualTheme, gameState.player.magicProtagonistGender]);
+    const handleVisualThemeSelect = useCallback((nextTheme: VisualThemeId) => {
+        setVisualTheme(nextTheme);
+        void audioService.switchThemeAndPlayBGM(getBgmThemeForPlayer(nextTheme, gameState.player), 'menu');
+    }, [gameState.player.magicProtagonistGender]);
     const getRandomCurrentStoryIndex = useCallback(() => {
         const storyCount = coopSyncedVisualTheme === 'high-school' ? HIGH_SCHOOL_STORIES.length : GAME_STORIES.length;
         return Math.floor(Math.random() * storyCount);
@@ -1953,6 +1998,7 @@ const App: React.FC = () => {
             case GameScreen.TREASURE:
                 return 'reward' as const;
             case GameScreen.FLOOR_RESULT:
+            case GameScreen.MAGIC_ROMANCE_ENDING:
             case GameScreen.ENDING:
                 return 'victory' as const;
             case GameScreen.GAME_OVER:
@@ -1980,6 +2026,11 @@ const App: React.FC = () => {
             codexBuffer: [],
             familiars: [],
             familiarActionQueue: [],
+            magicTransformed: false,
+            magicTransformedThisBattle: false,
+            magicRuleState: sourcePlayer.magicRuleState
+                ? createMagicRuleState(getMagicProtagonistId(sourcePlayer))
+                : undefined,
             floatingText: null
         };
 
@@ -2533,7 +2584,11 @@ const App: React.FC = () => {
                 return;
             }
 
-            if (gameState.screen !== GameScreen.START_MENU && gameState.screen !== GameScreen.PROBLEM_CHALLENGE) {
+            if (
+                gameState.screen !== GameScreen.START_MENU &&
+                gameState.screen !== GameScreen.PROBLEM_CHALLENGE &&
+                gameState.screen !== GameScreen.MAGIC_EVENT_SIMULATION
+            ) {
                 const currentFromStorage = storageService.getDailyPlayTime();
 
                 setDailyPlaySeconds(prev => {
@@ -2575,9 +2630,11 @@ const App: React.FC = () => {
             return;
         }
         const isAssignmentUtilityScreen = gameState.screen === GameScreen.ASSIGNMENT_CREATE || gameState.screen === GameScreen.SUBMISSION || gameState.screen === GameScreen.REWARD_CARD_ALBUM;
-        if (!isAssignmentUtilityScreen &&
+        if (gameState.screen !== GameScreen.MAGIC_EVENT_SIMULATION && (
+            !isAssignmentUtilityScreen &&
             gameState.screen !== GameScreen.START_MENU &&
             gameState.screen !== GameScreen.GAME_OVER &&
+            gameState.screen !== GameScreen.MAGIC_ROMANCE_ENDING &&
             gameState.screen !== GameScreen.ENDING &&
             gameState.screen !== GameScreen.VICTORY &&
             gameState.screen !== GameScreen.COMPENDIUM &&
@@ -2586,6 +2643,7 @@ const App: React.FC = () => {
             gameState.screen !== GameScreen.RELIC_SELECTION &&
             gameState.screen !== GameScreen.MODE_SELECTION &&
             gameState.screen !== GameScreen.DEBUG_MENU &&
+            gameState.screen !== GameScreen.MAGIC_EVENT_SIMULATION &&
             gameState.screen !== GameScreen.MINI_GAME_SELECT &&
             gameState.screen === GameScreen.MINI_GAME_POKER ||
             gameState.screen === GameScreen.MINI_GAME_SURVIVOR ||
@@ -2599,7 +2657,7 @@ const App: React.FC = () => {
             gameState.screen !== GameScreen.VS_BATTLE &&
             gameState.screen !== GameScreen.RACE_SETUP &&
             gameState.screen !== GameScreen.FLOOR_RESULT
-        ) {
+        )) {
             storageService.saveGame(gameState);
         }
 
@@ -2795,6 +2853,7 @@ const App: React.FC = () => {
             GameScreen.FLOOR_RESULT,
             GameScreen.EVENT,
             GameScreen.GAME_OVER,
+            GameScreen.MAGIC_ROMANCE_ENDING,
             GameScreen.ENDING
         ]);
 
@@ -3855,7 +3914,9 @@ const App: React.FC = () => {
         setShowStartOverConfirm(false);
         const saved = storageService.loadGame();
         if (saved) {
-            const savedVisualTheme = saved.visualTheme === 'high-school' || (!saved.visualTheme && visualTheme === 'high-school') ? 'high-school' : 'elementary';
+            const savedVisualTheme = VISUAL_THEMES.includes(saved.visualTheme as VisualThemeId)
+                ? saved.visualTheme as VisualThemeId
+                : visualTheme;
             setVisualTheme(savedVisualTheme);
             if (saved.screen === GameScreen.ASSIGNMENT_CREATE || saved.screen === GameScreen.SUBMISSION || saved.screen === GameScreen.REWARD_CARD_ALBUM) {
                 storageService.clearSave();
@@ -3876,18 +3937,27 @@ const App: React.FC = () => {
 
                 if (canRestoreEvent) {
                     const unlockedCards = storageService.getUnlockedCards();
-                    const restoredEvent = generateEvent(
-                        saved.player,
-                        setGameState,
-                        handleNodeComplete,
-                        setEventResultLog,
-                        languageMode,
-                        unlockedCards,
-                        saved.currentEventTitle,
-                        savedVisualTheme,
-                        saved.act,
-                        saved.floor
-                    );
+                    const restoredEvent = savedVisualTheme === 'magic'
+                        ? generateMagicRomanceSelectionEvent(
+                            saved.player,
+                            getMagicProtagonistId(saved.player),
+                            saved.act,
+                            setGameState,
+                            setEventData,
+                            setEventResultLog
+                        )
+                        : generateEvent(
+                            saved.player,
+                            setGameState,
+                            handleNodeComplete,
+                            setEventResultLog,
+                            languageMode,
+                            unlockedCards,
+                            saved.currentEventTitle,
+                            savedVisualTheme,
+                            saved.act,
+                            saved.floor
+                        );
                     setEventData(restoredEvent);
                     setEventResultLog(null);
                 } else {
@@ -3929,7 +3999,7 @@ const App: React.FC = () => {
             saved.visualTheme = savedVisualTheme;
             setGameState(saved);
             const bgmType = getBgmForScreen(saved) || 'map';
-            await audioService.switchThemeAndPlayBGM(savedVisualTheme, bgmType);
+            await audioService.switchThemeAndPlayBGM(getBgmThemeForPlayer(savedVisualTheme, saved.player), bgmType);
             addLog(trans("続きから再開しました。", languageMode), "blue");
         }
     };
@@ -4357,7 +4427,9 @@ const App: React.FC = () => {
             echoes: 0,
             cardsPlayedThisTurn: 0,
             attacksPlayedThisTurn: 0,
-            codexBuffer: []
+            codexBuffer: [],
+            magicTransformed: false,
+            magicTransformedThisBattle: false
         };
 
         const bossName = await generateEnemyName(15);
@@ -4445,7 +4517,16 @@ const App: React.FC = () => {
         let initialDeck: ICard[] = [];
         let logs = [trans("旅の支度をしている...", languageMode)];
 
-        if (gameState.challengeMode === '1A1D') {
+        const magicProtagonistId = char.magicProtagonistId
+            ?? MAGIC_HERO_ID_BY_CHARACTER_ID[char.id]
+            ?? 'AKARI';
+        if (visualTheme === 'magic') {
+            initialDeck = createMagicStartingDeck(magicProtagonistId).map((card, index) => ({
+                ...card,
+                id: `${card.id}-${Date.now()}-${index}`,
+            }));
+            logs = [`${getMagicRuleConfig(magicProtagonistId).name}を軸に、魔法遠征の支度を整えた。`];
+        } else if (gameState.challengeMode === '1A1D') {
             const attacks = Object.values(CARDS_LIBRARY).filter(c => c.type === CardType.ATTACK && c.rarity === 'COMMON');
             const skills = Object.values(CARDS_LIBRARY).filter(c => c.type === CardType.SKILL && c.rarity === 'COMMON');
             const a = attacks[Math.floor(Math.random() * attacks.length)];
@@ -4461,7 +4542,9 @@ const App: React.FC = () => {
         const startingCardNames = initialDeck.map(c => c.name);
         storageService.saveUnlockedCards(startingCardNames);
 
-        const starterRelic = RELIC_LIBRARY[char.startingRelicId];
+        const starterRelic = visualTheme === 'magic'
+            ? getMagicRuleConfig(magicProtagonistId).relic
+            : RELIC_LIBRARY[char.startingRelicId];
         const relics = starterRelic ? [starterRelic] : [];
 
         const commonRelics = Object.values(RELIC_LIBRARY).filter(r => r.rarity === 'COMMON' && r.id !== 'SPIRIT_POOP');
@@ -4475,6 +4558,8 @@ const App: React.FC = () => {
         const initialPlayerState = {
             ...gameState.player,
             id: char.id,
+            magicProtagonistId: char.magicProtagonistId,
+            magicProtagonistGender: char.magicProtagonistGender,
             maxHp: char.maxHp,
             currentHp: char.maxHp,
             gold: char.gold,
@@ -4501,8 +4586,10 @@ const App: React.FC = () => {
             echoes: 0,
             partner: undefined,
             garden: garden,
-            codexBuffer: []
+            codexBuffer: [],
+            magicRuleState: visualTheme === 'magic' ? createMagicRuleState(magicProtagonistId) : undefined
         };
+        void audioService.setBgmTheme(getBgmThemeForPlayer(visualTheme, initialPlayerState));
 
         if (gameState.challengeMode === 'COOP' && coopSession) {
             const participantDisplayName =
@@ -4921,7 +5008,8 @@ const App: React.FC = () => {
                     });
                 }
 
-                const battleBackgroundScene = chooseBattleBackgroundScene(node.type, nextState.act, nextState.floor);
+                const activeBattleVisualTheme = nextState.visualTheme || visualTheme;
+                const battleBackgroundScene = chooseBattleBackgroundScene(node.type, nextState.act, nextState.floor, activeBattleVisualTheme);
                 const flavor = getBattleBackgroundFlavor(battleBackgroundScene, nextState.act * 100 + nextState.floor);
 
                 const p = preparePlayerForBattle(nextState.player, node.type);
@@ -5126,18 +5214,28 @@ const App: React.FC = () => {
                     p.relicCounters['TINY_CHEST_PROGRESS'] = tinyChestProgress;
                 }
                 const unlockedCards = storageService.getUnlockedCards();
-                const ev = generateEvent(
-                    nextState.player,
-                    setGameState,
-                    handleNodeComplete,
-                    setEventResultLog,
-                    languageMode,
-                    unlockedCards,
-                    undefined,
-                    visualTheme,
-                    nextState.act,
-                    nextState.floor
-                );
+                const activeVisualTheme = nextState.visualTheme || visualTheme;
+                const ev = activeVisualTheme === 'magic'
+                    ? generateMagicRomanceSelectionEvent(
+                        nextState.player,
+                        getMagicProtagonistId(nextState.player),
+                        nextState.act,
+                        setGameState,
+                        setEventData,
+                        setEventResultLog
+                    )
+                    : generateEvent(
+                        nextState.player,
+                        setGameState,
+                        handleNodeComplete,
+                        setEventResultLog,
+                        languageMode,
+                        unlockedCards,
+                        undefined,
+                        activeVisualTheme,
+                        nextState.act,
+                        nextState.floor
+                    );
                 setEventData(ev);
                 setEventResultLog(null);
                 if (gameState.challengeMode === 'COOP') {
@@ -5840,6 +5938,7 @@ const App: React.FC = () => {
             const actorPlayer = actorEntry?.player ?? prev.player;
             const actorSelectedEnemyId = actorEntry?.selectedEnemyId ?? actionSelectedEnemyId;
             let p = { ...actorPlayer, hand: [...actorPlayer.hand], drawPile: [...actorPlayer.drawPile], discardPile: [...actorPlayer.discardPile], deck: [...actorPlayer.deck], powers: { ...actorPlayer.powers } };
+            const magicEffectMultiplier = p.magicTransformed ? 2 : 1;
             let enemies = prev.enemies.map(e => ({ ...e }));
             const currentLogs: string[] = [`> ${trans(card.name, languageMode)} ${trans("を使用", languageMode)}`];
             const nextActiveEffects: VisualEffectInstance[] = [];
@@ -5854,6 +5953,20 @@ const App: React.FC = () => {
             const additionalResult = applyAdditionalCardLogic(card, p, enemies, languageMode, currentLogs, nextActiveEffects);
             Object.assign(p, additionalResult.player);
             enemies = additionalResult.enemies;
+            if (prev.visualTheme === 'magic') {
+                const protagonistId = getMagicProtagonistId(p);
+                if (p.relics.some((relic) => relic.magicRelicHeroId === protagonistId)) {
+                    const magicRuleResult = applyMagicRuleOnCardPlay(
+                        protagonistId,
+                        card,
+                        p,
+                        enemies,
+                        currentLogs,
+                    );
+                    p = magicRuleResult.player;
+                    enemies = magicRuleResult.enemies;
+                }
+            }
             if (localCoopChainCount >= 2) {
                 currentLogs.push(`🤝 連携 x${localCoopChainCount}！`);
                 nextActiveEffects.push({ id: `vfx-coop-chain-${Date.now()}`, type: 'SHOCKWAVE', targetId: 'player' });
@@ -6216,7 +6329,8 @@ const App: React.FC = () => {
                                     logParts.push(`x2(ペン先)`);
                                 }
                             }
-                            let damage = Math.floor(baseDamage * multiplier * attackDamageMultiplier);
+                            let damage = Math.floor(baseDamage * multiplier * attackDamageMultiplier * magicEffectMultiplier);
+                            if (magicEffectMultiplier > 1) logParts.push('x2(変身)');
                             if (p.powers['WEAK'] > 0) {
                                 damage = Math.floor(damage * 0.75);
                                 logParts.push(`x0.75(${trans("へろへろ", languageMode)})`);
@@ -6257,10 +6371,10 @@ const App: React.FC = () => {
                             if (e.currentHp <= 0 && e.enemyType === 'THE_HEART' && e.phase === 1) {
                                 e.currentHp = e.maxHp;
                                 e.phase = 2;
-                                e.name = "真・校長先生";
+                                e.name = prev.visualTheme === 'magic' ? "真・大魔女校長" : "真・校長先生";
                                 e.poison = 0; e.weak = 0; e.vulnerable = 0;
                                 e.floatingText = { id: `phase-evo-${Date.now()}`, text: '本気モード！', color: 'text-yellow-500' };
-                                currentLogs.push("校長先生が真の姿を現した！");
+                                currentLogs.push(prev.visualTheme === 'magic' ? "大魔女校長が真の姿を現した！" : "校長先生が真の姿を現した！");
                                 nextActiveEffects.push({ id: `vfx-evo-${Date.now()}`, type: 'BUFF', targetId: e.id, delay: hitDelay + 200 });
                             }
                             if (damage > 0 || logParts.length > 1) {
@@ -6436,7 +6550,7 @@ const App: React.FC = () => {
                     }
 
                     if (card.block) {
-                        let blk = card.block;
+                        let blk = card.block * magicEffectMultiplier;
                         let logParts = [`${blk}`];
                         if (p.powers['DEXTERITY']) {
                             blk += p.powers['DEXTERITY'];
@@ -6458,18 +6572,20 @@ const App: React.FC = () => {
                         nextActiveEffects.push({ id: `vfx-dblblk-${Date.now()}`, type: 'BLOCK', targetId: 'player', delay: hitDelay });
                     }
                     if (card.heal) {
-                        p.currentHp = Math.min(p.currentHp + card.heal, p.maxHp);
+                        const healAmount = card.heal * magicEffectMultiplier;
+                        p.currentHp = Math.min(p.currentHp + healAmount, p.maxHp);
                         if (p.partner) {
-                            p.partner.currentHp = Math.min(p.partner.maxHp, p.partner.currentHp + card.heal);
-                            p.partner.floatingText = { id: `heal-p-${Date.now()}`, text: `+${card.heal}`, color: 'text-green-500' };
+                            p.partner.currentHp = Math.min(p.partner.maxHp, p.partner.currentHp + healAmount);
+                            p.partner.floatingText = { id: `heal-p-${Date.now()}`, text: `+${healAmount}`, color: 'text-green-500' };
                         }
                         nextActiveEffects.push({ id: `vfx-heal-${Date.now()}`, type: 'HEAL', targetId: 'player', delay: hitDelay });
                     }
-                    if (card.energy) p.currentEnergy += card.energy;
+                    if (card.energy) p.currentEnergy += card.energy * magicEffectMultiplier;
                     if (card.selfDamage) {
-                        p.currentHp -= card.selfDamage;
-                        p.hpLostThisTurn = (p.hpLostThisTurn || 0) + card.selfDamage;
-                        currentLogs.push(`${trans("自分に", languageMode)}${card.selfDamage}${trans("ダメージ", languageMode)}`);
+                        const selfDamage = card.selfDamage * magicEffectMultiplier;
+                        p.currentHp -= selfDamage;
+                        p.hpLostThisTurn = (p.hpLostThisTurn || 0) + selfDamage;
+                        currentLogs.push(`${trans("自分に", languageMode)}${selfDamage}${trans("ダメージ", languageMode)}`);
                         if (p.powers['RUPTURE']) {
                             p.strength += p.powers['RUPTURE'];
                             nextActiveEffects.push({ id: `vfx-rup-${Date.now()}`, type: 'BUFF', targetId: 'player', delay: hitDelay });
@@ -6499,23 +6615,24 @@ const App: React.FC = () => {
                         }
                     }
                     if (card.vulnerable) {
+                        const vulnerableAmount = card.vulnerable * magicEffectMultiplier;
                         if (card.target === TargetType.SELF) {
-                            p.powers['VULNERABLE'] = (p.powers['VULNERABLE'] || 0) + card.vulnerable;
-                            p.floatingText = { id: `self-vuln-${Date.now()}`, text: `${trans("びくびく", languageMode)}+${card.vulnerable}`, color: 'text-pink-400' };
+                            p.powers['VULNERABLE'] = (p.powers['VULNERABLE'] || 0) + vulnerableAmount;
+                            p.floatingText = { id: `self-vuln-${Date.now()}`, text: `${trans("びくびく", languageMode)}+${vulnerableAmount}`, color: 'text-pink-400' };
                             nextActiveEffects.push({ id: `vfx-self-dbuff-${Date.now()}`, type: 'DEBUFF', targetId: 'player', delay: hitDelay, statusEffectKey: 'vulnerable' });
                         } else {
                             targets.forEach(e => {
-                                applyDebuff(e, 'VULNERABLE', card.vulnerable!);
+                                applyDebuff(e, 'VULNERABLE', vulnerableAmount);
                                 nextActiveEffects.push({ id: `vfx-dbuff-${Date.now()}-${e.id}`, type: 'DEBUFF', targetId: e.id, delay: hitDelay, statusEffectKey: 'vulnerable' });
                             });
                         }
                     }
                     if (card.weak) targets.forEach(e => {
-                        applyDebuff(e, 'WEAK', card.weak!);
+                        applyDebuff(e, 'WEAK', card.weak! * magicEffectMultiplier);
                         nextActiveEffects.push({ id: `vfx-dbuff-${Date.now()}-${e.id}`, type: 'DEBUFF', targetId: e.id, delay: hitDelay, statusEffectKey: 'weak' });
                     });
                     if (card.poison) {
-                        let amt = card.poison;
+                        let amt = card.poison * magicEffectMultiplier;
                         if (p.relics.find(r => r.id === 'SNAKE_SKULL')) amt += 1;
                         targets.forEach(e => {
                             applyDebuff(e, 'POISON', amt);
@@ -6842,11 +6959,12 @@ const App: React.FC = () => {
                         currentLogs.push(trans("HPを全回復した！", languageMode));
                     }
                     if (card.draw && !isGalaxyExpressCard) {
+                        const drawAmount = card.draw * magicEffectMultiplier;
                         if (card.familiarSummon) {
-                            p.nextTurnDraw += card.draw;
-                            currentLogs.push(trans(`召喚効果：次のターン開始時に${card.draw}枚ドロー`, languageMode));
+                            p.nextTurnDraw += drawAmount;
+                            currentLogs.push(trans(`召喚効果：次のターン開始時に${drawAmount}枚ドロー`, languageMode));
                         } else {
-                            for (let j = 0; j < card.draw; j++) {
+                            for (let j = 0; j < drawAmount; j++) {
                                 if (p.drawPile.length === 0) {
                                     if (p.discardPile === undefined || p.discardPile.length === 0) break;
                                     p.drawPile = shuffle(p.discardPile);
@@ -7455,6 +7573,14 @@ const App: React.FC = () => {
                     if (target.powers['CONFUSED'] === 0 && label) newLogs.push(`${label}の${trans("こんらん", languageMode)}が回復した`);
                 }
             };
+            if (prev.visualTheme === 'magic' && p.magicTransformed && prev.enemies.some(enemy => enemy.currentHp > 0)) {
+                const hpLoss = 20;
+                p.currentHp = Math.max(0, p.currentHp - hpLoss);
+                p.hpLostThisTurn = (p.hpLostThisTurn || 0) + hpLoss;
+                p.floatingText = { id: `magic-drain-${Date.now()}`, text: `-${hpLoss}`, color: 'text-fuchsia-300', iconType: 'heart' };
+                newLogs.push(`変身の反動でHP-${hpLoss}`);
+                nextActiveEffects.push({ id: `vfx-magic-drain-${Date.now()}`, type: 'SLASH', targetId: 'player' });
+            }
             if (hasRelic(p, 'POCKETWATCH')) {
                 p.relicCounters['POCKETWATCH_PENDING'] = p.cardsPlayedThisTurn <= 3 ? 1 : 0;
             }
@@ -7539,10 +7665,10 @@ const App: React.FC = () => {
                         if (enemy.currentHp <= 0 && enemy.enemyType === 'THE_HEART' && enemy.phase === 1) {
                             enemy.currentHp = enemy.maxHp;
                             enemy.phase = 2;
-                            enemy.name = "真・校長先生";
+                            enemy.name = prev.visualTheme === 'magic' ? "真・大魔女校長" : "真・校長先生";
                             enemy.poison = 0; enemy.weak = 0; enemy.vulnerable = 0;
                             enemy.floatingText = { id: `phase-evo-${Date.now()}`, text: '本気モード！', color: 'text-yellow-500' };
-                            nextLogs.push("校長先生が真の姿を現した！");
+                            nextLogs.push(prev.visualTheme === 'magic' ? "大魔女校長が真の姿を現した！" : "校長先生が真の姿を現した！");
                         }
                     }
                     return enemy;
@@ -7869,10 +7995,10 @@ const App: React.FC = () => {
                         if (e.currentHp <= 0 && e.enemyType === 'THE_HEART' && e.phase === 1) {
                             e.currentHp = e.maxHp;
                             e.phase = 2;
-                            e.name = "真・校長先生";
+                            e.name = prev.visualTheme === 'magic' ? "真・大魔女校長" : "真・校長先生";
                             enemy.poison = 0; enemy.weak = 0; enemy.vulnerable = 0;
                             enemy.floatingText = { id: `phase-evo-${Date.now()}`, text: '本気モード！', color: 'text-yellow-500' };
-                            newLogs.push("校長先生が真の姿を現した！");
+                            newLogs.push(prev.visualTheme === 'magic' ? "大魔女校長が真の姿を現した！" : "校長先生が真の姿を現した！");
                             nextActiveEffects.push({ id: `vfx-evo2-${Date.now()}`, type: 'BUFF', targetId: e.id });
                         }
                         if (didHpDamage && p.currentHp <= 0) {
@@ -8281,6 +8407,47 @@ const App: React.FC = () => {
         coopStartedTurnSlotRef.current = turnKey;
         startPlayerTurn();
     }, [activeCoopTurnSlot, coopBattleState, coopSelfPeerId, coopSession, executeQueuedTurnTransition, gameState.challengeMode, gameState.player.hand.length, gameState.screen, gameState.turn]);
+
+    const handleMagicTransform = useCallback(() => {
+        if (stateRef.current.visualTheme !== 'magic' && visualTheme !== 'magic') return;
+        setGameState(prev => {
+            if (prev.screen !== GameScreen.BATTLE || prev.player.magicTransformed) return prev;
+            const protagonistId = getMagicProtagonistId(prev.player);
+            const magicCards = getMagicCardsForHero(protagonistId).map((card, index) => ({
+                ...card,
+                id: `magic-${card.id}-${Date.now()}-${index}`,
+                visualTheme: 'magic' as VisualThemeId,
+                transformedOnly: true,
+                magicRuleCardIndex: index,
+            } as ICard));
+            const nextPlayer: Player = {
+                ...prev.player,
+                magicTransformed: true,
+                magicTransformedThisBattle: true,
+                drawPile: shuffle([...prev.player.drawPile, ...magicCards]),
+                floatingText: { id: `magic-transform-${Date.now()}`, text: '変身!', color: 'text-fuchsia-300', iconType: 'zap' },
+            };
+            return {
+                ...prev,
+                player: nextPlayer,
+                combatLog: [
+                    ...prev.combatLog,
+                    MAGIC_TRANSFORMATION_QUOTES[protagonistId] ?? MAGIC_TRANSFORMATION_QUOTES.AKARI,
+                    '変身完了。カード効果が2倍になり、強化版の専用ルールカード3枚が山札に加わった。'
+                ],
+                activeEffects: [
+                    ...prev.activeEffects,
+                    { id: `vfx-magic-transform-${Date.now()}`, type: 'BUFF', targetId: 'player' }
+                ],
+            };
+        });
+        audioService.playSound('buff');
+        setLastActionType(CardType.POWER);
+        setLastActionTime(Date.now());
+        window.setTimeout(() => {
+            setGameState(prev => ({ ...prev, activeEffects: [] }));
+        }, 1500);
+    }, [visualTheme]);
 
     const handleEndTurnClick = () => {
         if (isEndingTurnRef.current) return;
@@ -8952,7 +9119,9 @@ const App: React.FC = () => {
                 return {
                     ...prev,
                     player: nextPlayer,
-                    screen: GameScreen.ENDING,
+                    screen: prev.visualTheme === 'magic' && hasMagicEnding(nextPlayer, getMagicProtagonistId(nextPlayer))
+                        ? GameScreen.MAGIC_ROMANCE_ENDING
+                        : GameScreen.ENDING,
                     newlyUnlockedCardName: unlockedCard?.name
                 };
             } else {
@@ -8966,16 +9135,12 @@ const App: React.FC = () => {
     }, [coopSelfPeerId, coopSession, localAssignmentProblemConfig, selectedCharName, unlockRandomAdditionalCard]);
 
     const createEnemyFinisherCard = useCallback((enemy: Enemy): ICard => {
-        const storedTheme = typeof window !== 'undefined'
-            ? window.localStorage.getItem('learning-rogue-visual-theme')
-            : null;
+        const storedTheme = readStoredVisualTheme();
         const finisherTheme: VisualThemeId =
-            stateRef.current.visualTheme === 'high-school' || visualTheme === 'high-school' || storedTheme === 'high-school'
-                ? 'high-school'
-                : 'elementary';
-        const finisherDisplayName = finisherTheme === 'high-school'
-            ? getHighSchoolEnemyVariant(enemy).name
-            : enemy.name;
+            VISUAL_THEMES.includes(stateRef.current.visualTheme as VisualThemeId)
+                ? stateRef.current.visualTheme as VisualThemeId
+                : visualTheme || storedTheme;
+        const finisherDisplayName = getThemedEnemyDisplayName(enemy, finisherTheme);
 
         return {
             id: `enemy-finisher-${enemy.id}-${Date.now()}`,
@@ -9495,7 +9660,9 @@ const App: React.FC = () => {
         if (!gameState.modePool || gameState.modePool.length === 0) {
             handleModeCorrectProgress(gameState.mode, correctCount);
         }
-        setTotalMathCorrect(prev => prev + correctCount);
+        if (!localAssignmentProblemConfig?.mode) {
+            addMiniGameUnlockCorrectCount(correctCount);
+        }
         setGameState(prev => ({ ...prev, actStats: { ...prev.actStats!, mathCorrect: prev.actStats!.mathCorrect + correctCount } }));
         goToRewardPhase(bonusGold);
     };
@@ -9647,7 +9814,16 @@ const App: React.FC = () => {
             goldGained += goldReward;
         }
 
-        const allPossibleCards = getFilteredCardPool(player.id);
+        const magicRewardCards = stateRef.current.visualTheme === 'magic'
+            ? getMagicCardsForHero(getMagicProtagonistId(player)).map((card) => ({
+                ...card,
+                transformedOnly: false,
+            }))
+            : [];
+        const allPossibleCards = [
+            ...getFilteredCardPool(player.id),
+            ...magicRewardCards,
+        ];
         const isHighSchoolReward = stateRef.current.visualTheme === 'high-school';
         const nonFamiliarCards = allPossibleCards.filter(card => !card.familiarSummon);
         const familiarCards = allPossibleCards.filter(card => !!card.familiarSummon);
@@ -9782,6 +9958,17 @@ const App: React.FC = () => {
         }
     };
 
+    const addMiniGameUnlockCorrectCount = useCallback((correctCount: number) => {
+        if (correctCount <= 0) return;
+        setTotalMathCorrect(prev => {
+            const stored = storageService.getMathCorrectCount();
+            const base = Math.max(prev, stored);
+            const next = base + correctCount;
+            storageService.saveMathCorrectCount(next);
+            return next;
+        });
+    }, []);
+
     const handleAssignmentAnswerResult = useCallback((result: { mode: string; correct: boolean; elapsedMs: number; problemId?: string }) => {
         const assignment = effectiveAssignment;
         const assignmentModePool = getAssignmentModePool(assignment);
@@ -9801,6 +9988,7 @@ const App: React.FC = () => {
             setAssignmentProgressVersion(prev => prev + 1);
         }
         if (!assignment || !result.correct || !isAssignmentAnswer) return;
+        addMiniGameUnlockCorrectCount(1);
 
         if (isCustomAssignmentAnswer) {
             const customProblems = assignment.customProblems || [];
@@ -9878,7 +10066,7 @@ const App: React.FC = () => {
                 rewardCard,
             });
         }
-    }, [correctCustomAssignmentProblemIds, createRewardCardForAssignment, currentAssignment, currentAssignmentAnswers, effectiveAssignment, markDailyAssignmentCompleted]);
+    }, [addMiniGameUnlockCorrectCount, correctCustomAssignmentProblemIds, createRewardCardForAssignment, currentAssignment, currentAssignmentAnswers, effectiveAssignment, markDailyAssignmentCompleted]);
 
     const removeRewardFromList = useCallback((rewards: RewardItem[], item: RewardItem) => {
         if (shouldClearAllCardRewards(item)) {
@@ -11867,17 +12055,24 @@ const App: React.FC = () => {
                 )}
 
                 {gameState.screen === GameScreen.START_MENU && (
-                    <div className={`w-full h-full bg-gray-900 flex items-center justify-center relative overflow-hidden ${visualTheme === 'high-school' ? 'start-menu-high-school' : ''}`}>
+                    <div className={`w-full h-full bg-gray-900 flex items-center justify-center relative overflow-hidden ${visualTheme === 'high-school' ? 'start-menu-high-school' : visualTheme === 'magic' ? 'start-menu-magic' : ''}`}>
                         <div
-                            className={`absolute inset-0 bg-cover bg-[position:38%_center] md:bg-center transition-all duration-700 ease-out ${visualTheme === 'high-school' ? 'opacity-0 scale-105 blur-sm' : 'opacity-100 scale-100 blur-0'}`}
+                            className={`absolute inset-0 bg-cover bg-[position:38%_center] md:bg-center transition-all duration-700 ease-out ${visualTheme !== 'elementary' ? 'opacity-0 scale-105 blur-sm' : 'opacity-100 scale-100 blur-0'}`}
                             style={{ backgroundImage: `url(${assetUrl('sprites/learning-rogue-title-background.webp')})` }}
                         />
                         <div
                             className={`absolute inset-0 bg-cover bg-center transition-all duration-700 ease-out ${visualTheme === 'high-school' ? 'opacity-100 scale-100 blur-0' : 'opacity-0 scale-110 blur-sm'}`}
                             style={{ backgroundImage: `url(${assetUrl('sprites/high-school/title-background.webp')})`, clipPath: visualTheme === 'high-school' ? 'polygon(0 0, 100% 0, 100% 100%, 0 100%)' : 'polygon(0 0, 0 0, 0 100%, 0 100%)' }}
                         />
+                        <div
+                            className={`absolute inset-0 bg-cover bg-center transition-all duration-700 ease-out ${visualTheme === 'magic' ? 'opacity-100 scale-100 blur-0' : 'opacity-0 scale-110 blur-sm'}`}
+                            style={{ backgroundImage: `url(${assetUrl('sprites/magic/title-background.webp')})`, clipPath: visualTheme === 'magic' ? 'polygon(0 0, 100% 0, 100% 100%, 0 100%)' : 'polygon(100% 0, 100% 0, 100% 100%, 100% 100%)' }}
+                        />
                         {visualTheme === 'high-school' && (
                             <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(115deg,transparent_0%,transparent_42%,rgba(239,68,68,0.45)_48%,transparent_54%,transparent_100%)] animate-pulse" />
+                        )}
+                        {visualTheme === 'magic' && (
+                            <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_42%,rgba(236,72,153,0.28),transparent_34%),linear-gradient(115deg,transparent_0%,rgba(168,85,247,0.34)_46%,transparent_58%,transparent_100%)] animate-pulse" />
                         )}
                         <div className="absolute inset-0 bg-slate-950/55" />
                         <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(15,23,42,0.12),rgba(2,6,23,0.72))]" />
@@ -12263,11 +12458,12 @@ const App: React.FC = () => {
                                         {([
                                             { id: 'elementary', label: '小学生編' },
                                             { id: 'high-school', label: '高校編' },
+                                            { id: 'magic', label: 'マジック編' },
                                         ] as const).map((theme) => (
                                         <button
                                             key={theme.id}
                                             type="button"
-                                            onClick={() => setVisualTheme(theme.id)}
+                                            onClick={() => handleVisualThemeSelect(theme.id)}
                                             className={`px-4 py-2 text-sm font-black transition-colors ${
                                                 visualTheme === theme.id
                                                     ? 'bg-amber-300 text-slate-950'
@@ -12779,6 +12975,8 @@ const App: React.FC = () => {
                             newlyUnlockedCardName={gameState.newlyUnlockedCardName}
                             typingMode={gameState.challengeMode === 'TYPING'}
                             visualTheme={gameState.visualTheme || visualTheme}
+                            magicHeroId={getMagicProtagonistId(gameState.player)}
+                            magicRomance={gameState.player.magicRomance}
                         />
                     </div>
                 )}
@@ -12817,6 +13015,7 @@ const App: React.FC = () => {
                         <DebugMenuScreen
                             onStart={handleDebugStart}
                             onStartAct3Boss={handleDebugStartAct3Boss}
+                            onStartMagicEventSimulation={() => setGameState(prev => ({ ...prev, screen: GameScreen.MAGIC_EVENT_SIMULATION }))}
                             onBack={returnToTitle}
                             onTimeUpdate={handleTimeUpdate}
                             onAddClearCount={handleDebugAddClearCount}
@@ -12825,6 +13024,15 @@ const App: React.FC = () => {
                             totalMathCorrect={totalMathCorrect}
                             nextMiniGameThreshold={nextThreshold}
                             languageMode={languageMode}
+                        />
+                    </div>
+                )}
+
+                {gameState.screen === GameScreen.MAGIC_EVENT_SIMULATION && (
+                    <div className="absolute inset-0">
+                        <MagicEventSimulationScreen
+                            languageMode={languageMode}
+                            onBack={() => setGameState(prev => ({ ...prev, screen: GameScreen.DEBUG_MENU }))}
                         />
                     </div>
                 )}
@@ -12882,6 +13090,7 @@ const App: React.FC = () => {
                             modeCorrectCounts={modeCorrectCounts}
                             assignment={activeAssignment}
                             onAnswerResult={handleAssignmentAnswerResult}
+                            visualTheme={visualTheme}
                         />
                     </div>
                 )}
@@ -13231,6 +13440,7 @@ const App: React.FC = () => {
                             languageMode={languageMode}
                             modeMasteryMap={Object.fromEntries(Object.entries(modeCorrectCounts).map(([mode, count]) => [mode, count >= 100]))}
                             modeCorrectCounts={modeCorrectCounts}
+                            visualTheme={visualTheme}
                         />
                     </div>
                 )}
@@ -13259,6 +13469,7 @@ const App: React.FC = () => {
                             languageMode={languageMode}
                             modeMasteryMap={Object.fromEntries(Object.entries(modeCorrectCounts).map(([mode, count]) => [mode, count >= 100]))}
                             modeCorrectCounts={modeCorrectCounts}
+                            visualTheme={visualTheme}
                         />
                         {raceSession && !raceSession.ended && !raceSession.isHost && gameState.challengeMode === 'RACE' && (
                             <div className="absolute inset-0 bg-black/65 backdrop-blur-[1px] flex items-center justify-center p-4 z-20">
@@ -13290,6 +13501,7 @@ const App: React.FC = () => {
                             coopParticipants={gameState.challengeMode === 'COOP' ? coopSession?.participants : undefined}
                             coopSelfPeerId={gameState.challengeMode === 'COOP' ? coopSelfPeerId : undefined}
                             coopDecisionOwnerPeerId={gameState.challengeMode === 'COOP' ? coopDecisionOwner?.peerId : undefined}
+                            visualTheme={visualTheme}
                         />
                     </div>
                 )}
@@ -13329,7 +13541,7 @@ const App: React.FC = () => {
 
                 {gameState.screen === GameScreen.RELIC_SELECTION && (
                     <div className="absolute inset-0">
-                        <RelicSelectionScreen relics={starterRelics} onSelect={handleRelicSelect} languageMode={languageMode} typingMode={gameState.challengeMode === 'TYPING'} />
+                        <RelicSelectionScreen relics={starterRelics} onSelect={handleRelicSelect} languageMode={languageMode} typingMode={gameState.challengeMode === 'TYPING'} visualTheme={visualTheme} />
                         {gameState.challengeMode === 'COOP' && coopAwaitingMapSync && coopSession && !coopSession.isHost && (
                             <div className="absolute inset-0 bg-black/65 backdrop-blur-[1px] flex items-center justify-center p-4 z-20">
                                 <div className="bg-slate-900 border-2 border-emerald-500 rounded-xl p-6 text-white text-center max-w-md w-full">
@@ -13445,7 +13657,7 @@ const App: React.FC = () => {
                             />
                         ) : (
                             <BattleScene
-                                player={gameState.player} companions={gameState.challengeMode === 'COOP' ? coopCompanions : undefined} coopSelfPeerId={gameState.challengeMode === 'COOP' ? coopSelfPeerId : undefined} coopEffectOwnerPeerId={gameState.challengeMode === 'COOP' ? coopEffectOwnerPeerId : undefined} coopTurnQueue={gameState.challengeMode === 'COOP' ? coopBattleQueueView : undefined} coopCanAct={gameState.challengeMode === 'COOP' ? coopBattleCanAct : true} coopTurnOwnerLabel={gameState.challengeMode === 'COOP' ? coopBattleTurnOwnerLabel : undefined} coopSupportCards={gameState.challengeMode === 'COOP' ? coopSupportCards : undefined} onUseCoopSupport={gameState.challengeMode === 'COOP' ? handleUseCoopSupport : undefined} selfDown={gameState.challengeMode === 'COOP' && gameState.player.currentHp <= 0} enemies={gameState.enemies} selectedEnemyId={gameState.selectedEnemyId} onSelectEnemy={handleSelectEnemy} onPlayCard={handlePlayCard} onEndTurn={handleEndTurnClick} turnLog={turnLog} narrative={currentNarrative} lastActionTime={lastActionTime} lastActionType={lastActionType} actingEnemyId={actingEnemyId} selectionState={gameState.selectionState} onHandSelection={handleHandSelection}
+                                player={gameState.player} companions={gameState.challengeMode === 'COOP' ? coopCompanions : undefined} coopSelfPeerId={gameState.challengeMode === 'COOP' ? coopSelfPeerId : undefined} coopEffectOwnerPeerId={gameState.challengeMode === 'COOP' ? coopEffectOwnerPeerId : undefined} coopTurnQueue={gameState.challengeMode === 'COOP' ? coopBattleQueueView : undefined} coopCanAct={gameState.challengeMode === 'COOP' ? coopBattleCanAct : true} coopTurnOwnerLabel={gameState.challengeMode === 'COOP' ? coopBattleTurnOwnerLabel : undefined} coopSupportCards={gameState.challengeMode === 'COOP' ? coopSupportCards : undefined} onUseCoopSupport={gameState.challengeMode === 'COOP' ? handleUseCoopSupport : undefined} selfDown={gameState.challengeMode === 'COOP' && gameState.player.currentHp <= 0} enemies={gameState.enemies} selectedEnemyId={gameState.selectedEnemyId} onSelectEnemy={handleSelectEnemy} onPlayCard={handlePlayCard} onTransform={coopSyncedVisualTheme === 'magic' ? handleMagicTransform : undefined} onEndTurn={handleEndTurnClick} turnLog={turnLog} narrative={currentNarrative} lastActionTime={lastActionTime} lastActionType={lastActionType} actingEnemyId={actingEnemyId} selectionState={gameState.selectionState} onHandSelection={handleHandSelection}
                                 onUsePotion={handleUsePotion} combatLog={gameState.combatLog} languageMode={languageMode} codexOptions={gameState.codexOptions} onCodexSelect={onCodexSelect} onPlaySynthesizedCard={handlePlaySynthesizedCard}
                                 parryState={gameState.parryState} onParry={handleParryClick} showParryTutorial={showParryTutorial} onCloseParryTutorial={handleCloseParryTutorial} activeEffects={gameState.activeEffects}
                                 onCancelSelection={handleCancelSelection}
@@ -13622,7 +13834,7 @@ const App: React.FC = () => {
 
                 {gameState.screen === GameScreen.REWARD && (
                     <div className="absolute inset-0">
-                        <RewardScreen rewards={gameState.rewards} onSelectReward={handleRewardSelection} onSkip={finishRewardPhase} isLoading={isLoading || coopAwaitingRewardSync} currentPotions={gameState.player.potions} potionCapacity={getPotionCapacity(gameState.player)} languageMode={languageMode} typingMode={gameState.challengeMode === 'TYPING'} dummyRewards={raceRewardDummyDisplay} autoSkipWhenEmpty={gameState.challengeMode !== 'COOP'} skipDisabled={coopRewardSkipDisabled} skipDisabledMessage={coopAwaitingRewardSync ? 'ホストが報酬を確定するまで待っています' : (coopRewardSkipDisabled ? '他のプレイヤーの報酬完了を待っています' : undefined)} interactionDisabled={gameState.challengeMode === 'COOP' ? false : coopInteractionDisabled} interactionDisabledMessage={coopInteractionDisabledMessage} />
+                        <RewardScreen rewards={gameState.rewards} onSelectReward={handleRewardSelection} onSkip={finishRewardPhase} isLoading={isLoading || coopAwaitingRewardSync} currentPotions={gameState.player.potions} potionCapacity={getPotionCapacity(gameState.player)} languageMode={languageMode} typingMode={gameState.challengeMode === 'TYPING'} dummyRewards={raceRewardDummyDisplay} autoSkipWhenEmpty={gameState.challengeMode !== 'COOP'} skipDisabled={coopRewardSkipDisabled} skipDisabledMessage={coopAwaitingRewardSync ? 'ホストが報酬を確定するまで待っています' : (coopRewardSkipDisabled ? '他のプレイヤーの報酬完了を待っています' : undefined)} interactionDisabled={gameState.challengeMode === 'COOP' ? false : coopInteractionDisabled} interactionDisabledMessage={coopInteractionDisabledMessage} visualTheme={gameState.visualTheme || visualTheme} />
                     </div>
                 )}
 
@@ -13640,6 +13852,7 @@ const App: React.FC = () => {
                             scienceRoomChance={getDifficultyConfig(gameState.difficultyLevel).scienceRoomChance}
                             interactionDisabled={gameState.challengeMode === 'COOP' ? false : coopInteractionDisabled}
                             interactionDisabledMessage={coopInteractionDisabledMessage}
+                            visualTheme={gameState.visualTheme || visualTheme}
                         />
                     </div>
                 )}
@@ -13667,6 +13880,7 @@ const App: React.FC = () => {
                             })()}
                             interactionDisabled={gameState.challengeMode === 'COOP' ? false : coopInteractionDisabled}
                             interactionDisabledMessage={coopInteractionDisabledMessage}
+                            visualTheme={gameState.visualTheme || visualTheme}
                         />
                     </div>
                 )}
@@ -13704,6 +13918,7 @@ const App: React.FC = () => {
                                 }
                             }}
                             languageMode={languageMode}
+                            visualTheme={gameState.visualTheme || visualTheme}
                         />
                     </div>
                 )}
@@ -13715,7 +13930,7 @@ const App: React.FC = () => {
                             description={trans(eventData.description, languageMode)}
                             options={eventData.options.map((o: any, idx: number) => ({ ...o, action: () => handleCoopEventOptionSelect(idx), label: trans(o.label, languageMode), text: trans(o.text, languageMode) }))}
                             imageKey={eventData.imageKey ?? eventData.title}
-                            image={coopSyncedVisualTheme === 'high-school' ? undefined : gameState.player.imageData}
+                            image={coopSyncedVisualTheme === 'elementary' ? gameState.player.imageData : undefined}
                             resultLog={eventResultLog ? trans(eventResultLog, languageMode) : null}
                             onContinue={handleEventComplete}
                             typingMode={gameState.challengeMode === 'TYPING'}
@@ -13741,6 +13956,17 @@ const App: React.FC = () => {
                     </div>
                 )}
 
+                {gameState.screen === GameScreen.MAGIC_ROMANCE_ENDING && (
+                    <div className="absolute inset-0">
+                        <MagicRomanceEndingScreen
+                            player={gameState.player}
+                            heroId={getMagicProtagonistId(gameState.player)}
+                            languageMode={languageMode}
+                            onComplete={() => setGameState(prev => ({ ...prev, screen: GameScreen.ENDING }))}
+                        />
+                    </div>
+                )}
+
                 {gameState.screen === GameScreen.TREASURE && (
                     <div className="absolute inset-0">
                         <TreasureScreen
@@ -13755,6 +13981,7 @@ const App: React.FC = () => {
                             onClaimPool={gameState.challengeMode === 'COOP' ? handleTreasureClaim : undefined}
                             resolved={gameState.challengeMode === 'COOP' ? !!coopSession?.participants.find(participant => participant.peerId === coopSelfPeerId)?.treasureResolved : false}
                             waitingForOthers={gameState.challengeMode === 'COOP' ? !!coopSession?.participants.some(participant => !participant.treasureResolved) : false}
+                            visualTheme={gameState.visualTheme || visualTheme}
                         />
                     </div>
                 )}
@@ -14106,7 +14333,13 @@ const App: React.FC = () => {
                 {gameState.screen === GameScreen.GAME_OVER && (
                     <div
                         className="w-full h-full bg-red-900 bg-cover bg-center flex flex-col items-center justify-start text-center text-white p-4 overflow-y-auto custom-scrollbar relative"
-                        style={{ backgroundImage: `url(${assetUrl('sprites/backgrounds/learning-rogue/event-hallway.webp')})` }}
+                        style={{
+                            backgroundImage: `url(${assetUrl(
+                                coopSyncedVisualTheme === 'magic'
+                                    ? 'sprites/backgrounds/learning-rogue/magic-event-hallway.webp'
+                                    : 'sprites/backgrounds/learning-rogue/event-hallway.webp'
+                            )})`
+                        }}
                     >
                         <div className="absolute inset-0 bg-red-950/72 pointer-events-none" />
                         <div className="relative z-10 my-auto w-full max-w-2xl py-8">
@@ -14165,19 +14398,34 @@ const App: React.FC = () => {
                 {gameState.screen === GameScreen.ENDING && (
                     <div
                         className="w-full h-full bg-yellow-900 bg-cover bg-center flex flex-col items-center justify-start text-center text-white p-4 overflow-y-auto custom-scrollbar relative"
-                        style={{ backgroundImage: `url(${assetUrl('sprites/backgrounds/learning-rogue/reward-rooftop.webp')})` }}
+                        style={{
+                            backgroundImage: `url(${assetUrl(
+                                coopSyncedVisualTheme === 'magic'
+                                    ? 'sprites/backgrounds/learning-rogue/magic-act-clear.webp'
+                                    : 'sprites/backgrounds/learning-rogue/reward-rooftop.webp'
+                            )})`
+                        }}
                     >
                         <div className="absolute inset-0 bg-amber-950/62 pointer-events-none" />
                         <div className="relative z-10 my-auto w-full max-w-2xl py-8">
                             <Trophy size={80} className="text-yellow-400 mx-auto mb-6 animate-pulse shrink-0" />
                             <h1 className="text-4xl md:text-6xl mb-4 font-bold text-yellow-200 shrink-0">
-                                {trans(coopSyncedVisualTheme === 'high-school' ? "卒業おめでとう！" : "ゲームクリア！", languageMode)}
+                                {trans(
+                                    coopSyncedVisualTheme === 'high-school'
+                                        ? "卒業おめでとう！"
+                                        : coopSyncedVisualTheme === 'magic'
+                                            ? "願いの夜明け"
+                                            : "ゲームクリア！",
+                                    languageMode
+                                )}
                             </h1>
                             <p className="mb-8 text-lg md:text-xl shrink-0 whitespace-pre-line">
                                 {trans(
                                     coopSyncedVisualTheme === 'high-school'
                                         ? "あなたは真・校長の支配を打ち破り、\nこの学園に自分たちの明日を取り戻しました。\n反逆の卒業生として、その名は校内伝説に刻まれるでしょう。"
-                                        : "あなたは校長先生をせっとくし、\nでんせつの しょうがくせいとして かたりつがれることでしょう。",
+                                        : coopSyncedVisualTheme === 'magic'
+                                            ? "あなたは大魔女校長が作り出した「願いの檻」を打ち破り、\n学園に自由な未来と朝の光を取り戻しました。\n学び、迷い、誰かを大切にした日々は、これからもあなたの魔法を強くしていくでしょう。"
+                                            : "あなたは校長先生をせっとくし、\nでんせつの しょうがくせいとして かたりつがれることでしょう。",
                                     languageMode
                                 )}
                             </p>

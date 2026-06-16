@@ -200,7 +200,9 @@ const MapScreen: React.FC<MapScreenProps> = ({ nodes, currentNodeId, onNodeSelec
         : Math.min(4, Math.max(1, act));
     const mapBackground = visualTheme === 'high-school'
         ? assetUrl(`sprites/backgrounds/learning-rogue/high-school-map-act${highSchoolMapAct}.webp`)
-        : mapBackgrounds[(Math.max(1, act) - 1) % mapBackgrounds.length];
+        : visualTheme === 'magic'
+            ? assetUrl(`sprites/backgrounds/learning-rogue/magic-map-act${Math.min(4, Math.max(1, act))}.webp`)
+            : mapBackgrounds[(Math.max(1, act) - 1) % mapBackgrounds.length];
 
     return (
         <div className="main-map-screen flex flex-col h-full w-full bg-slate-950 relative overflow-hidden">

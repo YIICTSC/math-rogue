@@ -1,13 +1,17 @@
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { ActStats, LanguageMode, Card as ICard } from '../types';
+import { ActStats, LanguageMode, Card as ICard, MagicRomanceProgress } from '../types';
 import { GAME_STORIES } from '../data/stories';
 import { HIGH_SCHOOL_STORIES } from '../data/highSchoolStories';
+import { getMagicActStoryPart, MAGIC_STORIES } from '../data/magicStories';
+import { ROMANCE_TARGETS } from '../data/romanceTargets';
+import { MAGIC_HEROES, isMagicMaleProtagonist } from '../data/magicHeroes';
 import { ADDITIONAL_CARDS } from '../constants1';
 import { trans } from '../utils/textUtils';
 import { Skull, Coins, Brain, ArrowRight, BookOpen, Sparkles } from 'lucide-react';
 import { audioService } from '../services/audioService';
 import Card from './Card';
+import { assetUrl } from '../utils/assetPaths';
 
 interface FloorResultScreenProps {
   act: number;
@@ -17,16 +21,34 @@ interface FloorResultScreenProps {
   languageMode: LanguageMode;
   newlyUnlockedCardName?: string; // 追加
   typingMode?: boolean;
-  visualTheme?: 'elementary' | 'high-school';
+  visualTheme?: 'elementary' | 'high-school' | 'magic';
+  magicHeroId?: string;
+  magicRomance?: MagicRomanceProgress;
 }
 
-const FloorResultScreen: React.FC<FloorResultScreenProps> = ({ act, stats, storyIndex, onNext, languageMode, newlyUnlockedCardName, typingMode = false, visualTheme = 'elementary' }) => {
+const FloorResultScreen: React.FC<FloorResultScreenProps> = ({ act, stats, storyIndex, onNext, languageMode, newlyUnlockedCardName, typingMode = false, visualTheme = 'elementary', magicHeroId = 'AKARI', magicRomance }) => {
   const [displayedText, setDisplayedText] = useState("");
   const [isTyping, setIsTyping] = useState(true);
   
-  const storyPool = visualTheme === 'high-school' ? HIGH_SCHOOL_STORIES : GAME_STORIES;
+  const storyPool = visualTheme === 'high-school'
+    ? HIGH_SCHOOL_STORIES
+    : visualTheme === 'magic'
+      ? MAGIC_STORIES
+      : GAME_STORIES;
   const storySet = storyPool[storyIndex % storyPool.length] || storyPool[0];
-  const currentPart = storySet.parts[(act - 1) % 3]; 
+  const closestTargetEntry = useMemo(() => {
+    const ranked = Object.entries(magicRomance?.affection ?? {}).sort((a, b) => b[1] - a[1]);
+    if (!ranked.length || ranked[0][1] <= 0) return null;
+    return {
+      target: isMagicMaleProtagonist(magicHeroId)
+        ? MAGIC_HEROES.find((entry) => entry.id === ranked[0][0])
+        : ROMANCE_TARGETS.find((entry) => entry.id === ranked[0][0]),
+      affection: ranked[0][1],
+    };
+  }, [magicHeroId, magicRomance]);
+  const currentPart = visualTheme === 'magic'
+    ? getMagicActStoryPart(magicHeroId, act, closestTargetEntry?.target?.name, closestTargetEntry?.affection, storySet)
+    : storySet.parts[(act - 1) % 3];
 
   // 解放されたカード情報の取得
   const unlockedCard = useMemo(() => {
@@ -83,9 +105,13 @@ const FloorResultScreen: React.FC<FloorResultScreenProps> = ({ act, stats, story
   }, [typingMode, isTyping, currentPart, languageMode]);
 
   return (
-    <div className="main-floor-result-screen w-full h-full bg-[#0a0a0a] flex flex-col items-center justify-center p-3 sm:p-6 md:p-8 lg:p-10 relative overflow-hidden font-mono">
+    <div
+      className="main-floor-result-screen w-full h-full bg-[#0a0a0a] bg-cover bg-center flex flex-col items-center justify-center p-3 sm:p-6 md:p-8 lg:p-10 relative overflow-hidden font-mono"
+      style={visualTheme === 'magic' ? { backgroundImage: `url(${assetUrl('sprites/backgrounds/learning-rogue/magic-act-clear.webp')})` } : undefined}
+    >
+      {visualTheme === 'magic' && <div className="absolute inset-0 bg-slate-950/62 pointer-events-none" />}
       {/* Background decoration */}
-      <div className="absolute inset-0 opacity-10 pointer-events-none flex items-center justify-center">
+      <div className={`absolute inset-0 pointer-events-none flex items-center justify-center ${visualTheme === 'magic' ? 'opacity-5' : 'opacity-10'}`}>
         <BookOpen className="text-gray-500 w-[200px] h-[200px] sm:w-[400px] sm:h-[400px]" />
       </div>
 
@@ -161,7 +187,7 @@ const FloorResultScreen: React.FC<FloorResultScreenProps> = ({ act, stats, story
         <div className="mt-2 shrink-0">
             <button 
                 onClick={handleNext}
-                className={`w-full py-3 sm:py-4 md:py-3 rounded-lg font-black text-lg sm:text-xl flex items-center justify-center gap-2 sm:gap-3 transition-all transform active:scale-95 shadow-xl border-b-4 ${isTyping ? 'bg-gray-700 border-gray-900 text-gray-400' : 'bg-white text-black border-gray-300 hover:bg-gray-200'}`}
+                className={`w-full py-3 sm:py-4 md:py-3 rounded-lg font-black text-lg sm:text-xl flex items-center justify-center gap-2 sm:gap-3 transition-all transform active:scale-95 shadow-xl border-b-4 ${isTyping ? 'bg-slate-200 text-slate-900 border-slate-400 hover:bg-white' : 'bg-white text-black border-gray-300 hover:bg-gray-200'}`}
             >
                 {isTyping ? trans("スキップ", languageMode) : trans("次へ進む", languageMode)} <ArrowRight size={20} className="sm:size-6" />{typingMode && ' [Enter]'}
             </button>

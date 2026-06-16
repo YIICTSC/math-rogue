@@ -1,8 +1,9 @@
 import type { Character, Enemy } from '../types';
 import { assetUrl } from '../utils/assetPaths';
 import { HIGH_SCHOOL_STARTER_REPLACEMENTS } from './highSchoolCards';
+import { MAGIC_HEROES, MAGIC_MALE_PROTAGONISTS } from './magicHeroes';
 
-export type VisualThemeId = 'elementary' | 'high-school';
+export type VisualThemeId = 'elementary' | 'high-school' | 'magic';
 export type HighSchoolHeroAction = 'idle' | 'attack' | 'skill';
 export type HighSchoolEnemyAction = HighSchoolHeroAction;
 
@@ -19,13 +20,28 @@ const HIGH_SCHOOL_CHARACTER_NAMES = [
 ];
 
 export const getThemedCharacters = (characters: Character[], theme: VisualThemeId): Character[] => {
-  if (theme !== 'high-school') return characters;
-  return characters.map((character, index) => ({
-    ...character,
-    name: HIGH_SCHOOL_CHARACTER_NAMES[index] ?? character.name,
-    imageData: assetUrl(`sprites/high-school/characters/${index % 9}.png`),
-    deckTemplate: character.deckTemplate.map(cardId => HIGH_SCHOOL_STARTER_REPLACEMENTS[cardId] ?? cardId),
-  }));
+  if (theme === 'high-school') {
+    return characters.map((character, index) => ({
+      ...character,
+      name: HIGH_SCHOOL_CHARACTER_NAMES[index] ?? character.name,
+      imageData: assetUrl(`sprites/high-school/characters/${index % 9}.png`),
+      deckTemplate: character.deckTemplate.map(cardId => HIGH_SCHOOL_STARTER_REPLACEMENTS[cardId] ?? cardId),
+    }));
+  }
+  if (theme === 'magic') {
+    return characters.map((character, index) => {
+      const heroId = MAGIC_HERO_ID_BY_CHARACTER_ID[character.id] ?? MAGIC_HEROES[index % MAGIC_HEROES.length]?.id;
+      const hero = MAGIC_HEROES.find((entry) => entry.id === heroId) ?? MAGIC_HEROES[0];
+      return {
+        ...character,
+        name: hero?.name ?? character.name,
+        imageData: assetUrl(`sprites/magic/characters/heroine-${String((hero?.index ?? index + 1)).padStart(2, '0')}-before.png`),
+        magicProtagonistId: hero.id,
+        magicProtagonistGender: 'female' as const,
+      };
+    });
+  }
+  return characters;
 };
 
 const HIGH_SCHOOL_CHARACTER_INDEX_BY_ID: Record<string, number> = {
@@ -47,6 +63,58 @@ export const getHighSchoolCharacterSpritePath = (
   const imageIndex = HIGH_SCHOOL_CHARACTER_INDEX_BY_ID[characterId ?? 'WARRIOR'] ?? 0;
   const folder = action === 'idle' ? 'characters' : `characters-${action}`;
   return assetUrl(`sprites/high-school/${folder}/${imageIndex}.png`);
+};
+
+export const MAGIC_HERO_ID_BY_CHARACTER_ID: Record<string, string> = {
+  WARRIOR: 'AKARI',
+  CARETAKER: 'SHIZUKU',
+  ASSASSIN: 'HIYORI',
+  MAGE: 'TSUBASA',
+  DODGEBALL: 'REI',
+  BARD: 'MADOKA',
+  LIBRARIAN: 'KOHARU',
+  CHEF: 'MIRAI',
+  GARDENER: 'SERA',
+};
+
+export const getMagicCharacterSpritePath = (
+  characterId: string | undefined,
+  action: HighSchoolHeroAction,
+  transformed = false,
+  magicProtagonistId?: string,
+  magicProtagonistGender?: 'female' | 'male',
+) => {
+  if (magicProtagonistGender === 'male') {
+    const protagonist = MAGIC_MALE_PROTAGONISTS.find((entry) => entry.id === magicProtagonistId)
+      ?? MAGIC_MALE_PROTAGONISTS[0];
+    const folder = action === 'idle' ? 'male-characters' : `male-characters-${action}`;
+    const form = transformed ? 'after' : 'before';
+    return assetUrl(`sprites/magic/${folder}/${protagonist.assetId}-${form}.png`);
+  }
+  const imageIndex = (HIGH_SCHOOL_CHARACTER_INDEX_BY_ID[characterId ?? 'WARRIOR'] ?? 0) + 1;
+  const folder = action === 'idle' ? 'characters' : `characters-${action}`;
+  const form = transformed ? 'after' : 'before';
+  return assetUrl(`sprites/magic/${folder}/heroine-${String(imageIndex).padStart(2, '0')}-${form}.png`);
+};
+
+export const getThemedCharacterSpritePath = (
+  theme: VisualThemeId,
+  characterId: string | undefined,
+  action: HighSchoolHeroAction,
+  fallbackImageData: string,
+  transformed = false,
+  magicProtagonistId?: string,
+  magicProtagonistGender?: 'female' | 'male',
+) => {
+  if (theme === 'high-school') return getHighSchoolCharacterSpritePath(characterId, action);
+  if (theme === 'magic') return getMagicCharacterSpritePath(
+    characterId,
+    action,
+    transformed,
+    magicProtagonistId,
+    magicProtagonistGender,
+  );
+  return fallbackImageData;
 };
 
 export const HIGH_SCHOOL_ENEMY_VARIANTS = [
@@ -206,16 +274,163 @@ export const getHighSchoolHumanoidEnemySpritePath = (
   return assetUrl(`sprites/high-school/${folder}/${variant.imageIndex}.png`);
 };
 
+export const MAGIC_ENEMY_VARIANTS = [
+  { name: '星屑の使い魔', imageIndex: 0 },
+  { name: '月影スライム', imageIndex: 1 },
+  { name: '花迷宮の芽獣', imageIndex: 2 },
+  { name: '火花コウモリ', imageIndex: 3 },
+  { name: '影縫いの欠片', imageIndex: 4 },
+  { name: '時計塔の歯車霊', imageIndex: 5 },
+  { name: '風読みの小竜', imageIndex: 6 },
+  { name: '夢喰いの泡', imageIndex: 7 },
+  { name: '光膜のクラゲ', imageIndex: 8 },
+  { name: '魔導書の幼体', imageIndex: 9 },
+  { name: '結晶ネズミ', imageIndex: 10 },
+  { name: '黒板魔法陣', imageIndex: 11 },
+  { name: '星砂ミミック', imageIndex: 12 },
+  { name: '月輪ガーゴイル', imageIndex: 13 },
+  { name: '蔓薔薇の怪', imageIndex: 14 },
+  { name: '炎冠の小鬼', imageIndex: 15 },
+  { name: '闇インクの影', imageIndex: 16 },
+  { name: '時砂の亡霊', imageIndex: 17 },
+  { name: '旋風ケットシー', imageIndex: 18 },
+  { name: '悪夢の仮面', imageIndex: 19 },
+  { name: '聖灯の羽虫', imageIndex: 20 },
+  { name: '魔石ゴーレム', imageIndex: 21 },
+  { name: '封印リボン', imageIndex: 22 },
+  { name: '彗星の尾獣', imageIndex: 23 },
+  { name: '月読の鏡片', imageIndex: 24 },
+  { name: '花粉の幻霧', imageIndex: 25 },
+  { name: '火球の精', imageIndex: 26 },
+  { name: '影絵の騎獣', imageIndex: 27 },
+  { name: '遅刻ベルの霊', imageIndex: 28 },
+  { name: '風鈴の魔物', imageIndex: 29 },
+  { name: '夢色キャンディ怪', imageIndex: 30 },
+  { name: '光輪の番犬', imageIndex: 31 },
+  { name: '星図の蛇', imageIndex: 32 },
+  { name: '月蝕ランタン', imageIndex: 33 },
+  { name: '花冠の毒蜂', imageIndex: 34 },
+  { name: '炎筆の魔獣', imageIndex: 35 },
+  { name: '闇劇場の人形', imageIndex: 36 },
+  { name: '時針の蜘蛛', imageIndex: 37 },
+  { name: '風札の狐面', imageIndex: 38 },
+  { name: '夢頁の蝶', imageIndex: 39 },
+  { name: '光晶の盾獣', imageIndex: 40 },
+  { name: '魔力試験の残滓', imageIndex: 41 },
+  { name: '星鍵の守り手', imageIndex: 42 },
+  { name: '月光庭園の影花', imageIndex: 43 },
+  { name: '深淵図書館の栞獣', imageIndex: 44 },
+] as const;
+
+export const MAGIC_HUMANOID_ENEMY_VARIANTS = [
+  { name: '見習い魔女の反逆者', imageIndex: 0 },
+  { name: '仮面の魔法剣士', imageIndex: 1 },
+  { name: 'ルーン図書委員', imageIndex: 2 },
+  { name: '水晶錬金術師', imageIndex: 3 },
+  { name: '影舞台の奇術師', imageIndex: 4 },
+  { name: '月社の祓い手', imageIndex: 5 },
+  { name: '茨庭の魔導士', imageIndex: 6 },
+  { name: '鐘鎧の召喚士', imageIndex: 7 },
+  { name: '呪い人形の操者', imageIndex: 8 },
+  { name: '炎厨房の魔法使い', imageIndex: 9 },
+  { name: '重盾の魔法騎士', imageIndex: 10 },
+  { name: '紙嵐の忍術士', imageIndex: 11 },
+  { name: '鏡界の幻術師', imageIndex: 12 },
+  { name: '雷指揮のコンダクター', imageIndex: 13 },
+  { name: '氷鏡の槍術士', imageIndex: 14 },
+  { name: '獣面の地脈術師', imageIndex: 15 },
+  { name: '時計塔の時術師', imageIndex: 16 },
+  { name: '蝋燭の死霊学徒', imageIndex: 17 },
+  { name: '星見台の弓術士', imageIndex: 18 },
+  { name: '禁術学園の風紀長', imageIndex: 19 },
+  { name: '大魔女校長', imageIndex: 20 },
+  { name: '星災の女王', imageIndex: 21 },
+] as const;
+
+export const getMagicHumanoidEnemyVariant = (enemy: Pick<Enemy, 'name' | 'enemyType' | 'phase'>) => {
+  if (enemy.enemyType === 'THE_HEART') {
+    return enemy.phase === 2
+      ? MAGIC_HUMANOID_ENEMY_VARIANTS[21]
+      : MAGIC_HUMANOID_ENEMY_VARIANTS[20];
+  }
+  if (enemy.enemyType === 'GUARDIAN') return MAGIC_HUMANOID_ENEMY_VARIANTS[getStableIndex(enemy.name, 20)];
+  if (enemy.enemyType === 'ELITE_FORCE') return MAGIC_HUMANOID_ENEMY_VARIANTS[getStableIndex(enemy.name, 20)];
+  if (enemy.enemyType === 'TEACHER') return MAGIC_HUMANOID_ENEMY_VARIANTS[getStableIndex(enemy.name, 20)];
+  if (enemy.enemyType === 'GENERIC' && getStableIndex(enemy.name, 4) === 0) {
+    return MAGIC_HUMANOID_ENEMY_VARIANTS[getStableIndex(enemy.name, 20)];
+  }
+  return null;
+};
+
+export const getMagicEnemyVariant = (enemy: Pick<Enemy, 'name' | 'enemyType' | 'phase'>) => {
+  const humanoid = getMagicHumanoidEnemyVariant(enemy);
+  if (humanoid) return humanoid;
+  return MAGIC_ENEMY_VARIANTS[getStableIndex(enemy.name, MAGIC_ENEMY_VARIANTS.length)];
+};
+
+export const getMagicHumanoidEnemySpritePath = (
+  enemy: Pick<Enemy, 'name' | 'enemyType' | 'phase'>,
+  action: HighSchoolEnemyAction,
+) => {
+  const variant = getMagicHumanoidEnemyVariant(enemy);
+  if (!variant) return null;
+  const folder = action === 'idle' ? 'humanoid-enemies' : `humanoid-enemies-${action}`;
+  return assetUrl(`sprites/magic/${folder}/${variant.imageIndex}.png`);
+};
+
+export const getThemedEnemyVariant = (
+  enemy: Pick<Enemy, 'name' | 'enemyType' | 'phase'>,
+  theme: VisualThemeId,
+) => {
+  if (theme === 'high-school') return getHighSchoolEnemyVariant(enemy);
+  if (theme === 'magic') return getMagicEnemyVariant(enemy);
+  return null;
+};
+
+export const getThemedHumanoidEnemyVariant = (
+  enemy: Pick<Enemy, 'name' | 'enemyType' | 'phase'>,
+  theme: VisualThemeId,
+) => {
+  if (theme === 'high-school') return getHighSchoolHumanoidEnemyVariant(enemy);
+  if (theme === 'magic') return getMagicHumanoidEnemyVariant(enemy);
+  return null;
+};
+
+export const getThemedHumanoidEnemySpritePath = (
+  enemy: Pick<Enemy, 'name' | 'enemyType' | 'phase'>,
+  theme: VisualThemeId,
+  action: HighSchoolEnemyAction,
+) => {
+  if (theme === 'high-school') return getHighSchoolHumanoidEnemySpritePath(enemy, action);
+  if (theme === 'magic') return getMagicHumanoidEnemySpritePath(enemy, action);
+  return null;
+};
+
+export const getThemedMonsterEnemySpritePath = (
+  enemy: Pick<Enemy, 'name' | 'enemyType' | 'phase'>,
+  theme: VisualThemeId,
+) => {
+  if (theme === 'high-school') return assetUrl(`sprites/high-school/enemies/${getHighSchoolEnemyVariant(enemy).imageIndex}.png`);
+  if (theme === 'magic') return assetUrl(`sprites/magic/enemies/${getMagicEnemyVariant(enemy).imageIndex}.png`);
+  return null;
+};
+
 export const getThemedEnemyDisplayName = (
   enemy: Pick<Enemy, 'name' | 'enemyType' | 'phase'>,
   theme: VisualThemeId,
-) => theme === 'high-school' ? getHighSchoolEnemyVariant(enemy).name : enemy.name;
+) => {
+  if (theme === 'high-school') return getHighSchoolEnemyVariant(enemy).name;
+  if (theme === 'magic') return getMagicEnemyVariant(enemy).name;
+  return enemy.name;
+};
 
 export interface HighSchoolEventTheme {
   title: string;
   description: string;
   imageIndex: number;
 }
+
+export type ThemedEventTheme = HighSchoolEventTheme;
 
 export const HIGH_SCHOOL_EVENT_THEMES: HighSchoolEventTheme[] = [
   {
@@ -412,3 +627,62 @@ export const getHighSchoolEventTheme = (title: string, act = 1, floor = 1): High
 
 export const getHighSchoolEventThemeByTitle = (title: string): HighSchoolEventTheme | undefined =>
   HIGH_SCHOOL_EVENT_THEMES.find(theme => theme.title === title);
+
+export const MAGIC_EVENT_THEMES: ThemedEventTheme[] = [
+  { title: '星図教室の放課後', description: '黒板に浮かぶ星図が、今日の選択を静かに照らしている。', imageIndex: 0 },
+  { title: '月光の中庭', description: '月の光を浴びた噴水の前で、誰かがひとり考え込んでいる。', imageIndex: 1 },
+  { title: '花の迷宮演習', description: '訓練場に咲いた魔法の花が、正しい道と危険な道を隠している。', imageIndex: 2 },
+  { title: '炎の魔法実技', description: '実技室の結界内で、炎の軌跡が勇気と焦りを映し出す。', imageIndex: 3 },
+  { title: '深淵図書館の栞', description: '禁書棚の奥で、見覚えのない栞が小さく光っている。', imageIndex: 4 },
+  { title: '時計塔の補習', description: '止まった時計の針が、やり直したい一問を指している。', imageIndex: 5 },
+  { title: '風渡りの屋上', description: '屋上を抜ける風に、言えなかった言葉が少しだけ軽くなる。', imageIndex: 6 },
+  { title: '夢見の保健室', description: '白いカーテンの向こうで、誰かの悪夢が淡い光になって揺れる。', imageIndex: 7 },
+  { title: '光の礼拝堂', description: 'ステンドグラスの下で、使命と願いのどちらを選ぶか問われる。', imageIndex: 8 },
+  { title: '魔法陣の廊下', description: '廊下の床に現れた魔法陣が、次の出会いへ導いている。', imageIndex: 9 },
+  { title: 'SNSに届いた予兆', description: '端末に届いた短いメッセージが、学園の裏側の異変を告げる。', imageIndex: 10 },
+  { title: '購買部の魔法雑貨', description: '棚に並ぶ不思議な小物の中に、今日だけ役立つ品が混じっている。', imageIndex: 11 },
+  { title: '寮の作戦会議', description: '夜の共有スペースで、仲間たちが明日の作戦を小声で話し合う。', imageIndex: 12 },
+  { title: '水族館の約束', description: '休日の水槽前で、戦いから離れた一瞬の本音がこぼれる。', imageIndex: 13 },
+  { title: '夏祭りの結界', description: '屋台の明かりに紛れて、薄い結界のほころびが見えている。', imageIndex: 14 },
+  { title: '文化祭の秘密舞台', description: '舞台袖の暗がりで、誰かの魔法と恋心が同時に揺れている。', imageIndex: 15 },
+  { title: 'クリスマス街の魔光', description: 'イルミネーションの中に、異世界からの淡い信号が混じっている。', imageIndex: 16 },
+  { title: 'バレンタインの魔法包み', description: '小さな包みに込めた気持ちが、魔力より強く胸を鳴らす。', imageIndex: 17 },
+  { title: '卒業式前夜の星空', description: '最後の夜、九人の願いが星空の下でひとつの答えに近づく。', imageIndex: 18 },
+  { title: '真夜中の変身訓練', description: '誰もいない訓練場で、変身後の自分と向き合う時間が始まる。', imageIndex: 19 },
+];
+
+const getMagicEventPool = (act = 1): ThemedEventTheme[] => {
+  const safeAct = Math.max(1, act);
+  if (safeAct <= 1) return MAGIC_EVENT_THEMES.slice(0, 12);
+  if (safeAct === 2) return MAGIC_EVENT_THEMES.slice(4, 18);
+  if (safeAct === 3) return MAGIC_EVENT_THEMES.slice(8, 20);
+  return MAGIC_EVENT_THEMES;
+};
+
+export const getMagicEventTheme = (title: string, act = 1, floor = 1): ThemedEventTheme => {
+  const pool = getMagicEventPool(act);
+  return pool[getStableIndex(`${title}:${floor}`, pool.length)];
+};
+
+export const getMagicEventThemeByTitle = (title: string): ThemedEventTheme | undefined =>
+  MAGIC_EVENT_THEMES.find(theme => theme.title === title);
+
+export const getVisualThemeEventTheme = (
+  theme: VisualThemeId,
+  title: string,
+  act = 1,
+  floor = 1,
+): ThemedEventTheme | null => {
+  if (theme === 'high-school') return getHighSchoolEventTheme(title, act, floor);
+  if (theme === 'magic') return getMagicEventTheme(title, act, floor);
+  return null;
+};
+
+export const getVisualThemeEventThemeByTitle = (
+  theme: VisualThemeId,
+  title: string,
+): ThemedEventTheme | undefined => {
+  if (theme === 'high-school') return getHighSchoolEventThemeByTitle(title);
+  if (theme === 'magic') return getMagicEventThemeByTitle(title);
+  return undefined;
+};

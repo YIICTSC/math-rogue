@@ -102,6 +102,39 @@ const CompositeArtPiece: React.FC<{
     return <PixelSprite seed={seed} name={spriteName} className="w-full h-full opacity-90" size={16} />;
   }
 
+  if (refToken.startsWith('magic-rule:')) {
+    const [, heroId, index] = refToken.split(':');
+    return (
+      <img
+        src={assetUrl(`sprites/magic/rule-cards/${heroId}/${index}.webp`)}
+        alt={heroId}
+        className="w-full h-full object-cover opacity-95"
+      />
+    );
+  }
+
+  if (refToken.startsWith('magic-basic:')) {
+    const [, heroId, art] = refToken.split(':');
+    return (
+      <img
+        src={assetUrl(`sprites/magic/basic-cards/${heroId}/${art}.webp`)}
+        alt={heroId}
+        className="w-full h-full object-cover opacity-95"
+      />
+    );
+  }
+
+  if (refToken.startsWith('magic-card:')) {
+    const index = refToken.substring('magic-card:'.length);
+    return (
+      <img
+        src={assetUrl(`sprites/magic/cards/${index}.webp`)}
+        alt="magic card"
+        className="w-full h-full object-cover opacity-95"
+      />
+    );
+  }
+
   const cardName = refToken.startsWith('card:') ? refToken.substring('card:'.length) : refToken;
   const candidates = getCardIllustrationPaths(seed, trans(cardName, languageMode), [cardName]);
   if (!failed && imageIndex < candidates.length) {
@@ -221,6 +254,9 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled, onInspect, languag
   };
 
   const renderCardArt = () => {
+    const usesMagicRuleCardArt = card.magicRuleCardArt
+      || (card.magicRuleCardIndex !== undefined && card.id.startsWith('start-MAGIC_'));
+
     if (card.familiarSummon) {
       return (
         <div className="relative h-full w-full overflow-hidden bg-[radial-gradient(circle_at_55%_45%,rgba(236,72,153,0.32),rgba(15,23,42,0.78)_55%,rgba(0,0,0,0.95))]">
@@ -264,7 +300,7 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled, onInspect, languag
           visualTheme={card.visualTheme}
           enemyType={card.enemyIllustrationEnemyType}
           phase={card.enemyIllustrationPhase}
-          action={card.capture && card.visualTheme === 'high-school' ? 'attack' : 'idle'}
+          action={card.capture && card.visualTheme && card.visualTheme !== 'elementary' ? 'attack' : 'idle'}
           className="w-full h-full"
           size={16}
         />
@@ -275,6 +311,36 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled, onInspect, languag
       return (
         <img
           src={assetUrl(`sprites/high-school/cards/${card.highSchoolCardArtIndex}.webp`)}
+          alt={translatedCardName}
+          className="w-full h-full object-cover opacity-95 drop-shadow-md"
+        />
+      );
+    }
+
+    if (usesMagicRuleCardArt && card.magicRuleCardIndex !== undefined && card.magicHeroId) {
+      return (
+        <img
+          src={assetUrl(`sprites/magic/rule-cards/${card.magicHeroId}/${card.magicRuleCardIndex}.webp`)}
+          alt={translatedCardName}
+          className="w-full h-full object-cover opacity-95 drop-shadow-md"
+        />
+      );
+    }
+
+    if (card.magicBasicCardArt && card.magicHeroId) {
+      return (
+        <img
+          src={assetUrl(`sprites/magic/basic-cards/${card.magicHeroId}/${card.magicBasicCardArt}.webp`)}
+          alt={translatedCardName}
+          className="w-full h-full object-cover opacity-95 drop-shadow-md"
+        />
+      );
+    }
+
+    if (card.magicCardArtIndex !== undefined) {
+      return (
+        <img
+          src={assetUrl(`sprites/magic/cards/${card.magicCardArtIndex}.webp`)}
           alt={translatedCardName}
           className="w-full h-full object-cover opacity-95 drop-shadow-md"
         />

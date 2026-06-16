@@ -1098,7 +1098,7 @@ export const storageService = {
       // Don't save if we are on transient screens OR mini-games
       // Title screen resume should only work for the main game
       const transientOrMini = [
-          GameScreen.START_MENU, GameScreen.GAME_OVER, GameScreen.ENDING,
+          GameScreen.START_MENU, GameScreen.GAME_OVER, GameScreen.ENDING, GameScreen.MAGIC_ROMANCE_ENDING,
           GameScreen.VICTORY, GameScreen.COMPENDIUM, GameScreen.HELP,
           GameScreen.CHARACTER_SELECTION, GameScreen.DIFFICULTY_SELECTION, GameScreen.RANKING, GameScreen.PROBLEM_CHALLENGE,
           GameScreen.ASSIGNMENT_CREATE, GameScreen.SUBMISSION, GameScreen.REWARD_CARD_ALBUM,

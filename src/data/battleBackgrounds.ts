@@ -84,20 +84,103 @@ export const BATTLE_BACKGROUND_SCENES: BattleBackgroundScene[] = [
   }
 ];
 
+export const MAGIC_BATTLE_BACKGROUND_SCENES: BattleBackgroundScene[] = [
+  {
+    id: 'classroom',
+    image: battleBackgroundUrl('magic-battle-classroom.webp'),
+    flavorTexts: [
+      '魔法陣の光が教室の床を走り、黒板の星図が静かに輝いた。',
+      '浮かび上がった机の影を抜けて、授業では教わらない戦いが始まる。',
+      'チョークの粉が星屑に変わり、変身した心に魔力が満ちていく。'
+    ]
+  },
+  {
+    id: 'library',
+    image: battleBackgroundUrl('magic-battle-library.webp'),
+    flavorTexts: [
+      '深淵図書館の本棚が開き、封じられた呪文がページからこぼれた。',
+      '月明かりを受けた魔導書が舞い、知識の迷宮が戦場へ変わる。',
+      '静かな閲覧席の奥で、古い契約の鎖がきしむ音がした。'
+    ]
+  },
+  {
+    id: 'science-lab',
+    image: battleBackgroundUrl('magic-battle-science-lab.webp'),
+    flavorTexts: [
+      '錬金フラスコが淡く発光し、実験台の上で時間の歯車が回り出す。',
+      '薬品棚の影に隠れた魔力が、理科室全体を結界へ作り替えた。',
+      '結晶化した魔素が床を伝い、次の一手を待つように震えている。'
+    ]
+  },
+  {
+    id: 'hallway',
+    image: battleBackgroundUrl('magic-battle-hallway.webp'),
+    flavorTexts: [
+      '黄昏の廊下にステンドグラスの光が落ち、封印扉が遠くで鳴った。',
+      '掲示板の紙片がリボンのように舞い、廊下の奥から敵意が近づく。',
+      '放課後の足音が消えた瞬間、学園の裏側が姿を現した。'
+    ]
+  },
+  {
+    id: 'rooftop',
+    image: battleBackgroundUrl('magic-battle-rooftop.webp'),
+    flavorTexts: [
+      '大きな月の下、屋上の結界が星座の形に組み上がっていく。',
+      '夜風に羽根と光粒が舞い、遠い街明かりが小さくまたたいた。',
+      'フェンスの向こうの空へ、願いと覚悟がまっすぐ伸びていく。'
+    ]
+  },
+  {
+    id: 'courtyard',
+    image: battleBackgroundUrl('magic-battle-courtyard.webp'),
+    flavorTexts: [
+      '中庭の噴水が星の水を吹き上げ、花壇の結界が淡く開いた。',
+      '夜の学園に花びらが舞い、優しい光の奥で危険な気配が揺れる。',
+      '校舎に囲まれた広場が、恋も友情も守るための戦場になった。'
+    ]
+  },
+  {
+    id: 'music-room',
+    image: battleBackgroundUrl('magic-battle-music-room.webp'),
+    flavorTexts: [
+      '音楽ホールの譜面が光の粒に変わり、夢の舞台が幕を開ける。',
+      '誰も弾いていないピアノが和音を鳴らし、紫の魔力が渦を巻いた。',
+      'シャンデリアの光が降り注ぎ、悪夢を断つための旋律が響く。'
+    ]
+  },
+  {
+    id: 'gym',
+    image: battleBackgroundUrl('magic-battle-gym.webp'),
+    flavorTexts: [
+      '訓練場の結界ドームが閉じ、床の星印が決戦の位置を示した。',
+      '魔法標的が赤く灯り、奥義を放つための魔力が一気に高まる。',
+      '広いホールに歓声はない。ただ、巨悪へ向かう覚悟だけが満ちている。'
+    ]
+  }
+];
+
 const sceneById = new Map(BATTLE_BACKGROUND_SCENES.map(scene => [scene.id, scene]));
+const magicSceneById = new Map(MAGIC_BATTLE_BACKGROUND_SCENES.map(scene => [scene.id, scene]));
 
 export const chooseBattleBackgroundScene = (
   nodeType: NodeType | undefined,
   act: number,
-  floor: number
+  floor: number,
+  visualTheme: 'elementary' | 'high-school' | 'magic' = 'elementary'
 ): BattleBackgroundScene => {
-  if (nodeType === NodeType.BOSS) return sceneById.get('gym') ?? BATTLE_BACKGROUND_SCENES[0];
-  const regularScenes = BATTLE_BACKGROUND_SCENES.filter(scene => scene.id !== 'gym');
+  const scenes = visualTheme === 'magic' ? MAGIC_BATTLE_BACKGROUND_SCENES : BATTLE_BACKGROUND_SCENES;
+  const byId = visualTheme === 'magic' ? magicSceneById : sceneById;
+  if (nodeType === NodeType.BOSS) return byId.get('gym') ?? scenes[0];
+  const regularScenes = scenes.filter(scene => scene.id !== 'gym');
   const index = Math.abs((act * 7 + floor * 3) % regularScenes.length);
-  return regularScenes[index] ?? BATTLE_BACKGROUND_SCENES[0];
+  return regularScenes[index] ?? scenes[0];
 };
 
-export const getBattleBackgroundSceneById = (id: string | undefined): BattleBackgroundScene => {
+export const getBattleBackgroundSceneById = (
+  id: string | undefined,
+  visualTheme: 'elementary' | 'high-school' | 'magic' = 'elementary'
+): BattleBackgroundScene => {
+  if (visualTheme === 'magic') return magicSceneById.get(id ?? '') ?? MAGIC_BATTLE_BACKGROUND_SCENES[0];
   return sceneById.get(id ?? '') ?? BATTLE_BACKGROUND_SCENES[0];
 };
 

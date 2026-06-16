@@ -20,6 +20,7 @@ import React, { useMemo, useState, useCallback } from 'react';
 interface DebugMenuScreenProps {
     onStart: (deck: ICard[], relics: Relic[], potions: Potion[]) => void;
     onStartAct3Boss: (deck: ICard[], relics: Relic[], potions: Potion[]) => void;
+    onStartMagicEventSimulation: () => void;
     onBack: () => void;
     onTimeUpdate: (newDailySeconds: number) => void;
     onAddClearCount: () => void;
@@ -79,6 +80,7 @@ const TranslationRow = React.memo(({ original, context, debugLanguageMode, isInl
 const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
     onStart,
     onStartAct3Boss,
+    onStartMagicEventSimulation,
     onBack,
     onTimeUpdate,
     onAddClearCount,
@@ -262,6 +264,12 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
                 </h2>
                 <div className="flex gap-2 md:gap-4 text-sm md:text-base">
                     <button onClick={onBack} className="text-gray-300 hover:text-white underline">{trans("戻る", initialLanguageMode)}</button>
+                    <button
+                        onClick={onStartMagicEventSimulation}
+                        className="bg-fuchsia-800 hover:bg-fuchsia-700 text-white px-3 py-1 md:px-4 md:py-2 rounded font-bold flex items-center shadow-lg border border-fuchsia-400 text-xs"
+                    >
+                        恋愛イベントSIM <Sparkles size={14} className="ml-1" />
+                    </button>
                     <button
                         onClick={() => onStartAct3Boss(selectedDeck, selectedRelics, selectedPotions)}
                         className="bg-purple-700 hover:bg-purple-600 text-white px-3 py-1 md:px-4 md:py-2 rounded font-bold flex items-center shadow-lg border border-purple-400 text-xs"

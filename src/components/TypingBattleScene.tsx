@@ -10,7 +10,7 @@ import { AlertCircle, FlaskConical, Gem, Heart, Keyboard, Shield, Skull, Triangl
 import { getTypingLessonDefinition, TypingLessonId } from '../data/typingLessonConfig';
 import { PotionIcon, RelicIcon } from './ItemIcon';
 import { getBattleBackgroundSceneById } from '../data/battleBackgrounds';
-import { getHighSchoolCharacterSpritePath, getThemedEnemyDisplayName, type HighSchoolEnemyAction, type VisualThemeId } from '../data/visualThemes';
+import { getThemedCharacterSpritePath, getThemedEnemyDisplayName, type HighSchoolEnemyAction, type VisualThemeId } from '../data/visualThemes';
 import type { BattleUiSettings } from './SettingsModal';
 
 interface TypingBattleSceneProps {
@@ -625,9 +625,17 @@ const TypingBattleScene: React.FC<TypingBattleSceneProps> = ({
         '--typing-battle-player-offset-y': `${battleUiSettings.playerOffsetY}px`,
         '--typing-battle-stats-scale': battleUiSettings.statsScale
     } as React.CSSProperties : undefined;
-    const playerSpriteSource = visualTheme === 'high-school'
-        ? getHighSchoolCharacterSpritePath(player.id, 'idle')
-        : player.imageData;
+    const playerSpriteSource = getThemedCharacterSpritePath(
+        visualTheme,
+        player.id,
+        'idle',
+        player.imageData,
+        !!player.magicTransformed,
+        player.magicProtagonistId,
+        player.magicProtagonistGender,
+    );
+    const isMagicMalePlayerSprite = visualTheme === 'magic'
+        && player.magicProtagonistGender === 'male';
     const getRelicCounter = (relicId: string) => {
         if (relicId === 'KUNAI' || relicId === 'SHURIKEN' || relicId === 'ORNAMENTAL_FAN') {
             return player.relicCounters['ATTACK_COUNT'];
@@ -814,7 +822,7 @@ const TypingBattleScene: React.FC<TypingBattleSceneProps> = ({
     };
 
     const focusInput = () => inputRef.current?.focus();
-    const battleBackgroundScene = getBattleBackgroundSceneById(battleBackgroundId);
+    const battleBackgroundScene = getBattleBackgroundSceneById(battleBackgroundId, visualTheme);
 
     return (
         <div className={`flex h-full w-full flex-col overflow-hidden bg-gray-950 text-white ${isShaking ? 'animate-screen-shake' : ''}`} style={battleUiStyle} onClick={focusInput}>
@@ -951,7 +959,12 @@ const TypingBattleScene: React.FC<TypingBattleSceneProps> = ({
                 <div className="absolute bottom-2 left-2 right-2 z-20 flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
                     <div className="flex min-h-[136px] min-w-0 flex-1 items-end gap-2 p-1.5">
                         <div className="relative h-28 w-28 shrink-0 md:h-36 md:w-36" style={{ transform: `translateY(var(--typing-battle-player-offset-y, 0px)) scale(var(--typing-battle-player-scale, 1))` }}>
-                            <img src={playerSpriteSource} alt="Hero" className="h-full w-full pixel-art drop-shadow-lg" style={{ imageRendering: 'pixelated' }} />
+                            <img
+                                src={playerSpriteSource}
+                                alt="Hero"
+                                className={`h-full w-full drop-shadow-lg ${isMagicMalePlayerSprite ? 'object-contain' : 'pixel-art'}`}
+                                style={isMagicMalePlayerSprite ? undefined : { imageRendering: 'pixelated' }}
+                            />
                             <StandardVFXOverlay effects={activeEffects} targetId="player" />
                             <StandardFloatingTextOverlay data={player.floatingText} languageMode={languageMode} />
                         </div>

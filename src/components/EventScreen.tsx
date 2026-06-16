@@ -4,6 +4,7 @@ import { HelpCircle, ArrowRight } from 'lucide-react';
 import { assetUrl } from '../utils/assetPaths';
 import { LanguageMode } from '../types';
 import { trans } from '../utils/textUtils';
+import type { VisualThemeId } from '../data/visualThemes';
 
 
 const HIGH_SCHOOL_EVENT_IMAGE_POSITION: Partial<Record<number, string>> = {
@@ -45,12 +46,29 @@ interface EventScreenProps {
     interactionDisabled?: boolean;
     interactionDisabledMessage?: string;
     languageMode: LanguageMode;
+    visualTheme?: VisualThemeId;
 }
 
-const EventScreen: React.FC<EventScreenProps> = ({ title, description, options, imageKey, image, resultLog, onContinue, typingMode = false, interactionDisabled = false, interactionDisabledMessage, languageMode }) => {
+const EventScreen: React.FC<EventScreenProps> = ({ title, description, options, imageKey, image, resultLog, onContinue, typingMode = false, interactionDisabled = false, interactionDisabledMessage, languageMode, visualTheme = 'elementary' }) => {
   const highSchoolEventIndex = useMemo(() => {
     const match = imageKey?.match(/^high-school-event-(\d+)$/);
     return match ? Number(match[1]) : null;
+  }, [imageKey]);
+  const magicEventIndex = useMemo(() => {
+    const match = imageKey?.match(/^magic-event-(\d+)$/);
+    return match ? Number(match[1]) : null;
+  }, [imageKey]);
+  const magicRomanceImage = useMemo(() => {
+    const match = imageKey?.match(/^magic-romance:([^:]+):([^:]+):(r[1-6])$/);
+    return match
+      ? assetUrl(`sprites/magic/events/romance/${match[1]}/${match[2]}/${match[3]}.webp`)
+      : null;
+  }, [imageKey]);
+  const magicFriendshipImage = useMemo(() => {
+    const match = imageKey?.match(/^magic-friendship:([^:]+):([^:]+)$/);
+    return match
+      ? assetUrl(`sprites/magic/events/friendship/${match[1]}/${match[2]}/event.webp`)
+      : null;
   }, [imageKey]);
   const highSchoolEventObjectPosition = useMemo(() => {
     if (highSchoolEventIndex === null) return undefined;
@@ -58,9 +76,28 @@ const EventScreen: React.FC<EventScreenProps> = ({ title, description, options, 
   }, [highSchoolEventIndex]);
 
   const imageCandidates = useMemo(() => {
+    if (magicFriendshipImage) {
+      return [
+        magicFriendshipImage,
+        assetUrl('event-illustrations/default.svg'),
+      ];
+    }
+    if (magicRomanceImage) {
+      return [
+        magicRomanceImage,
+        assetUrl('event-illustrations/default.svg'),
+      ];
+    }
     if (highSchoolEventIndex !== null) {
       return [
         assetUrl(`sprites/high-school/events/${highSchoolEventIndex}.png`),
+        assetUrl('event-illustrations/default.svg'),
+      ];
+    }
+    if (magicEventIndex !== null) {
+      return [
+        assetUrl(`sprites/magic/events/${magicEventIndex}.webp`),
+        assetUrl(`sprites/magic/events/${magicEventIndex}.png`),
         assetUrl('event-illustrations/default.svg'),
       ];
     }
@@ -73,7 +110,7 @@ const EventScreen: React.FC<EventScreenProps> = ({ title, description, options, 
       assetUrl(`event-illustrations/${encodedTitle}.svg`),
       assetUrl('event-illustrations/default.svg')
     ];
-  }, [highSchoolEventIndex, imageKey, title]);
+  }, [highSchoolEventIndex, magicEventIndex, magicFriendshipImage, magicRomanceImage, imageKey, title]);
   const [imageIndex, setImageIndex] = useState(0);
   const [choiceLocked, setChoiceLocked] = useState(false);
   const [continueLocked, setContinueLocked] = useState(false);
@@ -136,7 +173,11 @@ const EventScreen: React.FC<EventScreenProps> = ({ title, description, options, 
   return (
     <div
       className="main-event-screen flex h-full w-full flex-col items-center justify-start overflow-y-auto bg-gray-900 bg-cover bg-center p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] text-white relative custom-scrollbar sm:justify-center sm:p-8"
-      style={{ backgroundImage: `url(${assetUrl('sprites/backgrounds/learning-rogue/event-hallway.webp')})` }}
+      style={{
+        backgroundImage: `url(${assetUrl(visualTheme === 'magic'
+          ? 'sprites/backgrounds/learning-rogue/magic-event-hallway.webp'
+          : 'sprites/backgrounds/learning-rogue/event-hallway.webp')})`
+      }}
     >
         <div className="absolute inset-0 bg-slate-950/60 pointer-events-none" />
         
@@ -196,6 +237,11 @@ const EventScreen: React.FC<EventScreenProps> = ({ title, description, options, 
                                 <span className="font-bold text-yellow-400 block group-hover:text-yellow-200 text-base sm:text-lg tracking-wide break-words">
                                     {opt.label}
                                 </span>
+                                {opt.text && (
+                                    <span className="mt-1 block text-xs leading-relaxed text-gray-300 sm:text-sm">
+                                        {opt.text}
+                                    </span>
+                                )}
                             </button>
                         ))}
                     </div>

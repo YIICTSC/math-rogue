@@ -7,6 +7,7 @@ import { getUpgradedCard } from '../utils/cardUtils';
 import { trans } from '../utils/textUtils';
 import { assetUrl } from '../utils/assetPaths';
 import { CARD_ERASER_NAME, getErasableEffectOptions } from '../utils/cardEraser';
+import type { VisualThemeId } from '../data/visualThemes';
 
 const REST_SHORTCUT_KEYS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', 'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', 'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l'];
 
@@ -22,11 +23,14 @@ interface RestScreenProps {
   scienceRoomChance?: number;
   interactionDisabled?: boolean;
   interactionDisabledMessage?: string;
+  visualTheme?: VisualThemeId;
 }
 
-const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSynthesize, onSelfStudy, onLeave, languageMode, typingMode = false, scienceRoomChance = 0.5, interactionDisabled = false, interactionDisabledMessage }) => {
+const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSynthesize, onSelfStudy, onLeave, languageMode, typingMode = false, scienceRoomChance = 0.5, interactionDisabled = false, interactionDisabledMessage, visualTheme = 'elementary' }) => {
+  const isMagic = visualTheme === 'magic';
+  const restHubMessage = isMagic ? "結界保健室だ。魔力を整えて、次の出撃に備えよう。" : "放課後の校舎だ。どこへ行こう？";
   const [mode, setMode] = useState<'CHOICE' | 'UPGRADE' | 'SYNTHESIS' | 'SELF_STUDY' | 'ERASER_EFFECT' | 'PREVIEW_UPGRADE' | 'PREVIEW_SYNTHESIS' | 'RESULT' | 'DONE'>('CHOICE');
-  const [message, setMessage] = useState("放課後の校舎だ。どこへ行こう？");
+  const [message, setMessage] = useState(restHubMessage);
   const [selectedCard, setSelectedCard] = useState<ICard | null>(null);
   const [synthCards, setSynthCards] = useState<ICard[]>([]);
   const [resultCard, setResultCard] = useState<ICard | null>(null);
@@ -78,7 +82,7 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
                   setMode('CHOICE');
                   setSynthCards([]);
                   setSelectedCard(null);
-                  setMessage("放課後の校舎だ。どこへ行こう？");
+                  setMessage(restHubMessage);
               }
               return;
           }
@@ -126,13 +130,13 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
       setMode('DONE');
       setMessage(languageMode === 'ENGLISH'
           ? `You took a nap in the infirmary bed. Healed ${healAmount} HP!`
-          : `保健室のベッドで仮眠をとった。HPが ${healAmount} 回復した！`);
+          : isMagic ? `結界保健室で魔力を整えた。HPが ${healAmount} 回復した！` : `保健室のベッドで仮眠をとった。HPが ${healAmount} 回復した！`);
   };
 
   const handleSmithChoice = () => {
       if (interactionDisabled) return;
       setMode('UPGRADE');
-      setMessage("図工室だ。どの道具（カード）を改良する？");
+      setMessage(isMagic ? "魔法工房だ。どのカードに星屑の強化を施す？" : "図工室だ。どの道具（カード）を改良する？");
   };
 
   const handleSynthesizeChoice = () => {
@@ -144,16 +148,16 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
       }
       setMode('SYNTHESIS');
       setSynthCards([]);
-      setMessage(isMage 
-          ? `理科室だ。混ぜ合わせたいカードを3枚選んでね。\n(理科クラブ部長特典：3枚合成！)` 
-          : "理科室だ。混ぜ合わせたいカードを2枚選んでね。");
+      setMessage(isMagic
+          ? (isMage ? `錬金結界だ。共鳴させたいカードを3枚選んで。\n(時環の錬金術師特典：3枚合成！)` : "錬金結界だ。共鳴させたいカードを2枚選んで。")
+          : (isMage ? `理科室だ。混ぜ合わせたいカードを3枚選んでね。\n(理科クラブ部長特典：3枚合成！)` : "理科室だ。混ぜ合わせたいカードを2枚選んでね。"));
   };
 
   const handleSelfStudyChoice = () => {
       if (interactionDisabled || !hasCardEraser) return;
       setMode('SELF_STUDY');
       setSelectedCard(null);
-      setMessage("自習だ。カード消しゴムで、どのカードの不要な効果を消す？");
+      setMessage(isMagic ? "静かな祈りの間だ。どのカードから乱れた魔力をほどく？" : "自習だ。カード消しゴムで、どのカードの不要な効果を消す？");
   };
 
   const handleCardClick = (card: ICard) => {
@@ -162,7 +166,7 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
           if (card.upgraded) return;
           setSelectedCard(card);
           setMode('PREVIEW_UPGRADE');
-          setMessage("このカードを改良しますか？");
+          setMessage(isMagic ? "このカードへ魔法刻印を重ねますか？" : "このカードを改良しますか？");
       } else if (mode === 'SYNTHESIS') {
           if (synthCards.find(c => c.id === card.id)) {
               // Deselect
@@ -175,7 +179,7 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
                   
                   if (newSelection.length === requiredCards) {
                       setMode('PREVIEW_SYNTHESIS');
-                      setMessage(trans(`この${requiredCards}枚を実験（合成）しますか？（元のカードは消えます）`, languageMode));
+                      setMessage(trans(isMagic ? `この${requiredCards}枚を共鳴合成しますか？（元のカードは消えます）` : `この${requiredCards}枚を実験（合成）しますか？（元のカードは消えます）`, languageMode));
                   }
               }
           }
@@ -184,7 +188,7 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
           if (options.length === 0) return;
           setSelectedCard(card);
           setMode('ERASER_EFFECT');
-          setMessage("消したい効果を選んでください。カード消しゴムは使用後に除外されます。");
+          setMessage(isMagic ? "ほどきたい魔力を選んでください。カード消しゴムは使用後に除外されます。" : "消したい効果を選んでください。カード消しゴムは使用後に除外されます。");
       }
   };
 
@@ -194,7 +198,7 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
       setMode('DONE');
       setMessage(languageMode === 'ENGLISH'
           ? `Removed an unwanted effect from ${trans(selectedCard.name, languageMode)}! The card eraser was used up.`
-          : `${trans(selectedCard.name, languageMode)} の不要な効果を消した！カード消しゴムは使い切った。`);
+          : isMagic ? `${trans(selectedCard.name, languageMode)} の乱れた魔力をほどいた！カード消しゴムは使い切った。` : `${trans(selectedCard.name, languageMode)} の不要な効果を消した！カード消しゴムは使い切った。`);
       setSelectedCard(null);
   };
 
@@ -205,7 +209,7 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
       const selection = shuffled.slice(0, requiredCards);
       setSynthCards(selection);
       setMode('PREVIEW_SYNTHESIS');
-      setMessage(trans(`ランダムな${requiredCards}枚で実験しますか？`, languageMode));
+      setMessage(trans(isMagic ? `ランダムな${requiredCards}枚で共鳴合成しますか？` : `ランダムな${requiredCards}枚で実験しますか？`, languageMode));
   };
 
   const confirmUpgrade = () => {
@@ -215,7 +219,7 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
           setMode('DONE');
           setMessage(languageMode === 'ENGLISH'
               ? `${trans(selectedCard.name, languageMode)} was upgraded! It feels sharper now.`
-              : `${trans(selectedCard.name, languageMode)} が強化された！切れ味が増したようだ。`);
+              : isMagic ? `${trans(selectedCard.name, languageMode)} に星屑の刻印が宿った！` : `${trans(selectedCard.name, languageMode)} が強化された！切れ味が増したようだ。`);
           setSelectedCard(null);
       }
   };
@@ -226,7 +230,7 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
           const result = onSynthesize(synthCards);
           setResultCard(result);
           setMode('RESULT');
-          setMessage("実験成功！新たな力が生まれた！");
+          setMessage(isMagic ? "共鳴成功！新しい魔法の流れが生まれた！" : "実験成功！新たな力が生まれた！");
           setSynthCards([]);
       }
   };
@@ -236,20 +240,24 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
       if (mode === 'PREVIEW_UPGRADE') {
           setMode('UPGRADE');
           setSelectedCard(null);
-          setMessage("どのカードを改良する？");
+          setMessage(isMagic ? "どのカードに魔法刻印を重ねる？" : "どのカードを改良する？");
       } else if (mode === 'PREVIEW_SYNTHESIS') {
           setMode('SYNTHESIS');
           setSynthCards([]); 
-          setMessage(isMage 
-              ? `混ぜ合わせたいカードを3枚選んでね。` 
-              : "混ぜ合わせたいカードを2枚選んでね。");
+          setMessage(isMagic
+              ? (isMage ? `共鳴させたいカードを3枚選んで。` : "共鳴させたいカードを2枚選んで。")
+              : (isMage ? `混ぜ合わせたいカードを3枚選んでね。` : "混ぜ合わせたいカードを2枚選んでね。"));
       }
   };
 
   return (
     <div
       className="main-rest-screen flex flex-col h-full w-full bg-gray-900 bg-cover bg-center text-white relative items-center justify-center p-4 md:p-8"
-      style={{ backgroundImage: `url(${assetUrl('sprites/backgrounds/learning-rogue/rest-infirmary.webp')})` }}
+      style={{
+        backgroundImage: `url(${assetUrl(visualTheme === 'magic'
+          ? 'sprites/backgrounds/learning-rogue/magic-rest-infirmary.webp'
+          : 'sprites/backgrounds/learning-rogue/rest-infirmary.webp')})`
+      }}
     >
         <div className="absolute inset-0 bg-slate-950/58 pointer-events-none" />
         
@@ -260,7 +268,7 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
                 </div>
             )}
             <h2 className="text-3xl md:text-4xl text-orange-500 font-bold mb-4 flex items-center justify-center shrink-0">
-                <DoorOpen className="mr-3" /> {trans("放課後の探索", languageMode)}
+                <DoorOpen className="mr-3" /> {trans(isMagic ? "結界保健室" : "放課後の探索", languageMode)}
             </h2>
             <p className="text-lg md:text-xl text-gray-300 mb-6 min-h-[3rem] shrink-0 whitespace-pre-wrap">{trans(message, languageMode)}</p>
 
@@ -356,7 +364,7 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
                             {mode === 'SYNTHESIS' ? ` ・ ${trans("ランダム合成:", languageMode)} R` : ''}
                         </div>
                      )}
-                     <button onClick={() => { setMode('CHOICE'); setSynthCards([]); setMessage("放課後の校舎だ。どこへ行こう？"); }} className="mt-4 text-gray-400 underline hover:text-white shrink-0">{trans("戻る", languageMode)}{typingMode && ' [0]'}</button>
+                     <button onClick={() => { setMode('CHOICE'); setSynthCards([]); setMessage(restHubMessage); }} className="mt-4 text-gray-400 underline hover:text-white shrink-0">{trans("戻る", languageMode)}{typingMode && ' [0]'}</button>
                 </div>
             )}
 

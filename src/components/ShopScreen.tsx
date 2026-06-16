@@ -7,6 +7,7 @@ import { ShoppingBag, Trash2, Coins, Gem, FlaskConical, X } from 'lucide-react';
 import { trans } from '../utils/textUtils';
 import { assetUrl } from '../utils/assetPaths';
 import { PotionIcon, RelicIcon } from './ItemIcon';
+import type { VisualThemeId } from '../data/visualThemes';
 
 interface ShopScreenProps {
   player: Player;
@@ -25,12 +26,13 @@ interface ShopScreenProps {
   removeCost?: number;
   interactionDisabled?: boolean;
   interactionDisabledMessage?: string;
+  visualTheme?: VisualThemeId;
 }
 
 const REMOVE_COST = 75;
 const SHOP_SHORTCUT_KEYS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', 'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', 'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l'];
 
-const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics = [], shopPotions = [], onBuyCard, onBuyRelic, onBuyPotion, onRemoveCard, onLeave, languageMode, potionCapacity = 3, typingMode = false, priceMultiplier = 1, removeCost, interactionDisabled = false, interactionDisabledMessage }) => {
+const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics = [], shopPotions = [], onBuyCard, onBuyRelic, onBuyPotion, onRemoveCard, onLeave, languageMode, potionCapacity = 3, typingMode = false, priceMultiplier = 1, removeCost, interactionDisabled = false, interactionDisabledMessage, visualTheme = 'elementary' }) => {
   const [purchasedIds, setPurchasedIds] = useState<string[]>([]);
   const [removed, setRemoved] = useState(false);
   const [viewMode, setViewMode] = useState<'BUY' | 'REMOVE'>('BUY');
@@ -39,6 +41,7 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics =
   const [inspectedItem, setInspectedItem] = useState<{ type: 'CARD' | 'RELIC' | 'POTION', data: any } | null>(null);
   const longPressTimer = useRef<any>(null);
   const startPos = useRef({ x: 0, y: 0 });
+  const currencyLabel = visualTheme === 'magic' ? '魔晶' : '円';
 
   const handlePointerDown = (e: React.PointerEvent, itemType: 'RELIC' | 'POTION', data: any) => {
       startPos.current = { x: e.clientX, y: e.clientY };
@@ -200,7 +203,11 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics =
   return (
     <div
       className="main-shop-screen flex flex-col h-full w-full bg-gray-900 bg-cover bg-center text-white relative"
-      style={{ backgroundImage: `url(${assetUrl('sprites/backgrounds/learning-rogue/shop-store.webp')})` }}
+      style={{
+        backgroundImage: `url(${assetUrl(visualTheme === 'magic'
+          ? 'sprites/backgrounds/learning-rogue/magic-shop-store.webp'
+          : 'sprites/backgrounds/learning-rogue/shop-store.webp')})`
+      }}
     >
        <div className="absolute inset-0 bg-slate-950/60 pointer-events-none" />
        
@@ -248,15 +255,15 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics =
            <div className="flex items-center">
                <ShoppingBag size={24} className="text-yellow-500 mr-2" />
                <div>
-                   <h2 className="text-xl font-bold text-yellow-100">{trans("購買部", languageMode)}</h2>
-                   <p className="text-xs text-gray-400">「{trans("いいもの揃ってるよ...", languageMode)}」</p>
+                   <h2 className="text-xl font-bold text-yellow-100">{trans(visualTheme === 'magic' ? "魔法購買部" : "購買部", languageMode)}</h2>
+                   <p className="text-xs text-gray-400">「{trans(visualTheme === 'magic' ? "結界遠征向けの護符と魔法薬、揃ってるよ" : "いいもの揃ってるよ...", languageMode)}」</p>
                </div>
            </div>
            
            <div className="flex items-center gap-2">
                 <div className="flex items-center bg-yellow-900 px-3 py-1 rounded-full border border-yellow-500">
                     <Coins className="text-yellow-400 mr-1" size={16}/>
-                    <span className="text-sm font-bold">{player.gold} {trans("円", languageMode)}</span>
+                    <span className="text-sm font-bold">{player.gold} {trans(currencyLabel, languageMode)}</span>
                 </div>
                 <button onClick={interactionDisabled ? undefined : onLeave} disabled={interactionDisabled} className="bg-red-600 hover:bg-red-500 px-3 py-1 rounded font-bold border-2 border-white cursor-pointer text-xs disabled:cursor-not-allowed disabled:opacity-50">
                     {trans("出る", languageMode)}{typingMode && ' [Enter]'}
@@ -318,7 +325,7 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics =
                     disabled={removed || player.gold < getPrice(removeCost ?? (player.relics.find(r => r.id === 'SMILING_MASK') ? 50 : REMOVE_COST))}
                     className={`flex-1 py-2 rounded border-2 flex items-center justify-center gap-1 cursor-pointer text-sm ${viewMode === 'REMOVE' ? 'bg-red-600 border-white' : 'bg-gray-800 border-gray-600 text-gray-400'} ${removed ? 'opacity-50 cursor-not-allowed' : ''}`}
                 >
-                    <Trash2 size={14}/> {trans("カード削除", languageMode)} ({getPrice(removeCost ?? (player.relics.find(r => r.id === 'SMILING_MASK') ? 50 : REMOVE_COST))} {trans("円", languageMode)}){typingMode && ' [0]'}
+                    <Trash2 size={14}/> {trans(visualTheme === 'magic' ? "魔力浄化" : "カード削除", languageMode)} ({getPrice(removeCost ?? (player.relics.find(r => r.id === 'SMILING_MASK') ? 50 : REMOVE_COST))} {trans(currencyLabel, languageMode)}){typingMode && ' [0]'}
                 </button>
            </div>
            {typingMode && (
@@ -364,7 +371,7 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics =
                                                 disabled={!canAfford}
                                                 className={`px-2 py-0.5 rounded-full font-bold text-xs shadow-lg border border-white ${canAfford ? 'bg-yellow-600 hover:bg-yellow-500 text-white cursor-pointer' : 'bg-gray-600 text-gray-400 cursor-not-allowed'}`}
                                             >
-                                                {price} {trans("円", languageMode)}
+                                                {price} {trans(currencyLabel, languageMode)}
                                             </button>
                                         )}
                                         {isSold && <div className="text-red-500 font-bold rotate-12 text-xs">{trans("売切れ", languageMode)}</div>}
@@ -405,7 +412,7 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics =
                                                 disabled={!canAfford}
                                                 className={`px-2 py-0.5 rounded-full font-bold text-xs shadow-lg border border-white ${canAfford ? 'bg-yellow-600 hover:bg-yellow-500 text-white cursor-pointer' : 'bg-gray-600 text-gray-400 cursor-not-allowed'}`}
                                             >
-                                                {isFull ? `${price} ${trans("円", languageMode)} (${trans("入替", languageMode)})` : `${price} ${trans("円", languageMode)}`}
+                                                {isFull ? `${price} ${trans(currencyLabel, languageMode)} (${trans("入替", languageMode)})` : `${price} ${trans(currencyLabel, languageMode)}`}
                                             </button>
                                         )}
                                         {isSold && <div className="text-red-500 font-bold rotate-12 text-xs">{trans("売切れ", languageMode)}</div>}
@@ -446,7 +453,7 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics =
                                                     ${canAfford ? 'bg-yellow-600 hover:bg-yellow-500 text-white cursor-pointer' : 'bg-gray-600 text-gray-400 cursor-not-allowed'}
                                                 `}
                                             >
-                                                {price} {trans("円", languageMode)}
+                                                {price} {trans(currencyLabel, languageMode)}
                                             </button>
                                         </div>
                                     )}

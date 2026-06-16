@@ -1,5 +1,8 @@
 
 import type { AttackEffectKey, StatusEffectKey } from '../types';
+import type { VisualThemeId } from '../data/visualThemes';
+
+export type BgmThemeId = VisualThemeId | 'magic-female' | 'magic-male';
 
 class AudioService {
   private ctx: AudioContext | null = null;
@@ -18,7 +21,7 @@ class AudioService {
   private bgmSequence: string[] = [];
   
   private bgmMode: 'OSCILLATOR' | 'MP3' | 'STUDY' = 'MP3';
-  private bgmTheme: 'elementary' | 'high-school' = 'elementary';
+  private bgmTheme: BgmThemeId = 'elementary';
   private bgmVolume: number = 0.4;
   private sfxVolume: number = 0.6;
   private audioBuffers: Record<string, AudioBuffer> = {};
@@ -130,7 +133,7 @@ class AudioService {
       return this.bgmMode;
   }
 
-  public async setBgmTheme(theme: 'elementary' | 'high-school') {
+  public async setBgmTheme(theme: BgmThemeId) {
       if (this.bgmTheme === theme) return;
       this.bgmTheme = theme;
       await this.restartCurrentBGM();
@@ -770,7 +773,7 @@ class AudioService {
       }
   }
 
-  public async switchThemeAndPlayBGM(theme: 'elementary' | 'high-school', type: 'battle' | 'mid_boss' | 'boss' | 'final_boss' | 'menu' | 'map' | 'shop' | 'event' | 'rest' | 'reward' | 'victory' | 'game_over' | 'math' | 'poker_shop' | 'poker_play' | 'survivor_metal' | 'school_psyche' | 'dungeon_gym' | 'dungeon_science' | 'dungeon_music' | 'dungeon_library' | 'dungeon_roof' | 'dungeon_boss' | 'paper_plane_setup' | 'paper_plane_battle' | 'paper_plane_vacation' | 'relic_select' | 'kocho_setup' | 'kocho_battle' | 'kocho_boss', loop: boolean = true) {
+  public async switchThemeAndPlayBGM(theme: BgmThemeId, type: 'battle' | 'mid_boss' | 'boss' | 'final_boss' | 'menu' | 'map' | 'shop' | 'event' | 'rest' | 'reward' | 'victory' | 'game_over' | 'math' | 'poker_shop' | 'poker_play' | 'survivor_metal' | 'school_psyche' | 'dungeon_gym' | 'dungeon_science' | 'dungeon_music' | 'dungeon_library' | 'dungeon_roof' | 'dungeon_boss' | 'paper_plane_setup' | 'paper_plane_battle' | 'paper_plane_vacation' | 'relic_select' | 'kocho_setup' | 'kocho_battle' | 'kocho_boss', loop: boolean = true) {
       this.bgmTheme = theme;
       this.stopBGM();
       await this.playBGM(type, loop);
@@ -810,11 +813,11 @@ class AudioService {
       if (!this.ctx || !this.bgmGain) return;
       if (!this.isCurrentPlayback(type, playbackGeneration)) return;
       const baseUrl = (import.meta as any).env.BASE_URL;
-      const themedPaths = this.bgmTheme === 'high-school'
+      const themedPaths = this.bgmTheme !== 'elementary'
           ? [
-              `${baseUrl}bgm/high-school/${type}.mp3`,
-              `/bgm/high-school/${type}.mp3`,
-              `bgm/high-school/${type}.mp3`,
+              `${baseUrl}bgm/${this.bgmTheme}/${type}.mp3`,
+              `/bgm/${this.bgmTheme}/${type}.mp3`,
+              `bgm/${this.bgmTheme}/${type}.mp3`,
           ]
           : [];
       const paths = [
@@ -827,7 +830,8 @@ class AudioService {
       ];
       if (await this.playHtmlAudioMp3(paths, loop, type, playbackGeneration)) return;
       if (!this.isCurrentPlayback(type, playbackGeneration)) return;
-      let buffer = this.audioBuffers[type];
+      const cacheKey = `${this.bgmTheme}:${type}`;
+      let buffer = this.audioBuffers[cacheKey];
       if (!buffer) {
           for (const path of paths) {
               try {
@@ -835,7 +839,7 @@ class AudioService {
                   if (response.ok) {
                       const arrayBuffer = await response.arrayBuffer();
                       buffer = await this.ctx.decodeAudioData(arrayBuffer);
-                      this.audioBuffers[type] = buffer;
+                      this.audioBuffers[cacheKey] = buffer;
                       break; 
                   }
               } catch (e) {}

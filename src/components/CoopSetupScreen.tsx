@@ -32,14 +32,14 @@ export interface CoopStartPayload {
   roomCode: string;
   participants: CoopParticipantPayload[];
   battleMode: 'TURN_BASED' | 'REALTIME';
-  visualTheme?: 'elementary' | 'high-school';
+  visualTheme?: 'elementary' | 'high-school' | 'magic';
 }
 
 interface CoopSetupScreenProps {
   player: Player;
   onStart: (payload: CoopStartPayload) => void;
   onClose: () => void;
-  visualTheme: 'elementary' | 'high-school';
+  visualTheme: 'elementary' | 'high-school' | 'magic';
 }
 
 const MAX_COOP_PLAYERS = 4;

@@ -18,9 +18,24 @@ import { storageService } from '../services/storageService';
 import { PotionIcon, RelicIcon } from './ItemIcon';
 import { getBattleBackgroundSceneById } from '../data/battleBackgrounds';
 import { getStatusEffectKeyForVfx } from '../data/statusEffects';
-import { getHighSchoolCharacterSpritePath, getHighSchoolEnemyVariant, getHighSchoolHumanoidEnemyVariant, getThemedEnemyDisplayName, type HighSchoolEnemyAction, type HighSchoolHeroAction, type VisualThemeId } from '../data/visualThemes';
+import { getThemedCharacterSpritePath, getThemedEnemyDisplayName, getThemedEnemyVariant, getThemedHumanoidEnemyVariant, type HighSchoolEnemyAction, type HighSchoolHeroAction, type VisualThemeId } from '../data/visualThemes';
 import { assetUrl } from '../utils/assetPaths';
 import type { BattleUiSettings } from './SettingsModal';
+import MagicRulePanel from './MagicRulePanel';
+
+const MAGIC_MALE_ACTION_SCALE: Record<string, {
+    before: { attack: number; skill: number };
+    after: { attack: number; skill: number };
+}> = {
+    REN: { before: { attack: 1.159, skill: 0.988 }, after: { attack: 1.082, skill: 1.007 } },
+    SOMA: { before: { attack: 1.148, skill: 1.087 }, after: { attack: 1.186, skill: 1.115 } },
+    MINATO: { before: { attack: 1.115, skill: 0.888 }, after: { attack: 1.178, skill: 1.092 } },
+    RIKU: { before: { attack: 0.949, skill: 0.907 }, after: { attack: 1.110, skill: 1.037 } },
+    YAMATO: { before: { attack: 1.003, skill: 1.040 }, after: { attack: 1.271, skill: 1.150 } },
+    LEON: { before: { attack: 1.093, skill: 0.999 }, after: { attack: 1.214, skill: 1.103 } },
+    ELLIOT: { before: { attack: 1.078, skill: 0.975 }, after: { attack: 1.140, skill: 1.119 } },
+    SAKUYA: { before: { attack: 1.097, skill: 1.055 }, after: { attack: 1.128, skill: 0.996 } },
+};
 
 const POWER_DEFINITIONS: Record<string, { name: string, desc: string }> = {
     WEAK: { name: "へろへろ", desc: "攻撃で与えるダメージが25%減っちゃう。" },
@@ -331,6 +346,7 @@ interface BattleSceneProps {
     onSelectEnemy: (id: string) => void;
     onPlayCard: (card: ICard) => void;
     onPlaySynthesizedCard: (card: ICard) => void;
+    onTransform?: () => void;
     onEndTurn: () => void;
     turnLog: string;
     narrative: string;
@@ -364,11 +380,11 @@ type DrawEntryAnimation = {
 };
 
 const BattleScene: React.FC<BattleSceneProps> = ({
-    player, companions = [], coopSelfPeerId, coopEffectOwnerPeerId, coopTurnQueue = [], coopCanAct = true, coopTurnOwnerLabel, coopSupportCards = [], onUseCoopSupport, selfDown = false, enemies, selectedEnemyId, onSelectEnemy, onPlayCard, onPlaySynthesizedCard, onEndTurn, turnLog, narrative, lastActionTime, lastActionType, actingEnemyId,
+    player, companions = [], coopSelfPeerId, coopEffectOwnerPeerId, coopTurnQueue = [], coopCanAct = true, coopTurnOwnerLabel, coopSupportCards = [], onUseCoopSupport, selfDown = false, enemies, selectedEnemyId, onSelectEnemy, onPlayCard, onPlaySynthesizedCard, onTransform, onEndTurn, turnLog, narrative, lastActionTime, lastActionType, actingEnemyId,
     selectionState, onHandSelection, onCancelSelection, onUsePotion, combatLog, languageMode, codexOptions, onCodexSelect, parryState, onParry, showParryTutorial = false, onCloseParryTutorial, activeEffects, finisherCutinCard, hideEnemyIntents = false, onOpenSettings, battleBackgroundId, visualTheme = 'elementary', battleUiSettings
 }) => {
     const isCoopBattleView = !!coopSelfPeerId || companions.length > 0;
-    const battleBackgroundScene = getBattleBackgroundSceneById(battleBackgroundId);
+    const battleBackgroundScene = getBattleBackgroundSceneById(battleBackgroundId, visualTheme);
     const battleUiStyle = battleUiSettings ? {
         '--battle-ui-control-bar-offset-y': `${battleUiSettings.controlBarOffsetY}px`,
         '--battle-ui-hand-card-scale': battleUiSettings.handCardScale,
@@ -549,6 +565,8 @@ const BattleScene: React.FC<BattleSceneProps> = ({
 
     // Get latest 2 logs
     const latestLogs = [...combatLog].reverse().slice(0, 2);
+    const hasMagicTransformationEffect = visualTheme === 'magic'
+        && activeEffects.some(effect => effect.targetId === 'player' && effect.type === 'BUFF' && effect.id.startsWith('vfx-magic-transform-'));
 
     useEffect(() => {
         const isLandscapeViewport = () => {
@@ -689,9 +707,22 @@ const BattleScene: React.FC<BattleSceneProps> = ({
             : lastActionType === CardType.SKILL || lastActionType === CardType.POWER
                 ? 'skill'
                 : 'idle';
-    const playerSpriteSource = visualTheme === 'high-school'
-        ? getHighSchoolCharacterSpritePath(player.id, highSchoolHeroAction)
-        : player.imageData;
+    const playerSpriteSource = getThemedCharacterSpritePath(
+        visualTheme,
+        player.id,
+        highSchoolHeroAction,
+        player.imageData,
+        !!player.magicTransformed,
+        player.magicProtagonistId,
+        player.magicProtagonistGender,
+    );
+    const isMagicMalePlayerSprite = visualTheme === 'magic'
+        && player.magicProtagonistGender === 'male';
+    const magicMalePlayerSpriteScale = isMagicMalePlayerSprite && highSchoolHeroAction !== 'idle'
+        ? MAGIC_MALE_ACTION_SCALE[player.magicProtagonistId ?? 'REN']
+            ?.[player.magicTransformed ? 'after' : 'before']
+            ?.[highSchoolHeroAction] ?? 1
+        : 1;
     const familiarActionSequence = useMemo(
         () => (player.familiarActionQueue || [])
             .filter(familiar => familiar.actionPulse)
@@ -741,7 +772,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
         };
     };
     useEffect(() => {
-        if (visualTheme !== 'high-school') {
+        if (visualTheme === 'elementary') {
             themedEnemyNameMapRef.current.clear();
             return;
         }
@@ -750,11 +781,18 @@ const BattleScene: React.FC<BattleSceneProps> = ({
         });
     }, [enemies, visualTheme]);
     const renderBattleLog = (log: string) => {
-        if (visualTheme !== 'high-school') return trans(log, languageMode);
+        if (visualTheme === 'elementary') return trans(log, languageMode);
         const themedLog = [...themedEnemyNameMapRef.current.entries()]
             .sort(([a], [b]) => b.length - a.length)
             .reduce((nextLog, [baseName, themedName]) => nextLog.replaceAll(baseName, themedName), log);
-        return trans(themedLog, languageMode);
+        const magicLog = visualTheme === 'magic'
+            ? themedLog
+                .replaceAll('を使用', 'を解放')
+                .replaceAll('ターン終了', '結界反動')
+                .replaceAll('変身の反動', '変身結界の反動')
+                .replaceAll('魔法少女へ変身した！', '変身完了。胸の奥の魔法核が目を覚ました！')
+            : themedLog;
+        return trans(magicLog, languageMode);
     };
 
     const getEnemyActionClass = (enemy: Enemy) => {
@@ -913,9 +951,10 @@ const BattleScene: React.FC<BattleSceneProps> = ({
 
     return (
         <div
-            className={`battle-scene-root battle-ui-custom ${visualTheme === 'high-school' ? 'battle-high-school' : ''} flex flex-col h-full w-full bg-gray-900 text-white relative overflow-hidden ${forceLandscapeSplit || isPcBrowserViewport ? 'battle-force-split battle-pc-split' : ''} ${isShaking ? 'animate-screen-shake' : ''}`}
+            className={`battle-scene-root battle-ui-custom ${visualTheme === 'high-school' ? 'battle-high-school' : visualTheme === 'magic' ? 'battle-magic' : ''} flex flex-col h-full w-full bg-gray-900 text-white relative overflow-hidden ${forceLandscapeSplit || isPcBrowserViewport ? 'battle-force-split battle-pc-split' : ''} ${isShaking ? 'animate-screen-shake' : ''}`}
             style={battleUiStyle}
         >
+            {visualTheme === 'magic' && <MagicRulePanel player={player} />}
             {finisherCutinCard && (
                 <BattleFinisherCutinOverlay card={finisherCutinCard} languageMode={languageMode} />
             )}
@@ -1447,16 +1486,12 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                             const enemyHpPercent = (enemy.currentHp / enemy.maxHp) * 100;
                             const isSelected = !isFinisherActive && (selectedEnemyId === enemy.id || (!selectedEnemyId && visualEnemies.length === 1));
                             const actionClass = getEnemyActionClass(enemy);
-                            const themedEnemy = visualTheme === 'high-school'
-                                ? getHighSchoolEnemyVariant(enemy)
-                                : null;
+                            const themedEnemy = getThemedEnemyVariant(enemy, visualTheme);
                             const enemyName = trans(themedEnemy?.name ?? enemy.name, languageMode);
                             const enemyNameNeedsScroll = enemyName.length > 8;
                             const isTrueBossPhase2 = enemy.enemyType === 'THE_HEART' && enemy.phase === 2;
                             const isFinalBoss = enemy.enemyType === 'THE_HEART';
-                            const humanoidEnemy = visualTheme === 'high-school'
-                                ? getHighSchoolHumanoidEnemyVariant(enemy)
-                                : null;
+                            const humanoidEnemy = getThemedHumanoidEnemyVariant(enemy, visualTheme);
                             const highSchoolEnemyAction: HighSchoolEnemyAction = actingEnemyId !== enemy.id
                                 ? 'idle'
                                 : ['ATTACK', 'ATTACK_DEBUFF', 'ATTACK_DEFEND', 'PIERCE_ATTACK'].includes(enemy.nextIntent.type)
@@ -1525,7 +1560,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                         </div>
                                     )}
 
-                                    <div className={`battle-enemy-sprite ${humanoidEnemy ? 'battle-humanoid-enemy-sprite' : ''} ${isFinalBoss ? 'battle-final-boss-sprite' : ''} ${isTrueBossPhase2 ? 'battle-true-boss-sprite' : ''} relative mb-1 transition-all duration-700 ${humanoidEnemy ? 'w-40 h-40 md:w-48 md:h-48' : isTrueBossPhase2 ? ENEMY_ILLUSTRATION_SIZE_CLASS.battleTrueBossPhase2 : isFinalBoss ? ENEMY_ILLUSTRATION_SIZE_CLASS.battleFinalBoss : ENEMY_ILLUSTRATION_SIZE_CLASS.battleNormal}`}>
+                                    <div className={`battle-enemy-sprite ${humanoidEnemy ? 'battle-humanoid-enemy-sprite' : ''} ${isFinalBoss ? 'battle-final-boss-sprite' : ''} ${isTrueBossPhase2 ? 'battle-true-boss-sprite' : ''} relative mb-1 transition-all duration-700 ${humanoidEnemy ? 'w-40 h-40 md:w-48 md:h-48' : isTrueBossPhase2 ? ENEMY_ILLUSTRATION_SIZE_CLASS.battleTrueBossPhase2 : isFinalBoss ? ENEMY_ILLUSTRATION_SIZE_CLASS.battleFinalBoss : visualTheme === 'magic' ? 'w-32 h-32 md:w-40 md:h-40' : ENEMY_ILLUSTRATION_SIZE_CLASS.battleNormal}`}>
                                         {isFinisherActive ? (
                                             <div className="relative w-full h-full flex items-center justify-center">
                                                 {!finisherBurst && (
@@ -1654,7 +1689,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                     <div ref={playerAreaRef} className={isTrueBossPhase2SpecialLayout ? "battle-player-area relative z-20 flex items-end pl-2 pb-2 shrink-0" : "battle-player-area flex items-end pl-2 pb-2 shrink-0 mt-auto"}>
                         <div ref={playerGroupRef} className={isTrueBossPhase2SpecialLayout ? "flex flex-col items-start md:flex-row md:items-end relative max-w-[48vw] md:max-w-none" : "flex items-end relative"}>
 
-                            <div ref={playerSpriteRef} className={`battle-player-sprite order-1 ${visualTheme === 'high-school' ? 'w-40 h-40 md:w-48 md:h-48' : 'w-20 h-20 md:w-24 md:h-24'} relative transition-all duration-150 ease-out ${isTrueBossPhase2SpecialLayout ? 'mr-0 md:mr-2 mb-1 md:mb-0' : 'mr-2'} ${getActionClass()} ${selectedSupportCard ? 'ring-2 ring-emerald-300 rounded-lg cursor-pointer' : ''}`} onClick={() => {
+                            <div ref={playerSpriteRef} className={`battle-player-sprite order-1 ${visualTheme !== 'elementary' ? 'w-40 h-40 md:w-48 md:h-48' : 'w-20 h-20 md:w-24 md:h-24'} relative transition-all duration-150 ease-out ${isTrueBossPhase2SpecialLayout ? 'mr-0 md:mr-2 mb-1 md:mb-0' : 'mr-2'} ${getActionClass()} ${selectedSupportCard ? 'ring-2 ring-emerald-300 rounded-lg cursor-pointer' : ''}`} onClick={() => {
                                 if (selectedSupportCard && onUseCoopSupport) {
                                     onUseCoopSupport(selectedSupportCard);
                                     setSelectedSupportCard(null);
@@ -1691,12 +1726,24 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                         })}
                                     </div>
                                 )}
+                                {hasMagicTransformationEffect && !mobileActiveFamiliar && (
+                                    <div className="pointer-events-none absolute -inset-x-28 -top-32 bottom-[-2rem] z-30 overflow-visible md:-inset-x-36 md:-top-40">
+                                        <div
+                                            className="h-full w-full animate-magic-transformation-overlay bg-contain bg-center bg-no-repeat mix-blend-screen"
+                                            style={{ backgroundImage: `url(${assetUrl('sprites/magic/effects/transformation-sheet.webp')})` }}
+                                        />
+                                    </div>
+                                )}
                                 <img
                                     key={displayedPlayerSpriteKey}
                                     src={displayedPlayerSpriteSource}
                                     alt={mobileActiveFamiliar?.name || "Hero"}
-                                    className={`relative z-10 w-full h-full transition-all duration-300 ease-out animate-in fade-in zoom-in-95 ${mobileActiveFamiliar ? `object-contain drop-shadow-[0_0_14px_rgba(217,70,239,0.95)] ${mobileFamiliarPresentation?.phase === 'action' ? 'animate-pulse' : ''}` : 'pixel-art'} ${visualTheme === 'high-school' && !mobileActiveFamiliar ? '-scale-x-100' : ''}`}
-                                    style={mobileActiveFamiliar ? undefined : { imageRendering: 'pixelated' }}
+                                    className={`relative z-10 w-full h-full transition-all duration-300 ease-out animate-in fade-in zoom-in-95 ${mobileActiveFamiliar ? `object-contain drop-shadow-[0_0_14px_rgba(217,70,239,0.95)] ${mobileFamiliarPresentation?.phase === 'action' ? 'animate-pulse' : ''}` : isMagicMalePlayerSprite ? 'magic-male-battle-sprite object-contain' : 'pixel-art'} ${visualTheme === 'high-school' && !mobileActiveFamiliar ? '-scale-x-100' : ''}`}
+                                    style={mobileActiveFamiliar
+                                        ? undefined
+                                        : isMagicMalePlayerSprite
+                                            ? { '--magic-male-sprite-scale': magicMalePlayerSpriteScale } as React.CSSProperties
+                                            : { imageRendering: 'pixelated' }}
                                 />
                                 <FloatingTextOverlay data={player.floatingText} languageMode={languageMode} />
                                 {(isCoopBattleView ? selfScopedEffects.length > 0 : shouldRenderPlayerScopedVfxOnSelf) && (
@@ -1745,7 +1792,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                                         key={activeFamiliarDisplay ? `${activeFamiliarDisplay.familiar.instanceId}-${activeFamiliarDisplay.familiar.actionPulse}` : companion.id}
                                                         src={companionImageSrc}
                                                         alt={activeFamiliarDisplay?.familiar.name || companion.name}
-                                                        className={`w-full h-full transition-all duration-300 ease-out animate-in fade-in zoom-in-95 ${activeFamiliarDisplay ? 'object-contain drop-shadow-[0_0_12px_rgba(217,70,239,0.95)] animate-pulse' : `pixel-art ${visualTheme === 'high-school' ? '-scale-x-100' : ''}`}`}
+                                                        className={`w-full h-full transition-all duration-300 ease-out animate-in fade-in zoom-in-95 ${activeFamiliarDisplay ? 'object-contain drop-shadow-[0_0_12px_rgba(217,70,239,0.95)] animate-pulse' : `pixel-art ${visualTheme !== 'elementary' ? '-scale-x-100' : ''}`}`}
                                                         style={activeFamiliarDisplay ? undefined : { imageRendering: 'pixelated' }}
                                                     />
                                                     <FloatingTextOverlay data={companion.floatingText} languageMode={languageMode} offset="-top-2 -right-1" />
@@ -1993,6 +2040,21 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                         {`${trans("進行中", languageMode)}: ${coopTurnOwnerLabel}`}
                     </div>
                 )}
+                {visualTheme === 'magic' && (
+                    <button
+                        onClick={!player.magicTransformed && !actingEnemyId && !selectionState.active && coopCanAct ? onTransform : undefined}
+                        disabled={!!player.magicTransformed || !!actingEnemyId || selectionState.active || !coopCanAct || !onTransform}
+                        className={`mr-2 rounded border-2 px-3 py-1.5 text-xs font-black shadow-lg transition-all ${
+                            player.magicTransformed
+                                ? 'border-fuchsia-200 bg-fuchsia-500 text-white'
+                                : !actingEnemyId && !selectionState.active && coopCanAct && onTransform
+                                    ? 'border-fuchsia-200 bg-fuchsia-900 text-fuchsia-50 hover:bg-fuchsia-700'
+                                    : 'border-gray-500 bg-gray-700 text-gray-300 opacity-50 grayscale'
+                        }`}
+                    >
+                        {player.magicTransformed ? '変身中 HP-20' : '変身'}
+                    </button>
+                )}
                 <button
                     onClick={!actingEnemyId && !selectionState.active && coopCanAct ? onEndTurn : undefined}
                     disabled={!!actingEnemyId || selectionState.active || !coopCanAct}
@@ -2176,6 +2238,18 @@ const extractIllustrationTokens = (card: ICard): string[] => {
         return card.illustrationRefs.filter(Boolean).slice(0, MAX_ILLUSTRATION_REFS);
     }
 
+    if (card.magicRuleCardArt && card.magicHeroId && card.magicRuleCardIndex !== undefined) {
+        return [`magic-rule:${card.magicHeroId}:${card.magicRuleCardIndex}`];
+    }
+
+    if (card.magicBasicCardArt && card.magicHeroId) {
+        return [`magic-basic:${card.magicHeroId}:${card.magicBasicCardArt}`];
+    }
+
+    if (card.magicCardArtIndex !== undefined) {
+        return [`magic-card:${card.magicCardArtIndex}`];
+    }
+
     const enemyNames = [
         ...(card.enemyIllustrationNames || []),
         ...(card.enemyIllustrationName ? [card.enemyIllustrationName] : []),
@@ -2194,7 +2268,15 @@ const extractIllustrationTokens = (card: ICard): string[] => {
 const FinisherArtPiece: React.FC<{ token: string; seed: string; languageMode: LanguageMode; card: ICard }> = ({ token, seed, languageMode, card }) => {
     const [imageIndex, setImageIndex] = useState(0);
     const [failed, setFailed] = useState(false);
-    const normalized = token.startsWith('enemy:') || token.startsWith('card:') || token.startsWith('pixel:') || token.startsWith('familiar:') ? token : `card:${token}`;
+    const normalized = token.startsWith('enemy:')
+        || token.startsWith('card:')
+        || token.startsWith('pixel:')
+        || token.startsWith('familiar:')
+        || token.startsWith('magic-rule:')
+        || token.startsWith('magic-basic:')
+        || token.startsWith('magic-card:')
+        ? token
+        : `card:${token}`;
 
     useEffect(() => {
         setImageIndex(0);
@@ -2210,7 +2292,7 @@ const FinisherArtPiece: React.FC<{ token: string; seed: string; languageMode: La
                 visualTheme={card.visualTheme}
                 enemyType={card.enemyIllustrationEnemyType}
                 phase={card.enemyIllustrationPhase}
-                action={card.capture && card.visualTheme === 'high-school' ? 'attack' : 'idle'}
+                action={card.capture && card.visualTheme && card.visualTheme !== 'elementary' ? 'attack' : 'idle'}
                 className="w-full h-full"
                 size={32}
             />
@@ -2234,6 +2316,39 @@ const FinisherArtPiece: React.FC<{ token: string; seed: string; languageMode: La
     if (normalized.startsWith('pixel:')) {
         const sprite = normalized.substring('pixel:'.length);
         return <PixelSprite seed={seed} name={sprite} className="w-full h-full" size={32} />;
+    }
+
+    if (normalized.startsWith('magic-rule:')) {
+        const [, heroId, index] = normalized.split(':');
+        return (
+            <img
+                src={assetUrl(`sprites/magic/rule-cards/${heroId}/${index}.webp`)}
+                alt={card.name}
+                className="w-full h-full object-cover"
+            />
+        );
+    }
+
+    if (normalized.startsWith('magic-basic:')) {
+        const [, heroId, art] = normalized.split(':');
+        return (
+            <img
+                src={assetUrl(`sprites/magic/basic-cards/${heroId}/${art}.webp`)}
+                alt={card.name}
+                className="w-full h-full object-cover"
+            />
+        );
+    }
+
+    if (normalized.startsWith('magic-card:')) {
+        const index = normalized.substring('magic-card:'.length);
+        return (
+            <img
+                src={assetUrl(`sprites/magic/cards/${index}.webp`)}
+                alt={card.name}
+                className="w-full h-full object-cover"
+            />
+        );
     }
 
     const cardName = normalized.substring('card:'.length);
@@ -2420,7 +2535,7 @@ export const BattleFinisherCutinOverlay: React.FC<{ card: ICard; languageMode: L
                 <div className="absolute inset-0 flex items-center justify-center">
                     <div className="relative w-[112vw] h-[112vh] border-4 border-white/90 bg-black/25 overflow-hidden shadow-[0_0_60px_rgba(0,0,0,0.75)]">
                         {collagePanels.map((panel) => (
-                            <div
+        <div
                                 key={`collage-${panel.index}`}
                                 className={`absolute inset-0 opacity-0 ${shuffledDirections[panel.index % shuffledDirections.length] === 'left'
                                         ? 'animate-finish-cutin-stack-left'
@@ -2436,7 +2551,7 @@ export const BattleFinisherCutinOverlay: React.FC<{ card: ICard; languageMode: L
                                     animationDelay: `${panelDelays[panel.index] ?? panel.index * delayStepMs}ms`,
                                     zIndex: 20 + panel.index
                                 }}
-                            >
+        >
                                 <div
                                     className="absolute inset-0 border-[2px] border-white/95 shadow-[inset_0_0_0_1px_rgba(0,0,0,0.2)] bg-black"
                                     style={{ transform: `translate(0%, 0%) scale(${panel.scale}) rotate(${panel.rot}deg)` }}
@@ -2854,7 +2969,7 @@ const FullscreenCardArtModal: React.FC<{ card: ICard; languageMode: LanguageMode
                             visualTheme={card.visualTheme}
                             enemyType={card.enemyIllustrationEnemyType}
                             phase={card.enemyIllustrationPhase}
-                            action={card.capture && card.visualTheme === 'high-school' ? 'attack' : 'idle'}
+                            action={card.capture && card.visualTheme && card.visualTheme !== 'elementary' ? 'attack' : 'idle'}
                             className="w-full h-full"
                             size={32}
                         />
