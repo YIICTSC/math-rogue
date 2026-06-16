@@ -9,6 +9,8 @@ export interface CoopParticipantPayload {
   name: string;
   imageData?: string;
   selectedCharacterId?: string;
+  magicProtagonistId?: string;
+  magicProtagonistGender?: 'female' | 'male';
   maxHp?: number;
   currentHp?: number;
   block?: number;

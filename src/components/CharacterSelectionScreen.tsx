@@ -8,8 +8,8 @@ import { assetUrl } from '../utils/assetPaths';
 import { audioService } from '../services/audioService';
 import { storageService } from '../services/storageService';
 import { RelicIcon } from './ItemIcon';
-import type { VisualThemeId } from '../data/visualThemes';
-import { MAGIC_MALE_PROTAGONISTS } from '../data/magicHeroes';
+import { MAGIC_HERO_ID_BY_CHARACTER_ID, type VisualThemeId } from '../data/visualThemes';
+import { MAGIC_HEROES, MAGIC_MALE_PROTAGONISTS } from '../data/magicHeroes';
 import { getMagicRuleConfig } from '../data/magicLoadouts';
 
 const MAGIC_MALE_CHARACTER_IDS = [
@@ -34,6 +34,8 @@ interface CharacterSelectionScreenProps {
     name: string;
     imageData?: string;
     selectedCharacterId?: string;
+    magicProtagonistId?: string;
+    magicProtagonistGender?: 'female' | 'male';
   }>;
   coopSelfPeerId?: string;
   coopDecisionOwnerPeerId?: string;
@@ -49,8 +51,9 @@ const CharacterSelectionScreen: React.FC<CharacterSelectionScreenProps> = ({ cha
   
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
-  const displayedCharacters = useMemo(() => visualTheme === 'magic' && magicGender === 'male'
-    ? MAGIC_MALE_CHARACTER_IDS.flatMap((characterId, index) => {
+  const displayedCharacters = useMemo(() => {
+    if (visualTheme === 'magic' && magicGender === 'male') {
+      return MAGIC_MALE_CHARACTER_IDS.flatMap((characterId, index) => {
         const baseCharacter = characters.find((character) => character.id === characterId);
         const protagonist = MAGIC_MALE_PROTAGONISTS[index];
         if (!baseCharacter || !protagonist) return [];
@@ -62,8 +65,25 @@ const CharacterSelectionScreen: React.FC<CharacterSelectionScreenProps> = ({ cha
           magicProtagonistId: protagonist.id,
           magicProtagonistGender: 'male' as const,
         }];
-      })
-    : characters, [characters, magicGender, visualTheme]);
+      });
+    }
+
+    if (visualTheme === 'magic') {
+      return characters.map((character, index) => {
+        const heroId = character.magicProtagonistId ?? MAGIC_HERO_ID_BY_CHARACTER_ID[character.id] ?? MAGIC_HEROES[index % MAGIC_HEROES.length]?.id;
+        const hero = MAGIC_HEROES.find((entry) => entry.id === heroId) ?? MAGIC_HEROES[0];
+        return {
+          ...character,
+          name: hero.name,
+          description: `【${hero.attribute}属性】${hero.personality}。${hero.specialty}を得意とする魔法少女。${hero.story}`,
+          magicProtagonistId: hero.id,
+          magicProtagonistGender: 'female' as const,
+        };
+      });
+    }
+
+    return characters;
+  }, [characters, magicGender, visualTheme]);
 
   // 初回マウント時に保存されている画像を読み込む
   useEffect(() => {
@@ -322,8 +342,10 @@ const CharacterSelectionScreen: React.FC<CharacterSelectionScreenProps> = ({ cha
             <div className="text-xs font-black tracking-[0.25em] text-emerald-200 uppercase mb-3">Coop Party</div>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               {coopParticipants.map((participant) => {
-                const selectedChar = participant.selectedCharacterId
-                  ? displayedCharacters.find((char) => char.id === participant.selectedCharacterId)
+                const selectedChar = participant.magicProtagonistId
+                  ? displayedCharacters.find((char) => char.magicProtagonistId === participant.magicProtagonistId)
+                  : participant.selectedCharacterId
+                    ? displayedCharacters.find((char) => char.id === participant.selectedCharacterId)
                   : null;
                 const isSelf = participant.peerId === coopSelfPeerId;
                 const isDecisionOwner = participant.peerId === coopDecisionOwnerPeerId;
@@ -366,6 +388,9 @@ const CharacterSelectionScreen: React.FC<CharacterSelectionScreenProps> = ({ cha
                 const relic = visualTheme === 'magic' && char.magicProtagonistId
                     ? getMagicRuleConfig(char.magicProtagonistId).relic
                     : RELIC_LIBRARY[char.startingRelicId];
+                const magicRule = visualTheme === 'magic' && char.magicProtagonistId
+                    ? getMagicRuleConfig(char.magicProtagonistId)
+                    : null;
                 const charImage = customImages[char.id] || char.imageData;
                 const isCustom = !!customImages[char.id];
                 const isMagicMalePortrait = visualTheme === 'magic'
@@ -457,15 +482,24 @@ const CharacterSelectionScreen: React.FC<CharacterSelectionScreenProps> = ({ cha
                                 <div className="text-left">
                                     <div className="text-[10px] text-indigo-300 font-black uppercase tracking-tighter mb-0.5">{trans("固有ギミック", languageMode)}</div>
                                     <div className="text-[11px] text-gray-300 font-bold leading-snug">
-                                        {char.id === 'WARRIOR' && trans('戦闘後の体力回復による高い生存能力。', languageMode)}
-                                        {char.id === 'CARETAKER' && trans('倒した敵を仲間の攻撃カードとして「捕獲」。', languageMode)}
-                                        {char.id === 'ASSASSIN' && trans('毒による固定ダメージ。初期相棒との共闘。', languageMode)}
-                                        {char.id === 'MAGE' && trans('理科室での「3枚合成」。3つの効果を併せ持つ最強のキメラを作成可能。', languageMode)}
-                                        {char.id === 'DODGEBALL' && trans('ドロー＆ディスカード。ミニゲームでの敵撃破。', languageMode)}
-                                        {char.id === 'BARD' && trans('デバフ管理と、敵の攻撃を反射する「応答」。', languageMode)}
-                                        {char.id === 'LIBRARIAN' && trans('手札の「保留」と、強力な物語カードの活用。', languageMode)}
-                                        {char.id === 'CHEF' && trans('献立（初期デッキ）の自由にカスタマイズ。', languageMode)}
-                                        {char.id === 'GARDENER' && trans('菜園での種まきと強力な植物カードへの進化。', languageMode)}
+                                        {magicRule ? (
+                                            <>
+                                                <div>{trans(`${magicRule.name}：${magicRule.description}`, languageMode)}</div>
+                                                <div className="mt-1 text-indigo-100/80">{trans(magicRule.completionCondition, languageMode)}</div>
+                                            </>
+                                        ) : (
+                                            <>
+                                                {char.id === 'WARRIOR' && trans('戦闘後の体力回復による高い生存能力。', languageMode)}
+                                                {char.id === 'CARETAKER' && trans('倒した敵を仲間の攻撃カードとして「捕獲」。', languageMode)}
+                                                {char.id === 'ASSASSIN' && trans('毒による固定ダメージ。初期相棒との共闘。', languageMode)}
+                                                {char.id === 'MAGE' && trans('理科室での「3枚合成」。3つの効果を併せ持つ最強のキメラを作成可能。', languageMode)}
+                                                {char.id === 'DODGEBALL' && trans('ドロー＆ディスカード。ミニゲームでの敵撃破。', languageMode)}
+                                                {char.id === 'BARD' && trans('デバフ管理と、敵の攻撃を反射する「応答」。', languageMode)}
+                                                {char.id === 'LIBRARIAN' && trans('手札の「保留」と、強力な物語カードの活用。', languageMode)}
+                                                {char.id === 'CHEF' && trans('献立（初期デッキ）の自由にカスタマイズ。', languageMode)}
+                                                {char.id === 'GARDENER' && trans('菜園での種まきと強力な植物カードへの進化。', languageMode)}
+                                            </>
+                                        )}
                                     </div>
                                 </div>
                             </div>

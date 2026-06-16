@@ -4,6 +4,14 @@ import type { VisualThemeId } from '../data/visualThemes';
 
 export type BgmThemeId = VisualThemeId | 'magic-female' | 'magic-male';
 
+declare const __APP_ASSET_VERSION__: string | undefined;
+
+const APP_ASSET_VERSION = typeof __APP_ASSET_VERSION__ === 'string' ? __APP_ASSET_VERSION__ : 'dev';
+const versionMagicBgmPath = (path: string) =>
+    path.includes('/bgm/magic') || path.startsWith('bgm/magic')
+        ? `${path}${path.includes('?') ? '&' : '?'}v=${encodeURIComponent(APP_ASSET_VERSION)}`
+        : path;
+
 class AudioService {
   private ctx: AudioContext | null = null;
   private masterGain: GainNode | null = null;
@@ -827,7 +835,7 @@ class AudioService {
           `bgm/${type}.mp3`,
           `/${type}.mp3`,
           `${type}.mp3`
-      ];
+      ].map(versionMagicBgmPath);
       if (await this.playHtmlAudioMp3(paths, loop, type, playbackGeneration)) return;
       if (!this.isCurrentPlayback(type, playbackGeneration)) return;
       const cacheKey = `${this.bgmTheme}:${type}`;

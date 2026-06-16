@@ -14,6 +14,8 @@ import { getCardIllustrationPaths } from '../utils/cardIllustration';
 import { ENEMY_ILLUSTRATION_SIZE_CLASS } from '../constants/uiSizing';
 import { PotionIcon, RelicIcon } from './ItemIcon';
 import { HIGH_SCHOOL_ENEMY_VARIANTS, HIGH_SCHOOL_HUMANOID_ENEMY_VARIANTS, getHighSchoolEnemyVariant, type VisualThemeId } from '../data/visualThemes';
+import { MAGIC_CARDS } from '../data/magicCards';
+import { getMagicCardArtUrl } from '../utils/cardArtPaths';
 
 interface CompendiumScreenProps {
     unlockedCardNames: string[];
@@ -85,12 +87,16 @@ const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, 
     }, []);
 
     const allCards = useMemo(() => {
-        return Object.values(CARDS_LIBRARY).sort((a, b) => {
+        const cards = [
+            ...Object.values(CARDS_LIBRARY),
+            ...(visualTheme === 'magic' ? MAGIC_CARDS : []),
+        ];
+        return cards.sort((a, b) => {
             if (a.type !== b.type) return a.type.localeCompare(b.type);
             if (a.cost !== b.cost) return a.cost - b.cost;
             return a.name.localeCompare(b.name);
         });
-    }, []);
+    }, [visualTheme]);
 
     const allRelics = useMemo(() => Object.values(RELIC_LIBRARY), []);
     const allPotions = useMemo(() => Object.values(POTION_LIBRARY), []);
@@ -256,7 +262,7 @@ const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, 
                 {activeTab === 'CARDS' && (
                     <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8 gap-4 justify-items-center">
                         {allCards.map((template, idx) => {
-                            const isUnlocked = isDebug || unlockedCardNames.includes(template.name);
+                            const isUnlocked = isDebug || visualTheme === 'magic' || unlockedCardNames.includes(template.name);
                             const cardInstance: ICard = { id: `compendium-${idx}`, ...template };
 
                             return (
@@ -464,6 +470,7 @@ const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, 
 
 const FullscreenCardArtModal: React.FC<{ card: ICard; languageMode: LanguageMode; onClose: () => void }> = ({ card, languageMode, onClose }) => {
     const translated = trans(card.name, languageMode);
+    const magicArtUrl = getMagicCardArtUrl(card);
     const imageCandidates = useMemo(
         () => getCardIllustrationPaths(card.id, translated, [card.name]),
         [card.id, card.name, translated]
@@ -487,7 +494,13 @@ const FullscreenCardArtModal: React.FC<{ card: ICard; languageMode: LanguageMode
             </button>
 
             <div className="w-full h-full max-w-[96vw] max-h-[96vh] flex items-center justify-center" onClick={(e) => e.stopPropagation()}>
-                {imageIndex < imageCandidates.length ? (
+                {magicArtUrl ? (
+                    <img
+                        src={magicArtUrl}
+                        alt={translated}
+                        className="max-w-full max-h-full object-contain rounded"
+                    />
+                ) : imageIndex < imageCandidates.length ? (
                     <img
                         src={imageCandidates[imageIndex]}
                         alt={translated}
@@ -541,6 +554,7 @@ const CompendiumBgmModeModal: React.FC<{ cards: ICard[]; languageMode: LanguageM
     const familiarActionSrc = activeCard.familiarSummon
         ? assetUrl(`sprites/high-school/familiars-action/${activeCard.familiarSummon.imageIndex}.webp`)
         : null;
+    const magicArtUrl = getMagicCardArtUrl(activeCard);
     const imageCandidates = useMemo(
         () => getCardIllustrationPaths(activeCard.id, translated, [activeCard.name]),
         [activeCard.id, activeCard.name, translated]
@@ -725,6 +739,12 @@ const CompendiumBgmModeModal: React.FC<{ cards: ICard[]; languageMode: LanguageM
                                 style={{ transform: 'translate(-50%, -50%)' }}
                             />
                         </div>
+                    ) : magicArtUrl ? (
+                        <img
+                            src={magicArtUrl}
+                            alt={translated}
+                            className="h-full w-full object-contain"
+                        />
                     ) : imageIndex < imageCandidates.length ? (
                         <img
                             src={imageCandidates[imageIndex]}

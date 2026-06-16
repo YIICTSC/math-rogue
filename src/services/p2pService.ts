@@ -2,6 +2,9 @@ import Peer, { DataConnection } from 'peerjs';
 import { CoopSharedState, CoopSupportEffectId, CoopTreasurePool, RaceTrickEffectId } from '../types';
 import { OFFLINE_DISTRIBUTABLE, OFFLINE_NETWORK_FEATURE_MESSAGE } from '../config/runtime';
 
+type P2PVisualThemeId = 'elementary' | 'high-school' | 'magic';
+type P2PMagicProtagonistGender = 'female' | 'male';
+
 export type P2PEvent =
     | { type: 'HANDSHAKE', player: any }
     | { type: 'STATE_UPDATE', myState: any, yourState: any, lastAction?: string, receiverTurn?: boolean, turnCount?: number, senderName?: string }
@@ -9,8 +12,8 @@ export type P2PEvent =
     | { type: 'GIVE_UP' }
     | { type: 'RACE_JOIN', name: string, imageData?: string }
     | { type: 'RACE_PARTICIPANTS', participants: Array<{ peerId: string, name: string, imageData?: string }> }
-    | { type: 'RACE_START', endAt: number, durationSec: number, mode?: any, modePool?: string[], answerMode?: any, difficultyLevel?: number }
-    | { type: 'RACE_MODE_SET', mode: any, modePool?: string[], answerMode?: any }
+    | { type: 'RACE_START', endAt: number, durationSec: number, mode?: any, modePool?: string[], answerMode?: any, difficultyLevel?: number, visualTheme?: P2PVisualThemeId }
+    | { type: 'RACE_MODE_SET', mode: any, modePool?: string[], answerMode?: any, visualTheme?: P2PVisualThemeId }
     | { type: 'RACE_DIFFICULTY_SET', difficultyLevel: number }
     | { type: 'RACE_PROGRESS', name: string, imageData?: string, floor: number, maxDamage: number, gameOverCount: number, score: number, updatedAt: number }
     | { type: 'RACE_LEADERBOARD', entries: Array<{ peerId: string, name: string, imageData?: string, floor: number, maxDamage: number, gameOverCount: number, score: number, updatedAt: number }> }
@@ -26,6 +29,8 @@ export type P2PEvent =
             name: string,
             imageData?: string,
             selectedCharacterId?: string,
+            magicProtagonistId?: string,
+            magicProtagonistGender?: P2PMagicProtagonistGender,
             maxHp?: number,
             currentHp?: number,
             block?: number,
@@ -50,6 +55,8 @@ export type P2PEvent =
         name: string,
         imageData?: string,
         selectedCharacterId?: string,
+        magicProtagonistId?: string,
+        magicProtagonistGender?: P2PMagicProtagonistGender,
         maxHp?: number,
         currentHp?: number,
         block?: number,
@@ -68,7 +75,7 @@ export type P2PEvent =
     }> }
     | { type: 'COOP_MODE_SET', mode: any, modePool?: string[], answerMode?: any }
     | { type: 'COOP_DIFFICULTY_SET', difficultyLevel: number }
-    | { type: 'COOP_CHARACTER_SELECT', characterId: string, name: string, imageData: string, maxHp: number, currentHp: number, relicResolved?: boolean }
+    | { type: 'COOP_CHARACTER_SELECT', characterId: string, name: string, imageData: string, maxHp: number, currentHp: number, relicResolved?: boolean, magicProtagonistId?: string, magicProtagonistGender?: P2PMagicProtagonistGender }
     | { type: 'COOP_QUIZ_RESULT', correctCount: number }
     | { type: 'COOP_PLAYER_SNAPSHOT', player: any }
     | {
@@ -76,6 +83,8 @@ export type P2PEvent =
         name?: string,
         imageData?: string,
         selectedCharacterId?: string,
+        magicProtagonistId?: string,
+        magicProtagonistGender?: P2PMagicProtagonistGender,
         maxHp?: number,
         currentHp?: number,
         block?: number,

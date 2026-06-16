@@ -2201,6 +2201,8 @@ const App: React.FC = () => {
             name: selfParticipantName || coopSession.name || selectedCharName,
             imageData: gameState.player.imageData,
             selectedCharacterId: gameState.player.id,
+            magicProtagonistId: gameState.player.magicProtagonistId,
+            magicProtagonistGender: gameState.player.magicProtagonistGender,
             maxHp: gameState.player.maxHp,
             currentHp: gameState.player.currentHp,
             block: gameState.player.block,
@@ -2235,6 +2237,8 @@ const App: React.FC = () => {
             name: selfState.name,
             imageData: selfState.imageData,
             selectedCharacterId: selfState.selectedCharacterId,
+            magicProtagonistId: selfState.magicProtagonistId,
+            magicProtagonistGender: selfState.magicProtagonistGender,
             maxHp: selfState.maxHp,
             currentHp: selfState.currentHp,
             block: selfState.block,
@@ -2243,7 +2247,7 @@ const App: React.FC = () => {
             buffer: selfState.buffer,
             revivedThisBattle: selfState.revivedThisBattle
         });
-    }, [coopSelfPeerId, coopSession, gameState.challengeMode, gameState.screen, gameState.player.block, gameState.player.currentHp, gameState.player.id, gameState.player.imageData, gameState.player.maxHp, gameState.player.nextTurnEnergy, gameState.player.powers, gameState.player.strength, selectedCharName]);
+    }, [coopSelfPeerId, coopSession, gameState.challengeMode, gameState.screen, gameState.player.block, gameState.player.currentHp, gameState.player.id, gameState.player.imageData, gameState.player.magicProtagonistGender, gameState.player.magicProtagonistId, gameState.player.maxHp, gameState.player.nextTurnEnergy, gameState.player.powers, gameState.player.strength, selectedCharName]);
     useEffect(() => {
         if (gameState.challengeMode !== 'COOP' || !coopSession || !coopSelfPeerId || !gameState.player.id) return;
         upsertCoopPlayerSnapshot(coopSelfPeerId, gameState.player);
@@ -2682,8 +2686,9 @@ const App: React.FC = () => {
                         : [...prev.entries, { peerId: fromPeerId, name: data.name, imageData: data.imageData, floor: 0, maxDamage: 0, gameOverCount: 0, score: 0, updatedAt: Date.now() }];
                     const sortedEntries = [...nextEntries].sort(compareRaceEntries);
                     p2pService.sendTo(fromPeerId, { type: 'RACE_PARTICIPANTS', participants: nextParticipants });
-                    p2pService.sendTo(fromPeerId, { type: 'RACE_START', endAt: prev.endAt, durationSec: prev.durationSec, mode: gameState.mode, modePool: gameState.modePool, answerMode: gameState.answerMode, difficultyLevel: gameState.difficultyLevel });
-                    p2pService.sendTo(fromPeerId, { type: 'RACE_MODE_SET', mode: gameState.mode, modePool: gameState.modePool, answerMode: gameState.answerMode });
+                    const raceVisualTheme = gameState.visualTheme || visualTheme;
+                    p2pService.sendTo(fromPeerId, { type: 'RACE_START', endAt: prev.endAt, durationSec: prev.durationSec, mode: gameState.mode, modePool: gameState.modePool, answerMode: gameState.answerMode, difficultyLevel: gameState.difficultyLevel, visualTheme: raceVisualTheme });
+                    p2pService.sendTo(fromPeerId, { type: 'RACE_MODE_SET', mode: gameState.mode, modePool: gameState.modePool, answerMode: gameState.answerMode, visualTheme: raceVisualTheme });
                     p2pService.sendTo(fromPeerId, { type: 'RACE_DIFFICULTY_SET', difficultyLevel: gameState.difficultyLevel || 1 });
                     p2pService.sendTo(fromPeerId, { type: 'RACE_LEADERBOARD', entries: sortedEntries });
                     if (prev.ended) {
@@ -2695,8 +2700,12 @@ const App: React.FC = () => {
             }
 
             if (data.type === 'RACE_MODE_SET' && !raceSession.isHost) {
+                if (data.visualTheme) {
+                    setVisualTheme(data.visualTheme);
+                }
                 setGameState(prev => ({
                     ...prev,
+                    visualTheme: data.visualTheme ?? prev.visualTheme,
                     mode: localAssignmentProblemConfig?.mode || data.mode,
                     modePool: localAssignmentProblemConfig?.mode ? localAssignmentProblemConfig.modePool : data.modePool,
                     answerMode: localAssignmentProblemConfig?.answerMode || data.answerMode || prev.answerMode || 'CHOICE',
@@ -2799,7 +2808,7 @@ const App: React.FC = () => {
         return () => {
             p2pService.onData = previousOnData;
         };
-    }, [raceSession, gameState.challengeMode, gameState.screen, gameState.mode, gameState.modePool, gameState.answerMode, localAssignmentProblemConfig, applyRaceTrickEffectLocal, applyRaceGoldDelta, showRaceToast, raceSelfPeerId]);
+    }, [raceSession, gameState.challengeMode, gameState.screen, gameState.mode, gameState.modePool, gameState.answerMode, gameState.visualTheme, visualTheme, localAssignmentProblemConfig, applyRaceTrickEffectLocal, applyRaceGoldDelta, showRaceToast, raceSelfPeerId]);
 
     const sendCoopStateSync = useCallback(() => {
         if (!isCoopHost) return;
@@ -4318,7 +4327,7 @@ const App: React.FC = () => {
         }
         audioService.playSound('select');
         if (gameState.challengeMode === 'RACE' && raceSession?.isHost) {
-            p2pService.send({ type: 'RACE_MODE_SET', mode: effectiveMode, modePool: effectiveModePool, answerMode: effectiveAnswerMode });
+            p2pService.send({ type: 'RACE_MODE_SET', mode: effectiveMode, modePool: effectiveModePool, answerMode: effectiveAnswerMode, visualTheme });
         }
         if (gameState.challengeMode === 'COOP') {
             if (coopSession && !coopSession.isHost) {
@@ -4602,6 +4611,8 @@ const App: React.FC = () => {
                 name: participantDisplayName,
                 imageData: char.imageData,
                 selectedCharacterId: char.id,
+                magicProtagonistId: char.magicProtagonistId,
+                magicProtagonistGender: char.magicProtagonistGender,
                 maxHp: char.maxHp,
                 currentHp: char.maxHp,
                 relicResolved: shouldSkipStarterRelic
@@ -4625,7 +4636,9 @@ const App: React.FC = () => {
                     imageData: char.imageData,
                     maxHp: char.maxHp,
                     currentHp: char.maxHp,
-                    relicResolved: shouldSkipStarterRelic
+                    relicResolved: shouldSkipStarterRelic,
+                    magicProtagonistId: char.magicProtagonistId,
+                    magicProtagonistGender: char.magicProtagonistGender
                 });
             }
             if (!coopSession.isHost || !nextParticipants.every(participant => !!participant.selectedCharacterId)) {
@@ -11268,6 +11281,8 @@ const App: React.FC = () => {
                             ? {
                                 ...participant,
                             selectedCharacterId: data.characterId,
+                            magicProtagonistId: data.magicProtagonistId,
+                            magicProtagonistGender: data.magicProtagonistGender,
                             name: data.name,
                             imageData: data.imageData,
                             maxHp: data.maxHp,
@@ -11296,6 +11311,8 @@ const App: React.FC = () => {
                             name: data.name ?? participant.name,
                             imageData: data.imageData ?? participant.imageData,
                             selectedCharacterId: data.selectedCharacterId ?? participant.selectedCharacterId,
+                            magicProtagonistId: data.magicProtagonistId ?? participant.magicProtagonistId,
+                            magicProtagonistGender: data.magicProtagonistGender ?? participant.magicProtagonistGender,
                             maxHp: data.maxHp ?? participant.maxHp,
                             currentHp: data.currentHp ?? participant.currentHp,
                             block: data.block ?? participant.block,
@@ -13136,7 +13153,10 @@ const App: React.FC = () => {
                         ) : (
                             <P2PRaceSetup
                                 player={gameState.player}
+                                visualTheme={visualTheme}
                                 onRaceStart={(payload) => {
+                                    const raceVisualTheme = payload.visualTheme || visualTheme;
+                                    setVisualTheme(raceVisualTheme);
                                     const baseEntries: RaceEntry[] = payload.participants.map(p => ({
                                         peerId: p.peerId,
                                         name: p.name,
@@ -13174,11 +13194,12 @@ const App: React.FC = () => {
                                     const raceModePool = assignmentConfig?.mode ? assignmentConfig.modePool : payload.modePool;
                                     const raceAnswerMode = assignmentConfig?.mode ? assignmentConfig.answerMode : payload.answerMode;
                                     if (payload.isHost && assignmentConfig?.mode) {
-                                        p2pService.send({ type: 'RACE_MODE_SET', mode: assignmentConfig.mode, modePool: assignmentConfig.modePool, answerMode: assignmentConfig.answerMode });
+                                        p2pService.send({ type: 'RACE_MODE_SET', mode: assignmentConfig.mode, modePool: assignmentConfig.modePool, answerMode: assignmentConfig.answerMode, visualTheme: raceVisualTheme });
                                     }
                                     setGameState(prev => ({
                                         ...prev,
                                         challengeMode: 'RACE',
+                                        visualTheme: raceVisualTheme,
                                         mode: raceMode ?? prev.mode,
                                         modePool: raceModePool ?? prev.modePool,
                                         answerMode: raceAnswerMode ?? prev.answerMode ?? 'CHOICE',

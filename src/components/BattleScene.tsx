@@ -13,6 +13,7 @@ import { HERO_IMAGE_DATA, CARDS_LIBRARY, STATUS_CARDS } from '../constants';
 import { ENEMY_ILLUSTRATION_SIZE_CLASS } from '../constants/uiSizing';
 import { getUpgradedCard, synthesizeCards } from '../utils/cardUtils';
 import { getCardIllustrationPaths } from '../utils/cardIllustration';
+import { getMagicCardArtUrl } from '../utils/cardArtPaths';
 import React, { useEffect, useMemo, useState, useRef } from 'react';
 import { storageService } from '../services/storageService';
 import { PotionIcon, RelicIcon } from './ItemIcon';
@@ -2924,6 +2925,7 @@ export const BattleFinisherCutinOverlay: React.FC<{ card: ICard; languageMode: L
 
 const FullscreenCardArtModal: React.FC<{ card: ICard; languageMode: LanguageMode; onClose: () => void }> = ({ card, languageMode, onClose }) => {
     const translated = trans(card.name, languageMode);
+    const magicArtUrl = getMagicCardArtUrl(card);
     const imageCandidates = useMemo(
         () => getCardIllustrationPaths(card.id, translated, [card.name]),
         [card.id, card.name, translated]
@@ -2960,7 +2962,13 @@ const FullscreenCardArtModal: React.FC<{ card: ICard; languageMode: LanguageMode
             </button>
 
             <div className="w-full h-full max-w-[96vw] max-h-[96vh] flex items-center justify-center" onClick={(e) => e.stopPropagation()}>
-                {enemyIllustrationNames.length > 0 ? (
+                {magicArtUrl ? (
+                    <img
+                        src={magicArtUrl}
+                        alt={translated}
+                        className="max-w-full max-h-full object-contain rounded"
+                    />
+                ) : enemyIllustrationNames.length > 0 ? (
                     <div className="w-[70vmin] h-[70vmin] max-w-[90vw] max-h-[90vh]">
                         <EnemyIllustration
                             name={enemyIllustrationNames[0]}
