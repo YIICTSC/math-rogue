@@ -393,6 +393,7 @@ const CharacterSelectionScreen: React.FC<CharacterSelectionScreenProps> = ({ cha
                     : null;
                 const charImage = customImages[char.id] || char.imageData;
                 const isCustom = !!customImages[char.id];
+                const isMagicPortrait = visualTheme === 'magic' && !isCustom;
                 const isMagicMalePortrait = visualTheme === 'magic'
                     && magicGender === 'male'
                     && !isCustom;
@@ -433,12 +434,12 @@ const CharacterSelectionScreen: React.FC<CharacterSelectionScreenProps> = ({ cha
                             </div>
                         )}
 
-                        <div className="w-24 h-24 mb-4 relative drop-shadow-[0_0_15px_rgba(255,255,255,0.2)]">
+                        <div className={`w-24 h-24 mb-4 relative drop-shadow-[0_0_15px_rgba(255,255,255,0.2)] ${isMagicPortrait ? 'overflow-hidden rounded-xl bg-slate-950/50' : ''}`}>
                              <img 
                                 src={charImage} 
                                 alt={char.name} 
-                                className={`w-full h-full ${isCustom ? 'rounded-xl object-cover' : isMagicMalePortrait ? 'object-contain' : 'pixel-art'}`}
-                                style={{ imageRendering: isCustom || isMagicMalePortrait ? 'auto' : 'pixelated' }}
+                                className={`w-full h-full ${isCustom ? 'rounded-xl object-cover' : isMagicPortrait ? `magic-character-select-portrait-image ${isMagicMalePortrait ? 'magic-character-select-portrait-image-male' : ''}` : 'pixel-art'}`}
+                                style={{ imageRendering: isCustom || isMagicPortrait ? 'auto' : 'pixelated' }}
                              />
                              {isUnlocked && visualTheme !== 'magic' && (
                                 <button 

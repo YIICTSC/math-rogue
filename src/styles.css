@@ -489,6 +489,17 @@ textarea {
   transform-origin: center bottom;
 }
 
+.main-character-screen .magic-character-select-portrait-image {
+  image-rendering: auto;
+  object-fit: contain;
+  transform: translateY(49%) scale(2.25);
+  transform-origin: center center;
+}
+
+.main-character-screen .magic-character-select-portrait-image-male {
+  transform: translateY(37%) scale(2.05);
+}
+
 .magic-rule-panel-mobile {
   display: none;
 }
