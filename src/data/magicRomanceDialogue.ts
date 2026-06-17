@@ -17,72 +17,6 @@ export interface MagicRomanceDialogueDefinition {
   choices: MagicRomanceChoiceDefinition[];
 }
 
-const HERO_STAGE_LINES: Record<string, string[]> = {
-  AKARI: [
-    'あかり「困ってるなら、私にも手伝わせて。星は一人で見るより、誰かと見た方がきれいだから！」',
-    'あかり「失敗したところ、一緒に見直そう。次に正解できれば、それで前進だよ」',
-    'あかり「戦いじゃない時間も大事にしたいな。あなたのこと、もっと知りたい」',
-    'あかり「怖くても手は離さない。私の光は、守りたい人のためにあるんだから！」',
-    'あかり「卒業しても、魔法がなくなっても、あなたの隣で笑っていたい」',
-  ],
-  SHIZUKU: [
-    'しずく「状況を整理しましょう。あなたの話を聞けば、最適な答えが見つかるはずです」',
-    'しずく「この解法は合理的です。でも、あなたが手伝ってくれたことの方が印象に残っています」',
-    'しずく「予定外の寄り道ですね。……嫌ではありません。記録しておきたいくらいです」',
-    'しずく「計算では危険です。それでも、あなたを置いて退くという選択肢はありません」',
-    'しずく「未来は予測不能です。だからこそ、あなたと一緒に確かめたいと思います」',
-  ],
-  HIYORI: [
-    'ひより「無理に元気なふりをしなくていいよ。ここでは、ゆっくり話してくれる？」',
-    'ひより「頑張ったところ、ちゃんと分かるよ。少しだけ休んでから続きをしようね」',
-    'ひより「あなたといると、心の痛みじゃなくて、あたたかい音が聞こえるの」',
-    'ひより「私が全部背負うんじゃなくて、一緒に支え合えばいいんだよね」',
-    'ひより「これからの毎日も、嬉しいことも苦しいことも、二人で分け合いたいな」',
-  ],
-  TSUBASA: [
-    'つばさ「悩んでる暇があるなら動こうぜ！　あたしも最後まで付き合うからさ！」',
-    'つばさ「いい勝負だったな。勉強でも魔法でも、次はもっと上を目指そうぜ！」',
-    'つばさ「こういう静かな時間、慣れないけど……おまえとなら悪くないな」',
-    'つばさ「一人で突っ込むな！　背中はあたしが守る。だから一緒に帰るぞ！」',
-    'つばさ「これからも競争しようぜ。どっちが幸せになれるか、二人で勝負だ！」',
-  ],
-  REI: [
-    'れい「軽率な行動は慎め。だが事情があるなら話せ。見捨てるつもりはない」',
-    'れい「努力は結果だけで測るものではない。おまえの積み重ねは、私が覚えている」',
-    'れい「静かだな。……おまえと過ごす沈黙なら、煩わしくはない」',
-    'れい「罪も傷も私が断ち切る。おまえは未来だけを見ていろ」',
-    'れい「私の隣は平穏ではない。それでも望むなら、生涯この手を離さない」',
-  ],
-  MADOKA: [
-    'まどか「えっと、この装置……たぶん直せます。あなたがそばで見ていてくれたら、ですけど」',
-    'まどか「失敗の記録も役に立つんです。あなたと見直すと、次の手順が見えてきます」',
-    'まどか「時間を止められたらって思ったこと、ありますか？　私は今が少しだけ……」',
-    'まどか「もうやり直しに逃げません。この瞬間のあなたを、私が助けます」',
-    'まどか「未来は未観測です。でも、あなたと過ごす時間だけは予約してもいいですか？」',
-  ],
-  KOHARU: [
-    'こはる「風があなたをここへ呼んだみたい。急がなくていいから、話してみて」',
-    'こはる「一緒に考えると、難しい問題も少しやわらかく見えるね」',
-    'こはる「このまま風に吹かれていたいな。あなたの隣だと、心が静かになるの」',
-    'こはる「守るだけじゃ足りない。あなたと同じ場所に立って、最後まで戦うね」',
-    'こはる「どこへ進んでも、帰ってきたくなる場所を二人で育てよう」',
-  ],
-  MIRAI: [
-    'みらい「さあ、悩み顔は舞台裏まで！　ここからは私と、とびきり素敵な場面にしましょう？」',
-    'みらい「努力は見えないところでするものよ。……でも、あなたには見つかっちゃったわね」',
-    'みらい「今だけは演技じゃない笑顔でいてもいい？　あなたの前なら、できそうなの」',
-    'みらい「悪夢の主役は私一人で十分よ。あなたは私と一緒に、朝までたどり着いて」',
-    'みらい「人生という舞台の次の幕も、あなたとダブル主演でいきたいわ」',
-  ],
-  SERA: [
-    'セラ「この世界のこと、まだ知らないことばかりです。あなたの言葉で教えてください」',
-    'セラ「学ぶたびに、この世界を好きになります。あなたと一緒なら、なおさらです」',
-    'セラ「星界の記録にはない気持ちです。でも、あなたを見ると胸が明るくなるんです」',
-    'セラ「二つの世界のどちらも諦めません。あなたとなら、光の道を作れます」',
-    'セラ「帰る場所を一つに決めなくてもいいんですね。あなたがいる場所へ、何度でも帰ります」',
-  ],
-};
-
 const TARGET_STAGE_LINES: Record<string, string[]> = {
   REN: [
     '蓮「昔からそうだよな。誰かのためなら、すぐ走り出す。だから俺も放っておけない」',
@@ -254,6 +188,20 @@ const CHOICE_RESPONSE_FOCUS = [
 
 const getTone = (id: string): RomanceCharacterTone => CHARACTER_TONES[id] ?? CHARACTER_TONES.AKARI;
 
+const PAIR_MEMORY_BY_STAGE = [
+  ['初めて名前を呼んだ瞬間', '警戒がほどけた目線', '魔法陣に重なった影', '差し出された手', '戻れない一歩'],
+  ['並べたノートの余白', '教室に残った魔力の匂い', '解けなかった問い', '同じ机に置いた護符', '夕日に透けた本音'],
+  ['人目を避けた廊下', '秘密を預けた小声', '寄り道の約束', '胸に残った沈黙', '二人だけの合図'],
+  ['崩れた結界の中心', '背中越しの呼吸', '傷だらけの帰り道', '離さなかった手', '守り抜いた名前'],
+  ['卒業前夜の空', '言えずにいた未来', '最後の任務前の約束', '二人で選ぶ朝', '終わりではない始まり'],
+] as const;
+
+const pickPairMemory = (leadId: string, partnerId: string, stageIndex: number) => {
+  const memories = PAIR_MEMORY_BY_STAGE[stageIndex];
+  const seed = [...`${leadId}:${partnerId}:${stageIndex}`].reduce((sum, char) => sum + char.charCodeAt(0), 0);
+  return memories[seed % memories.length];
+};
+
 const buildPairScene = (
   leadId: string,
   partnerId: string,
@@ -282,26 +230,27 @@ const buildPairLines = (
 ): string[] => {
   const lead = getTone(leadId);
   const partner = getTone(partnerId);
+  const memory = pickPairMemory(leadId, partnerId, stageIndex);
   return [
     [
-      `${leadName}「${partnerName}の${partner.worry}を、見なかったことにはしたくない」`,
-      `${partnerName}「${leadName}の${lead.voice}は少し眩しい。でも、今は逃げたくありません」`,
+      `${leadName}「${memory}を忘れない。${partnerName}の${partner.worry}ごと、今ここで向き合いたい」`,
+      `${partnerName}「${leadName}の${lead.motif}に触れると、私の${partner.motif}まで落ち着く。逃げずに聞きます」`,
     ],
     [
-      `${leadName}「今日は${lead.motif}だけじゃ足りない。${partnerName}の${partner.motif}を頼らせてくれ」`,
-      `${partnerName}「頼られるなら、私も${partner.worry}を隠さずに済みそうです」`,
+      `${leadName}「${memory}に答えを残そう。今日は${partnerName}の${partner.motif}を頼りに進みたい」`,
+      `${partnerName}「頼られるなら、${partner.worry}を隠す必要もありませんね。${leadName}の弱点も見せてください」`,
     ],
     [
-      `${leadName}「任務じゃない時間に、${partnerName}の${partner.future}を聞きたい」`,
-      `${partnerName}「それなら、${leadName}の${lead.future}も教えてください」`,
+      `${leadName}「任務じゃない${memory}だから言える。${partnerName}の${partner.future}を、もっと知りたい」`,
+      `${partnerName}「それなら、${leadName}の${lead.future}も聞かせて。片方だけ秘密にするのはずるいです」`,
     ],
     [
-      `${leadName}「ここで退いたら、${partnerName}の${partner.resolve}まで否定することになる」`,
-      `${partnerName}「なら私も、${leadName}の${lead.resolve}を信じて前へ出ます」`,
+      `${leadName}「${memory}で退いたら、${partnerName}の${partner.resolve}まで否定することになる」`,
+      `${partnerName}「なら私も、${leadName}の${lead.resolve}を信じます。帰る道は二人で作りましょう」`,
     ],
     [
-      `${leadName}「卒業後の約束を、曖昧なまま戦場へ持っていきたくない」`,
-      `${partnerName}「私も同じです。${leadName}となら、${partner.future}を選べる」`,
+      `${leadName}「${memory}を最後の思い出にしたくない。卒業後も、${partnerName}の隣を選ばせてほしい」`,
+      `${partnerName}「私も同じです。${leadName}となら、${partner.future}を怖がらずに選べる」`,
     ],
   ][stageIndex];
 };
@@ -332,12 +281,13 @@ const buildChoiceResponse = (
   const lead = getTone(leadId);
   const partner = getTone(partnerId);
   const focus = CHOICE_RESPONSE_FOCUS[stageIndex][choiceIndex];
+  const memory = pickPairMemory(leadId, partnerId, stageIndex);
   const branch = [
-    `${leadName}は${focus}を選び、${partnerName}が隠していた${partner.worry}へ踏み込んだ。${partnerName}は${lead.comfort}を拒まず、小さく息をつく。`,
-    `${leadName}が${focus}を差し出すと、${partnerName}は${partner.motif}を弱さではなく信頼の形として見せた。二人の間に、急がない沈黙が残る。`,
-    `${leadName}は${focus}で場を変えた。${partnerName}は${partner.voice}のまま笑い、${leadName}の${lead.future}に自分の願いを重ねる。`,
-    `${leadName}の${lead.resolve}に、${partnerName}の${partner.resolve}が応えた。選んだ${focus}は、二人が別々に戦わないための合図になった。`,
-    `${leadName}は${focus}を言葉にし、${partnerName}も${partner.future}を隠さなかった。恋と使命の答えは、二人だけの約束として結ばれる。`,
+    `${leadName}は${memory}を思い出しながら${focus}を選んだ。${partnerName}は${partner.worry}を笑ってごまかさず、${lead.comfort}を受け入れる。`,
+    `${focus}を選んだことで、${leadName}は${partnerName}の${partner.motif}が揺れる理由を知った。${partnerName}も${leadName}の${lead.voice}を、頼れる音として覚える。`,
+    `${leadName}の${focus}は、${memory}を二人だけの記憶に変えた。${partnerName}は${partner.future}を語り、${leadName}も${lead.future}を隠さない。`,
+    `${focus}の判断に迷いはなかった。${leadName}の${lead.resolve}と${partnerName}の${partner.resolve}が重なり、崩れた結界に帰り道が開く。`,
+    `${leadName}は${focus}を選び、${memory}の先にある約束を言葉にした。${partnerName}は${partner.future}を差し出し、二人の答えはもう揺れない。`,
   ][stageIndex];
   return `${branch}\n${RESPONSE_BY_REWARD[rewardKind]}`;
 };
@@ -351,14 +301,10 @@ export const getMagicRomanceDialogue = (
     const protagonist = MAGIC_MALE_PROTAGONISTS.find((entry) => entry.id === heroId) ?? MAGIC_MALE_PROTAGONISTS[0];
     const heroine = MAGIC_HEROES.find((entry) => entry.id === targetId) ?? MAGIC_HEROES[0];
     const safeStage = Math.max(0, Math.min(4, stageIndex));
-    const protagonistLine = TARGET_STAGE_LINES[protagonist.id]?.[safeStage]
-      ?? `${protagonist.name}「俺から話したいことがある。少し付き合ってくれ」`;
-    const heroineLine = HERO_STAGE_LINES[heroine.id]?.[safeStage]
-      ?? `${heroine.name}「うん。あなたの話を聞かせて」`;
     const pairLines = buildPairLines(protagonist.id, heroine.id, protagonist.name, heroine.name, safeStage);
     return {
       title: `${heroine.name}・${STAGE_TITLES[safeStage]}`,
-      description: `${buildPairScene(protagonist.id, heroine.id, protagonist.name, heroine.name, safeStage)}\n\n${protagonistLine}\n${pairLines[0]}\n\n${heroineLine}\n${pairLines[1]}`,
+      description: `${buildPairScene(protagonist.id, heroine.id, protagonist.name, heroine.name, safeStage)}\n\n${pairLines[0]}\n\n${pairLines[1]}`,
       choices: MALE_REWARD_CHOICES[safeStage].map((choice, choiceIndex) => ({
         ...choice,
         label: buildChoiceLabel(choice.label, heroine.id, heroine.name, safeStage, choiceIndex),
@@ -377,13 +323,11 @@ export const getMagicRomanceDialogue = (
   const hero = MAGIC_HEROES.find((entry) => entry.id === heroId) ?? MAGIC_HEROES[0];
   const target = ROMANCE_TARGETS.find((entry) => entry.id === targetId) ?? ROMANCE_TARGETS[0];
   const safeStage = Math.max(0, Math.min(4, stageIndex));
-  const heroLine = HERO_STAGE_LINES[hero.id]?.[safeStage] ?? `${hero.name}「あなたと話したいことがあるの」`;
-  const targetLine = TARGET_STAGE_LINES[target.id]?.[safeStage] ?? `${target.name}「君の話を聞かせてほしい」`;
   const pairLines = buildPairLines(hero.id, target.id, hero.name, target.name, safeStage);
 
   return {
     title: `${target.name}・${STAGE_TITLES[safeStage]}`,
-    description: `${buildPairScene(hero.id, target.id, hero.name, target.name, safeStage)}\n\n${heroLine}\n${pairLines[0]}\n\n${targetLine}\n${pairLines[1]}`,
+    description: `${buildPairScene(hero.id, target.id, hero.name, target.name, safeStage)}\n\n${pairLines[0]}\n\n${pairLines[1]}`,
     choices: REWARD_CHOICES[safeStage].map((choice, choiceIndex) => ({
       ...choice,
       label: buildChoiceLabel(choice.label, target.id, target.name, safeStage, choiceIndex),
