@@ -180,6 +180,12 @@ class AudioService {
       if (this.bgmGain && this.ctx) {
           this.bgmGain.gain.setTargetAtTime(this.bgmVolume, this.ctx.currentTime, 0.05);
       }
+      if (this.currentHtmlAudio) {
+          this.currentHtmlAudio.volume = this.bgmVolume;
+      }
+      this.activeBgmHtmlAudios.forEach(audio => {
+          audio.volume = this.bgmVolume;
+      });
   }
 
   public getBgmVolume() {
@@ -191,6 +197,11 @@ class AudioService {
       if (this.sfxGain && this.ctx) {
           this.sfxGain.gain.setTargetAtTime(this.sfxVolume, this.ctx.currentTime, 0.05);
       }
+      this.activeHtmlSfx.forEach(audios => {
+          audios.forEach(audio => {
+              audio.volume = this.sfxVolume;
+          });
+      });
   }
 
   public getSfxVolume() {

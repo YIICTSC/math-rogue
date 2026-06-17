@@ -126,10 +126,10 @@ const SettingsModal: React.FC<Props> = ({
                 </div>
               </div>
               <label className="block">{trans("BGM音量", languageMode)}: {Math.round(settings.bgmVolume * 100)}%
-                <input className="w-full" type="range" min={0} max={100} value={Math.round(settings.bgmVolume * 100)} onChange={e => onChange('bgmVolume', Number(e.target.value) / 100)} />
+                <input className="w-full" type="range" min={0} max={100} value={Math.round(settings.bgmVolume * 100)} onInput={e => onChange('bgmVolume', Number(e.currentTarget.value) / 100)} onChange={e => onChange('bgmVolume', Number(e.target.value) / 100)} />
               </label>
               <label className="block">{trans("SE音量", languageMode)}: {Math.round(settings.seVolume * 100)}%
-                <input className="w-full" type="range" min={0} max={100} value={Math.round(settings.seVolume * 100)} onChange={e => onChange('seVolume', Number(e.target.value) / 100)} />
+                <input className="w-full" type="range" min={0} max={100} value={Math.round(settings.seVolume * 100)} onInput={e => onChange('seVolume', Number(e.currentTarget.value) / 100)} onChange={e => onChange('seVolume', Number(e.target.value) / 100)} />
               </label>
             </>
           )}
