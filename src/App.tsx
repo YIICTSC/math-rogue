@@ -624,7 +624,7 @@ const App: React.FC = () => {
     const wait = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 
     const getFilteredCardPool = (playerId: string | undefined, includeSpecial: boolean = false): ICard[] => {
-        const isLibrarian = playerId === 'LIBRARIAN';
+        const isLibrarian = coopSyncedVisualTheme !== 'magic' && playerId === 'LIBRARIAN';
         const isGardener = coopSyncedVisualTheme !== 'magic' && playerId === 'GARDENER';
 
         // Get currently unlocked cards from storage
@@ -7738,7 +7738,7 @@ const App: React.FC = () => {
             if (!enemy || enemy.currentHp <= 0) continue;
             setActingEnemyId(enemy.id);
             lastActingEnemyRef.current = { ...enemy };
-            const isBard = stateRef.current.player.id === 'BARD';
+            const isBard = stateRef.current.visualTheme !== 'magic' && stateRef.current.player.id === 'BARD';
             const isAttackIntent =
                 enemy.nextIntent.type === EnemyIntentType.ATTACK ||
                 enemy.nextIntent.type === EnemyIntentType.ATTACK_DEBUFF ||
@@ -9819,7 +9819,7 @@ const App: React.FC = () => {
     const buildRewardBundleForPlayer = useCallback((player: Player, nodeType?: NodeType, challengeMode?: string, bonusGold: number = 0, rewardScope: string = 'reward') => {
         const rewards: RewardItem[] = [];
         let goldGained = 0;
-        const isLibrarian = player.id === 'LIBRARIAN';
+        const isLibrarian = stateRef.current.visualTheme !== 'magic' && player.id === 'LIBRARIAN';
         const isGardener = stateRef.current.visualTheme !== 'magic' && player.id === 'GARDENER';
         const rewardPrefix = `${rewardScope}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
         const getRewardCardTemplateKey = (card: ICard) => card.originalNames?.[0] || card.name || card.id;

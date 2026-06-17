@@ -38,7 +38,7 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
   // 50% chance for Science Room to be open normally
   const [isScienceRoomOpen] = useState(() => Math.random() < scienceRoomChance);
 
-  const isMage = player.id === 'MAGE';
+  const isMage = !isMagic && player.id === 'MAGE';
   // Science Club Kid (MAGE) always has the key to the Science Room
   const scienceRoomAvailable = isMage || isScienceRoomOpen;
   
