@@ -487,6 +487,7 @@ const CharacterSelectionScreen: React.FC<CharacterSelectionScreenProps> = ({ cha
                                             <>
                                                 <div>{trans(`${magicRule.name}：${magicRule.description}`, languageMode)}</div>
                                                 <div className="mt-1 text-indigo-100/80">{trans(magicRule.completionCondition, languageMode)}</div>
+                                                <div className="mt-1 text-amber-100/90">{trans(`完成効果：${magicRule.completionEffect}`, languageMode)}</div>
                                             </>
                                         ) : (
                                             <>
@@ -516,6 +517,11 @@ const CharacterSelectionScreen: React.FC<CharacterSelectionScreenProps> = ({ cha
                                     <div className="text-[10px] text-gray-400 font-bold leading-tight mt-0.5">
                                         {relic ? trans(relic.description, languageMode) : ''}
                                     </div>
+                                    {magicRule && (
+                                        <div className="mt-1 text-[10px] font-bold leading-tight text-amber-100/90">
+                                            {trans(`対応システム：${magicRule.name}`, languageMode)}
+                                        </div>
+                                    )}
                                 </div>
                             </div>
                         </div>

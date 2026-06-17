@@ -35,8 +35,23 @@
   100% { opacity: 0; transform: scale(1.22) translateY(-18px); filter: brightness(1.45) blur(2px); }
 }
 
+@keyframes magic-transformation-frame {
+  0%, 30% { background-position: 0% center; }
+  31%, 65% { background-position: 50% center; }
+  66%, 100% { background-position: 100% center; }
+}
+
 .animate-magic-transformation-overlay {
   animation: magic-transformation-overlay 1.45s ease-out both;
+}
+
+.magic-transformation-sheet-frame {
+  background-position: 0% center;
+  background-repeat: no-repeat;
+  background-size: 300% 100%;
+  animation:
+    magic-transformation-overlay 1.45s ease-out both,
+    magic-transformation-frame 1.45s steps(1, end) both;
 }
 
 .card-holographic {
@@ -501,35 +516,36 @@ textarea {
 }
 
 .magic-rule-panel-mobile {
+  display: block;
+  width: min(13rem, calc(100vw - 1rem));
+  max-height: calc(100dvh - 6rem);
+}
+
+.magic-rule-panel-desktop {
   display: none;
 }
 
-@media (orientation: portrait) and (max-width: 767px) {
-  .magic-rule-panel-desktop {
-    display: none;
-  }
+.magic-rule-panel-mobile[open] {
+  width: min(20rem, calc(100vw - 1rem));
+  overflow-y: auto;
+}
 
+.magic-rule-panel-mobile > summary {
+  list-style: none;
+}
+
+.magic-rule-panel-mobile > summary::-webkit-details-marker {
+  display: none;
+}
+
+.magic-rule-panel-mobile[open] .magic-rule-panel-mobile-chevron {
+  rotate: 180deg;
+}
+
+@media (orientation: portrait) and (max-width: 767px) {
   .magic-rule-panel-mobile {
-    display: block;
     width: min(10rem, calc(100vw - 1rem));
     max-height: calc(100dvh - 7rem);
-  }
-
-  .magic-rule-panel-mobile[open] {
-    width: min(18rem, calc(100vw - 1rem));
-    overflow-y: auto;
-  }
-
-  .magic-rule-panel-mobile > summary {
-    list-style: none;
-  }
-
-  .magic-rule-panel-mobile > summary::-webkit-details-marker {
-    display: none;
-  }
-
-  .magic-rule-panel-mobile[open] .magic-rule-panel-mobile-chevron {
-    rotate: 180deg;
   }
 }
 

@@ -215,6 +215,133 @@ const RESPONSE_BY_REWARD: Record<MagicRomanceRewardKind, string> = {
   strength: '守りたい気持ちが魔力の芯となり、恒久的な攻撃力を得た。',
 };
 
+interface RomanceCharacterTone {
+  voice: string;
+  motif: string;
+  worry: string;
+  comfort: string;
+  resolve: string;
+  future: string;
+}
+
+const CHARACTER_TONES: Record<string, RomanceCharacterTone> = {
+  AKARI: { voice: 'まっすぐな星の明るさ', motif: '星光', worry: '一人で先に走り過ぎる不安', comfort: '笑顔で相手の手を引くこと', resolve: '暗い場所でも最初の光になること', future: '願いを一緒に増やす明日' },
+  SHIZUKU: { voice: '静かな分析と隠した優しさ', motif: '月鏡', worry: '予定外の感情を扱いきれない戸惑い', comfort: '事実を並べて安心できる答えを作ること', resolve: '予測できない選択も受け入れること', future: '二人で検証し続ける未来' },
+  HIYORI: { voice: '痛みに寄り添う柔らかさ', motif: '花の治癒', worry: '誰かの傷を自分だけで抱える癖', comfort: '弱音を急かさず聞くこと', resolve: '支えられる強さも選ぶこと', future: '帰れる庭を育てる日々' },
+  TSUBASA: { voice: '熱血で不器用なまっすぐさ', motif: '炎のハンマー', worry: '立ち止まると弱さが見える怖さ', comfort: '勝負にして前へ進ませること', resolve: '背中を守りながら正面突破すること', future: '笑い合える競争を続ける毎日' },
+  REI: { voice: '寡黙な規律と深い庇護', motif: '闇符', worry: '禁術と過去を知られる恐れ', comfort: '沈黙ごと隣にいること', resolve: '罪も傷も断ち切って守ること', future: '平穏を二人で選び直す道' },
+  MADOKA: { voice: '内気な研究熱と時間への憧れ', motif: '時計装置', worry: '失敗を巻き戻したくなる弱さ', comfort: '失敗記録を一緒に読み返すこと', resolve: '今この瞬間を選んで助けること', future: '未観測の時間を予約する約束' },
+  KOHARU: { voice: '穏やかな風と芯の強さ', motif: '風と精霊樹', worry: '守るだけで距離を置いてしまう癖', comfort: '風のように重さをほどくこと', resolve: '同じ場所に立って戦うこと', future: '帰りたい場所を育てる季節' },
+  MIRAI: { voice: '華やかな演技と本音の寂しさ', motif: '夢舞台', worry: '笑顔の裏の不安を見せる怖さ', comfort: '舞台裏の本音を受け止めること', resolve: '悪夢の主役を奪い返すこと', future: '二人で続ける次の幕' },
+  SERA: { voice: '異世界の礼儀正しさと希望', motif: '星界光', worry: '帰る世界と残りたい気持ちの間で揺れること', comfort: '知らない日常を一緒に学ぶこと', resolve: '二つの世界をどちらも諦めないこと', future: '境界を越えて帰れる場所' },
+  REN: { voice: '世話焼きな幼なじみの近さ', motif: '防護風', worry: '近すぎて大切な気持ちを言い損ねること', comfort: '先に気づいて迎えに行くこと', resolve: '帰る道を風で開くこと', future: '普通の日常を恋人として守る朝' },
+  SOMA: { voice: '規律正しい完璧主義と誠実さ', motif: '氷の秩序', worry: '完璧でない自分を見せること', comfort: '対等な議論で答えを整えること', resolve: '規則より大切な相手を選ぶこと', future: '予定表にない幸福を共に修正する未来' },
+  MINATO: { voice: '努力家の後輩らしい素直さ', motif: '清流の治癒', worry: '守られるだけで終わること', comfort: '頼られるまで隣で学ぶこと', resolve: '今度は自分が手を引くこと', future: '憧れを越えて並んで歩く日々' },
+  RIKU: { voice: '軽やかな観測者の知性', motif: '時間環', worry: '未来を先に知って今を薄めてしまうこと', comfort: '予想外を面白がること', resolve: '正解の未来より生きた今を選ぶこと', future: '一日ずつ答え合わせする時間' },
+  YAMATO: { voice: 'ぶっきらぼうな炎の優しさ', motif: '炎拳', worry: '素直な言葉ほど照れて乱暴になること', comfort: '文句を言いながら一番前に立つこと', resolve: '帰る場所を炎で守ること', future: '肩肘張らず隣で笑う日常' },
+  LEON: { voice: '華やかな自信家の舞台性', motif: '幻奏', worry: '主役でいられない素顔を見せること', comfort: '相手を特等席へ招くこと', resolve: '悪夢を最高の結末へ書き換えること', future: '幕が下りても続く二人の舞台' },
+  ELLIOT: { voice: '静かな星界の気品と孤独', motif: '星界門', worry: '秘密に近づけた相手を危険へ巻き込むこと', comfort: '記録ではなく本心として誘うこと', resolve: '帰還命令より守りたい世界を選ぶこと', future: '境界を越えても閉じない道' },
+  SAKUYA: { voice: '冷たい封印術と赦しを求めない孤独', motif: '宵闇の封印', worry: '過去を知られた時に手を離されること', comfort: '赦しではなく現在の行動を見てもらうこと', resolve: '敵意も運命も封じて未来を守ること', future: '罪を背負っても隣を歩く平穏' },
+};
+
+const CHOICE_RESPONSE_FOCUS = [
+  ['距離を詰める言葉', '不安をほどく聞き方', '一緒に動く提案'],
+  ['得意分野への信頼', '弱点を見せる勇気', '休む時間の共有'],
+  ['二人だけの寄り道', '夢を聞き切る覚悟', '思い出を残す工夫'],
+  ['背中を預ける共闘', '帰すための約束', '守るための作戦'],
+  ['卒業後の居場所', '使命と恋の両立', '二人だけの誓い'],
+] as const;
+
+const getTone = (id: string): RomanceCharacterTone => CHARACTER_TONES[id] ?? CHARACTER_TONES.AKARI;
+
+const buildPairScene = (
+  leadId: string,
+  partnerId: string,
+  leadName: string,
+  partnerName: string,
+  stageIndex: number,
+): string => {
+  const lead = getTone(leadId);
+  const partner = getTone(partnerId);
+  const bridge = [
+    `${leadName}の${lead.motif}が、${partnerName}の${partner.motif}に触れて、いつもの放課後を少し違う色に変えた。`,
+    `${partnerName}が抱えていた${partner.worry}を、${leadName}は${lead.comfort}で受け止めようとする。`,
+    `誰にも急かされない時間の中で、${leadName}は${partnerName}の${partner.voice}を初めて近くで聞いた。`,
+    `崩れかけた結界の中、${leadName}の${lead.resolve}と${partnerName}の${partner.resolve}が同じ方向を向く。`,
+    `最終決戦前夜、${leadName}は${partnerName}と${lead.future}、そして${partner.future}を同時に選ぶ。`,
+  ][stageIndex];
+  return `${STAGE_SCENES[stageIndex]}\n${bridge}`;
+};
+
+const buildPairLines = (
+  leadId: string,
+  partnerId: string,
+  leadName: string,
+  partnerName: string,
+  stageIndex: number,
+): string[] => {
+  const lead = getTone(leadId);
+  const partner = getTone(partnerId);
+  return [
+    [
+      `${leadName}「${partnerName}の${partner.worry}を、見なかったことにはしたくない」`,
+      `${partnerName}「${leadName}の${lead.voice}は少し眩しい。でも、今は逃げたくありません」`,
+    ],
+    [
+      `${leadName}「今日は${lead.motif}だけじゃ足りない。${partnerName}の${partner.motif}を頼らせてくれ」`,
+      `${partnerName}「頼られるなら、私も${partner.worry}を隠さずに済みそうです」`,
+    ],
+    [
+      `${leadName}「任務じゃない時間に、${partnerName}の${partner.future}を聞きたい」`,
+      `${partnerName}「それなら、${leadName}の${lead.future}も教えてください」`,
+    ],
+    [
+      `${leadName}「ここで退いたら、${partnerName}の${partner.resolve}まで否定することになる」`,
+      `${partnerName}「なら私も、${leadName}の${lead.resolve}を信じて前へ出ます」`,
+    ],
+    [
+      `${leadName}「卒業後の約束を、曖昧なまま戦場へ持っていきたくない」`,
+      `${partnerName}「私も同じです。${leadName}となら、${partner.future}を選べる」`,
+    ],
+  ][stageIndex];
+};
+
+const buildChoiceLabel = (
+  baseLabel: string,
+  partnerId: string,
+  partnerName: string,
+  stageIndex: number,
+  choiceIndex: number,
+): string => {
+  const partner = getTone(partnerId);
+  const focus = CHOICE_RESPONSE_FOCUS[stageIndex][choiceIndex];
+  if (choiceIndex === 0) return `${partnerName}へ${focus}を向ける`;
+  if (choiceIndex === 1) return `${partner.worry}を受け止める`;
+  return `${baseLabel}（${partner.motif}）`;
+};
+
+const buildChoiceResponse = (
+  leadId: string,
+  partnerId: string,
+  leadName: string,
+  partnerName: string,
+  stageIndex: number,
+  choiceIndex: number,
+  rewardKind: MagicRomanceRewardKind,
+): string => {
+  const lead = getTone(leadId);
+  const partner = getTone(partnerId);
+  const focus = CHOICE_RESPONSE_FOCUS[stageIndex][choiceIndex];
+  const branch = [
+    `${leadName}は${focus}を選び、${partnerName}が隠していた${partner.worry}へ踏み込んだ。${partnerName}は${lead.comfort}を拒まず、小さく息をつく。`,
+    `${leadName}が${focus}を差し出すと、${partnerName}は${partner.motif}を弱さではなく信頼の形として見せた。二人の間に、急がない沈黙が残る。`,
+    `${leadName}は${focus}で場を変えた。${partnerName}は${partner.voice}のまま笑い、${leadName}の${lead.future}に自分の願いを重ねる。`,
+    `${leadName}の${lead.resolve}に、${partnerName}の${partner.resolve}が応えた。選んだ${focus}は、二人が別々に戦わないための合図になった。`,
+    `${leadName}は${focus}を言葉にし、${partnerName}も${partner.future}を隠さなかった。恋と使命の答えは、二人だけの約束として結ばれる。`,
+  ][stageIndex];
+  return `${branch}\n${RESPONSE_BY_REWARD[rewardKind]}`;
+};
+
 export const getMagicRomanceDialogue = (
   heroId: string,
   targetId: string,
@@ -228,12 +355,22 @@ export const getMagicRomanceDialogue = (
       ?? `${protagonist.name}「俺から話したいことがある。少し付き合ってくれ」`;
     const heroineLine = HERO_STAGE_LINES[heroine.id]?.[safeStage]
       ?? `${heroine.name}「うん。あなたの話を聞かせて」`;
+    const pairLines = buildPairLines(protagonist.id, heroine.id, protagonist.name, heroine.name, safeStage);
     return {
       title: `${heroine.name}・${STAGE_TITLES[safeStage]}`,
-      description: `${STAGE_SCENES[safeStage]}\n\n${protagonistLine}\n\n${heroineLine}`,
-      choices: MALE_REWARD_CHOICES[safeStage].map((choice) => ({
+      description: `${buildPairScene(protagonist.id, heroine.id, protagonist.name, heroine.name, safeStage)}\n\n${protagonistLine}\n${pairLines[0]}\n\n${heroineLine}\n${pairLines[1]}`,
+      choices: MALE_REWARD_CHOICES[safeStage].map((choice, choiceIndex) => ({
         ...choice,
-        response: `${protagonist.name}が一歩踏み込み、${heroine.name}との距離が近づいた。\n${RESPONSE_BY_REWARD[choice.rewardKind]}`,
+        label: buildChoiceLabel(choice.label, heroine.id, heroine.name, safeStage, choiceIndex),
+        response: buildChoiceResponse(
+          protagonist.id,
+          heroine.id,
+          protagonist.name,
+          heroine.name,
+          safeStage,
+          choiceIndex,
+          choice.rewardKind,
+        ),
       })),
     };
   }
@@ -242,13 +379,23 @@ export const getMagicRomanceDialogue = (
   const safeStage = Math.max(0, Math.min(4, stageIndex));
   const heroLine = HERO_STAGE_LINES[hero.id]?.[safeStage] ?? `${hero.name}「あなたと話したいことがあるの」`;
   const targetLine = TARGET_STAGE_LINES[target.id]?.[safeStage] ?? `${target.name}「君の話を聞かせてほしい」`;
+  const pairLines = buildPairLines(hero.id, target.id, hero.name, target.name, safeStage);
 
   return {
     title: `${target.name}・${STAGE_TITLES[safeStage]}`,
-    description: `${STAGE_SCENES[safeStage]}\n\n${heroLine}\n\n${targetLine}`,
-    choices: REWARD_CHOICES[safeStage].map((choice) => ({
+    description: `${buildPairScene(hero.id, target.id, hero.name, target.name, safeStage)}\n\n${heroLine}\n${pairLines[0]}\n\n${targetLine}\n${pairLines[1]}`,
+    choices: REWARD_CHOICES[safeStage].map((choice, choiceIndex) => ({
       ...choice,
-      response: `${target.name}との距離が近づいた。\n${RESPONSE_BY_REWARD[choice.rewardKind]}`,
+      label: buildChoiceLabel(choice.label, target.id, target.name, safeStage, choiceIndex),
+      response: buildChoiceResponse(
+        hero.id,
+        target.id,
+        hero.name,
+        target.name,
+        safeStage,
+        choiceIndex,
+        choice.rewardKind,
+      ),
     })),
   };
 };

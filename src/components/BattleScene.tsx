@@ -476,6 +476,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
 
     // --- BATTLE TUTORIAL STATE ---
     const [tutorialStep, setTutorialStep] = useState<number | null>(null);
+    const [showMagicTransformationTutorial, setShowMagicTransformationTutorial] = useState(false);
     const [showFriendshipComboTutorial, setShowFriendshipComboTutorial] = useState(false);
     const [friendshipComboEnabled, setFriendshipComboEnabled] = useState(true);
     const isDualMode = !!player.partner && player.partner.currentHp > 0;
@@ -502,6 +503,11 @@ const BattleScene: React.FC<BattleSceneProps> = ({
     }, []);
 
     useEffect(() => {
+        if (visualTheme !== 'magic' || tutorialStep !== null || storageService.getSeenMagicTransformationTutorial()) return;
+        setShowMagicTransformationTutorial(true);
+    }, [visualTheme, tutorialStep]);
+
+    useEffect(() => {
         if (!isDualMode || tutorialStep !== null || storageService.getSeenFriendshipComboTutorial()) return;
         setShowFriendshipComboTutorial(true);
         storageService.saveSeenFriendshipComboTutorial();
@@ -518,6 +524,12 @@ const BattleScene: React.FC<BattleSceneProps> = ({
     const closeTutorial = () => {
         setTutorialStep(null);
         storageService.saveSeenBattleTutorial();
+    };
+
+    const closeMagicTransformationTutorial = () => {
+        setShowMagicTransformationTutorial(false);
+        storageService.saveSeenMagicTransformationTutorial();
+        audioService.playSound('select');
     };
 
     const nextTutorialStep = () => {
@@ -1091,6 +1103,52 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                 <div className="absolute -bottom-4 right-8 -translate-x-1/2 w-0 h-0 border-l-[10px] border-l-transparent border-r-[10px] border-r-transparent border-t-[15px] border-t-red-400"></div>
                             </div>
                         )}
+                    </div>
+                </div>
+            )}
+
+            {showMagicTransformationTutorial && tutorialStep === null && (
+                <div className="app-modal-overlay fixed inset-0 z-[205] flex items-center justify-center bg-slate-950/82 p-4 backdrop-blur-sm animate-in fade-in duration-200">
+                    <div className="app-modal-panel w-full max-w-3xl overflow-hidden rounded-2xl border-2 border-fuchsia-300/80 bg-slate-950 shadow-[0_0_42px_rgba(217,70,239,0.55)]">
+                        <div className="relative aspect-video w-full overflow-hidden bg-slate-900">
+                            <img
+                                src={assetUrl('ui/magic/transformation-guide.png')}
+                                alt={languageMode === 'ENGLISH' ? 'Magical transformation tutorial' : 'マジック編の変身説明'}
+                                className="h-full w-full object-cover"
+                            />
+                            <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950 via-slate-950/75 to-transparent p-4">
+                                <div className="flex items-center gap-2 text-lg font-black text-fuchsia-100">
+                                    <Sparkles size={22} className="text-fuchsia-300" />
+                                    {languageMode === 'ENGLISH' ? 'Magical Transformation' : 'マジック編の変身'}
+                                </div>
+                            </div>
+                        </div>
+                        <div className="space-y-3 p-4 text-sm leading-relaxed text-slate-100 md:p-5">
+                            {languageMode === 'ENGLISH' ? (
+                                <>
+                                    <p><span className="font-black text-fuchsia-200">Transform</span> once per battle to switch into your magical form.</p>
+                                    <p>Transformation costs <span className="font-black text-rose-300">20 HP</span>, but your attacks and skills become much stronger while transformed.</p>
+                                    <p>Use it when you can finish enemies quickly or need a decisive burst of power.</p>
+                                </>
+                            ) : (
+                                <>
+                                    <p><span className="font-black text-fuchsia-200">変身</span>は、戦闘中に一度だけ使えるマジック編専用の切り札です。</p>
+                                    <p><span className="font-black text-rose-300">HPを20失う</span>かわりに、変身中は攻撃やスキルの効果が大きく強化されます。</p>
+                                    <p>敵を一気に倒したい時や、勝負を決めたいターンで使いましょう。</p>
+                                </>
+                            )}
+                            <div className="flex items-center justify-between gap-3 pt-2">
+                                <div className="text-xs font-bold text-fuchsia-200/80">
+                                    {languageMode === 'ENGLISH' ? 'Shown only the first time you enter Magic battles.' : 'この説明は初回のマジック編戦闘で一度だけ表示されます。'}
+                                </div>
+                                <button
+                                    onClick={closeMagicTransformationTutorial}
+                                    className="shrink-0 rounded-lg bg-fuchsia-500 px-4 py-2 text-sm font-black text-white shadow-lg hover:bg-fuchsia-400"
+                                >
+                                    {languageMode === 'ENGLISH' ? 'Got it' : 'わかった'}
+                                </button>
+                            </div>
+                        </div>
                     </div>
                 </div>
             )}
@@ -1730,7 +1788,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                 {hasMagicTransformationEffect && !mobileActiveFamiliar && (
                                     <div className="pointer-events-none absolute -inset-x-28 -top-32 bottom-[-2rem] z-30 overflow-visible md:-inset-x-36 md:-top-40">
                                         <div
-                                            className="h-full w-full animate-magic-transformation-overlay bg-contain bg-center bg-no-repeat mix-blend-screen"
+                                            className="magic-transformation-sheet-frame h-full w-full mix-blend-screen"
                                             style={{ backgroundImage: `url(${assetUrl('sprites/magic/effects/transformation-sheet.webp')})` }}
                                         />
                                     </div>

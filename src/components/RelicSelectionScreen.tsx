@@ -5,7 +5,6 @@ import { LanguageMode, Relic } from '../types';
 import { Gem, MousePointer2 } from 'lucide-react';
 import { trans } from '../utils/textUtils';
 import { assetUrl } from '../utils/assetPaths';
-import { audioService } from '../services/audioService';
 import { RelicIcon } from './ItemIcon';
 import type { VisualThemeId } from '../data/visualThemes';
 
@@ -18,11 +17,6 @@ interface RelicSelectionScreenProps {
 }
 
 const RelicSelectionScreen: React.FC<RelicSelectionScreenProps> = ({ relics, onSelect, languageMode, typingMode = false, visualTheme = 'elementary' }) => {
-  useEffect(() => {
-    // Play "relic_select" theme for selection phase
-    audioService.playBGM('relic_select');
-  }, []);
-
   useEffect(() => {
     if (!typingMode) return;
     const handleKeyDown = (e: KeyboardEvent) => {

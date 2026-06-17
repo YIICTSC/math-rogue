@@ -6,6 +6,7 @@ const shouldVersionAsset = (path: string): boolean =>
   path.startsWith('sprites/magic/') ||
   path.startsWith('sprites/backgrounds/learning-rogue/magic') ||
   path.startsWith('event-illustrations/magic-') ||
+  path.startsWith('ui/magic/') ||
   path.startsWith('bgm/magic');
 
 export const assetUrl = (path: string): string => {

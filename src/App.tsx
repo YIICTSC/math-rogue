@@ -1977,6 +1977,8 @@ const App: React.FC = () => {
             case GameScreen.MAP:
             case GameScreen.GARDEN:
                 return 'map' as const;
+            case GameScreen.RELIC_SELECTION:
+                return 'relic_select' as const;
             case GameScreen.BATTLE: {
                 if (state.enemies.some(enemy => enemy.enemyType === 'THE_HEART')) {
                     return 'final_boss' as const;
@@ -2281,16 +2283,18 @@ const App: React.FC = () => {
         if (gameState.challengeMode !== 'COOP' || !coopSession || coopSession.isHost) return;
         const bgmType = getBgmForScreen(gameState);
         if (!bgmType) return;
+        void audioService.setBgmTheme(getBgmThemeForPlayer(gameState.visualTheme || visualTheme, gameState.player));
         void audioService.playBGM(bgmType);
-    }, [coopSession, gameState, getBgmForScreen]);
+    }, [coopSession, gameState, getBgmForScreen, visualTheme]);
 
     useEffect(() => {
         if (gameState.challengeMode === 'COOP') return;
         if (gameState.screen === GameScreen.TREASURE) return;
         const bgmType = getBgmForScreen(gameState);
         if (!bgmType) return;
+        void audioService.setBgmTheme(getBgmThemeForPlayer(gameState.visualTheme || visualTheme, gameState.player));
         void audioService.playBGM(bgmType);
-    }, [gameState.screen, gameState.currentMapNodeId, gameState.challengeMode, gameState.enemies, getBgmForScreen]);
+    }, [gameState.screen, gameState.currentMapNodeId, gameState.challengeMode, gameState.enemies, gameState.player.magicProtagonistGender, gameState.visualTheme, getBgmForScreen, visualTheme]);
 
     useEffect(() => {
         if (gameState.challengeMode !== 'COOP' || gameState.screen !== GameScreen.BATTLE || !coopSession || !coopSession.isHost) return;

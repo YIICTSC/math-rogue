@@ -64,11 +64,14 @@ const EventScreen: React.FC<EventScreenProps> = ({ title, description, options, 
       ? assetUrl(`sprites/magic/events/romance/${match[1]}/${match[2]}/${match[3]}.webp`)
       : null;
   }, [imageKey]);
-  const magicFriendshipImage = useMemo(() => {
+  const magicFriendshipImages = useMemo(() => {
     const match = imageKey?.match(/^magic-friendship:([^:]+):([^:]+)$/);
-    return match
-      ? assetUrl(`sprites/magic/events/friendship/${match[1]}/${match[2]}/event.webp`)
-      : null;
+    if (!match) return [];
+    const [, heroId, friendHeroId] = match;
+    return [
+      assetUrl(`sprites/magic/events/friendship/${heroId}/${friendHeroId}/event.webp`),
+      assetUrl(`sprites/magic/events/friendship/${friendHeroId}/${heroId}/event.webp`),
+    ];
   }, [imageKey]);
   const highSchoolEventObjectPosition = useMemo(() => {
     if (highSchoolEventIndex === null) return undefined;
@@ -76,9 +79,9 @@ const EventScreen: React.FC<EventScreenProps> = ({ title, description, options, 
   }, [highSchoolEventIndex]);
 
   const imageCandidates = useMemo(() => {
-    if (magicFriendshipImage) {
+    if (magicFriendshipImages.length > 0) {
       return [
-        magicFriendshipImage,
+        ...magicFriendshipImages,
         assetUrl('event-illustrations/default.svg'),
       ];
     }
@@ -110,7 +113,7 @@ const EventScreen: React.FC<EventScreenProps> = ({ title, description, options, 
       assetUrl(`event-illustrations/${encodedTitle}.svg`),
       assetUrl('event-illustrations/default.svg')
     ];
-  }, [highSchoolEventIndex, magicEventIndex, magicFriendshipImage, magicRomanceImage, imageKey, title]);
+  }, [highSchoolEventIndex, magicEventIndex, magicFriendshipImages, magicRomanceImage, imageKey, title]);
   const [imageIndex, setImageIndex] = useState(0);
   const [choiceLocked, setChoiceLocked] = useState(false);
   const [continueLocked, setContinueLocked] = useState(false);
