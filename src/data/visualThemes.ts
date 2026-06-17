@@ -19,11 +19,24 @@ const HIGH_SCHOOL_CHARACTER_NAMES = [
   '園芸部部長',
 ];
 
+const HIGH_SCHOOL_CHARACTER_DESCRIPTIONS = [
+  '【攻撃タイプ】高い体力と正面突破の攻撃で戦う、扱いやすい高校編の主人公。',
+  '【捕獲タイプ】生物部で培った観察眼を活かし、倒した敵をカード化して戦う。',
+  '【テクニカル】毒による継続ダメージが得意。反逆の高校生が最初からパートナーとして参戦する。',
+  '【実験タイプ】3枚のカードを合成し、複数効果を持つキメラカードを作成できる。',
+  '【スピード】ドローとディスカードを軸に動き、ドッジボールで先制攻撃を狙える。',
+  '【デバフ・反射】敵を弱体化し、応答で攻撃を跳ね返す放送部の戦術家。',
+  '【戦略・保留】手札を残す保留と物語カードで、戦局をじっくり組み立てる。',
+  '【パワー】開始時に解放済みカードから初期デッキを組み、重い一撃で押し切る。',
+  '【育成タイプ】菜園で種を育て、強力な植物カードへ成長させて戦う大器晩成型。',
+];
+
 export const getThemedCharacters = (characters: Character[], theme: VisualThemeId): Character[] => {
   if (theme === 'high-school') {
     return characters.map((character, index) => ({
       ...character,
       name: HIGH_SCHOOL_CHARACTER_NAMES[index] ?? character.name,
+      description: HIGH_SCHOOL_CHARACTER_DESCRIPTIONS[index] ?? character.description,
       imageData: assetUrl(`sprites/high-school/characters/${index % 9}.png`),
       deckTemplate: character.deckTemplate.map(cardId => HIGH_SCHOOL_STARTER_REPLACEMENTS[cardId] ?? cardId),
     }));
@@ -35,6 +48,7 @@ export const getThemedCharacters = (characters: Character[], theme: VisualThemeI
       return {
         ...character,
         name: hero?.name ?? character.name,
+        description: `【${hero.attribute}の魔法】${hero.personality}。得意分野は${hero.specialty}。固有能力「${hero.ability}」を軸に戦う${hero.transformedTitle}。`,
         imageData: assetUrl(`sprites/magic/characters/heroine-${String((hero?.index ?? index + 1)).padStart(2, '0')}-before.png`),
         magicProtagonistId: hero.id,
         magicProtagonistGender: 'female' as const,

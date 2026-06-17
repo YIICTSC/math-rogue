@@ -625,7 +625,7 @@ const App: React.FC = () => {
 
     const getFilteredCardPool = (playerId: string | undefined, includeSpecial: boolean = false): ICard[] => {
         const isLibrarian = playerId === 'LIBRARIAN';
-        const isGardener = playerId === 'GARDENER';
+        const isGardener = coopSyncedVisualTheme !== 'magic' && playerId === 'GARDENER';
 
         // Get currently unlocked cards from storage
         const unlockedCards = new Set(storageService.getUnlockedCards().map(name => name.trim()));
@@ -4527,13 +4527,14 @@ const App: React.FC = () => {
         setSelectedCharName(char.name);
         setUnlockCheckStartMathCorrect(totalMathCorrect);
 
+        const isMagicTheme = coopSyncedVisualTheme === 'magic';
         let initialDeck: ICard[] = [];
         let logs = [trans("旅の支度をしている...", languageMode)];
 
         const magicProtagonistId = char.magicProtagonistId
             ?? MAGIC_HERO_ID_BY_CHARACTER_ID[char.id]
             ?? 'AKARI';
-        if (visualTheme === 'magic') {
+        if (isMagicTheme) {
             initialDeck = createMagicStartingDeck(magicProtagonistId).map((card, index) => ({
                 ...card,
                 id: `${card.id}-${Date.now()}-${index}`,
@@ -4555,7 +4556,7 @@ const App: React.FC = () => {
         const startingCardNames = initialDeck.map(c => c.name);
         storageService.saveUnlockedCards(startingCardNames);
 
-        const starterRelic = visualTheme === 'magic'
+        const starterRelic = isMagicTheme
             ? getMagicRuleConfig(magicProtagonistId).relic
             : RELIC_LIBRARY[char.startingRelicId];
         const relics = starterRelic ? [starterRelic] : [];
@@ -4566,7 +4567,7 @@ const App: React.FC = () => {
         const shouldSkipStarterRelic = !storageService.hasSkippedFirstStarterRelic();
         if (shouldSkipStarterRelic) storageService.markFirstStarterRelicSkipped();
 
-        const garden = char.id === 'GARDENER' ? Array(9).fill(null).map(() => ({ plantedCard: null, growth: 0, maxGrowth: 0 })) : undefined;
+        const garden = !isMagicTheme && char.id === 'GARDENER' ? Array(9).fill(null).map(() => ({ plantedCard: null, growth: 0, maxGrowth: 0 })) : undefined;
 
         const initialPlayerState = {
             ...gameState.player,
@@ -4600,7 +4601,7 @@ const App: React.FC = () => {
             partner: undefined,
             garden: garden,
             codexBuffer: [],
-            magicRuleState: visualTheme === 'magic' ? createMagicRuleState(magicProtagonistId) : undefined
+            magicRuleState: isMagicTheme ? createMagicRuleState(magicProtagonistId) : undefined
         };
         void audioService.setBgmTheme(getBgmThemeForPlayer(visualTheme, initialPlayerState));
 
@@ -4679,7 +4680,7 @@ const App: React.FC = () => {
             return;
         }
 
-        if (char.id === 'ASSASSIN') {
+        if (!isMagicTheme && char.id === 'ASSASSIN') {
             const warrior = themedCharacters.find(c => c.id === 'WARRIOR');
             const isHighSchoolTheme = visualTheme === 'high-school';
             const partnerName = warrior?.name ?? (isHighSchoolTheme ? '反逆の高校生' : 'わんぱく小学生');
@@ -5084,7 +5085,7 @@ const App: React.FC = () => {
                     coopBattleState: null
                 };
 
-                if (p.id === 'DODGEBALL' && (node.type === NodeType.COMBAT || node.type === NodeType.START)) {
+                if (nextState.visualTheme !== 'magic' && p.id === 'DODGEBALL' && (node.type === NodeType.COMBAT || node.type === NodeType.START)) {
                     setGameState({ ...nextGameState, screen: GameScreen.DODGEBALL_SHOOTING });
                 } else {
                     setCurrentBattleBackgroundId(battleBackgroundScene.id);
@@ -5141,7 +5142,7 @@ const App: React.FC = () => {
                         return { ...prev, participants: nextParticipants };
                     });
                 }
-                const isGardener = nextState.player.id === 'GARDENER';
+                const isGardener = nextState.visualTheme !== 'magic' && nextState.player.id === 'GARDENER';
                 const allPossibleCards = getFilteredCardPool(nextState.player.id);
                 const isHighSchoolShop = nextState.visualTheme === 'high-school';
                 const nonFamiliarShopCards = allPossibleCards.filter(card => !card.familiarSummon);
@@ -9474,7 +9475,7 @@ const App: React.FC = () => {
         setGameState(prev => {
             const currentNode = prev.map.find(n => n.id === prev.currentMapNodeId);
             let nextPlayer = { ...prev.player };
-            if (nextPlayer.id === 'GARDENER' && nextPlayer.garden) {
+            if (prev.visualTheme !== 'magic' && nextPlayer.id === 'GARDENER' && nextPlayer.garden) {
                 nextPlayer.garden = nextPlayer.garden.map(slot =>
                     slot.plantedCard ? { ...slot, growth: Math.min(slot.maxGrowth, slot.growth + 1) } : slot
                 );
@@ -9485,7 +9486,7 @@ const App: React.FC = () => {
                     const nextAct = prev.act + 1;
                     const newMap = generateDungeonMap(prev.difficultyLevel || 1);
                     audioService.playBGM('map');
-                    const isGardener = nextPlayer.id === 'GARDENER';
+                    const isGardener = prev.visualTheme !== 'magic' && nextPlayer.id === 'GARDENER';
                     if (prev.challengeMode === 'COOP') {
                         healCoopPartyToFull({ ...nextPlayer, currentHp: nextPlayer.maxHp, block: 0 });
                     }
@@ -9521,7 +9522,7 @@ const App: React.FC = () => {
                     return n;
                 });
                 audioService.playBGM('map');
-                const isGardener = nextPlayer.id === 'GARDENER';
+                const isGardener = prev.visualTheme !== 'magic' && nextPlayer.id === 'GARDENER';
                 return {
                     ...prev,
                     player: nextPlayer,
@@ -9819,7 +9820,7 @@ const App: React.FC = () => {
         const rewards: RewardItem[] = [];
         let goldGained = 0;
         const isLibrarian = player.id === 'LIBRARIAN';
-        const isGardener = player.id === 'GARDENER';
+        const isGardener = stateRef.current.visualTheme !== 'magic' && player.id === 'GARDENER';
         const rewardPrefix = `${rewardScope}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
         const getRewardCardTemplateKey = (card: ICard) => card.originalNames?.[0] || card.name || card.id;
         const pickedCardTemplateIds = new Set<string>();
@@ -10751,7 +10752,7 @@ const App: React.FC = () => {
             const nextAct = prev.act + 1;
             const newMap = generateDungeonMap(prev.difficultyLevel || 1);
             audioService.playBGM('map');
-            const isGardener = prev.player.id === 'GARDENER';
+            const isGardener = prev.visualTheme !== 'magic' && prev.player.id === 'GARDENER';
             if (prev.challengeMode === 'COOP') {
                 healCoopPartyToFull({ ...prev.player, currentHp: prev.player.maxHp, block: 0 });
             }
