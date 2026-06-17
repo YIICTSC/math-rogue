@@ -2324,7 +2324,7 @@ const extractIllustrationTokens = (card: ICard): string[] => {
     return [];
 };
 
-const FinisherArtPiece: React.FC<{ token: string; seed: string; languageMode: LanguageMode; card: ICard }> = ({ token, seed, languageMode, card }) => {
+const FinisherArtPiece: React.FC<{ token: string; seed: string; languageMode: LanguageMode; card: ICard; fitMode?: 'cover' | 'contain' }> = ({ token, seed, languageMode, card, fitMode = 'cover' }) => {
     const [imageIndex, setImageIndex] = useState(0);
     const [failed, setFailed] = useState(false);
     const normalized = token.startsWith('enemy:')
@@ -2377,13 +2377,15 @@ const FinisherArtPiece: React.FC<{ token: string; seed: string; languageMode: La
         return <PixelSprite seed={seed} name={sprite} className="w-full h-full" size={32} />;
     }
 
+    const imgClass = fitMode === 'contain' ? 'w-full h-full object-contain' : 'w-full h-full object-cover';
+
     if (normalized.startsWith('magic-rule:')) {
         const [, heroId, index] = normalized.split(':');
         return (
             <img
                 src={assetUrl(`sprites/magic/rule-cards/${heroId}/${index}.webp`)}
                 alt={card.name}
-                className="w-full h-full object-cover"
+                className={imgClass}
             />
         );
     }
@@ -2394,7 +2396,7 @@ const FinisherArtPiece: React.FC<{ token: string; seed: string; languageMode: La
             <img
                 src={assetUrl(`sprites/magic/basic-cards/${heroId}/${art}.webp`)}
                 alt={card.name}
-                className="w-full h-full object-cover"
+                className={imgClass}
             />
         );
     }
@@ -2405,7 +2407,7 @@ const FinisherArtPiece: React.FC<{ token: string; seed: string; languageMode: La
             <img
                 src={assetUrl(`sprites/magic/cards/${index}.webp`)}
                 alt={card.name}
-                className="w-full h-full object-cover"
+                className={imgClass}
             />
         );
     }
@@ -2417,7 +2419,7 @@ const FinisherArtPiece: React.FC<{ token: string; seed: string; languageMode: La
             <img
                 src={candidates[imageIndex]}
                 alt={cardName}
-                className="w-full h-full object-cover"
+                className={imgClass}
                 onError={() => {
                     const next = imageIndex + 1;
                     if (next < candidates.length) setImageIndex(next);
@@ -2871,9 +2873,9 @@ export const BattleFinisherCutinOverlay: React.FC<{ card: ICard; languageMode: L
                     </div>
                 </div>
             ) : (
-                <div className="absolute inset-0 flex items-center">
-                    <div className="w-[78vw] max-w-[920px] h-[42vh] max-h-[360px] animate-finish-cutin rounded-r-2xl overflow-hidden border-y-4 border-r-4 border-orange-300/70 shadow-[0_0_50px_rgba(251,146,60,0.45)] bg-black/30">
-                        <FinisherArtPiece token={illustrationTokens[0] || `card:${card.name}`} seed={`${card.id}-finisher`} languageMode={languageMode} card={card} />
+                <div className="absolute inset-0 flex items-center justify-center">
+                    <div className="w-full h-full animate-finish-cutin overflow-hidden flex items-center justify-center">
+                        <FinisherArtPiece token={illustrationTokens[0] || `card:${card.name}`} seed={`${card.id}-finisher`} languageMode={languageMode} card={card} fitMode="contain" />
                     </div>
                 </div>
             )}
