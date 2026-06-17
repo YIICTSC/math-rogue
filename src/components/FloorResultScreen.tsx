@@ -46,9 +46,11 @@ const FloorResultScreen: React.FC<FloorResultScreenProps> = ({ act, stats, story
       affection: ranked[0][1],
     };
   }, [magicHeroId, magicRomance]);
-  const currentPart = visualTheme === 'magic'
-    ? getMagicActStoryPart(magicHeroId, act, closestTargetEntry?.target?.name, closestTargetEntry?.affection, storySet)
-    : storySet.parts[(act - 1) % 3];
+  const currentPart = useMemo(() => {
+    return visualTheme === 'magic'
+      ? getMagicActStoryPart(magicHeroId, act, closestTargetEntry?.target?.name, closestTargetEntry?.affection, storySet)
+      : storySet.parts[(act - 1) % 3];
+  }, [visualTheme, magicHeroId, act, closestTargetEntry, storySet]);
 
   // 解放されたカード情報の取得
   const unlockedCard = useMemo(() => {
@@ -80,7 +82,7 @@ const FloorResultScreen: React.FC<FloorResultScreenProps> = ({ act, stats, story
     return () => {
       clearInterval(interval);
     };
-  }, [currentPart, languageMode]);
+  }, [currentPart.content, languageMode]);
 
   const handleNext = () => {
     if (isTyping) {
@@ -169,7 +171,7 @@ const FloorResultScreen: React.FC<FloorResultScreenProps> = ({ act, stats, story
                 </div>
 
                 {/* Story Section */}
-                <div className="floor-result-story-panel bg-gray-800/30 border-2 border-gray-700 p-4 sm:p-6 md:p-4 rounded-lg mb-4 min-h-[8rem] md:min-h-0 relative flex-grow flex flex-col justify-center overflow-hidden">
+                <div className="floor-result-story-panel bg-gray-800/30 border-2 border-gray-700 p-4 sm:p-6 md:p-4 rounded-lg mb-4 min-h-[8rem] md:min-h-0 relative flex-grow flex flex-col justify-center">
                     <div className="floor-result-story-title absolute -top-3 left-4 sm:left-6 bg-gray-700 px-2 sm:px-3 py-0.5 rounded text-[8px] sm:text-[9px] font-bold text-gray-300 uppercase tracking-widest z-10">
                         {trans(currentPart.title, languageMode)}
                     </div>
