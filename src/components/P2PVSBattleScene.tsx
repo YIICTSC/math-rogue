@@ -1003,13 +1003,22 @@ const P2PVSBattleScene: React.FC<P2PVSBattleSceneProps> = ({ player1, player2, i
             }
         }
 
-        if (card.promptsDiscard || card.promptsCopy || (card.promptsExhaust && card.promptsExhaust !== 99)) {
+        const isAutomaticCopyCard =
+            matchesCardName('カンニング', 'HOLOGRAM') ||
+            matchesCardName('お人形遊び', 'GIRLS_DOLL_HOUSE') ||
+            matchesCardName('二刀流', 'DUAL_WIELD') ||
+            matchesCardName('フォークダンス', 'PE_DANCE') ||
+            matchesCardName('鏡 (星新一)', 'KAGAMI_HOSHI') ||
+            matchesCardName('きてんの窓', 'KITSUNE_NO_MADO');
+        const promptsCopySelection = !!card.promptsCopy && !isAutomaticCopyCard;
+
+        if (card.promptsDiscard || promptsCopySelection || (card.promptsExhaust && card.promptsExhaust !== 99)) {
             const selectionType: SelectionType = card.promptsDiscard
                 ? 'DISCARD'
-                : card.promptsCopy
+                : promptsCopySelection
                     ? 'COPY'
                     : 'EXHAUST';
-            const amount = card.promptsDiscard || card.promptsCopy || card.promptsExhaust || 0;
+            const amount = card.promptsDiscard || (promptsCopySelection ? card.promptsCopy : 0) || card.promptsExhaust || 0;
 
             setP1State(nextCurrent);
             setP2State(nextTarget);

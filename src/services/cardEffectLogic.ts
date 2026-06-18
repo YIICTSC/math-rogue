@@ -20,6 +20,44 @@ const shuffle = (array: any[]) => {
     return array.sort(() => Math.random() - 0.5);
 };
 
+const APP_CANONICAL_CARD_LOGIC_KEY_LIST = [
+    '単位変換',
+    'SANSU_UNIT',
+    '磁石の力',
+    'RIKA_MAGNET',
+    '虹のプリズム',
+    'RIKA_RAINBOW',
+    '天気予報',
+    'RIKA_WEATHER',
+    'おとぎ話の扉',
+    'GIRLS_FAIRY_TALE',
+    'お姫様の呼び声',
+    'GIRLS_PRINCESS_CALL',
+    '夢のおもちゃ屋',
+    'OUT_TOY_STORE',
+    '究極の10連ガチャ',
+    'OUT_SUPER_GACHA',
+    '虫かごの秘密',
+    'OUT_BUG_BOX',
+    'お年玉の誘惑',
+    'OUT_NEW_YEAR_GOLD',
+    '路地裏の野良猫',
+    'OUT_STRAY_CAT',
+    '金魚すくい',
+    'OUT_GOLD_FISH',
+    'ローラーシューズ',
+    'OUT_ROLLER_BLADE',
+    '虹を追いかけて',
+    'OUT_RAINBOW_CHASE',
+];
+const APP_CANONICAL_CARD_LOGIC_KEYS = new Set(APP_CANONICAL_CARD_LOGIC_KEY_LIST);
+
+const isHandledByAppCardLogic = (card: ICard): boolean => {
+    const keys = [card.name, ...(card.originalNames ?? [])].filter(Boolean);
+    return keys.some(key => APP_CANONICAL_CARD_LOGIC_KEYS.has(key))
+        || APP_CANONICAL_CARD_LOGIC_KEY_LIST.some(key => card.id?.includes(key));
+};
+
 /**
  * constants1.ts で追加されたカードの中で、
  * 標準的なパラメータ (damage, block, draw, etc) だけでは実現できない特殊ロジックを処理します。
@@ -34,6 +72,10 @@ export const applyAdditionalCardLogic = (
 ): { player: Player; enemies: Enemy[] } => {
     const p = { ...player };
     const e_list = [...enemies];
+
+    if (isHandledByAppCardLogic(card)) {
+        return { player: p, enemies: e_list };
+    }
 
     const addCardToHand = (template: any, cost0 = true) => {
         let newC = { ...template, id: `gen-${Date.now()}-${Math.random()}` } as ICard;

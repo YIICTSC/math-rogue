@@ -7172,8 +7172,29 @@ const App: React.FC = () => {
                 } else if (!isConsumedOnUse && (shouldExhaust || card.promptsExhaust === 99)) {
                     if (p.powers['FEEL_NO_PAIN']) p.block += p.powers['FEEL_NO_PAIN'];
                 }
+                const automaticCopyKeys = [
+                    'カンニング',
+                    'HOLOGRAM',
+                    'お人形遊び',
+                    'GIRLS_DOLL_HOUSE',
+                    '二刀流',
+                    'DUAL_WIELD',
+                    'フォークダンス',
+                    'PE_DANCE',
+                    '鏡 (星新一)',
+                    'KAGAMI_HOSHI',
+                    'きてんの窓',
+                    'KITSUNE_NO_MADO',
+                    '影分身の術',
+                    'BOYS_SHADOW_CLONE',
+                ];
+                const isAutomaticCopyCard = automaticCopyKeys.some(key =>
+                    card.name === key ||
+                    card.originalNames?.includes(key) ||
+                    card.id?.includes(key)
+                );
                 if (card.promptsDiscard) nextSelectionState = { active: true, type: 'DISCARD', amount: card.promptsDiscard, originCardId: card.id };
-                if (card.promptsCopy) nextSelectionState = { active: true, type: 'COPY', amount: card.promptsCopy, originCardId: card.id };
+                if (card.promptsCopy && !isAutomaticCopyCard) nextSelectionState = { active: true, type: 'COPY', amount: card.promptsCopy, originCardId: card.id };
                 if (card.promptsExhaust && card.promptsExhaust !== 99) {
                     nextSelectionState = { active: true, type: 'EXHAUST', amount: card.promptsExhaust, originCardId: card.id };
                     currentLogs.push(trans("廃棄するカードを選択してください。", languageMode));
