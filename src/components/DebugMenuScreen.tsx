@@ -14,6 +14,10 @@ import { trans } from '../utils/textUtils';
 import { ATTACK_EFFECT_LIST } from '../data/attackEffects';
 import { STATUS_EFFECT_LIST } from '../data/statusEffects';
 import { HIGH_SCHOOL_EVENT_THEMES, HIGH_SCHOOL_HUMANOID_ENEMY_VARIANTS, type HighSchoolEnemyAction } from '../data/visualThemes';
+import { MAGIC_HEROES, MAGIC_MALE_PROTAGONISTS } from '../data/magicHeroes';
+import { getMagicRomanceDialogue, getMagicRomanceEndingText, type MagicRomanceEndingRank } from '../data/magicRomanceDialogue';
+import { getMagicRomanceVoiceLines } from '../services/magicRomanceEventService';
+import { getMagicEndingVoiceLine } from '../services/magicEndingService';
 import { assetUrl } from '../utils/assetPaths';
 import React, { useMemo, useState, useCallback } from 'react';
 
@@ -56,6 +60,17 @@ const HIGH_SCHOOL_HUMANOID_ACTIONS: { key: HighSchoolEnemyAction; label: string;
     { key: 'skill', label: 'SKILL', folder: 'humanoid-enemies-skill' },
 ];
 
+const MAGIC_VOICE_CHARACTERS = [
+    ...MAGIC_HEROES.map(hero => ({ id: hero.id, name: hero.name, label: hero.transformedTitle, gender: 'female' as const })),
+    ...MAGIC_MALE_PROTAGONISTS.map(hero => ({ id: hero.id, name: hero.name, label: hero.transformedTitle, gender: 'male' as const })),
+];
+
+const MAGIC_BATTLE_VOICE_GROUPS = [
+    { title: '攻撃', files: ['attack-1', 'attack-2', 'attack-3'] },
+    { title: '被ダメ', files: ['damage-1', 'damage-2', 'damage-3'] },
+    { title: '専用カード', files: ['spell-1', 'spell-2', 'spell-3'] },
+];
+
 const TranslationRow = React.memo(({ original, context, debugLanguageMode, isInline = false }: { original: string, context?: string, debugLanguageMode: LanguageMode, isInline?: boolean }) => {
     const translated = trans(original, debugLanguageMode);
     const isMissing = debugLanguageMode === 'HIRAGANA' && translated === original && original.match(/[一-龠]/);
@@ -90,11 +105,16 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
     nextMiniGameThreshold,
     languageMode: initialLanguageMode
 }) => {
-    const [activeTab, setActiveTab] = useState<'CARDS' | 'RELICS' | 'POTIONS' | 'SYNTHESIS' | 'SYSTEM' | 'EFFECTS' | 'EVENTS' | 'HUMANOID_SPRITES' | 'TRANSLATION'>('CARDS');
+    const [activeTab, setActiveTab] = useState<'CARDS' | 'RELICS' | 'POTIONS' | 'SYNTHESIS' | 'SYSTEM' | 'EFFECTS' | 'MAGIC_VOICES' | 'EVENTS' | 'HUMANOID_SPRITES' | 'TRANSLATION'>('CARDS');
     const [searchTerm, setSearchTerm] = useState("");
     const [debugLanguageMode, setDebugLanguageMode] = useState<LanguageMode>(initialLanguageMode);
     const [transSubTab, setTransSubTab] = useState<'STORY' | 'FLAVOR' | 'CARD' | 'EVENT' | 'ENEMY' | 'MISSING'>('STORY');
     const [copied, setCopied] = useState(false);
+    const [magicVoiceHeroId, setMagicVoiceHeroId] = useState('AKARI');
+    const [magicVoiceEventHeroId, setMagicVoiceEventHeroId] = useState('AKARI');
+    const [magicVoiceEventTargetId, setMagicVoiceEventTargetId] = useState('REN');
+    const [magicVoiceEventStage, setMagicVoiceEventStage] = useState(0);
+    const [magicVoiceEndingRank, setMagicVoiceEndingRank] = useState<MagicRomanceEndingRank>('TRUE_ROMANCE');
     const [effectPreviewTokens, setEffectPreviewTokens] = useState<Record<AttackEffectKey, number>>({} as Record<AttackEffectKey, number>);
     const [playingEffectKey, setPlayingEffectKey] = useState<AttackEffectKey | null>(null);
     const [statusPreviewTokens, setStatusPreviewTokens] = useState<Record<StatusEffectKey, number>>({} as Record<StatusEffectKey, number>);
@@ -112,6 +132,55 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
     const allCards = useMemo(() => Object.values(CARDS_LIBRARY).sort((a, b) => a.type.localeCompare(b.type) || a.cost - b.cost), []);
     const allRelics = useMemo(() => Object.values(RELIC_LIBRARY), []);
     const allPotions = useMemo(() => Object.values(POTION_LIBRARY), []);
+    const selectedMagicVoiceHero = useMemo(
+        () => MAGIC_VOICE_CHARACTERS.find(hero => hero.id === magicVoiceHeroId) ?? MAGIC_VOICE_CHARACTERS[0],
+        [magicVoiceHeroId]
+    );
+    const eventProtagonist = useMemo(
+        () => MAGIC_VOICE_CHARACTERS.find(hero => hero.id === magicVoiceEventHeroId) ?? MAGIC_VOICE_CHARACTERS[0],
+        [magicVoiceEventHeroId]
+    );
+    const eventTargetOptions = useMemo(
+        () => eventProtagonist.gender === 'male'
+            ? MAGIC_HEROES.map(hero => ({ id: hero.id, name: hero.name, label: hero.transformedTitle }))
+            : MAGIC_MALE_PROTAGONISTS.map(hero => ({ id: hero.id, name: hero.name, label: hero.transformedTitle })),
+        [eventProtagonist.gender]
+    );
+    const normalizedMagicVoiceEventTargetId = eventTargetOptions.some(target => target.id === magicVoiceEventTargetId)
+        ? magicVoiceEventTargetId
+        : eventTargetOptions[0]?.id ?? 'REN';
+    const magicVoiceEventDialogue = useMemo(
+        () => getMagicRomanceDialogue(magicVoiceEventHeroId, normalizedMagicVoiceEventTargetId, magicVoiceEventStage),
+        [magicVoiceEventHeroId, magicVoiceEventStage, normalizedMagicVoiceEventTargetId]
+    );
+    const magicVoiceEventLines = useMemo(
+        () => getMagicRomanceVoiceLines(magicVoiceEventHeroId, normalizedMagicVoiceEventTargetId, magicVoiceEventStage, magicVoiceEventDialogue.description),
+        [magicVoiceEventDialogue.description, magicVoiceEventHeroId, magicVoiceEventStage, normalizedMagicVoiceEventTargetId]
+    );
+    const magicVoiceEventQuotedLines = useMemo(
+        () => magicVoiceEventDialogue.description
+            .split('\n')
+            .map(line => line.match(/^([^「]+)「(.+)」$/))
+            .filter((match): match is RegExpMatchArray => !!match),
+        [magicVoiceEventDialogue.description]
+    );
+    const magicVoiceEndingAffection = {
+        BOND: 20,
+        SPECIAL: 60,
+        ROMANCE: 90,
+        TRUE_ROMANCE: 100,
+    }[magicVoiceEndingRank];
+    const magicVoiceEnding = useMemo(
+        () => getMagicRomanceEndingText(magicVoiceEventHeroId, normalizedMagicVoiceEventTargetId, magicVoiceEndingAffection),
+        [magicVoiceEndingAffection, magicVoiceEventHeroId, normalizedMagicVoiceEventTargetId]
+    );
+    const magicVoiceEndingLines = useMemo(
+        () => magicVoiceEnding.lines.map((line) => ({
+            text: line,
+            voiceLine: getMagicEndingVoiceLine(line, magicVoiceEventHeroId),
+        })),
+        [magicVoiceEnding.lines, magicVoiceEventHeroId]
+    );
 
     const filteredCards = useMemo(() => allCards.filter(c =>
         c.name.includes(searchTerm) ||
@@ -256,6 +325,24 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
         }, 620);
     };
 
+    const handleMagicVoiceEventHeroChange = (heroId: string) => {
+        const nextHero = MAGIC_VOICE_CHARACTERS.find(hero => hero.id === heroId) ?? MAGIC_VOICE_CHARACTERS[0];
+        setMagicVoiceEventHeroId(nextHero.id);
+        setMagicVoiceEventTargetId(nextHero.gender === 'male' ? MAGIC_HEROES[0].id : MAGIC_MALE_PROTAGONISTS[0].id);
+    };
+
+    const playMagicEventVoiceSequence = () => {
+        void audioService.playMagicEventVoiceSequence(magicVoiceEventLines);
+    };
+
+    const playMagicEndingVoiceSequence = () => {
+        void audioService.playMagicEventVoiceSequence(
+            magicVoiceEndingLines
+                .map(line => line.voiceLine)
+                .filter((line): line is { heroId: string; lineId: string } => !!line)
+        );
+    };
+
     return (
         <div className="flex flex-col h-full w-full bg-gray-900 text-white relative">
             <div className="bg-red-900/90 border-b-2 border-red-500 p-2 md:p-4 flex justify-between items-center shrink-0 z-20">
@@ -294,6 +381,7 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
                         <button onClick={() => setActiveTab('SYNTHESIS')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'SYNTHESIS' ? 'bg-purple-900 text-white' : 'text-purple-400 hover:bg-gray-750'}`}>合成</button>
                         <button onClick={() => setActiveTab('SYSTEM')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'SYSTEM' ? 'bg-indigo-900 text-white' : 'text-indigo-400 hover:bg-gray-750'}`}>システム</button>
                         <button onClick={() => setActiveTab('EFFECTS')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'EFFECTS' ? 'bg-orange-900 text-white' : 'text-orange-400 hover:bg-gray-750'}`}>エフェクト</button>
+                        <button onClick={() => setActiveTab('MAGIC_VOICES')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'MAGIC_VOICES' ? 'bg-fuchsia-900 text-white' : 'text-fuchsia-400 hover:bg-gray-750'}`}>マジック声</button>
                         <button onClick={() => setActiveTab('EVENTS')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'EVENTS' ? 'bg-cyan-900 text-white' : 'text-cyan-400 hover:bg-gray-750'}`}>高校編イベント</button>
                         <button onClick={() => setActiveTab('HUMANOID_SPRITES')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'HUMANOID_SPRITES' ? 'bg-rose-900 text-white' : 'text-rose-400 hover:bg-gray-750'}`}>高校人型敵</button>
                         <button onClick={() => setActiveTab('TRANSLATION')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'TRANSLATION' ? 'bg-emerald-900 text-white' : 'text-emerald-400 hover:bg-gray-750'}`}>翻訳確認</button>
@@ -546,6 +634,193 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
                                         </div>
                                     ))}
                                 </div>
+                            </div>
+                        )}
+
+                        {activeTab === 'MAGIC_VOICES' && (
+                            <div className="space-y-6">
+                                <section className="space-y-4">
+                                    <div className="flex items-center justify-between gap-3 border-b border-fuchsia-700/60 pb-3">
+                                        <h3 className="text-fuchsia-300 font-bold flex items-center">
+                                            <Volume2 size={18} className="mr-2" /> マジック編 戦闘ボイス確認
+                                        </h3>
+                                        <div className="text-xs text-gray-400">17人 / attack・damage・spell</div>
+                                    </div>
+                                    <div className="grid grid-cols-1 lg:grid-cols-[260px_1fr] gap-4">
+                                        <div className="bg-black/35 border border-gray-700 rounded-lg p-3 space-y-2">
+                                            <div className="text-xs font-bold text-gray-400">キャラクター</div>
+                                            <select
+                                                value={magicVoiceHeroId}
+                                                onChange={(event) => setMagicVoiceHeroId(event.target.value)}
+                                                className="w-full bg-slate-950 border border-fuchsia-700/70 rounded px-3 py-2 text-sm font-bold text-white outline-none focus:border-fuchsia-300"
+                                            >
+                                                {MAGIC_VOICE_CHARACTERS.map(hero => (
+                                                    <option key={hero.id} value={hero.id}>{hero.name} / {hero.id}</option>
+                                                ))}
+                                            </select>
+                                            <div className="rounded border border-fuchsia-900/60 bg-fuchsia-950/20 p-3">
+                                                <div className="text-base font-black text-white">{selectedMagicVoiceHero.name}</div>
+                                                <div className="text-xs text-fuchsia-200">{selectedMagicVoiceHero.label}</div>
+                                                <div className="mt-2 text-[10px] text-gray-500 font-mono">{selectedMagicVoiceHero.id}</div>
+                                            </div>
+                                        </div>
+                                        <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+                                            {MAGIC_BATTLE_VOICE_GROUPS.map(group => (
+                                                <div key={group.title} className="bg-black/35 border border-gray-700 rounded-lg p-3">
+                                                    <div className="mb-2 text-sm font-black text-fuchsia-100">{group.title}</div>
+                                                    <div className="space-y-2">
+                                                        {group.files.map(file => (
+                                                            <button
+                                                                key={file}
+                                                                onClick={() => audioService.playMagicVoiceFile(magicVoiceHeroId, file)}
+                                                                className="w-full bg-fuchsia-800 hover:bg-fuchsia-700 text-white py-2 rounded font-bold text-xs flex items-center justify-center gap-2"
+                                                            >
+                                                                <Volume2 size={13} /> {file}.ogg
+                                                            </button>
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </section>
+
+                                <section className="space-y-4">
+                                    <div className="flex items-center justify-between gap-3 border-b border-purple-700/60 pb-3">
+                                        <h3 className="text-purple-300 font-bold flex items-center">
+                                            <MessageSquare size={18} className="mr-2" /> 恋愛イベント ボイス確認
+                                        </h3>
+                                        <button
+                                            onClick={playMagicEventVoiceSequence}
+                                            className="bg-purple-700 hover:bg-purple-600 text-white px-3 py-1.5 rounded font-bold text-xs flex items-center gap-1"
+                                        >
+                                            <Volume2 size={13} /> 全行再生
+                                        </button>
+                                    </div>
+                                    <div className="grid grid-cols-1 lg:grid-cols-[260px_1fr] gap-4">
+                                        <div className="bg-black/35 border border-gray-700 rounded-lg p-3 space-y-3">
+                                            <label className="block space-y-1">
+                                                <span className="text-xs font-bold text-gray-400">主人公</span>
+                                                <select
+                                                    value={magicVoiceEventHeroId}
+                                                    onChange={(event) => handleMagicVoiceEventHeroChange(event.target.value)}
+                                                    className="w-full bg-slate-950 border border-purple-700/70 rounded px-3 py-2 text-sm font-bold text-white outline-none focus:border-purple-300"
+                                                >
+                                                    {MAGIC_VOICE_CHARACTERS.map(hero => (
+                                                        <option key={hero.id} value={hero.id}>{hero.name} / {hero.id}</option>
+                                                    ))}
+                                                </select>
+                                            </label>
+                                            <label className="block space-y-1">
+                                                <span className="text-xs font-bold text-gray-400">相手</span>
+                                                <select
+                                                    value={normalizedMagicVoiceEventTargetId}
+                                                    onChange={(event) => setMagicVoiceEventTargetId(event.target.value)}
+                                                    className="w-full bg-slate-950 border border-purple-700/70 rounded px-3 py-2 text-sm font-bold text-white outline-none focus:border-purple-300"
+                                                >
+                                                    {eventTargetOptions.map(target => (
+                                                        <option key={target.id} value={target.id}>{target.name} / {target.id}</option>
+                                                    ))}
+                                                </select>
+                                            </label>
+                                            <label className="block space-y-1">
+                                                <span className="text-xs font-bold text-gray-400">段階</span>
+                                                <select
+                                                    value={magicVoiceEventStage}
+                                                    onChange={(event) => setMagicVoiceEventStage(Number(event.target.value))}
+                                                    className="w-full bg-slate-950 border border-purple-700/70 rounded px-3 py-2 text-sm font-bold text-white outline-none focus:border-purple-300"
+                                                >
+                                                    {[0, 1, 2, 3, 4].map(stage => (
+                                                        <option key={stage} value={stage}>第{stage + 1}段階 / r{stage + 1}</option>
+                                                    ))}
+                                                </select>
+                                            </label>
+                                            <div className="rounded border border-purple-900/60 bg-purple-950/20 p-3">
+                                                <div className="text-sm font-black text-white">{magicVoiceEventDialogue.title}</div>
+                                                <div className="mt-1 text-[10px] text-gray-500 font-mono">
+                                                    romance-{magicVoiceEventHeroId.toLowerCase()}-{normalizedMagicVoiceEventTargetId.toLowerCase()}-r{magicVoiceEventStage + 1}
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="space-y-2">
+                                            {magicVoiceEventLines.map((line, index) => (
+                                                <div key={line.lineId} className="rounded-lg border border-gray-700 bg-black/35 p-3">
+                                                    <div className="mb-2 flex items-center justify-between gap-2">
+                                                        <div className="min-w-0">
+                                                            <div className="text-xs font-black text-purple-200">{line.heroId} / {line.lineId}.ogg</div>
+                                                            <div className="mt-1 text-sm text-gray-100 leading-relaxed">
+                                                                {magicVoiceEventQuotedLines[index]?.[1]}「{magicVoiceEventQuotedLines[index]?.[2]}」
+                                                            </div>
+                                                        </div>
+                                                        <button
+                                                            onClick={() => audioService.playMagicEventVoice(line.heroId, line.lineId)}
+                                                            className="shrink-0 bg-purple-800 hover:bg-purple-700 text-white px-3 py-2 rounded font-bold text-xs flex items-center gap-1"
+                                                        >
+                                                            <Volume2 size={13} /> 再生
+                                                        </button>
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </section>
+
+                                <section className="space-y-4">
+                                    <div className="flex items-center justify-between gap-3 border-b border-pink-700/60 pb-3">
+                                        <h3 className="text-pink-300 font-bold flex items-center">
+                                            <Sparkles size={18} className="mr-2" /> クリア後エンディング ボイス確認
+                                        </h3>
+                                        <button
+                                            onClick={playMagicEndingVoiceSequence}
+                                            className="bg-pink-700 hover:bg-pink-600 text-white px-3 py-1.5 rounded font-bold text-xs flex items-center gap-1"
+                                        >
+                                            <Volume2 size={13} /> 全行再生
+                                        </button>
+                                    </div>
+                                    <div className="grid grid-cols-1 lg:grid-cols-[260px_1fr] gap-4">
+                                        <div className="bg-black/35 border border-gray-700 rounded-lg p-3 space-y-3">
+                                            <label className="block space-y-1">
+                                                <span className="text-xs font-bold text-gray-400">エンド種別</span>
+                                                <select
+                                                    value={magicVoiceEndingRank}
+                                                    onChange={(event) => setMagicVoiceEndingRank(event.target.value as MagicRomanceEndingRank)}
+                                                    className="w-full bg-slate-950 border border-pink-700/70 rounded px-3 py-2 text-sm font-bold text-white outline-none focus:border-pink-300"
+                                                >
+                                                    <option value="BOND">絆エンド</option>
+                                                    <option value="SPECIAL">特別な関係エンド</option>
+                                                    <option value="ROMANCE">恋愛エンド</option>
+                                                    <option value="TRUE_ROMANCE">真恋愛エンド</option>
+                                                </select>
+                                            </label>
+                                            <div className="rounded border border-pink-900/60 bg-pink-950/20 p-3">
+                                                <div className="text-sm font-black text-white">{magicVoiceEnding.title}</div>
+                                                <div className="mt-1 text-xs text-pink-200">{magicVoiceEnding.rankLabel}</div>
+                                            </div>
+                                        </div>
+                                        <div className="space-y-2">
+                                            {magicVoiceEndingLines.map((line, index) => (
+                                                <div key={`${index}-${line.voiceLine?.lineId ?? line.text}`} className="rounded-lg border border-gray-700 bg-black/35 p-3">
+                                                    <div className="mb-2 flex items-center justify-between gap-2">
+                                                        <div className="min-w-0">
+                                                            <div className="text-xs font-black text-pink-200">
+                                                                {line.voiceLine ? `${line.voiceLine.heroId} / ${line.voiceLine.lineId}.ogg` : 'ボイスなし'}
+                                                            </div>
+                                                            <div className="mt-1 text-sm text-gray-100 leading-relaxed">{line.text}</div>
+                                                        </div>
+                                                        {line.voiceLine && (
+                                                            <button
+                                                                onClick={() => audioService.playMagicEventVoice(line.voiceLine?.heroId, line.voiceLine?.lineId)}
+                                                                className="shrink-0 bg-pink-800 hover:bg-pink-700 text-white px-3 py-2 rounded font-bold text-xs flex items-center gap-1"
+                                                            >
+                                                                <Volume2 size={13} /> 再生
+                                                            </button>
+                                                        )}
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </section>
                             </div>
                         )}
 

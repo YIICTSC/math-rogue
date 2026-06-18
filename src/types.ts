@@ -359,8 +359,6 @@ export enum GameScreen {
   DECK_CONSTRUCTION = 'DECK_CONSTRUCTION',
   MAP = 'MAP',
   BATTLE = 'BATTLE',
-  VS_SETUP = 'VS_SETUP',
-  VS_BATTLE = 'VS_BATTLE',
   RACE_SETUP = 'RACE_SETUP',
   COOP_SETUP = 'COOP_SETUP',
   DODGEBALL_SHOOTING = 'DODGEBALL_SHOOTING',
@@ -857,16 +855,6 @@ export interface RankingEntry {
   challengeMode?: string;
 }
 
-export interface VSRecord {
-  id: string;
-  date: number;
-  opponentName: string;
-  playerCharName: string;
-  opponentCharName: string;
-  victory: boolean;
-  turns: number;
-}
-
 export type PokerSuit = 'SPADE' | 'HEART' | 'DIAMOND' | 'CLUB';
 export type PokerRank = 2 | 3 | 4 | 5 | 6 | 7 | 8 | 9 | 10 | 11 | 12 | 13 | 14;
 
@@ -1085,8 +1073,6 @@ export interface GameState {
   codexOptions?: Card[];
   parryState?: ParryState;
   activeEffects: VisualEffectInstance[];
-  vsOpponent?: Player; // 対戦相手のデータ
-  vsIsHost?: boolean; // P2P対戦でホストかどうか
   currentStoryIndex?: number;
   actStats?: ActStats;
   currentEventTitle?: string;

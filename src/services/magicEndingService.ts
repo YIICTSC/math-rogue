@@ -9,6 +9,7 @@ export interface MagicEndingPage {
   title: string;
   description: string;
   lines: string[];
+  voiceLines?: Array<{ heroId: string; lineId: string } | null>;
   imagePath: string;
   rankLabel: string;
   metricLabel: string;
@@ -23,6 +24,55 @@ const getCharacterName = (id: string) =>
   ?? MAGIC_MALE_PROTAGONISTS.find((entry) => entry.id === id)?.name
   ?? ROMANCE_TARGETS.find((entry) => entry.id === id)?.name
   ?? id;
+
+const SPEAKER_NAME_TO_MAGIC_ID: Record<string, string> = {
+  あかり: 'AKARI',
+  しずく: 'SHIZUKU',
+  ひより: 'HIYORI',
+  つばさ: 'TSUBASA',
+  れい: 'REI',
+  まどか: 'MADOKA',
+  こはる: 'KOHARU',
+  みらい: 'MIRAI',
+  セラ: 'SERA',
+  蓮: 'REN',
+  颯真: 'SOMA',
+  湊: 'MINATO',
+  理玖: 'RIKU',
+  大和: 'YAMATO',
+  レオン: 'LEON',
+  エリオット: 'ELLIOT',
+  朔夜: 'SAKUYA',
+};
+
+const hashEndingVoiceText = (value: string) => {
+  let hash = 0;
+  for (let index = 0; index < value.length; index++) {
+    hash = Math.imul(hash, 31) + value.charCodeAt(index);
+    hash >>>= 0;
+  }
+  return hash.toString(36);
+};
+
+export const getMagicEndingVoiceLine = (line: string, fallbackHeroId?: string): { heroId: string; lineId: string } | null => {
+  const match = line.match(/^([^「]+)「(.+)」$/);
+  if (!match) {
+    if (!fallbackHeroId) return null;
+    return {
+      heroId: fallbackHeroId,
+      lineId: `ending-${hashEndingVoiceText(`${fallbackHeroId}:${line}`)}`,
+    };
+  }
+  const heroId = SPEAKER_NAME_TO_MAGIC_ID[match[1].trim()];
+  if (!heroId) return null;
+  return {
+    heroId,
+    lineId: `ending-${hashEndingVoiceText(`${heroId}:${match[2]}`)}`,
+  };
+};
+
+const getMagicEndingVoiceLines = (lines: string[], fallbackHeroId?: string) =>
+  lines.map((line) => getMagicEndingVoiceLine(line, fallbackHeroId));
 
 const getCompletedRomanceTargetIds = (player: Player, heroId: string) => {
   const progress = player.magicRomance;
@@ -83,6 +133,7 @@ const buildDoubleRomancePage = (
     title: `${firstName}と${secondName}、譲れない告白`,
     description: `決戦後、${heroName}を呼び止めた二人は、互いの想いが同じ強さだと知る。好意を曖昧にしないため、二人は正面から答えを求めた。`,
     lines,
+    voiceLines: getMagicEndingVoiceLines(lines, heroId),
     imagePath: getPairImagePath(heroId, firstTargetId, secondTargetId),
     rankLabel: '二股エンド',
     metricLabel: '好感度 100 / 100 × 2',
@@ -109,6 +160,7 @@ export const getMagicEndingPages = (player: Player, heroId: string): MagicEnding
         title: ending.title,
         description: ending.description,
         lines: ending.lines,
+        voiceLines: getMagicEndingVoiceLines(ending.lines, heroId),
         imagePath: ending.imagePath,
         rankLabel: ending.rankLabel,
         metricLabel: `好感度 ${affection}`,
@@ -130,6 +182,10 @@ export const getMagicEndingPages = (player: Player, heroId: string): MagicEnding
         lines: [
           `${getCharacterName(heroId)}と${friendName}は、戦いが終わっても変わらない約束を交わした。`,
           `恋とは違う。それでも何度でも選び直したい、大切な友情の未来だった。`,
+        ],
+        voiceLines: [
+          getMagicEndingVoiceLine(`${getCharacterName(heroId)}と${friendName}は、戦いが終わっても変わらない約束を交わした。`, heroId),
+          getMagicEndingVoiceLine(`恋とは違う。それでも何度でも選び直したい、大切な友情の未来だった。`, heroId),
         ],
         imagePath: `sprites/magic/events/friendship/${route.heroId}/${route.friendHeroId}/event.webp`,
         rankLabel: '友情エンド',

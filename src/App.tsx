@@ -46,9 +46,6 @@ import SubmissionScreen from './components/SubmissionScreen';
 import RewardCardAlbumScreen from './components/RewardCardAlbumScreen';
 import ChefDeckSelectionScreen from './components/ChefDeckSelectionScreen';
 import GardenScreen from './components/GardenScreen';
-import P2PBattleSetup from './components/P2PBattleSetup';
-import VSBattleScene from './components/VSBattleScene';
-import P2PVSBattleScene from './components/P2PVSBattleScene';
 import P2PRaceSetup from './components/P2PRaceSetup';
 import CoopSetupScreen, { CoopParticipantPayload, CoopStartPayload } from './components/CoopSetupScreen';
 import ModeSelectionScreen from './components/ModeSelectionScreen';
@@ -67,7 +64,7 @@ import { getAssignmentEncodedFromUrl, getAssignmentFromUrl, getAssignmentModePoo
 import { STUDENT_GRADE_OPTIONS, createDailyAssignment, getCurrentSchoolYear, isAdultProfile, promoteStudentProfileForSchoolYear } from './utils/dailyAssignmentUtils';
 import { getDifficultyConfig } from './config/difficulty';
 import { CARD_ERASER_TEMPLATE_ID, CARD_ERASER_NAME, eraseCardEffect, getErasableEffectOptions } from './utils/cardEraser';
-import { RotateCcw, Home, BookOpen, Coins, Trophy, HelpCircle, Infinity, Play, ScrollText, Plus, Minus, X as MultiplyIcon, Divide, Shuffle, Send, Swords, Terminal, Club, Zap, Gamepad2, Brain, Languages, Music, Book, MessageSquare, GraduationCap, Clock, AlertTriangle, TimerOff, X, Check, FlaskConical, Globe, MapPin, ChevronDown, ArrowLeft, Sparkles, Wifi, Flag, Keyboard, Users, Settings, ClipboardList, FileText } from 'lucide-react';
+import { RotateCcw, Home, BookOpen, Coins, Trophy, HelpCircle, Infinity, Play, ScrollText, Plus, Minus, X as MultiplyIcon, Divide, Shuffle, Send, Swords, Terminal, Club, Zap, Gamepad2, Brain, Languages, Music, Book, MessageSquare, GraduationCap, Clock, AlertTriangle, TimerOff, X, Check, FlaskConical, Globe, MapPin, ChevronDown, ArrowLeft, Sparkles, Flag, Keyboard, Users, Settings, ClipboardList, FileText } from 'lucide-react';
 import { applyAdditionalCardLogic } from './services/cardEffectLogic';
 import { p2pService } from './services/p2pService';
 import { TypingLessonId } from './data/typingLessonConfig';
@@ -279,6 +276,7 @@ const DEFAULT_APP_SETTINGS: AppSettings = {
     bgmMode: 'MP3',
     bgmVolume: 0.4,
     seVolume: 0.6,
+    voiceVolume: 0.8,
     reduceScreenShake: false,
     fontSize: 'normal',
     battleUi: {
@@ -746,16 +744,13 @@ const App: React.FC = () => {
     useEffect(() => {
         if (typeof window === 'undefined') return;
         const params = new URLSearchParams(window.location.search);
-        const hasVsPin = ((params.get('vsPin') || '').normalize('NFKC').replace(/[^0-9]/g, '').slice(0, 6)).length === 6;
         const hasCoopPin = ((params.get('coopPin') || '').normalize('NFKC').replace(/[^0-9]/g, '').slice(0, 6)).length === 6;
         const hasRacePin = ((params.get('racePin') || '').normalize('NFKC').replace(/[^0-9]/g, '').slice(0, 6)).length === 6;
-        const targetScreen = hasVsPin
-            ? GameScreen.VS_SETUP
-            : hasCoopPin
-                ? GameScreen.COOP_SETUP
-                : hasRacePin
-                    ? GameScreen.RACE_SETUP
-                    : null;
+        const targetScreen = hasCoopPin
+            ? GameScreen.COOP_SETUP
+            : hasRacePin
+                ? GameScreen.RACE_SETUP
+                : null;
         if (OFFLINE_DISTRIBUTABLE && targetScreen) return;
         if (!targetScreen) return;
         setGameState(prev => (
@@ -2127,9 +2122,7 @@ const App: React.FC = () => {
         actStats: sharedState.actStats,
         currentEventTitle: sharedState.currentEventTitle,
         newlyUnlockedCardName: sharedState.newlyUnlockedCardName,
-        coopBattleState: sharedState.coopBattleState ?? null,
-        vsOpponent: undefined,
-        vsIsHost: undefined
+        coopBattleState: sharedState.coopBattleState ?? null
     }), []);
     const broadcastCoopBattleState = useCallback((battleState: CoopBattleState | null, syncOverrides?: {
         activeEffects?: VisualEffectInstance[],
@@ -2661,8 +2654,6 @@ const App: React.FC = () => {
             gameState.screen === GameScreen.MINI_GAME_PAPER_PLANE ||
             gameState.screen === GameScreen.MINI_GAME_GO_HOME ||
             gameState.screen !== GameScreen.PROBLEM_CHALLENGE &&
-            gameState.screen !== GameScreen.VS_SETUP &&
-            gameState.screen !== GameScreen.VS_BATTLE &&
             gameState.screen !== GameScreen.RACE_SETUP &&
             gameState.screen !== GameScreen.FLOOR_RESULT
         )) {
@@ -2831,6 +2822,7 @@ const App: React.FC = () => {
                     description: eventData.description,
                     image: eventData.image,
                     imageKey: eventData.imageKey,
+                    voiceLines: eventData.voiceLines,
                     options: (eventData.options || []).map((option: any) => ({
                         label: option.label,
                         text: option.text
@@ -2840,6 +2832,14 @@ const App: React.FC = () => {
             }
         });
     }, [buildCoopSharedState, eventData, eventResultLog, gameState, isCoopHost, shopCards, shopPotions, shopRelics, treasureOpened, treasurePools, treasureRewards]);
+    useEffect(() => {
+        if (gameState.screen !== GameScreen.EVENT || eventResultLog || !eventData?.voiceLines?.length) {
+            audioService.stopMagicEventVoices();
+            return;
+        }
+        void audioService.playMagicEventVoiceSequence(eventData.voiceLines);
+        return () => audioService.stopMagicEventVoices();
+    }, [eventData?.imageKey, eventData?.title, eventData?.voiceLines, eventResultLog, gameState.screen]);
     const sendCoopRewardSyncToPeer = useCallback((peerId: string) => {
         if (!coopSession?.isHost || gameState.challengeMode !== 'COOP' || gameState.screen !== GameScreen.REWARD) return;
         const participant = coopSession.participants.find(entry => entry.peerId === peerId);
@@ -3202,6 +3202,7 @@ const App: React.FC = () => {
         audioService.setBgmMode(appSettings.bgmMode);
         audioService.setBgmVolume(appSettings.bgmVolume);
         audioService.setSfxVolume(appSettings.seVolume);
+        audioService.setVoiceVolume(appSettings.voiceVolume);
 
         if (gameState.screen === GameScreen.START_MENU) {
             audioService.init();
@@ -3232,6 +3233,7 @@ const App: React.FC = () => {
         storageService.saveAppSettings(appSettings);
         audioService.setBgmVolume(appSettings.bgmVolume);
         audioService.setSfxVolume(appSettings.seVolume);
+        audioService.setVoiceVolume(appSettings.voiceVolume);
     }, [appSettings]);
 
     useEffect(() => {
@@ -3435,7 +3437,7 @@ const App: React.FC = () => {
         setCoopBattleKey(null);
         setCoopEnemyTurnCursor(0);
         p2pService.close();
-        setGameState(prev => ({ ...prev, screen: GameScreen.START_MENU, challengeMode: undefined, typingLessonId: undefined, vsOpponent: undefined }));
+        setGameState(prev => ({ ...prev, screen: GameScreen.START_MENU, challengeMode: undefined, typingLessonId: undefined }));
         setHasSave(storageService.hasSaveFile());
         audioService.playBGM('menu');
     };
@@ -3931,6 +3933,11 @@ const App: React.FC = () => {
                 ? saved.visualTheme as VisualThemeId
                 : visualTheme;
             setVisualTheme(savedVisualTheme);
+            if ((saved.screen as string) === 'VS_SETUP' || (saved.screen as string) === 'VS_BATTLE') {
+                saved.screen = GameScreen.START_MENU;
+                delete (saved as any).vsOpponent;
+                delete (saved as any).vsIsHost;
+            }
             if (saved.screen === GameScreen.ASSIGNMENT_CREATE || saved.screen === GameScreen.SUBMISSION || saved.screen === GameScreen.REWARD_CARD_ALBUM) {
                 storageService.clearSave();
                 setHasSave(false);
@@ -5415,7 +5422,15 @@ const App: React.FC = () => {
 
     const handleCancelSelection = (coopActorPeerId?: string) => {
         if (gameState.challengeMode === 'COOP' && coopSession && !coopSession.isHost && gameState.screen === GameScreen.BATTLE) {
+            if (gameState.selectionState.active && gameState.selectionState.type === 'DISCARD') {
+                audioService.playSound('wrong');
+                return;
+            }
             queueCoopBattleEvent({ type: 'COOP_BATTLE_SELECTION_STATE', selectionCancelled: true });
+            return;
+        }
+        if (gameState.selectionState.active && gameState.selectionState.type === 'DISCARD') {
+            if (!coopActorPeerId) audioService.playSound('wrong');
             return;
         }
         setGameState(prev => ({
@@ -5909,6 +5924,13 @@ const App: React.FC = () => {
         if (actingEnemyId) return;
         if (gameState.selectionState.active) return;
         if (card.unplayable) return;
+        const requiredDiscardCount = card.promptsDiscard || 0;
+        const incomingDrawCount = (card.draw || 0) * (actionPlayer.magicTransformed ? 2 : 1);
+        const discardableHandCount = actionPlayer.hand.filter(handCard => handCard.id !== card.id).length + incomingDrawCount;
+        if (requiredDiscardCount > 0 && discardableHandCount < requiredDiscardCount) {
+            if (!isCoopHostRemoteAction) audioService.playSound('wrong');
+            return;
+        }
 
         const hasChoker = !!actionPlayer.relics.find(r => r.id === 'VELVET_CHOKER');
         if (hasChoker && actionPlayer.cardsPlayedThisTurn >= 6) {
@@ -5923,6 +5945,12 @@ const App: React.FC = () => {
         }
 
         let cardAttackPreviewHitCount = 1;
+        const magicVoiceHeroId = gameState.visualTheme === 'magic' ? getMagicProtagonistId(actionPlayer) : undefined;
+        const isOwnMagicRuleCard = !!magicVoiceHeroId && card.magicHeroId === magicVoiceHeroId && card.magicRuleCardIndex !== undefined;
+        if (!isCoopHostRemoteAction && isOwnMagicRuleCard) {
+            audioService.playMagicVoice(magicVoiceHeroId, 'spell', 3, card.magicRuleCardIndex + 1);
+        }
+
         if (card.type === CardType.ATTACK) {
             if (card.playCopies) cardAttackPreviewHitCount += card.playCopies;
             if (card.hitsPerSkillInHand) {
@@ -5933,6 +5961,9 @@ const App: React.FC = () => {
             }
             cardAttackPreviewHitCount = Math.max(1, Math.min(100, cardAttackPreviewHitCount));
             if (!isCoopHostRemoteAction) audioService.playAttackEffectSound(getAttackEffectKeyForCard(card, cardAttackPreviewHitCount), cardAttackPreviewHitCount);
+            if (!isCoopHostRemoteAction && magicVoiceHeroId && !isOwnMagicRuleCard) {
+                audioService.playMagicVoice(magicVoiceHeroId, 'attack');
+            }
         } else if (!isCoopHostRemoteAction) {
             audioService.playSound('block');
         }
@@ -8125,7 +8156,12 @@ const App: React.FC = () => {
                         }
                     }
                     syncRedSkullState(p);
-                    if (didHpDamage) audioService.playSound('damage');
+                    if (didHpDamage) {
+                        audioService.playSound('damage');
+                        if (prev.visualTheme === 'magic') {
+                            audioService.playMagicVoice(getMagicProtagonistId(p), 'damage');
+                        }
+                    }
                     if (didApplyDebuff && intent.type === EnemyIntentType.ATTACK_DEBUFF) audioService.playSound('debuff');
                     return {
                         ...prev,
@@ -11990,6 +12026,12 @@ const App: React.FC = () => {
             setBgmMode(mode);
             audioService.setBgmMode(mode);
             storageService.saveBgmMode(mode);
+        } else if (key === 'bgmVolume') {
+            audioService.setBgmVolume(value as number);
+        } else if (key === 'seVolume') {
+            audioService.setSfxVolume(value as number);
+        } else if (key === 'voiceVolume') {
+            audioService.setVoiceVolume(value as number);
         }
     }, []);
 
@@ -11998,7 +12040,8 @@ const App: React.FC = () => {
             ...prev,
             bgmMode: DEFAULT_APP_SETTINGS.bgmMode,
             bgmVolume: DEFAULT_APP_SETTINGS.bgmVolume,
-            seVolume: DEFAULT_APP_SETTINGS.seVolume
+            seVolume: DEFAULT_APP_SETTINGS.seVolume,
+            voiceVolume: DEFAULT_APP_SETTINGS.voiceVolume
         }));
     }, []);
 
@@ -12008,6 +12051,7 @@ const App: React.FC = () => {
         audioService.setBgmMode(DEFAULT_APP_SETTINGS.bgmMode);
         audioService.setBgmVolume(DEFAULT_APP_SETTINGS.bgmVolume);
         audioService.setSfxVolume(DEFAULT_APP_SETTINGS.seVolume);
+        audioService.setVoiceVolume(DEFAULT_APP_SETTINGS.voiceVolume);
     }, []);
 
     const quitApp = useCallback(() => {
@@ -12558,11 +12602,11 @@ const App: React.FC = () => {
                                     {isLoading ? trans("じゅんびちゅう...", languageMode) : trans("冒険を始める", languageMode)}
                                 </button>
 
-                                <div className={`grid w-full ${OFFLINE_DISTRIBUTABLE ? 'grid-cols-1 gap-2' : isMobilePortrait ? 'grid-cols-4 gap-1' : 'grid-cols-2 sm:grid-cols-4 gap-2'}`}>
+                                <div className={`grid w-full ${OFFLINE_DISTRIBUTABLE ? 'grid-cols-1 gap-2' : isMobilePortrait ? 'grid-cols-3 gap-1' : 'grid-cols-3 gap-2'}`}>
                                     <button
                                         disabled={isAssignmentChallengeOnlyLocked}
                                         onClick={startChallengeGame}
-                                        className={`min-w-0 border-b-4 border-r-4 rounded-none transition-all shadow-md flex items-center justify-center ${isMobilePortrait ? 'py-1.5 px-0.5 text-[10px]' : 'py-2 px-1 text-xs'} font-bold ${isDailyLimitReached || isAssignmentChallengeOnlyLocked ? 'bg-gray-800 border-gray-700 text-gray-500 grayscale opacity-70 cursor-not-allowed' : 'bg-red-900/80 text-red-100 border-red-500 hover:bg-red-800 hover:shadow-red-900/50'}`}
+                                        className={`w-full min-w-0 border-b-4 border-r-4 rounded-none transition-all shadow-md flex items-center justify-center ${isMobilePortrait ? 'py-1.5 px-0.5 text-[10px]' : 'py-2 px-1 text-xs'} font-bold ${isDailyLimitReached || isAssignmentChallengeOnlyLocked ? 'bg-gray-800 border-gray-700 text-gray-500 grayscale opacity-70 cursor-not-allowed' : 'bg-red-900/80 text-red-100 border-red-500 hover:bg-red-800 hover:shadow-red-900/50'}`}
                                     >
                                         <Swords className={isMobilePortrait ? 'mr-0.5' : 'mr-1'} size={isMobilePortrait ? 12 : 14} /> {trans("1A1D", languageMode)}
                                     </button>
@@ -12578,28 +12622,12 @@ const App: React.FC = () => {
                                                         setShowTimeLimitModal(true);
                                                         return;
                                                     }
-                                                    setGameState(prev => ({ ...prev, screen: GameScreen.VS_SETUP }));
-                                                }}
-                                                className={`min-w-0 border-b-4 border-r-4 rounded-none flex items-center justify-center shadow-md ${isMobilePortrait ? 'py-1.5 px-0.5 text-[10px]' : 'py-2 px-1 text-xs'} font-bold ${isDailyLimitReached || isAssignmentChallengeOnlyLocked ? 'bg-gray-800 border-gray-700 text-gray-500 grayscale opacity-70 cursor-not-allowed' : 'bg-indigo-600/80 text-white border-indigo-400 hover:bg-indigo-700 cursor-pointer'}`}
-                                            >
-                                                <Wifi className={isMobilePortrait ? 'mr-0.5' : 'mr-1'} size={isMobilePortrait ? 12 : 14} /> {trans("VS", languageMode)}
-                                            </button>
-
-                                            <button
-                                                disabled={isAssignmentChallengeOnlyLocked}
-                                                onClick={() => {
-                                                    if (redirectToAssignmentChallengeIfLocked()) return;
-                                                    if (isDailyLimitReached) {
-                                                        audioService.playSound('wrong');
-                                                        setShowTimeLimitModal(true);
-                                                        return;
-                                                    }
                                                     setPendingAssignmentStartScreen(GameScreen.COOP_SETUP);
                                                     if (showDailyAssignmentNoticeForProblemSelection()) return;
                                                     setPendingAssignmentStartScreen(null);
                                                     setGameState(prev => ({ ...prev, screen: GameScreen.COOP_SETUP }));
                                                 }}
-                                                className={`min-w-0 border-b-4 border-r-4 rounded-none flex items-center justify-center shadow-md ${isMobilePortrait ? 'py-1.5 px-0.5 text-[10px]' : 'py-2 px-1 text-xs'} font-bold ${isDailyLimitReached || isAssignmentChallengeOnlyLocked ? 'bg-gray-800 border-gray-700 text-gray-500 grayscale opacity-70 cursor-not-allowed' : 'bg-emerald-700/80 text-emerald-100 border-emerald-400 hover:bg-emerald-700 cursor-pointer'}`}
+                                                className={`w-full min-w-0 border-b-4 border-r-4 rounded-none flex items-center justify-center shadow-md ${isMobilePortrait ? 'py-1.5 px-0.5 text-[10px]' : 'py-2 px-1 text-xs'} font-bold ${isDailyLimitReached || isAssignmentChallengeOnlyLocked ? 'bg-gray-800 border-gray-700 text-gray-500 grayscale opacity-70 cursor-not-allowed' : 'bg-emerald-700/80 text-emerald-100 border-emerald-400 hover:bg-emerald-700 cursor-pointer'}`}
                                             >
                                                 <Users className={isMobilePortrait ? 'mr-0.5' : 'mr-1'} size={isMobilePortrait ? 12 : 14} /> {trans("協力", languageMode)}
                                             </button>
@@ -12618,7 +12646,7 @@ const App: React.FC = () => {
                                                     setPendingAssignmentStartScreen(null);
                                                     setGameState(prev => ({ ...prev, screen: GameScreen.RACE_SETUP }));
                                                 }}
-                                                className={`min-w-0 border-b-4 border-r-4 rounded-none flex items-center justify-center shadow-md ${isMobilePortrait ? 'py-1.5 px-0.5 text-[10px]' : 'py-2 px-1 text-xs'} font-bold ${isDailyLimitReached || isAssignmentChallengeOnlyLocked ? 'bg-gray-800 border-gray-700 text-gray-500 grayscale opacity-70 cursor-not-allowed' : 'bg-cyan-700/80 text-cyan-100 border-cyan-400 hover:bg-cyan-700 cursor-pointer'}`}
+                                                className={`w-full min-w-0 border-b-4 border-r-4 rounded-none flex items-center justify-center shadow-md ${isMobilePortrait ? 'py-1.5 px-0.5 text-[10px]' : 'py-2 px-1 text-xs'} font-bold ${isDailyLimitReached || isAssignmentChallengeOnlyLocked ? 'bg-gray-800 border-gray-700 text-gray-500 grayscale opacity-70 cursor-not-allowed' : 'bg-cyan-700/80 text-cyan-100 border-cyan-400 hover:bg-cyan-700 cursor-pointer'}`}
                                             >
                                                 <Flag className={isMobilePortrait ? 'mr-0.5' : 'mr-1'} size={isMobilePortrait ? 12 : 14} /> {trans("レース", languageMode)}
                                             </button>
@@ -13153,34 +13181,6 @@ const App: React.FC = () => {
                     </div>
                 )}
 
-                {!OFFLINE_DISTRIBUTABLE && gameState.screen === GameScreen.VS_SETUP && (
-                    <div className="absolute inset-0">
-                        {OFFLINE_DISTRIBUTABLE ? (
-                            <div className="absolute inset-0 flex items-center justify-center bg-slate-950 p-4 text-white">
-                                <div className="max-w-md rounded-2xl border border-amber-500 bg-slate-900 p-6 text-center">
-                                    <div className="mb-2 text-xl font-black text-amber-300">VSモードは無効です</div>
-                                    <div className="mb-4 text-sm text-slate-200">{OFFLINE_NETWORK_FEATURE_MESSAGE}</div>
-                                    <button onClick={returnToTitle} className="rounded-lg bg-amber-500 px-4 py-2 font-bold text-slate-950">タイトルへ戻る</button>
-                                </div>
-                            </div>
-                        ) : (
-                            <P2PBattleSetup
-                                player={gameState.player}
-                                onBattleStart={(opp, isHost, myName) => {
-                                    setGameState(prev => ({
-                                        ...prev,
-                                        player: { ...prev.player, name: myName },
-                                        vsOpponent: opp,
-                                        screen: GameScreen.VS_BATTLE,
-                                        vsIsHost: isHost
-                                    }));
-                                }}
-                                onClose={returnToTitle}
-                            />
-                        )}
-                    </div>
-                )}
-
                 {!OFFLINE_DISTRIBUTABLE && gameState.screen === GameScreen.RACE_SETUP && (
                     <div className="absolute inset-0">
                         {OFFLINE_DISTRIBUTABLE ? (
@@ -13462,21 +13462,6 @@ const App: React.FC = () => {
                             </div>
                         )}
                     </>
-                )}
-
-                {gameState.screen === GameScreen.VS_BATTLE && gameState.vsOpponent && (
-                    <div className="absolute inset-0">
-                        <P2PVSBattleScene
-                            player1={gameState.player}
-                            player2={gameState.vsOpponent}
-                            isHost={gameState.vsIsHost || false}
-                            onFinish={(winner) => {
-                                alert(trans(winner === 1 ? "あなたの勝利！" : "対戦相手の勝利！", languageMode));
-                                setGameState(prev => ({ ...prev, screen: GameScreen.START_MENU, vsOpponent: undefined, vsIsHost: undefined }));
-                            }}
-                            languageMode={languageMode}
-                        />
-                    </div>
                 )}
 
                 {gameState.screen === GameScreen.MINI_GAME_SELECT && (

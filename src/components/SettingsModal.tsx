@@ -20,6 +20,7 @@ export type AppSettings = {
   bgmMode: BgmMode;
   bgmVolume: number;
   seVolume: number;
+  voiceVolume: number;
   reduceScreenShake: boolean;
   fontSize: 'normal' | 'large';
   battleUi: BattleUiSettings;
@@ -130,6 +131,9 @@ const SettingsModal: React.FC<Props> = ({
               </label>
               <label className="block">{trans("SE音量", languageMode)}: {Math.round(settings.seVolume * 100)}%
                 <input className="w-full" type="range" min={0} max={100} value={Math.round(settings.seVolume * 100)} onInput={e => onChange('seVolume', Number(e.currentTarget.value) / 100)} onChange={e => onChange('seVolume', Number(e.target.value) / 100)} />
+              </label>
+              <label className="block">{trans("ボイス音量", languageMode)}: {Math.round(settings.voiceVolume * 100)}%
+                <input className="w-full" type="range" min={0} max={100} value={Math.round(settings.voiceVolume * 100)} onInput={e => onChange('voiceVolume', Number(e.currentTarget.value) / 100)} onChange={e => onChange('voiceVolume', Number(e.target.value) / 100)} />
               </label>
             </>
           )}

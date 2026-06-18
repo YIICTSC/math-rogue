@@ -12,11 +12,17 @@ interface MagicEventOption {
   action: () => void;
 }
 
+export interface MagicEventVoiceLine {
+  heroId: string;
+  lineId: string;
+}
+
 export interface MagicRomanceGameEvent {
   title: string;
   description: string;
   options: MagicEventOption[];
   imageKey?: string;
+  voiceLines?: MagicEventVoiceLine[];
 }
 
 const createEmptyProgress = (): MagicRomanceProgress => ({
@@ -60,6 +66,38 @@ const getRomanceImageKey = (heroId: string, targetId: string, stage: number) =>
   isMagicMaleProtagonist(heroId)
     ? `magic-romance:${targetId}:${heroId}:r${stage}`
     : `magic-romance:${heroId}:${targetId}:r${stage}`;
+
+const SPEAKER_NAME_TO_MAGIC_ID: Record<string, string> = {
+  あかり: 'AKARI',
+  しずく: 'SHIZUKU',
+  ひより: 'HIYORI',
+  つばさ: 'TSUBASA',
+  れい: 'REI',
+  まどか: 'MADOKA',
+  こはる: 'KOHARU',
+  みらい: 'MIRAI',
+  セラ: 'SERA',
+  蓮: 'REN',
+  颯真: 'SOMA',
+  湊: 'MINATO',
+  理玖: 'RIKU',
+  大和: 'YAMATO',
+  レオン: 'LEON',
+  エリオット: 'ELLIOT',
+  朔夜: 'SAKUYA',
+};
+
+export const getMagicRomanceVoiceLines = (heroId: string, targetId: string, stageIndex: number, description: string): MagicEventVoiceLine[] => {
+  const linePrefix = `romance-${heroId}-${targetId}-r${stageIndex + 1}`.toLowerCase();
+  return description
+    .split('\n')
+    .map((line) => line.match(/^([^「]+)「(.+)」$/))
+    .filter((match): match is RegExpMatchArray => !!match)
+    .map((match, index) => ({
+      heroId: SPEAKER_NAME_TO_MAGIC_ID[match[1].trim()] ?? heroId,
+      lineId: `${linePrefix}-${index + 1}`,
+    }));
+};
 
 export const getBestMagicRomanceTargetId = (player: Player, heroId?: string): string | null => {
   const affection = getProgress(player).affection;
@@ -228,6 +266,7 @@ const buildDialogueEvent = (
     title: dialogue.title,
     description: dialogue.description,
     imageKey: getRomanceImageKey(heroId, targetId, stageIndex + 1),
+    voiceLines: getMagicRomanceVoiceLines(heroId, targetId, stageIndex, dialogue.description),
     options: dialogue.choices.map((choice, choiceIndex) => ({
       label: choice.label,
       text: `好感度+${choice.affectionGain}`,
@@ -289,6 +328,7 @@ const buildCompletedRouteEvent = (
     title: `${target.name}・約束の続き`,
     description: `${dialogue.description}\n\n五つの大切な時間を重ねた二人には、もう言葉に迷う距離はなかった。`,
     imageKey: getRomanceImageKey(heroId, targetId, 5),
+    voiceLines: getMagicRomanceVoiceLines(heroId, targetId, 4, dialogue.description),
     options: choices.map((choice, choiceIndex) => ({
       label: choice.label,
       text: `5段階完了 / ${choice.text}`,
@@ -426,6 +466,7 @@ const buildChapterWaitEvent = (
     title: `${target.name}・次の季節を待ちながら`,
     description: `${dialogue.description}\n\n二人の関係は確かに進んでいる。けれど、次の出来事が動き出すのは第${requiredAct}章からだ。今日は焦らず、いつもの学園生活を一緒に過ごすことにした。`,
     imageKey: getRomanceImageKey(heroId, targetId, previousStage + 1),
+    voiceLines: getMagicRomanceVoiceLines(heroId, targetId, previousStage, dialogue.description),
     options: choices.map((choice, choiceIndex) => ({
       label: choice.label,
       text: `段階維持 / ${choice.text}`,

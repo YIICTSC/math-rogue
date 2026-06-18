@@ -1,0 +1,780 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>マジック編 立ち絵・イベント絵 前半3枚確認表</title>
+<style>
+  :root { color-scheme: dark; --bg: #111827; --panel: #182235; --line: #334155; --text: #e5e7eb; --muted: #94a3b8; --accent: #f0abfc; }
+  * { box-sizing: border-box; }
+  body { margin: 0; padding: 24px; background: var(--bg); color: var(--text); font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+  h1 { margin: 0 0 8px; font-size: 24px; }
+  h2 { margin: 32px 0 12px; font-size: 18px; color: var(--accent); }
+  p { margin: 0 0 16px; color: var(--muted); line-height: 1.6; }
+  .toolbar { position: sticky; top: 0; z-index: 3; display: flex; gap: 12px; align-items: center; padding: 12px 0 16px; background: linear-gradient(var(--bg) 75%, transparent); }
+  input, select { background: #020617; border: 1px solid var(--line); color: var(--text); border-radius: 6px; padding: 9px 10px; font-size: 14px; }
+  input { min-width: 280px; }
+  .table-wrap { overflow: auto; border: 1px solid var(--line); border-radius: 8px; background: var(--panel); }
+  table { width: 100%; min-width: 1180px; border-collapse: collapse; }
+  th, td { border-bottom: 1px solid var(--line); border-right: 1px solid var(--line); padding: 10px; vertical-align: top; }
+  thead th { position: sticky; top: 58px; z-index: 2; background: #0f172a; color: #f8fafc; font-size: 13px; }
+  tbody th { width: 150px; background: #0f172a; text-align: left; }
+  tr.hidden { display: none; }
+  .route { color: #f8fafc; font-weight: 800; letter-spacing: .03em; }
+  .names { margin-top: 6px; color: var(--muted); font-size: 12px; line-height: 1.45; }
+  .tile { margin: 0; width: 100%; }
+  .tile img { display: block; width: 100%; height: 190px; object-fit: contain; background: #020617; border-radius: 6px; border: 1px solid #1e293b; }
+  .tile.portrait img { height: 190px; }
+  .tile figcaption { margin-top: 6px; color: var(--muted); font-size: 10px; overflow-wrap: anywhere; line-height: 1.35; }
+  .tile.missing img { min-height: 80px; background: repeating-linear-gradient(135deg, #3f1d1d, #3f1d1d 10px, #1f1111 10px, #1f1111 20px); }
+  .tile.missing figcaption { color: #fca5a5; font-weight: 700; }
+  .note { margin-top: 10px; font-size: 12px; color: var(--muted); }
+</style>
+</head>
+<body>
+  <h1>マジック編 立ち絵・イベント絵 前半3枚確認表</h1>
+  <p>立ち絵は変身後の通常立ち絵、イベント絵は恋愛イベントの r1-r3 を表示。全72ルートを横並びで確認するためのローカル確認表。</p>
+  <div class="toolbar">
+    <input id="filter" type="search" placeholder="ID・名前で絞り込み: SOMA / まどか など">
+    <select id="heroine">
+      <option value="">女性主人公: すべて</option>
+      <option value="AKARI">AKARI / 星宮あかり</option><option value="SHIZUKU">SHIZUKU / 水城しずく</option><option value="HIYORI">HIYORI / 花咲ひより</option><option value="TSUBASA">TSUBASA / 火神つばさ</option><option value="REI">REI / 黒羽れい</option><option value="MADOKA">MADOKA / 翠川まどか</option><option value="KOHARU">KOHARU / 風森こはる</option><option value="MIRAI">MIRAI / 紫藤みらい</option><option value="SERA">SERA / 白峰セラ</option>
+    </select>
+    <select id="target">
+      <option value="">男性主人公: すべて</option>
+      <option value="REN">REN / 朝霧 蓮</option><option value="SOMA">SOMA / 御影 颯真</option><option value="MINATO">MINATO / 白石 湊</option><option value="RIKU">RIKU / 天音 理玖</option><option value="YAMATO">YAMATO / 黒瀬 大和</option><option value="LEON">LEON / 神代 レオン</option><option value="ELLIOT">ELLIOT / エリオット・ノクス</option><option value="SAKUYA">SAKUYA / 九条 朔夜</option>
+    </select>
+  </div>
+  <h2>ルート別確認</h2>
+  <div class="table-wrap">
+    <table id="route-table">
+      <thead><tr><th>ルート</th><th>女性立ち絵</th><th>男性立ち絵</th><th>イベント r1</th><th>イベント r2</th><th>イベント r3</th></tr></thead>
+      <tbody><tr data-route="AKARI-REN" data-heroine="AKARI" data-target="REN" data-search="AKARI-REN 星宮あかり 朝霧 蓮 星冠の魔法騎士 蒼風の守護騎士">
+      <th scope="row"><div class="route">AKARI-REN</div><div class="names">星宮あかり<br>朝霧 蓮</div></th>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/characters/heroine-01-after.png" alt="星宮あかり 立ち絵" loading="lazy"><figcaption>sprites/magic/characters/heroine-01-after.png</figcaption></figure></td>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/male-characters/ren-after.png" alt="朝霧 蓮 立ち絵" loading="lazy"><figcaption>sprites/magic/male-characters/ren-after.png</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/AKARI/REN/r1.webp" alt="AKARI-REN r1" loading="lazy"><figcaption>sprites/magic/events/romance/AKARI/REN/r1.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/AKARI/REN/r2.webp" alt="AKARI-REN r2" loading="lazy"><figcaption>sprites/magic/events/romance/AKARI/REN/r2.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/AKARI/REN/r3.webp" alt="AKARI-REN r3" loading="lazy"><figcaption>sprites/magic/events/romance/AKARI/REN/r3.webp</figcaption></figure></td>
+    </tr>
+<tr data-route="AKARI-SOMA" data-heroine="AKARI" data-target="SOMA" data-search="AKARI-SOMA 星宮あかり 御影 颯真 星冠の魔法騎士 氷律の執行騎士">
+      <th scope="row"><div class="route">AKARI-SOMA</div><div class="names">星宮あかり<br>御影 颯真</div></th>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/characters/heroine-01-after.png" alt="星宮あかり 立ち絵" loading="lazy"><figcaption>sprites/magic/characters/heroine-01-after.png</figcaption></figure></td>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/male-characters/soma-after.png" alt="御影 颯真 立ち絵" loading="lazy"><figcaption>sprites/magic/male-characters/soma-after.png</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/AKARI/SOMA/r1.webp" alt="AKARI-SOMA r1" loading="lazy"><figcaption>sprites/magic/events/romance/AKARI/SOMA/r1.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/AKARI/SOMA/r2.webp" alt="AKARI-SOMA r2" loading="lazy"><figcaption>sprites/magic/events/romance/AKARI/SOMA/r2.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/AKARI/SOMA/r3.webp" alt="AKARI-SOMA r3" loading="lazy"><figcaption>sprites/magic/events/romance/AKARI/SOMA/r3.webp</figcaption></figure></td>
+    </tr>
+<tr data-route="AKARI-MINATO" data-heroine="AKARI" data-target="MINATO" data-search="AKARI-MINATO 星宮あかり 白石 湊 星冠の魔法騎士 清流の癒術騎士">
+      <th scope="row"><div class="route">AKARI-MINATO</div><div class="names">星宮あかり<br>白石 湊</div></th>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/characters/heroine-01-after.png" alt="星宮あかり 立ち絵" loading="lazy"><figcaption>sprites/magic/characters/heroine-01-after.png</figcaption></figure></td>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/male-characters/minato-after.png" alt="白石 湊 立ち絵" loading="lazy"><figcaption>sprites/magic/male-characters/minato-after.png</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/AKARI/MINATO/r1.webp" alt="AKARI-MINATO r1" loading="lazy"><figcaption>sprites/magic/events/romance/AKARI/MINATO/r1.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/AKARI/MINATO/r2.webp" alt="AKARI-MINATO r2" loading="lazy"><figcaption>sprites/magic/events/romance/AKARI/MINATO/r2.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/AKARI/MINATO/r3.webp" alt="AKARI-MINATO r3" loading="lazy"><figcaption>sprites/magic/events/romance/AKARI/MINATO/r3.webp</figcaption></figure></td>
+    </tr>
+<tr data-route="AKARI-RIKU" data-heroine="AKARI" data-target="RIKU" data-search="AKARI-RIKU 星宮あかり 天音 理玖 星冠の魔法騎士 時詠の観測騎士">
+      <th scope="row"><div class="route">AKARI-RIKU</div><div class="names">星宮あかり<br>天音 理玖</div></th>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/characters/heroine-01-after.png" alt="星宮あかり 立ち絵" loading="lazy"><figcaption>sprites/magic/characters/heroine-01-after.png</figcaption></figure></td>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/male-characters/riku-after.png" alt="天音 理玖 立ち絵" loading="lazy"><figcaption>sprites/magic/male-characters/riku-after.png</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/AKARI/RIKU/r1.webp" alt="AKARI-RIKU r1" loading="lazy"><figcaption>sprites/magic/events/romance/AKARI/RIKU/r1.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/AKARI/RIKU/r2.webp" alt="AKARI-RIKU r2" loading="lazy"><figcaption>sprites/magic/events/romance/AKARI/RIKU/r2.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/AKARI/RIKU/r3.webp" alt="AKARI-RIKU r3" loading="lazy"><figcaption>sprites/magic/events/romance/AKARI/RIKU/r3.webp</figcaption></figure></td>
+    </tr>
+<tr data-route="AKARI-YAMATO" data-heroine="AKARI" data-target="YAMATO" data-search="AKARI-YAMATO 星宮あかり 黒瀬 大和 星冠の魔法騎士 紅蓮の拳闘騎士">
+      <th scope="row"><div class="route">AKARI-YAMATO</div><div class="names">星宮あかり<br>黒瀬 大和</div></th>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/characters/heroine-01-after.png" alt="星宮あかり 立ち絵" loading="lazy"><figcaption>sprites/magic/characters/heroine-01-after.png</figcaption></figure></td>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/male-characters/yamato-after.png" alt="黒瀬 大和 立ち絵" loading="lazy"><figcaption>sprites/magic/male-characters/yamato-after.png</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/AKARI/YAMATO/r1.webp" alt="AKARI-YAMATO r1" loading="lazy"><figcaption>sprites/magic/events/romance/AKARI/YAMATO/r1.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/AKARI/YAMATO/r2.webp" alt="AKARI-YAMATO r2" loading="lazy"><figcaption>sprites/magic/events/romance/AKARI/YAMATO/r2.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/AKARI/YAMATO/r3.webp" alt="AKARI-YAMATO r3" loading="lazy"><figcaption>sprites/magic/events/romance/AKARI/YAMATO/r3.webp</figcaption></figure></td>
+    </tr>
+<tr data-route="AKARI-LEON" data-heroine="AKARI" data-target="LEON" data-search="AKARI-LEON 星宮あかり 神代 レオン 星冠の魔法騎士 幻奏の舞台騎士">
+      <th scope="row"><div class="route">AKARI-LEON</div><div class="names">星宮あかり<br>神代 レオン</div></th>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/characters/heroine-01-after.png" alt="星宮あかり 立ち絵" loading="lazy"><figcaption>sprites/magic/characters/heroine-01-after.png</figcaption></figure></td>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/male-characters/leon-after.png" alt="神代 レオン 立ち絵" loading="lazy"><figcaption>sprites/magic/male-characters/leon-after.png</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/AKARI/LEON/r1.webp" alt="AKARI-LEON r1" loading="lazy"><figcaption>sprites/magic/events/romance/AKARI/LEON/r1.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/AKARI/LEON/r2.webp" alt="AKARI-LEON r2" loading="lazy"><figcaption>sprites/magic/events/romance/AKARI/LEON/r2.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/AKARI/LEON/r3.webp" alt="AKARI-LEON r3" loading="lazy"><figcaption>sprites/magic/events/romance/AKARI/LEON/r3.webp</figcaption></figure></td>
+    </tr>
+<tr data-route="AKARI-ELLIOT" data-heroine="AKARI" data-target="ELLIOT" data-search="AKARI-ELLIOT 星宮あかり エリオット・ノクス 星冠の魔法騎士 星界の記録騎士">
+      <th scope="row"><div class="route">AKARI-ELLIOT</div><div class="names">星宮あかり<br>エリオット・ノクス</div></th>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/characters/heroine-01-after.png" alt="星宮あかり 立ち絵" loading="lazy"><figcaption>sprites/magic/characters/heroine-01-after.png</figcaption></figure></td>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/male-characters/elliot-after.png" alt="エリオット・ノクス 立ち絵" loading="lazy"><figcaption>sprites/magic/male-characters/elliot-after.png</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/AKARI/ELLIOT/r1.webp" alt="AKARI-ELLIOT r1" loading="lazy"><figcaption>sprites/magic/events/romance/AKARI/ELLIOT/r1.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/AKARI/ELLIOT/r2.webp" alt="AKARI-ELLIOT r2" loading="lazy"><figcaption>sprites/magic/events/romance/AKARI/ELLIOT/r2.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/AKARI/ELLIOT/r3.webp" alt="AKARI-ELLIOT r3" loading="lazy"><figcaption>sprites/magic/events/romance/AKARI/ELLIOT/r3.webp</figcaption></figure></td>
+    </tr>
+<tr data-route="AKARI-SAKUYA" data-heroine="AKARI" data-target="SAKUYA" data-search="AKARI-SAKUYA 星宮あかり 九条 朔夜 星冠の魔法騎士 宵闇の封印騎士">
+      <th scope="row"><div class="route">AKARI-SAKUYA</div><div class="names">星宮あかり<br>九条 朔夜</div></th>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/characters/heroine-01-after.png" alt="星宮あかり 立ち絵" loading="lazy"><figcaption>sprites/magic/characters/heroine-01-after.png</figcaption></figure></td>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/male-characters/sakuya-after.png" alt="九条 朔夜 立ち絵" loading="lazy"><figcaption>sprites/magic/male-characters/sakuya-after.png</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/AKARI/SAKUYA/r1.webp" alt="AKARI-SAKUYA r1" loading="lazy"><figcaption>sprites/magic/events/romance/AKARI/SAKUYA/r1.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/AKARI/SAKUYA/r2.webp" alt="AKARI-SAKUYA r2" loading="lazy"><figcaption>sprites/magic/events/romance/AKARI/SAKUYA/r2.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/AKARI/SAKUYA/r3.webp" alt="AKARI-SAKUYA r3" loading="lazy"><figcaption>sprites/magic/events/romance/AKARI/SAKUYA/r3.webp</figcaption></figure></td>
+    </tr>
+<tr data-route="SHIZUKU-REN" data-heroine="SHIZUKU" data-target="REN" data-search="SHIZUKU-REN 水城しずく 朝霧 蓮 月鏡の水晶騎士 蒼風の守護騎士">
+      <th scope="row"><div class="route">SHIZUKU-REN</div><div class="names">水城しずく<br>朝霧 蓮</div></th>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/characters/heroine-02-after.png" alt="水城しずく 立ち絵" loading="lazy"><figcaption>sprites/magic/characters/heroine-02-after.png</figcaption></figure></td>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/male-characters/ren-after.png" alt="朝霧 蓮 立ち絵" loading="lazy"><figcaption>sprites/magic/male-characters/ren-after.png</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/SHIZUKU/REN/r1.webp" alt="SHIZUKU-REN r1" loading="lazy"><figcaption>sprites/magic/events/romance/SHIZUKU/REN/r1.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/SHIZUKU/REN/r2.webp" alt="SHIZUKU-REN r2" loading="lazy"><figcaption>sprites/magic/events/romance/SHIZUKU/REN/r2.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/SHIZUKU/REN/r3.webp" alt="SHIZUKU-REN r3" loading="lazy"><figcaption>sprites/magic/events/romance/SHIZUKU/REN/r3.webp</figcaption></figure></td>
+    </tr>
+<tr data-route="SHIZUKU-SOMA" data-heroine="SHIZUKU" data-target="SOMA" data-search="SHIZUKU-SOMA 水城しずく 御影 颯真 月鏡の水晶騎士 氷律の執行騎士">
+      <th scope="row"><div class="route">SHIZUKU-SOMA</div><div class="names">水城しずく<br>御影 颯真</div></th>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/characters/heroine-02-after.png" alt="水城しずく 立ち絵" loading="lazy"><figcaption>sprites/magic/characters/heroine-02-after.png</figcaption></figure></td>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/male-characters/soma-after.png" alt="御影 颯真 立ち絵" loading="lazy"><figcaption>sprites/magic/male-characters/soma-after.png</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/SHIZUKU/SOMA/r1.webp" alt="SHIZUKU-SOMA r1" loading="lazy"><figcaption>sprites/magic/events/romance/SHIZUKU/SOMA/r1.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/SHIZUKU/SOMA/r2.webp" alt="SHIZUKU-SOMA r2" loading="lazy"><figcaption>sprites/magic/events/romance/SHIZUKU/SOMA/r2.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/SHIZUKU/SOMA/r3.webp" alt="SHIZUKU-SOMA r3" loading="lazy"><figcaption>sprites/magic/events/romance/SHIZUKU/SOMA/r3.webp</figcaption></figure></td>
+    </tr>
+<tr data-route="SHIZUKU-MINATO" data-heroine="SHIZUKU" data-target="MINATO" data-search="SHIZUKU-MINATO 水城しずく 白石 湊 月鏡の水晶騎士 清流の癒術騎士">
+      <th scope="row"><div class="route">SHIZUKU-MINATO</div><div class="names">水城しずく<br>白石 湊</div></th>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/characters/heroine-02-after.png" alt="水城しずく 立ち絵" loading="lazy"><figcaption>sprites/magic/characters/heroine-02-after.png</figcaption></figure></td>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/male-characters/minato-after.png" alt="白石 湊 立ち絵" loading="lazy"><figcaption>sprites/magic/male-characters/minato-after.png</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/SHIZUKU/MINATO/r1.webp" alt="SHIZUKU-MINATO r1" loading="lazy"><figcaption>sprites/magic/events/romance/SHIZUKU/MINATO/r1.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/SHIZUKU/MINATO/r2.webp" alt="SHIZUKU-MINATO r2" loading="lazy"><figcaption>sprites/magic/events/romance/SHIZUKU/MINATO/r2.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/SHIZUKU/MINATO/r3.webp" alt="SHIZUKU-MINATO r3" loading="lazy"><figcaption>sprites/magic/events/romance/SHIZUKU/MINATO/r3.webp</figcaption></figure></td>
+    </tr>
+<tr data-route="SHIZUKU-RIKU" data-heroine="SHIZUKU" data-target="RIKU" data-search="SHIZUKU-RIKU 水城しずく 天音 理玖 月鏡の水晶騎士 時詠の観測騎士">
+      <th scope="row"><div class="route">SHIZUKU-RIKU</div><div class="names">水城しずく<br>天音 理玖</div></th>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/characters/heroine-02-after.png" alt="水城しずく 立ち絵" loading="lazy"><figcaption>sprites/magic/characters/heroine-02-after.png</figcaption></figure></td>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/male-characters/riku-after.png" alt="天音 理玖 立ち絵" loading="lazy"><figcaption>sprites/magic/male-characters/riku-after.png</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/SHIZUKU/RIKU/r1.webp" alt="SHIZUKU-RIKU r1" loading="lazy"><figcaption>sprites/magic/events/romance/SHIZUKU/RIKU/r1.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/SHIZUKU/RIKU/r2.webp" alt="SHIZUKU-RIKU r2" loading="lazy"><figcaption>sprites/magic/events/romance/SHIZUKU/RIKU/r2.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/SHIZUKU/RIKU/r3.webp" alt="SHIZUKU-RIKU r3" loading="lazy"><figcaption>sprites/magic/events/romance/SHIZUKU/RIKU/r3.webp</figcaption></figure></td>
+    </tr>
+<tr data-route="SHIZUKU-YAMATO" data-heroine="SHIZUKU" data-target="YAMATO" data-search="SHIZUKU-YAMATO 水城しずく 黒瀬 大和 月鏡の水晶騎士 紅蓮の拳闘騎士">
+      <th scope="row"><div class="route">SHIZUKU-YAMATO</div><div class="names">水城しずく<br>黒瀬 大和</div></th>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/characters/heroine-02-after.png" alt="水城しずく 立ち絵" loading="lazy"><figcaption>sprites/magic/characters/heroine-02-after.png</figcaption></figure></td>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/male-characters/yamato-after.png" alt="黒瀬 大和 立ち絵" loading="lazy"><figcaption>sprites/magic/male-characters/yamato-after.png</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/SHIZUKU/YAMATO/r1.webp" alt="SHIZUKU-YAMATO r1" loading="lazy"><figcaption>sprites/magic/events/romance/SHIZUKU/YAMATO/r1.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/SHIZUKU/YAMATO/r2.webp" alt="SHIZUKU-YAMATO r2" loading="lazy"><figcaption>sprites/magic/events/romance/SHIZUKU/YAMATO/r2.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/SHIZUKU/YAMATO/r3.webp" alt="SHIZUKU-YAMATO r3" loading="lazy"><figcaption>sprites/magic/events/romance/SHIZUKU/YAMATO/r3.webp</figcaption></figure></td>
+    </tr>
+<tr data-route="SHIZUKU-LEON" data-heroine="SHIZUKU" data-target="LEON" data-search="SHIZUKU-LEON 水城しずく 神代 レオン 月鏡の水晶騎士 幻奏の舞台騎士">
+      <th scope="row"><div class="route">SHIZUKU-LEON</div><div class="names">水城しずく<br>神代 レオン</div></th>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/characters/heroine-02-after.png" alt="水城しずく 立ち絵" loading="lazy"><figcaption>sprites/magic/characters/heroine-02-after.png</figcaption></figure></td>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/male-characters/leon-after.png" alt="神代 レオン 立ち絵" loading="lazy"><figcaption>sprites/magic/male-characters/leon-after.png</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/SHIZUKU/LEON/r1.webp" alt="SHIZUKU-LEON r1" loading="lazy"><figcaption>sprites/magic/events/romance/SHIZUKU/LEON/r1.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/SHIZUKU/LEON/r2.webp" alt="SHIZUKU-LEON r2" loading="lazy"><figcaption>sprites/magic/events/romance/SHIZUKU/LEON/r2.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/SHIZUKU/LEON/r3.webp" alt="SHIZUKU-LEON r3" loading="lazy"><figcaption>sprites/magic/events/romance/SHIZUKU/LEON/r3.webp</figcaption></figure></td>
+    </tr>
+<tr data-route="SHIZUKU-ELLIOT" data-heroine="SHIZUKU" data-target="ELLIOT" data-search="SHIZUKU-ELLIOT 水城しずく エリオット・ノクス 月鏡の水晶騎士 星界の記録騎士">
+      <th scope="row"><div class="route">SHIZUKU-ELLIOT</div><div class="names">水城しずく<br>エリオット・ノクス</div></th>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/characters/heroine-02-after.png" alt="水城しずく 立ち絵" loading="lazy"><figcaption>sprites/magic/characters/heroine-02-after.png</figcaption></figure></td>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/male-characters/elliot-after.png" alt="エリオット・ノクス 立ち絵" loading="lazy"><figcaption>sprites/magic/male-characters/elliot-after.png</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/SHIZUKU/ELLIOT/r1.webp" alt="SHIZUKU-ELLIOT r1" loading="lazy"><figcaption>sprites/magic/events/romance/SHIZUKU/ELLIOT/r1.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/SHIZUKU/ELLIOT/r2.webp" alt="SHIZUKU-ELLIOT r2" loading="lazy"><figcaption>sprites/magic/events/romance/SHIZUKU/ELLIOT/r2.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/SHIZUKU/ELLIOT/r3.webp" alt="SHIZUKU-ELLIOT r3" loading="lazy"><figcaption>sprites/magic/events/romance/SHIZUKU/ELLIOT/r3.webp</figcaption></figure></td>
+    </tr>
+<tr data-route="SHIZUKU-SAKUYA" data-heroine="SHIZUKU" data-target="SAKUYA" data-search="SHIZUKU-SAKUYA 水城しずく 九条 朔夜 月鏡の水晶騎士 宵闇の封印騎士">
+      <th scope="row"><div class="route">SHIZUKU-SAKUYA</div><div class="names">水城しずく<br>九条 朔夜</div></th>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/characters/heroine-02-after.png" alt="水城しずく 立ち絵" loading="lazy"><figcaption>sprites/magic/characters/heroine-02-after.png</figcaption></figure></td>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/male-characters/sakuya-after.png" alt="九条 朔夜 立ち絵" loading="lazy"><figcaption>sprites/magic/male-characters/sakuya-after.png</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/SHIZUKU/SAKUYA/r1.webp" alt="SHIZUKU-SAKUYA r1" loading="lazy"><figcaption>sprites/magic/events/romance/SHIZUKU/SAKUYA/r1.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/SHIZUKU/SAKUYA/r2.webp" alt="SHIZUKU-SAKUYA r2" loading="lazy"><figcaption>sprites/magic/events/romance/SHIZUKU/SAKUYA/r2.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/SHIZUKU/SAKUYA/r3.webp" alt="SHIZUKU-SAKUYA r3" loading="lazy"><figcaption>sprites/magic/events/romance/SHIZUKU/SAKUYA/r3.webp</figcaption></figure></td>
+    </tr>
+<tr data-route="HIYORI-REN" data-heroine="HIYORI" data-target="REN" data-search="HIYORI-REN 花咲ひより 朝霧 蓮 命花の治癒術師 蒼風の守護騎士">
+      <th scope="row"><div class="route">HIYORI-REN</div><div class="names">花咲ひより<br>朝霧 蓮</div></th>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/characters/heroine-03-after.png" alt="花咲ひより 立ち絵" loading="lazy"><figcaption>sprites/magic/characters/heroine-03-after.png</figcaption></figure></td>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/male-characters/ren-after.png" alt="朝霧 蓮 立ち絵" loading="lazy"><figcaption>sprites/magic/male-characters/ren-after.png</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/HIYORI/REN/r1.webp" alt="HIYORI-REN r1" loading="lazy"><figcaption>sprites/magic/events/romance/HIYORI/REN/r1.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/HIYORI/REN/r2.webp" alt="HIYORI-REN r2" loading="lazy"><figcaption>sprites/magic/events/romance/HIYORI/REN/r2.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/HIYORI/REN/r3.webp" alt="HIYORI-REN r3" loading="lazy"><figcaption>sprites/magic/events/romance/HIYORI/REN/r3.webp</figcaption></figure></td>
+    </tr>
+<tr data-route="HIYORI-SOMA" data-heroine="HIYORI" data-target="SOMA" data-search="HIYORI-SOMA 花咲ひより 御影 颯真 命花の治癒術師 氷律の執行騎士">
+      <th scope="row"><div class="route">HIYORI-SOMA</div><div class="names">花咲ひより<br>御影 颯真</div></th>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/characters/heroine-03-after.png" alt="花咲ひより 立ち絵" loading="lazy"><figcaption>sprites/magic/characters/heroine-03-after.png</figcaption></figure></td>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/male-characters/soma-after.png" alt="御影 颯真 立ち絵" loading="lazy"><figcaption>sprites/magic/male-characters/soma-after.png</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/HIYORI/SOMA/r1.webp" alt="HIYORI-SOMA r1" loading="lazy"><figcaption>sprites/magic/events/romance/HIYORI/SOMA/r1.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/HIYORI/SOMA/r2.webp" alt="HIYORI-SOMA r2" loading="lazy"><figcaption>sprites/magic/events/romance/HIYORI/SOMA/r2.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/HIYORI/SOMA/r3.webp" alt="HIYORI-SOMA r3" loading="lazy"><figcaption>sprites/magic/events/romance/HIYORI/SOMA/r3.webp</figcaption></figure></td>
+    </tr>
+<tr data-route="HIYORI-MINATO" data-heroine="HIYORI" data-target="MINATO" data-search="HIYORI-MINATO 花咲ひより 白石 湊 命花の治癒術師 清流の癒術騎士">
+      <th scope="row"><div class="route">HIYORI-MINATO</div><div class="names">花咲ひより<br>白石 湊</div></th>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/characters/heroine-03-after.png" alt="花咲ひより 立ち絵" loading="lazy"><figcaption>sprites/magic/characters/heroine-03-after.png</figcaption></figure></td>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/male-characters/minato-after.png" alt="白石 湊 立ち絵" loading="lazy"><figcaption>sprites/magic/male-characters/minato-after.png</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/HIYORI/MINATO/r1.webp" alt="HIYORI-MINATO r1" loading="lazy"><figcaption>sprites/magic/events/romance/HIYORI/MINATO/r1.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/HIYORI/MINATO/r2.webp" alt="HIYORI-MINATO r2" loading="lazy"><figcaption>sprites/magic/events/romance/HIYORI/MINATO/r2.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/HIYORI/MINATO/r3.webp" alt="HIYORI-MINATO r3" loading="lazy"><figcaption>sprites/magic/events/romance/HIYORI/MINATO/r3.webp</figcaption></figure></td>
+    </tr>
+<tr data-route="HIYORI-RIKU" data-heroine="HIYORI" data-target="RIKU" data-search="HIYORI-RIKU 花咲ひより 天音 理玖 命花の治癒術師 時詠の観測騎士">
+      <th scope="row"><div class="route">HIYORI-RIKU</div><div class="names">花咲ひより<br>天音 理玖</div></th>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/characters/heroine-03-after.png" alt="花咲ひより 立ち絵" loading="lazy"><figcaption>sprites/magic/characters/heroine-03-after.png</figcaption></figure></td>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/male-characters/riku-after.png" alt="天音 理玖 立ち絵" loading="lazy"><figcaption>sprites/magic/male-characters/riku-after.png</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/HIYORI/RIKU/r1.webp" alt="HIYORI-RIKU r1" loading="lazy"><figcaption>sprites/magic/events/romance/HIYORI/RIKU/r1.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/HIYORI/RIKU/r2.webp" alt="HIYORI-RIKU r2" loading="lazy"><figcaption>sprites/magic/events/romance/HIYORI/RIKU/r2.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/HIYORI/RIKU/r3.webp" alt="HIYORI-RIKU r3" loading="lazy"><figcaption>sprites/magic/events/romance/HIYORI/RIKU/r3.webp</figcaption></figure></td>
+    </tr>
+<tr data-route="HIYORI-YAMATO" data-heroine="HIYORI" data-target="YAMATO" data-search="HIYORI-YAMATO 花咲ひより 黒瀬 大和 命花の治癒術師 紅蓮の拳闘騎士">
+      <th scope="row"><div class="route">HIYORI-YAMATO</div><div class="names">花咲ひより<br>黒瀬 大和</div></th>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/characters/heroine-03-after.png" alt="花咲ひより 立ち絵" loading="lazy"><figcaption>sprites/magic/characters/heroine-03-after.png</figcaption></figure></td>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/male-characters/yamato-after.png" alt="黒瀬 大和 立ち絵" loading="lazy"><figcaption>sprites/magic/male-characters/yamato-after.png</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/HIYORI/YAMATO/r1.webp" alt="HIYORI-YAMATO r1" loading="lazy"><figcaption>sprites/magic/events/romance/HIYORI/YAMATO/r1.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/HIYORI/YAMATO/r2.webp" alt="HIYORI-YAMATO r2" loading="lazy"><figcaption>sprites/magic/events/romance/HIYORI/YAMATO/r2.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/HIYORI/YAMATO/r3.webp" alt="HIYORI-YAMATO r3" loading="lazy"><figcaption>sprites/magic/events/romance/HIYORI/YAMATO/r3.webp</figcaption></figure></td>
+    </tr>
+<tr data-route="HIYORI-LEON" data-heroine="HIYORI" data-target="LEON" data-search="HIYORI-LEON 花咲ひより 神代 レオン 命花の治癒術師 幻奏の舞台騎士">
+      <th scope="row"><div class="route">HIYORI-LEON</div><div class="names">花咲ひより<br>神代 レオン</div></th>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/characters/heroine-03-after.png" alt="花咲ひより 立ち絵" loading="lazy"><figcaption>sprites/magic/characters/heroine-03-after.png</figcaption></figure></td>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/male-characters/leon-after.png" alt="神代 レオン 立ち絵" loading="lazy"><figcaption>sprites/magic/male-characters/leon-after.png</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/HIYORI/LEON/r1.webp" alt="HIYORI-LEON r1" loading="lazy"><figcaption>sprites/magic/events/romance/HIYORI/LEON/r1.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/HIYORI/LEON/r2.webp" alt="HIYORI-LEON r2" loading="lazy"><figcaption>sprites/magic/events/romance/HIYORI/LEON/r2.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/HIYORI/LEON/r3.webp" alt="HIYORI-LEON r3" loading="lazy"><figcaption>sprites/magic/events/romance/HIYORI/LEON/r3.webp</figcaption></figure></td>
+    </tr>
+<tr data-route="HIYORI-ELLIOT" data-heroine="HIYORI" data-target="ELLIOT" data-search="HIYORI-ELLIOT 花咲ひより エリオット・ノクス 命花の治癒術師 星界の記録騎士">
+      <th scope="row"><div class="route">HIYORI-ELLIOT</div><div class="names">花咲ひより<br>エリオット・ノクス</div></th>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/characters/heroine-03-after.png" alt="花咲ひより 立ち絵" loading="lazy"><figcaption>sprites/magic/characters/heroine-03-after.png</figcaption></figure></td>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/male-characters/elliot-after.png" alt="エリオット・ノクス 立ち絵" loading="lazy"><figcaption>sprites/magic/male-characters/elliot-after.png</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/HIYORI/ELLIOT/r1.webp" alt="HIYORI-ELLIOT r1" loading="lazy"><figcaption>sprites/magic/events/romance/HIYORI/ELLIOT/r1.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/HIYORI/ELLIOT/r2.webp" alt="HIYORI-ELLIOT r2" loading="lazy"><figcaption>sprites/magic/events/romance/HIYORI/ELLIOT/r2.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/HIYORI/ELLIOT/r3.webp" alt="HIYORI-ELLIOT r3" loading="lazy"><figcaption>sprites/magic/events/romance/HIYORI/ELLIOT/r3.webp</figcaption></figure></td>
+    </tr>
+<tr data-route="HIYORI-SAKUYA" data-heroine="HIYORI" data-target="SAKUYA" data-search="HIYORI-SAKUYA 花咲ひより 九条 朔夜 命花の治癒術師 宵闇の封印騎士">
+      <th scope="row"><div class="route">HIYORI-SAKUYA</div><div class="names">花咲ひより<br>九条 朔夜</div></th>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/characters/heroine-03-after.png" alt="花咲ひより 立ち絵" loading="lazy"><figcaption>sprites/magic/characters/heroine-03-after.png</figcaption></figure></td>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/male-characters/sakuya-after.png" alt="九条 朔夜 立ち絵" loading="lazy"><figcaption>sprites/magic/male-characters/sakuya-after.png</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/HIYORI/SAKUYA/r1.webp" alt="HIYORI-SAKUYA r1" loading="lazy"><figcaption>sprites/magic/events/romance/HIYORI/SAKUYA/r1.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/HIYORI/SAKUYA/r2.webp" alt="HIYORI-SAKUYA r2" loading="lazy"><figcaption>sprites/magic/events/romance/HIYORI/SAKUYA/r2.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/HIYORI/SAKUYA/r3.webp" alt="HIYORI-SAKUYA r3" loading="lazy"><figcaption>sprites/magic/events/romance/HIYORI/SAKUYA/r3.webp</figcaption></figure></td>
+    </tr>
+<tr data-route="TSUBASA-REN" data-heroine="TSUBASA" data-target="REN" data-search="TSUBASA-REN 火神つばさ 朝霧 蓮 神鍛の炎戦士 蒼風の守護騎士">
+      <th scope="row"><div class="route">TSUBASA-REN</div><div class="names">火神つばさ<br>朝霧 蓮</div></th>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/characters/heroine-04-after.png" alt="火神つばさ 立ち絵" loading="lazy"><figcaption>sprites/magic/characters/heroine-04-after.png</figcaption></figure></td>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/male-characters/ren-after.png" alt="朝霧 蓮 立ち絵" loading="lazy"><figcaption>sprites/magic/male-characters/ren-after.png</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/TSUBASA/REN/r1.webp" alt="TSUBASA-REN r1" loading="lazy"><figcaption>sprites/magic/events/romance/TSUBASA/REN/r1.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/TSUBASA/REN/r2.webp" alt="TSUBASA-REN r2" loading="lazy"><figcaption>sprites/magic/events/romance/TSUBASA/REN/r2.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/TSUBASA/REN/r3.webp" alt="TSUBASA-REN r3" loading="lazy"><figcaption>sprites/magic/events/romance/TSUBASA/REN/r3.webp</figcaption></figure></td>
+    </tr>
+<tr data-route="TSUBASA-SOMA" data-heroine="TSUBASA" data-target="SOMA" data-search="TSUBASA-SOMA 火神つばさ 御影 颯真 神鍛の炎戦士 氷律の執行騎士">
+      <th scope="row"><div class="route">TSUBASA-SOMA</div><div class="names">火神つばさ<br>御影 颯真</div></th>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/characters/heroine-04-after.png" alt="火神つばさ 立ち絵" loading="lazy"><figcaption>sprites/magic/characters/heroine-04-after.png</figcaption></figure></td>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/male-characters/soma-after.png" alt="御影 颯真 立ち絵" loading="lazy"><figcaption>sprites/magic/male-characters/soma-after.png</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/TSUBASA/SOMA/r1.webp" alt="TSUBASA-SOMA r1" loading="lazy"><figcaption>sprites/magic/events/romance/TSUBASA/SOMA/r1.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/TSUBASA/SOMA/r2.webp" alt="TSUBASA-SOMA r2" loading="lazy"><figcaption>sprites/magic/events/romance/TSUBASA/SOMA/r2.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/TSUBASA/SOMA/r3.webp" alt="TSUBASA-SOMA r3" loading="lazy"><figcaption>sprites/magic/events/romance/TSUBASA/SOMA/r3.webp</figcaption></figure></td>
+    </tr>
+<tr data-route="TSUBASA-MINATO" data-heroine="TSUBASA" data-target="MINATO" data-search="TSUBASA-MINATO 火神つばさ 白石 湊 神鍛の炎戦士 清流の癒術騎士">
+      <th scope="row"><div class="route">TSUBASA-MINATO</div><div class="names">火神つばさ<br>白石 湊</div></th>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/characters/heroine-04-after.png" alt="火神つばさ 立ち絵" loading="lazy"><figcaption>sprites/magic/characters/heroine-04-after.png</figcaption></figure></td>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/male-characters/minato-after.png" alt="白石 湊 立ち絵" loading="lazy"><figcaption>sprites/magic/male-characters/minato-after.png</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/TSUBASA/MINATO/r1.webp" alt="TSUBASA-MINATO r1" loading="lazy"><figcaption>sprites/magic/events/romance/TSUBASA/MINATO/r1.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/TSUBASA/MINATO/r2.webp" alt="TSUBASA-MINATO r2" loading="lazy"><figcaption>sprites/magic/events/romance/TSUBASA/MINATO/r2.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/TSUBASA/MINATO/r3.webp" alt="TSUBASA-MINATO r3" loading="lazy"><figcaption>sprites/magic/events/romance/TSUBASA/MINATO/r3.webp</figcaption></figure></td>
+    </tr>
+<tr data-route="TSUBASA-RIKU" data-heroine="TSUBASA" data-target="RIKU" data-search="TSUBASA-RIKU 火神つばさ 天音 理玖 神鍛の炎戦士 時詠の観測騎士">
+      <th scope="row"><div class="route">TSUBASA-RIKU</div><div class="names">火神つばさ<br>天音 理玖</div></th>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/characters/heroine-04-after.png" alt="火神つばさ 立ち絵" loading="lazy"><figcaption>sprites/magic/characters/heroine-04-after.png</figcaption></figure></td>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/male-characters/riku-after.png" alt="天音 理玖 立ち絵" loading="lazy"><figcaption>sprites/magic/male-characters/riku-after.png</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/TSUBASA/RIKU/r1.webp" alt="TSUBASA-RIKU r1" loading="lazy"><figcaption>sprites/magic/events/romance/TSUBASA/RIKU/r1.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/TSUBASA/RIKU/r2.webp" alt="TSUBASA-RIKU r2" loading="lazy"><figcaption>sprites/magic/events/romance/TSUBASA/RIKU/r2.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/TSUBASA/RIKU/r3.webp" alt="TSUBASA-RIKU r3" loading="lazy"><figcaption>sprites/magic/events/romance/TSUBASA/RIKU/r3.webp</figcaption></figure></td>
+    </tr>
+<tr data-route="TSUBASA-YAMATO" data-heroine="TSUBASA" data-target="YAMATO" data-search="TSUBASA-YAMATO 火神つばさ 黒瀬 大和 神鍛の炎戦士 紅蓮の拳闘騎士">
+      <th scope="row"><div class="route">TSUBASA-YAMATO</div><div class="names">火神つばさ<br>黒瀬 大和</div></th>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/characters/heroine-04-after.png" alt="火神つばさ 立ち絵" loading="lazy"><figcaption>sprites/magic/characters/heroine-04-after.png</figcaption></figure></td>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/male-characters/yamato-after.png" alt="黒瀬 大和 立ち絵" loading="lazy"><figcaption>sprites/magic/male-characters/yamato-after.png</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/TSUBASA/YAMATO/r1.webp" alt="TSUBASA-YAMATO r1" loading="lazy"><figcaption>sprites/magic/events/romance/TSUBASA/YAMATO/r1.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/TSUBASA/YAMATO/r2.webp" alt="TSUBASA-YAMATO r2" loading="lazy"><figcaption>sprites/magic/events/romance/TSUBASA/YAMATO/r2.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/TSUBASA/YAMATO/r3.webp" alt="TSUBASA-YAMATO r3" loading="lazy"><figcaption>sprites/magic/events/romance/TSUBASA/YAMATO/r3.webp</figcaption></figure></td>
+    </tr>
+<tr data-route="TSUBASA-LEON" data-heroine="TSUBASA" data-target="LEON" data-search="TSUBASA-LEON 火神つばさ 神代 レオン 神鍛の炎戦士 幻奏の舞台騎士">
+      <th scope="row"><div class="route">TSUBASA-LEON</div><div class="names">火神つばさ<br>神代 レオン</div></th>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/characters/heroine-04-after.png" alt="火神つばさ 立ち絵" loading="lazy"><figcaption>sprites/magic/characters/heroine-04-after.png</figcaption></figure></td>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/male-characters/leon-after.png" alt="神代 レオン 立ち絵" loading="lazy"><figcaption>sprites/magic/male-characters/leon-after.png</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/TSUBASA/LEON/r1.webp" alt="TSUBASA-LEON r1" loading="lazy"><figcaption>sprites/magic/events/romance/TSUBASA/LEON/r1.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/TSUBASA/LEON/r2.webp" alt="TSUBASA-LEON r2" loading="lazy"><figcaption>sprites/magic/events/romance/TSUBASA/LEON/r2.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/TSUBASA/LEON/r3.webp" alt="TSUBASA-LEON r3" loading="lazy"><figcaption>sprites/magic/events/romance/TSUBASA/LEON/r3.webp</figcaption></figure></td>
+    </tr>
+<tr data-route="TSUBASA-ELLIOT" data-heroine="TSUBASA" data-target="ELLIOT" data-search="TSUBASA-ELLIOT 火神つばさ エリオット・ノクス 神鍛の炎戦士 星界の記録騎士">
+      <th scope="row"><div class="route">TSUBASA-ELLIOT</div><div class="names">火神つばさ<br>エリオット・ノクス</div></th>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/characters/heroine-04-after.png" alt="火神つばさ 立ち絵" loading="lazy"><figcaption>sprites/magic/characters/heroine-04-after.png</figcaption></figure></td>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/male-characters/elliot-after.png" alt="エリオット・ノクス 立ち絵" loading="lazy"><figcaption>sprites/magic/male-characters/elliot-after.png</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/TSUBASA/ELLIOT/r1.webp" alt="TSUBASA-ELLIOT r1" loading="lazy"><figcaption>sprites/magic/events/romance/TSUBASA/ELLIOT/r1.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/TSUBASA/ELLIOT/r2.webp" alt="TSUBASA-ELLIOT r2" loading="lazy"><figcaption>sprites/magic/events/romance/TSUBASA/ELLIOT/r2.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/TSUBASA/ELLIOT/r3.webp" alt="TSUBASA-ELLIOT r3" loading="lazy"><figcaption>sprites/magic/events/romance/TSUBASA/ELLIOT/r3.webp</figcaption></figure></td>
+    </tr>
+<tr data-route="TSUBASA-SAKUYA" data-heroine="TSUBASA" data-target="SAKUYA" data-search="TSUBASA-SAKUYA 火神つばさ 九条 朔夜 神鍛の炎戦士 宵闇の封印騎士">
+      <th scope="row"><div class="route">TSUBASA-SAKUYA</div><div class="names">火神つばさ<br>九条 朔夜</div></th>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/characters/heroine-04-after.png" alt="火神つばさ 立ち絵" loading="lazy"><figcaption>sprites/magic/characters/heroine-04-after.png</figcaption></figure></td>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/male-characters/sakuya-after.png" alt="九条 朔夜 立ち絵" loading="lazy"><figcaption>sprites/magic/male-characters/sakuya-after.png</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/TSUBASA/SAKUYA/r1.webp" alt="TSUBASA-SAKUYA r1" loading="lazy"><figcaption>sprites/magic/events/romance/TSUBASA/SAKUYA/r1.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/TSUBASA/SAKUYA/r2.webp" alt="TSUBASA-SAKUYA r2" loading="lazy"><figcaption>sprites/magic/events/romance/TSUBASA/SAKUYA/r2.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/TSUBASA/SAKUYA/r3.webp" alt="TSUBASA-SAKUYA r3" loading="lazy"><figcaption>sprites/magic/events/romance/TSUBASA/SAKUYA/r3.webp</figcaption></figure></td>
+    </tr>
+<tr data-route="REI-REN" data-heroine="REI" data-target="REN" data-search="REI-REN 黒羽れい 朝霧 蓮 深紅の符術姫 蒼風の守護騎士">
+      <th scope="row"><div class="route">REI-REN</div><div class="names">黒羽れい<br>朝霧 蓮</div></th>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/characters/heroine-05-after.png" alt="黒羽れい 立ち絵" loading="lazy"><figcaption>sprites/magic/characters/heroine-05-after.png</figcaption></figure></td>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/male-characters/ren-after.png" alt="朝霧 蓮 立ち絵" loading="lazy"><figcaption>sprites/magic/male-characters/ren-after.png</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/REI/REN/r1.webp" alt="REI-REN r1" loading="lazy"><figcaption>sprites/magic/events/romance/REI/REN/r1.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/REI/REN/r2.webp" alt="REI-REN r2" loading="lazy"><figcaption>sprites/magic/events/romance/REI/REN/r2.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/REI/REN/r3.webp" alt="REI-REN r3" loading="lazy"><figcaption>sprites/magic/events/romance/REI/REN/r3.webp</figcaption></figure></td>
+    </tr>
+<tr data-route="REI-SOMA" data-heroine="REI" data-target="SOMA" data-search="REI-SOMA 黒羽れい 御影 颯真 深紅の符術姫 氷律の執行騎士">
+      <th scope="row"><div class="route">REI-SOMA</div><div class="names">黒羽れい<br>御影 颯真</div></th>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/characters/heroine-05-after.png" alt="黒羽れい 立ち絵" loading="lazy"><figcaption>sprites/magic/characters/heroine-05-after.png</figcaption></figure></td>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/male-characters/soma-after.png" alt="御影 颯真 立ち絵" loading="lazy"><figcaption>sprites/magic/male-characters/soma-after.png</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/REI/SOMA/r1.webp" alt="REI-SOMA r1" loading="lazy"><figcaption>sprites/magic/events/romance/REI/SOMA/r1.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/REI/SOMA/r2.webp" alt="REI-SOMA r2" loading="lazy"><figcaption>sprites/magic/events/romance/REI/SOMA/r2.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/REI/SOMA/r3.webp" alt="REI-SOMA r3" loading="lazy"><figcaption>sprites/magic/events/romance/REI/SOMA/r3.webp</figcaption></figure></td>
+    </tr>
+<tr data-route="REI-MINATO" data-heroine="REI" data-target="MINATO" data-search="REI-MINATO 黒羽れい 白石 湊 深紅の符術姫 清流の癒術騎士">
+      <th scope="row"><div class="route">REI-MINATO</div><div class="names">黒羽れい<br>白石 湊</div></th>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/characters/heroine-05-after.png" alt="黒羽れい 立ち絵" loading="lazy"><figcaption>sprites/magic/characters/heroine-05-after.png</figcaption></figure></td>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/male-characters/minato-after.png" alt="白石 湊 立ち絵" loading="lazy"><figcaption>sprites/magic/male-characters/minato-after.png</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/REI/MINATO/r1.webp" alt="REI-MINATO r1" loading="lazy"><figcaption>sprites/magic/events/romance/REI/MINATO/r1.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/REI/MINATO/r2.webp" alt="REI-MINATO r2" loading="lazy"><figcaption>sprites/magic/events/romance/REI/MINATO/r2.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/REI/MINATO/r3.webp" alt="REI-MINATO r3" loading="lazy"><figcaption>sprites/magic/events/romance/REI/MINATO/r3.webp</figcaption></figure></td>
+    </tr>
+<tr data-route="REI-RIKU" data-heroine="REI" data-target="RIKU" data-search="REI-RIKU 黒羽れい 天音 理玖 深紅の符術姫 時詠の観測騎士">
+      <th scope="row"><div class="route">REI-RIKU</div><div class="names">黒羽れい<br>天音 理玖</div></th>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/characters/heroine-05-after.png" alt="黒羽れい 立ち絵" loading="lazy"><figcaption>sprites/magic/characters/heroine-05-after.png</figcaption></figure></td>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/male-characters/riku-after.png" alt="天音 理玖 立ち絵" loading="lazy"><figcaption>sprites/magic/male-characters/riku-after.png</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/REI/RIKU/r1.webp" alt="REI-RIKU r1" loading="lazy"><figcaption>sprites/magic/events/romance/REI/RIKU/r1.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/REI/RIKU/r2.webp" alt="REI-RIKU r2" loading="lazy"><figcaption>sprites/magic/events/romance/REI/RIKU/r2.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/REI/RIKU/r3.webp" alt="REI-RIKU r3" loading="lazy"><figcaption>sprites/magic/events/romance/REI/RIKU/r3.webp</figcaption></figure></td>
+    </tr>
+<tr data-route="REI-YAMATO" data-heroine="REI" data-target="YAMATO" data-search="REI-YAMATO 黒羽れい 黒瀬 大和 深紅の符術姫 紅蓮の拳闘騎士">
+      <th scope="row"><div class="route">REI-YAMATO</div><div class="names">黒羽れい<br>黒瀬 大和</div></th>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/characters/heroine-05-after.png" alt="黒羽れい 立ち絵" loading="lazy"><figcaption>sprites/magic/characters/heroine-05-after.png</figcaption></figure></td>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/male-characters/yamato-after.png" alt="黒瀬 大和 立ち絵" loading="lazy"><figcaption>sprites/magic/male-characters/yamato-after.png</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/REI/YAMATO/r1.webp" alt="REI-YAMATO r1" loading="lazy"><figcaption>sprites/magic/events/romance/REI/YAMATO/r1.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/REI/YAMATO/r2.webp" alt="REI-YAMATO r2" loading="lazy"><figcaption>sprites/magic/events/romance/REI/YAMATO/r2.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/REI/YAMATO/r3.webp" alt="REI-YAMATO r3" loading="lazy"><figcaption>sprites/magic/events/romance/REI/YAMATO/r3.webp</figcaption></figure></td>
+    </tr>
+<tr data-route="REI-LEON" data-heroine="REI" data-target="LEON" data-search="REI-LEON 黒羽れい 神代 レオン 深紅の符術姫 幻奏の舞台騎士">
+      <th scope="row"><div class="route">REI-LEON</div><div class="names">黒羽れい<br>神代 レオン</div></th>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/characters/heroine-05-after.png" alt="黒羽れい 立ち絵" loading="lazy"><figcaption>sprites/magic/characters/heroine-05-after.png</figcaption></figure></td>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/male-characters/leon-after.png" alt="神代 レオン 立ち絵" loading="lazy"><figcaption>sprites/magic/male-characters/leon-after.png</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/REI/LEON/r1.webp" alt="REI-LEON r1" loading="lazy"><figcaption>sprites/magic/events/romance/REI/LEON/r1.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/REI/LEON/r2.webp" alt="REI-LEON r2" loading="lazy"><figcaption>sprites/magic/events/romance/REI/LEON/r2.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/REI/LEON/r3.webp" alt="REI-LEON r3" loading="lazy"><figcaption>sprites/magic/events/romance/REI/LEON/r3.webp</figcaption></figure></td>
+    </tr>
+<tr data-route="REI-ELLIOT" data-heroine="REI" data-target="ELLIOT" data-search="REI-ELLIOT 黒羽れい エリオット・ノクス 深紅の符術姫 星界の記録騎士">
+      <th scope="row"><div class="route">REI-ELLIOT</div><div class="names">黒羽れい<br>エリオット・ノクス</div></th>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/characters/heroine-05-after.png" alt="黒羽れい 立ち絵" loading="lazy"><figcaption>sprites/magic/characters/heroine-05-after.png</figcaption></figure></td>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/male-characters/elliot-after.png" alt="エリオット・ノクス 立ち絵" loading="lazy"><figcaption>sprites/magic/male-characters/elliot-after.png</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/REI/ELLIOT/r1.webp" alt="REI-ELLIOT r1" loading="lazy"><figcaption>sprites/magic/events/romance/REI/ELLIOT/r1.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/REI/ELLIOT/r2.webp" alt="REI-ELLIOT r2" loading="lazy"><figcaption>sprites/magic/events/romance/REI/ELLIOT/r2.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/REI/ELLIOT/r3.webp" alt="REI-ELLIOT r3" loading="lazy"><figcaption>sprites/magic/events/romance/REI/ELLIOT/r3.webp</figcaption></figure></td>
+    </tr>
+<tr data-route="REI-SAKUYA" data-heroine="REI" data-target="SAKUYA" data-search="REI-SAKUYA 黒羽れい 九条 朔夜 深紅の符術姫 宵闇の封印騎士">
+      <th scope="row"><div class="route">REI-SAKUYA</div><div class="names">黒羽れい<br>九条 朔夜</div></th>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/characters/heroine-05-after.png" alt="黒羽れい 立ち絵" loading="lazy"><figcaption>sprites/magic/characters/heroine-05-after.png</figcaption></figure></td>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/male-characters/sakuya-after.png" alt="九条 朔夜 立ち絵" loading="lazy"><figcaption>sprites/magic/male-characters/sakuya-after.png</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/REI/SAKUYA/r1.webp" alt="REI-SAKUYA r1" loading="lazy"><figcaption>sprites/magic/events/romance/REI/SAKUYA/r1.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/REI/SAKUYA/r2.webp" alt="REI-SAKUYA r2" loading="lazy"><figcaption>sprites/magic/events/romance/REI/SAKUYA/r2.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/REI/SAKUYA/r3.webp" alt="REI-SAKUYA r3" loading="lazy"><figcaption>sprites/magic/events/romance/REI/SAKUYA/r3.webp</figcaption></figure></td>
+    </tr>
+<tr data-route="MADOKA-REN" data-heroine="MADOKA" data-target="REN" data-search="MADOKA-REN 翠川まどか 朝霧 蓮 時環の錬金術師 蒼風の守護騎士">
+      <th scope="row"><div class="route">MADOKA-REN</div><div class="names">翠川まどか<br>朝霧 蓮</div></th>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/characters/heroine-06-after.png" alt="翠川まどか 立ち絵" loading="lazy"><figcaption>sprites/magic/characters/heroine-06-after.png</figcaption></figure></td>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/male-characters/ren-after.png" alt="朝霧 蓮 立ち絵" loading="lazy"><figcaption>sprites/magic/male-characters/ren-after.png</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/MADOKA/REN/r1.webp" alt="MADOKA-REN r1" loading="lazy"><figcaption>sprites/magic/events/romance/MADOKA/REN/r1.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/MADOKA/REN/r2.webp" alt="MADOKA-REN r2" loading="lazy"><figcaption>sprites/magic/events/romance/MADOKA/REN/r2.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/MADOKA/REN/r3.webp" alt="MADOKA-REN r3" loading="lazy"><figcaption>sprites/magic/events/romance/MADOKA/REN/r3.webp</figcaption></figure></td>
+    </tr>
+<tr data-route="MADOKA-SOMA" data-heroine="MADOKA" data-target="SOMA" data-search="MADOKA-SOMA 翠川まどか 御影 颯真 時環の錬金術師 氷律の執行騎士">
+      <th scope="row"><div class="route">MADOKA-SOMA</div><div class="names">翠川まどか<br>御影 颯真</div></th>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/characters/heroine-06-after.png" alt="翠川まどか 立ち絵" loading="lazy"><figcaption>sprites/magic/characters/heroine-06-after.png</figcaption></figure></td>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/male-characters/soma-after.png" alt="御影 颯真 立ち絵" loading="lazy"><figcaption>sprites/magic/male-characters/soma-after.png</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/MADOKA/SOMA/r1.webp" alt="MADOKA-SOMA r1" loading="lazy"><figcaption>sprites/magic/events/romance/MADOKA/SOMA/r1.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/MADOKA/SOMA/r2.webp" alt="MADOKA-SOMA r2" loading="lazy"><figcaption>sprites/magic/events/romance/MADOKA/SOMA/r2.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/MADOKA/SOMA/r3.webp" alt="MADOKA-SOMA r3" loading="lazy"><figcaption>sprites/magic/events/romance/MADOKA/SOMA/r3.webp</figcaption></figure></td>
+    </tr>
+<tr data-route="MADOKA-MINATO" data-heroine="MADOKA" data-target="MINATO" data-search="MADOKA-MINATO 翠川まどか 白石 湊 時環の錬金術師 清流の癒術騎士">
+      <th scope="row"><div class="route">MADOKA-MINATO</div><div class="names">翠川まどか<br>白石 湊</div></th>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/characters/heroine-06-after.png" alt="翠川まどか 立ち絵" loading="lazy"><figcaption>sprites/magic/characters/heroine-06-after.png</figcaption></figure></td>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/male-characters/minato-after.png" alt="白石 湊 立ち絵" loading="lazy"><figcaption>sprites/magic/male-characters/minato-after.png</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/MADOKA/MINATO/r1.webp" alt="MADOKA-MINATO r1" loading="lazy"><figcaption>sprites/magic/events/romance/MADOKA/MINATO/r1.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/MADOKA/MINATO/r2.webp" alt="MADOKA-MINATO r2" loading="lazy"><figcaption>sprites/magic/events/romance/MADOKA/MINATO/r2.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/MADOKA/MINATO/r3.webp" alt="MADOKA-MINATO r3" loading="lazy"><figcaption>sprites/magic/events/romance/MADOKA/MINATO/r3.webp</figcaption></figure></td>
+    </tr>
+<tr data-route="MADOKA-RIKU" data-heroine="MADOKA" data-target="RIKU" data-search="MADOKA-RIKU 翠川まどか 天音 理玖 時環の錬金術師 時詠の観測騎士">
+      <th scope="row"><div class="route">MADOKA-RIKU</div><div class="names">翠川まどか<br>天音 理玖</div></th>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/characters/heroine-06-after.png" alt="翠川まどか 立ち絵" loading="lazy"><figcaption>sprites/magic/characters/heroine-06-after.png</figcaption></figure></td>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/male-characters/riku-after.png" alt="天音 理玖 立ち絵" loading="lazy"><figcaption>sprites/magic/male-characters/riku-after.png</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/MADOKA/RIKU/r1.webp" alt="MADOKA-RIKU r1" loading="lazy"><figcaption>sprites/magic/events/romance/MADOKA/RIKU/r1.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/MADOKA/RIKU/r2.webp" alt="MADOKA-RIKU r2" loading="lazy"><figcaption>sprites/magic/events/romance/MADOKA/RIKU/r2.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/MADOKA/RIKU/r3.webp" alt="MADOKA-RIKU r3" loading="lazy"><figcaption>sprites/magic/events/romance/MADOKA/RIKU/r3.webp</figcaption></figure></td>
+    </tr>
+<tr data-route="MADOKA-YAMATO" data-heroine="MADOKA" data-target="YAMATO" data-search="MADOKA-YAMATO 翠川まどか 黒瀬 大和 時環の錬金術師 紅蓮の拳闘騎士">
+      <th scope="row"><div class="route">MADOKA-YAMATO</div><div class="names">翠川まどか<br>黒瀬 大和</div></th>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/characters/heroine-06-after.png" alt="翠川まどか 立ち絵" loading="lazy"><figcaption>sprites/magic/characters/heroine-06-after.png</figcaption></figure></td>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/male-characters/yamato-after.png" alt="黒瀬 大和 立ち絵" loading="lazy"><figcaption>sprites/magic/male-characters/yamato-after.png</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/MADOKA/YAMATO/r1.webp" alt="MADOKA-YAMATO r1" loading="lazy"><figcaption>sprites/magic/events/romance/MADOKA/YAMATO/r1.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/MADOKA/YAMATO/r2.webp" alt="MADOKA-YAMATO r2" loading="lazy"><figcaption>sprites/magic/events/romance/MADOKA/YAMATO/r2.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/MADOKA/YAMATO/r3.webp" alt="MADOKA-YAMATO r3" loading="lazy"><figcaption>sprites/magic/events/romance/MADOKA/YAMATO/r3.webp</figcaption></figure></td>
+    </tr>
+<tr data-route="MADOKA-LEON" data-heroine="MADOKA" data-target="LEON" data-search="MADOKA-LEON 翠川まどか 神代 レオン 時環の錬金術師 幻奏の舞台騎士">
+      <th scope="row"><div class="route">MADOKA-LEON</div><div class="names">翠川まどか<br>神代 レオン</div></th>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/characters/heroine-06-after.png" alt="翠川まどか 立ち絵" loading="lazy"><figcaption>sprites/magic/characters/heroine-06-after.png</figcaption></figure></td>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/male-characters/leon-after.png" alt="神代 レオン 立ち絵" loading="lazy"><figcaption>sprites/magic/male-characters/leon-after.png</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/MADOKA/LEON/r1.webp" alt="MADOKA-LEON r1" loading="lazy"><figcaption>sprites/magic/events/romance/MADOKA/LEON/r1.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/MADOKA/LEON/r2.webp" alt="MADOKA-LEON r2" loading="lazy"><figcaption>sprites/magic/events/romance/MADOKA/LEON/r2.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/MADOKA/LEON/r3.webp" alt="MADOKA-LEON r3" loading="lazy"><figcaption>sprites/magic/events/romance/MADOKA/LEON/r3.webp</figcaption></figure></td>
+    </tr>
+<tr data-route="MADOKA-ELLIOT" data-heroine="MADOKA" data-target="ELLIOT" data-search="MADOKA-ELLIOT 翠川まどか エリオット・ノクス 時環の錬金術師 星界の記録騎士">
+      <th scope="row"><div class="route">MADOKA-ELLIOT</div><div class="names">翠川まどか<br>エリオット・ノクス</div></th>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/characters/heroine-06-after.png" alt="翠川まどか 立ち絵" loading="lazy"><figcaption>sprites/magic/characters/heroine-06-after.png</figcaption></figure></td>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/male-characters/elliot-after.png" alt="エリオット・ノクス 立ち絵" loading="lazy"><figcaption>sprites/magic/male-characters/elliot-after.png</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/MADOKA/ELLIOT/r1.webp" alt="MADOKA-ELLIOT r1" loading="lazy"><figcaption>sprites/magic/events/romance/MADOKA/ELLIOT/r1.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/MADOKA/ELLIOT/r2.webp" alt="MADOKA-ELLIOT r2" loading="lazy"><figcaption>sprites/magic/events/romance/MADOKA/ELLIOT/r2.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/MADOKA/ELLIOT/r3.webp" alt="MADOKA-ELLIOT r3" loading="lazy"><figcaption>sprites/magic/events/romance/MADOKA/ELLIOT/r3.webp</figcaption></figure></td>
+    </tr>
+<tr data-route="MADOKA-SAKUYA" data-heroine="MADOKA" data-target="SAKUYA" data-search="MADOKA-SAKUYA 翠川まどか 九条 朔夜 時環の錬金術師 宵闇の封印騎士">
+      <th scope="row"><div class="route">MADOKA-SAKUYA</div><div class="names">翠川まどか<br>九条 朔夜</div></th>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/characters/heroine-06-after.png" alt="翠川まどか 立ち絵" loading="lazy"><figcaption>sprites/magic/characters/heroine-06-after.png</figcaption></figure></td>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/male-characters/sakuya-after.png" alt="九条 朔夜 立ち絵" loading="lazy"><figcaption>sprites/magic/male-characters/sakuya-after.png</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/MADOKA/SAKUYA/r1.webp" alt="MADOKA-SAKUYA r1" loading="lazy"><figcaption>sprites/magic/events/romance/MADOKA/SAKUYA/r1.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/MADOKA/SAKUYA/r2.webp" alt="MADOKA-SAKUYA r2" loading="lazy"><figcaption>sprites/magic/events/romance/MADOKA/SAKUYA/r2.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/MADOKA/SAKUYA/r3.webp" alt="MADOKA-SAKUYA r3" loading="lazy"><figcaption>sprites/magic/events/romance/MADOKA/SAKUYA/r3.webp</figcaption></figure></td>
+    </tr>
+<tr data-route="KOHARU-REN" data-heroine="KOHARU" data-target="REN" data-search="KOHARU-REN 風森こはる 朝霧 蓮 翠嵐の精霊弓士 蒼風の守護騎士">
+      <th scope="row"><div class="route">KOHARU-REN</div><div class="names">風森こはる<br>朝霧 蓮</div></th>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/characters/heroine-07-after.png" alt="風森こはる 立ち絵" loading="lazy"><figcaption>sprites/magic/characters/heroine-07-after.png</figcaption></figure></td>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/male-characters/ren-after.png" alt="朝霧 蓮 立ち絵" loading="lazy"><figcaption>sprites/magic/male-characters/ren-after.png</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/KOHARU/REN/r1.webp" alt="KOHARU-REN r1" loading="lazy"><figcaption>sprites/magic/events/romance/KOHARU/REN/r1.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/KOHARU/REN/r2.webp" alt="KOHARU-REN r2" loading="lazy"><figcaption>sprites/magic/events/romance/KOHARU/REN/r2.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/KOHARU/REN/r3.webp" alt="KOHARU-REN r3" loading="lazy"><figcaption>sprites/magic/events/romance/KOHARU/REN/r3.webp</figcaption></figure></td>
+    </tr>
+<tr data-route="KOHARU-SOMA" data-heroine="KOHARU" data-target="SOMA" data-search="KOHARU-SOMA 風森こはる 御影 颯真 翠嵐の精霊弓士 氷律の執行騎士">
+      <th scope="row"><div class="route">KOHARU-SOMA</div><div class="names">風森こはる<br>御影 颯真</div></th>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/characters/heroine-07-after.png" alt="風森こはる 立ち絵" loading="lazy"><figcaption>sprites/magic/characters/heroine-07-after.png</figcaption></figure></td>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/male-characters/soma-after.png" alt="御影 颯真 立ち絵" loading="lazy"><figcaption>sprites/magic/male-characters/soma-after.png</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/KOHARU/SOMA/r1.webp" alt="KOHARU-SOMA r1" loading="lazy"><figcaption>sprites/magic/events/romance/KOHARU/SOMA/r1.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/KOHARU/SOMA/r2.webp" alt="KOHARU-SOMA r2" loading="lazy"><figcaption>sprites/magic/events/romance/KOHARU/SOMA/r2.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/KOHARU/SOMA/r3.webp" alt="KOHARU-SOMA r3" loading="lazy"><figcaption>sprites/magic/events/romance/KOHARU/SOMA/r3.webp</figcaption></figure></td>
+    </tr>
+<tr data-route="KOHARU-MINATO" data-heroine="KOHARU" data-target="MINATO" data-search="KOHARU-MINATO 風森こはる 白石 湊 翠嵐の精霊弓士 清流の癒術騎士">
+      <th scope="row"><div class="route">KOHARU-MINATO</div><div class="names">風森こはる<br>白石 湊</div></th>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/characters/heroine-07-after.png" alt="風森こはる 立ち絵" loading="lazy"><figcaption>sprites/magic/characters/heroine-07-after.png</figcaption></figure></td>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/male-characters/minato-after.png" alt="白石 湊 立ち絵" loading="lazy"><figcaption>sprites/magic/male-characters/minato-after.png</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/KOHARU/MINATO/r1.webp" alt="KOHARU-MINATO r1" loading="lazy"><figcaption>sprites/magic/events/romance/KOHARU/MINATO/r1.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/KOHARU/MINATO/r2.webp" alt="KOHARU-MINATO r2" loading="lazy"><figcaption>sprites/magic/events/romance/KOHARU/MINATO/r2.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/KOHARU/MINATO/r3.webp" alt="KOHARU-MINATO r3" loading="lazy"><figcaption>sprites/magic/events/romance/KOHARU/MINATO/r3.webp</figcaption></figure></td>
+    </tr>
+<tr data-route="KOHARU-RIKU" data-heroine="KOHARU" data-target="RIKU" data-search="KOHARU-RIKU 風森こはる 天音 理玖 翠嵐の精霊弓士 時詠の観測騎士">
+      <th scope="row"><div class="route">KOHARU-RIKU</div><div class="names">風森こはる<br>天音 理玖</div></th>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/characters/heroine-07-after.png" alt="風森こはる 立ち絵" loading="lazy"><figcaption>sprites/magic/characters/heroine-07-after.png</figcaption></figure></td>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/male-characters/riku-after.png" alt="天音 理玖 立ち絵" loading="lazy"><figcaption>sprites/magic/male-characters/riku-after.png</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/KOHARU/RIKU/r1.webp" alt="KOHARU-RIKU r1" loading="lazy"><figcaption>sprites/magic/events/romance/KOHARU/RIKU/r1.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/KOHARU/RIKU/r2.webp" alt="KOHARU-RIKU r2" loading="lazy"><figcaption>sprites/magic/events/romance/KOHARU/RIKU/r2.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/KOHARU/RIKU/r3.webp" alt="KOHARU-RIKU r3" loading="lazy"><figcaption>sprites/magic/events/romance/KOHARU/RIKU/r3.webp</figcaption></figure></td>
+    </tr>
+<tr data-route="KOHARU-YAMATO" data-heroine="KOHARU" data-target="YAMATO" data-search="KOHARU-YAMATO 風森こはる 黒瀬 大和 翠嵐の精霊弓士 紅蓮の拳闘騎士">
+      <th scope="row"><div class="route">KOHARU-YAMATO</div><div class="names">風森こはる<br>黒瀬 大和</div></th>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/characters/heroine-07-after.png" alt="風森こはる 立ち絵" loading="lazy"><figcaption>sprites/magic/characters/heroine-07-after.png</figcaption></figure></td>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/male-characters/yamato-after.png" alt="黒瀬 大和 立ち絵" loading="lazy"><figcaption>sprites/magic/male-characters/yamato-after.png</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/KOHARU/YAMATO/r1.webp" alt="KOHARU-YAMATO r1" loading="lazy"><figcaption>sprites/magic/events/romance/KOHARU/YAMATO/r1.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/KOHARU/YAMATO/r2.webp" alt="KOHARU-YAMATO r2" loading="lazy"><figcaption>sprites/magic/events/romance/KOHARU/YAMATO/r2.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/KOHARU/YAMATO/r3.webp" alt="KOHARU-YAMATO r3" loading="lazy"><figcaption>sprites/magic/events/romance/KOHARU/YAMATO/r3.webp</figcaption></figure></td>
+    </tr>
+<tr data-route="KOHARU-LEON" data-heroine="KOHARU" data-target="LEON" data-search="KOHARU-LEON 風森こはる 神代 レオン 翠嵐の精霊弓士 幻奏の舞台騎士">
+      <th scope="row"><div class="route">KOHARU-LEON</div><div class="names">風森こはる<br>神代 レオン</div></th>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/characters/heroine-07-after.png" alt="風森こはる 立ち絵" loading="lazy"><figcaption>sprites/magic/characters/heroine-07-after.png</figcaption></figure></td>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/male-characters/leon-after.png" alt="神代 レオン 立ち絵" loading="lazy"><figcaption>sprites/magic/male-characters/leon-after.png</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/KOHARU/LEON/r1.webp" alt="KOHARU-LEON r1" loading="lazy"><figcaption>sprites/magic/events/romance/KOHARU/LEON/r1.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/KOHARU/LEON/r2.webp" alt="KOHARU-LEON r2" loading="lazy"><figcaption>sprites/magic/events/romance/KOHARU/LEON/r2.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/KOHARU/LEON/r3.webp" alt="KOHARU-LEON r3" loading="lazy"><figcaption>sprites/magic/events/romance/KOHARU/LEON/r3.webp</figcaption></figure></td>
+    </tr>
+<tr data-route="KOHARU-ELLIOT" data-heroine="KOHARU" data-target="ELLIOT" data-search="KOHARU-ELLIOT 風森こはる エリオット・ノクス 翠嵐の精霊弓士 星界の記録騎士">
+      <th scope="row"><div class="route">KOHARU-ELLIOT</div><div class="names">風森こはる<br>エリオット・ノクス</div></th>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/characters/heroine-07-after.png" alt="風森こはる 立ち絵" loading="lazy"><figcaption>sprites/magic/characters/heroine-07-after.png</figcaption></figure></td>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/male-characters/elliot-after.png" alt="エリオット・ノクス 立ち絵" loading="lazy"><figcaption>sprites/magic/male-characters/elliot-after.png</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/KOHARU/ELLIOT/r1.webp" alt="KOHARU-ELLIOT r1" loading="lazy"><figcaption>sprites/magic/events/romance/KOHARU/ELLIOT/r1.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/KOHARU/ELLIOT/r2.webp" alt="KOHARU-ELLIOT r2" loading="lazy"><figcaption>sprites/magic/events/romance/KOHARU/ELLIOT/r2.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/KOHARU/ELLIOT/r3.webp" alt="KOHARU-ELLIOT r3" loading="lazy"><figcaption>sprites/magic/events/romance/KOHARU/ELLIOT/r3.webp</figcaption></figure></td>
+    </tr>
+<tr data-route="KOHARU-SAKUYA" data-heroine="KOHARU" data-target="SAKUYA" data-search="KOHARU-SAKUYA 風森こはる 九条 朔夜 翠嵐の精霊弓士 宵闇の封印騎士">
+      <th scope="row"><div class="route">KOHARU-SAKUYA</div><div class="names">風森こはる<br>九条 朔夜</div></th>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/characters/heroine-07-after.png" alt="風森こはる 立ち絵" loading="lazy"><figcaption>sprites/magic/characters/heroine-07-after.png</figcaption></figure></td>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/male-characters/sakuya-after.png" alt="九条 朔夜 立ち絵" loading="lazy"><figcaption>sprites/magic/male-characters/sakuya-after.png</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/KOHARU/SAKUYA/r1.webp" alt="KOHARU-SAKUYA r1" loading="lazy"><figcaption>sprites/magic/events/romance/KOHARU/SAKUYA/r1.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/KOHARU/SAKUYA/r2.webp" alt="KOHARU-SAKUYA r2" loading="lazy"><figcaption>sprites/magic/events/romance/KOHARU/SAKUYA/r2.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/KOHARU/SAKUYA/r3.webp" alt="KOHARU-SAKUYA r3" loading="lazy"><figcaption>sprites/magic/events/romance/KOHARU/SAKUYA/r3.webp</figcaption></figure></td>
+    </tr>
+<tr data-route="MIRAI-REN" data-heroine="MIRAI" data-target="REN" data-search="MIRAI-REN 紫藤みらい 朝霧 蓮 夢幻の舞台魔術師 蒼風の守護騎士">
+      <th scope="row"><div class="route">MIRAI-REN</div><div class="names">紫藤みらい<br>朝霧 蓮</div></th>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/characters/heroine-08-after.png" alt="紫藤みらい 立ち絵" loading="lazy"><figcaption>sprites/magic/characters/heroine-08-after.png</figcaption></figure></td>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/male-characters/ren-after.png" alt="朝霧 蓮 立ち絵" loading="lazy"><figcaption>sprites/magic/male-characters/ren-after.png</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/MIRAI/REN/r1.webp" alt="MIRAI-REN r1" loading="lazy"><figcaption>sprites/magic/events/romance/MIRAI/REN/r1.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/MIRAI/REN/r2.webp" alt="MIRAI-REN r2" loading="lazy"><figcaption>sprites/magic/events/romance/MIRAI/REN/r2.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/MIRAI/REN/r3.webp" alt="MIRAI-REN r3" loading="lazy"><figcaption>sprites/magic/events/romance/MIRAI/REN/r3.webp</figcaption></figure></td>
+    </tr>
+<tr data-route="MIRAI-SOMA" data-heroine="MIRAI" data-target="SOMA" data-search="MIRAI-SOMA 紫藤みらい 御影 颯真 夢幻の舞台魔術師 氷律の執行騎士">
+      <th scope="row"><div class="route">MIRAI-SOMA</div><div class="names">紫藤みらい<br>御影 颯真</div></th>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/characters/heroine-08-after.png" alt="紫藤みらい 立ち絵" loading="lazy"><figcaption>sprites/magic/characters/heroine-08-after.png</figcaption></figure></td>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/male-characters/soma-after.png" alt="御影 颯真 立ち絵" loading="lazy"><figcaption>sprites/magic/male-characters/soma-after.png</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/MIRAI/SOMA/r1.webp" alt="MIRAI-SOMA r1" loading="lazy"><figcaption>sprites/magic/events/romance/MIRAI/SOMA/r1.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/MIRAI/SOMA/r2.webp" alt="MIRAI-SOMA r2" loading="lazy"><figcaption>sprites/magic/events/romance/MIRAI/SOMA/r2.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/MIRAI/SOMA/r3.webp" alt="MIRAI-SOMA r3" loading="lazy"><figcaption>sprites/magic/events/romance/MIRAI/SOMA/r3.webp</figcaption></figure></td>
+    </tr>
+<tr data-route="MIRAI-MINATO" data-heroine="MIRAI" data-target="MINATO" data-search="MIRAI-MINATO 紫藤みらい 白石 湊 夢幻の舞台魔術師 清流の癒術騎士">
+      <th scope="row"><div class="route">MIRAI-MINATO</div><div class="names">紫藤みらい<br>白石 湊</div></th>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/characters/heroine-08-after.png" alt="紫藤みらい 立ち絵" loading="lazy"><figcaption>sprites/magic/characters/heroine-08-after.png</figcaption></figure></td>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/male-characters/minato-after.png" alt="白石 湊 立ち絵" loading="lazy"><figcaption>sprites/magic/male-characters/minato-after.png</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/MIRAI/MINATO/r1.webp" alt="MIRAI-MINATO r1" loading="lazy"><figcaption>sprites/magic/events/romance/MIRAI/MINATO/r1.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/MIRAI/MINATO/r2.webp" alt="MIRAI-MINATO r2" loading="lazy"><figcaption>sprites/magic/events/romance/MIRAI/MINATO/r2.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/MIRAI/MINATO/r3.webp" alt="MIRAI-MINATO r3" loading="lazy"><figcaption>sprites/magic/events/romance/MIRAI/MINATO/r3.webp</figcaption></figure></td>
+    </tr>
+<tr data-route="MIRAI-RIKU" data-heroine="MIRAI" data-target="RIKU" data-search="MIRAI-RIKU 紫藤みらい 天音 理玖 夢幻の舞台魔術師 時詠の観測騎士">
+      <th scope="row"><div class="route">MIRAI-RIKU</div><div class="names">紫藤みらい<br>天音 理玖</div></th>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/characters/heroine-08-after.png" alt="紫藤みらい 立ち絵" loading="lazy"><figcaption>sprites/magic/characters/heroine-08-after.png</figcaption></figure></td>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/male-characters/riku-after.png" alt="天音 理玖 立ち絵" loading="lazy"><figcaption>sprites/magic/male-characters/riku-after.png</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/MIRAI/RIKU/r1.webp" alt="MIRAI-RIKU r1" loading="lazy"><figcaption>sprites/magic/events/romance/MIRAI/RIKU/r1.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/MIRAI/RIKU/r2.webp" alt="MIRAI-RIKU r2" loading="lazy"><figcaption>sprites/magic/events/romance/MIRAI/RIKU/r2.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/MIRAI/RIKU/r3.webp" alt="MIRAI-RIKU r3" loading="lazy"><figcaption>sprites/magic/events/romance/MIRAI/RIKU/r3.webp</figcaption></figure></td>
+    </tr>
+<tr data-route="MIRAI-YAMATO" data-heroine="MIRAI" data-target="YAMATO" data-search="MIRAI-YAMATO 紫藤みらい 黒瀬 大和 夢幻の舞台魔術師 紅蓮の拳闘騎士">
+      <th scope="row"><div class="route">MIRAI-YAMATO</div><div class="names">紫藤みらい<br>黒瀬 大和</div></th>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/characters/heroine-08-after.png" alt="紫藤みらい 立ち絵" loading="lazy"><figcaption>sprites/magic/characters/heroine-08-after.png</figcaption></figure></td>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/male-characters/yamato-after.png" alt="黒瀬 大和 立ち絵" loading="lazy"><figcaption>sprites/magic/male-characters/yamato-after.png</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/MIRAI/YAMATO/r1.webp" alt="MIRAI-YAMATO r1" loading="lazy"><figcaption>sprites/magic/events/romance/MIRAI/YAMATO/r1.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/MIRAI/YAMATO/r2.webp" alt="MIRAI-YAMATO r2" loading="lazy"><figcaption>sprites/magic/events/romance/MIRAI/YAMATO/r2.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/MIRAI/YAMATO/r3.webp" alt="MIRAI-YAMATO r3" loading="lazy"><figcaption>sprites/magic/events/romance/MIRAI/YAMATO/r3.webp</figcaption></figure></td>
+    </tr>
+<tr data-route="MIRAI-LEON" data-heroine="MIRAI" data-target="LEON" data-search="MIRAI-LEON 紫藤みらい 神代 レオン 夢幻の舞台魔術師 幻奏の舞台騎士">
+      <th scope="row"><div class="route">MIRAI-LEON</div><div class="names">紫藤みらい<br>神代 レオン</div></th>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/characters/heroine-08-after.png" alt="紫藤みらい 立ち絵" loading="lazy"><figcaption>sprites/magic/characters/heroine-08-after.png</figcaption></figure></td>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/male-characters/leon-after.png" alt="神代 レオン 立ち絵" loading="lazy"><figcaption>sprites/magic/male-characters/leon-after.png</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/MIRAI/LEON/r1.webp" alt="MIRAI-LEON r1" loading="lazy"><figcaption>sprites/magic/events/romance/MIRAI/LEON/r1.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/MIRAI/LEON/r2.webp" alt="MIRAI-LEON r2" loading="lazy"><figcaption>sprites/magic/events/romance/MIRAI/LEON/r2.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/MIRAI/LEON/r3.webp" alt="MIRAI-LEON r3" loading="lazy"><figcaption>sprites/magic/events/romance/MIRAI/LEON/r3.webp</figcaption></figure></td>
+    </tr>
+<tr data-route="MIRAI-ELLIOT" data-heroine="MIRAI" data-target="ELLIOT" data-search="MIRAI-ELLIOT 紫藤みらい エリオット・ノクス 夢幻の舞台魔術師 星界の記録騎士">
+      <th scope="row"><div class="route">MIRAI-ELLIOT</div><div class="names">紫藤みらい<br>エリオット・ノクス</div></th>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/characters/heroine-08-after.png" alt="紫藤みらい 立ち絵" loading="lazy"><figcaption>sprites/magic/characters/heroine-08-after.png</figcaption></figure></td>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/male-characters/elliot-after.png" alt="エリオット・ノクス 立ち絵" loading="lazy"><figcaption>sprites/magic/male-characters/elliot-after.png</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/MIRAI/ELLIOT/r1.webp" alt="MIRAI-ELLIOT r1" loading="lazy"><figcaption>sprites/magic/events/romance/MIRAI/ELLIOT/r1.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/MIRAI/ELLIOT/r2.webp" alt="MIRAI-ELLIOT r2" loading="lazy"><figcaption>sprites/magic/events/romance/MIRAI/ELLIOT/r2.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/MIRAI/ELLIOT/r3.webp" alt="MIRAI-ELLIOT r3" loading="lazy"><figcaption>sprites/magic/events/romance/MIRAI/ELLIOT/r3.webp</figcaption></figure></td>
+    </tr>
+<tr data-route="MIRAI-SAKUYA" data-heroine="MIRAI" data-target="SAKUYA" data-search="MIRAI-SAKUYA 紫藤みらい 九条 朔夜 夢幻の舞台魔術師 宵闇の封印騎士">
+      <th scope="row"><div class="route">MIRAI-SAKUYA</div><div class="names">紫藤みらい<br>九条 朔夜</div></th>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/characters/heroine-08-after.png" alt="紫藤みらい 立ち絵" loading="lazy"><figcaption>sprites/magic/characters/heroine-08-after.png</figcaption></figure></td>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/male-characters/sakuya-after.png" alt="九条 朔夜 立ち絵" loading="lazy"><figcaption>sprites/magic/male-characters/sakuya-after.png</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/MIRAI/SAKUYA/r1.webp" alt="MIRAI-SAKUYA r1" loading="lazy"><figcaption>sprites/magic/events/romance/MIRAI/SAKUYA/r1.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/MIRAI/SAKUYA/r2.webp" alt="MIRAI-SAKUYA r2" loading="lazy"><figcaption>sprites/magic/events/romance/MIRAI/SAKUYA/r2.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/MIRAI/SAKUYA/r3.webp" alt="MIRAI-SAKUYA r3" loading="lazy"><figcaption>sprites/magic/events/romance/MIRAI/SAKUYA/r3.webp</figcaption></figure></td>
+    </tr>
+<tr data-route="SERA-REN" data-heroine="SERA" data-target="REN" data-search="SERA-REN 白峰セラ 朝霧 蓮 星界の光術師 蒼風の守護騎士">
+      <th scope="row"><div class="route">SERA-REN</div><div class="names">白峰セラ<br>朝霧 蓮</div></th>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/characters/heroine-09-after.png" alt="白峰セラ 立ち絵" loading="lazy"><figcaption>sprites/magic/characters/heroine-09-after.png</figcaption></figure></td>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/male-characters/ren-after.png" alt="朝霧 蓮 立ち絵" loading="lazy"><figcaption>sprites/magic/male-characters/ren-after.png</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/SERA/REN/r1.webp" alt="SERA-REN r1" loading="lazy"><figcaption>sprites/magic/events/romance/SERA/REN/r1.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/SERA/REN/r2.webp" alt="SERA-REN r2" loading="lazy"><figcaption>sprites/magic/events/romance/SERA/REN/r2.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/SERA/REN/r3.webp" alt="SERA-REN r3" loading="lazy"><figcaption>sprites/magic/events/romance/SERA/REN/r3.webp</figcaption></figure></td>
+    </tr>
+<tr data-route="SERA-SOMA" data-heroine="SERA" data-target="SOMA" data-search="SERA-SOMA 白峰セラ 御影 颯真 星界の光術師 氷律の執行騎士">
+      <th scope="row"><div class="route">SERA-SOMA</div><div class="names">白峰セラ<br>御影 颯真</div></th>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/characters/heroine-09-after.png" alt="白峰セラ 立ち絵" loading="lazy"><figcaption>sprites/magic/characters/heroine-09-after.png</figcaption></figure></td>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/male-characters/soma-after.png" alt="御影 颯真 立ち絵" loading="lazy"><figcaption>sprites/magic/male-characters/soma-after.png</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/SERA/SOMA/r1.webp" alt="SERA-SOMA r1" loading="lazy"><figcaption>sprites/magic/events/romance/SERA/SOMA/r1.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/SERA/SOMA/r2.webp" alt="SERA-SOMA r2" loading="lazy"><figcaption>sprites/magic/events/romance/SERA/SOMA/r2.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/SERA/SOMA/r3.webp" alt="SERA-SOMA r3" loading="lazy"><figcaption>sprites/magic/events/romance/SERA/SOMA/r3.webp</figcaption></figure></td>
+    </tr>
+<tr data-route="SERA-MINATO" data-heroine="SERA" data-target="MINATO" data-search="SERA-MINATO 白峰セラ 白石 湊 星界の光術師 清流の癒術騎士">
+      <th scope="row"><div class="route">SERA-MINATO</div><div class="names">白峰セラ<br>白石 湊</div></th>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/characters/heroine-09-after.png" alt="白峰セラ 立ち絵" loading="lazy"><figcaption>sprites/magic/characters/heroine-09-after.png</figcaption></figure></td>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/male-characters/minato-after.png" alt="白石 湊 立ち絵" loading="lazy"><figcaption>sprites/magic/male-characters/minato-after.png</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/SERA/MINATO/r1.webp" alt="SERA-MINATO r1" loading="lazy"><figcaption>sprites/magic/events/romance/SERA/MINATO/r1.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/SERA/MINATO/r2.webp" alt="SERA-MINATO r2" loading="lazy"><figcaption>sprites/magic/events/romance/SERA/MINATO/r2.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/SERA/MINATO/r3.webp" alt="SERA-MINATO r3" loading="lazy"><figcaption>sprites/magic/events/romance/SERA/MINATO/r3.webp</figcaption></figure></td>
+    </tr>
+<tr data-route="SERA-RIKU" data-heroine="SERA" data-target="RIKU" data-search="SERA-RIKU 白峰セラ 天音 理玖 星界の光術師 時詠の観測騎士">
+      <th scope="row"><div class="route">SERA-RIKU</div><div class="names">白峰セラ<br>天音 理玖</div></th>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/characters/heroine-09-after.png" alt="白峰セラ 立ち絵" loading="lazy"><figcaption>sprites/magic/characters/heroine-09-after.png</figcaption></figure></td>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/male-characters/riku-after.png" alt="天音 理玖 立ち絵" loading="lazy"><figcaption>sprites/magic/male-characters/riku-after.png</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/SERA/RIKU/r1.webp" alt="SERA-RIKU r1" loading="lazy"><figcaption>sprites/magic/events/romance/SERA/RIKU/r1.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/SERA/RIKU/r2.webp" alt="SERA-RIKU r2" loading="lazy"><figcaption>sprites/magic/events/romance/SERA/RIKU/r2.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/SERA/RIKU/r3.webp" alt="SERA-RIKU r3" loading="lazy"><figcaption>sprites/magic/events/romance/SERA/RIKU/r3.webp</figcaption></figure></td>
+    </tr>
+<tr data-route="SERA-YAMATO" data-heroine="SERA" data-target="YAMATO" data-search="SERA-YAMATO 白峰セラ 黒瀬 大和 星界の光術師 紅蓮の拳闘騎士">
+      <th scope="row"><div class="route">SERA-YAMATO</div><div class="names">白峰セラ<br>黒瀬 大和</div></th>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/characters/heroine-09-after.png" alt="白峰セラ 立ち絵" loading="lazy"><figcaption>sprites/magic/characters/heroine-09-after.png</figcaption></figure></td>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/male-characters/yamato-after.png" alt="黒瀬 大和 立ち絵" loading="lazy"><figcaption>sprites/magic/male-characters/yamato-after.png</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/SERA/YAMATO/r1.webp" alt="SERA-YAMATO r1" loading="lazy"><figcaption>sprites/magic/events/romance/SERA/YAMATO/r1.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/SERA/YAMATO/r2.webp" alt="SERA-YAMATO r2" loading="lazy"><figcaption>sprites/magic/events/romance/SERA/YAMATO/r2.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/SERA/YAMATO/r3.webp" alt="SERA-YAMATO r3" loading="lazy"><figcaption>sprites/magic/events/romance/SERA/YAMATO/r3.webp</figcaption></figure></td>
+    </tr>
+<tr data-route="SERA-LEON" data-heroine="SERA" data-target="LEON" data-search="SERA-LEON 白峰セラ 神代 レオン 星界の光術師 幻奏の舞台騎士">
+      <th scope="row"><div class="route">SERA-LEON</div><div class="names">白峰セラ<br>神代 レオン</div></th>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/characters/heroine-09-after.png" alt="白峰セラ 立ち絵" loading="lazy"><figcaption>sprites/magic/characters/heroine-09-after.png</figcaption></figure></td>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/male-characters/leon-after.png" alt="神代 レオン 立ち絵" loading="lazy"><figcaption>sprites/magic/male-characters/leon-after.png</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/SERA/LEON/r1.webp" alt="SERA-LEON r1" loading="lazy"><figcaption>sprites/magic/events/romance/SERA/LEON/r1.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/SERA/LEON/r2.webp" alt="SERA-LEON r2" loading="lazy"><figcaption>sprites/magic/events/romance/SERA/LEON/r2.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/SERA/LEON/r3.webp" alt="SERA-LEON r3" loading="lazy"><figcaption>sprites/magic/events/romance/SERA/LEON/r3.webp</figcaption></figure></td>
+    </tr>
+<tr data-route="SERA-ELLIOT" data-heroine="SERA" data-target="ELLIOT" data-search="SERA-ELLIOT 白峰セラ エリオット・ノクス 星界の光術師 星界の記録騎士">
+      <th scope="row"><div class="route">SERA-ELLIOT</div><div class="names">白峰セラ<br>エリオット・ノクス</div></th>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/characters/heroine-09-after.png" alt="白峰セラ 立ち絵" loading="lazy"><figcaption>sprites/magic/characters/heroine-09-after.png</figcaption></figure></td>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/male-characters/elliot-after.png" alt="エリオット・ノクス 立ち絵" loading="lazy"><figcaption>sprites/magic/male-characters/elliot-after.png</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/SERA/ELLIOT/r1.webp" alt="SERA-ELLIOT r1" loading="lazy"><figcaption>sprites/magic/events/romance/SERA/ELLIOT/r1.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/SERA/ELLIOT/r2.webp" alt="SERA-ELLIOT r2" loading="lazy"><figcaption>sprites/magic/events/romance/SERA/ELLIOT/r2.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/SERA/ELLIOT/r3.webp" alt="SERA-ELLIOT r3" loading="lazy"><figcaption>sprites/magic/events/romance/SERA/ELLIOT/r3.webp</figcaption></figure></td>
+    </tr>
+<tr data-route="SERA-SAKUYA" data-heroine="SERA" data-target="SAKUYA" data-search="SERA-SAKUYA 白峰セラ 九条 朔夜 星界の光術師 宵闇の封印騎士">
+      <th scope="row"><div class="route">SERA-SAKUYA</div><div class="names">白峰セラ<br>九条 朔夜</div></th>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/characters/heroine-09-after.png" alt="白峰セラ 立ち絵" loading="lazy"><figcaption>sprites/magic/characters/heroine-09-after.png</figcaption></figure></td>
+      <td><figure class="tile portrait "><img src="../public/sprites/magic/male-characters/sakuya-after.png" alt="九条 朔夜 立ち絵" loading="lazy"><figcaption>sprites/magic/male-characters/sakuya-after.png</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/SERA/SAKUYA/r1.webp" alt="SERA-SAKUYA r1" loading="lazy"><figcaption>sprites/magic/events/romance/SERA/SAKUYA/r1.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/SERA/SAKUYA/r2.webp" alt="SERA-SAKUYA r2" loading="lazy"><figcaption>sprites/magic/events/romance/SERA/SAKUYA/r2.webp</figcaption></figure></td>
+      <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/SERA/SAKUYA/r3.webp" alt="SERA-SAKUYA r3" loading="lazy"><figcaption>sprites/magic/events/romance/SERA/SAKUYA/r3.webp</figcaption></figure></td>
+    </tr></tbody>
+    </table>
+  </div>
+  <p class="note">男性主人公でプレイする場合も、イベント画像ファイルは女性ID/男性IDのフォルダに格納されるため、この表の同一ルート行を確認対象にする。</p>
+
+  <h2>キャラ別サンプル</h2>
+  <p>各キャラの立ち絵と、そのキャラが登場する r1 イベント絵の先頭3件。</p>
+  <div class="table-wrap">
+    <table id="character-table">
+      <thead><tr><th>キャラ</th><th>立ち絵</th><th>サンプル1</th><th>サンプル2</th><th>サンプル3</th></tr></thead>
+      <tbody><tr data-character="AKARI" data-search="AKARI 星宮あかり 星冠の魔法騎士">
+    <th scope="row"><div class="route">AKARI</div><div class="names">星宮あかり<br>星冠の魔法騎士</div></th>
+    <td><figure class="tile portrait "><img src="../public/sprites/magic/characters/heroine-01-after.png" alt="星宮あかり 立ち絵" loading="lazy"><figcaption>sprites/magic/characters/heroine-01-after.png</figcaption></figure></td>
+    <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/AKARI/REN/r1.webp" alt="AKARI sample 1" loading="lazy"><figcaption>sprites/magic/events/romance/AKARI/REN/r1.webp</figcaption></figure></td>
+    <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/AKARI/SOMA/r1.webp" alt="AKARI sample 2" loading="lazy"><figcaption>sprites/magic/events/romance/AKARI/SOMA/r1.webp</figcaption></figure></td>
+    <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/AKARI/MINATO/r1.webp" alt="AKARI sample 3" loading="lazy"><figcaption>sprites/magic/events/romance/AKARI/MINATO/r1.webp</figcaption></figure></td>
+  </tr>
+<tr data-character="SHIZUKU" data-search="SHIZUKU 水城しずく 月鏡の水晶騎士">
+    <th scope="row"><div class="route">SHIZUKU</div><div class="names">水城しずく<br>月鏡の水晶騎士</div></th>
+    <td><figure class="tile portrait "><img src="../public/sprites/magic/characters/heroine-02-after.png" alt="水城しずく 立ち絵" loading="lazy"><figcaption>sprites/magic/characters/heroine-02-after.png</figcaption></figure></td>
+    <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/SHIZUKU/REN/r1.webp" alt="SHIZUKU sample 1" loading="lazy"><figcaption>sprites/magic/events/romance/SHIZUKU/REN/r1.webp</figcaption></figure></td>
+    <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/SHIZUKU/SOMA/r1.webp" alt="SHIZUKU sample 2" loading="lazy"><figcaption>sprites/magic/events/romance/SHIZUKU/SOMA/r1.webp</figcaption></figure></td>
+    <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/SHIZUKU/MINATO/r1.webp" alt="SHIZUKU sample 3" loading="lazy"><figcaption>sprites/magic/events/romance/SHIZUKU/MINATO/r1.webp</figcaption></figure></td>
+  </tr>
+<tr data-character="HIYORI" data-search="HIYORI 花咲ひより 命花の治癒術師">
+    <th scope="row"><div class="route">HIYORI</div><div class="names">花咲ひより<br>命花の治癒術師</div></th>
+    <td><figure class="tile portrait "><img src="../public/sprites/magic/characters/heroine-03-after.png" alt="花咲ひより 立ち絵" loading="lazy"><figcaption>sprites/magic/characters/heroine-03-after.png</figcaption></figure></td>
+    <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/HIYORI/REN/r1.webp" alt="HIYORI sample 1" loading="lazy"><figcaption>sprites/magic/events/romance/HIYORI/REN/r1.webp</figcaption></figure></td>
+    <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/HIYORI/SOMA/r1.webp" alt="HIYORI sample 2" loading="lazy"><figcaption>sprites/magic/events/romance/HIYORI/SOMA/r1.webp</figcaption></figure></td>
+    <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/HIYORI/MINATO/r1.webp" alt="HIYORI sample 3" loading="lazy"><figcaption>sprites/magic/events/romance/HIYORI/MINATO/r1.webp</figcaption></figure></td>
+  </tr>
+<tr data-character="TSUBASA" data-search="TSUBASA 火神つばさ 神鍛の炎戦士">
+    <th scope="row"><div class="route">TSUBASA</div><div class="names">火神つばさ<br>神鍛の炎戦士</div></th>
+    <td><figure class="tile portrait "><img src="../public/sprites/magic/characters/heroine-04-after.png" alt="火神つばさ 立ち絵" loading="lazy"><figcaption>sprites/magic/characters/heroine-04-after.png</figcaption></figure></td>
+    <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/TSUBASA/REN/r1.webp" alt="TSUBASA sample 1" loading="lazy"><figcaption>sprites/magic/events/romance/TSUBASA/REN/r1.webp</figcaption></figure></td>
+    <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/TSUBASA/SOMA/r1.webp" alt="TSUBASA sample 2" loading="lazy"><figcaption>sprites/magic/events/romance/TSUBASA/SOMA/r1.webp</figcaption></figure></td>
+    <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/TSUBASA/MINATO/r1.webp" alt="TSUBASA sample 3" loading="lazy"><figcaption>sprites/magic/events/romance/TSUBASA/MINATO/r1.webp</figcaption></figure></td>
+  </tr>
+<tr data-character="REI" data-search="REI 黒羽れい 深紅の符術姫">
+    <th scope="row"><div class="route">REI</div><div class="names">黒羽れい<br>深紅の符術姫</div></th>
+    <td><figure class="tile portrait "><img src="../public/sprites/magic/characters/heroine-05-after.png" alt="黒羽れい 立ち絵" loading="lazy"><figcaption>sprites/magic/characters/heroine-05-after.png</figcaption></figure></td>
+    <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/REI/REN/r1.webp" alt="REI sample 1" loading="lazy"><figcaption>sprites/magic/events/romance/REI/REN/r1.webp</figcaption></figure></td>
+    <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/REI/SOMA/r1.webp" alt="REI sample 2" loading="lazy"><figcaption>sprites/magic/events/romance/REI/SOMA/r1.webp</figcaption></figure></td>
+    <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/REI/MINATO/r1.webp" alt="REI sample 3" loading="lazy"><figcaption>sprites/magic/events/romance/REI/MINATO/r1.webp</figcaption></figure></td>
+  </tr>
+<tr data-character="MADOKA" data-search="MADOKA 翠川まどか 時環の錬金術師">
+    <th scope="row"><div class="route">MADOKA</div><div class="names">翠川まどか<br>時環の錬金術師</div></th>
+    <td><figure class="tile portrait "><img src="../public/sprites/magic/characters/heroine-06-after.png" alt="翠川まどか 立ち絵" loading="lazy"><figcaption>sprites/magic/characters/heroine-06-after.png</figcaption></figure></td>
+    <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/MADOKA/REN/r1.webp" alt="MADOKA sample 1" loading="lazy"><figcaption>sprites/magic/events/romance/MADOKA/REN/r1.webp</figcaption></figure></td>
+    <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/MADOKA/SOMA/r1.webp" alt="MADOKA sample 2" loading="lazy"><figcaption>sprites/magic/events/romance/MADOKA/SOMA/r1.webp</figcaption></figure></td>
+    <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/MADOKA/MINATO/r1.webp" alt="MADOKA sample 3" loading="lazy"><figcaption>sprites/magic/events/romance/MADOKA/MINATO/r1.webp</figcaption></figure></td>
+  </tr>
+<tr data-character="KOHARU" data-search="KOHARU 風森こはる 翠嵐の精霊弓士">
+    <th scope="row"><div class="route">KOHARU</div><div class="names">風森こはる<br>翠嵐の精霊弓士</div></th>
+    <td><figure class="tile portrait "><img src="../public/sprites/magic/characters/heroine-07-after.png" alt="風森こはる 立ち絵" loading="lazy"><figcaption>sprites/magic/characters/heroine-07-after.png</figcaption></figure></td>
+    <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/KOHARU/REN/r1.webp" alt="KOHARU sample 1" loading="lazy"><figcaption>sprites/magic/events/romance/KOHARU/REN/r1.webp</figcaption></figure></td>
+    <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/KOHARU/SOMA/r1.webp" alt="KOHARU sample 2" loading="lazy"><figcaption>sprites/magic/events/romance/KOHARU/SOMA/r1.webp</figcaption></figure></td>
+    <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/KOHARU/MINATO/r1.webp" alt="KOHARU sample 3" loading="lazy"><figcaption>sprites/magic/events/romance/KOHARU/MINATO/r1.webp</figcaption></figure></td>
+  </tr>
+<tr data-character="MIRAI" data-search="MIRAI 紫藤みらい 夢幻の舞台魔術師">
+    <th scope="row"><div class="route">MIRAI</div><div class="names">紫藤みらい<br>夢幻の舞台魔術師</div></th>
+    <td><figure class="tile portrait "><img src="../public/sprites/magic/characters/heroine-08-after.png" alt="紫藤みらい 立ち絵" loading="lazy"><figcaption>sprites/magic/characters/heroine-08-after.png</figcaption></figure></td>
+    <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/MIRAI/REN/r1.webp" alt="MIRAI sample 1" loading="lazy"><figcaption>sprites/magic/events/romance/MIRAI/REN/r1.webp</figcaption></figure></td>
+    <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/MIRAI/SOMA/r1.webp" alt="MIRAI sample 2" loading="lazy"><figcaption>sprites/magic/events/romance/MIRAI/SOMA/r1.webp</figcaption></figure></td>
+    <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/MIRAI/MINATO/r1.webp" alt="MIRAI sample 3" loading="lazy"><figcaption>sprites/magic/events/romance/MIRAI/MINATO/r1.webp</figcaption></figure></td>
+  </tr>
+<tr data-character="SERA" data-search="SERA 白峰セラ 星界の光術師">
+    <th scope="row"><div class="route">SERA</div><div class="names">白峰セラ<br>星界の光術師</div></th>
+    <td><figure class="tile portrait "><img src="../public/sprites/magic/characters/heroine-09-after.png" alt="白峰セラ 立ち絵" loading="lazy"><figcaption>sprites/magic/characters/heroine-09-after.png</figcaption></figure></td>
+    <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/SERA/REN/r1.webp" alt="SERA sample 1" loading="lazy"><figcaption>sprites/magic/events/romance/SERA/REN/r1.webp</figcaption></figure></td>
+    <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/SERA/SOMA/r1.webp" alt="SERA sample 2" loading="lazy"><figcaption>sprites/magic/events/romance/SERA/SOMA/r1.webp</figcaption></figure></td>
+    <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/SERA/MINATO/r1.webp" alt="SERA sample 3" loading="lazy"><figcaption>sprites/magic/events/romance/SERA/MINATO/r1.webp</figcaption></figure></td>
+  </tr>
+<tr data-character="REN" data-search="REN 朝霧 蓮 蒼風の守護騎士">
+    <th scope="row"><div class="route">REN</div><div class="names">朝霧 蓮<br>蒼風の守護騎士</div></th>
+    <td><figure class="tile portrait "><img src="../public/sprites/magic/male-characters/ren-after.png" alt="朝霧 蓮 立ち絵" loading="lazy"><figcaption>sprites/magic/male-characters/ren-after.png</figcaption></figure></td>
+    <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/AKARI/REN/r1.webp" alt="REN sample 1" loading="lazy"><figcaption>sprites/magic/events/romance/AKARI/REN/r1.webp</figcaption></figure></td>
+    <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/SHIZUKU/REN/r1.webp" alt="REN sample 2" loading="lazy"><figcaption>sprites/magic/events/romance/SHIZUKU/REN/r1.webp</figcaption></figure></td>
+    <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/HIYORI/REN/r1.webp" alt="REN sample 3" loading="lazy"><figcaption>sprites/magic/events/romance/HIYORI/REN/r1.webp</figcaption></figure></td>
+  </tr>
+<tr data-character="SOMA" data-search="SOMA 御影 颯真 氷律の執行騎士">
+    <th scope="row"><div class="route">SOMA</div><div class="names">御影 颯真<br>氷律の執行騎士</div></th>
+    <td><figure class="tile portrait "><img src="../public/sprites/magic/male-characters/soma-after.png" alt="御影 颯真 立ち絵" loading="lazy"><figcaption>sprites/magic/male-characters/soma-after.png</figcaption></figure></td>
+    <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/AKARI/SOMA/r1.webp" alt="SOMA sample 1" loading="lazy"><figcaption>sprites/magic/events/romance/AKARI/SOMA/r1.webp</figcaption></figure></td>
+    <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/SHIZUKU/SOMA/r1.webp" alt="SOMA sample 2" loading="lazy"><figcaption>sprites/magic/events/romance/SHIZUKU/SOMA/r1.webp</figcaption></figure></td>
+    <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/HIYORI/SOMA/r1.webp" alt="SOMA sample 3" loading="lazy"><figcaption>sprites/magic/events/romance/HIYORI/SOMA/r1.webp</figcaption></figure></td>
+  </tr>
+<tr data-character="MINATO" data-search="MINATO 白石 湊 清流の癒術騎士">
+    <th scope="row"><div class="route">MINATO</div><div class="names">白石 湊<br>清流の癒術騎士</div></th>
+    <td><figure class="tile portrait "><img src="../public/sprites/magic/male-characters/minato-after.png" alt="白石 湊 立ち絵" loading="lazy"><figcaption>sprites/magic/male-characters/minato-after.png</figcaption></figure></td>
+    <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/AKARI/MINATO/r1.webp" alt="MINATO sample 1" loading="lazy"><figcaption>sprites/magic/events/romance/AKARI/MINATO/r1.webp</figcaption></figure></td>
+    <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/SHIZUKU/MINATO/r1.webp" alt="MINATO sample 2" loading="lazy"><figcaption>sprites/magic/events/romance/SHIZUKU/MINATO/r1.webp</figcaption></figure></td>
+    <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/HIYORI/MINATO/r1.webp" alt="MINATO sample 3" loading="lazy"><figcaption>sprites/magic/events/romance/HIYORI/MINATO/r1.webp</figcaption></figure></td>
+  </tr>
+<tr data-character="RIKU" data-search="RIKU 天音 理玖 時詠の観測騎士">
+    <th scope="row"><div class="route">RIKU</div><div class="names">天音 理玖<br>時詠の観測騎士</div></th>
+    <td><figure class="tile portrait "><img src="../public/sprites/magic/male-characters/riku-after.png" alt="天音 理玖 立ち絵" loading="lazy"><figcaption>sprites/magic/male-characters/riku-after.png</figcaption></figure></td>
+    <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/AKARI/RIKU/r1.webp" alt="RIKU sample 1" loading="lazy"><figcaption>sprites/magic/events/romance/AKARI/RIKU/r1.webp</figcaption></figure></td>
+    <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/SHIZUKU/RIKU/r1.webp" alt="RIKU sample 2" loading="lazy"><figcaption>sprites/magic/events/romance/SHIZUKU/RIKU/r1.webp</figcaption></figure></td>
+    <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/HIYORI/RIKU/r1.webp" alt="RIKU sample 3" loading="lazy"><figcaption>sprites/magic/events/romance/HIYORI/RIKU/r1.webp</figcaption></figure></td>
+  </tr>
+<tr data-character="YAMATO" data-search="YAMATO 黒瀬 大和 紅蓮の拳闘騎士">
+    <th scope="row"><div class="route">YAMATO</div><div class="names">黒瀬 大和<br>紅蓮の拳闘騎士</div></th>
+    <td><figure class="tile portrait "><img src="../public/sprites/magic/male-characters/yamato-after.png" alt="黒瀬 大和 立ち絵" loading="lazy"><figcaption>sprites/magic/male-characters/yamato-after.png</figcaption></figure></td>
+    <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/AKARI/YAMATO/r1.webp" alt="YAMATO sample 1" loading="lazy"><figcaption>sprites/magic/events/romance/AKARI/YAMATO/r1.webp</figcaption></figure></td>
+    <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/SHIZUKU/YAMATO/r1.webp" alt="YAMATO sample 2" loading="lazy"><figcaption>sprites/magic/events/romance/SHIZUKU/YAMATO/r1.webp</figcaption></figure></td>
+    <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/HIYORI/YAMATO/r1.webp" alt="YAMATO sample 3" loading="lazy"><figcaption>sprites/magic/events/romance/HIYORI/YAMATO/r1.webp</figcaption></figure></td>
+  </tr>
+<tr data-character="LEON" data-search="LEON 神代 レオン 幻奏の舞台騎士">
+    <th scope="row"><div class="route">LEON</div><div class="names">神代 レオン<br>幻奏の舞台騎士</div></th>
+    <td><figure class="tile portrait "><img src="../public/sprites/magic/male-characters/leon-after.png" alt="神代 レオン 立ち絵" loading="lazy"><figcaption>sprites/magic/male-characters/leon-after.png</figcaption></figure></td>
+    <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/AKARI/LEON/r1.webp" alt="LEON sample 1" loading="lazy"><figcaption>sprites/magic/events/romance/AKARI/LEON/r1.webp</figcaption></figure></td>
+    <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/SHIZUKU/LEON/r1.webp" alt="LEON sample 2" loading="lazy"><figcaption>sprites/magic/events/romance/SHIZUKU/LEON/r1.webp</figcaption></figure></td>
+    <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/HIYORI/LEON/r1.webp" alt="LEON sample 3" loading="lazy"><figcaption>sprites/magic/events/romance/HIYORI/LEON/r1.webp</figcaption></figure></td>
+  </tr>
+<tr data-character="ELLIOT" data-search="ELLIOT エリオット・ノクス 星界の記録騎士">
+    <th scope="row"><div class="route">ELLIOT</div><div class="names">エリオット・ノクス<br>星界の記録騎士</div></th>
+    <td><figure class="tile portrait "><img src="../public/sprites/magic/male-characters/elliot-after.png" alt="エリオット・ノクス 立ち絵" loading="lazy"><figcaption>sprites/magic/male-characters/elliot-after.png</figcaption></figure></td>
+    <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/AKARI/ELLIOT/r1.webp" alt="ELLIOT sample 1" loading="lazy"><figcaption>sprites/magic/events/romance/AKARI/ELLIOT/r1.webp</figcaption></figure></td>
+    <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/SHIZUKU/ELLIOT/r1.webp" alt="ELLIOT sample 2" loading="lazy"><figcaption>sprites/magic/events/romance/SHIZUKU/ELLIOT/r1.webp</figcaption></figure></td>
+    <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/HIYORI/ELLIOT/r1.webp" alt="ELLIOT sample 3" loading="lazy"><figcaption>sprites/magic/events/romance/HIYORI/ELLIOT/r1.webp</figcaption></figure></td>
+  </tr>
+<tr data-character="SAKUYA" data-search="SAKUYA 九条 朔夜 宵闇の封印騎士">
+    <th scope="row"><div class="route">SAKUYA</div><div class="names">九条 朔夜<br>宵闇の封印騎士</div></th>
+    <td><figure class="tile portrait "><img src="../public/sprites/magic/male-characters/sakuya-after.png" alt="九条 朔夜 立ち絵" loading="lazy"><figcaption>sprites/magic/male-characters/sakuya-after.png</figcaption></figure></td>
+    <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/AKARI/SAKUYA/r1.webp" alt="SAKUYA sample 1" loading="lazy"><figcaption>sprites/magic/events/romance/AKARI/SAKUYA/r1.webp</figcaption></figure></td>
+    <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/SHIZUKU/SAKUYA/r1.webp" alt="SAKUYA sample 2" loading="lazy"><figcaption>sprites/magic/events/romance/SHIZUKU/SAKUYA/r1.webp</figcaption></figure></td>
+    <td><figure class="tile  "><img src="../public/sprites/magic/events/romance/HIYORI/SAKUYA/r1.webp" alt="SAKUYA sample 3" loading="lazy"><figcaption>sprites/magic/events/romance/HIYORI/SAKUYA/r1.webp</figcaption></figure></td>
+  </tr></tbody>
+    </table>
+  </div>
+<script>
+  const filter = document.getElementById('filter');
+  const heroine = document.getElementById('heroine');
+  const target = document.getElementById('target');
+  const applyFilter = () => {
+    const text = filter.value.trim().toLowerCase();
+    document.querySelectorAll('#route-table tbody tr').forEach(row => {
+      const okText = !text || row.dataset.search.toLowerCase().includes(text);
+      const okHeroine = !heroine.value || row.dataset.heroine === heroine.value;
+      const okTarget = !target.value || row.dataset.target === target.value;
+      row.classList.toggle('hidden', !(okText && okHeroine && okTarget));
+    });
+    document.querySelectorAll('#character-table tbody tr').forEach(row => {
+      const okText = !text || row.dataset.search.toLowerCase().includes(text);
+      row.classList.toggle('hidden', !okText);
+    });
+  };
+  filter.addEventListener('input', applyFilter);
+  heroine.addEventListener('change', applyFilter);
+  target.addEventListener('change', applyFilter);
+</script>
+</body>
+</html>

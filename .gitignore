@@ -11,6 +11,10 @@ coverage/
 tmp/
 .codex-logs/
 
+# Generated voice source files are too large for the repo. Commit compressed OGG files instead.
+public/sfx/magic-voices/**/*.wav
+public/sfx/magic-event-voices/**/*.wav
+
 # Local iOS app work. Keep the GitHub repo focused on the web game.
 ios/
 *.xcodeproj/

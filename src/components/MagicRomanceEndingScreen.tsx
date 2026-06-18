@@ -1,9 +1,10 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Heart, ChevronRight, Users } from 'lucide-react';
 import type { LanguageMode, Player } from '../types';
 import { getMagicEndingPages } from '../services/magicEndingService';
 import { trans } from '../utils/textUtils';
 import { assetUrl } from '../utils/assetPaths';
+import { audioService } from '../services/audioService';
 
 interface MagicRomanceEndingScreenProps {
   player: Player;
@@ -29,7 +30,18 @@ const MagicRomanceEndingScreen: React.FC<MagicRomanceEndingScreenProps> = ({
   const isLast = lineIndex >= ending.lines.length - 1;
   const isFinalEnding = endingIndex >= endings.length - 1;
 
+  useEffect(() => {
+    if (lineIndex < 0) {
+      audioService.stopMagicEventVoices();
+      return;
+    }
+    const voiceLine = ending.voiceLines?.[lineIndex];
+    if (!voiceLine) return;
+    void audioService.playMagicEventVoice(voiceLine.heroId, voiceLine.lineId);
+  }, [ending, lineIndex]);
+
   const handleNext = () => {
+    audioService.stopMagicEventVoices();
     if (isLast) {
       if (isFinalEnding) {
         onComplete();

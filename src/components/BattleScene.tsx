@@ -1413,12 +1413,14 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                             {selectionState.type === 'COPY' && `コピー (${selectionState.amount})`}
                             {selectionState.type === 'EXHAUST' && `${trans("廃棄", languageMode)} (${selectionState.amount})`}
                         </span>
-                        <button
-                            onClick={onCancelSelection}
-                            className="bg-red-900/80 hover:bg-red-700 text-white text-[10px] px-3 py-1 rounded border border-red-500 flex items-center gap-1 transition-colors"
-                        >
-                            <RotateCcw size={10} /> {trans("やめる", languageMode)}
-                        </button>
+                        {selectionState.type !== 'DISCARD' && (
+                            <button
+                                onClick={onCancelSelection}
+                                className="bg-red-900/80 hover:bg-red-700 text-white text-[10px] px-3 py-1 rounded border border-red-500 flex items-center gap-1 transition-colors"
+                            >
+                                <RotateCcw size={10} /> {trans("やめる", languageMode)}
+                            </button>
+                        )}
                     </div>
                 )}
 
@@ -2164,12 +2166,16 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                         const isGrandFinaleDisabled = card.playCondition === 'DRAW_PILE_EMPTY' && player.drawPile.length > 0;
                         const isChokerDisabled = player.relics.some(r => r.id === 'VELVET_CHOKER') && player.cardsPlayedThisTurn >= 6;
                         const isNormalityDisabled = player.hand.some(c => c.name === '退屈' || c.name === 'NORMALITY') && player.cardsPlayedThisTurn >= 3;
+                        const requiredDiscardCount = card.promptsDiscard || 0;
+                        const incomingDrawCount = (card.draw || 0) * (player.magicTransformed ? 2 : 1);
+                        const discardableHandCount = player.hand.filter(c => c.id !== card.id).length + incomingDrawCount;
+                        const isDiscardCostDisabled = requiredDiscardCount > 0 && discardableHandCount < requiredDiscardCount;
 
                         const isFriendshipComboSelectionMode = isDualMode && friendshipComboEnabled;
                         const isSelectedDual = isFriendshipComboSelectionMode && selectedCardIds.includes(card.id);
                         const isSelectedActive = selectionState.active;
 
-                        const specialDisabled = isClashDisabled || isGrandFinaleDisabled || isChokerDisabled || isNormalityDisabled;
+                        const specialDisabled = isClashDisabled || isGrandFinaleDisabled || isChokerDisabled || isNormalityDisabled || isDiscardCostDisabled;
 
                         const displayCard = { ...card };
                         if (player.powers['CORRUPTION'] && card.type === CardType.SKILL) {

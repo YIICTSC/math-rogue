@@ -1,5 +1,5 @@
 
-import { AssignmentAnswerRecord, AssignmentPayload, GameState, GameScreen, RankingEntry, Card, PokerScoreEntry, SurvivorScoreEntry, DungeonScoreEntry, PokerRunState, KochoScoreEntry, PaperPlaneScoreEntry, VSRecord, LanguageMode, GoHomeScoreEntry, StudentProfile } from '../types';
+import { AssignmentAnswerRecord, AssignmentPayload, GameState, GameScreen, RankingEntry, Card, PokerScoreEntry, SurvivorScoreEntry, DungeonScoreEntry, PokerRunState, KochoScoreEntry, PaperPlaneScoreEntry, LanguageMode, GoHomeScoreEntry, StudentProfile } from '../types';
 
 const STORAGE_KEY_UNLOCKED_CARDS = 'pixel_spire_unlocked_cards_v1';
 const STORAGE_KEY_UNLOCKED_RELICS = 'pixel_spire_unlocked_relics_v1';
@@ -12,7 +12,6 @@ const STORAGE_KEY_RANKING = 'pixel_spire_ranking_v1';
 const STORAGE_KEY_POKER_RANKING = 'pixel_spire_poker_ranking_v1';
 const STORAGE_KEY_SURVIVOR_RANKING = 'pixel_spire_survivor_ranking_v1';
 const STORAGE_KEY_DUNGEON_RANKING = 'pixel_spire_dungeon_ranking_v1';
-const STORAGE_KEY_VS_RANKING = 'pixel_spire_vs_ranking_v1';
 const STORAGE_KEY_LEGACY_CARD = 'pixel_spire_legacy_card_v1';
 const STORAGE_KEY_COOP_LEGACY_CARD = 'pixel_spire_coop_legacy_card_v1';
 const STORAGE_KEY_DEBUG_MATH_SKIP = 'pixel_spire_debug_math_skip_v1';
@@ -187,7 +186,6 @@ const normalizeBurnRewards = (rewards: GameState['rewards']): GameState['rewards
 const normalizeBurnGameState = (state: GameState): GameState => ({
   ...state,
   player: normalizeBurnPlayer(state.player),
-  vsOpponent: state.vsOpponent ? normalizeBurnPlayer(state.vsOpponent) : state.vsOpponent,
   rewards: normalizeBurnRewards(state.rewards),
   codexOptions: normalizeBurnCards(state.codexOptions),
   narrativeLog: state.narrativeLog.map((entry) => normalizeBurnText(entry) || entry),
@@ -569,26 +567,6 @@ export const storageService = {
   getLocalScores: (): RankingEntry[] => {
       try {
           const stored = localStorage.getItem(STORAGE_KEY_RANKING);
-          return stored ? JSON.parse(stored) : [];
-      } catch (e) {
-          return [];
-      }
-  },
-
-  // --- VS Battle Records ---
-  saveVSRecord: (record: VSRecord) => {
-      try {
-          const current = storageService.getVSRecords();
-          const updated = [record, ...current].slice(0, 50);
-          localStorage.setItem(STORAGE_KEY_VS_RANKING, JSON.stringify(updated));
-      } catch (e) {
-          console.warn("Failed to save VS record", e);
-      }
-  },
-
-  getVSRecords: (): VSRecord[] => {
-      try {
-          const stored = localStorage.getItem(STORAGE_KEY_VS_RANKING);
           return stored ? JSON.parse(stored) : [];
       } catch (e) {
           return [];
@@ -1258,7 +1236,6 @@ export const storageService = {
       localStorage.removeItem(STORAGE_KEY_DUNGEON_STATE);
       localStorage.removeItem(STORAGE_KEY_DUNGEON_RANKING_2);
       localStorage.removeItem(STORAGE_KEY_DUNGEON_STATE_2);
-      localStorage.removeItem(STORAGE_KEY_VS_RANKING);
       localStorage.removeItem(STORAGE_KEY_KOCHO_STATE);
       localStorage.removeItem(STORAGE_KEY_KOCHO_RANKING);
       localStorage.removeItem(STORAGE_KEY_KOCHO_UNLOCKED_CARDS);
