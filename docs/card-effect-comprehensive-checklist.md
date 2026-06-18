@@ -804,7 +804,7 @@
 |[ ]|OK|`OUT_KICKBOARD`|最強のキックボード|30ダメージ。|`ADDITIONAL_CARDS`|汎用効果フィールド|
 |[ ]|OK|`OUT_PAPER_PLANE_ULTRA`|最強の紙飛行機|全体に20ダメージ。|`ADDITIONAL_CARDS`|汎用効果フィールド|
 |[ ]|OK|`CLEAVE`|雑巾がけ|敵全体に8ダメージ。|`CARDS_LIBRARY`|汎用効果フィールド|
-|[ ]|OK|`TIME_THIEF`|時間どろぼう|5ダメージ。敵の次の行動を1ターン遅らせる。|`LIBRARIAN_CARDS`|追加ロジックあり|
+|[ ]|OK|`TIME_THIEF`|時間どろぼう|5ダメージ。敵の次の行動を1ターン遅らせる。廃棄。|`LIBRARIAN_CARDS`|追加ロジックあり|
 |[ ]|OK|`BOYS_GENESIS_RAY`|創世の光線|全体に40ダメージ。|`ADDITIONAL_CARDS`|汎用効果フィールド|
 |[ ]|OK|`CONSECRATE`|掃除の時間|全体5ダメージ。|`CARDS_LIBRARY`|汎用効果フィールド|
 |[ ]|OK|`GOSHI_REVENGE`|走れメロス・ラストスパート|15ダメージ。|`LIBRARIAN_CARDS`|汎用効果フィールド|
@@ -815,7 +815,7 @@
 |[ ]|OK|`DOOM_AND_GLOOM`|日曜の夜|全体10ダメージ。|`CARDS_LIBRARY`|汎用効果フィールド|
 |[ ]|OK|`OUT_MUSEUM_TRIP`|博物館の恐竜|38ダメージ。|`ADDITIONAL_CARDS`|汎用効果フィールド|
 |[ ]|OK|`OUT_MY_HERO`|僕だけのヒーロー|50ダメージ。自分のHPが半分以下の時、コスト0になりダメージが2倍になる。|`ADDITIONAL_CARDS`|汎用効果フィールド|
-|[ ]|OK|`GIRLS_CHOCO_VALENTINE`|本命チョコ|15ダメージ。対象を1ターンスタンさせる。|`ADDITIONAL_CARDS`|追加ロジックあり|
+|[ ]|OK|`GIRLS_CHOCO_VALENTINE`|本命チョコ|15ダメージ。対象を1ターンスタンさせる。廃棄。|`ADDITIONAL_CARDS`|追加ロジックあり|
 |[ ]|OK|`HYPERBEAM`|目からビーム|全体26ダメージ。|`CARDS_LIBRARY`|汎用効果フィールド|
 |[ ]|OK|`RASHOMON`|羅生門|10ダメージ。敵をたおすと手札のカード1枚を廃棄する。|`LIBRARIAN_CARDS`|追加ロジックあり|
 |[ ]|OK|`BOYS_THUNDER_FIST`|雷神の鉄拳|10ダメージ。次のアタックのコスト-1。|`ADDITIONAL_CARDS`|追加ロジックあり|
@@ -992,7 +992,7 @@
 |[ ]|OK|`OUT_ANIME_BINGE`|アニメ一気見|ターンの開始時、手札の全コストを1下げる。|`ADDITIONAL_CARDS`|汎用効果フィールド|
 |[ ]|OK|`OUT_GRANDPA_WISDOM`|おじいちゃんの教え|HPを失う度、ムキムキ1を得る。|`ADDITIONAL_CARDS`|汎用効果フィールド|
 |[ ]|OK|`CACTUS`|サボテン|トゲトゲ4を得る。|`GROWN_PLANTS`|汎用効果フィールド|
-|[ ]|OK|`GIRLS_JEWEL_SHINE`|ジュエル・シャイン|ターン開始時にキラキラ1を得る。|`ADDITIONAL_CARDS`|汎用効果フィールド|
+|[ ]|OK|`GIRLS_JEWEL_SHINE`|ジュエル・シャイン|キラキラ1を得る。|`ADDITIONAL_CARDS`|汎用効果フィールド|
 |[ ]|OK|`GIRLS_CAKE_TOPPER`|デコレーション・ケーキ|カードを使用する度、HPを1回復。|`ADDITIONAL_CARDS`|汎用効果フィールド|
 |[ ]|OK|`NEZUMI_NO_YOMEIRI`|ねずみの嫁入り|この戦闘中、被ダメージを1軽減する。|`LIBRARIAN_CARDS`|汎用効果フィールド|
 |[ ]|OK|`BURST`|バースト|次のスキルを2回発動。|`CARDS_LIBRARY`|追加ロジックあり|
