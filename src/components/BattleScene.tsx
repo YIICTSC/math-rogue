@@ -1127,20 +1127,18 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                             {languageMode === 'ENGLISH' ? (
                                 <>
                                     <p><span className="font-black text-fuchsia-200">Transform</span> once per battle to switch into your magical form.</p>
-                                    <p>Transformation costs <span className="font-black text-rose-300">20 HP</span>, but your attacks and skills become much stronger while transformed.</p>
-                                    <p>Use it when you can finish enemies quickly or need a decisive burst of power.</p>
+                                    <p>While transformed, <span className="font-black text-fuchsia-200">all card effects are doubled</span>, but you take <span className="font-black text-rose-300">20 damage at the end of each turn</span>.</p>
+                                    <p>The added transformation cards gain <span className="font-black text-amber-200">+10% effect per 100 Magic Crystals</span> and <span className="font-black text-sky-200">+10% effect per 10 cards in your draw pile</span>.</p>
                                 </>
                             ) : (
                                 <>
                                     <p><span className="font-black text-fuchsia-200">変身</span>は、戦闘中に一度だけ使えるマジック編専用の切り札です。</p>
-                                    <p><span className="font-black text-rose-300">HPを20失う</span>かわりに、変身中は攻撃やスキルの効果が大きく強化されます。</p>
-                                    <p>敵を一気に倒したい時や、勝負を決めたいターンで使いましょう。</p>
+                                    <p>変身中は<span className="font-black text-fuchsia-200">すべてのカード効果が2倍</span>になりますが、<span className="font-black text-rose-300">ターン終了時に20ダメージ</span>を受けます。</p>
+                                    <p>変身で追加されるカードは、<span className="font-black text-amber-200">魔晶100Gごとに効果+10%</span>、<span className="font-black text-sky-200">山札10枚ごとに効果+10%</span>強化されます。</p>
                                 </>
                             )}
                             <div className="flex items-center justify-between gap-3 pt-2">
-                                <div className="text-xs font-bold text-fuchsia-200/80">
-                                    {languageMode === 'ENGLISH' ? 'Shown only the first time you enter Magic battles.' : 'この説明は初回のマジック編戦闘で一度だけ表示されます。'}
-                                </div>
+                                <div />
                                 <button
                                     onClick={closeMagicTransformationTutorial}
                                     className="shrink-0 rounded-lg bg-fuchsia-500 px-4 py-2 text-sm font-black text-white shadow-lg hover:bg-fuchsia-400"

@@ -77,7 +77,7 @@ import { chooseBattleBackgroundScene, getBattleBackgroundFlavor } from './data/b
 import { OFFLINE_DISTRIBUTABLE, OFFLINE_NETWORK_FEATURE_MESSAGE } from './config/runtime';
 import { getAttackEffectKeyForCard, getMultihitFrameSequence } from './data/attackEffects';
 import { getThemedCharacters, getThemedEnemyDisplayName, MAGIC_HERO_ID_BY_CHARACTER_ID, type VisualThemeId } from './data/visualThemes';
-import { getMagicCardsForHero } from './data/magicCards';
+import { boostMagicCardForTransformation, getMagicCardsForHero } from './data/magicCards';
 import { createMagicRuleState, createMagicStartingDeck, getMagicRuleConfig } from './data/magicLoadouts';
 import { generateMagicRomanceSelectionEvent } from './services/magicRomanceEventService';
 import { applyMagicRuleOnCardPlay } from './services/magicRuleService';
@@ -369,7 +369,7 @@ const determineEnemyType = (name: string, isBoss: boolean): string => {
     return 'GENERIC';
 };
 
-const estimateBossScalingSingleCardDamage = (deck: ICard[]): number => {
+const estimateBossScalingSingleCardDamage = (deck: ICard[], effectMultiplier = 1): number => {
     const strikeCount = deck.filter(c => c.name === 'えんぴつ攻撃' || c.originalNames?.includes('えんぴつ攻撃')).length;
     const attackCount = deck.filter(c => c.type === CardType.ATTACK).length;
     const skillCount = deck.filter(c => c.type === CardType.SKILL).length;
@@ -406,7 +406,7 @@ const estimateBossScalingSingleCardDamage = (deck: ICard[]): number => {
         if (card.hitsPerSkillInHand) hits = Math.max(1, assumedSkillsInHand);
         if (card.hitsPerAttackPlayed) hits = Math.max(1, assumedPriorAttacks);
 
-        return Math.max(0, perHit * Math.min(hits, 100));
+        return Math.max(0, perHit * Math.min(hits, 100) * effectMultiplier);
     }));
 };
 
@@ -4950,7 +4950,14 @@ const App: React.FC = () => {
                 let enemies: Enemy[] = [];
                 let bgmType: 'battle' | 'mid_boss' | 'boss' | 'final_boss' = 'battle';
 
-                const maxAtkDmg = estimateBossScalingSingleCardDamage(nextState.player.deck);
+                let maxAtkDmg = estimateBossScalingSingleCardDamage(nextState.player.deck);
+                if ((nextState.visualTheme || visualTheme) === 'magic') {
+                    const protagonistId = getMagicProtagonistId(nextState.player);
+                    const transformedMagicCards = getMagicCardsForHero(protagonistId).map(card =>
+                        boostMagicCardForTransformation(card, nextState.player.gold, nextState.player.deck.length) as ICard
+                    );
+                    maxAtkDmg = Math.max(maxAtkDmg, estimateBossScalingSingleCardDamage(transformedMagicCards, 2));
+                }
                 const difficulty = getDifficultyConfig(gameState.difficultyLevel);
                 const enemyHpMultiplier = coopEnemyHpMultiplier * difficulty.enemyHpMultiplier;
 
@@ -6001,8 +6008,9 @@ const App: React.FC = () => {
                 card.id?.includes('GIRLS_GIFT_BOX');
 
             if (card.gold) {
-                p.gold += card.gold;
-                currentLogs.push(`${card.gold}ゴールドをゲット！`);
+                const goldAmount = card.gold * magicEffectMultiplier;
+                p.gold += goldAmount;
+                currentLogs.push(`${goldAmount}ゴールドをゲット！`);
                 audioService.playSound('buff');
             }
 
@@ -6414,7 +6422,7 @@ const App: React.FC = () => {
                                 currentLogs.push(`${trans(e.name, languageMode)}${trans("を倒した！", languageMode)}`);
                                 nextActStats.enemiesDefeated++;
 
-                                if (card.fatalEnergy) p.currentEnergy += card.fatalEnergy;
+                                if (card.fatalEnergy) p.currentEnergy += card.fatalEnergy * magicEffectMultiplier;
                                 if (card.fatalPermanentDamage) {
                                     p.deck = p.deck.map(dc => {
                                         if (dc.id === card.id) {
@@ -6429,7 +6437,11 @@ const App: React.FC = () => {
                                     });
                                     currentLogs.push(`${trans(card.name, languageMode)} の威力が上がった！`);
                                 }
-                                if (card.fatalMaxHp) { p.maxHp += card.fatalMaxHp!; p.currentHp += card.fatalMaxHp!; }
+                                if (card.fatalMaxHp) {
+                                    const maxHpAmount = card.fatalMaxHp * magicEffectMultiplier;
+                                    p.maxHp += maxHpAmount;
+                                    p.currentHp += maxHpAmount;
+                                }
                                 if (e.corpseExplosion) {
                                     enemies.forEach(other => {
                                         if (other.id !== e.id && other.currentHp > 0) {
@@ -6613,23 +6625,25 @@ const App: React.FC = () => {
 
                     // --- FIX: fatalMaxHp as instant boost for non-attack Skills (target: SELF) ---
                     if (card.fatalMaxHp && card.type === CardType.SKILL && card.target === TargetType.SELF) {
-                        p.maxHp += card.fatalMaxHp;
-                        p.currentHp += card.fatalMaxHp;
-                        p.floatingText = { id: `maxhp-${Date.now()}`, text: `MaxHP+${card.fatalMaxHp}`, color: 'text-green-400', iconType: 'heart' };
+                        const maxHpAmount = card.fatalMaxHp * magicEffectMultiplier;
+                        p.maxHp += maxHpAmount;
+                        p.currentHp += maxHpAmount;
+                        p.floatingText = { id: `maxhp-${Date.now()}`, text: `MaxHP+${maxHpAmount}`, color: 'text-green-400', iconType: 'heart' };
                         nextActiveEffects.push({ id: `vfx-mhp-${Date.now()}`, type: 'BUFF', targetId: 'player', delay: hitDelay });
                     }
 
                     if (card.strength) {
+                        const strengthAmount = card.strength * magicEffectMultiplier;
                         if (card.target === TargetType.ENEMY || card.target === TargetType.ALL_ENEMIES) {
                             targets.forEach(e => {
-                                e.strength += card.strength!;
-                                e.floatingText = { id: `str-${Date.now()}-${e.id}`, text: `${card.strength > 0 ? '+' : ''}${card.strength}`, color: card.strength > 0 ? 'text-red-500' : 'text-gray-400', iconType: 'sword' };
+                                e.strength += strengthAmount;
+                                e.floatingText = { id: `str-${Date.now()}-${e.id}`, text: `${strengthAmount > 0 ? '+' : ''}${strengthAmount}`, color: strengthAmount > 0 ? 'text-red-500' : 'text-gray-400', iconType: 'sword' };
                             });
-                            currentLogs.push(`${trans("敵のムキムキ", languageMode)}${card.strength > 0 ? '+' : ''}${card.strength}`);
+                            currentLogs.push(`${trans("敵のムキムキ", languageMode)}${strengthAmount > 0 ? '+' : ''}${strengthAmount}`);
                         } else {
-                            p.strength += card.strength;
+                            p.strength += strengthAmount;
                             nextActiveEffects.push({ id: `vfx-buff-${Date.now()}`, type: 'BUFF', targetId: 'player', delay: hitDelay, statusEffectKey: 'strength' });
-                            currentLogs.push(`${trans("ムキムキ", languageMode)}+${card.strength}`);
+                            currentLogs.push(`${trans("ムキムキ", languageMode)}+${strengthAmount}`);
                         }
                     }
                     if (card.vulnerable) {
@@ -6957,7 +6971,7 @@ const App: React.FC = () => {
                         if (card.applyPower.id === 'CLEAR_DEBUFFS') {
                             p = clearCombatDebuffs(p);
                         } else {
-                            p.powers[card.applyPower.id] = (p.powers[card.applyPower.id] || 0) + card.applyPower.amount;
+                            p.powers[card.applyPower.id] = (p.powers[card.applyPower.id] || 0) + card.applyPower.amount * magicEffectMultiplier;
                         }
                         if (card.applyPower.id === 'CORPSE_EXPLOSION' && targets.length > 0) {
                             targets.forEach(e => e.corpseExplosion = true);
@@ -7069,8 +7083,8 @@ const App: React.FC = () => {
                             if (template) p.discardPile.push({ ...template, id: `gen-discard-${Date.now()}-${act}-${h}-${c}-${Math.random()}` });
                         }
                     }
-                    if (card.nextTurnDraw) p.nextTurnDraw += card.nextTurnDraw;
-                    if (card.nextTurnEnergy) p.nextTurnEnergy += card.nextTurnEnergy;
+                    if (card.nextTurnDraw) p.nextTurnDraw += card.nextTurnDraw * magicEffectMultiplier;
+                    if (card.nextTurnEnergy) p.nextTurnEnergy += card.nextTurnEnergy * magicEffectMultiplier;
 
                     if (card.name === '早退' || card.name === 'EXPULSION' || card.originalNames?.includes('早退') || card.originalNames?.includes('EXPULSION')) {
                         const threshold = card.upgraded ? 40 : 30;
@@ -8431,8 +8445,9 @@ const App: React.FC = () => {
         setGameState(prev => {
             if (prev.screen !== GameScreen.BATTLE || prev.player.magicTransformed) return prev;
             const protagonistId = getMagicProtagonistId(prev.player);
+            const dynamicDeckSize = prev.player.drawPile.length;
             const magicCards = getMagicCardsForHero(protagonistId).map((card, index) => ({
-                ...card,
+                ...boostMagicCardForTransformation(card, prev.player.gold, dynamicDeckSize),
                 id: `magic-${card.id}-${Date.now()}-${index}`,
                 visualTheme: 'magic' as VisualThemeId,
                 transformedOnly: true,

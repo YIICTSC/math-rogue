@@ -378,7 +378,28 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled, onInspect, languag
 
   const renderDescription = () => {
     const desc = languageMode === 'ENGLISH' ? buildEnglishCardDescription(card) : trans(card.description, languageMode);
-    return <span className={card.holographic ? 'text-cyan-100 font-bold' : card.upgraded ? 'text-green-300 font-bold' : ''}>{desc}</span>;
+    const textClassName = card.holographic ? 'text-cyan-100 font-bold' : card.upgraded ? 'text-green-300 font-bold' : '';
+    if (!card.magicBoostedEffectText) {
+      return <span className={textClassName}>{desc}</span>;
+    }
+
+    const [effectLine, ...restLines] = desc.split('\n');
+    const parts = effectLine.split(/(\d+(?:\.\d+)?)/g);
+    return (
+      <span className={textClassName}>
+        {parts.map((part, index) => (
+          /^\d+(?:\.\d+)?$/.test(part) ? (
+            <span
+              key={`${part}-${index}`}
+              className="text-amber-200 font-black drop-shadow-[0_0_4px_rgba(250,204,21,1)] animate-pulse"
+            >
+              {part}
+            </span>
+          ) : part
+        ))}
+        {restLines.length > 0 ? `\n${restLines.join('\n')}` : ''}
+      </span>
+    );
   };
 
   const displayName = translatedCardName + (card.upgraded ? '+' : '');

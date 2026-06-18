@@ -25,6 +25,7 @@ const getCardKeywords = (card: ICard) => {
 
 const getProcessedDescription = (card: ICard, languageMode: LanguageMode) => {
   let desc = trans(card.description, languageMode);
+  if (card.magicBoostedEffectText) return desc;
   if (card.damage !== undefined) desc = desc.replace(/(\d+)ダメージ/g, `${card.damage}${trans('ダメージ', languageMode)}`);
   if (card.block !== undefined) desc = desc.replace(/ブロック(\d+)/g, `${trans('ブロック', languageMode)}${card.block}`);
   if (card.poison !== undefined) desc = desc.replace(/ドクドク(\d+)/g, `${trans('ドクドク', languageMode)}${card.poison}`);

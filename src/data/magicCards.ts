@@ -232,3 +232,82 @@ export const getMagicCardsForHero = (heroId: string) =>
 
 export const applyTransformationMultiplier = (value: number | undefined, transformed: boolean) =>
   (value ?? 0) * (transformed ? 2 : 1);
+
+const MAGIC_DYNAMIC_NUMERIC_FIELDS = [
+  'damage',
+  'block',
+  'heal',
+  'energy',
+  'weak',
+  'vulnerable',
+  'poison',
+  'strength',
+  'draw',
+] as const;
+
+const scalePositiveInteger = (value: number | undefined, multiplier: number) => {
+  if (value === undefined) return undefined;
+  if (value === 0) return 0;
+  return Math.max(1, Math.floor(value * multiplier));
+};
+
+const replaceFirstEffectNumber = (description: string, baseValue: number | undefined, displayValue: number | undefined, suffix: string) => {
+  if (baseValue === undefined || displayValue === undefined || baseValue === displayValue) return description;
+  return description.replace(new RegExp(`${baseValue}${suffix}`), `${displayValue}${suffix}`);
+};
+
+export const getMagicDynamicBoostMultiplier = (gold: number, deckSize: number) => {
+  const goldBonusPercent = Math.floor(Math.max(0, gold) / 100) * 10;
+  const deckBonusPercent = Math.floor(Math.max(0, deckSize) / 10) * 10;
+  return 1 + (goldBonusPercent + deckBonusPercent) / 100;
+};
+
+export const boostMagicCardForTransformation = (card: Card, gold: number, deckSize: number): Card => {
+  const dynamicMultiplier = getMagicDynamicBoostMultiplier(gold, deckSize);
+  const transformedDisplayMultiplier = 2;
+  const nextCard: Card = {
+    ...card,
+    applyPower: card.applyPower ? { ...card.applyPower } : undefined,
+    magicBoostedEffectText: true,
+    magicDynamicBoostMultiplier: dynamicMultiplier,
+  };
+
+  for (const field of MAGIC_DYNAMIC_NUMERIC_FIELDS) {
+    const scaled = scalePositiveInteger(card[field], dynamicMultiplier);
+    if (scaled !== undefined) {
+      nextCard[field] = scaled as never;
+    }
+  }
+
+  if (nextCard.strength !== undefined) {
+    nextCard.strength *= transformedDisplayMultiplier;
+  }
+
+  if (card.applyPower) {
+    nextCard.applyPower = {
+      ...card.applyPower,
+      amount: (scalePositiveInteger(card.applyPower.amount, dynamicMultiplier) ?? card.applyPower.amount) * transformedDisplayMultiplier,
+    };
+  }
+
+  let description = card.description;
+  description = replaceFirstEffectNumber(description, card.damage, (nextCard.damage ?? 0) * transformedDisplayMultiplier, 'ダメージ');
+  description = replaceFirstEffectNumber(description, card.block, (nextCard.block ?? 0) * transformedDisplayMultiplier, '。');
+  description = replaceFirstEffectNumber(description, card.heal, (nextCard.heal ?? 0) * transformedDisplayMultiplier, '回復');
+  description = replaceFirstEffectNumber(description, card.energy, (nextCard.energy ?? 0) * transformedDisplayMultiplier, 'を得る');
+  description = replaceFirstEffectNumber(description, card.draw, (nextCard.draw ?? 0) * transformedDisplayMultiplier, '枚引く');
+  description = replaceFirstEffectNumber(description, card.weak, (nextCard.weak ?? 0) * transformedDisplayMultiplier, 'にする');
+  description = replaceFirstEffectNumber(description, card.vulnerable, (nextCard.vulnerable ?? 0) * transformedDisplayMultiplier, 'にする');
+  description = replaceFirstEffectNumber(description, card.poison, (nextCard.poison ?? 0) * transformedDisplayMultiplier, '。');
+  description = replaceFirstEffectNumber(description, card.strength, nextCard.strength, '。');
+  if (card.applyPower) {
+    const powerAmount = nextCard.applyPower?.amount;
+    description = replaceFirstEffectNumber(description, card.applyPower.amount, powerAmount, 'を得る');
+    description = replaceFirstEffectNumber(description, card.applyPower.amount, powerAmount, 'ダメージ');
+    description = replaceFirstEffectNumber(description, card.applyPower.amount, powerAmount, 'を付与');
+    description = replaceFirstEffectNumber(description, card.applyPower.amount, powerAmount, '枚追加で引く');
+  }
+  nextCard.description = description;
+
+  return nextCard;
+};

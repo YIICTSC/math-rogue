@@ -81,6 +81,8 @@ export interface Card {
   magicBasicCardArt?: 'strike' | 'guard' | 'focus';
   magicHeroId?: string;
   transformedOnly?: boolean;
+  magicBoostedEffectText?: boolean;
+  magicDynamicBoostMultiplier?: number;
   familiarSummon?: FamiliarSummonSpec;
 
   nextTurnEnergy?: number;
