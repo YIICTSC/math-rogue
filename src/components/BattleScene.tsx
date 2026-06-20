@@ -20,6 +20,7 @@ import { PotionIcon, RelicIcon } from './ItemIcon';
 import { getBattleBackgroundSceneById } from '../data/battleBackgrounds';
 import { getStatusEffectKeyForVfx } from '../data/statusEffects';
 import { getThemedCharacterSpritePath, getThemedEnemyDisplayName, getThemedEnemyVariant, getThemedHumanoidEnemyVariant, type HighSchoolEnemyAction, type HighSchoolHeroAction, type VisualThemeId } from '../data/visualThemes';
+import { boostMagicCardForTransformation } from '../data/magicCards';
 import { assetUrl } from '../utils/assetPaths';
 import type { BattleUiSettings } from './SettingsModal';
 import MagicRulePanel from './MagicRulePanel';
@@ -2177,9 +2178,9 @@ const BattleScene: React.FC<BattleSceneProps> = ({
 
                         const specialDisabled = isClashDisabled || isGrandFinaleDisabled || isChokerDisabled || isNormalityDisabled || isDiscardCostDisabled;
 
-                        const displayCard = { ...card };
+                        let displayCard = { ...card };
                         if (player.magicTransformed && !card.transformedOnly) {
-                            displayCard.magicBoostedEffectText = true;
+                            displayCard = boostMagicCardForTransformation(displayCard, 0, 0);
                         }
                         if (player.powers['CORRUPTION'] && card.type === CardType.SKILL) {
                             displayCard.cost = 0;
