@@ -904,6 +904,7 @@ const App: React.FC = () => {
     const battleFinisherCutinCardRef = useRef<ICard | null>(null);
     const [showParryTutorial, setShowParryTutorial] = useState(false);
     const parryTutorialResolverRef = useRef<(() => void) | null>(null);
+    const lastMagicDamageVoiceActionRef = useRef<string | null>(null);
     const [isPreloadingGameAssets, setIsPreloadingGameAssets] = useState(false);
     const gameAssetPreloadPromisesRef = useRef<Partial<Record<VisualThemeId, Promise<void>>>>({});
     const startGameAssetPreload = useCallback(() => {
@@ -7803,6 +7804,7 @@ const App: React.FC = () => {
             const enemy = stateRef.current.enemies.find(e => e.id === enemyTemplate.id);
             if (!enemy || enemy.currentHp <= 0) continue;
             setActingEnemyId(enemy.id);
+            const enemyActionKey = `${stateRef.current.turn}:${enemy.id}`;
             lastActingEnemyRef.current = { ...enemy };
             const isBard = stateRef.current.visualTheme !== 'magic' && stateRef.current.player.id === 'BARD';
             const isAttackIntent =
@@ -8158,7 +8160,8 @@ const App: React.FC = () => {
                     syncRedSkullState(p);
                     if (didHpDamage) {
                         audioService.playSound('damage');
-                        if (prev.visualTheme === 'magic') {
+                        if (prev.visualTheme === 'magic' && lastMagicDamageVoiceActionRef.current !== enemyActionKey) {
+                            lastMagicDamageVoiceActionRef.current = enemyActionKey;
                             audioService.playMagicVoice(getMagicProtagonistId(p), 'damage');
                         }
                     }
@@ -12602,11 +12605,11 @@ const App: React.FC = () => {
                                     {isLoading ? trans("じゅんびちゅう...", languageMode) : trans("冒険を始める", languageMode)}
                                 </button>
 
-                                <div className={`grid w-full ${OFFLINE_DISTRIBUTABLE ? 'grid-cols-1 gap-2' : isMobilePortrait ? 'grid-cols-3 gap-1' : 'grid-cols-3 gap-2'}`}>
+                                <div className={`grid w-full ${OFFLINE_DISTRIBUTABLE ? 'grid-cols-1 gap-2' : 'start-menu-mode-grid grid-cols-3 gap-2'}`}>
                                     <button
                                         disabled={isAssignmentChallengeOnlyLocked}
                                         onClick={startChallengeGame}
-                                        className={`w-full min-w-0 border-b-4 border-r-4 rounded-none transition-all shadow-md flex items-center justify-center ${isMobilePortrait ? 'py-1.5 px-0.5 text-[10px]' : 'py-2 px-1 text-xs'} font-bold ${isDailyLimitReached || isAssignmentChallengeOnlyLocked ? 'bg-gray-800 border-gray-700 text-gray-500 grayscale opacity-70 cursor-not-allowed' : 'bg-red-900/80 text-red-100 border-red-500 hover:bg-red-800 hover:shadow-red-900/50'}`}
+                                        className={`start-menu-mode-primary w-full min-w-0 border-b-4 border-r-4 rounded-none transition-all shadow-md flex items-center justify-center ${isMobilePortrait ? 'py-1.5 px-0.5 text-[10px]' : 'py-2 px-1 text-xs'} font-bold ${isDailyLimitReached || isAssignmentChallengeOnlyLocked ? 'bg-gray-800 border-gray-700 text-gray-500 grayscale opacity-70 cursor-not-allowed' : 'bg-red-900/80 text-red-100 border-red-500 hover:bg-red-800 hover:shadow-red-900/50'}`}
                                     >
                                         <Swords className={isMobilePortrait ? 'mr-0.5' : 'mr-1'} size={isMobilePortrait ? 12 : 14} /> {trans("1A1D", languageMode)}
                                     </button>
