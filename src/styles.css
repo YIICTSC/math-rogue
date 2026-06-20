@@ -927,6 +927,15 @@ textarea {
 }
 
 @media (orientation: portrait) and (max-width: 540px) {
+  .start-menu-mode-grid {
+    grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+    gap: 0.25rem !important;
+  }
+
+  .start-menu-mode-grid .start-menu-mode-primary {
+    grid-column: auto;
+  }
+
   .start-menu-button-panel > .mb-4 {
     gap: 0.35rem;
   }
@@ -3897,7 +3906,7 @@ textarea {
     display: none !important;
   }
 
-  .start-menu-actions > .grid {
+  .start-menu-actions > .grid:not(.start-menu-mode-grid) {
     grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
     gap: 0.25rem !important;
   }

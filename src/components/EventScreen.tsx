@@ -79,6 +79,12 @@ const EventScreen: React.FC<EventScreenProps> = ({ title, description, options, 
   }, [highSchoolEventIndex]);
 
   const imageCandidates = useMemo(() => {
+    if (visualTheme === 'magic' && title === '忘れ物') {
+      return [
+        assetUrl('sprites/magic/events/forgotten-card.webp'),
+        assetUrl('event-illustrations/default.svg'),
+      ];
+    }
     if (magicFriendshipImages.length > 0) {
       return [
         ...magicFriendshipImages,
@@ -113,7 +119,7 @@ const EventScreen: React.FC<EventScreenProps> = ({ title, description, options, 
       assetUrl(`event-illustrations/${encodedTitle}.svg`),
       assetUrl('event-illustrations/default.svg')
     ];
-  }, [highSchoolEventIndex, magicEventIndex, magicFriendshipImages, magicRomanceImage, imageKey, title]);
+  }, [highSchoolEventIndex, magicEventIndex, magicFriendshipImages, magicRomanceImage, imageKey, title, visualTheme]);
   const [imageIndex, setImageIndex] = useState(0);
   const [choiceLocked, setChoiceLocked] = useState(false);
   const [continueLocked, setContinueLocked] = useState(false);

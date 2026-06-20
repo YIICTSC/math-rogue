@@ -2178,6 +2178,9 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                         const specialDisabled = isClashDisabled || isGrandFinaleDisabled || isChokerDisabled || isNormalityDisabled || isDiscardCostDisabled;
 
                         const displayCard = { ...card };
+                        if (player.magicTransformed && !card.transformedOnly) {
+                            displayCard.magicBoostedEffectText = true;
+                        }
                         if (player.powers['CORRUPTION'] && card.type === CardType.SKILL) {
                             displayCard.cost = 0;
                         }

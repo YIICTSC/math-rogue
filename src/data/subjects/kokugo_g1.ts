@@ -1,8 +1,154 @@
 import { GeneralProblem, d, fillGeneratedUnitProblems } from './utils';
 
+type ProblemRow = [string, string, string, string, string, string];
+
+const fixedProblems = (rows: ProblemRow[]): GeneralProblem[] => rows.map(
+  ([question, answer, wrong1, wrong2, wrong3, hint]) => ({
+    question,
+    answer,
+    options: d(answer, wrong1, wrong2, wrong3),
+    hint,
+  }),
+);
+
 export const KOKUGO_G1_UNIT_DATA: Record<string, GeneralProblem[]> = {
-  KOKUGO_G1_U01: [], // ひらがな
-  KOKUGO_G1_U02: [], // ことばあつめ
+  KOKUGO_G1_U01: fixedProblems([
+    ['「あさ」の はじめの もじは？', 'あ', 'お', 'さ', 'ま', 'さいしょの おとを ゆっくり よもう。'],
+    ['「いぬ」の はじめの もじは？', 'い', 'に', 'ぬ', 'り', 'さいしょに きこえる おと。'],
+    ['「うみ」の はじめの もじは？', 'う', 'み', 'え', 'む', '「う・み」と わけて よもう。'],
+    ['「えき」の はじめの もじは？', 'え', 'き', 'け', 'い', 'さいしょの おとを えらぼう。'],
+    ['「おに」の はじめの もじは？', 'お', 'に', 'あ', 'の', '「お・に」の さいしょ。'],
+    ['「かさ」の はじめの もじは？', 'か', 'さ', 'き', 'が', 'さいしょの おとに ちゅうもく。'],
+    ['「きく」の はじめの もじは？', 'き', 'く', 'さ', 'ち', '「き・く」と よもう。'],
+    ['「くも」の はじめの もじは？', 'く', 'も', 'こ', 'す', 'さいしょに きこえる おと。'],
+    ['「けむり」の はじめの もじは？', 'け', 'き', 'め', 'れ', '「け・む・り」の さいしょ。'],
+    ['「こま」の はじめの もじは？', 'こ', 'ま', 'く', 'ほ', 'さいしょの おとを えらぼう。'],
+    ['「さる」の はじめの もじは？', 'さ', 'る', 'せ', 'ち', '「さ・る」と わけて よもう。'],
+    ['「しか」の はじめの もじは？', 'し', 'か', 'さ', 'ち', 'さいしょに きこえる おと。'],
+    ['「すな」の はじめの もじは？', 'す', 'な', 'せ', 'つ', '「す・な」の さいしょ。'],
+    ['「せみ」の はじめの もじは？', 'せ', 'み', 'そ', 'し', 'さいしょの おとに ちゅうもく。'],
+    ['「そら」の はじめの もじは？', 'そ', 'ら', 'さ', 'ろ', '「そ・ら」と よもう。'],
+    ['「たこ」の はじめの もじは？', 'た', 'こ', 'な', 'だ', 'さいしょに きこえる おと。'],
+    ['「ちず」の はじめの もじは？', 'ち', 'ず', 'し', 'つ', '「ち・ず」の さいしょ。'],
+    ['「つき」の はじめの もじは？', 'つ', 'き', 'て', 'ち', 'さいしょの おとを えらぼう。'],
+    ['「てら」の はじめの もじは？', 'て', 'ら', 'と', 'で', '「て・ら」と わけて よもう。'],
+    ['「とり」の はじめの もじは？', 'と', 'り', 'て', 'ど', 'さいしょに きこえる おと。'],
+    ['「なす」の はじめの もじは？', 'な', 'す', 'ぬ', 'ね', '「な・す」の さいしょ。'],
+    ['「にわ」の はじめの もじは？', 'に', 'わ', 'ね', 'ぬ', 'さいしょの おとに ちゅうもく。'],
+    ['「ぬの」の はじめの もじは？', 'ぬ', 'の', 'ね', 'め', '「ぬ・の」と よもう。'],
+    ['「ねこ」の はじめの もじは？', 'ね', 'こ', 'ぬ', 'れ', 'さいしょに きこえる おと。'],
+    ['「のり」の はじめの もじは？', 'の', 'り', 'ね', 'め', '「の・り」の さいしょ。'],
+    ['「はな」の はじめの もじは？', 'は', 'な', 'ほ', 'ば', 'さいしょの おとを えらぼう。'],
+    ['「ひも」の はじめの もじは？', 'ひ', 'も', 'し', 'び', '「ひ・も」と わけて よもう。'],
+    ['「ふね」の はじめの もじは？', 'ふ', 'ね', 'へ', 'ぶ', 'さいしょに きこえる おと。'],
+    ['「へび」の はじめの もじは？', 'へ', 'び', 'ほ', 'べ', '「へ・び」の さいしょ。'],
+    ['「ほし」の はじめの もじは？', 'ほ', 'し', 'は', 'ぼ', 'さいしょの おとに ちゅうもく。'],
+    ['「まど」の はじめの もじは？', 'ま', 'ど', 'み', 'な', '「ま・ど」と よもう。'],
+    ['「みみ」の はじめの もじは？', 'み', 'に', 'ひ', 'む', 'さいしょに きこえる おと。'],
+    ['「むし」の はじめの もじは？', 'む', 'し', 'め', 'も', '「む・し」の さいしょ。'],
+    ['「めだか」の はじめの もじは？', 'め', 'だ', 'ね', 'ぬ', 'さいしょの おとを えらぼう。'],
+    ['「もり」の はじめの もじは？', 'も', 'り', 'ま', 'ほ', '「も・り」と わけて よもう。'],
+    ['「やま」の はじめの もじは？', 'や', 'ま', 'ゆ', 'ら', 'さいしょに きこえる おと。'],
+    ['「ゆき」の はじめの もじは？', 'ゆ', 'き', 'よ', 'や', '「ゆ・き」の さいしょ。'],
+    ['「よる」の はじめの もじは？', 'よ', 'る', 'や', 'ゆ', 'さいしょの おとに ちゅうもく。'],
+    ['「らくだ」の はじめの もじは？', 'ら', 'だ', 'り', 'な', '「ら・く・だ」の さいしょ。'],
+    ['「りす」の はじめの もじは？', 'り', 'す', 'い', 'る', 'さいしょに きこえる おと。'],
+    ['「るす」の はじめの もじは？', 'る', 'す', 'ろ', 'れ', '「る・す」の さいしょ。'],
+    ['「れきし」の はじめの もじは？', 'れ', 'き', 'ね', 'る', 'さいしょの おとを えらぼう。'],
+    ['「ろうか」の はじめの もじは？', 'ろ', 'う', 'る', 'ら', '「ろ・う・か」の さいしょ。'],
+    ['「わに」の はじめの もじは？', 'わ', 'に', 'れ', 'ね', 'さいしょに きこえる おと。'],
+    ['「ほんを よむ。」の「ほん」の あとに ある もじは？', 'を', 'お', 'わ', 'ん', 'なにを するかを つなぐ もじ。'],
+    ['「みかん」の さいごの もじは？', 'ん', 'み', 'か', 'な', 'いちばん うしろの おと。'],
+    ['あ、い、う、__、お。__に はいる もじは？', 'え', 'か', 'い', 'お', 'あいうえおの ならび。'],
+    ['か、き、__、け、こ。__に はいる もじは？', 'く', 'こ', 'け', 'さ', 'かきくけこの ならび。'],
+    ['さ、__、す、せ、そ。__に はいる もじは？', 'し', 'ち', 'さ', 'せ', 'さしすせその ならび。'],
+    ['た、ち、つ、__、と。__に はいる もじは？', 'て', 'と', 'つ', 'な', 'たちつてとの ならび。'],
+    ['な、に、ぬ、ね、__。__に はいる もじは？', 'の', 'ね', 'は', 'ぬ', 'なにぬねのの ならび。'],
+    ['は、ひ、__、へ、ほ。__に はいる もじは？', 'ふ', 'ほ', 'へ', 'ま', 'はひふへほの ならび。'],
+    ['ま、__、む、め、も。__に はいる もじは？', 'み', 'に', 'め', 'や', 'まみむめもの ならび。'],
+    ['や、__、よ。__に はいる もじは？', 'ゆ', 'よ', 'や', 'ら', 'やゆよの ならび。'],
+    ['ら、り、る、__、ろ。__に はいる もじは？', 'れ', 'ね', 'ろ', 'わ', 'らりるれろの ならび。'],
+    ['「か」に てんてんを つけると？', 'が', 'ぱ', 'ざ', 'だ', 'てんてんで おとが にごる。'],
+    ['「き」に てんてんを つけると？', 'ぎ', 'じ', 'び', 'ぢ', 'きの にごる おと。'],
+    ['「く」に てんてんを つけると？', 'ぐ', 'ず', 'ぶ', 'ご', 'くの にごる おと。'],
+    ['「け」に てんてんを つけると？', 'げ', 'ぜ', 'べ', 'で', 'けの にごる おと。'],
+    ['「こ」に てんてんを つけると？', 'ご', 'ど', 'ぼ', 'ぞ', 'この にごる おと。'],
+    ['「さ」に てんてんを つけると？', 'ざ', 'が', 'だ', 'ば', 'さの にごる おと。'],
+    ['「し」に てんてんを つけると？', 'じ', 'ぎ', 'ぢ', 'び', 'しの にごる おと。'],
+    ['「す」に てんてんを つけると？', 'ず', 'ぐ', 'づ', 'ぶ', 'すの にごる おと。'],
+    ['「せ」に てんてんを つけると？', 'ぜ', 'げ', 'で', 'べ', 'せの にごる おと。'],
+    ['「そ」に てんてんを つけると？', 'ぞ', 'ご', 'ど', 'ぼ', 'その にごる おと。'],
+    ['「た」に てんてんを つけると？', 'だ', 'が', 'ざ', 'ば', 'たの にごる おと。'],
+    ['「て」に てんてんを つけると？', 'で', 'げ', 'ぜ', 'べ', 'ての にごる おと。'],
+    ['「と」に てんてんを つけると？', 'ど', 'ご', 'ぞ', 'ぼ', 'との にごる おと。'],
+    ['「は」に てんてんを つけると？', 'ば', 'ぱ', 'だ', 'が', 'はの にごる おと。'],
+    ['「ひ」に てんてんを つけると？', 'び', 'ぴ', 'じ', 'ぎ', 'ひの にごる おと。'],
+    ['「ふ」に てんてんを つけると？', 'ぶ', 'ぷ', 'ず', 'ぐ', 'ふの にごる おと。'],
+    ['「へ」に てんてんを つけると？', 'べ', 'ぺ', 'で', 'げ', 'への にごる おと。'],
+    ['「ほ」に てんてんを つけると？', 'ぼ', 'ぽ', 'ど', 'ご', 'ほの にごる おと。'],
+    ['「は」に まるを つけると？', 'ぱ', 'ば', 'ぽ', 'ぴ', 'まるを つけた おと。'],
+    ['「ひ」に まるを つけると？', 'ぴ', 'び', 'ぱ', 'ぷ', 'ひに まるを つける。'],
+    ['「ふ」に まるを つけると？', 'ぷ', 'ぶ', 'ぺ', 'ぽ', 'ふに まるを つける。'],
+    ['「へ」に まるを つけると？', 'ぺ', 'べ', 'ぱ', 'ぷ', 'へに まるを つける。'],
+    ['「ほ」に まるを つけると？', 'ぽ', 'ぼ', 'ぺ', 'ぱ', 'ほに まるを つける。'],
+    ['「き」と ちいさい「や」を あわせると？', 'きゃ', 'きゅ', 'きょ', 'しゃ', 'ふたつの おとを つなげよう。'],
+    ['「し」と ちいさい「ゆ」を あわせると？', 'しゅ', 'しゃ', 'しょ', 'ちゅ', 'しと ゆを つなげた おと。'],
+    ['「ち」と ちいさい「よ」を あわせると？', 'ちょ', 'ちゃ', 'ちゅ', 'しょ', 'ちと よを つなげた おと。'],
+    ['「に」と ちいさい「や」を あわせると？', 'にゃ', 'にゅ', 'にょ', 'みゃ', 'にと やを つなげた おと。'],
+    ['「り」と ちいさい「ゆ」を あわせると？', 'りゅ', 'りゃ', 'りょ', 'にゅ', 'りと ゆを つなげた おと。'],
+  ]), // ひらがな
+  KOKUGO_G1_U02: fixedProblems([
+    ['「あめ」と おなじ もじから はじまる ことばは？', 'あさ', 'いす', 'うみ', 'えき', 'どちらも「あ」から はじまる。'],
+    ['「いぬ」と おなじ もじから はじまる ことばは？', 'いし', 'うし', 'えき', 'おに', 'どちらも「い」から はじまる。'],
+    ['「うみ」と おなじ もじから はじまる ことばは？', 'うた', 'いと', 'えだ', 'おと', 'どちらも「う」から はじまる。'],
+    ['「えき」と おなじ もじから はじまる ことばは？', 'えび', 'おに', 'かさ', 'いけ', 'どちらも「え」から はじまる。'],
+    ['「おに」と おなじ もじから はじまる ことばは？', 'おと', 'あし', 'うた', 'えき', 'どちらも「お」から はじまる。'],
+    ['「かさ」と おなじ もじから はじまる ことばは？', 'かに', 'きく', 'くも', 'こま', 'どちらも「か」から はじまる。'],
+    ['「すな」と おなじ もじから はじまる ことばは？', 'すいか', 'さかな', 'せみ', 'そら', 'どちらも「す」から はじまる。'],
+    ['「たこ」と おなじ もじから はじまる ことばは？', 'たまご', 'ちず', 'つき', 'とり', 'どちらも「た」から はじまる。'],
+    ['「はな」と おなじ もじから はじまる ことばは？', 'はこ', 'ひも', 'ふね', 'ほし', 'どちらも「は」から はじまる。'],
+    ['「やま」と おなじ もじから はじまる ことばは？', 'やさい', 'ゆき', 'よる', 'りす', 'どちらも「や」から はじまる。'],
+    ['「ねこ」と おなじ もじで おわる ことばは？', 'たこ', 'いぬ', 'かさ', 'そら', 'どちらも「こ」で おわる。'],
+    ['「そら」と おなじ もじで おわる ことばは？', 'とら', 'さる', 'ふね', 'くま', 'どちらも「ら」で おわる。'],
+    ['「やま」と おなじ もじで おわる ことばは？', 'くま', 'うし', 'とり', 'ねこ', 'どちらも「ま」で おわる。'],
+    ['「かわ」と おなじ もじで おわる ことばは？', 'にわ', 'いえ', 'みち', 'そら', 'どちらも「わ」で おわる。'],
+    ['「はこ」と おなじ もじで おわる ことばは？', 'たこ', 'かさ', 'ふね', 'いす', 'どちらも「こ」で おわる。'],
+    ['どうぶつの なかまは？', 'うさぎ', 'りんご', 'でんしゃ', 'えんぴつ', 'うさぎは どうぶつ。'],
+    ['くだものの なかまは？', 'みかん', 'だいこん', 'あさがお', 'めだか', 'みかんは くだもの。'],
+    ['やさいの なかまは？', 'にんじん', 'ぶどう', 'たんぽぽ', 'すずめ', 'にんじんは やさい。'],
+    ['のりものの なかまは？', 'でんしゃ', 'つくえ', 'すいか', 'うさぎ', 'でんしゃは ひとを のせて はしる。'],
+    ['はなの なかまは？', 'たんぽぽ', 'とんぼ', 'みかん', 'くるま', 'たんぽぽは はな。'],
+    ['いろの なかまは？', 'あか', 'いぬ', 'かさ', 'やま', 'あかは いろの なまえ。'],
+    ['からだの なかまは？', 'みみ', 'いす', 'くつ', 'はさみ', 'みみは からだの いちぶ。'],
+    ['がっこうで つかう ものは？', 'えんぴつ', 'なべ', 'まくら', 'じょうろ', 'えんぴつで もじや えを かく。'],
+    ['あめの ひに つかう ものは？', 'かさ', 'うちわ', 'すいとう', 'ぼうし', 'かさで あめを ふせぐ。'],
+    ['あしに はく ものは？', 'くつ', 'ぼうし', 'てぶくろ', 'めがね', 'くつは あしに はく。'],
+    ['そとで する あそびは？', 'おにごっこ', 'どくしょ', 'おえかき', 'おりがみ', 'おにごっこは そとで からだを うごかす あそび。'],
+    ['のみものの なかまは？', 'みず', 'ぱん', 'あめ', 'ごはん', 'みずは のむ もの。'],
+    ['うみで みつかる いきものは？', 'さかな', 'うさぎ', 'せみ', 'すずめ', 'さかなは うみで およぐ。'],
+    ['きに なる ものは？', 'どんぐり', 'たまご', 'にんじん', 'かい', 'どんぐりは きに なる み。'],
+    ['だいどころに ある ものは？', 'なべ', 'つくえ', 'ぶらんこ', 'くつばこ', 'なべは りょうりに つかう。'],
+    ['なかまが ちがう ことばは？「いぬ・ねこ・うさぎ・りんご」', 'りんご', 'いぬ', 'ねこ', 'うさぎ', 'りんごだけ くだもの。ほかは どうぶつ。'],
+    ['なかまが ちがう ことばは？「ばす・ふね・でんしゃ・つくえ」', 'つくえ', 'ばす', 'ふね', 'でんしゃ', 'つくえだけ のりものでは ない。'],
+    ['なかまが ちがう ことばは？「あか・あお・きいろ・りす」', 'りす', 'あか', 'あお', 'きいろ', 'りすだけ いろの なまえでは ない。'],
+    ['なかまが ちがう ことばは？「りんご・みかん・ぶどう・きゅうり」', 'きゅうり', 'りんご', 'みかん', 'ぶどう', 'きゅうりだけ やさい。ほかは くだもの。'],
+    ['なかまが ちがう ことばは？「えんぴつ・けしごむ・ものさし・まくら」', 'まくら', 'えんぴつ', 'けしごむ', 'ものさし', 'まくらだけ べんきょうに つかう ものでは ない。'],
+    ['なかまが ちがう ことばは？「め・みみ・はな・かさ」', 'かさ', 'め', 'みみ', 'はな', 'かさだけ からだの いちぶでは ない。'],
+    ['なかまが ちがう ことばは？「さくら・たんぽぽ・あさがお・めだか」', 'めだか', 'さくら', 'たんぽぽ', 'あさがお', 'めだかだけ はなでは ない。'],
+    ['なかまが ちがう ことばは？「はる・なつ・あき・あさ」', 'あさ', 'はる', 'なつ', 'あき', 'あさだけ きせつの なまえでは ない。'],
+    ['なかまが ちがう ことばは？「はしる・とぶ・およぐ・えんぴつ」', 'えんぴつ', 'はしる', 'とぶ', 'およぐ', 'えんぴつだけ うごきを あらわす ことばでは ない。'],
+    ['なかまが ちがう ことばは？「おおきい・ちいさい・ながい・でんしゃ」', 'でんしゃ', 'おおきい', 'ちいさい', 'ながい', 'でんしゃだけ ようすを あらわす ことばでは ない。'],
+    ['もじが ふたつの ことばは？', 'いぬ', 'すいか', 'たまご', 'えんぴつ', '「い・ぬ」で ふたつ。'],
+    ['もじが みっつの ことばは？', 'りんご', 'いぬ', 'ひこうき', 'えんぴつ', '「り・ん・ご」で みっつ。'],
+    ['「あさがお」は もじが いくつ？', 'よっつ', 'ふたつ', 'みっつ', 'いつつ', '「あ・さ・が・お」で よっつ。'],
+    ['もじが よっつの ことばは？', 'ひこうき', 'いぬ', 'りんご', 'えんぴつ', '「ひ・こ・う・き」で よっつ。'],
+    ['「か・た・つ・む・り」は もじが いくつ？', 'いつつ', 'ふたつ', 'みっつ', 'よっつ', 'か、た、つ、む、りの いつつ。'],
+    ['「あ」と「め」を つなぐと できる ことばは？', 'あめ', 'あし', 'うめ', 'いめ', '「あ・め」と つなぐ。'],
+    ['「そ」と「ら」を つなぐと できる ことばは？', 'そら', 'さら', 'そり', 'とら', '「そ・ら」と つなぐ。'],
+    ['「た」「ま」「ご」を じゅんに つなぐと？', 'たまご', 'たごま', 'またご', 'まごた', 'た、ま、ごの じゅんに よむ。'],
+    ['「く」「る」「ま」を じゅんに つなぐと？', 'くるま', 'くまる', 'るくま', 'まくる', 'く、る、まの じゅんに よむ。'],
+    ['「えん」「ぴつ」を つなぐと できる ことばは？', 'えんぴつ', 'えんつぴ', 'ぴつえん', 'えぴんつ', 'えん、ぴつの じゅんに つなぐ。'],
+  ]), // ことばあつめ
   KOKUGO_G1_U03: [], // のばすおん（ー）
   KOKUGO_G1_U04: [], // ちいさい「っ」
   KOKUGO_G1_U05: [], // は・を・へ
@@ -288,7 +434,315 @@ const makeUnitProblem = (unitId: string, n: number): GeneralProblem => {
   }
 };
 
-fillGeneratedUnitProblems(KOKUGO_G1_UNIT_DATA, makeUnitProblem);
+const optionSet = (answer: string, pool: string[]): string[] => {
+  const wrong = [...new Set([...pool, 'ア', 'イ', 'ウ', 'エ', 'オ'])].filter((item) => item !== answer).slice(0, 3);
+  return d(answer, ...wrong);
+};
+
+const fieldOptions = (answer: string, values: string[], index: number): string[] => {
+  const rotated = [...values.slice(index + 1), ...values.slice(0, index + 1), 'わからない', 'かいていない', 'べつの こと'];
+  const wrong = [...new Set(rotated)].filter((item) => item !== answer).slice(0, 3);
+  return d(answer, ...wrong);
+};
+
+const longSoundWords = [
+  ['ケーキ', 'ケ', 'たべもの'], ['スープ', 'ス', 'たべもの'], ['コーヒー', 'コ', 'のみもの'],
+  ['ラーメン', 'ラ', 'たべもの'], ['ボール', 'ボ', 'あそび'], ['プール', 'プ', 'ばしょ'],
+  ['ノート', 'ノ', 'ぶんぼうぐ'], ['テープ', 'テ', 'どうぐ'], ['セーター', 'セ', 'きるもの'],
+  ['タクシー', 'シ', 'のりもの'],
+] as const;
+
+const smallTsuWords = [
+  ['きって', 'きて'], ['がっこう', 'がこう'], ['きっぷ', 'きぷ'], ['らっぱ', 'らぱ'], ['ざっし', 'ざし'],
+  ['こっぷ', 'こぷ'], ['せっけん', 'せけん'], ['まっすぐ', 'ますぐ'], ['にっき', 'にき'], ['はっぱ', 'はぱ'],
+] as const;
+
+const particleRows: Array<[string, string, string]> = [
+  ['わたし__ いちねんせいです。', 'は', 'だれの はなしかを しめす。'], ['ぞう__ はなが ながいです。', 'は', 'なにの はなしかを しめす。'],
+  ['きょう__ はれです。', 'は', 'きょうの はなしかを しめす。'], ['この ほん__ おもしろいです。', 'は', 'ほんについて はなす。'],
+  ['あさ__ パンを たべます。', 'は', 'あさについて はなす。'], ['ぼく__ うたが すきです。', 'は', 'ぼくについて はなす。'],
+  ['ねこ__ しっぽが ながいです。', 'は', 'ねこについて はなす。'], ['きょうしつ__ しずかです。', 'は', 'きょうしつについて はなす。'],
+  ['この はな__ あかいです。', 'は', 'はなについて はなす。'], ['なつ__ あついです。', 'は', 'なつについて はなす。'],
+  ['ほん__ よみます。', 'を', 'なにを するかを つなぐ。'], ['みず__ のみます。', 'を', 'のむ ものを しめす。'],
+  ['え__ かきます。', 'を', 'かく ものを しめす。'], ['うた__ うたいます。', 'を', 'うたう ものを しめす。'],
+  ['て__ あらいます。', 'を', 'あらう ものを しめす。'], ['くつ__ はきます。', 'を', 'はく ものを しめす。'],
+  ['まど__ あけます。', 'を', 'あける ものを しめす。'], ['ボール__ なげます。', 'を', 'なげる ものを しめす。'],
+  ['おりがみ__ おります。', 'を', 'おる ものを しめす。'], ['にもつ__ もちます。', 'を', 'もつ ものを しめす。'],
+  ['こうえん__ いきます。', 'へ', 'いく さきを しめす。'], ['がっこう__ むかいます。', 'へ', 'むかう さきを しめす。'],
+  ['うち__ かえります。', 'へ', 'かえる さきを しめす。'], ['としょかん__ いきます。', 'へ', 'いく さきを しめす。'],
+  ['みぎ__ まがります。', 'へ', 'すすむ むきを しめす。'], ['えき__ あるきます。', 'へ', 'むかう さきを しめす。'],
+  ['うんどうじょう__ でます。', 'へ', 'でていく さきを しめす。'], ['そと__ とびだしました。', 'へ', 'うごく さきを しめす。'],
+  ['まえ__ すすみます。', 'へ', 'すすむ むきを しめす。'], ['やま__ のぼります。', 'へ', 'むかう さきを しめす。'],
+  ['わたし__ りんご__ たべます。', 'は', 'はじめの しるしは はなしの ぬし。'],
+  ['わたしは りんご__ たべます。', 'を', 'たべる ものを しめす。'], ['ぼく__ うみ__ いきます。', 'は', 'はじめは ぼくの はなし。'],
+  ['ぼくは うみ__ いきます。', 'へ', 'いく さきを しめす。'], ['あね__ てがみ__ かきます。', 'は', 'だれの はなしかを しめす。'],
+  ['あねは てがみ__ かきます。', 'を', 'かく ものを しめす。'], ['いぬ__ にわ__ はしります。', 'は', 'いぬについて はなす。'],
+  ['いぬは にわ__ はしります。', 'へ', 'むかう さきを しめす。'], ['せんせい__ ドア__ あけます。', 'は', 'せんせいについて はなす。'],
+  ['せんせいは ドア__ あけます。', 'を', 'あける ものを しめす。'], ['あした__ えんそくです。', 'は', 'あしたについて はなす。'],
+  ['きゅうしょく__ カレーです。', 'は', 'きゅうしょくについて はなす。'], ['はみがき__ します。', 'を', 'する ことを しめす。'],
+  ['なわとび__ します。', 'を', 'する ことを しめす。'], ['ひだり__ すすみます。', 'へ', 'すすむ むきを しめす。'],
+  ['かわ__ あるきます。', 'へ', 'むかう さきを しめす。'], ['わたし__ えき__ あるきます。', 'は', 'わたしについて はなす。'],
+  ['わたしは えき__ あるきます。', 'へ', 'むかう さきを しめす。'], ['ともだち__ しゃしん__ みます。', 'は', 'ともだちについて はなす。'],
+  ['ともだちは しゃしん__ みます。', 'を', 'みる ものを しめす。'],
+];
+
+const refinedStories = [
+  { text: 'あめが やんだので、ゆうたは にわで かたつむりを みつけました。そっと はっぱに のせました。', who: 'ゆうた', place: 'にわ', action: 'かたつむりを はっぱに のせた', feeling: 'やさしい きもち', reason: 'あめが やんだから' },
+  { text: 'みきは きょうしつで えんぴつを なくしました。あやさんが いっしょに さがして くれました。', who: 'みき', place: 'きょうしつ', action: 'えんぴつを さがした', feeling: 'ほっとした きもち', reason: 'えんぴつを なくしたから' },
+  { text: 'こうたは こうえんで ちいさな こを みました。ぶらんこを ゆずると、こは にっこり しました。', who: 'こうた', place: 'こうえん', action: 'ぶらんこを ゆずった', feeling: 'うれしい きもち', reason: 'ちいさな こが まっていたから' },
+  { text: 'さきは としょかんで きょうりゅうの ほんを かりました。うちで よむのが たのしみです。', who: 'さき', place: 'としょかん', action: 'ほんを かりた', feeling: 'たのしみな きもち', reason: 'きょうりゅうが すきだから' },
+  { text: 'けんは うんどうじょうで ころびました。ともだちが てを かして くれたので、たちあがれました。', who: 'けん', place: 'うんどうじょう', action: 'ともだちの てを かりた', feeling: 'ありがたい きもち', reason: 'ころんで しまったから' },
+  { text: 'ななは だいどころで おかあさんと サラダを つくりました。トマトを きれいに ならべました。', who: 'なな', place: 'だいどころ', action: 'サラダを つくった', feeling: 'できて うれしい きもち', reason: 'おてつだいを したかったから' },
+  { text: 'りくは かわべで きれいな いしを ひろいました。いもうとへの おみやげに しました。', who: 'りく', place: 'かわべ', action: 'いしを ひろった', feeling: 'よろこぶと いいなという きもち', reason: 'いもうとに あげるため' },
+  { text: 'あおいは げんかんで ぬれた かさを ひらいたままに していました。みずを きって とじました。', who: 'あおい', place: 'げんかん', action: 'かさを とじた', feeling: 'きを つけようという きもち', reason: 'ゆかが ぬれるから' },
+  { text: 'そうたは もりで どんぐりを ひろいました。おおきさごとに わけて はこへ いれました。', who: 'そうた', place: 'もり', action: 'どんぐりを わけた', feeling: 'もっと みつけたい きもち', reason: 'おおきさを くらべるため' },
+  { text: 'えまは おんがくしつで うたいました。さいしょは どきどきしましたが、さいごまで こえを だしました。', who: 'えま', place: 'おんがくしつ', action: 'さいごまで うたった', feeling: 'がんばって よかった きもち', reason: 'みんなと うたうため' },
+];
+
+const refinedExplanations = [
+  { text: 'まず てを みずで ぬらします。つぎに せっけんで あらい、さいごに みずで ながします。', first: 'てを ぬらす', next: 'せっけんで あらう', last: 'みずで ながす', topic: 'ての あらいかた', connector: 'つぎに' },
+  { text: 'あさがおの たねを つちに いれ、つちを かけます。それから、みずを あげます。', first: 'たねを つちに いれる', next: 'つちを かける', last: 'みずを あげる', topic: 'あさがおの うえかた', connector: 'それから' },
+  { text: 'おりがみを はんぶんに おります。つぎに ひらいて、まんなかの せんまで りょうはしを おります。', first: 'はんぶんに おる', next: 'ひらく', last: 'りょうはしを おる', topic: 'おりがみの おりかた', connector: 'つぎに' },
+  { text: 'ほんを えらびます。かりる ほんが きまったら、カウンターへ もって いきます。', first: 'ほんを えらぶ', next: 'かりる ほんを きめる', last: 'カウンターへ もっていく', topic: 'ほんの かりかた', connector: 'きまったら' },
+  { text: 'えんぴつを けずります。つぎに ノートを ひらき、ひづけを かきます。', first: 'えんぴつを けずる', next: 'ノートを ひらく', last: 'ひづけを かく', topic: 'べんきょうの じゅんび', connector: 'つぎに' },
+  { text: 'くつの どろを おとします。それから つまさきを まえにして そろえます。', first: 'どろを おとす', next: 'つまさきを まえにする', last: 'くつを そろえる', topic: 'くつの そろえかた', connector: 'それから' },
+  { text: 'コップに みずを いれます。つぎに えのぐを すこし つけ、みずで のばして ぬります。', first: 'コップに みずを いれる', next: 'えのぐを つける', last: 'いろを ぬる', topic: 'えのぐの つかいかた', connector: 'つぎに' },
+  { text: 'ハンカチを みずで ぬらします。そのあと せっけんを つけて もみ、みずで すすぎます。', first: 'ハンカチを ぬらす', next: 'せっけんで もむ', last: 'みずで すすぐ', topic: 'ハンカチの あらいかた', connector: 'そのあと' },
+  { text: 'はぶらしを ちいさく うごかして、まえの はを みがきます。さいごに おくばも みがきます。', first: 'はぶらしを ちいさく うごかす', next: 'まえの はを みがく', last: 'おくばも みがく', topic: 'はの みがきかた', connector: 'さいごに' },
+  { text: 'きゅうしょくの まえに つくえを ふきます。それから てを あらって、しずかに まちます。', first: 'つくえを ふく', next: 'てを あらう', last: 'しずかに まつ', topic: 'きゅうしょくの じゅんび', connector: 'それから' },
+];
+
+const sceneReadings = [
+  { text: 'へやで そらを みると、まどに あめつぶが あたっています。まどを しめました。', place: 'へやの なか', weather: 'あめ', action: 'まどを しめる', clue: 'あめつぶ', time: 'わからない' },
+  { text: 'あさひが でて、すずめが ないています。いえの まえで ランドセルを せおい、がっこうへ いきます。', place: 'いえの まえ', weather: 'はれ', action: 'がっこうへ いく', clue: 'ランドセル', time: 'あさ' },
+  { text: 'ひるに こうえんで おべんとうを ひろげ、シートに すわって たべはじめました。', place: 'こうえん', weather: 'わからない', action: 'おべんとうを たべる', clue: 'シート', time: 'ひる' },
+  { text: 'ほんだなの まえで、よみたい ほんを しずかに さがしています。', place: 'としょかん', weather: 'わからない', action: 'ほんを さがす', clue: 'ほんだな', time: 'わからない' },
+  { text: 'ゆきが つもり、てぶくろを した こどもが ゆきだるまを つくっています。', place: 'そと', weather: 'ゆき', action: 'ゆきだるまを つくる', clue: 'てぶくろ', time: 'わからない' },
+  { text: 'よる、ねる へやの まどから ほしが みえます。えほんを まくらの そばに おいて、ねる じゅんびを します。', place: 'ねる へや', weather: 'はれ', action: 'ねる じゅんびを する', clue: 'まくら', time: 'よる' },
+  { text: 'スタートの あいずで、みんなが いっせいに はしりだしました。', place: 'うんどうじょう', weather: 'わからない', action: 'かけっこを する', clue: 'スタートの あいず', time: 'わからない' },
+  { text: 'やさいや くだものが ならび、かごを もった ひとが えらんでいます。', place: 'みせ', weather: 'わからない', action: 'かいものを する', clue: 'かご', time: 'わからない' },
+  { text: 'なみの おとが して、すなで やまを つくっています。', place: 'うみべ', weather: 'わからない', action: 'すなあそびを する', clue: 'なみの おと', time: 'わからない' },
+  { text: 'チャイムが なり、つくえの うえに きょうかしょを ひらきました。', place: 'きょうしつ', weather: 'わからない', action: 'べんきょうを はじめる', clue: 'チャイム', time: 'わからない' },
+];
+
+const mainIdeaTexts = [
+  { text: 'うさぎの みみは ながく、ちいさな おとも よく ききます。', main: 'うさぎの みみの はたらき', detail: 'ちいさな おとも きく', title: 'うさぎの みみ', repeated: 'みみ', summary: 'ながい みみで おとを きく' },
+  { text: 'あさがおは あさに はなが ひらきます。ひるごろには しぼみます。', main: 'あさがおが ひらく じかん', detail: 'ひるごろ しぼむ', title: 'あさがおの はな', repeated: 'あさがお', summary: 'あさに ひらき ひるに しぼむ' },
+  { text: 'えんぴつは かくと しんが へります。みじかくなったら けずります。', main: 'えんぴつの つかいかた', detail: 'しんが へる', title: 'えんぴつ', repeated: 'えんぴつ', summary: 'しんが へったら けずる' },
+  { text: 'ありは たべものを みつけると、なかまの いる すへ はこびます。', main: 'ありが たべものを はこぶこと', detail: 'すへ はこぶ', title: 'ありの しごと', repeated: 'あり', summary: 'たべものを すへ はこぶ' },
+  { text: 'かさは あめで からだが ぬれるのを ふせぎます。つかった あとは かわかします。', main: 'かさの やくめと しまいかた', detail: 'つかった あと かわかす', title: 'かさの やくめ', repeated: 'かさ', summary: 'あめを ふせぎ あとで かわかす' },
+  { text: 'つばめは はるに やってきます。のきしたなどに すを つくります。', main: 'つばめが はるに すを つくること', detail: 'のきしたに すを つくる', title: 'はるの つばめ', repeated: 'つばめ', summary: 'はるに きて すを つくる' },
+  { text: 'どんぐりは きの みです。じめんに おち、めが でることが あります。', main: 'どんぐりから めが でること', detail: 'きの みである', title: 'どんぐりの め', repeated: 'どんぐり', summary: 'じめんに おちて めが でる' },
+  { text: 'せっけんを つかうと、ての よごれが おちやすくなります。ゆびの あいだも あらいます。', main: 'せっけんで てを あらうこと', detail: 'ゆびの あいだも あらう', title: 'きれいな て', repeated: 'て', summary: 'せっけんで すみずみまで あらう' },
+  { text: 'でんしゃは えきで ひとを のせます。せんろの うえを はしります。', main: 'でんしゃの はしる ところ', detail: 'えきで ひとを のせる', title: 'でんしゃ', repeated: 'でんしゃ', summary: 'ひとを のせて せんろを はしる' },
+  { text: 'はるになると、さくらの はなが さきます。はなびらは うすい ももいろです。', main: 'はるに さく さくら', detail: 'はなびらは ももいろ', title: 'はるの さくら', repeated: 'はな', summary: 'はるに ももいろの はなが さく' },
+];
+
+const sentenceWritingRows = [
+  { words: 'わたし・ほん・よむ', sentence: 'わたしは ほんを よみます。', subject: 'わたしは', action: 'ほんを よみます', detail: 'としょかんで', expanded: 'わたしは としょかんで ほんを よみます。' },
+  { words: 'いぬ・にわ・はしる', sentence: 'いぬが にわを はしります。', subject: 'いぬが', action: 'にわを はしります', detail: 'げんきに', expanded: 'いぬが にわを げんきに はしります。' },
+  { words: 'わたし・ぱん・たべる', sentence: 'わたしは ぱんを たべました。', subject: 'わたしは', action: 'ぱんを たべました', detail: 'あさ', expanded: 'わたしは あさ、ぱんを たべました。' },
+  { words: 'わたし・ともだち・あそぶ', sentence: 'わたしは ともだちと あそびます。', subject: 'わたしは', action: 'ともだちと あそびます', detail: 'こうえんで', expanded: 'わたしは こうえんで ともだちと あそびます。' },
+  { words: 'ねこ・ねる', sentence: 'ねこが ねています。', subject: 'ねこが', action: 'ねています', detail: 'いすで', expanded: 'ねこが いすで ねています。' },
+  { words: 'あね・うた・うたう', sentence: 'あねが うたを うたいます。', subject: 'あねが', action: 'うたを うたいます', detail: 'きれいな こえで', expanded: 'あねが きれいな こえで うたを うたいます。' },
+  { words: 'ぼく・え・かく', sentence: 'ぼくは えを かきます。', subject: 'ぼくは', action: 'えを かきます', detail: 'おおきな かみに', expanded: 'ぼくは おおきな かみに えを かきます。' },
+  { words: 'すずめ・そら・とぶ', sentence: 'すずめが そらを とびます。', subject: 'すずめが', action: 'そらを とびます', detail: 'たかく', expanded: 'すずめが そらを たかく とびます。' },
+  { words: 'きょう・あめ・ふる', sentence: 'きょうは あめが ふりました。', subject: 'きょうは', action: 'あめが ふりました', detail: 'あさから', expanded: 'きょうは あさから あめが ふりました。' },
+  { words: 'せんせい・えほん・よむ', sentence: 'せんせいが えほんを よみます。', subject: 'せんせいが', action: 'えほんを よみます', detail: 'みんなに', expanded: 'せんせいが みんなに えほんを よみます。' },
+];
+
+const diaryWritingRows = [
+  { day: 'きょう', place: 'こうえん', event: 'ぶらんこに のりました', feeling: 'たのしかったです', title: 'こうえんで あそんだよ' },
+  { day: 'にちようび', place: 'うち', event: 'おかしを つくりました', feeling: 'うまく できて うれしかったです', title: 'はじめての おかし' },
+  { day: 'きのう', place: 'としょかん', event: 'えほんを かりました', feeling: 'よむのが たのしみです', title: 'えほんを かりたよ' },
+  { day: 'どようび', place: 'どうぶつえん', event: 'きりんを みました', feeling: 'くびの ながさに おどろきました', title: 'おおきな きりん' },
+  { day: 'きょう', place: 'がっこう', event: 'あさがおに みずを あげました', feeling: 'はやく さくと いいなと おもいました', title: 'あさがおの おせわ' },
+  { day: 'きのう', place: 'にわ', event: 'だんごむしを みつけました', feeling: 'ちいさくて かわいいと おもいました', title: 'だんごむしを みつけた' },
+  { day: 'にちようび', place: 'かわべ', event: 'まるい いしを ひろいました', feeling: 'たからものに しようと おもいました', title: 'まるい いし' },
+  { day: 'どようび', place: 'うみ', event: 'すなで やまを つくりました', feeling: 'くずれたけれど おもしろかったです', title: 'すなの やま' },
+  { day: 'きょう', place: 'きょうしつ', event: 'みんなで うたいました', feeling: 'こえが そろって うれしかったです', title: 'みんなの うた' },
+  { day: 'きのう', place: 'だいどころ', event: 'さらを ならべました', feeling: 'おてつだいが できて よかったです', title: 'さらを ならべたよ' },
+];
+
+const storyPlanningRows = [
+  { character: 'こりす', place: 'もり', problem: 'どんぐりを おとした', action: 'なかまと さがした', ending: 'どんぐりが みつかった' },
+  { character: 'しろい ねこ', place: 'まち', problem: 'うちへ かえる みちが わからない', action: 'ことりに みちを きいた', ending: 'ぶじに うちへ かえった' },
+  { character: 'ちいさな さかな', place: 'うみ', problem: 'なかまと はぐれた', action: 'あわの あとを おいかけた', ending: 'なかまに あえた' },
+  { character: 'あおい かさ', place: 'えき', problem: 'もちぬしが こなかった', action: 'えきいんさんが あずかった', ending: 'もちぬしが とりに きた' },
+  { character: 'そらを とべない ことり', place: 'おおきな き', problem: 'すから おりられない', action: 'はねを なんども うごかした', ending: 'はじめて とべた' },
+  { character: 'あかい ぼうし', place: 'こうえん', problem: 'かぜに とばされた', action: 'いぬが おいかけた', ending: 'こどもの もとへ もどった' },
+  { character: 'おなかの すいた くま', place: 'やま', problem: 'たべものが みつからない', action: 'かわで さかなを さがした', ending: 'さかなを みつけた' },
+  { character: 'まほうの えんぴつ', place: 'きょうしつ', problem: 'しんが おれて かけない', action: 'けずって もらった', ending: 'きれいな えが かけた' },
+  { character: 'よごれた くつ', place: 'げんかん', problem: 'どろだらけに なった', action: 'みずで あらって かわかした', ending: 'また きれいに なった' },
+  { character: 'ひとりの ゆきだるま', place: 'ゆきの にわ', problem: 'ひとりで さびしい', action: 'こどもが となりに もうひとつ つくった', ending: 'ふたりで ならんだ' },
+];
+
+const listeningRows = [
+  { speech: 'あしたは えんそくです。すいとうを もって きてください。', topic: 'あしたの えんそく', action: 'すいとうを もってくる', time: 'あした', item: 'すいとう', response: 'わかりました' },
+  { speech: 'ほんを よんだら、もとの ほんだなへ もどしましょう。', topic: 'ほんの かたづけ', action: 'ほんだなへ もどす', time: 'よんだ あと', item: 'ほん', response: 'もとの ばしょへ もどします' },
+  { speech: 'あめが ふっています。ろうかを ゆっくり あるきましょう。', topic: 'あめの ひの あんぜん', action: 'ゆっくり あるく', time: 'あめの ひ', item: 'ろうか', response: 'きを つけて あるきます' },
+  { speech: 'きゅうしょくの まえに、てを きれいに あらってください。', topic: 'きゅうしょくの じゅんび', action: 'てを あらう', time: 'きゅうしょくの まえ', item: 'て', response: 'てを あらいます' },
+  { speech: 'きょうは うんどうじょうで おにごっこを します。あかい ぼうしを かぶります。', topic: 'おにごっこの じゅんび', action: 'あかい ぼうしを かぶる', time: 'きょう', item: 'あかい ぼうし', response: 'ぼうしを じゅんびします' },
+  { speech: 'えを かくので、くれよんと がようしを だしましょう。', topic: 'おえかきの じゅんび', action: 'どうぐを だす', time: 'えを かく まえ', item: 'くれよんと がようし', response: 'どうぐを だします' },
+  { speech: 'かえりの かいで、あしたの じかんわりを たしかめます。', topic: 'あしたの じかんわり', action: 'じかんわりを たしかめる', time: 'かえりの かい', item: 'じかんわり', response: 'たしかめます' },
+  { speech: 'はなが さいています。ふまないように、みちを あるきましょう。', topic: 'はなを まもること', action: 'みちを あるく', time: 'そとを あるく とき', item: 'はな', response: 'はなを ふまないように します' },
+  { speech: 'おんがくが はじまったら、てびょうしを ふたつ うちます。', topic: 'おんがくの うごき', action: 'てびょうしを ふたつ うつ', time: 'おんがくが はじまったら', item: 'てびょうし', response: 'ふたつ うちます' },
+  { speech: 'つかった はさみは とじて、どうぐばこへ しまってください。', topic: 'はさみの かたづけ', action: 'とじて しまう', time: 'つかった あと', item: 'はさみ', response: 'あんぜんに しまいます' },
+];
+
+const selfIntroductionRows = [
+  { name: 'あおい', like: 'えを かくこと', reason: 'いろを えらぶのが たのしいから', skill: 'どうぶつの え', wish: 'おおきな えを かきたい' },
+  { name: 'ゆうた', like: 'サッカー', reason: 'みんなで ボールを おうのが たのしいから', skill: 'ボールを けること', wish: 'しあいに でたい' },
+  { name: 'みさき', like: 'ほんを よむこと', reason: 'いろいろな おはなしに あえるから', skill: 'おもしろい ほんを さがすこと', wish: 'ながい おはなしも よみたい' },
+  { name: 'けん', like: 'むしを さがすこと', reason: 'ちがう かたちを みつけられるから', skill: 'ありを みつけること', wish: 'かぶとむしを みたい' },
+  { name: 'さくら', like: 'うたうこと', reason: 'みんなと こえを あわせられるから', skill: 'おおきな こえで うたうこと', wish: 'みんなの まえで うたいたい' },
+  { name: 'りく', like: 'つみきを つむこと', reason: 'たかい とうを つくれるから', skill: 'くずれないように つむこと', wish: 'おしろを つくりたい' },
+  { name: 'なな', like: 'なわとび', reason: 'なんかいも とべると うれしいから', skill: 'まえとび', wish: 'うしろとびも できるように なりたい' },
+  { name: 'そうた', like: 'りょうりの おてつだい', reason: 'おいしいものが できるから', skill: 'やさいを あらうこと', wish: 'さらだを つくりたい' },
+  { name: 'えま', like: 'おりがみ', reason: 'いちまいの かみが いろいろな かたちに なるから', skill: 'つるを おること', wish: 'どうぶつを たくさん おりたい' },
+  { name: 'はる', like: 'かけっこ', reason: 'かぜを きって はしるのが きもちいいから', skill: 'さいごまで はしること', wish: 'もっと はやく なりたい' },
+];
+
+const presentationRows = [
+  { topic: 'わたしの たからもの', opening: 'わたしの たからものを しょうかいします', point: 'あおい ビーだまです', example: 'ひかりに あてると きらきらします', closing: 'これからも たいせつに します' },
+  { topic: 'すきな どうぶつ', opening: 'わたしの すきな どうぶつを はなします', point: 'うさぎが すきです', example: 'ながい みみが かわいいです', closing: 'いつか だっこして みたいです' },
+  { topic: 'たのしかった こと', opening: 'たのしかった ことを はっぴょうします', point: 'こうえんで あそんだことです', example: 'おおきな すべりだいを すべりました', closing: 'また あそびたいです' },
+  { topic: 'できるように なったこと', opening: 'できるように なったことを はなします', point: 'ひとりで くつを はけます', example: 'みぎと ひだりも たしかめます', closing: 'つぎは はやく はきたいです' },
+  { topic: 'おすすめの ほん', opening: 'おすすめの ほんを しょうかいします', point: 'くまが でてくる えほんです', example: 'くまが ともだちを たすけます', closing: 'ぜひ よんで ください' },
+  { topic: 'みつけた もの', opening: 'きょう みつけた ものを はなします', point: 'にわで せみの ぬけがらを みつけました', example: 'せなかが ひらいて いました', closing: 'みんなにも みせたいです' },
+  { topic: 'すきな きゅうしょく', opening: 'すきな きゅうしょくを はなします', point: 'カレーが すきです', example: 'やさいが やわらかくて おいしいです', closing: 'つぎの カレーが たのしみです' },
+  { topic: 'わたしの おてつだい', opening: 'いつもの おてつだいを しょうかいします', point: 'さらを ならべます', example: 'おはしも いっしょに おきます', closing: 'これからも つづけたいです' },
+  { topic: 'あさがおの ようす', opening: 'あさがおの ようすを はっぴょうします', point: 'はが よっつに ふえました', example: 'つるも すこし のびました', closing: 'はなが さくのが たのしみです' },
+  { topic: 'しょうらいの ゆめ', opening: 'わたしの ゆめを はなします', point: 'パンやさんに なりたいです', example: 'あまい パンを つくりたいです', closing: 'りょうりを たくさん れんしゅうします' },
+];
+
+const makeRefinedLanguageProblem = (unitId: string, n: number): GeneralProblem => {
+  const variant = n % 5;
+  const index = Math.floor(n / 5) % 10;
+  if (unitId === 'KOKUGO_G1_U03') {
+    const [word, before, group] = longSoundWords[index];
+    if (variant === 0) return { question: `「${word.replace('ー', '□')}」の □に「ー」を いれた ことばは？`, answer: word, options: optionSet(word, [word.replace('ー', ''), 'サカナ', 'クルマ', 'ハサミ']), hint: 'のばす ところを たしかめよう。' };
+    if (variant === 1) return { question: `「${word}」に ある しるしは？`, answer: 'ー', options: d('ー', 'っ', '、', '。'), hint: 'おとを ながく のばす。' };
+    if (variant === 2) return { question: `「${word}」で「ー」の まえに ある もじは？`, answer: before, options: optionSet(before, [...word.replaceAll('ー', ''), 'カ', 'ト']), hint: 'しるしの すぐ まえを みよう。' };
+    if (variant === 3) return { question: `「${word}」の よみかたで よいのは？`, answer: 'まえの おとを のばす', options: d('まえの おとを のばす', '「っ」と よむ', 'おとを とばす', 'うしろから よむ'), hint: '「ー」は まえの おとを のばす。' };
+    return { question: `${group}の「${word.replace('ー', '□')}」で、□に はいる しるしは？`, answer: 'ー', options: d('ー', 'っ', '、', '。'), hint: 'ことばの なかの しるしを みよう。' };
+  }
+  if (unitId === 'KOKUGO_G1_U04') {
+    const [word, missing] = smallTsuWords[index];
+    if (variant === 0) return { question: `「${word.replace('っ', '□')}」の □に「っ」を いれた ことばは？`, answer: word, options: optionSet(word, [missing, 'かさ', 'いぬ', 'そら']), hint: 'つまる おとの ばしょを みよう。' };
+    if (variant === 1) return { question: `「${word}」の ちいさい もじは？`, answer: 'っ', options: d('っ', 'つ', 'ー', 'ん'), hint: 'ふつうの「つ」より ちいさい。' };
+    if (variant === 2) return { question: `「${missing}」に「っ」を いれて できる ことばは？`, answer: word, options: optionSet(word, [missing, `${missing}ん`, `${missing}う`, `${missing}い`]), hint: 'つまる ところを かんがえよう。' };
+    if (variant === 3) return { question: `「${word}」を よむ とき「っ」で どうする？`, answer: 'いちど おとを とめる', options: d('いちど おとを とめる', 'ながく のばす', 'さいごから よむ', 'おとを たす'), hint: '「っ」は つまる おと。' };
+    return { question: `ただしく かいてある ことばは？「${word}」`, answer: word, options: optionSet(word, [missing, word.replace('っ', 'つ'), `${word}っ`]), hint: 'ちいさい「っ」の ばしょを みよう。' };
+  }
+  if (unitId === 'KOKUGO_G1_U05') {
+    const [sentence, answer, hint] = particleRows[n % particleRows.length];
+    return { question: `「${sentence}」 __に はいる もじは？`, answer, options: d(answer, ...['は', 'を', 'へ', 'が'].filter((x) => x !== answer).slice(0, 3)), hint };
+  }
+  if (unitId === 'KOKUGO_G1_U06') {
+    const i = n % kata.length;
+    const pools = [kata[(i + 1) % kata.length], kata[(i + 3) % kata.length], kata[(i + 5) % kata.length]];
+    if (n % 3 === 0) return { question: `ひらがなの「${hira[i]}」と おなじ おとの カタカナは？`, answer: kata[i], options: optionSet(kata[i], pools), hint: 'ひらがなと カタカナの おとを あわせよう。' };
+    if (n % 3 === 1) return { question: `カタカナの ならびで「${kata[(i + kata.length - 1) % kata.length]}」の つぎは？`, answer: kata[i], options: optionSet(kata[i], pools), hint: 'ならびを たしかめよう。' };
+    return { question: `「${kata[i]}」から はじまる カタカナの ことばを えらぶ とき、はじめに みる もじは？`, answer: kata[i], options: optionSet(kata[i], pools), hint: 'さいしょの もじを みよう。' };
+  }
+  if (unitId === 'KOKUGO_G1_U07') {
+    const item = refinedStories[index];
+    if (variant === 0) return { question: `「${item.text}」で、でてくる ひとは？`, answer: item.who, options: fieldOptions(item.who, refinedStories.map((row) => row.who), index), hint: 'だれの おはなしかを みつけよう。' };
+    if (variant === 1) return { question: `「${item.text}」で、できごとが おきた ばしょは？`, answer: item.place, options: fieldOptions(item.place, refinedStories.map((row) => row.place), index), hint: 'どこでの できごとかを さがそう。' };
+    if (variant === 2) return { question: `「${item.text}」で、したことは？`, answer: item.action, options: fieldOptions(item.action, refinedStories.map((row) => row.action), index), hint: 'ぶんに かいてある うごきを みよう。' };
+    if (variant === 3) return { question: `「${item.text}」で、そのことを した わけは？`, answer: item.reason, options: fieldOptions(item.reason, refinedStories.map((row) => row.reason), index), hint: 'まえと あとの できごとを つなげよう。' };
+    return { question: `「${item.text}」の おわりで、どんな きもちだと かんがえられる？`, answer: item.feeling, options: fieldOptions(item.feeling, refinedStories.map((row) => row.feeling), index), hint: 'したことや おきたことから きもちを かんがえよう。' };
+  }
+  if (unitId === 'KOKUGO_G1_U08') {
+    const item = refinedExplanations[index];
+    if (variant === 0) return { question: `「${item.text}」で、はじめに することは？`, answer: item.first, options: fieldOptions(item.first, refinedExplanations.map((row) => row.first), index), hint: 'さいしょの ぶんを たしかめよう。' };
+    if (variant === 1) return { question: `「${item.text}」で、つぎに することは？`, answer: item.next, options: fieldOptions(item.next, refinedExplanations.map((row) => row.next), index), hint: 'じゅんばんを おって よもう。' };
+    if (variant === 2) return { question: `「${item.text}」で、さいごに することは？`, answer: item.last, options: fieldOptions(item.last, refinedExplanations.map((row) => row.last), index), hint: 'おわりに かいてある うごきを みよう。' };
+    if (variant === 3) return { question: `「${item.text}」は、なにを せつめいしている？`, answer: item.topic, options: fieldOptions(item.topic, refinedExplanations.map((row) => row.topic), index), hint: 'ぜんたいで せつめいしていることを まとめよう。' };
+    return { question: `「${item.text}」で、じゅんばんを あらわす ことばは？`, answer: item.connector, options: fieldOptions(item.connector, refinedExplanations.map((row) => row.connector), index), hint: 'うごきと うごきを つなぐ ことばを さがそう。' };
+  }
+  if (unitId === 'KOKUGO_G1_U09') {
+    const item = sceneReadings[index];
+    if (variant === 0) return { question: `「${item.text}」どんな ばしょの ばめん？`, answer: item.place, options: fieldOptions(item.place, sceneReadings.map((row) => row.place), index), hint: 'ものや おとから ばしょを かんがえよう。' };
+    if (variant === 1) return { question: `「${item.text}」どんな てんきだと わかる？`, answer: item.weather, options: fieldOptions(item.weather, sceneReadings.map((row) => row.weather), index), hint: 'てんきが わからない ばめんも ある。' };
+    if (variant === 2) return { question: `「${item.text}」なにを している ばめん？`, answer: item.action, options: fieldOptions(item.action, sceneReadings.map((row) => row.action), index), hint: 'ようすを あらわす ことばから かんがえよう。' };
+    if (variant === 3) return { question: `「${item.text}」ばしょや うごきを かんがえる てがかりは？`, answer: item.clue, options: fieldOptions(item.clue, sceneReadings.map((row) => row.clue), index), hint: 'ばめんを よく あらわす ことばを えらぼう。' };
+    return { question: `「${item.text}」いつごろの ばめん？`, answer: item.time, options: fieldOptions(item.time, sceneReadings.map((row) => row.time), index), hint: 'ぶんだけで きめられない ときは「わからない」。' };
+  }
+  if (unitId === 'KOKUGO_G1_U10') {
+    const item = mainIdeaTexts[index];
+    if (variant === 0) return { question: `「${item.text}」いちばん たいせつな ことは？`, answer: item.main, options: fieldOptions(item.main, mainIdeaTexts.map((row) => row.main), index), hint: 'ふたつの ぶんに つうじる ことを えらぼう。' };
+    if (variant === 1) return { question: `「${item.text}」に かいてある くわしい ことは？`, answer: item.detail, options: fieldOptions(item.detail, mainIdeaTexts.map((row) => row.detail), index), hint: 'ぶんに かいてあることを そのまま たしかめよう。' };
+    if (variant === 2) return { question: `「${item.text}」に つける だいで よいものは？`, answer: item.title, options: fieldOptions(item.title, mainIdeaTexts.map((row) => row.title), index), hint: 'ぜんたいの ないように あう だいを えらぼう。' };
+    if (variant === 3) return { question: `「${item.text}」で、たいせつな ものを あらわす ことばは？`, answer: item.repeated, options: fieldOptions(item.repeated, mainIdeaTexts.map((row) => row.repeated), index), hint: 'なにについて かいているかを みよう。' };
+    return { question: `「${item.text}」を みじかく まとめたものは？`, answer: item.summary, options: fieldOptions(item.summary, mainIdeaTexts.map((row) => row.summary), index), hint: 'たいせつな ことを のこして みじかくしよう。' };
+  }
+  if (unitId === 'KOKUGO_G1_U11') {
+    const item = sentenceWritingRows[index];
+    if (variant === 0) return { question: `「${item.words}」を つかって かいた ぶんは？`, answer: item.sentence, options: d(item.sentence, item.sentence.replace('。', ''), `${item.action} ${item.subject}。`, `${item.subject} ${item.action}。`.replace(/は |が /, '')), hint: 'ことばの じゅんと「。」を たしかめよう。' };
+    if (variant === 1) return { question: `「${item.sentence}」で、だれや なにを あらわす まとまりは？`, answer: item.subject, options: fieldOptions(item.subject, sentenceWritingRows.map((row) => row.subject), index), hint: 'だれが するのかを みつけよう。' };
+    if (variant === 2) return { question: `「${item.sentence}」で、したことを あらわす まとまりは？`, answer: item.action, options: fieldOptions(item.action, sentenceWritingRows.map((row) => row.action), index), hint: 'なにを したかを みつけよう。' };
+    if (variant === 3) return { question: `「${item.sentence}」に ようすを くわしく たす ことばは？`, answer: item.detail, options: fieldOptions(item.detail, sentenceWritingRows.map((row) => row.detail), index), hint: 'どこで、いつ、どのようにを たすと くわしくなる。' };
+    return { question: `「${item.sentence}」を くわしく した ぶんは？`, answer: item.expanded, options: d(item.expanded, item.sentence, `${item.detail}。`, `${item.expanded.replace('。', '')}、`), hint: 'もとの ぶんに くわしい ことばを たそう。' };
+  }
+  if (unitId === 'KOKUGO_G1_U12') {
+    const item = diaryWritingRows[index];
+    const text = `${item.day}、${item.place}で ${item.event}。${item.feeling}。`;
+    if (variant === 0) return { question: `にっき「${text}」いつの こと？`, answer: item.day, options: fieldOptions(item.day, diaryWritingRows.map((row) => row.day), index), hint: 'はじめの ことばを みよう。' };
+    if (variant === 1) return { question: `にっき「${text}」どこでの こと？`, answer: item.place, options: fieldOptions(item.place, diaryWritingRows.map((row) => row.place), index), hint: 'できごとの ばしょを さがそう。' };
+    if (variant === 2) return { question: `にっき「${text}」なにを した？`, answer: item.event, options: fieldOptions(item.event, diaryWritingRows.map((row) => row.event), index), hint: 'できごとを あらわす ぶんを みよう。' };
+    if (variant === 3) return { question: `にっき「${text}」おもったことは？`, answer: item.feeling, options: fieldOptions(item.feeling, diaryWritingRows.map((row) => row.feeling), index), hint: 'きもちや おもいが かいてある ところ。' };
+    return { question: `にっき「${text}」に あう だいは？`, answer: item.title, options: fieldOptions(item.title, diaryWritingRows.map((row) => row.title), index), hint: 'いちばん こころに のこった ことを だいに しよう。' };
+  }
+  if (unitId === 'KOKUGO_G1_U13') {
+    const item = storyPlanningRows[index];
+    const plan = `${item.character}が ${item.place}に います。${item.problem}ので、${item.action}。そして、${item.ending}。`;
+    if (variant === 0) return { question: `おはなし「${plan}」でてくるのは？`, answer: item.character, options: fieldOptions(item.character, storyPlanningRows.map((row) => row.character), index), hint: 'おはなしの しゅじんこうを みつけよう。' };
+    if (variant === 1) return { question: `おはなし「${plan}」ばしょは？`, answer: item.place, options: fieldOptions(item.place, storyPlanningRows.map((row) => row.place), index), hint: 'どこで おきたかを みよう。' };
+    if (variant === 2) return { question: `おはなし「${plan}」こまったことは？`, answer: item.problem, options: fieldOptions(item.problem, storyPlanningRows.map((row) => row.problem), index), hint: 'はじめに おきた もんだいを みつけよう。' };
+    if (variant === 3) return { question: `おはなし「${plan}」こまった あとに したことは？`, answer: item.action, options: fieldOptions(item.action, storyPlanningRows.map((row) => row.action), index), hint: 'できごとの じゅんばんを みよう。' };
+    return { question: `おはなし「${plan}」さいごは どうなった？`, answer: item.ending, options: fieldOptions(item.ending, storyPlanningRows.map((row) => row.ending), index), hint: 'おはなしの おわりを たしかめよう。' };
+  }
+  if (unitId === 'KOKUGO_G1_U14') {
+    const item = listeningRows[index];
+    if (variant === 0) return { question: `はなし「${item.speech}」なんの はなし？`, answer: item.topic, options: fieldOptions(item.topic, listeningRows.map((row) => row.topic), index), hint: 'いちばん つたえたい ことを きこう。' };
+    if (variant === 1) return { question: `はなし「${item.speech}」なにを する？`, answer: item.action, options: fieldOptions(item.action, listeningRows.map((row) => row.action), index), hint: 'してほしい ことを ききとろう。' };
+    if (variant === 2) return { question: `はなし「${item.speech}」いつ する？`, answer: item.time, options: fieldOptions(item.time, listeningRows.map((row) => row.time), index), hint: 'ときを あらわす ことばを きこう。' };
+    if (variant === 3) return { question: `はなし「${item.speech}」たいせつな ものや ばしょは？`, answer: item.item, options: fieldOptions(item.item, listeningRows.map((row) => row.item), index), hint: 'なにを じゅんびし、なにに きを つけるかを きこう。' };
+    return { question: `はなし「${item.speech}」きいた あとの へんじで よいものは？`, answer: item.response, options: fieldOptions(item.response, listeningRows.map((row) => row.response), index), hint: 'きいた ないように あう へんじを しよう。' };
+  }
+  if (unitId === 'KOKUGO_G1_U15') {
+    const item = selfIntroductionRows[index];
+    const speech = `わたしは ${item.name}です。${item.like}が すきです。${item.reason}です。${item.skill}が とくいです。${item.wish}です。`;
+    if (variant === 0) return { question: `じこしょうかい「${speech}」なまえは？`, answer: item.name, options: fieldOptions(item.name, selfIntroductionRows.map((row) => row.name), index), hint: 'はじめに いった なまえを たしかめよう。' };
+    if (variant === 1) return { question: `じこしょうかい「${speech}」すきなことは？`, answer: item.like, options: fieldOptions(item.like, selfIntroductionRows.map((row) => row.like), index), hint: '「すきです」の まえを みよう。' };
+    if (variant === 2) return { question: `じこしょうかい「${speech}」すきな わけは？`, answer: item.reason, options: fieldOptions(item.reason, selfIntroductionRows.map((row) => row.reason), index), hint: 'すきなことと わけを つなげて はなそう。' };
+    if (variant === 3) return { question: `じこしょうかい「${speech}」とくいなことは？`, answer: item.skill, options: fieldOptions(item.skill, selfIntroductionRows.map((row) => row.skill), index), hint: 'じぶんが できることを たしかめよう。' };
+    return { question: `じこしょうかい「${speech}」これから したいことは？`, answer: item.wish, options: fieldOptions(item.wish, selfIntroductionRows.map((row) => row.wish), index), hint: 'さいごに はなした ねがいを みよう。' };
+  }
+  if (unitId === 'KOKUGO_G1_U16') {
+    const item = presentationRows[index];
+    const speech = `${item.opening}。${item.point}。${item.example}。${item.closing}。`;
+    if (variant === 0) return { question: `はっぴょう「${speech}」だいは？`, answer: item.topic, options: fieldOptions(item.topic, presentationRows.map((row) => row.topic), index), hint: 'はっぴょう ぜんたいの ないようを まとめよう。' };
+    if (variant === 1) return { question: `はっぴょう「${speech}」はじめの ことばは？`, answer: item.opening, options: fieldOptions(item.opening, presentationRows.map((row) => row.opening), index), hint: 'なにを はなすかを さいしょに つたえる。' };
+    if (variant === 2) return { question: `はっぴょう「${speech}」いちばん つたえたいことは？`, answer: item.point, options: fieldOptions(item.point, presentationRows.map((row) => row.point), index), hint: 'だいに つながる たいせつな ぶんを みよう。' };
+    if (variant === 3) return { question: `はっぴょう「${speech}」くわしく せつめいした ところは？`, answer: item.example, options: fieldOptions(item.example, presentationRows.map((row) => row.example), index), hint: 'たいせつなことの ようすや わけを さがそう。' };
+    return { question: `はっぴょう「${speech}」おわりの ことばは？`, answer: item.closing, options: fieldOptions(item.closing, presentationRows.map((row) => row.closing), index), hint: 'さいごに つたえた ことを みよう。' };
+  }
+  return makeUnitProblem(unitId, n);
+};
+
+(['KOKUGO_G1_U03', 'KOKUGO_G1_U04', 'KOKUGO_G1_U05'] as const).forEach((unitId) => {
+  KOKUGO_G1_UNIT_DATA[unitId] = Array.from({ length: 50 }, (_, n) => makeRefinedLanguageProblem(unitId, n));
+});
+KOKUGO_G1_UNIT_DATA.KOKUGO_G1_U06 = Array.from({ length: 83 }, (_, n) => makeRefinedLanguageProblem('KOKUGO_G1_U06', n));
+(['KOKUGO_G1_U07', 'KOKUGO_G1_U08', 'KOKUGO_G1_U09', 'KOKUGO_G1_U10', 'KOKUGO_G1_U11', 'KOKUGO_G1_U12', 'KOKUGO_G1_U13', 'KOKUGO_G1_U14', 'KOKUGO_G1_U15', 'KOKUGO_G1_U16'] as const).forEach((unitId) => {
+  KOKUGO_G1_UNIT_DATA[unitId] = Array.from({ length: 50 }, (_, n) => makeRefinedLanguageProblem(unitId, n));
+});
+
+const generatedUnitData = Object.fromEntries(Object.entries(KOKUGO_G1_UNIT_DATA).filter(([, items]) => items.length === 0)) as Record<string, GeneralProblem[]>;
+fillGeneratedUnitProblems(generatedUnitData, makeRefinedLanguageProblem);
 
 export const KOKUGO_G1_DATA: Record<string, GeneralProblem[]> = {
   KOKUGO_G1_1: Object.values(KOKUGO_G1_UNIT_DATA).flat(),

@@ -6,6 +6,9 @@ const assetVersion = process.env.VITE_ASSET_VERSION || new Date().toISOString().
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
+  server: {
+    allowedHosts: ['.trycloudflare.com'],
+  },
   define: {
     __APP_ASSET_VERSION__: JSON.stringify(assetVersion),
   },
