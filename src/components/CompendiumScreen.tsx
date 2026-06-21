@@ -7,7 +7,7 @@ import { BookOpen, Lock, ArrowLeft, Swords, Gem, FlaskConical, Skull, X, Music, 
 import EnemyIllustration from './EnemyIllustration';
 import PixelSprite from './PixelSprite';
 import { storageService } from '../services/storageService';
-import { audioService } from '../services/audioService';
+import { audioService, type BgmThemeId } from '../services/audioService';
 import { trans } from '../utils/textUtils';
 import { assetUrl } from '../utils/assetPaths';
 import { getCardIllustrationPaths } from '../utils/cardIllustration';
@@ -41,6 +41,17 @@ const shuffleList = <T,>(items: T[]) => {
         [next[i], next[j]] = [next[j], next[i]];
     }
     return next;
+};
+
+type CompendiumBgmLibraryId = 'mix' | 'elementary' | 'high-school' | 'magic';
+
+type CompendiumBgmTrack = {
+    id: string;
+    type: string;
+    theme: BgmThemeId;
+    library: Exclude<CompendiumBgmLibraryId, 'mix'>;
+    title: string;
+    subtitle: string;
 };
 
 const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, onBack, languageMode, isDebug = false, visualTheme = 'elementary' }) => {
@@ -143,7 +154,7 @@ const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, 
         const visibleNames = isDebug ? allCards.map(card => card.name) : unlockedCardNames;
         const uniqueNames = Array.from(new Set(visibleNames));
         return uniqueNames
-            .map(name => Object.values(CARDS_LIBRARY).find(card => card.name === name))
+            .map(name => allCards.find(card => card.name === name))
             .filter((card): card is typeof allCards[number] => Boolean(card))
             .filter(card => !card.isSeed)
             .map((card, index) => ({ ...card, id: `compendium-showcase-${index}` }));
@@ -193,7 +204,6 @@ const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, 
         }
         audioService.playSound('select');
         setShowBgmMode(true);
-        audioService.playBGM('random', false);
     };
 
     const closeBgmMode = () => {
@@ -520,57 +530,77 @@ const FullscreenCardArtModal: React.FC<{ card: ICard; languageMode: LanguageMode
 };
 
 const CompendiumBgmModeModal: React.FC<{ cards: ICard[]; languageMode: LanguageMode; onClose: () => void }> = ({ cards, languageMode, onClose }) => {
-    const defaultTracks = useMemo(() => [...audioService.getBgmTrackList()], []);
-    const transitionVariants = useMemo(() => ([
-        'animate-in fade-in duration-700',
-        'animate-in fade-in zoom-in-95 duration-700',
-        'animate-in slide-in-from-right-12 fade-in duration-700',
-        'animate-in slide-in-from-left-12 fade-in duration-700',
-        'animate-in slide-in-from-bottom-12 fade-in duration-700',
-        'animate-in slide-in-from-top-12 fade-in duration-700',
+    const sourceTracks = useMemo(() => [...audioService.getBgmTrackList()], []);
+    const initialTheme = useMemo(() => audioService.getBgmTheme(), []);
+    const libraries = useMemo(() => ([
+        { id: 'mix' as const, label: 'ALL MIX', caption: '通常・高校・マジック' },
+        { id: 'elementary' as const, label: '通常編', caption: 'Original' },
+        { id: 'high-school' as const, label: '高校編', caption: 'High School' },
+        { id: 'magic' as const, label: 'マジック編', caption: 'Magic' },
     ]), []);
+    const allTracks = useMemo<CompendiumBgmTrack[]>(() => {
+        const themes: Array<{ library: Exclude<CompendiumBgmLibraryId, 'mix'>; theme: BgmThemeId; subtitle: string }> = [
+            { library: 'elementary', theme: 'elementary', subtitle: '通常編' },
+            { library: 'high-school', theme: 'high-school', subtitle: '高校編' },
+            { library: 'magic', theme: 'magic', subtitle: 'マジック編' },
+        ];
+        return themes.flatMap(({ library, theme, subtitle }) =>
+            sourceTracks.map(track => ({
+                id: `${theme}::${track}`,
+                type: track,
+                theme,
+                library,
+                title: track.replace(/_/g, ' ').toUpperCase(),
+                subtitle,
+            }))
+        );
+    }, [sourceTracks]);
+    const [libraryId, setLibraryId] = useState<CompendiumBgmLibraryId>('mix');
     const [playOrder, setPlayOrder] = useState<'sorted' | 'random'>(() => audioService.getBgmAdvanceMode());
-    const [randomTrackOrder, setRandomTrackOrder] = useState<string[]>(() => shuffleList(defaultTracks));
+    const selectedTracks = useMemo(
+        () => allTracks.filter(track => libraryId === 'mix' || track.library === libraryId),
+        [allTracks, libraryId]
+    );
+    const [randomTrackOrder, setRandomTrackOrder] = useState<CompendiumBgmTrack[]>(() => shuffleList(allTracks));
     const bgmTracks = useMemo(() => {
         if (playOrder === 'sorted') {
-            return [...defaultTracks].sort((a, b) => a.localeCompare(b));
+            return [...selectedTracks].sort((a, b) => a.subtitle.localeCompare(b.subtitle) || a.title.localeCompare(b.title));
         }
-        return randomTrackOrder;
-    }, [defaultTracks, playOrder, randomTrackOrder]);
-    const [cardIndex, setCardIndex] = useState(() => Math.floor(Math.random() * cards.length));
-    const [trackIndex, setTrackIndex] = useState(() => {
-        const current = audioService.getCurrentBgmType();
-        const found = current ? bgmTracks.findIndex(track => track === current) : -1;
-        return found >= 0 ? found : 0;
-    });
+        const selectedIds = new Set(selectedTracks.map(track => track.id));
+        const ordered = randomTrackOrder.filter(track => selectedIds.has(track.id));
+        return ordered.length > 0 ? ordered : shuffleList(selectedTracks);
+    }, [playOrder, randomTrackOrder, selectedTracks]);
+    const [cardIndex, setCardIndex] = useState(() => Math.floor(Math.random() * Math.max(1, cards.length)));
+    const [trackIndex, setTrackIndex] = useState(0);
     const [isPlaying, setIsPlaying] = useState(true);
     const [isPaused, setIsPaused] = useState(false);
     const [isRepeat, setIsRepeat] = useState(false);
-    const [transitionClass, setTransitionClass] = useState(transitionVariants[0]);
-    const [transitionKey, setTransitionKey] = useState(0);
+    const [imageIndex, setImageIndex] = useState(0);
+    const [screenKey, setScreenKey] = useState(0);
     const activeCard = cards[cardIndex] || cards[0];
-    const activeTrack = bgmTracks[trackIndex] || bgmTracks[0];
-    const translated = trans(activeCard.name, languageMode);
-    const familiarActionSrc = activeCard.familiarSummon
+    const activeTrack = bgmTracks[trackIndex] || bgmTracks[0] || allTracks[0];
+    const translated = activeCard ? trans(activeCard.name, languageMode) : '';
+    const familiarActionSrc = activeCard?.familiarSummon
         ? assetUrl(`sprites/high-school/familiars-action/${activeCard.familiarSummon.imageIndex}.webp`)
         : null;
-    const magicArtUrl = getMagicCardArtUrl(activeCard);
+    const magicArtUrl = activeCard ? getMagicCardArtUrl(activeCard) : null;
     const imageCandidates = useMemo(
-        () => getCardIllustrationPaths(activeCard.id, translated, [activeCard.name]),
-        [activeCard.id, activeCard.name, translated]
+        () => activeCard ? getCardIllustrationPaths(activeCard.id, translated, [activeCard.name]) : [],
+        [activeCard, translated]
     );
-    const [imageIndex, setImageIndex] = useState(0);
+
+    useEffect(() => {
+        setTrackIndex(0);
+        if (playOrder === 'random') setRandomTrackOrder(shuffleList(selectedTracks));
+    }, [libraryId, selectedTracks, playOrder]);
 
     useEffect(() => {
         setImageIndex(0);
-        setTransitionClass(transitionVariants[Math.floor(Math.random() * transitionVariants.length)]);
-        setTransitionKey(prev => prev + 1);
-    }, [activeCard.id, transitionVariants]);
+        setScreenKey(prev => prev + 1);
+    }, [activeCard?.id]);
 
     useEffect(() => {
         audioService.setBackgroundPlaybackEnabled(true);
-        audioService.setBgmAdvanceMode(playOrder, bgmTracks);
-        audioService.playBGM(activeTrack as any, isRepeat);
         setIsPlaying(true);
         setIsPaused(false);
         return () => {
@@ -583,66 +613,57 @@ const CompendiumBgmModeModal: React.FC<{ cards: ICard[]; languageMode: LanguageM
     }, []);
 
     useEffect(() => {
-        if (cards.length <= 1 || !isPlaying) return;
+        if (cards.length <= 1 || !isPlaying || isPaused) return;
         const interval = window.setInterval(() => {
             setCardIndex(prev => {
-                if (cards.length <= 1) return prev;
                 let next = prev;
-                while (next === prev) {
+                while (next === prev && cards.length > 1) {
                     next = Math.floor(Math.random() * cards.length);
                 }
                 return next;
             });
-        }, 7000);
+        }, 5200);
         return () => window.clearInterval(interval);
-    }, [cards, isPlaying]);
+    }, [cards.length, isPaused, isPlaying]);
 
     useEffect(() => {
-        audioService.setBgmAdvanceMode(playOrder, bgmTracks);
+        if (!activeTrack) return;
+        audioService.setBgmAdvanceMode(playOrder, bgmTracks.map(track => track.id));
         if (!isPlaying) {
             audioService.stopBGM();
             return;
         }
-        audioService.playBGM(activeTrack as any, isRepeat);
+        void audioService.setBgmTheme(activeTrack.theme).then(() => audioService.playBGM(activeTrack.type as any, isRepeat));
         setIsPaused(false);
     }, [activeTrack, bgmTracks, isPlaying, isRepeat, playOrder]);
 
     useEffect(() => {
         const syncTrackLabel = () => {
             const current = audioService.getCurrentBgmType();
+            const currentTheme = audioService.getBgmTheme();
             if (!current) return;
-            const currentIndex = bgmTracks.findIndex(track => track === current);
-            if (currentIndex >= 0) {
-                setTrackIndex(prev => (prev === currentIndex ? prev : currentIndex));
-            }
+            const currentIndex = bgmTracks.findIndex(track => track.type === current && track.theme === currentTheme);
+            if (currentIndex >= 0) setTrackIndex(prev => (prev === currentIndex ? prev : currentIndex));
         };
-
         syncTrackLabel();
         const interval = window.setInterval(syncTrackLabel, 300);
         return () => window.clearInterval(interval);
     }, [bgmTracks]);
 
-    useEffect(() => {
-        const current = audioService.getCurrentBgmType();
-        if (!current) return;
-        const currentIndex = bgmTracks.findIndex(track => track === current);
-        if (currentIndex >= 0) {
-            setTrackIndex(currentIndex);
-        }
-    }, [bgmTracks]);
-
     const handleClose = () => {
         audioService.setBgmAdvanceMode('random');
-        audioService.playBGM('menu');
+        void audioService.setBgmTheme(initialTheme).then(() => audioService.playBGM('menu'));
         onClose();
     };
 
     const handlePrevTrack = () => {
+        if (bgmTracks.length === 0) return;
         setTrackIndex(prev => (prev - 1 + bgmTracks.length) % bgmTracks.length);
         setIsPlaying(true);
     };
 
     const handleNextTrack = () => {
+        if (bgmTracks.length === 0) return;
         setTrackIndex(prev => (prev + 1) % bgmTracks.length);
         setIsPlaying(true);
     };
@@ -650,7 +671,7 @@ const CompendiumBgmModeModal: React.FC<{ cards: ICard[]; languageMode: LanguageM
     const handlePlayPause = () => {
         if (!isPlaying) {
             setIsPlaying(true);
-            audioService.playBGM(activeTrack as any, isRepeat);
+            if (activeTrack) void audioService.setBgmTheme(activeTrack.theme).then(() => audioService.playBGM(activeTrack.type as any, isRepeat));
             setIsPaused(false);
             return;
         }
@@ -672,18 +693,18 @@ const CompendiumBgmModeModal: React.FC<{ cards: ICard[]; languageMode: LanguageM
     const handleToggleRepeat = () => {
         const next = !isRepeat;
         setIsRepeat(next);
-        if (isPlaying) {
-            audioService.playBGM(activeTrack as any, next);
+        if (isPlaying && activeTrack) {
+            void audioService.setBgmTheme(activeTrack.theme).then(() => audioService.playBGM(activeTrack.type as any, next));
         }
     };
 
     const handleTogglePlayOrder = () => {
-        const currentTrack = audioService.getCurrentBgmType() || activeTrack;
         setPlayOrder(prev => {
             const nextMode = prev === 'sorted' ? 'random' : 'sorted';
             if (nextMode === 'random') {
-                const shuffled = shuffleList(defaultTracks.filter(track => track !== currentTrack));
-                setRandomTrackOrder([currentTrack, ...shuffled]);
+                const currentId = activeTrack?.id;
+                const shuffled = shuffleList(selectedTracks.filter(track => track.id !== currentId));
+                setRandomTrackOrder(currentId && activeTrack ? [activeTrack, ...shuffled] : shuffled);
             }
             return nextMode;
         });
@@ -695,11 +716,11 @@ const CompendiumBgmModeModal: React.FC<{ cards: ICard[]; languageMode: LanguageM
     };
 
     useEffect(() => {
-        if (!('mediaSession' in navigator)) return;
+        if (!('mediaSession' in navigator) || !activeTrack) return;
         navigator.mediaSession.metadata = new MediaMetadata({
-            title: activeTrack,
-            artist: '学習ローグ',
-            album: '図鑑 BGM モード'
+            title: activeTrack.title,
+            artist: activeTrack.subtitle,
+            album: '図鑑 iPod BGM'
         });
         navigator.mediaSession.setActionHandler('play', () => {
             if (!isPlaying) {
@@ -726,43 +747,7 @@ const CompendiumBgmModeModal: React.FC<{ cards: ICard[]; languageMode: LanguageM
     }, [activeTrack, isPlaying]);
 
     return (
-        <div className="fixed inset-0 z-[80] bg-black flex flex-col">
-            <div className="absolute inset-0 overflow-hidden">
-                <div key={transitionKey} className={`${transitionClass} flex h-full w-full items-center justify-center`}>
-                    {familiarActionSrc ? (
-                        <div className="relative h-full w-full overflow-hidden bg-[radial-gradient(circle_at_55%_45%,rgba(236,72,153,0.34),rgba(15,23,42,0.78)_55%,rgba(0,0,0,0.96))]">
-                            <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(248,250,252,0.18),transparent_28%,rgba(239,68,68,0.22)_52%,transparent_70%)]" />
-                            <img
-                                src={familiarActionSrc}
-                                alt={activeCard.familiarSummon?.name || translated}
-                                className="absolute left-1/2 top-[18%] h-[205%] w-[205%] -translate-x-1/2 -translate-y-1/2 object-contain opacity-100 drop-shadow-[0_0_24px_rgba(244,114,182,0.85)]"
-                                style={{ transform: 'translate(-50%, -50%)' }}
-                            />
-                        </div>
-                    ) : magicArtUrl ? (
-                        <img
-                            src={magicArtUrl}
-                            alt={translated}
-                            className="h-full w-full object-contain"
-                        />
-                    ) : imageIndex < imageCandidates.length ? (
-                        <img
-                            src={imageCandidates[imageIndex]}
-                            alt={translated}
-                            className="h-full w-full object-contain"
-                            onError={() => setImageIndex(prev => prev + 1)}
-                        />
-                    ) : (
-                        <div className="flex h-full w-full items-center justify-center bg-[radial-gradient(circle_at_top,_rgba(34,211,238,0.2),_rgba(2,6,23,0.95)_60%)]">
-                            <div className="h-[70vmin] w-[70vmin] max-h-[86vh] max-w-[86vw] opacity-90">
-                                <PixelSprite seed={activeCard.id} name={activeCard.textureRef || 'SWORD'} className="w-full h-full" size={32} />
-                            </div>
-                        </div>
-                    )}
-                </div>
-                <div className="absolute inset-0 bg-gradient-to-b from-black/45 via-black/10 to-black/85" />
-            </div>
-
+        <div className="fixed inset-0 z-[80] flex items-center justify-center overflow-auto bg-[radial-gradient(circle_at_top,#1f2937_0%,#030712_48%,#000_100%)] p-3 text-white sm:p-6">
             <button
                 onClick={(e) => {
                     e.stopPropagation();
@@ -770,63 +755,126 @@ const CompendiumBgmModeModal: React.FC<{ cards: ICard[]; languageMode: LanguageM
                 }}
                 className="absolute right-3 top-3 z-20 rounded-full border border-white/15 bg-black/70 p-2.5 text-white/90 hover:text-white sm:right-4 sm:top-4 sm:p-3"
             >
-                <X size={22} className="sm:w-[26px] sm:h-[26px]" />
+                <X size={22} className="sm:h-[26px] sm:w-[26px]" />
             </button>
 
-            <div className="relative z-10 flex flex-1 flex-col justify-between p-3 sm:p-6">
-                <div className="flex items-start justify-between gap-4">
-                    <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-                        <div className="rounded-full border border-cyan-300/30 bg-cyan-500/10 px-3 py-1 text-[10px] font-black tracking-[0.24em] text-cyan-200 sm:px-4 sm:text-xs sm:tracking-[0.3em]">
-                            {trans("BGMモード", languageMode)}
+            <div className="grid w-full max-w-6xl items-center gap-5 lg:grid-cols-[minmax(320px,430px)_1fr]">
+                <div className="mx-auto w-full max-w-[430px] rounded-[42px] border border-white/80 bg-gradient-to-b from-zinc-100 to-zinc-300 p-5 text-slate-950 shadow-[0_34px_90px_rgba(0,0,0,0.65),inset_0_2px_8px_rgba(255,255,255,0.95)] sm:rounded-[56px] sm:p-7">
+                    <div className="mb-4 flex items-center justify-between px-2 text-[10px] font-black tracking-[0.22em] text-zinc-500">
+                        <span>LEARNING ROGUE</span>
+                        <span>iPOD MODE</span>
+                    </div>
+                    <div className="relative overflow-hidden rounded-[18px] border-[5px] border-zinc-800 bg-black shadow-inner">
+                        <div className="absolute left-3 top-2 z-10 rounded-full bg-black/55 px-2 py-0.5 text-[10px] font-bold text-lime-100">
+                            {isPlaying && !isPaused ? 'PLAY' : isPaused ? 'PAUSE' : 'STOP'}
                         </div>
-                        <div className="rounded-full border border-white/15 bg-slate-950/30 px-3 py-1.5 text-[11px] font-bold text-white/85 backdrop-blur-sm sm:px-4 sm:py-2 sm:text-sm">
-                            {'\u266B'} {activeTrack}
+                        <div className="absolute right-3 top-2 z-10 rounded-full bg-black/55 px-2 py-0.5 text-[10px] font-bold text-white/80">
+                            {activeTrack?.subtitle}
                         </div>
+                        <div key={screenKey} className="flex aspect-[4/3] items-center justify-center bg-[radial-gradient(circle_at_center,rgba(15,23,42,0.9),#020617)] animate-in fade-in zoom-in-95 duration-700">
+                            {activeCard && familiarActionSrc ? (
+                                <img
+                                    src={familiarActionSrc}
+                                    alt={activeCard.familiarSummon?.name || translated}
+                                    className="h-full w-full object-contain drop-shadow-[0_0_18px_rgba(244,114,182,0.8)]"
+                                />
+                            ) : activeCard && magicArtUrl ? (
+                                <img src={magicArtUrl} alt={translated} className="h-full w-full object-contain" />
+                            ) : activeCard && imageIndex < imageCandidates.length ? (
+                                <img
+                                    src={imageCandidates[imageIndex]}
+                                    alt={translated}
+                                    className="h-full w-full object-contain"
+                                    onError={() => setImageIndex(prev => prev + 1)}
+                                />
+                            ) : activeCard ? (
+                                <div className="h-[78%] w-[78%]">
+                                    <PixelSprite seed={activeCard.id} name={activeCard.textureRef || 'SWORD'} className="h-full w-full" size={32} />
+                                </div>
+                            ) : (
+                                <div className="text-sm text-white/60">NO CARD</div>
+                            )}
+                        </div>
+                        <div className="border-t border-white/10 bg-slate-950/95 p-3">
+                            <div className="truncate text-base font-black text-white">{translated || 'No Card'}</div>
+                            <div className="mt-1 line-clamp-2 min-h-[2.5rem] text-[11px] leading-5 text-slate-300">
+                                {activeCard ? trans(activeCard.description, languageMode) : ''}
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="mx-auto mt-6 grid h-56 w-56 place-items-center rounded-full bg-gradient-to-b from-zinc-50 to-zinc-300 shadow-[inset_0_8px_18px_rgba(255,255,255,0.9),inset_0_-10px_18px_rgba(0,0,0,0.18)] sm:h-64 sm:w-64">
+                        <button onClick={handleTogglePlayOrder} className="self-start pt-5 text-[11px] font-black tracking-[0.2em] text-zinc-500 hover:text-zinc-900">
+                            {playOrder === 'sorted' ? 'ORDER' : 'SHUFFLE'}
+                        </button>
+                        <button onClick={handlePrevTrack} className="absolute mr-36 text-zinc-500 hover:text-zinc-950 sm:mr-44">
+                            <StepBack size={30} />
+                        </button>
+                        <button onClick={handleNextTrack} className="absolute ml-36 text-zinc-500 hover:text-zinc-950 sm:ml-44">
+                            <StepForward size={30} />
+                        </button>
+                        <button onClick={handleNextCard} className="self-end pb-5 text-[11px] font-black tracking-[0.2em] text-zinc-500 hover:text-zinc-900">
+                            CARD
+                        </button>
                         <button
-                            onClick={handleTogglePlayOrder}
-                            className="rounded-full border border-white/15 bg-slate-950/30 px-3 py-1.5 text-[11px] font-bold text-white/85 backdrop-blur-sm hover:bg-white/10 sm:px-4 sm:py-2 sm:text-sm"
+                            onClick={handlePlayPause}
+                            className="absolute grid h-24 w-24 place-items-center rounded-full bg-gradient-to-b from-zinc-200 to-zinc-50 text-zinc-700 shadow-[inset_0_4px_10px_rgba(0,0,0,0.12),0_2px_8px_rgba(255,255,255,0.8)] hover:text-zinc-950"
                         >
-                            {playOrder === 'sorted' ? trans('曲順: 名前順', languageMode) : trans('曲順: シャッフル', languageMode)}
+                            {isPlaying && !isPaused ? <Pause size={34} /> : <Play size={34} />}
+                        </button>
+                    </div>
+                    <div className="mt-4 flex justify-center gap-2">
+                        <button onClick={handleStop} className="rounded-full bg-zinc-900 px-4 py-2 text-xs font-black text-white hover:bg-zinc-700">
+                            <Square size={13} className="mr-1 inline" /> STOP
+                        </button>
+                        <button onClick={handleToggleRepeat} className={`rounded-full px-4 py-2 text-xs font-black ${isRepeat ? 'bg-amber-500 text-zinc-950' : 'bg-zinc-900 text-white hover:bg-zinc-700'}`}>
+                            <Repeat size={13} className="mr-1 inline" /> LOOP
                         </button>
                     </div>
                 </div>
 
-                <div className="flex-1" />
-
-                <div className="mx-auto flex w-full max-w-5xl flex-col gap-3 rounded-[22px] border border-white/15 bg-slate-950/30 p-3 backdrop-blur-md sm:gap-4 sm:rounded-[28px] sm:p-6">
-                    <div className="flex flex-col gap-1.5 text-center sm:gap-2 sm:text-left">
-                        <div className="text-lg font-black leading-tight text-white sm:text-3xl">{translated}</div>
-                        <div className="line-clamp-2 text-xs leading-relaxed text-slate-300 sm:line-clamp-none sm:text-sm">
-                            {trans(activeCard.description, languageMode)}
-                        </div>
+                <div className="rounded-[28px] border border-white/10 bg-white/[0.06] p-4 shadow-2xl backdrop-blur-md sm:p-6">
+                    <div className="mb-5">
+                        <div className="text-xs font-black tracking-[0.4em] text-cyan-200">COMPENDIUM BGM</div>
+                        <h3 className="mt-2 text-3xl font-black text-white sm:text-4xl">{activeTrack?.title}</h3>
+                        <p className="mt-2 text-sm text-slate-300">
+                            {activeTrack?.subtitle} / {trackIndex + 1} of {bgmTracks.length} / cards {cards.length}
+                        </p>
                     </div>
-                    <div className="flex flex-wrap items-center justify-between gap-2 sm:gap-3">
-                        <div className="text-[11px] text-slate-300 sm:text-sm">
-                            {cardIndex + 1} / {cards.length} ・ {trans('スライドショー', languageMode)}
-                        </div>
-                        <div className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2">
-                            <button onClick={handlePrevTrack} className="rounded-full bg-white/10 p-2 text-white hover:bg-white/20 sm:p-3">
-                                <StepBack size={16} className="sm:w-[18px] sm:h-[18px]" />
-                            </button>
-                            <button onClick={handlePlayPause} className="rounded-full bg-cyan-500/80 p-2 text-white hover:bg-cyan-400 sm:p-3">
-                                {isPlaying && !isPaused ? <Pause size={16} className="sm:w-[18px] sm:h-[18px]" /> : <Play size={16} className="sm:w-[18px] sm:h-[18px]" />}
-                            </button>
-                            <button onClick={handleStop} className="rounded-full bg-white/10 p-2 text-white hover:bg-white/20 sm:p-3">
-                                <Square size={16} className="sm:w-[18px] sm:h-[18px]" />
-                            </button>
-                            <button onClick={handleNextTrack} className="rounded-full bg-white/10 p-2 text-white hover:bg-white/20 sm:p-3">
-                                <StepForward size={16} className="sm:w-[18px] sm:h-[18px]" />
-                            </button>
+
+                    <div className="mb-5 grid grid-cols-2 gap-2 sm:grid-cols-4">
+                        {libraries.map(library => (
                             <button
-                                onClick={handleToggleRepeat}
-                                className={`rounded-full p-2 text-white sm:p-3 ${isRepeat ? 'bg-amber-500/80 hover:bg-amber-400' : 'bg-white/10 hover:bg-white/20'}`}
+                                key={library.id}
+                                onClick={() => setLibraryId(library.id)}
+                                className={`rounded-2xl border p-3 text-left transition ${
+                                    libraryId === library.id
+                                        ? 'border-cyan-300 bg-cyan-300/20 text-cyan-50 shadow-[0_0_18px_rgba(34,211,238,0.25)]'
+                                        : 'border-white/10 bg-black/20 text-slate-300 hover:bg-white/10'
+                                }`}
                             >
-                                <Repeat size={16} className="sm:w-[18px] sm:h-[18px]" />
+                                <div className="text-sm font-black">{library.label}</div>
+                                <div className="mt-1 text-[10px] text-slate-400">{library.caption}</div>
                             </button>
-                            <button onClick={handleNextCard} className="rounded-full bg-white/10 p-2 text-white hover:bg-white/20 sm:p-3" title={trans("次のカード", languageMode)}>
-                                <ArrowLeft className="rotate-180 sm:w-[18px] sm:h-[18px]" size={16} />
+                        ))}
+                    </div>
+
+                    <div className="max-h-[38vh] overflow-y-auto rounded-2xl border border-white/10 bg-black/25 p-2 custom-scrollbar">
+                        {bgmTracks.slice(0, 80).map((track, index) => (
+                            <button
+                                key={track.id}
+                                onClick={() => {
+                                    setTrackIndex(index);
+                                    setIsPlaying(true);
+                                }}
+                                className={`mb-1 flex w-full items-center justify-between rounded-xl px-3 py-2 text-left text-sm ${
+                                    index === trackIndex ? 'bg-white text-slate-950' : 'text-slate-200 hover:bg-white/10'
+                                }`}
+                            >
+                                <span className="truncate font-bold">{track.title}</span>
+                                <span className="ml-3 shrink-0 text-[10px] opacity-70">{track.subtitle}</span>
                             </button>
-                        </div>
+                        ))}
                     </div>
                 </div>
             </div>

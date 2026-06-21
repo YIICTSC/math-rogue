@@ -75,6 +75,14 @@ class AudioService {
 
   constructor() {}
 
+  private parseBgmSequenceEntry(entry: string): { theme?: BgmThemeId; type: string } {
+      const separatorIndex = entry.indexOf('::');
+      if (separatorIndex === -1) return { type: entry };
+      const theme = entry.slice(0, separatorIndex) as BgmThemeId;
+      const type = entry.slice(separatorIndex + 2);
+      return { theme, type };
+  }
+
   public init() {
     if (this.ctx) {
         if (this.ctx.state === 'suspended') this.ctx.resume().catch(e => console.warn(e));
@@ -229,9 +237,14 @@ class AudioService {
       return [...this.bgmList] as const;
   }
 
+  public getBgmTheme() {
+      return this.bgmTheme;
+  }
+
   public setBgmAdvanceMode(mode: 'random' | 'sorted', sequence?: string[]) {
       this.bgmAdvanceMode = mode;
       this.bgmSequence = sequence && sequence.length > 0 ? [...sequence] : [...this.bgmList];
+      this.unplayedBgmList = [...this.bgmSequence];
   }
 
   public getBgmAdvanceMode() {
@@ -818,31 +831,43 @@ class AudioService {
   public async playRandomBGM() {
       // Refresh the pool if empty
       if (this.unplayedBgmList.length === 0) {
-          this.unplayedBgmList = [...this.bgmList];
+          this.unplayedBgmList = this.bgmSequence.length > 0 ? [...this.bgmSequence] : [...this.bgmList];
       }
 
       // Filter out current BGM if possible to prevent immediate repeats on pool refresh
       let candidates = this.unplayedBgmList;
       if (candidates.length > 1 && this.currentBgmType) {
-          candidates = candidates.filter(t => t !== this.currentBgmType);
+          candidates = candidates.filter(entry => {
+              const parsed = this.parseBgmSequenceEntry(entry);
+              return parsed.type !== this.currentBgmType || (parsed.theme && parsed.theme !== this.bgmTheme);
+          });
       }
 
       const nextIndex = Math.floor(Math.random() * candidates.length);
       const next = candidates[nextIndex];
+      const parsed = this.parseBgmSequenceEntry(next);
       
       // Remove from unplayed list
       this.unplayedBgmList = this.unplayedBgmList.filter(t => t !== next);
+      if (parsed.theme) this.bgmTheme = parsed.theme;
 
       // ランダム再生時は自動で次へ行くように loop=false にする
-      await this.playBGM(next as any, false);
+      await this.playBGM(parsed.type as any, false);
   }
 
   public async playNextSequentialBGM() {
       const sequence = this.bgmSequence.length > 0 ? this.bgmSequence : [...this.bgmList];
       if (sequence.length === 0) return;
-      const currentIndex = this.currentBgmType ? sequence.findIndex(track => track === this.currentBgmType) : -1;
+      const currentIndex = this.currentBgmType
+          ? sequence.findIndex(track => {
+              const parsed = this.parseBgmSequenceEntry(track);
+              return parsed.type === this.currentBgmType && (!parsed.theme || parsed.theme === this.bgmTheme);
+          })
+          : -1;
       const nextIndex = currentIndex >= 0 ? (currentIndex + 1) % sequence.length : 0;
-      await this.playBGM(sequence[nextIndex] as any, false);
+      const parsed = this.parseBgmSequenceEntry(sequence[nextIndex]);
+      if (parsed.theme) this.bgmTheme = parsed.theme;
+      await this.playBGM(parsed.type as any, false);
   }
 
   private async playMp3(type: string, loop: boolean, playbackGeneration: number) {
