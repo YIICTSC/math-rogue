@@ -1,0 +1,1442 @@
+[
+  {
+    "hero": "WARRIOR",
+    "heroName": "反逆の高校生",
+    "file": "attack-1.ogg",
+    "text": "そこをどけ！",
+    "originalText": "そこをどけ！",
+    "caption": "高校生の男子アニメ主人公。低めでクールな若い中低音。大人の渋声にはしない。普段は落ち着いて短く言い切り、熱い場面だけ感情を強める。語尾をだらけさせず、学生らしい鋭さと反骨心を出して明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "WARRIOR",
+    "heroName": "反逆の高校生",
+    "file": "attack-2.ogg",
+    "text": "ぶち抜く！",
+    "originalText": "ぶち抜く！",
+    "caption": "高校生の男子アニメ主人公。低めでクールな若い中低音。大人の渋声にはしない。普段は落ち着いて短く言い切り、熱い場面だけ感情を強める。語尾をだらけさせず、学生らしい鋭さと反骨心を出して明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "WARRIOR",
+    "heroName": "反逆の高校生",
+    "file": "attack-3.ogg",
+    "text": "甘いんだよ！",
+    "originalText": "甘いんだよ！",
+    "caption": "高校生の男子アニメ主人公。低めでクールな若い中低音。大人の渋声にはしない。普段は落ち着いて短く言い切り、熱い場面だけ感情を強める。語尾をだらけさせず、学生らしい鋭さと反骨心を出して明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "WARRIOR",
+    "heroName": "反逆の高校生",
+    "file": "attack-4.ogg",
+    "text": "真正面から行く！",
+    "originalText": "真正面から行く！",
+    "caption": "高校生の男子アニメ主人公。低めでクールな若い中低音。大人の渋声にはしない。普段は落ち着いて短く言い切り、熱い場面だけ感情を強める。語尾をだらけさせず、学生らしい鋭さと反骨心を出して明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "WARRIOR",
+    "heroName": "反逆の高校生",
+    "file": "attack-5.ogg",
+    "text": "食らえ、これでどうだ！",
+    "originalText": "食らえっ！",
+    "caption": "高校生の男子アニメ主人公。低めでクールな若い中低音。大人の渋声にはしない。普段は落ち着いて短く言い切り、熱い場面だけ感情を強める。語尾をだらけさせず、学生らしい鋭さと反骨心を出して明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "WARRIOR",
+    "heroName": "反逆の高校生",
+    "file": "summon-1.ogg",
+    "text": "来い、力を貸せ！",
+    "originalText": "来い、力を貸せ！",
+    "caption": "高校生の男子アニメ主人公。低めでクールな若い中低音。大人の渋声にはしない。普段は落ち着いて短く言い切り、熱い場面だけ感情を強める。語尾をだらけさせず、学生らしい鋭さと反骨心を出して明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "WARRIOR",
+    "heroName": "反逆の高校生",
+    "file": "summon-2.ogg",
+    "text": "出番だ、暴れてこい！",
+    "originalText": "出番だ、暴れてこい！",
+    "caption": "高校生の男子アニメ主人公。低めでクールな若い中低音。大人の渋声にはしない。普段は落ち着いて短く言い切り、熱い場面だけ感情を強める。語尾をだらけさせず、学生らしい鋭さと反骨心を出して明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "WARRIOR",
+    "heroName": "反逆の高校生",
+    "file": "summon-3.ogg",
+    "text": "俺についてこい！",
+    "originalText": "俺についてこい！",
+    "caption": "高校生の男子アニメ主人公。低めでクールな若い中低音。大人の渋声にはしない。普段は落ち着いて短く言い切り、熱い場面だけ感情を強める。語尾をだらけさせず、学生らしい鋭さと反骨心を出して明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "WARRIOR",
+    "heroName": "反逆の高校生",
+    "file": "summon-4.ogg",
+    "text": "ここで決めるぞ！",
+    "originalText": "ここで決めるぞ！",
+    "caption": "高校生の男子アニメ主人公。低めでクールな若い中低音。大人の渋声にはしない。普段は落ち着いて短く言い切り、熱い場面だけ感情を強める。語尾をだらけさせず、学生らしい鋭さと反骨心を出して明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "WARRIOR",
+    "heroName": "反逆の高校生",
+    "file": "summon-5.ogg",
+    "text": "頼んだぜ、相棒！",
+    "originalText": "頼んだぜ、相棒！",
+    "caption": "高校生の男子アニメ主人公。低めでクールな若い中低音。大人の渋声にはしない。普段は落ち着いて短く言い切り、熱い場面だけ感情を強める。語尾をだらけさせず、学生らしい鋭さと反骨心を出して明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "WARRIOR",
+    "heroName": "反逆の高校生",
+    "file": "block-1.ogg",
+    "text": "その程度か！",
+    "originalText": "その程度か！",
+    "caption": "高校生の男子アニメ主人公。低めでクールな若い中低音。大人の渋声にはしない。普段は落ち着いて短く言い切り、熱い場面だけ感情を強める。語尾をだらけさせず、学生らしい鋭さと反骨心を出して明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "WARRIOR",
+    "heroName": "反逆の高校生",
+    "file": "block-2.ogg",
+    "text": "受け止める！",
+    "originalText": "受け止める！",
+    "caption": "高校生の男子アニメ主人公。低めでクールな若い中低音。大人の渋声にはしない。普段は落ち着いて短く言い切り、熱い場面だけ感情を強める。語尾をだらけさせず、学生らしい鋭さと反骨心を出して明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "WARRIOR",
+    "heroName": "反逆の高校生",
+    "file": "block-3.ogg",
+    "text": "ここは通さねえ！",
+    "originalText": "ここは通さねえ！",
+    "caption": "高校生の男子アニメ主人公。低めでクールな若い中低音。大人の渋声にはしない。普段は落ち着いて短く言い切り、熱い場面だけ感情を強める。語尾をだらけさせず、学生らしい鋭さと反骨心を出して明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "WARRIOR",
+    "heroName": "反逆の高校生",
+    "file": "block-4.ogg",
+    "text": "正面なら負けねえ！",
+    "originalText": "正面なら負けねえ！",
+    "caption": "高校生の男子アニメ主人公。低めでクールな若い中低音。大人の渋声にはしない。普段は落ち着いて短く言い切り、熱い場面だけ感情を強める。語尾をだらけさせず、学生らしい鋭さと反骨心を出して明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "WARRIOR",
+    "heroName": "反逆の高校生",
+    "file": "block-5.ogg",
+    "text": "効くかよ、止めてやる！",
+    "originalText": "効くかよ！",
+    "caption": "高校生の男子アニメ主人公。低めでクールな若い中低音。大人の渋声にはしない。普段は落ち着いて短く言い切り、熱い場面だけ感情を強める。語尾をだらけさせず、学生らしい鋭さと反骨心を出して明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "WARRIOR",
+    "heroName": "反逆の高校生",
+    "file": "power-1.ogg",
+    "text": "ギアを上げるぞ！",
+    "originalText": "ギアを上げるぞ！",
+    "caption": "高校生の男子アニメ主人公。低めでクールな若い中低音。大人の渋声にはしない。普段は落ち着いて短く言い切り、熱い場面だけ感情を強める。語尾をだらけさせず、学生らしい鋭さと反骨心を出して明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "WARRIOR",
+    "heroName": "反逆の高校生",
+    "file": "power-2.ogg",
+    "text": "まだ力は残ってる！",
+    "originalText": "まだ力は残ってる！",
+    "caption": "高校生の男子アニメ主人公。低めでクールな若い中低音。大人の渋声にはしない。普段は落ち着いて短く言い切り、熱い場面だけ感情を強める。語尾をだらけさせず、学生らしい鋭さと反骨心を出して明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "WARRIOR",
+    "heroName": "反逆の高校生",
+    "file": "power-3.ogg",
+    "text": "本気で行く！",
+    "originalText": "本気で行く！",
+    "caption": "高校生の男子アニメ主人公。低めでクールな若い中低音。大人の渋声にはしない。普段は落ち着いて短く言い切り、熱い場面だけ感情を強める。語尾をだらけさせず、学生らしい鋭さと反骨心を出して明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "WARRIOR",
+    "heroName": "反逆の高校生",
+    "file": "power-4.ogg",
+    "text": "熱くなってきた！",
+    "originalText": "熱くなってきた！",
+    "caption": "高校生の男子アニメ主人公。低めでクールな若い中低音。大人の渋声にはしない。普段は落ち着いて短く言い切り、熱い場面だけ感情を強める。語尾をだらけさせず、学生らしい鋭さと反骨心を出して明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "WARRIOR",
+    "heroName": "反逆の高校生",
+    "file": "power-5.ogg",
+    "text": "俺は止まらねえ！",
+    "originalText": "俺は止まらねえ！",
+    "caption": "高校生の男子アニメ主人公。低めでクールな若い中低音。大人の渋声にはしない。普段は落ち着いて短く言い切り、熱い場面だけ感情を強める。語尾をだらけさせず、学生らしい鋭さと反骨心を出して明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "WARRIOR",
+    "heroName": "反逆の高校生",
+    "file": "damage-1.ogg",
+    "text": "ぐっ、まだ立てる！",
+    "originalText": "ぐっ！",
+    "caption": "高校生の男子アニメ主人公。低めでクールな若い中低音。大人の渋声にはしない。普段は落ち着いて短く言い切り、熱い場面だけ感情を強める。語尾をだらけさせず、学生らしい鋭さと反骨心を出して明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "WARRIOR",
+    "heroName": "反逆の高校生",
+    "file": "damage-2.ogg",
+    "text": "やるじゃねえか！",
+    "originalText": "やるじゃねえか！",
+    "caption": "高校生の男子アニメ主人公。低めでクールな若い中低音。大人の渋声にはしない。普段は落ち着いて短く言い切り、熱い場面だけ感情を強める。語尾をだらけさせず、学生らしい鋭さと反骨心を出して明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "WARRIOR",
+    "heroName": "反逆の高校生",
+    "file": "damage-3.ogg",
+    "text": "まだだ、倒れねえ！",
+    "originalText": "まだだ！",
+    "caption": "高校生の男子アニメ主人公。低めでクールな若い中低音。大人の渋声にはしない。普段は落ち着いて短く言い切り、熱い場面だけ感情を強める。語尾をだらけさせず、学生らしい鋭さと反骨心を出して明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "WARRIOR",
+    "heroName": "反逆の高校生",
+    "file": "damage-4.ogg",
+    "text": "ちっ、油断した！",
+    "originalText": "ちっ、油断した！",
+    "caption": "高校生の男子アニメ主人公。低めでクールな若い中低音。大人の渋声にはしない。普段は落ち着いて短く言い切り、熱い場面だけ感情を強める。語尾をだらけさせず、学生らしい鋭さと反骨心を出して明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "WARRIOR",
+    "heroName": "反逆の高校生",
+    "file": "damage-5.ogg",
+    "text": "これくらい！",
+    "originalText": "これくらい！",
+    "caption": "高校生の男子アニメ主人公。低めでクールな若い中低音。大人の渋声にはしない。普段は落ち着いて短く言い切り、熱い場面だけ感情を強める。語尾をだらけさせず、学生らしい鋭さと反骨心を出して明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "WARRIOR",
+    "heroName": "反逆の高校生",
+    "file": "item-1.ogg",
+    "text": "使えるものは使う！",
+    "originalText": "使えるものは使う！",
+    "caption": "高校生の男子アニメ主人公。低めでクールな若い中低音。大人の渋声にはしない。普段は落ち着いて短く言い切り、熱い場面だけ感情を強める。語尾をだらけさせず、学生らしい鋭さと反骨心を出して明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "WARRIOR",
+    "heroName": "反逆の高校生",
+    "file": "item-2.ogg",
+    "text": "こいつで立て直す！",
+    "originalText": "こいつで立て直す！",
+    "caption": "高校生の男子アニメ主人公。低めでクールな若い中低音。大人の渋声にはしない。普段は落ち着いて短く言い切り、熱い場面だけ感情を強める。語尾をだらけさせず、学生らしい鋭さと反骨心を出して明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "WARRIOR",
+    "heroName": "反逆の高校生",
+    "file": "item-3.ogg",
+    "text": "今が使いどきだ！",
+    "originalText": "今が使いどきだ！",
+    "caption": "高校生の男子アニメ主人公。低めでクールな若い中低音。大人の渋声にはしない。普段は落ち着いて短く言い切り、熱い場面だけ感情を強める。語尾をだらけさせず、学生らしい鋭さと反骨心を出して明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "WARRIOR",
+    "heroName": "反逆の高校生",
+    "file": "item-4.ogg",
+    "text": "補給完了、戻るぞ！",
+    "originalText": "補給完了！",
+    "caption": "高校生の男子アニメ主人公。低めでクールな若い中低音。大人の渋声にはしない。普段は落ち着いて短く言い切り、熱い場面だけ感情を強める。語尾をだらけさせず、学生らしい鋭さと反骨心を出して明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "WARRIOR",
+    "heroName": "反逆の高校生",
+    "file": "item-5.ogg",
+    "text": "まだ終われねえ！",
+    "originalText": "まだ終われねえ！",
+    "caption": "高校生の男子アニメ主人公。低めでクールな若い中低音。大人の渋声にはしない。普段は落ち着いて短く言い切り、熱い場面だけ感情を強める。語尾をだらけさせず、学生らしい鋭さと反骨心を出して明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "WARRIOR",
+    "heroName": "反逆の高校生",
+    "file": "finish-1.ogg",
+    "text": "これで終わりだ！",
+    "originalText": "これで終わりだ！",
+    "caption": "高校生の男子アニメ主人公。低めでクールな若い中低音。大人の渋声にはしない。普段は落ち着いて短く言い切り、熱い場面だけ感情を強める。語尾をだらけさせず、学生らしい鋭さと反骨心を出して明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "WARRIOR",
+    "heroName": "反逆の高校生",
+    "file": "finish-2.ogg",
+    "text": "俺の勝ちだ！",
+    "originalText": "俺の勝ちだ！",
+    "caption": "高校生の男子アニメ主人公。低めでクールな若い中低音。大人の渋声にはしない。普段は落ち着いて短く言い切り、熱い場面だけ感情を強める。語尾をだらけさせず、学生らしい鋭さと反骨心を出して明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "WARRIOR",
+    "heroName": "反逆の高校生",
+    "file": "finish-3.ogg",
+    "text": "道は俺が開く！",
+    "originalText": "道は俺が開く！",
+    "caption": "高校生の男子アニメ主人公。低めでクールな若い中低音。大人の渋声にはしない。普段は落ち着いて短く言い切り、熱い場面だけ感情を強める。語尾をだらけさせず、学生らしい鋭さと反骨心を出して明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "WARRIOR",
+    "heroName": "反逆の高校生",
+    "file": "finish-4.ogg",
+    "text": "最後まで立ってた方が勝ちだ！",
+    "originalText": "最後まで立ってた方が勝ちだ！",
+    "caption": "高校生の男子アニメ主人公。低めでクールな若い中低音。大人の渋声にはしない。普段は落ち着いて短く言い切り、熱い場面だけ感情を強める。語尾をだらけさせず、学生らしい鋭さと反骨心を出して明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "WARRIOR",
+    "heroName": "反逆の高校生",
+    "file": "finish-5.ogg",
+    "text": "二度と邪魔すんな！",
+    "originalText": "二度と邪魔すんな！",
+    "caption": "高校生の男子アニメ主人公。低めでクールな若い中低音。大人の渋声にはしない。普段は落ち着いて短く言い切り、熱い場面だけ感情を強める。語尾をだらけさせず、学生らしい鋭さと反骨心を出して明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "WARRIOR",
+    "heroName": "反逆の高校生",
+    "file": "defeat-1.ogg",
+    "text": "くそっ、ここまでか……",
+    "originalText": "くそっ、ここまでか……",
+    "caption": "高校生の男子アニメ主人公。低めでクールな若い中低音。大人の渋声にはしない。普段は落ち着いて短く言い切り、熱い場面だけ感情を強める。語尾をだらけさせず、学生らしい鋭さと反骨心を出して明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "WARRIOR",
+    "heroName": "反逆の高校生",
+    "file": "defeat-2.ogg",
+    "text": "まだ、倒れるわけには……",
+    "originalText": "まだ、倒れるわけには……",
+    "caption": "高校生の男子アニメ主人公。低めでクールな若い中低音。大人の渋声にはしない。普段は落ち着いて短く言い切り、熱い場面だけ感情を強める。語尾をだらけさせず、学生らしい鋭さと反骨心を出して明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "WARRIOR",
+    "heroName": "反逆の高校生",
+    "file": "defeat-3.ogg",
+    "text": "体が、動かねえ……",
+    "originalText": "体が、動かねえ……",
+    "caption": "高校生の男子アニメ主人公。低めでクールな若い中低音。大人の渋声にはしない。普段は落ち着いて短く言い切り、熱い場面だけ感情を強める。語尾をだらけさせず、学生らしい鋭さと反骨心を出して明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "WARRIOR",
+    "heroName": "反逆の高校生",
+    "file": "defeat-4.ogg",
+    "text": "こんなところで……！",
+    "originalText": "こんなところで……！",
+    "caption": "高校生の男子アニメ主人公。低めでクールな若い中低音。大人の渋声にはしない。普段は落ち着いて短く言い切り、熱い場面だけ感情を強める。語尾をだらけさせず、学生らしい鋭さと反骨心を出して明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "WARRIOR",
+    "heroName": "反逆の高校生",
+    "file": "defeat-5.ogg",
+    "text": "悪い、後は頼んだ……",
+    "originalText": "悪い、後は頼んだ……",
+    "caption": "高校生の男子アニメ主人公。低めでクールな若い中低音。大人の渋声にはしない。普段は落ち着いて短く言い切り、熱い場面だけ感情を強める。語尾をだらけさせず、学生らしい鋭さと反骨心を出して明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "ASSASSIN",
+    "heroName": "謎めく転入生",
+    "file": "attack-1.ogg",
+    "text": "そこだ、見えている。",
+    "originalText": "そこだ。",
+    "caption": "高校生の男子アニメ声。クールでそっけない若い中音。低く渋くしすぎない。感情を抑え、短く乾いた返事のように言い切る。語尾を伸ばさず、知的で距離感のある声で明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "ASSASSIN",
+    "heroName": "謎めく転入生",
+    "file": "attack-2.ogg",
+    "text": "遅いよ、届かない。",
+    "originalText": "遅いよ。",
+    "caption": "高校生の男子アニメ声。クールでそっけない若い中音。低く渋くしすぎない。感情を抑え、短く乾いた返事のように言い切る。語尾を伸ばさず、知的で距離感のある声で明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "ASSASSIN",
+    "heroName": "謎めく転入生",
+    "file": "attack-3.ogg",
+    "text": "隙が見えた。",
+    "originalText": "隙が見えた。",
+    "caption": "高校生の男子アニメ声。クールでそっけない若い中音。低く渋くしすぎない。感情を抑え、短く乾いた返事のように言い切る。語尾を伸ばさず、知的で距離感のある声で明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "ASSASSIN",
+    "heroName": "謎めく転入生",
+    "file": "attack-4.ogg",
+    "text": "静かに眠れ。",
+    "originalText": "静かに眠れ。",
+    "caption": "高校生の男子アニメ声。クールでそっけない若い中音。低く渋くしすぎない。感情を抑え、短く乾いた返事のように言い切る。語尾を伸ばさず、知的で距離感のある声で明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "ASSASSIN",
+    "heroName": "謎めく転入生",
+    "file": "attack-5.ogg",
+    "text": "これでどうかな。",
+    "originalText": "これでどうかな。",
+    "caption": "高校生の男子アニメ声。クールでそっけない若い中音。低く渋くしすぎない。感情を抑え、短く乾いた返事のように言い切る。語尾を伸ばさず、知的で距離感のある声で明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "ASSASSIN",
+    "heroName": "謎めく転入生",
+    "file": "summon-1.ogg",
+    "text": "おいで、君の番だ。",
+    "originalText": "おいで、君の番だ。",
+    "caption": "高校生の男子アニメ声。クールでそっけない若い中音。低く渋くしすぎない。感情を抑え、短く乾いた返事のように言い切る。語尾を伸ばさず、知的で距離感のある声で明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "ASSASSIN",
+    "heroName": "謎めく転入生",
+    "file": "summon-2.ogg",
+    "text": "力を見せてくれ。",
+    "originalText": "力を見せてくれ。",
+    "caption": "高校生の男子アニメ声。クールでそっけない若い中音。低く渋くしすぎない。感情を抑え、短く乾いた返事のように言い切る。語尾を伸ばさず、知的で距離感のある声で明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "ASSASSIN",
+    "heroName": "謎めく転入生",
+    "file": "summon-3.ogg",
+    "text": "呼び声に応えろ。",
+    "originalText": "呼び声に応えろ。",
+    "caption": "高校生の男子アニメ声。クールでそっけない若い中音。低く渋くしすぎない。感情を抑え、短く乾いた返事のように言い切る。語尾を伸ばさず、知的で距離感のある声で明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "ASSASSIN",
+    "heroName": "謎めく転入生",
+    "file": "summon-4.ogg",
+    "text": "さあ、始めようか。",
+    "originalText": "さあ、始めようか。",
+    "caption": "高校生の男子アニメ声。クールでそっけない若い中音。低く渋くしすぎない。感情を抑え、短く乾いた返事のように言い切る。語尾を伸ばさず、知的で距離感のある声で明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "ASSASSIN",
+    "heroName": "謎めく転入生",
+    "file": "summon-5.ogg",
+    "text": "任せたよ、相棒。",
+    "originalText": "任せたよ、相棒。",
+    "caption": "高校生の男子アニメ声。クールでそっけない若い中音。低く渋くしすぎない。感情を抑え、短く乾いた返事のように言い切る。語尾を伸ばさず、知的で距離感のある声で明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "ASSASSIN",
+    "heroName": "謎めく転入生",
+    "file": "block-1.ogg",
+    "text": "読めている。",
+    "originalText": "読めている。",
+    "caption": "高校生の男子アニメ声。クールでそっけない若い中音。低く渋くしすぎない。感情を抑え、短く乾いた返事のように言い切る。語尾を伸ばさず、知的で距離感のある声で明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "ASSASSIN",
+    "heroName": "謎めく転入生",
+    "file": "block-2.ogg",
+    "text": "無駄だよ、読めている。",
+    "originalText": "無駄だよ。",
+    "caption": "高校生の男子アニメ声。クールでそっけない若い中音。低く渋くしすぎない。感情を抑え、短く乾いた返事のように言い切る。語尾を伸ばさず、知的で距離感のある声で明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "ASSASSIN",
+    "heroName": "謎めく転入生",
+    "file": "block-3.ogg",
+    "text": "ここは崩させない。",
+    "originalText": "ここは崩させない。",
+    "caption": "高校生の男子アニメ声。クールでそっけない若い中音。低く渋くしすぎない。感情を抑え、短く乾いた返事のように言い切る。語尾を伸ばさず、知的で距離感のある声で明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "ASSASSIN",
+    "heroName": "謎めく転入生",
+    "file": "block-4.ogg",
+    "text": "想定の範囲内だ。",
+    "originalText": "想定の範囲内だ。",
+    "caption": "高校生の男子アニメ声。クールでそっけない若い中音。低く渋くしすぎない。感情を抑え、短く乾いた返事のように言い切る。語尾を伸ばさず、知的で距離感のある声で明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "ASSASSIN",
+    "heroName": "謎めく転入生",
+    "file": "block-5.ogg",
+    "text": "防いでみせる。",
+    "originalText": "防いでみせる。",
+    "caption": "高校生の男子アニメ声。クールでそっけない若い中音。低く渋くしすぎない。感情を抑え、短く乾いた返事のように言い切る。語尾を伸ばさず、知的で距離感のある声で明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "ASSASSIN",
+    "heroName": "謎めく転入生",
+    "file": "power-1.ogg",
+    "text": "少し本気を出そう。",
+    "originalText": "少し本気を出そう。",
+    "caption": "高校生の男子アニメ声。クールでそっけない若い中音。低く渋くしすぎない。感情を抑え、短く乾いた返事のように言い切る。語尾を伸ばさず、知的で距離感のある声で明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "ASSASSIN",
+    "heroName": "謎めく転入生",
+    "file": "power-2.ogg",
+    "text": "流れはつかんだ。",
+    "originalText": "流れはつかんだ。",
+    "caption": "高校生の男子アニメ声。クールでそっけない若い中音。低く渋くしすぎない。感情を抑え、短く乾いた返事のように言い切る。語尾を伸ばさず、知的で距離感のある声で明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "ASSASSIN",
+    "heroName": "謎めく転入生",
+    "file": "power-3.ogg",
+    "text": "準備は整った。",
+    "originalText": "準備は整った。",
+    "caption": "高校生の男子アニメ声。クールでそっけない若い中音。低く渋くしすぎない。感情を抑え、短く乾いた返事のように言い切る。語尾を伸ばさず、知的で距離感のある声で明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "ASSASSIN",
+    "heroName": "謎めく転入生",
+    "file": "power-4.ogg",
+    "text": "次で決める。",
+    "originalText": "次で決める。",
+    "caption": "高校生の男子アニメ声。クールでそっけない若い中音。低く渋くしすぎない。感情を抑え、短く乾いた返事のように言い切る。語尾を伸ばさず、知的で距離感のある声で明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "ASSASSIN",
+    "heroName": "謎めく転入生",
+    "file": "power-5.ogg",
+    "text": "力が満ちていく。",
+    "originalText": "力が満ちていく。",
+    "caption": "高校生の男子アニメ声。クールでそっけない若い中音。低く渋くしすぎない。感情を抑え、短く乾いた返事のように言い切る。語尾を伸ばさず、知的で距離感のある声で明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "ASSASSIN",
+    "heroName": "謎めく転入生",
+    "file": "damage-1.ogg",
+    "text": "くっ、計算外だね。",
+    "originalText": "くっ……！",
+    "caption": "高校生の男子アニメ声。クールでそっけない若い中音。低く渋くしすぎない。感情を抑え、短く乾いた返事のように言い切る。語尾を伸ばさず、知的で距離感のある声で明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "ASSASSIN",
+    "heroName": "謎めく転入生",
+    "file": "damage-2.ogg",
+    "text": "なるほどね。",
+    "originalText": "なるほどね。",
+    "caption": "高校生の男子アニメ声。クールでそっけない若い中音。低く渋くしすぎない。感情を抑え、短く乾いた返事のように言い切る。語尾を伸ばさず、知的で距離感のある声で明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "ASSASSIN",
+    "heroName": "謎めく転入生",
+    "file": "damage-3.ogg",
+    "text": "これは予想外だ。",
+    "originalText": "これは予想外だ。",
+    "caption": "高校生の男子アニメ声。クールでそっけない若い中音。低く渋くしすぎない。感情を抑え、短く乾いた返事のように言い切る。語尾を伸ばさず、知的で距離感のある声で明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "ASSASSIN",
+    "heroName": "謎めく転入生",
+    "file": "damage-4.ogg",
+    "text": "まだ問題ない。",
+    "originalText": "まだ問題ない。",
+    "caption": "高校生の男子アニメ声。クールでそっけない若い中音。低く渋くしすぎない。感情を抑え、短く乾いた返事のように言い切る。語尾を伸ばさず、知的で距離感のある声で明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "ASSASSIN",
+    "heroName": "謎めく転入生",
+    "file": "damage-5.ogg",
+    "text": "少し、効いたよ。",
+    "originalText": "少し、効いたよ。",
+    "caption": "高校生の男子アニメ声。クールでそっけない若い中音。低く渋くしすぎない。感情を抑え、短く乾いた返事のように言い切る。語尾を伸ばさず、知的で距離感のある声で明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "ASSASSIN",
+    "heroName": "謎めく転入生",
+    "file": "item-1.ogg",
+    "text": "保険は必要だ。",
+    "originalText": "保険は必要だ。",
+    "caption": "高校生の男子アニメ声。クールでそっけない若い中音。低く渋くしすぎない。感情を抑え、短く乾いた返事のように言い切る。語尾を伸ばさず、知的で距離感のある声で明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "ASSASSIN",
+    "heroName": "謎めく転入生",
+    "file": "item-2.ogg",
+    "text": "今、使っておこう。",
+    "originalText": "今、使っておこう。",
+    "caption": "高校生の男子アニメ声。クールでそっけない若い中音。低く渋くしすぎない。感情を抑え、短く乾いた返事のように言い切る。語尾を伸ばさず、知的で距離感のある声で明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "ASSASSIN",
+    "heroName": "謎めく転入生",
+    "file": "item-3.ogg",
+    "text": "備えは無駄にならない。",
+    "originalText": "備えは無駄にならない。",
+    "caption": "高校生の男子アニメ声。クールでそっけない若い中音。低く渋くしすぎない。感情を抑え、短く乾いた返事のように言い切る。語尾を伸ばさず、知的で距離感のある声で明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "ASSASSIN",
+    "heroName": "謎めく転入生",
+    "file": "item-4.ogg",
+    "text": "これで修正できる。",
+    "originalText": "これで修正できる。",
+    "caption": "高校生の男子アニメ声。クールでそっけない若い中音。低く渋くしすぎない。感情を抑え、短く乾いた返事のように言い切る。語尾を伸ばさず、知的で距離感のある声で明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "ASSASSIN",
+    "heroName": "謎めく転入生",
+    "file": "item-5.ogg",
+    "text": "次に備えよう。",
+    "originalText": "次に備えよう。",
+    "caption": "高校生の男子アニメ声。クールでそっけない若い中音。低く渋くしすぎない。感情を抑え、短く乾いた返事のように言い切る。語尾を伸ばさず、知的で距離感のある声で明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "ASSASSIN",
+    "heroName": "謎めく転入生",
+    "file": "finish-1.ogg",
+    "text": "結末は見えていた。",
+    "originalText": "結末は見えていた。",
+    "caption": "高校生の男子アニメ声。クールでそっけない若い中音。低く渋くしすぎない。感情を抑え、短く乾いた返事のように言い切る。語尾を伸ばさず、知的で距離感のある声で明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "ASSASSIN",
+    "heroName": "謎めく転入生",
+    "file": "finish-2.ogg",
+    "text": "これでチェックメイトだ。",
+    "originalText": "これでチェックメイトだ。",
+    "caption": "高校生の男子アニメ声。クールでそっけない若い中音。低く渋くしすぎない。感情を抑え、短く乾いた返事のように言い切る。語尾を伸ばさず、知的で距離感のある声で明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "ASSASSIN",
+    "heroName": "謎めく転入生",
+    "file": "finish-3.ogg",
+    "text": "君の負けだよ。",
+    "originalText": "君の負けだよ。",
+    "caption": "高校生の男子アニメ声。クールでそっけない若い中音。低く渋くしすぎない。感情を抑え、短く乾いた返事のように言い切る。語尾を伸ばさず、知的で距離感のある声で明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "ASSASSIN",
+    "heroName": "謎めく転入生",
+    "file": "finish-4.ogg",
+    "text": "静かな幕引きだ。",
+    "originalText": "静かな幕引きだ。",
+    "caption": "高校生の男子アニメ声。クールでそっけない若い中音。低く渋くしすぎない。感情を抑え、短く乾いた返事のように言い切る。語尾を伸ばさず、知的で距離感のある声で明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "ASSASSIN",
+    "heroName": "謎めく転入生",
+    "file": "finish-5.ogg",
+    "text": "予定どおり、終わりだ。",
+    "originalText": "予定どおり、終わりだ。",
+    "caption": "高校生の男子アニメ声。クールでそっけない若い中音。低く渋くしすぎない。感情を抑え、短く乾いた返事のように言い切る。語尾を伸ばさず、知的で距離感のある声で明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "ASSASSIN",
+    "heroName": "謎めく転入生",
+    "file": "defeat-1.ogg",
+    "text": "僕の読みが、外れたか……",
+    "originalText": "僕の読みが、外れたか……",
+    "caption": "高校生の男子アニメ声。クールでそっけない若い中音。低く渋くしすぎない。感情を抑え、短く乾いた返事のように言い切る。語尾を伸ばさず、知的で距離感のある声で明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "ASSASSIN",
+    "heroName": "謎めく転入生",
+    "file": "defeat-2.ogg",
+    "text": "まだ、謎は残っている……",
+    "originalText": "まだ、謎は残っている……",
+    "caption": "高校生の男子アニメ声。クールでそっけない若い中音。低く渋くしすぎない。感情を抑え、短く乾いた返事のように言い切る。語尾を伸ばさず、知的で距離感のある声で明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "ASSASSIN",
+    "heroName": "謎めく転入生",
+    "file": "defeat-3.ogg",
+    "text": "ここで退場とはね……",
+    "originalText": "ここで退場とはね……",
+    "caption": "高校生の男子アニメ声。クールでそっけない若い中音。低く渋くしすぎない。感情を抑え、短く乾いた返事のように言い切る。語尾を伸ばさず、知的で距離感のある声で明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "ASSASSIN",
+    "heroName": "謎めく転入生",
+    "file": "defeat-4.ogg",
+    "text": "次の一手が、打てない……",
+    "originalText": "次の一手が、打てない……",
+    "caption": "高校生の男子アニメ声。クールでそっけない若い中音。低く渋くしすぎない。感情を抑え、短く乾いた返事のように言い切る。語尾を伸ばさず、知的で距離感のある声で明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "ASSASSIN",
+    "heroName": "謎めく転入生",
+    "file": "defeat-5.ogg",
+    "text": "すまない、後を任せる……",
+    "originalText": "すまない、後を任せる……",
+    "caption": "高校生の男子アニメ声。クールでそっけない若い中音。低く渋くしすぎない。感情を抑え、短く乾いた返事のように言い切る。語尾を伸ばさず、知的で距離感のある声で明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "DODGEBALL",
+    "heroName": "バスケ部エース",
+    "file": "attack-1.ogg",
+    "text": "速攻で行くぜ！",
+    "originalText": "速攻で行くぜ！",
+    "caption": "高校生の男子スポーツ少年声。若く熱血な中音。元気でまっすぐ、試合中のエースのように勢いよく叫ぶ。大人っぽくせず、語尾をだらけさせず、歯切れよく明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "DODGEBALL",
+    "heroName": "バスケ部エース",
+    "file": "attack-2.ogg",
+    "text": "もらった、決めるぜ！",
+    "originalText": "もらった！",
+    "caption": "高校生の男子スポーツ少年声。若く熱血な中音。元気でまっすぐ、試合中のエースのように勢いよく叫ぶ。大人っぽくせず、語尾をだらけさせず、歯切れよく明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "DODGEBALL",
+    "heroName": "バスケ部エース",
+    "file": "attack-3.ogg",
+    "text": "止めてみろ！",
+    "originalText": "止めてみろ！",
+    "caption": "高校生の男子スポーツ少年声。若く熱血な中音。元気でまっすぐ、試合中のエースのように勢いよく叫ぶ。大人っぽくせず、語尾をだらけさせず、歯切れよく明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "DODGEBALL",
+    "heroName": "バスケ部エース",
+    "file": "attack-4.ogg",
+    "text": "一気に抜く！",
+    "originalText": "一気に抜く！",
+    "caption": "高校生の男子スポーツ少年声。若く熱血な中音。元気でまっすぐ、試合中のエースのように勢いよく叫ぶ。大人っぽくせず、語尾をだらけさせず、歯切れよく明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "DODGEBALL",
+    "heroName": "バスケ部エース",
+    "file": "attack-5.ogg",
+    "text": "決めるぜ、止めてみろ！",
+    "originalText": "決めるぜ！",
+    "caption": "高校生の男子スポーツ少年声。若く熱血な中音。元気でまっすぐ、試合中のエースのように勢いよく叫ぶ。大人っぽくせず、語尾をだらけさせず、歯切れよく明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "DODGEBALL",
+    "heroName": "バスケ部エース",
+    "file": "summon-1.ogg",
+    "text": "パスだ、決めてこい！",
+    "originalText": "パスだ、決めてこい！",
+    "caption": "高校生の男子スポーツ少年声。若く熱血な中音。元気でまっすぐ、試合中のエースのように勢いよく叫ぶ。大人っぽくせず、語尾をだらけさせず、歯切れよく明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "DODGEBALL",
+    "heroName": "バスケ部エース",
+    "file": "summon-2.ogg",
+    "text": "チームプレーで行くぞ！",
+    "originalText": "チームプレーで行くぞ！",
+    "caption": "高校生の男子スポーツ少年声。若く熱血な中音。元気でまっすぐ、試合中のエースのように勢いよく叫ぶ。大人っぽくせず、語尾をだらけさせず、歯切れよく明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "DODGEBALL",
+    "heroName": "バスケ部エース",
+    "file": "summon-3.ogg",
+    "text": "頼むぜ、相棒！",
+    "originalText": "頼むぜ、相棒！",
+    "caption": "高校生の男子スポーツ少年声。若く熱血な中音。元気でまっすぐ、試合中のエースのように勢いよく叫ぶ。大人っぽくせず、語尾をだらけさせず、歯切れよく明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "DODGEBALL",
+    "heroName": "バスケ部エース",
+    "file": "summon-4.ogg",
+    "text": "コートに出な！",
+    "originalText": "コートに出な！",
+    "caption": "高校生の男子スポーツ少年声。若く熱血な中音。元気でまっすぐ、試合中のエースのように勢いよく叫ぶ。大人っぽくせず、語尾をだらけさせず、歯切れよく明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "DODGEBALL",
+    "heroName": "バスケ部エース",
+    "file": "summon-5.ogg",
+    "text": "一緒に攻めるぞ！",
+    "originalText": "一緒に攻めるぞ！",
+    "caption": "高校生の男子スポーツ少年声。若く熱血な中音。元気でまっすぐ、試合中のエースのように勢いよく叫ぶ。大人っぽくせず、語尾をだらけさせず、歯切れよく明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "DODGEBALL",
+    "heroName": "バスケ部エース",
+    "file": "block-1.ogg",
+    "text": "ナイスブロック！",
+    "originalText": "ナイスブロック！",
+    "caption": "高校生の男子スポーツ少年声。若く熱血な中音。元気でまっすぐ、試合中のエースのように勢いよく叫ぶ。大人っぽくせず、語尾をだらけさせず、歯切れよく明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "DODGEBALL",
+    "heroName": "バスケ部エース",
+    "file": "block-2.ogg",
+    "text": "ここは抜かせねえ！",
+    "originalText": "ここは抜かせねえ！",
+    "caption": "高校生の男子スポーツ少年声。若く熱血な中音。元気でまっすぐ、試合中のエースのように勢いよく叫ぶ。大人っぽくせず、語尾をだらけさせず、歯切れよく明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "DODGEBALL",
+    "heroName": "バスケ部エース",
+    "file": "block-3.ogg",
+    "text": "正面から来い！",
+    "originalText": "正面から来い！",
+    "caption": "高校生の男子スポーツ少年声。若く熱血な中音。元気でまっすぐ、試合中のエースのように勢いよく叫ぶ。大人っぽくせず、語尾をだらけさせず、歯切れよく明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "DODGEBALL",
+    "heroName": "バスケ部エース",
+    "file": "block-4.ogg",
+    "text": "リバウンドは俺のもんだ！",
+    "originalText": "リバウンドは俺のもんだ！",
+    "caption": "高校生の男子スポーツ少年声。若く熱血な中音。元気でまっすぐ、試合中のエースのように勢いよく叫ぶ。大人っぽくせず、語尾をだらけさせず、歯切れよく明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "DODGEBALL",
+    "heroName": "バスケ部エース",
+    "file": "block-5.ogg",
+    "text": "守りも任せろ！",
+    "originalText": "守りも任せろ！",
+    "caption": "高校生の男子スポーツ少年声。若く熱血な中音。元気でまっすぐ、試合中のエースのように勢いよく叫ぶ。大人っぽくせず、語尾をだらけさせず、歯切れよく明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "DODGEBALL",
+    "heroName": "バスケ部エース",
+    "file": "power-1.ogg",
+    "text": "調子上がってきた！",
+    "originalText": "調子上がってきた！",
+    "caption": "高校生の男子スポーツ少年声。若く熱血な中音。元気でまっすぐ、試合中のエースのように勢いよく叫ぶ。大人っぽくせず、語尾をだらけさせず、歯切れよく明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "DODGEBALL",
+    "heroName": "バスケ部エース",
+    "file": "power-2.ogg",
+    "text": "まだ走れるぜ！",
+    "originalText": "まだ走れるぜ！",
+    "caption": "高校生の男子スポーツ少年声。若く熱血な中音。元気でまっすぐ、試合中のエースのように勢いよく叫ぶ。大人っぽくせず、語尾をだらけさせず、歯切れよく明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "DODGEBALL",
+    "heroName": "バスケ部エース",
+    "file": "power-3.ogg",
+    "text": "ゾーンに入った！",
+    "originalText": "ゾーンに入った！",
+    "caption": "高校生の男子スポーツ少年声。若く熱血な中音。元気でまっすぐ、試合中のエースのように勢いよく叫ぶ。大人っぽくせず、語尾をだらけさせず、歯切れよく明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "DODGEBALL",
+    "heroName": "バスケ部エース",
+    "file": "power-4.ogg",
+    "text": "次の一本、決める！",
+    "originalText": "次の一本、決める！",
+    "caption": "高校生の男子スポーツ少年声。若く熱血な中音。元気でまっすぐ、試合中のエースのように勢いよく叫ぶ。大人っぽくせず、語尾をだらけさせず、歯切れよく明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "DODGEBALL",
+    "heroName": "バスケ部エース",
+    "file": "power-5.ogg",
+    "text": "エンジン全開！",
+    "originalText": "エンジン全開！",
+    "caption": "高校生の男子スポーツ少年声。若く熱血な中音。元気でまっすぐ、試合中のエースのように勢いよく叫ぶ。大人っぽくせず、語尾をだらけさせず、歯切れよく明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "DODGEBALL",
+    "heroName": "バスケ部エース",
+    "file": "damage-1.ogg",
+    "text": "うおっ、まだ走れる！",
+    "originalText": "うおっ！",
+    "caption": "高校生の男子スポーツ少年声。若く熱血な中音。元気でまっすぐ、試合中のエースのように勢いよく叫ぶ。大人っぽくせず、語尾をだらけさせず、歯切れよく明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "DODGEBALL",
+    "heroName": "バスケ部エース",
+    "file": "damage-2.ogg",
+    "text": "効いたぜ……！",
+    "originalText": "効いたぜ……！",
+    "caption": "高校生の男子スポーツ少年声。若く熱血な中音。元気でまっすぐ、試合中のエースのように勢いよく叫ぶ。大人っぽくせず、語尾をだらけさせず、歯切れよく明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "DODGEBALL",
+    "heroName": "バスケ部エース",
+    "file": "damage-3.ogg",
+    "text": "まだ試合中だ！",
+    "originalText": "まだ試合中だ！",
+    "caption": "高校生の男子スポーツ少年声。若く熱血な中音。元気でまっすぐ、試合中のエースのように勢いよく叫ぶ。大人っぽくせず、語尾をだらけさせず、歯切れよく明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "DODGEBALL",
+    "heroName": "バスケ部エース",
+    "file": "damage-4.ogg",
+    "text": "ファウルじゃねえのか！",
+    "originalText": "ファウルじゃねえのか！",
+    "caption": "高校生の男子スポーツ少年声。若く熱血な中音。元気でまっすぐ、試合中のエースのように勢いよく叫ぶ。大人っぽくせず、語尾をだらけさせず、歯切れよく明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "DODGEBALL",
+    "heroName": "バスケ部エース",
+    "file": "damage-5.ogg",
+    "text": "立て直す、まだ行ける！",
+    "originalText": "立て直す！",
+    "caption": "高校生の男子スポーツ少年声。若く熱血な中音。元気でまっすぐ、試合中のエースのように勢いよく叫ぶ。大人っぽくせず、語尾をだらけさせず、歯切れよく明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "DODGEBALL",
+    "heroName": "バスケ部エース",
+    "file": "item-1.ogg",
+    "text": "タイム、補給だ！",
+    "originalText": "タイム、補給だ！",
+    "caption": "高校生の男子スポーツ少年声。若く熱血な中音。元気でまっすぐ、試合中のエースのように勢いよく叫ぶ。大人っぽくせず、語尾をだらけさせず、歯切れよく明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "DODGEBALL",
+    "heroName": "バスケ部エース",
+    "file": "item-2.ogg",
+    "text": "こいつで回復！",
+    "originalText": "こいつで回復！",
+    "caption": "高校生の男子スポーツ少年声。若く熱血な中音。元気でまっすぐ、試合中のエースのように勢いよく叫ぶ。大人っぽくせず、語尾をだらけさせず、歯切れよく明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "DODGEBALL",
+    "heroName": "バスケ部エース",
+    "file": "item-3.ogg",
+    "text": "水分補給は大事だぜ！",
+    "originalText": "水分補給は大事だぜ！",
+    "caption": "高校生の男子スポーツ少年声。若く熱血な中音。元気でまっすぐ、試合中のエースのように勢いよく叫ぶ。大人っぽくせず、語尾をだらけさせず、歯切れよく明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "DODGEBALL",
+    "heroName": "バスケ部エース",
+    "file": "item-4.ogg",
+    "text": "よし復活、走るぜ！",
+    "originalText": "よし、復活！",
+    "caption": "高校生の男子スポーツ少年声。若く熱血な中音。元気でまっすぐ、試合中のエースのように勢いよく叫ぶ。大人っぽくせず、語尾をだらけさせず、歯切れよく明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "DODGEBALL",
+    "heroName": "バスケ部エース",
+    "file": "item-5.ogg",
+    "text": "後半戦も走り切る！",
+    "originalText": "後半戦も走り切る！",
+    "caption": "高校生の男子スポーツ少年声。若く熱血な中音。元気でまっすぐ、試合中のエースのように勢いよく叫ぶ。大人っぽくせず、語尾をだらけさせず、歯切れよく明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "DODGEBALL",
+    "heroName": "バスケ部エース",
+    "file": "finish-1.ogg",
+    "text": "ブザービーター！",
+    "originalText": "ブザービーター！",
+    "caption": "高校生の男子スポーツ少年声。若く熱血な中音。元気でまっすぐ、試合中のエースのように勢いよく叫ぶ。大人っぽくせず、語尾をだらけさせず、歯切れよく明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "DODGEBALL",
+    "heroName": "バスケ部エース",
+    "file": "finish-2.ogg",
+    "text": "試合終了だ！",
+    "originalText": "試合終了だ！",
+    "caption": "高校生の男子スポーツ少年声。若く熱血な中音。元気でまっすぐ、試合中のエースのように勢いよく叫ぶ。大人っぽくせず、語尾をだらけさせず、歯切れよく明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "DODGEBALL",
+    "heroName": "バスケ部エース",
+    "file": "finish-3.ogg",
+    "text": "最後の一本、いただき！",
+    "originalText": "最後の一本、いただき！",
+    "caption": "高校生の男子スポーツ少年声。若く熱血な中音。元気でまっすぐ、試合中のエースのように勢いよく叫ぶ。大人っぽくせず、語尾をだらけさせず、歯切れよく明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "DODGEBALL",
+    "heroName": "バスケ部エース",
+    "file": "finish-4.ogg",
+    "text": "勝負あり、俺たちの勝ちだ！",
+    "originalText": "勝負あり！",
+    "caption": "高校生の男子スポーツ少年声。若く熱血な中音。元気でまっすぐ、試合中のエースのように勢いよく叫ぶ。大人っぽくせず、語尾をだらけさせず、歯切れよく明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "DODGEBALL",
+    "heroName": "バスケ部エース",
+    "file": "finish-5.ogg",
+    "text": "ナイスゲーム！",
+    "originalText": "ナイスゲーム！",
+    "caption": "高校生の男子スポーツ少年声。若く熱血な中音。元気でまっすぐ、試合中のエースのように勢いよく叫ぶ。大人っぽくせず、語尾をだらけさせず、歯切れよく明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "DODGEBALL",
+    "heroName": "バスケ部エース",
+    "file": "defeat-1.ogg",
+    "text": "くそっ、足が動かねえ……",
+    "originalText": "くそっ、足が動かねえ……",
+    "caption": "高校生の男子スポーツ少年声。若く熱血な中音。元気でまっすぐ、試合中のエースのように勢いよく叫ぶ。大人っぽくせず、語尾をだらけさせず、歯切れよく明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "DODGEBALL",
+    "heroName": "バスケ部エース",
+    "file": "defeat-2.ogg",
+    "text": "まだ試合は、終わってない……",
+    "originalText": "まだ試合は、終わってない……",
+    "caption": "高校生の男子スポーツ少年声。若く熱血な中音。元気でまっすぐ、試合中のエースのように勢いよく叫ぶ。大人っぽくせず、語尾をだらけさせず、歯切れよく明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "DODGEBALL",
+    "heroName": "バスケ部エース",
+    "file": "defeat-3.ogg",
+    "text": "一本、届かなかったか……",
+    "originalText": "一本、届かなかったか……",
+    "caption": "高校生の男子スポーツ少年声。若く熱血な中音。元気でまっすぐ、試合中のエースのように勢いよく叫ぶ。大人っぽくせず、語尾をだらけさせず、歯切れよく明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "DODGEBALL",
+    "heroName": "バスケ部エース",
+    "file": "defeat-4.ogg",
+    "text": "みんな、後は頼む……",
+    "originalText": "みんな、後は頼む……",
+    "caption": "高校生の男子スポーツ少年声。若く熱血な中音。元気でまっすぐ、試合中のエースのように勢いよく叫ぶ。大人っぽくせず、語尾をだらけさせず、歯切れよく明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "DODGEBALL",
+    "heroName": "バスケ部エース",
+    "file": "defeat-5.ogg",
+    "text": "次は、絶対に負けねえ……",
+    "originalText": "次は、絶対に負けねえ……",
+    "caption": "高校生の男子スポーツ少年声。若く熱血な中音。元気でまっすぐ、試合中のエースのように勢いよく叫ぶ。大人っぽくせず、語尾をだらけさせず、歯切れよく明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "GARDENER",
+    "heroName": "園芸部部長",
+    "file": "attack-1.ogg",
+    "text": "今だ、伸びろ！",
+    "originalText": "今だ、伸びろ！",
+    "caption": "高校生の男子アニメ声。優しくおだやかな若い中音。老成させず、好青年らしく誠実で柔らかい。語尾をだらけさせず、最後まで明るく丁寧に言い切る。植物を大切にする落ち着いた口調で明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "GARDENER",
+    "heroName": "園芸部部長",
+    "file": "attack-2.ogg",
+    "text": "根を張って！",
+    "originalText": "根を張って！",
+    "caption": "高校生の男子アニメ声。優しくおだやかな若い中音。老成させず、好青年らしく誠実で柔らかい。語尾をだらけさせず、最後まで明るく丁寧に言い切る。植物を大切にする落ち着いた口調で明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "GARDENER",
+    "heroName": "園芸部部長",
+    "file": "attack-3.ogg",
+    "text": "芽吹く力を！",
+    "originalText": "芽吹く力を！",
+    "caption": "高校生の男子アニメ声。優しくおだやかな若い中音。老成させず、好青年らしく誠実で柔らかい。語尾をだらけさせず、最後まで明るく丁寧に言い切る。植物を大切にする落ち着いた口調で明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "GARDENER",
+    "heroName": "園芸部部長",
+    "file": "attack-4.ogg",
+    "text": "道を開こう！",
+    "originalText": "道を開こう！",
+    "caption": "高校生の男子アニメ声。優しくおだやかな若い中音。老成させず、好青年らしく誠実で柔らかい。語尾をだらけさせず、最後まで明るく丁寧に言い切る。植物を大切にする落ち着いた口調で明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "GARDENER",
+    "heroName": "園芸部部長",
+    "file": "attack-5.ogg",
+    "text": "大地よ、力を！",
+    "originalText": "大地よ、力を！",
+    "caption": "高校生の男子アニメ声。優しくおだやかな若い中音。老成させず、好青年らしく誠実で柔らかい。語尾をだらけさせず、最後まで明るく丁寧に言い切る。植物を大切にする落ち着いた口調で明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "GARDENER",
+    "heroName": "園芸部部長",
+    "file": "summon-1.ogg",
+    "text": "おいで、陽の当たる場所へ。",
+    "originalText": "おいで、陽の当たる場所へ。",
+    "caption": "高校生の男子アニメ声。優しくおだやかな若い中音。老成させず、好青年らしく誠実で柔らかい。語尾をだらけさせず、最後まで明るく丁寧に言い切る。植物を大切にする落ち着いた口調で明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "GARDENER",
+    "heroName": "園芸部部長",
+    "file": "summon-2.ogg",
+    "text": "育てた力を見せてくれ。",
+    "originalText": "育てた力を見せてくれ。",
+    "caption": "高校生の男子アニメ声。優しくおだやかな若い中音。老成させず、好青年らしく誠実で柔らかい。語尾をだらけさせず、最後まで明るく丁寧に言い切る。植物を大切にする落ち着いた口調で明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "GARDENER",
+    "heroName": "園芸部部長",
+    "file": "summon-3.ogg",
+    "text": "一緒に根を張ろう。",
+    "originalText": "一緒に根を張ろう。",
+    "caption": "高校生の男子アニメ声。優しくおだやかな若い中音。老成させず、好青年らしく誠実で柔らかい。語尾をだらけさせず、最後まで明るく丁寧に言い切る。植物を大切にする落ち着いた口調で明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "GARDENER",
+    "heroName": "園芸部部長",
+    "file": "summon-4.ogg",
+    "text": "さあ、芽吹く時間だ。",
+    "originalText": "さあ、芽吹く時間だ。",
+    "caption": "高校生の男子アニメ声。優しくおだやかな若い中音。老成させず、好青年らしく誠実で柔らかい。語尾をだらけさせず、最後まで明るく丁寧に言い切る。植物を大切にする落ち着いた口調で明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "GARDENER",
+    "heroName": "園芸部部長",
+    "file": "summon-5.ogg",
+    "text": "頼むよ、大切な仲間。",
+    "originalText": "頼むよ、大切な仲間。",
+    "caption": "高校生の男子アニメ声。優しくおだやかな若い中音。老成させず、好青年らしく誠実で柔らかい。語尾をだらけさせず、最後まで明るく丁寧に言い切る。植物を大切にする落ち着いた口調で明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "GARDENER",
+    "heroName": "園芸部部長",
+    "file": "block-1.ogg",
+    "text": "根は簡単に折れない！",
+    "originalText": "根は簡単に折れない！",
+    "caption": "高校生の男子アニメ声。優しくおだやかな若い中音。老成させず、好青年らしく誠実で柔らかい。語尾をだらけさせず、最後まで明るく丁寧に言い切る。植物を大切にする落ち着いた口調で明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "GARDENER",
+    "heroName": "園芸部部長",
+    "file": "block-2.ogg",
+    "text": "この場所は守るよ。",
+    "originalText": "この場所は守るよ。",
+    "caption": "高校生の男子アニメ声。優しくおだやかな若い中音。老成させず、好青年らしく誠実で柔らかい。語尾をだらけさせず、最後まで明るく丁寧に言い切る。植物を大切にする落ち着いた口調で明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "GARDENER",
+    "heroName": "園芸部部長",
+    "file": "block-3.ogg",
+    "text": "葉を広げて、守るよ！",
+    "originalText": "葉を広げて！",
+    "caption": "高校生の男子アニメ声。優しくおだやかな若い中音。老成させず、好青年らしく誠実で柔らかい。語尾をだらけさせず、最後まで明るく丁寧に言い切る。植物を大切にする落ち着いた口調で明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "GARDENER",
+    "heroName": "園芸部部長",
+    "file": "block-4.ogg",
+    "text": "嵐にも耐えてみせる。",
+    "originalText": "嵐にも耐えてみせる。",
+    "caption": "高校生の男子アニメ声。優しくおだやかな若い中音。老成させず、好青年らしく誠実で柔らかい。語尾をだらけさせず、最後まで明るく丁寧に言い切る。植物を大切にする落ち着いた口調で明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "GARDENER",
+    "heroName": "園芸部部長",
+    "file": "block-5.ogg",
+    "text": "しっかり支える！",
+    "originalText": "しっかり支える！",
+    "caption": "高校生の男子アニメ声。優しくおだやかな若い中音。老成させず、好青年らしく誠実で柔らかい。語尾をだらけさせず、最後まで明るく丁寧に言い切る。植物を大切にする落ち着いた口調で明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "GARDENER",
+    "heroName": "園芸部部長",
+    "file": "power-1.ogg",
+    "text": "成長を感じるよ。",
+    "originalText": "成長を感じるよ。",
+    "caption": "高校生の男子アニメ声。優しくおだやかな若い中音。老成させず、好青年らしく誠実で柔らかい。語尾をだらけさせず、最後まで明るく丁寧に言い切る。植物を大切にする落ち着いた口調で明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "GARDENER",
+    "heroName": "園芸部部長",
+    "file": "power-2.ogg",
+    "text": "陽の光が満ちてきた。",
+    "originalText": "陽の光が満ちてきた。",
+    "caption": "高校生の男子アニメ声。優しくおだやかな若い中音。老成させず、好青年らしく誠実で柔らかい。語尾をだらけさせず、最後まで明るく丁寧に言い切る。植物を大切にする落ち着いた口調で明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "GARDENER",
+    "heroName": "園芸部部長",
+    "file": "power-3.ogg",
+    "text": "大きく育ってくれ。",
+    "originalText": "大きく育ってくれ。",
+    "caption": "高校生の男子アニメ声。優しくおだやかな若い中音。老成させず、好青年らしく誠実で柔らかい。語尾をだらけさせず、最後まで明るく丁寧に言い切る。植物を大切にする落ち着いた口調で明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "GARDENER",
+    "heroName": "園芸部部長",
+    "file": "power-4.ogg",
+    "text": "積み重ねは裏切らない。",
+    "originalText": "積み重ねは裏切らない。",
+    "caption": "高校生の男子アニメ声。優しくおだやかな若い中音。老成させず、好青年らしく誠実で柔らかい。語尾をだらけさせず、最後まで明るく丁寧に言い切る。植物を大切にする落ち着いた口調で明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "GARDENER",
+    "heroName": "園芸部部長",
+    "file": "power-5.ogg",
+    "text": "今こそ花開くときだ！",
+    "originalText": "今こそ花開くときだ！",
+    "caption": "高校生の男子アニメ声。優しくおだやかな若い中音。老成させず、好青年らしく誠実で柔らかい。語尾をだらけさせず、最後まで明るく丁寧に言い切る。植物を大切にする落ち着いた口調で明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "GARDENER",
+    "heroName": "園芸部部長",
+    "file": "damage-1.ogg",
+    "text": "うっ、でも根は残る！",
+    "originalText": "うっ！",
+    "caption": "高校生の男子アニメ声。優しくおだやかな若い中音。老成させず、好青年らしく誠実で柔らかい。語尾をだらけさせず、最後まで明るく丁寧に言い切る。植物を大切にする落ち着いた口調で明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "GARDENER",
+    "heroName": "園芸部部長",
+    "file": "damage-2.ogg",
+    "text": "枝が折れそうだ……！",
+    "originalText": "枝が折れそうだ……！",
+    "caption": "高校生の男子アニメ声。優しくおだやかな若い中音。老成させず、好青年らしく誠実で柔らかい。語尾をだらけさせず、最後まで明るく丁寧に言い切る。植物を大切にする落ち着いた口調で明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "GARDENER",
+    "heroName": "園芸部部長",
+    "file": "damage-3.ogg",
+    "text": "まだ根は生きてる。",
+    "originalText": "まだ根は生きてる。",
+    "caption": "高校生の男子アニメ声。優しくおだやかな若い中音。老成させず、好青年らしく誠実で柔らかい。語尾をだらけさせず、最後まで明るく丁寧に言い切る。植物を大切にする落ち着いた口調で明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "GARDENER",
+    "heroName": "園芸部部長",
+    "file": "damage-4.ogg",
+    "text": "この程度の風なら！",
+    "originalText": "この程度の風なら！",
+    "caption": "高校生の男子アニメ声。優しくおだやかな若い中音。老成させず、好青年らしく誠実で柔らかい。語尾をだらけさせず、最後まで明るく丁寧に言い切る。植物を大切にする落ち着いた口調で明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "GARDENER",
+    "heroName": "園芸部部長",
+    "file": "damage-5.ogg",
+    "text": "踏ん張らないと！",
+    "originalText": "踏ん張らないと！",
+    "caption": "高校生の男子アニメ声。優しくおだやかな若い中音。老成させず、好青年らしく誠実で柔らかい。語尾をだらけさせず、最後まで明るく丁寧に言い切る。植物を大切にする落ち着いた口調で明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "GARDENER",
+    "heroName": "園芸部部長",
+    "file": "item-1.ogg",
+    "text": "栄養を補給しよう。",
+    "originalText": "栄養を補給しよう。",
+    "caption": "高校生の男子アニメ声。優しくおだやかな若い中音。老成させず、好青年らしく誠実で柔らかい。語尾をだらけさせず、最後まで明るく丁寧に言い切る。植物を大切にする落ち着いた口調で明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "GARDENER",
+    "heroName": "園芸部部長",
+    "file": "item-2.ogg",
+    "text": "水やりを忘れずに。",
+    "originalText": "水やりを忘れずに。",
+    "caption": "高校生の男子アニメ声。優しくおだやかな若い中音。老成させず、好青年らしく誠実で柔らかい。語尾をだらけさせず、最後まで明るく丁寧に言い切る。植物を大切にする落ち着いた口調で明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "GARDENER",
+    "heroName": "園芸部部長",
+    "file": "item-3.ogg",
+    "text": "これで元気になる。",
+    "originalText": "これで元気になる。",
+    "caption": "高校生の男子アニメ声。優しくおだやかな若い中音。老成させず、好青年らしく誠実で柔らかい。語尾をだらけさせず、最後まで明るく丁寧に言い切る。植物を大切にする落ち着いた口調で明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "GARDENER",
+    "heroName": "園芸部部長",
+    "file": "item-4.ogg",
+    "text": "肥料は今が使いどきだ。",
+    "originalText": "肥料は今が使いどきだ。",
+    "caption": "高校生の男子アニメ声。優しくおだやかな若い中音。老成させず、好青年らしく誠実で柔らかい。語尾をだらけさせず、最後まで明るく丁寧に言い切る。植物を大切にする落ち着いた口調で明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "GARDENER",
+    "heroName": "園芸部部長",
+    "file": "item-5.ogg",
+    "text": "少し手入れをしよう。",
+    "originalText": "少し手入れをしよう。",
+    "caption": "高校生の男子アニメ声。優しくおだやかな若い中音。老成させず、好青年らしく誠実で柔らかい。語尾をだらけさせず、最後まで明るく丁寧に言い切る。植物を大切にする落ち着いた口調で明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "GARDENER",
+    "heroName": "園芸部部長",
+    "file": "finish-1.ogg",
+    "text": "努力が実を結んだね。",
+    "originalText": "努力が実を結んだね。",
+    "caption": "高校生の男子アニメ声。優しくおだやかな若い中音。老成させず、好青年らしく誠実で柔らかい。語尾をだらけさせず、最後まで明るく丁寧に言い切る。植物を大切にする落ち着いた口調で明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "GARDENER",
+    "heroName": "園芸部部長",
+    "file": "finish-2.ogg",
+    "text": "きれいな花が咲いたよ。",
+    "originalText": "きれいな花が咲いたよ。",
+    "caption": "高校生の男子アニメ声。優しくおだやかな若い中音。老成させず、好青年らしく誠実で柔らかい。語尾をだらけさせず、最後まで明るく丁寧に言い切る。植物を大切にする落ち着いた口調で明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "GARDENER",
+    "heroName": "園芸部部長",
+    "file": "finish-3.ogg",
+    "text": "これが育てた力だ！",
+    "originalText": "これが育てた力だ！",
+    "caption": "高校生の男子アニメ声。優しくおだやかな若い中音。老成させず、好青年らしく誠実で柔らかい。語尾をだらけさせず、最後まで明るく丁寧に言い切る。植物を大切にする落ち着いた口調で明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "GARDENER",
+    "heroName": "園芸部部長",
+    "file": "finish-4.ogg",
+    "text": "収穫の時間だね。",
+    "originalText": "収穫の時間だね。",
+    "caption": "高校生の男子アニメ声。優しくおだやかな若い中音。老成させず、好青年らしく誠実で柔らかい。語尾をだらけさせず、最後まで明るく丁寧に言い切る。植物を大切にする落ち着いた口調で明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "GARDENER",
+    "heroName": "園芸部部長",
+    "file": "finish-5.ogg",
+    "text": "大地に還って、また芽吹いて。",
+    "originalText": "大地に還って、また芽吹いて。",
+    "caption": "高校生の男子アニメ声。優しくおだやかな若い中音。老成させず、好青年らしく誠実で柔らかい。語尾をだらけさせず、最後まで明るく丁寧に言い切る。植物を大切にする落ち着いた口調で明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "GARDENER",
+    "heroName": "園芸部部長",
+    "file": "defeat-1.ogg",
+    "text": "まだ、育てたいものが……",
+    "originalText": "まだ、育てたいものが……",
+    "caption": "高校生の男子アニメ声。優しくおだやかな若い中音。老成させず、好青年らしく誠実で柔らかい。語尾をだらけさせず、最後まで明るく丁寧に言い切る。植物を大切にする落ち着いた口調で明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "GARDENER",
+    "heroName": "園芸部部長",
+    "file": "defeat-2.ogg",
+    "text": "根を、張りきれなかった……",
+    "originalText": "根を、張りきれなかった……",
+    "caption": "高校生の男子アニメ声。優しくおだやかな若い中音。老成させず、好青年らしく誠実で柔らかい。語尾をだらけさせず、最後まで明るく丁寧に言い切る。植物を大切にする落ち着いた口調で明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "GARDENER",
+    "heroName": "園芸部部長",
+    "file": "defeat-3.ogg",
+    "text": "みんなの花を、守れない……",
+    "originalText": "みんなの花を、守れない……",
+    "caption": "高校生の男子アニメ声。優しくおだやかな若い中音。老成させず、好青年らしく誠実で柔らかい。語尾をだらけさせず、最後まで明るく丁寧に言い切る。植物を大切にする落ち着いた口調で明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "GARDENER",
+    "heroName": "園芸部部長",
+    "file": "defeat-4.ogg",
+    "text": "水やりを、頼んだよ……",
+    "originalText": "水やりを、頼んだよ……",
+    "caption": "高校生の男子アニメ声。優しくおだやかな若い中音。老成させず、好青年らしく誠実で柔らかい。語尾をだらけさせず、最後まで明るく丁寧に言い切る。植物を大切にする落ち着いた口調で明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  },
+  {
+    "hero": "GARDENER",
+    "heroName": "園芸部部長",
+    "file": "defeat-5.ogg",
+    "text": "次の季節まで、休ませて……",
+    "originalText": "次の季節まで、休ませて……",
+    "caption": "高校生の男子アニメ声。優しくおだやかな若い中音。老成させず、好青年らしく誠実で柔らかい。語尾をだらけさせず、最後まで明るく丁寧に言い切る。植物を大切にする落ち着いた口調で明瞭に話す。",
+    "engine": "Aratako/Irodori-TTS-500M-v2-VoiceDesign"
+  }
+]

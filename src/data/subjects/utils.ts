@@ -20,6 +20,8 @@ export interface GeneralProblem {
     question: string;
     answer: string;
     options: string[];
+    passage?: string;
+    passageTitle?: string;
     hint?: string;
     unitLabel?: string;
     visual?: ProblemVisual;
@@ -90,6 +92,8 @@ const problemSignature = (problem: GeneralProblem): string =>
         question: problem.question,
         answer: problem.answer,
         options: problem.options,
+        passage: problem.passage,
+        passageTitle: problem.passageTitle,
         hint: problem.hint,
         unitLabel: problem.unitLabel,
         visual: problem.visual,

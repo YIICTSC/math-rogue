@@ -14,6 +14,7 @@ tmp/
 # Generated voice source files are too large for the repo. Commit compressed OGG files instead.
 public/sfx/magic-voices/**/*.wav
 public/sfx/magic-event-voices/**/*.wav
+public/sfx/high-school-voices/**/*.wav
 
 # Local iOS app work. Keep the GitHub repo focused on the web game.
 ios/

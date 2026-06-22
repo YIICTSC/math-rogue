@@ -738,7 +738,13 @@ const makeRefinedLanguageProblem = (unitId: string, n: number): GeneralProblem =
 });
 KOKUGO_G1_UNIT_DATA.KOKUGO_G1_U06 = Array.from({ length: 83 }, (_, n) => makeRefinedLanguageProblem('KOKUGO_G1_U06', n));
 (['KOKUGO_G1_U07', 'KOKUGO_G1_U08', 'KOKUGO_G1_U09', 'KOKUGO_G1_U10', 'KOKUGO_G1_U11', 'KOKUGO_G1_U12', 'KOKUGO_G1_U13', 'KOKUGO_G1_U14', 'KOKUGO_G1_U15', 'KOKUGO_G1_U16'] as const).forEach((unitId) => {
-  KOKUGO_G1_UNIT_DATA[unitId] = Array.from({ length: 50 }, (_, n) => makeRefinedLanguageProblem(unitId, n));
+  KOKUGO_G1_UNIT_DATA[unitId] = Array.from({ length: 50 }, (_, n) => {
+    const problem=makeRefinedLanguageProblem(unitId,n);
+    if(unitId!=='KOKUGO_G1_U07')return problem;
+    const text=refinedStories[n%10].text;
+    const label=`おはなし ${n%10+1}`;
+    return{...problem,question:problem.question.replace(`「${text}」`,label),passage:text,passageTitle:`${label}の ぶん`};
+  });
 });
 
 const generatedUnitData = Object.fromEntries(Object.entries(KOKUGO_G1_UNIT_DATA).filter(([, items]) => items.length === 0)) as Record<string, GeneralProblem[]>;

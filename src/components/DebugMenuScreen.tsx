@@ -71,6 +71,29 @@ const MAGIC_BATTLE_VOICE_GROUPS = [
     { title: '専用カード', files: ['spell-1', 'spell-2', 'spell-3'] },
 ];
 
+const HIGH_SCHOOL_VOICE_CHARACTERS = [
+    { id: 'WARRIOR', name: '反逆の高校生', label: '攻撃タイプ' },
+    { id: 'CARETAKER', name: '生物部の先輩', label: '捕獲タイプ' },
+    { id: 'ASSASSIN', name: '謎めく転入生', label: 'テクニカル' },
+    { id: 'MAGE', name: '化学研究会長', label: '実験タイプ' },
+    { id: 'DODGEBALL', name: 'バスケ部エース', label: 'スピード' },
+    { id: 'BARD', name: '放送部ディレクター', label: 'デバフ・反射' },
+    { id: 'LIBRARIAN', name: '文芸部書記', label: '戦略・保留' },
+    { id: 'CHEF', name: '学食の料理長', label: 'パワー' },
+    { id: 'GARDENER', name: '園芸部部長', label: '育成タイプ' },
+];
+
+const HIGH_SCHOOL_BATTLE_VOICE_GROUPS = [
+    { title: '攻撃', files: ['attack-1', 'attack-2', 'attack-3', 'attack-4', 'attack-5'] },
+    { title: '召喚', files: ['summon-1', 'summon-2', 'summon-3', 'summon-4', 'summon-5'] },
+    { title: 'ブロック', files: ['block-1', 'block-2', 'block-3', 'block-4', 'block-5'] },
+    { title: 'パワー', files: ['power-1', 'power-2', 'power-3', 'power-4', 'power-5'] },
+    { title: '被ダメ', files: ['damage-1', 'damage-2', 'damage-3', 'damage-4', 'damage-5'] },
+    { title: 'アイテム', files: ['item-1', 'item-2', 'item-3', 'item-4', 'item-5'] },
+    { title: 'フィニッシュ', files: ['finish-1', 'finish-2', 'finish-3', 'finish-4', 'finish-5'] },
+    { title: '戦闘不能', files: ['defeat-1', 'defeat-2', 'defeat-3', 'defeat-4', 'defeat-5'] },
+];
+
 const TranslationRow = React.memo(({ original, context, debugLanguageMode, isInline = false }: { original: string, context?: string, debugLanguageMode: LanguageMode, isInline?: boolean }) => {
     const translated = trans(original, debugLanguageMode);
     const isMissing = debugLanguageMode === 'HIRAGANA' && translated === original && original.match(/[一-龠]/);
@@ -111,6 +134,9 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
     const [transSubTab, setTransSubTab] = useState<'STORY' | 'FLAVOR' | 'CARD' | 'EVENT' | 'ENEMY' | 'MISSING'>('STORY');
     const [copied, setCopied] = useState(false);
     const [magicVoiceHeroId, setMagicVoiceHeroId] = useState('AKARI');
+    const [highSchoolVoiceHeroId, setHighSchoolVoiceHeroId] = useState('WARRIOR');
+    const [highSchoolVoiceFixTargets, setHighSchoolVoiceFixTargets] = useState<string[]>([]);
+    const [highSchoolVoiceFixCopied, setHighSchoolVoiceFixCopied] = useState(false);
     const [magicVoiceEventHeroId, setMagicVoiceEventHeroId] = useState('AKARI');
     const [magicVoiceEventTargetId, setMagicVoiceEventTargetId] = useState('REN');
     const [magicVoiceEventStage, setMagicVoiceEventStage] = useState(0);
@@ -136,6 +162,17 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
         () => MAGIC_VOICE_CHARACTERS.find(hero => hero.id === magicVoiceHeroId) ?? MAGIC_VOICE_CHARACTERS[0],
         [magicVoiceHeroId]
     );
+    const selectedHighSchoolVoiceHero = useMemo(
+        () => HIGH_SCHOOL_VOICE_CHARACTERS.find(hero => hero.id === highSchoolVoiceHeroId) ?? HIGH_SCHOOL_VOICE_CHARACTERS[0],
+        [highSchoolVoiceHeroId]
+    );
+    const highSchoolVoiceFixText = useMemo(() => {
+        return highSchoolVoiceFixTargets.map(key => {
+            const [heroId, file] = key.split('/');
+            const hero = HIGH_SCHOOL_VOICE_CHARACTERS.find(entry => entry.id === heroId);
+            return `${hero?.name ?? heroId}\t${heroId}\t${file}.ogg`;
+        }).join('\n');
+    }, [highSchoolVoiceFixTargets]);
     const eventProtagonist = useMemo(
         () => MAGIC_VOICE_CHARACTERS.find(hero => hero.id === magicVoiceEventHeroId) ?? MAGIC_VOICE_CHARACTERS[0],
         [magicVoiceEventHeroId]
@@ -341,6 +378,22 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
                 .map(line => line.voiceLine)
                 .filter((line): line is { heroId: string; lineId: string } => !!line)
         );
+    };
+
+    const toggleHighSchoolVoiceFixTarget = (heroId: string, file: string) => {
+        const key = `${heroId}/${file}`;
+        setHighSchoolVoiceFixTargets(prev => {
+            if (prev.includes(key)) return prev.filter(entry => entry !== key);
+            return [...prev, key].sort();
+        });
+        setHighSchoolVoiceFixCopied(false);
+    };
+
+    const copyHighSchoolVoiceFixTargets = async () => {
+        if (!highSchoolVoiceFixText) return;
+        await navigator.clipboard.writeText(highSchoolVoiceFixText);
+        setHighSchoolVoiceFixCopied(true);
+        window.setTimeout(() => setHighSchoolVoiceFixCopied(false), 1600);
     };
 
     return (
@@ -678,6 +731,92 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
                                                                 <Volume2 size={13} /> {file}.ogg
                                                             </button>
                                                         ))}
+                                                    </div>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </section>
+
+                                <section className="space-y-4">
+                                    <div className="flex items-center justify-between gap-3 border-b border-sky-700/60 pb-3">
+                                        <h3 className="text-sky-300 font-bold flex items-center">
+                                            <Volume2 size={18} className="mr-2" /> 高校編 戦闘ボイス確認
+                                        </h3>
+                                        <div className="text-xs text-gray-400">9人 / 8カテゴリ / 各5種 / 要修正 {highSchoolVoiceFixTargets.length}</div>
+                                    </div>
+                                    <div className="grid grid-cols-1 lg:grid-cols-[260px_1fr] gap-4">
+                                        <div className="bg-black/35 border border-gray-700 rounded-lg p-3 space-y-2">
+                                            <div className="text-xs font-bold text-gray-400">キャラクター</div>
+                                            <select
+                                                value={highSchoolVoiceHeroId}
+                                                onChange={(event) => setHighSchoolVoiceHeroId(event.target.value)}
+                                                className="w-full bg-slate-950 border border-sky-700/70 rounded px-3 py-2 text-sm font-bold text-white outline-none focus:border-sky-300"
+                                            >
+                                                {HIGH_SCHOOL_VOICE_CHARACTERS.map(hero => (
+                                                    <option key={hero.id} value={hero.id}>{hero.name} / {hero.id}</option>
+                                                ))}
+                                            </select>
+                                            <div className="rounded border border-sky-900/60 bg-sky-950/20 p-3">
+                                                <div className="text-base font-black text-white">{selectedHighSchoolVoiceHero.name}</div>
+                                                <div className="text-xs text-sky-200">{selectedHighSchoolVoiceHero.label}</div>
+                                                <div className="mt-2 text-[10px] text-gray-500 font-mono">{selectedHighSchoolVoiceHero.id}</div>
+                                            </div>
+                                            <div className="rounded border border-gray-700 bg-black/40 p-3 space-y-2">
+                                                <div className="flex items-center justify-between gap-2">
+                                                    <div className="text-xs font-black text-sky-100">要修正リスト</div>
+                                                    <button
+                                                        onClick={copyHighSchoolVoiceFixTargets}
+                                                        disabled={!highSchoolVoiceFixText}
+                                                        className="bg-sky-800 hover:bg-sky-700 disabled:bg-gray-700 disabled:text-gray-500 text-white px-2 py-1 rounded font-bold text-[10px] flex items-center gap-1"
+                                                    >
+                                                        {highSchoolVoiceFixCopied ? <Check size={12} /> : <Copy size={12} />}
+                                                        {highSchoolVoiceFixCopied ? 'コピー済み' : 'コピー'}
+                                                    </button>
+                                                </div>
+                                                <textarea
+                                                    readOnly
+                                                    value={highSchoolVoiceFixText}
+                                                    placeholder="要修正にチェックしたボイスがここに並びます"
+                                                    className="h-28 w-full resize-none rounded border border-gray-700 bg-slate-950 p-2 text-[10px] leading-relaxed text-sky-50 outline-none"
+                                                />
+                                                <button
+                                                    onClick={() => setHighSchoolVoiceFixTargets([])}
+                                                    disabled={highSchoolVoiceFixTargets.length === 0}
+                                                    className="w-full bg-gray-800 hover:bg-gray-700 disabled:bg-gray-800 disabled:text-gray-600 text-gray-200 py-1.5 rounded font-bold text-[10px]"
+                                                >
+                                                    チェックを全解除
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-3">
+                                            {HIGH_SCHOOL_BATTLE_VOICE_GROUPS.map(group => (
+                                                <div key={group.title} className="bg-black/35 border border-gray-700 rounded-lg p-3">
+                                                    <div className="mb-2 text-sm font-black text-sky-100">{group.title}</div>
+                                                    <div className="space-y-2">
+                                                        {group.files.map(file => {
+                                                            const fixKey = `${highSchoolVoiceHeroId}/${file}`;
+                                                            const needsFix = highSchoolVoiceFixTargets.includes(fixKey);
+                                                            return (
+                                                                <div key={file} className={`rounded border p-2 ${needsFix ? 'border-red-500 bg-red-950/35' : 'border-sky-900/50 bg-slate-950/45'}`}>
+                                                                    <button
+                                                                        onClick={() => audioService.playHighSchoolVoiceFile(highSchoolVoiceHeroId, file)}
+                                                                        className="w-full bg-sky-800 hover:bg-sky-700 text-white py-2 rounded font-bold text-xs flex items-center justify-center gap-2"
+                                                                    >
+                                                                        <Volume2 size={13} /> {file}.ogg
+                                                                    </button>
+                                                                    <label className="mt-2 flex items-center justify-center gap-2 text-[10px] font-bold text-red-200">
+                                                                        <input
+                                                                            type="checkbox"
+                                                                            checked={needsFix}
+                                                                            onChange={() => toggleHighSchoolVoiceFixTarget(highSchoolVoiceHeroId, file)}
+                                                                            className="h-4 w-4 accent-red-500"
+                                                                        />
+                                                                        要修正
+                                                                    </label>
+                                                                </div>
+                                                            );
+                                                        })}
                                                     </div>
                                                 </div>
                                             ))}

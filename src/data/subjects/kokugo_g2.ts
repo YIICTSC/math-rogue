@@ -285,7 +285,7 @@ const makeRefinedG2Problem = (unitId: string, n: number): GeneralProblem => {
     const otherGroups = refinedKatakanaWords.filter((row) => row.group !== item.group);
     if (variant === 0) return { question: `ひらがなの「${item.reading}」を カタカナで 書いたものは？`, answer: item.word, options: g2Choices(item.word, otherGroups.map((row) => row.word), index), hint: `「${item.reading}」は「${item.word}」と 書く。` };
     if (variant === 1) return { question: `「${item.word}」の はじめの カタカナは？`, answer: [...item.word][0], options: g2Choices([...item.word][0], refinedKatakanaWords.map((row) => [...row.word][0]), index), hint: 'いちばん はじめの 文字を 見よう。' };
-    return { question: `${item.group}を あらわす カタカナの ことばは？`, answer: item.word, options: g2Choices(item.word, otherGroups.map((row) => row.word), index), hint: `「${item.word}」は ${item.group}を あらわす。` };
+    return { question: `「${item.reading}」と よむ ${item.group}の カタカナは？`, answer: item.word, options: g2Choices(item.word, otherGroups.map((row) => row.word), index), hint: `「${item.word}」は ${item.group}を あらわす。` };
   }
 
   const variant = n % 5;
@@ -379,7 +379,13 @@ const makeRefinedG2Problem = (unitId: string, n: number): GeneralProblem => {
 
 KOKUGO_G2_UNIT_DATA.KOKUGO_G2_U01 = Array.from({ length: 66 }, (_, n) => makeRefinedG2Problem('KOKUGO_G2_U01', n));
 (['KOKUGO_G2_U02', 'KOKUGO_G2_U03', 'KOKUGO_G2_U04', 'KOKUGO_G2_U05', 'KOKUGO_G2_U06', 'KOKUGO_G2_U07', 'KOKUGO_G2_U08', 'KOKUGO_G2_U09', 'KOKUGO_G2_U10', 'KOKUGO_G2_U11'] as const).forEach((unitId) => {
-  KOKUGO_G2_UNIT_DATA[unitId] = Array.from({ length: 50 }, (_, n) => makeRefinedG2Problem(unitId, n));
+  KOKUGO_G2_UNIT_DATA[unitId] = Array.from({ length: 50 }, (_, n) => {
+    const problem=makeRefinedG2Problem(unitId,n);
+    if(unitId!=='KOKUGO_G2_U06'&&unitId!=='KOKUGO_G2_U10')return problem;
+    const text=refinedStories[n%10].text;
+    const label=`${n%10+1}`;
+    return{...problem,question:problem.question.replace(`物語「${text}」`,`物語 ${label}`).replace(`話「${text}」`,`話 ${label}`),passage:text,passageTitle:`物語 ${label}の 本文`};
+  });
 });
 
 export const KOKUGO_G2_DATA: Record<string, GeneralProblem[]> = {

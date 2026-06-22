@@ -1263,7 +1263,7 @@ class AudioService {
   }
 
   private isVoiceSfxName(name: string) {
-      return name.startsWith('magic-voice-') || name.startsWith('magic-event-voice-');
+      return name.startsWith('magic-voice-') || name.startsWith('magic-event-voice-') || name.startsWith('high-school-voice-');
   }
 
   private getHtmlSfxVolume(name: string) {
@@ -1388,6 +1388,44 @@ class AudioService {
               `/sfx/magic-voices/${safeHeroId}/${voiceNameForPath}.wav`,
               `sfx/magic-voices/${safeHeroId}/${voiceNameForPath}.ogg`,
               `sfx/magic-voices/${safeHeroId}/${voiceNameForPath}.wav`,
+          ],
+          maxDurationMs,
+          false,
+          generation,
+      );
+  }
+
+  public playHighSchoolVoice(
+      heroId: string | undefined,
+      action: 'attack' | 'summon' | 'block' | 'power' | 'damage' | 'item' | 'finish' | 'defeat' = 'attack',
+      variantCount = 5,
+  ) {
+      const safeAction = action.replace(/[^a-z0-9_-]/gi, '').toLowerCase();
+      const voiceName = `${safeAction}-${Math.floor(Math.random() * Math.max(1, variantCount)) + 1}`;
+      this.playHighSchoolVoiceFile(heroId, voiceName, 2600);
+  }
+
+  public playHighSchoolVoiceFile(heroId: string | undefined, voiceName: string | undefined, maxDurationMs = 2600) {
+      if (!heroId || !voiceName) return Promise.resolve(false);
+      this.init();
+      if (!this.ctx || !this.sfxGain || this.isMuted) return Promise.resolve(false);
+      const safeHeroId = heroId.replace(/[^A-Z0-9_-]/gi, '').toUpperCase();
+      const safeVoiceName = voiceName.replace(/[^a-z0-9_-]/gi, '').toLowerCase();
+      if (!safeHeroId || !safeVoiceName) return Promise.resolve(false);
+      this.ctx.resume().catch(() => {});
+      const baseUrl = (import.meta as any).env.BASE_URL;
+      const name = `high-school-voice-${safeHeroId}-${safeVoiceName}`;
+      const generation = (this.sfxPlaybackGenerations.get(name) ?? 0) + 1;
+      this.sfxPlaybackGenerations.set(name, generation);
+      return this.playHtmlSfx(
+          name,
+          [
+              `${baseUrl}sfx/high-school-voices/${safeHeroId}/${safeVoiceName}.ogg`,
+              `${baseUrl}sfx/high-school-voices/${safeHeroId}/${safeVoiceName}.wav`,
+              `/sfx/high-school-voices/${safeHeroId}/${safeVoiceName}.ogg`,
+              `/sfx/high-school-voices/${safeHeroId}/${safeVoiceName}.wav`,
+              `sfx/high-school-voices/${safeHeroId}/${safeVoiceName}.ogg`,
+              `sfx/high-school-voices/${safeHeroId}/${safeVoiceName}.wav`,
           ],
           maxDurationMs,
           false,

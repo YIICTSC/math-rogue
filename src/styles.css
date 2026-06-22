@@ -498,6 +498,63 @@ textarea {
   image-rendering: pixelated;
 }
 
+.compendium-ipod-shell {
+  display: grid;
+  grid-template-rows: auto minmax(150px, 1fr) auto auto;
+  width: min(92vw, 390px);
+  height: min(96dvh, 700px);
+  max-height: calc(100dvh - 12px);
+  overflow: hidden;
+}
+
+.compendium-ipod-screen {
+  min-height: 0;
+  height: 100%;
+}
+
+.compendium-ipod-art {
+  height: calc(100% - 76px);
+  min-height: 0;
+}
+
+.compendium-ipod-wheel {
+  width: clamp(150px, 29dvh, 220px);
+  height: clamp(150px, 29dvh, 220px);
+}
+
+@media (orientation: landscape) {
+  .compendium-ipod-shell {
+    grid-template-columns: minmax(0, 1.25fr) minmax(190px, 0.75fr);
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    column-gap: 14px;
+    width: min(94vw, 760px);
+    height: min(94dvh, 430px);
+    padding: 12px !important;
+  }
+
+  .compendium-ipod-header {
+    grid-column: 1 / -1;
+  }
+
+  .compendium-ipod-screen {
+    grid-column: 1;
+    grid-row: 2 / 4;
+  }
+
+  .compendium-ipod-wheel {
+    grid-column: 2;
+    grid-row: 2;
+    width: min(42dvh, 230px);
+    height: min(42dvh, 230px);
+    margin-top: 0 !important;
+  }
+
+  .compendium-ipod-secondary-controls {
+    grid-column: 2;
+    grid-row: 3;
+  }
+}
+
 .magic-male-battle-sprite {
   image-rendering: auto;
   scale: var(--magic-male-sprite-scale, 1);

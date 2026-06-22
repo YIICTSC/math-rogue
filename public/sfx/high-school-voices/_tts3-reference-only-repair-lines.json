@@ -1,0 +1,26 @@
+[
+  {
+    "hero": "LIBRARIAN",
+    "heroName": "文芸部書記",
+    "file": "power-5.ogg",
+    "text": "この想いを、力に。",
+    "originalText": "この想いを、力に。",
+    "seconds": 2.4000000000000004,
+    "reference": "outputs\\high_school_reference_only_refs\\LIBRARIAN-reference-only.wav",
+    "caption": "",
+    "engine": "Aratako/Irodori-TTS-600M-v3-VoiceDesign",
+    "method": "reference-only"
+  },
+  {
+    "hero": "LIBRARIAN",
+    "heroName": "文芸部書記",
+    "file": "damage-1.ogg",
+    "text": "うっ、頁が乱れます。",
+    "originalText": "うっ……！",
+    "seconds": 2.4000000000000004,
+    "reference": "outputs\\high_school_reference_only_refs\\LIBRARIAN-reference-only.wav",
+    "caption": "",
+    "engine": "Aratako/Irodori-TTS-600M-v3-VoiceDesign",
+    "method": "reference-only"
+  }
+]

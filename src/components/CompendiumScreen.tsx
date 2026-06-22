@@ -43,7 +43,7 @@ const shuffleList = <T,>(items: T[]) => {
     return next;
 };
 
-type CompendiumBgmLibraryId = 'mix' | 'elementary' | 'high-school' | 'magic';
+type CompendiumBgmLibraryId = 'mix' | 'elementary' | 'high-school' | 'magic-female' | 'magic-male' | 'minigame';
 
 type CompendiumBgmTrack = {
     id: string;
@@ -53,6 +53,25 @@ type CompendiumBgmTrack = {
     title: string;
     subtitle: string;
 };
+
+const COMPENDIUM_MINIGAME_BGM_TRACKS = new Set([
+    'school_psyche',
+    'dungeon_gym',
+    'dungeon_science',
+    'dungeon_music',
+    'dungeon_library',
+    'dungeon_roof',
+    'dungeon_boss',
+    'kocho_setup',
+    'kocho_battle',
+    'kocho_boss',
+    'poker_shop',
+    'poker_play',
+    'survivor_metal',
+    'paper_plane_setup',
+    'paper_plane_battle',
+    'paper_plane_vacation',
+]);
 
 const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, onBack, languageMode, isDebug = false, visualTheme = 'elementary' }) => {
     const [activeTab, setActiveTab] = useState<'CARDS' | 'RELICS' | 'POTIONS' | 'ENEMIES'>('CARDS');
@@ -533,19 +552,22 @@ const CompendiumBgmModeModal: React.FC<{ cards: ICard[]; languageMode: LanguageM
     const sourceTracks = useMemo(() => [...audioService.getBgmTrackList()], []);
     const initialTheme = useMemo(() => audioService.getBgmTheme(), []);
     const libraries = useMemo(() => ([
-        { id: 'mix' as const, label: 'ALL MIX', caption: '通常・高校・マジック' },
+        { id: 'mix' as const, label: 'ALL MIX', caption: '通常・高校・魔法男女' },
         { id: 'elementary' as const, label: '通常編', caption: 'Original' },
         { id: 'high-school' as const, label: '高校編', caption: 'High School' },
-        { id: 'magic' as const, label: 'マジック編', caption: 'Magic' },
+        { id: 'magic-female' as const, label: 'マジック編 女子', caption: 'Magic Girls' },
+        { id: 'magic-male' as const, label: 'マジック編 男子', caption: 'Magic Boys' },
+        { id: 'minigame' as const, label: 'ミニゲーム', caption: 'Mini Games' },
     ]), []);
     const allTracks = useMemo<CompendiumBgmTrack[]>(() => {
         const themes: Array<{ library: Exclude<CompendiumBgmLibraryId, 'mix'>; theme: BgmThemeId; subtitle: string }> = [
             { library: 'elementary', theme: 'elementary', subtitle: '通常編' },
             { library: 'high-school', theme: 'high-school', subtitle: '高校編' },
-            { library: 'magic', theme: 'magic', subtitle: 'マジック編' },
+            { library: 'magic-female', theme: 'magic-female', subtitle: 'マジック編 女子' },
+            { library: 'magic-male', theme: 'magic-male', subtitle: 'マジック編 男子' },
         ];
-        return themes.flatMap(({ library, theme, subtitle }) =>
-            sourceTracks.map(track => ({
+        const storyTracks = themes.flatMap(({ library, theme, subtitle }) =>
+            sourceTracks.filter(track => !COMPENDIUM_MINIGAME_BGM_TRACKS.has(track)).map(track => ({
                 id: `${theme}::${track}`,
                 type: track,
                 theme,
@@ -554,11 +576,23 @@ const CompendiumBgmModeModal: React.FC<{ cards: ICard[]; languageMode: LanguageM
                 subtitle,
             }))
         );
+        const minigameTracks: CompendiumBgmTrack[] = sourceTracks
+            .filter(track => COMPENDIUM_MINIGAME_BGM_TRACKS.has(track))
+            .map(track => ({
+                id: `elementary::${track}`,
+                type: track,
+                theme: 'elementary',
+                library: 'minigame',
+                title: track.replace(/_/g, ' ').toUpperCase(),
+                subtitle: 'ミニゲーム',
+            }));
+        return [...storyTracks, ...minigameTracks];
     }, [sourceTracks]);
     const [libraryId, setLibraryId] = useState<CompendiumBgmLibraryId>('mix');
+    const [screenView, setScreenView] = useState<'now-playing' | 'playlists'>('now-playing');
     const [playOrder, setPlayOrder] = useState<'sorted' | 'random'>(() => audioService.getBgmAdvanceMode());
     const selectedTracks = useMemo(
-        () => allTracks.filter(track => libraryId === 'mix' || track.library === libraryId),
+        () => allTracks.filter(track => libraryId === 'mix' ? track.library !== 'minigame' : track.library === libraryId),
         [allTracks, libraryId]
     );
     const [randomTrackOrder, setRandomTrackOrder] = useState<CompendiumBgmTrack[]>(() => shuffleList(allTracks));
@@ -591,8 +625,7 @@ const CompendiumBgmModeModal: React.FC<{ cards: ICard[]; languageMode: LanguageM
 
     useEffect(() => {
         setTrackIndex(0);
-        if (playOrder === 'random') setRandomTrackOrder(shuffleList(selectedTracks));
-    }, [libraryId, selectedTracks, playOrder]);
+    }, [libraryId]);
 
     useEffect(() => {
         setImageIndex(0);
@@ -633,7 +666,7 @@ const CompendiumBgmModeModal: React.FC<{ cards: ICard[]; languageMode: LanguageM
             audioService.stopBGM();
             return;
         }
-        void audioService.setBgmTheme(activeTrack.theme).then(() => audioService.playBGM(activeTrack.type as any, isRepeat));
+        void audioService.switchThemeAndPlayBGM(activeTrack.theme, activeTrack.type as any, isRepeat);
         setIsPaused(false);
     }, [activeTrack, bgmTracks, isPlaying, isRepeat, playOrder]);
 
@@ -652,7 +685,7 @@ const CompendiumBgmModeModal: React.FC<{ cards: ICard[]; languageMode: LanguageM
 
     const handleClose = () => {
         audioService.setBgmAdvanceMode('random');
-        void audioService.setBgmTheme(initialTheme).then(() => audioService.playBGM('menu'));
+        void audioService.switchThemeAndPlayBGM(initialTheme, 'menu');
         onClose();
     };
 
@@ -671,7 +704,7 @@ const CompendiumBgmModeModal: React.FC<{ cards: ICard[]; languageMode: LanguageM
     const handlePlayPause = () => {
         if (!isPlaying) {
             setIsPlaying(true);
-            if (activeTrack) void audioService.setBgmTheme(activeTrack.theme).then(() => audioService.playBGM(activeTrack.type as any, isRepeat));
+            if (activeTrack) void audioService.switchThemeAndPlayBGM(activeTrack.theme, activeTrack.type as any, isRepeat);
             setIsPaused(false);
             return;
         }
@@ -694,7 +727,7 @@ const CompendiumBgmModeModal: React.FC<{ cards: ICard[]; languageMode: LanguageM
         const next = !isRepeat;
         setIsRepeat(next);
         if (isPlaying && activeTrack) {
-            void audioService.setBgmTheme(activeTrack.theme).then(() => audioService.playBGM(activeTrack.type as any, next));
+            void audioService.switchThemeAndPlayBGM(activeTrack.theme, activeTrack.type as any, next);
         }
     };
 
@@ -720,7 +753,7 @@ const CompendiumBgmModeModal: React.FC<{ cards: ICard[]; languageMode: LanguageM
         navigator.mediaSession.metadata = new MediaMetadata({
             title: activeTrack.title,
             artist: activeTrack.subtitle,
-            album: '図鑑 iPod BGM'
+            album: '図鑑 Music Mode'
         });
         navigator.mediaSession.setActionHandler('play', () => {
             if (!isPlaying) {
@@ -747,7 +780,7 @@ const CompendiumBgmModeModal: React.FC<{ cards: ICard[]; languageMode: LanguageM
     }, [activeTrack, isPlaying]);
 
     return (
-        <div className="fixed inset-0 z-[80] flex items-center justify-center overflow-auto bg-[radial-gradient(circle_at_top,#1f2937_0%,#030712_48%,#000_100%)] p-3 text-white sm:p-6">
+        <div className="fixed inset-0 z-[80] flex items-center justify-center overflow-hidden bg-[radial-gradient(circle_at_top,#1f2937_0%,#030712_48%,#000_100%)] p-2 text-white">
             <button
                 onClick={(e) => {
                     e.stopPropagation();
@@ -758,20 +791,52 @@ const CompendiumBgmModeModal: React.FC<{ cards: ICard[]; languageMode: LanguageM
                 <X size={22} className="sm:h-[26px] sm:w-[26px]" />
             </button>
 
-            <div className="grid w-full max-w-6xl items-center gap-5 lg:grid-cols-[minmax(320px,430px)_1fr]">
-                <div className="mx-auto w-full max-w-[430px] rounded-[42px] border border-white/80 bg-gradient-to-b from-zinc-100 to-zinc-300 p-5 text-slate-950 shadow-[0_34px_90px_rgba(0,0,0,0.65),inset_0_2px_8px_rgba(255,255,255,0.95)] sm:rounded-[56px] sm:p-7">
-                    <div className="mb-4 flex items-center justify-between px-2 text-[10px] font-black tracking-[0.22em] text-zinc-500">
+            <div className="flex h-full w-full items-center justify-center">
+                <div className="compendium-ipod-shell mx-auto rounded-[38px] border border-white/80 bg-gradient-to-b from-zinc-100 to-zinc-300 p-4 text-slate-950 shadow-[0_34px_90px_rgba(0,0,0,0.65),inset_0_2px_8px_rgba(255,255,255,0.95)]">
+                    <div className="compendium-ipod-header mb-2 flex items-center justify-between px-2 text-[9px] font-black tracking-[0.2em] text-zinc-500">
                         <span>LEARNING ROGUE</span>
-                        <span>iPOD MODE</span>
+                        <span>MUSIC MODE</span>
                     </div>
-                    <div className="relative overflow-hidden rounded-[18px] border-[5px] border-zinc-800 bg-black shadow-inner">
+                    <div className="compendium-ipod-screen relative overflow-hidden rounded-[16px] border-[4px] border-zinc-800 bg-black shadow-inner">
+                        {screenView === 'playlists' ? (
+                            <div className="flex h-full min-h-0 flex-col bg-gradient-to-b from-slate-100 to-slate-300 text-slate-950">
+                                <div className="flex items-center justify-between border-b border-slate-400/70 bg-gradient-to-b from-white to-slate-300 px-3 py-2 text-[11px] font-black">
+                                    <span>PLAYLISTS</span>
+                                    <span>{selectedTracks.length} SONGS</span>
+                                </div>
+                                <div className="min-h-0 flex-1 overflow-y-auto p-2 custom-scrollbar">
+                                    {libraries.map((library, index) => (
+                                        <button
+                                            key={library.id}
+                                            onClick={() => {
+                                                setLibraryId(library.id);
+                                                setScreenView('now-playing');
+                                                setIsPlaying(true);
+                                            }}
+                                            className={`mb-1 flex w-full items-center justify-between rounded-md border px-3 py-2 text-left ${
+                                                libraryId === library.id
+                                                    ? 'border-slate-800 bg-slate-800 text-white'
+                                                    : 'border-slate-300 bg-white/75 text-slate-800 hover:bg-white'
+                                            }`}
+                                        >
+                                            <span>
+                                                <span className="mr-2 text-[10px] opacity-50">{String(index + 1).padStart(2, '0')}</span>
+                                                <span className="text-xs font-black">{library.label}</span>
+                                            </span>
+                                            <span className="text-[10px] opacity-65">{library.caption} ›</span>
+                                        </button>
+                                    ))}
+                                </div>
+                            </div>
+                        ) : (
+                            <>
                         <div className="absolute left-3 top-2 z-10 rounded-full bg-black/55 px-2 py-0.5 text-[10px] font-bold text-lime-100">
                             {isPlaying && !isPaused ? 'PLAY' : isPaused ? 'PAUSE' : 'STOP'}
                         </div>
                         <div className="absolute right-3 top-2 z-10 rounded-full bg-black/55 px-2 py-0.5 text-[10px] font-bold text-white/80">
                             {activeTrack?.subtitle}
                         </div>
-                        <div key={screenKey} className="flex aspect-[4/3] items-center justify-center bg-[radial-gradient(circle_at_center,rgba(15,23,42,0.9),#020617)] animate-in fade-in zoom-in-95 duration-700">
+                        <div key={screenKey} className="compendium-ipod-art flex items-center justify-center bg-[radial-gradient(circle_at_center,rgba(15,23,42,0.9),#020617)] animate-in fade-in zoom-in-95 duration-700">
                             {activeCard && familiarActionSrc ? (
                                 <img
                                     src={familiarActionSrc}
@@ -796,16 +861,22 @@ const CompendiumBgmModeModal: React.FC<{ cards: ICard[]; languageMode: LanguageM
                             )}
                         </div>
                         <div className="border-t border-white/10 bg-slate-950/95 p-3">
-                            <div className="truncate text-base font-black text-white">{translated || 'No Card'}</div>
-                            <div className="mt-1 line-clamp-2 min-h-[2.5rem] text-[11px] leading-5 text-slate-300">
+                            <div className="truncate text-sm font-black text-white">{activeTrack?.title || 'NO TRACK'}</div>
+                            <div className="mt-0.5 flex items-center justify-between gap-2 text-[10px] text-slate-300">
+                                <span className="truncate">{translated || 'No Card'}</span>
+                                <span className="shrink-0">{trackIndex + 1}/{bgmTracks.length}</span>
+                            </div>
+                            <div className="mt-0.5 line-clamp-2 text-[8px] leading-[11px] text-slate-400">
                                 {activeCard ? trans(activeCard.description, languageMode) : ''}
                             </div>
                         </div>
+                            </>
+                        )}
                     </div>
 
-                    <div className="mx-auto mt-6 grid h-56 w-56 place-items-center rounded-full bg-gradient-to-b from-zinc-50 to-zinc-300 shadow-[inset_0_8px_18px_rgba(255,255,255,0.9),inset_0_-10px_18px_rgba(0,0,0,0.18)] sm:h-64 sm:w-64">
-                        <button onClick={handleTogglePlayOrder} className="self-start pt-5 text-[11px] font-black tracking-[0.2em] text-zinc-500 hover:text-zinc-900">
-                            {playOrder === 'sorted' ? 'ORDER' : 'SHUFFLE'}
+                    <div className="compendium-ipod-wheel relative mx-auto mt-3 grid place-items-center rounded-full bg-gradient-to-b from-zinc-50 to-zinc-300 shadow-[inset_0_8px_18px_rgba(255,255,255,0.9),inset_0_-10px_18px_rgba(0,0,0,0.18)]">
+                        <button onClick={() => setScreenView(prev => prev === 'now-playing' ? 'playlists' : 'now-playing')} className="self-start pt-4 text-[10px] font-black tracking-[0.2em] text-zinc-500 hover:text-zinc-900">
+                            {screenView === 'playlists' ? 'NOW' : 'MENU'}
                         </button>
                         <button onClick={handlePrevTrack} className="absolute mr-36 text-zinc-500 hover:text-zinc-950 sm:mr-44">
                             <StepBack size={30} />
@@ -823,7 +894,7 @@ const CompendiumBgmModeModal: React.FC<{ cards: ICard[]; languageMode: LanguageM
                             {isPlaying && !isPaused ? <Pause size={34} /> : <Play size={34} />}
                         </button>
                     </div>
-                    <div className="mt-4 flex justify-center gap-2">
+                    <div className="compendium-ipod-secondary-controls mt-2 flex justify-center gap-2">
                         <button onClick={handleStop} className="rounded-full bg-zinc-900 px-4 py-2 text-xs font-black text-white hover:bg-zinc-700">
                             <Square size={13} className="mr-1 inline" /> STOP
                         </button>
@@ -833,7 +904,7 @@ const CompendiumBgmModeModal: React.FC<{ cards: ICard[]; languageMode: LanguageM
                     </div>
                 </div>
 
-                <div className="rounded-[28px] border border-white/10 bg-white/[0.06] p-4 shadow-2xl backdrop-blur-md sm:p-6">
+                <div className="hidden">
                     <div className="mb-5">
                         <div className="text-xs font-black tracking-[0.4em] text-cyan-200">COMPENDIUM BGM</div>
                         <h3 className="mt-2 text-3xl font-black text-white sm:text-4xl">{activeTrack?.title}</h3>

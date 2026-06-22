@@ -1701,6 +1701,17 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
                         {currentProblem.unitLabel}
                     </div>
                 )}
+
+                {currentProblem.passage && (
+                    <section className="mb-4 w-full max-h-[34vh] overflow-y-auto rounded-xl border border-cyan-200/30 bg-slate-950/70 px-3 py-3 text-left shadow-inner sm:px-4">
+                        <div className="mb-2 text-[10px] font-bold uppercase tracking-wider text-cyan-200 sm:text-xs">
+                            {currentProblem.passageTitle || '本文'}
+                        </div>
+                        <p className="whitespace-pre-wrap text-sm leading-7 text-slate-100 sm:text-base">
+                            {currentProblem.passage}
+                        </p>
+                    </section>
+                )}
                 
                 <h3 className="text-[clamp(1.25rem,4vw,1.875rem)] font-bold text-white leading-tight mb-4 break-words w-full min-w-0">
                     {currentProblem.question}

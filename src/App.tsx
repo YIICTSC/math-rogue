@@ -33,6 +33,16 @@ import EnglishChallengeScreen from './components/EnglishChallengeScreen';
 import GeneralChallengeScreen from './components/GeneralChallengeScreen';
 import DebugMenuScreen from './components/DebugMenuScreen';
 import MagicEventSimulationScreen from './components/MagicEventSimulationScreen';
+
+type HighSchoolBattleVoiceAction = 'attack' | 'summon' | 'block' | 'power' | 'damage' | 'item' | 'finish' | 'defeat';
+
+const getHighSchoolBattleVoiceActionForCard = (card: ICard): HighSchoolBattleVoiceAction => {
+    if (card.familiarSummon) return 'summon';
+    if (card.type === CardType.ATTACK || !!card.damage || !!card.damageBasedOnBlock) return 'attack';
+    if (card.type === CardType.POWER || (card.strength ?? 0) > 0 || !!card.applyPower) return 'power';
+    if ((card.block ?? 0) > 0) return 'block';
+    return 'block';
+};
 import MiniGameSelectScreen from './components/MiniGameSelectScreen';
 import MiniGameRouter from './components/MiniGameRouter'; // Added
 import { MINI_GAMES } from './miniGameConfig'; // Added
@@ -5696,7 +5706,12 @@ const App: React.FC = () => {
             audioService.playSound('wrong');
             return;
         }
-        if (!isCoopHostRemoteAction) audioService.playSound('select');
+        if (!isCoopHostRemoteAction) {
+            audioService.playSound('select');
+            if (gameState.visualTheme === 'high-school') {
+                audioService.playHighSchoolVoice(gameState.player.id, 'item');
+            }
+        }
         if (!isCoopHostRemoteAction && gameState.challengeMode === 'COOP' && coopSession && !coopSession.isHost) {
             queueCoopBattleEvent({ type: 'COOP_BATTLE_USE_POTION', potionId: potion.id });
             return;
@@ -5947,9 +5962,13 @@ const App: React.FC = () => {
 
         let cardAttackPreviewHitCount = 1;
         const magicVoiceHeroId = gameState.visualTheme === 'magic' ? getMagicProtagonistId(actionPlayer) : undefined;
+        const highSchoolVoiceHeroId = gameState.visualTheme === 'high-school' ? actionPlayer.id : undefined;
         const isOwnMagicRuleCard = !!magicVoiceHeroId && card.magicHeroId === magicVoiceHeroId && card.magicRuleCardIndex !== undefined;
         if (!isCoopHostRemoteAction && isOwnMagicRuleCard) {
             audioService.playMagicVoice(magicVoiceHeroId, 'spell', 3, card.magicRuleCardIndex + 1);
+        }
+        if (!isCoopHostRemoteAction && highSchoolVoiceHeroId) {
+            audioService.playHighSchoolVoice(highSchoolVoiceHeroId, getHighSchoolBattleVoiceActionForCard(card));
         }
 
         if (card.type === CardType.ATTACK) {
@@ -8164,6 +8183,9 @@ const App: React.FC = () => {
                             lastMagicDamageVoiceActionRef.current = enemyActionKey;
                             audioService.playMagicVoice(getMagicProtagonistId(p), 'damage');
                         }
+                        if (prev.visualTheme === 'high-school') {
+                            audioService.playHighSchoolVoice(p.id, 'damage');
+                        }
                     }
                     if (didApplyDebuff && intent.type === EnemyIntentType.ATTACK_DEBUFF) audioService.playSound('debuff');
                     return {
@@ -9185,6 +9207,9 @@ const App: React.FC = () => {
             audioService.stopBGM();
         }
         audioService.playSound('win');
+        if (stateRef.current.visualTheme === 'high-school') {
+            audioService.playHighSchoolVoice(stateRef.current.player.id, 'finish');
+        }
         setGameState(prev => {
             const nextPlayer = buildPostBattlePlayer(prev.player, true);
 
@@ -9258,6 +9283,9 @@ const App: React.FC = () => {
         setNewlyUnlockedCard(null);
         setLegacyCardSelected(false);
         audioService.playSound('lose');
+        if (stateRef.current.visualTheme === 'high-school') {
+            audioService.playHighSchoolVoice(stateRef.current.player.id, 'defeat');
+        }
         audioService.playBGM('game_over');
         const currentState = stateRef.current;
         const score = calculateScore(currentState, false);
@@ -12179,8 +12207,6 @@ const App: React.FC = () => {
                         {visualTheme === 'magic' && (
                             <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_42%,rgba(236,72,153,0.28),transparent_34%),linear-gradient(115deg,transparent_0%,rgba(168,85,247,0.34)_46%,transparent_58%,transparent_100%)] animate-pulse" />
                         )}
-                        <div className="absolute inset-0 bg-slate-950/55" />
-                        <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,rgba(15,23,42,0.12),rgba(2,6,23,0.72))]" />
                         {isLegacyVercelHost && showMigrationNotice && (
                             <div className="app-modal-overlay app-migration-modal-overlay fixed inset-0 z-[10001] bg-black/80 flex items-center justify-center p-3 sm:p-4">
                                 <div
