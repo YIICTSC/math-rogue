@@ -190,20 +190,20 @@ const EventScreen: React.FC<EventScreenProps> = ({ title, description, options, 
     >
         <div className="absolute inset-0 bg-slate-950/60 pointer-events-none" />
         
-        <div className="z-10 my-auto w-full max-w-2xl rounded-lg border-2 border-gray-600 bg-gray-800 p-4 shadow-2xl sm:p-8">
+        <div className="event-screen-panel z-10 my-auto w-full max-w-2xl rounded-lg border-2 border-gray-600 bg-gray-800 p-4 shadow-2xl sm:p-8">
             {interactionDisabled && (
-                <div className="mb-4 rounded-lg border border-cyan-500/50 bg-cyan-950/30 px-4 py-3 text-center text-sm font-bold text-cyan-100">
+                <div className="event-screen-notice mb-4 rounded-lg border border-cyan-500/50 bg-cyan-950/30 px-4 py-3 text-center text-sm font-bold text-cyan-100">
                     {interactionDisabledMessage ? trans(interactionDisabledMessage, languageMode) : trans('他のプレイヤーの選択を待っています', languageMode)}
                 </div>
             )}
-            <div className="mb-4 flex items-center border-b border-gray-700 pb-3 sm:mb-6 sm:pb-4">
+            <div className="event-screen-title mb-4 flex items-center border-b border-gray-700 pb-3 sm:mb-6 sm:pb-4">
                 <div className="mr-3 rounded-full border border-purple-500 bg-purple-900 p-2 sm:mr-4 sm:p-3">
                     <HelpCircle size={28} className="text-purple-300 sm:h-8 sm:w-8" />
                 </div>
                 <h2 className="text-2xl font-bold text-purple-100 sm:text-3xl">{title}</h2>
             </div>
 
-            <div className="relative mx-auto mb-4 aspect-square w-full max-w-[18rem] overflow-hidden rounded-xl border border-purple-400/40 bg-slate-900 sm:mb-6 sm:max-w-[22rem]">
+            <div className="event-screen-image relative mx-auto mb-4 aspect-square w-full max-w-[18rem] overflow-hidden rounded-xl border border-purple-400/40 bg-slate-900 sm:mb-6 sm:max-w-[22rem]">
                 <img
                     src={imageCandidates[imageIndex]}
                     alt={`${title} thumbnail`}
@@ -221,7 +221,7 @@ const EventScreen: React.FC<EventScreenProps> = ({ title, description, options, 
                 <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-transparent" />
             </div>
             
-            <div className="mb-6 min-h-[6rem] whitespace-pre-wrap text-base leading-relaxed text-gray-300 sm:mb-8 sm:text-lg">
+            <div className="event-screen-description mb-6 min-h-[6rem] whitespace-pre-wrap text-base leading-relaxed text-gray-300 sm:mb-8 sm:text-lg">
                 {resultLog ? (
                     <div className="animate-in fade-in duration-500">
                         <p className="text-yellow-300 font-bold mb-2">{trans("結果", languageMode)}:</p>
@@ -232,7 +232,7 @@ const EventScreen: React.FC<EventScreenProps> = ({ title, description, options, 
                 )}
             </div>
 
-            <div className="flex flex-col gap-4">
+            <div className="event-screen-actions flex flex-col gap-4">
                 {!resultLog ? (
                     <div className="grid max-h-[36vh] grid-cols-1 gap-3 overflow-y-auto pr-1 sm:grid-cols-2">
                         {options.map((opt, idx) => (

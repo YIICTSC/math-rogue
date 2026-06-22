@@ -74,7 +74,7 @@ import { getAssignmentEncodedFromUrl, getAssignmentFromUrl, getAssignmentModePoo
 import { STUDENT_GRADE_OPTIONS, createDailyAssignment, getCurrentSchoolYear, isAdultProfile, promoteStudentProfileForSchoolYear } from './utils/dailyAssignmentUtils';
 import { getDifficultyConfig } from './config/difficulty';
 import { CARD_ERASER_TEMPLATE_ID, CARD_ERASER_NAME, eraseCardEffect, getErasableEffectOptions } from './utils/cardEraser';
-import { RotateCcw, Home, BookOpen, Coins, Trophy, HelpCircle, Infinity, Play, ScrollText, Plus, Minus, X as MultiplyIcon, Divide, Shuffle, Send, Swords, Terminal, Club, Zap, Gamepad2, Brain, Languages, Music, Book, MessageSquare, GraduationCap, Clock, AlertTriangle, TimerOff, X, Check, FlaskConical, Globe, MapPin, ChevronDown, ArrowLeft, Sparkles, Flag, Keyboard, Users, Settings, ClipboardList, FileText } from 'lucide-react';
+import { RotateCcw, Home, BookOpen, Coins, Trophy, HelpCircle, Infinity, Play, ScrollText, Plus, Minus, X as MultiplyIcon, Divide, Shuffle, Send, Swords, Terminal, Club, Zap, Gamepad2, Brain, Languages, Music, Book, MessageSquare, GraduationCap, Clock, AlertTriangle, TimerOff, X, Check, FlaskConical, Globe, MapPin, ChevronDown, ArrowLeft, Sparkles, Flag, Keyboard, Users, Settings, ClipboardList, FileText, Monitor } from 'lucide-react';
 import { applyAdditionalCardLogic } from './services/cardEffectLogic';
 import { p2pService } from './services/p2pService';
 import { TypingLessonId } from './data/typingLessonConfig';
@@ -88,6 +88,7 @@ import { boostMagicCardForTransformation, getMagicCardsForHero } from './data/ma
 import { createMagicRuleState, createMagicStartingDeck, getMagicRuleConfig } from './data/magicLoadouts';
 import { generateMagicRomanceSelectionEvent } from './services/magicRomanceEventService';
 import { applyMagicRuleOnCardPlay } from './services/magicRuleService';
+import { UI_PREVIEW_GROUPS, UI_PREVIEW_SCREENS } from './data/uiPreviewScreens';
 
 const PARRY_WINDOW_MS = 650;
 const PARRY_PERFECT_MS = 220;
@@ -576,11 +577,6 @@ const App: React.FC = () => {
         return isTouchLike && isPortrait;
     };
 
-    const detectShortMobilePortrait = () => {
-        if (typeof window === 'undefined') return false;
-        return detectMobilePortrait() && window.innerHeight <= 740;
-    };
-
     const createDeck = (template: string[] = STARTING_DECK_TEMPLATE): ICard[] => {
         return template.map((key, index) => {
             const cardTemplate = CARDS_LIBRARY[key];
@@ -736,7 +732,13 @@ const App: React.FC = () => {
     const [miniGameProblemModePool, setMiniGameProblemModePool] = useState<string[] | undefined>(undefined);
     const [miniGameAnswerMode, setMiniGameAnswerMode] = useState<AnswerMode>('CHOICE');
     const [isMobilePortrait, setIsMobilePortrait] = useState(false);
-    const [isShortMobilePortrait, setIsShortMobilePortrait] = useState(false);
+    const [isUiPreviewMode, setIsUiPreviewMode] = useState(false);
+    const [isUiPreviewToolbarOpen, setIsUiPreviewToolbarOpen] = useState(true);
+    const [uiPreviewViewport, setUiPreviewViewport] = useState(() => ({
+        width: typeof window === 'undefined' ? 0 : window.innerWidth,
+        height: typeof window === 'undefined' ? 0 : window.innerHeight,
+    }));
+    const uiPreviewSnapshotRef = useRef<GameState | null>(null);
     const previousScreenRef = useRef<GameScreen>(GameScreen.START_MENU);
     const isLegacyVercelHost = typeof window !== 'undefined' && window.location.hostname === LEGACY_VERCEL_HOST;
     const [showMigrationNotice, setShowMigrationNotice] = useState<boolean>(() => isLegacyVercelHost);
@@ -744,7 +746,7 @@ const App: React.FC = () => {
     useEffect(() => {
         const syncMobilePortrait = () => {
             setIsMobilePortrait(detectMobilePortrait());
-            setIsShortMobilePortrait(detectShortMobilePortrait());
+            setUiPreviewViewport({ width: window.innerWidth, height: window.innerHeight });
         };
         syncMobilePortrait();
         window.addEventListener('resize', syncMobilePortrait);
@@ -1131,7 +1133,6 @@ const App: React.FC = () => {
     const [isDebugHpOne, setIsDebugHpOne] = useState<boolean>(false);
     const [isMiniGameDebugUnlocked, setIsMiniGameDebugUnlocked] = useState<boolean>(false);
     const [titleClickCount, setTitleCount] = useState<number>(0);
-    const [miniGameUnlockClickCount, setMiniGameUnlockClickCount] = useState<number>(0);
     const [logClickCount, setLogClickCount] = useState<number>(0);
     const [debugLoadout, setDebugLoadout] = useState<{ deck: ICard[], relics: Relic[], potions: Potion[] } | null>(null);
 
@@ -2586,6 +2587,7 @@ const App: React.FC = () => {
 
     useEffect(() => {
         const interval = setInterval(() => {
+            if (isUiPreviewMode) return;
             setTotalPlaySeconds(prev => {
                 const next = prev + 1;
                 storageService.saveTotalPlayTime(next);
@@ -2635,9 +2637,10 @@ const App: React.FC = () => {
             }
         }, 1000);
         return () => clearInterval(interval);
-    }, [gameState.screen, PLAY_LIMIT_SECONDS, gameState.challengeMode]);
+    }, [gameState.screen, PLAY_LIMIT_SECONDS, gameState.challengeMode, isUiPreviewMode]);
 
     useEffect(() => {
+        if (isUiPreviewMode) return;
         if (gameState.challengeMode === 'RACE' || gameState.challengeMode === 'COOP') {
             return;
         }
@@ -2674,7 +2677,7 @@ const App: React.FC = () => {
         if (gameState.screen === GameScreen.START_MENU) {
             setHasSave(storageService.hasSaveFile());
         }
-    }, [gameState]);
+    }, [gameState, isUiPreviewMode]);
 
     useEffect(() => {
         if (!raceSession || gameState.challengeMode !== 'RACE' || gameState.screen === GameScreen.RACE_SETUP) return;
@@ -3291,19 +3294,6 @@ const App: React.FC = () => {
         }
     };
 
-    const handleMiniGameUnlockClick = (e: React.MouseEvent) => {
-        e.stopPropagation();
-        const next = miniGameUnlockClickCount + 1;
-        setMiniGameUnlockClickCount(next);
-        if (next >= 10) {
-            const newState = !isMiniGameDebugUnlocked;
-            setIsMiniGameDebugUnlocked(newState);
-            storageService.saveDebugMiniGameUnlock(newState);
-            setMiniGameUnlockClickCount(0);
-            audioService.playSound('select');
-        }
-    };
-
     const disableMathDebugSkip = () => {
         if (!isMathDebugSkipped) return;
         setIsMathDebugSkipped(false);
@@ -3324,7 +3314,6 @@ const App: React.FC = () => {
         if (!isMiniGameDebugUnlocked) return;
         setIsMiniGameDebugUnlocked(false);
         storageService.saveDebugMiniGameUnlock(false);
-        setMiniGameUnlockClickCount(0);
         audioService.playSound('select');
     };
 
@@ -4378,6 +4367,168 @@ const App: React.FC = () => {
         }
         setGameState(prev => ({ ...prev, difficultyLevel: level, shopRemoveCount: 0, screen: GameScreen.CHARACTER_SELECTION }));
     };
+
+    const handleStartUiPreview = useCallback((screen: GameScreen) => {
+        if (!uiPreviewSnapshotRef.current) {
+            uiPreviewSnapshotRef.current = stateRef.current;
+        }
+        setIsUiPreviewMode(true);
+        setIsUiPreviewToolbarOpen(true);
+        if (screen === GameScreen.BATTLE) {
+            setTurnLog(getSelfTurnLogLabel());
+            setCurrentNarrative('UI確認用の戦闘です。');
+            audioService.playBGM('battle');
+        }
+        if (screen === GameScreen.FLOOR_RESULT || screen === GameScreen.ENDING || screen === GameScreen.GAME_OVER) {
+            setNewlyUnlockedCard(null);
+            setLegacyCardSelected(false);
+            audioService.playBGM(screen === GameScreen.GAME_OVER ? 'game_over' : 'victory');
+        }
+        setGameState(prev => {
+            const previewMap = (screen === GameScreen.MAP || screen === GameScreen.BATTLE) && prev.map.length === 0
+                ? generateDungeonMap(prev.difficultyLevel || 1)
+                : prev.map;
+
+            if (screen === GameScreen.BATTLE) {
+                const previewEnemy: Enemy = {
+                    id: 'ui-preview-enemy',
+                    enemyType: 'TEACHER',
+                    name: visualTheme === 'magic' ? '異次元の魔法教師' : visualTheme === 'high-school' ? '抜き打ち試験の監督' : '宿題を忘れた先生',
+                    maxHp: 9999,
+                    currentHp: 9999,
+                    block: 12,
+                    strength: 2,
+                    nextIntent: { type: EnemyIntentType.ATTACK_DEBUFF, value: 8, secondaryValue: 2, debuffType: 'VULNERABLE' },
+                    vulnerable: 1,
+                    weak: 0,
+                    poison: 3,
+                    artifact: 0,
+                    corpseExplosion: false,
+                    floatingText: null,
+                };
+                const sourcePlayer = {
+                    ...prev.player,
+                    deck: prev.player.deck.length > 0 ? prev.player.deck : createDeck(),
+                    currentHp: Math.max(1, prev.player.maxHp),
+                    maxEnergy: Math.max(3, prev.player.maxEnergy),
+                };
+                const previewPlayer = preparePlayerForBattle(sourcePlayer, NodeType.COMBAT);
+                return {
+                    ...prev,
+                    screen: GameScreen.BATTLE,
+                    challengeMode: undefined,
+                    act: 1,
+                    floor: 1,
+                    turn: 1,
+                    map: previewMap,
+                    player: previewPlayer,
+                    enemies: [previewEnemy],
+                    selectedEnemyId: previewEnemy.id,
+                    combatLog: ['UI確認用の戦闘を開始'],
+                    selectionState: { active: false, type: 'DISCARD', amount: 0 },
+                    parryState: { active: false, enemyId: null, success: false },
+                    activeEffects: [],
+                    coopBattleState: null,
+                };
+            }
+
+            if (screen === GameScreen.FLOOR_RESULT || screen === GameScreen.ENDING || screen === GameScreen.GAME_OVER) {
+                const isGameOverPreview = screen === GameScreen.GAME_OVER;
+                const isEndingPreview = screen === GameScreen.ENDING;
+                return {
+                    ...prev,
+                    screen,
+                    challengeMode: undefined,
+                    difficultyLevel: 6,
+                    act: isEndingPreview ? 4 : isGameOverPreview ? 2 : 1,
+                    floor: isEndingPreview ? 20 : isGameOverPreview ? 7 : 6,
+                    player: {
+                        ...prev.player,
+                        deck: prev.player.deck.length > 0 ? prev.player.deck : createDeck(),
+                        currentHp: isGameOverPreview ? 0 : Math.max(1, prev.player.currentHp),
+                    },
+                    actStats: {
+                        enemiesDefeated: isGameOverPreview ? 5 : 12,
+                        goldGained: isGameOverPreview ? 84 : 320,
+                        mathCorrect: isGameOverPreview ? 18 : 64,
+                    },
+                    currentStoryIndex: 0,
+                    newlyUnlockedCardName: undefined,
+                    isEndless: false,
+                };
+            }
+
+            return {
+                ...prev,
+                screen,
+                map: previewMap,
+            };
+        });
+    }, [getSelfTurnLogLabel, preparePlayerForBattle, visualTheme]);
+
+    const closeUiPreview = useCallback(() => {
+        const snapshot = uiPreviewSnapshotRef.current;
+        uiPreviewSnapshotRef.current = null;
+        setIsUiPreviewMode(false);
+        setIsUiPreviewToolbarOpen(true);
+        setGameState(prev => snapshot ?? ({ ...prev, screen: GameScreen.DEBUG_MENU }));
+    }, []);
+
+    const handleStartProblemUiPreview = useCallback((mode: GameMode, modePool?: string[]) => {
+        const screen = getChallengeScreenForMode(mode);
+        handleStartUiPreview(screen);
+        setGameState(prev => ({
+            ...prev,
+            screen,
+            mode,
+            modePool: modePool && modePool.length > 0 ? modePool : undefined,
+            answerMode: 'CHOICE',
+            challengeMode: undefined,
+        }));
+    }, [handleStartUiPreview]);
+
+    const handleStartEventUiPreview = useCallback((theme: VisualThemeId, title: string) => {
+        setEventResultLog(null);
+        const previewEvent = title === '忘れ物'
+            ? generateLegacyEvent(
+                { ...CARDS_LIBRARY['STRIKE'], id: 'ui-preview-legacy-card' } as ICard,
+                setGameState,
+                setEventResultLog,
+                languageMode,
+            )
+            : generateEvent(
+                stateRef.current.player,
+                setGameState,
+                () => undefined,
+                setEventResultLog,
+                languageMode,
+                unlockedCardNames,
+                title,
+                theme,
+                1,
+                1,
+            );
+        setEventData(previewEvent);
+        handleStartUiPreview(GameScreen.EVENT);
+        setGameState(prev => ({
+            ...prev,
+            screen: GameScreen.EVENT,
+            visualTheme: theme,
+            currentEventTitle: title,
+            challengeMode: undefined,
+        }));
+    }, [handleStartUiPreview, languageMode, unlockedCardNames]);
+
+    useEffect(() => {
+        if (!isUiPreviewMode) return;
+        const handlePreviewKeyDown = (event: KeyboardEvent) => {
+            if (event.key !== 'Escape') return;
+            event.preventDefault();
+            closeUiPreview();
+        };
+        window.addEventListener('keydown', handlePreviewKeyDown);
+        return () => window.removeEventListener('keydown', handlePreviewKeyDown);
+    }, [closeUiPreview, isUiPreviewMode]);
 
     const handleDebugStart = (deck: ICard[], relics: Relic[], potions: Potion[]) => {
         const map = generateDungeonMap(gameState.difficultyLevel || 1);
@@ -12115,6 +12266,63 @@ const App: React.FC = () => {
                     }
                 `}</style>
 
+                {isUiPreviewMode && (
+                    <div className="fixed right-2 top-2 z-[10060] flex items-start gap-2 text-white">
+                        {isUiPreviewToolbarOpen ? (
+                            <div className="w-[min(92vw,360px)] rounded-xl border-2 border-sky-400 bg-slate-950/95 p-3 shadow-[0_0_28px_rgba(56,189,248,0.5)] backdrop-blur-md">
+                                <div className="mb-2 flex items-center justify-between gap-3">
+                                    <div>
+                                        <div className="flex items-center gap-2 text-xs font-black text-sky-300">
+                                            <Monitor size={15} /> UI実寸確認
+                                        </div>
+                                        <div className="mt-0.5 font-mono text-[10px] text-gray-400">
+                                            {uiPreviewViewport.width} × {uiPreviewViewport.height}px / 100%
+                                        </div>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        onClick={() => setIsUiPreviewToolbarOpen(false)}
+                                        className="rounded border border-gray-600 px-2 py-1 text-xs text-gray-300 hover:bg-gray-800"
+                                    >
+                                        隠す
+                                    </button>
+                                </div>
+                                <select
+                                    value={gameState.screen}
+                                    onChange={(event) => handleStartUiPreview(event.target.value as GameScreen)}
+                                    className="w-full rounded border border-sky-700 bg-black px-3 py-2 text-sm font-bold text-white outline-none focus:border-sky-300"
+                                >
+                                    {UI_PREVIEW_GROUPS.map(group => (
+                                        <optgroup key={group} label={group}>
+                                            {UI_PREVIEW_SCREENS.filter(item => item.group === group).map(item => (
+                                                <option key={item.screen} value={item.screen}>{item.label}</option>
+                                            ))}
+                                        </optgroup>
+                                    ))}
+                                </select>
+                                <div className="mt-2 flex items-center justify-between gap-2">
+                                    <span className="truncate font-mono text-[10px] text-gray-500">{gameState.screen}</span>
+                                    <button
+                                        type="button"
+                                        onClick={closeUiPreview}
+                                        className="shrink-0 rounded-lg bg-sky-600 px-4 py-2 text-xs font-black text-white hover:bg-sky-500"
+                                    >
+                                        デバッグへ戻る (Esc)
+                                    </button>
+                                </div>
+                            </div>
+                        ) : (
+                            <button
+                                type="button"
+                                onClick={() => setIsUiPreviewToolbarOpen(true)}
+                                className="flex items-center gap-2 rounded-lg border-2 border-sky-400 bg-slate-950/95 px-3 py-2 text-xs font-black text-sky-200 shadow-lg"
+                            >
+                                <Monitor size={16} /> {uiPreviewViewport.width}×{uiPreviewViewport.height}
+                            </button>
+                        )}
+                    </div>
+                )}
+
                 {showGlobalSettingsGear && gameState.screen !== GameScreen.START_MENU && (
                     <button
                         onClick={() => setShowSettingsModal(true)}
@@ -12296,15 +12504,15 @@ const App: React.FC = () => {
                         )}
 
                         {assignmentLetter && showAssignmentLetter && (
-                            <div className="fixed inset-0 z-[10030] flex items-center justify-center bg-black/80 p-2 sm:p-4">
-                                <div className={`w-full max-w-2xl max-h-[96vh] overflow-y-auto rounded-2xl border-4 p-3 text-slate-900 sm:p-4 ${
+                            <div className="assignment-letter-overlay fixed inset-0 z-[10030] flex items-center justify-center bg-black/80 p-2 sm:p-4">
+                                <div className={`assignment-letter-panel w-full max-w-2xl max-h-[96vh] overflow-y-auto rounded-2xl border-4 p-3 text-slate-900 sm:p-4 ${
                                     isTeacherAssignmentActive
                                         ? 'border-amber-300 bg-[#fff7d6] shadow-[0_0_40px_rgba(250,204,21,0.35)]'
                                         : 'border-lime-300 bg-[#f3ffd4] shadow-[0_0_40px_rgba(163,230,53,0.35)]'
                                 }`}>
-                                    <div className={`mb-1 text-center text-[10px] font-black tracking-[0.3em] ${isTeacherAssignmentActive ? 'text-amber-700' : 'text-lime-700'}`}>{isTeacherAssignmentActive ? 'TEACHER LETTER' : 'DAILY LETTER'}</div>
-                                    <h2 className="mb-2 text-center text-xl font-black sm:text-2xl">{assignmentLetter.title}</h2>
-                                    <div className={`mb-3 overflow-hidden rounded-xl border-2 bg-slate-950/90 ${isTeacherAssignmentActive ? 'border-amber-300' : 'border-lime-300'}`}>
+                                    <div className={`assignment-letter-eyebrow mb-1 text-center text-[10px] font-black tracking-[0.3em] ${isTeacherAssignmentActive ? 'text-amber-700' : 'text-lime-700'}`}>{isTeacherAssignmentActive ? 'TEACHER LETTER' : 'DAILY LETTER'}</div>
+                                    <h2 className="assignment-letter-title mb-2 text-center text-xl font-black sm:text-2xl">{assignmentLetter.title}</h2>
+                                    <div className={`assignment-letter-banner mb-3 overflow-hidden rounded-xl border-2 bg-slate-950/90 ${isTeacherAssignmentActive ? 'border-amber-300' : 'border-lime-300'}`}>
                                         <div className="relative">
                                             <img
                                                 src={ASSIGNMENT_INTRO_BANNER_IMAGE}
@@ -12322,7 +12530,7 @@ const App: React.FC = () => {
                                             </div>
                                         </div>
                                     </div>
-                                    <div className={`mb-3 rounded-xl border-2 bg-white/70 p-3 text-xs font-bold leading-6 sm:text-sm ${isTeacherAssignmentActive ? 'border-amber-300' : 'border-lime-300'}`}>
+                                    <div className={`assignment-letter-summary mb-3 rounded-xl border-2 bg-white/70 p-3 text-xs font-bold leading-6 sm:text-sm ${isTeacherAssignmentActive ? 'border-amber-300' : 'border-lime-300'}`}>
                                         <div>{isTeacherAssignmentActive ? '先生から課題が届きました。' : '今日の学習課題です。'}</div>
                                         <div>期限: {assignmentLetter.dueAt ? new Date(assignmentLetter.dueAt).toLocaleString('ja-JP') : '未設定'}</div>
                                         <div>形式: {assignmentLetter.gameMode === 'FREE' ? 'フリー' : '問題チャレンジのみ'}</div>
@@ -12330,7 +12538,7 @@ const App: React.FC = () => {
                                             {assignmentLetter.units.map(unit => `${unit.name} (${unit.targetCorrect || 10}問)`).join(' / ') || 'オリジナル問題'}
                                         </div>
                                     </div>
-                                    <div className="grid gap-2 sm:grid-cols-3">
+                                    <div className="assignment-letter-actions grid gap-2 sm:grid-cols-3">
                                         <button
                                             onClick={() => {
                                                 setShowAssignmentLetter(false);
@@ -12508,26 +12716,6 @@ const App: React.FC = () => {
                                     {trans("学習ローグ", languageMode)}
                                 </span>
                             </h1>
-
-                            {!isShortMobilePortrait && !shouldShowCrowdfundingBanner && (
-                                <div
-                                    className="start-menu-progress mb-6 bg-black/40 px-4 py-2 rounded-lg border border-gray-600 cursor-pointer select-none"
-                                    onClick={handleMiniGameUnlockClick}
-                                >
-                                {isDailyLimitReached ? (
-                                    <div className="text-red-500 text-xs md:text-sm font-bold animate-pulse flex items-center gap-2">
-                                        <AlertTriangle size={16} /> {trans("本日のプレイ制限に達しました。問題チャレンジで勉強しましょう！", languageMode)}
-                                    </div>
-                                ) : nextThreshold ? (
-                                    <div className="text-yellow-300 text-xs md:text-sm font-bold">
-                                        {trans("次のミニゲーム開放まで", languageMode)}: <span className="text-xl md:text-2xl text-white mx-1">{Math.max(0, nextThreshold - totalMathCorrect)}</span> {trans("問正解", languageMode)}
-                                    </div>
-                                ) : (
-                                    <div className="text-green-400 text-xs md:text-sm font-bold animate-pulse">{trans("全ミニゲーム開放済み！", languageMode)}</div>
-                                )}
-                                    <div className="text-gray-500 text-[10px] mt-1">{trans("累計正解数", languageMode)}: {totalMathCorrect}{trans("問", languageMode)}</div>
-                                </div>
-                            )}
 
                             {isAssignmentChallengeOnlyLocked && activeAssignment && (
                                 <div className="mb-3 w-full max-w-[360px] rounded-lg border border-emerald-400 bg-emerald-950/80 px-3 py-2 text-center text-xs font-black text-emerald-100 shadow-lg">
@@ -12781,15 +12969,15 @@ const App: React.FC = () => {
                 )}
 
                 {gameState.screen !== GameScreen.START_MENU && assignmentLetter && showAssignmentLetter && (
-                            <div className="fixed inset-0 z-[10030] flex items-center justify-center bg-black/80 p-2 sm:p-4">
-                        <div className={`w-full max-w-2xl max-h-[96vh] overflow-y-auto rounded-2xl border-4 p-3 text-slate-900 sm:p-4 ${
+                            <div className="assignment-letter-overlay fixed inset-0 z-[10030] flex items-center justify-center bg-black/80 p-2 sm:p-4">
+                        <div className={`assignment-letter-panel w-full max-w-2xl max-h-[96vh] overflow-y-auto rounded-2xl border-4 p-3 text-slate-900 sm:p-4 ${
                             isTeacherAssignmentActive
                                 ? 'border-amber-300 bg-[#fff7d6] shadow-[0_0_40px_rgba(250,204,21,0.35)]'
                                 : 'border-lime-300 bg-[#f3ffd4] shadow-[0_0_40px_rgba(163,230,53,0.35)]'
                         }`}>
-                            <div className={`mb-1 text-center text-[10px] font-black tracking-[0.3em] ${isTeacherAssignmentActive ? 'text-amber-700' : 'text-lime-700'}`}>{isTeacherAssignmentActive ? 'TEACHER LETTER' : 'DAILY LETTER'}</div>
-                            <h2 className="mb-2 text-center text-xl font-black sm:text-2xl">{assignmentLetter.title}</h2>
-                            <div className={`mb-3 overflow-hidden rounded-xl border-2 bg-slate-950/90 ${isTeacherAssignmentActive ? 'border-amber-300' : 'border-lime-300'}`}>
+                            <div className={`assignment-letter-eyebrow mb-1 text-center text-[10px] font-black tracking-[0.3em] ${isTeacherAssignmentActive ? 'text-amber-700' : 'text-lime-700'}`}>{isTeacherAssignmentActive ? 'TEACHER LETTER' : 'DAILY LETTER'}</div>
+                            <h2 className="assignment-letter-title mb-2 text-center text-xl font-black sm:text-2xl">{assignmentLetter.title}</h2>
+                            <div className={`assignment-letter-banner mb-3 overflow-hidden rounded-xl border-2 bg-slate-950/90 ${isTeacherAssignmentActive ? 'border-amber-300' : 'border-lime-300'}`}>
                                 <div className="relative">
                                     <img
                                         src={ASSIGNMENT_INTRO_BANNER_IMAGE}
@@ -12807,7 +12995,7 @@ const App: React.FC = () => {
                                     </div>
                                 </div>
                             </div>
-                            <div className={`mb-3 rounded-xl border-2 bg-white/70 p-3 text-xs font-bold leading-6 sm:text-sm ${isTeacherAssignmentActive ? 'border-amber-300' : 'border-lime-300'}`}>
+                            <div className={`assignment-letter-summary mb-3 rounded-xl border-2 bg-white/70 p-3 text-xs font-bold leading-6 sm:text-sm ${isTeacherAssignmentActive ? 'border-amber-300' : 'border-lime-300'}`}>
                                 <div>{isTeacherAssignmentActive ? '先生から課題が届きました。' : '今日の学習課題です。'}</div>
                                 <div>期限: {assignmentLetter.dueAt ? new Date(assignmentLetter.dueAt).toLocaleString('ja-JP') : '未設定'}</div>
                                 <div>形式: {assignmentLetter.gameMode === 'FREE' ? 'フリー' : '問題チャレンジのみ'}</div>
@@ -12815,7 +13003,7 @@ const App: React.FC = () => {
                                     {assignmentLetter.units.map(unit => `${unit.name} (${unit.targetCorrect || 10}問)`).join(' / ') || 'オリジナル問題'}
                                 </div>
                             </div>
-                            <div className="grid gap-2 sm:grid-cols-3">
+                            <div className="assignment-letter-actions grid gap-2 sm:grid-cols-3">
                                 <button
                                     onClick={() => {
                                         setShowAssignmentLetter(false);
@@ -13131,6 +13319,9 @@ const App: React.FC = () => {
                             onStart={handleDebugStart}
                             onStartAct3Boss={handleDebugStartAct3Boss}
                             onStartMagicEventSimulation={() => setGameState(prev => ({ ...prev, screen: GameScreen.MAGIC_EVENT_SIMULATION }))}
+                            onStartUiPreview={handleStartUiPreview}
+                            onStartProblemUiPreview={handleStartProblemUiPreview}
+                            onStartEventUiPreview={handleStartEventUiPreview}
                             onBack={returnToTitle}
                             onTimeUpdate={handleTimeUpdate}
                             onAddClearCount={handleDebugAddClearCount}
@@ -13601,6 +13792,7 @@ const App: React.FC = () => {
                                 onSelectDifficulty={handleDifficultySelect}
                                 onBack={() => setGameState(prev => ({ ...prev, screen: prev.challengeMode === 'TYPING' ? GameScreen.TYPING_MODE_SELECTION : GameScreen.MODE_SELECTION }))}
                                 languageMode={languageMode}
+                                visualTheme={visualTheme}
                             />
                         )}
                     </div>

@@ -323,7 +323,7 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics =
                 <button 
                     onClick={() => setViewMode('REMOVE')}
                     disabled={removed || player.gold < getPrice(removeCost ?? (player.relics.find(r => r.id === 'SMILING_MASK') ? 50 : REMOVE_COST))}
-                    className={`flex-1 py-2 rounded border-2 flex items-center justify-center gap-1 cursor-pointer text-sm ${viewMode === 'REMOVE' ? 'bg-red-600 border-white' : 'bg-gray-800 border-gray-600 text-gray-400'} ${removed ? 'opacity-50 cursor-not-allowed' : ''}`}
+                    className={`flex-1 py-2 rounded border-2 flex items-center justify-center gap-1 cursor-pointer text-sm ${viewMode === 'REMOVE' ? 'bg-red-600 border-white text-white' : 'bg-red-950 border-red-700 text-red-200'} ${removed || player.gold < getPrice(removeCost ?? (player.relics.find(r => r.id === 'SMILING_MASK') ? 50 : REMOVE_COST)) ? 'cursor-not-allowed saturate-75' : ''}`}
                 >
                     <Trash2 size={14}/> {trans(visualTheme === 'magic' ? "魔力浄化" : "カード削除", languageMode)} ({getPrice(removeCost ?? (player.relics.find(r => r.id === 'SMILING_MASK') ? 50 : REMOVE_COST))} {trans(currencyLabel, languageMode)}){typingMode && ' [0]'}
                 </button>

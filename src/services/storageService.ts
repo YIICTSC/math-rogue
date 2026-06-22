@@ -17,6 +17,7 @@ const STORAGE_KEY_COOP_LEGACY_CARD = 'pixel_spire_coop_legacy_card_v1';
 const STORAGE_KEY_DEBUG_MATH_SKIP = 'pixel_spire_debug_math_skip_v1';
 const STORAGE_KEY_DEBUG_HP_ONE = 'pixel_spire_debug_hp_one_v1';
 const STORAGE_KEY_DEBUG_MINI_GAME_UNLOCK = 'pixel_spire_debug_mini_game_unlock_v1';
+const STORAGE_KEY_UI_PREVIEW_CHECKLIST = 'pixel_spire_ui_preview_checklist_v1';
 const STORAGE_KEY_MATH_CORRECT_COUNT = 'pixel_spire_math_correct_count_v1';
 const STORAGE_KEY_CHALLENGE_RECORDS = 'pixel_spire_challenge_records_v1';
 const STORAGE_KEY_MAX_UNLOCKED_DIFFICULTY = 'pixel_spire_max_unlocked_difficulty_v1';
@@ -96,6 +97,9 @@ export interface StorageTransferPayload {
     origin: string;
     entries: Record<string, string>;
 }
+
+export type UiPreviewCheckTarget = 'pc' | 'mobileLandscape' | 'mobilePortrait';
+export type UiPreviewChecklist = Record<string, Partial<Record<UiPreviewCheckTarget, boolean>>>;
 
 /**
  * ローカルの現在日付を取得する（YYYY-MM-DD）
@@ -1192,6 +1196,19 @@ export const storageService = {
       } catch { return false; }
   },
 
+  saveUiPreviewChecklist: (checklist: UiPreviewChecklist) => {
+      localStorage.setItem(STORAGE_KEY_UI_PREVIEW_CHECKLIST, JSON.stringify(checklist));
+  },
+
+  getUiPreviewChecklist: (): UiPreviewChecklist => {
+      try {
+          const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY_UI_PREVIEW_CHECKLIST) || '{}');
+          return parsed && typeof parsed === 'object' && !Array.isArray(parsed) ? parsed : {};
+      } catch {
+          return {};
+      }
+  },
+
   exportTransferData: (): StorageTransferPayload => {
       const entries = collectTransferEntries();
       return {
@@ -1247,6 +1264,7 @@ export const storageService = {
       localStorage.removeItem(STORAGE_KEY_DEBUG_MATH_SKIP);
       localStorage.removeItem(STORAGE_KEY_DEBUG_HP_ONE);
       localStorage.removeItem(STORAGE_KEY_DEBUG_MINI_GAME_UNLOCK);
+      localStorage.removeItem(STORAGE_KEY_UI_PREVIEW_CHECKLIST);
       localStorage.removeItem(STORAGE_KEY_MATH_CORRECT_COUNT);
       localStorage.removeItem(STORAGE_KEY_SEEN_BATTLE_TUTORIAL);
       localStorage.removeItem(STORAGE_KEY_SEEN_PARRY_TUTORIAL);
