@@ -279,8 +279,10 @@ const getCurrentUnitsForCategory = (categoryId: SubjectCategoryConfig['id'], gra
 
   const baseUnits: SelectableUnitOption[] = categoryId === 'ENGLISH'
     ? (ENGLISH_GRADE_UNITS[grade] || []).map((unit) => ({ ...unit, modes: [unit.mode] }))
+    : categoryId === 'LIFE'
+    ? (SCIENCE_GRADE_UNITS[grade] || []).filter((unit) => unit.mode.startsWith('LIFE_')).map((unit) => ({ ...unit, modes: [unit.mode] }))
     : categoryId === 'SCIENCE'
-    ? (SCIENCE_GRADE_UNITS[grade] || []).map((unit) => ({ ...unit, modes: [unit.mode] }))
+    ? (SCIENCE_GRADE_UNITS[grade] || []).filter((unit) => unit.mode.startsWith('SCIENCE_')).map((unit) => ({ ...unit, modes: [unit.mode] }))
     : categoryId === 'SOCIAL'
     ? (SOCIAL_GRADE_UNITS[grade] || []).map((unit) => ({ ...unit, modes: [unit.mode] }))
     : categoryId === 'KOKUGO_GRADES'
@@ -447,6 +449,7 @@ const getCategoryIcon = (id: string) => {
         case 'KANKEN': return <Book size={20} />;
         case 'HARD_KANJI': return <Book size={20} />;
         case 'ENGLISH': return <Languages size={20} />;
+        case 'LIFE': return <Home size={20} />;
         case 'SCIENCE': return <FlaskConical size={20} />;
         case 'SOCIAL': return <Globe size={20} />;
         case 'SUMMARY': return <GraduationCap size={20} />;
@@ -492,6 +495,50 @@ const getCategoryClasses = (color: string) => {
   }
 };
 
+export interface DebugProblemUnitOption {
+  id: string;
+  name: string;
+  mode: GameMode;
+  modePool?: string[];
+}
+
+export interface DebugProblemUnitGroup {
+  id: string;
+  name: string;
+  units: DebugProblemUnitOption[];
+}
+
+const getDebugGradeLabel = (grade: number) => grade <= 6 ? `小${grade}` : `中${grade - 6}`;
+
+export const getDebugProblemUnitGroups = (): DebugProblemUnitGroup[] => {
+  const fromModeUnits = (units: Array<{ id: string; name: string; mode: string }>, prefix: string): DebugProblemUnitOption[] =>
+    units.map(unit => ({ id: `${prefix}-${unit.id}`, name: unit.name, mode: unit.mode as GameMode, modePool: [unit.mode] }));
+  const fromPoolUnits = (entries: Array<[string, MathUnitOption[]]>, prefix: string): DebugProblemUnitOption[] =>
+    entries.flatMap(([grade, units]) => units.map(unit => ({
+      id: `${prefix}-${grade}-${unit.id}`,
+      name: `${getDebugGradeLabel(Number(grade))} / ${unit.name}`,
+      mode: (unit.modes[0] || GameMode.MATH_G1_1) as GameMode,
+      modePool: unit.modes,
+    })));
+  const granularCategoryIds = new Set(['MATH_GRADES', 'KOKUGO_GRADES', 'ENGLISH', 'LIFE', 'SCIENCE', 'SOCIAL', 'SUMMARY']);
+
+  return [
+    { id: 'MATH_UNITS', name: '算数・数学（単元）', units: fromPoolUnits(Object.entries(MATH_GRADE_UNITS), 'math') },
+    { id: 'KOKUGO_UNITS', name: '国語（単元）', units: fromPoolUnits(Object.entries(KOKUGO_GRADE_UNITS), 'kokugo') },
+    { id: 'ENGLISH_UNITS', name: '英語（単元）', units: fromModeUnits(Object.values(ENGLISH_GRADE_UNITS).flat(), 'english') },
+    { id: 'LIFE_UNITS', name: '生活（単元）', units: fromModeUnits(Object.values(SCIENCE_GRADE_UNITS).flat().filter((unit) => unit.mode.startsWith('LIFE_')), 'life') },
+    { id: 'SCIENCE_UNITS', name: '理科（単元）', units: fromModeUnits(Object.values(SCIENCE_GRADE_UNITS).flat().filter((unit) => unit.mode.startsWith('SCIENCE_')), 'science') },
+    { id: 'SOCIAL_UNITS', name: '社会（単元）', units: fromModeUnits(Object.values(SOCIAL_GRADE_UNITS).flat(), 'social') },
+    ...SUBJECT_CATEGORIES
+      .filter(category => !granularCategoryIds.has(category.id))
+      .map(category => ({
+        id: category.id,
+        name: category.name,
+        units: category.subModes.map(unit => ({ id: `${category.id}-${unit.id}`, name: unit.name, mode: unit.mode })),
+      })),
+  ].filter(group => group.units.length > 0);
+};
+
 const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
   onBack,
   languageMode,
@@ -535,7 +582,7 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
     ));
   }, [showUpperProblems]);
   const defaultDisplayedCategory = displayedCategories[0] || SUBJECT_CATEGORIES[0];
-  const isUnitCategory = selectedCategory.id === 'MATH_GRADES' || selectedCategory.id === 'KOKUGO_GRADES' || selectedCategory.id === 'ENGLISH' || selectedCategory.id === 'SCIENCE' || selectedCategory.id === 'SOCIAL' || selectedCategory.id === 'SUMMARY';
+  const isUnitCategory = selectedCategory.id === 'MATH_GRADES' || selectedCategory.id === 'KOKUGO_GRADES' || selectedCategory.id === 'ENGLISH' || selectedCategory.id === 'LIFE' || selectedCategory.id === 'SCIENCE' || selectedCategory.id === 'SOCIAL' || selectedCategory.id === 'SUMMARY';
   const problemLanguageMode: LanguageMode = languageMode === 'ENGLISH' ? 'JAPANESE' : languageMode;
   const canSelectAnswerMode = selectedCategory.id === 'MATH' || selectedCategory.id === 'UPPER_MATH' || selectedCategory.id === 'KANJI' || selectedCategory.id === 'KANKEN' || selectedCategory.id === 'HARD_KANJI';
   const shouldContinueOnWrong = !!assignment || continueOnWrong;
@@ -622,6 +669,8 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
   };
 
   const getSelectableGrades = (categoryId: SubjectCategoryConfig['id']): number[] => {
+    if (categoryId === 'LIFE') return [1, 2];
+    if (categoryId === 'SCIENCE') return [3, 4, 5, 6, 7, 8, 9];
     if (categoryId === 'ENGLISH' || categoryId === 'SOCIAL') return [3, 4, 5, 6, 7, 8, 9];
     return [1, 2, 3, 4, 5, 6, 7, 8, 9];
   };
@@ -650,7 +699,14 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
       setSelectedCategory(cat);
       setSelectedSubMode(cat.subModes[0]);
       setActiveChallenge(null);
+      setSelectedMathUnitIds([]);
       if (cat.id === 'ENGLISH' && selectedMathGrade < 3) {
+        setSelectedMathGrade(3);
+      }
+      if (cat.id === 'LIFE' && selectedMathGrade > 2) {
+        setSelectedMathGrade(1);
+      }
+      if (cat.id === 'SCIENCE' && selectedMathGrade < 3) {
         setSelectedMathGrade(3);
       }
       audioService.playSound('select');

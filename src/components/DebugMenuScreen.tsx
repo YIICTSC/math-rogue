@@ -2,29 +2,35 @@
 import { CARDS_LIBRARY, RELIC_LIBRARY, POTION_LIBRARY, ENEMY_LIBRARY } from '../constants';
 import { GAME_STORIES } from '../data/stories';
 import { FLAVOR_TEXTS, ENEMY_NAMES } from '../services/geminiService';
-import { AttackEffectKey, StatusEffectKey, Card as ICard, Relic, Potion, CardType, TargetType, LanguageMode } from '../types';
+import { AttackEffectKey, StatusEffectKey, Card as ICard, Relic, Potion, CardType, TargetType, LanguageMode, GameScreen, GameMode } from '../types';
 import Card from './Card';
 import AttackEffectSprite from './AttackEffectSprite';
 import StatusEffectSprite from './StatusEffectSprite';
-import { ArrowRight, Trash2, Plus, Gem, FlaskConical, Swords, Shield, Zap, Search, Beaker, RotateCcw, Skull, Clock, History, Languages, FileText, BookOpen, MessageSquare, HelpCircle, AlertCircle, Copy, Check, X, Volume2, Sparkles } from 'lucide-react';
+import { ArrowRight, Trash2, Plus, Gem, FlaskConical, Swords, Shield, Zap, Search, Beaker, RotateCcw, Skull, Clock, History, Languages, FileText, BookOpen, MessageSquare, HelpCircle, AlertCircle, Copy, Check, X, Volume2, Sparkles, Monitor } from 'lucide-react';
 import { createHolographicCard, synthesizeCards } from '../utils/cardUtils';
-import { storageService } from '../services/storageService';
+import { storageService, type UiPreviewCheckTarget, type UiPreviewChecklist } from '../services/storageService';
 import { audioService } from '../services/audioService';
 import { trans } from '../utils/textUtils';
 import { ATTACK_EFFECT_LIST } from '../data/attackEffects';
 import { STATUS_EFFECT_LIST } from '../data/statusEffects';
-import { HIGH_SCHOOL_EVENT_THEMES, HIGH_SCHOOL_HUMANOID_ENEMY_VARIANTS, type HighSchoolEnemyAction } from '../data/visualThemes';
+import { HIGH_SCHOOL_EVENT_THEMES, MAGIC_EVENT_THEMES, HIGH_SCHOOL_HUMANOID_ENEMY_VARIANTS, type HighSchoolEnemyAction, type VisualThemeId } from '../data/visualThemes';
 import { MAGIC_HEROES, MAGIC_MALE_PROTAGONISTS } from '../data/magicHeroes';
 import { getMagicRomanceDialogue, getMagicRomanceEndingText, type MagicRomanceEndingRank } from '../data/magicRomanceDialogue';
 import { getMagicRomanceVoiceLines } from '../services/magicRomanceEventService';
 import { getMagicEndingVoiceLine } from '../services/magicEndingService';
 import { assetUrl } from '../utils/assetPaths';
+import { UI_PREVIEW_GROUPS, UI_PREVIEW_SCREENS } from '../data/uiPreviewScreens';
+import { getDebugProblemUnitGroups } from './ProblemChallengeScreen';
+import { ELEMENTARY_EVENT_TITLES } from '../services/eventService';
 import React, { useMemo, useState, useCallback } from 'react';
 
 interface DebugMenuScreenProps {
     onStart: (deck: ICard[], relics: Relic[], potions: Potion[]) => void;
     onStartAct3Boss: (deck: ICard[], relics: Relic[], potions: Potion[]) => void;
     onStartMagicEventSimulation: () => void;
+    onStartUiPreview: (screen: GameScreen) => void;
+    onStartProblemUiPreview: (mode: GameMode, modePool?: string[]) => void;
+    onStartEventUiPreview: (theme: VisualThemeId, title: string) => void;
     onBack: () => void;
     onTimeUpdate: (newDailySeconds: number) => void;
     onAddClearCount: () => void;
@@ -58,6 +64,18 @@ const HIGH_SCHOOL_HUMANOID_ACTIONS: { key: HighSchoolEnemyAction; label: string;
     { key: 'idle', label: 'IDLE', folder: 'humanoid-enemies' },
     { key: 'attack', label: 'ATTACK', folder: 'humanoid-enemies-attack' },
     { key: 'skill', label: 'SKILL', folder: 'humanoid-enemies-skill' },
+];
+
+const DEBUG_PROBLEM_UNIT_GROUPS = getDebugProblemUnitGroups();
+const DEBUG_EVENT_GROUPS: Array<{ id: VisualThemeId; name: string; titles: string[] }> = [
+    { id: 'elementary', name: '小学生編', titles: [...ELEMENTARY_EVENT_TITLES] },
+    { id: 'high-school', name: '高校編', titles: HIGH_SCHOOL_EVENT_THEMES.map(event => event.title) },
+    { id: 'magic', name: 'マジック編', titles: MAGIC_EVENT_THEMES.map(event => event.title) },
+];
+const UI_PREVIEW_CHECK_TARGETS: Array<{ id: UiPreviewCheckTarget; label: string }> = [
+    { id: 'pc', label: 'PC' },
+    { id: 'mobileLandscape', label: 'スマホ横' },
+    { id: 'mobilePortrait', label: '縦画面' },
 ];
 
 const MAGIC_VOICE_CHARACTERS = [
@@ -119,6 +137,9 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
     onStart,
     onStartAct3Boss,
     onStartMagicEventSimulation,
+    onStartUiPreview,
+    onStartProblemUiPreview,
+    onStartEventUiPreview,
     onBack,
     onTimeUpdate,
     onAddClearCount,
@@ -128,7 +149,7 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
     nextMiniGameThreshold,
     languageMode: initialLanguageMode
 }) => {
-    const [activeTab, setActiveTab] = useState<'CARDS' | 'RELICS' | 'POTIONS' | 'SYNTHESIS' | 'SYSTEM' | 'EFFECTS' | 'MAGIC_VOICES' | 'EVENTS' | 'HUMANOID_SPRITES' | 'TRANSLATION'>('CARDS');
+    const [activeTab, setActiveTab] = useState<'CARDS' | 'RELICS' | 'POTIONS' | 'SYNTHESIS' | 'SYSTEM' | 'UI_PREVIEW' | 'EFFECTS' | 'MAGIC_VOICES' | 'EVENTS' | 'HUMANOID_SPRITES' | 'TRANSLATION'>('CARDS');
     const [searchTerm, setSearchTerm] = useState("");
     const [debugLanguageMode, setDebugLanguageMode] = useState<LanguageMode>(initialLanguageMode);
     const [transSubTab, setTransSubTab] = useState<'STORY' | 'FLAVOR' | 'CARD' | 'EVENT' | 'ENEMY' | 'MISSING'>('STORY');
@@ -146,6 +167,11 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
     const [statusPreviewTokens, setStatusPreviewTokens] = useState<Record<StatusEffectKey, number>>({} as Record<StatusEffectKey, number>);
     const [playingStatusKey, setPlayingStatusKey] = useState<StatusEffectKey | null>(null);
     const [addHolographicCards, setAddHolographicCards] = useState(false);
+    const [debugProblemGroupId, setDebugProblemGroupId] = useState(DEBUG_PROBLEM_UNIT_GROUPS[0]?.id ?? '');
+    const [debugProblemUnitId, setDebugProblemUnitId] = useState(DEBUG_PROBLEM_UNIT_GROUPS[0]?.units[0]?.id ?? '');
+    const [debugEventTheme, setDebugEventTheme] = useState<VisualThemeId>('elementary');
+    const [debugEventTitle, setDebugEventTitle] = useState(DEBUG_EVENT_GROUPS[0]?.titles[0] ?? '');
+    const [uiPreviewChecklist, setUiPreviewChecklist] = useState<UiPreviewChecklist>(() => storageService.getUiPreviewChecklist());
 
     const [selectedDeck, setSelectedDeck] = useState<ICard[]>([]);
     const [selectedRelics, setSelectedRelics] = useState<Relic[]>([]);
@@ -154,6 +180,10 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
     const [synthSlot1, setSynthSlot1] = useState<ICard | null>(null);
     const [synthSlot2, setSynthSlot2] = useState<ICard | null>(null);
     const [synthResult, setSynthResult] = useState<ICard | null>(null);
+    const debugProblemGroup = DEBUG_PROBLEM_UNIT_GROUPS.find(group => group.id === debugProblemGroupId) ?? DEBUG_PROBLEM_UNIT_GROUPS[0];
+    const debugProblemUnit = debugProblemGroup?.units.find(unit => unit.id === debugProblemUnitId) ?? debugProblemGroup?.units[0];
+    const debugEventGroup = DEBUG_EVENT_GROUPS.find(group => group.id === debugEventTheme) ?? DEBUG_EVENT_GROUPS[0];
+    const selectedDebugEventTitle = debugEventGroup?.titles.includes(debugEventTitle) ? debugEventTitle : debugEventGroup?.titles[0] ?? '';
 
     const allCards = useMemo(() => Object.values(CARDS_LIBRARY).sort((a, b) => a.type.localeCompare(b.type) || a.cost - b.cost), []);
     const allRelics = useMemo(() => Object.values(RELIC_LIBRARY), []);
@@ -396,6 +426,50 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
         window.setTimeout(() => setHighSchoolVoiceFixCopied(false), 1600);
     };
 
+    const toggleUiPreviewCheck = (key: string, target: UiPreviewCheckTarget) => {
+        setUiPreviewChecklist(prev => {
+            const next: UiPreviewChecklist = {
+                ...prev,
+                [key]: {
+                    ...prev[key],
+                    [target]: !prev[key]?.[target],
+                },
+            };
+            storageService.saveUiPreviewChecklist(next);
+            return next;
+        });
+    };
+
+    const renderUiPreviewChecks = (key: string) => (
+        <div className="flex flex-wrap items-center justify-center gap-2">
+            {UI_PREVIEW_CHECK_TARGETS.map(target => (
+                <label
+                    key={target.id}
+                    className={`flex cursor-pointer items-center gap-1 rounded border px-1.5 py-1 text-[9px] font-black transition-colors ${
+                        uiPreviewChecklist[key]?.[target.id]
+                            ? 'border-emerald-400 bg-emerald-950 text-emerald-200'
+                            : 'border-slate-600 bg-slate-950 text-slate-400'
+                    }`}
+                >
+                    <input
+                        type="checkbox"
+                        checked={Boolean(uiPreviewChecklist[key]?.[target.id])}
+                        onChange={() => toggleUiPreviewCheck(key, target.id)}
+                        className="h-3 w-3 accent-emerald-500"
+                    />
+                    {target.label}
+                </label>
+            ))}
+        </div>
+    );
+    const completedUiPreviewScreenCount = UI_PREVIEW_SCREENS.filter(item =>
+        UI_PREVIEW_CHECK_TARGETS.every(target => uiPreviewChecklist[`screen:${item.screen}`]?.[target.id])
+    ).length;
+    const totalUiPreviewChecks = Object.values(uiPreviewChecklist).reduce(
+        (total, entry) => total + UI_PREVIEW_CHECK_TARGETS.filter(target => entry?.[target.id]).length,
+        0,
+    );
+
     return (
         <div className="flex flex-col h-full w-full bg-gray-900 text-white relative">
             <div className="bg-red-900/90 border-b-2 border-red-500 p-2 md:p-4 flex justify-between items-center shrink-0 z-20">
@@ -433,6 +507,7 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
                         <button onClick={() => setActiveTab('POTIONS')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'POTIONS' ? 'bg-gray-700 text-white' : 'text-gray-400 hover:bg-gray-750'}`}>ポーション</button>
                         <button onClick={() => setActiveTab('SYNTHESIS')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'SYNTHESIS' ? 'bg-purple-900 text-white' : 'text-purple-400 hover:bg-gray-750'}`}>合成</button>
                         <button onClick={() => setActiveTab('SYSTEM')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'SYSTEM' ? 'bg-indigo-900 text-white' : 'text-indigo-400 hover:bg-gray-750'}`}>システム</button>
+                        <button onClick={() => setActiveTab('UI_PREVIEW')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'UI_PREVIEW' ? 'bg-sky-900 text-white' : 'text-sky-400 hover:bg-gray-750'}`}>UI実寸</button>
                         <button onClick={() => setActiveTab('EFFECTS')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'EFFECTS' ? 'bg-orange-900 text-white' : 'text-orange-400 hover:bg-gray-750'}`}>エフェクト</button>
                         <button onClick={() => setActiveTab('MAGIC_VOICES')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'MAGIC_VOICES' ? 'bg-fuchsia-900 text-white' : 'text-fuchsia-400 hover:bg-gray-750'}`}>マジック声</button>
                         <button onClick={() => setActiveTab('EVENTS')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'EVENTS' ? 'bg-cyan-900 text-white' : 'text-cyan-400 hover:bg-gray-750'}`}>高校編イベント</button>
@@ -687,6 +762,147 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
                                         </div>
                                     ))}
                                 </div>
+                            </div>
+                        )}
+
+                        {activeTab === 'UI_PREVIEW' && (
+                            <div className="space-y-6">
+                                <div className="rounded-xl border border-sky-700/70 bg-sky-950/30 p-4">
+                                    <h3 className="flex items-center gap-2 font-bold text-sky-200">
+                                        <Monitor size={20} /> UI実寸確認モード
+                                    </h3>
+                                    <p className="mt-2 text-xs leading-relaxed text-gray-300">
+                                        選択した画面を拡大・縮小せず、現在のウィンドウサイズで表示します。画面右上のフローティングバーから別画面への切り替えとデバッグメニューへの復帰ができます。
+                                    </p>
+                                    <div className="mt-3 flex flex-wrap gap-2 text-[10px] font-black">
+                                        <span className="rounded-full border border-emerald-500/60 bg-emerald-950 px-3 py-1 text-emerald-200">
+                                            基本画面完了 {completedUiPreviewScreenCount} / {UI_PREVIEW_SCREENS.length}
+                                        </span>
+                                        <span className="rounded-full border border-sky-500/60 bg-sky-950 px-3 py-1 text-sky-200">
+                                            保存済みチェック {totalUiPreviewChecks}
+                                        </span>
+                                    </div>
+                                </div>
+                                <section className="rounded-xl border border-emerald-600/70 bg-emerald-950/25 p-4">
+                                    <h4 className="mb-3 flex items-center gap-2 text-sm font-black text-emerald-300">
+                                        <BookOpen size={18} /> 問題UI・単元指定
+                                    </h4>
+                                    <div className="grid grid-cols-1 gap-3 md:grid-cols-[minmax(0,0.8fr)_minmax(0,1.4fr)_auto] md:items-end">
+                                        <label className="flex min-w-0 flex-col gap-1 text-[10px] font-bold text-gray-400">
+                                            教科
+                                            <select
+                                                value={debugProblemGroup?.id ?? ''}
+                                                onChange={(event) => {
+                                                    const nextGroup = DEBUG_PROBLEM_UNIT_GROUPS.find(group => group.id === event.target.value);
+                                                    setDebugProblemGroupId(event.target.value);
+                                                    setDebugProblemUnitId(nextGroup?.units[0]?.id ?? '');
+                                                }}
+                                                className="min-w-0 rounded-lg border border-emerald-700 bg-slate-950 px-3 py-2 text-xs font-bold text-white"
+                                            >
+                                                {DEBUG_PROBLEM_UNIT_GROUPS.map(group => (
+                                                    <option key={group.id} value={group.id}>{group.name}</option>
+                                                ))}
+                                            </select>
+                                        </label>
+                                        <label className="flex min-w-0 flex-col gap-1 text-[10px] font-bold text-gray-400">
+                                            単元
+                                            <select
+                                                value={debugProblemUnit?.id ?? ''}
+                                                onChange={(event) => setDebugProblemUnitId(event.target.value)}
+                                                className="min-w-0 rounded-lg border border-emerald-700 bg-slate-950 px-3 py-2 text-xs font-bold text-white"
+                                            >
+                                                {(debugProblemGroup?.units ?? []).map(unit => (
+                                                    <option key={unit.id} value={unit.id}>{unit.name}</option>
+                                                ))}
+                                            </select>
+                                        </label>
+                                        <div className="flex flex-col gap-2">
+                                            <button
+                                                type="button"
+                                                disabled={!debugProblemUnit}
+                                                onClick={() => debugProblemUnit && onStartProblemUiPreview(debugProblemUnit.mode, debugProblemUnit.modePool)}
+                                                className="rounded-lg border border-emerald-300 bg-emerald-600 px-5 py-2 text-xs font-black text-white hover:bg-emerald-500 disabled:opacity-40"
+                                            >
+                                                この単元を表示
+                                            </button>
+                                            {debugProblemUnit && renderUiPreviewChecks(`problem:${debugProblemUnit.id}`)}
+                                        </div>
+                                    </div>
+                                </section>
+                                <section className="rounded-xl border border-amber-600/70 bg-amber-950/25 p-4">
+                                    <h4 className="mb-3 flex items-center gap-2 text-sm font-black text-amber-300">
+                                        <HelpCircle size={18} /> イベントUI確認
+                                    </h4>
+                                    <div className="grid grid-cols-1 gap-3 md:grid-cols-[minmax(0,0.7fr)_minmax(0,1.5fr)_auto] md:items-end">
+                                        <label className="flex min-w-0 flex-col gap-1 text-[10px] font-bold text-gray-400">
+                                            テーマ
+                                            <select
+                                                value={debugEventTheme}
+                                                onChange={(event) => {
+                                                    const theme = event.target.value as VisualThemeId;
+                                                    const nextGroup = DEBUG_EVENT_GROUPS.find(group => group.id === theme);
+                                                    setDebugEventTheme(theme);
+                                                    setDebugEventTitle(nextGroup?.titles[0] ?? '');
+                                                }}
+                                                className="min-w-0 rounded-lg border border-amber-700 bg-slate-950 px-3 py-2 text-xs font-bold text-white"
+                                            >
+                                                {DEBUG_EVENT_GROUPS.map(group => (
+                                                    <option key={group.id} value={group.id}>{group.name}</option>
+                                                ))}
+                                            </select>
+                                        </label>
+                                        <label className="flex min-w-0 flex-col gap-1 text-[10px] font-bold text-gray-400">
+                                            イベント
+                                            <select
+                                                value={selectedDebugEventTitle}
+                                                onChange={(event) => setDebugEventTitle(event.target.value)}
+                                                className="min-w-0 rounded-lg border border-amber-700 bg-slate-950 px-3 py-2 text-xs font-bold text-white"
+                                            >
+                                                {(debugEventGroup?.titles ?? []).map(title => (
+                                                    <option key={title} value={title}>{title}</option>
+                                                ))}
+                                            </select>
+                                        </label>
+                                        <div className="flex flex-col gap-2">
+                                            <button
+                                                type="button"
+                                                disabled={!selectedDebugEventTitle}
+                                                onClick={() => selectedDebugEventTitle && onStartEventUiPreview(debugEventTheme, selectedDebugEventTitle)}
+                                                className="rounded-lg border border-amber-300 bg-amber-600 px-5 py-2 text-xs font-black text-white hover:bg-amber-500 disabled:opacity-40"
+                                            >
+                                                このイベントを表示
+                                            </button>
+                                            {selectedDebugEventTitle && renderUiPreviewChecks(`event:${debugEventTheme}:${selectedDebugEventTitle}`)}
+                                        </div>
+                                    </div>
+                                </section>
+                                {UI_PREVIEW_GROUPS.map(group => (
+                                    <section key={group}>
+                                        <h4 className="mb-3 border-b border-gray-700 pb-2 text-sm font-black text-sky-300">{group}</h4>
+                                        <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-4">
+                                            {UI_PREVIEW_SCREENS.filter(item => item.group === group).map(item => {
+                                                const checklistKey = `screen:${item.screen}`;
+                                                const completed = UI_PREVIEW_CHECK_TARGETS.every(target => uiPreviewChecklist[checklistKey]?.[target.id]);
+                                                return (
+                                                    <div
+                                                        key={item.screen}
+                                                        className={`flex min-h-28 flex-col rounded-xl border p-2 shadow-lg transition-colors ${completed ? 'border-emerald-500 bg-emerald-950/40' : 'border-sky-700 bg-slate-900'}`}
+                                                    >
+                                                        <button
+                                                            type="button"
+                                                            onClick={() => onStartUiPreview(item.screen)}
+                                                            className="flex min-h-16 flex-1 flex-col items-center justify-center gap-1 rounded-lg text-center text-sm font-bold text-white hover:bg-sky-900/70"
+                                                        >
+                                                            <Monitor size={20} className={completed ? 'text-emerald-300' : 'text-sky-300'} />
+                                                            {item.label}
+                                                        </button>
+                                                        {renderUiPreviewChecks(checklistKey)}
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                    </section>
+                                ))}
                             </div>
                         )}
 

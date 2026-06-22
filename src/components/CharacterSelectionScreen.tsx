@@ -382,7 +382,7 @@ const CharacterSelectionScreen: React.FC<CharacterSelectionScreenProps> = ({ cha
           </div>
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-6xl pb-20">
+        <div className="character-selection-carousel grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 w-full max-w-6xl pb-20">
             {displayedCharacters.map((char, index) => {
                 const isUnlocked = index < unlockedCount;
                 const relic = visualTheme === 'magic' && char.magicProtagonistId
@@ -412,7 +412,7 @@ const CharacterSelectionScreen: React.FC<CharacterSelectionScreenProps> = ({ cha
                     'amber': 'border-amber-600 bg-amber-950/40 hover:bg-amber-900/60 shadow-amber-900/20',
                 };
                 
-                const baseClass = `relative border-4 rounded-2xl p-5 transition-all duration-300 flex flex-col items-center ${isUnlocked ? 'cursor-pointer hover:-translate-y-2 shadow-2xl scale-100 active:scale-95' : 'opacity-60 cursor-not-allowed grayscale'}`;
+                const baseClass = `character-selection-card relative border-4 rounded-2xl p-5 transition-all duration-300 flex flex-col items-center ${isUnlocked ? 'cursor-pointer hover:-translate-y-2 shadow-2xl scale-100 active:scale-95' : 'opacity-60 cursor-not-allowed grayscale'}`;
                 const colorClass = isUnlocked ? (colorMap[char.color] || 'border-gray-600') : 'border-gray-700 bg-gray-900';
 
                 return (
@@ -434,7 +434,7 @@ const CharacterSelectionScreen: React.FC<CharacterSelectionScreenProps> = ({ cha
                             </div>
                         )}
 
-                        <div className={`w-24 h-24 mb-4 relative drop-shadow-[0_0_15px_rgba(255,255,255,0.2)] ${isMagicPortrait ? 'overflow-hidden rounded-xl bg-slate-950/50' : ''}`}>
+                        <div className={`character-selection-portrait w-24 h-24 mb-4 relative drop-shadow-[0_0_15px_rgba(255,255,255,0.2)] ${isMagicPortrait ? 'overflow-hidden rounded-xl bg-slate-950/50' : ''}`}>
                              <img 
                                 src={charImage} 
                                 alt={char.name} 
@@ -461,7 +461,7 @@ const CharacterSelectionScreen: React.FC<CharacterSelectionScreenProps> = ({ cha
                              )}
                         </div>
 
-                        <div className="w-full flex justify-between items-center mb-3 border-b-2 border-white/10 pb-2">
+                        <div className="character-selection-summary w-full flex justify-between items-center mb-3 border-b-2 border-white/10 pb-2">
                             <h3 className="text-xl font-black text-white truncate">{trans(char.name, languageMode)}</h3>
                             <div className="flex gap-2 text-xs font-bold">
                                 <span className="flex items-center text-red-400"><Heart size={14} className="mr-1 fill-current"/> {char.maxHp}</span>
@@ -469,12 +469,12 @@ const CharacterSelectionScreen: React.FC<CharacterSelectionScreenProps> = ({ cha
                             </div>
                         </div>
 
-                        <p className="text-xs text-gray-100 font-bold mb-5 text-center leading-relaxed bg-black/30 p-2 rounded-lg w-full">
+                        <p className="character-selection-description text-xs text-gray-100 font-bold mb-5 text-center leading-relaxed bg-black/30 p-2 rounded-lg w-full">
                             {trans(char.description, languageMode)}
                         </p>
 
                         {/* Character Details Grid */}
-                        <div className="w-full grid grid-cols-1 gap-3 mb-6">
+                        <div className="character-selection-details w-full grid grid-cols-1 gap-3 mb-6">
                             {/* Special Mechanic */}
                             <div className="bg-white/5 rounded-xl p-3 border border-white/10 flex items-start">
                                 <div className="bg-indigo-500/20 p-1.5 rounded-lg mr-3 mt-0.5">
@@ -527,7 +527,7 @@ const CharacterSelectionScreen: React.FC<CharacterSelectionScreenProps> = ({ cha
                         </div>
 
                         {isUnlocked && (
-                            <div className="mt-auto w-full bg-white/10 group-hover:bg-white/20 text-center py-3 rounded-xl font-black text-white flex items-center justify-center transition-all border border-white/20">
+                            <div className="character-selection-action mt-auto w-full bg-white/10 group-hover:bg-white/20 text-center py-3 rounded-xl font-black text-white flex items-center justify-center transition-all border border-white/20">
                                 {trans("選択", languageMode)} <ArrowRight size={18} className="ml-2 animate-bounce-x" />
                             </div>
                         )}

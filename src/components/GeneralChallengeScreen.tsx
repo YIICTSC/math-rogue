@@ -1679,7 +1679,7 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
         <div className="absolute inset-0 texture-dark-matter opacity-20 pointer-events-none"></div>
         <RewardHintBanner text={rewardHint} />
         
-        <div className="z-10 w-full max-w-md text-center flex flex-col py-2 md:py-0 min-w-0">
+        <div className="general-challenge-layout z-10 w-full max-w-md text-center flex flex-col py-2 md:py-0 min-w-0">
             {isEnglishSpeakingReviewMode(mode) && !isChallenge && (
                 <div className="mb-4 flex justify-center gap-3 text-xs md:text-sm text-cyan-100">
                     <span>Score: {correctCount}</span>
@@ -1688,7 +1688,7 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
                 </div>
             )}
 
-            <div className="w-full bg-black/40 border-4 border-white p-3 sm:p-4 md:p-6 rounded-2xl mb-4 shadow-2xl relative overflow-hidden flex flex-col items-center justify-center min-h-[210px] md:min-h-[260px] min-w-0">
+            <div className="general-challenge-question w-full bg-black/40 border-4 border-white p-3 sm:p-4 md:p-6 rounded-2xl mb-4 shadow-2xl relative overflow-hidden flex flex-col items-center justify-center min-h-[210px] md:min-h-[260px] min-w-0">
                 {currentProblem.hint && (storageService.getHintStreaks()[currentProblem.sourceMode] || 0) < 3 && (
                     <div className="bg-white/10 p-2 rounded-lg border border-white/20 mb-4 w-full animate-in fade-in slide-in-from-top-2">
                         <div className="text-[10px] text-yellow-300 font-bold mb-0.5 uppercase tracking-tighter text-left">Hint</div>
@@ -1801,7 +1801,7 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
             </div>
 
             {!currentProblem.speechPrompt?.freeResponse && answerMode === 'INPUT' && isNumericAnswer(currentProblem.actualCorrectAnswer) && (
-            <form onSubmit={handleInputSubmit} className="w-full space-y-3">
+            <form onSubmit={handleInputSubmit} className="general-challenge-input w-full space-y-3">
                 <input
                     ref={inputRef}
                     value={inputAnswer}
@@ -1824,7 +1824,7 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
             )}
 
             {!currentProblem.speechPrompt?.freeResponse && !(answerMode === 'INPUT' && isNumericAnswer(currentProblem.actualCorrectAnswer)) && (
-            <div className="w-full grid grid-cols-2 gap-2 md:gap-3 min-w-0">
+            <div className="general-challenge-options w-full grid grid-cols-2 gap-2 md:gap-3 min-w-0">
                 {currentProblem.options.map((opt, idx) => (
                     <button
                         key={idx}
