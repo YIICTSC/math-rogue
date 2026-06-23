@@ -13,7 +13,7 @@ import { assetUrl } from '../utils/assetPaths';
 import { getCardIllustrationPaths } from '../utils/cardIllustration';
 import { ENEMY_ILLUSTRATION_SIZE_CLASS } from '../constants/uiSizing';
 import { PotionIcon, RelicIcon } from './ItemIcon';
-import { HIGH_SCHOOL_ENEMY_VARIANTS, HIGH_SCHOOL_HUMANOID_ENEMY_VARIANTS, getHighSchoolEnemyVariant, type VisualThemeId } from '../data/visualThemes';
+import { getThemedEnemyDisplayName, type VisualThemeId } from '../data/visualThemes';
 import { MAGIC_CARDS } from '../data/magicCards';
 import { getMagicCardArtUrl } from '../utils/cardArtPaths';
 
@@ -30,8 +30,72 @@ type CompendiumEnemy = {
     description: string;
     tier: 1 | 2 | 3;
     collectionKey: string;
-    imagePath?: string;
-    schoolVariant?: 'elementary' | 'high-school';
+    enemyType: string;
+    phase?: number;
+};
+
+const COMPENDIUM_ENEMY_THEME_OPTIONS: Array<{ id: VisualThemeId; label: string; caption: string }> = [
+    { id: 'elementary', label: '小学生編', caption: 'School' },
+    { id: 'high-school', label: '高校編', caption: 'High School' },
+    { id: 'magic', label: 'マジック編', caption: 'Magic' },
+];
+
+const inferCompendiumEnemyType = (enemyName: string) => {
+    if (enemyName.includes('校長')) return 'THE_HEART';
+    if (
+        enemyName.includes('先生') ||
+        enemyName.includes('教頭') ||
+        enemyName.includes('教育実習') ||
+        enemyName.includes('顧問') ||
+        enemyName.includes('委員長') ||
+        enemyName.includes('会長') ||
+        enemyName.includes('用務員') ||
+        enemyName.includes('上級生') ||
+        enemyName.includes('不良')
+    ) {
+        return 'TEACHER';
+    }
+    return 'GENERIC';
+};
+
+const getHighSchoolEnemyDescription = (enemy: CompendiumEnemy, displayName: string) => {
+    if (enemy.enemyType === 'THE_HEART') {
+        return `${displayName}。朝礼を三分で終わらせるという禁術を封印したまま、進路希望調査を武器にしてくる。`;
+    }
+    if (displayName.includes('風紀')) return `${displayName}。制服の乱れを見つける速度だけは光速級。こちらの心のシャツまできっちり入れ直してくる。`;
+    if (displayName.includes('模試') || displayName.includes('答案') || displayName.includes('赤点') || displayName.includes('試験')) return `${displayName}。弱点欄に「ケアレスミス」と赤ペンで書き込んでくる。正解しても部分点の話を始めるのが厄介。`;
+    if (displayName.includes('部') || displayName.includes('委員')) return `${displayName}。放課後の肩書きを戦闘力に変えた存在。会議は長いが、攻撃の結論だけは妙に早い。`;
+    if (displayName.includes('進路') || displayName.includes('内申')) return `${displayName}。未来の話をするたびに防御力が上がる。夢を聞かれる前に倒したいタイプ。`;
+    if (displayName.includes('購買') || displayName.includes('弁当') || displayName.includes('パン')) return `${displayName}。昼休みの争奪戦で鍛えられた怪物。残り一個の焼きそばパンを見る目をしている。`;
+    if (displayName.includes('黒板') || displayName.includes('チョーク') || displayName.includes('赤ペン') || displayName.includes('参考書')) return `${displayName}。知識を振りかざすより、まず粉っぽい。近づくとノートの余白まで支配される。`;
+    if (displayName.includes('ロッカー') || displayName.includes('階段') || displayName.includes('廊下') || displayName.includes('校門')) return `${displayName}。校舎のすき間に溜まった気配が形を持ったもの。通り道なのに、なぜか通してくれない。`;
+    if (displayName.includes('スマホ') || displayName.includes('USB') || displayName.includes('コピー') || displayName.includes('カメラ')) return `${displayName}。便利さの裏側で育ったデジタル怪異。通知音ひとつで集中力を根こそぎ持っていく。`;
+    if (displayName.includes('竜') || displayName.includes('覇王') || displayName.includes('女王') || displayName.includes('王')) return `${displayName}。名前の圧がすでに期末テスト三教科分。倒す前から反省文を書かされた気分になる。`;
+    if (enemy.enemyType === 'TEACHER') return `${displayName}。注意、指導、再提出を三段コンボで放つ人型の圧。目が合うと姿勢だけ先に正される。`;
+    if (enemy.tier === 1) return `${displayName}。高校生活の小さな不安が、妙に堂々と歩き出したもの。軽そうに見えて、地味に予定を狂わせる。`;
+    if (enemy.tier === 2) return `${displayName}。放課後のざわめきをまとった中堅怪異。倒すと静かになるが、なぜかチャイムだけは鳴る。`;
+    return `${displayName}。受験、部活、行事、寝不足が悪い方向に団結した強敵。青春の輝きより影のほうが濃い。`;
+};
+
+const getMagicEnemyDescription = (enemy: CompendiumEnemy, displayName: string) => {
+    if (enemy.enemyType === 'THE_HEART') {
+        return `${displayName}。校則を呪文に変える大魔法の使い手。詠唱は長いが、聞き終えるころには反省文が三枚増えている。`;
+    }
+    if (displayName.includes('星') || displayName.includes('彗星') || displayName.includes('星図')) return `${displayName}。星のまたたきを盗んでポケットに詰めている。倒すと夜空が少しだけ読みやすくなる。`;
+    if (displayName.includes('月') || displayName.includes('月光') || displayName.includes('月蝕')) return `${displayName}。満月の日だけ強気になるロマン派の魔物。曇りの日はやや機嫌が悪い。`;
+    if (displayName.includes('花') || displayName.includes('薔薇') || displayName.includes('茨') || displayName.includes('庭')) return `${displayName}。優雅に見えて根はかなりしつこい。花言葉はたぶん「再提出」。`;
+    if (displayName.includes('火') || displayName.includes('炎')) return `${displayName}。情熱と火力の区別がついていない。黒板を焦がしても「演出」と言い張る。`;
+    if (displayName.includes('影') || displayName.includes('闇') || displayName.includes('深淵')) return `${displayName}。暗がりに台詞を足して雰囲気を二倍にするタイプ。明るい場所でも少しだけ格好つけている。`;
+    if (displayName.includes('時計') || displayName.includes('時') || displayName.includes('鐘')) return `${displayName}。時間割を勝手に組み替える迷惑な時術系。休み時間だけ短くするので評判は最悪。`;
+    if (displayName.includes('風') || displayName.includes('旋風')) return `${displayName}。噂とプリントを同じ速度で飛ばしてくる。追い風のふりをした横風。`;
+    if (displayName.includes('夢') || displayName.includes('悪夢')) return `${displayName}。寝不足の魔力を好む夢界の住人。勝つと少し眠くなるが、負けると宿題の夢を見る。`;
+    if (displayName.includes('光') || displayName.includes('聖') || displayName.includes('晶')) return `${displayName}。まぶしさで正論を押し通すタイプ。清らかそうに見えて、目つぶし性能が高い。`;
+    if (displayName.includes('魔導書') || displayName.includes('禁術') || displayName.includes('ルーン') || displayName.includes('図書')) return `${displayName}。ページをめくる音だけで威圧してくる知識系魔物。注釈が長い。`;
+    if (displayName.includes('魔女') || displayName.includes('魔法') || displayName.includes('錬金') || displayName.includes('召喚')) return `${displayName}。実験成功率より自己演出を優先する魔法学園の強敵。煙が出ればだいたい満足する。`;
+    if (enemy.enemyType === 'TEACHER') return `${displayName}。杖より指示棒が似合う人型の魔法使い。注意ひとつで黒板の文字まで整列する。`;
+    if (enemy.tier === 1) return `${displayName}。初級魔法のこぼれ火から生まれた小さな厄介者。かわいい顔で机の上を異界にする。`;
+    if (enemy.tier === 2) return `${displayName}。召喚陣の端で育った中堅魔物。名前を呼ぶと得意げに出てくるが、帰り方は知らない。`;
+    return `${displayName}。星、呪文、寝不足が危険な配合で混ざった上級魔物。魔法陣より先に距離を取ったほうがいい。`;
 };
 
 const shuffleList = <T,>(items: T[]) => {
@@ -78,7 +142,7 @@ const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, 
     const [unlockedRelics, setUnlockedRelics] = useState<string[]>([]);
     const [unlockedPotions, setUnlockedPotions] = useState<string[]>([]);
     const [defeatedEnemies, setDefeatedEnemies] = useState<string[]>([]);
-    const [enemyListMode, setEnemyListMode] = useState<'ALL' | 'HIGH_SCHOOL'>('ALL');
+    const [enemyCompendiumTheme, setEnemyCompendiumTheme] = useState<VisualThemeId>(visualTheme);
 
     const [selectedItem, setSelectedItem] = useState<{
         type: 'CARD' | 'RELIC' | 'POTION' | 'ENEMY';
@@ -116,6 +180,10 @@ const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, 
         setDefeatedEnemies(storageService.getDefeatedEnemies());
     }, []);
 
+    useEffect(() => {
+        setEnemyCompendiumTheme(visualTheme);
+    }, [visualTheme]);
+
     const allCards = useMemo(() => {
         const cards = [
             ...Object.values(CARDS_LIBRARY),
@@ -131,44 +199,23 @@ const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, 
     const allRelics = useMemo(() => Object.values(RELIC_LIBRARY), []);
     const allPotions = useMemo(() => Object.values(POTION_LIBRARY), []);
     const allEnemies = useMemo<CompendiumEnemy[]>(() => {
-        const baseEnemies = Object.values(ENEMY_LIBRARY)
+        return Object.values(ENEMY_LIBRARY)
             .sort((a, b) => a.tier - b.tier)
-            .map(enemy => ({ ...enemy, collectionKey: enemy.name, schoolVariant: 'elementary' as const }));
-
-        if (visualTheme !== 'high-school') return baseEnemies;
-
-        const highSchoolEnemies: CompendiumEnemy[] = [
-            ...HIGH_SCHOOL_ENEMY_VARIANTS.map(enemy => ({
-                name: enemy.name,
-                description: '高校編に登場する敵。校舎に染みついた不安や試験の圧力が形を持った存在。',
-                tier: (enemy.imageIndex >= 36 ? 3 : enemy.imageIndex >= 18 ? 2 : 1) as 1 | 2 | 3,
-                collectionKey: `high-school-enemy-${enemy.imageIndex}`,
-                imagePath: assetUrl(`sprites/high-school/enemies/${enemy.imageIndex}.png`),
-                schoolVariant: 'high-school',
-            })),
-            ...HIGH_SCHOOL_HUMANOID_ENEMY_VARIANTS.map(enemy => ({
-                name: enemy.name,
-                description: '高校編に登場する人型敵。部活や委員会、進路指導の緊張感をまとって立ちはだかる。',
-                tier: (enemy.imageIndex >= 35 ? 3 : enemy.imageIndex >= 15 ? 2 : 1) as 1 | 2 | 3,
-                collectionKey: `high-school-humanoid-enemy-${enemy.imageIndex}`,
-                imagePath: assetUrl(`sprites/high-school/humanoid-enemies/${enemy.imageIndex}.png`),
-                schoolVariant: 'high-school',
-            })),
-        ];
-
-        return [...baseEnemies, ...highSchoolEnemies].sort((a, b) => a.tier - b.tier || a.name.localeCompare(b.name));
-    }, [visualTheme]);
-    const getEnemyDisplayName = (enemy: { name: string; imagePath?: string }) => enemy.imagePath
-        ? enemy.name
-        : visualTheme === 'high-school'
-        ? getHighSchoolEnemyVariant({ name: enemy.name, enemyType: 'GENERIC', phase: undefined }).name
-        : enemy.name;
-    const displayEnemies = useMemo(() => {
-        if (visualTheme === 'high-school' && enemyListMode === 'HIGH_SCHOOL') {
-            return allEnemies.filter(enemy => enemy.schoolVariant === 'high-school');
-        }
-        return allEnemies;
-    }, [allEnemies, enemyListMode, visualTheme]);
+            .map(enemy => ({
+                ...enemy,
+                collectionKey: enemy.name,
+                enemyType: inferCompendiumEnemyType(enemy.name),
+                phase: undefined,
+            }));
+    }, []);
+    const getEnemyDisplayName = (enemy: CompendiumEnemy) => getThemedEnemyDisplayName(enemy, enemyCompendiumTheme);
+    const getEnemyDescription = (enemy: CompendiumEnemy) => {
+        const displayName = getEnemyDisplayName(enemy);
+        if (enemyCompendiumTheme === 'high-school') return getHighSchoolEnemyDescription(enemy, displayName);
+        if (enemyCompendiumTheme === 'magic') return getMagicEnemyDescription(enemy, displayName);
+        return enemy.description;
+    };
+    const displayEnemies = allEnemies;
     const unlockedCardsForShowcase = useMemo(() => {
         const visibleNames = isDebug ? allCards.map(card => card.name) : unlockedCardNames;
         const uniqueNames = Array.from(new Set(visibleNames));
@@ -183,16 +230,10 @@ const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, 
             return new Set(allEnemies.map(enemy => enemy.collectionKey));
         }
         const knownNames = new Set(allEnemies.map(enemy => enemy.collectionKey));
-        if (visualTheme === 'high-school') {
-            allEnemies
-                .filter(enemy => enemy.imagePath)
-                .forEach(enemy => knownNames.add(enemy.collectionKey));
-        }
         return new Set([
             ...defeatedEnemies.filter(name => knownNames.has(name)),
-            ...(visualTheme === 'high-school' ? allEnemies.filter(enemy => enemy.imagePath).map(enemy => enemy.collectionKey) : []),
         ]);
-    }, [allEnemies, defeatedEnemies, isDebug, visualTheme]);
+    }, [allEnemies, defeatedEnemies, isDebug]);
 
     const totalCards = allCards.length;
     const currentLibraryUnlockedCount = isDebug
@@ -362,28 +403,33 @@ const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, 
 
                 {activeTab === 'ENEMIES' && (
                     <>
-                    {visualTheme === 'high-school' && (
-                        <div className="mb-4 flex flex-wrap items-center gap-2">
+                    <div className="mb-4 flex flex-wrap items-center gap-2">
+                        {COMPENDIUM_ENEMY_THEME_OPTIONS.map(option => (
                             <button
-                                onClick={() => setEnemyListMode('ALL')}
-                                className={`px-3 py-1.5 rounded text-xs font-bold border ${enemyListMode === 'ALL' ? 'bg-amber-600 border-amber-300 text-white' : 'bg-black/50 border-gray-700 text-gray-300'}`}
+                                key={option.id}
+                                onClick={() => setEnemyCompendiumTheme(option.id)}
+                                className={`px-3 py-1.5 rounded text-xs font-bold border transition-colors ${
+                                    enemyCompendiumTheme === option.id
+                                        ? option.id === 'elementary'
+                                            ? 'bg-amber-600 border-amber-300 text-white'
+                                            : option.id === 'high-school'
+                                            ? 'bg-red-700 border-red-300 text-white'
+                                            : 'bg-purple-700 border-purple-300 text-white'
+                                        : 'bg-black/50 border-gray-700 text-gray-300 hover:border-gray-400'
+                                }`}
                             >
-                                すべて
+                                <span>{option.label}</span>
+                                <span className="ml-2 text-[10px] opacity-75">{option.caption}</span>
                             </button>
-                            <button
-                                onClick={() => setEnemyListMode('HIGH_SCHOOL')}
-                                className={`px-3 py-1.5 rounded text-xs font-bold border ${enemyListMode === 'HIGH_SCHOOL' ? 'bg-red-700 border-red-300 text-white' : 'bg-black/50 border-gray-700 text-gray-300'}`}
-                            >
-                                高校編の敵一覧
-                            </button>
-                            <span className="text-xs text-gray-300">
-                                高校編専用: {HIGH_SCHOOL_ENEMY_VARIANTS.length + HIGH_SCHOOL_HUMANOID_ENEMY_VARIANTS.length}体
-                            </span>
+                        ))}
+                        <div className="text-xs text-gray-300">
+                            {trans('表示テーマ', languageMode)}: {COMPENDIUM_ENEMY_THEME_OPTIONS.find(option => option.id === enemyCompendiumTheme)?.label}
                         </div>
-                    )}
+                    </div>
                     <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-4">
                         {displayEnemies.map((enemy, idx) => {
                             const isUnlocked = defeatedEnemySet.has(enemy.collectionKey) || defeatedEnemySet.has(enemy.name);
+                            const enemyDisplayName = getEnemyDisplayName(enemy);
                             return (
                                 <div
                                     key={idx}
@@ -394,13 +440,17 @@ const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, 
                                     className={`bg-black/60 border ${isUnlocked ? 'border-red-900 hover:border-red-500' : 'border-gray-800'} p-2 rounded flex flex-col items-center text-center cursor-pointer transition-colors aspect-square justify-center relative overflow-hidden`}
                                 >
                                     <div className={`${ENEMY_ILLUSTRATION_SIZE_CLASS.compendiumGrid} mb-2 bg-gray-900 rounded relative ${!isUnlocked ? 'brightness-0 opacity-20' : ''}`}>
-                                        {enemy.imagePath ? (
-                                            <img src={enemy.imagePath} alt={enemy.name} className="absolute inset-0 w-full h-full object-contain" draggable={false} />
-                                        ) : (
-                                            <EnemyIllustration name={enemy.name} seed={enemy.name} className="w-full h-full" size={16} visualTheme={visualTheme} />
-                                        )}
+                                        <EnemyIllustration
+                                            name={enemy.name}
+                                            seed={`${enemyCompendiumTheme}-${enemy.collectionKey}`}
+                                            className="w-full h-full"
+                                            size={16}
+                                            visualTheme={enemyCompendiumTheme}
+                                            enemyType={enemy.enemyType}
+                                            phase={enemy.phase}
+                                        />
                                     </div>
-                                    <div className={`font-bold text-[10px] truncate w-full ${isUnlocked ? 'text-red-200' : 'text-gray-600'}`}>{isUnlocked ? trans(getEnemyDisplayName(enemy), languageMode) : '???'}</div>
+                                    <div className={`font-bold text-[10px] truncate w-full ${isUnlocked ? 'text-red-200' : 'text-gray-600'}`}>{isUnlocked ? trans(enemyDisplayName, languageMode) : '???'}</div>
                                     {!isUnlocked && <Lock size={16} className="absolute top-2 right-2 text-gray-600" />}
                                 </div>
                             );
@@ -454,11 +504,15 @@ const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, 
                             {selectedItem.type === 'ENEMY' && (
                                 <div className={`${ENEMY_ILLUSTRATION_SIZE_CLASS.compendiumDetail} bg-black rounded border border-gray-600 relative`}>
                                     {selectedItem.unlocked ? (
-                                        selectedItem.data.imagePath ? (
-                                            <img src={selectedItem.data.imagePath} alt={selectedItem.data.name} className="absolute inset-0 w-full h-full object-contain" draggable={false} />
-                                        ) : (
-                                            <EnemyIllustration name={selectedItem.data.name} seed={selectedItem.data.name} className="w-full h-full" size={16} visualTheme={visualTheme} />
-                                        )
+                                        <EnemyIllustration
+                                            name={selectedItem.data.name}
+                                            seed={`${enemyCompendiumTheme}-${selectedItem.data.collectionKey}`}
+                                            className="w-full h-full"
+                                            size={16}
+                                            visualTheme={enemyCompendiumTheme}
+                                            enemyType={selectedItem.data.enemyType}
+                                            phase={selectedItem.data.phase}
+                                        />
                                     ) : <div className="w-full h-full flex items-center justify-center text-gray-700 text-4xl">?</div>}
                                 </div>
                             )}
@@ -467,7 +521,9 @@ const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, 
                         <div className="bg-black/40 p-4 rounded border border-gray-600 w-full text-left">
                             {selectedItem.unlocked ? (
                                 <>
-                                    <p className="text-gray-300 text-sm leading-relaxed mb-2">{trans(selectedItem.data.description, languageMode)}</p>
+                                    <p className="text-gray-300 text-sm leading-relaxed mb-2">
+                                        {trans(selectedItem.type === 'ENEMY' ? getEnemyDescription(selectedItem.data) : selectedItem.data.description, languageMode)}
+                                    </p>
                                     {selectedItem.type === 'ENEMY' && <p className="text-red-400 text-xs mt-2 font-mono">{trans("危険度", languageMode)}: Tier {selectedItem.data.tier}</p>}
                                     {selectedItem.type === 'RELIC' && <p className="text-yellow-600 text-xs mt-2 font-mono">{trans("レアリティ", languageMode)}: {selectedItem.data.rarity}</p>}
                                 </>
@@ -633,16 +689,8 @@ const CompendiumBgmModeModal: React.FC<{ cards: ICard[]; languageMode: LanguageM
     }, [activeCard?.id]);
 
     useEffect(() => {
-        audioService.setBackgroundPlaybackEnabled(true);
         setIsPlaying(true);
         setIsPaused(false);
-        return () => {
-            audioService.setBackgroundPlaybackEnabled(false);
-            if ('mediaSession' in navigator) {
-                navigator.mediaSession.playbackState = 'none';
-                navigator.mediaSession.metadata = null;
-            }
-        };
     }, []);
 
     useEffect(() => {
@@ -747,37 +795,6 @@ const CompendiumBgmModeModal: React.FC<{ cards: ICard[]; languageMode: LanguageM
         if (cards.length <= 1) return;
         setCardIndex(prev => (prev + 1) % cards.length);
     };
-
-    useEffect(() => {
-        if (!('mediaSession' in navigator) || !activeTrack) return;
-        navigator.mediaSession.metadata = new MediaMetadata({
-            title: activeTrack.title,
-            artist: activeTrack.subtitle,
-            album: '図鑑 Music Mode'
-        });
-        navigator.mediaSession.setActionHandler('play', () => {
-            if (!isPlaying) {
-                setIsPlaying(true);
-                return;
-            }
-            audioService.resumeBGM();
-            setIsPaused(false);
-        });
-        navigator.mediaSession.setActionHandler('pause', () => {
-            audioService.pauseBGM();
-            setIsPaused(true);
-        });
-        navigator.mediaSession.setActionHandler('stop', handleStop);
-        navigator.mediaSession.setActionHandler('previoustrack', handlePrevTrack);
-        navigator.mediaSession.setActionHandler('nexttrack', handleNextTrack);
-        return () => {
-            navigator.mediaSession.setActionHandler('play', null);
-            navigator.mediaSession.setActionHandler('pause', null);
-            navigator.mediaSession.setActionHandler('stop', null);
-            navigator.mediaSession.setActionHandler('previoustrack', null);
-            navigator.mediaSession.setActionHandler('nexttrack', null);
-        };
-    }, [activeTrack, isPlaying]);
 
     return (
         <div className="fixed inset-0 z-[80] flex items-center justify-center overflow-hidden bg-[radial-gradient(circle_at_top,#1f2937_0%,#030712_48%,#000_100%)] p-2 text-white">

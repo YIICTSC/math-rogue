@@ -110,7 +110,7 @@ const FinalBridgeScreen: React.FC<FinalBridgeScreenProps> = ({ player, onComplet
                 <Heart size={40} className="text-green-400 group-hover:scale-110 transition-transform" />
                 <div>
                   <div className="font-bold text-lg mb-1 text-white">{trans("友情の絆", languageMode)}</div>
-                  <div className="text-[10px] text-gray-400">{trans("HPを全回復し、最大HP+10", languageMode)}</div>
+                  <div className="text-[10px] text-gray-400">{trans("最大HP+20", languageMode)}</div>
                 </div>
               </button>
 
