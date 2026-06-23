@@ -334,7 +334,19 @@ export const VFXOverlay: React.FC<{ effects: VisualEffectInstance[], targetId: s
 
 interface BattleSceneProps {
     player: Player;
-    companions?: Array<{ id: string; name: string; maxHp: number; currentHp: number; imageData: string; floatingText: FloatingText | null; familiarActionQueue?: ActiveFamiliar[]; }>;
+    companions?: Array<{
+        id: string;
+        name: string;
+        maxHp: number;
+        currentHp: number;
+        imageData: string;
+        characterId?: string;
+        magicProtagonistId?: string;
+        magicProtagonistGender?: 'female' | 'male';
+        magicTransformed?: boolean;
+        floatingText: FloatingText | null;
+        familiarActionQueue?: ActiveFamiliar[];
+    }>;
     coopSelfPeerId?: string;
     coopEffectOwnerPeerId?: string | null;
     coopTurnQueue?: Array<{ id: string; type: 'SELF' | 'ALLY' | 'ENEMY'; label: string }>;
@@ -429,7 +441,6 @@ const BattleScene: React.FC<BattleSceneProps> = ({
         card.effectId === 'REVIVE_BANDAGE' ||
         card.effectId === 'REVIVE_NURSE'
     );
-    const isTrueBossPhase2Active = visualEnemies.some(enemy => enemy.enemyType === 'THE_HEART' && enemy.phase === 2);
     const isPcBrowserViewport = typeof window !== 'undefined' && window.innerWidth >= 900;
 
     useEffect(() => {
@@ -466,7 +477,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
     const [drawEntryAnimations, setDrawEntryAnimations] = useState<DrawEntryAnimation[]>([]);
     const [pendingExhaustCardHint, setPendingExhaustCardHint] = useState(false);
     const [showExhaustCardHint, setShowExhaustCardHint] = useState(false);
-    const isTrueBossPhase2SpecialLayout = isTrueBossPhase2Active && !isTouchPortraitViewport;
+    const isTrueBossPhase2SpecialLayout = false;
     const battleViewRef = useRef<HTMLDivElement>(null);
     const playerAreaRef = useRef<HTMLDivElement>(null);
     const playerGroupRef = useRef<HTMLDivElement>(null);
@@ -822,6 +833,67 @@ const BattleScene: React.FC<BattleSceneProps> = ({
 
     const showInfo = (title: string, desc: string) => {
         setTooltip({ title, msg: desc });
+    };
+
+    const getFamiliarTriggerText = (familiar: ActiveFamiliar): string => {
+        switch (familiar.trigger) {
+            case 'END_TURN':
+                return '毎ターン終了時';
+            case 'ONCE_END_TURN':
+                return 'このターン終了時に一度だけ';
+            case 'EVERY_OTHER_TURN':
+                return '2ターンに1回';
+            case 'LOW_HP_END_TURN':
+                return 'HPが半分以下ならターン終了時';
+            case 'NO_BLOCK_END_TURN':
+                return 'ブロック0ならターン終了時';
+            default:
+                return '条件達成時';
+        }
+    };
+
+    const getFamiliarEffectText = (familiar: ActiveFamiliar): string => {
+        const amount = familiar.effect.amount;
+        switch (familiar.effect.kind) {
+            case 'DAMAGE':
+                return `ランダムな敵に${amount}ダメージ。`;
+            case 'RANDOM_HITS':
+                return `ランダムな敵に1ダメージを${amount}回与える。`;
+            case 'AOE_DAMAGE':
+                return `敵全体に${amount}ダメージ。`;
+            case 'BLOCK':
+                return `ブロック${amount}。`;
+            case 'HEAL':
+                return `HPを${amount}回復。`;
+            case 'DRAW':
+                return `カードを${amount}枚引く。`;
+            case 'ENERGY_NEXT':
+                return `次ターンのエナジー+${amount}。`;
+            case 'POISON':
+                return `ランダムな敵にドクドク${amount}。`;
+            case 'AOE_POISON':
+                return `敵全体にドクドク${amount}。`;
+            case 'WEAK':
+                return `敵全体にへろへろ${amount}。`;
+            case 'VULNERABLE':
+                return `敵全体にびくびく${amount}。`;
+            case 'STRENGTH':
+                return `ムキムキ+${amount}。`;
+            case 'GOLD':
+                return `ゴールド${amount}を得る。`;
+            case 'CHAOS_SURGE':
+                return `カードを${amount}枚引き、ムキムキ+${amount}、次ターンのエナジー+${Math.max(1, amount - 1)}。`;
+            default:
+                return '特殊効果を発動する。';
+        }
+    };
+
+    const showFamiliarInfo = (familiar: ActiveFamiliar) => {
+        const duration = familiar.duration === 'BATTLE' ? '戦闘終了まで' : `${familiar.duration}ターン`;
+        showInfo(
+            trans(familiar.name, languageMode),
+            trans(`召喚カード効果\n発動条件: ${getFamiliarTriggerText(familiar)}\n効果: ${getFamiliarEffectText(familiar)}\n持続: ${duration}\n経過ターン: ${familiar.turnsActive}`, languageMode)
+        );
     };
 
     const getIntentHoverText = (enemy: Enemy): string => {
@@ -1408,7 +1480,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
 
                 {/* Selection Overlay */}
                 {selectionState.active && (
-                    <div className="absolute top-4 left-1/2 -translate-x-1/2 bg-black/80 z-40 text-center py-2 px-6 border-b-2 border-yellow-500 animate-pulse rounded shadow-xl pointer-events-auto flex flex-col items-center gap-2">
+                    <div className="battle-selection-notice absolute left-1/2 top-[34%] -translate-x-1/2 -translate-y-1/2 bg-black/80 z-40 text-center py-2 px-6 border-b-2 border-yellow-500 animate-pulse rounded shadow-xl pointer-events-auto flex flex-col items-center gap-2">
                         <span className="text-yellow-400 font-bold text-sm">
                             {selectionState.type === 'DISCARD' && `${trans("捨てる", languageMode)} (${selectionState.amount})`}
                             {selectionState.type === 'COPY' && `コピー (${selectionState.amount})`}
@@ -1552,6 +1624,14 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                             const isTrueBossPhase2 = enemy.enemyType === 'THE_HEART' && enemy.phase === 2;
                             const isFinalBoss = enemy.enemyType === 'THE_HEART';
                             const humanoidEnemy = getThemedHumanoidEnemyVariant(enemy, visualTheme);
+                            const useFinalBossLayout = isFinalBoss && !humanoidEnemy;
+                            const enemySpriteSizeClass = humanoidEnemy
+                                    ? 'w-40 h-40 md:w-48 md:h-48'
+                                    : isFinalBoss
+                                        ? ENEMY_ILLUSTRATION_SIZE_CLASS.battleFinalBoss
+                                        : visualTheme === 'magic'
+                                            ? 'w-32 h-32 md:w-40 md:h-40'
+                                            : ENEMY_ILLUSTRATION_SIZE_CLASS.battleNormal;
                             const highSchoolEnemyAction: HighSchoolEnemyAction = actingEnemyId !== enemy.id
                                 ? 'idle'
                                 : ['ATTACK', 'ATTACK_DEBUFF', 'ATTACK_DEFEND', 'PIERCE_ATTACK'].includes(enemy.nextIntent.type)
@@ -1568,7 +1648,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                     onClick={() => {
                                         if (!isFinisherActive && coopCanAct) onSelectEnemy(enemy.id);
                                     }}
-                                    className={`battle-enemy-unit ${humanoidEnemy ? 'battle-humanoid-enemy-unit' : ''} flex flex-col items-center z-10 transition-all duration-200 cursor-pointer relative ${isFinalBoss ? 'md:flex-row md:items-center md:gap-3' : ''} ${isSelected && !actionClass ? 'scale-105 z-20' : ''} ${!isSelected && !actionClass ? 'hover:scale-105' : ''} ${actionClass} ${isTrueBossPhase2 ? 'sinister-aura' : ''} ${tutorialStep === 2 ? 'ring-4 ring-red-500 ring-offset-4 ring-offset-transparent animate-pulse rounded-lg' : ''} ${isParryTarget ? 'ring-4 ring-cyan-300 ring-offset-4 ring-offset-slate-900 rounded-lg shadow-[0_0_30px_rgba(34,211,238,0.75)] z-[60]' : ''} ${isFinisherActive ? '!z-[300]' : ''}`}
+                                    className={`battle-enemy-unit ${humanoidEnemy ? 'battle-humanoid-enemy-unit' : ''} flex flex-col items-center z-10 transition-all duration-200 cursor-pointer relative ${useFinalBossLayout ? 'md:flex-row md:items-center md:gap-3' : ''} ${isSelected && !actionClass ? 'scale-105 z-20' : ''} ${!isSelected && !actionClass ? 'hover:scale-105' : ''} ${actionClass} ${tutorialStep === 2 ? 'ring-4 ring-red-500 ring-offset-4 ring-offset-transparent animate-pulse rounded-lg' : ''} ${isParryTarget ? 'ring-4 ring-cyan-300 ring-offset-4 ring-offset-slate-900 rounded-lg shadow-[0_0_30px_rgba(34,211,238,0.75)] z-[60]' : ''} ${isFinisherActive ? '!z-[300]' : ''}`}
                                 >
                                     {isParryTarget && (
                                         <div className="absolute -inset-5 rounded-full border-2 border-cyan-300/70 animate-ping pointer-events-none"></div>
@@ -1620,7 +1700,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                         </div>
                                     )}
 
-                                    <div className={`battle-enemy-sprite ${humanoidEnemy ? 'battle-humanoid-enemy-sprite' : ''} ${isFinalBoss ? 'battle-final-boss-sprite' : ''} ${isTrueBossPhase2 ? 'battle-true-boss-sprite' : ''} relative mb-1 transition-all duration-700 ${humanoidEnemy ? 'w-40 h-40 md:w-48 md:h-48' : isTrueBossPhase2 ? ENEMY_ILLUSTRATION_SIZE_CLASS.battleTrueBossPhase2 : isFinalBoss ? ENEMY_ILLUSTRATION_SIZE_CLASS.battleFinalBoss : visualTheme === 'magic' ? 'w-32 h-32 md:w-40 md:h-40' : ENEMY_ILLUSTRATION_SIZE_CLASS.battleNormal}`}>
+                                    <div className={`battle-enemy-sprite ${humanoidEnemy ? 'battle-humanoid-enemy-sprite' : ''} ${useFinalBossLayout ? 'battle-final-boss-sprite' : ''} relative mb-1 transition-all duration-700 ${enemySpriteSizeClass}`}>
                                         {isFinisherActive ? (
                                             <div className="relative w-full h-full flex items-center justify-center">
                                                 {!finisherBurst && (
@@ -1686,7 +1766,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                     </div>
 
                                     {!isFinisherActive && (
-                                        <div className={`battle-enemy-stats ${isTrueBossPhase2 ? 'w-32 md:w-48' : isFinalBoss ? 'w-32 md:w-44' : 'w-24 md:w-28'} ${isFinalBoss ? 'md:shrink-0 md:self-center' : ''} bg-black/90 border-2 px-1 py-0.5 text-white text-[9px] md:text-[10px] transition-all shadow-md rounded relative z-10 border-gray-600 ${isTrueBossPhase2 ? 'border-purple-500 shadow-[0_0_18px_rgba(168,85,247,0.35)]' : isFinalBoss ? 'border-red-500 shadow-[0_0_14px_rgba(239,68,68,0.25)]' : ''}`}>
+                                        <div className={`battle-enemy-stats ${useFinalBossLayout ? 'w-32 md:w-44 md:shrink-0 md:self-center' : 'w-24 md:w-28'} bg-black/90 border-2 px-1 py-0.5 text-white text-[9px] md:text-[10px] transition-all shadow-md rounded relative z-10 border-gray-600 ${useFinalBossLayout ? 'border-red-500 shadow-[0_0_14px_rgba(239,68,68,0.25)]' : ''}`}>
                                             {isSelected && (
                                                 <div
                                                     aria-hidden="true"
@@ -1758,16 +1838,21 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                 showInfo(trans("自分", languageMode), trans("あなたのキャラクター。\nHPが0になるとゲームオーバー。", languageMode));
                             }}>
                                 {visualTheme === 'high-school' && !mobileActiveFamiliar && (player.familiars || []).length > 0 && (
-                                    <div className="pointer-events-none absolute -inset-x-28 -top-24 bottom-0 z-0 md:-inset-x-36 md:-top-28">
-                                        {(player.familiars || []).slice(-5).map((familiar, index) => {
+                                    <div className="pointer-events-none absolute left-[-56px] right-[-56px] top-[-104px] bottom-[-4px] z-0 md:left-[-72px] md:right-[-72px] md:top-[-120px] overflow-visible">
+                                        {(player.familiars || []).slice(-10).map((familiar, index) => {
                                             const active = familiar.actionPulse && Date.now() - familiar.actionPulse < 900;
                                             const src = assetUrl(`sprites/high-school/${active ? 'familiars-action' : 'familiars'}/${familiar.imageIndex}.webp`);
                                             const positions = [
-                                                { left: '-34%', bottom: '0%', zIndex: 0 },
-                                                { left: '70%', bottom: '3%', zIndex: 18 },
-                                                { left: '-12%', bottom: '46%', zIndex: 0 },
-                                                { left: '52%', bottom: '50%', zIndex: 0 },
-                                                { left: '18%', bottom: '-8%', zIndex: 18 },
+                                                { left: '4%', bottom: '2%', zIndex: 0 },
+                                                { left: '58%', bottom: '4%', zIndex: 18 },
+                                                { left: '16%', bottom: '36%', zIndex: 0 },
+                                                { left: '52%', bottom: '38%', zIndex: 0 },
+                                                { left: '32%', bottom: '-4%', zIndex: 18 },
+                                                { left: '0%', bottom: '22%', zIndex: 0 },
+                                                { left: '68%', bottom: '24%', zIndex: 0 },
+                                                { left: '10%', bottom: '64%', zIndex: 0 },
+                                                { left: '60%', bottom: '66%', zIndex: 0 },
+                                                { left: '34%', bottom: '74%', zIndex: 0 },
                                             ];
                                             const pos = positions[index % positions.length];
                                             return (
@@ -1775,9 +1860,24 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                                     key={familiar.instanceId}
                                                     src={src}
                                                     alt={familiar.name}
-                                                    className={`absolute h-40 w-32 object-contain drop-shadow-[0_0_10px_rgba(217,70,239,0.9)] md:h-48 md:w-40 ${active ? 'animate-pulse' : ''}`}
+                                                    role="button"
+                                                    tabIndex={0}
+                                                    title={familiar.name}
+                                                    onClick={(e) => {
+                                                        e.stopPropagation();
+                                                        showFamiliarInfo(familiar);
+                                                    }}
+                                                    onKeyDown={(e) => {
+                                                        if (e.key !== 'Enter' && e.key !== ' ') return;
+                                                        e.preventDefault();
+                                                        e.stopPropagation();
+                                                        showFamiliarInfo(familiar);
+                                                    }}
+                                                    className={`pointer-events-auto absolute h-28 w-24 cursor-pointer object-contain drop-shadow-[0_0_10px_rgba(217,70,239,0.9)] md:h-36 md:w-28 ${active ? 'animate-pulse' : ''}`}
                                                     style={{
-                                                        ...pos,
+                                                        left: `clamp(0px, ${pos.left}, calc(100% - 6rem))`,
+                                                        bottom: `clamp(0px, ${pos.bottom}, calc(100% - 7rem))`,
+                                                        zIndex: pos.zIndex,
                                                         transform: `scale(${active ? 1.08 : 1})`,
                                                         transformOrigin: 'center bottom'
                                                     }}
@@ -1833,7 +1933,19 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                         const hpPercent = Math.max(0, Math.min(100, (companion.currentHp / Math.max(1, companion.maxHp)) * 100));
                                         const isDown = companion.currentHp <= 0;
                                         const activeFamiliarDisplay = getActiveFamiliarDisplay(companion.familiarActionQueue);
-                                        const companionImageSrc = activeFamiliarDisplay?.src || companion.imageData;
+                                        const transformedMagicImageSrc = visualTheme === 'magic' && companion.magicTransformed
+                                            ? getThemedCharacterSpritePath(
+                                                'magic',
+                                                companion.characterId,
+                                                'idle',
+                                                companion.imageData,
+                                                true,
+                                                companion.magicProtagonistId,
+                                                companion.magicProtagonistGender,
+                                            )
+                                            : null;
+                                        const companionImageSrc = activeFamiliarDisplay?.src || transformedMagicImageSrc || companion.imageData;
+                                        const isMagicTransformedCompanion = Boolean(transformedMagicImageSrc && !activeFamiliarDisplay);
                                         return (
                                             <div
                                                 key={companion.id}
@@ -1852,8 +1964,8 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                                         key={activeFamiliarDisplay ? `${activeFamiliarDisplay.familiar.instanceId}-${activeFamiliarDisplay.familiar.actionPulse}` : companion.id}
                                                         src={companionImageSrc}
                                                         alt={activeFamiliarDisplay?.familiar.name || companion.name}
-                                                        className={`w-full h-full transition-all duration-300 ease-out animate-in fade-in zoom-in-95 ${activeFamiliarDisplay ? 'object-contain drop-shadow-[0_0_12px_rgba(217,70,239,0.95)] animate-pulse' : `pixel-art ${visualTheme !== 'elementary' ? '-scale-x-100' : ''}`}`}
-                                                        style={activeFamiliarDisplay ? undefined : { imageRendering: 'pixelated' }}
+                                                        className={`w-full h-full transition-all duration-300 ease-out animate-in fade-in zoom-in-95 ${activeFamiliarDisplay ? 'object-contain drop-shadow-[0_0_12px_rgba(217,70,239,0.95)] animate-pulse' : isMagicTransformedCompanion ? 'object-contain -scale-x-100 drop-shadow-[0_0_12px_rgba(217,70,239,0.75)]' : `pixel-art ${visualTheme !== 'elementary' ? '-scale-x-100' : ''}`}`}
+                                                        style={activeFamiliarDisplay || isMagicTransformedCompanion ? undefined : { imageRendering: 'pixelated' }}
                                                     />
                                                     <FloatingTextOverlay data={companion.floatingText} languageMode={languageMode} offset="-top-2 -right-1" />
                                                     <VFXOverlay effects={getPlayerScopedEffectsForPeer(companion.id)} targetId={companion.id} />
@@ -2129,7 +2241,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
             </div>
 
             {/* 4. Hand Area */}
-            <div className={`battle-hand-area h-60 md:h-64 bg-gray-900 border-t border-gray-700 relative z-[80] ${selectionState.active ? 'bg-blue-900/20' : ''} ${selfDown ? 'bg-red-950/20' : ''}`}>
+            <div className={`battle-hand-area h-60 md:h-64 bg-gray-900 border-t border-gray-700 relative ${selectionState.active ? 'z-[500] bg-blue-900/20' : 'z-[80]'} ${selfDown ? 'bg-red-950/20' : ''}`}>
                 <style>
                     {`
                         @keyframes battle-hand-card-entry {
@@ -2193,7 +2305,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                         const drawEntryDelayMs = drawEntryAnimationMap.get(card.id);
                         const isDrawEntryAnimating = drawEntryDelayMs !== undefined;
                         const baseZIndex = 120 + i;
-                        const selectedZIndex = 220;
+                        const selectedZIndex = 800;
                         const animatingZIndex = 180 + i;
                         const cardZIndex = Math.max(
                             isSelectedActive || isSelectedDual ? selectedZIndex : baseZIndex,
@@ -2203,10 +2315,10 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                         return (
                             <div
                                 key={card.id}
-                                className={`battle-hand-card inline-block align-middle transition-all duration-500 ease-out w-28 h-44 md:w-32 md:h-48 shrink-0 relative 
+                                className={`battle-hand-card inline-block align-middle transition-all duration-500 ease-out w-28 h-44 md:w-32 md:h-48 shrink-0 relative
                             ml-0
-                            md:group-hover/hand:-ml-2 md:group-active/hand:-ml-2 
-                            ${isSelectedActive || isSelectedDual ? 'cursor-pointer -translate-y-8 z-30 scale-110' : 'hover:-translate-y-4 hover:z-20'}
+                            md:group-hover/hand:-ml-2 md:group-active/hand:-ml-2
+                            ${isSelectedActive || isSelectedDual ? 'battle-hand-card-popup cursor-pointer -translate-y-8 z-[800] scale-110' : 'hover:-translate-y-4 hover:z-[700]'}
                             ${tutorialStep === 4 ? 'ring-4 ring-blue-500 ring-offset-2 ring-offset-transparent animate-pulse rounded-lg' : ''}
                         `}
                                 style={{

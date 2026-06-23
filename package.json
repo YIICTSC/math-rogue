@@ -15,6 +15,10 @@
   "build": {
     "appId": "jp.learningrogue.offline",
     "productName": "学習ローグ オフライン版",
+    "electronLanguages": [
+      "ja",
+      "en-US"
+    ],
     "directories": {
       "output": "release"
     },

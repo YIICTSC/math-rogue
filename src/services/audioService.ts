@@ -959,9 +959,6 @@ class AudioService {
               }
               this.currentHtmlAudio = audio;
               this.activeBgmHtmlAudios.add(audio);
-              if ('mediaSession' in navigator) {
-                  navigator.mediaSession.playbackState = 'playing';
-              }
               return true;
           } catch {
               // Try the next URL shape before falling back to synthesized BGM.
@@ -1005,9 +1002,6 @@ class AudioService {
       this.isPlayingBGM = false;
       this.isBgmPaused = false;
       this.currentBgmType = null;
-      if ('mediaSession' in navigator) {
-          navigator.mediaSession.playbackState = 'none';
-      }
   }
 
   public pauseBGM() {
@@ -1015,9 +1009,6 @@ class AudioService {
       this.ctx.suspend().catch(() => {});
       this.currentHtmlAudio?.pause();
       this.isBgmPaused = true;
-      if ('mediaSession' in navigator) {
-          navigator.mediaSession.playbackState = 'paused';
-      }
   }
 
   public resumeBGM() {
@@ -1025,9 +1016,6 @@ class AudioService {
       this.ctx.resume().catch(() => {});
       this.currentHtmlAudio?.play().catch(() => {});
       this.isBgmPaused = false;
-      if ('mediaSession' in navigator) {
-          navigator.mediaSession.playbackState = 'playing';
-      }
   }
 
   public stopAllAudio() {

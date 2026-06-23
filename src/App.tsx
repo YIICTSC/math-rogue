@@ -79,7 +79,7 @@ import { applyAdditionalCardLogic } from './services/cardEffectLogic';
 import { p2pService } from './services/p2pService';
 import { TypingLessonId } from './data/typingLessonConfig';
 import { getRandomRaceTrickCard, getRaceTrickCard } from './raceTricks';
-import { getRandomCoopSupportCard } from './coopSupportCards';
+import { COOP_SUPPORT_LIBRARY, getRandomCoopSupportCard } from './coopSupportCards';
 import { chooseBattleBackgroundScene, getBattleBackgroundFlavor } from './data/battleBackgrounds';
 import { OFFLINE_DISTRIBUTABLE, OFFLINE_NETWORK_FEATURE_MESSAGE } from './config/runtime';
 import { getAttackEffectKeyForCard, getMultihitFrameSequence } from './data/attackEffects';
@@ -98,6 +98,19 @@ const ASSIGNMENT_INTRO_BANNER_IMAGE = assetUrl('banners/daily-assignment-reward-
 const CROWDFUNDING_BANNER_END_AT = new Date('2026-06-20T23:59:59+09:00').getTime();
 const HOLOGRAPHIC_REWARD_CARD_CHANCE = 0.05;
 const VISUAL_THEMES: VisualThemeId[] = ['elementary', 'high-school', 'magic'];
+type UiPreviewBattleConfig = {
+    coop: boolean;
+    participantCount: number;
+    enemyCount: number;
+    summonCount: number;
+};
+
+const DEFAULT_UI_PREVIEW_BATTLE_CONFIG: UiPreviewBattleConfig = {
+    coop: false,
+    participantCount: 4,
+    enemyCount: 2,
+    summonCount: 0,
+};
 const getMagicProtagonistId = (player: Pick<Player, 'id' | 'magicProtagonistId'>) =>
     player.magicProtagonistId ?? MAGIC_HERO_ID_BY_CHARACTER_ID[player.id ?? 'WARRIOR'] ?? 'AKARI';
 const getBgmThemeForPlayer = (
@@ -738,7 +751,16 @@ const App: React.FC = () => {
         width: typeof window === 'undefined' ? 0 : window.innerWidth,
         height: typeof window === 'undefined' ? 0 : window.innerHeight,
     }));
+    const [uiPreviewBattleConfig, setUiPreviewBattleConfig] = useState<UiPreviewBattleConfig>(DEFAULT_UI_PREVIEW_BATTLE_CONFIG);
     const uiPreviewSnapshotRef = useRef<GameState | null>(null);
+    const uiPreviewCoopSnapshotRef = useRef<{
+        coopSession: CoopSession | null;
+        coopSupportCards: CoopSupportCard[];
+        coopBattleQueue: CoopBattleTurnSlot[];
+        coopBattleKey: string | null;
+        coopEnemyTurnCursor: number;
+        coopPlayerSnapshots: Record<string, Player>;
+    } | null>(null);
     const previousScreenRef = useRef<GameScreen>(GameScreen.START_MENU);
     const isLegacyVercelHost = typeof window !== 'undefined' && window.location.hostname === LEGACY_VERCEL_HOST;
     const [showMigrationNotice, setShowMigrationNotice] = useState<boolean>(() => isLegacyVercelHost);
@@ -1435,6 +1457,10 @@ const App: React.FC = () => {
                     maxHp: battleEntry?.player.maxHp || participant.maxHp || 100,
                     currentHp: battleEntry?.player.currentHp ?? participant.currentHp ?? participant.maxHp ?? 100,
                     imageData: battleEntry?.player.imageData || participant.imageData || HERO_IMAGE_DATA,
+                    characterId: battleEntry?.player.id || participant.selectedCharacterId,
+                    magicProtagonistId: battleEntry?.player.magicProtagonistId || participant.magicProtagonistId,
+                    magicProtagonistGender: battleEntry?.player.magicProtagonistGender || participant.magicProtagonistGender,
+                    magicTransformed: Boolean(battleEntry?.player.magicTransformed),
                     floatingText: battleEntry?.player.floatingText || null,
                     familiarActionQueue: battleEntry?.player.familiarActionQueue || []
                 };
@@ -4368,17 +4394,226 @@ const App: React.FC = () => {
         setGameState(prev => ({ ...prev, difficultyLevel: level, shopRemoveCount: 0, screen: GameScreen.CHARACTER_SELECTION }));
     };
 
+    const createUiPreviewEnemies = useCallback((count: number): Enemy[] => {
+        const safeCount = Math.min(3, Math.max(1, count));
+        return Array.from({ length: safeCount }, (_, index) => ({
+            id: `ui-preview-enemy-${index + 1}`,
+            enemyType: index === 0 ? 'TEACHER' : index === 1 ? 'SLIME' : 'BOSS',
+            name: visualTheme === 'magic'
+                ? ['異次元の魔法教師', '暴走する魔導書', '星喰いの試験官'][index]
+                : visualTheme === 'high-school'
+                    ? ['抜き打ち試験の監督', '居残り課題の化身', '赤点回収委員'][index]
+                    : ['宿題を忘れた先生', 'ノートの亡霊', '給食ラスボス'][index],
+            maxHp: 9999,
+            currentHp: 9999,
+            block: index === 0 ? 12 : 6 + index * 4,
+            strength: index,
+            nextIntent: index === 0
+                ? { type: EnemyIntentType.ATTACK_DEBUFF, value: 8, secondaryValue: 2, debuffType: 'VULNERABLE' }
+                : index === 1
+                    ? { type: EnemyIntentType.BLOCK, value: 14 }
+                    : { type: EnemyIntentType.ATTACK, value: 18 },
+            vulnerable: index === 0 ? 1 : 0,
+            weak: index === 1 ? 1 : 0,
+            poison: index === 0 ? 3 : 0,
+            artifact: 0,
+            corpseExplosion: false,
+            floatingText: null,
+        }));
+    }, [visualTheme]);
+
+    const createUiPreviewFamiliars = useCallback((count: number): ActiveFamiliar[] => {
+        const safeCount = Math.min(10, Math.max(0, count));
+        return Array.from({ length: safeCount }, (_, index) => ({
+            id: `ui-preview-familiar-${index + 1}`,
+            instanceId: `ui-preview-familiar-${index + 1}`,
+            name: `召喚${index + 1}`,
+            hpCost: 0,
+            imageIndex: (index % 10) + 1,
+            duration: 'BATTLE',
+            trigger: 'END_TURN',
+            effect: { kind: 'DAMAGE', amount: 1 },
+            turnsActive: index,
+            actionPulse: index % 3 === 0 ? Date.now() : undefined,
+        }));
+    }, []);
+
+    const applyUiPreviewBattle = useCallback((config: UiPreviewBattleConfig) => {
+        const previous = stateRef.current;
+        const previewMap = previous.map.length === 0
+            ? generateDungeonMap(previous.difficultyLevel || 1)
+            : previous.map;
+        const previewEnemies = createUiPreviewEnemies(config.enemyCount);
+        const previewFamiliars = createUiPreviewFamiliars(config.summonCount);
+        const sourcePlayer = {
+            ...previous.player,
+            deck: previous.player.deck.length > 0 ? previous.player.deck : createDeck(),
+            currentHp: Math.max(1, previous.player.maxHp),
+            maxEnergy: Math.max(3, previous.player.maxEnergy),
+        };
+        const preparedPreviewPlayer = preparePlayerForBattle(sourcePlayer, NodeType.COMBAT);
+        const previewPlayer: Player = {
+            ...preparedPreviewPlayer,
+            familiars: previewFamiliars,
+            familiarActionQueue: previewFamiliars.filter(familiar => familiar.actionPulse),
+        };
+        const selectedEnemyId = previewEnemies[0]?.id || null;
+        const baseState: GameState = {
+            ...previous,
+            screen: GameScreen.BATTLE,
+            act: 1,
+            floor: 1,
+            turn: 1,
+            map: previewMap,
+            player: previewPlayer,
+            enemies: previewEnemies,
+            selectedEnemyId,
+            combatLog: [config.coop ? 'UI確認用の協力戦闘を開始' : 'UI確認用の戦闘を開始'],
+            selectionState: { active: false, type: 'DISCARD', amount: 0 },
+            parryState: { active: false, enemyId: null, success: false },
+            activeEffects: [],
+        };
+
+        setTurnLog(getSelfTurnLogLabel());
+        setCurrentNarrative(config.coop ? 'UI確認用の協力モード戦闘です。' : 'UI確認用の戦闘です。');
+        audioService.playBGM('battle');
+
+        if (!config.coop) {
+            setCoopSession(null);
+            setCoopSupportCards([]);
+            setCoopPlayerSnapshots({});
+            setCoopBattleQueue([]);
+            setCoopBattleKey(null);
+            setCoopEnemyTurnCursor(0);
+            setGameState({
+                ...baseState,
+                challengeMode: undefined,
+                coopBattleState: null,
+            });
+            return;
+        }
+
+        const safeParticipantCount = Math.min(4, Math.max(1, config.participantCount));
+        const selfPeerId = p2pService.getMyId() || 'self';
+        const characterPool = themedCharacters.length > 0 ? themedCharacters : CHARACTERS;
+        const battleKey = `ui-preview-coop-${safeParticipantCount}-${config.enemyCount}`;
+        const participants: CoopParticipant[] = Array.from({ length: safeParticipantCount }, (_, index) => {
+            const character = characterPool[index % characterPool.length];
+            const peerId = index === 0 ? selfPeerId : `ui-preview-peer-${index + 1}`;
+            const hp = Math.max(1, character?.maxHp || previewPlayer.maxHp);
+            return {
+                peerId,
+                name: index === 0 ? '自分' : `参加者${index + 1}`,
+                imageData: character?.imageData || previewPlayer.imageData || HERO_IMAGE_DATA,
+                selectedCharacterId: character?.id || previewPlayer.id,
+                magicProtagonistId: character?.magicProtagonistId,
+                magicProtagonistGender: character?.magicProtagonistGender,
+                maxHp: hp,
+                currentHp: Math.max(1, hp - index * 7),
+                block: index === 0 ? previewPlayer.block : index * 3,
+                strength: index === 2 ? 1 : 0,
+                nextTurnEnergy: 0,
+            };
+        });
+        const battlePlayers: CoopBattlePlayerState[] = participants.map((participant, index) => {
+            const preparedParticipantPlayer = preparePlayerForBattle({
+                ...previewPlayer,
+                id: participant.selectedCharacterId || previewPlayer.id,
+                imageData: participant.imageData || previewPlayer.imageData,
+                maxHp: participant.maxHp || previewPlayer.maxHp,
+                currentHp: participant.currentHp ?? previewPlayer.currentHp,
+                block: participant.block || 0,
+                strength: participant.strength || 0,
+                hand: index === 0 ? previewPlayer.hand : [],
+                drawPile: index === 0 ? previewPlayer.drawPile : [],
+                discardPile: index === 0 ? previewPlayer.discardPile : [],
+                codexBuffer: [],
+            }, NodeType.COMBAT);
+            const participantPlayer: Player = {
+                ...preparedParticipantPlayer,
+                familiars: previewFamiliars,
+                familiarActionQueue: previewFamiliars.filter(familiar => familiar.actionPulse),
+            };
+            return {
+                peerId: participant.peerId,
+                name: participant.name,
+                player: participantPlayer,
+                selectedEnemyId,
+                isDown: participantPlayer.currentHp <= 0,
+            };
+        });
+        const enemySlot: CoopBattleTurnSlot = {
+            id: `coop-turn-enemy-${battleKey}`,
+            type: 'ENEMY',
+            label: '敵',
+        };
+        const turnQueue: CoopBattleTurnSlot[] = [
+            {
+                id: `coop-turn-realtime-allies-${battleKey}`,
+                type: 'ALLY',
+                label: '全員',
+            },
+            enemySlot,
+        ];
+        const previewCoopBattleState: CoopBattleState = {
+            battleKey,
+            battleMode: 'REALTIME',
+            players: battlePlayers,
+            turnQueue,
+            turnCursor: 0,
+            enemyTurnCursor: 0,
+            roundEndedPeerIds: [],
+        };
+        const playerSnapshots = battlePlayers.reduce<Record<string, Player>>((acc, entry) => {
+            acc[entry.peerId] = entry.player;
+            return acc;
+        }, {});
+
+        setCoopSession({
+            isHost: false,
+            name: participants[0]?.name || '自分',
+            roomCode: 'UI0000',
+            participants,
+            battleMode: 'REALTIME',
+            visualTheme,
+        });
+        setCoopSupportCards(COOP_SUPPORT_LIBRARY.slice(0, 4).map(card => ({ ...card })));
+        setCoopPlayerSnapshots(playerSnapshots);
+        setCoopBattleQueue(turnQueue);
+        setCoopBattleKey(battleKey);
+        setCoopEnemyTurnCursor(0);
+        setGameState({
+            ...baseState,
+            challengeMode: 'COOP',
+            player: battlePlayers[0]?.player || previewPlayer,
+            coopBattleState: previewCoopBattleState,
+        });
+    }, [createUiPreviewEnemies, createUiPreviewFamiliars, getSelfTurnLogLabel, preparePlayerForBattle, themedCharacters, visualTheme]);
+
     const handleStartUiPreview = useCallback((screen: GameScreen) => {
         if (!uiPreviewSnapshotRef.current) {
             uiPreviewSnapshotRef.current = stateRef.current;
+            uiPreviewCoopSnapshotRef.current = {
+                coopSession,
+                coopSupportCards,
+                coopBattleQueue,
+                coopBattleKey,
+                coopEnemyTurnCursor,
+                coopPlayerSnapshots,
+            };
         }
         setIsUiPreviewMode(true);
         setIsUiPreviewToolbarOpen(true);
         if (screen === GameScreen.BATTLE) {
-            setTurnLog(getSelfTurnLogLabel());
-            setCurrentNarrative('UI確認用の戦闘です。');
-            audioService.playBGM('battle');
+            applyUiPreviewBattle(uiPreviewBattleConfig);
+            return;
         }
+        setCoopSession(null);
+        setCoopSupportCards([]);
+        setCoopPlayerSnapshots({});
+        setCoopBattleQueue([]);
+        setCoopBattleKey(null);
+        setCoopEnemyTurnCursor(0);
         if (screen === GameScreen.FLOOR_RESULT || screen === GameScreen.ENDING || screen === GameScreen.GAME_OVER) {
             setNewlyUnlockedCard(null);
             setLegacyCardSelected(false);
@@ -4390,46 +4625,7 @@ const App: React.FC = () => {
                 : prev.map;
 
             if (screen === GameScreen.BATTLE) {
-                const previewEnemy: Enemy = {
-                    id: 'ui-preview-enemy',
-                    enemyType: 'TEACHER',
-                    name: visualTheme === 'magic' ? '異次元の魔法教師' : visualTheme === 'high-school' ? '抜き打ち試験の監督' : '宿題を忘れた先生',
-                    maxHp: 9999,
-                    currentHp: 9999,
-                    block: 12,
-                    strength: 2,
-                    nextIntent: { type: EnemyIntentType.ATTACK_DEBUFF, value: 8, secondaryValue: 2, debuffType: 'VULNERABLE' },
-                    vulnerable: 1,
-                    weak: 0,
-                    poison: 3,
-                    artifact: 0,
-                    corpseExplosion: false,
-                    floatingText: null,
-                };
-                const sourcePlayer = {
-                    ...prev.player,
-                    deck: prev.player.deck.length > 0 ? prev.player.deck : createDeck(),
-                    currentHp: Math.max(1, prev.player.maxHp),
-                    maxEnergy: Math.max(3, prev.player.maxEnergy),
-                };
-                const previewPlayer = preparePlayerForBattle(sourcePlayer, NodeType.COMBAT);
-                return {
-                    ...prev,
-                    screen: GameScreen.BATTLE,
-                    challengeMode: undefined,
-                    act: 1,
-                    floor: 1,
-                    turn: 1,
-                    map: previewMap,
-                    player: previewPlayer,
-                    enemies: [previewEnemy],
-                    selectedEnemyId: previewEnemy.id,
-                    combatLog: ['UI確認用の戦闘を開始'],
-                    selectionState: { active: false, type: 'DISCARD', amount: 0 },
-                    parryState: { active: false, enemyId: null, success: false },
-                    activeEffects: [],
-                    coopBattleState: null,
-                };
+                return prev;
             }
 
             if (screen === GameScreen.FLOOR_RESULT || screen === GameScreen.ENDING || screen === GameScreen.GAME_OVER) {
@@ -4455,6 +4651,7 @@ const App: React.FC = () => {
                     currentStoryIndex: 0,
                     newlyUnlockedCardName: undefined,
                     isEndless: false,
+                    coopBattleState: null,
                 };
             }
 
@@ -4462,15 +4659,27 @@ const App: React.FC = () => {
                 ...prev,
                 screen,
                 map: previewMap,
+                challengeMode: undefined,
+                coopBattleState: null,
             };
         });
-    }, [getSelfTurnLogLabel, preparePlayerForBattle, visualTheme]);
+    }, [applyUiPreviewBattle, coopBattleKey, coopBattleQueue, coopEnemyTurnCursor, coopPlayerSnapshots, coopSession, coopSupportCards, uiPreviewBattleConfig]);
 
     const closeUiPreview = useCallback(() => {
         const snapshot = uiPreviewSnapshotRef.current;
+        const coopSnapshot = uiPreviewCoopSnapshotRef.current;
         uiPreviewSnapshotRef.current = null;
+        uiPreviewCoopSnapshotRef.current = null;
         setIsUiPreviewMode(false);
         setIsUiPreviewToolbarOpen(true);
+        if (coopSnapshot) {
+            setCoopSession(coopSnapshot.coopSession);
+            setCoopSupportCards(coopSnapshot.coopSupportCards);
+            setCoopBattleQueue(coopSnapshot.coopBattleQueue);
+            setCoopBattleKey(coopSnapshot.coopBattleKey);
+            setCoopEnemyTurnCursor(coopSnapshot.coopEnemyTurnCursor);
+            setCoopPlayerSnapshots(coopSnapshot.coopPlayerSnapshots);
+        }
         setGameState(prev => snapshot ?? ({ ...prev, screen: GameScreen.DEBUG_MENU }));
     }, []);
 
@@ -8693,6 +8902,16 @@ const App: React.FC = () => {
                 drawPile: shuffle([...prev.player.drawPile, ...magicCards]),
                 floatingText: { id: `magic-transform-${Date.now()}`, text: '変身!', color: 'text-fuchsia-300', iconType: 'zap' },
             };
+            if (prev.challengeMode === 'COOP' && coopSession && !coopSession.isHost) {
+                window.setTimeout(() => {
+                    p2pService.send({ type: 'COOP_PLAYER_SNAPSHOT', player: nextPlayer });
+                }, 0);
+            }
+            if (prev.challengeMode === 'COOP' && coopSession?.isHost) {
+                window.setTimeout(() => {
+                    sendCoopStateSync();
+                }, 0);
+            }
             return {
                 ...prev,
                 player: nextPlayer,
@@ -8713,7 +8932,7 @@ const App: React.FC = () => {
         window.setTimeout(() => {
             setGameState(prev => ({ ...prev, activeEffects: [] }));
         }, 1500);
-    }, [visualTheme]);
+    }, [coopSession, sendCoopStateSync, visualTheme]);
 
     const handleEndTurnClick = () => {
         if (isEndingTurnRef.current) return;
@@ -9278,10 +9497,9 @@ const App: React.FC = () => {
             let newPowers = { ...p.powers };
             let newStrength = p.strength;
             let newMaxHp = p.maxHp;
-            let newCurrentHp = p.maxHp;
+            let newCurrentHp = p.currentHp;
             if (upgradeType === 'HEAL') {
-                newMaxHp += 10;
-                newCurrentHp = newMaxHp;
+                newMaxHp += 20;
             } else if (upgradeType === 'APOTHEOSIS') {
                 newDeck = newDeck.map(c => getUpgradedCard(c));
             } else if (upgradeType === 'STRENGTH') {
@@ -11616,7 +11834,6 @@ const App: React.FC = () => {
                 upsertCoopPlayerSnapshot(fromPeerId, data.player);
                 setGameState(prev => {
                     if (!prev.coopBattleState) return prev;
-                    if (prev.screen === GameScreen.BATTLE) return prev;
                     const hasTargetEntry = prev.coopBattleState.players.some(entry => entry.peerId === fromPeerId);
                     if (!hasTargetEntry) return prev;
                     return {
@@ -11627,7 +11844,24 @@ const App: React.FC = () => {
                                 entry.peerId === fromPeerId
                                     ? {
                                         ...entry,
-                                        player: data.player,
+                                        player: prev.screen === GameScreen.BATTLE
+                                            ? {
+                                                ...entry.player,
+                                                id: data.player.id ?? entry.player.id,
+                                                imageData: data.player.imageData ?? entry.player.imageData,
+                                                maxHp: data.player.maxHp ?? entry.player.maxHp,
+                                                currentHp: data.player.currentHp ?? entry.player.currentHp,
+                                                block: data.player.block ?? entry.player.block,
+                                                strength: data.player.strength ?? entry.player.strength,
+                                                powers: data.player.powers ?? entry.player.powers,
+                                                magicProtagonistId: data.player.magicProtagonistId ?? entry.player.magicProtagonistId,
+                                                magicProtagonistGender: data.player.magicProtagonistGender ?? entry.player.magicProtagonistGender,
+                                                magicTransformed: data.player.magicTransformed ?? entry.player.magicTransformed,
+                                                magicTransformedThisBattle: data.player.magicTransformedThisBattle ?? entry.player.magicTransformedThisBattle,
+                                                floatingText: data.player.floatingText ?? entry.player.floatingText,
+                                                familiarActionQueue: data.player.familiarActionQueue ?? entry.player.familiarActionQueue,
+                                            }
+                                            : data.player,
                                         isDown: data.player.currentHp <= 0
                                     }
                                     : entry
@@ -12300,6 +12534,95 @@ const App: React.FC = () => {
                                         </optgroup>
                                     ))}
                                 </select>
+                                {gameState.screen === GameScreen.BATTLE && (
+                                    <div className="mt-2 rounded-lg border border-emerald-500/40 bg-emerald-950/35 p-2">
+                                        <div className="mb-2 flex items-center justify-between gap-2">
+                                            <span className="text-[10px] font-black uppercase tracking-[0.18em] text-emerald-200">Battle Preview</span>
+                                            <div className="flex rounded border border-emerald-600/70 bg-black/40 p-0.5 text-[10px] font-black">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        const nextConfig = { ...uiPreviewBattleConfig, coop: false };
+                                                        setUiPreviewBattleConfig(nextConfig);
+                                                        applyUiPreviewBattle(nextConfig);
+                                                    }}
+                                                    className={`rounded px-2 py-1 ${!uiPreviewBattleConfig.coop ? 'bg-emerald-500 text-black' : 'text-emerald-100 hover:bg-emerald-900/70'}`}
+                                                >
+                                                    通常
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        const nextConfig = { ...uiPreviewBattleConfig, coop: true };
+                                                        setUiPreviewBattleConfig(nextConfig);
+                                                        applyUiPreviewBattle(nextConfig);
+                                                    }}
+                                                    className={`rounded px-2 py-1 ${uiPreviewBattleConfig.coop ? 'bg-emerald-500 text-black' : 'text-emerald-100 hover:bg-emerald-900/70'}`}
+                                                >
+                                                    協力
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div className="grid grid-cols-2 gap-2">
+                                            <label className="text-[10px] font-bold text-emerald-100">
+                                                <span className="mb-1 block">参加者 {uiPreviewBattleConfig.participantCount}人</span>
+                                                <input
+                                                    type="range"
+                                                    min={1}
+                                                    max={4}
+                                                    value={uiPreviewBattleConfig.participantCount}
+                                                    disabled={!uiPreviewBattleConfig.coop}
+                                                    onChange={(event) => {
+                                                        const nextConfig = {
+                                                            ...uiPreviewBattleConfig,
+                                                            participantCount: Number(event.target.value),
+                                                            coop: true,
+                                                        };
+                                                        setUiPreviewBattleConfig(nextConfig);
+                                                        applyUiPreviewBattle(nextConfig);
+                                                    }}
+                                                    className="w-full accent-emerald-400 disabled:opacity-35"
+                                                />
+                                            </label>
+                                            <label className="text-[10px] font-bold text-emerald-100">
+                                                <span className="mb-1 block">敵 {uiPreviewBattleConfig.enemyCount}体</span>
+                                                <input
+                                                    type="range"
+                                                    min={1}
+                                                    max={3}
+                                                    value={uiPreviewBattleConfig.enemyCount}
+                                                    onChange={(event) => {
+                                                        const nextConfig = {
+                                                            ...uiPreviewBattleConfig,
+                                                            enemyCount: Number(event.target.value),
+                                                        };
+                                                        setUiPreviewBattleConfig(nextConfig);
+                                                        applyUiPreviewBattle(nextConfig);
+                                                    }}
+                                                    className="w-full accent-emerald-400"
+                                                />
+                                            </label>
+                                            <label className="col-span-2 text-[10px] font-bold text-emerald-100">
+                                                <span className="mb-1 block">召喚 {uiPreviewBattleConfig.summonCount}体</span>
+                                                <input
+                                                    type="range"
+                                                    min={0}
+                                                    max={10}
+                                                    value={uiPreviewBattleConfig.summonCount}
+                                                    onChange={(event) => {
+                                                        const nextConfig = {
+                                                            ...uiPreviewBattleConfig,
+                                                            summonCount: Number(event.target.value),
+                                                        };
+                                                        setUiPreviewBattleConfig(nextConfig);
+                                                        applyUiPreviewBattle(nextConfig);
+                                                    }}
+                                                    className="w-full accent-fuchsia-400"
+                                                />
+                                            </label>
+                                        </div>
+                                    </div>
+                                )}
                                 <div className="mt-2 flex items-center justify-between gap-2">
                                     <span className="truncate font-mono text-[10px] text-gray-500">{gameState.screen}</span>
                                     <button

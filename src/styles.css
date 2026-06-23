@@ -2179,6 +2179,21 @@ textarea {
   transform: scale(calc(0.95 * var(--battle-ui-hand-card-scale, 1))) !important;
 }
 
+.battle-hand-area:has(.battle-hand-card-popup) {
+  overflow: visible !important;
+  z-index: 500 !important;
+}
+
+.battle-hand-card.battle-hand-card-popup {
+  z-index: 800 !important;
+}
+
+.battle-hand-card.battle-hand-card-popup .battle-hand-card-inner,
+.battle-hand-card:hover .battle-hand-card-inner,
+.battle-hand-card:focus-within .battle-hand-card-inner {
+  z-index: 801 !important;
+}
+
 @media (min-width: 768px) {
   .battle-scene-root.battle-ui-custom {
     --battle-ui-hand-area-base-height: 16rem;
@@ -4043,6 +4058,12 @@ textarea {
     font-size: 0.52rem !important;
   }
 
+  .battle-selection-notice {
+    top: 30% !important;
+    min-width: 8.5rem;
+    max-width: min(54vw, 18rem);
+  }
+
   .app-modal-overlay {
     align-items: flex-start !important;
     padding: 0.5rem !important;
@@ -4052,6 +4073,11 @@ textarea {
 
   .app-start-over-modal-overlay {
     align-items: center !important;
+  }
+
+  .app-time-limit-modal-overlay {
+    align-items: center !important;
+    justify-content: center !important;
   }
 
   .app-modal-panel {
@@ -4078,6 +4104,12 @@ textarea {
     padding: 1rem !important;
     text-align: left !important;
     transform: none !important;
+  }
+
+  .app-time-limit-modal {
+    width: min(74vw, 34rem) !important;
+    max-width: min(74vw, 34rem) !important;
+    margin: 0 auto !important;
   }
 
   .app-start-over-modal > svg,
