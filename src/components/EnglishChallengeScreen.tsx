@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { CheckCircle, XCircle, Volume2, VolumeX } from 'lucide-react';
 import { audioService } from '../services/audioService';
-import { GameMode } from '../types';
+import { AssignmentAnswerResult, AssignmentReviewProblem, GameMode } from '../types';
 import { storageService } from '../services/storageService';
 import { ENGLISH_DATA, EnglishProblem } from '../data/englishData';
 import RewardHintBanner from './RewardHintBanner';
@@ -14,14 +14,18 @@ interface EnglishChallengeScreenProps {
   isChallenge?: boolean;
   streak?: number;
   rewardHint?: string;
-  onAnswerResult?: (result: { mode: string; correct: boolean; elapsedMs: number }) => void;
+  onAnswerResult?: (result: AssignmentAnswerResult) => void;
+  reviewProblem?: AssignmentReviewProblem | null;
 }
 
 interface ExtendedEnglishProblem extends EnglishProblem {
   actualCorrectAnswer: string;
+  problemKey?: string;
+  isAssignmentRetry?: boolean;
+  retryOfProblemKey?: string;
 }
 
-const EnglishChallengeScreen: React.FC<EnglishChallengeScreenProps> = ({ onComplete, mode, debugSkip, isChallenge, streak = 0, rewardHint, onAnswerResult }) => {
+const EnglishChallengeScreen: React.FC<EnglishChallengeScreenProps> = ({ onComplete, mode, debugSkip, isChallenge, streak = 0, rewardHint, onAnswerResult, reviewProblem = null }) => {
   const [problems, setProblems] = useState<ExtendedEnglishProblem[]>([]);
   const [currentProblemIndex, setCurrentProblemIndex] = useState(0);
   const [correctCount, setCorrectCount] = useState(0);
@@ -76,6 +80,20 @@ const EnglishChallengeScreen: React.FC<EnglishChallengeScreenProps> = ({ onCompl
         }
     }
 
+    if (reviewProblem) {
+      setProblems([{
+        question: reviewProblem.question,
+        answer: reviewProblem.correctAnswer,
+        options: [...new Set([reviewProblem.correctAnswer, ...(reviewProblem.options || [])])].slice(0, 4).sort(() => Math.random() - 0.5),
+        hint: undefined,
+        actualCorrectAnswer: reviewProblem.correctAnswer,
+        problemKey: reviewProblem.problemKey,
+        isAssignmentRetry: true,
+        retryOfProblemKey: reviewProblem.problemKey,
+      }]);
+      return;
+    }
+
     let problemPool: EnglishProblem[];
     if (mode === GameMode.ENGLISH_MIXED) {
         problemPool = Object.values(ENGLISH_DATA).flat();
@@ -93,13 +111,14 @@ const EnglishChallengeScreen: React.FC<EnglishChallengeScreenProps> = ({ onCompl
             const correctAnswer = p.options[0];
             return {
                 ...p,
+                problemKey: `${mode}:${p.question}`,
                 actualCorrectAnswer: correctAnswer,
                 options: [...p.options].sort(() => Math.random() - 0.5)
             };
         });
         
     setProblems(shuffled);
-  }, [mode, debugSkip, isChallenge]);
+  }, [mode, debugSkip, isChallenge, reviewProblem]);
 
   useEffect(() => {
     questionStartedAtRef.current = Date.now();
@@ -133,6 +152,12 @@ const EnglishChallengeScreen: React.FC<EnglishChallengeScreenProps> = ({ onCompl
       mode,
       correct: isCorrect,
       elapsedMs: Date.now() - questionStartedAtRef.current,
+      problemKey: problems[currentProblemIndex].problemKey || `${mode}:${problems[currentProblemIndex].question}`,
+      question: problems[currentProblemIndex].question,
+      correctAnswer: problems[currentProblemIndex].actualCorrectAnswer,
+      selectedAnswer: option,
+      isRetry: problems[currentProblemIndex].isAssignmentRetry,
+      retryOfProblemKey: problems[currentProblemIndex].retryOfProblemKey,
     };
     if (isCorrect) {
       setCorrectCount(prev => prev + 1);

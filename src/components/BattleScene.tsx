@@ -45,7 +45,7 @@ const POWER_DEFINITIONS: Record<string, { name: string, desc: string }> = {
     POISON: { name: "ドクドク", desc: "ターン終了時にHPダメージを受け、数値が1減る。" },
     STRENGTH: { name: "ムキムキ", desc: "攻撃ダメージがその数値分アップ！" },
     DEXTERITY: { name: "カチカチ", desc: "ブロックを得るカードの効果がその数値分アップ！" },
-    ARTIFACT: { name: "キラキラ", desc: "次に受ける悪い効果（デバフ）を無効化する。" },
+    ARTIFACT: { name: "キラキラ", desc: "受けるダメージを1にする。" },
     INTANGIBLE: { name: "スケスケ", desc: "受けるダメージとHP減少が1になる。" },
     THORNS: { name: "トゲトゲ", desc: "攻撃を受けた時、相手にその数値分のダメージを返す。" },
     THORNS_DESC: { name: "トゲトゲ", desc: "攻撃を受けた時、相手にその数値分のダメージを返す。" },
@@ -866,7 +866,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
             case 'HEAL':
                 return `HPを${amount}回復。`;
             case 'DRAW':
-                return `カードを${amount}枚引く。`;
+                return `次ターン開始時にカードを${amount}枚引く。`;
             case 'ENERGY_NEXT':
                 return `次ターンのエナジー+${amount}。`;
             case 'POISON':
@@ -882,7 +882,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
             case 'GOLD':
                 return `ゴールド${amount}を得る。`;
             case 'CHAOS_SURGE':
-                return `カードを${amount}枚引き、ムキムキ+${amount}、次ターンのエナジー+${Math.max(1, amount - 1)}。`;
+                return `次ターン開始時にカードを${amount}枚引き、ムキムキ+${amount}、次ターンのエナジー+${Math.max(1, amount - 1)}。`;
             default:
                 return '特殊効果を発動する。';
         }
@@ -1813,7 +1813,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                                     </div>
                                                 )}
                                                 {enemy.artifact > 0 && (
-                                                    <div className="flex items-center bg-yellow-900/80 rounded px-0.5 border border-yellow-500/50 cursor-pointer" onClick={(e) => { e.stopPropagation(); showInfo(trans("キラキラ", languageMode), trans("デバフを無効化する。", languageMode)); }}>
+                                                    <div className="flex items-center bg-yellow-900/80 rounded px-0.5 border border-yellow-500/50 cursor-pointer" onClick={(e) => { e.stopPropagation(); showInfo(trans("キラキラ", languageMode), trans("受けるダメージを1にする。", languageMode)); }}>
                                                         <Hexagon size={8} className="text-yellow-200" /> <span className="text-[8px] ml-0.5 font-bold">{enemy.artifact}</span>
                                                     </div>
                                                 )}

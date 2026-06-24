@@ -1,5 +1,5 @@
 import React from 'react';
-import { AnswerMode, AssignmentPayload, GameMode, GameScreen } from '../types';
+import { AnswerMode, AssignmentAnswerResult, AssignmentPayload, GameMode, GameScreen } from '../types';
 import { getChallengeScreenForMode } from '../subjectConfig';
 import MathChallengeScreen from './MathChallengeScreen';
 import KanjiChallengeScreen from './KanjiChallengeScreen';
@@ -17,7 +17,7 @@ interface MiniGameProblemChallengeProps {
   streak?: number;
   rewardHint?: string;
   assignment?: AssignmentPayload | null;
-  onAnswerResult?: (result: { mode: string; correct: boolean; elapsedMs: number; problemId?: string }) => void;
+  onAnswerResult?: (result: AssignmentAnswerResult) => void;
 }
 
 const MiniGameProblemChallenge: React.FC<MiniGameProblemChallengeProps> = ({
@@ -45,7 +45,7 @@ const MiniGameProblemChallenge: React.FC<MiniGameProblemChallengeProps> = ({
   const effectiveAnswerMode = assignment?.answerMode || answerMode;
   const effectiveCustomProblems = assignment?.gameMode === 'FREE' ? assignment.customProblems : undefined;
   const challengeScreen = getChallengeScreenForMode(effectiveMode);
-  const handleAnswerResult = (result: { mode: string; correct: boolean; elapsedMs: number; problemId?: string }) => {
+  const handleAnswerResult = (result: AssignmentAnswerResult) => {
     if (onAnswerResult) {
       onAnswerResult(result);
       return;
@@ -59,6 +59,12 @@ const MiniGameProblemChallenge: React.FC<MiniGameProblemChallengeProps> = ({
       mode: result.mode,
       unitName: isCustomAssignmentAnswer ? 'オリジナル問題' : assignmentUnit?.name,
       problemId: result.problemId,
+      problemKey: result.problemKey,
+      question: result.question,
+      correctAnswer: result.correctAnswer,
+      selectedAnswer: result.selectedAnswer,
+      isRetry: result.isRetry,
+      retryOfProblemKey: result.retryOfProblemKey,
       correct: result.correct,
       elapsedMs: Math.max(0, result.elapsedMs || 0),
       answeredAt: new Date().toISOString(),

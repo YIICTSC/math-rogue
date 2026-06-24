@@ -30,6 +30,14 @@ const sanitizeFileNamePart = (value: string) =>
     .replace(/\s+/g, '')
     .trim();
 
+const escapeHtml = (value: string | number | undefined) =>
+  String(value ?? '-')
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#39;');
+
 const SubmissionScreen: React.FC<SubmissionScreenProps> = ({ onBack, assignment, onProfileChange }) => {
   const [profile, setProfile] = useState<StudentProfile>(() => storageService.getStudentProfile());
   const answers = useMemo(() => storageService.getAssignmentAnswers(), []);
@@ -42,6 +50,19 @@ const SubmissionScreen: React.FC<SubmissionScreenProps> = ({ onBack, assignment,
   const correctCount = targetAnswers.filter((answer) => answer.correct).length;
   const accuracy = answerCount > 0 ? Math.round((correctCount / answerCount) * 100) : 0;
   const elapsedMs = targetAnswers.reduce((total, answer) => total + Math.max(0, answer.elapsedMs || 0), 0);
+  const mistakeRows = useMemo(() => (
+    targetAnswers
+      .filter((answer) => !answer.correct && !answer.isRetry && (answer.question || answer.problemKey))
+      .map((answer) => {
+        const retry = targetAnswers.find((candidate) => (
+          candidate.isRetry &&
+          candidate.retryOfProblemKey &&
+          candidate.retryOfProblemKey === (answer.problemKey || answer.problemId) &&
+          new Date(candidate.answeredAt).getTime() >= new Date(answer.answeredAt).getTime()
+        ));
+        return { answer, retry };
+      })
+  ), [targetAnswers]);
   const unitProgress = useMemo(() => (
     assignment?.units.map((unit) => {
       const unitAnswers = targetAnswers.filter((answer) => unit.modes.includes(answer.mode));
@@ -112,6 +133,7 @@ ${unitProgress.length > 0 ? `<table style="margin-bottom:18px"><thead><tr><th>�
   <div class="cell"><div class="label">正答率</div><div class="value">${accuracy}%</div></div>
   <div class="cell"><div class="label">回答時間</div><div class="value">${formatDuration(elapsedMs)}</div></div>
 </div>
+${mistakeRows.length > 0 ? `<h2>間違えた問題と再出題結果</h2><table><thead><tr><th>問題</th><th>自分の回答</th><th>正解</th><th>再出題結果</th></tr></thead><tbody>${mistakeRows.map(({ answer, retry }) => `<tr><td>${escapeHtml(answer.question || answer.problemKey)}</td><td>${escapeHtml(answer.selectedAnswer)}</td><td>${escapeHtml(answer.correctAnswer)}</td><td>${retry ? (retry.correct ? '正答' : '不正解') : '未出題'}${retry ? `<br><span class="label">回答: ${escapeHtml(retry.selectedAnswer)}</span>` : ''}</td></tr>`).join('')}</tbody></table>` : ''}
 <script>window.onload = () => window.print();</script>
 </body>
 </html>`;
@@ -125,27 +147,27 @@ ${unitProgress.length > 0 ? `<table style="margin-bottom:18px"><thead><tr><th>�
   };
 
   return (
-    <div className="h-full w-full overflow-hidden bg-slate-950 text-white">
-      <div className="flex h-full flex-col bg-[linear-gradient(180deg,#020617,#111827)]">
-        <div className="flex items-center justify-between border-b border-emerald-500/30 px-4 py-3">
-          <button onClick={onBack} className="flex items-center gap-2 rounded-lg border border-slate-600 bg-slate-900 px-3 py-2 text-sm font-bold text-slate-200 hover:bg-slate-800">
+    <div className="submission-screen h-full w-full overflow-hidden bg-slate-950 text-white">
+      <div className="submission-shell flex h-full flex-col bg-[linear-gradient(180deg,#020617,#111827)]">
+        <div className="submission-header flex items-center justify-between border-b border-emerald-500/30 px-4 py-3">
+          <button onClick={onBack} className="submission-back flex items-center gap-2 rounded-lg border border-slate-600 bg-slate-900 px-3 py-2 text-sm font-bold text-slate-200 hover:bg-slate-800">
             <ArrowLeft size={16} /> 戻る
           </button>
-          <div className="flex items-center gap-2 text-emerald-200">
+          <div className="submission-title flex items-center gap-2 text-emerald-200">
             <FileText size={18} />
             <h2 className="text-xl font-black tracking-wider">{assignment ? '提出' : '学習実績'}</h2>
           </div>
-          <button onClick={downloadPdf} className="flex items-center gap-2 rounded-lg bg-emerald-400 px-4 py-2 text-sm font-black text-slate-950 hover:bg-emerald-300">
+          <button onClick={downloadPdf} className="submission-pdf flex items-center gap-2 rounded-lg bg-emerald-400 px-4 py-2 text-sm font-black text-slate-950 hover:bg-emerald-300">
             <Download size={16} /> PDF
           </button>
         </div>
 
-        <div className="grid flex-1 min-h-0 gap-4 overflow-y-auto p-4 custom-scrollbar lg:grid-cols-[1fr_1.4fr]">
-          <section className="rounded-xl border border-slate-700 bg-black/35 p-4">
-            <div className="mb-4 flex items-center gap-2 text-lg font-black text-white">
+        <div className="submission-grid grid flex-1 min-h-0 gap-4 overflow-y-auto p-4 custom-scrollbar lg:grid-cols-[1fr_1.4fr]">
+          <section className="submission-profile rounded-xl border border-slate-700 bg-black/35 p-4">
+            <div className="submission-section-title mb-4 flex items-center gap-2 text-lg font-black text-white">
               <UserRound size={18} /> 提出者
             </div>
-            <div className="grid grid-cols-4 gap-2">
+            <div className="submission-profile-grid grid grid-cols-4 gap-2">
               <label>
                 <span className="mb-1 block text-xs font-bold text-slate-400">学年</span>
                 <select
@@ -173,7 +195,7 @@ ${unitProgress.length > 0 ? `<table style="margin-bottom:18px"><thead><tr><th>�
               </label>
             </div>
 
-            <div className="mt-5 rounded-xl border border-emerald-500/30 bg-emerald-950/25 p-4">
+            <div className="submission-target mt-5 rounded-xl border border-emerald-500/30 bg-emerald-950/25 p-4">
               <div className="text-xs font-bold text-emerald-200">対象</div>
               <div className="mt-1 text-xl font-black">{assignment?.title || '自身の学習実績'}</div>
               <div className="mt-1 text-xs text-slate-300">期限: {assignment ? formatDate(assignment.dueAt) : 'なし'}</div>
@@ -185,8 +207,8 @@ ${unitProgress.length > 0 ? `<table style="margin-bottom:18px"><thead><tr><th>�
             </div>
           </section>
 
-          <section className="rounded-xl border border-slate-700 bg-black/35 p-4">
-            <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
+          <section className="submission-results rounded-xl border border-slate-700 bg-black/35 p-4">
+            <div className="submission-stats grid grid-cols-2 gap-3 sm:grid-cols-4">
               {[
                 ['回答数', `${answerCount}`],
                 ['正答数', `${correctCount}`],
@@ -215,6 +237,36 @@ ${unitProgress.length > 0 ? `<table style="margin-bottom:18px"><thead><tr><th>�
                       </div>
                     </div>
                   ))}
+                </div>
+              </div>
+            )}
+            {mistakeRows.length > 0 && (
+              <div className="mt-4 rounded-lg border border-rose-500/40 bg-rose-950/20 p-3">
+                <div className="mb-2 text-sm font-black text-rose-100">間違えた問題と再出題結果</div>
+                <div className="max-h-64 overflow-y-auto rounded border border-slate-700 custom-scrollbar">
+                  <table className="w-full text-left text-xs">
+                    <thead className="sticky top-0 bg-slate-950 text-slate-300">
+                      <tr>
+                        <th className="p-2">問題</th>
+                        <th className="p-2">回答</th>
+                        <th className="p-2">正解</th>
+                        <th className="p-2">再出題</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {mistakeRows.map(({ answer, retry }) => (
+                        <tr key={`${answer.answeredAt}-${answer.problemKey || answer.problemId || answer.question}`} className="border-t border-slate-800">
+                          <td className="p-2 text-slate-100">{answer.question || answer.problemKey || '-'}</td>
+                          <td className="p-2 text-rose-200">{answer.selectedAnswer || '-'}</td>
+                          <td className="p-2 text-emerald-200">{answer.correctAnswer || '-'}</td>
+                          <td className={`p-2 font-bold ${retry?.correct ? 'text-emerald-300' : retry ? 'text-rose-300' : 'text-slate-400'}`}>
+                            {retry ? (retry.correct ? '正答' : '不正解') : '未出題'}
+                            {retry?.selectedAnswer && <div className="mt-0.5 font-normal text-slate-300">回答: {retry.selectedAnswer}</div>}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
                 </div>
               </div>
             )}

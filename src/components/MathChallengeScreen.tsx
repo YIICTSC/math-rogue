@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { CheckCircle, XCircle } from 'lucide-react';
 import { audioService } from '../services/audioService';
-import { AnswerMode, GameMode } from '../types';
+import { AnswerMode, AssignmentAnswerResult, AssignmentReviewProblem, GameMode } from '../types';
 import { storageService } from '../services/storageService';
 import { resolveAnswerMode } from '../utils/answerMode';
 import RewardHintBanner from './RewardHintBanner';
@@ -11,10 +11,13 @@ interface MathProblem {
   question: string;
   options: number[];
   answer: number;
+  problemKey?: string;
+  isAssignmentRetry?: boolean;
+  retryOfProblemKey?: string;
 }
 
-const MathChallengeScreen: React.FC<MathChallengeScreenProps> = ({ onComplete, mode, answerMode = 'CHOICE', useSavedAnswerMode = false, debugSkip, isChallenge, streak = 0, rewardHint, onAnswerResult }) => {
-  const resolvedAnswerMode = resolveAnswerMode(answerMode, useSavedAnswerMode);
+const MathChallengeScreen: React.FC<MathChallengeScreenProps> = ({ onComplete, mode, answerMode = 'CHOICE' as AnswerMode, useSavedAnswerMode = false, debugSkip, isChallenge, streak = 0, rewardHint, onAnswerResult, reviewProblem = null }) => {
+  const resolvedAnswerMode = resolveAnswerMode(answerMode as AnswerMode, useSavedAnswerMode);
   const [problems, setProblems] = useState<MathProblem[]>([]);
   const [currentProblemIndex, setCurrentProblemIndex] = useState(0);
   const [correctCount, setCorrectCount] = useState(0);
@@ -44,6 +47,20 @@ const MathChallengeScreen: React.FC<MathChallengeScreenProps> = ({ onComplete, m
         } catch (e) {
             console.warn("BGM playback failed", e);
         }
+    }
+
+    if (reviewProblem) {
+      const answer = Number(reviewProblem.correctAnswer);
+      const optionValues = [...new Set([answer, ...(reviewProblem.options || []).map((option) => Number(option)).filter(Number.isFinite)])];
+      setProblems([{
+        question: reviewProblem.question,
+        options: optionValues.length >= 4 ? optionValues.slice(0, 4).sort(() => Math.random() - 0.5) : [answer, answer + 1, answer - 1, answer + 2].sort(() => Math.random() - 0.5),
+        answer,
+        problemKey: reviewProblem.problemKey,
+        isAssignmentRetry: true,
+        retryOfProblemKey: reviewProblem.problemKey,
+      }]);
+      return;
     }
 
     const safeMode = mode || GameMode.MULTIPLICATION;
@@ -135,11 +152,12 @@ const MathChallengeScreen: React.FC<MathChallengeScreenProps> = ({ onComplete, m
       generatedProblems.push({
         question: `${a} ${operator} ${b} = ?`,
         options: Array.from(options).sort(() => Math.random() - 0.5),
-        answer: answer
+        answer: answer,
+        problemKey: `${type}:${a}${operator}${b}`,
       });
     }
     setProblems(generatedProblems);
-  }, [mode, debugSkip, isChallenge]);
+  }, [mode, debugSkip, isChallenge, reviewProblem]);
 
   useEffect(() => {
     questionStartedAtRef.current = Date.now();
@@ -162,6 +180,12 @@ const MathChallengeScreen: React.FC<MathChallengeScreenProps> = ({ onComplete, m
       mode,
       correct: isCorrect,
       elapsedMs: Date.now() - questionStartedAtRef.current,
+      problemKey: problems[currentProblemIndex].problemKey || `${mode}:${problems[currentProblemIndex].question}`,
+      question: problems[currentProblemIndex].question,
+      correctAnswer: String(problems[currentProblemIndex].answer),
+      selectedAnswer: Number.isNaN(option) ? inputAnswer : String(option),
+      isRetry: problems[currentProblemIndex].isAssignmentRetry,
+      retryOfProblemKey: problems[currentProblemIndex].retryOfProblemKey,
     };
     if (isCorrect) {
       setCorrectCount(prev => prev + 1);
@@ -301,5 +325,6 @@ interface MathChallengeScreenProps {
   isChallenge?: boolean;
   streak?: number;
   rewardHint?: string;
-  onAnswerResult?: (result: { mode: string; correct: boolean; elapsedMs: number }) => void;
+  onAnswerResult?: (result: AssignmentAnswerResult) => void;
+  reviewProblem?: AssignmentReviewProblem | null;
 }

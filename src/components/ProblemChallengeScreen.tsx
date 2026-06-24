@@ -1,6 +1,6 @@
 
-import React, { useState, useEffect, useMemo, useRef } from 'react';
-import { AnswerMode, AssignmentPayload, GameMode, LanguageMode, GameScreen } from '../types';
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
+import { AnswerMode, AssignmentAnswerResult, AssignmentPayload, AssignmentReviewProblem, GameMode, LanguageMode, GameScreen } from '../types';
 import { storageService } from '../services/storageService';
 import { audioService } from '../services/audioService';
 import MathChallengeScreen from './MathChallengeScreen';
@@ -25,7 +25,7 @@ interface ProblemChallengeScreenProps {
   onCorrectAnswers?: (mode: string, correctCount: number) => void;
   modeCorrectCounts?: Record<string, number>;
   assignment?: AssignmentPayload | null;
-  onAnswerResult?: (result: { mode: string; correct: boolean; elapsedMs: number; problemId?: string }) => void;
+  onAnswerResult?: (result: AssignmentAnswerResult) => void;
   visualTheme?: VisualThemeId;
 }
 
@@ -562,6 +562,7 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
   const [streak, setStreak] = useState(0);
   const [records, setRecords] = useState<Record<string, number>>({});
   const [isQuitting, setIsQuitting] = useState(false);
+  const [assignmentReviewQueue, setAssignmentReviewQueue] = useState<Array<{ problem: AssignmentReviewProblem; dueStep: number }>>([]);
   const appliedAssignmentSignatureRef = useRef('');
   const displayedCategories = useMemo<SubjectCategoryConfig[]>(() => {
     const kanjiCategory = SUBJECT_CATEGORIES.find((cat) => cat.id === 'KANJI');
@@ -626,6 +627,7 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
     setContinueOnWrong(true);
     setStreak(0);
     setChallengeStep(0);
+    setAssignmentReviewQueue([]);
   }, [assignment, phase]);
 
   useEffect(() => {
@@ -759,6 +761,40 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
     }
   };
 
+  const activeReviewProblem = useMemo(() => {
+    if (!assignment) return null;
+    return assignmentReviewQueue.find((item) => item.dueStep <= challengeStep)?.problem || null;
+  }, [assignment, assignmentReviewQueue, challengeStep]);
+
+  const handleChallengeAnswerResult = useCallback((result: AssignmentAnswerResult) => {
+    if (assignment && result.problemKey) {
+      if (result.isRetry) {
+        setAssignmentReviewQueue(prev => prev.filter(item => item.problem.problemKey !== (result.retryOfProblemKey || result.problemKey)));
+      }
+      if (!result.correct && result.question && result.correctAnswer) {
+        const retryKey = result.retryOfProblemKey || result.problemKey;
+        setAssignmentReviewQueue(prev => {
+          const withoutCurrent = prev.filter(item => item.problem.problemKey !== retryKey);
+          return [
+            ...withoutCurrent,
+            {
+              dueStep: challengeStep + 3,
+              problem: {
+                mode: result.mode,
+                problemId: result.problemId,
+                problemKey: retryKey,
+                question: result.question,
+                correctAnswer: result.correctAnswer,
+                options: [result.correctAnswer, result.selectedAnswer || ''].filter(Boolean),
+              },
+            },
+          ];
+        });
+      }
+    }
+    onAnswerResult?.(result);
+  }, [assignment, challengeStep, onAnswerResult]);
+
   const handleFinish = () => {
     if (assignment) {
       onBack();
@@ -865,7 +901,8 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
               answerMode={challengeAnswerMode}
               useSavedAnswerMode
               onComplete={handleCompleteOne}
-              onAnswerResult={onAnswerResult}
+              onAnswerResult={handleChallengeAnswerResult}
+              reviewProblem={activeReviewProblem?.mode === challengeSubMode.mode ? activeReviewProblem : null}
               isChallenge={true}
               streak={streak}
             />
@@ -877,7 +914,8 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
               answerMode={challengeAnswerMode}
               useSavedAnswerMode
               onComplete={handleCompleteOne}
-              onAnswerResult={onAnswerResult}
+              onAnswerResult={handleChallengeAnswerResult}
+              reviewProblem={activeReviewProblem?.mode === challengeSubMode.mode ? activeReviewProblem : null}
               isChallenge={true}
               streak={streak}
             />
@@ -887,7 +925,8 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
               key={`${streak}-${challengeStep}`}
               mode={challengeSubMode.mode}
               onComplete={handleCompleteOne}
-              onAnswerResult={onAnswerResult}
+              onAnswerResult={handleChallengeAnswerResult}
+              reviewProblem={activeReviewProblem?.mode === challengeSubMode.mode ? activeReviewProblem : null}
               isChallenge={true}
               streak={streak}
             />
@@ -900,8 +939,9 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
               answerMode={challengeAnswerMode}
               onModeCorrect={onCorrectAnswers}
               onComplete={handleCompleteOne}
-              onAnswerResult={onAnswerResult}
+              onAnswerResult={handleChallengeAnswerResult}
               customProblems={assignment?.customProblems}
+              reviewProblem={activeReviewProblem}
               problemOffset={challengeStep}
               isChallenge={true}
               streak={streak}

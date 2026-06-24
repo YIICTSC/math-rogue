@@ -117,8 +117,8 @@ const FloorResultScreen: React.FC<FloorResultScreenProps> = ({ act, stats, story
         <BookOpen className="text-gray-500 w-[200px] h-[200px] sm:w-[400px] sm:h-[400px]" />
       </div>
 
-      <div className="z-10 w-full max-w-2xl md:max-w-5xl bg-black/90 border-2 sm:border-4 border-gray-700 p-4 sm:p-8 md:p-6 rounded-xl shadow-2xl animate-in fade-in zoom-in duration-500 max-h-[95vh] flex flex-col overflow-y-auto md:overflow-hidden custom-scrollbar">
-        <div className="text-center mb-4 sm:mb-6 md:mb-4 shrink-0">
+      <div className="floor-result-panel z-10 w-full max-w-2xl md:max-w-5xl bg-black/90 border-2 sm:border-4 border-gray-700 p-4 sm:p-8 md:p-6 rounded-xl shadow-2xl animate-in fade-in zoom-in duration-500 max-h-[95vh] flex flex-col overflow-y-auto md:overflow-hidden custom-scrollbar">
+        <div className="floor-result-header text-center mb-4 sm:mb-6 md:mb-4 shrink-0">
           <h2 className="floor-result-heading text-3xl sm:text-4xl md:text-5xl font-black text-gray-100 mb-2 tracking-tighter italic">
             ACT {act} <span className="text-gray-500 not-italic text-2xl sm:text-4xl">CLEARED</span>
           </h2>
@@ -126,20 +126,20 @@ const FloorResultScreen: React.FC<FloorResultScreenProps> = ({ act, stats, story
         </div>
 
         {/* Responsive Body Grid: Only grid on md: when unlockedCard exists */}
-        <div className={`flex flex-col flex-grow min-h-0 ${unlockedCard ? 'md:grid md:grid-cols-12 md:gap-6' : ''}`}>
+        <div className={`floor-result-body flex flex-col flex-grow min-h-0 ${unlockedCard ? 'has-unlocked-card md:grid md:grid-cols-12 md:gap-6' : ''}`}>
             
             {/* Left Side: Unlocked Card (Column 1-5 on PC) */}
             {unlockedCard && (
-                <div className="md:col-span-5 flex flex-col justify-center mb-6 md:mb-0">
-                    <div className="p-4 bg-yellow-600/10 border-2 border-yellow-500/50 rounded-xl animate-in zoom-in duration-700 delay-300 h-full flex flex-col">
-                        <div className="flex items-center justify-center gap-2 text-yellow-400 font-black text-xs sm:text-sm mb-3 italic tracking-widest shrink-0">
+                <div className="floor-result-unlocked md:col-span-5 flex flex-col justify-center mb-6 md:mb-0">
+                    <div className="floor-result-unlocked-panel p-4 bg-yellow-600/10 border-2 border-yellow-500/50 rounded-xl animate-in zoom-in duration-700 delay-300 h-full flex flex-col">
+                        <div className="floor-result-unlocked-title flex items-center justify-center gap-2 text-yellow-400 font-black text-xs sm:text-sm mb-3 italic tracking-widest shrink-0">
                             <Sparkles size={16}/> NEW CARD UNLOCKED! <Sparkles size={16}/>
                         </div>
-                        <div className="flex flex-row md:flex-col items-center justify-center gap-4 flex-grow">
-                            <div className="scale-75 sm:scale-90 md:scale-100 origin-center shrink-0">
+                        <div className="floor-result-unlocked-content flex flex-row md:flex-col items-center justify-center gap-4 flex-grow">
+                            <div className="floor-result-card-preview scale-75 sm:scale-90 md:scale-100 origin-center shrink-0">
                                 <Card card={unlockedCard} onClick={()=>{}} disabled={false} languageMode={languageMode}/>
                             </div>
-                            <div className="text-left md:text-center flex-1 md:flex-initial">
+                            <div className="floor-result-unlocked-copy text-left md:text-center flex-1 md:flex-initial">
                                 <h4 className="text-white font-bold text-lg mb-1">{trans(unlockedCard.name, languageMode)}</h4>
                                 <p className="text-gray-400 text-xs leading-relaxed line-clamp-3">{trans(unlockedCard.description, languageMode)}</p>
                                 <p className="text-yellow-500/70 text-[9px] mt-2 font-bold uppercase tracking-tighter hidden md:block">Next reward pool expanded</p>
@@ -150,7 +150,7 @@ const FloorResultScreen: React.FC<FloorResultScreenProps> = ({ act, stats, story
             )}
 
             {/* Right Side: Stats + Story (Column 6-12 on PC) */}
-            <div className={`${unlockedCard ? 'md:col-span-7' : 'w-full max-w-2xl mx-auto'} flex flex-col flex-grow min-h-0`}>
+            <div className={`floor-result-main ${unlockedCard ? 'md:col-span-7' : 'w-full max-w-2xl mx-auto'} flex flex-col flex-grow min-h-0`}>
                 {/* Stats Section */}
                 <div className="grid grid-cols-3 gap-2 sm:gap-6 md:gap-3 mb-4 shrink-0">
                     <div className="bg-gray-900/50 p-2 sm:p-3 rounded-lg border border-gray-800 flex flex-col items-center justify-center">
@@ -186,7 +186,7 @@ const FloorResultScreen: React.FC<FloorResultScreenProps> = ({ act, stats, story
         </div>
 
         {/* Footer Area */}
-        <div className="mt-2 shrink-0">
+        <div className="floor-result-footer mt-2 shrink-0">
             <button 
                 onClick={handleNext}
                 className={`w-full py-3 sm:py-4 md:py-3 rounded-lg font-black text-lg sm:text-xl flex items-center justify-center gap-2 sm:gap-3 transition-all transform active:scale-95 shadow-xl border-b-4 ${isTyping ? 'bg-slate-200 text-slate-900 border-slate-400 hover:bg-white' : 'bg-white text-black border-gray-300 hover:bg-gray-200'}`}

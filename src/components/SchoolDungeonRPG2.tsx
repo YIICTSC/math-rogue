@@ -4,7 +4,7 @@ import { ArrowLeft, ArrowUp, ArrowDown, ArrowRight, ArrowUpLeft, ArrowUpRight, A
 import { audioService } from '../services/audioService';
 import { createPixelSpriteCanvas } from './PixelSprite';
 import { storageService } from '../services/storageService';
-import { AnswerMode, AssignmentPayload, GameMode } from '../types';
+import { AnswerMode, AssignmentAnswerResult, AssignmentPayload, GameMode, MiniGameDebugPreview } from '../types';
 import { EXTRA_SCHOOL_DUNGEON_ITEMS } from '../data/schoolDungeonExtraItems';
 import MiniGameProblemChallenge from './MiniGameProblemChallenge';
 import { assetUrl } from '../utils/assetPaths';
@@ -18,7 +18,8 @@ interface SchoolDungeonRPG2Props {
   problemModePool?: string[];
   answerMode?: AnswerMode;
   assignment?: AssignmentPayload | null;
-  onAnswerResult?: (result: { mode: string; correct: boolean; elapsedMs: number; problemId?: string }) => void;
+  onAnswerResult?: (result: AssignmentAnswerResult) => void;
+  debugPreview?: MiniGameDebugPreview;
 }
 
 // --- GBC PALETTE (Dynamic based on Floor) ---
@@ -410,7 +411,7 @@ const computeDijkstraMap = (map: TileType[][], targetX: number, targetY: number)
     return dMap;
 };
 
-const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMode = GameMode.MIXED, problemModePool, answerMode = 'CHOICE', assignment, onAnswerResult }) => {
+const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMode = GameMode.MIXED, problemModePool, answerMode = 'CHOICE', assignment, onAnswerResult, debugPreview }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [map, setMap] = useState<TileType[][]>([]);
   const [visitedMap, setVisitedMap] = useState<boolean[][]>([]);
@@ -437,8 +438,8 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
   const [level, setLevel] = useState(1);
   const [belly, setBelly] = useState(100);
   const [maxBelly, setMaxBelly] = useState(100);
-  const [gameOver, setGameOver] = useState(false);
-  const [gameClear, setGameClear] = useState(false);
+  const [gameOver, setGameOver] = useState(debugPreview === 'GAME_OVER');
+  const [gameClear, setGameClear] = useState(debugPreview === 'ENDING');
   const [menuOpen, setMenuOpen] = useState(false);
   const [showMap, setShowMap] = useState(false); 
   const [showHelp, setShowHelp] = useState(false);
@@ -457,6 +458,14 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
   const [idMap, setIdMap] = useState<Record<string, string>>({}); 
   const [identifiedTypes, setIdentifiedTypes] = useState<Set<string>>(new Set());
   const [selectedItemIndex, setSelectedItemIndex] = useState(0);
+  const [selectedItemActionIndex, setSelectedItemActionIndex] = useState(0);
+  const [selectedEquipmentSlot, setSelectedEquipmentSlot] = useState<'weapon'|'armor'|'ranged'|'accessory' | null>(null);
+  useEffect(() => {
+      if (selectedEquipmentSlot && !player.equipment?.[selectedEquipmentSlot]) {
+          setSelectedEquipmentSlot(null);
+          setSelectedItemIndex(0);
+      }
+  }, [player.equipment, selectedEquipmentSlot]);
   const [blankScrollSelectionIndex, setBlankScrollSelectionIndex] = useState(0);
   const menuListRef = useRef<HTMLDivElement>(null);
   const lastInputType = useRef<'KEY' | 'MOUSE'>('KEY');
@@ -519,8 +528,14 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
     spriteCache.current['TRAP'] = createPixelSpriteCanvas('TRAP', 'CROSS|#0f380f'); 
     spriteCache.current['ACCESSORY'] = createPixelSpriteCanvas('ACCESSORY', 'SHIELD|#FFD700'); 
     spriteCache.current['DECK_CARD'] = createPixelSpriteCanvas('DECK_CARD', 'NOTEBOOK|#FFFFFF|SKILL'); 
-    const savedState = storageService.loadDungeonState2();
-    if (savedState) restoreState(savedState); else startNewGame();
+    if (debugPreview) {
+      startNewGame();
+      setGameOver(debugPreview === 'GAME_OVER');
+      setGameClear(debugPreview === 'ENDING');
+    } else {
+      const savedState = storageService.loadDungeonState2();
+      if (savedState) restoreState(savedState); else startNewGame();
+    }
     return () => audioService.stopBGM();
   }, []);
 
@@ -557,7 +572,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
   };
 
   const saveData = useCallback(() => {
-      if (gameOver) return;
+      if (debugPreview || gameOver || gameClear) return;
       if (saveDebounceRef.current) clearTimeout(saveDebounceRef.current);
       saveDebounceRef.current = setTimeout(() => {
           const state = {
@@ -569,7 +584,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
           };
           storageService.saveDungeonState2(state);
       }, 500); 
-  }, [map, visitedMap, floorMapRevealed, player, enemies, floorItems, traps, inventory, floor, level, belly, maxBelly, idMap, identifiedTypes, isEndless, gameOver, dungeonDeck, dungeonHand, dungeonDiscard]);
+  }, [map, visitedMap, floorMapRevealed, player, enemies, floorItems, traps, inventory, floor, level, belly, maxBelly, idMap, identifiedTypes, isEndless, debugPreview, gameOver, gameClear, dungeonDeck, dungeonHand, dungeonDiscard]);
 
   const stableSpriteIndex = (value: string, modulo: number) => {
       let hash = 0;
@@ -1321,6 +1336,24 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
       const nextTheme = getTheme(nextFloor); audioService.playBGM(nextTheme.bgm);
   };
 
+  const moveItemMenuSelection = (direction: -1 | 1) => {
+      const equippedSlots = (['weapon', 'armor', 'ranged', 'accessory'] as const).filter(slot => player.equipment?.[slot]);
+      if (selectedEquipmentSlot) {
+          const currentIndex = equippedSlots.indexOf(selectedEquipmentSlot);
+          const nextIndex = currentIndex + direction;
+          if (nextIndex >= 0 && nextIndex < equippedSlots.length) setSelectedEquipmentSlot(equippedSlots[nextIndex]);
+          else if (direction > 0 && inventory.length > 0) { setSelectedEquipmentSlot(null); setSelectedItemIndex(0); }
+      } else if (direction < 0 && selectedItemIndex === 0 && equippedSlots.length > 0) {
+          setSelectedEquipmentSlot(equippedSlots[equippedSlots.length - 1]);
+          setSelectedItemActionIndex(0);
+      } else if (inventory.length > 0) {
+          setSelectedItemIndex(prev => Math.max(0, Math.min(inventory.length - 1, prev + direction)));
+      } else if (equippedSlots.length > 0) {
+          setSelectedEquipmentSlot(direction > 0 ? equippedSlots[0] : equippedSlots[equippedSlots.length - 1]);
+      }
+      audioService.playSound('select');
+  };
+
   const movePlayer = (dx: 0|1|-1, dy: 0|1|-1) => {
       if(gameOver || gameClear) return;
       if (shopState.active) { if (dy !== 0) { const shopkeeper = enemies.find(e => e.id === shopState.merchantId); const listLength = shopState.mode === 'BUY' ? (shopkeeper?.shopItems?.length || 0) : inventory.length; setSelectedItemIndex(prev => Math.max(0, Math.min(listLength - 1, prev + dy))); audioService.playSound('select'); } return; }
@@ -1329,9 +1362,15 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
               if (synthState.active && synthState.mode === 'BLANK' && synthState.step === 'SELECT_EFFECT') {
                   const knownCount = Array.from(identifiedTypes).filter((t: any) => (t as string).startsWith('SCROLL')).length;
                   if (knownCount > 0) setBlankScrollSelectionIndex(prev => Math.max(0, Math.min(knownCount - 1, prev + dy)));
+              } else if (!synthState.active) {
+                  moveItemMenuSelection(dy as -1 | 1);
               } else if (inventory.length > 0) {
                   setSelectedItemIndex(prev => Math.max(0, Math.min(inventory.length - 1, prev + dy)));
               }
+              if (synthState.active) audioService.playSound('select');
+          }
+          if (!synthState.active && dx !== 0 && inventory.length > 0 && !selectedEquipmentSlot) {
+              setSelectedItemActionIndex(prev => Math.max(0, Math.min(3, prev + dx)));
               audioService.playSound('select');
           }
           return;
@@ -1368,7 +1407,17 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
       if (gameOver) { handleRestart(); return; }
       if (gameClear) return;
       if (shopState.active) { handleShopAction(); return; }
-      if (menuOpen) { if (synthState.active) handleSynthesisStep(); else if (inventory.length > 0) handleItemAction(selectedItemIndex); return; }
+      if (menuOpen) {
+          if (synthState.active) handleSynthesisStep();
+          else if (selectedEquipmentSlot) handleUnequip(selectedEquipmentSlot);
+          else if (inventory.length > 0) {
+              if (selectedItemActionIndex === 0) handleItemAction(selectedItemIndex);
+              else if (selectedItemActionIndex === 1) handleThrowItem(selectedItemIndex);
+              else if (selectedItemActionIndex === 2) handleDropItem(selectedItemIndex);
+              else setInspectedItem(inventory[selectedItemIndex]);
+          }
+          return;
+      }
       if (map[player.y][player.x] === 'STAIRS') { addLog("階段を降りる..."); audioService.playSound('select'); setShowMathChallenge(true); return; }
       const tx = player.x + player.dir.x; const ty = player.y + player.dir.y; const target = enemies.find(e => e.x === tx && e.y === ty);
       if (target) { if (target.enemyType === 'SHOPKEEPER') { addLog("「へいらっしゃい！何にする？」", currentTheme.colors.C2); setShopState({ active: true, merchantId: target.id, mode: 'BUY' }); setSelectedItemIndex(0); audioService.playSound('select'); } else { attackEnemy(target); processTurn(player.x, player.y); } return; }
@@ -1472,7 +1521,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
       return () => { if (interval) clearInterval(interval); };
   }, [isFastForwarding, enemies, player.hp, belly, gameOver, gameClear]);
 
-  const toggleMenu = () => { if (shopState.active) { setShopState(prev => ({ ...prev, active: false })); return; } if (menuOpen) { setMenuOpen(false); setSynthState({ active: false, mode: 'SYNTH', step: 'SELECT_BASE', baseIndex: null }); } else { setMenuOpen(true); setSelectedItemIndex(0); } audioService.playSound('select'); };
+  const toggleMenu = () => { if (shopState.active) { setShopState(prev => ({ ...prev, active: false })); return; } if (menuOpen) { setMenuOpen(false); setSynthState({ active: false, mode: 'SYNTH', step: 'SELECT_BASE', baseIndex: null }); } else { setMenuOpen(true); setSelectedItemIndex(0); setSelectedItemActionIndex(0); const firstEquippedSlot = (['weapon', 'armor', 'ranged', 'accessory'] as const).find(slot => player.equipment?.[slot]) ?? null; setSelectedEquipmentSlot(firstEquippedSlot); } audioService.playSound('select'); };
   const startEndlessMode = () => { setIsEndless(true); setGameClear(false); setFloor(f => f + 1); generateFloor(floor + 1); addLog("中学生編(エンドレス)開始！"); };
   const handleSynthesisStep = () => {
       const idx = synthState.mode === 'BLANK' ? blankScrollSelectionIndex : selectedItemIndex; const item = inventory[idx];
@@ -1597,8 +1646,12 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
         if ((menuOpen || shopState.active) && (e.key === 'Backspace' || e.key === 'x')) { if (shopState.active) { setShopState(prev => ({...prev, active: false})); return; } if (synthState.active) setSynthState({ active: false, mode: 'SYNTH', step: 'SELECT_BASE', baseIndex: null }); else setMenuOpen(false); return; }
         if (menuOpen || shopState.active) {
             const listLength = shopState.active && shopState.mode === 'BUY' ? (enemies.find(e=>e.id===shopState.merchantId)?.shopItems?.length||0) : inventory.length;
-            if (e.key === 'ArrowUp') setSelectedItemIndex(prev => Math.max(0, prev - 1));
-            if (e.key === 'ArrowDown') setSelectedItemIndex(prev => Math.min(listLength - 1, prev + 1));
+            if (menuOpen && !synthState.active && e.key === 'ArrowUp') moveItemMenuSelection(-1);
+            else if (menuOpen && !synthState.active && e.key === 'ArrowDown') moveItemMenuSelection(1);
+            else if (e.key === 'ArrowUp') setSelectedItemIndex(prev => Math.max(0, prev - 1));
+            else if (e.key === 'ArrowDown') setSelectedItemIndex(prev => Math.min(listLength - 1, prev + 1));
+            if (menuOpen && !synthState.active && !selectedEquipmentSlot && e.key === 'ArrowLeft') setSelectedItemActionIndex(prev => Math.max(0, prev - 1));
+            if (menuOpen && !synthState.active && !selectedEquipmentSlot && e.key === 'ArrowRight') setSelectedItemActionIndex(prev => Math.min(3, prev + 1));
             if (shopState.active) { if (e.key === 'ArrowLeft' && shopState.mode === 'SELL') { setShopState(prev => ({ ...prev, mode: 'BUY' })); setSelectedItemIndex(0); audioService.playSound('select'); } if (e.key === 'ArrowRight' && shopState.mode === 'BUY') { setShopState(prev => ({ ...prev, mode: 'SELL' })); setSelectedItemIndex(0); audioService.playSound('select'); } }
             if (e.key === 'z' || e.key === 'Enter' || e.key === ' ') handleActionBtn(); return;
         }
@@ -1616,7 +1669,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
         }
     };
     window.addEventListener('keydown', handleKeyDown); return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [player, map, enemies, floorItems, menuOpen, gameOver, gameClear, inventory, selectedItemIndex, synthState, shopState]);
+  }, [player, map, enemies, floorItems, menuOpen, gameOver, gameClear, inventory, selectedItemIndex, selectedItemActionIndex, selectedEquipmentSlot, synthState, shopState]);
 
   const frameCountRef = useRef(0);
   useEffect(() => { const loop = setInterval(() => { frameCountRef.current++; renderGame(); }, 50); return () => clearInterval(loop); }, [map, player, enemies, floorItems, traps, menuOpen, visitedMap, floorMapRevealed, currentTheme]);
@@ -1982,11 +2035,32 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
                             </div>
                         ) : (
                             <>
-                                {!synthState.active && (<div className="mb-2 border-b pb-2" style={{ borderColor: C1 }}><div className="mb-1" style={{ color: C2 }}>装備中:</div>{player.equipment?.weapon && <div onClick={()=>handleUnequip('weapon')} className="cursor-pointer hover:text-white">[武] {getItemName(player.equipment.weapon)}</div>}{player.equipment?.armor && <div onClick={()=>handleUnequip('armor')} className="cursor-pointer hover:text-white">[防] {getItemName(player.equipment.armor)}</div>}{player.equipment?.ranged && <div onClick={()=>handleUnequip('ranged')} className="cursor-pointer hover:text-white">[投] {getItemName(player.equipment.ranged)}</div>}{player.equipment?.accessory && <div onClick={()=>handleUnequip('accessory')} className="cursor-pointer hover:text-white">[腕] {getItemName(player.equipment.accessory)}</div>}</div>)}
+                                {!synthState.active && (
+                                    <div className="mb-2 border-b pb-2" style={{ borderColor: C1 }}>
+                                        <div className="mb-1" style={{ color: C2 }}>装備中:</div>
+                                        {(['weapon', 'armor', 'ranged', 'accessory'] as const).map(slot => {
+                                            const equippedItem = player.equipment?.[slot];
+                                            if (!equippedItem) return null;
+                                            const slotLabel = { weapon: '武', armor: '防', ranged: '投', accessory: '腕' }[slot];
+                                            const selected = selectedEquipmentSlot === slot;
+                                            return <button key={slot} type="button" className="block w-full cursor-pointer px-2 py-1 text-left" style={{ backgroundColor: selected ? C2 : 'transparent', color: selected ? C0 : C3, border: `1px solid ${selected ? C3 : 'transparent'}` }} onMouseEnter={() => { setSelectedEquipmentSlot(slot); setSelectedItemActionIndex(0); }} onClick={() => handleUnequip(slot)}>{selected && <span className="mr-1 animate-pulse">▶</span>}[{slotLabel}] {getItemName(equippedItem)} <span className="float-right text-[9px]">外す</span></button>;
+                                        })}
+                                    </div>
+                                )}
                                 <div ref={menuListRef} className="flex flex-col gap-1 overflow-y-auto flex-grow custom-scrollbar relative">
                                     {inventory.map((item, i) => {
                                         const isSynthTarget = synthState.active && ((synthState.step === 'SELECT_BASE' && synthState.mode === 'SYNTH' && !['WEAPON','ARMOR'].includes(item.category)) || (synthState.step === 'SELECT_MAT' && synthState.baseIndex === i));
-                                        return (<div key={i} className={`flex items-center border ${isSynthTarget ? 'opacity-30' : ''}`} style={{ borderColor: selectedItemIndex === i ? C3 : 'transparent', backgroundColor: selectedItemIndex === i ? C2 : 'transparent', color: selectedItemIndex === i ? C0 : C3 }} onContextMenu={(e) => { e.preventDefault(); setInspectedItem(item); }} onTouchStart={() => handleTouchStart(item)} onTouchEnd={handleTouchEnd}><button className="flex-grow text-left px-2 py-1 cursor-pointer flex justify-between items-center" onClick={() => !isSynthTarget && (synthState.active ? handleSynthesisStep() : handleItemAction(i))} onMouseEnter={() => { lastInputType.current = 'MOUSE'; setSelectedItemIndex(i); }}><span>{selectedItemIndex === i && <span className="mr-1 animate-pulse">▶</span>}{getItemName(item)} {item.plus ? `+${item.plus}` : ''} {item.count ? `(${item.count})` : ''}{item.category === 'STAFF' ? `[${item.charges}]` : ''}</span><span className="text-[9px]" style={{ color: selectedItemIndex === i ? C0 : C2 }}>{synthState.active ? '選択' : (['WEAPON','ARMOR','RANGED','ACCESSORY'].includes(item.category) ? '装備' : (item.category==='STAFF' ? '振る' : '使う'))}</span></button>{!synthState.active && (<button className="px-2 py-1 border-l flex items-center justify-center hover:opacity-80" style={{ borderColor: C1 }} onClick={(e) => { e.stopPropagation(); handleThrowItem(i); }} title="投げる"><Send size={10} /></button>)}{!synthState.active && (<button className="px-2 py-1 border-l flex items-center justify-center hover:opacity-80" style={{ borderColor: C1 }} onClick={(e) => { e.stopPropagation(); handleDropItem(i); }} title="足元に置く"><ArrowDown size={10} /></button>)}<button className="px-2 py-1 border-l flex items-center justify-center hover:opacity-80" style={{ borderColor: C1 }} onClick={(e) => { e.stopPropagation(); setInspectedItem(item); }} title="詳細"><Info size={10} /></button></div>);
+                                        return (
+                                            <div key={i} className={`flex items-center border ${isSynthTarget ? 'opacity-30' : ''}`} style={{ borderColor: !selectedEquipmentSlot && selectedItemIndex === i ? C3 : 'transparent', backgroundColor: !selectedEquipmentSlot && selectedItemIndex === i ? C2 : 'transparent', color: !selectedEquipmentSlot && selectedItemIndex === i ? C0 : C3 }} onContextMenu={(e) => { e.preventDefault(); setInspectedItem(item); }} onTouchStart={() => handleTouchStart(item)} onTouchEnd={handleTouchEnd}>
+                                                <button className="flex-grow text-left px-2 py-1 cursor-pointer flex justify-between items-center" onClick={() => !isSynthTarget && (synthState.active ? handleSynthesisStep() : handleItemAction(i))} onMouseEnter={() => { lastInputType.current = 'MOUSE'; setSelectedEquipmentSlot(null); setSelectedItemIndex(i); setSelectedItemActionIndex(0); }} style={!synthState.active && !selectedEquipmentSlot && selectedItemIndex === i && selectedItemActionIndex === 0 ? { backgroundColor: C3, color: C0 } : undefined}>
+                                                    <span>{selectedItemIndex === i && <span className="mr-1 animate-pulse">▶</span>}{getItemName(item)} {item.plus ? `+${item.plus}` : ''} {item.count ? `(${item.count})` : ''}{item.category === 'STAFF' ? `[${item.charges}]` : ''}</span>
+                                                    <span className="text-[9px]" style={{ color: !selectedEquipmentSlot && selectedItemIndex === i ? C0 : C2 }}>{synthState.active ? '選択' : (['WEAPON','ARMOR','RANGED','ACCESSORY'].includes(item.category) ? '装備' : (item.category==='STAFF' ? '振る' : '使う'))}</span>
+                                                </button>
+                                                {!synthState.active && (<button className="px-2 py-1 border-l flex items-center justify-center hover:opacity-80" style={{ borderColor: C1, backgroundColor: !selectedEquipmentSlot && selectedItemIndex === i && selectedItemActionIndex === 1 ? C3 : 'transparent', color: !selectedEquipmentSlot && selectedItemIndex === i && selectedItemActionIndex === 1 ? C0 : undefined }} onClick={(e) => { e.stopPropagation(); handleThrowItem(i); }} onMouseEnter={() => { setSelectedEquipmentSlot(null); setSelectedItemIndex(i); setSelectedItemActionIndex(1); }} title="投げる"><Send size={10} /></button>)}
+                                                {!synthState.active && (<button className="px-2 py-1 border-l flex items-center justify-center hover:opacity-80" style={{ borderColor: C1, backgroundColor: !selectedEquipmentSlot && selectedItemIndex === i && selectedItemActionIndex === 2 ? C3 : 'transparent', color: !selectedEquipmentSlot && selectedItemIndex === i && selectedItemActionIndex === 2 ? C0 : undefined }} onClick={(e) => { e.stopPropagation(); handleDropItem(i); }} onMouseEnter={() => { setSelectedEquipmentSlot(null); setSelectedItemIndex(i); setSelectedItemActionIndex(2); }} title="足元に置く"><ArrowDown size={10} /></button>)}
+                                                <button className="px-2 py-1 border-l flex items-center justify-center hover:opacity-80" style={{ borderColor: C1, backgroundColor: !selectedEquipmentSlot && selectedItemIndex === i && selectedItemActionIndex === 3 ? C3 : 'transparent', color: !selectedEquipmentSlot && selectedItemIndex === i && selectedItemActionIndex === 3 ? C0 : undefined }} onClick={(e) => { e.stopPropagation(); setInspectedItem(item); }} onMouseEnter={() => { setSelectedEquipmentSlot(null); setSelectedItemIndex(i); setSelectedItemActionIndex(3); }} title="詳細"><Info size={10} /></button>
+                                            </div>
+                                        );
                                     })}
                                     {inventory.length === 0 && <span className="text-center" style={{ color: C1 }}>Empty</span>}
                                 </div>
@@ -2032,27 +2106,38 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
                     </div>
                 )}
             </div>
-            <div className="w-full h-16 p-1 text-[9px] mb-1 rounded border-2 font-mono leading-tight flex flex-col justify-end shrink-0 shadow-inner overflow-hidden" style={{ backgroundColor: C0, color: C3, borderColor: C1 }}>{logs.slice(-4).map((l) => (<div key={l.id} style={{ color: l.color || C3 }} className="truncate">{l.message}</div>))}</div>
+            <div className="dungeon-log-panel w-full h-16 p-1 text-[9px] mb-1 rounded border-2 font-mono leading-tight flex flex-col justify-end shrink-0 shadow-inner overflow-hidden" style={{ backgroundColor: C0, color: C3, borderColor: C1 }}>{logs.slice(-4).map((l) => (<div key={l.id} style={{ color: l.color || C3 }} className="dungeon-log-entry truncate">{l.message}</div>))}</div>
         </div>
 
         <div className="dungeon-landscape-action-panel hidden landscape:flex md:flex order-3 w-64 flex-col items-center justify-between p-4 bg-[#161616] border-2 border-[#333] rounded-xl shadow-2xl relative shrink-0">
-            <div className="absolute top-4 right-4 flex flex-col items-center">
-                <button className="w-12 h-12 bg-[#333] rounded-full shadow-inner active:shadow-none active:translate-y-1 transition-all flex items-center justify-center text-white border border-[#555]" onClick={fireRangedWeapon}><Crosshair size={24}/></button>
-                <span className="text-[#666] text-xs font-bold mt-1">R-SHOOT</span>
+            <div className="flex flex-col items-center gap-8 w-full mt-4">
+                <div className="flex flex-col items-center group">
+                    <button className="w-14 h-14 bg-[#333] rounded-full shadow-[0_4px_0_#111] active:shadow-none active:translate-y-1 transition-all flex items-center justify-center text-white border border-[#555]" onClick={fireRangedWeapon}>
+                        <Crosshair size={28}/>
+                    </button>
+                    <span className="text-[#666] text-xs font-bold mt-1">R-SHOOT</span>
+                </div>
+                <div className="flex flex-col items-center group">
+                    <button className="w-20 h-20 bg-[#8b0000] rounded-full shadow-[0_6px_0_#500000] active:shadow-none active:translate-y-1 transition-all flex items-center justify-center text-[#ffaaaa] font-bold border-2 border-[#a00000] text-2xl" onClick={toggleMenu}>B</button>
+                    <span className="text-[#666] text-sm font-bold mt-1">MENU</span>
+                </div>
+                <div className="flex flex-col items-center group">
+                    <button className="w-20 h-20 bg-[#ff0000] rounded-full shadow-[0_6px_0_#8b0000] active:shadow-none active:translate-y-1 transition-all flex items-center justify-center text-[#ffaaaa] font-bold border-2 border-[#cc0000] text-2xl" onMouseDown={() => handlePressStart()} onMouseUp={(e) => handlePressEnd(e)} onMouseLeave={(e) => handlePressEnd(e)} onTouchStart={(e) => { e.preventDefault(); handlePressStart(); }} onTouchEnd={(e) => { e.preventDefault(); handlePressEnd(e); }}>A</button>
+                    <span className="text-[#666] text-sm font-bold mt-1">ACT / FF</span>
+                </div>
             </div>
-            <div className="absolute top-4 left-4"><button onClick={handleQuit} className="text-[#555] text-[10px] font-bold border border-[#333] px-3 py-1 rounded bg-[#222] hover:text-white hover:border-gray-500 flex items-center gap-1"><LogOut size={12}/> QUIT</button></div>
-            <div className="mt-20 flex flex-col gap-8 w-full items-center">
-                <div className="flex flex-col items-center group"><button className="w-20 h-20 bg-[#ff0000] rounded-full shadow-[0_6px_0_#8b0000] active:shadow-none active:translate-y-1 transition-all flex items-center justify-center text-[#ffaaaa] font-bold border-2 border-[#cc0000] text-2xl" onMouseDown={() => handlePressStart()} onMouseUp={(e) => handlePressEnd(e)} onMouseLeave={(e) => handlePressEnd(e)} onTouchStart={(e) => { e.preventDefault(); handlePressStart(); }} onTouchEnd={(e) => { e.preventDefault(); handlePressEnd(e); }}>A</button><span className="text-[#666] text-sm font-bold mt-1 uppercase tracking-widest">Action</span></div>
-                <div className="flex flex-col items-center group"><button className="w-16 h-16 bg-[#8b0000] rounded-full shadow-[0_4px_0_#500000] active:shadow-none active:translate-y-1 transition-all flex items-center justify-center text-[#ffaaaa] font-bold border-2 border-[#a00000] text-xl" onClick={toggleMenu}>B</button><span className="text-[#666] text-sm font-bold mt-1 uppercase tracking-widest">Menu</span></div>
-            </div>
-            <div className="w-full flex flex-col gap-2 mt-4 max-h-[25vh] overflow-y-auto custom-scrollbar p-1">
+            <div className="dungeon-landscape-card-hand w-full flex flex-col gap-2 mt-4 max-h-[25vh] overflow-y-auto custom-scrollbar p-1">
                 {dungeonHand.length > 0 ? (dungeonHand.map((card, i) => (
-                    <button key={card.id} className="w-full bg-[#2a2a2a] border-2 border-[#555] rounded-lg flex items-center gap-2 text-white p-1 hover:bg-[#333] hover:border-white transition-all shadow" onClick={() => handleCardUse(i)}>
-                        <DungeonCardSprite templateId={card.templateId} className={`w-9 h-9 rounded border ${card.type === 'ATTACK' ? 'border-red-700' : card.type === 'DEFENSE' ? 'border-blue-700' : 'border-green-700'}`} />
-                        <div className="flex flex-col items-start"><span className="text-[10px] font-bold leading-tight">{card.name}</span><span className="text-[7px] text-gray-500 uppercase">{card.type}</span></div>
+                    <button key={card.id} className="dungeon-landscape-card w-full bg-[#2a2a2a] border-2 border-[#555] rounded-lg flex items-center gap-2 text-white p-1 hover:bg-[#333] hover:border-white transition-all shadow" onClick={() => handleCardUse(i)}>
+                        <div className={`dungeon-landscape-card-type w-full text-[4px] font-bold px-0.5 rounded-t mb-0.5 text-center ${card.type === 'ATTACK' ? 'bg-red-900' : card.type === 'DEFENSE' ? 'bg-blue-900' : 'bg-green-900'}`}>{card.type}</div>
+                        <DungeonCardSprite templateId={card.templateId} className="dungeon-landscape-card-art w-9 h-9 rounded border border-current" />
+                        <div className="dungeon-landscape-card-name flex flex-col items-start"><span className="text-[10px] font-bold leading-tight">{card.name}</span><span className="text-[7px] text-gray-500 uppercase">{card.type}</span></div>
                     </button>
                 ))) : (<div className="text-gray-600 text-xs text-center animate-pulse">Wait...</div>)}
             </div>
+            <button onClick={handleQuit} className="w-full text-[#555] hover:text-white hover:border-gray-500 border border-[#333] py-2 rounded bg-[#222] text-xs font-bold transition-all flex items-center justify-center gap-2 mb-2">
+                <LogOut size={14}/> QUIT GAME
+            </button>
         </div>
 
         <div className="portrait:flex landscape:hidden md:hidden order-4 w-full max-w-md h-[220px] relative rounded-t-xl border-t-2 border-[#333] bg-[#1a1a2a] shrink-0 overflow-hidden">

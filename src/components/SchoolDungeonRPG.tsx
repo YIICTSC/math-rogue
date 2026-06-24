@@ -4,7 +4,7 @@ import { ArrowLeft, ArrowUp, ArrowDown, ArrowRight, ArrowUpLeft, ArrowUpRight, A
 import { audioService } from '../services/audioService';
 import { createPixelSpriteCanvas } from './PixelSprite';
 import { storageService } from '../services/storageService';
-import { AnswerMode, AssignmentPayload, GameMode } from '../types';
+import { AnswerMode, AssignmentAnswerResult, AssignmentPayload, GameMode, MiniGameDebugPreview } from '../types';
 import { EXTRA_SCHOOL_DUNGEON_ITEMS } from '../data/schoolDungeonExtraItems';
 import MiniGameProblemChallenge from './MiniGameProblemChallenge';
 import { assetUrl } from '../utils/assetPaths';
@@ -18,7 +18,8 @@ interface SchoolDungeonRPGProps {
   problemModePool?: string[];
   answerMode?: AnswerMode;
   assignment?: AssignmentPayload | null;
-  onAnswerResult?: (result: { mode: string; correct: boolean; elapsedMs: number; problemId?: string }) => void;
+  onAnswerResult?: (result: AssignmentAnswerResult) => void;
+  debugPreview?: MiniGameDebugPreview;
 }
 
 // --- GBC PALETTE (Dynamic based on Floor) ---
@@ -331,7 +332,7 @@ const computeDijkstraMap = (map: TileType[][], targetX: number, targetY: number)
     return dMap;
 };
 
-const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode = GameMode.MIXED, problemModePool, answerMode = 'CHOICE', assignment, onAnswerResult }) => {
+const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode = GameMode.MIXED, problemModePool, answerMode = 'CHOICE', assignment, onAnswerResult, debugPreview }) => {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   
   // --- STATE ---
@@ -362,8 +363,8 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
   const [level, setLevel] = useState(1);
   const [belly, setBelly] = useState(100);
   const [maxBelly, setMaxBelly] = useState(100);
-  const [gameOver, setGameOver] = useState(false);
-  const [gameClear, setGameClear] = useState(false);
+  const [gameOver, setGameOver] = useState(debugPreview === 'GAME_OVER');
+  const [gameClear, setGameClear] = useState(debugPreview === 'ENDING');
   const [menuOpen, setMenuOpen] = useState(false);
   const [showMap, setShowMap] = useState(false); 
   const [showHelp, setShowHelp] = useState(false);
@@ -395,6 +396,14 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
 
   // Menu Navigation
   const [selectedItemIndex, setSelectedItemIndex] = useState(0);
+  const [selectedItemActionIndex, setSelectedItemActionIndex] = useState(0);
+  const [selectedEquipmentSlot, setSelectedEquipmentSlot] = useState<'weapon'|'armor'|'ranged'|'accessory' | null>(null);
+  useEffect(() => {
+      if (selectedEquipmentSlot && !player.equipment?.[selectedEquipmentSlot]) {
+          setSelectedEquipmentSlot(null);
+          setSelectedItemIndex(0);
+      }
+  }, [player.equipment, selectedEquipmentSlot]);
   const [blankScrollSelectionIndex, setBlankScrollSelectionIndex] = useState(0);
   const menuListRef = useRef<HTMLDivElement>(null);
   const lastInputType = useRef<'KEY' | 'MOUSE'>('KEY');
@@ -469,11 +478,17 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
     spriteCache.current['ACCESSORY'] = createPixelSpriteCanvas('ACCESSORY', 'SHIELD|#FFD700'); // Bracelet/Ring
 
     // Load Game State
-    const savedState = storageService.loadDungeonState();
-    if (savedState) {
-        restoreState(savedState);
-    } else {
+    if (debugPreview) {
         startNewGame();
+        setGameOver(debugPreview === 'GAME_OVER');
+        setGameClear(debugPreview === 'ENDING');
+    } else {
+        const savedState = storageService.loadDungeonState();
+        if (savedState) {
+            restoreState(savedState);
+        } else {
+            startNewGame();
+        }
     }
     
     return () => {
@@ -508,7 +523,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
   };
 
   const saveData = useCallback(() => {
-      if (gameOver) return;
+      if (debugPreview || gameOver || gameClear) return;
       if (saveDebounceRef.current) clearTimeout(saveDebounceRef.current);
       
       saveDebounceRef.current = setTimeout(() => {
@@ -522,7 +537,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
           };
           storageService.saveDungeonState(state);
       }, 500); // 500ms debounce
-  }, [map, visitedMap, floorMapRevealed, player, enemies, floorItems, traps, inventory, floor, level, belly, maxBelly, idMap, identifiedTypes, isEndless, gameOver]);
+  }, [map, visitedMap, floorMapRevealed, player, enemies, floorItems, traps, inventory, floor, level, belly, maxBelly, idMap, identifiedTypes, isEndless, debugPreview, gameOver, gameClear]);
 
   // Update Visited Map when player moves
   useEffect(() => {
@@ -1473,6 +1488,28 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
       audioService.playBGM(nextTheme.bgm);
   };
 
+  const moveItemMenuSelection = (direction: -1 | 1) => {
+      const equippedSlots = (['weapon', 'armor', 'ranged', 'accessory'] as const).filter(slot => player.equipment?.[slot]);
+      if (selectedEquipmentSlot) {
+          const currentIndex = equippedSlots.indexOf(selectedEquipmentSlot);
+          const nextIndex = currentIndex + direction;
+          if (nextIndex >= 0 && nextIndex < equippedSlots.length) {
+              setSelectedEquipmentSlot(equippedSlots[nextIndex]);
+          } else if (direction > 0 && inventory.length > 0) {
+              setSelectedEquipmentSlot(null);
+              setSelectedItemIndex(0);
+          }
+      } else if (direction < 0 && selectedItemIndex === 0 && equippedSlots.length > 0) {
+          setSelectedEquipmentSlot(equippedSlots[equippedSlots.length - 1]);
+          setSelectedItemActionIndex(0);
+      } else if (inventory.length > 0) {
+          setSelectedItemIndex(prev => Math.max(0, Math.min(inventory.length - 1, prev + direction)));
+      } else if (equippedSlots.length > 0) {
+          setSelectedEquipmentSlot(direction > 0 ? equippedSlots[0] : equippedSlots[equippedSlots.length - 1]);
+      }
+      audioService.playSound('select');
+  };
+
   const movePlayer = (dx: 0|1|-1, dy: 0|1|-1) => {
       if(gameOver || gameClear) return;
 
@@ -1497,7 +1534,10 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
               audioService.playSound('select');
           } else {
               if (dy !== 0) {
-                  setSelectedItemIndex(prev => Math.max(0, Math.min(inventory.length - 1, prev + dy)));
+                  moveItemMenuSelection(dy as -1 | 1);
+              }
+              if (dx !== 0 && inventory.length > 0 && !selectedEquipmentSlot) {
+                  setSelectedItemActionIndex(prev => Math.max(0, Math.min(3, prev + dx)));
                   audioService.playSound('select');
               }
           }
@@ -1618,7 +1658,15 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
       if (shopState.active) { handleShopAction(); return; }
       if (menuOpen) {
           if (synthState.active) handleSynthesisStep();
-          else if (inventory.length > 0) handleItemAction(selectedItemIndex);
+          else if (selectedEquipmentSlot) {
+              handleUnequip(selectedEquipmentSlot);
+          }
+          else if (inventory.length > 0) {
+              if (selectedItemActionIndex === 0) handleItemAction(selectedItemIndex);
+              else if (selectedItemActionIndex === 1) handleThrowItem(selectedItemIndex);
+              else if (selectedItemActionIndex === 2) handleDropItem(selectedItemIndex);
+              else setInspectedItem(inventory[selectedItemIndex]);
+          }
           return;
       }
       
@@ -1983,6 +2031,9 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
       } else {
           setMenuOpen(true);
           setSelectedItemIndex(0);
+          setSelectedItemActionIndex(0);
+          const firstEquippedSlot = (['weapon', 'armor', 'ranged', 'accessory'] as const).find(slot => player.equipment?.[slot]) ?? null;
+          setSelectedEquipmentSlot(firstEquippedSlot);
       }
       audioService.playSound('select');
   };
@@ -2506,8 +2557,12 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
                 ? (enemies.find(e=>e.id===shopState.merchantId)?.shopItems?.length||0) 
                 : inventory.length;
             
-            if (e.key === 'ArrowUp') setSelectedItemIndex(prev => Math.max(0, prev - 1));
-            if (e.key === 'ArrowDown') setSelectedItemIndex(prev => Math.min(listLength - 1, prev + 1));
+            if (menuOpen && !synthState.active && e.key === 'ArrowUp') moveItemMenuSelection(-1);
+            else if (menuOpen && !synthState.active && e.key === 'ArrowDown') moveItemMenuSelection(1);
+            else if (e.key === 'ArrowUp') setSelectedItemIndex(prev => Math.max(0, prev - 1));
+            else if (e.key === 'ArrowDown') setSelectedItemIndex(prev => Math.min(listLength - 1, prev + 1));
+            if (menuOpen && !synthState.active && !selectedEquipmentSlot && e.key === 'ArrowLeft') setSelectedItemActionIndex(prev => Math.max(0, prev - 1));
+            if (menuOpen && !synthState.active && !selectedEquipmentSlot && e.key === 'ArrowRight') setSelectedItemActionIndex(prev => Math.min(3, prev + 1));
             
             if (shopState.active) {
                 if (e.key === 'ArrowLeft' && shopState.mode === 'SELL') {
@@ -2540,7 +2595,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [player, map, enemies, floorItems, menuOpen, gameOver, gameClear, inventory, selectedItemIndex, synthState, shopState]);
+  }, [player, map, enemies, floorItems, menuOpen, gameOver, gameClear, inventory, selectedItemIndex, selectedItemActionIndex, selectedEquipmentSlot, synthState, shopState]);
 
   // --- RENDER LOOP ---
   const frameCountRef = useRef(0);
@@ -3198,10 +3253,24 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
                                     {!synthState.active && (
                                         <div className="mb-2 border-b pb-2" style={{ borderColor: C1 }}>
                                             <div className="mb-1" style={{ color: C2 }}>装備中:</div>
-                                            {player.equipment?.weapon && <div onClick={()=>handleUnequip('weapon')} className="cursor-pointer hover:text-white">[武] {getItemName(player.equipment.weapon)}</div>}
-                                            {player.equipment?.armor && <div onClick={()=>handleUnequip('armor')} className="cursor-pointer hover:text-white">[防] {getItemName(player.equipment.armor)}</div>}
-                                            {player.equipment?.ranged && <div onClick={()=>handleUnequip('ranged')} className="cursor-pointer hover:text-white">[投] {getItemName(player.equipment.ranged)}</div>}
-                                            {player.equipment?.accessory && <div onClick={()=>handleUnequip('accessory')} className="cursor-pointer hover:text-white">[腕] {getItemName(player.equipment.accessory)}</div>}
+                                            {(['weapon', 'armor', 'ranged', 'accessory'] as const).map(slot => {
+                                                const equippedItem = player.equipment?.[slot];
+                                                if (!equippedItem) return null;
+                                                const slotLabel = { weapon: '武', armor: '防', ranged: '投', accessory: '腕' }[slot];
+                                                const selected = selectedEquipmentSlot === slot;
+                                                return (
+                                                    <button
+                                                        key={slot}
+                                                        type="button"
+                                                        className="block w-full cursor-pointer px-2 py-1 text-left"
+                                                        style={{ backgroundColor: selected ? C2 : 'transparent', color: selected ? C0 : C3, border: `1px solid ${selected ? C3 : 'transparent'}` }}
+                                                        onMouseEnter={() => { setSelectedEquipmentSlot(slot); setSelectedItemActionIndex(0); }}
+                                                        onClick={() => handleUnequip(slot)}
+                                                    >
+                                                        {selected && <span className="mr-1 animate-pulse">▶</span>}[{slotLabel}] {getItemName(equippedItem)} <span className="float-right text-[9px]">外す</span>
+                                                    </button>
+                                                );
+                                            })}
                                         </div>
                                     )}
 
@@ -3217,16 +3286,17 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
                                                     key={i} 
                                                     className={`flex items-center border ${isSynthTarget ? 'opacity-30' : ''}`}
                                                     style={{ 
-                                                        borderColor: selectedItemIndex === i ? C3 : 'transparent',
-                                                        backgroundColor: selectedItemIndex === i ? C2 : 'transparent',
-                                                        color: selectedItemIndex === i ? C0 : C3
+                                                        borderColor: !selectedEquipmentSlot && selectedItemIndex === i ? C3 : 'transparent',
+                                                        backgroundColor: !selectedEquipmentSlot && selectedItemIndex === i ? C2 : 'transparent',
+                                                        color: !selectedEquipmentSlot && selectedItemIndex === i ? C0 : C3
                                                     }}
-                                                    onMouseEnter={() => { lastInputType.current = 'MOUSE'; setSelectedItemIndex(i); }}
+                                                    onMouseEnter={() => { lastInputType.current = 'MOUSE'; setSelectedEquipmentSlot(null); setSelectedItemIndex(i); }}
                                                 >
-                                                    <button 
+                                                    <button
                                                         className="flex-grow text-left px-2 py-1 cursor-pointer flex justify-between items-center"
                                                         onClick={() => !isSynthTarget && (synthState.active ? handleSynthesisStep() : handleItemAction(i))}
-                                                        onMouseEnter={() => { lastInputType.current = 'MOUSE'; setSelectedItemIndex(i); }}
+                                                        onMouseEnter={() => { lastInputType.current = 'MOUSE'; setSelectedEquipmentSlot(null); setSelectedItemIndex(i); setSelectedItemActionIndex(0); }}
+                                                        style={!synthState.active && !selectedEquipmentSlot && selectedItemIndex === i && selectedItemActionIndex === 0 ? { backgroundColor: C3, color: C0 } : undefined}
                                                     >
                                                         <span>
                                                             {getItemName(item)} 
@@ -3234,7 +3304,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
                                                             {item.count ? `(${item.count})` : ''}
                                                             {item.category === 'STAFF' ? `[${item.charges}]` : ''}
                                                         </span>
-                                                        <span className="text-[9px]" style={{ color: selectedItemIndex === i ? C0 : C2 }}>
+                                                        <span className="text-[9px]" style={{ color: !selectedEquipmentSlot && selectedItemIndex === i ? C0 : C2 }}>
                                                             {synthState.active 
                                                                 ? '選択' 
                                                                 : (['WEAPON','ARMOR','RANGED','ACCESSORY'].includes(item.category) ? '装備' : (item.category==='STAFF' ? '振る' : '使う'))
@@ -3242,29 +3312,32 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
                                                         </span>
                                                     </button>
                                                     {!synthState.active && (
-                                                        <button 
+                                                        <button
                                                             className="px-2 py-1 border-l flex items-center justify-center hover:opacity-80"
-                                                            style={{ borderColor: C1 }}
+                                                            style={{ borderColor: C1, backgroundColor: !selectedEquipmentSlot && selectedItemIndex === i && selectedItemActionIndex === 1 ? C3 : 'transparent', color: !selectedEquipmentSlot && selectedItemIndex === i && selectedItemActionIndex === 1 ? C0 : undefined }}
                                                             onClick={(e) => { e.stopPropagation(); handleThrowItem(i); }}
+                                                            onMouseEnter={() => { setSelectedEquipmentSlot(null); setSelectedItemIndex(i); setSelectedItemActionIndex(1); }}
                                                             title="投げる"
                                                         >
                                                             <Send size={10} />
                                                         </button>
                                                     )}
                                                     {!synthState.active && (
-                                                        <button 
+                                                        <button
                                                             className="px-2 py-1 border-l flex items-center justify-center hover:opacity-80"
-                                                            style={{ borderColor: C1 }}
+                                                            style={{ borderColor: C1, backgroundColor: !selectedEquipmentSlot && selectedItemIndex === i && selectedItemActionIndex === 2 ? C3 : 'transparent', color: !selectedEquipmentSlot && selectedItemIndex === i && selectedItemActionIndex === 2 ? C0 : undefined }}
                                                             onClick={(e) => { e.stopPropagation(); handleDropItem(i); }}
+                                                            onMouseEnter={() => { setSelectedEquipmentSlot(null); setSelectedItemIndex(i); setSelectedItemActionIndex(2); }}
                                                             title="足元に置く"
                                                         >
                                                             <ArrowDown size={10} />
                                                         </button>
                                                     )}
-                                                    <button 
+                                                    <button
                                                         className="px-2 py-1 border-l flex items-center justify-center hover:opacity-80"
-                                                        style={{ borderColor: C1 }}
+                                                        style={{ borderColor: C1, backgroundColor: !selectedEquipmentSlot && selectedItemIndex === i && selectedItemActionIndex === 3 ? C3 : 'transparent', color: !selectedEquipmentSlot && selectedItemIndex === i && selectedItemActionIndex === 3 ? C0 : undefined }}
                                                         onClick={(e) => { e.stopPropagation(); setInspectedItem(item); }}
+                                                        onMouseEnter={() => { setSelectedEquipmentSlot(null); setSelectedItemIndex(i); setSelectedItemActionIndex(3); }}
                                                         title="詳細"
                                                     >
                                                         <Info size={10} />
@@ -3337,9 +3410,9 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
                 </div>
             </div>
 
-            <div className="w-full h-16 p-1 text-[9px] mb-1 rounded border-2 font-mono leading-tight flex flex-col justify-end shrink-0 shadow-inner overflow-hidden" style={{ backgroundColor: C0, color: C3, borderColor: C1 }}>
+            <div className="dungeon-log-panel w-full h-16 p-1 text-[9px] mb-1 rounded border-2 font-mono leading-tight flex flex-col justify-end shrink-0 shadow-inner overflow-hidden" style={{ backgroundColor: C0, color: C3, borderColor: C1 }}>
                 {logs.slice(-4).map((l) => (
-                    <div key={l.id} style={{ color: l.color || C3 }} className="truncate">{l.message}</div>
+                    <div key={l.id} style={{ color: l.color || C3 }} className="dungeon-log-entry truncate">{l.message}</div>
                 ))}
             </div>
         </div>

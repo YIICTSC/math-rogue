@@ -4,6 +4,7 @@ import { ArrowLeft, Send, Wind, Trophy, Zap, Shield, Move, RefreshCw, Layers, Cr
 import { audioService } from '../services/audioService';
 import { storageService, PaperPlaneProgress } from '../services/storageService';
 import { assetUrl } from '../utils/assetPaths';
+import { MiniGameDebugPreview } from '../types';
 
 // --- TYPES & CONSTANTS ---
 
@@ -832,6 +833,43 @@ const rollRewardParts = (templates: Omit<ShipPart, 'id'>[], count: number, idPre
         opts.push(createPartFromTemplate(template, `${idPrefix}_${i}`, quality));
     }
     return opts;
+};
+
+const createDebugPaperPlanePlayer = (): ShipState => {
+    const ship = SHIPS[0];
+    return {
+        yOffset: 1,
+        hp: ship.baseHp,
+        maxHp: ship.baseHp,
+        fuel: MAX_FUEL,
+        maxFuel: MAX_FUEL,
+        durability: 0,
+        maxDurability: 0,
+        isStunned: false,
+        parts: JSON.parse(JSON.stringify(ship.layout)),
+        starCoins: 240,
+        vacationDays: 4,
+        passivePower: 0,
+        partInventory: rollRewardParts(PART_TEMPLATES, 4, 'debug_inv'),
+        talents: [PILOTS[0].intrinsicTalent],
+    };
+};
+
+const createDebugPaperPlaneVacationEvents = (): VacationEvent[] => [
+    { ...VACATION_EVENTS_DB.find(event => event.type === 'SHOP')!, id: 'debug_vac_shop' },
+    { ...VACATION_EVENTS_DB.find(event => event.type === 'REPAIR')!, id: 'debug_vac_repair' },
+    { ...VACATION_EVENTS_DB.find(event => event.type === 'PARTS')!, id: 'debug_vac_parts' },
+    { ...VACATION_EVENTS_DB.find(event => event.type === 'ENHANCE')!, id: 'debug_vac_enhance' },
+];
+
+const getPaperPlaneDebugPhase = (debugPreview?: MiniGameDebugPreview, savedPhase?: GamePhase): GamePhase => {
+    if (debugPreview === 'GAME_OVER') return 'GAME_OVER';
+    if (debugPreview === 'ENDING') return 'VICTORY';
+    if (debugPreview === 'PAPER_REWARD') return 'REWARD_SELECT';
+    if (debugPreview === 'PAPER_EQUIP') return 'REWARD_EQUIP';
+    if (debugPreview === 'PAPER_VACATION') return 'VACATION';
+    if (debugPreview === 'PAPER_HANGAR') return 'HANGAR';
+    return savedPhase || 'SETUP';
 };
 
 // --- HELPERS ---
@@ -1686,13 +1724,18 @@ const loadProgress = () => {
     return storageService.loadPaperPlaneProgress();
 };
 
-const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
+const PaperPlaneBattle: React.FC<{ onBack: () => void; debugPreview?: MiniGameDebugPreview }> = ({ onBack, debugPreview }) => {
     const savedData = loadInitialState();
+    const isDebugPaperPlaneUi = Boolean(debugPreview?.startsWith('PAPER_'));
+    const debugPlayer = isDebugPaperPlaneUi ? createDebugPaperPlanePlayer() : null;
     const [progress, setProgress] = useState<PaperPlaneProgress>(loadProgress());
-    const [newlyUnlockedPart, setNewlyUnlockedPart] = useState<ShipPart | null>(null);
-
-    const [phase, setPhase] = useState<GamePhase>(savedData?.phase || 'SETUP');
-    const [stage, setStage] = useState(savedData?.stage || 1); 
+    const [newlyUnlockedPart, setNewlyUnlockedPart] = useState<ShipPart | null>(() =>
+        debugPreview === 'ENDING' && UNLOCKABLE_PART_TEMPLATES[0]
+            ? createPartFromTemplate(UNLOCKABLE_PART_TEMPLATES[0], 'debug_unlock_preview')
+            : null
+    );
+    const [phase, setPhase] = useState<GamePhase>(getPaperPlaneDebugPhase(debugPreview, savedData?.phase));
+    const [stage, setStage] = useState(savedData?.stage || 1);
     const [turn, setTurn] = useState(savedData?.turn || 1);
     const [isEndless, setIsEndless] = useState(savedData?.isEndless || false);
     
@@ -1714,7 +1757,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     const [hand, setHand] = useState<EnergyCard[]>(savedData?.hand || []);
     const [selectedCardId, setSelectedCardId] = useState<string | null>(null);
 
-    const [player, setPlayer] = useState<ShipState>(savedData?.player || {
+    const [player, setPlayer] = useState<ShipState>(debugPlayer || savedData?.player || {
         yOffset: 1, 
         hp: 40, maxHp: 40, fuel: MAX_FUEL, maxFuel: MAX_FUEL, durability: 0, maxDurability: 0, isStunned: false,
         parts: [], // Set in init
@@ -1745,19 +1788,20 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     
     const [clashState, setClashState] = useState<ClashState>({ active: false, phase: 'INIT', data: [] });
     
-    const [vacationEvents, setVacationEvents] = useState<VacationEvent[]>(savedData?.vacationEvents || []);
-    const [vacationLog, setVacationLog] = useState<string>(savedData?.vacationLog || "休暇を楽しんでください。");
-    const [pendingPart, setPendingPart] = useState<ShipPart | null>(savedData?.pendingPart || null); 
+    const [vacationEvents, setVacationEvents] = useState<VacationEvent[]>(isDebugPaperPlaneUi ? createDebugPaperPlaneVacationEvents() : savedData?.vacationEvents || []);
+    const [vacationLog, setVacationLog] = useState<string>(isDebugPaperPlaneUi ? "デバッグ用の休暇イベントです。ショップ系イベントも確認できます。" : savedData?.vacationLog || "休暇を楽しんでください。");
+    const [pendingPart, setPendingPart] = useState<ShipPart | null>(debugPreview === 'PAPER_EQUIP' ? createPartFromTemplate(PART_TEMPLATES[0], 'debug_pending') : savedData?.pendingPart || null);
     const [hangarSelection, setHangarSelection] = useState<{loc: 'SHIP'|'INV', idx: number}|null>(null);
 
-    const [rewardOptions, setRewardOptions] = useState<ShipPart[]>(savedData?.rewardOptions || []);
-    const [earnedCoins, setEarnedCoins] = useState(savedData?.earnedCoins || 0);
+    const [rewardOptions, setRewardOptions] = useState<ShipPart[]>(debugPreview === 'PAPER_REWARD' ? rollRewardParts(PART_TEMPLATES, 3, 'debug_reward') : savedData?.rewardOptions || []);
+    const [earnedCoins, setEarnedCoins] = useState(debugPreview === 'PAPER_REWARD' ? 80 : savedData?.earnedCoins || 0);
     const [battleStats, setBattleStats] = useState<BattleStats>(savedData?.battleStats || createBattleStats());
 
     // --- AUTO SAVE ---
     const saveDebounceRef = useRef<any>(null);
 
     useEffect(() => {
+        if (debugPreview) return;
         if (phase === 'GAME_OVER') {
             storageService.clearPaperPlaneState();
         } else if (phase !== 'TUTORIAL' && phase !== 'SETUP') {
@@ -1770,11 +1814,12 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 storageService.savePaperPlaneState(stateToSave);
             }, 1000); 
         }
-    }, [phase, stage, turn, pool, hand, player, enemy, enemyIntents, vacationEvents, vacationLog, pendingPart, rewardOptions, earnedCoins, isEndless, selectedMissionLevel, battleStats]);
+    }, [phase, stage, turn, pool, hand, player, enemy, enemyIntents, vacationEvents, vacationLog, pendingPart, rewardOptions, earnedCoins, isEndless, selectedMissionLevel, battleStats, debugPreview]);
 
     // --- SCORE SAVING ---
     const scoreSavedRef = useRef(false);
     useEffect(() => {
+        if (debugPreview) return;
         if (phase === 'VICTORY' || phase === 'GAME_OVER') {
             if (scoreSavedRef.current) return;
             scoreSavedRef.current = true;
@@ -1794,7 +1839,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         } else {
             scoreSavedRef.current = false;
         }
-    }, [phase, stage, player.starCoins, player.hp, selectedMissionLevel]);
+    }, [phase, stage, player.starCoins, player.hp, selectedMissionLevel, debugPreview]);
 
     useEffect(() => {
         // Initial BGM check based on loaded phase
@@ -3024,6 +3069,12 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     };
 
     const handleHangarAction = (loc: 'SHIP' | 'INV', idx: number) => {
+        const isInventoryEmptySlot = loc === 'INV' && idx >= player.partInventory.length;
+
+        if (isInventoryEmptySlot && !hangarSelection) {
+            return;
+        }
+
         if (!hangarSelection) {
             setHangarSelection({ loc, idx });
             audioService.playSound('select');
@@ -3040,7 +3091,12 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         const inventory = [...newPlayer.partInventory];
 
         const sourcePart = hangarSelection.loc === 'SHIP' ? parts[hangarSelection.idx] : inventory[hangarSelection.idx];
-        const targetPart = loc === 'SHIP' ? parts[idx] : inventory[idx];
+        const targetPart = loc === 'SHIP' ? parts[idx] : (inventory[idx] || createEmptyPart(`hangar_empty_${idx}`));
+
+        if (!sourcePart) {
+            setHangarSelection(null);
+            return;
+        }
 
         if (hangarSelection.loc === 'SHIP' && loc === 'SHIP') {
             parts[hangarSelection.idx] = targetPart;
@@ -3062,7 +3118,12 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                 return;
             }
             parts[hangarSelection.idx] = targetPart;
-            inventory[idx] = sourcePart;
+            if (idx >= inventory.length) {
+                parts[hangarSelection.idx] = createEmptyPart(`empty_${Date.now()}`);
+                inventory.push(sourcePart);
+            } else {
+                inventory[idx] = sourcePart;
+            }
         }
         
         setPlayer({ ...newPlayer, parts, partInventory: inventory });
@@ -3509,9 +3570,9 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         const unlockedShips = SHIPS.filter(s => progress.rank >= s.unlockRank);
 
         return (
-            <div className="w-full h-full bg-slate-900 text-white p-2 md:p-4 flex flex-col font-mono overflow-hidden md:overflow-y-auto relative">
+            <div className="paper-plane-setup-screen w-full h-full bg-slate-900 text-white p-2 md:p-4 flex flex-col font-mono overflow-hidden md:overflow-y-auto relative">
                 <PaperPlaneSceneBackdrop sprite={PAPER_PLANE_SCENE_BACKGROUNDS.setup} alpha={0.22} />
-                <div className="relative z-10 flex items-center mb-2 md:mb-6">
+                <div className="paper-plane-setup-header relative z-10 flex items-center mb-2 md:mb-6">
                      <button onClick={onBack} className="text-gray-400 hover:text-white mr-2 md:mr-4"><ArrowLeft size={20}/></button>
                      <h2 className="text-lg md:text-2xl font-bold text-cyan-400">MISSION BRIEFING</h2>
                      <div className="ml-auto text-[10px] md:text-sm bg-indigo-900 px-2 md:px-3 py-1 rounded-full border border-indigo-500 flex items-center">
@@ -3519,25 +3580,25 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                      </div>
                 </div>
 
-                <div className="relative z-10 flex justify-center mb-3 md:mb-8 gap-2 md:gap-4 border-b border-gray-700 pb-1 md:pb-2">
+                <div className="paper-plane-setup-tabs relative z-10 flex justify-center mb-3 md:mb-8 gap-2 md:gap-4 border-b border-gray-700 pb-1 md:pb-2">
                      <button onClick={() => setSetupStep('SHIP')} className={`px-3 md:px-4 py-1.5 md:py-2 rounded-t-lg font-bold text-xs md:text-base transition-colors ${setupStep==='SHIP'?'bg-cyan-700 text-white':'bg-slate-800 text-gray-500'}`}>機体</button>
                      <button onClick={() => setSetupStep('PILOT')} className={`px-3 md:px-4 py-1.5 md:py-2 rounded-t-lg font-bold text-xs md:text-base transition-colors ${setupStep==='PILOT'?'bg-cyan-700 text-white':'bg-slate-800 text-gray-500'}`}>パイロット</button>
                      <button onClick={() => setSetupStep('MISSION')} className={`px-3 md:px-4 py-1.5 md:py-2 rounded-t-lg font-bold text-xs md:text-base transition-colors ${setupStep==='MISSION'?'bg-cyan-700 text-white':'bg-slate-800 text-gray-500'}`}>任務</button>
                 </div>
 
-                <div className="relative z-10 flex-1 min-h-0 max-w-4xl mx-auto w-full">
+                <div className="paper-plane-setup-content relative z-10 flex-1 min-h-0 max-w-4xl mx-auto w-full">
                     {setupStep === 'SHIP' && (
-                         <div className="grid grid-cols-3 gap-2 md:gap-6">
+                         <div className="paper-plane-ship-grid grid grid-cols-3 gap-2 md:gap-6">
                              {SHIPS.map(ship => {
                                  const isUnlocked = progress.rank >= ship.unlockRank;
                                  return (
                                      <div 
                                         key={ship.id} 
                                         onClick={() => isUnlocked && setSelectedShipId(ship.id)}
-                                        className={`border-2 p-2 md:p-6 rounded-lg md:rounded-xl flex flex-col items-center cursor-pointer transition-all relative overflow-hidden ${selectedShipId === ship.id ? 'border-cyan-400 bg-slate-800 shadow-[0_0_20px_rgba(34,211,238,0.3)]' : 'border-slate-600 bg-slate-900 hover:bg-slate-800'} ${!isUnlocked ? 'opacity-50 grayscale' : ''}`}
+                                        className={`paper-plane-setup-card border-2 p-2 md:p-6 rounded-lg md:rounded-xl flex flex-col items-center cursor-pointer transition-all relative overflow-hidden ${selectedShipId === ship.id ? 'border-cyan-400 bg-slate-800 shadow-[0_0_20px_rgba(34,211,238,0.3)]' : 'border-slate-600 bg-slate-900 hover:bg-slate-800'} ${!isUnlocked ? 'opacity-50 grayscale' : ''}`}
                                      >
                                          <div className={`w-full h-16 md:h-32 ${ship.color} mb-2 md:mb-4 rounded-lg flex items-center justify-center relative overflow-hidden`}>
-                                             <PaperPlaneSheetImage sprite={getPaperPlaneShipSprite(ship.id)} title={ship.name} className="absolute inset-1 md:inset-2 bg-no-repeat" />
+                                             <PaperPlaneSheetImage sprite={getPaperPlaneShipSprite(ship.id)} title={ship.name} className="paper-plane-ship-art absolute bg-no-repeat" />
                                              {!isUnlocked && <Lock size={24} className="absolute text-gray-300 md:w-8 md:h-8"/>}
                                          </div>
                                          <h3 className="text-[11px] md:text-xl font-bold mb-1 md:mb-2 leading-tight text-center">{ship.name}</h3>
@@ -3550,14 +3611,14 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                                      </div>
                                  )
                              })}
-                             <div className="col-span-full text-center mt-4">
+                             <div className="paper-plane-setup-next col-span-full text-center mt-4">
                                 <button onClick={() => setSetupStep('PILOT')} className="bg-cyan-600 hover:bg-cyan-500 px-10 md:px-12 py-2 md:py-3 rounded-full font-bold text-base md:text-lg shadow-lg animate-pulse">次へ</button>
                              </div>
                          </div>
                     )}
 
                     {setupStep === 'PILOT' && (
-                        <div className="flex flex-col items-center w-full max-w-4xl mx-auto">
+                        <div className="paper-plane-pilot-step flex flex-col items-center w-full max-w-4xl mx-auto">
                             <div className="flex justify-between w-full mb-2 md:mb-4 px-3 md:px-4 bg-slate-800 p-1.5 md:p-2 rounded">
                                 <span className="text-xs md:text-sm text-gray-400">現在のリロール回数</span>
                                 <span className="font-bold text-yellow-400 flex items-center text-xs md:text-base"><RefreshCw size={14} className="mr-1"/> {progress.rerollCount}</span>
@@ -3565,11 +3626,11 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
 
 
 
-                            <div className="grid grid-cols-3 gap-2 md:gap-6 w-full mb-2 md:mb-6">
+                            <div className="paper-plane-pilot-grid grid grid-cols-3 gap-2 md:gap-6 w-full mb-2 md:mb-6">
                                 {pilotOptions.map((pilot, i) => (
                                     <div 
                                         key={i}
-                                        className={`relative border-2 p-2 md:p-4 rounded-lg md:rounded-xl cursor-pointer transition-all flex flex-col h-full ${selectedPilotIndex === i ? 'border-yellow-400 bg-slate-800 shadow-[0_0_15px_rgba(250,204,21,0.3)] md:scale-105' : 'border-slate-600 bg-slate-900 hover:border-slate-400'}`}
+                                        className={`paper-plane-setup-card relative border-2 p-2 md:p-4 rounded-lg md:rounded-xl cursor-pointer transition-all flex flex-col h-full ${selectedPilotIndex === i ? 'border-yellow-400 bg-slate-800 shadow-[0_0_15px_rgba(250,204,21,0.3)] md:scale-105' : 'border-slate-600 bg-slate-900 hover:border-slate-400'}`}
                                         onClick={() => setSelectedPilotIndex(i)}
                                     >
                                         <div className="absolute top-2 right-2">
@@ -3582,20 +3643,20 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                                             </button>
                                         </div>
 
-                                        <div className="flex flex-col items-center mb-2 md:mb-4">
-                                            <div className="w-14 h-14 md:w-20 md:h-20 mb-1 md:mb-2 rounded-lg bg-black/30 border border-cyan-500/20 overflow-hidden">
+                                        <div className="paper-plane-pilot-identity flex flex-col items-center mb-2 md:mb-4">
+                                            <div className="paper-plane-pilot-art w-14 h-14 md:w-20 md:h-20 mb-1 md:mb-2 rounded-lg bg-black/30 border border-cyan-500/20 overflow-hidden">
                                                  <img src={getPaperPlanePilotImage(pilot.id)} alt="" className="w-full h-full object-contain [image-rendering:pixelated]" />
                                             </div>
-                                            <div className="font-bold text-[10px] md:text-lg leading-tight text-center pr-4 md:pr-0">{pilot.name}</div>
+                                            <div className="paper-plane-pilot-name font-bold text-[10px] md:text-lg leading-tight text-center pr-4 md:pr-0">{pilot.name}</div>
                                         </div>
-                                        
-                                        <div className="text-[9px] md:text-sm bg-slate-800 border border-yellow-500/30 p-1.5 md:p-3 rounded mt-auto w-full min-h-[64px] md:min-h-[92px] flex flex-col justify-start">
+
+                                        <div className="paper-plane-pilot-main-trait text-[9px] md:text-sm bg-slate-800 border border-yellow-500/30 p-1.5 md:p-3 rounded mt-auto w-full min-h-[64px] md:min-h-[92px] flex flex-col justify-start">
                                             <div className="font-bold text-yellow-400 mb-1 flex items-center leading-tight"><Zap size={12} className="mr-1 shrink-0 md:w-3.5 md:h-3.5"/> {pilot.intrinsicTalent.name}</div>
                                             <div className="text-gray-300 leading-tight md:leading-relaxed font-bold">{pilot.intrinsicTalent.description}</div>
                                         </div>
                                         
                                         {pilot.randomTalents && pilot.randomTalents.length > 0 && (
-                                            <div className="text-[8px] md:text-xs bg-indigo-900/40 p-1.5 md:p-2 rounded mt-1 md:mt-2 w-full leading-tight">
+                                            <div className="paper-plane-pilot-random-trait text-[8px] md:text-xs bg-indigo-900/40 p-1.5 md:p-2 rounded mt-1 md:mt-2 w-full leading-tight">
                                                 <div className="font-bold text-indigo-300 mb-0.5 md:mb-1 flex items-center"><Star size={10} className="mr-1 shrink-0 md:w-3 md:h-3"/> ランダム特性</div>
                                                 {pilot.randomTalents.map((t, idx) => (
                                                     <div key={idx} className="mb-0.5 md:mb-1 last:mb-0">
@@ -3608,34 +3669,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                                 ))}
                             </div>
                             
-                            {/* Stat Preview */}
-                            <div className="w-full bg-slate-800/80 border border-cyan-500/30 p-2 md:p-4 rounded-xl mb-2 md:mb-6">
-                                <div className="text-cyan-400 font-bold mb-1 md:mb-2 flex items-center justify-center text-[10px] md:text-base"><Activity size={14} className="mr-1 md:mr-2"/> 機体スペック予想 ({SHIPS.find(s => s.id === selectedShipId)?.name || '未選択'})</div>
-                                <div className="flex justify-center gap-6 md:gap-8">
-                                    <div className="text-center">
-                                        <div className="text-[9px] md:text-xs text-gray-400 mb-0.5 md:mb-1">最大HP</div>
-                                        <div className="text-base md:text-xl font-bold text-green-400">
-                                            {(SHIPS.find(s => s.id === selectedShipId)?.baseHp || 0) + 
-                                             (selectedPilotIndex !== -1 ? [pilotOptions[selectedPilotIndex].intrinsicTalent, ...(pilotOptions[selectedPilotIndex].randomTalents || [])].filter(t => t.effectType === 'MAX_HP').reduce((a, b) => a + (b.value || 0), 0) : 0)}
-                                        </div>
-                                    </div>
-                                    <div className="text-center">
-                                        <div className="text-[9px] md:text-xs text-gray-400 mb-0.5 md:mb-1">最大燃料</div>
-                                        <div className="text-base md:text-xl font-bold text-orange-400">
-                                            {MAX_FUEL + 
-                                             (selectedPilotIndex !== -1 ? [pilotOptions[selectedPilotIndex].intrinsicTalent, ...(pilotOptions[selectedPilotIndex].randomTalents || [])].filter(t => t.effectType === 'FUEL').reduce((a, b) => a + (b.value || 0), 0) : 0)}
-                                        </div>
-                                    </div>
-                                    <div className="text-center">
-                                        <div className="text-[9px] md:text-xs text-gray-400 mb-0.5 md:mb-1">パッシブ出力</div>
-                                        <div className="text-base md:text-xl font-bold text-yellow-400">
-                                            +{(selectedPilotIndex !== -1 ? [pilotOptions[selectedPilotIndex].intrinsicTalent, ...(pilotOptions[selectedPilotIndex].randomTalents || [])].filter(t => t.effectType === 'PASSIVE_POWER').reduce((a, b) => a + (b.value || 0), 0) : 0)}
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div className="flex gap-3 md:gap-4">
+                            <div className="paper-plane-pilot-actions flex gap-3 md:gap-4">
                                 <button 
                                     onClick={handleRerollPilots} 
                                     disabled={progress.rerollCount <= 0}
@@ -3655,8 +3689,8 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                     )}
 
                     {setupStep === 'MISSION' && (
-                        <div className="flex flex-col items-center max-w-lg mx-auto">
-                            <div className="w-full bg-slate-800 p-3 md:p-6 rounded-xl border border-slate-600 text-center mb-4 md:mb-8">
+                        <div className="paper-plane-mission-step flex flex-col items-center max-w-lg mx-auto">
+                            <div className="paper-plane-mission-card w-full bg-slate-800 p-3 md:p-6 rounded-xl border border-slate-600 text-center mb-4 md:mb-8">
                                 <h3 className="text-lg md:text-xl font-bold text-red-400 mb-1 md:mb-2">難易度設定</h3>
                                 <div className="flex items-center justify-center gap-6 my-3 md:my-6">
                                     <button 
@@ -3742,33 +3776,33 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
     if (phase === 'REWARD_SELECT') {
          const rerollCost = Math.max(0, 50 - player.talents.filter(t => t.effectType === 'DISCOUNT_REROLL_REWARD').reduce((a,b)=>a+b.value, 0));
          return (
-             <div className="w-full h-full bg-black/90 text-white p-4 flex flex-col items-center justify-start md:justify-center font-mono z-50 relative overflow-y-auto py-8">
+             <div className="paper-plane-reward-screen w-full h-full bg-black/90 text-white p-4 flex flex-col items-center justify-start md:justify-center font-mono z-50 relative overflow-y-auto py-8">
                  <PaperPlaneSceneBackdrop sprite={PAPER_PLANE_SCENE_BACKGROUNDS.reward} alpha={0.2} />
                  <RenderTooltip />
-                 <Trophy size={64} className="text-yellow-400 mb-4 animate-bounce"/>
-                 <h2 className="text-4xl font-bold mb-4 text-white">VICTORY!</h2>
-                 <div className="text-yellow-300 text-2xl font-bold mb-4 flex items-center bg-black/50 px-6 py-2 rounded-full border border-yellow-500">
+                 <Trophy size={64} className="paper-plane-reward-trophy text-yellow-400 mb-4 animate-bounce"/>
+                 <h2 className="paper-plane-reward-title text-4xl font-bold mb-4 text-white">VICTORY!</h2>
+                 <div className="paper-plane-reward-coins text-yellow-300 text-2xl font-bold mb-4 flex items-center bg-black/50 px-6 py-2 rounded-full border border-yellow-500">
                      <Star size={24} className="mr-2 fill-current"/> +{earnedCoins}
                  </div>
-                 
-                 <div className="flex gap-4 mb-8">
-                     <button 
-                        onClick={handleRerollRewards} 
-                        disabled={player.starCoins < rerollCost} 
+
+                 <div className="paper-plane-reward-actions flex gap-4 mb-8">
+                     <button
+                        onClick={handleRerollRewards}
+                        disabled={player.starCoins < rerollCost}
                         className={`bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded font-bold flex items-center transition-colors border border-indigo-400 ${player.starCoins < rerollCost ? 'opacity-50 cursor-not-allowed' : ''}`}
                      >
                          <RefreshCw className="mr-2" size={16}/> リロール ({rerollCost} Coin)
                      </button>
                  </div>
-                 
-                 <p className="text-gray-300 mb-4">戦利品を選択してください (長押しで詳細)</p>
-                 
-                 <div className="flex flex-wrap gap-4 md:gap-8 justify-center mb-8 shrink-0">
+
+                 <p className="paper-plane-reward-hint text-gray-300 mb-4">戦利品を選択してください (長押しで詳細)</p>
+
+                 <div className="paper-plane-reward-grid flex flex-wrap gap-4 md:gap-8 justify-center mb-8 shrink-0">
                      {rewardOptions.map((part, i) => (
-                         <div 
-                            key={i} 
+                         <div
+                            key={i}
                             onClick={() => handleRewardSelect(part)}
-                            className="bg-slate-800 border-2 border-cyan-500 p-4 rounded-xl w-32 md:w-48 flex flex-col items-center cursor-pointer hover:scale-105 hover:bg-slate-700 transition-all shadow-lg group"
+                            className="paper-plane-reward-card bg-slate-800 border-2 border-cyan-500 p-4 rounded-xl w-32 md:w-48 flex flex-col items-center cursor-pointer hover:scale-105 hover:bg-slate-700 transition-all shadow-lg group"
                          >
                              <div className="w-16 h-16 mb-2">
                                  <ShipPartView part={part} onLongPress={(p) => setTooltipPart(p)} />
@@ -3787,47 +3821,49 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
          const buffGrid = calculateBuffGrid(player.parts);
 
          return (
-             <div className="w-full h-full bg-slate-900 text-white p-4 font-mono flex flex-col items-center relative overflow-y-auto">
+             <div className="paper-plane-equip-screen w-full h-full bg-slate-900 text-white p-4 font-mono flex flex-col items-center relative overflow-y-auto">
                  <PaperPlaneSceneBackdrop sprite={PAPER_PLANE_SCENE_BACKGROUNDS.reward} alpha={0.18} />
                  <RenderTooltip />
-                 <div className="text-center mb-6 mt-4">
+                 <div className="paper-plane-equip-header text-center mb-6 mt-4">
                      <h2 className="text-2xl font-bold text-green-400 mb-2">パーツ換装</h2>
                      <p className="text-sm text-gray-300">新しいパーツをセットする場所を選んでください (長押しで詳細)</p>
                  </div>
 
-                 {pendingPart && (
-                     <div className="flex items-center gap-4 mb-8 bg-slate-800 p-3 rounded-lg border border-slate-600">
-                         <div className="text-xs text-gray-400">NEW:</div>
-                         <div className="w-16 h-16 md:w-20 md:h-20">
-                             <ShipPartView part={pendingPart} onLongPress={(p) => setTooltipPart(p)} />
+                 <div className="paper-plane-equip-layout">
+                     {pendingPart && (
+                         <div className="paper-plane-equip-new-part flex items-center gap-4 mb-8 bg-slate-800 p-3 rounded-lg border border-slate-600">
+                             <div className="text-xs text-gray-400">NEW:</div>
+                             <div className="w-16 h-16 md:w-20 md:h-20">
+                                 <ShipPartView part={pendingPart} onLongPress={(p) => setTooltipPart(p)} />
+                             </div>
+                             <div className="text-left">
+                                 <div className="font-bold text-white">{pendingPart.name}</div>
+                                 <div className="text-xs text-gray-400">{pendingPart.description}</div>
+                             </div>
                          </div>
-                         <div className="text-left">
-                             <div className="font-bold text-white">{pendingPart.name}</div>
-                             <div className="text-xs text-gray-400">{pendingPart.description}</div>
-                         </div>
-                     </div>
-                 )}
+                     )}
 
-                 <div className="bg-black/40 p-4 rounded-xl border-2 border-slate-700 mb-8 shrink-0">
-                     <div className="grid grid-cols-3 gap-2">
-                         {player.parts.map((p, i) => {
-                             const r = Math.floor(i / SHIP_WIDTH);
-                             const c = i % SHIP_WIDTH;
-                             return (
-                                 <div key={i} className="w-16 h-16 md:w-20 md:h-20" onClick={() => handlePartEquip(i)}>
-                                     <ShipPartView 
-                                         part={p} 
-                                         pendingReplace={true} 
-                                         onLongPress={(p) => setTooltipPart(p)} 
-                                         bonusPower={buffGrid[r][c] + player.passivePower} 
-                                     />
-                                 </div>
-                             );
-                         })}
+                     <div className="paper-plane-equip-grid-panel bg-black/40 p-4 rounded-xl border-2 border-slate-700 mb-8 shrink-0">
+                         <div className="paper-plane-equip-grid grid grid-cols-3 gap-2">
+                             {player.parts.map((p, i) => {
+                                 const r = Math.floor(i / SHIP_WIDTH);
+                                 const c = i % SHIP_WIDTH;
+                                 return (
+                                     <div key={i} className="w-16 h-16 md:w-20 md:h-20" onClick={() => handlePartEquip(i)}>
+                                         <ShipPartView
+                                             part={p}
+                                             pendingReplace={true}
+                                             onLongPress={(p) => setTooltipPart(p)}
+                                             bonusPower={buffGrid[r][c] + player.passivePower}
+                                         />
+                                     </div>
+                                 );
+                             })}
+                         </div>
                      </div>
                  </div>
 
-                 <div className="flex gap-4 shrink-0 pb-8">
+                 <div className="paper-plane-equip-actions flex gap-4 shrink-0 pb-8">
                      <button onClick={handleStorePart} className="bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-lg font-bold shadow-lg flex items-center">
                          <Archive size={20} className="mr-2"/> 格納庫に保管
                      </button>
@@ -3843,19 +3879,19 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
         const buffGrid = calculateBuffGrid(player.parts);
 
         return (
-            <div className="w-full h-full bg-slate-900 text-white p-4 font-mono flex flex-col items-center relative overflow-hidden">
+            <div className="paper-plane-hangar-screen w-full h-full bg-slate-900 text-white p-4 font-mono flex flex-col items-center relative overflow-hidden">
                 <PaperPlaneSceneBackdrop sprite={PAPER_PLANE_SCENE_BACKGROUNDS.hangar} alpha={0.2} />
                 <RenderTooltip />
-                <div className="text-center mb-4 mt-2 shrink-0">
+                <div className="paper-plane-hangar-header text-center mb-4 mt-2 shrink-0">
                     <h2 className="text-2xl font-bold text-orange-400 mb-2 flex items-center justify-center"><Settings className="mr-2"/> 機体改造 (Hangar)</h2>
                     <p className="text-sm text-gray-300">船と格納庫のパーツを入れ替えます</p>
                 </div>
 
-                <div className="flex-grow flex flex-col md:flex-row gap-4 md:gap-8 w-full max-w-5xl overflow-hidden min-h-0">
+                <div className="paper-plane-hangar-layout flex-grow flex flex-col md:flex-row gap-4 md:gap-8 w-full max-w-5xl overflow-hidden min-h-0">
                     {/* Ship Grid */}
-                    <div className="flex-shrink-0 md:flex-1 flex flex-col items-center bg-black/40 p-2 md:p-4 rounded-xl border-2 border-slate-700 overflow-y-auto md:overflow-visible">
-                        <div className="text-cyan-300 font-bold mb-4 flex items-center"><Send className="mr-2"/> SHIP</div>
-                        <div className="grid grid-cols-3 gap-2 md:gap-3">
+                    <div className="paper-plane-hangar-ship flex-shrink-0 md:flex-1 flex flex-col items-center bg-black/40 p-2 md:p-4 rounded-xl border-2 border-slate-700 overflow-y-auto md:overflow-visible">
+                        <div className="paper-plane-hangar-section-title text-cyan-300 font-bold mb-4 flex items-center"><Send className="mr-2"/> SHIP</div>
+                        <div className="paper-plane-hangar-ship-grid grid grid-cols-3 gap-2 md:gap-3">
                             {player.parts.map((p, i) => {
                                 const r = Math.floor(i / SHIP_WIDTH);
                                 const c = i % SHIP_WIDTH;
@@ -3883,31 +3919,39 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                     </div>
 
                     {/* Inventory */}
-                    <div className="flex-1 flex flex-col items-center bg-black/40 p-2 md:p-4 rounded-xl border-2 border-slate-700 overflow-y-auto custom-scrollbar min-h-0">
-                        <div className="text-orange-300 font-bold mb-4 flex items-center"><Archive className="mr-2"/> INVENTORY</div>
-                        {player.partInventory.length === 0 ? (
-                            <div className="text-gray-500 italic mt-8">Empty</div>
-                        ) : (
-                            <div className="flex flex-wrap gap-2 md:gap-3 justify-center">
-                                {player.partInventory.map((p, i) => (
-                                    <div key={i} className="w-16 h-16 md:w-24 md:h-24 relative">
-                                        <ShipPartView 
-                                            part={p} 
-                                            onClick={() => handleHangarAction('INV', i)} 
-                                            onLongPress={(p) => setTooltipPart(p)}
-                                            highlight={hangarSelection?.loc === 'INV' && hangarSelection.idx === i}
-                                        />
-                                        {hangarSelection?.loc === 'INV' && hangarSelection.idx === i && (
-                                            <div className="absolute inset-0 border-4 border-yellow-400 animate-pulse pointer-events-none rounded"></div>
-                                        )}
-                                    </div>
-                                ))}
+                    <div className="paper-plane-hangar-inventory flex-1 flex flex-col items-center bg-black/40 p-2 md:p-4 rounded-xl border-2 border-slate-700 overflow-y-auto custom-scrollbar min-h-0">
+                        <div className="paper-plane-hangar-section-title text-orange-300 font-bold mb-4 flex items-center"><Archive className="mr-2"/> INVENTORY</div>
+                        <div className="paper-plane-hangar-inventory-list flex flex-wrap gap-2 md:gap-3 justify-center">
+                            {player.partInventory.length === 0 && (
+                                <div className="paper-plane-hangar-empty-label text-gray-500 italic">Empty</div>
+                            )}
+                            {player.partInventory.map((p, i) => (
+                                <div key={i} className="w-16 h-16 md:w-24 md:h-24 relative">
+                                    <ShipPartView
+                                        part={p}
+                                        onClick={() => handleHangarAction('INV', i)}
+                                        onLongPress={(p) => setTooltipPart(p)}
+                                        highlight={hangarSelection?.loc === 'INV' && hangarSelection.idx === i}
+                                    />
+                                    {hangarSelection?.loc === 'INV' && hangarSelection.idx === i && (
+                                        <div className="absolute inset-0 border-4 border-yellow-400 animate-pulse pointer-events-none rounded"></div>
+                                    )}
+                                </div>
+                            ))}
+                            <div
+                                className="paper-plane-hangar-empty-slot w-16 h-16 md:w-24 md:h-24 relative"
+                                onClick={() => handleHangarAction('INV', player.partInventory.length)}
+                            >
+                                <ShipPartView
+                                    part={createEmptyPart('hangar_inventory_empty')}
+                                    pendingReplace={hangarSelection?.loc === 'SHIP'}
+                                />
                             </div>
-                        )}
+                        </div>
                     </div>
                 </div>
 
-                <button onClick={() => { setPhase('VACATION'); setHangarSelection(null); }} className="bg-gray-600 hover:bg-gray-500 text-white px-8 py-3 rounded-lg font-bold shadow-lg flex items-center mt-4 shrink-0">
+                <button onClick={() => { setPhase('VACATION'); setHangarSelection(null); }} className="paper-plane-hangar-back bg-gray-600 hover:bg-gray-500 text-white px-8 py-3 rounded-lg font-bold shadow-lg flex items-center mt-4 shrink-0">
                     <ArrowLeft size={20} className="mr-2"/> 休暇に戻る
                 </button>
             </div>
@@ -4237,31 +4281,31 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
             </div>
 
             {(phase === 'VICTORY' || phase === 'GAME_OVER') && (
-                <div className="absolute inset-0 bg-black/80 z-50 flex items-center justify-center p-4 animate-in fade-in zoom-in duration-300">
-                    <div className="bg-slate-800 p-8 rounded-xl border-4 border-slate-600 text-center shadow-2xl">
+                <div className="paper-plane-result-overlay absolute inset-0 bg-black/80 z-50 flex items-center justify-center p-4 animate-in fade-in zoom-in duration-300">
+                    <div className="paper-plane-result-panel bg-slate-800 p-8 rounded-xl border-4 border-slate-600 text-center shadow-2xl">
                         {phase === 'VICTORY' && (
-                            <>
-                                <Trophy size={64} className="text-yellow-400 mx-auto mb-4 animate-bounce"/>
-                                <h2 className="text-4xl font-bold text-white mb-2">MISSION COMPLETE</h2>
-                                <p className="text-gray-400 mb-6">全ステージクリアおめでとう！</p>
-                                <div className="mb-6 rounded-xl border border-cyan-500/50 bg-slate-900/80 p-4">
+                            <div className="paper-plane-victory-content">
+                                <Trophy size={64} className="paper-plane-result-icon text-yellow-400 mx-auto mb-4 animate-bounce"/>
+                                <h2 className="paper-plane-result-title text-4xl font-bold text-white mb-2">MISSION COMPLETE</h2>
+                                <p className="paper-plane-result-subtitle text-gray-400 mb-6">全ステージクリアおめでとう！</p>
+                                <div className="paper-plane-unlock-card mb-6 rounded-xl border border-cyan-500/50 bg-slate-900/80 p-4">
                                     <div className="text-cyan-300 font-bold mb-2">
                                         アンロック済みパーツ: {(progress.unlockedPartNames?.length || 0)} / {PAPER_PLANE_UNLOCK_TARGET}
                                     </div>
                                     {newlyUnlockedPart ? (
-                                        <div className="flex flex-col items-center gap-2">
-                                            <div className="text-yellow-300 font-bold">NEW PART UNLOCKED</div>
-                                            <div className="w-24">
+                                        <div className="paper-plane-unlock-detail flex flex-col items-center gap-2">
+                                            <div className="paper-plane-unlock-label text-yellow-300 font-bold">NEW PART UNLOCKED</div>
+                                            <div className="paper-plane-unlock-part w-24">
                                                 <ShipPartView part={newlyUnlockedPart} onLongPress={(p) => setTooltipPart(p)} />
                                             </div>
-                                            <div className="text-white font-bold">{newlyUnlockedPart.name}</div>
-                                            <div className="text-xs text-slate-300 max-w-sm">{newlyUnlockedPart.description}</div>
+                                            <div className="paper-plane-unlock-name text-white font-bold">{newlyUnlockedPart.name}</div>
+                                            <div className="paper-plane-unlock-description text-xs text-slate-300 max-w-sm">{newlyUnlockedPart.description}</div>
                                         </div>
                                     ) : (
                                         <div className="text-sm text-slate-400">今回新規解放できるパーツはありません。</div>
                                     )}
                                 </div>
-                                <div className="flex flex-col gap-4">
+                                <div className="paper-plane-result-actions flex flex-col gap-4">
                                     <button onClick={activateEndlessMode} className="bg-purple-600 px-8 py-3 rounded text-xl font-bold hover:bg-purple-500 border-2 border-purple-400 flex items-center justify-center animate-pulse">
                                         <Repeat className="mr-2" /> エンドレスモードへ
                                     </button>
@@ -4273,15 +4317,15 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                                     </button>
                                     <button onClick={onBack} className="bg-cyan-600 px-8 py-3 rounded text-xl font-bold border-2 border-cyan-400">タイトルへ戻る</button>
                                 </div>
-                            </>
+                            </div>
                         )}
                         {phase === 'GAME_OVER' && (
-                            <>
-                                <Skull size={64} className="text-red-500 mx-auto mb-4"/>
-                                <h2 className="text-4xl font-bold text-red-500 mb-2">DESTROYED</h2>
-                                <p className="text-gray-400 mb-6">Stage {stage}</p>
-                                <div className="flex flex-col gap-4">
-                                    <button 
+                            <div className="paper-plane-game-over-content">
+                                <Skull size={64} className="paper-plane-result-icon text-red-500 mx-auto mb-4"/>
+                                <h2 className="paper-plane-result-title text-4xl font-bold text-red-500 mb-2">DESTROYED</h2>
+                                <p className="paper-plane-result-subtitle text-gray-400 mb-6">Stage {stage}</p>
+                                <div className="paper-plane-result-actions flex flex-col gap-4">
+                                    <button
                                         onClick={returnToSetup}
                                         className="bg-green-600 px-8 py-3 rounded text-xl font-bold hover:bg-green-500 border-2 border-green-400 flex items-center justify-center"
                                     >
@@ -4289,7 +4333,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void }> = ({ onBack }) => {
                                     </button>
                                     <button onClick={onBack} className="mt-2 bg-gray-600 px-8 py-3 rounded text-xl font-bold">タイトルへ戻る</button>
                                 </div>
-                            </>
+                            </div>
                         )}
                     </div>
                 </div>

@@ -1,9 +1,9 @@
 
 import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { ArrowLeft, Play, X, RotateCcw, Swords, Shield, RefreshCw, Zap, Trophy, Skull, ChevronsRight, ChevronLeft, ChevronRight, Clock, Ghost, ArrowRightLeft, Gift, ShoppingBag, Hammer, Coins, Plus, Crosshair, Heart, Move, AlertTriangle, Hourglass, Maximize2, Minimize2, Wind, Anchor, Flame, Activity, ArrowUp, Dna, Shuffle, Star, HelpCircle, Book, AlertCircle, Flag, Music, Mic, Milk, Battery, ShieldCheck, Bomb, Utensils, PenTool, Circle, ArrowRight, Target, Package } from 'lucide-react';
+import { ArrowLeft, Play, X, RotateCcw, Swords, Shield, RefreshCw, Zap, Skull, ChevronsRight, ChevronLeft, ChevronRight, Clock, Ghost, ArrowRightLeft, Gift, ShoppingBag, Hammer, Coins, Plus, Crosshair, Heart, Move, AlertTriangle, Hourglass, Maximize2, Minimize2, Wind, Anchor, Flame, Activity, ArrowUp, Dna, Shuffle, Star, HelpCircle, Book, AlertCircle, Flag, Music, Mic, Milk, Battery, ShieldCheck, Bomb, Utensils, PenTool, Circle, ArrowRight, Target, Package } from 'lucide-react';
 import { audioService } from '../services/audioService';
 import { storageService } from '../services/storageService';
-import { AnswerMode, AssignmentPayload, GameMode } from '../types';
+import { AnswerMode, AssignmentAnswerResult, AssignmentPayload, GameMode, MiniGameDebugPreview } from '../types';
 import MiniGameProblemChallenge from './MiniGameProblemChallenge';
 import { assetUrl } from '../utils/assetPaths';
 
@@ -574,6 +574,25 @@ const getInitialState = (): KochoGameState => ({
     nextWaveMessage: undefined
 });
 
+const createKochoDebugPreviewState = (debugPreview: MiniGameDebugPreview | undefined, initial: KochoGameState): KochoGameState => {
+    if (debugPreview === 'GAME_OVER') return { ...initial, phase: 'GAME_OVER', status: 'GAME_OVER', pendingPhase: null };
+    if (debugPreview === 'ENDING') return { ...initial, phase: 'VICTORY', status: 'VICTORY', battleStage: FINAL_STAGE, pendingPhase: null };
+    if (debugPreview === 'KOCHO_REWARD') return { ...initial, phase: 'REWARD', status: 'PLAYING', money: 80, pendingPhase: null };
+    if (debugPreview === 'KOCHO_UPGRADE') return { ...initial, phase: 'UPGRADE_EVENT', status: 'PLAYING', money: 80, currentUpgradeOffer: UPGRADE_POOLS[0], pendingPhase: null };
+    if (debugPreview === 'KOCHO_SHOP') {
+        return {
+            ...initial,
+            phase: 'SHOP',
+            status: 'PLAYING',
+            money: 180,
+            currentUpgradeOffer: UPGRADE_POOLS[1],
+            shopInventory: SHOP_RELICS.slice(0, 4),
+            pendingPhase: null,
+        };
+    }
+    return initial;
+};
+
 // --- COMPONENT ---
 const KochoShowdown: React.FC<{
     onBack: () => void;
@@ -581,13 +600,15 @@ const KochoShowdown: React.FC<{
     problemModePool?: string[];
     answerMode?: AnswerMode;
     assignment?: AssignmentPayload | null;
-    onAnswerResult?: (result: { mode: string; correct: boolean; elapsedMs: number; problemId?: string }) => void;
-}> = ({ onBack, problemMode = GameMode.MIXED, problemModePool, answerMode = 'CHOICE', assignment, onAnswerResult }) => {
+    onAnswerResult?: (result: AssignmentAnswerResult) => void;
+    debugPreview?: MiniGameDebugPreview;
+}> = ({ onBack, problemMode = GameMode.MIXED, problemModePool, answerMode = 'CHOICE', assignment, onAnswerResult, debugPreview }) => {
     
     // State
     const [gameState, setGameState] = useState<KochoGameState>(() => {
         const saved = storageService.loadKochoState();
-        return saved ? hydrateState(saved) : getInitialState();
+        const initial = saved ? hydrateState(saved) : getInitialState();
+        return createKochoDebugPreviewState(debugPreview, initial);
     });
 
     const [vfxList, setVfxList] = useState<KochoVFX[]>([]);
@@ -603,8 +624,14 @@ const KochoShowdown: React.FC<{
     const [animating, setAnimating] = useState(false);
     const [activeActionCardName, setActiveActionCardName] = useState<string | null>(null);
     const activeActionCardNameRef = useRef<string | null>(null);
-    const [rewardCards, setRewardCards] = useState<KCard[]>([]);
-    const [newlyUnlockedCard, setNewlyUnlockedCard] = useState<(typeof KOCHO_UNLOCKABLE_CARD_DB)[number] | null>(null);
+    const [rewardCards, setRewardCards] = useState<KCard[]>(() =>
+        debugPreview === 'KOCHO_REWARD'
+            ? getUnlockedKochoCardTemplates().slice(0, 3).map((card, index) => ({ ...card, id: `debug_reward_${index}`, currentCooldown: 0, usedSlots: 0 }))
+            : []
+    );
+    const [newlyUnlockedCard, setNewlyUnlockedCard] = useState<(typeof KOCHO_UNLOCKABLE_CARD_DB)[number] | null>(
+        debugPreview === 'ENDING' ? KOCHO_UNLOCKABLE_CARD_DB[0] ?? null : null
+    );
     const [kochoUnlockedCount, setKochoUnlockedCount] = useState(() => storageService.getUnlockedKochoCards().length);
     
     // UI State
@@ -668,6 +695,7 @@ const KochoShowdown: React.FC<{
 
     // --- Save Score on End Game ---
     useEffect(() => {
+        if (debugPreview) return;
         if (gameState.status === 'VICTORY' || gameState.status === 'GAME_OVER') {
             storageService.saveKochoScore({
                 id: `kocho-${Date.now()}`,
@@ -683,7 +711,7 @@ const KochoShowdown: React.FC<{
             }
             storageService.clearKochoState();
         }
-    }, [gameState.status, gameState.battleStage, gameState.totalTurns, unlockRandomKochoCard]);
+    }, [gameState.status, gameState.battleStage, gameState.totalTurns, unlockRandomKochoCard, debugPreview]);
 
     const addLog = (msg: string) => {
         setGameState(prev => ({ ...prev, logs: [msg, ...prev.logs.slice(0, 4)] }));
@@ -2354,52 +2382,54 @@ const KochoShowdown: React.FC<{
                 )}
                 {e && (
                     <div className="relative w-full h-full flex items-end justify-center z-20">
-                        <div className={`transition-transform duration-200 ${e.facing === -1 ? 'scale-x-[-1]' : ''}`}>
-                            {(() => {
-                                const asset = getKochoEnemyAsset(e);
-                                return <KochoSheetSprite sheet="characters" src={asset.src} cell={asset.cell} className="h-20 w-20 md:h-36 md:w-36" />;
-                            })()}
-                        </div>
-                        {e.intent && (
-                            <div
-                                className="absolute -top-8 left-1/2 -translate-x-1/2 flex flex-col items-center z-20 group"
-                                onMouseEnter={() => setActiveIntentTooltipEnemyId(e.id)}
-                                onMouseLeave={() => setActiveIntentTooltipEnemyId(prev => (prev === e.id ? null : prev))}
-                                onTouchStart={(event) => {
-                                    event.preventDefault();
-                                    setActiveIntentTooltipEnemyId(prev => (prev === e.id ? null : e.id));
-                                }}
-                            >
-                                {e.intent.type === 'ATTACK' && e.intent.timer === 1 && (
-                                    <div className="bg-red-600 text-white text-xs px-2 py-1 rounded-full font-bold border border-white shadow-lg flex items-center animate-bounce">
-                                        <Swords size={12} className="mr-1"/> !
-                                    </div>
-                                )}
-                                {e.intent.type === 'WAIT' && (
-                                    <div className="bg-gray-600 text-white text-xs px-2 py-1 rounded-full font-bold border border-white shadow-lg flex items-center">
-                                        <Hourglass size={12} className="mr-1"/> {e.intent.timer}
-                                    </div>
-                                )}
-                                {e.intent.type === 'SUMMON' && (
-                                    <div className="bg-purple-600 text-white text-xs px-2 py-1 rounded-full font-bold border border-white shadow-lg flex items-center">
-                                        <Ghost size={12} className="mr-1"/> !
-                                    </div>
-                                )}
-                                {e.intent.type === 'SPECIAL' && (
-                                    <div className="bg-orange-600 text-white text-xs px-2 py-1 rounded-full font-bold border border-white shadow-lg flex items-center animate-pulse">
-                                        <AlertTriangle size={12} className="mr-1"/> SP!
-                                    </div>
-                                )}
-                                {getIntentTooltip(e) && (
-                                    <div
-                                        className={`pointer-events-none absolute left-1/2 top-[-56px] w-max -translate-x-1/2 rounded border border-cyan-300/60 bg-slate-900/95 px-2 py-1 text-[10px] text-cyan-100 shadow-lg transition-opacity duration-150 ${activeIntentTooltipEnemyId === e.id ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}
-                                    >
-                                        <div className="font-bold leading-tight">{getIntentTooltip(e)?.title}</div>
-                                        <div className="leading-tight text-cyan-200/90">{getIntentTooltip(e)?.detail}</div>
-                                    </div>
-                                )}
+                        <div className="relative flex items-end justify-center">
+                            <div className={`transition-transform duration-200 ${e.facing === -1 ? 'scale-x-[-1]' : ''}`}>
+                                {(() => {
+                                    const asset = getKochoEnemyAsset(e);
+                                    return <KochoSheetSprite sheet="characters" src={asset.src} cell={asset.cell} className="h-20 w-20 md:h-36 md:w-36" />;
+                                })()}
                             </div>
-                        )}
+                            {e.intent && (
+                                <div
+                                    className="absolute -top-4 md:-top-5 left-1/2 -translate-x-1/2 flex flex-col items-center z-30 group"
+                                    onMouseEnter={() => setActiveIntentTooltipEnemyId(e.id)}
+                                    onMouseLeave={() => setActiveIntentTooltipEnemyId(prev => (prev === e.id ? null : prev))}
+                                    onTouchStart={(event) => {
+                                        event.preventDefault();
+                                        setActiveIntentTooltipEnemyId(prev => (prev === e.id ? null : e.id));
+                                    }}
+                                >
+                                    {e.intent.type === 'ATTACK' && e.intent.timer === 1 && (
+                                        <div className="bg-red-600 text-white text-xs px-2 py-1 rounded-full font-bold border border-white shadow-lg flex items-center animate-bounce">
+                                            <Swords size={12} className="mr-1"/> !
+                                        </div>
+                                    )}
+                                    {e.intent.type === 'WAIT' && (
+                                        <div className="bg-gray-600 text-white text-xs px-2 py-1 rounded-full font-bold border border-white shadow-lg flex items-center">
+                                            <Hourglass size={12} className="mr-1"/> {e.intent.timer}
+                                        </div>
+                                    )}
+                                    {e.intent.type === 'SUMMON' && (
+                                        <div className="bg-purple-600 text-white text-xs px-2 py-1 rounded-full font-bold border border-white shadow-lg flex items-center">
+                                            <Ghost size={12} className="mr-1"/> !
+                                        </div>
+                                    )}
+                                    {e.intent.type === 'SPECIAL' && (
+                                        <div className="bg-orange-600 text-white text-xs px-2 py-1 rounded-full font-bold border border-white shadow-lg flex items-center animate-pulse">
+                                            <AlertTriangle size={12} className="mr-1"/> SP!
+                                        </div>
+                                    )}
+                                    {getIntentTooltip(e) && (
+                                        <div
+                                            className={`pointer-events-none absolute left-1/2 top-[-56px] w-max -translate-x-1/2 rounded border border-cyan-300/60 bg-slate-900/95 px-2 py-1 text-[10px] text-cyan-100 shadow-lg transition-opacity duration-150 ${activeIntentTooltipEnemyId === e.id ? 'opacity-100' : 'opacity-0 group-hover:opacity-100'}`}
+                                        >
+                                            <div className="font-bold leading-tight">{getIntentTooltip(e)?.title}</div>
+                                            <div className="leading-tight text-cyan-200/90">{getIntentTooltip(e)?.detail}</div>
+                                        </div>
+                                    )}
+                                </div>
+                            )}
+                        </div>
                         <div className="absolute -bottom-6 w-16 text-center bg-black/50 text-white text-xs rounded border border-red-500">{e.hp}/{e.maxHp}</div>
                         {e.bossPhase && <div className="absolute top-0 left-0 bg-yellow-600 text-black text-[10px] px-1 rounded font-bold">P{e.bossPhase}</div>}
                     </div>
@@ -2605,16 +2635,18 @@ const KochoShowdown: React.FC<{
 
                             {/* UPGRADE EVENT UI */}
                             {gameState.phase === 'UPGRADE_EVENT' && (
-                                <div className="w-full h-full flex flex-col items-center justify-center p-4 relative">
-                                    
-                                    <h2 className="text-3xl font-bold text-emerald-400 mb-4 flex items-center animate-pulse"><Hammer className="mr-2"/> Maintenance</h2>
-                                    
-                                    <UpgradeOfferDisplay />
-                                    
-                                    <div className="bg-slate-900 border border-slate-600 rounded-lg p-4 w-full max-w-2xl overflow-y-auto custom-scrollbar mb-8">
+                                <div className="kocho-upgrade-event-panel w-full h-full flex flex-col items-center justify-center p-4 relative">
+
+                                    <div className="kocho-upgrade-event-summary flex flex-col items-center">
+                                        <h2 className="text-3xl font-bold text-emerald-400 mb-4 flex items-center animate-pulse"><Hammer className="mr-2"/> Maintenance</h2>
+
+                                        <UpgradeOfferDisplay />
+                                    </div>
+
+                                    <div className="kocho-upgrade-card-list bg-slate-900 border border-slate-600 rounded-lg p-4 w-full max-w-2xl overflow-y-auto custom-scrollbar mb-8">
                                         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                                             {gameState.hand.map((card, i) => (
-                                                <div key={i} className={`bg-slate-800 p-3 rounded border relative transition-all ${gameState.shopUpgradeUsed ? 'opacity-50 cursor-not-allowed border-slate-600' : 'hover:border-yellow-400 cursor-pointer border-slate-600'}`} onClick={() => handleApplyUpgrade(i)}>
+                                                <div key={i} className={`kocho-upgrade-target-card bg-slate-800 p-3 rounded border relative transition-all ${gameState.shopUpgradeUsed ? 'opacity-50 cursor-not-allowed border-slate-600' : 'hover:border-yellow-400 cursor-pointer border-slate-600'}`} onClick={() => handleApplyUpgrade(i)}>
                                                     <KochoCardActionArt card={card} className="mb-2 h-10 w-10 rounded border border-slate-600 bg-black/40" />
                                                     <div className="font-bold text-sm text-white mb-1">{card.name}</div>
                                                     <div className="text-xs text-gray-400 mb-2">{card.description}</div>
@@ -2633,24 +2665,24 @@ const KochoShowdown: React.FC<{
                                             ))}
                                         </div>
                                     </div>
-                                    
-                                    <button onClick={finishShopOrEvent} className="bg-red-600 hover:bg-red-500 text-white font-bold py-3 px-8 rounded-lg shadow-lg flex items-center border-2 border-red-400">次へ進む <ArrowUp className="ml-2"/></button>
+
+                                    <button onClick={finishShopOrEvent} className="kocho-upgrade-next-button bg-red-600 hover:bg-red-500 text-white font-bold py-3 px-8 rounded-lg shadow-lg flex items-center border-2 border-red-400">次へ進む <ArrowUp className="ml-2"/></button>
                                 </div>
                             )}
 
                             {/* SHOP UI */}
                             {gameState.phase === 'SHOP' && (
-                                <div className="w-full h-full flex flex-col p-4 md:p-8 overflow-y-auto relative">
+                                <div className="kocho-shop-panel w-full h-full flex flex-col p-4 md:p-8 overflow-y-auto relative">
                                     <h2 className="text-3xl font-bold text-indigo-400 mb-6 flex items-center shrink-0"><ShoppingBag className="mr-2"/> Shop</h2>
-                                    <div className="flex flex-col md:flex-row gap-8 flex-grow">
-                                        <div className="flex-1 bg-slate-900 border border-slate-600 rounded-lg p-4 overflow-y-auto custom-scrollbar flex flex-col">
+                                    <div className="kocho-shop-columns flex flex-col md:flex-row gap-8 flex-grow">
+                                        <div className="kocho-shop-upgrade-column flex-1 bg-slate-900 border border-slate-600 rounded-lg p-4 overflow-y-auto custom-scrollbar flex flex-col">
                                             <h3 className="text-xl font-bold text-white mb-4 flex items-center justify-between"><span className="flex items-center"><Hammer className="mr-2 text-red-400"/> Deck Upgrade</span><span className={`text-xs ${gameState.shopUpgradeUsed ? 'text-red-500' : 'text-green-400'}`}>{gameState.shopUpgradeUsed ? '(済)' : '(1回のみ)'}</span></h3>
                                             
                                             <UpgradeOfferDisplay />
 
-                                            <div className="grid grid-cols-2 gap-4">
+                                            <div className="kocho-shop-upgrade-card-grid grid grid-cols-2 gap-4">
                                                 {gameState.hand.map((card, i) => (
-                                                    <div key={i} className={`bg-slate-800 p-3 rounded border relative transition-all ${gameState.shopUpgradeUsed ? 'opacity-50 cursor-not-allowed border-slate-600' : 'hover:border-yellow-400 cursor-pointer border-slate-600'}`} onClick={() => handleApplyUpgrade(i)}>
+                                                    <div key={i} className={`kocho-upgrade-target-card bg-slate-800 p-3 rounded border relative transition-all ${gameState.shopUpgradeUsed ? 'opacity-50 cursor-not-allowed border-slate-600' : 'hover:border-yellow-400 cursor-pointer border-slate-600'}`} onClick={() => handleApplyUpgrade(i)}>
                                                         <KochoCardActionArt card={card} className="mb-2 h-10 w-10 rounded border border-slate-600 bg-black/40" />
                                                         <div className="font-bold text-sm text-white mb-1">{card.name}</div>
                                                         <div className="text-xs text-gray-400 mb-2">{card.description}</div>
@@ -2666,9 +2698,9 @@ const KochoShowdown: React.FC<{
                                                 ))}
                                             </div>
                                         </div>
-                                        <div className="w-full md:w-96 bg-slate-900 border border-slate-600 rounded-lg p-4 shrink-0">
+                                        <div className="kocho-shop-relic-column w-full md:w-96 bg-slate-900 border border-slate-600 rounded-lg p-4 shrink-0">
                                             <h3 className="text-xl font-bold text-white mb-4 flex items-center"><Gift className="mr-2 text-yellow-400"/> Relics (2 Random)</h3>
-                                            <div className="space-y-4">
+                                            <div className="kocho-shop-relic-list space-y-4">
                                                 {gameState.shopInventory.map(item => {
                                                     const owned = gameState.relics.some(r => r.id === item.id) && item.id !== 'R_POTION';
                                                     const finalPrice = getShopPrice(item.price);
@@ -2689,7 +2721,7 @@ const KochoShowdown: React.FC<{
                                                 })}
                                                 {gameState.shopInventory.length === 0 && <div className="text-gray-500 text-center py-4">売り切れ</div>}
                                             </div>
-                                            <button onClick={finishShopOrEvent} className="mt-8 w-full bg-red-600 hover:bg-red-500 text-white font-bold py-4 rounded-lg text-xl flex items-center justify-center animate-pulse border-2 border-red-400">次へ進む <ArrowUp className="ml-2"/></button>
+                                            <button onClick={finishShopOrEvent} className="kocho-shop-next-button mt-8 w-full bg-red-600 hover:bg-red-500 text-white font-bold py-4 rounded-lg text-xl flex items-center justify-center animate-pulse border-2 border-red-400">次へ進む <ArrowUp className="ml-2"/></button>
                                         </div>
                                     </div>
                                 </div>
@@ -2697,16 +2729,10 @@ const KochoShowdown: React.FC<{
 
                             {/* VICTORY UI */}
                             {gameState.status === 'VICTORY' && (
-                                <div className="text-center animate-in zoom-in">
-                                    <Trophy size={64} className="text-yellow-400 mb-4 animate-bounce mx-auto"/>
-                                    <h2 className="text-4xl font-bold text-white mb-4">GRADUATION!</h2>
-                                    <p className="text-gray-300 mb-8">You defeated the Principal.</p>
-                                    <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-yellow-500/50 bg-yellow-950/40 px-4 py-2 text-sm font-bold text-yellow-200">
-                                        <Gift size={16}/>
-                                        追加カード解放 {kochoUnlockedCount}/{KOCHO_UNLOCKABLE_CARD_TOTAL}
-                                    </div>
-                                    {newlyUnlockedCard ? (
-                                        <div className="mx-auto mb-8 w-64 rounded-2xl border-4 border-yellow-500 bg-slate-900 p-5 shadow-xl">
+                                <div className="kocho-victory-panel text-center animate-in zoom-in">
+                                    <div className="kocho-victory-unlock-area">
+                                        {newlyUnlockedCard ? (
+                                        <div className="kocho-victory-card mx-auto mb-8 w-64 rounded-2xl border-4 border-yellow-500 bg-slate-900 p-5 shadow-xl">
                                             <div className="mb-2 text-xs font-black tracking-[0.2em] text-yellow-300">NEW CARD</div>
                                             <KochoCardActionArt card={newlyUnlockedCard} className="mx-auto mb-3 h-16 w-16 rounded-full border border-yellow-400/50 bg-black/40" />
                                             <div className="text-lg font-bold text-white">{newlyUnlockedCard.name}</div>
@@ -2717,12 +2743,21 @@ const KochoShowdown: React.FC<{
                                             <div className="mt-3 text-xs leading-relaxed text-gray-300">{newlyUnlockedCard.description}</div>
                                             <div className="mt-4 text-[11px] font-bold text-emerald-300">以降の校長対決の報酬に登場します</div>
                                         </div>
-                                    ) : (
-                                        <div className="mb-8 rounded-xl border border-emerald-500/40 bg-emerald-950/30 px-5 py-4 text-sm font-bold text-emerald-200">
+                                        ) : (
+                                        <div className="kocho-victory-card mb-8 rounded-xl border border-emerald-500/40 bg-emerald-950/30 px-5 py-4 text-sm font-bold text-emerald-200">
                                             追加カードはすべて解放済みです
                                         </div>
-                                    )}
-                                    <button onClick={onBack} className="bg-indigo-600 px-8 py-3 rounded text-xl font-bold hover:bg-indigo-500">Return</button>
+                                        )}
+                                    </div>
+                                    <div className="kocho-victory-text-area flex flex-col items-center justify-center">
+                                        <h2 className="text-4xl font-bold text-white mb-4">GRADUATION!</h2>
+                                        <p className="text-gray-300 mb-8">You defeated the Principal.</p>
+                                        <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-yellow-500/50 bg-yellow-950/40 px-4 py-2 text-sm font-bold text-yellow-200">
+                                            <Gift size={16}/>
+                                            追加カード解放 {kochoUnlockedCount}/{KOCHO_UNLOCKABLE_CARD_TOTAL}
+                                        </div>
+                                        <button onClick={onBack} className="bg-indigo-600 px-8 py-3 rounded text-xl font-bold hover:bg-indigo-500">Return</button>
+                                    </div>
                                 </div>
                             )}
 
@@ -2815,10 +2850,10 @@ const KochoShowdown: React.FC<{
 
                 {/* Controls (Sidebar) */}
                 {gameState.status !== 'GAME_OVER' && gameState.status !== 'VICTORY' && gameState.phase === 'BATTLE' && (
-                    <div className="w-full md:w-80 bg-[#0f0f1b] border-t md:border-t-0 md:border-l border-indigo-900 p-2 md:p-4 shrink-0 flex flex-col gap-2 md:h-full md:overflow-y-auto custom-scrollbar">
+                    <div className="kocho-control-panel w-full md:w-80 bg-[#0f0f1b] border-t md:border-t-0 md:border-l border-indigo-900 p-2 md:p-4 shrink-0 flex flex-col gap-2 md:h-full md:overflow-y-auto custom-scrollbar">
                         
                         {/* Queue Display */}
-                        <div className="flex justify-between items-center gap-2 bg-black/30 p-2 rounded-lg border border-indigo-900/30 shrink-0">
+                        <div className="kocho-queue-panel flex justify-between items-center gap-2 bg-black/30 p-2 rounded-lg border border-indigo-900/30 shrink-0">
                             <div className="flex gap-1 justify-center items-center flex-grow">
                                 {[...Array(3)].map((_, i) => {
                                     const card = gameState.queue[i];
@@ -2826,7 +2861,7 @@ const KochoShowdown: React.FC<{
                                         <div key={i} className="w-12 h-16 md:w-16 md:h-20 bg-slate-800 border border-slate-600 rounded flex flex-col items-center justify-center relative group cursor-pointer hover:border-red-400 shrink-0" onClick={() => handleUnqueueCard(i)}>
                                             <div className={`w-full h-1 ${card.color} absolute top-0`}></div>
                                             <div className="text-[9px] md:text-xs text-center font-bold px-1 overflow-hidden whitespace-nowrap text-ellipsis w-full">{card.name}</div>
-                                            <KochoCardActionArt card={card} className="h-7 w-7 rounded bg-black/40" />
+                                            <KochoCardActionArt card={card} className="kocho-queue-card-art h-7 w-7 rounded bg-black/40" />
                                             <X size={12} className="absolute -top-1 -right-1 bg-red-500 rounded-full text-white opacity-0 group-hover:opacity-100"/>
                                         </div>
                                     ) : (
@@ -2840,27 +2875,35 @@ const KochoShowdown: React.FC<{
                         </div>
 
                         {/* Hand Cards */}
-                        <div className="flex md:flex-col md:flex-nowrap gap-2 overflow-x-auto md:overflow-x-hidden md:overflow-y-auto pb-2 px-1 custom-scrollbar min-h-[100px] md:min-h-0 md:flex-grow items-center md:items-stretch">
+                        <div className="kocho-hand-card-strip flex gap-2 overflow-x-auto overflow-y-hidden pb-2 px-1 custom-scrollbar min-h-[9.5rem] md:min-h-[10.5rem] shrink-0 items-stretch snap-x snap-mandatory">
                             {gameState.hand.map((card, i) => (
-                                <div 
-                                    key={card.id} 
-                                    className={`w-20 h-28 md:w-full md:h-auto bg-slate-800 border-2 rounded-lg flex flex-col md:flex-row justify-between p-1 md:p-2 cursor-pointer transition-transform relative shadow-lg shrink-0 md:shrink ${card.usedSlots > 0 ? 'border-yellow-400' : 'border-slate-600'} ${card.currentCooldown > 0 ? 'opacity-50 grayscale' : 'hover:-translate-y-2 md:hover:translate-y-0 md:hover:translate-x-2'}`} 
+                                <div
+                                    key={card.id}
+                                    className={`kocho-hand-card w-28 h-36 md:w-32 md:h-40 bg-slate-800 border-2 rounded-xl flex flex-col justify-between p-2 cursor-pointer transition-transform relative shadow-lg shrink-0 snap-start ${card.usedSlots > 0 ? 'border-yellow-400' : 'border-slate-600'} ${card.currentCooldown > 0 ? 'opacity-50 grayscale' : 'hover:-translate-y-1'}`}
                                     onClick={() => handleQueueCard(card, i)}
                                 >
-                                    <div className={`absolute top-0 left-0 w-full h-1 md:w-1 md:h-full ${card.color} rounded-t-sm md:rounded-l-sm`}></div>
+                                    <div className={`absolute top-0 left-0 w-full h-1.5 ${card.color} rounded-t-lg`}></div>
                                     
                                     {/* Icon Badge for Effect Type */}
                                     <div className="absolute top-1 right-1 text-[8px] bg-black/60 px-1 rounded text-white font-mono">
                                         {(card.effectType === 'PIERCE' || card.effectType === 'FURTHEST') ? '>>>' : (card.type === 'MOVE' ? 'MOVE' : (card.effectType === 'PIERCE_DASH' ? 'THRU' : '>|'))}
                                     </div>
 
-                                    <div className="flex flex-col h-full w-full md:hidden">
-                                        <div className="mt-1 text-[9px] font-bold text-center leading-tight truncate">{card.name}</div>
-                                        <KochoCardActionArt card={card} className="mx-auto my-0.5 h-8 w-8 rounded bg-black/40" />
-                                        <div className="text-[8px] text-gray-400 text-center leading-tight h-6 overflow-hidden">{card.description}</div>
-                                        <div className="flex justify-between items-center text-[8px] text-gray-500 mt-auto font-mono w-full"><span>CD:{card.cooldown}</span>{card.damage > 0 ? <span className="text-red-400 font-bold">{card.damage}</span> : <span className="opacity-70">{card.type}</span>}</div>
+                                    <div className="flex flex-col h-full w-full pt-2">
+                                        <div className="text-[11px] md:text-xs font-bold text-center leading-tight truncate px-3">{card.name}</div>
+                                        <KochoCardActionArt card={card} className="kocho-hand-card-art mx-auto my-1 h-12 w-12 md:h-14 md:w-14 rounded-lg bg-black/40 border border-slate-700" />
+                                        <div className="text-[9px] md:text-[10px] text-gray-300 text-center leading-tight min-h-[2.4em] max-h-[2.4em] overflow-hidden">{card.description}</div>
+                                        <div className="flex justify-center gap-1 mt-1">
+                                            {[...Array(card.maxSlots)].map((_, idx) => (
+                                                <div key={idx} className={`w-1.5 h-1.5 rounded-full ${idx < card.usedSlots ? 'bg-yellow-400' : 'bg-gray-600'}`} />
+                                            ))}
+                                        </div>
+                                        <div className="flex justify-between items-center text-[9px] md:text-[10px] text-gray-500 mt-auto font-mono w-full">
+                                            <span>CD:{card.cooldown}</span>
+                                            {card.damage > 0 ? <span className="text-red-400 font-bold flex items-center"><Swords size={10} className="mr-0.5"/>{card.damage}</span> : <span className="opacity-70">{card.type}</span>}
+                                        </div>
                                     </div>
-                                    <div className="hidden md:flex flex-row items-center w-full pl-2 gap-2">
+                                    <div className="hidden">
                                         <KochoCardActionArt card={card} className="h-9 w-9 shrink-0 rounded bg-black/40" />
                                         <div className="flex-grow min-w-0">
                                             <div className="text-xs font-bold truncate">{card.name}</div>
@@ -2882,7 +2925,7 @@ const KochoShowdown: React.FC<{
                         </div>
 
                         {/* Movement Controls */}
-                        <div className="flex justify-center items-center gap-4 py-2 border-t border-indigo-900/30 relative shrink-0">
+                        <div className="kocho-movement-controls flex justify-center items-center gap-4 py-2 border-t border-indigo-900/30 relative shrink-0">
                             <button onClick={() => handleMove(-1)} className="bg-slate-700 hover:bg-slate-600 p-4 rounded-full border border-slate-500 active:bg-slate-800 transition-colors shadow-lg"><ChevronLeft size={24}/></button>
                             <div className="flex flex-col items-center gap-1">
                                 <div className="flex gap-1">
