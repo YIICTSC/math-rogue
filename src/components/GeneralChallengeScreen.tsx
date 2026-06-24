@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { CheckCircle, XCircle, Volume2, Mic } from 'lucide-react';
 import { audioService } from '../services/audioService';
-import { AnswerMode, AssignmentCustomProblem, GameMode } from '../types';
+import { AnswerMode, AssignmentAnswerResult, AssignmentCustomProblem, AssignmentReviewProblem, GameMode } from '../types';
 import { storageService } from '../services/storageService';
 import { SUBJECT_DATA, GeneralProblem } from '../data/subjectData';
 import { MAP_SYMBOL_ASSET_MAP } from './mapSymbolImageMap';
@@ -18,9 +18,10 @@ interface GeneralChallengeScreenProps {
   isChallenge?: boolean;
   streak?: number;
   rewardHint?: string;
-  onAnswerResult?: (result: { mode: string; correct: boolean; elapsedMs: number; problemId?: string }) => void;
+  onAnswerResult?: (result: AssignmentAnswerResult) => void;
   customProblems?: AssignmentCustomProblem[];
   problemOffset?: number;
+  reviewProblem?: AssignmentReviewProblem | null;
 }
 
 const EMPTY_CUSTOM_PROBLEMS: AssignmentCustomProblem[] = [];
@@ -61,6 +62,9 @@ interface ExtendedGeneralProblem extends GeneralProblem {
   actualCorrectAnswer: string;
   sourceMode: string;
   assignmentProblemId?: string;
+  assignmentProblemKey?: string;
+  isAssignmentRetry?: boolean;
+  retryOfProblemKey?: string;
 }
 
 type BrowserSpeechRecognition = {
@@ -100,7 +104,7 @@ const isEnglishSpeakingReviewMode = (mode: string) =>
   /^ENGLISH_G8_U(11|12|13)$/.test(mode) ||
   /^ENGLISH_G9_U(12|13|14)$/.test(mode);
 
-const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onComplete, mode, modePool, onModeCorrect, answerMode = 'CHOICE', debugSkip, isChallenge, streak = 0, rewardHint, onAnswerResult, customProblems = EMPTY_CUSTOM_PROBLEMS, problemOffset = 0 }) => {
+const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onComplete, mode, modePool, onModeCorrect, answerMode = 'CHOICE', debugSkip, isChallenge, streak = 0, rewardHint, onAnswerResult, customProblems = EMPTY_CUSTOM_PROBLEMS, problemOffset = 0, reviewProblem = null }) => {
   const [problems, setProblems] = useState<ExtendedGeneralProblem[]>([]);
   const [currentProblemIndex, setCurrentProblemIndex] = useState(0);
   const [correctCount, setCorrectCount] = useState(0);
@@ -359,6 +363,22 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
         }
     }
 
+    if (reviewProblem) {
+      setProblems([{
+        question: reviewProblem.question,
+        answer: reviewProblem.correctAnswer,
+        options: [...new Set([reviewProblem.correctAnswer, ...(reviewProblem.options || [])])].slice(0, 4).sort(() => Math.random() - 0.5),
+        unitLabel: reviewProblem.unitName || '再出題',
+        sourceMode: reviewProblem.mode,
+        assignmentProblemId: reviewProblem.problemId,
+        assignmentProblemKey: reviewProblem.problemKey,
+        retryOfProblemKey: reviewProblem.problemKey,
+        isAssignmentRetry: true,
+        actualCorrectAnswer: reviewProblem.correctAnswer,
+      }]);
+      return;
+    }
+
     let problemPool: Array<GeneralProblem & { sourceMode: string }> = [];
     if (modePool && modePool.length > 0) {
       problemPool = modePool.flatMap((m) => (SUBJECT_DATA[m] || []).map((p) => ({ ...p, sourceMode: m })));
@@ -400,12 +420,13 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
             return {
                 ...p,
                 actualCorrectAnswer: correctAnswer,
-                options: [...p.options].sort(() => Math.random() - 0.5)
+                options: [...p.options].sort(() => Math.random() - 0.5),
+                assignmentProblemKey: ('assignmentProblemId' in p ? p.assignmentProblemId : undefined) || `${p.sourceMode}:${p.question}`,
             };
         });
         
     setProblems(shuffled);
-  }, [mode, modePool, debugSkip, isChallenge, customProblems, problemOffset]);
+  }, [mode, modePool, debugSkip, isChallenge, customProblems, problemOffset, reviewProblem]);
 
   const attemptedCount = currentProblemIndex + (isAnswered ? 1 : 0);
   const accuracy = attemptedCount > 0 ? Math.round((correctCount / attemptedCount) * 100) : 0;
@@ -472,6 +493,12 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
       correct: isCorrect,
       elapsedMs: Date.now() - questionStartedAtRef.current,
       problemId: problems[currentProblemIndex].assignmentProblemId,
+      problemKey: problems[currentProblemIndex].assignmentProblemKey || problems[currentProblemIndex].assignmentProblemId || `${problems[currentProblemIndex].sourceMode}:${problems[currentProblemIndex].question}`,
+      question: problems[currentProblemIndex].question,
+      correctAnswer: problems[currentProblemIndex].actualCorrectAnswer,
+      selectedAnswer: selected,
+      isRetry: problems[currentProblemIndex].isAssignmentRetry,
+      retryOfProblemKey: problems[currentProblemIndex].retryOfProblemKey,
     };
 
     setTimeout(() => {

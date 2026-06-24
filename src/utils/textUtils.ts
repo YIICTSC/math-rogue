@@ -962,6 +962,7 @@ const BASE_DICTIONARY: Record<string, string> = {
     "使用するとその戦闘中はデッキから消滅。": "つかうと そのバトルでは なくなる。",
     "キラキラ (Artifact)": "キラキラ (バリア)",
     "デバフを1回無効化。": "わるい こうかを 1かい ふせぐ。",
+    "受けるダメージを1にする。": "うける ダメージを 1に する。",
 
     // --- Battle UI & Card Text Specifics ---
     "山札": "やまふだ",
@@ -4451,6 +4452,7 @@ Object.assign(ENGLISH_DICTIONARY, {
     "応答!": "Respond!",
     "捨てる": "Discard",
     "デバフを無効化する。": "Negates a debuff.",
+    "受けるダメージを1にする。": "Reduce incoming damage to 1.",
     "進行中": "In Progress",
     "戦闘不能": "Defeated",
     "の行動を待っています": "is waiting to act",
@@ -5272,7 +5274,7 @@ const getPowerEffectEnglish = (id: string | undefined, amount: number): string |
         case 'HEAL':
             return `Heal ${amount} HP`;
         case 'DRAW':
-            return `Draw ${plural(amount, "card")}`;
+            return `Draw ${plural(amount, "card")} at the start of next turn`;
         case 'ENERGY_NEXT':
             return `Gain ${amount} Energy next turn`;
         case 'POISON':
@@ -5288,7 +5290,7 @@ const getPowerEffectEnglish = (id: string | undefined, amount: number): string |
         case 'GOLD':
             return `Gain ${amount} Gold`;
         case 'CHAOS_SURGE':
-            return `Draw ${plural(amount, "card")}, gain ${amount} Strength, and gain Energy next turn`;
+            return `Draw ${plural(amount, "card")} at the start of next turn, gain ${amount} Strength, and gain Energy next turn`;
         default:
             return null;
     }

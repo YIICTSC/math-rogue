@@ -397,6 +397,17 @@ export enum GameScreen {
   FLOOR_RESULT = 'FLOOR_RESULT'
 }
 
+export type MiniGameDebugPreview =
+  | 'GAME_OVER'
+  | 'ENDING'
+  | 'KOCHO_REWARD'
+  | 'KOCHO_UPGRADE'
+  | 'KOCHO_SHOP'
+  | 'PAPER_REWARD'
+  | 'PAPER_EQUIP'
+  | 'PAPER_VACATION'
+  | 'PAPER_HANGAR';
+
 export enum GameMode {
   // 算数（動的生成）
   ADDITION = 'ADDITION',
@@ -767,9 +778,38 @@ export interface AssignmentAnswerRecord {
   mode: string;
   unitName?: string;
   problemId?: string;
+  problemKey?: string;
+  question?: string;
+  correctAnswer?: string;
+  selectedAnswer?: string;
+  isRetry?: boolean;
+  retryOfProblemKey?: string;
   correct: boolean;
   answeredAt: string;
   elapsedMs: number;
+}
+
+export interface AssignmentReviewProblem {
+  mode: string;
+  problemId?: string;
+  problemKey: string;
+  question: string;
+  correctAnswer: string;
+  options?: string[];
+  unitName?: string;
+}
+
+export interface AssignmentAnswerResult {
+  mode: string;
+  correct: boolean;
+  elapsedMs: number;
+  problemId?: string;
+  problemKey?: string;
+  question?: string;
+  correctAnswer?: string;
+  selectedAnswer?: string;
+  isRetry?: boolean;
+  retryOfProblemKey?: string;
 }
 
 export interface StudentProfile {

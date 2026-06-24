@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import {
     GameState, GameScreen, Enemy, Card as ICard, ActiveFamiliar,
-    CardType, TargetType, EnemyIntentType, NodeType, MapNode, RewardItem, Relic, Potion, Player, EnemyIntent, Character, FloatingText, RankingEntry, GameMode, LanguageMode, AnswerMode, VisualEffectInstance, GardenSlot, VFXType, ActStats, RaceTrickCard, RaceTrickEffectId, CoopSupportCard, CoopBattleState, CoopBattleTurnSlot, CoopBattlePlayerState, CoopSharedState, CoopTreasurePool, AssignmentPayload, StudentProfile
+    CardType, TargetType, EnemyIntentType, NodeType, MapNode, RewardItem, Relic, Potion, Player, EnemyIntent, Character, FloatingText, RankingEntry, GameMode, LanguageMode, AnswerMode, VisualEffectInstance, GardenSlot, VFXType, ActStats, RaceTrickCard, RaceTrickEffectId, CoopSupportCard, CoopBattleState, CoopBattleTurnSlot, CoopBattlePlayerState, CoopSharedState, CoopTreasurePool, AssignmentPayload, AssignmentAnswerResult, StudentProfile, MiniGameDebugPreview
 } from './types';
 import {
     INITIAL_HP, INITIAL_ENERGY, HAND_SIZE,
@@ -747,6 +747,8 @@ const App: React.FC = () => {
     const [isMobilePortrait, setIsMobilePortrait] = useState(false);
     const [isUiPreviewMode, setIsUiPreviewMode] = useState(false);
     const [isUiPreviewToolbarOpen, setIsUiPreviewToolbarOpen] = useState(true);
+    const [uiPreviewMiniGameOutcome, setUiPreviewMiniGameOutcome] = useState<MiniGameDebugPreview | undefined>(undefined);
+    const [focusedUiPreviewScreenId, setFocusedUiPreviewScreenId] = useState<string | undefined>(undefined);
     const [uiPreviewViewport, setUiPreviewViewport] = useState(() => ({
         width: typeof window === 'undefined' ? 0 : window.innerWidth,
         height: typeof window === 'undefined' ? 0 : window.innerHeight,
@@ -2314,8 +2316,10 @@ const App: React.FC = () => {
         if (gameState.challengeMode !== 'COOP' || !coopSession || coopSession.isHost) return;
         const bgmType = getBgmForScreen(gameState);
         if (!bgmType) return;
-        void audioService.setBgmTheme(getBgmThemeForPlayer(gameState.visualTheme || visualTheme, gameState.player));
-        void audioService.playBGM(bgmType);
+        void (async () => {
+            await audioService.setBgmTheme(getBgmThemeForPlayer(gameState.visualTheme || visualTheme, gameState.player));
+            await audioService.playBGM(bgmType);
+        })();
     }, [coopSession, gameState, getBgmForScreen, visualTheme]);
 
     useEffect(() => {
@@ -2323,8 +2327,10 @@ const App: React.FC = () => {
         if (gameState.screen === GameScreen.TREASURE) return;
         const bgmType = getBgmForScreen(gameState);
         if (!bgmType) return;
-        void audioService.setBgmTheme(getBgmThemeForPlayer(gameState.visualTheme || visualTheme, gameState.player));
-        void audioService.playBGM(bgmType);
+        void (async () => {
+            await audioService.setBgmTheme(getBgmThemeForPlayer(gameState.visualTheme || visualTheme, gameState.player));
+            await audioService.playBGM(bgmType);
+        })();
     }, [gameState.screen, gameState.currentMapNodeId, gameState.challengeMode, gameState.enemies, gameState.player.magicProtagonistGender, gameState.visualTheme, getBgmForScreen, visualTheme]);
 
     useEffect(() => {
@@ -2434,7 +2440,10 @@ const App: React.FC = () => {
                 }
             };
             if (nextHp <= 0 && prev.screen !== GameScreen.GAME_OVER) {
-                audioService.playBGM('game_over');
+                void audioService.switchThemeAndPlayBGM(
+                    getBgmThemeForPlayer(nextState.visualTheme || visualTheme, nextState.player),
+                    'game_over'
+                );
                 return { ...nextState, screen: GameScreen.GAME_OVER };
             }
             return nextState;
@@ -2627,6 +2636,7 @@ const App: React.FC = () => {
             if (
                 gameState.screen !== GameScreen.START_MENU &&
                 gameState.screen !== GameScreen.PROBLEM_CHALLENGE &&
+                gameState.screen !== GameScreen.DEBUG_MENU &&
                 gameState.screen !== GameScreen.MAGIC_EVENT_SIMULATION
             ) {
                 const currentFromStorage = storageService.getDailyPlayTime();
@@ -3577,11 +3587,8 @@ const App: React.FC = () => {
                         effects.push({ id: `vfx-fam-heal-${Date.now()}`, type: 'HEAL', targetId: 'player' });
                         break;
                     case 'DRAW':
-                        for (let i = 0; i < amount; i += 1) {
-                            const drawn = drawOneCard(player);
-                            if (drawn) player.hand.push(drawn);
-                        }
-                        player.floatingText = { id: `fam-draw-${Date.now()}`, text: `+${amount}枚`, color: 'text-cyan-200', iconType: 'zap' };
+                        player.nextTurnDraw += amount;
+                        player.floatingText = { id: `fam-draw-${Date.now()}`, text: `次+${amount}枚`, color: 'text-cyan-200', iconType: 'zap' };
                         effects.push({ id: `vfx-fam-draw-${Date.now()}`, type: 'BUFF', targetId: 'player' });
                         break;
                     case 'ENERGY_NEXT':
@@ -3628,10 +3635,7 @@ const App: React.FC = () => {
                         effects.push({ id: `vfx-fam-gold-${Date.now()}`, type: 'BUFF', targetId: 'player' });
                         break;
                     case 'CHAOS_SURGE':
-                        for (let i = 0; i < amount; i += 1) {
-                            const drawn = drawOneCard(player);
-                            if (drawn) player.hand.push(drawn);
-                        }
+                        player.nextTurnDraw += amount;
                         player.strength += amount;
                         player.nextTurnEnergy += Math.max(1, amount - 1);
                         player.floatingText = { id: `fam-chaos-${Date.now()}`, text: `混沌+${amount}`, color: 'text-fuchsia-200', iconType: 'zap' };
@@ -4590,7 +4594,8 @@ const App: React.FC = () => {
         });
     }, [createUiPreviewEnemies, createUiPreviewFamiliars, getSelfTurnLogLabel, preparePlayerForBattle, themedCharacters, visualTheme]);
 
-    const handleStartUiPreview = useCallback((screen: GameScreen) => {
+    const handleStartUiPreview = useCallback((screen: GameScreen, miniGameOutcome?: MiniGameDebugPreview) => {
+        const selectedPreviewItem = UI_PREVIEW_SCREENS.find(item => item.screen === screen && item.miniGameOutcome === miniGameOutcome);
         if (!uiPreviewSnapshotRef.current) {
             uiPreviewSnapshotRef.current = stateRef.current;
             uiPreviewCoopSnapshotRef.current = {
@@ -4604,6 +4609,8 @@ const App: React.FC = () => {
         }
         setIsUiPreviewMode(true);
         setIsUiPreviewToolbarOpen(true);
+        setUiPreviewMiniGameOutcome(miniGameOutcome);
+        setFocusedUiPreviewScreenId(selectedPreviewItem?.id ?? screen);
         if (screen === GameScreen.BATTLE) {
             applyUiPreviewBattle(uiPreviewBattleConfig);
             return;
@@ -4614,10 +4621,17 @@ const App: React.FC = () => {
         setCoopBattleQueue([]);
         setCoopBattleKey(null);
         setCoopEnemyTurnCursor(0);
+        const previewUnlockedCardTemplate = Object.values(ADDITIONAL_CARDS)[0] || null;
+        const previewUnlockedCard = previewUnlockedCardTemplate
+            ? { ...previewUnlockedCardTemplate, id: `ui-preview-unlocked-${Date.now()}` } as ICard
+            : null;
         if (screen === GameScreen.FLOOR_RESULT || screen === GameScreen.ENDING || screen === GameScreen.GAME_OVER) {
-            setNewlyUnlockedCard(null);
+            setNewlyUnlockedCard(screen === GameScreen.FLOOR_RESULT || screen === GameScreen.ENDING ? previewUnlockedCard : null);
             setLegacyCardSelected(false);
-            audioService.playBGM(screen === GameScreen.GAME_OVER ? 'game_over' : 'victory');
+            void audioService.switchThemeAndPlayBGM(
+                getBgmThemeForPlayer(visualTheme, gameState.player),
+                screen === GameScreen.GAME_OVER ? 'game_over' : 'victory'
+            );
         }
         setGameState(prev => {
             const previewMap = (screen === GameScreen.MAP || screen === GameScreen.BATTLE) && prev.map.length === 0
@@ -4631,11 +4645,12 @@ const App: React.FC = () => {
             if (screen === GameScreen.FLOOR_RESULT || screen === GameScreen.ENDING || screen === GameScreen.GAME_OVER) {
                 const isGameOverPreview = screen === GameScreen.GAME_OVER;
                 const isEndingPreview = screen === GameScreen.ENDING;
+                const shouldShowLegacyCardPreview = isEndingPreview || isGameOverPreview;
                 return {
                     ...prev,
                     screen,
                     challengeMode: undefined,
-                    difficultyLevel: 6,
+                    difficultyLevel: shouldShowLegacyCardPreview ? 5 : 6,
                     act: isEndingPreview ? 4 : isGameOverPreview ? 2 : 1,
                     floor: isEndingPreview ? 20 : isGameOverPreview ? 7 : 6,
                     player: {
@@ -4649,7 +4664,9 @@ const App: React.FC = () => {
                         mathCorrect: isGameOverPreview ? 18 : 64,
                     },
                     currentStoryIndex: 0,
-                    newlyUnlockedCardName: undefined,
+                    newlyUnlockedCardName: screen === GameScreen.FLOOR_RESULT || screen === GameScreen.ENDING
+                        ? previewUnlockedCardTemplate?.name
+                        : undefined,
                     isEndless: false,
                     coopBattleState: null,
                 };
@@ -4672,6 +4689,7 @@ const App: React.FC = () => {
         uiPreviewCoopSnapshotRef.current = null;
         setIsUiPreviewMode(false);
         setIsUiPreviewToolbarOpen(true);
+        setUiPreviewMiniGameOutcome(undefined);
         if (coopSnapshot) {
             setCoopSession(coopSnapshot.coopSession);
             setCoopSupportCards(coopSnapshot.coopSupportCards);
@@ -5611,7 +5629,6 @@ const App: React.FC = () => {
                         }
                         setTreasureOpened(false);
                         setGameState({ ...nextState, player: p, screen: GameScreen.TREASURE });
-                        audioService.playBGM('reward');
                         return;
                     }
                     p.relicCounters['TINY_CHEST_PROGRESS'] = tinyChestProgress;
@@ -5684,7 +5701,6 @@ const App: React.FC = () => {
                 }
                 setTreasureOpened(false);
                 setGameState({ ...nextState, player: p, screen: GameScreen.TREASURE });
-                audioService.playBGM('reward');
             }
 
         } catch (e) {
@@ -9427,7 +9443,10 @@ const App: React.FC = () => {
                 newlyUnlockedCardName: undefined,
                 coopBattleState: null
             }));
-            audioService.playBGM('menu');
+            void audioService.switchThemeAndPlayBGM(
+                getBgmThemeForPlayer(visualTheme, gameState.player),
+                'menu'
+            );
             return;
         }
         if (gameState.challengeMode === 'RACE') {
@@ -9655,8 +9674,11 @@ const App: React.FC = () => {
         if (stateRef.current.visualTheme === 'high-school') {
             audioService.playHighSchoolVoice(stateRef.current.player.id, 'defeat');
         }
-        audioService.playBGM('game_over');
         const currentState = stateRef.current;
+        void audioService.switchThemeAndPlayBGM(
+            getBgmThemeForPlayer(currentState.visualTheme || visualTheme, currentState.player),
+            'game_over'
+        );
         const score = calculateScore(currentState, false);
         storageService.saveScore({
             id: `run-${Date.now()}`,
@@ -9675,7 +9697,7 @@ const App: React.FC = () => {
             screen: GameScreen.GAME_OVER,
             newlyUnlockedCardName: undefined
         }));
-    }, [selectedCharName]);
+    }, [selectedCharName, visualTheme]);
 
     const applyCoopAutoRevives = useCallback(() => {
         const currentState = stateRef.current;
@@ -10459,7 +10481,7 @@ const App: React.FC = () => {
         });
     }, []);
 
-    const handleAssignmentAnswerResult = useCallback((result: { mode: string; correct: boolean; elapsedMs: number; problemId?: string }) => {
+    const handleAssignmentAnswerResult = useCallback((result: AssignmentAnswerResult) => {
         const assignment = effectiveAssignment;
         const assignmentModePool = getAssignmentModePool(assignment);
         const assignmentUnit = assignment?.units.find((unit) => unit.modes.includes(result.mode));
@@ -10470,6 +10492,12 @@ const App: React.FC = () => {
             mode: result.mode,
             unitName: isCustomAssignmentAnswer ? 'オリジナル問題' : assignmentUnit?.name,
             problemId: result.problemId,
+            problemKey: result.problemKey,
+            question: result.question,
+            correctAnswer: result.correctAnswer,
+            selectedAnswer: result.selectedAnswer,
+            isRetry: result.isRetry,
+            retryOfProblemKey: result.retryOfProblemKey,
             correct: result.correct,
             elapsedMs: Math.max(0, result.elapsedMs || 0),
             answeredAt: new Date().toISOString(),
@@ -12522,14 +12550,17 @@ const App: React.FC = () => {
                                     </button>
                                 </div>
                                 <select
-                                    value={gameState.screen}
-                                    onChange={(event) => handleStartUiPreview(event.target.value as GameScreen)}
+                                    value={uiPreviewMiniGameOutcome ? `${gameState.screen}:${uiPreviewMiniGameOutcome}` : gameState.screen}
+                                    onChange={(event) => {
+                                        const item = UI_PREVIEW_SCREENS.find(entry => entry.id === event.target.value);
+                                        if (item) handleStartUiPreview(item.screen, item.miniGameOutcome);
+                                    }}
                                     className="w-full rounded border border-sky-700 bg-black px-3 py-2 text-sm font-bold text-white outline-none focus:border-sky-300"
                                 >
                                     {UI_PREVIEW_GROUPS.map(group => (
                                         <optgroup key={group} label={group}>
                                             {UI_PREVIEW_SCREENS.filter(item => item.group === group).map(item => (
-                                                <option key={item.screen} value={item.screen}>{item.label}</option>
+                                                <option key={item.id} value={item.id}>{item.label}</option>
                                             ))}
                                         </optgroup>
                                     ))}
@@ -13653,6 +13684,7 @@ const App: React.FC = () => {
                             totalMathCorrect={totalMathCorrect}
                             nextMiniGameThreshold={nextThreshold}
                             languageMode={languageMode}
+                            focusedUiPreviewScreenId={focusedUiPreviewScreenId}
                         />
                     </div>
                 )}
@@ -14039,6 +14071,7 @@ const App: React.FC = () => {
                 {miniGame && (
                     <div className="absolute inset-0">
                         <MiniGameRouter
+                            key={`${gameState.screen}:${uiPreviewMiniGameOutcome ?? 'DEFAULT'}`}
                             screen={gameState.screen}
                             onBack={returnToTitle}
                             problemMode={miniGameProblemMode}
@@ -14047,6 +14080,7 @@ const App: React.FC = () => {
                             assignment={activeAssignment}
                             onAnswerResult={handleAssignmentAnswerResult}
                             languageMode={languageMode}
+                            debugPreview={isUiPreviewMode ? uiPreviewMiniGameOutcome : undefined}
                         />
                     </div>
                 )}
@@ -14158,7 +14192,7 @@ const App: React.FC = () => {
 
                 {gameState.screen === GameScreen.HELP && (
                     <div className="absolute inset-0">
-                        <HelpScreen onBack={returnToTitle} languageMode={languageMode} />
+                        <HelpScreen onBack={returnToTitle} languageMode={languageMode} visualTheme={gameState.visualTheme || visualTheme} />
                     </div>
                 )}
 
@@ -14923,7 +14957,7 @@ const App: React.FC = () => {
 
                 {gameState.screen === GameScreen.GAME_OVER && (
                     <div
-                        className="w-full h-full bg-red-900 bg-cover bg-center flex flex-col items-center justify-start text-center text-white p-4 overflow-y-auto custom-scrollbar relative"
+                        className="game-over-screen w-full h-full bg-red-900 bg-cover bg-center flex flex-col items-center justify-start text-center text-white p-4 overflow-y-auto custom-scrollbar relative"
                         style={{
                             backgroundImage: `url(${assetUrl(
                                 coopSyncedVisualTheme === 'magic'
@@ -14933,18 +14967,20 @@ const App: React.FC = () => {
                         }}
                     >
                         <div className="absolute inset-0 bg-red-950/72 pointer-events-none" />
-                        <div className="relative z-10 my-auto w-full max-w-2xl py-8">
-                            <h1 className="text-6xl mb-4 font-bold">しゅくだいがふえた…</h1>
-                            <p className="mb-8 text-2xl">Act {gameState.act} - Floor {gameState.floor}</p>
+                        <div className="game-over-content relative z-10 my-auto w-full max-w-2xl py-8">
+                            <div className="game-over-main">
+                                <h1 className="game-over-title text-6xl mb-4 font-bold">しゅくだいがふえた…</h1>
+                                <p className="game-over-subtitle mb-8 text-2xl">Act {gameState.act} - Floor {gameState.floor}</p>
+                            </div>
 
                             {/* Newly Unlocked Card Section */}
                             {newlyUnlockedCard && (
-                                <div className="mb-8 p-6 bg-yellow-600/20 border-2 border-yellow-400 rounded-2xl animate-in zoom-in duration-500 shadow-[0_0_20px_rgba(250,204,21,0.3)]">
-                                    <div className="flex items-center justify-center gap-2 text-yellow-400 font-black text-xl mb-4 italic tracking-widest">
+                                <div className="game-over-unlocked mb-8 p-6 bg-yellow-600/20 border-2 border-yellow-400 rounded-2xl animate-in zoom-in duration-500 shadow-[0_0_20px_rgba(250,204,21,0.3)]">
+                                    <div className="game-over-unlocked-title flex items-center justify-center gap-2 text-yellow-400 font-black text-xl mb-4 italic tracking-widest">
                                         <Sparkles size={24} /> NEW CARD UNLOCKED! <Sparkles size={24} />
                                     </div>
-                                    <div className="flex flex-col items-center gap-4">
-                                        <div className="scale-100">
+                                    <div className="game-over-unlocked-body flex flex-col items-center gap-4">
+                                        <div className="game-over-card-preview scale-100">
                                             <Card card={newlyUnlockedCard} onClick={() => { }} disabled={false} languageMode={languageMode} />
                                         </div>
                                         <p className="text-sm text-yellow-100 font-bold">新しい学習の成果が、次回の冒険から現れるようになります！</p>
@@ -14953,9 +14989,9 @@ const App: React.FC = () => {
                             )}
 
                             {getDifficultyConfig(gameState.difficultyLevel).legacyCardAllowed && !legacyCardSelected ? (
-                                <div className="mb-8 shrink-0">
-                                    <p className="mb-4 text-sm text-red-200 font-bold">次回の冒険に持っていくカードを1枚選んでください</p>
-                                    <div className="flex flex-wrap justify-center gap-2 max-h-60 overflow-y-auto custom-scrollbar p-2 bg-black/30 rounded border border-red-700/50">
+                                <div className="game-over-legacy mb-8 shrink-0">
+                                    <p className="game-over-legacy-title mb-4 text-sm text-red-200 font-bold">次回の冒険に持っていくカードを1枚選んでください</p>
+                                    <div className="game-over-legacy-list flex flex-wrap justify-center gap-2 max-h-60 overflow-y-auto custom-scrollbar p-2 bg-black/30 rounded border border-red-700/50">
                                         {gameState.player.deck.map(card => (
                                             <div key={card.id} className="scale-75 cursor-pointer hover:scale-90 transition-transform" onClick={() => handleLegacyCardSelect(card)}>
                                                 <Card card={card} onClick={() => handleLegacyCardSelect(card)} disabled={false} languageMode={languageMode} />
@@ -14964,12 +15000,12 @@ const App: React.FC = () => {
                                     </div>
                                 </div>
                             ) : getDifficultyConfig(gameState.difficultyLevel).legacyCardAllowed ? (
-                                <div className="mb-8 p-4 bg-black/50 border border-gray-500 rounded-lg animate-in zoom-in duration-150 shrink-0">
+                                <div className="game-over-legacy mb-8 p-4 bg-black/50 border border-gray-500 rounded-lg animate-in zoom-in duration-150 shrink-0">
                                     <p className="text-gray-300 font-bold text-xl">遺志は継がれた...</p>
                                     <p className="text-sm text-gray-500 mt-1">次の児童が拾うことになる。</p>
                                 </div>
                             ) : null}
-                            <div className="flex flex-col gap-4 items-center">
+                            <div className="game-over-actions flex flex-col gap-4 items-center">
                                 <button onClick={handleRetry} className="bg-black border-2 border-white px-8 py-3 cursor-pointer w-64 hover:bg-gray-800 flex items-center justify-center"><RotateCcw className="mr-2" size={20} /> {trans("再挑戦", languageMode)}</button>
                                 <button
                                     onClick={returnToTitle}
@@ -14988,7 +15024,7 @@ const App: React.FC = () => {
 
                 {gameState.screen === GameScreen.ENDING && (
                     <div
-                        className="w-full h-full bg-yellow-900 bg-cover bg-center flex flex-col items-center justify-start text-center text-white p-4 overflow-y-auto custom-scrollbar relative"
+                        className="ending-screen w-full h-full bg-yellow-900 bg-cover bg-center flex flex-col items-center justify-start text-center text-white p-4 overflow-y-auto custom-scrollbar relative"
                         style={{
                             backgroundImage: `url(${assetUrl(
                                 coopSyncedVisualTheme === 'magic'
@@ -14998,37 +15034,14 @@ const App: React.FC = () => {
                         }}
                     >
                         <div className="absolute inset-0 bg-amber-950/62 pointer-events-none" />
-                        <div className="relative z-10 my-auto w-full max-w-2xl py-8">
-                            <Trophy size={80} className="text-yellow-400 mx-auto mb-6 animate-pulse shrink-0" />
-                            <h1 className="text-4xl md:text-6xl mb-4 font-bold text-yellow-200 shrink-0">
-                                {trans(
-                                    coopSyncedVisualTheme === 'high-school'
-                                        ? "卒業おめでとう！"
-                                        : coopSyncedVisualTheme === 'magic'
-                                            ? "願いの夜明け"
-                                            : "ゲームクリア！",
-                                    languageMode
-                                )}
-                            </h1>
-                            <p className="mb-8 text-lg md:text-xl shrink-0 whitespace-pre-line">
-                                {trans(
-                                    coopSyncedVisualTheme === 'high-school'
-                                        ? "あなたは真・校長の支配を打ち破り、\nこの学園に自分たちの明日を取り戻しました。\n反逆の卒業生として、その名は校内伝説に刻まれるでしょう。"
-                                        : coopSyncedVisualTheme === 'magic'
-                                            ? "あなたは大魔女校長が作り出した「願いの檻」を打ち破り、\n学園に自由な未来と朝の光を取り戻しました。\n学び、迷い、誰かを大切にした日々は、これからもあなたの魔法を強くしていくでしょう。"
-                                            : "あなたは校長先生をせっとくし、\nでんせつの しょうがくせいとして かたりつがれることでしょう。",
-                                    languageMode
-                                )}
-                            </p>
-
-                            {/* Newly Unlocked Card Section */}
+                        <div className={`ending-content relative z-10 my-auto w-full ${newlyUnlockedCard ? 'max-w-5xl' : 'max-w-2xl'} py-8`}>
                             {newlyUnlockedCard && (
-                                <div className="mb-8 p-6 bg-white/20 border-2 border-white rounded-2xl animate-in zoom-in duration-500 shadow-xl">
-                                    <div className="flex items-center justify-center gap-2 text-white font-black text-xl mb-4 italic tracking-widest">
+                                <div className="ending-unlocked-card mb-8 p-6 bg-white/20 border-2 border-white rounded-2xl animate-in zoom-in duration-500 shadow-xl">
+                                    <div className="ending-unlocked-title flex items-center justify-center gap-2 text-white font-black text-xl mb-4 italic tracking-widest">
                                         <Sparkles size={24} /> NEW CARD UNLOCKED! <Sparkles size={24} />
                                     </div>
-                                    <div className="flex flex-col items-center gap-4">
-                                        <div className="scale-100">
+                                    <div className="ending-unlocked-card-body flex flex-col items-center gap-4">
+                                        <div className="ending-card-preview scale-100">
                                             <Card card={newlyUnlockedCard} onClick={() => { }} disabled={false} languageMode={languageMode} />
                                         </div>
                                         <p className="text-sm text-yellow-100 font-bold">
@@ -15043,8 +15056,30 @@ const App: React.FC = () => {
                                 </div>
                             )}
 
+                            <div className="ending-main">
+                                <h1 className="ending-title text-4xl md:text-6xl mb-4 font-bold text-yellow-200 shrink-0">
+                                    {trans(
+                                        coopSyncedVisualTheme === 'high-school'
+                                            ? "卒業おめでとう！"
+                                            : coopSyncedVisualTheme === 'magic'
+                                                ? "願いの夜明け"
+                                                : "ゲームクリア！",
+                                        languageMode
+                                    )}
+                                </h1>
+                                <p className="ending-message mb-8 text-lg md:text-xl shrink-0 whitespace-pre-line">
+                                    {trans(
+                                        coopSyncedVisualTheme === 'high-school'
+                                            ? "あなたは真・校長の支配を打ち破り、\nこの学園に自分たちの明日を取り戻しました。\n反逆の卒業生として、その名は校内伝説に刻まれるでしょう。"
+                                            : coopSyncedVisualTheme === 'magic'
+                                                ? "あなたは大魔女校長が作り出した「願いの檻」を打ち破り、\n学園に自由な未来と朝の光を取り戻しました。\n学び、迷い、誰かを大切にした日々は、これからもあなたの魔法を強くしていくでしょう。"
+                                                : "あなたは校長先生をせっとくし、\nでんせつの しょうがくせいとして かたりつがれることでしょう。",
+                                        languageMode
+                                    )}
+                                </p>
+
                             {getDifficultyConfig(gameState.difficultyLevel).legacyCardAllowed && !legacyCardSelected ? (
-                                <div className="mb-8 shrink-0">
+                                <div className="ending-legacy mb-8 shrink-0">
                                     <p className="mb-4 text-sm text-yellow-100 font-bold">
                                         {trans(
                                             coopSyncedVisualTheme === 'high-school'
@@ -15062,7 +15097,7 @@ const App: React.FC = () => {
                                     </div>
                                 </div>
                             ) : getDifficultyConfig(gameState.difficultyLevel).legacyCardAllowed ? (
-                                <div className="mb-8 p-4 bg-green-900/50 border-green-500 rounded-lg animate-in zoom-in duration-150 shrink-0">
+                                <div className="ending-legacy mb-8 p-4 bg-green-900/50 border-green-500 rounded-lg animate-in zoom-in duration-150 shrink-0">
                                     <p className="text-green-400 font-bold text-xl">{trans("カードを継承しました！", languageMode)}</p>
                                     <p className="text-sm text-green-200 mt-1">
                                         {trans(
@@ -15074,13 +15109,14 @@ const App: React.FC = () => {
                                     </p>
                                 </div>
                             ) : null}
-                            <div className="flex flex-col gap-4 items-center mt-4 pb-8 shrink-0">
+                            <div className="ending-actions flex flex-col gap-4 items-center mt-4 pb-8 shrink-0">
                                 <button onClick={startEndlessMode} className="bg-purple-900 border-4 border-purple-500 px-8 py-4 cursor-pointer text-xl hover:bg-purple-800 font-bold w-full max-sm shadow-[0_0_20px_rgba(168,85,247,0.5)] transform transition-transform hover:scale-105 active:scale-95 flex items-center justify-center animate-pulse">
                                     <Infinity className="mr-2" /> {trans("エンドレスモードへ", languageMode)} (Act {gameState.act + 1})
                                 </button>
                                 <button onClick={returnToTitle} className="bg-blue-600 border-2 border-white px-8 py-4 cursor-pointer text-xl hover:bg-blue-500 font-bold w-full max-sm shadow-lg transform transition-transform hover:scale-105 active:scale-95">
                                     {trans("伝説となる", languageMode)} ({trans("タイトルへ戻る", languageMode)})
                                 </button>
+                            </div>
                             </div>
                         </div>
                     </div>

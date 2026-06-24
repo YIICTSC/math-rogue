@@ -61,7 +61,7 @@ const buildFamiliarEffectText = (kind: (typeof EFFECTS)[number][0], amount: numb
     case 'HEAL':
       return `HPを${amount}回復。`;
     case 'DRAW':
-      return `カードを${amount}枚引く。`;
+      return `次ターン開始時にカードを${amount}枚引く。`;
     case 'ENERGY_NEXT':
       return `次ターンのエナジー+${amount}。`;
     case 'POISON':
@@ -77,7 +77,7 @@ const buildFamiliarEffectText = (kind: (typeof EFFECTS)[number][0], amount: numb
     case 'GOLD':
       return `ゴールド${amount}を得る。`;
     case 'CHAOS_SURGE':
-      return `カードを${amount}枚引き、ムキムキ+${amount}、次ターンのエナジー+${Math.max(1, amount - 1)}。`;
+      return `次ターン開始時にカードを${amount}枚引き、ムキムキ+${amount}、次ターンのエナジー+${Math.max(1, amount - 1)}。`;
     default:
       return '';
   }

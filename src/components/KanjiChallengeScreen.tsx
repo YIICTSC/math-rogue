@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { CheckCircle, XCircle } from 'lucide-react';
 import { audioService } from '../services/audioService';
-import { AnswerMode, GameMode } from '../types';
+import { AnswerMode, AssignmentAnswerResult, AssignmentReviewProblem, GameMode } from '../types';
 import { storageService } from '../services/storageService';
 import { HARD_KANJI_DATA, KANJI_DATA, KANKEN_DATA, KanjiProblem } from '../data/kanjiData';
 import { resolveAnswerMode } from '../utils/answerMode';
@@ -16,15 +16,19 @@ interface KanjiChallengeScreenProps {
   isChallenge?: boolean;
   streak?: number;
   rewardHint?: string;
-  onAnswerResult?: (result: { mode: string; correct: boolean; elapsedMs: number }) => void;
+  onAnswerResult?: (result: AssignmentAnswerResult) => void;
+  reviewProblem?: AssignmentReviewProblem | null;
 }
 
 interface ExtendedKanjiProblem extends KanjiProblem {
   actualCorrectAnswer: string;
+  problemKey?: string;
+  isAssignmentRetry?: boolean;
+  retryOfProblemKey?: string;
 }
 
-const KanjiChallengeScreen: React.FC<KanjiChallengeScreenProps> = ({ onComplete, mode, answerMode = 'CHOICE', useSavedAnswerMode = false, debugSkip, isChallenge, streak = 0, rewardHint, onAnswerResult }) => {
-  const resolvedAnswerMode = resolveAnswerMode(answerMode, useSavedAnswerMode);
+const KanjiChallengeScreen: React.FC<KanjiChallengeScreenProps> = ({ onComplete, mode, answerMode = 'CHOICE' as AnswerMode, useSavedAnswerMode = false, debugSkip, isChallenge, streak = 0, rewardHint, onAnswerResult, reviewProblem = null }) => {
+  const resolvedAnswerMode = resolveAnswerMode(answerMode as AnswerMode, useSavedAnswerMode);
   const [problems, setProblems] = useState<ExtendedKanjiProblem[]>([]);
   const [currentProblemIndex, setCurrentProblemIndex] = useState(0);
   const [correctCount, setCorrectCount] = useState(0);
@@ -68,6 +72,19 @@ const KanjiChallengeScreen: React.FC<KanjiChallengeScreenProps> = ({ onComplete,
         }
     }
 
+    if (reviewProblem) {
+      setProblems([{
+        question: reviewProblem.question,
+        options: [...new Set([reviewProblem.correctAnswer, ...(reviewProblem.options || [])])].slice(0, 4).sort(() => Math.random() - 0.5),
+        hint: undefined,
+        actualCorrectAnswer: reviewProblem.correctAnswer,
+        problemKey: reviewProblem.problemKey,
+        isAssignmentRetry: true,
+        retryOfProblemKey: reviewProblem.problemKey,
+      }]);
+      return;
+    }
+
     let problemPool: KanjiProblem[];
     if (mode === GameMode.KANJI_MIXED) {
         problemPool = Object.values(KANJI_DATA).flat();
@@ -98,6 +115,7 @@ const KanjiChallengeScreen: React.FC<KanjiChallengeScreenProps> = ({ onComplete,
                 : p.options;
             return {
                 ...p,
+                problemKey: `${mode}:${p.question}`,
                 actualCorrectAnswer: correctAnswer,
                 // 表示用にはシャッフルした選択肢を渡す
                 options: [...contextualOptions].sort(() => Math.random() - 0.5)
@@ -105,7 +123,7 @@ const KanjiChallengeScreen: React.FC<KanjiChallengeScreenProps> = ({ onComplete,
         });
         
     setProblems(shuffled);
-  }, [mode, debugSkip, isChallenge]);
+  }, [mode, debugSkip, isChallenge, reviewProblem]);
 
   const handleAnswer = (option: string) => {
     if (isAnswered) return;
@@ -119,6 +137,12 @@ const KanjiChallengeScreen: React.FC<KanjiChallengeScreenProps> = ({ onComplete,
       mode,
       correct: isCorrect,
       elapsedMs: Date.now() - questionStartedAtRef.current,
+      problemKey: problems[currentProblemIndex].problemKey || `${mode}:${problems[currentProblemIndex].question}`,
+      question: problems[currentProblemIndex].question,
+      correctAnswer: problems[currentProblemIndex].actualCorrectAnswer,
+      selectedAnswer: option,
+      isRetry: problems[currentProblemIndex].isAssignmentRetry,
+      retryOfProblemKey: problems[currentProblemIndex].retryOfProblemKey,
     };
     
     if (isCorrect) {

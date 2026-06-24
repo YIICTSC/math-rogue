@@ -151,27 +151,27 @@ const AssignmentCreateScreen: React.FC<AssignmentCreateScreenProps> = ({ onBack,
   const canCopy = selectedUnits.length > 0 || assignment.customProblems.length > 0;
 
   return (
-    <div className="h-full w-full overflow-hidden bg-slate-950 text-white">
-      <div className="flex h-full flex-col bg-[radial-gradient(circle_at_top,rgba(14,165,233,0.18),transparent_38%),linear-gradient(180deg,#020617,#0f172a)]">
-        <div className="flex items-center justify-between border-b border-cyan-500/30 px-4 py-3">
-          <button onClick={onBack} className="flex items-center gap-2 rounded-lg border border-slate-600 bg-slate-900 px-3 py-2 text-sm font-bold text-slate-200 hover:bg-slate-800">
+    <div className="assignment-create-screen h-full w-full overflow-hidden bg-slate-950 text-white">
+      <div className="assignment-create-shell flex h-full flex-col bg-[radial-gradient(circle_at_top,rgba(14,165,233,0.18),transparent_38%),linear-gradient(180deg,#020617,#0f172a)]">
+        <div className="assignment-create-header flex items-center justify-between border-b border-cyan-500/30 px-4 py-3">
+          <button onClick={onBack} className="assignment-create-back flex items-center gap-2 rounded-lg border border-slate-600 bg-slate-900 px-3 py-2 text-sm font-bold text-slate-200 hover:bg-slate-800">
             <ArrowLeft size={16} /> 戻る
           </button>
-          <div className="flex items-center gap-2 text-cyan-200">
+          <div className="assignment-create-title flex items-center gap-2 text-cyan-200">
             <Clipboard size={18} />
             <h2 className="text-xl font-black tracking-wider">課題送信</h2>
           </div>
           <button
             onClick={copyUrl}
             disabled={!canCopy}
-            className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-black ${canCopy ? 'bg-cyan-400 text-slate-950 hover:bg-cyan-300' : 'bg-slate-700 text-slate-400 cursor-not-allowed'}`}
+            className={`assignment-create-copy flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-black ${canCopy ? 'bg-cyan-400 text-slate-950 hover:bg-cyan-300' : 'bg-slate-700 text-slate-400 cursor-not-allowed'}`}
           >
             <Copy size={16} /> URLコピー
           </button>
         </div>
 
-        <div className="grid flex-1 min-h-0 gap-4 overflow-hidden p-4 lg:grid-cols-[1.2fr_1.8fr_1fr]">
-          <section className="min-h-0 overflow-y-auto rounded-xl border border-slate-700 bg-black/35 p-3 custom-scrollbar">
+        <div className="assignment-create-grid grid flex-1 min-h-0 gap-4 overflow-hidden p-4 lg:grid-cols-[1.2fr_1.8fr_1fr]">
+          <section className="assignment-create-settings min-h-0 overflow-y-auto rounded-xl border border-slate-700 bg-black/35 p-3 custom-scrollbar">
             <label className="mb-3 block">
               <span className="mb-1 block text-xs font-bold text-slate-400">課題名</span>
               <input value={title} onChange={(e) => setTitle(e.target.value)} className="w-full rounded-lg border border-slate-600 bg-slate-900 px-3 py-2 text-sm font-bold" />
@@ -205,7 +205,7 @@ const AssignmentCreateScreen: React.FC<AssignmentCreateScreenProps> = ({ onBack,
             </div>
           </section>
 
-          <section className="flex min-h-0 flex-col rounded-xl border border-slate-700 bg-black/35 p-3">
+          <section className="assignment-create-units flex min-h-0 flex-col rounded-xl border border-slate-700 bg-black/35 p-3">
             <button
               type="button"
               onClick={() => {
@@ -240,7 +240,7 @@ const AssignmentCreateScreen: React.FC<AssignmentCreateScreenProps> = ({ onBack,
                 ))}
               </div>
             )}
-            <div className="grid flex-1 min-h-0 grid-cols-2 gap-2 overflow-y-auto custom-scrollbar">
+            <div className="assignment-create-unit-grid grid flex-1 min-h-0 grid-cols-2 gap-2 overflow-y-auto custom-scrollbar">
               {units.map((unit) => {
                 const selected = selectedUnits.some((item) => item.id === unit.id);
                 return (
@@ -252,8 +252,8 @@ const AssignmentCreateScreen: React.FC<AssignmentCreateScreenProps> = ({ onBack,
             </div>
           </section>
 
-          <section className="flex min-h-0 flex-col gap-3">
-            <div className="rounded-xl border border-slate-700 bg-black/35 p-3">
+          <section className="assignment-create-side flex min-h-0 flex-col gap-3">
+            <div className="assignment-create-selected rounded-xl border border-slate-700 bg-black/35 p-3">
               <div className="mb-2 flex items-center justify-between">
                 <div className="text-sm font-black text-cyan-200">選択中 {selectedUnits.length}件</div>
                 <button onClick={() => setSelectedUnits([])} className="text-xs font-bold text-slate-400 hover:text-white">解除</button>
@@ -278,7 +278,7 @@ const AssignmentCreateScreen: React.FC<AssignmentCreateScreenProps> = ({ onBack,
               </div>
             </div>
 
-            <div className="flex min-h-0 flex-1 flex-col rounded-xl border border-slate-700 bg-black/35 p-3">
+            <div className="assignment-create-custom flex min-h-0 flex-1 flex-col rounded-xl border border-slate-700 bg-black/35 p-3">
               <button onClick={addCustomProblem} className="mb-2 flex items-center justify-center gap-2 rounded-lg border border-emerald-400 bg-emerald-500/15 px-3 py-2 text-xs font-black text-emerald-100">
                 <Plus size={14} /> オリジナル問題
               </button>

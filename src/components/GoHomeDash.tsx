@@ -3,7 +3,7 @@ import { Heart, Star, Skull, Brain, Book, Flame, Wind, Target, RotateCcw, ArrowL
 import { audioService } from '../services/audioService';
 import { SPRITE_TEMPLATES } from './PixelSprite';
 import { storageService } from '../services/storageService';
-import { AnswerMode, AssignmentPayload, GameMode, LanguageMode } from '../types';
+import { AnswerMode, AssignmentAnswerResult, AssignmentPayload, GameMode, LanguageMode, MiniGameDebugPreview } from '../types';
 import MiniGameProblemChallenge from './MiniGameProblemChallenge';
 import { assetUrl } from '../utils/assetPaths';
 
@@ -162,8 +162,9 @@ const GoHomeDash: React.FC<{
     problemModePool?: string[];
     answerMode?: AnswerMode;
     assignment?: AssignmentPayload | null;
-    onAnswerResult?: (result: { mode: string; correct: boolean; elapsedMs: number; problemId?: string }) => void;
-}> = ({ onBack, problemMode = GameMode.MIXED, problemModePool, answerMode = 'CHOICE', assignment, onAnswerResult }) => {
+    onAnswerResult?: (result: AssignmentAnswerResult) => void;
+    debugPreview?: MiniGameDebugPreview;
+}> = ({ onBack, problemMode = GameMode.MIXED, problemModePool, answerMode = 'CHOICE', assignment, onAnswerResult, debugPreview }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
     const playerSpriteRef = useRef<HTMLImageElement | null>(null);
@@ -176,6 +177,13 @@ const GoHomeDash: React.FC<{
     useEffect(() => {
         gameStateRef.current = gameState;
     }, [gameState]);
+
+    useEffect(() => {
+        if (debugPreview === 'GAME_OVER') {
+            gameStateRef.current = 'GAME_OVER';
+            setGameState('GAME_OVER');
+        }
+    }, [debugPreview]);
 
     useEffect(() => {
         const image = new Image();

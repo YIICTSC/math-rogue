@@ -4,7 +4,7 @@ import { ArrowLeft, X, Club, Diamond, Heart, Spade, ShoppingBag, BarChart3, Arro
 import { audioService } from '../services/audioService';
 import PixelSprite from './PixelSprite';
 import {
-    AnswerMode, AssignmentPayload, PokerCard, PokerRunState, PokerBlind, PokerSupporter, PokerConsumable, PokerSuit, PokerRank, PokerScoringContext, PokerPack, PokerVoucher, GameMode, LanguageMode
+    AnswerMode, AssignmentAnswerResult, AssignmentPayload, PokerCard, PokerRunState, PokerBlind, PokerSupporter, PokerConsumable, PokerSuit, PokerRank, PokerScoringContext, PokerPack, PokerVoucher, GameMode, LanguageMode, MiniGameDebugPreview
 } from '../types';
 import { POKER_HAND_LEVELS, SUPPORTERS_LIBRARY, CONSUMABLES_LIBRARY, PACK_LIBRARY, POKER_ENHANCEMENTS, VOUCHERS_LIBRARY, EXPANDED_SUPPORTER_IDS } from '../constants';
 import { storageService } from '../services/storageService';
@@ -642,8 +642,9 @@ interface PokerGameScreenProps {
   problemModePool?: string[];
   answerMode?: AnswerMode;
   assignment?: AssignmentPayload | null;
-  onAnswerResult?: (result: { mode: string; correct: boolean; elapsedMs: number; problemId?: string }) => void;
+  onAnswerResult?: (result: AssignmentAnswerResult) => void;
   languageMode?: LanguageMode;
+  debugPreview?: MiniGameDebugPreview;
 }
 
 type ScoreAnimationState = {
@@ -668,7 +669,7 @@ type ScoreBreakdownEntry = {
   accent?: 'chips' | 'mult' | 'special';
 };
 
-const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode = GameMode.MIXED, problemModePool, answerMode = 'CHOICE', assignment, onAnswerResult, languageMode }) => {
+const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode = GameMode.MIXED, problemModePool, answerMode = 'CHOICE', assignment, onAnswerResult, languageMode, debugPreview }) => {
   const pokerTutorialSteps = useMemo(() => getPokerTutorialSteps(languageMode), [languageMode]);
   const pokerTutorialLabels = useMemo(() => getPokerTutorialLabels(languageMode), [languageMode]);
   const expandedSupporterUnlockCount = Math.min(
@@ -688,6 +689,10 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
       ? SUPPORTERS_LIBRARY.find(s => s.id === nextUnlockSupporterId) ?? null
       : null;
   const willUnlockExpandedSupporters = nextUnlockSupporter !== null;
+  const previewUnlockSupporter = debugPreview === 'ENDING'
+      ? nextUnlockSupporter ?? SUPPORTERS_LIBRARY.find(s => EXPANDED_SUPPORTER_IDS.includes(s.id)) ?? SUPPORTERS_LIBRARY[0] ?? null
+      : nextUnlockSupporter;
+  const showSupporterUnlock = willUnlockExpandedSupporters || (debugPreview === 'ENDING' && previewUnlockSupporter !== null);
   
   const hydrateState = (state: PokerRunState): PokerRunState => {
       const hydrateSupporters = (list: PokerSupporter[]) => list.map(item => {
@@ -725,7 +730,9 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
   };
 
   // --- Game State ---
-  const [phase, setPhase] = useState<'BLIND_SELECT' | 'PLAY' | 'SHOP' | 'PACK_OPEN' | 'GAME_OVER' | 'VICTORY_WAIT' | 'VICTORY' | 'MATH'>('BLIND_SELECT');
+  const [phase, setPhase] = useState<'BLIND_SELECT' | 'PLAY' | 'SHOP' | 'PACK_OPEN' | 'GAME_OVER' | 'VICTORY_WAIT' | 'VICTORY' | 'MATH'>(
+      debugPreview === 'GAME_OVER' ? 'GAME_OVER' : debugPreview === 'ENDING' ? 'VICTORY_WAIT' : 'BLIND_SELECT'
+  );
   const [highScore, setHighScore] = useState(0); 
   const saveDebounceRef = useRef<any>(null);
 
@@ -894,6 +901,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
 
   // --- Initialization & Auto Save ---
   useEffect(() => {
+      if (debugPreview) return;
       const saved = storageService.loadPokerState();
       if (!saved) {
           initRun();
@@ -1967,16 +1975,27 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
 
   if (phase === 'VICTORY_WAIT') {
       return (
-          <div className="flex flex-col h-full w-full bg-slate-900 text-white p-8 items-center justify-center relative font-mono text-center">
-              <Trophy size={80} className="text-yellow-400 mb-6 animate-bounce" />
-              <h1 className="text-5xl font-black text-white mb-4">GRADUATION!</h1>
-              <p className="text-xl text-gray-300 mb-12">You have conquered the 8th Grade (Ante 8).</p>
-              {willUnlockExpandedSupporters && (
-                  <div className="w-full max-w-2xl mb-10 rounded-2xl border-2 border-yellow-300 bg-yellow-500/10 px-6 py-5 shadow-[0_0_30px_rgba(250,204,21,0.15)]">
+          <div className={`poker-victory-screen ${showSupporterUnlock ? 'poker-victory-has-unlock' : ''} flex flex-col h-full w-full bg-slate-900 text-white p-8 items-center justify-center relative font-mono text-center`}>
+              <Trophy size={80} className="poker-victory-trophy text-yellow-400 mb-6 animate-bounce" />
+              <h1 className="poker-victory-title text-5xl font-black text-white mb-4">GRADUATION!</h1>
+              <p className="poker-victory-message text-xl text-gray-300 mb-12">You have conquered the 8th Grade (Ante 8).</p>
+              {showSupporterUnlock && (
+                  <div className="poker-victory-unlock w-full max-w-2xl mb-10 rounded-2xl border-2 border-yellow-300 bg-yellow-500/10 px-6 py-5 shadow-[0_0_30px_rgba(250,204,21,0.15)]">
                       <div className="text-sm font-bold tracking-[0.2em] text-yellow-300 mb-2">NEXT RUN UNLOCK</div>
                       <div className="text-2xl font-black text-white mb-2">追加サポーター 1種 解禁</div>
-                      {nextUnlockSupporter && (
-                          <div className="text-xl font-bold text-yellow-100 mb-2">{nextUnlockSupporter.name}</div>
+                      {previewUnlockSupporter && (
+                          <div className="poker-victory-unlock-item mb-3 flex items-center gap-4 rounded-xl border border-yellow-300/40 bg-black/25 p-3 text-left">
+                              <div className="poker-victory-unlock-icon h-24 w-24 shrink-0 rounded-xl border border-yellow-300/50 bg-slate-950/80 p-2 shadow-lg">
+                                  {renderPokerItemIcon(previewUnlockSupporter.icon, previewUnlockSupporter.name, 'h-full w-full', previewUnlockSupporter.id)}
+                              </div>
+                              <div className="min-w-0 flex-1">
+                                  <div className="text-xl font-bold text-yellow-100">{previewUnlockSupporter.name}</div>
+                                  <div className="mt-1 text-[10px] font-black tracking-[0.18em] text-yellow-300">{previewUnlockSupporter.rarity} SUPPORTER</div>
+                                  <div className="mt-2 text-sm font-bold leading-relaxed text-white">
+                                      効果：{previewUnlockSupporter.description}
+                                  </div>
+                              </div>
+                          </div>
                       )}
                       <div className="text-sm text-yellow-100/90 leading-relaxed">
                           次のランから、上のサポーターがショップと「部員勧誘」パックに出現します。
@@ -1984,7 +2003,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
                   </div>
               )}
               
-              <div className="flex flex-col gap-4 w-full max-w-md">
+              <div className="poker-victory-actions flex flex-col gap-4 w-full max-w-md">
                   <button 
                     onClick={proceedToEndless}
                     className="bg-purple-600 hover:bg-purple-500 text-white text-xl font-bold py-4 px-8 rounded-lg shadow-lg border-2 border-purple-300 flex items-center justify-center"
@@ -2005,26 +2024,30 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
   if (phase === 'BLIND_SELECT') {
       const config = runState.currentBlind;
       return (
-          <div className="flex flex-col h-full w-full bg-slate-900 text-white p-8 items-center justify-center relative font-mono" style={pokerTableBackgroundStyle}>
+          <div className="poker-rival-screen flex flex-col h-full w-full bg-slate-900 text-white p-8 items-center justify-center relative font-mono overflow-hidden" style={pokerTableBackgroundStyle}>
               <div className="absolute top-4 left-4">
                   <button onClick={handleQuit} className="text-gray-400 hover:text-white flex items-center"><ArrowLeft className="mr-2"/> 戻る</button>
               </div>
-              <div className="text-center animate-in zoom-in duration-300">
-                  <div className="text-2xl text-yellow-500 mb-2 font-bold">第{runState.ante}幕 / 8</div>
-                  {runState.isEndless && <div className="text-purple-400 text-sm font-bold animate-pulse mb-2">エンドレスモード</div>}
-                  <div className="mx-auto mb-3 h-28 w-28 rounded-2xl border-4 border-yellow-400 bg-slate-950/80 bg-no-repeat shadow-[0_0_24px_rgba(250,204,21,0.25)]" style={getPokerRivalPortraitStyle(currentRivalVisual, 0)} />
-                  <div className="text-sm font-black tracking-[0.35em] text-yellow-300">次のライバル</div>
-                  <div className="text-4xl md:text-6xl font-black mb-4 text-white tracking-tighter leading-tight">{config.rivalName || config.name}</div>
-                  <div className="bg-slate-800 p-6 rounded-xl border-4 border-slate-600 mb-8 min-w-[300px]">
-                      <div className="text-gray-400 mb-2 text-sm uppercase tracking-widest">目標スコア</div>
-                      <div className="text-5xl font-bold text-red-500 mb-4">{config.scoreGoal.toLocaleString()}</div>
-                      <div className="text-gray-400 mb-2 text-sm uppercase tracking-widest">勝利報酬</div>
-                      <div className="text-3xl font-bold text-yellow-400 mb-2">${config.rewardMoney}</div>
-                      {config.description && <div className="text-purple-300 text-sm mt-4 border-t border-slate-600 pt-2">{config.description}</div>}
+              <div className="poker-rival-layout text-center animate-in zoom-in duration-300">
+                  <div className="poker-rival-identity">
+                      <div className="poker-rival-ante text-2xl text-yellow-500 mb-2 font-bold">第{runState.ante}幕 / 8</div>
+                      {runState.isEndless && <div className="poker-rival-endless text-purple-400 text-sm font-bold animate-pulse mb-2">エンドレスモード</div>}
+                      <div className="poker-rival-portrait mx-auto mb-3 h-28 w-28 rounded-2xl border-4 border-yellow-400 bg-slate-950/80 bg-no-repeat shadow-[0_0_24px_rgba(250,204,21,0.25)]" style={getPokerRivalPortraitStyle(currentRivalVisual, 0)} />
+                      <div className="poker-rival-label text-sm font-black tracking-[0.35em] text-yellow-300">次のライバル</div>
+                      <div className="poker-rival-name text-4xl md:text-6xl font-black mb-4 text-white tracking-tighter leading-tight">{config.rivalName || config.name}</div>
                   </div>
-                  <button onClick={startBlind} className="bg-red-600 hover:bg-red-500 text-white text-2xl font-bold py-4 px-12 rounded-full shadow-[0_0_20px_rgba(220,38,38,0.5)] animate-pulse flex items-center justify-center mx-auto">
-                      <Play className="mr-2 fill-current"/> 対戦開始
-                  </button>
+                  <div className="poker-rival-details">
+                      <div className="poker-rival-stats bg-slate-800 p-6 rounded-xl border-4 border-slate-600 mb-8 min-w-[300px]">
+                          <div className="text-gray-400 mb-2 text-sm uppercase tracking-widest">目標スコア</div>
+                          <div className="poker-rival-score text-5xl font-bold text-red-500 mb-4">{config.scoreGoal.toLocaleString()}</div>
+                          <div className="text-gray-400 mb-2 text-sm uppercase tracking-widest">勝利報酬</div>
+                          <div className="poker-rival-reward text-3xl font-bold text-yellow-400 mb-2">${config.rewardMoney}</div>
+                          {config.description && <div className="poker-rival-description text-purple-300 text-sm mt-4 border-t border-slate-600 pt-2">{config.description}</div>}
+                      </div>
+                      <button onClick={startBlind} className="poker-rival-start bg-red-600 hover:bg-red-500 text-white text-2xl font-bold py-4 px-12 rounded-full shadow-[0_0_20px_rgba(220,38,38,0.5)] animate-pulse flex items-center justify-center mx-auto">
+                          <Play className="mr-2 fill-current"/> 対戦開始
+                      </button>
+                  </div>
               </div>
           </div>
       );
@@ -2081,7 +2104,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
       const voucher = runState.shopVoucher;
 
       return (
-          <div className="flex flex-col h-full w-full bg-slate-900 text-white p-4 font-mono relative overflow-hidden" style={pokerTableBackgroundStyle}>
+          <div className="mini-game-poker-screen poker-shop-screen flex flex-col h-full w-full bg-slate-900 text-white p-4 font-mono relative overflow-hidden" style={pokerTableBackgroundStyle}>
               {renderInspectionModal()}
               
               {showRoundResult && roundResult && (
@@ -2119,15 +2142,15 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
                   </div>
               )}
 
-              <div className="flex justify-between items-center mb-4 bg-slate-800 p-4 rounded-lg shadow-lg shrink-0">
+              <div className="poker-shop-header flex justify-between items-center mb-4 bg-slate-800 p-4 rounded-lg shadow-lg shrink-0">
                   <h2 className="text-2xl font-bold flex items-center"><ShoppingBag className="mr-2 text-yellow-500"/> 購買部</h2>
                   <div className="text-2xl font-bold text-yellow-400">${runState.money}</div>
                   <button onClick={nextBlind} className="bg-green-600 hover:bg-green-500 px-6 py-2 rounded font-bold flex items-center shadow-lg transform transition active:translate-y-1">次のライバルへ <ArrowLeft className="rotate-180 inline ml-1"/></button>
               </div>
               
-              <div className="flex-grow flex flex-col gap-4 overflow-hidden">
-                  
-                  <div className="w-full bg-slate-800/90 p-2 rounded-lg border border-slate-600 shrink-0 shadow-sm">
+              <div className="poker-shop-body flex-grow flex flex-col gap-4 overflow-hidden">
+
+                  <div className="poker-shop-owned w-full bg-slate-800/90 p-2 rounded-lg border border-slate-600 shrink-0 shadow-sm">
                       <div className="flex gap-2 h-16 md:h-20 items-stretch">
                           <div className="flex-1 bg-black/20 rounded border border-slate-700 flex flex-col px-2 py-1 min-w-0">
                               <div className="text-[9px] text-blue-300 font-bold mb-0.5 flex items-center"><span className="w-2 h-2 bg-blue-500 rounded-full mr-1 inline-block"></span>SUPPORTERS ({runState.supporters.length}/5)</div>
@@ -2173,13 +2196,13 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
                       )}
                   </div>
 
-                  <div className="flex-grow bg-slate-800/30 p-2 md:p-4 rounded-lg border-2 border-slate-700 overflow-y-auto custom-scrollbar">
-                      <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-                          
+                  <div className="poker-shop-items flex-grow bg-slate-800/30 p-2 md:p-4 rounded-lg border-2 border-slate-700 overflow-y-auto custom-scrollbar">
+                      <div className="poker-shop-items-grid grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+
                           <div className="col-span-2 md:col-span-1 row-span-1">
                               {voucher ? (
-                                  <div 
-                                    className="bg-slate-900 border-2 border-slate-600 p-2 rounded-lg flex flex-col items-center text-center h-full relative group cursor-pointer hover:border-white transition-colors justify-between min-h-[160px]"
+                                  <div
+                                    className="poker-shop-card bg-slate-900 border-2 border-slate-600 p-2 rounded-lg flex flex-col items-center text-center h-full relative group cursor-pointer hover:border-white transition-colors justify-between min-h-[160px]"
                                     onClick={() => buyItem(voucher, -1, 'VOUCHER')}
                                     onContextMenu={(e) => handleContextMenu(e, voucher, 'VOUCHER', false)}
                                     onTouchStart={() => handleTouchStart(voucher, 'VOUCHER', false)}
@@ -2194,14 +2217,14 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
                                       <button disabled={runState.money < getPrice(voucher.price)} className={`w-full py-1 rounded font-bold text-xs ${runState.money >= getPrice(voucher.price) ? 'bg-slate-100 text-black hover:bg-white' : 'bg-gray-700 text-gray-500 cursor-not-allowed'}`}>${getPrice(voucher.price)}</button>
                                   </div>
                               ) : (
-                                  <div className="bg-slate-900/50 border-2 border-slate-700 border-dashed p-4 rounded-lg flex flex-col items-center justify-center h-full text-gray-600 text-xs italic min-h-[160px]">
+                                  <div className="poker-shop-card bg-slate-900/50 border-2 border-slate-700 border-dashed p-4 rounded-lg flex flex-col items-center justify-center h-full text-gray-600 text-xs italic min-h-[160px]">
                                       Sold Out
                                   </div>
                               )}
                           </div>
 
                           {shopPacks.map((item) => (
-                              <div key={item.id} className="bg-slate-700 p-2 rounded flex flex-col items-center text-center relative group cursor-pointer hover:bg-slate-600 transition-colors shadow-lg justify-between min-h-[160px]" onClick={() => buyItem(item, runState.shopInventory.indexOf(item), 'NORMAL')} onContextMenu={(e) => handleContextMenu(e, item, 'PACK', false)} onTouchStart={() => handleTouchStart(item, 'PACK', false)} onTouchEnd={handleTouchEnd}>
+                              <div key={item.id} className="poker-shop-card bg-slate-700 p-2 rounded flex flex-col items-center text-center relative group cursor-pointer hover:bg-slate-600 transition-colors shadow-lg justify-between min-h-[160px]" onClick={() => buyItem(item, runState.shopInventory.indexOf(item), 'NORMAL')} onContextMenu={(e) => handleContextMenu(e, item, 'PACK', false)} onTouchStart={() => handleTouchStart(item, 'PACK', false)} onTouchEnd={handleTouchEnd}>
                                   <div className="absolute top-1 left-1 text-[8px] font-bold text-orange-300 bg-orange-900/50 px-1.5 py-0.5 rounded">PACK</div>
                                   <div className="w-12 h-12 mt-4">{renderPokerItemIcon(item.icon, item.name, 'w-full h-full', item.id)}</div>
                                   <div className="font-bold text-xs">{item.name}</div>
@@ -2211,7 +2234,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
                           ))}
                           
                           {shopSupporters.map((item) => (
-                              <div key={item.id} className="bg-slate-700 p-2 rounded flex flex-col items-center text-center relative group cursor-pointer hover:bg-slate-600 transition-colors shadow-lg justify-between min-h-[160px]" onClick={() => buyItem(item, runState.shopInventory.indexOf(item), 'NORMAL')} onContextMenu={(e) => handleContextMenu(e, item, 'SUPPORTER', false)} onTouchStart={() => handleTouchStart(item, 'SUPPORTER', false)} onTouchEnd={handleTouchEnd}>
+                              <div key={item.id} className="poker-shop-card bg-slate-700 p-2 rounded flex flex-col items-center text-center relative group cursor-pointer hover:bg-slate-600 transition-colors shadow-lg justify-between min-h-[160px]" onClick={() => buyItem(item, runState.shopInventory.indexOf(item), 'NORMAL')} onContextMenu={(e) => handleContextMenu(e, item, 'SUPPORTER', false)} onTouchStart={() => handleTouchStart(item, 'SUPPORTER', false)} onTouchEnd={handleTouchEnd}>
                                   <div className="absolute top-1 left-1 text-[8px] font-bold text-blue-300 bg-blue-900/50 px-1.5 py-0.5 rounded">SUPPORTER</div>
                                   <div className="w-12 h-12 mt-4">{renderPokerItemIcon(item.icon, item.name, 'w-full h-full', item.id)}</div>
                                   <div className="font-bold text-xs">{item.name}</div>
@@ -2221,7 +2244,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
                           ))}
                           
                           {shopConsumables.map((item) => (
-                              <div key={item.id} className="bg-slate-700 p-2 rounded flex flex-col items-center text-center relative group cursor-pointer hover:bg-slate-600 transition-colors shadow-lg justify-between min-h-[160px]" onClick={() => buyItem(item, runState.shopInventory.indexOf(item), 'NORMAL')} onContextMenu={(e) => handleContextMenu(e, item, 'CONSUMABLE', false)} onTouchStart={() => handleTouchStart(item, 'CONSUMABLE', false)} onTouchEnd={handleTouchEnd}>
+                              <div key={item.id} className="poker-shop-card bg-slate-700 p-2 rounded flex flex-col items-center text-center relative group cursor-pointer hover:bg-slate-600 transition-colors shadow-lg justify-between min-h-[160px]" onClick={() => buyItem(item, runState.shopInventory.indexOf(item), 'NORMAL')} onContextMenu={(e) => handleContextMenu(e, item, 'CONSUMABLE', false)} onTouchStart={() => handleTouchStart(item, 'CONSUMABLE', false)} onTouchEnd={handleTouchEnd}>
                                   <div className="absolute top-1 left-1 text-[8px] font-bold text-purple-300 bg-purple-900/50 px-1.5 py-0.5 rounded">CARD</div>
                                   <div className="w-12 h-12 mt-4">{renderPokerItemIcon(item.icon, item.name, 'w-full h-full', item.id)}</div>
                                   <div className="font-bold text-xs">{item.name}</div>

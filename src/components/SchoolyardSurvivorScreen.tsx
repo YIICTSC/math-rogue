@@ -5,7 +5,7 @@ import { HERO_IMAGE_DATA } from '../constants';
 import PixelSprite, { SPRITE_TEMPLATES, createPixelSpriteCanvas } from './PixelSprite';
 import { audioService } from '../services/audioService';
 import { storageService } from '../services/storageService';
-import { AnswerMode, AssignmentPayload, GameMode } from '../types';
+import { AnswerMode, AssignmentAnswerResult, AssignmentPayload, GameMode, MiniGameDebugPreview } from '../types';
 import MiniGameProblemChallenge from './MiniGameProblemChallenge';
 import { assetUrl } from '../utils/assetPaths';
 
@@ -492,7 +492,8 @@ interface SchoolyardSurvivorScreenProps {
     problemModePool?: string[];
     answerMode?: AnswerMode;
     assignment?: AssignmentPayload | null;
-    onAnswerResult?: (result: { mode: string; correct: boolean; elapsedMs: number; problemId?: string }) => void;
+    onAnswerResult?: (result: AssignmentAnswerResult) => void;
+    debugPreview?: MiniGameDebugPreview;
 }
 
 // --- UTILS ---
@@ -531,7 +532,7 @@ const createSchoolyardBackground = (): HTMLCanvasElement => {
     return c;
 };
 
-const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onBack, problemMode = GameMode.MIXED, problemModePool, answerMode = 'CHOICE', assignment, onAnswerResult }) => {
+const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onBack, problemMode = GameMode.MIXED, problemModePool, answerMode = 'CHOICE', assignment, onAnswerResult, debugPreview }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
     const bgCanvasRef = useRef<HTMLCanvasElement | null>(null);
@@ -575,6 +576,13 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
 
     const [upgradeOptions, setUpgradeOptions] = useState<any[]>([]);
     const [uiState, setUiState] = useState({ hp: 100, maxHp: 100, level: 1, time: 0, score: 0, xpPercent: 0, gameOver: false });
+
+    useEffect(() => {
+        if (debugPreview === 'GAME_OVER') {
+            gameState.current = 'GAME_OVER';
+            setUiState(prev => ({ ...prev, hp: 0, time: Math.max(prev.time, 185), score: Math.max(prev.score, 12480), gameOver: true }));
+        }
+    }, [debugPreview]);
 
     const keys = useRef<Record<string, boolean>>({});
     const joystickRef = useRef<{ x: number, y: number }>({ x: 0, y: 0 });

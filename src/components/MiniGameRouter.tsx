@@ -1,6 +1,6 @@
 
 import React from 'react';
-import { AnswerMode, AssignmentPayload, GameMode, GameScreen, LanguageMode } from '../types';
+import { AnswerMode, AssignmentAnswerResult, AssignmentPayload, GameMode, GameScreen, LanguageMode, MiniGameDebugPreview } from '../types';
 import PokerGameScreen from './PokerGameScreen';
 import SchoolyardSurvivorScreen from './SchoolyardSurvivorScreen';
 import SchoolDungeonRPG from './SchoolDungeonRPG';
@@ -17,8 +17,9 @@ interface MiniGameRouterProps {
     problemModePool?: string[];
     answerMode?: AnswerMode;
     assignment?: AssignmentPayload | null;
-    onAnswerResult?: (result: { mode: string; correct: boolean; elapsedMs: number; problemId?: string }) => void;
+    onAnswerResult?: (result: AssignmentAnswerResult) => void;
     languageMode?: LanguageMode;
+    debugPreview?: MiniGameDebugPreview;
 }
 
 export interface MiniGameComponentProps {
@@ -28,8 +29,9 @@ export interface MiniGameComponentProps {
     problemModePool?: string[];
     answerMode?: AnswerMode;
     assignment?: AssignmentPayload | null;
-    onAnswerResult?: (result: { mode: string; correct: boolean; elapsedMs: number; problemId?: string }) => void;
+    onAnswerResult?: (result: AssignmentAnswerResult) => void;
     languageMode?: LanguageMode;
+    debugPreview?: MiniGameDebugPreview;
 }
 
 /**
@@ -46,7 +48,7 @@ const MINI_GAME_MAP: Partial<Record<GameScreen, React.ComponentType<MiniGameComp
     [GameScreen.MINI_GAME_GO_HOME]: GoHomeDash,
 };
 
-const MiniGameRouter: React.FC<MiniGameRouterProps> = ({ screen, onBack, onFinish, problemMode, problemModePool, answerMode, assignment, onAnswerResult, languageMode }) => {
+const MiniGameRouter: React.FC<MiniGameRouterProps> = ({ screen, onBack, onFinish, problemMode, problemModePool, answerMode, assignment, onAnswerResult, languageMode, debugPreview }) => {
     const Component = MINI_GAME_MAP[screen];
 
     if (!Component) {
@@ -69,6 +71,7 @@ const MiniGameRouter: React.FC<MiniGameRouterProps> = ({ screen, onBack, onFinis
             assignment={assignment}
             onAnswerResult={onAnswerResult}
             languageMode={languageMode}
+            debugPreview={debugPreview}
         />
     );
 };

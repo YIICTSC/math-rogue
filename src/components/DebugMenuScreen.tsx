@@ -2,7 +2,7 @@
 import { CARDS_LIBRARY, RELIC_LIBRARY, POTION_LIBRARY, ENEMY_LIBRARY } from '../constants';
 import { GAME_STORIES } from '../data/stories';
 import { FLAVOR_TEXTS, ENEMY_NAMES } from '../services/geminiService';
-import { AttackEffectKey, StatusEffectKey, Card as ICard, Relic, Potion, CardType, TargetType, LanguageMode, GameScreen, GameMode } from '../types';
+import { AttackEffectKey, StatusEffectKey, Card as ICard, Relic, Potion, CardType, TargetType, LanguageMode, GameScreen, GameMode, MiniGameDebugPreview } from '../types';
 import Card from './Card';
 import AttackEffectSprite from './AttackEffectSprite';
 import StatusEffectSprite from './StatusEffectSprite';
@@ -22,13 +22,13 @@ import { assetUrl } from '../utils/assetPaths';
 import { UI_PREVIEW_GROUPS, UI_PREVIEW_SCREENS } from '../data/uiPreviewScreens';
 import { getDebugProblemUnitGroups } from './ProblemChallengeScreen';
 import { ELEMENTARY_EVENT_TITLES } from '../services/eventService';
-import React, { useMemo, useState, useCallback } from 'react';
+import React, { useMemo, useState, useCallback, useEffect, useRef } from 'react';
 
 interface DebugMenuScreenProps {
     onStart: (deck: ICard[], relics: Relic[], potions: Potion[]) => void;
     onStartAct3Boss: (deck: ICard[], relics: Relic[], potions: Potion[]) => void;
     onStartMagicEventSimulation: () => void;
-    onStartUiPreview: (screen: GameScreen) => void;
+    onStartUiPreview: (screen: GameScreen, miniGameOutcome?: MiniGameDebugPreview) => void;
     onStartProblemUiPreview: (mode: GameMode, modePool?: string[]) => void;
     onStartEventUiPreview: (theme: VisualThemeId, title: string) => void;
     onBack: () => void;
@@ -39,6 +39,7 @@ interface DebugMenuScreenProps {
     totalMathCorrect: number;
     nextMiniGameThreshold: number | null;
     languageMode: LanguageMode;
+    focusedUiPreviewScreenId?: string;
 }
 
 // 翻訳デバッグ用にイベントデータのサンプルを定義 (eventService.tsの内容を網羅)
@@ -147,9 +148,11 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
     clearCount,
     totalMathCorrect,
     nextMiniGameThreshold,
-    languageMode: initialLanguageMode
+    languageMode: initialLanguageMode,
+    focusedUiPreviewScreenId
 }) => {
-    const [activeTab, setActiveTab] = useState<'CARDS' | 'RELICS' | 'POTIONS' | 'SYNTHESIS' | 'SYSTEM' | 'UI_PREVIEW' | 'EFFECTS' | 'MAGIC_VOICES' | 'EVENTS' | 'HUMANOID_SPRITES' | 'TRANSLATION'>('CARDS');
+    const [activeTab, setActiveTab] = useState<'CARDS' | 'RELICS' | 'POTIONS' | 'SYNTHESIS' | 'SYSTEM' | 'UI_PREVIEW' | 'EFFECTS' | 'MAGIC_VOICES' | 'EVENTS' | 'HUMANOID_SPRITES' | 'TRANSLATION'>(focusedUiPreviewScreenId ? 'UI_PREVIEW' : 'CARDS');
+    const focusedUiPreviewItemRef = useRef<HTMLDivElement | null>(null);
     const [searchTerm, setSearchTerm] = useState("");
     const [debugLanguageMode, setDebugLanguageMode] = useState<LanguageMode>(initialLanguageMode);
     const [transSubTab, setTransSubTab] = useState<'STORY' | 'FLAVOR' | 'CARD' | 'EVENT' | 'ENEMY' | 'MISSING'>('STORY');
@@ -172,6 +175,19 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
     const [debugEventTheme, setDebugEventTheme] = useState<VisualThemeId>('elementary');
     const [debugEventTitle, setDebugEventTitle] = useState(DEBUG_EVENT_GROUPS[0]?.titles[0] ?? '');
     const [uiPreviewChecklist, setUiPreviewChecklist] = useState<UiPreviewChecklist>(() => storageService.getUiPreviewChecklist());
+
+    useEffect(() => {
+        if (!focusedUiPreviewScreenId) return;
+        setActiveTab('UI_PREVIEW');
+    }, [focusedUiPreviewScreenId]);
+
+    useEffect(() => {
+        if (activeTab !== 'UI_PREVIEW' || !focusedUiPreviewScreenId) return;
+        const timer = window.setTimeout(() => {
+            focusedUiPreviewItemRef.current?.scrollIntoView({ block: 'center', inline: 'nearest' });
+        }, 0);
+        return () => window.clearTimeout(timer);
+    }, [activeTab, focusedUiPreviewScreenId]);
 
     const [selectedDeck, setSelectedDeck] = useState<ICard[]>([]);
     const [selectedRelics, setSelectedRelics] = useState<Relic[]>([]);
@@ -463,7 +479,7 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
         </div>
     );
     const completedUiPreviewScreenCount = UI_PREVIEW_SCREENS.filter(item =>
-        UI_PREVIEW_CHECK_TARGETS.every(target => uiPreviewChecklist[`screen:${item.screen}`]?.[target.id])
+        UI_PREVIEW_CHECK_TARGETS.every(target => uiPreviewChecklist[`screen:${item.id}`]?.[target.id])
     ).length;
     const totalUiPreviewChecks = Object.values(uiPreviewChecklist).reduce(
         (total, entry) => total + UI_PREVIEW_CHECK_TARGETS.filter(target => entry?.[target.id]).length,
@@ -881,16 +897,18 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
                                         <h4 className="mb-3 border-b border-gray-700 pb-2 text-sm font-black text-sky-300">{group}</h4>
                                         <div className="grid grid-cols-2 gap-3 md:grid-cols-3 xl:grid-cols-4">
                                             {UI_PREVIEW_SCREENS.filter(item => item.group === group).map(item => {
-                                                const checklistKey = `screen:${item.screen}`;
+                                                const checklistKey = `screen:${item.id}`;
                                                 const completed = UI_PREVIEW_CHECK_TARGETS.every(target => uiPreviewChecklist[checklistKey]?.[target.id]);
+                                                const isFocusedPreviewItem = focusedUiPreviewScreenId === item.id;
                                                 return (
                                                     <div
-                                                        key={item.screen}
-                                                        className={`flex min-h-28 flex-col rounded-xl border p-2 shadow-lg transition-colors ${completed ? 'border-emerald-500 bg-emerald-950/40' : 'border-sky-700 bg-slate-900'}`}
+                                                        key={item.id}
+                                                        ref={isFocusedPreviewItem ? focusedUiPreviewItemRef : undefined}
+                                                        className={`flex min-h-28 flex-col rounded-xl border p-2 shadow-lg transition-colors ${completed ? 'border-emerald-500 bg-emerald-950/40' : 'border-sky-700 bg-slate-900'} ${isFocusedPreviewItem ? 'ring-2 ring-yellow-300 ring-offset-2 ring-offset-slate-950' : ''}`}
                                                     >
                                                         <button
                                                             type="button"
-                                                            onClick={() => onStartUiPreview(item.screen)}
+                                                            onClick={() => onStartUiPreview(item.screen, item.miniGameOutcome)}
                                                             className="flex min-h-16 flex-1 flex-col items-center justify-center gap-1 rounded-lg text-center text-sm font-bold text-white hover:bg-sky-900/70"
                                                         >
                                                             <Monitor size={20} className={completed ? 'text-emerald-300' : 'text-sky-300'} />
