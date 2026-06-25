@@ -400,6 +400,7 @@ export enum GameScreen {
 export type MiniGameDebugPreview =
   | 'GAME_OVER'
   | 'ENDING'
+  | 'DUNGEON_SHOP'
   | 'KOCHO_REWARD'
   | 'KOCHO_UPGRADE'
   | 'KOCHO_SHOP'

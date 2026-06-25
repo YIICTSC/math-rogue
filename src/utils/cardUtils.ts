@@ -525,6 +525,7 @@ export const synthesizeCards = (c1: Card, c2: Card, c3?: Card): Card => {
     const newAddCardToDraw = c1.addCardToDraw || c2.addCardToDraw || c3?.addCardToDraw;
     const newAddCardToDiscard = c1.addCardToDiscard || c2.addCardToDiscard || c3?.addCardToDiscard;
     const sourceCards = [c1, c2, c3].filter(Boolean) as Card[];
+    const holographicSource = sourceCards.find(c => c.holographic);
     const magicSource = sourceCards.find(c => c.magicHeroId && ((c.magicRuleCardIndices?.length ?? 0) > 0 || c.magicRuleCardIndex !== undefined));
     const magicRuleCardIndices = sourceCards.flatMap(c => {
         if (c.magicHeroId && c.magicHeroId !== magicSource?.magicHeroId) return [];
@@ -779,6 +780,10 @@ export const synthesizeCards = (c1: Card, c2: Card, c3?: Card): Card => {
         textureRef: newTextureRef,
         illustrationRefs: mergedIllustrationRefs,
         illustrationRefWriteIndex,
+        holographic: !!holographicSource,
+        holographicVariant: holographicSource
+            ? (holographicSource.holographicVariant || getHolographicVariantForCard({ ...holographicSource, type: newType }))
+            : undefined,
         visualTheme: hasMagicSource ? 'magic' : c1.visualTheme,
         magicHeroId: magicSource?.magicHeroId,
         magicRuleCardIndex: magicRuleCardIndices[0],

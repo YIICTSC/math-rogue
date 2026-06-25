@@ -33,6 +33,7 @@ export const UI_PREVIEW_SCREENS: UiPreviewScreenDefinition[] = [
     { id: `${GameScreen.MINI_GAME_POKER}:GAME_OVER`, screen: GameScreen.MINI_GAME_POKER, label: '放課後ポーカー：ゲームオーバー', group: 'ミニゲーム', miniGameOutcome: 'GAME_OVER' },
     { id: `${GameScreen.MINI_GAME_POKER}:ENDING`, screen: GameScreen.MINI_GAME_POKER, label: '放課後ポーカー：エンディング', group: 'ミニゲーム', miniGameOutcome: 'ENDING' },
     { id: GameScreen.MINI_GAME_DUNGEON, screen: GameScreen.MINI_GAME_DUNGEON, label: '風来の小学生', group: 'ミニゲーム' },
+    { id: `${GameScreen.MINI_GAME_DUNGEON}:DUNGEON_SHOP`, screen: GameScreen.MINI_GAME_DUNGEON, label: '風来の小学生：ショップ', group: 'ミニゲーム', miniGameOutcome: 'DUNGEON_SHOP' },
     { id: `${GameScreen.MINI_GAME_DUNGEON}:GAME_OVER`, screen: GameScreen.MINI_GAME_DUNGEON, label: '風来の小学生：ゲームオーバー', group: 'ミニゲーム', miniGameOutcome: 'GAME_OVER' },
     { id: `${GameScreen.MINI_GAME_DUNGEON}:ENDING`, screen: GameScreen.MINI_GAME_DUNGEON, label: '風来の小学生：エンディング', group: 'ミニゲーム', miniGameOutcome: 'ENDING' },
     { id: GameScreen.MINI_GAME_KOCHO, screen: GameScreen.MINI_GAME_KOCHO, label: '校長対決', group: 'ミニゲーム' },
@@ -49,6 +50,7 @@ export const UI_PREVIEW_SCREENS: UiPreviewScreenDefinition[] = [
     { id: `${GameScreen.MINI_GAME_PAPER_PLANE}:GAME_OVER`, screen: GameScreen.MINI_GAME_PAPER_PLANE, label: '紙飛行機バトル：ゲームオーバー', group: 'ミニゲーム', miniGameOutcome: 'GAME_OVER' },
     { id: `${GameScreen.MINI_GAME_PAPER_PLANE}:ENDING`, screen: GameScreen.MINI_GAME_PAPER_PLANE, label: '紙飛行機バトル：エンディング', group: 'ミニゲーム', miniGameOutcome: 'ENDING' },
     { id: GameScreen.MINI_GAME_DUNGEON_2, screen: GameScreen.MINI_GAME_DUNGEON_2, label: '風来の小学生2', group: 'ミニゲーム' },
+    { id: `${GameScreen.MINI_GAME_DUNGEON_2}:DUNGEON_SHOP`, screen: GameScreen.MINI_GAME_DUNGEON_2, label: '風来の小学生2：ショップ', group: 'ミニゲーム', miniGameOutcome: 'DUNGEON_SHOP' },
     { id: `${GameScreen.MINI_GAME_DUNGEON_2}:GAME_OVER`, screen: GameScreen.MINI_GAME_DUNGEON_2, label: '風来の小学生2：ゲームオーバー', group: 'ミニゲーム', miniGameOutcome: 'GAME_OVER' },
     { id: `${GameScreen.MINI_GAME_DUNGEON_2}:ENDING`, screen: GameScreen.MINI_GAME_DUNGEON_2, label: '風来の小学生2：エンディング', group: 'ミニゲーム', miniGameOutcome: 'ENDING' },
 

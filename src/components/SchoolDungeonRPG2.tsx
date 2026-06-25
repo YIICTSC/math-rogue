@@ -1113,8 +1113,16 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
     initInventory.push({ ...ITEM_DB['PENCIL_SWORD'], id: `start-w-${Date.now()}` });
     setInventory(initInventory);
 
-    setPlayer({ id: 0, type: 'PLAYER', x: 1, y: 1, char: '@', name: 'わんぱく小学生', hp: 50, maxHp: 50, baseAttack: 3, baseDefense: 0, attack: 3, defense: 0, xp: 0, gold: 0, dir: {x:0, y:1}, equipment: { weapon: null, armor: null, ranged: null, accessory: null }, status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0, poison: 0, trapSight: 0 }, offset: { x: 0, y: 0 } });
-    setLogs([]); initDeck(); generateFloor(1); addLog("風来の旅が始まった！");
+    setPlayer({ id: 0, type: 'PLAYER', x: 1, y: 1, char: '@', name: 'わんぱく小学生', hp: 50, maxHp: 50, baseAttack: 3, baseDefense: 0, attack: 3, defense: 0, xp: 0, gold: debugPreview === 'DUNGEON_SHOP' ? 500 : 0, dir: {x:0, y:1}, equipment: { weapon: null, armor: null, ranged: null, accessory: null }, status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0, poison: 0, trapSight: 0 }, offset: { x: 0, y: 0 } });
+    setLogs([]); initDeck(); generateFloor(1);
+    if (debugPreview === 'DUNGEON_SHOP') {
+        const debugShopkeeper = createShopkeeper(3, 3);
+        setEnemies(prev => [...prev.filter(e => e.enemyType !== 'SHOPKEEPER'), debugShopkeeper]);
+        setShopState({ active: true, merchantId: debugShopkeeper.id, mode: 'BUY' });
+        setSelectedItemIndex(0);
+        addLog("UI確認用の購買部を開きました。");
+    }
+    addLog("風来の旅が始まった！");
   };
 
   const handleRestart = () => { 
