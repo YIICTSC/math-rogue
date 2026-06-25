@@ -215,8 +215,8 @@ const EnglishChallengeScreen: React.FC<EnglishChallengeScreenProps> = ({ onCompl
             </button>
         </div>
 
-        <div className="z-10 w-full max-w-md text-center flex flex-col">
-            <div className="bg-black/40 border-4 border-white p-4 md:p-6 rounded-2xl mb-4 shadow-2xl relative overflow-hidden flex flex-col items-center justify-center min-h-[200px] md:min-h-[300px]">
+        <div className="basic-challenge-layout z-10 w-full max-w-md text-center flex flex-col">
+            <div className="basic-challenge-question bg-black/40 border-4 border-white p-4 md:p-6 rounded-2xl mb-4 shadow-2xl relative overflow-hidden flex flex-col items-center justify-center min-h-[200px] md:min-h-[300px]">
                 {currentProblem.hint && (storageService.getHintStreaks()[mode] || 0) < 3 && (
                     <div className="bg-indigo-800/60 p-2 rounded-lg border border-indigo-400/30 mb-4 w-full animate-in fade-in slide-in-from-top-2">
                         <div className="text-[9px] text-cyan-300 font-bold mb-0.5 uppercase tracking-tighter text-left">Hint</div>
@@ -262,7 +262,7 @@ const EnglishChallengeScreen: React.FC<EnglishChallengeScreenProps> = ({ onCompl
                 )}
             </div>
 
-            <div className={`grid ${isConv ? 'grid-cols-1' : 'grid-cols-2'} gap-2 md:gap-4`}>
+            <div className={`basic-challenge-options grid ${isConv ? 'grid-cols-1' : 'grid-cols-2'} gap-2 md:gap-4`}>
                 {currentProblem.options.map((opt, idx) => (
                     <button
                         key={idx}

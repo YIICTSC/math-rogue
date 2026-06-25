@@ -207,8 +207,8 @@ const KanjiChallengeScreen: React.FC<KanjiChallengeScreenProps> = ({ onComplete,
         <div className="absolute inset-0 texture-dark-matter opacity-20 pointer-events-none"></div>
         <RewardHintBanner text={rewardHint} />
         
-        <div className="z-10 w-full max-w-md text-center">
-            <div className="bg-black/40 border-4 border-white p-8 rounded-lg mb-8 shadow-2xl relative overflow-hidden flex flex-col items-center justify-center min-h-[260px]">
+        <div className="basic-challenge-layout z-10 w-full max-w-md text-center">
+            <div className="basic-challenge-question bg-black/40 border-4 border-white p-8 rounded-lg mb-8 shadow-2xl relative overflow-hidden flex flex-col items-center justify-center min-h-[260px]">
                 {currentProblem.hint && (storageService.getHintStreaks()[mode] || 0) < 3 && (
                     <div className="bg-blue-900/40 p-2 rounded border border-blue-500/30 mb-4 w-full animate-in fade-in slide-in-from-top-2">
                         <div className="text-[10px] text-blue-300 font-bold mb-1">ヒント</div>
@@ -230,7 +230,7 @@ const KanjiChallengeScreen: React.FC<KanjiChallengeScreenProps> = ({ onComplete,
             </div>
 
             {resolvedAnswerMode === 'INPUT' ? (
-              <form onSubmit={handleInputSubmit} className="space-y-3">
+              <form onSubmit={handleInputSubmit} className="basic-challenge-options space-y-3">
                 <input
                   ref={inputRef}
                   value={inputAnswer}
@@ -249,7 +249,7 @@ const KanjiChallengeScreen: React.FC<KanjiChallengeScreenProps> = ({ onComplete,
                 </button>
               </form>
             ) : (
-              <div className="grid grid-cols-2 gap-4">
+              <div className="basic-challenge-options grid grid-cols-2 gap-4">
                 {currentProblem.options.map((opt, idx) => (
                     <button
                         key={idx}

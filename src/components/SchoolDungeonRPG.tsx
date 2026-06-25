@@ -1521,6 +1521,18 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
       if(gameOver || gameClear) return;
 
       if (shopState.active) {
+          if (dx < 0 && shopState.mode !== 'BUY') {
+              setShopState(prev => ({ ...prev, mode: 'BUY' }));
+              setSelectedItemIndex(0);
+              audioService.playSound('select');
+              return;
+          }
+          if (dx > 0 && shopState.mode !== 'SELL') {
+              setShopState(prev => ({ ...prev, mode: 'SELL' }));
+              setSelectedItemIndex(0);
+              audioService.playSound('select');
+              return;
+          }
           if (dy !== 0) {
               const shopkeeper = enemies.find(e => e.id === shopState.merchantId);
               const listLength = shopState.mode === 'BUY' ? (shopkeeper?.shopItems?.length || 0) : inventory.length;

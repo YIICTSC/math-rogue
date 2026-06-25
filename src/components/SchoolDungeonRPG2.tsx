@@ -1364,7 +1364,19 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
 
   const movePlayer = (dx: 0|1|-1, dy: 0|1|-1) => {
       if(gameOver || gameClear) return;
-      if (shopState.active) { if (dy !== 0) { const shopkeeper = enemies.find(e => e.id === shopState.merchantId); const listLength = shopState.mode === 'BUY' ? (shopkeeper?.shopItems?.length || 0) : inventory.length; setSelectedItemIndex(prev => Math.max(0, Math.min(listLength - 1, prev + dy))); audioService.playSound('select'); } return; }
+      if (shopState.active) {
+          if (dx < 0 && shopState.mode !== 'BUY') { setShopState(prev => ({ ...prev, mode: 'BUY' })); setSelectedItemIndex(0); audioService.playSound('select'); return; }
+          if (dx > 0 && shopState.mode !== 'SELL') { setShopState(prev => ({ ...prev, mode: 'SELL' })); setSelectedItemIndex(0); audioService.playSound('select'); return; }
+          if (dy !== 0) {
+              const shopkeeper = enemies.find(e => e.id === shopState.merchantId);
+              const listLength = shopState.mode === 'BUY' ? (shopkeeper?.shopItems?.length || 0) : inventory.length;
+              const minIndex = !shopRemovedThisFloor ? -1 : 0;
+              const maxIndex = Math.max(minIndex, listLength - 1);
+              setSelectedItemIndex(prev => Math.max(minIndex, Math.min(maxIndex, prev + dy)));
+              audioService.playSound('select');
+          }
+          return;
+      }
       if (menuOpen) {
           if (dy !== 0) {
               if (synthState.active && synthState.mode === 'BLANK' && synthState.step === 'SELECT_EFFECT') {
@@ -1476,6 +1488,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
   const handleShopAction = (indexOverride?: number) => {
       const shopkeeper = enemies.find(e => e.id === shopState.merchantId); if (!shopkeeper) { setShopState(prev => ({ ...prev, active: false })); return; }
       const idx = indexOverride !== undefined ? indexOverride : selectedItemIndex;
+      if (idx === -1 && !shopRemovedThisFloor) { setDeckViewMode('REMOVE'); setShowDeck(true); audioService.playSound('select'); return; }
       if (shopState.mode === 'BUY') {
           if (!shopkeeper.shopItems || shopkeeper.shopItems.length === 0) return; const item = shopkeeper.shopItems[idx]; if (!item) return;
           if ((player.gold || 0) >= (item.price || 0)) {
@@ -1654,10 +1667,12 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
         if ((menuOpen || shopState.active) && (e.key === 'Backspace' || e.key === 'x')) { if (shopState.active) { setShopState(prev => ({...prev, active: false})); return; } if (synthState.active) setSynthState({ active: false, mode: 'SYNTH', step: 'SELECT_BASE', baseIndex: null }); else setMenuOpen(false); return; }
         if (menuOpen || shopState.active) {
             const listLength = shopState.active && shopState.mode === 'BUY' ? (enemies.find(e=>e.id===shopState.merchantId)?.shopItems?.length||0) : inventory.length;
+            const minIndex = shopState.active && !shopRemovedThisFloor ? -1 : 0;
+            const maxIndex = Math.max(minIndex, listLength - 1);
             if (menuOpen && !synthState.active && e.key === 'ArrowUp') moveItemMenuSelection(-1);
             else if (menuOpen && !synthState.active && e.key === 'ArrowDown') moveItemMenuSelection(1);
-            else if (e.key === 'ArrowUp') setSelectedItemIndex(prev => Math.max(0, prev - 1));
-            else if (e.key === 'ArrowDown') setSelectedItemIndex(prev => Math.min(listLength - 1, prev + 1));
+            else if (e.key === 'ArrowUp') setSelectedItemIndex(prev => Math.max(minIndex, prev - 1));
+            else if (e.key === 'ArrowDown') setSelectedItemIndex(prev => Math.min(maxIndex, prev + 1));
             if (menuOpen && !synthState.active && !selectedEquipmentSlot && e.key === 'ArrowLeft') setSelectedItemActionIndex(prev => Math.max(0, prev - 1));
             if (menuOpen && !synthState.active && !selectedEquipmentSlot && e.key === 'ArrowRight') setSelectedItemActionIndex(prev => Math.min(3, prev + 1));
             if (shopState.active) { if (e.key === 'ArrowLeft' && shopState.mode === 'SELL') { setShopState(prev => ({ ...prev, mode: 'BUY' })); setSelectedItemIndex(0); audioService.playSound('select'); } if (e.key === 'ArrowRight' && shopState.mode === 'BUY') { setShopState(prev => ({ ...prev, mode: 'SELL' })); setSelectedItemIndex(0); audioService.playSound('select'); } }
@@ -2026,7 +2041,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
                         <div className="flex justify-between items-center border-b mb-2 pb-1" style={{ borderColor: C3 }}><h3 className="font-bold flex items-center"><ShoppingBag size={12} className="mr-1"/> 購買部</h3><button onClick={() => setShopState(prev => ({...prev, active: false}))}><X size={12}/></button></div>
                         <div className="flex gap-2 mb-2"><button className={`flex-1 py-1 text-center border`} style={{ borderColor: C3, backgroundColor: shopState.mode === 'BUY' ? C3 : 'transparent', color: shopState.mode === 'BUY' ? C0 : C3 }} onClick={() => { setShopState(prev => ({ ...prev, mode: 'BUY' })); setSelectedItemIndex(0); }}>買う</button><button className={`flex-1 py-1 text-center border`} style={{ borderColor: C3, backgroundColor: shopState.mode === 'SELL' ? C3 : 'transparent', color: shopState.mode === 'SELL' ? C0 : C3 }} onClick={() => { setShopState(prev => ({ ...prev, mode: 'SELL' })); setSelectedItemIndex(0); }}>売る</button></div>
                         <div className="flex justify-end mb-2 border-b pb-1" style={{ borderColor: C1 }}><span className="flex items-center"><Coins size={10} className="mr-1"/> {player.gold} G</span></div>
-                        {!shopRemovedThisFloor && (<button className="w-full border mb-2 py-1 flex items-center justify-center gap-2 hover:opacity-80" style={{ borderColor: C1, color: C3 }} onClick={() => { setDeckViewMode('REMOVE'); setShowDeck(true); }}><Trash2 size={12} /> カード除外 (100 G)</button>)}
+                        {!shopRemovedThisFloor && (<button className="w-full border mb-2 py-1 flex items-center justify-center gap-2 hover:opacity-80" style={{ borderColor: selectedItemIndex === -1 ? C3 : C1, backgroundColor: selectedItemIndex === -1 ? C2 : 'transparent', color: selectedItemIndex === -1 ? C0 : C3 }} onMouseEnter={() => { lastInputType.current = 'MOUSE'; setSelectedItemIndex(-1); }} onClick={() => handleShopAction(-1)}>{selectedItemIndex === -1 && <span className="mr-1 animate-pulse">▶</span>}<Trash2 size={12} /> カード除外 (100 G)</button>)}
                         <div ref={menuListRef} className="flex flex-col gap-1 overflow-y-auto flex-grow custom-scrollbar relative">
                             {shopState.mode === 'BUY' ? (enemies.find(e => e.id === shopState.merchantId)?.shopItems?.map((item, i) => (<div key={i} className="flex items-center border" style={{ borderColor: selectedItemIndex === i ? C3 : 'transparent', backgroundColor: selectedItemIndex === i ? C2 : 'transparent', color: selectedItemIndex === i ? C0 : C3 }} onMouseEnter={() => { lastInputType.current = 'MOUSE'; setSelectedItemIndex(i); }}><button className="flex-grow text-left px-2 py-1 cursor-pointer flex justify-between items-center" onClick={() => handleShopAction(i)}>{selectedItemIndex === i && <span className="mr-1 animate-pulse">▶</span>}<span>{getItemName(item)}</span><span className="flex items-center gap-1">{item.price} G</span></button><button className="px-2 py-1 border-l flex items-center justify-center hover:opacity-80" style={{ borderColor: C1 }} onClick={(e) => { e.stopPropagation(); setInspectedItem(item); }}><Info size={10} /></button></div>)) || <div className="text-center">売り切れ</div>) : (inventory.map((item, i) => (<div key={i} className="flex items-center border" style={{ borderColor: selectedItemIndex === i ? C3 : 'transparent', backgroundColor: selectedItemIndex === i ? C2 : 'transparent', color: selectedItemIndex === i ? C0 : C3 }} onMouseEnter={() => { lastInputType.current = 'MOUSE'; setSelectedItemIndex(i); }}><button className="flex-grow text-left px-2 py-1 cursor-pointer flex justify-between items-center" onClick={() => handleShopAction(i)}>{selectedItemIndex === i && <span className="mr-1 animate-pulse">▶</span>}<span>{getItemName(item)}</span><span className="flex items-center gap-1">{Math.floor((item.price || (item.value || 100)) / 2)} G</span></button><button className="px-2 py-1 border-l flex items-center justify-center hover:opacity-80" style={{ borderColor: C1 }} onClick={(e) => { e.stopPropagation(); setInspectedItem(item); }}><Info size={10} /></button></div>)))}
                             {shopState.mode === 'SELL' && inventory.length === 0 && <div className="text-center">持ち物なし</div>}
