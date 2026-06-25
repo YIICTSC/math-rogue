@@ -255,8 +255,8 @@ const MathChallengeScreen: React.FC<MathChallengeScreenProps> = ({ onComplete, m
         <div className="absolute inset-0 texture-blackboard opacity-20 pointer-events-none"></div>
         <RewardHintBanner text={rewardHint} />
         
-        <div className="z-10 w-full max-w-md text-center">
-            <div className="bg-black/40 border-4 border-white p-8 rounded-lg mb-8 shadow-2xl relative overflow-hidden flex items-center justify-center min-h-[160px]">
+        <div className="basic-challenge-layout z-10 w-full max-w-md text-center">
+            <div className="basic-challenge-question bg-black/40 border-4 border-white p-8 rounded-lg mb-8 shadow-2xl relative overflow-hidden flex items-center justify-center min-h-[160px]">
                 <h3 className="text-5xl font-bold text-white tracking-widest font-mono">{currentProblem.question}</h3>
                 
                 {feedback && (
@@ -271,7 +271,7 @@ const MathChallengeScreen: React.FC<MathChallengeScreenProps> = ({ onComplete, m
             </div>
 
             {resolvedAnswerMode === 'INPUT' ? (
-              <form onSubmit={handleInputSubmit} className="space-y-3">
+              <form onSubmit={handleInputSubmit} className="basic-challenge-options space-y-3">
                 <input
                   ref={inputRef}
                   value={inputAnswer}
@@ -292,7 +292,7 @@ const MathChallengeScreen: React.FC<MathChallengeScreenProps> = ({ onComplete, m
                 </button>
               </form>
             ) : (
-              <div className="grid grid-cols-2 gap-4">
+              <div className="basic-challenge-options grid grid-cols-2 gap-4">
                 {currentProblem.options.map((opt, idx) => (
                     <button
                         key={idx}

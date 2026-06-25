@@ -2589,10 +2589,10 @@ const KochoShowdown: React.FC<{
             )}
 
             {/* Main Content */}
-            <div className="flex-grow flex flex-col md:flex-row overflow-hidden relative">
-                
+            <div className="kocho-showdown-main flex-grow flex flex-col md:flex-row overflow-hidden relative">
+
                 {/* Game Field */}
-                <div className="flex-1 relative bg-[#1a1a2e] flex flex-col items-center justify-center p-4 overflow-hidden">
+                <div className="kocho-battle-field flex-1 relative bg-[#1a1a2e] flex flex-col items-center justify-center p-4 overflow-hidden">
                     <KochoSheetSprite
                         sheet="backgrounds"
                         cell={getKochoBackgroundCell()}

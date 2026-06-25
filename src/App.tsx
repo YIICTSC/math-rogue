@@ -1665,6 +1665,9 @@ const App: React.FC = () => {
         return Math.max(1, Math.min(4, participantCount));
     }, [coopSession, gameState.challengeMode]);
     const coopInteractionDisabled = gameState.challengeMode === 'COOP' && !coopCanDecide;
+    const coopLocalProgressInteractionDisabled = gameState.challengeMode === 'COOP'
+        ? false
+        : coopInteractionDisabled;
     const coopInteractionDisabledMessage = coopDecisionOwner
         ? `${coopDecisionOwner.name} が選択しています`
         : '他のプレイヤーの選択を待っています';
@@ -8171,6 +8174,12 @@ const App: React.FC = () => {
             setTimeout(resolve, 600);
         });
         const livingEnemiesAtStart = stateRef.current.enemies.filter(enemy => enemy.currentHp > 0);
+        const coopEnemyTurnRemainingBlock = new Map<string, number>();
+        if (stateRef.current.challengeMode === 'COOP' && coopSession?.isHost) {
+            (stateRef.current.coopBattleState?.players || []).forEach(entry => {
+                coopEnemyTurnRemainingBlock.set(entry.peerId, entry.player.block || 0);
+            });
+        }
         let enemiesToAct = [...stateRef.current.enemies];
         if (enemyActionCountOverride !== undefined) {
             enemiesToAct = [];
@@ -8363,8 +8372,14 @@ const App: React.FC = () => {
                             for (const targetEntry of aliveTargets) {
                                 const isSelfTarget = targetEntry.peerId === coopSelfPeerId;
                                 const targetName = targetEntry.name || coopSelfDisplayName;
+                                const trackedBlock = coopEnemyTurnRemainingBlock.get(targetEntry.peerId);
                                 if (isSelfTarget) {
-                                    const resolved = resolveDamageAgainstDefense(damage, p.block, p.powers['BUFFER'] || 0);
+                                    const resolved = resolveDamageAgainstDefense(
+                                        damage,
+                                        trackedBlock ?? (p.block || 0),
+                                        p.powers['BUFFER'] || 0
+                                    );
+                                    coopEnemyTurnRemainingBlock.set(targetEntry.peerId, resolved.nextBlock);
                                     p.block = resolved.nextBlock;
                                     p.powers['BUFFER'] = resolved.nextBuffer;
                                     const unblockedDamage = resolved.unblockedDamage;
@@ -8391,7 +8406,12 @@ const App: React.FC = () => {
                                     if (p.currentHp <= 0) newLogs.push(`${targetName}が倒れた...`);
                                 } else {
                                     const targetPlayer = targetEntry.player;
-                                    const resolved = resolveDamageAgainstDefense(damage, targetPlayer.block, targetPlayer.powers['BUFFER'] || 0);
+                                    const resolved = resolveDamageAgainstDefense(
+                                        damage,
+                                        trackedBlock ?? (targetPlayer.block || 0),
+                                        targetPlayer.powers['BUFFER'] || 0
+                                    );
+                                    coopEnemyTurnRemainingBlock.set(targetEntry.peerId, resolved.nextBlock);
                                     const unblockedDamage = resolved.unblockedDamage;
                                     const nextHp = Math.max(0, targetPlayer.currentHp - unblockedDamage);
                                     targetPlayer.currentHp = nextHp;
@@ -14459,7 +14479,7 @@ const App: React.FC = () => {
 
                 {gameState.screen === GameScreen.REWARD && (
                     <div className="absolute inset-0">
-                        <RewardScreen rewards={gameState.rewards} onSelectReward={handleRewardSelection} onSkip={finishRewardPhase} isLoading={isLoading || coopAwaitingRewardSync} currentPotions={gameState.player.potions} potionCapacity={getPotionCapacity(gameState.player)} languageMode={languageMode} typingMode={gameState.challengeMode === 'TYPING'} dummyRewards={raceRewardDummyDisplay} autoSkipWhenEmpty={gameState.challengeMode !== 'COOP'} skipDisabled={coopRewardSkipDisabled} skipDisabledMessage={coopAwaitingRewardSync ? 'ホストが報酬を確定するまで待っています' : (coopRewardSkipDisabled ? '他のプレイヤーの報酬完了を待っています' : undefined)} interactionDisabled={gameState.challengeMode === 'COOP' ? false : coopInteractionDisabled} interactionDisabledMessage={coopInteractionDisabledMessage} visualTheme={gameState.visualTheme || visualTheme} />
+                        <RewardScreen rewards={gameState.rewards} onSelectReward={handleRewardSelection} onSkip={finishRewardPhase} isLoading={isLoading || coopAwaitingRewardSync} currentPotions={gameState.player.potions} potionCapacity={getPotionCapacity(gameState.player)} languageMode={languageMode} typingMode={gameState.challengeMode === 'TYPING'} dummyRewards={raceRewardDummyDisplay} autoSkipWhenEmpty={gameState.challengeMode !== 'COOP'} skipDisabled={coopRewardSkipDisabled} skipDisabledMessage={coopAwaitingRewardSync ? 'ホストが報酬を確定するまで待っています' : (coopRewardSkipDisabled ? '他のプレイヤーの報酬完了を待っています' : undefined)} interactionDisabled={coopLocalProgressInteractionDisabled} interactionDisabledMessage={coopInteractionDisabledMessage} visualTheme={gameState.visualTheme || visualTheme} />
                     </div>
                 )}
 
@@ -14475,7 +14495,7 @@ const App: React.FC = () => {
                             languageMode={languageMode}
                             typingMode={gameState.challengeMode === 'TYPING'}
                             scienceRoomChance={getDifficultyConfig(gameState.difficultyLevel).scienceRoomChance}
-                            interactionDisabled={gameState.challengeMode === 'COOP' ? false : coopInteractionDisabled}
+                            interactionDisabled={coopLocalProgressInteractionDisabled}
                             interactionDisabledMessage={coopInteractionDisabledMessage}
                             visualTheme={gameState.visualTheme || visualTheme}
                         />
@@ -14503,7 +14523,7 @@ const App: React.FC = () => {
                                 const base = gameState.player.relics.find(r => r.id === 'SMILING_MASK') ? Math.min(50, difficulty.removeBaseCost) : difficulty.removeBaseCost;
                                 return base + (gameState.shopRemoveCount || 0) * difficulty.removeCostStep;
                             })()}
-                            interactionDisabled={gameState.challengeMode === 'COOP' ? false : coopInteractionDisabled}
+                            interactionDisabled={coopLocalProgressInteractionDisabled}
                             interactionDisabledMessage={coopInteractionDisabledMessage}
                             visualTheme={gameState.visualTheme || visualTheme}
                         />
