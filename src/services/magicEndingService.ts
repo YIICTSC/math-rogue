@@ -117,6 +117,26 @@ const getPairImagePath = (heroId: string, firstTargetId: string, secondTargetId:
   return `sprites/magic/events/double-romance/${folder}/${pair.join('-')}.webp`;
 };
 
+const DOUBLE_ROMANCE_HERO_REPLY_LINES: Record<string, string> = {
+  AKARI: 'わ、わかったから二人とも一歩だけ下がって！星より先に私の心臓が爆発しちゃうよ！',
+  SHIZUKU: 'ま、待ってください。情報量と距離が同時に限界です……一人ずつ、順番に聞かせてください。',
+  HIYORI: 'あの、二人ともそんなに近いと、嬉しいけど困っちゃうよ……ちゃんと聞くから、少しだけ待って。',
+  TSUBASA: 'ちょ、真正面から二人同時は反則だって！逃げないから、順番に勝負させてくれ！',
+  REI: '待て。二人に迫られては、さすがの私も判断が乱れる……一人ずつ、言葉を聞かせろ。',
+  MADOKA: 'ひゃっ、二人同時は処理が追いつきません……！ログを分けるので、順番にお願いします。',
+  KOHARU: 'えっと、風向きまで慌ててるみたい……二人とも少しだけ距離を置いて、順番に話そう。',
+  MIRAI: '待って、こんな急展開は台本にないわ……！でも逃げないから、一人ずつ私に言葉をちょうだい。',
+  SERA: 'あ、あの、二人の光が近すぎて目が回りそうです……ちゃんと受け止めますから、順番にお願いします。',
+  REN: 'ちょっと待て、二人とも近い。ちゃんと向き合うから、まず落ち着いて一人ずつ話してくれ。',
+  SOMA: '待ってくれ。この状況を同時処理する規則はない……私が逃げないうちに、順番に話してほしい。',
+  MINATO: 'ま、待ってください！二人に詰められると、ぼくの勇気が先に限界です……一人ずつお願いします！',
+  RIKU: 'おっと、この未来はさすがに読めなかったな……逃げないから、順番に答えさせてよ。',
+  YAMATO: 'ちょ、詰め寄んなって！逃げねえから、二人いっぺんに来るな。順番に言え、ちゃんと聞く。',
+  LEON: '待ちたまえ、主役が二人に迫られて台詞を飛ばす場面なんて聞いてない……順番に、僕へ告げて。',
+  ELLIOT: 'お待ちください。二人の想いを同時に受け取るには、私の記録容量が足りません……順番にお願いします。',
+  SAKUYA: '待て。二人にここまで迫られては、封印より先に私の平静が解ける……一人ずつ話せ。',
+};
+
 const buildDoubleRomancePage = (
   heroId: string,
   firstTargetId: string,
@@ -125,16 +145,13 @@ const buildDoubleRomancePage = (
   const heroName = getCharacterName(heroId);
   const firstName = getCharacterName(firstTargetId);
   const secondName = getCharacterName(secondTargetId);
-  const maleHero = isMagicMaleProtagonist(heroId);
   const firstEnding = getMagicRomanceEndingText(heroId, firstTargetId, 100);
   const secondEnding = getMagicRomanceEndingText(heroId, secondTargetId, 100);
   const lines = [
     firstEnding.lines[1],
     secondEnding.lines[1],
     firstEnding.lines[0],
-    maleHero
-      ? `${firstName}と${secondName}は互いを見つめ、それから同時に${heroName}へ詰め寄った。`
-      : `${firstName}と${secondName}は互いに視線をぶつけ、同時に${heroName}との距離を詰めた。`,
+    `${heroName}「${DOUBLE_ROMANCE_HERO_REPLY_LINES[heroId] ?? DOUBLE_ROMANCE_HERO_REPLY_LINES.AKARI}」`,
   ];
 
   return {
