@@ -107,7 +107,7 @@ const REWARD_CHOICES: Array<Array<Omit<MagicRomanceChoiceDefinition, 'response'>
     { label: 'いったん退いて作戦を練る', affectionGain: 14, rewardKind: 'heal', rewardAmount: 22 },
   ],
   [
-    { label: '卒業後も隣にいたいと告げる', affectionGain: 20, rewardKind: 'upgrade', rewardAmount: 1 },
+    { label: '卒業後も隣にいたいと告げる', affectionGain: 22, rewardKind: 'upgrade', rewardAmount: 1 },
     { label: '使命と恋を両方選ぶ', affectionGain: 18, rewardKind: 'maxHp', rewardAmount: 4 },
     { label: '二人だけの約束を交わす', affectionGain: 16, rewardKind: 'strength', rewardAmount: 1 },
   ],
@@ -135,7 +135,7 @@ const MALE_REWARD_CHOICES: Array<Array<Omit<MagicRomanceChoiceDefinition, 'respo
     { label: '彼女を守る作戦を組み直す', affectionGain: 14, rewardKind: 'heal', rewardAmount: 22 },
   ],
   [
-    { label: '卒業後も隣にいてほしいと告げる', affectionGain: 20, rewardKind: 'upgrade', rewardAmount: 1 },
+    { label: '卒業後も隣にいてほしいと告げる', affectionGain: 22, rewardKind: 'upgrade', rewardAmount: 1 },
     { label: '使命も彼女も諦めないと誓う', affectionGain: 18, rewardKind: 'maxHp', rewardAmount: 4 },
     { label: '自分から二人の約束を結ぶ', affectionGain: 16, rewardKind: 'strength', rewardAmount: 1 },
   ],
@@ -4137,6 +4137,7 @@ export const getMagicRomanceEndingText = (heroId: string, targetId: string, affe
   description: string;
   lines: string[];
   imagePath: string;
+  fallbackImagePath?: string;
   rank: MagicRomanceEndingRank;
   rankLabel: string;
 } => {
@@ -4153,6 +4154,13 @@ export const getMagicRomanceEndingText = (heroId: string, targetId: string, affe
       ROMANCE: '恋愛エンド',
       TRUE_ROMANCE: '真恋愛エンド',
     }[rank];
+    const baseImagePath = `sprites/magic/events/romance/${heroine.id}/${protagonist.id}/r6.webp`;
+    const variantImagePath = {
+      BOND: `sprites/magic/events/romance/${heroine.id}/${protagonist.id}/r6-bond.webp`,
+      SPECIAL: `sprites/magic/events/romance/${heroine.id}/${protagonist.id}/r6-special.webp`,
+      ROMANCE: baseImagePath,
+      TRUE_ROMANCE: `sprites/magic/events/romance/${heroine.id}/${protagonist.id}/r6-true.webp`,
+    }[rank];
     return {
       title: `${protagonist.name}と${heroine.name}の、その先`,
       description: rank === 'TRUE_ROMANCE'
@@ -4164,7 +4172,8 @@ export const getMagicRomanceEndingText = (heroId: string, targetId: string, affe
         protagonistLines[1],
         heroineLines[1],
       ],
-      imagePath: `sprites/magic/events/romance/${heroine.id}/${protagonist.id}/r6.webp`,
+      imagePath: variantImagePath,
+      fallbackImagePath: baseImagePath,
       rank,
       rankLabel,
     };
@@ -4198,6 +4207,13 @@ export const getMagicRomanceEndingText = (heroId: string, targetId: string, affe
     TRUE_ROMANCE: '二つの願いと学びが奇跡を起こし、真の敵を退けた。二人は世界の境界さえ越え、恋と使命を共に選び続ける。',
   }[rank];
   const [openingLine, closingLine] = HERO_ENDING_LINES[hero.id]?.[rank] ?? HERO_ENDING_LINES.AKARI[rank];
+  const baseImagePath = `sprites/magic/events/romance/${hero.id}/${target.id}/r6.webp`;
+  const variantImagePath = {
+    BOND: `sprites/magic/events/romance/${hero.id}/${target.id}/r6-bond.webp`,
+    SPECIAL: `sprites/magic/events/romance/${hero.id}/${target.id}/r6-special.webp`,
+    ROMANCE: baseImagePath,
+    TRUE_ROMANCE: `sprites/magic/events/romance/${hero.id}/${target.id}/r6-true.webp`,
+  }[rank];
 
   return {
     title: `${hero.name}と${target.name}の、その先`,
@@ -4207,7 +4223,8 @@ export const getMagicRomanceEndingText = (heroId: string, targetId: string, affe
       ...targetLines,
       closingLine,
     ],
-    imagePath: `sprites/magic/events/romance/${hero.id}/${target.id}/r6.webp`,
+    imagePath: variantImagePath,
+    fallbackImagePath: baseImagePath,
     rank,
     rankLabel,
   };

@@ -62,6 +62,7 @@ export const UI_PREVIEW_SCREENS: UiPreviewScreenDefinition[] = [
     { id: GameScreen.SUBMISSION, screen: GameScreen.SUBMISSION, label: '提出', group: 'その他' },
     { id: GameScreen.FLOOR_RESULT, screen: GameScreen.FLOOR_RESULT, label: 'ACT終了', group: 'その他' },
     { id: GameScreen.ENDING, screen: GameScreen.ENDING, label: 'エンディング', group: 'その他' },
+    { id: GameScreen.MAGIC_ROMANCE_ENDING, screen: GameScreen.MAGIC_ROMANCE_ENDING, label: 'マジック恋愛イベントエンド', group: 'その他' },
     { id: GameScreen.GAME_OVER, screen: GameScreen.GAME_OVER, label: 'ゲームオーバー', group: 'その他' },
 ];
 

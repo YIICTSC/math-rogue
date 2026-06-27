@@ -3,7 +3,7 @@ import React, { useMemo, useState, useEffect, useRef } from 'react';
 import { CARDS_LIBRARY, RELIC_LIBRARY, POTION_LIBRARY, ENEMY_LIBRARY } from '../constants';
 import { Card as ICard, LanguageMode } from '../types';
 import Card from './Card';
-import { BookOpen, Lock, ArrowLeft, Swords, Gem, FlaskConical, Skull, X, Music, StepBack, StepForward, Pause, Play, Square, Repeat } from 'lucide-react';
+import { BookOpen, Lock, ArrowLeft, Swords, Gem, FlaskConical, Skull, X, Music, StepBack, StepForward, Pause, Play, Square, Repeat, Heart, Users, Volume2, ChevronRight } from 'lucide-react';
 import EnemyIllustration from './EnemyIllustration';
 import PixelSprite from './PixelSprite';
 import { storageService } from '../services/storageService';
@@ -16,6 +16,7 @@ import { PotionIcon, RelicIcon } from './ItemIcon';
 import { getThemedEnemyDisplayName, type VisualThemeId } from '../data/visualThemes';
 import { MAGIC_CARDS } from '../data/magicCards';
 import { getMagicCardArtUrl } from '../utils/cardArtPaths';
+import { getDebugMagicEndingGalleryEntries, type MagicEndingGalleryEntry } from '../services/magicEndingService';
 
 interface CompendiumScreenProps {
     unlockedCardNames: string[];
@@ -138,10 +139,11 @@ const COMPENDIUM_MINIGAME_BGM_TRACKS = new Set([
 ]);
 
 const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, onBack, languageMode, isDebug = false, visualTheme = 'elementary' }) => {
-    const [activeTab, setActiveTab] = useState<'CARDS' | 'RELICS' | 'POTIONS' | 'ENEMIES'>('CARDS');
+    const [activeTab, setActiveTab] = useState<'CARDS' | 'RELICS' | 'POTIONS' | 'ENEMIES' | 'ENDINGS'>('CARDS');
     const [unlockedRelics, setUnlockedRelics] = useState<string[]>([]);
     const [unlockedPotions, setUnlockedPotions] = useState<string[]>([]);
     const [defeatedEnemies, setDefeatedEnemies] = useState<string[]>([]);
+    const [magicEndings, setMagicEndings] = useState<MagicEndingGalleryEntry[]>([]);
     const [enemyCompendiumTheme, setEnemyCompendiumTheme] = useState<VisualThemeId>(visualTheme);
 
     const [selectedItem, setSelectedItem] = useState<{
@@ -150,6 +152,7 @@ const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, 
         unlocked: boolean;
     } | null>(null);
     const [fullscreenArtCard, setFullscreenArtCard] = useState<ICard | null>(null);
+    const [selectedEnding, setSelectedEnding] = useState<MagicEndingGalleryEntry | null>(null);
     const [showBgmMode, setShowBgmMode] = useState(false);
 
     const longPressTimer = useRef<any>(null);
@@ -178,6 +181,7 @@ const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, 
         setUnlockedRelics(storageService.getUnlockedRelics());
         setUnlockedPotions(storageService.getUnlockedPotions());
         setDefeatedEnemies(storageService.getDefeatedEnemies());
+        setMagicEndings(storageService.getMagicEndingGallery());
     }, []);
 
     useEffect(() => {
@@ -253,6 +257,15 @@ const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, 
     const defeatedEnemiesCount = displayEnemies.filter(enemy => defeatedEnemySet.has(enemy.collectionKey) || defeatedEnemySet.has(enemy.name)).length;
     const enemiesPercentage = Math.floor((defeatedEnemiesCount / totalEnemies) * 100);
 
+    const visibleMagicEndings = useMemo(
+        () => isDebug ? getDebugMagicEndingGalleryEntries() : magicEndings,
+        [isDebug, magicEndings]
+    );
+    const sortedMagicEndings = useMemo(
+        () => [...visibleMagicEndings].sort((a, b) => b.unlockedAt - a.unlockedAt || a.heroName.localeCompare(b.heroName) || a.title.localeCompare(b.title)),
+        [visibleMagicEndings]
+    );
+
     const handleItemClick = (type: 'CARD' | 'RELIC' | 'POTION' | 'ENEMY', data: any, unlocked: boolean) => {
         setSelectedItem({ type, data, unlocked });
     };
@@ -292,6 +305,7 @@ const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, 
                         {activeTab === 'RELICS' && <p className="text-xs text-gray-400">{trans("収集率", languageMode)}: {unlockedRelicsCount}/{totalRelics} ({relicsPercentage}%) {isDebug && "(DEBUG ON)"}</p>}
                         {activeTab === 'POTIONS' && <p className="text-xs text-gray-400">{trans("収集率", languageMode)}: {unlockedPotionsCount}/{totalPotions} ({potionsPercentage}%) {isDebug && "(DEBUG ON)"}</p>}
                         {activeTab === 'ENEMIES' && <p className="text-xs text-gray-400">{trans("収集率", languageMode)}: {defeatedEnemiesCount}/{totalEnemies} ({enemiesPercentage}%) {isDebug && "(DEBUG ON)"}</p>}
+                        {activeTab === 'ENDINGS' && <p className="text-xs text-gray-400">{trans("到達済み", languageMode)}: {sortedMagicEndings.length} {trans("件", languageMode)} {isDebug && "(DEBUG ON)"}</p>}
                     </div>
                 </div>
 
@@ -308,6 +322,9 @@ const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, 
                     </button>
                     <button onClick={() => setActiveTab('ENEMIES')} className={`px-3 py-1 rounded text-sm font-bold flex items-center ${activeTab === 'ENEMIES' ? 'bg-amber-600 text-white' : 'bg-gray-700 text-gray-300'}`}>
                         <Skull size={14} className="mr-1" /> {trans("魔物", languageMode)}
+                    </button>
+                    <button onClick={() => setActiveTab('ENDINGS')} className={`px-3 py-1 rounded text-sm font-bold flex items-center ${activeTab === 'ENDINGS' ? 'bg-amber-600 text-white' : 'bg-gray-700 text-gray-300'}`}>
+                        <Heart size={14} className="mr-1" /> {trans("エンディング", languageMode)}
                     </button>
                     <button
                         onClick={openBgmMode}
@@ -458,6 +475,55 @@ const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, 
                     </div>
                     </>
                 )}
+
+                {activeTab === 'ENDINGS' && (
+                    sortedMagicEndings.length > 0 ? (
+                        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                            {sortedMagicEndings.map((ending) => (
+                                <button
+                                    key={ending.id}
+                                    onClick={() => setSelectedEnding(ending)}
+                                    className="group overflow-hidden rounded-lg border border-pink-300/35 bg-slate-950/80 text-left shadow-xl transition hover:border-pink-200 hover:bg-slate-900"
+                                >
+                                    <div className="relative aspect-[16/10] overflow-hidden bg-black">
+                                        <img
+                                            src={assetUrl(ending.imagePath)}
+                                            alt={ending.title}
+                                            className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
+                                            onError={(event) => {
+                                                if (!ending.fallbackImagePath || event.currentTarget.dataset.fallbackApplied === 'true') return;
+                                                event.currentTarget.dataset.fallbackApplied = 'true';
+                                                event.currentTarget.src = assetUrl(ending.fallbackImagePath);
+                                            }}
+                                        />
+                                        <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/15 to-transparent" />
+                                        <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between gap-2">
+                                            <span className={`rounded px-2 py-1 text-[10px] font-black ${ending.kind === 'friendship' ? 'bg-emerald-400 text-slate-950' : ending.kind === 'double-romance' ? 'bg-rose-500 text-white' : 'bg-pink-300 text-slate-950'}`}>
+                                                {trans(ending.rankLabel, languageMode)}
+                                            </span>
+                                            <span className="flex items-center rounded bg-black/70 px-2 py-1 text-[10px] font-bold text-white">
+                                                <Volume2 size={12} className="mr-1" /> PLAY
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div className="p-3">
+                                        <div className="text-[11px] font-bold text-pink-200">{trans(ending.heroName, languageMode)} / {trans(ending.metricLabel, languageMode)}</div>
+                                        <div className="mt-1 line-clamp-2 text-sm font-black text-white">{trans(ending.title, languageMode)}</div>
+                                        <div className="mt-2 line-clamp-2 text-xs leading-relaxed text-slate-300">{trans(ending.description, languageMode)}</div>
+                                    </div>
+                                </button>
+                            ))}
+                        </div>
+                    ) : (
+                        <div className="mx-auto flex min-h-[45vh] max-w-xl flex-col items-center justify-center rounded-lg border border-white/10 bg-black/55 p-8 text-center">
+                            <Lock size={38} className="mb-4 text-slate-500" />
+                            <h3 className="text-xl font-black text-white">{trans("マジック編エンディング未到達", languageMode)}</h3>
+                            <p className="mt-3 text-sm leading-relaxed text-slate-300">
+                                {trans("マジック編で恋愛エンド、修羅場エンド、友情エンドに到達すると、ここでイラストとボイス付きイベントを振り返れます。", languageMode)}
+                            </p>
+                        </div>
+                    )
+                )}
             </div>
 
             {/* Detail Modal */}
@@ -542,6 +608,13 @@ const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, 
                     onClose={() => setFullscreenArtCard(null)}
                 />
             )}
+            {selectedEnding && (
+                <MagicEndingReplayModal
+                    ending={selectedEnding}
+                    languageMode={languageMode}
+                    onClose={() => setSelectedEnding(null)}
+                />
+            )}
             {showBgmMode && (
                 <CompendiumBgmModeModal
                     cards={unlockedCardsForShowcase}
@@ -599,6 +672,102 @@ const FullscreenCardArtModal: React.FC<{ card: ICard; languageMode: LanguageMode
                 ) : (
                     <div className="text-gray-400">{trans("イラストがありません", languageMode)}</div>
                 )}
+            </div>
+        </div>
+    );
+};
+
+const MagicEndingReplayModal: React.FC<{ ending: MagicEndingGalleryEntry; languageMode: LanguageMode; onClose: () => void }> = ({ ending, languageMode, onClose }) => {
+    const [lineIndex, setLineIndex] = useState(-1);
+    const currentLine = lineIndex < 0 ? ending.description : ending.lines[lineIndex];
+    const isLast = lineIndex >= ending.lines.length - 1;
+
+    useEffect(() => {
+        audioService.stopMagicEventVoices();
+        if (lineIndex < 0) return;
+        const voiceLine = ending.voiceLines?.[lineIndex];
+        if (voiceLine) {
+            void audioService.playMagicEventVoice(voiceLine.heroId, voiceLine.lineId);
+        }
+        return () => audioService.stopMagicEventVoices();
+    }, [ending, lineIndex]);
+
+    useEffect(() => () => audioService.stopMagicEventVoices(), []);
+
+    const handleClose = () => {
+        audioService.stopMagicEventVoices();
+        onClose();
+    };
+
+    const handleNext = () => {
+        audioService.stopMagicEventVoices();
+        if (isLast) {
+            handleClose();
+            return;
+        }
+        setLineIndex((current) => current + 1);
+    };
+
+    return (
+        <div className="magic-romance-ending-screen fixed inset-0 z-[75] flex items-end justify-center overflow-hidden bg-black p-4 text-white sm:p-8" onClick={handleClose}>
+            <img
+                src={assetUrl(ending.imagePath)}
+                alt={ending.title}
+                className="magic-romance-ending-bg absolute inset-0 h-full w-full object-cover"
+                onError={(event) => {
+                    if (!ending.fallbackImagePath || event.currentTarget.dataset.fallbackApplied === 'true') return;
+                    event.currentTarget.dataset.fallbackApplied = 'true';
+                    event.currentTarget.src = assetUrl(ending.fallbackImagePath);
+                }}
+            />
+            <div className="absolute inset-0 bg-gradient-to-t from-black via-black/45 to-black/10" />
+            <button
+                onClick={(event) => {
+                    event.stopPropagation();
+                    handleClose();
+                }}
+                className="absolute right-3 top-3 z-20 rounded-full border border-white/20 bg-black/70 p-2.5 text-white/90 hover:text-white"
+            >
+                <X size={24} />
+            </button>
+
+            <div className="magic-romance-ending-layout relative z-10 mb-4 w-full max-w-5xl sm:mb-8" onClick={(event) => event.stopPropagation()}>
+                <div className="magic-romance-ending-art hidden overflow-hidden rounded-xl border border-pink-200/45 bg-slate-950/60 shadow-2xl">
+                    <img
+                        src={assetUrl(ending.imagePath)}
+                        alt={ending.title}
+                        className="h-full w-full object-cover"
+                        onError={(event) => {
+                            if (!ending.fallbackImagePath || event.currentTarget.dataset.fallbackApplied === 'true') return;
+                            event.currentTarget.dataset.fallbackApplied = 'true';
+                            event.currentTarget.src = assetUrl(ending.fallbackImagePath);
+                        }}
+                    />
+                </div>
+
+                <div className="magic-romance-ending-panel w-full rounded-lg border border-pink-300/60 bg-slate-950/88 p-5 shadow-2xl backdrop-blur-sm sm:p-7">
+                    <div className="magic-romance-ending-header mb-3 flex items-center gap-3 border-b border-pink-300/30 pb-3">
+                        {ending.kind === 'friendship'
+                            ? <Users className="shrink-0 text-emerald-300" size={22} />
+                            : <Heart className="shrink-0 text-pink-300" fill="currentColor" size={22} />}
+                        <div className="min-w-0">
+                            <div className={`text-xs font-bold ${ending.kind === 'friendship' ? 'text-emerald-300' : 'text-pink-300'}`}>
+                                {trans(ending.heroName, languageMode)} / {trans(ending.rankLabel, languageMode)} / {trans(ending.metricLabel, languageMode)}
+                            </div>
+                            <h1 className="magic-romance-ending-title text-xl font-black text-pink-100 sm:text-2xl">{trans(ending.title, languageMode)}</h1>
+                        </div>
+                    </div>
+                    <p className="magic-romance-ending-text min-h-[7rem] whitespace-pre-wrap text-base leading-relaxed text-slate-100 sm:text-lg">
+                        {trans(currentLine, languageMode)}
+                    </p>
+                    <button
+                        onClick={handleNext}
+                        className="magic-romance-ending-button mt-4 flex w-full items-center justify-center gap-2 rounded-md bg-pink-400 px-5 py-3 font-black text-slate-950 transition-colors hover:bg-pink-300"
+                    >
+                        {trans(isLast ? '閉じる' : '次へ', languageMode)}
+                        <ChevronRight size={20} />
+                    </button>
+                </div>
             </div>
         </div>
     );

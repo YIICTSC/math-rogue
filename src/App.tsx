@@ -49,7 +49,7 @@ import { MINI_GAMES } from './miniGameConfig'; // Added
 import DodgeballShooting from './components/DodgeballShooting';
 import FinalBridgeScreen from './components/FinalBridgeScreen';
 import MagicRomanceEndingScreen from './components/MagicRomanceEndingScreen';
-import { hasMagicEnding } from './services/magicEndingService';
+import { getMagicEndingGalleryEntries, hasMagicEnding } from './services/magicEndingService';
 import ProblemChallengeScreen from './components/ProblemChallengeScreen';
 import AssignmentCreateScreen from './components/AssignmentCreateScreen';
 import SubmissionScreen from './components/SubmissionScreen';
@@ -89,6 +89,7 @@ import { createMagicRuleState, createMagicStartingDeck, getMagicRuleConfig } fro
 import { generateMagicRomanceSelectionEvent } from './services/magicRomanceEventService';
 import { applyMagicRuleOnCardPlay } from './services/magicRuleService';
 import { UI_PREVIEW_GROUPS, UI_PREVIEW_SCREENS } from './data/uiPreviewScreens';
+import { useXboxControllerNavigation } from './hooks/useXboxControllerNavigation';
 
 const PARRY_WINDOW_MS = 650;
 const PARRY_PERFECT_MS = 220;
@@ -577,6 +578,7 @@ const getNextEnemyIntent = (enemy: Enemy, turn: number): EnemyIntent => {
 };
 
 const App: React.FC = () => {
+    useXboxControllerNavigation();
     const electronApi = typeof window !== 'undefined'
         ? ((window as Window & { learningRogue?: LearningRogueElectronApi }).learningRogue)
         : undefined;
@@ -4452,15 +4454,52 @@ const App: React.FC = () => {
             : previous.map;
         const previewEnemies = createUiPreviewEnemies(config.enemyCount);
         const previewFamiliars = createUiPreviewFamiliars(config.summonCount);
+        const previewRelics = [
+            RELIC_LIBRARY.BURNING_BLOOD,
+            RELIC_LIBRARY.VAJRA,
+            RELIC_LIBRARY.ANCHOR,
+            RELIC_LIBRARY.MERCURY_HOURGLASS,
+            RELIC_LIBRARY.ICE_CREAM,
+            RELIC_LIBRARY.ORANGE_PELLETS,
+        ].filter(Boolean).map(relic => ({ ...relic }));
+        const previewPotions = ['FIRE_POTION', 'BLOCK_POTION', 'STRENGTH_POTION'].map((templateId, index) => ({
+            ...POTION_LIBRARY[templateId],
+            id: `ui-preview-potion-${index + 1}`,
+        } as Potion));
         const sourcePlayer = {
             ...previous.player,
             deck: previous.player.deck.length > 0 ? previous.player.deck : createDeck(),
             currentHp: Math.max(1, previous.player.maxHp),
             maxEnergy: Math.max(3, previous.player.maxEnergy),
+            relics: previewRelics,
+            potions: previewPotions,
+            powers: {
+                ...previous.player.powers,
+                STRENGTH: 2,
+                DEXTERITY: 1,
+                WEAK: 1,
+                VULNERABLE: 2,
+                POISON: 4,
+                ARTIFACT: 1,
+                THORNS: 3,
+            },
+            strength: Math.max(2, previous.player.strength),
+            block: Math.max(12, previous.player.block),
+            relicCounters: {
+                ...previous.player.relicCounters,
+                HAPPY_FLOWER: 2,
+                PEN_NIB: 6,
+            },
         };
         const preparedPreviewPlayer = preparePlayerForBattle(sourcePlayer, NodeType.COMBAT);
         const previewPlayer: Player = {
             ...preparedPreviewPlayer,
+            relics: previewRelics,
+            potions: previewPotions,
+            powers: sourcePlayer.powers,
+            strength: sourcePlayer.strength,
+            block: sourcePlayer.block,
+            relicCounters: sourcePlayer.relicCounters,
             familiars: previewFamiliars,
             familiarActionQueue: previewFamiliars.filter(familiar => familiar.actionPulse),
         };
@@ -4671,6 +4710,31 @@ const App: React.FC = () => {
                         ? previewUnlockedCardTemplate?.name
                         : undefined,
                     isEndless: false,
+                    coopBattleState: null,
+                };
+            }
+
+            if (screen === GameScreen.MAGIC_ROMANCE_ENDING) {
+                const previewHeroId = 'AKARI';
+                const previewTargetId = 'REN';
+                return {
+                    ...prev,
+                    screen,
+                    challengeMode: undefined,
+                    visualTheme: 'magic',
+                    player: {
+                        ...prev.player,
+                        id: 'MAGE',
+                        magicProtagonistId: previewHeroId,
+                        magicProtagonistGender: 'female',
+                        currentHp: Math.max(1, prev.player.currentHp),
+                        magicRomance: {
+                            affection: { [previewTargetId]: 100 },
+                            stages: { [previewTargetId]: 5 },
+                            selectedCounts: { [previewTargetId]: 5 },
+                            completedEventIds: Array.from({ length: 5 }, (_, index) => `${previewHeroId}-${previewTargetId}-${index + 1}`),
+                        },
+                    },
                     coopBattleState: null,
                 };
             }
@@ -9642,6 +9706,12 @@ const App: React.FC = () => {
                 setNewlyUnlockedCard(unlockedCard);
                 setLegacyCardSelected(false);
                 audioService.playBGM('victory');
+                if (prev.visualTheme === 'magic') {
+                    storageService.saveMagicEndingGalleryEntries(
+                        getMagicEndingGalleryEntries(nextPlayer, getMagicProtagonistId(nextPlayer))
+                    );
+                }
+
                 return {
                     ...prev,
                     player: nextPlayer,
@@ -12535,7 +12605,7 @@ const App: React.FC = () => {
     }, [electronApi]);
 
     return (
-        <div className={`app-shell w-full h-[100dvh] bg-black overflow-hidden ${appSettings.fontSize === 'large' ? 'text-[105%]' : ''}`}>
+        <div className={`app-shell w-full h-[100dvh] bg-black overflow-hidden ${appSettings.fontSize === 'large' ? 'text-[105%]' : ''} ${isUiPreviewMode ? 'gamepad-shortcuts-debug' : ''}`}>
             <div className={`w-full h-full relative overflow-hidden bg-black ${appSettings.lowDataMode ? '' : 'crt-scanline'} ${raceEffects.upsideDownUntil > raceEffectNow ? 'scale-x-[-1]' : ''} ${(raceEffects.deskShakeUntil > raceEffectNow && !appSettings.reduceScreenShake) ? 'animate-[race-desk-shake_0.18s_linear_infinite]' : ''}`}>
                 <style>{`
                     @keyframes race-desk-shake {

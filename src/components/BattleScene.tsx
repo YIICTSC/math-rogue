@@ -492,6 +492,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
     const [showFriendshipComboTutorial, setShowFriendshipComboTutorial] = useState(false);
     const [friendshipComboEnabled, setFriendshipComboEnabled] = useState(true);
     const isDualMode = !!player.partner && player.partner.currentHp > 0;
+    const shouldShowMagicTransformationTutorial = visualTheme === 'magic' && !storageService.getSeenMagicTransformationTutorial();
 
     useEffect(() => {
         const updateViewportMode = () => {
@@ -515,15 +516,23 @@ const BattleScene: React.FC<BattleSceneProps> = ({
     }, []);
 
     useEffect(() => {
-        if (visualTheme !== 'magic' || tutorialStep !== null || storageService.getSeenMagicTransformationTutorial()) return;
+        if (!shouldShowMagicTransformationTutorial || tutorialStep !== null || showExhaustCardHint || showFriendshipComboTutorial) return;
         setShowMagicTransformationTutorial(true);
-    }, [visualTheme, tutorialStep]);
+    }, [shouldShowMagicTransformationTutorial, showExhaustCardHint, showFriendshipComboTutorial, tutorialStep]);
 
     useEffect(() => {
-        if (!isDualMode || tutorialStep !== null || storageService.getSeenFriendshipComboTutorial()) return;
+        if (
+            !isDualMode ||
+            tutorialStep !== null ||
+            showMagicTransformationTutorial ||
+            showExhaustCardHint ||
+            pendingExhaustCardHint ||
+            shouldShowMagicTransformationTutorial ||
+            storageService.getSeenFriendshipComboTutorial()
+        ) return;
         setShowFriendshipComboTutorial(true);
         storageService.saveSeenFriendshipComboTutorial();
-    }, [isDualMode, tutorialStep]);
+    }, [isDualMode, pendingExhaustCardHint, shouldShowMagicTransformationTutorial, showExhaustCardHint, showMagicTransformationTutorial, tutorialStep]);
 
     useEffect(() => {
         if (!friendshipComboEnabled) {
@@ -697,11 +706,17 @@ const BattleScene: React.FC<BattleSceneProps> = ({
     }, [player.hand]);
 
     useEffect(() => {
-        if (!pendingExhaustCardHint || tutorialStep !== null || storageService.getSeenExhaustCardHint()) return;
+        if (
+            !pendingExhaustCardHint ||
+            tutorialStep !== null ||
+            showMagicTransformationTutorial ||
+            shouldShowMagicTransformationTutorial ||
+            storageService.getSeenExhaustCardHint()
+        ) return;
         setShowExhaustCardHint(true);
         setPendingExhaustCardHint(false);
         storageService.saveSeenExhaustCardHint();
-    }, [pendingExhaustCardHint, tutorialStep]);
+    }, [pendingExhaustCardHint, shouldShowMagicTransformationTutorial, showMagicTransformationTutorial, tutorialStep]);
 
     useEffect(() => {
         return () => {
@@ -1181,22 +1196,22 @@ const BattleScene: React.FC<BattleSceneProps> = ({
             )}
 
             {showMagicTransformationTutorial && tutorialStep === null && (
-                <div className="app-modal-overlay fixed inset-0 z-[205] flex items-center justify-center bg-slate-950/82 p-4 backdrop-blur-sm animate-in fade-in duration-200">
-                    <div className="app-modal-panel w-full max-w-3xl overflow-hidden rounded-2xl border-2 border-fuchsia-300/80 bg-slate-950 shadow-[0_0_42px_rgba(217,70,239,0.55)]">
-                        <div className="relative aspect-video w-full overflow-hidden bg-slate-900">
+                <div className="app-modal-overlay magic-transform-tutorial-overlay fixed inset-0 z-[205] flex items-center justify-center bg-slate-950/82 p-4 backdrop-blur-sm animate-in fade-in duration-200">
+                    <div className="app-modal-panel magic-transform-tutorial-panel w-full max-w-3xl overflow-hidden rounded-2xl border-2 border-fuchsia-300/80 bg-slate-950 shadow-[0_0_42px_rgba(217,70,239,0.55)]">
+                        <div className="magic-transform-tutorial-visual relative aspect-video w-full overflow-hidden bg-slate-900">
                             <img
                                 src={assetUrl('ui/magic/transformation-guide.png')}
                                 alt={languageMode === 'ENGLISH' ? 'Magical transformation tutorial' : 'マジック編の変身説明'}
                                 className="h-full w-full object-cover"
                             />
                             <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950 via-slate-950/75 to-transparent p-4">
-                                <div className="flex items-center gap-2 text-lg font-black text-fuchsia-100">
+                                <div className="magic-transform-tutorial-title flex items-center gap-2 text-lg font-black text-fuchsia-100">
                                     <Sparkles size={22} className="text-fuchsia-300" />
                                     {languageMode === 'ENGLISH' ? 'Magical Transformation' : 'マジック編の変身'}
                                 </div>
                             </div>
                         </div>
-                        <div className="space-y-3 p-4 text-sm leading-relaxed text-slate-100 md:p-5">
+                        <div className="magic-transform-tutorial-body space-y-3 p-4 text-sm leading-relaxed text-slate-100 md:p-5">
                             {languageMode === 'ENGLISH' ? (
                                 <>
                                     <p><span className="font-black text-fuchsia-200">Transform</span> once per battle to switch into your magical form.</p>
@@ -1210,11 +1225,11 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                     <p>変身で追加されるカードは、<span className="font-black text-amber-200">魔晶100Gごとに効果+10%</span>、<span className="font-black text-sky-200">山札10枚ごとに効果+10%</span>強化されます。</p>
                                 </>
                             )}
-                            <div className="flex items-center justify-between gap-3 pt-2">
+                            <div className="magic-transform-tutorial-actions flex items-center justify-between gap-3 pt-2">
                                 <div />
                                 <button
                                     onClick={closeMagicTransformationTutorial}
-                                    className="shrink-0 rounded-lg bg-fuchsia-500 px-4 py-2 text-sm font-black text-white shadow-lg hover:bg-fuchsia-400"
+                                    className="magic-transform-tutorial-button shrink-0 rounded-lg bg-fuchsia-500 px-4 py-2 text-sm font-black text-white shadow-lg hover:bg-fuchsia-400"
                                 >
                                     {languageMode === 'ENGLISH' ? 'Got it' : 'わかった'}
                                 </button>
@@ -1354,6 +1369,8 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                     <div className="flex items-center gap-1">
                         {onOpenSettings && (
                             <button
+                                data-gamepad-zone="battle-top"
+                                data-gamepad-order={0}
                                 onClick={onOpenSettings}
                                 className="flex items-center gap-1 px-2 py-1 rounded text-[10px] font-bold border transition-colors bg-black/50 border-gray-600 text-gray-400 hover:text-white hover:border-gray-400"
                                 title={trans("セッティング", languageMode)}
@@ -1362,6 +1379,8 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                             </button>
                         )}
                         <button
+                            data-gamepad-zone="battle-top"
+                            data-gamepad-order={1}
                             onClick={() => setShowLog(!showLog)}
                             className={`flex items-center gap-1 px-2 py-1 rounded text-[10px] font-bold border transition-colors ${showLog ? 'bg-gray-700 border-gray-500 text-white' : 'bg-black/50 border-gray-600 text-gray-400 hover:text-white hover:border-gray-400'}`}
                         >
@@ -1645,7 +1664,16 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                             return (
                                 <div
                                     key={enemy.id}
+                                    data-gamepad-zone="battle-enemies"
+                                    data-gamepad-order={visualEnemies.indexOf(enemy)}
+                                    role="button"
+                                    tabIndex={!isFinisherActive && coopCanAct ? 0 : -1}
                                     onClick={() => {
+                                        if (!isFinisherActive && coopCanAct) onSelectEnemy(enemy.id);
+                                    }}
+                                    onKeyDown={(event) => {
+                                        if (event.key !== 'Enter' && event.key !== ' ') return;
+                                        event.preventDefault();
                                         if (!isFinisherActive && coopCanAct) onSelectEnemy(enemy.id);
                                     }}
                                     className={`battle-enemy-unit ${humanoidEnemy ? 'battle-humanoid-enemy-unit' : ''} flex flex-col items-center z-10 transition-all duration-200 cursor-pointer relative ${useFinalBossLayout ? 'md:flex-row md:items-center md:gap-3' : ''} ${isSelected && !actionClass ? 'scale-105 z-20' : ''} ${!isSelected && !actionClass ? 'hover:scale-105' : ''} ${actionClass} ${tutorialStep === 2 ? 'ring-4 ring-red-500 ring-offset-4 ring-offset-transparent animate-pulse rounded-lg' : ''} ${isParryTarget ? 'ring-4 ring-cyan-300 ring-offset-4 ring-offset-slate-900 rounded-lg shadow-[0_0_30px_rgba(34,211,238,0.75)] z-[60]' : ''} ${isFinisherActive ? '!z-[300]' : ''}`}
@@ -1988,7 +2016,21 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                     <div className="h-full bg-green-500 transition-all duration-500" style={{ width: `${playerHpPercent}%` }}></div>
                                 </div>
 
-                                <div className="flex items-center justify-between border-t border-gray-700 pt-1" onClick={() => setShowRelicList(true)}>
+                                <div
+                                    data-gamepad-zone="battle-items"
+                                    data-gamepad-order={0}
+                                    data-gamepad-shortcut="LB"
+                                    aria-keyshortcuts="LB"
+                                    role="button"
+                                    tabIndex={0}
+                                    className="flex items-center justify-between border-t border-gray-700 pt-1"
+                                    onClick={() => setShowRelicList(true)}
+                                    onKeyDown={(event) => {
+                                        if (event.key !== 'Enter' && event.key !== ' ') return;
+                                        event.preventDefault();
+                                        setShowRelicList(true);
+                                    }}
+                                >
                                     <div className="flex -space-x-1 overflow-hidden w-20 cursor-pointer hover:bg-white/10 rounded px-1 transition-colors">
                                         {displayedRelics.slice(0, 5).map(r => {
                                             const counter = getRelicCounter(r.id);
@@ -2012,8 +2054,11 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                     </div>
 
                                     <div className="flex gap-0.5">
-                                        {player.potions.map(p => (
-                                            <div
+                                        {player.potions.map((p, index) => (
+                                            <button
+                                                type="button"
+                                                data-gamepad-zone="battle-items"
+                                                data-gamepad-order={index + 1}
                                                 key={p.id}
                                                 onClick={(e) => {
                                                     e.stopPropagation();
@@ -2021,10 +2066,11 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                                         setPotionConfirmation(p);
                                                     }
                                                 }}
-                                                className="w-4 h-4 md:w-5 md:h-5 bg-gray-800 rounded border border-white flex items-center justify-center cursor-pointer hover:scale-110"
+                                                disabled={!!actingEnemyId || selectionState.active || !coopCanAct}
+                                                className="w-4 h-4 md:w-5 md:h-5 bg-gray-800 rounded border border-white flex items-center justify-center cursor-pointer hover:scale-110 disabled:cursor-not-allowed disabled:opacity-50"
                                             >
                                                 <PotionIcon id={p.templateId} alt={p.name} />
-                                            </div>
+                                            </button>
                                         ))}
                                     </div>
                                 </div>
@@ -2084,6 +2130,8 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                 <div className={`absolute left-2 top-16 z-50 md:left-4 md:top-20 ${coopSupportHudOpen ? 'w-[min(330px,calc(100vw-16px))] md:w-[min(380px,calc(100vw-24px))]' : 'w-auto'}`}>
                     <div className={`${coopSupportHudOpen ? 'bg-slate-950/95 border-2 border-emerald-400/80 rounded-xl shadow-2xl shadow-emerald-950/40 px-3 py-2' : 'bg-black/50 border border-emerald-500/70 rounded px-0 py-0'} backdrop-blur text-white`}>
                         <button
+                            data-gamepad-zone="battle-coop"
+                            data-gamepad-order={0}
                             onClick={() => setCoopSupportHudOpen(prev => !prev)}
                             className={`${coopSupportHudOpen ? 'w-full justify-between text-left' : 'w-auto gap-1 px-2 py-1 text-[10px]'} flex items-center rounded font-bold transition-colors ${coopSupportHudOpen ? '' : 'text-emerald-200 hover:text-white hover:border-emerald-300'}`}
                         >
@@ -2117,6 +2165,8 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                             <div className="mt-2 flex flex-wrap gap-2">
                                                 {needsTarget ? (
                                                     <button
+                                                        data-gamepad-zone="battle-coop"
+                                                        data-gamepad-order={index + 1}
                                                         onClick={() => {
                                                             if (!canUse) return;
                                                             setSelectedSupportCard(current => current?.id === supportCard.id ? null : supportCard);
@@ -2133,6 +2183,8 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                                     </button>
                                                 ) : (
                                                     <button
+                                                        data-gamepad-zone="battle-coop"
+                                                        data-gamepad-order={index + 1}
                                                         onClick={() => {
                                                             if (!canUse) return;
                                                             onUseCoopSupport(supportCard);
@@ -2148,6 +2200,8 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                                 )}
                                                 {isSelected && (
                                                     <button
+                                                        data-gamepad-zone="battle-coop"
+                                                        data-gamepad-order={index + 50}
                                                         onClick={() => setSelectedSupportCard(null)}
                                                         className="rounded border border-gray-500 bg-gray-800 px-2 py-1 text-[11px] font-bold text-gray-200 hover:bg-gray-700"
                                                     >
@@ -2180,6 +2234,10 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                 {isDualMode && (
                     <div className="mx-2 flex items-center gap-1">
                         <button
+                            data-gamepad-zone="battle-actions"
+                            data-gamepad-order={0}
+                            data-gamepad-shortcut="RB"
+                            aria-keyshortcuts="RB"
                             onClick={executeDualTurn}
                             disabled={!friendshipComboEnabled || !!actingEnemyId || selectionState.active || selectedCardIds.length === 0}
                             className={`
@@ -2190,6 +2248,8 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                             <Users size={12} /> 友情コンボ
                         </button>
                         <button
+                            data-gamepad-zone="battle-actions"
+                            data-gamepad-order={1}
                             type="button"
                             onClick={() => {
                                 setFriendshipComboEnabled(prev => !prev);
@@ -2214,6 +2274,10 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                 )}
                 {visualTheme === 'magic' && (
                     <button
+                        data-gamepad-zone="battle-actions"
+                        data-gamepad-order={0}
+                        data-gamepad-shortcut="RB"
+                        aria-keyshortcuts="RB"
                         onClick={!player.magicTransformed && !actingEnemyId && !selectionState.active && coopCanAct ? onTransform : undefined}
                         disabled={!!player.magicTransformed || !!actingEnemyId || selectionState.active || !coopCanAct || !onTransform}
                         className={`mr-2 rounded border-2 px-3 py-1.5 text-xs font-black shadow-lg transition-all ${
@@ -2228,6 +2292,10 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                     </button>
                 )}
                 <button
+                    data-gamepad-zone="battle-actions"
+                    data-gamepad-order={2}
+                    data-gamepad-shortcut="Y"
+                    aria-keyshortcuts="Y"
                     onClick={!actingEnemyId && !selectionState.active && coopCanAct ? onEndTurn : undefined}
                     disabled={!!actingEnemyId || selectionState.active || !coopCanAct}
                     className={`
@@ -2345,6 +2413,8 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                     >
                                         <Card
                                             card={displayCard}
+                                            gamepadZone="battle-cards"
+                                            gamepadOrder={i}
                                             onClick={() => {
                                                 if (selfDown || !coopCanAct) return;
                                                 if (selectionState.active) {

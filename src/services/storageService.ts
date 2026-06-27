@@ -1,10 +1,12 @@
 
 import { AssignmentAnswerRecord, AssignmentPayload, GameState, GameScreen, RankingEntry, Card, PokerScoreEntry, SurvivorScoreEntry, DungeonScoreEntry, PokerRunState, KochoScoreEntry, PaperPlaneScoreEntry, LanguageMode, GoHomeScoreEntry, StudentProfile } from '../types';
+import type { MagicEndingGalleryEntry } from './magicEndingService';
 
 const STORAGE_KEY_UNLOCKED_CARDS = 'pixel_spire_unlocked_cards_v1';
 const STORAGE_KEY_UNLOCKED_RELICS = 'pixel_spire_unlocked_relics_v1';
 const STORAGE_KEY_UNLOCKED_POTIONS = 'pixel_spire_unlocked_potions_v1';
 const STORAGE_KEY_DEFEATED_ENEMIES = 'pixel_spire_defeated_enemies_v1';
+const STORAGE_KEY_MAGIC_ENDING_GALLERY = 'pixel_spire_magic_ending_gallery_v1';
 
 const STORAGE_KEY_GAME_STATE = 'pixel_spire_save_state_v1';
 const STORAGE_KEY_CLEAR_COUNT = 'pixel_spire_clear_count_v1';
@@ -467,6 +469,34 @@ export const storageService = {
         localStorage.setItem(STORAGE_KEY_DEFEATED_ENEMIES, JSON.stringify(updated));
       }
     } catch (e) { console.warn(e); }
+  },
+
+  getMagicEndingGallery: (): MagicEndingGalleryEntry[] => {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY_MAGIC_ENDING_GALLERY);
+      const parsed = stored ? JSON.parse(stored) : [];
+      return Array.isArray(parsed) ? parsed : [];
+    } catch (e) {
+      return [];
+    }
+  },
+
+  saveMagicEndingGalleryEntries: (entries: MagicEndingGalleryEntry[]) => {
+    if (entries.length === 0) return;
+    try {
+      const current = storageService.getMagicEndingGallery();
+      const byId = new Map(current.map(entry => [entry.id, entry]));
+      entries.forEach(entry => {
+        byId.set(entry.id, {
+          ...byId.get(entry.id),
+          ...entry,
+          unlockedAt: byId.get(entry.id)?.unlockedAt ?? entry.unlockedAt,
+        });
+      });
+      localStorage.setItem(STORAGE_KEY_MAGIC_ENDING_GALLERY, JSON.stringify(Array.from(byId.values())));
+    } catch (e) {
+      console.warn("Failed to save magic ending gallery", e);
+    }
   },
 
   // --- Clear Count (Unlock Characters) ---
@@ -1243,6 +1273,7 @@ export const storageService = {
       localStorage.removeItem(STORAGE_KEY_UNLOCKED_RELICS);
       localStorage.removeItem(STORAGE_KEY_UNLOCKED_POTIONS);
       localStorage.removeItem(STORAGE_KEY_DEFEATED_ENEMIES);
+      localStorage.removeItem(STORAGE_KEY_MAGIC_ENDING_GALLERY);
       localStorage.removeItem(STORAGE_KEY_GAME_STATE);
       localStorage.removeItem(STORAGE_KEY_CLEAR_COUNT);
       localStorage.removeItem(STORAGE_KEY_RANKING);

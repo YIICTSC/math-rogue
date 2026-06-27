@@ -14,6 +14,8 @@ interface CardProps {
   disabled: boolean;
   onInspect?: (card: CardType) => void;
   languageMode?: LanguageMode;
+  gamepadZone?: string;
+  gamepadOrder?: number;
 }
 
 export const KEYWORD_DEFINITIONS: Record<string, { title: string; desc: string }> = {
@@ -155,7 +157,7 @@ const CompositeArtPiece: React.FC<{
   return <div className="w-full h-full bg-black/20" />;
 };
 
-const Card: React.FC<CardProps> = ({ card, onClick, disabled, onInspect, languageMode = 'JAPANESE' }) => {
+const Card: React.FC<CardProps> = ({ card, onClick, disabled, onInspect, languageMode = 'JAPANESE', gamepadZone, gamepadOrder }) => {
   const longPressTimer = useRef<any>(null);
   const isLongPressActive = useRef(false);
   const startPos = useRef({ x: 0, y: 0 });
@@ -221,6 +223,13 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled, onInspect, languag
 
   const handleCardClick = () => {
     if (!isLongPressActive.current && !disabled) onClick();
+  };
+
+  const handleCardKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (disabled) return;
+    if (e.key !== 'Enter' && e.key !== ' ') return;
+    e.preventDefault();
+    onClick();
   };
 
   const getTypeColor = (type: EnumCardType) => {
@@ -422,7 +431,12 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled, onInspect, languag
 
   return (
     <div
+      role="button"
+      tabIndex={disabled ? -1 : 0}
+      data-gamepad-zone={gamepadZone}
+      data-gamepad-order={gamepadOrder}
       onClick={handleCardClick}
+      onKeyDown={handleCardKeyDown}
       onPointerDown={startLongPress}
       onPointerUp={endLongPress}
       onPointerLeave={endLongPress}
