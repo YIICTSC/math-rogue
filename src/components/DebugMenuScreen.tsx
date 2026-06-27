@@ -18,6 +18,7 @@ import { MAGIC_HEROES, MAGIC_MALE_PROTAGONISTS } from '../data/magicHeroes';
 import { getMagicRomanceDialogue, getMagicRomanceEndingText, type MagicRomanceEndingRank } from '../data/magicRomanceDialogue';
 import { getMagicRomanceVoiceLines } from '../services/magicRomanceEventService';
 import { getMagicEndingVoiceLine } from '../services/magicEndingService';
+import { MAGIC_ART_CONSISTENCY_TARGETS } from '../data/magicArtConsistencyTargets';
 import { assetUrl } from '../utils/assetPaths';
 import { UI_PREVIEW_GROUPS, UI_PREVIEW_SCREENS } from '../data/uiPreviewScreens';
 import { getDebugProblemUnitGroups } from './ProblemChallengeScreen';
@@ -151,7 +152,7 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
     languageMode: initialLanguageMode,
     focusedUiPreviewScreenId
 }) => {
-    const [activeTab, setActiveTab] = useState<'CARDS' | 'RELICS' | 'POTIONS' | 'SYNTHESIS' | 'SYSTEM' | 'UI_PREVIEW' | 'EFFECTS' | 'MAGIC_VOICES' | 'EVENTS' | 'HUMANOID_SPRITES' | 'TRANSLATION'>(focusedUiPreviewScreenId ? 'UI_PREVIEW' : 'CARDS');
+    const [activeTab, setActiveTab] = useState<'CARDS' | 'RELICS' | 'POTIONS' | 'SYNTHESIS' | 'SYSTEM' | 'UI_PREVIEW' | 'EFFECTS' | 'MAGIC_VOICES' | 'MAGIC_ART_AUDIT' | 'EVENTS' | 'HUMANOID_SPRITES' | 'TRANSLATION'>(focusedUiPreviewScreenId ? 'UI_PREVIEW' : 'CARDS');
     const focusedUiPreviewItemRef = useRef<HTMLDivElement | null>(null);
     const [searchTerm, setSearchTerm] = useState("");
     const [debugLanguageMode, setDebugLanguageMode] = useState<LanguageMode>(initialLanguageMode);
@@ -161,6 +162,10 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
     const [highSchoolVoiceHeroId, setHighSchoolVoiceHeroId] = useState('WARRIOR');
     const [highSchoolVoiceFixTargets, setHighSchoolVoiceFixTargets] = useState<string[]>([]);
     const [highSchoolVoiceFixCopied, setHighSchoolVoiceFixCopied] = useState(false);
+    const [magicArtSearchTerm, setMagicArtSearchTerm] = useState('');
+    const [magicArtCategoryFilter, setMagicArtCategoryFilter] = useState<'ALL' | 'COMMON_EVENT' | 'ROMANCE_EVENT' | 'ENDING_EVENT'>('ALL');
+    const [magicArtMismatchIds, setMagicArtMismatchIds] = useState<string[]>([]);
+    const [magicArtMismatchCopied, setMagicArtMismatchCopied] = useState(false);
     const [magicVoiceEventHeroId, setMagicVoiceEventHeroId] = useState('AKARI');
     const [magicVoiceEventTargetId, setMagicVoiceEventTargetId] = useState('REN');
     const [magicVoiceEventStage, setMagicVoiceEventStage] = useState(0);
@@ -219,6 +224,28 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
             return `${hero?.name ?? heroId}\t${heroId}\t${file}.ogg`;
         }).join('\n');
     }, [highSchoolVoiceFixTargets]);
+    const filteredMagicArtTargets = useMemo(() => {
+        const normalizedSearch = magicArtSearchTerm.trim().toLowerCase();
+        return MAGIC_ART_CONSISTENCY_TARGETS.filter(target => {
+            if (magicArtCategoryFilter !== 'ALL' && target.category !== magicArtCategoryFilter) return false;
+            if (!normalizedSearch) return true;
+            const haystack = [
+                target.label,
+                target.filePath,
+                target.heroId ?? '',
+                target.targetId ?? '',
+                target.expected,
+            ].join(' ').toLowerCase();
+            return haystack.includes(normalizedSearch);
+        });
+    }, [magicArtCategoryFilter, magicArtSearchTerm]);
+    const magicArtMismatchText = useMemo(() => {
+        const selected = new Set(magicArtMismatchIds);
+        return MAGIC_ART_CONSISTENCY_TARGETS
+            .filter(target => selected.has(target.id))
+            .map(target => target.filePath)
+            .join('\n');
+    }, [magicArtMismatchIds]);
     const eventProtagonist = useMemo(
         () => MAGIC_VOICE_CHARACTERS.find(hero => hero.id === magicVoiceEventHeroId) ?? MAGIC_VOICE_CHARACTERS[0],
         [magicVoiceEventHeroId]
@@ -442,6 +469,21 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
         window.setTimeout(() => setHighSchoolVoiceFixCopied(false), 1600);
     };
 
+    const toggleMagicArtMismatch = (id: string) => {
+        setMagicArtMismatchIds(prev => {
+            if (prev.includes(id)) return prev.filter(entry => entry !== id);
+            return [...prev, id].sort();
+        });
+        setMagicArtMismatchCopied(false);
+    };
+
+    const copyMagicArtMismatchTargets = async () => {
+        if (!magicArtMismatchText) return;
+        await navigator.clipboard.writeText(magicArtMismatchText);
+        setMagicArtMismatchCopied(true);
+        window.setTimeout(() => setMagicArtMismatchCopied(false), 1600);
+    };
+
     const toggleUiPreviewCheck = (key: string, target: UiPreviewCheckTarget) => {
         setUiPreviewChecklist(prev => {
             const next: UiPreviewChecklist = {
@@ -526,6 +568,7 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
                         <button onClick={() => setActiveTab('UI_PREVIEW')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'UI_PREVIEW' ? 'bg-sky-900 text-white' : 'text-sky-400 hover:bg-gray-750'}`}>UI実寸</button>
                         <button onClick={() => setActiveTab('EFFECTS')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'EFFECTS' ? 'bg-orange-900 text-white' : 'text-orange-400 hover:bg-gray-750'}`}>エフェクト</button>
                         <button onClick={() => setActiveTab('MAGIC_VOICES')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'MAGIC_VOICES' ? 'bg-fuchsia-900 text-white' : 'text-fuchsia-400 hover:bg-gray-750'}`}>マジック声</button>
+                        <button onClick={() => setActiveTab('MAGIC_ART_AUDIT')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'MAGIC_ART_AUDIT' ? 'bg-pink-900 text-white' : 'text-pink-400 hover:bg-gray-750'}`}>魔法絵不整合</button>
                         <button onClick={() => setActiveTab('EVENTS')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'EVENTS' ? 'bg-cyan-900 text-white' : 'text-cyan-400 hover:bg-gray-750'}`}>高校編イベント</button>
                         <button onClick={() => setActiveTab('HUMANOID_SPRITES')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'HUMANOID_SPRITES' ? 'bg-rose-900 text-white' : 'text-rose-400 hover:bg-gray-750'}`}>高校人型敵</button>
                         <button onClick={() => setActiveTab('TRANSLATION')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'TRANSLATION' ? 'bg-emerald-900 text-white' : 'text-emerald-400 hover:bg-gray-750'}`}>翻訳確認</button>
@@ -921,6 +964,145 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
                                         </div>
                                     </section>
                                 ))}
+                            </div>
+                        )}
+
+                        {activeTab === 'MAGIC_ART_AUDIT' && (
+                            <div className="space-y-4">
+                                <div className="rounded-xl border border-pink-700/70 bg-pink-950/30 p-4">
+                                    <div className="flex flex-col gap-3 lg:flex-row lg:items-start lg:justify-between">
+                                        <div>
+                                            <h3 className="flex items-center gap-2 font-bold text-pink-200">
+                                                <FileText size={20} /> マジック編 イベントイラスト不整合表
+                                            </h3>
+                                            <p className="mt-2 text-xs leading-relaxed text-gray-300">
+                                                目視確認で髪型、髪色、服装、場面が違う画像にチェックを入れると、対象ファイルパスをまとめてコピーできます。
+                                            </p>
+                                        </div>
+                                        <div className="flex flex-wrap gap-2 text-[10px] font-black">
+                                            <span className="rounded-full border border-pink-500/60 bg-pink-950 px-3 py-1 text-pink-100">
+                                                表示 {filteredMagicArtTargets.length} / {MAGIC_ART_CONSISTENCY_TARGETS.length}
+                                            </span>
+                                            <span className="rounded-full border border-red-500/60 bg-red-950 px-3 py-1 text-red-100">
+                                                不整合チェック {magicArtMismatchIds.length}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <div className="mt-4 grid grid-cols-1 gap-3 lg:grid-cols-[minmax(0,1fr)_220px_auto_auto] lg:items-end">
+                                        <label className="flex min-w-0 flex-col gap-1 text-[10px] font-bold text-gray-400">
+                                            検索
+                                            <input
+                                                type="text"
+                                                value={magicArtSearchTerm}
+                                                onChange={(event) => setMagicArtSearchTerm(event.target.value)}
+                                                placeholder="TSUBASA / SAKUYA / r6-true / ファイル名など"
+                                                className="min-w-0 rounded-lg border border-pink-700 bg-slate-950 px-3 py-2 text-xs font-bold text-white outline-none focus:border-pink-300"
+                                            />
+                                        </label>
+                                        <label className="flex min-w-0 flex-col gap-1 text-[10px] font-bold text-gray-400">
+                                            種別
+                                            <select
+                                                value={magicArtCategoryFilter}
+                                                onChange={(event) => setMagicArtCategoryFilter(event.target.value as typeof magicArtCategoryFilter)}
+                                                className="min-w-0 rounded-lg border border-pink-700 bg-slate-950 px-3 py-2 text-xs font-bold text-white outline-none focus:border-pink-300"
+                                            >
+                                                <option value="ALL">すべて</option>
+                                                <option value="COMMON_EVENT">共通イベント</option>
+                                                <option value="ROMANCE_EVENT">恋愛イベント r1-r5</option>
+                                                <option value="ENDING_EVENT">エンディング r6系</option>
+                                            </select>
+                                        </label>
+                                        <button
+                                            type="button"
+                                            onClick={copyMagicArtMismatchTargets}
+                                            disabled={!magicArtMismatchText}
+                                            className="rounded-lg border border-pink-300 bg-pink-700 px-4 py-2 text-xs font-black text-white hover:bg-pink-600 disabled:border-gray-700 disabled:bg-gray-800 disabled:text-gray-500"
+                                        >
+                                            <span className="inline-flex items-center gap-1">
+                                                {magicArtMismatchCopied ? <Check size={14} /> : <Copy size={14} />}
+                                                {magicArtMismatchCopied ? 'コピー済み' : 'ファイル名コピー'}
+                                            </span>
+                                        </button>
+                                        <button
+                                            type="button"
+                                            onClick={() => {
+                                                setMagicArtMismatchIds([]);
+                                                setMagicArtMismatchCopied(false);
+                                            }}
+                                            disabled={magicArtMismatchIds.length === 0}
+                                            className="rounded-lg border border-gray-600 bg-slate-800 px-4 py-2 text-xs font-black text-gray-200 hover:bg-slate-700 disabled:text-gray-600"
+                                        >
+                                            全解除
+                                        </button>
+                                    </div>
+                                    <textarea
+                                        readOnly
+                                        value={magicArtMismatchText}
+                                        placeholder="チェックした不整合イラストのファイルパスがここに並びます"
+                                        className="mt-3 h-24 w-full resize-none rounded-lg border border-gray-700 bg-slate-950 p-3 text-[10px] leading-relaxed text-pink-50 outline-none custom-scrollbar"
+                                    />
+                                </div>
+
+                                <div className="grid grid-cols-1 gap-3 xl:grid-cols-2">
+                                    {filteredMagicArtTargets.map(target => {
+                                        const checked = magicArtMismatchIds.includes(target.id);
+                                        const categoryLabel = target.category === 'COMMON_EVENT'
+                                            ? '共通イベント'
+                                            : target.category === 'ROMANCE_EVENT'
+                                                ? '恋愛イベント'
+                                                : 'エンディング';
+                                        return (
+                                            <div
+                                                key={target.id}
+                                                className={`grid grid-cols-[92px_minmax(0,1fr)] gap-3 rounded-xl border p-3 ${
+                                                    checked ? 'border-red-500 bg-red-950/25' : 'border-gray-700 bg-black/35'
+                                                }`}
+                                            >
+                                                <div className="flex flex-col gap-2">
+                                                    <div className="aspect-square overflow-hidden rounded-lg border border-gray-700 bg-slate-950">
+                                                        <img
+                                                            src={assetUrl(target.filePath)}
+                                                            alt={target.label}
+                                                            loading="lazy"
+                                                            className="h-full w-full object-contain"
+                                                            onError={(event) => {
+                                                                event.currentTarget.style.opacity = '0.22';
+                                                            }}
+                                                        />
+                                                    </div>
+                                                    <label className="flex cursor-pointer items-center justify-center gap-1 rounded border border-red-700 bg-red-950/50 px-2 py-1 text-[10px] font-black text-red-100">
+                                                        <input
+                                                            type="checkbox"
+                                                            checked={checked}
+                                                            onChange={() => toggleMagicArtMismatch(target.id)}
+                                                            className="h-4 w-4 accent-red-500"
+                                                        />
+                                                        不整合
+                                                    </label>
+                                                </div>
+                                                <div className="min-w-0">
+                                                    <div className="flex flex-wrap items-center gap-2">
+                                                        <span className="rounded-full border border-pink-700 bg-pink-950 px-2 py-0.5 text-[10px] font-black text-pink-100">
+                                                            {categoryLabel}
+                                                        </span>
+                                                        {target.heroId && (
+                                                            <span className="rounded-full border border-slate-700 bg-slate-950 px-2 py-0.5 text-[10px] font-black text-slate-200">
+                                                                {target.heroId}{target.targetId ? ` / ${target.targetId}` : ''}
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                    <div className="mt-2 text-sm font-black text-white">{target.label}</div>
+                                                    <div className="mt-1 break-all rounded border border-gray-800 bg-slate-950 p-2 font-mono text-[10px] leading-relaxed text-pink-100">
+                                                        {target.filePath}
+                                                    </div>
+                                                    <div className="mt-2 text-xs leading-relaxed text-gray-300">
+                                                        <span className="font-black text-gray-100">確認基準: </span>{target.expected}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
                             </div>
                         )}
 
