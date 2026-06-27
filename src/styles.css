@@ -4876,7 +4876,8 @@ textarea {
     margin: 0 !important;
     overflow-x: hidden;
     overflow-y: auto;
-    justify-content: flex-start;
+    justify-content: center !important;
+    text-align: center;
   }
 
   .main-challenge-screen .general-challenge-input,
@@ -7161,6 +7162,8 @@ textarea {
     min-height: 0 !important;
     margin: 0 !important;
     overflow-y: auto !important;
+    justify-content: center !important;
+    text-align: center;
   }
 
   .main-challenge-screen .general-challenge-input,
@@ -7202,6 +7205,8 @@ textarea {
     min-height: 0 !important;
     margin: 0 !important;
     overflow-y: auto !important;
+    justify-content: center !important;
+    text-align: center;
   }
 
   .main-challenge-screen .basic-challenge-options {
