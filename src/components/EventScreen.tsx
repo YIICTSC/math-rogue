@@ -79,7 +79,7 @@ const EventScreen: React.FC<EventScreenProps> = ({ title, description, options, 
   }, [highSchoolEventIndex]);
 
   const imageCandidates = useMemo(() => {
-    if (visualTheme === 'magic' && title === '忘れ物') {
+    if (visualTheme === 'magic' && (title === '忘れ物' || imageKey === '忘れ物' || imageKey === 'magic-forgotten-card')) {
       return [
         assetUrl('sprites/magic/events/forgotten-card.webp'),
         assetUrl('event-illustrations/default.svg'),

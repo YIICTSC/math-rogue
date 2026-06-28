@@ -14656,6 +14656,7 @@ const App: React.FC = () => {
                                 ? '他のプレイヤーの結果を待っています'
                                 : coopInteractionDisabledMessage}
                             languageMode={languageMode}
+                            visualTheme={gameState.visualTheme || coopSyncedVisualTheme}
                         />
                     </div>
                 )}

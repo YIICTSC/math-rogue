@@ -7,18 +7,41 @@ import {
   uniqueEnglishWordItems,
 } from './english_utils';
 
-const word = (en: string, jp: string, scene: string, exampleEn?: string, exampleJp?: string): EnglishWordItem => ({
+const word = (
+  en: string,
+  jp: string,
+  scene: string,
+  exampleEn?: string,
+  exampleJp?: string,
+  choiceGroup?: string,
+  allowAutoExample = true,
+): EnglishWordItem => ({
   en,
   jp,
   hint: scene,
   exampleEn,
   exampleJp,
+  choiceGroup,
+  allowAutoExample,
 });
 
 const words = (scene: string, entries: Array<[string, string]>): EnglishWordItem[] =>
   entries.map(([en, jp]) => word(en, jp, scene));
 
+const IRREGULAR_PLURALS: Record<string, string> = {
+  child: 'children',
+  person: 'people',
+  man: 'men',
+  woman: 'women',
+  foot: 'feet',
+  tooth: 'teeth',
+  mouse: 'mice',
+  goose: 'geese',
+  life: 'lives',
+};
+
 const pluralize = (en: string) => {
+  if (IRREGULAR_PLURALS[en]) return IRREGULAR_PLURALS[en];
   if (/(s|x|z|ch|sh)$/.test(en)) return `${en}es`;
   if (/[^aeiou]y$/.test(en)) return `${en.slice(0, -1)}ies`;
   if (en.endsWith('f')) return `${en.slice(0, -1)}ves`;
@@ -26,48 +49,214 @@ const pluralize = (en: string) => {
   return `${en}s`;
 };
 
+const IRREGULAR_PAST_TENSES: Record<string, string> = {
+  be: 'was',
+  become: 'became',
+  begin: 'began',
+  bring: 'brought',
+  build: 'built',
+  buy: 'bought',
+  catch: 'caught',
+  choose: 'chose',
+  come: 'came',
+  cut: 'cut',
+  do: 'did',
+  drink: 'drank',
+  eat: 'ate',
+  fall: 'fell',
+  feel: 'felt',
+  find: 'found',
+  fly: 'flew',
+  forget: 'forgot',
+  get: 'got',
+  give: 'gave',
+  go: 'went',
+  grow: 'grew',
+  have: 'had',
+  hear: 'heard',
+  hold: 'held',
+  know: 'knew',
+  leave: 'left',
+  lend: 'lent',
+  lose: 'lost',
+  make: 'made',
+  mean: 'meant',
+  meet: 'met',
+  put: 'put',
+  read: 'read',
+  receive: 'received',
+  run: 'ran',
+  say: 'said',
+  see: 'saw',
+  sell: 'sold',
+  send: 'sent',
+  sit: 'sat',
+  speak: 'spoke',
+  spend: 'spent',
+  swim: 'swam',
+  take: 'took',
+  teach: 'taught',
+  tell: 'told',
+  think: 'thought',
+  throw: 'threw',
+  understand: 'understood',
+  wear: 'wore',
+  win: 'won',
+  write: 'wrote',
+};
+
+const IRREGULAR_ING_FORMS: Record<string, string> = {
+  be: 'being',
+  begin: 'beginning',
+  control: 'controlling',
+  cut: 'cutting',
+  get: 'getting',
+  plan: 'planning',
+  put: 'putting',
+  run: 'running',
+  sit: 'sitting',
+  swim: 'swimming',
+};
+
+const DOUBLE_FINAL_PAST_TENSES: Record<string, string> = {
+  control: 'controlled',
+  plan: 'planned',
+};
+
+const applyToVerbHead = (en: string, transform: (head: string) => string) => {
+  const [head, ...rest] = en.split(' ');
+  return [transform(head), ...rest].join(' ');
+};
+
 const pastTense = (en: string) => {
-  if (en.endsWith('e')) return `${en}d`;
-  if (/[^aeiou]y$/.test(en)) return `${en.slice(0, -1)}ied`;
-  return `${en}ed`;
+  return applyToVerbHead(en, (head) => {
+    if (IRREGULAR_PAST_TENSES[head]) return IRREGULAR_PAST_TENSES[head];
+    if (DOUBLE_FINAL_PAST_TENSES[head]) return DOUBLE_FINAL_PAST_TENSES[head];
+    if (head.endsWith('e')) return `${head}d`;
+    if (/[^aeiou]y$/.test(head)) return `${head.slice(0, -1)}ied`;
+    return `${head}ed`;
+  });
 };
 
 const ingForm = (en: string) => {
-  if (en.endsWith('ie')) return `${en.slice(0, -2)}ying`;
-  if (en.endsWith('e') && !en.endsWith('ee')) return `${en.slice(0, -1)}ing`;
-  return `${en}ing`;
+  return applyToVerbHead(en, (head) => {
+    if (IRREGULAR_ING_FORMS[head]) return IRREGULAR_ING_FORMS[head];
+    if (head.endsWith('ie')) return `${head.slice(0, -2)}ying`;
+    if (head.endsWith('e') && !head.endsWith('ee')) return `${head.slice(0, -1)}ing`;
+    return `${head}ing`;
+  });
+};
+
+const IRREGULAR_COMPARATIVES: Record<string, string> = {
+  good: 'better',
+  well: 'better',
+  bad: 'worse',
+  little: 'less',
+  many: 'more',
+  much: 'more',
+};
+
+const IRREGULAR_SUPERLATIVES: Record<string, string> = {
+  good: 'best',
+  well: 'best',
+  bad: 'worst',
+  little: 'least',
+  many: 'most',
+  much: 'most',
 };
 
 const comparative = (en: string) => {
+  if (IRREGULAR_COMPARATIVES[en]) return IRREGULAR_COMPARATIVES[en];
   if (en.endsWith('y')) return `${en.slice(0, -1)}ier`;
+  if (en.endsWith('e')) return `${en}r`;
+  if (/^[a-z]*[aeiou][bcdfghjklmnpqrstvwxyz]$/.test(en) && !/[wxy]$/.test(en)) return `${en}${en.slice(-1)}er`;
   if (en.length <= 5) return `${en}er`;
   return `more ${en}`;
 };
 
 const superlative = (en: string) => {
+  if (IRREGULAR_SUPERLATIVES[en]) return IRREGULAR_SUPERLATIVES[en];
   if (en.endsWith('y')) return `${en.slice(0, -1)}iest`;
+  if (en.endsWith('e')) return `${en}st`;
+  if (/^[a-z]*[aeiou][bcdfghjklmnpqrstvwxyz]$/.test(en) && !/[wxy]$/.test(en)) return `${en}${en.slice(-1)}est`;
   if (en.length <= 5) return `${en}est`;
   return `the most ${en}`;
 };
 
+const JP_VERB_FORMS: Record<string, { past: string; ing: string }> = {
+  '持っている': { past: '持っていた', ing: '持っている' },
+  '知っている': { past: '知っていた', ing: '知っている' },
+  '大好きである': { past: '大好きだった', ing: '大好きである' },
+  '来る': { past: '来た', ing: '来ている' },
+  '行く': { past: '行った', ing: '行っている' },
+  '買う': { past: '買った', ing: '買っている' },
+  '会う': { past: '会った', ing: '会っている' },
+  '思う': { past: '思った', ing: '思っている' },
+  '取る': { past: '取った', ing: '取っている' },
+  '去る': { past: '去った', ing: '去っている' },
+  '選ぶ': { past: '選んだ', ing: '選んでいる' },
+  '貸す': { past: '貸した', ing: '貸している' },
+  '失う': { past: '失った', ing: '失っている' },
+  '身につける': { past: '身につけた', ing: '身につけている' },
+  '勝つ': { past: '勝った', ing: '勝っている' },
+  '捕まえる': { past: '捕まえた', ing: '捕まえている' },
+  '閉める': { past: '閉めた', ing: '閉めている' },
+  '切る': { past: '切った', ing: '切っている' },
+  '飲む': { past: '飲んだ', ing: '飲んでいる' },
+  '食べる': { past: '食べた', ing: '食べている' },
+  '見つける': { past: '見つけた', ing: '見つけている' },
+  '飛ぶ': { past: '飛んだ', ing: '飛んでいる' },
+  '与える': { past: '与えた', ing: '与えている' },
+  '持つ': { past: '持った', ing: '持っている' },
+  '聞こえる': { past: '聞こえた', ing: '聞こえている' },
+  '置く': { past: '置いた', ing: '置いている' },
+  '見る': { past: '見た', ing: '見ている' },
+  '売る': { past: '売った', ing: '売っている' },
+  '投げる': { past: '投げた', ing: '投げている' },
+  '欲しい': { past: '欲しかった', ing: '欲しがっている' },
+  '始まる': { past: '始まった', ing: '始まっている' },
+  '建てる': { past: '建てた', ing: '建てている' },
+  '育つ': { past: '育った', ing: '育っている' },
+  '出発する': { past: '出発した', ing: '出発している' },
+  '読む': { past: '読んだ', ing: '読んでいる' },
+  '借りる': { past: '借りた', ing: '借りている' },
+  '教える': { past: '教えた', ing: '教えている' },
+};
+
+const japaneseVerbForms = (jp: string) => {
+  if (JP_VERB_FORMS[jp]) return JP_VERB_FORMS[jp];
+  if (jp.endsWith('する')) return { past: `${jp.slice(0, -2)}した`, ing: `${jp.slice(0, -2)}している` };
+  if (jp.endsWith('である')) return { past: `${jp.slice(0, -3)}だった`, ing: jp };
+  if (/(える|ける|げる|せる|てる|ねる|べる|める|れる)$/.test(jp)) return { past: `${jp.slice(0, -1)}た`, ing: `${jp.slice(0, -1)}ている` };
+  if (jp.endsWith('く')) return { past: `${jp.slice(0, -1)}いた`, ing: `${jp.slice(0, -1)}いている` };
+  if (jp.endsWith('ぐ')) return { past: `${jp.slice(0, -1)}いだ`, ing: `${jp.slice(0, -1)}いでいる` };
+  if (jp.endsWith('す')) return { past: `${jp.slice(0, -1)}した`, ing: `${jp.slice(0, -1)}している` };
+  if (/[むぶぬ]$/.test(jp)) return { past: `${jp.slice(0, -1)}んだ`, ing: `${jp.slice(0, -1)}んでいる` };
+  if (/[うつる]$/.test(jp)) return { past: `${jp.slice(0, -1)}った`, ing: `${jp.slice(0, -1)}っている` };
+  return { past: `${jp}（過去）`, ing: `${jp}（進行中）` };
+};
+
 const nounForms = (scene: string, entries: Array<[string, string]>): EnglishWordItem[] =>
   entries.flatMap(([en, jp]) => [
-    word(en, jp, scene),
-    word(pluralize(en), `${jp}（複数）`, scene),
+    word(en, jp, scene, undefined, undefined, `${scene}:noun:singular`),
+    word(pluralize(en), `複数の${jp}`, scene, undefined, undefined, `${scene}:noun:plural`, false),
   ]);
 
 const verbForms = (scene: string, entries: Array<[string, string]>): EnglishWordItem[] =>
-  entries.flatMap(([en, jp]) => [
-    word(en, jp, scene),
-    word(pastTense(en), `${jp}した`, scene),
-    word(ingForm(en), `${jp}している`, scene),
-  ]);
+  entries.flatMap(([en, jp]) => {
+    const jpForms = japaneseVerbForms(jp);
+    return [
+      word(en, jp, scene, undefined, undefined, `${scene}:verb:base`, false),
+      word(pastTense(en), jpForms.past, scene, undefined, undefined, `${scene}:verb:past`, false),
+      word(ingForm(en), jpForms.ing, scene, undefined, undefined, `${scene}:verb:ing`, false),
+    ];
+  });
 
 const adjectiveForms = (scene: string, entries: Array<[string, string]>): EnglishWordItem[] =>
   entries.flatMap(([en, jp]) => [
-    word(en, jp, scene),
-    word(comparative(en), `より${jp}`, scene),
-    word(superlative(en), `最も${jp}`, scene),
+    word(en, jp, scene, undefined, undefined, `${scene}:adjective:base`),
+    word(comparative(en), `より${jp}`, scene, undefined, undefined, `${scene}:adjective:comparative`, false),
+    word(superlative(en), `最も${jp}`, scene, undefined, undefined, `${scene}:adjective:superlative`, false),
   ]);
 
 const numberWords = (start: number, end: number, scene: string): EnglishWordItem[] => {
