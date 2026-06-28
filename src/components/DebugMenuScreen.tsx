@@ -166,6 +166,7 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
     const [magicArtCategoryFilter, setMagicArtCategoryFilter] = useState<'ALL' | 'COMMON_EVENT' | 'ROMANCE_EVENT' | 'ENDING_EVENT'>('ALL');
     const [magicArtMismatchIds, setMagicArtMismatchIds] = useState<string[]>([]);
     const [magicArtMismatchCopied, setMagicArtMismatchCopied] = useState(false);
+    const [magicArtZoomTarget, setMagicArtZoomTarget] = useState<{ label: string; filePath: string; expected: string } | null>(null);
     const [magicVoiceEventHeroId, setMagicVoiceEventHeroId] = useState('AKARI');
     const [magicVoiceEventTargetId, setMagicVoiceEventTargetId] = useState('REN');
     const [magicVoiceEventStage, setMagicVoiceEventStage] = useState(0);
@@ -1059,7 +1060,16 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
                                                 }`}
                                             >
                                                 <div className="flex flex-col gap-2">
-                                                    <div className="aspect-square overflow-hidden rounded-lg border border-gray-700 bg-slate-950">
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => setMagicArtZoomTarget({
+                                                            label: target.label,
+                                                            filePath: target.filePath,
+                                                            expected: target.expected,
+                                                        })}
+                                                        className="group relative aspect-square overflow-hidden rounded-lg border border-gray-700 bg-slate-950 transition hover:border-pink-300 focus:border-pink-300 focus:outline-none focus:ring-2 focus:ring-pink-400"
+                                                        aria-label={`${target.label}を拡大表示`}
+                                                    >
                                                         <img
                                                             src={assetUrl(target.filePath)}
                                                             alt={target.label}
@@ -1069,7 +1079,10 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
                                                                 event.currentTarget.style.opacity = '0.22';
                                                             }}
                                                         />
-                                                    </div>
+                                                        <span className="absolute bottom-1 right-1 rounded bg-black/75 px-1.5 py-0.5 text-[9px] font-black text-white opacity-90 group-hover:bg-pink-700">
+                                                            拡大
+                                                        </span>
+                                                    </button>
                                                     <label className="flex cursor-pointer items-center justify-center gap-1 rounded border border-red-700 bg-red-950/50 px-2 py-1 text-[10px] font-black text-red-100">
                                                         <input
                                                             type="checkbox"
@@ -1103,6 +1116,44 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
                                         );
                                     })}
                                 </div>
+                                {magicArtZoomTarget && (
+                                    <div
+                                        className="fixed inset-0 z-[10070] flex items-center justify-center bg-black/92 p-3 text-white sm:p-6"
+                                        role="dialog"
+                                        aria-modal="true"
+                                        aria-label={`${magicArtZoomTarget.label} 拡大画像`}
+                                        onClick={() => setMagicArtZoomTarget(null)}
+                                    >
+                                        <div
+                                            className="flex max-h-[96dvh] w-full max-w-6xl flex-col overflow-hidden rounded-2xl border border-pink-300/50 bg-slate-950 shadow-2xl"
+                                            onClick={(event) => event.stopPropagation()}
+                                        >
+                                            <div className="flex items-start justify-between gap-3 border-b border-pink-500/30 p-3 sm:p-4">
+                                                <div className="min-w-0">
+                                                    <div className="truncate text-sm font-black text-pink-100 sm:text-base">{magicArtZoomTarget.label}</div>
+                                                    <div className="mt-1 break-all font-mono text-[10px] leading-relaxed text-pink-200/80">{magicArtZoomTarget.filePath}</div>
+                                                </div>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setMagicArtZoomTarget(null)}
+                                                    className="shrink-0 rounded-lg border border-white/20 bg-slate-900 px-3 py-2 text-xs font-black text-white hover:bg-slate-800"
+                                                >
+                                                    閉じる
+                                                </button>
+                                            </div>
+                                            <div className="min-h-0 flex-1 bg-black p-2 sm:p-4">
+                                                <img
+                                                    src={assetUrl(magicArtZoomTarget.filePath)}
+                                                    alt={`${magicArtZoomTarget.label} enlarged`}
+                                                    className="h-full max-h-[72dvh] w-full object-contain"
+                                                />
+                                            </div>
+                                            <div className="border-t border-pink-500/25 bg-slate-950 p-3 text-xs leading-relaxed text-gray-200 sm:p-4">
+                                                <span className="font-black text-pink-100">確認基準: </span>{magicArtZoomTarget.expected}
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
                             </div>
                         )}
 
