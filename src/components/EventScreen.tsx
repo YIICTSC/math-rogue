@@ -47,9 +47,10 @@ interface EventScreenProps {
     interactionDisabledMessage?: string;
     languageMode: LanguageMode;
     visualTheme?: VisualThemeId;
+    imageZoomEnabled?: boolean;
 }
 
-const EventScreen: React.FC<EventScreenProps> = ({ title, description, options, imageKey, image, resultLog, onContinue, typingMode = false, interactionDisabled = false, interactionDisabledMessage, languageMode, visualTheme = 'elementary' }) => {
+const EventScreen: React.FC<EventScreenProps> = ({ title, description, options, imageKey, image, resultLog, onContinue, typingMode = false, interactionDisabled = false, interactionDisabledMessage, languageMode, visualTheme = 'elementary', imageZoomEnabled = false }) => {
   const highSchoolEventIndex = useMemo(() => {
     const match = imageKey?.match(/^high-school-event-(\d+)$/);
     return match ? Number(match[1]) : null;
@@ -123,6 +124,7 @@ const EventScreen: React.FC<EventScreenProps> = ({ title, description, options, 
   const [imageIndex, setImageIndex] = useState(0);
   const [choiceLocked, setChoiceLocked] = useState(false);
   const [continueLocked, setContinueLocked] = useState(false);
+  const [imageZoomOpen, setImageZoomOpen] = useState(false);
   const inputLocked = interactionDisabled || choiceLocked;
   const continueInputLocked = interactionDisabled || continueLocked;
 
@@ -130,6 +132,7 @@ const EventScreen: React.FC<EventScreenProps> = ({ title, description, options, 
     setImageIndex(0);
     setChoiceLocked(false);
     setContinueLocked(false);
+    setImageZoomOpen(false);
   }, [imageKey, title]);
 
   useEffect(() => {
@@ -203,7 +206,19 @@ const EventScreen: React.FC<EventScreenProps> = ({ title, description, options, 
                 <h2 className="text-2xl font-bold text-purple-100 sm:text-3xl">{title}</h2>
             </div>
 
-            <div className="event-screen-image relative mx-auto mb-4 aspect-square w-full max-w-[18rem] overflow-hidden rounded-xl border border-purple-400/40 bg-slate-900 sm:mb-6 sm:max-w-[22rem]">
+            <div
+                className={`event-screen-image relative mx-auto mb-4 aspect-square w-full max-w-[18rem] overflow-hidden rounded-xl border border-purple-400/40 bg-slate-900 sm:mb-6 sm:max-w-[22rem] ${imageZoomEnabled ? 'cursor-zoom-in transition hover:border-fuchsia-200 hover:brightness-110' : ''}`}
+                role={imageZoomEnabled ? 'button' : undefined}
+                tabIndex={imageZoomEnabled ? 0 : undefined}
+                aria-label={imageZoomEnabled ? `${title}の画像を拡大` : undefined}
+                onClick={imageZoomEnabled ? () => setImageZoomOpen(true) : undefined}
+                onKeyDown={imageZoomEnabled ? (event) => {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                        event.preventDefault();
+                        setImageZoomOpen(true);
+                    }
+                } : undefined}
+            >
                 <img
                     src={imageCandidates[imageIndex]}
                     alt={`${title} thumbnail`}
@@ -219,6 +234,11 @@ const EventScreen: React.FC<EventScreenProps> = ({ title, description, options, 
                     />
                 )}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-transparent" />
+                {imageZoomEnabled && (
+                    <div className="absolute bottom-2 right-2 rounded-full border border-white/30 bg-black/70 px-2 py-1 text-[10px] font-black text-white">
+                        拡大
+                    </div>
+                )}
             </div>
             
             <div className="event-screen-description mb-6 min-h-[6rem] whitespace-pre-wrap text-base leading-relaxed text-gray-300 sm:mb-8 sm:text-lg">
@@ -267,6 +287,31 @@ const EventScreen: React.FC<EventScreenProps> = ({ title, description, options, 
                 )}
             </div>
         </div>
+
+        {imageZoomEnabled && imageZoomOpen && (
+            <div
+                className="fixed inset-0 z-[10060] flex items-center justify-center bg-black/90 p-3 sm:p-6"
+                role="dialog"
+                aria-modal="true"
+                aria-label={`${title} 拡大画像`}
+                onClick={() => setImageZoomOpen(false)}
+            >
+                <button
+                    type="button"
+                    className="absolute right-3 top-3 rounded-lg border border-white/30 bg-slate-950/90 px-4 py-2 text-sm font-black text-white hover:bg-slate-800 sm:right-5 sm:top-5"
+                    onClick={() => setImageZoomOpen(false)}
+                >
+                    閉じる
+                </button>
+                <img
+                    src={imageCandidates[imageIndex]}
+                    alt={`${title} enlarged`}
+                    className="max-h-[92dvh] max-w-[96vw] rounded-xl border border-fuchsia-200/50 object-contain shadow-2xl"
+                    onClick={(event) => event.stopPropagation()}
+                    onError={() => setImageIndex(prev => Math.min(prev + 1, imageCandidates.length - 1))}
+                />
+            </div>
+        )}
     </div>
   );
 };

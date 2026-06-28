@@ -241,6 +241,7 @@ const MagicEventSimulationScreen: React.FC<MagicEventSimulationScreenProps> = ({
             onContinue={handleContinue}
             languageMode={languageMode}
             visualTheme="magic"
+            imageZoomEnabled
           />
         ) : null}
       </div>
