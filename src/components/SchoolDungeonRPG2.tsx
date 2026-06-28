@@ -232,6 +232,26 @@ interface EquipmentSlots {
   accessory: Item | null;
 }
 
+const getEquipmentSlotForItem = (item: Item): keyof EquipmentSlots | null => {
+  if (item.category === 'WEAPON') return 'weapon';
+  if (item.category === 'ARMOR') return 'armor';
+  if (item.category === 'RANGED') return 'ranged';
+  if (item.category === 'ACCESSORY') return 'accessory';
+  return null;
+};
+
+const getEquipmentPowerValue = (item: Item | null | undefined): number => {
+  if (!item) return 0;
+  return (item.power || 0) + (item.plus || 0);
+};
+
+const getEquipmentSwitchDiffLabel = (item: Item, equipment?: EquipmentSlots): string | null => {
+  const slot = getEquipmentSlotForItem(item);
+  if (!slot) return null;
+  const diff = getEquipmentPowerValue(item) - getEquipmentPowerValue(equipment?.[slot]);
+  return diff === 0 ? '±0' : diff > 0 ? `+${diff}` : `${diff}`;
+};
+
 interface Entity {
   id: number;
   type: 'PLAYER' | 'ENEMY' | 'ITEM' | 'GOLD' | 'TRAP';
@@ -2073,10 +2093,14 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
                                 <div ref={menuListRef} className="flex flex-col gap-1 overflow-y-auto flex-grow custom-scrollbar relative">
                                     {inventory.map((item, i) => {
                                         const isSynthTarget = synthState.active && ((synthState.step === 'SELECT_BASE' && synthState.mode === 'SYNTH' && !['WEAPON','ARMOR'].includes(item.category)) || (synthState.step === 'SELECT_MAT' && synthState.baseIndex === i));
+                                        const switchDiffLabel = getEquipmentSwitchDiffLabel(item, player.equipment);
                                         return (
                                             <div key={i} className={`flex items-center border ${isSynthTarget ? 'opacity-30' : ''}`} style={{ borderColor: !selectedEquipmentSlot && selectedItemIndex === i ? C3 : 'transparent', backgroundColor: !selectedEquipmentSlot && selectedItemIndex === i ? C2 : 'transparent', color: !selectedEquipmentSlot && selectedItemIndex === i ? C0 : C3 }} onContextMenu={(e) => { e.preventDefault(); setInspectedItem(item); }} onTouchStart={() => handleTouchStart(item)} onTouchEnd={handleTouchEnd}>
                                                 <button className="flex-grow text-left px-2 py-1 cursor-pointer flex justify-between items-center" onClick={() => !isSynthTarget && (synthState.active ? handleSynthesisStep() : handleItemAction(i))} onMouseEnter={() => { lastInputType.current = 'MOUSE'; setSelectedEquipmentSlot(null); setSelectedItemIndex(i); setSelectedItemActionIndex(0); }} style={!synthState.active && !selectedEquipmentSlot && selectedItemIndex === i && selectedItemActionIndex === 0 ? { backgroundColor: C3, color: C0 } : undefined}>
-                                                    <span>{selectedItemIndex === i && <span className="mr-1 animate-pulse">▶</span>}{getItemName(item)} {item.plus ? `+${item.plus}` : ''} {item.count ? `(${item.count})` : ''}{item.category === 'STAFF' ? `[${item.charges}]` : ''}</span>
+                                                    <span className="flex min-w-0 flex-1 items-center justify-between gap-2 pr-2">
+                                                        <span className="truncate">{selectedItemIndex === i && <span className="mr-1 animate-pulse">▶</span>}{getItemName(item)} {item.plus ? `+${item.plus}` : ''} {item.count ? `(${item.count})` : ''}{item.category === 'STAFF' ? `[${item.charges}]` : ''}</span>
+                                                        {switchDiffLabel && <span className="shrink-0 text-[9px] font-bold" style={{ color: !selectedEquipmentSlot && selectedItemIndex === i ? C0 : C2 }}>{switchDiffLabel}</span>}
+                                                    </span>
                                                     <span className="text-[9px]" style={{ color: !selectedEquipmentSlot && selectedItemIndex === i ? C0 : C2 }}>{synthState.active ? '選択' : (['WEAPON','ARMOR','RANGED','ACCESSORY'].includes(item.category) ? '装備' : (item.category==='STAFF' ? '振る' : '使う'))}</span>
                                                 </button>
                                                 {!synthState.active && (<button className="px-2 py-1 border-l flex items-center justify-center hover:opacity-80" style={{ borderColor: C1, backgroundColor: !selectedEquipmentSlot && selectedItemIndex === i && selectedItemActionIndex === 1 ? C3 : 'transparent', color: !selectedEquipmentSlot && selectedItemIndex === i && selectedItemActionIndex === 1 ? C0 : undefined }} onClick={(e) => { e.stopPropagation(); handleThrowItem(i); }} onMouseEnter={() => { setSelectedEquipmentSlot(null); setSelectedItemIndex(i); setSelectedItemActionIndex(1); }} title="投げる"><Send size={10} /></button>)}

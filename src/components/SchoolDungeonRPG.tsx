@@ -165,6 +165,26 @@ interface EquipmentSlots {
   accessory: Item | null;
 }
 
+const getEquipmentSlotForItem = (item: Item): keyof EquipmentSlots | null => {
+  if (item.category === 'WEAPON') return 'weapon';
+  if (item.category === 'ARMOR') return 'armor';
+  if (item.category === 'RANGED') return 'ranged';
+  if (item.category === 'ACCESSORY') return 'accessory';
+  return null;
+};
+
+const getEquipmentPowerValue = (item: Item | null | undefined): number => {
+  if (!item) return 0;
+  return (item.power || 0) + (item.plus || 0);
+};
+
+const getEquipmentSwitchDiffLabel = (item: Item, equipment?: EquipmentSlots): string | null => {
+  const slot = getEquipmentSlotForItem(item);
+  if (!slot) return null;
+  const diff = getEquipmentPowerValue(item) - getEquipmentPowerValue(equipment?.[slot]);
+  return diff === 0 ? '±0' : diff > 0 ? `+${diff}` : `${diff}`;
+};
+
 interface Entity {
   id: number;
   type: 'PLAYER' | 'ENEMY' | 'ITEM' | 'GOLD' | 'TRAP';
@@ -3299,6 +3319,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
                                                 (synthState.step === 'SELECT_BASE' && synthState.mode === 'SYNTH' && !['WEAPON','ARMOR'].includes(item.category)) ||
                                                 (synthState.step === 'SELECT_MAT' && synthState.baseIndex === i)
                                             );
+                                            const switchDiffLabel = getEquipmentSwitchDiffLabel(item, player.equipment);
                                             
                                             return (
                                                 <div 
@@ -3317,11 +3338,18 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
                                                         onMouseEnter={() => { lastInputType.current = 'MOUSE'; setSelectedEquipmentSlot(null); setSelectedItemIndex(i); setSelectedItemActionIndex(0); }}
                                                         style={!synthState.active && !selectedEquipmentSlot && selectedItemIndex === i && selectedItemActionIndex === 0 ? { backgroundColor: C3, color: C0 } : undefined}
                                                     >
-                                                        <span>
-                                                            {getItemName(item)} 
-                                                            {item.plus ? `+${item.plus}` : ''} 
-                                                            {item.count ? `(${item.count})` : ''}
-                                                            {item.category === 'STAFF' ? `[${item.charges}]` : ''}
+                                                        <span className="flex min-w-0 flex-1 items-center justify-between gap-2 pr-2">
+                                                            <span className="truncate">
+                                                                {getItemName(item)} 
+                                                                {item.plus ? `+${item.plus}` : ''} 
+                                                                {item.count ? `(${item.count})` : ''}
+                                                                {item.category === 'STAFF' ? `[${item.charges}]` : ''}
+                                                            </span>
+                                                            {switchDiffLabel && (
+                                                                <span className="shrink-0 text-[9px] font-bold" style={{ color: !selectedEquipmentSlot && selectedItemIndex === i ? C0 : C2 }}>
+                                                                    {switchDiffLabel}
+                                                                </span>
+                                                            )}
                                                         </span>
                                                         <span className="text-[9px]" style={{ color: !selectedEquipmentSlot && selectedItemIndex === i ? C0 : C2 }}>
                                                             {synthState.active 

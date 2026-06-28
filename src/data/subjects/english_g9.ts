@@ -147,7 +147,7 @@ export const ENGLISH_G9_UNIT_DATA: Record<string, GeneralProblem[]> = {
     prompt('「I want to help people.」を いってみよう。', 'I want to help people.', ['I want help people.', 'I want to helps people.', 'I wanting to help people.'], '英作文を音読。', { speechPrompt: { expected: 'I want to help people', alternates: ['I want to help people.'], lang: 'en-US', buttonLabel: '英文を はなす' } }),
     prompt('「私は 毎日英語を練習します。」に 合うのは？', 'I practice English every day.', ['I am practice English every day.', 'I practiced English every day.', 'I practice every day English.'], '語順。'),
     prompt('「私たちは週末にボランティア活動をします。」に 合うのは？', 'We do volunteer work on weekends.', ['We are volunteer on weekends.', 'We did volunteer works every day.', 'We do work volunteer weekend.'], '社会・学校活動の語彙。'),
-    prompt('自分の好きな教科について 1文で話してみよう。', 'I like English because it is fun.', ['I like English because it is fun.', 'My favorite subject is English.', 'I enjoy studying English.'], '好きな教科と理由を入れる。', {
+    prompt('自分の好きな教科について 1文で話してみよう。', 'I like English because it is fun.', ['My favorite subject is English.', 'I enjoy studying English.', 'I like math because it is useful.'], '好きな教科と理由を入れる。', {
       speechPrompt: {
         expected: 'I like English because it is fun',
         alternates: ['My favorite subject is English because it is interesting', 'I enjoy English because it is fun'],
@@ -159,7 +159,7 @@ export const ENGLISH_G9_UNIT_DATA: Record<string, GeneralProblem[]> = {
         examples: ['I like English because it is fun.', 'My favorite subject is math because it is useful.'],
       },
     }),
-    prompt('将来したいことを 1文で話してみよう。', 'I want to be a teacher in the future.', ['I want to be a teacher in the future.', 'I want to help people in the future.', 'I want to travel abroad someday.'], 'I want to ... を使えるとよい。', {
+    prompt('将来したいことを 1文で話してみよう。', 'I want to be a teacher in the future.', ['I want to help people in the future.', 'I want to travel abroad someday.', 'I want to be a doctor in the future.'], 'I want to ... を使えるとよい。', {
       speechPrompt: {
         expected: 'I want to be a teacher in the future',
         alternates: ['I want to be a doctor in the future', 'I want to help people in the future'],
@@ -179,7 +179,7 @@ export const ENGLISH_G9_UNIT_DATA: Record<string, GeneralProblem[]> = {
     prompt('「Thank you for listening.」を いってみよう。', 'Thank you for listening.', ['Thank you listening.', 'Thanks for listen.', 'Thank you to listening.'], '結びの表現。', { speechPrompt: { expected: 'Thank you for listening', alternates: ['Thank you for listening.', 'Thanks for listening'], lang: 'en-US', buttonLabel: 'スピーチの結びを はなす' } }),
     prompt('スピーチで 理由や例を入れる目的は？', '内容をわかりやすくするため', ['文を長くするため', '難しい単語を増やすため', '読む量を減らすため'], '聞き手に伝える。'),
     prompt('スピーチで 経験を入れるよさは？', '自分の考えが伝わりやすくなる', ['文を短くできる', '発音をなくせる', '質問を減らせる'], '内容の具体化。'),
-    prompt('スピーチの書き出しを 自分の話題で言ってみよう。', 'Today, I want to talk about my hobby.', ['Today, I want to talk about my hobby.', 'I will hobby talk.', 'My hobby is talk today.'], 'Today, I want to talk about ... を使う。', {
+    prompt('スピーチの書き出しを 自分の話題で言ってみよう。', 'Today, I want to talk about my hobby.', ['Today, I will talk about my dream.', 'I want to introduce my school life today.', 'Let me talk about my town today.'], 'Today, I want to talk about ... を使う。', {
       speechPrompt: {
         expected: 'Today I want to talk about my hobby',
         alternates: ['Today, I want to talk about my dream', 'Today, I want to talk about my school life'],
@@ -191,7 +191,7 @@ export const ENGLISH_G9_UNIT_DATA: Record<string, GeneralProblem[]> = {
         examples: ['Today, I want to talk about my dream.', 'Today, I want to talk about my town.'],
       },
     }),
-    prompt('スピーチの結びを 自分の表現で言ってみよう。', 'Thank you for listening.', ['Thank you for listening.', 'Thanks for listening.', 'I am listening you.'], '終わりのあいさつ。', {
+    prompt('スピーチの結びを 自分の表現で言ってみよう。', 'Thank you for listening.', ['Thanks for listening.', 'Thank you very much for listening.', 'That is all.'], '終わりのあいさつ。', {
       speechPrompt: {
         expected: 'Thank you for listening',
         alternates: ['Thank you for listening.', 'Thanks for listening', 'Thank you very much for listening'],

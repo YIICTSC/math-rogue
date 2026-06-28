@@ -4,10 +4,12 @@ export interface EnglishWordItem {
   en: string;
   jp: string;
   hint?: string;
+  choiceGroup?: string;
   speech?: string;
   speechAlternates?: string[];
   exampleEn?: string;
   exampleJp?: string;
+  allowAutoExample?: boolean;
 }
 
 export interface EnglishResponseItem {
@@ -64,8 +66,11 @@ export const buildWordUnit = (
   const enableListening = options.enableListening !== false;
   const enableSpeaking = options.enableSpeaking === true;
   const enableSentenceExamples = options.enableSentenceExamples !== false;
-  const jpPool = items.map((item) => item.jp);
-  const enPool = items.map((item) => item.en);
+  const poolFor = (item: EnglishWordItem) => {
+    if (!item.choiceGroup) return items;
+    const grouped = items.filter((candidate) => candidate.choiceGroup === item.choiceGroup);
+    return grouped.length >= 4 ? grouped : items;
+  };
   const makeSpeechAlternates = (item: EnglishWordItem) => {
     const base = item.speech || item.en;
     const normalized = base.replace(/[.!?]/g, '');
@@ -79,6 +84,7 @@ export const buildWordUnit = (
 
   const problems: GeneralProblem[] = [];
   const buildExampleSentence = (item: EnglishWordItem) => {
+    if (item.allowAutoExample === false) return null;
     if (item.exampleEn && item.exampleJp) return { en: item.exampleEn, jp: item.exampleJp };
     const trimmed = item.en.replace(/[.!?]/g, '');
     if (/^\d+$/.test(item.jp)) {
@@ -106,6 +112,9 @@ export const buildWordUnit = (
   };
 
   items.forEach((item, index) => {
+    const itemPool = poolFor(item);
+    const jpPool = itemPool.map((candidate) => candidate.jp);
+    const enPool = itemPool.map((candidate) => candidate.en);
     problems.push({
         question: `「${item.en}」は 日本語で なんという？`,
         answer: item.jp,

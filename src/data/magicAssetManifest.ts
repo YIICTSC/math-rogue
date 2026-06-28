@@ -35,6 +35,7 @@ export const MAGIC_ASSET_PATHS = Array.from(new Set([
   ...MAGIC_BATTLE_BACKGROUND_SCENES.map(scene => scene.image),
   'sprites/magic/magic-heroines-cutout-preview.png',
   'sprites/magic/effects/transformation-sheet.webp',
+  'sprites/magic/events/forgotten-card.webp',
   'ui/magic/transformation-guide.png',
   'event-illustrations/magic-romance-select.webp',
   ...MAGIC_HEROES.flatMap(hero => {
