@@ -111,7 +111,7 @@ export const ENGLISH_G8_UNIT_DATA: Record<string, GeneralProblem[]> = {
   ENGLISH_G8_U08: cycleProblems([
     prompt('Ken is ___ than Tom.', 'taller', ['tall', 'tallest', 'more tall'], '比較級。', { audioPrompt: { text: 'Ken is taller than Tom.', lang: 'en-US', autoPlay: true } }),
     prompt('This is the most interesting book. の いみは？', 'これは いちばん おもしろい本です。', ['これは おもしろい本です。', 'これは もっとも新しい本です。', 'これは 本よりおもしろいです。'], '最上級。'),
-    prompt('Mt. Fuji is the ___ mountain in Japan.', 'highest', ['higher', 'high', 'most high'], '最上級。'),
+    prompt('Mt. Fuji is the ___ mountain in Japan.', 'highest', ['higher', 'high', 'highly'], '最上級。'),
     prompt('「My bag is bigger than yours.」を いってみよう。', 'My bag is bigger than yours.', ['My bag is biggest than yours.', 'My bag bigger yours.', 'My bag is big than yours.'], '比較級を発話。', { speechPrompt: { expected: 'My bag is bigger than yours', alternates: ['My bag is bigger than yours.'], lang: 'en-US', buttonLabel: '比較文を はなす' } }),
     prompt('This river is the ___ in the city.', 'longest', ['longer', 'long', 'most long'], '最上級。'),
     prompt('This smartphone is more useful than that one. の いみは？', 'このスマートフォンは あれより便利です。', ['このスマートフォンは あれより小さいです。', 'このスマートフォンは あれと同じです。', 'このスマートフォンは 古いです。'], '現代的な語彙。'),

@@ -100,7 +100,7 @@ export interface StorageTransferPayload {
     entries: Record<string, string>;
 }
 
-export type UiPreviewCheckTarget = 'pc' | 'mobileLandscape' | 'mobilePortrait';
+export type UiPreviewCheckTarget = 'pc' | 'mobileLandscape' | 'mobilePortrait' | 'buttonLayout';
 export type UiPreviewChecklist = Record<string, Partial<Record<UiPreviewCheckTarget, boolean>>>;
 
 /**

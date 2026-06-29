@@ -87,8 +87,13 @@ export const buildWordUnit = (
     if (item.allowAutoExample === false) return null;
     if (item.exampleEn && item.exampleJp) return { en: item.exampleEn, jp: item.exampleJp };
     const trimmed = item.en.replace(/[.!?]/g, '');
+    if (/^(hello|good morning|goodbye|thank you|see you|nice to meet you|good afternoon|good night|see you tomorrow|you are welcome)$/i.test(trimmed)) {
+      const withName = /^(hello|good morning|good afternoon)$/i.test(trimmed);
+      return { en: withName ? `${trimmed}, Ken.` : `${trimmed}.`, jp: `${item.jp} という あいさつです。` };
+    }
     if (/^\d+$/.test(item.jp)) {
-      return { en: `I have ${trimmed} books.`, jp: `わたしは ${item.jp}さつの 本を もっています。` };
+      const bookNoun = item.jp === '1' ? 'book' : 'books';
+      return { en: `I have ${trimmed} ${bookNoun}.`, jp: `わたしは ${item.jp}さつの 本を もっています。` };
     }
     if (trimmed.includes("o'clock") || trimmed.includes('half past') || trimmed.startsWith('It is ')) {
       return { en: trimmed.startsWith('It is ') ? trimmed : `It is ${trimmed}.`, jp: `${item.jp} を あらわす 文。` };
@@ -99,14 +104,33 @@ export const buildWordUnit = (
     if (/^(get up|eat breakfast|go to school|study|play|go to bed|brush my teeth|do homework)$/i.test(trimmed)) {
       return { en: `I ${trimmed} every day.`, jp: `わたしは 毎日 ${item.jp}。` };
     }
-    if (/^(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday|January|February|March|April|May|June|July|August|September|October|November|December)$/i.test(trimmed)) {
-      return { en: `I like ${trimmed}.`, jp: `文の中で ${item.jp} が 出てくる。` };
+    if (/^(Monday|Tuesday|Wednesday|Thursday|Friday|Saturday|Sunday)$/i.test(trimmed)) {
+      return { en: `Today is ${trimmed}.`, jp: `きょうは ${item.jp}です。` };
     }
-    if (/^(red|blue|yellow|green|black|white|pink|orange|brown|purple)$/i.test(trimmed)) {
+    if (/^(January|February|March|April|May|June|July|August|September|October|November|December)$/i.test(trimmed)) {
+      return { en: `My birthday is in ${trimmed}.`, jp: `わたしの たんじょうびは ${item.jp}です。` };
+    }
+    if (/^(father|mother|brother|sister|grandfather|grandmother|family|friend)$/i.test(trimmed)) {
+      return { en: `This is my ${trimmed}.`, jp: `こちらは わたしの ${item.jp}です。` };
+    }
+    if (/^(red|blue|yellow|green|black|white|pink|orange|brown|purple)$/i.test(trimmed) && /^(赤|青|黄色|緑|黒|白|ピンク|オレンジ|茶色|むらさき)$/.test(item.jp)) {
       return { en: `This is ${trimmed}.`, jp: `これは ${item.jp}です。` };
     }
+    if (/^(English|Japanese|math|science|music|art|P E|PE)$/i.test(trimmed)) {
+      return { en: `I study ${trimmed.replace(/^P E$/i, 'P.E.')}.`, jp: `わたしは ${item.jp}を べんきょうします。` };
+    }
+    if (/^(I|You|He|She|It|We|They|My|This|These|That|Those|What|How|Where|When|Who|Whose|Which|Do|Does|Did|Can|Could|Are|Is|Am|Please|Let|Go|Turn|Stand|Sit|Open|Close|Give|Take|Touch|Kimono|Origami|Tea|Cherry)$/i.test(trimmed.split(/\s+/)[0])) {
+      return null;
+    }
+    if (trimmed.includes(' ')) {
+      return null;
+    }
     if (/^[a-z][a-z ]+$/i.test(trimmed) && !trimmed.includes('I ') && !trimmed.includes('My ') && !trimmed.includes('This ') && !trimmed.includes('We ')) {
-      return { en: `I like ${trimmed}.`, jp: `わたしは ${item.jp}が すきです。` };
+      if (/^(milk|rice|juice|water|bread|tea|music|soccer|baseball|basketball|tennis|sushi|curry|ramen|salad|spaghetti)$/i.test(trimmed)) {
+        return { en: `I like ${trimmed}.`, jp: `わたしは ${item.jp}が すきです。` };
+      }
+      const article = /^[aeiou]/i.test(trimmed) ? 'an' : 'a';
+      return { en: `This is ${article} ${trimmed}.`, jp: `これは ${item.jp}です。` };
     }
     return null;
   };
@@ -157,10 +181,10 @@ export const buildWordUnit = (
       const example = buildExampleSentence(item);
       if (example) {
         problems.push({
-          question: `つぎの文の「${item.en}」に 近い いみは どれ？\n${example.en}`,
+          question: `つぎの文の「${item.en}」は 日本語で なんという？\n${example.en}`,
           answer: item.jp,
           options: d(item.jp, ...pickDistinct(jpPool, item.jp, index + 6, 3)),
-          hint: '単語が 文の中で どう使われるか見よう。',
+          hint: '文の中の英語と日本語を結びつけよう。',
           audioPrompt: { text: example.en, lang: 'en-US', autoPlay: false },
         });
       }

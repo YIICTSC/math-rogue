@@ -500,6 +500,8 @@ export interface DebugProblemUnitOption {
   name: string;
   mode: GameMode;
   modePool?: string[];
+  level: 'LOWER' | 'UPPER';
+  gradeLabel: string;
 }
 
 export interface DebugProblemUnitGroup {
@@ -511,30 +513,63 @@ export interface DebugProblemUnitGroup {
 const getDebugGradeLabel = (grade: number) => grade <= 6 ? `小${grade}` : `中${grade - 6}`;
 
 export const getDebugProblemUnitGroups = (): DebugProblemUnitGroup[] => {
-  const fromModeUnits = (units: Array<{ id: string; name: string; mode: string }>, prefix: string): DebugProblemUnitOption[] =>
-    units.map(unit => ({ id: `${prefix}-${unit.id}`, name: unit.name, mode: unit.mode as GameMode, modePool: [unit.mode] }));
+  const fromGradeModeUnits = (
+    entries: Array<[string, Array<{ id: string; name: string; mode: string }>]>,
+    prefix: string,
+  ): DebugProblemUnitOption[] =>
+    entries.flatMap(([grade, units]) => units.map(unit => ({
+      id: `${prefix}-${grade}-${unit.id}`,
+      name: `${getDebugGradeLabel(Number(grade))} / ${unit.name}`,
+      mode: unit.mode as GameMode,
+      modePool: [unit.mode],
+      level: 'LOWER',
+      gradeLabel: getDebugGradeLabel(Number(grade)),
+    })));
+  const fromScienceGradeUnits = (
+    entries: Array<[string, Array<{ id: string; name: string; mode: string }>]>,
+    prefix: string,
+    modePrefix: string,
+  ): DebugProblemUnitOption[] =>
+    entries.flatMap(([grade, units]) => units
+      .filter((unit) => unit.mode.startsWith(modePrefix))
+      .map(unit => ({
+        id: `${prefix}-${unit.id}`,
+        name: `${getDebugGradeLabel(Number(grade))} / ${unit.name}`,
+        mode: unit.mode as GameMode,
+        modePool: [unit.mode],
+        level: 'LOWER',
+        gradeLabel: getDebugGradeLabel(Number(grade)),
+      })));
   const fromPoolUnits = (entries: Array<[string, MathUnitOption[]]>, prefix: string): DebugProblemUnitOption[] =>
     entries.flatMap(([grade, units]) => units.map(unit => ({
       id: `${prefix}-${grade}-${unit.id}`,
       name: `${getDebugGradeLabel(Number(grade))} / ${unit.name}`,
       mode: (unit.modes[0] || GameMode.MATH_G1_1) as GameMode,
       modePool: unit.modes,
+      level: 'LOWER',
+      gradeLabel: getDebugGradeLabel(Number(grade)),
     })));
   const granularCategoryIds = new Set(['MATH_GRADES', 'KOKUGO_GRADES', 'ENGLISH', 'LIFE', 'SCIENCE', 'SOCIAL', 'SUMMARY']);
 
   return [
     { id: 'MATH_UNITS', name: '算数・数学（単元）', units: fromPoolUnits(Object.entries(MATH_GRADE_UNITS), 'math') },
     { id: 'KOKUGO_UNITS', name: '国語（単元）', units: fromPoolUnits(Object.entries(KOKUGO_GRADE_UNITS), 'kokugo') },
-    { id: 'ENGLISH_UNITS', name: '英語（単元）', units: fromModeUnits(Object.values(ENGLISH_GRADE_UNITS).flat(), 'english') },
-    { id: 'LIFE_UNITS', name: '生活（単元）', units: fromModeUnits(Object.values(SCIENCE_GRADE_UNITS).flat().filter((unit) => unit.mode.startsWith('LIFE_')), 'life') },
-    { id: 'SCIENCE_UNITS', name: '理科（単元）', units: fromModeUnits(Object.values(SCIENCE_GRADE_UNITS).flat().filter((unit) => unit.mode.startsWith('SCIENCE_')), 'science') },
-    { id: 'SOCIAL_UNITS', name: '社会（単元）', units: fromModeUnits(Object.values(SOCIAL_GRADE_UNITS).flat(), 'social') },
+    { id: 'ENGLISH_UNITS', name: '英語（単元）', units: fromGradeModeUnits(Object.entries(ENGLISH_GRADE_UNITS), 'english') },
+    { id: 'LIFE_UNITS', name: '生活（単元）', units: fromScienceGradeUnits(Object.entries(SCIENCE_GRADE_UNITS), 'life', 'LIFE_') },
+    { id: 'SCIENCE_UNITS', name: '理科（単元）', units: fromScienceGradeUnits(Object.entries(SCIENCE_GRADE_UNITS), 'science', 'SCIENCE_') },
+    { id: 'SOCIAL_UNITS', name: '社会（単元）', units: fromGradeModeUnits(Object.entries(SOCIAL_GRADE_UNITS), 'social') },
     ...SUBJECT_CATEGORIES
       .filter(category => !granularCategoryIds.has(category.id))
       .map(category => ({
         id: category.id,
         name: category.name,
-        units: category.subModes.map(unit => ({ id: `${category.id}-${unit.id}`, name: unit.name, mode: unit.mode })),
+        units: category.subModes.map(unit => ({ id: `${category.id}-${unit.id}`, name: unit.name, mode: unit.mode, level: 'LOWER', gradeLabel: '小中' })),
+      })),
+    ...UPPER_PROBLEM_CATEGORIES
+      .map(category => ({
+        id: category.id,
+        name: category.name,
+        units: category.subModes.map(unit => ({ id: `${category.id}-${unit.id}`, name: unit.name, mode: unit.mode, level: 'UPPER', gradeLabel: '高校以上' })),
       })),
   ].filter(group => group.units.length > 0);
 };

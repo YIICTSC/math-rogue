@@ -22,6 +22,7 @@ import { MAGIC_ART_CONSISTENCY_TARGETS } from '../data/magicArtConsistencyTarget
 import { assetUrl } from '../utils/assetPaths';
 import { UI_PREVIEW_GROUPS, UI_PREVIEW_SCREENS } from '../data/uiPreviewScreens';
 import { getDebugProblemUnitGroups } from './ProblemChallengeScreen';
+import { SUBJECT_DATA, type GeneralProblem } from '../data/subjectData';
 import { ELEMENTARY_EVENT_TITLES } from '../services/eventService';
 import React, { useMemo, useState, useCallback, useEffect, useRef } from 'react';
 
@@ -69,6 +70,98 @@ const HIGH_SCHOOL_HUMANOID_ACTIONS: { key: HighSchoolEnemyAction; label: string;
 ];
 
 const DEBUG_PROBLEM_UNIT_GROUPS = getDebugProblemUnitGroups();
+type ProblemDebugLevel = 'ALL' | 'LOWER' | 'UPPER';
+
+const DYNAMIC_MATH_DEBUG_META: Partial<Record<GameMode, { range: string; examples: Array<{ question: string; answer: string; options: string[] }> }>> = {
+    [GameMode.ADD_1DIGIT]: {
+        range: '1桁 + 1桁、繰り上がりなし。a=1〜8、b=1〜(9-a)。',
+        examples: [
+            { question: '1 + 1 = ?', answer: '2', options: ['2', '1', '3', '4'] },
+            { question: '4 + 5 = ?', answer: '9', options: ['9', '8', '10', '7'] },
+        ],
+    },
+    [GameMode.ADD_1DIGIT_CARRY]: {
+        range: '1桁 + 1桁、繰り上がりあり。a=1〜9、bは10-a以上〜9。',
+        examples: [
+            { question: '7 + 5 = ?', answer: '12', options: ['12', '11', '13', '10'] },
+            { question: '9 + 8 = ?', answer: '17', options: ['17', '16', '18', '15'] },
+        ],
+    },
+    [GameMode.SUB_1DIGIT]: {
+        range: '1桁 - 1桁、繰り下がりなし。a=1〜9、b=1〜a。',
+        examples: [
+            { question: '9 - 4 = ?', answer: '5', options: ['5', '4', '6', '3'] },
+            { question: '6 - 6 = ?', answer: '0', options: ['0', '1', '2', '3'] },
+        ],
+    },
+    [GameMode.SUB_1DIGIT_BORROW]: {
+        range: '繰り下がりあり。答え=1〜9、b=1〜9、a=答え+b。aが10未満なら補正。',
+        examples: [
+            { question: '13 - 5 = ?', answer: '8', options: ['8', '7', '9', '6'] },
+            { question: '17 - 9 = ?', answer: '8', options: ['8', '9', '7', '6'] },
+        ],
+    },
+    [GameMode.ADDITION]: {
+        range: '2桁 + 2桁。a=10〜49、b=10〜49。',
+        examples: [
+            { question: '12 + 34 = ?', answer: '46', options: ['46', '45', '47', '41'] },
+            { question: '49 + 49 = ?', answer: '98', options: ['98', '97', '99', '93'] },
+        ],
+    },
+    [GameMode.SUBTRACTION]: {
+        range: '2桁 - 1〜2桁。a=20〜69、b=5〜a-6。',
+        examples: [
+            { question: '20 - 5 = ?', answer: '15', options: ['15', '14', '16', '10'] },
+            { question: '69 - 58 = ?', answer: '11', options: ['11', '10', '12', '9'] },
+        ],
+    },
+    [GameMode.MULTIPLICATION]: {
+        range: 'かけ算九九。1×1〜9×9。',
+        examples: [
+            { question: '1 × 1 = ?', answer: '1', options: ['1', '2', '3', '4'] },
+            { question: '9 × 9 = ?', answer: '81', options: ['81', '80', '82', '72'] },
+        ],
+    },
+    [GameMode.DIVISION]: {
+        range: '九九の逆算。割る数=2〜9、答え=1〜9、割られる数=割る数×答え。',
+        examples: [
+            { question: '18 ÷ 2 = ?', answer: '9', options: ['9', '8', '10', '7'] },
+            { question: '72 ÷ 8 = ?', answer: '9', options: ['9', '8', '7', '6'] },
+        ],
+    },
+    [GameMode.MIXED]: {
+        range: '2桁たし算、2桁ひき算、九九、わり算からランダム。',
+        examples: [
+            { question: '23 + 18 = ?', answer: '41', options: ['41', '40', '42', '39'] },
+            { question: '8 × 7 = ?', answer: '56', options: ['56', '54', '63', '48'] },
+        ],
+    },
+};
+
+type DebugProblemUnit = ReturnType<typeof getDebugProblemUnitGroups>[number]['units'][number];
+
+const getProblemDebugGradeLabel = (unit: Pick<DebugProblemUnit, 'name' | 'gradeLabel'> | string): string => {
+    if (typeof unit !== 'string') return unit.gradeLabel;
+    const unitName = unit;
+    const lowerMatch = unitName.match(/(小\d|中\d)/);
+    if (lowerMatch) return lowerMatch[1];
+    const gradeMatch = unitName.match(/小学(\d)年|中学(\d)年/);
+    if (gradeMatch) return gradeMatch[1] ? `小${gradeMatch[1]}` : `中${gradeMatch[2]}`;
+    return '高校以上';
+};
+
+const getProblemDebugModeList = (unit: { mode: GameMode; modePool?: string[] }) =>
+    unit.modePool && unit.modePool.length > 0 ? unit.modePool : [unit.mode];
+
+const getProblemsForDebugUnit = (unit: { mode: GameMode; modePool?: string[] }): GeneralProblem[] =>
+    getProblemDebugModeList(unit).flatMap(mode => SUBJECT_DATA[mode] || []);
+
+const formatProblemDebugCopyLine = (
+    groupName: string,
+    unit: DebugProblemUnit,
+    problemCount: number,
+) => `${groupName}\t${getProblemDebugGradeLabel(unit)}\t${unit.name}\t${getProblemDebugModeList(unit).join(',')}\t${problemCount}問`;
+
 const DEBUG_EVENT_GROUPS: Array<{ id: VisualThemeId; name: string; titles: string[] }> = [
     { id: 'elementary', name: '小学生編', titles: [...ELEMENTARY_EVENT_TITLES] },
     { id: 'high-school', name: '高校編', titles: HIGH_SCHOOL_EVENT_THEMES.map(event => event.title) },
@@ -78,6 +171,7 @@ const UI_PREVIEW_CHECK_TARGETS: Array<{ id: UiPreviewCheckTarget; label: string 
     { id: 'pc', label: 'PC' },
     { id: 'mobileLandscape', label: 'スマホ横' },
     { id: 'mobilePortrait', label: '縦画面' },
+    { id: 'buttonLayout', label: 'ボタン配置' },
 ];
 
 const MAGIC_VOICE_CHARACTERS = [
@@ -152,7 +246,7 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
     languageMode: initialLanguageMode,
     focusedUiPreviewScreenId
 }) => {
-    const [activeTab, setActiveTab] = useState<'CARDS' | 'RELICS' | 'POTIONS' | 'SYNTHESIS' | 'SYSTEM' | 'UI_PREVIEW' | 'EFFECTS' | 'MAGIC_VOICES' | 'MAGIC_ART_AUDIT' | 'EVENTS' | 'HUMANOID_SPRITES' | 'TRANSLATION'>(focusedUiPreviewScreenId ? 'UI_PREVIEW' : 'CARDS');
+    const [activeTab, setActiveTab] = useState<'CARDS' | 'RELICS' | 'POTIONS' | 'SYNTHESIS' | 'SYSTEM' | 'UI_PREVIEW' | 'PROBLEM_DEBUG' | 'EFFECTS' | 'MAGIC_VOICES' | 'MAGIC_ART_AUDIT' | 'EVENTS' | 'HUMANOID_SPRITES' | 'TRANSLATION'>(focusedUiPreviewScreenId ? 'UI_PREVIEW' : 'CARDS');
     const focusedUiPreviewItemRef = useRef<HTMLDivElement | null>(null);
     const [searchTerm, setSearchTerm] = useState("");
     const [debugLanguageMode, setDebugLanguageMode] = useState<LanguageMode>(initialLanguageMode);
@@ -178,6 +272,12 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
     const [addHolographicCards, setAddHolographicCards] = useState(false);
     const [debugProblemGroupId, setDebugProblemGroupId] = useState(DEBUG_PROBLEM_UNIT_GROUPS[0]?.id ?? '');
     const [debugProblemUnitId, setDebugProblemUnitId] = useState(DEBUG_PROBLEM_UNIT_GROUPS[0]?.units[0]?.id ?? '');
+    const [problemDebugLevel, setProblemDebugLevel] = useState<ProblemDebugLevel>('ALL');
+    const [problemDebugGrade, setProblemDebugGrade] = useState('ALL');
+    const [problemDebugSearch, setProblemDebugSearch] = useState('');
+    const [problemDebugDetailUnitId, setProblemDebugDetailUnitId] = useState<string | null>(null);
+    const [problemDebugFixUnitIds, setProblemDebugFixUnitIds] = useState<string[]>([]);
+    const [problemDebugFixCopied, setProblemDebugFixCopied] = useState(false);
     const [debugEventTheme, setDebugEventTheme] = useState<VisualThemeId>('elementary');
     const [debugEventTitle, setDebugEventTitle] = useState(DEBUG_EVENT_GROUPS[0]?.titles[0] ?? '');
     const [uiPreviewChecklist, setUiPreviewChecklist] = useState<UiPreviewChecklist>(() => storageService.getUiPreviewChecklist());
@@ -206,6 +306,59 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
     const debugProblemUnit = debugProblemGroup?.units.find(unit => unit.id === debugProblemUnitId) ?? debugProblemGroup?.units[0];
     const debugEventGroup = DEBUG_EVENT_GROUPS.find(group => group.id === debugEventTheme) ?? DEBUG_EVENT_GROUPS[0];
     const selectedDebugEventTitle = debugEventGroup?.titles.includes(debugEventTitle) ? debugEventTitle : debugEventGroup?.titles[0] ?? '';
+    const problemDebugGroupOptions = useMemo(() => (
+        DEBUG_PROBLEM_UNIT_GROUPS.filter(group =>
+            problemDebugLevel === 'ALL' || group.units.some(unit => unit.level === problemDebugLevel)
+        )
+    ), [problemDebugLevel]);
+    const problemDebugGroup = problemDebugGroupOptions.find(group => group.id === debugProblemGroupId) ?? problemDebugGroupOptions[0] ?? DEBUG_PROBLEM_UNIT_GROUPS[0];
+    const problemDebugGradeOptions = useMemo(() => {
+        const labels = new Set((problemDebugGroup?.units ?? [])
+            .filter(unit => problemDebugLevel === 'ALL' || unit.level === problemDebugLevel)
+            .map(unit => getProblemDebugGradeLabel(unit)));
+        return ['ALL', ...Array.from(labels).sort((a, b) => a.localeCompare(b, 'ja'))];
+    }, [problemDebugGroup, problemDebugLevel]);
+    const filteredProblemDebugUnits = useMemo(() => {
+        const normalizedSearch = problemDebugSearch.trim().toLowerCase();
+        return (problemDebugGroup?.units ?? []).filter(unit => {
+            if (problemDebugLevel !== 'ALL' && unit.level !== problemDebugLevel) return false;
+            if (problemDebugGrade !== 'ALL' && getProblemDebugGradeLabel(unit) !== problemDebugGrade) return false;
+            if (!normalizedSearch) return true;
+            const haystack = [
+                problemDebugGroup?.name ?? '',
+                unit.name,
+                unit.mode,
+                ...(unit.modePool ?? []),
+            ].join(' ').toLowerCase();
+            return haystack.includes(normalizedSearch);
+        });
+    }, [problemDebugGrade, problemDebugGroup, problemDebugSearch]);
+    const selectedProblemDebugUnit = (
+        problemDebugGroup?.units.find(unit => unit.id === problemDebugDetailUnitId)
+        ?? filteredProblemDebugUnits[0]
+        ?? problemDebugGroup?.units[0]
+    );
+    const selectedProblemDebugProblems = useMemo(() => (
+        selectedProblemDebugUnit ? getProblemsForDebugUnit(selectedProblemDebugUnit) : []
+    ), [selectedProblemDebugUnit]);
+    const selectedProblemDebugDynamicMeta = selectedProblemDebugUnit ? DYNAMIC_MATH_DEBUG_META[selectedProblemDebugUnit.mode] : undefined;
+    const problemDebugFixText = useMemo(() => {
+        const selected = new Set(problemDebugFixUnitIds);
+        return DEBUG_PROBLEM_UNIT_GROUPS.flatMap(group => (
+            group.units
+                .filter(unit => selected.has(unit.id))
+                .map(unit => formatProblemDebugCopyLine(group.name, unit, getProblemsForDebugUnit(unit).length))
+        )).join('\n');
+    }, [problemDebugFixUnitIds]);
+
+    useEffect(() => {
+        if (!problemDebugGroupOptions.length) return;
+        if (problemDebugGroupOptions.some(group => group.id === debugProblemGroupId)) return;
+        setDebugProblemGroupId(problemDebugGroupOptions[0].id);
+        setDebugProblemUnitId(problemDebugGroupOptions[0].units[0]?.id ?? '');
+        setProblemDebugDetailUnitId(null);
+        setProblemDebugGrade('ALL');
+    }, [debugProblemGroupId, problemDebugGroupOptions]);
 
     const allCards = useMemo(() => Object.values(CARDS_LIBRARY).sort((a, b) => a.type.localeCompare(b.type) || a.cost - b.cost), []);
     const allRelics = useMemo(() => Object.values(RELIC_LIBRARY), []);
@@ -416,6 +569,21 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
         setTimeout(() => setCopied(false), 2000);
     };
 
+    const toggleProblemDebugFixUnit = (unitId: string) => {
+        setProblemDebugFixUnitIds(prev => {
+            if (prev.includes(unitId)) return prev.filter(id => id !== unitId);
+            return [...prev, unitId].sort();
+        });
+        setProblemDebugFixCopied(false);
+    };
+
+    const copyProblemDebugFixUnits = async () => {
+        if (!problemDebugFixText) return;
+        await navigator.clipboard.writeText(problemDebugFixText);
+        setProblemDebugFixCopied(true);
+        window.setTimeout(() => setProblemDebugFixCopied(false), 1600);
+    };
+
     const playEffectPreview = (effectKey: AttackEffectKey) => {
         audioService.playAttackEffectSound(effectKey);
         const token = Date.now();
@@ -567,6 +735,7 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
                         <button onClick={() => setActiveTab('SYNTHESIS')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'SYNTHESIS' ? 'bg-purple-900 text-white' : 'text-purple-400 hover:bg-gray-750'}`}>合成</button>
                         <button onClick={() => setActiveTab('SYSTEM')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'SYSTEM' ? 'bg-indigo-900 text-white' : 'text-indigo-400 hover:bg-gray-750'}`}>システム</button>
                         <button onClick={() => setActiveTab('UI_PREVIEW')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'UI_PREVIEW' ? 'bg-sky-900 text-white' : 'text-sky-400 hover:bg-gray-750'}`}>UI実寸</button>
+                        <button onClick={() => setActiveTab('PROBLEM_DEBUG')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'PROBLEM_DEBUG' ? 'bg-lime-900 text-white' : 'text-lime-400 hover:bg-gray-750'}`}>問題デバッグ</button>
                         <button onClick={() => setActiveTab('EFFECTS')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'EFFECTS' ? 'bg-orange-900 text-white' : 'text-orange-400 hover:bg-gray-750'}`}>エフェクト</button>
                         <button onClick={() => setActiveTab('MAGIC_VOICES')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'MAGIC_VOICES' ? 'bg-fuchsia-900 text-white' : 'text-fuchsia-400 hover:bg-gray-750'}`}>マジック声</button>
                         <button onClick={() => setActiveTab('MAGIC_ART_AUDIT')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'MAGIC_ART_AUDIT' ? 'bg-pink-900 text-white' : 'text-pink-400 hover:bg-gray-750'}`}>魔法絵不整合</button>
@@ -822,6 +991,306 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
                                         </div>
                                     ))}
                                 </div>
+                            </div>
+                        )}
+
+                        {activeTab === 'PROBLEM_DEBUG' && (
+                            <div className="space-y-4">
+                                <div className="rounded-xl border border-lime-700/70 bg-lime-950/25 p-4">
+                                    <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+                                        <div>
+                                            <h3 className="flex items-center gap-2 text-sm font-black text-lime-200">
+                                                <BookOpen size={18} /> 問題デバッグ
+                                            </h3>
+                                            <p className="mt-1 text-xs leading-relaxed text-gray-300">
+                                                小中学校・高校以上の単元別に、出題される問題、選択肢、答え、動的生成問題の範囲と例を確認します。
+                                            </p>
+                                        </div>
+                                        <div className="flex flex-wrap gap-2 text-[10px] font-black">
+                                            <span className="rounded-full border border-lime-500/60 bg-black/40 px-3 py-1 text-lime-200">
+                                                表示単元 {filteredProblemDebugUnits.length}
+                                            </span>
+                                            <span className="rounded-full border border-rose-500/60 bg-black/40 px-3 py-1 text-rose-200">
+                                                修正チェック {problemDebugFixUnitIds.length}
+                                            </span>
+                                        </div>
+                                    </div>
+
+                                    <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-[0.8fr_1fr_0.8fr_1.2fr]">
+                                        <label className="flex flex-col gap-1 text-[10px] font-bold text-gray-400">
+                                            区分
+                                            <select
+                                                value={problemDebugLevel}
+                                                onChange={(event) => {
+                                                    setProblemDebugLevel(event.target.value as ProblemDebugLevel);
+                                                    setProblemDebugGrade('ALL');
+                                                    setProblemDebugDetailUnitId(null);
+                                                }}
+                                                className="rounded-lg border border-lime-700 bg-slate-950 px-3 py-2 text-xs font-bold text-white"
+                                            >
+                                                <option value="ALL">すべて</option>
+                                                <option value="LOWER">小中学校</option>
+                                                <option value="UPPER">高校以上</option>
+                                            </select>
+                                        </label>
+                                        <label className="flex flex-col gap-1 text-[10px] font-bold text-gray-400">
+                                            教科・領域
+                                            <select
+                                                value={problemDebugGroup?.id ?? ''}
+                                                onChange={(event) => {
+                                                    const nextGroup = DEBUG_PROBLEM_UNIT_GROUPS.find(group => group.id === event.target.value);
+                                                    setDebugProblemGroupId(event.target.value);
+                                                    setDebugProblemUnitId(nextGroup?.units[0]?.id ?? '');
+                                                    setProblemDebugGrade('ALL');
+                                                    setProblemDebugDetailUnitId(null);
+                                                }}
+                                                className="rounded-lg border border-lime-700 bg-slate-950 px-3 py-2 text-xs font-bold text-white"
+                                            >
+                                                {problemDebugGroupOptions.map(group => (
+                                                    <option key={group.id} value={group.id}>{group.name}</option>
+                                                ))}
+                                            </select>
+                                        </label>
+                                        <label className="flex flex-col gap-1 text-[10px] font-bold text-gray-400">
+                                            学年
+                                            <select
+                                                value={problemDebugGrade}
+                                                onChange={(event) => {
+                                                    setProblemDebugGrade(event.target.value);
+                                                    setProblemDebugDetailUnitId(null);
+                                                }}
+                                                className="rounded-lg border border-lime-700 bg-slate-950 px-3 py-2 text-xs font-bold text-white"
+                                            >
+                                                {problemDebugGradeOptions.map(grade => (
+                                                    <option key={grade} value={grade}>{grade === 'ALL' ? 'すべて' : grade}</option>
+                                                ))}
+                                            </select>
+                                        </label>
+                                        <label className="flex flex-col gap-1 text-[10px] font-bold text-gray-400">
+                                            検索
+                                            <input
+                                                value={problemDebugSearch}
+                                                onChange={(event) => {
+                                                    setProblemDebugSearch(event.target.value);
+                                                    setProblemDebugDetailUnitId(null);
+                                                }}
+                                                placeholder="単元名・モードID"
+                                                className="rounded-lg border border-lime-700 bg-slate-950 px-3 py-2 text-xs font-bold text-white outline-none focus:border-lime-300"
+                                            />
+                                        </label>
+                                    </div>
+                                </div>
+
+                                {problemDebugDetailUnitId && selectedProblemDebugUnit ? (
+                                    <div className="rounded-xl border border-slate-700 bg-slate-950/60 p-4">
+                                        <div className="mb-4 flex flex-col gap-3 border-b border-slate-700 pb-3 md:flex-row md:items-start md:justify-between">
+                                            <div>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => setProblemDebugDetailUnitId(null)}
+                                                    className="mb-2 rounded border border-slate-600 bg-slate-800 px-3 py-1 text-xs font-black text-slate-100 hover:bg-slate-700"
+                                                >
+                                                    ← 単元一覧へ戻る
+                                                </button>
+                                                <h4 className="text-base font-black text-lime-100">{selectedProblemDebugUnit.name}</h4>
+                                                <div className="mt-1 text-[10px] font-mono text-slate-400">
+                                                    {problemDebugGroup?.name} / {getProblemDebugGradeLabel(selectedProblemDebugUnit)} / {getProblemDebugModeList(selectedProblemDebugUnit).join(', ')}
+                                                </div>
+                                            </div>
+                                            <label className="flex cursor-pointer items-center gap-2 rounded-lg border border-rose-700 bg-rose-950/30 px-3 py-2 text-xs font-black text-rose-100">
+                                                <input
+                                                    type="checkbox"
+                                                    checked={problemDebugFixUnitIds.includes(selectedProblemDebugUnit.id)}
+                                                    onChange={() => toggleProblemDebugFixUnit(selectedProblemDebugUnit.id)}
+                                                />
+                                                修正が必要
+                                            </label>
+                                        </div>
+
+                                        <div className="mb-4 grid grid-cols-1 gap-3 md:grid-cols-3">
+                                            <div className="rounded-lg border border-slate-700 bg-black/30 p-3">
+                                                <div className="text-[10px] font-bold text-slate-500">出題問題数</div>
+                                                <div className="mt-1 text-2xl font-black text-white">{selectedProblemDebugProblems.length}</div>
+                                            </div>
+                                            <div className="rounded-lg border border-slate-700 bg-black/30 p-3">
+                                                <div className="text-[10px] font-bold text-slate-500">生成問題</div>
+                                                <div className="mt-1 text-sm font-black text-white">{selectedProblemDebugDynamicMeta ? 'あり' : 'なし'}</div>
+                                            </div>
+                                            <div className="rounded-lg border border-slate-700 bg-black/30 p-3">
+                                                <div className="text-[10px] font-bold text-slate-500">選択肢不足</div>
+                                                <div className="mt-1 text-sm font-black text-white">
+                                                    {selectedProblemDebugProblems.filter(problem => !problem.options || problem.options.length < 4).length} 件
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        {selectedProblemDebugDynamicMeta && (
+                                            <section className="mb-4 rounded-xl border border-amber-700/70 bg-amber-950/20 p-3">
+                                                <h5 className="mb-2 text-xs font-black text-amber-200">生成問題の出題範囲</h5>
+                                                <p className="text-xs leading-relaxed text-amber-50/90">{selectedProblemDebugDynamicMeta.range}</p>
+                                                <div className="mt-3 grid grid-cols-1 gap-2 md:grid-cols-2">
+                                                    {selectedProblemDebugDynamicMeta.examples.map((example, index) => (
+                                                        <div key={index} className="rounded-lg border border-amber-800 bg-black/30 p-2 text-xs">
+                                                            <div className="font-mono text-white">{example.question}</div>
+                                                            <div className="mt-1 text-amber-200">答え: {example.answer}</div>
+                                                            <div className="mt-1 text-slate-400">選択肢: {example.options.join(' / ')}</div>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            </section>
+                                        )}
+
+                                        <section className="rounded-xl border border-slate-700 bg-black/25">
+                                            <div className="border-b border-slate-700 px-3 py-2 text-xs font-black text-slate-200">
+                                                出題例・問題一覧
+                                            </div>
+                                            <div className="max-h-[560px] overflow-y-auto custom-scrollbar">
+                                                {selectedProblemDebugProblems.length === 0 && !selectedProblemDebugDynamicMeta && (
+                                                    <div className="p-4 text-sm text-slate-400">この単元の静的問題データは見つかりません。</div>
+                                                )}
+                                                {selectedProblemDebugProblems.map((problem, index) => (
+                                                    <div key={`${problem.question}-${index}`} className="border-b border-slate-800 p-3 last:border-b-0">
+                                                        <div className="mb-1 flex flex-wrap items-center gap-2 text-[10px] font-black text-slate-500">
+                                                            <span>#{index + 1}</span>
+                                                            {problem.unitLabel && <span className="rounded bg-slate-800 px-2 py-0.5 text-slate-300">{problem.unitLabel}</span>}
+                                                            {problem.passageTitle && <span className="rounded bg-indigo-950 px-2 py-0.5 text-indigo-200">{problem.passageTitle}</span>}
+                                                            {problem.visual && <span className="rounded bg-cyan-950 px-2 py-0.5 text-cyan-200">visual</span>}
+                                                            {problem.audioPrompt && <span className="rounded bg-purple-950 px-2 py-0.5 text-purple-200">audio</span>}
+                                                            {problem.speechPrompt && <span className="rounded bg-emerald-950 px-2 py-0.5 text-emerald-200">speech</span>}
+                                                        </div>
+                                                        {problem.passage && (
+                                                            <pre className="mb-2 whitespace-pre-wrap rounded border border-slate-800 bg-slate-950 p-2 text-[11px] leading-relaxed text-slate-300">{problem.passage}</pre>
+                                                        )}
+                                                        <div className="whitespace-pre-wrap text-sm font-bold leading-relaxed text-white">{problem.question}</div>
+                                                        <div className="mt-2 grid grid-cols-1 gap-1 md:grid-cols-2">
+                                                            {(problem.options || []).map((option, optionIndex) => (
+                                                                <div
+                                                                    key={`${option}-${optionIndex}`}
+                                                                    className={`rounded border px-2 py-1 text-xs ${option === problem.answer ? 'border-lime-400 bg-lime-950/50 text-lime-100' : 'border-slate-700 bg-slate-900 text-slate-300'}`}
+                                                                >
+                                                                    {optionIndex + 1}. {option}
+                                                                </div>
+                                                            ))}
+                                                        </div>
+                                                        <div className="mt-2 text-xs font-black text-lime-300">答え: {problem.answer}</div>
+                                                        {problem.hint && <div className="mt-1 text-[11px] text-slate-400">ヒント: {problem.hint}</div>}
+                                                        {problem.visual && <pre className="mt-2 overflow-x-auto rounded bg-slate-950 p-2 text-[10px] text-cyan-200">{JSON.stringify(problem.visual, null, 2)}</pre>}
+                                                        {problem.speechPrompt?.examples && (
+                                                            <div className="mt-2 text-[11px] text-emerald-200">
+                                                                発話例: {problem.speechPrompt.examples.join(' / ')}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                ))}
+                                            </div>
+                                        </section>
+                                    </div>
+                                ) : (
+                                    <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1.2fr)_minmax(320px,0.8fr)]">
+                                        <section className="rounded-xl border border-slate-700 bg-slate-950/55">
+                                            <div className="flex items-center justify-between gap-3 border-b border-slate-700 px-3 py-2">
+                                                <h4 className="text-xs font-black text-slate-200">単元一覧</h4>
+                                                <div className="text-[10px] text-slate-500">{problemDebugGroup?.name}</div>
+                                            </div>
+                                            <div className="max-h-[620px] overflow-y-auto custom-scrollbar">
+                                                {filteredProblemDebugUnits.map(unit => {
+                                                    const problemCount = getProblemsForDebugUnit(unit).length;
+                                                    const dynamicMeta = DYNAMIC_MATH_DEBUG_META[unit.mode];
+                                                    const checked = problemDebugFixUnitIds.includes(unit.id);
+                                                    return (
+                                                        <div key={unit.id} className={`grid grid-cols-[auto_minmax(0,1fr)_auto] gap-3 border-b border-slate-800 p-3 last:border-b-0 ${checked ? 'bg-rose-950/25' : 'hover:bg-white/5'}`}>
+                                                            <label className="flex cursor-pointer items-start pt-1">
+                                                                <input
+                                                                    type="checkbox"
+                                                                    checked={checked}
+                                                                    onChange={() => toggleProblemDebugFixUnit(unit.id)}
+                                                                    aria-label={`${unit.name}を修正対象にする`}
+                                                                />
+                                                            </label>
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => {
+                                                                    setDebugProblemUnitId(unit.id);
+                                                                    setProblemDebugDetailUnitId(unit.id);
+                                                                }}
+                                                                className="min-w-0 text-left"
+                                                            >
+                                                                <div className="text-sm font-black text-white">{unit.name}</div>
+                                                                <div className="mt-1 flex flex-wrap gap-1 text-[10px] font-bold">
+                                                                    <span className="rounded bg-slate-800 px-2 py-0.5 text-slate-300">{getProblemDebugGradeLabel(unit)}</span>
+                                                                    <span className="rounded bg-slate-800 px-2 py-0.5 text-slate-300">{getProblemDebugModeList(unit).join(', ')}</span>
+                                                                    {dynamicMeta && <span className="rounded bg-amber-900 px-2 py-0.5 text-amber-100">生成あり</span>}
+                                                                </div>
+                                                            </button>
+                                                            <div className="flex flex-col items-end justify-center gap-1 text-right">
+                                                                <div className="text-lg font-black text-lime-200">{problemCount}</div>
+                                                                <div className="text-[10px] text-slate-500">問</div>
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                })}
+                                                {filteredProblemDebugUnits.length === 0 && (
+                                                    <div className="p-6 text-center text-sm text-slate-400">該当する単元がありません。</div>
+                                                )}
+                                            </div>
+                                        </section>
+
+                                        <section className="rounded-xl border border-rose-800/70 bg-rose-950/20 p-3">
+                                            <div className="mb-3 flex items-center justify-between gap-2">
+                                                <h4 className="text-xs font-black text-rose-200">修正が必要な単元</h4>
+                                                <button
+                                                    type="button"
+                                                    disabled={!problemDebugFixText}
+                                                    onClick={copyProblemDebugFixUnits}
+                                                    className="flex items-center gap-1 rounded border border-rose-400 bg-rose-700 px-3 py-1 text-[10px] font-black text-white hover:bg-rose-600 disabled:opacity-40"
+                                                >
+                                                    {problemDebugFixCopied ? <Check size={12} /> : <Copy size={12} />}
+                                                    {problemDebugFixCopied ? 'コピー済み' : 'コピー'}
+                                                </button>
+                                            </div>
+                                            <textarea
+                                                readOnly
+                                                value={problemDebugFixText}
+                                                placeholder="チェックした単元がここに TSV 形式でまとまります。"
+                                                className="h-64 w-full resize-none rounded border border-rose-900 bg-black/50 p-2 font-mono text-[10px] text-rose-100 outline-none"
+                                            />
+                                            <div className="mt-2 flex flex-wrap gap-2">
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        const visibleIds = filteredProblemDebugUnits.map(unit => unit.id);
+                                                        setProblemDebugFixUnitIds(prev => Array.from(new Set([...prev, ...visibleIds])).sort());
+                                                        setProblemDebugFixCopied(false);
+                                                    }}
+                                                    className="rounded border border-slate-600 bg-slate-800 px-3 py-1 text-[10px] font-bold text-slate-100 hover:bg-slate-700"
+                                                >
+                                                    表示中を全チェック
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        const visible = new Set(filteredProblemDebugUnits.map(unit => unit.id));
+                                                        setProblemDebugFixUnitIds(prev => prev.filter(id => !visible.has(id)));
+                                                        setProblemDebugFixCopied(false);
+                                                    }}
+                                                    className="rounded border border-slate-600 bg-slate-800 px-3 py-1 text-[10px] font-bold text-slate-100 hover:bg-slate-700"
+                                                >
+                                                    表示中を解除
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => {
+                                                        setProblemDebugFixUnitIds([]);
+                                                        setProblemDebugFixCopied(false);
+                                                    }}
+                                                    className="rounded border border-slate-600 bg-slate-800 px-3 py-1 text-[10px] font-bold text-slate-100 hover:bg-slate-700"
+                                                >
+                                                    全解除
+                                                </button>
+                                            </div>
+                                        </section>
+                                    </div>
+                                )}
                             </div>
                         )}
 

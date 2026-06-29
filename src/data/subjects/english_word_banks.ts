@@ -397,7 +397,7 @@ const G5_WORDS: EnglishWordItem[] = [
   word('Tuesday', '火曜日', '小5 曜日', 'We have music on Tuesday.', '火曜日に音楽があります。'),
   word('Wednesday', '水曜日', '小5 曜日', 'I play soccer on Wednesday.', '私は水曜日にサッカーをします。'),
   word('Thursday', '木曜日', '小5 曜日', 'Thursday is busy.', '木曜日は忙しいです。'),
-  word('Friday', '金曜日', '小5 曜日', 'I like Friday.', '私は金曜日が好きです。'),
+  word('Friday', '金曜日', '小5 曜日', 'Today is Friday.', '今日は金曜日です。'),
   word('Saturday', '土曜日', '小5 曜日', 'I go shopping on Saturday.', '私は土曜日に買い物へ行きます。'),
   word('Sunday', '日曜日', '小5 曜日', 'Sunday is my day off.', '日曜日は休みの日です。'),
   word('birthday', '誕生日', '小5 行事', 'When is your birthday?', 'あなたの誕生日はいつですか。'),
