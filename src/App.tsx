@@ -70,7 +70,7 @@ import { generateEvent, generateLegacyEvent } from './services/eventService';
 import { createAssignmentRewardCard, createHolographicCard, getUpgradedCard, synthesizeCards } from './utils/cardUtils';
 import { sanitizeEnglishText, trans } from './utils/textUtils';
 import { assetUrl } from './utils/assetPaths';
-import { getAssignmentEncodedFromUrl, getAssignmentFromUrl, getAssignmentModePool, getAssignmentRepresentativeMode, tryOpenOfflineAssignmentApp } from './utils/assignmentUtils';
+import { getAssignmentFromUrl, getAssignmentModePool, getAssignmentRepresentativeMode } from './utils/assignmentUtils';
 import { STUDENT_GRADE_OPTIONS, createDailyAssignment, getCurrentSchoolYear, isAdultProfile, promoteStudentProfileForSchoolYear } from './utils/dailyAssignmentUtils';
 import { getDifficultyConfig } from './config/difficulty';
 import { CARD_ERASER_TEMPLATE_ID, CARD_ERASER_NAME, eraseCardEffect, getErasableEffectOptions } from './utils/cardEraser';
@@ -995,12 +995,8 @@ const App: React.FC = () => {
     }, [gameState.screen, startGameAssetPreload]);
 
     useEffect(() => {
-        const encodedAssignment = getAssignmentEncodedFromUrl();
         const assignment = getAssignmentFromUrl();
         if (!assignment) return;
-        if (encodedAssignment && !isElectronApp) {
-            tryOpenOfflineAssignmentApp(encodedAssignment);
-        }
         storageService.saveCurrentAssignment(assignment);
         setCurrentAssignment(assignment);
         setAssignmentLetterSource('title');
@@ -1009,7 +1005,7 @@ const App: React.FC = () => {
         const url = new URL(window.location.href);
         url.searchParams.delete('assignment');
         window.history.replaceState({}, '', url.toString());
-    }, [isElectronApp]);
+    }, []);
 
     const markDailyAssignmentCompleted = useCallback((assignmentId: string | undefined) => {
         if (!assignmentId || !assignmentId.startsWith('daily-')) return;

@@ -1,7 +1,6 @@
 import { AssignmentPayload, AssignmentUnit, GameMode } from '../types';
 
 const ASSIGNMENT_PARAM = 'assignment';
-const OFFLINE_ASSIGNMENT_PROTOCOL = 'learning-rogue://assignment';
 
 const encodeBase64Url = (value: string) => {
   const bytes = new TextEncoder().encode(value);
@@ -56,24 +55,6 @@ export const getAssignmentFromUrl = () => {
 export const getAssignmentEncodedFromUrl = () => {
   if (typeof window === 'undefined') return null;
   return new URLSearchParams(window.location.search).get(ASSIGNMENT_PARAM);
-};
-
-export const createOfflineAssignmentLaunchUrl = (encodedAssignment: string) => {
-  const url = new URL(OFFLINE_ASSIGNMENT_PROTOCOL);
-  url.searchParams.set(ASSIGNMENT_PARAM, encodedAssignment);
-  return url.toString();
-};
-
-export const tryOpenOfflineAssignmentApp = (encodedAssignment: string) => {
-  if (typeof window === 'undefined' || !encodedAssignment) return;
-  const launchUrl = createOfflineAssignmentLaunchUrl(encodedAssignment);
-  const iframe = document.createElement('iframe');
-  iframe.style.display = 'none';
-  iframe.src = launchUrl;
-  document.body.appendChild(iframe);
-  window.setTimeout(() => {
-    iframe.remove();
-  }, 1500);
 };
 
 export const createAssignmentUrl = (assignment: AssignmentPayload) => {
