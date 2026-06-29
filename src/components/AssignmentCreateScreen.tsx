@@ -1,5 +1,5 @@
-import React, { useMemo, useState } from 'react';
-import { ArrowLeft, Clipboard, Copy, Plus, Send, Trash2 } from 'lucide-react';
+import React, { useMemo, useRef, useState } from 'react';
+import { ArrowLeft, Clipboard, Copy, Download, Plus, Send, Trash2, Upload } from 'lucide-react';
 import { AssignmentCustomProblem, AssignmentPayload, AssignmentUnit, AnswerMode, LanguageMode } from '../types';
 import { SUBJECT_CATEGORIES, SubjectCategoryConfig } from '../subjectConfig';
 import { SubjectCategoryType } from '../subjectConfig';
@@ -17,6 +17,11 @@ const isGradeUnitCategory = (categoryId: SubjectCategoryType) =>
   ['MATH_GRADES', 'KOKUGO_GRADES', 'ENGLISH', 'LIFE', 'SCIENCE', 'SOCIAL', 'SUMMARY'].includes(categoryId);
 const DEFAULT_TARGET_CORRECT = 10;
 const CUSTOM_OPTION_COUNT = 3;
+const CUSTOM_PROBLEM_TEMPLATE_HEADERS = ['問題文', '正解', '誤答候補1', '誤答候補2', '誤答候補3', 'メモ'];
+const CUSTOM_PROBLEM_TEMPLATE_ROWS = [
+  ['日本で一番高い山は？', '富士山', '北岳', '筑波山', '阿蘇山', 'メモ列は読み込みません'],
+  ['「apple」の意味は？', 'りんご', 'みかん', 'ぶどう', 'バナナ', ''],
+];
 
 const getDefaultDueAt = () => {
   const due = new Date();
@@ -26,6 +31,107 @@ const getDefaultDueAt = () => {
   const month = String(due.getMonth() + 1).padStart(2, '0');
   const day = String(due.getDate()).padStart(2, '0');
   return `${year}-${month}-${day}T23:59`;
+};
+
+const escapeCsvCell = (value: string) => `"${String(value).replace(/"/g, '""')}"`;
+
+const createCustomProblemTemplateCsv = () => {
+  const rows = [CUSTOM_PROBLEM_TEMPLATE_HEADERS, ...CUSTOM_PROBLEM_TEMPLATE_ROWS];
+  return `\uFEFF${rows.map((row) => row.map(escapeCsvCell).join(',')).join('\r\n')}`;
+};
+
+const parseDelimitedText = (text: string, delimiter: ',' | '\t') => {
+  const source = text.replace(/^\uFEFF/, '').replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+  const rows: string[][] = [];
+  let row: string[] = [];
+  let cell = '';
+  let inQuotes = false;
+
+  for (let index = 0; index < source.length; index += 1) {
+    const char = source[index];
+    const nextChar = source[index + 1];
+
+    if (char === '"') {
+      if (inQuotes && nextChar === '"') {
+        cell += '"';
+        index += 1;
+      } else {
+        inQuotes = !inQuotes;
+      }
+      continue;
+    }
+
+    if (!inQuotes && char === delimiter) {
+      row.push(cell.trim());
+      cell = '';
+      continue;
+    }
+
+    if (!inQuotes && char === '\n') {
+      row.push(cell.trim());
+      if (row.some((item) => item.length > 0)) rows.push(row);
+      row = [];
+      cell = '';
+      continue;
+    }
+
+    cell += char;
+  }
+
+  row.push(cell.trim());
+  if (row.some((item) => item.length > 0)) rows.push(row);
+  return rows;
+};
+
+const normalizeHeader = (value: string) => value.replace(/^\uFEFF/, '').replace(/[\s（）()_\-]/g, '').toLowerCase();
+
+const findColumnIndex = (headers: string[], aliases: string[]) => {
+  const normalizedAliases = aliases.map(normalizeHeader);
+  return headers.findIndex((header) => normalizedAliases.includes(normalizeHeader(header)));
+};
+
+const parseCustomProblemRows = (text: string) => {
+  const firstLine = text.replace(/^\uFEFF/, '').split(/\r?\n/).find((line) => line.trim()) || '';
+  const delimiter: ',' | '\t' = firstLine.includes('\t') ? '\t' : ',';
+  const rows = parseDelimitedText(text, delimiter);
+  if (rows.length === 0) return { problems: [] as AssignmentCustomProblem[], skipped: 0 };
+
+  const headerCandidate = rows[0];
+  const headerQuestionIndex = findColumnIndex(headerCandidate, ['問題文', '問題', 'question', 'q']);
+  const headerAnswerIndex = findColumnIndex(headerCandidate, ['正解', '答え', '解答', 'answer', 'a']);
+  const hasHeader = headerQuestionIndex >= 0 && headerAnswerIndex >= 0;
+  const questionIndex = hasHeader ? headerQuestionIndex : 0;
+  const answerIndex = hasHeader ? headerAnswerIndex : 1;
+  const optionIndexes = hasHeader
+    ? [
+      findColumnIndex(headerCandidate, ['誤答候補1', '誤答1', '選択肢1', 'option1', 'wrong1']),
+      findColumnIndex(headerCandidate, ['誤答候補2', '誤答2', '選択肢2', 'option2', 'wrong2']),
+      findColumnIndex(headerCandidate, ['誤答候補3', '誤答3', '選択肢3', 'option3', 'wrong3']),
+    ]
+    : [2, 3, 4];
+  const dataRows = hasHeader ? rows.slice(1) : rows;
+  const now = Date.now();
+  let skipped = 0;
+  const problems = dataRows.reduce<AssignmentCustomProblem[]>((acc, row, index) => {
+    const question = (row[questionIndex] || '').trim();
+    const answer = (row[answerIndex] || '').trim();
+    if (!question || !answer) {
+      skipped += 1;
+      return acc;
+    }
+    const rawOptions = optionIndexes.map((optionIndex) => (
+      optionIndex >= 0 ? (row[optionIndex] || '').trim() : ''
+    ));
+    acc.push({
+      id: `custom-import-${now}-${index}`,
+      question,
+      answer,
+      options: Array.from({ length: CUSTOM_OPTION_COUNT }, (_, optionIndex) => rawOptions[optionIndex] || ''),
+    });
+    return acc;
+  }, []);
+
+  return { problems, skipped };
 };
 
 const AssignmentCreateScreen: React.FC<AssignmentCreateScreenProps> = ({ onBack, languageMode }) => {
@@ -38,9 +144,12 @@ const AssignmentCreateScreen: React.FC<AssignmentCreateScreenProps> = ({ onBack,
   const [gameMode, setGameMode] = useState<'FREE' | 'CHALLENGE_ONLY'>('FREE');
   const [answerMode, setAnswerMode] = useState<AnswerMode>('CHOICE');
   const [customProblems, setCustomProblems] = useState<AssignmentCustomProblem[]>([]);
+  const [customTargetCorrect, setCustomTargetCorrect] = useState(DEFAULT_TARGET_CORRECT);
+  const [customImportNotice, setCustomImportNotice] = useState<{ type: 'success' | 'error'; message: string } | null>(null);
   const [copiedUrl, setCopiedUrl] = useState('');
   const [copyFailed, setCopyFailed] = useState(false);
   const [showUpperProblems, setShowUpperProblems] = useState(false);
+  const customProblemFileInputRef = useRef<HTMLInputElement | null>(null);
   const categories = useMemo<SubjectCategoryConfig[]>(() => {
     return showUpperProblems ? UPPER_PROBLEM_CATEGORIES : SUBJECT_CATEGORIES;
   }, [showUpperProblems]);
@@ -65,17 +174,26 @@ const AssignmentCreateScreen: React.FC<AssignmentCreateScreenProps> = ({ onBack,
     },
     [category.subModes, selectedCategoryId, selectedGrade],
   );
+  const validCustomProblems = useMemo(
+    () => customProblems.filter((problem) => problem.question.trim() && problem.answer.trim()),
+    [customProblems],
+  );
+  const validCustomProblemCount = validCustomProblems.length;
+  const effectiveCustomTargetCorrect = validCustomProblemCount > 0
+    ? Math.min(validCustomProblemCount, Math.max(1, Math.floor(customTargetCorrect || 1)))
+    : Math.max(1, Math.floor(customTargetCorrect || DEFAULT_TARGET_CORRECT));
 
   const assignment = useMemo<AssignmentPayload>(() => ({
     id: `assignment-${Date.now()}`,
     title: title.trim() || '学習ローグ課題',
     units: selectedUnits,
-    customProblems: customProblems.filter((problem) => problem.question.trim() && problem.answer.trim()),
+    customProblems: validCustomProblems,
+    customTargetCorrect: effectiveCustomTargetCorrect,
     dueAt,
     gameMode,
     answerMode,
     createdAt: new Date().toISOString(),
-  }), [answerMode, customProblems, dueAt, gameMode, selectedUnits, title]);
+  }), [answerMode, dueAt, effectiveCustomTargetCorrect, gameMode, selectedUnits, title, validCustomProblems]);
 
   const toggleUnit = (unit: AssignmentUnit) => {
     setSelectedUnits((prev) => (
@@ -98,6 +216,13 @@ const AssignmentCreateScreen: React.FC<AssignmentCreateScreenProps> = ({ onBack,
       ...prev,
       { id: `custom-${Date.now()}`, question: '', answer: '', options: Array(CUSTOM_OPTION_COUNT).fill('') },
     ]);
+    setCustomImportNotice(null);
+  };
+
+  const updateCustomTargetCorrect = (targetCorrect: number) => {
+    const maxTarget = validCustomProblemCount > 0 ? validCustomProblemCount : 999;
+    const normalizedTarget = Math.max(1, Math.min(maxTarget, Math.floor(targetCorrect || 1)));
+    setCustomTargetCorrect(normalizedTarget);
   };
 
   const updateCustomProblem = (id: string, patch: Partial<AssignmentCustomProblem>) => {
@@ -106,6 +231,43 @@ const AssignmentCreateScreen: React.FC<AssignmentCreateScreenProps> = ({ onBack,
       ...patch,
       options: patch.options ? patch.options.slice(0, CUSTOM_OPTION_COUNT) : problem.options,
     } : problem));
+  };
+
+  const downloadCustomProblemTemplate = () => {
+    const blob = new Blob([createCustomProblemTemplateCsv()], { type: 'text/csv;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const anchor = document.createElement('a');
+    anchor.href = url;
+    anchor.download = 'learning-rogue-original-problems-template.csv';
+    document.body.appendChild(anchor);
+    anchor.click();
+    document.body.removeChild(anchor);
+    URL.revokeObjectURL(url);
+    setCustomImportNotice({ type: 'success', message: 'テンプレートCSVをダウンロードしました。ExcelやGoogle Sheetsで編集できます。' });
+    audioService.playSound('select');
+  };
+
+  const importCustomProblemFile = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    try {
+      const text = await file.text();
+      const { problems, skipped } = parseCustomProblemRows(text);
+      if (problems.length === 0) {
+        setCustomImportNotice({ type: 'error', message: '読み込める問題がありません。問題文と正解の列を確認してください。' });
+        return;
+      }
+      setCustomProblems((prev) => [...prev, ...problems]);
+      setCustomImportNotice({
+        type: 'success',
+        message: `${problems.length}問を追加しました。${skipped > 0 ? `未入力行 ${skipped}件はスキップしました。` : ''}`,
+      });
+      audioService.playSound('select');
+    } catch (error) {
+      setCustomImportNotice({ type: 'error', message: 'ファイルの読み込みに失敗しました。CSVまたはTSV形式で保存してから読み込んでください。' });
+    } finally {
+      event.target.value = '';
+    }
   };
 
   const copyUrl = async () => {
@@ -255,33 +417,102 @@ const AssignmentCreateScreen: React.FC<AssignmentCreateScreenProps> = ({ onBack,
           <section className="assignment-create-side flex min-h-0 flex-col gap-3">
             <div className="assignment-create-selected rounded-xl border border-slate-700 bg-black/35 p-3">
               <div className="mb-2 flex items-center justify-between">
-                <div className="text-sm font-black text-cyan-200">選択中 {selectedUnits.length}件</div>
+                <div className="text-sm font-black text-cyan-200">
+                  選択中 単元{selectedUnits.length}件 / オリジナル{validCustomProblemCount}問
+                </div>
                 <button onClick={() => setSelectedUnits([])} className="text-xs font-bold text-slate-400 hover:text-white">解除</button>
               </div>
               <div className="max-h-32 overflow-y-auto text-xs text-slate-200 custom-scrollbar">
-                {selectedUnits.length === 0 ? <div className="text-slate-500">単元を選択してください</div> : selectedUnits.map((unit) => (
-                  <div key={unit.id} className="mb-2 rounded border border-slate-700 bg-slate-900/70 p-2">
-                    <div className="mb-1 font-bold text-slate-100">{unit.name}</div>
-                    <label className="flex items-center justify-between gap-2 text-[10px] text-slate-300">
-                      目標正答数
-                      <input
-                        type="number"
-                        min={1}
-                        max={999}
-                        value={unit.targetCorrect || DEFAULT_TARGET_CORRECT}
-                        onChange={(event) => updateUnitTarget(unit.id, Number(event.target.value))}
-                        className="w-20 rounded border border-slate-600 bg-black px-2 py-1 text-right text-xs font-black text-white"
-                      />
-                    </label>
-                  </div>
-                ))}
+                {selectedUnits.length === 0 && validCustomProblemCount === 0 ? (
+                  <div className="text-slate-500">単元またはオリジナル問題を選択してください</div>
+                ) : (
+                  <>
+                    {selectedUnits.map((unit) => (
+                      <div key={unit.id} className="mb-2 rounded border border-slate-700 bg-slate-900/70 p-2">
+                        <div className="mb-1 font-bold text-slate-100">{unit.name}</div>
+                        <label className="flex items-center justify-between gap-2 text-[10px] text-slate-300">
+                          目標正答数
+                          <input
+                            type="number"
+                            min={1}
+                            max={999}
+                            value={unit.targetCorrect || DEFAULT_TARGET_CORRECT}
+                            onChange={(event) => updateUnitTarget(unit.id, Number(event.target.value))}
+                            className="w-20 rounded border border-slate-600 bg-black px-2 py-1 text-right text-xs font-black text-white"
+                          />
+                        </label>
+                      </div>
+                    ))}
+                    {validCustomProblemCount > 0 && (
+                      <div className="mb-2 rounded border border-emerald-500/50 bg-emerald-950/30 p-2">
+                        <div className="mb-1 font-bold text-emerald-100">オリジナル問題: {validCustomProblemCount}問</div>
+                        <div className="text-[10px] text-emerald-200">目標正答数: {effectiveCustomTargetCorrect}問</div>
+                      </div>
+                    )}
+                  </>
+                )}
               </div>
             </div>
 
             <div className="assignment-create-custom flex min-h-0 flex-1 flex-col rounded-xl border border-slate-700 bg-black/35 p-3">
-              <button onClick={addCustomProblem} className="mb-2 flex items-center justify-center gap-2 rounded-lg border border-emerald-400 bg-emerald-500/15 px-3 py-2 text-xs font-black text-emerald-100">
-                <Plus size={14} /> オリジナル問題
-              </button>
+              <div className="mb-2 grid grid-cols-1 gap-2">
+                <button onClick={addCustomProblem} className="flex items-center justify-center gap-2 rounded-lg border border-emerald-400 bg-emerald-500/15 px-3 py-2 text-xs font-black text-emerald-100">
+                  <Plus size={14} /> オリジナル問題
+                </button>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={downloadCustomProblemTemplate}
+                    className="flex items-center justify-center gap-1 rounded-lg border border-cyan-400 bg-cyan-500/15 px-2 py-2 text-[10px] font-black text-cyan-100 hover:bg-cyan-500/25"
+                  >
+                    <Download size={13} /> テンプレートCSV
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => customProblemFileInputRef.current?.click()}
+                    className="flex items-center justify-center gap-1 rounded-lg border border-violet-400 bg-violet-500/15 px-2 py-2 text-[10px] font-black text-violet-100 hover:bg-violet-500/25"
+                  >
+                    <Upload size={13} /> CSV読込
+                  </button>
+                </div>
+                <input
+                  ref={customProblemFileInputRef}
+                  type="file"
+                  accept=".csv,.tsv,.txt,text/csv,text/tab-separated-values"
+                  onChange={importCustomProblemFile}
+                  className="hidden"
+                />
+                <div className="rounded border border-slate-700 bg-slate-950/80 p-2 text-[10px] leading-4 text-slate-300">
+                  Excel / Google Sheetsでテンプレートを編集し、CSVまたはTSVで保存して読み込めます。4択の場合は誤答候補1〜3を使います。
+                </div>
+                <div className="rounded border border-emerald-500/40 bg-emerald-950/25 p-2">
+                  <div className="mb-2 flex items-center justify-between gap-2 text-[10px] font-bold text-emerald-100">
+                    <span>送信対象: {validCustomProblemCount}問</span>
+                    <span>目標: {effectiveCustomTargetCorrect}問正解</span>
+                  </div>
+                  <label className="flex items-center justify-between gap-2 text-[10px] font-bold text-slate-200">
+                    オリジナル問題の目標正答数
+                    <input
+                      type="number"
+                      min={1}
+                      max={validCustomProblemCount > 0 ? validCustomProblemCount : 999}
+                      value={effectiveCustomTargetCorrect}
+                      onChange={(event) => updateCustomTargetCorrect(Number(event.target.value))}
+                      disabled={validCustomProblemCount === 0}
+                      className="w-20 rounded border border-slate-600 bg-black px-2 py-1 text-right text-xs font-black text-white disabled:cursor-not-allowed disabled:text-slate-500"
+                    />
+                  </label>
+                </div>
+                {customImportNotice && (
+                  <div className={`rounded border p-2 text-[10px] font-bold leading-4 ${
+                    customImportNotice.type === 'success'
+                      ? 'border-emerald-500/50 bg-emerald-950/35 text-emerald-100'
+                      : 'border-red-500/50 bg-red-950/35 text-red-100'
+                  }`}>
+                    {customImportNotice.message}
+                  </div>
+                )}
+              </div>
               <div className="min-h-0 flex-1 overflow-y-auto custom-scrollbar">
                 {customProblems.map((problem) => (
                   <div key={problem.id} className="mb-2 rounded-lg border border-slate-700 bg-slate-900/80 p-2">

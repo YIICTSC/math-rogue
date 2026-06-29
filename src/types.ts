@@ -768,6 +768,7 @@ export interface AssignmentPayload {
   title: string;
   units: AssignmentUnit[];
   customProblems: AssignmentCustomProblem[];
+  customTargetCorrect?: number;
   dueAt: string;
   gameMode: 'FREE' | 'CHALLENGE_ONLY';
   answerMode: AnswerMode;

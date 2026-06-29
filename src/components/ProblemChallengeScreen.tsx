@@ -642,6 +642,7 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
       assignment.id,
       assignment.units.map((unit) => unit.id).join(','),
       customProblems.map((problem) => problem.id).join(','),
+      String(assignment.customTargetCorrect || ''),
     ].join('|');
     if (appliedAssignmentSignatureRef.current === assignmentSignature) return;
     appliedAssignmentSignatureRef.current = assignmentSignature;

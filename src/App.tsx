@@ -99,6 +99,36 @@ const ASSIGNMENT_INTRO_BANNER_IMAGE = assetUrl('banners/daily-assignment-reward-
 const CROWDFUNDING_BANNER_END_AT = new Date('2026-06-20T23:59:59+09:00').getTime();
 const HOLOGRAPHIC_REWARD_CARD_CHANCE = 0.05;
 const VISUAL_THEMES: VisualThemeId[] = ['elementary', 'high-school', 'magic'];
+
+const isKanjiAssignment = (assignment: AssignmentPayload | null | undefined) => {
+    if (!assignment) return false;
+    return assignment.units.some((unit) => (
+        unit.name.includes('漢字')
+        || unit.id.includes('KANJI')
+        || unit.modes.some((mode) => String(mode).includes('KANJI') || String(mode).includes('KANKEN'))
+    ));
+};
+
+const getAssignmentAnswerModeSummary = (assignment: AssignmentPayload | null | undefined) => {
+    const answerModeLabel = assignment?.answerMode === 'INPUT' ? '入力' : '4択';
+    return `${isKanjiAssignment(assignment) ? '漢字の答え方' : '答え方'}: ${answerModeLabel}`;
+};
+
+const getAssignmentCustomTargetCorrect = (assignment: AssignmentPayload | null | undefined) => {
+    const customProblemCount = assignment?.customProblems?.length || 0;
+    if (customProblemCount <= 0) return 0;
+    return Math.min(customProblemCount, Math.max(1, Number(assignment?.customTargetCorrect || customProblemCount)));
+};
+
+const getAssignmentTargetSummary = (assignment: AssignmentPayload) => {
+    const unitSummaries = assignment.units.map(unit => `${unit.name} (${unit.targetCorrect || 10}問)`);
+    const customProblemCount = assignment.customProblems?.length || 0;
+    if (customProblemCount > 0) {
+        unitSummaries.push(`オリジナル問題 (${customProblemCount}問中 ${getAssignmentCustomTargetCorrect(assignment)}問正解)`);
+    }
+    return unitSummaries.join(' / ') || 'オリジナル問題';
+};
+
 type UiPreviewBattleConfig = {
     coop: boolean;
     participantCount: number;
@@ -1007,7 +1037,8 @@ const App: React.FC = () => {
                 .filter(answer => answer.correct && answer.mode === 'ASSIGNMENT_CUSTOM' && answer.problemId)
                 .map(answer => answer.problemId as string)
         );
-        const completedCustomProblems = (currentAssignment.customProblems || []).every(problem => correctCustomProblemIds.has(problem.id));
+        const completedCustomProblems = (currentAssignment.customProblems || []).length === 0
+            || correctCustomProblemIds.size >= getAssignmentCustomTargetCorrect(currentAssignment);
         return completedUnits && completedCustomProblems;
     }, [currentAssignment, currentUrlAssignmentAnswers]);
     const shouldPrioritizeCurrentAssignment = !!currentAssignment && !isCurrentUrlAssignmentComplete;
@@ -1058,6 +1089,7 @@ const App: React.FC = () => {
     }, [effectiveAssignment, getAssignmentUnitCorrectCount]);
     const remainingAssignmentCustomProblems = useMemo(() => {
         if (!effectiveAssignment) return [];
+        if (correctCustomAssignmentProblemIds.size >= getAssignmentCustomTargetCorrect(effectiveAssignment)) return [];
         return (effectiveAssignment.customProblems || []).filter(problem => !correctCustomAssignmentProblemIds.has(problem.id));
     }, [correctCustomAssignmentProblemIds, effectiveAssignment]);
     const isCurrentAssignmentComplete = !!effectiveAssignment
@@ -10608,8 +10640,7 @@ const App: React.FC = () => {
             if (result.problemId) {
                 prevCorrectProblemIds.add(result.problemId);
             }
-            const remainingCustomAfter = customProblems.filter(problem => !prevCorrectProblemIds.has(problem.id));
-            if (remainingCustomAfter.length === 0) {
+            if (prevCorrectProblemIds.size >= getAssignmentCustomTargetCorrect(assignment)) {
                 const remainingUnitsAfter = assignment.units.filter(unit => {
                     const unitCorrect = currentAssignmentAnswers.filter(answer => answer.correct && unit.modes.includes(answer.mode)).length;
                     return unitCorrect < Math.max(1, Number(unit.targetCorrect || 10));
@@ -10649,7 +10680,9 @@ const App: React.FC = () => {
                 const unitCorrect = currentAssignmentAnswers.filter(answer => answer.correct && unit.modes.includes(answer.mode)).length;
                 return unitCorrect < Math.max(1, Number(unit.targetCorrect || 10));
             });
-            const remainingCustomAfter = (assignment.customProblems || []).filter(problem => !correctCustomAssignmentProblemIds.has(problem.id));
+            const remainingCustomAfter = correctCustomAssignmentProblemIds.size >= getAssignmentCustomTargetCorrect(assignment)
+                ? []
+                : (assignment.customProblems || []).filter(problem => !correctCustomAssignmentProblemIds.has(problem.id));
             const isAssignmentComplete = remainingAfter.length === 0 && remainingCustomAfter.length === 0;
             let rewardCard: ICard | undefined;
             if (isAssignmentComplete && !storageService.hasClaimedAssignmentRewardCard(assignment.id)) {
@@ -12978,8 +13011,9 @@ const App: React.FC = () => {
                                         <div>{isTeacherAssignmentActive ? '先生から課題が届きました。' : '今日の学習課題です。'}</div>
                                         <div>期限: {assignmentLetter.dueAt ? new Date(assignmentLetter.dueAt).toLocaleString('ja-JP') : '未設定'}</div>
                                         <div>形式: {assignmentLetter.gameMode === 'FREE' ? 'フリー' : '問題チャレンジのみ'}</div>
+                                        <div>{getAssignmentAnswerModeSummary(assignmentLetter)}</div>
                                         <div className="mt-2 text-xs text-slate-700">
-                                            {assignmentLetter.units.map(unit => `${unit.name} (${unit.targetCorrect || 10}問)`).join(' / ') || 'オリジナル問題'}
+                                            {getAssignmentTargetSummary(assignmentLetter)}
                                         </div>
                                     </div>
                                     <div className="assignment-letter-actions grid gap-2 sm:grid-cols-3">
@@ -13443,8 +13477,9 @@ const App: React.FC = () => {
                                 <div>{isTeacherAssignmentActive ? '先生から課題が届きました。' : '今日の学習課題です。'}</div>
                                 <div>期限: {assignmentLetter.dueAt ? new Date(assignmentLetter.dueAt).toLocaleString('ja-JP') : '未設定'}</div>
                                 <div>形式: {assignmentLetter.gameMode === 'FREE' ? 'フリー' : '問題チャレンジのみ'}</div>
+                                <div>{getAssignmentAnswerModeSummary(assignmentLetter)}</div>
                                 <div className="mt-2 text-xs text-slate-700">
-                                    {assignmentLetter.units.map(unit => `${unit.name} (${unit.targetCorrect || 10}問)`).join(' / ') || 'オリジナル問題'}
+                                    {getAssignmentTargetSummary(assignmentLetter)}
                                 </div>
                             </div>
                             <div className="assignment-letter-actions grid gap-2 sm:grid-cols-3">
@@ -13687,11 +13722,7 @@ const App: React.FC = () => {
                             <div className="grid gap-2 sm:grid-cols-2">
                                 <button
                                     onClick={() => {
-                                        const completed = assignmentProgressNotice.type === 'ASSIGNMENT_COMPLETE';
                                         setAssignmentProgressNotice(null);
-                                        if (completed) {
-                                            setGameState(prev => ({ ...prev, screen: GameScreen.START_MENU, challengeMode: undefined }));
-                                        }
                                     }}
                                     className="rounded-xl border border-slate-600 bg-slate-800 px-4 py-3 text-sm font-black text-slate-100 hover:bg-slate-700"
                                 >

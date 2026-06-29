@@ -40,6 +40,7 @@ export const decodeAssignmentPayload = (encoded: string): AssignmentPayload | nu
         answer: String(problem.answer || ''),
         options: Array.isArray(problem.options) ? problem.options.map((option) => String(option || '')) : [],
       })),
+      customTargetCorrect: Math.max(1, Number(assignment.customTargetCorrect || (assignment.customProblems || []).length || 10)),
     };
   } catch (e) {
     return null;
