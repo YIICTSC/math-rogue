@@ -188,7 +188,7 @@ const SOCIAL_UNIT_SEED_DATA: Record<string, GeneralProblem[]> = {
     q('工場のしごとを 学ぶ りゆうとして よい ものは？', '品物が できる 流れを 知るため', '星の 動きを 覚えるため', '水よう液を 作るため', '音の 高さを はかるため', '社会の しくみを 学ぶ。'),
   ],
   SOCIAL_3_U08: [
-    q('人や ものを はこぶ はたらきを 何という？', '交通', '地形', '気候', '憲法', 'くらしを つなぐ。'),
+    q('人や ものを はこぶ はたらきを 何という？', '交通', '地形', '気候', '山地', 'くらしを つなぐ。'),
     q('人を のせて はこぶ ものとして 正しい ものは？', 'バス', '田んぼ', '工場', '畑', 'のりものの 1つ。'),
     q('たくさんの 人が 町の 中を いどうしやすく する ものは？', '道路', '山', '田', '池', '交通の みち。'),
     q('電車が とまる ばしょを 何という？', '駅', '港', '工場', '役場', '人が のりおり する。'),
@@ -2000,7 +2000,7 @@ const expandUnitProblems = (mode: string, sourceMode: string, unitName: string):
   const seeds = SOCIAL_UNIT_SEED_DATA[mode] || [];
   const gradeMatch = mode.match(/^SOCIAL_(\d+)_/);
   const grade = gradeMatch ? Number(gradeMatch[1]) : 7;
-  if (grade <= 3) {
+  if (grade <= 6) {
     return dedupeByQuestion(seeds);
   }
   const source = SOURCE_MODE_DATA[sourceMode] || [];
@@ -2026,8 +2026,6 @@ const getGradeFromMode = (mode: string): number => {
 };
 
 const normalizeTextForGrade = (text: string, grade: number): string => {
-  if (grade >= 4) return text;
-
   const lowerGradeReplacements: Array<[string, string]> = [
     ['何', 'なに'],
     ['見る', 'みる'],
@@ -2387,9 +2385,36 @@ const normalizeTextForGrade = (text: string, grade: number): string => {
     ['好', 'す'],
   ];
 
-  return grade <= 2
-    ? replaceAll(text, lowerGradeReplacements)
-    : replaceAll(replaceAll(text, grade3Replacements), grade3SingleKanjiReplacements);
+  const elementaryUpperReplacements: Array<[string, string]> = [
+    ['非常に', 'とても'],
+    ['防ぐ', 'ふせぐ'],
+    ['吸う', 'すう'],
+    ['吸わない', 'すわない'],
+    ['豚', 'ぶた'],
+    ['占める', 'しめる'],
+    ['届く', 'とどく'],
+    ['狩り', 'かり'],
+    ['違い', 'ちがい'],
+    ['盛んな', 'さかんな'],
+    ['盛ん', 'さかん'],
+    ['捉える', 'とらえる'],
+    ['捉え', 'とらえ'],
+    ['暖かい', 'あたたかい'],
+    ['漠然', 'はっきりしない'],
+    ['役割', 'やくわり'],
+    ['床', 'ゆか'],
+    ['渡る', 'わたる'],
+    ['渡って', 'わたって'],
+    ['条令', '条例'],
+  ];
+
+  if (grade <= 2) return replaceAll(text, lowerGradeReplacements);
+
+  if (grade === 3) {
+    return replaceAll(replaceAll(text, grade3Replacements), grade3SingleKanjiReplacements);
+  }
+
+  return replaceAll(text, elementaryUpperReplacements);
 };
 
 const normalizeProblemForMode = (mode: string, problem: GeneralProblem): GeneralProblem => {
