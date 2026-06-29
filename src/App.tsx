@@ -928,7 +928,9 @@ const App: React.FC = () => {
         unitName?: string;
         remainingUnitNames: string[];
         rewardCard?: ICard;
+        assignment?: AssignmentPayload;
     } | null>(null);
+    const [completedAssignmentProblemSource, setCompletedAssignmentProblemSource] = useState<AssignmentPayload | null>(null);
     const [showAssignmentLetter, setShowAssignmentLetter] = useState(false);
     const [assignmentLetterSource, setAssignmentLetterSource] = useState<'title' | 'selection'>('title');
     const [dismissedDailyAssignmentId, setDismissedDailyAssignmentId] = useState<string | null>(null);
@@ -999,6 +1001,7 @@ const App: React.FC = () => {
         if (!assignment) return;
         storageService.saveCurrentAssignment(assignment);
         setCurrentAssignment(assignment);
+        setCompletedAssignmentProblemSource(null);
         setAssignmentLetterSource('title');
         setShowAssignmentLetter(true);
         setGameState(prev => ({ ...prev, screen: GameScreen.START_MENU }));
@@ -3505,6 +3508,7 @@ const App: React.FC = () => {
         setCoopBattleQueue([]);
         setCoopBattleKey(null);
         setCoopEnemyTurnCursor(0);
+        setCompletedAssignmentProblemSource(null);
         p2pService.close();
         setGameState(prev => ({ ...prev, screen: GameScreen.START_MENU, challengeMode: undefined, typingLessonId: undefined }));
         setHasSave(storageService.hasSaveFile());
@@ -10660,6 +10664,7 @@ const App: React.FC = () => {
                     unitName: 'オリジナル問題',
                     remainingUnitNames: remainingUnitsAfter.map(unit => unit.name),
                     rewardCard,
+                    assignment: isAssignmentComplete ? assignment : undefined,
                 });
             }
             return;
@@ -10701,6 +10706,7 @@ const App: React.FC = () => {
                     ...(remainingCustomAfter.length > 0 ? [`オリジナル問題 残り${remainingCustomAfter.length}問`] : []),
                 ],
                 rewardCard,
+                assignment: isAssignmentComplete ? assignment : undefined,
             });
         }
     }, [addMiniGameUnlockCorrectCount, correctCustomAssignmentProblemIds, createRewardCardForAssignment, currentAssignment, currentAssignmentAnswers, effectiveAssignment, markDailyAssignmentCompleted]);
@@ -13718,6 +13724,9 @@ const App: React.FC = () => {
                             <div className="grid gap-2 sm:grid-cols-2">
                                 <button
                                     onClick={() => {
+                                        if (assignmentProgressNotice.type === 'ASSIGNMENT_COMPLETE' && assignmentProgressNotice.assignment) {
+                                            setCompletedAssignmentProblemSource(assignmentProgressNotice.assignment);
+                                        }
                                         setAssignmentProgressNotice(null);
                                     }}
                                     className="rounded-xl border border-slate-600 bg-slate-800 px-4 py-3 text-sm font-black text-slate-100 hover:bg-slate-700"
@@ -13867,6 +13876,7 @@ const App: React.FC = () => {
                             onCorrectAnswers={handleModeCorrectProgress}
                             modeCorrectCounts={modeCorrectCounts}
                             assignment={activeAssignment}
+                            problemSourceAssignment={completedAssignmentProblemSource}
                             onAnswerResult={handleAssignmentAnswerResult}
                             visualTheme={visualTheme}
                         />

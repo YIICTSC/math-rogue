@@ -25,6 +25,7 @@ interface ProblemChallengeScreenProps {
   onCorrectAnswers?: (mode: string, correctCount: number) => void;
   modeCorrectCounts?: Record<string, number>;
   assignment?: AssignmentPayload | null;
+  problemSourceAssignment?: AssignmentPayload | null;
   onAnswerResult?: (result: AssignmentAnswerResult) => void;
   visualTheme?: VisualThemeId;
 }
@@ -580,6 +581,7 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
   onCorrectAnswers,
   modeCorrectCounts = {},
   assignment,
+  problemSourceAssignment,
   onAnswerResult,
   visualTheme = 'elementary',
 }) => {
@@ -622,6 +624,7 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
   const problemLanguageMode: LanguageMode = languageMode === 'ENGLISH' ? 'JAPANESE' : languageMode;
   const canSelectAnswerMode = selectedCategory.id === 'MATH' || selectedCategory.id === 'UPPER_MATH' || selectedCategory.id === 'KANJI' || selectedCategory.id === 'KANKEN' || selectedCategory.id === 'HARD_KANJI';
   const shouldContinueOnWrong = !!assignment || continueOnWrong;
+  const assignmentForProblemSource = assignment || problemSourceAssignment || null;
 
   // Voice feature control
   const [voiceEnabled, setVoiceEnabled] = useState(() => storageService.getEnglishVoiceEnabled());
@@ -634,15 +637,15 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
   }, []);
 
   useEffect(() => {
-    if (!assignment) return;
-    const customProblems = assignment.customProblems || [];
-    const modePool = Array.from(new Set(assignment.units.flatMap((unit) => unit.modes)));
+    if (!assignmentForProblemSource) return;
+    const customProblems = assignmentForProblemSource.customProblems || [];
+    const modePool = Array.from(new Set(assignmentForProblemSource.units.flatMap((unit) => unit.modes)));
     if (modePool.length === 0 && customProblems.length === 0) return;
     const assignmentSignature = [
-      assignment.id,
-      assignment.units.map((unit) => unit.id).join(','),
+      assignmentForProblemSource.id,
+      assignmentForProblemSource.units.map((unit) => unit.id).join(','),
       customProblems.map((problem) => problem.id).join(','),
-      String(assignment.customTargetCorrect || ''),
+      String(assignmentForProblemSource.customTargetCorrect || ''),
     ].join('|');
     if (appliedAssignmentSignatureRef.current === assignmentSignature) return;
     appliedAssignmentSignatureRef.current = assignmentSignature;
@@ -650,12 +653,12 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
     const representativeMode = (hasCustomProblems ? GameMode.UPPER_TRIVIA : (modePool[0] || GameMode.UPPER_TRIVIA)) as GameMode;
     setActiveChallenge({
       subMode: {
-        id: `ASSIGNMENT_${assignment.id}`,
-        name: assignment.title,
+        id: `ASSIGNMENT_${assignmentForProblemSource.id}`,
+        name: assignmentForProblemSource.title,
         mode: representativeMode,
       },
       modePool: modePool.length > 0 ? modePool : [],
-      answerMode: assignment.answerMode || 'CHOICE',
+      answerMode: assignmentForProblemSource.answerMode || 'CHOICE',
     });
     if (phase === 'SELECT') {
       setPhase('CHALLENGE');
@@ -664,7 +667,7 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
     setStreak(0);
     setChallengeStep(0);
     setAssignmentReviewQueue([]);
-  }, [assignment, phase]);
+  }, [assignmentForProblemSource, phase]);
 
   useEffect(() => {
     const nextCategory = displayedCategories.find((cat) => cat.id === selectedCategory.id) || defaultDisplayedCategory;
@@ -976,7 +979,7 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
               onModeCorrect={onCorrectAnswers}
               onComplete={handleCompleteOne}
               onAnswerResult={handleChallengeAnswerResult}
-              customProblems={assignment?.customProblems}
+              customProblems={assignmentForProblemSource?.customProblems}
               reviewProblem={activeReviewProblem}
               problemOffset={challengeStep}
               isChallenge={true}
