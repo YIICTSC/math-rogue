@@ -1103,6 +1103,7 @@ const App: React.FC = () => {
             customProblems: remainingAssignmentCustomProblems,
         };
     }, [effectiveAssignment, isCurrentAssignmentComplete, remainingAssignmentCustomProblems, remainingAssignmentUnits]);
+    const assignmentProblemSource = activeAssignment || completedAssignmentProblemSource;
     const getAssignmentProblemConfig = useCallback((assignment: AssignmentPayload | null | undefined) => {
         const assignmentModePool = assignment?.gameMode === 'FREE' ? getAssignmentModePool(assignment) : undefined;
         const assignmentHasCustomProblems = assignment?.gameMode === 'FREE' && assignment.customProblems.length > 0;
@@ -1113,10 +1114,10 @@ const App: React.FC = () => {
         };
     }, []);
     const localAssignmentProblemConfig = useMemo(() => (
-        activeAssignment?.gameMode === 'FREE' && isAssignmentWithinDeadline
-            ? getAssignmentProblemConfig(activeAssignment)
+        assignmentProblemSource?.gameMode === 'FREE' && isAssignmentWithinDeadline
+            ? getAssignmentProblemConfig(assignmentProblemSource)
             : null
-    ), [activeAssignment, getAssignmentProblemConfig, isAssignmentWithinDeadline]);
+    ), [assignmentProblemSource, getAssignmentProblemConfig, isAssignmentWithinDeadline]);
     const applyMiniGameAssignmentConfig = useCallback((screen: GameScreen, assignment: AssignmentPayload | null | undefined) => {
         const assignmentConfig = getAssignmentProblemConfig(assignment);
         setMiniGameProblemMode(assignmentConfig.mode || GameMode.UPPER_TRIVIA);
@@ -4353,6 +4354,7 @@ const App: React.FC = () => {
             setShowTimeLimitModal(true);
             return;
         }
+        setCompletedAssignmentProblemSource(null);
         audioService.playSound('select');
         startGameAssetPreload();
         const nextScreen = pendingMiniGameScreen || GameScreen.MINI_GAME_SELECT;
@@ -4395,6 +4397,7 @@ const App: React.FC = () => {
             setShowTimeLimitModal(true);
             return;
         }
+        setCompletedAssignmentProblemSource(null);
         const assignmentModePool = activeAssignment?.gameMode === 'FREE' ? getAssignmentModePool(activeAssignment) : undefined;
         const assignmentHasCustomProblems = activeAssignment?.gameMode === 'FREE' && activeAssignment.customProblems.length > 0;
         const effectiveMode = assignmentHasCustomProblems ? GameMode.UPPER_TRIVIA : assignmentModePool ? getAssignmentRepresentativeMode(activeAssignment) : mode;
@@ -10604,7 +10607,7 @@ const App: React.FC = () => {
     }, []);
 
     const handleAssignmentAnswerResult = useCallback((result: AssignmentAnswerResult) => {
-        const assignment = effectiveAssignment;
+        const assignment = activeAssignment ? effectiveAssignment : null;
         const assignmentModePool = getAssignmentModePool(assignment);
         const assignmentUnit = assignment?.units.find((unit) => unit.modes.includes(result.mode));
         const isCustomAssignmentAnswer = result.mode === 'ASSIGNMENT_CUSTOM' && (assignment?.customProblems.length || 0) > 0;
@@ -10709,7 +10712,7 @@ const App: React.FC = () => {
                 assignment: isAssignmentComplete ? assignment : undefined,
             });
         }
-    }, [addMiniGameUnlockCorrectCount, correctCustomAssignmentProblemIds, createRewardCardForAssignment, currentAssignment, currentAssignmentAnswers, effectiveAssignment, markDailyAssignmentCompleted]);
+    }, [activeAssignment, addMiniGameUnlockCorrectCount, correctCustomAssignmentProblemIds, createRewardCardForAssignment, currentAssignment, currentAssignmentAnswers, effectiveAssignment, markDailyAssignmentCompleted]);
 
     const removeRewardFromList = useCallback((rewards: RewardItem[], item: RewardItem) => {
         if (shouldClearAllCardRewards(item)) {
@@ -14204,7 +14207,7 @@ const App: React.FC = () => {
                             problemMode={miniGameProblemMode}
                             problemModePool={miniGameProblemModePool}
                             answerMode={miniGameAnswerMode}
-                            assignment={activeAssignment}
+                            assignment={assignmentProblemSource}
                             onAnswerResult={handleAssignmentAnswerResult}
                             languageMode={languageMode}
                             debugPreview={isUiPreviewMode ? uiPreviewMiniGameOutcome : undefined}
@@ -14486,7 +14489,7 @@ const App: React.FC = () => {
                             onModeCorrect={handleModeCorrectProgress}
                             onComplete={handleMathChallengeComplete}
                             onAnswerResult={handleAssignmentAnswerResult}
-                            customProblems={localAssignmentProblemConfig?.mode && activeAssignment?.gameMode === 'FREE' ? activeAssignment.customProblems : undefined}
+                            customProblems={localAssignmentProblemConfig?.mode && assignmentProblemSource?.gameMode === 'FREE' ? assignmentProblemSource.customProblems : undefined}
                             debugSkip={isMathDebugSkipped}
                             isChallenge={false}
                             rewardHint="正解するとゴールド獲得"
