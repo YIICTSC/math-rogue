@@ -33,7 +33,6 @@ export const MAGIC_ASSET_PATHS = Array.from(new Set([
   'sprites/backgrounds/learning-rogue/magic-final-bridge.webp',
   'sprites/backgrounds/learning-rogue/magic-act-clear.webp',
   ...MAGIC_BATTLE_BACKGROUND_SCENES.map(scene => scene.image),
-  'sprites/magic/magic-heroines-cutout-preview.webp',
   'sprites/magic/effects/transformation-sheet.webp',
   'sprites/magic/events/forgotten-card.webp',
   'ui/magic/transformation-guide.png',
