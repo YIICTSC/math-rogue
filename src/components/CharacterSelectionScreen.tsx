@@ -234,7 +234,7 @@ const CharacterSelectionScreen: React.FC<CharacterSelectionScreenProps> = ({ cha
             </button>
             
             <h3 className="text-xl font-bold mb-4 text-yellow-400 tracking-widest uppercase flex items-center gap-2">
-              <Camera size={20} /> 写真で作成
+              <Camera size={20} /> {trans("写真で作成", languageMode)}
             </h3>
 
             <div className="relative w-full aspect-square bg-black border-4 border-gray-600 rounded-2xl overflow-hidden mb-6">
@@ -276,13 +276,13 @@ const CharacterSelectionScreen: React.FC<CharacterSelectionScreenProps> = ({ cha
             <canvas ref={canvasRef} className="hidden" />
 
             <div className="flex flex-col gap-3 w-full">
-                <p className="text-[10px] text-gray-400 text-center px-4 font-bold">アイテムの位置に合わせて顔を写してね！</p>
+                <p className="text-[10px] text-gray-400 text-center px-4 font-bold">{trans("アイテムの位置に合わせて顔を写してね！", languageMode)}</p>
                 <button 
                     onClick={capturePhoto}
                     disabled={!!cameraError}
                     className="w-full bg-white text-black py-4 rounded-xl font-black text-xl hover:bg-gray-200 transition-all active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_4px_0_#ccc] flex items-center justify-center gap-2"
                 >
-                    <Camera size={24} /> 撮影する
+                    <Camera size={24} /> {trans("撮影する", languageMode)}
                 </button>
             </div>
             
@@ -314,8 +314,8 @@ const CharacterSelectionScreen: React.FC<CharacterSelectionScreenProps> = ({ cha
             {visualTheme === 'magic' && (
               <div className="mt-5 inline-flex rounded-full border border-fuchsia-300/60 bg-slate-950/80 p-1 shadow-lg">
                 {([
-                  ['female', '女子主人公'],
-                  ['male', '男子主人公'],
+                  ['female', trans('女子主人公', languageMode)],
+                  ['male', trans('男子主人公', languageMode)],
                 ] as const).map(([gender, label]) => (
                   <button
                     key={gender}
@@ -369,11 +369,11 @@ const CharacterSelectionScreen: React.FC<CharacterSelectionScreenProps> = ({ cha
                       </div>
                       <div className="min-w-0">
                         <div className="truncate text-sm font-black text-white">{participant.name}</div>
-                        <div className="text-[10px] text-emerald-200">{isSelf ? 'あなた' : '同行プレイヤー'}{isDecisionOwner ? ' / 決定役' : ''}</div>
+                        <div className="text-[10px] text-emerald-200">{trans(isSelf ? 'あなた' : '同行プレイヤー', languageMode)}{isDecisionOwner ? ` / ${trans('決定役', languageMode)}` : ''}</div>
                       </div>
                     </div>
                     <div className="text-[11px] font-bold text-gray-300">
-                      {selectedChar ? `選択済み: ${trans(selectedChar.name, languageMode)}` : 'キャラ選択待ち'}
+                      {selectedChar ? `${trans('選択済み:', languageMode)} ${trans(selectedChar.name, languageMode)}` : trans('キャラ選択待ち', languageMode)}
                     </div>
                   </div>
                 );

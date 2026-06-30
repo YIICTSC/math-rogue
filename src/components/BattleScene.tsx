@@ -1207,7 +1207,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                             <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950 via-slate-950/75 to-transparent p-4">
                                 <div className="magic-transform-tutorial-title flex items-center gap-2 text-lg font-black text-fuchsia-100">
                                     <Sparkles size={22} className="text-fuchsia-300" />
-                                    {languageMode === 'ENGLISH' ? 'Magical Transformation' : 'マジック編の変身'}
+                                {languageMode === 'ENGLISH' ? 'Magical Transformation' : trans('マジック編の変身', languageMode)}
                                 </div>
                             </div>
                         </div>
@@ -1220,9 +1220,9 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                 </>
                             ) : (
                                 <>
-                                    <p><span className="font-black text-fuchsia-200">変身</span>は、戦闘中に一度だけ使えるマジック編専用の切り札です。</p>
-                                    <p>変身中は<span className="font-black text-fuchsia-200">すべてのカード効果が2倍</span>になりますが、<span className="font-black text-rose-300">ターン終了時に20ダメージ</span>を受けます。</p>
-                                    <p>変身で追加されるカードは、<span className="font-black text-amber-200">魔晶100Gごとに効果+10%</span>、<span className="font-black text-sky-200">山札10枚ごとに効果+10%</span>強化されます。</p>
+                                    <p><span className="font-black text-fuchsia-200">{trans("変身", languageMode)}</span>{trans("は、戦闘中に一度だけ使えるマジック編専用の切り札です。", languageMode)}</p>
+                                    <p>{trans("変身中は", languageMode)}<span className="font-black text-fuchsia-200">{trans("すべてのカード効果が2倍", languageMode)}</span>{trans("になりますが、", languageMode)}<span className="font-black text-rose-300">{trans("ターン終了時に20ダメージ", languageMode)}</span>{trans("を受けます。", languageMode)}</p>
+                                    <p>{trans("変身で追加されるカードは、", languageMode)}<span className="font-black text-amber-200">{trans("魔晶100Gごとに効果+10%", languageMode)}</span>、<span className="font-black text-sky-200">{trans("山札10枚ごとに効果+10%", languageMode)}</span>{trans("強化されます。", languageMode)}</p>
                                 </>
                             )}
                             <div className="magic-transform-tutorial-actions flex items-center justify-between gap-3 pt-2">
@@ -1231,7 +1231,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                     onClick={closeMagicTransformationTutorial}
                                     className="magic-transform-tutorial-button shrink-0 rounded-lg bg-fuchsia-500 px-4 py-2 text-sm font-black text-white shadow-lg hover:bg-fuchsia-400"
                                 >
-                                    {languageMode === 'ENGLISH' ? 'Got it' : 'わかった'}
+                                    {languageMode === 'ENGLISH' ? 'Got it' : trans('わかった', languageMode)}
                                 </button>
                             </div>
                         </div>
@@ -1244,19 +1244,19 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                     <div className="app-modal-panel app-battle-info-modal w-full max-w-md rounded-lg border-2 border-cyan-300 bg-slate-950 p-4 shadow-[0_0_32px_rgba(34,211,238,0.55)]">
                         <div className="mb-3 flex items-center gap-2 text-cyan-200 font-black">
                             <Mic size={22} className="text-cyan-300" />
-                            応答パリィ
+                            {trans("応答パリィ", languageMode)}
                         </div>
                         <p className="mb-3 text-sm leading-relaxed text-slate-100">
-                            放送委員は、敵の攻撃にあわせて<span className="text-cyan-300 font-bold">応答!</span>を押すとダメージを受けずに音波を跳ね返せます。
+                            {trans("放送委員は、敵の攻撃にあわせて", languageMode)}<span className="text-cyan-300 font-bold">{trans("応答!", languageMode)}</span>{trans("を押すとダメージを受けずに音波を跳ね返せます。", languageMode)}
                         </p>
                         <p className="mb-4 text-xs leading-relaxed text-slate-300">
-                            ゲージがなくなる前に押しましょう。出てすぐ押せると<span className="text-yellow-300 font-bold">ベストアンサー</span>になり、反射ダメージが強くなります。
+                            {trans("ゲージがなくなる前に押しましょう。出てすぐ押せると", languageMode)}<span className="text-yellow-300 font-bold">{trans("ベストアンサー", languageMode)}</span>{trans("になり、反射ダメージが強くなります。", languageMode)}
                         </p>
                         <button
                             onClick={onCloseParryTutorial}
                             className="w-full rounded border-2 border-cyan-100 bg-cyan-600 px-4 py-2 text-sm font-black text-white shadow-[2px_2px_0_rgba(0,0,0,1)] transition hover:bg-cyan-500 active:translate-x-[2px] active:translate-y-[2px] active:shadow-none"
                         >
-                            わかった、応答する！
+                            {trans("わかった、応答する！", languageMode)}
                         </button>
                     </div>
                 </div>
@@ -1267,16 +1267,16 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                     <div className="app-modal-panel app-battle-info-modal w-full max-w-lg rounded-lg border-2 border-indigo-300 bg-slate-950 p-4 shadow-[0_0_32px_rgba(129,140,248,0.55)]">
                         <div className="mb-3 flex items-center gap-2 text-indigo-100 font-black">
                             <Users size={22} className="text-indigo-300" />
-                            友情コンボ
+                            {trans("友情コンボ", languageMode)}
                         </div>
                         <p className="mb-3 text-sm leading-relaxed text-slate-100">
-                            パートナーがいる戦闘では、手札からカードを2枚まで選べます。同じ種類のカードを2枚選んで<span className="font-bold text-yellow-300">友情コンボ</span>を押すと、2枚を合成した強力なカードとして発動します。
+                            {trans("パートナーがいる戦闘では、手札からカードを2枚まで選べます。同じ種類のカードを2枚選んで", languageMode)}<span className="font-bold text-yellow-300">{trans("友情コンボ", languageMode)}</span>{trans("を押すと、2枚を合成した強力なカードとして発動します。", languageMode)}
                         </p>
                         <div className="mb-4 rounded border border-indigo-400/40 bg-indigo-950/35 p-3 text-xs leading-relaxed text-indigo-50">
-                            発動条件: パートナーが生存中 / 2枚のカード種別が同じ / 召喚カード以外。消費エナジーは2枚の合計ではなく、2枚のうち高い方のコストです。
+                            {trans("発動条件: パートナーが生存中 / 2枚のカード種別が同じ / 召喚カード以外。消費エナジーは2枚の合計ではなく、2枚のうち高い方のコストです。", languageMode)}
                         </div>
                         <p className="mb-4 text-xs leading-relaxed text-slate-300">
-                            使わないときは友情コンボボタン右側の切替をOFFにすると、通常モードと同じくカードを1枚ずつクリックで使用できます。
+                            {trans("使わないときは友情コンボボタン右側の切替をOFFにすると、通常モードと同じくカードを1枚ずつクリックで使用できます。", languageMode)}
                         </p>
                         <button
                             onClick={() => {
@@ -1285,7 +1285,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                             }}
                             className="w-full rounded border-2 border-indigo-100 bg-indigo-600 px-4 py-2 text-sm font-black text-white shadow-[2px_2px_0_rgba(0,0,0,1)] transition hover:bg-indigo-500 active:translate-x-[2px] active:translate-y-[2px] active:shadow-none"
                         >
-                            わかった
+                            {trans("わかった", languageMode)}
                         </button>
                     </div>
                 </div>
