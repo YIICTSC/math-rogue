@@ -22,9 +22,9 @@ public/sprites/magic/events/romance/{heroId}/{targetId}/r5.webp
 生成元シート:
 
 ```text
-public/sprites/magic/events/romance-sheets/magic-romance-initial-sheet-01.png
+public/sprites/magic/events/romance-sheets/magic-romance-initial-sheet-01.webp
 ...
-public/sprites/magic/events/romance-sheets/magic-romance-initial-sheet-10.png
+public/sprites/magic/events/romance-sheets/magic-romance-initial-sheet-10.webp
 ```
 
 ## ルート順

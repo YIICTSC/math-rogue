@@ -10,14 +10,14 @@
 
 ### Protagonist Standing / Action / Skill
 
-- `public/sprites/magic/heroines/heroine-05-before-sheet.png`
-- `public/sprites/magic/heroines/heroine-06-before-sheet.png`
-- `public/sprites/magic/heroines/heroine-07-before-sheet.png`
-- `public/sprites/magic/heroines/heroine-07-after-sheet.png`
-- `public/sprites/magic/heroines/heroine-09-before-sheet.png`
-- `public/sprites/magic/heroines/heroine-09-after-sheet.png`
-- `public/sprites/magic/generated-sources/male-protagonist-sheets/yamato-before-3x1-source.png`
-- `public/sprites/magic/generated-sources/male-protagonist-sheets/yamato-after-3x1-source.png`
+- `public/sprites/magic/heroines/heroine-05-before-sheet.webp`
+- `public/sprites/magic/heroines/heroine-06-before-sheet.webp`
+- `public/sprites/magic/heroines/heroine-07-before-sheet.webp`
+- `public/sprites/magic/heroines/heroine-07-after-sheet.webp`
+- `public/sprites/magic/heroines/heroine-09-before-sheet.webp`
+- `public/sprites/magic/heroines/heroine-09-after-sheet.webp`
+- `public/sprites/magic/generated-sources/male-protagonist-sheets/yamato-before-3x1-source.webp`
+- `public/sprites/magic/generated-sources/male-protagonist-sheets/yamato-after-3x1-source.webp`
 
 上記から、対応する `characters`、`characters-attack`、`characters-skill` の切り出し画像も再生成した。
 

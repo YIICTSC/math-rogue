@@ -1042,6 +1042,11 @@ export interface KochoScoreEntry {
   stage: number;
   victory: boolean;
   turns: number;
+  difficultyLevel?: number;
+  isEndless?: boolean;
+  endlessFloor?: number;
+  endlessKills?: number;
+  endlessScore?: number;
 }
 
 export interface PaperPlaneScoreEntry {

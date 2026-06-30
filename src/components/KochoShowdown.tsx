@@ -9,7 +9,7 @@ import { assetUrl } from '../utils/assetPaths';
 
 // --- TYPES ---
 type Facing = 1 | -1; // 1: Right, -1: Left
-type GamePhase = 'BATTLE' | 'REWARD' | 'UPGRADE_EVENT' | 'SHOP' | 'VICTORY' | 'GAME_OVER' | 'MATH';
+type GamePhase = 'SETUP' | 'BATTLE' | 'REWARD' | 'UPGRADE_EVENT' | 'SHOP' | 'VICTORY' | 'GAME_OVER' | 'MATH';
 type CardEffectType = 'NORMAL' | 'COUNTER' | 'PUSH' | 'PULL' | 'RECOIL' | 'DASH_ATTACK' | 'FURTHEST' | 'PIERCE' | 'TELEPORT' | 'STUN' | 'HEAL' | 'DRAIN' | 'PIERCE_DASH';
 
 interface KCard {
@@ -136,6 +136,11 @@ interface KochoGameState {
     currentUpgradeOffer: UpgradeOffer | null; // Persist current upgrade offer
     shopInventory: KRelic[]; // New: Store specific relics for the shop
     nextWaveMessage?: string; // Message to display at start of next wave
+    difficultyLevel: number;
+    isEndless: boolean;
+    endlessFloor: number;
+    endlessKills: number;
+    endlessScore: number;
 }
 
 type KochoSheetKey = 'characters' | 'effects' | 'backgrounds';
@@ -155,6 +160,16 @@ const KOCHO_HERO_ACTION_SHEETS = [
 
 const KOCHO_ENEMY_SHEETS = [
     assetUrl('sprites/kocho-enemies-01.webp'),
+    assetUrl('sprites/high-school/sheets/enemy-supplement-1.webp'),
+    assetUrl('sprites/high-school/sheets/enemy-supplement-2.webp'),
+    assetUrl('sprites/high-school/sheets/enemy-supplement-3.webp'),
+    assetUrl('sprites/high-school/sheets/enemy-supplement-4.webp'),
+    assetUrl('sprites/high-school/sheets/humanoid-enemy-supplement-1.webp'),
+    assetUrl('sprites/high-school/sheets/humanoid-enemy-supplement-2.webp'),
+    assetUrl('sprites/high-school/sheets/humanoid-enemy-supplement-3.webp'),
+    assetUrl('sprites/high-school/sheets/female-humanoid-enemy-supplement-a-idle.webp'),
+    assetUrl('sprites/high-school/sheets/female-humanoid-enemy-supplement-b-idle.webp'),
+    assetUrl('sprites/high-school/sheets/principal-final-boss-3x2-chromakey.webp'),
 ];
 
 const KOCHO_EFFECT_SHEETS = [
@@ -163,10 +178,12 @@ const KOCHO_EFFECT_SHEETS = [
     assetUrl('sprites/kocho-effects-03.webp'),
 ];
 
-const sheetPosition = (cell: number) => {
-    const col = cell % 5;
-    const row = Math.floor(cell / 5);
-    return `${col * 25}% ${row * 25}%`;
+const sheetPosition = (cell: number, columns = 5, rows = 5) => {
+    const col = cell % columns;
+    const row = Math.floor(cell / columns);
+    const x = columns <= 1 ? 0 : (col * 100) / (columns - 1);
+    const y = rows <= 1 ? 0 : (row * 100) / (rows - 1);
+    return `${x}% ${y}%`;
 };
 
 const KochoSheetSprite: React.FC<{
@@ -176,13 +193,16 @@ const KochoSheetSprite: React.FC<{
     flipX?: boolean;
     title?: string;
     src?: string;
-}> = ({ sheet, cell, className = '', flipX = false, title, src }) => (
+    columns?: number;
+    rows?: number;
+}> = ({ sheet, cell, className = '', flipX = false, title, src, columns = 5, rows = 5 }) => (
     <div
         title={title}
         className={`kocho-sheet-sprite ${className}`}
         style={{
             backgroundImage: `url(${src || KOCHO_SPRITE_SHEETS[sheet]})`,
-            backgroundPosition: sheetPosition(cell),
+            backgroundPosition: sheetPosition(cell, columns, rows),
+            backgroundSize: `${columns * 100}% ${rows * 100}%`,
             transform: flipX ? 'scaleX(-1)' : undefined,
         }}
     />
@@ -497,11 +517,38 @@ const ENEMY_TYPES: EnemyTemplate[] = [
     { name: '飼育小屋番', maxHp: 8, sprite: 'DOG|#84cc16', attackDmg: 3, range: [1], speed: 5, attackCooldown: 1 },
     { name: '文化祭実行委員', maxHp: 11, sprite: 'FLAG|#06b6d4', attackDmg: 4, range: [1, 2], speed: 5, attackCooldown: 2 },
     { name: '卒業式の亡霊', maxHp: 14, sprite: 'GHOST|#e5e7eb', attackDmg: 5, range: [1, 2, 3], speed: 5, attackCooldown: 2, special: 'LULLABY' },
+
+    // Endless-only illustrated enemies
+    { name: '放課後の見回り', maxHp: 12, sprite: 'HUMANOID|#64748b', attackDmg: 4, range: [1, 2], speed: 5, attackCooldown: 2 },
+    { name: '答案の亡霊', maxHp: 10, sprite: 'GHOST|#94a3b8', attackDmg: 3, range: [2, 3, 4], speed: 5, attackCooldown: 2, special: 'LULLABY' },
+    { name: '購買部の圧', maxHp: 16, sprite: 'LUNCH_TRAY|#f59e0b', attackDmg: 6, range: [1], speed: 4, attackCooldown: 1 },
+    { name: '補習監督', maxHp: 18, sprite: 'TEACHER|#7c2d12', attackDmg: 5, range: [1, 2], speed: 5, attackCooldown: 2, special: 'LECTURE' },
+    { name: '風紀委員長', maxHp: 14, sprite: 'FLAG|#2563eb', attackDmg: 4, range: [1, 2, 3], speed: 6, attackCooldown: 2, special: 'CONFISCATE' },
+    { name: '図書室監査員', maxHp: 17, sprite: 'BOOK_OPEN|#4c1d95', attackDmg: 5, range: [2, 3], speed: 4, attackCooldown: 2, special: 'SHIELD' },
+    { name: '放送委員の刺客', maxHp: 13, sprite: 'RADIO_TOWER|#db2777', attackDmg: 4, range: [2, 3, 4], speed: 6, attackCooldown: 1 },
+    { name: '生徒会監査', maxHp: 20, sprite: 'BOSS|#0f766e', attackDmg: 5, range: [1, 2, 3], speed: 5, attackCooldown: 2, special: 'CONFISCATE' },
+    { name: '校則執行官', maxHp: 24, sprite: 'TEACHER|#991b1b', attackDmg: 7, range: [1, 2], speed: 6, attackCooldown: 1, special: 'LECTURE' },
+    { name: '深夜校長', maxHp: 38, sprite: 'BOSS|#111827', attackDmg: 8, range: [1, 2, 3, 4], speed: 6, attackCooldown: 1, special: 'LULLABY' },
 ];
 
 const GRID_SIZE = 7;
 const FINAL_STAGE = 7;
 const MAX_CONSUMABLES = 3;
+
+const KOCHO_DIFFICULTIES = [
+    { level: 1, name: '通常授業', hpMultiplier: 1.0, damageBonus: 0, dropMultiplier: 1.0, scoreMultiplier: 1.0 },
+    { level: 2, name: '小テスト', hpMultiplier: 1.1, damageBonus: 0, dropMultiplier: 1.0, scoreMultiplier: 1.1 },
+    { level: 3, name: '抜き打ちテスト', hpMultiplier: 1.18, damageBonus: 1, dropMultiplier: 0.95, scoreMultiplier: 1.2 },
+    { level: 4, name: '赤点回避', hpMultiplier: 1.28, damageBonus: 1, dropMultiplier: 0.9, scoreMultiplier: 1.35 },
+    { level: 5, name: '居残り', hpMultiplier: 1.4, damageBonus: 2, dropMultiplier: 0.82, scoreMultiplier: 1.5 },
+    { level: 6, name: '追試', hpMultiplier: 1.55, damageBonus: 2, dropMultiplier: 0.75, scoreMultiplier: 1.75 },
+    { level: 7, name: '補習地獄', hpMultiplier: 1.72, damageBonus: 3, dropMultiplier: 0.68, scoreMultiplier: 2.0 },
+    { level: 8, name: '職員室召喚', hpMultiplier: 1.92, damageBonus: 3, dropMultiplier: 0.6, scoreMultiplier: 2.4 },
+    { level: 9, name: '全校集会処刑台', hpMultiplier: 2.15, damageBonus: 4, dropMultiplier: 0.5, scoreMultiplier: 2.8 },
+    { level: 10, name: '校長最終通告', hpMultiplier: 2.45, damageBonus: 5, dropMultiplier: 0.4, scoreMultiplier: 3.5 },
+];
+
+const getKochoDifficulty = (level: number) => KOCHO_DIFFICULTIES[Math.max(0, Math.min(KOCHO_DIFFICULTIES.length - 1, Math.floor(level || 1) - 1))];
 
 // --- HELPER: Hydrate/Restore State ---
 const hydrateState = (state: any): KochoGameState => {
@@ -544,11 +591,16 @@ const hydrateState = (state: any): KochoGameState => {
         totalTurns: state.totalTurns || 0, // Restore Total Turns
         pendingPhase: state.pendingPhase || null,
         nextWaveMessage: state.nextWaveMessage || undefined, // New field
+        difficultyLevel: state.difficultyLevel || 1,
+        isEndless: Boolean(state.isEndless),
+        endlessFloor: state.endlessFloor || 0,
+        endlessKills: state.endlessKills || 0,
+        endlessScore: state.endlessScore || 0,
     };
 };
 
 const getInitialState = (): KochoGameState => ({
-    phase: 'BATTLE',
+    phase: 'SETUP',
     pendingPhase: null,
     battleStage: 1,
     battleSequence: 0,
@@ -571,7 +623,12 @@ const getInitialState = (): KochoGameState => ({
     shopUpgradeUsed: false,
     currentUpgradeOffer: null,
     shopInventory: [],
-    nextWaveMessage: undefined
+    nextWaveMessage: undefined,
+    difficultyLevel: 1,
+    isEndless: false,
+    endlessFloor: 0,
+    endlessKills: 0,
+    endlessScore: 0
 });
 
 const createKochoDebugPreviewState = (debugPreview: MiniGameDebugPreview | undefined, initial: KochoGameState): KochoGameState => {
@@ -663,7 +720,7 @@ const KochoShowdown: React.FC<{
 
     // Initialization (Only if starting fresh or reset)
     useEffect(() => {
-        if (gameState.wave === 1 && gameState.enemies.length === 0 && gameState.status === 'PLAYING' && gameState.battleStage === 1 && gameState.turn === 1) {
+        if (gameState.phase === 'BATTLE' && gameState.wave === 1 && gameState.enemies.length === 0 && gameState.status === 'PLAYING' && gameState.battleStage === 1 && gameState.turn === 1) {
             startWave(1, 0, 1);
         }
     }, []);
@@ -674,12 +731,53 @@ const KochoShowdown: React.FC<{
         stateRef.current = initialState;
         setNewlyUnlockedCard(null);
         storageService.saveKochoState(initialState);
-        startWave(1, 0, 1);
     };
 
+    const startKochoRun = (difficultyLevel: number) => {
+        const difficulty = getKochoDifficulty(difficultyLevel);
+        const initialState: KochoGameState = {
+            ...getInitialState(),
+            phase: 'BATTLE',
+            difficultyLevel: difficulty.level,
+            logs: [`難易度${difficulty.level}: ${difficulty.name}`]
+        };
+        setGameState(initialState);
+        stateRef.current = initialState;
+        setNewlyUnlockedCard(null);
+        storageService.saveKochoState(initialState);
+        startWave(1, 0, 1);
+    };
     const handleQuit = () => {
         // Save handled by effect, ensure cleared if needed or just save current state
         onBack();
+    };
+
+    const startEndlessRun = () => {
+        const nextState: KochoGameState = {
+            ...stateRef.current,
+            phase: 'BATTLE',
+            pendingPhase: null,
+            battleStage: FINAL_STAGE + 1,
+            battleSequence: 0,
+            wave: 1,
+            maxWaves: 1,
+            turn: 1,
+            status: 'PLAYING',
+            queue: [],
+            enemies: [],
+            fieldItems: [],
+            isEndless: true,
+            endlessFloor: 1,
+            endlessKills: 0,
+            endlessScore: 0,
+            logs: ['放課後エンドレスが始まった...'],
+            nextWaveMessage: '校長室の奥に、終わらない補習棟が現れた。'
+        };
+        setNewlyUnlockedCard(null);
+        setGameState(nextState);
+        stateRef.current = nextState;
+        storageService.saveKochoState(nextState);
+        startWave(FINAL_STAGE + 1, 0, 1);
     };
     
     const unlockRandomKochoCard = useCallback(() => {
@@ -702,16 +800,21 @@ const KochoShowdown: React.FC<{
                 date: Date.now(),
                 stage: gameState.battleStage,
                 victory: gameState.status === 'VICTORY',
-                turns: gameState.totalTurns
+                turns: gameState.totalTurns,
+                difficultyLevel: gameState.difficultyLevel,
+                isEndless: gameState.isEndless,
+                endlessFloor: gameState.endlessFloor,
+                endlessKills: gameState.endlessKills,
+                endlessScore: gameState.endlessScore
             });
-            if (gameState.status === 'VICTORY') {
+            if (gameState.status === 'VICTORY' && !gameState.isEndless) {
                 const unlockedCard = unlockRandomKochoCard();
                 setNewlyUnlockedCard(unlockedCard);
                 setKochoUnlockedCount(storageService.getUnlockedKochoCards().length);
             }
             storageService.clearKochoState();
         }
-    }, [gameState.status, gameState.battleStage, gameState.totalTurns, unlockRandomKochoCard, debugPreview]);
+    }, [gameState.status, gameState.battleStage, gameState.totalTurns, gameState.difficultyLevel, gameState.isEndless, gameState.endlessFloor, gameState.endlessKills, gameState.endlessScore, unlockRandomKochoCard, debugPreview]);
 
     const addLog = (msg: string) => {
         setGameState(prev => ({ ...prev, logs: [msg, ...prev.logs.slice(0, 4)] }));
@@ -759,7 +862,7 @@ const KochoShowdown: React.FC<{
 
     const spawnConsumable = (pos: number) => {
         // 15% chance or if Recycle relic procs
-        let dropChance = 0.15;
+        let dropChance = 0.15 * getKochoDifficulty(stateRef.current.difficultyLevel).dropMultiplier;
         if (stateRef.current.relics.some(r => r.id === 'R_FANG')) dropChance = 0; // Fang consumes chance? No, Fang heals.
         
         if (Math.random() > dropChance) return;
@@ -815,7 +918,41 @@ const KochoShowdown: React.FC<{
         };
 
         // Stage Logic
-        if (stage === FINAL_STAGE) {
+        if (stateRef.current.isEndless || stage > FINAL_STAGE) {
+            maxW = 1;
+            const floor = Math.max(1, stateRef.current.endlessFloor || wave || 1);
+            const endlessMobNames = [
+                '放課後の見回り', '答案の亡霊', '購買部の圧',
+                ...(floor >= 3 ? ['補習監督', '風紀委員長', '図書室監査員'] : []),
+                ...(floor >= 6 ? ['放送委員の刺客', '生徒会監査'] : []),
+                ...(floor >= 10 ? ['校則執行官'] : []),
+            ];
+            const endlessMobPool = endlessMobNames
+                .map(name => ENEMY_TYPES.find(e => e.name === name))
+                .filter((enemy): enemy is EnemyTemplate => Boolean(enemy));
+
+            if (floor % 5 === 0) {
+                const bossName = floor >= 15 ? '深夜校長' : floor >= 10 ? '校則執行官' : '生徒会監査';
+                const boss = ENEMY_TYPES.find(e => e.name === bossName) || ENEMY_TYPES[0];
+                newEnemies.push(createEnemySafe(boss, 0));
+                const minion = endlessMobPool[Math.floor(Math.random() * endlessMobPool.length)] || ENEMY_TYPES[0];
+                newEnemies.push(createEnemySafe(minion, 1));
+                logMsg = `放課後エンドレス 補習${floor}限目 - ${boss.name}`;
+                bgmId = 'kocho_boss';
+            } else {
+                const count = Math.min(4, 2 + Math.floor(floor / 4));
+                for (let i = 0; i < count; i++) {
+                    const template = endlessMobPool[Math.floor(Math.random() * endlessMobPool.length)] || ENEMY_TYPES[0];
+                    newEnemies.push(createEnemySafe(template, i));
+                }
+                if (floor % 3 === 0) {
+                    const enforcer = ENEMY_TYPES.find(e => e.name === '校則執行官');
+                    if (enforcer && newEnemies.length < 4) newEnemies.push(createEnemySafe(enforcer, newEnemies.length));
+                }
+                logMsg = `放課後エンドレス 補習${floor}限目`;
+                bgmId = floor % 3 === 0 ? 'kocho_boss' : 'kocho_battle';
+            }
+        } else if (stage === FINAL_STAGE) {
             // Final Boss (Sequence doesn't really matter here, but let's keep it clean)
             const boss = ENEMY_TYPES.find(e => e.name === '校長')!;
             newEnemies.push(createEnemySafe(boss, 0, 1)); // Phase 1
@@ -923,7 +1060,11 @@ const KochoShowdown: React.FC<{
         }));
 
         audioService.playBGM(bgmId);
-        if (stage === FINAL_STAGE) {
+        if (stateRef.current.isEndless || stage > FINAL_STAGE) {
+            const floor = Math.max(1, stateRef.current.endlessFloor || wave || 1);
+            const isBossFloor = floor % 5 === 0;
+            showAnnouncement(isBossFloor ? '補習監査' : `補習 ${floor}限目`, isBossFloor ? '放課後エンドレス強敵' : '放課後エンドレス', isBossFloor ? 'danger' : 'special', isBossFloor ? 1500 : 1100);
+        } else if (stage === FINAL_STAGE) {
             showAnnouncement('最終決戦', '校長室', 'danger', 1700);
         } else if (sequence === 2) {
             const eliteName = newEnemies[0]?.name || '強敵';
@@ -937,14 +1078,17 @@ const KochoShowdown: React.FC<{
     // Modified createEnemy to accept explicit pos instead of calculating internally based on index 
     // (Calculation moved to createEnemySafe in startWave)
     const createEnemy = (template: EnemyTemplate, pos: number, bossPhase?: number): KEntity => {
+        const endlessFloor = stateRef.current.isEndless ? Math.max(1, stateRef.current.endlessFloor) : 0;
+        const hpBonus = endlessFloor > 0 ? Math.floor(endlessFloor * 1.8) : 0;
+        const maxHp = Math.ceil((template.maxHp + hpBonus) * getKochoDifficulty(stateRef.current.difficultyLevel).hpMultiplier);
         return {
             id: `e_${Date.now()}_${pos}`,
             type: 'ENEMY',
             name: template.name,
             pos: pos,
             facing: pos < 3 ? 1 : -1,
-            maxHp: template.maxHp,
-            hp: template.maxHp,
+            maxHp,
+            hp: maxHp,
             spriteName: template.sprite,
             shield: 0,
             barrier: 0,
@@ -1209,11 +1353,13 @@ const KochoShowdown: React.FC<{
 
                     if (!isSpecial) {
                         if (inRange && facingCorrect) {
-                            e.intent = { 
-                                type: 'ATTACK', 
-                                damage: template.attackDmg, 
-                                range: template.range, 
-                                timer: 1 
+                            const endlessAttackBonus = current.isEndless ? Math.floor(Math.max(1, current.endlessFloor) / 5) : 0;
+                            const difficultyAttackBonus = getKochoDifficulty(current.difficultyLevel).damageBonus;
+                            e.intent = {
+                                type: 'ATTACK',
+                                damage: template.attackDmg + endlessAttackBonus + difficultyAttackBonus,
+                                range: template.range,
+                                timer: 1
                             };
                         } else {
                             let bestTargetPos = e.pos;
@@ -1930,8 +2076,20 @@ const KochoShowdown: React.FC<{
             
             if (aliveEnemies.length === 0) {
                 const rewardMoney = 10 + prev.battleStage * 5;
+                const defeatedCount = prev.enemies.length;
+                const endlessScoreGain = Math.floor((defeatedCount * 100 + Math.max(1, prev.endlessFloor) * 25) * getKochoDifficulty(prev.difficultyLevel).scoreMultiplier);
                 setTimeout(() => handlePhaseComplete(), 1000);
-                return { ...prev, status: 'WAVE_CLEAR', queue: [], hand: newHand, money: prev.money + rewardMoney, logs: [...prev.logs, `Wave Clear! +${rewardMoney}G`], enemies: aliveEnemies };
+                return {
+                    ...prev,
+                    status: 'WAVE_CLEAR',
+                    queue: [],
+                    hand: newHand,
+                    money: prev.money + rewardMoney,
+                    logs: [...prev.logs, `Wave Clear! +${rewardMoney}G`],
+                    enemies: aliveEnemies,
+                    endlessKills: prev.isEndless ? prev.endlessKills + defeatedCount : prev.endlessKills,
+                    endlessScore: prev.isEndless ? prev.endlessScore + endlessScoreGain : prev.endlessScore
+                };
             }
 
             return { ...prev, status: 'PLAYING', queue: [], hand: newHand, enemies: aliveEnemies };
@@ -1947,8 +2105,25 @@ const KochoShowdown: React.FC<{
         let nextStageVal = current.battleStage;
         let nextSequence = current.battleSequence;
 
+        if (current.isEndless) {
+            if (current.phase === 'BATTLE') {
+                if (current.endlessFloor % 5 === 0) {
+                    nextPhase = 'SHOP';
+                } else if (current.endlessFloor % 3 === 0) {
+                    nextPhase = 'UPGRADE_EVENT';
+                } else {
+                    nextPhase = 'REWARD';
+                }
+            } else {
+                const nextFloor = current.endlessFloor + 1;
+                nextStageVal = FINAL_STAGE + nextFloor;
+                nextSequence = nextFloor % 5;
+                nextWave = 1;
+                nextPhase = 'BATTLE';
+            }
+        }
         // Stage 1: Tutorial (Linear)
-        if (current.battleStage === 1) {
+        else if (current.battleStage === 1) {
             if (nextWave > current.maxWaves) {
                 if (current.phase === 'BATTLE') nextPhase = 'REWARD';
                 else if (current.phase === 'REWARD') { nextStageVal++; nextSequence = 0; nextWave = 1; nextPhase = 'BATTLE'; }
@@ -2018,9 +2193,23 @@ const KochoShowdown: React.FC<{
              if (nextPhase === 'VICTORY') {
                   setGameState(prev => ({ ...prev, status: 'VICTORY', pendingPhase: null }));
                   audioService.playSound('win');
-             } else if (nextPhase === 'BATTLE') {
-                  startWave(nextStageVal, nextSequence, nextWave);
-             }
+              } else if (nextPhase === 'BATTLE') {
+                  if (stateRef.current.isEndless) {
+                      const nextFloor = Math.max(1, nextStageVal - FINAL_STAGE);
+                      const nextState = {
+                          ...stateRef.current,
+                          endlessFloor: nextFloor,
+                          battleStage: FINAL_STAGE + nextFloor,
+                          battleSequence: nextFloor % 5,
+                          wave: 1
+                      };
+                      stateRef.current = nextState;
+                      setGameState(nextState);
+                      startWave(FINAL_STAGE + nextFloor, nextFloor % 5, 1);
+                  } else {
+                      startWave(nextStageVal, nextSequence, nextWave);
+                  }
+              }
         }
     };
 
@@ -2267,6 +2456,23 @@ const KochoShowdown: React.FC<{
     };
 
     const getKochoEnemyAsset = (enemy: KEntity) => {
+        const endlessNameCells: Array<[string, number, number]> = [
+            ['放課後の見回り', 1, 0],
+            ['答案の亡霊', 2, 4],
+            ['購買部の圧', 3, 8],
+            ['補習監督', 4, 12],
+            ['風紀委員長', 5, 1],
+            ['図書室監査員', 6, 5],
+            ['放送委員の刺客', 7, 9],
+            ['生徒会監査', 8, 13],
+            ['校則執行官', 9, 17],
+            ['深夜校長', 10, 0],
+        ];
+        const endlessMatch = endlessNameCells.find(([name]) => enemy.name.includes(name));
+        if (endlessMatch) {
+            const isPrincipalSheet = endlessMatch[1] === 10;
+            return { src: KOCHO_ENEMY_SHEETS[endlessMatch[1]], cell: endlessMatch[2], columns: isPrincipalSheet ? 3 : 5, rows: isPrincipalSheet ? 2 : 5 };
+        }
         const nameCells: Array<[string, number]> = [
             ['不良生徒', 0], ['熱血教師', 1], ['用務員', 2], ['ガリ勉', 3], ['教頭', 4],
             ['理科の先生', 5], ['体育の先生', 6], ['音楽の先生', 7], ['生活指導', 8],
@@ -2277,7 +2483,7 @@ const KochoShowdown: React.FC<{
             ['卒業式の亡霊', 24],
         ];
         const match = nameCells.find(([name]) => enemy.name.includes(name));
-        return { src: KOCHO_ENEMY_SHEETS[0], cell: match ? match[1] : 0 };
+        return { src: KOCHO_ENEMY_SHEETS[0], cell: match ? match[1] : 0, columns: 5, rows: 5 };
     };
 
     const getKochoEffectAsset = (vfx: KochoVFX) => {
@@ -2307,6 +2513,10 @@ const KochoShowdown: React.FC<{
         if (gameState.phase === 'REWARD') return 22;
         if (gameState.phase === 'SHOP') return 23;
         if (gameState.phase === 'UPGRADE_EVENT' || gameState.phase === 'MATH') return 24;
+        if (gameState.isEndless) {
+            const endlessCells = [9, 12, 16, 18, 21, 2];
+            return endlessCells[Math.max(0, gameState.endlessFloor - 1) % endlessCells.length];
+        }
         if (gameState.status === 'VICTORY' || gameState.battleStage === FINAL_STAGE) return 2;
         const stageCells = [0, 1, 4, 5, 6, 7, 9];
         return stageCells[Math.max(0, Math.min(stageCells.length - 1, gameState.battleStage - 1))];
@@ -2386,7 +2596,7 @@ const KochoShowdown: React.FC<{
                             <div className={`transition-transform duration-200 ${e.facing === -1 ? 'scale-x-[-1]' : ''}`}>
                                 {(() => {
                                     const asset = getKochoEnemyAsset(e);
-                                    return <KochoSheetSprite sheet="characters" src={asset.src} cell={asset.cell} className="h-20 w-20 md:h-36 md:w-36" />;
+                                    return <KochoSheetSprite sheet="characters" src={asset.src} cell={asset.cell} columns={asset.columns} rows={asset.rows} className="h-20 w-20 md:h-36 md:w-36" />;
                                 })()}
                             </div>
                             {e.intent && (
@@ -2487,9 +2697,19 @@ const KochoShowdown: React.FC<{
             <div className="flex justify-between items-center p-2 md:p-4 bg-black/40 border-b border-indigo-500/30 shrink-0">
                 <button onClick={handleQuit} className="flex items-center text-gray-400 hover:text-white"><ArrowLeft className="mr-2"/> <span className="hidden md:inline">Quit</span></button>
                 <h2 className="text-sm md:text-xl font-bold text-indigo-100 tracking-widest hidden md:block">
-                    KOCHO SHOWDOWN <span className="text-xs text-pink-400 ml-2">Stage {gameState.battleStage}</span>
+                    KOCHO SHOWDOWN <span className="text-xs text-pink-400 ml-2">{gameState.phase === 'SETUP' ? 'Difficulty Select' : gameState.isEndless ? `補習 ${gameState.endlessFloor}限目` : `Stage ${gameState.battleStage}`}</span>
                 </h2>
                 <div className="flex items-center gap-2 md:gap-4">
+                    {gameState.phase !== 'SETUP' && (
+                        <div className="text-xs md:text-sm font-bold text-indigo-200 hidden md:flex items-center gap-2 bg-indigo-950/40 px-2 py-1 rounded border border-indigo-500/40">
+                            Lv.{gameState.difficultyLevel} {getKochoDifficulty(gameState.difficultyLevel).name}
+                        </div>
+                    )}
+                    {gameState.isEndless && (
+                        <div className="text-xs md:text-sm font-bold text-pink-200 flex items-center gap-2 bg-pink-950/50 px-2 py-1 rounded border border-pink-500/50">
+                            <Skull size={14}/> {gameState.endlessKills} K / {gameState.endlessScore} pt
+                        </div>
+                    )}
                     <button onClick={() => setShowHelpModal(true)} className="flex items-center gap-2 text-indigo-200 hover:text-white transition-colors text-xs md:text-sm font-bold border border-indigo-500/30 px-2 py-1 rounded bg-black/20">
                         <HelpCircle size={14}/> <span className="hidden md:inline">Help</span>
                     </button>
@@ -2504,6 +2724,33 @@ const KochoShowdown: React.FC<{
                     </div>
                 </div>
             </div>
+
+            {gameState.phase === 'SETUP' && (
+                <div className="absolute inset-0 z-40 flex items-center justify-center bg-[#111827]/95 p-4">
+                    <div className="w-full max-w-5xl rounded-xl border-2 border-indigo-500/60 bg-slate-950 p-5 shadow-2xl">
+                        <div className="mb-5 text-center">
+                            <div className="text-[11px] font-black uppercase tracking-[0.35em] text-pink-300">Kocho Showdown</div>
+                            <h2 className="mt-2 text-3xl font-black text-white">難易度選択</h2>
+                            <p className="mt-2 text-sm text-slate-400">Lv.1は現在の校長対決そのまま。上げるほど敵HP・攻撃力が増え、アイテムドロップが減ります。</p>
+                        </div>
+                        <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
+                            {KOCHO_DIFFICULTIES.map(difficulty => (
+                                <button
+                                    key={difficulty.level}
+                                    onClick={() => startKochoRun(difficulty.level)}
+                                    className="flex items-center justify-between rounded-lg border border-slate-700 bg-slate-900 px-4 py-3 text-left transition-colors hover:border-pink-400 hover:bg-slate-800"
+                                >
+                                    <div>
+                                        <div className="text-base font-black text-white">Lv.{difficulty.level} {difficulty.name}</div>
+                                        <div className="mt-1 text-xs text-slate-400">HP x{difficulty.hpMultiplier.toFixed(2)} / 攻撃 +{difficulty.damageBonus} / SCORE x{difficulty.scoreMultiplier.toFixed(1)}</div>
+                                    </div>
+                                    <Play size={18} className="text-pink-300" />
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            )}
 
             {/* Help Modal */}
             {showHelpModal && (
@@ -2756,7 +3003,10 @@ const KochoShowdown: React.FC<{
                                             <Gift size={16}/>
                                             追加カード解放 {kochoUnlockedCount}/{KOCHO_UNLOCKABLE_CARD_TOTAL}
                                         </div>
-                                        <button onClick={onBack} className="bg-indigo-600 px-8 py-3 rounded text-xl font-bold hover:bg-indigo-500">Return</button>
+                                        <div className="flex flex-col gap-3 md:flex-row">
+                                            <button onClick={startEndlessRun} className="bg-pink-600 px-8 py-3 rounded text-xl font-bold hover:bg-pink-500 border border-pink-300">放課後エンドレスへ</button>
+                                            <button onClick={onBack} className="bg-indigo-600 px-8 py-3 rounded text-xl font-bold hover:bg-indigo-500">Return</button>
+                                        </div>
                                     </div>
                                 </div>
                             )}
@@ -2766,7 +3016,8 @@ const KochoShowdown: React.FC<{
                                 <div className="text-center animate-in zoom-in">
                                     <Skull size={64} className="text-red-500 mb-4 mx-auto"/>
                                     <h2 className="text-4xl font-bold text-red-500 mb-4">EXPELLED</h2>
-                                    <p className="text-gray-400 mb-4">Stage {gameState.battleStage}</p>
+                                    <p className="text-gray-400 mb-2">{gameState.isEndless ? `補習 ${gameState.endlessFloor}限目 / ${gameState.endlessScore} pt` : `Stage ${gameState.battleStage}`}</p>
+                                    {gameState.isEndless && <p className="text-sm text-pink-300 mb-4">撃破数 {gameState.endlessKills}</p>}
                                     <button onClick={() => initGame()} className="bg-white text-black px-8 py-3 rounded text-xl font-bold hover:bg-gray-200">Retry</button>
                                 </div>
                             )}

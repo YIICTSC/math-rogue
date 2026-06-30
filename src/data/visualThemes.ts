@@ -37,7 +37,7 @@ export const getThemedCharacters = (characters: Character[], theme: VisualThemeI
       ...character,
       name: HIGH_SCHOOL_CHARACTER_NAMES[index] ?? character.name,
       description: HIGH_SCHOOL_CHARACTER_DESCRIPTIONS[index] ?? character.description,
-      imageData: assetUrl(`sprites/high-school/characters/${index % 9}.png`),
+      imageData: assetUrl(`sprites/high-school/characters/${index % 9}.webp`),
       deckTemplate: character.deckTemplate.map(cardId => HIGH_SCHOOL_STARTER_REPLACEMENTS[cardId] ?? cardId),
     }));
   }
@@ -49,7 +49,7 @@ export const getThemedCharacters = (characters: Character[], theme: VisualThemeI
         ...character,
         name: hero?.name ?? character.name,
         description: `【${hero.attribute}の魔法】${hero.personality}。得意分野は${hero.specialty}。固有能力「${hero.ability}」を軸に戦う${hero.transformedTitle}。`,
-        imageData: assetUrl(`sprites/magic/characters/heroine-${String((hero?.index ?? index + 1)).padStart(2, '0')}-before.png`),
+        imageData: assetUrl(`sprites/magic/characters/heroine-${String((hero?.index ?? index + 1)).padStart(2, '0')}-before.webp`),
         magicProtagonistId: hero.id,
         magicProtagonistGender: 'female' as const,
       };
@@ -76,7 +76,7 @@ export const getHighSchoolCharacterSpritePath = (
 ) => {
   const imageIndex = HIGH_SCHOOL_CHARACTER_INDEX_BY_ID[characterId ?? 'WARRIOR'] ?? 0;
   const folder = action === 'idle' ? 'characters' : `characters-${action}`;
-  return assetUrl(`sprites/high-school/${folder}/${imageIndex}.png`);
+  return assetUrl(`sprites/high-school/${folder}/${imageIndex}.webp`);
 };
 
 export const MAGIC_HERO_ID_BY_CHARACTER_ID: Record<string, string> = {
@@ -103,12 +103,12 @@ export const getMagicCharacterSpritePath = (
       ?? MAGIC_MALE_PROTAGONISTS[0];
     const folder = action === 'idle' ? 'male-characters' : `male-characters-${action}`;
     const form = transformed ? 'after' : 'before';
-    return assetUrl(`sprites/magic/${folder}/${protagonist.assetId}-${form}.png`);
+    return assetUrl(`sprites/magic/${folder}/${protagonist.assetId}-${form}.webp`);
   }
   const imageIndex = (HIGH_SCHOOL_CHARACTER_INDEX_BY_ID[characterId ?? 'WARRIOR'] ?? 0) + 1;
   const folder = action === 'idle' ? 'characters' : `characters-${action}`;
   const form = transformed ? 'after' : 'before';
-  return assetUrl(`sprites/magic/${folder}/heroine-${String(imageIndex).padStart(2, '0')}-${form}.png`);
+  return assetUrl(`sprites/magic/${folder}/heroine-${String(imageIndex).padStart(2, '0')}-${form}.webp`);
 };
 
 export const getThemedCharacterSpritePath = (
@@ -285,7 +285,7 @@ export const getHighSchoolHumanoidEnemySpritePath = (
   const variant = getHighSchoolHumanoidEnemyVariant(enemy);
   if (!variant) return null;
   const folder = action === 'idle' ? 'humanoid-enemies' : `humanoid-enemies-${action}`;
-  return assetUrl(`sprites/high-school/${folder}/${variant.imageIndex}.png`);
+  return assetUrl(`sprites/high-school/${folder}/${variant.imageIndex}.webp`);
 };
 
 export const MAGIC_ENEMY_VARIANTS = [
@@ -389,7 +389,7 @@ export const getMagicHumanoidEnemySpritePath = (
   const variant = getMagicHumanoidEnemyVariant(enemy);
   if (!variant) return null;
   const folder = action === 'idle' ? 'humanoid-enemies' : `humanoid-enemies-${action}`;
-  return assetUrl(`sprites/magic/${folder}/${variant.imageIndex}.png`);
+  return assetUrl(`sprites/magic/${folder}/${variant.imageIndex}.webp`);
 };
 
 export const getThemedEnemyVariant = (
@@ -424,8 +424,8 @@ export const getThemedMonsterEnemySpritePath = (
   enemy: Pick<Enemy, 'name' | 'enemyType' | 'phase'>,
   theme: VisualThemeId,
 ) => {
-  if (theme === 'high-school') return assetUrl(`sprites/high-school/enemies/${getHighSchoolEnemyVariant(enemy).imageIndex}.png`);
-  if (theme === 'magic') return assetUrl(`sprites/magic/enemies/${getMagicEnemyVariant(enemy).imageIndex}.png`);
+  if (theme === 'high-school') return assetUrl(`sprites/high-school/enemies/${getHighSchoolEnemyVariant(enemy).imageIndex}.webp`);
+  if (theme === 'magic') return assetUrl(`sprites/magic/enemies/${getMagicEnemyVariant(enemy).imageIndex}.webp`);
   return null;
 };
 

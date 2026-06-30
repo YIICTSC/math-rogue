@@ -1912,7 +1912,7 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
                                         <div key={event.imageIndex} className="bg-black/35 border border-gray-700 rounded-lg overflow-hidden">
                                             <div className="aspect-square bg-slate-950 overflow-hidden">
                                                 <img
-                                                    src={assetUrl(`sprites/high-school/events/${event.imageIndex}.png`)}
+                                                    src={assetUrl(`sprites/high-school/events/${event.imageIndex}.webp`)}
                                                     alt={event.title}
                                                     className={`w-full h-full object-cover ${event.imageIndex < 18 ? 'scale-[1.18]' : ''}`}
                                                 />
@@ -1951,7 +1951,7 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
                                                     <div key={action.key} className="bg-slate-950/80 border border-gray-800 rounded p-2">
                                                         <div className="aspect-square bg-[linear-gradient(45deg,#111827_25%,#0f172a_25%,#0f172a_50%,#111827_50%,#111827_75%,#0f172a_75%)] bg-[length:16px_16px] rounded relative overflow-hidden">
                                                             <img
-                                                                src={assetUrl(`sprites/high-school/${action.folder}/${enemy.imageIndex}.png`)}
+                                                                src={assetUrl(`sprites/high-school/${action.folder}/${enemy.imageIndex}.webp`)}
                                                                 alt={`${enemy.name} ${action.label}`}
                                                                 className="absolute inset-0 w-full h-full object-contain"
                                                                 draggable={false}

@@ -977,6 +977,7 @@ const App: React.FC = () => {
     const lastMagicDamageVoiceActionRef = useRef<string | null>(null);
     const [isPreloadingGameAssets, setIsPreloadingGameAssets] = useState(false);
     const gameAssetPreloadPromisesRef = useRef<Partial<Record<VisualThemeId, Promise<void>>>>({});
+    const deferredGameAssetPreloadStartedRef = useRef<Partial<Record<VisualThemeId, boolean>>>({});
     const startGameAssetPreload = useCallback(() => {
         const preloadKey = visualTheme;
         if (!gameAssetPreloadPromisesRef.current[preloadKey]) {
@@ -988,6 +989,12 @@ const App: React.FC = () => {
                 .then(() => undefined)
                 .catch(() => undefined)
                 .finally(() => setIsPreloadingGameAssets(false));
+        }
+        if (!deferredGameAssetPreloadStartedRef.current[preloadKey]) {
+            deferredGameAssetPreloadStartedRef.current[preloadKey] = true;
+            void gameAssetPreloadPromisesRef.current[preloadKey]
+                ?.then(() => assetPreloadService.preloadDeferredGameAssets(preloadKey))
+                .catch(() => undefined);
         }
     }, [visualTheme]);
 

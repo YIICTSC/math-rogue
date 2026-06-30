@@ -171,7 +171,7 @@ const OmegaBalancerZ: React.FC<OmegaBalancerZProps> = ({ onBack, onFinish, omega
   runRef.current = run;
 
   const fallbackCharacter = visualTheme === 'high-school'
-    ? { id: 'WARRIOR', name: '反逆の高校生', imageData: assetUrl('sprites/high-school/characters/0.png') }
+    ? { id: 'WARRIOR', name: '反逆の高校生', imageData: assetUrl('sprites/high-school/characters/0.webp') }
     : { id: 'WARRIOR', name: 'わんぱく小学生', imageData: getCharacterImage(OMEGA_HEROES[0]) };
   const displayPlayer = {
     id: omegaPlayer?.id || fallbackCharacter.id,

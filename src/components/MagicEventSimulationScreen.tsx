@@ -30,13 +30,13 @@ const PROTAGONISTS: ProtagonistOption[] = [
     id: hero.id,
     name: hero.name,
     gender: 'female' as const,
-    image: assetUrl(`sprites/magic/characters/heroine-${String(hero.index).padStart(2, '0')}-before.png`),
+    image: assetUrl(`sprites/magic/characters/heroine-${String(hero.index).padStart(2, '0')}-before.webp`),
   })),
   ...MAGIC_MALE_PROTAGONISTS.map((hero) => ({
     id: hero.id,
     name: hero.name,
     gender: 'male' as const,
-    image: assetUrl(`sprites/magic/male-characters/${hero.assetId}-before.png`),
+    image: assetUrl(`sprites/magic/male-characters/${hero.assetId}-before.webp`),
   })),
 ];
 

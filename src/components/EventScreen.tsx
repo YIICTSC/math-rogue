@@ -100,14 +100,14 @@ const EventScreen: React.FC<EventScreenProps> = ({ title, description, options, 
     }
     if (highSchoolEventIndex !== null) {
       return [
-        assetUrl(`sprites/high-school/events/${highSchoolEventIndex}.png`),
+        assetUrl(`sprites/high-school/events/${highSchoolEventIndex}.webp`),
         assetUrl('event-illustrations/default.svg'),
       ];
     }
     if (magicEventIndex !== null) {
       return [
         assetUrl(`sprites/magic/events/${magicEventIndex}.webp`),
-        assetUrl(`sprites/magic/events/${magicEventIndex}.png`),
+        assetUrl(`sprites/magic/events/${magicEventIndex}.webp`),
         assetUrl('event-illustrations/default.svg'),
       ];
     }

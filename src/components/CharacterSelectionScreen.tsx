@@ -61,7 +61,7 @@ const CharacterSelectionScreen: React.FC<CharacterSelectionScreenProps> = ({ cha
           ...baseCharacter,
           name: protagonist.name,
           description: `【${protagonist.role}】${protagonist.personality}。${protagonist.specialty}を得意とする魔法騎士。`,
-          imageData: assetUrl(`sprites/magic/male-characters/${protagonist.assetId}-before.png`),
+          imageData: assetUrl(`sprites/magic/male-characters/${protagonist.assetId}-before.webp`),
           magicProtagonistId: protagonist.id,
           magicProtagonistGender: 'male' as const,
         }];

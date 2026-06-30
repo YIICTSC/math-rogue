@@ -29,12 +29,12 @@
 
 保存予定:
 
-- `public/sprites/magic/male-characters/{target-id}-before.png`
-- `public/sprites/magic/male-characters/{target-id}-after.png`
-- `public/sprites/magic/male-characters-attack/{target-id}-before.png`
-- `public/sprites/magic/male-characters-attack/{target-id}-after.png`
-- `public/sprites/magic/male-characters-skill/{target-id}-before.png`
-- `public/sprites/magic/male-characters-skill/{target-id}-after.png`
+- `public/sprites/magic/male-characters/{target-id}-before.webp`
+- `public/sprites/magic/male-characters/{target-id}-after.webp`
+- `public/sprites/magic/male-characters-attack/{target-id}-before.webp`
+- `public/sprites/magic/male-characters-attack/{target-id}-after.webp`
+- `public/sprites/magic/male-characters-skill/{target-id}-before.webp`
+- `public/sprites/magic/male-characters-skill/{target-id}-after.webp`
 
 ## 実装順
 

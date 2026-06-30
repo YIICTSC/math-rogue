@@ -17,15 +17,15 @@ public/sprites/magic/events/romance/{heroId}/{targetId}/r5.webp
 生成元:
 
 ```text
-public/sprites/magic/events/romance-sheets/magic-romance-initial-sheet-01.png
+public/sprites/magic/events/romance-sheets/magic-romance-initial-sheet-01.webp
 ...
-public/sprites/magic/events/romance-sheets/magic-romance-initial-sheet-10.png
+public/sprites/magic/events/romance-sheets/magic-romance-initial-sheet-10.webp
 ```
 
 確認用:
 
 ```text
-public/sprites/magic/events/romance-review/magic-romance-initial-90-contact-trimmed.png
+public/sprites/magic/events/romance-review/magic-romance-initial-90-contact-trimmed.webp
 ```
 
 ## QA結果
@@ -57,14 +57,14 @@ public/sprites/magic/events/romance-review/magic-romance-initial-90-contact-trim
 ## リテイク生成元
 
 ```text
-public/sprites/magic/events/romance-sheets/magic-romance-retake-rei-sakuya.png
-public/sprites/magic/events/romance-sheets/magic-romance-retake-koharu-sakuya.png
-public/sprites/magic/events/romance-sheets/magic-romance-retake-mirai-riku.png
-public/sprites/magic/events/romance-sheets/magic-romance-retake-madoka-elliot.png
+public/sprites/magic/events/romance-sheets/magic-romance-retake-rei-sakuya.webp
+public/sprites/magic/events/romance-sheets/magic-romance-retake-koharu-sakuya.webp
+public/sprites/magic/events/romance-sheets/magic-romance-retake-mirai-riku.webp
+public/sprites/magic/events/romance-sheets/magic-romance-retake-madoka-elliot.webp
 ```
 
 更新後確認用:
 
 ```text
-public/sprites/magic/events/romance-review/magic-romance-initial-90-contact-retake.png
+public/sprites/magic/events/romance-review/magic-romance-initial-90-contact-retake.webp
 ```

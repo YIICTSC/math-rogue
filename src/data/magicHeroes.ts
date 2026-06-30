@@ -53,5 +53,5 @@ export const isMagicMaleProtagonist = (id: string | undefined) =>
 export const getMagicHeroSprite = (hero: MagicHero, transformed: boolean, action: 'idle' | 'attack' | 'skill' = 'idle') => {
   const folder = action === 'idle' ? 'characters' : `characters-${action}`;
   const form = transformed ? 'after' : 'before';
-  return `sprites/magic/${folder}/heroine-${String(hero.index).padStart(2, '0')}-${form}.png`;
+  return `sprites/magic/${folder}/heroine-${String(hero.index).padStart(2, '0')}-${form}.webp`;
 };

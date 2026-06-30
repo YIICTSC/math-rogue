@@ -29,6 +29,8 @@ const RankingScreen: React.FC<RankingScreenProps> = ({ onBack, languageMode }) =
       setDungeonData(storageService.getDungeonScores().sort((a, b) => b.score - a.score));
       setDungeon2Data(storageService.getDungeonScores2().sort((a, b) => b.score - a.score));
       setKochoData(storageService.getKochoScores().sort((a, b) => {
+          if ((b.endlessScore || 0) !== (a.endlessScore || 0)) return (b.endlessScore || 0) - (a.endlessScore || 0);
+          if ((b.endlessFloor || 0) !== (a.endlessFloor || 0)) return (b.endlessFloor || 0) - (a.endlessFloor || 0);
           if (b.stage !== a.stage) return b.stage - a.stage;
           return a.turns - b.turns; // ステージが同じならターン数が少ない方が上位
       }));
@@ -447,7 +449,7 @@ const RankingScreen: React.FC<RankingScreenProps> = ({ onBack, languageMode }) =
                                     </div>
                                     <div>
                                         <div className="font-bold text-indigo-300">
-                                            Stage {entry.stage}
+                                            {entry.isEndless ? `補習 ${entry.endlessFloor || 0}限目` : `Stage ${entry.stage}`}
                                         </div>
                                         <div className="flex items-center text-[10px] text-gray-500">
                                             <Calendar size={10} className="mr-1" />
@@ -459,15 +461,23 @@ const RankingScreen: React.FC<RankingScreenProps> = ({ onBack, languageMode }) =
                                 {/* Middle: Victory */}
                                 <div className="flex-grow mb-2 md:mb-0 px-0 md:px-4">
                                     <div className={`text-sm font-bold ${entry.victory ? 'text-yellow-400' : 'text-gray-400'}`}>
-                                        {entry.victory ? 'GRADUATION (Victory)' : 'EXPELLED (Defeat)'}
+                                        {entry.isEndless ? '放課後エンドレス' : entry.victory ? 'GRADUATION (Victory)' : 'EXPELLED (Defeat)'}
                                     </div>
+                                    <div className="mt-1 text-xs text-indigo-300">
+                                        難易度 Lv.{entry.difficultyLevel || 1}
+                                    </div>
+                                    {entry.isEndless && (
+                                        <div className="mt-1 text-xs text-pink-300">
+                                            撃破数 {entry.endlessKills || 0}
+                                        </div>
+                                    )}
                                 </div>
 
                                 {/* Right: Turns */}
                                 <div className="w-full md:w-32 text-right">
-                                    <div className="text-xs text-gray-500">TURNS</div>
+                                    <div className="text-xs text-gray-500">{entry.isEndless ? 'SCORE' : 'TURNS'}</div>
                                     <div className="text-xl font-mono font-bold text-pink-300">
-                                        {entry.turns}
+                                        {entry.isEndless ? (entry.endlessScore || 0) : entry.turns}
                                     </div>
                                 </div>
                             </div>

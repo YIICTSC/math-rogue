@@ -4,9 +4,9 @@ ImageGenで3x3スプライトシートを3枚生成し、各セルを切り出�
 
 ## ImageGen Sprite Sheets
 
-- `public/sprites/magic/events/romance/generated-sheets/sakuya-ending-variants-01.png`
-- `public/sprites/magic/events/romance/generated-sheets/sakuya-ending-variants-02.png`
-- `public/sprites/magic/events/romance/generated-sheets/tsubasa-ending-variants-01.png`
+- `public/sprites/magic/events/romance/generated-sheets/sakuya-ending-variants-01.webp`
+- `public/sprites/magic/events/romance/generated-sheets/sakuya-ending-variants-02.webp`
+- `public/sprites/magic/events/romance/generated-sheets/tsubasa-ending-variants-01.webp`
 
 ## Imported Cells
 
