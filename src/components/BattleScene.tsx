@@ -1055,7 +1055,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
             className={`battle-scene-root battle-ui-custom ${visualTheme === 'high-school' ? 'battle-high-school' : visualTheme === 'magic' ? 'battle-magic' : ''} flex flex-col h-full w-full bg-gray-900 text-white relative overflow-hidden ${forceLandscapeSplit || isPcBrowserViewport ? 'battle-force-split battle-pc-split' : ''} ${isShaking ? 'animate-screen-shake' : ''}`}
             style={battleUiStyle}
         >
-            {visualTheme === 'magic' && <MagicRulePanel player={player} />}
+            {visualTheme === 'magic' && <MagicRulePanel player={player} languageMode={languageMode} />}
             {finisherCutinCard && (
                 <BattleFinisherCutinOverlay card={finisherCutinCard} languageMode={languageMode} />
             )}
@@ -1465,7 +1465,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                 type="button"
                                 onClick={() => setShowLog(false)}
                                 className="ml-2 rounded border border-gray-600 bg-gray-900/90 p-0.5 text-gray-300 hover:border-gray-400 hover:text-white"
-                                title="バトルログを閉じる"
+                                title={trans("バトルログを閉じる", languageMode)}
                             >
                                 <X size={12} />
                             </button>
@@ -1489,7 +1489,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                     <div className="absolute inset-0 z-50 flex items-center justify-center pointer-events-none">
                         <div className="bg-black/90 border-4 border-yellow-400 p-8 rounded-xl shadow-[0_0_50px_rgba(250,204,21,0.5)] animate-in zoom-in duration-300 flex flex-col items-center">
                             <Sparkles className="text-yellow-400 mb-4 animate-spin" size={48} />
-                            <h2 className="text-3xl font-black text-yellow-100 mb-6 tracking-widest text-shadow-lg">友情コンボ！</h2>
+                            <h2 className="text-3xl font-black text-yellow-100 mb-6 tracking-widest text-shadow-lg">{trans("友情コンボ！", languageMode)}</h2>
                             <div className="scale-125">
                                 <Card card={synthesizedCard} onClick={() => { }} disabled={false} languageMode={languageMode} onInspect={onInspect} />
                             </div>
@@ -1550,7 +1550,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                             </div>
                             <div className="overflow-y-auto custom-scrollbar flex-grow space-y-2 pr-1">
                                 {player.relics.length === 0 ? (
-                                    <div className="text-center text-gray-500 py-8">レリックを持っていません</div>
+                                    <div className="text-center text-gray-500 py-8">{trans("レリックを持っていません", languageMode)}</div>
                                 ) : (
                                     player.relics.map(r => {
                                         const counter = getRelicCounter(r.id);
@@ -2138,7 +2138,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                             {coopSupportHudOpen ? (
                                 <div>
                                     <div className="text-[10px] uppercase tracking-[0.25em] text-emerald-200">Coop Item</div>
-                                    <div className="text-sm font-black">支援カード {coopSupportCards.length} 枚</div>
+                                    <div className="text-sm font-black">{trans("支援カード", languageMode)} {coopSupportCards.length} {trans("枚", languageMode)}</div>
                                 </div>
                             ) : (
                                 <>
@@ -2179,7 +2179,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                                                 : 'border-gray-600 bg-gray-700 text-gray-400 cursor-not-allowed'
                                                             }`}
                                                     >
-                                                        {isSelected ? '対象を選択中' : '対象を選ぶ'}
+                                                        {trans(isSelected ? '対象を選択中' : '対象を選ぶ', languageMode)}
                                                     </button>
                                                 ) : (
                                                     <button
@@ -2195,7 +2195,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                                                 : 'border-gray-600 bg-gray-700 text-gray-400 cursor-not-allowed'
                                                             }`}
                                                     >
-                                                        使う
+                                                        {trans("使う", languageMode)}
                                                     </button>
                                                 )}
                                                 {isSelected && (
@@ -2205,7 +2205,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                                         onClick={() => setSelectedSupportCard(null)}
                                                         className="rounded border border-gray-500 bg-gray-800 px-2 py-1 text-[11px] font-bold text-gray-200 hover:bg-gray-700"
                                                     >
-                                                        取消
+                                                        {trans("取消", languageMode)}
                                                     </button>
                                                 )}
                                             </div>
@@ -2245,7 +2245,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                 ${friendshipComboEnabled && !actingEnemyId && !selectionState.active && selectedCardIds.length > 0 ? 'hover:bg-indigo-500 animate-pulse cursor-pointer' : 'opacity-50 cursor-not-allowed grayscale'}
                             `}
                         >
-                            <Users size={12} /> 友情コンボ
+                            <Users size={12} /> {trans("友情コンボ", languageMode)}
                         </button>
                         <button
                             data-gamepad-zone="battle-actions"
@@ -2260,7 +2260,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                     ? 'border-indigo-200 bg-indigo-500 text-white hover:bg-indigo-400'
                                     : 'border-gray-400 bg-gray-700 text-gray-100 hover:bg-gray-600'
                             }`}
-                            title="友情コンボの使用を切り替える"
+                            title={trans("友情コンボの使用を切り替える", languageMode)}
                         >
                             {friendshipComboEnabled ? 'ON' : 'OFF'}
                         </button>
@@ -2288,7 +2288,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                     : 'border-gray-500 bg-gray-700 text-gray-300 opacity-50 grayscale'
                         }`}
                     >
-                        {player.magicTransformed ? '変身中 HP-20' : '変身'}
+                        {trans(player.magicTransformed ? '変身中 HP-20' : '変身', languageMode)}
                     </button>
                 )}
                 <button

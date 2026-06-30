@@ -365,7 +365,7 @@ const RewardScreen: React.FC<RewardScreenProps> = ({ rewards, onSelectReward, on
         >
           {isLoading ? trans("読み込み中...", languageMode) : `${trans("これ以上受け取らずに進む", languageMode)} >>`}
         </button>
-        {typingMode && <div className="mt-2 text-center text-[10px] font-bold text-cyan-300">{languageMode === 'ENGLISH' ? '1-9: Select / 0 or Enter: Continue' : '1-9: 選択 / 0 or Enter: 進む'}</div>}
+        {typingMode && <div className="mt-2 text-center text-[10px] font-bold text-cyan-300">{languageMode === 'ENGLISH' ? '1-9: Select / 0 or Enter: Continue' : trans('1-9: 選択 / 0 or Enter: 進む', languageMode)}</div>}
       </div>
     </div>
   );

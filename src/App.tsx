@@ -9042,7 +9042,7 @@ const App: React.FC = () => {
                 magicTransformed: true,
                 magicTransformedThisBattle: true,
                 drawPile: shuffle([...prev.player.drawPile, ...magicCards]),
-                floatingText: { id: `magic-transform-${Date.now()}`, text: '変身!', color: 'text-fuchsia-300', iconType: 'zap' },
+                floatingText: { id: `magic-transform-${Date.now()}`, text: trans('変身!', languageMode), color: 'text-fuchsia-300', iconType: 'zap' },
             };
             if (prev.challengeMode === 'COOP' && coopSession && !coopSession.isHost) {
                 window.setTimeout(() => {
@@ -15121,14 +15121,14 @@ const App: React.FC = () => {
                                         <div className="game-over-card-preview scale-100">
                                             <Card card={newlyUnlockedCard} onClick={() => { }} disabled={false} languageMode={languageMode} />
                                         </div>
-                                        <p className="text-sm text-yellow-100 font-bold">新しい学習の成果が、次回の冒険から現れるようになります！</p>
+                                        <p className="text-sm text-yellow-100 font-bold">{trans("新しい学習の成果が、次回の冒険から現れるようになります！", languageMode)}</p>
                                     </div>
                                 </div>
                             )}
 
                             {getDifficultyConfig(gameState.difficultyLevel).legacyCardAllowed && !legacyCardSelected ? (
                                 <div className="game-over-legacy mb-8 shrink-0">
-                                    <p className="game-over-legacy-title mb-4 text-sm text-red-200 font-bold">次回の冒険に持っていくカードを1枚選んでください</p>
+                                    <p className="game-over-legacy-title mb-4 text-sm text-red-200 font-bold">{trans("次回の冒険に持っていくカードを1枚選んでください", languageMode)}</p>
                                     <div className="game-over-legacy-list flex flex-wrap justify-center gap-2 max-h-60 overflow-y-auto custom-scrollbar p-2 bg-black/30 rounded border border-red-700/50">
                                         {gameState.player.deck.map(card => (
                                             <div key={card.id} className="scale-75 cursor-pointer hover:scale-90 transition-transform" onClick={() => handleLegacyCardSelect(card)}>
@@ -15139,8 +15139,8 @@ const App: React.FC = () => {
                                 </div>
                             ) : getDifficultyConfig(gameState.difficultyLevel).legacyCardAllowed ? (
                                 <div className="game-over-legacy mb-8 p-4 bg-black/50 border border-gray-500 rounded-lg animate-in zoom-in duration-150 shrink-0">
-                                    <p className="text-gray-300 font-bold text-xl">遺志は継がれた...</p>
-                                    <p className="text-sm text-gray-500 mt-1">次の児童が拾うことになる。</p>
+                                    <p className="text-gray-300 font-bold text-xl">{trans("遺志は継がれた...", languageMode)}</p>
+                                    <p className="text-sm text-gray-500 mt-1">{trans("次の児童が拾うことになる。", languageMode)}</p>
                                 </div>
                             ) : null}
                             <div className="game-over-actions flex flex-col gap-4 items-center">

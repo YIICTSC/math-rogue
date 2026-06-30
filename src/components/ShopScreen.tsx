@@ -330,7 +330,7 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics =
            </div>
            {typingMode && (
                 <div className="mb-3 text-center text-[10px] font-bold text-cyan-300">
-                    {languageMode === 'ENGLISH' ? '1-9, QWERTY...: Select / 0: Buy-Remove Toggle / Enter: Leave Shop' : '1-9, QWERTY...: 選択 / 0: 購入・削除切替 / Enter: 店を出る'}
+                    {languageMode === 'ENGLISH' ? '1-9, QWERTY...: Select / 0: Buy-Remove Toggle / Enter: Leave Shop' : trans('1-9, QWERTY...: 選択 / 0: 購入・削除切替 / Enter: 店を出る', languageMode)}
                 </div>
            )}
 
