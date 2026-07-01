@@ -28,7 +28,7 @@ interface RestScreenProps {
 
 const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSynthesize, onSelfStudy, onLeave, languageMode, typingMode = false, scienceRoomChance = 0.5, interactionDisabled = false, interactionDisabledMessage, visualTheme = 'elementary' }) => {
   const isMagic = visualTheme === 'magic';
-  const restHubMessage = isMagic ? "結界保健室だ。魔力を整えて、次の出撃に備えよう。" : "放課後の校舎だ。どこへ行こう？";
+  const restHubMessage = isMagic ? "特別結界室だ。魔力を整えて、次の出撃に備えよう。" : "放課後の校舎だ。どこへ行こう？";
   const [mode, setMode] = useState<'CHOICE' | 'UPGRADE' | 'SYNTHESIS' | 'SELF_STUDY' | 'ERASER_EFFECT' | 'PREVIEW_UPGRADE' | 'PREVIEW_SYNTHESIS' | 'RESULT' | 'DONE'>('CHOICE');
   const [message, setMessage] = useState(restHubMessage);
   const [selectedCard, setSelectedCard] = useState<ICard | null>(null);
@@ -130,7 +130,7 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
       setMode('DONE');
       setMessage(languageMode === 'ENGLISH'
           ? `You took a nap in the infirmary bed. Healed ${healAmount} HP!`
-          : isMagic ? `結界保健室で魔力を整えた。HPが ${healAmount} 回復した！` : `保健室のベッドで仮眠をとった。HPが ${healAmount} 回復した！`);
+          : isMagic ? `特別結界室で魔力を整えた。HPが ${healAmount} 回復した！` : `保健室のベッドで仮眠をとった。HPが ${healAmount} 回復した！`);
   };
 
   const handleSmithChoice = () => {
@@ -268,7 +268,7 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
                 </div>
             )}
             <h2 className="text-3xl md:text-4xl text-orange-500 font-bold mb-4 flex items-center justify-center shrink-0">
-                <DoorOpen className="mr-3" /> {trans(isMagic ? "結界保健室" : "放課後の探索", languageMode)}
+                <DoorOpen className="mr-3" /> {trans(isMagic ? "特別結界室" : "放課後の探索", languageMode)}
             </h2>
             <p className="text-lg md:text-xl text-gray-300 mb-6 min-h-[3rem] shrink-0 whitespace-pre-wrap">{trans(message, languageMode)}</p>
 
