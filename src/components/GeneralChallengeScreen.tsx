@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { CheckCircle, XCircle, Volume2, Mic } from 'lucide-react';
 import { audioService } from '../services/audioService';
-import { AnswerMode, AssignmentAnswerResult, AssignmentCustomProblem, AssignmentReviewProblem, GameMode } from '../types';
+import { AnswerMode, AssignmentAnswerResult, AssignmentCustomProblem, AssignmentReviewProblem, GameMode, LanguageMode } from '../types';
 import { storageService } from '../services/storageService';
 import { SUBJECT_DATA, GeneralProblem } from '../data/subjectData';
 import { MAP_SYMBOL_ASSET_MAP } from './mapSymbolImageMap';
@@ -18,6 +18,7 @@ interface GeneralChallengeScreenProps {
   isChallenge?: boolean;
   streak?: number;
   rewardHint?: string;
+  languageMode?: LanguageMode;
   onAnswerResult?: (result: AssignmentAnswerResult) => void;
   customProblems?: AssignmentCustomProblem[];
   problemOffset?: number;
@@ -104,7 +105,7 @@ const isEnglishSpeakingReviewMode = (mode: string) =>
   /^ENGLISH_G8_U(11|12|13)$/.test(mode) ||
   /^ENGLISH_G9_U(12|13|14)$/.test(mode);
 
-const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onComplete, mode, modePool, onModeCorrect, answerMode = 'CHOICE', debugSkip, isChallenge, streak = 0, rewardHint, onAnswerResult, customProblems = EMPTY_CUSTOM_PROBLEMS, problemOffset = 0, reviewProblem = null }) => {
+const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onComplete, mode, modePool, onModeCorrect, answerMode = 'CHOICE', debugSkip, isChallenge, streak = 0, rewardHint, languageMode = 'NORMAL', onAnswerResult, customProblems = EMPTY_CUSTOM_PROBLEMS, problemOffset = 0, reviewProblem = null }) => {
   const [problems, setProblems] = useState<ExtendedGeneralProblem[]>([]);
   const [currentProblemIndex, setCurrentProblemIndex] = useState(0);
   const [correctCount, setCorrectCount] = useState(0);
@@ -1704,7 +1705,7 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
   return (
     <div className={`main-challenge-screen flex flex-col h-full w-full ${bgClass} text-white relative items-center justify-center p-2 sm:p-3 md:p-8 font-mono overflow-y-auto overflow-x-hidden`}>
         <div className="absolute inset-0 texture-dark-matter opacity-20 pointer-events-none"></div>
-        <RewardHintBanner text={rewardHint} />
+        <RewardHintBanner text={rewardHint} languageMode={languageMode} />
         
         <div className="general-challenge-layout z-10 w-full max-w-md text-center flex flex-col py-2 md:py-0 min-w-0">
             {isEnglishSpeakingReviewMode(mode) && !isChallenge && (

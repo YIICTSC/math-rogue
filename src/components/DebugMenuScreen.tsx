@@ -1,5 +1,5 @@
 
-import { CARDS_LIBRARY, RELIC_LIBRARY, POTION_LIBRARY, ENEMY_LIBRARY } from '../constants';
+import { CARDS_LIBRARY, RELIC_LIBRARY, POTION_LIBRARY } from '../constants';
 import { GAME_STORIES } from '../data/stories';
 import { FLAVOR_TEXTS, ENEMY_NAMES } from '../services/geminiService';
 import { AttackEffectKey, StatusEffectKey, Card as ICard, Relic, Potion, CardType, TargetType, LanguageMode, GameScreen, GameMode, MiniGameDebugPreview } from '../types';
@@ -14,6 +14,7 @@ import { trans } from '../utils/textUtils';
 import { ATTACK_EFFECT_LIST } from '../data/attackEffects';
 import { STATUS_EFFECT_LIST } from '../data/statusEffects';
 import { HIGH_SCHOOL_EVENT_THEMES, MAGIC_EVENT_THEMES, HIGH_SCHOOL_HUMANOID_ENEMY_VARIANTS, type HighSchoolEnemyAction, type VisualThemeId } from '../data/visualThemes';
+import { getEnemyLibraryByTheme } from '../data/enemyCatalogs';
 import { MAGIC_HEROES, MAGIC_MALE_PROTAGONISTS } from '../data/magicHeroes';
 import { getMagicRomanceDialogue, getMagicRomanceEndingText, type MagicRomanceEndingRank } from '../data/magicRomanceDialogue';
 import { getMagicRomanceVoiceLines } from '../services/magicRomanceEventService';
@@ -551,7 +552,9 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
         allCards.forEach(c => { check(c.name); check(c.description); });
         allRelics.forEach(r => { check(r.name); check(r.description); });
         allPotions.forEach(p => { check(p.name); check(p.description); });
-        Object.values(ENEMY_LIBRARY).forEach(e => check(e.name));
+        (['elementary', 'high-school', 'magic'] as VisualThemeId[])
+            .flatMap(theme => Object.values(getEnemyLibraryByTheme(theme)))
+            .forEach(e => check(e.name));
         ENEMY_NAMES.forEach(check);
         EVENT_SAMPLES.forEach(ev => {
             check(ev.title);
@@ -839,8 +842,13 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
                                     {transSubTab === 'ENEMY' && (
                                         <>
                                             <div className="bg-gray-800/80 p-1 px-3 text-[10px] font-black text-red-400 border-y border-gray-700">LIBRARY ENEMIES</div>
-                                            {Object.values(ENEMY_LIBRARY).map((enemy, i) => (
-                                                <TranslationRow key={i} original={enemy.name} context={`Tier ${enemy.tier}`} debugLanguageMode={debugLanguageMode} />
+                                            {(['elementary', 'high-school', 'magic'] as VisualThemeId[]).map(theme => (
+                                                <React.Fragment key={theme}>
+                                                    <div className="bg-gray-900/80 p-1 px-3 text-[10px] font-black text-red-300 border-y border-gray-800">THEME: {theme}</div>
+                                                    {Object.values(getEnemyLibraryByTheme(theme)).map((enemy, i) => (
+                                                        <TranslationRow key={`${theme}-${i}`} original={enemy.name} context={`Tier ${enemy.tier}`} debugLanguageMode={debugLanguageMode} />
+                                                    ))}
+                                                </React.Fragment>
                                             ))}
                                             <div className="bg-gray-800/80 p-1 px-3 text-[10px] font-black text-orange-400 border-y border-gray-700">GENERATED NAMES</div>
                                             {ENEMY_NAMES.map((name, i) => (

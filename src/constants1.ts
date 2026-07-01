@@ -92,7 +92,7 @@ export const ADDITIONAL_CARDS: Record<string, Omit<Card, 'id'>> = {
 
   // --- 体育・行事・生活系 (20枚) ---
   PE_DASH: { name: '50m走', cost: 0, type: CardType.SKILL, target: TargetType.SELF, description: 'ムキムキ2を得る。', strength: 2, rarity: 'UNCOMMON', textureRef: 'SHOE|赤|SKILL' },
-  PE_JUMP: { name: '縄跳び', cost: 1, type: CardType.ATTACK, target: TargetType.ENEMY, description: '3ダメージを3回与える。HPを1失う。', damage: 3, playCopies: 2, rarity: 'COMMON', textureRef: 'SWORD|灰|ATTACK' },
+  PE_JUMP: { name: '縄跳び', cost: 1, type: CardType.ATTACK, target: TargetType.ENEMY, description: '3ダメージを3回与える。HPを1失う。', damage: 3, playCopies: 2, selfDamage: 1, rarity: 'COMMON', textureRef: 'SWORD|灰|ATTACK' },
   PE_BALL: { name: 'ドッジボール投球', cost: 1, type: CardType.ATTACK, target: TargetType.ENEMY, description: '12ダメージ。', damage: 12, rarity: 'COMMON', textureRef: 'FIST|赤|ATTACK' },
   PE_SWIM: { name: '25mクロール', cost: 1, type: CardType.SKILL, target: TargetType.SELF, description: 'ブロック6。カードを1枚引く。', block: 6, draw: 1, rarity: 'COMMON', textureRef: 'SHOE|青|SKILL' },
   PE_TEAM: { name: '二人三脚', cost: 1, type: CardType.SKILL, target: TargetType.SELF, description: 'ムキムキ1、カチカチ1を得る。', strength: 1, rarity: 'UNCOMMON', textureRef: 'HUMANOID|白|SKILL' },

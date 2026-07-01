@@ -3,6 +3,7 @@ import { ArrowLeft, Download, FileText, UserRound } from 'lucide-react';
 import { AssignmentPayload, LanguageMode, StudentProfile } from '../types';
 import { storageService } from '../services/storageService';
 import { STUDENT_GRADE_OPTIONS, getCurrentSchoolYear } from '../utils/dailyAssignmentUtils';
+import { trans } from '../utils/textUtils';
 
 interface SubmissionScreenProps {
   onBack: () => void;
@@ -11,10 +12,11 @@ interface SubmissionScreenProps {
   onProfileChange?: (profile: StudentProfile) => void;
 }
 
-const formatDuration = (ms: number) => {
+const formatDuration = (ms: number, languageMode: LanguageMode = 'JAPANESE') => {
   const totalSeconds = Math.round(ms / 1000);
   const minutes = Math.floor(totalSeconds / 60);
   const seconds = totalSeconds % 60;
+  if (languageMode === 'ENGLISH') return `${minutes}m ${seconds.toString().padStart(2, '0')}s`;
   return `${minutes}分${seconds.toString().padStart(2, '0')}秒`;
 };
 
@@ -38,7 +40,7 @@ const escapeHtml = (value: string | number | undefined) =>
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
 
-const SubmissionScreen: React.FC<SubmissionScreenProps> = ({ onBack, assignment, onProfileChange }) => {
+const SubmissionScreen: React.FC<SubmissionScreenProps> = ({ onBack, assignment, languageMode, onProfileChange }) => {
   const [profile, setProfile] = useState<StudentProfile>(() => storageService.getStudentProfile());
   const answers = useMemo(() => storageService.getAssignmentAnswers(), []);
   const targetAnswers = useMemo(() => (
@@ -151,11 +153,11 @@ ${mistakeRows.length > 0 ? `<h2>間違えた問題と再出題結果</h2><table>
       <div className="submission-shell flex h-full flex-col bg-[linear-gradient(180deg,#020617,#111827)]">
         <div className="submission-header flex items-center justify-between border-b border-emerald-500/30 px-4 py-3">
           <button onClick={onBack} className="submission-back flex items-center gap-2 rounded-lg border border-slate-600 bg-slate-900 px-3 py-2 text-sm font-bold text-slate-200 hover:bg-slate-800">
-            <ArrowLeft size={16} /> 戻る
+            <ArrowLeft size={16} /> {trans('戻る', languageMode)}
           </button>
           <div className="submission-title flex items-center gap-2 text-emerald-200">
             <FileText size={18} />
-            <h2 className="text-xl font-black tracking-wider">{assignment ? '提出' : '学習実績'}</h2>
+            <h2 className="text-xl font-black tracking-wider">{trans(assignment ? '提出' : '学習実績', languageMode)}</h2>
           </div>
           <button onClick={downloadPdf} className="submission-pdf flex items-center gap-2 rounded-lg bg-emerald-400 px-4 py-2 text-sm font-black text-slate-950 hover:bg-emerald-300">
             <Download size={16} /> PDF
@@ -165,42 +167,43 @@ ${mistakeRows.length > 0 ? `<h2>間違えた問題と再出題結果</h2><table>
         <div className="submission-grid grid flex-1 min-h-0 gap-4 overflow-y-auto p-4 custom-scrollbar lg:grid-cols-[1fr_1.4fr]">
           <section className="submission-profile rounded-xl border border-slate-700 bg-black/35 p-4">
             <div className="submission-section-title mb-4 flex items-center gap-2 text-lg font-black text-white">
-              <UserRound size={18} /> 提出者
+              <UserRound size={18} /> {trans('提出者', languageMode)}
             </div>
             <div className="submission-profile-grid grid grid-cols-4 gap-2">
               <label>
-                <span className="mb-1 block text-xs font-bold text-slate-400">学年</span>
+                <span className="mb-1 block text-xs font-bold text-slate-400">{trans('学年', languageMode)}</span>
                 <select
                   value={profile.grade}
                   onChange={(e) => updateProfile({ grade: e.target.value, schoolYear: getCurrentSchoolYear() })}
                   className="w-full rounded-lg border border-slate-600 bg-slate-900 px-2 py-2 text-sm font-bold"
+                  data-allow-japanese
                 >
-                  <option value="">未設定</option>
+                  <option value="">{trans('未設定', languageMode)}</option>
                   {STUDENT_GRADE_OPTIONS.map((grade) => (
                     <option key={grade} value={grade}>{grade}</option>
                   ))}
                 </select>
               </label>
               <label>
-                <span className="mb-1 block text-xs font-bold text-slate-400">組</span>
-                <input value={profile.className} onChange={(e) => updateProfile({ className: e.target.value })} className="w-full rounded-lg border border-slate-600 bg-slate-900 px-3 py-2 text-sm font-bold" />
+                <span className="mb-1 block text-xs font-bold text-slate-400">{trans('組', languageMode)}</span>
+                <input value={profile.className} onChange={(e) => updateProfile({ className: e.target.value })} className="w-full rounded-lg border border-slate-600 bg-slate-900 px-3 py-2 text-sm font-bold" data-allow-japanese />
               </label>
               <label>
-                <span className="mb-1 block text-xs font-bold text-slate-400">番号</span>
-                <input value={profile.number} onChange={(e) => updateProfile({ number: e.target.value })} className="w-full rounded-lg border border-slate-600 bg-slate-900 px-3 py-2 text-sm font-bold" />
+                <span className="mb-1 block text-xs font-bold text-slate-400">{trans('番号', languageMode)}</span>
+                <input value={profile.number} onChange={(e) => updateProfile({ number: e.target.value })} className="w-full rounded-lg border border-slate-600 bg-slate-900 px-3 py-2 text-sm font-bold" data-allow-japanese />
               </label>
               <label>
-                <span className="mb-1 block text-xs font-bold text-slate-400">名前</span>
-                <input value={profile.name} onChange={(e) => updateProfile({ name: e.target.value })} className="w-full rounded-lg border border-slate-600 bg-slate-900 px-3 py-2 text-sm font-bold" />
+                <span className="mb-1 block text-xs font-bold text-slate-400">{trans('名前', languageMode)}</span>
+                <input value={profile.name} onChange={(e) => updateProfile({ name: e.target.value })} className="w-full rounded-lg border border-slate-600 bg-slate-900 px-3 py-2 text-sm font-bold" data-allow-japanese />
               </label>
             </div>
 
             <div className="submission-target mt-5 rounded-xl border border-emerald-500/30 bg-emerald-950/25 p-4">
-              <div className="text-xs font-bold text-emerald-200">対象</div>
-              <div className="mt-1 text-xl font-black">{assignment?.title || '自身の学習実績'}</div>
-              <div className="mt-1 text-xs text-slate-300">期限: {assignment ? formatDate(assignment.dueAt) : 'なし'}</div>
+              <div className="text-xs font-bold text-emerald-200">{trans('対象', languageMode)}</div>
+              <div className="mt-1 text-xl font-black" data-allow-japanese>{assignment?.title || trans('自身の学習実績', languageMode)}</div>
+              <div className="mt-1 text-xs text-slate-300">{trans('期限:', languageMode)} {assignment ? formatDate(assignment.dueAt) : trans('なし', languageMode)}</div>
               {assignment && (
-                <div className="mt-3 text-xs leading-5 text-slate-200">
+                <div className="mt-3 text-xs leading-5 text-slate-200" data-allow-japanese>
                   {assignment.units.map((unit) => `${unit.name} (${unit.targetCorrect || 10}問)`).join(' / ') || 'オリジナル問題'}
                 </div>
               )}
@@ -210,10 +213,10 @@ ${mistakeRows.length > 0 ? `<h2>間違えた問題と再出題結果</h2><table>
           <section className="submission-results rounded-xl border border-slate-700 bg-black/35 p-4">
             <div className="submission-stats grid grid-cols-2 gap-3 sm:grid-cols-4">
               {[
-                ['回答数', `${answerCount}`],
-                ['正答数', `${correctCount}`],
-                ['正答率', `${accuracy}%`],
-                ['回答時間', formatDuration(elapsedMs)],
+                [trans('回答数', languageMode), `${answerCount}`],
+                [trans('正答数', languageMode), `${correctCount}`],
+                [trans('正答率', languageMode), `${accuracy}%`],
+                [trans('回答時間', languageMode), formatDuration(elapsedMs, languageMode)],
               ].map(([label, value]) => (
                 <div key={label} className="rounded-xl border border-slate-700 bg-slate-900 p-3">
                   <div className="text-xs font-bold text-slate-400">{label}</div>
@@ -221,15 +224,15 @@ ${mistakeRows.length > 0 ? `<h2>間違えた問題と再出題結果</h2><table>
                 </div>
               ))}
             </div>
-            <div className="mt-3 text-xs text-slate-400">最終回答: {formatDate(latestAt)}</div>
+            <div className="mt-3 text-xs text-slate-400">{trans('最終回答:', languageMode)} {formatDate(latestAt)}</div>
             {unitProgress.length > 0 && (
               <div className="mt-4 rounded-lg border border-slate-700 bg-slate-900/70 p-3">
-                <div className="mb-2 text-sm font-black text-emerald-200">単元別目標</div>
+                <div className="mb-2 text-sm font-black text-emerald-200">{trans('単元別目標', languageMode)}</div>
                 <div className="space-y-2">
                   {unitProgress.map((item) => (
                     <div key={item.unit.id}>
                       <div className="mb-1 flex items-center justify-between gap-2 text-xs">
-                        <span className="font-bold text-slate-100">{item.unit.name}</span>
+                        <span className="font-bold text-slate-100" data-allow-japanese>{item.unit.name}</span>
                         <span className="font-mono text-slate-300">{item.correct}/{item.target}</span>
                       </div>
                       <div className="h-2 overflow-hidden rounded-full bg-black/60">
@@ -242,26 +245,26 @@ ${mistakeRows.length > 0 ? `<h2>間違えた問題と再出題結果</h2><table>
             )}
             {mistakeRows.length > 0 && (
               <div className="mt-4 rounded-lg border border-rose-500/40 bg-rose-950/20 p-3">
-                <div className="mb-2 text-sm font-black text-rose-100">間違えた問題と再出題結果</div>
+                <div className="mb-2 text-sm font-black text-rose-100">{trans('間違えた問題と再出題結果', languageMode)}</div>
                 <div className="max-h-64 overflow-y-auto rounded border border-slate-700 custom-scrollbar">
                   <table className="w-full text-left text-xs">
                     <thead className="sticky top-0 bg-slate-950 text-slate-300">
                       <tr>
-                        <th className="p-2">問題</th>
-                        <th className="p-2">回答</th>
-                        <th className="p-2">正解</th>
-                        <th className="p-2">再出題</th>
+                        <th className="p-2">{trans('問題', languageMode)}</th>
+                        <th className="p-2">{trans('回答', languageMode)}</th>
+                        <th className="p-2">{trans('正解', languageMode)}</th>
+                        <th className="p-2">{trans('再出題', languageMode)}</th>
                       </tr>
                     </thead>
                     <tbody>
                       {mistakeRows.map(({ answer, retry }) => (
                         <tr key={`${answer.answeredAt}-${answer.problemKey || answer.problemId || answer.question}`} className="border-t border-slate-800">
-                          <td className="p-2 text-slate-100">{answer.question || answer.problemKey || '-'}</td>
-                          <td className="p-2 text-rose-200">{answer.selectedAnswer || '-'}</td>
-                          <td className="p-2 text-emerald-200">{answer.correctAnswer || '-'}</td>
+                          <td className="p-2 text-slate-100" data-allow-japanese>{answer.question || answer.problemKey || '-'}</td>
+                          <td className="p-2 text-rose-200" data-allow-japanese>{answer.selectedAnswer || '-'}</td>
+                          <td className="p-2 text-emerald-200" data-allow-japanese>{answer.correctAnswer || '-'}</td>
                           <td className={`p-2 font-bold ${retry?.correct ? 'text-emerald-300' : retry ? 'text-rose-300' : 'text-slate-400'}`}>
-                            {retry ? (retry.correct ? '正答' : '不正解') : '未出題'}
-                            {retry?.selectedAnswer && <div className="mt-0.5 font-normal text-slate-300">回答: {retry.selectedAnswer}</div>}
+                            {retry ? (retry.correct ? trans('正答', languageMode) : trans('不正解', languageMode)) : trans('未出題', languageMode)}
+                            {retry?.selectedAnswer && <div className="mt-0.5 font-normal text-slate-300">{trans('回答:', languageMode)} <span data-allow-japanese>{retry.selectedAnswer}</span></div>}
                           </td>
                         </tr>
                       ))}

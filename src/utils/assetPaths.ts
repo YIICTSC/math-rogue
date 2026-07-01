@@ -4,6 +4,7 @@ const APP_ASSET_VERSION = typeof __APP_ASSET_VERSION__ === 'string' ? __APP_ASSE
 
 const shouldVersionAsset = (path: string): boolean =>
   path.startsWith('sprites/magic/') ||
+  path.startsWith('sprites/high-school/events/') ||
   path.startsWith('sprites/backgrounds/learning-rogue/magic') ||
   path.startsWith('event-illustrations/magic-') ||
   path.startsWith('ui/magic/') ||

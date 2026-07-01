@@ -2,7 +2,7 @@
 import React from 'react';
 import { Player, GameState, GameScreen, CardType, Card, TargetType } from '../types';
 import { CARDS_LIBRARY, RELIC_LIBRARY, POTION_LIBRARY, CURSE_CARDS, EVENT_CARDS, STATUS_CARDS } from '../constants';
-import { trans } from '../utils/textUtils';
+import { transEventText as trans } from '../utils/textUtils';
 import { LanguageMode } from '../types';
 import { getUpgradedCard } from '../utils/cardUtils';
 import { ADDITIONAL_CARDS } from '../constants1';

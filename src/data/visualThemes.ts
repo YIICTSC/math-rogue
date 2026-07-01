@@ -249,6 +249,8 @@ const getStableIndex = (text: string, size: number) => {
 export const getHighSchoolEnemyVariant = (enemy: Pick<Enemy, 'name' | 'enemyType' | 'phase'>) => {
   const humanoid = getHighSchoolHumanoidEnemyVariant(enemy);
   if (humanoid) return humanoid;
+  const direct = HIGH_SCHOOL_ENEMY_VARIANTS.find(variant => variant.name === enemy.name || `ボス: ${variant.name}` === enemy.name);
+  if (direct) return direct;
   if (enemy.enemyType === 'THE_HEART') {
     return enemy.phase === 2
       ? { name: '真・校長', imageIndex: 8 }
@@ -263,6 +265,8 @@ export const getHighSchoolHumanoidEnemyVariant = (enemy: Pick<Enemy, 'name' | 'e
       ? HIGH_SCHOOL_HUMANOID_ENEMY_VARIANTS[14]
       : HIGH_SCHOOL_HUMANOID_ENEMY_VARIANTS[13];
   }
+  const direct = HIGH_SCHOOL_HUMANOID_ENEMY_VARIANTS.find(variant => variant.name === enemy.name || `ボス: ${variant.name}` === enemy.name);
+  if (direct) return direct;
   if (enemy.enemyType === 'GUARDIAN') {
     return HIGH_SCHOOL_HUMANOID_ENEMY_VARIANTS[20 + getStableIndex(enemy.name, 33)];
   }
@@ -367,6 +371,8 @@ export const getMagicHumanoidEnemyVariant = (enemy: Pick<Enemy, 'name' | 'enemyT
       ? MAGIC_HUMANOID_ENEMY_VARIANTS[21]
       : MAGIC_HUMANOID_ENEMY_VARIANTS[20];
   }
+  const direct = MAGIC_HUMANOID_ENEMY_VARIANTS.find(variant => variant.name === enemy.name || `ボス: ${variant.name}` === enemy.name);
+  if (direct) return direct;
   if (enemy.enemyType === 'GUARDIAN') return MAGIC_HUMANOID_ENEMY_VARIANTS[getStableIndex(enemy.name, 20)];
   if (enemy.enemyType === 'ELITE_FORCE') return MAGIC_HUMANOID_ENEMY_VARIANTS[getStableIndex(enemy.name, 20)];
   if (enemy.enemyType === 'TEACHER') return MAGIC_HUMANOID_ENEMY_VARIANTS[getStableIndex(enemy.name, 20)];
@@ -379,6 +385,8 @@ export const getMagicHumanoidEnemyVariant = (enemy: Pick<Enemy, 'name' | 'enemyT
 export const getMagicEnemyVariant = (enemy: Pick<Enemy, 'name' | 'enemyType' | 'phase'>) => {
   const humanoid = getMagicHumanoidEnemyVariant(enemy);
   if (humanoid) return humanoid;
+  const direct = MAGIC_ENEMY_VARIANTS.find(variant => variant.name === enemy.name || `ボス: ${variant.name}` === enemy.name);
+  if (direct) return direct;
   return MAGIC_ENEMY_VARIANTS[getStableIndex(enemy.name, MAGIC_ENEMY_VARIANTS.length)];
 };
 

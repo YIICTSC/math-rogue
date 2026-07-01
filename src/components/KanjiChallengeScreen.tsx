@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { CheckCircle, XCircle } from 'lucide-react';
 import { audioService } from '../services/audioService';
-import { AnswerMode, AssignmentAnswerResult, AssignmentReviewProblem, GameMode } from '../types';
+import { AnswerMode, AssignmentAnswerResult, AssignmentReviewProblem, GameMode, LanguageMode } from '../types';
 import { storageService } from '../services/storageService';
 import { HARD_KANJI_DATA, KANJI_DATA, KANKEN_DATA, KanjiProblem } from '../data/kanjiData';
 import { resolveAnswerMode } from '../utils/answerMode';
@@ -16,6 +16,7 @@ interface KanjiChallengeScreenProps {
   isChallenge?: boolean;
   streak?: number;
   rewardHint?: string;
+  languageMode?: LanguageMode;
   onAnswerResult?: (result: AssignmentAnswerResult) => void;
   reviewProblem?: AssignmentReviewProblem | null;
 }
@@ -27,7 +28,7 @@ interface ExtendedKanjiProblem extends KanjiProblem {
   retryOfProblemKey?: string;
 }
 
-const KanjiChallengeScreen: React.FC<KanjiChallengeScreenProps> = ({ onComplete, mode, answerMode = 'CHOICE' as AnswerMode, useSavedAnswerMode = false, debugSkip, isChallenge, streak = 0, rewardHint, onAnswerResult, reviewProblem = null }) => {
+const KanjiChallengeScreen: React.FC<KanjiChallengeScreenProps> = ({ onComplete, mode, answerMode = 'CHOICE' as AnswerMode, useSavedAnswerMode = false, debugSkip, isChallenge, streak = 0, rewardHint, languageMode = 'NORMAL', onAnswerResult, reviewProblem = null }) => {
   const resolvedAnswerMode = resolveAnswerMode(answerMode as AnswerMode, useSavedAnswerMode);
   const [problems, setProblems] = useState<ExtendedKanjiProblem[]>([]);
   const [currentProblemIndex, setCurrentProblemIndex] = useState(0);
@@ -205,7 +206,7 @@ const KanjiChallengeScreen: React.FC<KanjiChallengeScreenProps> = ({ onComplete,
   return (
     <div className="main-challenge-screen flex flex-col h-full w-full bg-cyan-950 text-white relative items-center justify-center p-8 font-mono">
         <div className="absolute inset-0 texture-dark-matter opacity-20 pointer-events-none"></div>
-        <RewardHintBanner text={rewardHint} />
+        <RewardHintBanner text={rewardHint} languageMode={languageMode} />
         
         <div className="basic-challenge-layout z-10 w-full max-w-md text-center">
             <div className="basic-challenge-question bg-black/40 border-4 border-white p-8 rounded-lg mb-8 shadow-2xl relative overflow-hidden flex flex-col items-center justify-center min-h-[260px]">

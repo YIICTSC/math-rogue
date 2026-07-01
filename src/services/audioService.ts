@@ -1,6 +1,7 @@
 
 import type { AttackEffectKey, StatusEffectKey } from '../types';
 import type { VisualThemeId } from '../data/visualThemes';
+import { getHumanoidEnemyVoiceProfile, type HumanoidEnemyVoiceAction } from '../data/humanoidEnemyVoiceLines';
 
 export type BgmThemeId = VisualThemeId | 'magic-female' | 'magic-male';
 
@@ -1251,7 +1252,7 @@ class AudioService {
   }
 
   private isVoiceSfxName(name: string) {
-      return name.startsWith('magic-voice-') || name.startsWith('magic-event-voice-') || name.startsWith('high-school-voice-');
+      return name.startsWith('magic-voice-') || name.startsWith('magic-event-voice-') || name.startsWith('high-school-voice-') || name.startsWith('enemy-voice-');
   }
 
   private getHtmlSfxVolume(name: string) {
@@ -1414,6 +1415,38 @@ class AudioService {
               `/sfx/high-school-voices/${safeHeroId}/${safeVoiceName}.wav`,
               `sfx/high-school-voices/${safeHeroId}/${safeVoiceName}.ogg`,
               `sfx/high-school-voices/${safeHeroId}/${safeVoiceName}.wav`,
+          ],
+          maxDurationMs,
+          false,
+          generation,
+      );
+  }
+
+  public playHumanoidEnemyVoice(
+      theme: VisualThemeId | undefined,
+      enemyName: string | undefined,
+      action: HumanoidEnemyVoiceAction,
+      maxDurationMs = 2600,
+  ) {
+      const profile = getHumanoidEnemyVoiceProfile(theme, enemyName);
+      if (!profile) return Promise.resolve(false);
+      this.init();
+      if (!this.ctx || !this.sfxGain || this.isMuted) return Promise.resolve(false);
+      this.ctx.resume().catch(() => {});
+      const safeAction = action.replace(/[^a-z0-9_-]/gi, '').toLowerCase();
+      const baseUrl = (import.meta as any).env.BASE_URL;
+      const name = `enemy-voice-${profile.theme}-${profile.id}-${safeAction}`;
+      const generation = (this.sfxPlaybackGenerations.get(name) ?? 0) + 1;
+      this.sfxPlaybackGenerations.set(name, generation);
+      return this.playHtmlSfx(
+          name,
+          [
+              `${baseUrl}sfx/enemy-voices/${profile.theme}/${profile.id}/${safeAction}.ogg`,
+              `${baseUrl}sfx/enemy-voices/${profile.theme}/${profile.id}/${safeAction}.wav`,
+              `/sfx/enemy-voices/${profile.theme}/${profile.id}/${safeAction}.ogg`,
+              `/sfx/enemy-voices/${profile.theme}/${profile.id}/${safeAction}.wav`,
+              `sfx/enemy-voices/${profile.theme}/${profile.id}/${safeAction}.ogg`,
+              `sfx/enemy-voices/${profile.theme}/${profile.id}/${safeAction}.wav`,
           ],
           maxDurationMs,
           false,

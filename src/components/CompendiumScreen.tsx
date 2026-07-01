@@ -1,6 +1,6 @@
 
 import React, { useMemo, useState, useEffect, useRef } from 'react';
-import { CARDS_LIBRARY, RELIC_LIBRARY, POTION_LIBRARY, ENEMY_LIBRARY } from '../constants';
+import { CARDS_LIBRARY, RELIC_LIBRARY, POTION_LIBRARY } from '../constants';
 import { Card as ICard, LanguageMode } from '../types';
 import Card from './Card';
 import { BookOpen, Lock, ArrowLeft, Swords, Gem, FlaskConical, Skull, X, Music, StepBack, StepForward, Pause, Play, Square, Repeat, Heart, Users, Volume2, ChevronRight } from 'lucide-react';
@@ -14,6 +14,8 @@ import { getCardIllustrationPaths } from '../utils/cardIllustration';
 import { ENEMY_ILLUSTRATION_SIZE_CLASS } from '../constants/uiSizing';
 import { PotionIcon, RelicIcon } from './ItemIcon';
 import { getThemedEnemyDisplayName, type VisualThemeId } from '../data/visualThemes';
+import { getEnemyLibraryByTheme } from '../data/enemyCatalogs';
+import { getHumanoidEnemyVoiceProfile, type HumanoidEnemyVoiceAction } from '../data/humanoidEnemyVoiceLines';
 import { MAGIC_CARDS } from '../data/magicCards';
 import { getMagicCardArtUrl } from '../utils/cardArtPaths';
 import { getDebugMagicEndingGalleryEntries, type MagicEndingGalleryEntry } from '../services/magicEndingService';
@@ -40,6 +42,8 @@ const COMPENDIUM_ENEMY_THEME_OPTIONS: Array<{ id: VisualThemeId; label: string; 
     { id: 'high-school', label: '高校編', caption: 'High School' },
     { id: 'magic', label: 'マジック編', caption: 'Magic' },
 ];
+
+const COMPENDIUM_ENEMY_VOICE_ACTIONS: HumanoidEnemyVoiceAction[] = ['spawn', 'attack', 'defense', 'skill', 'damage', 'defeat'];
 
 const inferCompendiumEnemyType = (enemyName: string) => {
     if (enemyName.includes('校長')) return 'THE_HEART';
@@ -203,7 +207,7 @@ const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, 
     const allRelics = useMemo(() => Object.values(RELIC_LIBRARY), []);
     const allPotions = useMemo(() => Object.values(POTION_LIBRARY), []);
     const allEnemies = useMemo<CompendiumEnemy[]>(() => {
-        return Object.values(ENEMY_LIBRARY)
+        return Object.values(getEnemyLibraryByTheme(enemyCompendiumTheme))
             .sort((a, b) => a.tier - b.tier)
             .map(enemy => ({
                 ...enemy,
@@ -211,9 +215,10 @@ const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, 
                 enemyType: inferCompendiumEnemyType(enemy.name),
                 phase: undefined,
             }));
-    }, []);
+    }, [enemyCompendiumTheme]);
     const getEnemyDisplayName = (enemy: CompendiumEnemy) => getThemedEnemyDisplayName(enemy, enemyCompendiumTheme);
     const getEnemyDescription = (enemy: CompendiumEnemy) => {
+        if (languageMode === 'ENGLISH') return enemy.description;
         const displayName = getEnemyDisplayName(enemy);
         if (enemyCompendiumTheme === 'high-school') return getHighSchoolEnemyDescription(enemy, displayName);
         if (enemyCompendiumTheme === 'magic') return getMagicEnemyDescription(enemy, displayName);
@@ -267,6 +272,16 @@ const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, 
     );
 
     const handleItemClick = (type: 'CARD' | 'RELIC' | 'POTION' | 'ENEMY', data: any, unlocked: boolean) => {
+        if (type === 'ENEMY' && unlocked) {
+            const enemy = data as CompendiumEnemy;
+            const profile = getHumanoidEnemyVoiceProfile(enemyCompendiumTheme, enemy.name);
+            if (profile) {
+                const action = COMPENDIUM_ENEMY_VOICE_ACTIONS[Math.floor(Math.random() * COMPENDIUM_ENEMY_VOICE_ACTIONS.length)];
+                audioService.playHumanoidEnemyVoice(enemyCompendiumTheme, enemy.name, action);
+            } else {
+                audioService.playSound('select');
+            }
+        }
         setSelectedItem({ type, data, unlocked });
     };
 
@@ -435,12 +450,12 @@ const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, 
                                         : 'bg-black/50 border-gray-700 text-gray-300 hover:border-gray-400'
                                 }`}
                             >
-                                <span>{option.label}</span>
+                                <span>{trans(option.label, languageMode)}</span>
                                 <span className="ml-2 text-[10px] opacity-75">{option.caption}</span>
                             </button>
                         ))}
                         <div className="text-xs text-gray-300">
-                            {trans('表示テーマ', languageMode)}: {COMPENDIUM_ENEMY_THEME_OPTIONS.find(option => option.id === enemyCompendiumTheme)?.label}
+                            {trans('表示テーマ', languageMode)}: {trans(COMPENDIUM_ENEMY_THEME_OPTIONS.find(option => option.id === enemyCompendiumTheme)?.label || '', languageMode)}
                         </div>
                     </div>
                     <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-4">
@@ -1007,9 +1022,9 @@ const CompendiumBgmModeModal: React.FC<{ cards: ICard[]; languageMode: LanguageM
                                         >
                                             <span>
                                                 <span className="mr-2 text-[10px] opacity-50">{String(index + 1).padStart(2, '0')}</span>
-                                                <span className="text-xs font-black">{library.label}</span>
+                                                <span className="text-xs font-black">{trans(library.label, languageMode)}</span>
                                             </span>
-                                            <span className="text-[10px] opacity-65">{library.caption} ›</span>
+                                            <span className="text-[10px] opacity-65">{trans(library.caption, languageMode)} ›</span>
                                         </button>
                                     ))}
                                 </div>
@@ -1020,7 +1035,7 @@ const CompendiumBgmModeModal: React.FC<{ cards: ICard[]; languageMode: LanguageM
                             {isPlaying && !isPaused ? 'PLAY' : isPaused ? 'PAUSE' : 'STOP'}
                         </div>
                         <div className="absolute right-3 top-2 z-10 rounded-full bg-black/55 px-2 py-0.5 text-[10px] font-bold text-white/80">
-                            {activeTrack?.subtitle}
+                            {trans(activeTrack?.subtitle || '', languageMode)}
                         </div>
                         <div key={screenKey} className="compendium-ipod-art flex items-center justify-center bg-[radial-gradient(circle_at_center,rgba(15,23,42,0.9),#020617)] animate-in fade-in zoom-in-95 duration-700">
                             {activeCard && familiarActionSrc ? (
@@ -1095,7 +1110,7 @@ const CompendiumBgmModeModal: React.FC<{ cards: ICard[]; languageMode: LanguageM
                         <div className="text-xs font-black tracking-[0.4em] text-cyan-200">COMPENDIUM BGM</div>
                         <h3 className="mt-2 text-3xl font-black text-white sm:text-4xl">{activeTrack?.title}</h3>
                         <p className="mt-2 text-sm text-slate-300">
-                            {activeTrack?.subtitle} / {trackIndex + 1} of {bgmTracks.length} / cards {cards.length}
+                            {trans(activeTrack?.subtitle || '', languageMode)} / {trackIndex + 1} of {bgmTracks.length} / cards {cards.length}
                         </p>
                     </div>
 
@@ -1110,8 +1125,8 @@ const CompendiumBgmModeModal: React.FC<{ cards: ICard[]; languageMode: LanguageM
                                         : 'border-white/10 bg-black/20 text-slate-300 hover:bg-white/10'
                                 }`}
                             >
-                                <div className="text-sm font-black">{library.label}</div>
-                                <div className="mt-1 text-[10px] text-slate-400">{library.caption}</div>
+                                <div className="text-sm font-black">{trans(library.label, languageMode)}</div>
+                                <div className="mt-1 text-[10px] text-slate-400">{trans(library.caption, languageMode)}</div>
                             </button>
                         ))}
                     </div>
@@ -1129,7 +1144,7 @@ const CompendiumBgmModeModal: React.FC<{ cards: ICard[]; languageMode: LanguageM
                                 }`}
                             >
                                 <span className="truncate font-bold">{track.title}</span>
-                                <span className="ml-3 shrink-0 text-[10px] opacity-70">{track.subtitle}</span>
+                                <span className="ml-3 shrink-0 text-[10px] opacity-70">{trans(track.subtitle, languageMode)}</span>
                             </button>
                         ))}
                     </div>

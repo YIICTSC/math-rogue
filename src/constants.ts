@@ -137,7 +137,7 @@ export const GROWN_PLANTS: Record<string, Omit<Card, 'id'>> = {
     POWER_SHIITAKE: { name: '剛力のシイタケ', cost: 1, type: CardType.SKILL, description: 'ムキムキ2を得る。廃棄。', strength: 2, exhaust: true, rarity: 'SPECIAL', textureRef: 'PLANT|茶|SKILL' },
     BOUNTY_PERSIMMON: { name: '豊穣のカキ', cost: 1, type: CardType.SKILL, description: '次のターン、追加で2枚引く。廃棄。', nextTurnDraw: 2, exhaust: true, rarity: 'SPECIAL', textureRef: 'PLANT|橙|SKILL' },
     EARLY_PLUM: { name: '早咲きのウメ', cost: 0, type: CardType.SKILL, description: '次のターン、エナジー1を得る。廃棄。', nextTurnEnergy: 1, exhaust: true, rarity: 'SPECIAL', textureRef: 'PLANT|赤|SKILL' },
-    AWAKE_COFFEE: { name: '覚醒のコーヒー', cost: 0, type: CardType.SKILL, description: 'エナジー2を得る。1枚引く。HPを1失う。廃棄。', energy: 2, exhaust: true, rarity: 'SPECIAL', textureRef: 'PLANT|黒|SKILL' },
+    AWAKE_COFFEE: { name: '覚醒のコーヒー', cost: 0, type: CardType.SKILL, description: 'エナジー2を得る。1枚引く。HPを1失う。廃棄。', energy: 2, draw: 1, selfDamage: 1, exhaust: true, rarity: 'SPECIAL', textureRef: 'PLANT|黒|SKILL' },
     SWEET_CACAO: { name: '魅惑のカカオ', cost: 0, type: CardType.SKILL, description: '手札を全て捨て、同数引く。廃棄。', exhaust: true, rarity: 'SPECIAL', textureRef: 'PLANT|茶|SKILL' },
     EXPLOSIVE_PEPPER: { name: '爆炎のコショウ', cost: 2, type: CardType.ATTACK, target: TargetType.ALL_ENEMIES, description: '全体20ダメージ。自分に3ダメージ。廃棄。', damage: 20, selfDamage: 3, exhaust: true, rarity: 'SPECIAL', textureRef: 'PLANT|灰|ATTACK' },
     WILLOW_WIND: { name: '柳に風', cost: 2, type: CardType.SKILL, description: 'スケスケ1（無敵）を得る。廃棄。', applyPower: { id: 'INTANGIBLE', amount: 1 }, exhaust: true, rarity: 'SPECIAL', textureRef: 'PLANT|緑|SKILL' },

@@ -1,7 +1,7 @@
 import React from 'react';
 import { X } from 'lucide-react';
 import { Card as ICard, LanguageMode } from '../types';
-import { trans } from '../utils/textUtils';
+import { buildEnglishCardDescription, trans } from '../utils/textUtils';
 import Card, { KEYWORD_DEFINITIONS } from './Card';
 
 interface CardInspectionModalProps {
@@ -24,6 +24,8 @@ const getCardKeywords = (card: ICard) => {
 };
 
 const getProcessedDescription = (card: ICard, languageMode: LanguageMode) => {
+  if (languageMode === 'ENGLISH') return buildEnglishCardDescription(card);
+
   let desc = trans(card.description, languageMode);
   if (card.magicBoostedEffectText) return desc;
   if (card.damage !== undefined) desc = desc.replace(/(\d+)ダメージ/g, `${card.damage}${trans('ダメージ', languageMode)}`);

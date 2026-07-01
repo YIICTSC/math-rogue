@@ -127,6 +127,8 @@ const EventScreen: React.FC<EventScreenProps> = ({ title, description, options, 
   const [imageZoomOpen, setImageZoomOpen] = useState(false);
   const inputLocked = interactionDisabled || choiceLocked;
   const continueInputLocked = interactionDisabled || continueLocked;
+  const zoomOpenLabel = languageMode === 'ENGLISH' ? `Enlarge ${title} image` : `${title}の画像を拡大`;
+  const zoomDialogLabel = languageMode === 'ENGLISH' ? `${title} enlarged image` : `${title} 拡大画像`;
 
   useEffect(() => {
     setImageIndex(0);
@@ -210,7 +212,7 @@ const EventScreen: React.FC<EventScreenProps> = ({ title, description, options, 
                 className={`event-screen-image relative mx-auto mb-4 aspect-square w-full max-w-[18rem] overflow-hidden rounded-xl border border-purple-400/40 bg-slate-900 sm:mb-6 sm:max-w-[22rem] ${imageZoomEnabled ? 'cursor-zoom-in transition hover:border-fuchsia-200 hover:brightness-110' : ''}`}
                 role={imageZoomEnabled ? 'button' : undefined}
                 tabIndex={imageZoomEnabled ? 0 : undefined}
-                aria-label={imageZoomEnabled ? `${title}の画像を拡大` : undefined}
+                aria-label={imageZoomEnabled ? zoomOpenLabel : undefined}
                 onClick={imageZoomEnabled ? () => setImageZoomOpen(true) : undefined}
                 onKeyDown={imageZoomEnabled ? (event) => {
                     if (event.key === 'Enter' || event.key === ' ') {
@@ -229,14 +231,14 @@ const EventScreen: React.FC<EventScreenProps> = ({ title, description, options, 
                 {image && (
                     <img
                         src={image}
-                        alt="主人公"
+                        alt={languageMode === 'ENGLISH' ? 'Hero' : '主人公'}
                         className="absolute left-1 bottom-0 h-[50%] sm:h-[58%] md:h-[64%] object-contain drop-shadow-[0_6px_12px_rgba(0,0,0,0.8)]"
                     />
                 )}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-transparent" />
                 {imageZoomEnabled && (
                     <div className="absolute bottom-2 right-2 rounded-full border border-white/30 bg-black/70 px-2 py-1 text-[10px] font-black text-white">
-                        拡大
+                        {trans("拡大", languageMode)}
                     </div>
                 )}
             </div>
@@ -293,7 +295,7 @@ const EventScreen: React.FC<EventScreenProps> = ({ title, description, options, 
                 className="fixed inset-0 z-[10060] flex items-center justify-center bg-black/90 p-3 sm:p-6"
                 role="dialog"
                 aria-modal="true"
-                aria-label={`${title} 拡大画像`}
+                aria-label={zoomDialogLabel}
                 onClick={() => setImageZoomOpen(false)}
             >
                 <button
@@ -301,7 +303,7 @@ const EventScreen: React.FC<EventScreenProps> = ({ title, description, options, 
                     className="absolute right-3 top-3 rounded-lg border border-white/30 bg-slate-950/90 px-4 py-2 text-sm font-black text-white hover:bg-slate-800 sm:right-5 sm:top-5"
                     onClick={() => setImageZoomOpen(false)}
                 >
-                    閉じる
+                    {trans("閉じる", languageMode)}
                 </button>
                 <img
                     src={imageCandidates[imageIndex]}

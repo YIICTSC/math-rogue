@@ -1,4 +1,7 @@
 
+import type { VisualThemeId } from '../data/visualThemes';
+import { getAllEnemyNamesByTheme, getEnemyNamesByAct } from '../data/enemyCatalogs';
+
 // Local data lists to replace AI generation
 export const ENEMIES_ACT1 = [
   "野良犬", "意地悪なカラス", "消しゴムのカス", "グレムリン", "スズメバチ",
@@ -63,7 +66,11 @@ export const generateFlavorText = async (context: string): Promise<string> => {
   return getRandom(FLAVOR_TEXTS);
 };
 
-export const generateEnemyName = async (floor: number, act: number = 1): Promise<string> => {
+export const generateEnemyName = async (floor: number, act: number = 1, visualTheme: VisualThemeId = 'elementary'): Promise<string> => {
+  if (visualTheme !== 'elementary') {
+    const themedNames = getEnemyNamesByAct(visualTheme, act);
+    return getRandom(themedNames.length > 0 ? themedNames : getAllEnemyNamesByTheme(visualTheme));
+  }
   if (act === 1) return getRandom(ENEMIES_ACT1);
   if (act === 2) return getRandom(ENEMIES_ACT2);
   if (act === 3) return getRandom(ENEMIES_ACT3);

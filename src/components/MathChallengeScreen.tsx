@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { CheckCircle, XCircle } from 'lucide-react';
 import { audioService } from '../services/audioService';
-import { AnswerMode, AssignmentAnswerResult, AssignmentReviewProblem, GameMode } from '../types';
+import { AnswerMode, AssignmentAnswerResult, AssignmentReviewProblem, GameMode, LanguageMode } from '../types';
 import { storageService } from '../services/storageService';
 import { resolveAnswerMode } from '../utils/answerMode';
 import RewardHintBanner from './RewardHintBanner';
@@ -16,7 +16,7 @@ interface MathProblem {
   retryOfProblemKey?: string;
 }
 
-const MathChallengeScreen: React.FC<MathChallengeScreenProps> = ({ onComplete, mode, answerMode = 'CHOICE' as AnswerMode, useSavedAnswerMode = false, debugSkip, isChallenge, streak = 0, rewardHint, onAnswerResult, reviewProblem = null }) => {
+const MathChallengeScreen: React.FC<MathChallengeScreenProps> = ({ onComplete, mode, answerMode = 'CHOICE' as AnswerMode, useSavedAnswerMode = false, debugSkip, isChallenge, streak = 0, rewardHint, languageMode = 'NORMAL', onAnswerResult, reviewProblem = null }) => {
   const resolvedAnswerMode = resolveAnswerMode(answerMode as AnswerMode, useSavedAnswerMode);
   const [problems, setProblems] = useState<MathProblem[]>([]);
   const [currentProblemIndex, setCurrentProblemIndex] = useState(0);
@@ -253,7 +253,7 @@ const MathChallengeScreen: React.FC<MathChallengeScreenProps> = ({ onComplete, m
   return (
     <div className="main-challenge-screen flex flex-col h-full w-full bg-emerald-950 text-white relative items-center justify-center p-8 font-mono">
         <div className="absolute inset-0 texture-blackboard opacity-20 pointer-events-none"></div>
-        <RewardHintBanner text={rewardHint} />
+        <RewardHintBanner text={rewardHint} languageMode={languageMode} />
         
         <div className="basic-challenge-layout z-10 w-full max-w-md text-center">
             <div className="basic-challenge-question bg-black/40 border-4 border-white p-8 rounded-lg mb-8 shadow-2xl relative overflow-hidden flex items-center justify-center min-h-[160px]">
@@ -325,6 +325,7 @@ interface MathChallengeScreenProps {
   isChallenge?: boolean;
   streak?: number;
   rewardHint?: string;
+  languageMode?: LanguageMode;
   onAnswerResult?: (result: AssignmentAnswerResult) => void;
   reviewProblem?: AssignmentReviewProblem | null;
 }

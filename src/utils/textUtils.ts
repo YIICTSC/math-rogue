@@ -17,8 +17,10 @@ const BASE_DICTIONARY: Record<string, string> = {
     "年": "ねん",
     "対戦": "たいせん",
     "1A1Dモード": "1A1Dモード",
+    "協力": "きょうりょく",
+    "レース": "レース",
     "ミニゲーム": "ミニゲーム",
-    "デバッグメニュー": "デバッグメニュー",
+    "デバッグメニュー": "デバッグ メニュー",
     "図鑑": "ずかん",
     "記録": "きろく",
     "遊び方": "あそびかた",
@@ -206,6 +208,9 @@ const BASE_DICTIONARY: Record<string, string> = {
     "ご褒美カードを獲得しました": "ごほうびカードを ゲットしました",
     "続ける": "つづける",
     "提出PDFを用意": "ていしゅつPDFを ようい",
+    "課題送信": "かだい そうしん",
+    "カード帳": "カードちょう",
+    "提出": "ていしゅつ",
     "参加コード": "さんかコード",
     "決定役": "きめるひと",
     "あなたの番です": "あなたの ばんです",
@@ -956,6 +961,7 @@ const BASE_DICTIONARY: Record<string, string> = {
     "(デバッグ: 計算スキップ ON)": "(デバッグ: けいさん スキップ ON)",
     "(デバッグ: てきHP1 & ぜんかいほう ON)": "(デバッグ: てきHP1 & ぜんかいほう ON)",
     "(デバッグ: ミニゲームぜんかいほう ON)": "(デバッグ: ミニゲーム ぜんかいほう ON)",
+    "BGM: 学習": "BGM: がくしゅう",
     "BGM: 電子音": "BGM: ピコピコ",
     "BGM: MP3": "BGM: リアル",
     "BGM: 学習(SEのみ)": "BGM: がくしゅう(SEのみ)",
@@ -1032,6 +1038,11 @@ const BASE_DICTIONARY: Record<string, string> = {
     "戦闘に勝利すると学習チャレンジが発生！": "バトルに かつと がくしゅうチャレンジが はじまるよ！",
     "算数チャレンジ": "さんすう チャレンジ",
     "問題を正解するとボーナスゴールドを獲得でき、冒険が有利になります。": "もんだいに せいかいすると おかねが もらえるよ。",
+    "正解するとゴールド獲得": "せいかいすると おかねを ゲット",
+    "正解すると$1獲得": "せいかいすると $1 ゲット",
+    "全問正解でHP+1": "ぜんもん せいかいで HP+1",
+    "全問正解で満腹度+10": "ぜんもん せいかいで まんぷくど+10",
+    "全問正解でHP15回復": "ぜんもん せいかいで HP15 かいふく",
     "特別教室（休憩マス）": "とくべつ きょうしつ（きゅうけい）",
     "ベッドで仮眠をとります。": "ベッドで ねます。",
     "HPを30%回復します。": "HPが 30% かいふくします。",
@@ -2982,6 +2993,182 @@ Object.assign(BASE_DICTIONARY, {
     "次の児童が拾うことになる。": "つぎの じどうが ひろうことに なる。",
 });
 
+Object.assign(BASE_DICTIONARY, {
+    // High-school / magic route enemy names
+    "予備校の亡霊": "よびこうの ぼうれい",
+    "風紀委員の騎士": "ふうきいいんの きし",
+    "模試答案の怪物": "もしとうあんの かいぶつ",
+    "噂話の影": "うわさばなしの かげ",
+    "部活主将の残像": "ぶかつしゅしょうの ざんぞう",
+    "スマホの幽鬼": "スマホの ゆうき",
+    "化学室の異常体": "かがくしつの いじょうたい",
+    "奨学金の死神": "しょうがくきんの しにがみ",
+    "期末試験の覇王": "きまつしけんの はおう",
+    "進路相談の小鬼": "しんろそうだんの こおに",
+    "宿題運搬ロボ": "しゅくだい うんぱんロボ",
+    "保健室の鏡怪": "ほけんしつの かがみかい",
+    "補習時間の亡霊": "ほしゅうじかんの ぼうれい",
+    "赤点竜": "あかてんりゅう",
+    "購買機の魔物": "こうばいきの まもの",
+    "黒板鳥": "こくばんどり",
+    "居残りの影": "いのこりの かげ",
+    "終業ベルの番人": "しゅうぎょうベルの ばんにん",
+    "答案紙の魔人": "とうあんしの まじん",
+    "スマホ依存の影": "スマホいぞんの かげ",
+    "ロッカーの亡霊": "ロッカーの ぼうれい",
+    "購買パンの怪物": "こうばいパンの かいぶつ",
+    "チョーク粉の雲": "チョークこな の くも",
+    "内申点の秤": "ないしんてんの はかり",
+    "黒板消しゴーレム": "こくばんけし ゴーレム",
+    "模試時計の悪霊": "もしどけいの あくりょう",
+    "進路プリントの渦": "しんろプリントの うず",
+    "赤ペンの槍兵": "あかペンの そうへい",
+    "実験フラスコ怪": "じっけんフラスコかい",
+    "体育倉庫のマット": "たいいくそうこの マット",
+    "弁当箱ミミック": "べんとうばこ ミミック",
+    "補習ベルの亡霊": "ほしゅうベルの ぼうれい",
+    "コピー機の怨念": "コピーきの おんねん",
+    "掲示板ピンの群れ": "けいじばんピンの むれ",
+    "雨傘の影武者": "あまがさの かげむしゃ",
+    "成績表スライム": "せいせきひょう スライム",
+    "体育館ライトの怪": "たいいくかんライトの かい",
+    "化学薬品の泡": "かがくやくひんの あわ",
+    "古い参考書の壁": "ふるい さんこうしょの かべ",
+    "部室のラジカセ": "ぶしつの ラジカセ",
+    "階段踊り場の影": "かいだんおどりばの かげ",
+    "卒業証書の亡霊": "そつぎょうしょうしょの ぼうれい",
+    "昼休みチャイム獣": "ひるやすみチャイムじゅう",
+    "校則ファイルの魔物": "こうそくファイルの まもの",
+    "USBメモリの怪": "USBメモリの かい",
+    "ロボ掃除機の反乱": "ロボそうじきの はんらん",
+    "欠席届の怨霊": "けっせきとどけの おんりょう",
+    "文化祭看板の魔物": "ぶんかさいかんばんの まもの",
+    "試験監視カメラ": "しけんかんしカメラ",
+    "放課後ノイズ": "ほうかごノイズ",
+    "監督官の先輩": "かんとくかんの せんぱい",
+    "剣道部の風紀委員": "けんどうぶの ふうきいいん",
+    "白衣の査問官": "はくいの さもんかん",
+    "禁書管理の書記": "きんしょかんりの しょき",
+    "銀髪の審査員": "ぎんぱつの しんさいん",
+    "鎖の執行部員": "くさりの しっこうぶいん",
+    "赤章の副会長": "せきしょうの ふくかいちょう",
+    "実験区画の主任": "じっけんくかくの しゅにん",
+    "表彰台の王子": "ひょうしょうだいの おうじ",
+    "紅衣の監察官": "こういの かんさつかん",
+    "冬制服の支配者": "ふゆせいふくの しはいしゃ",
+    "紫扇の評議員": "しせんの ひょうぎいん",
+    "黒翼の番長": "こくよくの ばんちょう",
+    "校長": "こうちょう",
+    "真・校長": "しん・こうちょう",
+    "新米風紀委員": "しんまい ふうきいいん",
+    "竹刀の体育係": "しないの たいいくがかり",
+    "赤ペン監督生": "あかペン かんとくせい",
+    "図書委員の番人": "としょいいんの ばんにん",
+    "購買部の用心棒": "こうばいぶの ようじんぼう",
+    "軽音部の刺客": "けいおんぶの しかく",
+    "バスケ部の壁": "バスケぶの かべ",
+    "化学部の実験兵": "かがくぶの じっけんへい",
+    "新聞部の追跡者": "しんぶんぶの ついせきしゃ",
+    "生徒会の斥候": "せいとかいの せっこう",
+    "剣道場の門番": "けんどうじょうの もんばん",
+    "応援団の番長": "おうえんだんの ばんちょう",
+    "保健委員の執行者": "ほけんいいんの しっこうしゃ",
+    "美術部の幻術師": "びじゅつぶの げんじゅつし",
+    "吹奏楽部の号令手": "すいそうがくぶの ごうれいしゅ",
+    "放送部の支配者": "ほうそうぶの しはいしゃ",
+    "進路指導の補佐": "しんろしどうの ほさ",
+    "数学研究会の刺客": "すうがくけんきゅうかいの しかく",
+    "白手袋の監察員": "しろてぶくろの かんさついん",
+    "文化祭実行委員": "ぶんかさいじっこういいん",
+    "風紀委員副隊長": "ふうきいいん ふくたいちょう",
+    "剣道部の主将": "けんどうぶの しゅしょう",
+    "赤ペン試験官": "あかペン しけんかん",
+    "禁書庫の司書": "きんしょこの ししょ",
+    "購買部の番人": "こうばいぶの ばんにん",
+    "軽音部ギタリスト": "けいおんぶ ギタリスト",
+    "バスケ部エース": "バスケぶ エース",
+    "化学部の白衣兵": "かがくぶの はくいへい",
+    "新聞部カメラマン": "しんぶんぶ カメラマン",
+    "生徒会の策士": "せいとかいの さくし",
+    "茶道部の令嬢": "さどうぶの れいじょう",
+    "弓道部の射手": "きゅうどうぶの いて",
+    "陸上部の疾走者": "りくじょうぶの しっそうしゃ",
+    "演劇部の仮面役者": "えんげきぶの かめんやくしゃ",
+    "電算部ハッカー": "でんさんぶ ハッカー",
+    "天文部の予言者": "てんもんぶの よげんしゃ",
+    "園芸委員の剪定者": "えんげいいいんの せんていしゃ",
+    "試験女王": "しけんじょおう",
+    "星屑の使い魔": "ほしくずの つかいま",
+    "月影スライム": "つきかげスライム",
+    "花迷宮の芽獣": "はなめいきゅうの めじゅう",
+    "火花コウモリ": "ひばなコウモリ",
+    "影縫いの欠片": "かげぬいの かけら",
+    "時計塔の歯車霊": "とけいとうの はぐるまれい",
+    "風読みの小竜": "かぜよみの こりゅう",
+    "夢喰いの泡": "ゆめくいの あわ",
+    "光膜のクラゲ": "こうまくの クラゲ",
+    "魔導書の幼体": "まどうしょの ようたい",
+    "結晶ネズミ": "けっしょうネズミ",
+    "黒板魔法陣": "こくばんまほうじん",
+    "星砂ミミック": "ほしすなミミック",
+    "月輪ガーゴイル": "げつりんガーゴイル",
+    "蔓薔薇の怪": "つるばらの かい",
+    "炎冠の小鬼": "えんかんの こおに",
+    "闇インクの影": "やみインクの かげ",
+    "時砂の亡霊": "ときすなの ぼうれい",
+    "旋風ケットシー": "つむじかぜケットシー",
+    "悪夢の仮面": "あくむの かめん",
+    "聖灯の羽虫": "せいとうの はむし",
+    "魔石ゴーレム": "ませきゴーレム",
+    "封印リボン": "ふういんリボン",
+    "彗星の尾獣": "すいせいの おじゅう",
+    "月読の鏡片": "つくよみの かがみへん",
+    "花粉の幻霧": "かふんの げんむ",
+    "火球の精": "かきゅうの せい",
+    "影絵の騎獣": "かげえの きじゅう",
+    "遅刻ベルの霊": "ちこくベルの れい",
+    "風鈴の魔物": "ふうりんの まもの",
+    "夢色キャンディ怪": "ゆめいろキャンディかい",
+    "光輪の番犬": "こうりんの ばんけん",
+    "星図の蛇": "せいずの へび",
+    "月蝕ランタン": "げっしょくランタン",
+    "花冠の毒蜂": "はなかんむりの どくばち",
+    "炎筆の魔獣": "えんぴつの まじゅう",
+    "闇劇場の人形": "やみげきじょうの にんぎょう",
+    "時針の蜘蛛": "ときばりの くも",
+    "風札の狐面": "かぜふだの きつねめん",
+    "夢頁の蝶": "ゆめページの ちょう",
+    "光晶の盾獣": "こうしょうの たてじゅう",
+    "魔力試験の残滓": "まりょくしけんの ざんし",
+    "星鍵の守り手": "ほしかぎの まもりて",
+    "月光庭園の影花": "げっこうていえんの かげばな",
+    "深淵図書館の栞獣": "しんえんとしょかんの しおりじゅう",
+    "見習い魔女の反逆者": "みならいまじょの はんぎゃくしゃ",
+    "仮面の魔法剣士": "かめんの まほうけんし",
+    "ルーン図書委員": "ルーンとしょいいん",
+    "水晶錬金術師": "すいしょうれんきんじゅつし",
+    "影舞台の奇術師": "かげぶたいの きじゅつし",
+    "月社の祓い手": "つきやしろの はらいて",
+    "茨庭の魔導士": "いばらにわの まどうし",
+    "鐘鎧の召喚士": "かねよろいの しょうかんし",
+    "呪い人形の操者": "のろいにんぎょうの そうしゃ",
+    "炎厨房の魔法使い": "ほのおちゅうぼうの まほうつかい",
+    "重盾の魔法騎士": "じゅうたての まほうきし",
+    "紙嵐の忍術士": "かみあらしの にんじゅつし",
+    "鏡界の幻術師": "きょうかいの げんじゅつし",
+    "雷指揮のコンダクター": "かみなりしきの コンダクター",
+    "氷鏡の槍術士": "ひょうきょうの そうじゅつし",
+    "獣面の地脈術師": "じゅうめんの ちみゃくじゅつし",
+    "時計塔の時術師": "とけいとうの じじゅつし",
+    "蝋燭の死霊学徒": "ろうそくの しりょうがくと",
+    "星見台の弓術士": "ほしみだいの きゅうじゅつし",
+    "禁術学園の風紀長": "きんじゅつがくえんの ふうきちょう",
+    "大魔女校長": "だいまじょこうちょう",
+    "星災の女王": "せいさいの じょおう",
+    "真・大魔女校長": "しん・だいまじょこうちょう",
+    "真・校長先生": "しん・こうちょうせんせい",
+});
+
 const DICTIONARY: Record<string, string> = {
     ...BASE_DICTIONARY,
     ...EVENT_DICTIONARY,
@@ -3066,6 +3253,28 @@ const ENGLISH_DICTIONARY: Record<string, string> = {
     "ご褒美カードを獲得しました": "Reward card obtained",
     "続ける": "Continue",
     "提出PDFを用意": "Prepare Submission PDF",
+    "提出": "Submit",
+    "学習実績": "Learning Record",
+    "提出者": "Student",
+    "組": "Class",
+    "番号": "No.",
+    "名前": "Name",
+    "対象": "Target",
+    "自身の学習実績": "Your learning record",
+    "なし": "None",
+    "回答数": "Answers",
+    "正答数": "Correct",
+    "正答率": "Accuracy",
+    "回答時間": "Time",
+    "最終回答:": "Last answer:",
+    "単元別目標": "Unit Goals",
+    "間違えた問題と再出題結果": "Missed Problems and Retry Results",
+    "回答": "Answer",
+    "回答:": "Answer:",
+    "正解": "Correct",
+    "再出題": "Retry",
+    "正答": "Correct",
+    "未出題": "Not retried",
     "参加コード": "Join Code",
     "決定役": "Decision Maker",
     "あなたの番です": "Your turn",
@@ -3613,6 +3822,42 @@ const ENGLISH_DICTIONARY: Record<string, string> = {
     "校庭ワープとび": "Schoolyard Warp Jump",
     "銀河はやぶさ": "Galaxy Falcon",
     "校長先生ブラックホール": "Principal Black Hole",
+    "いたずら好きの小悪魔。機械を壊すのが得意。": "A mischievous little demon that is good at breaking machines.",
+    "針を急に進めて休み時間を終わらせる。": "It suddenly advances its hands to end recess early.",
+    "一度読めば二度と元の世界には戻れないとされる本。": "A book said to keep anyone who reads it from ever returning to the original world.",
+    "下校時刻を過ぎても教室に残る者を狙う。": "It targets students who stay in the classroom after dismissal time.",
+    "水辺に潜む黒い影. 引きずり込もうとする。": "A black shadow lurking by the water, trying to drag students in.",
+    "燃え盛る炎の精霊。熱い。": "A blazing fire spirit. It is scorching hot.",
+    "楽しかった過去に引きずり込もうとする影。": "A shadow that tries to pull you back into happier days.",
+    "遅刻した生徒を阻む鉄壁の門。": "An iron wall of a gate that blocks late students.",
+    "休みなしの練習を強要する。": "Forces endless practice with no breaks.",
+    "鳴るはずのない時間に鳴り響く音。": "A chime that rings out at a time when it should never sound.",
+    "理理不尽な校則を作る黒幕。": "The mastermind behind absurd school rules.",
+    "授業時間を永遠に引き伸ばす。": "It stretches class time out forever.",
+    "教科書には載っていない魔法を使う。": "Uses magic that never appears in any textbook.",
+    "花子さんの弟を自称するが、誰も信じていない。影が薄い。": "Claims to be Hanako's younger brother, but no one believes him. His presence is faint.",
+    "机の奥で3ヶ月眠り続けた絶望の味。": "The taste of despair after sleeping in the back of a desk for three months.",
+    "高速で飛来する枕の嵐。": "A storm of pillows flying in at high speed.",
+    "新入生": "New Student",
+    "放課後特訓": "After-School Training",
+    "小テスト": "Quiz",
+    "中間試験": "Midterm Exam",
+    "期末試験": "Final Exam",
+    "赤点サバイバル": "Failing Grade Survival",
+    "校則ブレイカー": "School Rule Breaker",
+    "受験デスロード": "Entrance Exam Death Road",
+    "卒業不可避インフェルノ": "Graduation Is Impossible Inferno",
+    "校長先生ファイナル留年ビーム": "Principal's Final Repeat-Year Beam",
+    "魔法入門": "Magic Basics",
+    "見習い魔法使い": "Apprentice Mage",
+    "初級魔導士": "Junior Sorcerer",
+    "中級魔導士": "Intermediate Sorcerer",
+    "上級魔導士": "Senior Sorcerer",
+    "禁断魔法オーバードライブ": "Forbidden Magic Overdrive",
+    "次元粉砕アークメイジ": "Dimension-Crushing Archmage",
+    "銀河爆裂グランドウィザード": "Galaxy-Burst Grand Wizard",
+    "宇宙終焉マジカルカタストロフ": "Cosmic-End Magical Catastrophe",
+    "神々も補習する超絶魔法大魔王": "Supreme Magic Overlord of Divine Remedial Lessons",
     "敵HP": "Enemy HP",
     "休憩時理科室なし": "No Science Room at rest sites",
     "休憩時理科室": "Science Room at rest sites",
@@ -3622,6 +3867,8 @@ const ENGLISH_DICTIONARY: Record<string, string> = {
     "削除費固定": "Fixed removal cost",
     "削除費": "Removal cost",
     "前の難易度をクリアすると解禁": "Clear the previous difficulty to unlock",
+    "未解禁": "Locked",
+    "で始める": "Start",
     "結果": "Result",
     "報酬": "Reward",
     "ゴールド": "Gold",
@@ -3632,6 +3879,11 @@ const ENGLISH_DICTIONARY: Record<string, string> = {
     "ホストが報酬を確定するまで待っています": "Waiting for the host to confirm rewards.",
     "欲しい報酬を選択してください": "Choose a reward.",
     "ゴールドを獲得": "Gain Gold",
+    "正解するとゴールド獲得": "Answer correctly to gain gold",
+    "正解すると$1獲得": "Answer correctly to gain $1",
+    "全問正解でHP+1": "Answer all correctly for HP +1",
+    "全問正解で満腹度+10": "Answer all correctly for Fullness +10",
+    "全問正解でHP15回復": "Answer all correctly to heal 15 HP",
     "ポーションがいっぱいです": "Potion slots are full",
     "どれを捨てて入れ替えますか？": "Which potion do you want to discard and replace?",
     "ダミー報酬": "Dummy Reward",
@@ -3740,6 +3992,15 @@ const ENGLISH_CARD_NAME_DICTIONARY: Record<string, string> = {
     "ノート交換": "Notebook Swap",
     "ハイカード": "High Card",
     "ハンマー投げ": "Hammer Throw",
+    "分度器アタック": "Protractor Attack",
+    "円グラフ": "Pie Chart",
+    "50m走": "50m Dash",
+    "25mクロール": "25m Crawl",
+    "跳び箱10段": "10-Level Vaulting Box",
+    "3ポイントシュート": "Three-Point Shot",
+    "動物園のライオン": "Zoo Lion",
+    "究極の10連ガチャ": "Ultimate 10-Pull Gacha",
+    "重力100倍プレス": "100x Gravity Press",
     "ハーフパンツ": "Gym Shorts",
     "パニック": "Panic",
     "パレット": "Palette",
@@ -3979,7 +4240,7 @@ const ENGLISH_TOKEN_DICTIONARY: Record<string, string> = {
     "宝の確認を終えました": "Treasure confirmed.",
     "この宝を取る": "Claim This Treasure",
     "イラストがありません": "No illustration available",
-    "タッチでイラスト拡大": "Tap to enlarge art",
+    "タッチでイラスト拡大": "Tap to enlarge illustration",
     "コスト": "Cost",
     "ダメージ": "Damage",
     "ブロック": "Block",
@@ -4461,13 +4722,13 @@ const ENGLISH_GENERATED_CARD_NAME_DICTIONARY: Record<string, string> = {
     "百花繚乱": "Girls Flower Bomb",
     "むしゃくしゃ": "Yatsuatari",
     "早退": "Expulsion",
-    "えんぴつの削りかす": "Shiv",
+    "えんぴつの削りかす": "Pencil Shavings",
     "捕獲網": "Capture Net",
     "先生に報告": "Neutralize",
     "上履きキック": "Iron Wave",
     "頭突き": "Headbutt",
     "ラリアット": "Clothesline",
-    "チョーク投げ": "Dagger Throw",
+    "チョーク投げ": "Chalk Throw",
     "定規で叩く": "Pommel Strike",
     "雑巾がけ": "Cleave",
     "早弁": "Quick Slash",
@@ -4484,7 +4745,7 @@ const ENGLISH_GENERATED_CARD_NAME_DICTIONARY: Record<string, string> = {
     "掃除の時間": "Consecrate",
     "列に割り込む": "Cut Through",
     "口喧嘩": "Clash",
-    "消しゴム投げ": "Dagger Spray",
+    "消しゴム投げ": "Eraser Throw",
     "カンチョー": "Sucker Punch",
     "追い打ち": "Bane",
     "雄叫び": "Warcry",
@@ -4528,7 +4789,7 @@ const ENGLISH_GENERATED_CARD_NAME_DICTIONARY: Record<string, string> = {
     "終わりのチャイム": "Finisher",
     "炭酸ジュース": "Melter",
     "知恵熱": "Hemokinesis",
-    "画鋲投げ": "Flechettes",
+    "画鋲投げ": "Thumbtack Throw",
     "穴だらけ": "Riddle With Holes",
     "卒業式": "Grand Finale",
     "一夜漬け": "Mind Blast",
@@ -4556,6 +4817,9 @@ const ENGLISH_GENERATED_CARD_NAME_DICTIONARY: Record<string, string> = {
     "カンニングペーパー": "Strategist",
     "覚醒": "Apotheosis",
     "やる気スイッチ": "Inflame",
+    "タオル攻撃": "Towel Attack",
+    "テンションMAX": "Max Tension",
+    "集中力": "Focus",
     "反抗期": "Demon Form",
     "予習復習": "Echo Form",
     "秘密基地": "Barricade",
@@ -4573,6 +4837,198 @@ const ENGLISH_GENERATED_CARD_NAME_DICTIONARY: Record<string, string> = {
     "模範解答": "Master Reality",
     "逆ギレ": "Berserk",
 };
+
+Object.assign(ENGLISH_CARD_NAME_DICTIONARY, {
+    "つまみ食い": "Sneak Snack",
+    "牛乳一気飲み": "Milk Chug",
+    "えんぴつの削りかす": "Pencil Shavings",
+    "ごんの栗": "Gon's Chestnuts",
+    "走れメロス": "Run, Melos!",
+    "邪智暴虐": "Brutal Tyranny",
+    "メロスの信実": "Melos's Trust",
+    "蜘蛛の糸": "Spider's Thread",
+    "極楽の蓮": "Lotus of Paradise",
+    "山月記": "The Moon Over the Mountain",
+    "ボッコちゃん": "Bokko-chan",
+    "おーい、でてこい": "Hey, Come On Out!",
+    "殺し屋ですのよ": "The Hitwoman",
+    "星のプレゼント": "Star Gift",
+    "鏡 (星新一)": "Mirror (Shinichi Hoshi)",
+    "星の王子さま": "The Little Prince",
+    "窓ぎわのトットちゃん": "Totto-chan by the Window",
+    "よだかの星": "The Nighthawk Star",
+    "羅生門": "Rashomon Gate",
+    "カンダタの叫び": "Kandata's Cry",
+    "走れメロス・ラストスパート": "Run, Melos! Last Sprint",
+    "こころ": "Kokoro",
+    "坊っちゃん": "Botchan",
+    "吾輩は猫である": "I Am a Cat",
+    "どっこいしょ": "Heave-Ho",
+    "きてんの窓": "The Fox Window",
+    "かちかち山": "Kachi-Kachi Mountain",
+    "桃太郎": "Momotaro",
+    "かぐや姫": "Princess Kaguya",
+    "花咲かじいさん": "The Old Man Who Made Flowers Bloom",
+    "かさじぞう": "The Grateful Jizo",
+    "鶴の恩返し": "The Crane's Return of Favor",
+    "おむすびころりん": "Rolling Rice Ball",
+    "ねずみの嫁入り": "The Mouse's Wedding",
+    "口喧嘩": "Verbal Sparring",
+    "カンチョー": "Surprise Poke",
+    "追い打ち": "Follow-Up Hit",
+    "雄叫び": "Battle Shout",
+    "知らんぷり": "Play Dumb",
+    "装備点検": "Equipment Check",
+    "側転": "Cartwheel",
+    "バック転": "Back Handspring",
+    "準備": "Preparation",
+    "カンニング": "Cheating",
+    "予習": "Preview Study",
+    "瞑想": "Meditation",
+    "土下座": "Deep Apology",
+    "先読み": "Read Ahead",
+    "速読": "Speed Reading",
+    "カフェイン": "Caffeine Boost",
+    "目隠し": "Blindfold",
+    "足払い": "Leg Sweep",
+    "アッパー": "Uppercut",
+    "げんこつ": "Knuckle Bonk",
+    "給食当番": "Lunch Duty",
+    "いただきます": "Thanks for the Meal",
+    "重いバット": "Heavy Bat",
+    "宿題宿題": "Homework Barrage",
+    "廊下ダッシュ": "Hallway Dash",
+    "目からビーム": "Eye Beam",
+    "ビリビリに破る": "Tear to Shreds",
+    "日曜の夜": "Sunday Night",
+    "夜ふかし": "Stay Up Late",
+    "台風": "Typhoon",
+    "ひらめき": "Flash of Insight",
+    "袋叩き": "Group Pummeling",
+    "やられたらやり返す": "Hit Back Harder",
+    "断捨離": "Decluttering",
+    "グルグルバット": "Dizzy Bat Swing",
+    "ヘッドロック": "Headlock",
+    "フルスイング": "Full Swing",
+    "かかと落とし": "Heel Drop",
+    "終わりのチャイム": "Final Chime",
+    "炭酸ジュース": "Soda Pop",
+    "知恵熱": "Study Fever",
+    "卒業式": "Graduation Ceremony",
+    "一夜漬け": "Last-Minute Cramming",
+    "衝撃波": "Shock Wave",
+    "鉄壁": "Iron Wall",
+    "パシリ": "Errand Runner",
+    "興奮": "Excitement",
+    "かまくら": "Snow Hut",
+    "再起動": "Restart",
+    "バリア": "Barrier",
+    "弱点発見": "Weak Point Found",
+    "武器奪取": "Weapon Snatch",
+    "二刀流": "Dual Wielding",
+    "見張り": "Lookout",
+    "恐怖": "Fear",
+    "衝撃のうわさ": "Shocking Rumor",
+    "不快感": "Discomfort",
+    "バースト": "Burst",
+    "錬金術": "Alchemy",
+    "山勘": "Wild Guess",
+    "化学反応": "Chemical Reaction",
+    "発見": "Discovery",
+    "カンニングペーパー": "Cheat Sheet",
+    "覚醒": "Awakening",
+    "やる気スイッチ": "Motivation Switch",
+    "反抗期": "Rebellious Phase",
+    "予習復習": "Preview and Review",
+    "秘密基地": "Secret Base",
+    "賞味期限": "Expiration Date",
+    "成長痛": "Growing Pains",
+    "進級": "Grade Promotion",
+    "異臭騒ぎ": "Strange Smell Incident",
+    "反復横跳び": "Side-Step Drill",
+    "千本ノック": "Thousand Knock Drill",
+    "整理整頓": "Tidying Up",
+    "悪口": "Badmouthing",
+    "摩擦熱": "Friction Heat",
+    "心の壁": "Mental Wall",
+    "自由研究": "Independent Research",
+    "模範解答": "Model Answer",
+    "蒼炎キツネの契約": "Blue-Flame Fox Contract",
+    "むしゃくしゃ": "Frustrated",
+    "早退": "Leaving Early",
+    "先生に報告": "Report to Teacher",
+    "上履きキック": "Indoor-Shoe Kick",
+    "頭突き": "Headbutt",
+    "ラリアット": "Lariat",
+    "定規で叩く": "Ruler Smack",
+    "雑巾がけ": "Floor-Wiping Sweep",
+    "早弁": "Early Lunch",
+    "ひっかく": "Scratch",
+    "レーザーポインター": "Laser Pointer",
+    "寒いギャグ": "Bad Joke",
+    "静電気": "Static Shock",
+    "ブーメラン": "Boomerang",
+    "ボディスラム": "Body Slam",
+    "暴れる": "Rampage",
+    "キレる": "Snap",
+    "飛び膝蹴り": "Flying Knee Kick",
+    "グーパンチ": "Straight Punch",
+    "掃除の時間": "Cleaning Time",
+    "列に割り込む": "Cut in Line",
+    "充電": "Recharge",
+    "ジャンプ": "Jump",
+    "深呼吸": "Deep Breath",
+    "穴だらけ": "Full of Holes",
+    "指切りげんまん": "Pinky Promise",
+    "工作の時間": "Craft Time",
+    "隠し芸": "Secret Talent",
+    "逆ギレ": "Angry Comeback",
+    "スターライト・シンフォニー": "Starlight Symphony",
+    "ハートフル・ブルーム": "Heartful Bloom",
+    "恋するマカロン・ヒール": "Macaron Heal of Love",
+    "ミラクル・ステッキ": "Miracle Wand",
+    "夢見るリボン・バインド": "Dreaming Ribbon Bind",
+    "おやすみスウィート": "Sweet Goodnight",
+    "ジュエル・シャイン": "Jewel Shine",
+    "花咲く乙女の庭": "Maiden's Blooming Garden",
+    "憧れのドレスアップ": "Dream Dress-Up",
+    "キャンディ・ポップ・ウェーブ": "Candy Pop Wave",
+    "月光のセレナーデ": "Moonlight Serenade",
+    "天使の羽ばたき": "Angel's Wings",
+    "さくらんぼのワルツ": "Cherry Waltz",
+    "ドリーム・キャッチャー": "Dream Catcher",
+    "一角獣の突進": "Unicorn Charge",
+    "なないろマジック": "Seven-Color Magic",
+    "デコレーション・ケーキ": "Decoration Cake",
+    "おとぎ話の扉": "Door to Fairy Tales",
+    "輝くティアラの守り": "Shining Tiara Guard",
+    "流星の願い": "Meteor Wish",
+    "お茶会の時間": "Tea Party Time",
+    "内緒の噂話": "Secret Gossip",
+    "お人形遊び": "Doll Play",
+    "本命チョコ": "True-Love Chocolate",
+    "夢色メロディ": "Dream-Colored Melody",
+    "ひらひら蝶々": "Fluttering Butterfly",
+    "雪の結晶": "Snow Crystal",
+    "秘密のプレゼント": "Secret Present",
+    "人魚の歌声": "Mermaid Song",
+    "ひまわりスマイル": "Sunflower Smile",
+    "ラブリー・キッス": "Lovely Kiss",
+    "お菓子の行進": "Sweets Parade",
+    "ムーンライト・ステップ": "Moonlight Step",
+    "カラフル・レインボー": "Colorful Rainbow",
+    "天使の祈り": "Angel's Prayer",
+    "ずっと友達だよ": "Friends Forever",
+    "純真な心": "Pure Heart",
+    "華麗な舞": "Graceful Dance",
+    "いちごの奇跡": "Strawberry Miracle",
+    "飴玉の嵐": "Candy Storm",
+    "奇跡のリボン": "Miracle Ribbon",
+    "星屑のきらめき": "Stardust Sparkle",
+    "お姫様の呼び声": "Princess Call",
+    "永遠の約束": "Eternal Promise",
+    "百花繚乱": "Flowers in Full Bloom",
+});
 
 Object.assign(ENGLISH_DICTIONARY, {
     // Main route: high-school / magic UI
@@ -4940,7 +5396,7 @@ Object.assign(ENGLISH_DICTIONARY, {
 
 Object.assign(ENGLISH_DICTIONARY, {
     // Story / ending route text
-    "ついに、校舎の最上階へと続く『最後の渡り廊下』にたどり着いた...": "At last, you reached the final skybridge leading to the top floor of the school...",
+    "ついに、校舎の最上階へと続く『最後の渡り廊下』にたどり着いた...": "At last, you have reached the final corridor leading to the top floor of the school...",
     "背後には、これまでに乗り越えてきた数々のテストや宿題の記憶が遠ざかっていく。": "Behind you, the memories of every test and homework assignment you have overcome fade into the distance.",
     "前方にそびえ立つ重厚な扉の向こうには、この学校の全てを統べる『校長先生』が待っている。": "Beyond the massive door ahead waits the Principal, the one who rules over everything in this school.",
     "「君はよく頑張った。だが、本当の試験はこれからだ...」": "\"You have done well. But the real exam begins now...\"",
@@ -4950,6 +5406,11 @@ Object.assign(ENGLISH_DICTIONARY, {
     "前方の特別棟には、学園の未来を一つの型へ押し込めようとする『校長』が待っている。": "In the special building ahead waits the Principal, trying to force the academy's future into a single mold.",
     "「自由な選択は混乱を生む。だから私が、全員の正解を決める」": "\"Free choice creates chaos. That is why I will decide the right answer for everyone.\"",
     "その言葉に従えば安全かもしれない。けれど、自分の答えを選ぶために、最後の準備を整えよう。": "Obeying those words might be safe. Even so, make your final preparations so you can choose your own answer.",
+    "星の神殿へ続く渡り廊下に、九つの魔法陣が静かに灯っている。": "Nine magic circles glow quietly along the corridor leading to the Star Temple.",
+    "背後には、授業、?マスでの出会い、恋と友情、そして変身して越えた戦いの記憶が残っている。": "Behind you remain memories of classes, encounters on mystery spaces, love and friendship, and the battles you overcame after transforming.",
+    "前方の結界の奥には、学園の魔力を束ねようとする『大魔女校長』が待っている。": "Beyond the barrier ahead waits the Grand Witch Principal, who seeks to bind all of the academy's magic.",
+    "「あなたの願いも恋も、すべて私の秩序の中に封じましょう」": "\"I will seal your wishes and your love inside my order.\"",
+    "答えはカードと学びの中にある。最後の準備を整えよう。": "The answer lies in your cards and everything you have learned. Make your final preparations.",
     "最後の覚醒": "Final Awakening",
     "決戦に持ち込む『最後の力』を一つだけ選んでください。": "Choose one final power to bring into the decisive battle.",
     "友情の絆": "Bond of Friendship",
@@ -5119,6 +5580,22 @@ Object.assign(ENGLISH_DICTIONARY, {
 
 Object.assign(ENGLISH_DICTIONARY, {
     // Additional story and route titles that should never fall back to generic labels.
+    "クラウドファンディング詳細ページを開く": "Open crowdfunding details",
+    "音声読み上げをオフにする": "Turn voice reading off",
+    "音声読み上げをオンにする": "Turn voice reading on",
+    "写真を撮る": "Take Photo",
+    "リセット": "Reset",
+    "主人公を選び直す": "Choose Character Again",
+    "位置交換": "Swap Position",
+    "位置交換 (CD: 3)": "Swap Position (CD: 3)",
+    "投げる": "Throw",
+    "足元に置く": "Place on Ground",
+    "詳細": "Details",
+    "固定する": "Pin",
+    "キラ切替": "Toggle Foil",
+    "答えを入力": "Enter Answer",
+    "読み方を入力": "Enter Reading",
+    "難易度決定待ち": "Waiting for Difficulty Decision",
     "異界の知恵": "Otherworldly Wisdom",
     "知識の深淵": "Abyss of Knowledge",
     "肉球の支配": "Rule of the Paw Pads",
@@ -5460,6 +5937,115 @@ const ENGLISH_ENEMY_NAME_DICTIONARY: Record<string, string> = {
     "通知表の「がんばりましょう」": "Report Card's Needs Improvement",
     "三者面談の空気感": "Parent-Teacher Conference Tension",
     "校長先生": "Principal",
+};
+
+Object.assign(ENGLISH_ENEMY_NAME_DICTIONARY, {
+    "チョーク粉の雲": "Cloud of Chalk Dust",
+    "内申点の秤": "Report-Score Scales",
+    "実験フラスコ怪": "Experiment Flask Monster",
+    "弁当箱ミミック": "Lunchbox Mimic",
+    "成績表スライム": "Report Card Slime",
+    "部室のラジカセ": "Clubroom Boombox",
+    "ロボ掃除機の反乱": "Rebellious Robot Vacuum",
+    "竹刀の体育係": "P.E. Monitor with a Bamboo Sword",
+    "バスケ部の壁": "Basketball Club Wall",
+    "化学部の実験兵": "Chemistry Club Lab Soldier",
+    "新聞部の追跡者": "Newspaper Club Pursuer",
+    "応援団の番長": "Cheer Squad Boss",
+    "保健委員の執行者": "Health Committee Enforcer",
+    "吹奏楽部の号令手": "Band Club Caller",
+    "白手袋の監察員": "White-Gloved Inspector",
+    "化学部の白衣兵": "Chemistry Club Lab-Coat Soldier",
+    "新聞部カメラマン": "Newspaper Club Cameraman",
+    "弓道部の射手": "Archery Club Archer",
+    "電算部ハッカー": "Computer Club Hacker",
+    "天文部の予言者": "Astronomy Club Prophet",
+    "魔導書の幼体": "Young Grimoire",
+    "結晶ネズミ": "Crystal Mouse",
+    "蔓薔薇の怪": "Bramble Rose Monster",
+    "聖灯の羽虫": "Holy Lamp Gnat",
+    "魔石ゴーレム": "Magic-Stone Golem",
+    "火球の精": "Fireball Sprite",
+    "見習い魔女の反逆者": "Apprentice Witch Rebel",
+    "茨庭の魔導士": "Briar Garden Mage",
+    "紙嵐の忍術士": "Paper-Storm Ninja",
+    "雷指揮のコンダクター": "Thunder Conducting Maestro",
+    "獣面の地脈術師": "Beast-Masked Geomancer",
+    "バスケットボール": "Basketball",
+    "用務員さん": "Custodian",
+    "放課後の居残りおばけ": "After-School Detention Ghost",
+    "修学旅行の枕投げ": "School Trip Pillow Fight",
+    "部活の鬼顧問": "Relentless Club Advisor",
+    "真夜中のチャイム": "Midnight Chime",
+    "卒業式の幻影": "Graduation Ceremony Phantom",
+    "時間を食べる時計": "Time-Eating Clock",
+    "スマホ依存の影": "Smartphone Addiction Shadow",
+    "模試時計の悪霊": "Mock Exam Clock Wraith",
+    "補習ベルの亡霊": "Remedial Bell Ghost",
+    "雨傘の影武者": "Umbrella Shadow Double",
+    "階段踊り場の影": "Stair Landing Shadow",
+    "剣道場の門番": "Kendo Hall Gatekeeper",
+    "美術部の幻術師": "Art Club Illusionist",
+    "数学研究会の刺客": "Math Research Club Assassin",
+    "禁書庫の司書": "Forbidden Archive Librarian",
+    "星屑の使い魔": "Stardust Familiar",
+    "月影スライム": "Moonshadow Slime",
+    "花迷宮の芽獣": "Flower-Labyrinth Sprout Beast",
+    "火花コウモリ": "Spark Bat",
+    "影縫いの欠片": "Shadow-Stitch Fragment",
+    "時計塔の歯車霊": "Clocktower Gear Spirit",
+    "風読みの小竜": "Wind-Reading Little Dragon",
+    "夢喰いの泡": "Dream-Eating Bubble",
+    "黒板魔法陣": "Blackboard Magic Circle",
+    "星砂ミミック": "Star-Sand Mimic",
+    "月輪ガーゴイル": "Moon-Ring Gargoyle",
+    "炎冠の小鬼": "Flame-Crowned Imp",
+    "闇インクの影": "Dark-Ink Shadow",
+    "時砂の亡霊": "Time-Sand Ghost",
+    "旋風ケットシー": "Whirlwind Cait Sith",
+    "悪夢の仮面": "Nightmare Mask",
+    "封印リボン": "Sealing Ribbon",
+    "彗星の尾獣": "Comet-Tail Beast",
+    "月読の鏡片": "Tsukuyomi Mirror Shard",
+    "花粉の幻霧": "Pollen Mirage Mist",
+    "影絵の騎獣": "Shadow-Puppet Riding Beast",
+    "風鈴の魔物": "Wind-Chime Monster",
+    "夢色キャンディ怪": "Dream-Colored Candy Monster",
+    "星図の蛇": "Star-Chart Serpent",
+    "月蝕ランタン": "Lunar-Eclipse Lantern",
+    "花冠の毒蜂": "Flower-Crown Venom Bee",
+    "炎筆の魔獣": "Flame-Brush Magic Beast",
+    "闇劇場の人形": "Dark-Theater Doll",
+    "時針の蜘蛛": "Clock-Hand Spider",
+    "風札の狐面": "Wind-Card Fox Mask",
+    "夢頁の蝶": "Dream-Page Butterfly",
+    "魔力試験の残滓": "Magic Exam Remnant",
+    "月光庭園の影花": "Shadow Flower of the Moonlit Garden",
+    "仮面の魔法剣士": "Masked Magic Swordsman",
+    "影舞台の奇術師": "Shadow-Stage Magician",
+    "月社の祓い手": "Moon-Shrine Exorcist",
+    "炎厨房の魔法使い": "Flame-Kitchen Mage",
+    "重盾の魔法騎士": "Heavy-Shield Magic Knight",
+    "鏡界の幻術師": "Mirror-Realm Illusionist",
+    "氷鏡の槍術士": "Ice-Mirror Spearman",
+    "時計塔の時術師": "Clocktower Time Mage",
+    "星見台の弓術士": "Stargazing-Deck Archer",
+    "禁術学園の風紀長": "Disciplinary Chief of the Forbidden Arts Academy",
+    "星災の女王": "Queen of Star Calamity",
+});
+
+const translateEnglishEnemyCatalogDescription = (text: string): string | null => {
+    const match = text.match(/^(高校編|マジック編)に出現する敵\s+(.+)。$/);
+    if (!match) return null;
+
+    const routeName = match[1] === "高校編" ? "high school route" : "magic route";
+    const enemyName = match[2].trim();
+    const translatedEnemyName = ENGLISH_ENEMY_NAME_DICTIONARY[enemyName]
+        || ENGLISH_DICTIONARY[enemyName]
+        || enemyName.replace(/^ボス\s*[：:]\s*/, "Boss: ");
+
+    if (JAPANESE_TEXT_PATTERN.test(translatedEnemyName)) return null;
+    return `An enemy from the ${routeName}: ${translatedEnemyName}.`;
 };
 
 const buildEnglishTokenPhrase = (text: string): string | null => {
@@ -5869,6 +6455,143 @@ const EVENT_PHRASE_TRANSLATIONS: Record<string, string> = {
     "ムキムキ": "Strength",
 };
 
+const MAGIC_EVENT_NAME_TRANSLATIONS: Record<string, string> = {
+    "あかり": "Akari",
+    "しずく": "Shizuku",
+    "ひより": "Hiyori",
+    "つばさ": "Tsubasa",
+    "れい": "Rei",
+    "まどか": "Madoka",
+    "こはる": "Koharu",
+    "みらい": "Mirai",
+    "セラ": "Sera",
+    "蓮": "Ren",
+    "颯真": "Soma",
+    "湊": "Minato",
+    "理玖": "Riku",
+    "大和": "Yamato",
+    "レオン": "Leon",
+    "エリオット": "Elliot",
+    "朔夜": "Sakuya",
+};
+
+const MAGIC_EVENT_PHRASE_TRANSLATIONS: Record<string, string> = {
+    "星光": "Starlight",
+    "月鏡": "Moon Mirror",
+    "花の治癒": "Flower Healing",
+    "炎のハンマー": "Flame Hammer",
+    "闇符": "Dark Sigils",
+    "時計装置": "Clockwork Device",
+    "風と精霊樹": "Wind and the Spirit Tree",
+    "夢舞台": "Dream Stage",
+    "星界光": "Astral Light",
+    "防護風": "Protective Wind",
+    "氷の秩序": "Ice Order",
+    "清流の治癒": "Clear-Stream Healing",
+    "時間環": "Time Ring",
+    "炎拳": "Flame Fist",
+    "幻奏": "Illusion Performance",
+    "星界門": "Astral Gate",
+    "宵闇の封印": "Twilight Seal",
+    "魔法陣": "magic circle",
+    "結界": "barrier",
+    "魔力": "magic power",
+    "魔法": "magic",
+    "魔法少女": "magical girl",
+    "星界": "astral world",
+    "任務": "mission",
+    "使命": "duty",
+    "恋心": "romantic feelings",
+    "恋愛": "romance",
+    "好感度": "Affection",
+    "絆": "Bond",
+    "友情": "Friendship",
+    "親友": "best friend",
+    "相棒": "partner",
+    "親友の証": "Proof of Best Friends",
+};
+
+const applyEnglishPhraseTable = (text: string, table: Record<string, string>): string => {
+    let result = text;
+    Object.keys(table)
+        .sort((a, b) => b.length - a.length)
+        .forEach(key => {
+            if (result.includes(key)) {
+                const escapedKey = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                result = result.replace(new RegExp(escapedKey, 'g'), table[key]);
+            }
+        });
+    return result;
+};
+
+const buildEnglishMagicEventFallback = (text: string): string | null => {
+    const trimmed = text.trim();
+    if (!trimmed || !JAPANESE_TEXT_PATTERN.test(trimmed)) return null;
+    const hasMagicCharacterName = Object.keys(MAGIC_EVENT_NAME_TRANSLATIONS).some(name => trimmed.includes(name));
+    if (trimmed.includes('\n')) {
+        const lines = trimmed.split(/\n/).map(line => buildEnglishMagicEventFallback(line) || line);
+        if (lines.some((line, index) => line !== trimmed.split(/\n/)[index]) && !JAPANESE_TEXT_PATTERN.test(lines.join('\n'))) {
+            return lines.join('\n');
+        }
+    }
+
+    const dialogue = trimmed.match(/^([^「」]+)「(.+)」$/);
+    if (dialogue) {
+        const speaker = MAGIC_EVENT_NAME_TRANSLATIONS[dialogue[1].trim()] || getEnglishFamiliarName(dialogue[1].trim());
+        const inner = buildEnglishMagicEventFallback(dialogue[2])
+            || buildEnglishCompositionalTranslation(dialogue[2])
+            || buildEnglishNarrativeSummary(dialogue[2])
+            || "They share their honest feelings.";
+        return `${speaker}: ${inner}`;
+    }
+
+    const affection = trimmed.match(/^好感度\+(\d+)$/);
+    if (affection) return `Affection +${affection[1]}`;
+    const bond = trimmed.match(/^絆\+(\d+)$/);
+    if (bond) return `Bond +${bond[1]}`;
+    const rewardText = trimmed
+        .replace(/(\d+)段階完了/g, "Stage $1 complete")
+        .replace(/段階維持/g, "Stage held")
+        .replace(/友情ルート完了/g, "Friendship route complete")
+        .replace(/好感度\+(\d+)/g, "Affection +$1")
+        .replace(/絆\+(\d+)/g, "Bond +$1")
+        .replace(/最大HP\+(\d+)/g, "Max HP +$1")
+        .replace(/HPを(\d+)回復/g, "Heal $1 HP")
+        .replace(/(\d+)Gを得る/g, "Gain $1G")
+        .replace(/カードを1枚強化/g, "Upgrade 1 card");
+    if (rewardText !== trimmed && !JAPANESE_TEXT_PATTERN.test(rewardText)) return rewardText;
+
+    let result = applyEnglishPhraseTable(trimmed, { ...MAGIC_EVENT_NAME_TRANSLATIONS, ...MAGIC_EVENT_PHRASE_TRANSLATIONS, ...EVENT_PHRASE_TRANSLATIONS });
+    ENGLISH_TEXT_PATTERNS.forEach(([pattern, replacement]) => {
+        result = result.replace(pattern, replacement);
+    });
+    result = result
+        .replace(/「/g, '"')
+        .replace(/」/g, '"')
+        .replace(/、/g, ', ')
+        .replace(/。/g, '.')
+        .replace(/！/g, '!')
+        .replace(/？/g, '?')
+        .replace(/・/g, ': ')
+        .replace(/\s+/g, ' ')
+        .trim();
+    if (result !== trimmed && !JAPANESE_TEXT_PATTERN.test(result) && /[A-Za-z0-9]/.test(result)) return result;
+
+    if (/卒業前夜の約束/.test(trimmed)) return "Promise on the Eve of Graduation";
+    if (/一緒|隣|帰|約束|伝える|告げる|誘う|聞く|話|頼|守|支え|戦|共闘|調べ|練習|進む|迷|選ぶ|写真|舞台|幕|休日|会う|信じ|待つ|得意|苦手|教え|褒め|注意|分析|処方|勝負|手当て|抱え|焦ら|居場所|退路|信号|状況|古典/.test(trimmed)) {
+        if (/卒業|未来|これから/.test(trimmed)) return "Talk About Your Future Together";
+        if (/聞く|話|本音|正直/.test(trimmed)) return "Listen to Their True Feelings";
+        if (/約束|誓う/.test(trimmed)) return "Make a Promise";
+        if (/誘う|一緒/.test(trimmed)) return "Invite Them to Act Together";
+        if (/守|支え|戦|共闘|退路|封印/.test(trimmed)) return "Stand Together in the Crisis";
+        return "Choose a Thoughtful Response";
+    }
+    if (hasMagicCharacterName || /魔法|魔力|結界|星界|任務|使命|恋|好感度|絆|友情|親友|相棒|禁書|敵幹部|数学|補習|夏祭り|夜道|完璧主義|星|月|花|炎|風|闇|影|氷|時|夢|幻|封印|エンド|同盟|コンビ|庭園|特訓|証明|門|世界|二界|清流|流星|星界/.test(trimmed)) {
+        return "A magical academy event unfolds. Read the situation, choose how to respond, and deepen the bond.";
+    }
+    return null;
+};
+
 const buildEnglishCompositionalTranslation = (text: string): string | null => {
     if (text.length < 4 || !JAPANESE_TEXT_PATTERN.test(text)) return null;
 
@@ -5936,11 +6659,42 @@ const buildEnglishNarrativeSummary = (text: string): string | null => {
     return null;
 };
 
-const translateEnglishNameInline = (name: string): string => (
-    EVENT_TITLE_ENGLISH_FALLBACK[name]
-    || sanitizeEnglishText(name).replace(/^"|"$/g, '').trim()
-    || name
-);
+const EVENT_INLINE_NAME_TRANSLATIONS: Record<string, string> = {
+    "チャイム時計": "Chime Clock",
+    "回避": "Dodge",
+    "先読み": "Read Ahead",
+    "めまい": "Dizziness",
+    "粘液": "Mucus",
+    "虚無": "Void",
+};
+
+const translateEnglishNameInline = (name: string): string => {
+    if (EVENT_INLINE_NAME_TRANSLATIONS[name]) return EVENT_INLINE_NAME_TRANSLATIONS[name];
+    if (EVENT_TITLE_ENGLISH_FALLBACK[name]) return EVENT_TITLE_ENGLISH_FALLBACK[name];
+    const sanitized = sanitizeEnglishText(name).replace(/^"|"$/g, '').trim();
+    if (
+        !sanitized ||
+        JAPANESE_TEXT_PATTERN.test(sanitized) ||
+        /Choose a Thoughtful Response|A magical academy event unfolds|Event Details|School Foe/.test(sanitized) ||
+        /^[\s,.;:!、。！？ー…-]+$/.test(sanitized)
+    ) {
+        return "Item";
+    }
+    return sanitized;
+};
+
+const translateEnglishEventTitle = (text: string): string | null => {
+    if (EVENT_TITLE_ENGLISH_FALLBACK[text]) return EVENT_TITLE_ENGLISH_FALLBACK[text];
+    const numberedTitle = text.match(/^(.+?)\s+(\d+)$/);
+    if (numberedTitle && EVENT_TITLE_ENGLISH_FALLBACK[numberedTitle[1]]) {
+        return `${EVENT_TITLE_ENGLISH_FALLBACK[numberedTitle[1]]} ${numberedTitle[2]}`;
+    }
+    const pairedTitle = text.match(/^(.+?)・(.+)$/);
+    if (pairedTitle && EVENT_TITLE_ENGLISH_FALLBACK[pairedTitle[2]]) {
+        return `${getEnglishFamiliarName(pairedTitle[1])}: ${EVENT_TITLE_ENGLISH_FALLBACK[pairedTitle[2]]}`;
+    }
+    return null;
+};
 
 const EVENT_TITLE_ENGLISH_FALLBACK: Record<string, string> = {
     "忘れ物": "Lost Item",
@@ -6010,9 +6764,151 @@ const EVENT_TITLE_ENGLISH_FALLBACK: Record<string, string> = {
     "延滞図書の督促": "Overdue Library Notice",
     "肥沃な土壌": "Fertile Soil",
     "新メニューのインスピレーション": "New Menu Inspiration",
+    "魔法史の小テスト": "Magic History Quiz",
+    "実技補習": "Practical Remedial Lesson",
+    "共同研究": "Joint Research",
+    "禁書のささやき": "Whisper of the Forbidden Book",
+    "閉館後の灯り": "Light After Closing",
+    "精霊樹の落とし物": "Spirit Tree Lost Item",
+    "昼休みの相談": "Lunchtime Consultation",
+    "風に飛んだノート": "Notebook Blown by the Wind",
+    "生徒会からの依頼": "Student Council Request",
+    "放課後の約束": "After-School Promise",
+    "秘密の相談": "Secret Consultation",
+    "共闘訓練": "Cooperative Battle Training",
+    "最初の会話": "First Conversation",
+    "勉強の誘い": "Study Invitation",
+    "休日の約束": "Holiday Promise",
+    "守りたい理由": "Reason to Protect",
+    "告白の予感": "Premonition of Confession",
+    "卒業後の夢": "Dream After Graduation",
+    "夏祭りの待ち合わせ": "Summer Festival Meeting",
+    "文化祭前夜": "Night Before the Culture Festival",
+    "クリスマス交換会": "Christmas Gift Exchange",
+    "バレンタイン作戦": "Valentine Operation",
+    "進路希望調査": "Career Preference Survey",
+    "卒業式の前日": "Day Before Graduation",
 };
 
+Object.assign(ENGLISH_DICTIONARY, {
+    "収集率": "Collection Rate",
+    "件": "entries",
+    "魔物": "Enemies",
+    "エンディング": "Endings",
+    "拡大": "Enlarge",
+    "表示テーマ": "Display Theme",
+    "課題送信": "Assignment",
+    "カード帳": "Cards",
+    "記録": "Record",
+    "続きデータがあります": "Saved Adventure Found",
+    "保存された冒険があります": "Saved Adventure Found",
+    "続きから遊ぶ": "Continue Saved Adventure",
+    "最初から始める": "Start Over",
+    "最初から": "Start Over",
+    "冒険を始める": "Start Adventure",
+    "冒険を はじめる": "Start Adventure",
+    "やめる": "Cancel",
+    "カードをデッキに加える": "Add the card to your deck",
+    "ひろわずに進む": "Continue without picking it up",
+    "お金が足りない…。": "You do not have enough gold.",
+    "完璧な再現で拍手喝采！\n余興代として50G獲得。": "Your perfect imitation earned a round of applause!\nGained 50G as a performance reward.",
+    "短い仮眠で頭が冴えた。": "A short nap cleared your head.",
+    "温かさが体に広がった。": "Warmth spread through your body.",
+    "小学生編": "Elementary Mode",
+    "高校編": "High School Mode",
+    "マジック編": "Magic Mode",
+    "マジック編 女子": "Magic Girls",
+    "マジック編 男子": "Magic Boys",
+    "通常編": "Main Story",
+    "通常・高校・魔法男女": "Main, High School, Magic Girls/Boys",
+    "ミニゲーム": "Mini Games",
+    "マジック編エンディング未到達": "No Magic Endings Reached",
+    "マジック編で恋愛エンド、修羅場エンド、友情エンドに到達すると、ここでイラストとボイス付きイベントを振り返れます。": "Reach romance, dramatic, or friendship endings in Magic Mode to review illustrated and voiced events here.",
+    "タッチでイラスト拡大": "Tap to enlarge illustration",
+    "危険度": "Threat",
+    "このアイテムはまだ発見されていません。": "This item has not been discovered yet.",
+    "この出来事": "This Event",
+    "ひろう": "Pick Up",
+    "拾う": "Pick Up",
+    "そのままにする": "Leave It Alone",
+    "割る": "Break It",
+    "鏡を破壊して道を開く": "Break the Mirror Open and Clear the Way",
+    "断る": "Refuse the offer",
+    "リスクを避けて静観する": "Avoid the Risk and Watch Quietly",
+    "情報を聞き出す": "Ask for Information",
+    "相手の目的を探る": "Investigate Their Motives",
+    "落ち着いて考える": "Think Calmly",
+    "仲間に相談する": "Consult Your Friends",
+    "最後まで話を聞く": "Listen to the End",
+    "自分の経験を話す": "Share Your Own Experience",
+    "素直な気持ちを伝える": "Express Your Honest Feelings",
+    "まず使命を優先する": "Put the Mission First",
+    "みんなとの時間を大切にする": "Treasure Time with Everyone",
+    "将来について話す": "Talk About the Future",
+    "出会い": "Meeting",
+    "信頼": "Trust",
+    "接近": "Growing Closer",
+    "危機": "Crisis",
+    "告白/約束": "Confession / Promise",
+    "個別エンド": "Personal Ending",
+    "二人で今日のことを書き残した。まどかはページの端に、小さく「大切」と記した。": "The two of them wrote down what happened today. In the corner of the page, Madoka quietly wrote, \"precious.\"",
+    "レオン「閉幕じゃないよ。星をまたぐツアーの初日さ。」": "Leon: \"This is not the closing curtain. It is the first day of a tour across the stars.\"",
+    "次の任務を相談する": "Discuss the Next Mission",
+    "連携を練習する": "Practice Coordination",
+    "一緒に休む": "Rest Together",
+    "相棒技を磨く": "Practice Partner Techniques",
+    "次の任務を約束する": "Promise the Next Mission",
+    "購買へ寄る": "Stop by the School Store",
+    "本音を聞く": "Ask for Their True Feelings",
+    "親友の証を結ぶ": "Seal the Proof of Best Friends",
+    "一緒に復習する": "Review Together",
+    "魔力を整える": "Steady Your Magic Power",
+    "一緒に帰る": "Go Home Together",
+    "勉強の続きをする": "Continue Studying",
+    "放課後、誰と過ごす？": "After School, Who Will You Spend Time With?",
+    "約束の続き": "Continuing the Promise",
+    "次の季節を待ちながら": "Waiting for the Next Season",
+    "深淵図書館の栞": "Bookmark of the Abyss Library",
+    "寮の作戦会議": "Dorm Strategy Meeting",
+    "水族館の約束": "Aquarium Promise",
+    "夏祭りの結界": "Summer Festival Barrier",
+    "完璧でない自分を見せること": "Showing Your Imperfect Self",
+    "今度は自分が手を引くこと": "Taking Their Hand This Time",
+    "背中を預ける": "Trust Them With Your Back",
+    "次元亀裂の共同封鎖": "Joint Sealing of the Dimensional Rift",
+});
+
 const EVENT_SENTENCE_TRANSLATIONS: Array<[RegExp, (match: RegExpMatchArray) => string]> = [
+    [/^最大HPと現在HPが(\d+)増えた。?$/, ([, amount]) => `Max HP and current HP +${amount}.`],
+    [/^カードを(\d+)枚強化(?:した)?。?$/, ([, amount]) => `Upgraded ${amount} cards.`],
+    [/^全カード強化。?$/, () => "Upgraded all cards."],
+    [/^HP\+(\d+)、(\d+)G獲得。?$/, ([, hp, amount]) => `Healed ${hp} HP and gained ${amount}G.`],
+    [/^HP-(\d+)、(\d+)G獲得。?$/, ([, hp, amount]) => `Lost ${hp} HP and gained ${amount}G.`],
+    [/^HP-(\d+)、全カード強化。?$/, ([, hp]) => `Lost ${hp} HP and upgraded all cards.`],
+    [/^HP-(\d+)、最大HP\+(\d+)。?$/, ([, hp, maxHp]) => `Lost ${hp} HP and gained +${maxHp} Max HP.`],
+    [/^最大HP\+(\d+)、HP-(\d+)。?$/, ([, maxHp, hp]) => `Gained +${maxHp} Max HP and lost ${hp} HP.`],
+    [/^「(.+)」を習得した。?$/, ([, card]) => `Learned "${translateEnglishNameInline(card)}".`],
+    [/^「(.+)」を習得。?$/, ([, card]) => `Learned "${translateEnglishNameInline(card)}".`],
+    [/^レリック「(.+)」を得た。?$/, ([, item]) => `Gained the relic "${translateEnglishNameInline(item)}".`],
+    [/^状態異常「(.+)」を受けた。?$/, ([, status]) => `Received the status "${translateEnglishNameInline(status)}".`],
+    [/^(.+?)[。！]HP-(\d+)。?$/, ([, result, hp]) => `${translateEventSentence(result)} Lost ${hp} HP.`],
+    [/^(.+?)でHP-(\d+)。?$/, ([, result, hp]) => `${translateEventSentence(result)} Lost ${hp} HP.`],
+    [/^(.+?)[。！](\d+)G(?:入手|獲得|を得た)。?$/, ([, result, amount]) => `${translateEventSentence(result)} Gained ${amount}G.`],
+    [/^(.+?)(\d+)G(?:入手|獲得|手に入れた|稼いだ|をもらった|を受け取った)。?$/, ([, result, amount]) => `${translateEventSentence(result)} Gained ${amount}G.`],
+    [/^(.+?)[。！](\d+)G(?:失う|失った)。?$/, ([, result, amount]) => `${translateEventSentence(result)} Lost ${amount}G.`],
+    [/^(.+?)(\d+)G(?:失う|失った)。?$/, ([, result, amount]) => `${translateEventSentence(result)} Lost ${amount}G.`],
+    [/^(.+?)\n(\d+)G。?$/, ([, result, amount]) => `${translateEventSentence(result)} Gained ${amount}G.`],
+    [/^(.+?)[。、](?:ムキムキ永続|恒久ムキムキ)\+(\d+)。?$/, ([, result, amount]) => `${translateEventSentence(result)} Permanent Strength +${amount}.`],
+    [/^(.+?)[。！](?:ムキムキ永続|恒久ムキムキ)\+(\d+)と(.+)を入手。?$/, ([, result, amount, item]) => `${translateEventSentence(result)} Permanent Strength +${amount} and obtained "${translateEnglishNameInline(item)}".`],
+    [/^(.+?)[。！](.+)ポーションを入手。?$/, ([, result, potion]) => `${translateEventSentence(result)} Obtained a ${translateEnglishNameInline(potion)} Potion.`],
+    [/^(.+?)[。！]呪い「(.+)」を受けた。?$/, ([, result, curse]) => `${translateEventSentence(result)} Received the curse "${translateEnglishNameInline(curse)}".`],
+    [/^(.+?)[。！]状態異常「(.+)」を受けた。?$/, ([, result, status]) => `${translateEventSentence(result)} Received the status "${translateEnglishNameInline(status)}".`],
+    [/^(.+?)[。！]「(.+)」を入手。?$/, ([, result, item]) => `${translateEventSentence(result)} Obtained "${translateEnglishNameInline(item)}".`],
+    [/^(.+?)\n「(.+)」をコピーした。?$/, ([, result, card]) => `${translateEventSentence(result)} Copied "${translateEnglishNameInline(card)}".`],
+    [/^(.+?)\n「(.+)」を習得。?$/, ([, result, card]) => `${translateEventSentence(result)} Learned "${translateEnglishNameInline(card)}".`],
+    [/^(.+?)\n「(.+)」が飛んだ。?$/, ([, result, card]) => `${translateEventSentence(result)} Lost "${translateEnglishNameInline(card)}".`],
+    [/^(.+?)[。！]レリック「(.+)」を入手。?$/, ([, result, item]) => `${translateEventSentence(result)} Obtained the relic "${translateEnglishNameInline(item)}".`],
+    [/^(.+?)[。！]レリック「(.+)」を得た。?$/, ([, result, item]) => `${translateEventSentence(result)} Gained the relic "${translateEnglishNameInline(item)}".`],
     [/^校庭の隅に、誰かが落としたと思われるカード「(.+)」が落ちている。\nこれは以前ここを冒険した生徒の持ち物かもしれない...。$/, ([, card]) => `In the corner of the schoolyard, you find a card that someone seems to have dropped: "${translateEnglishNameInline(card)}".\nIt may have belonged to a student who adventured here before.`],
     [/^「(.+)」を拾い、大切にランドセルにしまった。$/, ([, card]) => `You picked up "${translateEnglishNameInline(card)}" and carefully tucked it into your school bag.`],
     [/^自分には必要ないと判断し、そのまま通り過ぎた。またいつか誰かが拾うだろう。$/, () => "You decided you did not need it and walked past. Someone else may pick it up someday."],
@@ -6029,7 +6925,7 @@ const EVENT_SENTENCE_TRANSLATIONS: Array<[RegExp, (match: RegExpMatchArray) => s
     [/^(.+)\n最大HP\+(\d+)。$/, ([, result, amount]) => `${translateEventSentence(result)}\nMax HP +${amount}.`],
     [/^(.+)\n恒久ムキムキ\+(\d+)。$/, ([, result, amount]) => `${translateEventSentence(result)}\nPermanent Strength +${amount}.`],
     [/^(.+)\n(\d+)Gを得た。$/, ([, result, amount]) => `${translateEventSentence(result)}\nGained ${amount}G.`],
-    [/^(.+)\n(.+)G獲得。$/, ([, result, amount]) => `${translateEventSentence(result)}\nGained ${amount}G.`],
+    [/^(.+)\n.*?(\d+)G獲得。$/, ([, result, amount]) => `${translateEventSentence(result)}\nGained ${amount}G.`],
     [/^(.+)\nHP-(\d+)、(.+)G獲得。$/, ([, result, hp, amount]) => `${translateEventSentence(result)}\nLost ${hp} HP and gained ${amount}G.`],
     [/^(.+)\nHP-(\d+)、「(.+)」が強化された。$/, ([, result, hp, card]) => `${translateEventSentence(result)}\nLost ${hp} HP, and "${translateEnglishNameInline(card)}" was upgraded.`],
     [/^(.+)\n「(.+)」が強化された。$/, ([, result, card]) => `${translateEventSentence(result)}\n"${translateEnglishNameInline(card)}" was upgraded.`],
@@ -6071,6 +6967,7 @@ const EVENT_SENTENCE_EXACT: Record<string, string> = {
     "今日は席替えの日だ。窓際の一番後ろになれるか...？\nそれとも最前列か。": "Today is seat-change day. Can you get the back seat by the window...?\nOr will you end up in the front row?",
     "放送室に誰もいない。マイクの電源が入っている。\nイタズラするチャンス？": "No one is in the broadcast room. The microphone is on.\nIs this a chance for a prank?",
     "校長先生の話が長い...もう30分も続いている。\n貧血で倒れそうだ。": "The principal's speech is long... It has already gone on for 30 minutes.\nYou feel like you might faint.",
+    "待ちに待ったプール開きだ！\nしかし水は冷たそうだ。": "The long-awaited pool opening is here!\nBut the water looks cold.",
     "体育倉庫のマットの間に何かが挟まっている。\n腐った匂いもするが...": "Something is stuck between the mats in the gym storage room.\nIt also smells rotten...",
     "ジリリリリ！非常ベルが鳴り響く。「お・か・し」を守って避難しよう。": "Rrrrring! The emergency bell blares. Evacuate while following the safety rules.",
     "森の奥に子供たちの秘密基地を見つけた。お菓子やマンガが置いてある。": "Deep in the woods, you find a children's secret base. Snacks and manga are lying around.",
@@ -6082,6 +6979,267 @@ const EVENT_SENTENCE_EXACT: Record<string, string> = {
     "校舎裏の掲示板に, ターゲットの情報が書かれている。": "Behind the school building, target information is written on a bulletin board.",
     "実験中に薬品を混ぜすぎた！フラスコが光り輝いている。": "Too many chemicals were mixed during an experiment! The flask is glowing brightly.",
     "タイヤを引いて校庭を10周！エースへの道は険しい。": "Pull a tire around the schoolyard for 10 laps! The road to becoming an ace is rough.",
+    "禁術の歴史を扱う抜き打ちテストが始まった。": "A pop quiz on the history of forbidden arts has begun.",
+    "魔法陣の線がどうしても閉じず、放課後の補習が決まった。": "The magic circle's line just will not close, so an after-school remedial lesson has been scheduled.",
+    "二人一組で属性魔法の相性を調べる課題が出された。": "You are assigned to work in pairs and study the compatibility of elemental magic.",
+    "封印棚の奥から、自分の名前を呼ぶ声が聞こえる。": "From the back of the sealed shelf, you hear a voice calling your name.",
+    "誰もいないはずの閲覧席に魔法灯が一つ残っている。": "A single magic lamp remains lit at a reading seat where no one should be.",
+    "精霊樹の根元で、見覚えのない星形の鍵を拾った。": "At the base of the spirit tree, you pick up an unfamiliar star-shaped key.",
+    "仲間が進路希望調査票を手に、ため息をついている。": "A friend sighs while holding a career preference survey.",
+    "大切な研究ノートが屋上の風にさらわれた。": "Your important research notebook is swept away by the rooftop wind.",
+    "校内の魔力異常を調査してほしいと頼まれた。": "You are asked to investigate a magical anomaly inside the academy.",
+    "学んだ内容を整理し、確実な一歩を選んだ。": "You organized what you learned and chose a steady next step.",
+    "一人で抱えず、チームで答えを見つけた。": "Instead of carrying it alone, the team found the answer together.",
+    "互いに苦手なことを一つずつ教え合う。": "You teach each other one thing you each struggle with.",
+    "誰にも話せなかった不安を打ち明けられる。": "They open up about an anxiety they could not tell anyone else.",
+    "背中を預けるための連携を練習する。": "You practice coordination so you can trust each other's backs.",
+    "互いの弱さを知り、距離が縮まった。": "You learned each other's weak points, and the distance between you narrowed.",
+    "偶然二人きりになり、思いがけない一面を知る。": "By chance, the two of you are alone, and you discover an unexpected side of them.",
+    "次の試験へ向けて一緒に勉強しようと誘われる。": "They invite you to study together for the next exam.",
+    "学園の外で会う約束を交わす。": "You promise to meet outside the academy.",
+    "戦う理由と、大切にしたい未来を語り合う。": "You talk about your reasons for fighting and the future you want to protect.",
+    "言葉にできない想いが、沈黙の中で伝わってくる。": "Feelings that cannot be put into words come through in the silence.",
+    "卒業後も隣にいたいと、未来の話を始める。": "They begin talking about a future where they still want to be by your side after graduation.",
+    "浴衣姿の仲間たちが神社の鳥居で待っている。": "Your friends in yukata wait by the shrine gate.",
+    "舞台と模擬店の準備が終わらず、校内に明かりが残る。": "Stage and food-stall preparations are unfinished, and lights remain on across the academy.",
+    "寮の暖炉の前に、名前のない小さな贈り物が置かれている。": "In front of the dorm fireplace, a small nameless gift has been left.",
+    "九人分のチョコレート作りで台所が戦場になった。": "Making chocolate for nine people turns the kitchen into a battlefield.",
+    "卒業後に魔法少女を続けるか、答えを書く時が来た。": "The time has come to write whether you will continue as a magical girl after graduation.",
+    "最後の夕焼けを見ながら、三年間を振り返る。": "Watching the final sunset, you look back on the last three years.",
+    "何気ない時間が大切な思い出になった。": "An ordinary moment became an important memory.",
+    "自分の望む未来が少しだけ明確になった。": "The future you want became a little clearer.",
+};
+
+const SCHOOL_EVENT_EXACT_TRANSLATIONS: Record<string, string> = {
+    "水中トレーニング": "Underwater Training",
+    "買う": "Buy it",
+    "無視": "Ignore it",
+    "断る": "Refuse the offer",
+    "この場は深追いしない": "Do not press any deeper here",
+    "交渉して分ける": "Negotiate and share it",
+    "バックれる": "Skip out",
+    "石像と深夜読書会": "Hold a midnight reading club with the statue",
+    "読み返す": "Read it again",
+    "漫画評論チャンネル開設": "Launch a manga review channel",
+    "助走のフォーム改善": "Improve your run-up form",
+    "包丁アートパフォーマンス": "Perform knife art",
+    "写して学ぶ": "Copy it and learn",
+    "弟子入り": "Become an apprentice",
+    "覗き込む": "Peer inside",
+    "立ち去る": "Walk away",
+    "読む": "Read it",
+    "燃やす": "Burn it",
+    "捨てる": "Throw it away",
+    "逃げ出す": "Run away",
+    "飲んでみる": "Try drinking it",
+    "耐える": "Endure it",
+    "休む": "Take a rest",
+    "寝る": "Go to sleep",
+    "飲む": "Drink it",
+    "かける": "Pour it on",
+    "滑る": "Slide across",
+    "捕まえる": "Catch it",
+    "あさる": "Search through it",
+    "掃除する": "Clean it",
+    "観察する": "Observe it",
+    "破る": "Tear it up",
+    "植える": "Plant it",
+    "研究する": "Research it",
+    "試食する": "Taste-test it",
+    "譜面を整える": "Organize the sheet music",
+    "一曲だけ弾く": "Play one song",
+    "静けさを味わう": "Enjoy the quiet",
+    "ばらけた譜面を並べると、手順の癖も見えた。": "As you arranged the scattered sheet music, you also noticed the habits in your procedure.",
+    "指が温まり、気持ちも前へ出た。": "Your fingers warmed up, and your confidence moved forward too.",
+    "余韻の中で疲れがほどけた。": "The lingering music eased your fatigue.",
+    "軽食を買う": "Buy a snack",
+    "ポイントを使う": "Use your points",
+    "資料を分類する": "Sort the documents",
+    "予算案を読む": "Read the budget proposal",
+    "会議の空気を整える": "Settle the meeting room",
+    "雨宿りする": "Take shelter from the rain",
+    "傘立てを整える": "Organize the umbrella stand",
+    "ノートを整える": "Organize your notes",
+    "読みかけの本を開く": "Open the book you were reading",
+    "忘れ物を届ける": "Deliver the lost item",
+    "軽くストレッチする": "Do a light stretch",
+    "備品を整える": "Organize the equipment",
+    "サドルを拭く": "Wipe the saddle",
+    "雨粒を払う": "Brush off the raindrops",
+    "薬箱を整理する": "Organize the medicine box",
+    "体調メモを書く": "Write a health note",
+    "色を足す": "Add color",
+    "道具を洗う": "Wash the tools",
+    "しばらく眺める": "Look at it for a while",
+    "靴を並べ直す": "Line up the shoes again",
+    "ベンチで待つ": "Wait on the bench",
+    "時刻表を確認する": "Check the timetable",
+    "考えをまとめる": "Organize your thoughts",
+    "式次第を確認する": "Check the program",
+    "チラシ配りを手伝う": "Help hand out flyers",
+    "前列を引く": "Draw a front-row seat",
+    "友人と笑う": "Laugh with a friend",
+    "席表を書き直す": "Rewrite the seating chart",
+    "弁当を分ける": "Share your lunch",
+    "傘に入る": "Share an umbrella",
+    "予備の傘を貸す": "Lend a spare umbrella",
+    "添削を読み込む": "Study the corrections",
+    "質問する": "Ask a question",
+    "礼を言う": "Say thanks",
+    "議事録を取る": "Take meeting notes",
+    "予算を確認する": "Check the budget",
+    "意見を出す": "Offer an opinion",
+    "丁寧に掃く": "Sweep carefully",
+    "落ち葉を集める": "Gather fallen leaves",
+    "季節を惜しむ": "Savor the season",
+    "差出人を探す": "Look for the sender",
+    "返事を書く": "Write a reply",
+    "そっと戻す": "Put it back quietly",
+    "全力で走る": "Run with all your strength",
+    "応援に回る": "Switch to cheering",
+    "バトンを磨く": "Polish the baton",
+    "味見する": "Taste it",
+    "夏の句を考える": "Think of a summer haiku",
+    "短く復習する": "Do a quick review",
+    "水分を取る": "Drink some water",
+    "フォームを見直す": "Review your form",
+    "願いを決める": "Decide your wish",
+    "譜面を読む": "Read the sheet music",
+    "合奏に混ざる": "Join the ensemble",
+    "片付けを手伝う": "Help clean up",
+    "冷たい飲み物を買う": "Buy a cold drink",
+    "新商品を試す": "Try the new product",
+    "寄り道の相談をする": "Talk about stopping somewhere",
+    "自転車を拭く": "Wipe the bicycle",
+    "空模様を読む": "Read the sky",
+    "設計を見直す": "Review the design",
+    "演出を考える": "Plan the staging",
+    "静かに描く": "Draw quietly",
+    "荷物を運ぶ": "Carry the luggage",
+    "しおりを確認する": "Check the itinerary",
+    "売店を見る": "Check the shop",
+    "素振りを続ける": "Keep practicing swings",
+    "球拾いを手伝う": "Help collect balls",
+    "フォームを観察する": "Observe the form",
+    "味見をする": "Taste it",
+    "分量を量る": "Measure the ingredients",
+    "余りを売る": "Sell the leftovers",
+    "質問を受ける": "Answer questions",
+    "記事を読む": "Read the article",
+    "相談に乗る": "Hear them out",
+    "友人を励ます": "Encourage a friend",
+    "次を決める": "Decide the next step",
+    "雪を踏みしめる": "Step through the snow",
+    "早めに登校する": "Go to school early",
+    "手を温める": "Warm your hands",
+    "朝学習を始める": "Start morning study",
+    "友人を呼ぶ": "Call a friend",
+    "募金を呼びかける": "Call for donations",
+    "品物を並べる": "Arrange the goods",
+    "飾りを直す": "Fix the decorations",
+    "願いを書く": "Write down your wish",
+    "甘酒を飲む": "Drink amazake",
+    "おみくじを引く": "Draw a fortune slip",
+    "計画を立てる": "Make a plan",
+    "助言を受ける": "Accept advice",
+    "受け取る": "Accept it",
+    "お返しを考える": "Think of a return gift",
+    "箱をしまう": "Put the box away",
+    "机をなでる": "Touch the desk",
+    "問題を解き切る": "Finish solving the problems",
+    "ドリンクを足す": "Refill your drink",
+    "机まわりを整えると、次の一手も見えやすくなった。": "After organizing your desk, the next move became easier to see.",
+    "考えが整理され、ノートの要点がつながった。": "Your thoughts settled, and the key points in your notes connected.",
+    "忘れていた小遣い袋を鞄で見つけた。": "You found a forgotten allowance pouch in your bag.",
+    "間違いの癖を一つ潰した。": "You corrected one habit behind your mistakes.",
+    "気持ちを切り替え、肩の力が抜けた。": "You reset your mood, and the tension left your shoulders.",
+    "数字を追ううちに、手札の扱いも洗練された。": "As you followed the numbers, your handling of cards became sharper.",
+    "掲示を見比べるうちに、今の自分に必要なことが見えた。": "Comparing the notices showed you what you need right now.",
+    "新しい活動の要領を覚えた。": "You learned the basics of a new activity.",
+    "空気が入れ替わり、むせ返る匂いが消えた。": "Fresh air flowed in, and the choking smell disappeared.",
+    "安全な分だけ小瓶に分けた。": "You separated a safe amount into a small bottle.",
+    "事故の経過を整理し、使える知見に変えた。": "You organized the accident record and turned it into useful knowledge.",
+    "温かい軽食で空腹が落ち着いた。": "A warm snack settled your hunger.",
+    "貯まっていたポイントを換金した。": "You cashed in the points you had saved.",
+    "面倒な場をさばいて、少し肝が据わった。": "Managing the difficult meeting made you a little steadier.",
+    "雨脚が弱まるまで休んだ。": "You rested until the rain eased.",
+    "机に向かうと、今日の学びが一本につながった。": "At your desk, the day's lessons came together.",
+    "持ち主に届け、礼を受け取った。": "You delivered it to its owner and received thanks.",
+    "固まっていた体がほぐれた。": "Your stiff body loosened up.",
+    "一節が思わぬ発想をくれた。": "One passage gave you an unexpected idea.",
+    "区切りをつけると、気持ちが軽くなった。": "Drawing a line under the day made you feel lighter.",
+    "冷たい空気で頭がすっきりした。": "The cold air cleared your head.",
+    "濡れた道を見ながら、次の動きが自然に整理できた。": "Watching the wet road helped you sort out your next move.",
+    "使える備品を一つ分けてもらった。": "You were given one useful supply item.",
+    "自分の限界を把握し、無理の線引きが上手くなった。": "You understood your limits and got better at drawing the line.",
+    "一筆入れる覚悟が、そのまま力になった。": "The resolve to add one stroke became strength.",
+    "丁寧な片付けを見込まれ、材料費の残りを託された。": "Your careful cleanup earned trust, and you were given the leftover material money.",
+    "未完成の絵を見ていると、自分の次の手も浮かんだ。": "Looking at the unfinished painting gave you an idea for your next move.",
+    "落とし物の持ち主から礼を受けた。": "The owner of the lost item thanked you.",
+    "夜風に当たりながら、電車を待った。": "You waited for the train in the night breeze.",
+    "乗り継ぎを見直し、余った交通費が残った。": "You reviewed your transfers and had some travel money left over.",
+    "ホームの静けさで、次にやることが整理できた。": "The quiet platform helped you organize what to do next.",
+    "受け渡しを見直し、手順が洗練された。": "Reviewing the handoff refined your procedure.",
+    "冷たさで一気に生き返った。": "The cold taste brought you back to life.",
+    "混雑を想像して、先回りの感覚を得た。": "Imagining the crowd gave you a better sense of how to prepare ahead.",
+    "熱気が抜け、頭の中まで少し涼しくなった。": "The heat cleared out, and even your thoughts cooled a little.",
+    "冷たい水が体の奥まで染みた。": "The cold water sank deep into your body.",
+    "音を合わせる緊張で、背筋が伸びた。": "The tension of matching the music straightened your posture.",
+    "困っていた生徒に感謝された。": "A student in trouble thanked you.",
+    "導線を整えると、手順もすっきりした。": "Organizing the flow also clarified the procedure.",
+    "驚かせ方を考えるうち、発想が広がった。": "Thinking about how to surprise people broadened your ideas.",
+    "重い鞄を手伝い、足腰に力が入った。": "Helping with a heavy bag strengthened your legs and back.",
+    "正確さを意識し、手順が安定した。": "Focusing on accuracy made the procedure steadier.",
+    "焼きたての甘さで元気が戻った。": "The fresh-baked sweetness restored your energy.",
+    "相手の考えを整理するうち、自分も整った。": "Helping them sort out their thoughts also settled your own.",
+    "余裕を持てたぶん、準備も丁寧になった。": "Having extra time made your preparation more careful.",
+    "冷えた指が戻り、体も楽になった。": "Your cold fingers recovered, and your body felt easier.",
+    "声を張るうち、人前に立つ強さがついた。": "Raising your voice gave you strength in front of others.",
+    "売上が伸び、運営から礼を受けた。": "Sales improved, and the organizers thanked you.",
+    "細部を整える感覚が、次にも活きそうだ。": "The sense for fixing details will help next time too.",
+    "妙に縁起の良い小瓶を授かった。": "You received a strangely lucky little bottle.",
+    "照れくささごと、甘さが疲れをほどいた。": "The sweetness, embarrassment and all, eased your fatigue.",
+    "落とし物を届けた礼が、思わぬ形で返ってきた。": "Thanks for returning a lost item came back in an unexpected form.",
+    "静けさの中で、ようやく一息つけた。": "In the quiet, you finally caught your breath.",
+};
+
+const buildEnglishSchoolEventFallback = (text: string): string | null => {
+    const exact = SCHOOL_EVENT_EXACT_TRANSLATIONS[text.trim()];
+    if (exact) return exact;
+    return null;
+};
+
+const buildEnglishEventSentenceFallback = (text: string): string => {
+    const normalized = text.trim();
+    if (!normalized) return "";
+    if (/失敗|転倒|痛め|疲れ|消耗|落とし|つった|倒れ|沈んだ|凍え|破綻|炎上|大恥|腹痛|恥|後悔|不安/.test(normalized)) {
+        return "The mishap left a mark.";
+    }
+    if (/回復|癒|休|落ち着|深呼吸|眠れ|温ま|空腹|元気|軽くな/.test(normalized)) {
+        return "You took a moment to recover.";
+    }
+    if (/鍛|筋力|体幹|腕力|肝が据|腹が据|覚醒|自信|強さ|強く|腹式呼吸|覚悟|耐え/.test(normalized)) {
+        return "The experience made you stronger.";
+    }
+    if (/強化|洗練|冴え|磨か|技|コツ|手順|フォーム|知識|理論|整理|最適化|把握|分析|研究/.test(normalized)) {
+        return "You refined what you learned from the event.";
+    }
+    if (/取り除|削っ|捨て|処分|片付|ノイズ|無駄/.test(normalized)) {
+        return "You cleared away something unnecessary.";
+    }
+    if (/売れ|収入|報酬|賞金|謝礼|返金|投げ銭|課金|観光|広告|チケット|売上/.test(normalized)) {
+        return "Your effort earned a reward.";
+    }
+    if (/レリック|伝説|大成功|大当たり|ヒット|絶賛|名物|人気|祝福/.test(normalized)) {
+        return "The event became a memorable success.";
+    }
+    if (/感謝|礼|誠意|良心|正直|助け|救った|平和/.test(normalized)) {
+        return "Your careful choice helped the situation.";
+    }
+    if (/逃走|退避|避難|走|滑走|移動/.test(normalized)) {
+        return "You moved through the situation cleanly.";
+    }
+    return "You handled the event and turned it into progress.";
 };
 
 function translateEventSentence(text: string): string {
@@ -6089,16 +7247,20 @@ function translateEventSentence(text: string): string {
     if (!trimmed) return "";
     if (ENGLISH_DICTIONARY[trimmed]) return ENGLISH_DICTIONARY[trimmed];
     if (EVENT_SENTENCE_EXACT[trimmed]) return EVENT_SENTENCE_EXACT[trimmed];
+    const schoolEventFallback = buildEnglishSchoolEventFallback(trimmed);
+    if (schoolEventFallback) return schoolEventFallback;
     if (EVENT_TITLE_ENGLISH_FALLBACK[trimmed]) return EVENT_TITLE_ENGLISH_FALLBACK[trimmed];
     for (const [pattern, formatter] of EVENT_SENTENCE_TRANSLATIONS) {
         const match = trimmed.match(pattern);
         if (match) return formatter(match);
     }
+    const magicFallback = buildEnglishMagicEventFallback(trimmed);
+    if (magicFallback && !/Choose a Thoughtful Response|A magical academy event unfolds/.test(magicFallback)) return magicFallback;
     const effectSummary = buildEnglishEffectSummary(trimmed);
     if (effectSummary) return effectSummary;
     const compositional = buildEnglishCompositionalTranslation(trimmed);
-    if (compositional && !JAPANESE_TEXT_PATTERN.test(compositional)) return compositional;
-    return trimmed
+    if (compositional && !JAPANESE_TEXT_PATTERN.test(compositional) && !/[、。！？]/.test(compositional) && /[A-Za-z0-9]/.test(compositional) && compositional.trim().split(/\s+/).length >= 2 && !/^[\s,.;:!、。！？ー…-]+/.test(compositional)) return compositional;
+    const cleaned = trimmed
         .replace(/「(.+?)」が強化された。?/g, (_, card) => `"${translateEnglishNameInline(card)}" was upgraded.`)
         .replace(/「(.+?)」を取り除いた。?/g, (_, card) => `Removed "${translateEnglishNameInline(card)}".`)
         .replace(/「(.+?)」を得た。?/g, (_, item) => `Gained "${translateEnglishNameInline(item)}".`)
@@ -6109,7 +7271,10 @@ function translateEventSentence(text: string): string {
         .replace(/呪い「(.+?)」を受けた。?/g, (_, curse) => `Received the curse "${translateEnglishNameInline(curse)}".`)
         .replace(/[ぁ-んァ-ン一-龠々]+/g, '')
         .replace(/\s+/g, ' ')
-        .trim() || "Event resolved.";
+        .trim();
+    return cleaned && !/^[\s,.;:!、。！？ー…-]+$/.test(cleaned)
+        ? cleaned
+        : buildEnglishEventSentenceFallback(trimmed);
 }
 
 const buildEnglishEventFullTranslation = (text: string): string | null => {
@@ -6125,6 +7290,584 @@ const buildEnglishEventFullTranslation = (text: string): string | null => {
     if (!translated || translated === text) return null;
     if (JAPANESE_TEXT_PATTERN.test(translated)) return null;
     return translated;
+};
+
+const EVENT_HIRAGANA_PHRASES: Record<string, string> = {
+    "校庭": "こうてい",
+    "隅": "すみ",
+    "誰か": "だれか",
+    "落とした": "おとした",
+    "思われる": "おもわれる",
+    "落ちている": "おちている",
+    "以前": "いぜん",
+    "冒険": "ぼうけん",
+    "生徒": "せいと",
+    "持ち物": "もちもの",
+    "残って": "のこって",
+    "勉強": "べんきょう",
+    "少し": "すこし",
+    "仮眠": "かみん",
+    "机": "つくえ",
+    "片付ける": "かたづける",
+    "小さな": "ちいさな",
+    "成果": "せいか",
+    "得る": "える",
+    "静かな": "しずかな",
+    "復習": "ふくしゅう",
+    "進んだ": "すすんだ",
+    "短い": "みじかい",
+    "頭": "あたま",
+    "冴えた": "さえた",
+    "整える": "ととのえる",
+    "次": "つぎ",
+    "一手": "いって",
+    "見え": "みえ",
+    "冷たい": "つめたい",
+    "風": "かぜ",
+    "腹": "はら",
+    "据わった": "すわった",
+    "夕景": "ゆうけい",
+    "考え": "かんがえ",
+    "整理": "せいり",
+    "要点": "ようてん",
+    "忘れて": "わすれて",
+    "小遣い": "こづかい",
+    "鞄": "かばん",
+    "見つけた": "みつけた",
+    "答案": "とうあん",
+    "見直す": "みなおす",
+    "間違い": "まちがい",
+    "癖": "くせ",
+    "一つ": "ひとつ",
+    "潰した": "つぶした",
+    "苦手": "にがて",
+    "弱点": "じゃくてん",
+    "直視": "ちょくし",
+    "勝負": "しょうぶ",
+    "強く": "つよく",
+    "気持ち": "きもち",
+    "切り替え": "きりかえ",
+    "肩": "かた",
+    "力": "ちから",
+    "抜けた": "ぬけた",
+    "飾り付け": "かざりつけ",
+    "段取り": "だんどり",
+    "良さ": "よさ",
+    "買われ": "かわれ",
+    "謝礼": "しゃれい",
+    "受け取った": "うけとった",
+    "会計": "かいけい",
+    "手伝う": "てつだう",
+    "数字": "すうじ",
+    "追う": "おう",
+    "手札": "てふだ",
+    "扱い": "あつかい",
+    "洗練": "せんれん",
+    "休憩": "きゅうけい",
+    "入れる": "いれる",
+    "教室": "きょうしつ",
+    "一息": "ひといき",
+    "掲示": "けいじ",
+    "見比べる": "みくらべる",
+    "今": "いま",
+    "自分": "じぶん",
+    "必要": "ひつよう",
+    "新しい": "あたらしい",
+    "活動": "かつどう",
+    "要領": "ようりょう",
+    "覚えた": "おぼえた",
+    "落ちて": "おちて",
+    "購買券": "こうばいけん",
+    "拾って": "ひろって",
+    "届け": "とどけ",
+    "換気": "かんき",
+    "空気": "くうき",
+    "入れ替わり": "いれかわり",
+    "匂い": "におい",
+    "消えた": "きえた",
+    "残った": "のこった",
+    "試料": "しりょう",
+    "調べる": "しらべる",
+    "安全": "あんぜん",
+    "小瓶": "こびん",
+    "分けた": "わけた",
+    "記録": "きろく",
+    "事故": "じこ",
+    "経過": "けいか",
+    "使える": "つかえる",
+    "知見": "ちけん",
+    "変えた": "かえた",
+    "軽食": "けいしょく",
+    "買う": "かう",
+    "温かい": "あたたかい",
+    "空腹": "くうふく",
+    "落ち着いた": "おちついた",
+    "栄養": "えいよう",
+    "選ぶ": "えらぶ",
+    "棚": "たな",
+    "集中": "しゅうちゅう",
+    "一本": "いっぽん",
+    "貯まって": "たまって",
+    "換金": "かんきん",
+    "資料": "しりょう",
+    "分類": "ぶんるい",
+    "山積み": "やまづみ",
+    "判断": "はんだん",
+    "速く": "はやく",
+    "予算案": "よさんあん",
+    "読む": "よむ",
+    "無駄": "むだ",
+    "協力費": "きょうりょくひ",
+    "会議": "かいぎ",
+    "面倒": "めんどう",
+    "場": "ば",
+    "雨宿り": "あまやどり",
+    "雨脚": "あまあし",
+    "弱まる": "よわまる",
+    "休んだ": "やすんだ",
+    "雨音": "あまおと",
+    "聞く": "きく",
+    "単調": "たんちょう",
+    "思考": "しこう",
+    "傘立て": "かさたて",
+    "落とし主": "おとしぬし",
+    "向かう": "むかう",
+    "今日": "きょう",
+    "学び": "まなび",
+    "窓": "まど",
+    "開ける": "あける",
+    "夕方": "ゆうがた",
+    "明日": "あした",
+    "準備": "じゅんび",
+    "済ませる": "すませる",
+    "余白": "よはく",
+    "譜面": "ふめん",
+    "並べる": "ならべる",
+    "手順": "てじゅん",
+    "弾く": "ひく",
+    "指": "ゆび",
+    "温まり": "あたたまり",
+    "前": "まえ",
+    "出た": "でた",
+    "静けさ": "しずけさ",
+    "味わう": "あじわう",
+    "余韻": "よいん",
+    "中": "なか",
+    "疲れ": "つかれ",
+    "持ち主": "もちぬし",
+    "軽く": "かるく",
+    "固まって": "かたまって",
+    "体": "からだ",
+    "備品": "びひん",
+    "妙に": "みょうに",
+    "読": "よ",
+    "本": "ほん",
+    "開く": "ひらく",
+    "一節": "いっせつ",
+    "発想": "はっそう",
+    "調べ物": "しらべもの",
+    "進める": "すすめる",
+    "辿り着いた": "たどりついた",
+    "灯り": "あかり",
+    "消して": "けして",
+    "帰る": "かえる",
+    "区切り": "くぎり",
+    "軽くなった": "かるくなった",
+    "撃破後": "げきはご",
+    "個別恋愛": "こべつれんあい",
+    "真恋愛": "しんれんあい",
+    "候補": "こうほ",
+    "兼ねる": "かねる",
+    "関係": "かんけい",
+    "物語": "ものがたり",
+    "分岐": "ぶんき",
+    "先輩": "せんぱい",
+    "後ろ": "うしろ",
+    "湊": "みなと",
+    "蓮": "れん",
+    "隣": "となり",
+    "同じ": "おなじ",
+    "景色": "けしき",
+    "歩いた": "あるいた",
+    "花": "はな",
+    "方向": "ほうこう",
+    "道": "みち",
+    "作る": "つくる",
+    "処方": "しょほう",
+    "星界標準": "せいかいひょうじゅん",
+    "登録": "とうろく",
+    "多め": "おおめ",
+    "反省会": "はんせいかい",
+    "走り": "はしり",
+    "安心": "あんしん",
+    "咲ける": "さける",
+    "案内板": "あんないばん",
+    "監修": "かんしゅう",
+    "風向き": "かざむき",
+    "表示": "ひょうじ",
+    "大和": "やまと",
+    "五分": "ごふん",
+    "壊さない": "こわさない",
+    "範囲": "はんい",
+    "横": "よこ",
+    "並んで": "ならんで",
+    "知らせる": "しらせる",
+    "呼ぶ": "よぶ",
+    "味": "あじ",
+    "友だち": "ともだち",
+    "一杯": "いっぱい",
+    "星界": "せいかい",
+    "楽譜": "がくふ",
+    "難しい": "むずかしい",
+    "客席": "きゃくせき",
+    "宇宙": "うちゅう",
+    "燃える": "もえる",
+    "初演": "しょえん",
+    "指揮": "しき",
+    "任せます": "まかせます",
+    "私": "わたし",
+    "迷子": "まいご",
+    "星": "ほし",
+    "席": "せき",
+    "案内": "あんない",
+    "朔夜": "さくや",
+    "赦し": "ゆるし",
+    "君": "きみ",
+    "俺": "おれ",
+    "いま日": "きょう",
+    "確認": "かくにん",
+    "受け": "うけ",
+    "受": "う",
+    "入": "い",
+    "整": "ととの",
+    "手": "て",
+    "見": "み",
+    "礼": "れい",
+    "動": "うご",
+    "迷": "まよ",
+    "取": "と",
+    "待": "ま",
+    "話": "はなし",
+    "言葉": "ことば",
+    "言": "い",
+    "出": "で",
+    "後": "あと",
+    "任": "まか",
+    "笑": "わら",
+    "水": "みず",
+    "友": "とも",
+    "返": "かえ",
+    "片付": "かたづ",
+    "気": "き",
+    "思": "おも",
+    "直": "なお",
+    "書": "か",
+    "色": "いろ",
+    "丁寧": "ていねい",
+    "撮": "と",
+    "差": "さ",
+    "代": "だい",
+    "合": "あ",
+    "感覚": "かんかく",
+    "込": "こ",
+    "深": "ふか",
+    "心": "こころ",
+    "知": "し",
+    "抜": "ぬ",
+    "先": "さき",
+    "拭": "ふ",
+    "困": "こま",
+    "自然": "しぜん",
+    "短": "みじか",
+    "持": "も",
+    "把握": "はあく",
+    "覚悟": "かくご",
+    "眺": "なが",
+    "絵": "え",
+    "物": "もの",
+    "当": "あ",
+    "涼": "すず",
+    "予定": "よてい",
+    "写真": "しゃしん",
+    "後輩": "こうはい",
+    "手際": "てぎわ",
+    "効": "き",
+    "間": "あいだ",
+    "傘": "かさ",
+    "理解": "りかい",
+    "流": "なが",
+    "声": "こえ",
+    "葉": "は",
+    "静": "しず",
+    "最後": "さいご",
+    "渡": "わた",
+    "組": "く",
+    "教": "おし",
+    "音": "おと",
+    "自信": "じしん",
+    "良": "よ",
+    "決": "き",
+    "固": "かた",
+    "飲": "の",
+    "重": "おも",
+    "運": "はこ",
+    "広": "ひろ",
+    "売": "う",
+    "戻": "もど",
+    "伝": "つた",
+    "冷": "つめ",
+    "一": "いち",
+    "方": "かた",
+    "字": "じ",
+    "肝": "きも",
+    "具": "ぐ",
+    "熱": "ねつ",
+    "乗": "の",
+    "生": "せい",
+    "使": "つか",
+    "極": "きわ",
+    "質": "しつ",
+    "強": "つよ",
+    "集": "あつ",
+    "余裕": "よゆう",
+    "澄": "す",
+    "踏": "ふ",
+    "芯": "しん",
+    "願": "ねが",
+    "目標": "もくひょう",
+    "伸": "の",
+    "相談": "そうだん",
+    "切": "き",
+    "口": "くち",
+    "活": "かつ",
+    "元": "もと",
+    "量": "りょう",
+    "朝": "あさ",
+    "名": "な",
+    "袋": "ふくろ",
+    "験": "けん",
+    "部": "ぶ",
+    "紙": "かみ",
+    "廊下": "ろうか",
+    "安": "あん",
+    "用": "よう",
+    "選": "えら",
+    "類": "るい",
+    "費": "ひ",
+    "替": "か",
+    "雨粒": "あまつぶ",
+    "払": "はら",
+    "濡": "ぬ",
+    "休": "やす",
+    "薬箱": "くすりばこ",
+    "調": "しら",
+    "限界": "げんかい",
+    "無理": "むり",
+    "線": "せん",
+    "足": "あし",
+    "材料費": "ざいりょうひ",
+    "託": "たく",
+    "未": "み",
+    "浮": "う",
+    "靴": "くつ",
+    "引": "ひ",
+    "夜": "よる",
+    "電車": "でんしゃ",
+    "刻表": "こくひょう",
+    "継": "つ",
+    "交通費": "こうつうひ",
+    "春": "はる",
+    "式": "しき",
+    "新": "あたら",
+    "助": "たす",
+    "勧誘": "かんゆう",
+    "配": "くば",
+    "距離": "きょり",
+    "喧騒": "けんそう",
+    "列": "れつ",
+    "逃": "に",
+    "何": "なに",
+    "表": "ひょう",
+    "配置": "はいち",
+    "弁": "べん",
+    "食": "しょく",
+    "昼食": "ちゅうしょく",
+    "以": "い",
+    "進路": "しんろ",
+    "他": "ほか",
+    "輪郭": "りんかく",
+    "昼休": "ひるやす",
+    "雨": "あめ",
+    "避": "さ",
+    "予備": "よび",
+    "貸": "か",
+    "翌日": "よくじつ",
+    "磨": "みが",
+    "添削": "てんさく",
+    "赤字": "あかじ",
+    "意図": "いと",
+    "視点": "してん",
+    "素": "す",
+    "身": "み",
+    "議事録": "ぎじろく",
+    "予算": "よさん",
+    "余剰費": "よじょうひ",
+    "意": "い",
+    "置": "お",
+    "掃": "は",
+    "呼吸": "こきゅう",
+    "作業": "さぎょう",
+    "師": "し",
+    "季節": "きせつ",
+    "惜": "お",
+    "終": "お",
+    "送": "おく",
+    "探": "さが",
+    "観察眼": "かんさつがん",
+    "事": "こと",
+    "研": "みが",
+    "脚": "あし",
+    "緩": "ゆる",
+    "通": "とお",
+    "応援": "おうえん",
+    "晴": "は",
+    "氷": "こおり",
+    "削": "けず",
+    "混雑": "こんざつ",
+    "想像": "そうぞう",
+    "説明": "せつめい",
+    "散": "ち",
+    "識": "しき",
+    "形": "かたち",
+    "促": "うなが",
+    "夏": "なつ",
+    "句": "く",
+    "奥": "おく",
+    "染": "し",
+    "減": "へ",
+    "増": "ふ",
+    "夜空": "よぞら",
+    "光": "ひかり",
+    "譲": "ゆず",
+    "奏": "かな",
+    "緊張": "きんちょう",
+    "背筋": "せすじ",
+    "顧": "かえり",
+    "預": "あず",
+    "得": "え",
+    "荷": "に",
+    "観察": "かんさつ",
+    "感謝": "かんしゃ",
+    "大": "だい",
+    "向": "む",
+    "温": "あたた",
+    "立": "た",
+    "策": "さく",
+    "評価": "ひょうか",
+    "曲": "きょく",
+    "歩": "ある",
+    "焦": "あせ",
+    "板": "いた",
+    "拾": "ひろ",
+    "視界": "しかい",
+    "滑": "すべ",
+    "振": "ふ",
+    "甘": "あま",
+    "胸": "むね",
+    "相": "あい",
+    "結果": "けっか",
+    "止": "と",
+    "課題": "かだい",
+    "楽": "たの",
+    "営": "いとな",
+    "応": "おう",
+    "粘": "ねば",
+    "完璧": "かんぺき",
+    "掴": "つか",
+    "勝": "か",
+    "技": "わざ",
+    "奉仕": "ほうし",
+    "洞察": "どうさつ",
+    "誠実": "せいじつ",
+    "打": "う",
+    "防御": "ぼうぎょ",
+    "成功": "せいこう",
+    "筆": "ふで",
+    "喉": "のど",
+    "潤": "うるお",
+    "商品": "しょうひん",
+    "試": "ため",
+    "寄": "よ",
+    "雑談": "ざつだん",
+    "薄": "うす",
+    "自転車": "じてんしゃ",
+    "空模様": "そらもよう",
+    "腕": "うで",
+    "設計": "せっけい",
+    "導": "みちび",
+    "演": "えん",
+    "驚": "おどろ",
+    "比": "くら",
+    "描": "えが",
+    "触": "ふ",
+    "志望": "しぼう",
+    "条": "じょう",
+    "別案": "べつあん",
+    "肢": "し",
+    "腰": "こし",
+    "行程": "こうてい",
+    "店": "みせ",
+    "小銭": "こぜに",
+    "夕日": "ゆうひ",
+    "沈": "しず",
+    "崩": "くず",
+    "球拾": "たまひろ",
+    "監督": "かんとく",
+    "盗": "ぬす",
+    "焼": "や",
+    "正確": "せいかく",
+    "定": "さだ",
+    "好評": "こうひょう",
+    "影補": "かげほ",
+    "励": "はげ",
+    "太": "ふと",
+    "雪": "ゆき",
+    "早": "はや",
+    "登校": "とうこう",
+    "転": "ころ",
+    "支": "ささ",
+    "始": "はじ",
+    "募金": "ぼきん",
+    "呼": "よ",
+    "張": "は",
+    "品": "しな",
+    "飾": "かざ",
+    "細": "こま",
+    "文": "ぶん",
+    "甘酒": "あまざけ",
+    "縁起": "えんぎ",
+    "授": "さず",
+    "計画": "けいかく",
+    "照": "て",
+    "箱": "はこ",
+    "束": "たば",
+    "積": "つ",
+    "側": "がわ",
+    "写": "うつ",
+    "記念": "きねん",
+    "黒板": "こくばん",
+    "消": "け",
+    "解": "と",
+};
+
+const buildHiraganaEventFallback = (text: string): string => {
+    let result = trans(text, 'HIRAGANA');
+    Object.keys(EVENT_HIRAGANA_PHRASES)
+        .sort((a, b) => b.length - a.length)
+        .forEach(key => {
+            result = result.replace(new RegExp(key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'g'), EVENT_HIRAGANA_PHRASES[key]);
+        });
+    return result;
 };
 
 const plural = (count: number, word: string) => `${count} ${word}${count === 1 ? "" : "s"}`;
@@ -6375,13 +8118,25 @@ export const buildEnglishCardDescription = (card: Card): string => {
 export const sanitizeEnglishText = (text: string): string => {
     if (!text || !JAPANESE_TEXT_PATTERN.test(text)) return text;
 
+    const schoolEventExact = buildEnglishSchoolEventFallback(text);
+    if (schoolEventExact) return schoolEventExact;
+
+    const enemyCatalogDescription = translateEnglishEnemyCatalogDescription(text);
+    if (enemyCatalogDescription) return enemyCatalogDescription;
+
+    const exactTranslation = ENGLISH_DICTIONARY[text] || translateEnglishEventTitle(text) || ENGLISH_CARD_NAME_DICTIONARY[text] || ENGLISH_GENERATED_CARD_NAME_DICTIONARY[text] || ENGLISH_ITEM_NAME_DICTIONARY[text] || ENGLISH_ENEMY_NAME_DICTIONARY[text];
+    if (exactTranslation) return exactTranslation;
+
     const familiarContract = text.match(/^(.+)の契約$/);
     if (familiarContract) return `${getEnglishFamiliarName(familiarContract[1])} Contract`;
 
     const eventFullTranslation = buildEnglishEventFullTranslation(text);
     if (eventFullTranslation) return eventFullTranslation;
 
-    let result = ENGLISH_DICTIONARY[text] || ENGLISH_CARD_NAME_DICTIONARY[text] || ENGLISH_GENERATED_CARD_NAME_DICTIONARY[text] || ENGLISH_ITEM_NAME_DICTIONARY[text] || ENGLISH_ENEMY_NAME_DICTIONARY[text] || text;
+    const magicEventTranslation = buildEnglishMagicEventFallback(text);
+    if (magicEventTranslation) return magicEventTranslation;
+
+    let result = text;
 
     Object.keys({ ...ENGLISH_DICTIONARY, ...ENGLISH_ENEMY_NAME_DICTIONARY, ...ENGLISH_ITEM_NAME_DICTIONARY, ...ENGLISH_GENERATED_CARD_NAME_DICTIONARY, ...ENGLISH_CARD_NAME_DICTIONARY, ...ENGLISH_TOKEN_DICTIONARY })
         .sort((a, b) => b.length - a.length)
@@ -6419,7 +8174,11 @@ export const sanitizeEnglishText = (text: string): string => {
     const narrativeSummary = buildEnglishNarrativeSummary(text);
     if (narrativeSummary) return narrativeSummary;
 
-    if (!JAPANESE_TEXT_PATTERN.test(result)) return result;
+    const schoolEventFallback = buildEnglishSchoolEventFallback(text);
+    if (schoolEventFallback) return schoolEventFallback;
+
+    if (!JAPANESE_TEXT_PATTERN.test(result) && /[A-Za-z0-9]/.test(result)) return result;
+    if (!JAPANESE_TEXT_PATTERN.test(result)) return "Event Details";
 
     const hint = ENGLISH_FALLBACK_BY_HINT.find(([pattern]) => pattern.test(text));
     if (hint) return hint[1];
@@ -6434,8 +8193,8 @@ export const sanitizeEnglishText = (text: string): string => {
     if (tokenPhrase) return tokenPhrase;
 
     if (/敵|生徒|犬|カラス|幽霊|魔|妖精|怪|スライム|時計|鉛筆|ノート|教科書|リコーダー/.test(text)) return "School Foe";
-    if (text.length <= 8) return "Event Choice";
-    return "Event Text";
+    if (text.length <= 8) return "Choose Option";
+    return "Event Details";
 };
 
 // 置換用キーワードのリスト（長い順にソートして置換ミスを防ぐ）
@@ -6701,11 +8460,23 @@ export const trans = (text: string, mode: LanguageMode): string => {
     if (!text) return "";
     if (mode === 'JAPANESE') return text;
     if (mode === 'ENGLISH') {
+        const schoolEventExact = buildEnglishSchoolEventFallback(text);
+        if (schoolEventExact) return schoolEventExact;
+
+        const enemyCatalogDescription = translateEnglishEnemyCatalogDescription(text);
+        if (enemyCatalogDescription) return enemyCatalogDescription;
+
         if (ENGLISH_DICTIONARY[text]) return ENGLISH_DICTIONARY[text];
         if (ENGLISH_CARD_NAME_DICTIONARY[text]) return ENGLISH_CARD_NAME_DICTIONARY[text];
         if (ENGLISH_GENERATED_CARD_NAME_DICTIONARY[text]) return ENGLISH_GENERATED_CARD_NAME_DICTIONARY[text];
         if (ENGLISH_ITEM_NAME_DICTIONARY[text]) return ENGLISH_ITEM_NAME_DICTIONARY[text];
         if (ENGLISH_ENEMY_NAME_DICTIONARY[text]) return ENGLISH_ENEMY_NAME_DICTIONARY[text];
+
+        const eventTitleTranslation = translateEnglishEventTitle(text);
+        if (eventTitleTranslation) return eventTitleTranslation;
+
+        const eventFullTranslation = buildEnglishEventFullTranslation(text);
+        if (eventFullTranslation) return eventFullTranslation;
 
         let result = text;
         Object.keys({ ...ENGLISH_DICTIONARY, ...ENGLISH_ENEMY_NAME_DICTIONARY, ...ENGLISH_ITEM_NAME_DICTIONARY, ...ENGLISH_GENERATED_CARD_NAME_DICTIONARY, ...ENGLISH_CARD_NAME_DICTIONARY })
@@ -6747,6 +8518,52 @@ export const trans = (text: string, mode: LanguageMode): string => {
     result = result.replace(/,/g, "、");
 
     return result;
+};
+
+export const transEventText = (text: string, mode: LanguageMode): string => {
+    if (!text) return "";
+    if (mode === 'HIRAGANA') return buildHiraganaEventFallback(text);
+    if (mode !== 'ENGLISH') return trans(text, mode);
+
+    const earlyExact = buildEnglishSchoolEventFallback(text);
+    if (earlyExact) return earlyExact;
+    const earlyFull = buildEnglishEventFullTranslation(text);
+    if (earlyFull) return earlyFull;
+
+    const base = trans(text, mode);
+    if (/HP|G|カード|レリック|呪い|ポーション|最大HP|恒久|強化|獲得|回復|状態異常|習得/.test(text)) {
+        const effectFirst = translateEventSentence(text);
+        if (effectFirst && !JAPANESE_TEXT_PATTERN.test(effectFirst) && !/[、。！？]/.test(effectFirst) && !/^You handled the (event|situation)/.test(effectFirst)) {
+            return effectFirst;
+        }
+    }
+    const weakBase =
+        JAPANESE_TEXT_PATTERN.test(base) ||
+        /Choose Option|Event Details|School Foe|Discovery\./.test(base) ||
+        /Choose a Thoughtful Response|A magical academy event unfolds/.test(base) ||
+        /^Upgrade card\(s\)\.?$/.test(base.trim()) ||
+        /[、。！？]/.test(base) ||
+        /^[\s,.;:!、。！？ー…-]+/.test(base) ||
+        base.trim().split(/\s+/).length < 2;
+    if (!weakBase) return base;
+
+    const exact = buildEnglishSchoolEventFallback(text);
+    if (exact) return exact;
+    const full = buildEnglishEventFullTranslation(text);
+    if (full) return full;
+    if (/HP|G|カード|レリック|呪い|ポーション|最大HP|恒久|強化|獲得|回復|状態異常|習得/.test(text)) {
+        const effectOnly = translateEventSentence(text);
+        if (effectOnly && !JAPANESE_TEXT_PATTERN.test(effectOnly) && !/[、。！？]/.test(effectOnly) && !/^You handled the (event|situation)/.test(effectOnly)) {
+            return effectOnly;
+        }
+    }
+    if (/^[^。\n！？]+$/.test(text)) return "Choose a fitting event action";
+    if (/[。！？…]|\.{3}/.test(text)) {
+        const sentence = translateEventSentence(text);
+        if (sentence && !JAPANESE_TEXT_PATTERN.test(sentence) && !/[、。！？]/.test(sentence)) return sentence;
+        return "You handled the situation carefully and turned the experience into progress.";
+    }
+    return base;
 };
 
 export const transProblemSubjectName = (text: string, mode: LanguageMode): string => {

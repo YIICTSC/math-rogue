@@ -952,7 +952,7 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
 
   const isMastered = (mode: string) => !!modeMasteryMap[mode];
   const getCategoryLabel = (id: SubjectCategoryType) => transProblemSubjectName(CATEGORY_LABELS[id] || id, languageMode);
-  const getSubLabel = (_id: string, fallback: string) => fallback;
+  const getSubLabel = (_id: string, fallback: string) => transProblemSubjectName(fallback, languageMode);
   const getUnitCorrectCount = (unit: { mode?: string; modes?: string[] }) => {
     if (unit.modes && unit.modes.length > 0) {
       return unit.modes.reduce((total, mode) => total + (modeCorrectCounts[mode] || 0), 0);
@@ -1034,7 +1034,7 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
 
     return (
       <div className="rounded-lg border border-slate-700 bg-slate-950/60 p-2">
-        <div className="mb-1 text-[10px] font-bold text-slate-400">答え方</div>
+        <div className="mb-1 text-[10px] font-bold text-slate-400">{trans('答え方', languageMode)}</div>
         <div className="grid grid-cols-2 gap-1.5">
           {([
             ['CHOICE', '4択'],
@@ -1050,7 +1050,7 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
               }}
               className={`rounded border px-2 py-1.5 text-xs font-black transition-colors ${answerMode === mode ? 'border-yellow-300 bg-yellow-500 text-slate-950' : 'border-slate-600 bg-slate-800 text-slate-200 hover:border-slate-400'}`}
             >
-              {label}
+              {trans(label, languageMode)}
             </button>
           ))}
         </div>
@@ -1086,7 +1086,7 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
         return {
           mode: GameMode.ENGLISH_MIXED as string,
           canStart: true,
-          label: `${getCategoryLabel(selectedCategory.id)} / ミックス`,
+          label: `${getCategoryLabel(selectedCategory.id)} / ${trans('ミックス', languageMode)}`,
         };
       }
     }
@@ -1293,7 +1293,7 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
                 onClick={() => { setSelectedSubModeId('ENGLISH_MIXED'); audioService.playSound('select'); }}
                 className={`p-2 rounded-lg border text-[10px] font-bold transition-colors ${selectedSubModeId === 'ENGLISH_MIXED' ? `${theme.bg} border-white text-white` : 'bg-slate-700 border-slate-600 text-gray-300 hover:bg-slate-600'}`}
               >
-                <span data-allow-japanese="true">ミックス</span>
+                <span data-allow-japanese="true">{trans('ミックス', languageMode)}</span>
               </button>
             </div>
           </div>
@@ -1491,7 +1491,7 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
             ))}
             <button onClick={() => handleSelect(GameMode.ENGLISH_MIXED)} className="bg-indigo-900/60 border border-indigo-500 p-1 rounded hover:bg-indigo-800 text-[10px] font-bold">
               {renderMasteryPrefix(GameMode.ENGLISH_MIXED)}
-              <span data-allow-japanese="true">ミックス</span>
+              <span data-allow-japanese="true">{trans('ミックス', languageMode)}</span>
             </button>
           </div>
         </div>

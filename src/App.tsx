@@ -5,7 +5,7 @@ import {
 } from './types';
 import {
     INITIAL_HP, INITIAL_ENERGY, HAND_SIZE,
-    CARDS_LIBRARY, STARTING_DECK_TEMPLATE, STATUS_CARDS, CURSE_CARDS, EVENT_CARDS, RELIC_LIBRARY, TRUE_BOSS, POTION_LIBRARY, CHARACTERS, HERO_IMAGE_DATA, ENEMY_LIBRARY, LIBRARIAN_CARDS, GROWN_PLANTS, GARDEN_SEEDS
+    CARDS_LIBRARY, STARTING_DECK_TEMPLATE, STATUS_CARDS, CURSE_CARDS, EVENT_CARDS, RELIC_LIBRARY, POTION_LIBRARY, CHARACTERS, HERO_IMAGE_DATA, LIBRARIAN_CARDS, GROWN_PLANTS, GARDEN_SEEDS
 } from './constants';
 import { ADDITIONAL_CARDS } from './constants1';
 import { GAME_STORIES } from './data/stories';
@@ -43,6 +43,19 @@ const getHighSchoolBattleVoiceActionForCard = (card: ICard): HighSchoolBattleVoi
     if ((card.block ?? 0) > 0) return 'block';
     return 'block';
 };
+
+const getHumanoidEnemyVoiceActionForIntent = (intent: EnemyIntent): HumanoidEnemyVoiceAction => {
+    if (
+        intent.type === EnemyIntentType.ATTACK ||
+        intent.type === EnemyIntentType.ATTACK_DEBUFF ||
+        intent.type === EnemyIntentType.ATTACK_DEFEND ||
+        intent.type === EnemyIntentType.PIERCE_ATTACK
+    ) {
+        return 'attack';
+    }
+    if (intent.type === EnemyIntentType.DEFEND) return 'defense';
+    return 'skill';
+};
 import MiniGameSelectScreen from './components/MiniGameSelectScreen';
 import MiniGameRouter from './components/MiniGameRouter'; // Added
 import { MINI_GAMES } from './miniGameConfig'; // Added
@@ -68,7 +81,7 @@ import { generateDungeonMap } from './services/mapGenerator';
 import { storageService } from './services/storageService';
 import { generateEvent, generateLegacyEvent } from './services/eventService';
 import { createAssignmentRewardCard, createHolographicCard, getUpgradedCard, synthesizeCards } from './utils/cardUtils';
-import { sanitizeEnglishText, trans } from './utils/textUtils';
+import { sanitizeEnglishText, trans, transEventText } from './utils/textUtils';
 import { assetUrl } from './utils/assetPaths';
 import { getAssignmentFromUrl, getAssignmentModePool, getAssignmentRepresentativeMode } from './utils/assignmentUtils';
 import { STUDENT_GRADE_OPTIONS, createDailyAssignment, getCurrentSchoolYear, isAdultProfile, promoteStudentProfileForSchoolYear } from './utils/dailyAssignmentUtils';
@@ -84,6 +97,8 @@ import { chooseBattleBackgroundScene, getBattleBackgroundFlavor } from './data/b
 import { OFFLINE_DISTRIBUTABLE, OFFLINE_NETWORK_FEATURE_MESSAGE } from './config/runtime';
 import { getAttackEffectKeyForCard, getMultihitFrameSequence } from './data/attackEffects';
 import { getThemedCharacters, getThemedEnemyDisplayName, MAGIC_HERO_ID_BY_CHARACTER_ID, type VisualThemeId } from './data/visualThemes';
+import { getTrueBossByTheme } from './data/enemyCatalogs';
+import { getHumanoidEnemyVoiceProfile, type HumanoidEnemyVoiceAction } from './data/humanoidEnemyVoiceLines';
 import { boostMagicCardForTransformation, getMagicCardsForHero } from './data/magicCards';
 import { createMagicRuleState, createMagicStartingDeck, getMagicRuleConfig } from './data/magicLoadouts';
 import { generateMagicRomanceSelectionEvent } from './services/magicRomanceEventService';
@@ -99,6 +114,13 @@ const ASSIGNMENT_INTRO_BANNER_IMAGE = assetUrl('banners/daily-assignment-reward-
 const CROWDFUNDING_BANNER_END_AT = new Date('2026-06-20T23:59:59+09:00').getTime();
 const HOLOGRAPHIC_REWARD_CARD_CHANCE = 0.05;
 const VISUAL_THEMES: VisualThemeId[] = ['elementary', 'high-school', 'magic'];
+const DEFAULT_DAILY_ASSIGNMENT_PROFILE: StudentProfile = {
+    grade: '小学1年生',
+    className: '',
+    number: '',
+    name: '',
+    schoolYear: getCurrentSchoolYear(),
+};
 
 const isKanjiAssignment = (assignment: AssignmentPayload | null | undefined) => {
     if (!assignment) return false;
@@ -109,9 +131,13 @@ const isKanjiAssignment = (assignment: AssignmentPayload | null | undefined) => 
     ));
 };
 
-const getAssignmentAnswerModeSummary = (assignment: AssignmentPayload | null | undefined) => {
+const getAssignmentAnswerModeSummary = (assignment: AssignmentPayload | null | undefined, languageMode: LanguageMode) => {
+    if (languageMode === 'ENGLISH') {
+        const answerModeLabel = assignment?.answerMode === 'INPUT' ? 'Input' : 'Multiple choice';
+        return `${isKanjiAssignment(assignment) ? 'Kanji answer mode' : 'Answer mode'}: ${answerModeLabel}`;
+    }
     const answerModeLabel = assignment?.answerMode === 'INPUT' ? '入力' : '4択';
-    return `${isKanjiAssignment(assignment) ? '漢字の答え方' : '答え方'}: ${answerModeLabel}`;
+    return `${trans(isKanjiAssignment(assignment) ? '漢字の答え方' : '答え方', languageMode)}: ${trans(answerModeLabel, languageMode)}`;
 };
 
 const getAssignmentCustomTargetCorrect = (assignment: AssignmentPayload | null | undefined) => {
@@ -411,14 +437,44 @@ const shouldPreserveLocalCoopScreen = (localScreen: GameScreen, incomingScreen: 
 };
 
 const determineEnemyType = (name: string, isBoss: boolean): string => {
+    const normalizedName = name.replace(/^\s*ボス\s*[：:]\s*/, '');
     if (isBoss) return 'GUARDIAN';
-    if (name.includes('先生') || name.includes('用務員') || name.includes('教頭') || name.includes('実習生')) return 'TEACHER';
-    if (name.includes('ゴーレム') || name.includes('主') || name.includes('守護者') || name.includes('模型') || name.includes('守衛')) return 'TANK';
-    if (name.includes('亡霊') || name.includes('幽霊') || name.includes('花子') || name.includes('影') || name.includes('鏡') || name.includes('残滓')) return 'GHOST';
-    if (name.includes('悪魔') || name.includes('不良') || name.includes('カラス') || name.includes('狂信者') || name.includes('怪物') || name.includes('王')) return 'AGGRESSIVE';
-    if (name.includes('宿題') || name.includes('ミミック') || name.includes('泥棒') || name.includes('妖精') || name.includes('精') || name.includes('怪')) return 'TRICKSTER';
-    if (name.includes('虫') || name.includes('カス') || name.includes('スライム') || name.includes('ハチ') || name.includes('雑草')) return 'SWARM';
-    if (name.includes('権化') || name.includes('絶望') || name.includes('偏差値')) return 'ELITE_FORCE';
+    if (
+        normalizedName.includes('先生') || normalizedName.includes('用務員') || normalizedName.includes('教頭') || normalizedName.includes('実習生') ||
+        normalizedName.includes('委員') || normalizedName.includes('監督') || normalizedName.includes('査問官') || normalizedName.includes('会長') ||
+        normalizedName.includes('評議員') || normalizedName.includes('執行') || normalizedName.includes('風紀') || normalizedName.includes('校長')
+    ) return 'TEACHER';
+    if (
+        normalizedName.includes('ゴーレム') || normalizedName.includes('主') || normalizedName.includes('守護者') || normalizedName.includes('模型') || normalizedName.includes('守衛') ||
+        normalizedName.includes('騎士') || normalizedName.includes('鎧') || normalizedName.includes('盾') || normalizedName.includes('壁') || normalizedName.includes('門番') ||
+        normalizedName.includes('ガーゴイル') || normalizedName.includes('番犬') || normalizedName.includes('守り手') || normalizedName.includes('魔石') || normalizedName.includes('封印')
+    ) return 'TANK';
+    if (
+        normalizedName.includes('亡霊') || normalizedName.includes('幽霊') || normalizedName.includes('花子') || normalizedName.includes('影') || normalizedName.includes('鏡') || normalizedName.includes('残滓') ||
+        normalizedName.includes('月影') || normalizedName.includes('月蝕') || normalizedName.includes('夢') || normalizedName.includes('悪夢') || normalizedName.includes('幻') ||
+        normalizedName.includes('闇') || normalizedName.includes('影絵') || normalizedName.includes('蝋燭')
+    ) return 'GHOST';
+    if (
+        normalizedName.includes('悪魔') || normalizedName.includes('不良') || normalizedName.includes('カラス') || normalizedName.includes('狂信者') || normalizedName.includes('怪物') || normalizedName.includes('王') ||
+        normalizedName.includes('竜') || normalizedName.includes('炎') || normalizedName.includes('火') || normalizedName.includes('雷') || normalizedName.includes('槍') ||
+        normalizedName.includes('剣') || normalizedName.includes('刺客') || normalizedName.includes('番長') || normalizedName.includes('女王')
+    ) return 'AGGRESSIVE';
+    if (
+        normalizedName.includes('宿題') || normalizedName.includes('ミミック') || normalizedName.includes('泥棒') || normalizedName.includes('妖精') || normalizedName.includes('精') || normalizedName.includes('怪') ||
+        normalizedName.includes('スマホ') || normalizedName.includes('噂') || normalizedName.includes('コピー') || normalizedName.includes('掲示板') || normalizedName.includes('時計') ||
+        normalizedName.includes('歯車') || normalizedName.includes('魔導書') || normalizedName.includes('図書') || normalizedName.includes('インク') || normalizedName.includes('仮面') ||
+        normalizedName.includes('狐面') || normalizedName.includes('奇術') || normalizedName.includes('忍術')
+    ) return 'TRICKSTER';
+    if (
+        normalizedName.includes('虫') || normalizedName.includes('カス') || normalizedName.includes('スライム') || normalizedName.includes('ハチ') || normalizedName.includes('雑草') ||
+        normalizedName.includes('花') || normalizedName.includes('芽') || normalizedName.includes('蔓') || normalizedName.includes('薔薇') || normalizedName.includes('花粉') ||
+        normalizedName.includes('クラゲ') || normalizedName.includes('羽虫') || normalizedName.includes('ネズミ') || normalizedName.includes('泡') || normalizedName.includes('結晶')
+    ) return 'SWARM';
+    if (
+        normalizedName.includes('権化') || normalizedName.includes('絶望') || normalizedName.includes('偏差値') ||
+        normalizedName.includes('期末') || normalizedName.includes('模試') || normalizedName.includes('試験') || normalizedName.includes('成績') || normalizedName.includes('内申') ||
+        normalizedName.includes('星災') || normalizedName.includes('禁術') || normalizedName.includes('深淵') || normalizedName.includes('星鍵')
+    ) return 'ELITE_FORCE';
     return 'GENERIC';
 };
 
@@ -464,8 +520,59 @@ const estimateBossScalingSingleCardDamage = (deck: ICard[], effectMultiplier = 1
 };
 
 const getNamedEnemyIntent = (enemy: Enemy, turn: number, isAct2Plus: boolean): EnemyIntent | null => {
-    const name = enemy.name;
+    const name = enemy.name.replace(/^\s*ボス\s*[：:]\s*/, '');
     const cycle = turn % 3;
+
+    if (name.includes('模試') || name.includes('試験') || name.includes('期末') || name.includes('答案') || name.includes('成績') || name.includes('内申') || name.includes('偏差値') || name.includes('赤点')) {
+        if (cycle === 1) return { type: EnemyIntentType.DEBUFF, value: 0, secondaryValue: 2, debuffType: 'VULNERABLE' };
+        if (cycle === 2) return { type: EnemyIntentType.ATTACK_DEFEND, value: isAct2Plus ? 12 : 7, secondaryValue: isAct2Plus ? 14 : 8 };
+        return { type: EnemyIntentType.ATTACK_DEBUFF, value: isAct2Plus ? 14 : 9, secondaryValue: 2, debuffType: 'WEAK' };
+    }
+    if (name.includes('スマホ') || name.includes('USB') || name.includes('コピー') || name.includes('掲示板') || name.includes('放課後ノイズ')) {
+        if (cycle === 1) return { type: EnemyIntentType.DEBUFF, value: 0, secondaryValue: 2, debuffType: 'CONFUSED' };
+        if (cycle === 2) return { type: EnemyIntentType.PIERCE_ATTACK, value: isAct2Plus ? 12 : 7 };
+        return { type: EnemyIntentType.ATTACK_DEFEND, value: isAct2Plus ? 9 : 5, secondaryValue: isAct2Plus ? 10 : 6 };
+    }
+    if (name.includes('風紀') || name.includes('校則') || name.includes('監督') || name.includes('執行') || name.includes('委員') || name.includes('会長')) {
+        if (cycle === 1) return { type: EnemyIntentType.BUFF, value: 0, secondaryValue: isAct2Plus ? 4 : 2 };
+        if (cycle === 2) return { type: EnemyIntentType.ATTACK_DEBUFF, value: isAct2Plus ? 10 : 6, secondaryValue: 2, debuffType: 'VULNERABLE' };
+        return { type: EnemyIntentType.DEFEND, value: isAct2Plus ? 18 : 10 };
+    }
+    if (name.includes('星') || name.includes('月') || name.includes('光') || name.includes('聖灯') || name.includes('光輪') || name.includes('光晶')) {
+        if (cycle === 1) return { type: EnemyIntentType.DEFEND, value: isAct2Plus ? 16 : 9 };
+        if (cycle === 2) return { type: EnemyIntentType.ATTACK_DEFEND, value: isAct2Plus ? 9 : 5, secondaryValue: isAct2Plus ? 12 : 7 };
+        return { type: EnemyIntentType.PIERCE_ATTACK, value: isAct2Plus ? 13 : 8 };
+    }
+    if (name.includes('花') || name.includes('芽') || name.includes('蔓') || name.includes('薔薇') || name.includes('花粉') || name.includes('毒蜂') || name.includes('庭')) {
+        if (cycle === 1) return { type: EnemyIntentType.ATTACK_DEBUFF, value: isAct2Plus ? 7 : 4, secondaryValue: 2, debuffType: 'POISON' };
+        if (cycle === 2) return { type: EnemyIntentType.ATTACK_DEFEND, value: isAct2Plus ? 8 : 5, secondaryValue: isAct2Plus ? 14 : 8 };
+        return { type: EnemyIntentType.DEBUFF, value: 0, secondaryValue: 2, debuffType: 'WEAK' };
+    }
+    if (name.includes('炎') || name.includes('火') || name.includes('雷') || name.includes('竜') || name.includes('槍') || name.includes('剣')) {
+        if (cycle === 1) return { type: EnemyIntentType.ATTACK, value: isAct2Plus ? 14 : 8 };
+        if (cycle === 2) return { type: EnemyIntentType.ATTACK_DEBUFF, value: isAct2Plus ? 10 : 6, secondaryValue: 1, debuffType: 'VULNERABLE' };
+        return { type: EnemyIntentType.PIERCE_ATTACK, value: isAct2Plus ? 12 : 7 };
+    }
+    if (name.includes('風') || name.includes('鈴') || name.includes('旋風') || name.includes('ケットシー') || name.includes('狐面')) {
+        if (cycle === 1) return { type: EnemyIntentType.ATTACK, value: isAct2Plus ? 9 : 5 };
+        if (cycle === 2) return { type: EnemyIntentType.DEBUFF, value: 0, secondaryValue: 2, debuffType: 'CONFUSED' };
+        return { type: EnemyIntentType.ATTACK_DEFEND, value: isAct2Plus ? 8 : 5, secondaryValue: isAct2Plus ? 10 : 6 };
+    }
+    if (name.includes('夢') || name.includes('影') || name.includes('闇') || name.includes('仮面') || name.includes('人形') || name.includes('鏡') || name.includes('蝋燭')) {
+        if (cycle === 1) return { type: EnemyIntentType.DEBUFF, value: 0, secondaryValue: 2, debuffType: 'WEAK' };
+        if (cycle === 2) return { type: EnemyIntentType.ATTACK_DEBUFF, value: isAct2Plus ? 9 : 5, secondaryValue: 2, debuffType: 'CONFUSED' };
+        return { type: EnemyIntentType.ATTACK_DEFEND, value: isAct2Plus ? 7 : 4, secondaryValue: isAct2Plus ? 12 : 7 };
+    }
+    if (name.includes('時計') || name.includes('歯車') || name.includes('時') || name.includes('鐘') || name.includes('ベル')) {
+        if (cycle === 1) return { type: EnemyIntentType.ATTACK_DEFEND, value: isAct2Plus ? 8 : 5, secondaryValue: isAct2Plus ? 12 : 7 };
+        if (cycle === 2) return { type: EnemyIntentType.DEBUFF, value: 0, secondaryValue: 2, debuffType: 'CONFUSED' };
+        return { type: EnemyIntentType.ATTACK, value: isAct2Plus ? 13 : 8 };
+    }
+    if (name.includes('魔導書') || name.includes('図書') || name.includes('禁書') || name.includes('栞') || name.includes('ルーン') || name.includes('紙嵐')) {
+        if (cycle === 1) return { type: EnemyIntentType.DEBUFF, value: 0, secondaryValue: 2, debuffType: 'CONFUSED' };
+        if (cycle === 2) return { type: EnemyIntentType.DEFEND, value: isAct2Plus ? 15 : 9 };
+        return { type: EnemyIntentType.ATTACK_DEBUFF, value: isAct2Plus ? 10 : 6, secondaryValue: 2, debuffType: 'WEAK' };
+    }
 
     if (name.includes('傘')) {
         if (cycle === 1) return { type: EnemyIntentType.ATTACK_DEFEND, value: isAct2Plus ? 7 : 4, secondaryValue: isAct2Plus ? 12 : 8 };
@@ -837,6 +944,22 @@ const App: React.FC = () => {
             const tagName = element.tagName.toLowerCase();
             return tagName === 'script' || tagName === 'style' || tagName === 'textarea' || tagName === 'input' || Boolean(element.closest('[data-allow-japanese]'));
         };
+        const shouldSkipAttribute = (element: Element | null) => {
+            if (!element) return true;
+            const tagName = element.tagName.toLowerCase();
+            return tagName === 'script' || tagName === 'style';
+        };
+        const translatableAttributes = ['title', 'aria-label', 'placeholder'];
+
+        const sanitizeElementAttributes = (element: Element) => {
+            if (shouldSkipAttribute(element)) return;
+            translatableAttributes.forEach((attribute) => {
+                const current = element.getAttribute(attribute);
+                if (!current) return;
+                const next = sanitizeEnglishText(current);
+                if (next !== current) element.setAttribute(attribute, next);
+            });
+        };
 
         const sanitizeTextNode = (node: Node) => {
             if (node.nodeType !== Node.TEXT_NODE || shouldSkip(node.parentElement)) return;
@@ -845,6 +968,8 @@ const App: React.FC = () => {
         };
 
         const sanitizeTree = (root: ParentNode) => {
+            if (root instanceof Element) sanitizeElementAttributes(root);
+            root.querySelectorAll?.('[title], [aria-label], [placeholder]').forEach(sanitizeElementAttributes);
             const walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT);
             let node = walker.nextNode();
             while (node) {
@@ -857,6 +982,10 @@ const App: React.FC = () => {
         const frame = window.requestAnimationFrame(run);
         const observer = new MutationObserver((mutations) => {
             mutations.forEach((mutation) => {
+                if (mutation.type === 'attributes') {
+                    sanitizeElementAttributes(mutation.target as Element);
+                    return;
+                }
                 if (mutation.type === 'characterData') {
                     sanitizeTextNode(mutation.target);
                     return;
@@ -870,7 +999,7 @@ const App: React.FC = () => {
                 });
             });
         });
-        observer.observe(document.body, { childList: true, characterData: true, subtree: true });
+        observer.observe(document.body, { childList: true, characterData: true, attributes: true, attributeFilter: translatableAttributes, subtree: true });
 
         return () => {
             window.cancelAnimationFrame(frame);
@@ -920,6 +1049,9 @@ const App: React.FC = () => {
         if (promoted.grade) storageService.saveStudentProfile(promoted);
         return promoted;
     });
+    const dailyAssignmentProfile = useMemo<StudentProfile>(() => (
+        studentProfile.grade ? studentProfile : DEFAULT_DAILY_ASSIGNMENT_PROFILE
+    ), [studentProfile]);
     const [showStudentGradeSurvey, setShowStudentGradeSurvey] = useState<boolean>(() => !storageService.getStudentProfile().grade);
     const [currentAssignment, setCurrentAssignment] = useState<AssignmentPayload | null>(() => storageService.getCurrentAssignment());
     const [assignmentProgressVersion, setAssignmentProgressVersion] = useState(0);
@@ -1049,8 +1181,8 @@ const App: React.FC = () => {
     }, [currentAssignment, currentUrlAssignmentAnswers]);
     const shouldPrioritizeCurrentAssignment = !!currentAssignment && !isCurrentUrlAssignmentComplete;
     const generatedDailyAssignment = useMemo(
-        () => shouldPrioritizeCurrentAssignment ? null : createDailyAssignment(studentProfile, storageService.getModeCorrectCounts()),
-        [shouldPrioritizeCurrentAssignment, studentProfile.grade, studentProfile.schoolYear]
+        () => shouldPrioritizeCurrentAssignment ? null : createDailyAssignment(dailyAssignmentProfile, storageService.getModeCorrectCounts()),
+        [shouldPrioritizeCurrentAssignment, dailyAssignmentProfile.grade, dailyAssignmentProfile.schoolYear]
     );
     const dailyAssignment = useMemo(
         () => generatedDailyAssignment && !completedDailyAssignmentIds.includes(generatedDailyAssignment.id)
@@ -4950,7 +5082,7 @@ const App: React.FC = () => {
             magicTransformedThisBattle: false
         };
 
-        const bossName = await generateEnemyName(15);
+        const bossName = await generateEnemyName(15, 3, visualTheme);
         const bossEnemy: Enemy = {
             id: `debug-boss-${Date.now()}`,
             enemyType: 'GUARDIAN',
@@ -5465,9 +5597,11 @@ const App: React.FC = () => {
                 }
                 const difficulty = getDifficultyConfig(gameState.difficultyLevel);
                 const enemyHpMultiplier = coopEnemyHpMultiplier * difficulty.enemyHpMultiplier;
+                const activeBattleVisualTheme = nextState.visualTheme || visualTheme;
 
                 if (gameState.act === 4 && node.type === NodeType.BOSS) {
-                    let finalHeartHp = TRUE_BOSS.maxHp;
+                    const trueBoss = getTrueBossByTheme(activeBattleVisualTheme);
+                    let finalHeartHp = trueBoss.maxHp;
                     if (maxAtkDmg > finalHeartHp) {
                         finalHeartHp = Math.ceil(maxAtkDmg * 6);
                     }
@@ -5476,7 +5610,7 @@ const App: React.FC = () => {
                     enemies.push({
                         id: 'true-boss',
                         enemyType: 'THE_HEART',
-                        name: TRUE_BOSS.name,
+                        name: trueBoss.name,
                         maxHp: finalHeartHp,
                         currentHp: isDebugHpOne ? 1 : finalHeartHp,
                         block: 0,
@@ -5513,7 +5647,7 @@ const App: React.FC = () => {
                         const hpStep = Math.max(2, Math.floor(baseHp * 0.08));
                         const hpAdjusted = Math.max(1, Math.floor(baseHp + hpOffsets[i] * hpStep));
 
-                        const name = await generateEnemyName(node.y, gameState.act);
+                        const name = await generateEnemyName(node.y, gameState.act, nextState.visualTheme || visualTheme);
                         const isBoss = node.type === NodeType.BOSS;
 
                         enemies.push({
@@ -5538,7 +5672,6 @@ const App: React.FC = () => {
                     });
                 }
 
-                const activeBattleVisualTheme = nextState.visualTheme || visualTheme;
                 const battleBackgroundScene = chooseBattleBackgroundScene(node.type, nextState.act, nextState.floor, activeBattleVisualTheme);
                 const flavor = getBattleBackgroundFlavor(battleBackgroundScene, nextState.act * 100 + nextState.floor);
 
@@ -5604,6 +5737,12 @@ const App: React.FC = () => {
                     setGameState({ ...nextGameState, screen: GameScreen.BATTLE });
                     setCurrentNarrative(flavor);
                     audioService.playBGM(bgmType);
+                    const voicedEnemies = enemies.filter(enemy => getHumanoidEnemyVoiceProfile(activeBattleVisualTheme, enemy.name));
+                    voicedEnemies.forEach((enemy, index) => {
+                        window.setTimeout(() => {
+                            audioService.playHumanoidEnemyVoice(activeBattleVisualTheme, enemy.name, 'spawn');
+                        }, 450 + index * 850);
+                    });
                     setTurnLog(getSelfTurnLogLabel());
                 }
 
@@ -6829,6 +6968,8 @@ const App: React.FC = () => {
                 delete p.turnFlags['NEXT_ATTACK_TRIPLE'];
                 currentLogs.push(trans("次のアタックが3連発動！", languageMode));
             }
+            const voicedEnemyDamageIds = new Set<string>();
+            const voicedEnemyDefeatIds = new Set<string>();
 
             let baseVfx = 'SLASH';
             if (card.type === CardType.ATTACK) {
@@ -6866,6 +7007,7 @@ const App: React.FC = () => {
                     if (card.damage || card.damageBasedOnBlock || card.damagePerCardInHand || card.damagePerAttackPlayed || card.damagePerStrike || card.damagePerCardInDraw) {
                         targets.forEach(e => {
                             if (e.currentHp <= 0) return;
+                            const hpBeforeDamage = e.currentHp;
                             let baseDamage = (card.damage || 0);
                             let logParts: string[] = [`${baseDamage}`];
                             if (card.damageBasedOnBlock) { baseDamage += p.block; logParts[0] = `${baseDamage}(Block)`; }
@@ -6938,6 +7080,17 @@ const App: React.FC = () => {
                                 e.floatingText = { id: `phase-evo-${Date.now()}`, text: '本気モード！', color: 'text-yellow-500' };
                                 currentLogs.push(prev.visualTheme === 'magic' ? "大魔女校長が真の姿を現した！" : "校長先生が真の姿を現した！");
                                 nextActiveEffects.push({ id: `vfx-evo-${Date.now()}`, type: 'BUFF', targetId: e.id, delay: hitDelay + 200 });
+                            }
+                            if (damage > 0 && hpBeforeDamage > 0) {
+                                if (e.currentHp <= 0) {
+                                    if (!voicedEnemyDefeatIds.has(e.id)) {
+                                        voicedEnemyDefeatIds.add(e.id);
+                                        audioService.playHumanoidEnemyVoice(prev.visualTheme, e.name, 'defeat');
+                                    }
+                                } else if (!voicedEnemyDamageIds.has(e.id)) {
+                                    voicedEnemyDamageIds.add(e.id);
+                                    audioService.playHumanoidEnemyVoice(prev.visualTheme, e.name, 'damage');
+                                }
                             }
                             if (damage > 0 || logParts.length > 1) {
                                 if (h % 5 === 0 || h === hits - 1) {
@@ -8344,6 +8497,11 @@ const App: React.FC = () => {
             if (stateRef.current.parryState?.active) {
                 setGameState(prev => ({ ...prev, parryState: { active: false, enemyId: null, success: false, result: parrySuccess ? parryResult : 'miss' } }));
             }
+            audioService.playHumanoidEnemyVoice(
+                stateRef.current.visualTheme,
+                enemy.name,
+                getHumanoidEnemyVoiceActionForIntent(enemy.nextIntent),
+            );
             if (isAttackIntent) audioService.playSound('attack');
             else if (enemy.nextIntent.type === EnemyIntentType.DEFEND) audioService.playSound('block');
             else if (enemy.nextIntent.type === EnemyIntentType.BUFF) audioService.playSound('buff');
@@ -8375,6 +8533,7 @@ const App: React.FC = () => {
                         }
                         : null;
                     const intent = e.nextIntent;
+                    const enemyHpBeforeAction = e.currentHp;
                     if (e.sleepTurns && e.sleepTurns > 0) {
                         const remainingSleep = e.sleepTurns - 1;
                         newLogs.push(`${trans(e.name, languageMode)}は眠っている...`);
@@ -8671,6 +8830,9 @@ const App: React.FC = () => {
                     }
                     e.nextIntent = getNextEnemyIntent(e, prev.turn + 1);
                     const aliveEnemies = newEnemies.filter(en => en.currentHp > 0 || (en.enemyType === 'THE_HEART' && en.phase === 1));
+                    if (enemyHpBeforeAction > 0 && e.currentHp < enemyHpBeforeAction) {
+                        audioService.playHumanoidEnemyVoice(prev.visualTheme, e.name, e.currentHp <= 0 ? 'defeat' : 'damage');
+                    }
                     if (hasRelic(p, 'BIRD_FACED_URN')) {
                         const defeatedNow = newEnemies.length - aliveEnemies.length;
                         if (defeatedNow > 0) {
@@ -12650,7 +12812,7 @@ const App: React.FC = () => {
     }, [electronApi]);
 
     return (
-        <div className={`app-shell w-full h-[100dvh] bg-black overflow-hidden ${appSettings.fontSize === 'large' ? 'text-[105%]' : ''} ${isUiPreviewMode ? 'gamepad-shortcuts-debug' : ''}`}>
+        <div key={`app-shell-${languageMode}`} className={`app-shell w-full h-[100dvh] bg-black overflow-hidden ${appSettings.fontSize === 'large' ? 'text-[105%]' : ''} ${isUiPreviewMode ? 'gamepad-shortcuts-debug' : ''}`}>
             <div className={`w-full h-full relative overflow-hidden bg-black ${appSettings.lowDataMode ? '' : 'crt-scanline'} ${raceEffects.upsideDownUntil > raceEffectNow ? 'scale-x-[-1]' : ''} ${(raceEffects.deskShakeUntil > raceEffectNow && !appSettings.reduceScreenShake) ? 'animate-[race-desk-shake_0.18s_linear_infinite]' : ''}`}>
                 <style>{`
                     @keyframes race-desk-shake {
@@ -12969,7 +13131,7 @@ const App: React.FC = () => {
                             </div>
                         )}
 
-                        {showStudentGradeSurvey && gameState.screen === GameScreen.START_MENU && (
+                        {showStudentGradeSurvey && gameState.screen === GameScreen.START_MENU && !assignmentLetter && (
                             <div className="fixed inset-0 z-[10035] flex items-center justify-center bg-black/85 p-4">
                                 <div className="w-full max-w-2xl rounded-2xl border-4 border-cyan-300 bg-slate-950 p-5 text-white shadow-[0_0_40px_rgba(34,211,238,0.32)]">
                                     <div className="mb-2 text-center text-xs font-black tracking-[0.3em] text-cyan-300">PROFILE</div>
@@ -13023,8 +13185,8 @@ const App: React.FC = () => {
                                         <div>{trans(isTeacherAssignmentActive ? '先生から課題が届きました。' : '今日の学習課題です。', languageMode)}</div>
                                         <div>{trans("期限:", languageMode)} {assignmentLetter.dueAt ? new Date(assignmentLetter.dueAt).toLocaleString('ja-JP') : trans('未設定', languageMode)}</div>
                                         <div>{trans("形式:", languageMode)} {trans(assignmentLetter.gameMode === 'FREE' ? 'フリー' : '問題チャレンジのみ', languageMode)}</div>
-                                        <div>{getAssignmentAnswerModeSummary(assignmentLetter)}</div>
-                                        <div className="mt-2 text-xs text-slate-700">
+                                        <div>{getAssignmentAnswerModeSummary(assignmentLetter, languageMode)}</div>
+                                        <div className="mt-2 text-xs text-slate-700" data-allow-japanese>
                                             {getAssignmentTargetSummary(assignmentLetter)}
                                         </div>
                                     </div>
@@ -13394,20 +13556,20 @@ const App: React.FC = () => {
                                             onClick={() => setGameState(prev => ({ ...prev, screen: GameScreen.ASSIGNMENT_CREATE }))}
                                             className="flex-1 py-2 px-1 text-xs font-bold border-b-4 border-r-4 rounded-none bg-cyan-900/80 text-cyan-100 border-cyan-500 hover:bg-cyan-800 cursor-pointer flex items-center justify-center shadow-md"
                                         >
-                                            <ClipboardList className="mr-1" size={16} /> 課題送信
+                                            <ClipboardList className="mr-1" size={16} /> {trans("課題送信", languageMode)}
                                         </button>
                                     )}
                                     <button
                                         onClick={() => setGameState(prev => ({ ...prev, screen: GameScreen.REWARD_CARD_ALBUM }))}
                                         className="flex-1 py-2 px-1 text-xs font-bold border-b-4 border-r-4 rounded-none bg-cyan-950/80 text-cyan-100 border-cyan-300 hover:bg-cyan-900 cursor-pointer flex items-center justify-center shadow-md"
                                     >
-                                        <Sparkles className="mr-1" size={16} /> カード帳
+                                        <Sparkles className="mr-1" size={16} /> {trans("カード帳", languageMode)}
                                     </button>
                                     <button
                                         onClick={() => setGameState(prev => ({ ...prev, screen: GameScreen.SUBMISSION }))}
                                         className="flex-1 py-2 px-1 text-xs font-bold border-b-4 border-r-4 rounded-none bg-slate-800/90 text-slate-100 border-slate-500 hover:bg-slate-700 cursor-pointer flex items-center justify-center shadow-md"
                                     >
-                                        <FileText className="mr-1" size={16} /> 提出
+                                        <FileText className="mr-1" size={16} /> {trans("提出", languageMode)}
                                     </button>
                                 </div>
 
@@ -13476,7 +13638,7 @@ const App: React.FC = () => {
                                         draggable={false}
                                     />
                                     <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950/95 via-slate-950/75 to-transparent p-2">
-                                        <div className="mb-1 text-xs font-black text-lime-100 sm:text-sm">今日の課題を達成して、ご褒美カードをゲットしよう！</div>
+                                        <div className="mb-1 text-xs font-black text-lime-100 sm:text-sm">{trans("今日の課題を達成して、ご褒美カードをゲットしよう！", languageMode)}</div>
                                         <div className="grid grid-cols-3 gap-1 text-[10px] font-black text-slate-100 sm:text-[11px]">
                                             <div className="rounded-md border border-lime-300/50 bg-lime-300/15 px-2 py-1">課題に挑戦</div>
                                             <div className="rounded-md border border-cyan-300/50 bg-cyan-300/15 px-2 py-1">目標達成</div>
@@ -13489,8 +13651,8 @@ const App: React.FC = () => {
                                 <div>{isTeacherAssignmentActive ? '先生から課題が届きました。' : '今日の学習課題です。'}</div>
                                 <div>期限: {assignmentLetter.dueAt ? new Date(assignmentLetter.dueAt).toLocaleString('ja-JP') : '未設定'}</div>
                                 <div>形式: {assignmentLetter.gameMode === 'FREE' ? 'フリー' : '問題チャレンジのみ'}</div>
-                                <div>{getAssignmentAnswerModeSummary(assignmentLetter)}</div>
-                                <div className="mt-2 text-xs text-slate-700">
+                                <div>{getAssignmentAnswerModeSummary(assignmentLetter, languageMode)}</div>
+                                <div className="mt-2 text-xs text-slate-700" data-allow-japanese>
                                     {getAssignmentTargetSummary(assignmentLetter)}
                                 </div>
                             </div>
@@ -14455,6 +14617,7 @@ const App: React.FC = () => {
                             debugSkip={isMathDebugSkipped}
                             isChallenge={false}
                             rewardHint="正解するとゴールド獲得"
+                            languageMode={languageMode}
                         />
                     </div>
                 )}
@@ -14470,6 +14633,7 @@ const App: React.FC = () => {
                             debugSkip={isMathDebugSkipped}
                             isChallenge={false}
                             rewardHint="正解するとゴールド獲得"
+                            languageMode={languageMode}
                         />
                     </div>
                 )}
@@ -14483,6 +14647,7 @@ const App: React.FC = () => {
                             debugSkip={isMathDebugSkipped}
                             isChallenge={false}
                             rewardHint="正解するとゴールド獲得"
+                            languageMode={languageMode}
                         />
                     </div>
                 )}
@@ -14500,6 +14665,7 @@ const App: React.FC = () => {
                             debugSkip={isMathDebugSkipped}
                             isChallenge={false}
                             rewardHint="正解するとゴールド獲得"
+                            languageMode={languageMode}
                         />
                     </div>
                 )}
@@ -14688,12 +14854,12 @@ const App: React.FC = () => {
                 {gameState.screen === GameScreen.EVENT && eventData && (
                     <div className="absolute inset-0">
                         <EventScreen
-                            title={trans(eventData.title, languageMode)}
-                            description={trans(eventData.description, languageMode)}
-                            options={eventData.options.map((o: any, idx: number) => ({ ...o, action: () => handleCoopEventOptionSelect(idx), label: trans(o.label, languageMode), text: trans(o.text, languageMode) }))}
+                            title={transEventText(eventData.title, languageMode)}
+                            description={transEventText(eventData.description, languageMode)}
+                            options={eventData.options.map((o: any, idx: number) => ({ ...o, action: () => handleCoopEventOptionSelect(idx), label: transEventText(o.label, languageMode), text: transEventText(o.text, languageMode) }))}
                             imageKey={eventData.imageKey ?? eventData.title}
                             image={coopSyncedVisualTheme === 'elementary' ? gameState.player.imageData : undefined}
-                            resultLog={eventResultLog ? trans(eventResultLog, languageMode) : null}
+                            resultLog={eventResultLog ? transEventText(eventResultLog, languageMode) : null}
                             onContinue={handleEventComplete}
                             typingMode={gameState.challengeMode === 'TYPING'}
                             interactionDisabled={gameState.challengeMode === 'COOP'
