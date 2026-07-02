@@ -311,7 +311,7 @@ const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, 
             <div className="absolute inset-0 bg-slate-950/62 pointer-events-none" />
 
             {/* Header */}
-            <div className="z-10 bg-black/80 border-b-4 border-amber-600 p-4 flex flex-col md:flex-row justify-between items-center shadow-xl gap-4 shrink-0">
+            <div className="compendium-header z-10 bg-black/80 border-b-4 border-amber-600 p-4 flex flex-col md:flex-row justify-between items-center shadow-xl gap-4 shrink-0">
                 <div className="flex items-center">
                     <BookOpen size={32} className="text-amber-500 mr-3" />
                     <div>
@@ -325,7 +325,7 @@ const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, 
                 </div>
 
                 {/* Tabs */}
-                <div className="flex gap-2">
+                <div className="compendium-tabs flex gap-2">
                     <button onClick={() => setActiveTab('CARDS')} className={`px-3 py-1 rounded text-sm font-bold flex items-center ${activeTab === 'CARDS' ? 'bg-amber-600 text-white' : 'bg-gray-700 text-gray-300'}`}>
                         <Swords size={14} className="mr-1" /> {trans("カード", languageMode)}
                     </button>
@@ -352,7 +352,7 @@ const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, 
 
                 <button
                     onClick={onBack}
-                    className="flex items-center bg-gray-700 hover:bg-gray-600 border border-gray-400 px-4 py-2 rounded text-white transition-colors"
+                    className="compendium-back-button flex items-center bg-gray-700 hover:bg-gray-600 border border-gray-400 px-4 py-2 rounded text-white transition-colors"
                 >
                     <ArrowLeft size={16} className="mr-2" /> {trans("戻る", languageMode)}
                 </button>

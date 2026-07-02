@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { flushSync } from 'react-dom';
 import { Heart, Star, Skull, Brain, Book, Flame, Wind, Target, RotateCcw, ArrowLeft, Play, Sparkles, ChevronRight, AlertTriangle, Zap, Crosshair, Shield, Move, FastForward, Repeat, Search, Ghost, Music, Activity, Rocket, FlaskConical, Globe, MapPin, CheckCircle2, ChevronDown, Check, Languages, Home } from 'lucide-react';
 import { audioService } from '../services/audioService';
 import { SPRITE_TEMPLATES } from './PixelSprite';
@@ -166,6 +167,7 @@ const GoHomeDash: React.FC<{
     debugPreview?: MiniGameDebugPreview;
 }> = ({ onBack, problemMode = GameMode.MIXED, problemModePool, answerMode = 'CHOICE', assignment, onAnswerResult, debugPreview }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
+    const guideCanvasRef = useRef<HTMLCanvasElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
     const playerSpriteRef = useRef<HTMLImageElement | null>(null);
     const playerJumpSpriteRef = useRef<HTMLImageElement | null>(null);
@@ -254,10 +256,20 @@ const GoHomeDash: React.FC<{
 
     const scoreRef = useRef(0);
     const levelRef = useRef(1);
+    const hpRef = useRef(3);
+    const maxHpRef = useRef(3);
     const expRef = useRef(0);
     const nextLevelExpRef = useRef(200);
     const frameCount = useRef(0);
     const shakeRef = useRef(0);
+
+    useEffect(() => {
+        hpRef.current = hp;
+    }, [hp]);
+
+    useEffect(() => {
+        maxHpRef.current = maxHp;
+    }, [maxHp]);
 
     const playerRef = useRef({
         x: PLAYER_DEFAULT_X,
@@ -370,7 +382,7 @@ const GoHomeDash: React.FC<{
     };
 
     const initGame = () => {
-        scoreRef.current = 0; levelRef.current = 1; expRef.current = 0; nextLevelExpRef.current = 200;
+        scoreRef.current = 0; levelRef.current = 1; hpRef.current = 3; maxHpRef.current = 3; expRef.current = 0; nextLevelExpRef.current = 200;
         setScore(0); setLevel(1); setExp(0); setHp(3); setMaxHp(3); setNextLevelExp(200);
         playerRef.current = {
             x: PLAYER_DEFAULT_X, y: GROUND_Y, vy: 0, isJumping: false, isFalling: false, isPressing: false, jumpCount: 0, maxJumps: 1, invulFrame: 0,
@@ -800,15 +812,24 @@ const GoHomeDash: React.FC<{
     };
 
     const setGameOverState = () => {
-        setGameState('GAME_OVER');
-        audioService.playSound('lose');
-        storageService.saveGoHomeScore({
-            id: `gohome-${Date.now()}`,
-            date: Date.now(),
-            score: Math.floor(scoreRef.current),
-            level: levelRef.current,
-            distance: Math.floor(scoreRef.current)
+        if (gameStateRef.current === 'GAME_OVER') return;
+        const finalScore = Math.floor(scoreRef.current);
+        const finalLevel = levelRef.current;
+        gameStateRef.current = 'GAME_OVER';
+        flushSync(() => {
+            setScore(finalScore);
+            setGameState('GAME_OVER');
         });
+        window.setTimeout(() => {
+            audioService.playSound('lose');
+            storageService.saveGoHomeScore({
+                id: `gohome-${Date.now()}`,
+                date: Date.now(),
+                score: finalScore,
+                level: finalLevel,
+                distance: finalScore
+            });
+        }, 0);
     };
 
     const handleChallengeComplete = (correctCount: number) => {
@@ -821,6 +842,7 @@ const GoHomeDash: React.FC<{
     };
 
     const handlePlayerDamage = (isFall: boolean, obsIdx?: number) => {
+        if (gameStateRef.current !== 'PLAYING') return;
         const p = playerRef.current;
         if (p.barrier) {
             p.barrier = false;
@@ -832,11 +854,13 @@ const GoHomeDash: React.FC<{
             }
             audioService.playSound('block'); return;
         }
-        setHp(prev => {
-            const next = prev - 1;
-            if (next <= 0) { setGameOverState(); }
-            return next;
-        });
+        const nextHp = Math.max(0, hpRef.current - 1);
+        hpRef.current = nextHp;
+        setHp(nextHp);
+        if (nextHp <= 0) {
+            setGameOverState();
+            return;
+        }
         p.invulFrame = 60; audioService.playSound('damage'); triggerShake();
         if (isFall) { p.y = GROUND_Y; p.vy = 0; p.isFalling = false; }
     };
@@ -1117,9 +1141,17 @@ const GoHomeDash: React.FC<{
                 accumulator = 0;
             }
 
-            if (canvasRef.current) {
+            if (gameStateRef.current !== 'GAME_OVER' && canvasRef.current) {
                 const ctx = canvasRef.current.getContext('2d');
                 if (ctx) draw(ctx);
+            }
+            if (gameStateRef.current === 'PLAYING' && canvasRef.current && guideCanvasRef.current) {
+                const guideCtx = guideCanvasRef.current.getContext('2d');
+                if (guideCtx) {
+                    guideCtx.clearRect(0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+                    guideCtx.imageSmoothingEnabled = false;
+                    guideCtx.drawImage(canvasRef.current, 0, 0, CANVAS_WIDTH, CANVAS_HEIGHT);
+                }
             }
             frameIdRef.current = requestAnimationFrame(loop);
         };
@@ -1155,6 +1187,12 @@ const GoHomeDash: React.FC<{
                     <div className="text-[8px] text-indigo-400 font-bold uppercase tracking-widest bg-black/40 px-2 py-0.5 rounded">Distance</div>
                 </div>
             </div>
+
+            {gameState === 'PLAYING' && (
+                <div className="go-home-mini-guide pointer-events-none">
+                    <canvas ref={guideCanvasRef} width={CANVAS_WIDTH} height={CANVAS_HEIGHT} className="w-full h-auto bg-black pixel-art" style={{ imageRendering: 'pixelated' }} />
+                </div>
+            )}
 
             <div className="flex-grow w-full flex flex-col items-center justify-center min-h-0 relative">
                 <div className="w-full relative group">
@@ -1203,7 +1241,7 @@ const GoHomeDash: React.FC<{
             )}
 
             {gameState === 'GAME_OVER' && (
-                <div className="absolute inset-0 z-70 flex flex-col items-center justify-center bg-red-950/98 animate-in fade-in backdrop-blur-lg" onPointerDown={e => e.stopPropagation()}>
+                <div className="absolute inset-0 z-[70] flex flex-col items-center justify-center bg-red-950/98 animate-in fade-in backdrop-blur-lg" onPointerDown={e => e.stopPropagation()}>
                     <Skull size={80} className="text-red-600 mb-6 animate-pulse" /><h2 className="text-7xl font-black text-white mb-2 italic tracking-tighter uppercase">Failed</h2><div className="text-2xl text-yellow-400 mb-12 font-black bg-black/60 px-8 py-3 rounded-full border-2 border-yellow-500/50 italic shadow-xl">DISTANCE: {score.toLocaleString()}m</div>
                     <div className="flex flex-col gap-4 w-64">
                         <button onClick={(e) => { e.stopPropagation(); initGame(); audioService.playSound('select'); }} className="w-full bg-white text-black py-4 rounded-2xl font-black text-xl shadow-[0_8px_0_#ccc] hover:bg-slate-200 transition-all active:translate-y-1 active:shadow-none">TRY AGAIN</button>

@@ -690,6 +690,9 @@ const KochoShowdown: React.FC<{
         debugPreview === 'ENDING' ? KOCHO_UNLOCKABLE_CARD_DB[0] ?? null : null
     );
     const [kochoUnlockedCount, setKochoUnlockedCount] = useState(() => storageService.getUnlockedKochoCards().length);
+    const [maxUnlockedDifficulty, setMaxUnlockedDifficulty] = useState(() =>
+        debugPreview ? KOCHO_DIFFICULTIES.length : storageService.getMaxUnlockedKochoDifficulty()
+    );
     
     // UI State
     const [showRelicModal, setShowRelicModal] = useState(false);
@@ -735,6 +738,7 @@ const KochoShowdown: React.FC<{
 
     const startKochoRun = (difficultyLevel: number) => {
         const difficulty = getKochoDifficulty(difficultyLevel);
+        if (!debugPreview && difficulty.level > maxUnlockedDifficulty) return;
         const initialState: KochoGameState = {
             ...getInitialState(),
             phase: 'BATTLE',
@@ -808,6 +812,9 @@ const KochoShowdown: React.FC<{
                 endlessScore: gameState.endlessScore
             });
             if (gameState.status === 'VICTORY' && !gameState.isEndless) {
+                const nextDifficulty = Math.min(KOCHO_DIFFICULTIES.length, gameState.difficultyLevel + 1);
+                storageService.unlockKochoDifficulty(nextDifficulty);
+                setMaxUnlockedDifficulty(storageService.getMaxUnlockedKochoDifficulty());
                 const unlockedCard = unlockRandomKochoCard();
                 setNewlyUnlockedCard(unlockedCard);
                 setKochoUnlockedCount(storageService.getUnlockedKochoCards().length);
@@ -2697,7 +2704,7 @@ const KochoShowdown: React.FC<{
             <div className="flex justify-between items-center p-2 md:p-4 bg-black/40 border-b border-indigo-500/30 shrink-0">
                 <button onClick={handleQuit} className="flex items-center text-gray-400 hover:text-white"><ArrowLeft className="mr-2"/> <span className="hidden md:inline">Quit</span></button>
                 <h2 className="text-sm md:text-xl font-bold text-indigo-100 tracking-widest hidden md:block">
-                    KOCHO SHOWDOWN <span className="text-xs text-pink-400 ml-2">{gameState.phase === 'SETUP' ? 'Difficulty Select' : gameState.isEndless ? `補習 ${gameState.endlessFloor}限目` : `Stage ${gameState.battleStage}`}</span>
+                    校長対決 <span className="text-xs text-pink-400 ml-2">{gameState.phase === 'SETUP' ? '難易度選択' : gameState.isEndless ? `補習 ${gameState.endlessFloor}限目` : `ステージ ${gameState.battleStage}`}</span>
                 </h2>
                 <div className="flex items-center gap-2 md:gap-4">
                     {gameState.phase !== 'SETUP' && (
@@ -2707,7 +2714,7 @@ const KochoShowdown: React.FC<{
                     )}
                     {gameState.isEndless && (
                         <div className="text-xs md:text-sm font-bold text-pink-200 flex items-center gap-2 bg-pink-950/50 px-2 py-1 rounded border border-pink-500/50">
-                            <Skull size={14}/> {gameState.endlessKills} K / {gameState.endlessScore} pt
+                            <Skull size={14}/> 撃破 {gameState.endlessKills} / {gameState.endlessScore}点
                         </div>
                     )}
                     <button onClick={() => setShowHelpModal(true)} className="flex items-center gap-2 text-indigo-200 hover:text-white transition-colors text-xs md:text-sm font-bold border border-indigo-500/30 px-2 py-1 rounded bg-black/20">
@@ -2726,27 +2733,36 @@ const KochoShowdown: React.FC<{
             </div>
 
             {gameState.phase === 'SETUP' && (
-                <div className="absolute inset-0 z-40 flex items-center justify-center bg-[#111827]/95 p-4">
-                    <div className="w-full max-w-5xl rounded-xl border-2 border-indigo-500/60 bg-slate-950 p-5 shadow-2xl">
-                        <div className="mb-5 text-center">
-                            <div className="text-[11px] font-black uppercase tracking-[0.35em] text-pink-300">Kocho Showdown</div>
-                            <h2 className="mt-2 text-3xl font-black text-white">難易度選択</h2>
-                            <p className="mt-2 text-sm text-slate-400">Lv.1は現在の校長対決そのまま。上げるほど敵HP・攻撃力が増え、アイテムドロップが減ります。</p>
+                <div className="kocho-difficulty-overlay absolute inset-0 z-40 flex items-center justify-center bg-[#111827]/95 p-4">
+                    <div className="kocho-difficulty-panel w-full max-w-5xl rounded-xl border-2 border-indigo-500/60 bg-slate-950 p-5 shadow-2xl">
+                        <div className="kocho-difficulty-header mb-5 text-center">
+                            <div className="kocho-difficulty-eyebrow text-[11px] font-black uppercase tracking-[0.35em] text-pink-300">Kocho Showdown</div>
+                            <h2 className="kocho-difficulty-heading mt-2 text-3xl font-black text-white">難易度選択</h2>
+                            <p className="kocho-difficulty-description mt-2 text-sm text-slate-400">Lv.1から開始し、クリアするたびに次のレベルが1つ解禁されます。上げるほど敵HP・攻撃力が増え、アイテムドロップが減ります。</p>
                         </div>
-                        <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
-                            {KOCHO_DIFFICULTIES.map(difficulty => (
-                                <button
-                                    key={difficulty.level}
-                                    onClick={() => startKochoRun(difficulty.level)}
-                                    className="flex items-center justify-between rounded-lg border border-slate-700 bg-slate-900 px-4 py-3 text-left transition-colors hover:border-pink-400 hover:bg-slate-800"
-                                >
-                                    <div>
-                                        <div className="text-base font-black text-white">Lv.{difficulty.level} {difficulty.name}</div>
-                                        <div className="mt-1 text-xs text-slate-400">HP x{difficulty.hpMultiplier.toFixed(2)} / 攻撃 +{difficulty.damageBonus} / SCORE x{difficulty.scoreMultiplier.toFixed(1)}</div>
-                                    </div>
-                                    <Play size={18} className="text-pink-300" />
-                                </button>
-                            ))}
+                        <div className="kocho-difficulty-grid grid grid-cols-1 gap-2 md:grid-cols-2">
+                            {KOCHO_DIFFICULTIES.map(difficulty => {
+                                const locked = difficulty.level > maxUnlockedDifficulty;
+                                return (
+                                    <button
+                                        key={difficulty.level}
+                                        onClick={() => startKochoRun(difficulty.level)}
+                                        disabled={locked}
+                                        className={`kocho-difficulty-button flex items-center justify-between rounded-lg border px-4 py-3 text-left transition-colors ${
+                                            locked
+                                                ? 'cursor-not-allowed border-slate-800 bg-slate-900/55 opacity-55'
+                                                : 'border-slate-700 bg-slate-900 hover:border-pink-400 hover:bg-slate-800'
+                                        }`}
+                                    >
+                                        <div>
+                                            <div className={`kocho-difficulty-title text-base font-black ${locked ? 'text-slate-500' : 'text-white'}`}>Lv.{difficulty.level} {difficulty.name}</div>
+                                            <div className="kocho-difficulty-meta mt-1 text-xs text-slate-400">HP x{difficulty.hpMultiplier.toFixed(2)} / 攻撃 +{difficulty.damageBonus} / SCORE x{difficulty.scoreMultiplier.toFixed(1)}</div>
+                                            {locked && <div className="kocho-difficulty-lock mt-1 text-[11px] font-bold text-pink-300">前のレベルをクリアすると解禁</div>}
+                                        </div>
+                                        {locked ? <ShieldCheck size={18} className="text-slate-500" /> : <Play size={18} className="text-pink-300" />}
+                                    </button>
+                                );
+                            })}
                         </div>
                     </div>
                 </div>
@@ -2980,12 +2996,12 @@ const KochoShowdown: React.FC<{
                                     <div className="kocho-victory-unlock-area">
                                         {newlyUnlockedCard ? (
                                         <div className="kocho-victory-card mx-auto mb-8 w-64 rounded-2xl border-4 border-yellow-500 bg-slate-900 p-5 shadow-xl">
-                                            <div className="mb-2 text-xs font-black tracking-[0.2em] text-yellow-300">NEW CARD</div>
+                                            <div className="mb-2 text-xs font-black tracking-[0.2em] text-yellow-300">新カード解禁</div>
                                             <KochoCardActionArt card={newlyUnlockedCard} className="mx-auto mb-3 h-16 w-16 rounded-full border border-yellow-400/50 bg-black/40" />
                                             <div className="text-lg font-bold text-white">{newlyUnlockedCard.name}</div>
                                             <div className="mt-2 flex justify-center gap-2 text-[11px]">
-                                                {newlyUnlockedCard.damage > 0 && <span className="rounded bg-red-900/40 px-2 py-1 font-bold text-red-300">ATK {newlyUnlockedCard.damage}</span>}
-                                                <span className="rounded bg-blue-900/40 px-2 py-1 font-bold text-blue-300">CD {newlyUnlockedCard.cooldown}</span>
+                                                {newlyUnlockedCard.damage > 0 && <span className="rounded bg-red-900/40 px-2 py-1 font-bold text-red-300">攻撃 {newlyUnlockedCard.damage}</span>}
+                                                <span className="rounded bg-blue-900/40 px-2 py-1 font-bold text-blue-300">待機 {newlyUnlockedCard.cooldown}</span>
                                             </div>
                                             <div className="mt-3 text-xs leading-relaxed text-gray-300">{newlyUnlockedCard.description}</div>
                                             <div className="mt-4 text-[11px] font-bold text-emerald-300">以降の校長対決の報酬に登場します</div>
@@ -2997,15 +3013,15 @@ const KochoShowdown: React.FC<{
                                         )}
                                     </div>
                                     <div className="kocho-victory-text-area flex flex-col items-center justify-center">
-                                        <h2 className="text-4xl font-bold text-white mb-4">GRADUATION!</h2>
-                                        <p className="text-gray-300 mb-8">You defeated the Principal.</p>
+                                        <h2 className="text-4xl font-bold text-white mb-4">校長説得完了！</h2>
+                                        <p className="text-gray-300 mb-8">校長先生との最終対決に勝利しました。</p>
                                         <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-yellow-500/50 bg-yellow-950/40 px-4 py-2 text-sm font-bold text-yellow-200">
                                             <Gift size={16}/>
                                             追加カード解放 {kochoUnlockedCount}/{KOCHO_UNLOCKABLE_CARD_TOTAL}
                                         </div>
                                         <div className="flex flex-col gap-3 md:flex-row">
                                             <button onClick={startEndlessRun} className="bg-pink-600 px-8 py-3 rounded text-xl font-bold hover:bg-pink-500 border border-pink-300">放課後エンドレスへ</button>
-                                            <button onClick={onBack} className="bg-indigo-600 px-8 py-3 rounded text-xl font-bold hover:bg-indigo-500">Return</button>
+                                            <button onClick={onBack} className="bg-indigo-600 px-8 py-3 rounded text-xl font-bold hover:bg-indigo-500">職員室に戻る</button>
                                         </div>
                                     </div>
                                 </div>
@@ -3015,10 +3031,10 @@ const KochoShowdown: React.FC<{
                             {gameState.status === 'GAME_OVER' && (
                                 <div className="text-center animate-in zoom-in">
                                     <Skull size={64} className="text-red-500 mb-4 mx-auto"/>
-                                    <h2 className="text-4xl font-bold text-red-500 mb-4">EXPELLED</h2>
-                                    <p className="text-gray-400 mb-2">{gameState.isEndless ? `補習 ${gameState.endlessFloor}限目 / ${gameState.endlessScore} pt` : `Stage ${gameState.battleStage}`}</p>
+                                    <h2 className="text-4xl font-bold text-red-500 mb-4">校長室送り</h2>
+                                    <p className="text-gray-400 mb-2">{gameState.isEndless ? `補習 ${gameState.endlessFloor}限目 / ${gameState.endlessScore}点` : `ステージ ${gameState.battleStage}`}</p>
                                     {gameState.isEndless && <p className="text-sm text-pink-300 mb-4">撃破数 {gameState.endlessKills}</p>}
-                                    <button onClick={() => initGame()} className="bg-white text-black px-8 py-3 rounded text-xl font-bold hover:bg-gray-200">Retry</button>
+                                    <button onClick={() => initGame()} className="bg-white text-black px-8 py-3 rounded text-xl font-bold hover:bg-gray-200">再挑戦</button>
                                 </div>
                             )}
                         </div>

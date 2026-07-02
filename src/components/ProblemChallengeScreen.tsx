@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { AnswerMode, AssignmentAnswerResult, AssignmentPayload, AssignmentReviewProblem, GameMode, LanguageMode, GameScreen } from '../types';
 import { storageService } from '../services/storageService';
-import { audioService } from '../services/audioService';
+import { audioService, type BgmThemeId } from '../services/audioService';
 import MathChallengeScreen from './MathChallengeScreen';
 import KanjiChallengeScreen from './KanjiChallengeScreen';
 import EnglishChallengeScreen from './EnglishChallengeScreen';
@@ -30,7 +30,44 @@ interface ProblemChallengeScreenProps {
   visualTheme?: VisualThemeId;
 }
 
-const BGM_OPTIONS = [
+type ProblemChallengeBgmOption = {
+  id: string;
+  name: string;
+  theme?: BgmThemeId;
+  track?: string;
+};
+
+const STORY_BGM_TRACKS = [
+  { id: 'battle', name: '通常バトル' },
+  { id: 'boss', name: 'ボス戦' },
+  { id: 'mid_boss', name: 'エリート戦' },
+  { id: 'final_boss', name: '最終決戦' },
+  { id: 'menu', name: 'メインメニュー' },
+  { id: 'map', name: 'マップ移動' },
+  { id: 'shop', name: 'ショップ' },
+  { id: 'event', name: 'イベント' },
+  { id: 'rest', name: '休憩' },
+  { id: 'reward', name: '報酬獲得' },
+  { id: 'math', name: '学習タイム' },
+  { id: 'relic_select', name: 'レリック選択' },
+  { id: 'victory', name: '勝利ファンファーレ' },
+  { id: 'game_over', name: 'ゲームオーバー' },
+];
+
+const createThemedBgmOptions = (
+  theme: BgmThemeId,
+  label: string,
+  excludedTrackIds: string[] = []
+): ProblemChallengeBgmOption[] => STORY_BGM_TRACKS
+  .filter(track => !excludedTrackIds.includes(track.id))
+  .map(track => ({
+    id: `${theme}::${track.id}`,
+    name: `${label}: ${track.name}`,
+    theme,
+    track: track.id,
+  }));
+
+const BGM_OPTIONS: ProblemChallengeBgmOption[] = [
   { id: 'random', name: 'ランダム (自動切替)' },
   { id: 'none', name: 'BGMなし' },
   { id: 'school_psyche', name: '一般教室 (風来1)' },
@@ -59,7 +96,12 @@ const BGM_OPTIONS = [
   { id: 'math', name: '学習タイム' },
   { id: 'victory', name: '勝利ファンファーレ' },
   { id: 'game_over', name: 'ゲームオーバー' },
+  ...createThemedBgmOptions('high-school', '高校編'),
+  ...createThemedBgmOptions('magic-female', 'マジック編 女子'),
+  ...createThemedBgmOptions('magic-male', 'マジック編 男子', ['menu']),
 ];
+
+const BGM_OPTION_BY_ID = new Map(BGM_OPTIONS.map(option => [option.id, option]));
 const UNIT_MASTERY_TARGET = 100;
 
 interface MathUnitOption {
@@ -767,10 +809,13 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
     setStreak(0);
     setChallengeStep(0);
 
+    const selectedBgm = BGM_OPTION_BY_ID.get(selectedBgmId);
     if (selectedBgmId === 'random') {
       audioService.playRandomBGM();
     } else if (selectedBgmId === 'none') {
       audioService.stopBGM();
+    } else if (selectedBgm?.theme && selectedBgm.track) {
+      audioService.switchThemeAndPlayBGM(selectedBgm.theme, selectedBgm.track as any, true);
     } else {
       audioService.playBGM(selectedBgmId as any, true);
     }

@@ -4286,7 +4286,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; debugPreview?: MiniGameDe
                         {phase === 'VICTORY' && (
                             <div className="paper-plane-victory-content">
                                 <Trophy size={64} className="paper-plane-result-icon text-yellow-400 mx-auto mb-4 animate-bounce"/>
-                                <h2 className="paper-plane-result-title text-4xl font-bold text-white mb-2">MISSION COMPLETE</h2>
+                                <h2 className="paper-plane-result-title text-4xl font-bold text-white mb-2">任務達成！</h2>
                                 <p className="paper-plane-result-subtitle text-gray-400 mb-6">全ステージクリアおめでとう！</p>
                                 <div className="paper-plane-unlock-card mb-6 rounded-xl border border-cyan-500/50 bg-slate-900/80 p-4">
                                     <div className="text-cyan-300 font-bold mb-2">
@@ -4294,7 +4294,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; debugPreview?: MiniGameDe
                                     </div>
                                     {newlyUnlockedPart ? (
                                         <div className="paper-plane-unlock-detail flex flex-col items-center gap-2">
-                                            <div className="paper-plane-unlock-label text-yellow-300 font-bold">NEW PART UNLOCKED</div>
+                                            <div className="paper-plane-unlock-label text-yellow-300 font-bold">新パーツ解禁</div>
                                             <div className="paper-plane-unlock-part w-24">
                                                 <ShipPartView part={newlyUnlockedPart} onLongPress={(p) => setTooltipPart(p)} />
                                             </div>
@@ -4322,8 +4322,8 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; debugPreview?: MiniGameDe
                         {phase === 'GAME_OVER' && (
                             <div className="paper-plane-game-over-content">
                                 <Skull size={64} className="paper-plane-result-icon text-red-500 mx-auto mb-4"/>
-                                <h2 className="paper-plane-result-title text-4xl font-bold text-red-500 mb-2">DESTROYED</h2>
-                                <p className="paper-plane-result-subtitle text-gray-400 mb-6">Stage {stage}</p>
+                                <h2 className="paper-plane-result-title text-4xl font-bold text-red-500 mb-2">撃墜</h2>
+                                <p className="paper-plane-result-subtitle text-gray-400 mb-6">ステージ {stage}</p>
                                 <div className="paper-plane-result-actions flex flex-col gap-4">
                                     <button
                                         onClick={returnToSetup}

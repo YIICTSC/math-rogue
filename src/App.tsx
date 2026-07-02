@@ -72,7 +72,7 @@ import GardenScreen from './components/GardenScreen';
 import P2PRaceSetup from './components/P2PRaceSetup';
 import CoopSetupScreen, { CoopParticipantPayload, CoopStartPayload } from './components/CoopSetupScreen';
 import ModeSelectionScreen from './components/ModeSelectionScreen';
-import SettingsModal, { AppSettings, SettingsTab } from './components/SettingsModal';
+import SettingsModal, { AppSettings, BattleUiSettings, SettingsTab } from './components/SettingsModal';
 import Card from './components/Card';
 import { audioService, type BgmThemeId } from './services/audioService';
 import { assetPreloadService } from './services/assetPreloadService';
@@ -108,6 +108,8 @@ import { useXboxControllerNavigation } from './hooks/useXboxControllerNavigation
 
 const PARRY_WINDOW_MS = 650;
 const PARRY_PERFECT_MS = 220;
+const ENEMY_FINISHER_BURST_VOICE_DELAY_MS = 760;
+const PORTRAIT_BATTLE_ENEMY_OFFSET_Y_BASELINE = 60;
 const CROWDFUNDING_BANNER_URL = 'https://camp-fire.jp/projects/954165/view?utm_campaign=cp_po_share_c_msg_mypage_projects_open';
 const CROWDFUNDING_BANNER_IMAGE = assetUrl('banners/campfire-crowdfunding.png');
 const ASSIGNMENT_INTRO_BANNER_IMAGE = assetUrl('banners/daily-assignment-reward-intro.png');
@@ -369,7 +371,39 @@ const DEFAULT_APP_SETTINGS: AppSettings = {
         playerOffsetY: 0,
         statsScale: 1
     },
+    battleUiPortrait: {
+        controlBarOffsetY: 0,
+        handCardScale: 1,
+        enemyScale: 1,
+        playerScale: 1,
+        enemyOffsetY: 0,
+        playerOffsetY: 0,
+        statsScale: 1
+    },
+    battleUiLandscape: {
+        controlBarOffsetY: 0,
+        handCardScale: 1,
+        enemyScale: 1,
+        playerScale: 1,
+        enemyOffsetY: 0,
+        playerOffsetY: 0,
+        statsScale: 1
+    },
     lowDataMode: false
+};
+
+const normalizeBattleUiSettings = (
+    saved?: (Partial<BattleUiSettings> & { controlBarHeightRem?: number }) | null
+): BattleUiSettings => ({
+    ...DEFAULT_APP_SETTINGS.battleUi,
+    ...(saved || {}),
+    controlBarOffsetY: saved?.controlBarOffsetY ?? DEFAULT_APP_SETTINGS.battleUi.controlBarOffsetY,
+    handCardScale: saved?.handCardScale ?? DEFAULT_APP_SETTINGS.battleUi.handCardScale
+});
+
+const getViewportBattleUiOrientation = (): 'portrait' | 'landscape' => {
+    if (typeof window === 'undefined') return 'portrait';
+    return window.innerWidth > window.innerHeight ? 'landscape' : 'portrait';
 };
 
 const RACE_TRICK_SCREEN_SET = new Set<GameScreen>([
@@ -1086,20 +1120,27 @@ const App: React.FC = () => {
     const [appSettings, setAppSettings] = useState<AppSettings>(() => {
         const saved = storageService.getAppSettings<AppSettings>();
         const savedBattleUi = saved?.battleUi as (Partial<AppSettings['battleUi']> & { controlBarHeightRem?: number }) | undefined;
+        const baseBattleUi = normalizeBattleUiSettings(savedBattleUi);
         const merged = {
             ...DEFAULT_APP_SETTINGS,
             ...(saved || {}),
-            battleUi: {
-                ...DEFAULT_APP_SETTINGS.battleUi,
-                ...(savedBattleUi || {}),
-                controlBarOffsetY: savedBattleUi?.controlBarOffsetY
-                    ?? DEFAULT_APP_SETTINGS.battleUi.controlBarOffsetY,
-                handCardScale: savedBattleUi?.handCardScale
-                    ?? DEFAULT_APP_SETTINGS.battleUi.handCardScale
-            }
+            battleUi: baseBattleUi,
+            battleUiPortrait: normalizeBattleUiSettings(saved?.battleUiPortrait || baseBattleUi),
+            battleUiLandscape: normalizeBattleUiSettings(saved?.battleUiLandscape || baseBattleUi)
         };
         return storageService.getBgmMode() ? merged : { ...merged, bgmMode: 'MP3' };
     });
+    const [battleUiOrientation, setBattleUiOrientation] = useState<'portrait' | 'landscape'>(() => getViewportBattleUiOrientation());
+    const activeBattleUiSettings = useMemo(
+        () => {
+            if (battleUiOrientation === 'landscape') return appSettings.battleUiLandscape;
+            return {
+                ...appSettings.battleUiPortrait,
+                enemyOffsetY: appSettings.battleUiPortrait.enemyOffsetY + PORTRAIT_BATTLE_ENEMY_OFFSET_Y_BASELINE
+            };
+        },
+        [appSettings.battleUiLandscape, appSettings.battleUiPortrait, battleUiOrientation]
+    );
     const [totalMathCorrect, setTotalMathCorrect] = useState<number>(0);
     const [nextThreshold, setNextThreshold] = useState<number | null>(null);
     const [battleFinisherCutinCard, setBattleFinisherCutinCard] = useState<ICard | null>(null);
@@ -3461,6 +3502,19 @@ const App: React.FC = () => {
         audioService.setSfxVolume(appSettings.seVolume);
         audioService.setVoiceVolume(appSettings.voiceVolume);
     }, [appSettings]);
+
+    useEffect(() => {
+        const syncBattleUiOrientation = () => {
+            setBattleUiOrientation(getViewportBattleUiOrientation());
+        };
+        syncBattleUiOrientation();
+        window.addEventListener('resize', syncBattleUiOrientation);
+        window.addEventListener('orientationchange', syncBattleUiOrientation);
+        return () => {
+            window.removeEventListener('resize', syncBattleUiOrientation);
+            window.removeEventListener('orientationchange', syncBattleUiOrientation);
+        };
+    }, []);
 
     useEffect(() => {
         if (!electronApi) return;
@@ -7085,7 +7139,15 @@ const App: React.FC = () => {
                                 if (e.currentHp <= 0) {
                                     if (!voicedEnemyDefeatIds.has(e.id)) {
                                         voicedEnemyDefeatIds.add(e.id);
-                                        audioService.playHumanoidEnemyVoice(prev.visualTheme, e.name, 'defeat');
+                                        const hasOtherAliveEnemies = newEnemies.some(other =>
+                                            other.id !== e.id &&
+                                            (other.currentHp > 0 || (other.enemyType === 'THE_HEART' && other.phase === 1))
+                                        );
+                                        if (hasOtherAliveEnemies) {
+                                            audioService.playHumanoidEnemyVoice(prev.visualTheme, e.name, 'defeat');
+                                        } else {
+                                            lastDefeatedEnemyForFinisherRef.current = { ...e };
+                                        }
                                     }
                                 } else if (!voicedEnemyDamageIds.has(e.id)) {
                                     voicedEnemyDamageIds.add(e.id);
@@ -8831,7 +8893,15 @@ const App: React.FC = () => {
                     e.nextIntent = getNextEnemyIntent(e, prev.turn + 1);
                     const aliveEnemies = newEnemies.filter(en => en.currentHp > 0 || (en.enemyType === 'THE_HEART' && en.phase === 1));
                     if (enemyHpBeforeAction > 0 && e.currentHp < enemyHpBeforeAction) {
-                        audioService.playHumanoidEnemyVoice(prev.visualTheme, e.name, e.currentHp <= 0 ? 'defeat' : 'damage');
+                        if (e.currentHp <= 0) {
+                            if (aliveEnemies.length > 0) {
+                                audioService.playHumanoidEnemyVoice(prev.visualTheme, e.name, 'defeat');
+                            } else {
+                                lastDefeatedEnemyForFinisherRef.current = { ...e };
+                            }
+                        } else {
+                            audioService.playHumanoidEnemyVoice(prev.visualTheme, e.name, 'damage');
+                        }
                     }
                     if (hasRelic(p, 'BIRD_FACED_URN')) {
                         const defeatedNow = newEnemies.length - aliveEnemies.length;
@@ -9867,10 +9937,12 @@ const App: React.FC = () => {
     const lastPlayedCardRef = useRef<ICard | null>(null);
     const victorySequenceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const defeatSequenceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+    const enemyDefeatVoiceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const battleVictoryResolvingRef = useRef(false);
     const battleDefeatResolvingRef = useRef(false);
     const lastActingEnemyRef = useRef<Enemy | null>(null);
     const lastLethalEnemyRef = useRef<Enemy | null>(null);
+    const lastDefeatedEnemyForFinisherRef = useRef<Enemy | null>(null);
     useEffect(() => { stateRef.current = gameState; }, [gameState]);
 
     const resolveBattleVictory = useCallback(() => {
@@ -10091,6 +10163,11 @@ const App: React.FC = () => {
             battleDefeatResolvingRef.current = false;
             lastActingEnemyRef.current = null;
             lastLethalEnemyRef.current = null;
+            lastDefeatedEnemyForFinisherRef.current = null;
+            if (enemyDefeatVoiceTimerRef.current) {
+                clearTimeout(enemyDefeatVoiceTimerRef.current);
+                enemyDefeatVoiceTimerRef.current = null;
+            }
         }
         if (gameState.screen === GameScreen.BATTLE) {
             if (gameState.challengeMode === 'COOP' && coopSession && !coopSession.isHost) {
@@ -10107,8 +10184,23 @@ const App: React.FC = () => {
 
                 if (lastPlayedCardRef.current) {
                     const finisherCard = { ...lastPlayedCardRef.current };
+                    const defeatedEnemyForFinisher = lastDefeatedEnemyForFinisherRef.current;
                     lastPlayedCardRef.current = null;
+                    lastDefeatedEnemyForFinisherRef.current = null;
                     setBattleFinisherCutinCard(finisherCard);
+                    if (enemyDefeatVoiceTimerRef.current) {
+                        clearTimeout(enemyDefeatVoiceTimerRef.current);
+                    }
+                    if (defeatedEnemyForFinisher) {
+                        enemyDefeatVoiceTimerRef.current = setTimeout(() => {
+                            audioService.playHumanoidEnemyVoice(
+                                stateRef.current.visualTheme,
+                                defeatedEnemyForFinisher.name,
+                                'defeat',
+                            );
+                            enemyDefeatVoiceTimerRef.current = null;
+                        }, ENEMY_FINISHER_BURST_VOICE_DELAY_MS);
+                    }
 
                     if (victorySequenceTimerRef.current) {
                         clearTimeout(victorySequenceTimerRef.current);
@@ -10127,6 +10219,7 @@ const App: React.FC = () => {
                 if (revivedPlayer) {
                     lastActingEnemyRef.current = null;
                     lastLethalEnemyRef.current = null;
+                    lastDefeatedEnemyForFinisherRef.current = null;
                     audioService.playSound('buff');
                     setGameState(prev => ({
                         ...prev,
@@ -10137,6 +10230,7 @@ const App: React.FC = () => {
                 if (ghostPotIndex !== -1) {
                     lastActingEnemyRef.current = null;
                     lastLethalEnemyRef.current = null;
+                    lastDefeatedEnemyForFinisherRef.current = null;
                     audioService.playSound('buff');
                     setGameState(prev => ({
                         ...prev,
@@ -10158,6 +10252,7 @@ const App: React.FC = () => {
                     if (hasAliveCoopPlayer) {
                         lastActingEnemyRef.current = null;
                         lastLethalEnemyRef.current = null;
+                        lastDefeatedEnemyForFinisherRef.current = null;
                         return;
                     }
                 }
@@ -10180,6 +10275,7 @@ const App: React.FC = () => {
                         setBattleFinisherCutinCard(null);
                         lastActingEnemyRef.current = null;
                         lastLethalEnemyRef.current = null;
+                        lastDefeatedEnemyForFinisherRef.current = null;
                         resolveBattleDefeat();
                         defeatSequenceTimerRef.current = null;
                     }, COOP_FINISHER_DISPLAY_MS);
@@ -10217,6 +10313,9 @@ const App: React.FC = () => {
             }
             if (defeatSequenceTimerRef.current) {
                 clearTimeout(defeatSequenceTimerRef.current);
+            }
+            if (enemyDefeatVoiceTimerRef.current) {
+                clearTimeout(enemyDefeatVoiceTimerRef.current);
             }
         };
     }, []);
@@ -14577,7 +14676,7 @@ const App: React.FC = () => {
                                 onOpenSettings={() => setShowSettingsModal(true)}
                                 battleBackgroundId={currentBattleBackgroundId}
                                 visualTheme={coopSyncedVisualTheme}
-                                battleUiSettings={appSettings.battleUi}
+                                battleUiSettings={activeBattleUiSettings}
                             />
                         ) : (
                             <BattleScene
@@ -14590,7 +14689,7 @@ const App: React.FC = () => {
                                 onOpenSettings={() => setShowSettingsModal(true)}
                                 battleBackgroundId={currentBattleBackgroundId}
                                 visualTheme={coopSyncedVisualTheme}
-                                battleUiSettings={appSettings.battleUi}
+                                battleUiSettings={activeBattleUiSettings}
                             />
                         )}
                     </div>
@@ -15440,6 +15539,7 @@ const App: React.FC = () => {
                     onResetWindowState={resetWindowState}
                     onQuitApp={quitApp}
                     showCommunication={!OFFLINE_DISTRIBUTABLE}
+                    battleUiOrientation={battleUiOrientation}
                     languageMode={languageMode}
                 />
             </div>

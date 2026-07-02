@@ -1,5 +1,6 @@
 
 import { LanguageMode, type Card } from '../types';
+import { EVENT_HIRAGANA_EXACT } from '../data/eventHiraganaExact';
 import { EVENT_DICTIONARY } from './textUtils2';
 
 const BASE_DICTIONARY: Record<string, string> = {
@@ -6178,6 +6179,271 @@ const buildEnglishEffectSummary = (text: string): string | null => {
     return effects.length > 0 ? `${effects.join(". ")}.` : null;
 };
 
+const EVENT_OPTION_HEAD_TRANSLATIONS: Record<string, string> = {
+    "学習効率調整": "Study Efficiency Adjustment",
+    "知性": "Intellect",
+    "造形": "Craftsmanship",
+    "支援役": "Support Role",
+    "正道": "Right Path",
+    "対策": "Countermeasure",
+    "分析": "Analysis",
+    "料理": "Cooking",
+    "傾聴": "Active Listening",
+    "協調": "Cooperation",
+    "交渉": "Negotiation",
+    "鎮圧": "Suppression",
+    "癒やし系": "Healing Approach",
+    "試作": "Prototype",
+    "ふれあい": "Friendly Contact",
+    "リーダー行動": "Leader Action",
+    "交流": "Interaction",
+    "休息": "Rest",
+    "作業": "Work",
+    "修繕": "Repair",
+    "備えを確認": "Check Preparations",
+    "公的手段": "Official Procedure",
+    "共有": "Sharing",
+    "共演": "Joint Performance",
+    "共鳴": "Resonance",
+    "冷静": "Calm Judgment",
+    "制圧": "Subdue",
+    "前進": "Move Forward",
+    "創作": "Creation",
+    "即断": "Quick Decision",
+    "反抗": "Defiance",
+    "反響": "Echo",
+    "取引": "Deal",
+    "善行": "Good Deed",
+    "堅実ルート": "Steady Route",
+    "奇想天外": "Wild Idea",
+    "奇策": "Unusual Plan",
+    "奉仕": "Service",
+    "奔走": "Running Around",
+    "奔走する": "Run Around",
+    "学び": "Learning",
+    "安全策": "Safe Plan",
+    "実務": "Practical Work",
+    "実行": "Execution",
+    "実食": "Taste Test",
+    "静観": "Wait and Watch",
+    "平和": "Peaceful Approach",
+    "度胸": "Courage",
+    "強欲ルート": "Greedy Route",
+    "強行": "Force Through",
+    "循環": "Cycle",
+    "徳を積む": "Build Virtue",
+    "急行": "Rush",
+    "悪戯": "Prank",
+    "意志": "Willpower",
+    "慎重策": "Careful Plan",
+    "技術": "Technique",
+    "指導": "Guidance",
+    "探求": "Inquiry",
+    "探索": "Search",
+    "撤退": "Retreat",
+    "改善": "Improvement",
+    "攻める掃除": "Aggressive Cleaning",
+    "敬意": "Respect",
+    "整備": "Maintenance",
+    "整理": "Organizing",
+    "整頓": "Tidying Up",
+    "暴走": "Reckless Move",
+    "本気": "Full Effort",
+    "本番": "Real Performance",
+    "栄養": "Nutrition",
+    "根性": "Grit",
+    "栽培": "Cultivation",
+    "検証": "Verification",
+    "模倣": "Imitation",
+    "正攻法": "Straightforward Plan",
+    "正面突破": "Frontal Breakthrough",
+    "気合": "Fighting Spirit",
+    "水に挑む": "Challenge the Water",
+    "決別": "Parting Ways",
+    "滑走": "Slide Run",
+    "献身": "Devotion",
+    "異界": "Otherworld Approach",
+    "癒やし": "Healing",
+    "直飲み": "Drink Directly",
+    "研究": "Research",
+    "破壊": "Destruction",
+    "礼儀": "Courtesy",
+    "祈願": "Prayer",
+    "節水": "Water Saving",
+    "考察": "Consideration",
+    "耐久": "Endurance",
+    "背徳": "Forbidden Choice",
+    "良心": "Conscience",
+    "裏方": "Backstage Support",
+    "覗き見": "Peek",
+    "観察": "Observation",
+    "評価": "Evaluation",
+    "試食": "Taste Test",
+    "誠実": "Honesty",
+    "読書": "Reading",
+    "警備": "Security",
+    "賭け": "Gamble",
+    "軽量化": "Lightening the Load",
+    "追跡": "Pursuit",
+    "退避": "Evacuation",
+    "逃走": "Escape",
+    "通報": "Report",
+    "連携重視": "Teamwork Focus",
+    "遊び": "Play",
+    "運営": "Operations",
+    "運搬": "Carrying",
+    "運試し": "Test Your Luck",
+    "鍛錬": "Training",
+    "鼓舞": "Encouragement",
+};
+
+const translateEnglishEventEffectChunk = (chunk: string): string => {
+    const trimmed = chunk.trim();
+    if (trimmed === "レリック") return "Gain a relic";
+    if (trimmed === "ポーション") return "Gain a potion";
+    if (trimmed === "呪い") return "Receive a curse";
+    if (trimmed === "粘液") return "Receive Mucus";
+    if (trimmed === "再起動カード") return "Gain Reboot Card";
+    if (trimmed === "頭突き入手") return "Gain Headbutt";
+    if (trimmed === "レアカード") return "Gain a rare card";
+    if (trimmed === "HP全回復+削除") return "Heal to full HP and remove 1 card";
+    if (trimmed === "全回復+次戦闘E-1") return "Heal to full HP and start the next battle with -1 Energy";
+    if (trimmed === "全回復+寄生虫") return "Heal to full HP and receive Parasite";
+    if (trimmed === "全回復+呪い") return "Heal to full HP and receive a curse";
+    if (trimmed === "全カード強化+恥") return "Upgrade all cards and receive Embarrassment";
+    const goldHp = trimmed.match(/^(\d+)G\+HP(\d+)$/);
+    if (goldHp) return `Gain ${goldHp[1]}G and heal ${goldHp[2]} HP`;
+    const goldCurse = trimmed.match(/^(\d+)G\+呪い$/);
+    if (goldCurse) return `Gain ${goldCurse[1]}G and receive a curse`;
+    const relicHp = trimmed.match(/^レリック\+HP-(\d+)$/);
+    if (relicHp) return `Gain a relic and lose ${relicHp[1]} HP`;
+    const maxHpHp = trimmed.match(/^最大HP\+(\d+)&HP-(\d+)$/);
+    if (maxHpHp) return `Increase max HP by ${maxHpHp[1]} and lose ${maxHpHp[2]} HP`;
+    const namedCurse = trimmed.match(/^呪い「(.+)」$/);
+    if (namedCurse) return `Receive the curse "${translateEnglishNameInline(namedCurse[1])}"`;
+    const itemPlusStatus = trimmed.match(/^(.+)\+(.+)$/);
+    if (itemPlusStatus && !/^HP[+-]/.test(trimmed) && !/^最大HP/.test(trimmed)) {
+        return `${translateEnglishNameInline(itemPlusStatus[1])} and ${translateEnglishNameInline(itemPlusStatus[2])}`;
+    }
+    const cardUpgrade = trimmed.match(/^カード(\d+)枚強化$/);
+    if (cardUpgrade) return `Upgrade ${cardUpgrade[1]} cards`;
+    const cardSingleUpgrade = trimmed.match(/^カード(?:1枚)?強化$/);
+    if (cardSingleUpgrade) return "Upgrade 1 card";
+    if (/全カード強化/.test(trimmed)) return "Upgrade all cards";
+    if (/カード削除/.test(trimmed)) return "Remove 1 card";
+    if (/カード変化/.test(trimmed)) return "Transform 1 card";
+    if (/防御強化/.test(trimmed)) return "Improve defense";
+    if (/グルグルバット強化/.test(trimmed)) return "Upgrade Whirl Bat";
+    if (/退屈/.test(trimmed)) return "Receive Boredom";
+    const hpGain = trimmed.match(/^HP\+(\d+)$/);
+    if (hpGain) return `Heal ${hpGain[1]} HP`;
+    const hpLoss = trimmed.match(/^HP-(\d+)$/);
+    if (hpLoss) return `Lose ${hpLoss[1]} HP`;
+    const gold = trimmed.match(/^(\d+)G$/);
+    if (gold) return `Gain ${gold[1]}G`;
+    const maxHp = trimmed.match(/^最大HP\+(\d+)$/);
+    if (maxHp) return `Increase max HP by ${maxHp[1]}`;
+    return translateEnglishNameInline(trimmed);
+};
+
+const buildEnglishEventOptionEffectText = (text: string): string | null => {
+    const match = text.match(/^(.+?)（(.+)）$/);
+    if (!match) return null;
+    const head = EVENT_OPTION_HEAD_TRANSLATIONS[match[1]] || translateEnglishNameInline(match[1]);
+    const effects = match[2].split(/\s*[\/／]\s*/).map(translateEnglishEventEffectChunk).filter(Boolean);
+    if (!head || effects.length === 0 || effects.some(effect => /Choose Option|Item/.test(effect))) return null;
+    return `${head} (${effects.join(" / ")})`;
+};
+
+const EVENT_ACTION_OBJECT_TRANSLATIONS: Record<string, string> = {
+    "栄養ドリンク": "an energy drink",
+    "調べ物": "the research",
+    "灯り": "the lights",
+    "風": "the wind",
+    "氷": "the ice",
+    "弱点": "your weak points",
+    "花束": "the bouquet",
+    "写真": "the photo",
+    "先生": "a teacher",
+    "鏡": "the mirror",
+    "鏡の奥にある真実": "the truth inside the mirror",
+    "鏡の向こう側": "the other side of the mirror",
+    "禁書の力": "the forbidden book's power",
+    "危ない部分": "only the dangerous parts",
+    "正々堂々ジャンケン": "fair rock-paper-scissors",
+    "半分こ": "splitting it in half",
+    "配膳": "serving lunch",
+    "今回は我慢": "holding back this time",
+    "距離": "your distance",
+    "パン": "bread",
+    "見回り先生": "the patrol teacher",
+    "交換": "the trade",
+    "モノマネ対決": "an imitation contest",
+    "くじ引き": "the lottery draw",
+    "学習効率": "study efficiency",
+};
+
+const EVENT_ACTION_EXACT_TRANSLATIONS: Record<string, string> = {
+    "サンプルサンプル": "Sample result",
+    "栄養ドリンクを選ぶ": "Choose an energy drink",
+    "調べ物を進める": "Continue the research",
+    "灯りを消して帰る": "Turn off the lights and leave",
+    "風に当たる": "Feel the wind",
+    "氷を削る": "Shave the ice",
+    "教え合う": "Teach each other",
+    "風を入れる": "Let in some air",
+    "写真を手伝う": "Help with the photos",
+    "弱点を確認する": "Check your weak points",
+    "花束を受け取る": "Accept the bouquet",
+    "写真に写る": "Join the photo",
+    "関わらず立ち去る": "Leave without getting involved",
+    "通報する": "Report it",
+    "先生を呼んで摘発を試みる": "Call a teacher and try to expose it",
+    "調合を学びたいと願い出る": "Ask to learn the mixture",
+    "鏡の奥にある真実を探る": "Search for the truth inside the mirror",
+    "鏡の向こう側と交渉する": "Negotiate with the other side of the mirror",
+    "禁書の力を受け入れる": "Accept the forbidden book's power",
+    "封印する": "Seal it away",
+    "写し取る": "Copy it down",
+    "危ない部分だけ抜き書きする": "Copy only the dangerous parts",
+    "正々堂々ジャンケン": "Play fair rock-paper-scissors",
+    "真っ向勝負で揚げパンを狙う": "Go straight for the fried bread",
+    "半分こを提案": "Suggest splitting it in half",
+    "クラスメートと分け合って食べる": "Share it with your classmates",
+    "配膳を手伝う": "Help serve lunch",
+    "きっぱり譲る": "Give it up cleanly",
+    "今回は我慢して次に備える": "Hold back this time and prepare for next time",
+    "保護する": "Protect it",
+    "じっと観察": "Observe quietly",
+    "距離を保って様子を見る": "Keep your distance and watch",
+    "エサで手なづけ": "Tame it with food",
+    "パンをみせて信頼を得る": "Show bread and earn its trust",
+    "見回り先生を呼ぶ": "Call the patrol teacher",
+    "交換に応じる": "Accept the trade",
+    "モノマネ対決": "Imitation contest",
+    "くじ引きに賭ける": "Bet on the lottery draw",
+    "先生に相談する": "Ask the teacher for advice",
+};
+
+const buildEnglishEventActionFallback = (text: string): string | null => {
+    const trimmed = text.trim();
+    if (EVENT_ACTION_EXACT_TRANSLATIONS[trimmed]) return EVENT_ACTION_EXACT_TRANSLATIONS[trimmed];
+    const objectKeys = Object.keys(EVENT_ACTION_OBJECT_TRANSLATIONS).sort((a, b) => b.length - a.length);
+    const objectOf = (raw: string) => EVENT_ACTION_OBJECT_TRANSLATIONS[raw] || translateEnglishNameInline(raw);
+    for (const object of objectKeys) {
+        const translatedObject = objectOf(object);
+        if (trimmed === `${object}を選ぶ`) return `Choose ${translatedObject}`;
+        if (trimmed === `${object}を進める`) return `Continue ${translatedObject}`;
+        if (trimmed === `${object}を確認する`) return `Check ${translatedObject}`;
+        if (trimmed === `${object}を受け取る`) return `Accept ${translatedObject}`;
+        if (trimmed === `${object}を手伝う`) return `Help with ${translatedObject}`;
+        if (trimmed === `${object}を呼ぶ`) return `Call ${translatedObject}`;
+        if (trimmed === `${object}を探る`) return `Investigate ${translatedObject}`;
+        if (trimmed === `${object}を受け入れる`) return `Accept ${translatedObject}`;
+    }
+    return null;
+};
+
 const EVENT_PHRASE_TRANSLATIONS: Record<string, string> = {
     "校長先生": "the Principal",
     "校長": "the Principal",
@@ -6660,6 +6926,37 @@ const buildEnglishNarrativeSummary = (text: string): string | null => {
 };
 
 const EVENT_INLINE_NAME_TRANSLATIONS: Record<string, string> = {
+    "あかり": "Akari",
+    "しずく": "Shizuku",
+    "ひより": "Hiyori",
+    "つばさ": "Tsubasa",
+    "れい": "Rei",
+    "まどか": "Madoka",
+    "こはる": "Koharu",
+    "みらい": "Mirai",
+    "セラ": "Sera",
+    "蓮": "Ren",
+    "大和": "Yamato",
+    "湊": "Minato",
+    "颯真": "Soma",
+    "理玖": "Riku",
+    "レオン": "Leon",
+    "エリオット": "Elliot",
+    "朔夜": "Sakuya",
+    "サンプル": "Sample",
+    "後悔": "Regret",
+    "恥": "Embarrassment",
+    "不安": "Anxiety",
+    "悩み": "Worry",
+    "寄生虫": "Parasite",
+    "再起動カード": "Reboot Card",
+    "頭突き": "Headbutt",
+    "防御": "Defense",
+    "グルグルバット": "Whirl Bat",
+    "レアカード": "Rare Card",
+    "金の定規": "Golden Ruler",
+    "マトリョーシカ": "Matryoshka",
+    "図書カード": "Library Card",
     "チャイム時計": "Chime Clock",
     "回避": "Dodge",
     "先読み": "Read Ahead",
@@ -6880,6 +7177,7 @@ Object.assign(ENGLISH_DICTIONARY, {
 
 const EVENT_SENTENCE_TRANSLATIONS: Array<[RegExp, (match: RegExpMatchArray) => string]> = [
     [/^最大HPと現在HPが(\d+)増えた。?$/, ([, amount]) => `Max HP and current HP +${amount}.`],
+    [/^最大HPと現在HPが(\d+)増えた$/, ([, amount]) => `Max HP and current HP +${amount}.`],
     [/^カードを(\d+)枚強化(?:した)?。?$/, ([, amount]) => `Upgraded ${amount} cards.`],
     [/^全カード強化。?$/, () => "Upgraded all cards."],
     [/^HP\+(\d+)、(\d+)G獲得。?$/, ([, hp, amount]) => `Healed ${hp} HP and gained ${amount}G.`],
@@ -6890,11 +7188,12 @@ const EVENT_SENTENCE_TRANSLATIONS: Array<[RegExp, (match: RegExpMatchArray) => s
     [/^「(.+)」を習得した。?$/, ([, card]) => `Learned "${translateEnglishNameInline(card)}".`],
     [/^「(.+)」を習得。?$/, ([, card]) => `Learned "${translateEnglishNameInline(card)}".`],
     [/^レリック「(.+)」を得た。?$/, ([, item]) => `Gained the relic "${translateEnglishNameInline(item)}".`],
+    [/^レリック「(.+)」を入手。?$/, ([, item]) => `Obtained the relic "${translateEnglishNameInline(item)}".`],
     [/^状態異常「(.+)」を受けた。?$/, ([, status]) => `Received the status "${translateEnglishNameInline(status)}".`],
     [/^(.+?)[。！]HP-(\d+)。?$/, ([, result, hp]) => `${translateEventSentence(result)} Lost ${hp} HP.`],
     [/^(.+?)でHP-(\d+)。?$/, ([, result, hp]) => `${translateEventSentence(result)} Lost ${hp} HP.`],
     [/^(.+?)[。！](\d+)G(?:入手|獲得|を得た)。?$/, ([, result, amount]) => `${translateEventSentence(result)} Gained ${amount}G.`],
-    [/^(.+?)(\d+)G(?:入手|獲得|手に入れた|稼いだ|をもらった|を受け取った)。?$/, ([, result, amount]) => `${translateEventSentence(result)} Gained ${amount}G.`],
+    [/^(.+?)(\d+)G(?:入手|獲得|手に入れた|手に入った|稼いだ|をもらった|を受け取った)。?$/, ([, result, amount]) => `${translateEventSentence(result)} Gained ${amount}G.`],
     [/^(.+?)[。！](\d+)G(?:失う|失った)。?$/, ([, result, amount]) => `${translateEventSentence(result)} Lost ${amount}G.`],
     [/^(.+?)(\d+)G(?:失う|失った)。?$/, ([, result, amount]) => `${translateEventSentence(result)} Lost ${amount}G.`],
     [/^(.+?)\n(\d+)G。?$/, ([, result, amount]) => `${translateEventSentence(result)} Gained ${amount}G.`],
@@ -6904,6 +7203,8 @@ const EVENT_SENTENCE_TRANSLATIONS: Array<[RegExp, (match: RegExpMatchArray) => s
     [/^(.+?)[。！]呪い「(.+)」を受けた。?$/, ([, result, curse]) => `${translateEventSentence(result)} Received the curse "${translateEnglishNameInline(curse)}".`],
     [/^(.+?)[。！]状態異常「(.+)」を受けた。?$/, ([, result, status]) => `${translateEventSentence(result)} Received the status "${translateEnglishNameInline(status)}".`],
     [/^(.+?)[。！]「(.+)」を入手。?$/, ([, result, item]) => `${translateEventSentence(result)} Obtained "${translateEnglishNameInline(item)}".`],
+    [/^(.+?)[。！]「(.+)」が強化された。?$/, ([, result, card]) => `${translateEventSentence(result)} "${translateEnglishNameInline(card)}" was upgraded.`],
+    [/^(.+?)[。！]「(.+)」を強化した。?$/, ([, result, card]) => `${translateEventSentence(result)} "${translateEnglishNameInline(card)}" was upgraded.`],
     [/^(.+?)\n「(.+)」をコピーした。?$/, ([, result, card]) => `${translateEventSentence(result)} Copied "${translateEnglishNameInline(card)}".`],
     [/^(.+?)\n「(.+)」を習得。?$/, ([, result, card]) => `${translateEventSentence(result)} Learned "${translateEnglishNameInline(card)}".`],
     [/^(.+?)\n「(.+)」が飛んだ。?$/, ([, result, card]) => `${translateEventSentence(result)} Lost "${translateEnglishNameInline(card)}".`],
@@ -6941,6 +7242,17 @@ const EVENT_SENTENCE_TRANSLATIONS: Array<[RegExp, (match: RegExpMatchArray) => s
     [/^(.+)\n(.+)ポーションを入手。$/, ([, result, potion]) => `${translateEventSentence(result)}\nObtained a ${translateEnglishNameInline(potion)} Potion.`],
     [/^(.+)\nポーションを入手。$/, ([, result]) => `${translateEventSentence(result)}\nObtained a potion.`],
     [/^(.+)\n呪い「(.+)」を受けた。$/, ([, result, curse]) => `${translateEventSentence(result)}\nReceived the curse "${translateEnglishNameInline(curse)}".`],
+    [/^(.+)\nHPが(\d+)回復し「(.+)」が強化された。$/, ([, result, amount, card]) => `${translateEventSentence(result)}\nHealed ${amount} HP, and "${translateEnglishNameInline(card)}" was upgraded.`],
+    [/^(.+)\nHP-(\d+)、「(.+)」を置いてきた。$/, ([, result, amount, card]) => `${translateEventSentence(result)}\nLost ${amount} HP and left "${translateEnglishNameInline(card)}" behind.`],
+    [/^(.+)\n「(.+)」強化、呪い「(.+)」を受けた。$/, ([, result, card, curse]) => `${translateEventSentence(result)}\n"${translateEnglishNameInline(card)}" was upgraded, and you received the curse "${translateEnglishNameInline(curse)}".`],
+    [/^(.+)\nHP-(\d+)、「(.+)」強化。$/, ([, result, amount, card]) => `${translateEventSentence(result)}\nLost ${amount} HP, and "${translateEnglishNameInline(card)}" was upgraded.`],
+    [/^(.+)\n(\d+)G獲得し、「(.+)」を処分した。$/, ([, result, amount, card]) => `${translateEventSentence(result)}\nGained ${amount}G and removed "${translateEnglishNameInline(card)}".`],
+    [/^(.+?) 好感度\+(\d+)\n(.+)\n(\d+)$/, ([, name, amount, label, value]) => `${translateEnglishNameInline(name)} Affection +${amount}\n${translateEnglishNameInline(label)}\n${value}`],
+    [/^(.+?) 絆\+(\d+)\n(.+)\n(\d+)$/, ([, name, amount, label, value]) => `${translateEnglishNameInline(name)} Bond +${amount}\n${translateEnglishNameInline(label)}\n${value}`],
+    [/^友情ルート完了 \/ (.+)$/, ([, name]) => `Friendship route complete / ${translateEnglishNameInline(name)}`],
+    [/^段階維持 \/ (.+)$/, ([, name]) => `Stage held / ${translateEnglishNameInline(name)}`],
+    [/^(.+)（友情）$/, ([, name]) => `${translateEnglishNameInline(name)} (Friendship)`],
+    [/^絆 (\d+)\/(\d+) \/ 友情エンド解放済み$/, ([, current, max]) => `Bond ${current}/${max} / Friendship ending unlocked`],
     [/^(.+)\n呪いカードを1枚受け取った。$/, ([, result]) => `${translateEventSentence(result)}\nReceived 1 curse card.`],
     [/^(.+)\nHPが(\d+)減った。$/, ([, result, amount]) => `${translateEventSentence(result)}\nLost ${amount} HP.`],
     [/^(.+)\nHP-(\d+)。$/, ([, result, amount]) => `${translateEventSentence(result)}\nLost ${amount} HP.`],
@@ -6952,6 +7264,91 @@ const EVENT_SENTENCE_TRANSLATIONS: Array<[RegExp, (match: RegExpMatchArray) => s
 ];
 
 const EVENT_SENTENCE_EXACT: Record<string, string> = {
+    "鏡の中から「あかり」の複製が現れた。": "A duplicate of Akari appeared from inside the mirror.",
+    "禁書と契約した。(HP-10)": "You made a contract with the forbidden book. Lost 10 HP.",
+    "空気が凍って黒歴史化…呪い「後悔」を受けた。": "The air froze and the moment became a dark memory... You received the curse \"Regret\".",
+    "伝説の演目になった。観客から80Gの投げ銭！": "Your performance became legendary. The audience tossed you 80G in tips!",
+    "完泳して達成感MAX！": "You finished the swim and felt maximum achievement!",
+    "誰にも見られていない。150Gを手に入れた。": "No one saw you. You gained 150G.",
+    "中身は思ったより少なかった。": "There was less inside than you expected.",
+    "30Gだけ手に入った。": "You gained only 30G.",
+    "100点満点！": "A perfect score!",
+    "お祝いに100Gをもらった。": "You received 100G as a celebration.",
+    "マットの隙間に60Gが挟まっていた。": "60G was stuck between the mats.",
+    "夜になると動き出すという石像。背負っている薪（まき）が重そうだ。": "A stone statue said to move at night. The bundle of firewood on its back looks heavy.",
+    "ボロボロの『ジャンプ』が置いてある。続きが気になる。": "A tattered copy of Jump is lying here. You cannot help wondering what happens next.",
+    "夜になると増えるという伝説の階段。今、足元にあるのは13段目だ。": "A legendary staircase said to gain steps at night. Right now, the step beneath your feet is the thirteenth.",
+    "4章ボス撃破後に表示する個別恋愛エンド。真恋愛エンド候補を兼ねる。": "An individual romance ending shown after defeating the Chapter 4 boss. It also serves as a true romance ending candidate.",
+    "50 サンプルのあかりとの関係を、あかりの物語として分岐させる。": "Branches the 50-sample relationship with Akari into Akari's story route.",
+    "もう「先輩の後ろ」ではない。湊は蓮の隣で、同じ景色を見て歩いた。": "Minato was no longer walking behind his senior. He walked beside Ren, seeing the same scenery.",
+    "こはる「風は任せて。花が笑う方向へ、ちゃんと道を作るから。」": "Koharu: Leave the wind to me. I will make a proper path toward the place where the flowers can smile.",
+    "セラ「では、ひよりの花の処方も星界標準に登録します。やさしさ多めで。」": "Sera: Then I will register Hiyori's flower prescription as a celestial standard, with extra kindness.",
+    "つばさ「あかり、今日の反省会は走りながらでいいよな？」": "Tsubasa: Akari, today's review meeting can happen while we run, right?",
+    "ひより「うん。こはるちゃんが風を見てくれるから、安心して咲けるよ。」": "Hiyori: Yes. Koharu watches the wind for me, so I can bloom without worry.",
+    "セラ「案内板を作ります。こはる監修なら、風向き表示つきです。」": "Sera: I will make a guide sign. With Koharu supervising, it will include wind direction.",
+    "蓮「大和、反省会は五分だけ。机を壊さない範囲でな。」": "Ren: Yamato, the review meeting is five minutes only. Keep it within desk-safe limits.",
+    "蓮「今日は俺の後ろじゃなくて、横に並んで帰る日だな。」": "Ren: Today is the day you walk home beside me, not behind me.",
+    "蓮「もちろん。迷ったら風で知らせる。迷わなくても、たまに呼ぶ。」": "Ren: Of course. If you get lost, I will signal with the wind. Even if you do not, I will call sometimes.",
+    "エリオット「湊の水は安心の味がします。処方名は、友だちの一杯で。」": "Elliot: Minato's water tastes like reassurance. The prescription name will be A Cup from a Friend.",
+    "レオン「星界の楽譜、難しいね。だけど客席が宇宙なら燃える。」": "Leon: Celestial sheet music is difficult. But if the audience is the universe, that fires me up.",
+    "エリオット「初演の指揮は任せます。私は迷子の星を席へ案内します。」": "Elliot: I will leave the premiere's conducting to you. I will guide lost stars to their seats.",
+    "朔夜「赦しはいらないと言ったのに、君は隣に残った。」": "Sakuya: I said I did not need forgiveness, yet you stayed by my side.",
+    "春の景色を残すと、肩の力が抜けた。": "Capturing the spring scenery helped the tension leave your shoulders.",
+    "いくつもの勧誘を聞き、新しい要領を覚えた。": "After hearing many club invitations, you learned a new way to handle things.",
+    "だるさの中でも、一歩だけ進めた。": "Even through the sluggishness, you managed to take one step forward.",
+    "別の見方に触れ、自分の視界も広がった。": "Seeing another point of view widened your own perspective.",
+    "落ち込む前に動くと、芯が少し太くなった。": "Acting before you sank into discouragement made your core a little stronger.",
+    "次に使える具体策を持ち帰った。": "You brought home a concrete tactic you can use next time.",
+    "校内を駆け回った経験が糧に。": "The experience of running all over the school became fuel for growth.",
+    "身元不明の英雄として語られた。": "You were spoken of as an unidentified hero.",
+    "結果は平凡だが学びは大きい。": "The result was ordinary, but the lesson was substantial.",
+    "看護師の助言で心の重荷が消えた。": "The nurse's advice lifted the weight from your heart.",
+    "迷いを札に託した。": "You entrusted your hesitation to a talisman.",
+    "通行証をもらい迷いが消えた。": "Receiving the pass cleared away your hesitation.",
+    "発想が閃いた。": "A new idea flashed into your mind.",
+    "講評で課題が明確に。": "The critique made your next task clear.",
+    "誘惑に打ち勝った。": "You overcame the temptation.",
+    "公式に認められた。": "You were officially recognized.",
+    "掲示板を綺麗にした。": "You cleaned up the bulletin board.",
+    "脱兎のごとく逃げた！": "You fled like a startled rabbit!",
+    "運用改善に成功。": "You succeeded in improving the operation.",
+    "観察眼が鋭くなった。": "Your eye for observation grew sharper.",
+    "面倒を一つ手放した。": "You let go of one troublesome burden.",
+    "昔の言葉に背中を押された。": "Old words gave you a push forward.",
+    "過去を断ち切った。": "You cut yourself free from the past.",
+    "機転が効いた。": "Your quick thinking paid off.",
+    "名台詞が刺さった。": "A famous line struck home.",
+    "実験成功！": "The experiment succeeded!",
+    "心の濁りも流れた。": "The cloudiness in your heart washed away too.",
+    "切れ味最高！": "The sharpness was perfect!",
+    "人の振り見て我が振り直せ。": "Seeing another's behavior taught you to correct your own.",
+    "別世界に吸い込まれた！": "You were pulled into another world!",
+    "一節が刺さった。": "One passage struck home.",
+    "静かな決断。": "You made a quiet decision.",
+    "反響で集中力が高まった。": "The echo sharpened your concentration.",
+    "きれいに片づけた。": "You cleaned it up neatly.",
+    "まる写しで効率アップ。": "Copying it outright improved efficiency.",
+    "教育祭で評価された。": "Your work was recognized at the education festival.",
+    "几帳面さが戻った。": "Your careful habits returned.",
+    "連携が良くなった。": "Your coordination improved.",
+    "体が毒に慣れた！": "Your body adapted to the poison!",
+    "危険を断って思考が澄んだ。": "Refusing the danger cleared your thoughts.",
+    "追跡で集中力が上がった。": "The chase sharpened your focus.",
+    "主との激闘に勝利した。": "You won the fierce battle against the master.",
+    "売買成立。": "The deal went through.",
+    "勇気を出して取り返した。": "You found the courage to take it back.",
+    "正式な手続きで解決。": "You solved it through the proper procedure.",
+    "土いじりで集中した。": "Working with the soil helped you focus.",
+    "サンプル": "Sample",
+    "五つの大切な時間を重ねた二人には、もう言葉に迷う距離はなかった。": "After sharing five important moments, the two no longer stood at a distance where words could falter.",
+    "あかりとの五つの物語を越え、穏やかな時間を過ごした。": "After passing through five stories with Akari, you spent a peaceful time together.",
+    "好感度は変化しない。": "Affection does not change.",
+    "あかりとの絆が、恋とは違う強さで胸に灯る。": "Your bond with Akari glows in your heart with a strength different from romance.",
+    "これは恋愛ではなく、何周しても選び直したくなる友情の終着点だ。": "This is not romance, but the destination of a friendship you would choose again no matter how many loops you lived.",
+    "あかりとの友情ルートを確認した。": "You confirmed Akari's friendship route.",
+    "二人の関係は確かに進んでいる。けれど、次の出来事が動き出すのは第50章からだ。今日は焦らず、いつもの学園生活を一緒に過ごすことにした。": "The relationship between the two has certainly moved forward. But the next event begins from Chapter 50, so today you decide not to rush and spend an ordinary academy day together.",
+    "授業と魔法訓練の合間に、少しだけ自由な時間ができた。": "Between classes and magic training, you found a little free time.",
+    "恋の相手、あるいは親友として絆を深める相手を選ぼう。以前選んだ相手は、次から候補に現れやすくなる。": "Choose someone to grow closer to as a romantic interest or a best friend. Someone you chose before will be more likely to appear as a candidate next time.",
     "落ちていた購買券を見つけた。16Gを得た。": "You found a dropped school store voucher. Gained 16G.",
     "深呼吸で調子が戻った。HPが8回復した。": "A deep breath helped you recover. Healed 8 HP.",
     "小さな気づきが自信になった。最大HP+1。": "A small realization became confidence. Max HP +1.",
@@ -7012,6 +7409,108 @@ const EVENT_SENTENCE_EXACT: Record<string, string> = {
 
 const SCHOOL_EVENT_EXACT_TRANSLATIONS: Record<string, string> = {
     "水中トレーニング": "Underwater Training",
+    "星と月の作戦会議": "Star and Moon Strategy Meeting",
+    "夜の教室、二人だけの星図": "A Star Map for Two in the Night Classroom",
+    "星月同盟エンド": "Star-Moon Alliance Ending",
+    "星火の突撃コンビ": "Starfire Charge Duo",
+    "訓練場の流星スパーリング": "Meteor Sparring at the Training Ground",
+    "流星ブレイブエンド": "Meteor Brave Ending",
+    "月が選んだ一番星": "The First Star Chosen by the Moon",
+    "月鏡に映るリーダーの背中": "The Leader's Back Reflected in the Moon Mirror",
+    "ルナスターエンド": "Lunar Star Ending",
+    "月時計の研究室": "Moon Clock Laboratory",
+    "壊れた時計塔の共同解析": "Joint Analysis of the Broken Clock Tower",
+    "クロノミラーエンド": "Chrono Mirror Ending",
+    "花風の癒やし庭園": "Healing Garden of Flowers and Wind",
+    "精霊樹の下で聞く本音": "True Feelings Beneath the Spirit Tree",
+    "ブルームゲイルエンド": "Bloom Gale Ending",
+    "命花と星界の祈り": "Life Flowers and Celestial Prayers",
+    "保健室に降る星の光": "Starlight Falling in the Infirmary",
+    "ホーリーブルームエンド": "Holy Bloom Ending",
+    "炎星ライバル宣言": "Fire-Star Rival Declaration",
+    "流星ハンマー特訓": "Meteor Hammer Special Training",
+    "ブレイズスターエンド": "Blaze Star Ending",
+    "炎と影札の約束": "Promise of Flame and Shadow Cards",
+    "封印廊下の背中合わせ": "Back to Back in the Sealed Corridor",
+    "シャドウフォージエンド": "Shadow Forge Ending",
+    "影を照らす炎": "Flames That Light the Shadows",
+    "禁術印を砕く火花": "Sparks That Break Forbidden Seals",
+    "クリムゾンブレイズエンド": "Crimson Blaze Ending",
+    "闇符と星界記録": "Dark Talismans and Celestial Records",
+    "深淵図書館の封印解除": "Unsealing the Abyss Library",
+    "ノクターンライトエンド": "Nocturne Light Ending",
+    "時環と月鏡の証明": "Proof of Time Rings and Moon Mirrors",
+    "失敗記録の再計算": "Recalculating the Failure Records",
+    "タイムミラーエンド": "Time Mirror Ending",
+    "夢時計アンコール": "Dream Clock Encore",
+    "止まった舞台の時間修復": "Repairing Time on the Frozen Stage",
+    "クロノステージエンド": "Chrono Stage Ending",
+    "風が運ぶ花の声": "The Flower Voice Carried by the Wind",
+    "中庭の結界花壇": "Barrier Flowerbed in the Courtyard",
+    "ゲイルブルームエンド": "Gale Bloom Ending",
+    "翠嵐と星界の道標": "Emerald Gale and the Celestial Signpost",
+    "精霊樹に降りる星図": "A Star Chart Descending on the Spirit Tree",
+    "ワールドツリーライトエンド": "World Tree Light Ending",
+    "夢幻舞台の調律師": "Tuner of the Dream Stage",
+    "悪夢のリハーサル": "Nightmare Rehearsal",
+    "ドリームクロックエンド": "Dream Clock Ending",
+    "花束のカーテンコール": "Bouquet Curtain Call",
+    "保健室の秘密リハーサル": "Secret Rehearsal in the Infirmary",
+    "ハートフルステージエンド": "Heartful Stage Ending",
+    "星界から来た花守り": "Flower Guardian from the Celestial Realm",
+    "星界語で書かれた処方箋": "A Prescription Written in Celestial Script",
+    "セレスティアルブルームエンド": "Celestial Bloom Ending",
+    "星光と禁術の境界": "Boundary of Starlight and Forbidden Arts",
+    "封印門の共同防衛": "Joint Defense of the Sealed Gate",
+    "ライトシールエンド": "Light Seal Ending",
+    "風炎の悪友コンビ": "Wind-and-Flame Troublemaker Duo",
+    "中庭の風炎スパーリング": "Wind-Flame Sparring in the Courtyard",
+    "ゲイルブレイズエンド": "Gale Blaze Ending",
+    "風が支える清流": "A Clear Stream Supported by Wind",
+    "屋上の防護魔法練習": "Protective Magic Practice on the Rooftop",
+    "アクアゲイルエンド": "Aqua Gale Ending",
+    "氷律と時詠の盤上戦": "Board Battle of Ice Law and Time Reading",
+    "凍結時計の作戦盤": "Strategy Board of the Frozen Clock",
+    "クロノオーダーエンド": "Chrono Order Ending",
+    "二界の生徒会協定": "Student Council Accord Between Two Worlds",
+    "月夜の機密文書交換": "Secret Document Exchange by Moonlight",
+    "アストラルオーダーエンド": "Astral Order Ending",
+    "追いつく清流": "The Clear Stream That Catches Up",
+    "雨の使い魔救護": "Rescuing Familiars in the Rain",
+    "ブルーゲイルエンド": "Blue Gale Ending",
+    "清流と星界の救護班": "Clear Stream and Celestial Rescue Team",
+    "保健室の星水治療": "Star-Water Treatment in the Infirmary",
+    "スターリィスプリングエンド": "Starry Spring Ending",
+    "未来を縛らない規則": "Rules That Do Not Bind the Future",
+    "止まった鐘楼の共同修理": "Joint Repair of the Stopped Bell Tower",
+    "フリークロックエンド": "Free Clock Ending",
+    "時幻即興劇": "Time-Illusion Improvisation",
+    "一秒先のアドリブ舞台": "Ad-Lib Stage One Second Ahead",
+    "クロノノクターンエンド": "Chrono Nocturne Ending",
+    "拳と風の防波堤": "Breakwater of Fists and Wind",
+    "崩壊結界の最前線": "Front Line of the Collapsing Barrier",
+    "バーニングゲイルエンド": "Burning Gale Ending",
+    "獄炎と宵闇の停戦": "Ceasefire Between Hellfire and Twilight",
+    "地下封印区画の共同突破": "Joint Breakthrough of the Underground Seal Zone",
+    "ヘルファイアシールエンド": "Hellfire Seal Ending",
+    "幻想時計の二重奏": "Duet of the Illusion Clock",
+    "時環ステージの調律": "Tuning the Time-Ring Stage",
+    "ミラージュクロックエンド": "Mirage Clock Ending",
+    "星譜のノクターン": "Nocturne of the Star Score",
+    "星空ドームの未完成楽譜": "Unfinished Score in the Star Dome",
+    "セレスティアルノクターンエンド": "Celestial Nocturne Ending",
+    "星界氷壁協定": "Celestial Ice Wall Accord",
+    "禁書庫の共同防衛": "Joint Defense of the Forbidden Archive",
+    "フローズンアーカイブエンド": "Frozen Archive Ending",
+    "幻奏の星界門": "Celestial Gate of Illusion Music",
+    "舞台に開く星の門": "Star Gate Opening on the Stage",
+    "アストラルステージエンド": "Astral Stage Ending",
+    "宵闇を殴り開け": "Punch Open the Twilight",
+    "影兵包囲網の突破": "Breaking Through the Shadow-Soldier Encirclement",
+    "ナイトブレイカーエンド": "Night Breaker Ending",
+    "風がほどく封印": "The Seal Undone by Wind",
+    "次元亀裂の共同封鎖": "Joint Sealing of the Dimensional Rift",
+    "ゲイルシールエンド": "Gale Seal Ending",
     "買う": "Buy it",
     "無視": "Ignore it",
     "断る": "Refuse the offer",
@@ -7037,6 +7536,10 @@ const SCHOOL_EVENT_EXACT_TRANSLATIONS: Record<string, string> = {
     "寝る": "Go to sleep",
     "飲む": "Drink it",
     "かける": "Pour it on",
+    "記録を残す": "Leave a record",
+    "帰り道を考える": "Think about the way home",
+    "互いに教える": "Teach each other",
+    "後輩に言葉を残す": "Leave words for a younger student",
     "滑る": "Slide across",
     "捕まえる": "Catch it",
     "あさる": "Search through it",
@@ -7212,54 +7715,156 @@ const buildEnglishSchoolEventFallback = (text: string): string | null => {
 const buildEnglishEventSentenceFallback = (text: string): string => {
     const normalized = text.trim();
     if (!normalized) return "";
+    if (/誰も見ていない片付け/.test(normalized)) {
+        return "Cleaning up when no one was watching somehow helped settle your mood.";
+    }
+    if (/教室の隅で一息ついた/.test(normalized)) {
+        return "You took a quiet breather in the corner of the classroom.";
+    }
+    if (/雨音/.test(normalized) && /焦り|思考|整/.test(normalized)) {
+        return "Listening to the rain helped your thoughts settle and eased your impatience.";
+    }
+    if (/礼を受け取|礼を受けた|感謝された|謝礼/.test(normalized)) {
+        return "Your helpful action was noticed, and you received thanks in return.";
+    }
+    if (/段取り|手順|流れ/.test(normalized) && /見え|整|洗練|速く|迷わ/.test(normalized)) {
+        return "Reviewing the plan made the next steps clearer and your movements smoother.";
+    }
+    if (/言葉|声|話/.test(normalized) && /自分|考え|覚悟|前へ|晴れ|整|深ま/.test(normalized)) {
+        return "Putting things into words helped clarify your thoughts and steady your mood.";
+    }
+    if (/静かな|静けさ|夜空|風|空気/.test(normalized) && /心|気分|頭|疲れ|熱|整|澄|ゆる|抜け|入れ替わ/.test(normalized)) {
+        return "The quiet atmosphere helped you calm down and clear your head.";
+    }
+    if (/選択肢|視点|見方|切り口|観察|問い/.test(normalized)) {
+        return "Seeing the situation from a new angle gave you a useful perspective.";
+    }
+    if (/時間|待つ|余裕/.test(normalized) && /使え|見極め|できた|受け止め|前を向/.test(normalized)) {
+        return "Using the time well gave you room to think and move forward.";
+    }
+    if (/飲み物|軽食|水|喉|空腹|温かい/.test(normalized) && /潤|落ち着|疲れ|元気|楽|戻/.test(normalized)) {
+        return "The drink and short break helped your body recover.";
+    }
+    if (/片付|整理|整え|無駄/.test(normalized) && /気分|心|次|見え|減った|整/.test(normalized)) {
+        return "Tidying things up also helped clear your mind for the next step.";
+    }
+    if (/席|場所/.test(normalized) && /腹が据|何とかなる|合う場所/.test(normalized)) {
+        return "Finding your place helped you feel steadier about what came next.";
+    }
+    if (/拾|見つけ|封筒|小銭|券|費|代/.test(normalized) && /G|もら|受け取|残った|渡された|預かった/.test(normalized)) {
+        return "You found a small reward and put the extra money to use.";
+    }
+    if (/復習|一問|答案|問題|理解|要点|ノート|ページ|課題|説明|数字|用語|模範|正解|暗号/.test(normalized)) {
+        return "The study moment clarified what you needed to understand next.";
+    }
+    if (/認め|評価|採用|成功|成立|吉|当たった|完璧|完成|大ウケ|大盛況|バズ|完売|スポンサー|拍手|潔さ|才能|働きぶり|主導権|輝き|限定|作品/.test(normalized)) {
+        return "Your effort was recognized and turned into a stronger result.";
+    }
+    if (/一息|呼吸|肩|昼食|飲み物|眠気|休憩|温かい|体|疲れ|回復|粘れ/.test(normalized)) {
+        return "The short break helped your body and mind recover.";
+    }
+    if (/段取り|予定|目標|名前をつけ|行程|計画|作戦|準備|手順/.test(normalized)) {
+        return "Turning the situation into a plan made the next step easier to take.";
+    }
+    if (/焦り|気持ち|心|胸|悩み|雑念|恐れ|恐怖|覚悟|迷わ|静ま|余白/.test(normalized)) {
+        return "Facing the feeling directly helped your mind settle.";
+    }
+    if (/カード|レリック|ポーション|小瓶|習得|強化|手札|プロテイン|飴/.test(normalized)) {
+        return "You turned the event into a useful tool for the road ahead.";
+    }
+    if (/友|相手|会話|雑談|告白|誘|説得|みんな|全員|本人|話|喋|伝える/.test(normalized)) {
+        return "The exchange with others changed the mood and opened a way forward.";
+    }
+    if (/発見|隠し|宝|合言葉|辿り着|選んだ|届|見つけ|落ちて|拾った/.test(normalized)) {
+        return "You noticed the opening and turned it into an advantage.";
+    }
+    if (/小銭|紙幣|財布|費用|赤字|販売|収益|代行|依頼|参加費|出演料|協力費|会員権|余興代|稼いだ|獲得|入手|もらった/.test(normalized)) {
+        return "The opportunity produced a practical reward.";
+    }
+    if (/運動|腕立て|姿勢|動き|脚|練習|筋|腰|踏み込|振り|背筋/.test(normalized)) {
+        return "The physical effort sharpened your rhythm and confidence.";
+    }
+    if (/怒られ|痛み|破片|呪|減った|失った|混乱|腐った|重傷|警報|失敗|追い返|崩れ|大混乱|恥|後悔|反撃|逆恨み|噛まれ|ひっかかれ|疲弊|痛い|ひねった|抜かれた|緊張|怪し|期限|壊した|壊れ/.test(normalized)) {
+        return "The risky choice backfired and left you with a setback.";
+    }
+    if (/鏡|祭壇|掲示板|粘土|クッキー|リコーダー|校章|集金袋|カバン|草むら|道端|地面|乾燥/.test(normalized)) {
+        return "The strange school scene offered a choice with real consequences.";
+    }
+    if (/成果なし|現状維持|戻るしかない|誰もいない|届かず/.test(normalized)) {
+        return "Nothing changed much, but you avoided making things worse.";
+    }
     if (/失敗|転倒|痛め|疲れ|消耗|落とし|つった|倒れ|沈んだ|凍え|破綻|炎上|大恥|腹痛|恥|後悔|不安/.test(normalized)) {
-        return "The mishap left a mark.";
+        return "The mishap left a mark and cost you momentum.";
     }
     if (/回復|癒|休|落ち着|深呼吸|眠れ|温ま|空腹|元気|軽くな/.test(normalized)) {
-        return "You took a moment to recover.";
+        return "You took a moment to recover and regain your rhythm.";
     }
     if (/鍛|筋力|体幹|腕力|肝が据|腹が据|覚醒|自信|強さ|強く|腹式呼吸|覚悟|耐え/.test(normalized)) {
-        return "The experience made you stronger.";
+        return "The experience strengthened your resolve and helped you grow.";
     }
     if (/強化|洗練|冴え|磨か|技|コツ|手順|フォーム|知識|理論|整理|最適化|把握|分析|研究/.test(normalized)) {
-        return "You refined what you learned from the event.";
+        return "You refined what you learned and turned it into a practical advantage.";
     }
     if (/取り除|削っ|捨て|処分|片付|ノイズ|無駄/.test(normalized)) {
-        return "You cleared away something unnecessary.";
+        return "You cleared away something unnecessary and made room to move forward.";
     }
     if (/売れ|収入|報酬|賞金|謝礼|返金|投げ銭|課金|観光|広告|チケット|売上/.test(normalized)) {
-        return "Your effort earned a reward.";
+        return "Your effort paid off and earned a useful reward.";
     }
     if (/レリック|伝説|大成功|大当たり|ヒット|絶賛|名物|人気|祝福/.test(normalized)) {
-        return "The event became a memorable success.";
+        return "The event turned into a memorable success with lasting value.";
     }
     if (/感謝|礼|誠意|良心|正直|助け|救った|平和/.test(normalized)) {
-        return "Your careful choice helped the situation.";
+        return "Your careful choice helped someone and improved the situation.";
     }
     if (/逃走|退避|避難|走|滑走|移動/.test(normalized)) {
-        return "You moved through the situation cleanly.";
+        return "You moved through the situation cleanly and kept the momentum going.";
     }
-    return "You handled the event and turned it into progress.";
+    return "You handled the moment and carried its outcome into what came next.";
 };
 
+function isUsableEnglishEventTranslation(translated: string | null | undefined, source: string, minimumRatio = 0.75): translated is string {
+    if (!translated) return false;
+    const trimmed = translated.trim();
+    const alphaCount = (trimmed.match(/[A-Za-z]/g) ?? []).length;
+    return alphaCount >= Math.max(18, Math.floor(source.length * minimumRatio)) &&
+        !JAPANESE_TEXT_PATTERN.test(trimmed) &&
+        !/[、。！？]/.test(trimmed) &&
+        /[A-Za-z0-9]/.test(trimmed) &&
+        trimmed.split(/\s+/).length >= 4 &&
+        !/^[\s,.;:!、。！？ー…-]+$/.test(trimmed) &&
+        !/,\s*\.?$/.test(trimmed);
+}
+
 function translateEventSentence(text: string): string {
-    const trimmed = text.trim();
+    const trimmed = text.trim().replace(/<br\s*\/?>/gi, '\n');
     if (!trimmed) return "";
     if (ENGLISH_DICTIONARY[trimmed]) return ENGLISH_DICTIONARY[trimmed];
     if (EVENT_SENTENCE_EXACT[trimmed]) return EVENT_SENTENCE_EXACT[trimmed];
     const schoolEventFallback = buildEnglishSchoolEventFallback(trimmed);
     if (schoolEventFallback) return schoolEventFallback;
+    const optionEffectText = buildEnglishEventOptionEffectText(trimmed);
+    if (optionEffectText) return optionEffectText;
+    const actionFallback = buildEnglishEventActionFallback(trimmed);
+    if (actionFallback) return actionFallback;
     if (EVENT_TITLE_ENGLISH_FALLBACK[trimmed]) return EVENT_TITLE_ENGLISH_FALLBACK[trimmed];
     for (const [pattern, formatter] of EVENT_SENTENCE_TRANSLATIONS) {
         const match = trimmed.match(pattern);
         if (match) return formatter(match);
     }
     const magicFallback = buildEnglishMagicEventFallback(trimmed);
-    if (magicFallback && !/Choose a Thoughtful Response|A magical academy event unfolds/.test(magicFallback)) return magicFallback;
+    if (
+        magicFallback &&
+        !/Choose a Thoughtful Response|A magical academy event unfolds|Stand Together in the Crisis|Listen to Their True Feelings|Invite Them to Act Together|Make a Promise|Talk About Your Future Together/.test(magicFallback)
+    ) return magicFallback;
     const effectSummary = buildEnglishEffectSummary(trimmed);
-    if (effectSummary) return effectSummary;
+    if (effectSummary) {
+        const hasNarrativeContext = JAPANESE_TEXT_PATTERN.test(trimmed.replace(/HP|G|\d+|[+\-]/g, "")) && trimmed.replace(/<br\s*\/?>/gi, "").length >= 12;
+        if (hasNarrativeContext) return `${buildEnglishEventSentenceFallback(trimmed)} ${effectSummary}`;
+        return effectSummary;
+    }
     const compositional = buildEnglishCompositionalTranslation(trimmed);
-    if (compositional && !JAPANESE_TEXT_PATTERN.test(compositional) && !/[、。！？]/.test(compositional) && /[A-Za-z0-9]/.test(compositional) && compositional.trim().split(/\s+/).length >= 2 && !/^[\s,.;:!、。！？ー…-]+/.test(compositional)) return compositional;
+    if (isUsableEnglishEventTranslation(compositional, trimmed)) return compositional;
     const cleaned = trimmed
         .replace(/「(.+?)」が強化された。?/g, (_, card) => `"${translateEnglishNameInline(card)}" was upgraded.`)
         .replace(/「(.+?)」を取り除いた。?/g, (_, card) => `Removed "${translateEnglishNameInline(card)}".`)
@@ -7272,21 +7877,28 @@ function translateEventSentence(text: string): string {
         .replace(/[ぁ-んァ-ン一-龠々]+/g, '')
         .replace(/\s+/g, ' ')
         .trim();
-    return cleaned && !/^[\s,.;:!、。！？ー…-]+$/.test(cleaned)
+    const cleanedAlphaCount = (cleaned.match(/[A-Za-z]/g) ?? []).length;
+    return cleaned &&
+        cleanedAlphaCount >= Math.max(12, Math.floor(trimmed.length * 0.5)) &&
+        !/[、。！？]/.test(cleaned) &&
+        !/^[\s,.;:!、。！？ー…-]+$/.test(cleaned) &&
+        !/,\s*\.?$/.test(cleaned)
         ? cleaned
         : buildEnglishEventSentenceFallback(trimmed);
 }
 
 const buildEnglishEventFullTranslation = (text: string): string | null => {
     if (text.length < 12 || !JAPANESE_TEXT_PATTERN.test(text)) return null;
-    if (!/[。\n！？」]|\d+G|HP|カード|レリック|呪い|ポーション/.test(text)) return null;
-    if (EVENT_SENTENCE_EXACT[text]) return EVENT_SENTENCE_EXACT[text];
+    if (!/[。\n！？」]|\d+G|HP|カード|レリック|呪い|ポーション|<br\s*\/?>|好感度|絆|友情ルート|段階維持|友情エンド/.test(text)) return null;
+    const normalizedText = text.replace(/<br\s*\/?>/gi, '\n');
+    if (EVENT_SENTENCE_EXACT[normalizedText]) return EVENT_SENTENCE_EXACT[normalizedText];
     for (const [pattern, formatter] of EVENT_SENTENCE_TRANSLATIONS) {
-        const match = text.match(pattern);
+        const match = normalizedText.match(pattern);
         if (match) return formatter(match);
     }
-    const lines = text.split(/\n/);
-    const translated = lines.map(line => translateEventSentence(line)).join('\n');
+    const separator = /<br\s*\/?>/i.test(text) ? '<br>' : '\n';
+    const lines = normalizedText.split(/\r?\n/);
+    const translated = lines.map(line => translateEventSentence(line)).join(separator);
     if (!translated || translated === text) return null;
     if (JAPANESE_TEXT_PATTERN.test(translated)) return null;
     return translated;
@@ -7861,6 +8473,9 @@ const EVENT_HIRAGANA_PHRASES: Record<string, string> = {
 };
 
 const buildHiraganaEventFallback = (text: string): string => {
+    if (EVENT_HIRAGANA_EXACT[text]) return EVENT_HIRAGANA_EXACT[text];
+    const normalizedText = text.replace(/<br\s*\/?>/gi, '<br>');
+    if (EVENT_HIRAGANA_EXACT[normalizedText]) return EVENT_HIRAGANA_EXACT[normalizedText];
     let result = trans(text, 'HIRAGANA');
     Object.keys(EVENT_HIRAGANA_PHRASES)
         .sort((a, b) => b.length - a.length)
@@ -8134,7 +8749,10 @@ export const sanitizeEnglishText = (text: string): string => {
     if (eventFullTranslation) return eventFullTranslation;
 
     const magicEventTranslation = buildEnglishMagicEventFallback(text);
-    if (magicEventTranslation) return magicEventTranslation;
+    if (
+        magicEventTranslation &&
+        !/Choose a Thoughtful Response|A magical academy event unfolds|Stand Together in the Crisis|Listen to Their True Feelings|Invite Them to Act Together|Make a Promise|Talk About Your Future Together/.test(magicEventTranslation)
+    ) return magicEventTranslation;
 
     let result = text;
 
@@ -8169,7 +8787,7 @@ export const sanitizeEnglishText = (text: string): string => {
     if (effectSummary) return effectSummary;
 
     const compositionalTranslation = buildEnglishCompositionalTranslation(text);
-    if (compositionalTranslation) return compositionalTranslation;
+    if (isUsableEnglishEventTranslation(compositionalTranslation, text)) return compositionalTranslation;
 
     const narrativeSummary = buildEnglishNarrativeSummary(text);
     if (narrativeSummary) return narrativeSummary;
@@ -8557,7 +9175,19 @@ export const transEventText = (text: string, mode: LanguageMode): string => {
             return effectOnly;
         }
     }
-    if (/^[^。\n！？]+$/.test(text)) return "Choose a fitting event action";
+    if (/^[^。\n！？]+$/.test(text)) {
+        const sentence = translateEventSentence(text);
+        if (
+            sentence &&
+            !JAPANESE_TEXT_PATTERN.test(sentence) &&
+            !/[、。！？]/.test(sentence) &&
+            !/^You handled the (event|situation)/.test(sentence) &&
+            !/Choose Option|Choose a fitting event action|Event Details|School Foe/.test(sentence)
+        ) {
+            return sentence;
+        }
+        return "Choose a fitting event action";
+    }
     if (/[。！？…]|\.{3}/.test(text)) {
         const sentence = translateEventSentence(text);
         if (sentence && !JAPANESE_TEXT_PATTERN.test(sentence) && !/[、。！？]/.test(sentence)) return sentence;

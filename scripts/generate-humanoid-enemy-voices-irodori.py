@@ -3,7 +3,6 @@ from __future__ import annotations
 import hashlib
 import json
 import re
-import shutil
 import sys
 import time
 from pathlib import Path
@@ -15,26 +14,6 @@ import soundfile as sf
 ROOT = Path(__file__).resolve().parents[1]
 IRODORI_URL = "http://127.0.0.1:8088/v1/audio/speech"
 IRODORI_VOICES_DIR = Path(r"C:\Users\myfav\Documents\VScode\tools\Irodori-TTS-Server\voices")
-
-CHARACTER_IDS = [
-    "AKARI",
-    "SHIZUKU",
-    "HIYORI",
-    "TSUBASA",
-    "REI",
-    "MADOKA",
-    "KOHARU",
-    "MIRAI",
-    "SERA",
-    "REN",
-    "SOMA",
-    "MINATO",
-    "RIKU",
-    "YAMATO",
-    "LEON",
-    "ELLIOT",
-    "SAKUYA",
-]
 
 ACTIONS = ("spawn", "attack", "defense", "skill", "damage", "defeat")
 ACTION_LABELS = {
@@ -115,21 +94,18 @@ def parse_markdown_lines() -> dict[str, dict[str, str]]:
     }
 
 
-def prepare_reference_voices() -> None:
+def prepare_reference_voices(seeds: list[dict[str, str]]) -> None:
     IRODORI_VOICES_DIR.mkdir(parents=True, exist_ok=True)
-    for character_id in CHARACTER_IDS:
-        event_dir = ROOT / "public/sfx/magic-event-voices" / character_id
-        battle_dir = ROOT / "public/sfx/magic-voices" / character_id
-        candidates = list(event_dir.glob("ending-*.wav"))
-        if not candidates:
-            candidates = list(battle_dir.glob("spell-*.wav")) or list(battle_dir.glob("attack-*.wav"))
-        if not candidates:
-            print(f"reference missing: {character_id}", file=sys.stderr)
-            continue
-        source = max(candidates, key=lambda path: path.stat().st_size)
-        target = IRODORI_VOICES_DIR / f"{character_id}.wav"
-        if not target.exists() or source.stat().st_mtime > target.stat().st_mtime:
-            shutil.copy2(source, target)
+    for seed in seeds:
+        speaker_id = seed["speaker_id"]
+        if not speaker_id.startswith("ENEMY_"):
+            raise RuntimeError(f"enemy voice speakerId must start with ENEMY_: {seed['id']} {speaker_id}")
+        target = IRODORI_VOICES_DIR / f"{speaker_id}.wav"
+        if not target.exists():
+            raise RuntimeError(
+                f"enemy reference missing: {seed['id']} {seed['name']} ({speaker_id}). "
+                "Run scripts/create-enemy-reference-voices-irodori.py first."
+            )
 
 
 def stable_seed(line_id: str) -> int:
@@ -137,17 +113,34 @@ def stable_seed(line_id: str) -> int:
     return int.from_bytes(digest[:4], "little") % 2_000_000_000
 
 
-def synthesize(text: str, speaker_id: str, line_id: str, wav_path: Path, num_steps: int) -> None:
+def target_seconds(action: str, text: str) -> float:
+    minimum_by_action = {
+        "spawn": 1.45,
+        "attack": 1.25,
+        "defense": 1.25,
+        "skill": 1.3,
+        "damage": 1.1,
+        "defeat": 1.35,
+    }
+    spoken_chars = len(re.sub(r"[、。！？!\?\s…・「」『』（）()]", "", text))
+    punctuation_pauses = len(re.findall(r"[、。！？!?…]", text))
+    estimated = 0.42 + spoken_chars * 0.19 + punctuation_pauses * 0.08
+    minimum = minimum_by_action.get(action, 1.25)
+    return round(min(3.4, max(minimum, estimated)), 2)
+
+
+def synthesize(text: str, speaker_id: str, line_id: str, action: str, wav_path: Path, num_steps: int) -> None:
     payload = {
         "model": "irodori-tts",
         "input": text,
         "voice": speaker_id,
         "response_format": "wav",
-        "speed": 1.0,
+        "speed": 1.08,
         "irodori": {
             "num_steps": num_steps,
             "cfg_scale_text": 3.0,
             "cfg_scale_speaker": 5.0,
+            "seconds": target_seconds(action, text),
             "t_schedule_mode": "sway",
             "sway_coeff": -1.0,
             "chunking_enabled": False,
@@ -198,7 +191,7 @@ def main() -> None:
             print(f"{row['line_id']} {row['speaker_id']}: {row['text']}")
         return
 
-    prepare_reference_voices()
+    prepare_reference_voices(seeds)
     generated = 0
     skipped = 0
     failed: list[str] = []
@@ -213,7 +206,7 @@ def main() -> None:
         started = time.time()
         try:
             print(f"[{index}/{len(jobs)}] {row['theme']} {row['id']} {row['action']} {row['speaker_id']}")
-            synthesize(row["text"], row["speaker_id"], row["line_id"], wav_path, num_steps)
+            synthesize(row["text"], row["speaker_id"], row["line_id"], row["action"], wav_path, num_steps)
             convert_to_ogg(wav_path)
             generated += 1
             print(f"  done {time.time() - started:.1f}s")

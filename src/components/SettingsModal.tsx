@@ -24,6 +24,8 @@ export type AppSettings = {
   reduceScreenShake: boolean;
   fontSize: 'normal' | 'large';
   battleUi: BattleUiSettings;
+  battleUiPortrait: BattleUiSettings;
+  battleUiLandscape: BattleUiSettings;
   lowDataMode: boolean;
 };
 
@@ -42,6 +44,7 @@ type Props = {
   onResetWindowState?: () => void;
   onQuitApp?: () => void;
   showCommunication?: boolean;
+  battleUiOrientation?: 'portrait' | 'landscape';
   languageMode: LanguageMode;
 };
 
@@ -94,10 +97,14 @@ const SettingsModal: React.FC<Props> = ({
   onResetWindowState,
   onQuitApp,
   showCommunication = true,
+  battleUiOrientation = 'portrait',
   languageMode
 }) => {
   if (!open) return null;
   const visibleTabs = showCommunication ? tabs : tabs.filter(t => t.key !== 'COMM');
+  const battleUiSettingsKey = battleUiOrientation === 'landscape' ? 'battleUiLandscape' : 'battleUiPortrait';
+  const activeBattleUi = settings[battleUiSettingsKey] || settings.battleUi;
+  const updateBattleUi = (next: BattleUiSettings) => onChange(battleUiSettingsKey, next);
 
   return (
     <div className="app-modal-overlay app-settings-modal-overlay fixed inset-0 z-[10020] bg-black/25 backdrop-blur-[1px] flex items-center justify-center p-3" onClick={onClose}>
@@ -164,69 +171,74 @@ const SettingsModal: React.FC<Props> = ({
           {tab === 'BATTLE' && (
             <div className="rounded border border-slate-700 p-3 space-y-3">
               <div>
-                <div className="font-bold">{trans("戦闘画面のUI調整", languageMode)}</div>
+                <div className="font-bold">
+                  {trans("戦闘画面のUI調整", languageMode)}
+                  <span className="ml-2 rounded border border-cyan-400/40 bg-cyan-950/50 px-2 py-0.5 text-[10px] text-cyan-100">
+                    {trans(battleUiOrientation === 'landscape' ? "横画面" : "縦画面", languageMode)}
+                  </span>
+                </div>
                 <p className="mt-1 text-xs text-slate-400">
                   {trans("戦闘中にこの設定を開くと、変更が画面へすぐ反映されます。", languageMode)}
                 </p>
               </div>
               <BattleSlider
                 label={trans("手札上部バー上下位置", languageMode)}
-                value={settings.battleUi.controlBarOffsetY}
+                value={activeBattleUi.controlBarOffsetY}
                 min={-140}
                 max={40}
                 step={2}
                 unit="px"
-                onChange={value => onChange('battleUi', { ...settings.battleUi, controlBarOffsetY: value })}
+                onChange={value => updateBattleUi({ ...activeBattleUi, controlBarOffsetY: value })}
               />
               <BattleSlider
                 label={trans("手札カードサイズ", languageMode)}
-                value={settings.battleUi.handCardScale}
+                value={activeBattleUi.handCardScale}
                 min={0.65}
                 max={1.35}
                 step={0.05}
-                onChange={value => onChange('battleUi', { ...settings.battleUi, handCardScale: value })}
+                onChange={value => updateBattleUi({ ...activeBattleUi, handCardScale: value })}
               />
               <BattleSlider
                 label={trans("敵キャラサイズ", languageMode)}
-                value={settings.battleUi.enemyScale}
+                value={activeBattleUi.enemyScale}
                 min={0.6}
                 max={1.6}
                 step={0.05}
-                onChange={value => onChange('battleUi', { ...settings.battleUi, enemyScale: value })}
+                onChange={value => updateBattleUi({ ...activeBattleUi, enemyScale: value })}
               />
               <BattleSlider
                 label={trans("味方キャラサイズ", languageMode)}
-                value={settings.battleUi.playerScale}
+                value={activeBattleUi.playerScale}
                 min={0.6}
                 max={1.6}
                 step={0.05}
-                onChange={value => onChange('battleUi', { ...settings.battleUi, playerScale: value })}
+                onChange={value => updateBattleUi({ ...activeBattleUi, playerScale: value })}
               />
               <BattleSlider
                 label={trans("敵キャラ上下位置", languageMode)}
-                value={settings.battleUi.enemyOffsetY}
+                value={activeBattleUi.enemyOffsetY}
                 min={-80}
                 max={80}
                 step={2}
                 unit="px"
-                onChange={value => onChange('battleUi', { ...settings.battleUi, enemyOffsetY: value })}
+                onChange={value => updateBattleUi({ ...activeBattleUi, enemyOffsetY: value })}
               />
               <BattleSlider
                 label={trans("味方キャラ上下位置", languageMode)}
-                value={settings.battleUi.playerOffsetY}
+                value={activeBattleUi.playerOffsetY}
                 min={-80}
                 max={80}
                 step={2}
                 unit="px"
-                onChange={value => onChange('battleUi', { ...settings.battleUi, playerOffsetY: value })}
+                onChange={value => updateBattleUi({ ...activeBattleUi, playerOffsetY: value })}
               />
               <BattleSlider
                 label={trans("ステータス表示サイズ", languageMode)}
-                value={settings.battleUi.statsScale}
+                value={activeBattleUi.statsScale}
                 min={0.75}
                 max={1.35}
                 step={0.05}
-                onChange={value => onChange('battleUi', { ...settings.battleUi, statsScale: value })}
+                onChange={value => updateBattleUi({ ...activeBattleUi, statsScale: value })}
               />
             </div>
           )}

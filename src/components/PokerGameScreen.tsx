@@ -1977,11 +1977,11 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
       return (
           <div className={`poker-victory-screen ${showSupporterUnlock ? 'poker-victory-has-unlock' : ''} flex flex-col h-full w-full bg-slate-900 text-white p-8 items-center justify-center relative font-mono text-center`}>
               <Trophy size={80} className="poker-victory-trophy text-yellow-400 mb-6 animate-bounce" />
-              <h1 className="poker-victory-title text-5xl font-black text-white mb-4">GRADUATION!</h1>
-              <p className="poker-victory-message text-xl text-gray-300 mb-12">You have conquered the 8th Grade (Ante 8).</p>
+              <h1 className="poker-victory-title text-5xl font-black text-white mb-4">放課後ポーカー制覇！</h1>
+              <p className="poker-victory-message text-xl text-gray-300 mb-12">アンティ8まで勝ち抜き、放課後の頂点に立ちました。</p>
               {showSupporterUnlock && (
                   <div className="poker-victory-unlock w-full max-w-2xl mb-10 rounded-2xl border-2 border-yellow-300 bg-yellow-500/10 px-6 py-5 shadow-[0_0_30px_rgba(250,204,21,0.15)]">
-                      <div className="text-sm font-bold tracking-[0.2em] text-yellow-300 mb-2">NEXT RUN UNLOCK</div>
+                      <div className="text-sm font-bold tracking-[0.2em] text-yellow-300 mb-2">次回から解禁</div>
                       <div className="text-2xl font-black text-white mb-2">追加サポーター 1種 解禁</div>
                       {previewUnlockSupporter && (
                           <div className="poker-victory-unlock-item mb-3 flex items-center gap-4 rounded-xl border border-yellow-300/40 bg-black/25 p-3 text-left">
@@ -1990,7 +1990,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
                               </div>
                               <div className="min-w-0 flex-1">
                                   <div className="text-xl font-bold text-yellow-100">{previewUnlockSupporter.name}</div>
-                                  <div className="mt-1 text-[10px] font-black tracking-[0.18em] text-yellow-300">{previewUnlockSupporter.rarity} SUPPORTER</div>
+                                  <div className="mt-1 text-[10px] font-black tracking-[0.18em] text-yellow-300">{previewUnlockSupporter.rarity} サポーター</div>
                                   <div className="mt-2 text-sm font-bold leading-relaxed text-white">
                                       効果：{previewUnlockSupporter.description}
                                   </div>
@@ -2014,7 +2014,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
                     onClick={finishRunVictory}
                     className="bg-slate-700 hover:bg-slate-600 text-gray-200 text-lg font-bold py-4 px-8 rounded-lg flex items-center justify-center"
                   >
-                      <ArrowLeft className="mr-3" /> メニューへ
+                      <ArrowLeft className="mr-3" /> 職員室に戻る
                   </button>
               </div>
           </div>
@@ -2262,9 +2262,9 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
   if (phase === 'GAME_OVER' || phase === 'VICTORY') {
       return (
           <div className="flex flex-col h-full w-full bg-black text-white items-center justify-center p-8 font-mono text-center">
-              <div className={`text-6xl font-bold mb-4 ${phase === 'VICTORY' ? 'text-yellow-400' : 'text-red-500'}`}>{phase === 'VICTORY' ? 'GRADUATED!' : 'EXPELLED'}</div>
-              <p className="text-xl text-gray-400 mb-8">Reached Ante {runState.ante}</p>
-              <button onClick={() => { storageService.clearPokerState(); onBack(); }} className="bg-white text-black px-8 py-3 font-bold rounded hover:bg-gray-200">Return to Menu</button>
+              <div className={`text-6xl font-bold mb-4 ${phase === 'VICTORY' ? 'text-yellow-400' : 'text-red-500'}`}>{phase === 'VICTORY' ? '卒業！' : '放課後終了'}</div>
+              <p className="text-xl text-gray-400 mb-8">{phase === 'VICTORY' ? '8年生の勝負を制しました' : `アンティ${runState.ante}で敗退`}</p>
+              <button onClick={() => { storageService.clearPokerState(); onBack(); }} className="bg-white text-black px-8 py-3 font-bold rounded hover:bg-gray-200">職員室に戻る</button>
           </div>
       );
   }

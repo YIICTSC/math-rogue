@@ -37,6 +37,7 @@ const STORAGE_KEY_DUNGEON_RANKING_2 = 'pixel_spire_dungeon_ranking_2_v1';
 const STORAGE_KEY_KOCHO_STATE = 'pixel_spire_kocho_state_v1';
 const STORAGE_KEY_KOCHO_RANKING = 'pixel_spire_kocho_ranking_v1';
 const STORAGE_KEY_KOCHO_UNLOCKED_CARDS = 'pixel_spire_kocho_unlocked_cards_v1';
+const STORAGE_KEY_KOCHO_MAX_UNLOCKED_DIFFICULTY = 'pixel_spire_kocho_max_unlocked_difficulty_v1';
 
 // For Paper Plane Battle
 const STORAGE_KEY_PAPER_PLANE_STATE = 'pixel_spire_paper_plane_state_v1';
@@ -817,6 +818,26 @@ export const storageService = {
       }
   },
 
+  getMaxUnlockedKochoDifficulty: (): number => {
+      try {
+          const stored = localStorage.getItem(STORAGE_KEY_KOCHO_MAX_UNLOCKED_DIFFICULTY);
+          const parsed = stored ? parseInt(stored, 10) : 1;
+          return Math.min(10, Math.max(1, Number.isFinite(parsed) ? parsed : 1));
+      } catch (e) {
+          return 1;
+      }
+  },
+
+  unlockKochoDifficulty: (level: number) => {
+      try {
+          const current = storageService.getMaxUnlockedKochoDifficulty();
+          const next = Math.min(10, Math.max(current, level));
+          localStorage.setItem(STORAGE_KEY_KOCHO_MAX_UNLOCKED_DIFFICULTY, next.toString());
+      } catch (e) {
+          console.warn("Failed to unlock kocho difficulty", e);
+      }
+  },
+
   // --- Paper Plane Battle State & Progress & Scores ---
   savePaperPlaneScore: (entry: PaperPlaneScoreEntry) => {
       try {
@@ -1288,6 +1309,7 @@ export const storageService = {
       localStorage.removeItem(STORAGE_KEY_KOCHO_STATE);
       localStorage.removeItem(STORAGE_KEY_KOCHO_RANKING);
       localStorage.removeItem(STORAGE_KEY_KOCHO_UNLOCKED_CARDS);
+      localStorage.removeItem(STORAGE_KEY_KOCHO_MAX_UNLOCKED_DIFFICULTY);
       localStorage.removeItem(STORAGE_KEY_PAPER_PLANE_STATE);
       localStorage.removeItem(STORAGE_KEY_PAPER_PLANE_PROGRESS);
       localStorage.removeItem(STORAGE_KEY_PAPER_PLANE_RANKING);

@@ -6,6 +6,7 @@ import { AttackEffectKey, StatusEffectKey, Card as ICard, Relic, Potion, CardTyp
 import Card from './Card';
 import AttackEffectSprite from './AttackEffectSprite';
 import StatusEffectSprite from './StatusEffectSprite';
+import EnemyIllustration from './EnemyIllustration';
 import { ArrowRight, Trash2, Plus, Gem, FlaskConical, Swords, Shield, Zap, Search, Beaker, RotateCcw, Skull, Clock, History, Languages, FileText, BookOpen, MessageSquare, HelpCircle, AlertCircle, Copy, Check, X, Volume2, Sparkles, Monitor } from 'lucide-react';
 import { createHolographicCard, synthesizeCards } from '../utils/cardUtils';
 import { storageService, type UiPreviewCheckTarget, type UiPreviewChecklist } from '../services/storageService';
@@ -13,8 +14,9 @@ import { audioService } from '../services/audioService';
 import { trans } from '../utils/textUtils';
 import { ATTACK_EFFECT_LIST } from '../data/attackEffects';
 import { STATUS_EFFECT_LIST } from '../data/statusEffects';
-import { HIGH_SCHOOL_EVENT_THEMES, MAGIC_EVENT_THEMES, HIGH_SCHOOL_HUMANOID_ENEMY_VARIANTS, type HighSchoolEnemyAction, type VisualThemeId } from '../data/visualThemes';
+import { HIGH_SCHOOL_EVENT_THEMES, MAGIC_EVENT_THEMES, HIGH_SCHOOL_HUMANOID_ENEMY_VARIANTS, MAGIC_HUMANOID_ENEMY_VARIANTS, type HighSchoolEnemyAction, type VisualThemeId } from '../data/visualThemes';
 import { getEnemyLibraryByTheme } from '../data/enemyCatalogs';
+import { HUMANOID_ENEMY_VOICE_PROFILES, type HumanoidEnemyVoiceGender, type HumanoidEnemyVoiceProfile } from '../data/humanoidEnemyVoiceLines';
 import { MAGIC_HEROES, MAGIC_MALE_PROTAGONISTS } from '../data/magicHeroes';
 import { getMagicRomanceDialogue, getMagicRomanceEndingText, type MagicRomanceEndingRank } from '../data/magicRomanceDialogue';
 import { getMagicRomanceVoiceLines } from '../services/magicRomanceEventService';
@@ -247,7 +249,7 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
     languageMode: initialLanguageMode,
     focusedUiPreviewScreenId
 }) => {
-    const [activeTab, setActiveTab] = useState<'CARDS' | 'RELICS' | 'POTIONS' | 'SYNTHESIS' | 'SYSTEM' | 'UI_PREVIEW' | 'PROBLEM_DEBUG' | 'EFFECTS' | 'MAGIC_VOICES' | 'MAGIC_ART_AUDIT' | 'EVENTS' | 'HUMANOID_SPRITES' | 'TRANSLATION'>(focusedUiPreviewScreenId ? 'UI_PREVIEW' : 'CARDS');
+    const [activeTab, setActiveTab] = useState<'CARDS' | 'RELICS' | 'POTIONS' | 'SYNTHESIS' | 'SYSTEM' | 'UI_PREVIEW' | 'PROBLEM_DEBUG' | 'EFFECTS' | 'MAGIC_VOICES' | 'ENEMY_VOICE_AUDIT' | 'MAGIC_ART_AUDIT' | 'EVENTS' | 'HUMANOID_SPRITES' | 'TRANSLATION'>(focusedUiPreviewScreenId ? 'UI_PREVIEW' : 'CARDS');
     const focusedUiPreviewItemRef = useRef<HTMLDivElement | null>(null);
     const [searchTerm, setSearchTerm] = useState("");
     const [debugLanguageMode, setDebugLanguageMode] = useState<LanguageMode>(initialLanguageMode);
@@ -257,6 +259,9 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
     const [highSchoolVoiceHeroId, setHighSchoolVoiceHeroId] = useState('WARRIOR');
     const [highSchoolVoiceFixTargets, setHighSchoolVoiceFixTargets] = useState<string[]>([]);
     const [highSchoolVoiceFixCopied, setHighSchoolVoiceFixCopied] = useState(false);
+    const [enemyVoiceAuditTheme, setEnemyVoiceAuditTheme] = useState<'all' | 'high-school' | 'magic'>('all');
+    const [enemyVoiceGenderOverrides, setEnemyVoiceGenderOverrides] = useState<Record<string, HumanoidEnemyVoiceGender>>({});
+    const [enemyVoiceAuditCopied, setEnemyVoiceAuditCopied] = useState(false);
     const [magicArtSearchTerm, setMagicArtSearchTerm] = useState('');
     const [magicArtCategoryFilter, setMagicArtCategoryFilter] = useState<'ALL' | 'COMMON_EVENT' | 'ROMANCE_EVENT' | 'ENDING_EVENT'>('ALL');
     const [magicArtMismatchIds, setMagicArtMismatchIds] = useState<string[]>([]);
@@ -379,6 +384,35 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
             return `${hero?.name ?? heroId}\t${heroId}\t${file}.ogg`;
         }).join('\n');
     }, [highSchoolVoiceFixTargets]);
+    const filteredEnemyVoiceAuditProfiles = useMemo(() => (
+        HUMANOID_ENEMY_VOICE_PROFILES
+            .filter(profile => enemyVoiceAuditTheme === 'all' || profile.theme === enemyVoiceAuditTheme)
+            .sort((a, b) => a.theme.localeCompare(b.theme) || a.id.localeCompare(b.id))
+    ), [enemyVoiceAuditTheme]);
+    const enemyVoiceAuditRows = useMemo(() => (
+        filteredEnemyVoiceAuditProfiles.map(profile => {
+            const checkedGender = enemyVoiceGenderOverrides[profile.id] ?? profile.gender;
+            return {
+                profile,
+                checkedGender,
+                changed: checkedGender !== profile.gender,
+            };
+        })
+    ), [enemyVoiceGenderOverrides, filteredEnemyVoiceAuditProfiles]);
+    const enemyVoiceAuditChangedCount = enemyVoiceAuditRows.filter(row => row.changed).length;
+    const enemyVoiceAuditCopyText = useMemo(() => {
+        const header = 'theme\tid\tname\tcurrentGender\tcheckedGender\tspeakerId\tstatus';
+        const rows = enemyVoiceAuditRows.map(({ profile, checkedGender, changed }) => [
+            profile.theme,
+            profile.id,
+            profile.name,
+            profile.gender,
+            checkedGender,
+            profile.speakerId,
+            changed ? 'CHANGE' : 'OK',
+        ].join('\t'));
+        return [header, ...rows].join('\n');
+    }, [enemyVoiceAuditRows]);
     const filteredMagicArtTargets = useMemo(() => {
         const normalizedSearch = magicArtSearchTerm.trim().toLowerCase();
         return MAGIC_ART_CONSISTENCY_TARGETS.filter(target => {
@@ -641,6 +675,26 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
         window.setTimeout(() => setHighSchoolVoiceFixCopied(false), 1600);
     };
 
+    const setEnemyVoiceAuditGender = (profile: HumanoidEnemyVoiceProfile, gender: HumanoidEnemyVoiceGender) => {
+        setEnemyVoiceGenderOverrides(prev => ({ ...prev, [profile.id]: gender }));
+        setEnemyVoiceAuditCopied(false);
+    };
+
+    const resetEnemyVoiceAuditGender = (profile: HumanoidEnemyVoiceProfile) => {
+        setEnemyVoiceGenderOverrides(prev => {
+            const next = { ...prev };
+            delete next[profile.id];
+            return next;
+        });
+        setEnemyVoiceAuditCopied(false);
+    };
+
+    const copyEnemyVoiceAuditResults = async () => {
+        await navigator.clipboard.writeText(enemyVoiceAuditCopyText);
+        setEnemyVoiceAuditCopied(true);
+        window.setTimeout(() => setEnemyVoiceAuditCopied(false), 1600);
+    };
+
     const toggleMagicArtMismatch = (id: string) => {
         setMagicArtMismatchIds(prev => {
             if (prev.includes(id)) return prev.filter(entry => entry !== id);
@@ -741,6 +795,7 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
                         <button onClick={() => setActiveTab('PROBLEM_DEBUG')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'PROBLEM_DEBUG' ? 'bg-lime-900 text-white' : 'text-lime-400 hover:bg-gray-750'}`}>問題デバッグ</button>
                         <button onClick={() => setActiveTab('EFFECTS')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'EFFECTS' ? 'bg-orange-900 text-white' : 'text-orange-400 hover:bg-gray-750'}`}>エフェクト</button>
                         <button onClick={() => setActiveTab('MAGIC_VOICES')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'MAGIC_VOICES' ? 'bg-fuchsia-900 text-white' : 'text-fuchsia-400 hover:bg-gray-750'}`}>マジック声</button>
+                        <button onClick={() => setActiveTab('ENEMY_VOICE_AUDIT')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'ENEMY_VOICE_AUDIT' ? 'bg-violet-900 text-white' : 'text-violet-400 hover:bg-gray-750'}`}>敵声整合</button>
                         <button onClick={() => setActiveTab('MAGIC_ART_AUDIT')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'MAGIC_ART_AUDIT' ? 'bg-pink-900 text-white' : 'text-pink-400 hover:bg-gray-750'}`}>魔法絵不整合</button>
                         <button onClick={() => setActiveTab('EVENTS')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'EVENTS' ? 'bg-cyan-900 text-white' : 'text-cyan-400 hover:bg-gray-750'}`}>高校編イベント</button>
                         <button onClick={() => setActiveTab('HUMANOID_SPRITES')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'HUMANOID_SPRITES' ? 'bg-rose-900 text-white' : 'text-rose-400 hover:bg-gray-750'}`}>高校人型敵</button>
@@ -1631,6 +1686,149 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
                                         </div>
                                     </div>
                                 )}
+                            </div>
+                        )}
+
+                        {activeTab === 'ENEMY_VOICE_AUDIT' && (
+                            <div className="space-y-4">
+                                <div className="flex flex-col gap-3 rounded-xl border border-violet-800/70 bg-black/35 p-4">
+                                    <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                                        <div>
+                                            <h3 className="flex items-center text-lg font-black text-violet-200">
+                                                <Volume2 size={18} className="mr-2" /> 敵ボイス男女整合チェック
+                                            </h3>
+                                            <p className="mt-1 text-xs leading-relaxed text-gray-400">
+                                                敵イラストを見ながら男女をチェックし、結果をTSVでコピーできます。変更が必要な行は `CHANGE` になります。
+                                            </p>
+                                        </div>
+                                        <div className="flex flex-wrap gap-2">
+                                            {[
+                                                { id: 'all', label: '全体' },
+                                                { id: 'high-school', label: '高校編' },
+                                                { id: 'magic', label: 'マジック編' },
+                                            ].map(option => (
+                                                <button
+                                                    key={option.id}
+                                                    onClick={() => setEnemyVoiceAuditTheme(option.id as typeof enemyVoiceAuditTheme)}
+                                                    className={`rounded px-3 py-1.5 text-xs font-black ${enemyVoiceAuditTheme === option.id ? 'bg-violet-500 text-white' : 'bg-slate-900 text-violet-200 hover:bg-slate-800'}`}
+                                                >
+                                                    {option.label}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                    <div className="grid grid-cols-1 gap-3 lg:grid-cols-[1fr_360px]">
+                                        <div className="grid grid-cols-2 gap-2 text-xs sm:grid-cols-4">
+                                            <div className="rounded border border-violet-900/60 bg-slate-950 p-3">
+                                                <div className="text-[10px] font-black text-gray-500">表示</div>
+                                                <div className="mt-1 text-lg font-black text-white">{enemyVoiceAuditRows.length}</div>
+                                            </div>
+                                            <div className="rounded border border-violet-900/60 bg-slate-950 p-3">
+                                                <div className="text-[10px] font-black text-gray-500">変更</div>
+                                                <div className={`mt-1 text-lg font-black ${enemyVoiceAuditChangedCount > 0 ? 'text-amber-300' : 'text-emerald-300'}`}>{enemyVoiceAuditChangedCount}</div>
+                                            </div>
+                                            <div className="rounded border border-violet-900/60 bg-slate-950 p-3">
+                                                <div className="text-[10px] font-black text-gray-500">男性</div>
+                                                <div className="mt-1 text-lg font-black text-sky-200">{enemyVoiceAuditRows.filter(row => row.checkedGender === 'male').length}</div>
+                                            </div>
+                                            <div className="rounded border border-violet-900/60 bg-slate-950 p-3">
+                                                <div className="text-[10px] font-black text-gray-500">女性</div>
+                                                <div className="mt-1 text-lg font-black text-pink-200">{enemyVoiceAuditRows.filter(row => row.checkedGender === 'female').length}</div>
+                                            </div>
+                                        </div>
+                                        <div className="space-y-2 rounded border border-violet-900/60 bg-slate-950 p-3">
+                                            <div className="flex items-center justify-between gap-2">
+                                                <div className="text-xs font-black text-violet-100">コピー結果</div>
+                                                <button
+                                                    onClick={copyEnemyVoiceAuditResults}
+                                                    className="flex items-center gap-1 rounded bg-violet-700 px-3 py-1.5 text-xs font-black text-white hover:bg-violet-600"
+                                                >
+                                                    {enemyVoiceAuditCopied ? <Check size={13} /> : <Copy size={13} />}
+                                                    {enemyVoiceAuditCopied ? 'コピー済み' : 'TSVコピー'}
+                                                </button>
+                                            </div>
+                                            <textarea
+                                                readOnly
+                                                value={enemyVoiceAuditCopyText}
+                                                className="h-28 w-full resize-none rounded border border-violet-900/60 bg-black/60 p-2 font-mono text-[10px] leading-relaxed text-violet-50 outline-none"
+                                            />
+                                            <button
+                                                onClick={() => {
+                                                    setEnemyVoiceGenderOverrides({});
+                                                    setEnemyVoiceAuditCopied(false);
+                                                }}
+                                                disabled={Object.keys(enemyVoiceGenderOverrides).length === 0}
+                                                className="w-full rounded bg-slate-800 py-1.5 text-[10px] font-black text-gray-200 hover:bg-slate-700 disabled:text-gray-600"
+                                            >
+                                                チェックを初期状態へ戻す
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4">
+                                    {enemyVoiceAuditRows.map(({ profile, checkedGender, changed }) => {
+                                        const variant = profile.theme === 'high-school'
+                                            ? HIGH_SCHOOL_HUMANOID_ENEMY_VARIANTS.find(entry => entry.name === profile.name)
+                                            : MAGIC_HUMANOID_ENEMY_VARIANTS.find(entry => entry.name === profile.name);
+                                        return (
+                                            <div
+                                                key={profile.id}
+                                                className={`rounded-xl border p-3 ${changed ? 'border-amber-400 bg-amber-950/25' : 'border-violet-900/60 bg-black/35'}`}
+                                            >
+                                                <div className="flex gap-3">
+                                                    <div className="relative h-24 w-24 shrink-0 rounded-lg border border-slate-700 bg-slate-950">
+                                                        <EnemyIllustration
+                                                            name={profile.name}
+                                                            seed={`${profile.theme}-${profile.name}`}
+                                                            visualTheme={profile.theme}
+                                                            enemyType="GENERIC"
+                                                            className="h-full w-full"
+                                                            size={14}
+                                                        />
+                                                    </div>
+                                                    <div className="min-w-0 flex-1">
+                                                        <div className="truncate text-sm font-black text-white">{profile.name}</div>
+                                                        <div className="mt-1 text-[10px] font-mono text-gray-500">{profile.theme} / {profile.id} / img {variant?.imageIndex ?? '-'}</div>
+                                                        <div className="mt-2 text-[11px] text-gray-300">
+                                                            現在: <span className={profile.gender === 'male' ? 'text-sky-300' : 'text-pink-300'}>{profile.gender === 'male' ? '男性' : '女性'}</span>
+                                                        </div>
+                                                        <div className="text-[11px] text-gray-400">話者: <span className="font-mono text-violet-200">{profile.speakerId}</span></div>
+                                                    </div>
+                                                </div>
+                                                <div className="mt-3 grid grid-cols-2 gap-2">
+                                                    <button
+                                                        onClick={() => setEnemyVoiceAuditGender(profile, 'male')}
+                                                        className={`rounded border px-2 py-2 text-xs font-black ${checkedGender === 'male' ? 'border-sky-300 bg-sky-600 text-white' : 'border-slate-700 bg-slate-900 text-sky-200 hover:bg-slate-800'}`}
+                                                    >
+                                                        男性
+                                                    </button>
+                                                    <button
+                                                        onClick={() => setEnemyVoiceAuditGender(profile, 'female')}
+                                                        className={`rounded border px-2 py-2 text-xs font-black ${checkedGender === 'female' ? 'border-pink-300 bg-pink-600 text-white' : 'border-slate-700 bg-slate-900 text-pink-200 hover:bg-slate-800'}`}
+                                                    >
+                                                        女性
+                                                    </button>
+                                                </div>
+                                                <div className="mt-2 flex gap-2">
+                                                    <button
+                                                        onClick={() => audioService.playHumanoidEnemyVoice(profile.theme, profile.name, 'spawn')}
+                                                        className="flex flex-1 items-center justify-center gap-1 rounded bg-violet-800 py-1.5 text-[10px] font-black text-white hover:bg-violet-700"
+                                                    >
+                                                        <Volume2 size={12} /> 出現声
+                                                    </button>
+                                                    <button
+                                                        onClick={() => resetEnemyVoiceAuditGender(profile)}
+                                                        disabled={!enemyVoiceGenderOverrides[profile.id]}
+                                                        className="rounded bg-slate-800 px-2 py-1.5 text-[10px] font-black text-gray-200 hover:bg-slate-700 disabled:text-gray-600"
+                                                    >
+                                                        戻す
+                                                    </button>
+                                                </div>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
                             </div>
                         )}
 
