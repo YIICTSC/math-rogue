@@ -214,6 +214,15 @@ const CharacterSelectionScreen: React.FC<CharacterSelectionScreenProps> = ({ cha
     audioService.playSound('select');
   };
 
+  const scrollToCharacterPoster = (charId: string) => {
+    document.getElementById(`character-poster-${charId}`)?.scrollIntoView({
+      behavior: 'smooth',
+      block: 'nearest',
+      inline: 'center',
+    });
+    audioService.playSound('select');
+  };
+
   return (
     <div
       className="main-character-screen flex flex-col h-full w-full bg-gray-900 bg-cover bg-center text-white relative overflow-hidden"
@@ -291,8 +300,8 @@ const CharacterSelectionScreen: React.FC<CharacterSelectionScreenProps> = ({ cha
         </div>
       )}
 
-      <div className="z-10 flex flex-col items-center justify-start h-full p-4 pt-8 overflow-y-auto custom-scrollbar">
-        <div className="text-center mb-8 shrink-0">
+      <div className="character-selection-shell z-10 flex flex-col items-center justify-start h-full p-4 pt-8 overflow-y-auto custom-scrollbar">
+        <div className="character-selection-header text-center mb-8 shrink-0">
             <h2 className="text-3xl md:text-4xl text-yellow-400 font-bold mb-2 flex items-center justify-center animate-pulse">
              {trans("主人公選択", languageMode)}
             </h2>
@@ -416,8 +425,9 @@ const CharacterSelectionScreen: React.FC<CharacterSelectionScreenProps> = ({ cha
                 const colorClass = isUnlocked ? (colorMap[char.color] || 'border-gray-600') : 'border-gray-700 bg-gray-900';
 
                 return (
-                    <div 
-                        key={char.id} 
+                    <div
+                        key={char.id}
+                        id={`character-poster-${char.id}`}
                         className={`${baseClass} ${colorClass}`}
                         onClick={() => isUnlocked && handleCharSelect(char)}
                     >
@@ -534,6 +544,35 @@ const CharacterSelectionScreen: React.FC<CharacterSelectionScreenProps> = ({ cha
                     </div>
                 );
             })}
+        </div>
+        <div className="character-selection-thumbnail-row" aria-label={trans("主人公一覧", languageMode)}>
+          {displayedCharacters.map((char, index) => {
+            const isUnlocked = index < unlockedCount;
+            const charImage = customImages[char.id] || char.imageData;
+            const isCustom = !!customImages[char.id];
+            const isMagicPortrait = visualTheme === 'magic' && !isCustom;
+
+            return (
+              <button
+                key={char.id}
+                type="button"
+                className={`character-selection-thumb ${isUnlocked ? '' : 'is-locked'}`}
+                onClick={() => scrollToCharacterPoster(char.id)}
+                aria-label={trans(char.name, languageMode)}
+              >
+                <span className="character-selection-thumb-frame">
+                  <img
+                    src={charImage}
+                    alt=""
+                    className="character-selection-thumb-img"
+                    style={{ imageRendering: isCustom || isMagicPortrait ? 'auto' : 'pixelated' }}
+                  />
+                  {!isUnlocked && <Lock size={16} className="character-selection-thumb-lock" />}
+                </span>
+                <span className="character-selection-thumb-name">{trans(char.name, languageMode)}</span>
+              </button>
+            );
+          })}
         </div>
       </div>
       <style>{`
