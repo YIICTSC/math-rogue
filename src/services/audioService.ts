@@ -890,8 +890,6 @@ class AudioService {
           `/${type}.mp3`,
           `${type}.mp3`
       ].map(versionMagicBgmPath);
-      if (await this.playHtmlAudioMp3(paths, loop, type, playbackGeneration)) return;
-      if (!this.isCurrentPlayback(type, playbackGeneration)) return;
       const cacheKey = `${this.bgmTheme}:${type}`;
       let buffer = this.audioBuffers[cacheKey];
       if (!buffer) {
