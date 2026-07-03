@@ -4141,6 +4141,12 @@ export const getMagicRomanceEndingText = (heroId: string, targetId: string, affe
   rank: MagicRomanceEndingRank;
   rankLabel: string;
 } => {
+  const getEndingSpeakerName = (name: string) => {
+    const spacedParts = name.trim().split(/\s+/);
+    if (spacedParts.length > 1) return spacedParts[spacedParts.length - 1];
+    return name.split('・')[0];
+  };
+
   if (isMagicMaleProtagonist(heroId)) {
     const protagonist = MAGIC_MALE_PROTAGONISTS.find((entry) => entry.id === heroId) ?? MAGIC_MALE_PROTAGONISTS[0];
     const heroine = MAGIC_HEROES.find((entry) => entry.id === targetId) ?? MAGIC_HEROES[0];
@@ -4183,15 +4189,16 @@ export const getMagicRomanceEndingText = (heroId: string, targetId: string, affe
   const rank = getMagicRomanceEndingRank(affection);
   const romanceTargetLines = TARGET_ENDING_LINES[target.id] ?? TARGET_ENDING_LINES.REN;
   const targetStageLines = TARGET_STAGE_LINES[target.id] ?? TARGET_STAGE_LINES.REN;
+  const targetSpeakerName = getEndingSpeakerName(target.name);
   const targetLines = rank === 'BOND'
     ? [
         targetStageLines[2],
-        `${target.name}「今度は戦いのない日に、ゆっくり続きを話そう」`,
+        `${targetSpeakerName}「今度は戦いのない日に、ゆっくり続きを話そう」`,
       ]
     : rank === 'SPECIAL'
       ? [
           targetStageLines[3],
-          `${target.name}「急がなくていい。これからも君の一番近くで、答えを探したい」`,
+          `${targetSpeakerName}「急がなくていい。これからも君の一番近くで、答えを探したい」`,
         ]
       : romanceTargetLines;
   const rankLabel = {
