@@ -250,6 +250,7 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
     focusedUiPreviewScreenId
 }) => {
     const [activeTab, setActiveTab] = useState<'CARDS' | 'RELICS' | 'POTIONS' | 'SYNTHESIS' | 'SYSTEM' | 'UI_PREVIEW' | 'PROBLEM_DEBUG' | 'EFFECTS' | 'MAGIC_VOICES' | 'ENEMY_VOICE_AUDIT' | 'MAGIC_ART_AUDIT' | 'EVENTS' | 'HUMANOID_SPRITES' | 'TRANSLATION'>(focusedUiPreviewScreenId ? 'UI_PREVIEW' : 'CARDS');
+    const showLoadoutPanel = activeTab === 'CARDS' || activeTab === 'RELICS' || activeTab === 'POTIONS' || activeTab === 'SYNTHESIS';
     const focusedUiPreviewItemRef = useRef<HTMLDivElement | null>(null);
     const [searchTerm, setSearchTerm] = useState("");
     const [debugLanguageMode, setDebugLanguageMode] = useState<LanguageMode>(initialLanguageMode);
@@ -887,7 +888,7 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
             </div>
 
             <div className="flex flex-col md:flex-row flex-grow overflow-hidden">
-                <div className="w-full md:w-3/4 h-[60%] md:h-full border-b md:border-b-0 md:border-r border-gray-700 flex flex-col bg-gray-800/50 min-h-0">
+                <div className={`w-full ${showLoadoutPanel ? 'h-[60%] md:h-full md:w-3/4 md:border-r' : 'h-full md:w-full'} border-b md:border-b-0 border-gray-700 flex flex-col bg-gray-800/50 min-h-0`}>
                     <div className="flex bg-gray-800 border-b border-gray-700 overflow-x-auto shrink-0">
                         <button onClick={() => setActiveTab('CARDS')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'CARDS' ? 'bg-gray-700 text-white' : 'text-gray-400 hover:bg-gray-750'}`}>カード</button>
                         <button onClick={() => setActiveTab('RELICS')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'RELICS' ? 'bg-gray-700 text-white' : 'text-gray-400 hover:bg-gray-750'}`}>レリック</button>
@@ -2424,6 +2425,7 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
                     </div>
                 </div>
 
+                {showLoadoutPanel && (
                 <div className="w-full md:w-1/4 h-[40%] md:h-full flex flex-col bg-black/20 text-xs min-h-0">
                     <div className="p-2 bg-black/50 border-b border-gray-700 font-bold text-gray-300 text-[10px] md:text-xs shrink-0">
                         LOADOUT
@@ -2484,6 +2486,7 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
                         </div>
                     </div>
                 </div>
+                )}
             </div>
         </div>
     );
