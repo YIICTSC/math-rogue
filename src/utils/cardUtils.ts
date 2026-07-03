@@ -2,6 +2,16 @@
 import { Card, CardType, TargetType } from '../types';
 
 const MAX_ILLUSTRATION_REFS = 8;
+const uniqueStrings = (values: string[]): string[] => {
+    const seen = new Set<string>();
+    const result: string[] = [];
+    values.forEach((value) => {
+        if (!value || seen.has(value)) return;
+        seen.add(value);
+        result.push(value);
+    });
+    return result;
+};
 
 const safeDecodeURIComponent = (value: string) => {
     try {
@@ -700,17 +710,18 @@ export const synthesizeCards = (c1: Card, c2: Card, c3?: Card): Card => {
     const { refs: mergedIllustrationRefs, writeIndex: illustrationRefWriteIndex } = mergeIllustrationRefsCircular(c1, c2, c3);
 
     // 10. Inherit Original Names for Special Logic
-    const originalNames: string[] = [];
+    const originalNameCandidates: string[] = [];
     const addOriginals = (c: Card) => {
         if (c.originalNames && c.originalNames.length > 0) {
-            originalNames.push(...c.originalNames);
+            originalNameCandidates.push(...c.originalNames);
         } else {
-            originalNames.push(c.name);
+            originalNameCandidates.push(c.name);
         }
     };
     addOriginals(c1);
     addOriginals(c2);
     if (c3) addOriginals(c3);
+    const originalNames = uniqueStrings(originalNameCandidates);
 
     return {
         id: `synth-${Date.now()}-${Math.random()}`,

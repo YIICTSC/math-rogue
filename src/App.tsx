@@ -110,6 +110,7 @@ const PARRY_WINDOW_MS = 650;
 const PARRY_PERFECT_MS = 220;
 const ENEMY_FINISHER_BURST_VOICE_DELAY_MS = 760;
 const PORTRAIT_BATTLE_ENEMY_OFFSET_Y_BASELINE = 60;
+const MAX_CARD_DETAIL_VFX = 80;
 const CROWDFUNDING_BANNER_URL = 'https://camp-fire.jp/projects/954165/view?utm_campaign=cp_po_share_c_msg_mypage_projects_open';
 const CROWDFUNDING_BANNER_IMAGE = assetUrl('banners/campfire-crowdfunding.png');
 const ASSIGNMENT_INTRO_BANNER_IMAGE = assetUrl('banners/daily-assignment-reward-intro.png');
@@ -6657,8 +6658,9 @@ const App: React.FC = () => {
             if (card.hitsPerAttackPlayed) {
                 cardAttackPreviewHitCount = actionPlayer.attacksPlayedThisTurn + 1;
             }
-            cardAttackPreviewHitCount = Math.max(1, Math.min(100, cardAttackPreviewHitCount));
-            if (!isCoopHostRemoteAction) audioService.playAttackEffectSound(getAttackEffectKeyForCard(card, cardAttackPreviewHitCount), cardAttackPreviewHitCount);
+            cardAttackPreviewHitCount = Math.max(1, cardAttackPreviewHitCount);
+            const audioPreviewHitCount = Math.min(cardAttackPreviewHitCount, MAX_CARD_DETAIL_VFX);
+            if (!isCoopHostRemoteAction) audioService.playAttackEffectSound(getAttackEffectKeyForCard(card, audioPreviewHitCount), audioPreviewHitCount);
             if (!isCoopHostRemoteAction && magicVoiceHeroId && !isOwnMagicRuleCard) {
                 audioService.playMagicVoice(magicVoiceHeroId, 'attack');
             }
@@ -7038,10 +7040,10 @@ const App: React.FC = () => {
                 if (card.playCopies) hits += card.playCopies;
                 if (card.hitsPerSkillInHand) hits = p.hand.filter(c => c.type === CardType.SKILL && c.id !== card.id).length;
                 if (card.hitsPerAttackPlayed) hits = p.attacksPlayedThisTurn;
-                const maxHits = 100;
-                if (hits > maxHits) hits = maxHits;
+                hits = Math.max(1, Math.floor(hits));
+                const visualHitCount = Math.min(hits, MAX_CARD_DETAIL_VFX);
                 const hitsToLog = Math.min(hits, 10);
-                const multihitFrameSequence = getMultihitFrameSequence(hits);
+                const multihitFrameSequence = getMultihitFrameSequence(visualHitCount);
 
                 for (let h = 0; h < hits; h++) {
                     const hitDelay = (act * hits + h) * 80;
@@ -7103,11 +7105,12 @@ const App: React.FC = () => {
                             e.currentHp -= damage;
 
                             let finalVfx: VFXType = baseVfx as VFXType;
+                            const shouldShowDetailVfx = h < MAX_CARD_DETAIL_VFX || h === hits - 1;
                             const attackEffectKey = card.type === CardType.ATTACK
-                                ? getAttackEffectKeyForCard(card, hits, e.currentHp <= 0)
+                                ? getAttackEffectKeyForCard(card, visualHitCount, e.currentHp <= 0)
                                 : undefined;
                             const attackEffectFrame = attackEffectKey === 'multihit'
-                                ? multihitFrameSequence[h] ?? multihitFrameSequence[multihitFrameSequence.length - 1]
+                                ? multihitFrameSequence[Math.min(h, multihitFrameSequence.length - 1)] ?? multihitFrameSequence[multihitFrameSequence.length - 1]
                                 : undefined;
                             if (card.type === CardType.ATTACK) {
                                 finalVfx = 'ATTACK_SPRITE';
@@ -7116,15 +7119,17 @@ const App: React.FC = () => {
                                 if (e.currentHp <= 0 && (finalVfx === 'SLASH' || finalVfx === 'CRITICAL')) finalVfx = 'EXPLOSION';
                             }
 
-                            nextActiveEffects.push({
-                                id: `vfx-${Date.now()}-${Math.random()}`,
-                                type: finalVfx,
-                                targetId: e.id,
-                                delay: hitDelay,
-                                rotation: Math.random() * 360,
-                                attackEffectKey,
-                                attackEffectFrame
-                            });
+                            if (shouldShowDetailVfx) {
+                                nextActiveEffects.push({
+                                    id: `vfx-${Date.now()}-${Math.random()}`,
+                                    type: finalVfx,
+                                    targetId: e.id,
+                                    delay: Math.min(hitDelay, MAX_CARD_DETAIL_VFX * 80),
+                                    rotation: Math.random() * 360,
+                                    attackEffectKey,
+                                    attackEffectFrame
+                                });
+                            }
 
                             if (e.currentHp <= 0 && e.enemyType === 'THE_HEART' && e.phase === 1) {
                                 e.currentHp = e.maxHp;
@@ -7139,7 +7144,7 @@ const App: React.FC = () => {
                                 if (e.currentHp <= 0) {
                                     if (!voicedEnemyDefeatIds.has(e.id)) {
                                         voicedEnemyDefeatIds.add(e.id);
-                                        const hasOtherAliveEnemies = newEnemies.some(other =>
+                                        const hasOtherAliveEnemies = enemies.some(other =>
                                             other.id !== e.id &&
                                             (other.currentHp > 0 || (other.enemyType === 'THE_HEART' && other.phase === 1))
                                         );
@@ -7742,7 +7747,7 @@ const App: React.FC = () => {
                         currentLogs.push(trans("HPを全回復した！", languageMode));
                     }
                     if (card.draw && !isGalaxyExpressCard) {
-                        const drawAmount = card.draw * magicEffectMultiplier;
+                        const drawAmount = Math.max(0, Math.floor(card.draw * magicEffectMultiplier));
                         if (card.familiarSummon) {
                             p.nextTurnDraw += drawAmount;
                             currentLogs.push(trans(`召喚効果：次のターン開始時に${drawAmount}枚ドロー`, languageMode));
@@ -7765,7 +7770,8 @@ const App: React.FC = () => {
                                     }
                                     p.hand.push(card);
                                     if (p.powers['EVOLVE'] && (card.type === CardType.STATUS || card.type === CardType.CURSE)) {
-                                        for (let k = 0; k < p.powers['EVOLVE']; k++) {
+                                        const evolveDrawCount = Math.max(0, Math.floor(p.powers['EVOLVE']));
+                                        for (let k = 0; k < evolveDrawCount; k++) {
                                             if (p.drawPile.length === 0) {
                                                 if (p.discardPile === undefined || p.discardPile.length === 0) break;
                                                 p.drawPile = shuffle(p.discardPile);
@@ -7807,7 +7813,8 @@ const App: React.FC = () => {
                     }
 
                     if (card.addCardToHand && !(card.name === '幻覚キノコ' || card.originalNames?.includes('幻覚キノコ') || card.id?.includes('MYSTIC_MUSHROOM'))) {
-                        for (let c = 0; c < card.addCardToHand.count; c++) {
+                        const addToHandCount = Math.max(0, Math.floor(card.addCardToHand.count));
+                        for (let c = 0; c < addToHandCount; c++) {
                             const template = CARDS_LIBRARY[card.addCardToHand.cardName];
                             if (template) {
                                 let newC = { ...template, id: `gen-hand-${Date.now()}-${act}-${h}-${c}-${Math.random()}` };
@@ -7822,14 +7829,16 @@ const App: React.FC = () => {
                         }
                     }
                     if (card.addCardToDraw) {
-                        for (let c = 0; c < card.addCardToDraw.count; c++) {
+                        const addToDrawCount = Math.max(0, Math.floor(card.addCardToDraw.count));
+                        for (let c = 0; c < addToDrawCount; c++) {
                             const template = CARDS_LIBRARY[card.addCardToDraw.cardName];
                             if (template) p.drawPile.push({ ...template, id: `gen-draw-${Date.now()}-${act}-${h}-${c}-${Math.random()}` });
                         }
                         p.drawPile = shuffle(p.drawPile);
                     }
                     if (card.addCardToDiscard) {
-                        for (let c = 0; c < card.addCardToDiscard.count; c++) {
+                        const addToDiscardCount = Math.max(0, Math.floor(card.addCardToDiscard.count));
+                        for (let c = 0; c < addToDiscardCount; c++) {
                             const template = CARDS_LIBRARY[card.addCardToDiscard.cardName];
                             if (template) p.discardPile.push({ ...template, id: `gen-discard-${Date.now()}-${act}-${h}-${c}-${Math.random()}` });
                         }
@@ -7974,7 +7983,8 @@ const App: React.FC = () => {
             }
 
             if ((card.battleBonusDrawOnPlay || 0) > 0) {
-                for (let i = 0; i < (card.battleBonusDrawOnPlay || 0); i++) {
+                const battleBonusDrawCount = Math.max(0, Math.floor(card.battleBonusDrawOnPlay || 0));
+                for (let i = 0; i < battleBonusDrawCount; i++) {
                     if (p.drawPile.length === 0 && p.discardPile.length > 0) {
                         p.drawPile = shuffle(p.discardPile);
                         p.discardPile = [];
@@ -8174,6 +8184,7 @@ const App: React.FC = () => {
                 newDiscardPile = [...newDiscardPile, ...p.hand];
             }
             let drawCount = HAND_SIZE + (p.powers['TOOLS_OF_THE_TRADE'] ? 1 : 0) + p.nextTurnDraw + drawBonus;
+            drawCount = Math.max(0, Math.floor(drawCount));
             p.nextTurnDraw = 0;
             for (let i = 0; i < drawCount; i++) {
                 if (newDrawPile.length === 0) {
@@ -8193,7 +8204,8 @@ const App: React.FC = () => {
                     }
                     newHand.push(card);
                     if (p.powers['EVOLVE'] && (card.type === CardType.STATUS || card.type === CardType.CURSE)) {
-                        for (let k = 0; k < p.powers['EVOLVE']; k++) {
+                        const evolveDrawCount = Math.max(0, Math.floor(p.powers['EVOLVE']));
+                        for (let k = 0; k < evolveDrawCount; k++) {
                             if (newDrawPile.length === 0) {
                                 if (newDiscardPile === undefined || newDiscardPile.length === 0) break;
                                 newDrawPile = shuffle(newDiscardPile);

@@ -308,6 +308,15 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
     const [synthSlot1, setSynthSlot1] = useState<ICard | null>(null);
     const [synthSlot2, setSynthSlot2] = useState<ICard | null>(null);
     const [synthResult, setSynthResult] = useState<ICard | null>(null);
+    const [stressHitCount, setStressHitCount] = useState(240);
+    const [stressDamage, setStressDamage] = useState(1);
+    const [stressDraw, setStressDraw] = useState(0);
+    const [stressAddHand, setStressAddHand] = useState(0);
+    const [stressAddDraw, setStressAddDraw] = useState(0);
+    const [stressAddDiscard, setStressAddDiscard] = useState(0);
+    const [stressNextTurnDraw, setStressNextTurnDraw] = useState(0);
+    const [stressBattleBonusDraw, setStressBattleBonusDraw] = useState(0);
+    const [stressOriginalNameCount, setStressOriginalNameCount] = useState(30);
     const debugProblemGroup = DEBUG_PROBLEM_UNIT_GROUPS.find(group => group.id === debugProblemGroupId) ?? DEBUG_PROBLEM_UNIT_GROUPS[0];
     const debugProblemUnit = debugProblemGroup?.units.find(unit => unit.id === debugProblemUnitId) ?? debugProblemGroup?.units[0];
     const debugEventGroup = DEBUG_EVENT_GROUPS.find(group => group.id === debugEventTheme) ?? DEBUG_EVENT_GROUPS[0];
@@ -548,6 +557,82 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
         setSynthResult(newCard);
     };
 
+    const normalizeDebugNumber = (value: number, fallback = 0) => {
+        if (!Number.isFinite(value)) return fallback;
+        return Math.max(0, Math.floor(value));
+    };
+
+    const makeStressOriginalNames = (count: number) => {
+        const specialNames = [
+            '大掃除',
+            '山勘',
+            '発見',
+            '錬金術',
+            '虹のプリズム',
+            '磁石の力',
+            '大ジャンプ',
+            '早退',
+            'あがく',
+            '天気予報',
+            '銀河鉄道の夜',
+            'ドリーム・キャッチャー',
+        ];
+        return Array.from({ length: normalizeDebugNumber(count) }, (_item, index) => (
+            specialNames[index] ?? `合成過多素材${index + 1}`
+        ));
+    };
+
+    const createStressSynthCard = (): ICard => {
+        const hits = Math.max(1, normalizeDebugNumber(stressHitCount, 1));
+        const damage = normalizeDebugNumber(stressDamage, 1);
+        const draw = normalizeDebugNumber(stressDraw);
+        const addHand = normalizeDebugNumber(stressAddHand);
+        const addDraw = normalizeDebugNumber(stressAddDraw);
+        const addDiscard = normalizeDebugNumber(stressAddDiscard);
+        const nextTurnDraw = normalizeDebugNumber(stressNextTurnDraw);
+        const battleBonusDraw = normalizeDebugNumber(stressBattleBonusDraw);
+        const originalNames = makeStressOriginalNames(stressOriginalNameCount);
+
+        const card: ICard = {
+            id: `debug-over-synth-${Date.now()}-${Math.random()}`,
+            name: `合成過多テスト${hits}H`,
+            cost: 0,
+            type: CardType.ATTACK,
+            target: TargetType.ENEMY,
+            rarity: 'SPECIAL',
+            damage,
+            playCopies: hits > 1 ? hits - 1 : undefined,
+            draw: draw || undefined,
+            nextTurnDraw: nextTurnDraw || undefined,
+            battleBonusDrawOnPlay: battleBonusDraw || undefined,
+            addCardToHand: addHand > 0 ? { cardName: 'SHIV', count: addHand, cost0: true } : undefined,
+            addCardToDraw: addDraw > 0 ? { cardName: 'WOUND', count: addDraw } : undefined,
+            addCardToDiscard: addDiscard > 0 ? { cardName: 'BURN', count: addDiscard } : undefined,
+            originalNames,
+            textureRef: 'LIGHTNING|紫|ATTACK',
+            description: [
+                `${damage}ダメージを${hits}回`,
+                draw > 0 ? `${draw}枚引く` : '',
+                addHand > 0 ? `SHIVを${addHand}枚手札に加える` : '',
+                addDraw > 0 ? `WOUNDを${addDraw}枚山札に加える` : '',
+                addDiscard > 0 ? `BURNを${addDiscard}枚捨て札に加える` : '',
+                nextTurnDraw > 0 ? `次ターン${nextTurnDraw}枚ドロー` : '',
+                battleBonusDraw > 0 ? `使用後${battleBonusDraw}枚ドロー` : '',
+                originalNames.length > 0 ? `元カード名${originalNames.length}件` : '',
+            ].filter(Boolean).join('。') + '。',
+        };
+
+        return card;
+    };
+
+    const addStressSynthCardToDeck = () => {
+        setSelectedDeck(prev => [...prev, createStressSynthCard()]);
+    };
+
+    const setStressSynthCardAsResult = () => {
+        setSynthResult(createStressSynthCard());
+    };
+
     const addSynthToDeck = () => {
         if (synthResult) {
             setSelectedDeck(prev => [...prev, { ...synthResult, id: `synth-added-${Date.now()}` }]);
@@ -752,6 +837,24 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
     const totalUiPreviewChecks = Object.values(uiPreviewChecklist).reduce(
         (total, entry) => total + UI_PREVIEW_CHECK_TARGETS.filter(target => entry?.[target.id]).length,
         0,
+    );
+    const renderStressNumberInput = (
+        label: string,
+        value: number,
+        setter: React.Dispatch<React.SetStateAction<number>>,
+        hint?: string,
+    ) => (
+        <label className="flex flex-col gap-1 rounded-lg border border-purple-900/70 bg-black/30 p-2">
+            <span className="text-[10px] font-black text-purple-200">{label}</span>
+            <input
+                type="number"
+                min={0}
+                value={value}
+                onChange={(event) => setter(Number(event.target.value))}
+                className="w-full rounded border border-slate-600 bg-slate-950 px-2 py-1 text-sm font-bold text-white outline-none focus:border-purple-400"
+            />
+            {hint && <span className="text-[9px] leading-tight text-slate-400">{hint}</span>}
+        </label>
     );
 
     return (
@@ -2230,6 +2333,43 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
                                             </div>
                                         </>
                                     )}
+                                </div>
+                                <div className="rounded-xl border border-purple-700/70 bg-purple-950/20 p-4">
+                                    <div className="mb-3 flex flex-col gap-1 md:flex-row md:items-end md:justify-between">
+                                        <div>
+                                            <h4 className="text-sm font-black text-purple-100">合成過多カード再現</h4>
+                                            <p className="text-[10px] leading-relaxed text-purple-200/70">
+                                                効果値の上限なしで、重い合成カードを直接作成します。主に戦闘時の大量ヒット・大量生成・元カード名肥大の検証用です。
+                                            </p>
+                                        </div>
+                                        <div className="flex gap-2">
+                                            <button
+                                                type="button"
+                                                onClick={setStressSynthCardAsResult}
+                                                className="rounded bg-purple-700 px-3 py-2 text-xs font-black text-white hover:bg-purple-600"
+                                            >
+                                                結果に反映
+                                            </button>
+                                            <button
+                                                type="button"
+                                                onClick={addStressSynthCardToDeck}
+                                                className="rounded bg-emerald-600 px-3 py-2 text-xs font-black text-white hover:bg-emerald-500"
+                                            >
+                                                デッキへ追加
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-5 gap-2">
+                                        {renderStressNumberInput('ヒット数', stressHitCount, setStressHitCount, 'playCopies + 1')}
+                                        {renderStressNumberInput('1ヒット威力', stressDamage, setStressDamage)}
+                                        {renderStressNumberInput('即時ドロー', stressDraw, setStressDraw)}
+                                        {renderStressNumberInput('手札生成', stressAddHand, setStressAddHand, 'SHIV')}
+                                        {renderStressNumberInput('山札生成', stressAddDraw, setStressAddDraw, 'WOUND')}
+                                        {renderStressNumberInput('捨て札生成', stressAddDiscard, setStressAddDiscard, 'BURN')}
+                                        {renderStressNumberInput('次ターンドロー', stressNextTurnDraw, setStressNextTurnDraw)}
+                                        {renderStressNumberInput('使用後ドロー', stressBattleBonusDraw, setStressBattleBonusDraw)}
+                                        {renderStressNumberInput('元カード名数', stressOriginalNameCount, setStressOriginalNameCount, 'originalNames')}
+                                    </div>
                                 </div>
                             </div>
                         )}
