@@ -4372,8 +4372,14 @@ textarea {
   }
 }
 
+@media (orientation: portrait) and (max-width: 767px) {
+  .battle-scene-root.battle-ui-custom {
+    --battle-ui-enemy-offset-y-baseline: -60px;
+  }
+}
+
 .battle-scene-root.battle-ui-custom .battle-enemies-area > * {
-  transform: translateY(var(--battle-ui-enemy-offset-y, 0px)) scale(var(--battle-ui-enemy-scale, 1)) !important;
+  transform: translateY(calc(var(--battle-ui-enemy-offset-y, 0px) + var(--battle-ui-enemy-offset-y-baseline, 0px))) scale(var(--battle-ui-enemy-scale, 1)) !important;
   transform-origin: center bottom !important;
 }
 
