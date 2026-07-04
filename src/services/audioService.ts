@@ -31,7 +31,7 @@ class AudioService {
   
   private bgmMode: 'OSCILLATOR' | 'MP3' | 'STUDY' = 'MP3';
   private bgmTheme: BgmThemeId = 'elementary';
-  private bgmVolume: number = 0.4;
+  private bgmVolume: number = 1;
   private sfxVolume: number = 0.6;
   private voiceVolume: number = 0.8;
   private audioBuffers: Record<string, AudioBuffer> = {};
@@ -187,15 +187,15 @@ class AudioService {
   }
 
   public setBgmVolume(volume: number) {
-      this.bgmVolume = Math.max(0, Math.min(1, volume));
+      this.bgmVolume = Math.max(0, Math.min(1.5, volume));
       if (this.bgmGain && this.ctx) {
           this.bgmGain.gain.setTargetAtTime(this.bgmVolume, this.ctx.currentTime, 0.05);
       }
       if (this.currentHtmlAudio) {
-          this.currentHtmlAudio.volume = this.bgmVolume;
+          this.currentHtmlAudio.volume = Math.min(1, this.bgmVolume);
       }
       this.activeBgmHtmlAudios.forEach(audio => {
-          audio.volume = this.bgmVolume;
+          audio.volume = Math.min(1, this.bgmVolume);
       });
   }
 
@@ -204,14 +204,14 @@ class AudioService {
   }
 
   public setSfxVolume(volume: number) {
-      this.sfxVolume = Math.max(0, Math.min(1, volume));
+      this.sfxVolume = Math.max(0, Math.min(1.5, volume));
       if (this.sfxGain && this.ctx) {
           this.sfxGain.gain.setTargetAtTime(this.sfxVolume, this.ctx.currentTime, 0.05);
       }
       this.activeHtmlSfx.forEach((audios, name) => {
           if (this.isVoiceSfxName(name)) return;
           audios.forEach(audio => {
-              audio.volume = this.sfxVolume;
+              audio.volume = Math.min(1, this.sfxVolume);
           });
       });
   }
@@ -221,11 +221,11 @@ class AudioService {
   }
 
   public setVoiceVolume(volume: number) {
-      this.voiceVolume = Math.max(0, Math.min(1, volume));
+      this.voiceVolume = Math.max(0, Math.min(1.5, volume));
       this.activeHtmlSfx.forEach((audios, name) => {
           if (!this.isVoiceSfxName(name)) return;
           audios.forEach(audio => {
-              audio.volume = this.voiceVolume;
+              audio.volume = Math.min(1, this.voiceVolume);
           });
       });
   }
@@ -890,8 +890,6 @@ class AudioService {
           `/${type}.mp3`,
           `${type}.mp3`
       ].map(versionMagicBgmPath);
-      if (await this.playHtmlAudioMp3(paths, loop, type, playbackGeneration)) return;
-      if (!this.isCurrentPlayback(type, playbackGeneration)) return;
       const cacheKey = `${this.bgmTheme}:${type}`;
       let buffer = this.audioBuffers[cacheKey];
       if (!buffer) {

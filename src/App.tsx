@@ -358,9 +358,9 @@ const EMPTY_RACE_EFFECTS: RaceEffectState = {
 
 const DEFAULT_APP_SETTINGS: AppSettings = {
     bgmMode: 'MP3',
-    bgmVolume: 0.4,
-    seVolume: 0.6,
-    voiceVolume: 0.8,
+    bgmVolume: 1,
+    seVolume: 1,
+    voiceVolume: 1,
     reduceScreenShake: false,
     fontSize: 'normal',
     battleUi: {
