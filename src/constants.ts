@@ -538,7 +538,7 @@ export const CARDS_LIBRARY: Record<string, Omit<Card, 'id'>> = {
     SKIM: { name: '速読', cost: 1, type: CardType.SKILL, target: TargetType.SELF, description: '3枚引く。', draw: 3, rarity: 'COMMON', textureRef: 'NOTEBOOK|白|SKILL' },
     TURBO: { name: 'カフェイン', cost: 0, type: CardType.SKILL, target: TargetType.SELF, description: 'E2を得る。虚無追加。', energy: 2, addCardToDraw: { cardName: 'VOID', count: 1 }, rarity: 'COMMON', textureRef: 'POTION|黄|SKILL' },
     BLIND: { name: '目隠し', cost: 0, type: CardType.SKILL, target: TargetType.ENEMY, description: 'へろへろ2を与える。', weak: 2, rarity: 'COMMON', textureRef: 'EYE|灰|SKILL' },
-    TRIP: { name: '足払い', cost: 0, type: CardType.SKILL, target: TargetType.ALL_ENEMIES, description: '敵全体にびくびく2を与える。ブロック3。', vulnerable: 2, rarity: 'COMMON', textureRef: 'SHOE|青|SKILL' },
+    TRIP: { name: '足払い', cost: 0, type: CardType.SKILL, target: TargetType.ALL_ENEMIES, description: '敵全体にびくびく2を与える。ブロック3。', vulnerable: 2, block: 3, rarity: 'COMMON', textureRef: 'SHOE|青|SKILL' },
     DEEP_BREATH: { name: '深呼吸', cost: 0, type: CardType.SKILL, target: TargetType.SELF, description: '捨て札を山札に戻す。1枚引く。廃棄。', shuffleHandToDraw: true, draw: 1, exhaust: true, rarity: 'COMMON', textureRef: 'FLAME|白|SKILL' },
     UPPERCUT: { name: 'アッパー', cost: 2, type: CardType.ATTACK, target: TargetType.ENEMY, description: '13ダメージ。へろへろ1とびくびく1。', damage: 13, weak: 1, vulnerable: 1, rarity: 'RARE', textureRef: 'FIST|攻擊' },
     BLUDGEON: { name: 'げんこつ', cost: 3, type: CardType.ATTACK, target: TargetType.ENEMY, description: '32ダメージを与える。', damage: 32, rarity: 'RARE', textureRef: 'FIST|赤|ATTACK' },

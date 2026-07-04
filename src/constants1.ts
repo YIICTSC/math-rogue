@@ -71,7 +71,7 @@ export const ADDITIONAL_CARDS: Record<string, Omit<Card, 'id'>> = {
   // --- 社会系 (20枚) ---
   SYAKAI_GEOGRAPHY: { name: '日本地図', cost: 1, type: CardType.SKILL, target: TargetType.SELF, description: 'カードを3枚引く。', draw: 3, rarity: 'RARE', textureRef: 'NOTEBOOK|黄|SKILL' },
   SYAKAI_HISTORY: { name: '歴史の教科書', cost: 2, type: CardType.POWER, target: TargetType.SELF, description: 'ターンの開始時、手札の全コストを1下げる。', applyPower: { id: 'COST_REDUCTION', amount: 1 }, rarity: 'LEGENDARY', textureRef: 'NOTEBOOK|茶|POWER' },
-  SYAKAI_COIN: { name: '小銭入れ', cost: 0, type: CardType.SKILL, target: TargetType.SELF, description: '20ゴールドを得る。廃棄。', gold: 20, rarity: 'COMMON', textureRef: 'GEM|黄|SKILL' },
+  SYAKAI_COIN: { name: '小銭入れ', cost: 0, type: CardType.SKILL, target: TargetType.SELF, description: '20ゴールドを得る。廃棄。', gold: 20, exhaust: true, rarity: 'COMMON', textureRef: 'GEM|黄|SKILL' },
   SYAKAI_LAW: { name: '校則遵守', cost: 1, type: CardType.SKILL, target: TargetType.SELF, description: 'キラキラ2（デバフ無効）を得る。', applyPower: { id: 'ARTIFACT', amount: 2 }, rarity: 'UNCOMMON', textureRef: 'SHIELD|白|SKILL' },
   SYAKAI_MARKET: { name: 'バザーの掘り出し物', cost: 1, type: CardType.SKILL, target: TargetType.SELF, description: 'ランダムなポーションを1つ得る。', addPotion: true, rarity: 'RARE', textureRef: 'BACKPACK|桃|SKILL' },
   SYAKAI_CITY: { name: '未来都市', cost: 2, type: CardType.POWER, target: TargetType.SELF, description: 'ターン開始時にエナジー1、ドロー1。', applyPower: { id: 'ENERGY_DRAW_POWER', amount: 1 }, rarity: 'LEGENDARY', textureRef: 'ROBOT|青|POWER' },

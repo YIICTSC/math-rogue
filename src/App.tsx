@@ -8997,6 +8997,7 @@ const App: React.FC = () => {
             p.hand.forEach(c => {
                 if (c.name === 'やけど' || c.name === 'やほど' || c.name === 'BURN') { p.currentHp -= 2; newLogs.push("やけどダメージ"); nextActiveEffects.push({ id: `vfx-burn-${Date.now()}`, type: 'FIRE', targetId: 'player' }); }
                 if (c.name === '虫歯' || c.name === 'DECAY') { p.currentHp -= 2; newLogs.push("虫歯ダメージ"); nextActiveEffects.push({ id: `vfx-decay-${Date.now()}`, type: 'DEBUFF', targetId: 'player' }); }
+                if (c.name === '人間失格' || c.name === 'OSAMU_NIGHT') { p.currentHp -= 3; newLogs.push("人間失格ダメージ"); nextActiveEffects.push({ id: `vfx-osamu-night-${Date.now()}`, type: 'DEBUFF', targetId: 'player' }); }
                 if (c.name === '不安' || c.name === 'DOUBT') p.powers['WEAK'] = (p.powers['WEAK'] || 0) + 1;
                 if (c.name === '恥' || c.name === 'SHAME') p.powers['VULNERABLE'] = (p.powers['VULNERABLE'] || 0) + 1;
                 if (c.name === '後悔' || c.name === 'REGRET') { p.currentHp -= p.hand.length; newLogs.push("後悔ダメージ"); nextActiveEffects.push({ id: `vfx-reg-${Date.now()}`, type: 'SLASH', targetId: 'player' }); }
