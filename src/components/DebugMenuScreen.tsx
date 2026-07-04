@@ -1943,7 +1943,7 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
                                         <h3 className="text-fuchsia-300 font-bold flex items-center">
                                             <Volume2 size={18} className="mr-2" /> マジック編 戦闘ボイス確認
                                         </h3>
-                                        <div className="text-xs text-gray-400">17人 / attack・damage・spell</div>
+                                        <div className="text-xs text-gray-400">17人 / attack・damage・spell / 変身後エフェクト</div>
                                     </div>
                                     <div className="grid grid-cols-1 lg:grid-cols-[260px_1fr] gap-4">
                                         <div className="bg-black/35 border border-gray-700 rounded-lg p-3 space-y-2">
@@ -1971,7 +1971,7 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
                                                         {group.files.map(file => (
                                                             <button
                                                                 key={file}
-                                                                onClick={() => audioService.playMagicVoiceFile(magicVoiceHeroId, file)}
+                                                                onClick={() => audioService.playMagicVoiceFile(magicVoiceHeroId, file, 2200, true)}
                                                                 className="w-full bg-fuchsia-800 hover:bg-fuchsia-700 text-white py-2 rounded font-bold text-xs flex items-center justify-center gap-2"
                                                             >
                                                                 <Volume2 size={13} /> {file}.ogg
