@@ -34,7 +34,6 @@ class AudioService {
   private bgmVolume: number = 0.4;
   private sfxVolume: number = 0.6;
   private voiceVolume: number = 0.8;
-  private readonly masterOutputGain = 0.4;
   private audioBuffers: Record<string, AudioBuffer> = {};
   private sfxBuffers: Record<string, AudioBuffer> = {};
   private sfxLoadPromises: Record<string, Promise<AudioBuffer | null> | undefined> = {};
@@ -98,7 +97,7 @@ class AudioService {
     
     // Master Chain
     this.masterGain = this.ctx.createGain();
-    this.masterGain.gain.value = this.masterOutputGain;
+    this.masterGain.gain.value = 0.4;
     
     // Simple Delay/Reverb Effect (Echo)
     const delay = this.ctx.createDelay();
@@ -119,7 +118,7 @@ class AudioService {
 
     // BGM Bus
     this.bgmGain = this.ctx.createGain();
-    this.bgmGain.gain.value = this.getBgmOutputGain();
+    this.bgmGain.gain.value = this.bgmVolume;
     this.bgmGain.connect(this.masterGain);
 
     // SFX Bus
@@ -190,7 +189,7 @@ class AudioService {
   public setBgmVolume(volume: number) {
       this.bgmVolume = Math.max(0, Math.min(1, volume));
       if (this.bgmGain && this.ctx) {
-          this.bgmGain.gain.setTargetAtTime(this.getBgmOutputGain(), this.ctx.currentTime, 0.05);
+          this.bgmGain.gain.setTargetAtTime(this.bgmVolume, this.ctx.currentTime, 0.05);
       }
       if (this.currentHtmlAudio) {
           this.currentHtmlAudio.volume = this.bgmVolume;
@@ -202,10 +201,6 @@ class AudioService {
 
   public getBgmVolume() {
       return this.bgmVolume;
-  }
-
-  private getBgmOutputGain() {
-      return this.masterOutputGain > 0 ? this.bgmVolume / this.masterOutputGain : this.bgmVolume;
   }
 
   public setSfxVolume(volume: number) {
@@ -809,13 +804,6 @@ class AudioService {
           await this.playRandomBGM();
           return;
       }
-
-      if (this.bgmVolume <= 0) {
-          this.stopBGM();
-          this.currentBgmType = type;
-          this.isLooping = loop;
-          return;
-      }
       
       if (this.isPlayingBGM && this.currentBgmType === type) return;
       this.init(); 
@@ -902,6 +890,8 @@ class AudioService {
           `/${type}.mp3`,
           `${type}.mp3`
       ].map(versionMagicBgmPath);
+      if (await this.playHtmlAudioMp3(paths, loop, type, playbackGeneration)) return;
+      if (!this.isCurrentPlayback(type, playbackGeneration)) return;
       const cacheKey = `${this.bgmTheme}:${type}`;
       let buffer = this.audioBuffers[cacheKey];
       if (!buffer) {
