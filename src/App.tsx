@@ -393,6 +393,15 @@ const DEFAULT_APP_SETTINGS: AppSettings = {
     lowDataMode: false
 };
 
+const migrateSavedAudioVolumeDefaults = (saved: AppSettings | null): Partial<AppSettings> => {
+    if (!saved) return {};
+    const migrated: Partial<AppSettings> = {};
+    if (saved.bgmVolume === 0.4) migrated.bgmVolume = DEFAULT_APP_SETTINGS.bgmVolume;
+    if (saved.seVolume === 0.6) migrated.seVolume = DEFAULT_APP_SETTINGS.seVolume;
+    if (saved.voiceVolume === 0.8) migrated.voiceVolume = DEFAULT_APP_SETTINGS.voiceVolume;
+    return migrated;
+};
+
 const normalizeBattleUiSettings = (
     saved?: (Partial<BattleUiSettings> & { controlBarHeightRem?: number }) | null
 ): BattleUiSettings => ({
@@ -1125,6 +1134,7 @@ const App: React.FC = () => {
         const merged = {
             ...DEFAULT_APP_SETTINGS,
             ...(saved || {}),
+            ...migrateSavedAudioVolumeDefaults(saved),
             battleUi: baseBattleUi,
             battleUiPortrait: normalizeBattleUiSettings(saved?.battleUiPortrait || baseBattleUi),
             battleUiLandscape: normalizeBattleUiSettings(saved?.battleUiLandscape || baseBattleUi)
