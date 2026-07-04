@@ -34,6 +34,7 @@ class AudioService {
   private bgmVolume: number = 0.4;
   private sfxVolume: number = 0.6;
   private voiceVolume: number = 0.8;
+  private readonly masterOutputGain = 0.4;
   private audioBuffers: Record<string, AudioBuffer> = {};
   private sfxBuffers: Record<string, AudioBuffer> = {};
   private sfxLoadPromises: Record<string, Promise<AudioBuffer | null> | undefined> = {};
@@ -97,7 +98,7 @@ class AudioService {
     
     // Master Chain
     this.masterGain = this.ctx.createGain();
-    this.masterGain.gain.value = 0.4;
+    this.masterGain.gain.value = this.masterOutputGain;
     
     // Simple Delay/Reverb Effect (Echo)
     const delay = this.ctx.createDelay();
@@ -118,7 +119,7 @@ class AudioService {
 
     // BGM Bus
     this.bgmGain = this.ctx.createGain();
-    this.bgmGain.gain.value = this.bgmVolume;
+    this.bgmGain.gain.value = this.getBgmOutputGain();
     this.bgmGain.connect(this.masterGain);
 
     // SFX Bus
@@ -189,7 +190,7 @@ class AudioService {
   public setBgmVolume(volume: number) {
       this.bgmVolume = Math.max(0, Math.min(1, volume));
       if (this.bgmGain && this.ctx) {
-          this.bgmGain.gain.setTargetAtTime(this.bgmVolume, this.ctx.currentTime, 0.05);
+          this.bgmGain.gain.setTargetAtTime(this.getBgmOutputGain(), this.ctx.currentTime, 0.05);
       }
       if (this.currentHtmlAudio) {
           this.currentHtmlAudio.volume = this.bgmVolume;
@@ -201,6 +202,10 @@ class AudioService {
 
   public getBgmVolume() {
       return this.bgmVolume;
+  }
+
+  private getBgmOutputGain() {
+      return this.masterOutputGain > 0 ? this.bgmVolume / this.masterOutputGain : this.bgmVolume;
   }
 
   public setSfxVolume(volume: number) {
@@ -802,6 +807,13 @@ class AudioService {
   public async playBGM(type: 'battle' | 'mid_boss' | 'boss' | 'final_boss' | 'menu' | 'map' | 'shop' | 'event' | 'rest' | 'reward' | 'victory' | 'game_over' | 'math' | 'poker_shop' | 'poker_play' | 'survivor_metal' | 'school_psyche' | 'dungeon_gym' | 'dungeon_science' | 'dungeon_music' | 'dungeon_library' | 'dungeon_roof' | 'dungeon_boss' | 'paper_plane_setup' | 'paper_plane_battle' | 'paper_plane_vacation' | 'relic_select' | 'kocho_setup' | 'kocho_battle' | 'kocho_boss' | 'random', loop: boolean = true) {
       if (type === 'random') {
           await this.playRandomBGM();
+          return;
+      }
+
+      if (this.bgmVolume <= 0) {
+          this.stopBGM();
+          this.currentBgmType = type;
+          this.isLooping = loop;
           return;
       }
       

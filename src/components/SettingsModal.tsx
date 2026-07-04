@@ -29,6 +29,12 @@ export type AppSettings = {
   lowDataMode: boolean;
 };
 
+const bgmModeLabels: Record<BgmMode, string> = {
+  STUDY: 'BGMなし',
+  MP3: 'MP3',
+  OSCILLATOR: '内蔵音源'
+};
+
 type Props = {
   open: boolean;
   tab: SettingsTab;
@@ -129,9 +135,10 @@ const SettingsModal: React.FC<Props> = ({
                 <div className="font-bold">{trans("BGMモード", languageMode)}</div>
                 <div className="flex gap-2 flex-wrap">
                   {(['STUDY','MP3','OSCILLATOR'] as BgmMode[]).map(mode => (
-                    <button key={mode} onClick={() => onChange('bgmMode', mode)} className={`px-3 py-1 rounded border ${settings.bgmMode === mode ? 'border-cyan-300 bg-cyan-700' : 'border-slate-600 bg-slate-800'}`}>{mode}</button>
+                    <button key={mode} onClick={() => onChange('bgmMode', mode)} className={`px-3 py-1 rounded border ${settings.bgmMode === mode ? 'border-cyan-300 bg-cyan-700' : 'border-slate-600 bg-slate-800'}`}>{trans(bgmModeLabels[mode], languageMode)}</button>
                   ))}
                 </div>
+                <div className="text-xs text-slate-400">{trans("Bluetooth機器が不安定な場合は「BGMなし」を使用してください。", languageMode)}</div>
               </div>
               <label className="block">{trans("BGM音量", languageMode)}: {Math.round(settings.bgmVolume * 100)}%
                 <input className="w-full" type="range" min={0} max={100} value={Math.round(settings.bgmVolume * 100)} onInput={e => onChange('bgmVolume', Number(e.currentTarget.value) / 100)} onChange={e => onChange('bgmVolume', Number(e.target.value) / 100)} />
