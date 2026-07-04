@@ -3,7 +3,7 @@ import { Settings, X, Volume2, Monitor, Wifi } from 'lucide-react';
 import { LanguageMode } from '../types';
 import { trans } from '../utils/textUtils';
 
-export type BgmMode = 'STUDY' | 'MP3' | 'OSCILLATOR';
+export type BgmMode = 'STUDY' | 'MP3';
 export type SettingsTab = 'AUDIO' | 'DISPLAY' | 'BATTLE' | 'COMM';
 
 export type BattleUiSettings = {
@@ -128,7 +128,7 @@ const SettingsModal: React.FC<Props> = ({
               <div className="rounded border border-slate-700 p-3 space-y-2">
                 <div className="font-bold">{trans("BGMモード", languageMode)}</div>
                 <div className="flex gap-2 flex-wrap">
-                  {(['STUDY','MP3','OSCILLATOR'] as BgmMode[]).map(mode => (
+                  {(['STUDY','MP3'] as BgmMode[]).map(mode => (
                     <button key={mode} onClick={() => onChange('bgmMode', mode)} className={`px-3 py-1 rounded border ${settings.bgmMode === mode ? 'border-cyan-300 bg-cyan-700' : 'border-slate-600 bg-slate-800'}`}>{mode}</button>
                   ))}
                 </div>

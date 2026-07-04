@@ -13,6 +13,8 @@ const versionMagicBgmPath = (path: string) =>
         ? `${path}${path.includes('?') ? '&' : '?'}v=${encodeURIComponent(APP_ASSET_VERSION)}`
         : path;
 
+type HtmlSfxEffect = 'magic-transform-voice';
+
 class AudioService {
   private ctx: AudioContext | null = null;
   private masterGain: GainNode | null = null;
@@ -1191,16 +1193,21 @@ class AudioService {
       maxDurationMs: number,
       overlap: boolean,
       generation: number,
+      effect?: HtmlSfxEffect,
   ): Promise<boolean> {
       for (const path of paths) {
+          let effectCleanup = () => {};
           try {
               const audio = new Audio(path);
               audio.preload = 'auto';
-              audio.volume = this.getHtmlSfxVolume(name);
+              const htmlVolume = this.getHtmlSfxVolume(name);
+              audio.volume = effect ? 1 : htmlVolume;
+              effectCleanup = this.attachHtmlSfxEffect(audio, htmlVolume, effect);
               await audio.play();
               if (!overlap && this.sfxPlaybackGenerations.get(name) !== generation) {
                   audio.pause();
                   audio.currentTime = 0;
+                  effectCleanup();
                   return true;
               }
               if (!overlap) this.stopActiveSfx(name);
@@ -1213,6 +1220,7 @@ class AudioService {
                   if (timer) window.clearTimeout(timer);
                   audios.delete(audio);
                   if (audios.size === 0) this.activeHtmlSfx.delete(name);
+                  effectCleanup();
               };
               audio.onended = cleanup;
               const timer = window.setTimeout(() => {
@@ -1243,10 +1251,52 @@ class AudioService {
                   this.htmlSfxStopTimers.set(audio, settleTimer);
               });
           } catch {
+              effectCleanup();
               // Try the next URL shape before falling back to WebAudio or synth.
           }
       }
       return false;
+  }
+
+  private attachHtmlSfxEffect(audio: HTMLAudioElement, volume: number, effect?: HtmlSfxEffect) {
+      if (!effect || !this.ctx || !this.sfxGain) return () => {};
+      try {
+          const source = this.ctx.createMediaElementSource(audio);
+          const dryGain = this.ctx.createGain();
+          const wetGain = this.ctx.createGain();
+          const delay = this.ctx.createDelay(0.5);
+          const feedback = this.ctx.createGain();
+          const filter = this.ctx.createBiquadFilter();
+
+          dryGain.gain.value = volume;
+          wetGain.gain.value = volume * 0.2;
+          delay.delayTime.value = 0.18;
+          feedback.gain.value = 0.24;
+          filter.type = 'lowpass';
+          filter.frequency.value = 2800;
+          filter.Q.value = 0.6;
+
+          source.connect(dryGain);
+          dryGain.connect(this.sfxGain);
+          source.connect(delay);
+          delay.connect(filter);
+          filter.connect(wetGain);
+          wetGain.connect(this.sfxGain);
+          filter.connect(feedback);
+          feedback.connect(delay);
+
+          return () => {
+              try { source.disconnect(); } catch {}
+              try { dryGain.disconnect(); } catch {}
+              try { wetGain.disconnect(); } catch {}
+              try { delay.disconnect(); } catch {}
+              try { feedback.disconnect(); } catch {}
+              try { filter.disconnect(); } catch {}
+          };
+      } catch {
+          audio.volume = volume;
+          return () => {};
+      }
   }
 
   private isVoiceSfxName(name: string) {
@@ -1345,15 +1395,15 @@ class AudioService {
       this.playSfxMp3(`status-effects/${effect}`, fallbackByEffect[effect], { maxDurationMs: 1400 });
   }
 
-  public playMagicVoice(heroId: string | undefined, action: 'attack' | 'damage' | 'spell' = 'attack', variantCount = 3, spellIndex?: number) {
+  public playMagicVoice(heroId: string | undefined, action: 'attack' | 'damage' | 'spell' = 'attack', variantCount = 3, spellIndex?: number, transformed = false) {
       const safeAction = action.replace(/[^a-z0-9_-]/gi, '').toLowerCase();
       const voiceName = safeAction === 'spell'
           ? `spell-${Math.max(1, Math.min(3, spellIndex ?? 1))}`
           : `${safeAction}-${Math.floor(Math.random() * Math.max(1, variantCount)) + 1}`;
-      this.playMagicVoiceFile(heroId, voiceName, 2200);
+      this.playMagicVoiceFile(heroId, voiceName, 2200, transformed);
   }
 
-  public playMagicVoiceFile(heroId: string | undefined, voiceName: string | undefined, maxDurationMs = 2200) {
+  public playMagicVoiceFile(heroId: string | undefined, voiceName: string | undefined, maxDurationMs = 2200, transformed = false) {
       if (!heroId || !voiceName) return Promise.resolve(false);
       this.init();
       if (!this.ctx || !this.sfxGain || this.isMuted) return Promise.resolve(false);
@@ -1379,6 +1429,7 @@ class AudioService {
           maxDurationMs,
           false,
           generation,
+          transformed ? 'magic-transform-voice' : undefined,
       );
   }
 

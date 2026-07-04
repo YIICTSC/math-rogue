@@ -402,6 +402,10 @@ const migrateSavedAudioVolumeDefaults = (saved: AppSettings | null): Partial<App
     return migrated;
 };
 
+const normalizeBgmMode = (mode: string | null | undefined): AppSettings['bgmMode'] => (
+    mode === 'STUDY' ? 'STUDY' : 'MP3'
+);
+
 const normalizeBattleUiSettings = (
     saved?: (Partial<BattleUiSettings> & { controlBarHeightRem?: number }) | null
 ): BattleUiSettings => ({
@@ -1119,9 +1123,8 @@ const App: React.FC = () => {
     const [transferExportCount, setTransferExportCount] = useState<number>(0);
     const [transferImportText, setTransferImportText] = useState<string>('');
     const [transferStatus, setTransferStatus] = useState<DataTransferStatus | null>(null);
-    const [bgmMode, setBgmMode] = useState<'OSCILLATOR' | 'MP3' | 'STUDY'>(() => {
-        const saved = storageService.getBgmMode() as 'OSCILLATOR' | 'MP3' | 'STUDY' | null;
-        return saved || 'MP3';
+    const [bgmMode, setBgmMode] = useState<AppSettings['bgmMode']>(() => {
+        return normalizeBgmMode(storageService.getBgmMode());
     });
     const [showBgmSwitchHint, setShowBgmSwitchHint] = useState<boolean>(() => !storageService.getSeenBgmSwitchHint());
     const [showSettingsModal, setShowSettingsModal] = useState(false);
@@ -1134,6 +1137,7 @@ const App: React.FC = () => {
         const merged = {
             ...DEFAULT_APP_SETTINGS,
             ...(saved || {}),
+            bgmMode: normalizeBgmMode(saved?.bgmMode || storageService.getBgmMode()),
             ...migrateSavedAudioVolumeDefaults(saved),
             battleUi: baseBattleUi,
             battleUiPortrait: normalizeBattleUiSettings(saved?.battleUiPortrait || baseBattleUi),
@@ -3612,10 +3616,7 @@ const App: React.FC = () => {
 
     const toggleBgmMode = () => {
         dismissBgmSwitchHint();
-        let nextMode: 'OSCILLATOR' | 'MP3' | 'STUDY';
-        if (bgmMode === 'STUDY') nextMode = 'MP3';
-        else if (bgmMode === 'MP3') nextMode = 'OSCILLATOR';
-        else nextMode = 'STUDY';
+        const nextMode: AppSettings['bgmMode'] = bgmMode === 'STUDY' ? 'MP3' : 'STUDY';
 
         setBgmMode(nextMode);
         setAppSettings(prev => ({ ...prev, bgmMode: nextMode }));
@@ -6654,7 +6655,7 @@ const App: React.FC = () => {
         const highSchoolVoiceHeroId = gameState.visualTheme === 'high-school' ? actionPlayer.id : undefined;
         const isOwnMagicRuleCard = !!magicVoiceHeroId && card.magicHeroId === magicVoiceHeroId && card.magicRuleCardIndex !== undefined;
         if (!isCoopHostRemoteAction && isOwnMagicRuleCard) {
-            audioService.playMagicVoice(magicVoiceHeroId, 'spell', 3, card.magicRuleCardIndex + 1);
+            audioService.playMagicVoice(magicVoiceHeroId, 'spell', 3, card.magicRuleCardIndex + 1, actionPlayer.magicTransformed);
         }
         if (!isCoopHostRemoteAction && highSchoolVoiceHeroId) {
             audioService.playHighSchoolVoice(highSchoolVoiceHeroId, getHighSchoolBattleVoiceActionForCard(card));
@@ -6672,7 +6673,7 @@ const App: React.FC = () => {
             const audioPreviewHitCount = Math.min(cardAttackPreviewHitCount, MAX_CARD_DETAIL_VFX);
             if (!isCoopHostRemoteAction) audioService.playAttackEffectSound(getAttackEffectKeyForCard(card, audioPreviewHitCount), audioPreviewHitCount);
             if (!isCoopHostRemoteAction && magicVoiceHeroId && !isOwnMagicRuleCard) {
-                audioService.playMagicVoice(magicVoiceHeroId, 'attack');
+                audioService.playMagicVoice(magicVoiceHeroId, 'attack', 3, undefined, actionPlayer.magicTransformed);
             }
         } else if (!isCoopHostRemoteAction) {
             audioService.playSound('block');
@@ -8937,7 +8938,7 @@ const App: React.FC = () => {
                         audioService.playSound('damage');
                         if (prev.visualTheme === 'magic' && lastMagicDamageVoiceActionRef.current !== enemyActionKey) {
                             lastMagicDamageVoiceActionRef.current = enemyActionKey;
-                            audioService.playMagicVoice(getMagicProtagonistId(p), 'damage');
+                            audioService.playMagicVoice(getMagicProtagonistId(p), 'damage', 3, undefined, p.magicTransformed);
                         }
                         if (prev.visualTheme === 'high-school') {
                             audioService.playHighSchoolVoice(p.id, 'damage');
@@ -13413,9 +13414,7 @@ const App: React.FC = () => {
                                     onClick={toggleBgmMode}
                                     className={`flex h-9 items-center border-t-2 border-l-2 border-r-4 border-b-4 px-2 text-[10px] sm:text-xs font-black uppercase tracking-[0.08em] shadow-[0_0_0_1px_rgba(0,0,0,0.45)] transition-all active:translate-x-[2px] active:translate-y-[2px] active:border-r-2 active:border-b-2 ${bgmMode === 'STUDY'
                                             ? 'bg-indigo-950/95 text-indigo-200 border-t-indigo-300 border-l-indigo-300 border-r-indigo-700 border-b-indigo-700'
-                                            : bgmMode === 'MP3'
-                                                ? 'bg-emerald-950/95 text-emerald-200 border-t-emerald-300 border-l-emerald-300 border-r-emerald-700 border-b-emerald-700'
-                                                : 'bg-cyan-950/95 text-cyan-100 border-t-cyan-300 border-l-cyan-300 border-r-cyan-700 border-b-cyan-700'
+                                            : 'bg-emerald-950/95 text-emerald-200 border-t-emerald-300 border-l-emerald-300 border-r-emerald-700 border-b-emerald-700'
                                         }`}
                                     title={trans("BGMモード切替", languageMode)}
                                 >
@@ -13423,9 +13422,7 @@ const App: React.FC = () => {
                                     {trans(
                                         bgmMode === 'STUDY'
                                             ? 'BGM: 学習'
-                                            : bgmMode === 'MP3'
-                                                ? 'BGM: MP3'
-                                                : 'BGM: 電子音',
+                                            : 'BGM: MP3',
                                         languageMode
                                     )}
                                 </button>
