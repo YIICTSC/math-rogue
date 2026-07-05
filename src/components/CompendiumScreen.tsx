@@ -364,7 +364,7 @@ const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, 
                 {activeTab === 'CARDS' && (
                     <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 xl:grid-cols-8 gap-4 justify-items-center">
                         {allCards.map((template, idx) => {
-                            const isUnlocked = isDebug || visualTheme === 'magic' || unlockedCardNames.includes(template.name);
+                            const isUnlocked = isDebug || unlockedCardNames.includes(template.name);
                             const cardInstance: ICard = { id: `compendium-${idx}`, ...template };
 
                             return (

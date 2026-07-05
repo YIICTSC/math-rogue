@@ -1,6 +1,7 @@
 
 import { AssignmentAnswerRecord, AssignmentPayload, GameState, GameScreen, RankingEntry, Card, PokerScoreEntry, SurvivorScoreEntry, DungeonScoreEntry, PokerRunState, KochoScoreEntry, PaperPlaneScoreEntry, LanguageMode, GoHomeScoreEntry, StudentProfile } from '../types';
 import type { MagicEndingGalleryEntry } from './magicEndingService';
+import type { VisualThemeId } from '../data/visualThemes';
 
 const STORAGE_KEY_UNLOCKED_CARDS = 'pixel_spire_unlocked_cards_v1';
 const STORAGE_KEY_UNLOCKED_RELICS = 'pixel_spire_unlocked_relics_v1';
@@ -10,6 +11,7 @@ const STORAGE_KEY_MAGIC_ENDING_GALLERY = 'pixel_spire_magic_ending_gallery_v1';
 
 const STORAGE_KEY_GAME_STATE = 'pixel_spire_save_state_v1';
 const STORAGE_KEY_CLEAR_COUNT = 'pixel_spire_clear_count_v1';
+const STORAGE_KEY_THEME_CLEAR_COUNTS = 'pixel_spire_theme_clear_counts_v1';
 const STORAGE_KEY_RANKING = 'pixel_spire_ranking_v1';
 const STORAGE_KEY_POKER_RANKING = 'pixel_spire_poker_ranking_v1';
 const STORAGE_KEY_SURVIVOR_RANKING = 'pixel_spire_survivor_ranking_v1';
@@ -517,6 +519,39 @@ export const storageService = {
           localStorage.setItem(STORAGE_KEY_CLEAR_COUNT, (current + 1).toString());
       } catch (e) {
           console.warn("Failed to save clear count", e);
+      }
+  },
+
+  getThemeClearCounts: (): Record<VisualThemeId, number> => {
+      try {
+          const stored = localStorage.getItem(STORAGE_KEY_THEME_CLEAR_COUNTS);
+          const parsed = stored ? JSON.parse(stored) : {};
+          return {
+              elementary: Math.max(0, Number(parsed.elementary) || 0),
+              'high-school': Math.max(0, Number(parsed['high-school']) || 0),
+              magic: Math.max(0, Number(parsed.magic) || 0),
+          };
+      } catch (e) {
+          return { elementary: 0, 'high-school': 0, magic: 0 };
+      }
+  },
+
+  getThemeClearCount: (theme: VisualThemeId): number => {
+      return storageService.getThemeClearCounts()[theme] || 0;
+  },
+
+  incrementThemeClearCount: (theme: VisualThemeId): number => {
+      try {
+          const current = storageService.getThemeClearCounts();
+          const nextCount = (current[theme] || 0) + 1;
+          localStorage.setItem(STORAGE_KEY_THEME_CLEAR_COUNTS, JSON.stringify({
+              ...current,
+              [theme]: nextCount,
+          }));
+          return nextCount;
+      } catch (e) {
+          console.warn("Failed to save theme clear count", e);
+          return storageService.getThemeClearCount(theme);
       }
   },
 
@@ -1298,6 +1333,7 @@ export const storageService = {
       localStorage.removeItem(STORAGE_KEY_MAGIC_ENDING_GALLERY);
       localStorage.removeItem(STORAGE_KEY_GAME_STATE);
       localStorage.removeItem(STORAGE_KEY_CLEAR_COUNT);
+      localStorage.removeItem(STORAGE_KEY_THEME_CLEAR_COUNTS);
       localStorage.removeItem(STORAGE_KEY_RANKING);
       localStorage.removeItem(STORAGE_KEY_POKER_RANKING);
       localStorage.removeItem(STORAGE_KEY_POKER_STATE);

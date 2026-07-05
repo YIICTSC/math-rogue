@@ -1080,6 +1080,7 @@ const App: React.FC = () => {
     }, [visualTheme, gameState.player.magicProtagonistGender]);
     const handleVisualThemeSelect = useCallback((nextTheme: VisualThemeId) => {
         setVisualTheme(nextTheme);
+        setClearCount(storageService.getThemeClearCount(nextTheme));
         void audioService.switchThemeAndPlayBGM(getBgmThemeForPlayer(nextTheme, gameState.player), 'menu');
     }, [gameState.player.magicProtagonistGender]);
     const getRandomCurrentStoryIndex = useCallback(() => {
@@ -1405,7 +1406,7 @@ const App: React.FC = () => {
     const [treasureRewards, setTreasureRewards] = useState<RewardItem[]>([]);
     const [treasureOpened, setTreasureOpened] = useState(false);
     const [treasurePools, setTreasurePools] = useState<CoopTreasurePool[]>([]);
-    const [clearCount, setClearCount] = useState<number>(0);
+    const [clearCount, setClearCount] = useState<number>(() => storageService.getThemeClearCount(visualTheme));
     const [maxUnlockedDifficulty, setMaxUnlockedDifficulty] = useState<number>(() => storageService.getMaxUnlockedDifficulty());
     const [raceSession, setRaceSession] = useState<RaceSession | null>(null);
     const [coopSession, setCoopSession] = useState<CoopSession | null>(null);
@@ -3475,7 +3476,7 @@ const App: React.FC = () => {
         const unlocked = storageService.getUnlockedCards();
         setUnlockedCardNames(unlocked);
         setHasSave(storageService.hasSaveFile());
-        setClearCount(storageService.getClearCount());
+        setClearCount(storageService.getThemeClearCount(visualTheme));
         setIsMathDebugSkipped(storageService.getDebugMathSkip());
         setIsDebugHpOne(storageService.getDebugHpOne());
         setIsMiniGameDebugUnlocked(storageService.getDebugMiniGameUnlock());
@@ -3668,15 +3669,17 @@ const App: React.FC = () => {
         }
 
         if (isEndingReturn) {
-            const previousClearCount = storageService.getClearCount();
+            const completedTheme = stateRef.current.visualTheme || visualTheme;
+            const completedThemeCharacters = getThemedCharacters(CHARACTERS, completedTheme);
+            const previousClearCount = storageService.getThemeClearCount(completedTheme);
+            const nextClearCount = storageService.incrementThemeClearCount(completedTheme);
             storageService.incrementClearCount();
-            const nextClearCount = previousClearCount + 1;
-            const previousUnlockedCount = Math.min(themedCharacters.length, previousClearCount + 2);
-            const nextUnlockedCount = Math.min(themedCharacters.length, nextClearCount + 2);
-            setClearCount(nextClearCount);
-            setNewlyUnlockedCharacters(themedCharacters.slice(previousUnlockedCount, nextUnlockedCount));
+            const previousUnlockedCount = Math.min(completedThemeCharacters.length, previousClearCount + 2);
+            const nextUnlockedCount = Math.min(completedThemeCharacters.length, nextClearCount + 2);
+            setClearCount(storageService.getThemeClearCount(visualTheme));
+            setNewlyUnlockedCharacters(completedThemeCharacters.slice(previousUnlockedCount, nextUnlockedCount));
         } else if (isDebugReturn) {
-            const nextClearCount = storageService.getClearCount();
+            const nextClearCount = storageService.getThemeClearCount(visualTheme);
             const previousUnlockedCount = Math.min(themedCharacters.length, debugMenuStartClearCount + 2);
             const nextUnlockedCount = Math.min(themedCharacters.length, nextClearCount + 2);
             setClearCount(nextClearCount);
@@ -3722,15 +3725,16 @@ const App: React.FC = () => {
     };
 
     const openDebugMenu = useCallback(() => {
-        setDebugMenuStartClearCount(storageService.getClearCount());
+        setDebugMenuStartClearCount(storageService.getThemeClearCount(visualTheme));
         setDebugMenuStartMathCorrect(storageService.getMathCorrectCount());
         setGameState(prev => ({ ...prev, screen: GameScreen.DEBUG_MENU }));
-    }, []);
+    }, [visualTheme]);
 
     const handleDebugAddClearCount = useCallback(() => {
+        storageService.incrementThemeClearCount(visualTheme);
         storageService.incrementClearCount();
-        setClearCount(storageService.getClearCount());
-    }, []);
+        setClearCount(storageService.getThemeClearCount(visualTheme));
+    }, [visualTheme]);
 
     const handleDebugBoostMathCorrect = useCallback(() => {
         const current = storageService.getMathCorrectCount();
