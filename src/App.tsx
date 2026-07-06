@@ -60,6 +60,7 @@ import MiniGameSelectScreen from './components/MiniGameSelectScreen';
 import MiniGameRouter from './components/MiniGameRouter'; // Added
 import { MINI_GAMES } from './miniGameConfig'; // Added
 import DodgeballShooting from './components/DodgeballShooting';
+import BasketballLayupShooting from './components/BasketballLayupShooting';
 import FinalBridgeScreen from './components/FinalBridgeScreen';
 import MagicRomanceEndingScreen from './components/MagicRomanceEndingScreen';
 import { getMagicEndingGalleryEntries, hasMagicEnding } from './services/magicEndingService';
@@ -4928,6 +4929,31 @@ const App: React.FC = () => {
                 return prev;
             }
 
+            if (screen === GameScreen.DODGEBALL_SHOOTING || screen === GameScreen.BASKETBALL_LAYUP) {
+                const isBasketballPreview = screen === GameScreen.BASKETBALL_LAYUP;
+                const previewCharacters = isBasketballPreview
+                    ? getThemedCharacters(CHARACTERS, 'high-school')
+                    : CHARACTERS;
+                return {
+                    ...prev,
+                    screen,
+                    visualTheme: isBasketballPreview ? 'high-school' : 'elementary',
+                    challengeMode: undefined,
+                    enemies: createUiPreviewEnemies(1).map(enemy => ({
+                        ...enemy,
+                        name: isBasketballPreview ? 'バスケ部の壁' : 'いたずら上級生',
+                        enemyType: isBasketballPreview ? 'GUARDIAN' : 'TRICKSTER',
+                    })),
+                    player: {
+                        ...prev.player,
+                        id: 'DODGEBALL',
+                        imageData: previewCharacters.find(character => character.id === 'DODGEBALL')?.imageData || prev.player.imageData,
+                        currentHp: Math.max(1, prev.player.currentHp),
+                    },
+                    coopBattleState: null,
+                };
+            }
+
             if (screen === GameScreen.FLOOR_RESULT || screen === GameScreen.ENDING || screen === GameScreen.GAME_OVER) {
                 const isGameOverPreview = screen === GameScreen.GAME_OVER;
                 const isEndingPreview = screen === GameScreen.ENDING;
@@ -4991,7 +5017,7 @@ const App: React.FC = () => {
                 coopBattleState: null,
             };
         });
-    }, [applyUiPreviewBattle, coopBattleKey, coopBattleQueue, coopEnemyTurnCursor, coopPlayerSnapshots, coopSession, coopSupportCards, uiPreviewBattleConfig]);
+    }, [applyUiPreviewBattle, coopBattleKey, coopBattleQueue, coopEnemyTurnCursor, coopPlayerSnapshots, coopSession, coopSupportCards, createUiPreviewEnemies, themedCharacters, uiPreviewBattleConfig]);
 
     const closeUiPreview = useCallback(() => {
         const snapshot = uiPreviewSnapshotRef.current;
@@ -5801,7 +5827,10 @@ const App: React.FC = () => {
                 };
 
                 if (nextState.visualTheme !== 'magic' && p.id === 'DODGEBALL' && (node.type === NodeType.COMBAT || node.type === NodeType.START)) {
-                    setGameState({ ...nextGameState, screen: GameScreen.DODGEBALL_SHOOTING });
+                    setGameState({
+                        ...nextGameState,
+                        screen: nextState.visualTheme === 'high-school' ? GameScreen.BASKETBALL_LAYUP : GameScreen.DODGEBALL_SHOOTING
+                    });
                 } else {
                     setCurrentBattleBackgroundId(battleBackgroundScene.id);
                     setGameState({ ...nextGameState, screen: GameScreen.BATTLE });
@@ -6036,6 +6065,22 @@ const App: React.FC = () => {
                 screen: GameScreen.BATTLE,
                 enemies: [],
                 narrativeLog: [...prev.narrativeLog, "ドッジボールで撃破！戦闘をスキップします。"]
+            }));
+        } else {
+            setGameState(prev => ({ ...prev, screen: GameScreen.BATTLE }));
+            audioService.playBGM('battle');
+            setTurnLog(getSelfTurnLogLabel());
+        }
+    };
+
+    const handleBasketballLayupResult = (hit: boolean) => {
+        if (hit) {
+            audioService.playSound('win');
+            setGameState(prev => ({
+                ...prev,
+                screen: GameScreen.BATTLE,
+                enemies: [],
+                narrativeLog: [...prev.narrativeLog, "速攻レイアップ成功！戦闘をスキップします。"]
             }));
         } else {
             setGameState(prev => ({ ...prev, screen: GameScreen.BATTLE }));
@@ -14721,10 +14766,20 @@ const App: React.FC = () => {
 
                 {gameState.screen === GameScreen.DODGEBALL_SHOOTING && (
                     <div className="absolute inset-0">
-                        < DodgeballShooting
+                        <DodgeballShooting
                             enemy={gameState.enemies[0]}
                             playerImage={gameState.player.imageData}
                             onComplete={handleDodgeballResult}
+                        />
+                    </div>
+                )}
+
+                {gameState.screen === GameScreen.BASKETBALL_LAYUP && (
+                    <div className="absolute inset-0">
+                        <BasketballLayupShooting
+                            enemy={gameState.enemies[0]}
+                            playerImage={gameState.player.imageData}
+                            onComplete={handleBasketballLayupResult}
                         />
                     </div>
                 )}

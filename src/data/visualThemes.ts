@@ -7,39 +7,81 @@ export type VisualThemeId = 'elementary' | 'high-school' | 'magic';
 export type HighSchoolHeroAction = 'idle' | 'attack' | 'skill';
 export type HighSchoolEnemyAction = HighSchoolHeroAction;
 
-const HIGH_SCHOOL_CHARACTER_NAMES = [
-  '反逆の高校生',
-  '生物部の先輩',
-  '謎めく転入生',
-  '化学研究会長',
-  'バスケ部エース',
-  '放送部ディレクター',
-  '文芸部書記',
-  '学食の料理長',
-  '園芸部部長',
+const HIGH_SCHOOL_CHARACTER_ORDER = [
+  'WARRIOR',
+  'CARETAKER',
+  'ASSASSIN',
+  'DODGEBALL',
+  'BARD',
+  'LIBRARIAN',
+  'CHEF',
+  'GARDENER',
+  'MAGE',
 ];
 
-const HIGH_SCHOOL_CHARACTER_DESCRIPTIONS = [
-  '【攻撃タイプ】高い体力と正面突破の攻撃で戦う、扱いやすい高校編の主人公。',
-  '【捕獲タイプ】生物部で培った観察眼を活かし、倒した敵をカード化して戦う。',
-  '【テクニカル】毒による継続ダメージが得意。反逆の高校生が最初からパートナーとして参戦する。',
-  '【実験タイプ】3枚のカードを合成し、複数効果を持つキメラカードを作成できる。',
-  '【スピード】ドローとディスカードを軸に動き、ドッジボールで先制攻撃を狙える。',
-  '【デバフ・反射】敵を弱体化し、応答で攻撃を跳ね返す放送部の戦術家。',
-  '【戦略・保留】手札を残す保留と物語カードで、戦局をじっくり組み立てる。',
-  '【パワー】開始時に解放済みカードから初期デッキを組み、重い一撃で押し切る。',
-  '【育成タイプ】菜園で種を育て、強力な植物カードへ成長させて戦う大器晩成型。',
-];
+const HIGH_SCHOOL_CHARACTER_CONFIG: Record<string, { name: string; description: string; imageIndex: number }> = {
+  WARRIOR: {
+    name: '反逆の高校生',
+    description: '【攻撃タイプ】高い体力と正面突破の攻撃で戦う、扱いやすい高校編の主人公。',
+    imageIndex: 0,
+  },
+  CARETAKER: {
+    name: '生物部の先輩',
+    description: '【捕獲タイプ】生物部で培った観察眼を活かし、倒した敵をカード化して戦う。',
+    imageIndex: 1,
+  },
+  ASSASSIN: {
+    name: '謎めく転入生',
+    description: '【テクニカル】毒による継続ダメージが得意。反逆の高校生が最初からパートナーとして参戦する。',
+    imageIndex: 2,
+  },
+  MAGE: {
+    name: '化学研究会長',
+    description: '【実験タイプ】3枚のカードを合成し、複数効果を持つキメラカードを作成できる。',
+    imageIndex: 3,
+  },
+  DODGEBALL: {
+    name: 'バスケ部エース',
+    description: '【スピード】ドローとディスカードを軸に動き、速攻レイアップで戦闘スキップを狙える。',
+    imageIndex: 4,
+  },
+  BARD: {
+    name: '放送部ディレクター',
+    description: '【デバフ・反射】敵を弱体化し、応答で攻撃を跳ね返す放送部の戦術家。',
+    imageIndex: 5,
+  },
+  LIBRARIAN: {
+    name: '文芸部書記',
+    description: '【戦略・保留】手札を残す保留と物語カードで、戦局をじっくり組み立てる。',
+    imageIndex: 6,
+  },
+  CHEF: {
+    name: '学食の料理長',
+    description: '【パワー】開始時に解放済みカードから初期デッキを組み、重い一撃で押し切る。',
+    imageIndex: 7,
+  },
+  GARDENER: {
+    name: '園芸部部長',
+    description: '【育成タイプ】菜園で種を育て、強力な植物カードへ成長させて戦う大器晩成型。',
+    imageIndex: 8,
+  },
+};
 
 export const getThemedCharacters = (characters: Character[], theme: VisualThemeId): Character[] => {
   if (theme === 'high-school') {
-    return characters.map((character, index) => ({
-      ...character,
-      name: HIGH_SCHOOL_CHARACTER_NAMES[index] ?? character.name,
-      description: HIGH_SCHOOL_CHARACTER_DESCRIPTIONS[index] ?? character.description,
-      imageData: assetUrl(`sprites/high-school/characters/${index % 9}.webp`),
-      deckTemplate: character.deckTemplate.map(cardId => HIGH_SCHOOL_STARTER_REPLACEMENTS[cardId] ?? cardId),
-    }));
+    const characterMap = new Map(characters.map(character => [character.id, character]));
+    return HIGH_SCHOOL_CHARACTER_ORDER.flatMap(characterId => {
+      const character = characterMap.get(characterId);
+      if (!character) return [];
+      const config = HIGH_SCHOOL_CHARACTER_CONFIG[character.id];
+      return [{
+        ...character,
+        name: config?.name ?? character.name,
+        description: config?.description ?? character.description,
+        imageData: assetUrl(`sprites/high-school/characters/${config?.imageIndex ?? 0}.webp`),
+        deckTemplate: character.deckTemplate.map(cardId => HIGH_SCHOOL_STARTER_REPLACEMENTS[cardId] ?? cardId),
+      }];
+    });
   }
   if (theme === 'magic') {
     return characters.map((character, index) => {
@@ -59,15 +101,15 @@ export const getThemedCharacters = (characters: Character[], theme: VisualThemeI
 };
 
 const HIGH_SCHOOL_CHARACTER_INDEX_BY_ID: Record<string, number> = {
-  WARRIOR: 0,
-  CARETAKER: 1,
-  ASSASSIN: 2,
-  MAGE: 3,
-  DODGEBALL: 4,
-  BARD: 5,
-  LIBRARIAN: 6,
-  CHEF: 7,
-  GARDENER: 8,
+  WARRIOR: HIGH_SCHOOL_CHARACTER_CONFIG.WARRIOR.imageIndex,
+  CARETAKER: HIGH_SCHOOL_CHARACTER_CONFIG.CARETAKER.imageIndex,
+  ASSASSIN: HIGH_SCHOOL_CHARACTER_CONFIG.ASSASSIN.imageIndex,
+  MAGE: HIGH_SCHOOL_CHARACTER_CONFIG.MAGE.imageIndex,
+  DODGEBALL: HIGH_SCHOOL_CHARACTER_CONFIG.DODGEBALL.imageIndex,
+  BARD: HIGH_SCHOOL_CHARACTER_CONFIG.BARD.imageIndex,
+  LIBRARIAN: HIGH_SCHOOL_CHARACTER_CONFIG.LIBRARIAN.imageIndex,
+  CHEF: HIGH_SCHOOL_CHARACTER_CONFIG.CHEF.imageIndex,
+  GARDENER: HIGH_SCHOOL_CHARACTER_CONFIG.GARDENER.imageIndex,
 };
 
 export const getHighSchoolCharacterSpritePath = (

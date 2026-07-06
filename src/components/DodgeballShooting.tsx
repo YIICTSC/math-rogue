@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Enemy } from '../types';
 import EnemyIllustration from './EnemyIllustration';
 import { audioService } from '../services/audioService';
@@ -12,16 +12,16 @@ interface DodgeballShootingProps {
 }
 
 const DodgeballShooting: React.FC<DodgeballShootingProps> = ({ enemy, playerImage, onComplete }) => {
-    const [ballPos, setBallPos] = useState({ x: 15, y: 50 }); // Percentage
-    const [enemyPos, setEnemyPos] = useState({ x: 80, y: 50 }); // Percentage
+    const [ballPos, setBallPos] = useState({ x: 15, y: 50 });
+    const [enemyPos, setEnemyPos] = useState({ x: 80, y: 50 });
     const [isThrown, setIsThrown] = useState(false);
     const [result, setResult] = useState<'NONE' | 'HIT' | 'MISS'>('NONE');
-    
-    const requestRef = useRef<number>(null);
+
+    const requestRef = useRef<number | null>(null);
     const ballRef = useRef({ x: 15, y: 50 });
     const enemyRef = useRef({ x: 80, y: 50 });
 
-    // 敵のタイプに応じた移動ロジック
+    // 敵のタイプに応じたディフェンス移動
     useEffect(() => {
         const moveEnemy = (time: number) => {
             if (result !== 'NONE') return;
@@ -33,42 +33,33 @@ const DodgeballShooting: React.FC<DodgeballShootingProps> = ({ enemy, playerImag
 
             switch (type) {
                 case 'TEACHER':
-                    // 規則的だが大きくゆったり動く
                     newY = 50 + Math.sin(time / 600) * 35;
                     break;
                 case 'GHOST':
-                    // ジッター（震え）を伴う不規則な浮遊
                     newY = 50 + Math.sin(time / 300) * 25 + (Math.random() - 0.5) * 5;
                     newX = 80 + Math.cos(time / 1000) * 3;
                     break;
                 case 'AGGRESSIVE':
-                    // 素早く鋭い動き
                     newY = 50 + Math.sin(time / 200) * 40;
                     break;
                 case 'TRICKSTER':
-                    // 8の字のような円軌道
                     newY = 50 + Math.sin(time / 400) * 30;
                     newX = 80 + Math.cos(time / 200) * 6;
                     break;
                 case 'TANK':
-                    // 重々しく、動きが少ない
                     newY = 50 + Math.sin(time / 1200) * 15;
                     break;
                 case 'GUARDIAN':
-                    // 複雑な複合波
                     newY = 50 + Math.sin(time / 350) * 20 + Math.sin(time / 800) * 20;
                     newX = 80 + Math.sin(time / 500) * 5;
                     break;
                 case 'SWARM':
-                    // 小刻みなバウンド
                     newY = 70 - Math.abs(Math.sin(time / 200)) * 50;
                     break;
                 default:
-                    // 標準の動き
                     newY = 50 + Math.sin(time / 400) * 30;
             }
 
-            // 画面端のクランプ（はみ出し防止）
             newY = Math.max(15, Math.min(85, newY));
             newX = Math.max(65, Math.min(95, newX));
 
@@ -87,16 +78,14 @@ const DodgeballShooting: React.FC<DodgeballShootingProps> = ({ enemy, playerImag
         setIsThrown(true);
         audioService.playSound('attack');
 
-        const throwSpeed = 1.8; // 少し弾速をアップ
+        const throwSpeed = 1.8;
         const animateBall = () => {
             ballRef.current.x += throwSpeed;
             setBallPos({ ...ballRef.current });
 
-            // 敵の現在の座標を取得して衝突判定
             const ex = enemyRef.current.x;
             const ey = enemyRef.current.y;
 
-            // 当たり判定 (敵のX座標を中心とした一定範囲)
             if (ballRef.current.x >= ex - 5 && ballRef.current.x <= ex + 5) {
                 const dist = Math.abs(ballRef.current.y - ey);
                 if (dist < 12) {
@@ -140,7 +129,6 @@ const DodgeballShooting: React.FC<DodgeballShootingProps> = ({ enemy, playerImag
 
             {/* Field */}
             <div className="w-full max-w-2xl h-64 relative bg-black/40 border-y-4 border-slate-600">
-                {/* Center Line */}
                 <div className="absolute left-1/2 top-0 bottom-0 w-1 bg-white/20"></div>
 
                 {/* Player */}

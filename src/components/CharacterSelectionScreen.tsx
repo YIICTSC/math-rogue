@@ -505,7 +505,7 @@ const CharacterSelectionScreen: React.FC<CharacterSelectionScreenProps> = ({ cha
                                                 {char.id === 'CARETAKER' && trans('倒した敵を仲間の攻撃カードとして「捕獲」。', languageMode)}
                                                 {char.id === 'ASSASSIN' && trans('毒による固定ダメージ。初期相棒との共闘。', languageMode)}
                                                 {char.id === 'MAGE' && trans('理科室での「3枚合成」。3つの効果を併せ持つ最強のキメラを作成可能。', languageMode)}
-                                                {char.id === 'DODGEBALL' && trans('ドロー＆ディスカード。ミニゲームでの敵撃破。', languageMode)}
+                                                {char.id === 'DODGEBALL' && trans(visualTheme === 'high-school' ? 'ドロー＆ディスカード。速攻レイアップで敵撃破。' : 'ドロー＆ディスカード。ドッジボールで敵撃破。', languageMode)}
                                                 {char.id === 'BARD' && trans('デバフ管理と、敵の攻撃を反射する「応答」。', languageMode)}
                                                 {char.id === 'LIBRARIAN' && trans('手札の「保留」と、強力な物語カードの活用。', languageMode)}
                                                 {char.id === 'CHEF' && trans('献立（初期デッキ）の自由にカスタマイズ。', languageMode)}

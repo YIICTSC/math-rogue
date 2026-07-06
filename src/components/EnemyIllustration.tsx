@@ -18,9 +18,12 @@ interface EnemyIllustrationProps {
 const EnemyIllustration: React.FC<EnemyIllustrationProps> = ({ name, seed, aliases = [], className = '', size = 16, visualTheme = 'elementary', enemyType = 'GENERIC', phase, action = 'idle' }) => {
   const enemyRef = { name, enemyType, phase };
   const humanoidPath = getThemedHumanoidEnemySpritePath(enemyRef, visualTheme, action);
+  const humanoidIdlePath = action !== 'idle'
+    ? getThemedHumanoidEnemySpritePath(enemyRef, visualTheme, 'idle')
+    : null;
   const monsterPath = getThemedMonsterEnemySpritePath(enemyRef, visualTheme);
   const imagePaths = humanoidPath
-    ? [humanoidPath]
+    ? Array.from(new Set([humanoidPath, humanoidIdlePath].filter(Boolean) as string[]))
     : monsterPath
     ? [monsterPath]
     : getEnemyIllustrationPaths(name, aliases);
