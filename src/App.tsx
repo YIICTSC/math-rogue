@@ -1102,7 +1102,8 @@ const App: React.FC = () => {
     const dailyAssignmentProfile = useMemo<StudentProfile>(() => (
         studentProfile.grade ? studentProfile : DEFAULT_DAILY_ASSIGNMENT_PROFILE
     ), [studentProfile]);
-    const [showStudentGradeSurvey, setShowStudentGradeSurvey] = useState<boolean>(() => !storageService.getStudentProfile().grade);
+    const isStudentGradeUnset = !studentProfile.grade?.trim();
+    const [showStudentGradeSurvey, setShowStudentGradeSurvey] = useState<boolean>(() => !storageService.getStudentProfile().grade?.trim());
     const [currentAssignment, setCurrentAssignment] = useState<AssignmentPayload | null>(() => storageService.getCurrentAssignment());
     const [assignmentProgressVersion, setAssignmentProgressVersion] = useState(0);
     const [assignmentProgressNotice, setAssignmentProgressNotice] = useState<{
@@ -1163,6 +1164,12 @@ const App: React.FC = () => {
     const [battleFinisherCutinCard, setBattleFinisherCutinCard] = useState<ICard | null>(null);
     const battleFinisherCutinCardRef = useRef<ICard | null>(null);
     const [showParryTutorial, setShowParryTutorial] = useState(false);
+
+    useEffect(() => {
+        if (isStudentGradeUnset) {
+            setShowStudentGradeSurvey(true);
+        }
+    }, [isStudentGradeUnset]);
     const parryTutorialResolverRef = useRef<(() => void) | null>(null);
     const lastMagicDamageVoiceActionRef = useRef<string | null>(null);
     const [isPreloadingGameAssets, setIsPreloadingGameAssets] = useState(false);
@@ -13307,7 +13314,7 @@ const App: React.FC = () => {
                             </div>
                         )}
 
-                        {showStudentGradeSurvey && gameState.screen === GameScreen.START_MENU && !assignmentLetter && (
+                        {showStudentGradeSurvey && isStudentGradeUnset && (
                             <div className="fixed inset-0 z-[10035] flex items-center justify-center bg-black/85 p-4">
                                 <div className="w-full max-w-2xl rounded-2xl border-4 border-cyan-300 bg-slate-950 p-5 text-white shadow-[0_0_40px_rgba(34,211,238,0.32)]">
                                     <div className="mb-2 text-center text-xs font-black tracking-[0.3em] text-cyan-300">PROFILE</div>
