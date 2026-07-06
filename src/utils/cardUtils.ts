@@ -1,5 +1,6 @@
 
 import { Card, CardType, TargetType } from '../types';
+import { CARDS_LIBRARY } from '../constants';
 
 const MAX_ILLUSTRATION_REFS = 8;
 const uniqueStrings = (values: string[]): string[] => {
@@ -361,6 +362,54 @@ const appendSentence = (description: string, sentence: string): string => {
     return `${trimmed}${trimmed.endsWith('。') ? '' : '。'}${sentence}`;
 };
 
+const getDisplayCardName = (cardName: string): string => CARDS_LIBRARY[cardName]?.name || cardName;
+
+const describeSynthPower = (id: string | undefined, amount: number): string => {
+    switch (id) {
+        case 'DEXTERITY': return `カチカチ${amount}`;
+        case 'ARTIFACT': return `キラキラ${amount}`;
+        case 'INTANGIBLE': return `スケスケ${amount}`;
+        case 'METALLICIZE': return `金属化${amount}`;
+        case 'REGEN': return `じわじわ回復${amount}`;
+        case 'THORNS': return `トゲトゲ${amount}`;
+        case 'DEMON_FORM': return `毎ターンムキムキ+${amount}`;
+        case 'DRAW_POWER':
+        case 'DRAW_POWER_2':
+            return `毎ターンドロー+${amount}`;
+        case 'BERSERK_POWER':
+        case 'DEVA_FORM':
+            return `毎ターンエナジー+${amount}`;
+        case 'ENERGY_DRAW_POWER':
+            return `毎ターンエナジー+${amount}/ドロー+${amount}`;
+        case 'AFTER_IMAGE': return `使用時ブロック+${amount}`;
+        case 'THOUSAND_CUTS': return `使用時全体${amount}ダメージ`;
+        case 'ENVENOM': return `攻撃時ドクドク${amount}`;
+        case 'ECHO_FORM': return `毎ターン初回${amount + 1}回発動`;
+        case 'EVOLVE': return `状態異常でドロー+${amount}`;
+        case 'MASTER_REALITY': return '生成カード強化';
+        case 'STATIC_DISCHARGE': return `被弾時ランダム${5 * amount}ダメージ`;
+        case 'BUFFER': return `HPダメージ無効${amount}回`;
+        case 'BARRICADE': return 'ブロック持ち越し';
+        case 'COST_REDUCTION': return `毎ターン全コスト-${amount}`;
+        case 'CLEAR_DEBUFFS': return '全デバフ解除';
+        case 'NOXIOUS_FUMES': return `毎ターン全体ドクドク${amount}`;
+        case 'INFINITE_BLADES': return `毎ターン削りかす${amount}枚`;
+        case 'ACCURACY': return `削りかす威力+${amount}`;
+        case 'CORRUPTION': return 'スキル0コスト/廃棄';
+        case 'FEEL_NO_PAIN': return `廃棄時ブロック+${amount}`;
+        case 'RUPTURE': return `HP減少時ムキムキ+${amount}`;
+        case 'CREATIVE_AI': return '毎ターンパワー生成';
+        case 'BURST': return `次スキル${amount + 1}回発動`;
+        case 'HEAL_ON_PLAY': return `使用時HP${amount}回復`;
+        case 'LIZARD_TAIL': return '一度だけ復活';
+        case 'LOSE_STRENGTH': return `ターン終了時ムキムキ-${amount}`;
+        case 'SKILL_BLOCK': return `スキル時ブロック+${amount}`;
+        case 'STRENGTH_DOWN': return `ターン終了時ムキムキ-${amount}`;
+        case 'MERCURY_HOURGLASS': return `ターン終了時全体${amount}ダメージ`;
+        default: return id ? `${id}${amount}` : '';
+    }
+};
+
 const getTripleBoostedCard = (card: Card): Card => {
     let boosted = { ...card, upgraded: false, holographic: false };
     for (let i = 0; i < 3; i += 1) {
@@ -583,73 +632,65 @@ export const synthesizeCards = (c1: Card, c2: Card, c3?: Card): Card => {
 
     if (newDamage > 0) {
         let text = `${newDamage}ダメージ`;
-        if (newTarget === TargetType.ALL_ENEMIES) text = `全体に${text}`;
-        else if (newTarget === TargetType.RANDOM_ENEMY) text = `ランダムな敵に${text}`;
+        if (newTarget === TargetType.ALL_ENEMIES) text = `全体${newDamage}ダメージ`;
+        else if (newTarget === TargetType.RANDOM_ENEMY) text = `ランダム${newDamage}ダメージ`;
         else if (newTarget === TargetType.SELF) text = `自分に${text}`;
 
         if (newTotalHits > 1) {
-            text += `を${newTotalHits}回`;
+            text += `x${newTotalHits}`;
         }
-        if (newStrengthScaling > 1) text += `(ムキムキ${newStrengthScaling}倍)`;
+        if (newStrengthScaling > 1) text += `/ムキムキx${newStrengthScaling}`;
         parts.push(text);
     }
 
     if (newBlock > 0) parts.push(`ブロック${newBlock}`);
-    if (newPoison > 0) parts.push(`ドクドク${newPoison}`);
-    if (newWeak > 0) parts.push(`へろへろ${newWeak}`);
-    if (newVulnerable > 0) parts.push(`びくびく${newVulnerable}`);
+    if (newPoison > 0) parts.push(`${newTarget === TargetType.ALL_ENEMIES ? '全体' : ''}ドクドク${newPoison}`);
+    if (newWeak > 0) parts.push(`${newTarget === TargetType.ALL_ENEMIES ? '全体' : ''}へろへろ${newWeak}`);
+    if (newVulnerable > 0) parts.push(`${newTarget === TargetType.ALL_ENEMIES ? '全体' : ''}びくびく${newVulnerable}`);
     if (newStrength > 0) parts.push(`ムキムキ${newStrength}`);
-    if (newPoisonMultiplier > 0) parts.push(`毒を${newPoisonMultiplier}倍`);
+    if (newStrength < 0) parts.push(`敵ムキムキ${newStrength}`);
+    if (newPoisonMultiplier > 0) parts.push(`ドクドクx${newPoisonMultiplier}`);
     if (newDraw > 0) parts.push(`${newDraw}枚引く`);
-    if (newEnergy > 0) parts.push(`E${newEnergy}を得る`);
+    if (newEnergy > 0) parts.push(`エナジー+${newEnergy}`);
     if (newHeal > 0) parts.push(`HP${newHeal}回復`);
     if (newSelfDamage > 0) parts.push(`自分に${newSelfDamage}ダメージ`);
 
     // Advanced Logic Descriptions
     if (newDamageBasedOnBlock) parts.push("ブロック値分のダメージ");
-    if (newDamagePerStrike > 0) parts.push(`デッキの攻撃カード数x${newDamagePerStrike}ダメージ追加`);
-    if (newDamagePerCardInHand > 0) parts.push(`手札枚数x${newDamagePerCardInHand}ダメージ追加`);
-    if (newDamagePerAttackPlayed > 0) parts.push(`使用攻撃数x${newDamagePerAttackPlayed}ダメージ追加`);
-    if (newDamagePerCardInDraw > 0) parts.push(`山札枚数x${newDamagePerCardInDraw}ダメージ追加`);
+    if (newDamagePerStrike > 0) parts.push(`攻撃枚数x${newDamagePerStrike}追加`);
+    if (newDamagePerCardInHand > 0) parts.push(`手札枚数x${newDamagePerCardInHand}`);
+    if (newDamagePerAttackPlayed > 0) parts.push(`使用攻撃x${newDamagePerAttackPlayed}追加`);
+    if (newDamagePerCardInDraw > 0) parts.push(`山札枚数x${newDamagePerCardInDraw}`);
 
     if (newLifesteal) parts.push("HP吸収");
     if (newDoubleBlock) parts.push("ブロック2倍");
     if (newDoubleStrength) parts.push("ムキムキ2倍");
     if (newCapture) parts.push("捕獲");
-    if (newUpgradeHand) parts.push("手札全体を強化");
-    if (newUpgradeDeck) parts.push("デッキ全体を強化");
+    if (newUpgradeHand) parts.push("手札全強化");
+    if (newUpgradeDeck) parts.push("デッキ全強化");
 
     // Generation / Actions
-    if (newAddCardToHand) parts.push(`${newAddCardToHand.cardName}を${newAddCardToHand.count}枚手札に加える`);
-    if (newAddCardToDraw) parts.push(`${newAddCardToDraw.cardName}を山札に加える`);
-    if (newAddCardToDiscard) parts.push(`${newAddCardToDiscard.cardName}を捨て札に加える`);
+    if (newAddCardToHand) parts.push(`${getDisplayCardName(newAddCardToHand.cardName)}${newAddCardToHand.count}枚を手札`);
+    if (newAddCardToDraw) parts.push(`${getDisplayCardName(newAddCardToDraw.cardName)}${newAddCardToDraw.count}枚を山札`);
+    if (newAddCardToDiscard) parts.push(`${getDisplayCardName(newAddCardToDiscard.cardName)}${newAddCardToDiscard.count}枚を捨て札`);
 
     if (newPromptsDiscard > 0) parts.push(`手札を${newPromptsDiscard}枚捨てる`);
-    if (newPromptsExhaust > 0) parts.push(newPromptsExhaust === 99 ? "手札を全て廃棄" : `手札を${newPromptsExhaust}枚廃棄`);
-    if (newPromptsCopy > 0) parts.push("カードをコピー");
+    if (newPromptsExhaust > 0) parts.push(newPromptsExhaust === 99 ? "手札全廃棄" : `手札を${newPromptsExhaust}枚廃棄`);
+    if (newPromptsCopy > 0) parts.push(`${newPromptsCopy}枚コピー`);
 
     // Fatal Effects
-    if (newFatalEnergy > 0) parts.push(`たおすとE${newFatalEnergy}`);
-    if (newFatalPermanentDamage > 0) parts.push(`たおすと威力+${newFatalPermanentDamage}`);
-    if (newFatalMaxHp > 0) parts.push(`たおすと最大HP+${newFatalMaxHp}`);
+    if (newFatalEnergy > 0) parts.push(`撃破時エナジー+${newFatalEnergy}`);
+    if (newFatalPermanentDamage > 0) parts.push(`撃破時威力+${newFatalPermanentDamage}`);
+    if (newFatalMaxHp > 0) parts.push(`撃破時最大HP+${newFatalMaxHp}`);
 
     // Next Turn
-    if (newNextTurnEnergy > 0) parts.push(`次ターンE+${newNextTurnEnergy}`);
-    if (newNextTurnDraw > 0) parts.push(`次ターン${newNextTurnDraw}枚ドロー`);
+    if (newNextTurnEnergy > 0) parts.push(`次ターンエナジー+${newNextTurnEnergy}`);
+    if (newNextTurnDraw > 0) parts.push(`次ターンドロー+${newNextTurnDraw}`);
 
     // Power
     if (newApplyPower) {
-        const powerNameMap: Record<string, string> = {
-            'DEMON_FORM': '悪魔化', 'ECHO_FORM': '反響', 'BARRICADE': 'バリケード',
-            'CORRUPTION': '堕落', 'FEEL_NO_PAIN': '無痛', 'RUPTURE': '破裂',
-            'EVOLVE': '進化', 'NOXIOUS_FUMES': '有毒ガス', 'AFTER_IMAGE': '残像',
-            'THOUSAND_CUTS': '千切れ', 'TOOLS_OF_THE_TRADE': '商売道具', 'ENVENOM': '猛毒',
-            'STATIC_DISCHARGE': '静電放電', 'BUFFER': 'バッファー', 'CREATIVE_AI': '創造的AI',
-            'DEVA_FORM': 'デバ化', 'MASTER_REALITY': '真なる理', 'INTANGIBLE': '無敵',
-            'ARTIFACT': 'アーティファクト', 'ACCURACY': '精度上昇', 'INFINITE_BLADES': '無限の刃'
-        };
-        const pName = powerNameMap[newApplyPower.id] || newApplyPower.id;
-        parts.push(`${pName}${newApplyPower.amount}を得る`);
+        const powerText = describeSynthPower(newApplyPower.id, newApplyPower.amount);
+        if (powerText) parts.push(powerText);
     }
 
     if (newPlayCondition === 'DRAW_PILE_EMPTY') parts.push("山札0の時のみ");
@@ -657,7 +698,7 @@ export const synthesizeCards = (c1: Card, c2: Card, c3?: Card): Card => {
 
     if (newExhaust) parts.push("廃棄");
     if (newInnate) parts.push("天賦");
-    if (newEthereal) parts.push("虚無");
+    if (newEthereal) parts.push("使用不可");
 
     // Special Logic Descriptions (Manual map for effects not covered by stats)
     const specialDescMap: Record<string, string> = {

@@ -237,7 +237,7 @@ const HelpScreen: React.FC<HelpScreenProps> = ({ onBack, languageMode = 'JAPANES
                         </div>
                         <div>
                             <span className="font-bold text-yellow-500">{trans("キラキラ (Artifact)", languageMode)}</span>
-                            <p className="text-xs text-gray-400">{trans("受けるダメージを1にする。", languageMode)}</p>
+                            <p className="text-xs text-gray-400">{trans("次に受けるデバフを1回ふせぐ。", languageMode)}</p>
                         </div>
                     </div>
                 </section>

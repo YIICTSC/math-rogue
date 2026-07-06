@@ -45,7 +45,7 @@ const POWER_DEFINITIONS: Record<string, { name: string, desc: string }> = {
     POISON: { name: "ドクドク", desc: "ターン終了時にHPダメージを受け、数値が1減る。" },
     STRENGTH: { name: "ムキムキ", desc: "攻撃ダメージがその数値分アップ！" },
     DEXTERITY: { name: "カチカチ", desc: "ブロックを得るカードの効果がその数値分アップ！" },
-    ARTIFACT: { name: "キラキラ", desc: "受けるダメージを1にする。" },
+    ARTIFACT: { name: "キラキラ", desc: "次に受けるデバフを1回ふせぐ。" },
     INTANGIBLE: { name: "スケスケ", desc: "受けるダメージとHP減少が1になる。" },
     THORNS: { name: "トゲトゲ", desc: "攻撃を受けた時、相手にその数値分のダメージを返す。" },
     THORNS_DESC: { name: "トゲトゲ", desc: "攻撃を受けた時、相手にその数値分のダメージを返す。" },
@@ -1826,12 +1826,12 @@ const BattleScene: React.FC<BattleSceneProps> = ({
 
                                             <div className="flex flex-wrap gap-0.5 justify-center min-h-[14px]">
                                                 {enemy.vulnerable > 0 && (
-                                                    <div className="flex items-center bg-pink-900/80 rounded px-0.5 border border-pink-500/50 cursor-pointer" onClick={(e) => { e.stopPropagation(); showInfo(trans("脆弱", languageMode), trans("攻撃から受けるダメージが50%増加。", languageMode)); }}>
+                                                    <div className="flex items-center bg-pink-900/80 rounded px-0.5 border border-pink-500/50 cursor-pointer" onClick={(e) => { e.stopPropagation(); showInfo(trans("びくびく", languageMode), trans("攻撃から受けるダメージが50%増加。", languageMode)); }}>
                                                         <AlertCircle size={8} className="text-pink-300" /> <span className="text-[8px] ml-0.5 font-bold">{enemy.vulnerable}</span>
                                                     </div>
                                                 )}
                                                 {enemy.weak > 0 && (
-                                                    <div className="flex items-center bg-gray-700/80 rounded px-0.5 border border-gray-500/50 cursor-pointer" onClick={(e) => { e.stopPropagation(); showInfo(trans("弱体", languageMode), trans("攻撃で与えるダメージが25%減少。", languageMode)); }}>
+                                                    <div className="flex items-center bg-gray-700/80 rounded px-0.5 border border-gray-500/50 cursor-pointer" onClick={(e) => { e.stopPropagation(); showInfo(trans("へろへろ", languageMode), trans("攻撃で与えるダメージが25%減少。", languageMode)); }}>
                                                         <TrendingDown size={8} className="text-gray-300" /> <span className="text-[8px] ml-0.5 font-bold">{enemy.weak}</span>
                                                     </div>
                                                 )}
@@ -1841,7 +1841,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                                     </div>
                                                 )}
                                                 {enemy.artifact > 0 && (
-                                                    <div className="flex items-center bg-yellow-900/80 rounded px-0.5 border border-yellow-500/50 cursor-pointer" onClick={(e) => { e.stopPropagation(); showInfo(trans("キラキラ", languageMode), trans("受けるダメージを1にする。", languageMode)); }}>
+                                                    <div className="flex items-center bg-yellow-900/80 rounded px-0.5 border border-yellow-500/50 cursor-pointer" onClick={(e) => { e.stopPropagation(); showInfo(trans("キラキラ", languageMode), trans("次に受けるデバフを1回ふせぐ。", languageMode)); }}>
                                                         <Hexagon size={8} className="text-yellow-200" /> <span className="text-[8px] ml-0.5 font-bold">{enemy.artifact}</span>
                                                     </div>
                                                 )}
@@ -2050,7 +2050,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                                 +{player.relics.length - 5}
                                             </div>
                                         )}
-                                        {player.relics.length === 0 && <span className="text-[9px] text-gray-500">No Relics</span>}
+                                        {player.relics.length === 0 && <span className="text-[9px] text-gray-500">{trans("もちものなし", languageMode)}</span>}
                                     </div>
 
                                     <div className="flex gap-0.5">
@@ -2079,7 +2079,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                     {player.strength !== 0 && (
                                         <span
                                             className={`flex items-center ${player.strength > 0 ? 'text-red-400' : 'text-gray-400'} text-[9px] font-bold border border-gray-700 px-1 rounded bg-black cursor-pointer`}
-                                            onClick={() => showInfo(trans("筋力", languageMode), trans("攻撃カードのダメージを増加させる。", languageMode))}
+                                            onClick={() => showInfo(trans("ムキムキ", languageMode), trans("攻撃カードのダメージを増加させる。", languageMode))}
                                         >
                                             <Sword size={8} className="mr-0.5" /> {player.strength}
                                         </span>

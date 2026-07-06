@@ -6,7 +6,7 @@ import { getUpgradedCard } from '../utils/cardUtils';
 
 // ヘルパー関数: デバフの付与
 const applyDebuff = (enemy: Enemy, type: 'WEAK' | 'VULNERABLE' | 'POISON', amount: number) => {
-    if (enemy.artifact > 0 && type !== 'POISON') {
+    if (enemy.artifact > 0) {
         enemy.artifact--;
         return;
     }

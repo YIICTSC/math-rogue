@@ -6061,7 +6061,7 @@ const App: React.FC = () => {
     };
 
     const applyDebuff = (enemy: Enemy, type: 'WEAK' | 'VULNERABLE' | 'POISON', amount: number) => {
-        if (enemy.artifact > 0 && type !== 'POISON') {
+        if (enemy.artifact > 0) {
             enemy.artifact--;
             return;
         }
@@ -8877,7 +8877,7 @@ const App: React.FC = () => {
                         const applyDebuff = (target: Player, targetName: string) => {
                             if (target.powers['ARTIFACT'] > 0) {
                                 target.powers['ARTIFACT']--;
-                                newLogs.push(`${targetName}は${trans("アーティファクトでデバフを防いだ", languageMode)}`);
+                                newLogs.push(`${targetName}は${trans("キラキラでデバフを防いだ", languageMode)}`);
                                 return;
                             }
                             if (type === 'WEAK') {

@@ -997,7 +997,7 @@ const TypingBattleScene: React.FC<TypingBattleSceneProps> = ({
                                             +{player.relics.length - 5}
                                         </div>
                                     )}
-                                    {player.relics.length === 0 && <span className="text-[8px] text-gray-500">No Relics</span>}
+                                    {player.relics.length === 0 && <span className="text-[8px] text-gray-500">{trans("もちものなし", languageMode)}</span>}
                                 </div>
                                 <div className="ml-2 flex shrink-0 gap-0.5">
                                     {player.potions.map(potion => (
