@@ -364,6 +364,17 @@ const appendSentence = (description: string, sentence: string): string => {
 
 const getDisplayCardName = (cardName: string): string => CARDS_LIBRARY[cardName]?.name || cardName;
 
+const roundSynthDecimal = (value: number): number => Math.round(value * 100) / 100;
+
+const mergeCardGeneration = <T extends { cardName: string; count: number; cost0?: boolean }>(values: Array<T | undefined>): T | undefined => {
+    const adds = values.filter((value): value is T => value !== undefined);
+    if (adds.length === 0) return undefined;
+    const firstCardName = adds[0].cardName;
+    if (!adds.every(add => add.cardName === firstCardName)) return adds[0];
+    const totalCount = adds.reduce((acc, add) => acc + add.count, 0);
+    return { ...adds[0], count: totalCount };
+};
+
 const describeSynthPower = (id: string | undefined, amount: number): string => {
     switch (id) {
         case 'DEXTERITY': return `カチカチ${amount}`;
@@ -485,6 +496,7 @@ export const synthesizeCards = (c1: Card, c2: Card, c3?: Card): Card => {
 
     // 3. Helper for Summation
     const sum = (k: keyof Card) => ((c1[k] as number) || 0) + ((c2[k] as number) || 0) + ((c3?.[k] as number) || 0);
+    const sourceCards = [c1, c2, c3].filter(Boolean) as Card[];
 
     // Basic Stats
     const newDamage = sum('damage');
@@ -498,6 +510,16 @@ export const synthesizeCards = (c1: Card, c2: Card, c3?: Card): Card => {
     const newStrength = sum('strength');
     const newSelfDamage = sum('selfDamage');
     const newPoisonMultiplier = sum('poisonMultiplier');
+    const newGold = sum('gold');
+    const newBattleBonusDrawOnPlay = sum('battleBonusDrawOnPlay');
+    const newHitsPerSkillInHand = sum('hitsPerSkillInHand');
+    const newHitsPerAttackPlayed = sum('hitsPerAttackPlayed');
+    const blockMultipliers = sourceCards
+        .map(card => card.blockMultiplier)
+        .filter((value): value is number => value !== undefined && value > 0);
+    const newBlockMultiplier = blockMultipliers.length > 0
+        ? roundSynthDecimal(blockMultipliers.reduce((acc, value) => acc * value, 1))
+        : undefined;
 
     // Advanced Logic Summation/Max
     const s1 = c1.strengthScaling || 1;
@@ -536,6 +558,12 @@ export const synthesizeCards = (c1: Card, c2: Card, c3?: Card): Card => {
     const newDoubleStrength = c1.doubleStrength || c2.doubleStrength || c3?.doubleStrength;
     const newCapture = c1.capture || c2.capture || c3?.capture;
     const newDamageBasedOnBlock = c1.damageBasedOnBlock || c2.damageBasedOnBlock || c3?.damageBasedOnBlock;
+    const newShuffleHandToDraw = c1.shuffleHandToDraw || c2.shuffleHandToDraw || c3?.shuffleHandToDraw;
+    const newAddPotion = c1.addPotion || c2.addPotion || c3?.addPotion;
+    const newConsumedOnUse = c1.consumedOnUse || c2.consumedOnUse || c3?.consumedOnUse;
+    const newEraserOnly = c1.eraserOnly || c2.eraserOnly || c3?.eraserOnly;
+    const seedSource = sourceCards.find(card => card.isSeed);
+    const familiarSource = sourceCards.find(card => card.familiarSummon);
 
     // 5. Multi-hit Logic (Additive)
     const extraHits1 = c1.playCopies || 0;
@@ -568,22 +596,9 @@ export const synthesizeCards = (c1: Card, c2: Card, c3?: Card): Card => {
         }
     }
 
-    // addCardToHand
-    let newAddCardToHand = undefined;
-    const adds = [c1.addCardToHand, c2.addCardToHand, c3?.addCardToHand].filter(a => a !== undefined);
-    if (adds.length > 0) {
-        const firstCardName = adds[0]!.cardName;
-        if (adds.every(a => a!.cardName === firstCardName)) {
-            const totalCount = adds.reduce((acc, a) => acc + a!.count, 0);
-            newAddCardToHand = { ...adds[0]!, count: totalCount };
-        } else {
-            newAddCardToHand = adds[0];
-        }
-    }
-
-    const newAddCardToDraw = c1.addCardToDraw || c2.addCardToDraw || c3?.addCardToDraw;
-    const newAddCardToDiscard = c1.addCardToDiscard || c2.addCardToDiscard || c3?.addCardToDiscard;
-    const sourceCards = [c1, c2, c3].filter(Boolean) as Card[];
+    const newAddCardToHand = mergeCardGeneration([c1.addCardToHand, c2.addCardToHand, c3?.addCardToHand]);
+    const newAddCardToDraw = mergeCardGeneration([c1.addCardToDraw, c2.addCardToDraw, c3?.addCardToDraw]);
+    const newAddCardToDiscard = mergeCardGeneration([c1.addCardToDiscard, c2.addCardToDiscard, c3?.addCardToDiscard]);
     const holographicSource = sourceCards.find(c => c.holographic);
     const magicSource = sourceCards.find(c => c.magicHeroId && ((c.magicRuleCardIndices?.length ?? 0) > 0 || c.magicRuleCardIndex !== undefined));
     const magicRuleCardIndices = sourceCards.flatMap(c => {
@@ -653,7 +668,11 @@ export const synthesizeCards = (c1: Card, c2: Card, c3?: Card): Card => {
     if (newDraw > 0) parts.push(`${newDraw}枚引く`);
     if (newEnergy > 0) parts.push(`エナジー+${newEnergy}`);
     if (newHeal > 0) parts.push(`HP${newHeal}回復`);
+    if (newGold > 0) parts.push(`${newGold}G`);
+    if (newAddPotion) parts.push("ポーション入手");
     if (newSelfDamage > 0) parts.push(`自分に${newSelfDamage}ダメージ`);
+    if (newBlockMultiplier !== undefined) parts.push(`ブロックx${newBlockMultiplier}`);
+    if (newShuffleHandToDraw) parts.push("捨て札を山札");
 
     // Advanced Logic Descriptions
     if (newDamageBasedOnBlock) parts.push("ブロック値分のダメージ");
@@ -661,6 +680,9 @@ export const synthesizeCards = (c1: Card, c2: Card, c3?: Card): Card => {
     if (newDamagePerCardInHand > 0) parts.push(`手札枚数x${newDamagePerCardInHand}`);
     if (newDamagePerAttackPlayed > 0) parts.push(`使用攻撃x${newDamagePerAttackPlayed}追加`);
     if (newDamagePerCardInDraw > 0) parts.push(`山札枚数x${newDamagePerCardInDraw}`);
+    if (newHitsPerSkillInHand > 0) parts.push("手札スキル数ヒット");
+    if (newHitsPerAttackPlayed > 0) parts.push("使用攻撃数ヒット");
+    if (newBattleBonusDrawOnPlay > 0) parts.push(`使用後ドロー+${newBattleBonusDrawOnPlay}`);
 
     if (newLifesteal) parts.push("HP吸収");
     if (newDoubleBlock) parts.push("ブロック2倍");
@@ -699,6 +721,10 @@ export const synthesizeCards = (c1: Card, c2: Card, c3?: Card): Card => {
     if (newExhaust) parts.push("廃棄");
     if (newInnate) parts.push("天賦");
     if (newEthereal) parts.push("使用不可");
+    if (newConsumedOnUse) parts.push("使い切り");
+    if (newEraserOnly) parts.push("効果消し");
+    if (seedSource?.grownCardId) parts.push(`${getDisplayCardName(seedSource.grownCardId)}に成長`);
+    if (familiarSource?.familiarSummon) parts.push(`${familiarSource.familiarSummon.name}召喚`);
 
     // Special Logic Descriptions (Manual map for effects not covered by stats)
     const specialDescMap: Record<string, string> = {
@@ -781,6 +807,9 @@ export const synthesizeCards = (c1: Card, c2: Card, c3?: Card): Card => {
         draw: newDraw || undefined,
         energy: newEnergy || undefined,
         heal: newHeal || undefined,
+        gold: newGold || undefined,
+        addPotion: newAddPotion || undefined,
+        blockMultiplier: newBlockMultiplier,
         poison: newPoison || undefined,
         weak: newWeak || undefined,
         vulnerable: newVulnerable || undefined,
@@ -791,6 +820,7 @@ export const synthesizeCards = (c1: Card, c2: Card, c3?: Card): Card => {
 
         // Flags
         exhaust: newExhaust,
+        consumedOnUse: newConsumedOnUse,
         innate: newInnate,
         unplayable: newEthereal,
         playCondition: newPlayCondition as any,
@@ -804,7 +834,14 @@ export const synthesizeCards = (c1: Card, c2: Card, c3?: Card): Card => {
         doubleStrength: newDoubleStrength,
         capture: newCapture,
         damageBasedOnBlock: newDamageBasedOnBlock,
+        shuffleHandToDraw: newShuffleHandToDraw,
         applyPower: newApplyPower,
+        battleBonusDrawOnPlay: newBattleBonusDrawOnPlay || undefined,
+        eraserOnly: newEraserOnly,
+        familiarSummon: familiarSource?.familiarSummon ? { ...familiarSource.familiarSummon } : undefined,
+        isSeed: seedSource?.isSeed,
+        growthRequired: seedSource?.growthRequired,
+        grownCardId: seedSource?.grownCardId,
 
         // Generation
         addCardToHand: newAddCardToHand,
@@ -819,6 +856,8 @@ export const synthesizeCards = (c1: Card, c2: Card, c3?: Card): Card => {
         damagePerCardInHand: newDamagePerCardInHand || undefined,
         damagePerAttackPlayed: newDamagePerAttackPlayed || undefined,
         damagePerCardInDraw: newDamagePerCardInDraw || undefined,
+        hitsPerSkillInHand: newHitsPerSkillInHand || undefined,
+        hitsPerAttackPlayed: newHitsPerAttackPlayed || undefined,
 
         // Prompts
         promptsDiscard: newPromptsDiscard || undefined,
