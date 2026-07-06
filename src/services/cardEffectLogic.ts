@@ -397,7 +397,7 @@ export const applyAdditionalCardLogic = (
             case '大ジャンプ':
             case 'VAULT':
             case '次元跳躍': {
-                if (card.name === '次元跳躍') {
+                if (targetName === '次元跳躍') {
                     const badCards = p.hand.filter(c => c.type === CardType.STATUS || c.type === CardType.CURSE);
                     const count = badCards.length;
                     badCards.forEach(c => {

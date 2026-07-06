@@ -7,6 +7,7 @@ export interface MagicRuleConfig {
   name: string;
   shortName: string;
   description: string;
+  selectionSummary: string;
   completionCondition: string;
   completionEffect: string;
   slotLabels: [string, string, string];
@@ -62,6 +63,26 @@ const COMPLETION_EFFECTS: Record<string, string> = {
   SAKUYA: 'HPを3支払い、敵全体にドクドク9とへろへろ2を与える。HPは1未満にならない。その後、常夜契約は空に戻る。',
 };
 
+const SELECTION_SUMMARIES: Record<string, string> = {
+  AKARI: '攻撃・スキル・パワーを1枚ずつ使うと、全体攻撃とブロック。',
+  SHIZUKU: '専用カード3回で、単体追撃・びくびく・ブロック。',
+  HIYORI: '種を植えて育てる。収穫で全体攻撃と回復。',
+  TSUBASA: '専用カードで炉熱を上げ、手札強化・ムキムキ・エナジー。',
+  REI: '封印札を3枚重ね、全体へへろへろとドクドク。',
+  MADOKA: '専用カード3回で、ドロー・エナジー・ブロック。',
+  KOHARU: '3種の精霊契約で、全体攻撃・ブロック・ドロー。',
+  MIRAI: '3演目を揃え、全体攻撃・へろへろ・エナジー。',
+  SERA: '専用カード3回で、ドロー・ブロック・ムキムキ。',
+  REN: '守護をためて攻撃で消費。単体追撃とブロック。',
+  SOMA: '専用カードを番号順に使うと、全体攻撃と弱体化。',
+  MINATO: '治癒水を3滴集め、回復・ブロック・攻撃に変換。',
+  RIKU: '未来候補を3つ観測し、ドロー・エナジー・ブロック。',
+  YAMATO: '闘気を3ためて、単体大ダメージとムキムキ。',
+  LEON: '音符を3つ揃え、全体攻撃とドロー。',
+  ELLIOT: '星界門を3段階開き、回復・ブロック・ムキムキ。',
+  SAKUYA: '代償で契約を進め、全体へドクドクとへろへろ。',
+};
+
 export const MAGIC_RULE_CONFIGS: Record<string, MagicRuleConfig> = Object.fromEntries(
   CONFIG_ROWS.map((row) => [row.heroId, {
     heroId: row.heroId,
@@ -69,6 +90,7 @@ export const MAGIC_RULE_CONFIGS: Record<string, MagicRuleConfig> = Object.fromEn
     name: row.name,
     shortName: row.shortName,
     description: row.description,
+    selectionSummary: SELECTION_SUMMARIES[row.heroId] ?? row.description,
     completionCondition: row.completionCondition
       ?? COMPLETION_CONDITIONS[row.heroId]
       ?? 'この主人公の専用カードを合計3回使う。同じカードを複数回使っても進行する。3回目のカード効果後に完成効果が発動する。',

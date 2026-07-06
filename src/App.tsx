@@ -6791,11 +6791,13 @@ const App: React.FC = () => {
             const isGalaxyExpressCard =
                 card.name === '銀河鉄道の夜' ||
                 card.originalNames?.includes('銀河鉄道の夜') ||
+                card.originalNames?.includes('GALAXY_EXPRESS') ||
                 card.id?.includes('GALAXY_EXPRESS') ||
                 card.description.includes('山札の上から5枚を見る');
             const isGiftBoxCard =
                 card.name === '秘密のプレゼント' ||
                 card.originalNames?.includes('秘密のプレゼント') ||
+                card.originalNames?.includes('GIRLS_GIFT_BOX') ||
                 card.id?.includes('GIRLS_GIFT_BOX');
 
             if (card.gold) {
@@ -7021,7 +7023,7 @@ const App: React.FC = () => {
                     const newCard = p.drawPile.pop();
                     if (newCard) {
                         const card = { ...newCard };
-                        if (card.name === '虚無' || card.name === 'VOID') {
+                        if (card.name === '虚無' || card.name === 'VOID' || card.originalNames?.includes('虚無') || card.originalNames?.includes('VOID')) {
                             p.currentEnergy = Math.max(0, p.currentEnergy - 1);
                             p.floatingText = { id: `void-turn-${Date.now()}-${i}`, text: '-1 Energy', color: 'text-red-500', iconType: 'zap' };
                         }
@@ -7089,9 +7091,9 @@ const App: React.FC = () => {
 
             let baseVfx = 'SLASH';
             if (card.type === CardType.ATTACK) {
-                if (card.name.includes('火') || card.name.includes('炎') || card.name === '焼却炉' || card.name === 'IMMOLATE') baseVfx = 'FIRE';
-                else if (card.name.includes('雷') || card.name === '静電気' || card.name === 'BALL_LIGHTNING') baseVfx = 'LIGHTNING';
-                else if (card.name === '大掃除' || card.name === 'FIEND_FIRE') baseVfx = 'EXPLOSION';
+                if (card.name.includes('火') || card.name.includes('炎') || card.name === '焼却炉' || card.name === 'IMMOLATE' || card.originalNames?.some(name => name.includes('火') || name.includes('炎') || name === '焼却炉' || name === 'IMMOLATE')) baseVfx = 'FIRE';
+                else if (card.name.includes('雷') || card.name === '静電気' || card.name === 'BALL_LIGHTNING' || card.originalNames?.some(name => name.includes('雷') || name === '静電気' || name === 'BALL_LIGHTNING')) baseVfx = 'LIGHTNING';
+                else if (card.name === '大掃除' || card.name === 'FIEND_FIRE' || card.originalNames?.includes('大掃除') || card.originalNames?.includes('FIEND_FIRE')) baseVfx = 'EXPLOSION';
             }
 
             for (let act = 0; act < activations; act++) {
@@ -7131,7 +7133,7 @@ const App: React.FC = () => {
                             if (card.damagePerAttackPlayed) baseDamage += (p.attacksPlayedThisTurn) * card.damagePerAttackPlayed!;
                             if (card.damagePerStrike) baseDamage += (p.deck.filter(c => c.name === 'えんぴつ攻撃' || c.originalNames?.includes('えんぴつ攻撃')).length) * card.damagePerStrike!;
                             if (card.damagePerCardInDraw) baseDamage += p.drawPile.length * card.damagePerCardInDraw!;
-                            if ((card.name === 'えんぴつの削りかす' || card.name === 'SHIV') && p.powers['ACCURACY']) {
+                            if ((card.name === 'えんぴつの削りかす' || card.name === 'SHIV' || card.originalNames?.includes('えんぴつの削りかす') || card.originalNames?.includes('SHIV')) && p.powers['ACCURACY']) {
                                 baseDamage += p.powers['ACCURACY'];
                                 logParts.push(`+${p.powers['ACCURACY']}(精度)`);
                             }
@@ -7381,12 +7383,12 @@ const App: React.FC = () => {
                                     currentLogs.push(`${trans(capturedDisplayName, languageMode)}を${trans("捕獲した！", languageMode)} (${trans(randomCardTemplate.name, languageMode)}の効果付与)`);
                                     nextActiveEffects.push({ id: `vfx-cap-${Date.now()}`, type: 'BUFF', targetId: 'player', delay: hitDelay });
                                 }
-                                if (card.name === '羅生門' || (card.id && card.id.includes('RASHOMON'))) {
+                                if (card.name === '羅生門' || card.originalNames?.includes('羅生門') || card.originalNames?.includes('RASHOMON') || (card.id && card.id.includes('RASHOMON'))) {
                                     nextSelectionState = { active: true, type: 'EXHAUST', amount: 1 };
                                     currentLogs.push(trans("羅生門：手札1枚を廃棄してください。", languageMode));
                                 }
                             }
-                            if (card.name === '時間どろぼう' || card.name === 'TIME_THIEF') {
+                            if (card.name === '時間どろぼう' || card.name === 'TIME_THIEF' || card.originalNames?.includes('時間どろぼう') || card.originalNames?.includes('TIME_THIEF') || card.id?.includes('TIME_THIEF')) {
                                 e.nextIntent = { type: EnemyIntentType.SLEEP, value: 0 };
                                 currentLogs.push(`${trans(e.name, languageMode)}の行動を遅らせた！`);
                                 e.floatingText = { id: `delay-${Date.now()}`, text: '遅延', color: 'text-blue-400' };
@@ -7516,6 +7518,8 @@ const App: React.FC = () => {
                     const isWeatherForecastCard =
                         card.name === '天気予報' ||
                         card.originalNames?.includes('天気予報') ||
+                        card.originalNames?.includes('RIKA_WEATHER') ||
+                        card.id?.includes('RIKA_WEATHER') ||
                         card.description.includes('山札のトップ3枚');
                     if (isWeatherForecastCard) {
                         const peekCards: ICard[] = [];
@@ -7821,7 +7825,7 @@ const App: React.FC = () => {
                                 const newCard = p.drawPile.pop();
                                 if (newCard) {
                                     const card = { ...newCard };
-                                    if (card.name === '虚無' || card.name === 'VOID') {
+                                    if (card.name === '虚無' || card.name === 'VOID' || card.originalNames?.includes('虚無') || card.originalNames?.includes('VOID')) {
                                         p.currentEnergy = Math.max(0, p.currentEnergy - 1);
                                         p.floatingText = { id: `void-turn-${Date.now()}-${j}`, text: '-1 Energy', color: 'text-red-500', iconType: 'zap' };
                                     }
@@ -7840,7 +7844,7 @@ const App: React.FC = () => {
                                             const extraCardRaw = p.drawPile.pop();
                                             if (extraCardRaw) {
                                                 const extraCard = { ...extraCardRaw };
-                                                if (extraCard.name === '虚無' || extraCard.name === 'VOID') {
+                                                if (extraCard.name === '虚無' || extraCard.name === 'VOID' || extraCard.originalNames?.includes('虚無') || extraCard.originalNames?.includes('VOID')) {
                                                     p.currentEnergy = Math.max(0, p.currentEnergy - 1);
                                                     p.floatingText = { id: `void-evolve-${Date.now()}-${k}`, text: '-1 Energy', color: 'text-red-500', iconType: 'zap' };
                                                 }
@@ -8255,7 +8259,7 @@ const App: React.FC = () => {
                 const drawnCard = newDrawPile.pop();
                 if (drawnCard) {
                     const card = { ...drawnCard };
-                    if (card.name === '虚無' || card.name === 'VOID') {
+                    if (card.name === '虚無' || card.name === 'VOID' || card.originalNames?.includes('虚無') || card.originalNames?.includes('VOID')) {
                         p.currentEnergy = Math.max(0, p.currentEnergy - 1);
                         p.floatingText = { id: `void-turn-${Date.now()}-${i}`, text: '-1 Energy', color: 'text-red-500', iconType: 'zap' };
                     }
@@ -11863,7 +11867,7 @@ const App: React.FC = () => {
                 const p = prev.player;
                 const card = p.deck.find(c => c.id === cardId);
                 let newMaxHp = p.maxHp;
-                if (card && (card.name === '寄生虫' || card.name === 'PARASITE')) {
+                if (card && (card.name === '寄生虫' || card.name === 'PARASITE' || card.originalNames?.includes('寄生虫') || card.originalNames?.includes('PARASITE'))) {
                     newMaxHp -= 3;
                 }
                 const newDeck = p.deck.filter(c => c.id !== cardId);
@@ -11876,7 +11880,7 @@ const App: React.FC = () => {
             const p = prev.player;
             const card = p.deck.find(c => c.id === cardId);
             let newMaxHp = p.maxHp;
-            if (card && (card.name === '寄生虫' || card.name === 'PARASITE')) {
+            if (card && (card.name === '寄生虫' || card.name === 'PARASITE' || card.originalNames?.includes('寄生虫') || card.originalNames?.includes('PARASITE'))) {
                 newMaxHp -= 3;
             }
             const newDeck = p.deck.filter(c => c.id !== cardId);

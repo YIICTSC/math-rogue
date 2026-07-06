@@ -186,6 +186,9 @@ export const getUpgradedCard = (card: Card): Card => {
     if (card.upgraded) return card; // Prevent double upgrade
 
     const newCard = { ...card, upgraded: true };
+    const hasCardIdentity = (...names: string[]) => (
+        names.includes(card.name) || names.some(name => card.originalNames?.includes(name))
+    );
 
     const hasDamage = (card.damage !== undefined && card.damage > 0);
     const hasBlock = (card.block !== undefined && card.block > 0);
@@ -220,9 +223,9 @@ export const getUpgradedCard = (card: Card): Card => {
     }
 
     // Specific Card Upgrade Logic overrides
-    if (card.name === 'ボディスラム' || card.name === 'BODY_SLAM') newCard.cost = 0;
-    if (card.name === '限界突破' || card.name === 'LIMIT_BREAK') newCard.exhaust = false;
-    if (card.name === '触媒' || card.name === 'CATALYST') newCard.poisonMultiplier = 3;
+    if (hasCardIdentity('ボディスラム', 'BODY_SLAM')) newCard.cost = 0;
+    if (hasCardIdentity('限界突破', 'LIMIT_BREAK')) newCard.exhaust = false;
+    if (hasCardIdentity('触媒', 'CATALYST')) newCard.poisonMultiplier = 3;
 
     // Keep description values in sync with upgraded stats.
     let syncedDesc = newCard.description;
@@ -383,6 +386,7 @@ const describeSynthPower = (id: string | undefined, amount: number): string => {
         case 'METALLICIZE': return `金属化${amount}`;
         case 'REGEN': return `じわじわ回復${amount}`;
         case 'THORNS': return `トゲトゲ${amount}`;
+        case 'ICE_CREAM': return '余ったエナジーを持ち越し';
         case 'DEMON_FORM': return `毎ターンムキムキ+${amount}`;
         case 'DRAW_POWER':
         case 'DRAW_POWER_2':
@@ -729,20 +733,112 @@ export const synthesizeCards = (c1: Card, c2: Card, c3?: Card): Card => {
     // Special Logic Descriptions (Manual map for effects not covered by stats)
     const specialDescMap: Record<string, string> = {
         '発見': 'ランダムなカードを3枚生成', 'DISCOVERY': 'ランダムなカードを3枚生成',
+        '国語辞典': '特殊演出',
+        'ゼロの発見': 'ランダムなカードを3枚生成', 'SANSU_ZERO': 'ランダムなカードを3枚生成',
+        '読解力': '次のスキル2回発動',
+        '未完の小説': '捨て札を山札に戻す',
+        '無限大': '特殊演出',
         '錬金術': '0コストのカードを1枚生成', 'ALCHEMIZE': '0コストのカードを1枚生成',
         '山勘': '手札を全捨て＆ドロー', 'CALCULATED_GAMBLE': '手札を全捨て＆ドロー',
+        '単位変換': '手札を全入れ替え', 'SANSU_UNIT': '手札を全入れ替え',
+        'パニック': '手札1枚を0コスト',
+        '魅惑のカカオ': '手札を全入れ替え',
         'あがく': '0コスト以外を捨てる', 'SCRAPE': '0コスト以外を捨てる',
         '早退': 'HP30以下を消滅', 'EXPULSION': 'HP30以下を消滅',
         '大ジャンプ': '追加ターン', 'VAULT': '追加ターン',
+        '次元跳躍': '状態異常を消滅してムキムキ',
         '断捨離': '非攻撃を廃棄', 'SEVER_SOUL': '非攻撃を廃棄',
+        '読書感想文': '非攻撃を廃棄', 'KOKUGO_BOOK_REPORT': '非攻撃を廃棄',
         '大掃除': '手札廃棄数x7ダメ', 'FIEND_FIRE': '手札廃棄数x7ダメ',
         'むしゃくしゃ': 'プレイ時威力+5', 'YATSUATARI': 'プレイ時威力+5',
         '磁石の力': '捨て札から1枚回収', 'RIKA_MAGNET': '捨て札から1枚回収',
         '鉄棒の逆上がり': '捨て札から1枚回収', 'PE_HORIZONTAL_BAR': '捨て札から1枚回収',
         '虹のプリズム': '手札2枚強化', 'RIKA_RAINBOW': '手札2枚強化',
         '学習アルゴリズム': '永続ブロック増加', 'GENETIC_ALGORITHM': '永続ブロック増加',
+        '人体模型': 'スケスケ1',
+        'バザーの掘り出し物': '特殊演出',
+        '学級委員選挙': '特殊演出',
+        '伝統文化': '生成カード強化',
+        '歴史の教科書': '毎ターン全コスト-1',
+        '未来都市': '毎ターンエナジー+1/ドロー+1',
+        'お年玉貯金': '100G',
+        '産業革命': '今/次ターンエナジー+1/1枚引く',
+        '覚醒のコーヒー': '1枚引く/自分に1ダメージ',
+        '世界遺産登録': '最大HP+5',
+        '学芸会の主役': '使用時ブロック+1',
+        'カンニング': '手札の攻撃をコピー',
+        'お人形遊び': '手札のスキルをコピー',
+        '二刀流': '手札1枚を2枚コピー',
+        'フォークダンス': '手札1枚コピー/1枚捨てる',
+        '鏡 (星新一)': '手札1枚コピー/自分にびくびく1',
+        'きてんの窓': '高コスト優先コピーを0コスト',
+        'スポーツ王': 'カチカチ2',
+        '顕微鏡': '次ターンドロー+1',
+        'キラキラの粉': '敵全体へろへろ1',
+        '邪智暴虐': '1枚引く',
+        '一寸法師': '連撃後ブロック3',
+        '縄跳び': '自分に1ダメージ',
+        '飴玉の嵐': '敵全体へろへろ1',
+        'ブーメラン': 'エナジー+1',
+        'かいけつゾロリ': 'ブロック3',
+        '側転': 'ブロック2',
+        '電脳世界へのダイブ': '手札1枚を0コスト',
+        'スタンプラリー': '5枚使用でエナジー+1/2ドロー', 'OUT_STAMP_COLLECT': '5枚使用でエナジー+1/2ドロー',
+        '戦隊ヒーローのポーズ': '攻撃に使用後ドロー付与', 'OUT_SUPER_HERO_POSE': '攻撃に使用後ドロー付与',
+        '秘密のプレゼント': 'ポーション2個入手', 'GIRLS_GIFT_BOX': 'ポーション2個入手',
+        '天気予報': '山札を確認して並べ替え', 'RIKA_WEATHER': '山札を確認して並べ替え',
+        '金魚すくい': '手札1枚を強化して0コスト', 'OUT_GOLD_FISH': '手札1枚を強化して0コスト',
+        '夢のおもちゃ屋': 'レジェンダリーを1枚生成', 'OUT_TOY_STORE': 'レジェンダリーを1枚生成',
+        '幻覚キノコ': 'ランダムカードを複数生成', 'MYSTIC_MUSHROOM': 'ランダムカードを複数生成',
+        'お年玉の誘惑': '手札1枚を0コスト', 'OUT_NEW_YEAR_GOLD': '手札1枚を0コスト',
+        'ガチャの神引き': 'デッキのレジェンダリーをコピー', 'OUT_GACHA_LUCK': 'デッキのレジェンダリーをコピー',
+        '図書室での昼寝': 'HP全回復/デバフ解除', 'OUT_LIBRARY_SLEEP': 'HP全回復/デバフ解除',
+        '手作りの宝地図': 'ランダムなレリック入手', 'OUT_TREASURE_MAP': 'ランダムなレリック入手',
+        '初詣の願い事': '手札を全て0コスト', 'OUT_SHRINE_PRAY': '手札を全て0コスト',
+        'ローラーシューズ': '手札を全て0コスト', 'OUT_ROLLER_BLADE': '手札を全て0コスト',
+        '虫かごの秘密': '捕獲カードを手札に加える', 'OUT_BUG_BOX': '捕獲カードを手札に加える',
+        '出前ピザパーティー': '自分とパートナーを全回復', 'OUT_PIZZA_PARTY': '自分とパートナーを全回復',
+        '虹を追いかけて': 'デッキ5枚を強化', 'OUT_RAINBOW_CHASE': 'デッキ5枚を強化',
+        '迷い犬の恩返し': '次戦闘開始時エナジー+3', 'OUT_STREET_DOG': '次戦闘開始時エナジー+3',
+        '究極の10連ガチャ': 'ランダムカード10枚生成', 'OUT_SUPER_GACHA': 'ランダムカード10枚生成',
+        'いつかの卒業式': 'ムキムキ20/カチカチ20/キラキラ5', 'OUT_GRADUATION_DAY': 'ムキムキ20/カチカチ20/キラキラ5',
+        '田んぼのかかし': '敵全体を眠らせる', 'OUT_SCARE_CROW': '敵全体を眠らせる',
+        'おやすみスウィート': '敵全体を眠らせる', 'GIRLS_SWEET_DREAM': '敵全体を眠らせる',
+        'ドリーム・キャッチャー': '山札から1枚選ぶ', 'GIRLS_DREAM_CATCHER': '山札から1枚選ぶ',
+        'なないろマジック': '手札1枚を0コスト', 'GIRLS_RAINBOW_MAGIC': '手札1枚を0コスト',
+        'お姫様の呼び声': '山札からスキルを手札へ', 'GIRLS_PRINCESS_CALL': '山札からスキルを手札へ',
+        'おとぎ話の扉': 'スペシャルカード3枚生成', 'GIRLS_FAIRY_TALE': 'スペシャルカード3枚生成',
+        '影分身の術': '手札の攻撃を全コピー', 'BOYS_SHADOW_CLONE': '手札の攻撃を全コピー',
+        '真の勇者覚醒': '毎ターンエナジー+1/ドロー+1/ムキムキ2',
+        '秘密のラブレター': '非ボス敵を逃がす',
+        '真夏の肝試し': '敵全体ムキムキ-3',
+        '秘密の近道': '山札から高コスト優先で0コスト化',
+        '天体観測': '特殊演出',
+        '親友との約束': 'パートナー最大HP+20', 'OUT_FRIEND_FOREVER': 'パートナー最大HP+20',
+        'ずっと友達だよ': 'パートナー連携強化', 'GIRLS_FRIENDSHIP': 'パートナー連携強化',
+        '雷神の鉄拳': '追加の雷ダメージ', 'BOYS_THUNDER_FIST': '追加の雷ダメージ',
+        'リベンジ・バースト': 'HP低下時に追加ダメージ', 'BOYS_REVENGE': 'HP低下時に追加ダメージ',
+        '修羅の構え': '攻撃性能を強化', 'BOYS_BATTLE_STANCE': '攻撃性能を強化',
+        '路地裏の野良猫': '次の攻撃が3回発動', 'OUT_STRAY_CAT': '次の攻撃が3回発動',
+        'バネの弾力': 'ブロックと反撃準備', 'RIKA_SPRING': 'ブロックと反撃準備',
+        '華麗な舞': 'ムキムキ+2', 'GIRLS_BALLERINA': 'ムキムキ+2',
+        '本命チョコ': 'HP回復と強化', 'GIRLS_CHOCO_VALENTINE': 'HP回復と強化',
+        'カラフル・レインボー': '敵全体のブロック解除', 'GIRLS_COLORFUL_RAIN': '敵全体のブロック解除',
+        '川での魚つかみ': 'ランダムな魚効果', 'OUT_FISH_CATCH': 'ランダムな魚効果',
+        '奇跡のリボン': 'エナジー全回復', 'GIRLS_MIRACLE_RIBBON': 'エナジー全回復',
+        'おじいちゃんの古民家': 'HP全回復', 'OUT_OLD_HOUSE': 'HP全回復',
+        '夕焼けのチャイム': '非ボス敵を帰宅させる',
+        '伝説のかくれんぼ': 'スケスケ2',
+        '二度寝の誘惑に勝てない...。': 'HP15回復/次ターンエナジー+2/ドロー+2',
+        '休日の二度寝': 'HP15回復/次ターンエナジー+2/ドロー+2',
+        '水たまりジャンプ': '使用時エナジー回復',
+        '工事現場の重機': '敵全体のブロック解除',
+        '僕だけのヒーロー': '特殊演出',
+        'デコレーション・ケーキ': '使用時HP回復',
         '戦略家': '捨てられた時E+2', 'STRATEGIST': '捨てられた時E+2',
         'カンニングペーパー': '捨てられた時E+2',
+        '羅生門': '撃破時に手札1枚廃棄', 'RASHOMON': '撃破時に手札1枚廃棄',
+        '時間どろぼう': '敵行動を1ターン遅延', 'TIME_THIEF': '敵行動を1ターン遅延',
         '空虚': 'E-1', 'VOID': 'E-1'
     };
 

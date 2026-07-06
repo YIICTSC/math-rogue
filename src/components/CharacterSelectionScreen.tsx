@@ -421,7 +421,7 @@ const CharacterSelectionScreen: React.FC<CharacterSelectionScreenProps> = ({ cha
                     'amber': 'border-amber-600 bg-amber-950/40 hover:bg-amber-900/60 shadow-amber-900/20',
                 };
                 
-                const baseClass = `character-selection-card relative border-4 rounded-2xl p-5 transition-all duration-300 flex flex-col items-center ${isUnlocked ? 'cursor-pointer hover:-translate-y-2 shadow-2xl scale-100 active:scale-95' : 'opacity-60 cursor-not-allowed grayscale'}`;
+                const baseClass = `character-selection-card relative border-4 rounded-2xl p-5 transition-all duration-300 flex flex-col items-center ${isUnlocked ? 'cursor-pointer shadow-2xl scale-100 active:scale-95' : 'opacity-60 cursor-not-allowed grayscale'}`;
                 const colorClass = isUnlocked ? (colorMap[char.color] || 'border-gray-600') : 'border-gray-700 bg-gray-900';
 
                 return (
@@ -495,9 +495,7 @@ const CharacterSelectionScreen: React.FC<CharacterSelectionScreenProps> = ({ cha
                                     <div className="text-[11px] text-gray-300 font-bold leading-snug">
                                         {magicRule ? (
                                             <>
-                                                <div>{trans(`${magicRule.name}：${magicRule.description}`, languageMode)}</div>
-                                                <div className="mt-1 text-indigo-100/80">{trans(magicRule.completionCondition, languageMode)}</div>
-                                                <div className="mt-1 text-amber-100/90">{trans(`完成効果：${magicRule.completionEffect}`, languageMode)}</div>
+                                                <div className="text-indigo-100">{trans(`${magicRule.shortName}：${magicRule.selectionSummary}`, languageMode)}</div>
                                             </>
                                         ) : (
                                             <>
