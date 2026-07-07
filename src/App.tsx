@@ -1544,6 +1544,7 @@ const App: React.FC = () => {
     const [coopRewardSets, setCoopRewardSets] = useState<Record<string, RewardItem[]>>({});
     const [coopAwaitingRewardSync, setCoopAwaitingRewardSync] = useState(false);
     const [coopAwaitingMapSync, setCoopAwaitingMapSync] = useState(false);
+    const [coopRejoinAwaitingStateSync, setCoopRejoinAwaitingStateSync] = useState(false);
     const [coopNeedsInitialMapSync, setCoopNeedsInitialMapSync] = useState(false);
     const [coopLateJoinCharacterSelect, setCoopLateJoinCharacterSelect] = useState(false);
     const [coopMapPendingNodeId, setCoopMapPendingNodeId] = useState<string | null>(null);
@@ -11019,6 +11020,29 @@ const App: React.FC = () => {
         return () => window.clearTimeout(timeout);
     }, [coopAllStarterRelicsResolved, coopNeedsInitialMapSync, coopSession, gameState.challengeMode, gameState.screen, sendCoopStateSync]);
     useEffect(() => {
+        if (
+            gameState.challengeMode !== 'COOP' ||
+            !coopSession ||
+            coopSession.isHost ||
+            !coopRejoinAwaitingStateSync ||
+            coopLateJoinCharacterSelect
+        ) {
+            return;
+        }
+        if (gameState.map.length > 0 && gameState.screen === GameScreen.MAP) {
+            setCoopRejoinAwaitingStateSync(false);
+            return;
+        }
+
+        const requestSync = () => {
+            p2pService.send({ type: 'COOP_STATE_SYNC_REQUEST' });
+            p2pService.send({ type: 'COOP_REWARD_SYNC_REQUEST' });
+        };
+        requestSync();
+        const interval = window.setInterval(requestSync, 900);
+        return () => window.clearInterval(interval);
+    }, [coopLateJoinCharacterSelect, coopRejoinAwaitingStateSync, coopSession, gameState.challengeMode, gameState.map.length, gameState.screen]);
+    useEffect(() => {
         if (gameState.screen !== GameScreen.MAP) {
             clearCoopMapPending();
             return;
@@ -12496,6 +12520,7 @@ const App: React.FC = () => {
             if (data.type === 'COOP_REJOIN_ACCEPTED' && !coopSession.isHost) {
                 coopHostMigrationInProgressRef.current = false;
                 setCoopLateJoinCharacterSelect(!!data.needsCharacterSelect);
+                setCoopRejoinAwaitingStateSync(!data.needsCharacterSelect);
                 setCoopSession(prev => prev ? {
                     ...prev,
                     isHost: false,
@@ -12664,6 +12689,9 @@ const App: React.FC = () => {
                         prev.rewards.length > 0;
                     if (shouldReleaseInitialMapWait) {
                         setCoopAwaitingMapSync(false);
+                    }
+                    if (coopRejoinAwaitingStateSync && data.state.map.length > 0) {
+                        setCoopRejoinAwaitingStateSync(false);
                     }
                     if (
                         preserveLocalScreen &&
@@ -15293,8 +15321,16 @@ const App: React.FC = () => {
                             floor={gameState.floor}
                             typingMode={gameState.challengeMode === 'TYPING'}
                             selectionHoldMs={raceEffects.shoeLaceUntil > raceEffectNow ? 400 : 0}
-                            selectionDisabled={(gameState.challengeMode === 'COOP' && !!coopSession?.isHost && (!coopCanDecide || coopNeedsInitialMapSync)) || coopMapSelectionPending}
-                            selectionDisabledMessage={gameState.challengeMode === 'COOP' ? (coopNeedsInitialMapSync ? '参加者へ初回マップを同期しています...' : coopMapPendingMessage) : undefined}
+                            selectionDisabled={
+                                (gameState.challengeMode === 'COOP' && !!coopSession?.isHost && (!coopCanDecide || coopNeedsInitialMapSync)) ||
+                                coopMapSelectionPending ||
+                                (gameState.challengeMode === 'COOP' && !coopSession?.isHost && coopRejoinAwaitingStateSync)
+                            }
+                            selectionDisabledMessage={gameState.challengeMode === 'COOP'
+                                ? (coopRejoinAwaitingStateSync
+                                    ? 'ホストのマップを同期中...'
+                                    : (coopNeedsInitialMapSync ? '参加者へ初回マップを同期しています...' : coopMapPendingMessage))
+                                : undefined}
                             visualTheme={coopSyncedVisualTheme}
                             highSchoolStoryId={coopSyncedVisualTheme === 'high-school' ? HIGH_SCHOOL_STORIES[gameState.currentStoryIndex || 0]?.id : undefined}
                         />
@@ -15494,6 +15530,7 @@ const App: React.FC = () => {
                                     setCoopSupportCards([]);
                                     setTreasurePools([]);
                                     setCoopLateJoinCharacterSelect(!!payload.isLateJoin);
+                                    setCoopRejoinAwaitingStateSync(!!payload.isRejoin && !payload.isLateJoin);
                                     setCoopSession({
                                         isHost: payload.isHost,
                                         name: payload.name,
