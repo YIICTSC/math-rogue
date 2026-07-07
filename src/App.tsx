@@ -2080,7 +2080,14 @@ const App: React.FC = () => {
     const coopBattleState = gameState.coopBattleState || null;
     const coopBattleQueueView = useMemo(() => {
         const sourceQueue = coopBattleState?.turnQueue || coopBattleQueue;
-        return sourceQueue.map(slot => {
+        const cursor = coopBattleState && sourceQueue === coopBattleState.turnQueue
+            ? Math.max(0, Math.min(coopBattleState.turnCursor, sourceQueue.length - 1))
+            : 0;
+        const orderedQueue = cursor > 0
+            ? [...sourceQueue.slice(cursor), ...sourceQueue.slice(0, cursor)]
+            : sourceQueue;
+
+        return orderedQueue.map(slot => {
             if (slot.type === 'ENEMY') return slot;
             return {
                 ...slot,

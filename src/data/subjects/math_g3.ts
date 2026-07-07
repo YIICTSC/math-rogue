@@ -505,11 +505,14 @@ const makeUnitProblem = (unitId: string, n: number): GeneralProblem => {
             const c = (n % 7) + 1;
             const p = n % 4;
             if (p === 0) {
-                const max = Math.max(a, b, c);
-                const winners = [["ねこ", a], ["いぬ", b], ["うさぎ", c]].filter(([, v]) => v === max).map(([label]) => label);
-                const answer = winners.length === 1 ? winners[0] : "おなじ";
-                const wrongs = ["ねこ", "いぬ", "うさぎ", "おなじ"].filter((label) => label !== answer).slice(0, 3);
-                return { question: `ぼうグラフ。 いちばん おおいの どうぶつは？`, answer, options: d(answer, ...wrongs), hint: "いちばん高いぼう。", visual: { kind: 'bar_chart', values: [a, b, c], labels: ["ねこ", "いぬ", "うさぎ"] } };
+                const base = (n % 6) + 2;
+                const uniqueValues = [base + 2, base, base + 1];
+                const rotation = Math.floor(n / 4) % uniqueValues.length;
+                const values = [...uniqueValues.slice(rotation), ...uniqueValues.slice(0, rotation)];
+                const labels = ["ねこ", "いぬ", "うさぎ"];
+                const answer = labels[values.indexOf(Math.max(...values))];
+                const wrongs = labels.filter((label) => label !== answer);
+                return { question: `ぼうグラフ。 いちばん おおい どうぶつは？`, answer, options: d(answer, ...wrongs, "おなじ"), hint: "いちばん高いぼう。", visual: { kind: 'bar_chart', values, labels } };
             }
             if (p === 1) {
                 return { question: `ねこ と いぬ の 合計は？`, answer: `${a + b}ひき`, options: d(`${a + b}ひき`, `${a + b + 1}ひき`, `${a - b}ひき`, `${a}ひき`), hint: "2つのぼうを たす。", visual: { kind: 'bar_chart', values: [a, b], labels: ["ねこ", "いぬ"] } };
