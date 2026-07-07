@@ -39,6 +39,7 @@ export interface CoopStartPayload {
   battleMode: 'TURN_BASED' | 'REALTIME';
   visualTheme?: 'elementary' | 'high-school' | 'magic';
   isRejoin?: boolean;
+  isLateJoin?: boolean;
   selfPeerId?: string;
   slotId?: string;
   reconnectToken?: string;
@@ -176,6 +177,7 @@ const CoopSetupScreen: React.FC<CoopSetupScreenProps> = ({ player, onStart, onCl
           battleMode: data.battleMode === 'REALTIME' ? 'REALTIME' : 'TURN_BASED',
           visualTheme: data.visualTheme,
           isRejoin: true,
+          isLateJoin: !!data.needsCharacterSelect,
           selfPeerId: p2pService.getMyId() || undefined,
           slotId: data.slotId,
           reconnectToken: data.reconnectToken || resumeInfo?.reconnectToken

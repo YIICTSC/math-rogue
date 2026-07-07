@@ -1539,11 +1539,13 @@ const App: React.FC = () => {
     const [raceRewardDummyDisplay, setRaceRewardDummyDisplay] = useState(0);
     const [coopSupportCards, setCoopSupportCards] = useState<CoopSupportCard[]>([]);
     const [coopPartyHudOpen, setCoopPartyHudOpen] = useState(true);
+    const [coopInviteCodeCopied, setCoopInviteCodeCopied] = useState(false);
     const [coopPlayerSnapshots, setCoopPlayerSnapshots] = useState<Record<string, Player>>({});
     const [coopRewardSets, setCoopRewardSets] = useState<Record<string, RewardItem[]>>({});
     const [coopAwaitingRewardSync, setCoopAwaitingRewardSync] = useState(false);
     const [coopAwaitingMapSync, setCoopAwaitingMapSync] = useState(false);
     const [coopNeedsInitialMapSync, setCoopNeedsInitialMapSync] = useState(false);
+    const [coopLateJoinCharacterSelect, setCoopLateJoinCharacterSelect] = useState(false);
     const [coopMapPendingNodeId, setCoopMapPendingNodeId] = useState<string | null>(null);
     const [coopBattleQueue, setCoopBattleQueue] = useState<CoopBattleTurnSlot[]>([]);
     const [coopBattleKey, setCoopBattleKey] = useState<string | null>(null);
@@ -2054,6 +2056,13 @@ const App: React.FC = () => {
         }
         return trans("あなたのターン", languageMode);
     }, [coopSelfDisplayName, gameState.challengeMode, languageMode]);
+    const handleCopyCoopInviteCode = useCallback(() => {
+        if (!coopSession?.roomCode) return;
+        navigator.clipboard?.writeText(coopSession.roomCode);
+        setCoopInviteCodeCopied(true);
+        audioService.playSound('select');
+        window.setTimeout(() => setCoopInviteCodeCopied(false), 1600);
+    }, [coopSession?.roomCode]);
     const coopAllRewardsResolved = useMemo(() => {
         if (!coopSession || gameState.screen !== GameScreen.REWARD) return false;
         return areActiveCoopParticipantsResolved(coopSession.participants, participant => !!participant.rewardResolved);
@@ -5660,6 +5669,25 @@ const App: React.FC = () => {
                 });
             }
             if (!coopSession.isHost || !areActiveCoopParticipantsResolved(nextParticipants, participant => !!participant.selectedCharacterId)) {
+                if (!coopSession.isHost && coopLateJoinCharacterSelect) {
+                    setCoopLateJoinCharacterSelect(false);
+                    setGameState(prev => ({
+                        ...prev,
+                        act: prev.act || 1,
+                        floor: prev.floor || 0,
+                        turn: prev.turn || 0,
+                        player: initialPlayerState,
+                        narrativeLog: logs,
+                        activeEffects: [],
+                        screen: GameScreen.MAP
+                    }));
+                    window.setTimeout(() => {
+                        p2pService.send({ type: 'COOP_STATE_SYNC_REQUEST' });
+                        p2pService.send({ type: 'COOP_REWARD_SYNC_REQUEST' });
+                    }, 120);
+                    startGameAssetPreload();
+                    return;
+                }
                 setGameState(prev => ({
                     ...prev,
                     act: 1,
@@ -12399,8 +12427,53 @@ const App: React.FC = () => {
             previousOnClose?.(closedPeerId);
         };
         p2pService.onData = (data, fromPeerId) => {
+            if (data.type === 'COOP_JOIN' && coopSession.isHost && fromPeerId) {
+                setCoopSession(prev => {
+                    if (!prev) return prev;
+                    const existing = prev.participants.find(participant =>
+                        participant.peerId === fromPeerId ||
+                        (!!data.slotId && participant.slotId === data.slotId)
+                    );
+                    const slotId = existing?.slotId || data.slotId || `coop-slot-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+                    const reconnectToken = existing?.reconnectToken || data.reconnectToken || `coop-token-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
+                    const nextParticipant: CoopParticipant = {
+                        ...(existing || {}),
+                        peerId: fromPeerId,
+                        slotId,
+                        reconnectToken,
+                        name: data.name,
+                        imageData: data.imageData,
+                        disconnected: false
+                    };
+                    const withoutExisting = prev.participants.filter(participant =>
+                        participant.peerId !== fromPeerId &&
+                        (!slotId || participant.slotId !== slotId)
+                    );
+                    if (!existing && withoutExisting.length >= 4) {
+                        p2pService.sendTo(fromPeerId, { type: 'COOP_REJOIN_REJECTED', reason: '参加人数が上限です' });
+                        return prev;
+                    }
+                    const nextParticipants = [...withoutExisting, nextParticipant];
+                    p2pService.send({ type: 'COOP_PARTICIPANTS', participants: nextParticipants, decisionOwnerIndex: prev.decisionOwnerIndex });
+                    p2pService.sendTo(fromPeerId, {
+                        type: 'COOP_REJOIN_ACCEPTED',
+                        roomCode: prev.roomCode || '',
+                        slotId,
+                        reconnectToken,
+                        name: data.name,
+                        participants: nextParticipants,
+                        battleMode: prev.battleMode,
+                        visualTheme: gameState.visualTheme || visualTheme,
+                        needsCharacterSelect: !nextParticipant.selectedCharacterId
+                    });
+                    return { ...prev, participants: nextParticipants };
+                });
+                return;
+            }
+
             if (data.type === 'COOP_REJOIN_ACCEPTED' && !coopSession.isHost) {
                 coopHostMigrationInProgressRef.current = false;
+                setCoopLateJoinCharacterSelect(!!data.needsCharacterSelect);
                 setCoopSession(prev => prev ? {
                     ...prev,
                     isHost: false,
@@ -12409,7 +12482,9 @@ const App: React.FC = () => {
                     participants: data.participants
                 } : prev);
                 window.setTimeout(() => {
-                    p2pService.send({ type: 'COOP_STATE_SYNC_REQUEST' });
+                    if (!data.needsCharacterSelect) {
+                        p2pService.send({ type: 'COOP_STATE_SYNC_REQUEST' });
+                    }
                     p2pService.send({ type: 'COOP_REWARD_SYNC_REQUEST' });
                 }, 120);
                 return;
@@ -12697,8 +12772,16 @@ const App: React.FC = () => {
                             : participant
                     );
                     p2pService.send({ type: 'COOP_PARTICIPANTS', participants: nextParticipants, decisionOwnerIndex: prev.decisionOwnerIndex });
-                    if (areActiveCoopParticipantsResolved(nextParticipants, participant => !!participant.selectedCharacterId)) {
+                    if (
+                        COOP_LOCAL_SETUP_SCREEN_SET.has(gameState.screen) &&
+                        areActiveCoopParticipantsResolved(nextParticipants, participant => !!participant.selectedCharacterId)
+                    ) {
                         window.setTimeout(() => advanceCoopAfterCharacterReady(nextParticipants), 0);
+                    } else {
+                        window.setTimeout(() => {
+                            sendCoopStateSync(fromPeerId);
+                            sendCoopRewardSyncToPeer(fromPeerId);
+                        }, 80);
                     }
                     return { ...prev, participants: nextParticipants };
                 });
@@ -14786,12 +14869,25 @@ const App: React.FC = () => {
                                     <div className="text-[9px] sm:text-[10px] uppercase tracking-[0.2em] sm:tracking-[0.25em] text-emerald-200">Coop Party</div>
                                     <div className="text-[9px] sm:text-[10px] text-emerald-100/80">{coopSession.participants.length}{trans("人", languageMode)}</div>
                                 </div>
-                                <button
-                                    onClick={() => setCoopPartyHudOpen(prev => !prev)}
-                                    className="rounded border border-emerald-400/40 bg-emerald-950/30 px-1.5 py-0.5 sm:px-2 sm:py-1 text-[9px] sm:text-[10px] font-bold text-emerald-100 hover:bg-emerald-900/40"
-                                >
-                                    {trans(coopPartyHudOpen ? '非表示' : '表示', languageMode)}
-                                </button>
+                                <div className="flex shrink-0 items-center gap-1">
+                                    {coopSession.roomCode && (
+                                        <button
+                                            onClick={handleCopyCoopInviteCode}
+                                            className="flex items-center gap-1 rounded border border-cyan-400/40 bg-cyan-950/30 px-1.5 py-0.5 sm:px-2 sm:py-1 text-[9px] sm:text-[10px] font-bold text-cyan-100 hover:bg-cyan-900/40"
+                                            title={trans('途中参加コードをコピー', languageMode)}
+                                        >
+                                            {coopInviteCodeCopied ? <Check size={12} /> : <ClipboardList size={12} />}
+                                            <span className="hidden sm:inline">{trans('参加', languageMode)}</span>
+                                            <span className="tabular-nums tracking-widest">{coopSession.roomCode}</span>
+                                        </button>
+                                    )}
+                                    <button
+                                        onClick={() => setCoopPartyHudOpen(prev => !prev)}
+                                        className="rounded border border-emerald-400/40 bg-emerald-950/30 px-1.5 py-0.5 sm:px-2 sm:py-1 text-[9px] sm:text-[10px] font-bold text-emerald-100 hover:bg-emerald-900/40"
+                                    >
+                                        {trans(coopPartyHudOpen ? '非表示' : '表示', languageMode)}
+                                    </button>
+                                </div>
                             </div>
                             {coopPartyHudOpen && (
                                 <div className="space-y-1.5 sm:space-y-2">
@@ -15339,6 +15435,7 @@ const App: React.FC = () => {
                                     setCoopEnemyTurnCursor(0);
                                     setCoopSupportCards([]);
                                     setTreasurePools([]);
+                                    setCoopLateJoinCharacterSelect(!!payload.isLateJoin);
                                     setCoopSession({
                                         isHost: payload.isHost,
                                         name: payload.name,
@@ -15353,11 +15450,13 @@ const App: React.FC = () => {
                                             ...prev,
                                             visualTheme: hostVisualTheme,
                                             challengeMode: 'COOP',
-                                            screen: GameScreen.MAP,
+                                            screen: payload.isLateJoin ? GameScreen.CHARACTER_SELECTION : GameScreen.MAP,
                                             coopBattleState: null
                                         }));
                                         window.setTimeout(() => {
-                                            p2pService.send({ type: 'COOP_STATE_SYNC_REQUEST' });
+                                            if (!payload.isLateJoin) {
+                                                p2pService.send({ type: 'COOP_STATE_SYNC_REQUEST' });
+                                            }
                                             p2pService.send({ type: 'COOP_REWARD_SYNC_REQUEST' });
                                         }, 120);
                                         return;

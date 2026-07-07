@@ -59,7 +59,8 @@ export type P2PEvent =
         name?: string,
         participants: P2PCoopParticipant[],
         battleMode?: 'TURN_BASED' | 'REALTIME',
-        visualTheme?: P2PVisualThemeId
+        visualTheme?: P2PVisualThemeId,
+        needsCharacterSelect?: boolean
     }
     | { type: 'COOP_REJOIN_REJECTED', reason?: string }
     | {
