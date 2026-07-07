@@ -12443,7 +12443,25 @@ const App: React.FC = () => {
                         reconnectToken,
                         name: data.name,
                         imageData: data.imageData,
-                        disconnected: false
+                        disconnected: false,
+                        selectedCharacterId: undefined,
+                        magicProtagonistId: undefined,
+                        magicProtagonistGender: undefined,
+                        maxHp: undefined,
+                        currentHp: undefined,
+                        block: 0,
+                        nextTurnEnergy: 0,
+                        strength: 0,
+                        buffer: 0,
+                        revivedThisBattle: false,
+                        quizResolved: false,
+                        quizCorrectCount: 0,
+                        eventResolved: false,
+                        relicResolved: false,
+                        restResolved: false,
+                        shopResolved: false,
+                        rewardResolved: false,
+                        treasureResolved: false
                     };
                     const withoutExisting = prev.participants.filter(participant =>
                         participant.peerId !== fromPeerId &&
@@ -12464,7 +12482,7 @@ const App: React.FC = () => {
                         participants: nextParticipants,
                         battleMode: prev.battleMode,
                         visualTheme: gameState.visualTheme || visualTheme,
-                        needsCharacterSelect: !nextParticipant.selectedCharacterId
+                        needsCharacterSelect: true
                     });
                     return { ...prev, participants: nextParticipants };
                 });
@@ -12579,6 +12597,13 @@ const App: React.FC = () => {
                 if (data.state.visualTheme) {
                     setVisualTheme(data.state.visualTheme);
                 }
+                if (coopLateJoinCharacterSelect) {
+                    setCoopSession(prev => prev ? {
+                        ...prev,
+                        battleMode: data.state.coopBattleState?.battleMode || prev.battleMode
+                    } : prev);
+                    return;
+                }
                 if (data.aux) {
                     setShopCards(data.aux.shopCards || []);
                     setShopRelics(data.aux.shopRelics || []);
@@ -12684,6 +12709,9 @@ const App: React.FC = () => {
 
             if (data.type === 'COOP_PARTICIPANTS') {
                 setCoopSession(prev => prev ? { ...prev, participants: data.participants, decisionOwnerIndex: data.decisionOwnerIndex ?? prev.decisionOwnerIndex } : prev);
+                if (coopLateJoinCharacterSelect) {
+                    return;
+                }
                 if (!coopSession.isHost && coopSelfPeerId) {
                     const selfParticipant = data.participants.find(participant => participant.peerId === coopSelfPeerId);
                     if (selfParticipant && (selfParticipant.currentHp !== undefined || selfParticipant.maxHp !== undefined || selfParticipant.block !== undefined)) {
@@ -12884,6 +12912,9 @@ const App: React.FC = () => {
             }
 
             if (data.type === 'COOP_BATTLE_FINISH' && !coopSession.isHost) {
+                if (coopLateJoinCharacterSelect) {
+                    return;
+                }
                 const applyBattleFinish = () => {
                     coopApplyingRemoteBattleSyncRef.current = true;
                     queuedCoopBattleEventRef.current = null;
@@ -12929,6 +12960,9 @@ const App: React.FC = () => {
             }
 
             if (data.type === 'COOP_BATTLE_SYNC') {
+                if (coopLateJoinCharacterSelect) {
+                    return;
+                }
                 coopApplyingRemoteBattleSyncRef.current = true;
                 const pendingQueuedBattleEvent = queuedCoopBattleEventRef.current;
                 setCoopBattleState(data.battleState);
