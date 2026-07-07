@@ -10092,6 +10092,10 @@ const App: React.FC = () => {
 
     const handleCoopEventOptionSelect = useCallback((optionIndex: number) => {
         if (gameState.challengeMode === 'COOP' && coopSession && coopSelfPeerId) {
+            if ((gameState.visualTheme || visualTheme) === 'magic') {
+                eventData?.options?.[optionIndex]?.action?.();
+                return;
+            }
             if (!coopSession.isHost) {
                 p2pService.send({ type: 'COOP_EVENT_OPTION', optionIndex });
                 return;
@@ -10103,7 +10107,7 @@ const App: React.FC = () => {
             return;
         }
         eventData?.options?.[optionIndex]?.action?.();
-    }, [applyCoopPlayerStateToPeer, coopSelfPeerId, coopSession, eventData, gameState.challengeMode, gameState.player, resolveCoopEventOptionForPlayer]);
+    }, [applyCoopPlayerStateToPeer, coopSelfPeerId, coopSession, eventData, gameState.challengeMode, gameState.player, gameState.visualTheme, resolveCoopEventOptionForPlayer, visualTheme]);
 
     const handleLegacyCardSelect = (card: ICard) => {
         storageService.saveLegacyCard(card, gameState.challengeMode === 'COOP' ? 'COOP' : 'NORMAL');
@@ -12611,7 +12615,27 @@ const App: React.FC = () => {
                     setTreasureRewards(data.aux.treasureRewards || []);
                     setTreasureOpened(data.aux.treasureOpened || false);
                     setTreasurePools(data.aux.treasurePools || []);
-                    if (data.aux.eventData) {
+                    if (
+                        data.state.screen === GameScreen.EVENT &&
+                        (data.state.visualTheme || visualTheme) === 'magic' &&
+                        (gameState.screen !== GameScreen.EVENT || !eventData)
+                    ) {
+                        setEventData(generateMagicRomanceSelectionEvent(
+                            gameState.player,
+                            getMagicProtagonistId(gameState.player),
+                            data.state.act,
+                            setGameState,
+                            setEventData,
+                            setEventResultLog
+                        ));
+                    } else if (
+                        data.state.screen === GameScreen.EVENT &&
+                        (data.state.visualTheme || visualTheme) === 'magic' &&
+                        gameState.screen === GameScreen.EVENT &&
+                        eventData
+                    ) {
+                        // Magic romance events branch per player in coop; keep the local branch event.
+                    } else if (data.aux.eventData) {
                         setEventData({
                             ...data.aux.eventData,
                             options: (data.aux.eventData.options || []).map(option => ({
