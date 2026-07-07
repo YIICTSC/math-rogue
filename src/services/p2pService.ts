@@ -5,6 +5,34 @@ import { OFFLINE_DISTRIBUTABLE, OFFLINE_NETWORK_FEATURE_MESSAGE } from '../confi
 type P2PVisualThemeId = 'elementary' | 'high-school' | 'magic';
 type P2PMagicProtagonistGender = 'female' | 'male';
 
+type P2PCoopParticipant = {
+    peerId: string,
+    slotId?: string,
+    reconnectToken?: string,
+    name: string,
+    imageData?: string,
+    disconnected?: boolean,
+    selectedCharacterId?: string,
+    magicProtagonistId?: string,
+    magicProtagonistGender?: P2PMagicProtagonistGender,
+    maxHp?: number,
+    currentHp?: number,
+    block?: number,
+    nextTurnEnergy?: number,
+    strength?: number,
+    buffer?: number,
+    revivedThisBattle?: boolean,
+    quizResolved?: boolean,
+    quizCorrectCount?: number,
+    eventResolved?: boolean,
+    relicResolved?: boolean,
+    restResolved?: boolean,
+    shopResolved?: boolean,
+    rewardResolved?: boolean,
+    treasureResolved?: boolean,
+    floatingText?: any
+};
+
 export type P2PEvent =
     | { type: 'HANDSHAKE', player: any }
     | { type: 'STATE_UPDATE', myState: any, yourState: any, lastAction?: string, receiverTurn?: boolean, turnCount?: number, senderName?: string }
@@ -21,58 +49,25 @@ export type P2PEvent =
     | { type: 'RACE_TRICK_PLAY', cardId: string, effectId: RaceTrickEffectId, targetPeerId: string, sourceName: string, sourceGold: number }
     | { type: 'RACE_TRICK_APPLY', cardId: string, effectId: RaceTrickEffectId, sourcePeerId: string, sourceName: string, sourceGold: number }
     | { type: 'RACE_TRICK_RESULT', effectId: RaceTrickEffectId, sourcePeerId: string, targetPeerId: string, sourceGoldAfter?: number, goldDelta?: number }
-    | { type: 'COOP_JOIN', name: string, imageData?: string }
+    | { type: 'COOP_JOIN', name: string, imageData?: string, slotId?: string, reconnectToken?: string }
+    | { type: 'COOP_REJOIN', roomCode: string, slotId: string, reconnectToken: string, name: string, imageData?: string }
+    | {
+        type: 'COOP_REJOIN_ACCEPTED',
+        roomCode: string,
+        slotId: string,
+        reconnectToken?: string,
+        name?: string,
+        participants: P2PCoopParticipant[],
+        battleMode?: 'TURN_BASED' | 'REALTIME',
+        visualTheme?: P2PVisualThemeId
+    }
+    | { type: 'COOP_REJOIN_REJECTED', reason?: string }
     | {
         type: 'COOP_PARTICIPANTS',
-        participants: Array<{
-            peerId: string,
-            name: string,
-            imageData?: string,
-            selectedCharacterId?: string,
-            magicProtagonistId?: string,
-            magicProtagonistGender?: P2PMagicProtagonistGender,
-            maxHp?: number,
-            currentHp?: number,
-            block?: number,
-            nextTurnEnergy?: number,
-            strength?: number,
-            buffer?: number,
-            revivedThisBattle?: boolean,
-            quizResolved?: boolean,
-            quizCorrectCount?: number,
-            eventResolved?: boolean,
-            relicResolved?: boolean,
-            restResolved?: boolean,
-            shopResolved?: boolean,
-            rewardResolved?: boolean,
-            treasureResolved?: boolean,
-            floatingText?: any
-        }>,
+        participants: P2PCoopParticipant[],
         decisionOwnerIndex?: number
     }
-    | { type: 'COOP_START', roomCode?: string, battleMode?: 'TURN_BASED' | 'REALTIME', visualTheme?: 'elementary' | 'high-school' | 'magic', participants?: Array<{
-        peerId: string,
-        name: string,
-        imageData?: string,
-        selectedCharacterId?: string,
-        magicProtagonistId?: string,
-        magicProtagonistGender?: P2PMagicProtagonistGender,
-        maxHp?: number,
-        currentHp?: number,
-        block?: number,
-        nextTurnEnergy?: number,
-        strength?: number,
-        buffer?: number,
-        revivedThisBattle?: boolean,
-        quizResolved?: boolean,
-        quizCorrectCount?: number,
-        eventResolved?: boolean,
-        relicResolved?: boolean,
-        restResolved?: boolean,
-        shopResolved?: boolean,
-        rewardResolved?: boolean,
-        treasureResolved?: boolean,
-    }> }
+    | { type: 'COOP_START', roomCode?: string, battleMode?: 'TURN_BASED' | 'REALTIME', visualTheme?: 'elementary' | 'high-school' | 'magic', participants?: P2PCoopParticipant[] }
     | { type: 'COOP_MODE_SET', mode: any, modePool?: string[], answerMode?: any }
     | { type: 'COOP_DIFFICULTY_SET', difficultyLevel: number }
     | { type: 'COOP_CHARACTER_SELECT', characterId: string, name: string, imageData: string, maxHp: number, currentHp: number, relicResolved?: boolean, magicProtagonistId?: string, magicProtagonistGender?: P2PMagicProtagonistGender }
@@ -281,20 +276,21 @@ class P2PService {
 
     public onConnect: ((conn: DataConnection) => void) | null = null;
     public onData: ((data: P2PEvent, fromPeerId?: string) => void) | null = null;
-    public onClose: (() => void) | null = null;
+    public onClose: ((peerId?: string) => void) | null = null;
     public onError: ((err: any) => void) | null = null;
 
     constructor() { }
 
-    public async initHost(): Promise<string> {
+    public async initHost(roomCode?: string): Promise<string> {
         if (OFFLINE_DISTRIBUTABLE) {
             throw new Error(OFFLINE_NETWORK_FEATURE_MESSAGE);
         }
         return new Promise((resolve, reject) => {
-            const code = Math.floor(100000 + Math.random() * 900000).toString();
+            const code = roomCode || Math.floor(100000 + Math.random() * 900000).toString();
             const peerId = `lr-battle-${code}`;
 
             try {
+                this.close({ silent: true });
                 this.peer = new Peer(peerId);
 
                 this.peer.on('open', (id) => {
@@ -324,6 +320,7 @@ class P2PService {
         return new Promise((resolve, reject) => {
             try {
                 const peerId = `lr-battle-${code}`;
+                this.close({ silent: true });
                 this.peer = new Peer();
 
                 this.peer.on('open', (id) => {
@@ -356,7 +353,7 @@ class P2PService {
 
         conn.on('close', () => {
             this.connections.delete(conn.peer);
-            if (this.onClose) this.onClose();
+            if (this.onClose) this.onClose(conn.peer);
         });
 
         conn.on('error', (err) => {
@@ -392,7 +389,11 @@ class P2PService {
         return this.myId;
     }
 
-    public close() {
+    public close(options?: { silent?: boolean }) {
+        const previousOnClose = this.onClose;
+        if (options?.silent) {
+            this.onClose = null;
+        }
         this.connections.forEach(conn => conn.close());
         this.connections.clear();
         if (this.peer) {
@@ -400,6 +401,9 @@ class P2PService {
             this.peer = null;
         }
         this.myId = null;
+        if (options?.silent) {
+            this.onClose = previousOnClose;
+        }
     }
 
     public isConnected() {

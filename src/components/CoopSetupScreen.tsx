@@ -6,8 +6,11 @@ import { audioService } from '../services/audioService';
 
 export interface CoopParticipantPayload {
   peerId: string;
+  slotId?: string;
+  reconnectToken?: string;
   name: string;
   imageData?: string;
+  disconnected?: boolean;
   selectedCharacterId?: string;
   magicProtagonistId?: string;
   magicProtagonistGender?: 'female' | 'male';
@@ -35,6 +38,10 @@ export interface CoopStartPayload {
   participants: CoopParticipantPayload[];
   battleMode: 'TURN_BASED' | 'REALTIME';
   visualTheme?: 'elementary' | 'high-school' | 'magic';
+  isRejoin?: boolean;
+  selfPeerId?: string;
+  slotId?: string;
+  reconnectToken?: string;
 }
 
 interface CoopSetupScreenProps {
@@ -45,6 +52,43 @@ interface CoopSetupScreenProps {
 }
 
 const MAX_COOP_PLAYERS = 4;
+const COOP_RESUME_STORAGE_KEY = 'learning-rogue.coopResume';
+
+interface CoopResumeInfo {
+  roomCode: string;
+  name: string;
+  slotId: string;
+  reconnectToken: string;
+  isHost?: boolean;
+  battleMode?: 'TURN_BASED' | 'REALTIME';
+  visualTheme?: 'elementary' | 'high-school' | 'magic';
+  updatedAt: number;
+}
+
+const createResumeId = (prefix: string) => {
+  const randomPart = typeof crypto !== 'undefined' && 'randomUUID' in crypto
+    ? crypto.randomUUID()
+    : `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`;
+  return `${prefix}-${randomPart}`;
+};
+
+const loadCoopResumeInfo = (): CoopResumeInfo | null => {
+  if (typeof window === 'undefined') return null;
+  try {
+    const raw = window.localStorage.getItem(COOP_RESUME_STORAGE_KEY);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as CoopResumeInfo;
+    if (!parsed.roomCode || !parsed.slotId || !parsed.reconnectToken) return null;
+    return parsed;
+  } catch {
+    return null;
+  }
+};
+
+const saveCoopResumeInfo = (info: CoopResumeInfo) => {
+  if (typeof window === 'undefined') return;
+  window.localStorage.setItem(COOP_RESUME_STORAGE_KEY, JSON.stringify(info));
+};
 
 const CoopSetupScreen: React.FC<CoopSetupScreenProps> = ({ player, onStart, onClose, visualTheme }) => {
   const [mode, setMode] = useState<'SELECT' | 'HOST' | 'JOIN'>('SELECT');
@@ -54,6 +98,7 @@ const CoopSetupScreen: React.FC<CoopSetupScreenProps> = ({ player, onStart, onCl
   const [status, setStatus] = useState<'IDLE' | 'CONNECTING' | 'CONNECTED' | 'ERROR'>('IDLE');
   const [errorMsg, setErrorMsg] = useState('');
   const [participants, setParticipants] = useState<CoopParticipantPayload[]>([]);
+  const [resumeInfo, setResumeInfo] = useState<CoopResumeInfo | null>(() => loadCoopResumeInfo());
   const [joinSent, setJoinSent] = useState(false);
   const [inviteUrlCopied, setInviteUrlCopied] = useState(false);
   const [battleMode, setBattleMode] = useState<'TURN_BASED' | 'REALTIME'>('TURN_BASED');
@@ -96,10 +141,52 @@ const CoopSetupScreen: React.FC<CoopSetupScreenProps> = ({ player, onStart, onCl
             });
             return prev;
           }
-          const next = [...withoutPeer, { peerId: fromPeerId, name: data.name, imageData: data.imageData }];
+          const next = [...withoutPeer, {
+            peerId: fromPeerId,
+            slotId: data.slotId || createResumeId('coop-slot'),
+            reconnectToken: data.reconnectToken || createResumeId('coop-token'),
+            name: data.name,
+            imageData: data.imageData,
+            disconnected: false
+          }];
           p2pService.send({ type: 'COOP_PARTICIPANTS', participants: next, decisionOwnerIndex: 0 });
           return next;
         });
+      }
+
+      if (data.type === 'COOP_REJOIN_ACCEPTED') {
+        if (startTriggeredRef.current) return;
+        startTriggeredRef.current = true;
+        joinInFlightRef.current = false;
+        saveCoopResumeInfo({
+          roomCode: data.roomCode || roomCode,
+          name: myName.trim() || data.name || resumeInfo?.name || 'プレイヤー',
+          slotId: data.slotId,
+          reconnectToken: data.reconnectToken || resumeInfo?.reconnectToken || '',
+          battleMode: data.battleMode === 'REALTIME' ? 'REALTIME' : 'TURN_BASED',
+          visualTheme: data.visualTheme,
+          updatedAt: Date.now()
+        });
+        setResumeInfo(loadCoopResumeInfo());
+        onStart({
+          isHost: false,
+          name: myName.trim() || data.name || resumeInfo?.name || 'プレイヤー',
+          roomCode: data.roomCode || roomCode,
+          participants: data.participants,
+          battleMode: data.battleMode === 'REALTIME' ? 'REALTIME' : 'TURN_BASED',
+          visualTheme: data.visualTheme,
+          isRejoin: true,
+          selfPeerId: p2pService.getMyId() || undefined,
+          slotId: data.slotId,
+          reconnectToken: data.reconnectToken || resumeInfo?.reconnectToken
+        });
+      }
+
+      if (data.type === 'COOP_REJOIN_REJECTED') {
+        joinInFlightRef.current = false;
+        setStatus('ERROR');
+        setErrorMsg(data.reason || '復帰できません');
+        audioService.playSound('wrong');
       }
 
       if (data.type === 'COOP_PARTICIPANTS') {
@@ -121,7 +208,17 @@ const CoopSetupScreen: React.FC<CoopSetupScreenProps> = ({ player, onStart, onCl
       }
     };
 
-    p2pService.onClose = () => {
+    p2pService.onClose = (closedPeerId?: string) => {
+      if (mode === 'HOST' && closedPeerId) {
+        setParticipants(prev => {
+          const next = prev.map(participant =>
+            participant.peerId === closedPeerId ? { ...participant, disconnected: true } : participant
+          );
+          p2pService.send({ type: 'COOP_PARTICIPANTS', participants: next, decisionOwnerIndex: 0 });
+          return next;
+        });
+        return;
+      }
       setStatus('IDLE');
     };
 
@@ -137,14 +234,30 @@ const CoopSetupScreen: React.FC<CoopSetupScreenProps> = ({ player, onStart, onCl
       p2pService.onClose = null;
       p2pService.onError = null;
     };
-  }, [mode, myName, onStart, participants, roomCode]);
+  }, [mode, myName, onStart, participants, resumeInfo, roomCode]);
 
   useEffect(() => {
     if (mode === 'JOIN' && status === 'CONNECTED' && myName.trim() && !joinSent) {
-      p2pService.send({ type: 'COOP_JOIN', name: myName.trim(), imageData: player.imageData });
+      const slotId = resumeInfo?.roomCode === roomCode && resumeInfo.name === myName.trim()
+        ? resumeInfo.slotId
+        : createResumeId('coop-slot');
+      const reconnectToken = resumeInfo?.roomCode === roomCode && resumeInfo.name === myName.trim()
+        ? resumeInfo.reconnectToken
+        : createResumeId('coop-token');
+      p2pService.send({ type: 'COOP_JOIN', name: myName.trim(), imageData: player.imageData, slotId, reconnectToken });
+      saveCoopResumeInfo({
+        roomCode,
+        name: myName.trim(),
+        slotId,
+        reconnectToken,
+        battleMode,
+        visualTheme,
+        updatedAt: Date.now()
+      });
+      setResumeInfo(loadCoopResumeInfo());
       setJoinSent(true);
     }
-  }, [mode, status, myName, joinSent, player.imageData]);
+  }, [battleMode, mode, status, myName, joinSent, player.imageData, resumeInfo, roomCode, visualTheme]);
 
   const handleCreateRoom = async () => {
     if (!myName.trim()) return;
@@ -153,16 +266,60 @@ const CoopSetupScreen: React.FC<CoopSetupScreenProps> = ({ player, onStart, onCl
     try {
       const code = await p2pService.initHost();
       const hostPeerId = p2pService.getMyId() || 'host';
+      const slotId = createResumeId('coop-slot');
+      const reconnectToken = createResumeId('coop-token');
       setRoomCode(code);
       setMode('HOST');
       setStatus('CONNECTED');
-      setParticipants([{ peerId: hostPeerId, name: myName.trim(), imageData: player.imageData }]);
+      setParticipants([{ peerId: hostPeerId, slotId, reconnectToken, name: myName.trim(), imageData: player.imageData, disconnected: false }]);
+      saveCoopResumeInfo({
+        roomCode: code,
+        name: myName.trim(),
+        slotId,
+        reconnectToken,
+        isHost: true,
+        battleMode,
+        visualTheme,
+        updatedAt: Date.now()
+      });
+      setResumeInfo(loadCoopResumeInfo());
       setJoinSent(false);
       startTriggeredRef.current = false;
       audioService.playSound('select');
     } catch (err: any) {
       setStatus('ERROR');
       setErrorMsg(err?.message || 'ルーム作成に失敗');
+      audioService.playSound('wrong');
+    }
+  };
+
+  const handleRejoinRoom = async () => {
+    const saved = resumeInfo;
+    if (!saved || joinInFlightRef.current || status === 'CONNECTING') return;
+    joinInFlightRef.current = true;
+    setStatus('CONNECTING');
+    setErrorMsg('');
+    setMyName(saved.name);
+    setInputCode(saved.roomCode);
+    try {
+      await p2pService.connect(saved.roomCode);
+      setRoomCode(saved.roomCode);
+      setMode('JOIN');
+      setJoinSent(true);
+      startTriggeredRef.current = false;
+      p2pService.send({
+        type: 'COOP_REJOIN',
+        name: saved.name,
+        imageData: player.imageData,
+        roomCode: saved.roomCode,
+        slotId: saved.slotId,
+        reconnectToken: saved.reconnectToken
+      });
+      audioService.playSound('select');
+    } catch (err: any) {
+      joinInFlightRef.current = false;
+      setStatus('ERROR');
+      setErrorMsg(err?.message || '復帰に失敗');
       audioService.playSound('wrong');
     }
   };
@@ -254,6 +411,16 @@ const CoopSetupScreen: React.FC<CoopSetupScreenProps> = ({ player, onStart, onCl
 
         {mode === 'SELECT' && (
           <div className="space-y-4">
+            {resumeInfo && (
+              <button
+                onClick={handleRejoinRoom}
+                disabled={status === 'CONNECTING'}
+                className="w-full bg-amber-600 disabled:bg-gray-700 py-3 rounded-xl font-bold flex flex-col items-center justify-center gap-1 text-base"
+              >
+                <span>前回の協力に復帰</span>
+                <span className="text-xs font-normal text-amber-100">コード {resumeInfo.roomCode} / {resumeInfo.name}</span>
+              </button>
+            )}
             <button
               onClick={() => {
                 setMode('HOST');
@@ -309,7 +476,7 @@ const CoopSetupScreen: React.FC<CoopSetupScreenProps> = ({ player, onStart, onCl
                     <Users size={14} /> 参加者 {participants.length} / {MAX_COOP_PLAYERS}
                   </div>
                   {participants.map(p => (
-                    <div key={p.peerId} className="text-sm text-gray-200">- {p.name}</div>
+                    <div key={p.slotId || p.peerId} className="text-sm text-gray-200">- {p.name}{p.disconnected ? ' (切断中)' : ''}</div>
                   ))}
                 </div>
                 <div className="bg-black/40 border border-emerald-500/40 rounded p-3 space-y-2">
@@ -376,7 +543,7 @@ const CoopSetupScreen: React.FC<CoopSetupScreenProps> = ({ player, onStart, onCl
                   {participants.length === 0 ? (
                     <div className="text-sm text-gray-400">待機中...</div>
                   ) : participants.map(p => (
-                    <div key={p.peerId} className="text-sm text-gray-200">- {p.name}</div>
+                    <div key={p.slotId || p.peerId} className="text-sm text-gray-200">- {p.name}{p.disconnected ? ' (切断中)' : ''}</div>
                   ))}
                 </div>
                 <div className="text-sm text-gray-400 flex items-center gap-2">
