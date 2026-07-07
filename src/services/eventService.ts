@@ -256,6 +256,9 @@ export const generateEvent = (
                 activeEventTitle = event.title;
                 try {
                     option.action();
+                } catch (error) {
+                    console.error(`Event action failed: ${event.title} / ${option.label}`, error);
+                    setEventResultLog(trans("何も起きず、イベントは終わった。", languageMode));
                 } finally {
                     activeEventTitle = null;
                 }
@@ -980,15 +983,33 @@ export const generateEvent = (
             description: "「ねえ、君のそのカード、僕のと交換しない？」\n見たことのないカードを持っている。",
             options: [
                 { label: "交換に応じる", text: "カードを差し出して対価を受け取る", action: () => {
-                    const removeIdx = Math.floor(Math.random() * player.deck.length);
-                    const removed = player.deck[removeIdx];
                     const keys = Object.keys(CARDS_LIBRARY).filter(k => {
                         const c = CARDS_LIBRARY[k];
                         return (c.rarity === 'UNCOMMON' || c.rarity === 'RARE') && isCardAvailable(c as Card, unlockedCardNames);
                     });
-                    const newCardTemplate = CARDS_LIBRARY[keys[Math.floor(Math.random() * keys.length)]];
+                    const fallbackKeys = Object.keys(CARDS_LIBRARY).filter(k => {
+                        const c = CARDS_LIBRARY[k] as Card;
+                        return c.type !== CardType.CURSE && c.type !== CardType.STATUS && c.rarity !== 'SPECIAL';
+                    });
+                    const tradePool = keys.length > 0 ? keys : fallbackKeys;
+                    const selectedKey = tradePool[Math.floor(Math.random() * tradePool.length)];
+                    const newCardTemplate = selectedKey ? CARDS_LIBRARY[selectedKey] : null;
+                    if (!newCardTemplate) {
+                        setEventResultLog(trans("転校生はカードを見せびらかしただけで、何も交換せず去っていった。", languageMode));
+                        return;
+                    }
                     const roll = Math.random();
+                    let removedName = 'カード';
                     setGameState(prev => {
+                        if (prev.player.deck.length === 0) {
+                            return {
+                                ...prev,
+                                player: addCardWithEventRelics(prev.player, { ...newCardTemplate, id: `trade-gift-${Date.now()}` } as Card)
+                            };
+                        }
+                        const removeIdx = Math.floor(Math.random() * prev.player.deck.length);
+                        const removed = prev.player.deck[removeIdx];
+                        removedName = removed?.name || removedName;
                         const newDeck = [...prev.player.deck];
                         let newMaxHp = prev.player.maxHp;
                         if (removed && (removed.name === '寄生虫' || removed.name === 'PARASITE')) newMaxHp -= 3;
@@ -997,7 +1018,7 @@ export const generateEvent = (
                         return { ...prev, player: { ...prev.player, deck: newDeck, maxHp: newMaxHp, currentHp: Math.min(prev.player.currentHp, newMaxHp) } };
                     });
                     if (roll < 0.34) {
-                        setEventResultLog(trans(`交換大成功！「${removed ? removed.name : 'カード'}」を渡し「${newCardTemplate.name}」を入手。`, languageMode));
+                        setEventResultLog(trans(`交換大成功！「${removedName}」を渡し「${newCardTemplate.name}」を入手。`, languageMode));
                     } else if (roll < 0.67) {
                         setEventResultLog(trans(`交換成立。「${newCardTemplate.name}」を受け取った。`, languageMode));
                     } else {

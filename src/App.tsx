@@ -1462,6 +1462,7 @@ const App: React.FC = () => {
     const coopLastBattleActionSignatureRef = useRef<string | null>(null);
     const coopPendingSkipStarterRelicRef = useRef(false);
     const coopPendingEndTurnKeyRef = useRef<string | null>(null);
+    const coopProcessedEndTurnKeysRef = useRef<Set<string>>(new Set());
     const coopEndTurnResendTimerRef = useRef<number | null>(null);
     const coopRealtimeAutoAdvanceTimerRef = useRef<number | null>(null);
     const coopRealtimeEnemyPhaseResolvingRef = useRef(false);
@@ -3275,7 +3276,9 @@ const App: React.FC = () => {
         if (gameState.screen !== GameScreen.BATTLE) {
             coopLastBattleActionSignatureRef.current = null;
             coopProcessedHostActionIdsRef.current.clear();
+            coopProcessedEndTurnKeysRef.current.clear();
             coopPendingHostActionRef.current = null;
+            coopPendingEndTurnKeyRef.current = null;
             coopHostStartedTurnKeysRef.current.clear();
             coopHostPreparedInitialTurnPeerIdsRef.current.clear();
             coopRemoteFinisherCardIdRef.current = null;
@@ -9405,12 +9408,20 @@ const App: React.FC = () => {
                 return;
             }
             const endTurnActionId = `coop-end-${gameState.coopBattleState?.battleKey ?? 'battle'}-${gameState.coopBattleState?.turnCursor ?? 0}-${gameState.coopBattleState?.enemyTurnCursor ?? 0}-${coopSelfPeerId ?? 'peer'}-${Date.now()}`;
+            const coopEndTurnKey = gameState.coopBattleState && coopSelfPeerId
+                ? `${gameState.coopBattleState.battleKey}:${gameState.coopBattleState.turnCursor}:${gameState.coopBattleState.enemyTurnCursor}:${coopSelfPeerId}`
+                : null;
+            if (coopEndTurnKey && coopPendingEndTurnKeyRef.current === coopEndTurnKey) {
+                return;
+            }
+            if (coopEndTurnKey) {
+                coopPendingEndTurnKeyRef.current = coopEndTurnKey;
+            }
             if (isRealtimeCoopTurn && gameState.coopBattleState && coopSelfPeerId) {
                 const turnKey = `${gameState.coopBattleState.battleKey}:${gameState.coopBattleState.turnCursor}:${gameState.coopBattleState.enemyTurnCursor}`;
-                if ((gameState.coopBattleState.roundEndedPeerIds || []).includes(coopSelfPeerId) || coopPendingEndTurnKeyRef.current === turnKey) {
+                if ((gameState.coopBattleState.roundEndedPeerIds || []).includes(coopSelfPeerId)) {
                     return;
                 }
-                coopPendingEndTurnKeyRef.current = turnKey;
                 if (coopEndTurnResendTimerRef.current) {
                     window.clearInterval(coopEndTurnResendTimerRef.current);
                 }
@@ -9434,7 +9445,9 @@ const App: React.FC = () => {
                         latestTurnKey !== turnKey ||
                         (coopSelfPeerId && (latestBattleState.roundEndedPeerIds || []).includes(coopSelfPeerId))
                     ) {
-                        coopPendingEndTurnKeyRef.current = null;
+                        if (coopPendingEndTurnKeyRef.current === coopEndTurnKey) {
+                            coopPendingEndTurnKeyRef.current = null;
+                        }
                         if (coopEndTurnResendTimerRef.current) {
                             window.clearInterval(coopEndTurnResendTimerRef.current);
                             coopEndTurnResendTimerRef.current = null;
@@ -12483,6 +12496,10 @@ const App: React.FC = () => {
                 }
                 if (data.battleState && coopSelfPeerId) {
                     coopPendingHostActionRef.current = null;
+                    const incomingTurnKey = `${data.battleState.battleKey}:${data.battleState.turnCursor}:${data.battleState.enemyTurnCursor}:${coopSelfPeerId}`;
+                    if (coopPendingEndTurnKeyRef.current && coopPendingEndTurnKeyRef.current !== incomingTurnKey) {
+                        coopPendingEndTurnKeyRef.current = null;
+                    }
                     const normalizedBattleState = coopSession.isHost
                         ? preserveLocalPlayerInCoopBattleState(data.battleState)
                         : data.battleState;
@@ -12714,6 +12731,29 @@ const App: React.FC = () => {
             }
 
             if (data.type === 'COOP_END_TURN' && coopSession.isHost && fromPeerId && gameState.screen === GameScreen.BATTLE) {
+                const latestBattleState = stateRef.current.coopBattleState;
+                if (!latestBattleState) return;
+                if (
+                    (data.battleKey && data.battleKey !== latestBattleState.battleKey) ||
+                    (data.turnCursor !== undefined && data.turnCursor !== latestBattleState.turnCursor) ||
+                    (data.enemyTurnCursor !== undefined && data.enemyTurnCursor !== latestBattleState.enemyTurnCursor)
+                ) {
+                    return;
+                }
+                const endTurnKey = `${latestBattleState.battleKey}:${latestBattleState.turnCursor}:${latestBattleState.enemyTurnCursor}:${fromPeerId}`;
+                if (coopProcessedEndTurnKeysRef.current.has(endTurnKey)) {
+                    if (
+                        latestBattleState.battleMode === 'REALTIME' &&
+                        (latestBattleState.roundEndedPeerIds || []).includes(fromPeerId)
+                    ) {
+                        broadcastCoopBattleState(latestBattleState);
+                    }
+                    return;
+                }
+                coopProcessedEndTurnKeysRef.current.add(endTurnKey);
+                if (coopProcessedEndTurnKeysRef.current.size > 500) {
+                    coopProcessedEndTurnKeysRef.current = new Set(Array.from(coopProcessedEndTurnKeysRef.current).slice(-250));
+                }
                 applyHostCoopBattleSnapshot(fromPeerId, data, { advanceTurn: true });
                 return;
             }
