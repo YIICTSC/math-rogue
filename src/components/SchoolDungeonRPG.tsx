@@ -4,10 +4,11 @@ import { ArrowLeft, ArrowUp, ArrowDown, ArrowRight, ArrowUpLeft, ArrowUpRight, A
 import { audioService } from '../services/audioService';
 import { createPixelSpriteCanvas } from './PixelSprite';
 import { storageService } from '../services/storageService';
-import { AnswerMode, AssignmentAnswerResult, AssignmentPayload, GameMode, MiniGameDebugPreview } from '../types';
+import { AnswerMode, AssignmentAnswerResult, AssignmentPayload, GameMode, LanguageMode, MiniGameDebugPreview } from '../types';
 import { EXTRA_SCHOOL_DUNGEON_ITEMS } from '../data/schoolDungeonExtraItems';
 import MiniGameProblemChallenge from './MiniGameProblemChallenge';
 import { assetUrl } from '../utils/assetPaths';
+import { trans } from '../utils/textUtils';
 
 // --- セッション内アイテム引き継ぎ用変数 ---
 let inheritedItemTemplate: Item | null = null;
@@ -19,6 +20,7 @@ interface SchoolDungeonRPGProps {
   answerMode?: AnswerMode;
   assignment?: AssignmentPayload | null;
   onAnswerResult?: (result: AssignmentAnswerResult) => void;
+  languageMode?: LanguageMode;
   debugPreview?: MiniGameDebugPreview;
 }
 
@@ -352,7 +354,8 @@ const computeDijkstraMap = (map: TileType[][], targetX: number, targetY: number)
     return dMap;
 };
 
-const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode = GameMode.MIXED, problemModePool, answerMode = 'CHOICE', assignment, onAnswerResult, debugPreview }) => {
+const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode = GameMode.MIXED, problemModePool, answerMode = 'CHOICE', assignment, onAnswerResult, languageMode = 'JAPANESE', debugPreview }) => {
+  const tr = (text: string) => trans(text, languageMode);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   
   // --- STATE ---
@@ -1810,10 +1813,13 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
   };
 
   const getItemName = (item: Item) => {
-      if (item.category === 'WEAPON' || item.category === 'ARMOR' || item.category === 'RANGED' || item.category === 'SYNTH' || item.category === 'CONSUMABLE' || item.category === 'ACCESSORY') return item.name;
-      if (item.type.includes('MEAT')) return item.name;
-      if (identifiedTypes.has(item.type)) return item.name;
-      return idMap[item.type] || item.name;
+      const displayName = (() => {
+          if (item.category === 'WEAPON' || item.category === 'ARMOR' || item.category === 'RANGED' || item.category === 'SYNTH' || item.category === 'CONSUMABLE' || item.category === 'ACCESSORY') return item.name;
+          if (item.type.includes('MEAT')) return item.name;
+          if (identifiedTypes.has(item.type)) return item.name;
+          return idMap[item.type] || item.name;
+      })();
+      return tr(displayName);
   };
 
   const fireRangedWeapon = () => {
@@ -2948,7 +2954,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
         {/* Math Challenge Overlay (Full Screen) */}
         {showMathChallenge && (
              <div className="fixed inset-0 z-[100] w-full h-full pointer-events-auto">
-                 <MiniGameProblemChallenge mode={problemMode} modePool={problemModePool} answerMode={answerMode} assignment={assignment} onAnswerResult={onAnswerResult} onComplete={handleMathComplete} rewardHint="全問正解で満腹度+10" />
+                 <MiniGameProblemChallenge mode={problemMode} modePool={problemModePool} answerMode={answerMode} assignment={assignment} onAnswerResult={onAnswerResult} onComplete={handleMathComplete} rewardHint={languageMode === 'ENGLISH' ? 'Perfect score: Fullness +10' : '全問正解で満腹度+10'} languageMode={languageMode} />
              </div>
         )}
 
@@ -2957,23 +2963,23 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
             <div className="absolute inset-0 z-50 flex items-center justify-center p-4" style={{ backgroundColor: `${C0}F2` }} onClick={() => setShowStatus(false)}>
                 <div className="w-full max-w-md border-4 p-6 shadow-xl overflow-y-auto max-h-[80vh] custom-scrollbar" style={{ backgroundColor: C3, borderColor: C1, color: C0 }} onClick={e => e.stopPropagation()}>
                     <div className="flex justify-between items-center mb-4 border-b-2 pb-2" style={{ borderColor: C1 }}>
-                        <h2 className="font-bold text-xl flex items-center"><User className="mr-2"/> ステータス</h2>
+                        <h2 className="font-bold text-xl flex items-center"><User className="mr-2"/> {tr('ステータス')}</h2>
                         <button onClick={() => setShowStatus(false)}><X size={24}/></button>
                     </div>
                     <div className="space-y-4">
                         <div className="grid grid-cols-2 gap-4">
-                            <div><span style={{ color: C1 }} className="font-bold">名前:</span> {player.name}</div>
-                            <div><span style={{ color: C1 }} className="font-bold">称号:</span> {level < 5 ? '新入生' : (level < 10 ? '一般生徒' : '番長')}</div>
+                            <div><span style={{ color: C1 }} className="font-bold">{tr('名前')}:</span> {player.name}</div>
+                            <div><span style={{ color: C1 }} className="font-bold">{tr('称号')}:</span> {tr(level < 5 ? '新入生' : (level < 10 ? '一般生徒' : '番長'))}</div>
                             <div><span style={{ color: C1 }} className="font-bold">Lv:</span> {level}</div>
-                            <div><span style={{ color: C1 }} className="font-bold">経験値:</span> {player.xp}</div>
+                            <div><span style={{ color: C1 }} className="font-bold">{tr('経験値')}:</span> {player.xp}</div>
                             <div><span style={{ color: C1 }} className="font-bold">HP:</span> {player.hp}/{player.maxHp}</div>
-                            <div><span style={{ color: C1 }} className="font-bold">満腹度:</span> {belly}/{maxBelly}</div>
-                            <div><span style={{ color: C1 }} className="font-bold">攻撃力:</span> {player.attack}</div>
-                            <div><span style={{ color: C1 }} className="font-bold">防御力:</span> {player.defense}</div>
-                            <div><span style={{ color: C1 }} className="font-bold">所持金:</span> {player.gold} G</div>
+                            <div><span style={{ color: C1 }} className="font-bold">{tr('満腹度')}:</span> {belly}/{maxBelly}</div>
+                            <div><span style={{ color: C1 }} className="font-bold">{tr('攻撃力')}:</span> {player.attack}</div>
+                            <div><span style={{ color: C1 }} className="font-bold">{tr('防御力')}:</span> {player.defense}</div>
+                            <div><span style={{ color: C1 }} className="font-bold">{tr('所持金')}:</span> {player.gold} G</div>
                         </div>
                         <div className="border-t-2 pt-2" style={{ borderColor: C1 }}>
-                            <h3 className="font-bold mb-2">装備</h3>
+                            <h3 className="font-bold mb-2">{tr('装備')}</h3>
                             <div className="grid grid-cols-1 gap-1 text-sm">
                                 <div>
                                     <span className="font-bold mr-2">[武]</span> 
@@ -2985,7 +2991,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
                                                 ({(player.equipment.weapon.power||0) + (player.equipment.weapon.plus||0)})
                                             </span>
                                         </span>
-                                    ) : 'なし'}
+                                    ) : tr('なし')}
                                 </div>
                                 <div>
                                     <span className="font-bold mr-2">[防]</span> 
@@ -2997,25 +3003,25 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
                                                 ({(player.equipment.armor.power||0) + (player.equipment.armor.plus||0)})
                                             </span>
                                         </span>
-                                    ) : 'なし'}
+                                    ) : tr('なし')}
                                 </div>
-                                <div><span className="font-bold mr-2">[投]</span> {player.equipment?.ranged ? `${getItemName(player.equipment.ranged)} (${player.equipment.ranged.count})` : 'なし'}</div>
-                                <div><span className="font-bold mr-2">[腕]</span> {player.equipment?.accessory ? `${getItemName(player.equipment.accessory)}` : 'なし'}</div>
+                                <div><span className="font-bold mr-2">[投]</span> {player.equipment?.ranged ? `${getItemName(player.equipment.ranged)} (${player.equipment.ranged.count})` : tr('なし')}</div>
+                                <div><span className="font-bold mr-2">[腕]</span> {player.equipment?.accessory ? `${getItemName(player.equipment.accessory)}` : tr('なし')}</div>
                             </div>
                         </div>
                         <div className="border-t-2 pt-2" style={{ borderColor: C1 }}>
-                            <h3 className="font-bold mb-2">状態</h3>
+                            <h3 className="font-bold mb-2">{tr('状態')}</h3>
                             <div className="flex flex-wrap gap-2 text-xs">
-                                {player.status.sleep > 0 && <span className="px-2 rounded" style={{ backgroundColor: C1, color: C3 }}>睡眠</span>}
-                                {player.status.confused > 0 && <span className="px-2 rounded" style={{ backgroundColor: C1, color: C3 }}>混乱</span>}
-                                {player.status.frozen > 0 && <span className="px-2 rounded" style={{ backgroundColor: C1, color: C3 }}>金縛り</span>}
-                                {player.status.blind > 0 && <span className="px-2 rounded" style={{ backgroundColor: C1, color: C3 }}>目潰し</span>}
-                                {player.status.poison && player.status.poison > 0 && <span className="px-2 rounded" style={{ backgroundColor: C1, color: C3 }}>毒</span>}
-                                {Object.values(player.status).every((v: number) => v <= 0) && <span>健康</span>}
+                                {player.status.sleep > 0 && <span className="px-2 rounded" style={{ backgroundColor: C1, color: C3 }}>{tr('睡眠')}</span>}
+                                {player.status.confused > 0 && <span className="px-2 rounded" style={{ backgroundColor: C1, color: C3 }}>{tr('混乱')}</span>}
+                                {player.status.frozen > 0 && <span className="px-2 rounded" style={{ backgroundColor: C1, color: C3 }}>{tr('金縛り')}</span>}
+                                {player.status.blind > 0 && <span className="px-2 rounded" style={{ backgroundColor: C1, color: C3 }}>{tr('目潰し')}</span>}
+                                {player.status.poison && player.status.poison > 0 && <span className="px-2 rounded" style={{ backgroundColor: C1, color: C3 }}>{tr('毒')}</span>}
+                                {Object.values(player.status).every((v: number) => v <= 0) && <span>{tr('健康')}</span>}
                             </div>
                         </div>
                     </div>
-                    <button onClick={() => setShowStatus(false)} className="mt-6 w-full py-2 font-bold rounded" style={{ backgroundColor: C1, color: C3 }}>閉じる</button>
+                    <button onClick={() => setShowStatus(false)} className="mt-6 w-full py-2 font-bold rounded" style={{ backgroundColor: C1, color: C3 }}>{tr('閉じる')}</button>
                 </div>
             </div>
         )}
@@ -3025,37 +3031,37 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
             <div className="absolute inset-0 z-50 flex items-center justify-center p-4" style={{ backgroundColor: `${C0}F2` }} onClick={() => setShowHelp(false)}>
                 <div className="w-full max-w-md border-4 p-6 shadow-xl overflow-y-auto max-h-[80vh] custom-scrollbar" style={{ backgroundColor: C3, borderColor: C1, color: C0 }} onClick={e => e.stopPropagation()}>
                     <div className="flex justify-between items-center mb-4 border-b-2 pb-2" style={{ borderColor: C1 }}>
-                        <h2 className="font-bold text-xl flex items-center"><HelpCircle className="mr-2"/> 遊び方</h2>
+                        <h2 className="font-bold text-xl flex items-center"><HelpCircle className="mr-2"/> {tr('遊び方')}</h2>
                         <button onClick={() => setShowHelp(false)}><X size={24}/></button>
                     </div>
                     <div className="space-y-4 text-sm">
                         <section>
-                            <h3 className="font-bold border-b mb-1" style={{ borderColor: C1 }}>目的</h3>
-                            <p>地下20階を目指し、校長先生を説得(撃破)してください。<br/>道中で落ちている武器や道具を駆使して生き残りましょう。</p>
+                            <h3 className="font-bold border-b mb-1" style={{ borderColor: C1 }}>{tr('目的')}</h3>
+                            <p>{tr('地下20階を目指し、校長先生を説得(撃破)してください。')}<br/>{tr('道中で落ちている武器や道具を駆使して生き残りましょう。')}</p>
                         </section>
                         <section>
-                            <h3 className="font-bold border-b mb-1" style={{ borderColor: C1 }}>操作方法</h3>
+                            <h3 className="font-bold border-b mb-1" style={{ borderColor: C1 }}>{tr('操作方法')}</h3>
                             <ul className="list-disc pl-5">
-                                <li><strong>移動:</strong> 十字キー または 画面パッド</li>
-                                <li><strong>攻撃:</strong> Aボタン または Zキー</li>
-                                <li><strong>メニュー:</strong> Bボタン または Xキー</li>
-                                <li><strong>飛び道具:</strong> <Crosshair size={12} className="inline"/>ボタン または Rキー</li>
-                                <li><strong>早送り:</strong> Aボタン長押し (敵がいない時)</li>
+                                <li><strong>{tr('移動')}:</strong> {tr('十字キー または 画面パッド')}</li>
+                                <li><strong>{tr('攻撃')}:</strong> {tr('Aボタン または Zキー')}</li>
+                                <li><strong>{tr('メニュー')}:</strong> {tr('Bボタン または Xキー')}</li>
+                                <li><strong>{tr('飛び道具')}:</strong> <Crosshair size={12} className="inline"/>{tr('ボタン または Rキー')}</li>
+                                <li><strong>{tr('早送り')}:</strong> {tr('Aボタン長押し (敵がいない時)')}</li>
                             </ul>
                         </section>
                         <section>
-                            <h3 className="font-bold border-b mb-1" style={{ borderColor: C1 }}>ヒント</h3>
+                            <h3 className="font-bold border-b mb-1" style={{ borderColor: C1 }}>{tr('ヒント')}</h3>
                             <ul className="list-disc pl-5">
-                                <li>お腹が減るとHPが減ります。おにぎりやパンを食べましょう。</li>
-                                <li><strong className="text-red-700">傘</strong>は振ると魔法が出ますが、回数制限があります。使い切ったら投げましょう。</li>
-                                <li><strong className="text-blue-700">腕輪</strong>は装備するだけで効果があります。</li>
-                                <li>「工作のり」を使うと、装備を合成して強くできます。</li>
-                                <li>敵に囲まれたら通路に逃げ込みましょう。</li>
-                                <li>まれに購買部員(店)が現れます。アイテム売買が可能です。</li>
+                                <li>{tr('お腹が減るとHPが減ります。おにぎりやパンを食べましょう。')}</li>
+                                <li>{tr('傘は振ると魔法が出ますが、回数制限があります。使い切ったら投げましょう。')}</li>
+                                <li>{tr('腕輪は装備するだけで効果があります。')}</li>
+                                <li>{tr('「工作のり」を使うと、装備を合成して強くできます。')}</li>
+                                <li>{tr('敵に囲まれたら通路に逃げ込みましょう。')}</li>
+                                <li>{tr('まれに購買部員(店)が現れます。アイテム売買が可能です。')}</li>
                             </ul>
                         </section>
                     </div>
-                    <button onClick={() => setShowHelp(false)} className="mt-6 w-full py-2 font-bold rounded" style={{ backgroundColor: C1, color: C3 }}>閉じる</button>
+                    <button onClick={() => setShowHelp(false)} className="mt-6 w-full py-2 font-bold rounded" style={{ backgroundColor: C1, color: C3 }}>{tr('閉じる')}</button>
                 </div>
             </div>
         )}
@@ -3086,7 +3092,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
             <div className="w-full aspect-[4/3] md:aspect-auto md:flex-1 relative shrink-0 shadow-lg border-2 max-h-[45vh] md:max-h-full flex flex-col overflow-hidden" style={{ backgroundColor: C3, borderColor: C0 }}>
                 <div className="w-full h-full relative overflow-hidden flex flex-col">
                     <div className="absolute top-0 left-0 w-full h-8 flex justify-between items-center px-2 text-[10px] z-10 border-b" style={{ backgroundColor: C0, color: C3, borderColor: C1 }}>
-                        <span className="font-bold tracking-widest">{currentTheme.name}</span>
+                        <span className="font-bold tracking-widest">{tr(currentTheme.name)}</span>
                         <div className="flex gap-2">
                             <button onClick={() => setShowMap(!showMap)} className="flex items-center gap-1 hover:text-white border px-1 rounded" style={{ borderColor: C3 }}><MapIcon size={10}/> Map</button>
                             <button onClick={() => setShowStatus(true)} className="flex items-center gap-1 hover:text-white border px-1 rounded" style={{ borderColor: C3 }}><User size={10}/> Sts</button>
@@ -3108,7 +3114,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
                     {/* Fast Forward Indicator */}
                     {isFastForwarding && (
                         <div className="absolute top-16 right-2 animate-pulse flex items-center rounded px-2" style={{ backgroundColor: `${C0}80`, color: C3 }}>
-                            <FastForward size={16} className="mr-1"/> 早送り中
+                            <FastForward size={16} className="mr-1"/> {tr('早送り中')}
                         </div>
                     )}
 
@@ -3160,7 +3166,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
                     {shopState.active && (
                         <div className="absolute right-0 top-0 bottom-0 w-3/4 border-l-2 z-30 p-2 text-xs flex flex-col" style={{ backgroundColor: C0, borderColor: C3, color: C3 }}>
                             <div className="flex justify-between items-center border-b mb-2 pb-1" style={{ borderColor: C3 }}>
-                                <h3 className="font-bold flex items-center"><ShoppingBag size={12} className="mr-1"/> 購買部</h3>
+                                <h3 className="font-bold flex items-center"><ShoppingBag size={12} className="mr-1"/> {tr('購買部')}</h3>
                                 <button onClick={() => setShopState(prev => ({...prev, active: false}))}><X size={12}/></button>
                             </div>
                             
@@ -3174,7 +3180,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
                                     }}
                                     onClick={() => { setShopState(prev => ({ ...prev, mode: 'BUY' })); setSelectedItemIndex(0); }}
                                 >
-                                    買う
+                                    {tr('買う')}
                                 </button>
                                 <button 
                                     className={`flex-1 py-1 text-center border`}
@@ -3185,7 +3191,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
                                     }}
                                     onClick={() => { setShopState(prev => ({ ...prev, mode: 'SELL' })); setSelectedItemIndex(0); }}
                                 >
-                                    売る
+                                    {tr('売る')}
                                 </button>
                             </div>
 
@@ -3223,7 +3229,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
                                                 <Info size={10} />
                                             </button>
                                         </div>
-                                    )) || <div className="text-center">売り切れ</div>
+                                    )) || <div className="text-center">{tr('売り切れ')}</div>
                                 ) : (
                                     inventory.map((item, i) => (
                                         <div 
@@ -3255,7 +3261,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
                                         </div>
                                     ))
                                 )}
-                                {shopState.mode === 'SELL' && inventory.length === 0 && <div className="text-center">持ち物なし</div>}
+                                {shopState.mode === 'SELL' && inventory.length === 0 && <div className="text-center">{tr('持ち物なし')}</div>}
                             </div>
                         </div>
                     )}
@@ -3403,14 +3409,14 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
                         <div className="absolute inset-0 flex flex-col items-center justify-center z-40 p-4 text-center" style={{ backgroundColor: `${C0}F2`, color: C3 }}>
                             <Award size={48} className="mb-4" style={{ color: C2 }}/>
                             <h2 className="text-2xl font-bold mb-4">GRADUATION!</h2>
-                            <p className="mb-2">ついに校長を説得した！</p>
-                            <p className="mb-8">君は伝説の小学生となった。</p>
+                            <p className="mb-2">{tr('ついに校長を説得した！')}</p>
+                            <p className="mb-8">{tr('君は伝説の小学生となった。')}</p>
                             <div className="flex flex-col gap-4 w-full">
                                 <button onClick={startEndlessMode} className="border-2 px-4 py-3 animate-pulse font-bold" style={{ borderColor: C3, color: C3, backgroundColor: 'transparent' }}>
-                                    中学生編へ (エンドレス)
+                                    {tr('中学生編へ (エンドレス)')}
                                 </button>
                                 <button onClick={handleQuit} className="border-2 px-4 py-2 text-sm" style={{ borderColor: C1, color: C3 }}>
-                                    タイトルへ戻る
+                                    {tr('タイトルへ戻る')}
                                 </button>
                             </div>
                         </div>
@@ -3423,7 +3429,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
                             <p className="text-[10px] mb-4 opacity-70">Floor: {floor} / Level: {level}</p>
                             
                             <div className="bg-black/60 border-2 border-red-500 rounded p-3 w-full max-w-xs mb-4 flex flex-col">
-                                <h3 className="text-red-400 font-bold text-xs mb-2">引き継ぐアイテムを選択</h3>
+                                <h3 className="text-red-400 font-bold text-xs mb-2">{tr('引き継ぐアイテムを選択')}</h3>
                                 <div className="flex-grow overflow-y-auto max-h-48 custom-scrollbar space-y-1 pr-1">
                                     {allPossessions.map((item, idx) => (
                                         <div 
@@ -3437,17 +3443,17 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
                                                 {item.category === 'STAFF' && <Umbrella size={14} />}
                                                 {item.category === 'RANGED' && <Target size={14} />}
                                                 {item.category === 'ACCESSORY' && <Circle size={14} />}
-                                                <span className="truncate max-w-[120px]">{item.name} {item.plus ? `+${item.plus}` : ''}</span>
+                                                <span className="truncate max-w-[120px]">{tr(item.name)} {item.plus ? `+${item.plus}` : ''}</span>
                                             </div>
-                                            {inventory.every(invItem => invItem.id !== item.id) && <span className="text-[8px] bg-blue-900 px-1 rounded">装備中</span>}
+                                            {inventory.every(invItem => invItem.id !== item.id) && <span className="text-[8px] bg-blue-900 px-1 rounded">{tr('装備中')}</span>}
                                         </div>
                                     ))}
-                                    {allPossessions.length === 0 && <div className="text-[10px] text-gray-600 py-4 italic">所持品なし</div>}
+                                    {allPossessions.length === 0 && <div className="text-[10px] text-gray-600 py-4 italic">{tr('所持品なし')}</div>}
                                 </div>
                             </div>
 
                             <button onClick={handleRestart} className="px-6 py-2 bg-red-600 hover:bg-red-500 text-white font-bold rounded border-2 border-white animate-pulse flex items-center justify-center gap-2 w-full max-w-xs">
-                                <RotateCcw size={16}/> {inheritItemIdx !== null ? "アイテムを持って再挑戦" : "再挑戦"}
+                                <RotateCcw size={16}/> {inheritItemIdx !== null ? tr('アイテムを持って再挑戦') : tr('再挑戦')}
                             </button>
                             <button onClick={handleQuit} className="mt-4 text-xs hover:underline opacity-50">
                                 EXIT

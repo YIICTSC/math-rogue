@@ -15,6 +15,7 @@ import {
     POKER_ALL_ITEM_SPRITE_KEYS
 } from '../data/pokerItemSpriteManifest';
 import { assetUrl } from '../utils/assetPaths';
+import { trans } from '../utils/textUtils';
 
 // --- Constants & Helpers ---
 const SUITS: PokerSuit[] = ['SPADE', 'HEART', 'DIAMOND', 'CLUB'];
@@ -670,6 +671,7 @@ type ScoreBreakdownEntry = {
 };
 
 const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode = GameMode.MIXED, problemModePool, answerMode = 'CHOICE', assignment, onAnswerResult, languageMode, debugPreview }) => {
+  const t = (text: string) => trans(text, languageMode ?? 'JAPANESE');
   const pokerTutorialSteps = useMemo(() => getPokerTutorialSteps(languageMode), [languageMode]);
   const pokerTutorialLabels = useMemo(() => getPokerTutorialLabels(languageMode), [languageMode]);
   const expandedSupporterUnlockCount = Math.min(
@@ -1881,8 +1883,8 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
                           
                           {cardEnhancement && (
                               <div className="bg-black/50 p-2 rounded w-full text-center mt-2 border border-yellow-500/30">
-                                  <div className="text-yellow-400 font-bold">{cardEnhancement.name}</div>
-                                  <div className="text-gray-300 text-xs">{cardEnhancement.desc}</div>
+                                  <div className="text-yellow-400 font-bold">{t(cardEnhancement.name)}</div>
+                                  <div className="text-gray-300 text-xs">{t(cardEnhancement.desc)}</div>
                               </div>
                           )}
                       </div>
@@ -1890,10 +1892,10 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
                       <>
                         <div className="flex flex-col items-center mb-4">
                             <div className="w-24 h-24 mb-4">{renderPokerItemIcon((item as PokerPack).icon, (item as PokerPack).name, 'w-full h-full', (item as PokerPack).id)}</div>
-                            <h3 className="text-2xl font-bold text-yellow-400 mb-2">{(item as PokerPack).name}</h3>
+                            <h3 className="text-2xl font-bold text-yellow-400 mb-2">{t((item as PokerPack).name)}</h3>
                             <div className="text-sm font-bold text-white bg-orange-700 px-3 py-1 rounded-full">PACK</div>
                         </div>
-                        <p className="text-lg text-gray-300 text-center leading-relaxed">{(item as PokerPack).description}</p>
+                        <p className="text-lg text-gray-300 text-center leading-relaxed">{t((item as PokerPack).description)}</p>
                         <div className="mt-6 text-center text-yellow-500 font-bold text-xl">${getPrice((item as PokerPack).price)}</div> 
                       </>
                   ) : (
@@ -1902,7 +1904,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
                             <div className={`w-24 h-24 mb-4 rounded-lg overflow-hidden border-4 ${edition ? editionColor : 'border-transparent'}`}>
                                 {renderPokerItemIcon((item as any).icon, (item as any).name, 'w-full h-full', (item as any).id)}
                             </div>
-                            <h3 className="text-2xl font-bold text-yellow-400 mb-1">{(item as any).name}</h3>
+                            <h3 className="text-2xl font-bold text-yellow-400 mb-1">{t((item as any).name)}</h3>
                             
                             {edition && (
                                 <div className={`text-xs font-bold mb-2 border px-2 py-0.5 rounded ${editionColor} bg-black/50`}>
@@ -1913,7 +1915,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
                             {isVoucher && <div className="text-sm font-bold text-white bg-slate-700 px-3 py-1 rounded-full">VOUCHER</div>}
                             {!isVoucher && <div className="text-sm font-bold text-white bg-slate-700 px-3 py-1 rounded-full">{'rarity' in item ? (item as PokerSupporter).rarity : (item as PokerConsumable).type}</div>}
                         </div>
-                        <p className="text-lg text-gray-300 text-center leading-relaxed mb-4">{(item as any).description}</p>
+                        <p className="text-lg text-gray-300 text-center leading-relaxed mb-4">{t((item as any).description)}</p>
                         
                         {/* Dynamic Bonus Display for Supporters */}
                         {isSupporter && supporterItem.getDynamicDescription && (
@@ -1968,7 +1970,8 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
               assignment={assignment}
               onAnswerResult={onAnswerResult}
               onComplete={handleMathComplete}
-              rewardHint="正解すると$1獲得"
+              rewardHint={languageMode === 'ENGLISH' ? 'Earn $1 for a correct answer' : '正解すると$1獲得'}
+              languageMode={languageMode}
             />
       );
   }
@@ -1977,28 +1980,28 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
       return (
           <div className={`poker-victory-screen ${showSupporterUnlock ? 'poker-victory-has-unlock' : ''} flex flex-col h-full w-full bg-slate-900 text-white p-8 items-center justify-center relative font-mono text-center`}>
               <Trophy size={80} className="poker-victory-trophy text-yellow-400 mb-6 animate-bounce" />
-              <h1 className="poker-victory-title text-5xl font-black text-white mb-4">放課後ポーカー制覇！</h1>
-              <p className="poker-victory-message text-xl text-gray-300 mb-12">アンティ8まで勝ち抜き、放課後の頂点に立ちました。</p>
+              <h1 className="poker-victory-title text-5xl font-black text-white mb-4">{t('放課後ポーカー制覇！')}</h1>
+              <p className="poker-victory-message text-xl text-gray-300 mb-12">{t('アンティ8まで勝ち抜き、放課後の頂点に立ちました。')}</p>
               {showSupporterUnlock && (
                   <div className="poker-victory-unlock w-full max-w-2xl mb-10 rounded-2xl border-2 border-yellow-300 bg-yellow-500/10 px-6 py-5 shadow-[0_0_30px_rgba(250,204,21,0.15)]">
-                      <div className="text-sm font-bold tracking-[0.2em] text-yellow-300 mb-2">次回から解禁</div>
-                      <div className="text-2xl font-black text-white mb-2">追加サポーター 1種 解禁</div>
+                      <div className="text-sm font-bold tracking-[0.2em] text-yellow-300 mb-2">{t('次回から解禁')}</div>
+                      <div className="text-2xl font-black text-white mb-2">{t('追加サポーター 1種 解禁')}</div>
                       {previewUnlockSupporter && (
                           <div className="poker-victory-unlock-item mb-3 flex items-center gap-4 rounded-xl border border-yellow-300/40 bg-black/25 p-3 text-left">
                               <div className="poker-victory-unlock-icon h-24 w-24 shrink-0 rounded-xl border border-yellow-300/50 bg-slate-950/80 p-2 shadow-lg">
                                   {renderPokerItemIcon(previewUnlockSupporter.icon, previewUnlockSupporter.name, 'h-full w-full', previewUnlockSupporter.id)}
                               </div>
                               <div className="min-w-0 flex-1">
-                                  <div className="text-xl font-bold text-yellow-100">{previewUnlockSupporter.name}</div>
-                                  <div className="mt-1 text-[10px] font-black tracking-[0.18em] text-yellow-300">{previewUnlockSupporter.rarity} サポーター</div>
+                                  <div className="text-xl font-bold text-yellow-100">{t(previewUnlockSupporter.name)}</div>
+                                  <div className="mt-1 text-[10px] font-black tracking-[0.18em] text-yellow-300">{previewUnlockSupporter.rarity} {t('サポーター')}</div>
                                   <div className="mt-2 text-sm font-bold leading-relaxed text-white">
-                                      効果：{previewUnlockSupporter.description}
+                                      {t('効果')}：{t(previewUnlockSupporter.description)}
                                   </div>
                               </div>
                           </div>
                       )}
                       <div className="text-sm text-yellow-100/90 leading-relaxed">
-                          次のランから、上のサポーターがショップと「部員勧誘」パックに出現します。
+                          {t('次のランから、上のサポーターがショップと「部員勧誘」パックに出現します。')}
                       </div>
                   </div>
               )}
@@ -2008,13 +2011,13 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
                     onClick={proceedToEndless}
                     className="bg-purple-600 hover:bg-purple-500 text-white text-xl font-bold py-4 px-8 rounded-lg shadow-lg border-2 border-purple-300 flex items-center justify-center"
                   >
-                      <RotateCcw className="mr-3" /> エンドレスモード
+                      <RotateCcw className="mr-3" /> {t('エンドレスモード')}
                   </button>
                   <button 
                     onClick={finishRunVictory}
                     className="bg-slate-700 hover:bg-slate-600 text-gray-200 text-lg font-bold py-4 px-8 rounded-lg flex items-center justify-center"
                   >
-                      <ArrowLeft className="mr-3" /> 職員室に戻る
+                      <ArrowLeft className="mr-3" /> {t('職員室に戻る')}
                   </button>
               </div>
           </div>
@@ -2026,26 +2029,26 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
       return (
           <div className="poker-rival-screen flex flex-col h-full w-full bg-slate-900 text-white p-8 items-center justify-center relative font-mono overflow-hidden" style={pokerTableBackgroundStyle}>
               <div className="absolute top-4 left-4">
-                  <button onClick={handleQuit} className="text-gray-400 hover:text-white flex items-center"><ArrowLeft className="mr-2"/> 戻る</button>
+                  <button onClick={handleQuit} className="text-gray-400 hover:text-white flex items-center"><ArrowLeft className="mr-2"/> {t('戻る')}</button>
               </div>
               <div className="poker-rival-layout text-center animate-in zoom-in duration-300">
                   <div className="poker-rival-identity">
-                      <div className="poker-rival-ante text-2xl text-yellow-500 mb-2 font-bold">第{runState.ante}幕 / 8</div>
-                      {runState.isEndless && <div className="poker-rival-endless text-purple-400 text-sm font-bold animate-pulse mb-2">エンドレスモード</div>}
+                      <div className="poker-rival-ante text-2xl text-yellow-500 mb-2 font-bold">{t('第')}{runState.ante}{t('幕')} / 8</div>
+                      {runState.isEndless && <div className="poker-rival-endless text-purple-400 text-sm font-bold animate-pulse mb-2">{t('エンドレスモード')}</div>}
                       <div className="poker-rival-portrait mx-auto mb-3 h-28 w-28 rounded-2xl border-4 border-yellow-400 bg-slate-950/80 bg-no-repeat shadow-[0_0_24px_rgba(250,204,21,0.25)]" style={getPokerRivalPortraitStyle(currentRivalVisual, 0)} />
-                      <div className="poker-rival-label text-sm font-black tracking-[0.35em] text-yellow-300">次のライバル</div>
-                      <div className="poker-rival-name text-4xl md:text-6xl font-black mb-4 text-white tracking-tighter leading-tight">{config.rivalName || config.name}</div>
+                      <div className="poker-rival-label text-sm font-black tracking-[0.35em] text-yellow-300">{t('次のライバル')}</div>
+                      <div className="poker-rival-name text-4xl md:text-6xl font-black mb-4 text-white tracking-tighter leading-tight">{t(config.rivalName || config.name)}</div>
                   </div>
                   <div className="poker-rival-details">
                       <div className="poker-rival-stats bg-slate-800 p-6 rounded-xl border-4 border-slate-600 mb-8 min-w-[300px]">
-                          <div className="text-gray-400 mb-2 text-sm uppercase tracking-widest">目標スコア</div>
+                          <div className="text-gray-400 mb-2 text-sm uppercase tracking-widest">{t('目標スコア')}</div>
                           <div className="poker-rival-score text-5xl font-bold text-red-500 mb-4">{config.scoreGoal.toLocaleString()}</div>
-                          <div className="text-gray-400 mb-2 text-sm uppercase tracking-widest">勝利報酬</div>
+                          <div className="text-gray-400 mb-2 text-sm uppercase tracking-widest">{t('勝利報酬')}</div>
                           <div className="poker-rival-reward text-3xl font-bold text-yellow-400 mb-2">${config.rewardMoney}</div>
-                          {config.description && <div className="poker-rival-description text-purple-300 text-sm mt-4 border-t border-slate-600 pt-2">{config.description}</div>}
+                          {config.description && <div className="poker-rival-description text-purple-300 text-sm mt-4 border-t border-slate-600 pt-2">{t(config.description)}</div>}
                       </div>
                       <button onClick={startBlind} className="poker-rival-start bg-red-600 hover:bg-red-500 text-white text-2xl font-bold py-4 px-12 rounded-full shadow-[0_0_20px_rgba(220,38,38,0.5)] animate-pulse flex items-center justify-center mx-auto">
-                          <Play className="mr-2 fill-current"/> 対戦開始
+                          <Play className="mr-2 fill-current"/> {t('対戦開始')}
                       </button>
                   </div>
               </div>
@@ -2062,14 +2065,14 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
                   {renderInspectionModal()}
                   
                   <div className="z-10 flex flex-col items-center w-full max-w-4xl">
-                      <h2 className="text-3xl font-bold mb-8 text-yellow-400 animate-pulse">{isPackOpened ? "Choose One!" : "Open Pack!"}</h2>
+                      <h2 className="text-3xl font-bold mb-8 text-yellow-400 animate-pulse">{isPackOpened ? t("Choose One!") : t("Open Pack!")}</h2>
                       
                       {!isPackOpened ? (
                           <div className="cursor-pointer hover:scale-110 transition-transform animate-bounce relative" onClick={revealPack}>
                               <div className="w-48 h-64 bg-gradient-to-br from-yellow-600 to-yellow-800 rounded-lg border-4 border-yellow-300 shadow-[0_0_50px_rgba(253,224,71,0.5)] flex flex-col items-center justify-center p-4 text-center">
                                   <div className="text-6xl mb-4">{renderPokerItemIcon(currentPack.icon, currentPack.name, 'w-24 h-24', currentPack.id)}</div>
-                                  <div className="text-2xl font-black text-white drop-shadow-md">{currentPack.name}</div>
-                                  <div className="text-sm text-yellow-200 mt-2">{currentPack.description}</div>
+                                  <div className="text-2xl font-black text-white drop-shadow-md">{t(currentPack.name)}</div>
+                                  <div className="text-sm text-yellow-200 mt-2">{t(currentPack.description)}</div>
                               </div>
                           </div>
                       ) : (
@@ -2085,14 +2088,14 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
                                   return (
                                       <div key={idx} className={`relative cursor-pointer transition-transform hover:-translate-y-4 duration-300 ${disabled ? 'opacity-50 grayscale cursor-not-allowed' : ''}`} onClick={() => !disabled && selectPackItem(item)} onContextMenu={(e) => handleContextMenu(e, item, type, false)} onTouchStart={() => handleTouchStart(item, type, false)} onTouchEnd={handleTouchEnd}>
                                           {isCard && <div className="w-32 h-48 bg-white text-black rounded-lg border-4 border-yellow-300 shadow-xl flex flex-col items-center justify-between p-2" style={getPokerCardFaceStyle(item as PokerCard)}><div className={`text-2xl font-bold w-full text-left ${['HEART', 'DIAMOND'].includes((item as PokerCard).suit) ? 'text-red-600' : 'text-black'}`}>{getRankDisplay((item as PokerCard).rank)}</div><div className="scale-150">{getSuitIcon((item as PokerCard).suit, (item as PokerCard).enhancement === 'WILD')}</div><div className="text-xs text-center font-bold text-gray-500">{(item as PokerCard).enhancement || ''}</div><div className={`text-2xl font-bold w-full text-right rotate-180 ${['HEART', 'DIAMOND'].includes((item as PokerCard).suit) ? 'text-red-600' : 'text-black'}`}>{getRankDisplay((item as PokerCard).rank)}</div></div>}
-                                          {!isCard && <div className="w-32 h-48 bg-slate-800 text-white rounded-lg border-4 border-blue-400 shadow-xl flex flex-col items-center justify-center p-2 text-center">{renderPokerItemIcon((item as any).icon, (item as any).name, 'w-16 h-16 mb-2', (item as any).id)}<div className="font-bold text-sm">{(item as any).name}</div><div className="text-[10px] text-gray-400 mt-2 leading-tight">{(item as any).description}</div></div>}
-                                          <button className={`absolute -bottom-4 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full text-xs font-bold shadow-lg ${disabled ? 'bg-gray-600 text-gray-300' : 'bg-blue-600 text-white animate-pulse'}`}>{disabled ? 'FULL' : 'SELECT'}</button>
+                                          {!isCard && <div className="w-32 h-48 bg-slate-800 text-white rounded-lg border-4 border-blue-400 shadow-xl flex flex-col items-center justify-center p-2 text-center">{renderPokerItemIcon((item as any).icon, (item as any).name, 'w-16 h-16 mb-2', (item as any).id)}<div className="font-bold text-sm">{t((item as any).name)}</div><div className="text-[10px] text-gray-400 mt-2 leading-tight">{t((item as any).description)}</div></div>}
+                                          <button className={`absolute -bottom-4 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full text-xs font-bold shadow-lg ${disabled ? 'bg-gray-600 text-gray-300' : 'bg-blue-600 text-white animate-pulse'}`}>{disabled ? t('FULL') : t('SELECT')}</button>
                                       </div>
                                   );
                               })}
                           </div>
                       )}
-                      <button onClick={() => { setPhase('SHOP'); setCurrentPack(null); }} className="mt-12 text-gray-400 hover:text-white border-b border-transparent hover:border-white transition-colors">Skip</button>
+                      <button onClick={() => { setPhase('SHOP'); setCurrentPack(null); }} className="mt-12 text-gray-400 hover:text-white border-b border-transparent hover:border-white transition-colors">{t('Skip')}</button>
                   </div>
               </div>
           );
@@ -2110,42 +2113,42 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
               {showRoundResult && roundResult && (
                   <div className="absolute inset-0 z-50 bg-black/90 flex items-center justify-center p-4" onClick={closeResultModal}>
                       <div className="bg-slate-800 border-4 border-yellow-500 rounded-lg p-6 w-full max-w-sm shadow-2xl relative animate-in zoom-in duration-300" onClick={e => e.stopPropagation()}>
-                          <h2 className="text-3xl font-black text-white text-center mb-6 border-b border-slate-600 pb-2">ラウンド勝利</h2>
+                          <h2 className="text-3xl font-black text-white text-center mb-6 border-b border-slate-600 pb-2">{t('ラウンド勝利')}</h2>
                           
                           <div className="space-y-3 font-mono text-sm mb-6">
                               <div className="flex justify-between items-center text-gray-300">
-                                  <span>ライバル撃破報酬</span>
+                                  <span>{t('ライバル撃破報酬')}</span>
                                   <span className="font-bold text-yellow-400">${roundResult.blind}</span>
                               </div>
                               <div className="flex justify-between items-center text-gray-300">
-                                  <span>利息</span>
+                                  <span>{t('利息')}</span>
                                   <span className="font-bold text-yellow-400">${roundResult.interest}</span>
                               </div>
                               <div className="flex justify-between items-center text-gray-300">
-                                  <span>残り手数</span>
+                                  <span>{t('残り手数')}</span>
                                   <span className="font-bold text-yellow-400">${roundResult.hands}</span>
                               </div>
                               <div className="flex justify-between items-center text-cyan-300 border-t border-slate-600 pt-2">
-                                  <span className="flex items-center"><Calculator className="mr-2" size={14}/> 計算ボーナス</span>
+                                  <span className="flex items-center"><Calculator className="mr-2" size={14}/> {t('計算ボーナス')}</span>
                                   <span className="font-bold">+${roundResult.math}</span>
                               </div>
                               <div className="flex justify-between items-center text-xl font-black text-white bg-slate-700 p-2 rounded mt-2">
-                                  <span>合計</span>
+                                  <span>{t('合計')}</span>
                                   <span className="text-yellow-400">${roundResult.blind + roundResult.interest + roundResult.hands + roundResult.math}</span>
                               </div>
                           </div>
                           
                           <button onClick={closeResultModal} className="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-3 rounded-lg flex items-center justify-center shadow-lg transition-colors">
-                              <Check className="mr-2"/> 購買部へ
+                              <Check className="mr-2"/> {t('購買部へ')}
                           </button>
                       </div>
                   </div>
               )}
 
               <div className="poker-shop-header flex justify-between items-center mb-4 bg-slate-800 p-4 rounded-lg shadow-lg shrink-0">
-                  <h2 className="text-2xl font-bold flex items-center"><ShoppingBag className="mr-2 text-yellow-500"/> 購買部</h2>
+                  <h2 className="text-2xl font-bold flex items-center"><ShoppingBag className="mr-2 text-yellow-500"/> {t('購買部')}</h2>
                   <div className="text-2xl font-bold text-yellow-400">${runState.money}</div>
-                  <button onClick={nextBlind} className="bg-green-600 hover:bg-green-500 px-6 py-2 rounded font-bold flex items-center shadow-lg transform transition active:translate-y-1">次のライバルへ <ArrowLeft className="rotate-180 inline ml-1"/></button>
+                  <button onClick={nextBlind} className="bg-green-600 hover:bg-green-500 px-6 py-2 rounded font-bold flex items-center shadow-lg transform transition active:translate-y-1">{t('次のライバルへ')} <ArrowLeft className="rotate-180 inline ml-1"/></button>
               </div>
               
               <div className="poker-shop-body flex-grow flex flex-col gap-4 overflow-hidden">
@@ -2212,8 +2215,8 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
                                       <div className="w-12 h-12 bg-slate-800 rounded-full flex items-center justify-center border-2 border-slate-700 mt-2">
                                           {renderPokerItemIcon(voucher.icon, voucher.name, 'w-8 h-8', voucher.id)}
                                       </div>
-                                      <div className="font-bold text-xs">{voucher.name}</div>
-                                      <div className="text-[9px] text-gray-400 leading-tight h-8 overflow-hidden">{voucher.description}</div>
+                                      <div className="font-bold text-xs">{t(voucher.name)}</div>
+                                      <div className="text-[9px] text-gray-400 leading-tight h-8 overflow-hidden">{t(voucher.description)}</div>
                                       <button disabled={runState.money < getPrice(voucher.price)} className={`w-full py-1 rounded font-bold text-xs ${runState.money >= getPrice(voucher.price) ? 'bg-slate-100 text-black hover:bg-white' : 'bg-gray-700 text-gray-500 cursor-not-allowed'}`}>${getPrice(voucher.price)}</button>
                                   </div>
                               ) : (
@@ -2227,8 +2230,8 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
                               <div key={item.id} className="poker-shop-card bg-slate-700 p-2 rounded flex flex-col items-center text-center relative group cursor-pointer hover:bg-slate-600 transition-colors shadow-lg justify-between min-h-[160px]" onClick={() => buyItem(item, runState.shopInventory.indexOf(item), 'NORMAL')} onContextMenu={(e) => handleContextMenu(e, item, 'PACK', false)} onTouchStart={() => handleTouchStart(item, 'PACK', false)} onTouchEnd={handleTouchEnd}>
                                   <div className="absolute top-1 left-1 text-[8px] font-bold text-orange-300 bg-orange-900/50 px-1.5 py-0.5 rounded">PACK</div>
                                   <div className="w-12 h-12 mt-4">{renderPokerItemIcon(item.icon, item.name, 'w-full h-full', item.id)}</div>
-                                  <div className="font-bold text-xs">{item.name}</div>
-                                  <div className="text-[9px] text-gray-400 h-8 overflow-hidden leading-tight">{item.description}</div>
+                                  <div className="font-bold text-xs">{t(item.name)}</div>
+                                  <div className="text-[9px] text-gray-400 h-8 overflow-hidden leading-tight">{t(item.description)}</div>
                                   <button disabled={runState.money < getPrice(item.price)} className={`w-full py-1 rounded font-bold text-xs ${runState.money >= getPrice(item.price) ? 'bg-orange-600 hover:bg-orange-500 shadow-md' : 'bg-gray-600 cursor-not-allowed'}`}>${getPrice(item.price)}</button>
                               </div>
                           ))}
@@ -2237,8 +2240,8 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
                               <div key={item.id} className="poker-shop-card bg-slate-700 p-2 rounded flex flex-col items-center text-center relative group cursor-pointer hover:bg-slate-600 transition-colors shadow-lg justify-between min-h-[160px]" onClick={() => buyItem(item, runState.shopInventory.indexOf(item), 'NORMAL')} onContextMenu={(e) => handleContextMenu(e, item, 'SUPPORTER', false)} onTouchStart={() => handleTouchStart(item, 'SUPPORTER', false)} onTouchEnd={handleTouchEnd}>
                                   <div className="absolute top-1 left-1 text-[8px] font-bold text-blue-300 bg-blue-900/50 px-1.5 py-0.5 rounded">SUPPORTER</div>
                                   <div className="w-12 h-12 mt-4">{renderPokerItemIcon(item.icon, item.name, 'w-full h-full', item.id)}</div>
-                                  <div className="font-bold text-xs">{item.name}</div>
-                                  <div className="text-[9px] text-gray-400 h-8 overflow-hidden leading-tight">{item.description}</div>
+                                  <div className="font-bold text-xs">{t(item.name)}</div>
+                                  <div className="text-[9px] text-gray-400 h-8 overflow-hidden leading-tight">{t(item.description)}</div>
                                   <button disabled={runState.money < getPrice(item.price)} className={`w-full py-1 rounded font-bold text-xs ${runState.money >= getPrice(item.price) ? 'bg-blue-600 hover:bg-blue-500 shadow-md' : 'bg-gray-600 cursor-not-allowed'}`}>${getPrice(item.price)}</button>
                               </div>
                           ))}
@@ -2247,8 +2250,8 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
                               <div key={item.id} className="poker-shop-card bg-slate-700 p-2 rounded flex flex-col items-center text-center relative group cursor-pointer hover:bg-slate-600 transition-colors shadow-lg justify-between min-h-[160px]" onClick={() => buyItem(item, runState.shopInventory.indexOf(item), 'NORMAL')} onContextMenu={(e) => handleContextMenu(e, item, 'CONSUMABLE', false)} onTouchStart={() => handleTouchStart(item, 'CONSUMABLE', false)} onTouchEnd={handleTouchEnd}>
                                   <div className="absolute top-1 left-1 text-[8px] font-bold text-purple-300 bg-purple-900/50 px-1.5 py-0.5 rounded">CARD</div>
                                   <div className="w-12 h-12 mt-4">{renderPokerItemIcon(item.icon, item.name, 'w-full h-full', item.id)}</div>
-                                  <div className="font-bold text-xs">{item.name}</div>
-                                  <div className="text-[9px] text-gray-400 h-8 overflow-hidden leading-tight">{item.description}</div>
+                                  <div className="font-bold text-xs">{t(item.name)}</div>
+                                  <div className="text-[9px] text-gray-400 h-8 overflow-hidden leading-tight">{t(item.description)}</div>
                                   <button disabled={runState.money < getPrice(item.price)} className={`w-full py-1 rounded font-bold text-xs ${runState.money >= getPrice(item.price) ? 'bg-purple-600 hover:bg-purple-500 shadow-md' : 'bg-gray-600 cursor-not-allowed'}`}>${getPrice(item.price)}</button>
                               </div>
                           ))}
@@ -2262,9 +2265,9 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
   if (phase === 'GAME_OVER' || phase === 'VICTORY') {
       return (
           <div className="flex flex-col h-full w-full bg-black text-white items-center justify-center p-8 font-mono text-center">
-              <div className={`text-6xl font-bold mb-4 ${phase === 'VICTORY' ? 'text-yellow-400' : 'text-red-500'}`}>{phase === 'VICTORY' ? '卒業！' : '放課後終了'}</div>
-              <p className="text-xl text-gray-400 mb-8">{phase === 'VICTORY' ? '8年生の勝負を制しました' : `アンティ${runState.ante}で敗退`}</p>
-              <button onClick={() => { storageService.clearPokerState(); onBack(); }} className="bg-white text-black px-8 py-3 font-bold rounded hover:bg-gray-200">職員室に戻る</button>
+              <div className={`text-6xl font-bold mb-4 ${phase === 'VICTORY' ? 'text-yellow-400' : 'text-red-500'}`}>{phase === 'VICTORY' ? t('卒業！') : t('放課後終了')}</div>
+              <p className="text-xl text-gray-400 mb-8">{phase === 'VICTORY' ? t('8年生の勝負を制しました') : t('アンティ{ante}で敗退').replace('{ante}', String(runState.ante))}</p>
+              <button onClick={() => { storageService.clearPokerState(); onBack(); }} className="bg-white text-black px-8 py-3 font-bold rounded hover:bg-gray-200">{t('職員室に戻る')}</button>
           </div>
       );
   }
@@ -2319,11 +2322,11 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
       <div className={`w-[min(92vw,420px)] rounded-2xl border px-4 py-2 shadow-[0_0_15px_rgba(59,130,246,0.22)] backdrop-blur-md animate-in fade-in slide-in-from-bottom-2 pointer-events-none ${currentHandInfo.isDisallowed ? 'border-red-500 bg-red-950/85' : 'border-blue-500/50 bg-slate-900/85'}`}>
           {currentHandInfo.isDisallowed && (
               <div className="mb-2 flex items-center justify-center gap-2 rounded-lg border border-red-500/60 bg-red-900/60 px-3 py-1 text-[10px] font-bold text-red-100">
-                  <AlertTriangle size={12}/> 厳しい監視: 同じ役は無効です
+                  <AlertTriangle size={12}/> {t('厳しい監視: 同じ役は無効です')}
               </div>
           )}
           <div className={`text-sm md:text-base font-bold tracking-wider flex items-center justify-center gap-2 ${currentHandInfo.isDisallowed ? 'text-red-300 line-through opacity-80' : 'text-white'}`}>
-              {currentHandInfo.name}
+              {t(currentHandInfo.name)}
               <span className={`${currentHandInfo.isDisallowed ? 'bg-gray-600' : 'bg-blue-600'} text-white text-[10px] px-1.5 py-0.5 rounded font-mono`}>Lv.{currentHandInfo.level}</span>
           </div>
       </div>
@@ -2336,14 +2339,14 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
             <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4" onClick={() => setShowRulesModal(false)}>
                 <div className="bg-slate-800 border-4 border-yellow-500 rounded-lg p-6 w-full max-w-3xl max-h-[85vh] overflow-y-auto relative shadow-2xl custom-scrollbar" onClick={e => e.stopPropagation()}>
                     <button onClick={() => setShowRulesModal(false)} className="absolute top-4 right-4 text-gray-400 hover:text-white"><X size={24}/></button>
-                    <h2 className="text-2xl font-bold text-yellow-400 mb-4 flex items-center"><BookOpen className="mr-2"/> 遊び方 (How to Play)</h2>
+                    <h2 className="text-2xl font-bold text-yellow-400 mb-4 flex items-center"><BookOpen className="mr-2"/> {t('遊び方')}</h2>
                     <div className="bg-slate-900/80 p-4 rounded-lg border border-slate-600 mb-6 text-sm space-y-4">
-                        <div><h3 className="font-bold text-white mb-2 flex items-center"><Flag className="mr-2 text-red-400"/> ゲームの目的</h3><p className="text-gray-300">ポーカーの役を作ってスコアを稼げ！<span className="text-red-400 font-bold">目標スコア(Score Goal)</span>を達成しましょう。<br/>全8ステージ(Ante)をクリアすると卒業(ゲームクリア)です。</p></div>
-                        <div><h3 className="font-bold text-white mb-2 flex items-center"><Calculator className="mr-2 text-blue-400"/> スコア計算</h3><div className="flex items-center gap-2 bg-black/40 p-2 rounded justify-center"><span className="text-blue-400 font-bold text-lg">チップ (Chips)</span><X size={16} className="text-gray-500"/><span className="text-red-500 font-bold text-lg">倍率 (Mult)</span><ArrowRight size={16} className="text-gray-500"/><span className="text-yellow-400 font-bold text-lg">スコア</span></div></div>
-                        <div><h3 className="font-bold text-white mb-2 flex items-center"><ShoppingBag className="mr-2 text-yellow-400"/> 買い物</h3><p className="text-gray-300">ラウンド勝利後に獲得したお金でアイテムを購入できます。</p></div>
+                        <div><h3 className="font-bold text-white mb-2 flex items-center"><Flag className="mr-2 text-red-400"/> {t('ゲームの目的')}</h3><p className="text-gray-300">{t('ポーカーの役を作ってスコアを稼げ！')}<span className="text-red-400 font-bold">{t('目標スコア')}</span>{t('を達成しましょう。')}<br/>{t('全8ステージ(Ante)をクリアすると卒業(ゲームクリア)です。')}</p></div>
+                        <div><h3 className="font-bold text-white mb-2 flex items-center"><Calculator className="mr-2 text-blue-400"/> {t('スコア計算')}</h3><div className="flex items-center gap-2 bg-black/40 p-2 rounded justify-center"><span className="text-blue-400 font-bold text-lg">{t('チップ')}</span><X size={16} className="text-gray-500"/><span className="text-red-500 font-bold text-lg">{t('倍率')}</span><ArrowRight size={16} className="text-gray-500"/><span className="text-yellow-400 font-bold text-lg">{t('スコア')}</span></div></div>
+                        <div><h3 className="font-bold text-white mb-2 flex items-center"><ShoppingBag className="mr-2 text-yellow-400"/> {t('買い物')}</h3><p className="text-gray-300">{t('ラウンド勝利後に獲得したお金でアイテムを購入できます。')}</p></div>
                     </div>
-                    <h2 className="text-2xl font-bold text-yellow-400 mb-4 flex items-center border-t border-slate-600 pt-6"><HelpCircle className="mr-2"/> 役一覧 (Hand Types)</h2>
-                    <div className="space-y-4 text-sm"><div className="grid grid-cols-1 gap-3">{['FLUSH_FIVE', 'FLUSH_HOUSE', 'FIVE_OF_A_KIND', 'ROYAL_FLUSH', 'STRAIGHT_FLUSH', 'FOUR_OF_A_KIND', 'FULL_HOUSE', 'FLUSH', 'STRAIGHT', 'THREE_OF_A_KIND', 'TWO_PAIR', 'PAIR', 'HIGH_CARD'].map((key) => { const def = POKER_HAND_LEVELS[key]; const example = HAND_EXAMPLES[key]; return (<div key={key} className="bg-slate-900 p-3 rounded-lg border border-slate-700"><div className="flex justify-between items-center mb-1"><span className="font-bold text-lg text-white">{def.name}</span><span className="text-blue-300 font-mono text-xs">{def.baseChips} <span className="text-gray-500">x</span> <span className="text-red-400">{def.baseMult}</span></span></div><div className="text-xs text-gray-400 mb-2">{example.desc}</div><div className="flex gap-1">{example.cards.map((c, i) => (<div key={i} className="bg-white text-black w-8 h-10 rounded-sm border border-gray-400 flex flex-col items-center justify-center shadow-sm"><div className={`text-[10px] font-bold leading-none ${getSuitColorClass(c.s)}`}>{c.r}</div><div className="scale-75">{getSuitIcon(c.s)}</div></div>))}</div></div>); })}</div></div>
+                    <h2 className="text-2xl font-bold text-yellow-400 mb-4 flex items-center border-t border-slate-600 pt-6"><HelpCircle className="mr-2"/> {t('役一覧')}</h2>
+                    <div className="space-y-4 text-sm"><div className="grid grid-cols-1 gap-3">{['FLUSH_FIVE', 'FLUSH_HOUSE', 'FIVE_OF_A_KIND', 'ROYAL_FLUSH', 'STRAIGHT_FLUSH', 'FOUR_OF_A_KIND', 'FULL_HOUSE', 'FLUSH', 'STRAIGHT', 'THREE_OF_A_KIND', 'TWO_PAIR', 'PAIR', 'HIGH_CARD'].map((key) => { const def = POKER_HAND_LEVELS[key]; const example = HAND_EXAMPLES[key]; return (<div key={key} className="bg-slate-900 p-3 rounded-lg border border-slate-700"><div className="flex justify-between items-center mb-1"><span className="font-bold text-lg text-white">{t(def.name)}</span><span className="text-blue-300 font-mono text-xs">{def.baseChips} <span className="text-gray-500">x</span> <span className="text-red-400">{def.baseMult}</span></span></div><div className="text-xs text-gray-400 mb-2">{t(example.desc)}</div><div className="flex gap-1">{example.cards.map((c, i) => (<div key={i} className="bg-white text-black w-8 h-10 rounded-sm border border-gray-400 flex flex-col items-center justify-center shadow-sm"><div className={`text-[10px] font-bold leading-none ${getSuitColorClass(c.s)}`}>{c.r}</div><div className="scale-75">{getSuitIcon(c.s)}</div></div>))}</div></div>); })}</div></div>
                 </div>
             </div>
         )}
@@ -2352,8 +2355,8 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
             <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4" onClick={() => setShowHandList(false)}>
                 <div className="bg-slate-800 border-4 border-slate-600 rounded-lg p-6 w-full max-w-2xl max-h-[80vh] overflow-y-auto relative shadow-2xl" onClick={e => e.stopPropagation()}>
                     <button onClick={() => setShowHandList(false)} className="absolute top-4 right-4 text-gray-400 hover:text-white"><X size={24}/></button>
-                    <h2 className="text-2xl font-bold text-white mb-4 flex items-center"><BarChart3 className="mr-2"/> Hand Levels (役のレベル)</h2>
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">{Object.entries(POKER_HAND_LEVELS).map(([key, def]) => { const level = runState.handLevels[key] || 1; const currentChips = def.baseChips + (level - 1) * 10; const currentMult = def.baseMult + (level - 1) * 1; return (<div key={key} className={`p-3 rounded border flex justify-between items-center ${key === lastHandScore?.name ? 'bg-yellow-900/50 border-yellow-500' : 'bg-slate-900 border-slate-700'}`}><div><div className="font-bold text-white">{def.name}</div><div className="text-xs text-blue-300">Lvl {level}</div></div><div className="text-right"><span className="text-blue-400 font-bold">{currentChips}</span><span className="text-gray-500 mx-1">X</span><span className="text-red-500 font-bold">{currentMult}</span></div></div>) })}</div>
+                    <h2 className="text-2xl font-bold text-white mb-4 flex items-center"><BarChart3 className="mr-2"/> {t('役のレベル')}</h2>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">{Object.entries(POKER_HAND_LEVELS).map(([key, def]) => { const level = runState.handLevels[key] || 1; const currentChips = def.baseChips + (level - 1) * 10; const currentMult = def.baseMult + (level - 1) * 1; return (<div key={key} className={`p-3 rounded border flex justify-between items-center ${key === lastHandScore?.name ? 'bg-yellow-900/50 border-yellow-500' : 'bg-slate-900 border-slate-700'}`}><div><div className="font-bold text-white">{t(def.name)}</div><div className="text-xs text-blue-300">Lvl {level}</div></div><div className="text-right"><span className="text-blue-400 font-bold">{currentChips}</span><span className="text-gray-500 mx-1">X</span><span className="text-red-500 font-bold">{currentMult}</span></div></div>) })}</div>
                 </div>
             </div>
         )}
@@ -2408,24 +2411,24 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
                     <div className="mt-0.5 w-full truncate text-center text-[8px] md:text-[9px] font-bold text-yellow-100 leading-tight">{currentRivalName}</div>
                 </div>
                 <div className="flex flex-col items-start bg-slate-800 p-2 rounded border border-slate-600 flex-grow md:w-48 shadow-lg justify-center">
-                    <div className="flex justify-between w-full md:block"><div className="text-[10px] text-red-400 font-bold uppercase">目標スコア</div><div className="text-[10px] text-gray-400 md:mt-1 block md:hidden">現在: {runState.currentScore.toLocaleString()}</div></div>
+                    <div className="flex justify-between w-full md:block"><div className="text-[10px] text-red-400 font-bold uppercase">{t('目標スコア')}</div><div className="text-[10px] text-gray-400 md:mt-1 block md:hidden">{t('現在')}: {runState.currentScore.toLocaleString()}</div></div>
                     <div className="text-xl md:text-3xl font-black text-white leading-tight">{runState.currentBlind.scoreGoal.toLocaleString()}</div>
                     <div className="w-full h-1.5 bg-gray-700 rounded-full mt-1 overflow-hidden"><div className="h-full bg-red-500 transition-all duration-500" style={{ width: `${Math.min(100, (runState.currentScore / runState.currentBlind.scoreGoal) * 100)}%` }}></div></div>
-                    <div className="text-xs text-gray-400 mt-1 hidden md:block">現在: {runState.currentScore.toLocaleString()}</div>
+                    <div className="text-xs text-gray-400 mt-1 hidden md:block">{t('現在')}: {runState.currentScore.toLocaleString()}</div>
                 </div>
-                <div className="bg-slate-800 p-2 rounded border border-yellow-500 flex flex-col items-center justify-center w-20 md:hidden shrink-0"><div className="text-[10px] text-yellow-400 uppercase">所持金</div><div className="text-lg font-bold text-yellow-400">${runState.money}</div></div>
+                <div className="bg-slate-800 p-2 rounded border border-yellow-500 flex flex-col items-center justify-center w-20 md:hidden shrink-0"><div className="text-[10px] text-yellow-400 uppercase">{t('所持金')}</div><div className="text-lg font-bold text-yellow-400">${runState.money}</div></div>
             </div>
             <div className="flex items-center justify-between md:justify-end gap-2 w-full md:w-auto">
                 <div className={`flex gap-2 ${getPokerTutorialHighlightClass('tools')}`}>
                     <button onClick={() => openPokerTutorial(0)} className="bg-yellow-600 hover:bg-yellow-500 p-1 md:p-2 rounded border border-yellow-300 text-slate-950 flex flex-col items-center justify-center w-12 h-12 md:w-14 md:h-14"><BookOpen size={18} className="md:w-5 md:h-5"/><span className="text-[8px] md:text-[9px] font-black leading-none mt-1">{pokerTutorialLabels.button}</span></button>
-                    <button onClick={() => { setShowRulesModal(true); audioService.playSound('select'); }} className="bg-slate-700 hover:bg-slate-600 p-1 md:p-2 rounded border border-slate-500 text-white flex flex-col items-center justify-center w-12 h-12 md:w-14 md:h-14"><HelpCircle size={18} className="md:w-5 md:h-5 text-yellow-400"/><span className="text-[9px] md:text-[10px] leading-none mt-1">ルール</span></button>
-                    <button onClick={() => { setShowDeckList(true); audioService.playSound('select'); }} className="bg-slate-700 hover:bg-slate-600 p-1 md:p-2 rounded border border-slate-500 text-white flex flex-col items-center justify-center w-12 h-12 md:w-14 md:h-14"><Layers size={18} className="md:w-5 md:h-5"/><span className="text-[9px] md:text-[10px] leading-none mt-1">山札</span></button>
-                    <button onClick={() => { setShowHandList(true); audioService.playSound('select'); }} className="bg-slate-700 hover:bg-slate-600 p-1 md:p-2 rounded border border-slate-500 text-white flex flex-col items-center justify-center w-12 h-12 md:w-14 md:h-14"><BarChart3 size={18} className="md:w-5 md:h-5"/><span className="text-[9px] md:text-[10px] leading-none mt-1">役</span></button>
+                    <button onClick={() => { setShowRulesModal(true); audioService.playSound('select'); }} className="bg-slate-700 hover:bg-slate-600 p-1 md:p-2 rounded border border-slate-500 text-white flex flex-col items-center justify-center w-12 h-12 md:w-14 md:h-14"><HelpCircle size={18} className="md:w-5 md:h-5 text-yellow-400"/><span className="text-[9px] md:text-[10px] leading-none mt-1">{t('ルール')}</span></button>
+                    <button onClick={() => { setShowDeckList(true); audioService.playSound('select'); }} className="bg-slate-700 hover:bg-slate-600 p-1 md:p-2 rounded border border-slate-500 text-white flex flex-col items-center justify-center w-12 h-12 md:w-14 md:h-14"><Layers size={18} className="md:w-5 md:h-5"/><span className="text-[9px] md:text-[10px] leading-none mt-1">{t('山札')}</span></button>
+                    <button onClick={() => { setShowHandList(true); audioService.playSound('select'); }} className="bg-slate-700 hover:bg-slate-600 p-1 md:p-2 rounded border border-slate-500 text-white flex flex-col items-center justify-center w-12 h-12 md:w-14 md:h-14"><BarChart3 size={18} className="md:w-5 md:h-5"/><span className="text-[9px] md:text-[10px] leading-none mt-1">{t('役')}</span></button>
                 </div>
                 <div className="flex gap-2">
-                    <div className="bg-slate-800 p-1 md:p-2 rounded border border-blue-600 flex flex-col items-center w-14 md:w-20 justify-center"><div className="text-[9px] md:text-[10px] text-blue-400 uppercase">手数</div><div className="text-base md:text-lg font-bold text-blue-100">{runState.handsRemaining}</div></div>
-                    <div className="bg-slate-800 p-1 md:p-2 rounded border border-red-900 flex flex-col items-center w-14 md:w-20 justify-center"><div className="text-[9px] md:text-[10px] text-red-400 uppercase">捨札</div><div className="text-base md:text-lg font-bold text-red-100">{runState.discardsRemaining}</div></div>
-                    <div className="bg-slate-800 p-2 rounded border border-yellow-500 hidden md:flex flex-col items-center w-20 justify-center"><div className="text-[10px] text-yellow-400 uppercase">所持金</div><div className="text-lg font-bold text-yellow-400">${runState.money}</div></div>
+                    <div className="bg-slate-800 p-1 md:p-2 rounded border border-blue-600 flex flex-col items-center w-14 md:w-20 justify-center"><div className="text-[9px] md:text-[10px] text-blue-400 uppercase">{t('手数')}</div><div className="text-base md:text-lg font-bold text-blue-100">{runState.handsRemaining}</div></div>
+                    <div className="bg-slate-800 p-1 md:p-2 rounded border border-red-900 flex flex-col items-center w-14 md:w-20 justify-center"><div className="text-[9px] md:text-[10px] text-red-400 uppercase">{t('捨札')}</div><div className="text-base md:text-lg font-bold text-red-100">{runState.discardsRemaining}</div></div>
+                    <div className="bg-slate-800 p-2 rounded border border-yellow-500 hidden md:flex flex-col items-center w-20 justify-center"><div className="text-[10px] text-yellow-400 uppercase">{t('所持金')}</div><div className="text-lg font-bold text-yellow-400">${runState.money}</div></div>
                 </div>
             </div>
         </div>
@@ -2471,8 +2474,8 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
             )}
             {selectedConsumable && (
                 <div className="absolute top-4 bg-purple-900/80 p-2 rounded text-center border border-purple-400 z-40">
-                    <div className="text-sm font-bold text-purple-200">Using: {selectedConsumable.name}</div>
-                    <div className="text-xs mb-2">Select cards then click USE</div>
+                    <div className="text-sm font-bold text-purple-200">{t('Using')}: {t(selectedConsumable.name)}</div>
+                    <div className="text-xs mb-2">{t('Select cards then click USE')}</div>
                     <div className="flex gap-2 justify-center"><button onClick={applyTarot} className="bg-purple-600 px-3 py-1 rounded text-xs font-bold hover:bg-purple-500">USE</button><button onClick={() => { setSelectedConsumable(null); setSelectedCards([]); }} className="bg-gray-600 px-3 py-1 rounded text-xs hover:bg-gray-500">CANCEL</button></div>
                 </div>
             )}

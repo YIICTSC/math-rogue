@@ -3,9 +3,10 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { ArrowLeft, Play, X, RotateCcw, Swords, Shield, RefreshCw, Zap, Skull, ChevronsRight, ChevronLeft, ChevronRight, Clock, Ghost, ArrowRightLeft, Gift, ShoppingBag, Hammer, Coins, Plus, Crosshair, Heart, Move, AlertTriangle, Hourglass, Maximize2, Minimize2, Wind, Anchor, Flame, Activity, ArrowUp, Dna, Shuffle, Star, HelpCircle, Book, AlertCircle, Flag, Music, Mic, Milk, Battery, ShieldCheck, Bomb, Utensils, PenTool, Circle, ArrowRight, Target, Package } from 'lucide-react';
 import { audioService } from '../services/audioService';
 import { storageService } from '../services/storageService';
-import { AnswerMode, AssignmentAnswerResult, AssignmentPayload, GameMode, MiniGameDebugPreview } from '../types';
+import { AnswerMode, AssignmentAnswerResult, AssignmentPayload, GameMode, LanguageMode, MiniGameDebugPreview } from '../types';
 import MiniGameProblemChallenge from './MiniGameProblemChallenge';
 import { assetUrl } from '../utils/assetPaths';
+import { trans } from '../utils/textUtils';
 
 // --- TYPES ---
 type Facing = 1 | -1; // 1: Right, -1: Left
@@ -658,8 +659,10 @@ const KochoShowdown: React.FC<{
     answerMode?: AnswerMode;
     assignment?: AssignmentPayload | null;
     onAnswerResult?: (result: AssignmentAnswerResult) => void;
+    languageMode?: LanguageMode;
     debugPreview?: MiniGameDebugPreview;
-}> = ({ onBack, problemMode = GameMode.MIXED, problemModePool, answerMode = 'CHOICE', assignment, onAnswerResult, debugPreview }) => {
+}> = ({ onBack, problemMode = GameMode.MIXED, problemModePool, answerMode = 'CHOICE', assignment, onAnswerResult, languageMode = 'JAPANESE', debugPreview }) => {
+    const tr = (text: string) => trans(text, languageMode);
     
     // State
     const [gameState, setGameState] = useState<KochoGameState>(() => {
@@ -2672,12 +2675,12 @@ const KochoShowdown: React.FC<{
         if (!offer) return null;
         return (
             <div className="bg-slate-800 border-2 border-indigo-500 p-4 rounded-xl text-center mb-6 w-full max-w-sm mx-auto shadow-lg relative">
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-indigo-600 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider shadow">Active Technique</div>
+                <div className="absolute -top-3 left-1/2 -translate-x-1/2 bg-indigo-600 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider shadow">{tr('Active Technique')}</div>
                 <div className={`text-5xl mb-2 flex justify-center ${offer.color} mt-2`}>
                     {offer.icon}
                 </div>
-                <div className="text-lg font-bold mb-1">{offer.description}</div>
-                <div className="text-gray-400 text-xs mb-4">Click a card below to apply</div>
+                <div className="text-lg font-bold mb-1">{tr(offer.description)}</div>
+                <div className="text-gray-400 text-xs mb-4">{tr('Click a card below to apply')}</div>
                 
                 <button 
                     onClick={handleRerollUpgrade} 
@@ -2696,7 +2699,7 @@ const KochoShowdown: React.FC<{
             {/* Math Challenge Overlay */}
             {gameState.phase === 'MATH' && (
                  <div className="absolute inset-0 z-[100] w-full h-full pointer-events-auto">
-                     <MiniGameProblemChallenge mode={problemMode} modePool={problemModePool} answerMode={answerMode} assignment={assignment} onAnswerResult={onAnswerResult} onComplete={handleMathComplete} rewardHint="全問正解でHP+1" />
+                     <MiniGameProblemChallenge mode={problemMode} modePool={problemModePool} answerMode={answerMode} assignment={assignment} onAnswerResult={onAnswerResult} onComplete={handleMathComplete} rewardHint={languageMode === 'ENGLISH' ? 'Perfect score: HP +1' : '全問正解でHP+1'} languageMode={languageMode} />
                  </div>
             )}
 
@@ -2704,7 +2707,7 @@ const KochoShowdown: React.FC<{
             <div className="flex justify-between items-center p-2 md:p-4 bg-black/40 border-b border-indigo-500/30 shrink-0">
                 <button onClick={handleQuit} className="flex items-center text-gray-400 hover:text-white"><ArrowLeft className="mr-2"/> <span className="hidden md:inline">Quit</span></button>
                 <h2 className="text-sm md:text-xl font-bold text-indigo-100 tracking-widest hidden md:block">
-                    校長対決 <span className="text-xs text-pink-400 ml-2">{gameState.phase === 'SETUP' ? '難易度選択' : gameState.isEndless ? `補習 ${gameState.endlessFloor}限目` : `ステージ ${gameState.battleStage}`}</span>
+                    {tr('校長対決')} <span className="text-xs text-pink-400 ml-2">{gameState.phase === 'SETUP' ? tr('難易度選択') : gameState.isEndless ? `${tr('補習')} ${gameState.endlessFloor}${tr('限目')}` : `${tr('ステージ')} ${gameState.battleStage}`}</span>
                 </h2>
                 <div className="flex items-center gap-2 md:gap-4">
                     {gameState.phase !== 'SETUP' && (
@@ -2737,8 +2740,8 @@ const KochoShowdown: React.FC<{
                     <div className="kocho-difficulty-panel w-full max-w-5xl rounded-xl border-2 border-indigo-500/60 bg-slate-950 p-5 shadow-2xl">
                         <div className="kocho-difficulty-header mb-5 text-center">
                             <div className="kocho-difficulty-eyebrow text-[11px] font-black uppercase tracking-[0.35em] text-pink-300">Kocho Showdown</div>
-                            <h2 className="kocho-difficulty-heading mt-2 text-3xl font-black text-white">難易度選択</h2>
-                            <p className="kocho-difficulty-description mt-2 text-sm text-slate-400">Lv.1から開始し、クリアするたびに次のレベルが1つ解禁されます。上げるほど敵HP・攻撃力が増え、アイテムドロップが減ります。</p>
+                            <h2 className="kocho-difficulty-heading mt-2 text-3xl font-black text-white">{tr('難易度選択')}</h2>
+                            <p className="kocho-difficulty-description mt-2 text-sm text-slate-400">{tr('Lv.1から開始し、クリアするたびに次のレベルが1つ解禁されます。上げるほど敵HP・攻撃力が増え、アイテムドロップが減ります。')}</p>
                         </div>
                         <div className="kocho-difficulty-grid grid grid-cols-1 gap-2 md:grid-cols-2">
                             {KOCHO_DIFFICULTIES.map(difficulty => {
@@ -2757,7 +2760,7 @@ const KochoShowdown: React.FC<{
                                         <div>
                                             <div className={`kocho-difficulty-title text-base font-black ${locked ? 'text-slate-500' : 'text-white'}`}>Lv.{difficulty.level} {difficulty.name}</div>
                                             <div className="kocho-difficulty-meta mt-1 text-xs text-slate-400">HP x{difficulty.hpMultiplier.toFixed(2)} / 攻撃 +{difficulty.damageBonus} / SCORE x{difficulty.scoreMultiplier.toFixed(1)}</div>
-                                            {locked && <div className="kocho-difficulty-lock mt-1 text-[11px] font-bold text-pink-300">前のレベルをクリアすると解禁</div>}
+                                            {locked && <div className="kocho-difficulty-lock mt-1 text-[11px] font-bold text-pink-300">{tr('前のレベルをクリアすると解禁')}</div>}
                                         </div>
                                         {locked ? <ShieldCheck size={18} className="text-slate-500" /> : <Play size={18} className="text-pink-300" />}
                                     </button>
@@ -2773,42 +2776,42 @@ const KochoShowdown: React.FC<{
                 <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4 animate-in fade-in duration-200" onClick={() => setShowHelpModal(false)}>
                     <div className="bg-slate-800 border-4 border-indigo-500 rounded-lg p-6 w-full max-w-2xl max-h-[85vh] overflow-y-auto relative shadow-2xl custom-scrollbar" onClick={e => e.stopPropagation()}>
                         <button onClick={() => setShowHelpModal(false)} className="absolute top-4 right-4 text-gray-400 hover:text-white"><X size={24}/></button>
-                        <h2 className="text-2xl font-bold text-indigo-300 mb-6 flex items-center"><Book className="mr-2"/> 校長対決の遊び方</h2>
+                        <h2 className="text-2xl font-bold text-indigo-300 mb-6 flex items-center"><Book className="mr-2"/> {tr('校長対決の遊び方')}</h2>
                         
                         <div className="space-y-6 text-sm text-gray-300">
                             <section>
-                                <h3 className="text-lg font-bold text-white mb-2 border-b border-gray-600 pb-1 flex items-center"><Flag className="mr-2 text-yellow-400"/> 基本ルール</h3>
-                                <p>7つのステージを攻略し、最深部の<span className="text-red-400 font-bold">校長先生</span>を倒すことが目的です。<br/>HPが0になるとゲームオーバーです。</p>
+                                <h3 className="text-lg font-bold text-white mb-2 border-b border-gray-600 pb-1 flex items-center"><Flag className="mr-2 text-yellow-400"/> {tr('基本ルール')}</h3>
+                                <p>{tr('7つのステージを攻略し、最深部の校長先生を倒すことが目的です。')}<br/>{tr('HPが0になるとゲームオーバーです。')}</p>
                             </section>
 
                             <section>
-                                <h3 className="text-lg font-bold text-white mb-2 border-b border-gray-600 pb-1 flex items-center"><Swords className="mr-2 text-red-400"/> バトルシステム</h3>
+                                <h3 className="text-lg font-bold text-white mb-2 border-b border-gray-600 pb-1 flex items-center"><Swords className="mr-2 text-red-400"/> {tr('バトルシステム')}</h3>
                                 <ul className="list-disc pl-5 space-y-2">
-                                    <li><strong>移動・待機・向き変更:</strong> ボタンを押すと即座に実行され、ターンが経過します。</li>
-                                    <li><strong>カード攻撃:</strong> 手札のカードを選んで<span className="text-indigo-400 font-bold">予約(Queue)</span>します（最大3枚）。<br/>「EXEC」ボタンで予約したカードを連続発動します。</li>
-                                    <li><strong>クールダウン(CD):</strong> 使用したカードはCDが発生し、一時的に使えなくなります。<br/>移動やアクションを行うとCDが減少します。</li>
-                                    <li><strong>消耗品:</strong> 敵が落とすアイテムを拾って使用できます（最大3つ）。</li>
+                                    <li><strong>{tr('移動・待機・向き変更')}:</strong> {tr('ボタンを押すと即座に実行され、ターンが経過します。')}</li>
+                                    <li><strong>{tr('カード攻撃')}:</strong> {tr('手札のカードを選んで予約します（最大3枚）。')}<br/>{tr('「EXEC」ボタンで予約したカードを連続発動します。')}</li>
+                                    <li><strong>{tr('クールダウン(CD)')}:</strong> {tr('使用したカードはCDが発生し、一時的に使えなくなります。')}<br/>{tr('移動やアクションを行うとCDが減少します。')}</li>
+                                    <li><strong>{tr('消耗品')}:</strong> {tr('敵が落とすアイテムを拾って使用できます（最大3つ）。')}</li>
                                 </ul>
                             </section>
 
                             <section>
-                                <h3 className="text-lg font-bold text-white mb-2 border-b border-gray-600 pb-1 flex items-center"><AlertCircle className="mr-2 text-red-500"/> 敵の行動予測</h3>
-                                <p className="mb-2">敵の頭上のアイコンで次の行動がわかります。</p>
+                                <h3 className="text-lg font-bold text-white mb-2 border-b border-gray-600 pb-1 flex items-center"><AlertCircle className="mr-2 text-red-500"/> {tr('敵の行動予測')}</h3>
+                                <p className="mb-2">{tr('敵の頭上のアイコンで次の行動がわかります。')}</p>
                                 <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
-                                    <div className="flex items-center gap-2 bg-black/30 p-2 rounded"><Swords className="text-red-500" size={16}/> <span className="text-red-400">攻撃</span> (カウント0で発動)</div>
-                                    <div className="flex items-center gap-2 bg-black/30 p-2 rounded"><Hourglass className="text-gray-400" size={16}/> <span className="text-gray-300">待機</span> (数字は残りターン)</div>
-                                    <div className="flex items-center gap-2 bg-black/30 p-2 rounded"><Ghost className="text-purple-400" size={16}/> <span className="text-purple-300">召喚</span></div>
-                                    <div className="flex items-center gap-2 bg-black/30 p-2 rounded"><AlertTriangle className="text-orange-500" size={16}/> <span className="text-orange-400">特殊行動</span> (ボススキル)</div>
+                                    <div className="flex items-center gap-2 bg-black/30 p-2 rounded"><Swords className="text-red-500" size={16}/> <span className="text-red-400">{tr('攻撃')}</span> ({tr('カウント0で発動')})</div>
+                                    <div className="flex items-center gap-2 bg-black/30 p-2 rounded"><Hourglass className="text-gray-400" size={16}/> <span className="text-gray-300">{tr('待機')}</span> ({tr('数字は残りターン')})</div>
+                                    <div className="flex items-center gap-2 bg-black/30 p-2 rounded"><Ghost className="text-purple-400" size={16}/> <span className="text-purple-300">{tr('召喚')}</span></div>
+                                    <div className="flex items-center gap-2 bg-black/30 p-2 rounded"><AlertTriangle className="text-orange-500" size={16}/> <span className="text-orange-400">{tr('特殊行動')}</span> ({tr('ボススキル')})</div>
                                 </div>
                             </section>
 
                             <section>
-                                <h3 className="text-lg font-bold text-white mb-2 border-b border-gray-600 pb-1 flex items-center"><Hammer className="mr-2 text-emerald-400"/> 強化 (Upgrade)</h3>
-                                <p>ステージクリア後やショップでカードを強化できます。<br/>スロット拡張、威力アップ、CD短縮などを組み合わせて最強のデッキを作りましょう。</p>
+                                <h3 className="text-lg font-bold text-white mb-2 border-b border-gray-600 pb-1 flex items-center"><Hammer className="mr-2 text-emerald-400"/> {tr('強化 (Upgrade)')}</h3>
+                                <p>{tr('ステージクリア後やショップでカードを強化できます。')}<br/>{tr('スロット拡張、威力アップ、CD短縮などを組み合わせて最強のデッキを作りましょう。')}</p>
                             </section>
                         </div>
                         
-                        <button onClick={() => setShowHelpModal(false)} className="mt-8 w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 rounded-lg transition-colors border border-indigo-400">閉じる</button>
+                        <button onClick={() => setShowHelpModal(false)} className="mt-8 w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 rounded-lg transition-colors border border-indigo-400">{tr('閉じる')}</button>
                     </div>
                 </div>
             )}
@@ -2818,10 +2821,10 @@ const KochoShowdown: React.FC<{
                 <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4 animate-in fade-in duration-200" onClick={() => setShowItemModal(false)}>
                     <div className="bg-slate-800 border-4 border-green-500 rounded-lg p-6 w-full max-w-lg shadow-2xl relative" onClick={e => e.stopPropagation()}>
                         <button onClick={() => setShowItemModal(false)} className="absolute top-4 right-4 text-gray-400 hover:text-white"><X size={24}/></button>
-                        <h2 className="text-2xl font-bold text-green-400 mb-6 flex items-center"><Package className="mr-2"/> アイテム一覧 ({gameState.consumables.length}/{MAX_CONSUMABLES})</h2>
+                        <h2 className="text-2xl font-bold text-green-400 mb-6 flex items-center"><Package className="mr-2"/> {tr('アイテム一覧')} ({gameState.consumables.length}/{MAX_CONSUMABLES})</h2>
                         
                         {gameState.consumables.length === 0 ? (
-                            <div className="text-gray-500 text-center py-8 border-2 border-dashed border-gray-700 rounded-lg">アイテムを持っていません</div>
+                            <div className="text-gray-500 text-center py-8 border-2 border-dashed border-gray-700 rounded-lg">{tr('アイテムを持っていません')}</div>
                         ) : (
                             <div className="grid grid-cols-1 gap-4">
                                 {gameState.consumables.map((item, i) => (
@@ -2831,22 +2834,22 @@ const KochoShowdown: React.FC<{
                                                 <KochoItemImage item={item} className="h-full w-full rounded-full" />
                                             </div>
                                             <div>
-                                                <div className="font-bold text-white text-lg">{item.name}</div>
-                                                <div className="text-sm text-gray-400">{item.desc}</div>
+                                                <div className="font-bold text-white text-lg">{tr(item.name)}</div>
+                                                <div className="text-sm text-gray-400">{tr(item.desc)}</div>
                                             </div>
                                         </div>
                                         <button 
                                             onClick={() => { useConsumable(i); setShowItemModal(false); }}
                                             className="bg-green-600 hover:bg-green-500 text-white font-bold py-2 px-4 rounded transition-colors shadow-lg"
                                         >
-                                            使う
+                                            {tr('使う')}
                                         </button>
                                     </div>
                                 ))}
                             </div>
                         )}
                         
-                        <button onClick={() => setShowItemModal(false)} className="mt-8 w-full bg-slate-700 hover:bg-slate-600 text-white font-bold py-3 rounded-lg transition-colors border border-slate-500">閉じる</button>
+                        <button onClick={() => setShowItemModal(false)} className="mt-8 w-full bg-slate-700 hover:bg-slate-600 text-white font-bold py-3 rounded-lg transition-colors border border-slate-500">{tr('閉じる')}</button>
                     </div>
                 </div>
             )}
@@ -2869,12 +2872,12 @@ const KochoShowdown: React.FC<{
                             {/* REWARD UI */}
                             {gameState.phase === 'REWARD' && (
                                 <div className="text-center w-full">
-                                    <h2 className="text-3xl font-bold text-yellow-400 mb-8 flex items-center justify-center"><Gift className="mr-2"/> Card Reward</h2>
+                                    <h2 className="text-3xl font-bold text-yellow-400 mb-8 flex items-center justify-center"><Gift className="mr-2"/> {tr('Card Reward')}</h2>
                                     <div className="flex gap-4 md:gap-8 justify-center flex-wrap">
                                         {rewardCards.map((card, i) => (
                                             <div key={i} className="w-32 md:w-40 bg-slate-800 border-4 border-yellow-500 rounded-xl p-4 flex flex-col items-center hover:scale-105 transition-transform cursor-pointer" onClick={() => selectReward(card)}>
                                                 <KochoCardActionArt card={card} className="mb-2 h-16 w-16 rounded-lg border border-indigo-400/40 bg-black/40" />
-                                                <div className="font-bold text-white mb-1 text-center text-sm md:text-base leading-tight">{card.name}</div>
+                                                <div className="font-bold text-white mb-1 text-center text-sm md:text-base leading-tight">{tr(card.name)}</div>
                                                 
                                                 {/* ADDED STATS DISPLAY */}
                                                 <div className="flex gap-1 text-[10px] my-1 justify-center w-full">
@@ -2882,14 +2885,14 @@ const KochoShowdown: React.FC<{
                                                     <span className="text-blue-300 bg-blue-900/50 px-1.5 py-0.5 rounded font-bold border border-blue-500/50">CD {card.cooldown}</span>
                                                 </div>
 
-                                                <div className="text-[10px] text-gray-400 text-center leading-tight h-8 overflow-hidden flex items-center justify-center">{card.description}</div>
+                                                <div className="text-[10px] text-gray-400 text-center leading-tight h-8 overflow-hidden flex items-center justify-center">{tr(card.description)}</div>
                                                 
                                                 <div className="flex gap-0.5 justify-center mt-2">
                                                     {[...Array(card.maxSlots)].map((_, idx) => (
                                                         <div key={idx} className="w-1.5 h-1.5 rounded-full bg-gray-600 border border-gray-400" />
                                                     ))}
                                                 </div>
-                                                <button className="mt-4 bg-yellow-600 text-black font-bold px-4 py-1 rounded-full text-xs hover:bg-yellow-500">Select</button>
+                                                <button className="mt-4 bg-yellow-600 text-black font-bold px-4 py-1 rounded-full text-xs hover:bg-yellow-500">{tr('Select')}</button>
                                             </div>
                                         ))}
                                     </div>
@@ -2911,8 +2914,8 @@ const KochoShowdown: React.FC<{
                                             {gameState.hand.map((card, i) => (
                                                 <div key={i} className={`kocho-upgrade-target-card bg-slate-800 p-3 rounded border relative transition-all ${gameState.shopUpgradeUsed ? 'opacity-50 cursor-not-allowed border-slate-600' : 'hover:border-yellow-400 cursor-pointer border-slate-600'}`} onClick={() => handleApplyUpgrade(i)}>
                                                     <KochoCardActionArt card={card} className="mb-2 h-10 w-10 rounded border border-slate-600 bg-black/40" />
-                                                    <div className="font-bold text-sm text-white mb-1">{card.name}</div>
-                                                    <div className="text-xs text-gray-400 mb-2">{card.description}</div>
+                                                    <div className="font-bold text-sm text-white mb-1">{tr(card.name)}</div>
+                                                    <div className="text-xs text-gray-400 mb-2">{tr(card.description)}</div>
                                                     <div className="flex gap-2 text-[10px] mb-1">
                                                         {card.damage > 0 && <span className="text-red-400 bg-red-900/30 px-1 rounded">ATK:{card.damage}</span>}
                                                         <span className="text-blue-400 bg-blue-900/30 px-1 rounded">CD:{card.cooldown}</span>
@@ -2929,17 +2932,17 @@ const KochoShowdown: React.FC<{
                                         </div>
                                     </div>
 
-                                    <button onClick={finishShopOrEvent} className="kocho-upgrade-next-button bg-red-600 hover:bg-red-500 text-white font-bold py-3 px-8 rounded-lg shadow-lg flex items-center border-2 border-red-400">次へ進む <ArrowUp className="ml-2"/></button>
+                                    <button onClick={finishShopOrEvent} className="kocho-upgrade-next-button bg-red-600 hover:bg-red-500 text-white font-bold py-3 px-8 rounded-lg shadow-lg flex items-center border-2 border-red-400">{tr('次へ進む')} <ArrowUp className="ml-2"/></button>
                                 </div>
                             )}
 
                             {/* SHOP UI */}
                             {gameState.phase === 'SHOP' && (
                                 <div className="kocho-shop-panel w-full h-full flex flex-col p-4 md:p-8 overflow-y-auto relative">
-                                    <h2 className="text-3xl font-bold text-indigo-400 mb-6 flex items-center shrink-0"><ShoppingBag className="mr-2"/> Shop</h2>
+                                    <h2 className="text-3xl font-bold text-indigo-400 mb-6 flex items-center shrink-0"><ShoppingBag className="mr-2"/> {tr('Shop')}</h2>
                                     <div className="kocho-shop-columns flex flex-col md:flex-row gap-8 flex-grow">
                                         <div className="kocho-shop-upgrade-column flex-1 bg-slate-900 border border-slate-600 rounded-lg p-4 overflow-y-auto custom-scrollbar flex flex-col">
-                                            <h3 className="text-xl font-bold text-white mb-4 flex items-center justify-between"><span className="flex items-center"><Hammer className="mr-2 text-red-400"/> Deck Upgrade</span><span className={`text-xs ${gameState.shopUpgradeUsed ? 'text-red-500' : 'text-green-400'}`}>{gameState.shopUpgradeUsed ? '(済)' : '(1回のみ)'}</span></h3>
+                                            <h3 className="text-xl font-bold text-white mb-4 flex items-center justify-between"><span className="flex items-center"><Hammer className="mr-2 text-red-400"/> {tr('Deck Upgrade')}</span><span className={`text-xs ${gameState.shopUpgradeUsed ? 'text-red-500' : 'text-green-400'}`}>{gameState.shopUpgradeUsed ? tr('(済)') : tr('(1回のみ)')}</span></h3>
                                             
                                             <UpgradeOfferDisplay />
 
@@ -2947,8 +2950,8 @@ const KochoShowdown: React.FC<{
                                                 {gameState.hand.map((card, i) => (
                                                     <div key={i} className={`kocho-upgrade-target-card bg-slate-800 p-3 rounded border relative transition-all ${gameState.shopUpgradeUsed ? 'opacity-50 cursor-not-allowed border-slate-600' : 'hover:border-yellow-400 cursor-pointer border-slate-600'}`} onClick={() => handleApplyUpgrade(i)}>
                                                         <KochoCardActionArt card={card} className="mb-2 h-10 w-10 rounded border border-slate-600 bg-black/40" />
-                                                        <div className="font-bold text-sm text-white mb-1">{card.name}</div>
-                                                        <div className="text-xs text-gray-400 mb-2">{card.description}</div>
+                                                        <div className="font-bold text-sm text-white mb-1">{tr(card.name)}</div>
+                                                        <div className="text-xs text-gray-400 mb-2">{tr(card.description)}</div>
                                                         <div className="flex gap-2 text-[10px] mb-1">{card.damage > 0 && <span className="text-red-400 bg-red-900/30 px-1 rounded">ATK:{card.damage}</span>}<span className="text-blue-400 bg-blue-900/30 px-1 rounded">CD:{card.cooldown}</span></div>
                                                         {/* Slots Visual */}
                                                         <div className="flex gap-1">
@@ -2962,7 +2965,7 @@ const KochoShowdown: React.FC<{
                                             </div>
                                         </div>
                                         <div className="kocho-shop-relic-column w-full md:w-96 bg-slate-900 border border-slate-600 rounded-lg p-4 shrink-0">
-                                            <h3 className="text-xl font-bold text-white mb-4 flex items-center"><Gift className="mr-2 text-yellow-400"/> Relics (2 Random)</h3>
+                                            <h3 className="text-xl font-bold text-white mb-4 flex items-center"><Gift className="mr-2 text-yellow-400"/> {tr('Relics (2 Random)')}</h3>
                                             <div className="kocho-shop-relic-list space-y-4">
                                                 {gameState.shopInventory.map(item => {
                                                     const owned = gameState.relics.some(r => r.id === item.id) && item.id !== 'R_POTION';
@@ -2974,17 +2977,17 @@ const KochoShowdown: React.FC<{
                                                                     <KochoRelicImage relic={item} className="h-full w-full rounded-sm" />
                                                                 </div>
                                                                 <div className="min-w-0 flex-1">
-                                                                    <div className="font-bold text-sm text-yellow-200 leading-tight">{item.name}</div>
-                                                                    <div className="text-xs text-gray-400 leading-tight break-words">{item.desc}</div>
+                                                                    <div className="font-bold text-sm text-yellow-200 leading-tight">{tr(item.name)}</div>
+                                                                    <div className="text-xs text-gray-400 leading-tight break-words">{tr(item.desc)}</div>
                                                                 </div>
                                                             </div>
-                                                            <button disabled={owned} onClick={() => buyShopItem(item)} className={`shrink-0 px-3 py-1 rounded text-sm font-bold ${owned ? 'bg-gray-600 text-gray-400' : 'bg-yellow-600 text-black hover:bg-yellow-500'}`}>{owned ? 'Sold' : `${finalPrice}G`}</button>
+                                                            <button disabled={owned} onClick={() => buyShopItem(item)} className={`shrink-0 px-3 py-1 rounded text-sm font-bold ${owned ? 'bg-gray-600 text-gray-400' : 'bg-yellow-600 text-black hover:bg-yellow-500'}`}>{owned ? tr('Sold') : `${finalPrice}G`}</button>
                                                         </div>
                                                     );
                                                 })}
-                                                {gameState.shopInventory.length === 0 && <div className="text-gray-500 text-center py-4">売り切れ</div>}
+                                                {gameState.shopInventory.length === 0 && <div className="text-gray-500 text-center py-4">{tr('売り切れ')}</div>}
                                             </div>
-                                            <button onClick={finishShopOrEvent} className="kocho-shop-next-button mt-8 w-full bg-red-600 hover:bg-red-500 text-white font-bold py-4 rounded-lg text-xl flex items-center justify-center animate-pulse border-2 border-red-400">次へ進む <ArrowUp className="ml-2"/></button>
+                                            <button onClick={finishShopOrEvent} className="kocho-shop-next-button mt-8 w-full bg-red-600 hover:bg-red-500 text-white font-bold py-4 rounded-lg text-xl flex items-center justify-center animate-pulse border-2 border-red-400">{tr('次へ進む')} <ArrowUp className="ml-2"/></button>
                                         </div>
                                     </div>
                                 </div>
@@ -2996,32 +2999,32 @@ const KochoShowdown: React.FC<{
                                     <div className="kocho-victory-unlock-area">
                                         {newlyUnlockedCard ? (
                                         <div className="kocho-victory-card mx-auto mb-8 w-64 rounded-2xl border-4 border-yellow-500 bg-slate-900 p-5 shadow-xl">
-                                            <div className="mb-2 text-xs font-black tracking-[0.2em] text-yellow-300">新カード解禁</div>
+                                            <div className="mb-2 text-xs font-black tracking-[0.2em] text-yellow-300">{tr('新カード解禁')}</div>
                                             <KochoCardActionArt card={newlyUnlockedCard} className="mx-auto mb-3 h-16 w-16 rounded-full border border-yellow-400/50 bg-black/40" />
-                                            <div className="text-lg font-bold text-white">{newlyUnlockedCard.name}</div>
+                                            <div className="text-lg font-bold text-white">{tr(newlyUnlockedCard.name)}</div>
                                             <div className="mt-2 flex justify-center gap-2 text-[11px]">
-                                                {newlyUnlockedCard.damage > 0 && <span className="rounded bg-red-900/40 px-2 py-1 font-bold text-red-300">攻撃 {newlyUnlockedCard.damage}</span>}
-                                                <span className="rounded bg-blue-900/40 px-2 py-1 font-bold text-blue-300">待機 {newlyUnlockedCard.cooldown}</span>
+                                                {newlyUnlockedCard.damage > 0 && <span className="rounded bg-red-900/40 px-2 py-1 font-bold text-red-300">{tr('攻撃')} {newlyUnlockedCard.damage}</span>}
+                                                <span className="rounded bg-blue-900/40 px-2 py-1 font-bold text-blue-300">{tr('待機')} {newlyUnlockedCard.cooldown}</span>
                                             </div>
-                                            <div className="mt-3 text-xs leading-relaxed text-gray-300">{newlyUnlockedCard.description}</div>
-                                            <div className="mt-4 text-[11px] font-bold text-emerald-300">以降の校長対決の報酬に登場します</div>
+                                            <div className="mt-3 text-xs leading-relaxed text-gray-300">{tr(newlyUnlockedCard.description)}</div>
+                                            <div className="mt-4 text-[11px] font-bold text-emerald-300">{tr('以降の校長対決の報酬に登場します')}</div>
                                         </div>
                                         ) : (
                                         <div className="kocho-victory-card mb-8 rounded-xl border border-emerald-500/40 bg-emerald-950/30 px-5 py-4 text-sm font-bold text-emerald-200">
-                                            追加カードはすべて解放済みです
+                                            {tr('追加カードはすべて解放済みです')}
                                         </div>
                                         )}
                                     </div>
                                     <div className="kocho-victory-text-area flex flex-col items-center justify-center">
-                                        <h2 className="text-4xl font-bold text-white mb-4">校長説得完了！</h2>
-                                        <p className="text-gray-300 mb-8">校長先生との最終対決に勝利しました。</p>
+                                        <h2 className="text-4xl font-bold text-white mb-4">{tr('校長説得完了！')}</h2>
+                                        <p className="text-gray-300 mb-8">{tr('校長先生との最終対決に勝利しました。')}</p>
                                         <div className="mb-6 inline-flex items-center gap-2 rounded-full border border-yellow-500/50 bg-yellow-950/40 px-4 py-2 text-sm font-bold text-yellow-200">
                                             <Gift size={16}/>
-                                            追加カード解放 {kochoUnlockedCount}/{KOCHO_UNLOCKABLE_CARD_TOTAL}
+                                            {tr('追加カード解放')} {kochoUnlockedCount}/{KOCHO_UNLOCKABLE_CARD_TOTAL}
                                         </div>
                                         <div className="flex flex-col gap-3 md:flex-row">
-                                            <button onClick={startEndlessRun} className="bg-pink-600 px-8 py-3 rounded text-xl font-bold hover:bg-pink-500 border border-pink-300">放課後エンドレスへ</button>
-                                            <button onClick={onBack} className="bg-indigo-600 px-8 py-3 rounded text-xl font-bold hover:bg-indigo-500">職員室に戻る</button>
+                                            <button onClick={startEndlessRun} className="bg-pink-600 px-8 py-3 rounded text-xl font-bold hover:bg-pink-500 border border-pink-300">{tr('放課後エンドレスへ')}</button>
+                                            <button onClick={onBack} className="bg-indigo-600 px-8 py-3 rounded text-xl font-bold hover:bg-indigo-500">{tr('職員室に戻る')}</button>
                                         </div>
                                     </div>
                                 </div>
@@ -3031,10 +3034,10 @@ const KochoShowdown: React.FC<{
                             {gameState.status === 'GAME_OVER' && (
                                 <div className="text-center animate-in zoom-in">
                                     <Skull size={64} className="text-red-500 mb-4 mx-auto"/>
-                                    <h2 className="text-4xl font-bold text-red-500 mb-4">校長室送り</h2>
+                                    <h2 className="text-4xl font-bold text-red-500 mb-4">{tr('校長室送り')}</h2>
                                     <p className="text-gray-400 mb-2">{gameState.isEndless ? `補習 ${gameState.endlessFloor}限目 / ${gameState.endlessScore}点` : `ステージ ${gameState.battleStage}`}</p>
-                                    {gameState.isEndless && <p className="text-sm text-pink-300 mb-4">撃破数 {gameState.endlessKills}</p>}
-                                    <button onClick={() => initGame()} className="bg-white text-black px-8 py-3 rounded text-xl font-bold hover:bg-gray-200">再挑戦</button>
+                                    {gameState.isEndless && <p className="text-sm text-pink-300 mb-4">{tr('撃破数')} {gameState.endlessKills}</p>}
+                                    <button onClick={() => initGame()} className="bg-white text-black px-8 py-3 rounded text-xl font-bold hover:bg-gray-200">{tr('再挑戦')}</button>
                                 </div>
                             )}
                         </div>
@@ -3045,7 +3048,7 @@ const KochoShowdown: React.FC<{
                         <div className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center p-4 animate-in fade-in duration-200" onClick={() => setShowRelicModal(false)}>
                             <div className="w-full h-full max-w-4xl flex flex-col" onClick={e => e.stopPropagation()}>
                                 <div className="flex justify-between items-center mb-6 border-b border-indigo-500 pb-4">
-                                    <h2 className="text-3xl font-bold text-yellow-400 flex items-center"><Gift className="mr-3" size={32}/> 所持レリック一覧</h2>
+                                    <h2 className="text-3xl font-bold text-yellow-400 flex items-center"><Gift className="mr-3" size={32}/> {tr('所持レリック一覧')}</h2>
                                     <button onClick={() => setShowRelicModal(false)} className="text-gray-400 hover:text-white p-2 border-2 border-transparent hover:border-white rounded-full transition-colors"><X size={32}/></button>
                                 </div>
                                 
@@ -3053,7 +3056,7 @@ const KochoShowdown: React.FC<{
                                     {gameState.relics.length === 0 ? (
                                         <div className="flex flex-col items-center justify-center h-64 text-gray-500 border-2 border-dashed border-gray-700 rounded-lg">
                                             <Gift size={48} className="mb-4 opacity-50"/>
-                                            <p className="text-xl">レリックを持っていません。</p>
+                                            <p className="text-xl">{tr('レリックを持っていません。')}</p>
                                         </div>
                                     ) : (
                                         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -3063,8 +3066,8 @@ const KochoShowdown: React.FC<{
                                                         <KochoRelicImage relic={relic} className="h-full w-full rounded-sm" />
                                                     </div>
                                                     <div>
-                                                        <div className="font-bold text-white text-xl mb-2">{relic.name}</div>
-                                                        <div className="text-sm text-gray-300 leading-relaxed">{relic.desc}</div>
+                                                        <div className="font-bold text-white text-xl mb-2">{tr(relic.name)}</div>
+                                                        <div className="text-sm text-gray-300 leading-relaxed">{tr(relic.desc)}</div>
                                                     </div>
                                                 </div>
                                             ))}
@@ -3072,7 +3075,7 @@ const KochoShowdown: React.FC<{
                                     )}
                                 </div>
                                 
-                                <button onClick={() => setShowRelicModal(false)} className="mt-6 w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-4 rounded-lg text-xl transition-colors border-2 border-indigo-400 shadow-lg">閉じる</button>
+                                <button onClick={() => setShowRelicModal(false)} className="mt-6 w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-4 rounded-lg text-xl transition-colors border-2 border-indigo-400 shadow-lg">{tr('閉じる')}</button>
                             </div>
                         </div>
                     )}
@@ -3127,7 +3130,7 @@ const KochoShowdown: React.FC<{
                                     return card ? (
                                         <div key={i} className="w-12 h-16 md:w-16 md:h-20 bg-slate-800 border border-slate-600 rounded flex flex-col items-center justify-center relative group cursor-pointer hover:border-red-400 shrink-0" onClick={() => handleUnqueueCard(i)}>
                                             <div className={`w-full h-1 ${card.color} absolute top-0`}></div>
-                                            <div className="text-[9px] md:text-xs text-center font-bold px-1 overflow-hidden whitespace-nowrap text-ellipsis w-full">{card.name}</div>
+                                            <div className="text-[9px] md:text-xs text-center font-bold px-1 overflow-hidden whitespace-nowrap text-ellipsis w-full">{tr(card.name)}</div>
                                             <KochoCardActionArt card={card} className="kocho-queue-card-art h-7 w-7 rounded bg-black/40" />
                                             <X size={12} className="absolute -top-1 -right-1 bg-red-500 rounded-full text-white opacity-0 group-hover:opacity-100"/>
                                         </div>
@@ -3157,9 +3160,9 @@ const KochoShowdown: React.FC<{
                                     </div>
 
                                     <div className="flex flex-col h-full w-full pt-2">
-                                        <div className="text-[11px] md:text-xs font-bold text-center leading-tight truncate px-3">{card.name}</div>
+                                        <div className="text-[11px] md:text-xs font-bold text-center leading-tight truncate px-3">{tr(card.name)}</div>
                                         <KochoCardActionArt card={card} className="kocho-hand-card-art mx-auto my-1 h-12 w-12 md:h-14 md:w-14 rounded-lg bg-black/40 border border-slate-700" />
-                                        <div className="text-[9px] md:text-[10px] text-gray-300 text-center leading-tight min-h-[2.4em] max-h-[2.4em] overflow-hidden">{card.description}</div>
+                                        <div className="text-[9px] md:text-[10px] text-gray-300 text-center leading-tight min-h-[2.4em] max-h-[2.4em] overflow-hidden">{tr(card.description)}</div>
                                         <div className="flex justify-center gap-1 mt-1">
                                             {[...Array(card.maxSlots)].map((_, idx) => (
                                                 <div key={idx} className={`w-1.5 h-1.5 rounded-full ${idx < card.usedSlots ? 'bg-yellow-400' : 'bg-gray-600'}`} />
@@ -3173,8 +3176,8 @@ const KochoShowdown: React.FC<{
                                     <div className="hidden">
                                         <KochoCardActionArt card={card} className="h-9 w-9 shrink-0 rounded bg-black/40" />
                                         <div className="flex-grow min-w-0">
-                                            <div className="text-xs font-bold truncate">{card.name}</div>
-                                            <div className="text-[10px] text-gray-400 truncate">{card.description}</div>
+                                            <div className="text-xs font-bold truncate">{tr(card.name)}</div>
+                                            <div className="text-[10px] text-gray-400 truncate">{tr(card.description)}</div>
                                             <div className="flex gap-0.5 mt-0.5">
                                                 {[...Array(card.maxSlots)].map((_, idx) => (
                                                     <div key={idx} className={`w-1 h-1 rounded-full ${idx < card.usedSlots ? 'bg-yellow-400' : 'bg-gray-600'}`} />

@@ -4,10 +4,11 @@ import { ArrowLeft, ArrowUp, ArrowDown, ArrowRight, ArrowUpLeft, ArrowUpRight, A
 import { audioService } from '../services/audioService';
 import { createPixelSpriteCanvas } from './PixelSprite';
 import { storageService } from '../services/storageService';
-import { AnswerMode, AssignmentAnswerResult, AssignmentPayload, GameMode, MiniGameDebugPreview } from '../types';
+import { AnswerMode, AssignmentAnswerResult, AssignmentPayload, GameMode, LanguageMode, MiniGameDebugPreview } from '../types';
 import { EXTRA_SCHOOL_DUNGEON_ITEMS } from '../data/schoolDungeonExtraItems';
 import MiniGameProblemChallenge from './MiniGameProblemChallenge';
 import { assetUrl } from '../utils/assetPaths';
+import { trans } from '../utils/textUtils';
 
 // --- セッション内アイテム引き継ぎ用変数 ---
 let inheritedItemTemplate2: Item | null = null;
@@ -19,6 +20,7 @@ interface SchoolDungeonRPG2Props {
   answerMode?: AnswerMode;
   assignment?: AssignmentPayload | null;
   onAnswerResult?: (result: AssignmentAnswerResult) => void;
+  languageMode?: LanguageMode;
   debugPreview?: MiniGameDebugPreview;
 }
 
@@ -431,7 +433,8 @@ const computeDijkstraMap = (map: TileType[][], targetX: number, targetY: number)
     return dMap;
 };
 
-const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMode = GameMode.MIXED, problemModePool, answerMode = 'CHOICE', assignment, onAnswerResult, debugPreview }) => {
+const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMode = GameMode.MIXED, problemModePool, answerMode = 'CHOICE', assignment, onAnswerResult, languageMode = 'JAPANESE', debugPreview }) => {
+  const tr = (text: string) => trans(text, languageMode);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [map, setMap] = useState<TileType[][]>([]);
   const [visitedMap, setVisitedMap] = useState<boolean[][]>([]);
@@ -1485,7 +1488,15 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
       }
   };
 
-  const getItemName = (item: Item) => { if (item.category === 'WEAPON' || item.category === 'ARMOR' || item.category === 'RANGED' || item.category === 'SYNTH' || item.category === 'CONSUMABLE' || item.category === 'ACCESSORY' || item.category === 'DECK_CARD') return item.name; if (item.type.includes('MEAT')) return item.name; if (identifiedTypes.has(item.type)) return item.name; return idMap[item.type] || item.name; };
+  const getItemName = (item: Item) => {
+      const displayName = (() => {
+          if (item.category === 'WEAPON' || item.category === 'ARMOR' || item.category === 'RANGED' || item.category === 'SYNTH' || item.category === 'CONSUMABLE' || item.category === 'ACCESSORY' || item.category === 'DECK_CARD') return item.name;
+          if (item.type.includes('MEAT')) return item.name;
+          if (identifiedTypes.has(item.type)) return item.name;
+          return idMap[item.type] || item.name;
+      })();
+      return tr(displayName);
+  };
   const fireRangedWeapon = () => {
       if (menuOpen || shopState.active) return; const rangedItem = player.equipment?.ranged;
       if (!rangedItem) { addLog("飛び道具を装備していない！"); return; }
@@ -1912,29 +1923,29 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
             </div>
         )}
         
-        {showMathChallenge && (<div className="fixed inset-0 z-[100] w-full h-full pointer-events-auto"><MiniGameProblemChallenge mode={problemMode} modePool={problemModePool} answerMode={answerMode} assignment={assignment} onAnswerResult={onAnswerResult} onComplete={handleMathComplete} rewardHint="全問正解で満腹度+10" /></div>)}
+        {showMathChallenge && (<div className="fixed inset-0 z-[100] w-full h-full pointer-events-auto"><MiniGameProblemChallenge mode={problemMode} modePool={problemModePool} answerMode={answerMode} assignment={assignment} onAnswerResult={onAnswerResult} onComplete={handleMathComplete} rewardHint={languageMode === 'ENGLISH' ? 'Perfect score: Fullness +10' : '全問正解で満腹度+10'} languageMode={languageMode} /></div>)}
 
         {showDeck && (
             <div className="absolute inset-0 z-50 flex items-center justify-center p-4" style={{ backgroundColor: `${C0}F2` }} onClick={() => setShowDeck(false)}>
                 <div className="w-full max-w-md border-4 p-6 shadow-xl overflow-y-auto max-h-[80vh] custom-scrollbar" style={{ backgroundColor: C3, borderColor: C1, color: C0 }} onClick={e => e.stopPropagation()}>
                     <div className="flex justify-between items-center mb-4 border-b-2 pb-2" style={{ borderColor: C1 }}>
-                        <h2 className="font-bold text-xl flex items-center"><Layers className="mr-2"/> デッキ一覧 ({dungeonDeck.length})</h2>
+                        <h2 className="font-bold text-xl flex items-center"><Layers className="mr-2"/> {tr('デッキ一覧')} ({dungeonDeck.length})</h2>
                         <button onClick={() => setShowDeck(false)}><X size={24}/></button>
                     </div>
-                    {deckViewMode === 'REMOVE' && (<div className="bg-red-900/50 p-2 mb-4 text-center border-2 border-red-500 rounded text-red-200 font-bold">除外するカードを選択してください</div>)}
+                    {deckViewMode === 'REMOVE' && (<div className="bg-red-900/50 p-2 mb-4 text-center border-2 border-red-500 rounded text-red-200 font-bold">{tr('除外するカードを選択してください')}</div>)}
                     <div className="space-y-2">
-                        {dungeonDeck.length === 0 ? (<div className="text-center text-sm py-4 opacity-50">デッキは空です</div>) : (
+                        {dungeonDeck.length === 0 ? (<div className="text-center text-sm py-4 opacity-50">{tr('デッキは空です')}</div>) : (
                             dungeonDeck.map((card, idx) => (
                                 <div key={card.id} className={`border p-2 rounded flex items-center gap-3 ${deckViewMode === 'REMOVE' ? 'cursor-pointer hover:bg-red-500 hover:text-white' : ''}`} style={{ borderColor: C1 }} onClick={() => deckViewMode === 'REMOVE' && handleCardRemoval(card.id)}>
                                     <DungeonCardSprite templateId={card.templateId} className="w-[36px] h-[36px] rounded border border-current bg-black/10" />
-                                    <div className="flex-grow"><div className="font-bold flex justify-between"><span>{card.name}</span><span className="text-xs opacity-70 font-normal">{card.type}</span></div><div className="text-xs opacity-80">{card.description} {card.power > 0 && `(Pow:${card.power})`}</div></div>
+                                    <div className="flex-grow"><div className="font-bold flex justify-between"><span>{tr(card.name)}</span><span className="text-xs opacity-70 font-normal">{card.type}</span></div><div className="text-xs opacity-80">{tr(card.description)} {card.power > 0 && `(Pow:${card.power})`}</div></div>
                                     {deckViewMode === 'REMOVE' && <Trash2 size={16} />}
                                 </div>
                             ))
                         )}
                     </div>
-                    <div className="mt-4 pt-4 border-t-2 text-xs opacity-70" style={{ borderColor: C1 }}><p>手札: {dungeonHand.length}枚 / 捨て札: {dungeonDiscard.length}枚</p></div>
-                    <button onClick={() => setShowDeck(false)} className="mt-6 w-full py-2 font-bold rounded" style={{ backgroundColor: C1, color: C3 }}>閉じる</button>
+                    <div className="mt-4 pt-4 border-t-2 text-xs opacity-70" style={{ borderColor: C1 }}><p>{tr('手札')}: {dungeonHand.length} / {tr('捨て札')}: {dungeonDiscard.length}</p></div>
+                    <button onClick={() => setShowDeck(false)} className="mt-6 w-full py-2 font-bold rounded" style={{ backgroundColor: C1, color: C3 }}>{tr('閉じる')}</button>
                 </div>
             </div>
         )}
@@ -1942,45 +1953,45 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
         {showStatus && (
             <div className="absolute inset-0 z-50 flex items-center justify-center p-4" style={{ backgroundColor: `${C0}F2` }} onClick={() => setShowStatus(false)}>
                 <div className="w-full max-w-md border-4 p-6 shadow-xl overflow-y-auto max-h-[80vh] custom-scrollbar" style={{ backgroundColor: C3, borderColor: C1, color: C0 }} onClick={e => e.stopPropagation()}>
-                    <div className="flex justify-between items-center mb-4 border-b-2 pb-2" style={{ borderColor: C1 }}><h2 className="font-bold text-xl flex items-center"><User className="mr-2"/> ステータス</h2><button onClick={() => setShowStatus(false)}><X size={24}/></button></div>
+                    <div className="flex justify-between items-center mb-4 border-b-2 pb-2" style={{ borderColor: C1 }}><h2 className="font-bold text-xl flex items-center"><User className="mr-2"/> {tr('ステータス')}</h2><button onClick={() => setShowStatus(false)}><X size={24}/></button></div>
                     <div className="space-y-4">
                         <div className="grid grid-cols-2 gap-4">
-                            <div><span style={{ color: C1 }} className="font-bold">名前:</span> {player.name}</div>
-                            <div><span style={{ color: C1 }} className="font-bold">称号:</span> {level < 5 ? '新入生' : (level < 10 ? '一般生徒' : '番長')}</div>
+                            <div><span style={{ color: C1 }} className="font-bold">{tr('名前')}:</span> {player.name}</div>
+                            <div><span style={{ color: C1 }} className="font-bold">{tr('称号')}:</span> {tr(level < 5 ? '新入生' : (level < 10 ? '一般生徒' : '番長'))}</div>
                             <div><span style={{ color: C1 }} className="font-bold">Lv:</span> {level}</div>
-                            <div><span style={{ color: C1 }} className="font-bold">経験値:</span> {player.xp}</div>
+                            <div><span style={{ color: C1 }} className="font-bold">{tr('経験値')}:</span> {player.xp}</div>
                             <div><span style={{ color: C1 }} className="font-bold">HP:</span> {player.hp}/{player.maxHp}</div>
-                            <div><span style={{ color: C1 }} className="font-bold">満腹度:</span> {belly}/{maxBelly}</div>
-                            <div><span style={{ color: C1 }} className="font-bold">攻撃力:</span> {player.attack}</div>
-                            <div><span style={{ color: C1 }} className="font-bold">防御力:</span> {player.defense}</div>
-                            <div><span style={{ color: C1 }} className="font-bold">所持金:</span> {player.gold} G</div>
+                            <div><span style={{ color: C1 }} className="font-bold">{tr('満腹度')}:</span> {belly}/{maxBelly}</div>
+                            <div><span style={{ color: C1 }} className="font-bold">{tr('攻撃力')}:</span> {player.attack}</div>
+                            <div><span style={{ color: C1 }} className="font-bold">{tr('防御力')}:</span> {player.defense}</div>
+                            <div><span style={{ color: C1 }} className="font-bold">{tr('所持金')}:</span> {player.gold} G</div>
                         </div>
                         <div className="border-t-2 pt-2" style={{ borderColor: C1 }}>
-                            <h3 className="font-bold mb-2">装備</h3>
+                            <h3 className="font-bold mb-2">{tr('装備')}</h3>
                             <div className="grid grid-cols-1 gap-1 text-sm">
-                                <div><span className="font-bold mr-2">[武]</span> {player.equipment?.weapon ? (<span>{getItemName(player.equipment.weapon)} {player.equipment.weapon.plus ? `+${player.equipment.weapon.plus}` : ''}<span className="text-[10px] ml-1 opacity-70">({(player.equipment.weapon.power||0) + (player.equipment.weapon.plus||0)})</span></span>) : 'なし'}</div>
-                                <div><span className="font-bold mr-2">[防]</span> {player.equipment?.armor ? (<span>{getItemName(player.equipment.armor)} {player.equipment.armor.plus ? `+${player.equipment.armor.plus}` : ''}<span className="text-[10px] ml-1 opacity-70">({(player.equipment.armor.power||0) + (player.equipment.armor.plus||0)})</span></span>) : 'なし'}</div>
-                                <div><span className="font-bold mr-2">[投]</span> {player.equipment?.ranged ? `${getItemName(player.equipment.ranged)} (${player.equipment.ranged.count})` : 'なし'}</div>
-                                <div><span className="font-bold mr-2">[腕]</span> {player.equipment?.accessory ? `${getItemName(player.equipment.accessory)}` : 'なし'}</div>
+                                <div><span className="font-bold mr-2">[武]</span> {player.equipment?.weapon ? (<span>{getItemName(player.equipment.weapon)} {player.equipment.weapon.plus ? `+${player.equipment.weapon.plus}` : ''}<span className="text-[10px] ml-1 opacity-70">({(player.equipment.weapon.power||0) + (player.equipment.weapon.plus||0)})</span></span>) : tr('なし')}</div>
+                                <div><span className="font-bold mr-2">[防]</span> {player.equipment?.armor ? (<span>{getItemName(player.equipment.armor)} {player.equipment.armor.plus ? `+${player.equipment.armor.plus}` : ''}<span className="text-[10px] ml-1 opacity-70">({(player.equipment.armor.power||0) + (player.equipment.armor.plus||0)})</span></span>) : tr('なし')}</div>
+                                <div><span className="font-bold mr-2">[投]</span> {player.equipment?.ranged ? `${getItemName(player.equipment.ranged)} (${player.equipment.ranged.count})` : tr('なし')}</div>
+                                <div><span className="font-bold mr-2">[腕]</span> {player.equipment?.accessory ? `${getItemName(player.equipment.accessory)}` : tr('なし')}</div>
                             </div>
                         </div>
                         <div className="border-t-2 pt-2" style={{ borderColor: C1 }}>
-                            <h3 className="font-bold mb-2">状態</h3>
+                            <h3 className="font-bold mb-2">{tr('状態')}</h3>
                             <div className="flex flex-wrap gap-2 text-xs">
-                                {player.status.sleep > 0 && <span className="px-2 rounded" style={{ backgroundColor: C1, color: C3 }}>睡眠</span>}
-                                {player.status.confused > 0 && <span className="px-2 rounded" style={{ backgroundColor: C1, color: C3 }}>混乱</span>}
-                                {player.status.frozen > 0 && <span className="px-2 rounded" style={{ backgroundColor: C1, color: C3 }}>金縛り</span>}
-                                {player.status.blind > 0 && <span className="px-2 rounded" style={{ backgroundColor: C1, color: C3 }}>目潰し</span>}
-                                {player.status.speed > 0 && <span className="px-2 rounded" style={{ backgroundColor: C1, color: C3 }}>倍速</span>}
-                                {player.status.poison && player.status.poison > 0 && <span className="px-2 rounded" style={{ backgroundColor: C1, color: C3 }}>毒</span>}
-                                {player.status.defenseBuff && player.status.defenseBuff > 0 && <span className="px-2 rounded" style={{ backgroundColor: C1, color: C3 }}>防御UP</span>}
-                                {player.status.attackBuff && player.status.attackBuff > 0 && <span className="px-2 rounded" style={{ backgroundColor: C1, color: C3 }}>攻撃UP</span>}
-                                {player.status.trapSight && player.status.trapSight > 0 && <span className="px-2 rounded" style={{ backgroundColor: C1, color: C3 }}>罠見え</span>}
-                                {Object.values(player.status).every((v: number) => v <= 0) && <span>健康</span>}
+                                {player.status.sleep > 0 && <span className="px-2 rounded" style={{ backgroundColor: C1, color: C3 }}>{tr('睡眠')}</span>}
+                                {player.status.confused > 0 && <span className="px-2 rounded" style={{ backgroundColor: C1, color: C3 }}>{tr('混乱')}</span>}
+                                {player.status.frozen > 0 && <span className="px-2 rounded" style={{ backgroundColor: C1, color: C3 }}>{tr('金縛り')}</span>}
+                                {player.status.blind > 0 && <span className="px-2 rounded" style={{ backgroundColor: C1, color: C3 }}>{tr('目潰し')}</span>}
+                                {player.status.speed > 0 && <span className="px-2 rounded" style={{ backgroundColor: C1, color: C3 }}>{tr('倍速')}</span>}
+                                {player.status.poison && player.status.poison > 0 && <span className="px-2 rounded" style={{ backgroundColor: C1, color: C3 }}>{tr('毒')}</span>}
+                                {player.status.defenseBuff && player.status.defenseBuff > 0 && <span className="px-2 rounded" style={{ backgroundColor: C1, color: C3 }}>{tr('防御UP')}</span>}
+                                {player.status.attackBuff && player.status.attackBuff > 0 && <span className="px-2 rounded" style={{ backgroundColor: C1, color: C3 }}>{tr('攻撃UP')}</span>}
+                                {player.status.trapSight && player.status.trapSight > 0 && <span className="px-2 rounded" style={{ backgroundColor: C1, color: C3 }}>{tr('罠見え')}</span>}
+                                {Object.values(player.status).every((v: number) => v <= 0) && <span>{tr('健康')}</span>}
                             </div>
                         </div>
                     </div>
-                    <button onClick={() => setShowStatus(false)} className="mt-6 w-full py-2 font-bold rounded" style={{ backgroundColor: C1, color: C3 }}>閉じる</button>
+                    <button onClick={() => setShowStatus(false)} className="mt-6 w-full py-2 font-bold rounded" style={{ backgroundColor: C1, color: C3 }}>{tr('閉じる')}</button>
                 </div>
             </div>
         )}
@@ -1988,13 +1999,13 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
         {showHelp && (
             <div className="absolute inset-0 z-50 flex items-center justify-center p-4" style={{ backgroundColor: `${C0}F2` }} onClick={() => setShowHelp(false)}>
                 <div className="w-full max-w-md border-4 p-6 shadow-xl overflow-y-auto max-h-[80vh] custom-scrollbar" style={{ backgroundColor: C3, borderColor: C1, color: C0 }} onClick={e => e.stopPropagation()}>
-                    <div className="flex justify-between items-center mb-4 border-b-2 pb-2" style={{ borderColor: C1 }}><h2 className="font-bold text-xl flex items-center"><HelpCircle className="mr-2"/> 遊び方</h2><button onClick={() => setShowHelp(false)}><X size={24}/></button></div>
+                    <div className="flex justify-between items-center mb-4 border-b-2 pb-2" style={{ borderColor: C1 }}><h2 className="font-bold text-xl flex items-center"><HelpCircle className="mr-2"/> {tr('遊び方')}</h2><button onClick={() => setShowHelp(false)}><X size={24}/></button></div>
                     <div className="space-y-4 text-sm">
-                        <section><h3 className="font-bold border-b mb-1" style={{ borderColor: C1 }}>目的</h3><p>地下20階を目指し、校長先生を説得(撃破)してください。<br/>道中で落ちている武器や道具を駆使して生き残りましょう。</p></section>
-                        <section><h3 className="font-bold border-b mb-1" style={{ borderColor: C1 }}>操作方法</h3><ul className="list-disc pl-5"><li><strong>移動:</strong> 十字キー または 画面パッド</li><li><strong>攻撃:</strong> Aボタン または Zキー</li><li><strong>メニュー:</strong> Bボタン または Xキー</li><li><strong>飛び道具:</strong> <Crosshair size={12} className="inline"/>ボタン または Rキー</li><li><strong>早送り:</strong> Aボタン長押し (敵がいない時)</li></ul></section>
-                        <section><h3 className="font-bold border-b mb-1" style={{ borderColor: C1 }}>カードシステム</h3><ul className="list-disc pl-5"><li>コントローラー下のカードをタップして発動します。</li><li>使用するとターンを消費し、新たなカードを引きます。</li><li>カードはフロアに落ちていることもあります。</li><li>ダメージは<strong>(攻撃力 + カード威力) - 敵防御力</strong>で計算されます。</li></ul></section>
+                        <section><h3 className="font-bold border-b mb-1" style={{ borderColor: C1 }}>{tr('目的')}</h3><p>{tr('地下20階を目指し、校長先生を説得(撃破)してください。')}<br/>{tr('道中で落ちている武器や道具を駆使して生き残りましょう。')}</p></section>
+                        <section><h3 className="font-bold border-b mb-1" style={{ borderColor: C1 }}>{tr('操作方法')}</h3><ul className="list-disc pl-5"><li><strong>{tr('移動')}:</strong> {tr('十字キー または 画面パッド')}</li><li><strong>{tr('攻撃')}:</strong> {tr('Aボタン または Zキー')}</li><li><strong>{tr('メニュー')}:</strong> {tr('Bボタン または Xキー')}</li><li><strong>{tr('飛び道具')}:</strong> <Crosshair size={12} className="inline"/>{tr('ボタン または Rキー')}</li><li><strong>{tr('早送り')}:</strong> {tr('Aボタン長押し (敵がいない時)')}</li></ul></section>
+                        <section><h3 className="font-bold border-b mb-1" style={{ borderColor: C1 }}>{tr('カードシステム')}</h3><ul className="list-disc pl-5"><li>{tr('コントローラー下のカードをタップして発動します。')}</li><li>{tr('使用するとターンを消費し、新たなカードを引きます。')}</li><li>{tr('カードはフロアに落ちていることもあります。')}</li><li>{tr('ダメージは(攻撃力 + カード威力) - 敵防御力で計算されます。')}</li></ul></section>
                     </div>
-                    <button onClick={() => setShowHelp(false)} className="mt-6 w-full py-2 font-bold rounded" style={{ backgroundColor: C1, color: C3 }}>閉じる</button>
+                    <button onClick={() => setShowHelp(false)} className="mt-6 w-full py-2 font-bold rounded" style={{ backgroundColor: C1, color: C3 }}>{tr('閉じる')}</button>
                 </div>
             </div>
         )}
@@ -2018,7 +2029,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
         <div className="dungeon-game-panel w-full max-w-md md:max-w-full md:flex-1 flex flex-col gap-2 min-h-0 order-2">
             <div className="w-full aspect-[4/3] md:aspect-auto md:flex-1 relative shrink-0 shadow-lg border-2 max-h-[45vh] md:max-h-full flex flex-col overflow-hidden" style={{ backgroundColor: C3, borderColor: C0 }}>
                 <div className="w-full h-8 flex justify-between items-center px-2 text-[10px] z-10 border-b shrink-0" style={{ backgroundColor: C0, color: C3, borderColor: C1 }}>
-                    <span className="font-bold tracking-widest">{currentTheme.name}</span>
+                    <span className="font-bold tracking-widest">{tr(currentTheme.name)}</span>
                     <div className="flex gap-2">
                         <button onClick={() => setShowMap(!showMap)} className="flex items-center gap-1 hover:text-white border px-1 rounded" style={{ borderColor: C3 }}><MapIcon size={10}/> Map</button>
                         <button onClick={() => setShowStatus(true)} className="flex items-center gap-1 hover:text-white border px-1 rounded" style={{ borderColor: C3 }}><User size={10}/> Sts</button>
@@ -2031,7 +2042,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
                 </div>
                 <div className="relative flex-1 min-h-0 w-full bg-[#111827]">
                     <canvas ref={canvasRef} width={VIEW_W * TILE_SIZE * SCALE} height={VIEW_H * TILE_SIZE * SCALE} className="w-full h-full object-contain pixel-art" style={{ imageRendering: 'pixelated' }} />
-                    {isFastForwarding && (<div className="absolute top-2 right-2 animate-pulse flex items-center rounded px-2" style={{ backgroundColor: `${C0}80`, color: C3 }}><FastForward size={16} className="mr-1"/> 早送り中</div>)}
+                    {isFastForwarding && (<div className="absolute top-2 right-2 animate-pulse flex items-center rounded px-2" style={{ backgroundColor: `${C0}80`, color: C3 }}><FastForward size={16} className="mr-1"/> {tr('早送り中')}</div>)}
                     {showMap && map.length > 0 && (
                         <div className="absolute inset-0 z-20 flex items-center justify-center p-4" style={{ backgroundColor: `${C0}E6` }}>
                             <div className="w-full h-full border grid" style={{ borderColor: C3, gridTemplateColumns: `repeat(${MAP_W}, 1fr)` }}>
@@ -2058,35 +2069,35 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
                 </div>
                 {shopState.active && (
                     <div className="absolute right-0 top-0 bottom-0 w-3/4 border-l-2 z-30 p-2 text-xs flex flex-col" style={{ backgroundColor: C0, borderColor: C3, color: C3 }}>
-                        <div className="flex justify-between items-center border-b mb-2 pb-1" style={{ borderColor: C3 }}><h3 className="font-bold flex items-center"><ShoppingBag size={12} className="mr-1"/> 購買部</h3><button onClick={() => setShopState(prev => ({...prev, active: false}))}><X size={12}/></button></div>
-                        <div className="flex gap-2 mb-2"><button className={`flex-1 py-1 text-center border`} style={{ borderColor: C3, backgroundColor: shopState.mode === 'BUY' ? C3 : 'transparent', color: shopState.mode === 'BUY' ? C0 : C3 }} onClick={() => { setShopState(prev => ({ ...prev, mode: 'BUY' })); setSelectedItemIndex(0); }}>買う</button><button className={`flex-1 py-1 text-center border`} style={{ borderColor: C3, backgroundColor: shopState.mode === 'SELL' ? C3 : 'transparent', color: shopState.mode === 'SELL' ? C0 : C3 }} onClick={() => { setShopState(prev => ({ ...prev, mode: 'SELL' })); setSelectedItemIndex(0); }}>売る</button></div>
+                        <div className="flex justify-between items-center border-b mb-2 pb-1" style={{ borderColor: C3 }}><h3 className="font-bold flex items-center"><ShoppingBag size={12} className="mr-1"/> {tr('購買部')}</h3><button onClick={() => setShopState(prev => ({...prev, active: false}))}><X size={12}/></button></div>
+                        <div className="flex gap-2 mb-2"><button className={`flex-1 py-1 text-center border`} style={{ borderColor: C3, backgroundColor: shopState.mode === 'BUY' ? C3 : 'transparent', color: shopState.mode === 'BUY' ? C0 : C3 }} onClick={() => { setShopState(prev => ({ ...prev, mode: 'BUY' })); setSelectedItemIndex(0); }}>{tr('買う')}</button><button className={`flex-1 py-1 text-center border`} style={{ borderColor: C3, backgroundColor: shopState.mode === 'SELL' ? C3 : 'transparent', color: shopState.mode === 'SELL' ? C0 : C3 }} onClick={() => { setShopState(prev => ({ ...prev, mode: 'SELL' })); setSelectedItemIndex(0); }}>{tr('売る')}</button></div>
                         <div className="flex justify-end mb-2 border-b pb-1" style={{ borderColor: C1 }}><span className="flex items-center"><Coins size={10} className="mr-1"/> {player.gold} G</span></div>
-                        {!shopRemovedThisFloor && (<button className="w-full border mb-2 py-1 flex items-center justify-center gap-2 hover:opacity-80" style={{ borderColor: selectedItemIndex === -1 ? C3 : C1, backgroundColor: selectedItemIndex === -1 ? C2 : 'transparent', color: selectedItemIndex === -1 ? C0 : C3 }} onMouseEnter={() => { lastInputType.current = 'MOUSE'; setSelectedItemIndex(-1); }} onClick={() => handleShopAction(-1)}>{selectedItemIndex === -1 && <span className="mr-1 animate-pulse">▶</span>}<Trash2 size={12} /> カード除外 (100 G)</button>)}
+                        {!shopRemovedThisFloor && (<button className="w-full border mb-2 py-1 flex items-center justify-center gap-2 hover:opacity-80" style={{ borderColor: selectedItemIndex === -1 ? C3 : C1, backgroundColor: selectedItemIndex === -1 ? C2 : 'transparent', color: selectedItemIndex === -1 ? C0 : C3 }} onMouseEnter={() => { lastInputType.current = 'MOUSE'; setSelectedItemIndex(-1); }} onClick={() => handleShopAction(-1)}>{selectedItemIndex === -1 && <span className="mr-1 animate-pulse">▶</span>}<Trash2 size={12} /> {tr('カード除外')} (100 G)</button>)}
                         <div ref={menuListRef} className="flex flex-col gap-1 overflow-y-auto flex-grow custom-scrollbar relative">
-                            {shopState.mode === 'BUY' ? (enemies.find(e => e.id === shopState.merchantId)?.shopItems?.map((item, i) => (<div key={i} className="flex items-center border" style={{ borderColor: selectedItemIndex === i ? C3 : 'transparent', backgroundColor: selectedItemIndex === i ? C2 : 'transparent', color: selectedItemIndex === i ? C0 : C3 }} onMouseEnter={() => { lastInputType.current = 'MOUSE'; setSelectedItemIndex(i); }}><button className="flex-grow text-left px-2 py-1 cursor-pointer flex justify-between items-center" onClick={() => handleShopAction(i)}>{selectedItemIndex === i && <span className="mr-1 animate-pulse">▶</span>}<span>{getItemName(item)}</span><span className="flex items-center gap-1">{item.price} G</span></button><button className="px-2 py-1 border-l flex items-center justify-center hover:opacity-80" style={{ borderColor: C1 }} onClick={(e) => { e.stopPropagation(); setInspectedItem(item); }}><Info size={10} /></button></div>)) || <div className="text-center">売り切れ</div>) : (inventory.map((item, i) => (<div key={i} className="flex items-center border" style={{ borderColor: selectedItemIndex === i ? C3 : 'transparent', backgroundColor: selectedItemIndex === i ? C2 : 'transparent', color: selectedItemIndex === i ? C0 : C3 }} onMouseEnter={() => { lastInputType.current = 'MOUSE'; setSelectedItemIndex(i); }}><button className="flex-grow text-left px-2 py-1 cursor-pointer flex justify-between items-center" onClick={() => handleShopAction(i)}>{selectedItemIndex === i && <span className="mr-1 animate-pulse">▶</span>}<span>{getItemName(item)}</span><span className="flex items-center gap-1">{Math.floor((item.price || (item.value || 100)) / 2)} G</span></button><button className="px-2 py-1 border-l flex items-center justify-center hover:opacity-80" style={{ borderColor: C1 }} onClick={(e) => { e.stopPropagation(); setInspectedItem(item); }}><Info size={10} /></button></div>)))}
-                            {shopState.mode === 'SELL' && inventory.length === 0 && <div className="text-center">持ち物なし</div>}
+                            {shopState.mode === 'BUY' ? (enemies.find(e => e.id === shopState.merchantId)?.shopItems?.map((item, i) => (<div key={i} className="flex items-center border" style={{ borderColor: selectedItemIndex === i ? C3 : 'transparent', backgroundColor: selectedItemIndex === i ? C2 : 'transparent', color: selectedItemIndex === i ? C0 : C3 }} onMouseEnter={() => { lastInputType.current = 'MOUSE'; setSelectedItemIndex(i); }}><button className="flex-grow text-left px-2 py-1 cursor-pointer flex justify-between items-center" onClick={() => handleShopAction(i)}>{selectedItemIndex === i && <span className="mr-1 animate-pulse">▶</span>}<span>{getItemName(item)}</span><span className="flex items-center gap-1">{item.price} G</span></button><button className="px-2 py-1 border-l flex items-center justify-center hover:opacity-80" style={{ borderColor: C1 }} onClick={(e) => { e.stopPropagation(); setInspectedItem(item); }}><Info size={10} /></button></div>)) || <div className="text-center">{tr('売り切れ')}</div>) : (inventory.map((item, i) => (<div key={i} className="flex items-center border" style={{ borderColor: selectedItemIndex === i ? C3 : 'transparent', backgroundColor: selectedItemIndex === i ? C2 : 'transparent', color: selectedItemIndex === i ? C0 : C3 }} onMouseEnter={() => { lastInputType.current = 'MOUSE'; setSelectedItemIndex(i); }}><button className="flex-grow text-left px-2 py-1 cursor-pointer flex justify-between items-center" onClick={() => handleShopAction(i)}>{selectedItemIndex === i && <span className="mr-1 animate-pulse">▶</span>}<span>{getItemName(item)}</span><span className="flex items-center gap-1">{Math.floor((item.price || (item.value || 100)) / 2)} G</span></button><button className="px-2 py-1 border-l flex items-center justify-center hover:opacity-80" style={{ borderColor: C1 }} onClick={(e) => { e.stopPropagation(); setInspectedItem(item); }}><Info size={10} /></button></div>)))}
+                            {shopState.mode === 'SELL' && inventory.length === 0 && <div className="text-center">{tr('持ち物なし')}</div>}
                         </div>
                     </div>
                 )}
                 {menuOpen && (
                     <div className="absolute right-0 top-0 bottom-0 w-3/4 border-l-2 z-30 p-2 text-xs flex flex-col" style={{ backgroundColor: C0, borderColor: C3, color: C3 }}>
-                        <div className="flex justify-between items-center border-b mb-2 pb-1" style={{ borderColor: C3 }}><h3 className="font-bold">{synthState.active ? (synthState.mode === 'BLANK' ? '書き込む内容を選択' : (synthState.step === 'SELECT_BASE' ? (synthState.mode==='CHANGE'?'変化させる物':'ベースを選択') : (synthState.mode==='CHANGE'?'変化':'素材を選択'))) : `MOCHIMONO (${inventory.length}/${MAX_INVENTORY})`}</h3><button onClick={toggleMenu}><X size={12}/></button></div>
+                        <div className="flex justify-between items-center border-b mb-2 pb-1" style={{ borderColor: C3 }}><h3 className="font-bold">{synthState.active ? tr(synthState.mode === 'BLANK' ? '書き込む内容を選択' : (synthState.step === 'SELECT_BASE' ? (synthState.mode==='CHANGE'?'変化させる物':'ベースを選択') : (synthState.mode==='CHANGE'?'変化':'素材を選択'))) : `MOCHIMONO (${inventory.length}/${MAX_INVENTORY})`}</h3><button onClick={toggleMenu}><X size={12}/></button></div>
                         {synthState.mode === 'BLANK' && synthState.step === 'SELECT_EFFECT' ? (
                             <div ref={menuListRef} className="flex flex-col gap-1 overflow-y-auto flex-grow custom-scrollbar relative">
-                                {Array.from(identifiedTypes).filter((t: any) => (t as string).startsWith('SCROLL')).map((type, i) => (<div key={i} className="flex items-center border" style={{ borderColor: blankScrollSelectionIndex === i ? C3 : 'transparent', backgroundColor: blankScrollSelectionIndex === i ? C2 : 'transparent', color: blankScrollSelectionIndex === i ? C0 : C3 }}><button className="flex-grow text-left px-2 py-1 cursor-pointer" onClick={() => handleSynthesisStep()} onMouseEnter={() => { lastInputType.current = 'MOUSE'; setBlankScrollSelectionIndex(i); }}>{blankScrollSelectionIndex === i && <span className="mr-1 animate-pulse">▶</span>}{ITEM_DB[type as string].name}</button></div>))}
-                                {Array.from(identifiedTypes).filter((t: any) => (t as string).startsWith('SCROLL')).length === 0 && <div className="text-red-500">識別済みのノートがありません</div>}
+                                {Array.from(identifiedTypes).filter((t: any) => (t as string).startsWith('SCROLL')).map((type, i) => (<div key={i} className="flex items-center border" style={{ borderColor: blankScrollSelectionIndex === i ? C3 : 'transparent', backgroundColor: blankScrollSelectionIndex === i ? C2 : 'transparent', color: blankScrollSelectionIndex === i ? C0 : C3 }}><button className="flex-grow text-left px-2 py-1 cursor-pointer" onClick={() => handleSynthesisStep()} onMouseEnter={() => { lastInputType.current = 'MOUSE'; setBlankScrollSelectionIndex(i); }}>{blankScrollSelectionIndex === i && <span className="mr-1 animate-pulse">▶</span>}{tr(ITEM_DB[type as string].name)}</button></div>))}
+                                {Array.from(identifiedTypes).filter((t: any) => (t as string).startsWith('SCROLL')).length === 0 && <div className="text-red-500">{tr('識別済みのノートがありません')}</div>}
                             </div>
                         ) : (
                             <>
                                 {!synthState.active && (
                                     <div className="mb-2 border-b pb-2" style={{ borderColor: C1 }}>
-                                        <div className="mb-1" style={{ color: C2 }}>装備中:</div>
+                                        <div className="mb-1" style={{ color: C2 }}>{tr('装備中')}:</div>
                                         {(['weapon', 'armor', 'ranged', 'accessory'] as const).map(slot => {
                                             const equippedItem = player.equipment?.[slot];
                                             if (!equippedItem) return null;
                                             const slotLabel = { weapon: '武', armor: '防', ranged: '投', accessory: '腕' }[slot];
                                             const selected = selectedEquipmentSlot === slot;
-                                            return <button key={slot} type="button" className="block w-full cursor-pointer px-2 py-1 text-left" style={{ backgroundColor: selected ? C2 : 'transparent', color: selected ? C0 : C3, border: `1px solid ${selected ? C3 : 'transparent'}` }} onMouseEnter={() => { setSelectedEquipmentSlot(slot); setSelectedItemActionIndex(0); }} onClick={() => handleUnequip(slot)}>{selected && <span className="mr-1 animate-pulse">▶</span>}[{slotLabel}] {getItemName(equippedItem)} <span className="float-right text-[9px]">外す</span></button>;
+                                            return <button key={slot} type="button" className="block w-full cursor-pointer px-2 py-1 text-left" style={{ backgroundColor: selected ? C2 : 'transparent', color: selected ? C0 : C3, border: `1px solid ${selected ? C3 : 'transparent'}` }} onMouseEnter={() => { setSelectedEquipmentSlot(slot); setSelectedItemActionIndex(0); }} onClick={() => handleUnequip(slot)}>{selected && <span className="mr-1 animate-pulse">▶</span>}[{slotLabel}] {getItemName(equippedItem)} <span className="float-right text-[9px]">{tr('外す')}</span></button>;
                                         })}
                                     </div>
                                 )}
@@ -2115,7 +2126,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
                         )}
                     </div>
                 )}
-                {gameClear && (<div className="absolute inset-0 flex flex-col items-center justify-center z-40 p-4 text-center" style={{ backgroundColor: `${C0}F2`, color: C3 }}><Award size={48} className="mb-4" style={{ color: C2 }}/><h2 className="text-2xl font-bold mb-4">GRADUATION!</h2><p className="mb-2">ついに校長を説得した！</p><p className="mb-8">君は伝説の小学生となった。</p><div className="flex flex-col gap-4 w-full"><button onClick={startEndlessMode} className="border-2 px-4 py-3 animate-pulse font-bold" style={{ borderColor: C3, color: C3, backgroundColor: 'transparent' }}>中学生編へ (エンドレス)</button><button onClick={handleQuit} className="border-2 px-4 py-2 text-sm" style={{ borderColor: C1, color: C3 }}>タイトルへ戻る</button></div></div>)}
+                {gameClear && (<div className="absolute inset-0 flex flex-col items-center justify-center z-40 p-4 text-center" style={{ backgroundColor: `${C0}F2`, color: C3 }}><Award size={48} className="mb-4" style={{ color: C2 }}/><h2 className="text-2xl font-bold mb-4">GRADUATION!</h2><p className="mb-2">{tr('ついに校長を説得した！')}</p><p className="mb-8">{tr('君は伝説の小学生となった。')}</p><div className="flex flex-col gap-4 w-full"><button onClick={startEndlessMode} className="border-2 px-4 py-3 animate-pulse font-bold" style={{ borderColor: C3, color: C3, backgroundColor: 'transparent' }}>{tr('中学生編へ (エンドレス)')}</button><button onClick={handleQuit} className="border-2 px-4 py-2 text-sm" style={{ borderColor: C1, color: C3 }}>{tr('タイトルへ戻る')}</button></div></div>)}
                 {gameOver && (
                     <div className="absolute inset-0 flex flex-col items-center justify-center z-40 p-4 text-center" style={{ backgroundColor: `${C0}E6`, color: C3 }}>
                         <Skull size={48} className="mb-2" style={{ color: C1 }}/>
@@ -2123,7 +2134,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
                         <p className="text-[10px] mb-4 opacity-70">Floor: {floor} / Level: {level}</p>
                         
                         <div className="bg-black/60 border-2 border-red-500 rounded p-3 w-full max-w-xs mb-4 flex flex-col">
-                            <h3 className="text-red-400 font-bold text-xs mb-2">引き継ぐアイテムを選択</h3>
+                            <h3 className="text-red-400 font-bold text-xs mb-2">{tr('引き継ぐアイテムを選択')}</h3>
                             <div className="flex-grow overflow-y-auto max-h-48 custom-scrollbar space-y-1 pr-1">
                                 {allPossessions.map((item, idx) => (
                                     <div 
@@ -2137,17 +2148,17 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
                                             {item.category === 'STAFF' && <Umbrella size={14} />}
                                             {item.category === 'RANGED' && <Target size={14} />}
                                             {item.category === 'ACCESSORY' && <Circle size={14} />}
-                                            <span className="truncate max-w-[120px]">{item.name} {item.plus ? `+${item.plus}` : ''}</span>
+                                            <span className="truncate max-w-[120px]">{tr(item.name)} {item.plus ? `+${item.plus}` : ''}</span>
                                         </div>
-                                        {inventory.every(invItem => invItem.id !== item.id) && <span className="text-[8px] bg-blue-900 px-1 rounded">装備中</span>}
+                                        {inventory.every(invItem => invItem.id !== item.id) && <span className="text-[8px] bg-blue-900 px-1 rounded">{tr('装備中')}</span>}
                                     </div>
                                 ))}
-                                {allPossessions.length === 0 && <div className="text-[10px] text-gray-600 py-4 italic">所持品なし</div>}
+                                {allPossessions.length === 0 && <div className="text-[10px] text-gray-600 py-4 italic">{tr('所持品なし')}</div>}
                             </div>
                         </div>
 
                         <button onClick={handleRestart} className="px-6 py-2 bg-red-600 hover:bg-red-500 text-white font-bold rounded border-2 border-white animate-pulse flex items-center justify-center gap-2 w-full max-w-xs">
-                            <RotateCcw size={16}/> {inheritItemIdx !== null ? "アイテムを持って再挑戦" : "再挑戦"}
+                            <RotateCcw size={16}/> {inheritItemIdx !== null ? tr('アイテムを持って再挑戦') : tr('再挑戦')}
                         </button>
                         <button onClick={handleQuit} className="mt-4 text-xs hover:underline opacity-50">EXIT</button>
                     </div>
@@ -2178,7 +2189,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
                     <button key={card.id} className="dungeon-landscape-card w-full bg-[#2a2a2a] border-2 border-[#555] rounded-lg flex items-center gap-2 text-white p-1 hover:bg-[#333] hover:border-white transition-all shadow" onClick={() => handleCardUse(i)}>
                         <div className={`dungeon-landscape-card-type w-full text-[4px] font-bold px-0.5 rounded-t mb-0.5 text-center ${card.type === 'ATTACK' ? 'bg-red-900' : card.type === 'DEFENSE' ? 'bg-blue-900' : 'bg-green-900'}`}>{card.type}</div>
                         <DungeonCardSprite templateId={card.templateId} className="dungeon-landscape-card-art w-9 h-9 rounded border border-current" />
-                        <div className="dungeon-landscape-card-name flex flex-col items-start"><span className="text-[10px] font-bold leading-tight">{card.name}</span><span className="text-[7px] text-gray-500 uppercase">{card.type}</span></div>
+                        <div className="dungeon-landscape-card-name flex flex-col items-start"><span className="text-[10px] font-bold leading-tight">{tr(card.name)}</span><span className="text-[7px] text-gray-500 uppercase">{card.type}</span></div>
                     </button>
                 ))) : (<div className="text-gray-600 text-xs text-center animate-pulse">Wait...</div>)}
             </div>
@@ -2206,7 +2217,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
                 <div className="flex flex-col items-center group"><button className="w-14 h-14 bg-[#ff0000] rounded-full shadow-[0_4px_0_#8b0000] active:shadow-none active:translate-y-1 transition-all flex items-center justify-center text-[#ffaaaa] font-bold border-2 border-[#cc0000]" onMouseDown={() => handlePressStart()} onMouseUp={(e) => handlePressEnd(e)} onMouseLeave={(e) => handlePressEnd(e)} onTouchStart={(e) => { e.preventDefault(); handlePressStart(); }} onTouchEnd={(e) => { e.preventDefault(); handlePressEnd(e); }}>A</button><span className="text-[#666] text-xs font-bold mt-1">ACT</span></div>
             </div>
             <div className="absolute bottom-1 right-1 left-1 h-14 flex items-end justify-end gap-1 pointer-events-none pr-1">
-                {dungeonHand.map((card, i) => (<button key={card.id} className="w-10 h-14 bg-[#2a2a2a] border border-[#555] rounded-md flex flex-col items-center justify-start text-white relative shadow p-0.5 pointer-events-auto" onClick={() => handleCardUse(i)}><div className={`w-full text-[4px] font-bold px-0.5 rounded-t mb-0.5 text-center ${card.type === 'ATTACK' ? 'bg-red-900' : card.type === 'DEFENSE' ? 'bg-blue-900' : 'bg-green-900'}`}>{card.type}</div><DungeonCardSprite templateId={card.templateId} className="w-7 h-7 rounded-sm" /><div className="text-[6px] font-bold text-center leading-none mt-0.5">{card.name}</div></button>))}
+                {dungeonHand.map((card, i) => (<button key={card.id} className="w-10 h-14 bg-[#2a2a2a] border border-[#555] rounded-md flex flex-col items-center justify-start text-white relative shadow p-0.5 pointer-events-auto" onClick={() => handleCardUse(i)}><div className={`w-full text-[4px] font-bold px-0.5 rounded-t mb-0.5 text-center ${card.type === 'ATTACK' ? 'bg-red-900' : card.type === 'DEFENSE' ? 'bg-blue-900' : 'bg-green-900'}`}>{card.type}</div><DungeonCardSprite templateId={card.templateId} className="w-7 h-7 rounded-sm" /><div className="text-[6px] font-bold text-center leading-none mt-0.5">{tr(card.name)}</div></button>))}
             </div>
         </div>
     </div>

@@ -7,6 +7,7 @@ import { storageService } from '../services/storageService';
 import { AnswerMode, AssignmentAnswerResult, AssignmentPayload, GameMode, LanguageMode, MiniGameDebugPreview } from '../types';
 import MiniGameProblemChallenge from './MiniGameProblemChallenge';
 import { assetUrl } from '../utils/assetPaths';
+import { trans } from '../utils/textUtils';
 
 // --- CONSTANTS ---
 const CANVAS_WIDTH = 800;
@@ -164,8 +165,9 @@ const GoHomeDash: React.FC<{
     answerMode?: AnswerMode;
     assignment?: AssignmentPayload | null;
     onAnswerResult?: (result: AssignmentAnswerResult) => void;
+    languageMode?: LanguageMode;
     debugPreview?: MiniGameDebugPreview;
-}> = ({ onBack, problemMode = GameMode.MIXED, problemModePool, answerMode = 'CHOICE', assignment, onAnswerResult, debugPreview }) => {
+}> = ({ onBack, problemMode = GameMode.MIXED, problemModePool, answerMode = 'CHOICE', assignment, onAnswerResult, languageMode = 'JAPANESE', debugPreview }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const guideCanvasRef = useRef<HTMLCanvasElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
@@ -245,7 +247,7 @@ const GoHomeDash: React.FC<{
         };
     }, []);
 
-    const [languageMode] = useState<LanguageMode>(() => storageService.getLanguageMode() || 'JAPANESE');
+    const t = (text: string) => trans(text, languageMode);
     
     const [score, setScore] = useState(0);
     const [level, setLevel] = useState(1);
@@ -1205,23 +1207,23 @@ const GoHomeDash: React.FC<{
 
             <div className="mt-4 flex flex-col items-center gap-2 pointer-events-none opacity-50 text-[10px] uppercase font-black tracking-widest">
                 <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-1"><Move size={12}/>クリックかタップでジャンプ</div>
+                    <div className="flex items-center gap-1"><Move size={12}/>{t('クリックかタップでジャンプ')}</div>
                 </div>
             </div>
 
             {gameState === 'START' && (
                 <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-slate-900/95 animate-in fade-in backdrop-blur-md">
-                    <h2 className="text-6xl md:text-7xl font-black text-orange-500 tracking-tighter italic mb-4 drop-shadow-[4px_4px_0_#000]">帰宅ダッシュ！</h2>
+                    <h2 className="text-6xl md:text-7xl font-black text-orange-500 tracking-tighter italic mb-4 drop-shadow-[4px_4px_0_#000]">{t('帰宅ダッシュ！')}</h2>
                     <div className="w-16 h-1 bg-orange-500 mb-8 rounded-full"></div>
-                    <p className="text-slate-400 mb-10 text-center px-8 text-sm md:text-base leading-relaxed">障害物をよけて帰宅せよ！<br/>ミサイルやスキルを駆使してゴールを目指せ。</p>
-                    <button onClick={(e) => { e.stopPropagation(); initGame(); audioService.playSound('select'); }} className="bg-white text-black px-12 py-5 rounded-3xl font-black text-2xl hover:bg-orange-400 hover:text-white transition-all transform hover:scale-110 shadow-[0_8px_0_#ccc] flex items-center gap-4 active:translate-y-1 active:shadow-none"><Play fill="currentColor" size={32} /> START DASH</button>
-                    <button onClick={(e) => { e.stopPropagation(); onBack(); }} className="mt-12 text-slate-500 hover:text-white flex items-center gap-2 font-bold transition-colors"><ArrowLeft size={20}/> 職員室に戻る</button>
+                    <p className="text-slate-400 mb-10 text-center px-8 text-sm md:text-base leading-relaxed">{t('障害物をよけて帰宅せよ！')}<br/>{t('ミサイルやスキルを駆使してゴールを目指せ。')}</p>
+                    <button onClick={(e) => { e.stopPropagation(); initGame(); audioService.playSound('select'); }} className="bg-white text-black px-12 py-5 rounded-3xl font-black text-2xl hover:bg-orange-400 hover:text-white transition-all transform hover:scale-110 shadow-[0_8px_0_#ccc] flex items-center gap-4 active:translate-y-1 active:shadow-none"><Play fill="currentColor" size={32} /> {t('START DASH')}</button>
+                    <button onClick={(e) => { e.stopPropagation(); onBack(); }} className="mt-12 text-slate-500 hover:text-white flex items-center gap-2 font-bold transition-colors"><ArrowLeft size={20}/> {t('職員室に戻る')}</button>
                 </div>
             )}
 
             {gameState === 'CHALLENGE' && (
                 <div className="absolute inset-0 z-[100] w-full h-full pointer-events-auto">
-                    <MiniGameProblemChallenge mode={problemMode} modePool={problemModePool} answerMode={answerMode} assignment={assignment} onAnswerResult={onAnswerResult} onComplete={handleChallengeComplete} isChallenge={false} streak={0} rewardHint="全問正解でHP+1" />
+                    <MiniGameProblemChallenge mode={problemMode} modePool={problemModePool} answerMode={answerMode} assignment={assignment} onAnswerResult={onAnswerResult} onComplete={handleChallengeComplete} isChallenge={false} streak={0} rewardHint={t('全問正解でHP+1')} languageMode={languageMode} />
                 </div>
             )}
 
@@ -1232,7 +1234,7 @@ const GoHomeDash: React.FC<{
                         {upgradeOptions.map(card => (
                             <div key={card.id} onClick={(e) => { e.stopPropagation(); selectUpgrade(card); }} className="bg-slate-800 border-2 border-slate-600 rounded-3xl p-4 flex items-center text-left transition-all transform hover:scale-102 hover:border-yellow-400 shadow-xl group">
                                 <div className="p-3 bg-black/40 rounded-2xl mr-4 border border-slate-700 group-hover:border-yellow-500/50">{getSubjectIcon(card.iconType)}</div>
-                                <div className="flex-grow"><h3 className="text-lg font-black text-white leading-tight">{card.name}</h3><p className="text-[10px] text-slate-400 font-bold leading-tight mt-1">{card.description}</p></div>
+                                <div className="flex-grow"><h3 className="text-lg font-black text-white leading-tight">{t(card.name)}</h3><p className="text-[10px] text-slate-400 font-bold leading-tight mt-1">{t(card.description)}</p></div>
                                 <ChevronRight size={20} className="text-slate-600 group-hover:text-yellow-400 transition-colors ml-2"/>
                             </div>
                         ))}

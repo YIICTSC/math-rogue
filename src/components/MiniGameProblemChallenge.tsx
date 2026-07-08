@@ -1,5 +1,5 @@
 import React from 'react';
-import { AnswerMode, AssignmentAnswerResult, AssignmentPayload, GameMode, GameScreen } from '../types';
+import { AnswerMode, AssignmentAnswerResult, AssignmentPayload, GameMode, GameScreen, LanguageMode } from '../types';
 import { getChallengeScreenForMode } from '../subjectConfig';
 import MathChallengeScreen from './MathChallengeScreen';
 import KanjiChallengeScreen from './KanjiChallengeScreen';
@@ -16,6 +16,7 @@ interface MiniGameProblemChallengeProps {
   isChallenge?: boolean;
   streak?: number;
   rewardHint?: string;
+  languageMode?: LanguageMode;
   assignment?: AssignmentPayload | null;
   onAnswerResult?: (result: AssignmentAnswerResult) => void;
 }
@@ -28,6 +29,7 @@ const MiniGameProblemChallenge: React.FC<MiniGameProblemChallengeProps> = ({
   isChallenge = false,
   streak = 0,
   rewardHint,
+  languageMode = storageService.getLanguageMode() ?? 'JAPANESE',
   assignment: assignmentOverride,
   onAnswerResult,
 }) => {
@@ -72,11 +74,11 @@ const MiniGameProblemChallenge: React.FC<MiniGameProblemChallengeProps> = ({
   };
 
   if (challengeScreen === GameScreen.KANJI_CHALLENGE) {
-    return <KanjiChallengeScreen mode={effectiveMode} answerMode={effectiveAnswerMode} onComplete={onComplete} isChallenge={isChallenge} streak={streak} rewardHint={rewardHint} onAnswerResult={handleAnswerResult} />;
+    return <KanjiChallengeScreen mode={effectiveMode} answerMode={effectiveAnswerMode} onComplete={onComplete} isChallenge={isChallenge} streak={streak} rewardHint={rewardHint} languageMode={languageMode} onAnswerResult={handleAnswerResult} />;
   }
 
   if (challengeScreen === GameScreen.ENGLISH_CHALLENGE) {
-    return <EnglishChallengeScreen mode={effectiveMode} onComplete={onComplete} isChallenge={isChallenge} streak={streak} rewardHint={rewardHint} onAnswerResult={handleAnswerResult} />;
+    return <EnglishChallengeScreen mode={effectiveMode} onComplete={onComplete} isChallenge={isChallenge} streak={streak} rewardHint={rewardHint} languageMode={languageMode} onAnswerResult={handleAnswerResult} />;
   }
 
   if (challengeScreen === GameScreen.GENERAL_CHALLENGE) {
@@ -89,13 +91,14 @@ const MiniGameProblemChallenge: React.FC<MiniGameProblemChallengeProps> = ({
         isChallenge={isChallenge}
         streak={streak}
         rewardHint={rewardHint}
+        languageMode={languageMode}
         onAnswerResult={handleAnswerResult}
         customProblems={effectiveCustomProblems}
       />
     );
   }
 
-  return <MathChallengeScreen mode={effectiveMode} answerMode={effectiveAnswerMode} onComplete={onComplete} isChallenge={isChallenge} streak={streak} rewardHint={rewardHint} onAnswerResult={handleAnswerResult} />;
+  return <MathChallengeScreen mode={effectiveMode} answerMode={effectiveAnswerMode} onComplete={onComplete} isChallenge={isChallenge} streak={streak} rewardHint={rewardHint} languageMode={languageMode} onAnswerResult={handleAnswerResult} />;
 };
 
 export default MiniGameProblemChallenge;

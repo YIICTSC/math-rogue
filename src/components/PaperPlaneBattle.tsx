@@ -4,7 +4,8 @@ import { ArrowLeft, Send, Wind, Trophy, Zap, Shield, Move, RefreshCw, Layers, Cr
 import { audioService } from '../services/audioService';
 import { storageService, PaperPlaneProgress } from '../services/storageService';
 import { assetUrl } from '../utils/assetPaths';
-import { MiniGameDebugPreview } from '../types';
+import { LanguageMode, MiniGameDebugPreview } from '../types';
+import { trans } from '../utils/textUtils';
 
 // --- TYPES & CONSTANTS ---
 
@@ -1455,19 +1456,21 @@ const PaperPlaneSceneBackdrop: React.FC<{ sprite: PaperPlaneSheetSprite; alpha?:
     />
 );
 
-const ShipPartView: React.FC<{ 
-    part: ShipPart, 
-    onClick?: () => void, 
+const ShipPartView: React.FC<{
+    part: ShipPart,
+    onClick?: () => void,
     onLongPress?: (part: ShipPart) => void,
-    isEnemy?: boolean, 
+    languageMode?: LanguageMode,
+    isEnemy?: boolean,
     highlight?: boolean,
     pendingReplace?: boolean,
     showPower?: boolean,
     bonusPower?: number,
     evalContext?: PartEvalContext
-}> = ({ part, onClick, onLongPress, isEnemy, highlight, pendingReplace, showPower = true, bonusPower = 0, evalContext }) => {
-    
+}> = ({ part, onClick, onLongPress, languageMode = 'JAPANESE', isEnemy, highlight, pendingReplace, showPower = true, bonusPower = 0, evalContext }) => {
+
     const longPressTimer = useRef<any>(null);
+    const t = (text: string) => trans(text, languageMode);
 
     const handleTouchStart = () => {
         longPressTimer.current = setTimeout(() => {
@@ -1577,7 +1580,7 @@ const ShipPartView: React.FC<{
         >
             <PaperPlaneSheetImage
                 sprite={partSprite}
-                title={part.name}
+                title={t(part.name)}
                 className={`absolute inset-1 bg-contain opacity-75 ${isEnemy ? '' : 'scale-x-[-1]'}`}
             />
             <div className="relative z-10 flex justify-between items-center">
@@ -1618,7 +1621,7 @@ const ShipPartView: React.FC<{
                 })}
             </div>
             
-            <div className="relative z-10 text-[8px] text-center text-gray-200 truncate w-full mt-auto drop-shadow">{part.name}</div>
+            <div className="relative z-10 text-[8px] text-center text-gray-200 truncate w-full mt-auto drop-shadow">{t(part.name)}</div>
         </div>
     );
 };
@@ -1724,7 +1727,8 @@ const loadProgress = () => {
     return storageService.loadPaperPlaneProgress();
 };
 
-const PaperPlaneBattle: React.FC<{ onBack: () => void; debugPreview?: MiniGameDebugPreview }> = ({ onBack, debugPreview }) => {
+const PaperPlaneBattle: React.FC<{ onBack: () => void; languageMode?: LanguageMode; debugPreview?: MiniGameDebugPreview }> = ({ onBack, languageMode = 'JAPANESE', debugPreview }) => {
+    const t = (text: string) => trans(text, languageMode);
     const savedData = loadInitialState();
     const isDebugPaperPlaneUi = Boolean(debugPreview?.startsWith('PAPER_'));
     const debugPlayer = isDebugPaperPlaneUi ? createDebugPaperPlanePlayer() : null;
@@ -3516,9 +3520,10 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; debugPreview?: MiniGameDe
                         <div className="flex gap-1 w-full justify-end">
                             {partsToRender.map((part, i) => (
                                 <div key={part.id} className="w-1/3 max-w-[80px]">
-                                    <ShipPartView 
-                                        part={part} 
-                                        onClick={() => handlePartClick((pRelIdx * 3) + i)} 
+                                    <ShipPartView
+                                        part={part}
+                                        languageMode={languageMode}
+                                        onClick={() => handlePartClick((pRelIdx * 3) + i)}
                                         onLongPress={(p) => setTooltipPart(p)}
                                         highlight={!!selectedCardId}
                                         pendingReplace={!!pendingPart}
@@ -3545,8 +3550,9 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; debugPreview?: MiniGameDe
                                 
                                 return (
                                     <div key={part.id} className="w-1/3 max-w-[80px] opacity-90">
-                                        <ShipPartView 
-                                            part={part} 
+                                        <ShipPartView
+                                            part={part}
+                                            languageMode={languageMode}
                                             isEnemy={true}
                                             showPower={true} 
                                             evalContext={{ row: eRelIdx, col: i, parts: enemy.parts, turn, fuel: enemy.fuel }}
@@ -3576,14 +3582,14 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; debugPreview?: MiniGameDe
                      <button onClick={onBack} className="text-gray-400 hover:text-white mr-2 md:mr-4"><ArrowLeft size={20}/></button>
                      <h2 className="text-lg md:text-2xl font-bold text-cyan-400">MISSION BRIEFING</h2>
                      <div className="ml-auto text-[10px] md:text-sm bg-indigo-900 px-2 md:px-3 py-1 rounded-full border border-indigo-500 flex items-center">
-                         <Star size={14} className="mr-1 text-yellow-400"/> ランク: {progress.rank}
+                         <Star size={14} className="mr-1 text-yellow-400"/> {t('ランク')}: {progress.rank}
                      </div>
                 </div>
 
                 <div className="paper-plane-setup-tabs relative z-10 flex justify-center mb-3 md:mb-8 gap-2 md:gap-4 border-b border-gray-700 pb-1 md:pb-2">
-                     <button onClick={() => setSetupStep('SHIP')} className={`px-3 md:px-4 py-1.5 md:py-2 rounded-t-lg font-bold text-xs md:text-base transition-colors ${setupStep==='SHIP'?'bg-cyan-700 text-white':'bg-slate-800 text-gray-500'}`}>機体</button>
-                     <button onClick={() => setSetupStep('PILOT')} className={`px-3 md:px-4 py-1.5 md:py-2 rounded-t-lg font-bold text-xs md:text-base transition-colors ${setupStep==='PILOT'?'bg-cyan-700 text-white':'bg-slate-800 text-gray-500'}`}>パイロット</button>
-                     <button onClick={() => setSetupStep('MISSION')} className={`px-3 md:px-4 py-1.5 md:py-2 rounded-t-lg font-bold text-xs md:text-base transition-colors ${setupStep==='MISSION'?'bg-cyan-700 text-white':'bg-slate-800 text-gray-500'}`}>任務</button>
+                     <button onClick={() => setSetupStep('SHIP')} className={`px-3 md:px-4 py-1.5 md:py-2 rounded-t-lg font-bold text-xs md:text-base transition-colors ${setupStep==='SHIP'?'bg-cyan-700 text-white':'bg-slate-800 text-gray-500'}`}>{t('機体')}</button>
+                     <button onClick={() => setSetupStep('PILOT')} className={`px-3 md:px-4 py-1.5 md:py-2 rounded-t-lg font-bold text-xs md:text-base transition-colors ${setupStep==='PILOT'?'bg-cyan-700 text-white':'bg-slate-800 text-gray-500'}`}>{t('パイロット')}</button>
+                     <button onClick={() => setSetupStep('MISSION')} className={`px-3 md:px-4 py-1.5 md:py-2 rounded-t-lg font-bold text-xs md:text-base transition-colors ${setupStep==='MISSION'?'bg-cyan-700 text-white':'bg-slate-800 text-gray-500'}`}>{t('任務')}</button>
                 </div>
 
                 <div className="paper-plane-setup-content relative z-10 flex-1 min-h-0 max-w-4xl mx-auto w-full">
@@ -3601,18 +3607,18 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; debugPreview?: MiniGameDe
                                              <PaperPlaneSheetImage sprite={getPaperPlaneShipSprite(ship.id)} title={ship.name} className="paper-plane-ship-art absolute bg-no-repeat" />
                                              {!isUnlocked && <Lock size={24} className="absolute text-gray-300 md:w-8 md:h-8"/>}
                                          </div>
-                                         <h3 className="text-[11px] md:text-xl font-bold mb-1 md:mb-2 leading-tight text-center">{ship.name}</h3>
-                                         <p className="hidden md:block text-sm text-gray-400 text-center mb-4 min-h-[3em]">{ship.description}</p>
+                                         <h3 className="text-[11px] md:text-xl font-bold mb-1 md:mb-2 leading-tight text-center">{t(ship.name)}</h3>
+                                         <p className="hidden md:block text-sm text-gray-400 text-center mb-4 min-h-[3em]">{t(ship.description)}</p>
                                          {!isUnlocked ? (
-                                             <div className="text-red-400 text-[9px] md:text-xs font-bold text-center">ランク {ship.unlockRank}</div>
+                                             <div className="text-red-400 text-[9px] md:text-xs font-bold text-center">{t('ランク')} {ship.unlockRank}</div>
                                          ) : (
-                                             <div className="text-green-400 text-[9px] md:text-xs font-bold">選択可能</div>
+                                             <div className="text-green-400 text-[9px] md:text-xs font-bold">{t('選択可能')}</div>
                                          )}
                                      </div>
                                  )
                              })}
                              <div className="paper-plane-setup-next col-span-full text-center mt-4">
-                                <button onClick={() => setSetupStep('PILOT')} className="bg-cyan-600 hover:bg-cyan-500 px-10 md:px-12 py-2 md:py-3 rounded-full font-bold text-base md:text-lg shadow-lg animate-pulse">次へ</button>
+                                <button onClick={() => setSetupStep('PILOT')} className="bg-cyan-600 hover:bg-cyan-500 px-10 md:px-12 py-2 md:py-3 rounded-full font-bold text-base md:text-lg shadow-lg animate-pulse">{t('次へ')}</button>
                              </div>
                          </div>
                     )}
@@ -3620,7 +3626,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; debugPreview?: MiniGameDe
                     {setupStep === 'PILOT' && (
                         <div className="paper-plane-pilot-step flex flex-col items-center w-full max-w-4xl mx-auto">
                             <div className="flex justify-between w-full mb-2 md:mb-4 px-3 md:px-4 bg-slate-800 p-1.5 md:p-2 rounded">
-                                <span className="text-xs md:text-sm text-gray-400">現在のリロール回数</span>
+                                <span className="text-xs md:text-sm text-gray-400">{t('現在のリロール回数')}</span>
                                 <span className="font-bold text-yellow-400 flex items-center text-xs md:text-base"><RefreshCw size={14} className="mr-1"/> {progress.rerollCount}</span>
                             </div>
 
@@ -3637,7 +3643,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; debugPreview?: MiniGameDe
                                             <button 
                                                 onClick={(e) => { e.stopPropagation(); setPinnedPilotIndex(pinnedPilotIndex === i ? null : i); }}
                                                 className={`p-1 md:p-1.5 rounded-full ${pinnedPilotIndex === i ? 'bg-yellow-500 text-black shadow-lg' : 'bg-slate-700 text-gray-400 hover:text-white hover:bg-slate-600'}`}
-                                                title="固定する"
+                                                title={t('固定する')}
                                             >
                                                 <User size={12} className="md:w-3.5 md:h-3.5"/>
                                             </button>
@@ -3647,20 +3653,20 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; debugPreview?: MiniGameDe
                                             <div className="paper-plane-pilot-art w-14 h-14 md:w-20 md:h-20 mb-1 md:mb-2 rounded-lg bg-black/30 border border-cyan-500/20 overflow-hidden">
                                                  <img src={getPaperPlanePilotImage(pilot.id)} alt="" className="w-full h-full object-contain [image-rendering:pixelated]" />
                                             </div>
-                                            <div className="paper-plane-pilot-name font-bold text-[10px] md:text-lg leading-tight text-center pr-4 md:pr-0">{pilot.name}</div>
+                                            <div className="paper-plane-pilot-name font-bold text-[10px] md:text-lg leading-tight text-center pr-4 md:pr-0">{t(pilot.name)}</div>
                                         </div>
 
                                         <div className="paper-plane-pilot-main-trait text-[9px] md:text-sm bg-slate-800 border border-yellow-500/30 p-1.5 md:p-3 rounded mt-auto w-full min-h-[64px] md:min-h-[92px] flex flex-col justify-start">
-                                            <div className="font-bold text-yellow-400 mb-1 flex items-center leading-tight"><Zap size={12} className="mr-1 shrink-0 md:w-3.5 md:h-3.5"/> {pilot.intrinsicTalent.name}</div>
-                                            <div className="text-gray-300 leading-tight md:leading-relaxed font-bold">{pilot.intrinsicTalent.description}</div>
+                                            <div className="font-bold text-yellow-400 mb-1 flex items-center leading-tight"><Zap size={12} className="mr-1 shrink-0 md:w-3.5 md:h-3.5"/> {t(pilot.intrinsicTalent.name)}</div>
+                                            <div className="text-gray-300 leading-tight md:leading-relaxed font-bold">{t(pilot.intrinsicTalent.description)}</div>
                                         </div>
                                         
                                         {pilot.randomTalents && pilot.randomTalents.length > 0 && (
                                             <div className="paper-plane-pilot-random-trait text-[8px] md:text-xs bg-indigo-900/40 p-1.5 md:p-2 rounded mt-1 md:mt-2 w-full leading-tight">
-                                                <div className="font-bold text-indigo-300 mb-0.5 md:mb-1 flex items-center"><Star size={10} className="mr-1 shrink-0 md:w-3 md:h-3"/> ランダム特性</div>
+                                                <div className="font-bold text-indigo-300 mb-0.5 md:mb-1 flex items-center"><Star size={10} className="mr-1 shrink-0 md:w-3 md:h-3"/> {t('ランダム特性')}</div>
                                                 {pilot.randomTalents.map((t, idx) => (
                                                     <div key={idx} className="mb-0.5 md:mb-1 last:mb-0">
-                                                        <span className="text-white font-bold">{t.name}</span>: <span className="text-gray-400">{t.description}</span>
+                                                        <span className="text-white font-bold">{trans(t.name, languageMode)}</span>: <span className="text-gray-400">{trans(t.description, languageMode)}</span>
                                                     </div>
                                                 ))}
                                             </div>
@@ -3675,14 +3681,14 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; debugPreview?: MiniGameDe
                                     disabled={progress.rerollCount <= 0}
                                     className={`bg-gray-700 hover:bg-gray-600 text-white px-4 md:px-8 py-2 md:py-3 rounded-lg font-bold flex items-center text-sm md:text-base ${progress.rerollCount <= 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
                                 >
-                                    <RefreshCw className="mr-2"/> 呼び直す
+                                    <RefreshCw className="mr-2"/> {t('呼び直す')}
                                 </button>
                                 <button 
                                     onClick={() => setSetupStep('MISSION')} 
                                     disabled={selectedPilotIndex === -1}
                                     className={`bg-cyan-600 hover:bg-cyan-500 px-8 md:px-12 py-2 md:py-3 rounded-lg font-bold text-base md:text-lg shadow-lg ${selectedPilotIndex === -1 ? 'opacity-50 cursor-not-allowed' : 'animate-pulse'}`}
                                 >
-                                    次へ
+                                    {t('次へ')}
                                 </button>
                             </div>
                         </div>
@@ -3691,7 +3697,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; debugPreview?: MiniGameDe
                     {setupStep === 'MISSION' && (
                         <div className="paper-plane-mission-step flex flex-col items-center max-w-lg mx-auto">
                             <div className="paper-plane-mission-card w-full bg-slate-800 p-3 md:p-6 rounded-xl border border-slate-600 text-center mb-4 md:mb-8">
-                                <h3 className="text-lg md:text-xl font-bold text-red-400 mb-1 md:mb-2">難易度設定</h3>
+                                <h3 className="text-lg md:text-xl font-bold text-red-400 mb-1 md:mb-2">{t('難易度設定')}</h3>
                                 <div className="flex items-center justify-center gap-6 my-3 md:my-6">
                                     <button 
                                         onClick={() => setSelectedMissionLevel(l => Math.max(0, l - 1))}
@@ -3718,28 +3724,30 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; debugPreview?: MiniGameDe
                                 <div className="text-xs md:text-sm text-gray-400 mb-2 md:mb-4">
                                     {(progress.maxClearedLevel[selectedShipId] ?? -1) < selectedMissionLevel ? (
                                         <div className="flex flex-col items-center">
-                                            <span className="text-red-500 font-bold mb-1">未クリア (挑戦中)</span>
+                                            <span className="text-red-500 font-bold mb-1">{t('未クリア (挑戦中)')}</span>
                                             {selectedMissionLevel === (progress.maxClearedLevel[selectedShipId] ?? -1) + 1 && (
                                                 <span className="text-xs text-yellow-400 animate-pulse">
-                                                    このランクをクリアすると Lv{selectedMissionLevel + 1} が解放されます！
+                                                    {languageMode === 'ENGLISH'
+                                                        ? t('このランクをクリアすると次のレベルが解放されます！').replace('{level}', String(selectedMissionLevel + 1))
+                                                        : `このランクをクリアすると Lv${selectedMissionLevel + 1} が解放されます！`}
                                                 </span>
                                             )}
                                         </div>
                                     ) : (
-                                        <span className="text-green-500 font-bold">クリア済み</span>
+                                        <span className="text-green-500 font-bold">{t('クリア済み')}</span>
                                     )}
                                 </div>
                                 
                                 <div className="bg-black/40 p-3 md:p-4 rounded text-left text-xs md:text-sm space-y-1.5 md:space-y-2">
                                     <div className="flex justify-between"><span className="text-gray-400">敵攻撃力:</span> <span className="text-red-400">+{selectedMissionLevel >= 1 ? (selectedMissionLevel >= 6 ? '2' : '1') : '0'}</span></div>
-                                    <div className="flex justify-between"><span className="text-gray-400">開始HP:</span> <span className="text-red-400">{selectedMissionLevel >= 2 ? (selectedMissionLevel >= 4 ? '-20%' : '-5') : '通常'}</span></div>
+                                    <div className="flex justify-between"><span className="text-gray-400">{t('開始HP')}:</span> <span className="text-red-400">{selectedMissionLevel >= 2 ? (selectedMissionLevel >= 4 ? '-20%' : '-5') : t('通常')}</span></div>
                                     <div className="flex justify-between"><span className="text-gray-400">敵耐久:</span> <span className="text-red-400">+{selectedMissionLevel >= 5 ? '強化' : '通常'}</span></div>
-                                    <div className="border-t border-gray-600 pt-2 flex justify-between font-bold"><span className="text-yellow-400">クリア報酬:</span> <span className="text-white">リロール +{selectedMissionLevel >= 5 ? '2' : (selectedMissionLevel >= 1 ? '1' : '0')}</span></div>
+                                    <div className="border-t border-gray-600 pt-2 flex justify-between font-bold"><span className="text-yellow-400">{t('クリア報酬')}:</span> <span className="text-white">{t('リロール')} +{selectedMissionLevel >= 5 ? '2' : (selectedMissionLevel >= 1 ? '1' : '0')}</span></div>
                                 </div>
                             </div>
                             
                             <button onClick={confirmSetup} className="bg-red-600 hover:bg-red-500 text-white w-full py-3 md:py-4 rounded-xl font-bold text-xl md:text-2xl shadow-[0_0_20px_rgba(220,38,38,0.6)] animate-pulse flex items-center justify-center">
-                                <Target className="mr-2"/> 出撃開始
+                                <Target className="mr-2"/> {t('出撃開始')}
                             </button>
                         </div>
                     )}
@@ -3753,22 +3761,22 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; debugPreview?: MiniGameDe
             <div className="w-full h-full bg-slate-900 text-white p-8 flex flex-col items-center justify-center font-mono relative overflow-hidden">
                 <PaperPlaneSceneBackdrop sprite={PAPER_PLANE_SCENE_BACKGROUNDS.tutorial} alpha={0.24} />
                 <Send size={64} className="relative z-10 text-cyan-400 mb-4 animate-bounce"/>
-                <h1 className="relative z-10 text-4xl font-bold mb-4">紙飛行機バトル v3.0</h1>
+                <h1 className="relative z-10 text-4xl font-bold mb-4">{t('紙飛行機バトル v3.0')}</h1>
                 <div className="max-w-md text-sm text-gray-300 space-y-2 mb-8 bg-slate-800 p-4 rounded border border-slate-600">
-                    <p>・機体は3x3のモジュールで構成されています。</p>
-                    <p>・エネルギーの色には相性があります。</p>
-                    <p className="text-yellow-400 font-bold">・オレンジ &gt; 青 &gt; 白 (白スロットには何色でもOK！)</p>
-                    <p>・エネルギーを入れるだけで出力が出ます。</p>
-                    <p>・全スロットを埋めると起動ボーナスが加算されます！</p>
-                    <p className="text-purple-400 font-bold">・パイロットの才能で戦略が変わる！</p>
-                    <p>・モジュール長押しで詳細を確認できます。</p>
-                    <p className="text-green-400 font-bold">・戦闘後は「休暇」で機体を強化しよう！</p>
-                    <p className="text-blue-400 font-bold mt-2">※オートセーブ機能搭載！</p>
+                    <p>{t('・機体は3x3のモジュールで構成されています。')}</p>
+                    <p>{t('・エネルギーの色には相性があります。')}</p>
+                    <p className="text-yellow-400 font-bold">{t('・オレンジ > 青 > 白 (白スロットには何色でもOK！)')}</p>
+                    <p>{t('・エネルギーを入れるだけで出力が出ます。')}</p>
+                    <p>{t('・全スロットを埋めると起動ボーナスが加算されます！')}</p>
+                    <p className="text-purple-400 font-bold">{t('・パイロットの才能で戦略が変わる！')}</p>
+                    <p>{t('・モジュール長押しで詳細を確認できます。')}</p>
+                    <p className="text-green-400 font-bold">{t('・戦闘後は「休暇」で機体を強化しよう！')}</p>
+                    <p className="text-blue-400 font-bold mt-2">{t('※オートセーブ機能搭載！')}</p>
                 </div>
                 <button onClick={() => { setPhase('SETUP'); initPilotRoll(); }} className="relative z-10 bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-3 px-8 rounded shadow-lg animate-pulse flex items-center">
-                    <Play className="mr-2"/> 出撃準備
+                    <Play className="mr-2"/> {t('出撃準備')}
                 </button>
-                <button onClick={onBack} className="relative z-10 mt-4 text-gray-500 hover:text-white underline text-xs">戻る</button>
+                <button onClick={onBack} className="relative z-10 mt-4 text-gray-500 hover:text-white underline text-xs">{t('戻る')}</button>
             </div>
         );
     }
@@ -3805,11 +3813,11 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; debugPreview?: MiniGameDe
                             className="paper-plane-reward-card bg-slate-800 border-2 border-cyan-500 p-4 rounded-xl w-32 md:w-48 flex flex-col items-center cursor-pointer hover:scale-105 hover:bg-slate-700 transition-all shadow-lg group"
                          >
                              <div className="w-16 h-16 mb-2">
-                                 <ShipPartView part={part} onLongPress={(p) => setTooltipPart(p)} />
+                                 <ShipPartView part={part} languageMode={languageMode} onLongPress={(p) => setTooltipPart(p)} />
                              </div>
-                             <div className="font-bold text-cyan-300 mb-1 text-sm md:text-base">{part.name}</div>
-                             <div className="text-[10px] text-gray-400 text-center h-10 overflow-hidden leading-tight">{part.description}</div>
-                             <button className="mt-2 bg-cyan-600 px-4 py-1 rounded text-xs font-bold group-hover:bg-cyan-500">獲得</button>
+                             <div className="font-bold text-cyan-300 mb-1 text-sm md:text-base">{t(part.name)}</div>
+                             <div className="text-[10px] text-gray-400 text-center h-10 overflow-hidden leading-tight">{t(part.description)}</div>
+                             <button className="mt-2 bg-cyan-600 px-4 py-1 rounded text-xs font-bold group-hover:bg-cyan-500">{t('獲得')}</button>
                          </div>
                      ))}
                  </div>
@@ -3825,8 +3833,8 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; debugPreview?: MiniGameDe
                  <PaperPlaneSceneBackdrop sprite={PAPER_PLANE_SCENE_BACKGROUNDS.reward} alpha={0.18} />
                  <RenderTooltip />
                  <div className="paper-plane-equip-header text-center mb-6 mt-4">
-                     <h2 className="text-2xl font-bold text-green-400 mb-2">パーツ換装</h2>
-                     <p className="text-sm text-gray-300">新しいパーツをセットする場所を選んでください (長押しで詳細)</p>
+                     <h2 className="text-2xl font-bold text-green-400 mb-2">{t('パーツ換装')}</h2>
+                     <p className="text-sm text-gray-300">{t('新しいパーツをセットする場所を選んでください (長押しで詳細)')}</p>
                  </div>
 
                  <div className="paper-plane-equip-layout">
@@ -3834,11 +3842,11 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; debugPreview?: MiniGameDe
                          <div className="paper-plane-equip-new-part flex items-center gap-4 mb-8 bg-slate-800 p-3 rounded-lg border border-slate-600">
                              <div className="text-xs text-gray-400">NEW:</div>
                              <div className="w-16 h-16 md:w-20 md:h-20">
-                                 <ShipPartView part={pendingPart} onLongPress={(p) => setTooltipPart(p)} />
+                                 <ShipPartView part={pendingPart} languageMode={languageMode} onLongPress={(p) => setTooltipPart(p)} />
                              </div>
                              <div className="text-left">
-                                 <div className="font-bold text-white">{pendingPart.name}</div>
-                                 <div className="text-xs text-gray-400">{pendingPart.description}</div>
+                                 <div className="font-bold text-white">{t(pendingPart.name)}</div>
+                                 <div className="text-xs text-gray-400">{t(pendingPart.description)}</div>
                              </div>
                          </div>
                      )}
@@ -3852,6 +3860,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; debugPreview?: MiniGameDe
                                      <div key={i} className="w-16 h-16 md:w-20 md:h-20" onClick={() => handlePartEquip(i)}>
                                          <ShipPartView
                                              part={p}
+                                             languageMode={languageMode}
                                              pendingReplace={true}
                                              onLongPress={(p) => setTooltipPart(p)}
                                              bonusPower={buffGrid[r][c] + player.passivePower}
@@ -3865,10 +3874,10 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; debugPreview?: MiniGameDe
 
                  <div className="paper-plane-equip-actions flex gap-4 shrink-0 pb-8">
                      <button onClick={handleStorePart} className="bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-lg font-bold shadow-lg flex items-center">
-                         <Archive size={20} className="mr-2"/> 格納庫に保管
+                         <Archive size={20} className="mr-2"/> {t('格納庫に保管')}
                      </button>
                      <button onClick={handleDiscardReward} className="bg-red-600 hover:bg-red-500 text-white px-8 py-3 rounded-lg font-bold shadow-lg flex items-center">
-                         <Trash2 size={20} className="mr-2"/> 破棄して進む
+                         <Trash2 size={20} className="mr-2"/> {t('破棄して進む')}
                      </button>
                  </div>
              </div>
@@ -3883,8 +3892,8 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; debugPreview?: MiniGameDe
                 <PaperPlaneSceneBackdrop sprite={PAPER_PLANE_SCENE_BACKGROUNDS.hangar} alpha={0.2} />
                 <RenderTooltip />
                 <div className="paper-plane-hangar-header text-center mb-4 mt-2 shrink-0">
-                    <h2 className="text-2xl font-bold text-orange-400 mb-2 flex items-center justify-center"><Settings className="mr-2"/> 機体改造 (Hangar)</h2>
-                    <p className="text-sm text-gray-300">船と格納庫のパーツを入れ替えます</p>
+                    <h2 className="text-2xl font-bold text-orange-400 mb-2 flex items-center justify-center"><Settings className="mr-2"/> {t('機体改造 (Hangar)')}</h2>
+                    <p className="text-sm text-gray-300">{t('船と格納庫のパーツを入れ替えます')}</p>
                 </div>
 
                 <div className="paper-plane-hangar-layout flex-grow flex flex-col md:flex-row gap-4 md:gap-8 w-full max-w-5xl overflow-hidden min-h-0">
@@ -3897,9 +3906,10 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; debugPreview?: MiniGameDe
                                 const c = i % SHIP_WIDTH;
                                 return (
                                     <div key={i} className="w-16 h-16 md:w-24 md:h-24 relative">
-                                        <ShipPartView 
-                                            part={p} 
-                                            onClick={() => handleHangarAction('SHIP', i)} 
+                                        <ShipPartView
+                                            part={p}
+                                            languageMode={languageMode}
+                                            onClick={() => handleHangarAction('SHIP', i)}
                                             onLongPress={(p) => setTooltipPart(p)}
                                             highlight={hangarSelection?.loc === 'SHIP' && hangarSelection.idx === i}
                                             bonusPower={buffGrid[r][c] + player.passivePower}
@@ -3913,7 +3923,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; debugPreview?: MiniGameDe
                         </div>
                         {hangarSelection?.loc === 'SHIP' && player.parts[hangarSelection.idx].type !== 'EMPTY' && (
                              <button onClick={handleUnequip} className="mt-6 bg-red-800 hover:bg-red-700 text-white px-6 py-2 rounded font-bold text-sm border border-red-500 flex items-center">
-                                 <Download className="mr-2" size={16}/> 外す (Unequip)
+                                 <Download className="mr-2" size={16}/> {t('外す (Unequip)')}
                              </button>
                         )}
                     </div>
@@ -3929,6 +3939,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; debugPreview?: MiniGameDe
                                 <div key={i} className="w-16 h-16 md:w-24 md:h-24 relative">
                                     <ShipPartView
                                         part={p}
+                                        languageMode={languageMode}
                                         onClick={() => handleHangarAction('INV', i)}
                                         onLongPress={(p) => setTooltipPart(p)}
                                         highlight={hangarSelection?.loc === 'INV' && hangarSelection.idx === i}
@@ -3944,6 +3955,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; debugPreview?: MiniGameDe
                             >
                                 <ShipPartView
                                     part={createEmptyPart('hangar_inventory_empty')}
+                                    languageMode={languageMode}
                                     pendingReplace={hangarSelection?.loc === 'SHIP'}
                                 />
                             </div>
@@ -3952,7 +3964,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; debugPreview?: MiniGameDe
                 </div>
 
                 <button onClick={() => { setPhase('VACATION'); setHangarSelection(null); }} className="paper-plane-hangar-back bg-gray-600 hover:bg-gray-500 text-white px-8 py-3 rounded-lg font-bold shadow-lg flex items-center mt-4 shrink-0">
-                    <ArrowLeft size={20} className="mr-2"/> 休暇に戻る
+                    <ArrowLeft size={20} className="mr-2"/> {t('休暇に戻る')}
                 </button>
             </div>
         );
@@ -3969,20 +3981,20 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; debugPreview?: MiniGameDe
                 {showPool && <PoolView pool={pool} onClose={() => setShowPool(false)} />}
                 
                 <div className="flex justify-between items-center mb-2 bg-slate-800 p-3 rounded-lg shadow-lg shrink-0">
-                    <h2 className="text-lg md:text-2xl font-bold flex items-center text-cyan-300"><Calendar className="mr-2" size={20}/> <span className="hidden md:inline">休暇モード</span><span className="md:hidden">休暇</span></h2>
+                    <h2 className="text-lg md:text-2xl font-bold flex items-center text-cyan-300"><Calendar className="mr-2" size={20}/> <span className="hidden md:inline">{t('休暇モード')}</span><span className="md:hidden">{t('休暇')}</span></h2>
                     <div className="flex gap-2 md:gap-4 text-sm">
                         <button onClick={() => setShowPool(true)} className="flex items-center gap-1 bg-indigo-600 hover:bg-indigo-500 px-3 py-1 rounded text-xs border border-indigo-400 transition-colors shadow-sm font-bold">
                             <Layers size={14} /> <span className="hidden md:inline">POOL</span>
                         </button>
                         <div className="flex items-center text-yellow-400 font-bold"><Star className="mr-1" size={16}/> {player.starCoins}</div>
-                        <div className="flex items-center text-orange-400 font-bold bg-black/40 px-2 py-0.5 rounded border border-orange-500/50">残{player.vacationDays}日</div>
+                        <div className="flex items-center text-orange-400 font-bold bg-black/40 px-2 py-0.5 rounded border border-orange-500/50">{t('残')}{player.vacationDays}{t('日')}</div>
                     </div>
                 </div>
 
                 {/* Status Strip */}
                 <div className="bg-black/40 p-2 rounded-lg border border-slate-700 text-xs md:text-sm flex justify-around mb-2 shrink-0 shadow-inner">
                     <div className="flex items-center gap-1"><span>HP:</span> <span className="text-green-400 font-bold">{player.hp}/{player.maxHp}</span></div>
-                    <div className="flex items-center gap-1"><span>燃料:</span> <span className="text-orange-400 font-bold">{player.fuel}/{player.maxFuel}</span></div>
+                    <div className="flex items-center gap-1"><span>{t('燃料')}:</span> <span className="text-orange-400 font-bold">{player.fuel}/{player.maxFuel}</span></div>
                     <div className="flex items-center gap-1"><span>Pwr:</span> <span className="text-purple-400 font-bold">+{player.passivePower}</span></div>
                 </div>
 
@@ -3991,11 +4003,11 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; debugPreview?: MiniGameDe
                     <div className="flex-1 overflow-y-auto custom-scrollbar relative bg-black/20 rounded-lg p-2 border border-slate-800/50">
                         {pendingPart ? (
                             <div className="bg-slate-800 border-2 border-green-500 p-4 rounded-lg animate-in zoom-in flex flex-col items-center justify-center min-h-full">
-                                <div className="text-center font-bold text-green-400 mb-2 text-lg">NEW PARTS!</div>
+                                <div className="text-center font-bold text-green-400 mb-2 text-lg">{t('NEW PARTS!')}</div>
                                 <div className="w-24 h-24 mb-4">
-                                    <ShipPartView part={pendingPart} onLongPress={(p) => setTooltipPart(p)} />
+                                    <ShipPartView part={pendingPart} languageMode={languageMode} onLongPress={(p) => setTooltipPart(p)} />
                                 </div>
-                                <div className="text-sm text-center mb-4">入れ替えるスロットを選択してください</div>
+                                <div className="text-sm text-center mb-4">{t('入れ替えるスロットを選択してください')}</div>
                                 
                                 <div className="grid grid-cols-3 gap-2 mb-6 p-3 bg-black/50 rounded border border-slate-600">
                                     {player.parts.map((p, i) => {
@@ -4003,7 +4015,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; debugPreview?: MiniGameDe
                                         const c = i % SHIP_WIDTH;
                                         return (
                                             <div key={i} className="w-16 h-16 md:w-20 md:h-20" onClick={() => handlePartEquip(i)}>
-                                                <ShipPartView part={p} pendingReplace={true} onLongPress={(p) => setTooltipPart(p)} bonusPower={buffGrid[r][c] + player.passivePower}/>
+                                                <ShipPartView part={p} languageMode={languageMode} pendingReplace={true} onLongPress={(p) => setTooltipPart(p)} bonusPower={buffGrid[r][c] + player.passivePower}/>
                                             </div>
                                         );
                                     })}
@@ -4011,10 +4023,10 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; debugPreview?: MiniGameDe
                                 
                                 <div className="flex gap-4">
                                     <button onClick={handleStorePart} className="bg-blue-600 hover:bg-blue-500 text-white px-6 py-3 rounded-lg font-bold shadow-lg flex items-center">
-                                        <Archive size={20} className="mr-2"/> 保管
+                                        <Archive size={20} className="mr-2"/> {t('保管')}
                                     </button>
                                     <button onClick={() => setPendingPart(null)} className="bg-gray-600 text-white px-6 py-3 rounded-lg hover:bg-gray-500 font-bold flex items-center justify-center shadow-lg">
-                                        <Trash2 size={20} className="mr-2"/> 破棄
+                                        <Trash2 size={20} className="mr-2"/> {t('破棄')}
                                     </button>
                                 </div>
                             </div>
@@ -4033,7 +4045,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; debugPreview?: MiniGameDe
                                         <div className="absolute top-2 right-2 flex flex-col items-end gap-1">
                                             {event.cost > 0 && (
                                                 <div className="text-[10px] font-bold bg-black/50 px-2 py-0.5 rounded text-orange-300 border border-orange-500/30">
-                                                    {event.cost}日
+                                                    {event.cost}{t('日')}
                                                 </div>
                                             )}
                                             {event.coinCost && event.coinCost > 0 && (
@@ -4059,8 +4071,8 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; debugPreview?: MiniGameDe
                                             {event.type === 'GAMBLE' && <Dice5 size={20} className="text-violet-400"/>}
                                         </div>
                                         <div className="w-full">
-                                            <div className="font-bold text-sm mb-1 truncate text-cyan-100">{event.name}</div>
-                                            <div className="text-[10px] text-gray-400 leading-tight line-clamp-2 min-h-[2.5em]">{event.description}</div>
+                                            <div className="font-bold text-sm mb-1 truncate text-cyan-100">{t(event.name)}</div>
+                                            <div className="text-[10px] text-gray-400 leading-tight line-clamp-2 min-h-[2.5em]">{t(event.description)}</div>
                                         </div>
                                     </button>
                                 ))}
@@ -4075,7 +4087,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; debugPreview?: MiniGameDe
                             disabled={!!pendingPart}
                             className={`w-full py-3 rounded-lg font-bold text-md shadow-lg flex items-center justify-center border-2 border-orange-700/50 ${!!pendingPart ? 'bg-gray-700 text-gray-500 cursor-not-allowed' : 'bg-slate-700 hover:bg-slate-600 text-orange-300'}`}
                         >
-                            <Settings className="mr-2" size={18}/> 機体改造 (Hangar)
+                            <Settings className="mr-2" size={18}/> {t('機体改造 (Hangar)')}
                         </button>
 
                         <div className="bg-slate-900 border border-slate-700 p-2 rounded h-20 md:h-24 overflow-y-auto text-xs text-cyan-200 font-mono custom-scrollbar shadow-inner">
@@ -4083,7 +4095,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; debugPreview?: MiniGameDe
                         </div>
 
                         <button onClick={endVacation} disabled={!!pendingPart} className={`w-full py-3 md:py-4 rounded-lg font-bold text-lg shadow-lg flex items-center justify-center border-b-4 border-black/20 active:border-0 active:translate-y-1 transition-all ${!!pendingPart ? 'bg-gray-700 text-gray-500 cursor-not-allowed' : 'bg-cyan-600 hover:bg-cyan-500 text-white animate-pulse'}`}>
-                            出発する <ArrowRight className="ml-2"/>
+                            {t('出発する')} <ArrowRight className="ml-2"/>
                         </button>
                     </div>
                 </div>
@@ -4103,11 +4115,11 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; debugPreview?: MiniGameDe
                  <div className="absolute inset-0 bg-black/90 z-[60] flex items-center justify-center p-4" onClick={() => setShowGameHelp(false)}>
                     <div className="bg-slate-800 border-2 border-yellow-500 p-6 rounded-lg max-w-lg w-full shadow-2xl relative text-sm max-h-[85vh] overflow-y-auto custom-scrollbar" onClick={e => e.stopPropagation()}>
                         <button onClick={() => setShowGameHelp(false)} className="absolute top-4 right-4 text-gray-400 hover:text-white"><X size={24}/></button>
-                        <h2 className="text-2xl font-bold text-yellow-400 mb-6 flex items-center"><HelpCircle className="mr-2"/> ゲームマニュアル</h2>
+                        <h2 className="text-2xl font-bold text-yellow-400 mb-6 flex items-center"><HelpCircle className="mr-2"/> {t('ゲームマニュアル')}</h2>
                         
                         <div className="space-y-6 text-gray-300">
                             <section>
-                                <h3 className="text-lg font-bold text-white mb-2 border-b border-gray-600 pb-1 flex items-center"><Settings className="mr-2 text-cyan-400"/> 機体構築</h3>
+                                <h3 className="text-lg font-bold text-white mb-2 border-b border-gray-600 pb-1 flex items-center"><Settings className="mr-2 text-cyan-400"/> {t('機体構築')}</h3>
                                 <ul className="list-disc pl-5 space-y-1">
                                     <li>機体は<strong>3x3</strong>のグリッドで構成されます。</li>
                                     <li>パーツには<strong>スロット</strong>があり、手札のエネルギーカードをはめることで起動します。</li>
@@ -4117,7 +4129,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; debugPreview?: MiniGameDe
                             </section>
 
                             <section>
-                                <h3 className="text-lg font-bold text-white mb-2 border-b border-gray-600 pb-1 flex items-center"><Cpu className="mr-2 text-purple-400"/> パーツ種類</h3>
+                                <h3 className="text-lg font-bold text-white mb-2 border-b border-gray-600 pb-1 flex items-center"><Cpu className="mr-2 text-purple-400"/> {t('パーツ種類')}</h3>
                                 <ul className="list-disc pl-5 space-y-1">
                                     <li><strong className="text-red-300">砲台:</strong> 同じ行に攻撃出力を出す基本攻撃パーツです。</li>
                                     <li><strong className="text-orange-300">ミサイル:</strong> 砲台より高出力になりやすい攻撃パーツです。</li>
@@ -4128,7 +4140,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; debugPreview?: MiniGameDe
                             </section>
 
                             <section>
-                                <h3 className="text-lg font-bold text-white mb-2 border-b border-gray-600 pb-1 flex items-center"><Swords className="mr-2 text-red-400"/> 戦闘システム</h3>
+                                <h3 className="text-lg font-bold text-white mb-2 border-b border-gray-600 pb-1 flex items-center"><Swords className="mr-2 text-red-400"/> {t('戦闘システム')}</h3>
                                 <ul className="list-disc pl-5 space-y-1">
                                     <li><strong>クラッシュバトル:</strong> 自機と敵機の同じ行(Row)同士がぶつかり合います。</li>
                                     <li>出力の高い方が、差分をダメージとして相手に与えます。</li>
@@ -4138,7 +4150,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; debugPreview?: MiniGameDe
                             </section>
 
                             <section>
-                                <h3 className="text-lg font-bold text-white mb-2 border-b border-gray-600 pb-1 flex items-center"><ShoppingBag className="mr-2 text-green-400"/> 休暇パート</h3>
+                                <h3 className="text-lg font-bold text-white mb-2 border-b border-gray-600 pb-1 flex items-center"><ShoppingBag className="mr-2 text-green-400"/> {t('休暇パート')}</h3>
                                 <ul className="list-disc pl-5 space-y-1">
                                     <li>ステージクリア後は休暇パートに入ります。</li>
                                     <li><strong>日数</strong>を消費して修理や強化を行います。</li>
@@ -4148,7 +4160,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; debugPreview?: MiniGameDe
                             </section>
                         </div>
                         
-                        <button onClick={() => setShowGameHelp(false)} className="mt-8 w-full bg-cyan-700 hover:bg-cyan-600 py-3 rounded text-white font-bold">閉じる</button>
+                        <button onClick={() => setShowGameHelp(false)} className="mt-8 w-full bg-cyan-700 hover:bg-cyan-600 py-3 rounded text-white font-bold">{t('閉じる')}</button>
                     </div>
                 </div>
             )}
@@ -4227,13 +4239,13 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; debugPreview?: MiniGameDe
             {showHandHelp && (
                  <div className="absolute inset-0 bg-black/80 z-50 flex items-center justify-center p-4" onClick={() => setShowHandHelp(false)}>
                     <div className="bg-slate-800 border-2 border-cyan-500 p-6 rounded-lg max-w-sm w-full shadow-2xl relative text-sm" onClick={e => e.stopPropagation()}>
-                        <h3 className="text-lg font-bold text-cyan-400 mb-4 flex items-center"><Info className="mr-2"/> エネルギーカードの仕組み</h3>
+                        <h3 className="text-lg font-bold text-cyan-400 mb-4 flex items-center"><Info className="mr-2"/> {t('エネルギーカードの仕組み')}</h3>
                         <ul className="list-disc pl-5 space-y-2 text-gray-300">
                             <li><span className="text-white font-bold">数値</span>: スロットに入れた時の出力パワーになります。</li>
                             <li><span className="text-white font-bold">色</span>: スロットの要求色に合わせる必要があります。</li>
                             <li><span className="text-orange-400 font-bold">オレンジ</span> &gt; <span className="text-blue-400 font-bold">青</span> &gt; <span className="text-slate-200 font-bold">白</span> の順でランクが高く、上位色は下位のスロットにも使用可能です。</li>
                         </ul>
-                        <button onClick={() => setShowHandHelp(false)} className="mt-6 w-full bg-cyan-700 py-2 rounded text-white font-bold">閉じる</button>
+                        <button onClick={() => setShowHandHelp(false)} className="mt-6 w-full bg-cyan-700 py-2 rounded text-white font-bold">{t('閉じる')}</button>
                     </div>
                 </div>
             )}
@@ -4286,52 +4298,52 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; debugPreview?: MiniGameDe
                         {phase === 'VICTORY' && (
                             <div className="paper-plane-victory-content">
                                 <Trophy size={64} className="paper-plane-result-icon text-yellow-400 mx-auto mb-4 animate-bounce"/>
-                                <h2 className="paper-plane-result-title text-4xl font-bold text-white mb-2">任務達成！</h2>
-                                <p className="paper-plane-result-subtitle text-gray-400 mb-6">全ステージクリアおめでとう！</p>
+                                <h2 className="paper-plane-result-title text-4xl font-bold text-white mb-2">{t('任務達成！')}</h2>
+                                <p className="paper-plane-result-subtitle text-gray-400 mb-6">{t('全ステージクリアおめでとう！')}</p>
                                 <div className="paper-plane-unlock-card mb-6 rounded-xl border border-cyan-500/50 bg-slate-900/80 p-4">
                                     <div className="text-cyan-300 font-bold mb-2">
-                                        アンロック済みパーツ: {(progress.unlockedPartNames?.length || 0)} / {PAPER_PLANE_UNLOCK_TARGET}
+                                        {t('アンロック済みパーツ')}: {(progress.unlockedPartNames?.length || 0)} / {PAPER_PLANE_UNLOCK_TARGET}
                                     </div>
                                     {newlyUnlockedPart ? (
                                         <div className="paper-plane-unlock-detail flex flex-col items-center gap-2">
-                                            <div className="paper-plane-unlock-label text-yellow-300 font-bold">新パーツ解禁</div>
+                                            <div className="paper-plane-unlock-label text-yellow-300 font-bold">{t('新パーツ解禁')}</div>
                                             <div className="paper-plane-unlock-part w-24">
-                                                <ShipPartView part={newlyUnlockedPart} onLongPress={(p) => setTooltipPart(p)} />
+                                                <ShipPartView part={newlyUnlockedPart} languageMode={languageMode} onLongPress={(p) => setTooltipPart(p)} />
                                             </div>
-                                            <div className="paper-plane-unlock-name text-white font-bold">{newlyUnlockedPart.name}</div>
-                                            <div className="paper-plane-unlock-description text-xs text-slate-300 max-w-sm">{newlyUnlockedPart.description}</div>
+                                            <div className="paper-plane-unlock-name text-white font-bold">{t(newlyUnlockedPart.name)}</div>
+                                            <div className="paper-plane-unlock-description text-xs text-slate-300 max-w-sm">{t(newlyUnlockedPart.description)}</div>
                                         </div>
                                     ) : (
-                                        <div className="text-sm text-slate-400">今回新規解放できるパーツはありません。</div>
+                                        <div className="text-sm text-slate-400">{t('今回新規解放できるパーツはありません。')}</div>
                                     )}
                                 </div>
                                 <div className="paper-plane-result-actions flex flex-col gap-4">
                                     <button onClick={activateEndlessMode} className="bg-purple-600 px-8 py-3 rounded text-xl font-bold hover:bg-purple-500 border-2 border-purple-400 flex items-center justify-center animate-pulse">
-                                        <Repeat className="mr-2" /> エンドレスモードへ
+                                        <Repeat className="mr-2" /> {t('エンドレスモードへ')}
                                     </button>
                                     <button 
                                         onClick={returnToSetup} 
                                         className="bg-green-600 px-8 py-3 rounded text-xl font-bold hover:bg-green-500 border-2 border-green-400 flex items-center justify-center"
                                     >
-                                        <Settings className="mr-2"/> 機体選択へ
+                                        <Settings className="mr-2"/> {t('機体選択へ')}
                                     </button>
-                                    <button onClick={onBack} className="bg-cyan-600 px-8 py-3 rounded text-xl font-bold border-2 border-cyan-400">タイトルへ戻る</button>
+                                    <button onClick={onBack} className="bg-cyan-600 px-8 py-3 rounded text-xl font-bold border-2 border-cyan-400">{t('タイトルへ戻る')}</button>
                                 </div>
                             </div>
                         )}
                         {phase === 'GAME_OVER' && (
                             <div className="paper-plane-game-over-content">
                                 <Skull size={64} className="paper-plane-result-icon text-red-500 mx-auto mb-4"/>
-                                <h2 className="paper-plane-result-title text-4xl font-bold text-red-500 mb-2">撃墜</h2>
+                                <h2 className="paper-plane-result-title text-4xl font-bold text-red-500 mb-2">{t('撃墜')}</h2>
                                 <p className="paper-plane-result-subtitle text-gray-400 mb-6">ステージ {stage}</p>
                                 <div className="paper-plane-result-actions flex flex-col gap-4">
                                     <button
                                         onClick={returnToSetup}
                                         className="bg-green-600 px-8 py-3 rounded text-xl font-bold hover:bg-green-500 border-2 border-green-400 flex items-center justify-center"
                                     >
-                                        <Settings className="mr-2"/> 機体選択へ
+                                        <Settings className="mr-2"/> {t('機体選択へ')}
                                     </button>
-                                    <button onClick={onBack} className="mt-2 bg-gray-600 px-8 py-3 rounded text-xl font-bold">タイトルへ戻る</button>
+                                    <button onClick={onBack} className="mt-2 bg-gray-600 px-8 py-3 rounded text-xl font-bold">{t('タイトルへ戻る')}</button>
                                 </div>
                             </div>
                         )}
