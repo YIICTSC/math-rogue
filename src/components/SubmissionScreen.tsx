@@ -4,6 +4,7 @@ import { AssignmentPayload, LanguageMode, StudentProfile } from '../types';
 import { storageService } from '../services/storageService';
 import { getCurrentSchoolYear, getStudentGradeOptions } from '../utils/dailyAssignmentUtils';
 import { trans } from '../utils/textUtils';
+import { formatProblemUnitName } from '../utils/problemUnitName';
 
 interface SubmissionScreenProps {
   onBack: () => void;
@@ -84,7 +85,7 @@ const SubmissionScreen: React.FC<SubmissionScreenProps> = ({ onBack, assignment,
   }, undefined);
   const studentGradeOptions = useMemo(() => getStudentGradeOptions(languageMode), [languageMode]);
   const formatQuestionCount = (count: number) => languageMode === 'ENGLISH' ? `${count} questions` : `${count}問`;
-  const formatUnitName = (name: string) => languageMode === 'ENGLISH' ? trans(name, languageMode) : name;
+  const formatUnitName = (name: string) => formatProblemUnitName(name, languageMode);
   const formatTargetTitle = (title: string) => languageMode === 'ENGLISH' ? trans(title, languageMode) : title;
 
   const updateProfile = (patch: Partial<StudentProfile>) => {

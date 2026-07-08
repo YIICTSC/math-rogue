@@ -18,6 +18,7 @@ import { trans, transProblemSubjectName } from '../utils/textUtils';
 import { assetUrl } from '../utils/assetPaths';
 import { saveAnswerModePreference } from '../utils/answerMode';
 import { getInitialProblemSetView, type ProblemSetView } from '../utils/localePreferences';
+import { formatProblemUnitName } from '../utils/problemUnitName';
 import { UPPER_KANJI_SUB_MODE_IDS, UPPER_PROBLEM_CATEGORIES } from './ModeSelectionScreen';
 import type { VisualThemeId } from '../data/visualThemes';
 
@@ -743,8 +744,8 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
   // Voice feature control
   const [voiceEnabled, setVoiceEnabled] = useState(() => storageService.getEnglishVoiceEnabled());
   const getCategoryLabel = (name: string) => transProblemSubjectName(name, languageMode);
-  const getSubLabel = (sub: SubModeConfig) => transProblemSubjectName(sub.name, languageMode);
-  const getUnitLabel = (name: string) => languageMode === 'ENGLISH' ? trans(name, languageMode) : name;
+  const getSubLabel = (sub: SubModeConfig) => formatProblemUnitName(sub.name, languageMode, selectedCategory.id);
+  const getUnitLabel = (name: string, categoryId = selectedCategory.id) => formatProblemUnitName(name, languageMode, categoryId);
 
   useEffect(() => {
     audioService.init();

@@ -15,6 +15,7 @@ import { trans, transProblemSubjectName } from '../utils/textUtils';
 import { assetUrl } from '../utils/assetPaths';
 import { saveAnswerModePreference } from '../utils/answerMode';
 import { getInitialProblemSetView, type ProblemSetView } from '../utils/localePreferences';
+import { formatProblemUnitName } from '../utils/problemUnitName';
 import type { VisualThemeId } from '../data/visualThemes';
 
 interface ModeSelectionScreenProps {
@@ -1029,8 +1030,8 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
 
   const isMastered = (mode: string) => !!modeMasteryMap[mode];
   const getCategoryLabel = (id: SubjectCategoryType) => transProblemSubjectName(CATEGORY_LABELS[id] || id, languageMode);
-  const getSubLabel = (_id: string, fallback: string) => transProblemSubjectName(fallback, languageMode);
-  const getUnitLabel = (name: string) => languageMode === 'ENGLISH' ? trans(name, languageMode) : name;
+  const getSubLabel = (_id: string, fallback: string, categoryId: SubjectCategoryType = selectedCategory.id) => formatProblemUnitName(fallback, languageMode, categoryId);
+  const getUnitLabel = (name: string, categoryId: SubjectCategoryType = selectedCategory.id) => formatProblemUnitName(name, languageMode, categoryId);
   const getUnitCorrectCount = (unit: { mode?: string; modes?: string[] }) => {
     if (unit.modes && unit.modes.length > 0) {
       return unit.modes.reduce((total, mode) => total + (modeCorrectCounts[mode] || 0), 0);
@@ -1414,7 +1415,7 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
                 className="bg-slate-800 border border-slate-600 p-1.5 rounded hover:border-white transition-colors text-[10px] md:text-xs font-bold truncate"
               >
                 {renderMasteryPrefix(sub.mode)}
-                <span data-allow-japanese="true">{getSubLabel(sub.id, sub.name)}</span>
+                <span data-allow-japanese="true">{getSubLabel(sub.id, sub.name, cat.id)}</span>
               </button>
             ))}
           </div>
@@ -1513,7 +1514,7 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
                         aria-hidden="true"
                       />
                       <span className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,rgba(255,255,255,0.08),transparent_36%,rgba(0,0,0,0.22))]" aria-hidden="true" />
-                      <span className="relative z-10 block pr-1" data-allow-japanese="true">{getUnitLabel(unit.name)}</span>
+                      <span className="relative z-10 block pr-1" data-allow-japanese="true">{getUnitLabel(unit.name, cat.id)}</span>
                       <span className="absolute bottom-1.5 left-2 z-10 h-1 w-[calc(100%-4.5rem)] overflow-hidden rounded-full bg-black/45 sm:w-[calc(100%-5rem)]">
                         <span
                           className={`block h-full rounded-full ${progressPercent >= 100 ? 'bg-yellow-300' : 'bg-emerald-300'}`}
@@ -1558,7 +1559,7 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
             {words.map(sub => (
               <button key={sub.id} onClick={() => handleSelect(sub.mode)} className="bg-slate-800 border border-slate-600 p-1.5 rounded hover:border-indigo-400 text-[10px] font-bold">
                 {renderMasteryPrefix(sub.mode)}
-                <span data-allow-japanese="true">{getSubLabel(sub.id, sub.name)}</span>
+                <span data-allow-japanese="true">{getSubLabel(sub.id, sub.name, cat.id)}</span>
               </button>
             ))}
           </div>
@@ -1567,7 +1568,7 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
             {convs.map(sub => (
               <button key={sub.id} onClick={() => handleSelect(sub.mode)} className="bg-pink-900/40 border border-pink-500/50 p-1 rounded hover:bg-pink-800 text-[10px] font-bold">
                 {renderMasteryPrefix(sub.mode)}
-                <span data-allow-japanese="true">{getSubLabel(sub.id, sub.name)}</span>
+                <span data-allow-japanese="true">{getSubLabel(sub.id, sub.name, cat.id)}</span>
               </button>
             ))}
             <button onClick={() => handleSelect(GameMode.ENGLISH_MIXED)} className="bg-indigo-900/60 border border-indigo-500 p-1 rounded hover:bg-indigo-800 text-[10px] font-bold">

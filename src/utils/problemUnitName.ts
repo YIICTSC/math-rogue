@@ -1,0 +1,57 @@
+import type { SubjectCategoryType } from '../subjectConfig';
+import type { LanguageMode } from '../types';
+import { trans } from './textUtils';
+
+const JAPANESE_CURRICULUM_UNIT_CATEGORIES = new Set<SubjectCategoryType>([
+  'MATH',
+  'MATH_GRADES',
+  'KOKUGO_GRADES',
+  'KANJI',
+  'KANKEN',
+  'HARD_KANJI',
+  'LIFE',
+  'SCIENCE',
+  'SOCIAL',
+  'ENGLISH',
+  'SUMMARY',
+  'MAP_PREF',
+  'IT_INFO',
+  'UPPER_MODERN',
+  'UPPER_CLASSICS',
+  'UPPER_ENGLISH',
+  'UPPER_INFORMATION',
+  'UPPER_TRIVIA',
+  'UPPER_MATH',
+  'UPPER_SCIENCE',
+  'UPPER_SOCIETY',
+  'UPPER_ESSAY',
+  'UPPER_PRACTICAL',
+]);
+
+const NATIVE_ENGLISH_UNIT_CATEGORIES = new Set<SubjectCategoryType>([
+  'NATIVE_ELA',
+  'NATIVE_MATH',
+  'NATIVE_SCIENCE',
+  'NATIVE_SOCIAL',
+  'NATIVE_JAPANESE',
+]);
+
+const hasJapaneseScript = (value: string) => /[\u3040-\u30ff\u3400-\u9fff]/.test(value);
+
+export const shouldKeepJapaneseProblemUnitName = (
+  name: string,
+  categoryId?: SubjectCategoryType,
+) => {
+  if (categoryId && NATIVE_ENGLISH_UNIT_CATEGORIES.has(categoryId)) return false;
+  if (categoryId && JAPANESE_CURRICULUM_UNIT_CATEGORIES.has(categoryId)) return true;
+  return hasJapaneseScript(name);
+};
+
+export const formatProblemUnitName = (
+  name: string,
+  languageMode: LanguageMode,
+  categoryId?: SubjectCategoryType,
+) => {
+  if (languageMode !== 'ENGLISH') return name;
+  return shouldKeepJapaneseProblemUnitName(name, categoryId) ? name : trans(name, languageMode);
+};

@@ -87,6 +87,7 @@ import { assetUrl } from './utils/assetPaths';
 import { getAssignmentFromUrl, getAssignmentModePool, getAssignmentRepresentativeMode } from './utils/assignmentUtils';
 import { createDailyAssignment, getCurrentSchoolYear, getStudentGradeOptions, isAdultProfile, promoteStudentProfileForSchoolYear } from './utils/dailyAssignmentUtils';
 import { getInitialLanguageMode, isEnglishDeviceLocale, isJapaneseDeviceLocale } from './utils/localePreferences';
+import { formatProblemUnitName } from './utils/problemUnitName';
 import { getDifficultyConfig } from './config/difficulty';
 import { CARD_ERASER_TEMPLATE_ID, CARD_ERASER_NAME, eraseCardEffect, getErasableEffectOptions } from './utils/cardEraser';
 import { RotateCcw, Home, BookOpen, Coins, Trophy, HelpCircle, Infinity, Play, ScrollText, Plus, Minus, X as MultiplyIcon, Divide, Shuffle, Send, Swords, Terminal, Club, Zap, Gamepad2, Brain, Languages, Music, Book, MessageSquare, GraduationCap, Clock, AlertTriangle, TimerOff, X, Check, FlaskConical, Globe, MapPin, ChevronDown, ArrowLeft, Sparkles, Flag, Keyboard, Users, Settings, ClipboardList, FileText, Monitor } from 'lucide-react';
@@ -166,7 +167,7 @@ const getAssignmentTargetSummary = (assignment: AssignmentPayload, languageMode:
     const unitSummaries = assignment.units.map(unit => {
         const targetCorrect = unit.targetCorrect || 10;
         return languageMode === 'ENGLISH'
-            ? `${trans(unit.name, languageMode)} (${targetCorrect} questions)`
+            ? `${formatProblemUnitName(unit.name, languageMode)} (${targetCorrect} questions)`
             : `${unit.name} (${targetCorrect}問)`;
     });
     const customProblemCount = assignment.customProblems?.length || 0;
@@ -183,7 +184,7 @@ const formatAssignmentProgressUnitName = (name: string, languageMode: LanguageMo
     if (languageMode !== 'ENGLISH') return name;
     const customRemaining = name.match(/^オリジナル問題 残り(\d+)問$/);
     if (customRemaining) return `${trans('オリジナル問題', languageMode)} (${customRemaining[1]} remaining)`;
-    return trans(name, languageMode);
+    return formatProblemUnitName(name, languageMode);
 };
 
 type UiPreviewBattleConfig = {

@@ -6,6 +6,7 @@ import { SubjectCategoryType } from '../subjectConfig';
 import { CATEGORY_LABELS, NATIVE_ENGLISH_PROBLEM_CATEGORIES, UPPER_PROBLEM_CATEGORIES, getCurrentUnitsForCategory, getSelectableGrades } from './ModeSelectionScreen';
 import { createAssignmentUrl } from '../utils/assignmentUtils';
 import { trans, transProblemSubjectName } from '../utils/textUtils';
+import { formatProblemUnitName } from '../utils/problemUnitName';
 import { audioService } from '../services/audioService';
 
 interface AssignmentCreateScreenProps {
@@ -200,7 +201,7 @@ const AssignmentCreateScreen: React.FC<AssignmentCreateScreenProps> = ({ onBack,
     if (languageMode === 'ENGLISH') return grade <= 6 ? `Grade ${grade}` : `JH ${grade - 6}`;
     return grade <= 6 ? `${grade}年` : `中${grade - 6}`;
   };
-  const formatUnitName = (name: string) => languageMode === 'ENGLISH' ? trans(name, languageMode) : name;
+  const formatUnitName = (name: string) => formatProblemUnitName(name, languageMode, selectedCategoryId);
 
   const changeProblemSetView = (view: AssignmentProblemSetView) => {
     const nextCategories = view === 'upper'

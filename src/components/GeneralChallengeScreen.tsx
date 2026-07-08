@@ -10,6 +10,7 @@ import { MAP_SYMBOL_ASSET_MAP } from './mapSymbolImageMap';
 import RewardHintBanner from './RewardHintBanner';
 import UnitBoardModal from './UnitBoardModal';
 import { trans } from '../utils/textUtils';
+import { formatProblemUnitName } from '../utils/problemUnitName';
 
 interface GeneralChallengeScreenProps {
   onComplete: (correctCount: number) => void;
@@ -409,7 +410,7 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
         question: reviewProblem.question,
         answer: reviewProblem.correctAnswer,
         options: [...new Set([reviewProblem.correctAnswer, ...(reviewProblem.options || [])])].slice(0, 4).sort(() => Math.random() - 0.5),
-        unitLabel: reviewProblem.unitName ? trans(reviewProblem.unitName, languageMode) : trans('再出題', languageMode),
+        unitLabel: reviewProblem.unitName ? formatProblemUnitName(reviewProblem.unitName, languageMode) : trans('再出題', languageMode),
         sourceMode: reviewProblem.mode,
         assignmentProblemId: reviewProblem.problemId,
         assignmentProblemKey: reviewProblem.problemKey,
