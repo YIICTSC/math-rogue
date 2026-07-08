@@ -29,8 +29,11 @@ export const getDeviceLocales = (): string[] => {
 export const isEnglishDeviceLocale = () =>
   getDeviceLocales().some((locale) => locale === 'en' || locale.startsWith('en-'));
 
+export const isJapaneseDeviceLocale = () =>
+  getDeviceLocales().some((locale) => locale === 'ja' || locale.startsWith('ja-'));
+
 export const getInitialLanguageMode = (storedMode: LanguageMode | null): LanguageMode =>
-  storedMode || (isEnglishDeviceLocale() ? 'ENGLISH' : 'JAPANESE');
+  storedMode || (isJapaneseDeviceLocale() ? 'JAPANESE' : isEnglishDeviceLocale() ? 'ENGLISH' : 'JAPANESE');
 
 export const getInitialProblemSetView = (storedView: ProblemSetView | null): ProblemSetView =>
-  storedView || (isEnglishDeviceLocale() ? 'nativeEnglish' : 'standard');
+  storedView || (isJapaneseDeviceLocale() ? 'standard' : isEnglishDeviceLocale() ? 'nativeEnglish' : 'standard');
