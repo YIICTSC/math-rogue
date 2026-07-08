@@ -1,6 +1,7 @@
-import { AssignmentPayload, AssignmentUnit, StudentProfile } from '../types';
+import { AssignmentPayload, AssignmentUnit, LanguageMode, StudentProfile } from '../types';
 import { UPPER_PROBLEM_CATEGORIES, getCurrentUnitsForCategory } from '../components/ModeSelectionScreen';
 import { CURRICULUM_WEEKLY_PLANS, UPPER_CURRICULUM_WEEKLY_PLANS } from '../data/dailyCurriculumPlan';
+import { NATIVE_ENGLISH_GRADE_UNITS, NativeEnglishSubjectId } from '../nativeEnglishUnitConfig';
 import type { SubjectCategoryType } from '../subjectConfig';
 
 export const STUDENT_GRADE_OPTIONS = [
@@ -17,11 +18,34 @@ export const STUDENT_GRADE_OPTIONS = [
   '大人',
 ] as const;
 
+export const ENGLISH_STUDENT_GRADE_OPTIONS = [
+  'Grade 1',
+  'Grade 2',
+  'Grade 3',
+  'Grade 4',
+  'Grade 5',
+  'Grade 6',
+  'Grade 7',
+  'Grade 8',
+  'Adult',
+] as const;
+
+export const getStudentGradeOptions = (languageMode: LanguageMode) =>
+  languageMode === 'ENGLISH' ? ENGLISH_STUDENT_GRADE_OPTIONS : STUDENT_GRADE_OPTIONS;
+
 const PROMOTABLE_GRADES = STUDENT_GRADE_OPTIONS.slice(0, 9);
+const ENGLISH_PROMOTABLE_GRADES = ENGLISH_STUDENT_GRADE_OPTIONS.slice(0, 8);
 const DAILY_TARGET_CORRECT = 20;
 const DAILY_TOTAL_TARGET_CORRECT = 50;
 const CHALLENGE_TARGET_CORRECT = DAILY_TOTAL_TARGET_CORRECT - DAILY_TARGET_CORRECT;
 const CHALLENGE_PICK_THRESHOLD = 50;
+const NATIVE_ENGLISH_SUBJECT_IDS: NativeEnglishSubjectId[] = [
+  'NATIVE_ELA',
+  'NATIVE_MATH',
+  'NATIVE_SCIENCE',
+  'NATIVE_SOCIAL',
+  'NATIVE_JAPANESE',
+];
 
 const ADULT_CHALLENGE_WEEKLY_ROTATION: Array<{ categoryId: SubjectCategoryType; unitOffset: number }> = [
   { categoryId: 'HARD_KANJI', unitOffset: 0 },
@@ -83,7 +107,9 @@ export const getCurrentSchoolYear = (date = new Date()) => {
   return date.getMonth() >= 3 ? year : year - 1;
 };
 
-export const isAdultProfile = (profile: StudentProfile | null | undefined) => profile?.grade === '大人';
+const isAdultGrade = (grade: string | undefined) => grade === '大人' || grade === 'Adult';
+
+export const isAdultProfile = (profile: StudentProfile | null | undefined) => isAdultGrade(profile?.grade);
 
 export const promoteStudentProfileForSchoolYear = (
   profile: StudentProfile,
@@ -97,9 +123,14 @@ export const promoteStudentProfileForSchoolYear = (
 
   let nextGrade = profile.grade;
   for (let year = savedSchoolYear; year < currentSchoolYear; year += 1) {
-    const index = PROMOTABLE_GRADES.indexOf(nextGrade as typeof PROMOTABLE_GRADES[number]);
-    if (index === -1) break;
-    nextGrade = PROMOTABLE_GRADES[index + 1] || '高校以上';
+    const japaneseIndex = PROMOTABLE_GRADES.indexOf(nextGrade as typeof PROMOTABLE_GRADES[number]);
+    if (japaneseIndex !== -1) {
+      nextGrade = PROMOTABLE_GRADES[japaneseIndex + 1] || '高校以上';
+      continue;
+    }
+    const englishIndex = ENGLISH_PROMOTABLE_GRADES.indexOf(nextGrade as typeof ENGLISH_PROMOTABLE_GRADES[number]);
+    if (englishIndex === -1) break;
+    nextGrade = ENGLISH_PROMOTABLE_GRADES[englishIndex + 1] || 'Adult';
   }
 
   return { ...profile, grade: nextGrade, schoolYear: currentSchoolYear };
@@ -111,6 +142,11 @@ const getGradeNumber = (grade: string): number | null => {
   const juniorHigh = grade.match(/^中学([1-3])年生$/);
   if (juniorHigh) return Number(juniorHigh[1]) + 6;
   return null;
+};
+
+const getNativeEnglishGradeNumber = (grade: string): number | null => {
+  const match = grade.match(/^Grade\s*([1-8])$/i);
+  return match ? Number(match[1]) : null;
 };
 
 const getDisplayGradeName = (gradeNumber: number) =>
@@ -226,6 +262,15 @@ const getGradeUnits = (gradeNumber: number, summaryGradeNumber = gradeNumber) =>
   );
 };
 
+const getNativeEnglishGradeUnits = (gradeNumber: number) =>
+  NATIVE_ENGLISH_SUBJECT_IDS.flatMap((subjectId) =>
+    (NATIVE_ENGLISH_GRADE_UNITS[subjectId]?.[gradeNumber] || []).map((unit) => ({
+      id: `${subjectId}:${unit.id}`,
+      name: unit.name,
+      modes: [unit.mode],
+    }))
+  );
+
 const getCorrectCountForUnit = (unit: { modes: string[] }, modeCorrectCounts: Record<string, number>) =>
   unit.modes.reduce((total, mode) => total + Math.max(0, Number(modeCorrectCounts[mode] || 0)), 0);
 
@@ -248,14 +293,22 @@ export const createDailyAssignment = (
 ): AssignmentPayload | null => {
   if (!profile.grade) return null;
   const gradeNumber = getGradeNumber(profile.grade);
-  const adult = profile.grade === '大人';
+  const nativeEnglishGradeNumber = getNativeEnglishGradeNumber(profile.grade);
+  const adult = isAdultGrade(profile.grade);
+  const useEnglishLabels = nativeEnglishGradeNumber !== null || profile.grade === 'Adult';
   const dateId = getLocalDateId(date);
   const schoolYearWeekIndex = getSchoolYearWeekIndex(date);
   const summaryGradeNumber = gradeNumber ? getDailySummaryGradeNumber(gradeNumber, schoolYearWeekIndex) : null;
-  const baseUnits = gradeNumber ? getGradeUnits(gradeNumber, summaryGradeNumber || gradeNumber) : getUpperUnits(adult);
+  const baseUnits = nativeEnglishGradeNumber
+    ? getNativeEnglishGradeUnits(nativeEnglishGradeNumber)
+    : gradeNumber
+      ? getGradeUnits(gradeNumber, summaryGradeNumber || gradeNumber)
+      : getUpperUnits(adult);
   if (baseUnits.length === 0) return null;
 
-  const weeklyPlan = gradeNumber
+  const weeklyPlan = nativeEnglishGradeNumber
+    ? null
+    : gradeNumber
     ? CURRICULUM_WEEKLY_PLANS[gradeNumber]?.[schoolYearWeekIndex]
     : UPPER_CURRICULUM_WEEKLY_PLANS[adult ? 'adult' : 'upper']?.[schoolYearWeekIndex];
   const weeklyUnits = weeklyPlan
@@ -293,13 +346,13 @@ export const createDailyAssignment = (
     toAssignmentUnit(seasonalBase, 'daily', DAILY_TARGET_CORRECT),
     toAssignmentUnit({
       ...challengeBase,
-      name: `チャレンジ: ${challengeBase.name}`,
+      name: `${useEnglishLabels ? 'Challenge' : 'チャレンジ'}: ${challengeBase.name}`,
     }, 'daily-challenge', CHALLENGE_TARGET_CORRECT),
   ];
 
   return {
     id: `daily-${profile.grade}-${dateId}`,
-    title: `${profile.grade} デイリー課題 ${dateId}`,
+    title: useEnglishLabels ? `${profile.grade} Daily Assignment ${dateId}` : `${profile.grade} デイリー課題 ${dateId}`,
     units,
     customProblems: [],
     dueAt: getEndOfToday(date),

@@ -85,8 +85,8 @@ import { createAssignmentRewardCard, createHolographicCard, getUpgradedCard, syn
 import { sanitizeEnglishText, trans, transEventText } from './utils/textUtils';
 import { assetUrl } from './utils/assetPaths';
 import { getAssignmentFromUrl, getAssignmentModePool, getAssignmentRepresentativeMode } from './utils/assignmentUtils';
-import { STUDENT_GRADE_OPTIONS, createDailyAssignment, getCurrentSchoolYear, isAdultProfile, promoteStudentProfileForSchoolYear } from './utils/dailyAssignmentUtils';
-import { getInitialLanguageMode } from './utils/localePreferences';
+import { createDailyAssignment, getCurrentSchoolYear, getStudentGradeOptions, isAdultProfile, promoteStudentProfileForSchoolYear } from './utils/dailyAssignmentUtils';
+import { getInitialLanguageMode, isEnglishDeviceLocale, isJapaneseDeviceLocale } from './utils/localePreferences';
 import { getDifficultyConfig } from './config/difficulty';
 import { CARD_ERASER_TEMPLATE_ID, CARD_ERASER_NAME, eraseCardEffect, getErasableEffectOptions } from './utils/cardEraser';
 import { RotateCcw, Home, BookOpen, Coins, Trophy, HelpCircle, Infinity, Play, ScrollText, Plus, Minus, X as MultiplyIcon, Divide, Shuffle, Send, Swords, Terminal, Club, Zap, Gamepad2, Brain, Languages, Music, Book, MessageSquare, GraduationCap, Clock, AlertTriangle, TimerOff, X, Check, FlaskConical, Globe, MapPin, ChevronDown, ArrowLeft, Sparkles, Flag, Keyboard, Users, Settings, ClipboardList, FileText, Monitor } from 'lucide-react';
@@ -125,6 +125,17 @@ const DEFAULT_DAILY_ASSIGNMENT_PROFILE: StudentProfile = {
     number: '',
     name: '',
     schoolYear: getCurrentSchoolYear(),
+};
+
+const getDefaultDailyAssignmentProfile = (languageMode: LanguageMode): StudentProfile => ({
+    ...DEFAULT_DAILY_ASSIGNMENT_PROFILE,
+    grade: languageMode === 'ENGLISH' ? 'Grade 1' : DEFAULT_DAILY_ASSIGNMENT_PROFILE.grade,
+});
+
+const getInitialStudentGradeMode = (languageMode: LanguageMode): LanguageMode => {
+    if (isJapaneseDeviceLocale()) return 'JAPANESE';
+    if (isEnglishDeviceLocale()) return 'ENGLISH';
+    return languageMode;
 };
 
 const isKanjiAssignment = (assignment: AssignmentPayload | null | undefined) => {
@@ -1201,9 +1212,11 @@ const App: React.FC = () => {
         if (promoted.grade) storageService.saveStudentProfile(promoted);
         return promoted;
     });
+    const [studentGradeMode, setStudentGradeMode] = useState<LanguageMode>(() => getInitialStudentGradeMode(languageMode));
     const dailyAssignmentProfile = useMemo<StudentProfile>(() => (
-        studentProfile.grade ? studentProfile : DEFAULT_DAILY_ASSIGNMENT_PROFILE
-    ), [studentProfile]);
+        studentProfile.grade ? studentProfile : getDefaultDailyAssignmentProfile(studentGradeMode)
+    ), [studentGradeMode, studentProfile]);
+    const studentGradeOptions = useMemo(() => getStudentGradeOptions(studentGradeMode), [studentGradeMode]);
     const isStudentGradeUnset = !studentProfile.grade?.trim();
     const [showStudentGradeSurvey, setShowStudentGradeSurvey] = useState<boolean>(() => !storageService.getStudentProfile().grade?.trim());
     const [currentAssignment, setCurrentAssignment] = useState<AssignmentPayload | null>(() => storageService.getCurrentAssignment());
@@ -13948,12 +13961,33 @@ const App: React.FC = () => {
                             <div className="fixed inset-0 z-[10035] flex items-center justify-center bg-black/85 p-4">
                                 <div className="w-full max-w-2xl rounded-2xl border-4 border-cyan-300 bg-slate-950 p-5 text-white shadow-[0_0_40px_rgba(34,211,238,0.32)]">
                                     <div className="mb-2 text-center text-xs font-black tracking-[0.3em] text-cyan-300">PROFILE</div>
-                                    <h2 className="mb-3 text-center text-2xl font-black">{trans("現在の学年を選んでください", languageMode)}</h2>
+                                    <h2 className="mb-3 text-center text-2xl font-black">{trans("現在の学年を選んでください", studentGradeMode)}</h2>
+                                    <div className="mb-4 flex justify-center">
+                                        <div className="grid grid-cols-2 overflow-hidden rounded-xl border border-cyan-400/60 bg-slate-900 p-1">
+                                            {[
+                                                { mode: 'JAPANESE' as LanguageMode, label: '日本語' },
+                                                { mode: 'ENGLISH' as LanguageMode, label: 'English' },
+                                            ].map((option) => (
+                                                <button
+                                                    key={option.mode}
+                                                    type="button"
+                                                    onClick={() => setStudentGradeMode(option.mode)}
+                                                    className={`rounded-lg px-4 py-2 text-sm font-black transition-colors ${
+                                                        studentGradeMode === option.mode
+                                                            ? 'bg-cyan-300 text-slate-950'
+                                                            : 'text-cyan-100 hover:bg-cyan-900/70'
+                                                    }`}
+                                                >
+                                                    {option.label}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
                                     <p className="mb-4 text-center text-sm font-bold leading-6 text-slate-300">
-                                        {trans("学年に合わせて、毎日の課題と提出レポートの学年欄を用意します。あとから提出画面で訂正できます。", languageMode)}
+                                        {trans("学年に合わせて、毎日の課題と提出レポートの学年欄を用意します。あとから提出画面で訂正できます。", studentGradeMode)}
                                     </p>
                                     <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-                                        {STUDENT_GRADE_OPTIONS.map((grade) => (
+                                        {studentGradeOptions.map((grade) => (
                                             <button
                                                 key={grade}
                                                 onClick={() => saveStudentGrade(grade)}
