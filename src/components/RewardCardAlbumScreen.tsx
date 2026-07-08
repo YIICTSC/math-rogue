@@ -24,6 +24,9 @@ const RewardCardAlbumScreen: React.FC<RewardCardAlbumScreenProps> = ({
   const [inspectedCard, setInspectedCard] = useState<ICard | null>(null);
   const [deleteTargetCard, setDeleteTargetCard] = useState<ICard | null>(null);
   const isStartSelection = !!onSelect;
+  const savedCardCountLabel = languageMode === 'ENGLISH'
+    ? `${cards.length} ${cards.length === 1 ? 'card' : 'cards'} saved`
+    : `${cards.length}${trans('枚保存中', languageMode)}`;
 
   const confirmDelete = () => {
     if (!deleteTargetCard) return;
@@ -56,22 +59,22 @@ const RewardCardAlbumScreen: React.FC<RewardCardAlbumScreenProps> = ({
               <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-full border border-red-400/70 bg-red-950 text-red-100">
                 <Trash2 size={24} />
               </div>
-              <h3 className="mb-2 text-xl font-black text-white">ご褒美カードを削除しますか？</h3>
+              <h3 className="mb-2 text-xl font-black text-white">{trans('ご褒美カードを削除しますか？', languageMode)}</h3>
               <p className="mb-4 text-sm font-bold leading-relaxed text-slate-300">
-                「{trans(deleteTargetCard.name, languageMode)}」をカード帳から削除します。削除すると元に戻せません。
+                {trans('「', languageMode)}{trans(deleteTargetCard.name, languageMode)}{trans('」をカード帳から削除します。削除すると元に戻せません。', languageMode)}
               </p>
               <div className="grid grid-cols-2 gap-3">
                 <button
                   onClick={() => setDeleteTargetCard(null)}
                   className="rounded-lg border border-slate-500 bg-slate-800 px-3 py-2 text-sm font-black text-slate-100 hover:bg-slate-700"
                 >
-                  やめる
+                  {trans('やめる', languageMode)}
                 </button>
                 <button
                   onClick={confirmDelete}
                   className="rounded-lg border border-red-400 bg-red-700 px-3 py-2 text-sm font-black text-white hover:bg-red-600"
                 >
-                  削除する
+                  {trans('削除する', languageMode)}
                 </button>
               </div>
             </div>
@@ -88,10 +91,10 @@ const RewardCardAlbumScreen: React.FC<RewardCardAlbumScreenProps> = ({
             </button>
             <div className="text-right">
               <div className="flex items-center justify-end text-2xl font-black text-cyan-100 drop-shadow-[0_0_12px_rgba(34,211,238,0.8)]">
-                <Sparkles className="mr-2 text-yellow-200" size={28} /> ご褒美カード帳
+                <Sparkles className="mr-2 text-yellow-200" size={28} /> {trans('ご褒美カード帳', languageMode)}
               </div>
               <div className="text-xs font-bold text-slate-300">
-                {isStartSelection ? '旅に持っていくカードを1枚選べます' : `${cards.length}枚保存中`}
+                {isStartSelection ? trans('旅に持っていくカードを1枚選べます', languageMode) : savedCardCountLabel}
               </div>
             </div>
           </div>
@@ -101,13 +104,13 @@ const RewardCardAlbumScreen: React.FC<RewardCardAlbumScreenProps> = ({
               onClick={() => onSelect?.(null)}
               className="self-center rounded-xl border-2 border-slate-500 bg-slate-900/90 px-6 py-3 text-sm font-black text-slate-100 hover:bg-slate-800"
             >
-              今回は使わない
+              {trans('今回は使わない', languageMode)}
             </button>
           )}
 
           {cards.length === 0 ? (
             <div className="mx-auto mt-12 max-w-md rounded-2xl border border-slate-600 bg-slate-900/85 p-6 text-center text-sm font-bold text-slate-200">
-              課題を達成すると、ご褒美カードがここに保存されます。
+              {trans('課題を達成すると、ご褒美カードがここに保存されます。', languageMode)}
             </div>
           ) : (
             <div className="grid grid-cols-2 gap-4 pb-8 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
@@ -128,14 +131,14 @@ const RewardCardAlbumScreen: React.FC<RewardCardAlbumScreenProps> = ({
                         onClick={() => onSelect?.(card)}
                         className="rounded-lg bg-cyan-300 px-3 py-2 text-xs font-black text-slate-950 hover:bg-cyan-200"
                       >
-                        このカードで始める
+                        {trans('このカードで始める', languageMode)}
                       </button>
                     )}
                     <button
                       onClick={() => setDeleteTargetCard(card)}
                       className="flex items-center justify-center rounded-lg border border-red-500/60 bg-red-950/70 px-3 py-2 text-xs font-black text-red-100 hover:bg-red-900"
                     >
-                      <Trash2 className="mr-1" size={14} /> 削除
+                      <Trash2 className="mr-1" size={14} /> {trans('削除', languageMode)}
                     </button>
                   </div>
                 </div>

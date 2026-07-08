@@ -561,6 +561,50 @@ export const generateEvent = (
         ],
     };
 
+    const buildGenericHighSchoolChoices = (theme: ThemedEventTheme): Array<{ label: string; text: string; result: string; effect: HighSchoolEffect }> => {
+        const rewards: HighSchoolEffect[] = [
+            { kind: 'momentum' },
+            { kind: 'heal', amount: 10 },
+            { kind: 'gold', amount: 25 },
+            { kind: 'upgrade' },
+            { kind: 'maxHp', amount: 2 },
+            { kind: 'skillCard' },
+        ];
+        const rewardText = (effect: HighSchoolEffect): string => {
+            switch (effect.kind) {
+                case 'heal': return `HPを${effect.amount}回復する`;
+                case 'gold': return `${effect.amount}Gを得る`;
+                case 'upgrade': return 'カードを1枚強化する';
+                case 'maxHp': return `最大HP+${effect.amount}`;
+                case 'skillCard': return 'スキルカードを1枚得る';
+                default: return '小さな成果を得る';
+            }
+        };
+        const first = getStableTextIndex(`${theme.title}:first`, rewards.length);
+        const second = getStableTextIndex(`${theme.title}:second`, rewards.length);
+        const third = getStableTextIndex(`${theme.title}:third`, rewards.length);
+        return [
+            {
+                label: '首を突っ込む',
+                text: rewardText(rewards[first]),
+                result: `${theme.title}に踏み込むと、思ったより大きな手応えが残った。`,
+                effect: rewards[first],
+            },
+            {
+                label: '友人と動く',
+                text: rewardText(rewards[second]),
+                result: `${theme.title}を友人と切り抜け、笑い話にできるくらいには前へ進んだ。`,
+                effect: rewards[second],
+            },
+            {
+                label: '少し距離を置く',
+                text: rewardText(rewards[third]),
+                result: `${theme.title}から一歩引いて眺めると、見落としていたものに気づいた。`,
+                effect: rewards[third],
+            },
+        ];
+    };
+
     const applyHighSchoolEffect = (themeTitle: string, choice: { result: string; effect: HighSchoolEffect }) => {
         switch (choice.effect.kind) {
             case 'gold':
@@ -635,11 +679,12 @@ export const generateEvent = (
     };
 
     const buildThemedEvent = (theme: ThemedEventTheme, themeId: VisualThemeId): GameEvent => {
+        const choices = highSchoolChoices[theme.imageIndex] ?? buildGenericHighSchoolChoices(theme);
         return {
             title: theme.title,
             description: theme.description,
             imageKey: `${themeId}-event-${theme.imageIndex}`,
-            options: highSchoolChoices[theme.imageIndex].map(choice => ({
+            options: choices.map(choice => ({
                 label: choice.label,
                 text: choice.text,
                 action: () => applyHighSchoolEffect(theme.title, choice),

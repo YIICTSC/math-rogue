@@ -301,7 +301,7 @@ export const UPPER_PROBLEM_CATEGORIES: SubjectCategoryConfig[] = [
   },
 ];
 
-const NATIVE_ENGLISH_PROBLEM_CATEGORIES: SubjectCategoryConfig[] = [
+export const NATIVE_ENGLISH_PROBLEM_CATEGORIES: SubjectCategoryConfig[] = [
   {
     id: 'NATIVE_ELA',
     name: 'ELA',
@@ -1030,6 +1030,7 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
   const isMastered = (mode: string) => !!modeMasteryMap[mode];
   const getCategoryLabel = (id: SubjectCategoryType) => transProblemSubjectName(CATEGORY_LABELS[id] || id, languageMode);
   const getSubLabel = (_id: string, fallback: string) => transProblemSubjectName(fallback, languageMode);
+  const getUnitLabel = (name: string) => languageMode === 'ENGLISH' ? trans(name, languageMode) : name;
   const getUnitCorrectCount = (unit: { mode?: string; modes?: string[] }) => {
     if (unit.modes && unit.modes.length > 0) {
       return unit.modes.reduce((total, mode) => total + (modeCorrectCounts[mode] || 0), 0);
@@ -1148,7 +1149,7 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
       const modePool = Array.from(new Set(selectedUnits.flatMap((u) => u.modes || (u.mode ? [u.mode] : []))));
       const representativeMode = (selectedUnits[0]?.modes?.[0] || selectedUnits[0]?.mode || GameMode.MATH_G1_1) as string;
       const detailLabel = selectedUnits.length === 1
-        ? selectedUnits[0].name
+        ? getUnitLabel(selectedUnits[0].name)
         : selectedUnits.length > 0
         ? `${trans('ミックス選択', languageMode)} (${selectedUnits.length}${trans('単元', languageMode)})`
         : trans('単元未選択', languageMode);
@@ -1265,7 +1266,7 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
                       aria-hidden="true"
                     />
                     <span className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,rgba(255,255,255,0.08),transparent_36%,rgba(0,0,0,0.22))]" aria-hidden="true" />
-                    <span className="relative z-10 block pr-1" data-allow-japanese="true">{unit.name}</span>
+                    <span className="relative z-10 block pr-1" data-allow-japanese="true">{getUnitLabel(unit.name)}</span>
                     <span className="absolute bottom-1.5 left-2 z-10 h-1 w-[calc(100%-4.5rem)] overflow-hidden rounded-full bg-black/45 sm:left-2.5 sm:w-[calc(100%-5rem)]">
                       <span
                         className={`block h-full rounded-full ${progressPercent >= 100 ? 'bg-yellow-300' : 'bg-emerald-300'}`}
@@ -1512,7 +1513,7 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
                         aria-hidden="true"
                       />
                       <span className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,rgba(255,255,255,0.08),transparent_36%,rgba(0,0,0,0.22))]" aria-hidden="true" />
-                      <span className="relative z-10 block pr-1" data-allow-japanese="true">{unit.name}</span>
+                      <span className="relative z-10 block pr-1" data-allow-japanese="true">{getUnitLabel(unit.name)}</span>
                       <span className="absolute bottom-1.5 left-2 z-10 h-1 w-[calc(100%-4.5rem)] overflow-hidden rounded-full bg-black/45 sm:w-[calc(100%-5rem)]">
                         <span
                           className={`block h-full rounded-full ${progressPercent >= 100 ? 'bg-yellow-300' : 'bg-emerald-300'}`}
@@ -1673,7 +1674,7 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
             )}
             {canSelectAnswerMode && (
               <div className="bg-black/40 rounded-xl border border-slate-800 p-3 text-xs text-slate-300">
-                答え方: <span className="font-bold text-white">{answerMode === 'CHOICE' ? '4択' : '入力'}</span>
+                {trans('答え方', languageMode)}: <span className="font-bold text-white">{trans(answerMode === 'CHOICE' ? '4択' : '入力', languageMode)}</span>
               </div>
             )}
             {selectedCategory.uiType === 'grade_term' && !isUnitCategory && (
@@ -1701,7 +1702,7 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
               </div>
             )}
             <button onClick={onBack} className="mt-auto text-slate-400 hover:text-white flex items-center gap-2 transition-colors py-1 text-xs">
-              <ArrowLeft size={14} /> もどる
+              <ArrowLeft size={14} /> {trans('戻る', languageMode)}
             </button>
           </div>
         </div>

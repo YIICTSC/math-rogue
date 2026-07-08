@@ -8,6 +8,7 @@ import { resolveAnswerMode } from '../utils/answerMode';
 import { getUnitBoardSummary } from '../data/unitBoardSummaries';
 import RewardHintBanner from './RewardHintBanner';
 import UnitBoardModal from './UnitBoardModal';
+import { trans } from '../utils/textUtils';
 
 interface MathProblem {
   question: string;
@@ -279,8 +280,8 @@ const MathChallengeScreen: React.FC<MathChallengeScreenProps> = ({ onComplete, m
                 type="button"
                 onClick={() => setIsUnitBoardOpen(true)}
                 className="absolute left-3 top-3 z-20 inline-flex h-11 w-11 items-center justify-center rounded-full border border-yellow-100/45 bg-black/35 text-yellow-100 shadow-lg transition hover:bg-black/55"
-                aria-label="単元板書を開く"
-                title="単元板書"
+                aria-label={trans('単元板書を開く', languageMode)}
+                title={trans('単元板書', languageMode)}
             >
                 <BookOpen size={22} />
             </button>
@@ -313,14 +314,14 @@ const MathChallengeScreen: React.FC<MathChallengeScreenProps> = ({ onComplete, m
                   inputMode="numeric"
                   pattern="[0-9０-９,，\\s]*"
                   className={`w-full rounded-lg border-4 bg-white px-4 py-4 text-center text-3xl font-black text-slate-950 outline-none transition-colors ${isAnswered ? 'border-slate-400 opacity-80' : 'border-blue-500 focus:border-yellow-300'}`}
-                  placeholder="答えを入力"
+                  placeholder={trans('答えを入力', languageMode)}
                 />
                 <button
                   type="submit"
                   disabled={isAnswered || normalizeNumberInput(inputAnswer) === ''}
                   className="w-full rounded-lg border-b-4 border-blue-900 bg-blue-600 py-4 text-xl font-bold transition-all hover:bg-blue-500 active:translate-y-1 active:border-b-0 disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  決定
+                  {trans('決定', languageMode)}
                 </button>
               </form>
             ) : (

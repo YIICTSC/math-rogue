@@ -731,16 +731,20 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
   };
   const defaultDisplayedCategory = displayedCategories[0] || SUBJECT_CATEGORIES[0];
   const isUnitCategory = selectedCategory.id === 'MATH_GRADES' || selectedCategory.id === 'KOKUGO_GRADES' || selectedCategory.id === 'ENGLISH' || selectedCategory.id === 'LIFE' || selectedCategory.id === 'SCIENCE' || selectedCategory.id === 'SOCIAL' || selectedCategory.id === 'SUMMARY' || isNativeEnglishCategory(selectedCategory.id);
+  const assignmentForProblemSource = assignment || problemSourceAssignment || null;
+  const assignmentUsesNativeEnglishProblems = !!assignmentForProblemSource?.units.some((unit) => (
+    unit.modes.some((mode) => String(mode).startsWith('NATIVE_'))
+  ));
   const problemLanguageMode: LanguageMode =
-    languageMode === 'ENGLISH' && !isNativeEnglishCategory(selectedCategory.id) ? 'JAPANESE' : languageMode;
+    languageMode === 'ENGLISH' && !isNativeEnglishCategory(selectedCategory.id) && !assignmentUsesNativeEnglishProblems ? 'JAPANESE' : languageMode;
   const canSelectAnswerMode = selectedCategory.id === 'MATH' || selectedCategory.id === 'UPPER_MATH' || selectedCategory.id === 'KANJI' || selectedCategory.id === 'KANKEN' || selectedCategory.id === 'HARD_KANJI';
   const shouldContinueOnWrong = !!assignment || continueOnWrong;
-  const assignmentForProblemSource = assignment || problemSourceAssignment || null;
 
   // Voice feature control
   const [voiceEnabled, setVoiceEnabled] = useState(() => storageService.getEnglishVoiceEnabled());
   const getCategoryLabel = (name: string) => transProblemSubjectName(name, languageMode);
   const getSubLabel = (sub: SubModeConfig) => transProblemSubjectName(sub.name, languageMode);
+  const getUnitLabel = (name: string) => languageMode === 'ENGLISH' ? trans(name, languageMode) : name;
 
   useEffect(() => {
     audioService.init();
@@ -802,7 +806,7 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
     const representativeMode = (selectedUnits[0]?.modes?.[0] || selectedUnits[0]?.mode || GameMode.MATH_G1_1) as GameMode;
 
     const label = selectedUnits.length === 1
-      ? selectedUnits[0].name
+      ? getUnitLabel(selectedUnits[0].name)
       : selectedUnits.length > 0
       ? `${trans('ミックス選択', languageMode)} (${selectedUnits.length}${trans('単元', languageMode)})`
       : trans('単元未選択', languageMode);
@@ -1273,7 +1277,7 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
                                 aria-hidden="true"
                               />
                               <span className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,rgba(255,255,255,0.08),transparent_36%,rgba(0,0,0,0.22))]" aria-hidden="true" />
-                              <span className="relative z-10 block pr-1" data-allow-japanese="true">{unit.name}</span>
+                              <span className="relative z-10 block pr-1" data-allow-japanese="true">{getUnitLabel(unit.name)}</span>
                               <span className="absolute bottom-1.5 left-2 z-10 h-1 w-[calc(100%-4.5rem)] overflow-hidden rounded-full bg-black/45 sm:left-2.5 sm:w-[calc(100%-5rem)]">
                                 <span
                                   className={`block h-full rounded-full ${progressPercent >= 100 ? 'bg-yellow-300' : 'bg-emerald-300'}`}
@@ -1290,7 +1294,7 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
                     </div>
 
                     <div className="bg-black/40 px-2 py-1 rounded border border-slate-700 text-[10px] text-slate-300">
-                      {trans('出題範囲', languageMode)}: <span data-allow-japanese="true">{previewSelection ? (isUnitCategory ? previewSelection.subMode.name : transProblemSubjectName(previewSelection.subMode.name, languageMode)) : ''}</span>
+                      {trans('出題範囲', languageMode)}: <span data-allow-japanese="true">{previewSelection ? (isUnitCategory ? getUnitLabel(previewSelection.subMode.name) : transProblemSubjectName(previewSelection.subMode.name, languageMode)) : ''}</span>
                     </div>
                     {selectedMathUnitIds.length === 0 && (
                       <div className="text-[10px] text-amber-300">
@@ -1350,7 +1354,7 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
           <div className="lg:col-span-3 flex flex-col gap-3 overflow-y-auto custom-scrollbar shrink-0">
              <div className="bg-black/40 rounded-xl border border-slate-800 p-3">
               <div className="text-[10px] uppercase tracking-[0.2em] text-slate-500 mb-2">{trans('選択中', languageMode)}</div>
-              <div className="text-xs font-bold text-emerald-400">{getCategoryLabel(selectedCategory.name)} / <span data-allow-japanese="true">{isUnitCategory ? footerSelectionLabel : transProblemSubjectName(footerSelectionLabel, languageMode)}</span></div>
+              <div className="text-xs font-bold text-emerald-400">{getCategoryLabel(selectedCategory.name)} / <span data-allow-japanese="true">{isUnitCategory ? getUnitLabel(footerSelectionLabel) : transProblemSubjectName(footerSelectionLabel, languageMode)}</span></div>
             </div>
             {canSelectAnswerMode && (
               <div className="bg-black/40 rounded-xl border border-slate-800 p-3 text-xs text-slate-300">

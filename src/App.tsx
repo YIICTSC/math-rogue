@@ -162,13 +162,28 @@ const getAssignmentCustomTargetCorrect = (assignment: AssignmentPayload | null |
     return Math.min(customProblemCount, Math.max(1, Number(assignment?.customTargetCorrect || customProblemCount)));
 };
 
-const getAssignmentTargetSummary = (assignment: AssignmentPayload) => {
-    const unitSummaries = assignment.units.map(unit => `${unit.name} (${unit.targetCorrect || 10}問)`);
+const getAssignmentTargetSummary = (assignment: AssignmentPayload, languageMode: LanguageMode) => {
+    const unitSummaries = assignment.units.map(unit => {
+        const targetCorrect = unit.targetCorrect || 10;
+        return languageMode === 'ENGLISH'
+            ? `${trans(unit.name, languageMode)} (${targetCorrect} questions)`
+            : `${unit.name} (${targetCorrect}問)`;
+    });
     const customProblemCount = assignment.customProblems?.length || 0;
     if (customProblemCount > 0) {
-        unitSummaries.push(`オリジナル問題 (${customProblemCount}問中 ${getAssignmentCustomTargetCorrect(assignment)}問正解)`);
+        const customTargetCorrect = getAssignmentCustomTargetCorrect(assignment);
+        unitSummaries.push(languageMode === 'ENGLISH'
+            ? `${trans('オリジナル問題', languageMode)} (${customTargetCorrect} / ${customProblemCount} correct)`
+            : `オリジナル問題 (${customProblemCount}問中 ${customTargetCorrect}問正解)`);
     }
-    return unitSummaries.join(' / ') || 'オリジナル問題';
+    return unitSummaries.join(' / ') || trans('オリジナル問題', languageMode);
+};
+
+const formatAssignmentProgressUnitName = (name: string, languageMode: LanguageMode) => {
+    if (languageMode !== 'ENGLISH') return name;
+    const customRemaining = name.match(/^オリジナル問題 残り(\d+)問$/);
+    if (customRemaining) return `${trans('オリジナル問題', languageMode)} (${customRemaining[1]} remaining)`;
+    return trans(name, languageMode);
 };
 
 type UiPreviewBattleConfig = {
@@ -1361,8 +1376,8 @@ const App: React.FC = () => {
     }, [currentAssignment, currentUrlAssignmentAnswers]);
     const shouldPrioritizeCurrentAssignment = !!currentAssignment && !isCurrentUrlAssignmentComplete;
     const generatedDailyAssignment = useMemo(
-        () => shouldPrioritizeCurrentAssignment ? null : createDailyAssignment(dailyAssignmentProfile, storageService.getModeCorrectCounts()),
-        [shouldPrioritizeCurrentAssignment, dailyAssignmentProfile.grade, dailyAssignmentProfile.schoolYear]
+        () => shouldPrioritizeCurrentAssignment ? null : createDailyAssignment(dailyAssignmentProfile, modeCorrectCounts),
+        [shouldPrioritizeCurrentAssignment, dailyAssignmentProfile.grade, dailyAssignmentProfile.schoolYear, modeCorrectCounts]
     );
     const dailyAssignment = useMemo(
         () => generatedDailyAssignment && !completedDailyAssignmentIds.includes(generatedDailyAssignment.id)
@@ -11330,7 +11345,7 @@ const App: React.FC = () => {
         storageService.saveAssignmentAnswer({
             assignmentId: isAssignmentAnswer ? assignment?.id : undefined,
             mode: result.mode,
-            unitName: isCustomAssignmentAnswer ? 'オリジナル問題' : assignmentUnit?.name,
+            unitName: isCustomAssignmentAnswer ? trans('オリジナル問題', languageMode) : assignmentUnit?.name,
             problemId: result.problemId,
             problemKey: result.problemKey,
             question: result.question,
@@ -11379,7 +11394,7 @@ const App: React.FC = () => {
                 }
                 setAssignmentProgressNotice({
                     type: isAssignmentComplete ? 'ASSIGNMENT_COMPLETE' : 'UNIT_COMPLETE',
-                    unitName: 'オリジナル問題',
+                    unitName: trans('オリジナル問題', languageMode),
                     remainingUnitNames: remainingUnitsAfter.map(unit => unit.name),
                     rewardCard,
                     assignment: isAssignmentComplete ? assignment : undefined,
@@ -11427,7 +11442,7 @@ const App: React.FC = () => {
                 assignment: isAssignmentComplete ? assignment : undefined,
             });
         }
-    }, [activeAssignment, addMiniGameUnlockCorrectCount, correctCustomAssignmentProblemIds, createRewardCardForAssignment, currentAssignment, currentAssignmentAnswers, effectiveAssignment, markDailyAssignmentCompleted]);
+    }, [activeAssignment, addMiniGameUnlockCorrectCount, correctCustomAssignmentProblemIds, createRewardCardForAssignment, currentAssignment, currentAssignmentAnswers, effectiveAssignment, languageMode, markDailyAssignmentCompleted]);
 
     const removeRewardFromList = useCallback((rewards: RewardItem[], item: RewardItem) => {
         if (shouldClearAllCardRewards(item)) {
@@ -14030,11 +14045,11 @@ const App: React.FC = () => {
                                     </div>
                                     <div className={`assignment-letter-summary mb-3 rounded-xl border-2 bg-white/70 p-3 text-xs font-bold leading-6 sm:text-sm ${isTeacherAssignmentActive ? 'border-amber-300' : 'border-lime-300'}`}>
                                         <div>{trans(isTeacherAssignmentActive ? '先生から課題が届きました。' : '今日の学習課題です。', languageMode)}</div>
-                                        <div>{trans("期限:", languageMode)} {assignmentLetter.dueAt ? new Date(assignmentLetter.dueAt).toLocaleString('ja-JP') : trans('未設定', languageMode)}</div>
+                                        <div>{trans("期限:", languageMode)} {assignmentLetter.dueAt ? new Date(assignmentLetter.dueAt).toLocaleString(languageMode === 'ENGLISH' ? 'en-US' : 'ja-JP') : trans('未設定', languageMode)}</div>
                                         <div>{trans("形式:", languageMode)} {trans(assignmentLetter.gameMode === 'FREE' ? 'フリー' : '問題チャレンジのみ', languageMode)}</div>
                                         <div>{getAssignmentAnswerModeSummary(assignmentLetter, languageMode)}</div>
                                         <div className="mt-2 text-xs text-slate-700" data-allow-japanese>
-                                            {getAssignmentTargetSummary(assignmentLetter)}
+                                            {getAssignmentTargetSummary(assignmentLetter, languageMode)}
                                         </div>
                                     </div>
                                     <div className="assignment-letter-actions grid gap-2 sm:grid-cols-3">
@@ -14476,27 +14491,27 @@ const App: React.FC = () => {
                                 <div className="relative">
                                     <img
                                         src={ASSIGNMENT_INTRO_BANNER_IMAGE}
-                                        alt="デイリー課題とご褒美カードの紹介"
+                                        alt={trans("デイリー課題とご褒美カードの紹介", languageMode)}
                                         className="aspect-[3/1] w-full object-cover"
                                         draggable={false}
                                     />
                                     <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950/95 via-slate-950/75 to-transparent p-2">
                                         <div className="mb-1 text-xs font-black text-lime-100 sm:text-sm">{trans("今日の課題を達成して、ご褒美カードをゲットしよう！", languageMode)}</div>
                                         <div className="grid grid-cols-3 gap-1 text-[10px] font-black text-slate-100 sm:text-[11px]">
-                                            <div className="rounded-md border border-lime-300/50 bg-lime-300/15 px-2 py-1">課題に挑戦</div>
-                                            <div className="rounded-md border border-cyan-300/50 bg-cyan-300/15 px-2 py-1">目標達成</div>
-                                            <div className="rounded-md border border-fuchsia-300/50 bg-fuchsia-300/15 px-2 py-1">カード保存</div>
+                                            <div className="rounded-md border border-lime-300/50 bg-lime-300/15 px-2 py-1">{trans("課題に挑戦", languageMode)}</div>
+                                            <div className="rounded-md border border-cyan-300/50 bg-cyan-300/15 px-2 py-1">{trans("目標達成", languageMode)}</div>
+                                            <div className="rounded-md border border-fuchsia-300/50 bg-fuchsia-300/15 px-2 py-1">{trans("カード保存", languageMode)}</div>
                                         </div>
                                     </div>
                                 </div>
                             </div>
                             <div className={`assignment-letter-summary mb-3 rounded-xl border-2 bg-white/70 p-3 text-xs font-bold leading-6 sm:text-sm ${isTeacherAssignmentActive ? 'border-amber-300' : 'border-lime-300'}`}>
-                                <div>{isTeacherAssignmentActive ? '先生から課題が届きました。' : '今日の学習課題です。'}</div>
-                                <div>期限: {assignmentLetter.dueAt ? new Date(assignmentLetter.dueAt).toLocaleString('ja-JP') : '未設定'}</div>
-                                <div>形式: {assignmentLetter.gameMode === 'FREE' ? 'フリー' : '問題チャレンジのみ'}</div>
+                                <div>{trans(isTeacherAssignmentActive ? '先生から課題が届きました。' : '今日の学習課題です。', languageMode)}</div>
+                                <div>{trans("期限:", languageMode)} {assignmentLetter.dueAt ? new Date(assignmentLetter.dueAt).toLocaleString(languageMode === 'ENGLISH' ? 'en-US' : 'ja-JP') : trans('未設定', languageMode)}</div>
+                                <div>{trans("形式:", languageMode)} {trans(assignmentLetter.gameMode === 'FREE' ? 'フリー' : '問題チャレンジのみ', languageMode)}</div>
                                 <div>{getAssignmentAnswerModeSummary(assignmentLetter, languageMode)}</div>
                                 <div className="mt-2 text-xs text-slate-700" data-allow-japanese>
-                                    {getAssignmentTargetSummary(assignmentLetter)}
+                                    {getAssignmentTargetSummary(assignmentLetter, languageMode)}
                                 </div>
                             </div>
                             <div className="assignment-letter-actions grid gap-2 sm:grid-cols-3">
@@ -14544,7 +14559,7 @@ const App: React.FC = () => {
                                     }}
                                     className={`rounded-xl px-4 py-3 text-sm font-black text-slate-950 ${isTeacherAssignmentActive ? 'bg-amber-400 hover:bg-amber-300' : 'bg-lime-400 hover:bg-lime-300'}`}
                                 >
-                                    課題を始める
+                                    {trans("課題を始める", languageMode)}
                                 </button>
                                 <button
                                     onClick={() => {
@@ -14562,7 +14577,7 @@ const App: React.FC = () => {
                                     }}
                                     className="rounded-xl border border-slate-500 bg-white px-4 py-3 text-sm font-black text-slate-800 hover:bg-slate-100"
                                 >
-                                    あとで
+                                    {trans("あとで", languageMode)}
                                 </button>
                                 {isTeacherAssignmentActive ? (
                                     <button
@@ -14573,7 +14588,7 @@ const App: React.FC = () => {
                                         }}
                                         className="rounded-xl border border-red-400 bg-red-50 px-4 py-3 text-sm font-black text-red-700 hover:bg-red-100"
                                     >
-                                        課題解除
+                                        {trans("課題解除", languageMode)}
                                     </button>
                                 ) : (
                                     <button
@@ -14587,7 +14602,7 @@ const App: React.FC = () => {
                                         }}
                                         className="rounded-xl border border-emerald-400 bg-emerald-50 px-4 py-3 text-sm font-black text-emerald-700 hover:bg-emerald-100"
                                     >
-                                        進捗を見る
+                                        {trans("進捗を見る", languageMode)}
                                     </button>
                                 )}
                             </div>
@@ -14704,7 +14719,7 @@ const App: React.FC = () => {
                             </h2>
                             {assignmentProgressNotice.unitName && (
                                 <div className="mb-3 rounded-xl border border-emerald-500/40 bg-emerald-950/40 px-3 py-2 text-center text-sm font-black text-emerald-100">
-                                    {assignmentProgressNotice.unitName}
+                                    {formatAssignmentProgressUnitName(assignmentProgressNotice.unitName, languageMode)}
                                 </div>
                             )}
                             {assignmentProgressNotice.remainingUnitNames.length > 0 ? (
@@ -14712,7 +14727,7 @@ const App: React.FC = () => {
                                     <div className="mb-2 text-xs font-black text-slate-400">{trans("残りの単元", languageMode)}</div>
                                     <div className="space-y-1 text-sm font-bold text-slate-100">
                                         {assignmentProgressNotice.remainingUnitNames.map(name => (
-                                            <div key={name}>{name}</div>
+                                            <div key={name}>{formatAssignmentProgressUnitName(name, languageMode)}</div>
                                         ))}
                                     </div>
                                 </div>
@@ -14903,9 +14918,9 @@ const App: React.FC = () => {
                         {OFFLINE_DISTRIBUTABLE ? (
                             <div className="absolute inset-0 flex items-center justify-center bg-slate-950 p-4 text-white">
                                 <div className="max-w-md rounded-2xl border border-amber-500 bg-slate-900 p-6 text-center">
-                                    <div className="mb-2 text-xl font-black text-amber-300">レースモードは無効です</div>
+                                    <div className="mb-2 text-xl font-black text-amber-300">{trans("レースモードは無効です", languageMode)}</div>
                                     <div className="mb-4 text-sm text-slate-200">{OFFLINE_NETWORK_FEATURE_MESSAGE}</div>
-                                    <button onClick={returnToTitle} className="rounded-lg bg-amber-500 px-4 py-2 font-bold text-slate-950">タイトルへ戻る</button>
+                                    <button onClick={returnToTitle} className="rounded-lg bg-amber-500 px-4 py-2 font-bold text-slate-950">{trans("タイトルへ戻る", languageMode)}</button>
                                 </div>
                             </div>
                         ) : (
@@ -15490,7 +15505,7 @@ const App: React.FC = () => {
                             onAnswerResult={handleAssignmentAnswerResult}
                             debugSkip={isMathDebugSkipped}
                             isChallenge={false}
-                            rewardHint="正解するとゴールド獲得"
+                            rewardHint={trans("正解するとゴールド獲得", languageMode)}
                             languageMode={languageMode}
                         />
                     </div>
@@ -15506,7 +15521,7 @@ const App: React.FC = () => {
                             onAnswerResult={handleAssignmentAnswerResult}
                             debugSkip={isMathDebugSkipped}
                             isChallenge={false}
-                            rewardHint="正解するとゴールド獲得"
+                            rewardHint={trans("正解するとゴールド獲得", languageMode)}
                             languageMode={languageMode}
                         />
                     </div>
@@ -15520,7 +15535,7 @@ const App: React.FC = () => {
                             onAnswerResult={handleAssignmentAnswerResult}
                             debugSkip={isMathDebugSkipped}
                             isChallenge={false}
-                            rewardHint="正解するとゴールド獲得"
+                            rewardHint={trans("正解するとゴールド獲得", languageMode)}
                             languageMode={languageMode}
                         />
                     </div>
@@ -15538,7 +15553,7 @@ const App: React.FC = () => {
                             customProblems={localAssignmentProblemConfig?.mode && assignmentProblemSource?.gameMode === 'FREE' ? assignmentProblemSource.customProblems : undefined}
                             debugSkip={isMathDebugSkipped}
                             isChallenge={false}
-                            rewardHint="正解するとゴールド獲得"
+                            rewardHint={trans("正解するとゴールド獲得", languageMode)}
                             languageMode={languageMode}
                         />
                     </div>
@@ -15549,9 +15564,9 @@ const App: React.FC = () => {
                         {OFFLINE_DISTRIBUTABLE ? (
                             <div className="absolute inset-0 flex items-center justify-center bg-slate-950 p-4 text-white">
                                 <div className="max-w-md rounded-2xl border border-amber-500 bg-slate-900 p-6 text-center">
-                                    <div className="mb-2 text-xl font-black text-amber-300">協力モードは無効です</div>
+                                    <div className="mb-2 text-xl font-black text-amber-300">{trans("協力モードは無効です", languageMode)}</div>
                                     <div className="mb-4 text-sm text-slate-200">{OFFLINE_NETWORK_FEATURE_MESSAGE}</div>
-                                    <button onClick={returnToTitle} className="rounded-lg bg-amber-500 px-4 py-2 font-bold text-slate-950">タイトルへ戻る</button>
+                                    <button onClick={returnToTitle} className="rounded-lg bg-amber-500 px-4 py-2 font-bold text-slate-950">{trans("タイトルへ戻る", languageMode)}</button>
                                 </div>
                             </div>
                         ) : (
@@ -16112,7 +16127,7 @@ const App: React.FC = () => {
                                         <div className="rounded-3xl border border-cyan-500/20 bg-slate-900/70 p-3 sm:p-4">
                                             <div className="mb-3 flex items-center justify-between">
                                                 <div className="text-sm font-black tracking-[0.25em] uppercase text-cyan-200">Leaderboard</div>
-                                                <div className="text-xs text-slate-400">参加者 {sortedEntries.length} 人</div>
+                                                <div className="text-xs text-slate-400">{trans("参加者", languageMode)} {sortedEntries.length} {trans("人", languageMode)}</div>
                                             </div>
                                             <div className="flex flex-col gap-2 max-h-[34vh] overflow-y-auto custom-scrollbar pr-1">
                                                 {sortedEntries.map((entry, index) => (
@@ -16123,7 +16138,7 @@ const App: React.FC = () => {
                                                         <div className={`w-14 shrink-0 text-center text-lg font-black ${index === 0 ? 'text-yellow-300' : 'text-slate-300'}`}>#{index + 1}</div>
                                                         <div className="min-w-0 flex-1">
                                                             <div className="truncate font-black text-white">{entry.name}</div>
-                                                            <div className="text-[11px] text-slate-400">更新: {new Date(entry.updatedAt).toLocaleTimeString('ja-JP', { hour: '2-digit', minute: '2-digit' })}</div>
+                                                            <div className="text-[11px] text-slate-400">{trans("更新:", languageMode)} {new Date(entry.updatedAt).toLocaleTimeString(languageMode === 'ENGLISH' ? 'en-US' : 'ja-JP', { hour: '2-digit', minute: '2-digit' })}</div>
                                                         </div>
                                                         <div className="w-24 shrink-0 text-right text-cyan-200 font-black tabular-nums">{entry.score}</div>
                                                     </div>
@@ -16138,7 +16153,7 @@ const App: React.FC = () => {
                                             }}
                                             className="mt-5 w-full rounded-2xl border border-cyan-400/40 bg-gradient-to-r from-cyan-700 to-sky-600 py-3 font-black tracking-wide hover:from-cyan-600 hover:to-sky-500 shadow-lg shadow-cyan-900/30"
                                         >
-                                            タイトルへ戻る
+                                            {trans("タイトルへ戻る", languageMode)}
                                         </button>
                                     </>
                                 );
@@ -16167,7 +16182,7 @@ const App: React.FC = () => {
                         <div className="absolute inset-0 bg-red-950/72 pointer-events-none" />
                         <div className="game-over-content relative z-10 my-auto w-full max-w-2xl py-8">
                             <div className="game-over-main">
-                                <h1 className="game-over-title text-6xl mb-4 font-bold">しゅくだいがふえた…</h1>
+                                <h1 className="game-over-title text-6xl mb-4 font-bold">{trans("しゅくだいがふえた…", languageMode)}</h1>
                                 <p className="game-over-subtitle mb-8 text-2xl">Act {gameState.act} - Floor {gameState.floor}</p>
                             </div>
 

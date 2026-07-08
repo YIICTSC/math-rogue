@@ -6,6 +6,7 @@ import { AssignmentAnswerResult, AssignmentReviewProblem, GameMode, LanguageMode
 import { storageService } from '../services/storageService';
 import { ENGLISH_DATA, EnglishProblem } from '../data/englishData';
 import RewardHintBanner from './RewardHintBanner';
+import { trans } from '../utils/textUtils';
 
 interface EnglishChallengeScreenProps {
   onComplete: (correctCount: number) => void;
@@ -210,7 +211,7 @@ const EnglishChallengeScreen: React.FC<EnglishChallengeScreenProps> = ({ onCompl
             <button 
               onClick={toggleVoice}
               className={`p-2 rounded-full border transition-all ${voiceEnabled ? 'bg-cyan-600 border-cyan-300 text-white' : 'bg-gray-800 border-gray-600 text-gray-400'}`}
-              title={voiceEnabled ? '音声読み上げをオフにする' : '音声読み上げをオンにする'}
+              title={trans(voiceEnabled ? '音声読み上げをオフにする' : '音声読み上げをオンにする', languageMode)}
             >
               {voiceEnabled ? <Volume2 size={20} /> : <VolumeX size={20} />}
             </button>

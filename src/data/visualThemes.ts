@@ -623,15 +623,76 @@ export const HIGH_SCHOOL_EVENT_THEMES: HighSchoolEventTheme[] = [
   { title: '卒業式の花道', description: '花束と拍手の間を、三年間の時間が静かに通り過ぎていく。', imageIndex: 51 },
   { title: '卒業後の教室', description: '誰もいない教室に、夕日だけが最後まで残っている。', imageIndex: 52 },
   { title: '深夜のファミレス', description: '参考書とドリンクバーの明かりの中で、友人たちがまだ粘っている。', imageIndex: 53 },
+  { title: '放課後の握手同盟', description: '校門の夕焼けの前で、別々に戦っていた二人が初めて同じ目的に手を伸ばす。', imageIndex: 54 },
+  { title: '夜の光る自販機', description: '校舎裏の自販機が、見たことのない飲み物を一つだけ光らせている。', imageIndex: 55 },
+  { title: '屋上告白と小さな門', description: '言いかけた言葉の上で、小さな異世界の門がぽんと開いた。', imageIndex: 56 },
+  { title: '嵐の日の即席めん', description: '帰れない教室で、友人たちと分けた湯気が妙に心強い。', imageIndex: 57 },
+  { title: '重力の軽い廊下', description: 'ロッカーと上履きが少し浮き、廊下全体が寝ぼけたように揺れている。', imageIndex: 58 },
+  { title: '本の中の小さな森', description: '図書室で開いた本のページに、指先ほどの森と風が生まれている。', imageIndex: 59 },
+  { title: '伝説バトンのリレー', description: 'リレーのバトンがまるで聖剣のように光り、走者の背中を押す。', imageIndex: 60 },
+  { title: '天文部の異世界観測', description: '望遠鏡の先には星ではなく、雲に浮かぶ城が映っていた。', imageIndex: 61 },
+  { title: '紙ドラゴンの生徒会室', description: '山積みの資料が折り重なり、紙のドラゴンになって議題を守っている。', imageIndex: 62 },
+  { title: '雨待ちイヤホン', description: 'バス停で片方ずつイヤホンを分けると、雨音まで少し優しく聞こえた。', imageIndex: 63 },
+  { title: '体育倉庫の召喚陣', description: 'ボールとフラフープが妙にきれいな円を作り、倉庫の床がうっすら光る。', imageIndex: 64 },
+  { title: '笑う肖像画', description: '美術室の描きかけの顔が、ほんの一瞬だけ励ますように笑った。', imageIndex: 65 },
+  { title: '文化祭カフェの本音', description: 'エプロン姿の相手が差し出した一皿に、いつもより少しだけ勇気が混じる。', imageIndex: 66 },
+  { title: '泡だらけの化学準備室', description: 'フラスコから色とりどりの泡があふれ、失敗のはずが拍手に変わった。', imageIndex: 67 },
+  { title: '夢光る保健室', description: '白いカーテンの向こうから、誰かの夢みたいな光がゆっくり漏れている。', imageIndex: 68 },
+  { title: '屋上ピクニック同盟', description: '購買パンを並べただけの昼食が、仲間との作戦会議になっていく。', imageIndex: 69 },
+  { title: '靴箱の招待状', description: '靴箱の奥で、差出人不明の招待状が淡く光りながら待っている。', imageIndex: 70 },
+  { title: '勝手に書くチョーク', description: '真夜中の黒板に、誰も持っていないチョークが解法を書き続けている。', imageIndex: 71 },
+  { title: '宝石カレーの昼休み', description: '食堂の鍋の中で、今日のカレーだけが宝箱みたいに輝いている。', imageIndex: 72 },
+  { title: '夕焼け自転車修理', description: '壊れた自転車を直すうち、言えなかった感謝まで少し直っていく。', imageIndex: 73 },
+  { title: '中庭を飛ぶラブレター', description: '風にさらわれた手紙を追って、校舎中が妙な恋の協力者になる。', imageIndex: 74 },
+  { title: '水槽の小さな人魚', description: '教室の水槽に、魚ではない小さな影が尾びれを揺らしている。', imageIndex: 75 },
+  { title: '秘密放送のマイク', description: '放送室のマイクが光り、まだ誰も知らない校内ニュースを告げようとする。', imageIndex: 76 },
+  { title: '雲まで続く階段', description: '踊り場の先が空へ伸び、雲の上からチャイムが聞こえてくる。', imageIndex: 77 },
+  { title: 'ベンチ裏の勝守り', description: '野球部のベンチで見つけた小さなお守りが、夕日の中で強く光る。', imageIndex: 78 },
+  { title: '乗り過ごし友情線', description: '降りる駅を過ぎてしまったのに、笑いすぎて誰も責める気になれない。', imageIndex: 79 },
+  { title: '星形パンケーキ実験', description: '家庭科室のフライパンで、なぜか星座みたいなパンケーキが焼けた。', imageIndex: 80 },
+  { title: '付箋オカルト研究会', description: '机の上の付箋がふわふわ浮き、研究会の仮説を勝手に並べ替える。', imageIndex: 81 },
+  { title: '水晶葉の園芸部', description: '花壇の芽が透明な葉を広げ、朝の光を小さな虹に変えている。', imageIndex: 82 },
+  { title: 'スポットライト討論会', description: '討論の熱が上がるほど、教室の明かりが舞台みたいに二人を照らす。', imageIndex: 83 },
+  { title: '雪の日の共有マフラー', description: '白くなった窓辺で、一本のマフラーが二人の沈黙を少し近づける。', imageIndex: 84 },
+  { title: '答案は宝の地図', description: '返ってきた答案の赤字をつなぐと、校内のどこかを示す地図になった。', imageIndex: 85 },
+  { title: 'もう一つの月の水槽', description: '屋上の貯水槽に映る月だけが、空とは違う向きで揺れている。', imageIndex: 86 },
+  { title: '逆回りの教室時計', description: '放課後の時計が逆に進み、失敗した一問だけをやり直せと急かしてくる。', imageIndex: 87 },
+  { title: '本物っぽいお化け屋敷', description: '文化祭の作り物のはずの影が、妙に礼儀正しく道を譲ってくれた。', imageIndex: 88 },
+  { title: '同じ本の指先', description: '図書室で同じ本に伸ばした手が触れそうになり、ページの音だけが響く。', imageIndex: 89 },
+  { title: '段ボール宇宙船計画', description: '教室の片隅で組んだ宇宙船が、なぜか発射前みたいな音を立てている。', imageIndex: 90 },
+  { title: '王冠が出る自販機', description: '自販機の取り出し口に、小さな光る王冠がころんと落ちてきた。', imageIndex: 91 },
+  { title: '月夜の自動ピアノ', description: '無人の音楽室でピアノが一曲だけ弾き、窓の月まで聞き入っている。', imageIndex: 92 },
+  { title: '花壇下の入口', description: '園芸部のシャベルが当たった土の下に、別世界へ続く光の縁が見えた。', imageIndex: 93 },
+  { title: '木刀の火花', description: '剣道場の稽古で木刀が打ち合うたび、火花のような決意が散る。', imageIndex: 94 },
+  { title: '返された傘', description: '雨の屋上で返された傘には、借りていた時間の温かさまで残っていた。', imageIndex: 95 },
+  { title: '掃除バケツ大暴走', description: '廊下を転がるバケツを追いかけるうち、なぜか全員が笑って走っている。', imageIndex: 96 },
+  { title: '脱走ドットモンスター', description: '情報室の画面から、四角い小さなモンスターたちが机の上へ飛び出した。', imageIndex: 97 },
+  { title: 'おかず交換会議', description: '昼休みの机でおかずが行き交い、友情の交渉術が磨かれていく。', imageIndex: 98 },
+  { title: '校舎裏の古い祠', description: '倉庫の奥の祠に手を合わせると、風もないのに鈴が小さく鳴った。', imageIndex: 99 },
+  { title: '昼のオーロラ窓', description: '授業中の窓いっぱいに、ありえない色のオーロラが静かに流れている。', imageIndex: 100 },
+  { title: '試験前のライバルノート', description: '言葉少ないライバルが、机の端にそっと自分のノートを滑らせてくる。', imageIndex: 101 },
+  { title: '真昼の星空プール', description: '昼のプールの水面に、夜空みたいな星が深く沈んでいる。', imageIndex: 102 },
+  { title: '徹夜組のコンビニ作戦', description: '深夜のコンビニで選ぶお菓子が、明け方まで戦う作戦会議になる。', imageIndex: 103 },
+  { title: '筆箱の眠り竜', description: '開けた筆箱の中で、小さな竜が鉛筆を抱えて気持ちよさそうに眠っていた。', imageIndex: 104 },
+  { title: '黒板の異世界市場', description: '黒板いっぱいに描かれた扉の向こうから、見知らぬ市場の声が漏れてくる。', imageIndex: 105 },
+  { title: '応援団の友情エール', description: '声を合わせた瞬間、校庭の熱気が仲間全員の背中を押した。', imageIndex: 106 },
+  { title: '水族館前の告白予行', description: '光る水槽の前で、練習のはずの言葉が本音に近づいていく。', imageIndex: 107 },
+  { title: '新聞部の謎スクープ', description: '校内新聞の締切前、誰も知らない噂だけが写真より先に走り出す。', imageIndex: 108 },
+  { title: '茶碗に映る遠い王国', description: '茶道部の一服に目を落とすと、茶碗の底に知らない王国が揺れていた。', imageIndex: 109 },
+  { title: '屋上温室の蛍', description: '屋上の小さな温室で、季節外れの蛍がガラス越しに瞬いている。', imageIndex: 110 },
+  { title: '階段の仲直り', description: '言い合いのあと、階段に並んで座ると謝る言葉が少しだけ軽くなった。', imageIndex: 111 },
+  { title: '舞台袖の手のひら', description: '音楽祭の出番前、そっと握られた手が緊張を半分だけ持っていく。', imageIndex: 112 },
+  { title: '机を回る小惑星', description: '理科準備室の机の上で、小さな惑星たちがノートの周りをゆっくり回る。', imageIndex: 113 },
 ];
 
 const HIGH_SCHOOL_NEUTRAL_EVENT_INDICES = [
   0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 53,
+  54, 55, 58, 59, 62, 64, 65, 68, 70, 71, 75, 76, 77, 81, 85, 86, 87, 91, 92, 97, 99, 100, 104, 105, 108, 109, 113,
 ];
-const HIGH_SCHOOL_SPRING_EVENT_INDICES = [18, 19, 20, 21, 22, 23, 24, 25, 26];
-const HIGH_SCHOOL_SUMMER_EVENT_INDICES = [27, 28, 29, 30, 31, 32, 33, 34, 35];
-const HIGH_SCHOOL_AUTUMN_EVENT_INDICES = [36, 37, 38, 39, 40, 41, 42, 43, 44];
-const HIGH_SCHOOL_WINTER_EVENT_INDICES = [45, 46, 47, 48, 49, 50];
+const HIGH_SCHOOL_SPRING_EVENT_INDICES = [18, 19, 20, 21, 22, 23, 24, 25, 26, 56, 61, 73, 74, 82, 89, 93, 95, 98, 101, 111];
+const HIGH_SCHOOL_SUMMER_EVENT_INDICES = [27, 28, 29, 30, 31, 32, 33, 34, 35, 57, 60, 63, 67, 69, 72, 78, 80, 83, 90, 94, 96, 102, 106, 107, 110, 112];
+const HIGH_SCHOOL_AUTUMN_EVENT_INDICES = [36, 37, 38, 39, 40, 41, 42, 43, 44, 66, 79, 88, 103];
+const HIGH_SCHOOL_WINTER_EVENT_INDICES = [45, 46, 47, 48, 49, 50, 84];
 const HIGH_SCHOOL_FINALE_EVENT_INDICES = [51, 52];
 
 const themesFromIndices = (indices: number[]) =>
@@ -639,41 +700,21 @@ const themesFromIndices = (indices: number[]) =>
 
 const getSeasonalHighSchoolEventPool = (act = 1, floor = 1): HighSchoolEventTheme[] => {
   const safeAct = Math.max(1, act);
-  const safeFloor = Math.max(1, floor);
   const neutral = themesFromIndices(HIGH_SCHOOL_NEUTRAL_EVENT_INDICES);
 
   if (safeAct <= 1) {
-    if (safeFloor <= 6) {
-      return [...themesFromIndices(HIGH_SCHOOL_SPRING_EVENT_INDICES), ...neutral];
-    }
-    if (safeFloor <= 10) {
-      return [
-        ...themesFromIndices(HIGH_SCHOOL_SPRING_EVENT_INDICES),
-        ...themesFromIndices(HIGH_SCHOOL_SUMMER_EVENT_INDICES),
-        ...neutral,
-      ];
-    }
-    return [...themesFromIndices(HIGH_SCHOOL_SUMMER_EVENT_INDICES), ...neutral];
+    return [...themesFromIndices(HIGH_SCHOOL_SPRING_EVENT_INDICES), ...neutral];
   }
 
   if (safeAct === 2) {
-    if (safeFloor <= 7) {
-      return [...themesFromIndices(HIGH_SCHOOL_SUMMER_EVENT_INDICES), ...neutral];
-    }
-    return [...themesFromIndices(HIGH_SCHOOL_AUTUMN_EVENT_INDICES), ...neutral];
+    return [
+      ...themesFromIndices(HIGH_SCHOOL_SUMMER_EVENT_INDICES),
+      ...themesFromIndices(HIGH_SCHOOL_AUTUMN_EVENT_INDICES),
+      ...neutral,
+    ];
   }
 
   if (safeAct === 3) {
-    if (safeFloor <= 5) {
-      return [
-        ...themesFromIndices(HIGH_SCHOOL_AUTUMN_EVENT_INDICES),
-        ...themesFromIndices(HIGH_SCHOOL_WINTER_EVENT_INDICES),
-        ...neutral,
-      ];
-    }
-    if (safeFloor <= 10) {
-      return [...themesFromIndices(HIGH_SCHOOL_WINTER_EVENT_INDICES), ...neutral];
-    }
     return [
       ...themesFromIndices(HIGH_SCHOOL_FINALE_EVENT_INDICES),
       ...themesFromIndices(HIGH_SCHOOL_WINTER_EVENT_INDICES),

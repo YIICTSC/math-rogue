@@ -6,6 +6,7 @@ import { storageService } from '../services/storageService';
 import { HARD_KANJI_DATA, KANJI_DATA, KANKEN_DATA, KanjiProblem } from '../data/kanjiData';
 import { resolveAnswerMode } from '../utils/answerMode';
 import RewardHintBanner from './RewardHintBanner';
+import { trans } from '../utils/textUtils';
 
 interface KanjiChallengeScreenProps {
   onComplete: (correctCount: number) => void;
@@ -212,11 +213,11 @@ const KanjiChallengeScreen: React.FC<KanjiChallengeScreenProps> = ({ onComplete,
             <div className="basic-challenge-question bg-black/40 border-4 border-white p-8 rounded-lg mb-8 shadow-2xl relative overflow-hidden flex flex-col items-center justify-center min-h-[260px]">
                 {currentProblem.hint && (storageService.getHintStreaks()[mode] || 0) < 3 && (
                     <div className="bg-blue-900/40 p-2 rounded border border-blue-500/30 mb-4 w-full animate-in fade-in slide-in-from-top-2">
-                        <div className="text-[10px] text-blue-300 font-bold mb-1">ヒント</div>
+                        <div className="text-[10px] text-blue-300 font-bold mb-1">{trans('ヒント', languageMode)}</div>
                         <div className="text-xs text-gray-200 leading-relaxed">{currentProblem.hint}</div>
                     </div>
                 )}
-                <div className="text-xs text-gray-400 mb-2">この漢字の読み方は？</div>
+                <div className="text-xs text-gray-400 mb-2">{trans('この漢字の読み方は？', languageMode)}</div>
                 <h3 className="text-7xl font-bold text-white tracking-widest font-serif">{currentProblem.question}</h3>
                 
                 {feedback && (
@@ -239,14 +240,14 @@ const KanjiChallengeScreen: React.FC<KanjiChallengeScreenProps> = ({ onComplete,
                   disabled={isAnswered}
                   autoFocus
                   className={`w-full rounded-lg border-4 bg-white px-4 py-4 text-center text-2xl font-black text-slate-950 outline-none transition-colors ${isAnswered ? 'border-slate-400 opacity-80' : 'border-cyan-500 focus:border-yellow-300'}`}
-                  placeholder="読み方を入力"
+                  placeholder={trans('読み方を入力', languageMode)}
                 />
                 <button
                   type="submit"
                   disabled={isAnswered || normalize(inputAnswer) === ''}
                   className="w-full rounded-lg border-b-4 border-cyan-950 bg-cyan-700 py-4 text-xl font-bold transition-all hover:bg-cyan-600 active:translate-y-1 active:border-b-0 disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                  決定
+                  {trans('決定', languageMode)}
                 </button>
               </form>
             ) : (

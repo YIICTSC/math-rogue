@@ -2,7 +2,7 @@ import React, { useMemo, useState } from 'react';
 import { ArrowLeft, Download, FileText, UserRound } from 'lucide-react';
 import { AssignmentPayload, LanguageMode, StudentProfile } from '../types';
 import { storageService } from '../services/storageService';
-import { STUDENT_GRADE_OPTIONS, getCurrentSchoolYear } from '../utils/dailyAssignmentUtils';
+import { getCurrentSchoolYear, getStudentGradeOptions } from '../utils/dailyAssignmentUtils';
 import { trans } from '../utils/textUtils';
 
 interface SubmissionScreenProps {
@@ -20,10 +20,10 @@ const formatDuration = (ms: number, languageMode: LanguageMode = 'JAPANESE') => 
   return `${minutes}分${seconds.toString().padStart(2, '0')}秒`;
 };
 
-const formatDate = (value?: string) => {
-  if (!value) return '未設定';
+const formatDate = (value?: string, languageMode: LanguageMode = 'JAPANESE') => {
+  if (!value) return trans('未設定', languageMode);
   const date = new Date(value);
-  return Number.isNaN(date.getTime()) ? value : date.toLocaleString('ja-JP');
+  return Number.isNaN(date.getTime()) ? value : date.toLocaleString(languageMode === 'ENGLISH' ? 'en-US' : 'ja-JP');
 };
 
 const sanitizeFileNamePart = (value: string) =>
@@ -82,6 +82,10 @@ const SubmissionScreen: React.FC<SubmissionScreenProps> = ({ onBack, assignment,
     if (!latest) return answer.answeredAt;
     return new Date(answer.answeredAt).getTime() > new Date(latest).getTime() ? answer.answeredAt : latest;
   }, undefined);
+  const studentGradeOptions = useMemo(() => getStudentGradeOptions(languageMode), [languageMode]);
+  const formatQuestionCount = (count: number) => languageMode === 'ENGLISH' ? `${count} questions` : `${count}問`;
+  const formatUnitName = (name: string) => languageMode === 'ENGLISH' ? trans(name, languageMode) : name;
+  const formatTargetTitle = (title: string) => languageMode === 'ENGLISH' ? trans(title, languageMode) : title;
 
   const updateProfile = (patch: Partial<StudentProfile>) => {
     const next = { ...profile, ...patch };
@@ -92,22 +96,35 @@ const SubmissionScreen: React.FC<SubmissionScreenProps> = ({ onBack, assignment,
 
   const buildReportHtml = () => {
     const pageOrientation = window.innerWidth > window.innerHeight ? 'landscape' : 'portrait';
+    const useEnglish = languageMode === 'ENGLISH';
+    const classNamePart = sanitizeFileNamePart(profile.className)
+      ? useEnglish ? `Class${sanitizeFileNamePart(profile.className)}` : `${sanitizeFileNamePart(profile.className)}組`
+      : '';
+    const numberPart = sanitizeFileNamePart(profile.number)
+      ? useEnglish ? `No${sanitizeFileNamePart(profile.number)}` : `${sanitizeFileNamePart(profile.number)}番`
+      : '';
     const reportFileName = [
       sanitizeFileNamePart(profile.grade),
-      sanitizeFileNamePart(profile.className) ? `${sanitizeFileNamePart(profile.className)}組` : '',
-      sanitizeFileNamePart(profile.number) ? `${sanitizeFileNamePart(profile.number)}番` : '',
+      classNamePart,
+      numberPart,
       sanitizeFileNamePart(profile.name),
-      sanitizeFileNamePart(assignment?.title || '学習実績'),
-    ].filter(Boolean).join('_') || '学習ローグ提出レポート';
+      sanitizeFileNamePart(assignment?.title || trans('学習実績', languageMode)),
+    ].filter(Boolean).join('_') || trans('学習ローグ提出レポート', languageMode);
+    const reportTitle = trans('学習ローグ 提出レポート', languageMode);
+    const targetTitle = assignment ? formatTargetTitle(assignment.title) : trans('自身の学習実績', languageMode);
+    const createdAt = new Date().toLocaleString(useEnglish ? 'en-US' : 'ja-JP');
+    const profileLine = useEnglish
+      ? `${profile.grade || '-'} / ${trans('Class', languageMode)} ${profile.className || '-'} / ${trans('No.', languageMode)} ${profile.number || '-'} / ${profile.name || '-'}`
+      : `${profile.grade || '-'} ${profile.className || '-'}組 ${profile.number || '-'}番 ${profile.name || '-'}`;
     return `
 <!doctype html>
-<html lang="ja">
+<html lang="${useEnglish ? 'en' : 'ja'}">
 <head>
 <meta charset="utf-8">
-<title>${reportFileName}</title>
+<title>${escapeHtml(reportFileName)}</title>
 <style>
 @page { size: A4 ${pageOrientation}; margin: 12mm; }
-body { font-family: "Yu Gothic", "Meiryo", sans-serif; padding: 32px; color: #0f172a; }
+body { font-family: ${useEnglish ? 'Arial, sans-serif' : '"Yu Gothic", "Meiryo", sans-serif'}; padding: 32px; color: #0f172a; }
 h1 { font-size: 24px; margin: 0 0 16px; }
 .meta { border: 1px solid #94a3b8; padding: 14px; margin-bottom: 18px; }
 .grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-bottom: 18px; }
@@ -121,21 +138,21 @@ th { background: #e2e8f0; }
 </style>
 </head>
 <body>
-<h1>学習ローグ 提出レポート</h1>
+<h1>${escapeHtml(reportTitle)}</h1>
 <div class="meta">
-  <div>課題: ${assignment?.title || '自身の学習実績'}</div>
-  <div>期限: ${assignment ? formatDate(assignment.dueAt) : 'なし'}</div>
-  <div>学年・組・番号・名前: ${profile.grade || '-'} ${profile.className || '-'}組 ${profile.number || '-'}番 ${profile.name || '-'}</div>
-  <div>作成日時: ${new Date().toLocaleString('ja-JP')}</div>
+  <div>${trans('課題:', languageMode)} ${escapeHtml(targetTitle)}</div>
+  <div>${trans('期限:', languageMode)} ${assignment ? formatDate(assignment.dueAt, languageMode) : trans('なし', languageMode)}</div>
+  <div>${trans('学年・組・番号・名前:', languageMode)} ${escapeHtml(profileLine)}</div>
+  <div>${trans('作成日時:', languageMode)} ${escapeHtml(createdAt)}</div>
 </div>
-${unitProgress.length > 0 ? `<table style="margin-bottom:18px"><thead><tr><th>単元</th><th>目標</th><th>正答</th><th>進捗</th></tr></thead><tbody>${unitProgress.map((item) => `<tr><td>${item.unit.name}</td><td>${item.target}</td><td>${item.correct}</td><td>${item.percent}%</td></tr>`).join('')}</tbody></table>` : ''}
+${unitProgress.length > 0 ? `<table style="margin-bottom:18px"><thead><tr><th>${trans('単元', languageMode)}</th><th>${trans('目標', languageMode)}</th><th>${trans('正答', languageMode)}</th><th>${trans('進捗', languageMode)}</th></tr></thead><tbody>${unitProgress.map((item) => `<tr><td>${escapeHtml(formatUnitName(item.unit.name))}</td><td>${item.target}</td><td>${item.correct}</td><td>${item.percent}%</td></tr>`).join('')}</tbody></table>` : ''}
 <div class="grid">
-  <div class="cell"><div class="label">回答数</div><div class="value">${answerCount}</div></div>
-  <div class="cell"><div class="label">正答数</div><div class="value">${correctCount}</div></div>
-  <div class="cell"><div class="label">正答率</div><div class="value">${accuracy}%</div></div>
-  <div class="cell"><div class="label">回答時間</div><div class="value">${formatDuration(elapsedMs)}</div></div>
+  <div class="cell"><div class="label">${trans('回答数', languageMode)}</div><div class="value">${answerCount}</div></div>
+  <div class="cell"><div class="label">${trans('正答数', languageMode)}</div><div class="value">${correctCount}</div></div>
+  <div class="cell"><div class="label">${trans('正答率', languageMode)}</div><div class="value">${accuracy}%</div></div>
+  <div class="cell"><div class="label">${trans('回答時間', languageMode)}</div><div class="value">${formatDuration(elapsedMs, languageMode)}</div></div>
 </div>
-${mistakeRows.length > 0 ? `<h2>間違えた問題と再出題結果</h2><table><thead><tr><th>問題</th><th>自分の回答</th><th>正解</th><th>再出題結果</th></tr></thead><tbody>${mistakeRows.map(({ answer, retry }) => `<tr><td>${escapeHtml(answer.question || answer.problemKey)}</td><td>${escapeHtml(answer.selectedAnswer)}</td><td>${escapeHtml(answer.correctAnswer)}</td><td>${retry ? (retry.correct ? '正答' : '不正解') : '未出題'}${retry ? `<br><span class="label">回答: ${escapeHtml(retry.selectedAnswer)}</span>` : ''}</td></tr>`).join('')}</tbody></table>` : ''}
+${mistakeRows.length > 0 ? `<h2>${trans('間違えた問題と再出題結果', languageMode)}</h2><table><thead><tr><th>${trans('問題', languageMode)}</th><th>${trans('自分の回答', languageMode)}</th><th>${trans('正解', languageMode)}</th><th>${trans('再出題結果', languageMode)}</th></tr></thead><tbody>${mistakeRows.map(({ answer, retry }) => `<tr><td>${escapeHtml(answer.question || answer.problemKey)}</td><td>${escapeHtml(answer.selectedAnswer)}</td><td>${escapeHtml(answer.correctAnswer)}</td><td>${retry ? (retry.correct ? trans('正答', languageMode) : trans('不正解', languageMode)) : trans('未出題', languageMode)}${retry ? `<br><span class="label">${trans('回答:', languageMode)} ${escapeHtml(retry.selectedAnswer)}</span>` : ''}</td></tr>`).join('')}</tbody></table>` : ''}
 <script>window.onload = () => window.print();</script>
 </body>
 </html>`;
@@ -179,7 +196,7 @@ ${mistakeRows.length > 0 ? `<h2>間違えた問題と再出題結果</h2><table>
                   data-allow-japanese
                 >
                   <option value="">{trans('未設定', languageMode)}</option>
-                  {STUDENT_GRADE_OPTIONS.map((grade) => (
+                  {studentGradeOptions.map((grade) => (
                     <option key={grade} value={grade}>{grade}</option>
                   ))}
                 </select>
@@ -200,11 +217,11 @@ ${mistakeRows.length > 0 ? `<h2>間違えた問題と再出題結果</h2><table>
 
             <div className="submission-target mt-5 rounded-xl border border-emerald-500/30 bg-emerald-950/25 p-4">
               <div className="text-xs font-bold text-emerald-200">{trans('対象', languageMode)}</div>
-              <div className="mt-1 text-xl font-black" data-allow-japanese>{assignment?.title || trans('自身の学習実績', languageMode)}</div>
-              <div className="mt-1 text-xs text-slate-300">{trans('期限:', languageMode)} {assignment ? formatDate(assignment.dueAt) : trans('なし', languageMode)}</div>
+              <div className="mt-1 text-xl font-black" data-allow-japanese>{assignment ? formatTargetTitle(assignment.title) : trans('自身の学習実績', languageMode)}</div>
+              <div className="mt-1 text-xs text-slate-300">{trans('期限:', languageMode)} {assignment ? formatDate(assignment.dueAt, languageMode) : trans('なし', languageMode)}</div>
               {assignment && (
                 <div className="mt-3 text-xs leading-5 text-slate-200" data-allow-japanese>
-                  {assignment.units.map((unit) => `${unit.name} (${unit.targetCorrect || 10}問)`).join(' / ') || 'オリジナル問題'}
+                  {assignment.units.map((unit) => `${formatUnitName(unit.name)} (${formatQuestionCount(unit.targetCorrect || 10)})`).join(' / ') || trans('オリジナル問題', languageMode)}
                 </div>
               )}
             </div>
@@ -224,7 +241,7 @@ ${mistakeRows.length > 0 ? `<h2>間違えた問題と再出題結果</h2><table>
                 </div>
               ))}
             </div>
-            <div className="mt-3 text-xs text-slate-400">{trans('最終回答:', languageMode)} {formatDate(latestAt)}</div>
+            <div className="mt-3 text-xs text-slate-400">{trans('最終回答:', languageMode)} {formatDate(latestAt, languageMode)}</div>
             {unitProgress.length > 0 && (
               <div className="mt-4 rounded-lg border border-slate-700 bg-slate-900/70 p-3">
                 <div className="mb-2 text-sm font-black text-emerald-200">{trans('単元別目標', languageMode)}</div>
@@ -232,7 +249,7 @@ ${mistakeRows.length > 0 ? `<h2>間違えた問題と再出題結果</h2><table>
                   {unitProgress.map((item) => (
                     <div key={item.unit.id}>
                       <div className="mb-1 flex items-center justify-between gap-2 text-xs">
-                        <span className="font-bold text-slate-100" data-allow-japanese>{item.unit.name}</span>
+                        <span className="font-bold text-slate-100" data-allow-japanese>{formatUnitName(item.unit.name)}</span>
                         <span className="font-mono text-slate-300">{item.correct}/{item.target}</span>
                       </div>
                       <div className="h-2 overflow-hidden rounded-full bg-black/60">

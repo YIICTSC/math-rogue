@@ -59,7 +59,7 @@ const MiniGameProblemChallenge: React.FC<MiniGameProblemChallengeProps> = ({
     storageService.saveAssignmentAnswer({
       assignmentId: isAssignmentAnswer ? assignment?.id : undefined,
       mode: result.mode,
-      unitName: isCustomAssignmentAnswer ? (languageMode === 'ENGLISH' ? 'Original Problems' : 'オリジナル問題') : assignmentUnit?.name,
+      unitName: isCustomAssignmentAnswer ? (languageMode === 'ENGLISH' ? 'Original Problem' : 'オリジナル問題') : assignmentUnit?.name,
       problemId: result.problemId,
       problemKey: result.problemKey,
       question: result.question,

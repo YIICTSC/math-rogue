@@ -129,7 +129,7 @@ const TreasureScreen: React.FC<TreasureScreenProps> = ({
                         </div>
                         <div className="mb-4 text-sm text-slate-300">
                           {claimed
-                            ? trans(`取得者: ${pool.claimedByName || 'Unknown'}`, languageMode)
+                            ? `${trans('取得者:', languageMode)} ${pool.claimedByName || 'Unknown'}`
                             : trans('未取得', languageMode)}
                         </div>
                         <div className="mb-4 flex flex-col gap-2 text-left">

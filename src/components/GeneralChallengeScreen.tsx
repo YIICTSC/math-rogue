@@ -9,6 +9,7 @@ import { getUnitBoardSummary } from '../data/unitBoardSummaries';
 import { MAP_SYMBOL_ASSET_MAP } from './mapSymbolImageMap';
 import RewardHintBanner from './RewardHintBanner';
 import UnitBoardModal from './UnitBoardModal';
+import { trans } from '../utils/textUtils';
 
 interface GeneralChallengeScreenProps {
   onComplete: (correctCount: number) => void;
@@ -29,7 +30,7 @@ interface GeneralChallengeScreenProps {
 
 const EMPTY_CUSTOM_PROBLEMS: AssignmentCustomProblem[] = [];
 
-const buildCustomProblemOptions = (answer: string, providedOptions: string[] = []): string[] => {
+const buildCustomProblemOptions = (answer: string, providedOptions: string[] = [], languageMode: LanguageMode = 'JAPANESE'): string[] => {
   const correct = answer.trim();
   const options = Array.from(new Set([correct, ...providedOptions.map((option) => option.trim()).filter(Boolean)]));
   const numericAnswer = Number(correct);
@@ -42,13 +43,21 @@ const buildCustomProblemOptions = (answer: string, providedOptions: string[] = [
     }
   }
 
-  const textSeeds = [
-    `${correct}？`,
-    `${correct}ではない`,
-    correct.length > 1 ? correct.slice(0, -1) : `${correct}1`,
-    `${correct}の一つ前`,
-    `${correct}の一つ後`,
-  ];
+  const textSeeds = languageMode === 'ENGLISH'
+    ? [
+        `Not ${correct}`,
+        correct.length > 1 ? correct.slice(0, -1) : `${correct} 1`,
+        `Before ${correct}`,
+        `After ${correct}`,
+        `${correct}?`,
+      ]
+    : [
+        `${correct}？`,
+        `${correct}ではない`,
+        correct.length > 1 ? correct.slice(0, -1) : `${correct}1`,
+        `${correct}の一つ前`,
+        `${correct}の一つ後`,
+      ];
   for (const seed of textSeeds) {
     const candidate = seed.trim();
     if (options.length >= 4) break;
@@ -400,7 +409,7 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
         question: reviewProblem.question,
         answer: reviewProblem.correctAnswer,
         options: [...new Set([reviewProblem.correctAnswer, ...(reviewProblem.options || [])])].slice(0, 4).sort(() => Math.random() - 0.5),
-        unitLabel: reviewProblem.unitName || '再出題',
+        unitLabel: reviewProblem.unitName ? trans(reviewProblem.unitName, languageMode) : trans('再出題', languageMode),
         sourceMode: reviewProblem.mode,
         assignmentProblemId: reviewProblem.problemId,
         assignmentProblemKey: reviewProblem.problemKey,
@@ -421,8 +430,8 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
       const customProblemPool = customProblems.map((problem) => ({
         question: problem.question,
         answer: problem.answer,
-        options: buildCustomProblemOptions(problem.answer, problem.options),
-        unitLabel: 'オリジナル問題',
+        options: buildCustomProblemOptions(problem.answer, problem.options, languageMode),
+        unitLabel: trans('オリジナル問題', languageMode),
         sourceMode: 'ASSIGNMENT_CUSTOM',
         assignmentProblemId: problem.id,
       }));
@@ -458,7 +467,7 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
         });
         
     setProblems(shuffled);
-  }, [mode, modePool, debugSkip, isChallenge, customProblems, problemOffset, reviewProblem]);
+  }, [mode, modePool, debugSkip, isChallenge, customProblems, problemOffset, reviewProblem, languageMode]);
 
   const attemptedCount = currentProblemIndex + (isAnswered ? 1 : 0);
   const accuracy = attemptedCount > 0 ? Math.round((correctCount / attemptedCount) * 100) : 0;
@@ -583,7 +592,7 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
     if (!currentProblem?.speechPrompt || isAnswered || isListening || speechStartInProgressRef.current) return;
     const RecognitionCtor = window.SpeechRecognition || window.webkitSpeechRecognition;
     if (!RecognitionCtor) {
-      setSpeechError('このブラウザでは はつわ判定が つかえません');
+      setSpeechError(trans('このブラウザでは はつわ判定が つかえません', languageMode));
       return;
     }
 
@@ -595,7 +604,7 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
     await stopSpeechSynthesis(180);
     const microphoneReady = await primeMicrophonePermission();
     if (!microphoneReady) {
-      setSpeechError('マイクの許可を確認してください');
+      setSpeechError(trans('マイクの許可を確認してください', languageMode));
       setIsListening(false);
       speechStartInProgressRef.current = false;
       return;
@@ -629,10 +638,10 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
       const detail = event?.error;
       setSpeechError(
         detail === 'not-allowed' || detail === 'service-not-allowed'
-          ? 'マイクの許可を確認してください'
+          ? trans('マイクの許可を確認してください', languageMode)
           : detail === 'no-speech'
-            ? '声が聞こえませんでした。もう一度どうぞ'
-            : 'うまく ききとれませんでした'
+            ? trans('声が聞こえませんでした。もう一度どうぞ', languageMode)
+            : trans('うまく ききとれませんでした', languageMode)
       );
       setIsListening(false);
     };
@@ -645,11 +654,11 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
       recognition.start();
     } catch (error) {
       console.warn('Speech recognition failed to start:', error);
-      setSpeechError('マイクを開始できませんでした。もう一度押してください');
+      setSpeechError(trans('マイクを開始できませんでした。もう一度押してください', languageMode));
       setIsListening(false);
       speechStartInProgressRef.current = false;
     }
-  }, [currentProblem, isAnswered, isListening, matchesSpeechPrompt, primeMicrophonePermission, stopSpeechSynthesis, submitAnswerResult]);
+  }, [currentProblem, isAnswered, isListening, languageMode, matchesSpeechPrompt, primeMicrophonePermission, stopSpeechSynthesis, submitAnswerResult]);
 
   useEffect(() => {
     const canvas = visualCanvasRef.current;
@@ -1742,8 +1751,8 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
                 type="button"
                 onClick={() => setIsUnitBoardOpen(true)}
                 className="absolute left-3 top-3 z-20 inline-flex h-11 w-11 items-center justify-center rounded-full border border-yellow-100/45 bg-black/35 text-yellow-100 shadow-lg transition hover:bg-black/55"
-                aria-label="単元板書を開く"
-                title="単元板書"
+                aria-label={trans('単元板書を開く', languageMode)}
+                title={trans('単元板書', languageMode)}
             >
                 <BookOpen size={22} />
             </button>
@@ -1776,7 +1785,7 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
                 {currentProblem.passage && (
                     <section className="mb-4 w-full max-h-[34vh] overflow-y-auto rounded-xl border border-cyan-200/30 bg-slate-950/70 px-3 py-3 text-left shadow-inner sm:px-4">
                         <div className="mb-2 text-[10px] font-bold uppercase tracking-wider text-cyan-200 sm:text-xs">
-                            {currentProblem.passageTitle || '本文'}
+                            {currentProblem.passageTitle || trans('本文', languageMode)}
                         </div>
                         <p className="whitespace-pre-wrap text-sm leading-7 text-slate-100 sm:text-base">
                             {currentProblem.passage}
@@ -1810,17 +1819,17 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
                             className={`inline-flex items-center gap-2 rounded-full border px-4 py-2 text-sm font-bold ${isListening ? 'border-emerald-300/60 bg-emerald-500/20 text-emerald-100' : 'border-pink-300/50 bg-pink-500/15 text-pink-100 hover:bg-pink-500/25'} disabled:opacity-60`}
                         >
                             <Mic size={18} />
-                            {isListening ? 'ききとり中...' : (currentProblem.speechPrompt.buttonLabel || 'はなして こたえる')}
+                            {isListening ? trans('ききとり中...', languageMode) : (currentProblem.speechPrompt.buttonLabel || trans('はなして こたえる', languageMode))}
                         </button>
                         {speechTranscript && (
-                            <div className="text-xs text-emerald-200">ききとり: {speechTranscript}</div>
+                            <div className="text-xs text-emerald-200">{trans('ききとり:', languageMode)} {speechTranscript}</div>
                         )}
                         {speechError && (
                             <div className="text-xs text-amber-300">{speechError}</div>
                         )}
                         {currentProblem.speechPrompt.freeResponse && currentProblem.speechPrompt.examples && currentProblem.speechPrompt.examples.length > 0 && (
                             <div className="w-full rounded-lg border border-pink-300/20 bg-pink-500/10 px-3 py-2 text-left text-[11px] text-pink-100">
-                                例: {currentProblem.speechPrompt.examples.join(' / ')}
+                                {trans('例:', languageMode)} {currentProblem.speechPrompt.examples.join(' / ')}
                             </div>
                         )}
                     </div>
@@ -1883,14 +1892,14 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
                     inputMode="numeric"
                     pattern="[-0-9０-９－ー―,，\s]*"
                     className={`w-full rounded-xl border-4 bg-white px-4 py-4 text-center text-3xl font-black text-slate-950 outline-none transition-colors ${isAnswered ? 'border-slate-400 opacity-80' : 'border-emerald-400 focus:border-yellow-300'}`}
-                    placeholder="答えを入力"
+                    placeholder={trans('答えを入力', languageMode)}
                 />
                 <button
                     type="submit"
                     disabled={isAnswered || normalizeNumberInput(inputAnswer) === ''}
                     className="w-full rounded-xl border-b-4 border-emerald-950 bg-emerald-600 py-3 text-xl font-bold transition-all hover:bg-emerald-500 active:translate-y-1 active:border-b-0 disabled:cursor-not-allowed disabled:opacity-50"
                 >
-                    決定
+                    {trans('決定', languageMode)}
                 </button>
             </form>
             )}
