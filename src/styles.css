@@ -2,6 +2,102 @@
 @tailwind components;
 @tailwind utilities;
 
+@media (orientation: landscape) and (max-height: 520px) {
+  .unit-board-dialog {
+    height: min(92dvh, 430px) !important;
+    width: min(96vw, 1040px) !important;
+  }
+
+  .unit-board-scroll {
+    top: 8% !important;
+    bottom: 18% !important;
+    left: 10% !important;
+    right: 10% !important;
+    padding-right: 0.45rem !important;
+    scrollbar-width: none !important;
+  }
+
+  .unit-board-scroll::-webkit-scrollbar {
+    display: none;
+  }
+
+  .unit-board-scroll::-webkit-scrollbar-thumb {
+    background: rgba(226, 232, 240, 0.45);
+    border-radius: 999px;
+  }
+
+  .unit-board-header {
+    align-items: flex-start !important;
+    gap: 0.45rem !important;
+    margin-bottom: 0.22rem !important;
+    padding-right: 2.25rem !important;
+  }
+
+  .unit-board-icon {
+    height: 1.1rem !important;
+    margin-top: 0.15rem !important;
+    width: 1.1rem !important;
+  }
+
+  .unit-board-label {
+    font-size: 0.48rem !important;
+    line-height: 1 !important;
+  }
+
+  .unit-board-title {
+    font-size: clamp(1.05rem, 4.8dvh, 1.35rem) !important;
+    line-height: 1.04 !important;
+  }
+
+  .unit-board-subtitle {
+    font-size: clamp(0.55rem, 2.1dvh, 0.68rem) !important;
+    line-height: 1.12 !important;
+    margin-top: 0.05rem !important;
+  }
+
+  .unit-board-content {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
+    column-gap: 0.75rem !important;
+    font-size: clamp(0.58rem, 2.25dvh, 0.72rem) !important;
+    line-height: 1.22 !important;
+    row-gap: 0.18rem !important;
+  }
+
+  .unit-board-section-title {
+    font-size: clamp(0.72rem, 2.85dvh, 0.9rem) !important;
+    line-height: 1 !important;
+    margin-bottom: 0.06rem !important;
+  }
+
+  .unit-board-content ul {
+    gap: 0.04rem !important;
+  }
+
+  .unit-board-content li {
+    gap: 0.25rem !important;
+  }
+
+  .unit-board-close {
+    height: 1.55rem !important;
+    right: 4.5% !important;
+    top: 8% !important;
+    width: 1.55rem !important;
+  }
+
+  .unit-board-footer {
+    bottom: 9% !important;
+    right: 10% !important;
+  }
+
+  .unit-board-return {
+    border-bottom-width: 3px !important;
+    font-size: 0.56rem !important;
+    line-height: 1 !important;
+    padding: 0.35rem 0.62rem !important;
+  }
+}
+
 @media (orientation: landscape) and (max-height: 520px) and (max-width: 900px) {
   .magic-transform-tutorial-overlay {
     padding: 0.35rem;

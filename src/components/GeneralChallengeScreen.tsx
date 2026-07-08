@@ -1,12 +1,14 @@
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { CheckCircle, XCircle, Volume2, Mic } from 'lucide-react';
+import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { BookOpen, CheckCircle, XCircle, Volume2, Mic } from 'lucide-react';
 import { audioService } from '../services/audioService';
 import { AnswerMode, AssignmentAnswerResult, AssignmentCustomProblem, AssignmentReviewProblem, GameMode, LanguageMode } from '../types';
 import { storageService } from '../services/storageService';
 import { SUBJECT_DATA, GeneralProblem } from '../data/subjectData';
+import { getUnitBoardSummary } from '../data/unitBoardSummaries';
 import { MAP_SYMBOL_ASSET_MAP } from './mapSymbolImageMap';
 import RewardHintBanner from './RewardHintBanner';
+import UnitBoardModal from './UnitBoardModal';
 
 interface GeneralChallengeScreenProps {
   onComplete: (correctCount: number) => void;
@@ -91,6 +93,11 @@ declare global {
 // 教科に応じた背景色の取得
 const getBackgroundClass = (mode: string) => {
     if (mode.startsWith('MATH')) return 'bg-emerald-950';
+    if (mode.startsWith('NATIVE_MATH')) return 'bg-emerald-950';
+    if (mode.startsWith('NATIVE_ELA')) return 'bg-indigo-950';
+    if (mode.startsWith('NATIVE_SCIENCE')) return 'bg-amber-950';
+    if (mode.startsWith('NATIVE_SOCIAL')) return 'bg-orange-950';
+    if (mode.startsWith('NATIVE_JAPANESE')) return 'bg-rose-950';
     if (mode.startsWith('ENGLISH')) return 'bg-indigo-950';
     if (mode.startsWith('SCIENCE') || mode.startsWith('LIFE')) return 'bg-amber-950';
     if (mode.startsWith('SOCIAL') || mode.includes('GEOGRAPHY') || mode.includes('HISTORY') || mode.includes('CIVICS')) return 'bg-orange-950';
@@ -105,7 +112,7 @@ const isEnglishSpeakingReviewMode = (mode: string) =>
   /^ENGLISH_G8_U(11|12|13)$/.test(mode) ||
   /^ENGLISH_G9_U(12|13|14)$/.test(mode);
 
-const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onComplete, mode, modePool, onModeCorrect, answerMode = 'CHOICE', debugSkip, isChallenge, streak = 0, rewardHint, languageMode = 'NORMAL', onAnswerResult, customProblems = EMPTY_CUSTOM_PROBLEMS, problemOffset = 0, reviewProblem = null }) => {
+const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onComplete, mode, modePool, onModeCorrect, answerMode = 'CHOICE', debugSkip, isChallenge, streak = 0, rewardHint, languageMode = 'JAPANESE', onAnswerResult, customProblems = EMPTY_CUSTOM_PROBLEMS, problemOffset = 0, reviewProblem = null }) => {
   const [problems, setProblems] = useState<ExtendedGeneralProblem[]>([]);
   const [currentProblemIndex, setCurrentProblemIndex] = useState(0);
   const [correctCount, setCorrectCount] = useState(0);
@@ -122,12 +129,36 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
   const speechSynthSettlingTimerRef = useRef<number | null>(null);
   const speechStartInProgressRef = useRef(false);
   const questionStartedAtRef = useRef(Date.now());
+  const unitBoardAutoShownRef = useRef<string | null>(null);
   const [mapSymbolImageFailed, setMapSymbolImageFailed] = useState(false);
+  const [isUnitBoardOpen, setIsUnitBoardOpen] = useState(false);
   const currentProblem = problems[currentProblemIndex];
+  const shouldUseEnglishAudioButton = languageMode === 'ENGLISH';
+  const audioButtonLabel = shouldUseEnglishAudioButton ? 'Listen' : 'おとを きく';
+  const audioButtonAriaLabel = shouldUseEnglishAudioButton ? 'Listen to audio' : 'おとを きく';
   const mapSymbolAsset =
     currentProblem?.visual?.kind === 'map_symbol'
       ? MAP_SYMBOL_ASSET_MAP[currentProblem.visual.symbol]
       : undefined;
+  const unitBoardSummary = useMemo(
+    () => getUnitBoardSummary(currentProblem?.sourceMode || mode, currentProblem?.unitLabel),
+    [currentProblem?.sourceMode, currentProblem?.unitLabel, mode]
+  );
+
+  useEffect(() => {
+    if (!unitBoardSummary || reviewProblem) return;
+    if (unitBoardAutoShownRef.current === unitBoardSummary.id) return;
+    unitBoardAutoShownRef.current = unitBoardSummary.id;
+
+    try {
+      const seenKey = `unit-board-seen:${unitBoardSummary.id}`;
+      if (window.localStorage.getItem(seenKey) === '1') return;
+      window.localStorage.setItem(seenKey, '1');
+      setIsUnitBoardOpen(true);
+    } catch {
+      setIsUnitBoardOpen(true);
+    }
+  }, [reviewProblem, unitBoardSummary]);
 
   const canonicalizeEnglishNumbers = (value: string) => {
     const smallNumberWords: Record<string, number> = {
@@ -1706,6 +1737,18 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
     <div className={`main-challenge-screen flex flex-col h-full w-full ${bgClass} text-white relative items-center justify-center p-2 sm:p-3 md:p-8 font-mono overflow-y-auto overflow-x-hidden`}>
         <div className="absolute inset-0 texture-dark-matter opacity-20 pointer-events-none"></div>
         <RewardHintBanner text={rewardHint} languageMode={languageMode} />
+        {unitBoardSummary && (
+            <button
+                type="button"
+                onClick={() => setIsUnitBoardOpen(true)}
+                className="absolute left-3 top-3 z-20 inline-flex h-11 w-11 items-center justify-center rounded-full border border-yellow-100/45 bg-black/35 text-yellow-100 shadow-lg transition hover:bg-black/55"
+                aria-label="単元板書を開く"
+                title="単元板書"
+            >
+                <BookOpen size={22} />
+            </button>
+        )}
+        <UnitBoardModal summary={unitBoardSummary} open={isUnitBoardOpen} onClose={() => setIsUnitBoardOpen(false)} />
         
         <div className="general-challenge-layout z-10 w-full max-w-md text-center flex flex-col py-2 md:py-0 min-w-0">
             {isEnglishSpeakingReviewMode(mode) && !isChallenge && (
@@ -1750,10 +1793,11 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
                         type="button"
                         onClick={() => speakPrompt(currentProblem.audioPrompt!.text, currentProblem.audioPrompt!.lang || 'ja-JP')}
                         disabled={isListening}
+                        aria-label={audioButtonAriaLabel}
                         className="mb-4 inline-flex items-center gap-2 rounded-full border border-cyan-300/50 bg-cyan-500/15 px-4 py-2 text-sm font-bold text-cyan-100 hover:bg-cyan-500/25"
                     >
                         <Volume2 size={18} />
-                        おとを きく
+                        {audioButtonLabel}
                     </button>
                 )}
 

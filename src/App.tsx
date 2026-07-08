@@ -79,13 +79,14 @@ import { audioService, type BgmThemeId } from './services/audioService';
 import { assetPreloadService } from './services/assetPreloadService';
 import { generateEnemyName } from './services/geminiService';
 import { generateDungeonMap } from './services/mapGenerator';
-import { storageService } from './services/storageService';
+import { parseTransferData, serializeTransferData, storageService } from './services/storageService';
 import { generateEvent, generateLegacyEvent } from './services/eventService';
 import { createAssignmentRewardCard, createHolographicCard, getUpgradedCard, synthesizeCards } from './utils/cardUtils';
 import { sanitizeEnglishText, trans, transEventText } from './utils/textUtils';
 import { assetUrl } from './utils/assetPaths';
 import { getAssignmentFromUrl, getAssignmentModePool, getAssignmentRepresentativeMode } from './utils/assignmentUtils';
 import { STUDENT_GRADE_OPTIONS, createDailyAssignment, getCurrentSchoolYear, isAdultProfile, promoteStudentProfileForSchoolYear } from './utils/dailyAssignmentUtils';
+import { getInitialLanguageMode } from './utils/localePreferences';
 import { getDifficultyConfig } from './config/difficulty';
 import { CARD_ERASER_TEMPLATE_ID, CARD_ERASER_NAME, eraseCardEffect, getErasableEffectOptions } from './utils/cardEraser';
 import { RotateCcw, Home, BookOpen, Coins, Trophy, HelpCircle, Infinity, Play, ScrollText, Plus, Minus, X as MultiplyIcon, Divide, Shuffle, Send, Swords, Terminal, Club, Zap, Gamepad2, Brain, Languages, Music, Book, MessageSquare, GraduationCap, Clock, AlertTriangle, TimerOff, X, Check, FlaskConical, Globe, MapPin, ChevronDown, ArrowLeft, Sparkles, Flag, Keyboard, Users, Settings, ClipboardList, FileText, Monitor } from 'lucide-react';
@@ -1085,7 +1086,7 @@ const App: React.FC = () => {
         ));
     }, []);
 
-    const [languageMode, setLanguageMode] = useState<LanguageMode>(() => storageService.getLanguageMode() || 'JAPANESE');
+    const [languageMode, setLanguageMode] = useState<LanguageMode>(() => getInitialLanguageMode(storageService.getLanguageMode()));
     useEffect(() => {
         if (languageMode !== 'ENGLISH' || typeof document === 'undefined') return;
 
@@ -1697,19 +1698,19 @@ const App: React.FC = () => {
         audioService.playSound('wrong');
         alert(OFFLINE_NETWORK_FEATURE_MESSAGE);
     }, []);
-    const refreshTransferExport = useCallback(() => {
+    const refreshTransferExport = useCallback(async () => {
         const payload = storageService.exportTransferData();
-        setTransferExportText(JSON.stringify(payload, null, 2));
+        setTransferExportText(await serializeTransferData(payload));
         setTransferExportCount(Object.keys(payload.entries).length);
     }, []);
     const openDataTransferModal = useCallback(() => {
-        refreshTransferExport();
+        void refreshTransferExport();
         setTransferImportText('');
         setTransferStatus(null);
         setShowDataTransferModal(true);
     }, [refreshTransferExport]);
     const handleCopyTransferData = useCallback(async () => {
-        const text = transferExportText || JSON.stringify(storageService.exportTransferData(), null, 2);
+        const text = transferExportText || await serializeTransferData(storageService.exportTransferData());
         try {
             await navigator.clipboard.writeText(text);
             setTransferStatus({ type: 'success', message: trans("エクスポートデータをコピーしました。", languageMode) });
@@ -1717,14 +1718,14 @@ const App: React.FC = () => {
             setTransferStatus({ type: 'error', message: trans("コピーに失敗しました。下の欄から手動でコピーしてください。", languageMode) });
         }
     }, [languageMode, transferExportText]);
-    const handleDownloadTransferData = useCallback(() => {
-        const text = transferExportText || JSON.stringify(storageService.exportTransferData(), null, 2);
-        const blob = new Blob([text], { type: 'application/json' });
+    const handleDownloadTransferData = useCallback(async () => {
+        const text = transferExportText || await serializeTransferData(storageService.exportTransferData());
+        const blob = new Blob([text], { type: 'text/plain;charset=utf-8' });
         const url = window.URL.createObjectURL(blob);
         const link = document.createElement('a');
         const stamp = new Date().toISOString().replace(/[:.]/g, '-');
         link.href = url;
-        link.download = `math-rogue-save-${stamp}.json`;
+        link.download = `math-rogue-save-${stamp}.txt`;
         document.body.appendChild(link);
         link.click();
         link.remove();
@@ -1744,7 +1745,7 @@ const App: React.FC = () => {
             event.target.value = '';
         }
     }, [languageMode]);
-    const handleImportTransferData = useCallback(() => {
+    const handleImportTransferData = useCallback(async () => {
         if (!transferImportText.trim()) {
             setTransferStatus({ type: 'error', message: trans("インポートするデータを貼り付けるか、ファイルを読み込んでください。", languageMode) });
             return;
@@ -1753,7 +1754,8 @@ const App: React.FC = () => {
             return;
         }
         try {
-            const result = storageService.importTransferData(transferImportText);
+            const payload = await parseTransferData(transferImportText);
+            const result = storageService.importTransferData(payload);
             setTransferStatus({
                 type: 'success',
                 message: `${trans("保存データを取り込みました。", languageMode)} (${result.importedKeys}${trans("件", languageMode)}) ${trans("ページを再読み込みします。", languageMode)}`
@@ -13876,60 +13878,62 @@ const App: React.FC = () => {
                             <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_42%,rgba(236,72,153,0.28),transparent_34%),linear-gradient(115deg,transparent_0%,rgba(168,85,247,0.34)_46%,transparent_58%,transparent_100%)] animate-pulse" />
                         )}
                         {isLegacyVercelHost && showMigrationNotice && (
-                            <div className="app-modal-overlay app-migration-modal-overlay fixed inset-0 z-[10001] bg-black/80 flex items-center justify-center p-3 sm:p-4">
+                            <div className="app-modal-overlay app-migration-modal-overlay fixed inset-0 z-[10001] bg-black/80 flex items-center justify-center p-2 sm:p-3">
                                 <div
-                                    className="app-modal-panel app-migration-modal w-full max-w-lg max-h-[92dvh] overflow-y-auto rounded-2xl border-4 border-cyan-400 bg-slate-950 text-center shadow-[0_0_60px_rgba(34,211,238,0.3)] overscroll-contain"
+                                    className="app-modal-panel app-migration-modal w-full max-w-lg max-h-[96dvh] overflow-y-auto rounded-xl border-2 border-cyan-400 bg-slate-950 text-center shadow-[0_0_40px_rgba(34,211,238,0.3)] overscroll-contain"
                                     style={{ WebkitOverflowScrolling: 'touch' }}
                                     onClick={e => e.stopPropagation()}
                                 >
-                                    <div className="px-4 py-5 sm:px-6 sm:py-7">
-                                        <div className="mx-auto mb-3 flex h-14 w-14 items-center justify-center rounded-full border-2 border-cyan-300 bg-cyan-500/10 sm:mb-4 sm:h-16 sm:w-16">
-                                            <Globe size={isMobilePortrait ? 28 : 34} className="text-cyan-300" />
+                                    <div className="px-3 py-3 sm:px-5 sm:py-4">
+                                        <div className="mb-2 flex items-center justify-center gap-2">
+                                            <span className="flex h-9 w-9 items-center justify-center rounded-full border border-cyan-300 bg-cyan-500/10">
+                                                <Globe size={22} className="text-cyan-300" />
+                                            </span>
+                                            <h2 className="text-lg font-black tracking-tight text-white sm:text-xl">
+                                                {trans("サイト移転のお知らせ", languageMode)}
+                                            </h2>
                                         </div>
-                                        <h2 className="mb-3 text-xl font-black tracking-tight text-white sm:text-2xl">
-                                            {trans("サイト移転のお知らせ", languageMode)}
-                                        </h2>
-                                        <p className="mb-3 text-sm font-bold leading-6 text-slate-200 sm:leading-7">
+                                        <p className="mb-2 text-sm font-bold leading-5 text-slate-200">
                                             {trans("現在のVercel版ではなく、新しい公開先からアクセスしてください。", languageMode)}
                                         </p>
-                                        <p className="mb-4 text-sm leading-6 text-slate-300 sm:mb-5 sm:leading-7">
+                                        <p className="mb-3 text-xs leading-5 text-slate-300 sm:text-sm">
                                             {trans("今後は下記URLが最新の公開先です。ブックマークの更新をお願いします。", languageMode)}
                                         </p>
-                                        <div className="mb-4 rounded-xl border border-amber-500/40 bg-amber-950/30 px-3 py-3 text-left sm:mb-5 sm:px-4 sm:py-4">
-                                            <div className="mb-2 text-sm font-black text-amber-200">
+                                        <div className="mb-3 rounded-lg border border-amber-500/40 bg-amber-950/30 px-3 py-2 text-left">
+                                            <div className="mb-1 text-xs font-black text-amber-200 sm:text-sm">
                                                 {trans("データを引き継ぐ場合は、次の手順で移行してください。", languageMode)}
                                             </div>
-                                            <div className="text-sm leading-6 text-amber-50 sm:leading-7">
+                                            <div className="text-xs leading-5 text-amber-50 sm:text-sm">
                                                 <div>{trans("1. このサイトで「データ移行」を開き、エクスポートします。", languageMode)}</div>
                                                 <div>{trans("2. 新しいサイトへ移動して、「データ移行」でインポートします。", languageMode)}</div>
                                             </div>
-                                            <div className="mt-2 text-xs font-bold leading-5 text-amber-300">
+                                            <div className="mt-1 text-[11px] font-bold leading-4 text-amber-300 sm:text-xs">
                                                 {trans("旧サイトのデータは新サイトへ自動では引き継がれません。", languageMode)}
                                             </div>
                                         </div>
-                                        <div className="rounded-xl border border-cyan-500/40 bg-black/40 px-3 py-3 text-left text-[11px] font-mono text-cyan-200 break-all sm:px-4 sm:text-xs">
+                                        <div className="rounded-lg border border-cyan-500/40 bg-black/40 px-3 py-2 text-left text-[11px] font-mono text-cyan-200 break-all sm:text-xs">
                                             {PRIMARY_SITE_URL}
                                         </div>
-                                        <div className="mt-4 border-t border-slate-800 pt-4 sm:mt-5 sm:pt-5">
-                                            <div className="flex flex-col gap-2 sm:gap-3">
+                                        <div className="mt-3 border-t border-slate-800 pt-3">
+                                            <div className="grid gap-2 sm:grid-cols-3">
                                                 <button
                                                     onClick={() => {
                                                         setShowMigrationNotice(false);
                                                         openDataTransferModal();
                                                     }}
-                                                    className="w-full rounded-xl border border-amber-400 bg-amber-500/10 px-4 py-3 text-sm font-black text-amber-100 transition-colors hover:bg-amber-500/20"
+                                                    className="w-full rounded-lg border border-amber-400 bg-amber-500/10 px-3 py-2 text-xs font-black text-amber-100 transition-colors hover:bg-amber-500/20 sm:text-sm"
                                                 >
                                                     {trans("データ移行を開く", languageMode)}
                                                 </button>
                                                 <button
                                                     onClick={handleMoveToPrimarySite}
-                                                    className="w-full rounded-xl border-b-4 border-r-4 border-cyan-300 bg-cyan-500 px-4 py-3 text-sm font-black text-slate-950 transition-colors hover:bg-cyan-400 sm:py-4 sm:text-base"
+                                                    className="w-full rounded-lg border-b-4 border-r-4 border-cyan-300 bg-cyan-500 px-3 py-2 text-xs font-black text-slate-950 transition-colors hover:bg-cyan-400 sm:text-sm"
                                                 >
                                                     {trans("新しいサイトへ移動する", languageMode)}
                                                 </button>
                                                 <button
                                                     onClick={() => setShowMigrationNotice(false)}
-                                                    className="w-full rounded-xl border border-slate-600 bg-slate-800 px-4 py-3 text-sm font-bold text-slate-200 transition-colors hover:bg-slate-700"
+                                                    className="w-full rounded-lg border border-slate-600 bg-slate-800 px-3 py-2 text-xs font-bold text-slate-200 transition-colors hover:bg-slate-700 sm:text-sm"
                                                 >
                                                     {trans("このまま続ける", languageMode)}
                                                 </button>
@@ -14558,12 +14562,12 @@ const App: React.FC = () => {
                 )}
 
                 {showDataTransferModal && (
-                    <div className="app-modal-overlay app-data-transfer-modal-overlay fixed inset-0 z-[10001] bg-black/90 flex items-center justify-center p-4" onClick={() => setShowDataTransferModal(false)}>
-                        <div className="app-modal-panel app-data-transfer-modal w-full max-w-5xl rounded-2xl border-2 border-cyan-500 bg-slate-950 p-5 shadow-[0_0_30px_rgba(34,211,238,0.25)] max-h-[90vh] overflow-y-auto" onClick={e => e.stopPropagation()}>
-                            <div className="flex items-start justify-between gap-4 mb-5">
+                    <div className="app-modal-overlay app-data-transfer-modal-overlay fixed inset-0 z-[10001] bg-black/90 flex items-center justify-center p-2 sm:p-4" onClick={() => setShowDataTransferModal(false)}>
+                        <div className="app-modal-panel app-data-transfer-modal w-full max-w-5xl rounded-xl border-2 border-cyan-500 bg-slate-950 p-3 shadow-[0_0_30px_rgba(34,211,238,0.25)] max-h-[94dvh] overflow-y-auto sm:p-5" onClick={e => e.stopPropagation()}>
+                            <div className="flex items-start justify-between gap-4 mb-3 sm:mb-5">
                                 <div>
-                                    <h2 className="text-2xl font-black text-white">{trans("データ移行", languageMode)}</h2>
-                                    <p className="text-sm text-slate-300 mt-1">{trans("Vercel版とGitHub版のあいだで保存データを移せます。", languageMode)}</p>
+                                    <h2 className="text-xl font-black text-white sm:text-2xl">{trans("データ移行", languageMode)}</h2>
+                                    <p className="text-xs text-slate-300 mt-1 sm:text-sm">{trans("Vercel版とGitHub版のあいだで保存データを移せます。", languageMode)}</p>
                                 </div>
                                 <button
                                     onClick={() => setShowDataTransferModal(false)}
@@ -14574,7 +14578,7 @@ const App: React.FC = () => {
                             </div>
 
                             {transferStatus && (
-                                <div className={`mb-4 rounded-xl border px-4 py-3 text-sm font-bold ${transferStatus.type === 'success'
+                                <div className={`mb-3 rounded-lg border px-3 py-2 text-sm font-bold sm:mb-4 sm:px-4 sm:py-3 ${transferStatus.type === 'success'
                                         ? 'border-emerald-500/50 bg-emerald-900/30 text-emerald-200'
                                         : transferStatus.type === 'error'
                                             ? 'border-red-500/50 bg-red-900/30 text-red-200'
@@ -14584,69 +14588,69 @@ const App: React.FC = () => {
                                 </div>
                             )}
 
-                            <div className="grid gap-5 md:grid-cols-2">
-                                <section className="rounded-2xl border border-slate-700 bg-black/30 p-4">
-                                    <h3 className="text-lg font-black text-white mb-2">{trans("エクスポート", languageMode)}</h3>
-                                    <p className="text-sm text-slate-300 mb-3">
-                                        {trans("この端末の保存データをJSONとして出力します。", languageMode)}
+                            <div className="grid gap-3 md:grid-cols-2 md:gap-5">
+                                <section className="rounded-xl border border-slate-700 bg-black/30 p-3 sm:p-4">
+                                    <h3 className="text-base font-black text-white mb-1 sm:text-lg sm:mb-2">{trans("エクスポート", languageMode)}</h3>
+                                    <p className="text-xs text-slate-300 mb-2 sm:text-sm sm:mb-3">
+                                        {trans("この端末の保存データを圧縮コードとして出力します。", languageMode)}
                                     </p>
-                                    <div className="mb-3 text-xs font-mono text-cyan-200">
+                                    <div className="mb-2 text-xs font-mono text-cyan-200 sm:mb-3">
                                         {trans("保存キー数", languageMode)}: {transferExportCount}
                                     </div>
                                     <textarea
                                         value={transferExportText}
                                         readOnly
-                                        className="w-full h-64 rounded-xl border border-slate-700 bg-slate-900 px-3 py-3 text-xs text-slate-200 font-mono"
+                                        className="w-full h-32 rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-xs text-slate-200 font-mono md:h-48"
                                     />
-                                    <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+                                    <div className="mt-2 flex flex-col gap-2 sm:mt-3 sm:flex-row">
                                         <button
                                             onClick={handleCopyTransferData}
-                                            className="flex-1 rounded-xl bg-cyan-500 px-4 py-3 text-sm font-black text-slate-950 hover:bg-cyan-400"
+                                            className="flex-1 rounded-lg bg-cyan-500 px-4 py-2 text-sm font-black text-slate-950 hover:bg-cyan-400 sm:py-3"
                                         >
                                             {trans("コピー", languageMode)}
                                         </button>
                                         <button
                                             onClick={handleDownloadTransferData}
-                                            className="flex-1 rounded-xl border border-cyan-500 bg-slate-900 px-4 py-3 text-sm font-black text-cyan-200 hover:bg-slate-800"
+                                            className="flex-1 rounded-lg border border-cyan-500 bg-slate-900 px-4 py-2 text-sm font-black text-cyan-200 hover:bg-slate-800 sm:py-3"
                                         >
                                             {trans("ダウンロード", languageMode)}
                                         </button>
                                     </div>
                                 </section>
 
-                                <section className="rounded-2xl border border-slate-700 bg-black/30 p-4">
-                                    <h3 className="text-lg font-black text-white mb-2">{trans("インポート", languageMode)}</h3>
-                                    <p className="text-sm text-slate-300 mb-3">
-                                        {trans("別の端末で出力したJSONを貼り付けるか、保存ファイルを読み込んでください。", languageMode)}
+                                <section className="rounded-xl border border-slate-700 bg-black/30 p-3 sm:p-4">
+                                    <h3 className="text-base font-black text-white mb-1 sm:text-lg sm:mb-2">{trans("インポート", languageMode)}</h3>
+                                    <p className="text-xs text-slate-300 mb-2 sm:text-sm sm:mb-3">
+                                        {trans("別の端末で出力した圧縮コードかJSONを貼り付けるか、保存ファイルを読み込んでください。", languageMode)}
                                     </p>
                                     <textarea
                                         value={transferImportText}
                                         onChange={e => setTransferImportText(e.target.value)}
-                                        placeholder={trans("ここにエクスポートしたJSONを貼り付けます。", languageMode)}
-                                        className="w-full h-64 rounded-xl border border-slate-700 bg-slate-900 px-3 py-3 text-xs text-slate-200 font-mono placeholder:text-slate-500"
+                                        placeholder={trans("ここにエクスポートした圧縮コードかJSONを貼り付けます。", languageMode)}
+                                        className="w-full h-32 rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-xs text-slate-200 font-mono placeholder:text-slate-500 md:h-48"
                                     />
                                     <input
                                         ref={transferFileInputRef}
                                         type="file"
-                                        accept=".json,application/json"
+                                        accept=".txt,.json,text/plain,application/json"
                                         className="hidden"
                                         onChange={handleTransferFileChange}
                                     />
-                                    <div className="mt-3 flex flex-col gap-2 sm:flex-row">
+                                    <div className="mt-2 flex flex-col gap-2 sm:mt-3 sm:flex-row">
                                         <button
                                             onClick={() => transferFileInputRef.current?.click()}
-                                            className="flex-1 rounded-xl border border-slate-600 bg-slate-800 px-4 py-3 text-sm font-black text-slate-200 hover:bg-slate-700"
+                                            className="flex-1 rounded-lg border border-slate-600 bg-slate-800 px-4 py-2 text-sm font-black text-slate-200 hover:bg-slate-700 sm:py-3"
                                         >
                                             {trans("ファイルを読み込む", languageMode)}
                                         </button>
                                         <button
                                             onClick={handleImportTransferData}
-                                            className="flex-1 rounded-xl bg-emerald-500 px-4 py-3 text-sm font-black text-slate-950 hover:bg-emerald-400"
+                                            className="flex-1 rounded-lg bg-emerald-500 px-4 py-2 text-sm font-black text-slate-950 hover:bg-emerald-400 sm:py-3"
                                         >
                                             {trans("インポートを実行", languageMode)}
                                         </button>
                                     </div>
-                                    <p className="mt-3 text-xs text-amber-200">
+                                    <p className="mt-2 text-xs text-amber-200 sm:mt-3">
                                         {trans("インポートを実行すると、この端末の既存データは取り込んだ内容で上書きされます。", languageMode)}
                                     </p>
                                 </section>

@@ -11,11 +11,13 @@ import MiniBattleBanner from './MiniBattleBanner';
 import { ArrowLeft, Brain, Book, Languages, Music, Play, Trophy, Home, Shuffle, CheckCircle, Target, ChevronRight, LogOut, GraduationCap, Star, Volume2, VolumeX, FlaskConical, Map as MapIcon, Globe, MapPin } from 'lucide-react';
 import { SUBJECT_CATEGORIES, SubjectCategoryConfig, SubModeConfig, getChallengeScreenForMode } from '../subjectConfig';
 import { ENGLISH_GRADE_UNITS } from '../englishUnitConfig';
+import { NATIVE_ENGLISH_GRADE_UNITS, NativeEnglishSubjectId } from '../nativeEnglishUnitConfig';
 import { SCIENCE_GRADE_UNITS, getScienceGradeMode } from '../scienceUnitConfig';
 import { SOCIAL_GRADE_UNITS, getSocialGradeMode } from '../socialUnitConfig';
 import { trans, transProblemSubjectName } from '../utils/textUtils';
 import { assetUrl } from '../utils/assetPaths';
 import { saveAnswerModePreference } from '../utils/answerMode';
+import { getInitialProblemSetView, type ProblemSetView } from '../utils/localePreferences';
 import { UPPER_KANJI_SUB_MODE_IDS, UPPER_PROBLEM_CATEGORIES } from './ModeSelectionScreen';
 import type { VisualThemeId } from '../data/visualThemes';
 
@@ -116,6 +118,51 @@ interface SelectableUnitOption {
   mode?: string;
   modes?: string[];
 }
+
+const NATIVE_ENGLISH_PROBLEM_CATEGORIES: SubjectCategoryConfig[] = [
+  {
+    id: 'NATIVE_ELA',
+    name: 'ELA',
+    color: 'indigo',
+    uiType: 'grade_term',
+    subModes: [{ id: 'NE_ELA', name: 'English Language Arts', mode: GameMode.NATIVE_ELA_G1 }],
+  },
+  {
+    id: 'NATIVE_MATH',
+    name: 'Math',
+    color: 'emerald',
+    uiType: 'grade_term',
+    subModes: [{ id: 'NE_MATH', name: 'Math', mode: GameMode.NATIVE_MATH_G1 }],
+  },
+  {
+    id: 'NATIVE_SCIENCE',
+    name: 'Science',
+    color: 'amber',
+    uiType: 'grade_term',
+    subModes: [{ id: 'NE_SCIENCE', name: 'Science', mode: GameMode.NATIVE_SCIENCE_G1 }],
+  },
+  {
+    id: 'NATIVE_SOCIAL',
+    name: 'Social Studies',
+    color: 'orange',
+    uiType: 'grade_term',
+    subModes: [{ id: 'NE_SOCIAL', name: 'Social Studies', mode: GameMode.NATIVE_SOCIAL_G1 }],
+  },
+  {
+    id: 'NATIVE_JAPANESE',
+    name: 'Japanese',
+    color: 'rose',
+    uiType: 'grade_term',
+    subModes: [{ id: 'NE_JAPANESE', name: 'Japanese', mode: GameMode.NATIVE_JAPANESE_G1 }],
+  },
+];
+
+const isNativeEnglishCategory = (categoryId: SubjectCategoryConfig['id']): categoryId is NativeEnglishSubjectId =>
+  categoryId === 'NATIVE_ELA' ||
+  categoryId === 'NATIVE_MATH' ||
+  categoryId === 'NATIVE_SCIENCE' ||
+  categoryId === 'NATIVE_SOCIAL' ||
+  categoryId === 'NATIVE_JAPANESE';
 
 const KOKUGO_GRADE_UNITS: Record<number, MathUnitOption[]> = {
   1: [
@@ -319,6 +366,9 @@ const getCurrentUnitsForCategory = (categoryId: SubjectCategoryConfig['id'], gra
     const summaryUnit = getGradeSummaryUnit(grade);
     return summaryUnit.modes && summaryUnit.modes.length > 0 ? [summaryUnit] : [];
   }
+  if (isNativeEnglishCategory(categoryId)) {
+    return (NATIVE_ENGLISH_GRADE_UNITS[categoryId][grade] || []).map((unit) => ({ ...unit, modes: [unit.mode] }));
+  }
 
   const baseUnits: SelectableUnitOption[] = categoryId === 'ENGLISH'
     ? (ENGLISH_GRADE_UNITS[grade] || []).map((unit) => ({ ...unit, modes: [unit.mode] }))
@@ -339,6 +389,7 @@ const getAllSelectableUnits = (): SelectableUnitOption[] => {
   const summaryUnits = Array.from({ length: 9 }, (_, index) => getGradeSummaryUnit(index + 1));
   return [
     ...summaryUnits,
+    ...Object.values(NATIVE_ENGLISH_GRADE_UNITS).flatMap((gradeUnits) => Object.values(gradeUnits).flat()).map((unit) => ({ ...unit, modes: [unit.mode] })),
     ...Object.values(MATH_GRADE_UNITS).flat().map((unit) => ({ ...unit })),
     ...Object.values(KOKUGO_GRADE_UNITS).flat().map((unit) => ({ ...unit })),
     ...Object.values(ENGLISH_GRADE_UNITS).flat().map((unit) => ({ ...unit, modes: [unit.mode] })),
@@ -492,6 +543,11 @@ const getCategoryIcon = (id: string) => {
         case 'KANKEN': return <Book size={20} />;
         case 'HARD_KANJI': return <Book size={20} />;
         case 'ENGLISH': return <Languages size={20} />;
+        case 'NATIVE_ELA': return <Book size={20} />;
+        case 'NATIVE_MATH': return <Brain size={20} />;
+        case 'NATIVE_SCIENCE': return <FlaskConical size={20} />;
+        case 'NATIVE_SOCIAL': return <Globe size={20} />;
+        case 'NATIVE_JAPANESE': return <Languages size={20} />;
         case 'LIFE': return <Home size={20} />;
         case 'SCIENCE': return <FlaskConical size={20} />;
         case 'SOCIAL': return <Globe size={20} />;
@@ -601,6 +657,11 @@ export const getDebugProblemUnitGroups = (): DebugProblemUnitGroup[] => {
     { id: 'LIFE_UNITS', name: '生活（単元）', units: fromScienceGradeUnits(Object.entries(SCIENCE_GRADE_UNITS), 'life', 'LIFE_') },
     { id: 'SCIENCE_UNITS', name: '理科（単元）', units: fromScienceGradeUnits(Object.entries(SCIENCE_GRADE_UNITS), 'science', 'SCIENCE_') },
     { id: 'SOCIAL_UNITS', name: '社会（単元）', units: fromGradeModeUnits(Object.entries(SOCIAL_GRADE_UNITS), 'social') },
+    { id: 'NATIVE_ELA_UNITS', name: '英語圏 ELA（単元）', units: fromGradeModeUnits(Object.entries(NATIVE_ENGLISH_GRADE_UNITS.NATIVE_ELA), 'native-ela') },
+    { id: 'NATIVE_MATH_UNITS', name: '英語圏 Math（単元）', units: fromGradeModeUnits(Object.entries(NATIVE_ENGLISH_GRADE_UNITS.NATIVE_MATH), 'native-math') },
+    { id: 'NATIVE_SCIENCE_UNITS', name: '英語圏 Science（単元）', units: fromGradeModeUnits(Object.entries(NATIVE_ENGLISH_GRADE_UNITS.NATIVE_SCIENCE), 'native-science') },
+    { id: 'NATIVE_SOCIAL_UNITS', name: '英語圏 Social Studies（単元）', units: fromGradeModeUnits(Object.entries(NATIVE_ENGLISH_GRADE_UNITS.NATIVE_SOCIAL), 'native-social') },
+    { id: 'NATIVE_JAPANESE_UNITS', name: '英語圏 Japanese（単元）', units: fromGradeModeUnits(Object.entries(NATIVE_ENGLISH_GRADE_UNITS.NATIVE_JAPANESE), 'native-japanese') },
     ...SUBJECT_CATEGORIES
       .filter(category => !granularCategoryIds.has(category.id))
       .map(category => ({
@@ -635,7 +696,7 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
   const [selectedMathUnitIds, setSelectedMathUnitIds] = useState<string[]>([]);
   const [selectedBgmId, setSelectedBgmId] = useState('random');
   const [answerMode, setAnswerMode] = useState<AnswerMode>('CHOICE');
-  const [showUpperProblems, setShowUpperProblems] = useState(false);
+  const [problemSetView, setProblemSetView] = useState<ProblemSetView>(() => getInitialProblemSetView(storageService.getProblemSetView()));
   const [continueOnWrong, setContinueOnWrong] = useState(false);
   const [challengeStep, setChallengeStep] = useState(0);
   const [streak, setStreak] = useState(0);
@@ -645,7 +706,10 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
   const appliedAssignmentSignatureRef = useRef('');
   const displayedCategories = useMemo<SubjectCategoryConfig[]>(() => {
     const kanjiCategory = SUBJECT_CATEGORIES.find((cat) => cat.id === 'KANJI');
-    if (showUpperProblems) {
+    if (problemSetView === 'nativeEnglish') {
+      return NATIVE_ENGLISH_PROBLEM_CATEGORIES;
+    }
+    if (problemSetView === 'upper') {
       return kanjiCategory
         ? [
             { ...kanjiCategory, subModes: kanjiCategory.subModes.filter((sub) => UPPER_KANJI_SUB_MODE_IDS.has(sub.id)) },
@@ -660,10 +724,15 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
         ? { ...cat, name: '漢検', subModes: cat.subModes.filter((sub) => !sub.id.startsWith('HK_')) }
         : cat
     ));
-  }, [showUpperProblems]);
+  }, [problemSetView]);
+  const changeProblemSetView = (view: ProblemSetView) => {
+    setProblemSetView(view);
+    storageService.saveProblemSetView(view);
+  };
   const defaultDisplayedCategory = displayedCategories[0] || SUBJECT_CATEGORIES[0];
-  const isUnitCategory = selectedCategory.id === 'MATH_GRADES' || selectedCategory.id === 'KOKUGO_GRADES' || selectedCategory.id === 'ENGLISH' || selectedCategory.id === 'LIFE' || selectedCategory.id === 'SCIENCE' || selectedCategory.id === 'SOCIAL' || selectedCategory.id === 'SUMMARY';
-  const problemLanguageMode: LanguageMode = languageMode === 'ENGLISH' ? 'JAPANESE' : languageMode;
+  const isUnitCategory = selectedCategory.id === 'MATH_GRADES' || selectedCategory.id === 'KOKUGO_GRADES' || selectedCategory.id === 'ENGLISH' || selectedCategory.id === 'LIFE' || selectedCategory.id === 'SCIENCE' || selectedCategory.id === 'SOCIAL' || selectedCategory.id === 'SUMMARY' || isNativeEnglishCategory(selectedCategory.id);
+  const problemLanguageMode: LanguageMode =
+    languageMode === 'ENGLISH' && !isNativeEnglishCategory(selectedCategory.id) ? 'JAPANESE' : languageMode;
   const canSelectAnswerMode = selectedCategory.id === 'MATH' || selectedCategory.id === 'UPPER_MATH' || selectedCategory.id === 'KANJI' || selectedCategory.id === 'KANKEN' || selectedCategory.id === 'HARD_KANJI';
   const shouldContinueOnWrong = !!assignment || continueOnWrong;
   const assignmentForProblemSource = assignment || problemSourceAssignment || null;
@@ -752,6 +821,11 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
   };
 
   const getSelectableGrades = (categoryId: SubjectCategoryConfig['id']): number[] => {
+    if (isNativeEnglishCategory(categoryId)) {
+      return Object.keys(NATIVE_ENGLISH_GRADE_UNITS[categoryId])
+        .map(Number)
+        .sort((a, b) => a - b);
+    }
     if (categoryId === 'LIFE') return [1, 2];
     if (categoryId === 'SCIENCE') return [3, 4, 5, 6, 7, 8, 9];
     if (categoryId === 'ENGLISH' || categoryId === 'SOCIAL') return [3, 4, 5, 6, 7, 8, 9];
@@ -783,6 +857,9 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
       setSelectedSubMode(cat.subModes[0]);
       setActiveChallenge(null);
       setSelectedMathUnitIds([]);
+      if (isNativeEnglishCategory(cat.id) && !getSelectableGrades(cat.id).includes(selectedMathGrade)) {
+        setSelectedMathGrade(1);
+      }
       if (cat.id === 'ENGLISH' && selectedMathGrade < 3) {
         setSelectedMathGrade(3);
       }
@@ -1029,6 +1106,7 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
               problemOffset={challengeStep}
               isChallenge={true}
               streak={streak}
+              languageMode={languageMode}
             />
           )}
         </div>
@@ -1071,18 +1149,34 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
         <button
           type="button"
           onClick={() => {
-            setShowUpperProblems(prev => !prev);
+            changeProblemSetView(problemSetView === 'upper' ? 'standard' : 'upper');
             setSelectedMathUnitIds([]);
             audioService.playSound('select');
           }}
           className={`absolute left-3 top-3 z-20 flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-[10px] font-black shadow-lg transition-colors sm:left-4 sm:top-4 sm:text-xs ${
-            showUpperProblems
+            problemSetView === 'upper'
               ? 'border-yellow-300 bg-yellow-500 text-slate-950 hover:bg-yellow-400'
               : 'border-emerald-300/60 bg-slate-900/85 text-emerald-100 hover:border-emerald-200 hover:bg-emerald-950'
           }`}
         >
           <GraduationCap size={14} />
-          {trans(showUpperProblems ? '通常問題へ' : '高校生以上', languageMode)}
+          {trans(problemSetView === 'upper' ? '通常問題へ' : '高校生以上', languageMode)}
+        </button>
+        <button
+          type="button"
+          onClick={() => {
+            changeProblemSetView(problemSetView === 'nativeEnglish' ? 'standard' : 'nativeEnglish');
+            setSelectedMathUnitIds([]);
+            audioService.playSound('select');
+          }}
+          className={`absolute right-3 top-3 z-20 flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-[10px] font-black shadow-lg transition-colors sm:right-4 sm:top-4 sm:text-xs ${
+            problemSetView === 'nativeEnglish'
+              ? 'border-yellow-300 bg-yellow-500 text-slate-950 hover:bg-yellow-400'
+              : 'border-indigo-300/60 bg-slate-900/85 text-indigo-100 hover:border-indigo-200 hover:bg-indigo-950'
+          }`}
+        >
+          <Languages size={14} />
+          {trans(problemSetView === 'nativeEnglish' ? '通常問題へ' : '英語圏児童向け', languageMode)}
         </button>
 
         {/* Header - Fixed */}
@@ -1090,6 +1184,12 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
           <h2 className="text-xl md:text-2xl font-bold text-emerald-400 tracking-widest mb-1">
             {trans('問題チャレンジ', languageMode)}
           </h2>
+          {problemSetView === 'upper' && (
+            <div className="mb-1 text-[10px] font-bold text-cyan-200">{trans('高校生以上の問題', languageMode)}</div>
+          )}
+          {problemSetView === 'nativeEnglish' && (
+            <div className="mb-1 text-[10px] font-bold text-indigo-200">{trans('英語圏児童向けの問題', languageMode)}</div>
+          )}
           <div className="flex items-center justify-center gap-1 text-yellow-500 font-bold text-[9px] uppercase tracking-wider">
             <Star size={8} fill="currentColor"/> {trans('ミニゲーム解放カウント対象', languageMode)} <Star size={8} fill="currentColor"/>
           </div>

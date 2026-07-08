@@ -1,11 +1,13 @@
 
-import React, { useState, useEffect, useRef } from 'react';
-import { CheckCircle, XCircle } from 'lucide-react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { BookOpen, CheckCircle, XCircle } from 'lucide-react';
 import { audioService } from '../services/audioService';
 import { AnswerMode, AssignmentAnswerResult, AssignmentReviewProblem, GameMode, LanguageMode } from '../types';
 import { storageService } from '../services/storageService';
 import { resolveAnswerMode } from '../utils/answerMode';
+import { getUnitBoardSummary } from '../data/unitBoardSummaries';
 import RewardHintBanner from './RewardHintBanner';
+import UnitBoardModal from './UnitBoardModal';
 
 interface MathProblem {
   question: string;
@@ -24,9 +26,27 @@ const MathChallengeScreen: React.FC<MathChallengeScreenProps> = ({ onComplete, m
   const [selectedOption, setSelectedOption] = useState<number | null>(null);
   const [inputAnswer, setInputAnswer] = useState('');
   const questionStartedAtRef = useRef(Date.now());
+  const unitBoardAutoShownRef = useRef<string | null>(null);
   const [isAnswered, setIsAnswered] = useState(false);
   const [feedback, setFeedback] = useState<'CORRECT' | 'WRONG' | null>(null);
+  const [isUnitBoardOpen, setIsUnitBoardOpen] = useState(false);
   const inputRef = React.useRef<HTMLInputElement>(null);
+  const unitBoardSummary = useMemo(() => getUnitBoardSummary(mode), [mode]);
+
+  useEffect(() => {
+    if (!unitBoardSummary || reviewProblem) return;
+    if (unitBoardAutoShownRef.current === unitBoardSummary.id) return;
+    unitBoardAutoShownRef.current = unitBoardSummary.id;
+
+    try {
+      const seenKey = `unit-board-seen:${unitBoardSummary.id}`;
+      if (window.localStorage.getItem(seenKey) === '1') return;
+      window.localStorage.setItem(seenKey, '1');
+      setIsUnitBoardOpen(true);
+    } catch {
+      setIsUnitBoardOpen(true);
+    }
+  }, [reviewProblem, unitBoardSummary]);
 
   useEffect(() => {
     if (!isAnswered && inputRef.current) {
@@ -254,6 +274,18 @@ const MathChallengeScreen: React.FC<MathChallengeScreenProps> = ({ onComplete, m
     <div className="main-challenge-screen flex flex-col h-full w-full bg-emerald-950 text-white relative items-center justify-center p-8 font-mono">
         <div className="absolute inset-0 texture-blackboard opacity-20 pointer-events-none"></div>
         <RewardHintBanner text={rewardHint} languageMode={languageMode} />
+        {unitBoardSummary && (
+            <button
+                type="button"
+                onClick={() => setIsUnitBoardOpen(true)}
+                className="absolute left-3 top-3 z-20 inline-flex h-11 w-11 items-center justify-center rounded-full border border-yellow-100/45 bg-black/35 text-yellow-100 shadow-lg transition hover:bg-black/55"
+                aria-label="単元板書を開く"
+                title="単元板書"
+            >
+                <BookOpen size={22} />
+            </button>
+        )}
+        <UnitBoardModal summary={unitBoardSummary} open={isUnitBoardOpen} onClose={() => setIsUnitBoardOpen(false)} />
         
         <div className="basic-challenge-layout z-10 w-full max-w-md text-center">
             <div className="basic-challenge-question bg-black/40 border-4 border-white p-8 rounded-lg mb-8 shadow-2xl relative overflow-hidden flex items-center justify-center min-h-[160px]">

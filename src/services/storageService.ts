@@ -2,6 +2,8 @@
 import { AssignmentAnswerRecord, AssignmentPayload, GameState, GameScreen, RankingEntry, Card, PokerScoreEntry, SurvivorScoreEntry, DungeonScoreEntry, PokerRunState, KochoScoreEntry, PaperPlaneScoreEntry, LanguageMode, GoHomeScoreEntry, StudentProfile } from '../types';
 import type { MagicEndingGalleryEntry } from './magicEndingService';
 import type { VisualThemeId } from '../data/visualThemes';
+import type { ProblemSetView } from '../utils/localePreferences';
+import { isProblemSetView } from '../utils/localePreferences';
 
 const STORAGE_KEY_UNLOCKED_CARDS = 'pixel_spire_unlocked_cards_v1';
 const STORAGE_KEY_UNLOCKED_RELICS = 'pixel_spire_unlocked_relics_v1';
@@ -66,6 +68,7 @@ const STORAGE_KEY_SEEN_BGM_SWITCH_HINT = 'pixel_spire_seen_bgm_switch_hint_v1';
 
 // --- LANGUAGE MODE FLAG ---
 const STORAGE_KEY_LANGUAGE_MODE = 'pixel_spire_language_mode_v1';
+const STORAGE_KEY_PROBLEM_SET_VIEW = 'pixel_spire_problem_set_view_v1';
 const STORAGE_KEY_APP_SETTINGS = 'pixel_spire_app_settings_v1';
 
 // --- PLAY TIME ---
@@ -105,6 +108,90 @@ export interface StorageTransferPayload {
 
 export type UiPreviewCheckTarget = 'pc' | 'mobileLandscape' | 'mobilePortrait' | 'buttonLayout';
 export type UiPreviewChecklist = Record<string, Partial<Record<UiPreviewCheckTarget, boolean>>>;
+
+const STORAGE_TRANSFER_TEXT_PREFIX = 'LRZ1:';
+
+const bytesToBase64Url = (bytes: Uint8Array): string => {
+  let binary = '';
+  const chunkSize = 0x8000;
+  for (let i = 0; i < bytes.length; i += chunkSize) {
+    const chunk = bytes.subarray(i, i + chunkSize);
+    binary += String.fromCharCode(...chunk);
+  }
+  return btoa(binary).replaceAll('+', '-').replaceAll('/', '_').replaceAll('=', '');
+};
+
+const base64UrlToBytes = (base64Url: string): Uint8Array => {
+  const base64 = base64Url.replaceAll('-', '+').replaceAll('_', '/').padEnd(Math.ceil(base64Url.length / 4) * 4, '=');
+  const binary = atob(base64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+  return bytes;
+};
+
+const streamToBytes = async (stream: ReadableStream<Uint8Array>): Promise<Uint8Array> => {
+  const chunks: Uint8Array[] = [];
+  const reader = stream.getReader();
+  let total = 0;
+  while (true) {
+    const { value, done } = await reader.read();
+    if (done) break;
+    if (!value) continue;
+    chunks.push(value);
+    total += value.length;
+  }
+  const bytes = new Uint8Array(total);
+  let offset = 0;
+  chunks.forEach((chunk) => {
+    bytes.set(chunk, offset);
+    offset += chunk.length;
+  });
+  return bytes;
+};
+
+const gzipText = async (text: string): Promise<string | null> => {
+  const CompressionStreamCtor = globalThis.CompressionStream;
+  if (!CompressionStreamCtor) return null;
+
+  const stream = new Blob([text])
+    .stream()
+    .pipeThrough(new CompressionStreamCtor('gzip'));
+  const bytes = await streamToBytes(stream);
+  return `${STORAGE_TRANSFER_TEXT_PREFIX}${bytesToBase64Url(bytes)}`;
+};
+
+const gunzipText = async (text: string): Promise<string> => {
+  const DecompressionStreamCtor = globalThis.DecompressionStream;
+  if (!DecompressionStreamCtor) {
+    throw new Error('このブラウザでは圧縮データを読み込めません。ファイル読み込みを試すか、最新版のブラウザで開いてください。');
+  }
+
+  const compressed = base64UrlToBytes(text.slice(STORAGE_TRANSFER_TEXT_PREFIX.length));
+  const stream = new Blob([compressed])
+    .stream()
+    .pipeThrough(new DecompressionStreamCtor('gzip'));
+  const bytes = await streamToBytes(stream);
+  return new TextDecoder().decode(bytes);
+};
+
+export const serializeTransferData = async (payload: StorageTransferPayload): Promise<string> => {
+  const minified = JSON.stringify(payload);
+  try {
+    return (await gzipText(minified)) || minified;
+  } catch {
+    return minified;
+  }
+};
+
+export const parseTransferData = async (payloadText: string): Promise<unknown> => {
+  const trimmed = payloadText.trim();
+  if (trimmed.startsWith(STORAGE_TRANSFER_TEXT_PREFIX)) {
+    return JSON.parse(await gunzipText(trimmed));
+  }
+  return JSON.parse(trimmed);
+};
 
 /**
  * ローカルの現在日付を取得する（YYYY-MM-DD）
@@ -1037,6 +1124,15 @@ export const storageService = {
     localStorage.setItem(STORAGE_KEY_LANGUAGE_MODE, mode);
   },
 
+  getProblemSetView: (): ProblemSetView | null => {
+    const stored = localStorage.getItem(STORAGE_KEY_PROBLEM_SET_VIEW);
+    return isProblemSetView(stored) ? stored : null;
+  },
+
+  saveProblemSetView: (view: ProblemSetView) => {
+    localStorage.setItem(STORAGE_KEY_PROBLEM_SET_VIEW, view);
+  },
+
   getAppSettings: <T>() : T | null => {
     try {
       const stored = localStorage.getItem(STORAGE_KEY_APP_SETTINGS);
@@ -1307,7 +1403,7 @@ export const storageService = {
       };
   },
 
-  importTransferData: (payload: string | StorageTransferPayload) => {
+  importTransferData: (payload: string | StorageTransferPayload | unknown) => {
       const parsed = typeof payload === 'string' ? JSON.parse(payload) : payload;
       const entries = normalizeTransferEntries(parsed);
 
@@ -1366,6 +1462,7 @@ export const storageService = {
       localStorage.removeItem(STORAGE_KEY_BGM_MODE);
       localStorage.removeItem(STORAGE_KEY_SEEN_BGM_SWITCH_HINT);
       localStorage.removeItem(STORAGE_KEY_LANGUAGE_MODE);
+      localStorage.removeItem(STORAGE_KEY_PROBLEM_SET_VIEW);
       localStorage.removeItem(STORAGE_KEY_APP_SETTINGS);
       localStorage.removeItem(STORAGE_KEY_TOTAL_PLAY_TIME);
       localStorage.removeItem(STORAGE_KEY_DAILY_PLAY_TIME);
