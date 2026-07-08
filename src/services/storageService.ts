@@ -260,6 +260,46 @@ const normalizeBurnCard = (card: Card): Card => {
 const normalizeBurnCards = (cards: Card[] | undefined): Card[] | undefined =>
   cards ? cards.map(normalizeBurnCard) : cards;
 
+type LegacyLanguageGradeProfile = Partial<StudentProfile> & {
+  gradeByLanguage?: Partial<Record<LanguageMode, string>>;
+  schoolYearByLanguage?: Partial<Record<LanguageMode, number>>;
+};
+
+const createEmptyStudentProfile = (): StudentProfile => ({
+  grade: '',
+  className: '',
+  number: '',
+  name: '',
+  schoolYear: undefined,
+  dailyAssignmentLanguageMode: undefined,
+});
+
+const getStudentGradeLanguageKey = (grade?: string): 'JAPANESE' | 'ENGLISH' | undefined => {
+  if (!grade) return undefined;
+  if (/^Grade\s*[1-8]$/i.test(grade) || grade === 'Adult') return 'ENGLISH';
+  if (/^(小学[1-6]年生|中学[1-3]年生|高校以上|大人)$/.test(grade)) return 'JAPANESE';
+  return undefined;
+};
+
+const normalizeStudentProfile = (profile: LegacyLanguageGradeProfile | null | undefined): StudentProfile => {
+  const base = { ...createEmptyStudentProfile(), ...(profile || {}) };
+  const inferredLanguage = base.dailyAssignmentLanguageMode
+    || getStudentGradeLanguageKey(base.grade)
+    || (base.gradeByLanguage?.ENGLISH ? 'ENGLISH' : undefined)
+    || (base.gradeByLanguage?.JAPANESE ? 'JAPANESE' : undefined);
+  const migratedGrade = base.grade || (inferredLanguage ? base.gradeByLanguage?.[inferredLanguage] : '') || '';
+  const migratedSchoolYear = base.schoolYear || (inferredLanguage ? base.schoolYearByLanguage?.[inferredLanguage] : undefined);
+  return {
+    ...base,
+    grade: migratedGrade,
+    className: base.className || '',
+    number: base.number || '',
+    name: base.name || '',
+    schoolYear: migratedSchoolYear,
+    dailyAssignmentLanguageMode: inferredLanguage,
+  };
+};
+
 const normalizeBurnPlayer = (player: GameState['player']): GameState['player'] => ({
   ...player,
   deck: normalizeBurnCards(player.deck) || [],
@@ -379,15 +419,16 @@ export const storageService = {
   getStudentProfile: (): StudentProfile => {
     try {
       const stored = localStorage.getItem(STORAGE_KEY_STUDENT_PROFILE);
-      return stored ? { grade: '', className: '', number: '', name: '', schoolYear: undefined, ...JSON.parse(stored) } : { grade: '', className: '', number: '', name: '', schoolYear: undefined };
+      return normalizeStudentProfile(stored ? JSON.parse(stored) : null);
     } catch (e) {
-      return { grade: '', className: '', number: '', name: '', schoolYear: undefined };
+      return createEmptyStudentProfile();
     }
   },
 
   saveStudentProfile: (profile: StudentProfile) => {
     try {
-      localStorage.setItem(STORAGE_KEY_STUDENT_PROFILE, JSON.stringify(profile));
+      const nextProfile = normalizeStudentProfile(profile);
+      localStorage.setItem(STORAGE_KEY_STUDENT_PROFILE, JSON.stringify(nextProfile));
     } catch (e) {
       console.warn("Failed to save student profile", e);
     }

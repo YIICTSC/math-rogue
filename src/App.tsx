@@ -1223,12 +1223,12 @@ const App: React.FC = () => {
     const [showDebugLog, setShowDebugLog] = useState<boolean>(false);
     const [showDataTransferModal, setShowDataTransferModal] = useState<boolean>(false);
     const [modeCorrectCounts, setModeCorrectCounts] = useState<Record<string, number>>(() => storageService.getModeCorrectCounts());
+    const [studentGradeMode, setStudentGradeMode] = useState<LanguageMode>(() => storageService.getStudentProfile().dailyAssignmentLanguageMode || getInitialStudentGradeMode(languageMode));
     const [studentProfile, setStudentProfile] = useState<StudentProfile>(() => {
         const promoted = promoteStudentProfileForSchoolYear(storageService.getStudentProfile());
         if (promoted.grade) storageService.saveStudentProfile(promoted);
         return promoted;
     });
-    const [studentGradeMode, setStudentGradeMode] = useState<LanguageMode>(() => getInitialStudentGradeMode(languageMode));
     const dailyAssignmentProfile = useMemo<StudentProfile>(() => (
         studentProfile.grade ? studentProfile : getDefaultDailyAssignmentProfile(studentGradeMode)
     ), [studentGradeMode, studentProfile]);
@@ -1482,17 +1482,24 @@ const App: React.FC = () => {
     }, [dailyAssignment, dismissedDailyAssignmentId, shouldPrioritizeCurrentAssignment, startedDailyAssignmentId]);
 
     const saveStudentGrade = useCallback((grade: string) => {
+        const dailyAssignmentLanguageMode = studentGradeMode === 'ENGLISH' ? 'ENGLISH' : 'JAPANESE';
         const nextProfile = {
             ...studentProfile,
             grade,
             schoolYear: getCurrentSchoolYear(),
+            dailyAssignmentLanguageMode,
         };
         setStudentProfile(nextProfile);
         storageService.saveStudentProfile(nextProfile);
         setShowStudentGradeSurvey(false);
         setDismissedDailyAssignmentId(null);
         setStartedDailyAssignmentId(null);
-    }, [studentProfile]);
+    }, [studentGradeMode, studentProfile]);
+
+    const requestStudentGradeReset = useCallback(() => {
+        setStudentGradeMode(studentProfile.dailyAssignmentLanguageMode || getInitialStudentGradeMode(languageMode));
+        setShowStudentGradeSurvey(true);
+    }, [languageMode, studentProfile.dailyAssignmentLanguageMode]);
 
     const createRewardCardForAssignment = useCallback((): ICard | null => {
         const pool = Object.values(CARDS_LIBRARY).filter(card =>
@@ -13973,7 +13980,7 @@ const App: React.FC = () => {
                             </div>
                         )}
 
-                        {showStudentGradeSurvey && isStudentGradeUnset && (
+                        {showStudentGradeSurvey && (
                             <div className="fixed inset-0 z-[10035] flex items-center justify-center bg-black/85 p-4">
                                 <div className="w-full max-w-2xl rounded-2xl border-4 border-cyan-300 bg-slate-950 p-5 text-white shadow-[0_0_40px_rgba(34,211,238,0.32)]">
                                     <div className="mb-2 text-center text-xs font-black tracking-[0.3em] text-cyan-300">PROFILE</div>
@@ -13988,6 +13995,7 @@ const App: React.FC = () => {
                                                     key={option.mode}
                                                     type="button"
                                                     onClick={() => setStudentGradeMode(option.mode)}
+                                                    data-allow-japanese
                                                     className={`rounded-lg px-4 py-2 text-sm font-black transition-colors ${
                                                         studentGradeMode === option.mode
                                                             ? 'bg-cyan-300 text-slate-950'
@@ -14894,7 +14902,9 @@ const App: React.FC = () => {
                             onBack={returnToTitle}
                             assignment={effectiveAssignment}
                             languageMode={languageMode}
+                            profile={studentProfile}
                             onProfileChange={setStudentProfile}
+                            onRequestGradeChange={requestStudentGradeReset}
                         />
                     </div>
                 )}

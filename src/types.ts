@@ -836,6 +836,7 @@ export interface StudentProfile {
   number: string;
   name: string;
   schoolYear?: number;
+  dailyAssignmentLanguageMode?: Extract<LanguageMode, 'JAPANESE' | 'ENGLISH'>;
 }
 
 export type RaceTrickEffectId =

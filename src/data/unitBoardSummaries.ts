@@ -1,3 +1,5 @@
+import { DEDICATED_UNIT_BOARD_SUMMARIES } from './unitBoardDedicatedSummaries';
+
 export interface UnitBoardSummary {
   id: string;
   title: string;
@@ -5234,7 +5236,7 @@ export const getUnitBoardSummary = (mode?: string, unitLabel?: string): UnitBoar
   if (!normalizedMode && !unitLabel) return null;
   const grade = inferGradeForMode(normalizedMode);
 
-  const exact = EXACT_SUMMARIES[normalizedMode];
+  const exact = DEDICATED_UNIT_BOARD_SUMMARIES[normalizedMode] ?? EXACT_SUMMARIES[normalizedMode];
   if (exact) {
     const summary = unitLabel && unitLabel !== exact.title
       ? { ...exact, id: `${exact.id}:${unitLabel}`, title: unitLabel }

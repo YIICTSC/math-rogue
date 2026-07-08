@@ -1,8 +1,7 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { ArrowLeft, Download, FileText, UserRound } from 'lucide-react';
 import { AssignmentPayload, LanguageMode, StudentProfile } from '../types';
 import { storageService } from '../services/storageService';
-import { getCurrentSchoolYear, getStudentGradeOptions } from '../utils/dailyAssignmentUtils';
 import { trans } from '../utils/textUtils';
 import { formatProblemUnitName } from '../utils/problemUnitName';
 
@@ -10,7 +9,9 @@ interface SubmissionScreenProps {
   onBack: () => void;
   assignment: AssignmentPayload | null;
   languageMode: LanguageMode;
+  profile?: StudentProfile;
   onProfileChange?: (profile: StudentProfile) => void;
+  onRequestGradeChange?: () => void;
 }
 
 const formatDuration = (ms: number, languageMode: LanguageMode = 'JAPANESE') => {
@@ -41,8 +42,8 @@ const escapeHtml = (value: string | number | undefined) =>
     .replace(/"/g, '&quot;')
     .replace(/'/g, '&#39;');
 
-const SubmissionScreen: React.FC<SubmissionScreenProps> = ({ onBack, assignment, languageMode, onProfileChange }) => {
-  const [profile, setProfile] = useState<StudentProfile>(() => storageService.getStudentProfile());
+const SubmissionScreen: React.FC<SubmissionScreenProps> = ({ onBack, assignment, languageMode, profile: externalProfile, onProfileChange, onRequestGradeChange }) => {
+  const [profile, setProfile] = useState<StudentProfile>(() => externalProfile || storageService.getStudentProfile());
   const answers = useMemo(() => storageService.getAssignmentAnswers(), []);
   const targetAnswers = useMemo(() => (
     assignment
@@ -83,10 +84,13 @@ const SubmissionScreen: React.FC<SubmissionScreenProps> = ({ onBack, assignment,
     if (!latest) return answer.answeredAt;
     return new Date(answer.answeredAt).getTime() > new Date(latest).getTime() ? answer.answeredAt : latest;
   }, undefined);
-  const studentGradeOptions = useMemo(() => getStudentGradeOptions(languageMode), [languageMode]);
   const formatQuestionCount = (count: number) => languageMode === 'ENGLISH' ? `${count} questions` : `${count}問`;
   const formatUnitName = (name: string) => formatProblemUnitName(name, languageMode);
   const formatTargetTitle = (title: string) => languageMode === 'ENGLISH' ? trans(title, languageMode) : title;
+
+  useEffect(() => {
+    if (externalProfile) setProfile(externalProfile);
+  }, [externalProfile]);
 
   const updateProfile = (patch: Partial<StudentProfile>) => {
     const next = { ...profile, ...patch };
@@ -190,17 +194,15 @@ ${mistakeRows.length > 0 ? `<h2>${trans('間違えた問題と再出題結果', 
             <div className="submission-profile-grid grid grid-cols-4 gap-2">
               <label>
                 <span className="mb-1 block text-xs font-bold text-slate-400">{trans('学年', languageMode)}</span>
-                <select
-                  value={profile.grade}
-                  onChange={(e) => updateProfile({ grade: e.target.value, schoolYear: getCurrentSchoolYear() })}
-                  className="w-full rounded-lg border border-slate-600 bg-slate-900 px-2 py-2 text-sm font-bold"
+                <button
+                  type="button"
+                  onClick={onRequestGradeChange}
+                  className="flex w-full items-center justify-between gap-2 rounded-lg border border-slate-600 bg-slate-900 px-2 py-2 text-left text-sm font-bold hover:border-cyan-300"
                   data-allow-japanese
                 >
-                  <option value="">{trans('未設定', languageMode)}</option>
-                  {studentGradeOptions.map((grade) => (
-                    <option key={grade} value={grade}>{grade}</option>
-                  ))}
-                </select>
+                  <span>{profile.grade || trans('未設定', languageMode)}</span>
+                  <span className="shrink-0 text-[10px] text-cyan-200">{trans('変更', languageMode)}</span>
+                </button>
               </label>
               <label>
                 <span className="mb-1 block text-xs font-bold text-slate-400">{trans('組', languageMode)}</span>
