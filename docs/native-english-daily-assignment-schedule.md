@@ -15,10 +15,62 @@
   - 固定枠: 30問正解目標。
   - Challenge枠: 20問正解目標。
 - 年度週は4月1日を起点に `W01` から `W52` として扱う。
-- 英語圏児童向けの固定枠は、学年ごとの単元配列を `weekIndex % unitCount` で順番に回す。
+- 英語圏児童向けの固定枠は、`src/data/nativeEnglishDailyCurriculumPlan.ts` の専用週別計画を優先する。
+- 専用週別計画に該当単元がない場合だけ、学年ごとの単元配列を `weekIndex % unitCount` で順番に回す。
 - Challenge枠は完全固定ではない。学習進捗がある場合は「着手済みで50問未満」の単元を優先し、進捗がない場合は固定枠以外の単元から選ばれる。
 
-このため、以下の表は「固定枠」に出る単元の週別表である。Challenge枠の厳密な出題単元はユーザーごとの正答数に依存する。
+このため、専用週別計画の表は「固定枠」に出る単元の週別表として扱う。Challenge枠の厳密な出題単元はユーザーごとの正答数に依存する。
+
+## 実装状況
+
+- Phase 1: 完了。専用計画導入前のローテーション確認用の週別表を作成済み。
+- Phase 2: 完了。`src/data/nativeEnglishDailyCurriculumPlan.ts` を追加し、Grade 1-8 の52週計画を生成。
+- Phase 3: 完了。英語Gradeのデイリー課題固定枠を専用週別計画参照へ接続。
+- Phase 4: 完了。ELA / Math を全Gradeで4単元以上に拡充。
+- Phase 5: 完了。Science / Social Studies / Japanese を全Gradeで3単元以上に拡充。
+- Phase 6: 完了。Life Skills / Digital Literacy は新教科化せず、Social Studies 配下に各Grade1単元ずつ追加。
+- Phase 7: 完了。追加54単元をすべて42問相当の明示概念問題へ移行。
+- Phase 8以降: 未着手。UI表示・翻訳確認と検証が次工程。
+
+## 専用週別計画パターン
+
+専用週別計画は13週パターンを4回繰り返して52週分を生成する。Quarter Review を13週ごとに置き、ELA / Math の頻度を高める。
+
+Grade 1-2:
+
+| 13週内の週 | 教科 | ラベル |
+| :--- | :--- | :--- |
+| 1 | ELA | ELA Skill |
+| 2 | Math | Math Fluency |
+| 3 | Science | Science Discovery |
+| 4 | ELA | ELA Reading |
+| 5 | Math | Review: Math |
+| 6 | Math | Math Practice |
+| 7 | ELA | ELA Vocabulary |
+| 8 | Social Studies | Social Studies |
+| 9 | Math | Math Word Problems |
+| 10 | ELA | Review: ELA |
+| 11 | Science | Science Lab |
+| 12 | Japanese | Japanese |
+| 13 | Math | Quarter Review |
+
+Grade 3-8:
+
+| 13週内の週 | 教科 | ラベル |
+| :--- | :--- | :--- |
+| 1 | ELA | ELA Analysis |
+| 2 | Math | Math Practice |
+| 3 | Science | Science Concepts |
+| 4 | Math | Math Word Problems |
+| 5 | ELA | Review: ELA |
+| 6 | Social Studies | Social Studies |
+| 7 | Math | Math Fluency |
+| 8 | ELA | Writing and Evidence |
+| 9 | Science | Science Data |
+| 10 | Math | Review: Math |
+| 11 | Social Studies | Civics and Geography |
+| 12 | Japanese | Japanese |
+| 13 | ELA | Quarter Review |
 
 ## Challenge枠の選ばれ方
 
@@ -29,6 +81,10 @@ Challenge枠は次の優先順で決まる。
 3. 複数ある場合は正答数が多い単元を優先する。
 4. 着手中の単元がない場合は、正答数が少ない単元を優先する。
 5. すべて同条件なら、学年内の単元配列順に近いものが選ばれる。
+
+## Phase 1時点のローテーション確認表
+
+以下の Grade 別表は、専用週別計画を入れる前の単純ローテーション確認表である。現在の固定枠は `src/data/nativeEnglishDailyCurriculumPlan.ts` の13週パターンを優先し、この表はフォールバック時の単元配列確認に使う。
 
 ## Grade 1
 

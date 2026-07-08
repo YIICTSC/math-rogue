@@ -908,7 +908,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
 
   const addLog = (msg: string, color?: string) => {
     setLogs(prev => {
-        const nextLogs = [...prev, { message: msg, color, id: Date.now() + Math.random() }];
+        const nextLogs = [...prev, { message: tr(msg), color, id: Date.now() + Math.random() }];
         if (nextLogs.length > 20) return nextLogs.slice(nextLogs.length - 20);
         return nextLogs;
     });
@@ -2941,7 +2941,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
                         <div>分類: {inspectedItem.category}</div>
                         {inspectedItem.power && (
                             <div>
-                                {inspectedItem.category === 'ARMOR' ? '防御' : '威力'}: {inspectedItem.power + (inspectedItem.plus || 0)}
+                                {tr(inspectedItem.category === 'ARMOR' ? '防御' : '威力')}: {inspectedItem.power + (inspectedItem.plus || 0)}
                                 {inspectedItem.plus ? <span className="text-[9px] font-normal ml-1">({inspectedItem.power}+{inspectedItem.plus})</span> : ''}
                             </div>
                         )}
@@ -2982,7 +2982,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
                             <h3 className="font-bold mb-2">{tr('装備')}</h3>
                             <div className="grid grid-cols-1 gap-1 text-sm">
                                 <div>
-                                    <span className="font-bold mr-2">[武]</span> 
+                                    <span className="font-bold mr-2">[{tr('武')}]</span>
                                     {player.equipment?.weapon ? (
                                         <span>
                                             {getItemName(player.equipment.weapon)} 
@@ -2994,7 +2994,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
                                     ) : tr('なし')}
                                 </div>
                                 <div>
-                                    <span className="font-bold mr-2">[防]</span> 
+                                    <span className="font-bold mr-2">[{tr('防')}]</span>
                                     {player.equipment?.armor ? (
                                         <span>
                                             {getItemName(player.equipment.armor)} 
@@ -3005,8 +3005,8 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
                                         </span>
                                     ) : tr('なし')}
                                 </div>
-                                <div><span className="font-bold mr-2">[投]</span> {player.equipment?.ranged ? `${getItemName(player.equipment.ranged)} (${player.equipment.ranged.count})` : tr('なし')}</div>
-                                <div><span className="font-bold mr-2">[腕]</span> {player.equipment?.accessory ? `${getItemName(player.equipment.accessory)}` : tr('なし')}</div>
+                                <div><span className="font-bold mr-2">[{tr('投')}]</span> {player.equipment?.ranged ? `${getItemName(player.equipment.ranged)} (${player.equipment.ranged.count})` : tr('なし')}</div>
+                                <div><span className="font-bold mr-2">[{tr('腕')}]</span> {player.equipment?.accessory ? `${getItemName(player.equipment.accessory)}` : tr('なし')}</div>
                             </div>
                         </div>
                         <div className="border-t-2 pt-2" style={{ borderColor: C1 }}>
@@ -3287,17 +3287,17 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
                                                 onClick={() => handleSynthesisStep()} 
                                                 onMouseEnter={() => { lastInputType.current = 'MOUSE'; setBlankScrollSelectionIndex(i); }}
                                             >
-                                                {ITEM_DB[type as string].name}
+                                                {tr(ITEM_DB[type as string].name)}
                                             </button>
                                         </div>
                                     ))}
-                                    {Array.from(identifiedTypes).filter((t: any) => (t as string).startsWith('SCROLL')).length === 0 && <div className="text-red-500">識別済みのノートがありません</div>}
+                                    {Array.from(identifiedTypes).filter((t: any) => (t as string).startsWith('SCROLL')).length === 0 && <div className="text-red-500">{tr('識別済みのノートがありません')}</div>}
                                 </div>
                             ) : (
                                 <>
                                     {!synthState.active && (
                                         <div className="mb-2 border-b pb-2" style={{ borderColor: C1 }}>
-                                            <div className="mb-1" style={{ color: C2 }}>装備中:</div>
+                                            <div className="mb-1" style={{ color: C2 }}>{tr('装備中')}:</div>
                                             {(['weapon', 'armor', 'ranged', 'accessory'] as const).map(slot => {
                                                 const equippedItem = player.equipment?.[slot];
                                                 if (!equippedItem) return null;
@@ -3312,7 +3312,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
                                                         onMouseEnter={() => { setSelectedEquipmentSlot(slot); setSelectedItemActionIndex(0); }}
                                                         onClick={() => handleUnequip(slot)}
                                                     >
-                                                        {selected && <span className="mr-1 animate-pulse">▶</span>}[{slotLabel}] {getItemName(equippedItem)} <span className="float-right text-[9px]">外す</span>
+                                                        {selected && <span className="mr-1 animate-pulse">▶</span>}[{tr(slotLabel)}] {getItemName(equippedItem)} <span className="float-right text-[9px]">{tr('外す')}</span>
                                                     </button>
                                                 );
                                             })}
@@ -3359,8 +3359,8 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
                                                         </span>
                                                         <span className="text-[9px]" style={{ color: !selectedEquipmentSlot && selectedItemIndex === i ? C0 : C2 }}>
                                                             {synthState.active 
-                                                                ? '選択' 
-                                                                : (['WEAPON','ARMOR','RANGED','ACCESSORY'].includes(item.category) ? '装備' : (item.category==='STAFF' ? '振る' : '使う'))
+                                                                ? tr('選択')
+                                                                : (['WEAPON','ARMOR','RANGED','ACCESSORY'].includes(item.category) ? tr('装備') : (item.category==='STAFF' ? tr('振る') : tr('使う')))
                                                             }
                                                         </span>
                                                     </button>
@@ -3370,7 +3370,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
                                                             style={{ borderColor: C1, backgroundColor: !selectedEquipmentSlot && selectedItemIndex === i && selectedItemActionIndex === 1 ? C3 : 'transparent', color: !selectedEquipmentSlot && selectedItemIndex === i && selectedItemActionIndex === 1 ? C0 : undefined }}
                                                             onClick={(e) => { e.stopPropagation(); handleThrowItem(i); }}
                                                             onMouseEnter={() => { setSelectedEquipmentSlot(null); setSelectedItemIndex(i); setSelectedItemActionIndex(1); }}
-                                                            title="投げる"
+                                                            title={tr('投げる')}
                                                         >
                                                             <Send size={10} />
                                                         </button>
@@ -3381,7 +3381,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
                                                             style={{ borderColor: C1, backgroundColor: !selectedEquipmentSlot && selectedItemIndex === i && selectedItemActionIndex === 2 ? C3 : 'transparent', color: !selectedEquipmentSlot && selectedItemIndex === i && selectedItemActionIndex === 2 ? C0 : undefined }}
                                                             onClick={(e) => { e.stopPropagation(); handleDropItem(i); }}
                                                             onMouseEnter={() => { setSelectedEquipmentSlot(null); setSelectedItemIndex(i); setSelectedItemActionIndex(2); }}
-                                                            title="足元に置く"
+                                                            title={tr('足元に置く')}
                                                         >
                                                             <ArrowDown size={10} />
                                                         </button>
@@ -3391,7 +3391,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
                                                         style={{ borderColor: C1, backgroundColor: !selectedEquipmentSlot && selectedItemIndex === i && selectedItemActionIndex === 3 ? C3 : 'transparent', color: !selectedEquipmentSlot && selectedItemIndex === i && selectedItemActionIndex === 3 ? C0 : undefined }}
                                                         onClick={(e) => { e.stopPropagation(); setInspectedItem(item); }}
                                                         onMouseEnter={() => { setSelectedEquipmentSlot(null); setSelectedItemIndex(i); setSelectedItemActionIndex(3); }}
-                                                        title="詳細"
+                                                        title={tr('詳細')}
                                                     >
                                                         <Info size={10} />
                                                     </button>

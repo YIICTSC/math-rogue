@@ -1360,7 +1360,8 @@ const calculateBuffGrid = (parts: ShipPart[], context?: Omit<PartEvalContext, 'r
 
 // --- COMPONENTS ---
 
-const PoolView: React.FC<{ pool: PoolState, onClose: () => void }> = ({ pool, onClose }) => {
+const PoolView: React.FC<{ pool: PoolState, onClose: () => void, languageMode?: LanguageMode }> = ({ pool, onClose, languageMode = 'JAPANESE' }) => {
+    const t = (text: string) => trans(text, languageMode);
     const allNumbers = [...pool.genNumbers, ...pool.coolNumbers].sort((a,b) => a - b);
     const allColors = [...pool.genColors, ...pool.coolColors].sort((a,b) => getColorRank(b) - getColorRank(a));
 
@@ -1371,14 +1372,14 @@ const PoolView: React.FC<{ pool: PoolState, onClose: () => void }> = ({ pool, on
                 <h3 className="text-xl font-bold mb-6 flex items-center text-white"><Layers className="mr-2"/> Energy Inventory</h3>
                 
                 <div className="mb-6">
-                    <div className="text-cyan-400 font-bold mb-3 border-b border-cyan-700 pb-1">所持エネルギー数値</div>
+                    <div className="text-cyan-400 font-bold mb-3 border-b border-cyan-700 pb-1">{t('所持エネルギー数値')}</div>
                     <div className="flex flex-wrap gap-1 font-mono text-sm mb-3">
                         {allNumbers.length > 0 ? allNumbers.map((n, i) => <span key={i} className="bg-slate-700 px-1.5 rounded">{n}</span>) : <span className="text-gray-600">Empty</span>}
                     </div>
                 </div>
                 
                 <div>
-                    <div className="text-orange-400 font-bold mb-3 border-b border-orange-700 pb-1">所持エネルギー色</div>
+                    <div className="text-orange-400 font-bold mb-3 border-b border-orange-700 pb-1">{t('所持エネルギー色')}</div>
                     <div className="flex flex-wrap gap-1">
                         {allColors.length > 0 ? allColors.map((c, i) => (
                             <div key={i} className={`w-6 h-6 rounded border-2 border-black/50 ${c==='ORANGE'?'bg-orange-500':c==='BLUE'?'bg-blue-500':'bg-slate-200'}`} title={c}></div>
@@ -1387,17 +1388,17 @@ const PoolView: React.FC<{ pool: PoolState, onClose: () => void }> = ({ pool, on
                 </div>
                 
                 <div className="text-xs text-gray-500 mt-6 text-center">
-                    合計: {allNumbers.length} 枚
+                    {t('合計')}: {allNumbers.length}{t('枚')}
                 </div>
 
                 <div className="mt-5 rounded-lg border border-cyan-800/70 bg-slate-950/70 p-3 text-xs leading-relaxed text-slate-300">
-                    <div className="mb-2 font-bold text-cyan-300">POOLの循環ルール</div>
-                    <p>バトル開始時とFIRE後、生成プールから数値と色を1つずつ取り出してエネルギーカードを作ります。</p>
-                    <p className="mt-1">使ったカードはそのターンの解決後にクールプールへ移り、生成プールが空になるとクールプールがまとめて生成プールへ戻って再利用されます。</p>
-                    <p className="mt-1">休暇・パイロット特性・イベントで追加された数値や色はプールに残り続け、以後の循環にも混ざります。</p>
+                    <div className="mb-2 font-bold text-cyan-300">{t('POOLの循環ルール')}</div>
+                    <p>{t('バトル開始時とFIRE後、生成プールから数値と色を1つずつ取り出してエネルギーカードを作ります。')}</p>
+                    <p className="mt-1">{t('使ったカードはそのターンの解決後にクールプールへ移り、生成プールが空になるとクールプールがまとめて生成プールへ戻って再利用されます。')}</p>
+                    <p className="mt-1">{t('休暇・パイロット特性・イベントで追加された数値や色はプールに残り続け、以後の循環にも混ざります。')}</p>
                 </div>
 
-                <button onClick={onClose} className="mt-4 w-full bg-slate-700 hover:bg-slate-600 text-white font-bold py-3 rounded-lg transition-colors">閉じる</button>
+                <button onClick={onClose} className="mt-4 w-full bg-slate-700 hover:bg-slate-600 text-white font-bold py-3 rounded-lg transition-colors">{t('閉じる')}</button>
             </div>
         </div>
     );
@@ -1974,7 +1975,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; languageMode?: LanguageMo
 
     // --- GAME LOGIC ---
 
-    const addLog = (msg: string) => setLogs(prev => [msg, ...prev.slice(0, 4)]);
+    const addLog = (msg: string) => setLogs(prev => [t(msg), ...prev.slice(0, 4)]);
 
     const initBattle = (stageNum: number, resolvedTalents?: Talent[]) => {
         let enemyIdx;
@@ -3384,15 +3385,15 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; languageMode?: LanguageMo
                     <div className="bg-black/40 p-2 rounded text-xs text-cyan-300 font-mono">
                         {tooltipPart.specialEffect === 'RANK_UP' ? (
                              <>
-                                <div>生成ランク補正: +{tooltipPart.basePower}</div>
+                                <div>{t('生成ランク補正')}: +{tooltipPart.basePower}</div>
                                 <div className="mt-2 text-gray-500">
-                                    投入したカードを消費せず、<br/>ランクを上げて手札に加えます(一時的)。
+                                    {t('投入したカードを消費せず、')}<br/>{t('ランクを上げて手札に加えます(一時的)。')}
                                 </div>
                              </>
                         ) : tooltipPart.type !== 'AMPLIFIER' ? (
                             <>
-                                <div>倍率: x{tooltipPart.multiplier}</div>
-                                <div>起動ボーナス: +{tooltipPart.basePower}</div>
+                                <div>{t('倍率')}: x{tooltipPart.multiplier}</div>
+                                <div>{t('起動ボーナス')}: +{tooltipPart.basePower}</div>
                                 <div className="mt-2 text-gray-500">
                                     Output = (Energy * {tooltipPart.multiplier}) + {tooltipPart.basePower}(if full)
                                     {player.passivePower > 0 && <div className="text-purple-400">+ {player.passivePower} (Passive)</div>}
@@ -3400,59 +3401,59 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; languageMode?: LanguageMo
                             </>
                         ) : (
                             <>
-                                <div>強化ボーナス: +{tooltipPart.basePower}</div>
+                                <div>{t('強化ボーナス')}: +{tooltipPart.basePower}</div>
                                 <div className="mt-2 text-gray-500">
-                                    隣接するパーツ(上下左右)の出力を加算します。<br/>
-                                    ※エネルギー充填時のみ有効
+                                    {t('隣接するパーツ(上下左右)の出力を加算します。')}<br/>
+                                    {t('※エネルギー充填時のみ有効')}
                                 </div>
                             </>
                         )}
-                        {tooltipPart.specialEffect === 'HEAL' && <div className="text-green-400 mt-2 font-bold">HP自動回復機能付き</div>}
-                        {tooltipPart.specialEffect === 'RECYCLE' && <div className="text-teal-400 mt-2 font-bold">エネルギー回収機能付き</div>}
-                        {tooltipPart.specialEffect === 'THORNS' && <div className="text-red-400 mt-2 font-bold">反撃ダメージ (被弾時、防御出力の半分を敵に返す)</div>}
-                        {tooltipPart.specialEffect === 'WHITE_BONUS' && <div className="text-slate-200 mt-2 font-bold">白エネルギー1個ごとに出力+2</div>}
-                        {tooltipPart.specialEffect === 'MATCH_BONUS' && <div className="text-amber-300 mt-2 font-bold">同じ数字で全スロットを埋めると出力+4</div>}
-                        {tooltipPart.specialEffect === 'LOW_SCORE_BOOST' && <div className="text-cyan-300 mt-2 font-bold">3以下の数字は、その値ぶん追加出力</div>}
-                        {tooltipPart.specialEffect === 'RAINBOW_BONUS' && <div className="text-fuchsia-300 mt-2 font-bold">3色そろうと出力+6</div>}
-                        {tooltipPart.specialEffect === 'SOLO_DOUBLE' && <div className="text-yellow-300 mt-2 font-bold">単独装填時、出力をもう一度加算</div>}
-                        {tooltipPart.specialEffect === 'BLUE_BONUS' && <div className="text-blue-300 mt-2 font-bold">青エネルギー1個ごとに出力+2</div>}
-                        {tooltipPart.specialEffect === 'ORANGE_BONUS' && <div className="text-orange-300 mt-2 font-bold">オレンジエネルギー1個ごとに出力+3</div>}
-                        {tooltipPart.specialEffect === 'HIGH_SCORE_BOOST' && <div className="text-rose-300 mt-2 font-bold">6以上の数字1枚ごとに出力+3</div>}
-                        {tooltipPart.specialEffect === 'EVEN_BONUS' && <div className="text-indigo-300 mt-2 font-bold">偶数で全埋めすると出力+5</div>}
-                        {tooltipPart.specialEffect === 'ODD_BONUS' && <div className="text-pink-300 mt-2 font-bold">奇数で全埋めすると出力+5</div>}
-                        {tooltipPart.specialEffect === 'SEQUENCE_BONUS' && <div className="text-lime-300 mt-2 font-bold">昇順/降順で全埋めすると出力+6</div>}
-                        {tooltipPart.specialEffect === 'MONO_COLOR_BONUS' && <div className="text-violet-300 mt-2 font-bold">同色で全埋めすると出力+6</div>}
-                        {tooltipPart.specialEffect === 'OVERCHARGE_HEAL' && <div className="text-green-300 mt-2 font-bold">合計12以上で出力+4、HP+3</div>}
-                        {tooltipPart.specialEffect === 'OVERCHARGE_RECYCLE' && <div className="text-teal-300 mt-2 font-bold">合計12以上で出力+4、燃料+1</div>}
-                        {tooltipPart.specialEffect === 'PRIME_BONUS' && <div className="text-sky-300 mt-2 font-bold">素数1つごとに出力+2、全素数でさらに+3</div>}
-                        {tooltipPart.specialEffect === 'SQUARE_BONUS' && <div className="text-emerald-300 mt-2 font-bold">平方数1つごとに出力+3</div>}
-                        {tooltipPart.specialEffect === 'GCD_BONUS' && <div className="text-cyan-300 mt-2 font-bold">最大公約数×2を追加出力</div>}
-                        {tooltipPart.specialEffect === 'LCM_BONUS' && <div className="text-red-300 mt-2 font-bold">最小公倍数÷3を追加出力</div>}
-                        {tooltipPart.specialEffect === 'FIBONACCI_BONUS' && <div className="text-amber-300 mt-2 font-bold">フィボナッチ数1つごとに出力+2、全一致でさらに+4</div>}
-                        {tooltipPart.specialEffect === 'MEAN_BONUS' && <div className="text-blue-300 mt-2 font-bold">平均値ぶん追加出力</div>}
-                        {tooltipPart.specialEffect === 'MEDIAN_BONUS' && <div className="text-indigo-300 mt-2 font-bold">中央値ぶん追加出力</div>}
-                        {tooltipPart.specialEffect === 'SAME_TYPE_LINK' && <div className="text-violet-300 mt-2 font-bold">隣接する同タイプ1つごとに出力+2</div>}
-                        {tooltipPart.specialEffect === 'ROW_UNITY' && <div className="text-fuchsia-300 mt-2 font-bold">同列3マス同タイプで出力+6</div>}
-                        {tooltipPart.specialEffect === 'CENTER_COMMAND' && <div className="text-yellow-300 mt-2 font-bold">中央配置で常時出力+4</div>}
-                        {tooltipPart.specialEffect === 'DIAGONAL_LINK' && <div className="text-rose-300 mt-2 font-bold">斜めのパーツ1つごとに出力+2</div>}
-                        {tooltipPart.specialEffect === 'MIRROR_BONUS' && <div className="text-slate-200 mt-2 font-bold">左右対称に同タイプがあると出力+5</div>}
-                        {tooltipPart.specialEffect === 'TURN_SCALE' && <div className="text-orange-300 mt-2 font-bold">現在ターン数ぶん追加出力（最大+10）</div>}
-                        {tooltipPart.specialEffect === 'DAMAGE_MEMORY' && <div className="text-red-300 mt-2 font-bold">この戦闘で受けたダメージ量を追加出力化（最大+10）</div>}
-                        {tooltipPart.specialEffect === 'EFFORT_STACK' && <div className="text-green-300 mt-2 font-bold">この戦闘での装填回数ぶん追加出力（最大+10）</div>}
-                        {tooltipPart.specialEffect === 'UNIQUE_VALUE_RECORD' && <div className="text-teal-300 mt-2 font-bold">見た数字の種類数ぶん追加出力（最大+9）</div>}
-                        {tooltipPart.specialEffect === 'RANDOM_SPIKE' && <div className="text-pink-300 mt-2 font-bold">ランダムで出力+4 か +10</div>}
-                        {tooltipPart.specialEffect === 'FORECAST_COLOR' && <div className="text-cyan-300 mt-2 font-bold">予報色1つごとに出力+3</div>}
-                        {tooltipPart.specialEffect === 'NO_CONSUME_CHANCE' && <div className="text-lime-300 mt-2 font-bold">約35%でカードを消費しない</div>}
-                        {tooltipPart.specialEffect === 'PALINDROME_BONUS' && <div className="text-purple-300 mt-2 font-bold">左右対称の数字並びで出力+7</div>}
-                        {tooltipPart.specialEffect === 'SUM_FIFTEEN_BONUS' && <div className="text-amber-300 mt-2 font-bold">合計15で出力+8、合計10で出力+4</div>}
-                        {tooltipPart.specialEffect === 'MULTIPLE_OF_THREE_BONUS' && <div className="text-orange-300 mt-2 font-bold">3の倍数1つごとに出力+3</div>}
-                        {tooltipPart.specialEffect === 'HAND_SIZE_BONUS' && <div className="text-blue-300 mt-2 font-bold">手札枚数ぶん追加出力（最大+8）</div>}
-                        {tooltipPart.specialEffect === 'TEMP_CARD_BONUS' && <div className="text-fuchsia-300 mt-2 font-bold">一時カード1枚ごとに出力+3</div>}
-                        {tooltipPart.specialEffect === 'EDGE_BONUS' && <div className="text-slate-200 mt-2 font-bold">端配置で出力+4</div>}
-                        {tooltipPart.specialEffect === 'CORNER_BONUS' && <div className="text-yellow-300 mt-2 font-bold">角配置で出力+6</div>}
-                        {tooltipPart.specialEffect === 'ISOLATION_BONUS' && <div className="text-emerald-300 mt-2 font-bold">孤立配置で出力+5</div>}
-                        {tooltipPart.specialEffect === 'ALT_COLOR_BONUS' && <div className="text-cyan-300 mt-2 font-bold">色が交互に並ぶと出力+6</div>}
-                        {tooltipPart.specialEffect === 'LAST_STREAK_BONUS' && <div className="text-red-300 mt-2 font-bold">連続装填回数ぶん追加出力（最大+8）</div>}
+                        {tooltipPart.specialEffect === 'HEAL' && <div className="text-green-400 mt-2 font-bold">{t('HP自動回復機能付き')}</div>}
+                        {tooltipPart.specialEffect === 'RECYCLE' && <div className="text-teal-400 mt-2 font-bold">{t('エネルギー回収機能付き')}</div>}
+                        {tooltipPart.specialEffect === 'THORNS' && <div className="text-red-400 mt-2 font-bold">{t('反撃ダメージ (被弾時、防御出力の半分を敵に返す)')}</div>}
+                        {tooltipPart.specialEffect === 'WHITE_BONUS' && <div className="text-slate-200 mt-2 font-bold">{t('白エネルギー1個ごとに出力+2')}</div>}
+                        {tooltipPart.specialEffect === 'MATCH_BONUS' && <div className="text-amber-300 mt-2 font-bold">{t('同じ数字で全スロットを埋めると出力+4')}</div>}
+                        {tooltipPart.specialEffect === 'LOW_SCORE_BOOST' && <div className="text-cyan-300 mt-2 font-bold">{t('3以下の数字は、その値ぶん追加出力')}</div>}
+                        {tooltipPart.specialEffect === 'RAINBOW_BONUS' && <div className="text-fuchsia-300 mt-2 font-bold">{t('3色そろうと出力+6')}</div>}
+                        {tooltipPart.specialEffect === 'SOLO_DOUBLE' && <div className="text-yellow-300 mt-2 font-bold">{t('単独装填時、出力をもう一度加算')}</div>}
+                        {tooltipPart.specialEffect === 'BLUE_BONUS' && <div className="text-blue-300 mt-2 font-bold">{t('青エネルギー1個ごとに出力+2')}</div>}
+                        {tooltipPart.specialEffect === 'ORANGE_BONUS' && <div className="text-orange-300 mt-2 font-bold">{t('オレンジエネルギー1個ごとに出力+3')}</div>}
+                        {tooltipPart.specialEffect === 'HIGH_SCORE_BOOST' && <div className="text-rose-300 mt-2 font-bold">{t('6以上の数字1枚ごとに出力+3')}</div>}
+                        {tooltipPart.specialEffect === 'EVEN_BONUS' && <div className="text-indigo-300 mt-2 font-bold">{t('偶数で全埋めすると出力+5')}</div>}
+                        {tooltipPart.specialEffect === 'ODD_BONUS' && <div className="text-pink-300 mt-2 font-bold">{t('奇数で全埋めすると出力+5')}</div>}
+                        {tooltipPart.specialEffect === 'SEQUENCE_BONUS' && <div className="text-lime-300 mt-2 font-bold">{t('昇順/降順で全埋めすると出力+6')}</div>}
+                        {tooltipPart.specialEffect === 'MONO_COLOR_BONUS' && <div className="text-violet-300 mt-2 font-bold">{t('同色で全埋めすると出力+6')}</div>}
+                        {tooltipPart.specialEffect === 'OVERCHARGE_HEAL' && <div className="text-green-300 mt-2 font-bold">{t('合計12以上で出力+4、HP+3')}</div>}
+                        {tooltipPart.specialEffect === 'OVERCHARGE_RECYCLE' && <div className="text-teal-300 mt-2 font-bold">{t('合計12以上で出力+4、燃料+1')}</div>}
+                        {tooltipPart.specialEffect === 'PRIME_BONUS' && <div className="text-sky-300 mt-2 font-bold">{t('素数1つごとに出力+2、全素数でさらに+3')}</div>}
+                        {tooltipPart.specialEffect === 'SQUARE_BONUS' && <div className="text-emerald-300 mt-2 font-bold">{t('平方数1つごとに出力+3')}</div>}
+                        {tooltipPart.specialEffect === 'GCD_BONUS' && <div className="text-cyan-300 mt-2 font-bold">{t('最大公約数×2を追加出力')}</div>}
+                        {tooltipPart.specialEffect === 'LCM_BONUS' && <div className="text-red-300 mt-2 font-bold">{t('最小公倍数÷3を追加出力')}</div>}
+                        {tooltipPart.specialEffect === 'FIBONACCI_BONUS' && <div className="text-amber-300 mt-2 font-bold">{t('フィボナッチ数1つごとに出力+2、全一致でさらに+4')}</div>}
+                        {tooltipPart.specialEffect === 'MEAN_BONUS' && <div className="text-blue-300 mt-2 font-bold">{t('平均値ぶん追加出力')}</div>}
+                        {tooltipPart.specialEffect === 'MEDIAN_BONUS' && <div className="text-indigo-300 mt-2 font-bold">{t('中央値ぶん追加出力')}</div>}
+                        {tooltipPart.specialEffect === 'SAME_TYPE_LINK' && <div className="text-violet-300 mt-2 font-bold">{t('隣接する同タイプ1つごとに出力+2')}</div>}
+                        {tooltipPart.specialEffect === 'ROW_UNITY' && <div className="text-fuchsia-300 mt-2 font-bold">{t('同列3マス同タイプで出力+6')}</div>}
+                        {tooltipPart.specialEffect === 'CENTER_COMMAND' && <div className="text-yellow-300 mt-2 font-bold">{t('中央配置で常時出力+4')}</div>}
+                        {tooltipPart.specialEffect === 'DIAGONAL_LINK' && <div className="text-rose-300 mt-2 font-bold">{t('斜めのパーツ1つごとに出力+2')}</div>}
+                        {tooltipPart.specialEffect === 'MIRROR_BONUS' && <div className="text-slate-200 mt-2 font-bold">{t('左右対称に同タイプがあると出力+5')}</div>}
+                        {tooltipPart.specialEffect === 'TURN_SCALE' && <div className="text-orange-300 mt-2 font-bold">{t('現在ターン数ぶん追加出力（最大+10）')}</div>}
+                        {tooltipPart.specialEffect === 'DAMAGE_MEMORY' && <div className="text-red-300 mt-2 font-bold">{t('この戦闘で受けたダメージ量を追加出力化（最大+10）')}</div>}
+                        {tooltipPart.specialEffect === 'EFFORT_STACK' && <div className="text-green-300 mt-2 font-bold">{t('この戦闘での装填回数ぶん追加出力（最大+10）')}</div>}
+                        {tooltipPart.specialEffect === 'UNIQUE_VALUE_RECORD' && <div className="text-teal-300 mt-2 font-bold">{t('見た数字の種類数ぶん追加出力（最大+9）')}</div>}
+                        {tooltipPart.specialEffect === 'RANDOM_SPIKE' && <div className="text-pink-300 mt-2 font-bold">{t('ランダムで出力+4 か +10')}</div>}
+                        {tooltipPart.specialEffect === 'FORECAST_COLOR' && <div className="text-cyan-300 mt-2 font-bold">{t('予報色1つごとに出力+3')}</div>}
+                        {tooltipPart.specialEffect === 'NO_CONSUME_CHANCE' && <div className="text-lime-300 mt-2 font-bold">{t('約35%でカードを消費しない')}</div>}
+                        {tooltipPart.specialEffect === 'PALINDROME_BONUS' && <div className="text-purple-300 mt-2 font-bold">{t('左右対称の数字並びで出力+7')}</div>}
+                        {tooltipPart.specialEffect === 'SUM_FIFTEEN_BONUS' && <div className="text-amber-300 mt-2 font-bold">{t('合計15で出力+8、合計10で出力+4')}</div>}
+                        {tooltipPart.specialEffect === 'MULTIPLE_OF_THREE_BONUS' && <div className="text-orange-300 mt-2 font-bold">{t('3の倍数1つごとに出力+3')}</div>}
+                        {tooltipPart.specialEffect === 'HAND_SIZE_BONUS' && <div className="text-blue-300 mt-2 font-bold">{t('手札枚数ぶん追加出力（最大+8）')}</div>}
+                        {tooltipPart.specialEffect === 'TEMP_CARD_BONUS' && <div className="text-fuchsia-300 mt-2 font-bold">{t('一時カード1枚ごとに出力+3')}</div>}
+                        {tooltipPart.specialEffect === 'EDGE_BONUS' && <div className="text-slate-200 mt-2 font-bold">{t('端配置で出力+4')}</div>}
+                        {tooltipPart.specialEffect === 'CORNER_BONUS' && <div className="text-yellow-300 mt-2 font-bold">{t('角配置で出力+6')}</div>}
+                        {tooltipPart.specialEffect === 'ISOLATION_BONUS' && <div className="text-emerald-300 mt-2 font-bold">{t('孤立配置で出力+5')}</div>}
+                        {tooltipPart.specialEffect === 'ALT_COLOR_BONUS' && <div className="text-cyan-300 mt-2 font-bold">{t('色が交互に並ぶと出力+6')}</div>}
+                        {tooltipPart.specialEffect === 'LAST_STREAK_BONUS' && <div className="text-red-300 mt-2 font-bold">{t('連続装填回数ぶん追加出力（最大+8）')}</div>}
                     </div>
                 </div>
             </div>
@@ -3739,9 +3740,9 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; languageMode?: LanguageMo
                                 </div>
                                 
                                 <div className="bg-black/40 p-3 md:p-4 rounded text-left text-xs md:text-sm space-y-1.5 md:space-y-2">
-                                    <div className="flex justify-between"><span className="text-gray-400">敵攻撃力:</span> <span className="text-red-400">+{selectedMissionLevel >= 1 ? (selectedMissionLevel >= 6 ? '2' : '1') : '0'}</span></div>
+                                    <div className="flex justify-between"><span className="text-gray-400">{t('敵攻撃力')}:</span> <span className="text-red-400">+{selectedMissionLevel >= 1 ? (selectedMissionLevel >= 6 ? '2' : '1') : '0'}</span></div>
                                     <div className="flex justify-between"><span className="text-gray-400">{t('開始HP')}:</span> <span className="text-red-400">{selectedMissionLevel >= 2 ? (selectedMissionLevel >= 4 ? '-20%' : '-5') : t('通常')}</span></div>
-                                    <div className="flex justify-between"><span className="text-gray-400">敵耐久:</span> <span className="text-red-400">+{selectedMissionLevel >= 5 ? '強化' : '通常'}</span></div>
+                                    <div className="flex justify-between"><span className="text-gray-400">{t('敵耐久')}:</span> <span className="text-red-400">+{selectedMissionLevel >= 5 ? t('強化') : t('通常')}</span></div>
                                     <div className="border-t border-gray-600 pt-2 flex justify-between font-bold"><span className="text-yellow-400">{t('クリア報酬')}:</span> <span className="text-white">{t('リロール')} +{selectedMissionLevel >= 5 ? '2' : (selectedMissionLevel >= 1 ? '1' : '0')}</span></div>
                                 </div>
                             </div>
@@ -3799,11 +3800,11 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; languageMode?: LanguageMo
                         disabled={player.starCoins < rerollCost}
                         className={`bg-indigo-600 hover:bg-indigo-500 text-white px-4 py-2 rounded font-bold flex items-center transition-colors border border-indigo-400 ${player.starCoins < rerollCost ? 'opacity-50 cursor-not-allowed' : ''}`}
                      >
-                         <RefreshCw className="mr-2" size={16}/> リロール ({rerollCost} Coin)
+                         <RefreshCw className="mr-2" size={16}/> {t('リロール')} ({rerollCost} Coin)
                      </button>
                  </div>
 
-                 <p className="paper-plane-reward-hint text-gray-300 mb-4">戦利品を選択してください (長押しで詳細)</p>
+                 <p className="paper-plane-reward-hint text-gray-300 mb-4">{t('戦利品を選択してください (長押しで詳細)')}</p>
 
                  <div className="paper-plane-reward-grid flex flex-wrap gap-4 md:gap-8 justify-center mb-8 shrink-0">
                      {rewardOptions.map((part, i) => (
@@ -3978,7 +3979,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; languageMode?: LanguageMo
                 <PaperPlaneSceneBackdrop sprite={PAPER_PLANE_SCENE_BACKGROUNDS.vacation} alpha={0.2} />
                 <RenderTooltip />
                 {/* Pool Overlay */}
-                {showPool && <PoolView pool={pool} onClose={() => setShowPool(false)} />}
+                {showPool && <PoolView pool={pool} onClose={() => setShowPool(false)} languageMode={languageMode} />}
                 
                 <div className="flex justify-between items-center mb-2 bg-slate-800 p-3 rounded-lg shadow-lg shrink-0">
                     <h2 className="text-lg md:text-2xl font-bold flex items-center text-cyan-300"><Calendar className="mr-2" size={20}/> <span className="hidden md:inline">{t('休暇モード')}</span><span className="md:hidden">{t('休暇')}</span></h2>
@@ -4091,7 +4092,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; languageMode?: LanguageMo
                         </button>
 
                         <div className="bg-slate-900 border border-slate-700 p-2 rounded h-20 md:h-24 overflow-y-auto text-xs text-cyan-200 font-mono custom-scrollbar shadow-inner">
-                            {vacationLog}
+                            {t(vacationLog)}
                         </div>
 
                         <button onClick={endVacation} disabled={!!pendingPart} className={`w-full py-3 md:py-4 rounded-lg font-bold text-lg shadow-lg flex items-center justify-center border-b-4 border-black/20 active:border-0 active:translate-y-1 transition-all ${!!pendingPart ? 'bg-gray-700 text-gray-500 cursor-not-allowed' : 'bg-cyan-600 hover:bg-cyan-500 text-white animate-pulse'}`}>
@@ -4108,7 +4109,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; languageMode?: LanguageMo
             <PaperPlaneSceneBackdrop sprite={PAPER_PLANE_SCENE_BACKGROUNDS.battle} alpha={0.16} />
             <RenderTooltip />
             {/* Pool Overlay */}
-            {showPool && <PoolView pool={pool} onClose={() => setShowPool(false)} />}
+            {showPool && <PoolView pool={pool} onClose={() => setShowPool(false)} languageMode={languageMode} />}
             
             {/* Game Help Modal */}
             {showGameHelp && (
@@ -4121,41 +4122,41 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; languageMode?: LanguageMo
                             <section>
                                 <h3 className="text-lg font-bold text-white mb-2 border-b border-gray-600 pb-1 flex items-center"><Settings className="mr-2 text-cyan-400"/> {t('機体構築')}</h3>
                                 <ul className="list-disc pl-5 space-y-1">
-                                    <li>機体は<strong>3x3</strong>のグリッドで構成されます。</li>
-                                    <li>パーツには<strong>スロット</strong>があり、手札のエネルギーカードをはめることで起動します。</li>
-                                    <li><strong>色相性:</strong> <span className="text-orange-400 font-bold">橙</span> &gt; <span className="text-blue-400 font-bold">青</span> &gt; <span className="text-slate-200 font-bold">白</span>。上位の色は下位のスロットにも使えます。</li>
-                                    <li>スロットを全て埋めると<strong>起動ボーナス</strong>が発生します。</li>
+                                    <li>{t('機体は3x3のグリッドで構成されます。')}</li>
+                                    <li>{t('パーツにはスロットがあり、手札のエネルギーカードをはめることで起動します。')}</li>
+                                    <li>{t('色相性: 橙 > 青 > 白。上位の色は下位のスロットにも使えます。')}</li>
+                                    <li>{t('スロットを全て埋めると起動ボーナスが発生します。')}</li>
                                 </ul>
                             </section>
 
                             <section>
                                 <h3 className="text-lg font-bold text-white mb-2 border-b border-gray-600 pb-1 flex items-center"><Cpu className="mr-2 text-purple-400"/> {t('パーツ種類')}</h3>
                                 <ul className="list-disc pl-5 space-y-1">
-                                    <li><strong className="text-red-300">砲台:</strong> 同じ行に攻撃出力を出す基本攻撃パーツです。</li>
-                                    <li><strong className="text-orange-300">ミサイル:</strong> 砲台より高出力になりやすい攻撃パーツです。</li>
-                                    <li><strong className="text-blue-300">盾:</strong> 行のぶつかり合いで受けるダメージを抑える防御パーツです。</li>
-                                    <li><strong className="text-emerald-300">エンジン:</strong> 燃料・移動・特殊効果で戦いやすさを支える補助パーツです。</li>
-                                    <li><strong className="text-purple-300">増幅器:</strong> 隣接パーツの出力を上げる支援パーツです。</li>
+                                    <li>{t('砲台: 同じ行に攻撃出力を出す基本攻撃パーツです。')}</li>
+                                    <li>{t('ミサイル: 砲台より高出力になりやすい攻撃パーツです。')}</li>
+                                    <li>{t('盾: 行のぶつかり合いで受けるダメージを抑える防御パーツです。')}</li>
+                                    <li>{t('エンジン: 燃料・移動・特殊効果で戦いやすさを支える補助パーツです。')}</li>
+                                    <li>{t('増幅器: 隣接パーツの出力を上げる支援パーツです。')}</li>
                                 </ul>
                             </section>
 
                             <section>
                                 <h3 className="text-lg font-bold text-white mb-2 border-b border-gray-600 pb-1 flex items-center"><Swords className="mr-2 text-red-400"/> {t('戦闘システム')}</h3>
                                 <ul className="list-disc pl-5 space-y-1">
-                                    <li><strong>クラッシュバトル:</strong> 自機と敵機の同じ行(Row)同士がぶつかり合います。</li>
-                                    <li>出力の高い方が、差分をダメージとして相手に与えます。</li>
-                                    <li><strong>FIREボタン:</strong> 攻撃を実行し、ターンを進めます。</li>
-                                    <li><strong>移動:</strong> 上下に移動して敵の攻撃を避けたり、有利な位置を取りましょう（燃料消費）。</li>
+                                    <li>{t('クラッシュバトル: 自機と敵機の同じ行(Row)同士がぶつかり合います。')}</li>
+                                    <li>{t('出力の高い方が、差分をダメージとして相手に与えます。')}</li>
+                                    <li>{t('FIREボタン: 攻撃を実行し、ターンを進めます。')}</li>
+                                    <li>{t('移動: 上下に移動して敵の攻撃を避けたり、有利な位置を取りましょう（燃料消費）。')}</li>
                                 </ul>
                             </section>
 
                             <section>
                                 <h3 className="text-lg font-bold text-white mb-2 border-b border-gray-600 pb-1 flex items-center"><ShoppingBag className="mr-2 text-green-400"/> {t('休暇パート')}</h3>
                                 <ul className="list-disc pl-5 space-y-1">
-                                    <li>ステージクリア後は休暇パートに入ります。</li>
-                                    <li><strong>日数</strong>を消費して修理や強化を行います。</li>
-                                    <li><strong>ショップ:</strong> スターコインを使って強力なパーツを購入できます。</li>
-                                    <li><strong>格納庫:</strong> パーツの配置換えや保管ができます。</li>
+                                    <li>{t('ステージクリア後は休暇パートに入ります。')}</li>
+                                    <li>{t('日数を消費して修理や強化を行います。')}</li>
+                                    <li>{t('ショップ: スターコインを使って強力なパーツを購入できます。')}</li>
+                                    <li>{t('格納庫: パーツの配置換えや保管ができます。')}</li>
                                 </ul>
                             </section>
                         </div>
@@ -4241,9 +4242,9 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; languageMode?: LanguageMo
                     <div className="bg-slate-800 border-2 border-cyan-500 p-6 rounded-lg max-w-sm w-full shadow-2xl relative text-sm" onClick={e => e.stopPropagation()}>
                         <h3 className="text-lg font-bold text-cyan-400 mb-4 flex items-center"><Info className="mr-2"/> {t('エネルギーカードの仕組み')}</h3>
                         <ul className="list-disc pl-5 space-y-2 text-gray-300">
-                            <li><span className="text-white font-bold">数値</span>: スロットに入れた時の出力パワーになります。</li>
-                            <li><span className="text-white font-bold">色</span>: スロットの要求色に合わせる必要があります。</li>
-                            <li><span className="text-orange-400 font-bold">オレンジ</span> &gt; <span className="text-blue-400 font-bold">青</span> &gt; <span className="text-slate-200 font-bold">白</span> の順でランクが高く、上位色は下位のスロットにも使用可能です。</li>
+                            <li>{t('数値: スロットに入れた時の出力パワーになります。')}</li>
+                            <li>{t('色: スロットの要求色に合わせる必要があります。')}</li>
+                            <li>{t('オレンジ > 青 > 白 の順でランクが高く、上位色は下位のスロットにも使用可能です。')}</li>
                         </ul>
                         <button onClick={() => setShowHandHelp(false)} className="mt-6 w-full bg-cyan-700 py-2 rounded text-white font-bold">{t('閉じる')}</button>
                     </div>

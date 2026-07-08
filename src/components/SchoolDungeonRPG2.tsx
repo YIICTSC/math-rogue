@@ -860,7 +860,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
   const triggerShake = (duration: number) => { shake.current.duration = duration; };
   const addLog = (msg: string, color?: string) => {
     setLogs(prev => {
-        const nextLogs = [...prev, { message: msg, color, id: Date.now() + Math.random() }];
+        const nextLogs = [...prev, { message: tr(msg), color, id: Date.now() + Math.random() }];
         if (nextLogs.length > 20) return nextLogs.slice(nextLogs.length - 20);
         return nextLogs;
     });
@@ -1916,7 +1916,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
                     <div className="text-sm mb-4 min-h-[3rem]">{getInspectedDescription(inspectedItem)}</div>
                     <div className="text-xs font-bold grid grid-cols-2 gap-2">
                         <div>分類: {inspectedItem.category}</div>
-                        {inspectedItem.power && (<div>{inspectedItem.category === 'ARMOR' ? '防御' : '威力'}: {inspectedItem.power + (inspectedItem.plus || 0)}{inspectedItem.plus ? <span className="text-[9px] font-normal ml-1">({inspectedItem.power}+{inspectedItem.plus})</span> : ''}</div>)}
+                        {inspectedItem.power && (<div>{tr(inspectedItem.category === 'ARMOR' ? '防御' : '威力')}: {inspectedItem.power + (inspectedItem.plus || 0)}{inspectedItem.plus ? <span className="text-[9px] font-normal ml-1">({inspectedItem.power}+{inspectedItem.plus})</span> : ''}</div>)}
                         {inspectedItem.value && <div>効果: {inspectedItem.value}</div>}
                     </div>
                 </div>
@@ -1969,10 +1969,10 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
                         <div className="border-t-2 pt-2" style={{ borderColor: C1 }}>
                             <h3 className="font-bold mb-2">{tr('装備')}</h3>
                             <div className="grid grid-cols-1 gap-1 text-sm">
-                                <div><span className="font-bold mr-2">[武]</span> {player.equipment?.weapon ? (<span>{getItemName(player.equipment.weapon)} {player.equipment.weapon.plus ? `+${player.equipment.weapon.plus}` : ''}<span className="text-[10px] ml-1 opacity-70">({(player.equipment.weapon.power||0) + (player.equipment.weapon.plus||0)})</span></span>) : tr('なし')}</div>
-                                <div><span className="font-bold mr-2">[防]</span> {player.equipment?.armor ? (<span>{getItemName(player.equipment.armor)} {player.equipment.armor.plus ? `+${player.equipment.armor.plus}` : ''}<span className="text-[10px] ml-1 opacity-70">({(player.equipment.armor.power||0) + (player.equipment.armor.plus||0)})</span></span>) : tr('なし')}</div>
-                                <div><span className="font-bold mr-2">[投]</span> {player.equipment?.ranged ? `${getItemName(player.equipment.ranged)} (${player.equipment.ranged.count})` : tr('なし')}</div>
-                                <div><span className="font-bold mr-2">[腕]</span> {player.equipment?.accessory ? `${getItemName(player.equipment.accessory)}` : tr('なし')}</div>
+                                <div><span className="font-bold mr-2">[{tr('武')}]</span> {player.equipment?.weapon ? (<span>{getItemName(player.equipment.weapon)} {player.equipment.weapon.plus ? `+${player.equipment.weapon.plus}` : ''}<span className="text-[10px] ml-1 opacity-70">({(player.equipment.weapon.power||0) + (player.equipment.weapon.plus||0)})</span></span>) : tr('なし')}</div>
+                                <div><span className="font-bold mr-2">[{tr('防')}]</span> {player.equipment?.armor ? (<span>{getItemName(player.equipment.armor)} {player.equipment.armor.plus ? `+${player.equipment.armor.plus}` : ''}<span className="text-[10px] ml-1 opacity-70">({(player.equipment.armor.power||0) + (player.equipment.armor.plus||0)})</span></span>) : tr('なし')}</div>
+                                <div><span className="font-bold mr-2">[{tr('投')}]</span> {player.equipment?.ranged ? `${getItemName(player.equipment.ranged)} (${player.equipment.ranged.count})` : tr('なし')}</div>
+                                <div><span className="font-bold mr-2">[{tr('腕')}]</span> {player.equipment?.accessory ? `${getItemName(player.equipment.accessory)}` : tr('なし')}</div>
                             </div>
                         </div>
                         <div className="border-t-2 pt-2" style={{ borderColor: C1 }}>
@@ -2097,7 +2097,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
                                             if (!equippedItem) return null;
                                             const slotLabel = { weapon: '武', armor: '防', ranged: '投', accessory: '腕' }[slot];
                                             const selected = selectedEquipmentSlot === slot;
-                                            return <button key={slot} type="button" className="block w-full cursor-pointer px-2 py-1 text-left" style={{ backgroundColor: selected ? C2 : 'transparent', color: selected ? C0 : C3, border: `1px solid ${selected ? C3 : 'transparent'}` }} onMouseEnter={() => { setSelectedEquipmentSlot(slot); setSelectedItemActionIndex(0); }} onClick={() => handleUnequip(slot)}>{selected && <span className="mr-1 animate-pulse">▶</span>}[{slotLabel}] {getItemName(equippedItem)} <span className="float-right text-[9px]">{tr('外す')}</span></button>;
+                                            return <button key={slot} type="button" className="block w-full cursor-pointer px-2 py-1 text-left" style={{ backgroundColor: selected ? C2 : 'transparent', color: selected ? C0 : C3, border: `1px solid ${selected ? C3 : 'transparent'}` }} onMouseEnter={() => { setSelectedEquipmentSlot(slot); setSelectedItemActionIndex(0); }} onClick={() => handleUnequip(slot)}>{selected && <span className="mr-1 animate-pulse">▶</span>}[{tr(slotLabel)}] {getItemName(equippedItem)} <span className="float-right text-[9px]">{tr('外す')}</span></button>;
                                         })}
                                     </div>
                                 )}
@@ -2112,11 +2112,11 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
                                                         <span className="truncate">{selectedItemIndex === i && <span className="mr-1 animate-pulse">▶</span>}{getItemName(item)} {item.plus ? `+${item.plus}` : ''} {item.count ? `(${item.count})` : ''}{item.category === 'STAFF' ? `[${item.charges}]` : ''}</span>
                                                         {switchDiffLabel && <span className="shrink-0 text-[9px] font-bold" style={{ color: !selectedEquipmentSlot && selectedItemIndex === i ? C0 : C2 }}>{switchDiffLabel}</span>}
                                                     </span>
-                                                    <span className="text-[9px]" style={{ color: !selectedEquipmentSlot && selectedItemIndex === i ? C0 : C2 }}>{synthState.active ? '選択' : (['WEAPON','ARMOR','RANGED','ACCESSORY'].includes(item.category) ? '装備' : (item.category==='STAFF' ? '振る' : '使う'))}</span>
+                                                    <span className="text-[9px]" style={{ color: !selectedEquipmentSlot && selectedItemIndex === i ? C0 : C2 }}>{synthState.active ? tr('選択') : (['WEAPON','ARMOR','RANGED','ACCESSORY'].includes(item.category) ? tr('装備') : (item.category==='STAFF' ? tr('振る') : tr('使う')))}</span>
                                                 </button>
-                                                {!synthState.active && (<button className="px-2 py-1 border-l flex items-center justify-center hover:opacity-80" style={{ borderColor: C1, backgroundColor: !selectedEquipmentSlot && selectedItemIndex === i && selectedItemActionIndex === 1 ? C3 : 'transparent', color: !selectedEquipmentSlot && selectedItemIndex === i && selectedItemActionIndex === 1 ? C0 : undefined }} onClick={(e) => { e.stopPropagation(); handleThrowItem(i); }} onMouseEnter={() => { setSelectedEquipmentSlot(null); setSelectedItemIndex(i); setSelectedItemActionIndex(1); }} title="投げる"><Send size={10} /></button>)}
-                                                {!synthState.active && (<button className="px-2 py-1 border-l flex items-center justify-center hover:opacity-80" style={{ borderColor: C1, backgroundColor: !selectedEquipmentSlot && selectedItemIndex === i && selectedItemActionIndex === 2 ? C3 : 'transparent', color: !selectedEquipmentSlot && selectedItemIndex === i && selectedItemActionIndex === 2 ? C0 : undefined }} onClick={(e) => { e.stopPropagation(); handleDropItem(i); }} onMouseEnter={() => { setSelectedEquipmentSlot(null); setSelectedItemIndex(i); setSelectedItemActionIndex(2); }} title="足元に置く"><ArrowDown size={10} /></button>)}
-                                                <button className="px-2 py-1 border-l flex items-center justify-center hover:opacity-80" style={{ borderColor: C1, backgroundColor: !selectedEquipmentSlot && selectedItemIndex === i && selectedItemActionIndex === 3 ? C3 : 'transparent', color: !selectedEquipmentSlot && selectedItemIndex === i && selectedItemActionIndex === 3 ? C0 : undefined }} onClick={(e) => { e.stopPropagation(); setInspectedItem(item); }} onMouseEnter={() => { setSelectedEquipmentSlot(null); setSelectedItemIndex(i); setSelectedItemActionIndex(3); }} title="詳細"><Info size={10} /></button>
+                                                {!synthState.active && (<button className="px-2 py-1 border-l flex items-center justify-center hover:opacity-80" style={{ borderColor: C1, backgroundColor: !selectedEquipmentSlot && selectedItemIndex === i && selectedItemActionIndex === 1 ? C3 : 'transparent', color: !selectedEquipmentSlot && selectedItemIndex === i && selectedItemActionIndex === 1 ? C0 : undefined }} onClick={(e) => { e.stopPropagation(); handleThrowItem(i); }} onMouseEnter={() => { setSelectedEquipmentSlot(null); setSelectedItemIndex(i); setSelectedItemActionIndex(1); }} title={tr('投げる')}><Send size={10} /></button>)}
+                                                {!synthState.active && (<button className="px-2 py-1 border-l flex items-center justify-center hover:opacity-80" style={{ borderColor: C1, backgroundColor: !selectedEquipmentSlot && selectedItemIndex === i && selectedItemActionIndex === 2 ? C3 : 'transparent', color: !selectedEquipmentSlot && selectedItemIndex === i && selectedItemActionIndex === 2 ? C0 : undefined }} onClick={(e) => { e.stopPropagation(); handleDropItem(i); }} onMouseEnter={() => { setSelectedEquipmentSlot(null); setSelectedItemIndex(i); setSelectedItemActionIndex(2); }} title={tr('足元に置く')}><ArrowDown size={10} /></button>)}
+                                                <button className="px-2 py-1 border-l flex items-center justify-center hover:opacity-80" style={{ borderColor: C1, backgroundColor: !selectedEquipmentSlot && selectedItemIndex === i && selectedItemActionIndex === 3 ? C3 : 'transparent', color: !selectedEquipmentSlot && selectedItemIndex === i && selectedItemActionIndex === 3 ? C0 : undefined }} onClick={(e) => { e.stopPropagation(); setInspectedItem(item); }} onMouseEnter={() => { setSelectedEquipmentSlot(null); setSelectedItemIndex(i); setSelectedItemActionIndex(3); }} title={tr('詳細')}><Info size={10} /></button>
                                             </div>
                                         );
                                     })}

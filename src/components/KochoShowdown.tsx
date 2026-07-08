@@ -746,7 +746,7 @@ const KochoShowdown: React.FC<{
             ...getInitialState(),
             phase: 'BATTLE',
             difficultyLevel: difficulty.level,
-            logs: [`難易度${difficulty.level}: ${difficulty.name}`]
+            logs: [`${tr('難易度')} ${difficulty.level}: ${tr(difficulty.name)}`]
         };
         setGameState(initialState);
         stateRef.current = initialState;
@@ -827,7 +827,7 @@ const KochoShowdown: React.FC<{
     }, [gameState.status, gameState.battleStage, gameState.totalTurns, gameState.difficultyLevel, gameState.isEndless, gameState.endlessFloor, gameState.endlessKills, gameState.endlessScore, unlockRandomKochoCard, debugPreview]);
 
     const addLog = (msg: string) => {
-        setGameState(prev => ({ ...prev, logs: [msg, ...prev.logs.slice(0, 4)] }));
+        setGameState(prev => ({ ...prev, logs: [tr(msg), ...prev.logs.slice(0, 4)] }));
     };
 
     const addVfx = (type: KochoVFX['type'], pos: number, options: Partial<KochoVFX> = {}) => {
@@ -1465,19 +1465,19 @@ const KochoShowdown: React.FC<{
         if (item.type === 'HEAL') {
             p.hp = Math.min(p.maxHp, p.hp + item.value);
             addVfx('HEAL', p.pos);
-            logs.unshift(`HPを${item.value}回復！`);
+            logs.unshift(tr(`HPを${item.value}回復！`));
             used = true;
         } else if (item.type === 'BARRIER') {
             p.barrier += item.value;
             addVfx('BARRIER', p.pos);
-            logs.unshift(`バリアを展開！`);
+            logs.unshift(tr(`バリアを展開！`));
             used = true;
         } else if (item.type === 'CD_REDUCE') {
             const reduceVal = item.value === 99 ? 99 : item.value;
             hand = hand.map(c => ({ ...c, currentCooldown: Math.max(0, c.currentCooldown - reduceVal) }));
             addVfx('BUFF', p.pos);
             addVfx('TEXT', p.pos, { text: item.value === 99 ? 'CD全快' : `CD-${item.value}`, color: 'text-cyan-300', durationMs: 900 });
-            logs.unshift(`手札のCDを${item.value === 99 ? '全' : item.value}短縮！`);
+            logs.unshift(tr(`手札のCDを${item.value === 99 ? '全' : item.value}短縮！`));
             used = true;
         } else if (item.type === 'BOMB') {
             enemies.forEach(e => {
@@ -1486,12 +1486,12 @@ const KochoShowdown: React.FC<{
                     addVfx('BLAST', e.pos);
                 }
             });
-            logs.unshift(`手榴弾！全体に${item.value}ダメージ！`);
+            logs.unshift(tr(`手榴弾！全体に${item.value}ダメージ！`));
             used = true;
         } else if (item.type === 'STRENGTH') {
             p.strength += 3;
             addVfx('BUFF', p.pos);
-            logs.unshift(`激辛カレー！次の攻撃力+3！`);
+            logs.unshift(tr(`激辛カレー！次の攻撃力+3！`));
             used = true;
         }
 
@@ -1501,7 +1501,7 @@ const KochoShowdown: React.FC<{
             if (!recycled) {
                 newConsumables = state.consumables.filter((_, i) => i !== index);
             } else {
-                logs.unshift("リサイクル成功！消費しなかった！");
+                logs.unshift(tr("リサイクル成功！消費しなかった！"));
             }
             
             setGameState({
@@ -2712,12 +2712,12 @@ const KochoShowdown: React.FC<{
                 <div className="flex items-center gap-2 md:gap-4">
                     {gameState.phase !== 'SETUP' && (
                         <div className="text-xs md:text-sm font-bold text-indigo-200 hidden md:flex items-center gap-2 bg-indigo-950/40 px-2 py-1 rounded border border-indigo-500/40">
-                            Lv.{gameState.difficultyLevel} {getKochoDifficulty(gameState.difficultyLevel).name}
+                            Lv.{gameState.difficultyLevel} {tr(getKochoDifficulty(gameState.difficultyLevel).name)}
                         </div>
                     )}
                     {gameState.isEndless && (
                         <div className="text-xs md:text-sm font-bold text-pink-200 flex items-center gap-2 bg-pink-950/50 px-2 py-1 rounded border border-pink-500/50">
-                            <Skull size={14}/> 撃破 {gameState.endlessKills} / {gameState.endlessScore}点
+                            <Skull size={14}/> {tr('撃破')} {gameState.endlessKills} / {gameState.endlessScore}{tr('点')}
                         </div>
                     )}
                     <button onClick={() => setShowHelpModal(true)} className="flex items-center gap-2 text-indigo-200 hover:text-white transition-colors text-xs md:text-sm font-bold border border-indigo-500/30 px-2 py-1 rounded bg-black/20">
@@ -2758,8 +2758,8 @@ const KochoShowdown: React.FC<{
                                         }`}
                                     >
                                         <div>
-                                            <div className={`kocho-difficulty-title text-base font-black ${locked ? 'text-slate-500' : 'text-white'}`}>Lv.{difficulty.level} {difficulty.name}</div>
-                                            <div className="kocho-difficulty-meta mt-1 text-xs text-slate-400">HP x{difficulty.hpMultiplier.toFixed(2)} / 攻撃 +{difficulty.damageBonus} / SCORE x{difficulty.scoreMultiplier.toFixed(1)}</div>
+                                            <div className={`kocho-difficulty-title text-base font-black ${locked ? 'text-slate-500' : 'text-white'}`}>Lv.{difficulty.level} {tr(difficulty.name)}</div>
+                                            <div className="kocho-difficulty-meta mt-1 text-xs text-slate-400">HP x{difficulty.hpMultiplier.toFixed(2)} / {tr('攻撃')} +{difficulty.damageBonus} / SCORE x{difficulty.scoreMultiplier.toFixed(1)}</div>
                                             {locked && <div className="kocho-difficulty-lock mt-1 text-[11px] font-bold text-pink-300">{tr('前のレベルをクリアすると解禁')}</div>}
                                         </div>
                                         {locked ? <ShieldCheck size={18} className="text-slate-500" /> : <Play size={18} className="text-pink-300" />}
@@ -3200,7 +3200,7 @@ const KochoShowdown: React.FC<{
                             <div className="flex flex-col items-center gap-1">
                                 <div className="flex gap-1">
                                     <button onClick={handleTurn} className="bg-slate-700 hover:bg-slate-600 px-3 py-2 rounded-lg border border-slate-500 text-sm font-bold flex items-center justify-center active:bg-slate-800 transition-colors w-16">TURN</button>
-                                    <button onClick={handleSwapPosition} className={`px-2 py-2 rounded-lg border flex items-center justify-center transition-colors w-12 ${gameState.specialActionCooldown > 0 ? 'bg-gray-800 border-gray-600 text-gray-500' : 'bg-cyan-700 border-cyan-400 text-cyan-100 hover:bg-cyan-600 active:scale-95'}`} title="位置交換 (CD: 3)">{gameState.specialActionCooldown > 0 ? <span className="text-xs font-bold">{gameState.specialActionCooldown}</span> : <RefreshCw size={16} />}</button>
+                                    <button onClick={handleSwapPosition} className={`px-2 py-2 rounded-lg border flex items-center justify-center transition-colors w-12 ${gameState.specialActionCooldown > 0 ? 'bg-gray-800 border-gray-600 text-gray-500' : 'bg-cyan-700 border-cyan-400 text-cyan-100 hover:bg-cyan-600 active:scale-95'}`} title={tr('位置交換 (CD: 3)')}>{gameState.specialActionCooldown > 0 ? <span className="text-xs font-bold">{gameState.specialActionCooldown}</span> : <RefreshCw size={16} />}</button>
                                 </div>
                                 <button onClick={handleWait} className="bg-gray-800 hover:bg-gray-700 px-6 py-2 rounded-lg border border-gray-600 text-xs flex items-center justify-center active:bg-gray-900 transition-colors w-28 text-gray-400"><Clock size={12} className="mr-1"/> WAIT</button>
                             </div>

@@ -2284,7 +2284,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
                   <div className="space-y-1">
                       {scoreBreakdown.slice(0, revealedBreakdownCount).map((entry) => (
                           <div key={entry.id} className="flex items-start justify-between gap-2 rounded-lg border border-slate-800 bg-slate-950/70 px-2 py-1 text-[10px] animate-in fade-in slide-in-from-bottom-1">
-                              <div className="min-w-0 flex-1 whitespace-normal break-words font-bold text-slate-100 leading-tight">{entry.label}</div>
+                              <div className="min-w-0 flex-1 whitespace-normal break-words font-bold text-slate-100 leading-tight">{t(entry.label)}</div>
                               <div className="flex shrink-0 items-center gap-1.5 font-black text-right">
                                   {entry.chipsDelta !== undefined && <span className="text-cyan-300">+{entry.chipsDelta}</span>}
                                   {entry.multDelta !== undefined && <span className="text-rose-300">+{entry.multDelta}M</span>}

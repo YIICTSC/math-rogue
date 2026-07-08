@@ -1,6 +1,7 @@
 import { AssignmentPayload, AssignmentUnit, LanguageMode, StudentProfile } from '../types';
 import { UPPER_PROBLEM_CATEGORIES, getCurrentUnitsForCategory } from '../components/ModeSelectionScreen';
 import { CURRICULUM_WEEKLY_PLANS, UPPER_CURRICULUM_WEEKLY_PLANS } from '../data/dailyCurriculumPlan';
+import { NATIVE_ENGLISH_DAILY_WEEKLY_PLANS } from '../data/nativeEnglishDailyCurriculumPlan';
 import { NATIVE_ENGLISH_GRADE_UNITS, NativeEnglishSubjectId } from '../nativeEnglishUnitConfig';
 import type { SubjectCategoryType } from '../subjectConfig';
 
@@ -271,6 +272,18 @@ const getNativeEnglishGradeUnits = (gradeNumber: number) =>
     }))
   );
 
+const getNativeEnglishPlannedUnit = (gradeNumber: number, schoolYearWeekIndex: number) => {
+  const plan = NATIVE_ENGLISH_DAILY_WEEKLY_PLANS[gradeNumber]?.[schoolYearWeekIndex];
+  if (!plan) return null;
+  const unit = NATIVE_ENGLISH_GRADE_UNITS[plan.subjectId]?.[gradeNumber]?.find((item) => item.id === plan.unitId);
+  if (!unit) return null;
+  return {
+    id: `${plan.subjectId}:${unit.id}`,
+    name: plan.label,
+    modes: [unit.mode],
+  };
+};
+
 const getCorrectCountForUnit = (unit: { modes: string[] }, modeCorrectCounts: Record<string, number>) =>
   unit.modes.reduce((total, mode) => total + Math.max(0, Number(modeCorrectCounts[mode] || 0)), 0);
 
@@ -299,6 +312,9 @@ export const createDailyAssignment = (
   const dateId = getLocalDateId(date);
   const schoolYearWeekIndex = getSchoolYearWeekIndex(date);
   const summaryGradeNumber = gradeNumber ? getDailySummaryGradeNumber(gradeNumber, schoolYearWeekIndex) : null;
+  const nativeEnglishPlannedUnit = nativeEnglishGradeNumber
+    ? getNativeEnglishPlannedUnit(nativeEnglishGradeNumber, schoolYearWeekIndex)
+    : null;
   const baseUnits = nativeEnglishGradeNumber
     ? getNativeEnglishGradeUnits(nativeEnglishGradeNumber)
     : gradeNumber
@@ -318,10 +334,12 @@ export const createDailyAssignment = (
         ? []
         : getUpperCategoryUnits(weeklyPlan.categoryId, adult)
     : [];
-  const plannedUnit = weeklyUnits.length > 0
+  const plannedUnit = nativeEnglishPlannedUnit || (weeklyUnits.length > 0
     ? weeklyUnits[weeklyPlan!.unitOffset % weeklyUnits.length]
-    : baseUnits[schoolYearWeekIndex % baseUnits.length];
-  const seasonalBase = weeklyPlan
+    : baseUnits[schoolYearWeekIndex % baseUnits.length]);
+  const seasonalBase = nativeEnglishPlannedUnit
+    ? plannedUnit
+    : weeklyPlan
     ? {
       ...plannedUnit,
       name: `${weeklyPlan.label}: ${plannedUnit.name}`,
