@@ -2127,7 +2127,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
             </style>
 
             {coopSupportCards.length > 0 && onUseCoopSupport && (
-                <div className={`absolute left-2 top-16 z-50 md:left-4 md:top-20 ${coopSupportHudOpen ? 'w-[min(330px,calc(100vw-16px))] md:w-[min(380px,calc(100vw-24px))]' : 'w-auto'}`}>
+                <div className={`absolute bottom-16 left-2 z-50 md:bottom-20 md:left-4 ${coopSupportHudOpen ? 'w-[min(330px,calc(100vw-16px))] md:w-[min(380px,calc(100vw-24px))]' : 'w-auto'}`}>
                     <div className={`${coopSupportHudOpen ? 'bg-slate-950/95 border-2 border-emerald-400/80 rounded-xl shadow-2xl shadow-emerald-950/40 px-3 py-2' : 'bg-black/50 border border-emerald-500/70 rounded px-0 py-0'} backdrop-blur text-white`}>
                         <button
                             data-gamepad-zone="battle-coop"
