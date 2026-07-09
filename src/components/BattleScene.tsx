@@ -453,12 +453,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
         if (coopSupportCards.length === 0) {
             setCoopSupportHudOpen(false);
             setSelectedSupportCard(null);
-            return;
         }
-        const isPhonePortrait = typeof window !== 'undefined'
-            && window.matchMedia('(max-width: 767px) and (orientation: portrait)').matches;
-        if (isPhonePortrait) return;
-        setCoopSupportHudOpen(true);
     }, [coopSupportCards.length]);
 
     const [isActing, setIsActing] = useState(false);
@@ -1861,6 +1856,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                 if (selectedSupportCard && onUseCoopSupport) {
                                     onUseCoopSupport(selectedSupportCard);
                                     setSelectedSupportCard(null);
+                                    setCoopSupportHudOpen(false);
                                     return;
                                 }
                                 showInfo(trans("自分", languageMode), trans("あなたのキャラクター。\nHPが0になるとゲームオーバー。", languageMode));
@@ -1955,8 +1951,9 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                 </div>
                             )}
 
+                            <div className={isTrueBossPhase2SpecialLayout ? "contents" : "order-2 flex min-w-0 flex-col items-start mb-2 md:contents"}>
                             {companions.length > 0 && (
-                                <div className={`order-3 flex items-end gap-1 md:gap-2 ${player.partner && player.partner.currentHp > 0 ? 'ml-0' : 'ml-1'} mb-2`}>
+                                <div className={`order-1 md:order-3 flex max-w-[min(16rem,calc(100vw-11rem))] flex-wrap items-end gap-1 md:max-w-none md:flex-nowrap md:gap-2 ${player.partner && player.partner.currentHp > 0 ? 'ml-0' : 'ml-1'} mb-1 md:mb-2`}>
                                     {companions.map((companion) => {
                                         const hpPercent = Math.max(0, Math.min(100, (companion.currentHp / Math.max(1, companion.maxHp)) * 100));
                                         const isDown = companion.currentHp <= 0;
@@ -1982,6 +1979,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                                     if (selectedSupportCard && onUseCoopSupport) {
                                                         onUseCoopSupport(selectedSupportCard, companion.id);
                                                         setSelectedSupportCard(null);
+                                                        setCoopSupportHudOpen(false);
                                                         return;
                                                     }
                                                     showInfo(companion.name, trans("協力モードの同行プレイヤー。HPのみを表示します。", languageMode));
@@ -2007,7 +2005,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                 </div>
                             )}
 
-                            <div className={`battle-player-stats order-2 bg-black/80 border-2 border-white p-1 text-white text-xs ${isTrueBossPhase2SpecialLayout ? 'w-28 md:w-40' : 'w-36 md:w-40'} mb-2 shadow-lg rounded z-20 ${tutorialStep === 1 ? 'ring-4 ring-green-500 ring-offset-4 ring-offset-transparent animate-pulse' : ''}`}>
+                            <div className={`battle-player-stats order-2 bg-black/80 border-2 border-white p-1 text-white text-xs ${isTrueBossPhase2SpecialLayout ? 'w-28 md:w-40' : 'w-36 md:w-40'} mb-0 md:mb-2 shadow-lg rounded z-20 ${tutorialStep === 1 ? 'ring-4 ring-green-500 ring-offset-4 ring-offset-transparent animate-pulse' : ''}`}>
                                 <div className="flex items-center justify-between mb-1">
                                     <span className="text-red-400 flex items-center font-bold" onClick={() => showInfo("HP", trans("ヒットポイント。0になると死亡する。", languageMode))}><Heart size={12} className="mr-1" /> {player.currentHp}/{player.maxHp}</span>
                                     <span className="text-blue-400 flex items-center font-bold" onClick={() => showInfo(trans("ブロック", languageMode), trans("次のターン開始時までダメージを防ぐ。", languageMode))}><Shield size={12} className="mr-1" /> {player.block}</span>
@@ -2095,6 +2093,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                     })}
                                 </div>
                             </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -2127,28 +2126,24 @@ const BattleScene: React.FC<BattleSceneProps> = ({
             </style>
 
             {coopSupportCards.length > 0 && onUseCoopSupport && (
-                <div className={`absolute bottom-16 left-2 z-50 md:bottom-20 md:left-4 ${coopSupportHudOpen ? 'w-[min(330px,calc(100vw-16px))] md:w-[min(380px,calc(100vw-24px))]' : 'w-auto'}`}>
-                    <div className={`${coopSupportHudOpen ? 'bg-slate-950/95 border-2 border-emerald-400/80 rounded-xl shadow-2xl shadow-emerald-950/40 px-3 py-2' : 'bg-black/50 border border-emerald-500/70 rounded px-0 py-0'} backdrop-blur text-white`}>
+                <div className={`absolute bottom-2 left-2 z-[900] md:left-4 ${coopSupportHudOpen ? 'w-[min(330px,calc(100vw-16px))] md:w-[min(380px,calc(100vw-24px))]' : 'w-[min(220px,calc(100vw-16px))] md:w-[240px]'}`}>
+                    <div className={`${coopSupportHudOpen ? 'flex flex-col-reverse border-2 border-emerald-400/80 px-3 py-2 shadow-2xl shadow-emerald-950/40' : 'border border-emerald-500/70 px-3 py-2 shadow-lg shadow-emerald-950/30'} rounded-xl bg-slate-950/92 backdrop-blur text-white`}>
                         <button
                             data-gamepad-zone="battle-coop"
                             data-gamepad-order={0}
                             onClick={() => setCoopSupportHudOpen(prev => !prev)}
-                            className={`${coopSupportHudOpen ? 'w-full justify-between text-left' : 'w-auto gap-1 px-2 py-1 text-[10px]'} flex items-center rounded font-bold transition-colors ${coopSupportHudOpen ? '' : 'text-emerald-200 hover:text-white hover:border-emerald-300'}`}
+                            className="flex w-full items-center justify-between rounded text-left font-bold text-emerald-100 transition-colors hover:text-white"
                         >
-                            {coopSupportHudOpen ? (
-                                <div>
-                                    <div className="text-[10px] uppercase tracking-[0.25em] text-emerald-200">Coop Item</div>
-                                    <div className="text-sm font-black">{trans("支援カード", languageMode)} {coopSupportCards.length} {trans("枚", languageMode)}</div>
+                            <div>
+                                <div className="flex items-center gap-1 text-[10px] uppercase tracking-[0.25em] text-emerald-200">
+                                    <Sparkles size={11} /> Coop Item
                                 </div>
-                            ) : (
-                                <>
-                                    <Sparkles size={10} /> ITEM {coopSupportCards.length}
-                                </>
-                            )}
-                            <ChevronDown className={`transition-transform ${coopSupportHudOpen ? 'rotate-180' : ''}`} size={coopSupportHudOpen ? 16 : 10} />
+                                <div className="text-sm font-black">{trans("支援カード", languageMode)} {coopSupportCards.length} {trans("枚", languageMode)}</div>
+                            </div>
+                            <ChevronDown className={`shrink-0 transition-transform ${coopSupportHudOpen ? 'rotate-180' : ''}`} size={16} />
                         </button>
                         {coopSupportHudOpen && (
-                            <div className="mt-3 space-y-2 max-h-[36vh] overflow-y-auto custom-scrollbar pr-1">
+                            <div className="mb-3 space-y-2 max-h-[36vh] overflow-y-auto custom-scrollbar pr-1">
                                 {coopSupportCards.map((supportCard, index) => {
                                     const needsTarget = supportNeedsTarget(supportCard);
                                     const isSelected = selectedSupportCard?.id === supportCard.id;
@@ -2170,6 +2165,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                                         onClick={() => {
                                                             if (!canUse) return;
                                                             setSelectedSupportCard(current => current?.id === supportCard.id ? null : supportCard);
+                                                            setCoopSupportHudOpen(false);
                                                         }}
                                                         disabled={!canUse}
                                                         className={`rounded border px-2 py-1 text-[11px] font-bold ${canUse
@@ -2188,6 +2184,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                                         onClick={() => {
                                                             if (!canUse) return;
                                                             onUseCoopSupport(supportCard);
+                                                            setCoopSupportHudOpen(false);
                                                         }}
                                                         disabled={!canUse}
                                                         className={`rounded border px-2 py-1 text-[11px] font-bold ${canUse

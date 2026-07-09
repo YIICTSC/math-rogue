@@ -1659,6 +1659,11 @@ const App: React.FC = () => {
         raceToastTimerRef.current = window.setTimeout(() => setRaceToast(null), 2200);
     }, []);
     useEffect(() => {
+        if (gameState.challengeMode === 'COOP' && CHALLENGE_SCREEN_SET.has(gameState.screen)) {
+            setCoopPartyHudOpen(false);
+        }
+    }, [gameState.challengeMode, gameState.screen]);
+    useEffect(() => {
         battleFinisherCutinCardRef.current = battleFinisherCutinCard;
     }, [battleFinisherCutinCard]);
     useEffect(() => {
