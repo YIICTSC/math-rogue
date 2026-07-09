@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import {
     GameState, GameScreen, Enemy, Card as ICard, ActiveFamiliar,
-    CardType, TargetType, EnemyIntentType, NodeType, MapNode, RewardItem, Relic, Potion, Player, EnemyIntent, Character, FloatingText, RankingEntry, GameMode, LanguageMode, AnswerMode, VisualEffectInstance, GardenSlot, VFXType, ActStats, RaceTrickCard, RaceTrickEffectId, CoopSupportCard, CoopBattleState, CoopBattleTurnSlot, CoopBattlePlayerState, CoopSharedState, CoopTreasurePool, AssignmentPayload, AssignmentAnswerResult, StudentProfile, MiniGameDebugPreview
+    CardType, TargetType, EnemyIntentType, NodeType, MapNode, RewardItem, Relic, Potion, Player, EnemyIntent, Character, FloatingText, RankingEntry, GameMode, LanguageMode, AnswerMode, SelectionState, VisualEffectInstance, GardenSlot, VFXType, ActStats, RaceTrickCard, RaceTrickEffectId, CoopSupportCard, CoopBattleState, CoopBattleTurnSlot, CoopBattlePlayerState, CoopSharedState, CoopTreasurePool, AssignmentPayload, AssignmentAnswerResult, StudentProfile, MiniGameDebugPreview
 } from './types';
 import {
     INITIAL_HP, INITIAL_ENERGY, HAND_SIZE,
@@ -2586,24 +2586,27 @@ const App: React.FC = () => {
         enemies?: Enemy[],
         selectedEnemyId?: string | null,
         combatLog?: string[],
+        selectionState?: SelectionState,
         turnLog?: string,
         actingEnemyId?: string | null,
         finisherCutinCard?: ICard | null
     }) => {
         if (!coopSession?.isHost) return;
+        const latestState = stateRef.current;
         const normalizedBattleState = mergeLocalPeerIntoCoopBattleState(battleState);
         p2pService.send({
             type: 'COOP_BATTLE_SYNC',
             battleState: normalizedBattleState,
-            activeEffects: syncOverrides?.activeEffects ?? gameState.activeEffects,
-            enemies: syncOverrides?.enemies ?? gameState.enemies,
-            selectedEnemyId: syncOverrides?.selectedEnemyId ?? gameState.selectedEnemyId,
-            combatLog: syncOverrides?.combatLog ?? gameState.combatLog,
+            activeEffects: syncOverrides?.activeEffects ?? latestState.activeEffects,
+            enemies: syncOverrides?.enemies ?? latestState.enemies,
+            selectedEnemyId: syncOverrides?.selectedEnemyId ?? latestState.selectedEnemyId,
+            combatLog: syncOverrides?.combatLog ?? latestState.combatLog,
+            selectionState: syncOverrides?.selectionState ?? latestState.selectionState,
             turnLog: syncOverrides?.turnLog ?? turnLog,
             actingEnemyId: syncOverrides?.actingEnemyId ?? actingEnemyId,
             finisherCutinCard: syncOverrides?.finisherCutinCard ?? battleFinisherCutinCard
         });
-    }, [actingEnemyId, battleFinisherCutinCard, coopSession, gameState.activeEffects, gameState.combatLog, gameState.enemies, gameState.selectedEnemyId, mergeLocalPeerIntoCoopBattleState, turnLog]);
+    }, [actingEnemyId, battleFinisherCutinCard, coopSession, mergeLocalPeerIntoCoopBattleState, turnLog]);
     const upsertCoopPlayerSnapshot = useCallback((peerId: string, player: Player) => {
         setCoopPlayerSnapshots(prev => ({ ...prev, [peerId]: player }));
     }, []);
@@ -3529,7 +3532,7 @@ const App: React.FC = () => {
             broadcastCoopBattleState(gameState.coopBattleState || null);
         }, 50);
         return () => window.clearTimeout(timeout);
-    }, [broadcastCoopBattleState, coopSession, gameState.challengeMode, gameState.coopBattleState]);
+    }, [broadcastCoopBattleState, coopSession, gameState.challengeMode, gameState.coopBattleState, gameState.selectionState]);
     useEffect(() => {
         if (
             !coopSession?.isHost ||
@@ -13160,6 +13163,7 @@ const App: React.FC = () => {
                                 enemies: data.enemies ?? prev.enemies,
                                 selectedEnemyId: selfBattlePlayer.selectedEnemyId ?? prev.selectedEnemyId,
                                 combatLog: data.combatLog ?? prev.combatLog,
+                                selectionState: data.selectionState ?? prev.selectionState,
                                 activeEffects: data.activeEffects ?? prev.activeEffects,
                                 coopBattleState: normalizedBattleState
                             };

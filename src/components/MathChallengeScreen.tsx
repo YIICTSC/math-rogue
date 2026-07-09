@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { BookOpen, CheckCircle, XCircle } from 'lucide-react';
 import { audioService } from '../services/audioService';
 import { AnswerMode, AssignmentAnswerResult, AssignmentReviewProblem, GameMode, LanguageMode } from '../types';
@@ -42,12 +42,22 @@ const MathChallengeScreen: React.FC<MathChallengeScreenProps> = ({ onComplete, m
     try {
       const seenKey = `unit-board-seen:${unitBoardSummary.id}`;
       if (window.localStorage.getItem(seenKey) === '1') return;
-      window.localStorage.setItem(seenKey, '1');
       setIsUnitBoardOpen(true);
     } catch {
       setIsUnitBoardOpen(true);
     }
   }, [reviewProblem, unitBoardSummary]);
+
+  const handleUnitBoardClose = useCallback(() => {
+    if (unitBoardSummary) {
+      try {
+        window.localStorage.setItem(`unit-board-seen:${unitBoardSummary.id}`, '1');
+      } catch {
+        // Storage can be unavailable in restricted browsers; closing the modal should still work.
+      }
+    }
+    setIsUnitBoardOpen(false);
+  }, [unitBoardSummary]);
 
   useEffect(() => {
     if (!isAnswered && inputRef.current) {
@@ -286,7 +296,7 @@ const MathChallengeScreen: React.FC<MathChallengeScreenProps> = ({ onComplete, m
                 <BookOpen size={22} />
             </button>
         )}
-        <UnitBoardModal summary={unitBoardSummary} open={isUnitBoardOpen} onClose={() => setIsUnitBoardOpen(false)} />
+        <UnitBoardModal summary={unitBoardSummary} open={isUnitBoardOpen} onClose={handleUnitBoardClose} />
         
         <div className="basic-challenge-layout z-10 w-full max-w-md text-center">
             <div className="basic-challenge-question bg-black/40 border-4 border-white p-8 rounded-lg mb-8 shadow-2xl relative overflow-hidden flex items-center justify-center min-h-[160px]">

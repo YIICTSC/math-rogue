@@ -20,6 +20,11 @@ const UnitBoardModal: React.FC<UnitBoardModalProps> = ({ summary, open, onClose 
   const exampleLabel = isNativeEnglishBoard ? 'Example' : '例';
   const closeLabel = isNativeEnglishBoard ? 'Back to question' : summary.grade && summary.grade <= 2 ? 'もんだいにもどる' : '問題にもどる';
   const closeAriaLabel = isNativeEnglishBoard ? 'Close board' : '板書を閉じる';
+  const handleClose = (event: React.MouseEvent<HTMLButtonElement> | React.PointerEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    onClose();
+  };
 
   return (
     <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/75 p-2 font-mono text-white sm:p-4">
@@ -36,7 +41,8 @@ const UnitBoardModal: React.FC<UnitBoardModalProps> = ({ summary, open, onClose 
       >
         <button
           type="button"
-          onClick={onClose}
+          onClick={handleClose}
+          onPointerUp={handleClose}
           className="unit-board-close absolute right-[6%] top-[5%] z-10 inline-flex h-9 w-9 items-center justify-center rounded-full border border-white/35 bg-black/35 text-white transition hover:bg-black/55 sm:h-10 sm:w-10"
           aria-label={closeAriaLabel}
         >
@@ -97,7 +103,8 @@ const UnitBoardModal: React.FC<UnitBoardModalProps> = ({ summary, open, onClose 
         <div className="unit-board-footer absolute bottom-[8%] right-[10%] z-10 flex justify-end">
           <button
             type="button"
-            onClick={onClose}
+            onClick={handleClose}
+            onPointerUp={handleClose}
             className="unit-board-return rounded-md border-b-4 border-emerald-950 bg-emerald-600 px-4 py-1.5 text-xs font-black text-white transition hover:bg-emerald-500 active:translate-y-1 active:border-b-0 sm:px-5 sm:py-2 sm:text-sm"
           >
             {closeLabel}

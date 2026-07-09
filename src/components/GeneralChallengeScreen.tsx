@@ -163,12 +163,22 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
     try {
       const seenKey = `unit-board-seen:${unitBoardSummary.id}`;
       if (window.localStorage.getItem(seenKey) === '1') return;
-      window.localStorage.setItem(seenKey, '1');
       setIsUnitBoardOpen(true);
     } catch {
       setIsUnitBoardOpen(true);
     }
   }, [reviewProblem, unitBoardSummary]);
+
+  const handleUnitBoardClose = useCallback(() => {
+    if (unitBoardSummary) {
+      try {
+        window.localStorage.setItem(`unit-board-seen:${unitBoardSummary.id}`, '1');
+      } catch {
+        // Storage can be unavailable in restricted browsers; closing the modal should still work.
+      }
+    }
+    setIsUnitBoardOpen(false);
+  }, [unitBoardSummary]);
 
   const canonicalizeEnglishNumbers = (value: string) => {
     const smallNumberWords: Record<string, number> = {
@@ -1758,7 +1768,7 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
                 <BookOpen size={22} />
             </button>
         )}
-        <UnitBoardModal summary={unitBoardSummary} open={isUnitBoardOpen} onClose={() => setIsUnitBoardOpen(false)} />
+        <UnitBoardModal summary={unitBoardSummary} open={isUnitBoardOpen} onClose={handleUnitBoardClose} />
         
         <div className="general-challenge-layout z-10 w-full max-w-md text-center flex flex-col py-2 md:py-0 min-w-0">
             {isEnglishSpeakingReviewMode(mode) && !isChallenge && (

@@ -1,5 +1,5 @@
 import Peer, { DataConnection } from 'peerjs';
-import { CoopSharedState, CoopSupportEffectId, CoopTreasurePool, RaceTrickEffectId } from '../types';
+import { CoopSharedState, CoopSupportEffectId, CoopTreasurePool, RaceTrickEffectId, SelectionState } from '../types';
 import { OFFLINE_DISTRIBUTABLE, OFFLINE_NETWORK_FEATURE_MESSAGE } from '../config/runtime';
 
 type P2PVisualThemeId = 'elementary' | 'high-school' | 'magic';
@@ -143,6 +143,7 @@ export type P2PEvent =
         enemies?: any[],
         selectedEnemyId?: string | null,
         combatLog?: string[],
+        selectionState?: SelectionState,
         turnLog?: string,
         actingEnemyId?: string | null,
         finisherCutinCard?: any | null
