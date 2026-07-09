@@ -520,6 +520,13 @@ const remapCoopBattleStatePeerId = (
     nextPeerId: string
 ): CoopBattleState | null | undefined => {
     if (!battleState || !oldPeerId || !nextPeerId || oldPeerId === nextPeerId) return battleState;
+    const nextSelectionStateByPeerId = battleState.selectionStateByPeerId
+        ? { ...battleState.selectionStateByPeerId }
+        : undefined;
+    if (nextSelectionStateByPeerId && nextSelectionStateByPeerId[oldPeerId]) {
+        nextSelectionStateByPeerId[nextPeerId] = nextSelectionStateByPeerId[oldPeerId];
+        delete nextSelectionStateByPeerId[oldPeerId];
+    }
     return {
         ...battleState,
         players: battleState.players.map(entry =>
@@ -534,7 +541,25 @@ const remapCoopBattleStatePeerId = (
                 }
                 : slot
         ),
-        roundEndedPeerIds: battleState.roundEndedPeerIds?.map(peerId => peerId === oldPeerId ? nextPeerId : peerId)
+        roundEndedPeerIds: battleState.roundEndedPeerIds?.map(peerId => peerId === oldPeerId ? nextPeerId : peerId),
+        selectionStateByPeerId: nextSelectionStateByPeerId
+    };
+};
+
+const INACTIVE_SELECTION_STATE: SelectionState = { active: false, type: 'DISCARD', amount: 0 };
+
+const withCoopSelectionStateForPeer = (
+    battleState: CoopBattleState | null | undefined,
+    peerId: string | null | undefined,
+    selectionState: SelectionState
+): CoopBattleState | null | undefined => {
+    if (!battleState || !peerId) return battleState;
+    return {
+        ...battleState,
+        selectionStateByPeerId: {
+            ...(battleState.selectionStateByPeerId || {}),
+            [peerId]: selectionState
+        }
     };
 };
 
@@ -2146,6 +2171,10 @@ const App: React.FC = () => {
         }
         return activeCoopTurnSlot.type !== 'ENEMY' && activeCoopTurnSlot.peerId === coopSelfPeerId;
     }, [activeCoopTurnSlot, coopBattleState, coopSelfPeerId, gameState.challengeMode, gameState.screen]);
+    const battleSelectionState = useMemo(() => {
+        if (gameState.challengeMode !== 'COOP' || !coopSelfPeerId) return gameState.selectionState;
+        return coopBattleState?.selectionStateByPeerId?.[coopSelfPeerId] || gameState.selectionState;
+    }, [coopBattleState, coopSelfPeerId, gameState.challengeMode, gameState.selectionState]);
     const isCoopHost = gameState.challengeMode === 'COOP' && !!coopSession?.isHost;
     const getRequiredRealtimeEndPeerIds = useCallback((battleState: CoopBattleState) => {
         const alivePeerIds = battleState.players
@@ -2831,7 +2860,8 @@ const App: React.FC = () => {
             turnQueue: queue,
             turnCursor: 0,
             enemyTurnCursor: 0,
-            roundEndedPeerIds: []
+            roundEndedPeerIds: [],
+            selectionStateByPeerId: {}
         };
         setCoopBattleState(nextBattleState);
         broadcastCoopBattleState(nextBattleState);
@@ -6484,7 +6514,10 @@ const App: React.FC = () => {
             const actorPlayer = actorEntry?.player ?? prev.player;
             const selectedCard = actorPlayer.hand.find(handCard => handCard.id === card.id) ?? card;
             const p = { ...actorPlayer, hand: [...actorPlayer.hand], discardPile: [...actorPlayer.discardPile] };
-            const mode = prev.selectionState;
+            const selectionPeerId = prev.challengeMode === 'COOP' ? (coopActorPeerId || coopSelfPeerId) : undefined;
+            const mode = selectionPeerId
+                ? (prev.coopBattleState?.selectionStateByPeerId?.[selectionPeerId] || prev.selectionState)
+                : prev.selectionState;
             if (mode.type === 'DISCARD' || mode.type === 'EXHAUST') {
                 p.hand = p.hand.filter(c => c.id !== selectedCard.id);
                 if (mode.type === 'DISCARD') {
@@ -6497,30 +6530,38 @@ const App: React.FC = () => {
                     if (p.powers['FEEL_NO_PAIN']) p.block += p.powers['FEEL_NO_PAIN'];
                 }
                 const newAmount = mode.amount - 1;
+                const nextSelectionState = { ...mode, active: newAmount > 0, amount: newAmount };
+                const updatedBattleState = prev.challengeMode === 'COOP'
+                    ? (coopActorPeerId
+                        ? updateCoopBattleStateForPeer(prev.coopBattleState, coopActorPeerId, p, actorEntry?.selectedEnemyId ?? prev.selectedEnemyId)
+                        : updateCoopBattleStateForLocalPlayer(prev.coopBattleState, p, prev.selectedEnemyId))
+                    : prev.coopBattleState;
                 return {
                     ...prev,
                     player: coopActorPeerId ? prev.player : p,
                     coopBattleState: prev.challengeMode === 'COOP'
-                        ? (coopActorPeerId
-                            ? updateCoopBattleStateForPeer(prev.coopBattleState, coopActorPeerId, p, actorEntry?.selectedEnemyId ?? prev.selectedEnemyId)
-                            : updateCoopBattleStateForLocalPlayer(prev.coopBattleState, p, prev.selectedEnemyId))
-                        : prev.coopBattleState,
-                    selectionState: { ...mode, active: newAmount > 0, amount: newAmount }
+                        ? withCoopSelectionStateForPeer(updatedBattleState, selectionPeerId, nextSelectionState)
+                        : updatedBattleState,
+                    selectionState: coopActorPeerId ? prev.selectionState : nextSelectionState
                 };
             }
             if (mode.type === 'COPY') {
                 const copy = { ...selectedCard, id: `copy-${Date.now()}` };
                 if (p.hand.length < HAND_SIZE + 5) p.hand.push(copy);
                 const newAmount = mode.amount - 1;
+                const nextSelectionState = { ...mode, active: newAmount > 0, amount: newAmount };
+                const updatedBattleState = prev.challengeMode === 'COOP'
+                    ? (coopActorPeerId
+                        ? updateCoopBattleStateForPeer(prev.coopBattleState, coopActorPeerId, p, actorEntry?.selectedEnemyId ?? prev.selectedEnemyId)
+                        : updateCoopBattleStateForLocalPlayer(prev.coopBattleState, p, prev.selectedEnemyId))
+                    : prev.coopBattleState;
                 return {
                     ...prev,
                     player: coopActorPeerId ? prev.player : p,
                     coopBattleState: prev.challengeMode === 'COOP'
-                        ? (coopActorPeerId
-                            ? updateCoopBattleStateForPeer(prev.coopBattleState, coopActorPeerId, p, actorEntry?.selectedEnemyId ?? prev.selectedEnemyId)
-                            : updateCoopBattleStateForLocalPlayer(prev.coopBattleState, p, prev.selectedEnemyId))
-                        : prev.coopBattleState,
-                    selectionState: { ...mode, active: newAmount > 0, amount: newAmount }
+                        ? withCoopSelectionStateForPeer(updatedBattleState, selectionPeerId, nextSelectionState)
+                        : updatedBattleState,
+                    selectionState: coopActorPeerId ? prev.selectionState : nextSelectionState
                 };
             }
             return prev;
@@ -6528,22 +6569,38 @@ const App: React.FC = () => {
     };
 
     const handleCancelSelection = (coopActorPeerId?: string) => {
+        const currentSelectionState = (() => {
+            const selectionPeerId = gameState.challengeMode === 'COOP' ? (coopActorPeerId || coopSelfPeerId) : undefined;
+            return selectionPeerId
+                ? (gameState.coopBattleState?.selectionStateByPeerId?.[selectionPeerId] || gameState.selectionState)
+                : gameState.selectionState;
+        })();
         if (gameState.challengeMode === 'COOP' && coopSession && !coopSession.isHost && gameState.screen === GameScreen.BATTLE) {
-            if (gameState.selectionState.active && gameState.selectionState.type === 'DISCARD') {
+            if (currentSelectionState.active && currentSelectionState.type === 'DISCARD') {
                 audioService.playSound('wrong');
                 return;
             }
             queueCoopBattleEvent({ type: 'COOP_BATTLE_SELECTION_STATE', selectionCancelled: true });
             return;
         }
-        if (gameState.selectionState.active && gameState.selectionState.type === 'DISCARD') {
+        if (currentSelectionState.active && currentSelectionState.type === 'DISCARD') {
             if (!coopActorPeerId) audioService.playSound('wrong');
             return;
         }
-        setGameState(prev => ({
-            ...prev,
-            selectionState: { ...prev.selectionState, active: false }
-        }));
+        setGameState(prev => {
+            const selectionPeerId = prev.challengeMode === 'COOP' ? (coopActorPeerId || coopSelfPeerId) : undefined;
+            const prevSelectionState = selectionPeerId
+                ? (prev.coopBattleState?.selectionStateByPeerId?.[selectionPeerId] || prev.selectionState)
+                : prev.selectionState;
+            const nextSelectionState = { ...prevSelectionState, active: false };
+            return {
+                ...prev,
+                coopBattleState: prev.challengeMode === 'COOP'
+                    ? withCoopSelectionStateForPeer(prev.coopBattleState, selectionPeerId, nextSelectionState)
+                    : prev.coopBattleState,
+                selectionState: coopActorPeerId ? prev.selectionState : nextSelectionState
+            };
+        });
         if (!coopActorPeerId) audioService.playSound('select');
     };
 
@@ -6963,17 +7020,21 @@ const App: React.FC = () => {
                     newLogs.push('No card to copy');
                 } else {
                     newLogs.push('Select 1 card to copy');
+                    const nextSelectionState: SelectionState = { active: true, type: 'COPY', amount: 1 };
                     const nextCoopBattleState = prev.challengeMode === 'COOP'
                         ? (coopActorPeerId
                             ? updateCoopBattleStateForPeer(prev.coopBattleState, coopActorPeerId, p, actorSelectedEnemyId)
                             : updateCoopBattleStateForLocalPlayer(prev.coopBattleState, p, actorSelectedEnemyId))
                         : prev.coopBattleState;
+                    const selectionPeerId = prev.challengeMode === 'COOP' ? (coopActorPeerId || coopSelfPeerId) : undefined;
                     return {
                         ...prev,
                         player: coopActorPeerId ? prev.player : p,
                         enemies,
-                        coopBattleState: nextCoopBattleState,
-                        selectionState: { active: true, type: 'COPY', amount: 1 },
+                        coopBattleState: prev.challengeMode === 'COOP'
+                            ? withCoopSelectionStateForPeer(nextCoopBattleState, selectionPeerId, nextSelectionState)
+                            : nextCoopBattleState,
+                        selectionState: coopActorPeerId ? prev.selectionState : nextSelectionState,
                         combatLog: [...prev.combatLog, ...newLogs].slice(-100),
                         activeEffects: [...prev.activeEffects, ...nextActiveEffects]
                     };
@@ -7034,7 +7095,11 @@ const App: React.FC = () => {
         if (actionPlayer.currentEnergy < effectiveCost && !actionPlayer.partner) return;
         if (gameState.enemies.length === 0) return;
         if (actingEnemyId) return;
-        if (gameState.selectionState.active) return;
+        const activeSelectionPeerId = gameState.challengeMode === 'COOP' ? (coopActorPeerId || coopSelfPeerId) : undefined;
+        const activeSelectionState = activeSelectionPeerId
+            ? (gameState.coopBattleState?.selectionStateByPeerId?.[activeSelectionPeerId] || INACTIVE_SELECTION_STATE)
+            : gameState.selectionState;
+        if (activeSelectionState.active) return;
         if (card.unplayable) return;
         const requiredDiscardCount = card.promptsDiscard || 0;
         const incomingDrawCount = (card.draw || 0) * (actionPlayer.magicTransformed ? 2 : 1);
@@ -7118,7 +7183,10 @@ const App: React.FC = () => {
             const effectOwnerPeerId = prev.challengeMode === 'COOP' && prev.screen === GameScreen.BATTLE
                 ? (coopActorPeerId || coopSelfPeerId)
                 : undefined;
-            let nextSelectionState = { ...prev.selectionState };
+            const selectionPeerId = prev.challengeMode === 'COOP' ? (coopActorPeerId || coopSelfPeerId) : undefined;
+            let nextSelectionState = selectionPeerId
+                ? { ...(prev.coopBattleState?.selectionStateByPeerId?.[selectionPeerId] || INACTIVE_SELECTION_STATE) }
+                : { ...prev.selectionState };
             const nextActStats = prev.actStats ? { ...prev.actStats } : { enemiesDefeated: 0, goldGained: 0, mathCorrect: 0 };
 
             // --- カード固有の拡張ロジック ---
@@ -8455,14 +8523,17 @@ const App: React.FC = () => {
                     ? updateCoopBattleStateForPeer(prev.coopBattleState, coopActorPeerId, p, nextSelectedId)
                     : updateCoopBattleStateForLocalPlayer(prev.coopBattleState, p, nextSelectedId))
                 : prev.coopBattleState;
+            const nextCoopBattleStateWithSelection = prev.challengeMode === 'COOP'
+                ? withCoopSelectionStateForPeer(nextCoopBattleState, selectionPeerId, nextSelectionState)
+                : nextCoopBattleState;
 
             return {
                 ...prev,
                 player: coopActorPeerId ? prev.player : p,
                 enemies: aliveEnemies,
                 selectedEnemyId: coopActorPeerId ? prev.selectedEnemyId : nextSelectedId,
-                coopBattleState: nextCoopBattleState,
-                selectionState: nextSelectionState,
+                coopBattleState: nextCoopBattleStateWithSelection,
+                selectionState: coopActorPeerId ? prev.selectionState : nextSelectionState,
                 actStats: nextActStats,
                 combatLog: [...prev.combatLog, ...currentLogs].slice(-100),
                 activeEffects: [...prev.activeEffects, ...attachCoopEffectOwner(nextActiveEffects, effectOwnerPeerId)]
@@ -8699,7 +8770,10 @@ const App: React.FC = () => {
             p.typesPlayedThisTurn = [];
             p.relicCounters['ATTACK_COUNT'] = 0;
             syncRedSkullState(p);
-            let nextSelection = { ...prev.selectionState };
+            const selectionPeerId = prev.challengeMode === 'COOP' ? (coopActorPeerId || coopSelfPeerId) : undefined;
+            let nextSelection = selectionPeerId
+                ? { ...(prev.coopBattleState?.selectionStateByPeerId?.[selectionPeerId] || INACTIVE_SELECTION_STATE) }
+                : { ...prev.selectionState };
             if (p.powers['TOOLS_OF_THE_TRADE']) {
                 nextSelection = { active: true, type: 'DISCARD', amount: 1 };
             }
@@ -8708,14 +8782,17 @@ const App: React.FC = () => {
                     ? updateCoopBattleStateForPeer(prev.coopBattleState, coopActorPeerId, p, actorSelectedEnemyId)
                     : updateCoopBattleStateForLocalPlayer(prev.coopBattleState, p, actorSelectedEnemyId))
                 : prev.coopBattleState;
+            const nextCoopBattleStateWithSelection = prev.challengeMode === 'COOP'
+                ? withCoopSelectionStateForPeer(nextCoopBattleState, selectionPeerId, nextSelection)
+                : nextCoopBattleState;
 
             isEndingTurnRef.current = false;
 
             return {
                 ...prev,
                 player: coopActorPeerId ? prev.player : p,
-                coopBattleState: nextCoopBattleState,
-                selectionState: nextSelection,
+                coopBattleState: nextCoopBattleStateWithSelection,
+                selectionState: coopActorPeerId ? prev.selectionState : nextSelection,
                 turn: prev.turn + 1,
                 activeEffects: [...prev.activeEffects, ...attachCoopEffectOwner(nextActiveEffects, coopActorPeerId)],
                 combatLog: [...prev.combatLog, ...currentLogs].slice(-100)
@@ -13157,13 +13234,16 @@ const App: React.FC = () => {
                                 : (isSameBattle && (enemyActing || isRealtimeEnemyPhase)
                                     ? preserveLocalBattleCardZones(selfBattlePlayer.player, prev.player, { preserveZones: true })
                                     : selfBattlePlayer.player);
+                            const selfSelectionState = coopSelfPeerId
+                                ? (normalizedBattleState?.selectionStateByPeerId?.[coopSelfPeerId] || data.selectionState)
+                                : data.selectionState;
                             return {
                                 ...prev,
                                 player: mergedLocalPlayer,
                                 enemies: data.enemies ?? prev.enemies,
                                 selectedEnemyId: selfBattlePlayer.selectedEnemyId ?? prev.selectedEnemyId,
                                 combatLog: data.combatLog ?? prev.combatLog,
-                                selectionState: data.selectionState ?? prev.selectionState,
+                                selectionState: selfSelectionState ?? prev.selectionState,
                                 activeEffects: data.activeEffects ?? prev.activeEffects,
                                 coopBattleState: normalizedBattleState
                             };
@@ -15478,7 +15558,7 @@ const App: React.FC = () => {
                             />
                         ) : (
                             <BattleScene
-                                player={gameState.player} companions={gameState.challengeMode === 'COOP' ? coopCompanions : undefined} coopSelfPeerId={gameState.challengeMode === 'COOP' ? coopSelfPeerId : undefined} coopEffectOwnerPeerId={gameState.challengeMode === 'COOP' ? coopEffectOwnerPeerId : undefined} coopTurnQueue={gameState.challengeMode === 'COOP' ? coopBattleQueueView : undefined} coopCanAct={gameState.challengeMode === 'COOP' ? coopBattleCanAct : true} coopTurnOwnerLabel={gameState.challengeMode === 'COOP' ? coopBattleTurnOwnerLabel : undefined} coopSupportCards={gameState.challengeMode === 'COOP' ? coopSupportCards : undefined} onUseCoopSupport={gameState.challengeMode === 'COOP' ? handleUseCoopSupport : undefined} selfDown={gameState.challengeMode === 'COOP' && gameState.player.currentHp <= 0} enemies={gameState.enemies} selectedEnemyId={gameState.selectedEnemyId} onSelectEnemy={handleSelectEnemy} onPlayCard={handlePlayCard} onTransform={coopSyncedVisualTheme === 'magic' ? handleMagicTransform : undefined} onEndTurn={handleEndTurnClick} turnLog={turnLog} narrative={currentNarrative} lastActionTime={lastActionTime} lastActionType={lastActionType} actingEnemyId={actingEnemyId} selectionState={gameState.selectionState} onHandSelection={handleHandSelection}
+                                player={gameState.player} companions={gameState.challengeMode === 'COOP' ? coopCompanions : undefined} coopSelfPeerId={gameState.challengeMode === 'COOP' ? coopSelfPeerId : undefined} coopEffectOwnerPeerId={gameState.challengeMode === 'COOP' ? coopEffectOwnerPeerId : undefined} coopTurnQueue={gameState.challengeMode === 'COOP' ? coopBattleQueueView : undefined} coopCanAct={gameState.challengeMode === 'COOP' ? coopBattleCanAct : true} coopTurnOwnerLabel={gameState.challengeMode === 'COOP' ? coopBattleTurnOwnerLabel : undefined} coopSupportCards={gameState.challengeMode === 'COOP' ? coopSupportCards : undefined} onUseCoopSupport={gameState.challengeMode === 'COOP' ? handleUseCoopSupport : undefined} selfDown={gameState.challengeMode === 'COOP' && gameState.player.currentHp <= 0} enemies={gameState.enemies} selectedEnemyId={gameState.selectedEnemyId} onSelectEnemy={handleSelectEnemy} onPlayCard={handlePlayCard} onTransform={coopSyncedVisualTheme === 'magic' ? handleMagicTransform : undefined} onEndTurn={handleEndTurnClick} turnLog={turnLog} narrative={currentNarrative} lastActionTime={lastActionTime} lastActionType={lastActionType} actingEnemyId={actingEnemyId} selectionState={battleSelectionState} onHandSelection={handleHandSelection}
                                 onUsePotion={handleUsePotion} combatLog={gameState.combatLog} languageMode={languageMode} codexOptions={gameState.codexOptions} onCodexSelect={onCodexSelect} onPlaySynthesizedCard={handlePlaySynthesizedCard}
                                 parryState={gameState.parryState} onParry={handleParryClick} showParryTutorial={showParryTutorial} onCloseParryTutorial={handleCloseParryTutorial} activeEffects={gameState.activeEffects}
                                 onCancelSelection={handleCancelSelection}

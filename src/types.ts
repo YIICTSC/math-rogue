@@ -340,6 +340,7 @@ export interface CoopBattleState {
   turnCursor: number;
   enemyTurnCursor: number;
   roundEndedPeerIds?: string[];
+  selectionStateByPeerId?: Record<string, SelectionState>;
 }
 
 export interface ActStats {

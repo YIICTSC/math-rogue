@@ -1,5 +1,5 @@
 import Peer, { DataConnection } from 'peerjs';
-import { CoopSharedState, CoopSupportEffectId, CoopTreasurePool, RaceTrickEffectId, SelectionState } from '../types';
+import { CoopBattleState, CoopSharedState, CoopSupportEffectId, CoopTreasurePool, RaceTrickEffectId, SelectionState } from '../types';
 import { OFFLINE_DISTRIBUTABLE, OFFLINE_NETWORK_FEATURE_MESSAGE } from '../config/runtime';
 
 type P2PVisualThemeId = 'elementary' | 'high-school' | 'magic';
@@ -121,24 +121,7 @@ export type P2PEvent =
     | { type: 'COOP_REWARD_SYNC_REQUEST' }
     | {
         type: 'COOP_BATTLE_SYNC',
-        battleState: {
-            battleKey: string,
-            players: Array<{
-                peerId: string,
-                name: string,
-                player: any,
-                selectedEnemyId?: string | null,
-                isDown?: boolean
-            }>,
-            turnQueue: Array<{
-                id: string,
-                type: 'SELF' | 'ALLY' | 'ENEMY',
-                label: string,
-                peerId?: string
-            }>,
-            turnCursor: number,
-            enemyTurnCursor: number
-        } | null,
+        battleState: CoopBattleState | null,
         activeEffects?: any[],
         enemies?: any[],
         selectedEnemyId?: string | null,
@@ -167,24 +150,7 @@ export type P2PEvent =
         selectedEnemyId?: string | null,
         turnLog?: string,
         actingEnemyId?: string | null,
-        battleState?: {
-            battleKey: string,
-            players: Array<{
-                peerId: string,
-                name: string,
-                player: any,
-                selectedEnemyId?: string | null,
-                isDown?: boolean
-            }>,
-            turnQueue: Array<{
-                id: string,
-                type: 'SELF' | 'ALLY' | 'ENEMY',
-                label: string,
-                peerId?: string
-            }>,
-            turnCursor: number,
-            enemyTurnCursor: number
-        } | null,
+        battleState?: CoopBattleState | null,
     }
     | {
         type: 'COOP_BATTLE_USE_POTION',
@@ -196,24 +162,7 @@ export type P2PEvent =
         selectedEnemyId?: string | null,
         turnLog?: string,
         actingEnemyId?: string | null,
-        battleState?: {
-            battleKey: string,
-            players: Array<{
-                peerId: string,
-                name: string,
-                player: any,
-                selectedEnemyId?: string | null,
-                isDown?: boolean
-            }>,
-            turnQueue: Array<{
-                id: string,
-                type: 'SELF' | 'ALLY' | 'ENEMY',
-                label: string,
-                peerId?: string
-            }>,
-            turnCursor: number,
-            enemyTurnCursor: number
-        } | null,
+        battleState?: CoopBattleState | null,
     }
     | {
         type: 'COOP_BATTLE_TURN_START' | 'COOP_BATTLE_SELECTION_STATE' | 'COOP_BATTLE_MODAL_RESOLVE' | 'COOP_BATTLE_CODEX_SELECT',
@@ -228,24 +177,7 @@ export type P2PEvent =
         selectedEnemyId?: string | null,
         turnLog?: string,
         actingEnemyId?: string | null,
-        battleState?: {
-            battleKey: string,
-            players: Array<{
-                peerId: string,
-                name: string,
-                player: any,
-                selectedEnemyId?: string | null,
-                isDown?: boolean
-            }>,
-            turnQueue: Array<{
-                id: string,
-                type: 'SELF' | 'ALLY' | 'ENEMY',
-                label: string,
-                peerId?: string
-            }>,
-            turnCursor: number,
-            enemyTurnCursor: number
-        } | null
+        battleState?: CoopBattleState | null
     }
     | {
         type: 'COOP_END_TURN',
