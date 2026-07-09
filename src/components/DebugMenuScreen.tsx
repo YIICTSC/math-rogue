@@ -27,6 +27,7 @@ import { UI_PREVIEW_GROUPS, UI_PREVIEW_SCREENS } from '../data/uiPreviewScreens'
 import { getDebugProblemUnitGroups } from './ProblemChallengeScreen';
 import { SUBJECT_DATA, type GeneralProblem } from '../data/subjectData';
 import { ELEMENTARY_EVENT_TITLES } from '../services/eventService';
+import { HIGH_SCHOOL_SUPPORTER_NPC_EVENTS, type SupporterNpcReward } from '../data/supporterNpcEvents';
 import React, { useMemo, useState, useCallback, useEffect, useRef } from 'react';
 
 interface DebugMenuScreenProps {
@@ -167,9 +168,19 @@ const formatProblemDebugCopyLine = (
 
 const DEBUG_EVENT_GROUPS: Array<{ id: VisualThemeId; name: string; titles: string[] }> = [
     { id: 'elementary', name: '小学生編', titles: [...ELEMENTARY_EVENT_TITLES] },
-    { id: 'high-school', name: '高校編', titles: HIGH_SCHOOL_EVENT_THEMES.map(event => event.title) },
+    { id: 'high-school', name: '高校編', titles: [...HIGH_SCHOOL_EVENT_THEMES.map(event => event.title), ...HIGH_SCHOOL_SUPPORTER_NPC_EVENTS.map(event => event.title)] },
     { id: 'magic', name: 'マジック編', titles: MAGIC_EVENT_THEMES.map(event => event.title) },
 ];
+
+const SUPPORTER_NPC_REWARD_LABELS: Record<SupporterNpcReward, string> = {
+    synthesis: '任意カード合成',
+    upgrade: 'カード強化',
+    rareCard: 'レアカード獲得',
+    heal: 'HP回復',
+    gold: 'ゴールド獲得',
+    maxHp: '最大HP上昇',
+    cleanse: '呪い解除',
+};
 const UI_PREVIEW_CHECK_TARGETS: Array<{ id: UiPreviewCheckTarget; label: string }> = [
     { id: 'pc', label: 'PC' },
     { id: 'mobileLandscape', label: 'スマホ横' },
@@ -2215,6 +2226,60 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
                                     <h3 className="text-cyan-300 font-bold flex items-center">
                                         <HelpCircle size={18} className="mr-2" /> 高校編イベント確認
                                     </h3>
+                                    <div className="text-xs text-gray-400">
+                                        通常{HIGH_SCHOOL_EVENT_THEMES.length}件 / NPC{HIGH_SCHOOL_SUPPORTER_NPC_EVENTS.length}件
+                                    </div>
+                                </div>
+                                <section className="rounded-xl border border-yellow-600/70 bg-yellow-950/20 p-4">
+                                    <div className="mb-3 flex items-center justify-between gap-3">
+                                        <div>
+                                            <h4 className="text-sm font-black text-yellow-200">支援NPCイベント動作確認</h4>
+                                            <p className="mt-1 text-xs text-gray-400">
+                                                高校編エンドレスの？マスに出るNPCイベントを個別に起動します。
+                                            </p>
+                                        </div>
+                                        <div className="shrink-0 text-xs font-bold text-yellow-300">{HIGH_SCHOOL_SUPPORTER_NPC_EVENTS.length}件</div>
+                                    </div>
+                                    <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
+                                        {HIGH_SCHOOL_SUPPORTER_NPC_EVENTS.map(event => (
+                                            <div key={event.id} className="overflow-hidden rounded-lg border border-yellow-700/70 bg-black/35">
+                                                <div className="aspect-square bg-slate-950">
+                                                    <img
+                                                        src={assetUrl(`sprites/high-school/supporter-npcs/${event.imageFile}`)}
+                                                        alt={event.npcName}
+                                                        className="h-full w-full object-cover"
+                                                        draggable={false}
+                                                    />
+                                                </div>
+                                                <div className="space-y-2 p-3">
+                                                    <div className="flex items-start justify-between gap-2">
+                                                        <div className="min-w-0">
+                                                            <div className="text-[10px] font-black text-yellow-300">{event.npcName}</div>
+                                                            <div className="truncate font-bold text-white">{event.title}</div>
+                                                        </div>
+                                                        <div className="shrink-0 rounded-full border border-yellow-500/60 px-2 py-1 text-[10px] font-bold text-yellow-100">
+                                                            {event.questions.length}問
+                                                        </div>
+                                                    </div>
+                                                    <div className="text-[11px] font-bold text-cyan-200">
+                                                        報酬: {SUPPORTER_NPC_REWARD_LABELS[event.reward]}
+                                                    </div>
+                                                    <p className="line-clamp-3 text-xs leading-relaxed text-gray-300">{event.description}</p>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => onStartEventUiPreview('high-school', event.title)}
+                                                        className="w-full rounded-lg border border-yellow-300 bg-yellow-600 px-4 py-2 text-xs font-black text-slate-950 hover:bg-yellow-400"
+                                                    >
+                                                        このNPCイベントを開始
+                                                    </button>
+                                                    {renderUiPreviewChecks(`event:high-school:${event.title}`)}
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </section>
+                                <div className="flex items-center justify-between gap-3 border-b border-cyan-700/40 pb-2 pt-2">
+                                    <h4 className="text-sm font-black text-cyan-300">通常イベント素材</h4>
                                     <div className="text-xs text-gray-400">{HIGH_SCHOOL_EVENT_THEMES.length}件</div>
                                 </div>
                                 <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-4">

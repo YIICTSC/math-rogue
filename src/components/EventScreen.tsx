@@ -55,6 +55,10 @@ const EventScreen: React.FC<EventScreenProps> = ({ title, description, options, 
     const match = imageKey?.match(/^high-school-event-(\d+)$/);
     return match ? Number(match[1]) : null;
   }, [imageKey]);
+  const highSchoolSupporterNpcImage = useMemo(() => {
+    const match = imageKey?.match(/^high-school-supporter-npc\/([^/]+)$/);
+    return match ? assetUrl(`sprites/high-school/supporter-npcs/${match[1]}`) : null;
+  }, [imageKey]);
   const magicEventIndex = useMemo(() => {
     const match = imageKey?.match(/^magic-event-(\d+)$/);
     return match ? Number(match[1]) : null;
@@ -98,6 +102,12 @@ const EventScreen: React.FC<EventScreenProps> = ({ title, description, options, 
         assetUrl('event-illustrations/default.svg'),
       ];
     }
+    if (highSchoolSupporterNpcImage) {
+      return [
+        highSchoolSupporterNpcImage,
+        assetUrl('event-illustrations/default.svg'),
+      ];
+    }
     if (highSchoolEventIndex !== null) {
       return [
         assetUrl(`sprites/high-school/events/${highSchoolEventIndex}.webp`),
@@ -120,7 +130,7 @@ const EventScreen: React.FC<EventScreenProps> = ({ title, description, options, 
       assetUrl(`event-illustrations/${encodedTitle}.svg`),
       assetUrl('event-illustrations/default.svg')
     ];
-  }, [highSchoolEventIndex, magicEventIndex, magicFriendshipImages, magicRomanceImage, imageKey, title, visualTheme]);
+  }, [highSchoolEventIndex, highSchoolSupporterNpcImage, magicEventIndex, magicFriendshipImages, magicRomanceImage, imageKey, title, visualTheme]);
   const [imageIndex, setImageIndex] = useState(0);
   const [choiceLocked, setChoiceLocked] = useState(false);
   const [continueLocked, setContinueLocked] = useState(false);

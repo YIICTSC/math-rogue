@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import PixelSprite from './PixelSprite';
 import { getEnemyIllustrationPaths } from '../utils/enemyIllustration';
+import { isLegacySpriteModeEnabled } from '../utils/legacySpriteMode';
 import { getThemedHumanoidEnemySpritePath, getThemedMonsterEnemySpritePath, type HighSchoolEnemyAction, type VisualThemeId } from '../data/visualThemes';
 
 interface EnemyIllustrationProps {
@@ -16,6 +17,14 @@ interface EnemyIllustrationProps {
 }
 
 const EnemyIllustration: React.FC<EnemyIllustrationProps> = ({ name, seed, aliases = [], className = '', size = 16, visualTheme = 'elementary', enemyType = 'GENERIC', phase, action = 'idle' }) => {
+  if (visualTheme === 'elementary' && isLegacySpriteModeEnabled()) {
+    return (
+      <div className={`relative ${className}`}>
+        <PixelSprite seed={seed} name={name} className="w-full h-full" size={size} />
+      </div>
+    );
+  }
+
   const enemyRef = { name, enemyType, phase };
   const humanoidPath = getThemedHumanoidEnemySpritePath(enemyRef, visualTheme, action);
   const humanoidIdlePath = action !== 'idle'

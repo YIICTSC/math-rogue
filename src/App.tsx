@@ -75,8 +75,10 @@ import CoopSetupScreen, { CoopParticipantPayload, CoopStartPayload } from './com
 import ModeSelectionScreen from './components/ModeSelectionScreen';
 import SettingsModal, { AppSettings, BattleUiSettings, SettingsTab } from './components/SettingsModal';
 import Card from './components/Card';
+import PixelSprite from './components/PixelSprite';
 import { audioService, type BgmThemeId } from './services/audioService';
 import { assetPreloadService } from './services/assetPreloadService';
+import { setLegacySpriteModeEnabled } from './utils/legacySpriteMode';
 import { generateEnemyName } from './services/geminiService';
 import { generateDungeonMap } from './services/mapGenerator';
 import { parseTransferData, serializeTransferData, storageService } from './services/storageService';
@@ -108,6 +110,7 @@ import { generateMagicRomanceSelectionEvent } from './services/magicRomanceEvent
 import { applyMagicRuleOnCardPlay } from './services/magicRuleService';
 import { UI_PREVIEW_GROUPS, UI_PREVIEW_SCREENS } from './data/uiPreviewScreens';
 import { useXboxControllerNavigation } from './hooks/useXboxControllerNavigation';
+import { CREDIT_SECTIONS } from './data/credits';
 
 const PARRY_WINDOW_MS = 650;
 const PARRY_PERFECT_MS = 220;
@@ -210,6 +213,99 @@ const getBgmThemeForPlayer = (
     if (player?.magicProtagonistGender === 'female') return 'magic-female';
     if (player?.magicProtagonistGender === 'male') return 'magic-male';
     return theme;
+};
+
+type CreditDecorationSprite = {
+    id: string;
+} & (
+    | { kind: 'pixel'; seed: string; name: string }
+    | { kind: 'image'; src: string; alt: string }
+);
+
+const CREDIT_DECORATION_SPRITE_POOL: CreditDecorationSprite[] = [
+    { id: 'pixel-hero', kind: 'pixel', seed: 'credit-hero', name: 'HERO_FRONT|青' },
+    { id: 'pixel-teacher', kind: 'pixel', seed: 'credit-teacher', name: 'TEACHER|赤' },
+    { id: 'pixel-slime', kind: 'pixel', seed: 'credit-slime', name: 'SLIME|緑' },
+    { id: 'pixel-boss', kind: 'pixel', seed: 'credit-boss', name: 'BOSS|黒' },
+    { id: 'pixel-dog', kind: 'pixel', seed: 'credit-dog', name: 'DOG|黄' },
+    { id: 'pixel-girl', kind: 'pixel', seed: 'credit-girl', name: 'GIRL|桃' },
+    { id: 'hs-hero-0', kind: 'image', src: assetUrl('sprites/high-school/characters/0.webp'), alt: '' },
+    { id: 'hs-hero-5', kind: 'image', src: assetUrl('sprites/high-school/characters/5.webp'), alt: '' },
+    { id: 'hs-enemy-4', kind: 'image', src: assetUrl('sprites/high-school/enemies/4.webp'), alt: '' },
+    { id: 'hs-enemy-12', kind: 'image', src: assetUrl('sprites/high-school/enemies/12.webp'), alt: '' },
+    { id: 'magic-heroine-01', kind: 'image', src: assetUrl('sprites/magic/characters/heroine-01-before.webp'), alt: '' },
+    { id: 'magic-heroine-05', kind: 'image', src: assetUrl('sprites/magic/characters/heroine-05-before.webp'), alt: '' },
+    { id: 'magic-enemy-8', kind: 'image', src: assetUrl('sprites/magic/enemies/8.webp'), alt: '' },
+    { id: 'magic-enemy-16', kind: 'image', src: assetUrl('sprites/magic/enemies/16.webp'), alt: '' },
+];
+
+const CREDIT_DECORATION_LANES = [
+    { id: 'lane-1', side: 'left' as const, top: '12%', size: 66, delay: -2, duration: 18, rotate: -5 },
+    { id: 'lane-2', side: 'right' as const, top: '28%', size: 74, delay: -7, duration: 21, rotate: 4 },
+    { id: 'lane-3', side: 'left' as const, top: '47%', size: 70, delay: -12, duration: 20, rotate: 6 },
+    { id: 'lane-4', side: 'right' as const, top: '64%', size: 76, delay: -16, duration: 23, rotate: -6 },
+    { id: 'lane-5', side: 'left' as const, top: '80%', size: 62, delay: -20, duration: 19, rotate: 3 },
+];
+
+const getNextCreditSpriteIndex = (currentIndex: number) => {
+    if (CREDIT_DECORATION_SPRITE_POOL.length <= 1) return 0;
+    const offset = 1 + Math.floor(Math.random() * (CREDIT_DECORATION_SPRITE_POOL.length - 1));
+    return (currentIndex + offset) % CREDIT_DECORATION_SPRITE_POOL.length;
+};
+
+const CreditFloatingSprite: React.FC<{
+    lane: typeof CREDIT_DECORATION_LANES[number];
+    initialIndex: number;
+    onLegacySpriteTap?: () => void;
+}> = ({ lane, initialIndex, onLegacySpriteTap }) => {
+    const [spriteIndex, setSpriteIndex] = useState(initialIndex % CREDIT_DECORATION_SPRITE_POOL.length);
+    const sprite = CREDIT_DECORATION_SPRITE_POOL[spriteIndex];
+    const isLegacyTrigger = sprite.kind === 'pixel' && !!onLegacySpriteTap;
+    const handleLegacyTriggerKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+        if (!isLegacyTrigger || (event.key !== 'Enter' && event.key !== ' ')) return;
+        event.preventDefault();
+        onLegacySpriteTap?.();
+    };
+
+    return (
+        <div
+            className={`credits-floating-sprite ${lane.side === 'right' ? 'credits-floating-sprite-right' : 'credits-floating-sprite-left'} ${isLegacyTrigger ? 'credits-floating-sprite-tappable' : ''}`}
+            style={{
+                '--credit-float-top': lane.top,
+                '--credit-float-delay': `${lane.delay}s`,
+                '--credit-float-duration': `${lane.duration}s`,
+                '--credit-float-rotate': `${lane.rotate ?? 0}deg`,
+                width: `${lane.size}px`,
+                height: `${lane.size}px`,
+            } as React.CSSProperties}
+            onAnimationIteration={() => setSpriteIndex(current => getNextCreditSpriteIndex(current))}
+            onClick={isLegacyTrigger ? (event) => {
+                event.stopPropagation();
+                onLegacySpriteTap?.();
+            } : undefined}
+            onKeyDown={handleLegacyTriggerKeyDown}
+            role={isLegacyTrigger ? 'button' : undefined}
+            tabIndex={isLegacyTrigger ? 0 : undefined}
+            aria-hidden={isLegacyTrigger ? undefined : 'true'}
+            aria-label={isLegacyTrigger ? '旧型スプライト表示で小学生編を開始' : undefined}
+        >
+            {sprite.kind === 'image' ? (
+                <img
+                    src={sprite.src}
+                    alt={sprite.alt}
+                    className="h-full w-full object-contain pixel-art drop-shadow-[0_0_12px_rgba(255,255,255,0.26)]"
+                    draggable={false}
+                />
+            ) : (
+                <PixelSprite
+                    seed={sprite.seed}
+                    name={sprite.name}
+                    className="h-full w-full drop-shadow-[0_0_12px_rgba(255,255,255,0.26)]"
+                    size={16}
+                />
+            )}
+        </div>
+    );
 };
 const MAGIC_TRANSFORMATION_QUOTES: Record<string, string> = {
     AKARI: 'あかり「星冠展開！みんなの願い、ここでつなぐよ！」',
@@ -1223,6 +1319,7 @@ const App: React.FC = () => {
     const [actingEnemyId, setActingEnemyId] = useState<string | null>(null);
     const [hasSave, setHasSave] = useState<boolean>(false);
     const [showStartOverConfirm, setShowStartOverConfirm] = useState<boolean>(false);
+    const [showCreditsModal, setShowCreditsModal] = useState<boolean>(false);
     const [selectedCharName, setSelectedCharName] = useState<string>("わんぱく小学生");
     const [legacyCardSelected, setLegacyCardSelected] = useState<boolean>(false);
     const [newlyUnlockedCard, setNewlyUnlockedCard] = useState<ICard | null>(null); // New State
@@ -1234,6 +1331,7 @@ const App: React.FC = () => {
         void audioService.setBgmTheme(getBgmThemeForPlayer(visualTheme, gameState.player));
     }, [visualTheme, gameState.player.magicProtagonistGender]);
     const handleVisualThemeSelect = useCallback((nextTheme: VisualThemeId) => {
+        setLegacySpriteModeEnabled(false);
         setVisualTheme(nextTheme);
         setClearCount(storageService.getThemeClearCount(nextTheme));
         void audioService.switchThemeAndPlayBGM(getBgmThemeForPlayer(nextTheme, gameState.player), 'menu');
@@ -1278,6 +1376,7 @@ const App: React.FC = () => {
     const [completedDailyAssignmentIds, setCompletedDailyAssignmentIds] = useState<string[]>(() => storageService.getCompletedDailyAssignmentIds());
     const [rewardCardAlbumVersion, setRewardCardAlbumVersion] = useState(0);
     const [pendingStarterRelic, setPendingStarterRelic] = useState<Relic | null>(null);
+    const [pendingStarterRewardOnly, setPendingStarterRewardOnly] = useState(false);
     const [transferExportText, setTransferExportText] = useState<string>('');
     const [transferExportCount, setTransferExportCount] = useState<number>(0);
     const [transferImportText, setTransferImportText] = useState<string>('');
@@ -1570,6 +1669,7 @@ const App: React.FC = () => {
     const [dreamCatcherModal, setDreamCatcherModal] = useState<SingleCardPickModalState | null>(null);
     const [orreryModal, setOrreryModal] = useState<RelicCardChoiceModalState | null>(null);
     const [peacePipeModal, setPeacePipeModal] = useState<RelicCardChoiceModalState | null>(null);
+    const [eventSynthesisModal, setEventSynthesisModal] = useState<{ cards: ICard[]; selectedIds: string[] } | null>(null);
     const [eventData, setEventData] = useState<any>(null);
     const [eventResultLog, setEventResultLog] = useState<string | null>(null);
     const [unlockedCardNames, setUnlockedCardNames] = useState<string[]>([]);
@@ -4646,7 +4746,8 @@ const App: React.FC = () => {
                             saved.currentEventTitle,
                             savedVisualTheme,
                             saved.act,
-                            saved.floor
+                            saved.floor,
+                            saved.isEndless
                         );
                     setEventData(restoredEvent);
                     setEventResultLog(null);
@@ -4694,7 +4795,7 @@ const App: React.FC = () => {
         }
     };
 
-    const launchNewAdventure = () => {
+    const launchNewAdventure = (themeOverride: VisualThemeId = visualTheme) => {
         if (redirectToAssignmentChallengeIfLocked()) return;
         if (isDailyLimitReached) {
             audioService.playSound('wrong');
@@ -4711,7 +4812,7 @@ const App: React.FC = () => {
             screen: activeAssignment?.gameMode === 'FREE' ? GameScreen.DIFFICULTY_SELECTION : GameScreen.MODE_SELECTION,
             mode: initialMode,
             modePool: assignmentHasCustomProblems ? (assignmentModePool || []) : assignmentModePool,
-            visualTheme,
+            visualTheme: themeOverride,
             answerMode: activeAssignment?.answerMode || 'CHOICE',
             difficultyLevel: 1,
             shopRemoveCount: 0,
@@ -4825,14 +4926,25 @@ const App: React.FC = () => {
         });
     };
 
-    const startGame = () => {
+    const startGame = (themeOverride: VisualThemeId = visualTheme, useLegacySprites = false) => {
         if (redirectToAssignmentChallengeIfLocked()) return;
+        if (!useLegacySprites) {
+            setLegacySpriteModeEnabled(false);
+        }
         if (hasSave) {
             audioService.playSound('wrong');
             setShowStartOverConfirm(true);
             return;
         }
-        launchNewAdventure();
+        launchNewAdventure(themeOverride);
+    };
+
+    const startLegacySpriteElementaryGame = () => {
+        setLegacySpriteModeEnabled(true);
+        setVisualTheme('elementary');
+        setClearCount(storageService.getThemeClearCount('elementary'));
+        setShowCreditsModal(false);
+        startGame('elementary', true);
     };
 
     const confirmStartOver = () => {
@@ -5463,6 +5575,7 @@ const App: React.FC = () => {
                 theme,
                 1,
                 1,
+                true
             );
         setEventData(previewEvent);
         handleStartUiPreview(GameScreen.EVENT);
@@ -5860,7 +5973,8 @@ const App: React.FC = () => {
                                 undefined,
                                 visualTheme,
                                 gameState.act,
-                                gameState.floor
+                                gameState.floor,
+                                gameState.isEndless
                             );
                             setEventData(ev);
                             setEventResultLog(null);
@@ -5914,6 +6028,30 @@ const App: React.FC = () => {
 
         const nextScreen = shouldSkipStarterRelic ? GameScreen.MAP : GameScreen.RELIC_SELECTION;
         const nextMap = shouldSkipStarterRelic ? generateDungeonMap(gameState.difficultyLevel || 1) : [];
+        if (
+            shouldSkipStarterRelic &&
+            rewardCardAlbum.length > 0 &&
+            gameState.challengeMode !== 'RACE' &&
+            gameState.challengeMode !== 'COOP'
+        ) {
+            setPendingStarterRelic(null);
+            setPendingStarterRewardOnly(true);
+            setGameState(prev => ({
+                ...prev,
+                screen: GameScreen.REWARD_CARD_ALBUM,
+                act: 1,
+                floor: 0,
+                turn: 0,
+                map: [],
+                currentMapNodeId: null,
+                player: initialPlayerState,
+                narrativeLog: logs,
+                combatLog: [],
+                activeEffects: []
+            }));
+            startGameAssetPreload();
+            return;
+        }
         setGameState(prev => ({
             ...prev,
             screen: nextScreen,
@@ -5937,6 +6075,26 @@ const App: React.FC = () => {
 
         const shouldSkipStarterRelic = !storageService.hasSkippedFirstStarterRelic();
         if (shouldSkipStarterRelic) storageService.markFirstStarterRelicSkipped();
+        if (
+            shouldSkipStarterRelic &&
+            rewardCardAlbum.length > 0 &&
+            gameState.challengeMode !== 'RACE' &&
+            gameState.challengeMode !== 'COOP'
+        ) {
+            setPendingStarterRelic(null);
+            setPendingStarterRewardOnly(true);
+            setGameState(prev => ({
+                ...prev,
+                screen: GameScreen.REWARD_CARD_ALBUM,
+                map: [],
+                player: {
+                    ...prev.player,
+                    deck: selectedCards
+                }
+            }));
+            startGameAssetPreload();
+            return;
+        }
         setGameState(prev => ({
             ...prev,
             screen: shouldSkipStarterRelic ? GameScreen.MAP : GameScreen.RELIC_SELECTION,
@@ -5952,6 +6110,7 @@ const App: React.FC = () => {
 
     const startAdventureAfterRelic = async (relic: Relic, rewardCard?: ICard | null) => {
         setPendingStarterRelic(null);
+        setPendingStarterRewardOnly(false);
         startGameAssetPreload();
         const map = generateDungeonMap(gameState.difficultyLevel || 1);
         const starterRewardCard = rewardCard
@@ -6014,6 +6173,36 @@ const App: React.FC = () => {
         }
     };
 
+    const startAdventureAfterSkippedStarterRelic = async (rewardCard?: ICard | null) => {
+        setPendingStarterRelic(null);
+        setPendingStarterRewardOnly(false);
+        startGameAssetPreload();
+        const map = generateDungeonMap(gameState.difficultyLevel || 1);
+        const starterRewardCard = rewardCard
+            ? { ...rewardCard, id: `starter-reward-card-${Date.now()}-${Math.random().toString(36).slice(2, 8)}` }
+            : null;
+        const starterRewardLog = starterRewardCard
+            ? [trans(`${starterRewardCard.name}をカード帳から持ってきた。`, languageMode)]
+            : [];
+        setGameState(prev => ({
+            ...prev,
+            screen: GameScreen.MAP,
+            map,
+            currentMapNodeId: null,
+            player: {
+                ...prev.player,
+                deck: starterRewardCard ? [...prev.player.deck, starterRewardCard] : prev.player.deck
+            },
+            narrativeLog: [
+                ...prev.narrativeLog,
+                ...starterRewardLog,
+                trans("初回のため、レリックなしで冒険を開始した。", languageMode),
+                trans("冒険が始まった。", languageMode)
+            ]
+        }));
+        audioService.playBGM('map');
+    };
+
     const handleRelicSelect = async (relic: Relic) => {
         audioService.playSound('buff');
         if (gameState.challengeMode === 'COOP' && coopSession && !coopSession.isHost) {
@@ -6048,6 +6237,7 @@ const App: React.FC = () => {
         }
         if (rewardCardAlbum.length > 0 && gameState.challengeMode !== 'RACE' && gameState.challengeMode !== 'COOP') {
             setPendingStarterRelic(relic);
+            setPendingStarterRewardOnly(false);
             setGameState(prev => ({ ...prev, screen: GameScreen.REWARD_CARD_ALBUM }));
             return;
         }
@@ -6412,7 +6602,8 @@ const App: React.FC = () => {
                         undefined,
                         activeVisualTheme,
                         nextState.act,
-                        nextState.floor
+                        nextState.floor,
+                        nextState.isEndless
                     );
                 setEventData(ev);
                 setEventResultLog(null);
@@ -10066,6 +10257,35 @@ const App: React.FC = () => {
         }));
     }, [dreamCatcherModal, galaxyExpressModal, gameState.player.drawPile, gameState.player.turnFlags, gameState.screen, goldFishModal, weatherScryModal]);
 
+    useEffect(() => {
+        if (gameState.screen !== GameScreen.EVENT) return;
+        if (eventSynthesisModal) return;
+        if (!gameState.player.turnFlags['EVENT_SYNTHESIS_PENDING_MODAL']) return;
+
+        const candidates = gameState.player.deck.filter(card =>
+            !card.familiarSummon && card.type !== CardType.STATUS && card.type !== CardType.CURSE
+        );
+
+        setGameState(prev => ({
+            ...prev,
+            player: {
+                ...prev.player,
+                turnFlags: {
+                    ...prev.player.turnFlags,
+                    EVENT_SYNTHESIS_PENDING_MODAL: false,
+                },
+            },
+        }));
+
+        if (candidates.length < 2) {
+            setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold + 25 } }));
+            setEventResultLog(prev => `${prev ?? ''}\n合成できるカードが足りなかったため、発想のメモとして25Gを得た。`.trim());
+            return;
+        }
+
+        setEventSynthesisModal({ cards: candidates, selectedIds: [] });
+    }, [eventSynthesisModal, gameState.player.deck, gameState.player.turnFlags, gameState.screen]);
+
     const onCodexSelect = (card: ICard | null) => {
         if (gameState.challengeMode === 'COOP' && coopSession && !coopSession.isHost && gameState.screen === GameScreen.BATTLE) {
             queueCoopBattleEvent({ type: 'COOP_BATTLE_TURN_START' });
@@ -10114,6 +10334,36 @@ const App: React.FC = () => {
             return applySynthesizeCard(cards);
         }
         return applySynthesizeCard(cards);
+    };
+
+    const toggleEventSynthesisCard = (cardId: string) => {
+        setEventSynthesisModal(prev => {
+            if (!prev) return prev;
+            if (prev.selectedIds.includes(cardId)) {
+                return { ...prev, selectedIds: prev.selectedIds.filter(id => id !== cardId) };
+            }
+            if (prev.selectedIds.length >= 2) return prev;
+            return { ...prev, selectedIds: [...prev.selectedIds, cardId] };
+        });
+    };
+
+    const confirmEventSynthesis = () => {
+        if (!eventSynthesisModal || eventSynthesisModal.selectedIds.length !== 2) return;
+        const selectedCards = eventSynthesisModal.selectedIds
+            .map(id => eventSynthesisModal.cards.find(card => card.id === id))
+            .filter((card): card is ICard => !!card);
+        if (selectedCards.length !== 2) return;
+        const result = handleSynthesizeCard(selectedCards);
+        setEventSynthesisModal(null);
+        setEventResultLog(prev => `${prev ?? ''}\nつかぽんが選んだ2枚をまとめ、「${result.name}」を作った。`.trim());
+        audioService.playSound('buff');
+    };
+
+    const skipEventSynthesis = () => {
+        setEventSynthesisModal(null);
+        setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold + 25 } }));
+        setEventResultLog(prev => `${prev ?? ''}\n今回は合成を見送り、発想のメモとして25Gを得た。`.trim());
+        audioService.playSound('select');
     };
 
     const handlePlaySynthesizedCard = async (card: ICard) => {
@@ -10211,7 +10461,8 @@ const App: React.FC = () => {
                 eventData.title,
                 visualTheme,
                 gameState.act,
-                gameState.floor
+                gameState.floor,
+                gameState.isEndless
             );
         }
 
@@ -14326,6 +14577,77 @@ const App: React.FC = () => {
                             </div>
                         </div>
 
+                        <button
+                            type="button"
+                            onClick={() => setShowCreditsModal(true)}
+                            className={`start-menu-credit-button absolute bottom-3 right-3 z-20 flex items-center gap-1.5 rounded px-3 py-2 text-[11px] font-black tracking-[0.18em] shadow-lg transition-colors focus:outline-none focus:ring-2 ${
+                                visualTheme === 'magic'
+                                    ? 'border border-fuchsia-200/80 bg-violet-950/75 text-fuchsia-100 shadow-[0_0_18px_rgba(217,70,239,0.26)] hover:bg-fuchsia-200 hover:text-violet-950 focus:ring-fuchsia-200'
+                                    : visualTheme === 'high-school'
+                                        ? 'border border-red-200/80 bg-slate-950/75 text-red-100 shadow-[0_0_18px_rgba(248,113,113,0.22)] hover:bg-red-200 hover:text-slate-950 focus:ring-red-200'
+                                        : 'border border-amber-300/70 bg-black/65 text-amber-100 shadow-[0_0_14px_rgba(251,191,36,0.2)] hover:bg-amber-300 hover:text-slate-950 focus:ring-amber-200'
+                            }`}
+                            aria-label="クレジットロールを開く"
+                        >
+                            <ScrollText size={14} />
+                            CREDIT
+                        </button>
+
+                        {showCreditsModal && (
+                            <div
+                                className="fixed inset-0 z-[10040] flex items-center justify-center bg-black/86 p-3 text-white"
+                                onClick={() => setShowCreditsModal(false)}
+                            >
+                                <div
+                                    className="relative flex h-[min(82vh,560px)] w-full max-w-xl flex-col overflow-hidden rounded-2xl border-2 border-amber-300/80 bg-slate-950 shadow-[0_0_40px_rgba(251,191,36,0.22)]"
+                                    onClick={e => e.stopPropagation()}
+                                >
+                                    <div className="flex items-center justify-between border-b border-amber-300/30 bg-black/45 px-4 py-3">
+                                        <div>
+                                            <div className="text-[10px] font-black tracking-[0.32em] text-amber-200">CREDIT ROLL</div>
+                                            <h2 className="text-lg font-black text-white">{trans("学習ローグ", languageMode)}</h2>
+                                        </div>
+                                        <button
+                                            type="button"
+                                            onClick={() => setShowCreditsModal(false)}
+                                            className="rounded border border-slate-500 bg-slate-900 p-2 text-slate-100 transition-colors hover:bg-slate-700"
+                                            aria-label="クレジットを閉じる"
+                                        >
+                                            <X size={18} />
+                                        </button>
+                                    </div>
+                                    <div className="credits-roll-viewport relative flex-1 overflow-hidden bg-[radial-gradient(circle_at_center,rgba(30,41,59,0.95),#020617_72%)]">
+                                        {CREDIT_DECORATION_LANES.map((lane, index) => (
+                                            <CreditFloatingSprite
+                                                key={lane.id}
+                                                lane={lane}
+                                                initialIndex={index * 3}
+                                                onLegacySpriteTap={startLegacySpriteElementaryGame}
+                                            />
+                                        ))}
+                                        <div className="pointer-events-none absolute inset-x-0 top-0 z-10 h-20 bg-gradient-to-b from-slate-950 to-transparent" />
+                                        <div className="pointer-events-none absolute inset-x-0 bottom-0 z-10 h-24 bg-gradient-to-t from-slate-950 to-transparent" />
+                                        <div className="credits-roll-track relative z-[2] px-6 text-center">
+                                            <div className="mb-10 text-xs font-black tracking-[0.36em] text-cyan-200">THANK YOU FOR PLAYING</div>
+                                            {CREDIT_SECTIONS.map(section => (
+                                                <section key={section.title} className={section.special ? "mb-14 rounded-xl border border-amber-300/35 bg-amber-300/5 px-3 py-6 shadow-[0_0_28px_rgba(251,191,36,0.12)]" : "mb-12"}>
+                                                    <h3 className={`mb-5 text-xs font-black uppercase tracking-[0.28em] ${section.special ? 'text-yellow-100' : 'text-amber-200'}`}>{section.title}</h3>
+                                                    <div className="space-y-3">
+                                                        {section.entries.map(entry => (
+                                                            <div key={`${section.title}-${entry}`} className={`${section.special ? 'text-3xl text-yellow-100 drop-shadow-[0_0_16px_rgba(251,191,36,0.4)]' : 'text-xl text-white drop-shadow-[0_0_10px_rgba(251,191,36,0.22)]'} font-black leading-tight`}>
+                                                                {entry}
+                                                            </div>
+                                                        ))}
+                                                    </div>
+                                                </section>
+                                            ))}
+                                            <div className="pt-4 text-sm font-bold tracking-[0.22em] text-slate-300">THANK YOU</div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
                         <div className="start-menu-content relative z-10 text-center p-8 w-full flex flex-col items-center">
                             <h1
                                 className="start-menu-title relative mb-7 flex min-h-[104px] w-full max-w-[560px] cursor-pointer select-none items-center justify-center leading-none"
@@ -14987,13 +15309,19 @@ const App: React.FC = () => {
                             onBack={() => {
                                 if (pendingStarterRelic) {
                                     setGameState(prev => ({ ...prev, screen: GameScreen.RELIC_SELECTION }));
+                                } else if (pendingStarterRewardOnly) {
+                                    startAdventureAfterSkippedStarterRelic(null);
                                 } else {
                                     returnToTitle();
                                 }
                             }}
-                            onSelect={pendingStarterRelic ? ((card) => {
-                                const relic = pendingStarterRelic;
-                                startAdventureAfterRelic(relic, card);
+                            onSelect={(pendingStarterRelic || pendingStarterRewardOnly) ? ((card) => {
+                                if (pendingStarterRelic) {
+                                    const relic = pendingStarterRelic;
+                                    startAdventureAfterRelic(relic, card);
+                                    return;
+                                }
+                                startAdventureAfterSkippedStarterRelic(card);
                             }) : undefined}
                             onDelete={(cardId) => {
                                 storageService.deleteRewardCardFromAlbum(cardId);
@@ -16058,6 +16386,54 @@ const App: React.FC = () => {
                             >
                                 決定
                             </button>
+                        </div>
+                    </div>
+                )}
+
+                {eventSynthesisModal && (
+                    <div className="app-modal-overlay app-event-synthesis-modal-overlay fixed inset-0 z-[232] bg-black/75 flex items-center justify-center p-3 sm:p-4">
+                        <div className="app-modal-panel app-card-choice-modal app-event-synthesis-modal w-full max-w-4xl rounded-xl border-2 border-purple-400 bg-slate-950 text-white p-4 shadow-2xl">
+                            <h3 className="text-xl font-black mb-2 text-purple-100">つかぽんのカード合成</h3>
+                            <p className="text-sm text-slate-300 mb-3">
+                                デッキから2枚選んで合成します。選んだカードは消え、合成カードがデッキに加わります。
+                            </p>
+                            <div className="mb-3 rounded border border-purple-400/40 bg-purple-950/35 px-3 py-2 text-sm font-bold text-purple-100">
+                                選択中: {eventSynthesisModal.selectedIds.length} / 2
+                            </div>
+                            <div className="grid max-h-[58vh] grid-cols-2 gap-3 overflow-y-auto pr-1 sm:grid-cols-3 md:grid-cols-4">
+                                {eventSynthesisModal.cards.map(card => {
+                                    const selected = eventSynthesisModal.selectedIds.includes(card.id);
+                                    return (
+                                        <div key={card.id} className={`rounded-xl border-2 p-1 transition-colors ${selected ? 'border-yellow-300 bg-yellow-300/15' : 'border-slate-700 bg-slate-900/80 hover:border-purple-300'}`}>
+                                            <div className="scale-[0.82] origin-top">
+                                                <Card
+                                                    card={card}
+                                                    onClick={() => toggleEventSynthesisCard(card.id)}
+                                                    disabled={false}
+                                                    languageMode={languageMode}
+                                                />
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+                            <div className="mt-4 flex flex-col gap-2 sm:flex-row">
+                                <button
+                                    type="button"
+                                    onClick={confirmEventSynthesis}
+                                    disabled={eventSynthesisModal.selectedIds.length !== 2}
+                                    className="flex-1 rounded bg-purple-600 px-4 py-3 font-black text-white transition-colors hover:bg-purple-500 disabled:cursor-not-allowed disabled:bg-slate-700 disabled:text-slate-400"
+                                >
+                                    この2枚を合成
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={skipEventSynthesis}
+                                    className="rounded bg-slate-700 px-4 py-3 font-bold text-slate-100 transition-colors hover:bg-slate-600"
+                                >
+                                    合成せず25G
+                                </button>
+                            </div>
                         </div>
                     </div>
                 )}

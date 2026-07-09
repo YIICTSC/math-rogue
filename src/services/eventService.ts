@@ -7,6 +7,7 @@ import { LanguageMode } from '../types';
 import { getUpgradedCard } from '../utils/cardUtils';
 import { ADDITIONAL_CARDS } from '../constants1';
 import { getVisualThemeEventTheme, getVisualThemeEventThemeByTitle, type ThemedEventTheme, type VisualThemeId } from '../data/visualThemes';
+import { getSupporterNpcEventByTitle, HIGH_SCHOOL_SUPPORTER_NPC_EVENTS, type SupporterNpcEventProfile, type SupporterNpcQuestion, type SupporterNpcReward } from '../data/supporterNpcEvents';
 
 interface EventOption {
     label: string;
@@ -47,6 +48,17 @@ const getStableTextIndex = (text: string, size: number): number => {
         hash = (hash * 31 + text.charCodeAt(i)) >>> 0;
     }
     return hash % size;
+};
+
+const getStableShuffledIndexes = (size: number, seed: string): number[] => {
+    const indexes = Array.from({ length: size }, (_, index) => index);
+    let hash = getStableTextIndex(seed, 2147483647) || 1;
+    for (let i = indexes.length - 1; i > 0; i--) {
+        hash = (hash * 1103515245 + 12345) & 0x7fffffff;
+        const j = hash % (i + 1);
+        [indexes[i], indexes[j]] = [indexes[j], indexes[i]];
+    }
+    return indexes;
 };
 
 interface EventSparkResult {
@@ -241,7 +253,8 @@ export const generateEvent = (
     preferredEventTitle?: string,
     visualTheme: VisualThemeId = 'elementary',
     currentAct = 1,
-    currentFloor = 1
+    currentFloor = 1,
+    isEndless = false
 ): GameEvent => {
     let activeEventTitle: string | null = null;
     const finalizeEvent = (event: GameEvent): GameEvent => {
@@ -691,6 +704,121 @@ export const generateEvent = (
             })),
         };
     };
+
+    const applySupporterReward = (profile: SupporterNpcEventProfile, question: SupporterNpcQuestion, correct: boolean) => {
+        if (!correct) {
+            setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold + 8 } }));
+            setEventResultLog(trans(`${question.explanation}\n惜しい。${profile.npcName}から参加賞として8Gを受け取った。`, languageMode));
+            return;
+        }
+
+        const resultPrefix = `${question.explanation}\n正解！`;
+        const applyFallbackUpgrade = (fallbackMessage: string) => {
+            let upgradedName = '';
+            setGameState(prev => {
+                const upgradeable = prev.player.deck.filter(card => !card.upgraded);
+                if (upgradeable.length === 0) return prev;
+                const target = upgradeable[getStableTextIndex(`${profile.id}:${question.question}:upgrade`, upgradeable.length)];
+                upgradedName = target.name;
+                return {
+                    ...prev,
+                    player: {
+                        ...prev.player,
+                        deck: prev.player.deck.map(card => card.id === target.id ? getUpgradedCard(card) : card),
+                    }
+                };
+            });
+            window.setTimeout(() => {
+                setEventResultLog(trans(upgradedName
+                    ? `${resultPrefix}\n「${upgradedName}」が強化された。`
+                    : `${resultPrefix}\n${fallbackMessage}`, languageMode));
+            }, 50);
+        };
+
+        switch (profile.reward as SupporterNpcReward) {
+            case 'synthesis':
+                setGameState(prev => ({
+                    ...prev,
+                    player: {
+                        ...prev.player,
+                        turnFlags: {
+                            ...prev.player.turnFlags,
+                            EVENT_SYNTHESIS_PENDING_MODAL: true,
+                        },
+                    },
+                }));
+                setEventResultLog(trans(`${resultPrefix}\nつかぽんがカード合成の準備を始めた。デッキから2枚選んで合成できる。`, languageMode));
+                return;
+            case 'upgrade':
+                applyFallbackUpgrade('強化できるカードがなかった。');
+                return;
+            case 'rareCard': {
+                const pool = Object.values(CARDS_LIBRARY).filter(card => card.rarity === 'RARE' && isCardAvailable(card, unlockedCardNames));
+                const card = pool[getStableTextIndex(`${profile.id}:${question.question}:rare`, Math.max(1, pool.length))];
+                if (!card) {
+                    applyFallbackUpgrade('レアカード候補が見つからなかった。');
+                    return;
+                }
+                setGameState(prev => ({ ...prev, player: addCardWithEventRelics(prev.player, { ...card, id: `supporter-rare-${Date.now()}` } as Card) }));
+                setEventResultLog(trans(`${resultPrefix}\n${profile.npcName}から「${card.name}」を受け取った。`, languageMode));
+                return;
+            }
+            case 'heal':
+                setGameState(prev => ({ ...prev, player: healPlayer(prev.player, 16) }));
+                setEventResultLog(trans(`${resultPrefix}\n${profile.npcName}の助けでHPが16回復した。`, languageMode));
+                return;
+            case 'gold':
+                setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold + 45 } }));
+                setEventResultLog(trans(`${resultPrefix}\n協力の見返りとして45Gを得た。`, languageMode));
+                return;
+            case 'maxHp':
+                setGameState(prev => ({
+                    ...prev,
+                    player: { ...prev.player, maxHp: prev.player.maxHp + 2, currentHp: prev.player.currentHp + 2 }
+                }));
+                setEventResultLog(trans(`${resultPrefix}\n心が少し強くなった。最大HP+2。`, languageMode));
+                return;
+            case 'cleanse':
+                setGameState(prev => ({
+                    ...prev,
+                    player: {
+                        ...healPlayer(prev.player, 10),
+                        deck: prev.player.deck.filter(card => card.type !== CardType.CURSE)
+                    }
+                }));
+                setEventResultLog(trans(`${resultPrefix}\n悩みがほどけ、HPが10回復した。デッキ内の呪いも取り除かれた。`, languageMode));
+                return;
+            default:
+                resolveMomentum(profile.title, `${resultPrefix}\n小さな成果を得た。`);
+        }
+    };
+
+    const buildSupporterNpcEvent = (profile: SupporterNpcEventProfile): GameEvent => {
+        const questionIndex = getStableTextIndex(`${profile.id}:${currentAct}:${currentFloor}:${preferredEventTitle ?? 'new'}`, profile.questions.length);
+        const question = profile.questions[questionIndex];
+        const order = getStableShuffledIndexes(question.options.length, `${profile.id}:${question.question}:options`);
+        const correctOptionPosition = order.findIndex(index => index === question.correctIndex);
+        return {
+            title: profile.title,
+            description: `${profile.description}\n\n問題: ${question.question}`,
+            imageKey: `high-school-supporter-npc/${profile.imageFile}`,
+            options: order.map((optionIndex, displayIndex) => ({
+                label: `${displayIndex + 1}. ${question.options[optionIndex]}`,
+                text: optionIndex === question.correctIndex ? 'これだと思う' : 'この答えを選ぶ',
+                action: () => applySupporterReward(profile, question, displayIndex === correctOptionPosition),
+            })),
+        };
+    };
+
+    const preferredSupporterEvent = getSupporterNpcEventByTitle(preferredEventTitle);
+    if (preferredSupporterEvent) {
+        return buildSupporterNpcEvent(preferredSupporterEvent);
+    }
+
+    if (visualTheme === 'high-school' && isEndless && HIGH_SCHOOL_SUPPORTER_NPC_EVENTS.length > 0 && Math.random() < 0.55) {
+        const profile = HIGH_SCHOOL_SUPPORTER_NPC_EVENTS[Math.floor(Math.random() * HIGH_SCHOOL_SUPPORTER_NPC_EVENTS.length)];
+        return buildSupporterNpcEvent(profile);
+    }
 
     const charType = getCharacterType(player);
     let potentialEvents: GameEvent[] = [];

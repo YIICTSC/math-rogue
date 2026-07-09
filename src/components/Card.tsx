@@ -6,6 +6,7 @@ import { buildEnglishCardDescription, trans } from '../utils/textUtils';
 import { getCardIllustrationPaths } from '../utils/cardIllustration';
 import { createEnemyIllustrationRef, getStatusCategoryLabel, getStatusCategoryClass, parseEnemyIllustrationRef } from '../utils/cardUtils';
 import { assetUrl } from '../utils/assetPaths';
+import { isLegacySpriteModeEnabled } from '../utils/legacySpriteMode';
 import type { VisualThemeId } from '../data/visualThemes';
 
 interface CardProps {
@@ -263,6 +264,12 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled, onInspect, languag
   };
 
   const renderCardArt = () => {
+    const resolvedCardVisualTheme = card.visualTheme ?? 'elementary';
+
+    if (resolvedCardVisualTheme === 'elementary' && isLegacySpriteModeEnabled() && card.textureRef) {
+      return <PixelSprite seed={card.id} name={card.textureRef} className="w-full h-full opacity-90 drop-shadow-md" size={16} />;
+    }
+
     const usesMagicRuleCardArt = card.magicRuleCardArt
       || (card.magicRuleCardIndex !== undefined && card.id.startsWith('start-MAGIC_'));
 

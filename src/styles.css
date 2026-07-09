@@ -2,6 +2,109 @@
 @tailwind components;
 @tailwind utilities;
 
+.credits-roll-viewport:hover .credits-roll-track {
+  animation-play-state: paused;
+}
+
+.credits-roll-track {
+  animation: credits-roll 28s linear infinite;
+  padding-bottom: 72%;
+  padding-top: clamp(340px, 58vh, 520px);
+  pointer-events: none;
+}
+
+.credits-floating-sprite {
+  animation-duration: var(--credit-float-duration);
+  animation-delay: var(--credit-float-delay);
+  animation-iteration-count: infinite;
+  animation-name: credit-sprite-float-left;
+  animation-timing-function: linear;
+  opacity: 0;
+  pointer-events: none;
+  position: absolute;
+  top: var(--credit-float-top);
+  z-index: 1;
+}
+
+.credits-floating-sprite-tappable {
+  cursor: pointer;
+  pointer-events: auto;
+  z-index: 3;
+}
+
+.credits-floating-sprite-tappable:focus-visible {
+  outline: 2px solid rgba(251, 191, 36, 0.9);
+  outline-offset: 4px;
+}
+
+.credits-floating-sprite-left {
+  animation-name: credit-sprite-float-left;
+  left: -86px;
+}
+
+.credits-floating-sprite-right {
+  animation-name: credit-sprite-float-right;
+  right: -86px;
+}
+
+@keyframes credits-roll {
+  from {
+    transform: translateY(0);
+  }
+
+  to {
+    transform: translateY(-72%);
+  }
+}
+
+@keyframes credit-sprite-float-left {
+  0% {
+    opacity: 0;
+    transform: translateX(0) rotate(var(--credit-float-rotate)) scale(0.92);
+  }
+
+  10%,
+  86% {
+    opacity: 0.46;
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateX(720px) rotate(calc(var(--credit-float-rotate) + 18deg)) scale(1.04);
+  }
+}
+
+@keyframes credit-sprite-float-right {
+  0% {
+    opacity: 0;
+    transform: translateX(0) rotate(var(--credit-float-rotate)) scale(0.92);
+  }
+
+  10%,
+  86% {
+    opacity: 0.46;
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateX(-720px) rotate(calc(var(--credit-float-rotate) - 18deg)) scale(1.04);
+  }
+}
+
+@media (orientation: landscape) and (max-height: 520px) {
+  .credits-roll-track {
+    padding-top: clamp(112px, 30vh, 168px);
+  }
+
+  .start-menu-credit-button {
+    bottom: 4.75rem !important;
+    left: 0.75rem !important;
+    padding: 0.45rem 0.65rem !important;
+    right: auto !important;
+    top: auto !important;
+  }
+}
+
 @media (orientation: landscape) and (max-height: 520px) {
   .unit-board-dialog {
     height: min(92dvh, 430px) !important;
