@@ -289,7 +289,19 @@ interface ActiveChallengeConfig {
   subMode: SubModeConfig;
   modePool?: string[];
   answerMode?: AnswerMode;
+  customProblems?: AssignmentPayload['customProblems'];
+  assignmentSignature?: string;
 }
+
+const getAssignmentSignature = (assignmentSource: AssignmentPayload) => {
+  const customProblems = assignmentSource.customProblems || [];
+  return [
+    assignmentSource.id,
+    assignmentSource.units.map((unit) => unit.id).join(','),
+    customProblems.map((problem) => problem.id).join(','),
+    String(assignmentSource.customTargetCorrect || ''),
+  ].join('|');
+};
 
 const getGradeLabel = (grade: number, languageMode: LanguageMode) =>
   languageMode === 'ENGLISH'
@@ -704,7 +716,9 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
   const [records, setRecords] = useState<Record<string, number>>({});
   const [isQuitting, setIsQuitting] = useState(false);
   const [assignmentReviewQueue, setAssignmentReviewQueue] = useState<Array<{ problem: AssignmentReviewProblem; dueStep: number }>>([]);
+  const [pendingAssignmentSource, setPendingAssignmentSource] = useState<AssignmentPayload | null>(null);
   const appliedAssignmentSignatureRef = useRef('');
+  const assignmentSourceStepRef = useRef(0);
   const displayedCategories = useMemo<SubjectCategoryConfig[]>(() => {
     const kanjiCategory = SUBJECT_CATEGORIES.find((cat) => cat.id === 'KANJI');
     if (problemSetView === 'nativeEnglish') {
@@ -752,38 +766,63 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
     setRecords(storageService.getChallengeRecords());
   }, []);
 
-  useEffect(() => {
-    if (!assignmentForProblemSource) return;
-    const customProblems = assignmentForProblemSource.customProblems || [];
-    const modePool = Array.from(new Set(assignmentForProblemSource.units.flatMap((unit) => unit.modes)));
-    if (modePool.length === 0 && customProblems.length === 0) return;
-    const assignmentSignature = [
-      assignmentForProblemSource.id,
-      assignmentForProblemSource.units.map((unit) => unit.id).join(','),
-      customProblems.map((problem) => problem.id).join(','),
-      String(assignmentForProblemSource.customTargetCorrect || ''),
-    ].join('|');
-    if (appliedAssignmentSignatureRef.current === assignmentSignature) return;
-    appliedAssignmentSignatureRef.current = assignmentSignature;
+  const applyAssignmentChallenge = useCallback((assignmentSource: AssignmentPayload, resetProgress: boolean) => {
+    const customProblems = assignmentSource.customProblems || [];
+    const modePool = Array.from(new Set(assignmentSource.units.flatMap((unit) => unit.modes)));
+    if (modePool.length === 0 && customProblems.length === 0) return false;
+    const assignmentSignature = getAssignmentSignature(assignmentSource);
     const hasCustomProblems = customProblems.length > 0;
     const representativeMode = (hasCustomProblems ? GameMode.UPPER_TRIVIA : (modePool[0] || GameMode.UPPER_TRIVIA)) as GameMode;
     setActiveChallenge({
       subMode: {
-        id: `ASSIGNMENT_${assignmentForProblemSource.id}`,
-        name: assignmentForProblemSource.title,
+        id: `ASSIGNMENT_${assignmentSource.id}`,
+        name: assignmentSource.title,
         mode: representativeMode,
       },
       modePool: modePool.length > 0 ? modePool : [],
-      answerMode: assignmentForProblemSource.answerMode || 'CHOICE',
+      answerMode: assignmentSource.answerMode || 'CHOICE',
+      customProblems,
+      assignmentSignature,
     });
+    appliedAssignmentSignatureRef.current = assignmentSignature;
+    assignmentSourceStepRef.current = challengeStep;
     if (phase === 'SELECT') {
       setPhase('CHALLENGE');
     }
     setContinueOnWrong(true);
-    setStreak(0);
-    setChallengeStep(0);
-    setAssignmentReviewQueue([]);
-  }, [assignmentForProblemSource, phase]);
+    if (resetProgress) {
+      setStreak(0);
+      setChallengeStep(0);
+      assignmentSourceStepRef.current = 0;
+      setAssignmentReviewQueue([]);
+    }
+    return true;
+  }, [challengeStep, phase]);
+
+  useEffect(() => {
+    if (!assignmentForProblemSource) return;
+    const assignmentSignature = getAssignmentSignature(assignmentForProblemSource);
+    if (appliedAssignmentSignatureRef.current === assignmentSignature) return;
+
+    const isRunningAssignmentChallenge = phase === 'CHALLENGE' && !!activeChallenge?.assignmentSignature;
+    if (isRunningAssignmentChallenge && challengeStep === assignmentSourceStepRef.current) {
+      setPendingAssignmentSource(assignmentForProblemSource);
+      return;
+    }
+
+    if (applyAssignmentChallenge(assignmentForProblemSource, phase === 'SELECT')) {
+      setPendingAssignmentSource(null);
+    }
+  }, [activeChallenge?.assignmentSignature, applyAssignmentChallenge, assignmentForProblemSource, challengeStep, phase]);
+
+  useEffect(() => {
+    if (!pendingAssignmentSource) return;
+    if (phase !== 'CHALLENGE') return;
+    if (challengeStep === assignmentSourceStepRef.current) return;
+    if (applyAssignmentChallenge(pendingAssignmentSource, false)) {
+      setPendingAssignmentSource(null);
+    }
+  }, [applyAssignmentChallenge, challengeStep, pendingAssignmentSource, phase]);
 
   useEffect(() => {
     const nextCategory = displayedCategories.find((cat) => cat.id === selectedCategory.id) || defaultDisplayedCategory;
@@ -1106,7 +1145,7 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
               onModeCorrect={onCorrectAnswers}
               onComplete={handleCompleteOne}
               onAnswerResult={handleChallengeAnswerResult}
-              customProblems={assignmentForProblemSource?.customProblems}
+              customProblems={activeChallenge?.customProblems}
               reviewProblem={activeReviewProblem}
               problemOffset={challengeStep}
               isChallenge={true}

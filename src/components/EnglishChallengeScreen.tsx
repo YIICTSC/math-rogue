@@ -265,7 +265,10 @@ const EnglishChallengeScreen: React.FC<EnglishChallengeScreenProps> = ({ onCompl
             </div>
 
             <div className={`basic-challenge-options grid ${isConv ? 'grid-cols-1' : 'grid-cols-2'} gap-2 md:gap-4`}>
-                {currentProblem.options.map((opt, idx) => (
+                {currentProblem.options.map((opt, idx) => {
+                    const isCorrectOption = normalize(opt) === normalize(currentProblem.actualCorrectAnswer);
+                    const isSelectedWrong = opt === selectedOption && !isCorrectOption;
+                    return (
                     <button
                         key={idx}
                         onClick={() => handleAnswer(opt)}
@@ -273,16 +276,18 @@ const EnglishChallengeScreen: React.FC<EnglishChallengeScreenProps> = ({ onCompl
                         className={`
                             py-2.5 px-4 font-bold rounded-xl border-b-4 transition-all active:border-b-0 active:translate-y-1
                             ${isConv ? 'text-left text-[13px] md:text-base' : 'text-center text-base md:text-lg'}
-                            ${isAnswered && normalize(opt) === normalize(currentProblem.actualCorrectAnswer) ? 'bg-green-600 border-green-800 scale-102' : ''}
-                            ${isAnswered && opt === selectedOption && normalize(opt) !== normalize(currentProblem.actualCorrectAnswer) ? 'bg-red-600 border-red-800' : ''}
-                            ${!isAnswered ? 'bg-indigo-700 border-indigo-900 hover:bg-indigo-600 cursor-pointer' : 'opacity-80'}
+                            ${isAnswered && isCorrectOption ? 'bg-green-600 border-green-800 scale-102' : ''}
+                            ${isAnswered && isSelectedWrong ? 'bg-red-600 border-red-800' : ''}
+                            ${!isAnswered || (!isCorrectOption && !isSelectedWrong) ? 'bg-indigo-700 border-indigo-900' : ''}
+                            ${!isAnswered ? 'hover:bg-indigo-600 cursor-pointer' : 'opacity-80'}
                             break-words leading-tight shadow-lg
                         `}
                     >
                         {isConv && <span className="text-cyan-300 mr-2">▶</span>}
                         {opt}
                     </button>
-                ))}
+                    );
+                })}
             </div>
         </div>
     </div>

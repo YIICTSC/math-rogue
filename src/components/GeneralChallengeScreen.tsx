@@ -1907,22 +1907,27 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
 
             {!currentProblem.speechPrompt?.freeResponse && !(answerMode === 'INPUT' && isNumericAnswer(currentProblem.actualCorrectAnswer)) && (
             <div className="general-challenge-options w-full grid grid-cols-2 gap-2 md:gap-3 min-w-0">
-                {currentProblem.options.map((opt, idx) => (
-                    <button
-                        key={idx}
-                        onClick={() => handleAnswer(opt)}
-                        disabled={isAnswered}
-                        className={`
-                            py-2.5 md:py-3 px-2 md:px-3 font-bold rounded-xl border-b-4 transition-all active:border-b-0 active:translate-y-1 text-[clamp(0.8rem,2.8vw,1rem)]
-                            ${isAnswered && normalize(opt) === normalize(currentProblem.actualCorrectAnswer) ? 'bg-green-600 border-green-800 scale-102' : ''}
-                            ${isAnswered && opt === selectedOption && normalize(opt) !== normalize(currentProblem.actualCorrectAnswer) ? 'bg-red-600 border-red-800' : ''}
-                            ${!isAnswered ? 'bg-white/10 border-white/30 hover:bg-white/20 cursor-pointer' : 'opacity-80'}
-                            break-words shadow-lg min-w-0
-                        `}
-                    >
-                        {opt}
-                    </button>
-                ))}
+                {currentProblem.options.map((opt, idx) => {
+                    const isCorrectOption = normalize(opt) === normalize(currentProblem.actualCorrectAnswer);
+                    const isSelectedWrong = opt === selectedOption && !isCorrectOption;
+                    return (
+                        <button
+                            key={idx}
+                            onClick={() => handleAnswer(opt)}
+                            disabled={isAnswered}
+                            className={`
+                                py-2.5 md:py-3 px-2 md:px-3 font-bold rounded-xl border-b-4 transition-all active:border-b-0 active:translate-y-1 text-[clamp(0.8rem,2.8vw,1rem)]
+                                ${isAnswered && isCorrectOption ? 'bg-green-600 border-green-800 scale-102' : ''}
+                                ${isAnswered && isSelectedWrong ? 'bg-red-600 border-red-800' : ''}
+                                ${!isAnswered || (!isCorrectOption && !isSelectedWrong) ? 'bg-white/10 border-white/30' : ''}
+                                ${!isAnswered ? 'hover:bg-white/20 cursor-pointer' : 'opacity-80'}
+                                break-words shadow-lg min-w-0
+                            `}
+                        >
+                            {opt}
+                        </button>
+                    );
+                })}
             </div>
             )}
         </div>

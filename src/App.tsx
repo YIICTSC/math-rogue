@@ -13658,6 +13658,54 @@ const App: React.FC = () => {
             .catch(() => undefined);
     }, [electronApi]);
 
+    const renderStudentGradeSurvey = () => {
+        if (!showStudentGradeSurvey) return null;
+        return (
+            <div className="fixed inset-0 z-[10035] flex items-center justify-center bg-black/85 p-4">
+                <div className="w-full max-w-2xl rounded-2xl border-4 border-cyan-300 bg-slate-950 p-5 text-white shadow-[0_0_40px_rgba(34,211,238,0.32)]">
+                    <div className="mb-2 text-center text-xs font-black tracking-[0.3em] text-cyan-300">PROFILE</div>
+                    <h2 className="mb-3 text-center text-2xl font-black">{trans("現在の学年を選んでください", studentGradeMode)}</h2>
+                    <div className="mb-4 flex justify-center">
+                        <div className="grid grid-cols-2 overflow-hidden rounded-xl border border-cyan-400/60 bg-slate-900 p-1">
+                            {[
+                                { mode: 'JAPANESE' as LanguageMode, label: '日本語' },
+                                { mode: 'ENGLISH' as LanguageMode, label: 'English' },
+                            ].map((option) => (
+                                <button
+                                    key={option.mode}
+                                    type="button"
+                                    onClick={() => setStudentGradeMode(option.mode)}
+                                    data-allow-japanese
+                                    className={`rounded-lg px-4 py-2 text-sm font-black transition-colors ${
+                                        studentGradeMode === option.mode
+                                            ? 'bg-cyan-300 text-slate-950'
+                                            : 'text-cyan-100 hover:bg-cyan-900/70'
+                                    }`}
+                                >
+                                    {option.label}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                    <p className="mb-4 text-center text-sm font-bold leading-6 text-slate-300">
+                        {trans("学年に合わせて、毎日の課題と提出レポートの学年欄を用意します。あとから提出画面で訂正できます。", studentGradeMode)}
+                    </p>
+                    <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
+                        {studentGradeOptions.map((grade) => (
+                            <button
+                                key={grade}
+                                onClick={() => saveStudentGrade(grade)}
+                                className="rounded-xl border border-cyan-500/50 bg-slate-900 px-3 py-3 text-sm font-black text-cyan-50 hover:bg-cyan-900/70"
+                            >
+                                {grade}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            </div>
+        );
+    };
+
     return (
         <div key={`app-shell-${languageMode}`} className={`app-shell w-full h-[100dvh] bg-black overflow-hidden ${appSettings.fontSize === 'large' ? 'text-[105%]' : ''} ${isUiPreviewMode ? 'gamepad-shortcuts-debug' : ''}`}>
             <div className={`w-full h-full relative overflow-hidden bg-black ${appSettings.lowDataMode ? '' : 'crt-scanline'} ${raceEffects.upsideDownUntil > raceEffectNow ? 'scale-x-[-1]' : ''} ${(raceEffects.deskShakeUntil > raceEffectNow && !appSettings.reduceScreenShake) ? 'animate-[race-desk-shake_0.18s_linear_infinite]' : ''}`}>
@@ -13975,51 +14023,6 @@ const App: React.FC = () => {
                                                 </button>
                                             </div>
                                         </div>
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-
-                        {showStudentGradeSurvey && (
-                            <div className="fixed inset-0 z-[10035] flex items-center justify-center bg-black/85 p-4">
-                                <div className="w-full max-w-2xl rounded-2xl border-4 border-cyan-300 bg-slate-950 p-5 text-white shadow-[0_0_40px_rgba(34,211,238,0.32)]">
-                                    <div className="mb-2 text-center text-xs font-black tracking-[0.3em] text-cyan-300">PROFILE</div>
-                                    <h2 className="mb-3 text-center text-2xl font-black">{trans("現在の学年を選んでください", studentGradeMode)}</h2>
-                                    <div className="mb-4 flex justify-center">
-                                        <div className="grid grid-cols-2 overflow-hidden rounded-xl border border-cyan-400/60 bg-slate-900 p-1">
-                                            {[
-                                                { mode: 'JAPANESE' as LanguageMode, label: '日本語' },
-                                                { mode: 'ENGLISH' as LanguageMode, label: 'English' },
-                                            ].map((option) => (
-                                                <button
-                                                    key={option.mode}
-                                                    type="button"
-                                                    onClick={() => setStudentGradeMode(option.mode)}
-                                                    data-allow-japanese
-                                                    className={`rounded-lg px-4 py-2 text-sm font-black transition-colors ${
-                                                        studentGradeMode === option.mode
-                                                            ? 'bg-cyan-300 text-slate-950'
-                                                            : 'text-cyan-100 hover:bg-cyan-900/70'
-                                                    }`}
-                                                >
-                                                    {option.label}
-                                                </button>
-                                            ))}
-                                        </div>
-                                    </div>
-                                    <p className="mb-4 text-center text-sm font-bold leading-6 text-slate-300">
-                                        {trans("学年に合わせて、毎日の課題と提出レポートの学年欄を用意します。あとから提出画面で訂正できます。", studentGradeMode)}
-                                    </p>
-                                    <div className="grid grid-cols-2 gap-2 sm:grid-cols-3">
-                                        {studentGradeOptions.map((grade) => (
-                                            <button
-                                                key={grade}
-                                                onClick={() => saveStudentGrade(grade)}
-                                                className="rounded-xl border border-cyan-500/50 bg-slate-900 px-3 py-3 text-sm font-black text-cyan-50 hover:bg-cyan-900/70"
-                                            >
-                                                {grade}
-                                            </button>
-                                        ))}
                                     </div>
                                 </div>
                             </div>
@@ -16345,6 +16348,7 @@ const App: React.FC = () => {
                         </div>
                     </div>
                 )}
+                {renderStudentGradeSurvey()}
                 <SettingsModal
                     open={showSettingsModal}
                     tab={settingsTab}

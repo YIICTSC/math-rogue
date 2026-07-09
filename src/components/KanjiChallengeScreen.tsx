@@ -252,21 +252,26 @@ const KanjiChallengeScreen: React.FC<KanjiChallengeScreenProps> = ({ onComplete,
               </form>
             ) : (
               <div className="basic-challenge-options grid grid-cols-2 gap-4">
-                {currentProblem.options.map((opt, idx) => (
+                {currentProblem.options.map((opt, idx) => {
+                  const isCorrectOption = normalize(opt) === normalize(problems[currentProblemIndex].actualCorrectAnswer);
+                  const isSelectedWrong = opt === selectedOption && !isCorrectOption;
+                  return (
                     <button
                         key={idx}
                         onClick={() => handleAnswer(opt)}
                         disabled={isAnswered}
                         className={`
                             py-4 text-xl font-bold rounded-lg border-b-4 transition-all active:border-b-0 active:translate-y-1
-                            ${isAnswered && normalize(opt) === normalize(problems[currentProblemIndex].actualCorrectAnswer) ? 'bg-green-600 border-green-800 scale-105' : ''}
-                            ${isAnswered && opt === selectedOption && normalize(opt) !== normalize(currentProblem.actualCorrectAnswer) ? 'bg-red-600 border-red-800' : ''}
-                            ${!isAnswered ? 'bg-cyan-700 border-cyan-900 hover:bg-cyan-600 cursor-pointer' : 'opacity-80'}
+                            ${isAnswered && isCorrectOption ? 'bg-green-600 border-green-800 scale-105' : ''}
+                            ${isAnswered && isSelectedWrong ? 'bg-red-600 border-red-800' : ''}
+                            ${!isAnswered || (!isCorrectOption && !isSelectedWrong) ? 'bg-cyan-700 border-cyan-900' : ''}
+                            ${!isAnswered ? 'hover:bg-cyan-600 cursor-pointer' : 'opacity-80'}
                         `}
                     >
                         {opt}
                     </button>
-                ))}
+                  );
+                })}
               </div>
             )}
         </div>
