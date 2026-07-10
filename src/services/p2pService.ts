@@ -198,6 +198,9 @@ export type P2PEvent =
     | { type: 'COOP_TREASURE_GRANT', rewards: any[], player?: any, addCurse?: boolean, poolId?: string }
     | { type: 'COOP_EVENT_OPTION', optionIndex: number, answerProgress?: number }
     | { type: 'COOP_EVENT_RESULT', player: any, resultLog: string | null }
+    | { type: 'COOP_FAN_FAVORITE_START', cards: any[] }
+    | { type: 'COOP_FAN_FAVORITE_VOTE', cardId: string }
+    | { type: 'COOP_FAN_FAVORITE_RESULT', player: any, resultLog: string }
     | { type: 'COOP_EVENT_CONTINUE' }
     | { type: 'COOP_REST_ACTION', action: 'REST' | 'UPGRADE' | 'SYNTHESIZE' | 'LEAVE', cardId?: string, cardIds?: string[] }
     | { type: 'COOP_SHOP_ACTION', action: 'BUY_CARD' | 'BUY_RELIC' | 'BUY_POTION' | 'REMOVE_CARD' | 'LEAVE', itemId?: string, replacePotionId?: string, cardId?: string, cost?: number }

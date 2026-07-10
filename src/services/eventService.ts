@@ -844,6 +844,10 @@ export const generateEvent = (
                 setGameState(prev => ({ ...prev, player: { ...prev.player, turnFlags: { ...prev.player.turnFlags, TOSHI_RAMEN_BATTLE_BOOSTS: (prev.player.turnFlags['TOSHI_RAMEN_BATTLE_BOOSTS'] || 0) + 3 } } }));
                 setEventResultLog(supporterText(`${resultPrefix}\nラーメンの気合で、次の3戦の開始時エナジーが1増える。`, `${resultPrefix}\nRamen spirit! Start your next 3 battles with 1 extra Energy.`));
                 return;
+            case 'fanFavorite':
+                setGameState(prev => ({ ...prev, player: { ...prev.player, turnFlags: { ...prev.player.turnFlags, EVENT_NPC_FAN_FAVORITE_PENDING_MODAL: true } } }));
+                setEventResultLog(supporterText(`${resultPrefix}\n愛市が、みんなに人気のキラカードを3枚並べた。推しを1枚選ぼう。`, `${resultPrefix}\nAiichi lays out three popular holographic cards. Choose your favorite.`));
+                return;
             case 'gold':
                 setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold + 45 } }));
                 setEventResultLog(supporterText(`${resultPrefix}\n協力の見返りとして45Gを得た。`, `${resultPrefix}\nYou earn 45G for working together.`));

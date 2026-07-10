@@ -12,7 +12,8 @@ export type SupporterNpcReward =
   | 'nutrition'
   | 'ramenBoost'
   | 'duplicate'
-  | 'chaos';
+  | 'chaos'
+  | 'fanFavorite';
 
 export interface SupporterNpcQuestion {
   question: string;
@@ -914,7 +915,7 @@ export const HIGH_SCHOOL_SUPPORTER_NPC_EVENTS: SupporterNpcEventProfile[] = [
     description: '大柄で笑顔の素敵なお兄さん、愛市がゲーム卓を囲むように手招きした。\n「協力って、勝ち負けより先に空気を読むところからだよな」',
     descriptionEnglish: 'Aiichi, a big man with a warm smile, gestures toward the game table. "Cooperation starts by reading the room before chasing a win."',
     imageFile: 'aiichi_cooperation_boardgamer.png',
-    reward: 'gold',
+    reward: 'fanFavorite',
     questions: aiichiQuestions,
     englishQuestions: aiichiQuestions.map(translateSupporterNpcQuestion),
   },

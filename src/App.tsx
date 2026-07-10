@@ -1674,7 +1674,8 @@ const App: React.FC = () => {
     const [orreryModal, setOrreryModal] = useState<RelicCardChoiceModalState | null>(null);
     const [peacePipeModal, setPeacePipeModal] = useState<RelicCardChoiceModalState | null>(null);
     const [eventSynthesisModal, setEventSynthesisModal] = useState<{ cards: ICard[]; selectedIds: string[] } | null>(null);
-    const [eventCardChoiceModal, setEventCardChoiceModal] = useState<{ mode: 'UPGRADE' | 'ORGANIZE' | 'DUPLICATE'; cards: ICard[] } | null>(null);
+    const [eventCardChoiceModal, setEventCardChoiceModal] = useState<{ mode: 'UPGRADE' | 'ORGANIZE' | 'DUPLICATE' | 'FAN_FAVORITE'; cards: ICard[] } | null>(null);
+    const [coopFanFavorite, setCoopFanFavorite] = useState<{ cards: ICard[]; votes: Record<string, string> } | null>(null);
     const [eventData, setEventData] = useState<any>(null);
     const [eventResultLog, setEventResultLog] = useState<string | null>(null);
     const [unlockedCardNames, setUnlockedCardNames] = useState<string[]>([]);
@@ -10337,34 +10338,56 @@ const App: React.FC = () => {
                 ? 'ORGANIZE'
                 : gameState.player.turnFlags['EVENT_NPC_DUPLICATE_PENDING_MODAL']
                     ? 'DUPLICATE'
-                    : null;
+                    : gameState.player.turnFlags['EVENT_NPC_FAN_FAVORITE_PENDING_MODAL']
+                        ? 'FAN_FAVORITE'
+                        : null;
         if (!mode) return;
-        const candidates = gameState.player.deck.filter(card => mode === 'UPGRADE' ? !card.upgraded : mode === 'DUPLICATE' ? card.cost <= 2 && (card.rarity === 'COMMON' || card.rarity === 'UNCOMMON') : card.cost > 0 && !card.unplayable);
-        setGameState(prev => ({ ...prev, player: { ...prev.player, turnFlags: { ...prev.player.turnFlags, EVENT_NPC_UPGRADE_PENDING_MODAL: false, EVENT_NPC_ORGANIZE_PENDING_MODAL: false, EVENT_NPC_DUPLICATE_PENDING_MODAL: false } } }));
+        if (mode === 'FAN_FAVORITE' && gameState.challengeMode === 'COOP') return;
+        const candidates = mode === 'FAN_FAVORITE'
+            ? shuffle(getFilteredCardPool(gameState.player.id).filter(card => card.rarity !== 'SPECIAL')).slice(0, 3).map((card, index) => ({
+                ...createHolographicCard({ ...card, id: `aiichi-favorite-${Date.now()}-${index}` })
+            }))
+            : gameState.player.deck.filter(card => mode === 'UPGRADE' ? !card.upgraded : mode === 'DUPLICATE' ? card.cost <= 2 && (card.rarity === 'COMMON' || card.rarity === 'UNCOMMON') : card.cost > 0 && !card.unplayable);
+        setGameState(prev => ({ ...prev, player: { ...prev.player, turnFlags: { ...prev.player.turnFlags, EVENT_NPC_UPGRADE_PENDING_MODAL: false, EVENT_NPC_ORGANIZE_PENDING_MODAL: false, EVENT_NPC_DUPLICATE_PENDING_MODAL: false, EVENT_NPC_FAN_FAVORITE_PENDING_MODAL: false } } }));
         if (candidates.length === 0) {
             const message = mode === 'UPGRADE'
                 ? languageMode === 'ENGLISH' ? 'No cards can be upgraded.' : '強化できるカードがなかった。'
                 : mode === 'DUPLICATE'
                     ? languageMode === 'ENGLISH' ? 'No Common or Uncommon cards costing 2 or less can be copied.' : '複製できるコスト2以下のコモン／アンコモンカードがなかった。'
+                    : mode === 'FAN_FAVORITE'
+                        ? languageMode === 'ENGLISH' ? 'No cards are available for Aiichi\'s recommendation.' : '愛市がすすめられるカードがなかった。'
                     : languageMode === 'ENGLISH' ? 'No cards can have their cost reduced.' : 'コストを下げられるカードはなかった。';
             setEventResultLog(prev => `${prev ?? ''}\n${message}`.trim());
             return;
         }
         setEventCardChoiceModal({ mode, cards: candidates });
-    }, [eventCardChoiceModal, gameState.player.deck, gameState.player.turnFlags, gameState.screen, languageMode]);
+    }, [eventCardChoiceModal, gameState.challengeMode, gameState.player.deck, gameState.player.turnFlags, gameState.screen, languageMode]);
 
     const applyEventCardChoice = (card: ICard) => {
         if (!eventCardChoiceModal) return;
         const mode = eventCardChoiceModal.mode;
+        if (mode === 'FAN_FAVORITE' && gameState.challengeMode === 'COOP' && coopSession && coopSelfPeerId) {
+            setEventCardChoiceModal(null);
+            if (coopSession.isHost) {
+                submitCoopFanFavoriteVote(coopSelfPeerId, card.id);
+            } else {
+                p2pService.send({ type: 'COOP_FAN_FAVORITE_VOTE', cardId: card.id });
+            }
+            return;
+        }
         setGameState(prev => ({
             ...prev,
             player: {
                 ...prev.player,
-                deck: mode === 'DUPLICATE' ? [...prev.player.deck, { ...card, id: `kida-copy-${Date.now()}` }] : prev.player.deck.map(item => item.id !== card.id ? item : mode === 'UPGRADE' ? getUpgradedCard(item) : { ...item, cost: Math.max(0, item.cost - 1) })
+                deck: mode === 'DUPLICATE' || mode === 'FAN_FAVORITE'
+                    ? [...prev.player.deck, { ...card, id: `${mode === 'FAN_FAVORITE' ? 'aiichi-favorite' : 'kida-copy'}-${Date.now()}` }]
+                    : prev.player.deck.map(item => item.id !== card.id ? item : mode === 'UPGRADE' ? getUpgradedCard(item) : { ...item, cost: Math.max(0, item.cost - 1) })
             }
         }));
         const message = mode === 'DUPLICATE'
             ? languageMode === 'ENGLISH' ? `${trans(card.name, languageMode)} was copied.` : `「${card.name}」を1枚複製した。`
+            : mode === 'FAN_FAVORITE'
+                ? languageMode === 'ENGLISH' ? `You chose the holographic ${trans(card.name, languageMode)}.` : `キラカード「${card.name}」をみんなの推しとして選んだ。`
             : mode === 'UPGRADE'
             ? languageMode === 'ENGLISH' ? `${trans(card.name, languageMode)} was upgraded.` : `「${card.name}」を強化した。`
             : languageMode === 'ENGLISH' ? `${trans(card.name, languageMode)} costs 1 less.` : `「${card.name}」のコストが1下がった。`;
@@ -10579,6 +10602,57 @@ const App: React.FC = () => {
         window.setTimeout(() => onResolved(nextPlayer, nextResultLog), 90);
     }, [coopSession?.participants, eventData, gameState, languageMode, unlockedCardNames]);
 
+    const beginCoopFanFavorite = (player: Player): Player => {
+        const cards = shuffle(getFilteredCardPool(player.id).filter(card => card.rarity !== 'SPECIAL')).slice(0, 3).map((card, index) => (
+            createHolographicCard({ ...card, id: `aiichi-coop-favorite-${Date.now()}-${index}` })
+        ));
+        const turnFlags = { ...player.turnFlags };
+        delete turnFlags.EVENT_NPC_FAN_FAVORITE_PENDING_MODAL;
+        const nextPlayer = { ...player, turnFlags };
+        if (cards.length === 0) return nextPlayer;
+        setCoopFanFavorite({ cards, votes: {} });
+        setEventCardChoiceModal({ mode: 'FAN_FAVORITE', cards });
+        p2pService.send({ type: 'COOP_FAN_FAVORITE_START', cards });
+        return nextPlayer;
+    };
+
+    const submitCoopFanFavoriteVote = (peerId: string, cardId: string) => {
+        if (!coopFanFavorite || !coopSession?.isHost) return;
+        if (!coopFanFavorite.cards.some(card => card.id === cardId) || coopFanFavorite.votes[peerId]) return;
+        const votes = { ...coopFanFavorite.votes, [peerId]: cardId };
+        const activeParticipants = getActiveCoopParticipants(coopSession.participants);
+        setCoopFanFavorite({ ...coopFanFavorite, votes });
+        if (Object.keys(votes).length < activeParticipants.length) return;
+
+        const selectedCard = coopFanFavorite.cards.reduce((best, candidate) => {
+            const bestVotes = Object.values(votes).filter(vote => vote === best.id).length;
+            const candidateVotes = Object.values(votes).filter(vote => vote === candidate.id).length;
+            return candidateVotes > bestVotes ? candidate : best;
+        }, coopFanFavorite.cards[0]);
+
+        activeParticipants.forEach(participant => {
+            const basePlayer = participant.peerId === coopSelfPeerId ? stateRef.current.player : coopPlayerSnapshots[participant.peerId];
+            if (!basePlayer) return;
+            const matched = votes[participant.peerId] === selectedCard.id;
+            const rewardCard = { ...selectedCard, id: `aiichi-coop-reward-${participant.peerId}-${Date.now()}` };
+            const nextPlayer = {
+                ...basePlayer,
+                gold: basePlayer.gold + (matched ? 25 : 0),
+                deck: [...basePlayer.deck, rewardCard]
+            };
+            const resultLog = languageMode === 'ENGLISH'
+                ? `${matched ? 'Your vote matched the group.' : 'The group chose a different favorite.'}\nEveryone receives the holographic ${trans(selectedCard.name, languageMode)}.${matched ? ' +25G' : ''}`
+                : `${matched ? 'みんなと推しが一致した！ 25Gを得た。' : 'みんなが選んだ推しを受け取った。'}\n全員がキラカード「${selectedCard.name}」を獲得。`;
+            applyCoopPlayerStateToPeer(participant.peerId, nextPlayer);
+            if (participant.peerId !== coopSelfPeerId) {
+                p2pService.sendTo(participant.peerId, { type: 'COOP_FAN_FAVORITE_RESULT', player: nextPlayer, resultLog });
+            } else {
+                setEventResultLog(resultLog);
+            }
+        });
+        setCoopFanFavorite(null);
+    };
+
     const handleEventComplete = useCallback(() => {
         if (
             isUiPreviewMode &&
@@ -10619,13 +10693,16 @@ const App: React.FC = () => {
                 return;
             }
             resolveCoopEventOptionForPlayer(gameState.player, coopSelfPeerId, optionIndex, answerMeta, (nextPlayer, resultLog) => {
-                applyCoopPlayerStateToPeer(coopSelfPeerId, nextPlayer);
+                const resolvedPlayer = nextPlayer.turnFlags['EVENT_NPC_FAN_FAVORITE_PENDING_MODAL']
+                    ? beginCoopFanFavorite(nextPlayer)
+                    : nextPlayer;
+                applyCoopPlayerStateToPeer(coopSelfPeerId, resolvedPlayer);
                 setEventResultLog(resultLog);
             });
             return;
         }
         eventData?.options?.[optionIndex]?.action?.(answerMeta);
-    }, [applyCoopPlayerStateToPeer, coopSelfPeerId, coopSession, eventData, gameState.challengeMode, gameState.player, gameState.visualTheme, resolveCoopEventOptionForPlayer, visualTheme]);
+    }, [applyCoopPlayerStateToPeer, beginCoopFanFavorite, coopSelfPeerId, coopSession, eventData, gameState.challengeMode, gameState.player, gameState.visualTheme, resolveCoopEventOptionForPlayer, visualTheme]);
 
     const handleLegacyCardSelect = (card: ICard) => {
         storageService.saveLegacyCard(card, gameState.challengeMode === 'COOP' ? 'COOP' : 'NORMAL');
@@ -14022,19 +14099,47 @@ const App: React.FC = () => {
                     : coopPlayerSnapshots[fromPeerId];
                 if (!sourcePlayer) return;
                 resolveCoopEventOptionForPlayer(sourcePlayer, fromPeerId, data.optionIndex, { quickQuizProgress: data.answerProgress }, (nextPlayer, resultLog) => {
+                    const resolvedPlayer = nextPlayer.turnFlags['EVENT_NPC_FAN_FAVORITE_PENDING_MODAL']
+                        ? beginCoopFanFavorite(nextPlayer)
+                        : nextPlayer;
                     if (fromPeerId === coopSelfPeerId) {
-                        applyCoopPlayerStateToPeer(coopSelfPeerId, nextPlayer);
+                        applyCoopPlayerStateToPeer(coopSelfPeerId, resolvedPlayer);
                         setEventResultLog(resultLog);
                         return;
                     }
-                    applyCoopPlayerStateToPeer(fromPeerId, nextPlayer);
-                    p2pService.sendTo(fromPeerId, { type: 'COOP_EVENT_RESULT', player: nextPlayer, resultLog });
+                    applyCoopPlayerStateToPeer(fromPeerId, resolvedPlayer);
+                    p2pService.sendTo(fromPeerId, { type: 'COOP_EVENT_RESULT', player: resolvedPlayer, resultLog });
                 });
                 return;
             }
 
             if (data.type === 'COOP_EVENT_RESULT' && !coopSession.isHost) {
                 applyCoopPlayerStateToPeer(coopSelfPeerId, data.player);
+                setEventResultLog(data.resultLog);
+                return;
+            }
+
+            if (data.type === 'COOP_FAN_FAVORITE_START' && !coopSession.isHost) {
+                const cards = data.cards as ICard[];
+                setGameState(prev => {
+                    const turnFlags = { ...prev.player.turnFlags };
+                    delete turnFlags.EVENT_NPC_FAN_FAVORITE_PENDING_MODAL;
+                    return { ...prev, player: { ...prev.player, turnFlags } };
+                });
+                setCoopFanFavorite({ cards, votes: {} });
+                setEventCardChoiceModal({ mode: 'FAN_FAVORITE', cards });
+                return;
+            }
+
+            if (data.type === 'COOP_FAN_FAVORITE_VOTE' && coopSession.isHost && fromPeerId) {
+                submitCoopFanFavoriteVote(fromPeerId, data.cardId);
+                return;
+            }
+
+            if (data.type === 'COOP_FAN_FAVORITE_RESULT' && !coopSession.isHost) {
+                applyCoopPlayerStateToPeer(coopSelfPeerId, data.player);
+                setCoopFanFavorite(null);
+                setEventCardChoiceModal(null);
                 setEventResultLog(data.resultLog);
                 return;
             }
@@ -16583,14 +16688,18 @@ const App: React.FC = () => {
                                     ? languageMode === 'ENGLISH' ? "Akame's Card Upgrade" : 'あかめのカード強化'
                                     : eventCardChoiceModal.mode === 'DUPLICATE'
                                         ? languageMode === 'ENGLISH' ? "Kida's Walking Board Game Warehouse" : '木田の歩くボードゲーム倉庫'
-                                        : languageMode === 'ENGLISH' ? "Kazuko's Clear Mind" : 'かずこの心の整理'}
+                                        : eventCardChoiceModal.mode === 'FAN_FAVORITE'
+                                            ? languageMode === 'ENGLISH' ? "Aiichi's Community Favorites" : '愛市のみんなの推し'
+                                            : languageMode === 'ENGLISH' ? "Kazuko's Clear Mind" : 'かずこの心の整理'}
                             </h3>
                             <p className="mb-3 text-sm text-slate-300">
                                 {eventCardChoiceModal.mode === 'UPGRADE'
                                     ? languageMode === 'ENGLISH' ? 'Choose one card to upgrade.' : '強化するカードを1枚選んでください。'
                                     : eventCardChoiceModal.mode === 'DUPLICATE'
                                         ? languageMode === 'ENGLISH' ? 'Choose one Common or Uncommon card costing 2 or less to copy.' : 'コスト2以下のコモン／アンコモンカードを1枚選んで複製してください。'
-                                        : languageMode === 'ENGLISH' ? 'Choose one card to reduce its cost by 1.' : 'コストを1下げるカードを1枚選んでください。'}
+                                        : eventCardChoiceModal.mode === 'FAN_FAVORITE'
+                                            ? languageMode === 'ENGLISH' ? 'Choose one holographic card that everyone recommends.' : 'みんながおすすめするキラカードから、1枚選んでください。'
+                                            : languageMode === 'ENGLISH' ? 'Choose one card to reduce its cost by 1.' : 'コストを1下げるカードを1枚選んでください。'}
                             </p>
                             <div className="grid max-h-[58vh] grid-cols-2 gap-3 overflow-y-auto pr-1 sm:grid-cols-3 md:grid-cols-4">
                                 {eventCardChoiceModal.cards.map(card => (
