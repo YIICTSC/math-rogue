@@ -69,9 +69,9 @@ const ChefDeckSelectionScreen: React.FC<ChefDeckSelectionScreenProps> = ({ onCom
       <div className="z-10 bg-black/80 border-b-4 border-pink-600 p-4 rounded-t-xl shrink-0 flex justify-between items-end">
         <div>
           <h2 className="text-2xl md:text-3xl font-bold text-pink-200 mb-1 flex items-center gap-2">
-            <Info size={24} className="text-pink-500" /> 給食当番の献立作成
+            <Info size={24} className="text-pink-500" /> {languageMode === 'ENGLISH' ? 'Lunch Duty Deck Builder' : '給食当番の献立作成'}
           </h2>
-          <p className="text-xs text-gray-400">これまでに獲得したカードから <span className="text-pink-400 font-bold">7枚</span> 選んで冒険を開始します。</p>
+          <p className="text-xs text-gray-400">{languageMode === 'ENGLISH' ? <>Choose <span className="text-pink-400 font-bold">7 cards</span> you have collected to begin your adventure.</> : <>これまでに獲得したカードから <span className="text-pink-400 font-bold">7枚</span> 選んで冒険を開始します。</>}</p>
         </div>
         <div className="text-right">
           <div className={`text-2xl font-black mb-1 ${selectedIds.length === 7 ? 'text-green-400' : 'text-yellow-400'}`}>
@@ -85,8 +85,8 @@ const ChefDeckSelectionScreen: React.FC<ChefDeckSelectionScreenProps> = ({ onCom
       <div className="z-10 flex-grow overflow-y-auto custom-scrollbar p-4 bg-black/40">
         {selectableCards.length === 0 ? (
           <div className="flex flex-col items-center justify-center h-full text-gray-500 text-center p-8">
-            <p className="mb-2 italic text-lg">選択できるカードがありません...</p>
-            <p className="text-sm">他のキャラクターで冒険してカードをアンロックしてください。</p>
+            <p className="mb-2 italic text-lg">{languageMode === 'ENGLISH' ? 'No cards are available to select...' : '選択できるカードがありません...'}</p>
+            <p className="text-sm">{languageMode === 'ENGLISH' ? 'Adventure with other characters to unlock cards.' : '他のキャラクターで冒険してカードをアンロックしてください。'}</p>
           </div>
         ) : (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-6 justify-items-center pb-20">
@@ -124,7 +124,7 @@ const ChefDeckSelectionScreen: React.FC<ChefDeckSelectionScreenProps> = ({ onCom
               : 'bg-gray-800 text-gray-500 border-2 border-gray-700 cursor-not-allowed'}
           `}
         >
-          冒険を開始する <ArrowRight size={20} />
+          {languageMode === 'ENGLISH' ? 'Begin Adventure' : '冒険を開始する'} <ArrowRight size={20} />
         </button>
       </div>
     </div>

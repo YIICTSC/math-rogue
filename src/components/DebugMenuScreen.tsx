@@ -180,7 +180,12 @@ const SUPPORTER_NPC_REWARD_LABELS: Record<SupporterNpcReward, string> = {
     heal: 'HP回復',
     gold: 'ゴールド獲得',
     maxHp: '最大HP上昇',
-    cleanse: '呪い解除',
+    organize: '心の整理（カードコスト-1）',
+    community: '地域のつながり（30G＋次回ショップ20%OFF）',
+    nutrition: '栄養チャージ（最大HP+2・HP10回復）',
+    ramenBoost: 'ラーメンの気合（次の3戦の開始エナジー+1）',
+    duplicate: '歩くボードゲーム倉庫（カード複製）',
+    chaos: 'どどめの混沌（レアカード＋次戦ランダム0コスト）',
 };
 const UI_PREVIEW_CHECK_TARGETS: Array<{ id: UiPreviewCheckTarget; label: string }> = [
     { id: 'pc', label: 'PC' },

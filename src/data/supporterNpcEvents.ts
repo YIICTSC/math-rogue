@@ -1,3 +1,5 @@
+import { SUPPORTER_NPC_ENGLISH_TRANSLATIONS } from './supporterNpcEventTranslations';
+
 export type SupporterNpcReward =
   | 'synthesis'
   | 'upgrade'
@@ -5,7 +7,12 @@ export type SupporterNpcReward =
   | 'heal'
   | 'gold'
   | 'maxHp'
-  | 'cleanse';
+  | 'organize'
+  | 'community'
+  | 'nutrition'
+  | 'ramenBoost'
+  | 'duplicate'
+  | 'chaos';
 
 export interface SupporterNpcQuestion {
   question: string;
@@ -17,11 +24,15 @@ export interface SupporterNpcQuestion {
 export interface SupporterNpcEventProfile {
   id: string;
   title: string;
+  titleEnglish: string;
   npcName: string;
+  npcNameEnglish: string;
   description: string;
+  descriptionEnglish: string;
   imageFile: string;
   reward: SupporterNpcReward;
   questions: SupporterNpcQuestion[];
+  englishQuestions?: SupporterNpcQuestion[];
 }
 
 const q = (
@@ -36,6 +47,144 @@ const q = (
   options: [correct, wrong1, wrong2, wrong3],
   correctIndex: 0,
   explanation,
+});
+
+const englishQuestion = (
+  question: string,
+  correct: string,
+  wrong1: string,
+  wrong2: string,
+  wrong3: string,
+  explanation = 'That is the best answer.'
+): SupporterNpcQuestion => ({
+  question,
+  options: [correct, wrong1, wrong2, wrong3],
+  correctIndex: 0,
+  explanation,
+});
+
+const encodeJapaneseAnswer = (answer: string) => `jp:${encodeURIComponent(answer)}`;
+
+const translateSupporterNpcQuestion = (source: SupporterNpcQuestion): SupporterNpcQuestion => ({
+  question: SUPPORTER_NPC_ENGLISH_TRANSLATIONS[source.question] || source.question,
+  options: source.options.map(option => SUPPORTER_NPC_ENGLISH_TRANSLATIONS[option] || option) as SupporterNpcQuestion['options'],
+  correctIndex: source.correctIndex,
+  explanation: SUPPORTER_NPC_ENGLISH_TRANSLATIONS[source.explanation] || source.explanation,
+});
+
+const tsukaponEnglishAnswerTerms: Array<[string, string]> = [
+  ['さくら', 'A tree with pale pink flowers that bloom when spring begins.'],
+  ['うめ', 'A tree that blooms before spring is fully warm and gives a sour fruit.'],
+  ['ふじ', 'A climbing plant with long hanging clusters of purple flowers.'],
+  ['たけ', 'A tall green plant with hollow stems, often used to make things.'],
+  ['まつ', 'An evergreen tree with needles and cones, often seen at New Year.'],
+  ['はな', 'The colorful part of a plant that can smell sweet and attract insects.'],
+  ['そら', 'The wide blue space above you where clouds and birds appear.'],
+  ['うみ', 'A huge body of salty water with waves and fish.'],
+  ['かわ', 'A long stream of water that flows toward the sea.'],
+  ['やま', 'Very high land with a top people may climb.'],
+  ['もり', 'A large area filled with many trees and wild animals.'],
+  ['あめ', 'Water that falls from clouds in drops.'],
+  ['ゆき', 'White, cold crystals that fall from clouds in winter.'],
+  ['かぜ', 'Moving air that you can feel but cannot see.'],
+  ['くも', 'A white or gray shape in the sky made from tiny drops of water.'],
+  ['つき', 'The bright round object that changes shape in the night sky.'],
+  ['たいよう', 'The star that gives Earth light and warmth during the day.'],
+  ['ほし', 'A tiny point of light you can see in the night sky.'],
+  ['にじ', 'A curved band of colors that can appear after rain.'],
+  ['あさ', 'The part of the day when people wake up and the sun rises.'],
+  ['ひる', 'The bright middle part of the day.'],
+  ['よる', 'The dark part of the day when many people sleep.'],
+  ['はる', 'The season after winter when flowers begin to bloom.'],
+  ['なつ', 'The hottest season, often with long sunny days.'],
+  ['あき', 'The season when leaves change color and many crops are gathered.'],
+  ['ふゆ', 'The coldest season, when snow may fall.'],
+  ['みず', 'A clear liquid you drink when you are thirsty.'],
+  ['ごはん', 'Cooked grains that are a common main food in Japan.'],
+  ['おちゃ', 'A hot or cold drink made by soaking leaves in water.'],
+  ['しお', 'Small white grains that make food taste stronger.'],
+  ['さとう', 'Sweet white grains used in desserts and drinks.'],
+  ['たまご', 'A food with a shell that can become a chick.'],
+  ['さかな', 'An animal that lives in water and breathes with gills.'],
+  ['にく', 'Food that comes from the body of an animal.'],
+  ['やさい', 'Plants grown for food, such as carrots and cabbage.'],
+  ['くだもの', 'Sweet plant food that often has seeds inside.'],
+  ['りんご', 'A round fruit that is often red or green and grows on trees.'],
+  ['いちご', 'A small red fruit with many seeds on its outside.'],
+  ['すいか', 'A large summer fruit with green skin and red flesh.'],
+  ['みかん', 'A small orange fruit with easy-to-peel skin.'],
+  ['ぶどう', 'Small sweet fruits that grow together in bunches.'],
+  ['なす', 'A purple vegetable with smooth skin.'],
+  ['だいこん', 'A long white root vegetable with a sharp fresh taste.'],
+  ['にんじん', 'An orange root vegetable often eaten by rabbits in stories.'],
+  ['きゅうり', 'A long green vegetable that is crisp and watery.'],
+  ['とうふ', 'A soft white food made from soybeans.'],
+  ['みそ', 'A salty paste made from fermented soybeans.'],
+  ['なっとう', 'Sticky fermented soybeans often eaten with rice.'],
+  ['そば', 'Thin noodles usually made with buckwheat flour.'],
+  ['うどん', 'Thick white noodles made from wheat flour.'],
+  ['すし', 'Rice with vinegar often served with fish or vegetables.'],
+  ['おにぎり', 'A hand-shaped ball of rice, sometimes wrapped in seaweed.'],
+  ['もち', 'A soft, chewy food made by pounding rice.'],
+  ['まんじゅう', 'A small sweet bun with filling inside.'],
+  ['いぬ', 'An animal that may bark and live with people as a pet.'],
+  ['ねこ', 'A small pet animal that may purr and chase mice.'],
+  ['うさぎ', 'A small animal with long ears that can hop quickly.'],
+  ['うま', 'A large animal people can ride, known for running fast.'],
+  ['とり', 'An animal with feathers, wings, and a beak.'],
+  ['かめ', 'A slow animal with a hard shell on its back.'],
+  ['うし', 'A large farm animal that gives milk.'],
+  ['ひつじ', 'A farm animal with thick wool.'],
+  ['ぶた', 'A pink farm animal with a round nose.'],
+  ['さる', 'An animal that climbs trees and has hands like people.'],
+  ['かさ', 'Something you hold above your head to stay dry in rain.'],
+  ['くつ', 'Things you wear on your feet when you go outside.'],
+  ['かぎ', 'A small metal thing used to open a locked door.'],
+  ['かみ', 'Thin material used for writing, drawing, or wrapping.'],
+  ['ほん', 'Pages with words or pictures bound together for reading.'],
+  ['ふで', 'A tool with a handle and soft hairs used for painting or writing.'],
+  ['はさみ', 'A tool with two sharp blades used to cut paper.'],
+  ['つくえ', 'A piece of furniture with a flat top for work or study.'],
+  ['いす', 'Furniture made for one person to sit on.'],
+  ['まど', 'A glass opening in a wall that lets in light and air.'],
+  ['とびら', 'A movable panel you open to enter or leave a room.'],
+  ['ふとん', 'Soft bedding spread on the floor for sleeping.'],
+  ['ふろ', 'A place where you wash your body in warm water.'],
+  ['はし', 'Two thin sticks used to pick up food while eating.'],
+  ['さら', 'A flat dish that you put food on at a meal.'],
+  ['ちゃわん', 'A bowl used for eating rice or drinking tea.'],
+  ['てぬぐい', 'A thin cloth used to dry hands or wipe sweat.'],
+  ['きもの', 'Traditional Japanese clothing with long sleeves and a sash.'],
+  ['じんじゃ', 'A Japanese place of worship, often marked by a gate.'],
+  ['てら', 'A Buddhist place of worship with statues and bells.'],
+  ['とりい', 'A gate that marks the entrance to a Shinto shrine.'],
+  ['まつり', 'A local celebration with food stalls, music, and people gathering.'],
+  ['はなみ', 'A spring activity of enjoying blooming cherry trees.'],
+  ['しょうぎ', 'A Japanese board game with pieces that can return to play after capture.'],
+  ['ご', 'A board game where players surround areas using black and white stones.'],
+  ['たこ', 'A sea animal with eight arms that can spray ink.'],
+  ['きつね', 'A wild animal with pointed ears and a bushy tail.'],
+  ['たぬき', 'A round-bodied Japanese wild animal often found in folk tales.'],
+  ['こい', 'A colorful fish often kept in ponds.'],
+  ['ほたる', 'A small insect that glows in the dark.'],
+  ['せみ', 'A summer insect known for its loud singing sound.'],
+  ['とんぼ', 'An insect with a long body and four clear wings.'],
+  ['かえる', 'A small animal that jumps and lives near water.'],
+  ['へび', 'A long animal with no legs that moves by sliding.'],
+  ['はなび', 'Bright colors and loud sounds in the night sky during celebrations.'],
+  ['こま', 'A small toy that spins when you twist or pull it.'],
+];
+
+const tsukaponEnglishQuestions = tsukaponEnglishAnswerTerms.map(([answer, clue], index) => {
+  const pool = tsukaponEnglishAnswerTerms.map(([word]) => word);
+  return englishQuestion(
+    clue,
+    encodeJapaneseAnswer(answer),
+    encodeJapaneseAnswer(pool[(index + 17) % pool.length]),
+    encodeJapaneseAnswer(pool[(index + 43) % pool.length]),
+    encodeJapaneseAnswer(pool[(index + 71) % pool.length]),
+    `The answer was ${answer}.`
+  );
 });
 
 const wordGameTerms = [
@@ -643,87 +792,183 @@ const ichiQuestions = [
   q('地域活動で困りごとを減らすために有効なことは？', '一人で抱えず声をかけ合う', '強い人だけが頑張る', '失敗した人は離れる', '自分の得だけ考える', '助けを求め合うと継続しやすい。'),
 ];
 
+const repeatEnglishQuestions = (questions: SupporterNpcQuestion[], count: number) =>
+  Array.from({ length: count }, (_, index) => questions[index % questions.length]);
+
+const ichiEnglishQuestions = [
+  englishQuestion('A new volunteer looks lost at a local event. What is the best first response?', 'Greet them and explain the next step', 'Ignore them', 'Give them every task at once', 'Tell them to leave'),
+  englishQuestion('Two volunteers disagree. What should happen first?', 'Listen to both reasons', 'Choose a side immediately', 'Raise your voice', 'End the event'),
+  englishQuestion('A plan is confusing for newcomers. How can it improve?', 'Put the important steps in a clear order', 'Add more difficult words', 'Hide the schedule', 'Make it longer'),
+  englishQuestion('Someone made a mistake while helping. What is a good response?', 'Help them find a way to fix it', 'Blame them in public', 'Never speak to them again', 'Pretend nothing happened'),
+  englishQuestion('What helps a community activity continue?', 'Thank people for what they did', 'Compare people harshly', 'Give one person all work', 'Only discuss failures'),
+];
+const akameEnglishQuestions = [
+  englishQuestion('Which city is the capital of Niigata Prefecture?', 'Niigata City', 'Sado City', 'Nagaoka City', 'Tokyo City'),
+  englishQuestion('Which rice is strongly associated with Niigata?', 'Koshihikari', 'Basmati', 'Arborio', 'Wild rice'),
+  englishQuestion('Which island belongs to Niigata Prefecture?', 'Sado Island', 'Okinawa Island', 'Awaji Island', 'Yakushima'),
+  englishQuestion('What is Niigata especially known for in winter?', 'Heavy snow in many areas', 'Desert sandstorms', 'Tropical heat all year', 'No rain at all'),
+  englishQuestion('What is a useful skill in a strategy board game?', 'Reading how the board may change', 'Ignoring every move', 'Never planning ahead', 'Only choosing at random'),
+];
+const tamagoEnglishQuestions = [
+  englishQuestion('What should you do before handling food such as eggs?', 'Wash your hands', 'Touch your phone', 'Leave food in the sun', 'Skip cleaning'),
+  englishQuestion('Which part protects what is inside an egg?', 'The shell', 'The yolk', 'The white', 'The steam'),
+  englishQuestion('Why are eggs usually cooked before eating?', 'Heat makes them safer to eat', 'It changes them into fruit', 'It removes all water', 'It makes them colder'),
+  englishQuestion('Where should fresh eggs usually be stored?', 'In a cool place such as a refrigerator', 'On a hot window', 'Under a desk', 'Inside a book'),
+  englishQuestion('What can a cracked egg shell allow?', 'Germs may enter more easily', 'It becomes a vegetable', 'It grows a new shell', 'It turns blue'),
+];
+const aiichiEnglishQuestions = [
+  englishQuestion('A co-op team has different ideas. What helps most?', 'Share reasons and choose a plan together', 'Let one person decide everything', 'Stop listening', 'Compete against teammates'),
+  englishQuestion('A teammate is quiet during planning. What is considerate?', 'Give them a chance to speak', 'Speak over them', 'Assume they agree', 'Remove them from the team'),
+  englishQuestion('What makes a team decision easier to follow?', 'Make the goal clear for everyone', 'Keep the goal secret', 'Change the rules every minute', 'Avoid talking'),
+  englishQuestion('A teammate notices a risk. What should the group do?', 'Thank them and check the risk', 'Laugh at them', 'Ignore the warning', 'Blame them'),
+  englishQuestion('What is a good co-op reward?', 'A result the whole team can enjoy', 'A prize for only the loudest person', 'No reward for anyone', 'A secret penalty'),
+];
+const toshiEnglishQuestions = [
+  englishQuestion('What is usually the main liquid part of a bowl of ramen?', 'Broth', 'Sand', 'Ice cream', 'Juice'),
+  englishQuestion('What are ramen noodles commonly made from?', 'Wheat flour', 'Chocolate', 'Wood', 'Cotton'),
+  englishQuestion('What topping is often sliced pork?', 'Chashu', 'Seaweed soup', 'Pickled plum', 'Rice cake'),
+  englishQuestion('Why do ramen shops care about noodle firmness?', 'It changes the texture of each bite', 'It changes the color of the bowl', 'It removes the broth', 'It makes the shop silent'),
+  englishQuestion('What is useful when comparing two ramen bowls?', 'Notice the broth, noodles, and toppings', 'Only count the chairs', 'Ignore the food', 'Choose by the bowl color alone'),
+];
+const kidaEnglishQuestions = [
+  englishQuestion('In a trick-taking game, what is a trick?', 'A round where each player plays one card', 'A box for game pieces', 'A type of dice', 'A snack break'),
+  englishQuestion('What is a trump suit in many trick-taking games?', 'A suit that can beat other suits', 'A suit you wear to play', 'A card you throw away', 'A score sheet'),
+  englishQuestion('What helps when learning a new board game?', 'Check the goal and turn order first', 'Skip all rules', 'Hide the pieces', 'Change the goal secretly'),
+  englishQuestion('What is important when explaining rules to a table?', 'Use a short example turn', 'Read only the box cover', 'Talk as fast as possible', 'Leave before questions'),
+  englishQuestion('What makes a game collection useful?', 'Keeping games organized and easy to find', 'Mixing every component together', 'Throwing away rulebooks', 'Hiding all labels'),
+];
+const dodomeEnglishQuestions = [
+  englishQuestion('A game night has players with different experience. What is best?', 'Choose a game everyone can learn', 'Choose the hardest game without asking', 'Start before people arrive', 'Hide the rules'),
+  englishQuestion('Someone loses badly and looks disappointed. What helps?', 'Thank them for playing and invite them again', 'Celebrate loudly at them', 'Tell them they should quit', 'Ignore them'),
+  englishQuestion('What should happen before a long game starts?', 'Explain the goal and main rules', 'Remove the rulebook', 'Turn off all lights', 'Shuffle unrelated games together'),
+  englishQuestion('A rule is unclear during play. What is fair?', 'Check the rule together', 'Let the loudest person decide', 'Change it secretly', 'End the game without talking'),
+  englishQuestion('What makes a game night welcoming?', 'Making room for questions and mistakes', 'Punishing beginners', 'Keeping scores secret', 'Refusing to explain anything'),
+];
+const naganoEnglishQuestions = [
+  englishQuestion('A friend has a problem but does not want advice yet. What is kind?', 'Listen first and ask what they need', 'Give a long lecture', 'Tell everyone else', 'Walk away immediately'),
+  englishQuestion('You promised to help but cannot make it. What should you do?', 'Tell the person early and apologize', 'Disappear without a message', 'Blame someone else', 'Pretend you promised nothing'),
+  englishQuestion('A small task feels overwhelming. What is a good first step?', 'Break it into a smaller step', 'Give up at once', 'Make it more confusing', 'Wait for someone to guess'),
+  englishQuestion('A family member is tired after work. What shows care?', 'Offer practical help', 'Demand more work', 'Make more noise', 'Ignore them'),
+  englishQuestion('What helps solve a disagreement at home?', 'Speak calmly about what each person needs', 'Keep score of old mistakes', 'Shout first', 'Avoid everyone forever'),
+];
+
 export const HIGH_SCHOOL_SUPPORTER_NPC_EVENTS: SupporterNpcEventProfile[] = [
   {
     id: 'tsukapon',
     title: 'つかぽんの言葉遊び試作会',
+    titleEnglish: 'Tsukapon\'s Word Game Playtest',
     npcName: 'つかぽん',
-    description: 'ボードゲーム開発者のつかぽんが、カードと試作品を広げて待っていた。\n「カタカナ言葉を使わずに説明するゲームだ。意味をくみ取れたら、君のデッキも一枚にまとめてやろう」',
+    npcNameEnglish: 'Tsukapon',
+    description: 'ボードゲーム開発者のつかぽんが、カードと試作品を広げて待っていた。\n「英語だけで説明されたお題を聞き、日本語の答えを選ぶゲームだ。意味をくみ取れたら、君のデッキも一枚にまとめてやろう」',
+    descriptionEnglish: 'Tsukapon, a board game designer, is waiting with cards and prototypes.\n"Listen to an English-only clue, then choose the Japanese answer. Understand it, and I will help combine your cards."',
     imageFile: 'tsukapon_boardgame_developer.png',
     reward: 'synthesis',
-    questions: tsukaponQuestions,
+    questions: tsukaponEnglishQuestions,
+    englishQuestions: tsukaponEnglishQuestions,
   },
   {
     id: 'ichi',
     title: 'いちの地域活動相談',
+    titleEnglish: 'Ichi\'s Community Advice',
     npcName: 'いち',
+    npcNameEnglish: 'Ichi',
     description: 'メガネの似合う、穏やかな大人が校門近くで手を振った。\n地域活動に熱いいちは、主人公の悩みを広い心で受け止めてくれる。',
+    descriptionEnglish: 'A calm, friendly adult waves near the school gate. Ichi listens carefully and helps with concerns about the community.',
     imageFile: 'ichi_community_supporter.png',
-    reward: 'heal',
+    reward: 'community',
     questions: ichiQuestions,
+    englishQuestions: ichiQuestions.map(translateSupporterNpcQuestion),
   },
   {
     id: 'akame',
     title: 'あかめの新潟雷轟クイズ',
+    titleEnglish: 'Akame\'s Niigata Raigo Quiz',
     npcName: 'あかめ',
+    npcNameEnglish: 'Akame',
     description: '雷のような勢いで、ボードゲーム制作サークル代表のあかめが現れた。\n「新潟を知る者は、盤面の流れも読める！」',
+    descriptionEnglish: 'Akame, leader of a board game circle, arrives with thunderous energy. "Know Niigata, and you can read the flow of the board!"',
     imageFile: 'akame_niigata_boardgame_leader.png',
     reward: 'upgrade',
     questions: akameQuestions,
+    englishQuestions: akameQuestions.map(translateSupporterNpcQuestion),
   },
   {
     id: 'tamagokazoku',
     title: 'たまごかぞくの卵クイズ',
+    titleEnglish: 'The Egg Family Quiz',
     npcName: 'たまごかぞく',
+    npcNameEnglish: 'The Egg Family',
     description: 'たまご、ちゃたまご、たまごベイビーが家庭科室からころころ現れた。\n卵の知識を試して、やさしい栄養補給を受けよう。',
+    descriptionEnglish: 'Tamago, Chatamago, and Tamago Baby roll out of the home economics room. Test your egg knowledge for a gentle boost.',
     imageFile: 'tamagokazoku_egg_mascots.png',
-    reward: 'heal',
+    reward: 'nutrition',
     questions: tamagoQuestions,
+    englishQuestions: tamagoQuestions.map(translateSupporterNpcQuestion),
   },
   {
     id: 'aiichi',
     title: '愛市の協力ボードゲーム問答',
+    titleEnglish: 'Aiichi\'s Co-op Board Game Challenge',
     npcName: '愛市',
+    npcNameEnglish: 'Aiichi',
     description: '大柄で笑顔の素敵なお兄さん、愛市がゲーム卓を囲むように手招きした。\n「協力って、勝ち負けより先に空気を読むところからだよな」',
+    descriptionEnglish: 'Aiichi, a big man with a warm smile, gestures toward the game table. "Cooperation starts by reading the room before chasing a win."',
     imageFile: 'aiichi_cooperation_boardgamer.png',
     reward: 'gold',
     questions: aiichiQuestions,
+    englishQuestions: aiichiQuestions.map(translateSupporterNpcQuestion),
   },
   {
     id: 'toshi',
     title: 'としのラーメン博士クイズ',
+    titleEnglish: 'Toshi\'s Ramen Scholar Quiz',
     npcName: 'とし',
+    npcNameEnglish: 'Toshi',
     description: '湯気の向こうから、ラーメン博士のとしがノートを開いた。\n90年代から今へ続くラーメンの流れを問われる。',
+    descriptionEnglish: 'Through the steam, ramen scholar Toshi opens a notebook. The quiz follows ramen culture from the 1990s to today.',
     imageFile: 'toshi_ramen_scholar.png',
-    reward: 'heal',
+    reward: 'ramenBoost',
     questions: toshiQuestions,
+    englishQuestions: toshiQuestions.map(translateSupporterNpcQuestion),
   },
   {
     id: 'kida',
     title: '木田の歩くボードゲーム倉庫',
+    titleEnglish: 'Kida\'s Walking Board Game Warehouse',
     npcName: '木田',
+    npcNameEnglish: 'Kida',
     description: '大きなリュックから箱が次々に顔を出す。\n木田はトリックテイキングとごいたの話になると、急に目を輝かせた。',
+    descriptionEnglish: 'Boxes keep appearing from Kida\'s huge backpack. Mention trick-taking games or Goita, and his eyes light up.',
     imageFile: 'kida_boardgame_warehouse.png',
-    reward: 'rareCard',
+    reward: 'duplicate',
     questions: kidaQuestions,
+    englishQuestions: kidaQuestions.map(translateSupporterNpcQuestion),
   },
   {
     id: 'dodome',
     title: 'どどめのゲーム会運営クイズ',
+    titleEnglish: 'Dodome\'s Game Night Quiz',
     npcName: 'どどめ',
+    npcNameEnglish: 'Dodome',
     description: 'ボードゲームもデジタルゲームも愛しすぎたゆるキャラ、どどめが現れた。\n言っていることは少し破綻しているが、ゲーム愛だけは本物らしい。',
+    descriptionEnglish: 'Dodome, a mascot who loves both board and digital games a little too much, appears. The logic is strange, but the love of games is real.',
     imageFile: 'dodome_boardgame_digital_mascot.png',
-    reward: 'rareCard',
+    reward: 'chaos',
     questions: dodomeQuestions,
+    englishQuestions: dodomeQuestions.map(translateSupporterNpcQuestion),
   },
   {
     id: 'nagano-kazuko',
     title: 'ながのかずこの近所の母相談室',
+    titleEnglish: 'Nagano Kazuko\'s Neighborhood Advice',
     npcName: 'ながのかずこ',
+    npcNameEnglish: 'Nagano Kazuko',
     description: '誰からも「母」と呼ばれる、近所みんなの母のような人が温かいお茶を出してくれた。\n悩みに向き合う人生教訓のクイズが始まる。',
+    descriptionEnglish: 'A kind neighbor everyone calls Mom offers warm tea. A quiz of practical life lessons is about to begin.',
     imageFile: 'nagano_kazuko_neighborhood_mother.png',
-    reward: 'cleanse',
+    reward: 'organize',
     questions: naganoQuestions,
+    englishQuestions: naganoQuestions.map(translateSupporterNpcQuestion),
   },
 ];
 

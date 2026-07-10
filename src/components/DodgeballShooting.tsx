@@ -1,17 +1,19 @@
 
 import React, { useEffect, useRef, useState } from 'react';
-import { Enemy } from '../types';
+import { Enemy, LanguageMode } from '../types';
 import EnemyIllustration from './EnemyIllustration';
 import { audioService } from '../services/audioService';
 import { ENEMY_ILLUSTRATION_SIZE_CLASS } from '../constants/uiSizing';
+import { trans } from '../utils/textUtils';
 
 interface DodgeballShootingProps {
     enemy: Enemy;
     playerImage: string;
+    languageMode: LanguageMode;
     onComplete: (hit: boolean) => void;
 }
 
-const DodgeballShooting: React.FC<DodgeballShootingProps> = ({ enemy, playerImage, onComplete }) => {
+const DodgeballShooting: React.FC<DodgeballShootingProps> = ({ enemy, playerImage, languageMode, onComplete }) => {
     const [ballPos, setBallPos] = useState({ x: 15, y: 50 });
     const [enemyPos, setEnemyPos] = useState({ x: 80, y: 50 });
     const [isThrown, setIsThrown] = useState(false);
@@ -118,10 +120,10 @@ const DodgeballShooting: React.FC<DodgeballShootingProps> = ({ enemy, playerImag
             {/* Header */}
             <div className="absolute top-10 text-center animate-pulse z-10 pointer-events-none">
                 <h2 className="text-3xl font-bold text-orange-500 drop-shadow-md">DODGEBALL ACE SPECIAL</h2>
-                <p className="text-white text-sm mt-2">タイミングよくクリックしてボールを当てろ！</p>
+                <p className="text-white text-sm mt-2">{languageMode === 'ENGLISH' ? 'Click at the right moment to hit the target!' : 'タイミングよくクリックしてボールを当てろ！'}</p>
                 <div className="mt-2 flex flex-col items-center gap-1">
                     <div className="bg-black/50 px-4 py-1 rounded-full border border-orange-500 text-orange-300 text-xs font-bold">
-                        TARGET: {enemy.name}
+                        TARGET: {trans(enemy.name, languageMode)}
                     </div>
                     <div className="text-[10px] text-gray-400 font-mono">TYPE: {enemy.enemyType}</div>
                 </div>

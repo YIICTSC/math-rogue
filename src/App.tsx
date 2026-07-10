@@ -1674,6 +1674,7 @@ const App: React.FC = () => {
     const [orreryModal, setOrreryModal] = useState<RelicCardChoiceModalState | null>(null);
     const [peacePipeModal, setPeacePipeModal] = useState<RelicCardChoiceModalState | null>(null);
     const [eventSynthesisModal, setEventSynthesisModal] = useState<{ cards: ICard[]; selectedIds: string[] } | null>(null);
+    const [eventCardChoiceModal, setEventCardChoiceModal] = useState<{ mode: 'UPGRADE' | 'ORGANIZE' | 'DUPLICATE'; cards: ICard[] } | null>(null);
     const [eventData, setEventData] = useState<any>(null);
     const [eventResultLog, setEventResultLog] = useState<string | null>(null);
     const [unlockedCardNames, setUnlockedCardNames] = useState<string[]>([]);
@@ -1955,7 +1956,7 @@ const App: React.FC = () => {
             const hostPeerId = coopSession.roomCode ? `lr-battle-${coopSession.roomCode}` : null;
             const hostParticipant = hostPeerId
                 ? coopSession.participants.find(participant => participant.peerId === hostPeerId)
-                : null;
+                : gameState.player.turnFlags['EVENT_NPC_DUPLICATE_PENDING_MODAL'] ? 'DUPLICATE' : null;
             return hostParticipant?.peerId ||
                 getActiveCoopParticipants(coopSession.participants)[0]?.peerId ||
                 coopSession.participants[0]?.peerId ||
@@ -2611,7 +2612,7 @@ const App: React.FC = () => {
             strength: 0,
             powers: {},
             relicCounters: { ...sourcePlayer.relicCounters },
-            turnFlags: {},
+            turnFlags: { ...sourcePlayer.turnFlags },
             typesPlayedThisTurn: [],
             echoes: 0,
             cardsPlayedThisTurn: 0,
@@ -2649,6 +2650,30 @@ const App: React.FC = () => {
         if (p.turnFlags['STREET_DOG_NEXT_BATTLE']) {
             p.nextTurnEnergy += 3;
             delete p.turnFlags['STREET_DOG_NEXT_BATTLE'];
+        }
+        const toshiBattleBoosts = p.turnFlags['TOSHI_RAMEN_BATTLE_BOOSTS'] || 0;
+        if (toshiBattleBoosts > 0) {
+            p.nextTurnEnergy += 1;
+            if (toshiBattleBoosts === 1) {
+                delete p.turnFlags['TOSHI_RAMEN_BATTLE_BOOSTS'];
+            } else {
+                p.turnFlags['TOSHI_RAMEN_BATTLE_BOOSTS'] = toshiBattleBoosts - 1;
+            }
+        }
+        if (p.turnFlags['DODOME_CHAOS_NEXT_BATTLE']) {
+            const candidates = p.drawPile.filter(card => card.cost > 0 && !card.unplayable);
+            const selected = candidates[Math.floor(Math.random() * candidates.length)];
+            if (selected) {
+                p.drawPile = p.drawPile.map(card => card.id === selected.id
+                    ? {
+                        ...card,
+                        battleRestore: card.battleRestore ?? { cost: card.cost },
+                        battleBaseCost: card.battleBaseCost ?? card.cost,
+                        cost: 0
+                    }
+                    : card);
+            }
+            delete p.turnFlags['DODOME_CHAOS_NEXT_BATTLE'];
         }
         if (p.relics.find(r => r.id === 'MUTAGENIC_STRENGTH')) p.strength += 3;
 
@@ -10304,6 +10329,50 @@ const App: React.FC = () => {
         setEventSynthesisModal({ cards: candidates, selectedIds: [] });
     }, [eventSynthesisModal, gameState.player.deck, gameState.player.turnFlags, gameState.screen]);
 
+    useEffect(() => {
+        if (gameState.screen !== GameScreen.EVENT || eventCardChoiceModal) return;
+        const mode = gameState.player.turnFlags['EVENT_NPC_UPGRADE_PENDING_MODAL']
+            ? 'UPGRADE'
+            : gameState.player.turnFlags['EVENT_NPC_ORGANIZE_PENDING_MODAL']
+                ? 'ORGANIZE'
+                : gameState.player.turnFlags['EVENT_NPC_DUPLICATE_PENDING_MODAL']
+                    ? 'DUPLICATE'
+                    : null;
+        if (!mode) return;
+        const candidates = gameState.player.deck.filter(card => mode === 'UPGRADE' ? !card.upgraded : mode === 'DUPLICATE' ? card.cost <= 2 && (card.rarity === 'COMMON' || card.rarity === 'UNCOMMON') : card.cost > 0 && !card.unplayable);
+        setGameState(prev => ({ ...prev, player: { ...prev.player, turnFlags: { ...prev.player.turnFlags, EVENT_NPC_UPGRADE_PENDING_MODAL: false, EVENT_NPC_ORGANIZE_PENDING_MODAL: false, EVENT_NPC_DUPLICATE_PENDING_MODAL: false } } }));
+        if (candidates.length === 0) {
+            const message = mode === 'UPGRADE'
+                ? languageMode === 'ENGLISH' ? 'No cards can be upgraded.' : '強化できるカードがなかった。'
+                : mode === 'DUPLICATE'
+                    ? languageMode === 'ENGLISH' ? 'No Common or Uncommon cards costing 2 or less can be copied.' : '複製できるコスト2以下のコモン／アンコモンカードがなかった。'
+                    : languageMode === 'ENGLISH' ? 'No cards can have their cost reduced.' : 'コストを下げられるカードはなかった。';
+            setEventResultLog(prev => `${prev ?? ''}\n${message}`.trim());
+            return;
+        }
+        setEventCardChoiceModal({ mode, cards: candidates });
+    }, [eventCardChoiceModal, gameState.player.deck, gameState.player.turnFlags, gameState.screen, languageMode]);
+
+    const applyEventCardChoice = (card: ICard) => {
+        if (!eventCardChoiceModal) return;
+        const mode = eventCardChoiceModal.mode;
+        setGameState(prev => ({
+            ...prev,
+            player: {
+                ...prev.player,
+                deck: mode === 'DUPLICATE' ? [...prev.player.deck, { ...card, id: `kida-copy-${Date.now()}` }] : prev.player.deck.map(item => item.id !== card.id ? item : mode === 'UPGRADE' ? getUpgradedCard(item) : { ...item, cost: Math.max(0, item.cost - 1) })
+            }
+        }));
+        const message = mode === 'DUPLICATE'
+            ? languageMode === 'ENGLISH' ? `${trans(card.name, languageMode)} was copied.` : `「${card.name}」を1枚複製した。`
+            : mode === 'UPGRADE'
+            ? languageMode === 'ENGLISH' ? `${trans(card.name, languageMode)} was upgraded.` : `「${card.name}」を強化した。`
+            : languageMode === 'ENGLISH' ? `${trans(card.name, languageMode)} costs 1 less.` : `「${card.name}」のコストが1下がった。`;
+        setEventResultLog(prev => `${prev ?? ''}\n${message}`.trim());
+        setEventCardChoiceModal(null);
+        audioService.playSound('buff');
+    };
+
     const onCodexSelect = (card: ICard | null) => {
         if (gameState.challengeMode === 'COOP' && coopSession && !coopSession.isHost && gameState.screen === GameScreen.BATTLE) {
             queueCoopBattleEvent({ type: 'COOP_BATTLE_TURN_START' });
@@ -10451,7 +10520,7 @@ const App: React.FC = () => {
                 onResolved(basePlayer, `${winnerName}が先に正解した。今回の早押し報酬は受け取れない。`);
                 return;
             }
-            if (selectedOption?.text !== 'これだと思う') {
+            if (!selectedOption?.isCorrect) {
                 onResolved(basePlayer, '惜しい。今回の早押しでは報酬を受け取れない。');
                 return;
             }
@@ -12550,6 +12619,7 @@ const App: React.FC = () => {
                 let price = card.price || 50;
                 if (prev.player.relics.find(r => r.id === 'MEMBERSHIP_CARD')) price = Math.floor(price * 0.5);
                 if (raceEffects.shopMarkupUntil > raceEffectNow) price = Math.floor(price * 1.25);
+                if (prev.player.turnFlags['ICHI_NEXT_SHOP_DISCOUNT']) price = Math.floor(price * 0.8);
                 const newP = { ...prev.player, gold: prev.player.gold - price };
                 addCardToDeckWithRelics(newP, { ...card, id: `buy-${Date.now()}` }, { addToDiscard: true });
                 return { ...prev, player: newP };
@@ -12562,6 +12632,7 @@ const App: React.FC = () => {
             let price = card.price || 50;
             if (prev.player.relics.find(r => r.id === 'MEMBERSHIP_CARD')) price = Math.floor(price * 0.5);
             if (raceEffects.shopMarkupUntil > raceEffectNow) price = Math.floor(price * 1.25);
+            if (prev.player.turnFlags['ICHI_NEXT_SHOP_DISCOUNT']) price = Math.floor(price * 0.8);
             const newP = { ...prev.player, gold: prev.player.gold - price };
             addCardToDeckWithRelics(newP, { ...card, id: `buy-${Date.now()}` }, { addToDiscard: true });
             return { ...prev, player: newP };
@@ -12579,6 +12650,7 @@ const App: React.FC = () => {
                 let price = relic.price || 150;
                 if (prev.player.relics.find(r => r.id === 'MEMBERSHIP_CARD')) price = Math.floor(price * 0.5);
                 if (raceEffects.shopMarkupUntil > raceEffectNow) price = Math.floor(price * 1.25);
+                if (prev.player.turnFlags['ICHI_NEXT_SHOP_DISCOUNT']) price = Math.floor(price * 0.8);
                 const newP = { ...prev.player, gold: prev.player.gold - price, relics: [...prev.player.relics, relic] };
                 if (relic.id === 'SOZU') newP.maxEnergy += 1;
                 if (relic.id === 'CURSED_KEY') newP.maxEnergy += 1;
@@ -12599,6 +12671,7 @@ const App: React.FC = () => {
             let price = relic.price || 150;
             if (prev.player.relics.find(r => r.id === 'MEMBERSHIP_CARD')) price = Math.floor(price * 0.5);
             if (raceEffects.shopMarkupUntil > raceEffectNow) price = Math.floor(price * 1.25);
+            if (prev.player.turnFlags['ICHI_NEXT_SHOP_DISCOUNT']) price = Math.floor(price * 0.8);
             const newP = { ...prev.player, gold: prev.player.gold - price, relics: [...prev.player.relics, relic] };
             if (relic.id === 'SOZU') newP.maxEnergy += 1;
             if (relic.id === 'CURSED_KEY') newP.maxEnergy += 1;
@@ -12625,6 +12698,7 @@ const App: React.FC = () => {
                     let price = potion.price || 50;
                     if (prev.player.relics.find(r => r.id === 'MEMBERSHIP_CARD')) price = Math.floor(price * 0.5);
                     if (raceEffects.shopMarkupUntil > raceEffectNow) price = Math.floor(price * 1.25);
+                    if (prev.player.turnFlags['ICHI_NEXT_SHOP_DISCOUNT']) price = Math.floor(price * 0.8);
                     let newPotions = [...prev.player.potions];
                     if (replacePotionId) {
                         newPotions = newPotions.filter(pt => pt.id !== replacePotionId);
@@ -12642,6 +12716,7 @@ const App: React.FC = () => {
                 let price = potion.price || 50;
                 if (prev.player.relics.find(r => r.id === 'MEMBERSHIP_CARD')) price = Math.floor(price * 0.5);
                 if (raceEffects.shopMarkupUntil > raceEffectNow) price = Math.floor(price * 1.25);
+                if (prev.player.turnFlags['ICHI_NEXT_SHOP_DISCOUNT']) price = Math.floor(price * 0.8);
                 let newPotions = [...prev.player.potions];
                 if (replacePotionId) {
                     newPotions = newPotions.filter(pt => pt.id !== replacePotionId);
@@ -12686,6 +12761,12 @@ const App: React.FC = () => {
     };
 
     const handleShopLeave = () => {
+        setGameState(prev => {
+            if (!prev.player.turnFlags['ICHI_NEXT_SHOP_DISCOUNT']) return prev;
+            const turnFlags = { ...prev.player.turnFlags };
+            delete turnFlags.ICHI_NEXT_SHOP_DISCOUNT;
+            return { ...prev, player: { ...prev.player, turnFlags } };
+        });
         if (gameState.challengeMode === 'COOP' && coopSession && coopSelfPeerId) {
             setCoopSession(prev => {
                 if (!prev) return prev;
@@ -14679,10 +14760,12 @@ const App: React.FC = () => {
                                             <div className="mb-10 text-xs font-black tracking-[0.36em] text-cyan-200">THANK YOU FOR PLAYING</div>
                                             {CREDIT_SECTIONS.map(section => (
                                                 <section key={section.title} className={section.special ? "mb-14 rounded-xl border border-amber-300/35 bg-amber-300/5 px-3 py-6 shadow-[0_0_28px_rgba(251,191,36,0.12)]" : "mb-12"}>
-                                                    <h3 className={`mb-5 text-xs font-black uppercase tracking-[0.28em] ${section.special ? 'text-yellow-100' : 'text-amber-200'}`}>{section.title}</h3>
+                                                    <h3 className={`mb-5 text-xs font-black uppercase tracking-[0.28em] ${section.special ? 'text-yellow-100' : 'text-amber-200'}`}>
+                                                        {languageMode === 'ENGLISH' && section.title === '制作' ? 'Production' : section.title}
+                                                    </h3>
                                                     <div className="space-y-3">
                                                         {section.entries.map(entry => (
-                                                            <div key={`${section.title}-${entry}`} className={`${section.special ? 'text-3xl text-yellow-100 drop-shadow-[0_0_16px_rgba(251,191,36,0.4)]' : 'text-xl text-white drop-shadow-[0_0_10px_rgba(251,191,36,0.22)]'} font-black leading-tight`}>
+                                                            <div key={`${section.title}-${entry}`} translate="no" data-allow-japanese className={`${section.special ? 'text-3xl text-yellow-100 drop-shadow-[0_0_16px_rgba(251,191,36,0.4)]' : 'text-xl text-white drop-shadow-[0_0_10px_rgba(251,191,36,0.22)]'} font-black leading-tight`}>
                                                                 {entry}
                                                             </div>
                                                         ))}
@@ -15432,6 +15515,7 @@ const App: React.FC = () => {
                             <P2PRaceSetup
                                 player={gameState.player}
                                 visualTheme={visualTheme}
+                                languageMode={languageMode}
                                 onRaceStart={(payload) => {
                                     const raceVisualTheme = payload.visualTheme || visualTheme;
                                     setVisualTheme(raceVisualTheme);
@@ -15985,6 +16069,7 @@ const App: React.FC = () => {
                         <DodgeballShooting
                             enemy={gameState.enemies[0]}
                             playerImage={gameState.player.imageData}
+                            languageMode={languageMode}
                             onComplete={handleDodgeballResult}
                         />
                     </div>
@@ -15995,6 +16080,7 @@ const App: React.FC = () => {
                         <BasketballLayupShooting
                             enemy={gameState.enemies[0]}
                             playerImage={gameState.player.imageData}
+                            languageMode={languageMode}
                             onComplete={handleBasketballLayupResult}
                         />
                     </div>
@@ -16078,6 +16164,7 @@ const App: React.FC = () => {
                             <CoopSetupScreen
                                 player={gameState.player}
                                 visualTheme={visualTheme}
+                                languageMode={languageMode}
                                 onStart={(payload: CoopStartPayload) => {
                                     const hostVisualTheme = payload.visualTheme || visualTheme;
                                     const selfPeerId = payload.selfPeerId || p2pService.getMyId();
@@ -16214,7 +16301,8 @@ const App: React.FC = () => {
                             potionCapacity={getPotionCapacity(gameState.player)}
                             languageMode={languageMode}
                             typingMode={gameState.challengeMode === 'TYPING'}
-                            priceMultiplier={raceEffects.shopMarkupUntil > raceEffectNow ? 1.25 : 1}
+                            priceMultiplier={(raceEffects.shopMarkupUntil > raceEffectNow ? 1.25 : 1) * (gameState.player.turnFlags['ICHI_NEXT_SHOP_DISCOUNT'] ? 0.8 : 1)}
+                            shopDiscountPercent={gameState.player.turnFlags['ICHI_NEXT_SHOP_DISCOUNT'] ? 20 : 0}
                             removeCost={(() => {
                                 const difficulty = getDifficultyConfig(gameState.difficultyLevel);
                                 const base = gameState.player.relics.find(r => r.id === 'SMILING_MASK') ? Math.min(50, difficulty.removeBaseCost) : difficulty.removeBaseCost;
@@ -16482,6 +16570,36 @@ const App: React.FC = () => {
                                 >
                                     合成せず25G
                                 </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {eventCardChoiceModal && (
+                    <div className="app-modal-overlay fixed inset-0 z-[233] flex items-center justify-center bg-black/75 p-3 sm:p-4">
+                        <div className="app-modal-panel w-full max-w-4xl rounded-xl border-2 border-amber-400 bg-slate-950 p-4 text-white shadow-2xl">
+                            <h3 className="mb-2 text-xl font-black text-amber-100">
+                                {eventCardChoiceModal.mode === 'UPGRADE'
+                                    ? languageMode === 'ENGLISH' ? "Akame's Card Upgrade" : 'あかめのカード強化'
+                                    : eventCardChoiceModal.mode === 'DUPLICATE'
+                                        ? languageMode === 'ENGLISH' ? "Kida's Walking Board Game Warehouse" : '木田の歩くボードゲーム倉庫'
+                                        : languageMode === 'ENGLISH' ? "Kazuko's Clear Mind" : 'かずこの心の整理'}
+                            </h3>
+                            <p className="mb-3 text-sm text-slate-300">
+                                {eventCardChoiceModal.mode === 'UPGRADE'
+                                    ? languageMode === 'ENGLISH' ? 'Choose one card to upgrade.' : '強化するカードを1枚選んでください。'
+                                    : eventCardChoiceModal.mode === 'DUPLICATE'
+                                        ? languageMode === 'ENGLISH' ? 'Choose one Common or Uncommon card costing 2 or less to copy.' : 'コスト2以下のコモン／アンコモンカードを1枚選んで複製してください。'
+                                        : languageMode === 'ENGLISH' ? 'Choose one card to reduce its cost by 1.' : 'コストを1下げるカードを1枚選んでください。'}
+                            </p>
+                            <div className="grid max-h-[58vh] grid-cols-2 gap-3 overflow-y-auto pr-1 sm:grid-cols-3 md:grid-cols-4">
+                                {eventCardChoiceModal.cards.map(card => (
+                                    <div key={card.id} className="rounded-xl border-2 border-slate-700 bg-slate-900/80 p-1 transition-colors hover:border-amber-300">
+                                        <div className="origin-top scale-[0.82]">
+                                            <Card card={card} onClick={() => applyEventCardChoice(card)} disabled={false} languageMode={languageMode} />
+                                        </div>
+                                    </div>
+                                ))}
                             </div>
                         </div>
                     </div>

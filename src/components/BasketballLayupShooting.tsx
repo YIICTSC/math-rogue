@@ -1,14 +1,16 @@
 import React, { useEffect, useRef, useState } from 'react';
-import { Enemy } from '../types';
+import { Enemy, LanguageMode } from '../types';
 import EnemyIllustration from './EnemyIllustration';
 import { audioService } from '../services/audioService';
 import { ENEMY_ILLUSTRATION_SIZE_CLASS } from '../constants/uiSizing';
 import { getHighSchoolCharacterSpritePath, getThemedEnemyDisplayName, getThemedHumanoidEnemyVariant } from '../data/visualThemes';
 import { assetUrl } from '../utils/assetPaths';
+import { trans } from '../utils/textUtils';
 
 interface BasketballLayupShootingProps {
     enemy: Enemy;
     playerImage: string;
+    languageMode: LanguageMode;
     onComplete: (hit: boolean) => void;
 }
 
@@ -52,7 +54,7 @@ const BALL_START = { x: 18, y: 75 };
 const HOOP_CENTER = { x: 75.5, y: 31.5 };
 const MISS_TARGET = { x: 83, y: 25 };
 
-const BasketballLayupShooting: React.FC<BasketballLayupShootingProps> = ({ enemy, playerImage, onComplete }) => {
+const BasketballLayupShooting: React.FC<BasketballLayupShootingProps> = ({ enemy, playerImage, languageMode, onComplete }) => {
     const [ballPos, setBallPos] = useState(BALL_START);
     const [enemyPos, setEnemyPos] = useState({ x: 62, y: 64 });
     const [isShooting, setIsShooting] = useState(false);
@@ -196,10 +198,10 @@ const BasketballLayupShooting: React.FC<BasketballLayupShootingProps> = ({ enemy
 
             <div className="absolute top-10 text-center animate-pulse z-10 pointer-events-none">
                 <h2 className="text-3xl font-bold text-orange-400 drop-shadow-md">FAST BREAK LAYUP</h2>
-                <p className="text-white text-sm mt-2">緑ゾーンでタップして速攻を決めろ！</p>
+                <p className="text-white text-sm mt-2">{languageMode === 'ENGLISH' ? 'Tap in the green zone for a fast-break score!' : '緑ゾーンでタップして速攻を決めろ！'}</p>
                 <div className="mt-2 flex flex-col items-center gap-1">
                     <div className="bg-black/50 px-4 py-1 rounded-full border border-orange-500 text-orange-300 text-xs font-bold">
-                        DEFENSE: {displayEnemyName}
+                        DEFENSE: {trans(displayEnemyName, languageMode)}
                     </div>
                     <div className="text-[10px] text-gray-400 font-mono">TYPE: {enemy.enemyType}</div>
                 </div>

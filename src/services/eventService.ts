@@ -16,6 +16,7 @@ interface EventAnswerMeta {
 interface EventOption {
     label: string;
     text: string;
+    isCorrect?: boolean;
     action: (answerMeta?: EventAnswerMeta) => void;
 }
 
@@ -715,15 +716,23 @@ export const generateEvent = (
         };
     };
 
+    const supporterText = (japanese: string, english: string) => languageMode === 'ENGLISH' ? english : japanese;
+
     const applySupporterReward = (profile: SupporterNpcEventProfile, question: SupporterNpcQuestion, correct: boolean, quickQuizProgress?: number) => {
+        const npcName = languageMode === 'ENGLISH' ? profile.npcNameEnglish : profile.npcName;
         const questionResultText = profile.id === 'tsukapon'
             ? correct
-                ? 'つかぽんの説明を読み取れた！'
-                : 'つかぽんの説明を読み取れなかった。'
-            : question.explanation;
+                ? supporterText('つかぽんの説明を読み取れた！', 'You understood Tsukapon\'s explanation!')
+                : supporterText('つかぽんの説明を読み取れなかった。', 'You could not work out Tsukapon\'s explanation.')
+            : correct
+                ? supporterText(question.explanation, `${npcName} nods approvingly.`)
+                : supporterText(question.explanation, `${npcName} shares a helpful note for next time.`);
         if (!correct) {
             setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold + 8 } }));
-            setEventResultLog(trans(`${questionResultText}\n惜しい。${profile.npcName}から参加賞として8Gを受け取った。`, languageMode));
+            setEventResultLog(supporterText(
+                `${questionResultText}\n惜しい。${profile.npcName}から参加賞として8Gを受け取った。`,
+                `${questionResultText}\nNot quite. ${npcName} gives you 8G as a participation prize.`
+            ));
             return;
         }
 
@@ -741,12 +750,12 @@ export const generateEvent = (
             }));
         }
         const speedBonusMessage = tsukaponSpeedBonus === 50
-            ? '\n先読み成功！早押し報酬として50Gを得た。'
+            ? supporterText('\n先読み成功！早押し報酬として50Gを得た。', '\nYou read ahead and earned a 50G quick-answer bonus!')
             : tsukaponSpeedBonus === 25
-                ? '\nひらめき成功！早押し報酬として25Gを得た。'
+                ? supporterText('\nひらめき成功！早押し報酬として25Gを得た。', '\nQuick thinking earned you a 25G quick-answer bonus!')
                 : '';
-        const resultPrefix = `${questionResultText}\n正解！${speedBonusMessage}`;
-        const applyFallbackUpgrade = (fallbackMessage: string) => {
+        const resultPrefix = `${questionResultText}\n${supporterText('正解！', 'Correct!')}${speedBonusMessage}`;
+        const applyFallbackUpgrade = (fallbackMessage: string, fallbackMessageEnglish: string) => {
             let upgradedName = '';
             setGameState(prev => {
                 const upgradeable = prev.player.deck.filter(card => !card.upgraded);
@@ -762,9 +771,9 @@ export const generateEvent = (
                 };
             });
             window.setTimeout(() => {
-                setEventResultLog(trans(upgradedName
-                    ? `${resultPrefix}\n「${upgradedName}」が強化された。`
-                    : `${resultPrefix}\n${fallbackMessage}`, languageMode));
+                setEventResultLog(upgradedName
+                    ? supporterText(`${resultPrefix}\n「${upgradedName}」が強化された。`, `${resultPrefix}\n${trans(upgradedName, languageMode)} was upgraded.`)
+                    : supporterText(`${resultPrefix}\n${fallbackMessage}`, `${resultPrefix}\n${fallbackMessageEnglish}`));
             }, 50);
         };
 
@@ -780,57 +789,90 @@ export const generateEvent = (
                         },
                     },
                 }));
-                setEventResultLog(trans(`${resultPrefix}\nつかぽんがカード合成の準備を始めた。デッキから2枚選んで合成できる。`, languageMode));
+                setEventResultLog(supporterText(`${resultPrefix}\nつかぽんがカード合成の準備を始めた。デッキから2枚選んで合成できる。`, `${resultPrefix}\nTsukapon prepares a card synthesis. Choose two cards from your deck to combine.`));
                 return;
             case 'upgrade':
-                applyFallbackUpgrade('強化できるカードがなかった。');
+                setGameState(prev => ({ ...prev, player: { ...prev.player, turnFlags: { ...prev.player.turnFlags, EVENT_NPC_UPGRADE_PENDING_MODAL: true } } }));
+                setEventResultLog(supporterText(`${resultPrefix}\nあかめが強化するカードを選ぶよう促した。`, `${resultPrefix}\nAkame asks you to choose a card to upgrade.`));
                 return;
-            case 'rareCard': {
+            case 'rareCard':
+            case 'chaos': {
                 const pool = Object.values(CARDS_LIBRARY).filter(card => card.rarity === 'RARE' && isCardAvailable(card, unlockedCardNames));
                 const card = pool[getStableTextIndex(`${profile.id}:${question.question}:rare`, Math.max(1, pool.length))];
                 if (!card) {
-                    applyFallbackUpgrade('レアカード候補が見つからなかった。');
+                    applyFallbackUpgrade('レアカード候補が見つからなかった。', 'No rare card was available.');
                     return;
                 }
-                setGameState(prev => ({ ...prev, player: addCardWithEventRelics(prev.player, { ...card, id: `supporter-rare-${Date.now()}` } as Card) }));
-                setEventResultLog(trans(`${resultPrefix}\n${profile.npcName}から「${card.name}」を受け取った。`, languageMode));
+                setGameState(prev => {
+                    const player = addCardWithEventRelics(prev.player, { ...card, id: `supporter-rare-${Date.now()}` } as Card);
+                    return {
+                        ...prev,
+                        player: profile.reward === 'chaos'
+                            ? { ...player, turnFlags: { ...player.turnFlags, DODOME_CHAOS_NEXT_BATTLE: true } }
+                            : player
+                    };
+                });
+                setEventResultLog(profile.reward === 'chaos'
+                    ? supporterText(`${resultPrefix}\nどどめから「${card.name}」を受け取った。次の戦闘では、ランダムなカード1枚が0コストになる。`, `${resultPrefix}\nDodome gives you ${trans(card.name, languageMode)}. One random card costs 0 for your next battle.`)
+                    : supporterText(`${resultPrefix}\n${profile.npcName}から「${card.name}」を受け取った。`, `${resultPrefix}\n${npcName} gives you ${trans(card.name, languageMode)}.`));
                 return;
             }
+            case 'duplicate':
+                setGameState(prev => ({ ...prev, player: { ...prev.player, turnFlags: { ...prev.player.turnFlags, EVENT_NPC_DUPLICATE_PENDING_MODAL: true } } }));
+                setEventResultLog(supporterText(`${resultPrefix}\n木田が倉庫から同じカードをもう1枚出せると言う。`, `${resultPrefix}\nKida offers to pull out one more copy from the warehouse.`));
+                return;
             case 'heal':
                 setGameState(prev => ({ ...prev, player: healPlayer(prev.player, 16) }));
-                setEventResultLog(trans(`${resultPrefix}\n${profile.npcName}の助けでHPが16回復した。`, languageMode));
+                setEventResultLog(supporterText(`${resultPrefix}\n${profile.npcName}の助けでHPが16回復した。`, `${resultPrefix}\n${npcName}'s help restores 16 HP.`));
+                return;
+            case 'community':
+                setGameState(prev => ({
+                    ...prev,
+                    player: {
+                        ...prev.player,
+                        gold: prev.player.gold + 30,
+                        turnFlags: { ...prev.player.turnFlags, ICHI_NEXT_SHOP_DISCOUNT: true }
+                    }
+                }));
+                setEventResultLog(supporterText(`${resultPrefix}\nいちの地域のつながりで30Gを得た。次回ショップの価格が20%下がる。`, `${resultPrefix}\nIchi's community connections earn you 30G. Your next shop prices are 20% lower.`));
+                return;
+            case 'nutrition':
+                setGameState(prev => ({ ...prev, player: { ...healPlayer(prev.player, 10), maxHp: prev.player.maxHp + 2, currentHp: Math.min(prev.player.maxHp + 2, prev.player.currentHp + 12) } }));
+                setEventResultLog(supporterText(`${resultPrefix}\n栄養チャージ！ 最大HPが2上がり、HPが10回復した。`, `${resultPrefix}\nNutrition charge! Max HP +2 and restore 10 HP.`));
+                return;
+            case 'ramenBoost':
+                setGameState(prev => ({ ...prev, player: { ...prev.player, turnFlags: { ...prev.player.turnFlags, TOSHI_RAMEN_BATTLE_BOOSTS: (prev.player.turnFlags['TOSHI_RAMEN_BATTLE_BOOSTS'] || 0) + 3 } } }));
+                setEventResultLog(supporterText(`${resultPrefix}\nラーメンの気合で、次の3戦の開始時エナジーが1増える。`, `${resultPrefix}\nRamen spirit! Start your next 3 battles with 1 extra Energy.`));
                 return;
             case 'gold':
                 setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold + 45 } }));
-                setEventResultLog(trans(`${resultPrefix}\n協力の見返りとして45Gを得た。`, languageMode));
+                setEventResultLog(supporterText(`${resultPrefix}\n協力の見返りとして45Gを得た。`, `${resultPrefix}\nYou earn 45G for working together.`));
                 return;
             case 'maxHp':
                 setGameState(prev => ({
                     ...prev,
                     player: { ...prev.player, maxHp: prev.player.maxHp + 2, currentHp: prev.player.currentHp + 2 }
                 }));
-                setEventResultLog(trans(`${resultPrefix}\n心が少し強くなった。最大HP+2。`, languageMode));
+                setEventResultLog(supporterText(`${resultPrefix}\n心が少し強くなった。最大HP+2。`, `${resultPrefix}\nYou feel a little stronger. Max HP +2.`));
                 return;
-            case 'cleanse':
-                setGameState(prev => ({
-                    ...prev,
-                    player: {
-                        ...healPlayer(prev.player, 10),
-                        deck: prev.player.deck.filter(card => card.type !== CardType.CURSE)
-                    }
-                }));
-                setEventResultLog(trans(`${resultPrefix}\n悩みがほどけ、HPが10回復した。デッキ内の呪いも取り除かれた。`, languageMode));
+            case 'organize': {
+                setGameState(prev => ({ ...prev, player: { ...prev.player, turnFlags: { ...prev.player.turnFlags, EVENT_NPC_ORGANIZE_PENDING_MODAL: true } } }));
+                setEventResultLog(supporterText(`${resultPrefix}\nかずこと話して心を整理するカードを選ぶ。`, `${resultPrefix}\nNagano Kazuko asks you to choose a card to make easier to use.`));
                 return;
+            }
             default:
-                resolveMomentum(profile.title, `${resultPrefix}\n小さな成果を得た。`);
+                resolveMomentum(profile.title, supporterText(`${resultPrefix}\n小さな成果を得た。`, `${resultPrefix}\nYou make a small but meaningful gain.`));
         }
     };
 
     const buildSupporterNpcEvent = (profile: SupporterNpcEventProfile): GameEvent => {
+        const questions = languageMode === 'ENGLISH' && profile.englishQuestions?.length
+            ? profile.englishQuestions
+            : profile.questions;
         const questionIndex = supporterQuestionIndex === undefined
-            ? getStableTextIndex(`${profile.id}:${currentAct}:${currentFloor}:${preferredEventTitle ?? 'new'}`, profile.questions.length)
-            : supporterQuestionIndex % profile.questions.length;
-        const question = profile.questions[questionIndex];
+            ? getStableTextIndex(`${profile.id}:${currentAct}:${currentFloor}:${preferredEventTitle ?? 'new'}`, questions.length)
+            : supporterQuestionIndex % questions.length;
+        const question = questions[questionIndex];
         const optionOrderSeed = supporterQuestionIndex === undefined
             ? `${currentAct}:${currentFloor}:${preferredEventTitle ?? 'new'}`
             : `debug:${supporterQuestionIndex}`;
@@ -838,11 +880,14 @@ export const generateEvent = (
         const correctOptionPosition = order.findIndex(index => index === question.correctIndex);
         return {
             title: profile.title,
-            description: `${profile.description}\n\n問題: ${question.question}`,
+            description: languageMode === 'ENGLISH'
+                ? `${profile.descriptionEnglish}\n\nQuestion: ${question.question}`
+                : `${profile.description}\n\n問題: ${question.question}`,
             imageKey: `high-school-supporter-npc/${profile.imageFile}`,
             options: order.map((optionIndex, displayIndex) => ({
                 label: `${displayIndex + 1}. ${question.options[optionIndex]}`,
-                text: optionIndex === question.correctIndex ? 'これだと思う' : 'この答えを選ぶ',
+                text: supporterText('この答えを選ぶ', 'Choose this answer'),
+                isCorrect: optionIndex === question.correctIndex,
                 action: (answerMeta?: EventAnswerMeta) => applySupporterReward(profile, question, displayIndex === correctOptionPosition, answerMeta?.quickQuizProgress),
             })),
         };

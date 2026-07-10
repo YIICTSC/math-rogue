@@ -8536,3 +8536,6 @@ textarea {
     gap: 0.45rem !important;
   }
 }
+.tsukapon-answer-text::before {
+  content: attr(data-answer);
+}

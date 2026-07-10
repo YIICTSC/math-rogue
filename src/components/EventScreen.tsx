@@ -5,6 +5,7 @@ import { assetUrl } from '../utils/assetPaths';
 import { LanguageMode } from '../types';
 import { trans } from '../utils/textUtils';
 import type { VisualThemeId } from '../data/visualThemes';
+import { HIGH_SCHOOL_SUPPORTER_NPC_EVENTS } from '../data/supporterNpcEvents';
 
 
 const HIGH_SCHOOL_EVENT_IMAGE_POSITION: Partial<Record<number, string>> = {
@@ -28,12 +29,23 @@ const HIGH_SCHOOL_EVENT_IMAGE_POSITION: Partial<Record<number, string>> = {
   17: '50% 42%',
 };
 
+const getTsukaponAnswerLabel = (label: string) => {
+  const value = label.replace(/^\d+\.\s*/, '');
+  if (!value.startsWith('jp:')) return value;
+  try {
+    return decodeURIComponent(value.slice(3));
+  } catch {
+    return value;
+  }
+};
+
 export interface EventAnswerMeta {
     quickQuizProgress?: number;
 }
 
 interface EventOption {
     text: string;
+    isCorrect?: boolean;
     action: (answerMeta?: EventAnswerMeta) => void;
     label: string;
 }
@@ -55,14 +67,23 @@ interface EventScreenProps {
 }
 
 const EventScreen: React.FC<EventScreenProps> = ({ title, description, options, imageKey, image, resultLog, onContinue, typingMode = false, interactionDisabled = false, interactionDisabledMessage, languageMode, visualTheme = 'elementary', imageZoomEnabled = false }) => {
+  const supporterNpcProfile = useMemo(() => {
+    const fileName = imageKey?.match(/^high-school-supporter-npc\/([^/]+)$/)?.[1];
+    return HIGH_SCHOOL_SUPPORTER_NPC_EVENTS.find(profile => profile.imageFile === fileName);
+  }, [imageKey]);
+  const isSupporterNpcEvent = Boolean(supporterNpcProfile);
   const isTsukaponQuickQuiz = imageKey === 'high-school-supporter-npc/tsukapon_boardgame_developer.png';
   const tsukaponQuestion = isTsukaponQuickQuiz
-    ? description.split('\n\n問題: ').at(-1) ?? description
+    ? description.split(/\n\n(?:問題|Question): /).at(-1) ?? description
     : '';
   const tsukaponQuizText = tsukaponQuestion.match(/『([\s\S]+)』これは何？」$/)?.[1] ?? tsukaponQuestion;
   const tsukaponIntroduction = isTsukaponQuickQuiz
-    ? description.replace(/\n\n問題: [\s\S]*$/, '')
+    ? description.replace(/\n\n(?:問題|Question): [\s\S]*$/, '')
     : description;
+  const [supporterIntroduction, supporterQuestion] = languageMode === 'ENGLISH' && isSupporterNpcEvent
+    ? description.split('\n\nQuestion: ', 2)
+    : [description, ''];
+  const eventTitle = languageMode === 'ENGLISH' && supporterNpcProfile ? supporterNpcProfile.titleEnglish : title;
   const highSchoolEventIndex = useMemo(() => {
     const match = imageKey?.match(/^high-school-event-(\d+)$/);
     return match ? Number(match[1]) : null;
@@ -269,7 +290,7 @@ const EventScreen: React.FC<EventScreenProps> = ({ title, description, options, 
                 <div className="mr-3 rounded-full border border-purple-500 bg-purple-900 p-2 sm:mr-4 sm:p-3">
                     <HelpCircle size={28} className="text-purple-300 sm:h-8 sm:w-8" />
                 </div>
-                <h2 className="text-2xl font-bold text-purple-100 sm:text-3xl">{title}</h2>
+                <h2 className="text-2xl font-bold text-purple-100 sm:text-3xl">{eventTitle}</h2>
             </div>
 
             <div
@@ -315,6 +336,13 @@ const EventScreen: React.FC<EventScreenProps> = ({ title, description, options, 
                     </div>
                 ) : isTsukaponQuickQuiz ? (
                     tsukaponIntroduction
+                ) : languageMode === 'ENGLISH' && isSupporterNpcEvent ? (
+                    <>
+                        <p>{supporterIntroduction}</p>
+                        <p className="mt-4 font-bold text-yellow-200">
+                            Question: {supporterQuestion}
+                        </p>
+                    </>
                 ) : (
                     description
                 )}
@@ -328,20 +356,25 @@ const EventScreen: React.FC<EventScreenProps> = ({ title, description, options, 
                         disabled={interactionDisabled}
                         className="w-full rounded-lg border border-yellow-300 bg-yellow-500 px-4 py-4 text-center text-lg font-black text-slate-950 transition-colors hover:bg-yellow-300 disabled:cursor-not-allowed disabled:opacity-50"
                     >
-                        問題をはじめる
+                        {languageMode === 'ENGLISH' ? 'Start Question' : '問題をはじめる'}
                     </button>
                 ) : !resultLog ? (
                     <div className="grid max-h-[36vh] grid-cols-1 gap-3 overflow-y-auto pr-1 sm:grid-cols-2">
                         {options.map((opt, idx) => (
                             <button 
-                                key={idx}
+                                key={`${isTsukaponQuickQuiz ? 'tsukapon-answer' : 'event-option'}-${idx}`}
                                 onClick={() => handleOptionAction(opt)}
                                 disabled={inputLocked}
+                                data-allow-japanese={isTsukaponQuickQuiz ? 'true' : undefined}
                                 className="relative w-full text-center p-3 sm:p-4 bg-black/40 hover:bg-purple-900/40 border border-gray-600 hover:border-purple-400 rounded transition-colors group min-h-[72px] sm:min-h-[88px] disabled:cursor-not-allowed disabled:opacity-50 disabled:hover:bg-black/40 disabled:hover:border-gray-600"
                             >
                                 {typingMode && <span className="absolute right-2 top-2 rounded-full border border-cyan-300 bg-cyan-950/95 px-1.5 py-0.5 text-[10px] font-black text-cyan-200">{idx + 1}</span>}
                                 <span className="font-bold text-yellow-400 block group-hover:text-yellow-200 text-base sm:text-lg tracking-wide break-words">
-                                    {opt.label}
+                                    {isTsukaponQuickQuiz ? (
+                                        <>
+                                            {idx + 1}. <span className="tsukapon-answer-text" data-answer={getTsukaponAnswerLabel(opt.label)} />
+                                        </>
+                                    ) : opt.label}
                                 </span>
                                 {opt.text && (
                                     <span className="mt-1 block text-xs leading-relaxed text-gray-300 sm:text-sm">
@@ -366,14 +399,14 @@ const EventScreen: React.FC<EventScreenProps> = ({ title, description, options, 
         </div>
 
         {isTsukaponQuickQuiz && tsukaponQuizOpen && !resultLog && (
-            <div className="fixed inset-0 z-[10050] flex items-start justify-center overflow-y-auto bg-slate-950/95 p-3 pt-[max(1rem,env(safe-area-inset-top))] sm:items-center sm:p-6">
+            <div data-allow-japanese="true" className="fixed inset-0 z-[10050] flex items-start justify-center overflow-y-auto bg-slate-950/95 p-3 pt-[max(1rem,env(safe-area-inset-top))] sm:items-center sm:p-6">
                 <div className="w-full max-w-5xl rounded-xl border-2 border-yellow-300 bg-slate-950 p-4 shadow-[0_0_60px_rgba(250,204,21,0.25)] sm:p-8">
                     <div className="mb-4 flex items-center justify-between gap-3 border-b border-yellow-500/40 pb-3">
                         <div className="text-xs font-black tracking-[0.24em] text-yellow-300">TSUKAPON QUICK QUIZ</div>
-                        <div className="rounded-full border border-cyan-300/60 px-3 py-1 text-xs font-bold text-cyan-100">早押し受付中</div>
+                        <div className="rounded-full border border-cyan-300/60 px-3 py-1 text-xs font-bold text-cyan-100">{languageMode === 'ENGLISH' ? 'Quick answers open' : '早押し受付中'}</div>
                     </div>
                     <div className="flex min-h-[34vh] items-center justify-center rounded-xl border border-slate-700 bg-black/35 px-4 py-8 text-center text-2xl font-black leading-relaxed text-white sm:min-h-[38vh] sm:px-10 sm:text-4xl md:text-5xl">
-                        <span>{typedDescription}</span>
+                        <span data-allow-japanese>{typedDescription}</span>
                         {!typewriterComplete && (
                             <span className="ml-2 inline-block h-8 w-3 animate-pulse bg-yellow-300 align-[-0.15em] sm:h-12 sm:w-4" aria-hidden="true" />
                         )}
@@ -381,14 +414,21 @@ const EventScreen: React.FC<EventScreenProps> = ({ title, description, options, 
                     <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
                         {options.map((opt, idx) => (
                             <button
-                                key={idx}
+                                key={`${isTsukaponQuickQuiz ? 'tsukapon-quick-answer' : 'event-option'}-${idx}`}
                                 type="button"
                                 onClick={() => handleOptionAction(opt)}
                                 disabled={inputLocked}
+                                data-allow-japanese={isTsukaponQuickQuiz ? 'true' : undefined}
                                 className="relative min-h-[76px] rounded-xl border border-yellow-500/50 bg-yellow-950/30 p-4 text-left transition-colors hover:border-yellow-200 hover:bg-yellow-900/45 disabled:cursor-not-allowed disabled:opacity-50"
                             >
                                 <span className="absolute right-3 top-3 rounded-full border border-cyan-300/60 bg-cyan-950 px-2 py-0.5 text-[10px] font-black text-cyan-100">{idx + 1}</span>
-                                <span className="block pr-9 text-xl font-black text-yellow-200 sm:text-2xl">{opt.label}</span>
+                                <span className="block pr-9 text-xl font-black text-yellow-200 sm:text-2xl">
+                                    {isTsukaponQuickQuiz ? (
+                                        <>
+                                            {idx + 1}. <span className="tsukapon-answer-text" data-answer={getTsukaponAnswerLabel(opt.label)} />
+                                        </>
+                                    ) : opt.label}
+                                </span>
                                 {opt.text && <span className="mt-1 block text-xs text-slate-300">{opt.text}</span>}
                             </button>
                         ))}

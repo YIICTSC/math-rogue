@@ -1,8 +1,44 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Player } from '../types';
+import { LanguageMode, Player } from '../types';
 import { p2pService, P2PEvent } from '../services/p2pService';
 import { X, Wifi, Users, Loader, AlertCircle, Swords, Copy, Check } from 'lucide-react';
 import { audioService } from '../services/audioService';
+
+const COOP_ENGLISH_COPY: Record<string, string> = {
+  'プレイヤー': 'Player',
+  '復帰できません': 'Unable to rejoin the room.',
+  '接続エラー': 'Connection error.',
+  'ルーム作成に失敗': 'Failed to create the room.',
+  '復帰に失敗': 'Failed to rejoin the room.',
+  '接続に失敗': 'Failed to connect.',
+  '協力モード': 'Co-op Mode',
+  '名前': 'Name',
+  '表示名': 'Display name',
+  '1〜4人で同じ冒険に挑むモードです。まずは部屋作成、参加、共通モード選択、同行表示まで導入します。': 'Team up with 1 to 4 players for the same adventure. Create or join a room, then choose how the party plays together.',
+  '前回の協力に復帰': 'Rejoin Previous Co-op',
+  'コード': 'Code',
+  'ルームを作成': 'Create Room',
+  'ルームに参加': 'Join Room',
+  '作成者名を入力して協力ルームを作成します。': 'Enter a host name to create a co-op room.',
+  '作成中...': 'Creating...',
+  'ルームコード': 'Room Code',
+  'URLをコピーしました！': 'Invite URL copied!',
+  '招待URLをコピー': 'Copy Invite URL',
+  '参加者': 'Players',
+  '切断中': 'Disconnected',
+  '戦闘進行モード（ホストが開始時に選択）': 'Battle flow (chosen by the host)',
+  'ターンベース': 'Turn-Based',
+  'リアルタイム': 'Real-Time',
+  'これまで通り、順番に行動します。': 'Players act one at a time, as usual.',
+  '全員が同時にカードを使用し、全員がターン終了後に敵が行動します。': 'Everyone uses cards together, then enemies act after the whole party ends its turn.',
+  '協力開始': 'Start Co-op',
+  '参加コードを入力して協力ルームへ接続します。': 'Enter a room code to join a co-op room.',
+  '6桁コード': '6-digit code',
+  '接続中...': 'Connecting...',
+  '参加する': 'Join',
+  '待機中...': 'Waiting...',
+  'ホストの開始待ち': 'Waiting for the host to start',
+};
 
 export interface CoopParticipantPayload {
   peerId: string;
@@ -50,6 +86,7 @@ interface CoopSetupScreenProps {
   onStart: (payload: CoopStartPayload) => void;
   onClose: () => void;
   visualTheme: 'elementary' | 'high-school' | 'magic';
+  languageMode: LanguageMode;
 }
 
 const MAX_COOP_PLAYERS = 4;
@@ -91,7 +128,8 @@ const saveCoopResumeInfo = (info: CoopResumeInfo) => {
   window.localStorage.setItem(COOP_RESUME_STORAGE_KEY, JSON.stringify(info));
 };
 
-const CoopSetupScreen: React.FC<CoopSetupScreenProps> = ({ player, onStart, onClose, visualTheme }) => {
+const CoopSetupScreen: React.FC<CoopSetupScreenProps> = ({ player, onStart, onClose, visualTheme, languageMode }) => {
+  const t = (text: string) => languageMode === 'ENGLISH' ? (COOP_ENGLISH_COPY[text] || text) : text;
   const [mode, setMode] = useState<'SELECT' | 'HOST' | 'JOIN'>('SELECT');
   const [myName, setMyName] = useState('');
   const [roomCode, setRoomCode] = useState('');
@@ -393,22 +431,22 @@ const CoopSetupScreen: React.FC<CoopSetupScreenProps> = ({ player, onStart, onCl
 
         <h2 className="text-2xl font-black mb-4 flex items-center gap-2">
           <Users size={24} className="text-emerald-300" />
-          協力モード
+          {t('協力モード')}
         </h2>
 
         <div className="mb-4">
-          <label className="block text-sm text-gray-300 mb-2">名前</label>
+          <label className="block text-sm text-gray-300 mb-2">{t('名前')}</label>
           <input
             value={myName}
             onChange={(e) => setMyName(e.target.value)}
-            placeholder="表示名"
+            placeholder={t('表示名')}
             className="w-full bg-black/60 border border-gray-600 rounded px-3 py-2"
             maxLength={20}
           />
         </div>
 
         <div className="mb-4 rounded-lg border border-emerald-500/40 bg-emerald-950/20 px-3 py-2 text-xs text-emerald-100">
-          1〜4人で同じ冒険に挑むモードです。まずは部屋作成、参加、共通モード選択、同行表示まで導入します。
+          {t('1〜4人で同じ冒険に挑むモードです。まずは部屋作成、参加、共通モード選択、同行表示まで導入します。')}
         </div>
 
         {mode === 'SELECT' && (
@@ -419,8 +457,8 @@ const CoopSetupScreen: React.FC<CoopSetupScreenProps> = ({ player, onStart, onCl
                 disabled={status === 'CONNECTING'}
                 className="w-full bg-amber-600 disabled:bg-gray-700 py-3 rounded-xl font-bold flex flex-col items-center justify-center gap-1 text-base"
               >
-                <span>前回の協力に復帰</span>
-                <span className="text-xs font-normal text-amber-100">コード {resumeInfo.roomCode} / {resumeInfo.name}</span>
+                <span>{t('前回の協力に復帰')}</span>
+                <span className="text-xs font-normal text-amber-100">{t('コード')} {resumeInfo.roomCode} / <span data-allow-japanese>{resumeInfo.name}</span></span>
               </button>
             )}
             <button
@@ -431,7 +469,7 @@ const CoopSetupScreen: React.FC<CoopSetupScreenProps> = ({ player, onStart, onCl
               }}
               className="w-full bg-emerald-600 py-4 rounded-xl font-bold flex items-center justify-center gap-2 text-lg"
             >
-              <Wifi size={20} /> ルームを作成
+              <Wifi size={20} /> {t('ルームを作成')}
             </button>
             <button
               onClick={() => {
@@ -441,7 +479,7 @@ const CoopSetupScreen: React.FC<CoopSetupScreenProps> = ({ player, onStart, onCl
               }}
               className="w-full bg-cyan-700 py-4 rounded-xl font-bold flex items-center justify-center gap-2 text-lg"
             >
-              <Users size={20} /> ルームに参加
+              <Users size={20} /> {t('ルームに参加')}
             </button>
           </div>
         )}
@@ -450,20 +488,20 @@ const CoopSetupScreen: React.FC<CoopSetupScreenProps> = ({ player, onStart, onCl
           <div className="space-y-3">
             {!roomCode ? (
               <>
-                <div className="text-sm text-gray-300">作成者名を入力して協力ルームを作成します。</div>
+                <div className="text-sm text-gray-300">{t('作成者名を入力して協力ルームを作成します。')}</div>
                 <button
                   onClick={handleCreateRoom}
                   disabled={!myName.trim() || status === 'CONNECTING'}
                   className="w-full bg-emerald-600 disabled:bg-gray-700 disabled:text-gray-300 py-3 rounded font-bold flex items-center justify-center gap-2"
                 >
                   {status === 'CONNECTING' ? <Loader size={18} className="animate-spin" /> : <Wifi size={18} />}
-                  {status === 'CONNECTING' ? '作成中...' : 'ルームを作成'}
+                  {status === 'CONNECTING' ? t('作成中...') : t('ルームを作成')}
                 </button>
               </>
             ) : (
               <>
                 <div className="bg-black/40 border border-emerald-500/60 rounded p-3 text-center">
-                  <div className="text-xs text-emerald-200/90 mb-1">ルームコード</div>
+                  <div className="text-xs text-emerald-200/90 mb-1">{t('ルームコード')}</div>
                   <div className="text-2xl font-black tracking-[0.35em] tabular-nums text-emerald-100">{roomCode}</div>
                 </div>
                 <button
@@ -471,36 +509,36 @@ const CoopSetupScreen: React.FC<CoopSetupScreenProps> = ({ player, onStart, onCl
                   className={`w-full py-2.5 rounded font-bold flex items-center justify-center gap-2 transition-colors ${inviteUrlCopied ? 'bg-emerald-600 text-white' : 'bg-emerald-900/60 hover:bg-emerald-800/70 text-emerald-100'}`}
                 >
                   {inviteUrlCopied ? <Check size={16} /> : <Copy size={16} />}
-                  {inviteUrlCopied ? 'URLをコピーしました！' : '招待URLをコピー'}
+                  {inviteUrlCopied ? t('URLをコピーしました！') : t('招待URLをコピー')}
                 </button>
                 <div className="bg-black/40 border border-gray-700 rounded p-3 max-h-44 overflow-auto">
                   <div className="text-sm font-bold mb-2 flex items-center gap-1">
-                    <Users size={14} /> 参加者 {participants.length} / {MAX_COOP_PLAYERS}
+                    <Users size={14} /> {t('参加者')} {participants.length} / {MAX_COOP_PLAYERS}
                   </div>
                   {participants.map(p => (
-                    <div key={p.slotId || p.peerId} className="text-sm text-gray-200">- {p.name}{p.disconnected ? ' (切断中)' : ''}</div>
+                    <div key={p.slotId || p.peerId} className="text-sm text-gray-200">- <span data-allow-japanese>{p.name}</span>{p.disconnected ? ` (${t('切断中')})` : ''}</div>
                   ))}
                 </div>
                 <div className="bg-black/40 border border-emerald-500/40 rounded p-3 space-y-2">
-                  <div className="text-xs text-emerald-200/90">戦闘進行モード（ホストが開始時に選択）</div>
+                  <div className="text-xs text-emerald-200/90">{t('戦闘進行モード（ホストが開始時に選択）')}</div>
                   <div className="grid grid-cols-2 gap-2">
                     <button
                       onClick={() => setBattleMode('TURN_BASED')}
                       className={`px-3 py-2 rounded text-sm font-bold border ${battleMode === 'TURN_BASED' ? 'bg-emerald-600 border-emerald-300 text-white' : 'bg-slate-800 border-slate-600 text-gray-200'}`}
                     >
-                      ターンベース
+                      {t('ターンベース')}
                     </button>
                     <button
                       onClick={() => setBattleMode('REALTIME')}
                       className={`px-3 py-2 rounded text-sm font-bold border ${battleMode === 'REALTIME' ? 'bg-cyan-600 border-cyan-300 text-white' : 'bg-slate-800 border-slate-600 text-gray-200'}`}
                     >
-                      リアルタイム
+                      {t('リアルタイム')}
                     </button>
                   </div>
                   <div className="text-[11px] text-gray-300">
                     {battleMode === 'TURN_BASED'
-                      ? 'これまで通り、順番に行動します。'
-                      : '全員が同時にカードを使用し、全員がターン終了後に敵が行動します。'}
+                      ? t('これまで通り、順番に行動します。')
+                      : t('全員が同時にカードを使用し、全員がターン終了後に敵が行動します。')}
                   </div>
                 </div>
                 <button
@@ -508,7 +546,7 @@ const CoopSetupScreen: React.FC<CoopSetupScreenProps> = ({ player, onStart, onCl
                   disabled={!canStart}
                   className="w-full bg-emerald-600 disabled:bg-gray-700 py-3 rounded font-bold flex items-center justify-center gap-2"
                 >
-                  <Swords size={18} /> 協力開始
+                  <Swords size={18} /> {t('協力開始')}
                 </button>
               </>
             )}
@@ -519,11 +557,11 @@ const CoopSetupScreen: React.FC<CoopSetupScreenProps> = ({ player, onStart, onCl
           <div className="space-y-3">
             {!roomCode ? (
               <>
-                <div className="text-sm text-gray-300">参加コードを入力して協力ルームへ接続します。</div>
+                <div className="text-sm text-gray-300">{t('参加コードを入力して協力ルームへ接続します。')}</div>
                 <input
                   value={inputCode}
                   onChange={(e) => setInputCode(e.target.value.normalize('NFKC').replace(/[^0-9]/g, '').slice(0, 6))}
-                  placeholder="6桁コード"
+                  placeholder={t('6桁コード')}
                   className="w-full min-w-0 bg-black/60 border border-gray-600 rounded px-3 py-3 text-center text-2xl font-black tracking-[0.35em]"
                 />
                 <button
@@ -532,24 +570,24 @@ const CoopSetupScreen: React.FC<CoopSetupScreenProps> = ({ player, onStart, onCl
                   className="w-full bg-cyan-700 disabled:bg-gray-700 disabled:text-gray-300 px-4 py-3 rounded font-bold flex items-center justify-center gap-2"
                 >
                   {status === 'CONNECTING' ? <Loader size={18} className="animate-spin" /> : <Users size={18} />}
-                  {status === 'CONNECTING' ? '接続中...' : '参加する'}
+                  {status === 'CONNECTING' ? t('接続中...') : t('参加する')}
                 </button>
               </>
             ) : (
               <>
-                <div className="bg-black/40 border border-gray-700 rounded p-3 text-sm text-gray-200">コード: {roomCode}</div>
+                <div className="bg-black/40 border border-gray-700 rounded p-3 text-sm text-gray-200">{t('コード')}: {roomCode}</div>
                 <div className="bg-black/40 border border-gray-700 rounded p-3 max-h-44 overflow-auto">
                   <div className="text-sm font-bold mb-2 flex items-center gap-1">
-                    <Users size={14} /> 参加者 {participants.length} / {MAX_COOP_PLAYERS}
+                    <Users size={14} /> {t('参加者')} {participants.length} / {MAX_COOP_PLAYERS}
                   </div>
                   {participants.length === 0 ? (
-                    <div className="text-sm text-gray-400">待機中...</div>
+                    <div className="text-sm text-gray-400">{t('待機中...')}</div>
                   ) : participants.map(p => (
-                    <div key={p.slotId || p.peerId} className="text-sm text-gray-200">- {p.name}{p.disconnected ? ' (切断中)' : ''}</div>
+                    <div key={p.slotId || p.peerId} className="text-sm text-gray-200">- <span data-allow-japanese>{p.name}</span>{p.disconnected ? ` (${t('切断中')})` : ''}</div>
                   ))}
                 </div>
                 <div className="text-sm text-gray-400 flex items-center gap-2">
-                  <Loader size={14} className="animate-spin" /> ホストの開始待ち
+                  <Loader size={14} className="animate-spin" /> {t('ホストの開始待ち')}
                 </div>
               </>
             )}
@@ -558,7 +596,7 @@ const CoopSetupScreen: React.FC<CoopSetupScreenProps> = ({ player, onStart, onCl
 
         {status === 'ERROR' && (
           <div className="mt-4 bg-red-900/40 border border-red-500 rounded p-3 text-sm flex items-center gap-2">
-            <AlertCircle size={14} /> {errorMsg}
+            <AlertCircle size={14} /> {t(errorMsg)}
           </div>
         )}
       </div>

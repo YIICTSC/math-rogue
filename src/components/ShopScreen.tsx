@@ -23,6 +23,7 @@ interface ShopScreenProps {
   potionCapacity?: number;
   typingMode?: boolean;
   priceMultiplier?: number;
+  shopDiscountPercent?: number;
   removeCost?: number;
   interactionDisabled?: boolean;
   interactionDisabledMessage?: string;
@@ -32,7 +33,7 @@ interface ShopScreenProps {
 const REMOVE_COST = 75;
 const SHOP_SHORTCUT_KEYS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', 'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', 'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l'];
 
-const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics = [], shopPotions = [], onBuyCard, onBuyRelic, onBuyPotion, onRemoveCard, onLeave, languageMode, potionCapacity = 3, typingMode = false, priceMultiplier = 1, removeCost, interactionDisabled = false, interactionDisabledMessage, visualTheme = 'elementary' }) => {
+const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics = [], shopPotions = [], onBuyCard, onBuyRelic, onBuyPotion, onRemoveCard, onLeave, languageMode, potionCapacity = 3, typingMode = false, priceMultiplier = 1, shopDiscountPercent = 0, removeCost, interactionDisabled = false, interactionDisabledMessage, visualTheme = 'elementary' }) => {
   const [purchasedIds, setPurchasedIds] = useState<string[]>([]);
   const [removed, setRemoved] = useState(false);
   const [viewMode, setViewMode] = useState<'BUY' | 'REMOVE'>('BUY');
@@ -259,7 +260,14 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics =
                    <p className="text-xs text-gray-400">「{trans(visualTheme === 'magic' ? "結界遠征向けの護符と魔法薬、揃ってるよ" : "いいもの揃ってるよ...", languageMode)}」</p>
                </div>
            </div>
-           
+           {shopDiscountPercent > 0 && (
+               <div className="rounded border border-emerald-300 bg-emerald-950/80 px-2 py-1 text-center text-xs font-bold text-emerald-100">
+                   {languageMode === 'ENGLISH'
+                       ? `Ichi's Community Discount ${shopDiscountPercent}% OFF`
+                       : `いちの地域割引 ${shopDiscountPercent}% OFF`}
+               </div>
+           )}
+
            <div className="flex items-center gap-2">
                 <div className="flex items-center bg-yellow-900 px-3 py-1 rounded-full border border-yellow-500">
                     <Coins className="text-yellow-400 mr-1" size={16}/>
