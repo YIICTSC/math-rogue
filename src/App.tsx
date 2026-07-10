@@ -18,7 +18,7 @@ import FloorResultScreen from './components/FloorResultScreen';
 import MapScreen from './components/MapScreen';
 import RestScreen from './components/RestScreen';
 import ShopScreen from './components/ShopScreen';
-import EventScreen from './components/EventScreen';
+import EventScreen, { type EventAnswerMeta } from './components/EventScreen';
 import CompendiumScreen from './components/CompendiumScreen';
 import RelicSelectionScreen from './components/RelicSelectionScreen';
 import HelpScreen from './components/HelpScreen';
@@ -111,6 +111,7 @@ import { applyMagicRuleOnCardPlay } from './services/magicRuleService';
 import { UI_PREVIEW_GROUPS, UI_PREVIEW_SCREENS } from './data/uiPreviewScreens';
 import { useXboxControllerNavigation } from './hooks/useXboxControllerNavigation';
 import { CREDIT_SECTIONS } from './data/credits';
+import { getSupporterNpcEventByTitle } from './data/supporterNpcEvents';
 
 const PARRY_WINDOW_MS = 650;
 const PARRY_PERFECT_MS = 220;
@@ -1187,6 +1188,7 @@ const App: React.FC = () => {
     const [isUiPreviewToolbarOpen, setIsUiPreviewToolbarOpen] = useState(true);
     const [uiPreviewMiniGameOutcome, setUiPreviewMiniGameOutcome] = useState<MiniGameDebugPreview | undefined>(undefined);
     const [focusedUiPreviewScreenId, setFocusedUiPreviewScreenId] = useState<string | undefined>(undefined);
+    const [focusedSupporterNpcEventTitle, setFocusedSupporterNpcEventTitle] = useState<string | undefined>(undefined);
     const [uiPreviewViewport, setUiPreviewViewport] = useState(() => ({
         width: typeof window === 'undefined' ? 0 : window.innerWidth,
         height: typeof window === 'undefined' ? 0 : window.innerHeight,
@@ -1201,6 +1203,8 @@ const App: React.FC = () => {
         coopEnemyTurnCursor: number;
         coopPlayerSnapshots: Record<string, Player>;
     } | null>(null);
+    const debugSupporterNpcQuestionIndexesRef = useRef<Record<string, number>>({});
+    const coopTsukaponWinnerRef = useRef<string | null>(null);
     const previousScreenRef = useRef<GameScreen>(GameScreen.START_MENU);
     const isLegacyVercelHost = typeof window !== 'undefined' && window.location.hostname === LEGACY_VERCEL_HOST;
     const [showMigrationNotice, setShowMigrationNotice] = useState<boolean>(() => isLegacyVercelHost);
@@ -5557,6 +5561,16 @@ const App: React.FC = () => {
 
     const handleStartEventUiPreview = useCallback((theme: VisualThemeId, title: string) => {
         setEventResultLog(null);
+        const supporterProfile = getSupporterNpcEventByTitle(title);
+        const supporterQuestionIndex = supporterProfile
+            ? (debugSupporterNpcQuestionIndexesRef.current[supporterProfile.id] ?? Math.floor(Math.random() * supporterProfile.questions.length))
+            : undefined;
+        if (supporterProfile) {
+            debugSupporterNpcQuestionIndexesRef.current[supporterProfile.id] = (supporterQuestionIndex + 1) % supporterProfile.questions.length;
+            setFocusedSupporterNpcEventTitle(title);
+        } else {
+            setFocusedSupporterNpcEventTitle(undefined);
+        }
         const previewEvent = title === '忘れ物'
             ? generateLegacyEvent(
                 { ...CARDS_LIBRARY['STRIKE'], id: 'ui-preview-legacy-card' } as ICard,
@@ -5575,10 +5589,14 @@ const App: React.FC = () => {
                 theme,
                 1,
                 1,
-                true
+                true,
+                supporterQuestionIndex
             );
         setEventData(previewEvent);
         handleStartUiPreview(GameScreen.EVENT);
+        if (supporterProfile) {
+            setFocusedUiPreviewScreenId(undefined);
+        }
         setGameState(prev => ({
             ...prev,
             screen: GameScreen.EVENT,
@@ -10417,8 +10435,28 @@ const App: React.FC = () => {
         gameState.selectionState.type,
     ]);
 
-    const resolveCoopEventOptionForPlayer = useCallback((basePlayer: Player, optionIndex: number, onResolved: (player: Player, resultLog: string | null) => void) => {
+    useEffect(() => {
+        coopTsukaponWinnerRef.current = null;
+    }, [eventData?.description, eventData?.imageKey, gameState.screen]);
+
+    const resolveCoopEventOptionForPlayer = useCallback((basePlayer: Player, peerId: string, optionIndex: number, answerMeta: EventAnswerMeta | undefined, onResolved: (player: Player, resultLog: string | null) => void) => {
         if (!eventData) return;
+
+        const isTsukaponQuickQuiz = eventData.imageKey === 'high-school-supporter-npc/tsukapon_boardgame_developer.png';
+        if (isTsukaponQuickQuiz) {
+            const selectedOption = eventData.options?.[optionIndex];
+            const winnerPeerId = coopTsukaponWinnerRef.current;
+            if (winnerPeerId) {
+                const winnerName = coopSession?.participants.find(participant => participant.peerId === winnerPeerId)?.name || 'ほかの参加者';
+                onResolved(basePlayer, `${winnerName}が先に正解した。今回の早押し報酬は受け取れない。`);
+                return;
+            }
+            if (selectedOption?.text !== 'これだと思う') {
+                onResolved(basePlayer, '惜しい。今回の早押しでは報酬を受け取れない。');
+                return;
+            }
+            coopTsukaponWinnerRef.current = peerId;
+        }
 
         let simulatedState: GameState = { ...gameState, player: { ...basePlayer } };
         let nextPlayer: Player = simulatedState.player;
@@ -10468,11 +10506,21 @@ const App: React.FC = () => {
 
         const option = regeneratedEvent.options[optionIndex];
         if (!option) return;
-        option.action();
+        option.action(answerMeta);
         window.setTimeout(() => onResolved(nextPlayer, nextResultLog), 90);
-    }, [eventData, gameState, languageMode, unlockedCardNames]);
+    }, [coopSession?.participants, eventData, gameState, languageMode, unlockedCardNames]);
 
     const handleEventComplete = useCallback(() => {
+        if (
+            isUiPreviewMode &&
+            focusedSupporterNpcEventTitle &&
+            eventData?.title === focusedSupporterNpcEventTitle
+        ) {
+            setEventData(null);
+            setEventResultLog(null);
+            closeUiPreview();
+            return;
+        }
         if (gameState.challengeMode === 'COOP' && coopSession && coopSelfPeerId) {
             setCoopSession(prev => {
                 if (!prev) return prev;
@@ -10489,25 +10537,25 @@ const App: React.FC = () => {
             return;
         }
         handleNodeComplete();
-    }, [coopSelfPeerId, coopSession, gameState.challengeMode, handleNodeComplete]);
+    }, [closeUiPreview, coopSelfPeerId, coopSession, eventData?.title, focusedSupporterNpcEventTitle, gameState.challengeMode, handleNodeComplete, isUiPreviewMode]);
 
-    const handleCoopEventOptionSelect = useCallback((optionIndex: number) => {
+    const handleCoopEventOptionSelect = useCallback((optionIndex: number, answerMeta?: EventAnswerMeta) => {
         if (gameState.challengeMode === 'COOP' && coopSession && coopSelfPeerId) {
             if ((gameState.visualTheme || visualTheme) === 'magic') {
                 eventData?.options?.[optionIndex]?.action?.();
                 return;
             }
             if (!coopSession.isHost) {
-                p2pService.send({ type: 'COOP_EVENT_OPTION', optionIndex });
+                p2pService.send({ type: 'COOP_EVENT_OPTION', optionIndex, answerProgress: answerMeta?.quickQuizProgress });
                 return;
             }
-            resolveCoopEventOptionForPlayer(gameState.player, optionIndex, (nextPlayer, resultLog) => {
+            resolveCoopEventOptionForPlayer(gameState.player, coopSelfPeerId, optionIndex, answerMeta, (nextPlayer, resultLog) => {
                 applyCoopPlayerStateToPeer(coopSelfPeerId, nextPlayer);
                 setEventResultLog(resultLog);
             });
             return;
         }
-        eventData?.options?.[optionIndex]?.action?.();
+        eventData?.options?.[optionIndex]?.action?.(answerMeta);
     }, [applyCoopPlayerStateToPeer, coopSelfPeerId, coopSession, eventData, gameState.challengeMode, gameState.player, gameState.visualTheme, resolveCoopEventOptionForPlayer, visualTheme]);
 
     const handleLegacyCardSelect = (card: ICard) => {
@@ -13892,7 +13940,7 @@ const App: React.FC = () => {
                     ? gameState.player
                     : coopPlayerSnapshots[fromPeerId];
                 if (!sourcePlayer) return;
-                resolveCoopEventOptionForPlayer(sourcePlayer, data.optionIndex, (nextPlayer, resultLog) => {
+                resolveCoopEventOptionForPlayer(sourcePlayer, fromPeerId, data.optionIndex, { quickQuizProgress: data.answerProgress }, (nextPlayer, resultLog) => {
                     if (fromPeerId === coopSelfPeerId) {
                         applyCoopPlayerStateToPeer(coopSelfPeerId, nextPlayer);
                         setEventResultLog(resultLog);
@@ -15289,6 +15337,7 @@ const App: React.FC = () => {
                             nextMiniGameThreshold={nextThreshold}
                             languageMode={languageMode}
                             focusedUiPreviewScreenId={focusedUiPreviewScreenId}
+                            focusedSupporterNpcEventTitle={focusedSupporterNpcEventTitle}
                         />
                     </div>
                 )}
@@ -16221,7 +16270,7 @@ const App: React.FC = () => {
                         <EventScreen
                             title={transEventText(eventData.title, languageMode)}
                             description={transEventText(eventData.description, languageMode)}
-                            options={eventData.options.map((o: any, idx: number) => ({ ...o, action: () => handleCoopEventOptionSelect(idx), label: transEventText(o.label, languageMode), text: transEventText(o.text, languageMode) }))}
+                            options={eventData.options.map((o: any, idx: number) => ({ ...o, action: (answerMeta?: EventAnswerMeta) => handleCoopEventOptionSelect(idx, answerMeta), label: transEventText(o.label, languageMode), text: transEventText(o.text, languageMode) }))}
                             imageKey={eventData.imageKey ?? eventData.title}
                             image={coopSyncedVisualTheme === 'elementary' ? gameState.player.imageData : undefined}
                             resultLog={eventResultLog ? transEventText(eventResultLog, languageMode) : null}

@@ -9,10 +9,14 @@ import { ADDITIONAL_CARDS } from '../constants1';
 import { getVisualThemeEventTheme, getVisualThemeEventThemeByTitle, type ThemedEventTheme, type VisualThemeId } from '../data/visualThemes';
 import { getSupporterNpcEventByTitle, HIGH_SCHOOL_SUPPORTER_NPC_EVENTS, type SupporterNpcEventProfile, type SupporterNpcQuestion, type SupporterNpcReward } from '../data/supporterNpcEvents';
 
+interface EventAnswerMeta {
+    quickQuizProgress?: number;
+}
+
 interface EventOption {
     label: string;
     text: string;
-    action: () => void;
+    action: (answerMeta?: EventAnswerMeta) => void;
 }
 
 interface GameEvent {
@@ -52,10 +56,15 @@ const getStableTextIndex = (text: string, size: number): number => {
 
 const getStableShuffledIndexes = (size: number, seed: string): number[] => {
     const indexes = Array.from({ length: size }, (_, index) => index);
-    let hash = getStableTextIndex(seed, 2147483647) || 1;
+    let hash = 2166136261;
+    for (let index = 0; index < seed.length; index++) {
+        hash = Math.imul(hash ^ seed.charCodeAt(index), 16777619);
+    }
     for (let i = indexes.length - 1; i > 0; i--) {
-        hash = (hash * 1103515245 + 12345) & 0x7fffffff;
-        const j = hash % (i + 1);
+        hash ^= hash << 13;
+        hash ^= hash >>> 17;
+        hash ^= hash << 5;
+        const j = (hash >>> 0) % (i + 1);
         [indexes[i], indexes[j]] = [indexes[j], indexes[i]];
     }
     return indexes;
@@ -254,7 +263,8 @@ export const generateEvent = (
     visualTheme: VisualThemeId = 'elementary',
     currentAct = 1,
     currentFloor = 1,
-    isEndless = false
+    isEndless = false,
+    supporterQuestionIndex?: number
 ): GameEvent => {
     let activeEventTitle: string | null = null;
     const finalizeEvent = (event: GameEvent): GameEvent => {
@@ -265,10 +275,10 @@ export const generateEvent = (
         options: event.options.map(option => ({
             ...option,
             text: option.text,
-            action: () => {
+            action: (answerMeta?: EventAnswerMeta) => {
                 activeEventTitle = event.title;
                 try {
-                    option.action();
+                    option.action(answerMeta);
                 } catch (error) {
                     console.error(`Event action failed: ${event.title} / ${option.label}`, error);
                     setEventResultLog(trans("何も起きず、イベントは終わった。", languageMode));
@@ -705,14 +715,37 @@ export const generateEvent = (
         };
     };
 
-    const applySupporterReward = (profile: SupporterNpcEventProfile, question: SupporterNpcQuestion, correct: boolean) => {
+    const applySupporterReward = (profile: SupporterNpcEventProfile, question: SupporterNpcQuestion, correct: boolean, quickQuizProgress?: number) => {
+        const questionResultText = profile.id === 'tsukapon'
+            ? correct
+                ? 'つかぽんの説明を読み取れた！'
+                : 'つかぽんの説明を読み取れなかった。'
+            : question.explanation;
         if (!correct) {
             setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold + 8 } }));
-            setEventResultLog(trans(`${question.explanation}\n惜しい。${profile.npcName}から参加賞として8Gを受け取った。`, languageMode));
+            setEventResultLog(trans(`${questionResultText}\n惜しい。${profile.npcName}から参加賞として8Gを受け取った。`, languageMode));
             return;
         }
 
-        const resultPrefix = `${question.explanation}\n正解！`;
+        const tsukaponSpeedBonus = profile.id !== 'tsukapon'
+            ? 0
+            : (quickQuizProgress ?? 1) <= 0.35
+                ? 50
+                : (quickQuizProgress ?? 1) <= 0.7
+                    ? 25
+                    : 0;
+        if (tsukaponSpeedBonus > 0) {
+            setGameState(prev => ({
+                ...prev,
+                player: { ...prev.player, gold: prev.player.gold + tsukaponSpeedBonus }
+            }));
+        }
+        const speedBonusMessage = tsukaponSpeedBonus === 50
+            ? '\n先読み成功！早押し報酬として50Gを得た。'
+            : tsukaponSpeedBonus === 25
+                ? '\nひらめき成功！早押し報酬として25Gを得た。'
+                : '';
+        const resultPrefix = `${questionResultText}\n正解！${speedBonusMessage}`;
         const applyFallbackUpgrade = (fallbackMessage: string) => {
             let upgradedName = '';
             setGameState(prev => {
@@ -794,9 +827,14 @@ export const generateEvent = (
     };
 
     const buildSupporterNpcEvent = (profile: SupporterNpcEventProfile): GameEvent => {
-        const questionIndex = getStableTextIndex(`${profile.id}:${currentAct}:${currentFloor}:${preferredEventTitle ?? 'new'}`, profile.questions.length);
+        const questionIndex = supporterQuestionIndex === undefined
+            ? getStableTextIndex(`${profile.id}:${currentAct}:${currentFloor}:${preferredEventTitle ?? 'new'}`, profile.questions.length)
+            : supporterQuestionIndex % profile.questions.length;
         const question = profile.questions[questionIndex];
-        const order = getStableShuffledIndexes(question.options.length, `${profile.id}:${question.question}:options`);
+        const optionOrderSeed = supporterQuestionIndex === undefined
+            ? `${currentAct}:${currentFloor}:${preferredEventTitle ?? 'new'}`
+            : `debug:${supporterQuestionIndex}`;
+        const order = getStableShuffledIndexes(question.options.length, `${profile.id}:${question.question}:options:${optionOrderSeed}`);
         const correctOptionPosition = order.findIndex(index => index === question.correctIndex);
         return {
             title: profile.title,
@@ -805,7 +843,7 @@ export const generateEvent = (
             options: order.map((optionIndex, displayIndex) => ({
                 label: `${displayIndex + 1}. ${question.options[optionIndex]}`,
                 text: optionIndex === question.correctIndex ? 'これだと思う' : 'この答えを選ぶ',
-                action: () => applySupporterReward(profile, question, displayIndex === correctOptionPosition),
+                action: (answerMeta?: EventAnswerMeta) => applySupporterReward(profile, question, displayIndex === correctOptionPosition, answerMeta?.quickQuizProgress),
             })),
         };
     };

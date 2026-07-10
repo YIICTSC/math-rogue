@@ -28,9 +28,13 @@ const HIGH_SCHOOL_EVENT_IMAGE_POSITION: Partial<Record<number, string>> = {
   17: '50% 42%',
 };
 
+export interface EventAnswerMeta {
+    quickQuizProgress?: number;
+}
+
 interface EventOption {
     text: string;
-    action: () => void;
+    action: (answerMeta?: EventAnswerMeta) => void;
     label: string;
 }
 
@@ -51,6 +55,14 @@ interface EventScreenProps {
 }
 
 const EventScreen: React.FC<EventScreenProps> = ({ title, description, options, imageKey, image, resultLog, onContinue, typingMode = false, interactionDisabled = false, interactionDisabledMessage, languageMode, visualTheme = 'elementary', imageZoomEnabled = false }) => {
+  const isTsukaponQuickQuiz = imageKey === 'high-school-supporter-npc/tsukapon_boardgame_developer.png';
+  const tsukaponQuestion = isTsukaponQuickQuiz
+    ? description.split('\n\n問題: ').at(-1) ?? description
+    : '';
+  const tsukaponQuizText = tsukaponQuestion.match(/『([\s\S]+)』これは何？」$/)?.[1] ?? tsukaponQuestion;
+  const tsukaponIntroduction = isTsukaponQuickQuiz
+    ? description.replace(/\n\n問題: [\s\S]*$/, '')
+    : description;
   const highSchoolEventIndex = useMemo(() => {
     const match = imageKey?.match(/^high-school-event-(\d+)$/);
     return match ? Number(match[1]) : null;
@@ -135,34 +147,75 @@ const EventScreen: React.FC<EventScreenProps> = ({ title, description, options, 
   const [choiceLocked, setChoiceLocked] = useState(false);
   const [continueLocked, setContinueLocked] = useState(false);
   const [imageZoomOpen, setImageZoomOpen] = useState(false);
+  const [tsukaponQuizOpen, setTsukaponQuizOpen] = useState(false);
+  const [typedDescription, setTypedDescription] = useState('');
   const inputLocked = interactionDisabled || choiceLocked;
   const continueInputLocked = interactionDisabled || continueLocked;
   const zoomOpenLabel = languageMode === 'ENGLISH' ? `Enlarge ${title} image` : `${title}の画像を拡大`;
   const zoomDialogLabel = languageMode === 'ENGLISH' ? `${title} enlarged image` : `${title} 拡大画像`;
+  const typewriterComplete = typedDescription.length >= tsukaponQuizText.length;
 
   useEffect(() => {
     setImageIndex(0);
     setChoiceLocked(false);
     setContinueLocked(false);
     setImageZoomOpen(false);
+    setTsukaponQuizOpen(false);
   }, [imageKey, title]);
+
+  useEffect(() => {
+    if (!isTsukaponQuickQuiz || !tsukaponQuizOpen || resultLog) {
+      setTypedDescription('');
+      return;
+    }
+
+    setTypedDescription('');
+    let nextLength = 0;
+    let timeoutId: number | undefined;
+    const typeNextCharacter = () => {
+      nextLength += 1;
+      setTypedDescription(tsukaponQuizText.slice(0, nextLength));
+      if (nextLength >= tsukaponQuizText.length) {
+        return;
+      }
+
+      const typedCharacter = tsukaponQuizText.charAt(nextLength - 1);
+      const punctuationPause = '、。！？』'.includes(typedCharacter);
+      const hesitationPause = !punctuationPause && Math.random() < 0.08;
+      const delay = punctuationPause
+        ? 1200 + Math.random() * 900
+        : hesitationPause
+          ? 900 + Math.random() * 900
+          : 260 + Math.random() * 180;
+      timeoutId = window.setTimeout(typeNextCharacter, delay);
+    };
+
+    timeoutId = window.setTimeout(typeNextCharacter, 360);
+
+    return () => {
+      if (timeoutId !== undefined) window.clearTimeout(timeoutId);
+    };
+  }, [isTsukaponQuickQuiz, resultLog, tsukaponQuizOpen, tsukaponQuizText]);
 
   useEffect(() => {
     if (!resultLog) return;
     setChoiceLocked(false);
     setContinueLocked(false);
+    setTsukaponQuizOpen(false);
   }, [resultLog]);
 
   const handleOptionAction = useCallback((option: EventOption) => {
     if (inputLocked || resultLog) return;
     setChoiceLocked(true);
     try {
-      option.action();
+      option.action(isTsukaponQuickQuiz && tsukaponQuizOpen
+        ? { quickQuizProgress: tsukaponQuizText.length > 0 ? typedDescription.length / tsukaponQuizText.length : 1 }
+        : undefined);
     } catch (error) {
       setChoiceLocked(false);
       throw error;
     }
-  }, [inputLocked, resultLog]);
+  }, [inputLocked, isTsukaponQuickQuiz, resultLog, tsukaponQuizOpen, tsukaponQuizText.length, typedDescription.length]);
 
   const handleContinueAction = useCallback(() => {
     if (continueInputLocked || !resultLog) return;
@@ -180,6 +233,7 @@ const EventScreen: React.FC<EventScreenProps> = ({ title, description, options, 
         }
         return;
       }
+      if (isTsukaponQuickQuiz && !tsukaponQuizOpen) return;
       if (e.key >= '1' && e.key <= '9') {
         const option = options[Number(e.key) - 1];
         if (!option) return;
@@ -192,7 +246,7 @@ const EventScreen: React.FC<EventScreenProps> = ({ title, description, options, 
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [typingMode, resultLog, options, interactionDisabled, handleContinueAction, handleOptionAction]);
+  }, [typingMode, resultLog, options, interactionDisabled, handleContinueAction, handleOptionAction, isTsukaponQuickQuiz, tsukaponQuizOpen]);
 
   return (
     <div
@@ -259,13 +313,24 @@ const EventScreen: React.FC<EventScreenProps> = ({ title, description, options, 
                         <p className="text-yellow-300 font-bold mb-2">{trans("結果", languageMode)}:</p>
                         {resultLog}
                     </div>
+                ) : isTsukaponQuickQuiz ? (
+                    tsukaponIntroduction
                 ) : (
                     description
                 )}
             </div>
 
             <div className="event-screen-actions flex flex-col gap-4">
-                {!resultLog ? (
+                {!resultLog && isTsukaponQuickQuiz ? (
+                    <button
+                        type="button"
+                        onClick={() => setTsukaponQuizOpen(true)}
+                        disabled={interactionDisabled}
+                        className="w-full rounded-lg border border-yellow-300 bg-yellow-500 px-4 py-4 text-center text-lg font-black text-slate-950 transition-colors hover:bg-yellow-300 disabled:cursor-not-allowed disabled:opacity-50"
+                    >
+                        問題をはじめる
+                    </button>
+                ) : !resultLog ? (
                     <div className="grid max-h-[36vh] grid-cols-1 gap-3 overflow-y-auto pr-1 sm:grid-cols-2">
                         {options.map((opt, idx) => (
                             <button 
@@ -299,6 +364,38 @@ const EventScreen: React.FC<EventScreenProps> = ({ title, description, options, 
                 )}
             </div>
         </div>
+
+        {isTsukaponQuickQuiz && tsukaponQuizOpen && !resultLog && (
+            <div className="fixed inset-0 z-[10050] flex items-start justify-center overflow-y-auto bg-slate-950/95 p-3 pt-[max(1rem,env(safe-area-inset-top))] sm:items-center sm:p-6">
+                <div className="w-full max-w-5xl rounded-xl border-2 border-yellow-300 bg-slate-950 p-4 shadow-[0_0_60px_rgba(250,204,21,0.25)] sm:p-8">
+                    <div className="mb-4 flex items-center justify-between gap-3 border-b border-yellow-500/40 pb-3">
+                        <div className="text-xs font-black tracking-[0.24em] text-yellow-300">TSUKAPON QUICK QUIZ</div>
+                        <div className="rounded-full border border-cyan-300/60 px-3 py-1 text-xs font-bold text-cyan-100">早押し受付中</div>
+                    </div>
+                    <div className="flex min-h-[34vh] items-center justify-center rounded-xl border border-slate-700 bg-black/35 px-4 py-8 text-center text-2xl font-black leading-relaxed text-white sm:min-h-[38vh] sm:px-10 sm:text-4xl md:text-5xl">
+                        <span>{typedDescription}</span>
+                        {!typewriterComplete && (
+                            <span className="ml-2 inline-block h-8 w-3 animate-pulse bg-yellow-300 align-[-0.15em] sm:h-12 sm:w-4" aria-hidden="true" />
+                        )}
+                    </div>
+                    <div className="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-2">
+                        {options.map((opt, idx) => (
+                            <button
+                                key={idx}
+                                type="button"
+                                onClick={() => handleOptionAction(opt)}
+                                disabled={inputLocked}
+                                className="relative min-h-[76px] rounded-xl border border-yellow-500/50 bg-yellow-950/30 p-4 text-left transition-colors hover:border-yellow-200 hover:bg-yellow-900/45 disabled:cursor-not-allowed disabled:opacity-50"
+                            >
+                                <span className="absolute right-3 top-3 rounded-full border border-cyan-300/60 bg-cyan-950 px-2 py-0.5 text-[10px] font-black text-cyan-100">{idx + 1}</span>
+                                <span className="block pr-9 text-xl font-black text-yellow-200 sm:text-2xl">{opt.label}</span>
+                                {opt.text && <span className="mt-1 block text-xs text-slate-300">{opt.text}</span>}
+                            </button>
+                        ))}
+                    </div>
+                </div>
+            </div>
+        )}
 
         {imageZoomEnabled && imageZoomOpen && (
             <div

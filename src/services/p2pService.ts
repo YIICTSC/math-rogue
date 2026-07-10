@@ -196,7 +196,7 @@ export type P2PEvent =
     | { type: 'COOP_TREASURE_OPEN' }
     | { type: 'COOP_TREASURE_CLAIM', poolId: string }
     | { type: 'COOP_TREASURE_GRANT', rewards: any[], player?: any, addCurse?: boolean, poolId?: string }
-    | { type: 'COOP_EVENT_OPTION', optionIndex: number }
+    | { type: 'COOP_EVENT_OPTION', optionIndex: number, answerProgress?: number }
     | { type: 'COOP_EVENT_RESULT', player: any, resultLog: string | null }
     | { type: 'COOP_EVENT_CONTINUE' }
     | { type: 'COOP_REST_ACTION', action: 'REST' | 'UPGRADE' | 'SYNTHESIZE' | 'LEAVE', cardId?: string, cardIds?: string[] }

@@ -46,6 +46,7 @@ interface DebugMenuScreenProps {
     nextMiniGameThreshold: number | null;
     languageMode: LanguageMode;
     focusedUiPreviewScreenId?: string;
+    focusedSupporterNpcEventTitle?: string;
 }
 
 // 翻訳デバッグ用にイベントデータのサンプルを定義 (eventService.tsの内容を網羅)
@@ -258,11 +259,13 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
     totalMathCorrect,
     nextMiniGameThreshold,
     languageMode: initialLanguageMode,
-    focusedUiPreviewScreenId
+    focusedUiPreviewScreenId,
+    focusedSupporterNpcEventTitle
 }) => {
-    const [activeTab, setActiveTab] = useState<'CARDS' | 'RELICS' | 'POTIONS' | 'SYNTHESIS' | 'SYSTEM' | 'UI_PREVIEW' | 'PROBLEM_DEBUG' | 'EFFECTS' | 'MAGIC_VOICES' | 'ENEMY_VOICE_AUDIT' | 'MAGIC_ART_AUDIT' | 'EVENTS' | 'HUMANOID_SPRITES' | 'TRANSLATION'>(focusedUiPreviewScreenId ? 'UI_PREVIEW' : 'CARDS');
+    const [activeTab, setActiveTab] = useState<'CARDS' | 'RELICS' | 'POTIONS' | 'SYNTHESIS' | 'SYSTEM' | 'UI_PREVIEW' | 'PROBLEM_DEBUG' | 'EFFECTS' | 'MAGIC_VOICES' | 'ENEMY_VOICE_AUDIT' | 'MAGIC_ART_AUDIT' | 'EVENTS' | 'HUMANOID_SPRITES' | 'TRANSLATION'>(focusedSupporterNpcEventTitle ? 'EVENTS' : focusedUiPreviewScreenId ? 'UI_PREVIEW' : 'CARDS');
     const showLoadoutPanel = activeTab === 'CARDS' || activeTab === 'RELICS' || activeTab === 'POTIONS' || activeTab === 'SYNTHESIS';
     const focusedUiPreviewItemRef = useRef<HTMLDivElement | null>(null);
+    const focusedSupporterNpcEventRef = useRef<HTMLDivElement | null>(null);
     const [searchTerm, setSearchTerm] = useState("");
     const [debugLanguageMode, setDebugLanguageMode] = useState<LanguageMode>(initialLanguageMode);
     const [transSubTab, setTransSubTab] = useState<'STORY' | 'FLAVOR' | 'CARD' | 'EVENT' | 'ENEMY' | 'MISSING'>('STORY');
@@ -306,12 +309,25 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
     }, [focusedUiPreviewScreenId]);
 
     useEffect(() => {
+        if (!focusedSupporterNpcEventTitle) return;
+        setActiveTab('EVENTS');
+    }, [focusedSupporterNpcEventTitle]);
+
+    useEffect(() => {
         if (activeTab !== 'UI_PREVIEW' || !focusedUiPreviewScreenId) return;
         const timer = window.setTimeout(() => {
             focusedUiPreviewItemRef.current?.scrollIntoView({ block: 'center', inline: 'nearest' });
         }, 0);
         return () => window.clearTimeout(timer);
     }, [activeTab, focusedUiPreviewScreenId]);
+
+    useEffect(() => {
+        if (activeTab !== 'EVENTS' || !focusedSupporterNpcEventTitle) return;
+        const timer = window.setTimeout(() => {
+            focusedSupporterNpcEventRef.current?.scrollIntoView({ block: 'center', inline: 'nearest' });
+        }, 0);
+        return () => window.clearTimeout(timer);
+    }, [activeTab, focusedSupporterNpcEventTitle]);
 
     const [selectedDeck, setSelectedDeck] = useState<ICard[]>([]);
     const [selectedRelics, setSelectedRelics] = useState<Relic[]>([]);
@@ -2241,8 +2257,14 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
                                         <div className="shrink-0 text-xs font-bold text-yellow-300">{HIGH_SCHOOL_SUPPORTER_NPC_EVENTS.length}件</div>
                                     </div>
                                     <div className="grid grid-cols-1 gap-4 md:grid-cols-2 xl:grid-cols-3">
-                                        {HIGH_SCHOOL_SUPPORTER_NPC_EVENTS.map(event => (
-                                            <div key={event.id} className="overflow-hidden rounded-lg border border-yellow-700/70 bg-black/35">
+                                        {HIGH_SCHOOL_SUPPORTER_NPC_EVENTS.map(event => {
+                                            const isFocusedSupporterNpcEvent = focusedSupporterNpcEventTitle === event.title;
+                                            return (
+                                            <div
+                                                key={event.id}
+                                                ref={isFocusedSupporterNpcEvent ? focusedSupporterNpcEventRef : undefined}
+                                                className={`overflow-hidden rounded-lg border bg-black/35 ${isFocusedSupporterNpcEvent ? 'border-yellow-200 ring-2 ring-yellow-300 ring-offset-2 ring-offset-slate-950' : 'border-yellow-700/70'}`}
+                                            >
                                                 <div className="aspect-square bg-slate-950">
                                                     <img
                                                         src={assetUrl(`sprites/high-school/supporter-npcs/${event.imageFile}`)}
@@ -2275,7 +2297,8 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
                                                     {renderUiPreviewChecks(`event:high-school:${event.title}`)}
                                                 </div>
                                             </div>
-                                        ))}
+                                            );
+                                        })}
                                     </div>
                                 </section>
                                 <div className="flex items-center justify-between gap-3 border-b border-cyan-700/40 pb-2 pt-2">
