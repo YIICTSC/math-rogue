@@ -225,6 +225,7 @@ const CharacterSelectionScreen: React.FC<CharacterSelectionScreenProps> = ({ cha
 
   return (
     <div
+      data-gamepad-initial-scope="character-selection"
       className="main-character-screen flex flex-col h-full w-full bg-gray-900 bg-cover bg-center text-white relative overflow-hidden"
       style={{
         backgroundImage: `url(${assetUrl(visualTheme === 'magic'
@@ -427,9 +428,17 @@ const CharacterSelectionScreen: React.FC<CharacterSelectionScreenProps> = ({ cha
                 return (
                     <div
                         key={char.id}
+                        data-gamepad-initial-choice={isUnlocked ? true : undefined}
+                        role={isUnlocked ? 'button' : undefined}
+                        tabIndex={isUnlocked ? 0 : undefined}
                         id={`character-poster-${char.id}`}
                         className={`${baseClass} ${colorClass}`}
                         onClick={() => isUnlocked && handleCharSelect(char)}
+                        onKeyDown={(event) => {
+                          if (!isUnlocked || (event.key !== 'Enter' && event.key !== ' ')) return;
+                          event.preventDefault();
+                          handleCharSelect(char);
+                        }}
                     >
                         {challengeMode === 'TYPING' && isUnlocked && index < 9 && (
                             <div className="absolute right-3 top-3 z-30 rounded-full border border-cyan-300 bg-cyan-950/95 px-1.5 py-0.5 text-[10px] font-black text-cyan-200">

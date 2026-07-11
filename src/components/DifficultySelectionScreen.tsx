@@ -67,7 +67,7 @@ const DifficultySelectionScreen: React.FC<DifficultySelectionScreenProps> = ({
   }, [maxUnlockedDifficulty, onBack, onSelectDifficulty]);
 
   return (
-    <div className="main-difficulty-screen h-full w-full overflow-y-auto bg-slate-950 p-2 text-white custom-scrollbar sm:p-4">
+    <div data-gamepad-initial-scope="difficulty-selection" className="main-difficulty-screen h-full w-full overflow-y-auto bg-slate-950 p-2 text-white custom-scrollbar sm:p-4">
       <div className="difficulty-desktop-layout mx-auto flex min-h-full max-w-5xl flex-col py-2 sm:py-6">
         <button
           onClick={onBack}
@@ -94,6 +94,7 @@ const DifficultySelectionScreen: React.FC<DifficultySelectionScreenProps> = ({
             return (
               <button
                 key={config.level}
+                data-gamepad-initial-choice={!locked ? true : undefined}
                 disabled={locked}
                 onClick={() => onSelectDifficulty(config.level)}
                 className={`relative rounded-lg border-2 p-3 text-left shadow-lg transition-all sm:p-4 ${
@@ -151,6 +152,7 @@ const DifficultySelectionScreen: React.FC<DifficultySelectionScreenProps> = ({
             return (
               <button
                 key={config.level}
+                data-gamepad-initial-choice={!locked ? true : undefined}
                 type="button"
                 onClick={() => setPreviewLevel(config.level)}
                 className={`relative rounded-lg border px-2 py-1.5 text-center font-black transition-colors ${

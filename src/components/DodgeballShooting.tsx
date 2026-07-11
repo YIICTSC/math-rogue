@@ -112,8 +112,18 @@ const DodgeballShooting: React.FC<DodgeballShootingProps> = ({ enemy, playerImag
 
     return (
         <div 
+            data-gamepad-shortcut="A"
+            role="button"
+            tabIndex={0}
+            aria-label={languageMode === 'ENGLISH' ? 'Throw ball' : 'ボールを投げる'}
             className="mini-game-dodgeball-screen w-full h-full bg-slate-800 flex flex-col items-center justify-center relative cursor-crosshair overflow-hidden"
             onClick={handleThrow}
+            onKeyDown={(event) => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    handleThrow();
+                }
+            }}
         >
             <div className="absolute inset-0 texture-dark-matter opacity-20 pointer-events-none"></div>
             

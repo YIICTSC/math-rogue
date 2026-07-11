@@ -62,7 +62,7 @@ const ChefDeckSelectionScreen: React.FC<ChefDeckSelectionScreenProps> = ({ onCom
   };
 
   return (
-    <div className="flex flex-col h-full w-full bg-gray-900 text-white p-4 overflow-hidden relative">
+    <div data-gamepad-initial-scope="chef-deck-selection" className="flex flex-col h-full w-full bg-gray-900 text-white p-4 overflow-hidden relative">
       <div className="absolute inset-0 texture-dark-matter opacity-30 pointer-events-none"></div>
 
       {/* Header */}
@@ -93,10 +93,19 @@ const ChefDeckSelectionScreen: React.FC<ChefDeckSelectionScreenProps> = ({ onCom
             {selectableCards.map((card) => {
               const isSelected = selectedIds.includes(card.id);
               return (
-                <div 
-                  key={card.id} 
+                <div
+                  key={card.id}
+                  data-gamepad-initial-choice
+                  role="button"
+                  tabIndex={0}
                   className={`relative transition-all duration-200 cursor-pointer ${isSelected ? 'scale-105' : 'hover:scale-102 opacity-80 hover:opacity-100'}`}
                   onClick={() => toggleSelection(card)}
+                  onKeyDown={(event) => {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                      event.preventDefault();
+                      toggleSelection(card);
+                    }
+                  }}
                 >
                   <Card card={card} onClick={() => {}} disabled={false} languageMode={languageMode} />
                   {isSelected && (

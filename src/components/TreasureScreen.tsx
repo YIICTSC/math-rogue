@@ -94,6 +94,7 @@ const TreasureScreen: React.FC<TreasureScreenProps> = ({
 
   return (
     <div
+      data-gamepad-initial-scope={`treasure-${isPoolMode ? 'pool' : displayOpen ? 'opened' : 'closed'}`}
       className="main-treasure-screen flex h-full w-full flex-col items-center justify-center overflow-y-auto bg-gray-900 bg-cover bg-center p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] text-white relative sm:p-8"
       style={{
         backgroundImage: `url(${assetUrl(visualTheme === 'magic'
@@ -149,6 +150,7 @@ const TreasureScreen: React.FC<TreasureScreenProps> = ({
                           ))}
                         </div>
                         <button
+                          data-gamepad-initial-choice={!claimed && !resolved ? true : undefined}
                           onClick={!claimed && !resolved ? () => onClaimPool?.(pool.id) : undefined}
                           disabled={claimed || resolved}
                           className="w-full rounded border-2 border-yellow-300 bg-yellow-600 px-4 py-2 font-bold text-white disabled:cursor-not-allowed disabled:opacity-50"
@@ -181,13 +183,15 @@ const TreasureScreen: React.FC<TreasureScreenProps> = ({
                     )}
                 </div>
                 <p className="text-gray-400 mb-8">{trans(visualTheme === 'magic' ? "結界の奥で、まだ名前のない魔力が脈打っている。" : "中には何が入っているだろうか？", languageMode)}</p>
-                <button 
+                <button
+                    data-gamepad-initial-choice
                     onClick={handleOpen}
                     className="bg-yellow-600 hover:bg-yellow-500 text-white px-8 py-3 rounded font-bold text-xl border-2 border-yellow-300"
                 >
                     {trans(visualTheme === 'magic' ? "解放する" : "開ける", languageMode)}{typingMode && ' [1/Enter]'}
                 </button>
                 <button
+                    data-gamepad-initial-choice
                     onClick={onLeave}
                     className="mt-3 bg-slate-800/90 hover:bg-slate-700 text-slate-200 px-6 py-2 rounded font-bold text-sm border-2 border-slate-500"
                 >

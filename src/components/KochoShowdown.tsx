@@ -2695,7 +2695,7 @@ const KochoShowdown: React.FC<{
 
     // --- MAIN RENDER ---
     return (
-        <div className="flex flex-col h-full w-full bg-[#1a1a2e] text-white font-mono relative overflow-hidden">
+        <div data-gamepad-navigation-root data-gamepad-initial-scope={`kocho-${gameState.phase}-${gameState.status}`} className="flex flex-col h-full w-full bg-[#1a1a2e] text-white font-mono relative overflow-hidden">
             {/* Math Challenge Overlay */}
             {gameState.phase === 'MATH' && (
                  <div className="absolute inset-0 z-[100] w-full h-full pointer-events-auto">
@@ -2736,7 +2736,7 @@ const KochoShowdown: React.FC<{
             </div>
 
             {gameState.phase === 'SETUP' && (
-                <div className="kocho-difficulty-overlay absolute inset-0 z-40 flex items-center justify-center bg-[#111827]/95 p-4">
+                <div data-gamepad-modal data-gamepad-initial-scope="kocho-difficulty" className="kocho-difficulty-overlay absolute inset-0 z-40 flex items-center justify-center bg-[#111827]/95 p-4">
                     <div className="kocho-difficulty-panel w-full max-w-5xl rounded-xl border-2 border-indigo-500/60 bg-slate-950 p-5 shadow-2xl">
                         <div className="kocho-difficulty-header mb-5 text-center">
                             <div className="kocho-difficulty-eyebrow text-[11px] font-black uppercase tracking-[0.35em] text-pink-300">Kocho Showdown</div>
@@ -2749,6 +2749,7 @@ const KochoShowdown: React.FC<{
                                 return (
                                     <button
                                         key={difficulty.level}
+                                        data-gamepad-initial-choice={!locked ? true : undefined}
                                         onClick={() => startKochoRun(difficulty.level)}
                                         disabled={locked}
                                         className={`kocho-difficulty-button flex items-center justify-between rounded-lg border px-4 py-3 text-left transition-colors ${
@@ -2867,7 +2868,7 @@ const KochoShowdown: React.FC<{
                     <div className="pointer-events-none absolute inset-0 bg-gradient-to-b from-black/35 via-[#111827]/35 to-black/70" />
                     {/* Status Overlay */}
                     {(gameState.status === 'VICTORY' || gameState.status === 'GAME_OVER' || gameState.phase === 'REWARD' || gameState.phase === 'SHOP' || gameState.phase === 'UPGRADE_EVENT') && (
-                        <div className="absolute inset-0 bg-black/75 z-40 flex flex-col items-center justify-center p-4 backdrop-blur-[1px]">
+                        <div data-gamepad-modal data-gamepad-initial-scope={`kocho-result-${gameState.phase}-${gameState.status}`} className="absolute inset-0 bg-black/75 z-40 flex flex-col items-center justify-center p-4 backdrop-blur-[1px]">
                             
                             {/* REWARD UI */}
                             {gameState.phase === 'REWARD' && (
@@ -2875,7 +2876,7 @@ const KochoShowdown: React.FC<{
                                     <h2 className="text-3xl font-bold text-yellow-400 mb-8 flex items-center justify-center"><Gift className="mr-2"/> {tr('Card Reward')}</h2>
                                     <div className="flex gap-4 md:gap-8 justify-center flex-wrap">
                                         {rewardCards.map((card, i) => (
-                                            <div key={i} className="w-32 md:w-40 bg-slate-800 border-4 border-yellow-500 rounded-xl p-4 flex flex-col items-center hover:scale-105 transition-transform cursor-pointer" onClick={() => selectReward(card)}>
+                                            <div key={i} data-gamepad-initial-choice role="button" tabIndex={0} className="w-32 md:w-40 bg-slate-800 border-4 border-yellow-500 rounded-xl p-4 flex flex-col items-center hover:scale-105 transition-transform cursor-pointer" onClick={() => selectReward(card)} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); selectReward(card); } }}>
                                                 <KochoCardActionArt card={card} className="mb-2 h-16 w-16 rounded-lg border border-indigo-400/40 bg-black/40" />
                                                 <div className="font-bold text-white mb-1 text-center text-sm md:text-base leading-tight">{tr(card.name)}</div>
                                                 
@@ -3139,7 +3140,7 @@ const KochoShowdown: React.FC<{
                                     );
                                 })}
                             </div>
-                            <button onClick={executeQueue} disabled={gameState.queue.length === 0 || animating} className={`w-16 h-16 md:w-20 md:h-20 rounded-full border-4 flex flex-col items-center justify-center font-bold shadow-lg transition-all shrink-0 ${gameState.queue.length > 0 ? 'bg-indigo-600 border-indigo-400 text-white hover:scale-105 active:scale-95 cursor-pointer animate-pulse' : 'bg-gray-800 border-gray-600 text-gray-500 cursor-not-allowed'}`}>
+                            <button data-gamepad-zone="kocho-queue" data-gamepad-order={3} data-gamepad-shortcut="Y" aria-keyshortcuts="Y" onClick={executeQueue} disabled={gameState.queue.length === 0 || animating} className={`w-16 h-16 md:w-20 md:h-20 rounded-full border-4 flex flex-col items-center justify-center font-bold shadow-lg transition-all shrink-0 ${gameState.queue.length > 0 ? 'bg-indigo-600 border-indigo-400 text-white hover:scale-105 active:scale-95 cursor-pointer animate-pulse' : 'bg-gray-800 border-gray-600 text-gray-500 cursor-not-allowed'}`}>
                                 <Play size={20} className="fill-current mb-1"/> EXEC
                             </button>
                         </div>
@@ -3149,8 +3150,14 @@ const KochoShowdown: React.FC<{
                             {gameState.hand.map((card, i) => (
                                 <div
                                     key={card.id}
+                                    data-gamepad-initial-choice
+                                    data-gamepad-zone="kocho-hand"
+                                    data-gamepad-order={i}
+                                    role="button"
+                                    tabIndex={0}
                                     className={`kocho-hand-card w-28 h-36 md:w-32 md:h-40 bg-slate-800 border-2 rounded-xl flex flex-col justify-between p-2 cursor-pointer transition-transform relative shadow-lg shrink-0 snap-start ${card.usedSlots > 0 ? 'border-yellow-400' : 'border-slate-600'} ${card.currentCooldown > 0 ? 'opacity-50 grayscale' : 'hover:-translate-y-1'}`}
                                     onClick={() => handleQueueCard(card, i)}
+                                    onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); handleQueueCard(card, i); } }}
                                 >
                                     <div className={`absolute top-0 left-0 w-full h-1.5 ${card.color} rounded-t-lg`}></div>
                                     

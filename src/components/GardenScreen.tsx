@@ -47,7 +47,7 @@ const GardenScreen: React.FC<GardenScreenProps> = ({ player, onPlant, onHarvest,
   const seedsInDeck = player.deck.filter(c => c.isSeed);
 
   return (
-    <div className="main-garden-screen flex flex-col h-full w-full bg-[#2d1b0e] text-white font-mono relative overflow-hidden">
+    <div data-gamepad-initial-scope={`garden-${selectedSlot === null ? 'slots' : `seeds-${selectedSlot}`}`} className="main-garden-screen flex flex-col h-full w-full bg-[#2d1b0e] text-white font-mono relative overflow-hidden">
       {/* Background Texture */}
       <div className="absolute inset-0 texture-dark-matter opacity-20 pointer-events-none"></div>
 
@@ -82,9 +82,18 @@ const GardenScreen: React.FC<GardenScreenProps> = ({ player, onPlant, onHarvest,
           
           <div className="grid grid-cols-3 gap-1.5 md:gap-3 p-2 md:p-4 bg-[#3e2723] border-4 md:border-8 border-[#5d4037] rounded-xl shadow-2xl relative w-fit h-fit">
             {player.garden?.map((slot, i) => (
-              <div 
+              <div
                 key={i}
+                data-gamepad-initial-choice
+                role="button"
+                tabIndex={0}
                 onClick={() => handleSlotClick(i)}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    handleSlotClick(i);
+                  }
+                }}
                 className={`
                   w-20 h-20 xs:w-24 xs:h-24 md:w-32 md:h-32 border-2 md:border-4 rounded-lg flex flex-col items-center justify-center relative cursor-pointer transition-all
                   ${slot.plantedCard ? 'bg-[#4e342e] border-green-800' : 'bg-[#2d1b0e] border-[#5d4037] hover:border-yellow-600'}
@@ -140,9 +149,17 @@ const GardenScreen: React.FC<GardenScreenProps> = ({ player, onPlant, onHarvest,
               </div>
             ) : (
               seedsInDeck.map((seed) => (
-                <div 
+                <div
                   key={seed.id}
+                  data-gamepad-initial-choice={selectedSlot !== null ? true : undefined}
+                  role={selectedSlot !== null ? 'button' : undefined}
+                  tabIndex={selectedSlot !== null ? 0 : undefined}
                   onClick={() => handlePlantSeed(seed)}
+                  onKeyDown={(event) => {
+                    if (selectedSlot === null || (event.key !== 'Enter' && event.key !== ' ')) return;
+                    event.preventDefault();
+                    handlePlantSeed(seed);
+                  }}
                   className={`
                     p-2 md:p-3 bg-[#4e342e] border-2 rounded-lg cursor-pointer transition-all flex items-center gap-2 md:gap-3 group
                     ${selectedSlot !== null ? 'hover:border-green-400 hover:bg-[#5d4037]' : 'opacity-50 grayscale cursor-not-allowed'}

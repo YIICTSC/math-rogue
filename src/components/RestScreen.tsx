@@ -252,6 +252,7 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
 
   return (
     <div
+      data-gamepad-initial-scope={`rest-${mode}`}
       className="main-rest-screen flex flex-col h-full w-full bg-gray-900 bg-cover bg-center text-white relative items-center justify-center p-4 md:p-8"
       style={{
         backgroundImage: `url(${assetUrl(visualTheme === 'magic'
@@ -275,7 +276,8 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
             {mode === 'CHOICE' && (
                 <div className="flex flex-wrap justify-center gap-4 md:gap-8">
                     {/* Health Room (Rest) */}
-                    <button 
+                    <button
+                        data-gamepad-initial-choice
                         onClick={handleRest}
                         className="group relative flex flex-col items-center gap-2 p-4 border-2 border-gray-600 hover:border-green-500 rounded-lg hover:bg-gray-800 transition-all w-32 md:w-40"
                     >
@@ -286,7 +288,8 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
                     </button>
 
                     {/* Art Room (Upgrade) */}
-                    <button 
+                    <button
+                        data-gamepad-initial-choice
                         onClick={handleSmithChoice}
                         className="group relative flex flex-col items-center gap-2 p-4 border-2 border-gray-600 hover:border-yellow-500 rounded-lg hover:bg-gray-800 transition-all w-32 md:w-40"
                     >
@@ -298,6 +301,7 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
 
                     {/* Science Room (Synthesis) */}
                     <button 
+                        data-gamepad-initial-choice={scienceRoomAvailable ? true : undefined}
                         onClick={handleSynthesizeChoice}
                         disabled={!scienceRoomAvailable}
                         className={`group relative flex flex-col items-center gap-2 p-4 border-2 rounded-lg transition-all w-32 md:w-40
@@ -317,6 +321,7 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
                     </button>
                     {hasCardEraser && (
                         <button 
+                            data-gamepad-initial-choice
                             onClick={handleSelfStudyChoice}
                             className="group relative flex flex-col items-center gap-2 p-4 border-2 border-gray-600 hover:border-cyan-400 rounded-lg hover:bg-gray-800 transition-all w-32 md:w-40"
                         >
@@ -344,10 +349,19 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
                             const isSelected = synthCards.some(s => s.id === card.id);
                             const shortcutKey = REST_SHORTCUT_KEYS[index];
                             return (
-                                <div 
-                                    key={card.id} 
+                                <div
+                                    key={card.id}
+                                    data-gamepad-initial-choice
+                                    role="button"
+                                    tabIndex={0}
                                     className={`scale-75 md:scale-90 transition-transform cursor-pointer relative ${isSelected ? 'ring-4 ring-purple-500 rounded-lg scale-95' : 'hover:scale-100'}`} 
                                     onClick={() => handleCardClick(card)}
+                                    onKeyDown={(event) => {
+                                      if (event.key === 'Enter' || event.key === ' ') {
+                                        event.preventDefault();
+                                        handleCardClick(card);
+                                      }
+                                    }}
                                 >
                                     {typingMode && shortcutKey && <div className="absolute right-1 top-1 z-30 rounded-full border border-cyan-300 bg-cyan-950/95 px-1.5 py-0.5 text-[10px] font-black uppercase text-cyan-200">{shortcutKey}</div>}
                                     <Card card={card} onClick={() => handleCardClick(card)} disabled={false} languageMode={languageMode}/>
@@ -377,6 +391,7 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
                         {selectedEraserOptions.map((option, index) => (
                             <button
                                 key={option.id}
+                                data-gamepad-initial-choice
                                 onClick={() => confirmSelfStudy(option.id)}
                                 className="relative rounded border-2 border-cyan-500 bg-cyan-950/40 px-4 py-3 text-left hover:bg-cyan-900/60"
                             >
@@ -409,7 +424,7 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
                         </div>
                     )}
                     <div className="rest-upgrade-actions flex gap-4">
-                        <button onClick={confirmUpgrade} className="bg-green-600 hover:bg-green-500 text-white px-8 py-2 rounded font-bold border border-white">
+                        <button data-gamepad-initial-choice onClick={confirmUpgrade} className="bg-green-600 hover:bg-green-500 text-white px-8 py-2 rounded font-bold border border-white">
                             {trans("改良する", languageMode)}{typingMode && ' [1]'}
                         </button>
                         <button onClick={cancelPreview} className="bg-gray-600 hover:bg-gray-500 text-white px-8 py-2 rounded border border-gray-400">
@@ -445,7 +460,7 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
                         </div>
                     )}
                     <div className="flex gap-4 pb-4 shrink-0 justify-center">
-                        <button onClick={confirmSynthesize} className="bg-purple-600 hover:bg-purple-500 text-white px-6 py-3 rounded-lg font-bold border border-white shadow-lg whitespace-nowrap">
+                        <button data-gamepad-initial-choice onClick={confirmSynthesize} className="bg-purple-600 hover:bg-purple-500 text-white px-6 py-3 rounded-lg font-bold border border-white shadow-lg whitespace-nowrap">
                             {trans("実験開始！", languageMode)}{typingMode && ' [1]'}
                         </button>
                         <button onClick={cancelPreview} className="bg-gray-600 hover:bg-gray-500 text-white px-6 py-3 rounded-lg border border-gray-400 whitespace-nowrap">

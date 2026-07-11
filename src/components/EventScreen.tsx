@@ -271,6 +271,7 @@ const EventScreen: React.FC<EventScreenProps> = ({ title, description, options, 
 
   return (
     <div
+      data-gamepad-initial-scope="event-screen"
       className="main-event-screen flex h-full w-full flex-col items-center justify-start overflow-y-auto bg-gray-900 bg-cover bg-center p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] text-white relative custom-scrollbar sm:justify-center sm:p-8"
       style={{
         backgroundImage: `url(${assetUrl(visualTheme === 'magic'
@@ -352,6 +353,7 @@ const EventScreen: React.FC<EventScreenProps> = ({ title, description, options, 
                 {!resultLog && isTsukaponQuickQuiz ? (
                     <button
                         type="button"
+                        data-gamepad-initial-choice
                         onClick={() => setTsukaponQuizOpen(true)}
                         disabled={interactionDisabled}
                         className="w-full rounded-lg border border-yellow-300 bg-yellow-500 px-4 py-4 text-center text-lg font-black text-slate-950 transition-colors hover:bg-yellow-300 disabled:cursor-not-allowed disabled:opacity-50"
@@ -363,6 +365,7 @@ const EventScreen: React.FC<EventScreenProps> = ({ title, description, options, 
                         {options.map((opt, idx) => (
                             <button 
                                 key={`${isTsukaponQuickQuiz ? 'tsukapon-answer' : 'event-option'}-${idx}`}
+                                data-gamepad-initial-choice
                                 onClick={() => handleOptionAction(opt)}
                                 disabled={inputLocked}
                                 data-allow-japanese={isTsukaponQuickQuiz ? 'true' : undefined}
@@ -399,7 +402,7 @@ const EventScreen: React.FC<EventScreenProps> = ({ title, description, options, 
         </div>
 
         {isTsukaponQuickQuiz && tsukaponQuizOpen && !resultLog && (
-            <div data-allow-japanese="true" className="fixed inset-0 z-[10050] flex items-start justify-center overflow-y-auto bg-slate-950/95 p-3 pt-[max(1rem,env(safe-area-inset-top))] sm:items-center sm:p-6">
+            <div data-allow-japanese="true" data-gamepad-initial-scope="tsukapon-quick-quiz" className="fixed inset-0 z-[10050] flex items-start justify-center overflow-y-auto bg-slate-950/95 p-3 pt-[max(1rem,env(safe-area-inset-top))] sm:items-center sm:p-6">
                 <div className="w-full max-w-5xl rounded-xl border-2 border-yellow-300 bg-slate-950 p-4 shadow-[0_0_60px_rgba(250,204,21,0.25)] sm:p-8">
                     <div className="mb-4 flex items-center justify-between gap-3 border-b border-yellow-500/40 pb-3">
                         <div className="text-xs font-black tracking-[0.24em] text-yellow-300">TSUKAPON QUICK QUIZ</div>
@@ -415,6 +418,7 @@ const EventScreen: React.FC<EventScreenProps> = ({ title, description, options, 
                         {options.map((opt, idx) => (
                             <button
                                 key={`${isTsukaponQuickQuiz ? 'tsukapon-quick-answer' : 'event-option'}-${idx}`}
+                                data-gamepad-initial-choice
                                 type="button"
                                 onClick={() => handleOptionAction(opt)}
                                 disabled={inputLocked}

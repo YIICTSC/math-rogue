@@ -71,6 +71,13 @@ const FOCUSABLE_SELECTOR = [
   'textarea:not(:disabled)',
   '[tabindex]:not([tabindex="-1"])',
 ].join(',');
+const INITIAL_CHOICE_SCOPE_SELECTOR = '[data-gamepad-initial-scope]';
+const INITIAL_CHOICE_SELECTOR = '[data-gamepad-initial-choice]';
+const GAMEPAD_MODAL_SELECTOR = [
+  '[data-gamepad-modal]',
+  '[role="dialog"][aria-modal="true"]',
+  '.app-modal-overlay',
+].join(',');
 
 const BATTLE_ZONE_ORDER = [
   'battle-top',
@@ -86,9 +93,9 @@ type BattleZone = typeof BATTLE_ZONE_ORDER[number];
 
 const KEYBOARD_GAMEPLAY_SURFACE_SELECTOR = [
   '.mini-game-dungeon-screen',
-  '.schoolyard-survivor-screen',
+  '.mini-game-survivor-screen',
   '.dodgeball-shooting-screen',
-  '.go-home-dash-screen',
+  '.mini-game-go-home-screen',
 ].join(',');
 
 const isHTMLElement = (value: EventTarget | null): value is HTMLElement =>
@@ -101,8 +108,18 @@ const isTextEditingElement = (element: Element | null): boolean => {
   return tag === 'input' || tag === 'textarea' || tag === 'select';
 };
 
-const getFocusableElements = (): HTMLElement[] =>
-  Array.from(document.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR))
+const getTopmostVisibleGamepadModal = (): HTMLElement | null =>
+  Array.from(document.querySelectorAll<HTMLElement>(GAMEPAD_MODAL_SELECTOR))
+    .reverse()
+    .find(element => {
+      const style = window.getComputedStyle(element);
+      const rect = element.getBoundingClientRect();
+      return style.visibility !== 'hidden' && style.display !== 'none' && rect.width > 0 && rect.height > 0;
+    }) ?? null;
+
+const getFocusableElements = (): HTMLElement[] => {
+  const modal = getTopmostVisibleGamepadModal();
+  return Array.from(document.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR))
     .filter(element => {
       const style = window.getComputedStyle(element);
       const rect = element.getBoundingClientRect();
@@ -110,8 +127,10 @@ const getFocusableElements = (): HTMLElement[] =>
         && style.display !== 'none'
         && rect.width > 0
         && rect.height > 0
-        && !element.closest('[aria-hidden="true"]');
+        && !element.closest('[aria-hidden="true"]')
+        && (!modal || modal.contains(element));
     });
+};
 
 const isVisibleAndEnabled = (element: HTMLElement): boolean => {
   if (element instanceof HTMLButtonElement && element.disabled) return false;
@@ -124,6 +143,16 @@ const isVisibleAndEnabled = (element: HTMLElement): boolean => {
     && rect.height > 0
     && !element.closest('[aria-hidden="true"]');
 };
+
+const getTopLeftInitialChoice = (scope: HTMLElement): HTMLElement | null =>
+  Array.from(scope.querySelectorAll<HTMLElement>(INITIAL_CHOICE_SELECTOR))
+    .filter(isVisibleAndEnabled)
+    .sort((a, b) => {
+      const rectA = a.getBoundingClientRect();
+      const rectB = b.getBoundingClientRect();
+      if (Math.abs(rectA.top - rectB.top) > 8) return rectA.top - rectB.top;
+      return rectA.left - rectB.left;
+    })[0] ?? null;
 
 const getBattleRoot = (): HTMLElement | null =>
   document.querySelector<HTMLElement>('.battle-scene-root');
@@ -314,8 +343,19 @@ const getNearestFocusableByDirection = (direction: 'up' | 'down' | 'left' | 'rig
 
     if (direction === 'up' && dy >= -4) continue;
     if (direction === 'down' && dy <= 4) continue;
-    if (direction === 'left' && dx >= -4) continue;
-    if (direction === 'right' && dx <= 4) continue;
+    if (direction === 'left' || direction === 'right') {
+      if (direction === 'left' && dx >= -4) continue;
+      if (direction === 'right' && dx <= 4) continue;
+
+      // Horizontal movement must stay in the same visual row. This prevents a
+      // card-row edge from jumping diagonally into help/settings controls.
+      const overlapTop = Math.max(activeRect.top, rect.top);
+      const overlapBottom = Math.min(activeRect.bottom, rect.bottom);
+      const verticalOverlap = Math.max(0, overlapBottom - overlapTop);
+      const minimumOverlap = Math.min(activeRect.height, rect.height) * 0.25;
+      const centerTolerance = Math.max(activeRect.height, rect.height) * 0.6;
+      if (verticalOverlap < minimumOverlap && Math.abs(dy) > centerTolerance) continue;
+    }
 
     const primary = direction === 'up' || direction === 'down' ? Math.abs(dy) : Math.abs(dx);
     const secondary = direction === 'up' || direction === 'down' ? Math.abs(dx) : Math.abs(dy);
@@ -353,24 +393,92 @@ const activateFocusedElement = () => {
 };
 
 const triggerShortcutButton = (buttonName: ShortcutButtonName): boolean => {
-  if (triggerBattleShortcut(buttonName)) return true;
-  const targets = Array.from(document.querySelectorAll<HTMLElement>(`[data-gamepad-shortcut~="${buttonName}"]`))
+  const modal = getTopmostVisibleGamepadModal();
+  if (!modal && triggerBattleShortcut(buttonName)) return true;
+  const shortcutRoot: ParentNode = modal ?? document;
+  const targets = Array.from(shortcutRoot.querySelectorAll<HTMLElement>(`[data-gamepad-shortcut~="${buttonName}"]`))
     .filter(isVisibleAndEnabled);
   const target = targets[0];
-  if (!target) return false;
+  // Do not leak a modal shortcut to controls behind the modal.
+  if (!target) return Boolean(modal);
   target.focus({ preventScroll: true });
   target.click();
   return true;
 };
 
 const clickBackLikeControl = () => {
-  const candidates = getFocusableElements();
-  const labels = ['戻る', '閉じる', 'キャンセル', 'メニューへ', 'EXIT', 'Quit', 'Back'];
+  const modal = getTopmostVisibleGamepadModal();
+  const candidates = getFocusableElements().filter(element => !modal || modal.contains(element));
+  const labels = ['戻る', '閉じる', 'キャンセル', '終了', 'メニューへ', 'EXIT', 'Exit', 'Quit', 'Back'];
   const target = candidates.find(element => {
     const text = `${element.textContent ?? ''} ${element.getAttribute('aria-label') ?? ''} ${element.getAttribute('title') ?? ''}`;
     return labels.some(label => text.includes(label));
   });
-  target?.click();
+  if (target) {
+    target.click();
+    return;
+  }
+  // Many existing overlays close when their backdrop is clicked.
+  modal?.click();
+};
+
+const handleZonedNavigation = (action: NavigationAction): boolean => {
+  if (action !== 'up' && action !== 'down' && action !== 'left' && action !== 'right' && action !== 'confirm') return false;
+  const active = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+  const root = active?.closest<HTMLElement>('[data-gamepad-navigation-root]');
+  const activeZone = active?.dataset.gamepadZone;
+  if (!root || !activeZone || !active) return false;
+
+  if (action === 'confirm') {
+    active.click();
+    return true;
+  }
+
+  const zoneElements = Array.from(root.querySelectorAll<HTMLElement>(`[data-gamepad-zone="${activeZone}"]`))
+    .filter(isVisibleAndEnabled)
+    .sort((a, b) => {
+      const orderA = Number(a.dataset.gamepadOrder ?? 0);
+      const orderB = Number(b.dataset.gamepadOrder ?? 0);
+      if (orderA !== orderB) return orderA - orderB;
+      return a.getBoundingClientRect().left - b.getBoundingClientRect().left;
+    });
+
+  if (action === 'left' || action === 'right') {
+    const currentIndex = zoneElements.indexOf(active);
+    if (currentIndex < 0) return true;
+    const nextIndex = Math.max(0, Math.min(zoneElements.length - 1, currentIndex + (action === 'right' ? 1 : -1)));
+    const next = zoneElements[nextIndex];
+    if (next && next !== active) {
+      next.focus({ preventScroll: true });
+      next.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+    }
+    // Horizontal input is always consumed at the edge of a zone.
+    return true;
+  }
+
+  const activeRect = active.getBoundingClientRect();
+  const activeCx = activeRect.left + activeRect.width / 2;
+  const activeCy = activeRect.top + activeRect.height / 2;
+  const candidates = Array.from(root.querySelectorAll<HTMLElement>('[data-gamepad-zone]'))
+    .filter(element => element.dataset.gamepadZone !== activeZone && isVisibleAndEnabled(element));
+
+  let best: { element: HTMLElement; score: number } | null = null;
+  for (const element of candidates) {
+    const rect = element.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+    const dx = Math.abs(cx - activeCx);
+    const dy = cy - activeCy;
+    if (action === 'up' && dy >= -4) continue;
+    if (action === 'down' && dy <= 4) continue;
+    const score = Math.abs(dy) * 2 + dx;
+    if (!best || score < best.score) best = { element, score };
+  }
+  if (best) {
+    best.element.focus({ preventScroll: true });
+    best.element.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+  }
+  return true;
 };
 
 const dispatchKeyboardEvent = (key: string): boolean => {
@@ -382,14 +490,31 @@ const dispatchKeyboardEvent = (key: string): boolean => {
     cancelable: true,
   });
   target.dispatchEvent(event);
+  // Real-time mini games track keydown/keyup state. Release synthetic inputs
+  // after a short pulse so a direction never remains stuck after the stick is released.
+  window.setTimeout(() => {
+    target.dispatchEvent(new KeyboardEvent('keyup', {
+      key,
+      code: key.startsWith('Arrow') ? key : key === 'Escape' ? 'Escape' : key === 'Enter' ? 'Enter' : key === ' ' ? 'Space' : key,
+      bubbles: true,
+      cancelable: true,
+    }));
+  }, 70);
   return event.defaultPrevented;
 };
 
+const getKeyboardActionKey = (action: NavigationAction): string => {
+  if (action === 'confirm' && document.querySelector('.mini-game-go-home-screen')) return ' ';
+  return ACTION_TO_KEY[action];
+};
+
 const handleActionFallback = (action: NavigationAction) => {
-  if (handleBattleAction(action)) return;
+  const modal = getTopmostVisibleGamepadModal();
+  if (!modal && handleBattleAction(action)) return;
+  if (!modal && handleZonedNavigation(action)) return;
 
   const keyboardGameplaySurface = document.querySelector(KEYBOARD_GAMEPLAY_SURFACE_SELECTOR);
-  if (keyboardGameplaySurface && !isTextEditingElement(document.activeElement)) {
+  if (keyboardGameplaySurface && action !== 'cancel' && !isTextEditingElement(document.activeElement)) {
     return;
   }
 
@@ -441,6 +566,40 @@ export const useXboxControllerNavigation = () => {
     if (typeof window === 'undefined' || !('getGamepads' in navigator)) return;
 
     let frameId = 0;
+    let initialChoiceFrameId = 0;
+    const initializedChoiceScopes = new WeakMap<HTMLElement, string>();
+
+    const focusPendingInitialChoice = () => {
+      initialChoiceFrameId = 0;
+      if (!document.body.classList.contains('gamepad-connected')) return;
+
+      const scopes = Array.from(document.querySelectorAll<HTMLElement>(INITIAL_CHOICE_SCOPE_SELECTOR))
+        .filter(isVisibleAndEnabled);
+      // A newly opened modal should win over its underlying screen.
+      for (const scope of scopes.reverse()) {
+        const scopeKey = scope.dataset.gamepadInitialScope ?? '';
+        if (initializedChoiceScopes.get(scope) === scopeKey) continue;
+        const choice = getTopLeftInitialChoice(scope);
+        if (!choice) continue;
+        choice.focus({ preventScroll: true });
+        choice.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+        initializedChoiceScopes.set(scope, scopeKey);
+        break;
+      }
+    };
+
+    const scheduleInitialChoiceFocus = () => {
+      if (initialChoiceFrameId) return;
+      initialChoiceFrameId = window.requestAnimationFrame(focusPendingInitialChoice);
+    };
+
+    const initialChoiceObserver = new MutationObserver(scheduleInitialChoiceFocus);
+    initialChoiceObserver.observe(document.body, {
+      attributes: true,
+      attributeFilter: ['data-gamepad-initial-scope'],
+      childList: true,
+      subtree: true,
+    });
     const markGamepadNavigation = () => document.body.classList.add('gamepad-navigation-active');
     const clearGamepadNavigation = (event?: Event) => {
       if (event instanceof KeyboardEvent && !event.isTrusted) return;
@@ -449,7 +608,7 @@ export const useXboxControllerNavigation = () => {
 
     const runAction = (action: NavigationAction) => {
       markGamepadNavigation();
-      const handled = dispatchKeyboardEvent(ACTION_TO_KEY[action]);
+      const handled = dispatchKeyboardEvent(getKeyboardActionKey(action));
       if (!handled) handleActionFallback(action);
     };
 
@@ -499,7 +658,9 @@ export const useXboxControllerNavigation = () => {
     const tick = () => {
       const gamepads = navigator.getGamepads();
       const gamepad = Array.from(gamepads).find(Boolean);
+      const wasConnected = document.body.classList.contains('gamepad-connected');
       document.body.classList.toggle('gamepad-connected', Boolean(gamepad));
+      if (gamepad && !wasConnected) scheduleInitialChoiceFocus();
 
       if (gamepad) {
         for (const [name, index] of Object.entries(BUTTON_INDEX) as [GamepadButtonName, number][]) {
@@ -543,6 +704,8 @@ export const useXboxControllerNavigation = () => {
     window.addEventListener('keydown', handleKeyboardEmulation);
     return () => {
       window.cancelAnimationFrame(frameId);
+      if (initialChoiceFrameId) window.cancelAnimationFrame(initialChoiceFrameId);
+      initialChoiceObserver.disconnect();
       window.removeEventListener('pointerdown', clearGamepadNavigation);
       window.removeEventListener('keydown', clearGamepadNavigation);
       window.removeEventListener('keydown', handleKeyboardEmulation);

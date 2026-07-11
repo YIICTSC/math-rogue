@@ -60,6 +60,7 @@ const FinalBridgeScreen: React.FC<FinalBridgeScreenProps> = ({ player, onComplet
 
   return (
     <div
+      data-gamepad-initial-scope={`final-bridge-${showChoices ? 'choice' : `story-${step}`}`}
       className="main-final-bridge-screen w-full h-full bg-black bg-cover bg-center flex flex-col items-center justify-center p-8 relative overflow-hidden font-mono"
       style={visualTheme === 'magic' ? { backgroundImage: `url(${assetUrl('sprites/backgrounds/learning-rogue/magic-final-bridge.webp')})` } : undefined}
     >
@@ -89,6 +90,7 @@ const FinalBridgeScreen: React.FC<FinalBridgeScreenProps> = ({ player, onComplet
             </div>
             
             <button 
+              data-gamepad-initial-choice
               onClick={nextStep}
               className="w-full flex items-center justify-center gap-2 bg-white text-black py-3 font-bold hover:bg-gray-200 transition-colors"
             >
@@ -104,6 +106,7 @@ const FinalBridgeScreen: React.FC<FinalBridgeScreenProps> = ({ player, onComplet
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
               <button 
+                data-gamepad-initial-choice
                 onClick={() => onComplete('HEAL')}
                 className="bg-green-900/40 border-2 border-green-500 p-6 rounded-xl hover:bg-green-800/60 transition-all group flex flex-col items-center gap-4 shadow-lg hover:shadow-green-500/20"
               >
@@ -115,6 +118,7 @@ const FinalBridgeScreen: React.FC<FinalBridgeScreenProps> = ({ player, onComplet
               </button>
 
               <button 
+                data-gamepad-initial-choice
                 onClick={() => onComplete('APOTHEOSIS')}
                 className="bg-purple-900/40 border-2 border-purple-500 p-6 rounded-xl hover:bg-purple-800/60 transition-all group flex flex-col items-center gap-4 shadow-lg hover:shadow-purple-500/20"
               >
@@ -126,6 +130,7 @@ const FinalBridgeScreen: React.FC<FinalBridgeScreenProps> = ({ player, onComplet
               </button>
 
               <button 
+                data-gamepad-initial-choice
                 onClick={() => onComplete('STRENGTH')}
                 className="bg-red-900/40 border-2 border-red-500 p-6 rounded-xl hover:bg-red-800/60 transition-all group flex flex-col items-center gap-4 shadow-lg hover:shadow-red-500/20"
               >

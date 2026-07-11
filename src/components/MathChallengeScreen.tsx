@@ -282,7 +282,7 @@ const MathChallengeScreen: React.FC<MathChallengeScreenProps> = ({ onComplete, m
   const currentProblem = problems[currentProblemIndex];
 
   return (
-    <div className="main-challenge-screen flex flex-col h-full w-full bg-emerald-950 text-white relative items-center justify-center p-8 font-mono">
+    <div data-gamepad-initial-scope={`math-challenge-${currentProblemIndex}`} className="main-challenge-screen flex flex-col h-full w-full bg-emerald-950 text-white relative items-center justify-center p-8 font-mono">
         <div className="absolute inset-0 texture-blackboard opacity-20 pointer-events-none"></div>
         <RewardHintBanner text={rewardHint} languageMode={languageMode} />
         {unitBoardSummary && (
@@ -342,6 +342,7 @@ const MathChallengeScreen: React.FC<MathChallengeScreenProps> = ({ onComplete, m
                   return (
                     <button
                         key={idx}
+                        data-gamepad-initial-choice
                         onClick={() => handleAnswer(opt)}
                         disabled={isAnswered}
                         className={`

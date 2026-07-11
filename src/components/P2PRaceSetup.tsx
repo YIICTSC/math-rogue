@@ -225,7 +225,7 @@ const P2PRaceSetup: React.FC<P2PRaceSetupProps> = ({ player, visualTheme, langua
     const cautionPlayerText = t('10〜12人は回線次第、20人以上は非推奨');
 
     return (
-        <div className="main-p2p-setup-screen fixed inset-0 z-[200] bg-slate-950/95 flex items-center justify-center p-4 text-white">
+        <div data-gamepad-initial-scope={`race-setup-${mode}-${battleCode ? 'room' : 'entry'}`} className="main-p2p-setup-screen fixed inset-0 z-[200] bg-slate-950/95 flex items-center justify-center p-4 text-white">
             <div className="main-p2p-setup-panel bg-slate-900 border-2 border-indigo-500 rounded-2xl w-full max-w-lg p-6 relative">
                 <button onClick={handleBack} className="absolute top-3 right-3 text-gray-400 hover:text-white"><X size={22} /></button>
 
@@ -250,6 +250,7 @@ const P2PRaceSetup: React.FC<P2PRaceSetupProps> = ({ player, visualTheme, langua
                 {mode === 'SELECT' && (
                     <div className="space-y-4">
                         <button
+                            data-gamepad-initial-choice
                             onClick={() => {
                                 setMode('HOST');
                                 setStatus('IDLE');
@@ -260,6 +261,7 @@ const P2PRaceSetup: React.FC<P2PRaceSetupProps> = ({ player, visualTheme, langua
                             <Wifi size={20} /> {t('ルームを作成')}
                         </button>
                         <button
+                            data-gamepad-initial-choice
                             onClick={() => {
                                 setMode('JOIN');
                                 setStatus('IDLE');

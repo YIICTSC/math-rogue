@@ -205,7 +205,7 @@ const MapScreen: React.FC<MapScreenProps> = ({ nodes, currentNodeId, onNodeSelec
             : mapBackgrounds[(Math.max(1, act) - 1) % mapBackgrounds.length];
 
     return (
-        <div className="main-map-screen flex flex-col h-full w-full bg-slate-950 relative overflow-hidden">
+        <div data-gamepad-initial-scope="map-screen" className="main-map-screen flex flex-col h-full w-full bg-slate-950 relative overflow-hidden">
             {/* 背景テクスチャ（黒板風） */}
             <div className="absolute inset-0 texture-dark-matter opacity-40 pointer-events-none"></div>
             <div className="absolute inset-0 bg-gradient-to-b from-transparent via-slate-900/50 to-black pointer-events-none"></div>
@@ -376,9 +376,17 @@ const MapScreen: React.FC<MapScreenProps> = ({ nodes, currentNodeId, onNodeSelec
                         return (
                             <div
                                 key={node.id}
+                                data-gamepad-initial-choice={isAvailable && !selectionDisabled ? true : undefined}
+                                role={isAvailable && !selectionDisabled ? 'button' : undefined}
+                                tabIndex={isAvailable && !selectionDisabled ? 0 : undefined}
                                 className={`absolute w-12 h-12 -ml-6 flex items-center justify-center rounded-2xl ${nodeBaseStyle} ${bgClass}`}
                                 style={{ left, bottom }}
                                 onClick={() => isAvailable && !selectionDisabled && selectionHoldMs <= 0 ? onNodeSelect(node) : null}
+                                onKeyDown={(event) => {
+                                    if (!isAvailable || selectionDisabled || (event.key !== 'Enter' && event.key !== ' ')) return;
+                                    event.preventDefault();
+                                    onNodeSelect(node);
+                                }}
                                 onPointerDown={() => {
                                     if (!isAvailable || selectionDisabled || selectionHoldMs <= 0) return;
                                     if (holdTimerRef.current) window.clearTimeout(holdTimerRef.current);

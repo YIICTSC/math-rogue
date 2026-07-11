@@ -423,7 +423,7 @@ const CoopSetupScreen: React.FC<CoopSetupScreenProps> = ({ player, onStart, onCl
   };
 
   return (
-    <div className="main-p2p-setup-screen fixed inset-0 z-[200] bg-slate-950/95 flex items-center justify-center p-4 text-white">
+    <div data-gamepad-initial-scope={`coop-setup-${mode}-${roomCode ? 'room' : 'entry'}`} className="main-p2p-setup-screen fixed inset-0 z-[200] bg-slate-950/95 flex items-center justify-center p-4 text-white">
       <div className="main-p2p-setup-panel bg-slate-900 border-2 border-emerald-500 rounded-2xl w-full max-w-lg p-6 relative">
         <button onClick={handleBack} className="absolute top-3 right-3 text-gray-400 hover:text-white">
           <X size={22} />
@@ -462,6 +462,7 @@ const CoopSetupScreen: React.FC<CoopSetupScreenProps> = ({ player, onStart, onCl
               </button>
             )}
             <button
+              data-gamepad-initial-choice
               onClick={() => {
                 setMode('HOST');
                 setStatus('IDLE');
@@ -472,6 +473,7 @@ const CoopSetupScreen: React.FC<CoopSetupScreenProps> = ({ player, onStart, onCl
               <Wifi size={20} /> {t('ルームを作成')}
             </button>
             <button
+              data-gamepad-initial-choice
               onClick={() => {
                 setMode('JOIN');
                 setStatus('IDLE');
@@ -523,12 +525,14 @@ const CoopSetupScreen: React.FC<CoopSetupScreenProps> = ({ player, onStart, onCl
                   <div className="text-xs text-emerald-200/90">{t('戦闘進行モード（ホストが開始時に選択）')}</div>
                   <div className="grid grid-cols-2 gap-2">
                     <button
+                      data-gamepad-initial-choice
                       onClick={() => setBattleMode('TURN_BASED')}
                       className={`px-3 py-2 rounded text-sm font-bold border ${battleMode === 'TURN_BASED' ? 'bg-emerald-600 border-emerald-300 text-white' : 'bg-slate-800 border-slate-600 text-gray-200'}`}
                     >
                       {t('ターンベース')}
                     </button>
                     <button
+                      data-gamepad-initial-choice
                       onClick={() => setBattleMode('REALTIME')}
                       className={`px-3 py-2 rounded text-sm font-bold border ${battleMode === 'REALTIME' ? 'bg-cyan-600 border-cyan-300 text-white' : 'bg-slate-800 border-slate-600 text-gray-200'}`}
                     >

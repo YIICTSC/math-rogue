@@ -150,6 +150,7 @@ const MiniGameSelectScreen: React.FC<MiniGameSelectScreenProps> = ({ onSelect, o
 
   return (
     <div
+      data-gamepad-initial-scope="mini-game-selection"
       className="main-mini-game-select-screen flex flex-col h-full w-full bg-gray-900 bg-cover bg-center text-white relative"
       style={{ backgroundImage: `url(${assetUrl('sprites/backgrounds/learning-rogue/selection-entrance.webp')})` }}
     >
@@ -197,6 +198,7 @@ const MiniGameSelectScreen: React.FC<MiniGameSelectScreenProps> = ({ onSelect, o
             {MINI_GAMES.map((game) => (
               <button
                 key={game.id}
+                data-gamepad-initial-choice={isUnlocked(game) ? true : undefined}
                 {...bindPress(game)}
                 className={`group relative bg-slate-800 border-4 border-slate-600 hover:border-white p-2 md:p-4 rounded-xl flex flex-col md:flex-row items-center justify-center md:justify-start text-center md:text-left transition-all shadow-xl overflow-hidden h-36 md:h-32 ${!isUnlocked(game) ? 'grayscale opacity-60' : 'hover:bg-slate-700'}`}
                 style={{ 

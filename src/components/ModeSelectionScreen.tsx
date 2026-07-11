@@ -1071,6 +1071,7 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
     return (
       <button
         key={sub.id}
+        data-gamepad-initial-choice
         onClick={options.onClick}
         className={`group relative min-h-[3.1rem] w-full overflow-hidden rounded-lg border px-2 py-1.5 pr-14 text-left text-[10px] font-bold leading-snug transition-colors md:text-xs sm:pr-16 ${
           selectedClass || options.className || 'bg-slate-700 border-slate-600 text-gray-300 hover:bg-slate-600'
@@ -1585,6 +1586,7 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
 
   return (
     <div
+      data-gamepad-initial-scope={`mode-selection-${problemSetView}-${selectedCategory.id}`}
       className="main-mode-selection-screen w-full h-full bg-slate-950 bg-cover bg-center flex flex-col text-white overflow-hidden relative"
       style={{
         backgroundImage: `url(${assetUrl(visualTheme === 'magic'
@@ -1639,6 +1641,7 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
             {displayedCategories.map((cat) => (
               <button
                 key={cat.id}
+                data-gamepad-initial-choice
                 onClick={() => handleCategorySelect(cat)}
                 className={`mode-category-button flex items-center justify-center lg:justify-start gap-2 px-2 py-1.5 sm:p-2.5 lg:p-3 rounded-lg lg:rounded-xl border-2 transition-all shrink-0 min-h-[2.5rem] sm:min-h-[3rem] lg:min-h-0 ${selectedCategory.id === cat.id ? 'bg-yellow-900/35 border-yellow-400 text-white shadow-[0_0_10px_rgba(250,204,21,0.18)]' : 'bg-slate-800 border-slate-700 text-slate-400 hover:border-slate-500'}`}
               >

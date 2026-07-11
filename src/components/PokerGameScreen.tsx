@@ -2027,7 +2027,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
   if (phase === 'BLIND_SELECT') {
       const config = runState.currentBlind;
       return (
-          <div className="poker-rival-screen flex flex-col h-full w-full bg-slate-900 text-white p-8 items-center justify-center relative font-mono overflow-hidden" style={pokerTableBackgroundStyle}>
+          <div data-gamepad-initial-scope="poker-rival" className="poker-rival-screen flex flex-col h-full w-full bg-slate-900 text-white p-8 items-center justify-center relative font-mono overflow-hidden" style={pokerTableBackgroundStyle}>
               <div className="absolute top-4 left-4">
                   <button onClick={handleQuit} className="text-gray-400 hover:text-white flex items-center"><ArrowLeft className="mr-2"/> {t('戻る')}</button>
               </div>
@@ -2047,7 +2047,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
                           <div className="poker-rival-reward text-3xl font-bold text-yellow-400 mb-2">${config.rewardMoney}</div>
                           {config.description && <div className="poker-rival-description text-purple-300 text-sm mt-4 border-t border-slate-600 pt-2">{t(config.description)}</div>}
                       </div>
-                      <button onClick={startBlind} className="poker-rival-start bg-red-600 hover:bg-red-500 text-white text-2xl font-bold py-4 px-12 rounded-full shadow-[0_0_20px_rgba(220,38,38,0.5)] animate-pulse flex items-center justify-center mx-auto">
+                      <button data-gamepad-initial-choice onClick={startBlind} className="poker-rival-start bg-red-600 hover:bg-red-500 text-white text-2xl font-bold py-4 px-12 rounded-full shadow-[0_0_20px_rgba(220,38,38,0.5)] animate-pulse flex items-center justify-center mx-auto">
                           <Play className="mr-2 fill-current"/> {t('対戦開始')}
                       </button>
                   </div>
@@ -2060,7 +2060,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
       
       if (phase === 'PACK_OPEN' && currentPack) {
           return (
-              <div className="flex flex-col h-full w-full bg-slate-900 text-white p-4 items-center justify-center relative font-mono overflow-hidden" style={pokerTableBackgroundStyle}>
+              <div data-gamepad-initial-scope={`poker-pack-${isPackOpened ? 'select' : 'open'}`} className="flex flex-col h-full w-full bg-slate-900 text-white p-4 items-center justify-center relative font-mono overflow-hidden" style={pokerTableBackgroundStyle}>
                   <div className="absolute inset-0 bg-black/80 z-0"></div>
                   {renderInspectionModal()}
                   
@@ -2068,7 +2068,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
                       <h2 className="text-3xl font-bold mb-8 text-yellow-400 animate-pulse">{isPackOpened ? t("Choose One!") : t("Open Pack!")}</h2>
                       
                       {!isPackOpened ? (
-                          <div className="cursor-pointer hover:scale-110 transition-transform animate-bounce relative" onClick={revealPack}>
+                          <div data-gamepad-initial-choice role="button" tabIndex={0} className="cursor-pointer hover:scale-110 transition-transform animate-bounce relative" onClick={revealPack} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); revealPack(); } }}>
                               <div className="w-48 h-64 bg-gradient-to-br from-yellow-600 to-yellow-800 rounded-lg border-4 border-yellow-300 shadow-[0_0_50px_rgba(253,224,71,0.5)] flex flex-col items-center justify-center p-4 text-center">
                                   <div className="text-6xl mb-4">{renderPokerItemIcon(currentPack.icon, currentPack.name, 'w-24 h-24', currentPack.id)}</div>
                                   <div className="text-2xl font-black text-white drop-shadow-md">{t(currentPack.name)}</div>
@@ -2086,7 +2086,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
                                   if (isConsumable && runState.consumables.length >= 2) disabled = true;
                                   const type = isCard ? 'CARD' : isSupporter ? 'SUPPORTER' : 'CONSUMABLE';
                                   return (
-                                      <div key={idx} className={`relative cursor-pointer transition-transform hover:-translate-y-4 duration-300 ${disabled ? 'opacity-50 grayscale cursor-not-allowed' : ''}`} onClick={() => !disabled && selectPackItem(item)} onContextMenu={(e) => handleContextMenu(e, item, type, false)} onTouchStart={() => handleTouchStart(item, type, false)} onTouchEnd={handleTouchEnd}>
+                                      <div key={idx} data-gamepad-initial-choice={!disabled ? true : undefined} role={!disabled ? 'button' : undefined} tabIndex={!disabled ? 0 : undefined} className={`relative cursor-pointer transition-transform hover:-translate-y-4 duration-300 ${disabled ? 'opacity-50 grayscale cursor-not-allowed' : ''}`} onClick={() => !disabled && selectPackItem(item)} onKeyDown={(event) => { if (!disabled && (event.key === 'Enter' || event.key === ' ')) { event.preventDefault(); selectPackItem(item); } }} onContextMenu={(e) => handleContextMenu(e, item, type, false)} onTouchStart={() => handleTouchStart(item, type, false)} onTouchEnd={handleTouchEnd}>
                                           {isCard && <div className="w-32 h-48 bg-white text-black rounded-lg border-4 border-yellow-300 shadow-xl flex flex-col items-center justify-between p-2" style={getPokerCardFaceStyle(item as PokerCard)}><div className={`text-2xl font-bold w-full text-left ${['HEART', 'DIAMOND'].includes((item as PokerCard).suit) ? 'text-red-600' : 'text-black'}`}>{getRankDisplay((item as PokerCard).rank)}</div><div className="scale-150">{getSuitIcon((item as PokerCard).suit, (item as PokerCard).enhancement === 'WILD')}</div><div className="text-xs text-center font-bold text-gray-500">{(item as PokerCard).enhancement || ''}</div><div className={`text-2xl font-bold w-full text-right rotate-180 ${['HEART', 'DIAMOND'].includes((item as PokerCard).suit) ? 'text-red-600' : 'text-black'}`}>{getRankDisplay((item as PokerCard).rank)}</div></div>}
                                           {!isCard && <div className="w-32 h-48 bg-slate-800 text-white rounded-lg border-4 border-blue-400 shadow-xl flex flex-col items-center justify-center p-2 text-center">{renderPokerItemIcon((item as any).icon, (item as any).name, 'w-16 h-16 mb-2', (item as any).id)}<div className="font-bold text-sm">{t((item as any).name)}</div><div className="text-[10px] text-gray-400 mt-2 leading-tight">{t((item as any).description)}</div></div>}
                                           <button className={`absolute -bottom-4 left-1/2 -translate-x-1/2 px-4 py-1 rounded-full text-xs font-bold shadow-lg ${disabled ? 'bg-gray-600 text-gray-300' : 'bg-blue-600 text-white animate-pulse'}`}>{disabled ? t('FULL') : t('SELECT')}</button>
@@ -2107,11 +2107,11 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
       const voucher = runState.shopVoucher;
 
       return (
-          <div className="mini-game-poker-screen poker-shop-screen flex flex-col h-full w-full bg-slate-900 text-white p-4 font-mono relative overflow-hidden" style={pokerTableBackgroundStyle}>
+          <div data-gamepad-initial-scope="poker-shop" className="mini-game-poker-screen poker-shop-screen flex flex-col h-full w-full bg-slate-900 text-white p-4 font-mono relative overflow-hidden" style={pokerTableBackgroundStyle}>
               {renderInspectionModal()}
               
               {showRoundResult && roundResult && (
-                  <div className="absolute inset-0 z-50 bg-black/90 flex items-center justify-center p-4" onClick={closeResultModal}>
+                  <div data-gamepad-modal data-gamepad-initial-scope="poker-round-result" className="absolute inset-0 z-50 bg-black/90 flex items-center justify-center p-4" onClick={closeResultModal}>
                       <div className="bg-slate-800 border-4 border-yellow-500 rounded-lg p-6 w-full max-w-sm shadow-2xl relative animate-in zoom-in duration-300" onClick={e => e.stopPropagation()}>
                           <h2 className="text-3xl font-black text-white text-center mb-6 border-b border-slate-600 pb-2">{t('ラウンド勝利')}</h2>
                           
@@ -2138,7 +2138,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
                               </div>
                           </div>
                           
-                          <button onClick={closeResultModal} className="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-3 rounded-lg flex items-center justify-center shadow-lg transition-colors">
+                          <button data-gamepad-initial-choice onClick={closeResultModal} className="w-full bg-green-600 hover:bg-green-500 text-white font-bold py-3 rounded-lg flex items-center justify-center shadow-lg transition-colors">
                               <Check className="mr-2"/> {t('購買部へ')}
                           </button>
                       </div>
@@ -2217,7 +2217,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
                                       </div>
                                       <div className="font-bold text-xs">{t(voucher.name)}</div>
                                       <div className="text-[9px] text-gray-400 leading-tight h-8 overflow-hidden">{t(voucher.description)}</div>
-                                      <button disabled={runState.money < getPrice(voucher.price)} className={`w-full py-1 rounded font-bold text-xs ${runState.money >= getPrice(voucher.price) ? 'bg-slate-100 text-black hover:bg-white' : 'bg-gray-700 text-gray-500 cursor-not-allowed'}`}>${getPrice(voucher.price)}</button>
+                                      <button data-gamepad-initial-choice={runState.money >= getPrice(voucher.price) ? true : undefined} disabled={runState.money < getPrice(voucher.price)} className={`w-full py-1 rounded font-bold text-xs ${runState.money >= getPrice(voucher.price) ? 'bg-slate-100 text-black hover:bg-white' : 'bg-gray-700 text-gray-500 cursor-not-allowed'}`}>${getPrice(voucher.price)}</button>
                                   </div>
                               ) : (
                                   <div className="poker-shop-card bg-slate-900/50 border-2 border-slate-700 border-dashed p-4 rounded-lg flex flex-col items-center justify-center h-full text-gray-600 text-xs italic min-h-[160px]">
@@ -2232,7 +2232,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
                                   <div className="w-12 h-12 mt-4">{renderPokerItemIcon(item.icon, item.name, 'w-full h-full', item.id)}</div>
                                   <div className="font-bold text-xs">{t(item.name)}</div>
                                   <div className="text-[9px] text-gray-400 h-8 overflow-hidden leading-tight">{t(item.description)}</div>
-                                  <button disabled={runState.money < getPrice(item.price)} className={`w-full py-1 rounded font-bold text-xs ${runState.money >= getPrice(item.price) ? 'bg-orange-600 hover:bg-orange-500 shadow-md' : 'bg-gray-600 cursor-not-allowed'}`}>${getPrice(item.price)}</button>
+                                  <button data-gamepad-initial-choice={runState.money >= getPrice(item.price) ? true : undefined} disabled={runState.money < getPrice(item.price)} className={`w-full py-1 rounded font-bold text-xs ${runState.money >= getPrice(item.price) ? 'bg-orange-600 hover:bg-orange-500 shadow-md' : 'bg-gray-600 cursor-not-allowed'}`}>${getPrice(item.price)}</button>
                               </div>
                           ))}
                           
@@ -2242,7 +2242,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
                                   <div className="w-12 h-12 mt-4">{renderPokerItemIcon(item.icon, item.name, 'w-full h-full', item.id)}</div>
                                   <div className="font-bold text-xs">{t(item.name)}</div>
                                   <div className="text-[9px] text-gray-400 h-8 overflow-hidden leading-tight">{t(item.description)}</div>
-                                  <button disabled={runState.money < getPrice(item.price)} className={`w-full py-1 rounded font-bold text-xs ${runState.money >= getPrice(item.price) ? 'bg-blue-600 hover:bg-blue-500 shadow-md' : 'bg-gray-600 cursor-not-allowed'}`}>${getPrice(item.price)}</button>
+                                  <button data-gamepad-initial-choice={runState.money >= getPrice(item.price) ? true : undefined} disabled={runState.money < getPrice(item.price)} className={`w-full py-1 rounded font-bold text-xs ${runState.money >= getPrice(item.price) ? 'bg-blue-600 hover:bg-blue-500 shadow-md' : 'bg-gray-600 cursor-not-allowed'}`}>${getPrice(item.price)}</button>
                               </div>
                           ))}
                           
@@ -2252,7 +2252,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
                                   <div className="w-12 h-12 mt-4">{renderPokerItemIcon(item.icon, item.name, 'w-full h-full', item.id)}</div>
                                   <div className="font-bold text-xs">{t(item.name)}</div>
                                   <div className="text-[9px] text-gray-400 h-8 overflow-hidden leading-tight">{t(item.description)}</div>
-                                  <button disabled={runState.money < getPrice(item.price)} className={`w-full py-1 rounded font-bold text-xs ${runState.money >= getPrice(item.price) ? 'bg-purple-600 hover:bg-purple-500 shadow-md' : 'bg-gray-600 cursor-not-allowed'}`}>${getPrice(item.price)}</button>
+                                  <button data-gamepad-initial-choice={runState.money >= getPrice(item.price) ? true : undefined} disabled={runState.money < getPrice(item.price)} className={`w-full py-1 rounded font-bold text-xs ${runState.money >= getPrice(item.price) ? 'bg-purple-600 hover:bg-purple-500 shadow-md' : 'bg-gray-600 cursor-not-allowed'}`}>${getPrice(item.price)}</button>
                               </div>
                           ))}
                       </div>
@@ -2333,7 +2333,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
   ) : null;
 
   return (
-    <div className="mini-game-poker-screen flex flex-col h-full w-full bg-green-900 text-white font-mono relative overflow-hidden" style={pokerTableBackgroundStyle}>
+    <div data-gamepad-navigation-root data-gamepad-initial-scope="poker-play" className="mini-game-poker-screen flex flex-col h-full w-full bg-green-900 text-white font-mono relative overflow-hidden" style={pokerTableBackgroundStyle}>
         {renderInspectionModal()}
         {showRulesModal && (
             <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4" onClick={() => setShowRulesModal(false)}>
@@ -2372,7 +2372,11 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
         )}
 
         {tutorialStep && (
-            <div className="fixed inset-0 z-[55] pointer-events-none">
+            <div
+                data-gamepad-modal
+                data-gamepad-initial-scope={`poker-tutorial-${tutorialStepIndex}`}
+                className="fixed inset-0 z-[55] pointer-events-none"
+            >
                 <div className="absolute inset-0 bg-black/55" />
                 <div className={getPokerTutorialPanelClass()}>
                     <div className="mb-2 flex items-center justify-between gap-3">
@@ -2390,13 +2394,13 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
                     <h2 className="mb-2 text-lg font-black text-white">{tutorialStep.title}</h2>
                     <p className="text-sm leading-relaxed text-slate-200">{tutorialStep.body}</p>
                     <div className="mt-4 flex items-center justify-between gap-2">
-                        <button onClick={goToPreviousPokerTutorialStep} disabled={tutorialStepIndex === 0} className="rounded border border-slate-600 px-3 py-2 text-xs font-bold text-slate-200 disabled:opacity-40 hover:bg-slate-800">
+                        <button data-gamepad-shortcut="LB" aria-keyshortcuts="LB" onClick={goToPreviousPokerTutorialStep} disabled={tutorialStepIndex === 0} className="rounded border border-slate-600 px-3 py-2 text-xs font-bold text-slate-200 disabled:opacity-40 hover:bg-slate-800">
                             {pokerTutorialLabels.previous}
                         </button>
                         <button onClick={closePokerTutorial} className="rounded border border-slate-700 px-3 py-2 text-xs font-bold text-slate-300 hover:bg-slate-800">
                             {pokerTutorialLabels.later}
                         </button>
-                        <button onClick={goToNextPokerTutorialStep} className="rounded bg-yellow-400 px-4 py-2 text-xs font-black text-slate-950 hover:bg-yellow-300">
+                        <button data-gamepad-initial-choice data-gamepad-shortcut="RB" aria-keyshortcuts="RB" onClick={goToNextPokerTutorialStep} className="rounded bg-yellow-400 px-4 py-2 text-xs font-black text-slate-950 hover:bg-yellow-300">
                             {tutorialStepIndex === pokerTutorialSteps.length - 1 ? pokerTutorialLabels.done : pokerTutorialLabels.next}
                         </button>
                     </div>
@@ -2420,10 +2424,10 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
             </div>
             <div className="flex items-center justify-between md:justify-end gap-2 w-full md:w-auto">
                 <div className={`flex gap-2 ${getPokerTutorialHighlightClass('tools')}`}>
-                    <button onClick={() => openPokerTutorial(0)} className="bg-yellow-600 hover:bg-yellow-500 p-1 md:p-2 rounded border border-yellow-300 text-slate-950 flex flex-col items-center justify-center w-12 h-12 md:w-14 md:h-14"><BookOpen size={18} className="md:w-5 md:h-5"/><span className="text-[8px] md:text-[9px] font-black leading-none mt-1">{pokerTutorialLabels.button}</span></button>
-                    <button onClick={() => { setShowRulesModal(true); audioService.playSound('select'); }} className="bg-slate-700 hover:bg-slate-600 p-1 md:p-2 rounded border border-slate-500 text-white flex flex-col items-center justify-center w-12 h-12 md:w-14 md:h-14"><HelpCircle size={18} className="md:w-5 md:h-5 text-yellow-400"/><span className="text-[9px] md:text-[10px] leading-none mt-1">{t('ルール')}</span></button>
-                    <button onClick={() => { setShowDeckList(true); audioService.playSound('select'); }} className="bg-slate-700 hover:bg-slate-600 p-1 md:p-2 rounded border border-slate-500 text-white flex flex-col items-center justify-center w-12 h-12 md:w-14 md:h-14"><Layers size={18} className="md:w-5 md:h-5"/><span className="text-[9px] md:text-[10px] leading-none mt-1">{t('山札')}</span></button>
-                    <button onClick={() => { setShowHandList(true); audioService.playSound('select'); }} className="bg-slate-700 hover:bg-slate-600 p-1 md:p-2 rounded border border-slate-500 text-white flex flex-col items-center justify-center w-12 h-12 md:w-14 md:h-14"><BarChart3 size={18} className="md:w-5 md:h-5"/><span className="text-[9px] md:text-[10px] leading-none mt-1">{t('役')}</span></button>
+                    <button data-gamepad-zone="poker-tools" data-gamepad-order={0} onClick={() => openPokerTutorial(0)} className="bg-yellow-600 hover:bg-yellow-500 p-1 md:p-2 rounded border border-yellow-300 text-slate-950 flex flex-col items-center justify-center w-12 h-12 md:w-14 md:h-14"><BookOpen size={18} className="md:w-5 md:h-5"/><span className="text-[8px] md:text-[9px] font-black leading-none mt-1">{pokerTutorialLabels.button}</span></button>
+                    <button data-gamepad-zone="poker-tools" data-gamepad-order={1} onClick={() => { setShowRulesModal(true); audioService.playSound('select'); }} className="bg-slate-700 hover:bg-slate-600 p-1 md:p-2 rounded border border-slate-500 text-white flex flex-col items-center justify-center w-12 h-12 md:w-14 md:h-14"><HelpCircle size={18} className="md:w-5 md:h-5 text-yellow-400"/><span className="text-[9px] md:text-[10px] leading-none mt-1">{t('ルール')}</span></button>
+                    <button data-gamepad-zone="poker-tools" data-gamepad-order={2} onClick={() => { setShowDeckList(true); audioService.playSound('select'); }} className="bg-slate-700 hover:bg-slate-600 p-1 md:p-2 rounded border border-slate-500 text-white flex flex-col items-center justify-center w-12 h-12 md:w-14 md:h-14"><Layers size={18} className="md:w-5 md:h-5"/><span className="text-[9px] md:text-[10px] leading-none mt-1">{t('山札')}</span></button>
+                    <button data-gamepad-zone="poker-tools" data-gamepad-order={3} onClick={() => { setShowHandList(true); audioService.playSound('select'); }} className="bg-slate-700 hover:bg-slate-600 p-1 md:p-2 rounded border border-slate-500 text-white flex flex-col items-center justify-center w-12 h-12 md:w-14 md:h-14"><BarChart3 size={18} className="md:w-5 md:h-5"/><span className="text-[9px] md:text-[10px] leading-none mt-1">{t('役')}</span></button>
                 </div>
                 <div className="flex gap-2">
                     <div className="bg-slate-800 p-1 md:p-2 rounded border border-blue-600 flex flex-col items-center w-14 md:w-20 justify-center"><div className="text-[9px] md:text-[10px] text-blue-400 uppercase">{t('手数')}</div><div className="text-base md:text-lg font-bold text-blue-100">{runState.handsRemaining}</div></div>
@@ -2485,8 +2489,8 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
             {runState.hand.map((card, idx) => {
                 const isSelected = selectedCards.includes(card.id);
                 return (
-                    <div 
-                        key={card.id} data-card-id={card.id} onPointerDown={(e) => handlePointerDown(e, card.id)} onContextMenu={(e) => handleContextMenu(e, card, 'CARD', true)} onTouchStart={() => handleTouchStart(card, 'CARD', true)} onTouchEnd={handleTouchEnd}
+                    <div
+                        key={card.id} data-card-id={card.id} data-gamepad-initial-choice data-gamepad-zone="poker-hand" data-gamepad-order={idx} role="button" tabIndex={0} onPointerDown={(e) => handlePointerDown(e, card.id)} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); toggleSelect(card.id); } }} onContextMenu={(e) => handleContextMenu(e, card, 'CARD', true)} onTouchStart={() => handleTouchStart(card, 'CARD', true)} onTouchEnd={handleTouchEnd}
                         className={`w-20 h-32 md:w-28 md:h-40 rounded-lg border-2 shadow-xl flex flex-col items-center justify-between p-2 cursor-pointer transition-transform duration-200 -ml-4 first:ml-0 relative ${isSelected ? '-translate-y-6 z-20 border-yellow-400 ring-2 ring-yellow-400' : 'border-gray-400 hover:-translate-y-2 z-10'} ${selectedConsumable ? 'hover:ring-2 hover:ring-purple-400' : ''} ${card.enhancement === 'GOLD' ? 'bg-amber-100 border-amber-500' : ''} ${card.enhancement === 'STEEL' ? 'bg-slate-300 border-slate-500' : ''} ${card.enhancement === 'GLASS' ? 'bg-cyan-100/80 border-cyan-300 backdrop-blur-sm' : ''} ${!card.enhancement ? 'bg-gray-100' : ''}`}
                         style={getPokerCardFaceStyle(card)}
                     >
@@ -2502,13 +2506,13 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
         </div>
 
         <div className="flex justify-center gap-4 my-2 z-30 shrink-0">
-            <button onClick={sortHandRank} className="bg-orange-600 hover:bg-orange-500 text-white px-4 py-2 rounded-full font-bold text-xs flex items-center shadow-lg border-2 border-orange-800">{sortRankAsc ? <ArrowUpNarrowWide size={16} className="mr-1"/> : <ArrowDownWideNarrow size={16} className="mr-1"/>} Rank</button>
-            <button onClick={sortHandSuit} className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-full font-bold text-xs flex items-center shadow-lg border-2 border-blue-800"><LayoutList size={16} className="mr-1"/> Suit</button>
+            <button data-gamepad-zone="poker-sort" data-gamepad-order={0} data-gamepad-shortcut="LB" aria-keyshortcuts="LB" onClick={sortHandRank} className="bg-orange-600 hover:bg-orange-500 text-white px-4 py-2 rounded-full font-bold text-xs flex items-center shadow-lg border-2 border-orange-800">{sortRankAsc ? <ArrowUpNarrowWide size={16} className="mr-1"/> : <ArrowDownWideNarrow size={16} className="mr-1"/>} Rank</button>
+            <button data-gamepad-zone="poker-sort" data-gamepad-order={1} data-gamepad-shortcut="RB" aria-keyshortcuts="RB" onClick={sortHandSuit} className="bg-blue-600 hover:bg-blue-500 text-white px-4 py-2 rounded-full font-bold text-xs flex items-center shadow-lg border-2 border-blue-800"><LayoutList size={16} className="mr-1"/> Suit</button>
         </div>
 
         <div className={`bg-slate-800 p-2 md:p-4 flex justify-center gap-4 z-20 shadow-up shrink-0 ${getPokerTutorialHighlightClass('actions')}`}>
-            <button onClick={playHand} disabled={animating || selectedCards.length === 0} className="bg-orange-600 hover:bg-orange-500 disabled:bg-gray-600 text-white font-bold py-2 px-8 rounded-lg text-lg md:text-xl shadow-lg border-b-4 border-orange-800 active:border-0 active:translate-y-1 transition-all">PLAY HAND</button>
-            <button onClick={discardHand} disabled={animating || selectedCards.length === 0 || runState.discardsRemaining <= 0} className="bg-red-700 hover:bg-red-600 disabled:bg-gray-600 text-white font-bold py-2 px-6 rounded-lg text-sm md:text-base shadow-lg border-b-4 border-red-900 active:border-0 active:translate-y-1 transition-all">DISCARD</button>
+            <button data-gamepad-zone="poker-actions" data-gamepad-order={0} data-gamepad-shortcut="Y" aria-keyshortcuts="Y" onClick={playHand} disabled={animating || selectedCards.length === 0} className="bg-orange-600 hover:bg-orange-500 disabled:bg-gray-600 text-white font-bold py-2 px-8 rounded-lg text-lg md:text-xl shadow-lg border-b-4 border-orange-800 active:border-0 active:translate-y-1 transition-all">PLAY HAND</button>
+            <button data-gamepad-zone="poker-actions" data-gamepad-order={1} data-gamepad-shortcut="X" aria-keyshortcuts="X" onClick={discardHand} disabled={animating || selectedCards.length === 0 || runState.discardsRemaining <= 0} className="bg-red-700 hover:bg-red-600 disabled:bg-gray-600 text-white font-bold py-2 px-6 rounded-lg text-sm md:text-base shadow-lg border-b-4 border-red-900 active:border-0 active:translate-y-1 transition-all">DISCARD</button>
         </div>
     </div>
   );

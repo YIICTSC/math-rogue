@@ -37,6 +37,7 @@ const RelicSelectionScreen: React.FC<RelicSelectionScreenProps> = ({ relics, onS
 
   return (
     <div
+      data-gamepad-initial-scope="relic-selection"
       className="main-relic-screen flex flex-col h-full w-full bg-gray-900 bg-cover bg-center text-white relative overflow-y-auto custom-scrollbar"
       style={{
         backgroundImage: `url(${assetUrl(visualTheme === 'magic'
@@ -56,10 +57,19 @@ const RelicSelectionScreen: React.FC<RelicSelectionScreenProps> = ({ relics, onS
 
         <div className="flex flex-wrap justify-center gap-4 md:gap-8 pb-8">
             {relics.map((relic) => (
-            <div 
-                key={relic.id} 
+            <div
+                key={relic.id}
+                data-gamepad-initial-choice
+                role="button"
+                tabIndex={0}
                 className="group relative w-full max-w-[280px] md:w-64 bg-black/60 border-2 border-gray-500 hover:border-yellow-400 p-4 md:p-6 rounded-lg flex flex-col items-center cursor-pointer transition-all hover:bg-black/80 hover:-translate-y-1 shadow-lg shrink-0"
                 onClick={() => onSelect(relic)}
+                onKeyDown={(event) => {
+                  if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    onSelect(relic);
+                  }
+                }}
             >
                 {typingMode && <div className="absolute right-3 top-3 rounded-full border border-cyan-300 bg-cyan-950/95 px-1.5 py-0.5 text-[10px] font-black text-cyan-200">{relics.findIndex(r => r.id === relic.id) + 1}</div>}
                 <div className="w-16 h-16 md:w-20 md:h-20 bg-gray-800 rounded-full border-4 border-gray-600 flex items-center justify-center mb-4 group-hover:border-yellow-500 transition-colors p-3">

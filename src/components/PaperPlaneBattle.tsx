@@ -1416,8 +1416,12 @@ const EnergyCardView: React.FC<{ card: EnergyCard, onClick?: () => void, selecte
     const iconSize = small ? 12 : 16;
     
     return (
-        <div 
+        <div
+            data-gamepad-zone="paper-hand"
+            role="button"
+            tabIndex={0}
             onClick={onClick}
+            onKeyDown={(event) => { if (onClick && (event.key === 'Enter' || event.key === ' ')) { event.preventDefault(); onClick(); } }}
             className={`
                 ${sizeClasses} ${borderColor} ${bgColor} 
                 flex flex-col items-center justify-center cursor-pointer transition-transform relative shadow-sm shrink-0
@@ -3577,7 +3581,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; languageMode?: LanguageMo
         const unlockedShips = SHIPS.filter(s => progress.rank >= s.unlockRank);
 
         return (
-            <div className="paper-plane-setup-screen w-full h-full bg-slate-900 text-white p-2 md:p-4 flex flex-col font-mono overflow-hidden md:overflow-y-auto relative">
+            <div data-gamepad-initial-scope={`paper-setup-${setupStep}`} className="paper-plane-setup-screen w-full h-full bg-slate-900 text-white p-2 md:p-4 flex flex-col font-mono overflow-hidden md:overflow-y-auto relative">
                 <PaperPlaneSceneBackdrop sprite={PAPER_PLANE_SCENE_BACKGROUNDS.setup} alpha={0.22} />
                 <div className="paper-plane-setup-header relative z-10 flex items-center mb-2 md:mb-6">
                      <button onClick={onBack} className="text-gray-400 hover:text-white mr-2 md:mr-4"><ArrowLeft size={20}/></button>
@@ -3785,7 +3789,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; languageMode?: LanguageMo
     if (phase === 'REWARD_SELECT') {
          const rerollCost = Math.max(0, 50 - player.talents.filter(t => t.effectType === 'DISCOUNT_REROLL_REWARD').reduce((a,b)=>a+b.value, 0));
          return (
-             <div className="paper-plane-reward-screen w-full h-full bg-black/90 text-white p-4 flex flex-col items-center justify-start md:justify-center font-mono z-50 relative overflow-y-auto py-8">
+             <div data-gamepad-initial-scope="paper-reward" className="paper-plane-reward-screen w-full h-full bg-black/90 text-white p-4 flex flex-col items-center justify-start md:justify-center font-mono z-50 relative overflow-y-auto py-8">
                  <PaperPlaneSceneBackdrop sprite={PAPER_PLANE_SCENE_BACKGROUNDS.reward} alpha={0.2} />
                  <RenderTooltip />
                  <Trophy size={64} className="paper-plane-reward-trophy text-yellow-400 mb-4 animate-bounce"/>
@@ -3810,7 +3814,11 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; languageMode?: LanguageMo
                      {rewardOptions.map((part, i) => (
                          <div
                             key={i}
+                            data-gamepad-initial-choice
+                            role="button"
+                            tabIndex={0}
                             onClick={() => handleRewardSelect(part)}
+                            onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); handleRewardSelect(part); } }}
                             className="paper-plane-reward-card bg-slate-800 border-2 border-cyan-500 p-4 rounded-xl w-32 md:w-48 flex flex-col items-center cursor-pointer hover:scale-105 hover:bg-slate-700 transition-all shadow-lg group"
                          >
                              <div className="w-16 h-16 mb-2">
@@ -4105,7 +4113,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; languageMode?: LanguageMo
     }
 
     return (
-        <div className="mini-game-paper-plane-screen w-full h-full bg-[#101018] text-white flex flex-col font-mono relative overflow-hidden">
+        <div data-gamepad-navigation-root data-gamepad-initial-scope="paper-battle" className="mini-game-paper-plane-screen w-full h-full bg-[#101018] text-white flex flex-col font-mono relative overflow-hidden">
             <PaperPlaneSceneBackdrop sprite={PAPER_PLANE_SCENE_BACKGROUNDS.battle} alpha={0.16} />
             <RenderTooltip />
             {/* Pool Overlay */}
@@ -4255,10 +4263,10 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; languageMode?: LanguageMo
             <div className="h-44 md:h-52 bg-[#0a0a10] border-t border-cyan-900 p-2 flex gap-2 shrink-0 z-20">
                 {/* Movement Controls */}
                 <div className="flex flex-col gap-2 justify-center w-14 md:w-16 shrink-0">
-                    <button onClick={() => handleMove(-1)} className="flex-1 bg-slate-800 border border-slate-600 rounded hover:bg-slate-700 active:bg-cyan-900 flex items-center justify-center text-cyan-400 shadow-inner">
+                    <button data-gamepad-zone="paper-move" data-gamepad-order={0} onClick={() => handleMove(-1)} className="flex-1 bg-slate-800 border border-slate-600 rounded hover:bg-slate-700 active:bg-cyan-900 flex items-center justify-center text-cyan-400 shadow-inner">
                         ▲
                     </button>
-                    <button onClick={() => handleMove(1)} className="flex-1 bg-slate-800 border border-slate-600 rounded hover:bg-slate-700 active:bg-cyan-900 flex items-center justify-center text-cyan-400 shadow-inner">
+                    <button data-gamepad-zone="paper-move" data-gamepad-order={1} onClick={() => handleMove(1)} className="flex-1 bg-slate-800 border border-slate-600 rounded hover:bg-slate-700 active:bg-cyan-900 flex items-center justify-center text-cyan-400 shadow-inner">
                         ▼
                     </button>
                 </div>
@@ -4283,8 +4291,12 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; languageMode?: LanguageMo
                 </div>
 
                 {/* End Turn */}
-                <button 
-                    onClick={resolveCombat} 
+                <button
+                    data-gamepad-zone="paper-actions"
+                    data-gamepad-order={0}
+                    data-gamepad-shortcut="Y"
+                    aria-keyshortcuts="Y"
+                    onClick={resolveCombat}
                     disabled={animating}
                     className="w-16 md:w-20 bg-red-900 hover:bg-red-800 border-2 border-red-600 rounded-lg flex flex-col items-center justify-center text-red-100 font-bold shadow-lg active:translate-y-1 transition-all"
                 >
@@ -4294,7 +4306,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; languageMode?: LanguageMo
             </div>
 
             {(phase === 'VICTORY' || phase === 'GAME_OVER') && (
-                <div className="paper-plane-result-overlay absolute inset-0 bg-black/80 z-50 flex items-center justify-center p-4 animate-in fade-in zoom-in duration-300">
+                <div data-gamepad-modal data-gamepad-initial-scope={`paper-result-${phase}`} className="paper-plane-result-overlay absolute inset-0 bg-black/80 z-50 flex items-center justify-center p-4 animate-in fade-in zoom-in duration-300">
                     <div className="paper-plane-result-panel bg-slate-800 p-8 rounded-xl border-4 border-slate-600 text-center shadow-2xl">
                         {phase === 'VICTORY' && (
                             <div className="paper-plane-victory-content">
@@ -4319,7 +4331,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; languageMode?: LanguageMo
                                     )}
                                 </div>
                                 <div className="paper-plane-result-actions flex flex-col gap-4">
-                                    <button onClick={activateEndlessMode} className="bg-purple-600 px-8 py-3 rounded text-xl font-bold hover:bg-purple-500 border-2 border-purple-400 flex items-center justify-center animate-pulse">
+                                    <button data-gamepad-initial-choice onClick={activateEndlessMode} className="bg-purple-600 px-8 py-3 rounded text-xl font-bold hover:bg-purple-500 border-2 border-purple-400 flex items-center justify-center animate-pulse">
                                         <Repeat className="mr-2" /> {t('エンドレスモードへ')}
                                     </button>
                                     <button 
@@ -4339,6 +4351,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; languageMode?: LanguageMo
                                 <p className="paper-plane-result-subtitle text-gray-400 mb-6">ステージ {stage}</p>
                                 <div className="paper-plane-result-actions flex flex-col gap-4">
                                     <button
+                                        data-gamepad-initial-choice
                                         onClick={returnToSetup}
                                         className="bg-green-600 px-8 py-3 rounded text-xl font-bold hover:bg-green-500 border-2 border-green-400 flex items-center justify-center"
                                     >

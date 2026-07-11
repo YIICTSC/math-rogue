@@ -1212,11 +1212,11 @@ const GoHomeDash: React.FC<{
             </div>
 
             {gameState === 'START' && (
-                <div className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-slate-900/95 animate-in fade-in backdrop-blur-md">
+                <div data-gamepad-modal data-gamepad-initial-scope="go-home-start" className="absolute inset-0 z-50 flex flex-col items-center justify-center bg-slate-900/95 animate-in fade-in backdrop-blur-md">
                     <h2 className="text-6xl md:text-7xl font-black text-orange-500 tracking-tighter italic mb-4 drop-shadow-[4px_4px_0_#000]">{t('帰宅ダッシュ！')}</h2>
                     <div className="w-16 h-1 bg-orange-500 mb-8 rounded-full"></div>
                     <p className="text-slate-400 mb-10 text-center px-8 text-sm md:text-base leading-relaxed">{t('障害物をよけて帰宅せよ！')}<br/>{t('ミサイルやスキルを駆使してゴールを目指せ。')}</p>
-                    <button onClick={(e) => { e.stopPropagation(); initGame(); audioService.playSound('select'); }} className="bg-white text-black px-12 py-5 rounded-3xl font-black text-2xl hover:bg-orange-400 hover:text-white transition-all transform hover:scale-110 shadow-[0_8px_0_#ccc] flex items-center gap-4 active:translate-y-1 active:shadow-none"><Play fill="currentColor" size={32} /> {t('START DASH')}</button>
+                    <button data-gamepad-initial-choice onClick={(e) => { e.stopPropagation(); initGame(); audioService.playSound('select'); }} className="bg-white text-black px-12 py-5 rounded-3xl font-black text-2xl hover:bg-orange-400 hover:text-white transition-all transform hover:scale-110 shadow-[0_8px_0_#ccc] flex items-center gap-4 active:translate-y-1 active:shadow-none"><Play fill="currentColor" size={32} /> {t('START DASH')}</button>
                     <button onClick={(e) => { e.stopPropagation(); onBack(); }} className="mt-12 text-slate-500 hover:text-white flex items-center gap-2 font-bold transition-colors"><ArrowLeft size={20}/> {t('職員室に戻る')}</button>
                 </div>
             )}
@@ -1228,11 +1228,11 @@ const GoHomeDash: React.FC<{
             )}
 
             {gameState === 'LEVEL_UP' && (
-                <div className="absolute inset-0 z-[60] flex flex-col items-center justify-center bg-indigo-950/95 p-4 backdrop-blur-md animate-in fade-in" onPointerDown={e => e.stopPropagation()}>
+                <div data-gamepad-modal data-gamepad-initial-scope={`go-home-level-up-${level}`} className="absolute inset-0 z-[60] flex flex-col items-center justify-center bg-indigo-950/95 p-4 backdrop-blur-md animate-in fade-in" onPointerDown={e => e.stopPropagation()}>
                     <div className="flex items-center gap-4 mb-10 animate-bounce"><Star size={40} className="text-yellow-400 fill-current" /><h2 className="text-5xl font-black text-white italic tracking-tighter uppercase">Grade Up!</h2><Star size={40} className="text-yellow-400 fill-current" /></div>
                     <div className="grid grid-cols-1 gap-4 w-full max-sm overflow-y-auto max-h-[60vh] p-2 custom-scrollbar">
                         {upgradeOptions.map(card => (
-                            <div key={card.id} onClick={(e) => { e.stopPropagation(); selectUpgrade(card); }} className="bg-slate-800 border-2 border-slate-600 rounded-3xl p-4 flex items-center text-left transition-all transform hover:scale-102 hover:border-yellow-400 shadow-xl group">
+                            <div key={card.id} data-gamepad-initial-choice role="button" tabIndex={0} onClick={(e) => { e.stopPropagation(); selectUpgrade(card); }} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); selectUpgrade(card); } }} className="bg-slate-800 border-2 border-slate-600 rounded-3xl p-4 flex items-center text-left transition-all transform hover:scale-102 hover:border-yellow-400 shadow-xl group">
                                 <div className="p-3 bg-black/40 rounded-2xl mr-4 border border-slate-700 group-hover:border-yellow-500/50">{getSubjectIcon(card.iconType)}</div>
                                 <div className="flex-grow"><h3 className="text-lg font-black text-white leading-tight">{t(card.name)}</h3><p className="text-[10px] text-slate-400 font-bold leading-tight mt-1">{t(card.description)}</p></div>
                                 <ChevronRight size={20} className="text-slate-600 group-hover:text-yellow-400 transition-colors ml-2"/>
@@ -1243,10 +1243,10 @@ const GoHomeDash: React.FC<{
             )}
 
             {gameState === 'GAME_OVER' && (
-                <div className="absolute inset-0 z-[70] flex flex-col items-center justify-center bg-red-950/98 animate-in fade-in backdrop-blur-lg" onPointerDown={e => e.stopPropagation()}>
+                <div data-gamepad-modal data-gamepad-initial-scope="go-home-game-over" className="absolute inset-0 z-[70] flex flex-col items-center justify-center bg-red-950/98 animate-in fade-in backdrop-blur-lg" onPointerDown={e => e.stopPropagation()}>
                     <Skull size={80} className="text-red-600 mb-6 animate-pulse" /><h2 className="text-7xl font-black text-white mb-2 italic tracking-tighter uppercase">Failed</h2><div className="text-2xl text-yellow-400 mb-12 font-black bg-black/60 px-8 py-3 rounded-full border-2 border-yellow-500/50 italic shadow-xl">DISTANCE: {score.toLocaleString()}m</div>
                     <div className="flex flex-col gap-4 w-64">
-                        <button onClick={(e) => { e.stopPropagation(); initGame(); audioService.playSound('select'); }} className="w-full bg-white text-black py-4 rounded-2xl font-black text-xl shadow-[0_8px_0_#ccc] hover:bg-slate-200 transition-all active:translate-y-1 active:shadow-none">TRY AGAIN</button>
+                        <button data-gamepad-initial-choice onClick={(e) => { e.stopPropagation(); initGame(); audioService.playSound('select'); }} className="w-full bg-white text-black py-4 rounded-2xl font-black text-xl shadow-[0_8px_0_#ccc] hover:bg-slate-200 transition-all active:translate-y-1 active:shadow-none">TRY AGAIN</button>
                         <button onClick={(e) => { e.stopPropagation(); onBack(); }} className="w-full bg-slate-800 text-white py-4 rounded-2xl font-black text-xl border-2 border-white/10 hover:bg-slate-700 transition-colors">EXIT</button>
                     </div>
                 </div>

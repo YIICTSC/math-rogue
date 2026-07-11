@@ -203,6 +203,7 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics =
 
   return (
     <div
+      data-gamepad-initial-scope="shop-screen"
       className="main-shop-screen flex flex-col h-full w-full bg-gray-900 bg-cover bg-center text-white relative"
       style={{
         backgroundImage: `url(${assetUrl(visualTheme === 'magic'
@@ -374,7 +375,8 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics =
                                         <div className="text-[9px] text-gray-400 text-center mb-2 h-8 overflow-hidden leading-tight">{trans(relic.description, languageMode)}</div>
                                         
                                         {!isSold && (
-                                            <button 
+                                            <button
+                                                data-gamepad-initial-choice={canAfford ? true : undefined}
                                                 onClick={() => handleBuyRelic(relic)}
                                                 disabled={!canAfford}
                                                 className={`px-2 py-0.5 rounded-full font-bold text-xs shadow-lg border border-white ${canAfford ? 'bg-yellow-600 hover:bg-yellow-500 text-white cursor-pointer' : 'bg-gray-600 text-gray-400 cursor-not-allowed'}`}
@@ -415,7 +417,8 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics =
                                         <div className="text-[9px] text-gray-400 text-center mb-2 h-8 overflow-hidden leading-tight">{trans(potion.description, languageMode)}</div>
                                         
                                         {!isSold && (
-                                            <button 
+                                            <button
+                                                data-gamepad-initial-choice={canAfford ? true : undefined}
                                                 onClick={() => handleBuyPotionClick(potion)}
                                                 disabled={!canAfford}
                                                 className={`px-2 py-0.5 rounded-full font-bold text-xs shadow-lg border border-white ${canAfford ? 'bg-yellow-600 hover:bg-yellow-500 text-white cursor-pointer' : 'bg-gray-600 text-gray-400 cursor-not-allowed'}`}
@@ -453,7 +456,8 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics =
                                     />
                                     {!isSold && (
                                         <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 w-full text-center z-20">
-                                            <button 
+                                            <button
+                                                data-gamepad-initial-choice={canAfford ? true : undefined}
                                                 onClick={(e) => { e.stopPropagation(); handleBuyCard(card); }}
                                                 disabled={!canAfford}
                                                 className={`

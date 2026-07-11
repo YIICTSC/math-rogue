@@ -191,8 +191,18 @@ const BasketballLayupShooting: React.FC<BasketballLayupShootingProps> = ({ enemy
 
     return (
         <div
+            data-gamepad-shortcut="A"
+            role="button"
+            tabIndex={0}
+            aria-label={languageMode === 'ENGLISH' ? 'Shoot' : 'シュートする'}
             className="mini-game-dodgeball-screen w-full h-full bg-slate-800 flex flex-col items-center justify-center relative cursor-crosshair overflow-hidden"
             onClick={handleShoot}
+            onKeyDown={(event) => {
+                if (event.key === 'Enter' || event.key === ' ') {
+                    event.preventDefault();
+                    handleShoot();
+                }
+            }}
         >
             <div className="absolute inset-0 bg-[radial-gradient(circle_at_50%_20%,rgba(251,146,60,0.20),transparent_35%),linear-gradient(120deg,rgba(15,23,42,0.95),rgba(30,41,59,0.98))] pointer-events-none"></div>
 
