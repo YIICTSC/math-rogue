@@ -1,4 +1,4 @@
-﻿import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Card as CardType, CardType as EnumCardType, LanguageMode } from '../types';
 import PixelSprite from './PixelSprite';
 import EnemyIllustration from './EnemyIllustration';
@@ -134,6 +134,36 @@ const CompositeArtPiece: React.FC<{
         src={assetUrl(`sprites/magic/cards/${index}.webp`)}
         alt="magic card"
         className="w-full h-full object-cover opacity-95"
+      />
+    );
+  }
+
+  if (refToken.startsWith('asset:')) {
+    const path = refToken.substring('asset:'.length);
+    const isAzukiBattleSprite = path.startsWith('sprites/high-school/azuki/');
+    const isDodomedesuCardArt = path.startsWith('enemy-illustrations/ドドメデス')
+      || path.startsWith('enemy-illustrations/ゲンゾー-')
+      || (path.startsWith('event-illustrations/dodomedesu-event-') && path !== 'event-illustrations/dodomedesu-event-4.webp');
+    if (isAzukiBattleSprite) {
+      return (
+        <div className="relative h-full w-full overflow-hidden bg-[radial-gradient(circle_at_50%_48%,#b9d1c9_0%,#6f9897_52%,#3e6870_100%)]">
+          <div className="absolute inset-[8%] rounded-full bg-cyan-50/10 blur-sm" />
+          <div className="absolute -left-[15%] -top-[22%] h-[60%] w-[60%] rounded-full border-[6px] border-white/10" />
+          <div className="absolute -bottom-[25%] -right-[15%] h-[70%] w-[70%] rounded-full border-[8px] border-emerald-100/10" />
+          <div className="absolute left-[10%] top-[13%] h-2 w-2 rounded-full bg-amber-100/45 shadow-[28px_12px_0_rgba(207,231,228,0.35),70px_-4px_0_rgba(245,215,166,0.38),98px_26px_0_rgba(209,235,225,0.3)]" />
+          <img
+            src={assetUrl(path)}
+            alt="Azuki card illustration"
+            className="relative z-10 h-full w-full scale-[1.2] object-contain drop-shadow-[0_5px_4px_rgba(25,45,50,0.6)]"
+          />
+        </div>
+      );
+    }
+    return (
+      <img
+        src={assetUrl(path)}
+        alt="card illustration"
+        className={`w-full h-full object-cover opacity-95 ${isDodomedesuCardArt ? 'object-top' : ''}`}
       />
     );
   }
@@ -284,6 +314,19 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled, onInspect, languag
             style={{ transform: 'translate(-50%, -50%)' }}
           />
         </div>
+      );
+    }
+
+    if (card.illustrationRefs?.length === 1 && compositeIllustrationRefs.length === 1) {
+      return (
+        <CompositeArtPiece
+          refToken={compositeIllustrationRefs[0]}
+          seed={`${card.id}-illustration`}
+          languageMode={languageMode}
+          visualTheme={card.visualTheme}
+          enemyType={card.enemyIllustrationEnemyType}
+          phase={card.enemyIllustrationPhase}
+        />
       );
     }
 
@@ -517,3 +560,4 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled, onInspect, languag
 };
 
 export default Card;
+

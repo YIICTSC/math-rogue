@@ -84,6 +84,8 @@ import { generateDungeonMap } from './services/mapGenerator';
 import { parseTransferData, serializeTransferData, storageService } from './services/storageService';
 import { generateEvent, generateLegacyEvent } from './services/eventService';
 import { createAssignmentRewardCard, createHolographicCard, getUpgradedCard, synthesizeCards } from './utils/cardUtils';
+import { AZUKI_BOSS_FLAG, AZUKI_BOSS_NAME, AZUKI_ENCOUNTER_FLAG, AZUKI_REWARD_CARDS } from './data/azukiBoss';
+import { DODOMEDESU_BOSS_ACTIVE_FLAG, DODOMEDESU_BOSS_READY_FLAG, DODOMEDESU_EVENT_STAGE_FLAG, DODOMEDESU_EVENT_STAGES, DODOMEDESU_NAME, DODOMEDESU_REWARD_CARDS, GENZO_NAME } from './data/dodomedesuBoss';
 import { sanitizeEnglishText, trans, transEventText } from './utils/textUtils';
 import { assetUrl } from './utils/assetPaths';
 import { getAssignmentFromUrl, getAssignmentModePool, getAssignmentRepresentativeMode } from './utils/assignmentUtils';
@@ -119,8 +121,8 @@ const ENEMY_FINISHER_BURST_VOICE_DELAY_MS = 760;
 const PORTRAIT_BATTLE_ENEMY_OFFSET_Y_BASELINE = 60;
 const MAX_CARD_DETAIL_VFX = 80;
 const CROWDFUNDING_BANNER_URL = 'https://camp-fire.jp/projects/954165/view?utm_campaign=cp_po_share_c_msg_mypage_projects_open';
-const CROWDFUNDING_BANNER_IMAGE = assetUrl('banners/campfire-crowdfunding.png');
-const ASSIGNMENT_INTRO_BANNER_IMAGE = assetUrl('banners/daily-assignment-reward-intro.png');
+const CROWDFUNDING_BANNER_IMAGE = assetUrl('banners/campfire-crowdfunding.webp');
+const ASSIGNMENT_INTRO_BANNER_IMAGE = assetUrl('banners/daily-assignment-reward-intro.webp');
 const CROWDFUNDING_BANNER_END_AT = new Date('2026-06-20T23:59:59+09:00').getTime();
 const HOLOGRAPHIC_REWARD_CARD_CHANCE = 0.05;
 const VISUAL_THEMES: VisualThemeId[] = ['elementary', 'high-school', 'magic'];
@@ -937,6 +939,20 @@ const getNextEnemyIntent = (enemy: Enemy, turn: number): EnemyIntent => {
     if (namedIntent) return namedIntent;
 
     switch (type) {
+        case 'GENZO':
+            if (turn % 3 === 1) return { type: EnemyIntentType.BUFF, value: 0, secondaryValue: 3 };
+            if (turn % 3 === 2) return { type: EnemyIntentType.ATTACK_DEFEND, value: 12, secondaryValue: 14 };
+            return { type: EnemyIntentType.ATTACK_DEBUFF, value: 10, secondaryValue: 2, debuffType: 'VULNERABLE' };
+        case 'DODOMEDESU':
+            if (turn % 4 === 1) return { type: EnemyIntentType.ATTACK, value: 22 };
+            if (turn % 4 === 2) return { type: EnemyIntentType.DEBUFF, value: 0, secondaryValue: 2, debuffType: 'CONFUSED' };
+            if (turn % 4 === 3) return { type: EnemyIntentType.ATTACK_DEFEND, value: 16, secondaryValue: 18 };
+            return { type: EnemyIntentType.PIERCE_ATTACK, value: 18 };
+        case 'AZUKI':
+            if (turn % 4 === 1) return { type: EnemyIntentType.ATTACK, value: isAct2Plus ? 18 : 12 };
+            if (turn % 4 === 2) return { type: EnemyIntentType.ATTACK_DEFEND, value: isAct2Plus ? 12 : 8, secondaryValue: isAct2Plus ? 14 : 10 };
+            if (turn % 4 === 3) return { type: EnemyIntentType.ATTACK_DEBUFF, value: isAct2Plus ? 10 : 6, secondaryValue: 1, debuffType: 'WEAK' };
+            return { type: EnemyIntentType.BUFF, value: 0, secondaryValue: 2 };
         case 'TEACHER':
             if (turn === 1) return { type: EnemyIntentType.BUFF, value: 0, secondaryValue: isAct2Plus ? 3 : 2 };
             if (localTurn === 2) return { type: EnemyIntentType.ATTACK, value: isAct2Plus ? 18 : 12 };
@@ -1663,6 +1679,7 @@ const App: React.FC = () => {
     const [titleClickCount, setTitleCount] = useState<number>(0);
     const [logClickCount, setLogClickCount] = useState<number>(0);
     const [debugLoadout, setDebugLoadout] = useState<{ deck: ICard[], relics: Relic[], potions: Potion[] } | null>(null);
+    const crowdfundingBossDebugRef = useRef<'AZUKI' | 'DODOMEDESU' | null>(null);
 
     const [shopCards, setShopCards] = useState<ICard[]>([]);
     const [shopRelics, setShopRelics] = useState<Relic[]>([]);
@@ -1675,9 +1692,22 @@ const App: React.FC = () => {
     const [peacePipeModal, setPeacePipeModal] = useState<RelicCardChoiceModalState | null>(null);
     const [eventSynthesisModal, setEventSynthesisModal] = useState<{ cards: ICard[]; selectedIds: string[] } | null>(null);
     const [eventCardChoiceModal, setEventCardChoiceModal] = useState<{ mode: 'UPGRADE' | 'ORGANIZE' | 'DUPLICATE' | 'FAN_FAVORITE'; cards: ICard[] } | null>(null);
+    const [azukiBattleInfoOpen, setAzukiBattleInfoOpen] = useState(false);
+    const azukiBattleActiveRef = useRef(false);
     const [coopFanFavorite, setCoopFanFavorite] = useState<{ cards: ICard[]; votes: Record<string, string> } | null>(null);
     const [eventData, setEventData] = useState<any>(null);
     const [eventResultLog, setEventResultLog] = useState<string | null>(null);
+    useEffect(() => {
+        const isAzukiBattle = gameState.screen === GameScreen.BATTLE
+            && gameState.enemies.some(enemy => enemy.enemyType === 'AZUKI');
+        if (isAzukiBattle && !azukiBattleActiveRef.current) {
+            setAzukiBattleInfoOpen(true);
+        }
+        if (!isAzukiBattle) {
+            setAzukiBattleInfoOpen(false);
+        }
+        azukiBattleActiveRef.current = isAzukiBattle;
+    }, [gameState.enemies, gameState.screen]);
     const [unlockedCardNames, setUnlockedCardNames] = useState<string[]>([]);
     const [starterRelics, setStarterRelics] = useState<Relic[]>([]);
     const [treasureRewards, setTreasureRewards] = useState<RewardItem[]>([]);
@@ -5554,6 +5584,7 @@ const App: React.FC = () => {
     }, [applyUiPreviewBattle, coopBattleKey, coopBattleQueue, coopEnemyTurnCursor, coopPlayerSnapshots, coopSession, coopSupportCards, createUiPreviewEnemies, themedCharacters, uiPreviewBattleConfig]);
 
     const closeUiPreview = useCallback(() => {
+        crowdfundingBossDebugRef.current = null;
         const snapshot = uiPreviewSnapshotRef.current;
         const coopSnapshot = uiPreviewCoopSnapshotRef.current;
         uiPreviewSnapshotRef.current = null;
@@ -5591,8 +5622,12 @@ const App: React.FC = () => {
         const supporterQuestionIndex = supporterProfile
             ? (debugSupporterNpcQuestionIndexesRef.current[supporterProfile.id] ?? Math.floor(Math.random() * supporterProfile.questions.length))
             : undefined;
+        const isCrowdfundingEvent = title === 'あずきとの出会い'
+            || DODOMEDESU_EVENT_STAGES.some(stage => stage.title === title);
         if (supporterProfile) {
             debugSupporterNpcQuestionIndexesRef.current[supporterProfile.id] = (supporterQuestionIndex + 1) % supporterProfile.questions.length;
+            setFocusedSupporterNpcEventTitle(title);
+        } else if (isCrowdfundingEvent) {
             setFocusedSupporterNpcEventTitle(title);
         } else {
             setFocusedSupporterNpcEventTitle(undefined);
@@ -5620,7 +5655,7 @@ const App: React.FC = () => {
             );
         setEventData(previewEvent);
         handleStartUiPreview(GameScreen.EVENT);
-        if (supporterProfile) {
+        if (supporterProfile || isCrowdfundingEvent) {
             setFocusedUiPreviewScreenId(undefined);
         }
         setGameState(prev => ({
@@ -5631,6 +5666,70 @@ const App: React.FC = () => {
             challengeMode: undefined,
         }));
     }, [handleStartUiPreview, languageMode, unlockedCardNames]);
+
+    const handleStartCrowdfundingBoss = useCallback((boss: 'AZUKI' | 'DODOMEDESU') => {
+        crowdfundingBossDebugRef.current = boss;
+        const map = generateDungeonMap(gameState.difficultyLevel || 1);
+        const bossNode = map.find(node => node.type === NodeType.BOSS);
+        if (!bossNode) return;
+
+        const sourceDeck = debugLoadout?.deck.length ? debugLoadout.deck : createDeck();
+        const sourcePlayer: Player = {
+            ...gameState.player,
+            deck: sourceDeck,
+            relics: debugLoadout?.relics ?? [],
+            potions: debugLoadout?.potions ?? [],
+            maxHp: 999,
+            currentHp: isDebugHpOne ? 1 : 999,
+            maxEnergy: 4,
+            currentEnergy: 4,
+            gold: 999,
+            hand: [],
+            discardPile: [],
+            drawPile: [],
+            powers: {},
+            turnFlags: boss === 'AZUKI' ? { [AZUKI_BOSS_FLAG]: true } : { [DODOMEDESU_BOSS_ACTIVE_FLAG]: true },
+        };
+        const player = preparePlayerForBattle(sourcePlayer, NodeType.BOSS);
+        const maxDeckBlock = Math.max(1, ...player.deck.map(card => Math.max(0, card.block || 0)));
+        const makeEnemy = (enemyType: Enemy['enemyType'], name: string, hp: number, artifact = 0): Enemy => {
+            const enemy: Enemy = {
+                id: `debug-${enemyType.toLowerCase()}-${Date.now()}`,
+                enemyType, name, maxHp: hp, currentHp: isDebugHpOne ? 1 : hp,
+                block: 0, strength: 0, nextIntent: { type: EnemyIntentType.UNKNOWN, value: 0 },
+                vulnerable: 0, weak: 0, poison: 0, artifact, corpseExplosion: false, floatingText: null,
+            };
+            return { ...enemy, nextIntent: getNextEnemyIntent(enemy, 1) };
+        };
+        const enemies = boss === 'AZUKI'
+            ? [makeEnemy('AZUKI', AZUKI_BOSS_NAME, maxDeckBlock * 10)]
+            : [makeEnemy('DODOMEDESU', DODOMEDESU_NAME, 300, 1), makeEnemy('GENZO', GENZO_NAME, 135)];
+
+        handleStartUiPreview(GameScreen.BATTLE);
+        setFocusedSupporterNpcEventTitle(boss === 'AZUKI' ? 'あずきとの出会い' : DODOMEDESU_EVENT_STAGES[4].title);
+        setFocusedUiPreviewScreenId(undefined);
+        setGameState(prev => ({
+            ...prev,
+            screen: GameScreen.BATTLE,
+            visualTheme: 'high-school',
+            isEndless: true,
+            act: 3,
+            floor: bossNode.y,
+            turn: 1,
+            map,
+            currentMapNodeId: bossNode.id,
+            player,
+            enemies,
+            selectedEnemyId: enemies[0].id,
+            narrativeLog: [`デバッグ: ${boss === 'AZUKI' ? AZUKI_BOSS_NAME : DODOMEDESU_NAME}戦を開始`],
+            combatLog: ['> クラウドファンディングボスとの戦闘開始！'],
+            rewards: [],
+            selectionState: { active: false, type: 'DISCARD', amount: 0 },
+            activeEffects: [],
+        }));
+        audioService.playBGM('boss');
+        setTurnLog(getSelfTurnLogLabel());
+    }, [debugLoadout, gameState.difficultyLevel, gameState.player, getSelfTurnLogLabel, handleStartUiPreview, isDebugHpOne, preparePlayerForBattle]);
 
     useEffect(() => {
         if (!isUiPreviewMode) return;
@@ -6339,8 +6438,40 @@ const App: React.FC = () => {
                 const difficulty = getDifficultyConfig(gameState.difficultyLevel);
                 const enemyHpMultiplier = coopEnemyHpMultiplier * difficulty.enemyHpMultiplier;
                 const activeBattleVisualTheme = nextState.visualTheme || visualTheme;
+                const isDodomedesuBoss = node.type === NodeType.BOSS
+                    && nextState.isEndless
+                    && activeBattleVisualTheme === 'high-school'
+                    && Boolean(nextState.player.turnFlags[DODOMEDESU_BOSS_READY_FLAG]);
+                const isAzukiBoss = node.type === NodeType.BOSS
+                    && nextState.isEndless
+                    && activeBattleVisualTheme === 'high-school'
+                    && Boolean(nextState.player.turnFlags[AZUKI_ENCOUNTER_FLAG]);
 
-                if (gameState.act === 4 && node.type === NodeType.BOSS) {
+                if (isDodomedesuBoss) {
+                    const baseBossHp = Math.ceil((170 * gameState.act + floorDifficulty * 2) * enemyHpMultiplier);
+                    const genzoHp = Math.ceil(baseBossHp * 0.45);
+                    enemies.push({ id: `dodomedesu-${Date.now()}`, enemyType: 'DODOMEDESU', name: DODOMEDESU_NAME, maxHp: baseBossHp, currentHp: isDebugHpOne ? 1 : baseBossHp, block: 0, strength: difficulty.enemyStrengthBonus, nextIntent: { type: EnemyIntentType.UNKNOWN, value: 0 }, vulnerable: 0, weak: 0, poison: 0, artifact: 1, corpseExplosion: false, floatingText: null });
+                    enemies.push({ id: `genzo-${Date.now()}`, enemyType: 'GENZO', name: GENZO_NAME, maxHp: genzoHp, currentHp: isDebugHpOne ? 1 : genzoHp, block: 0, strength: difficulty.enemyStrengthBonus, nextIntent: { type: EnemyIntentType.UNKNOWN, value: 0 }, vulnerable: 0, weak: 0, poison: 0, artifact: 0, corpseExplosion: false, floatingText: null });
+                    enemies = enemies.map(enemy => ({ ...enemy, nextIntent: getNextEnemyIntent(enemy, 1) }));
+                    bgmType = 'boss';
+                } else if (isAzukiBoss) {
+                    const maxDeckBlock = Math.max(1, ...nextState.player.deck.map(card => Math.max(0, card.block || 0)));
+                    const azukiHp = maxDeckBlock * 10;
+                    enemies.push({
+                        id: `azuki-boss-${Date.now()}`,
+                        enemyType: 'AZUKI',
+                        name: AZUKI_BOSS_NAME,
+                        maxHp: azukiHp,
+                        currentHp: isDebugHpOne ? 1 : azukiHp,
+                        block: 0,
+                        strength: difficulty.enemyStrengthBonus,
+                        nextIntent: { type: EnemyIntentType.UNKNOWN, value: 0 },
+                        vulnerable: 0, weak: 0, poison: 0, artifact: 0, corpseExplosion: false,
+                        floatingText: null
+                    });
+                    enemies = enemies.map(enemy => ({ ...enemy, nextIntent: getNextEnemyIntent(enemy, 1) }));
+                    bgmType = 'boss';
+                } else if (gameState.act === 4 && node.type === NodeType.BOSS) {
                     const trueBoss = getTrueBossByTheme(activeBattleVisualTheme);
                     let finalHeartHp = trueBoss.maxHp;
                     if (maxAtkDmg > finalHeartHp) {
@@ -6417,6 +6548,14 @@ const App: React.FC = () => {
                 const flavor = getBattleBackgroundFlavor(battleBackgroundScene, nextState.act * 100 + nextState.floor);
 
                 const p = preparePlayerForBattle(nextState.player, node.type);
+                if (isAzukiBoss) {
+                    p.turnFlags[AZUKI_BOSS_FLAG] = true;
+                    delete p.turnFlags[AZUKI_ENCOUNTER_FLAG];
+                }
+                if (isDodomedesuBoss) {
+                    p.turnFlags[DODOMEDESU_BOSS_ACTIVE_FLAG] = true;
+                    delete p.turnFlags[DODOMEDESU_BOSS_READY_FLAG];
+                }
 
                 if (gameState.challengeMode === 'COOP') {
                     setCoopSession(prev => {
@@ -7846,6 +7985,14 @@ const App: React.FC = () => {
                                 logParts.push(`x1.5(${trans("びくびく", languageMode)})`);
                             }
                             if (p.powers['ENVENOM']) applyDebuff(e, 'POISON', p.powers['ENVENOM']);
+                            if (e.enemyType === 'AZUKI' && card.type === CardType.ATTACK) {
+                                damage = 0;
+                                if (act === 0 && h === 0) {
+                                    currentLogs.push(languageMode === 'ENGLISH'
+                                        ? 'Azuki playfully avoids direct Attack damage!'
+                                        : 'あずきは通常のアタックを遊ぶようにかわした！');
+                                }
+                            }
                             if (e.block >= damage) { e.block -= damage; damage = 0; }
                             else { damage -= e.block; e.block = 0; }
                             e.currentHp -= damage;
@@ -9388,6 +9535,10 @@ const App: React.FC = () => {
                             logParts.push(`${e.strength >= 0 ? '+' : ''}${e.strength}(${trans("筋力", languageMode)})`);
                         }
                         let damage = baseDamage;
+                        if (e.enemyType === 'DODOMEDESU' && !newEnemies.some(enemy => enemy.enemyType === 'GENZO' && enemy.currentHp > 0)) {
+                            damage = Math.max(1, Math.floor(damage * 0.6));
+                            logParts.push('x0.6(ゲンゾー撃破)');
+                        }
                         if (e.weak > 0) {
                             damage = Math.floor(damage * 0.75);
                             logParts.push(`x0.75(${trans("へろへろ", languageMode)})`);
@@ -9448,12 +9599,21 @@ const App: React.FC = () => {
                             incomingDamage: number,
                             currentBlock: number,
                             currentBuffer: number
-                        ): { unblockedDamage: number; nextBlock: number; nextBuffer: number; blocked: boolean } => {
-                            if (incomingDamage <= 0) return { unblockedDamage: 0, nextBlock: currentBlock, nextBuffer: currentBuffer, blocked: false };
-                            if (currentBuffer > 0) return { unblockedDamage: 0, nextBlock: currentBlock, nextBuffer: currentBuffer - 1, blocked: true };
-                            if (isPierce) return { unblockedDamage: incomingDamage, nextBlock: currentBlock, nextBuffer: currentBuffer, blocked: false };
-                            if (currentBlock >= incomingDamage) return { unblockedDamage: 0, nextBlock: currentBlock - incomingDamage, nextBuffer: currentBuffer, blocked: true };
-                            return { unblockedDamage: incomingDamage - currentBlock, nextBlock: 0, nextBuffer: currentBuffer, blocked: currentBlock > 0 };
+                        ): { unblockedDamage: number; nextBlock: number; nextBuffer: number; blocked: boolean; blockedAmount: number } => {
+                            if (incomingDamage <= 0) return { unblockedDamage: 0, nextBlock: currentBlock, nextBuffer: currentBuffer, blocked: false, blockedAmount: 0 };
+                            if (currentBuffer > 0) return { unblockedDamage: 0, nextBlock: currentBlock, nextBuffer: currentBuffer - 1, blocked: true, blockedAmount: 0 };
+                            if (isPierce) return { unblockedDamage: incomingDamage, nextBlock: currentBlock, nextBuffer: currentBuffer, blocked: false, blockedAmount: 0 };
+                            const blockedAmount = Math.min(incomingDamage, currentBlock);
+                            if (currentBlock >= incomingDamage) return { unblockedDamage: 0, nextBlock: currentBlock - incomingDamage, nextBuffer: currentBuffer, blocked: true, blockedAmount };
+                            return { unblockedDamage: incomingDamage - currentBlock, nextBlock: 0, nextBuffer: currentBuffer, blocked: currentBlock > 0, blockedAmount };
+                        };
+                        const applyAzukiCounter = (blockedAmount: number) => {
+                            if (e.enemyType !== 'AZUKI' || blockedAmount <= 0) return;
+                            e.currentHp -= blockedAmount;
+                            e.floatingText = { id: `azuki-block-${Date.now()}`, text: `-${blockedAmount}`, color: 'text-cyan-300', iconType: 'shield' };
+                            newLogs.push(`あずきの攻撃を受け止め、${blockedAmount}の反射ダメージを与えた！`);
+                            nextActiveEffects.push({ id: `vfx-azuki-block-${Date.now()}`, type: 'BLOCK', targetId: 'player' });
+                            nextActiveEffects.push({ id: `vfx-azuki-counter-${Date.now()}`, type: 'SHOCKWAVE', targetId: e.id, delay: 80 });
                         };
 
                         if (prev.challengeMode === 'COOP' && coopSession?.isHost && nextCoopBattleState) {
@@ -9475,6 +9635,7 @@ const App: React.FC = () => {
                                         trackedBlock ?? (p.block || 0),
                                         p.powers['BUFFER'] || 0
                                     );
+                                    applyAzukiCounter(resolved.blockedAmount);
                                     coopEnemyTurnRemainingBlock.set(targetEntry.peerId, resolved.nextBlock);
                                     p.block = resolved.nextBlock;
                                     p.powers['BUFFER'] = resolved.nextBuffer;
@@ -9507,6 +9668,7 @@ const App: React.FC = () => {
                                         trackedBlock ?? (targetPlayer.block || 0),
                                         targetPlayer.powers['BUFFER'] || 0
                                     );
+                                    applyAzukiCounter(resolved.blockedAmount);
                                     coopEnemyTurnRemainingBlock.set(targetEntry.peerId, resolved.nextBlock);
                                     const unblockedDamage = resolved.unblockedDamage;
                                     const nextHp = Math.max(0, targetPlayer.currentHp - unblockedDamage);
@@ -9535,6 +9697,7 @@ const App: React.FC = () => {
                             }
                         } else if (p.partner && p.partner.currentHp > 0) {
                             const resolved = resolveDamageAgainstDefense(damage, p.block, p.powers['BUFFER'] || 0);
+                            applyAzukiCounter(resolved.blockedAmount);
                             p.block = resolved.nextBlock;
                             p.powers['BUFFER'] = resolved.nextBuffer;
                             const unblockedDamage = resolved.unblockedDamage;
@@ -9565,6 +9728,7 @@ const App: React.FC = () => {
                             }
                         } else {
                             const resolved = resolveDamageAgainstDefense(damage, p.block, p.powers['BUFFER'] || 0);
+                            applyAzukiCounter(resolved.blockedAmount);
                             p.block = resolved.nextBlock;
                             p.powers['BUFFER'] = resolved.nextBuffer;
                             const unblockedDamage = resolved.unblockedDamage;
@@ -10956,6 +11120,36 @@ const App: React.FC = () => {
         setGameState(prev => {
             const nextPlayer = buildPostBattlePlayer(prev.player, true);
 
+            if (crowdfundingBossDebugRef.current === 'AZUKI') {
+                const rewardPrefix = `debug-azuki-${Date.now()}`;
+                return {
+                    ...prev,
+                    player: {
+                        ...nextPlayer,
+                        turnFlags: { ...nextPlayer.turnFlags, [AZUKI_BOSS_FLAG]: true }
+                    },
+                    screen: GameScreen.REWARD,
+                    rewards: AZUKI_REWARD_CARDS.map((card, index) => ({
+                        type: 'CARD' as const,
+                        value: { ...card, id: `${rewardPrefix}-value-${index}` },
+                        id: `${rewardPrefix}-card-${index}`,
+                    })),
+                };
+            }
+            if (crowdfundingBossDebugRef.current === 'DODOMEDESU') {
+                const rewardPrefix = `debug-dodomedesu-${Date.now()}`;
+                return {
+                    ...prev,
+                    player: nextPlayer,
+                    screen: GameScreen.REWARD,
+                    rewards: DODOMEDESU_REWARD_CARDS.map((card, index) => ({
+                        type: 'CARD' as const,
+                        value: { ...card, id: `${rewardPrefix}-value-${index}` },
+                        id: `${rewardPrefix}-card-${index}`,
+                    })),
+                };
+            }
+
             if (prev.act === 4 && !prev.isEndless) {
                 const unlockedCard = unlockRandomAdditionalCard();
                 const nextDifficultyUnlock = Math.min(10, (prev.difficultyLevel || 1) + 1);
@@ -11007,7 +11201,24 @@ const App: React.FC = () => {
             VISUAL_THEMES.includes(stateRef.current.visualTheme as VisualThemeId)
                 ? stateRef.current.visualTheme as VisualThemeId
                 : visualTheme || storedTheme;
-        const finisherDisplayName = getThemedEnemyDisplayName(enemy, finisherTheme);
+        const isCrowdfundingBoss = enemy.enemyType === 'AZUKI'
+            || enemy.enemyType === 'DODOMEDESU'
+            || enemy.enemyType === 'GENZO';
+        const finisherDisplayName = isCrowdfundingBoss
+            ? enemy.name
+            : getThemedEnemyDisplayName(enemy, finisherTheme);
+        const remainingEnemies = stateRef.current.enemies;
+        const isDodomedesuAlive = remainingEnemies.some(entry => entry.enemyType === 'DODOMEDESU' && entry.currentHp > 0);
+        const isGenzoAlive = remainingEnemies.some(entry => entry.enemyType === 'GENZO' && entry.currentHp > 0);
+        const specialFinisherIllustration = enemy.enemyType === 'AZUKI'
+            ? 'asset:sprites/high-school/azuki/pounce.webp'
+            : enemy.enemyType === 'DODOMEDESU' || enemy.enemyType === 'GENZO'
+                ? isDodomedesuAlive && isGenzoAlive
+                    ? 'asset:enemy-illustrations/ドドメデス.webp'
+                    : isDodomedesuAlive
+                        ? 'asset:enemy-illustrations/ドドメデス-困惑.webp'
+                        : 'asset:enemy-illustrations/ゲンゾー-孤立.webp'
+                : undefined;
 
         return {
             id: `enemy-finisher-${enemy.id}-${Date.now()}`,
@@ -11024,6 +11235,7 @@ const App: React.FC = () => {
             enemyIllustrationPhase: enemy.phase,
             visualTheme: finisherTheme,
             textureRef: enemy.name,
+            illustrationRefs: specialFinisherIllustration ? [specialFinisherIllustration] : undefined,
         };
     }, [visualTheme]);
 
@@ -11316,6 +11528,10 @@ const App: React.FC = () => {
     }, []);
 
     const finishRewardPhase = () => {
+        if (isUiPreviewMode && crowdfundingBossDebugRef.current) {
+            closeUiPreview();
+            return;
+        }
         if (gameState.challengeMode === 'COOP' && coopSession && !coopSession.isHost) {
             if (coopSelfPeerId) {
                 setCoopSession(prev => prev ? {
@@ -11365,6 +11581,18 @@ const App: React.FC = () => {
 
             if (currentNode && currentNode.type === NodeType.BOSS) {
                 if (prev.isEndless) {
+                    if (nextPlayer.turnFlags[AZUKI_BOSS_FLAG]) {
+                        const turnFlags = { ...nextPlayer.turnFlags };
+                        delete turnFlags[AZUKI_BOSS_FLAG];
+                        nextPlayer = { ...nextPlayer, turnFlags };
+                    }
+                    if (nextPlayer.turnFlags[DODOMEDESU_BOSS_ACTIVE_FLAG]) {
+                        const turnFlags = { ...nextPlayer.turnFlags };
+                        delete turnFlags[DODOMEDESU_BOSS_ACTIVE_FLAG];
+                        delete turnFlags[DODOMEDESU_BOSS_READY_FLAG];
+                        delete turnFlags[DODOMEDESU_EVENT_STAGE_FLAG];
+                        nextPlayer = { ...nextPlayer, turnFlags };
+                    }
                     const nextAct = prev.act + 1;
                     const newMap = generateDungeonMap(prev.difficultyLevel || 1);
                     audioService.playBGM('map');
@@ -11452,8 +11680,19 @@ const App: React.FC = () => {
             return;
         }
         const currentNode = gameState.map.find(n => n.id === gameState.currentMapNodeId);
-        const nodeType = currentNode?.type;
-        const selfRewardBundle = buildRewardBundleForPlayer(gameState.player, nodeType, gameState.challengeMode, bonusGold, `self-${coopSelfPeerId || 'host'}`);
+        const debugBoss = crowdfundingBossDebugRef.current;
+        const nodeType = debugBoss ? NodeType.BOSS : currentNode?.type;
+        const rewardPlayer = debugBoss === 'AZUKI'
+            ? { ...gameState.player, turnFlags: { ...gameState.player.turnFlags, [AZUKI_BOSS_FLAG]: true } }
+            : gameState.player;
+        const generatedRewardBundle = buildRewardBundleForPlayer(rewardPlayer, nodeType, gameState.challengeMode, bonusGold, `self-${coopSelfPeerId || 'host'}`);
+        const selfRewardBundle = debugBoss === 'AZUKI'
+            ? {
+                ...generatedRewardBundle,
+                rewards: generatedRewardBundle.rewards.filter(reward => reward.id.includes('-azuki-card-')),
+                goldGained: 0,
+            }
+            : generatedRewardBundle;
 
         if (gameState.challengeMode === 'COOP') {
             const nextRewardSets: Record<string, RewardItem[]> = {};
@@ -11730,6 +11969,8 @@ const App: React.FC = () => {
         const rewardPrefix = `${rewardScope}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
         const getRewardCardTemplateKey = (card: ICard) => card.originalNames?.[0] || card.name || card.id;
         const pickedCardTemplateIds = new Set<string>();
+        const isAzukiBossReward = nodeType === NodeType.BOSS && Boolean(player.turnFlags[AZUKI_BOSS_FLAG]);
+        const isDodomedesuBossReward = nodeType === NodeType.BOSS && Boolean(player.turnFlags[DODOMEDESU_BOSS_ACTIVE_FLAG]);
 
         if (bonusGold > 0) {
             let goldReward = bonusGold;
@@ -11738,6 +11979,23 @@ const App: React.FC = () => {
             goldGained += goldReward;
         }
 
+        if (isAzukiBossReward) {
+            AZUKI_REWARD_CARDS.forEach((card, index) => {
+                rewards.push({
+                    type: 'CARD',
+                    value: { ...card, id: `${rewardPrefix}-azuki-card-value-${index}` },
+                    id: `${rewardPrefix}-azuki-card-${index}`
+                });
+            });
+        } else if (isDodomedesuBossReward) {
+            DODOMEDESU_REWARD_CARDS.forEach((card, index) => {
+                rewards.push({
+                    type: 'CARD',
+                    value: { ...card, id: `${rewardPrefix}-dodomedesu-card-value-${index}` },
+                    id: `${rewardPrefix}-dodomedesu-card-${index}`
+                });
+            });
+        } else {
         const magicRewardCards = stateRef.current.visualTheme === 'magic'
             ? getMagicCardsForHero(getMagicProtagonistId(player)).map((card) => ({
                 ...card,
@@ -11809,6 +12067,7 @@ const App: React.FC = () => {
             const eraserReward = { type: 'CARD' as const, value: createCardEraserCard(`${rewardPrefix}-eraser-value`), id: `${rewardPrefix}-eraser` };
             if (replaceIndex >= 0) rewards[replaceIndex] = eraserReward;
             else rewards.push(eraserReward);
+        }
         }
 
         if (challengeMode === 'RACE' && Math.random() < 0.3) {
@@ -15516,6 +15775,7 @@ const App: React.FC = () => {
                             onStartUiPreview={handleStartUiPreview}
                             onStartProblemUiPreview={handleStartProblemUiPreview}
                             onStartEventUiPreview={handleStartEventUiPreview}
+                            onStartCrowdfundingBoss={handleStartCrowdfundingBoss}
                             onBack={returnToTitle}
                             onTimeUpdate={handleTimeUpdate}
                             onAddClearCount={handleDebugAddClearCount}
@@ -16680,6 +16940,24 @@ const App: React.FC = () => {
                     </div>
                 )}
 
+                {azukiBattleInfoOpen && gameState.screen === GameScreen.BATTLE && (
+                    <div className="app-modal-overlay fixed inset-0 z-[240] flex items-center justify-center bg-black/80 p-4">
+                        <div className="app-modal-panel w-full max-w-lg rounded-xl border-2 border-amber-300 bg-slate-950 p-5 text-white shadow-[0_0_40px_rgba(251,191,36,0.38)]">
+                            <div className="mb-3 text-center text-2xl font-black text-amber-200">
+                                {languageMode === 'ENGLISH' ? 'AZUKI: PLAYFUL COUNTER' : 'あずきのじゃれつき'}
+                            </div>
+                            <p className="whitespace-pre-line text-center text-base leading-relaxed text-slate-100">
+                                {languageMode === 'ENGLISH'
+                                    ? 'Attack cards deal no direct damage to Azuki. When you block Azuki\'s normal attack, deal damage to Azuki equal to the amount blocked.\n\nPoison and debuffs still work. Piercing attacks cannot be countered this way.'
+                                    : 'あずきにはアタックカードの直接ダメージが効きません。あずきの通常攻撃をブロックすると、受け止めたブロック量と同じダメージをあずきへ与えます。\n\n毒やデバフは有効です。防御貫通攻撃は反射できません。'}
+                            </p>
+                            <button onClick={() => setAzukiBattleInfoOpen(false)} className="mt-5 w-full rounded-lg border border-amber-200 bg-amber-500 py-3 font-black text-slate-950 hover:bg-amber-300">
+                                {languageMode === 'ENGLISH' ? 'PLAY' : 'あずきと遊ぶ'}
+                            </button>
+                        </div>
+                    </div>
+                )}
+
                 {eventCardChoiceModal && (
                     <div className="app-modal-overlay fixed inset-0 z-[233] flex items-center justify-center bg-black/75 p-3 sm:p-4">
                         <div className="app-modal-panel w-full max-w-4xl rounded-xl border-2 border-amber-400 bg-slate-950 p-4 text-white shadow-2xl">
@@ -17139,3 +17417,4 @@ const App: React.FC = () => {
 };
 
 export default App;
+

@@ -2,10 +2,6 @@
 @tailwind components;
 @tailwind utilities;
 
-.credits-roll-viewport:hover .credits-roll-track {
-  animation-play-state: paused;
-}
-
 .credits-roll-track {
   animation: credits-roll 28s linear infinite;
   padding-bottom: 72%;

@@ -8,6 +8,8 @@ import { getUpgradedCard } from '../utils/cardUtils';
 import { ADDITIONAL_CARDS } from '../constants1';
 import { getVisualThemeEventTheme, getVisualThemeEventThemeByTitle, type ThemedEventTheme, type VisualThemeId } from '../data/visualThemes';
 import { getSupporterNpcEventByTitle, HIGH_SCHOOL_SUPPORTER_NPC_EVENTS, type SupporterNpcEventProfile, type SupporterNpcQuestion, type SupporterNpcReward } from '../data/supporterNpcEvents';
+import { AZUKI_ENCOUNTER_FLAG } from '../data/azukiBoss';
+import { DODOMEDESU_BOSS_READY_FLAG, DODOMEDESU_EVENT_STAGE_FLAG, DODOMEDESU_EVENT_STAGES } from '../data/dodomedesuBoss';
 
 interface EventAnswerMeta {
     quickQuizProgress?: number;
@@ -269,7 +271,11 @@ export const generateEvent = (
 ): GameEvent => {
     let activeEventTitle: string | null = null;
     const finalizeEvent = (event: GameEvent): GameEvent => {
-        const themedEvent = getVisualThemeEventTheme(visualTheme, event.title, currentAct, currentFloor);
+        const isCrowdfundingEvent = event.title === 'あずきとの出会い'
+            || DODOMEDESU_EVENT_STAGES.some(stage => stage.title === event.title);
+        const themedEvent = isCrowdfundingEvent
+            ? null
+            : getVisualThemeEventTheme(visualTheme, event.title, currentAct, currentFloor);
         if (themedEvent) return buildThemedEvent(themedEvent, visualTheme);
         return {
         ...event,
@@ -900,6 +906,90 @@ export const generateEvent = (
     const preferredSupporterEvent = getSupporterNpcEventByTitle(preferredEventTitle);
     if (preferredSupporterEvent) {
         return buildSupporterNpcEvent(preferredSupporterEvent);
+    }
+
+    const preferredDodomedesuStage = DODOMEDESU_EVENT_STAGES.findIndex(stage => stage.title === preferredEventTitle);
+    const dodomedesuStage = preferredDodomedesuStage >= 0
+        ? preferredDodomedesuStage
+        : Number(player.turnFlags[DODOMEDESU_EVENT_STAGE_FLAG] || 0);
+    const shouldShowDodomedesuEvent = visualTheme === 'high-school'
+        && isEndless
+        && (preferredDodomedesuStage >= 0 || !player.turnFlags[DODOMEDESU_BOSS_READY_FLAG])
+        && dodomedesuStage < DODOMEDESU_EVENT_STAGES.length
+        && (preferredDodomedesuStage >= 0 || Math.random() < (dodomedesuStage > 0 ? 0.35 : 0.12));
+    if (shouldShowDodomedesuEvent) {
+        const stage = DODOMEDESU_EVENT_STAGES[dodomedesuStage];
+        const advance = (result: string, reward: 'HEAL' | 'GOLD') => {
+            setGameState(prev => ({
+                ...prev,
+                player: {
+                    ...(reward === 'HEAL' ? healPlayer(prev.player, 8) : prev.player),
+                    gold: prev.player.gold + (reward === 'GOLD' ? 20 : 0),
+                    turnFlags: { ...prev.player.turnFlags, [DODOMEDESU_EVENT_STAGE_FLAG]: dodomedesuStage + 1 }
+                }
+            }));
+            setEventResultLog(result);
+        };
+        return finalizeEvent({
+            title: stage.title,
+            description: stage.description,
+            imageKey: `dodomedesu-event-${dodomedesuStage + 1}`,
+            options: dodomedesuStage === 4 ? [
+                {
+                    label: '最後のゲームを受けて立つ',
+                    text: 'この階層のボスがドドメデスとゲンゾーになる',
+                    action: () => {
+                        setGameState(prev => ({ ...prev, player: { ...prev.player, turnFlags: { ...prev.player.turnFlags, [DODOMEDESU_EVENT_STAGE_FLAG]: 5, [DODOMEDESU_BOSS_READY_FLAG]: true } } }));
+                        setEventResultLog('ゲンゾーが高らかに宣言し、ドドメデスが巨大な姿へ覚醒した。階層の最奥で決着をつける。');
+                    }
+                },
+                {
+                    label: 'どどめに呼びかける',
+                    text: 'HPを12回復し、覚醒をいったん思いとどまらせる',
+                    action: () => {
+                        setGameState(prev => ({ ...prev, player: healPlayer(prev.player, 12) }));
+                        setEventResultLog('どどめは一瞬だけ元の笑顔を取り戻した。だが、ゲンゾーはまだ諦めていない。HPが12回復した。');
+                    }
+                }
+            ] : [
+                { label: dodomedesuStage < 2 ? '一緒に遊ぶ' : '二人の話を聞く', text: 'HPを8回復して物語を進める', action: () => advance('二人との時間を過ごし、物語が次の段階へ進んだ。HPが8回復した。', 'HEAL') },
+                { label: dodomedesuStage < 2 ? 'ゲンゾーに勝負を挑む' : '危険性を指摘する', text: '20Gを得て物語を進める', action: () => advance('議論の謝礼として20Gを受け取った。二人の関係はさらに強くなっていく。', 'GOLD') }
+            ]
+        });
+    }
+
+    if (
+        visualTheme === 'high-school'
+        && isEndless
+        && (preferredEventTitle === 'あずきとの出会い' || (!player.turnFlags[AZUKI_ENCOUNTER_FLAG] && Math.random() < 0.12))
+    ) {
+        return finalizeEvent({
+            title: 'あずきとの出会い',
+            description: languageMode === 'ENGLISH'
+                ? 'At the school gate, a buff-colored cocker spaniel looks up at you with warm eyes. Her tail sways as if asking you to walk together.'
+                : '放課後の校門で、バフカラーのコッカースパニエルがこちらを見上げている。しっぽを揺らしながら、一緒に歩こうと誘っているようだ。',
+            imageKey: 'あずきとの出会い',
+            options: [
+                {
+                    label: languageMode === 'ENGLISH' ? 'Walk together' : '一緒に歩く',
+                    text: languageMode === 'ENGLISH' ? 'Azuki will appear as this act\'s boss' : 'この階層のボスがあずきになる',
+                    action: () => {
+                        setGameState(prev => ({ ...prev, player: { ...prev.player, turnFlags: { ...prev.player.turnFlags, [AZUKI_ENCOUNTER_FLAG]: true } } }));
+                        setEventResultLog(languageMode === 'ENGLISH'
+                            ? 'Azuki happily joins your walk. You sense a big reunion waiting at the end of this act.'
+                            : 'あずきは嬉しそうに並んで歩き出した。この階層の終わりで、もう一度会える気がする。');
+                    }
+                },
+                {
+                    label: languageMode === 'ENGLISH' ? 'Give a gentle pat' : 'やさしくなでる',
+                    text: languageMode === 'ENGLISH' ? 'Restore 10 HP' : 'HPを10回復',
+                    action: () => {
+                        setGameState(prev => ({ ...prev, player: healPlayer(prev.player, 10) }));
+                        setEventResultLog(languageMode === 'ENGLISH' ? 'Azuki relaxes beside you. Restore 10 HP.' : 'あずきが寄り添ってくれた。HPが10回復した。');
+                    }
+                }
+            ]
+        });
     }
 
     if (visualTheme === 'high-school' && isEndless && HIGH_SCHOOL_SUPPORTER_NPC_EVENTS.length > 0 && Math.random() < 0.55) {

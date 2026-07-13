@@ -3,6 +3,7 @@ import PixelSprite from './PixelSprite';
 import { getEnemyIllustrationPaths } from '../utils/enemyIllustration';
 import { isLegacySpriteModeEnabled } from '../utils/legacySpriteMode';
 import { getThemedHumanoidEnemySpritePath, getThemedMonsterEnemySpritePath, type HighSchoolEnemyAction, type VisualThemeId } from '../data/visualThemes';
+import { assetUrl } from '../utils/assetPaths';
 
 interface EnemyIllustrationProps {
   name: string;
@@ -26,12 +27,24 @@ const EnemyIllustration: React.FC<EnemyIllustrationProps> = ({ name, seed, alias
   }
 
   const enemyRef = { name, enemyType, phase };
+  const azukiSpritePath = visualTheme === 'high-school' && enemyType === 'AZUKI'
+    ? assetUrl(`sprites/high-school/azuki/${action === 'attack' ? 'pounce' : action === 'skill' ? 'howl' : 'idle'}.webp`)
+    : null;
+  const crowdfundingBossPath = visualTheme === 'high-school' && enemyType === 'DODOMEDESU'
+    ? assetUrl('enemy-illustrations/ドドメデス.webp')
+    : visualTheme === 'high-school' && enemyType === 'GENZO'
+      ? assetUrl('enemy-illustrations/ゲンゾー.webp')
+      : null;
   const humanoidPath = getThemedHumanoidEnemySpritePath(enemyRef, visualTheme, action);
   const humanoidIdlePath = action !== 'idle'
     ? getThemedHumanoidEnemySpritePath(enemyRef, visualTheme, 'idle')
     : null;
   const monsterPath = getThemedMonsterEnemySpritePath(enemyRef, visualTheme);
-  const imagePaths = humanoidPath
+  const imagePaths = crowdfundingBossPath
+    ? [crowdfundingBossPath]
+    : azukiSpritePath
+    ? [azukiSpritePath]
+    : humanoidPath
     ? Array.from(new Set([humanoidPath, humanoidIdlePath].filter(Boolean) as string[]))
     : monsterPath
     ? [monsterPath]
@@ -69,3 +82,4 @@ const EnemyIllustration: React.FC<EnemyIllustrationProps> = ({ name, seed, alias
 };
 
 export default EnemyIllustration;
+

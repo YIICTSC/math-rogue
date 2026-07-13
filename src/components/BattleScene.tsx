@@ -431,6 +431,9 @@ const BattleScene: React.FC<BattleSceneProps> = ({
     const isEnemyFinisherActive = !!finisherCutinCard?.id?.startsWith('enemy-finisher-');
     const isFinisherActive = !!finisherCutinCard && !isEnemyFinisherActive;
     const visualEnemies = isFinisherActive && enemies.length === 0 ? lastVisibleEnemies : enemies;
+    const isDodomedesuBattle = visualEnemies.some(enemy => enemy.enemyType === 'DODOMEDESU' || enemy.enemyType === 'GENZO');
+    const isDodomedesuAlive = visualEnemies.some(enemy => enemy.enemyType === 'DODOMEDESU' && enemy.currentHp > 0);
+    const isGenzoAlive = visualEnemies.some(enemy => enemy.enemyType === 'GENZO' && enemy.currentHp > 0);
     const playerHpPercent = (player.currentHp / player.maxHp) * 100;
     const supportNeedsTarget = (card: CoopSupportCard) => (
         card.effectId === 'ALLY_HEAL' ||
@@ -812,7 +815,13 @@ const BattleScene: React.FC<BattleSceneProps> = ({
             return;
         }
         enemies.forEach(enemy => {
-            themedEnemyNameMapRef.current.set(enemy.name, getThemedEnemyDisplayName(enemy, visualTheme));
+            const isCrowdfundingBoss = enemy.enemyType === 'AZUKI'
+                || enemy.enemyType === 'DODOMEDESU'
+                || enemy.enemyType === 'GENZO';
+            themedEnemyNameMapRef.current.set(
+                enemy.name,
+                isCrowdfundingBoss ? enemy.name : getThemedEnemyDisplayName(enemy, visualTheme)
+            );
         });
     }, [enemies, visualTheme]);
     const renderBattleLog = (log: string) => {
@@ -1195,7 +1204,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                     <div className="app-modal-panel magic-transform-tutorial-panel w-full max-w-3xl overflow-hidden rounded-2xl border-2 border-fuchsia-300/80 bg-slate-950 shadow-[0_0_42px_rgba(217,70,239,0.55)]">
                         <div className="magic-transform-tutorial-visual relative aspect-video w-full overflow-hidden bg-slate-900">
                             <img
-                                src={assetUrl('ui/magic/transformation-guide.png')}
+                                src={assetUrl('ui/magic/transformation-guide.webp')}
                                 alt={languageMode === 'ENGLISH' ? 'Magical transformation tutorial' : 'マジック編の変身説明'}
                                 className="h-full w-full object-cover"
                             />
@@ -1386,12 +1395,19 @@ const BattleScene: React.FC<BattleSceneProps> = ({
             </div>
 
             {/* 2. Battle Viewport */}
-            <div ref={battleViewRef} className="battle-view flex-1 min-h-0 relative overflow-y-auto custom-scrollbar flex flex-col justify-between p-2 bg-gray-800/50 gap-4">
-                <div
-                    className="pointer-events-none absolute inset-0 bg-cover bg-center opacity-76"
-                    style={{ backgroundImage: `url(${battleBackgroundScene.image})` }}
-                />
-                <div className="pointer-events-none absolute inset-0 bg-slate-950/45" />
+            <div ref={battleViewRef} className={`battle-view flex-1 min-h-0 relative overflow-y-auto custom-scrollbar flex flex-col justify-between p-2 gap-4 ${isDodomedesuBattle ? 'bg-[#160d19]' : 'bg-gray-800/50'}`}>
+                {!isDodomedesuBattle && (
+                    <>
+                        <div
+                            className="pointer-events-none absolute inset-0 bg-cover bg-center opacity-76"
+                            style={{ backgroundImage: `url(${battleBackgroundScene.image})` }}
+                        />
+                        <div className="pointer-events-none absolute inset-0 bg-slate-950/45" />
+                    </>
+                )}
+                {isDodomedesuBattle && (
+                    <div className="pointer-events-none absolute inset-0 bg-[radial-gradient(circle_at_50%_38%,rgba(100,46,79,0.42),rgba(22,13,25,0.96)_68%)]" />
+                )}
 
                 {/* Parry UI Overlay (Bard Special) */}
                 {parryState?.active && !parryState.success && (
@@ -1624,16 +1640,47 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                 )}
 
                 {/* Enemies + Player Area */}
-                <div className={isTrueBossPhase2SpecialLayout ? "battle-actors relative min-h-[220px] md:min-h-[320px] pt-2 md:pt-4" : "battle-actors flex flex-col flex-1 min-h-0"}>
+                <div className={isTrueBossPhase2SpecialLayout ? "battle-actors relative min-h-[220px] md:min-h-[320px] pt-2 md:pt-4" : "battle-actors relative flex flex-col flex-1 min-h-0"}>
+
+                    {isDodomedesuBattle && !isFinisherActive && (
+                        <div className="pointer-events-none absolute bottom-0 left-1/2 top-0 z-0 aspect-square max-h-full max-w-full -translate-x-1/2 overflow-hidden rounded-lg border-2 border-violet-400/70 bg-black shadow-[0_0_28px_rgba(139,92,246,0.4)]">
+                            <img
+                                src={assetUrl('enemy-illustrations/ドドメデス.webp')}
+                                alt="ドドメデスとゲンゾー"
+                                className={`absolute inset-0 h-full w-full object-contain object-center transition-opacity duration-700 ${isDodomedesuAlive && isGenzoAlive ? 'opacity-100' : 'opacity-0'}`}
+                            />
+                            <img
+                                src={assetUrl('enemy-illustrations/ドドメデス-困惑.webp')}
+                                alt="ゲンゾーを失い戸惑うドドメデス"
+                                className={`absolute inset-0 h-full w-full object-contain object-center transition-opacity duration-700 ${isDodomedesuAlive && !isGenzoAlive ? 'opacity-100' : 'opacity-0'}`}
+                            />
+                            <img
+                                src={assetUrl('enemy-illustrations/ゲンゾー-孤立.webp')}
+                                alt="泡を吹くドドメデスを見て慌てるゲンゾー"
+                                className={`absolute inset-0 h-full w-full object-contain object-center transition-opacity duration-700 ${!isDodomedesuAlive && isGenzoAlive ? 'opacity-100' : 'opacity-0'}`}
+                            />
+                            <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-black/10" />
+                        </div>
+                    )}
 
                     {/* Enemies Area */}
-                    <div className={isTrueBossPhase2SpecialLayout ? `battle-enemies-area absolute right-2 md:left-1/2 md:-translate-x-1/2 bottom-0 flex justify-end md:justify-center items-end gap-2 min-h-0 shrink-0 ${isFinisherActive ? 'z-[280]' : 'z-10'}` : `battle-enemies-area flex justify-center items-start pt-8 md:pt-14 gap-2 min-h-[180px] shrink-0 ${isFinisherActive ? 'z-[280]' : ''}`}>
+                    <div className={isDodomedesuBattle
+                        ? `battle-enemies-area absolute bottom-0 left-1/2 top-0 aspect-square max-h-full max-w-full -translate-x-1/2 flex items-end justify-center gap-3 pb-2 pt-0 ${isFinisherActive ? 'z-[280]' : 'z-10'}`
+                        : isTrueBossPhase2SpecialLayout
+                            ? `battle-enemies-area absolute right-2 md:left-1/2 md:-translate-x-1/2 bottom-0 flex justify-end md:justify-center items-end gap-2 min-h-0 shrink-0 ${isFinisherActive ? 'z-[280]' : 'z-10'}`
+                            : `battle-enemies-area flex justify-center items-start pt-8 md:pt-14 gap-2 min-h-[180px] shrink-0 ${isFinisherActive ? 'z-[280]' : ''}`}>
                         {visualEnemies.map((enemy) => {
                             const enemyHpPercent = (enemy.currentHp / enemy.maxHp) * 100;
                             const isSelected = !isFinisherActive && (selectedEnemyId === enemy.id || (!selectedEnemyId && visualEnemies.length === 1));
                             const actionClass = getEnemyActionClass(enemy);
                             const themedEnemy = getThemedEnemyVariant(enemy, visualTheme);
-                            const enemyName = trans(themedEnemy?.name ?? enemy.name, languageMode);
+                            const usesCrowdfundingBossName = enemy.enemyType === 'AZUKI'
+                                || enemy.enemyType === 'DODOMEDESU'
+                                || enemy.enemyType === 'GENZO';
+                            const enemyName = trans(
+                                usesCrowdfundingBossName ? enemy.name : (themedEnemy?.name ?? enemy.name),
+                                languageMode
+                            );
                             const enemyNameNeedsScroll = enemyName.length > 8;
                             const isTrueBossPhase2 = enemy.enemyType === 'THE_HEART' && enemy.phase === 2;
                             const isFinalBoss = enemy.enemyType === 'THE_HEART';
@@ -1652,6 +1699,13 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                     ? 'attack'
                                     : 'skill';
                             const isParryTarget = !!parryState?.active && parryState.enemyId === enemy.id;
+                            const dodomedesuIntentPosition = isDodomedesuBattle
+                                ? enemy.enemyType === 'DODOMEDESU'
+                                    ? '!top-[25%] !left-[45%]'
+                                    : enemy.enemyType === 'GENZO'
+                                        ? '!top-[3%] !left-[-5%]'
+                                        : ''
+                                : '';
                             const enemySvgAliases = isTrueBossPhase2
                                 ? ['THE_HEART_PHASE2', '真ボス2形態目', '真ボス_2', '真ボス第二形態', `${enemy.enemyType}_2`]
                                 : [];
@@ -1671,7 +1725,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                         event.preventDefault();
                                         if (!isFinisherActive && coopCanAct) onSelectEnemy(enemy.id);
                                     }}
-                                    className={`battle-enemy-unit ${humanoidEnemy ? 'battle-humanoid-enemy-unit' : ''} flex flex-col items-center z-10 transition-all duration-200 cursor-pointer relative ${useFinalBossLayout ? 'md:flex-row md:items-center md:gap-3' : ''} ${isSelected && !actionClass ? 'scale-105 z-20' : ''} ${!isSelected && !actionClass ? 'hover:scale-105' : ''} ${actionClass} ${tutorialStep === 2 ? 'ring-4 ring-red-500 ring-offset-4 ring-offset-transparent animate-pulse rounded-lg' : ''} ${isParryTarget ? 'ring-4 ring-cyan-300 ring-offset-4 ring-offset-slate-900 rounded-lg shadow-[0_0_30px_rgba(34,211,238,0.75)] z-[60]' : ''} ${isFinisherActive ? '!z-[300]' : ''}`}
+                                    className={`battle-enemy-unit ${humanoidEnemy ? 'battle-humanoid-enemy-unit' : ''} flex flex-col items-center z-10 transition-all duration-200 cursor-pointer relative ${isDodomedesuBattle ? 'h-full justify-end pb-1' : ''} ${useFinalBossLayout ? 'md:flex-row md:items-center md:gap-3' : ''} ${isSelected && !actionClass ? 'scale-105 z-20' : ''} ${!isSelected && !actionClass ? 'hover:scale-105' : ''} ${actionClass} ${tutorialStep === 2 ? 'ring-4 ring-red-500 ring-offset-4 ring-offset-transparent animate-pulse rounded-lg' : ''} ${isParryTarget ? 'ring-4 ring-cyan-300 ring-offset-4 ring-offset-slate-900 rounded-lg shadow-[0_0_30px_rgba(34,211,238,0.75)] z-[60]' : ''} ${isFinisherActive ? '!z-[300]' : ''}`}
                                 >
                                     {isParryTarget && (
                                         <div className="absolute -inset-5 rounded-full border-2 border-cyan-300/70 animate-ping pointer-events-none"></div>
@@ -1682,7 +1736,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
 
                                     {!isFinisherActive && (
                                         <div
-                                            className={`battle-enemy-intent absolute ${isTrueBossPhase2 ? '-top-1 md:-top-6' : '-top-6'} left-1/2 -translate-x-1/2 z-30 transition-all duration-300 text-xs font-extrabold px-1.5 py-0.5 rounded border-2 animate-bounce whitespace-nowrap shadow-xl flex items-center justify-center min-w-[40px] ${hideEnemyIntents ? 'bg-slate-900 text-slate-100 border-slate-500' : enemy.nextIntent.type === 'PIERCE_ATTACK' ? 'bg-red-800 text-white border-yellow-400 scale-125 ring-2 ring-red-400 shadow-red-900/50' : 'bg-white text-black border-red-600'}`}
+                                            className={`battle-enemy-intent absolute ${isTrueBossPhase2 ? '-top-1 md:-top-6' : '-top-6'} ${dodomedesuIntentPosition} left-1/2 -translate-x-1/2 z-30 transition-all duration-300 text-xs font-extrabold px-1.5 py-0.5 rounded border-2 animate-bounce whitespace-nowrap shadow-xl flex items-center justify-center min-w-[40px] ${hideEnemyIntents ? 'bg-slate-900 text-slate-100 border-slate-500' : enemy.nextIntent.type === 'PIERCE_ATTACK' ? 'bg-red-800 text-white border-yellow-400 scale-125 ring-2 ring-red-400 shadow-red-900/50' : 'bg-white text-black border-red-600'}`}
                                             onClick={(e) => { e.stopPropagation(); showInfo(trans("敵", languageMode), trans("敵の次の行動です。", languageMode)); }}
                                             title={hideEnemyIntents ? "???" : trans(getIntentHoverText(enemy), languageMode)}
                                         >
@@ -1723,7 +1777,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                         </div>
                                     )}
 
-                                    <div className={`battle-enemy-sprite ${humanoidEnemy ? 'battle-humanoid-enemy-sprite' : ''} ${useFinalBossLayout ? 'battle-final-boss-sprite' : ''} relative mb-1 transition-all duration-700 ${enemySpriteSizeClass}`}>
+                                    <div className={`battle-enemy-sprite ${humanoidEnemy ? 'battle-humanoid-enemy-sprite' : ''} ${useFinalBossLayout ? 'battle-final-boss-sprite' : ''} ${(enemy.enemyType === 'DODOMEDESU' || enemy.enemyType === 'GENZO') && isDodomedesuBattle ? 'invisible absolute' : ''} relative mb-1 transition-all duration-700 ${enemySpriteSizeClass}`}>
                                         {isFinisherActive ? (
                                             <div className="relative w-full h-full flex items-center justify-center">
                                                 {!finisherBurst && (
@@ -3249,3 +3303,4 @@ const FullscreenCardArtModal: React.FC<{ card: ICard; languageMode: LanguageMode
 };
 
 export default BattleScene;
+

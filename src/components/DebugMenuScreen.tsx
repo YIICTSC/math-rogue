@@ -28,6 +28,7 @@ import { getDebugProblemUnitGroups } from './ProblemChallengeScreen';
 import { SUBJECT_DATA, type GeneralProblem } from '../data/subjectData';
 import { ELEMENTARY_EVENT_TITLES } from '../services/eventService';
 import { HIGH_SCHOOL_SUPPORTER_NPC_EVENTS, type SupporterNpcReward } from '../data/supporterNpcEvents';
+import { DODOMEDESU_EVENT_STAGES } from '../data/dodomedesuBoss';
 import React, { useMemo, useState, useCallback, useEffect, useRef } from 'react';
 
 interface DebugMenuScreenProps {
@@ -37,6 +38,7 @@ interface DebugMenuScreenProps {
     onStartUiPreview: (screen: GameScreen, miniGameOutcome?: MiniGameDebugPreview) => void;
     onStartProblemUiPreview: (mode: GameMode, modePool?: string[]) => void;
     onStartEventUiPreview: (theme: VisualThemeId, title: string) => void;
+    onStartCrowdfundingBoss: (boss: 'AZUKI' | 'DODOMEDESU') => void;
     onBack: () => void;
     onTimeUpdate: (newDailySeconds: number) => void;
     onAddClearCount: () => void;
@@ -257,6 +259,7 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
     onStartUiPreview,
     onStartProblemUiPreview,
     onStartEventUiPreview,
+    onStartCrowdfundingBoss,
     onBack,
     onTimeUpdate,
     onAddClearCount,
@@ -2252,6 +2255,34 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
                                         通常{HIGH_SCHOOL_EVENT_THEMES.length}件 / NPC{HIGH_SCHOOL_SUPPORTER_NPC_EVENTS.length}件
                                     </div>
                                 </div>
+                                <section className="rounded-xl border border-fuchsia-500/70 bg-fuchsia-950/20 p-4">
+                                    <div className="mb-3">
+                                        <h4 className="text-sm font-black text-fuchsia-200">クラウドファンディング ボス導線</h4>
+                                        <p className="mt-1 text-xs text-gray-400">遭遇イベントからボス戦まで、各段階を直接起動して確認できます。</p>
+                                    </div>
+                                    <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+                                        <div className="overflow-hidden rounded-lg border border-amber-600/70 bg-black/35">
+                                            <img src={assetUrl('event-illustrations/あずきとの出会い.webp')} alt="あずきとの出会い" className="aspect-square w-full object-cover" />
+                                            <div className="space-y-2 p-3">
+                                                <div className="font-black text-amber-200">あずき</div>
+                                                <button type="button" onClick={() => onStartEventUiPreview('high-school', 'あずきとの出会い')} className="w-full rounded-lg border border-amber-300 bg-amber-700 px-3 py-2 text-xs font-black text-white hover:bg-amber-600">出会いイベントを開始</button>
+                                                <button type="button" onClick={() => onStartCrowdfundingBoss('AZUKI')} className="w-full rounded-lg border border-red-300 bg-red-800 px-3 py-2 text-xs font-black text-white hover:bg-red-700">あずき戦〜特別カード報酬を確認</button>
+                                            </div>
+                                        </div>
+                                        <div className="overflow-hidden rounded-lg border border-violet-600/70 bg-black/35">
+                                            <img src={assetUrl('event-illustrations/dodomedesu-event-5.webp')} alt="ドドメデス覚醒" className="aspect-square w-full object-cover" />
+                                            <div className="space-y-2 p-3">
+                                                <div className="font-black text-violet-200">ドドメデス＆ゲンゾー</div>
+                                                <div className="grid grid-cols-1 gap-2 sm:grid-cols-2">
+                                                    {DODOMEDESU_EVENT_STAGES.map((stage, index) => (
+                                                        <button key={stage.title} type="button" onClick={() => onStartEventUiPreview('high-school', stage.title)} className="rounded-lg border border-violet-400 bg-violet-900 px-3 py-2 text-left text-xs font-bold text-white hover:bg-violet-800">第{index + 1}段階: {stage.title}</button>
+                                                    ))}
+                                                </div>
+                                                <button type="button" onClick={() => onStartCrowdfundingBoss('DODOMEDESU')} className="w-full rounded-lg border border-red-300 bg-red-800 px-3 py-2 text-xs font-black text-white hover:bg-red-700">ドドメデス戦〜特別カード報酬を確認</button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </section>
                                 <section className="rounded-xl border border-yellow-600/70 bg-yellow-950/20 p-4">
                                     <div className="mb-3 flex items-center justify-between gap-3">
                                         <div>
@@ -2587,3 +2618,4 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
 };
 
 export default DebugMenuScreen;
+
