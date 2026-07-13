@@ -1,3 +1,5 @@
+import { CardType, TargetType, type Card } from '../types';
+
 export const DODOMEDESU_EVENT_STAGE_FLAG = 'DODOMEDESU_EVENT_STAGE';
 export const DODOMEDESU_BOSS_READY_FLAG = 'DODOMEDESU_BOSS_READY';
 export const DODOMEDESU_BOSS_ACTIVE_FLAG = 'DODOMEDESU_BOSS_ACTIVE';
