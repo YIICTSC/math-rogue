@@ -4856,6 +4856,9 @@ const App: React.FC = () => {
     };
 
     const launchNewAdventure = (themeOverride: VisualThemeId = visualTheme) => {
+        const adventureTheme = VISUAL_THEMES.includes(themeOverride as VisualThemeId)
+            ? themeOverride as VisualThemeId
+            : visualTheme;
         if (redirectToAssignmentChallengeIfLocked()) return;
         if (isDailyLimitReached) {
             audioService.playSound('wrong');
@@ -4872,7 +4875,7 @@ const App: React.FC = () => {
             screen: activeAssignment?.gameMode === 'FREE' ? GameScreen.DIFFICULTY_SELECTION : GameScreen.MODE_SELECTION,
             mode: initialMode,
             modePool: assignmentHasCustomProblems ? (assignmentModePool || []) : assignmentModePool,
-            visualTheme: themeOverride,
+            visualTheme: adventureTheme,
             answerMode: activeAssignment?.answerMode || 'CHOICE',
             difficultyLevel: 1,
             shopRemoveCount: 0,
@@ -15265,7 +15268,7 @@ const App: React.FC = () => {
                                     </>
                                 )}
                                 <button
-                                    onClick={startGame}
+                                    onClick={() => startGame()}
                                     disabled={isLoading || isAssignmentChallengeOnlyLocked}
                                     className={`w-full py-2 px-4 text-lg font-bold border-b-4 border-r-4 rounded-none transition-all shadow-lg flex items-center justify-center ${isDailyLimitReached || isAssignmentChallengeOnlyLocked ? 'bg-gray-800 border-gray-700 text-gray-500 grayscale opacity-70 cursor-not-allowed' : 'bg-gray-100 text-black border-gray-500 hover:bg-white hover:border-gray-400 hover:translate-x-[1px] hover:translate-y-[1px] active:border-0 active:translate-y-[4px] active:translate-x-[4px]'}`}
                                 >
