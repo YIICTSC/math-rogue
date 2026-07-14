@@ -16,7 +16,9 @@ const UnitBoardModal: React.FC<UnitBoardModalProps> = ({ summary, open, onClose,
   if (!open || !summary) return null;
 
   const isNativeEnglishBoard = summary.id.startsWith('NATIVE_');
-  const translate = (text: string) => isNativeEnglishBoard ? text : trans(text, languageMode);
+  const translate = (text: string) => isNativeEnglishBoard || languageMode === 'HIRAGANA'
+    ? text
+    : trans(text, languageMode);
   const boardLabel = isNativeEnglishBoard ? 'Board' : translate(summary.grade && summary.grade <= 2 ? 'ばんしょ' : '板書');
   const goalLabel = isNativeEnglishBoard ? 'Goal' : translate('めあて');
   const ideaLabel = isNativeEnglishBoard ? 'Key Ideas' : translate(summary.grade && summary.grade <= 1 ? 'かんがえかた' : '考え方');

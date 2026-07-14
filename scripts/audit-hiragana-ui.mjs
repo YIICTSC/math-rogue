@@ -34,6 +34,15 @@ const server = await createServer({ server: { middlewareMode: true }, appType: '
 
 try {
   const { trans } = await server.ssrLoadModule('/src/utils/textUtils.ts');
+  const { MINI_GAMES } = await server.ssrLoadModule('/src/miniGameConfig.ts');
+  for (const game of MINI_GAMES) {
+    for (const [field, value] of [['name', game.name], ['description', game.description]]) {
+      const output = trans(value, 'HIRAGANA');
+      if (KANJI.test(output)) {
+        failures.push(`src/miniGameConfig.ts [unlock notification ${field}] ${value} => ${output}`);
+      }
+    }
+  }
 
   for (const file of [
     'src/data/eventHiraganaExact.ts',

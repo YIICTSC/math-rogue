@@ -18,6 +18,15 @@ const server = await createServer({ server: { middlewareMode: true }, appType: '
 
 try {
   const { trans, transEventText } = await server.ssrLoadModule('/src/utils/textUtils.ts');
+  const { MINI_GAMES } = await server.ssrLoadModule('/src/miniGameConfig.ts');
+  for (const game of MINI_GAMES) {
+    for (const [field, value] of [['name', game.name], ['description', game.description]]) {
+      const output = trans(value, 'ENGLISH');
+      if (JAPANESE.test(output) || /Choose Option|You handled the moment/.test(output)) {
+        failures.push(`src/miniGameConfig.ts [unlock notification ${field}] ${value} => ${output}`);
+      }
+    }
+  }
   for (const file of collectSourceFiles('src')) {
     if (EXCLUDED_PATH.test(file)) continue;
     const source = fs.readFileSync(file, 'utf8');

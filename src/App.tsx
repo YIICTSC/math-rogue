@@ -173,9 +173,12 @@ const getAssignmentCustomTargetCorrect = (assignment: AssignmentPayload | null |
 const getAssignmentTargetSummary = (assignment: AssignmentPayload, languageMode: LanguageMode) => {
     const unitSummaries = assignment.units.map(unit => {
         const targetCorrect = unit.targetCorrect || 10;
-        return languageMode === 'ENGLISH'
-            ? `${formatProblemUnitName(unit.name, languageMode)} (${targetCorrect} questions)`
-            : `${trans(unit.name, languageMode)} (${targetCorrect}${trans('問', languageMode)})`;
+        if (languageMode === 'ENGLISH') {
+            return `${formatProblemUnitName(unit.name, languageMode)} (${targetCorrect} questions)`;
+        }
+        const unitName = languageMode === 'HIRAGANA' ? unit.name : trans(unit.name, languageMode);
+        const questionCountLabel = languageMode === 'HIRAGANA' ? 'もん' : '問';
+        return `${unitName} (${targetCorrect}${questionCountLabel})`;
     });
     const customProblemCount = assignment.customProblems?.length || 0;
     if (customProblemCount > 0) {
