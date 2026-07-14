@@ -9,6 +9,7 @@ import { getUnitBoardSummary } from '../data/unitBoardSummaries';
 import { MAP_SYMBOL_ASSET_MAP } from './mapSymbolImageMap';
 import RewardHintBanner from './RewardHintBanner';
 import UnitBoardModal from './UnitBoardModal';
+import { claimUnitBoardFirstDisplay } from '../utils/unitBoardSeen';
 import { trans } from '../utils/textUtils';
 import { formatProblemUnitName } from '../utils/problemUnitName';
 
@@ -160,25 +161,12 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
     if (unitBoardAutoShownRef.current === unitBoardSummary.id) return;
     unitBoardAutoShownRef.current = unitBoardSummary.id;
 
-    try {
-      const seenKey = `unit-board-seen:${unitBoardSummary.id}`;
-      if (window.localStorage.getItem(seenKey) === '1') return;
-      setIsUnitBoardOpen(true);
-    } catch {
-      setIsUnitBoardOpen(true);
-    }
+    if (claimUnitBoardFirstDisplay(unitBoardSummary.id)) setIsUnitBoardOpen(true);
   }, [reviewProblem, unitBoardSummary]);
 
   const handleUnitBoardClose = useCallback(() => {
-    if (unitBoardSummary) {
-      try {
-        window.localStorage.setItem(`unit-board-seen:${unitBoardSummary.id}`, '1');
-      } catch {
-        // Storage can be unavailable in restricted browsers; closing the modal should still work.
-      }
-    }
     setIsUnitBoardOpen(false);
-  }, [unitBoardSummary]);
+  }, []);
 
   const canonicalizeEnglishNumbers = (value: string) => {
     const smallNumberWords: Record<string, number> = {

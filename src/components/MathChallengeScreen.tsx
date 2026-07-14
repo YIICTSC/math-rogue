@@ -8,6 +8,7 @@ import { resolveAnswerMode } from '../utils/answerMode';
 import { getUnitBoardSummary } from '../data/unitBoardSummaries';
 import RewardHintBanner from './RewardHintBanner';
 import UnitBoardModal from './UnitBoardModal';
+import { claimUnitBoardFirstDisplay } from '../utils/unitBoardSeen';
 import { trans } from '../utils/textUtils';
 
 interface MathProblem {
@@ -39,25 +40,12 @@ const MathChallengeScreen: React.FC<MathChallengeScreenProps> = ({ onComplete, m
     if (unitBoardAutoShownRef.current === unitBoardSummary.id) return;
     unitBoardAutoShownRef.current = unitBoardSummary.id;
 
-    try {
-      const seenKey = `unit-board-seen:${unitBoardSummary.id}`;
-      if (window.localStorage.getItem(seenKey) === '1') return;
-      setIsUnitBoardOpen(true);
-    } catch {
-      setIsUnitBoardOpen(true);
-    }
+    if (claimUnitBoardFirstDisplay(unitBoardSummary.id)) setIsUnitBoardOpen(true);
   }, [reviewProblem, unitBoardSummary]);
 
   const handleUnitBoardClose = useCallback(() => {
-    if (unitBoardSummary) {
-      try {
-        window.localStorage.setItem(`unit-board-seen:${unitBoardSummary.id}`, '1');
-      } catch {
-        // Storage can be unavailable in restricted browsers; closing the modal should still work.
-      }
-    }
     setIsUnitBoardOpen(false);
-  }, [unitBoardSummary]);
+  }, []);
 
   useEffect(() => {
     if (!isAnswered && inputRef.current) {

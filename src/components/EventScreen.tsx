@@ -120,38 +120,38 @@ const EventScreen: React.FC<EventScreenProps> = ({ title, description, options, 
     if (visualTheme === 'magic' && (title === '忘れ物' || imageKey === '忘れ物' || imageKey === 'magic-forgotten-card')) {
       return [
         assetUrl('sprites/magic/events/forgotten-card.webp'),
-        assetUrl('event-illustrations/default.svg'),
+        assetUrl('event-illustrations/default.webp'),
       ];
     }
     if (magicFriendshipImages.length > 0) {
       return [
         ...magicFriendshipImages,
-        assetUrl('event-illustrations/default.svg'),
+        assetUrl('event-illustrations/default.webp'),
       ];
     }
     if (magicRomanceImage) {
       return [
         magicRomanceImage,
-        assetUrl('event-illustrations/default.svg'),
+        assetUrl('event-illustrations/default.webp'),
       ];
     }
     if (highSchoolSupporterNpcImage) {
       return [
         highSchoolSupporterNpcImage,
-        assetUrl('event-illustrations/default.svg'),
+        assetUrl('event-illustrations/default.webp'),
       ];
     }
     if (highSchoolEventIndex !== null) {
       return [
         assetUrl(`sprites/high-school/events/${highSchoolEventIndex}.webp`),
-        assetUrl('event-illustrations/default.svg'),
+        assetUrl('event-illustrations/default.webp'),
       ];
     }
     if (magicEventIndex !== null) {
       return [
         assetUrl(`sprites/magic/events/${magicEventIndex}.webp`),
         assetUrl(`sprites/magic/events/${magicEventIndex}.webp`),
-        assetUrl('event-illustrations/default.svg'),
+        assetUrl('event-illustrations/default.webp'),
       ];
     }
     const encodedTitle = encodeURIComponent(imageKey ?? title);
@@ -161,7 +161,7 @@ const EventScreen: React.FC<EventScreenProps> = ({ title, description, options, 
       assetUrl(`event-illustrations/${encodedTitle}.jpg`),
       assetUrl(`event-illustrations/${encodedTitle}.jpeg`),
       assetUrl(`event-illustrations/${encodedTitle}.svg`),
-      assetUrl('event-illustrations/default.svg')
+      assetUrl('event-illustrations/default.webp')
     ];
   }, [highSchoolEventIndex, highSchoolSupporterNpcImage, magicEventIndex, magicFriendshipImages, magicRomanceImage, imageKey, title, visualTheme]);
   const [imageIndex, setImageIndex] = useState(0);
