@@ -456,7 +456,7 @@ const CharacterSelectionScreen: React.FC<CharacterSelectionScreenProps> = ({ cha
                         <div className={`character-selection-portrait w-24 h-24 mb-4 relative drop-shadow-[0_0_15px_rgba(255,255,255,0.2)] ${isMagicPortrait ? 'overflow-hidden rounded-xl bg-slate-950/50' : ''}`}>
                              <img 
                                 src={charImage} 
-                                alt={char.name} 
+                                alt={trans(char.name, languageMode)}
                                 className={`w-full h-full ${isCustom ? 'rounded-xl object-cover' : isMagicPortrait ? `magic-character-select-portrait-image ${isMagicMalePortrait ? 'magic-character-select-portrait-image-male' : ''}` : 'pixel-art'}`}
                                 style={{ imageRendering: isCustom || isMagicPortrait ? 'auto' : 'pixelated' }}
                              />
@@ -526,7 +526,7 @@ const CharacterSelectionScreen: React.FC<CharacterSelectionScreenProps> = ({ cha
                             {/* Starting Relic Detail */}
                             <div className="bg-white/5 rounded-xl p-3 border border-white/10 flex items-start">
                                 <div className="bg-yellow-500/20 p-1 rounded-lg mr-3 mt-0.5 h-8 w-8 shrink-0">
-                                    {relic ? <RelicIcon id={relic.id} alt={relic.name} /> : <Gem size={16} className="text-yellow-400" />}
+                                    {relic ? <RelicIcon id={relic.id} alt={trans(relic.name, languageMode)} /> : <Gem size={16} className="text-yellow-400" />}
                                 </div>
                                 <div className="text-left">
                                     <div className="text-[10px] text-yellow-300 font-black uppercase tracking-tighter mb-0.5">{trans("初期装備", languageMode)}</div>
@@ -536,7 +536,7 @@ const CharacterSelectionScreen: React.FC<CharacterSelectionScreenProps> = ({ cha
                                     </div>
                                     {magicRule && (
                                         <div className="mt-1 text-[10px] font-bold leading-tight text-amber-100/90">
-                                            {trans(`対応システム：${magicRule.name}`, languageMode)}
+                                            {trans('対応システム', languageMode)}: {trans(magicRule.name, languageMode)}
                                         </div>
                                     )}
                                 </div>

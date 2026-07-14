@@ -5600,7 +5600,7 @@ Object.assign(ENGLISH_DICTIONARY, {
     "高校英語基礎": "High School English Basics",
     "英単語総合": "English Vocabulary",
     "学術・論説": "Academic / Argument",
-    "生活実用": "Practical Daily English",
+    "生活実用": "Practical Life",
     "ビジネス・進路": "Business / Career",
     "科学": "Science",
     "IT・テクノロジー": "IT / Technology",
@@ -8825,7 +8825,13 @@ const buildHiraganaEventFallback = (text: string): string => {
     if (EVENT_HIRAGANA_EXACT[text]) return EVENT_HIRAGANA_EXACT[text];
     const normalizedText = text.replace(/<br\s*\/?>/gi, '<br>');
     if (EVENT_HIRAGANA_EXACT[normalizedText]) return EVENT_HIRAGANA_EXACT[normalizedText];
-    let result = trans(text, 'HIRAGANA');
+    let result = normalizedText;
+    Object.entries({ ...EVENT_HIRAGANA_EXACT, ...HIRAGANA_RUNTIME_EXACT })
+        .sort(([a], [b]) => b.length - a.length)
+        .forEach(([source, translated]) => {
+            if (result.includes(source)) result = result.replaceAll(source, translated);
+        });
+    result = trans(result, 'HIRAGANA');
     Object.keys(EVENT_HIRAGANA_PHRASES)
         .sort((a, b) => b.length - a.length)
         .forEach(key => {
@@ -10417,6 +10423,7 @@ export const transEventText = (text: string, mode: LanguageMode): string => {
     if (!text) return "";
     if (mode === 'HIRAGANA') return buildHiraganaEventFallback(text);
     if (mode !== 'ENGLISH') return trans(text, mode);
+    if (ENGLISH_RUNTIME_EXACT[text]) return ENGLISH_RUNTIME_EXACT[text];
 
     const earlyExact = buildEnglishSchoolEventFallback(text);
     if (earlyExact) return earlyExact;

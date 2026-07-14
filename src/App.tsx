@@ -107,6 +107,7 @@ import { getThemedCharacters, getThemedEnemyDisplayName, MAGIC_HERO_ID_BY_CHARAC
 import { getTrueBossByTheme } from './data/enemyCatalogs';
 import { getHumanoidEnemyVoiceProfile, type HumanoidEnemyVoiceAction } from './data/humanoidEnemyVoiceLines';
 import { boostMagicCardForTransformation, getMagicCardsForHero } from './data/magicCards';
+import { MAGIC_HEROES } from './data/magicHeroes';
 import { createMagicRuleState, createMagicStartingDeck, getMagicRuleConfig } from './data/magicLoadouts';
 import { generateMagicRomanceSelectionEvent } from './services/magicRomanceEventService';
 import { applyMagicRuleOnCardPlay } from './services/magicRuleService';
@@ -4864,6 +4865,11 @@ const App: React.FC = () => {
             }
 
             saved.visualTheme = savedVisualTheme;
+            if (isDebugHpOne && saved.screen === GameScreen.BATTLE) {
+                saved.enemies = saved.enemies.map(enemy => (
+                    enemy.currentHp > 0 ? { ...enemy, currentHp: 1 } : enemy
+                ));
+            }
             setGameState(saved);
             const bgmType = getBgmForScreen(saved) || 'map';
             await audioService.switchThemeAndPlayBGM(getBgmThemeForPlayer(savedVisualTheme, saved.player), bgmType);
@@ -8042,7 +8048,7 @@ const App: React.FC = () => {
                             }
 
                             if (e.currentHp <= 0 && e.enemyType === 'THE_HEART' && e.phase === 1) {
-                                e.currentHp = e.maxHp;
+                                e.currentHp = isDebugHpOne ? 1 : e.maxHp;
                                 e.phase = 2;
                                 e.name = prev.visualTheme === 'magic' ? "真・大魔女校長" : "真・校長先生";
                                 e.poison = 0; e.weak = 0; e.vulnerable = 0;
@@ -9401,7 +9407,7 @@ const App: React.FC = () => {
                         nextLogs.push(`${trans(enemy.name, languageMode)}に毒ダメージ${poisonDmg}`);
                         nextActiveEffects.push({ id: `vfx-psn-${Date.now()}-${enemy.id}`, type: 'FIRE', targetId: enemy.id });
                         if (enemy.currentHp <= 0 && enemy.enemyType === 'THE_HEART' && enemy.phase === 1) {
-                            enemy.currentHp = enemy.maxHp;
+                            enemy.currentHp = isDebugHpOne ? 1 : enemy.maxHp;
                             enemy.phase = 2;
                             enemy.name = prev.visualTheme === 'magic' ? "真・大魔女校長" : "真・校長先生";
                             enemy.poison = 0; enemy.weak = 0; enemy.vulnerable = 0;
@@ -9772,7 +9778,7 @@ const App: React.FC = () => {
                             nextActiveEffects.push({ id: `vfx-thn-${Date.now()}`, type: 'SLASH', targetId: e.id });
                         }
                         if (e.currentHp <= 0 && e.enemyType === 'THE_HEART' && e.phase === 1) {
-                            e.currentHp = e.maxHp;
+                            e.currentHp = isDebugHpOne ? 1 : e.maxHp;
                             e.phase = 2;
                             e.name = prev.visualTheme === 'magic' ? "真・大魔女校長" : "真・校長先生";
                             enemy.poison = 0; enemy.weak = 0; enemy.vulnerable = 0;
@@ -16823,7 +16829,7 @@ const App: React.FC = () => {
                         <div className="app-modal-panel app-unlocks-modal flex max-h-[min(88vh,960px)] w-full max-w-4xl flex-col rounded-2xl border-2 border-yellow-400 bg-slate-900 p-4 sm:p-6 text-center shadow-[0_0_40px_rgba(250,204,21,0.25)]">
                             <div className="mb-4 flex items-center justify-center gap-2 text-yellow-300 font-black text-2xl shrink-0">
                                 <Sparkles size={24} />
-                                NEW UNLOCKS
+                                {trans('新しい解放要素', languageMode)}
                                 <Sparkles size={24} />
                             </div>
                             <div className="flex-1 overflow-y-auto pr-1 space-y-6">
@@ -16833,9 +16839,16 @@ const App: React.FC = () => {
                                         <div className="flex flex-wrap items-stretch justify-center gap-4 sm:gap-6">
                                             {newlyUnlockedCharacters.map((character) => (
                                                 <div key={character.id} className="flex w-full max-w-[16rem] flex-col rounded-xl border border-yellow-300/40 bg-slate-800/80 p-4">
-                                                    <img src={character.imageData} alt={character.name} className="mx-auto mb-3 h-28 w-28 object-contain pixelated" />
+                                                    <img src={character.imageData} alt={trans(character.name, languageMode)} className="mx-auto mb-3 h-28 w-28 object-contain pixelated" />
                                                     <div className="text-xl font-black text-yellow-100">{trans(character.name, languageMode)}</div>
-                                                    <div className="mt-2 text-sm text-slate-300 leading-relaxed">{trans(character.description, languageMode)}</div>
+                                                    <div className="mt-2 text-sm text-slate-300 leading-relaxed">
+                                                        {trans((() => {
+                                                            const magicHero = MAGIC_HEROES.find((hero) => hero.name === character.name);
+                                                            return magicHero
+                                                                ? `【${magicHero.attribute}属性】${magicHero.personality}。${magicHero.specialty}を得意とする魔法少女。${magicHero.story}`
+                                                                : character.description;
+                                                        })(), languageMode)}
+                                                    </div>
                                                 </div>
                                             ))}
                                         </div>
@@ -17266,7 +17279,7 @@ const App: React.FC = () => {
                             {newlyUnlockedCard && (
                                 <div className="game-over-unlocked mb-8 p-6 bg-yellow-600/20 border-2 border-yellow-400 rounded-2xl animate-in zoom-in duration-500 shadow-[0_0_20px_rgba(250,204,21,0.3)]">
                                     <div className="game-over-unlocked-title flex items-center justify-center gap-2 text-yellow-400 font-black text-xl mb-4 italic tracking-widest">
-                                        <Sparkles size={24} /> NEW CARD UNLOCKED! <Sparkles size={24} />
+                                        <Sparkles size={24} /> {trans("新しいカードを解放！", languageMode)} <Sparkles size={24} />
                                     </div>
                                     <div className="game-over-unlocked-body flex flex-col items-center gap-4">
                                         <div className="game-over-card-preview scale-100">
@@ -17327,7 +17340,7 @@ const App: React.FC = () => {
                             {newlyUnlockedCard && (
                                 <div className="ending-unlocked-card mb-8 p-6 bg-white/20 border-2 border-white rounded-2xl animate-in zoom-in duration-500 shadow-xl">
                                     <div className="ending-unlocked-title flex items-center justify-center gap-2 text-white font-black text-xl mb-4 italic tracking-widest">
-                                        <Sparkles size={24} /> NEW CARD UNLOCKED! <Sparkles size={24} />
+                                        <Sparkles size={24} /> {trans("新しいカードを解放！", languageMode)} <Sparkles size={24} />
                                     </div>
                                     <div className="ending-unlocked-card-body flex flex-col items-center gap-4">
                                         <div className="ending-card-preview scale-100">

@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { Heart, ChevronRight, Users } from 'lucide-react';
 import type { LanguageMode, Player } from '../types';
 import { getMagicEndingPages } from '../services/magicEndingService';
-import { trans } from '../utils/textUtils';
+import { trans, transEventText } from '../utils/textUtils';
 import { assetUrl } from '../utils/assetPaths';
 import { audioService } from '../services/audioService';
 
@@ -58,7 +58,7 @@ const MagicRomanceEndingScreen: React.FC<MagicRomanceEndingScreenProps> = ({
     <div className="magic-romance-ending-screen relative flex h-full w-full items-end justify-center overflow-hidden bg-black p-4 text-white sm:p-8">
       <img
         src={assetUrl(ending.imagePath)}
-        alt={ending.title}
+        alt={transEventText(ending.title, languageMode)}
         className="magic-romance-ending-bg absolute inset-0 h-full w-full object-cover"
         onError={(event) => {
           if (!ending.fallbackImagePath || event.currentTarget.dataset.fallbackApplied === 'true') return;
@@ -72,7 +72,7 @@ const MagicRomanceEndingScreen: React.FC<MagicRomanceEndingScreenProps> = ({
         <div className="magic-romance-ending-art hidden overflow-hidden rounded-xl border border-pink-200/45 bg-slate-950/60 shadow-2xl">
           <img
             src={assetUrl(ending.imagePath)}
-            alt={ending.title}
+            alt={transEventText(ending.title, languageMode)}
             className="h-full w-full object-cover"
             onError={(event) => {
               if (!ending.fallbackImagePath || event.currentTarget.dataset.fallbackApplied === 'true') return;
@@ -92,11 +92,11 @@ const MagicRomanceEndingScreen: React.FC<MagicRomanceEndingScreenProps> = ({
                 {trans(ending.rankLabel, languageMode)} / {trans(ending.metricLabel, languageMode)}
                 {endings.length > 1 && ` / ${endingIndex + 1} of ${endings.length}`}
               </div>
-              <h1 className="magic-romance-ending-title text-xl font-black text-pink-100 sm:text-2xl">{trans(ending.title, languageMode)}</h1>
+              <h1 className="magic-romance-ending-title text-xl font-black text-pink-100 sm:text-2xl">{transEventText(ending.title, languageMode)}</h1>
             </div>
           </div>
           <p className="magic-romance-ending-text min-h-[7rem] whitespace-pre-wrap text-base leading-relaxed text-slate-100 sm:text-lg">
-            {trans(currentText, languageMode)}
+            {transEventText(currentText, languageMode)}
           </p>
           <button
             onClick={handleNext}

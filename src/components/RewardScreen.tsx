@@ -154,12 +154,12 @@ const RewardScreen: React.FC<RewardScreenProps> = ({ rewards, onSelectReward, on
                     <div className="flex flex-col items-center mb-4">
                         {inspectedItem.type === 'RELIC' && (
                             <div className="w-20 h-20 bg-gray-800 border-4 border-yellow-600 rounded-full flex items-center justify-center mb-4 shadow-lg p-3">
-                                <RelicIcon id={inspectedItem.data.id} alt={inspectedItem.data.name} />
+                                <RelicIcon id={inspectedItem.data.id} alt={trans(inspectedItem.data.name, languageMode)} />
                             </div>
                         )}
                         {inspectedItem.type === 'POTION' && (
                             <div className="w-20 h-20 bg-gray-800 border-2 border-white/50 rounded flex items-center justify-center mb-4 shadow-lg p-3">
-                                <PotionIcon id={inspectedItem.data.templateId} alt={inspectedItem.data.name} />
+                                <PotionIcon id={inspectedItem.data.templateId} alt={trans(inspectedItem.data.name, languageMode)} />
                             </div>
                         )}
                         
@@ -194,7 +194,7 @@ const RewardScreen: React.FC<RewardScreenProps> = ({ rewards, onSelectReward, on
                             >
                                 {typingMode && <div className="absolute -right-1 -top-1 z-10 rounded-full border border-cyan-300 bg-cyan-950/95 px-1.5 py-0.5 text-[10px] font-black text-cyan-200">{currentPotions.findIndex(cp => cp.id === p.id) + 1}</div>}
                                 <div className="w-12 h-12 bg-gray-800 border-2 border-white rounded-full flex items-center justify-center mb-1 p-1.5">
-                                    <PotionIcon id={p.templateId} alt={p.name} />
+                                    <PotionIcon id={p.templateId} alt={trans(p.name, languageMode)} />
                                 </div>
                                 <div className="text-xs text-gray-400 w-16 truncate text-center">{trans(p.name, languageMode)}</div>
                             </div>
@@ -251,7 +251,7 @@ const RewardScreen: React.FC<RewardScreenProps> = ({ rewards, onSelectReward, on
                 >
                     {typingMode && <div className="absolute right-2 top-2 z-20 rounded-full border border-cyan-300 bg-cyan-950/95 px-2 py-0.5 text-[10px] font-black text-cyan-200">{rewards.findIndex(r => r.id === reward.id) + 1}</div>}
                     <div className="bg-gray-800 p-3 rounded-full border-2 border-yellow-600 mb-4 shadow-[0_0_15px_rgba(234,179,8,0.5)] h-20 w-20">
-                        <RelicIcon id={reward.value.id} alt={reward.value.name} />
+                        <RelicIcon id={reward.value.id} alt={trans(reward.value.name, languageMode)} />
                     </div>
                     <div className="text-center mb-auto w-full">
                         <div className="text-yellow-100 font-bold text-lg mb-2 truncate">{trans(reward.value.name, languageMode)}</div>
@@ -286,7 +286,7 @@ const RewardScreen: React.FC<RewardScreenProps> = ({ rewards, onSelectReward, on
                 >
                     {typingMode && <div className="absolute right-2 top-2 z-20 rounded-full border border-cyan-300 bg-cyan-950/95 px-2 py-0.5 text-[10px] font-black text-cyan-200">{rewards.findIndex(r => r.id === reward.id) + 1}</div>}
                     <div className="bg-gray-800 p-3 rounded-full border-2 border-white/50 mb-4 shadow-[0_0_15px_rgba(255,255,255,0.3)] h-20 w-20">
-                        <PotionIcon id={(reward.value as Potion).templateId} alt={reward.value.name} />
+                        <PotionIcon id={(reward.value as Potion).templateId} alt={trans(reward.value.name, languageMode)} />
                     </div>
                     <div className="text-center mb-auto w-full">
                         <div className="text-white font-bold text-lg mb-2 truncate">{trans(reward.value.name, languageMode)}</div>

@@ -53,5 +53,22 @@ export const formatProblemUnitName = (
   categoryId?: SubjectCategoryType,
 ) => {
   if (languageMode !== 'ENGLISH') return name;
-  return trans(name, languageMode);
+  // Daily assignments compose labels from independently translated category and
+  // unit names. Translate each segment so the generic sentence fallback cannot
+  // swallow an entire composite label.
+  return name
+    .split(/(\s*[/：:]\s*)/)
+    .map((segment) => {
+      if (/^\s*[/：:]\s*$/.test(segment)) {
+        return segment.includes('/') ? ' / ' : ': ';
+      }
+      return segment
+        .split(/\s+/)
+        .filter(Boolean)
+        .map((part) => trans(part, languageMode))
+        .join(' ');
+    })
+    .join('')
+    .replace(/\s{2,}/g, ' ')
+    .trim();
 };
