@@ -1582,7 +1582,14 @@ const App: React.FC = () => {
             customProblems: remainingAssignmentCustomProblems,
         };
     }, [effectiveAssignment, isCurrentAssignmentComplete, remainingAssignmentCustomProblems, remainingAssignmentUnits]);
-    const assignmentProblemSource = activeAssignment || completedAssignmentProblemSource;
+    // Keep the question source stable while a challenge is in progress. Assignment progress
+    // rebuilds both activeAssignment and the daily assignment after every saved answer.
+    const assignmentProblemSourceRef = useRef<AssignmentPayload | null>(null);
+    const currentProblemSource = effectiveAssignment || completedAssignmentProblemSource;
+    if (currentProblemSource && assignmentProblemSourceRef.current?.id !== currentProblemSource.id) {
+        assignmentProblemSourceRef.current = currentProblemSource;
+    }
+    const assignmentProblemSource = currentProblemSource ? assignmentProblemSourceRef.current : null;
     const getAssignmentProblemConfig = useCallback((assignment: AssignmentPayload | null | undefined) => {
         const assignmentModePool = assignment?.gameMode === 'FREE' ? getAssignmentModePool(assignment) : undefined;
         const assignmentHasCustomProblems = assignment?.gameMode === 'FREE' && assignment.customProblems.length > 0;
