@@ -233,7 +233,7 @@ const MapScreen: React.FC<MapScreenProps> = ({ nodes, currentNodeId, onNodeSelec
 
                 <div className="flex flex-col items-center">
                     <h2 className="text-xs md:text-sm font-black text-slate-400 uppercase tracking-tighter mb-0.5">
-                        {trans("第", languageMode)}{act}{trans("章", languageMode)} - {floor}F
+                        {languageMode === 'ENGLISH' ? `Act ${act}` : `${trans("第", languageMode)}${act}${trans("章", languageMode)}`} - {floor}F
                     </h2>
                     <div className="h-1 w-16 md:w-24 bg-gradient-to-r from-transparent via-yellow-500 to-transparent"></div>
                 </div>

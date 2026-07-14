@@ -174,16 +174,25 @@ const getAssignmentTargetSummary = (assignment: AssignmentPayload, languageMode:
         const targetCorrect = unit.targetCorrect || 10;
         return languageMode === 'ENGLISH'
             ? `${formatProblemUnitName(unit.name, languageMode)} (${targetCorrect} questions)`
-            : `${unit.name} (${targetCorrect}問)`;
+            : `${trans(unit.name, languageMode)} (${targetCorrect}${trans('問', languageMode)})`;
     });
     const customProblemCount = assignment.customProblems?.length || 0;
     if (customProblemCount > 0) {
         const customTargetCorrect = getAssignmentCustomTargetCorrect(assignment);
         unitSummaries.push(languageMode === 'ENGLISH'
             ? `${trans('オリジナル問題', languageMode)} (${customTargetCorrect} / ${customProblemCount} correct)`
-            : `オリジナル問題 (${customProblemCount}問中 ${customTargetCorrect}問正解)`);
+            : languageMode === 'HIRAGANA'
+                ? `おりじなるもんだい (${customProblemCount}もんちゅう ${customTargetCorrect}もんせいかい)`
+                : `オリジナル問題 (${customProblemCount}問中 ${customTargetCorrect}問正解)`);
     }
     return unitSummaries.join(' / ') || trans('オリジナル問題', languageMode);
+};
+
+const getAssignmentTitle = (title: string, languageMode: LanguageMode) => {
+    if (languageMode !== 'ENGLISH') return trans(title, languageMode);
+    const dailyTitle = title.match(/^(.+) デイリー課題 (.+)$/);
+    if (dailyTitle) return `${trans(dailyTitle[1], languageMode)} Daily Assignment ${dailyTitle[2]}`;
+    return trans(title, languageMode);
 };
 
 const formatAssignmentProgressUnitName = (name: string, languageMode: LanguageMode) => {
@@ -7602,19 +7611,17 @@ const App: React.FC = () => {
             const additionalResult = applyAdditionalCardLogic(card, p, enemies, languageMode, currentLogs, nextActiveEffects);
             Object.assign(p, additionalResult.player);
             enemies = additionalResult.enemies;
-            if (prev.visualTheme === 'magic') {
-                const protagonistId = getMagicProtagonistId(p);
-                if (p.relics.some((relic) => relic.magicRelicHeroId === protagonistId)) {
-                    const magicRuleResult = applyMagicRuleOnCardPlay(
-                        protagonistId,
-                        card,
-                        p,
-                        enemies,
-                        currentLogs,
-                    );
-                    p = magicRuleResult.player;
-                    enemies = magicRuleResult.enemies;
-                }
+            const protagonistId = getMagicProtagonistId(p);
+            if (p.relics.some((relic) => relic.magicRelicHeroId === protagonistId)) {
+                const magicRuleResult = applyMagicRuleOnCardPlay(
+                    protagonistId,
+                    card,
+                    p,
+                    enemies,
+                    currentLogs,
+                );
+                p = magicRuleResult.player;
+                enemies = magicRuleResult.enemies;
             }
             if (localCoopChainCount >= 2) {
                 currentLogs.push(`🤝 連携 x${localCoopChainCount}！`);
@@ -7785,7 +7792,7 @@ const App: React.FC = () => {
                 }
             }
 
-            if (card.name === '錬金術' || card.name === 'ALCHEMIZE' || card.originalNames?.includes('錬金術') || card.originalNames?.includes('ALCHEMIZE')) {
+            if (card.name === '理科室の調合' || card.name === '錬金術' || card.name === 'ALCHEMIZE' || card.originalNames?.includes('理科室の調合') || card.originalNames?.includes('錬金術') || card.originalNames?.includes('ALCHEMIZE')) {
                 const possibleCards = getFilteredCardPool(p.id).filter(c => c.rarity !== 'SPECIAL');
                 const randomCardTemplate = possibleCards[Math.floor(Math.random() * possibleCards.length)];
                 let newC = { ...randomCardTemplate, id: `alch-${Date.now()}`, cost: 0 } as ICard;
@@ -7796,7 +7803,7 @@ const App: React.FC = () => {
                 } else {
                     p.discardPile.push(newC);
                 }
-                currentLogs.push(`${trans("錬金術", languageMode)}: ${trans(newC.name, languageMode)}を生成`);
+                currentLogs.push(`${trans("理科室の調合", languageMode)}: ${trans(newC.name, languageMode)}を生成`);
                 nextActiveEffects.push({ id: `vfx-alch-${Date.now()}`, type: 'BUFF', targetId: 'player' });
             }
 
@@ -7897,7 +7904,7 @@ const App: React.FC = () => {
 
             let activations = 1;
             if (p.echoes > 0) { activations++; p.echoes--; currentLogs.push(trans("反響で再発動！", languageMode)); }
-            if (card.type === CardType.SKILL && p.powers['BURST'] > 0) { activations++; p.powers['BURST']--; currentLogs.push(trans("バーストで再発動！", languageMode)); }
+            if (card.type === CardType.SKILL && p.powers['BURST'] > 0) { activations++; p.powers['BURST']--; currentLogs.push(trans("スキル二度押しで再発動！", languageMode)); }
             if (card.type === CardType.ATTACK && p.relics.find(r => r.id === 'NECRONOMICON') && card.cost >= 2 && !p.turnFlags['NECRONOMICON_USED']) {
                 activations++;
                 p.turnFlags['NECRONOMICON_USED'] = true;
@@ -8842,6 +8849,7 @@ const App: React.FC = () => {
                     'HOLOGRAM',
                     'お人形遊び',
                     'GIRLS_DOLL_HOUSE',
+                    '二本鉛筆',
                     '二刀流',
                     'DUAL_WIELD',
                     'フォークダンス',
@@ -14904,7 +14912,7 @@ const App: React.FC = () => {
                                         : 'border-lime-300 bg-[#f3ffd4] shadow-[0_0_40px_rgba(163,230,53,0.35)]'
                                 }`}>
                                     <div className={`assignment-letter-eyebrow mb-1 text-center text-[10px] font-black tracking-[0.3em] ${isTeacherAssignmentActive ? 'text-amber-700' : 'text-lime-700'}`}>{isTeacherAssignmentActive ? 'TEACHER LETTER' : 'DAILY LETTER'}</div>
-                                    <h2 className="assignment-letter-title mb-2 text-center text-xl font-black sm:text-2xl">{assignmentLetter.title}</h2>
+                                    <h2 className="assignment-letter-title mb-2 text-center text-xl font-black sm:text-2xl">{getAssignmentTitle(assignmentLetter.title, languageMode)}</h2>
                                     <div className={`assignment-letter-banner mb-3 overflow-hidden rounded-xl border-2 bg-slate-950/90 ${isTeacherAssignmentActive ? 'border-amber-300' : 'border-lime-300'}`}>
                                         <div className="relative">
                                             <img
@@ -14928,7 +14936,7 @@ const App: React.FC = () => {
                                         <div>{trans("期限:", languageMode)} {assignmentLetter.dueAt ? new Date(assignmentLetter.dueAt).toLocaleString(languageMode === 'ENGLISH' ? 'en-US' : 'ja-JP') : trans('未設定', languageMode)}</div>
                                         <div>{trans("形式:", languageMode)} {trans(assignmentLetter.gameMode === 'FREE' ? 'フリー' : '問題チャレンジのみ', languageMode)}</div>
                                         <div>{getAssignmentAnswerModeSummary(assignmentLetter, languageMode)}</div>
-                                        <div className="mt-2 text-xs text-slate-700" data-allow-japanese>
+                                        <div className="mt-2 text-xs text-slate-700">
                                             {getAssignmentTargetSummary(assignmentLetter, languageMode)}
                                         </div>
                                     </div>
@@ -15439,7 +15447,7 @@ const App: React.FC = () => {
                                 : 'border-lime-300 bg-[#f3ffd4] shadow-[0_0_40px_rgba(163,230,53,0.35)]'
                         }`}>
                             <div className={`assignment-letter-eyebrow mb-1 text-center text-[10px] font-black tracking-[0.3em] ${isTeacherAssignmentActive ? 'text-amber-700' : 'text-lime-700'}`}>{isTeacherAssignmentActive ? 'TEACHER LETTER' : 'DAILY LETTER'}</div>
-                            <h2 className="assignment-letter-title mb-2 text-center text-xl font-black sm:text-2xl">{assignmentLetter.title}</h2>
+                            <h2 className="assignment-letter-title mb-2 text-center text-xl font-black sm:text-2xl">{getAssignmentTitle(assignmentLetter.title, languageMode)}</h2>
                             <div className={`assignment-letter-banner mb-3 overflow-hidden rounded-xl border-2 bg-slate-950/90 ${isTeacherAssignmentActive ? 'border-amber-300' : 'border-lime-300'}`}>
                                 <div className="relative">
                                     <img
@@ -15463,7 +15471,7 @@ const App: React.FC = () => {
                                 <div>{trans("期限:", languageMode)} {assignmentLetter.dueAt ? new Date(assignmentLetter.dueAt).toLocaleString(languageMode === 'ENGLISH' ? 'en-US' : 'ja-JP') : trans('未設定', languageMode)}</div>
                                 <div>{trans("形式:", languageMode)} {trans(assignmentLetter.gameMode === 'FREE' ? 'フリー' : '問題チャレンジのみ', languageMode)}</div>
                                 <div>{getAssignmentAnswerModeSummary(assignmentLetter, languageMode)}</div>
-                                <div className="mt-2 text-xs text-slate-700" data-allow-japanese>
+                                <div className="mt-2 text-xs text-slate-700">
                                     {getAssignmentTargetSummary(assignmentLetter, languageMode)}
                                 </div>
                             </div>

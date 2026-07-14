@@ -223,7 +223,7 @@ export const getUpgradedCard = (card: Card): Card => {
     }
 
     // Specific Card Upgrade Logic overrides
-    if (hasCardIdentity('ボディスラム', 'BODY_SLAM')) newCard.cost = 0;
+    if (hasCardIdentity('防具ごと体当たり', 'BODY_SLAM')) newCard.cost = 0;
     if (hasCardIdentity('限界突破', 'LIMIT_BREAK')) newCard.exhaust = false;
     if (hasCardIdentity('触媒', 'CATALYST')) newCard.poisonMultiplier = 3;
 
@@ -738,7 +738,7 @@ export const synthesizeCards = (c1: Card, c2: Card, c3?: Card): Card => {
         '読解力': '次のスキル2回発動',
         '未完の小説': '捨て札を山札に戻す',
         '無限大': '特殊演出',
-        '錬金術': '0コストのカードを1枚生成', 'ALCHEMIZE': '0コストのカードを1枚生成',
+        '理科室の調合': '0コストのカードを1枚生成', '錬金術': '0コストのカードを1枚生成', 'ALCHEMIZE': '0コストのカードを1枚生成',
         '山勘': '手札を全捨て＆ドロー', 'CALCULATED_GAMBLE': '手札を全捨て＆ドロー',
         '単位変換': '手札を全入れ替え', 'SANSU_UNIT': '手札を全入れ替え',
         'パニック': '手札1枚を0コスト',
@@ -768,7 +768,7 @@ export const synthesizeCards = (c1: Card, c2: Card, c3?: Card): Card => {
         '学芸会の主役': '使用時ブロック+1',
         'カンニング': '手札の攻撃をコピー',
         'お人形遊び': '手札のスキルをコピー',
-        '二刀流': '手札1枚を2枚コピー',
+        '二本鉛筆': '手札1枚を2枚コピー', '二刀流': '手札1枚を2枚コピー',
         'フォークダンス': '手札1枚コピー/1枚捨てる',
         '鏡 (星新一)': '手札1枚コピー/自分にびくびく1',
         'きてんの窓': '高コスト優先コピーを0コスト',

@@ -274,13 +274,14 @@ export const applyAdditionalCardLogic = (
                 }
                 break;
             }
-            case '二刀流': {
+            case '二刀流':
+            case '二本鉛筆': {
                 const pool = p.hand.filter(c => c.id !== card.id && (c.type === CardType.ATTACK || c.type === CardType.POWER));
                 if (pool.length > 0) {
                     const pick = pool[Math.floor(Math.random() * pool.length)];
                     addCardToHand(pick, false);
                     addCardToHand(pick, false);
-                    currentLogs.push(trans("二刀流：カードを2枚コピーした", languageMode));
+                    currentLogs.push(trans("二本鉛筆：カードを2枚コピーした", languageMode));
                 }
                 break;
             }

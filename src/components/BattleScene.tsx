@@ -70,7 +70,7 @@ const POWER_DEFINITIONS: Record<string, { name: string, desc: string }> = {
     CREATIVE_AI: { name: '自由研究', desc: 'ターン開始時、ランダムなパワーカードを加える。' },
     DEVA_FORM: { name: '受験勉強', desc: 'ターン開始時、エナジーを得る。' },
     MASTER_REALITY: { name: '模範解答', desc: 'カードが生成された時、それをアップグレードする。' },
-    BURST: { name: 'バースト', desc: '次にプレイするスキルカードが2回発動する。' },
+    BURST: { name: 'スキル二度押し', desc: '次にプレイするスキルカードが2回発動する。' },
     DOUBLE_POISON: { name: '化学反応', desc: 'ドクドクの効果を増幅させる。' },
     CORRUPTION: { name: '賞味期限', desc: 'スキルカードのコストが0になり、使用時に廃棄される。' },
     FEEL_NO_PAIN: { name: '我慢大会', desc: 'カードが廃棄される度、ブロックを得る。' },

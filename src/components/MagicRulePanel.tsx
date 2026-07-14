@@ -76,7 +76,9 @@ const MagicRulePanel: React.FC<MagicRulePanelProps> = ({ player, languageMode })
             <div className="truncate text-xs font-black">{trans(config.name, languageMode)}</div>
             <div className="flex items-center gap-1 text-[10px] font-black text-fuchsia-200">
               <span>{[0, 1, 2].map(index => index < progress ? '◆' : '◇').join('')}</span>
-              <span className="text-amber-200">{remaining > 0 ? `${trans("あと", languageMode)}${remaining}` : trans('完成', languageMode)}</span>
+              <span className="text-amber-200">{remaining > 0
+                ? (languageMode === 'ENGLISH' ? `${remaining} remaining` : `${trans("あと", languageMode)}${remaining}`)
+                : trans('完成', languageMode)}</span>
             </div>
           </div>
           <ChevronDown size={14} className="magic-rule-panel-mobile-chevron ml-auto shrink-0 text-fuchsia-200" />

@@ -3,6 +3,8 @@ import { LanguageMode, type Card } from '../types';
 import { EVENT_HIRAGANA_EXACT } from '../data/eventHiraganaExact';
 import { HIRAGANA_UI_EXACT } from '../data/hiraganaUiExact';
 import { HIRAGANA_DYNAMIC_UI_RULES } from '../data/hiraganaDynamicUiRules';
+import { HIRAGANA_RUNTIME_EXACT, HIRAGANA_RUNTIME_PARTIAL } from '../data/hiraganaRuntimeExact';
+import { ENGLISH_RUNTIME_EXACT } from '../data/englishRuntimeExact';
 import { EVENT_DICTIONARY } from './textUtils2';
 
 const BASE_DICTIONARY: Record<string, string> = {
@@ -1191,8 +1193,8 @@ const BASE_DICTIONARY: Record<string, string> = {
     "手札全廃棄": "てふだ ぜんぶ はいき",
     "全デバフ解除": "わるい こうかを ぜんぶ なおす",
     "ブロック持ち越し": "ブロックを もちこし",
-    "生成カード強化": "つくった カードを きょうか",
-    "生成カード": "つくった カード",
+    "生成カード強化": "せいせいカードきょうか",
+    "生成カード": "せいせいカード",
     "パワー生成": "パワーを つくる",
     "ポーション入手": "ポーションを ゲット",
     "捨て札を山札": "すてふだを やまふだへ",
@@ -1332,7 +1334,7 @@ const BASE_DICTIONARY: Record<string, string> = {
     "「大声」で敵全体にダメージを与え、さらに弱体化させる。": "「おおごえ」で てきぜんたいに ダメージをあたえて、さらに よわらせる。",
     "「予習（ブロック＆保留）」で次のターンに備える慎重派。": "「よしゅう（ブロック＆ほりゅう）」で つぎのターンに そなえる しんちょうなタイプ。",
     "「やる気」でムキムキになり、「重いバット」で超火力を叩き出す！": "「やるき」で ムキムキになり、「おもいバット」で すごいダメージを だす！",
-    "ブロックを固めて「ボディスラム」で反撃する鉄壁の守り。": "ブロックを かためて「ボディスラム」で はんげきする てっぺきの まもり。",
+    "ブロックを固めて「防具ごと体当たり」で反撃する鉄壁の守り。": "ブロックを かためて「ぼうぐごとたいあたり」で はんげきする てっぺきの まもり。",
 
     // --- Cards (Math Rogue) ---
     "えんぴつ攻撃": "えんぴつこうげき",
@@ -1341,7 +1343,7 @@ const BASE_DICTIONARY: Record<string, string> = {
     "先生に報告": "せんせいに ほうこく",
     "上履きキック": "うわばき キック",
     "頭突き": "ずつき",
-    "ラリアット": "ラリアット",
+    "腕ぐるぐるアタック": "うでぐるぐるアタック",
     "チョーク投げ": "チョークなげ",
     "大声": "おおごえ",
     "往復ビンタ": "おうふく ビンタ",
@@ -1354,11 +1356,11 @@ const BASE_DICTIONARY: Record<string, string> = {
     "寒いギャグ": "さむい ギャグ",
     "静電気": "せいでんき",
     "ブーメラン": "ブーメラン",
-    "ボディスラム": "ボディスラム",
+    "防具ごと体当たり": "ぼうぐごとたいあたり",
     "暴れる": "あばれる",
     "完璧な回答": "かんぺきな かいとう",
     "キレる": "キレる",
-    "飛び膝蹴り": "とびひざげり",
+    "跳び膝アタック": "とびひざアタック",
     "グーパンチ": "グーパンチ",
     "掃除の時間": "そうじの じかん",
     "列に割り込む": "れつに わりこむ",
@@ -1368,7 +1370,7 @@ const BASE_DICTIONARY: Record<string, string> = {
     "カンチョー": "カンチョー",
     "追い打ち": "おいうち",
     "生き残り": "いきのこり",
-    "雄叫び": "おたけび",
+    "気合いの掛け声": "きあいのかけごえ",
     "知らんぷり": "しらんぷり",
     "回避": "かいひ",
     "泣き叫ぶ": "なきさけぶ",
@@ -1386,7 +1388,7 @@ const BASE_DICTIONARY: Record<string, string> = {
     "速読": "そくどく",
     "カフェイン": "カフェイン",
     "目隠し": "めかくし",
-    "足払い": "あしばらい",
+    "つまずかせる": "つまずかせる",
     "深呼吸": "しんこきゅう",
     "アッパー": "アッパー",
     "げんこつ": "げんこつ",
@@ -1422,7 +1424,7 @@ const BASE_DICTIONARY: Record<string, string> = {
     "卒業式": "そつぎょうしき",
     "一夜漬け": "いちやづけ",
     "秘密基地": "ひみつきち",
-    "衝撃波": "しょうげきは",
+    "教室を揺らす一撃": "きょうしつをゆらすいちげき",
     "鉄壁": "てっぺき",
     "パシリ": "パシリ",
     "興奮": "こうふん",
@@ -1435,15 +1437,15 @@ const BASE_DICTIONARY: Record<string, string> = {
     "弱点": "じゃくてん",
     "弱点発見": "じゃくてん はっけん",
     "武器奪取": "ぶきをうばう",
-    "二刀流": "にとうりゅう",
+    "二本鉛筆": "にほんえんぴつ",
     "見張り": "みはり",
     "火事場の馬鹿力": "かじばの ばかぢから",
     "集中モード": "しゅうちゅう モード",
     "記憶": "きおく",
     "衝撃のうわさ": "しょうげきの うわさ",
     "不快感": "ふかいかん",
-    "バースト": "バースト",
-    "錬金術": "れんきんじゅつ",
+    "スキル二度押し": "スキルにどおし",
+    "理科室の調合": "りかしつのちょうごう",
     "大ジャンプ": "だい ジャンプ",
     "指切りげんまん": "ゆびきり げんまん",
     "工作の時間": "こうさくの じかん",
@@ -2898,7 +2900,7 @@ Object.assign(BASE_DICTIONARY, {
     "ひより「命花開花。傷つけるためじゃなく、守るために」": "ひより「いのちはな かいか。きずつけるためじゃなく、まもるために」",
     "つばさ「神鍛点火！真正面から、ぜんぶ打ち砕く！」": "つばさ「しんたん てんか！ましょうめんから、ぜんぶ うちくだく！」",
     "れい「影札結界、解放。弱き者へ刃は向けさせない」": "れい「かげふだ けっかい、かいほう。よわきものへ やいばは むけさせない」",
-    "まどか「時環再起動。失敗した時間ごと、私が進める」": "まどか「ときのわ さいきどう。しっぱいした じかんごと、わたしが すすめる」",
+    "まどか「時環再起動。失敗した時間ごと、私が進める」": "まどか「じかん さいきどう。しっぱいした じかんごと、わたしが すすめる」",
     "こはる「翠嵐招来。風よ、迷う心を運んで」": "こはる「すいらん しょうらい。かぜよ、まよう こころを はこんで」",
     "みらい「夢幻開演。悪夢だって、私の舞台で塗り替える」": "みらい「むげん かいえん。あくむだって、わたしの ぶたいで ぬりかえる」",
     "セラ「星界接続。二つの世界に、朝を届けます」": "セラ「せいかい せつぞく。ふたつの せかいに、あさを とどけます」",
@@ -2997,9 +2999,9 @@ Object.assign(BASE_DICTIONARY, {
     "専用カードで種を植え、育て、収穫する。収穫時に回復と全体攻撃が発生する。": "せんようカードで たねを うえ、そだて、しゅうかくする。しゅうかくじに かいふくと ぜんたいこうげきが おきる。",
     "専用カードを使うたび炉熱が上がる。炉熱3で手札を強化し、ムキムキを得る。": "せんようカードを つかうたび ろねつが あがる。ろねつ3で てふだを きょうかし、ムキムキを える。",
     "専用カードで封印札を重ねる。3枚揃うと敵全体を弱体化し、ドクドクを与える。": "せんようカードで ふういんふだを かさねる。3まい そろうと てきぜんたいを よわくし、ドクドクを あたえる。",
-    "専用カードを3回使うと時環が完成し、カード補充・エナジー・ブロックをまとめて得る。順番は自由。": "せんようカードを 3かい つかうと ときのわが かんせいし、カードほじゅう・エナジー・ブロックを まとめて える。じゅんばんは じゆう。",
+    "専用カードを3回使うと時環が完成し、カード補充・エナジー・ブロックをまとめて得る。順番は自由。": "せんようカードを 3かい つかうと じかんが かんせいし、カードほじゅう・エナジー・ブロックを まとめて える。じゅんばんは じゆう。",
     "専用カードの種類に応じて風・葉・樹の精霊と契約し、3種揃うと全効果を発動する。": "せんようカードの しゅるいに おうじて かぜ・は・きの せいれいと けいやくし、3しゅ そろうと ぜんこうかを はつどうする。",
-    "専用カードを演目枠へ置く。3演目が揃うとフィナーレで全体攻撃と弱体化を行う。": "せんようカードを えんもくわくへ おく。3えんもくが そろうと フィナーレで ぜんたいこうげきと よわたいかを おこなう。",
+    "専用カードを演目枠へ置く。3演目が揃うとフィナーレで全体攻撃と弱体化を行う。": "せんようカードを えんもくわくへ おく。3えんもくが そろうと フィナーレで ぜんたいこうげきと じゃくたいかを おこなう。",
     "専用カードを3回使うと解析が完了し、カード補充・ブロック・ムキムキを得る。順番は自由。": "せんようカードを 3かい つかうと かいせきが かんりょうし、カードほじゅう・ブロック・ムキムキを える。じゅんばんは じゆう。",
     "専用スキルで守護を蓄積し、専用攻撃で守護を消費して追加攻撃する。": "せんようスキルで しゅごを ため、せんようこうげきで しゅごを つかって ついかこうげきする。",
     "専用カードを番号順に使うと計画達成。順序が崩れると最初から組み直す。": "せんようカードを ばんごうじゅんに つかうと けいかくたっせい。じゅんじょが くずれると さいしょから くみなおす。",
@@ -3014,12 +3016,12 @@ Object.assign(BASE_DICTIONARY, {
     "命花壇：種を植えて育てる。収穫で全体攻撃と回復。": "いのちかだん：たねを うえて そだてる。しゅうかくで ぜんたいこうげきと かいふく。",
     "神鍛炉：専用カードで炉熱を上げ、手札強化・ムキムキ・エナジー。": "しんたんろ：せんようカードで ろねつを あげ、てふだきょうか・ムキムキ・エナジー。",
     "禁札陣：封印札を3枚重ね、全体へへろへろとドクドク。": "きんさつじん：ふういんふだを 3まい かさね、ぜんたいへ へろへろと ドクドク。",
-    "時環記録：専用カード3回で、ドロー・エナジー・ブロック。": "ときわきろく：せんようカード 3かいで、ドロー・エナジー・ブロック。",
+    "時環記録：専用カード3回で、ドロー・エナジー・ブロック。": "じかんきろく：せんようカード 3かいで、ドロー・エナジー・ブロック。",
     "精霊樹：3種の精霊契約で、全体攻撃・ブロック・ドロー。": "せいれいじゅ：3しゅの せいれいけいやくで、ぜんたいこうげき・ブロック・ドロー。",
     "夢幻舞台：3演目を揃え、全体攻撃・へろへろ・エナジー。": "むげんぶたい：3えんもくを そろえ、ぜんたいこうげき・へろへろ・エナジー。",
     "星界記録：専用カード3回で、ドロー・ブロック・ムキムキ。": "せいかいきろく：せんようカード 3かいで、ドロー・ブロック・ムキムキ。",
     "蒼風護陣：守護をためて攻撃で消費。単体追撃とブロック。": "そうふうごじん：しゅごを ためて こうげきで つかう。たんたい ついげきと ブロック。",
-    "氷律計画：専用カードを番号順に使うと、全体攻撃と弱体化。": "ひょうりつけいかく：せんようカードを ばんごうじゅんに つかうと、ぜんたいこうげきと よわたいか。",
+    "氷律計画：専用カードを番号順に使うと、全体攻撃と弱体化。": "ひょうりつけいかく：せんようカードを ばんごうじゅんに つかうと、ぜんたいこうげきと じゃくたいか。",
     "清流調合：治癒水を3滴集め、回復・ブロック・攻撃に変換。": "せいりゅうちょうごう：ちゆすいを 3てき あつめ、かいふく・ブロック・こうげきに へんかん。",
     "分岐盤：未来候補を3つ観測し、ドロー・エナジー・ブロック。": "ぶんきばん：みらいこうほを 3つ かんそくし、ドロー・エナジー・ブロック。",
     "紅蓮決闘：闘気を3ためて、単体大ダメージとムキムキ。": "ぐれんけっとう：とうきを 3ためて、たんたい だいダメージと ムキムキ。",
@@ -3036,7 +3038,7 @@ Object.assign(BASE_DICTIONARY, {
     "特別結界室だ。魔力を整えて、次の出撃に備えよう。": "とくべつ けっかいしつだ。まりょくを ととのえて、つぎの しゅつげきに そなえよう。",
     "特別結界室で魔力を整えた。": "とくべつ けっかいしつで まりょくを ととのえた。",
     "魔法工房だ。どのカードに星屑の強化を施す？": "まほうこうぼうだ。どのカードに ほしくずの きょうかを ほどこす？",
-    "錬金結界だ。共鳴させたいカードを3枚選んで。\n(時環の錬金術師特典：3枚合成！)": "れんきんけっかいだ。きょうめいさせたいカードを 3まい えらんで。\n(ときのわの れんきんじゅつし とくてん：3まい ごうせい！)",
+    "錬金結界だ。共鳴させたいカードを3枚選んで。\n(時環の錬金術師特典：3枚合成！)": "れんきんけっかいだ。きょうめいさせたいカードを 3まい えらんで。\n(じかんの れんきんじゅつし とくてん：3まい ごうせい！)",
     "錬金結界だ。共鳴させたいカードを2枚選んで。": "れんきんけっかいだ。きょうめいさせたいカードを 2まい えらんで。",
     "静かな祈りの間だ。どのカードから乱れた魔力をほどく？": "しずかな いのりの ま だ。どのカードから みだれた まりょくを ほどく？",
     "このカードへ魔法刻印を重ねますか？": "このカードへ まほうこくいんを かさねますか？",
@@ -4893,7 +4895,7 @@ const ENGLISH_GENERATED_CARD_NAME_DICTIONARY: Record<string, string> = {
     "先生に報告": "Neutralize",
     "上履きキック": "Iron Wave",
     "頭突き": "Headbutt",
-    "ラリアット": "Clothesline",
+    "腕ぐるぐるアタック": "Arm-Swing Attack",
     "チョーク投げ": "Chalk Throw",
     "定規で叩く": "Pommel Strike",
     "雑巾がけ": "Cleave",
@@ -4903,10 +4905,10 @@ const ENGLISH_GENERATED_CARD_NAME_DICTIONARY: Record<string, string> = {
     "寒いギャグ": "Cold Snap",
     "静電気": "Ball Lightning",
     "ブーメラン": "Sword Boomerang",
-    "ボディスラム": "Body Slam",
+    "防具ごと体当たり": "Armor-First Tackle",
     "暴れる": "Wild Strike",
     "キレる": "Anger",
-    "飛び膝蹴り": "Flying Knee",
+    "跳び膝アタック": "Jumping Knee Attack",
     "グーパンチ": "Empty Fist",
     "掃除の時間": "Consecrate",
     "列に割り込む": "Cut Through",
@@ -4914,7 +4916,7 @@ const ENGLISH_GENERATED_CARD_NAME_DICTIONARY: Record<string, string> = {
     "消しゴム投げ": "Eraser Throw",
     "カンチョー": "Sucker Punch",
     "追い打ち": "Bane",
-    "雄叫び": "Warcry",
+    "気合いの掛け声": "Rallying Shout",
     "知らんぷり": "Shrug It Off",
     "充電": "Charge Battery",
     "ジャンプ": "Leap",
@@ -4930,7 +4932,7 @@ const ENGLISH_GENERATED_CARD_NAME_DICTIONARY: Record<string, string> = {
     "速読": "Skim",
     "カフェイン": "Turbo",
     "目隠し": "Blind",
-    "足払い": "Trip",
+    "つまずかせる": "Trip Up",
     "深呼吸": "Deep Breath",
     "アッパー": "Uppercut",
     "げんこつ": "Bludgeon",
@@ -4959,7 +4961,7 @@ const ENGLISH_GENERATED_CARD_NAME_DICTIONARY: Record<string, string> = {
     "穴だらけ": "Riddle With Holes",
     "卒業式": "Grand Finale",
     "一夜漬け": "Mind Blast",
-    "衝撃波": "Shockwave",
+    "教室を揺らす一撃": "Classroom-Shaking Blow",
     "鉄壁": "Impervious",
     "パシリ": "Offering",
     "興奮": "Seeing Red",
@@ -4967,13 +4969,13 @@ const ENGLISH_GENERATED_CARD_NAME_DICTIONARY: Record<string, string> = {
     "再起動": "Reboot",
     "バリア": "Force Field",
     "武器奪取": "Disarm",
-    "二刀流": "Dual Wield",
+    "二本鉛筆": "Twin Pencils",
     "見張り": "Sentinel",
     "恐怖": "Terror",
     "衝撃のうわさ": "Corpse Explosion",
     "不快感": "Malaise",
-    "バースト": "Burst",
-    "錬金術": "Alchemize",
+    "スキル二度押し": "Double-Tap Skill",
+    "理科室の調合": "Science Lab Mixture",
     "指切りげんまん": "Offering Blood",
     "工作の時間": "Blade Dance",
     "隠し芸": "Cloak And Dagger",
@@ -5042,7 +5044,7 @@ Object.assign(ENGLISH_CARD_NAME_DICTIONARY, {
     "口喧嘩": "Verbal Sparring",
     "カンチョー": "Surprise Poke",
     "追い打ち": "Follow-Up Hit",
-    "雄叫び": "Battle Shout",
+    "気合いの掛け声": "Rallying Shout",
     "知らんぷり": "Play Dumb",
     "装備点検": "Equipment Check",
     "側転": "Cartwheel",
@@ -5056,7 +5058,7 @@ Object.assign(ENGLISH_CARD_NAME_DICTIONARY, {
     "速読": "Speed Reading",
     "カフェイン": "Caffeine Boost",
     "目隠し": "Blindfold",
-    "足払い": "Leg Sweep",
+    "つまずかせる": "Trip Up",
     "アッパー": "Uppercut",
     "げんこつ": "Knuckle Bonk",
     "給食当番": "Lunch Duty",
@@ -5082,7 +5084,7 @@ Object.assign(ENGLISH_CARD_NAME_DICTIONARY, {
     "知恵熱": "Study Fever",
     "卒業式": "Graduation Ceremony",
     "一夜漬け": "Last-Minute Cramming",
-    "衝撃波": "Shock Wave",
+    "教室を揺らす一撃": "Classroom-Shaking Blow",
     "鉄壁": "Iron Wall",
     "パシリ": "Errand Runner",
     "興奮": "Excitement",
@@ -5091,13 +5093,13 @@ Object.assign(ENGLISH_CARD_NAME_DICTIONARY, {
     "バリア": "Barrier",
     "弱点発見": "Weak Point Found",
     "武器奪取": "Weapon Snatch",
-    "二刀流": "Dual Wielding",
+    "二本鉛筆": "Twin Pencils",
     "見張り": "Lookout",
     "恐怖": "Fear",
     "衝撃のうわさ": "Shocking Rumor",
     "不快感": "Discomfort",
-    "バースト": "Burst",
-    "錬金術": "Alchemy",
+    "スキル二度押し": "Double-Tap Skill",
+    "理科室の調合": "Science Lab Mixture",
     "山勘": "Wild Guess",
     "化学反応": "Chemical Reaction",
     "発見": "Discovery",
@@ -5125,7 +5127,7 @@ Object.assign(ENGLISH_CARD_NAME_DICTIONARY, {
     "先生に報告": "Report to Teacher",
     "上履きキック": "Indoor-Shoe Kick",
     "頭突き": "Headbutt",
-    "ラリアット": "Lariat",
+    "腕ぐるぐるアタック": "Arm-Swing Attack",
     "定規で叩く": "Ruler Smack",
     "雑巾がけ": "Floor-Wiping Sweep",
     "早弁": "Early Lunch",
@@ -5134,10 +5136,10 @@ Object.assign(ENGLISH_CARD_NAME_DICTIONARY, {
     "寒いギャグ": "Bad Joke",
     "静電気": "Static Shock",
     "ブーメラン": "Boomerang",
-    "ボディスラム": "Body Slam",
+    "防具ごと体当たり": "Armor-First Tackle",
     "暴れる": "Rampage",
     "キレる": "Snap",
-    "飛び膝蹴り": "Flying Knee Kick",
+    "跳び膝アタック": "Jumping Knee Attack",
     "グーパンチ": "Straight Punch",
     "掃除の時間": "Cleaning Time",
     "列に割り込む": "Cut in Line",
@@ -10340,6 +10342,7 @@ export const trans = (text: string, mode: LanguageMode): string => {
     if (!text) return "";
     if (mode === 'JAPANESE') return text;
     if (mode === 'ENGLISH') {
+        if (ENGLISH_RUNTIME_EXACT[text]) return ENGLISH_RUNTIME_EXACT[text];
         const schoolEventExact = buildEnglishSchoolEventFallback(text);
         if (schoolEventExact) return schoolEventExact;
 
@@ -10373,6 +10376,7 @@ export const trans = (text: string, mode: LanguageMode): string => {
     }
 
     // 辞書に完全一致がある場合はそれを返す
+    if (HIRAGANA_RUNTIME_EXACT[text]) return HIRAGANA_RUNTIME_EXACT[text];
     if (HIRAGANA_UI_EXACT[text]) return HIRAGANA_UI_EXACT[text];
     if (DICTIONARY[text]) return DICTIONARY[text];
 
@@ -10381,6 +10385,11 @@ export const trans = (text: string, mode: LanguageMode): string => {
 
     // 部分置換ロジック
     let result = text;
+    Object.keys(HIRAGANA_RUNTIME_PARTIAL)
+        .sort((a, b) => b.length - a.length)
+        .forEach(key => {
+            result = result.replaceAll(key, HIRAGANA_RUNTIME_PARTIAL[key]);
+        });
     KEYWORDS.forEach(key => {
         if (result.includes(key)) {
             // キーワードに含まれる正規表現の特殊文字をエスケープする

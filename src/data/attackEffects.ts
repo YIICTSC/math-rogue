@@ -67,7 +67,7 @@ export const getAttackEffectKeyForCard = (card: Card, hitCount = 1, defeated = f
     if (includesAny(texture, ['LIGHTNING', 'EYE']) || includesAny(name, ['雷', '電', 'ビーム', 'レーザー', '大声', 'ひらめき', '夜ふかし'])) return 'lightning';
     if (card.target === TargetType.ALL_ENEMIES || includesAny(name, ['大掃除', '卒業式', '終わりのチャイム', '衝撃'])) return 'shockwave';
     if (includesAny(texture, ['DAGGER']) || includesAny(name, ['投げ', 'ブーメラン', '火縄銃', '画鋲', '豆鉄砲', '削りかす', 'チョーク'])) return 'projectile';
-    if (includesAny(texture, ['FIST', 'SHOE', 'BACKPACK', 'HUMANOID', 'BEAST']) || includesAny(name, ['パンチ', 'キック', '頭突き', 'タックル', 'ラリアット', 'ビンタ', 'アッパー', 'げんこつ', 'ボディスラム'])) return 'impact';
+    if (includesAny(texture, ['FIST', 'SHOE', 'BACKPACK', 'HUMANOID', 'BEAST']) || includesAny(name, ['パンチ', 'キック', '頭突き', 'タックル', '腕ぐるぐるアタック', 'ビンタ', 'アッパー', 'げんこつ', '防具ごと体当たり'])) return 'impact';
     if (includesAny(name, ['伝説', '学習', '黄金', '至高', '覚醒'])) return 'finisher';
 
     return 'slash';

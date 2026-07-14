@@ -604,7 +604,7 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
             '大掃除',
             '山勘',
             '発見',
-            '錬金術',
+            '理科室の調合',
             '虹のプリズム',
             '磁石の力',
             '大ジャンプ',

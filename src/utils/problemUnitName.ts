@@ -53,5 +53,5 @@ export const formatProblemUnitName = (
   categoryId?: SubjectCategoryType,
 ) => {
   if (languageMode !== 'ENGLISH') return name;
-  return shouldKeepJapaneseProblemUnitName(name, categoryId) ? name : trans(name, languageMode);
+  return trans(name, languageMode);
 };
