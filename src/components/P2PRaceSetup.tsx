@@ -4,6 +4,7 @@ import { p2pService, P2PEvent } from '../services/p2pService';
 import { X, Wifi, Users, Loader, AlertCircle, Copy, Check } from 'lucide-react';
 import { audioService } from '../services/audioService';
 import type { VisualThemeId } from '../data/visualThemes';
+import { trans } from '../utils/textUtils';
 
 const RACE_ENGLISH_COPY: Record<string, string> = {
     '接続エラー': 'Connection error.',
@@ -56,7 +57,9 @@ interface P2PRaceSetupProps {
 }
 
 const P2PRaceSetup: React.FC<P2PRaceSetupProps> = ({ player, visualTheme, languageMode, onRaceStart, onClose }) => {
-    const t = (text: string) => languageMode === 'ENGLISH' ? (RACE_ENGLISH_COPY[text] || text) : text;
+    const t = (text: string) => languageMode === 'ENGLISH'
+        ? (RACE_ENGLISH_COPY[text] || trans(text, languageMode))
+        : trans(text, languageMode);
     const [mode, setMode] = useState<'SELECT' | 'HOST' | 'JOIN'>('SELECT');
     const [myName, setMyName] = useState('');
     const [battleCode, setBattleCode] = useState('');

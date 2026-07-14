@@ -2,24 +2,28 @@ import React from 'react';
 import { BookOpen, X } from 'lucide-react';
 import { assetUrl } from '../utils/assetPaths';
 import type { UnitBoardSummary } from '../data/unitBoardSummaries';
+import type { LanguageMode } from '../types';
+import { trans } from '../utils/textUtils';
 
 interface UnitBoardModalProps {
   summary: UnitBoardSummary | null;
   open: boolean;
   onClose: () => void;
+  languageMode: LanguageMode;
 }
 
-const UnitBoardModal: React.FC<UnitBoardModalProps> = ({ summary, open, onClose }) => {
+const UnitBoardModal: React.FC<UnitBoardModalProps> = ({ summary, open, onClose, languageMode }) => {
   if (!open || !summary) return null;
 
   const isNativeEnglishBoard = summary.id.startsWith('NATIVE_');
-  const boardLabel = isNativeEnglishBoard ? 'Board' : summary.grade && summary.grade <= 2 ? 'ばんしょ' : '板書';
-  const goalLabel = isNativeEnglishBoard ? 'Goal' : 'めあて';
-  const ideaLabel = isNativeEnglishBoard ? 'Key Ideas' : summary.grade && summary.grade <= 1 ? 'かんがえかた' : '考え方';
-  const mistakesLabel = isNativeEnglishBoard ? 'Common Mistakes' : 'よくあるまちがい';
-  const exampleLabel = isNativeEnglishBoard ? 'Example' : '例';
-  const closeLabel = isNativeEnglishBoard ? 'Back to question' : summary.grade && summary.grade <= 2 ? 'もんだいにもどる' : '問題にもどる';
-  const closeAriaLabel = isNativeEnglishBoard ? 'Close board' : '板書を閉じる';
+  const translate = (text: string) => isNativeEnglishBoard ? text : trans(text, languageMode);
+  const boardLabel = isNativeEnglishBoard ? 'Board' : translate(summary.grade && summary.grade <= 2 ? 'ばんしょ' : '板書');
+  const goalLabel = isNativeEnglishBoard ? 'Goal' : translate('めあて');
+  const ideaLabel = isNativeEnglishBoard ? 'Key Ideas' : translate(summary.grade && summary.grade <= 1 ? 'かんがえかた' : '考え方');
+  const mistakesLabel = isNativeEnglishBoard ? 'Common Mistakes' : translate('よくあるまちがい');
+  const exampleLabel = isNativeEnglishBoard ? 'Example' : translate('例');
+  const closeLabel = isNativeEnglishBoard ? 'Back to question' : translate(summary.grade && summary.grade <= 2 ? 'もんだいにもどる' : '問題にもどる');
+  const closeAriaLabel = isNativeEnglishBoard ? 'Close board' : translate('板書を閉じる');
   const handleClose = (event: React.MouseEvent<HTMLButtonElement> | React.PointerEvent<HTMLButtonElement>) => {
     event.preventDefault();
     event.stopPropagation();
@@ -55,16 +59,16 @@ const UnitBoardModal: React.FC<UnitBoardModalProps> = ({ summary, open, onClose 
             <div className="min-w-0 text-left">
               <div className="unit-board-label text-[10px] font-bold tracking-widest text-yellow-100/90 sm:text-xs">{boardLabel}</div>
               <h2 id="unit-board-title" className="unit-board-title break-words text-xl font-black leading-tight text-white sm:text-2xl md:text-3xl">
-                {summary.title}
+                {translate(summary.title)}
               </h2>
-              <p className="unit-board-subtitle mt-0.5 text-xs font-bold leading-snug text-emerald-100 sm:mt-1 sm:text-sm md:text-base">{summary.subtitle}</p>
+              <p className="unit-board-subtitle mt-0.5 text-xs font-bold leading-snug text-emerald-100 sm:mt-1 sm:text-sm md:text-base">{translate(summary.subtitle)}</p>
             </div>
           </div>
 
           <div className="unit-board-content grid grid-cols-1 gap-2 text-left text-xs leading-5 text-emerald-50 sm:grid-cols-2 sm:gap-x-4 sm:gap-y-2 md:text-sm md:leading-6 lg:text-base">
             <section>
               <h3 className="unit-board-section-title mb-0.5 text-sm font-black text-yellow-100 sm:mb-1 sm:text-base md:text-lg">{goalLabel}</h3>
-              <p>{summary.goal}</p>
+              <p>{translate(summary.goal)}</p>
             </section>
 
             <section>
@@ -73,7 +77,7 @@ const UnitBoardModal: React.FC<UnitBoardModalProps> = ({ summary, open, onClose 
                 {summary.points.map((point) => (
                   <li key={point} className="flex gap-1.5 sm:gap-2">
                     <span className="mt-0.5 text-yellow-100">・</span>
-                    <span>{point}</span>
+                    <span>{translate(point)}</span>
                   </li>
                 ))}
               </ul>
@@ -85,7 +89,7 @@ const UnitBoardModal: React.FC<UnitBoardModalProps> = ({ summary, open, onClose 
                 {summary.mistakes.map((mistake) => (
                   <li key={mistake} className="flex gap-1.5 sm:gap-2">
                     <span className="mt-0.5 text-rose-100">・</span>
-                    <span>{mistake}</span>
+                    <span>{translate(mistake)}</span>
                   </li>
                 ))}
               </ul>
@@ -94,7 +98,7 @@ const UnitBoardModal: React.FC<UnitBoardModalProps> = ({ summary, open, onClose 
             {summary.example && (
               <section>
                 <h3 className="unit-board-section-title mb-0.5 text-sm font-black text-yellow-100 sm:mb-1 sm:text-base md:text-lg">{exampleLabel}</h3>
-                <p>{summary.example}</p>
+                <p>{translate(summary.example)}</p>
               </section>
             )}
           </div>

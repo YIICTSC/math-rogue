@@ -1768,7 +1768,7 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
                 <BookOpen size={22} />
             </button>
         )}
-        <UnitBoardModal summary={unitBoardSummary} open={isUnitBoardOpen} onClose={handleUnitBoardClose} />
+        <UnitBoardModal summary={unitBoardSummary} open={isUnitBoardOpen} onClose={handleUnitBoardClose} languageMode={languageMode} />
         
         <div className="general-challenge-layout z-10 w-full max-w-md text-center flex flex-col py-2 md:py-0 min-w-0">
             {isEnglishSpeakingReviewMode(mode) && !isChallenge && (

@@ -464,7 +464,7 @@ const CharacterSelectionScreen: React.FC<CharacterSelectionScreenProps> = ({ cha
                                 <button 
                                   onClick={(e) => { e.stopPropagation(); startCamera(char.id); }}
                                   className="absolute -bottom-2 -right-2 bg-indigo-600 p-1.5 rounded-full border-2 border-white shadow-lg hover:bg-indigo-500 transition-colors"
-                                  title="写真を撮る"
+                                title={trans('写真を撮る', languageMode)}
                                 >
                                   <Camera size={14} />
                                 </button>
@@ -473,7 +473,7 @@ const CharacterSelectionScreen: React.FC<CharacterSelectionScreenProps> = ({ cha
                                 <button 
                                   onClick={(e) => handleResetImage(e, char.id)}
                                   className="absolute -top-2 -left-2 bg-red-600 p-1 rounded-full border-2 border-white shadow-lg hover:bg-red-500 transition-colors"
-                                  title="リセット"
+                                  title={trans('リセット', languageMode)}
                                 >
                                   <RefreshCw size={12} />
                                 </button>

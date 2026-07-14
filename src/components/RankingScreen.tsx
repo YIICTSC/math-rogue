@@ -464,11 +464,11 @@ const RankingScreen: React.FC<RankingScreenProps> = ({ onBack, languageMode }) =
                                         {entry.isEndless ? '放課後エンドレス' : entry.victory ? 'GRADUATION (Victory)' : 'EXPELLED (Defeat)'}
                                     </div>
                                     <div className="mt-1 text-xs text-indigo-300">
-                                        難易度 Lv.{entry.difficultyLevel || 1}
+                                        {trans('難易度', languageMode)} Lv.{entry.difficultyLevel || 1}
                                     </div>
                                     {entry.isEndless && (
                                         <div className="mt-1 text-xs text-pink-300">
-                                            撃破数 {entry.endlessKills || 0}
+                                            {trans('撃破数', languageMode)} {entry.endlessKills || 0}
                                         </div>
                                     )}
                                 </div>

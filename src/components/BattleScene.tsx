@@ -1646,17 +1646,17 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                         <div className="pointer-events-none absolute bottom-0 left-1/2 top-0 z-0 aspect-square max-h-full max-w-full -translate-x-1/2 overflow-hidden rounded-lg border-2 border-violet-400/70 bg-black shadow-[0_0_28px_rgba(139,92,246,0.4)]">
                             <img
                                 src={assetUrl('enemy-illustrations/ドドメデス.webp')}
-                                alt="ドドメデスとゲンゾー"
+                                alt={trans('ドドメデスとゲンゾー', languageMode)}
                                 className={`absolute inset-0 h-full w-full object-contain object-center transition-opacity duration-700 ${isDodomedesuAlive && isGenzoAlive ? 'opacity-100' : 'opacity-0'}`}
                             />
                             <img
                                 src={assetUrl('enemy-illustrations/ドドメデス-困惑.webp')}
-                                alt="ゲンゾーを失い戸惑うドドメデス"
+                                    alt={trans('ゲンゾーを失い戸惑うドドメデス', languageMode)}
                                 className={`absolute inset-0 h-full w-full object-contain object-center transition-opacity duration-700 ${isDodomedesuAlive && !isGenzoAlive ? 'opacity-100' : 'opacity-0'}`}
                             />
                             <img
                                 src={assetUrl('enemy-illustrations/ゲンゾー-孤立.webp')}
-                                alt="泡を吹くドドメデスを見て慌てるゲンゾー"
+                                    alt={trans('泡を吹くドドメデスを見て慌てるゲンゾー', languageMode)}
                                 className={`absolute inset-0 h-full w-full object-contain object-center transition-opacity duration-700 ${!isDodomedesuAlive && isGenzoAlive ? 'opacity-100' : 'opacity-0'}`}
                             />
                             <div className="absolute inset-0 bg-gradient-to-t from-black/55 via-transparent to-black/10" />

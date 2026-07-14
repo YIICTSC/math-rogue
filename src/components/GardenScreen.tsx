@@ -177,7 +177,7 @@ const GardenScreen: React.FC<GardenScreenProps> = ({ player, onPlant, onHarvest,
                   </div>
                   <ArrowRight size={14} className="text-green-500 opacity-0 group-hover:opacity-100 hidden md:block" />
                   {selectedSlot !== null && (
-                    <div className="text-[8px] font-bold text-green-400 border border-green-500/50 px-1 rounded md:hidden">植える</div>
+                    <div className="text-[8px] font-bold text-green-400 border border-green-500/50 px-1 rounded md:hidden">{trans('植える', languageMode)}</div>
                   )}
                 </div>
               ))

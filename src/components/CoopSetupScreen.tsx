@@ -3,6 +3,7 @@ import { LanguageMode, Player } from '../types';
 import { p2pService, P2PEvent } from '../services/p2pService';
 import { X, Wifi, Users, Loader, AlertCircle, Swords, Copy, Check } from 'lucide-react';
 import { audioService } from '../services/audioService';
+import { trans } from '../utils/textUtils';
 
 const COOP_ENGLISH_COPY: Record<string, string> = {
   'プレイヤー': 'Player',
@@ -129,7 +130,9 @@ const saveCoopResumeInfo = (info: CoopResumeInfo) => {
 };
 
 const CoopSetupScreen: React.FC<CoopSetupScreenProps> = ({ player, onStart, onClose, visualTheme, languageMode }) => {
-  const t = (text: string) => languageMode === 'ENGLISH' ? (COOP_ENGLISH_COPY[text] || text) : text;
+  const t = (text: string) => languageMode === 'ENGLISH'
+    ? (COOP_ENGLISH_COPY[text] || trans(text, languageMode))
+    : trans(text, languageMode);
   const [mode, setMode] = useState<'SELECT' | 'HOST' | 'JOIN'>('SELECT');
   const [myName, setMyName] = useState('');
   const [roomCode, setRoomCode] = useState('');

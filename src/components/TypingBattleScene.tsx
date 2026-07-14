@@ -945,7 +945,7 @@ const TypingBattleScene: React.FC<TypingBattleSceneProps> = ({
                                             )}
                                             {enemy.weak > 0 && (
                                                 <div className="flex items-center rounded border border-gray-500/50 bg-gray-700/80 px-0.5">
-                                                    <span className="text-[8px] font-bold text-gray-300">弱 {enemy.weak}</span>
+                                                    <span className="text-[8px] font-bold text-gray-300">{trans('弱', languageMode)} {enemy.weak}</span>
                                                 </div>
                                             )}
                                         </div>
@@ -1016,9 +1016,9 @@ const TypingBattleScene: React.FC<TypingBattleSceneProps> = ({
                                 </div>
                             </div>
                             <div className="mt-auto flex items-center justify-between text-[8px] text-gray-300">
-                                <span>手札 {player.hand.length}</span>
-                                <span>山札 {player.drawPile.length}</span>
-                                <span>捨札 {player.discardPile.length}</span>
+                                <span>{trans('手札', languageMode)} {player.hand.length}</span>
+                                <span>{trans('山札', languageMode)} {player.drawPile.length}</span>
+                                <span>{trans('捨札', languageMode)} {player.discardPile.length}</span>
                             </div>
                         </div>
                     </div>
@@ -1054,7 +1054,7 @@ const TypingBattleScene: React.FC<TypingBattleSceneProps> = ({
                                     )}
                                 </div>
                             ) : (
-                                <div className="px-2 text-center text-xs font-bold text-slate-400">使えるカード待機中</div>
+                                <div className="px-2 text-center text-xs font-bold text-slate-400">{trans('使えるカード待機中', languageMode)}</div>
                             )}
                         </div>
                     </div>
@@ -1063,8 +1063,8 @@ const TypingBattleScene: React.FC<TypingBattleSceneProps> = ({
                 {selectionState.active && (
                     <div className="rounded-xl border border-indigo-500/60 bg-indigo-950/30 p-3">
                         <div className="mb-2 flex items-center justify-between gap-2 text-xs font-black text-indigo-200">
-                            <span>効果で手札選択が必要です</span>
-                            <button onClick={onCancelSelection} className="rounded border border-rose-500/60 px-2 py-1 text-rose-200 hover:bg-rose-900/30">選択をやめる</button>
+                            <span>{trans('効果で手札選択が必要です', languageMode)}</span>
+                            <button onClick={onCancelSelection} className="rounded border border-rose-500/60 px-2 py-1 text-rose-200 hover:bg-rose-900/30">{trans('選択をやめる', languageMode)}</button>
                         </div>
                         <div className="flex gap-3 overflow-x-auto pb-2">
                             {player.hand.map(card => (
@@ -1107,17 +1107,17 @@ const TypingBattleScene: React.FC<TypingBattleSceneProps> = ({
                         )) : '...'}
                     </div>
                     <div className="flex items-center gap-2 text-[10px] text-slate-300">
-                        <span className={`rounded border px-2 py-0.5 transition-colors duration-150 ${mistypeFlashActive ? 'border-red-400/70 text-red-100' : 'border-slate-600'}`}>次キー: {nextExpectedKey || '-'}</span>
-                        <span className={`rounded border px-2 py-0.5 transition-colors duration-150 ${mistypeFlashActive ? 'border-red-400/70 text-red-100' : 'border-slate-600'}`}>担当指: {currentFinger ? FINGER_LABELS[currentFinger] : 'IME入力'}</span>
+                        <span className={`rounded border px-2 py-0.5 transition-colors duration-150 ${mistypeFlashActive ? 'border-red-400/70 text-red-100' : 'border-slate-600'}`}>{trans('次キー', languageMode)}: {nextExpectedKey || '-'}</span>
+                        <span className={`rounded border px-2 py-0.5 transition-colors duration-150 ${mistypeFlashActive ? 'border-red-400/70 text-red-100' : 'border-slate-600'}`}>{trans('担当指', languageMode)}: {currentFinger ? FINGER_LABELS[currentFinger] : trans('IME入力', languageMode)}</span>
                     </div>
                     <div className="flex flex-wrap items-center gap-1.5 text-[10px] text-slate-300">
-                        <span className="rounded border border-amber-500/40 bg-amber-950/30 px-2 py-0.5 font-bold text-amber-200">今の重点練習</span>
+                        <span className="rounded border border-amber-500/40 bg-amber-950/30 px-2 py-0.5 font-bold text-amber-200">{trans('今の重点練習', languageMode)}</span>
                         {weakKeyEntries.length > 0 ? weakKeyEntries.map(([char, count]) => (
                             <span key={char} className="rounded border border-slate-600 bg-slate-950/70 px-2 py-0.5 font-bold text-slate-200">
                                 {char} x{count}
                             </span>
                         )) : (
-                            <span className="text-slate-500">まだ記録なし</span>
+                            <span className="text-slate-500">{trans('まだ記録なし', languageMode)}</span>
                         )}
                     </div>
                 </div>

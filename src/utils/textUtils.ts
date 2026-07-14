@@ -1,6 +1,8 @@
 
 import { LanguageMode, type Card } from '../types';
 import { EVENT_HIRAGANA_EXACT } from '../data/eventHiraganaExact';
+import { HIRAGANA_UI_EXACT } from '../data/hiraganaUiExact';
+import { HIRAGANA_DYNAMIC_UI_RULES } from '../data/hiraganaDynamicUiRules';
 import { EVENT_DICTIONARY } from './textUtils2';
 
 const BASE_DICTIONARY: Record<string, string> = {
@@ -10309,6 +10311,31 @@ Object.assign(ENGLISH_DICTIONARY, {
     "卒業王アキラ": "Graduation King Akira",
 });
 
+const translateHiraganaDynamicUi = (text: string): string | null => {
+    const patterns: Array<[RegExp, (...matches: string[]) => string]> = [
+        [/^(.+)をカード帳から持ってきた。$/, (_, name) => `${name}をカードちょうからもってきた。`],
+        [/^天気予報：(\d+)枚を山札に戻し、(\d+)枚を捨て札に送った$/, (_, keep, discard) => `てんきよほう：${keep}まいをやまふだにもどし、${discard}まいをすてふだにおくった`],
+        [/^銀河鉄道の夜：(.+)を手札に加え、残り(\d+)枚を捨て札に送った$/, (_, name, discard) => `ぎんがてつどうのよる：${name}をてふだにくわえ、のこり${discard}まいをすてふだにおくった`],
+        [/^今ターン失ったHPを力に変えた！ \((\d+)ダメージ\)$/, (_, damage) => `いまのターンでうしなったHPをちからにかえた！ (${damage}ダメージ)`],
+        [/^魅惑のカカオ：手札を(\d+)枚入れ替えた$/, (_, count) => `みわくのカカオ：てふだを${count}まいいれかえた`],
+        [/^鉄棒の逆上がり：捨て札から「(.+)」を回収した！$/, (_, name) => `てつぼうのさかあがり：すてふだから「${name}」をかいしゅうした！`],
+        [/^電脳世界へのダイブ：「(.+)」を0コスト化$/, (_, name) => `でんのうせかいへのダイブ：「${name}」を0コストにした`],
+        [/^次元跳躍：悪いカードを(\d+)枚消滅させ、ムキムキになった！$/, (_, count) => `じげんちょうやく：わるいカードを${count}まいけし、ムキムキになった！`],
+        [/^お姫様の呼び声：山札から「(.+)」を引き寄せた$/, (_, name) => `おひめさまのよびごえ：やまふだから「${name}」をひきよせた`],
+        [/^(.+)はかかしに見惚れている\.\.\.$/, (_, name) => `${name}はかかしにみとれている...`],
+    ];
+    for (const [pattern, build] of patterns) {
+        const match = text.match(pattern);
+        if (match) return build(...match);
+    }
+    const dynamicRuleSpecificity = (rule: { pattern: RegExp }) => rule.pattern.source.replace(/\(\.\*\?\)/g, '').length;
+    const dynamicRules = [...HIRAGANA_DYNAMIC_UI_RULES].sort((a, b) => dynamicRuleSpecificity(b) - dynamicRuleSpecificity(a));
+    for (const rule of dynamicRules) {
+        if (rule.pattern.test(text)) return text.replace(rule.pattern, rule.replacement);
+    }
+    return null;
+};
+
 export const trans = (text: string, mode: LanguageMode): string => {
     if (!text) return "";
     if (mode === 'JAPANESE') return text;
@@ -10346,7 +10373,11 @@ export const trans = (text: string, mode: LanguageMode): string => {
     }
 
     // 辞書に完全一致がある場合はそれを返す
+    if (HIRAGANA_UI_EXACT[text]) return HIRAGANA_UI_EXACT[text];
     if (DICTIONARY[text]) return DICTIONARY[text];
+
+    const dynamicUiTranslation = translateHiraganaDynamicUi(text);
+    if (dynamicUiTranslation) return dynamicUiTranslation;
 
     // 部分置換ロジック
     let result = text;

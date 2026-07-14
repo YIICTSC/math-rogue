@@ -60,7 +60,7 @@ const CardInspectionModal: React.FC<CardInspectionModalProps> = ({ card, languag
         <X size={24} />
       </button>
       <h3 className="text-2xl font-bold text-yellow-400 mb-2 border-b border-gray-600 pb-2">
-        {card.holographic ? 'キラ ' : ''}{trans(card.name, languageMode)}{card.upgraded ? '+' : ''}
+        {card.holographic ? `${trans('キラ', languageMode)} ` : ''}{trans(card.name, languageMode)}{card.upgraded ? '+' : ''}
       </h3>
       <div className="flex gap-2 mb-4 text-xs text-gray-400 font-mono">
         <span className="bg-blue-900/50 px-2 py-1 rounded border border-blue-500/30">
@@ -71,7 +71,7 @@ const CardInspectionModal: React.FC<CardInspectionModalProps> = ({ card, languag
         </span>
         {card.holographic && (
           <span className="bg-cyan-900/60 px-2 py-1 rounded border border-cyan-300/50 text-cyan-100">
-            キラ
+            {trans('キラ', languageMode)}
           </span>
         )}
       </div>

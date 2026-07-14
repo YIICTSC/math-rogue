@@ -450,7 +450,7 @@ const MapScreen: React.FC<MapScreenProps> = ({ nodes, currentNodeId, onNodeSelec
             {selectionDisabled && (
                 <div className="absolute inset-0 z-20 pointer-events-none flex items-center justify-center px-4">
                     <div className="rounded-2xl border border-emerald-400/50 bg-slate-950/85 px-5 py-4 text-center text-white shadow-2xl backdrop-blur">
-                        <div className="text-lg font-black text-emerald-200 mb-1">協力モード待機中</div>
+                        <div className="text-lg font-black text-emerald-200 mb-1">{trans('協力モード待機中', languageMode)}</div>
                         <div className="text-sm text-emerald-100">{selectionDisabledMessage || trans("ホストの選択を待っています", languageMode)}</div>
                     </div>
                 </div>

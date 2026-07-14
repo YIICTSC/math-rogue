@@ -14588,7 +14588,7 @@ const App: React.FC = () => {
                                 <div className="mb-2 flex items-center justify-between gap-3">
                                     <div>
                                         <div className="flex items-center gap-2 text-xs font-black text-sky-300">
-                                            <Monitor size={15} /> UI実寸確認
+                                            <Monitor size={15} /> {trans('UI実寸確認', languageMode)}
                                         </div>
                                         <div className="mt-0.5 font-mono text-[10px] text-gray-400">
                                             {uiPreviewViewport.width} × {uiPreviewViewport.height}px / 100%
@@ -14599,7 +14599,7 @@ const App: React.FC = () => {
                                         onClick={() => setIsUiPreviewToolbarOpen(false)}
                                         className="rounded border border-gray-600 px-2 py-1 text-xs text-gray-300 hover:bg-gray-800"
                                     >
-                                        隠す
+                                        {trans('隠す', languageMode)}
                                     </button>
                                 </div>
                                 <select
@@ -14632,7 +14632,7 @@ const App: React.FC = () => {
                                                     }}
                                                     className={`rounded px-2 py-1 ${!uiPreviewBattleConfig.coop ? 'bg-emerald-500 text-black' : 'text-emerald-100 hover:bg-emerald-900/70'}`}
                                                 >
-                                                    通常
+                                                    {trans('通常', languageMode)}
                                                 </button>
                                                 <button
                                                     type="button"
@@ -14643,13 +14643,13 @@ const App: React.FC = () => {
                                                     }}
                                                     className={`rounded px-2 py-1 ${uiPreviewBattleConfig.coop ? 'bg-emerald-500 text-black' : 'text-emerald-100 hover:bg-emerald-900/70'}`}
                                                 >
-                                                    協力
+                                                    {trans('協力', languageMode)}
                                                 </button>
                                             </div>
                                         </div>
                                         <div className="grid grid-cols-2 gap-2">
                                             <label className="text-[10px] font-bold text-emerald-100">
-                                                <span className="mb-1 block">参加者 {uiPreviewBattleConfig.participantCount}人</span>
+                                                <span className="mb-1 block">{trans('参加者', languageMode)} {uiPreviewBattleConfig.participantCount}{trans('人', languageMode)}</span>
                                                 <input
                                                     type="range"
                                                     min={1}
@@ -14669,7 +14669,7 @@ const App: React.FC = () => {
                                                 />
                                             </label>
                                             <label className="text-[10px] font-bold text-emerald-100">
-                                                <span className="mb-1 block">敵 {uiPreviewBattleConfig.enemyCount}体</span>
+                                                <span className="mb-1 block">{trans('敵', languageMode)} {uiPreviewBattleConfig.enemyCount}{trans('体', languageMode)}</span>
                                                 <input
                                                     type="range"
                                                     min={1}
@@ -14687,7 +14687,7 @@ const App: React.FC = () => {
                                                 />
                                             </label>
                                             <label className="col-span-2 text-[10px] font-bold text-emerald-100">
-                                                <span className="mb-1 block">召喚 {uiPreviewBattleConfig.summonCount}体</span>
+                                                <span className="mb-1 block">{trans('召喚', languageMode)} {uiPreviewBattleConfig.summonCount}{trans('体', languageMode)}</span>
                                                 <input
                                                     type="range"
                                                     min={0}
@@ -14714,7 +14714,7 @@ const App: React.FC = () => {
                                         onClick={closeUiPreview}
                                         className="shrink-0 rounded-lg bg-sky-600 px-4 py-2 text-xs font-black text-white hover:bg-sky-500"
                                     >
-                                        デバッグへ戻る (Esc)
+                                        {trans('デバッグへ戻る', languageMode)} (Esc)
                                     </button>
                                 </div>
                             </div>
@@ -15083,7 +15083,7 @@ const App: React.FC = () => {
                                         ? 'border border-red-200/80 bg-slate-950/75 text-red-100 shadow-[0_0_18px_rgba(248,113,113,0.22)] hover:bg-red-200 hover:text-slate-950 focus:ring-red-200'
                                         : 'border border-amber-300/70 bg-black/65 text-amber-100 shadow-[0_0_14px_rgba(251,191,36,0.2)] hover:bg-amber-300 hover:text-slate-950 focus:ring-amber-200'
                             }`}
-                            aria-label="クレジットロールを開く"
+                                    aria-label={trans('クレジットロールを開く', languageMode)}
                         >
                             <ScrollText size={14} />
                             CREDIT
@@ -15107,7 +15107,7 @@ const App: React.FC = () => {
                                             type="button"
                                             onClick={() => setShowCreditsModal(false)}
                                             className="rounded border border-slate-500 bg-slate-900 p-2 text-slate-100 transition-colors hover:bg-slate-700"
-                                            aria-label="クレジットを閉じる"
+                                            aria-label={trans('クレジットを閉じる', languageMode)}
                                         >
                                             <X size={18} />
                                         </button>
@@ -15409,12 +15409,12 @@ const App: React.FC = () => {
                                     href={CROWDFUNDING_BANNER_URL}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    aria-label="クラウドファンディング詳細ページを開く"
+                                    aria-label={trans('クラウドファンディング詳細ページを開く', languageMode)}
                                     className="start-menu-crowdfunding mt-4 block w-[min(92vw,500px)] max-w-full border-2 border-yellow-400/70 bg-black/45 p-1 shadow-[0_0_18px_rgba(250,204,21,0.22)] transition-transform hover:scale-[1.01] hover:border-yellow-200 focus:outline-none focus:ring-2 focus:ring-yellow-300"
                                 >
                                     <img
                                         src={CROWDFUNDING_BANNER_IMAGE}
-                                        alt="学習ローグ クラウドファンディング実施中"
+                                    alt={trans('学習ローグ クラウドファンディング実施中', languageMode)}
                                         className="block h-auto w-full"
                                         draggable={false}
                                     />
@@ -15751,11 +15751,11 @@ const App: React.FC = () => {
                             </h2>
                             <div className="space-y-4 text-sm font-mono text-gray-300 max-h-[60vh] overflow-y-auto custom-scrollbar">
                                 <section>
-                                    <h3 className="text-white font-bold mb-1">■ v1.0.4 アップデート</h3>
+                                    <h3 className="text-white font-bold mb-1">■ {trans('v1.0.4 アップデート', languageMode)}</h3>
                                     <ul className="list-disc pl-5 space-y-1">
-                                        <li>協力モードの進行、報酬、イベント同期を改善</li>
-                                        <li>協力専用UIに参加者名表示を追加</li>
-                                        <li>細かなバグ修正と安定性向上</li>
+                                        <li>{trans('協力モードの進行、報酬、イベント同期を改善', languageMode)}</li>
+                                        <li>{trans('協力専用UIに参加者名表示を追加', languageMode)}</li>
+                                        <li>{trans('細かなバグ修正と安定性向上', languageMode)}</li>
                                     </ul>
                                 </section>
                             </div>
@@ -16140,7 +16140,7 @@ const App: React.FC = () => {
                                             transform: `rotate(${(index % 2 === 0 ? 1 : -1) * (10 + index * 3)}deg)`
                                         }}
                                     >
-                                        ← こっち
+                                        {trans('← こっち', languageMode)}
                                     </div>
                                 ))}
                             </div>
@@ -16160,7 +16160,7 @@ const App: React.FC = () => {
                         {raceEffects.sleepyVignetteUntil > raceEffectNow && <div className="pointer-events-none absolute inset-0 z-40 shadow-[inset_0_0_120px_rgba(0,0,0,0.92)]" />}
                         {raceEffects.slowBellUntil > raceEffectNow && (
                             <div className="absolute inset-0 z-50 bg-black/45 backdrop-blur-[2px] flex items-center justify-center text-white font-black text-xl">
-                                しばらく操作できません
+                                {trans('しばらく操作できません', languageMode)}
                             </div>
                         )}
                     </>
@@ -16225,16 +16225,16 @@ const App: React.FC = () => {
                         {raceSession && !raceSession.ended && !raceSession.isHost && gameState.challengeMode === 'RACE' && (
                             <div className="absolute inset-0 bg-black/65 backdrop-blur-[1px] flex items-center justify-center p-4 z-20">
                                 <div className="bg-slate-900 border-2 border-cyan-500 rounded-xl p-6 text-white text-center max-w-md w-full">
-                                    <div className="text-xl font-black mb-2">レースモード準備中</div>
-                                    <div className="text-sm text-cyan-200">ホストのモード選択を待っています...</div>
+                                    <div className="text-xl font-black mb-2">{trans('レースモード準備中', languageMode)}</div>
+                                    <div className="text-sm text-cyan-200">{trans('ホストのモード選択を待っています...', languageMode)}</div>
                                 </div>
                             </div>
                         )}
                         {coopSession && !coopSession.isHost && gameState.challengeMode === 'COOP' && (
                             <div className="absolute inset-0 bg-black/65 backdrop-blur-[1px] flex items-center justify-center p-4 z-20">
                                 <div className="bg-slate-900 border-2 border-emerald-500 rounded-xl p-6 text-white text-center max-w-md w-full">
-                                    <div className="text-xl font-black mb-2">協力モード準備中</div>
-                                    <div className="text-sm text-emerald-200">ホストのモード選択を待っています...</div>
+                                    <div className="text-xl font-black mb-2">{trans('協力モード準備中', languageMode)}</div>
+                                    <div className="text-sm text-emerald-200">{trans('ホストのモード選択を待っています...', languageMode)}</div>
                                 </div>
                             </div>
                         )}
@@ -16264,9 +16264,9 @@ const App: React.FC = () => {
                             <div className="flex h-full w-full items-center justify-center bg-slate-950 p-6 text-white">
                                 <div className="max-w-md rounded-2xl border border-cyan-500 bg-slate-900 p-6 text-center shadow-2xl">
                                     <div className="mx-auto mb-4 h-12 w-12 animate-spin rounded-full border-4 border-cyan-500 border-t-transparent" />
-                                    <h2 className="mb-2 text-2xl font-black text-cyan-200">難易度決定待ち</h2>
+                                    <h2 className="mb-2 text-2xl font-black text-cyan-200">{trans('難易度決定待ち', languageMode)}</h2>
                                     <p className="text-sm font-bold leading-relaxed text-slate-300">
-                                        ホストがゲーム難易度を選ぶまで待っています。
+                                        {trans('ホストがゲーム難易度を選ぶまで待っています。', languageMode)}
                                     </p>
                                 </div>
                             </div>
@@ -16297,8 +16297,8 @@ const App: React.FC = () => {
                         {gameState.challengeMode === 'COOP' && coopAwaitingMapSync && coopSession && !coopSession.isHost && (
                             <div className="absolute inset-0 bg-black/65 backdrop-blur-[1px] flex items-center justify-center p-4 z-20">
                                 <div className="bg-slate-900 border-2 border-emerald-500 rounded-xl p-6 text-white text-center max-w-md w-full">
-                                    <div className="text-xl font-black mb-2">協力モード準備中</div>
-                                    <div className="text-sm text-emerald-200">ホストが初回マップを確定するまで待っています...</div>
+                                    <div className="text-xl font-black mb-2">{trans('協力モード準備中', languageMode)}</div>
+                                    <div className="text-sm text-emerald-200">{trans('ホストが初回マップを確定するまで待っています...', languageMode)}</div>
                                 </div>
                             </div>
                         )}
@@ -16354,7 +16354,7 @@ const App: React.FC = () => {
                         {gameState.challengeMode === 'COOP' && coopSession?.isHost && coopNeedsInitialMapSync && (
                             <div className="absolute left-1/2 -translate-x-1/2 top-[72px] z-30">
                                 <div className="bg-emerald-700 text-white font-black px-4 py-2 rounded-lg shadow-lg border border-emerald-300">
-                                    参加者へ初回マップを同期中...
+                                    {trans('参加者へ初回マップを同期中...', languageMode)}
                                 </div>
                             </div>
                         )}
@@ -16362,13 +16362,13 @@ const App: React.FC = () => {
                             <>
                                 <div className="absolute left-3 top-[72px] z-30">
                                     <div className="bg-slate-900/90 border border-cyan-500 rounded-lg px-3 py-2 text-cyan-100 shadow-lg min-w-[136px]">
-                                        <div className="text-[10px] font-bold tracking-wide text-cyan-200">レース残り時間</div>
+                                        <div className="text-[10px] font-bold tracking-wide text-cyan-200">{trans('レース残り時間', languageMode)}</div>
                                         <div className="text-xl font-black tabular-nums">{formatRaceRemaining(raceRemainingSec)}</div>
                                     </div>
                                 </div>
                                 <div className="absolute right-3 top-[72px] z-30 w-[180px]">
                                     <div className="bg-slate-900/90 border border-cyan-500 rounded-lg p-2 text-cyan-100 shadow-lg">
-                                        <div className="text-[10px] font-bold tracking-wide text-cyan-200 mb-1">ランキング</div>
+                                        <div className="text-[10px] font-bold tracking-wide text-cyan-200 mb-1">{trans('ランキング', languageMode)}</div>
                                         <div className="space-y-1">
                                             {(raceSession.entries || []).slice().sort(compareRaceEntries).slice(0, 5).map((entry, idx) => (
                                                 <div key={entry.peerId} className="flex items-center justify-between text-[11px]">
@@ -16788,10 +16788,10 @@ const App: React.FC = () => {
                 {masteryRewardModal && (
                     <div className="app-modal-overlay app-mastery-reward-modal-overlay fixed inset-0 z-[2147483647] bg-black/80 flex items-center justify-center p-4 pointer-events-auto">
                         <div className="app-modal-panel app-mastery-reward-modal w-full max-w-md bg-slate-900 border-2 border-yellow-400 rounded-xl p-6 text-center">
-                            <div className="text-2xl font-black text-yellow-300 mb-3">◎ マスター達成</div>
+                            <div className="text-2xl font-black text-yellow-300 mb-3">◎ {trans('マスター達成', languageMode)}</div>
                             <div className="text-white font-bold leading-relaxed mb-5">
-                                この種類の問題のマスターおめでとう！<br />
-                                ゲームの制限時間が5分延長されました！
+                                {trans('この種類の問題のマスターおめでとう！', languageMode)}<br />
+                                {trans('ゲームの制限時間が5分延長されました！', languageMode)}
                             </div>
                             <button
                                 onClick={() => setMasteryRewardModal(null)}
@@ -16814,13 +16814,13 @@ const App: React.FC = () => {
                             <div className="flex-1 overflow-y-auto pr-1 space-y-6">
                                 {newlyUnlockedCharacters.length > 0 && (
                                     <section className="flex flex-col">
-                                        <p className="text-white font-bold mb-4 shrink-0">新しい主人公が使えるようになりました</p>
+                                        <p className="text-white font-bold mb-4 shrink-0">{trans('新しい主人公が使えるようになりました', languageMode)}</p>
                                         <div className="flex flex-wrap items-stretch justify-center gap-4 sm:gap-6">
                                             {newlyUnlockedCharacters.map((character) => (
                                                 <div key={character.id} className="flex w-full max-w-[16rem] flex-col rounded-xl border border-yellow-300/40 bg-slate-800/80 p-4">
                                                     <img src={character.imageData} alt={character.name} className="mx-auto mb-3 h-28 w-28 object-contain pixelated" />
-                                                    <div className="text-xl font-black text-yellow-100">{character.name}</div>
-                                                    <div className="mt-2 text-sm text-slate-300 leading-relaxed">{character.description}</div>
+                                                    <div className="text-xl font-black text-yellow-100">{trans(character.name, languageMode)}</div>
+                                                    <div className="mt-2 text-sm text-slate-300 leading-relaxed">{trans(character.description, languageMode)}</div>
                                                 </div>
                                             ))}
                                         </div>
@@ -16828,15 +16828,15 @@ const App: React.FC = () => {
                                 )}
                                 {newlyUnlockedMiniGames.length > 0 && (
                                     <section className="flex flex-col">
-                                        <p className="text-white font-bold mb-4 shrink-0">新しいミニゲームが解禁されました</p>
+                                        <p className="text-white font-bold mb-4 shrink-0">{trans('新しいミニゲームが解禁されました', languageMode)}</p>
                                         <div className="flex flex-wrap items-stretch justify-center gap-4">
                                             {newlyUnlockedMiniGames.map((game) => (
                                                 <div key={game.id} className="flex w-full max-w-[16rem] flex-col rounded-xl border border-cyan-300/40 bg-slate-800/80 p-4">
                                                     <div className="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-full border border-white/10 bg-black/20">
                                                         <game.icon size={28} className="text-cyan-200" />
                                                     </div>
-                                                    <div className="text-xl font-black text-cyan-100">{game.name}</div>
-                                                    <div className="mt-2 text-sm text-slate-300 leading-relaxed">{game.description}</div>
+                                                    <div className="text-xl font-black text-cyan-100">{trans(game.name, languageMode)}</div>
+                                                    <div className="mt-2 text-sm text-slate-300 leading-relaxed">{trans(game.description, languageMode)}</div>
                                                 </div>
                                             ))}
                                         </div>
@@ -16860,7 +16860,7 @@ const App: React.FC = () => {
                     <div className="app-modal-overlay app-weather-scry-modal-overlay fixed inset-0 z-[230] bg-black/70 flex items-center justify-center p-4">
                         <div className="app-modal-panel app-card-choice-modal app-weather-scry-modal w-full max-w-lg rounded-xl border-2 border-cyan-400 bg-slate-900 text-white p-4">
                             <h3 className="text-xl font-bold mb-2">{trans("天気予報", languageMode)}</h3>
-                            <p className="text-sm text-slate-300 mb-3">山札に戻すか、捨て札に送るかを選択してください</p>
+                            <p className="text-sm text-slate-300 mb-3">{trans('山札に戻すか、捨て札に送るかを選択してください', languageMode)}</p>
                             <div className="space-y-2 max-h-[50vh] overflow-y-auto pr-1">
                                 {weatherScryModal.cards.map((card, idx) => {
                                     const keep = weatherScryModal.keepMap[card.id] !== false;
@@ -16872,13 +16872,13 @@ const App: React.FC = () => {
                                                     onClick={() => toggleWeatherScryCard(card.id, true)}
                                                     className={`flex-1 rounded px-2 py-1 text-sm ${keep ? 'bg-emerald-600' : 'bg-slate-700 hover:bg-slate-600'}`}
                                                 >
-                                                    山札に戻す
+                                                    {trans('山札に戻す', languageMode)}
                                                 </button>
                                                 <button
                                                     onClick={() => toggleWeatherScryCard(card.id, false)}
                                                     className={`flex-1 rounded px-2 py-1 text-sm ${!keep ? 'bg-rose-600' : 'bg-slate-700 hover:bg-slate-600'}`}
                                                 >
-                                                    捨て札へ送る
+                                                    {trans('捨て札へ送る', languageMode)}
                                                 </button>
                                             </div>
                                         </div>
@@ -16889,7 +16889,7 @@ const App: React.FC = () => {
                                 onClick={applyWeatherScrySelection}
                                 className="mt-4 w-full rounded bg-cyan-700 hover:bg-cyan-600 py-2 font-bold"
                             >
-                                決定
+                                {trans('決定', languageMode)}
                             </button>
                         </div>
                     </div>
@@ -16898,12 +16898,12 @@ const App: React.FC = () => {
                 {eventSynthesisModal && (
                     <div className="app-modal-overlay app-event-synthesis-modal-overlay fixed inset-0 z-[232] bg-black/75 flex items-center justify-center p-3 sm:p-4">
                         <div className="app-modal-panel app-card-choice-modal app-event-synthesis-modal w-full max-w-4xl rounded-xl border-2 border-purple-400 bg-slate-950 text-white p-4 shadow-2xl">
-                            <h3 className="text-xl font-black mb-2 text-purple-100">つかぽんのカード合成</h3>
+                            <h3 className="text-xl font-black mb-2 text-purple-100">{trans('つかぽんのカード合成', languageMode)}</h3>
                             <p className="text-sm text-slate-300 mb-3">
-                                デッキから2枚選んで合成します。選んだカードは消え、合成カードがデッキに加わります。
+                                {trans('デッキから2枚選んで合成します。選んだカードは消え、合成カードがデッキに加わります。', languageMode)}
                             </p>
                             <div className="mb-3 rounded border border-purple-400/40 bg-purple-950/35 px-3 py-2 text-sm font-bold text-purple-100">
-                                選択中: {eventSynthesisModal.selectedIds.length} / 2
+                                {trans('選択中', languageMode)}: {eventSynthesisModal.selectedIds.length} / 2
                             </div>
                             <div className="grid max-h-[58vh] grid-cols-2 gap-3 overflow-y-auto pr-1 sm:grid-cols-3 md:grid-cols-4">
                                 {eventSynthesisModal.cards.map(card => {
@@ -16929,14 +16929,14 @@ const App: React.FC = () => {
                                     disabled={eventSynthesisModal.selectedIds.length !== 2}
                                     className="flex-1 rounded bg-purple-600 px-4 py-3 font-black text-white transition-colors hover:bg-purple-500 disabled:cursor-not-allowed disabled:bg-slate-700 disabled:text-slate-400"
                                 >
-                                    この2枚を合成
+                                    {trans('この2枚を合成', languageMode)}
                                 </button>
                                 <button
                                     type="button"
                                     onClick={skipEventSynthesis}
                                     className="rounded bg-slate-700 px-4 py-3 font-bold text-slate-100 transition-colors hover:bg-slate-600"
                                 >
-                                    合成せず25G
+                                    {trans('合成せず25G', languageMode)}
                                 </button>
                             </div>
                         </div>
@@ -16999,7 +16999,7 @@ const App: React.FC = () => {
                     <div className="app-modal-overlay app-galaxy-express-modal-overlay fixed inset-0 z-[231] bg-black/70 flex items-center justify-center p-4">
                         <div className="app-modal-panel app-card-choice-modal app-galaxy-express-modal w-full max-w-2xl rounded-xl border-2 border-sky-400 bg-slate-950 text-white p-4">
                             <h3 className="text-xl font-bold mb-2">{trans("銀河鉄道の夜", languageMode)}</h3>
-                            <p className="text-sm text-slate-300 mb-3">1枚選んで手札に加え、残りは捨て札に送ります</p>
+                            <p className="text-sm text-slate-300 mb-3">{trans('1枚選んで手札に加え、残りは捨て札に送ります', languageMode)}</p>
                             <div className="grid gap-2 sm:grid-cols-2 max-h-[60vh] overflow-y-auto pr-1">
                                 {galaxyExpressModal.cards.map((card, idx) => (
                                     <button
@@ -17101,7 +17101,7 @@ const App: React.FC = () => {
                                 onClick={() => applyPeacePipeSelection(null)}
                                 className="mt-4 w-full rounded bg-slate-700 hover:bg-slate-600 py-2 font-bold"
                             >
-                                使わない
+                                {trans('使わない', languageMode)}
                             </button>
                         </div>
                     </div>
@@ -17146,11 +17146,11 @@ const App: React.FC = () => {
                                                 Race Result
                                             </div>
                                             <h2 className="mt-3 text-3xl sm:text-5xl font-black tracking-tight text-transparent bg-clip-text bg-gradient-to-r from-cyan-200 via-white to-yellow-200">
-                                                結果発表
+                                                {trans('結果発表', languageMode)}
                                             </h2>
                                             {winner && (
                                                 <p className="mt-2 text-sm sm:text-base text-cyan-100/85">
-                                                    優勝は <span className="font-black text-yellow-300">{winner.name}</span> ・ {winner.score} pt
+                                                    {trans('優勝は', languageMode)} <span className="font-black text-yellow-300">{winner.name}</span> ・ {winner.score} pt
                                                 </p>
                                             )}
                                         </div>

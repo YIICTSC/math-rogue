@@ -143,7 +143,7 @@ const TypingModeSelectionScreen: React.FC<TypingModeSelectionScreenProps> = ({
                         <div className="mt-5 rounded-xl border border-cyan-500/40 bg-cyan-950/30 p-3 text-xs leading-relaxed text-cyan-100">
                             {trans('初心者はホームポジション・アルファベットから、慣れたらローマ字・短文・総合へ進めます。進行に応じて1文字から長文まで段階的に広がります。', languageMode)}
                         </div>
-                        <div className="mt-3 text-xs font-bold text-cyan-300">1-9, QWERTY: 選択 / 0 or Esc: もどる</div>
+                        <div className="mt-3 text-xs font-bold text-cyan-300">1-9, QWERTY: {trans('選択', languageMode)} / 0 or Esc: {trans('もどる', languageMode)}</div>
                     </div>
                 </div>
             </div>
