@@ -6,6 +6,22 @@ import { createServer } from 'vite';
 const EXCLUDED_PATH = /[\\/](mini-games|data)[\\/]|DebugMenuScreen|MiniGame|SchoolDungeonRPG|PokerGame|PaperPlane|MagicEventSimulation/;
 const UI_ATTRIBUTES = new Set(['title', 'aria-label', 'placeholder', 'alt']);
 const KANJI = /[一-龠]/;
+const CONTEXTUAL_MISTRANSLATIONS = [
+  'そらにもどる',
+  'おはら',
+  'たいしゅつかーど',
+  'たいしゅつカード',
+  'いんくかめ',
+  'こものいれれ',
+  'まじわす',
+  'うけやめ',
+  'しゅんいた',
+  'しずくれんぐ',
+  'あとかたづけけ',
+  'いっって',
+  'おきんがたりない',
+  'じゅほのお',
+];
 
 const collectSourceFiles = (directory) => fs.readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
   const target = path.join(directory, entry.name);
@@ -18,6 +34,20 @@ const server = await createServer({ server: { middlewareMode: true }, appType: '
 
 try {
   const { trans } = await server.ssrLoadModule('/src/utils/textUtils.ts');
+
+  for (const file of [
+    'src/data/eventHiraganaExact.ts',
+    'src/data/hiraganaRuntimeExact.ts',
+    'src/data/hiraganaUiExact.ts',
+    'src/utils/textUtils.ts',
+  ]) {
+    const source = fs.readFileSync(file, 'utf8');
+    for (const mistranslation of CONTEXTUAL_MISTRANSLATIONS) {
+      if (source.includes(mistranslation)) {
+        failures.push(`${file} [contextual mistranslation] ${mistranslation}`);
+      }
+    }
+  }
 
   for (const file of collectSourceFiles('src')) {
     if (EXCLUDED_PATH.test(file)) continue;
