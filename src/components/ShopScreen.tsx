@@ -369,7 +369,7 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics =
                                             </div>
                                         )}
                                         <div className="w-16 h-16 bg-gray-800 border-4 border-yellow-600 rounded-full flex items-center justify-center mb-2 shadow-lg p-2.5">
-                                            <RelicIcon id={relic.id} alt={relic.name} />
+                                            <RelicIcon id={relic.id} alt={trans(relic.name, languageMode)} />
                                         </div>
                                         <div className="text-xs font-bold text-center truncate w-full">{trans(relic.name, languageMode)}</div>
                                         <div className="text-[9px] text-gray-400 text-center mb-2 h-8 overflow-hidden leading-tight">{trans(relic.description, languageMode)}</div>

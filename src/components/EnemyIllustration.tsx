@@ -15,9 +15,10 @@ interface EnemyIllustrationProps {
   enemyType?: string;
   phase?: number;
   action?: HighSchoolEnemyAction;
+  altText?: string;
 }
 
-const EnemyIllustration: React.FC<EnemyIllustrationProps> = ({ name, seed, aliases = [], className = '', size = 16, visualTheme = 'elementary', enemyType = 'GENERIC', phase, action = 'idle' }) => {
+const EnemyIllustration: React.FC<EnemyIllustrationProps> = ({ name, seed, aliases = [], className = '', size = 16, visualTheme = 'elementary', enemyType = 'GENERIC', phase, action = 'idle', altText = name }) => {
   if (visualTheme === 'elementary' && isLegacySpriteModeEnabled()) {
     return (
       <div className={`relative ${className}`}>
@@ -64,7 +65,7 @@ const EnemyIllustration: React.FC<EnemyIllustrationProps> = ({ name, seed, alias
       )}
       <img
         src={imagePaths[pathIndex]}
-        alt={name}
+        alt={altText}
         className={`absolute inset-0 w-full h-full object-contain ${imageStatus === 'error' ? 'opacity-0 pointer-events-none' : ''}`}
         onLoad={() => setImageStatus('loading')}
         onError={() => {

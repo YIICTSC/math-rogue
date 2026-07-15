@@ -961,7 +961,7 @@ const TypingBattleScene: React.FC<TypingBattleSceneProps> = ({
                         <div className="relative h-28 w-28 shrink-0 md:h-36 md:w-36" style={{ transform: `translateY(var(--typing-battle-player-offset-y, 0px)) scale(var(--typing-battle-player-scale, 1))` }}>
                             <img
                                 src={playerSpriteSource}
-                                alt="Hero"
+                                alt={trans('主人公', languageMode)}
                                 className={`h-full w-full drop-shadow-lg ${isMagicMalePlayerSprite ? 'object-contain' : 'pixel-art'}`}
                                 style={isMagicMalePlayerSprite ? undefined : { imageRendering: 'pixelated' }}
                             />
@@ -983,7 +983,7 @@ const TypingBattleScene: React.FC<TypingBattleSceneProps> = ({
                                         const counter = getRelicCounter(relic.id);
                                         return (
                                             <div key={relic.id} className="relative flex h-4 w-4 shrink-0 items-center justify-center rounded-full border border-yellow-600 bg-gray-700 p-0.5">
-                                                <RelicIcon id={relic.id} alt={relic.name} />
+                                                <RelicIcon id={relic.id} alt={trans(relic.name, languageMode)} />
                                                 {counter !== undefined && counter > 0 && (
                                                     <div className="absolute -right-1 -top-1 flex h-3.5 w-3.5 items-center justify-center rounded-full border border-white bg-red-600 text-[7px] font-bold text-white">
                                                         {counter}

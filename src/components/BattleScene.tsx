@@ -85,6 +85,7 @@ const POWER_DEFINITIONS: Record<string, { name: string, desc: string }> = {
 // Component for handling floating damage/heal numbers
 export const FloatingTextOverlay: React.FC<{ data: FloatingText | null, languageMode: LanguageMode, offset?: string }> = ({ data, languageMode, offset = "-top-4 -left-4" }) => {
     if (!data) return null;
+    const displayText = trans(data.text, languageMode).replace(/(\d)(Damage)\b/g, '$1 $2');
 
     return (
         <div
@@ -110,7 +111,7 @@ export const FloatingTextOverlay: React.FC<{ data: FloatingText | null, language
             {data.iconType === 'heart' && <Heart size={16} className="mr-1 fill-current" />}
             {data.iconType === 'poison' && <Droplets size={16} className="mr-1 fill-current" />}
             {data.iconType === 'skull' && <Skull size={16} className="mr-1 fill-current" />}
-            {trans(data.text, languageMode)}
+            {displayText}
         </div>
     );
 };
@@ -917,6 +918,28 @@ const BattleScene: React.FC<BattleSceneProps> = ({
 
     const getIntentHoverText = (enemy: Enemy): string => {
         const intent = enemy.nextIntent;
+        const debuffLabels: Record<string, Record<LanguageMode, string>> = {
+            WEAK: { JAPANESE: 'へろへろ', HIRAGANA: 'へろへろ', ENGLISH: 'Weak' },
+            VULNERABLE: { JAPANESE: 'びくびく', HIRAGANA: 'びくびく', ENGLISH: 'Vulnerable' },
+            POISON: { JAPANESE: '粘液', HIRAGANA: 'ねんえき', ENGLISH: 'Poison' },
+            CONFUSED: { JAPANESE: '混乱', HIRAGANA: 'こんらん', ENGLISH: 'Confused' }
+        };
+        const debuffLabel = intent.debuffType
+            ? (debuffLabels[intent.debuffType]?.[languageMode] ?? trans(intent.debuffType, languageMode))
+            : trans('デバフ', languageMode);
+        if (languageMode === 'ENGLISH') {
+            switch (intent.type) {
+                case EnemyIntentType.ATTACK: return `Attack: ${intent.value} damage`;
+                case EnemyIntentType.DEFEND: return `Defend: ${intent.value} Block`;
+                case EnemyIntentType.ATTACK_DEFEND: return `Attack and defend: ${intent.value} damage / ${intent.secondaryValue ?? intent.value} Block`;
+                case EnemyIntentType.ATTACK_DEBUFF: return `Special attack: ${intent.value} damage + ${debuffLabel}${intent.secondaryValue ? ` ${intent.secondaryValue}` : ''}`;
+                case EnemyIntentType.PIERCE_ATTACK: return `Piercing attack: ${intent.value} damage`;
+                case EnemyIntentType.BUFF: return `Buff: Strength +${intent.secondaryValue || 2}`;
+                case EnemyIntentType.DEBUFF: return `Debuff: ${debuffLabel}${intent.secondaryValue ? ` ${intent.secondaryValue}` : ''}`;
+                case EnemyIntentType.SLEEP: return 'Asleep: Does nothing';
+                default: return 'Next action unknown';
+            }
+        }
         switch (intent.type) {
             case EnemyIntentType.ATTACK:
                 return `通常攻撃: ${intent.value}ダメージ`;
@@ -925,13 +948,6 @@ const BattleScene: React.FC<BattleSceneProps> = ({
             case EnemyIntentType.ATTACK_DEFEND:
                 return `攻撃しつつ防御: ${intent.value}ダメージ / ブロック${intent.secondaryValue ?? intent.value}`;
             case EnemyIntentType.ATTACK_DEBUFF: {
-                const debuffLabelMap: Record<string, string> = {
-                    WEAK: 'へろへろ',
-                    VULNERABLE: 'びくびく',
-                    POISON: '粘液(状態異常カード)',
-                    CONFUSED: '混乱'
-                };
-                const debuffLabel = intent.debuffType ? (debuffLabelMap[intent.debuffType] ?? intent.debuffType) : 'デバフ';
                 return `特殊攻撃: ${intent.value}ダメージ + ${debuffLabel}${intent.secondaryValue ? ` ${intent.secondaryValue}` : ''}`;
             }
             case EnemyIntentType.PIERCE_ATTACK:
@@ -939,7 +955,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
             case EnemyIntentType.BUFF:
                 return `強化行動: ムキムキ+${intent.secondaryValue || 2}`;
             case EnemyIntentType.DEBUFF:
-                return `妨害行動: ${intent.debuffType || 'デバフ'}${intent.secondaryValue ? ` ${intent.secondaryValue}` : ''}`;
+                return `妨害行動: ${debuffLabel}${intent.secondaryValue ? ` ${intent.secondaryValue}` : ''}`;
             case EnemyIntentType.SLEEP:
                 return '睡眠中: 何もしない';
             default:
@@ -1205,7 +1221,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                         <div className="magic-transform-tutorial-visual relative aspect-video w-full overflow-hidden bg-slate-900">
                             <img
                                 src={assetUrl('ui/magic/transformation-guide.webp')}
-                                alt={languageMode === 'ENGLISH' ? 'Magical transformation tutorial' : 'マジック編の変身説明'}
+                                alt={trans('マジック編の変身説明', languageMode)}
                                 className="h-full w-full object-cover"
                             />
                             <div className="absolute inset-x-0 bottom-0 bg-gradient-to-t from-slate-950 via-slate-950/75 to-transparent p-4">
@@ -1568,7 +1584,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                         return (
                                             <div key={r.id} className="bg-black/40 p-3 rounded border border-gray-600 flex items-start gap-3">
                                                 <div className="bg-gray-700 p-1.5 rounded-full border border-yellow-600 shrink-0 relative h-10 w-10">
-                                                    <RelicIcon id={r.id} alt={r.name} />
+                                                    <RelicIcon id={r.id} alt={trans(r.name, languageMode)} />
                                                     {counter !== undefined && counter > 0 && (
                                                         <div className="absolute -top-2 -right-2 bg-red-600 text-white text-[10px] w-5 h-5 rounded-full flex items-center justify-center font-bold border border-white shadow-md">
                                                             {counter}
@@ -1784,6 +1800,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                                     <div className="w-full h-full animate-finisher-enemy-focus">
                                                         <EnemyIllustration
                                                             name={enemy.name}
+                                                            altText={enemyName}
                                                             seed={`${enemy.id}-finisher-main`}
                                                             aliases={enemySvgAliases}
                                                             visualTheme={visualTheme}
@@ -1819,6 +1836,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                                             >
                                                                 <EnemyIllustration
                                                                     name={enemy.name}
+                                                                    altText={enemyName}
                                                                     seed={`${enemy.id}-finisher-piece-${idx}`}
                                                                     aliases={enemySvgAliases}
                                                                     visualTheme={visualTheme}
@@ -1836,7 +1854,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                                 )}
                                             </div>
                                         ) : (
-                                            <EnemyIllustration name={enemy.name} seed={enemy.id} aliases={enemySvgAliases} visualTheme={visualTheme} enemyType={enemy.enemyType} phase={enemy.phase} action={highSchoolEnemyAction} className="w-full h-full drop-shadow-lg relative z-10" />
+                                            <EnemyIllustration name={enemy.name} altText={enemyName} seed={enemy.id} aliases={enemySvgAliases} visualTheme={visualTheme} enemyType={enemy.enemyType} phase={enemy.phase} action={highSchoolEnemyAction} className="w-full h-full drop-shadow-lg relative z-10" />
                                         )}
                                         {!isFinisherActive && <FloatingTextOverlay data={enemy.floatingText} languageMode={languageMode} />}
                                         {!isFinisherActive && <VFXOverlay effects={activeEffects} targetId={enemy.id} />}
@@ -1975,7 +1993,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                 <img
                                     key={displayedPlayerSpriteKey}
                                     src={displayedPlayerSpriteSource}
-                                    alt={mobileActiveFamiliar?.name || "Hero"}
+                                    alt={mobileActiveFamiliar ? trans(mobileActiveFamiliar.name, languageMode) : trans('主人公', languageMode)}
                                     className={`relative z-10 w-full h-full transition-all duration-300 ease-out animate-in fade-in zoom-in-95 ${mobileActiveFamiliar ? `object-contain drop-shadow-[0_0_14px_rgba(217,70,239,0.95)] ${mobileFamiliarPresentation?.phase === 'action' ? 'animate-pulse' : ''}` : isMagicMalePlayerSprite ? 'magic-male-battle-sprite object-contain' : 'pixel-art'} ${visualTheme === 'high-school' && !mobileActiveFamiliar ? '-scale-x-100' : ''}`}
                                     style={mobileActiveFamiliar
                                         ? undefined
@@ -2088,7 +2106,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                             const counter = getRelicCounter(r.id);
                                             return (
                                                 <div key={r.id} className="w-4 h-4 md:w-5 md:h-5 bg-gray-700 rounded-full border border-yellow-600 flex items-center justify-center shrink-0 relative group p-0.5">
-                                                    <RelicIcon id={r.id} alt={r.name} />
+                                                    <RelicIcon id={r.id} alt={trans(r.name, languageMode)} />
                                                     {counter !== undefined && counter > 0 && (
                                                         <div className="absolute -top-2 -right-2 bg-red-600 text-white text-[9px] w-4 h-4 rounded-full flex items-center justify-center font-bold border border-white shadow-md z-10 pointer-events-none scale-125">
                                                             {counter}
@@ -2606,7 +2624,7 @@ const FinisherArtPiece: React.FC<{ token: string; seed: string; languageMode: La
                 <div className="absolute inset-0 bg-[linear-gradient(115deg,transparent_0%,rgba(255,255,255,0.12)_32%,rgba(236,72,153,0.3)_52%,transparent_74%)]" />
                 <img
                     src={assetUrl(`sprites/high-school/familiars-action/${familiarImageIndex}.webp`)}
-                    alt={card.familiarSummon?.name || card.name}
+                    alt={trans(card.familiarSummon?.name || card.name, languageMode)}
                     className="absolute left-1/2 top-1/2 h-[150%] w-[150%] -translate-x-1/2 -translate-y-1/2 object-contain drop-shadow-[0_0_24px_rgba(217,70,239,0.95)]"
                 />
             </div>
@@ -2625,7 +2643,7 @@ const FinisherArtPiece: React.FC<{ token: string; seed: string; languageMode: La
         return (
             <img
                 src={assetUrl(`sprites/magic/rule-cards/${heroId}/${index}.webp`)}
-                alt={card.name}
+                alt={trans(card.name, languageMode)}
                 className={imgClass}
             />
         );
@@ -2636,7 +2654,7 @@ const FinisherArtPiece: React.FC<{ token: string; seed: string; languageMode: La
         return (
             <img
                 src={assetUrl(`sprites/magic/basic-cards/${heroId}/${art}.webp`)}
-                alt={card.name}
+                alt={trans(card.name, languageMode)}
                 className={imgClass}
             />
         );
@@ -2647,7 +2665,7 @@ const FinisherArtPiece: React.FC<{ token: string; seed: string; languageMode: La
         return (
             <img
                 src={assetUrl(`sprites/magic/cards/${index}.webp`)}
-                alt={card.name}
+                alt={trans(card.name, languageMode)}
                 className={imgClass}
             />
         );
@@ -2659,7 +2677,7 @@ const FinisherArtPiece: React.FC<{ token: string; seed: string; languageMode: La
         return (
             <img
                 src={candidates[imageIndex]}
-                alt={cardName}
+                alt={trans(cardName, languageMode)}
                 className={imgClass}
                 onError={() => {
                     const next = imageIndex + 1;

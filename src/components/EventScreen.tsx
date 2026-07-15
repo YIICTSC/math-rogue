@@ -317,7 +317,7 @@ const EventScreen: React.FC<EventScreenProps> = ({ title, description, options, 
                 {image && (
                     <img
                         src={image}
-                        alt={languageMode === 'ENGLISH' ? 'Hero' : '主人公'}
+                        alt={trans('主人公', languageMode)}
                         className="absolute left-1 bottom-0 h-[50%] sm:h-[58%] md:h-[64%] object-contain drop-shadow-[0_6px_12px_rgba(0,0,0,0.8)]"
                     />
                 )}

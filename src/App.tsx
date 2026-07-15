@@ -3229,7 +3229,7 @@ const App: React.FC = () => {
         return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
     };
 
-    const isDailyLimitReached = dailyPlaySeconds >= PLAY_LIMIT_SECONDS;
+    const isDailyLimitReached = !isDebugHpOne && dailyPlaySeconds >= PLAY_LIMIT_SECONDS;
 
     const VICTORY_GOLD = 25;
 
@@ -3289,6 +3289,7 @@ const App: React.FC = () => {
             }
 
             if (
+                !isDebugHpOne &&
                 gameState.screen !== GameScreen.START_MENU &&
                 gameState.screen !== GameScreen.PROBLEM_CHALLENGE &&
                 gameState.screen !== GameScreen.DEBUG_MENU &&
@@ -3328,7 +3329,7 @@ const App: React.FC = () => {
             }
         }, 1000);
         return () => clearInterval(interval);
-    }, [gameState.screen, PLAY_LIMIT_SECONDS, gameState.challengeMode, isUiPreviewMode]);
+    }, [gameState.screen, PLAY_LIMIT_SECONDS, gameState.challengeMode, isDebugHpOne, isUiPreviewMode]);
 
     useEffect(() => {
         if (isUiPreviewMode) return;
@@ -9796,12 +9797,16 @@ const App: React.FC = () => {
                     if (intent.type === EnemyIntentType.DEFEND || intent.type === EnemyIntentType.ATTACK_DEFEND) {
                         e.block += intent.value;
                         if (intent.type === EnemyIntentType.ATTACK_DEFEND && intent.secondaryValue) e.block = intent.secondaryValue;
-                        newLogs.push(`${trans(e.name, languageMode)}は防御を固めた (ブロック${e.block})`);
+                        newLogs.push(languageMode === 'ENGLISH'
+                            ? `${trans(e.name, languageMode)} fortified its defense (Block ${e.block})`
+                            : `${trans(e.name, languageMode)}${languageMode === 'HIRAGANA' ? 'はぼうぎょをかためた' : 'は防御を固めた'} (${trans('ブロック', languageMode)}${e.block})`);
                         nextActiveEffects.push({ id: `vfx-eblk-self-${Date.now()}`, type: 'BLOCK', targetId: e.id });
                     }
                     if (intent.type === EnemyIntentType.BUFF) {
                         e.strength += (intent.secondaryValue || 2);
-                        newLogs.push(`${trans(e.name, languageMode)}は力を溜めた (ムキムキ+${intent.secondaryValue || 2})`);
+                        newLogs.push(languageMode === 'ENGLISH'
+                            ? `${trans(e.name, languageMode)} gathered strength (Strength +${intent.secondaryValue || 2})`
+                            : `${trans(e.name, languageMode)}${languageMode === 'HIRAGANA' ? 'はちからをためた' : 'は力を溜めた'} (${trans('ムキムキ', languageMode)}+${intent.secondaryValue || 2})`);
                         nextActiveEffects.push({ id: `vfx-ebuff-${Date.now()}`, type: 'BUFF', targetId: e.id });
                     }
                     if (intent.type === EnemyIntentType.DEBUFF || intent.type === EnemyIntentType.ATTACK_DEBUFF) {
@@ -14780,7 +14785,7 @@ const App: React.FC = () => {
                             <p className="text-gray-300 mb-8 leading-relaxed font-bold">
                                 {trans("本日の冒険時間は終了しました。", languageMode)}<br />
                                 {trans("勉強の時間です！", languageMode)}<br />
-                                <span className="text-emerald-400">{trans("「問題チャレンジ」", languageMode)}</span>{trans("で脳を鍛えましょう。", languageMode)}
+                                <span className="text-emerald-400">{trans("「問題チャレンジ」", languageMode)}</span>{languageMode === 'ENGLISH' ? ' ' : ''}{trans("で脳を鍛えましょう。", languageMode)}
                             </p>
                             <button
                                 onClick={() => setShowTimeLimitModal(false)}

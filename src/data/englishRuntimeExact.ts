@@ -1,4 +1,5 @@
 export const ENGLISH_RUNTIME_EXACT: Record<string, string> = {
+  'マジック編の変身説明': 'Magical transformation tutorial',
   "新しい解放要素": "NEW UNLOCKS",
   "新しい主人公が使えるようになりました": "New protagonists are now available.",
   "新しいミニゲームが解禁されました": "New mini games are now available.",

@@ -401,7 +401,7 @@ const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, 
                                     className={`bg-black/60 border ${isUnlocked ? 'border-gray-600 hover:border-yellow-500' : 'border-gray-800'} p-4 rounded flex flex-col items-center text-center cursor-pointer transition-colors aspect-square justify-center`}
                                 >
                                     <div className={`w-12 h-12 bg-gray-800 rounded-full border border-yellow-600 flex items-center justify-center mb-2 p-1.5 ${!isUnlocked ? 'grayscale opacity-30' : ''}`}>
-                                        <RelicIcon id={relic.id} alt={relic.name} />
+                                        <RelicIcon id={relic.id} alt={trans(relic.name, languageMode)} />
                                     </div>
                                     <div className={`font-bold text-xs mb-1 truncate w-full ${isUnlocked ? 'text-yellow-200' : 'text-gray-600'}`}>{isUnlocked ? trans(relic.name, languageMode) : '???'}</div>
                                 </div>

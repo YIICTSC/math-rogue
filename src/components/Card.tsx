@@ -309,7 +309,7 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled, onInspect, languag
           <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(248,250,252,0.18),transparent_28%,rgba(239,68,68,0.22)_52%,transparent_70%)]" />
           <img
             src={assetUrl(`sprites/high-school/familiars-action/${card.familiarSummon.imageIndex}.webp`)}
-            alt={card.familiarSummon.name}
+            alt={trans(card.familiarSummon.name, languageMode)}
             className="absolute left-1/2 top-[18%] h-[205%] w-[205%] -translate-x-1/2 -translate-y-1/2 object-contain opacity-100 drop-shadow-[0_0_12px_rgba(244,114,182,0.85)]"
             style={{ transform: 'translate(-50%, -50%)' }}
           />

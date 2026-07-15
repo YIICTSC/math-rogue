@@ -6371,6 +6371,8 @@ const ENGLISH_TEXT_PATTERNS: Array<[RegExp, string]> = [
     [/(\d+)G獲得/g, "Gain $1G"],
     [/最大HP\+(\d+)/g, "Max HP +$1"],
     [/ムキムキ\+(\d+)/g, "Strength +$1"],
+    [/ブロック(\d+)を得る/g, "Gain $1 Block"],
+    [/ブロック(\d+)獲得/g, "Gain $1 Block"],
     [/ブロック(\d+)/g, "Block $1"],
     [/ドクドク(\d+)/g, "Poison $1"],
     [/へろへろ(\d+)/g, "Weak $1"],
@@ -8823,8 +8825,27 @@ const EVENT_HIRAGANA_PHRASES: Record<string, string> = {
 
 const buildHiraganaEventFallback = (text: string): string => {
     if (EVENT_HIRAGANA_EXACT[text]) return EVENT_HIRAGANA_EXACT[text];
-    const normalizedText = text.replace(/<br\s*\/?>/gi, '<br>');
+    const normalizedText = text.replace(/\r?\n/g, '<br>').replace(/<br\s*\/?>/gi, '<br>');
+    const forgottenCard = normalizedText.match(/^校庭の隅に、誰かが落としたと思われるカード「(.+)」が落ちている。\nこれは以前ここを冒険した生徒の持ち物かもしれない\.\.\.。$/);
+    if (forgottenCard) {
+        return `こうていのすみに、だれかがおとしたとおもわれるカード「${forgottenCard[1]}」がおちている。\nこれはいぜんここをぼうけんしたせいとのもちものかもしれない……。`;
+    }
     if (EVENT_HIRAGANA_EXACT[normalizedText]) return EVENT_HIRAGANA_EXACT[normalizedText];
+
+    const romanceProgress = normalizedText.match(/^好感度 (\d+)\/100 \/ 第(\d+)段階 \/ (.+)$/);
+    if (romanceProgress) {
+        return `こうかんど ${romanceProgress[1]}/100 / だい${romanceProgress[2]}だんかい / ${trans(romanceProgress[3], 'HIRAGANA')}`;
+    }
+    const romanceComplete = normalizedText.match(/^好感度 (\d+)\/100 \/ 5段階完了$/);
+    if (romanceComplete) return `こうかんど ${romanceComplete[1]}/100 / 5だんかいかんりょう`;
+    const romanceLocked = normalizedText.match(/^好感度 (\d+)\/100 \/ 第(\d+)章で第(\d+)段階解放$/);
+    if (romanceLocked) return `こうかんど ${romanceLocked[1]}/100 / だい${romanceLocked[2]}しょうでだい${romanceLocked[3]}だんかいかいほう`;
+    const affectionGain = normalizedText.match(/^(.+?) 好感度\+(\d+)$/);
+    if (affectionGain) return `${trans(affectionGain[1], 'HIRAGANA')} こうかんど+${affectionGain[2]}`;
+    const friendshipProgress = normalizedText.match(/^絆 (\d+)\/100 \/ (.+)$/);
+    if (friendshipProgress) return `きずな ${friendshipProgress[1]}/100 / ${trans(friendshipProgress[2], 'HIRAGANA')}`;
+    const relationshipLabel = normalizedText.match(/^(.+)（(.+)）$/);
+    if (relationshipLabel) return `${trans(relationshipLabel[1], 'HIRAGANA')}（${trans(relationshipLabel[2], 'HIRAGANA')}）`;
     let result = normalizedText;
     Object.entries({ ...EVENT_HIRAGANA_EXACT, ...HIRAGANA_RUNTIME_EXACT })
         .sort(([a], [b]) => b.length - a.length)
@@ -10321,6 +10342,14 @@ Object.assign(ENGLISH_DICTIONARY, {
 
 const translateHiraganaDynamicUi = (text: string): string | null => {
     const patterns: Array<[RegExp, (...matches: string[]) => string]> = [
+        [/^通常攻撃: (\d+)ダメージ$/, (_, damage) => `つうじょうこうげき: ${damage}ダメージ`],
+        [/^防御: ブロック(\d+)$/, (_, block) => `ぼうぎょ: ブロック${block}`],
+        [/^攻撃しつつ防御: (\d+)ダメージ \/ ブロック(\d+)$/, (_, damage, block) => `こうげきしつつぼうぎょ: ${damage}ダメージ / ブロック${block}`],
+        [/^特殊攻撃: (\d+)ダメージ \+ 粘液\(状態異常カード\)(?: (\d+))?$/, (_, damage, amount = '') => `とくしゅこうげき: ${damage}ダメージ + ねんえき(じょうたいいじょうカード)${amount ? ` ${amount}` : ''}`],
+        [/^特殊攻撃: 防御貫通で(\d+)ダメージ$/, (_, damage) => `とくしゅこうげき: ぼうぎょをむしして${damage}ダメージ`],
+        [/^敵HP x(\d+\.\d+)$/, (_, multiplier) => `てきHP x${multiplier}`],
+        [/^休憩時理科室 (\d+)%$/, (_, chance) => `きゅうけいじ りかしつ ${chance}%`],
+        [/^削除費 \+(\d+)G$/, (_, cost) => `さくじょひ +${cost}G`],
         [/^(.+)をカード帳から持ってきた。$/, (_, name) => `${name}をカードちょうからもってきた。`],
         [/^天気予報：(\d+)枚を山札に戻し、(\d+)枚を捨て札に送った$/, (_, keep, discard) => `てんきよほう：${keep}まいをやまふだにもどし、${discard}まいをすてふだにおくった`],
         [/^銀河鉄道の夜：(.+)を手札に加え、残り(\d+)枚を捨て札に送った$/, (_, name, discard) => `ぎんがてつどうのよる：${name}をてふだにくわえ、のこり${discard}まいをすてふだにおくった`],
@@ -10373,7 +10402,7 @@ export const trans = (text: string, mode: LanguageMode): string => {
             .forEach(key => {
                 if (result.includes(key)) {
                     const escapedKey = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-                    const regex = new RegExp(escapedKey.replace(/[。\.]$/, '[。\\.]?'), 'g');
+                    const regex = new RegExp(escapedKey, 'g');
                     result = result.replace(regex, ENGLISH_CARD_NAME_DICTIONARY[key] || ENGLISH_GENERATED_CARD_NAME_DICTIONARY[key] || ENGLISH_ITEM_NAME_DICTIONARY[key] || ENGLISH_ENEMY_NAME_DICTIONARY[key] || ENGLISH_DICTIONARY[key]);
                 }
             });
@@ -10400,8 +10429,7 @@ export const trans = (text: string, mode: LanguageMode): string => {
         if (result.includes(key)) {
             // キーワードに含まれる正規表現の特殊文字をエスケープする
             const escapedKey = key.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-            // 文末の句点（。）とピリオド（.）のゆらぎを吸収するための正規表現
-            const regex = new RegExp(escapedKey.replace(/[。\.]$/, '[。\\.]?'), 'g');
+            const regex = new RegExp(escapedKey, 'g');
             result = result.replace(regex, DICTIONARY[key]);
         }
     });
@@ -10412,8 +10440,12 @@ export const trans = (text: string, mode: LanguageMode): string => {
     result = result.replace(/HP/g, "HP");
     result = result.replace(/E(\d+)/g, "エナジー$1");
 
-    // 句読点の統一
+    // 小数点を保護してから句読点を統一する。
+    result = result.replace(/(\d)\.(\d)/g, "$1__DECIMAL_DOT__$2");
+    result = result.replace(/\.\.\./g, "__ELLIPSIS__");
     result = result.replace(/\./g, "。");
+    result = result.replace(/__DECIMAL_DOT__/g, ".");
+    result = result.replace(/__ELLIPSIS__/g, "……");
     result = result.replace(/,/g, "、");
 
     return result;
