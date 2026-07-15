@@ -6356,6 +6356,19 @@ const buildEnglishTokenPhrase = (text: string): string | null => {
 };
 
 const ENGLISH_TEXT_PATTERNS: Array<[RegExp, string]> = [
+    [/^召喚効果：次のターン開始時に(.+)枚ドロー$/, 'Summon Effect: Draw $1 card(s) at the start of the next turn.'],
+    [/^鏡：コピーしたが、自分がびくびく(.+)$/, 'Mirror: Copied the card, but gained $1 Vulnerable.'],
+    [/^キラキラの粉：敵をへろへろ(.+)にした$/, 'Sparkling Powder: Applied $1 Weak to the enemy.'],
+    [/^飴玉の嵐：敵全体へろへろ(.+)$/, 'Candy Storm: Applied $1 Weak to all enemies.'],
+    [/^(.+)\n最大HP\+(.+)。$/, '$1\nMax HP +$2.'],
+    [/^(.+)がパートナーになった！$/, '$1 became your partner!'],
+    [/^新しい種「(.+)」を手に入れた！$/, 'Obtained a new Seed: "$1"!'],
+    [/^パニック：「(.+)」が0コストになった$/, 'Panic: "$1" now costs 0.'],
+    [/^電脳世界へのダイブ：「(.+)」を0コスト化$/, 'Dive into Cyberspace: "$1" now costs 0.'],
+    [/^お姫様の呼び声：山札から「(.+)」を引き寄せた$/, 'Princess Call: Drew "$1" from the draw pile.'],
+    [/^山札から「(.+)」を0コストで引き寄せた！$/, 'Drew "$1" from the draw pile at 0 cost!'],
+    [/^虫かごから「(.+)」が飛び出した！$/, '"$1" jumped out of the bug cage!'],
+    [/^お年玉で「(.+)」のコストが0になった！$/, 'New Year Gift: "$1" now costs 0!'],
     [/第\s*(\d+)\s*章/g, "Act $1"],
     [/(\d+)\s*学期/g, "Term $1"],
     [/小\s*(\d+)/g, "Grade $1"],
@@ -10389,6 +10402,13 @@ export const trans = (text: string, mode: LanguageMode): string => {
         if (ENGLISH_GENERATED_CARD_NAME_DICTIONARY[text]) return ENGLISH_GENERATED_CARD_NAME_DICTIONARY[text];
         if (ENGLISH_ITEM_NAME_DICTIONARY[text]) return ENGLISH_ITEM_NAME_DICTIONARY[text];
         if (ENGLISH_ENEMY_NAME_DICTIONARY[text]) return ENGLISH_ENEMY_NAME_DICTIONARY[text];
+
+        const newSeed = text.match(/^新しい種「(.+)」を手に入れた！$/);
+        if (newSeed) return `Obtained a new Seed: "${newSeed[1]}"!`;
+        const cyberspaceDive = text.match(/^電脳世界へのダイブ：「(.+)」を0コスト化$/);
+        if (cyberspaceDive) return `Dive into Cyberspace: "${cyberspaceDive[1]}" now costs 0.`;
+        const princessCall = text.match(/^お姫様の呼び声：山札から「(.+)」を引き寄せた$/);
+        if (princessCall) return `Princess Call: Drew "${princessCall[1]}" from the draw pile.`;
 
         const eventTitleTranslation = translateEnglishEventTitle(text);
         if (eventTitleTranslation) return eventTitleTranslation;

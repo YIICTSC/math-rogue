@@ -6,6 +6,7 @@ import { createServer } from 'vite';
 const EXCLUDED_PATH = /[\\/](mini-games|data)[\\/]|DebugMenuScreen|MiniGame|SchoolDungeonRPG|PokerGame|PaperPlane|MagicEventSimulation|CreditRoll/;
 const UI_ATTRIBUTES = new Set(['title', 'aria-label', 'placeholder', 'alt']);
 const JAPANESE = /[ぁ-んァ-ヶ一-龠々〆ヵヶ]/;
+const GENERIC_FALLBACK = /^(Choose Option|Event Details|School Foe|Choose a fitting event action|You handled the (?:event|situation|moment).*)$/;
 
 const collectSourceFiles = (directory) => fs.readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
   const target = path.join(directory, entry.name);
@@ -56,11 +57,13 @@ try {
         if (ts.isStringLiteral(argument) || ts.isNoSubstitutionTemplateLiteral(argument)) {
           const output = translator(argument.text, 'ENGLISH');
           if (JAPANESE.test(output)) report(node, 'Japanese remains', argument.text, output);
+          if (GENERIC_FALLBACK.test(output.trim())) report(node, 'generic fallback translation', argument.text, output);
         } else if (ts.isTemplateExpression(argument)) {
           let sample = argument.head.text;
           for (const span of argument.templateSpans) sample += `1${span.literal.text}`;
           const output = translator(sample, 'ENGLISH');
           if (JAPANESE.test(output)) report(node, 'dynamic Japanese remains', sample, output);
+          if (GENERIC_FALLBACK.test(output.trim())) report(node, 'dynamic generic fallback translation', sample, output);
         }
       }
       if (ts.isJsxText(node) && JAPANESE.test(node.text.trim()) && !isExplicitNonEnglishBranch(node)) report(node, 'raw JSX text', node.text.trim());
