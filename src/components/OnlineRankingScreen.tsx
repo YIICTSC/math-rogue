@@ -3,36 +3,14 @@ import { ArrowLeft, ExternalLink, Globe2, RefreshCw, ShieldCheck, Trophy } from 
 import { LanguageMode } from '../types';
 import { onlineRankingService, OnlineLeaderboardEntry, OnlinePeriodType, OnlineRankingDefinition } from '../services/onlineRankingService';
 import { trans } from '../utils/textUtils';
+import { getOnlineRankingCategory, ONLINE_RANKING_CATEGORIES, ONLINE_RANKING_FALLBACKS } from '../data/onlineRankingDefinitions';
 
 interface Props { onBack: () => void; onLocal: () => void; onRequestName: () => void; languageMode: LanguageMode; }
 
-const fallbackRankings: OnlineRankingDefinition[] = [
-  { id: 'learning_correct', label: '今週の正解王', unit: '問', accent: 'cyan', description: '期間内に正解した問題数' },
-  { id: 'learning_accuracy', label: '正答率マスター', unit: '%', accent: 'green', description: '10問以上に挑戦したときの正答率' },
-  { id: 'learning_retry', label: '苦手克服王', unit: '問', accent: 'violet', description: '間違えた後に正解できた問題数' },
-  { id: 'assignment_complete', label: '課題達成王', unit: '件', accent: 'amber', description: '達成した課題数' },
-  { id: 'adventure_score', label: '冒険王', unit: 'pt', accent: 'rose', description: '1人での冒険の最高スコア' },
-  { id: 'coop_adventure_score', label: '協力プレイ冒険', unit: 'pt', accent: 'lime', description: '登録済みの仲間と協力して記録したチーム最高スコア', scope: 'team' },
-  { id: 'card_standard_power', label: '課題カード最強王', unit: '威力', accent: 'lime', description: '標準条件の最大威力' },
-  { id: 'card_efficiency', label: 'カードコスパ王', unit: '威力/EN', accent: 'orange', description: 'エナジー1あたりの最大標準威力' },
-  { id: 'card_collection', label: 'カードコレクター', unit: '種', accent: 'blue', description: 'カードの収集数' },
-  { id: 'card_collection_rate', label: 'カード収集率王', unit: '%', accent: 'teal', description: '通常カード全体に対する収集率' },
-  { id: 'card_actual_damage', label: '実戦最大一撃王', unit: 'ダメージ', accent: 'red', description: '実戦で記録した1回の最大ダメージ' },
-  { id: 'poker_best_hand', label: '放課後ポーカー', unit: '点', accent: 'gold', description: '放課後ポーカーの最高ハンド得点' },
-  { id: 'survivor_score', label: '校庭サバイバー', unit: 'pt', accent: 'magenta', description: '校庭サバイバーの最高スコア' },
-  { id: 'dungeon_score', label: '風来の小学生', unit: 'pt', accent: 'indigo', description: '風来の小学生の最高スコア' },
-  { id: 'dungeon2_score', label: '風来の小学生2', unit: 'pt', accent: 'navy', description: '風来の小学生2の最高スコア' },
-  { id: 'kocho_score', label: '校長対決', unit: 'pt', accent: 'purple', description: '校長対決・エンドレスの最高到達スコア' },
-  { id: 'paper_plane_score', label: '紙飛行機バトル', unit: 'pt', accent: 'sky', description: '紙飛行機バトルの最高スコア' },
-  { id: 'go_home_score', label: '帰宅ダッシュ', unit: 'pt', accent: 'yellow', description: '帰宅ダッシュの最高スコア' },
-  { id: 'growth_clear_count', label: '冒険踏破王', unit: '回', accent: 'emerald', description: '学習ローグの累計クリア回数' },
-  { id: 'growth_mastered_modes', label: '学びの達人王', unit: '分野', accent: 'mint', description: 'マスターした学習分野の数' },
-];
-
 const OnlineRankingScreen: React.FC<Props> = ({ onBack, onLocal, onRequestName, languageMode }) => {
-  const [rankingId, setRankingId] = useState(fallbackRankings[0].id);
+  const [rankingId, setRankingId] = useState(ONLINE_RANKING_FALLBACKS[0].id);
   const [periodType, setPeriodType] = useState<OnlinePeriodType>('weekly');
-  const [rankings, setRankings] = useState(fallbackRankings);
+  const [rankings, setRankings] = useState<OnlineRankingDefinition[]>(ONLINE_RANKING_FALLBACKS);
   const [entries, setEntries] = useState<OnlineLeaderboardEntry[]>([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
@@ -52,13 +30,37 @@ const OnlineRankingScreen: React.FC<Props> = ({ onBack, onLocal, onRequestName, 
 
   useEffect(() => { void load(Boolean(profile)); }, [rankingId, periodType]);
   const active = rankings.find((ranking) => ranking.id === rankingId) || rankings[0];
+  const activeCategory = getOnlineRankingCategory(rankingId);
+  const categoryRankings = activeCategory.rankingIds
+    .map((id) => rankings.find((ranking) => ranking.id === id))
+    .filter((ranking): ranking is OnlineRankingDefinition => !!ranking);
+
+  const selectRanking = (nextRankingId: string) => {
+    setRankingId(nextRankingId);
+    if (nextRankingId.startsWith('growth_')) setPeriodType('all');
+  };
+
+  const selectCategory = (categoryId: string) => {
+    const category = ONLINE_RANKING_CATEGORIES.find((item) => item.id === categoryId);
+    const firstAvailable = category?.rankingIds.find((id) => rankings.some((ranking) => ranking.id === id));
+    if (firstAvailable) selectRanking(firstAvailable);
+  };
 
   return <div className="flex h-full w-full flex-col bg-slate-950 text-white">
-    <header className="flex shrink-0 flex-col gap-3 border-b-2 border-lime-400/40 bg-black p-4 md:flex-row md:items-center">
-      <div className="flex items-center gap-2"><Globe2 className="text-lime-300" /><div><div className="text-[10px] font-black tracking-[.25em] text-lime-300">ONLINE</div><h2 className="text-xl font-black">{trans('オンラインランキング', languageMode)}</h2></div></div>
-      <div className="flex flex-1 gap-2 overflow-x-auto md:justify-center">{rankings.map((ranking) => <button key={ranking.id} onClick={() => { setRankingId(ranking.id); if (ranking.id.startsWith('growth_')) setPeriodType('all'); }} className={`whitespace-nowrap rounded-lg px-3 py-2 text-xs font-black ${rankingId === ranking.id ? 'bg-lime-300 text-slate-950' : 'bg-slate-800 text-slate-300'}`}>{trans(ranking.label, languageMode)}</button>)}</div>
-      <div className="flex gap-2">{profile && <button onClick={onRequestName} className="rounded-lg border border-cyan-600 bg-cyan-950 px-3 py-2 text-xs font-black text-cyan-100">{trans('端末連携', languageMode)}</button>}<button onClick={onLocal} className="rounded-lg border border-slate-600 bg-slate-800 px-3 py-2 text-xs font-black">{trans('端末記録', languageMode)}</button><button onClick={onBack} className="flex items-center gap-1 rounded-lg border border-slate-600 bg-slate-800 px-3 py-2 text-xs font-black"><ArrowLeft size={15} />{trans('戻る', languageMode)}</button></div>
+    <header className="shrink-0 border-b-2 border-lime-400/40 bg-black">
+      <div className="flex items-center gap-3 px-3 py-3 sm:px-4">
+        <div className="flex min-w-0 items-center gap-2"><Globe2 className="shrink-0 text-lime-300" /><div className="min-w-0"><div className="text-[9px] font-black tracking-[.25em] text-lime-300">ONLINE</div><h2 className="truncate text-base font-black sm:text-xl">{trans('オンラインランキング', languageMode)}</h2></div></div>
+        <div className="ml-auto flex shrink-0 gap-1.5 sm:gap-2">{profile && <button onClick={onRequestName} className="rounded-lg border border-cyan-600 bg-cyan-950 px-2 py-2 text-[10px] font-black text-cyan-100 sm:px-3 sm:text-xs">{trans('端末連携', languageMode)}</button>}<button onClick={onLocal} className="rounded-lg border border-slate-600 bg-slate-800 px-2 py-2 text-[10px] font-black sm:px-3 sm:text-xs">{trans('端末記録', languageMode)}</button><button onClick={onBack} className="flex items-center gap-1 rounded-lg border border-slate-600 bg-slate-800 px-2 py-2 text-[10px] font-black sm:px-3 sm:text-xs"><ArrowLeft size={15} />{trans('戻る', languageMode)}</button></div>
+      </div>
+      <nav className="flex gap-2 overflow-x-auto border-t border-slate-800 px-3 py-2 custom-scrollbar sm:px-4" aria-label={trans('ランキングカテゴリ', languageMode)}>
+        {ONLINE_RANKING_CATEGORIES.map((category) => <button key={category.id} onClick={() => selectCategory(category.id)} className={`min-w-[116px] rounded-xl border px-3 py-2 text-left transition-colors ${activeCategory.id === category.id ? 'border-lime-300 bg-lime-300 text-slate-950' : 'border-slate-700 bg-slate-900 text-slate-200 hover:border-slate-500'}`}><small className={`block text-[8px] font-black tracking-[.18em] ${activeCategory.id === category.id ? 'text-slate-700' : 'text-slate-500'}`}>{category.caption}</small><strong className="mt-0.5 block whitespace-nowrap text-xs">{trans(category.label, languageMode)}</strong></button>)}
+      </nav>
     </header>
+
+    <nav className="flex shrink-0 items-center gap-2 overflow-x-auto border-b border-slate-700 bg-slate-900 px-3 py-2 custom-scrollbar sm:px-4" aria-label={trans('詳細ランキング', languageMode)}>
+      <span className="shrink-0 text-[9px] font-black tracking-widest text-slate-500">DETAIL</span>
+      {categoryRankings.map((ranking) => <button key={ranking.id} onClick={() => selectRanking(ranking.id)} className={`whitespace-nowrap rounded-lg px-3 py-2 text-xs font-black ${rankingId === ranking.id ? 'bg-cyan-300 text-slate-950' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'}`}>{trans(ranking.label, languageMode)}</button>)}
+    </nav>
 
     <div className="flex shrink-0 items-center justify-between gap-3 border-b border-slate-800 bg-slate-900/80 px-4 py-3">
       <div className="flex gap-1">{(['daily','weekly','monthly','season','all'] as OnlinePeriodType[]).map((period) => <button key={period} disabled={rankingId.startsWith('growth_') && period !== 'all'} onClick={() => setPeriodType(period)} className={`rounded-full px-3 py-1.5 text-xs font-black disabled:opacity-30 ${periodType === period ? 'bg-cyan-300 text-slate-950' : 'text-slate-400'}`}>{trans(period === 'daily' ? '今日' : period === 'weekly' ? '今週' : period === 'monthly' ? '今月' : period === 'season' ? 'シーズン' : '歴代', languageMode)}</button>)}</div>
