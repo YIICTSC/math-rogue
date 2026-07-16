@@ -83,9 +83,9 @@ import { assetPreloadService } from './services/assetPreloadService';
 import { setLegacySpriteModeEnabled } from './utils/legacySpriteMode';
 import { generateEnemyName } from './services/geminiService';
 import { generateDungeonMap } from './services/mapGenerator';
-import { ONLINE_RANKING_DATA_CHANGED_EVENT, parseTransferData, serializeTransferData, storageService } from './services/storageService';
+import { parseTransferData, serializeTransferData, storageService } from './services/storageService';
 import { onlineRankingService, type OnlineRankingProfile, type OnlineReward } from './services/onlineRankingService';
-import { learningManagementService } from './services/learningManagementService';
+import { managementPortalService, type ManagementProfile } from './services/managementPortalService';
 import { generateEvent, generateLegacyEvent } from './services/eventService';
 import { createAssignmentRewardCard, createHolographicCard, getUpgradedCard, synthesizeCards } from './utils/cardUtils';
 import { AZUKI_BOSS_FLAG, AZUKI_BOSS_NAME, AZUKI_ENCOUNTER_FLAG, AZUKI_REWARD_CARDS } from './data/azukiBoss';
@@ -99,7 +99,7 @@ import { getOnlineRankingLabel, getOnlineRankingPeriodLabel } from './data/onlin
 import { formatProblemUnitName } from './utils/problemUnitName';
 import { getDifficultyConfig } from './config/difficulty';
 import { CARD_ERASER_TEMPLATE_ID, CARD_ERASER_NAME, eraseCardEffect, getErasableEffectOptions } from './utils/cardEraser';
-import { RotateCcw, Home, BookOpen, Coins, Trophy, HelpCircle, Infinity, Play, ScrollText, Plus, Minus, X as MultiplyIcon, Divide, Shuffle, Send, Swords, Terminal, Club, Zap, Gamepad2, Brain, Languages, Music, Book, MessageSquare, GraduationCap, Clock, AlertTriangle, TimerOff, X, Check, FlaskConical, Globe, MapPin, ChevronDown, ArrowLeft, Sparkles, Flag, Keyboard, Users, Settings, ClipboardList, FileText, Monitor, Link2 } from 'lucide-react';
+import { RotateCcw, Home, BookOpen, Coins, Trophy, HelpCircle, Infinity, Play, ScrollText, Plus, Minus, X as MultiplyIcon, Divide, Shuffle, Send, Swords, Terminal, Club, Zap, Gamepad2, Brain, Languages, Music, Book, MessageSquare, GraduationCap, Clock, AlertTriangle, TimerOff, X, Check, FlaskConical, Globe, MapPin, ChevronDown, ArrowLeft, Sparkles, Flag, Keyboard, Users, Settings, ClipboardList, FileText, Monitor } from 'lucide-react';
 import { applyAdditionalCardLogic } from './services/cardEffectLogic';
 import { p2pService } from './services/p2pService';
 import { TypingLessonId } from './data/typingLessonConfig';
@@ -1383,7 +1383,6 @@ const App: React.FC = () => {
     const [debugMenuStartMathCorrect, setDebugMenuStartMathCorrect] = useState<number>(0);
     const [showDebugLog, setShowDebugLog] = useState<boolean>(false);
     const [showDataTransferModal, setShowDataTransferModal] = useState<boolean>(false);
-    const [showAssignmentInbox, setShowAssignmentInbox] = useState<boolean>(false);
     const [modeCorrectCounts, setModeCorrectCounts] = useState<Record<string, number>>(() => storageService.getModeCorrectCounts());
     const [studentGradeMode, setStudentGradeMode] = useState<LanguageMode>(() => storageService.getStudentProfile().dailyAssignmentLanguageMode || getInitialStudentGradeMode(languageMode));
     const [studentProfile, setStudentProfile] = useState<StudentProfile>(() => {
@@ -1402,6 +1401,8 @@ const App: React.FC = () => {
     const [onlineNamePromptDismissed, setOnlineNamePromptDismissed] = useState(false);
     const [rankingRewardNotices, setRankingRewardNotices] = useState<OnlineReward[]>([]);
     const rankingRewardCheckedRef = useRef(false);
+    const [managementProfile, setManagementProfile] = useState<ManagementProfile | null>(() => managementPortalService.getProfile());
+    const [showAssignmentInbox, setShowAssignmentInbox] = useState(false);
     const [currentAssignment, setCurrentAssignment] = useState<AssignmentPayload | null>(() => storageService.getCurrentAssignment());
     const [assignmentProgressVersion, setAssignmentProgressVersion] = useState(0);
     const [assignmentProgressNotice, setAssignmentProgressNotice] = useState<{
@@ -1498,46 +1499,9 @@ const App: React.FC = () => {
 
     useEffect(() => {
         if (!onlineRankingProfile) return;
-        const retryOnlineRankingQueue = () => {
-            void onlineRankingService.flushPendingSubmissions()
-                .then(() => onlineRankingService.syncDirtySnapshots())
-                .catch(() => undefined);
-        };
-        const markOnlineRankingDirty = () => onlineRankingService.markSnapshotsDirty();
+        const retryOnlineRankingQueue = () => { void onlineRankingService.flushPendingSubmissions().catch(() => undefined); };
         window.addEventListener('online', retryOnlineRankingQueue);
-        window.addEventListener(ONLINE_RANKING_DATA_CHANGED_EVENT, markOnlineRankingDirty);
-        return () => {
-            window.removeEventListener('online', retryOnlineRankingQueue);
-            window.removeEventListener(ONLINE_RANKING_DATA_CHANGED_EVENT, markOnlineRankingDirty);
-        };
-    }, [onlineRankingProfile]);
-
-    useEffect(() => {
-        if (!onlineRankingProfile) return;
-        const syncScreens = new Set([
-            GameScreen.START_MENU,
-            GameScreen.FLOOR_RESULT,
-            GameScreen.GAME_OVER,
-            GameScreen.VICTORY,
-            GameScreen.ENDING,
-        ]);
-        if (syncScreens.has(gameState.screen)) {
-            void onlineRankingService.syncDirtySnapshots().catch(() => undefined);
-        }
-    }, [gameState.screen, onlineRankingProfile]);
-
-    useEffect(() => {
-        if (!onlineRankingProfile) return;
-        const syncBeforeBackground = () => {
-            if (document.hidden) void onlineRankingService.syncDirtySnapshots().catch(() => undefined);
-        };
-        const syncBeforePageHide = () => { void onlineRankingService.syncDirtySnapshots().catch(() => undefined); };
-        document.addEventListener('visibilitychange', syncBeforeBackground);
-        window.addEventListener('pagehide', syncBeforePageHide);
-        return () => {
-            document.removeEventListener('visibilitychange', syncBeforeBackground);
-            window.removeEventListener('pagehide', syncBeforePageHide);
-        };
+        return () => window.removeEventListener('online', retryOnlineRankingQueue);
     }, [onlineRankingProfile]);
     const parryTutorialResolverRef = useRef<(() => void) | null>(null);
     const lastMagicDamageVoiceActionRef = useRef<string | null>(null);
@@ -1581,6 +1545,24 @@ const App: React.FC = () => {
         const url = new URL(window.location.href);
         url.searchParams.delete('assignment');
         window.history.replaceState({}, '', url.toString());
+    }, []);
+
+    useEffect(() => {
+        if (!managementProfile) return;
+        const flush = () => { void managementPortalService.flushPending(); };
+        flush();
+        window.addEventListener('online', flush);
+        return () => window.removeEventListener('online', flush);
+    }, [managementProfile]);
+
+    const openManagedAssignment = useCallback((assignment: AssignmentPayload) => {
+        storageService.saveCurrentAssignment(assignment);
+        setCurrentAssignment(assignment);
+        setCompletedAssignmentProblemSource(null);
+        setAssignmentLetterSource('title');
+        setShowAssignmentInbox(false);
+        setShowAssignmentLetter(true);
+        setGameState(prev => ({ ...prev, screen: GameScreen.START_MENU }));
     }, []);
 
     const markDailyAssignmentCompleted = useCallback((assignmentId: string | undefined) => {
@@ -1896,34 +1878,6 @@ const App: React.FC = () => {
         }
         raceToastTimerRef.current = window.setTimeout(() => setRaceToast(null), 2200);
     }, []);
-
-    const claimManagementRewards = useCallback(async (alreadyClaimed?: Awaited<ReturnType<typeof learningManagementService.getPendingRewards>>) => {
-        const pending = alreadyClaimed || await learningManagementService.getPendingRewards();
-        if (!alreadyClaimed) for (const reward of pending) await learningManagementService.claimReward(reward.grantId);
-        if (pending.length === 0) return;
-        let added = 0;
-        for (const reward of pending) {
-            const claimedKey = `management:${reward.assignmentId}`;
-            if (storageService.hasClaimedAssignmentRewardCard(claimedKey)) continue;
-            const card = createRewardCardForAssignment();
-            if (!card) continue;
-            storageService.saveRewardCardToAlbum(card);
-            storageService.markAssignmentRewardCardClaimed(claimedKey);
-            added += 1;
-        }
-        if (added) setRewardCardAlbumVersion(prev => prev + added);
-    }, [createRewardCardForAssignment]);
-
-    useEffect(() => {
-        if (gameState.screen !== GameScreen.START_MENU || !learningManagementService.getConnection()) return;
-        const sync = async () => {
-            await learningManagementService.flushProgress();
-            await claimManagementRewards();
-        };
-        void sync().catch(() => undefined);
-        window.addEventListener('online', sync);
-        return () => window.removeEventListener('online', sync);
-    }, [claimManagementRewards, gameState.screen]);
     useEffect(() => {
         if (gameState.challengeMode === 'COOP' && CHALLENGE_SCREEN_SET.has(gameState.screen)) {
             setCoopPartyHudOpen(false);
@@ -5989,7 +5943,6 @@ const App: React.FC = () => {
 
         const combatState: GameState = {
             ...gameState,
-            visualTheme,
             screen: GameScreen.BATTLE,
             act: 3,
             floor: 16,
@@ -12308,7 +12261,7 @@ const App: React.FC = () => {
         const assignmentUnit = assignment?.units.find((unit) => unit.modes.includes(result.mode));
         const isCustomAssignmentAnswer = result.mode === 'ASSIGNMENT_CUSTOM' && (assignment?.customProblems.length || 0) > 0;
         const isAssignmentAnswer = !!assignment && (isCustomAssignmentAnswer || !assignmentModePool || assignmentModePool.includes(result.mode));
-        const answerRecord = {
+        storageService.saveAssignmentAnswer({
             assignmentId: isAssignmentAnswer ? assignment?.id : undefined,
             mode: result.mode,
             unitName: isCustomAssignmentAnswer ? trans('オリジナル問題', languageMode) : assignmentUnit?.name,
@@ -12322,13 +12275,9 @@ const App: React.FC = () => {
             correct: result.correct,
             elapsedMs: Math.max(0, result.elapsedMs || 0),
             answeredAt: new Date().toISOString(),
-        };
-        storageService.saveAssignmentAnswer(answerRecord);
-        if (isAssignmentAnswer && assignment?.source === 'MANAGEMENT') {
-            learningManagementService.queueProgress(assignment, answerRecord);
-            void learningManagementService.flushProgress()
-                .then(() => claimManagementRewards())
-                .catch(() => undefined);
+        });
+        if (isAssignmentAnswer && assignment.managementPortal) {
+            managementPortalService.queueAnswer(assignment, result);
         }
         if (isAssignmentAnswer) {
             setAssignmentProgressVersion(prev => prev + 1);
@@ -12353,7 +12302,7 @@ const App: React.FC = () => {
                 });
                 const isAssignmentComplete = remainingUnitsAfter.length === 0;
                 let rewardCard: ICard | undefined;
-                if (assignment.source !== 'MANAGEMENT' && isAssignmentComplete && !storageService.hasClaimedAssignmentRewardCard(assignment.id)) {
+                if (isAssignmentComplete && !storageService.hasClaimedAssignmentRewardCard(assignment.id)) {
                     const createdRewardCard = createRewardCardForAssignment();
                     if (createdRewardCard) {
                         storageService.saveRewardCardToAlbum(createdRewardCard);
@@ -12364,6 +12313,10 @@ const App: React.FC = () => {
                 }
                 if (isAssignmentComplete && !currentAssignment) {
                     markDailyAssignmentCompleted(assignment.id);
+                }
+                if (isAssignmentComplete && assignment.managementPortal) {
+                    void managementPortalService.completeAssignment(assignment.id)
+                        .catch(() => undefined);
                 }
                 setAssignmentProgressNotice({
                     type: isAssignmentComplete ? 'ASSIGNMENT_COMPLETE' : 'UNIT_COMPLETE',
@@ -12392,7 +12345,7 @@ const App: React.FC = () => {
                 : (assignment.customProblems || []).filter(problem => !correctCustomAssignmentProblemIds.has(problem.id));
             const isAssignmentComplete = remainingAfter.length === 0 && remainingCustomAfter.length === 0;
             let rewardCard: ICard | undefined;
-            if (assignment.source !== 'MANAGEMENT' && isAssignmentComplete && !storageService.hasClaimedAssignmentRewardCard(assignment.id)) {
+            if (isAssignmentComplete && !storageService.hasClaimedAssignmentRewardCard(assignment.id)) {
                 const createdRewardCard = createRewardCardForAssignment();
                 if (createdRewardCard) {
                     storageService.saveRewardCardToAlbum(createdRewardCard);
@@ -12403,6 +12356,10 @@ const App: React.FC = () => {
             }
             if (isAssignmentComplete && !currentAssignment) {
                 markDailyAssignmentCompleted(assignment.id);
+            }
+            if (isAssignmentComplete && assignment.managementPortal) {
+                void managementPortalService.completeAssignment(assignment.id)
+                    .catch(() => undefined);
             }
             setAssignmentProgressNotice({
                 type: isAssignmentComplete ? 'ASSIGNMENT_COMPLETE' : 'UNIT_COMPLETE',
@@ -12415,7 +12372,7 @@ const App: React.FC = () => {
                 assignment: isAssignmentComplete ? assignment : undefined,
             });
         }
-    }, [activeAssignment, addMiniGameUnlockCorrectCount, claimManagementRewards, correctCustomAssignmentProblemIds, createRewardCardForAssignment, currentAssignment, currentAssignmentAnswers, effectiveAssignment, languageMode, markDailyAssignmentCompleted]);
+    }, [activeAssignment, addMiniGameUnlockCorrectCount, correctCustomAssignmentProblemIds, createRewardCardForAssignment, currentAssignment, currentAssignmentAnswers, effectiveAssignment, languageMode, markDailyAssignmentCompleted]);
 
     const removeRewardFromList = useCallback((rewards: RewardItem[], item: RewardItem) => {
         if (shouldClearAllCardRewards(item)) {
@@ -15368,7 +15325,20 @@ const App: React.FC = () => {
                             {(!isMathDebugSkipped && !isDebugHpOne && !isMiniGameDebugUnlocked) && <div className="start-menu-debug-spacer mb-2 h-2"></div>}
 
                             <div className="start-menu-button-panel flex w-full flex-col items-center">
-                                <div className="mb-4 flex items-stretch justify-center gap-2">
+                                <div className="mb-4 flex flex-wrap items-stretch justify-center gap-2">
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowAssignmentInbox(true)}
+                                        className={`flex h-10 items-center gap-2 rounded-none border-2 px-3 text-xs font-black shadow-lg transition-colors ${
+                                            managementProfile
+                                                ? 'border-cyan-300 bg-cyan-950/85 text-cyan-100 hover:bg-cyan-900'
+                                                : 'border-slate-500 bg-slate-950/85 text-slate-200 hover:bg-slate-800'
+                                        }`}
+                                    >
+                                        <ClipboardList size={16} />
+                                        {trans(managementProfile ? '課題受信箱' : '課題連携', languageMode)}
+                                        {managementProfile && <span className="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(74,222,128,0.9)]" />}
+                                    </button>
                                     {assignmentLetter && isAssignmentLetterWithinDeadline && (
                                         <button
                                             type="button"
@@ -15511,14 +15481,6 @@ const App: React.FC = () => {
                                 </div>
 
                                 <div className="flex gap-2 w-full">
-                                    {!OFFLINE_DISTRIBUTABLE && (
-                                        <button
-                                            onClick={() => setShowAssignmentInbox(true)}
-                                            className="flex-1 py-2 px-1 text-xs font-bold border-b-4 border-r-4 rounded-none bg-emerald-950/80 text-emerald-100 border-emerald-400 hover:bg-emerald-900 cursor-pointer flex items-center justify-center shadow-md"
-                                        >
-                                            <Link2 className="mr-1" size={16} /> {trans("課題受信", languageMode)}
-                                        </button>
-                                    )}
                                     {isAdultProfile(studentProfile) && (
                                         <button
                                             onClick={() => setGameState(prev => ({ ...prev, screen: GameScreen.ASSIGNMENT_CREATE }))}
@@ -15718,22 +15680,6 @@ const App: React.FC = () => {
                             </div>
                         </div>
                     </div>
-                )}
-
-                {showAssignmentInbox && (
-                    <AssignmentInboxModal
-                        languageMode={languageMode}
-                        onClose={() => setShowAssignmentInbox(false)}
-                        onOpenAssignment={(assignment) => {
-                            storageService.saveCurrentAssignment(assignment);
-                            setCurrentAssignment(assignment);
-                            setCompletedAssignmentProblemSource(null);
-                            setAssignmentLetterSource('title');
-                            setShowAssignmentLetter(true);
-                            setShowAssignmentInbox(false);
-                        }}
-                        onRewardsClaimed={(rewards) => { void claimManagementRewards(rewards); }}
-                    />
                 )}
 
                 {showDataTransferModal && (
@@ -17598,6 +17544,12 @@ const App: React.FC = () => {
                     </div>
                 )}
                 {renderStudentGradeSurvey()}
+                <AssignmentInboxModal
+                    open={showAssignmentInbox && !showStudentGradeSurvey}
+                    onClose={() => setShowAssignmentInbox(false)}
+                    onSelect={openManagedAssignment}
+                    onProfileChange={setManagementProfile}
+                />
                 <OnlineNameSetupModal
                     open={showOnlineNameSetup && !showStudentGradeSurvey}
                     profile={onlineRankingProfile}

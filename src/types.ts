@@ -45,6 +45,12 @@ export interface Card {
   holographic?: boolean;
   holographicVariant?: 'red' | 'yellow' | 'blue' | 'purple';
   rewardCard?: boolean;
+  rewardSource?: 'ASSIGNMENT' | 'RANKING';
+  rewardGeneration?: 'ASSIGNMENT_REWARD';
+  rankingId?: string;
+  periodId?: string;
+  awardedRank?: number;
+  grantedAt?: string;
   unplayable?: boolean;
 
   // Advanced Effects
@@ -792,10 +798,13 @@ export interface AssignmentPayload {
   gameMode: 'FREE' | 'CHALLENGE_ONLY';
   answerMode: AnswerMode;
   createdAt: string;
-  source?: 'URL' | 'MANAGEMENT';
-  serverVersion?: number;
-  description?: string;
-  rewardEnabled?: boolean;
+  managementPortal?: {
+    version: number;
+    unitId: string;
+    subject?: string;
+    description?: string;
+    rewardEnabled?: boolean;
+  };
 }
 
 export interface AssignmentAnswerRecord {
