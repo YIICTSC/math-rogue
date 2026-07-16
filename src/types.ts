@@ -45,6 +45,12 @@ export interface Card {
   holographic?: boolean;
   holographicVariant?: 'red' | 'yellow' | 'blue' | 'purple';
   rewardCard?: boolean;
+  rewardSource?: 'ASSIGNMENT' | 'RANKING';
+  rewardGeneration?: 'ASSIGNMENT_REWARD';
+  rankingId?: string;
+  periodId?: string;
+  awardedRank?: number;
+  grantedAt?: string;
   unplayable?: boolean;
 
   // Advanced Effects

@@ -1,6 +1,7 @@
 import { Card, TargetType, CardType } from '../types';
 import { CARDS_LIBRARY } from '../constants';
 import { storageService } from './storageService';
+import { createAssignmentRewardCard } from '../utils/cardUtils';
 
 export type OnlineRankingProfile = {
   id: string;
@@ -57,6 +58,29 @@ const submissionHash = (value: string) => {
   let hash = 2166136261;
   for (const char of value) hash = Math.imul(hash ^ char.charCodeAt(0), 16777619) >>> 0;
   return hash.toString(36);
+};
+
+const createGeneratedRankingRewardCard = (reward: OnlineReward): Card => {
+  const pool = Object.values(CARDS_LIBRARY).filter((card) =>
+    card.type !== CardType.STATUS
+    && card.type !== CardType.CURSE
+    && card.rarity !== 'SPECIAL'
+    && !card.eraserOnly
+  );
+  const hash = Number.parseInt(submissionHash(reward.id), 36) >>> 0;
+  const template = pool[hash % Math.max(1, pool.length)];
+  if (!template) return reward.card;
+  return {
+    ...createAssignmentRewardCard(
+      { ...template, id: `ranking-reward-base-${reward.id}` },
+      { id: `ranking-reward-card-${reward.id}`, variant: hash % 6 },
+    ),
+    rewardSource: 'RANKING',
+    rankingId: reward.rankingId,
+    periodId: reward.periodKey,
+    awardedRank: reward.awardedRank,
+    grantedAt: new Date().toISOString(),
+  };
 };
 
 const getQueue = (): QueuedSubmission[] => {
@@ -467,11 +491,14 @@ export const onlineRankingService = {
     const existingIds = new Set(storageService.getRewardCardAlbum().map((card) => card.id));
     for (const reward of pending.rewards) {
       const result = await request<{ reward: OnlineReward }>(`/api/v1/rewards/${encodeURIComponent(reward.id)}/claim`, { method: 'POST', body: '{}' }, true);
-      if (!existingIds.has(result.reward.card.id)) {
-        storageService.saveRewardCardToAlbum(result.reward.card);
-        existingIds.add(result.reward.card.id);
+      const claimedReward = result.reward.card.rewardGeneration === 'ASSIGNMENT_REWARD'
+        ? { ...result.reward, card: createGeneratedRankingRewardCard(result.reward) }
+        : result.reward;
+      if (!existingIds.has(claimedReward.card.id)) {
+        storageService.saveRewardCardToAlbum(claimedReward.card);
+        existingIds.add(claimedReward.card.id);
       }
-      claimed.push(result.reward);
+      claimed.push(claimedReward);
     }
     return claimed;
   },

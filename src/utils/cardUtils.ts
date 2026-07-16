@@ -433,12 +433,17 @@ const getTripleBoostedCard = (card: Card): Card => {
     return boosted;
 };
 
-export const createAssignmentRewardCard = (card: Card): Card => {
+export const createAssignmentRewardCard = (
+    card: Card,
+    options: { id?: string; variant?: number } = {},
+): Card => {
     const boostedCard = applyHolographicBonus(getTripleBoostedCard(card));
-    const variant = Math.floor(Math.random() * 6);
+    const variant = options.variant === undefined
+        ? Math.floor(Math.random() * 6)
+        : Math.max(0, Math.min(5, Math.floor(options.variant)));
     const next: Card = {
         ...boostedCard,
-        id: `assignment-reward-card-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
+        id: options.id || `assignment-reward-card-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
         upgraded: false,
         holographic: true,
         holographicVariant: getHolographicVariantForCard(boostedCard),
