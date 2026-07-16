@@ -1549,7 +1549,7 @@ const App: React.FC = () => {
 
     useEffect(() => {
         if (!managementProfile) return;
-        const flush = () => { void managementPortalService.flushProgress(); };
+        const flush = () => { void managementPortalService.flushPending(); };
         flush();
         window.addEventListener('online', flush);
         return () => window.removeEventListener('online', flush);
@@ -12316,7 +12316,6 @@ const App: React.FC = () => {
                 }
                 if (isAssignmentComplete && assignment.managementPortal) {
                     void managementPortalService.completeAssignment(assignment.id)
-                        .then(() => managementPortalService.claimPendingRewards(assignment.id))
                         .catch(() => undefined);
                 }
                 setAssignmentProgressNotice({
@@ -12360,7 +12359,6 @@ const App: React.FC = () => {
             }
             if (isAssignmentComplete && assignment.managementPortal) {
                 void managementPortalService.completeAssignment(assignment.id)
-                    .then(() => managementPortalService.claimPendingRewards(assignment.id))
                     .catch(() => undefined);
             }
             setAssignmentProgressNotice({
