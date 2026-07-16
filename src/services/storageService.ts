@@ -84,6 +84,7 @@ const STORAGE_KEY_STUDENT_PROFILE = 'pixel_spire_student_profile_v1';
 const STORAGE_KEY_REWARD_CARD_ALBUM = 'pixel_spire_reward_card_album_v1';
 const STORAGE_KEY_REWARD_CARD_CLAIMED_ASSIGNMENTS = 'pixel_spire_reward_card_claimed_assignments_v1';
 const STORAGE_KEY_COMPLETED_DAILY_ASSIGNMENTS = 'pixel_spire_completed_daily_assignments_v1';
+const STORAGE_KEY_HIGHEST_CARD_DAMAGE = 'pixel_spire_highest_card_damage_v1';
 
 // --- CUSTOM CHARACTER IMAGES ---
 const STORAGE_KEY_CUSTOM_IMAGES = 'pixel_spire_custom_images_v1';
@@ -648,6 +649,36 @@ export const storageService = {
       } catch (e) {
           console.warn("Failed to save clear count", e);
       }
+  },
+
+  getHighestCardDamage: (): { damage: number; cardName: string; recordedAt: string } => {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY_HIGHEST_CARD_DAMAGE);
+      if (!stored) return { damage: 0, cardName: '', recordedAt: '' };
+      const parsed = JSON.parse(stored) as { damage?: unknown; cardName?: unknown; recordedAt?: unknown };
+      const damage = Number(parsed.damage);
+      return {
+        damage: Number.isSafeInteger(damage) && damage > 0 ? damage : 0,
+        cardName: typeof parsed.cardName === 'string' ? parsed.cardName.slice(0, 40) : '',
+        recordedAt: typeof parsed.recordedAt === 'string' ? parsed.recordedAt : '',
+      };
+    } catch {
+      return { damage: 0, cardName: '', recordedAt: '' };
+    }
+  },
+
+  saveHighestCardDamage: (damage: number, cardName: string) => {
+    try {
+      const safeDamage = Math.max(0, Math.min(1_000_000_000, Math.floor(Number(damage) || 0)));
+      if (safeDamage <= storageService.getHighestCardDamage().damage) return;
+      localStorage.setItem(STORAGE_KEY_HIGHEST_CARD_DAMAGE, JSON.stringify({
+        damage: safeDamage,
+        cardName: String(cardName || '').slice(0, 40),
+        recordedAt: new Date().toISOString(),
+      }));
+    } catch (e) {
+      console.warn('Failed to save highest card damage', e);
+    }
   },
 
   getThemeClearCounts: (): Record<VisualThemeId, number> => {
@@ -1511,5 +1542,6 @@ export const storageService = {
       localStorage.removeItem(STORAGE_KEY_MASTERED_MODES);
       localStorage.removeItem(STORAGE_KEY_CUSTOM_IMAGES);
       localStorage.removeItem(STORAGE_KEY_HINT_STREAKS);
+      localStorage.removeItem(STORAGE_KEY_HIGHEST_CARD_DAMAGE);
   }
 };

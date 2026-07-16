@@ -27,6 +27,7 @@ import CharacterSelectionScreen from './components/CharacterSelectionScreen';
 import TypingModeSelectionScreen from './components/TypingModeSelectionScreen';
 import DifficultySelectionScreen from './components/DifficultySelectionScreen';
 import RankingScreen from './components/RankingScreen';
+import OnlineNameSetupModal from './components/OnlineNameSetupModal';
 import MathChallengeScreen from './components/MathChallengeScreen';
 import KanjiChallengeScreen from './components/KanjiChallengeScreen';
 import EnglishChallengeScreen from './components/EnglishChallengeScreen';
@@ -82,6 +83,7 @@ import { setLegacySpriteModeEnabled } from './utils/legacySpriteMode';
 import { generateEnemyName } from './services/geminiService';
 import { generateDungeonMap } from './services/mapGenerator';
 import { parseTransferData, serializeTransferData, storageService } from './services/storageService';
+import { onlineRankingService, type OnlineRankingProfile, type OnlineReward } from './services/onlineRankingService';
 import { generateEvent, generateLegacyEvent } from './services/eventService';
 import { createAssignmentRewardCard, createHolographicCard, getUpgradedCard, synthesizeCards } from './utils/cardUtils';
 import { AZUKI_BOSS_FLAG, AZUKI_BOSS_NAME, AZUKI_ENCOUNTER_FLAG, AZUKI_REWARD_CARDS } from './data/azukiBoss';
@@ -1391,6 +1393,11 @@ const App: React.FC = () => {
     const studentGradeOptions = useMemo(() => getStudentGradeOptions(studentGradeMode), [studentGradeMode]);
     const isStudentGradeUnset = !studentProfile.grade?.trim();
     const [showStudentGradeSurvey, setShowStudentGradeSurvey] = useState<boolean>(() => !storageService.getStudentProfile().grade?.trim());
+    const [onlineRankingProfile, setOnlineRankingProfile] = useState<OnlineRankingProfile | null>(() => onlineRankingService.getProfile());
+    const [showOnlineNameSetup, setShowOnlineNameSetup] = useState(false);
+    const [onlineNamePromptDismissed, setOnlineNamePromptDismissed] = useState(false);
+    const [rankingRewardNotices, setRankingRewardNotices] = useState<OnlineReward[]>([]);
+    const rankingRewardCheckedRef = useRef(false);
     const [currentAssignment, setCurrentAssignment] = useState<AssignmentPayload | null>(() => storageService.getCurrentAssignment());
     const [assignmentProgressVersion, setAssignmentProgressVersion] = useState(0);
     const [assignmentProgressNotice, setAssignmentProgressNotice] = useState<{
@@ -1458,6 +1465,39 @@ const App: React.FC = () => {
             setShowStudentGradeSurvey(true);
         }
     }, [isStudentGradeUnset]);
+
+    useEffect(() => {
+        if (gameState.screen !== GameScreen.START_MENU) {
+            setOnlineNamePromptDismissed(false);
+            return;
+        }
+        if (!showStudentGradeSurvey && !onlineRankingProfile && !onlineNamePromptDismissed && onlineRankingService.isAvailable()) {
+            setShowOnlineNameSetup(true);
+        }
+    }, [gameState.screen, onlineNamePromptDismissed, onlineRankingProfile, showStudentGradeSurvey]);
+
+    useEffect(() => {
+        if (gameState.screen !== GameScreen.START_MENU) {
+            rankingRewardCheckedRef.current = false;
+            return;
+        }
+        if (!onlineRankingProfile || rankingRewardCheckedRef.current || !onlineRankingService.isAvailable()) return;
+        rankingRewardCheckedRef.current = true;
+        void onlineRankingService.claimPendingRewards()
+            .then((rewards) => {
+                if (rewards.length === 0) return;
+                setRewardCardAlbumVersion((version) => version + rewards.length);
+                setRankingRewardNotices(rewards);
+            })
+            .catch(() => undefined);
+    }, [gameState.screen, onlineRankingProfile]);
+
+    useEffect(() => {
+        if (!onlineRankingProfile) return;
+        const retryOnlineRankingQueue = () => { void onlineRankingService.flushPendingSubmissions().catch(() => undefined); };
+        window.addEventListener('online', retryOnlineRankingQueue);
+        return () => window.removeEventListener('online', retryOnlineRankingQueue);
+    }, [onlineRankingProfile]);
     const parryTutorialResolverRef = useRef<(() => void) | null>(null);
     const lastMagicDamageVoiceActionRef = useRef<string | null>(null);
     const [isPreloadingGameAssets, setIsPreloadingGameAssets] = useState(false);
@@ -3684,6 +3724,7 @@ const App: React.FC = () => {
                 p2pService.send({
                     type: 'COOP_REJOIN',
                     name: selfName,
+                    publicCode: onlineRankingProfile?.publicCode,
                     imageData: gameState.player.imageData,
                     roomCode,
                     slotId: selfSlotId,
@@ -3699,7 +3740,7 @@ const App: React.FC = () => {
                 coopHostMigrationInProgressRef.current = false;
             });
         }, isPromotedHost ? 500 : 1400);
-    }, [broadcastCoopBattleState, coopSelfPeerId, coopSession, gameState.challengeMode, gameState.player.imageData, retryWithDelay, sendCoopStateSync, setCoopBattleState]);
+    }, [broadcastCoopBattleState, coopSelfPeerId, coopSession, gameState.challengeMode, gameState.player.imageData, onlineRankingProfile?.publicCode, retryWithDelay, sendCoopStateSync, setCoopBattleState]);
     useEffect(() => {
         if (!isCoopHost) return;
         if (gameState.screen === GameScreen.COOP_SETUP || gameState.screen === GameScreen.START_MENU) return;
@@ -8023,6 +8064,7 @@ const App: React.FC = () => {
                             if (e.block >= damage) { e.block -= damage; damage = 0; }
                             else { damage -= e.block; e.block = 0; }
                             e.currentHp -= damage;
+                            if (!coopActorPeerId && damage > 0) storageService.saveHighestCardDamage(damage, card.name);
 
                             let finalVfx: VFXType = baseVfx as VFXType;
                             const shouldShowDetailVfx = h < MAX_CARD_DETAIL_VFX || h === hits - 1;
@@ -11197,7 +11239,10 @@ const App: React.FC = () => {
                     floor: prev.floor,
                     victory: true,
                     date: Date.now(),
-                    challengeMode: prev.challengeMode
+                    challengeMode: prev.challengeMode,
+                    teamPublicCodes: prev.challengeMode === 'COOP'
+                        ? [...new Set((coopSession?.participants || []).map(participant => participant.publicCode).filter((code): code is string => !!code))].sort()
+                        : undefined
                 });
 
                 setNewlyUnlockedCard(unlockedCard);
@@ -11294,7 +11339,10 @@ const App: React.FC = () => {
             floor: currentState.floor,
             victory: false,
             date: Date.now(),
-            challengeMode: currentState.challengeMode
+            challengeMode: currentState.challengeMode,
+            teamPublicCodes: currentState.challengeMode === 'COOP'
+                ? [...new Set((coopSession?.participants || []).map(participant => participant.publicCode).filter((code): code is string => !!code))].sort()
+                : undefined
         });
         setGameState(prev => ({
             ...prev,
@@ -11302,7 +11350,7 @@ const App: React.FC = () => {
             screen: GameScreen.GAME_OVER,
             newlyUnlockedCardName: undefined
         }));
-    }, [selectedCharName, visualTheme]);
+    }, [coopSession, selectedCharName, visualTheme]);
 
     const applyCoopAutoRevives = useCallback(() => {
         const currentState = stateRef.current;
@@ -13367,6 +13415,7 @@ const App: React.FC = () => {
                         slotId,
                         reconnectToken,
                         name: data.name,
+                        publicCode: data.publicCode,
                         imageData: data.imageData,
                         disconnected: false,
                         selectedCharacterId: undefined,
@@ -13450,6 +13499,7 @@ const App: React.FC = () => {
                             ...entry,
                             peerId: fromPeerId,
                             name: data.name || entry.name,
+                            publicCode: data.publicCode || entry.publicCode,
                             imageData: data.imageData ?? entry.imageData,
                             disconnected: false
                         }
@@ -16020,6 +16070,16 @@ const App: React.FC = () => {
                                         {trans(coopPartyHudOpen ? '非表示' : '表示', languageMode)}
                                     </button>
                                 </div>
+
+                                {!onlineRankingProfile && onlineRankingService.isAvailable() && (
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowOnlineNameSetup(true)}
+                                        className="mt-2 flex w-full items-center justify-center gap-2 rounded border border-lime-400/70 bg-lime-950/80 px-3 py-2 text-xs font-black text-lime-100 shadow-[0_0_16px_rgba(163,230,53,0.16)] hover:bg-lime-900"
+                                    >
+                                        <Trophy size={16} /> {trans("オンラインランキング参加名を決める", languageMode)}
+                                    </button>
+                                )}
                             </div>
                             {coopPartyHudOpen && (
                                 <div className="space-y-1.5 sm:space-y-2">
@@ -16342,7 +16402,11 @@ const App: React.FC = () => {
 
                 {gameState.screen === GameScreen.RANKING && (
                     <div className="absolute inset-0">
-                        <RankingScreen onBack={returnToTitle} languageMode={languageMode} />
+                        <RankingScreen
+                            onBack={returnToTitle}
+                            languageMode={languageMode}
+                            onRequestOnlineName={() => setShowOnlineNameSetup(true)}
+                        />
                     </div>
                 )}
 
@@ -16560,6 +16624,7 @@ const App: React.FC = () => {
                         ) : (
                             <CoopSetupScreen
                                 player={gameState.player}
+                                publicCode={onlineRankingProfile?.publicCode}
                                 visualTheme={visualTheme}
                                 languageMode={languageMode}
                                 onStart={(payload: CoopStartPayload) => {
@@ -17432,6 +17497,45 @@ const App: React.FC = () => {
                     </div>
                 )}
                 {renderStudentGradeSurvey()}
+                <OnlineNameSetupModal
+                    open={showOnlineNameSetup && !showStudentGradeSurvey}
+                    profile={onlineRankingProfile}
+                    languageMode={languageMode}
+                    onClose={() => {
+                        setShowOnlineNameSetup(false);
+                        setOnlineNamePromptDismissed(true);
+                    }}
+                    onRegistered={(profile) => {
+                        setOnlineRankingProfile(profile);
+                        setShowOnlineNameSetup(false);
+                        rankingRewardCheckedRef.current = false;
+                        void onlineRankingService.syncCurrentSnapshots().catch(() => undefined);
+                    }}
+                />
+                {rankingRewardNotices[0] && (
+                    <div className="fixed inset-0 z-[10038] flex items-center justify-center bg-black/90 p-4">
+                        <div className="w-full max-w-lg overflow-hidden rounded-2xl border-4 border-yellow-300 bg-gradient-to-b from-slate-900 to-black p-6 text-center text-white shadow-[0_0_55px_rgba(250,204,21,0.42)]">
+                            <div className="mb-2 text-xs font-black tracking-[0.32em] text-yellow-300">RANK IN!</div>
+                            <h2 className="mb-2 text-3xl font-black text-yellow-100">{trans("ランキング入賞！", languageMode)}</h2>
+                            <p className="mb-5 text-sm font-bold leading-6 text-slate-300">
+                                {trans("いずれかのランキングで3位以内に入りました。ご褒美カードを獲得！", languageMode)}
+                            </p>
+                            <div className="mx-auto mb-5 max-w-xs rounded-2xl border-2 border-cyan-300 bg-cyan-950/60 p-5 shadow-[0_0_30px_rgba(34,211,238,0.25)]">
+                                <div className="mb-1 text-5xl font-black text-yellow-300">#{rankingRewardNotices[0].awardedRank}</div>
+                                <div className="mb-3 text-xs font-black text-cyan-200">{rankingRewardNotices[0].rankingId} / {rankingRewardNotices[0].periodType}</div>
+                                <div className="text-xl font-black text-white">{rankingRewardNotices[0].card.name}</div>
+                                <div className="mt-2 text-xs font-bold text-slate-300">{rankingRewardNotices[0].card.description}</div>
+                            </div>
+                            <button
+                                type="button"
+                                onClick={() => setRankingRewardNotices((notices) => notices.slice(1))}
+                                className="w-full rounded-xl bg-yellow-300 px-5 py-3 text-lg font-black text-slate-950 hover:bg-yellow-200"
+                            >
+                                {rankingRewardNotices.length > 1 ? trans("次のカードを見る", languageMode) : trans("カード帳にしまう", languageMode)}
+                            </button>
+                        </div>
+                    </div>
+                )}
                 <SettingsModal
                     open={showSettingsModal}
                     tab={settingsTab}

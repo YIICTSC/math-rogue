@@ -913,6 +913,7 @@ export interface RankingEntry {
   victory: boolean;
   date: number;
   challengeMode?: string;
+  teamPublicCodes?: string[];
 }
 
 export type PokerSuit = 'SPADE' | 'HEART' | 'DIAMOND' | 'CLUB';

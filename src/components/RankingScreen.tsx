@@ -4,13 +4,16 @@ import { ArrowLeft, ScrollText, Calendar, Skull, Trophy, Club, Swords, Timer, Za
 import { RankingEntry, PokerScoreEntry, SurvivorScoreEntry, DungeonScoreEntry, KochoScoreEntry, PaperPlaneScoreEntry, GoHomeScoreEntry, LanguageMode } from '../types';
 import { storageService } from '../services/storageService';
 import { trans } from '../utils/textUtils';
+import OnlineRankingScreen from './OnlineRankingScreen';
 
 interface RankingScreenProps {
   onBack: () => void;
   languageMode: LanguageMode;
+  onRequestOnlineName?: () => void;
 }
 
-const RankingScreen: React.FC<RankingScreenProps> = ({ onBack, languageMode }) => {
+const RankingScreen: React.FC<RankingScreenProps> = ({ onBack, languageMode, onRequestOnlineName = () => undefined }) => {
+  const [rankingScope, setRankingScope] = useState<'LOCAL' | 'ONLINE'>('LOCAL');
   const [activeTab, setActiveTab] = useState<'ADVENTURE' | 'POKER' | 'SURVIVOR' | 'DUNGEON' | 'DUNGEON_2' | 'KOCHO' | 'PLANE' | 'GO_HOME'>('ADVENTURE');
   const [adventureData, setAdventureData] = useState<RankingEntry[]>([]);
   const [pokerData, setPokerData] = useState<PokerScoreEntry[]>([]);
@@ -48,6 +51,10 @@ const RankingScreen: React.FC<RankingScreenProps> = ({ onBack, languageMode }) =
       return `${m}:${s.toString().padStart(2, '0')}`;
   };
 
+  if (rankingScope === 'ONLINE') {
+      return <OnlineRankingScreen onBack={onBack} onLocal={() => setRankingScope('LOCAL')} onRequestName={onRequestOnlineName} languageMode={languageMode} />;
+  }
+
   return (
     <div className="main-ranking-screen flex flex-col h-full w-full bg-gray-900 text-white relative">
         {/* Header */}
@@ -56,6 +63,13 @@ const RankingScreen: React.FC<RankingScreenProps> = ({ onBack, languageMode }) =
                 <ScrollText size={24} className="text-gray-400 mr-2" />
                 <h2 className="text-xl font-bold text-gray-100">{trans('記録', languageMode)}</h2>
             </div>
+
+            <button
+                onClick={() => setRankingScope('ONLINE')}
+                className="flex items-center rounded border border-lime-400 bg-lime-950/70 px-3 py-2 text-xs font-black text-lime-200 hover:bg-lime-900"
+            >
+                <Trophy className="mr-2" size={16} /> {trans('オンライン', languageMode)}
+            </button>
             
             <div className="flex bg-gray-800 rounded p-1 overflow-x-auto max-w-full custom-scrollbar">
                 <button 
