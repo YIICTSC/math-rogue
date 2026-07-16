@@ -34,6 +34,7 @@ export type OnlineRankingDefinition = {
   unit: string;
   accent: string;
   description: string;
+  calculation: string;
   scope?: 'individual' | 'team';
 };
 
