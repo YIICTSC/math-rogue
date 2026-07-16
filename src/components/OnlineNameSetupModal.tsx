@@ -55,8 +55,8 @@ const OnlineNameSetupModal: React.FC<Props> = ({ open, languageMode, onClose, on
     finally { setLoading(false); }
   };
 
-  if (profile) return <div className="fixed inset-0 z-[10036] flex items-center justify-center bg-black/85 p-4">
-    <div className="relative w-full max-w-lg rounded-2xl border-4 border-cyan-300 bg-slate-950 p-6 text-center text-white shadow-[0_0_45px_rgba(34,211,238,0.25)]">
+  if (profile) return <div className="fixed inset-0 z-[10036] flex items-center justify-center bg-black/85 p-2 sm:p-4">
+    <div className="relative max-h-[calc(100dvh-1rem)] w-full max-w-lg overflow-y-auto overscroll-contain rounded-2xl border-4 border-cyan-300 bg-slate-950 p-4 text-center text-white shadow-[0_0_45px_rgba(34,211,238,0.25)] sm:max-h-[calc(100dvh-2rem)] sm:p-6">
       <button onClick={onClose} className="absolute right-3 top-3 rounded-lg border border-slate-600 bg-slate-900 p-2 text-slate-300" aria-label={trans('閉じる', languageMode)}><X size={18} /></button>
       <Smartphone className="mx-auto mb-3 text-cyan-300" size={38} /><div className="text-xs font-black tracking-[.25em] text-cyan-300">DEVICE LINK</div><h2 className="my-3 text-2xl font-black">{trans('別の端末と連携する', languageMode)}</h2>
       <p className="mb-5 text-sm font-bold leading-6 text-slate-300">{trans('新しい端末の「コードで引き継ぐ」に入力する、10分間・1回限りのコードを発行します。', languageMode)}</p>
@@ -66,8 +66,8 @@ const OnlineNameSetupModal: React.FC<Props> = ({ open, languageMode, onClose, on
     </div>
   </div>;
 
-  if (mode === 'redeem') return <div className="fixed inset-0 z-[10036] flex items-center justify-center bg-black/85 p-4">
-    <div className="relative w-full max-w-lg rounded-2xl border-4 border-cyan-300 bg-slate-950 p-6 text-white">
+  if (mode === 'redeem') return <div className="fixed inset-0 z-[10036] flex items-center justify-center bg-black/85 p-2 sm:p-4">
+    <div className="relative max-h-[calc(100dvh-1rem)] w-full max-w-lg overflow-y-auto overscroll-contain rounded-2xl border-4 border-cyan-300 bg-slate-950 p-4 text-white sm:max-h-[calc(100dvh-2rem)] sm:p-6">
       <button onClick={onClose} className="absolute right-3 top-3 rounded-lg border border-slate-600 bg-slate-900 p-2 text-slate-300" aria-label={trans('あとで決める', languageMode)}><X size={18} /></button>
       <div className="text-center text-xs font-black tracking-[.25em] text-cyan-300">DEVICE LINK</div><h2 className="my-3 text-center text-2xl font-black">{trans('コードで引き継ぐ', languageMode)}</h2><p className="mb-5 text-center text-sm font-bold leading-6 text-slate-300">{trans('すでに参加している端末で発行した8文字のコードを入力してください。', languageMode)}</p>
       <input value={transferCode} onChange={(event) => setTransferCode(event.target.value.toUpperCase())} maxLength={9} autoCapitalize="characters" className="mb-4 w-full rounded-xl border-2 border-cyan-500 bg-black px-4 py-4 text-center font-mono text-3xl font-black uppercase tracking-[.12em] text-white" placeholder="ABCD-EFGH" />
@@ -87,34 +87,34 @@ const OnlineNameSetupModal: React.FC<Props> = ({ open, languageMode, onClose, on
     } finally { setLoading(false); }
   };
 
-  return <div className="fixed inset-0 z-[10036] flex items-center justify-center bg-black/85 p-4">
-    <div className="relative w-full max-w-2xl overflow-hidden rounded-2xl border-4 border-lime-300 bg-slate-950 p-5 text-white shadow-[0_0_45px_rgba(190,242,100,0.28)]">
-      <button onClick={onClose} className="absolute right-3 top-3 rounded-lg border border-slate-600 bg-slate-900 p-2 text-slate-300 hover:text-white" aria-label={trans('あとで決める', languageMode)}><X size={18} /></button>
-      <div className="mb-2 text-center text-xs font-black tracking-[0.3em] text-lime-300">ONLINE RANKING</div>
-      <h2 className="mb-2 text-center text-2xl font-black">{trans('ランキング用の公開名を決めよう', languageMode)}</h2>
-      <p className="mx-auto mb-5 max-w-lg text-center text-sm font-bold leading-6 text-slate-300">{trans('本名や学校名は使わず、ランキングでみんなに見せる名前を選んでください。あとからでも設定できます。', languageMode)}</p>
-      <button onClick={() => setMode('redeem')} className="mx-auto mb-5 flex items-center gap-2 rounded-lg border border-cyan-500/60 bg-cyan-950/60 px-4 py-2 text-xs font-black text-cyan-100"><Smartphone size={16} />{trans('別の端末からコードで引き継ぐ', languageMode)}</button>
+  return <div className="fixed inset-0 z-[10036] flex items-center justify-center bg-black/85 p-2 sm:p-4">
+    <div className="relative max-h-[calc(100dvh-1rem)] w-full max-w-2xl overflow-y-auto overscroll-contain rounded-2xl border-4 border-lime-300 bg-slate-950 p-3 text-white shadow-[0_0_45px_rgba(190,242,100,0.28)] sm:max-h-[calc(100dvh-2rem)] sm:p-5">
+      <button onClick={onClose} className="absolute right-2 top-2 rounded-lg border border-slate-600 bg-slate-900 p-1.5 text-slate-300 hover:text-white sm:right-3 sm:top-3 sm:p-2" aria-label={trans('あとで決める', languageMode)}><X size={18} /></button>
+      <div className="mb-1 pr-9 text-center text-[10px] font-black tracking-[0.24em] text-lime-300 sm:mb-2 sm:pr-0 sm:text-xs sm:tracking-[0.3em]">ONLINE RANKING</div>
+      <h2 className="mb-1 pr-9 text-center text-lg font-black leading-tight sm:mb-2 sm:pr-0 sm:text-2xl">{trans('ランキング用の公開名を決めよう', languageMode)}</h2>
+      <p className="mx-auto mb-3 max-w-lg text-center text-xs font-bold leading-5 text-slate-300 sm:mb-5 sm:text-sm sm:leading-6">{trans('本名や学校名は使わず、ランキングでみんなに見せる名前を選んでください。あとからでも設定できます。', languageMode)}</p>
+      <button onClick={() => setMode('redeem')} className="mx-auto mb-3 flex items-center gap-2 rounded-lg border border-cyan-500/60 bg-cyan-950/60 px-3 py-2 text-[11px] font-black text-cyan-100 sm:mb-5 sm:px-4 sm:text-xs"><Smartphone size={15} />{trans('別の端末からコードで引き継ぐ', languageMode)}</button>
 
-      <div className="mb-4 grid grid-cols-1 gap-2 sm:grid-cols-3">
-        {suggestions.map((suggestion) => <button key={suggestion} onClick={() => setName(suggestion)} className={`rounded-xl border px-3 py-3 text-sm font-black ${name === suggestion ? 'border-lime-300 bg-lime-300 text-slate-950' : 'border-slate-600 bg-slate-900 text-slate-100 hover:border-lime-500'}`}>{suggestion}</button>)}
+      <div className="mb-2 grid grid-cols-3 gap-1.5 sm:mb-4 sm:gap-2">
+        {suggestions.map((suggestion) => <button key={suggestion} onClick={() => setName(suggestion)} className={`min-w-0 break-words rounded-lg border px-1.5 py-2 text-[11px] font-black leading-tight sm:rounded-xl sm:px-3 sm:py-3 sm:text-sm ${name === suggestion ? 'border-lime-300 bg-lime-300 text-slate-950' : 'border-slate-600 bg-slate-900 text-slate-100 hover:border-lime-500'}`}>{suggestion}</button>)}
       </div>
-      <button onClick={() => void loadSuggestions()} className="mx-auto mb-5 flex items-center gap-2 rounded-lg border border-cyan-500/60 bg-cyan-950/60 px-4 py-2 text-xs font-black text-cyan-100"><Dice5 size={16} />{trans('ほかの候補を見る', languageMode)}</button>
+      <button onClick={() => void loadSuggestions()} className="mx-auto mb-3 flex items-center gap-2 rounded-lg border border-cyan-500/60 bg-cyan-950/60 px-3 py-1.5 text-[11px] font-black text-cyan-100 sm:mb-5 sm:px-4 sm:py-2 sm:text-xs"><Dice5 size={15} />{trans('ほかの候補を見る', languageMode)}</button>
 
-      <label className="mb-4 block text-xs font-black text-slate-300">{trans('自由入力', languageMode)}
-        <input value={name} onChange={(event) => setName(event.target.value)} maxLength={16} className="mt-2 w-full rounded-xl border-2 border-slate-600 bg-black px-4 py-3 text-lg font-black text-white outline-none focus:border-lime-300" placeholder={trans('2～16文字', languageMode)} />
+      <label className="mb-3 block text-[11px] font-black text-slate-300 sm:mb-4 sm:text-xs">{trans('自由入力', languageMode)}
+        <input value={name} onChange={(event) => setName(event.target.value)} maxLength={16} className="mt-1.5 w-full rounded-xl border-2 border-slate-600 bg-black px-3 py-2.5 text-base font-black text-white outline-none focus:border-lime-300 sm:mt-2 sm:px-4 sm:py-3 sm:text-lg" placeholder={trans('2～16文字', languageMode)} />
       </label>
 
-      <label className="mb-4 flex cursor-pointer items-start gap-3 rounded-xl border border-slate-700 bg-slate-900/80 p-3 text-xs font-bold leading-5 text-slate-300">
+      <label className="mb-3 flex cursor-pointer items-start gap-2 rounded-xl border border-slate-700 bg-slate-900/80 p-2.5 text-[10px] font-bold leading-4 text-slate-300 sm:mb-4 sm:gap-3 sm:p-3 sm:text-xs sm:leading-5">
         <input type="checkbox" checked={accepted} onChange={(event) => setAccepted(event.target.checked)} className="mt-1 h-4 w-4 accent-lime-400" />
         <span><ShieldCheck size={16} className="mr-1 inline text-lime-300" />{trans('公開名と集計済みの記録をオンラインランキングに送信します。本名・学年・組・番号・問題文・回答内容は送信しません。', languageMode)}</span>
       </label>
 
       {error && <div className="mb-4 rounded-lg border border-red-500 bg-red-950/60 p-3 text-center text-xs font-bold text-red-100">{error}</div>}
-      <div className="flex flex-col-reverse gap-2 sm:flex-row">
-        <button onClick={onClose} className="flex-1 rounded-xl border border-slate-600 bg-slate-800 px-4 py-3 font-black text-slate-200">{trans('あとで決める', languageMode)}</button>
-        <button onClick={() => void submit()} disabled={!accepted || !name.trim() || loading} className="flex flex-[1.4] items-center justify-center gap-2 rounded-xl bg-lime-300 px-4 py-3 font-black text-slate-950 disabled:cursor-not-allowed disabled:opacity-40"><Check size={18} />{loading ? trans('登録中…', languageMode) : trans('この名前で参加する', languageMode)}</button>
+      <div className="grid grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)] gap-2">
+        <button onClick={onClose} className="min-w-0 rounded-xl border border-slate-600 bg-slate-800 px-2 py-2.5 text-sm font-black text-slate-200 sm:px-4 sm:py-3 sm:text-base">{trans('あとで決める', languageMode)}</button>
+        <button onClick={() => void submit()} disabled={!accepted || !name.trim() || loading} className="flex min-w-0 items-center justify-center gap-1.5 rounded-xl bg-lime-300 px-2 py-2.5 text-sm font-black text-slate-950 disabled:cursor-not-allowed disabled:opacity-40 sm:gap-2 sm:px-4 sm:py-3 sm:text-base"><Check size={17} />{loading ? trans('登録中…', languageMode) : trans('この名前で参加する', languageMode)}</button>
       </div>
-      <div className="mt-4 flex items-center justify-center gap-2 text-[10px] font-bold text-slate-500"><Globe2 size={12} />{trans('同じ名前のプレイヤーは識別コードで区別されます。', languageMode)}</div>
+      <div className="mt-2 flex items-center justify-center gap-1.5 text-center text-[9px] font-bold leading-4 text-slate-500 sm:mt-4 sm:gap-2 sm:text-[10px]"><Globe2 className="shrink-0" size={12} />{trans('同じ名前のプレイヤーは識別コードで区別されます。', languageMode)}</div>
     </div>
   </div>;
 };
