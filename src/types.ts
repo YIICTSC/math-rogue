@@ -790,6 +790,13 @@ export interface AssignmentPayload {
   gameMode: 'FREE' | 'CHALLENGE_ONLY';
   answerMode: AnswerMode;
   createdAt: string;
+  managementPortal?: {
+    version: number;
+    unitId: string;
+    subject?: string;
+    description?: string;
+    rewardEnabled?: boolean;
+  };
 }
 
 export interface AssignmentAnswerRecord {

@@ -28,6 +28,7 @@ import TypingModeSelectionScreen from './components/TypingModeSelectionScreen';
 import DifficultySelectionScreen from './components/DifficultySelectionScreen';
 import RankingScreen from './components/RankingScreen';
 import OnlineNameSetupModal from './components/OnlineNameSetupModal';
+import AssignmentInboxModal from './components/AssignmentInboxModal';
 import MathChallengeScreen from './components/MathChallengeScreen';
 import KanjiChallengeScreen from './components/KanjiChallengeScreen';
 import EnglishChallengeScreen from './components/EnglishChallengeScreen';
@@ -84,6 +85,7 @@ import { generateEnemyName } from './services/geminiService';
 import { generateDungeonMap } from './services/mapGenerator';
 import { parseTransferData, serializeTransferData, storageService } from './services/storageService';
 import { onlineRankingService, type OnlineRankingProfile, type OnlineReward } from './services/onlineRankingService';
+import { managementPortalService, type ManagementProfile } from './services/managementPortalService';
 import { generateEvent, generateLegacyEvent } from './services/eventService';
 import { createAssignmentRewardCard, createHolographicCard, getUpgradedCard, synthesizeCards } from './utils/cardUtils';
 import { AZUKI_BOSS_FLAG, AZUKI_BOSS_NAME, AZUKI_ENCOUNTER_FLAG, AZUKI_REWARD_CARDS } from './data/azukiBoss';
@@ -1399,6 +1401,8 @@ const App: React.FC = () => {
     const [onlineNamePromptDismissed, setOnlineNamePromptDismissed] = useState(false);
     const [rankingRewardNotices, setRankingRewardNotices] = useState<OnlineReward[]>([]);
     const rankingRewardCheckedRef = useRef(false);
+    const [managementProfile, setManagementProfile] = useState<ManagementProfile | null>(() => managementPortalService.getProfile());
+    const [showAssignmentInbox, setShowAssignmentInbox] = useState(false);
     const [currentAssignment, setCurrentAssignment] = useState<AssignmentPayload | null>(() => storageService.getCurrentAssignment());
     const [assignmentProgressVersion, setAssignmentProgressVersion] = useState(0);
     const [assignmentProgressNotice, setAssignmentProgressNotice] = useState<{
@@ -1541,6 +1545,24 @@ const App: React.FC = () => {
         const url = new URL(window.location.href);
         url.searchParams.delete('assignment');
         window.history.replaceState({}, '', url.toString());
+    }, []);
+
+    useEffect(() => {
+        if (!managementProfile) return;
+        const flush = () => { void managementPortalService.flushProgress(); };
+        flush();
+        window.addEventListener('online', flush);
+        return () => window.removeEventListener('online', flush);
+    }, [managementProfile]);
+
+    const openManagedAssignment = useCallback((assignment: AssignmentPayload) => {
+        storageService.saveCurrentAssignment(assignment);
+        setCurrentAssignment(assignment);
+        setCompletedAssignmentProblemSource(null);
+        setAssignmentLetterSource('title');
+        setShowAssignmentInbox(false);
+        setShowAssignmentLetter(true);
+        setGameState(prev => ({ ...prev, screen: GameScreen.START_MENU }));
     }, []);
 
     const markDailyAssignmentCompleted = useCallback((assignmentId: string | undefined) => {
@@ -12254,6 +12276,9 @@ const App: React.FC = () => {
             elapsedMs: Math.max(0, result.elapsedMs || 0),
             answeredAt: new Date().toISOString(),
         });
+        if (isAssignmentAnswer && assignment.managementPortal) {
+            managementPortalService.queueAnswer(assignment, result);
+        }
         if (isAssignmentAnswer) {
             setAssignmentProgressVersion(prev => prev + 1);
         }
@@ -12288,6 +12313,11 @@ const App: React.FC = () => {
                 }
                 if (isAssignmentComplete && !currentAssignment) {
                     markDailyAssignmentCompleted(assignment.id);
+                }
+                if (isAssignmentComplete && assignment.managementPortal) {
+                    void managementPortalService.completeAssignment(assignment.id)
+                        .then(() => managementPortalService.claimPendingRewards(assignment.id))
+                        .catch(() => undefined);
                 }
                 setAssignmentProgressNotice({
                     type: isAssignmentComplete ? 'ASSIGNMENT_COMPLETE' : 'UNIT_COMPLETE',
@@ -12327,6 +12357,11 @@ const App: React.FC = () => {
             }
             if (isAssignmentComplete && !currentAssignment) {
                 markDailyAssignmentCompleted(assignment.id);
+            }
+            if (isAssignmentComplete && assignment.managementPortal) {
+                void managementPortalService.completeAssignment(assignment.id)
+                    .then(() => managementPortalService.claimPendingRewards(assignment.id))
+                    .catch(() => undefined);
             }
             setAssignmentProgressNotice({
                 type: isAssignmentComplete ? 'ASSIGNMENT_COMPLETE' : 'UNIT_COMPLETE',
@@ -15292,7 +15327,20 @@ const App: React.FC = () => {
                             {(!isMathDebugSkipped && !isDebugHpOne && !isMiniGameDebugUnlocked) && <div className="start-menu-debug-spacer mb-2 h-2"></div>}
 
                             <div className="start-menu-button-panel flex w-full flex-col items-center">
-                                <div className="mb-4 flex items-stretch justify-center gap-2">
+                                <div className="mb-4 flex flex-wrap items-stretch justify-center gap-2">
+                                    <button
+                                        type="button"
+                                        onClick={() => setShowAssignmentInbox(true)}
+                                        className={`flex h-10 items-center gap-2 rounded-none border-2 px-3 text-xs font-black shadow-lg transition-colors ${
+                                            managementProfile
+                                                ? 'border-cyan-300 bg-cyan-950/85 text-cyan-100 hover:bg-cyan-900'
+                                                : 'border-slate-500 bg-slate-950/85 text-slate-200 hover:bg-slate-800'
+                                        }`}
+                                    >
+                                        <ClipboardList size={16} />
+                                        {trans(managementProfile ? '課題受信箱' : '課題連携', languageMode)}
+                                        {managementProfile && <span className="h-2 w-2 rounded-full bg-emerald-400 shadow-[0_0_8px_rgba(74,222,128,0.9)]" />}
+                                    </button>
                                     {assignmentLetter && isAssignmentLetterWithinDeadline && (
                                         <button
                                             type="button"
@@ -17498,6 +17546,12 @@ const App: React.FC = () => {
                     </div>
                 )}
                 {renderStudentGradeSurvey()}
+                <AssignmentInboxModal
+                    open={showAssignmentInbox && !showStudentGradeSurvey}
+                    onClose={() => setShowAssignmentInbox(false)}
+                    onSelect={openManagedAssignment}
+                    onProfileChange={setManagementProfile}
+                />
                 <OnlineNameSetupModal
                     open={showOnlineNameSetup && !showStudentGradeSurvey}
                     profile={onlineRankingProfile}
