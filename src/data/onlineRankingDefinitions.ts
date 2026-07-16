@@ -20,10 +20,10 @@ export const ONLINE_RANKING_FALLBACKS: OnlineRankingDefinition[] = [
   { id: 'paper_plane_score', label: '紙飛行機バトル', unit: 'pt', accent: 'sky', description: '紙飛行機バトルの最高スコア', calculation: '期間内の紙飛行機バトル終了スコアの最大値' },
   { id: 'go_home_score', label: '帰宅ダッシュ', unit: 'pt', accent: 'yellow', description: '帰宅ダッシュの最高スコア', calculation: '期間内の帰宅ダッシュ終了スコアの最大値' },
   { id: 'growth_clear_count', label: '冒険踏破王', unit: '回', accent: 'emerald', description: '学習ローグの累計クリア回数', calculation: '端末に保存された学習ローグの累計クリア回数' },
-  { id: 'growth_mastered_modes', label: '学びの達人王', unit: '分野', accent: 'mint', description: 'マスターした学習分野の数', calculation: 'マスター済み学習モードの重複しない種類数' },
+  { id: 'growth_mastered_modes', label: '学びの達人王', unit: '分野', accent: 'mint', description: 'マスターした学習分野の数', calculation: 'タイピング系を除き、累計正解数が100問以上になった学習モードの重複しない種類数' },
 ];
 
-export type OnlineRankingCategoryId = 'learning' | 'adventure' | 'cards' | 'minigames' | 'growth';
+export type OnlineRankingCategoryId = 'learning' | 'adventure' | 'cards' | 'minigames';
 
 export type OnlineRankingCategory = {
   id: OnlineRankingCategoryId;
@@ -37,13 +37,13 @@ export const ONLINE_RANKING_CATEGORIES: OnlineRankingCategory[] = [
     id: 'learning',
     label: '問題・課題',
     caption: 'LEARNING',
-    rankingIds: ['learning_correct', 'learning_accuracy', 'learning_retry', 'assignment_complete'],
+    rankingIds: ['learning_correct', 'learning_accuracy', 'learning_retry', 'assignment_complete', 'growth_mastered_modes'],
   },
   {
     id: 'adventure',
     label: '冒険・協力',
     caption: 'ADVENTURE',
-    rankingIds: ['adventure_score', 'coop_adventure_score'],
+    rankingIds: ['adventure_score', 'coop_adventure_score', 'growth_clear_count'],
   },
   {
     id: 'cards',
@@ -56,12 +56,6 @@ export const ONLINE_RANKING_CATEGORIES: OnlineRankingCategory[] = [
     label: 'ミニゲーム',
     caption: 'MINIGAMES',
     rankingIds: ['poker_best_hand', 'survivor_score', 'dungeon_score', 'dungeon2_score', 'kocho_score', 'paper_plane_score', 'go_home_score'],
-  },
-  {
-    id: 'growth',
-    label: '成長',
-    caption: 'GROWTH',
-    rankingIds: ['growth_clear_count', 'growth_mastered_modes'],
   },
 ];
 

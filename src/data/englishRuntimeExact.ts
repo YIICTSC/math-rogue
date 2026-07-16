@@ -333,6 +333,7 @@ export const ENGLISH_RUNTIME_EXACT: Record<string, string> = {
   '期間内の帰宅ダッシュ終了スコアの最大値': 'Highest Dash Home final score in the selected period',
   '端末に保存された学習ローグの累計クリア回数': 'Total Learning Rogue clears saved on this device',
   'マスター済み学習モードの重複しない種類数': 'Number of distinct mastered learning modes',
+  'タイピング系を除き、累計正解数が100問以上になった学習モードの重複しない種類数': 'Number of distinct non-typing learning modes with at least 100 total correct answers',
   '放課後ポーカー': 'After-School Poker',
   '点': 'points',
   '放課後ポーカーの最高ハンド得点': 'Highest hand score in After-School Poker',
