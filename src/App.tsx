@@ -93,6 +93,7 @@ import { assetUrl } from './utils/assetPaths';
 import { getAssignmentFromUrl, getAssignmentModePool, getAssignmentRepresentativeMode } from './utils/assignmentUtils';
 import { createDailyAssignment, getCurrentSchoolYear, getStudentGradeOptions, isAdultProfile, promoteStudentProfileForSchoolYear } from './utils/dailyAssignmentUtils';
 import { getInitialLanguageMode, isEnglishDeviceLocale, isJapaneseDeviceLocale } from './utils/localePreferences';
+import { getOnlineRankingLabel, getOnlineRankingPeriodLabel } from './data/onlineRankingDefinitions';
 import { formatProblemUnitName } from './utils/problemUnitName';
 import { getDifficultyConfig } from './config/difficulty';
 import { CARD_ERASER_TEMPLATE_ID, CARD_ERASER_NAME, eraseCardEffect, getErasableEffectOptions } from './utils/cardEraser';
@@ -17517,12 +17518,21 @@ const App: React.FC = () => {
                         <div className="w-full max-w-lg overflow-hidden rounded-2xl border-4 border-yellow-300 bg-gradient-to-b from-slate-900 to-black p-6 text-center text-white shadow-[0_0_55px_rgba(250,204,21,0.42)]">
                             <div className="mb-2 text-xs font-black tracking-[0.32em] text-yellow-300">RANK IN!</div>
                             <h2 className="mb-2 text-3xl font-black text-yellow-100">{trans("ランキング入賞！", languageMode)}</h2>
-                            <p className="mb-5 text-sm font-bold leading-6 text-slate-300">
-                                {trans("いずれかのランキングで3位以内に入りました。ご褒美カードを獲得！", languageMode)}
+                            <div className="mb-5 rounded-xl border border-yellow-300/40 bg-yellow-950/35 px-4 py-3">
+                                <div className="text-lg font-black text-yellow-100">{trans(getOnlineRankingLabel(rankingRewardNotices[0].rankingId), languageMode)}</div>
+                                <div className="mt-1 text-xs font-bold text-yellow-200/80">
+                                    {trans(getOnlineRankingPeriodLabel(rankingRewardNotices[0].periodType), languageMode)}
+                                    {rankingRewardNotices[0].periodKey ? ` ・ ${rankingRewardNotices[0].periodKey}` : ''}
+                                </div>
+                                <div className="mt-3 text-4xl font-black text-white">
+                                    {languageMode === 'ENGLISH' ? `RANK ${rankingRewardNotices[0].awardedRank}` : `第${rankingRewardNotices[0].awardedRank}位`}
+                                </div>
+                            </div>
+                            <p className="mb-4 text-sm font-bold leading-6 text-slate-300">
+                                {trans("入賞記念のご褒美カードを獲得しました！", languageMode)}
                             </p>
                             <div className="mx-auto mb-5 max-w-xs rounded-2xl border-2 border-cyan-300 bg-cyan-950/60 p-5 shadow-[0_0_30px_rgba(34,211,238,0.25)]">
-                                <div className="mb-1 text-5xl font-black text-yellow-300">#{rankingRewardNotices[0].awardedRank}</div>
-                                <div className="mb-3 text-xs font-black text-cyan-200">{rankingRewardNotices[0].rankingId} / {rankingRewardNotices[0].periodType}</div>
+                                <div className="mb-2 text-[10px] font-black tracking-[0.22em] text-cyan-200">REWARD CARD</div>
                                 <div className="text-xl font-black text-white">{rankingRewardNotices[0].card.name}</div>
                                 <div className="mt-2 text-xs font-bold text-slate-300">{rankingRewardNotices[0].card.description}</div>
                             </div>
