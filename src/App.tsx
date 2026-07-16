@@ -5989,6 +5989,7 @@ const App: React.FC = () => {
 
         const combatState: GameState = {
             ...gameState,
+            visualTheme,
             screen: GameScreen.BATTLE,
             act: 3,
             floor: 16,

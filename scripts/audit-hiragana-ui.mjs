@@ -35,6 +35,8 @@ const server = await createServer({ server: { middlewareMode: true }, appType: '
 try {
   const { trans } = await server.ssrLoadModule('/src/utils/textUtils.ts');
   const { MINI_GAMES } = await server.ssrLoadModule('/src/miniGameConfig.ts');
+  const { TYPING_LESSON_DEFINITIONS } = await server.ssrLoadModule('/src/data/typingLessonConfig.ts');
+  const { ONLINE_RANKING_FALLBACKS, ONLINE_RANKING_CATEGORIES } = await server.ssrLoadModule('/src/data/onlineRankingDefinitions.ts');
   for (const game of MINI_GAMES) {
     for (const [field, value] of [['name', game.name], ['description', game.description]]) {
       const output = trans(value, 'HIRAGANA');
@@ -42,6 +44,22 @@ try {
         failures.push(`src/miniGameConfig.ts [unlock notification ${field}] ${value} => ${output}`);
       }
     }
+  }
+  for (const lesson of TYPING_LESSON_DEFINITIONS) {
+    for (const value of [lesson.title, lesson.shortTitle, lesson.description, ...lesson.stages]) {
+      const output = trans(value, 'HIRAGANA');
+      if (KANJI.test(output)) failures.push(`typing lesson ${value} => ${output}`);
+    }
+  }
+  for (const ranking of ONLINE_RANKING_FALLBACKS) {
+    for (const value of [ranking.label, ranking.unit, ranking.description]) {
+      const output = trans(value, 'HIRAGANA');
+      if (KANJI.test(output)) failures.push(`online ranking ${value} => ${output}`);
+    }
+  }
+  for (const category of ONLINE_RANKING_CATEGORIES) {
+    const output = trans(category.label, 'HIRAGANA');
+    if (KANJI.test(output)) failures.push(`online ranking category ${category.label} => ${output}`);
   }
 
   for (const file of [

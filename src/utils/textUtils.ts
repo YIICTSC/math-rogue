@@ -9122,6 +9122,12 @@ export const buildEnglishCardDescription = (card: Card): string => {
 export const sanitizeEnglishText = (text: string): string => {
     if (!text || !JAPANESE_TEXT_PATTERN.test(text)) return text;
 
+    const prefixedBossName = text.match(/^ボス[:：]\s*(.+)$/);
+    if (prefixedBossName) {
+        const translatedName = sanitizeEnglishText(prefixedBossName[1]);
+        return `Boss: ${/^(Battle|Event Details|Choose Option)$/.test(translatedName) ? 'School Threat' : translatedName}`;
+    }
+
     const schoolEventExact = buildEnglishSchoolEventFallback(text);
     if (schoolEventExact) return schoolEventExact;
 
@@ -10360,6 +10366,8 @@ const translateHiraganaDynamicUi = (text: string): string | null => {
         [/^攻撃しつつ防御: (\d+)ダメージ \/ ブロック(\d+)$/, (_, damage, block) => `こうげきしつつぼうぎょ: ${damage}ダメージ / ブロック${block}`],
         [/^特殊攻撃: (\d+)ダメージ \+ 粘液\(状態異常カード\)(?: (\d+))?$/, (_, damage, amount = '') => `とくしゅこうげき: ${damage}ダメージ + ねんえき(じょうたいいじょうカード)${amount ? ` ${amount}` : ''}`],
         [/^特殊攻撃: 防御貫通で(\d+)ダメージ$/, (_, damage) => `とくしゅこうげき: ぼうぎょをむしして${damage}ダメージ`],
+        [/^強化行動: (.+)$/, (_, detail) => `きょうかこうどう: ${detail}`],
+        [/^妨害行動: (.+)$/, (_, detail) => `ぼうがいこうどう: ${detail}`],
         [/^敵HP x(\d+\.\d+)$/, (_, multiplier) => `てきHP x${multiplier}`],
         [/^休憩時理科室 (\d+)%$/, (_, chance) => `きゅうけいじ りかしつ ${chance}%`],
         [/^削除費 \+(\d+)G$/, (_, cost) => `さくじょひ +${cost}G`],
