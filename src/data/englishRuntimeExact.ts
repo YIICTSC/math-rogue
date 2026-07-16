@@ -296,7 +296,7 @@ export const ENGLISH_RUNTIME_EXACT: Record<string, string> = {
   '1人での冒険の最高スコア': 'Highest solo adventure score',
   '協力プレイ冒険': 'Co-op Adventure',
   '登録済みの仲間と協力して記録したチーム最高スコア': 'Highest team score recorded with registered co-op partners',
-  '課題カード最強王': 'Assignment Card Power Champion',
+  '最強カード王': 'Strongest Card Champion',
   '威力': 'power',
   '標準条件の最大威力': 'Highest power under standard conditions',
   'カードコスパ王': 'Card Efficiency Champion',

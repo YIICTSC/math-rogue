@@ -7,7 +7,7 @@ export const ONLINE_RANKING_FALLBACKS: OnlineRankingDefinition[] = [
   { id: 'assignment_complete', label: '課題達成王', unit: '件', accent: 'amber', description: '達成した課題数' },
   { id: 'adventure_score', label: '冒険王', unit: 'pt', accent: 'rose', description: '1人での冒険の最高スコア' },
   { id: 'coop_adventure_score', label: '協力プレイ冒険', unit: 'pt', accent: 'lime', description: '登録済みの仲間と協力して記録したチーム最高スコア', scope: 'team' },
-  { id: 'card_standard_power', label: '課題カード最強王', unit: '威力', accent: 'lime', description: '標準条件の最大威力' },
+  { id: 'card_standard_power', label: '最強カード王', unit: '威力', accent: 'lime', description: '標準条件の最大威力' },
   { id: 'card_efficiency', label: 'カードコスパ王', unit: '威力/EN', accent: 'orange', description: 'エナジー1あたりの最大標準威力' },
   { id: 'card_collection', label: 'カードコレクター', unit: '種', accent: 'blue', description: 'カードの収集数' },
   { id: 'card_collection_rate', label: 'カード収集率王', unit: '%', accent: 'teal', description: '通常カード全体に対する収集率' },
