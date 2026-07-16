@@ -51,8 +51,13 @@ type ProgressEvent = {
 const PROFILE_KEY = 'learning_rogue_management_profile_v1';
 const ASSIGNMENTS_KEY = 'learning_rogue_management_assignments_v1';
 const PROGRESS_QUEUE_KEY = 'learning_rogue_management_progress_queue_v1';
+const COMPLETION_QUEUE_KEY = 'learning_rogue_management_completion_queue_v1';
 const API_OVERRIDE_KEY = 'learning_rogue_management_api_v1';
 const DEFAULT_API_URL = 'https://learning-rogue-management.yishigeict.chatgpt.site';
+
+class ManagementRequestError extends Error {
+  constructor(message: string, readonly status: number) { super(message); }
+}
 
 const readJson = <T>(key: string, fallback: T): T => {
   if (typeof window === 'undefined') return fallback;
@@ -89,7 +94,7 @@ const request = async <T>(path: string, init: RequestInit = {}, token?: string):
     },
   });
   const data = await response.json().catch(() => ({})) as T & { error?: string };
-  if (!response.ok) throw new Error(data.error || '管理ポータルと通信できませんでした。');
+  if (!response.ok) throw new ManagementRequestError(data.error || '管理ポータルと通信できませんでした。', response.status);
   return data;
 };
 
@@ -136,6 +141,16 @@ const makeEventId = () => typeof crypto !== 'undefined' && 'randomUUID' in crypt
 
 const getQueue = () => readJson<ProgressEvent[]>(PROGRESS_QUEUE_KEY, []).filter(Boolean).slice(-300);
 const saveQueue = (queue: ProgressEvent[]) => writeJson(PROGRESS_QUEUE_KEY, queue.slice(-300));
+const getCompletionQueue = () => Array.from(new Set(readJson<string[]>(COMPLETION_QUEUE_KEY, []).filter((id) => typeof id === 'string' && id)));
+const saveCompletionQueue = (queue: string[]) => writeJson(COMPLETION_QUEUE_KEY, Array.from(new Set(queue)).slice(-100));
+
+const clearLocalLink = () => {
+  if (typeof window === 'undefined') return;
+  window.localStorage.removeItem(PROFILE_KEY);
+  window.localStorage.removeItem(ASSIGNMENTS_KEY);
+  window.localStorage.removeItem(PROGRESS_QUEUE_KEY);
+  window.localStorage.removeItem(COMPLETION_QUEUE_KEY);
+};
 
 export const managementPortalService = {
   getProfile: () => readJson<ManagementProfile | null>(PROFILE_KEY, null),
@@ -156,12 +171,11 @@ export const managementPortalService = {
     return profile;
   },
 
-  unlinkDevice() {
-    if (typeof window !== 'undefined') {
-      window.localStorage.removeItem(PROFILE_KEY);
-      window.localStorage.removeItem(ASSIGNMENTS_KEY);
-      window.localStorage.removeItem(PROGRESS_QUEUE_KEY);
-    }
+  async unlinkDevice() {
+    const profile = this.getProfile();
+    if (!profile) { clearLocalLink(); return; }
+    await request('/api/v1/learner-devices/revoke-current', { method: 'POST', body: '{}' }, profile.token);
+    clearLocalLink();
   },
 
   async fetchAssignments() {
@@ -215,11 +229,37 @@ export const managementPortalService = {
     }
   },
 
-  async completeAssignment(assignmentId: string) {
+  async flushCompletions() {
     const profile = this.getProfile();
-    if (!profile) return;
-    await this.flushProgress();
-    await request(`/api/v1/learner/assignments/${encodeURIComponent(assignmentId)}/complete`, { method: 'POST', body: '{}' }, profile.token);
+    const assignmentIds = getCompletionQueue();
+    if (!profile || assignmentIds.length === 0 || (typeof navigator !== 'undefined' && !navigator.onLine)) return { completed: 0, remaining: assignmentIds.length };
+    const remaining: string[] = [];
+    let completed = 0;
+    for (const assignmentId of assignmentIds.slice(0, 20)) {
+      try {
+        await request(`/api/v1/learner/assignments/${encodeURIComponent(assignmentId)}/complete`, { method: 'POST', body: '{}' }, profile.token);
+        await this.claimPendingRewards(assignmentId);
+        completed += 1;
+      } catch (reason) {
+        if (reason instanceof ManagementRequestError && reason.status === 404) continue;
+        remaining.push(assignmentId);
+      }
+    }
+    remaining.push(...assignmentIds.slice(20));
+    saveCompletionQueue(remaining);
+    return { completed, remaining: remaining.length };
+  },
+
+  async flushPending() {
+    const progress = await this.flushProgress();
+    const completions = await this.flushCompletions();
+    return { progress, completions };
+  },
+
+  async completeAssignment(assignmentId: string) {
+    if (!this.getProfile()) return;
+    saveCompletionQueue([...getCompletionQueue(), assignmentId]);
+    await this.flushPending();
   },
 
   async claimPendingRewards(assignmentId?: string) {
