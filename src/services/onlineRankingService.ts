@@ -98,6 +98,16 @@ const saveQueue = (queue: QueuedSubmission[]) => {
   try { window.localStorage.setItem(SUBMISSION_QUEUE_KEY, JSON.stringify(queue.slice(-100))); } catch { /* queue failure must not block play */ }
 };
 
+const isNonPositiveScoreSubmission = (item: Pick<QueuedSubmission, 'path' | 'body'>) => {
+  if (item.path !== '/api/v1/scores' && item.path !== '/api/v1/teams/scores') return false;
+  try {
+    const value = Number((JSON.parse(item.body) as { value?: unknown }).value);
+    return !Number.isFinite(value) || value <= 0;
+  } catch {
+    return false;
+  }
+};
+
 const getSubmissionCompactKey = (path: string, body: string) => {
   try {
     const data = JSON.parse(body) as Record<string, unknown>;
@@ -175,7 +185,9 @@ const submitOrQueue = async (path: string, body: string) => {
 const flushPendingSubmissions = async () => {
   const profile = onlineRankingService.getProfile();
   if (!profile || (typeof navigator !== 'undefined' && !navigator.onLine)) return { sent: 0, remaining: getQueue().length };
-  const queue = getQueue();
+  const storedQueue = getQueue();
+  const queue = storedQueue.filter((item) => !isNonPositiveScoreSubmission(item));
+  if (queue.length !== storedQueue.length) saveQueue(queue);
   const remaining: QueuedSubmission[] = [];
   let sent = 0;
   for (const item of queue.slice(0, 20)) {
@@ -493,6 +505,7 @@ export const onlineRankingService = {
       for (const periodType of ['weekly', 'monthly', 'season', 'all'] as OnlinePeriodType[]) {
         const snapshot = getSnapshot(periodType, profile.registeredAt);
         for (const [rankingId, value] of Object.entries(snapshot.values)) {
+          if (!Number.isFinite(value) || value <= 0) continue;
           await submitOrQueue('/api/v1/scores', JSON.stringify({
             recordId: `snapshot:${rankingId}:${periodType}:${snapshot.periodKey}:${value}`,
             rankingId,
@@ -507,12 +520,14 @@ export const onlineRankingService = {
       }
       const coopRuns = storageService.getLocalScores().filter((entry) => entry.challengeMode === 'COOP' && (entry.teamPublicCodes?.length || 0) >= 2);
       for (const run of coopRuns) {
+        const value = safeMetric(run.score, 100_000_000);
+        if (value <= 0) continue;
         for (const periodType of ['weekly', 'monthly', 'season', 'all'] as OnlinePeriodType[]) {
           await submitOrQueue('/api/v1/teams/scores', JSON.stringify({
             recordId: `${run.id}:${periodType}`,
             rankingId: 'coop_adventure_score',
             periodType,
-            value: safeMetric(run.score, 100_000_000),
+            value,
             occurredAt: new Date(run.date).toISOString(),
             memberPublicCodes: run.teamPublicCodes,
             metadata: { act: safeMetric(run.act, 100), floor: safeMetric(run.floor, 10000), victory: !!run.victory },

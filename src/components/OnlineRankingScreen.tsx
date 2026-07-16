@@ -20,7 +20,10 @@ const OnlineRankingScreen: React.FC<Props> = ({ onBack, onLocal, onRequestName, 
   const load = async (sync = false) => {
     setLoading(true); setError('');
     try {
-      if (sync && profile) await onlineRankingService.syncCurrentSnapshots();
+      if (sync && profile) {
+        try { await onlineRankingService.syncCurrentSnapshots(); }
+        catch (reason) { console.warn('Online ranking snapshot sync failed', reason); }
+      }
       const data = await onlineRankingService.getLeaderboard(rankingId, periodType);
       setEntries(data.entries); setRankings(data.rankings);
     } catch (reason) {
