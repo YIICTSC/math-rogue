@@ -17,6 +17,7 @@ export default function AssignmentInboxModal({ languageMode, onClose, onOpenAssi
   const [assignments, setAssignments] = useState<ManagementAssignment[]>(() => learningManagementService.getCachedAssignments());
   const [busy, setBusy] = useState(false);
   const [message, setMessage] = useState('');
+  const [openingId, setOpeningId] = useState('');
 
   const sync = useCallback(async () => {
     setBusy(true); setMessage('');
@@ -47,6 +48,13 @@ export default function AssignmentInboxModal({ languageMode, onClose, onOpenAssi
     finally { setBusy(false); }
   };
 
+  const openAssignment = async (assignment: ManagementAssignment) => {
+    setOpeningId(assignment.id); setMessage('');
+    try { onOpenAssignment(await learningManagementService.fetchAssignment(assignment.id)); }
+    catch (error) { setMessage(error instanceof Error ? error.message : trans('同期に失敗しました', languageMode)); }
+    finally { setOpeningId(''); }
+  };
+
   return <div className="fixed inset-0 z-[10040] flex items-center justify-center bg-black/90 p-3" onClick={onClose}>
     <div className="w-full max-w-3xl max-h-[92dvh] overflow-y-auto rounded-2xl border-2 border-cyan-400 bg-slate-950 p-4 text-white shadow-2xl" onClick={e => e.stopPropagation()}>
       <div className="mb-4 flex items-start justify-between gap-3">
@@ -60,7 +68,7 @@ export default function AssignmentInboxModal({ languageMode, onClose, onOpenAssi
       </section> : <>
         <div className="mb-3 flex flex-wrap items-center justify-between gap-2 rounded-xl border border-emerald-700 bg-emerald-950/20 p-3 text-sm"><span className="flex items-center gap-2 text-emerald-200"><CheckCircle2 size={17}/>{trans('端末連携済み', languageMode)}</span><div className="flex gap-2"><button disabled={busy} onClick={() => void sync()} className="flex items-center gap-1 rounded-lg border border-cyan-500 px-3 py-2 text-cyan-200"><RefreshCw size={15} className={busy ? 'animate-spin' : ''}/>{trans('同期', languageMode)}</button><button onClick={() => { learningManagementService.unlinkDevice(); setConnection(null); setAssignments([]); }} className="flex items-center gap-1 rounded-lg border border-red-700 px-3 py-2 text-red-300"><Unlink size={15}/>{trans('解除', languageMode)}</button></div></div>
         <div className="space-y-3">{assignments.length === 0 ? <div className="rounded-xl border border-dashed border-slate-600 p-8 text-center text-slate-400">{trans('現在、配信中の課題はありません。', languageMode)}</div> : assignments.map(a => <article key={a.id} className="rounded-xl border border-slate-700 bg-slate-900 p-4">
-          <div className="flex flex-wrap items-start justify-between gap-3"><div><h3 className="font-black text-cyan-100">{a.title}</h3><p className="mt-1 text-sm text-slate-300">{a.unitLabel} ・ {a.correctCount}/{a.targetCorrect} {trans('問正解', languageMode)}</p>{a.description && <p className="mt-2 text-xs text-slate-400">{a.description}</p>}</div><button disabled={a.status === 'completed'} onClick={() => onOpenAssignment(learningManagementService.toAssignmentPayload(a))} className="rounded-lg bg-amber-400 px-4 py-2 font-black text-slate-950 disabled:bg-slate-700 disabled:text-slate-400">{a.status === 'completed' ? trans('達成済み', languageMode) : trans('この課題に挑戦', languageMode)}</button></div>
+          <div className="flex flex-wrap items-start justify-between gap-3"><div><h3 className="font-black text-cyan-100">{a.title}</h3><p className="mt-1 text-sm text-slate-300">{a.unitLabel} ・ {a.correctCount}/{a.targetCorrect} {trans('問正解', languageMode)}</p>{a.description && <p className="mt-2 text-xs text-slate-400">{a.description}</p>}</div><button disabled={a.status === 'completed' || Boolean(openingId)} onClick={() => void openAssignment(a)} className="rounded-lg bg-amber-400 px-4 py-2 font-black text-slate-950 disabled:bg-slate-700 disabled:text-slate-400">{a.status === 'completed' ? trans('達成済み', languageMode) : openingId === a.id ? trans('同期中…', languageMode) : trans('この課題に挑戦', languageMode)}</button></div>
         </article>)}</div>
       </>}
       {message && <p className="mt-3 rounded-lg bg-slate-900 px-3 py-2 text-sm text-cyan-200">{message}</p>}

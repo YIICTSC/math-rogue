@@ -778,6 +778,8 @@ export interface AssignmentCustomProblem {
   question: string;
   answer: string;
   options: string[];
+  imageUrl?: string;
+  imageAlt?: string;
 }
 
 export interface AssignmentPayload {

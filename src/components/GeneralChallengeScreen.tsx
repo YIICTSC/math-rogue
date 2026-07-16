@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { BookOpen, CheckCircle, XCircle, Volume2, Mic } from 'lucide-react';
+import { BookOpen, CheckCircle, XCircle, Volume2, Mic, Maximize2, X } from 'lucide-react';
 import { audioService } from '../services/audioService';
 import { AnswerMode, AssignmentAnswerResult, AssignmentCustomProblem, AssignmentReviewProblem, GameMode, LanguageMode } from '../types';
 import { storageService } from '../services/storageService';
@@ -134,6 +134,8 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
   const [isListening, setIsListening] = useState(false);
   const [speechTranscript, setSpeechTranscript] = useState('');
   const [speechError, setSpeechError] = useState('');
+  const [imageExpanded, setImageExpanded] = useState(false);
+  const [customImageFailed, setCustomImageFailed] = useState(false);
   const visualCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
   const recognitionRef = useRef<BrowserSpeechRecognition | null>(null);
@@ -433,6 +435,8 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
         unitLabel: trans('オリジナル問題', languageMode),
         sourceMode: 'ASSIGNMENT_CUSTOM',
         assignmentProblemId: problem.id,
+        imageUrl: problem.imageUrl,
+        imageAlt: problem.imageAlt,
       }));
       const offset = customProblemPool.length > 0 ? problemOffset % customProblemPool.length : 0;
       const rotatedCustomProblemPool = [
@@ -504,6 +508,8 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
     setSpeechError('');
     setIsListening(false);
     setMapSymbolImageFailed(false);
+    setCustomImageFailed(false);
+    setImageExpanded(false);
     questionStartedAtRef.current = Date.now();
   }, [currentProblemIndex]);
 
@@ -1796,6 +1802,13 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
                     {currentProblem.question}
                 </h3>
 
+                {currentProblem.imageUrl && !customImageFailed && (
+                    <button type="button" onClick={() => setImageExpanded(true)} className="group relative mb-4 flex w-full max-w-[320px] items-center justify-center overflow-hidden rounded-xl border border-cyan-200/40 bg-white p-2" aria-label={trans('タッチでイラスト拡大', languageMode)}>
+                        <img src={currentProblem.imageUrl} alt={currentProblem.imageAlt || trans('問題のイラスト', languageMode)} className="max-h-[240px] w-full object-contain" onError={() => setCustomImageFailed(true)} />
+                        <span className="absolute bottom-2 right-2 rounded-full bg-slate-950/80 p-2 text-cyan-100"><Maximize2 size={16} /></span>
+                    </button>
+                )}
+
                 {currentProblem.audioPrompt && (
                     <button
                         type="button"
@@ -1879,6 +1892,8 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
                     </div>
                 )}
             </div>
+
+            {imageExpanded && currentProblem.imageUrl && <div className="fixed inset-0 z-[10080] flex items-center justify-center bg-black/95 p-3" role="dialog" aria-modal="true" aria-label={currentProblem.imageAlt || trans('問題のイラスト', languageMode)} onClick={() => setImageExpanded(false)}><button type="button" className="absolute right-4 top-4 rounded-full border border-white/50 bg-slate-950 p-3 text-white" onClick={() => setImageExpanded(false)} aria-label={trans('閉じる', languageMode)}><X size={24}/></button><img src={currentProblem.imageUrl} alt={currentProblem.imageAlt || trans('問題のイラスト', languageMode)} className="max-h-[92dvh] max-w-[96vw] object-contain" onClick={(event) => event.stopPropagation()} /></div>}
 
             {!currentProblem.speechPrompt?.freeResponse && answerMode === 'INPUT' && isNumericAnswer(currentProblem.actualCorrectAnswer) && (
             <form onSubmit={handleInputSubmit} className="general-challenge-input w-full space-y-3">

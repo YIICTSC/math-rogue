@@ -25,9 +25,14 @@ export interface ManagementAssignment {
   dueAt?: string | null;
   rewardEnabled: boolean;
   status: string;
+  gameMode?: string;
   correctCount: number;
   answeredCount: number;
   retryCorrectCount: number;
+}
+
+interface ManagementAssignmentDetail extends ManagementAssignment {
+  customProblems?: Array<{ id: string; question: string; answer: string; options: string[]; imageUrl?: string; imageAlt?: string }>;
 }
 
 export interface PendingManagementReward {
@@ -112,13 +117,28 @@ export const learningManagementService = {
     return result.assignments;
   },
 
-  toAssignmentPayload: (assignment: ManagementAssignment): AssignmentPayload => ({
+  fetchAssignment: async (assignmentId: string): Promise<AssignmentPayload> => {
+    const result = await request<{ assignment: ManagementAssignmentDetail }>(`/api/v1/learner/assignments/${encodeURIComponent(assignmentId)}`);
+    const connection = learningManagementService.getConnection();
+    const customProblems = await Promise.all((result.assignment.customProblems || []).map(async (problem) => {
+      if (!problem.imageUrl || !connection) return problem;
+      try {
+        const response = await fetch(problem.imageUrl, { headers: { Authorization: `Bearer ${connection.learnerToken}` } });
+        if (!response.ok) return { ...problem, imageUrl: undefined };
+        return { ...problem, imageUrl: URL.createObjectURL(await response.blob()) };
+      } catch { return { ...problem, imageUrl: undefined }; }
+    }));
+    return learningManagementService.toAssignmentPayload({ ...result.assignment, customProblems });
+  },
+
+  toAssignmentPayload: (assignment: ManagementAssignmentDetail): AssignmentPayload => ({
     id: assignment.id,
     title: assignment.title,
-    units: [{ id: assignment.unitId, name: assignment.unitLabel, modes: [assignment.unitId], targetCorrect: assignment.targetCorrect }],
-    customProblems: [],
+    units: assignment.customProblems?.length ? [] : [{ id: assignment.unitId, name: assignment.unitLabel, modes: [assignment.unitId], targetCorrect: assignment.targetCorrect }],
+    customProblems: assignment.customProblems || [],
+    customTargetCorrect: assignment.customProblems?.length ? assignment.targetCorrect : undefined,
     dueAt: assignment.dueAt || '',
-    gameMode: 'CHALLENGE_ONLY',
+    gameMode: assignment.customProblems?.length ? 'FREE' : 'CHALLENGE_ONLY',
     answerMode: assignment.answerMode.toLowerCase() === 'input' ? 'INPUT' : 'CHOICE',
     createdAt: new Date().toISOString(),
     source: 'MANAGEMENT',

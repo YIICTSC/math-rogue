@@ -362,6 +362,8 @@ export const storageService = {
           question: String(problem.question || ''),
           answer: String(problem.answer || ''),
           options: Array.isArray(problem.options) ? problem.options.map((option) => String(option || '')) : [],
+          imageUrl: problem.imageUrl ? String(problem.imageUrl) : undefined,
+          imageAlt: problem.imageAlt ? String(problem.imageAlt) : undefined,
         })),
         customTargetCorrect: Math.max(1, Number(assignment.customTargetCorrect || (assignment.customProblems || []).length || 10)),
       };

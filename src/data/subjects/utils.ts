@@ -24,6 +24,8 @@ export interface GeneralProblem {
     passageTitle?: string;
     hint?: string;
     unitLabel?: string;
+    imageUrl?: string;
+    imageAlt?: string;
     visual?: ProblemVisual;
     audioPrompt?: {
         text: string;
