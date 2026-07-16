@@ -13,7 +13,7 @@ interface RankingScreenProps {
 }
 
 const RankingScreen: React.FC<RankingScreenProps> = ({ onBack, languageMode, onRequestOnlineName = () => undefined }) => {
-  const [rankingScope, setRankingScope] = useState<'LOCAL' | 'ONLINE'>('LOCAL');
+  const [rankingScope, setRankingScope] = useState<'LOCAL' | 'ONLINE'>('ONLINE');
   const [activeTab, setActiveTab] = useState<'ADVENTURE' | 'POKER' | 'SURVIVOR' | 'DUNGEON' | 'DUNGEON_2' | 'KOCHO' | 'PLANE' | 'GO_HOME'>('ADVENTURE');
   const [adventureData, setAdventureData] = useState<RankingEntry[]>([]);
   const [pokerData, setPokerData] = useState<PokerScoreEntry[]>([]);
