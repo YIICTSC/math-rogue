@@ -46,6 +46,7 @@ export interface CoopParticipantPayload {
   slotId?: string;
   reconnectToken?: string;
   name: string;
+  publicCode?: string;
   imageData?: string;
   disconnected?: boolean;
   selectedCharacterId?: string;
@@ -84,6 +85,7 @@ export interface CoopStartPayload {
 
 interface CoopSetupScreenProps {
   player: Player;
+  publicCode?: string;
   onStart: (payload: CoopStartPayload) => void;
   onClose: () => void;
   visualTheme: 'elementary' | 'high-school' | 'magic';
@@ -129,7 +131,7 @@ const saveCoopResumeInfo = (info: CoopResumeInfo) => {
   window.localStorage.setItem(COOP_RESUME_STORAGE_KEY, JSON.stringify(info));
 };
 
-const CoopSetupScreen: React.FC<CoopSetupScreenProps> = ({ player, onStart, onClose, visualTheme, languageMode }) => {
+const CoopSetupScreen: React.FC<CoopSetupScreenProps> = ({ player, publicCode, onStart, onClose, visualTheme, languageMode }) => {
   const t = (text: string) => languageMode === 'ENGLISH'
     ? (COOP_ENGLISH_COPY[text] || trans(text, languageMode))
     : trans(text, languageMode);
@@ -188,6 +190,7 @@ const CoopSetupScreen: React.FC<CoopSetupScreenProps> = ({ player, onStart, onCl
             slotId: data.slotId || createResumeId('coop-slot'),
             reconnectToken: data.reconnectToken || createResumeId('coop-token'),
             name: data.name,
+            publicCode: data.publicCode,
             imageData: data.imageData,
             disconnected: false
           }];
@@ -287,7 +290,7 @@ const CoopSetupScreen: React.FC<CoopSetupScreenProps> = ({ player, onStart, onCl
       const reconnectToken = resumeInfo?.roomCode === roomCode && resumeInfo.name === myName.trim()
         ? resumeInfo.reconnectToken
         : createResumeId('coop-token');
-      p2pService.send({ type: 'COOP_JOIN', name: myName.trim(), imageData: player.imageData, slotId, reconnectToken });
+      p2pService.send({ type: 'COOP_JOIN', name: myName.trim(), publicCode, imageData: player.imageData, slotId, reconnectToken });
       saveCoopResumeInfo({
         roomCode,
         name: myName.trim(),
@@ -300,7 +303,7 @@ const CoopSetupScreen: React.FC<CoopSetupScreenProps> = ({ player, onStart, onCl
       setResumeInfo(loadCoopResumeInfo());
       setJoinSent(true);
     }
-  }, [battleMode, mode, status, myName, joinSent, player.imageData, resumeInfo, roomCode, visualTheme]);
+  }, [battleMode, mode, status, myName, joinSent, player.imageData, publicCode, resumeInfo, roomCode, visualTheme]);
 
   const handleCreateRoom = async () => {
     if (!myName.trim()) return;
@@ -314,7 +317,7 @@ const CoopSetupScreen: React.FC<CoopSetupScreenProps> = ({ player, onStart, onCl
       setRoomCode(code);
       setMode('HOST');
       setStatus('CONNECTED');
-      setParticipants([{ peerId: hostPeerId, slotId, reconnectToken, name: myName.trim(), imageData: player.imageData, disconnected: false }]);
+      setParticipants([{ peerId: hostPeerId, slotId, reconnectToken, name: myName.trim(), publicCode, imageData: player.imageData, disconnected: false }]);
       saveCoopResumeInfo({
         roomCode: code,
         name: myName.trim(),
@@ -353,6 +356,7 @@ const CoopSetupScreen: React.FC<CoopSetupScreenProps> = ({ player, onStart, onCl
       p2pService.send({
         type: 'COOP_REJOIN',
         name: saved.name,
+        publicCode,
         imageData: player.imageData,
         roomCode: saved.roomCode,
         slotId: saved.slotId,

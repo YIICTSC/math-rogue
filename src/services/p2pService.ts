@@ -10,6 +10,7 @@ type P2PCoopParticipant = {
     slotId?: string,
     reconnectToken?: string,
     name: string,
+    publicCode?: string,
     imageData?: string,
     disconnected?: boolean,
     selectedCharacterId?: string,
@@ -49,8 +50,8 @@ export type P2PEvent =
     | { type: 'RACE_TRICK_PLAY', cardId: string, effectId: RaceTrickEffectId, targetPeerId: string, sourceName: string, sourceGold: number }
     | { type: 'RACE_TRICK_APPLY', cardId: string, effectId: RaceTrickEffectId, sourcePeerId: string, sourceName: string, sourceGold: number }
     | { type: 'RACE_TRICK_RESULT', effectId: RaceTrickEffectId, sourcePeerId: string, targetPeerId: string, sourceGoldAfter?: number, goldDelta?: number }
-    | { type: 'COOP_JOIN', name: string, imageData?: string, slotId?: string, reconnectToken?: string }
-    | { type: 'COOP_REJOIN', roomCode: string, slotId: string, reconnectToken: string, name: string, imageData?: string }
+    | { type: 'COOP_JOIN', name: string, publicCode?: string, imageData?: string, slotId?: string, reconnectToken?: string }
+    | { type: 'COOP_REJOIN', roomCode: string, slotId: string, reconnectToken: string, name: string, publicCode?: string, imageData?: string }
     | {
         type: 'COOP_REJOIN_ACCEPTED',
         roomCode: string,
