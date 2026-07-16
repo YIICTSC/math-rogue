@@ -1,7 +1,7 @@
 import React from 'react';
 import { BookOpen, X } from 'lucide-react';
 import { assetUrl } from '../utils/assetPaths';
-import type { UnitBoardSummary } from '../data/unitBoardSummaries';
+import type { UnitBoardSummary, UnitBoardSummaryPage } from '../data/unitBoardSummaries';
 import type { LanguageMode } from '../types';
 import { trans } from '../utils/textUtils';
 
@@ -13,23 +13,54 @@ interface UnitBoardModalProps {
 }
 
 const UnitBoardModal: React.FC<UnitBoardModalProps> = ({ summary, open, onClose, languageMode }) => {
+  const [pageIndex, setPageIndex] = React.useState(0);
+
+  React.useEffect(() => {
+    if (open) setPageIndex(0);
+  }, [open, summary?.id]);
+
   if (!open || !summary) return null;
 
   const isNativeEnglishBoard = summary.id.startsWith('NATIVE_');
   const translate = (text: string) => isNativeEnglishBoard || languageMode === 'HIRAGANA'
     ? text
     : trans(text, languageMode);
+  const pages: UnitBoardSummaryPage[] = [
+    {
+      id: 'main',
+      label: isNativeEnglishBoard ? 'Overview' : '基本',
+      goal: summary.goal,
+      points: summary.points,
+      mistakes: summary.mistakes,
+      example: summary.example,
+    },
+    ...(summary.pages ?? []),
+  ];
+  const currentPageIndex = Math.min(pageIndex, pages.length - 1);
+  const currentPage = pages[currentPageIndex];
+  const hasMultiplePages = pages.length > 1;
   const boardLabel = isNativeEnglishBoard ? 'Board' : translate(summary.grade && summary.grade <= 2 ? 'ばんしょ' : '板書');
-  const goalLabel = isNativeEnglishBoard ? 'Goal' : translate('めあて');
-  const ideaLabel = isNativeEnglishBoard ? 'Key Ideas' : translate(summary.grade && summary.grade <= 1 ? 'かんがえかた' : '考え方');
-  const mistakesLabel = isNativeEnglishBoard ? 'Common Mistakes' : translate('よくあるまちがい');
-  const exampleLabel = isNativeEnglishBoard ? 'Example' : translate('例');
+  const pageLabel = translate(currentPage.label);
+  const goalLabel = isNativeEnglishBoard ? 'Goal' : translate(currentPage.sectionLabels?.goal ?? 'めあて');
+  const ideaLabel = isNativeEnglishBoard ? 'Key Ideas' : translate(currentPage.sectionLabels?.points ?? (summary.grade && summary.grade <= 1 ? 'かんがえかた' : '考え方'));
+  const mistakesLabel = isNativeEnglishBoard ? 'Common Mistakes' : translate(currentPage.sectionLabels?.mistakes ?? 'よくあるまちがい');
+  const exampleLabel = isNativeEnglishBoard ? 'Example' : translate(currentPage.sectionLabels?.example ?? '例');
   const closeLabel = isNativeEnglishBoard ? 'Back to question' : translate(summary.grade && summary.grade <= 2 ? 'もんだいにもどる' : '問題にもどる');
   const closeAriaLabel = isNativeEnglishBoard ? 'Close board' : translate('板書を閉じる');
+  const previousLabel = isNativeEnglishBoard ? 'Previous' : translate('前ページ');
+  const nextLabel = isNativeEnglishBoard ? 'Next' : translate('次ページ');
+  const pageIndicatorLabel = isNativeEnglishBoard
+    ? `${currentPageIndex + 1} / ${pages.length}`
+    : translate(`${currentPageIndex + 1} / ${pages.length}ページ`);
   const handleClose = (event: React.MouseEvent<HTMLButtonElement> | React.PointerEvent<HTMLButtonElement>) => {
     event.preventDefault();
     event.stopPropagation();
     onClose();
+  };
+  const handlePageChange = (nextIndex: number) => (event: React.MouseEvent<HTMLButtonElement> | React.PointerEvent<HTMLButtonElement>) => {
+    event.preventDefault();
+    event.stopPropagation();
+    setPageIndex(Math.max(0, Math.min(pages.length - 1, nextIndex)));
   };
 
   return (
@@ -63,20 +94,23 @@ const UnitBoardModal: React.FC<UnitBoardModalProps> = ({ summary, open, onClose,
               <h2 id="unit-board-title" className="unit-board-title break-words text-xl font-black leading-tight text-white sm:text-2xl md:text-3xl">
                 {translate(summary.title)}
               </h2>
-              <p className="unit-board-subtitle mt-0.5 text-xs font-bold leading-snug text-emerald-100 sm:mt-1 sm:text-sm md:text-base">{translate(summary.subtitle)}</p>
+              <p className="unit-board-subtitle mt-0.5 text-xs font-bold leading-snug text-emerald-100 sm:mt-1 sm:text-sm md:text-base">
+                {translate(summary.subtitle)}
+                {hasMultiplePages && <span className="ml-2 text-yellow-100/95">[{pageLabel}]</span>}
+              </p>
             </div>
           </div>
 
           <div className="unit-board-content grid grid-cols-1 gap-2 text-left text-xs leading-5 text-emerald-50 sm:grid-cols-2 sm:gap-x-4 sm:gap-y-2 md:text-sm md:leading-6 lg:text-base">
             <section>
               <h3 className="unit-board-section-title mb-0.5 text-sm font-black text-yellow-100 sm:mb-1 sm:text-base md:text-lg">{goalLabel}</h3>
-              <p>{translate(summary.goal)}</p>
+              <p>{translate(currentPage.goal)}</p>
             </section>
 
             <section>
               <h3 className="unit-board-section-title mb-0.5 text-sm font-black text-yellow-100 sm:mb-1 sm:text-base md:text-lg">{ideaLabel}</h3>
               <ul className="space-y-0.5 sm:space-y-1">
-                {summary.points.map((point) => (
+                {currentPage.points.map((point) => (
                   <li key={point} className="flex gap-1.5 sm:gap-2">
                     <span className="mt-0.5 text-yellow-100">・</span>
                     <span>{translate(point)}</span>
@@ -88,7 +122,7 @@ const UnitBoardModal: React.FC<UnitBoardModalProps> = ({ summary, open, onClose,
             <section>
               <h3 className="unit-board-section-title mb-0.5 text-sm font-black text-yellow-100 sm:mb-1 sm:text-base md:text-lg">{mistakesLabel}</h3>
               <ul className="space-y-0.5 sm:space-y-1">
-                {summary.mistakes.map((mistake) => (
+                {currentPage.mistakes.map((mistake) => (
                   <li key={mistake} className="flex gap-1.5 sm:gap-2">
                     <span className="mt-0.5 text-rose-100">・</span>
                     <span>{translate(mistake)}</span>
@@ -97,16 +131,43 @@ const UnitBoardModal: React.FC<UnitBoardModalProps> = ({ summary, open, onClose,
               </ul>
             </section>
 
-            {summary.example && (
+            {currentPage.example && (
               <section>
                 <h3 className="unit-board-section-title mb-0.5 text-sm font-black text-yellow-100 sm:mb-1 sm:text-base md:text-lg">{exampleLabel}</h3>
-                <p>{translate(summary.example)}</p>
+                <p>{translate(currentPage.example)}</p>
               </section>
             )}
           </div>
         </div>
 
-        <div className="unit-board-footer absolute bottom-[8%] right-[10%] z-10 flex justify-end">
+        <div className="unit-board-footer absolute bottom-[8%] inset-x-[10%] z-10 flex items-center justify-between gap-2">
+          <div className="flex min-w-0 items-center gap-2">
+            {hasMultiplePages && (
+              <>
+                <button
+                  type="button"
+                  onClick={handlePageChange(currentPageIndex - 1)}
+                  onPointerUp={handlePageChange(currentPageIndex - 1)}
+                  disabled={currentPageIndex === 0}
+                  className="rounded-md border-b-4 border-slate-950 bg-slate-700 px-3 py-1.5 text-xs font-black text-white transition hover:bg-slate-600 active:translate-y-1 active:border-b-0 disabled:cursor-not-allowed disabled:opacity-45 sm:px-4 sm:py-2 sm:text-sm"
+                >
+                  {previousLabel}
+                </button>
+                <span className="whitespace-nowrap rounded bg-black/25 px-2 py-1 text-xs font-black text-yellow-100 sm:text-sm">
+                  {pageIndicatorLabel}
+                </span>
+                <button
+                  type="button"
+                  onClick={handlePageChange(currentPageIndex + 1)}
+                  onPointerUp={handlePageChange(currentPageIndex + 1)}
+                  disabled={currentPageIndex >= pages.length - 1}
+                  className="rounded-md border-b-4 border-amber-950 bg-amber-600 px-3 py-1.5 text-xs font-black text-white transition hover:bg-amber-500 active:translate-y-1 active:border-b-0 disabled:cursor-not-allowed disabled:opacity-45 sm:px-4 sm:py-2 sm:text-sm"
+                >
+                  {nextLabel}
+                </button>
+              </>
+            )}
+          </div>
           <button
             type="button"
             onClick={handleClose}
