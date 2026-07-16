@@ -9,6 +9,7 @@
     "build": "vite build",
     "audit:hiragana": "node scripts/audit-hiragana-ui.mjs",
     "audit:english": "node scripts/audit-english-ui.mjs",
+    "test:management": "node scripts/verify-management-integration.mjs",
     "build:offline": "node scripts/build-offline.mjs",
     "build:icons": "node scripts/generate-icons.mjs",
     "compress:bgm": "node scripts/compress-bgm.mjs",
