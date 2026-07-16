@@ -17567,7 +17567,7 @@ const App: React.FC = () => {
                 />
                 {rankingRewardNotices[0] && (
                     <div className="fixed inset-0 z-[10038] flex items-center justify-center bg-black/90 p-4">
-                        <div className="w-full max-w-lg overflow-hidden rounded-2xl border-4 border-yellow-300 bg-gradient-to-b from-slate-900 to-black p-6 text-center text-white shadow-[0_0_55px_rgba(250,204,21,0.42)]">
+                        <div className="max-h-[calc(100dvh-2rem)] w-full max-w-lg overflow-y-auto rounded-2xl border-4 border-yellow-300 bg-gradient-to-b from-slate-900 to-black p-6 text-center text-white shadow-[0_0_55px_rgba(250,204,21,0.42)] custom-scrollbar">
                             <div className="mb-2 text-xs font-black tracking-[0.32em] text-yellow-300">RANK IN!</div>
                             <h2 className="mb-2 text-3xl font-black text-yellow-100">{trans("ランキング入賞！", languageMode)}</h2>
                             <div className="mb-5 rounded-xl border border-yellow-300/40 bg-yellow-950/35 px-4 py-3">
@@ -17583,10 +17583,18 @@ const App: React.FC = () => {
                             <p className="mb-4 text-sm font-bold leading-6 text-slate-300">
                                 {trans("入賞記念のご褒美カードを獲得しました！", languageMode)}
                             </p>
-                            <div className="mx-auto mb-5 max-w-xs rounded-2xl border-2 border-cyan-300 bg-cyan-950/60 p-5 shadow-[0_0_30px_rgba(34,211,238,0.25)]">
-                                <div className="mb-2 text-[10px] font-black tracking-[0.22em] text-cyan-200">REWARD CARD</div>
-                                <div className="text-xl font-black text-white">{rankingRewardNotices[0].card.name}</div>
-                                <div className="mt-2 text-xs font-bold text-slate-300">{rankingRewardNotices[0].card.description}</div>
+                            <div className="mx-auto mb-5 max-w-xs rounded-2xl border-2 border-cyan-300 bg-cyan-950/60 p-3 shadow-[0_0_30px_rgba(34,211,238,0.25)]">
+                                <div className="mb-3 text-[10px] font-black tracking-[0.22em] text-cyan-200">REWARD CARD</div>
+                                <div className="flex justify-center">
+                                    <div className="scale-90">
+                                        <Card
+                                            card={rankingRewardNotices[0].card}
+                                            onClick={() => {}}
+                                            disabled={false}
+                                            languageMode={languageMode}
+                                        />
+                                    </div>
+                                </div>
                             </div>
                             <button
                                 type="button"
