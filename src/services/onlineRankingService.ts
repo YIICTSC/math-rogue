@@ -48,10 +48,14 @@ export type OnlineReward = {
 const PROFILE_KEY = 'learning_rogue_online_ranking_profile_v1';
 const API_OVERRIDE_KEY = 'learning_rogue_online_ranking_api_v1';
 const SUBMISSION_QUEUE_KEY = 'learning_rogue_online_submission_queue_v1';
+const DIRTY_SNAPSHOT_KEY = 'learning_rogue_online_snapshot_dirty_v1';
 const DEFAULT_RANKING_URL = 'https://learning-rogue-ranking.yishigeict.chatgpt.site';
+const AUTO_SYNC_DEBOUNCE_MS = 45_000;
 
-type QueuedSubmission = { id: string; path: string; body: string; attempts: number; nextAttemptAt: number; createdAt: number };
+type QueuedSubmission = { id: string; compactKey?: string; path: string; body: string; attempts: number; nextAttemptAt: number; createdAt: number };
 class OnlineRequestError extends Error { constructor(message: string, readonly status: number) { super(message); } }
+let autoSyncTimer: number | null = null;
+let snapshotSyncPromise: Promise<void> | null = null;
 
 const submissionHash = (value: string) => {
   let hash = 2166136261;
@@ -70,12 +74,32 @@ const saveQueue = (queue: QueuedSubmission[]) => {
   try { window.localStorage.setItem(SUBMISSION_QUEUE_KEY, JSON.stringify(queue.slice(-100))); } catch { /* queue failure must not block play */ }
 };
 
+const getSubmissionCompactKey = (path: string, body: string) => {
+  try {
+    const data = JSON.parse(body) as Record<string, unknown>;
+    if (path === '/api/v1/cards/snapshot' || path === '/api/v1/activity/snapshot') return path;
+    if (path === '/api/v1/learning/daily-summary') return `${path}:${data.date || ''}`;
+    if (path === '/api/v1/scores') return `${path}:${data.rankingId || ''}:${data.periodType || ''}:${data.periodKey || ''}`;
+    if (path === '/api/v1/teams/scores') return `${path}:${data.recordId || ''}`;
+  } catch { /* malformed bodies use the content hash only */ }
+  return undefined;
+};
+
 const queueSubmission = (path: string, body: string) => {
-  const queue = getQueue();
+  const compactKey = getSubmissionCompactKey(path, body);
+  const queue = compactKey ? getQueue().filter((item) => item.compactKey !== compactKey) : getQueue();
   const id = `${path}:${submissionHash(body)}`;
   if (queue.some((item) => item.id === id)) return;
-  queue.push({ id, path, body, attempts: 0, nextAttemptAt: Date.now(), createdAt: Date.now() });
+  queue.push({ id, compactKey, path, body, attempts: 0, nextAttemptAt: Date.now(), createdAt: Date.now() });
   saveQueue(queue);
+};
+
+const scheduleDirtySnapshotSync = () => {
+  if (autoSyncTimer !== null) window.clearTimeout(autoSyncTimer);
+  autoSyncTimer = window.setTimeout(() => {
+    autoSyncTimer = null;
+    void onlineRankingService.syncDirtySnapshots().catch(() => undefined);
+  }, AUTO_SYNC_DEBOUNCE_MS);
 };
 
 const getPlatform = (): OnlinePlatform => {
@@ -368,6 +392,17 @@ export const onlineRankingService = {
   getPlatform,
   getPendingSubmissionCount: () => getQueue().length,
   flushPendingSubmissions,
+  markSnapshotsDirty: () => {
+    if (typeof window === 'undefined') return;
+    window.localStorage.setItem(DIRTY_SNAPSHOT_KEY, String(Date.now()));
+    if (onlineRankingService.getProfile()) scheduleDirtySnapshotSync();
+  },
+  hasDirtySnapshots: () => typeof window !== 'undefined' && Boolean(window.localStorage.getItem(DIRTY_SNAPSHOT_KEY)),
+  syncDirtySnapshots: async () => {
+    if (!onlineRankingService.getProfile() || !onlineRankingService.hasDirtySnapshots()) return;
+    if (typeof navigator !== 'undefined' && !navigator.onLine) return;
+    await onlineRankingService.syncCurrentSnapshots();
+  },
   getPublicUrl: () => String(import.meta.env.VITE_RANKING_PUBLIC_URL || DEFAULT_RANKING_URL).replace(/\/$/, ''),
 
   getProfile: (): OnlineRankingProfile | null => {
@@ -420,16 +455,19 @@ export const onlineRankingService = {
   syncCurrentSnapshots: async () => {
     const profile = onlineRankingService.getProfile();
     if (!profile) return;
-    await flushPendingSubmissions();
-    for (const summary of getDailyLearningSummaries(profile.registeredAt)) {
-      await submitOrQueue('/api/v1/learning/daily-summary', JSON.stringify(summary));
-    }
-    await submitOrQueue('/api/v1/cards/snapshot', JSON.stringify(getCardSnapshot()));
-    await submitOrQueue('/api/v1/activity/snapshot', JSON.stringify(getActivitySnapshot(profile.registeredAt)));
-    for (const periodType of ['weekly', 'monthly', 'season', 'all'] as OnlinePeriodType[]) {
-      const snapshot = getSnapshot(periodType, profile.registeredAt);
-      for (const [rankingId, value] of Object.entries(snapshot.values)) {
-        await submitOrQueue('/api/v1/scores', JSON.stringify({
+    if (snapshotSyncPromise) return snapshotSyncPromise;
+    const dirtyVersion = window.localStorage.getItem(DIRTY_SNAPSHOT_KEY);
+    snapshotSyncPromise = (async () => {
+      await flushPendingSubmissions();
+      for (const summary of getDailyLearningSummaries(profile.registeredAt)) {
+        await submitOrQueue('/api/v1/learning/daily-summary', JSON.stringify(summary));
+      }
+      await submitOrQueue('/api/v1/cards/snapshot', JSON.stringify(getCardSnapshot()));
+      await submitOrQueue('/api/v1/activity/snapshot', JSON.stringify(getActivitySnapshot(profile.registeredAt)));
+      for (const periodType of ['weekly', 'monthly', 'season', 'all'] as OnlinePeriodType[]) {
+        const snapshot = getSnapshot(periodType, profile.registeredAt);
+        for (const [rankingId, value] of Object.entries(snapshot.values)) {
+          await submitOrQueue('/api/v1/scores', JSON.stringify({
             recordId: `snapshot:${rankingId}:${periodType}:${snapshot.periodKey}:${value}`,
             rankingId,
             periodType,
@@ -439,25 +477,30 @@ export const onlineRankingService = {
             platform: getPlatform(),
             source: 'learning-rogue',
           }));
+        }
       }
-    }
-    const coopRuns = storageService.getLocalScores().filter((entry) => entry.challengeMode === 'COOP' && (entry.teamPublicCodes?.length || 0) >= 2);
-    for (const run of coopRuns) {
-      for (const periodType of ['weekly', 'monthly', 'season', 'all'] as OnlinePeriodType[]) {
-        await submitOrQueue('/api/v1/teams/scores', JSON.stringify({
-          recordId: `${run.id}:${periodType}`,
-          rankingId: 'coop_adventure_score',
-          periodType,
-          value: safeMetric(run.score, 100_000_000),
-          occurredAt: new Date(run.date).toISOString(),
-          memberPublicCodes: run.teamPublicCodes,
-          metadata: { act: safeMetric(run.act, 100), floor: safeMetric(run.floor, 10000), victory: !!run.victory },
-          platform: getPlatform(),
-          source: 'learning-rogue',
-        }));
+      const coopRuns = storageService.getLocalScores().filter((entry) => entry.challengeMode === 'COOP' && (entry.teamPublicCodes?.length || 0) >= 2);
+      for (const run of coopRuns) {
+        for (const periodType of ['weekly', 'monthly', 'season', 'all'] as OnlinePeriodType[]) {
+          await submitOrQueue('/api/v1/teams/scores', JSON.stringify({
+            recordId: `${run.id}:${periodType}`,
+            rankingId: 'coop_adventure_score',
+            periodType,
+            value: safeMetric(run.score, 100_000_000),
+            occurredAt: new Date(run.date).toISOString(),
+            memberPublicCodes: run.teamPublicCodes,
+            metadata: { act: safeMetric(run.act, 100), floor: safeMetric(run.floor, 10000), victory: !!run.victory },
+            platform: getPlatform(),
+            source: 'learning-rogue',
+          }));
+        }
       }
-    }
-    await flushPendingSubmissions();
+      await flushPendingSubmissions();
+      if (window.localStorage.getItem(DIRTY_SNAPSHOT_KEY) === dirtyVersion) {
+        window.localStorage.removeItem(DIRTY_SNAPSHOT_KEY);
+      }
+    })().finally(() => { snapshotSyncPromise = null; });
+    return snapshotSyncPromise;
   },
 
   claimPendingRewards: async (): Promise<OnlineReward[]> => {

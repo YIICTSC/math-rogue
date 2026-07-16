@@ -85,6 +85,12 @@ const STORAGE_KEY_REWARD_CARD_ALBUM = 'pixel_spire_reward_card_album_v1';
 const STORAGE_KEY_REWARD_CARD_CLAIMED_ASSIGNMENTS = 'pixel_spire_reward_card_claimed_assignments_v1';
 const STORAGE_KEY_COMPLETED_DAILY_ASSIGNMENTS = 'pixel_spire_completed_daily_assignments_v1';
 const STORAGE_KEY_HIGHEST_CARD_DAMAGE = 'pixel_spire_highest_card_damage_v1';
+export const ONLINE_RANKING_DATA_CHANGED_EVENT = 'learning-rogue:online-ranking-data-changed';
+
+const notifyOnlineRankingDataChanged = (reason: string) => {
+  if (typeof window === 'undefined') return;
+  window.dispatchEvent(new CustomEvent(ONLINE_RANKING_DATA_CHANGED_EVENT, { detail: { reason } }));
+};
 
 // --- CUSTOM CHARACTER IMAGES ---
 const STORAGE_KEY_CUSTOM_IMAGES = 'pixel_spire_custom_images_v1';
@@ -393,6 +399,7 @@ export const storageService = {
     try {
       const current = storageService.getAssignmentAnswers();
       localStorage.setItem(STORAGE_KEY_ASSIGNMENT_ANSWERS, JSON.stringify([...current, record]));
+      notifyOnlineRankingDataChanged('learning-answer');
     } catch (e) {
       console.warn("Failed to save assignment answer", e);
     }
@@ -448,6 +455,7 @@ export const storageService = {
     try {
       const current = storageService.getRewardCardAlbum();
       localStorage.setItem(STORAGE_KEY_REWARD_CARD_ALBUM, JSON.stringify([...current, card]));
+      notifyOnlineRankingDataChanged('reward-card');
     } catch (e) {
       console.warn("Failed to save reward card", e);
     }
@@ -457,6 +465,7 @@ export const storageService = {
     try {
       const next = storageService.getRewardCardAlbum().filter(card => card.id !== cardId);
       localStorage.setItem(STORAGE_KEY_REWARD_CARD_ALBUM, JSON.stringify(next));
+      notifyOnlineRankingDataChanged('reward-card');
     } catch (e) {
       console.warn("Failed to delete reward card", e);
     }
@@ -532,6 +541,7 @@ export const storageService = {
       if (!current.includes(cardName)) {
         const updated = [...current, cardName];
         localStorage.setItem(STORAGE_KEY_UNLOCKED_CARDS, JSON.stringify(updated));
+        notifyOnlineRankingDataChanged('card-collection');
       }
     } catch (e) {
       console.warn("Failed to save unlocked card", e);
@@ -542,6 +552,7 @@ export const storageService = {
       const current = storageService.getUnlockedCards();
       const next = new Set([...current, ...cardNames]);
       localStorage.setItem(STORAGE_KEY_UNLOCKED_CARDS, JSON.stringify(Array.from(next)));
+      notifyOnlineRankingDataChanged('card-collection');
     } catch (e) {
       console.warn("Failed to save unlocked cards", e);
     }
@@ -646,6 +657,7 @@ export const storageService = {
       try {
           const current = storageService.getClearCount();
           localStorage.setItem(STORAGE_KEY_CLEAR_COUNT, (current + 1).toString());
+          notifyOnlineRankingDataChanged('clear-count');
       } catch (e) {
           console.warn("Failed to save clear count", e);
       }
@@ -676,6 +688,7 @@ export const storageService = {
         cardName: String(cardName || '').slice(0, 40),
         recordedAt: new Date().toISOString(),
       }));
+      notifyOnlineRankingDataChanged('card-damage');
     } catch (e) {
       console.warn('Failed to save highest card damage', e);
     }
@@ -789,6 +802,7 @@ export const storageService = {
           // Increase limit to 50 for a better log experience
           const updated = [entry, ...current].slice(0, 50); 
           localStorage.setItem(STORAGE_KEY_RANKING, JSON.stringify(updated));
+          notifyOnlineRankingDataChanged(entry.challengeMode === 'COOP' ? 'coop-result' : 'adventure-result');
       } catch (e) {
           console.warn("Failed to save score", e);
       }
@@ -809,6 +823,7 @@ export const storageService = {
           const current = storageService.getPokerScores();
           const updated = [entry, ...current].slice(0, 50);
           localStorage.setItem(STORAGE_KEY_POKER_RANKING, JSON.stringify(updated));
+          notifyOnlineRankingDataChanged('mini-game-result');
       } catch (e) {
           console.warn("Failed to save poker score", e);
       }
@@ -867,6 +882,7 @@ export const storageService = {
           const current = storageService.getSurvivorScores();
           const updated = [entry, ...current].slice(0, 50);
           localStorage.setItem(STORAGE_KEY_SURVIVOR_RANKING, JSON.stringify(updated));
+          notifyOnlineRankingDataChanged('mini-game-result');
       } catch (e) {
           console.warn("Failed to save survivor score", e);
       }
@@ -887,6 +903,7 @@ export const storageService = {
           const current = storageService.getDungeonScores();
           const updated = [entry, ...current].slice(0, 50);
           localStorage.setItem(STORAGE_KEY_DUNGEON_RANKING, JSON.stringify(updated));
+          notifyOnlineRankingDataChanged('mini-game-result');
       } catch (e) {
           console.warn("Failed to save dungeon score", e);
       }
@@ -924,6 +941,7 @@ export const storageService = {
           const current = storageService.getDungeonScores2();
           const updated = [entry, ...current].slice(0, 50);
           localStorage.setItem(STORAGE_KEY_DUNGEON_RANKING_2, JSON.stringify(updated));
+          notifyOnlineRankingDataChanged('mini-game-result');
       } catch (e) {
           console.warn("Failed to save dungeon 2 score", e);
       }
@@ -961,6 +979,7 @@ export const storageService = {
           const current = storageService.getKochoScores();
           const updated = [entry, ...current].slice(0, 50);
           localStorage.setItem(STORAGE_KEY_KOCHO_RANKING, JSON.stringify(updated));
+          notifyOnlineRankingDataChanged('mini-game-result');
       } catch (e) {
           console.warn("Failed to save kocho score", e);
       }
@@ -1038,6 +1057,7 @@ export const storageService = {
           const current = storageService.getPaperPlaneScores();
           const updated = [entry, ...current].slice(0, 50);
           localStorage.setItem(STORAGE_KEY_PAPER_PLANE_RANKING, JSON.stringify(updated));
+          notifyOnlineRankingDataChanged('mini-game-result');
       } catch (e) {
           console.warn("Failed to save paper plane score", e);
       }
@@ -1097,6 +1117,7 @@ export const storageService = {
           const current = storageService.getGoHomeScores();
           const updated = [entry, ...current].slice(0, 50);
           localStorage.setItem(STORAGE_KEY_GO_HOME_RANKING, JSON.stringify(updated));
+          notifyOnlineRankingDataChanged('mini-game-result');
       } catch (e) {
           console.warn("Failed to save go home score", e);
       }
@@ -1281,6 +1302,7 @@ export const storageService = {
 
   saveModeCorrectCounts: (counts: Record<string, number>) => {
     localStorage.setItem(STORAGE_KEY_MODE_CORRECT_COUNTS, JSON.stringify(counts));
+    notifyOnlineRankingDataChanged('learning-progress');
   },
 
   getMasteredModes: (): string[] => {
@@ -1294,6 +1316,7 @@ export const storageService = {
 
   saveMasteredModes: (modes: string[]) => {
     localStorage.setItem(STORAGE_KEY_MASTERED_MODES, JSON.stringify(modes));
+    notifyOnlineRankingDataChanged('mastery');
   },
 
   getTypingWeakKeys: (): Record<string, Record<string, number>> => {

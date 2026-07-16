@@ -83,7 +83,7 @@ import { assetPreloadService } from './services/assetPreloadService';
 import { setLegacySpriteModeEnabled } from './utils/legacySpriteMode';
 import { generateEnemyName } from './services/geminiService';
 import { generateDungeonMap } from './services/mapGenerator';
-import { parseTransferData, serializeTransferData, storageService } from './services/storageService';
+import { ONLINE_RANKING_DATA_CHANGED_EVENT, parseTransferData, serializeTransferData, storageService } from './services/storageService';
 import { onlineRankingService, type OnlineRankingProfile, type OnlineReward } from './services/onlineRankingService';
 import { learningManagementService } from './services/learningManagementService';
 import { generateEvent, generateLegacyEvent } from './services/eventService';
@@ -1498,9 +1498,46 @@ const App: React.FC = () => {
 
     useEffect(() => {
         if (!onlineRankingProfile) return;
-        const retryOnlineRankingQueue = () => { void onlineRankingService.flushPendingSubmissions().catch(() => undefined); };
+        const retryOnlineRankingQueue = () => {
+            void onlineRankingService.flushPendingSubmissions()
+                .then(() => onlineRankingService.syncDirtySnapshots())
+                .catch(() => undefined);
+        };
+        const markOnlineRankingDirty = () => onlineRankingService.markSnapshotsDirty();
         window.addEventListener('online', retryOnlineRankingQueue);
-        return () => window.removeEventListener('online', retryOnlineRankingQueue);
+        window.addEventListener(ONLINE_RANKING_DATA_CHANGED_EVENT, markOnlineRankingDirty);
+        return () => {
+            window.removeEventListener('online', retryOnlineRankingQueue);
+            window.removeEventListener(ONLINE_RANKING_DATA_CHANGED_EVENT, markOnlineRankingDirty);
+        };
+    }, [onlineRankingProfile]);
+
+    useEffect(() => {
+        if (!onlineRankingProfile) return;
+        const syncScreens = new Set([
+            GameScreen.START_MENU,
+            GameScreen.FLOOR_RESULT,
+            GameScreen.GAME_OVER,
+            GameScreen.VICTORY,
+            GameScreen.ENDING,
+        ]);
+        if (syncScreens.has(gameState.screen)) {
+            void onlineRankingService.syncDirtySnapshots().catch(() => undefined);
+        }
+    }, [gameState.screen, onlineRankingProfile]);
+
+    useEffect(() => {
+        if (!onlineRankingProfile) return;
+        const syncBeforeBackground = () => {
+            if (document.hidden) void onlineRankingService.syncDirtySnapshots().catch(() => undefined);
+        };
+        const syncBeforePageHide = () => { void onlineRankingService.syncDirtySnapshots().catch(() => undefined); };
+        document.addEventListener('visibilitychange', syncBeforeBackground);
+        window.addEventListener('pagehide', syncBeforePageHide);
+        return () => {
+            document.removeEventListener('visibilitychange', syncBeforeBackground);
+            window.removeEventListener('pagehide', syncBeforePageHide);
+        };
     }, [onlineRankingProfile]);
     const parryTutorialResolverRef = useRef<(() => void) | null>(null);
     const lastMagicDamageVoiceActionRef = useRef<string | null>(null);
