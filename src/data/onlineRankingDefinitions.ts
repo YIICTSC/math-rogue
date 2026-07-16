@@ -10,7 +10,7 @@ export const ONLINE_RANKING_FALLBACKS: OnlineRankingDefinition[] = [
   { id: 'card_standard_power', label: '最強カード王', unit: '威力', accent: 'lime', description: '標準条件の最大威力' },
   { id: 'card_efficiency', label: 'カードコスパ王', unit: '威力/EN', accent: 'orange', description: 'エナジー1あたりの最大標準威力' },
   { id: 'card_collection', label: 'カードコレクター', unit: '種', accent: 'blue', description: 'カードの収集数' },
-  { id: 'card_collection_rate', label: 'カード収集率王', unit: '%', accent: 'teal', description: '通常カード全体に対する収集率' },
+  { id: 'card_block', label: '最強鉄壁王', unit: 'ブロック', accent: 'teal', description: '標準条件で測ったカード1枚の最大ブロック' },
   { id: 'card_actual_damage', label: '実戦最大一撃王', unit: 'ダメージ', accent: 'red', description: '実戦で記録した1回の最大ダメージ' },
   { id: 'poker_best_hand', label: '放課後ポーカー', unit: '点', accent: 'gold', description: '放課後ポーカーの最高ハンド得点' },
   { id: 'survivor_score', label: '校庭サバイバー', unit: 'pt', accent: 'magenta', description: '校庭サバイバーの最高スコア' },
@@ -49,7 +49,7 @@ export const ONLINE_RANKING_CATEGORIES: OnlineRankingCategory[] = [
     id: 'cards',
     label: 'カード',
     caption: 'CARDS',
-    rankingIds: ['card_standard_power', 'card_efficiency', 'card_collection', 'card_collection_rate', 'card_actual_damage'],
+    rankingIds: ['card_standard_power', 'card_efficiency', 'card_collection', 'card_block', 'card_actual_damage'],
   },
   {
     id: 'minigames',

@@ -289,6 +289,7 @@ type SafeCardComponents = {
   cost: number;
   baseDamage: number;
   blockDamage: number;
+  blockGain: number;
   handDamage: number;
   attackChainDamage: number;
   strikeDamage: number;
@@ -299,7 +300,7 @@ type SafeCardComponents = {
 const safeMetric = (value: unknown, maximum = 1_000_000) => Math.max(0, Math.min(maximum, Math.floor(Number(value) || 0)));
 
 const getSafeCardComponents = (card: Card, deck: Card[], index: number): SafeCardComponents | null => {
-  if (card.target === TargetType.SELF && !card.damageBasedOnBlock) return null;
+  if (card.target === TargetType.SELF && !card.damageBasedOnBlock && !(card.block && card.block > 0)) return null;
   const strikeCount = deck.filter((item) => item.name === 'えんぴつ攻撃' || item.originalNames?.includes('えんぴつ攻撃')).length;
   const attackCount = deck.filter((item) => item.type === CardType.ATTACK).length;
   const skillCount = deck.filter((item) => item.type === CardType.SKILL).length;
@@ -315,6 +316,7 @@ const getSafeCardComponents = (card: Card, deck: Card[], index: number): SafeCar
     cost: safeMetric(card.cost, 20),
     baseDamage: safeMetric(card.damage),
     blockDamage: card.damageBasedOnBlock ? 12 : 0,
+    blockGain: safeMetric(card.block),
     handDamage: safeMetric(Math.max(0, assumedHand - 1) * (card.damagePerCardInHand || 0)),
     attackChainDamage: safeMetric(assumedPriorAttacks * (card.damagePerAttackPlayed || 0)),
     strikeDamage: safeMetric(strikeCount * (card.damagePerStrike || 0)),
@@ -344,10 +346,10 @@ const getCardSnapshot = () => {
   const cards = all.map((card, index) => getSafeCardComponents(card, all, index)).filter((card): card is SafeCardComponents => card !== null);
   const highestDamage = storageService.getHighestCardDamage().damage;
   const collectionCount = uniqueOwnedBaseNames.size + rewards.length;
-  const signature = `${collectionCount}:${uniqueOwnedBaseNames.size}:${cards.map((card) => `${card.name}:${card.cost}:${card.baseDamage}:${card.hits}`).join('|')}:${highestDamage}`;
+  const signature = `${collectionCount}:${uniqueOwnedBaseNames.size}:${cards.map((card) => `${card.name}:${card.cost}:${card.baseDamage}:${card.blockGain}:${card.hits}`).join('|')}:${highestDamage}`;
   return {
-    snapshotId: `card-v1-${snapshotHash(signature)}`,
-    snapshotVersion: 1,
+    snapshotId: `card-v2-${snapshotHash(signature)}`,
+    snapshotVersion: 2,
     collectionCount,
     baseCollectionCount: uniqueOwnedBaseNames.size,
     totalAvailable: Math.max(1, uniqueBaseNames.size),

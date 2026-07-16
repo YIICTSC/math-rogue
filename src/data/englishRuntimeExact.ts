@@ -307,6 +307,8 @@ export const ENGLISH_RUNTIME_EXACT: Record<string, string> = {
   'カードの収集数': 'Number of card types collected',
   'カード収集率王': 'Card Collection Rate Champion',
   '通常カード全体に対する収集率': 'Collection rate across all standard cards',
+  '最強鉄壁王': 'Strongest Defense Champion',
+  '標準条件で測ったカード1枚の最大ブロック': 'Highest block from a single card under standard conditions',
   '実戦最大一撃王': 'Highest Battle Hit Champion',
   'ダメージ': 'damage',
   '実戦で記録した1回の最大ダメージ': 'Highest damage recorded in a single battle hit',
