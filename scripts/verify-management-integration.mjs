@@ -11,6 +11,10 @@ const [service, modal, app, types] = await Promise.all([
 assert.match(service, /learner-devices\/link/);
 assert.match(service, /learner\/assignments/);
 assert.match(service, /fetchAssignmentPayload/);
+assert.match(service, /isManagedCurriculumMode/);
+assert.match(service, /MATH_G\|KOKUGO_G/);
+assert.match(service, /ENGLISH_G\[3-9\]/);
+assert.match(service, /SCIENCE_\[3-9\]/);
 assert.match(service, /URL\.createObjectURL/);
 assert.match(service, /learner\/progress\/batch/);
 assert.match(service, /slice\(0, 50\)/);
