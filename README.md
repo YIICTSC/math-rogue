@@ -1,50 +1,136 @@
 <div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
+  <img src="./docs/images/learning-rogue-social-card.png" width="1200" alt="学習ローグ — 知識を力に、学びを冒険に。" />
+
+  # 学習ローグ
+
+  **知識を力に、学びを冒険に。**  問題に答えながらカードを組み、学校や異世界を攻略する学習ローグライクです。
 </div>
 
-# 学習ローグ
+## 今すぐ遊ぶ
 
-ブラウザでローカル動作確認できる Vite + React アプリです。
+| 入口 | URL | 用途 |
+| --- | --- | --- |
+| メインサイト | [ChatGPT Sites版](https://learning-rogue.yishigeict.chatgpt.site/) | 通常はこちらからプレイ |
+| GitHub Pages | [Web版](https://yiictsc.github.io/math-rogue/) | 直接プレイ・動作確認 |
+| Vercel | [Web版](https://math-rogue.vercel.app/) | 予備の配信先 |
+| ランキングホール | [オンラインランキング](https://learning-rogue-ranking.yishigeict.chatgpt.site/) | 個人・チーム記録の閲覧 |
 
-## ローカルで試す
+PC・タブレット・スマートフォンのブラウザに対応しています。ゲーム開始操作後は、対応端末で全画面表示へ切り替わります。
 
-前提: Node.js が入っていること
+## ゲームの流れ
 
-1. 依存関係を入れる
-   `npm install`
-2. 開発サーバーを起動する
-   `npm run dev`
-3. ブラウザで開く
-   `http://localhost:5173/`
+1. 学年・学習分野・出題方法を選ぶ
+2. 問題に正解して、冒険に必要な力や報酬を得る
+3. カード、レリック、ポーションを組み合わせてデッキを育てる
+4. 戦闘・イベント・ボスを突破し、冒険のクリアを目指す
+5. 学習記録や冒険記録を振り返り、オンラインランキングにも挑戦する
 
-同一ネットワーク上の別端末から確認する場合は、起動時に表示される `Network` の URL を使ってください。
+## 現在の主な機能
 
-## 本番ビルド確認
+### 学習
 
-1. ビルドする
-   `npm run build`
-2. ビルド結果を確認する
-   `npm run preview`
-3. ブラウザで開く
-   `http://localhost:4173/`
+- 小学1年〜中学3年を中心とした算数・数学、国語・漢字、英語、生活、理科、社会
+- 高校以降にもつながる数学・理科・社会・英語・情報・小論文・実用分野
+- 選択式、入力式、問題読み上げ、タイピング系モード
+- 日本語、ひらがな中心表示、英語表示
+- 日別・単元別の正解数、正答率、苦手克服、学習進度の記録
 
-## GitHub Pages で公開
+### 冒険とカード
 
-このリポジトリには、`main` ブランチへ push した時に GitHub Pages へ自動デプロイする workflow を入れています。
+- 小学生・高校生・魔法世界の3テーマ
+- カードバトル、マップ分岐、イベント、ショップ、ボス戦
+- カード強化・合成、レリック、ポーション、キャラクター育成
+- 1人用冒険に加え、合言葉で参加する協力プレイと学習レース
+- 日替わり課題、教員配信課題、ランキング入賞による報酬カード
 
-### 事前準備
+### ミニゲーム
 
-1. GitHub にリポジトリを push する
-2. GitHub の `Settings > Pages` を開く
-3. `Build and deployment` の `Source` を `GitHub Actions` にする
+- 放課後ポーカー
+- 校庭サバイバー
+- 風来の小学生 / 風来の小学生2
+- 校長対決
+- 紙飛行機バトル
+- 帰宅ダッシュ
 
-### 公開手順
+### オンラインランキング
 
-1. `main` ブランチへ push する
-2. GitHub の `Actions` タブで `Deploy To GitHub Pages` が成功するのを待つ
-3. `Settings > Pages` に表示される URL を開く
+ランキングは「問題・課題」「冒険・協力」「カード」「ミニゲーム」のカテゴリから詳細項目を選べます。各画面には集計方法も表示されます。
 
-### 補足
+- 今日・今週・今月・シーズン・歴代の期間別集計
+- 正解数、正答率、課題達成、冒険スコア、カード性能、各ミニゲームなど多様な項目
+- 個人記録と、協力プレイのチーム記録
+- 自動生成または自由入力で決める公開名（後から変更可能）
+- いずれかの対象ランキングで3位以内に入賞した際の報酬カード
+- 端末連携、記録の同期、受賞したランキング名と順位の確認
 
-- Vite の `base` は `./` にしてあるので、GitHub Pages のサブパス配信でも動作します。
-- `public/.nojekyll` を入れているので、Pages 側の Jekyll 変換は無効です。
+記録は端末内へ先に保存され、プレイ中の節目とランキング画面を開いた際に同期されます。一時的に通信できない場合も、送信待ち記録を保持して後から再送します。
+
+### 保護者・教員向け連携
+
+- 家庭、クラス、学年、学校などのグループ管理
+- 児童の学習進度・課題達成状況の確認
+- 標準問題、オリジナル問題、CSV/TSVを使った任意課題の作成・配信
+- 学校管理者による最大2,000人の名簿CSV一括取込
+- 権限管理、年度更新・異動、監査記録、データ削除手続き
+- ゲーム内の課題受信箱と報酬カードへの連携
+
+詳細は[保護者・教員向けグループ管理システム導入案](./docs/guardian-educator-group-management-introduction-plan.md)を参照してください。
+
+## データとプライバシー
+
+- プレイデータは基本的に利用中のブラウザ内へ保存されます。
+- 配信元や端末を変えると保存領域も変わるため、必要に応じてゲーム内のデータ書き出し・読み込み、または端末連携を利用してください。
+- オンラインランキングには公開名と集計に必要な記録を送り、本名・学校情報・解答内容は送信しません。
+- 公開名は不適切語の検査対象です。実名や個人を特定できる名前は使用しないでください。
+- 保護者・教員向け機能は、参加コード等による明示的な連携後に利用します。
+
+## ローカル開発
+
+Node.js と npm が必要です。
+
+```bash
+npm install
+npm run dev
+```
+
+開発サーバーは `http://localhost:5173/` で起動します。同じネットワークの別端末からは、起動時に表示される `Network` URLを利用できます。
+
+```bash
+npm run build
+npm run preview
+```
+
+本番ビルドのプレビューは `http://localhost:4173/` で起動します。
+
+### 主なコマンド
+
+| コマンド | 内容 |
+| --- | --- |
+| `npm run dev` | Vite開発サーバーを起動 |
+| `npm run build` | Web版を本番ビルド |
+| `npm run preview` | 本番ビルドをローカル確認 |
+| `npm run audit:hiragana` | ひらがな表示の監査 |
+| `npm run audit:english` | 英語表示の監査 |
+| `npm run test:management` | 管理システム連携を検証 |
+| `npm run dist:offline` | Windows向けオフライン版を生成 |
+
+## 公開構成
+
+メイン入口はChatGPT Sites版です。GitHub Pagesを通常のゲーム配信元とし、Vercelを予備配信元として利用する3段構成になっています。`main` ブランチへのpushでGitHub Pagesのデプロイが実行されます。
+
+```text
+ChatGPT Sites（メイン入口）
+├─ GitHub Pages（通常配信）
+└─ Vercel（予備配信）
+```
+
+## 関連資料
+
+- [オンラインランキング導入計画](./docs/online-ranking-sites-introduction-plan.md)
+- [保護者・教員向けグループ管理システム導入案](./docs/guardian-educator-group-management-introduction-plan.md)
+- [協力プレイの進行仕様](./docs/coop-battle-flow.md)
+- [Xboxコントローラー対応計画](./docs/xbox-controller-support-plan.md)
+- [ひらがな表示の整備計画](./docs/hiragana-translation-completion-plan-20260714.md)
+- [英語表示の整備計画](./docs/english-translation-completion-plan-20260714.md)
+
+> 学習ローグは継続開発中です。機能や問題内容は随時更新されます。
