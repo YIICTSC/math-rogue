@@ -110,12 +110,19 @@ const isTextEditingElement = (element: Element | null): boolean => {
 
 const getTopmostVisibleGamepadModal = (): HTMLElement | null =>
   Array.from(document.querySelectorAll<HTMLElement>(GAMEPAD_MODAL_SELECTOR))
-    .reverse()
-    .find(element => {
+    .map((element, domIndex) => {
       const style = window.getComputedStyle(element);
       const rect = element.getBoundingClientRect();
-      return style.visibility !== 'hidden' && style.display !== 'none' && rect.width > 0 && rect.height > 0;
-    }) ?? null;
+      const parsedZIndex = Number.parseInt(style.zIndex, 10);
+      return {
+        element,
+        domIndex,
+        visible: style.visibility !== 'hidden' && style.display !== 'none' && rect.width > 0 && rect.height > 0,
+        zIndex: Number.isFinite(parsedZIndex) ? parsedZIndex : 0,
+      };
+    })
+    .filter(candidate => candidate.visible)
+    .sort((a, b) => b.zIndex - a.zIndex || b.domIndex - a.domIndex)[0]?.element ?? null;
 
 const getFocusableElements = (): HTMLElement[] => {
   const modal = getTopmostVisibleGamepadModal();
@@ -304,6 +311,15 @@ const handleBattleAction = (action: NavigationAction): boolean => {
 const getInitialFocusableElement = (): HTMLElement | null => {
   const focusables = getFocusableElements();
   if (focusables.length === 0) return null;
+  const explicitChoices = focusables
+    .filter(element => element.hasAttribute('data-gamepad-initial-choice'))
+    .sort((a, b) => {
+      const rectA = a.getBoundingClientRect();
+      const rectB = b.getBoundingClientRect();
+      if (Math.abs(rectA.top - rectB.top) > 8) return rectA.top - rectB.top;
+      return rectA.left - rectB.left;
+    });
+  if (explicitChoices[0]) return explicitChoices[0];
   const viewportCx = window.innerWidth / 2;
   const viewportCy = window.innerHeight / 2;
   return focusables.reduce<{ element: HTMLElement; score: number } | null>((best, element) => {
@@ -409,7 +425,28 @@ const triggerShortcutButton = (buttonName: ShortcutButtonName): boolean => {
 const clickBackLikeControl = () => {
   const modal = getTopmostVisibleGamepadModal();
   const candidates = getFocusableElements().filter(element => !modal || modal.contains(element));
-  const labels = ['戻る', '閉じる', 'キャンセル', '終了', 'メニューへ', 'EXIT', 'Exit', 'Quit', 'Back'];
+  const explicitTarget = candidates.find(element => element.hasAttribute('data-gamepad-back'));
+  if (explicitTarget) {
+    explicitTarget.click();
+    return;
+  }
+  const labels = [
+    '戻る',
+    '閉じる',
+    'キャンセル',
+    'あとで',
+    'あとで決める',
+    '終了',
+    'メニューへ',
+    'Close',
+    'Cancel',
+    'Later',
+    'Decide Later',
+    'EXIT',
+    'Exit',
+    'Quit',
+    'Back',
+  ];
   const target = candidates.find(element => {
     const text = `${element.textContent ?? ''} ${element.getAttribute('aria-label') ?? ''} ${element.getAttribute('title') ?? ''}`;
     return labels.some(label => text.includes(label));
@@ -518,7 +555,9 @@ const handleActionFallback = (action: NavigationAction) => {
     return;
   }
 
-  if (isTextEditingElement(document.activeElement) && action !== 'confirm' && action !== 'cancel') return;
+  // Keep horizontal input available for caret/select changes, but let vertical
+  // controller navigation leave form fields and return to the surrounding UI.
+  if (isTextEditingElement(document.activeElement) && (action === 'left' || action === 'right')) return;
 
   if (action === 'up' || action === 'down' || action === 'left' || action === 'right') {
     const next = getNearestFocusableByDirection(action);
@@ -608,6 +647,13 @@ export const useXboxControllerNavigation = () => {
 
     const runAction = (action: NavigationAction) => {
       markGamepadNavigation();
+      // A focused text field or screen-level key handler may consume the
+      // synthetic Escape event without closing the visible overlay. When a
+      // modal is open, B must always operate the topmost modal directly.
+      if (action === 'cancel' && getTopmostVisibleGamepadModal()) {
+        clickBackLikeControl();
+        return;
+      }
       const handled = dispatchKeyboardEvent(getKeyboardActionKey(action));
       if (!handled) handleActionFallback(action);
     };

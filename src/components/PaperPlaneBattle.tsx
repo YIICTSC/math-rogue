@@ -3824,7 +3824,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; languageMode?: LanguageMo
                      {rewardOptions.map((part, i) => (
                          <div
                             key={i}
-                            data-gamepad-initial-choice
+                            data-gamepad-initial-choice={i === 0 ? true : undefined}
                             role="button"
                             tabIndex={0}
                             onClick={() => handleRewardSelect(part)}

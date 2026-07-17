@@ -2876,7 +2876,7 @@ const KochoShowdown: React.FC<{
                                     <h2 className="text-3xl font-bold text-yellow-400 mb-8 flex items-center justify-center"><Gift className="mr-2"/> {tr('Card Reward')}</h2>
                                     <div className="flex gap-4 md:gap-8 justify-center flex-wrap">
                                         {rewardCards.map((card, i) => (
-                                            <div key={i} data-gamepad-initial-choice role="button" tabIndex={0} className="w-32 md:w-40 bg-slate-800 border-4 border-yellow-500 rounded-xl p-4 flex flex-col items-center hover:scale-105 transition-transform cursor-pointer" onClick={() => selectReward(card)} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); selectReward(card); } }}>
+                                            <div key={i} data-gamepad-initial-choice={i === 0 ? true : undefined} role="button" tabIndex={0} className="w-32 md:w-40 bg-slate-800 border-4 border-yellow-500 rounded-xl p-4 flex flex-col items-center hover:scale-105 transition-transform cursor-pointer" onClick={() => selectReward(card)} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); selectReward(card); } }}>
                                                 <KochoCardActionArt card={card} className="mb-2 h-16 w-16 rounded-lg border border-indigo-400/40 bg-black/40" />
                                                 <div className="font-bold text-white mb-1 text-center text-sm md:text-base leading-tight">{tr(card.name)}</div>
                                                 
