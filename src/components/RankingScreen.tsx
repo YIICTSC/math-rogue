@@ -10,9 +10,10 @@ interface RankingScreenProps {
   onBack: () => void;
   languageMode: LanguageMode;
   onRequestOnlineName?: () => void;
+  onRequestOnlineNameChange?: () => void;
 }
 
-const RankingScreen: React.FC<RankingScreenProps> = ({ onBack, languageMode, onRequestOnlineName = () => undefined }) => {
+const RankingScreen: React.FC<RankingScreenProps> = ({ onBack, languageMode, onRequestOnlineName = () => undefined, onRequestOnlineNameChange = () => undefined }) => {
   const [rankingScope, setRankingScope] = useState<'LOCAL' | 'ONLINE'>('ONLINE');
   const [activeTab, setActiveTab] = useState<'ADVENTURE' | 'POKER' | 'SURVIVOR' | 'DUNGEON' | 'DUNGEON_2' | 'KOCHO' | 'PLANE' | 'GO_HOME'>('ADVENTURE');
   const [adventureData, setAdventureData] = useState<RankingEntry[]>([]);
@@ -52,7 +53,7 @@ const RankingScreen: React.FC<RankingScreenProps> = ({ onBack, languageMode, onR
   };
 
   if (rankingScope === 'ONLINE') {
-      return <OnlineRankingScreen onBack={onBack} onLocal={() => setRankingScope('LOCAL')} onRequestName={onRequestOnlineName} languageMode={languageMode} />;
+      return <OnlineRankingScreen onBack={onBack} onLocal={() => setRankingScope('LOCAL')} onRequestName={onRequestOnlineName} onRequestNameChange={onRequestOnlineNameChange} languageMode={languageMode} />;
   }
 
   return (

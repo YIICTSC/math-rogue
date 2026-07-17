@@ -1398,6 +1398,7 @@ const App: React.FC = () => {
     const [showStudentGradeSurvey, setShowStudentGradeSurvey] = useState<boolean>(() => !storageService.getStudentProfile().grade?.trim());
     const [onlineRankingProfile, setOnlineRankingProfile] = useState<OnlineRankingProfile | null>(() => onlineRankingService.getProfile());
     const [showOnlineNameSetup, setShowOnlineNameSetup] = useState(false);
+    const [onlineNameSetupIntent, setOnlineNameSetupIntent] = useState<'manage' | 'rename'>('manage');
     const [onlineNamePromptDismissed, setOnlineNamePromptDismissed] = useState(false);
     const [rankingRewardNotices, setRankingRewardNotices] = useState<OnlineReward[]>([]);
     const rankingRewardCheckedRef = useRef(false);
@@ -4835,6 +4836,21 @@ const App: React.FC = () => {
         return () => window.clearTimeout(timeout);
     }, [addLog, eventData, gameState.screen, languageMode]);
 
+    const requestGameFullscreen = () => {
+        if (typeof document === 'undefined' || document.fullscreenElement) return;
+        const root = document.documentElement as HTMLElement & {
+            webkitRequestFullscreen?: () => Promise<void> | void;
+        };
+        const request = root.requestFullscreen?.bind(root) || root.webkitRequestFullscreen?.bind(root);
+        if (!request) return;
+        try {
+            const result = request();
+            if (result && typeof result.catch === 'function') void result.catch(() => undefined);
+        } catch {
+            // 全画面表示が許可されない環境では、通常表示のままゲームを続行する。
+        }
+    };
+
     const continueGame = async () => {
         if (isDailyLimitReached) {
             audioService.playSound('wrong');
@@ -4865,6 +4881,8 @@ const App: React.FC = () => {
                 addLog("セーブデータが無効だったため削除しました。", "red");
                 return;
             }
+
+            requestGameFullscreen();
 
             if (saved.screen === GameScreen.EVENT) {
                 const currentNode = saved.map.find(n => n.id === saved.currentMapNodeId);
@@ -4955,6 +4973,7 @@ const App: React.FC = () => {
             setShowTimeLimitModal(true);
             return;
         }
+        requestGameFullscreen();
         const assignmentModePool = activeAssignment?.gameMode === 'FREE' ? getAssignmentModePool(activeAssignment) : undefined;
         const assignmentHasCustomProblems = activeAssignment?.gameMode === 'FREE' && activeAssignment.customProblems.length > 0;
         const initialMode = assignmentHasCustomProblems ? GameMode.UPPER_TRIVIA : assignmentModePool ? getAssignmentRepresentativeMode(activeAssignment) : GameMode.MULTIPLICATION;
@@ -5022,6 +5041,7 @@ const App: React.FC = () => {
             setShowTimeLimitModal(true);
             return;
         }
+        requestGameFullscreen();
         audioService.playSound('select');
         setIsLoading(false);
         showDailyAssignmentNoticeForProblemSelection();
@@ -5110,6 +5130,7 @@ const App: React.FC = () => {
 
     const startTypingGame = () => {
         if (redirectToAssignmentChallengeIfLocked()) return;
+        requestGameFullscreen();
         audioService.playSound('select');
         setIsLoading(false);
         showDailyAssignmentNoticeForProblemSelection();
@@ -16453,6 +16474,10 @@ const App: React.FC = () => {
                             onBack={returnToTitle}
                             languageMode={languageMode}
                             onRequestOnlineName={() => setShowOnlineNameSetup(true)}
+                            onRequestOnlineNameChange={() => {
+                                setOnlineNameSetupIntent('rename');
+                                setShowOnlineNameSetup(true);
+                            }}
                         />
                     </div>
                 )}
@@ -17553,14 +17578,17 @@ const App: React.FC = () => {
                 <OnlineNameSetupModal
                     open={showOnlineNameSetup && !showStudentGradeSurvey}
                     profile={onlineRankingProfile}
+                    initialMode={onlineNameSetupIntent}
                     languageMode={languageMode}
                     onClose={() => {
                         setShowOnlineNameSetup(false);
+                        setOnlineNameSetupIntent('manage');
                         setOnlineNamePromptDismissed(true);
                     }}
                     onRegistered={(profile) => {
                         setOnlineRankingProfile(profile);
                         setShowOnlineNameSetup(false);
+                        setOnlineNameSetupIntent('manage');
                         rankingRewardCheckedRef.current = false;
                         void onlineRankingService.syncCurrentSnapshots().catch(() => undefined);
                     }}

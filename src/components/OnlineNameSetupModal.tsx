@@ -10,24 +10,25 @@ interface Props {
   onClose: () => void;
   onRegistered: (profile: OnlineRankingProfile) => void;
   profile?: OnlineRankingProfile | null;
+  initialMode?: 'manage' | 'rename';
 }
 
-const OnlineNameSetupModal: React.FC<Props> = ({ open, languageMode, onClose, onRegistered, profile }) => {
+const OnlineNameSetupModal: React.FC<Props> = ({ open, languageMode, onClose, onRegistered, profile, initialMode = 'manage' }) => {
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [name, setName] = useState('');
   const [accepted, setAccepted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  const [mode, setMode] = useState<'register' | 'redeem'>('register');
+  const [mode, setMode] = useState<'register' | 'redeem' | 'rename'>('register');
   const [transferCode, setTransferCode] = useState('');
   const [issuedCode, setIssuedCode] = useState('');
 
-  const loadSuggestions = async () => {
+  const loadSuggestions = async (selectFirst = true) => {
     setError('');
     try {
       const next = await onlineRankingService.getSuggestions();
       setSuggestions(next);
-      if (!name && next[0]) setName(next[0]);
+      if (selectFirst && !name && next[0]) setName(next[0]);
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : trans('オンラインランキングは準備中です。', languageMode));
     }
@@ -37,8 +38,15 @@ const OnlineNameSetupModal: React.FC<Props> = ({ open, languageMode, onClose, on
     if (!open) return;
     setError('');
     setIssuedCode('');
-    if (!profile) void loadSuggestions();
-  }, [open, profile]);
+    if (profile && initialMode === 'rename') {
+      setName(profile.displayName);
+      setMode('rename');
+      void loadSuggestions(false);
+    } else {
+      setMode('register');
+      if (!profile) void loadSuggestions();
+    }
+  }, [open, profile, initialMode]);
   if (!open) return null;
 
   const issueLinkCode = async () => {
@@ -55,14 +63,54 @@ const OnlineNameSetupModal: React.FC<Props> = ({ open, languageMode, onClose, on
     finally { setLoading(false); }
   };
 
-  if (profile) return <div className="fixed inset-0 z-[10036] flex items-center justify-center bg-black/85 p-2 sm:p-4">
+  const startRename = () => {
+    setName(profile?.displayName || '');
+    setError('');
+    setMode('rename');
+    void loadSuggestions(false);
+  };
+
+  const submitRename = async () => {
+    if (!name.trim() || name.trim() === profile?.displayName) return;
+    setLoading(true);
+    setError('');
+    try {
+      onRegistered(await onlineRankingService.updateDisplayName(name.trim()));
+    } catch (reason) {
+      setError(reason instanceof Error ? reason.message : trans('公開名を変更できませんでした。', languageMode));
+    } finally { setLoading(false); }
+  };
+
+  if (profile && mode !== 'rename') return <div className="fixed inset-0 z-[10036] flex items-center justify-center bg-black/85 p-2 sm:p-4">
     <div className="relative max-h-[calc(100dvh-1rem)] w-full max-w-lg overflow-y-auto overscroll-contain rounded-2xl border-4 border-cyan-300 bg-slate-950 p-4 text-center text-white shadow-[0_0_45px_rgba(34,211,238,0.25)] sm:max-h-[calc(100dvh-2rem)] sm:p-6">
       <button onClick={onClose} className="absolute right-3 top-3 rounded-lg border border-slate-600 bg-slate-900 p-2 text-slate-300" aria-label={trans('閉じる', languageMode)}><X size={18} /></button>
       <Smartphone className="mx-auto mb-3 text-cyan-300" size={38} /><div className="text-xs font-black tracking-[.25em] text-cyan-300">DEVICE LINK</div><h2 className="my-3 text-2xl font-black">{trans('別の端末と連携する', languageMode)}</h2>
       <p className="mb-5 text-sm font-bold leading-6 text-slate-300">{trans('新しい端末の「コードで引き継ぐ」に入力する、10分間・1回限りのコードを発行します。', languageMode)}</p>
+      <button onClick={startRename} className="mb-3 w-full rounded-xl border-2 border-lime-400 bg-lime-950/50 px-4 py-3 font-black text-lime-100">{trans('公開名を変更', languageMode)}</button>
       {issuedCode ? <div className="mb-5 rounded-xl border-2 border-lime-300 bg-lime-950/50 p-5"><small className="font-black text-lime-200">TRANSFER CODE</small><div className="mt-2 font-mono text-4xl font-black tracking-[.14em] text-white">{issuedCode}</div><p className="mt-3 text-xs text-lime-100/70">{trans('このコードを公開したり、他人へ渡したりしないでください。', languageMode)}</p></div> : <button onClick={() => void issueLinkCode()} disabled={loading} className="mb-5 flex w-full items-center justify-center gap-2 rounded-xl bg-cyan-300 px-4 py-3 font-black text-slate-950 disabled:opacity-40"><Link2 size={18} />{loading ? trans('発行中…', languageMode) : trans('連携コードを発行', languageMode)}</button>}
       {error && <div className="mb-4 rounded-lg border border-red-500 bg-red-950/60 p-3 text-xs font-bold text-red-100">{error}</div>}
       <button onClick={onClose} className="w-full rounded-xl border border-slate-600 bg-slate-800 px-4 py-3 font-black">{trans('閉じる', languageMode)}</button>
+    </div>
+  </div>;
+
+  if (profile && mode === 'rename') return <div className="fixed inset-0 z-[10036] flex items-center justify-center bg-black/85 p-2 sm:p-4">
+    <div className="relative max-h-[calc(100dvh-1rem)] w-full max-w-2xl overflow-y-auto overscroll-contain rounded-2xl border-4 border-lime-300 bg-slate-950 p-4 text-white sm:max-h-[calc(100dvh-2rem)] sm:p-6">
+      <button onClick={() => setMode('register')} className="absolute right-3 top-3 rounded-lg border border-slate-600 bg-slate-900 p-2 text-slate-300" aria-label={trans('閉じる', languageMode)}><X size={18} /></button>
+      <div className="text-center text-xs font-black tracking-[.25em] text-lime-300">ONLINE RANKING</div>
+      <h2 className="mb-2 mt-3 text-center text-2xl font-black">{trans('公開名を変更', languageMode)}</h2>
+      <p className="mb-5 text-center text-sm font-bold text-slate-300">{trans('新しい公開名は、過去のランキング記録にも反映されます。', languageMode)}</p>
+      <div className="mb-4 grid grid-cols-3 gap-2">
+        {suggestions.map((suggestion) => <button key={suggestion} onClick={() => setName(suggestion)} className={`min-w-0 break-words rounded-xl border px-2 py-3 text-xs font-black ${name === suggestion ? 'border-lime-300 bg-lime-300 text-slate-950' : 'border-slate-600 bg-slate-900 text-slate-100'}`}>{suggestion}</button>)}
+      </div>
+      <button onClick={() => void loadSuggestions()} className="mx-auto mb-4 flex items-center gap-2 rounded-lg border border-cyan-500/60 bg-cyan-950/60 px-4 py-2 text-xs font-black text-cyan-100"><Dice5 size={15} />{trans('ほかの候補を見る', languageMode)}</button>
+      <label className="mb-4 block text-xs font-black text-slate-300">{trans('自由入力', languageMode)}
+        <input value={name} onChange={(event) => setName(event.target.value)} maxLength={16} className="mt-2 w-full rounded-xl border-2 border-slate-600 bg-black px-4 py-3 text-lg font-black text-white outline-none focus:border-lime-300" placeholder={trans('2～16文字', languageMode)} />
+      </label>
+      {error && <div className="mb-4 rounded-lg border border-red-500 bg-red-950/60 p-3 text-center text-xs font-bold text-red-100">{error}</div>}
+      <div className="grid grid-cols-2 gap-2">
+        <button onClick={() => setMode('register')} className="rounded-xl border border-slate-600 bg-slate-800 px-4 py-3 font-black">{trans('戻る', languageMode)}</button>
+        <button onClick={() => void submitRename()} disabled={!name.trim() || name.trim() === profile.displayName || loading} className="rounded-xl bg-lime-300 px-4 py-3 font-black text-slate-950 disabled:opacity-40">{loading ? trans('変更中…', languageMode) : trans('この名前に変更', languageMode)}</button>
+      </div>
     </div>
   </div>;
 

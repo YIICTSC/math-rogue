@@ -472,6 +472,18 @@ export const onlineRankingService = {
     return profile;
   },
 
+  updateDisplayName: async (displayName: string) => {
+    const current = onlineRankingService.getProfile();
+    if (!current) throw new Error('ランキングへの参加登録が必要です。');
+    const data = await request<{ player: Pick<OnlineRankingProfile, 'id' | 'publicCode' | 'displayName'> }>('/api/v1/players/display-name', {
+      method: 'PATCH',
+      body: JSON.stringify({ displayName }),
+    }, true);
+    const profile = { ...current, ...data.player };
+    window.localStorage.setItem(PROFILE_KEY, JSON.stringify(profile));
+    return profile;
+  },
+
   getLeaderboard: async (rankingId: string, periodType: OnlinePeriodType) => {
     return request<{ ranking: OnlineRankingDefinition; periodType: OnlinePeriodType; periodKey: string; entries: OnlineLeaderboardEntry[]; rankings: OnlineRankingDefinition[] }>(`/api/v1/leaderboards?rankingId=${encodeURIComponent(rankingId)}&periodType=${periodType}&platform=${getPlatform()}&source=learning-rogue`);
   },

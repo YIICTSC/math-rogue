@@ -5,9 +5,9 @@ import { onlineRankingService, OnlineLeaderboardEntry, OnlinePeriodType, OnlineR
 import { trans } from '../utils/textUtils';
 import { getOnlineRankingCategory, ONLINE_RANKING_CATEGORIES, ONLINE_RANKING_FALLBACKS } from '../data/onlineRankingDefinitions';
 
-interface Props { onBack: () => void; onLocal: () => void; onRequestName: () => void; languageMode: LanguageMode; }
+interface Props { onBack: () => void; onLocal: () => void; onRequestName: () => void; onRequestNameChange: () => void; languageMode: LanguageMode; }
 
-const OnlineRankingScreen: React.FC<Props> = ({ onBack, onLocal, onRequestName, languageMode }) => {
+const OnlineRankingScreen: React.FC<Props> = ({ onBack, onLocal, onRequestName, onRequestNameChange, languageMode }) => {
   const [rankingId, setRankingId] = useState(ONLINE_RANKING_FALLBACKS[0].id);
   const [periodType, setPeriodType] = useState<OnlinePeriodType>('weekly');
   const [rankings, setRankings] = useState<OnlineRankingDefinition[]>(ONLINE_RANKING_FALLBACKS);
@@ -51,9 +51,9 @@ const OnlineRankingScreen: React.FC<Props> = ({ onBack, onLocal, onRequestName, 
 
   return <div className="flex h-full w-full flex-col bg-slate-950 text-white">
     <header className="shrink-0 border-b-2 border-lime-400/40 bg-black">
-      <div className="flex items-center gap-3 px-3 py-3 sm:px-4">
+      <div className="flex flex-col items-stretch gap-2 px-3 py-3 sm:flex-row sm:items-center sm:gap-3 sm:px-4">
         <div className="flex min-w-0 items-center gap-2"><Globe2 className="shrink-0 text-lime-300" /><div className="min-w-0"><div className="text-[9px] font-black tracking-[.25em] text-lime-300">ONLINE</div><h2 className="truncate text-base font-black sm:text-xl">{trans('オンラインランキング', languageMode)}</h2></div></div>
-        <div className="ml-auto flex shrink-0 gap-1.5 sm:gap-2">{profile && <button onClick={onRequestName} className="rounded-lg border border-cyan-600 bg-cyan-950 px-2 py-2 text-[10px] font-black text-cyan-100 sm:px-3 sm:text-xs">{trans('端末連携', languageMode)}</button>}<button onClick={onLocal} className="rounded-lg border border-slate-600 bg-slate-800 px-2 py-2 text-[10px] font-black sm:px-3 sm:text-xs">{trans('端末記録', languageMode)}</button><button onClick={onBack} className="flex items-center gap-1 rounded-lg border border-slate-600 bg-slate-800 px-2 py-2 text-[10px] font-black sm:px-3 sm:text-xs"><ArrowLeft size={15} />{trans('戻る', languageMode)}</button></div>
+        <div className="flex flex-wrap justify-end gap-1.5 sm:ml-auto sm:shrink-0 sm:flex-nowrap sm:gap-2">{profile && <><button onClick={onRequestNameChange} className="rounded-lg border border-lime-500 bg-lime-950 px-2 py-2 text-[10px] font-black text-lime-100 sm:px-3 sm:text-xs">{trans('公開名を変更', languageMode)}</button><button onClick={onRequestName} className="rounded-lg border border-cyan-600 bg-cyan-950 px-2 py-2 text-[10px] font-black text-cyan-100 sm:px-3 sm:text-xs">{trans('端末連携', languageMode)}</button></>}<button onClick={onLocal} className="rounded-lg border border-slate-600 bg-slate-800 px-2 py-2 text-[10px] font-black sm:px-3 sm:text-xs">{trans('端末記録', languageMode)}</button><button onClick={onBack} className="flex items-center gap-1 rounded-lg border border-slate-600 bg-slate-800 px-2 py-2 text-[10px] font-black sm:px-3 sm:text-xs"><ArrowLeft size={15} />{trans('戻る', languageMode)}</button></div>
       </div>
       <nav className="flex gap-2 overflow-x-auto border-t border-slate-800 px-3 py-2 custom-scrollbar sm:px-4" aria-label={trans('ランキングカテゴリ', languageMode)}>
         {ONLINE_RANKING_CATEGORIES.map((category) => <button key={category.id} onClick={() => selectCategory(category.id)} className={`min-w-[116px] rounded-xl border px-3 py-2 text-left transition-colors ${activeCategory.id === category.id ? 'border-lime-300 bg-lime-300 text-slate-950' : 'border-slate-700 bg-slate-900 text-slate-200 hover:border-slate-500'}`}><small className={`block text-[8px] font-black tracking-[.18em] ${activeCategory.id === category.id ? 'text-slate-700' : 'text-slate-500'}`}>{category.caption}</small><strong className="mt-0.5 block whitespace-nowrap text-xs">{trans(category.label, languageMode)}</strong></button>)}
