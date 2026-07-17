@@ -118,9 +118,16 @@ const fallbackModeForSubject = (subject: string): GameMode => {
   return GameMode.MATH_G1_1;
 };
 
+const isManagedCurriculumMode = (unitId: string) =>
+  /^(?:MATH_G|KOKUGO_G)[1-9]_U\d{2}$/.test(unitId) ||
+  /^ENGLISH_G[3-9]_(?:U\d{2}|WORDS)$/.test(unitId) ||
+  /^(?:LIFE_[12]|SCIENCE_[3-9]|SOCIAL_[3-9])_U\d{2}$/.test(unitId);
+
 const resolveMode = (assignment: ManagedAssignment): GameMode => {
   const modes = new Set<string>(Object.values(GameMode));
-  return modes.has(assignment.unitId) ? assignment.unitId as GameMode : fallbackModeForSubject(assignment.subject);
+  return modes.has(assignment.unitId) || isManagedCurriculumMode(assignment.unitId)
+    ? assignment.unitId as GameMode
+    : fallbackModeForSubject(assignment.subject);
 };
 
 export const toAssignmentPayload = (assignment: ManagedAssignment): AssignmentPayload => ({
