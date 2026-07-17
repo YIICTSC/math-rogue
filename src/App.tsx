@@ -5849,6 +5849,9 @@ const App: React.FC = () => {
         if (!isUiPreviewMode) return;
         const handlePreviewKeyDown = (event: KeyboardEvent) => {
             if (event.key !== 'Escape') return;
+            // Let the controller navigation layer consume B/Escape for the
+            // topmost modal without also closing the entire UI preview.
+            if (event.defaultPrevented) return;
             event.preventDefault();
             closeUiPreview();
         };
@@ -15032,6 +15035,12 @@ const App: React.FC = () => {
                                 className="assignment-letter-overlay fixed inset-0 z-[10030] flex items-center justify-center bg-black/80 p-2 sm:p-4"
                                 data-gamepad-modal
                                 data-gamepad-initial-scope={`start-assignment-letter-${assignmentLetter.id}`}
+                                onKeyDown={(event) => {
+                                    if (event.key !== 'Escape') return;
+                                    event.preventDefault();
+                                    event.stopPropagation();
+                                    event.currentTarget.querySelector<HTMLElement>('[data-gamepad-back]')?.click();
+                                }}
                             >
                                 <div
                                     className={`assignment-letter-panel w-full max-w-2xl max-h-[96vh] overflow-y-auto rounded-2xl border-4 p-3 text-slate-900 sm:p-4 ${
@@ -15118,6 +15127,7 @@ const App: React.FC = () => {
                                             {trans("課題を始める", languageMode)}
                                         </button>
                                         <button
+                                            data-gamepad-back
                                             onClick={() => {
                                                 if (!isTeacherAssignmentActive && assignmentLetter) {
                                                     if (assignmentLetterSource === 'selection') {
@@ -15587,6 +15597,12 @@ const App: React.FC = () => {
                                 className="assignment-letter-overlay fixed inset-0 z-[10030] flex items-center justify-center bg-black/80 p-2 sm:p-4"
                                 data-gamepad-modal
                                 data-gamepad-initial-scope={`assignment-letter-${assignmentLetter.id}`}
+                                onKeyDown={(event) => {
+                                    if (event.key !== 'Escape') return;
+                                    event.preventDefault();
+                                    event.stopPropagation();
+                                    event.currentTarget.querySelector<HTMLElement>('[data-gamepad-back]')?.click();
+                                }}
                             >
                         <div
                             className={`assignment-letter-panel w-full max-w-2xl max-h-[96vh] overflow-y-auto rounded-2xl border-4 p-3 text-slate-900 sm:p-4 ${
@@ -15674,6 +15690,7 @@ const App: React.FC = () => {
                                     {trans("課題を始める", languageMode)}
                                 </button>
                                 <button
+                                    data-gamepad-back
                                     onClick={() => {
                                         if (!isTeacherAssignmentActive && assignmentLetter) {
                                             if (assignmentLetterSource === 'selection') {
@@ -17610,6 +17627,7 @@ const App: React.FC = () => {
                     onClose={() => setShowAssignmentInbox(false)}
                     onSelect={openManagedAssignment}
                     onProfileChange={setManagementProfile}
+                    languageMode={languageMode}
                 />
                 <OnlineNameSetupModal
                     open={showOnlineNameSetup && !showStudentGradeSurvey}
@@ -17641,7 +17659,11 @@ const App: React.FC = () => {
                                     {rankingRewardNotices[0].periodKey ? ` ・ ${rankingRewardNotices[0].periodKey}` : ''}
                                 </div>
                                 <div className="mt-3 text-4xl font-black text-white">
-                                    {languageMode === 'ENGLISH' ? `RANK ${rankingRewardNotices[0].awardedRank}` : `第${rankingRewardNotices[0].awardedRank}位`}
+                                    {languageMode === 'ENGLISH'
+                                        ? `RANK ${rankingRewardNotices[0].awardedRank}`
+                                        : languageMode === 'HIRAGANA'
+                                            ? `だい${rankingRewardNotices[0].awardedRank}い`
+                                            : `第${rankingRewardNotices[0].awardedRank}位`}
                                 </div>
                             </div>
                             <p className="mb-4 text-sm font-bold leading-6 text-slate-300">
