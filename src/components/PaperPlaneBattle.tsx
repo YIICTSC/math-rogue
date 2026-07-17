@@ -1734,6 +1734,16 @@ const loadProgress = () => {
 
 const PaperPlaneBattle: React.FC<{ onBack: () => void; languageMode?: LanguageMode; debugPreview?: MiniGameDebugPreview }> = ({ onBack, languageMode = 'JAPANESE', debugPreview }) => {
     const t = (text: string) => trans(text, languageMode);
+    useEffect(() => {
+        const handleEscape = (event: KeyboardEvent) => {
+            if (event.code !== 'Escape') return;
+            event.preventDefault();
+            onBack();
+        };
+        window.addEventListener('keydown', handleEscape);
+        return () => window.removeEventListener('keydown', handleEscape);
+    }, [onBack]);
+
     const savedData = loadInitialState();
     const isDebugPaperPlaneUi = Boolean(debugPreview?.startsWith('PAPER_'));
     const debugPlayer = isDebugPaperPlaneUi ? createDebugPaperPlanePlayer() : null;

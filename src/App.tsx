@@ -14903,8 +14903,11 @@ const App: React.FC = () => {
                 )}
 
                 {showStartOverConfirm && (
-                    <div className="app-modal-overlay app-start-over-modal-overlay fixed inset-0 z-[10000] bg-black/90 flex items-center justify-center p-4 animate-in fade-in duration-300">
-                        <div className="app-modal-panel app-start-over-modal bg-gray-900 border-4 border-yellow-500 p-8 rounded-2xl max-sm w-full max-w-md shadow-[0_0_50px_rgba(234,179,8,0.35)] text-center">
+                    <div
+                        className="app-modal-overlay app-start-over-modal-overlay fixed inset-0 z-[10000] bg-black/90 flex items-center justify-center p-4 animate-in fade-in duration-300"
+                        data-gamepad-initial-scope="start-over-confirm"
+                    >
+                        <div className="app-modal-panel app-start-over-modal bg-gray-900 border-4 border-yellow-500 p-8 rounded-2xl max-sm w-full max-w-md shadow-[0_0_50px_rgba(234,179,8,0.35)] text-center" data-gamepad-navigation-root>
                             <AlertTriangle size={64} className="text-yellow-400 mx-auto mb-6 animate-pulse" />
                             <h2 className="text-3xl font-black text-white mb-4 tracking-tighter">{trans("続きデータがあります", languageMode)}</h2>
                             <p className="text-gray-300 mb-8 leading-relaxed font-bold">
@@ -14914,6 +14917,7 @@ const App: React.FC = () => {
                             </p>
                             <div className="flex flex-col gap-3">
                                 <button
+                                    data-gamepad-initial-choice
                                     onClick={continueGame}
                                     className="bg-blue-600 text-white w-full py-4 rounded-xl font-black text-lg hover:bg-blue-500 transition-all"
                                 >
@@ -15024,12 +15028,19 @@ const App: React.FC = () => {
                         )}
 
                         {assignmentLetter && showAssignmentLetter && (
-                            <div className="assignment-letter-overlay fixed inset-0 z-[10030] flex items-center justify-center bg-black/80 p-2 sm:p-4">
-                                <div className={`assignment-letter-panel w-full max-w-2xl max-h-[96vh] overflow-y-auto rounded-2xl border-4 p-3 text-slate-900 sm:p-4 ${
+                            <div
+                                className="assignment-letter-overlay fixed inset-0 z-[10030] flex items-center justify-center bg-black/80 p-2 sm:p-4"
+                                data-gamepad-modal
+                                data-gamepad-initial-scope={`start-assignment-letter-${assignmentLetter.id}`}
+                            >
+                                <div
+                                    className={`assignment-letter-panel w-full max-w-2xl max-h-[96vh] overflow-y-auto rounded-2xl border-4 p-3 text-slate-900 sm:p-4 ${
                                     isTeacherAssignmentActive
                                         ? 'border-amber-300 bg-[#fff7d6] shadow-[0_0_40px_rgba(250,204,21,0.35)]'
                                         : 'border-lime-300 bg-[#f3ffd4] shadow-[0_0_40px_rgba(163,230,53,0.35)]'
-                                }`}>
+                                }`}
+                                    data-gamepad-navigation-root
+                                >
                                     <div className={`assignment-letter-eyebrow mb-1 text-center text-[10px] font-black tracking-[0.3em] ${isTeacherAssignmentActive ? 'text-amber-700' : 'text-lime-700'}`}>{isTeacherAssignmentActive ? 'TEACHER LETTER' : 'DAILY LETTER'}</div>
                                     <h2 className="assignment-letter-title mb-2 text-center text-xl font-black sm:text-2xl">{getAssignmentTitle(assignmentLetter.title, languageMode)}</h2>
                                     <div className={`assignment-letter-banner mb-3 overflow-hidden rounded-xl border-2 bg-slate-950/90 ${isTeacherAssignmentActive ? 'border-amber-300' : 'border-lime-300'}`}>
@@ -15572,12 +15583,19 @@ const App: React.FC = () => {
                 )}
 
                 {gameState.screen !== GameScreen.START_MENU && assignmentLetter && showAssignmentLetter && (
-                            <div className="assignment-letter-overlay fixed inset-0 z-[10030] flex items-center justify-center bg-black/80 p-2 sm:p-4">
-                        <div className={`assignment-letter-panel w-full max-w-2xl max-h-[96vh] overflow-y-auto rounded-2xl border-4 p-3 text-slate-900 sm:p-4 ${
+                            <div
+                                className="assignment-letter-overlay fixed inset-0 z-[10030] flex items-center justify-center bg-black/80 p-2 sm:p-4"
+                                data-gamepad-modal
+                                data-gamepad-initial-scope={`assignment-letter-${assignmentLetter.id}`}
+                            >
+                        <div
+                            className={`assignment-letter-panel w-full max-w-2xl max-h-[96vh] overflow-y-auto rounded-2xl border-4 p-3 text-slate-900 sm:p-4 ${
                             isTeacherAssignmentActive
                                 ? 'border-amber-300 bg-[#fff7d6] shadow-[0_0_40px_rgba(250,204,21,0.35)]'
                                 : 'border-lime-300 bg-[#f3ffd4] shadow-[0_0_40px_rgba(163,230,53,0.35)]'
-                        }`}>
+                        }`}
+                            data-gamepad-navigation-root
+                        >
                             <div className={`assignment-letter-eyebrow mb-1 text-center text-[10px] font-black tracking-[0.3em] ${isTeacherAssignmentActive ? 'text-amber-700' : 'text-lime-700'}`}>{isTeacherAssignmentActive ? 'TEACHER LETTER' : 'DAILY LETTER'}</div>
                             <h2 className="assignment-letter-title mb-2 text-center text-xl font-black sm:text-2xl">{getAssignmentTitle(assignmentLetter.title, languageMode)}</h2>
                             <div className={`assignment-letter-banner mb-3 overflow-hidden rounded-xl border-2 bg-slate-950/90 ${isTeacherAssignmentActive ? 'border-amber-300' : 'border-lime-300'}`}>
@@ -15609,6 +15627,7 @@ const App: React.FC = () => {
                             </div>
                             <div className="assignment-letter-actions grid gap-2 sm:grid-cols-3">
                                 <button
+                                    data-gamepad-initial-choice
                                     onClick={() => {
                                         setShowAssignmentLetter(false);
                                         if (!isTeacherAssignmentActive && assignmentLetter) {
@@ -15674,6 +15693,7 @@ const App: React.FC = () => {
                                 </button>
                                 {isTeacherAssignmentActive ? (
                                     <button
+                                        data-gamepad-initial-choice
                                         onClick={() => {
                                             storageService.clearCurrentAssignment();
                                             setCurrentAssignment(null);
@@ -17471,6 +17491,7 @@ const App: React.FC = () => {
 
                 {gameState.screen === GameScreen.ENDING && (
                     <div
+                        data-gamepad-initial-scope="main-ending"
                         className="ending-screen w-full h-full bg-yellow-900 bg-cover bg-center flex flex-col items-center justify-start text-center text-white p-4 overflow-y-auto custom-scrollbar relative"
                         style={{
                             backgroundImage: `url(${assetUrl(
@@ -17481,7 +17502,10 @@ const App: React.FC = () => {
                         }}
                     >
                         <div className="absolute inset-0 bg-amber-950/62 pointer-events-none" />
-                        <div className={`ending-content relative z-10 my-auto w-full ${newlyUnlockedCard ? 'max-w-5xl' : 'max-w-2xl'} py-8`}>
+                        <div
+                            data-gamepad-navigation-root
+                            className={`ending-content relative z-10 my-auto w-full ${newlyUnlockedCard ? 'max-w-5xl' : 'max-w-2xl'} py-8`}
+                        >
                             {newlyUnlockedCard && (
                                 <div className="ending-unlocked-card mb-8 p-6 bg-white/20 border-2 border-white rounded-2xl animate-in zoom-in duration-500 shadow-xl">
                                     <div className="ending-unlocked-title flex items-center justify-center gap-2 text-white font-black text-xl mb-4 italic tracking-widest">
@@ -17536,8 +17560,20 @@ const App: React.FC = () => {
                                         )}
                                     </p>
                                     <div className="flex flex-wrap justify-center gap-2 max-h-60 overflow-y-auto custom-scrollbar p-2 bg-black/30 rounded border border-yellow-700/50">
-                                        {gameState.player.deck.map(card => (
-                                            <div key={card.id} className="scale-75 cursor-pointer hover:scale-90 transition-transform" onClick={() => handleLegacyCardSelect(card)}>
+                                        {gameState.player.deck.map((card, index) => (
+                                            <div
+                                                key={card.id}
+                                                data-gamepad-initial-choice={index === 0 ? true : undefined}
+                                                role="button"
+                                                tabIndex={0}
+                                                className="scale-75 cursor-pointer hover:scale-90 transition-transform"
+                                                onClick={() => handleLegacyCardSelect(card)}
+                                                onKeyDown={(event) => {
+                                                    if (event.key !== 'Enter' && event.key !== ' ') return;
+                                                    event.preventDefault();
+                                                    handleLegacyCardSelect(card);
+                                                }}
+                                            >
                                                 <Card card={card} onClick={() => handleLegacyCardSelect(card)} disabled={false} languageMode={languageMode} />
                                             </div>
                                         ))}

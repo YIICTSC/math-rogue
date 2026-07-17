@@ -87,14 +87,14 @@ const DifficultySelectionScreen: React.FC<DifficultySelectionScreenProps> = ({
         </div>
 
         <div className="grid grid-cols-1 gap-2 md:grid-cols-2">
-          {DIFFICULTY_CONFIGS.map(config => {
+          {DIFFICULTY_CONFIGS.map((config, index) => {
             const locked = config.level > maxUnlockedDifficulty;
             const features = getFeatures(config);
 
             return (
               <button
                 key={config.level}
-                data-gamepad-initial-choice={!locked ? true : undefined}
+                data-gamepad-initial-choice={index === 0 ? true : undefined}
                 disabled={locked}
                 onClick={() => onSelectDifficulty(config.level)}
                 className={`relative rounded-lg border-2 p-3 text-left shadow-lg transition-all sm:p-4 ${
@@ -146,13 +146,13 @@ const DifficultySelectionScreen: React.FC<DifficultySelectionScreenProps> = ({
         </div>
 
         <div className="difficulty-floating-levels grid">
-          {DIFFICULTY_CONFIGS.map(config => {
+          {DIFFICULTY_CONFIGS.map((config, index) => {
             const locked = config.level > maxUnlockedDifficulty;
             const active = config.level === previewConfig.level;
             return (
               <button
                 key={config.level}
-                data-gamepad-initial-choice={!locked ? true : undefined}
+                data-gamepad-initial-choice={index === 0 ? true : undefined}
                 type="button"
                 onClick={() => setPreviewLevel(config.level)}
                 className={`relative rounded-lg border px-2 py-1.5 text-center font-black transition-colors ${

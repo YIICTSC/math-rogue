@@ -24,6 +24,7 @@ const MiniGameSelectScreen: React.FC<MiniGameSelectScreenProps> = ({ onSelect, o
     if (isDebug) return true;
     return totalMathCorrect >= game.threshold;
   };
+  const firstUnlockedGameId = MINI_GAMES.find(isUnlocked)?.id;
 
   const handlePressStart = (game: MiniGameConfig) => {
     if (!isUnlocked(game)) return;
@@ -71,6 +72,12 @@ const MiniGameSelectScreen: React.FC<MiniGameSelectScreenProps> = ({ onSelect, o
   };
 
   const bindPress = (game: MiniGameConfig) => ({
+    onClick: (event: React.MouseEvent) => {
+      // HTMLElement.click() and keyboard activation use detail=0. Pointer and
+      // touch launches are already handled by their release events below.
+      if (event.detail !== 0 || !isUnlocked(game)) return;
+      onSelect(game.screen);
+    },
     onMouseDown: () => handlePressStart(game),
     onMouseUp: (e: React.MouseEvent) => handlePressEnd(e, game),
     onMouseLeave: handleCancelPress,
@@ -159,8 +166,8 @@ const MiniGameSelectScreen: React.FC<MiniGameSelectScreenProps> = ({ onSelect, o
       
       {/* Delete Confirmation Modal */}
       {deleteTarget && (
-        <div className="app-modal-overlay fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4 animate-in fade-in duration-200">
-          <div className="app-modal-panel app-delete-confirm-modal bg-gray-800 border-2 border-red-500 p-6 rounded-lg max-w-sm w-full shadow-2xl text-center">
+        <div className="app-modal-overlay fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4 animate-in fade-in duration-200" data-gamepad-initial-scope="mini-game-delete-confirm">
+          <div className="app-modal-panel app-delete-confirm-modal bg-gray-800 border-2 border-red-500 p-6 rounded-lg max-w-sm w-full shadow-2xl text-center" data-gamepad-navigation-root>
             <AlertTriangle size={48} className="text-red-500 mx-auto mb-4 animate-bounce" />
             <h3 className="text-xl font-bold text-white mb-2">{trans('セーブデータを削除しますか？', languageMode)}</h3>
             <p className="text-sm text-gray-300 mb-6">
@@ -176,8 +183,9 @@ const MiniGameSelectScreen: React.FC<MiniGameSelectScreenProps> = ({ onSelect, o
               >
                 <Trash2 size={16} className="mr-2"/> {trans('削除する', languageMode)}
               </button>
-              <button 
-                onClick={() => setDeleteTarget(null)} 
+              <button
+                data-gamepad-initial-choice
+                onClick={() => setDeleteTarget(null)}
                 className="bg-gray-600 hover:bg-gray-500 text-white px-6 py-2 rounded font-bold transition-colors"
               >
                 {trans('キャンセル', languageMode)}
@@ -198,7 +206,7 @@ const MiniGameSelectScreen: React.FC<MiniGameSelectScreenProps> = ({ onSelect, o
             {MINI_GAMES.map((game) => (
               <button
                 key={game.id}
-                data-gamepad-initial-choice={isUnlocked(game) ? true : undefined}
+                data-gamepad-initial-choice={game.id === firstUnlockedGameId ? true : undefined}
                 {...bindPress(game)}
                 className={`group relative bg-slate-800 border-4 border-slate-600 hover:border-white p-2 md:p-4 rounded-xl flex flex-col md:flex-row items-center justify-center md:justify-start text-center md:text-left transition-all shadow-xl overflow-hidden h-36 md:h-32 ${!isUnlocked(game) ? 'grayscale opacity-60' : 'hover:bg-slate-700'}`}
                 style={{ 

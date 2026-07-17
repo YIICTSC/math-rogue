@@ -81,20 +81,20 @@ const OnlineNameSetupModal: React.FC<Props> = ({ open, languageMode, onClose, on
     } finally { setLoading(false); }
   };
 
-  if (profile && mode !== 'rename') return <div className="fixed inset-0 z-[10036] flex items-center justify-center bg-black/85 p-2 sm:p-4">
-    <div className="relative max-h-[calc(100dvh-1rem)] w-full max-w-lg overflow-y-auto overscroll-contain rounded-2xl border-4 border-cyan-300 bg-slate-950 p-4 text-center text-white shadow-[0_0_45px_rgba(34,211,238,0.25)] sm:max-h-[calc(100dvh-2rem)] sm:p-6">
+  if (profile && mode !== 'rename') return <div className="fixed inset-0 z-[10036] flex items-center justify-center bg-black/85 p-2 sm:p-4" data-gamepad-modal data-gamepad-initial-scope="online-profile-manage">
+    <div className="relative max-h-[calc(100dvh-1rem)] w-full max-w-lg overflow-y-auto overscroll-contain rounded-2xl border-4 border-cyan-300 bg-slate-950 p-4 text-center text-white shadow-[0_0_45px_rgba(34,211,238,0.25)] sm:max-h-[calc(100dvh-2rem)] sm:p-6" data-gamepad-navigation-root>
       <button onClick={onClose} className="absolute right-3 top-3 rounded-lg border border-slate-600 bg-slate-900 p-2 text-slate-300" aria-label={trans('閉じる', languageMode)}><X size={18} /></button>
       <Smartphone className="mx-auto mb-3 text-cyan-300" size={38} /><div className="text-xs font-black tracking-[.25em] text-cyan-300">DEVICE LINK</div><h2 className="my-3 text-2xl font-black">{trans('別の端末と連携する', languageMode)}</h2>
       <p className="mb-5 text-sm font-bold leading-6 text-slate-300">{trans('新しい端末の「コードで引き継ぐ」に入力する、10分間・1回限りのコードを発行します。', languageMode)}</p>
-      <button onClick={startRename} className="mb-3 w-full rounded-xl border-2 border-lime-400 bg-lime-950/50 px-4 py-3 font-black text-lime-100">{trans('公開名を変更', languageMode)}</button>
+      <button data-gamepad-initial-choice onClick={startRename} className="mb-3 w-full rounded-xl border-2 border-lime-400 bg-lime-950/50 px-4 py-3 font-black text-lime-100">{trans('公開名を変更', languageMode)}</button>
       {issuedCode ? <div className="mb-5 rounded-xl border-2 border-lime-300 bg-lime-950/50 p-5"><small className="font-black text-lime-200">TRANSFER CODE</small><div className="mt-2 font-mono text-4xl font-black tracking-[.14em] text-white">{issuedCode}</div><p className="mt-3 text-xs text-lime-100/70">{trans('このコードを公開したり、他人へ渡したりしないでください。', languageMode)}</p></div> : <button onClick={() => void issueLinkCode()} disabled={loading} className="mb-5 flex w-full items-center justify-center gap-2 rounded-xl bg-cyan-300 px-4 py-3 font-black text-slate-950 disabled:opacity-40"><Link2 size={18} />{loading ? trans('発行中…', languageMode) : trans('連携コードを発行', languageMode)}</button>}
       {error && <div className="mb-4 rounded-lg border border-red-500 bg-red-950/60 p-3 text-xs font-bold text-red-100">{error}</div>}
       <button onClick={onClose} className="w-full rounded-xl border border-slate-600 bg-slate-800 px-4 py-3 font-black">{trans('閉じる', languageMode)}</button>
     </div>
   </div>;
 
-  if (profile && mode === 'rename') return <div className="fixed inset-0 z-[10036] flex items-center justify-center bg-black/85 p-2 sm:p-4">
-    <div className="relative max-h-[calc(100dvh-1rem)] w-full max-w-2xl overflow-y-auto overscroll-contain rounded-2xl border-4 border-lime-300 bg-slate-950 p-4 text-white sm:max-h-[calc(100dvh-2rem)] sm:p-6">
+  if (profile && mode === 'rename') return <div className="fixed inset-0 z-[10036] flex items-center justify-center bg-black/85 p-2 sm:p-4" data-gamepad-modal data-gamepad-initial-scope="online-profile-rename">
+    <div className="relative max-h-[calc(100dvh-1rem)] w-full max-w-2xl overflow-y-auto overscroll-contain rounded-2xl border-4 border-lime-300 bg-slate-950 p-4 text-white sm:max-h-[calc(100dvh-2rem)] sm:p-6" data-gamepad-navigation-root>
       <button onClick={() => setMode('register')} className="absolute right-3 top-3 rounded-lg border border-slate-600 bg-slate-900 p-2 text-slate-300" aria-label={trans('閉じる', languageMode)}><X size={18} /></button>
       <div className="text-center text-xs font-black tracking-[.25em] text-lime-300">ONLINE RANKING</div>
       <h2 className="mb-2 mt-3 text-center text-2xl font-black">{trans('公開名を変更', languageMode)}</h2>
@@ -108,19 +108,19 @@ const OnlineNameSetupModal: React.FC<Props> = ({ open, languageMode, onClose, on
       </label>
       {error && <div className="mb-4 rounded-lg border border-red-500 bg-red-950/60 p-3 text-center text-xs font-bold text-red-100">{error}</div>}
       <div className="grid grid-cols-2 gap-2">
-        <button onClick={() => setMode('register')} className="rounded-xl border border-slate-600 bg-slate-800 px-4 py-3 font-black">{trans('戻る', languageMode)}</button>
+        <button data-gamepad-initial-choice onClick={() => setMode('register')} className="rounded-xl border border-slate-600 bg-slate-800 px-4 py-3 font-black">{trans('戻る', languageMode)}</button>
         <button onClick={() => void submitRename()} disabled={!name.trim() || name.trim() === profile.displayName || loading} className="rounded-xl bg-lime-300 px-4 py-3 font-black text-slate-950 disabled:opacity-40">{loading ? trans('変更中…', languageMode) : trans('この名前に変更', languageMode)}</button>
       </div>
     </div>
   </div>;
 
-  if (mode === 'redeem') return <div className="fixed inset-0 z-[10036] flex items-center justify-center bg-black/85 p-2 sm:p-4">
-    <div className="relative max-h-[calc(100dvh-1rem)] w-full max-w-lg overflow-y-auto overscroll-contain rounded-2xl border-4 border-cyan-300 bg-slate-950 p-4 text-white sm:max-h-[calc(100dvh-2rem)] sm:p-6">
+  if (mode === 'redeem') return <div className="fixed inset-0 z-[10036] flex items-center justify-center bg-black/85 p-2 sm:p-4" data-gamepad-modal data-gamepad-initial-scope="online-profile-redeem">
+    <div className="relative max-h-[calc(100dvh-1rem)] w-full max-w-lg overflow-y-auto overscroll-contain rounded-2xl border-4 border-cyan-300 bg-slate-950 p-4 text-white sm:max-h-[calc(100dvh-2rem)] sm:p-6" data-gamepad-navigation-root>
       <button onClick={onClose} className="absolute right-3 top-3 rounded-lg border border-slate-600 bg-slate-900 p-2 text-slate-300" aria-label={trans('あとで決める', languageMode)}><X size={18} /></button>
       <div className="text-center text-xs font-black tracking-[.25em] text-cyan-300">DEVICE LINK</div><h2 className="my-3 text-center text-2xl font-black">{trans('コードで引き継ぐ', languageMode)}</h2><p className="mb-5 text-center text-sm font-bold leading-6 text-slate-300">{trans('すでに参加している端末で発行した8文字のコードを入力してください。', languageMode)}</p>
       <input value={transferCode} onChange={(event) => setTransferCode(event.target.value.toUpperCase())} maxLength={9} autoCapitalize="characters" className="mb-4 w-full rounded-xl border-2 border-cyan-500 bg-black px-4 py-4 text-center font-mono text-3xl font-black uppercase tracking-[.12em] text-white" placeholder="ABCD-EFGH" />
       {error && <div className="mb-4 rounded-lg border border-red-500 bg-red-950/60 p-3 text-center text-xs font-bold text-red-100">{error}</div>}
-      <div className="flex gap-2"><button onClick={() => setMode('register')} className="flex-1 rounded-xl border border-slate-600 bg-slate-800 px-4 py-3 font-black">{trans('新しく参加', languageMode)}</button><button onClick={() => void redeemLinkCode()} disabled={transferCode.replace(/[^A-Z0-9]/g, '').length !== 8 || loading} className="flex-[1.4] rounded-xl bg-cyan-300 px-4 py-3 font-black text-slate-950 disabled:opacity-40">{loading ? trans('連携中…', languageMode) : trans('この端末へ引き継ぐ', languageMode)}</button></div>
+      <div className="flex gap-2"><button data-gamepad-initial-choice onClick={() => setMode('register')} className="flex-1 rounded-xl border border-slate-600 bg-slate-800 px-4 py-3 font-black">{trans('新しく参加', languageMode)}</button><button onClick={() => void redeemLinkCode()} disabled={transferCode.replace(/[^A-Z0-9]/g, '').length !== 8 || loading} className="flex-[1.4] rounded-xl bg-cyan-300 px-4 py-3 font-black text-slate-950 disabled:opacity-40">{loading ? trans('連携中…', languageMode) : trans('この端末へ引き継ぐ', languageMode)}</button></div>
     </div>
   </div>;
 
@@ -135,13 +135,13 @@ const OnlineNameSetupModal: React.FC<Props> = ({ open, languageMode, onClose, on
     } finally { setLoading(false); }
   };
 
-  return <div className="fixed inset-0 z-[10036] flex items-center justify-center bg-black/85 p-2 sm:p-4">
-    <div className="relative max-h-[calc(100dvh-1rem)] w-full max-w-2xl overflow-y-auto overscroll-contain rounded-2xl border-4 border-lime-300 bg-slate-950 p-3 text-white shadow-[0_0_45px_rgba(190,242,100,0.28)] sm:max-h-[calc(100dvh-2rem)] sm:p-5">
+  return <div className="fixed inset-0 z-[10036] flex items-center justify-center bg-black/85 p-2 sm:p-4" data-gamepad-modal data-gamepad-initial-scope="online-profile-register">
+    <div className="relative max-h-[calc(100dvh-1rem)] w-full max-w-2xl overflow-y-auto overscroll-contain rounded-2xl border-4 border-lime-300 bg-slate-950 p-3 text-white shadow-[0_0_45px_rgba(190,242,100,0.28)] sm:max-h-[calc(100dvh-2rem)] sm:p-5" data-gamepad-navigation-root>
       <button onClick={onClose} className="absolute right-2 top-2 rounded-lg border border-slate-600 bg-slate-900 p-1.5 text-slate-300 hover:text-white sm:right-3 sm:top-3 sm:p-2" aria-label={trans('あとで決める', languageMode)}><X size={18} /></button>
       <div className="mb-1 pr-9 text-center text-[10px] font-black tracking-[0.24em] text-lime-300 sm:mb-2 sm:pr-0 sm:text-xs sm:tracking-[0.3em]">ONLINE RANKING</div>
       <h2 className="mb-1 pr-9 text-center text-lg font-black leading-tight sm:mb-2 sm:pr-0 sm:text-2xl">{trans('ランキング用の公開名を決めよう', languageMode)}</h2>
       <p className="mx-auto mb-3 max-w-lg text-center text-xs font-bold leading-5 text-slate-300 sm:mb-5 sm:text-sm sm:leading-6">{trans('本名や学校名は使わず、ランキングでみんなに見せる名前を選んでください。あとからでも設定できます。', languageMode)}</p>
-      <button onClick={() => setMode('redeem')} className="mx-auto mb-3 flex items-center gap-2 rounded-lg border border-cyan-500/60 bg-cyan-950/60 px-3 py-2 text-[11px] font-black text-cyan-100 sm:mb-5 sm:px-4 sm:text-xs"><Smartphone size={15} />{trans('別の端末からコードで引き継ぐ', languageMode)}</button>
+      <button data-gamepad-initial-choice onClick={() => setMode('redeem')} className="mx-auto mb-3 flex items-center gap-2 rounded-lg border border-cyan-500/60 bg-cyan-950/60 px-3 py-2 text-[11px] font-black text-cyan-100 sm:mb-5 sm:px-4 sm:text-xs"><Smartphone size={15} />{trans('別の端末からコードで引き継ぐ', languageMode)}</button>
 
       <div className="mb-2 grid grid-cols-3 gap-1.5 sm:mb-4 sm:gap-2">
         {suggestions.map((suggestion) => <button key={suggestion} onClick={() => setName(suggestion)} className={`min-w-0 break-words rounded-lg border px-1.5 py-2 text-[11px] font-black leading-tight sm:rounded-xl sm:px-3 sm:py-3 sm:text-sm ${name === suggestion ? 'border-lime-300 bg-lime-300 text-slate-950' : 'border-slate-600 bg-slate-900 text-slate-100 hover:border-lime-500'}`}>{suggestion}</button>)}

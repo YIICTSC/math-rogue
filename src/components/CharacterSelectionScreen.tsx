@@ -428,7 +428,7 @@ const CharacterSelectionScreen: React.FC<CharacterSelectionScreenProps> = ({ cha
                 return (
                     <div
                         key={char.id}
-                        data-gamepad-initial-choice={isUnlocked ? true : undefined}
+                        data-gamepad-initial-choice={isUnlocked && index === 0 ? true : undefined}
                         role={isUnlocked ? 'button' : undefined}
                         tabIndex={isUnlocked ? 0 : undefined}
                         id={`character-poster-${char.id}`}

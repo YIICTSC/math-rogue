@@ -87,6 +87,8 @@ const MapScreen: React.FC<MapScreenProps> = ({ nodes, currentNodeId, onNodeSelec
         }
     }
     const availableNodes = nodes.filter(n => availableNodeIds.includes(n.id));
+    const initialAvailableNodeId = [...availableNodes]
+        .sort((a, b) => b.y - a.y || a.x - b.x)[0]?.id;
     const isInitialRouteSelection = currentNodeId === null;
 
     useEffect(() => {
@@ -376,7 +378,7 @@ const MapScreen: React.FC<MapScreenProps> = ({ nodes, currentNodeId, onNodeSelec
                         return (
                             <div
                                 key={node.id}
-                                data-gamepad-initial-choice={isAvailable && !selectionDisabled ? true : undefined}
+                                data-gamepad-initial-choice={node.id === initialAvailableNodeId && !selectionDisabled ? true : undefined}
                                 role={isAvailable && !selectionDisabled ? 'button' : undefined}
                                 tabIndex={isAvailable && !selectionDisabled ? 0 : undefined}
                                 className={`absolute w-12 h-12 -ml-6 flex items-center justify-center rounded-2xl ${nodeBaseStyle} ${bgClass}`}

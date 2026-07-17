@@ -451,6 +451,11 @@ const GoHomeDash: React.FC<{
 
     useEffect(() => {
         const handleKeyDown = (e: KeyboardEvent) => {
+            if (e.code === 'Escape') {
+                e.preventDefault();
+                onBack();
+                return;
+            }
             if (e.code !== 'Space' && e.code !== 'ArrowUp' && e.code !== 'KeyW') return;
             e.preventDefault();
             if (e.repeat) return;
@@ -470,7 +475,7 @@ const GoHomeDash: React.FC<{
             window.removeEventListener('keydown', handleKeyDown);
             window.removeEventListener('keyup', handleKeyUp);
         };
-    }, []);
+    }, [onBack]);
 
     const isDestroyable = (type: string) => !['HOLE', 'STEPS', 'HIGH_STEPS', 'MOUNTAIN_STEPS', 'IRON_BARRIER', 'VAULTING', 'CHALKBOARD', 'CURRICULUM_BOOK', 'BASKETBALL_TURRET'].includes(type);
 
