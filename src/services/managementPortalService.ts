@@ -24,6 +24,13 @@ export type ManagedAssignment = {
   correctCount: number;
   answeredCount: number;
   retryCorrectCount: number;
+  units?: ManagedAssignmentUnit[];
+};
+
+type ManagedAssignmentUnit = {
+  unitId: string;
+  unitLabel: string;
+  targetCorrect: number;
 };
 
 type ManagedAssignmentDetail = ManagedAssignment & {
@@ -123,35 +130,42 @@ const isManagedCurriculumMode = (unitId: string) =>
   /^ENGLISH_G[3-9]_(?:U\d{2}|WORDS)$/.test(unitId) ||
   /^(?:LIFE_[12]|SCIENCE_[3-9]|SOCIAL_[3-9])_U\d{2}$/.test(unitId);
 
-const resolveMode = (assignment: ManagedAssignment): GameMode => {
+const resolveMode = (unitId: string, subject: string): GameMode => {
   const modes = new Set<string>(Object.values(GameMode));
-  return modes.has(assignment.unitId) || isManagedCurriculumMode(assignment.unitId)
-    ? assignment.unitId as GameMode
-    : fallbackModeForSubject(assignment.subject);
+  return modes.has(unitId) || isManagedCurriculumMode(unitId)
+    ? unitId as GameMode
+    : fallbackModeForSubject(subject);
 };
 
-export const toAssignmentPayload = (assignment: ManagedAssignment): AssignmentPayload => ({
-  id: assignment.id,
-  title: assignment.title,
-  units: [{
-    id: assignment.unitId || `managed:${assignment.id}`,
-    name: assignment.unitLabel || assignment.subject,
-    modes: [resolveMode(assignment)],
-    targetCorrect: Math.max(1, Number(assignment.targetCorrect || 10)),
-  }],
-  customProblems: [],
-  dueAt: assignment.dueAt || '',
-  gameMode: 'FREE',
-  answerMode: (String(assignment.answerMode).toUpperCase() === 'INPUT' ? 'INPUT' : 'CHOICE') as AnswerMode,
-  createdAt: new Date().toISOString(),
-  managementPortal: {
-    version: Number(assignment.version || 1),
+export const toAssignmentPayload = (assignment: ManagedAssignment): AssignmentPayload => {
+  const managedUnits = assignment.units?.length ? assignment.units : [{
     unitId: assignment.unitId,
-    subject: assignment.subject,
-    description: assignment.description || undefined,
-    rewardEnabled: assignment.rewardEnabled,
-  },
-});
+    unitLabel: assignment.unitLabel,
+    targetCorrect: assignment.targetCorrect,
+  }];
+  return {
+    id: assignment.id,
+    title: assignment.title,
+    units: managedUnits.map((unit) => ({
+      id: unit.unitId || `managed:${assignment.id}`,
+      name: unit.unitLabel || assignment.subject,
+      modes: [resolveMode(unit.unitId, assignment.subject)],
+      targetCorrect: Math.max(1, Number(unit.targetCorrect || 10)),
+    })),
+    customProblems: [],
+    dueAt: assignment.dueAt || '',
+    gameMode: 'FREE',
+    answerMode: (String(assignment.answerMode).toUpperCase() === 'INPUT' ? 'INPUT' : 'CHOICE') as AnswerMode,
+    createdAt: new Date().toISOString(),
+    managementPortal: {
+      version: Number(assignment.version || 1),
+      unitId: managedUnits[0]?.unitId || assignment.unitId,
+      subject: assignment.subject,
+      description: assignment.description || undefined,
+      rewardEnabled: assignment.rewardEnabled,
+    },
+  };
+};
 
 const toDetailedAssignmentPayload = (assignment: ManagedAssignmentDetail): AssignmentPayload => ({
   ...toAssignmentPayload(assignment),
@@ -242,7 +256,7 @@ export const managementPortalService = {
       assignmentId: assignment.id,
       assignmentVersion: assignment.managementPortal.version,
       problemKey: String(result.problemKey || result.problemId || `${result.mode}:${Date.now()}`).slice(0, 160),
-      unitId: assignment.managementPortal.unitId || assignment.units[0]?.id || result.mode,
+      unitId: assignment.units.find((unit) => unit.modes.includes(result.mode))?.id || assignment.managementPortal.unitId || assignment.units[0]?.id || result.mode,
       correct: result.correct,
       isRetry: Boolean(result.isRetry),
       elapsedMs: Math.max(0, Math.round(result.elapsedMs || 0)),
