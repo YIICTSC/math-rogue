@@ -483,6 +483,7 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled, onInspect, languag
     <div
       role="button"
       tabIndex={disabled ? -1 : 0}
+      data-card-id={card.id}
       data-gamepad-zone={gamepadZone}
       data-gamepad-order={gamepadOrder}
       onClick={handleCardClick}

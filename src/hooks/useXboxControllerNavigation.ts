@@ -135,6 +135,7 @@ const getFocusableElements = (): HTMLElement[] => {
         && rect.width > 0
         && rect.height > 0
         && !element.closest('[aria-hidden="true"]')
+        && !element.closest('[data-gamepad-ignore]')
         && (!modal || modal.contains(element));
     });
 };
@@ -148,7 +149,8 @@ const isVisibleAndEnabled = (element: HTMLElement): boolean => {
     && style.display !== 'none'
     && rect.width > 0
     && rect.height > 0
-    && !element.closest('[aria-hidden="true"]');
+    && !element.closest('[aria-hidden="true"]')
+    && !element.closest('[data-gamepad-ignore]');
 };
 
 const getTopLeftInitialChoice = (scope: HTMLElement): HTMLElement | null =>
@@ -246,6 +248,8 @@ const triggerBattleShortcut = (buttonName: ShortcutButtonName): boolean => {
   if (!root) return false;
 
   if (buttonName === 'X') {
+    const controllerItems = root.querySelector<HTMLElement>('[data-gamepad-controller-items]');
+    if (controllerItems && isVisibleAndEnabled(controllerItems)) return clickBattleElement(controllerItems);
     const activeZone = getBattleActiveZone();
     const hasCoop = getBattleZoneElements('battle-coop').length > 0;
     const hasItems = getBattleZoneElements('battle-items').length > 0;
