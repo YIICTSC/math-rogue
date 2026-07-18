@@ -12300,6 +12300,7 @@ const App: React.FC = () => {
             elapsedMs: Math.max(0, result.elapsedMs || 0),
             answeredAt: new Date().toISOString(),
         });
+        managementPortalService.queueLearningActivity(result, isAssignmentAnswer ? assignment : null);
         if (isAssignmentAnswer && assignment.managementPortal) {
             managementPortalService.queueAnswer(assignment, result);
         }

@@ -66,9 +66,23 @@ type ProgressEvent = {
   schemaVersion: 1;
 };
 
+type LearningActivityEvent = {
+  eventId: string;
+  assignmentId?: string;
+  source: 'assignment' | 'self_study';
+  unitId: string;
+  correct: boolean;
+  isRetry: boolean;
+  elapsedMs: number;
+  occurredAt: string;
+  platform: 'web' | 'steam' | 'ios' | 'android';
+  schemaVersion: 1;
+};
+
 const PROFILE_KEY = 'learning_rogue_management_profile_v1';
 const ASSIGNMENTS_KEY = 'learning_rogue_management_assignments_v1';
 const PROGRESS_QUEUE_KEY = 'learning_rogue_management_progress_queue_v1';
+const ACTIVITY_QUEUE_KEY = 'learning_rogue_management_activity_queue_v1';
 const COMPLETION_QUEUE_KEY = 'learning_rogue_management_completion_queue_v1';
 const API_OVERRIDE_KEY = 'learning_rogue_management_api_v1';
 const DEFAULT_API_URL = 'https://learning-rogue-management.yishigeict.chatgpt.site';
@@ -181,6 +195,8 @@ const makeEventId = () => typeof crypto !== 'undefined' && 'randomUUID' in crypt
 
 const getQueue = () => readJson<ProgressEvent[]>(PROGRESS_QUEUE_KEY, []).filter(Boolean).slice(-300);
 const saveQueue = (queue: ProgressEvent[]) => writeJson(PROGRESS_QUEUE_KEY, queue.slice(-300));
+const getActivityQueue = () => readJson<LearningActivityEvent[]>(ACTIVITY_QUEUE_KEY, []).filter(Boolean).slice(-500);
+const saveActivityQueue = (queue: LearningActivityEvent[]) => writeJson(ACTIVITY_QUEUE_KEY, queue.slice(-500));
 const getCompletionQueue = () => Array.from(new Set(readJson<string[]>(COMPLETION_QUEUE_KEY, []).filter((id) => typeof id === 'string' && id)));
 const saveCompletionQueue = (queue: string[]) => writeJson(COMPLETION_QUEUE_KEY, Array.from(new Set(queue)).slice(-100));
 
@@ -189,6 +205,7 @@ const clearLocalLink = () => {
   window.localStorage.removeItem(PROFILE_KEY);
   window.localStorage.removeItem(ASSIGNMENTS_KEY);
   window.localStorage.removeItem(PROGRESS_QUEUE_KEY);
+  window.localStorage.removeItem(ACTIVITY_QUEUE_KEY);
   window.localStorage.removeItem(COMPLETION_QUEUE_KEY);
 };
 
@@ -268,6 +285,27 @@ export const managementPortalService = {
     void this.flushProgress();
   },
 
+  queueLearningActivity(result: AssignmentAnswerResult, assignment?: AssignmentPayload | null) {
+    if (!this.getProfile()) return;
+    const managedUnitId = assignment?.units.find((unit) => unit.modes.includes(result.mode))?.id
+      || assignment?.managementPortal?.unitId
+      || result.mode;
+    const event: LearningActivityEvent = {
+      eventId: makeEventId(),
+      assignmentId: assignment?.managementPortal ? assignment.id : undefined,
+      source: assignment?.managementPortal ? 'assignment' : 'self_study',
+      unitId: managedUnitId,
+      correct: result.correct,
+      isRetry: Boolean(result.isRetry),
+      elapsedMs: Math.max(0, Math.round(result.elapsedMs || 0)),
+      occurredAt: new Date().toISOString(),
+      platform: getPlatform(),
+      schemaVersion: 1,
+    };
+    saveActivityQueue([...getActivityQueue(), event]);
+    void this.flushLearningActivity();
+  },
+
   async flushProgress() {
     const profile = this.getProfile();
     const events = getQueue();
@@ -280,6 +318,24 @@ export const managementPortalService = {
       }, profile.token);
       const remaining = events.slice(batch.length);
       saveQueue(remaining);
+      return { accepted: result.accepted + result.duplicates, remaining: remaining.length };
+    } catch {
+      return { accepted: 0, remaining: events.length };
+    }
+  },
+
+  async flushLearningActivity() {
+    const profile = this.getProfile();
+    const events = getActivityQueue();
+    if (!profile || events.length === 0 || (typeof navigator !== 'undefined' && !navigator.onLine)) return { accepted: 0, remaining: events.length };
+    const batch = events.slice(0, 50);
+    try {
+      const result = await request<{ accepted: number; duplicates: number }>('/api/v1/learner/activity/batch', {
+        method: 'POST',
+        body: JSON.stringify({ events: batch }),
+      }, profile.token);
+      const remaining = events.slice(batch.length);
+      saveActivityQueue(remaining);
       return { accepted: result.accepted + result.duplicates, remaining: remaining.length };
     } catch {
       return { accepted: 0, remaining: events.length };
@@ -308,9 +364,9 @@ export const managementPortalService = {
   },
 
   async flushPending() {
-    const progress = await this.flushProgress();
+    const [progress, activity] = await Promise.all([this.flushProgress(), this.flushLearningActivity()]);
     const completions = await this.flushCompletions();
-    return { progress, completions };
+    return { progress, activity, completions };
   },
 
   async completeAssignment(assignmentId: string) {
