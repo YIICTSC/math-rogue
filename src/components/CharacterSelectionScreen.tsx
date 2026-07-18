@@ -87,9 +87,13 @@ const CharacterSelectionScreen: React.FC<CharacterSelectionScreenProps> = ({ cha
 
   // 初回マウント時に保存されている画像を読み込む
   useEffect(() => {
+    if (visualTheme !== 'elementary') {
+      setCustomImages({});
+      return;
+    }
     const savedImages = storageService.getCustomImages();
     setCustomImages(savedImages);
-  }, []);
+  }, [visualTheme]);
 
   useEffect(() => {
     if (challengeMode !== 'TYPING' || showCamera) return;
@@ -195,10 +199,12 @@ const CharacterSelectionScreen: React.FC<CharacterSelectionScreenProps> = ({ cha
   };
 
   const handleCharSelect = (char: Character) => {
-    // カスタム画像があれば上書きして選択
+    // 写真の反映は小学生編だけに限定する。
     const finalChar = {
       ...char,
-      imageData: customImages[char.id] || char.imageData
+      imageData: visualTheme === 'elementary'
+        ? customImages[char.id] || char.imageData
+        : char.imageData
     };
     onSelect(finalChar);
   };
@@ -401,8 +407,9 @@ const CharacterSelectionScreen: React.FC<CharacterSelectionScreenProps> = ({ cha
                 const magicRule = visualTheme === 'magic' && char.magicProtagonistId
                     ? getMagicRuleConfig(char.magicProtagonistId)
                     : null;
-                const charImage = customImages[char.id] || char.imageData;
-                const isCustom = !!customImages[char.id];
+                const customImage = visualTheme === 'elementary' ? customImages[char.id] : undefined;
+                const charImage = customImage || char.imageData;
+                const isCustom = !!customImage;
                 const isMagicPortrait = visualTheme === 'magic' && !isCustom;
                 const isMagicMalePortrait = visualTheme === 'magic'
                     && magicGender === 'male'
@@ -453,31 +460,35 @@ const CharacterSelectionScreen: React.FC<CharacterSelectionScreenProps> = ({ cha
                             </div>
                         )}
 
-                        <div className={`character-selection-portrait w-24 h-24 mb-4 relative drop-shadow-[0_0_15px_rgba(255,255,255,0.2)] ${isMagicPortrait ? 'overflow-hidden rounded-xl bg-slate-950/50' : ''}`}>
+                        <div className={`character-selection-portrait w-24 h-24 mb-4 relative drop-shadow-[0_0_15px_rgba(255,255,255,0.2)] ${visualTheme === 'elementary' ? 'character-selection-photo-enabled' : ''} ${isMagicPortrait ? 'overflow-hidden rounded-xl bg-slate-950/50' : ''}`}>
                              <img 
                                 src={charImage} 
                                 alt={trans(char.name, languageMode)}
                                 className={`w-full h-full ${isCustom ? 'rounded-xl object-cover' : isMagicPortrait ? `magic-character-select-portrait-image ${isMagicMalePortrait ? 'magic-character-select-portrait-image-male' : ''}` : 'pixel-art'}`}
                                 style={{ imageRendering: isCustom || isMagicPortrait ? 'auto' : 'pixelated' }}
                              />
-                             {isUnlocked && visualTheme !== 'magic' && (
+                             {isUnlocked && visualTheme === 'elementary' && (
                                 <button
+                                  type="button"
                                   data-gamepad-ignore
                                   onClick={(e) => { e.stopPropagation(); startCamera(char.id); }}
-                                  className="absolute -bottom-2 -right-2 bg-indigo-600 p-1.5 rounded-full border-2 border-white shadow-lg hover:bg-indigo-500 transition-colors"
-                                title={trans('写真を撮る', languageMode)}
+                                  className="character-photo-action character-photo-camera absolute bottom-0 right-0 z-[60] flex h-11 w-11 touch-manipulation items-center justify-center rounded-full border-2 border-white bg-indigo-600 p-0 shadow-lg transition-colors hover:bg-indigo-500"
+                                  title={trans('写真を撮る', languageMode)}
+                                  aria-label={trans('写真を撮る', languageMode)}
                                 >
-                                  <Camera size={14} />
+                                  <Camera size={19} />
                                 </button>
                              )}
-                             {isCustom && (
+                             {visualTheme === 'elementary' && isCustom && (
                                 <button
+                                  type="button"
                                   data-gamepad-ignore
                                   onClick={(e) => handleResetImage(e, char.id)}
-                                  className="absolute -top-2 -left-2 bg-red-600 p-1 rounded-full border-2 border-white shadow-lg hover:bg-red-500 transition-colors"
+                                  className="character-photo-action character-photo-reset absolute left-0 top-0 z-[60] flex h-11 w-11 touch-manipulation items-center justify-center rounded-full border-2 border-white bg-red-600 p-0 shadow-lg transition-colors hover:bg-red-500"
                                   title={trans('リセット', languageMode)}
+                                  aria-label={trans('リセット', languageMode)}
                                 >
-                                  <RefreshCw size={12} />
+                                  <RefreshCw size={18} />
                                 </button>
                              )}
                         </div>
