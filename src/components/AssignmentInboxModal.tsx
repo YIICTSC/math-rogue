@@ -4,7 +4,10 @@ import {
   ManagedAssignment,
   ManagementProfile,
   ManagementRelationship,
+  getNextRequiredManagedAssignment,
+  isManagedAssignmentComplete,
   managementPortalService,
+  sortManagedAssignments,
 } from '../services/managementPortalService';
 import { AssignmentPayload, LanguageMode } from '../types';
 import { trans } from '../utils/textUtils';
@@ -51,11 +54,8 @@ export default function AssignmentInboxModal({ open, onClose, onSelect, onProfil
       ? `${correct}/${target}もんせいかい・さいちょうせん ${retries}かい`
       : `${correct}/${target}問正解・再挑戦 ${retries}回`;
 
-  const sortedAssignments = useMemo(() => [...assignments].sort((a, b) => {
-    if (a.status === 'completed' && b.status !== 'completed') return 1;
-    if (a.status !== 'completed' && b.status === 'completed') return -1;
-    return Date.parse(a.dueAt || '2999-12-31') - Date.parse(b.dueAt || '2999-12-31');
-  }), [assignments]);
+  const sortedAssignments = useMemo(() => sortManagedAssignments(assignments), [assignments]);
+  const nextRequiredAssignment = useMemo(() => getNextRequiredManagedAssignment(assignments), [assignments]);
   const filterCounts = useMemo<Record<InboxFilter, number>>(() => ({
     all: assignments.length,
     new: assignments.filter((item) => item.status === 'unopened').length,
@@ -230,13 +230,16 @@ export default function AssignmentInboxModal({ open, onClose, onSelect, onProfil
                 const target = Math.max(1, Number(assignment.targetCorrect || 10));
                 const unitCount = assignment.units?.length || 1;
                 const progress = Math.min(100, Math.round(Number(assignment.correctCount || 0) / target * 100));
-                const completed = assignment.status === 'completed' || progress >= 100;
+                const completed = isManagedAssignmentComplete(assignment) || progress >= 100;
+                const blockedByRequired = Boolean(nextRequiredAssignment && nextRequiredAssignment.id !== assignment.id);
                 return (
                   <article key={assignment.id} className={`rounded-2xl border p-4 sm:p-5 ${completed ? 'border-emerald-800 bg-emerald-950/20' : 'border-slate-700 bg-slate-900'}`}>
                     <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
                       <div className="min-w-0 flex-1">
                         <div className="mb-2 flex flex-wrap items-center gap-2 text-[10px] font-black">
                           <span className="rounded-full bg-cyan-950 px-2 py-1 text-cyan-200">{t(assignment.subject)}</span>
+                          <span className={`rounded-full px-2 py-1 ${assignment.requirementType === 'required' ? 'bg-rose-950 text-rose-200' : 'bg-slate-800 text-slate-300'}`}>{t(assignment.requirementType === 'required' ? '必須課題' : '任意課題')}</span>
+                          <span className="rounded-full bg-indigo-950 px-2 py-1 text-indigo-200">{t(assignment.playMode === 'problem_only' ? '問題チャレンジのみ' : 'フリー')}</span>
                           <span className={completed ? 'text-emerald-300' : 'text-amber-300'}>{statusLabel(completed ? 'completed' : assignment.status)}</span>
                         </div>
                         <h3 className="truncate text-lg font-black" data-allow-japanese>{t(assignment.title)}</h3>
@@ -247,11 +250,11 @@ export default function AssignmentInboxModal({ open, onClose, onSelect, onProfil
                       </div>
                       <button
                         type="button"
-                        disabled={completed || Boolean(openingId)}
+                        disabled={completed || blockedByRequired || Boolean(openingId)}
                         onClick={() => void openAssignment(assignment)}
                         className="shrink-0 rounded-xl bg-amber-400 px-5 py-3 text-sm font-black text-slate-950 hover:bg-amber-300 disabled:bg-slate-700 disabled:text-slate-400"
                       >
-                        {t(completed ? '達成済み' : openingId === assignment.id ? '読込中…' : assignment.status === 'in_progress' ? 'つづきから' : '課題を開く')}
+                        {t(completed ? '達成済み' : blockedByRequired ? '先に必須課題' : openingId === assignment.id ? '読込中…' : assignment.status === 'in_progress' ? 'つづきから' : '課題を開く')}
                       </button>
                     </div>
                   </article>
