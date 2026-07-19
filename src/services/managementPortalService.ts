@@ -57,6 +57,11 @@ export type ManagementRelationship = {
   organizationType: string;
 };
 
+export type LearnerGroupInvitation = {
+  organizationName: string;
+  groupName: string;
+};
+
 type ProgressEvent = {
   eventId: string;
   assignmentId: string;
@@ -241,6 +246,40 @@ const clearLocalLink = () => {
 export const managementPortalService = {
   getProfile: () => readJson<ManagementProfile | null>(PROFILE_KEY, null),
   getCachedAssignments: () => readJson<ManagedAssignment[]>(ASSIGNMENTS_KEY, []),
+  getLearnerInvitationToken: () => {
+    if (typeof window === 'undefined') return '';
+    return new URLSearchParams(window.location.search).get('learnerInvite')?.trim() || '';
+  },
+  clearLearnerInvitationToken: () => {
+    if (typeof window === 'undefined') return;
+    const url = new URL(window.location.href);
+    url.searchParams.delete('learnerInvite');
+    window.history.replaceState(null, '', `${url.pathname}${url.search}${url.hash}`);
+  },
+
+  async fetchLearnerInvitation(token: string) {
+    const result = await request<{ invitation: LearnerGroupInvitation }>(`/api/group-invitations/${encodeURIComponent(token)}/learner`);
+    return result.invitation;
+  },
+
+  async joinLearnerInvitation(token: string, input: { displayName: string; attendanceNumber: string }) {
+    const currentProfile = this.getProfile();
+    const result = await request<{
+      displayName: string;
+      code?: string;
+      alreadyLinked?: boolean;
+    }>(`/api/group-invitations/${encodeURIComponent(token)}/learner`, {
+      method: 'POST',
+      body: JSON.stringify(input),
+    }, currentProfile?.token);
+    if (result.alreadyLinked && currentProfile) {
+      const profile = { ...currentProfile, displayName: result.displayName || currentProfile.displayName };
+      writeJson(PROFILE_KEY, profile);
+      return profile;
+    }
+    if (!result.code) throw new Error('端末連携を完了できませんでした。');
+    return this.linkDevice(result.code);
+  },
 
   async linkDevice(code: string) {
     const result = await request<{ learnerToken: string; learnerId: string; linkedAt: string }>('/api/v1/learner-devices/link', {

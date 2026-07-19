@@ -29,6 +29,7 @@ import DifficultySelectionScreen from './components/DifficultySelectionScreen';
 import RankingScreen from './components/RankingScreen';
 import OnlineNameSetupModal from './components/OnlineNameSetupModal';
 import AssignmentInboxModal from './components/AssignmentInboxModal';
+import LearnerGroupInviteModal from './components/LearnerGroupInviteModal';
 import MathChallengeScreen from './components/MathChallengeScreen';
 import KanjiChallengeScreen from './components/KanjiChallengeScreen';
 import EnglishChallengeScreen from './components/EnglishChallengeScreen';
@@ -1403,6 +1404,7 @@ const App: React.FC = () => {
     const [rankingRewardNotices, setRankingRewardNotices] = useState<OnlineReward[]>([]);
     const rankingRewardCheckedRef = useRef(false);
     const [managementProfile, setManagementProfile] = useState<ManagementProfile | null>(() => managementPortalService.getProfile());
+    const [learnerInvitationToken, setLearnerInvitationToken] = useState(() => managementPortalService.getLearnerInvitationToken());
     const requiredAssignmentCheckRef = useRef(false);
     const [showAssignmentInbox, setShowAssignmentInbox] = useState(false);
     const [currentAssignment, setCurrentAssignment] = useState<AssignmentPayload | null>(() => storageService.getCurrentAssignment());
@@ -17667,6 +17669,17 @@ const App: React.FC = () => {
                     onSelect={openManagedAssignment}
                     onProfileChange={setManagementProfile}
                     languageMode={languageMode}
+                />
+                <LearnerGroupInviteModal
+                    token={learnerInvitationToken}
+                    open={Boolean(learnerInvitationToken) && !showStudentGradeSurvey}
+                    languageMode={languageMode}
+                    onLinked={(profile) => {
+                        setManagementProfile(profile);
+                        setLearnerInvitationToken('');
+                        setShowAssignmentInbox(true);
+                    }}
+                    onCancel={() => setLearnerInvitationToken('')}
                 />
                 <OnlineNameSetupModal
                     open={showOnlineNameSetup && !showStudentGradeSurvey}

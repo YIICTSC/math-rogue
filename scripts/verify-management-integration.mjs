@@ -1,14 +1,18 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 
-const [service, modal, app, types] = await Promise.all([
+const [service, modal, inviteModal, app, types] = await Promise.all([
   readFile(new URL('../src/services/managementPortalService.ts', import.meta.url), 'utf8'),
   readFile(new URL('../src/components/AssignmentInboxModal.tsx', import.meta.url), 'utf8'),
+  readFile(new URL('../src/components/LearnerGroupInviteModal.tsx', import.meta.url), 'utf8'),
   readFile(new URL('../src/App.tsx', import.meta.url), 'utf8'),
   readFile(new URL('../src/types.ts', import.meta.url), 'utf8'),
 ]);
 
 assert.match(service, /learner-devices\/link/);
+assert.match(service, /learnerInvite/);
+assert.match(service, /group-invitations/);
+assert.match(service, /joinLearnerInvitation/);
 assert.match(service, /learner\/assignments/);
 assert.match(service, /fetchAssignmentPayload/);
 assert.match(service, /isManagedCurriculumMode/);
@@ -33,12 +37,16 @@ const progressQueueImplementation = service.slice(service.indexOf('queueAnswer('
 assert.doesNotMatch(progressQueueImplementation, /correctAnswer|selectedAnswer|question:/);
 assert.match(service, /PROGRESS_QUEUE_KEY/);
 assert.match(modal, /課題受信箱/);
+assert.match(inviteModal, /attendanceNumber/);
+assert.match(inviteModal, /displayName/);
+assert.doesNotMatch(inviteModal, /gradeLabel|連携コード/);
 assert.match(modal, /managementPortalService\.fetchAssignmentPayload/);
 assert.match(modal, /assignment\.units\?\.length/);
 assert.match(modal, /先に必須課題/);
 assert.match(modal, /assignment\.requirementType === 'required'/);
 assert.match(app, /assignment\.managementPortal/);
 assert.match(app, /requiredAssignmentCheckRef/);
+assert.match(app, /LearnerGroupInviteModal/);
 assert.match(app, /getNextRequiredManagedAssignment/);
 assert.match(app, /isRequiredTeacherAssignment/);
 assert.match(app, /managementPortalService\.queueAnswer/);
