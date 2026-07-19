@@ -85,7 +85,7 @@ import { generateEnemyName } from './services/geminiService';
 import { generateDungeonMap } from './services/mapGenerator';
 import { parseTransferData, serializeTransferData, storageService } from './services/storageService';
 import { onlineRankingService, type OnlineRankingProfile, type OnlineReward } from './services/onlineRankingService';
-import { managementPortalService, type ManagementProfile } from './services/managementPortalService';
+import { getNextRequiredManagedAssignment, managementPortalService, type ManagementProfile } from './services/managementPortalService';
 import { generateEvent, generateLegacyEvent } from './services/eventService';
 import { createAssignmentRewardCard, createHolographicCard, getUpgradedCard, synthesizeCards } from './utils/cardUtils';
 import { AZUKI_BOSS_FLAG, AZUKI_BOSS_NAME, AZUKI_ENCOUNTER_FLAG, AZUKI_REWARD_CARDS } from './data/azukiBoss';
@@ -1403,6 +1403,7 @@ const App: React.FC = () => {
     const [rankingRewardNotices, setRankingRewardNotices] = useState<OnlineReward[]>([]);
     const rankingRewardCheckedRef = useRef(false);
     const [managementProfile, setManagementProfile] = useState<ManagementProfile | null>(() => managementPortalService.getProfile());
+    const requiredAssignmentCheckRef = useRef(false);
     const [showAssignmentInbox, setShowAssignmentInbox] = useState(false);
     const [currentAssignment, setCurrentAssignment] = useState<AssignmentPayload | null>(() => storageService.getCurrentAssignment());
     const [assignmentProgressVersion, setAssignmentProgressVersion] = useState(0);
@@ -1566,6 +1567,38 @@ const App: React.FC = () => {
         setGameState(prev => ({ ...prev, screen: GameScreen.START_MENU }));
     }, []);
 
+    useEffect(() => {
+        if (gameState.screen !== GameScreen.START_MENU) {
+            requiredAssignmentCheckRef.current = false;
+            return;
+        }
+        if (!managementProfile || showStudentGradeSurvey || requiredAssignmentCheckRef.current) return;
+        requiredAssignmentCheckRef.current = true;
+        let cancelled = false;
+        void (async () => {
+            try {
+                await managementPortalService.flushPending();
+                let assignments;
+                try {
+                    assignments = await managementPortalService.fetchAssignments();
+                } catch {
+                    assignments = managementPortalService.getCachedAssignments();
+                }
+                const nextRequired = getNextRequiredManagedAssignment(assignments);
+                if (!nextRequired || cancelled) return;
+                const payload = currentAssignment?.id === nextRequired.id
+                    ? currentAssignment
+                    : await managementPortalService.fetchAssignmentPayload(nextRequired.id);
+                if (cancelled) return;
+                setShowOnlineNameSetup(false);
+                openManagedAssignment(payload);
+            } catch {
+                // Temporary network errors must not block locally playable content.
+            }
+        })();
+        return () => { cancelled = true; };
+    }, [currentAssignment, gameState.screen, managementProfile, openManagedAssignment, showStudentGradeSurvey]);
+
     const markDailyAssignmentCompleted = useCallback((assignmentId: string | undefined) => {
         if (!assignmentId || !assignmentId.startsWith('daily-')) return;
         storageService.markDailyAssignmentCompleted(assignmentId);
@@ -1612,6 +1645,7 @@ const App: React.FC = () => {
     const assignmentLetter = shouldPrioritizeCurrentAssignment ? currentAssignment : dailyAssignment;
     const effectiveAssignment = shouldPrioritizeCurrentAssignment ? currentAssignment : (isDailyAssignmentStarted ? dailyAssignment : null);
     const isTeacherAssignmentActive = shouldPrioritizeCurrentAssignment;
+    const isRequiredTeacherAssignment = isTeacherAssignmentActive && assignmentLetter?.requirementType === 'required';
 
     const isAssignmentDeadlineActive = useCallback((assignment: AssignmentPayload | null | undefined) => {
         if (!assignment) return false;
@@ -15074,13 +15108,14 @@ const App: React.FC = () => {
                                     <div className={`assignment-letter-summary mb-3 rounded-xl border-2 bg-white/70 p-3 text-xs font-bold leading-6 sm:text-sm ${isTeacherAssignmentActive ? 'border-amber-300' : 'border-lime-300'}`}>
                                         <div>{trans(isTeacherAssignmentActive ? '先生から課題が届きました。' : '今日の学習課題です。', languageMode)}</div>
                                         <div>{trans("期限:", languageMode)} {assignmentLetter.dueAt ? new Date(assignmentLetter.dueAt).toLocaleString(languageMode === 'ENGLISH' ? 'en-US' : 'ja-JP') : trans('未設定', languageMode)}</div>
+                                        {isTeacherAssignmentActive && <div>{trans("条件:", languageMode)} {trans(isRequiredTeacherAssignment ? '必須課題' : '任意課題', languageMode)}</div>}
                                         <div>{trans("形式:", languageMode)} {trans(assignmentLetter.gameMode === 'FREE' ? 'フリー' : '問題チャレンジのみ', languageMode)}</div>
                                         <div>{getAssignmentAnswerModeSummary(assignmentLetter, languageMode)}</div>
                                         <div className="mt-2 text-xs text-slate-700">
                                             {getAssignmentTargetSummary(assignmentLetter, languageMode)}
                                         </div>
                                     </div>
-                                    <div className="assignment-letter-actions grid gap-2 sm:grid-cols-3">
+                                    <div className={`assignment-letter-actions grid gap-2 ${isRequiredTeacherAssignment ? 'sm:grid-cols-1' : 'sm:grid-cols-3'}`}>
                                         <button
                                             onClick={() => {
                                                 setShowAssignmentLetter(false);
@@ -15127,7 +15162,7 @@ const App: React.FC = () => {
                                         >
                                             {trans("課題を始める", languageMode)}
                                         </button>
-                                        <button
+                                        {!isRequiredTeacherAssignment && <button
                                             data-gamepad-back
                                             onClick={() => {
                                                 if (!isTeacherAssignmentActive && assignmentLetter) {
@@ -15145,8 +15180,8 @@ const App: React.FC = () => {
                                             className="rounded-xl border border-slate-500 bg-white px-4 py-3 text-sm font-black text-slate-800 hover:bg-slate-100"
                                         >
                                             {trans("あとで", languageMode)}
-                                        </button>
-                                        {isTeacherAssignmentActive ? (
+                                        </button>}
+                                        {!isRequiredTeacherAssignment && (isTeacherAssignmentActive ? (
                                             <button
                                                 onClick={() => {
                                                     storageService.clearCurrentAssignment();
@@ -15171,7 +15206,7 @@ const App: React.FC = () => {
                                             >
                                                 {trans("結果を見る", languageMode)}
                                             </button>
-                                        )}
+                                        ))}
                                     </div>
                                 </div>
                             </div>
@@ -15636,13 +15671,14 @@ const App: React.FC = () => {
                             <div className={`assignment-letter-summary mb-3 rounded-xl border-2 bg-white/70 p-3 text-xs font-bold leading-6 sm:text-sm ${isTeacherAssignmentActive ? 'border-amber-300' : 'border-lime-300'}`}>
                                 <div>{trans(isTeacherAssignmentActive ? '先生から課題が届きました。' : '今日の学習課題です。', languageMode)}</div>
                                 <div>{trans("期限:", languageMode)} {assignmentLetter.dueAt ? new Date(assignmentLetter.dueAt).toLocaleString(languageMode === 'ENGLISH' ? 'en-US' : 'ja-JP') : trans('未設定', languageMode)}</div>
+                                {isTeacherAssignmentActive && <div>{trans("条件:", languageMode)} {trans(isRequiredTeacherAssignment ? '必須課題' : '任意課題', languageMode)}</div>}
                                 <div>{trans("形式:", languageMode)} {trans(assignmentLetter.gameMode === 'FREE' ? 'フリー' : '問題チャレンジのみ', languageMode)}</div>
                                 <div>{getAssignmentAnswerModeSummary(assignmentLetter, languageMode)}</div>
                                 <div className="mt-2 text-xs text-slate-700">
                                     {getAssignmentTargetSummary(assignmentLetter, languageMode)}
                                 </div>
                             </div>
-                            <div className="assignment-letter-actions grid gap-2 sm:grid-cols-3">
+                            <div className={`assignment-letter-actions grid gap-2 ${isRequiredTeacherAssignment ? 'sm:grid-cols-1' : 'sm:grid-cols-3'}`}>
                                 <button
                                     data-gamepad-initial-choice
                                     onClick={() => {
@@ -15690,7 +15726,7 @@ const App: React.FC = () => {
                                 >
                                     {trans("課題を始める", languageMode)}
                                 </button>
-                                <button
+                                {!isRequiredTeacherAssignment && <button
                                     data-gamepad-back
                                     onClick={() => {
                                         if (!isTeacherAssignmentActive && assignmentLetter) {
@@ -15708,8 +15744,8 @@ const App: React.FC = () => {
                                     className="rounded-xl border border-slate-500 bg-white px-4 py-3 text-sm font-black text-slate-800 hover:bg-slate-100"
                                 >
                                     {trans("あとで", languageMode)}
-                                </button>
-                                {isTeacherAssignmentActive ? (
+                                </button>}
+                                {!isRequiredTeacherAssignment && (isTeacherAssignmentActive ? (
                                     <button
                                         data-gamepad-initial-choice
                                         onClick={() => {
@@ -15735,7 +15771,7 @@ const App: React.FC = () => {
                                     >
                                         {trans("進捗を見る", languageMode)}
                                     </button>
-                                )}
+                                ))}
                             </div>
                         </div>
                     </div>

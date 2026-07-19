@@ -795,6 +795,7 @@ export interface AssignmentPayload {
   customProblems: AssignmentCustomProblem[];
   customTargetCorrect?: number;
   dueAt: string;
+  requirementType?: 'optional' | 'required';
   gameMode: 'FREE' | 'CHALLENGE_ONLY';
   answerMode: AnswerMode;
   createdAt: string;
@@ -804,6 +805,7 @@ export interface AssignmentPayload {
     subject?: string;
     description?: string;
     rewardEnabled?: boolean;
+    requirementType?: 'optional' | 'required';
   };
 }
 

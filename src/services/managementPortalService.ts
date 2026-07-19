@@ -18,6 +18,8 @@ export type ManagedAssignment = {
   targetCorrect: number;
   answerMode: string;
   gameMode: string;
+  requirementType?: 'optional' | 'required' | string;
+  playMode?: 'free' | 'problem_only' | string;
   dueAt?: string | null;
   rewardEnabled: boolean;
   status: 'unopened' | 'in_progress' | 'completed' | string;
@@ -151,6 +153,26 @@ const resolveMode = (unitId: string, subject: string): GameMode => {
     : fallbackModeForSubject(subject);
 };
 
+export const isManagedAssignmentComplete = (assignment: ManagedAssignment) =>
+  assignment.status === 'completed'
+  || assignment.status === 'submitted'
+  || Number(assignment.correctCount || 0) >= Math.max(1, Number(assignment.targetCorrect || 10));
+
+export const sortManagedAssignments = (items: ManagedAssignment[]) => [...items].sort((a, b) => {
+  const aRequired = a.requirementType === 'required' && !isManagedAssignmentComplete(a);
+  const bRequired = b.requirementType === 'required' && !isManagedAssignmentComplete(b);
+  if (aRequired !== bRequired) return aRequired ? -1 : 1;
+  const aCompleted = isManagedAssignmentComplete(a);
+  const bCompleted = isManagedAssignmentComplete(b);
+  if (aCompleted !== bCompleted) return aCompleted ? 1 : -1;
+  return Date.parse(a.dueAt || '2999-12-31') - Date.parse(b.dueAt || '2999-12-31');
+});
+
+export const getNextRequiredManagedAssignment = (items: ManagedAssignment[]) =>
+  sortManagedAssignments(items).find((assignment) =>
+    assignment.requirementType === 'required' && !isManagedAssignmentComplete(assignment),
+  ) || null;
+
 export const toAssignmentPayload = (assignment: ManagedAssignment): AssignmentPayload => {
   const managedUnits = assignment.units?.length ? assignment.units : [{
     unitId: assignment.unitId,
@@ -168,7 +190,8 @@ export const toAssignmentPayload = (assignment: ManagedAssignment): AssignmentPa
     })),
     customProblems: [],
     dueAt: assignment.dueAt || '',
-    gameMode: 'FREE',
+    requirementType: assignment.requirementType === 'required' ? 'required' : 'optional',
+    gameMode: assignment.playMode === 'problem_only' ? 'CHALLENGE_ONLY' : 'FREE',
     answerMode: (String(assignment.answerMode).toUpperCase() === 'INPUT' ? 'INPUT' : 'CHOICE') as AnswerMode,
     createdAt: new Date().toISOString(),
     managementPortal: {
@@ -177,6 +200,7 @@ export const toAssignmentPayload = (assignment: ManagedAssignment): AssignmentPa
       subject: assignment.subject,
       description: assignment.description || undefined,
       rewardEnabled: assignment.rewardEnabled,
+      requirementType: assignment.requirementType === 'required' ? 'required' : 'optional',
     },
   };
 };
@@ -186,7 +210,7 @@ const toDetailedAssignmentPayload = (assignment: ManagedAssignmentDetail): Assig
   units: assignment.customProblems?.length ? [] : toAssignmentPayload(assignment).units,
   customProblems: assignment.customProblems || [],
   customTargetCorrect: assignment.customProblems?.length ? Math.max(1, Number(assignment.targetCorrect || assignment.customProblems.length)) : undefined,
-  gameMode: assignment.customProblems?.length ? 'FREE' : toAssignmentPayload(assignment).gameMode,
+  gameMode: toAssignmentPayload(assignment).gameMode,
 });
 
 const makeEventId = () => typeof crypto !== 'undefined' && 'randomUUID' in crypto
