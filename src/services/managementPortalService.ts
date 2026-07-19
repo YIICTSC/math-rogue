@@ -9,6 +9,8 @@ export type ManagementProfile = {
 
 export type ManagedAssignment = {
   id: string;
+  sourceGroupId?: string | null;
+  sourceGroupName?: string | null;
   version: number;
   title: string;
   description?: string | null;
@@ -43,6 +45,7 @@ type ManagedAssignmentDetail = ManagedAssignment & {
     options: string[];
     imageUrl?: string;
     imageAlt?: string;
+    timeLimitSeconds?: number | null;
   }>;
 };
 
@@ -201,6 +204,8 @@ export const toAssignmentPayload = (assignment: ManagedAssignment): AssignmentPa
       description: assignment.description || undefined,
       rewardEnabled: assignment.rewardEnabled,
       requirementType: assignment.requirementType === 'required' ? 'required' : 'optional',
+      sourceGroupId: assignment.sourceGroupId || undefined,
+      sourceGroupName: assignment.sourceGroupName || undefined,
     },
   };
 };

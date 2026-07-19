@@ -70,7 +70,9 @@
     }
   },
   "dependencies": {
+    "@types/katex": "^0.16.8",
     "@vitejs/plugin-react": "^5.1.1",
+    "katex": "^0.16.47",
     "lucide-react": "^0.555.0",
     "peerjs": "^1.5.5",
     "react": "^19.2.0",

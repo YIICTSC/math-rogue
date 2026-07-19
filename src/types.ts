@@ -786,6 +786,7 @@ export interface AssignmentCustomProblem {
   options: string[];
   imageUrl?: string;
   imageAlt?: string;
+  timeLimitSeconds?: number | null;
 }
 
 export interface AssignmentPayload {
@@ -806,6 +807,8 @@ export interface AssignmentPayload {
     description?: string;
     rewardEnabled?: boolean;
     requirementType?: 'optional' | 'required';
+    sourceGroupId?: string;
+    sourceGroupName?: string;
   };
 }
 

@@ -15107,6 +15107,7 @@ const App: React.FC = () => {
                                     </div>
                                     <div className={`assignment-letter-summary mb-3 rounded-xl border-2 bg-white/70 p-3 text-xs font-bold leading-6 sm:text-sm ${isTeacherAssignmentActive ? 'border-amber-300' : 'border-lime-300'}`}>
                                         <div>{trans(isTeacherAssignmentActive ? '先生から課題が届きました。' : '今日の学習課題です。', languageMode)}</div>
+                                        {isTeacherAssignmentActive && assignmentLetter.managementPortal?.sourceGroupName && <div data-allow-japanese>{trans("配信元:", languageMode)} {assignmentLetter.managementPortal.sourceGroupName}</div>}
                                         <div>{trans("期限:", languageMode)} {assignmentLetter.dueAt ? new Date(assignmentLetter.dueAt).toLocaleString(languageMode === 'ENGLISH' ? 'en-US' : 'ja-JP') : trans('未設定', languageMode)}</div>
                                         {isTeacherAssignmentActive && <div>{trans("条件:", languageMode)} {trans(isRequiredTeacherAssignment ? '必須課題' : '任意課題', languageMode)}</div>}
                                         <div>{trans("形式:", languageMode)} {trans(assignmentLetter.gameMode === 'FREE' ? 'フリー' : '問題チャレンジのみ', languageMode)}</div>
@@ -15670,6 +15671,7 @@ const App: React.FC = () => {
                             </div>
                             <div className={`assignment-letter-summary mb-3 rounded-xl border-2 bg-white/70 p-3 text-xs font-bold leading-6 sm:text-sm ${isTeacherAssignmentActive ? 'border-amber-300' : 'border-lime-300'}`}>
                                 <div>{trans(isTeacherAssignmentActive ? '先生から課題が届きました。' : '今日の学習課題です。', languageMode)}</div>
+                                {isTeacherAssignmentActive && assignmentLetter.managementPortal?.sourceGroupName && <div data-allow-japanese>{trans("配信元:", languageMode)} {assignmentLetter.managementPortal.sourceGroupName}</div>}
                                 <div>{trans("期限:", languageMode)} {assignmentLetter.dueAt ? new Date(assignmentLetter.dueAt).toLocaleString(languageMode === 'ENGLISH' ? 'en-US' : 'ja-JP') : trans('未設定', languageMode)}</div>
                                 {isTeacherAssignmentActive && <div>{trans("条件:", languageMode)} {trans(isRequiredTeacherAssignment ? '必須課題' : '任意課題', languageMode)}</div>}
                                 <div>{trans("形式:", languageMode)} {trans(assignmentLetter.gameMode === 'FREE' ? 'フリー' : '問題チャレンジのみ', languageMode)}</div>

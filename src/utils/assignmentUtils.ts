@@ -40,6 +40,7 @@ export const decodeAssignmentPayload = (encoded: string): AssignmentPayload | nu
         options: Array.isArray(problem.options) ? problem.options.map((option) => String(option || '')) : [],
         imageUrl: problem.imageUrl ? String(problem.imageUrl) : undefined,
         imageAlt: problem.imageAlt ? String(problem.imageAlt) : undefined,
+        timeLimitSeconds: [10, 20, 30, 60].includes(Number(problem.timeLimitSeconds)) ? Number(problem.timeLimitSeconds) : null,
       })),
       customTargetCorrect: Math.max(1, Number(assignment.customTargetCorrect || (assignment.customProblems || []).length || 10)),
     };

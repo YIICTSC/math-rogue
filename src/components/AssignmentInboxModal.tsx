@@ -243,6 +243,7 @@ export default function AssignmentInboxModal({ open, onClose, onSelect, onProfil
                           <span className={completed ? 'text-emerald-300' : 'text-amber-300'}>{statusLabel(completed ? 'completed' : assignment.status)}</span>
                         </div>
                         <h3 className="truncate text-lg font-black" data-allow-japanese>{t(assignment.title)}</h3>
+                        {assignment.sourceGroupName && <p className="mt-1 text-xs font-black text-cyan-300" data-allow-japanese>{t('配信元')}: {assignment.sourceGroupName}</p>}
                         <p className="mt-1 text-sm text-slate-400" data-allow-japanese>{unitCount > 1 ? `${languageMode === 'ENGLISH' ? `${unitCount} units` : `${unitCount}単元`}・` : ''}{t(assignment.unitLabel)}・{t('目標')} {formatQuestionCount(target)}{assignment.dueAt ? `・${t('期限')} ${new Date(assignment.dueAt).toLocaleString(languageMode === 'ENGLISH' ? 'en-US' : 'ja-JP')}` : `・${t('期限なし')}`}</p>
                         {assignment.description && <p className="mt-2 text-xs leading-5 text-slate-300" data-allow-japanese>{t(assignment.description)}</p>}
                         <div className="mt-3 h-2 overflow-hidden rounded-full bg-slate-800"><div className="h-full rounded-full bg-gradient-to-r from-cyan-400 to-emerald-400" style={{ width: `${progress}%` }} /></div>

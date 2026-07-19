@@ -12,6 +12,7 @@ import UnitBoardModal from './UnitBoardModal';
 import { claimUnitBoardFirstDisplay } from '../utils/unitBoardSeen';
 import { trans } from '../utils/textUtils';
 import { formatProblemUnitName } from '../utils/problemUnitName';
+import MathText from './MathText';
 
 interface GeneralChallengeScreenProps {
   onComplete: (correctCount: number) => void;
@@ -79,6 +80,7 @@ interface ExtendedGeneralProblem extends GeneralProblem {
   assignmentProblemKey?: string;
   isAssignmentRetry?: boolean;
   retryOfProblemKey?: string;
+  timeLimitSeconds?: number | null;
 }
 
 type BrowserSpeechRecognition = {
@@ -135,6 +137,7 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
   const [speechTranscript, setSpeechTranscript] = useState('');
   const [speechError, setSpeechError] = useState('');
   const [imageExpanded, setImageExpanded] = useState(false);
+  const [remainingSeconds, setRemainingSeconds] = useState<number | null>(null);
   const [customImageFailed, setCustomImageFailed] = useState(false);
   const visualCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const inputRef = useRef<HTMLInputElement | null>(null);
@@ -437,6 +440,7 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
         assignmentProblemId: problem.id,
         imageUrl: problem.imageUrl,
         imageAlt: problem.imageAlt,
+        timeLimitSeconds: problem.timeLimitSeconds,
       }));
       const offset = customProblemPool.length > 0 ? problemOffset % customProblemPool.length : 0;
       const rotatedCustomProblemPool = [
@@ -510,8 +514,9 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
     setMapSymbolImageFailed(false);
     setCustomImageFailed(false);
     setImageExpanded(false);
+    setRemainingSeconds(currentProblem?.timeLimitSeconds || null);
     questionStartedAtRef.current = Date.now();
-  }, [currentProblemIndex]);
+  }, [currentProblem?.timeLimitSeconds, currentProblemIndex]);
 
   const submitAnswerResult = useCallback((isCorrect: boolean, selected: string) => {
     if (isAnswered) return;
@@ -567,6 +572,16 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
     const isCorrect = normalize(option) === normalize(problems[currentProblemIndex].actualCorrectAnswer);
     submitAnswerResult(isCorrect, option);
   };
+
+  useEffect(() => {
+    if (!currentProblem?.timeLimitSeconds || isAnswered || remainingSeconds === null) return;
+    if (remainingSeconds <= 0) {
+      submitAnswerResult(false, trans('時間切れ！', languageMode));
+      return;
+    }
+    const timer = window.setTimeout(() => setRemainingSeconds((current) => current === null ? null : Math.max(0, current - 1)), 1000);
+    return () => window.clearTimeout(timer);
+  }, [currentProblem?.timeLimitSeconds, isAnswered, languageMode, remainingSeconds, submitAnswerResult]);
 
   const handleInputSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -1798,8 +1813,10 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
                     </section>
                 )}
                 
+                {remainingSeconds !== null && <div className={`mb-3 w-full rounded-full border px-3 py-2 text-sm font-black ${remainingSeconds <= 5 ? 'border-red-300 bg-red-500/25 text-red-100' : 'border-cyan-300/50 bg-cyan-400/15 text-cyan-100'}`}><span>{trans('残り', languageMode)} {remainingSeconds}{languageMode === 'ENGLISH' ? ' sec' : '秒'}</span><div className="mt-1 h-1.5 overflow-hidden rounded-full bg-black/30"><i className="block h-full rounded-full bg-current transition-all duration-1000" style={{ width: `${Math.max(0, Math.min(100, remainingSeconds / Math.max(1, currentProblem.timeLimitSeconds || remainingSeconds) * 100))}%` }} /></div></div>}
+
                 <h3 className="text-[clamp(1.25rem,4vw,1.875rem)] font-bold text-white leading-tight mb-4 break-words w-full min-w-0">
-                    {currentProblem.question}
+                    <MathText text={currentProblem.question} />
                 </h3>
 
                 {currentProblem.imageUrl && !customImageFailed && (
@@ -1938,7 +1955,7 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
                                 break-words shadow-lg min-w-0
                             `}
                         >
-                            {opt}
+                            <MathText text={opt} />
                         </button>
                     );
                 })}
