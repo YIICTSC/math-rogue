@@ -17677,7 +17677,7 @@ const App: React.FC = () => {
                     onLinked={(profile) => {
                         setManagementProfile(profile);
                         setLearnerInvitationToken('');
-                        setShowAssignmentInbox(true);
+                        setShowAssignmentInbox(false);
                     }}
                     onCancel={() => setLearnerInvitationToken('')}
                 />

@@ -96,7 +96,11 @@ export default function AssignmentInboxModal({ open, onClose, onSelect, onProfil
   };
 
   useEffect(() => {
-    if (open && profile) void sync();
+    if (!open) return;
+    const latestProfile = managementPortalService.getProfile();
+    setProfile(latestProfile);
+    onProfileChange(latestProfile);
+    if (latestProfile) void sync();
     // Opening the modal is the deliberate refresh trigger.
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
