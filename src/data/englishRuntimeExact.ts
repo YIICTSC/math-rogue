@@ -558,4 +558,6 @@ export const ENGLISH_RUNTIME_EXACT: Record<string, string> = {
   '参加してこの端末を連携': 'Join and Link This Device',
   '氏名と出席番号は公開ランキングには送信されません。': 'Your name and attendance number are not sent to public rankings.',
   'あとで参加する': 'Join Later',
+  'アイテム': 'Items',
+  'レース用カード': 'Race Cards',
 };
