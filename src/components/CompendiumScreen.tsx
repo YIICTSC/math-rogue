@@ -8,7 +8,7 @@ import EnemyIllustration from './EnemyIllustration';
 import PixelSprite from './PixelSprite';
 import { storageService } from '../services/storageService';
 import { audioService, type BgmThemeId } from '../services/audioService';
-import { trans } from '../utils/textUtils';
+import { getEnglishFamiliarName, trans } from '../utils/textUtils';
 import { assetUrl } from '../utils/assetPaths';
 import { getCardIllustrationPaths } from '../utils/cardIllustration';
 import { ENEMY_ILLUSTRATION_SIZE_CLASS } from '../constants/uiSizing';
@@ -1041,7 +1041,9 @@ const CompendiumBgmModeModal: React.FC<{ cards: ICard[]; languageMode: LanguageM
                             {activeCard && familiarActionSrc ? (
                                 <img
                                     src={familiarActionSrc}
-                                    alt={activeCard.familiarSummon?.name || translated}
+                                    alt={activeCard.familiarSummon && languageMode === 'ENGLISH'
+                                        ? getEnglishFamiliarName(activeCard.familiarSummon.name)
+                                        : activeCard.familiarSummon?.name || translated}
                                     className="h-full w-full object-contain drop-shadow-[0_0_18px_rgba(244,114,182,0.8)]"
                                 />
                             ) : activeCard && magicArtUrl ? (

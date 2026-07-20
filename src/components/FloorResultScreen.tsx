@@ -7,7 +7,7 @@ import { getMagicActStoryPart, MAGIC_STORIES } from '../data/magicStories';
 import { ROMANCE_TARGETS } from '../data/romanceTargets';
 import { MAGIC_HEROES, isMagicMaleProtagonist } from '../data/magicHeroes';
 import { ADDITIONAL_CARDS } from '../constants1';
-import { trans, transEventText } from '../utils/textUtils';
+import { buildEnglishCardDescription, trans, transEventText } from '../utils/textUtils';
 import { Skull, Coins, Brain, ArrowRight, BookOpen, Sparkles } from 'lucide-react';
 import { audioService } from '../services/audioService';
 import Card from './Card';
@@ -141,7 +141,9 @@ const FloorResultScreen: React.FC<FloorResultScreenProps> = ({ act, stats, story
                             </div>
                             <div className="floor-result-unlocked-copy text-left md:text-center flex-1 md:flex-initial">
                                 <h4 className="text-white font-bold text-lg mb-1">{trans(unlockedCard.name, languageMode)}</h4>
-                                <p className="text-gray-400 text-xs leading-relaxed line-clamp-3">{trans(unlockedCard.description, languageMode)}</p>
+                                <p className="text-gray-400 text-xs leading-relaxed line-clamp-3">
+                                    {languageMode === 'ENGLISH' ? buildEnglishCardDescription(unlockedCard) : trans(unlockedCard.description, languageMode)}
+                                </p>
                                 <p className="text-yellow-500/70 text-[9px] mt-2 font-bold uppercase tracking-tighter hidden md:block">{trans('次から報酬候補に登場', languageMode)}</p>
                             </div>
                         </div>

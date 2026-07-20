@@ -37,6 +37,15 @@ try {
   const { MINI_GAMES } = await server.ssrLoadModule('/src/miniGameConfig.ts');
   const { TYPING_LESSON_DEFINITIONS } = await server.ssrLoadModule('/src/data/typingLessonConfig.ts');
   const { ONLINE_RANKING_FALLBACKS, ONLINE_RANKING_CATEGORIES } = await server.ssrLoadModule('/src/data/onlineRankingDefinitions.ts');
+  const REQUIRED_EXACT_TRANSLATIONS = {
+    '課題連携': 'かだいれんけい',
+    'ボスとの決戦開始！': 'ボスとの けっせん かいし！',
+    '> ボスとの決戦開始！': '> ボスとの けっせん かいし！',
+  };
+  for (const [source, expected] of Object.entries(REQUIRED_EXACT_TRANSLATIONS)) {
+    const output = trans(source, 'HIRAGANA');
+    if (output !== expected) failures.push(`required exact translation ${source} => ${output} (expected ${expected})`);
+  }
   for (const game of MINI_GAMES) {
     for (const [field, value] of [['name', game.name], ['description', game.description]]) {
       const output = trans(value, 'HIRAGANA');

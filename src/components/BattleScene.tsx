@@ -8,7 +8,7 @@ import EnemyIllustration from './EnemyIllustration';
 import AttackEffectSprite from './AttackEffectSprite';
 import StatusEffectSprite from './StatusEffectSprite';
 import { audioService } from '../services/audioService';
-import { trans } from '../utils/textUtils';
+import { getEnglishFamiliarName, trans } from '../utils/textUtils';
 import { HERO_IMAGE_DATA, CARDS_LIBRARY, STATUS_CARDS } from '../constants';
 import { ENEMY_ILLUSTRATION_SIZE_CLASS } from '../constants/uiSizing';
 import { getUpgradedCard, synthesizeCards } from '../utils/cardUtils';
@@ -2793,7 +2793,9 @@ const FinisherArtPiece: React.FC<{ token: string; seed: string; languageMode: La
                 <div className="absolute inset-0 bg-[linear-gradient(115deg,transparent_0%,rgba(255,255,255,0.12)_32%,rgba(236,72,153,0.3)_52%,transparent_74%)]" />
                 <img
                     src={assetUrl(`sprites/high-school/familiars-action/${familiarImageIndex}.webp`)}
-                    alt={trans(card.familiarSummon?.name || card.name, languageMode)}
+                    alt={card.familiarSummon && languageMode === 'ENGLISH'
+                        ? getEnglishFamiliarName(card.familiarSummon.name)
+                        : trans(card.familiarSummon?.name || card.name, languageMode)}
                     className="absolute left-1/2 top-1/2 h-[150%] w-[150%] -translate-x-1/2 -translate-y-1/2 object-contain drop-shadow-[0_0_24px_rgba(217,70,239,0.95)]"
                 />
             </div>

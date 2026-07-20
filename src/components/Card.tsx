@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Card as CardType, CardType as EnumCardType, LanguageMode } from '../types';
 import PixelSprite from './PixelSprite';
 import EnemyIllustration from './EnemyIllustration';
-import { buildEnglishCardDescription, trans } from '../utils/textUtils';
+import { buildEnglishCardDescription, getEnglishFamiliarName, trans } from '../utils/textUtils';
 import { getCardIllustrationPaths } from '../utils/cardIllustration';
 import { createEnemyIllustrationRef, getStatusCategoryLabel, getStatusCategoryClass, parseEnemyIllustrationRef } from '../utils/cardUtils';
 import { assetUrl } from '../utils/assetPaths';
@@ -89,6 +89,7 @@ const CompositeArtPiece: React.FC<{
     return (
       <EnemyIllustration
         name={enemyRef?.name || refToken.substring('enemy:'.length)}
+        altText={trans(enemyRef?.name || refToken.substring('enemy:'.length), languageMode)}
         seed={seed}
         visualTheme={resolvedVisualTheme}
         enemyType={enemyRef?.enemyType || enemyType}
@@ -174,7 +175,7 @@ const CompositeArtPiece: React.FC<{
     return (
       <img
         src={candidates[imageIndex]}
-        alt={cardName}
+        alt={trans(cardName, languageMode)}
         className="w-full h-full object-cover opacity-95"
         onError={() => {
           const next = imageIndex + 1;
@@ -309,7 +310,7 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled, onInspect, languag
           <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(248,250,252,0.18),transparent_28%,rgba(239,68,68,0.22)_52%,transparent_70%)]" />
           <img
             src={assetUrl(`sprites/high-school/familiars-action/${card.familiarSummon.imageIndex}.webp`)}
-            alt={trans(card.familiarSummon.name, languageMode)}
+            alt={languageMode === 'ENGLISH' ? getEnglishFamiliarName(card.familiarSummon.name) : trans(card.familiarSummon.name, languageMode)}
             className="absolute left-1/2 top-[18%] h-[205%] w-[205%] -translate-x-1/2 -translate-y-1/2 object-contain opacity-100 drop-shadow-[0_0_12px_rgba(244,114,182,0.85)]"
             style={{ transform: 'translate(-50%, -50%)' }}
           />

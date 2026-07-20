@@ -6017,6 +6017,7 @@ const App: React.FC = () => {
         const combatState: GameState = {
             ...gameState,
             screen: GameScreen.BATTLE,
+            visualTheme,
             act: 3,
             floor: 16,
             turn: 1,

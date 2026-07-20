@@ -435,7 +435,9 @@ const MapScreen: React.FC<MapScreenProps> = ({ nodes, currentNodeId, onNodeSelec
                                 )}
 
                                 {node.type === NodeType.BOSS && !isCompleted && (
-                                    <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-red-600 text-white text-[10px] font-black px-2 py-0.5 rounded border border-white animate-pulse uppercase tracking-widest">Boss</div>
+                                    <div className="absolute -top-8 left-1/2 -translate-x-1/2 bg-red-600 text-white text-[10px] font-black px-2 py-0.5 rounded border border-white animate-pulse uppercase tracking-widest">
+                                        {languageMode === 'ENGLISH' ? 'Boss' : 'ボス'}
+                                    </div>
                                 )}
                             </div>
                         );

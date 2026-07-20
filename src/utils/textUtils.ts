@@ -6753,8 +6753,8 @@ const buildEnglishEventActionFallback = (text: string): string | null => {
 };
 
 const EVENT_PHRASE_TRANSLATIONS: Record<string, string> = {
-    "校長先生": "the Principal",
-    "校長": "the Principal",
+    "校長先生": "Principal",
+    "校長": "Principal",
     "校長室": "the principal's office",
     "全校": "the whole school",
     "学園": "the academy",
@@ -8923,7 +8923,7 @@ const romanizeKatakana = (text: string): string => {
     return result ? result.charAt(0).toUpperCase() + result.slice(1) : "";
 };
 
-const getEnglishFamiliarName = (name: string): string => {
+export const getEnglishFamiliarName = (name: string): string => {
     if (!JAPANESE_TEXT_PATTERN.test(name)) return name;
     const katakanaName = name.match(/[ァ-ヶー]+$/)?.[0];
     if (katakanaName) return romanizeKatakana(katakanaName) || "Familiar";

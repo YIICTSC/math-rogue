@@ -22,6 +22,22 @@ try {
   const { MINI_GAMES } = await server.ssrLoadModule('/src/miniGameConfig.ts');
   const { TYPING_LESSON_DEFINITIONS } = await server.ssrLoadModule('/src/data/typingLessonConfig.ts');
   const { ONLINE_RANKING_FALLBACKS, ONLINE_RANKING_CATEGORIES } = await server.ssrLoadModule('/src/data/onlineRankingDefinitions.ts');
+  const REQUIRED_EXACT_TRANSLATIONS = {
+    '課題連携': 'Assignment Link',
+    '空き': 'Empty Slot',
+    'チラシ号': 'Flyer Glider',
+    'テスト用紙号': 'Test-Paper Glider',
+    '画用紙号': 'Drawing-Paper Glider',
+    '通常授業': 'Regular Class',
+    '抜き打ちテスト': 'Surprise Test',
+    '校長最終通告': "Principal's Final Warning",
+    '校長先生': 'Principal',
+    '校長': 'Principal',
+  };
+  for (const [source, expected] of Object.entries(REQUIRED_EXACT_TRANSLATIONS)) {
+    const output = trans(source, 'ENGLISH');
+    if (output !== expected) failures.push(`required exact translation ${source} => ${output} (expected ${expected})`);
+  }
   for (const game of MINI_GAMES) {
     for (const [field, value] of [['name', game.name], ['description', game.description]]) {
       const output = trans(value, 'ENGLISH');
