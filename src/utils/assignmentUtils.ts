@@ -32,6 +32,11 @@ export const decodeAssignmentPayload = (encoded: string): AssignmentPayload | nu
       units: assignment.units.map((unit) => ({
         ...unit,
         targetCorrect: Math.max(1, Number(unit.targetCorrect || 10)),
+        filterSchemaVersion: unit.filterSchemaVersion ? Number(unit.filterSchemaVersion) : undefined,
+        filters: unit.filters && typeof unit.filters.kind === 'string' && Array.isArray(unit.filters.values)
+          ? { kind: String(unit.filters.kind), values: unit.filters.values.map(String) }
+          : null,
+        filterLabel: unit.filterLabel ? String(unit.filterLabel) : undefined,
       })),
       customProblems: (assignment.customProblems || []).map((problem) => ({
         ...problem,

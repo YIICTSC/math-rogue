@@ -2,11 +2,12 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { CheckCircle, XCircle, Volume2, VolumeX } from 'lucide-react';
 import { audioService } from '../services/audioService';
-import { AssignmentAnswerResult, AssignmentReviewProblem, GameMode, LanguageMode } from '../types';
+import { AssignmentAnswerResult, AssignmentReviewProblem, AssignmentUnit, GameMode, LanguageMode } from '../types';
 import { storageService } from '../services/storageService';
 import { ENGLISH_DATA, EnglishProblem } from '../data/englishData';
 import RewardHintBanner from './RewardHintBanner';
 import { trans } from '../utils/textUtils';
+import { assignmentFilterForMode } from '../utils/assignmentRangeFilters';
 
 interface EnglishChallengeScreenProps {
   onComplete: (correctCount: number) => void;
@@ -18,6 +19,7 @@ interface EnglishChallengeScreenProps {
   languageMode?: LanguageMode;
   onAnswerResult?: (result: AssignmentAnswerResult) => void;
   reviewProblem?: AssignmentReviewProblem | null;
+  assignmentUnits?: AssignmentUnit[];
 }
 
 interface ExtendedEnglishProblem extends EnglishProblem {
@@ -27,7 +29,7 @@ interface ExtendedEnglishProblem extends EnglishProblem {
   retryOfProblemKey?: string;
 }
 
-const EnglishChallengeScreen: React.FC<EnglishChallengeScreenProps> = ({ onComplete, mode, debugSkip, isChallenge, streak = 0, rewardHint, languageMode = 'NORMAL', onAnswerResult, reviewProblem = null }) => {
+const EnglishChallengeScreen: React.FC<EnglishChallengeScreenProps> = ({ onComplete, mode, debugSkip, isChallenge, streak = 0, rewardHint, languageMode = 'NORMAL', onAnswerResult, reviewProblem = null, assignmentUnits }) => {
   const [problems, setProblems] = useState<ExtendedEnglishProblem[]>([]);
   const [currentProblemIndex, setCurrentProblemIndex] = useState(0);
   const [correctCount, setCorrectCount] = useState(0);
@@ -103,6 +105,21 @@ const EnglishChallengeScreen: React.FC<EnglishChallengeScreenProps> = ({ onCompl
         const key = mode as keyof typeof ENGLISH_DATA;
         problemPool = ENGLISH_DATA[key] || ENGLISH_DATA.ENGLISH_ES;
     }
+    const rangeFilter = assignmentFilterForMode(assignmentUnits, mode);
+    if (rangeFilter?.kind === 'english_words' && rangeFilter.values.includes('english_to_japanese')) {
+      const filtered = problemPool.filter((problem) => /[A-Za-z]/.test(problem.question) && !/[A-Za-z]/.test(problem.options[0] || problem.answer));
+      if (filtered.length > 0) problemPool = filtered;
+    }
+    if (rangeFilter?.kind === 'english_words' && rangeFilter.values.includes('japanese_to_english')) {
+      const source = problemPool.filter((problem) => /[A-Za-z]/.test(problem.question));
+      if (source.length > 0) problemPool = source.map((problem, index) => ({
+        ...problem,
+        question: problem.options[0] || problem.answer,
+        answer: problem.question,
+        options: [problem.question, ...[1, 2, 3].map((offset) => source[(index + offset) % source.length]?.question).filter(Boolean)],
+      }));
+    }
+    if (rangeFilter?.kind === 'english_words' && rangeFilter.values.includes('listening')) setVoiceEnabled(true);
     
     const count = isChallenge ? 1 : 3;
     const shuffled = [...problemPool]
@@ -120,7 +137,7 @@ const EnglishChallengeScreen: React.FC<EnglishChallengeScreenProps> = ({ onCompl
         });
         
     setProblems(shuffled);
-  }, [mode, debugSkip, isChallenge, reviewProblem]);
+  }, [mode, debugSkip, isChallenge, reviewProblem, assignmentUnits]);
 
   useEffect(() => {
     questionStartedAtRef.current = Date.now();

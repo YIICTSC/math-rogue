@@ -1,12 +1,17 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 
-const [service, modal, inviteModal, app, types] = await Promise.all([
+const [service, modal, inviteModal, app, types, rangeFilters, general, math, kanji, english] = await Promise.all([
   readFile(new URL('../src/services/managementPortalService.ts', import.meta.url), 'utf8'),
   readFile(new URL('../src/components/AssignmentInboxModal.tsx', import.meta.url), 'utf8'),
   readFile(new URL('../src/components/LearnerGroupInviteModal.tsx', import.meta.url), 'utf8'),
   readFile(new URL('../src/App.tsx', import.meta.url), 'utf8'),
   readFile(new URL('../src/types.ts', import.meta.url), 'utf8'),
+  readFile(new URL('../src/utils/assignmentRangeFilters.ts', import.meta.url), 'utf8'),
+  readFile(new URL('../src/components/GeneralChallengeScreen.tsx', import.meta.url), 'utf8'),
+  readFile(new URL('../src/components/MathChallengeScreen.tsx', import.meta.url), 'utf8'),
+  readFile(new URL('../src/components/KanjiChallengeScreen.tsx', import.meta.url), 'utf8'),
+  readFile(new URL('../src/components/EnglishChallengeScreen.tsx', import.meta.url), 'utf8'),
 ]);
 
 assert.match(service, /learner-devices\/link/);
@@ -68,4 +73,18 @@ assert.match(types, /managementPortal\?:/);
 assert.match(types, /requirementType\?: 'optional' \| 'required'/);
 assert.match(types, /enforcementLevel\?: 'optional' \| 'required' \| 'launch_lock'/);
 assert.match(types, /imageUrl\?: string/);
+assert.match(types, /filters\?: AssignmentRangeFilter/);
+assert.match(service, /filterSchemaVersion/);
+assert.match(service, /x-learning-rogue-assignment-schema': '2'/);
+assert.match(service, /最新版に更新してください/);
+assert.match(service, /filterLabel/);
+for (const kind of ['multiplication_table', 'division', 'addition_subtraction', 'time', 'decimal', 'fraction', 'kanji', 'english_words', 'prefectures', 'history']) assert.match(rangeFilters, new RegExp(kind));
+assert.match(rangeFilters, /PREFECTURE_REGIONS/);
+assert.match(rangeFilters, /matchesKanjiAssignmentRangeFilter/);
+assert.match(general, /matchesAssignmentRangeFilter/);
+assert.match(general, /assignmentUnits/);
+assert.match(math, /multiplication_table/);
+assert.match(math, /divisor_2_5/);
+assert.match(kanji, /matchesKanjiAssignmentRangeFilter/);
+assert.match(english, /japanese_to_english/);
 console.log('management integration verification passed');

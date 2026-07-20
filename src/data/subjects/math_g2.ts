@@ -431,8 +431,8 @@ const makeUnitProblem = (unitId: string, n: number): GeneralProblem => {
             return { question: `${repeatedAdd} を かけ算の 式にすると？`, answer: `${a} × ${b}`, options: d(`${a} × ${b}`, `${b} × ${a}`, `${a} + ${b}`, `${a} × ${b - 1}`), hint: "たしざんを かけざんに。" };
         }
         case 'MATH_G2_U10': {
-            const a = (n % 8) + 2;
-            const b = (Math.floor(n / 8) % 8) + 2;
+            const a = (n % 9) + 1;
+            const b = (Math.floor(n / 9) % 9) + 1;
             const p = a * b;
             if (n % 3 === 0) return { question: `九九。 ${a} × ${b} = ?`, answer: `${p}`, options: d(`${p}`, `${p + 1}`, `${p - 1}`, `${a + b}`), hint: "九九を おもいだそう。" };
             if (n % 3 === 1) return { question: `${p} に なる かけ算は？`, answer: `${a} × ${b}`, options: d(`${a} × ${b}`, `${a} + ${b}`, `${p} × 1`, `${a} × ${b + 1}`), hint: "しきを えらぼう。" };

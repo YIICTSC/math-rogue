@@ -16747,6 +16747,7 @@ const App: React.FC = () => {
                             isChallenge={false}
                             rewardHint={trans("正解するとゴールド獲得", languageMode)}
                             languageMode={languageMode}
+                            assignmentUnits={assignmentProblemSource?.units}
                         />
                     </div>
                 )}
@@ -16763,6 +16764,7 @@ const App: React.FC = () => {
                             isChallenge={false}
                             rewardHint={trans("正解するとゴールド獲得", languageMode)}
                             languageMode={languageMode}
+                            assignmentUnits={assignmentProblemSource?.units}
                         />
                     </div>
                 )}
@@ -16777,6 +16779,7 @@ const App: React.FC = () => {
                             isChallenge={false}
                             rewardHint={trans("正解するとゴールド獲得", languageMode)}
                             languageMode={languageMode}
+                            assignmentUnits={assignmentProblemSource?.units}
                         />
                     </div>
                 )}
@@ -16795,6 +16798,7 @@ const App: React.FC = () => {
                             isChallenge={false}
                             rewardHint={trans("正解するとゴールド獲得", languageMode)}
                             languageMode={languageMode}
+                            assignmentUnits={assignmentProblemSource?.units}
                         />
                     </div>
                 )}

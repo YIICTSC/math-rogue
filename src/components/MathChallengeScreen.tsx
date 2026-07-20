@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef, useMemo, useCallback } from 'react';
 import { BookOpen, CheckCircle, XCircle } from 'lucide-react';
 import { audioService } from '../services/audioService';
-import { AnswerMode, AssignmentAnswerResult, AssignmentReviewProblem, GameMode, LanguageMode } from '../types';
+import { AnswerMode, AssignmentAnswerResult, AssignmentReviewProblem, AssignmentUnit, GameMode, LanguageMode } from '../types';
 import { storageService } from '../services/storageService';
 import { resolveAnswerMode } from '../utils/answerMode';
 import { getUnitBoardSummary } from '../data/unitBoardSummaries';
@@ -10,6 +10,7 @@ import RewardHintBanner from './RewardHintBanner';
 import UnitBoardModal from './UnitBoardModal';
 import { claimUnitBoardFirstDisplay } from '../utils/unitBoardSeen';
 import { trans } from '../utils/textUtils';
+import { assignmentFilterForMode } from '../utils/assignmentRangeFilters';
 
 interface MathProblem {
   question: string;
@@ -20,7 +21,7 @@ interface MathProblem {
   retryOfProblemKey?: string;
 }
 
-const MathChallengeScreen: React.FC<MathChallengeScreenProps> = ({ onComplete, mode, answerMode = 'CHOICE' as AnswerMode, useSavedAnswerMode = false, debugSkip, isChallenge, streak = 0, rewardHint, languageMode = 'NORMAL', onAnswerResult, reviewProblem = null }) => {
+const MathChallengeScreen: React.FC<MathChallengeScreenProps> = ({ onComplete, mode, answerMode = 'CHOICE' as AnswerMode, useSavedAnswerMode = false, debugSkip, isChallenge, streak = 0, rewardHint, languageMode = 'NORMAL', onAnswerResult, reviewProblem = null, assignmentUnits }) => {
   const resolvedAnswerMode = resolveAnswerMode(answerMode as AnswerMode, useSavedAnswerMode);
   const [problems, setProblems] = useState<MathProblem[]>([]);
   const [currentProblemIndex, setCurrentProblemIndex] = useState(0);
@@ -83,6 +84,7 @@ const MathChallengeScreen: React.FC<MathChallengeScreenProps> = ({ onComplete, m
     }
 
     const safeMode = mode || GameMode.MULTIPLICATION;
+    const rangeFilter = assignmentFilterForMode(assignmentUnits, safeMode);
     const generatedProblems: MathProblem[] = [];
     // チャレンジモードなら1問、通常なら3問生成
     const count = isChallenge ? 1 : 3;
@@ -134,26 +136,34 @@ const MathChallengeScreen: React.FC<MathChallengeScreenProps> = ({ onComplete, m
               operator = '-';
               break;
           case GameMode.ADDITION:
-              a = Math.floor(Math.random() * 40) + 10;
-              b = Math.floor(Math.random() * 40) + 10;
+              if (rangeFilter?.kind === 'addition_subtraction' && rangeFilter.values.includes('within_10')) { a = Math.floor(Math.random() * 9) + 1; b = Math.floor(Math.random() * (10 - a)) + 1; }
+              else if (rangeFilter?.kind === 'addition_subtraction' && rangeFilter.values.includes('within_20')) { a = Math.floor(Math.random() * 10) + 1; b = Math.floor(Math.random() * (20 - a)) + 1; }
+              else { a = Math.floor(Math.random() * 40) + 10; b = Math.floor(Math.random() * 40) + 10; }
               answer = a + b;
               operator = '+';
               break;
           case GameMode.SUBTRACTION:
-              a = Math.floor(Math.random() * 50) + 20;
-              b = Math.floor(Math.random() * (a - 10)) + 5;
+              if (rangeFilter?.kind === 'addition_subtraction' && rangeFilter.values.includes('within_10')) { a = Math.floor(Math.random() * 9) + 1; b = Math.floor(Math.random() * a) + 1; }
+              else if (rangeFilter?.kind === 'addition_subtraction' && rangeFilter.values.includes('within_20')) { a = Math.floor(Math.random() * 19) + 1; b = Math.floor(Math.random() * a) + 1; }
+              else { a = Math.floor(Math.random() * 50) + 20; b = Math.floor(Math.random() * (a - 10)) + 5; }
               answer = a - b;
               operator = '-';
               break;
           case GameMode.DIVISION:
-              b = Math.floor(Math.random() * 8) + 2;
+              b = rangeFilter?.kind === 'division' && rangeFilter.values.includes('divisor_2_5') ? Math.floor(Math.random() * 4) + 2
+                : rangeFilter?.kind === 'division' && rangeFilter.values.includes('divisor_6_9') ? Math.floor(Math.random() * 4) + 6
+                : Math.floor(Math.random() * 8) + 2;
               answer = Math.floor(Math.random() * 9) + 1;
               a = b * answer;
+              if (rangeFilter?.kind === 'division' && rangeFilter.values.includes('remainder_with')) { const remainder = Math.floor(Math.random() * (b - 1)) + 1; a += remainder; answer = Math.floor(a / b); }
               operator = '÷';
               break;
           case GameMode.MULTIPLICATION:
           default:
-              a = Math.floor(Math.random() * 9) + 1;
+              if (rangeFilter?.kind === 'multiplication_table') {
+                const tables = rangeFilter.values.map(Number).filter((value) => value >= 1 && value <= 9);
+                a = tables.length ? tables[Math.floor(Math.random() * tables.length)] : Math.floor(Math.random() * 9) + 1;
+              } else a = Math.floor(Math.random() * 9) + 1;
               b = Math.floor(Math.random() * 9) + 1;
               answer = a * b;
               operator = '×';
@@ -176,7 +186,7 @@ const MathChallengeScreen: React.FC<MathChallengeScreenProps> = ({ onComplete, m
       });
     }
     setProblems(generatedProblems);
-  }, [mode, debugSkip, isChallenge, reviewProblem]);
+  }, [mode, debugSkip, isChallenge, reviewProblem, assignmentUnits]);
 
   useEffect(() => {
     questionStartedAtRef.current = Date.now();
@@ -365,4 +375,5 @@ interface MathChallengeScreenProps {
   languageMode?: LanguageMode;
   onAnswerResult?: (result: AssignmentAnswerResult) => void;
   reviewProblem?: AssignmentReviewProblem | null;
+  assignmentUnits?: AssignmentUnit[];
 }

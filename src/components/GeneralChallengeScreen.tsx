@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { BookOpen, CheckCircle, XCircle, Volume2, Mic, Maximize2, X } from 'lucide-react';
 import { audioService } from '../services/audioService';
-import { AnswerMode, AssignmentAnswerResult, AssignmentCustomProblem, AssignmentReviewProblem, GameMode, LanguageMode } from '../types';
+import { AnswerMode, AssignmentAnswerResult, AssignmentCustomProblem, AssignmentReviewProblem, AssignmentUnit, GameMode, LanguageMode } from '../types';
 import { storageService } from '../services/storageService';
 import { SUBJECT_DATA, GeneralProblem } from '../data/subjectData';
 import { getUnitBoardSummary } from '../data/unitBoardSummaries';
@@ -13,6 +13,7 @@ import { claimUnitBoardFirstDisplay } from '../utils/unitBoardSeen';
 import { trans } from '../utils/textUtils';
 import { formatProblemUnitName } from '../utils/problemUnitName';
 import MathText from './MathText';
+import { assignmentFilterForMode, matchesAssignmentRangeFilter } from '../utils/assignmentRangeFilters';
 
 interface GeneralChallengeScreenProps {
   onComplete: (correctCount: number) => void;
@@ -29,6 +30,7 @@ interface GeneralChallengeScreenProps {
   customProblems?: AssignmentCustomProblem[];
   problemOffset?: number;
   reviewProblem?: AssignmentReviewProblem | null;
+  assignmentUnits?: AssignmentUnit[];
 }
 
 const EMPTY_CUSTOM_PROBLEMS: AssignmentCustomProblem[] = [];
@@ -125,7 +127,7 @@ const isEnglishSpeakingReviewMode = (mode: string) =>
   /^ENGLISH_G8_U(11|12|13)$/.test(mode) ||
   /^ENGLISH_G9_U(12|13|14)$/.test(mode);
 
-const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onComplete, mode, modePool, onModeCorrect, answerMode = 'CHOICE', debugSkip, isChallenge, streak = 0, rewardHint, languageMode = 'JAPANESE', onAnswerResult, customProblems = EMPTY_CUSTOM_PROBLEMS, problemOffset = 0, reviewProblem = null }) => {
+const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onComplete, mode, modePool, onModeCorrect, answerMode = 'CHOICE', debugSkip, isChallenge, streak = 0, rewardHint, languageMode = 'JAPANESE', onAnswerResult, customProblems = EMPTY_CUSTOM_PROBLEMS, problemOffset = 0, reviewProblem = null, assignmentUnits }) => {
   const [problems, setProblems] = useState<ExtendedGeneralProblem[]>([]);
   const [currentProblemIndex, setCurrentProblemIndex] = useState(0);
   const [correctCount, setCorrectCount] = useState(0);
@@ -426,9 +428,17 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
 
     let problemPool: Array<GeneralProblem & { sourceMode: string }> = [];
     if (modePool && modePool.length > 0) {
-      problemPool = modePool.flatMap((m) => (SUBJECT_DATA[m] || []).map((p) => ({ ...p, sourceMode: m })));
+      problemPool = modePool.flatMap((m) => {
+        const source = SUBJECT_DATA[m] || [];
+        const filter = assignmentFilterForMode(assignmentUnits, m);
+        const filtered = filter ? source.filter((problem) => matchesAssignmentRangeFilter(problem, filter)) : source;
+        return (filtered.length > 0 ? filtered : source).map((p) => ({ ...p, sourceMode: m }));
+      });
     } else if (!modePool) {
-      problemPool = (SUBJECT_DATA[mode] || []).map((p) => ({ ...p, sourceMode: mode }));
+      const source = SUBJECT_DATA[mode] || [];
+      const filter = assignmentFilterForMode(assignmentUnits, mode);
+      const filtered = filter ? source.filter((problem) => matchesAssignmentRangeFilter(problem, filter)) : source;
+      problemPool = (filtered.length > 0 ? filtered : source).map((p) => ({ ...p, sourceMode: mode }));
     }
     if (customProblems.length > 0) {
       const customProblemPool = customProblems.map((problem) => ({
@@ -474,7 +484,7 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
         });
         
     setProblems(shuffled);
-  }, [mode, modePool, debugSkip, isChallenge, customProblems, problemOffset, reviewProblem, languageMode]);
+  }, [mode, modePool, debugSkip, isChallenge, customProblems, problemOffset, reviewProblem, languageMode, assignmentUnits]);
 
   const attemptedCount = currentProblemIndex + (isAnswered ? 1 : 0);
   const accuracy = attemptedCount > 0 ? Math.round((correctCount / attemptedCount) * 100) : 0;

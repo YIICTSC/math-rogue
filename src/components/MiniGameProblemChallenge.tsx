@@ -74,11 +74,11 @@ const MiniGameProblemChallenge: React.FC<MiniGameProblemChallengeProps> = ({
   };
 
   if (challengeScreen === GameScreen.KANJI_CHALLENGE) {
-    return <KanjiChallengeScreen mode={effectiveMode} answerMode={effectiveAnswerMode} onComplete={onComplete} isChallenge={isChallenge} streak={streak} rewardHint={rewardHint} languageMode={languageMode} onAnswerResult={handleAnswerResult} />;
+    return <KanjiChallengeScreen mode={effectiveMode} answerMode={effectiveAnswerMode} onComplete={onComplete} isChallenge={isChallenge} streak={streak} rewardHint={rewardHint} languageMode={languageMode} onAnswerResult={handleAnswerResult} assignmentUnits={assignment?.units} />;
   }
 
   if (challengeScreen === GameScreen.ENGLISH_CHALLENGE) {
-    return <EnglishChallengeScreen mode={effectiveMode} onComplete={onComplete} isChallenge={isChallenge} streak={streak} rewardHint={rewardHint} languageMode={languageMode} onAnswerResult={handleAnswerResult} />;
+    return <EnglishChallengeScreen mode={effectiveMode} onComplete={onComplete} isChallenge={isChallenge} streak={streak} rewardHint={rewardHint} languageMode={languageMode} onAnswerResult={handleAnswerResult} assignmentUnits={assignment?.units} />;
   }
 
   if (challengeScreen === GameScreen.GENERAL_CHALLENGE) {
@@ -94,11 +94,12 @@ const MiniGameProblemChallenge: React.FC<MiniGameProblemChallengeProps> = ({
         languageMode={languageMode}
         onAnswerResult={handleAnswerResult}
         customProblems={effectiveCustomProblems}
+        assignmentUnits={assignment?.units}
       />
     );
   }
 
-  return <MathChallengeScreen mode={effectiveMode} answerMode={effectiveAnswerMode} onComplete={onComplete} isChallenge={isChallenge} streak={streak} rewardHint={rewardHint} languageMode={languageMode} onAnswerResult={handleAnswerResult} />;
+  return <MathChallengeScreen mode={effectiveMode} answerMode={effectiveAnswerMode} onComplete={onComplete} isChallenge={isChallenge} streak={streak} rewardHint={rewardHint} languageMode={languageMode} onAnswerResult={handleAnswerResult} assignmentUnits={assignment?.units} />;
 };
 
 export default MiniGameProblemChallenge;

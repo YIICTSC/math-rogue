@@ -1,4 +1,4 @@
-import { AnswerMode, AssignmentAnswerResult, AssignmentPayload, GameMode } from '../types';
+import { AnswerMode, AssignmentAnswerResult, AssignmentPayload, AssignmentRangeFilter, GameMode } from '../types';
 
 export type ManagementProfile = {
   learnerId: string;
@@ -36,6 +36,9 @@ type ManagedAssignmentUnit = {
   unitId: string;
   unitLabel: string;
   targetCorrect: number;
+  filterSchemaVersion?: number | null;
+  filters?: AssignmentRangeFilter | null;
+  filterLabel?: string | null;
 };
 
 type ManagedAssignmentDetail = ManagedAssignment & {
@@ -132,6 +135,7 @@ const request = async <T>(path: string, init: RequestInit = {}, token?: string):
     ...init,
     headers: {
       'content-type': 'application/json',
+      'x-learning-rogue-assignment-schema': '2',
       ...(token ? { authorization: `Bearer ${token}` } : {}),
       ...(init.headers || {}),
     },
@@ -207,14 +211,22 @@ export const toAssignmentPayload = (assignment: ManagedAssignment): AssignmentPa
     unitLabel: assignment.unitLabel,
     targetCorrect: assignment.targetCorrect,
   }];
+  if (managedUnits.some((unit) => Number(unit.filterSchemaVersion || 0) > 1)) {
+    throw new Error('この課題の出題範囲を利用するには、学習ローグを最新版に更新してください。');
+  }
   return {
     id: assignment.id,
     title: assignment.title,
     units: managedUnits.map((unit) => ({
       id: unit.unitId || `managed:${assignment.id}`,
-      name: unit.unitLabel || assignment.subject,
+      name: `${unit.unitLabel || assignment.subject}${unit.filterLabel ? `｜${unit.filterLabel}` : ''}`,
       modes: [resolveMode(unit.unitId, assignment.subject)],
       targetCorrect: Math.max(1, Number(unit.targetCorrect || 10)),
+      filterSchemaVersion: unit.filterSchemaVersion ? Number(unit.filterSchemaVersion) : undefined,
+      filters: unit.filters && typeof unit.filters.kind === 'string' && Array.isArray(unit.filters.values)
+        ? { kind: unit.filters.kind, values: unit.filters.values.map(String) }
+        : null,
+      filterLabel: unit.filterLabel || undefined,
     })),
     customProblems: [],
     dueAt: assignment.dueAt || '',

@@ -777,6 +777,14 @@ export interface AssignmentUnit {
   name: string;
   modes: string[];
   targetCorrect: number;
+  filterSchemaVersion?: number;
+  filters?: AssignmentRangeFilter | null;
+  filterLabel?: string;
+}
+
+export interface AssignmentRangeFilter {
+  kind: string;
+  values: string[];
 }
 
 export interface AssignmentCustomProblem {

@@ -291,13 +291,14 @@ interface ActiveChallengeConfig {
   answerMode?: AnswerMode;
   customProblems?: AssignmentPayload['customProblems'];
   assignmentSignature?: string;
+  assignmentUnits?: AssignmentPayload['units'];
 }
 
 const getAssignmentSignature = (assignmentSource: AssignmentPayload) => {
   const customProblems = assignmentSource.customProblems || [];
   return [
     assignmentSource.id,
-    assignmentSource.units.map((unit) => unit.id).join(','),
+    assignmentSource.units.map((unit) => `${unit.id}:${unit.filterLabel || ''}:${JSON.stringify(unit.filters || null)}`).join(','),
     customProblems.map((problem) => problem.id).join(','),
     String(assignmentSource.customTargetCorrect || ''),
   ].join('|');
@@ -783,6 +784,7 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
       answerMode: assignmentSource.answerMode || 'CHOICE',
       customProblems,
       assignmentSignature,
+      assignmentUnits: assignmentSource.units,
     });
     appliedAssignmentSignatureRef.current = assignmentSignature;
     assignmentSourceStepRef.current = challengeStep;
@@ -1110,6 +1112,7 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
               reviewProblem={activeReviewProblem?.mode === challengeSubMode.mode ? activeReviewProblem : null}
               isChallenge={true}
               streak={streak}
+              assignmentUnits={activeChallenge?.assignmentUnits}
             />
           )}
           {ChallengeScreen === GameScreen.KANJI_CHALLENGE && (
@@ -1123,6 +1126,7 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
               reviewProblem={activeReviewProblem?.mode === challengeSubMode.mode ? activeReviewProblem : null}
               isChallenge={true}
               streak={streak}
+              assignmentUnits={activeChallenge?.assignmentUnits}
             />
           )}
           {ChallengeScreen === GameScreen.ENGLISH_CHALLENGE && (
@@ -1134,6 +1138,7 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
               reviewProblem={activeReviewProblem?.mode === challengeSubMode.mode ? activeReviewProblem : null}
               isChallenge={true}
               streak={streak}
+              assignmentUnits={activeChallenge?.assignmentUnits}
             />
           )}
           {ChallengeScreen === GameScreen.GENERAL_CHALLENGE && (
@@ -1151,6 +1156,7 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
               isChallenge={true}
               streak={streak}
               languageMode={languageMode}
+              assignmentUnits={activeChallenge?.assignmentUnits}
             />
           )}
         </div>
