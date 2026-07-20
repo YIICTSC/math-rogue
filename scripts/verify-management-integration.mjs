@@ -46,6 +46,8 @@ assert.match(modal, /先に必須課題/);
 assert.match(modal, /assignment\.requirementType === 'required'/);
 assert.match(app, /assignment\.managementPortal/);
 assert.match(app, /requiredAssignmentCheckRef/);
+assert.match(app, /pendingManagedAssignmentLetter/);
+assert.match(app, /setPendingManagedAssignmentLetter\(assignment\)/);
 assert.match(app, /LearnerGroupInviteModal/);
 assert.match(app, /setShowAssignmentInbox\(false\)/);
 assert.doesNotMatch(app.slice(app.indexOf('<LearnerGroupInviteModal'), app.indexOf('<OnlineNameSetupModal')), /setShowAssignmentInbox\(true\)/);

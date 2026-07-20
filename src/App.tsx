@@ -1418,6 +1418,7 @@ const App: React.FC = () => {
     } | null>(null);
     const [completedAssignmentProblemSource, setCompletedAssignmentProblemSource] = useState<AssignmentPayload | null>(null);
     const [showAssignmentLetter, setShowAssignmentLetter] = useState(false);
+    const [pendingManagedAssignmentLetter, setPendingManagedAssignmentLetter] = useState<AssignmentPayload | null>(null);
     const [assignmentLetterSource, setAssignmentLetterSource] = useState<'title' | 'selection'>('title');
     const [dismissedDailyAssignmentId, setDismissedDailyAssignmentId] = useState<string | null>(null);
     const [startedDailyAssignmentId, setStartedDailyAssignmentId] = useState<string | null>(null);
@@ -1563,11 +1564,18 @@ const App: React.FC = () => {
         storageService.saveCurrentAssignment(assignment);
         setCurrentAssignment(assignment);
         setCompletedAssignmentProblemSource(null);
+        setPendingManagedAssignmentLetter(assignment);
         setAssignmentLetterSource('title');
         setShowAssignmentInbox(false);
         setShowAssignmentLetter(true);
         setGameState(prev => ({ ...prev, screen: GameScreen.START_MENU }));
     }, []);
+
+    useEffect(() => {
+        if (!showAssignmentLetter) {
+            setPendingManagedAssignmentLetter(null);
+        }
+    }, [showAssignmentLetter]);
 
     useEffect(() => {
         if (gameState.screen !== GameScreen.START_MENU) {
@@ -1644,9 +1652,14 @@ const App: React.FC = () => {
     );
     const isDailyAssignmentDismissed = !!dailyAssignment && dismissedDailyAssignmentId === dailyAssignment.id;
     const isDailyAssignmentStarted = !!dailyAssignment && startedDailyAssignmentId === dailyAssignment.id && !isDailyAssignmentDismissed;
-    const assignmentLetter = shouldPrioritizeCurrentAssignment ? currentAssignment : dailyAssignment;
-    const effectiveAssignment = shouldPrioritizeCurrentAssignment ? currentAssignment : (isDailyAssignmentStarted ? dailyAssignment : null);
-    const isTeacherAssignmentActive = shouldPrioritizeCurrentAssignment;
+    // Keep the assignment selected in the inbox as the letter source until its
+    // modal closes. Otherwise the daily-assignment calculation from the render
+    // that initiated the async selection can briefly replace a required task.
+    const assignmentLetter = pendingManagedAssignmentLetter
+        || (shouldPrioritizeCurrentAssignment ? currentAssignment : dailyAssignment);
+    const effectiveAssignment = pendingManagedAssignmentLetter
+        || (shouldPrioritizeCurrentAssignment ? currentAssignment : (isDailyAssignmentStarted ? dailyAssignment : null));
+    const isTeacherAssignmentActive = !!pendingManagedAssignmentLetter || shouldPrioritizeCurrentAssignment;
     const isRequiredTeacherAssignment = isTeacherAssignmentActive && assignmentLetter?.requirementType === 'required';
 
     const isAssignmentDeadlineActive = useCallback((assignment: AssignmentPayload | null | undefined) => {
