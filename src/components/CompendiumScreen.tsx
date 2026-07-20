@@ -504,7 +504,7 @@ const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, 
                                     <div className="relative aspect-[16/10] overflow-hidden bg-black">
                                         <img
                                             src={assetUrl(ending.imagePath)}
-                                            alt={ending.title}
+                                            alt={trans(ending.title, languageMode)}
                                             className="h-full w-full object-cover transition duration-300 group-hover:scale-105"
                                             onError={(event) => {
                                                 if (!ending.fallbackImagePath || event.currentTarget.dataset.fallbackApplied === 'true') return;
@@ -594,6 +594,7 @@ const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, 
                                             visualTheme={enemyCompendiumTheme}
                                             enemyType={selectedItem.data.enemyType}
                                             phase={selectedItem.data.phase}
+                                            altText={trans(getEnemyDisplayName(selectedItem.data), languageMode)}
                                         />
                                     ) : <div className="w-full h-full flex items-center justify-center text-gray-700 text-4xl">?</div>}
                                 </div>
@@ -728,7 +729,7 @@ const MagicEndingReplayModal: React.FC<{ ending: MagicEndingGalleryEntry; langua
         <div className="magic-romance-ending-screen fixed inset-0 z-[75] flex items-end justify-center overflow-hidden bg-black p-4 text-white sm:p-8" onClick={handleClose}>
             <img
                 src={assetUrl(ending.imagePath)}
-                alt={ending.title}
+                alt={trans(ending.title, languageMode)}
                 className="magic-romance-ending-bg absolute inset-0 h-full w-full object-cover"
                 onError={(event) => {
                     if (!ending.fallbackImagePath || event.currentTarget.dataset.fallbackApplied === 'true') return;
@@ -751,7 +752,7 @@ const MagicEndingReplayModal: React.FC<{ ending: MagicEndingGalleryEntry; langua
                 <div className="magic-romance-ending-art hidden overflow-hidden rounded-xl border border-pink-200/45 bg-slate-950/60 shadow-2xl">
                     <img
                         src={assetUrl(ending.imagePath)}
-                        alt={ending.title}
+                        alt={trans(ending.title, languageMode)}
                         className="h-full w-full object-cover"
                         onError={(event) => {
                             if (!ending.fallbackImagePath || event.currentTarget.dataset.fallbackApplied === 'true') return;
@@ -1044,7 +1045,7 @@ const CompendiumBgmModeModal: React.FC<{ cards: ICard[]; languageMode: LanguageM
                                     src={familiarActionSrc}
                                     alt={activeCard.familiarSummon && languageMode === 'ENGLISH'
                                         ? getEnglishFamiliarName(activeCard.familiarSummon.name)
-                                        : activeCard.familiarSummon?.name || translated}
+                                        : trans(activeCard.familiarSummon?.name || activeCard.name, languageMode)}
                                     className="h-full w-full object-contain drop-shadow-[0_0_18px_rgba(244,114,182,0.8)]"
                                 />
                             ) : activeCard && magicArtUrl ? (

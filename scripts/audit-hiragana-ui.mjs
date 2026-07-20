@@ -28,6 +28,9 @@ const CONTEXTUAL_MISTRANSLATIONS = [
   'しようか。',
   'ひ0コス',
   'ぜんダメージぶん',
+  'いちばんじょう',
+  'あぶねえじ',
+  'ほうもつ',
 ];
 
 const collectSourceFiles = (directory) => fs.readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
@@ -47,6 +50,7 @@ try {
   const { MINI_GAMES } = await server.ssrLoadModule('/src/miniGameConfig.ts');
   const { TYPING_LESSON_DEFINITIONS } = await server.ssrLoadModule('/src/data/typingLessonConfig.ts');
   const { ONLINE_RANKING_FALLBACKS, ONLINE_RANKING_CATEGORIES } = await server.ssrLoadModule('/src/data/onlineRankingDefinitions.ts');
+  const { getDebugMagicEndingGalleryEntries } = await server.ssrLoadModule('/src/services/magicEndingService.ts');
   const REQUIRED_EXACT_TRANSLATIONS = {
     '課題連携': 'かだいれんけい',
     'ボスとの決戦開始！': 'ボスとの けっせん かいし！',
@@ -86,6 +90,28 @@ try {
         failures.push(`src/miniGameConfig.ts [unlock notification ${field}] ${value} => ${output}`);
       }
     }
+    const deleteConfirmation = `「${trans(game.name, 'HIRAGANA')}」${trans('の中断データを削除して最初からやり直します。', 'HIRAGANA')}`;
+    if (KANJI.test(deleteConfirmation)) failures.push(`minigame delete confirmation [${game.id}] ${deleteConfirmation}`);
+  }
+  for (const ending of getDebugMagicEndingGalleryEntries()) {
+    for (const [field, value] of [
+      ['hero name', ending.heroName],
+      ['title', ending.title],
+      ['description', ending.description],
+      ['rank label', ending.rankLabel],
+      ['metric label', ending.metricLabel],
+      ...ending.lines.map((line, index) => [`line ${index + 1}`, line]),
+    ]) {
+      const output = trans(value, 'HIRAGANA');
+      if (KANJI.test(output)) failures.push(`compendium ending ${ending.id} ${field} ${value} => ${output}`);
+      for (const mistranslation of CONTEXTUAL_MISTRANSLATIONS) {
+        if (output.includes(mistranslation)) failures.push(`compendium ending ${ending.id} ${field} [contextual mistranslation] ${value} => ${output}`);
+      }
+    }
+  }
+  for (const value of ['通常・高校・魔法男女', '通常編', '高校編', 'マジック編 女子', 'マジック編 男子', 'ミニゲーム']) {
+    const output = trans(value, 'HIRAGANA');
+    if (KANJI.test(output)) failures.push(`compendium BGM label ${value} => ${output}`);
   }
   for (const lesson of TYPING_LESSON_DEFINITIONS) {
     for (const value of [lesson.title, lesson.shortTitle, lesson.description, ...lesson.stages]) {

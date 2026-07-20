@@ -5,7 +5,9 @@ import { HIRAGANA_UI_EXACT } from '../data/hiraganaUiExact';
 import { HIRAGANA_DYNAMIC_UI_RULES } from '../data/hiraganaDynamicUiRules';
 import { HIRAGANA_RUNTIME_EXACT, HIRAGANA_RUNTIME_PARTIAL } from '../data/hiraganaRuntimeExact';
 import { HIRAGANA_COMPENDIUM_EXACT } from '../data/hiraganaCompendiumExact';
+import { HIRAGANA_ENDING_EXACT } from '../data/hiraganaEndingExact';
 import { ENGLISH_RUNTIME_EXACT } from '../data/englishRuntimeExact';
+import { ENGLISH_ENDING_EXACT } from '../data/englishEndingExact';
 import { EVENT_DICTIONARY } from './textUtils2';
 
 const BASE_DICTIONARY: Record<string, string> = {
@@ -10413,6 +10415,7 @@ export const trans = (text: string, mode: LanguageMode): string => {
     if (mode === 'JAPANESE') return text;
     if (mode === 'ENGLISH') {
         if (ENGLISH_RUNTIME_EXACT[text]) return ENGLISH_RUNTIME_EXACT[text];
+        if (ENGLISH_ENDING_EXACT[text]) return ENGLISH_ENDING_EXACT[text];
         const schoolEventExact = buildEnglishSchoolEventFallback(text);
         if (schoolEventExact) return schoolEventExact;
 
@@ -10457,6 +10460,7 @@ export const trans = (text: string, mode: LanguageMode): string => {
     }
 
     // 辞書に完全一致がある場合はそれを返す
+    if (HIRAGANA_ENDING_EXACT[text]) return HIRAGANA_ENDING_EXACT[text];
     if (HIRAGANA_RUNTIME_EXACT[text]) return HIRAGANA_RUNTIME_EXACT[text];
     if (HIRAGANA_UI_EXACT[text]) return HIRAGANA_UI_EXACT[text];
     if (HIRAGANA_COMPENDIUM_EXACT[text]) return HIRAGANA_COMPENDIUM_EXACT[text];
@@ -10503,6 +10507,7 @@ export const transEventText = (text: string, mode: LanguageMode): string => {
     if (mode === 'HIRAGANA') return buildHiraganaEventFallback(text);
     if (mode !== 'ENGLISH') return trans(text, mode);
     if (ENGLISH_RUNTIME_EXACT[text]) return ENGLISH_RUNTIME_EXACT[text];
+    if (ENGLISH_ENDING_EXACT[text]) return ENGLISH_ENDING_EXACT[text];
 
     const earlyExact = buildEnglishSchoolEventFallback(text);
     if (earlyExact) return earlyExact;

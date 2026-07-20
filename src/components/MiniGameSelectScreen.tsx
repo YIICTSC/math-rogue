@@ -51,7 +51,8 @@ const MiniGameSelectScreen: React.FC<MiniGameSelectScreenProps> = ({ onSelect, o
       e.preventDefault();
       return;
     }
-    
+    if ('button' in e && e.button !== 0) return;
+
     // Normal click
     onSelect(game.screen);
   };
@@ -83,7 +84,16 @@ const MiniGameSelectScreen: React.FC<MiniGameSelectScreenProps> = ({ onSelect, o
     onMouseLeave: handleCancelPress,
     onTouchStart: () => handlePressStart(game),
     onTouchEnd: (e: React.TouchEvent) => handlePressEnd(e, game),
-    onTouchMove: handleCancelPress
+    onTouchMove: handleCancelPress,
+    onContextMenu: (event: React.MouseEvent) => {
+      event.preventDefault();
+      if (!isUnlocked(game)) {
+        audioService.playSound('wrong');
+        return;
+      }
+      setDeleteTarget(game);
+      audioService.playSound('wrong');
+    }
   });
 
   const MiniGameSpriteIcon: React.FC<{ game: MiniGameConfig }> = ({ game }) => {

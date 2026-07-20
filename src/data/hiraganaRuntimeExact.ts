@@ -1,5 +1,9 @@
 // Generated from runtime game data; keep proper-noun readings in the overrides used by the generator.
 export const HIRAGANA_RUNTIME_EXACT: Record<string, string> = {
+  "通常・高校・魔法男女": "つうじょう・こうこう・まほう だんじょ",
+  "通常編": "つうじょうへん",
+  "マジック編 女子": "マジックへん じょし",
+  "マジック編 男子": "マジックへん だんし",
   "主人公": "しゅじんこう",
   "不正の終業式": "ふせいのしゅうぎょうしき",
   "校長室の金庫には、買われた未来の名簿が眠っている。扉を開け、偽物の合格通知を破り捨てる時だ。": "こうちょうしつのきんこには、かわれたみらいのめいぼがねむっている。とびらをあけ、にせもののごうかくつうちをやぶりすてるときだ。",
