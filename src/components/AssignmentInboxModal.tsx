@@ -4,6 +4,7 @@ import {
   ManagedAssignment,
   ManagementProfile,
   ManagementRelationship,
+  getNextLaunchLockedManagedAssignment,
   getNextRequiredManagedAssignment,
   isManagedAssignmentComplete,
   managementPortalService,
@@ -55,7 +56,7 @@ export default function AssignmentInboxModal({ open, onClose, onSelect, onProfil
       : `${correct}/${target}問正解・再挑戦 ${retries}回`;
 
   const sortedAssignments = useMemo(() => sortManagedAssignments(assignments), [assignments]);
-  const nextRequiredAssignment = useMemo(() => getNextRequiredManagedAssignment(assignments), [assignments]);
+  const nextRequiredAssignment = useMemo(() => getNextLaunchLockedManagedAssignment(assignments) || getNextRequiredManagedAssignment(assignments), [assignments]);
   const filterCounts = useMemo<Record<InboxFilter, number>>(() => ({
     all: assignments.length,
     new: assignments.filter((item) => item.status === 'unopened').length,
@@ -242,7 +243,7 @@ export default function AssignmentInboxModal({ open, onClose, onSelect, onProfil
                       <div className="min-w-0 flex-1">
                         <div className="mb-2 flex flex-wrap items-center gap-2 text-[10px] font-black">
                           <span className="rounded-full bg-cyan-950 px-2 py-1 text-cyan-200">{t(assignment.subject)}</span>
-                          <span className={`rounded-full px-2 py-1 ${assignment.requirementType === 'required' ? 'bg-rose-950 text-rose-200' : 'bg-slate-800 text-slate-300'}`}>{t(assignment.requirementType === 'required' ? '必須課題' : '任意課題')}</span>
+                          <span className={`rounded-full px-2 py-1 ${assignment.enforcementLevel === 'launch_lock' ? 'bg-fuchsia-900 text-fuchsia-100 ring-2 ring-fuchsia-400/50' : assignment.enforcementLevel === 'required' || assignment.requirementType === 'required' ? 'bg-rose-950 text-rose-200' : 'bg-slate-800 text-slate-300'}`}>{t(assignment.enforcementLevel === 'launch_lock' ? '最優先課題（起動時開始）' : assignment.enforcementLevel === 'required' || assignment.requirementType === 'required' ? '必須課題' : '任意課題')}</span>
                           <span className="rounded-full bg-indigo-950 px-2 py-1 text-indigo-200">{t(assignment.playMode === 'problem_only' ? '問題チャレンジのみ' : 'フリー')}</span>
                           <span className={completed ? 'text-emerald-300' : 'text-amber-300'}>{statusLabel(completed ? 'completed' : assignment.status)}</span>
                         </div>

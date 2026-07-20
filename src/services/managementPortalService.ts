@@ -21,6 +21,7 @@ export type ManagedAssignment = {
   answerMode: string;
   gameMode: string;
   requirementType?: 'optional' | 'required' | string;
+  enforcementLevel?: 'optional' | 'required' | 'launch_lock' | string;
   playMode?: 'free' | 'problem_only' | string;
   dueAt?: string | null;
   rewardEnabled: boolean;
@@ -166,10 +167,19 @@ export const isManagedAssignmentComplete = (assignment: ManagedAssignment) =>
   || assignment.status === 'submitted'
   || Number(assignment.correctCount || 0) >= Math.max(1, Number(assignment.targetCorrect || 10));
 
+export const isManagedAssignmentActive = (assignment: ManagedAssignment) => {
+  if (!assignment.dueAt) return true;
+  const dueTime = Date.parse(assignment.dueAt);
+  return !Number.isFinite(dueTime) || dueTime >= Date.now();
+};
+
 export const sortManagedAssignments = (items: ManagedAssignment[]) => [...items].sort((a, b) => {
-  const aRequired = a.requirementType === 'required' && !isManagedAssignmentComplete(a);
-  const bRequired = b.requirementType === 'required' && !isManagedAssignmentComplete(b);
-  if (aRequired !== bRequired) return aRequired ? -1 : 1;
+  const priority = (assignment: ManagedAssignment) =>
+    !isManagedAssignmentComplete(assignment) && isManagedAssignmentActive(assignment)
+      ? assignment.enforcementLevel === 'launch_lock' ? 0 : assignment.enforcementLevel === 'required' || assignment.requirementType === 'required' ? 1 : 2
+      : 3;
+  const priorityDifference = priority(a) - priority(b);
+  if (priorityDifference !== 0) return priorityDifference;
   const aCompleted = isManagedAssignmentComplete(a);
   const bCompleted = isManagedAssignmentComplete(b);
   if (aCompleted !== bCompleted) return aCompleted ? 1 : -1;
@@ -178,7 +188,17 @@ export const sortManagedAssignments = (items: ManagedAssignment[]) => [...items]
 
 export const getNextRequiredManagedAssignment = (items: ManagedAssignment[]) =>
   sortManagedAssignments(items).find((assignment) =>
-    assignment.requirementType === 'required' && !isManagedAssignmentComplete(assignment),
+    assignment.enforcementLevel !== 'launch_lock'
+    && (assignment.enforcementLevel === 'required' || assignment.requirementType === 'required')
+    && isManagedAssignmentActive(assignment)
+    && !isManagedAssignmentComplete(assignment),
+  ) || null;
+
+export const getNextLaunchLockedManagedAssignment = (items: ManagedAssignment[]) =>
+  sortManagedAssignments(items).find((assignment) =>
+    assignment.enforcementLevel === 'launch_lock'
+    && isManagedAssignmentActive(assignment)
+    && !isManagedAssignmentComplete(assignment),
   ) || null;
 
 export const toAssignmentPayload = (assignment: ManagedAssignment): AssignmentPayload => {
@@ -199,7 +219,8 @@ export const toAssignmentPayload = (assignment: ManagedAssignment): AssignmentPa
     customProblems: [],
     dueAt: assignment.dueAt || '',
     requirementType: assignment.requirementType === 'required' ? 'required' : 'optional',
-    gameMode: assignment.playMode === 'problem_only' ? 'CHALLENGE_ONLY' : 'FREE',
+    enforcementLevel: assignment.enforcementLevel === 'launch_lock' ? 'launch_lock' : assignment.enforcementLevel === 'required' ? 'required' : 'optional',
+    gameMode: assignment.enforcementLevel === 'launch_lock' || assignment.playMode === 'problem_only' ? 'CHALLENGE_ONLY' : 'FREE',
     answerMode: (String(assignment.answerMode).toUpperCase() === 'INPUT' ? 'INPUT' : 'CHOICE') as AnswerMode,
     createdAt: new Date().toISOString(),
     managementPortal: {
@@ -209,6 +230,7 @@ export const toAssignmentPayload = (assignment: ManagedAssignment): AssignmentPa
       description: assignment.description || undefined,
       rewardEnabled: assignment.rewardEnabled,
       requirementType: assignment.requirementType === 'required' ? 'required' : 'optional',
+      enforcementLevel: assignment.enforcementLevel === 'launch_lock' ? 'launch_lock' : assignment.enforcementLevel === 'required' ? 'required' : 'optional',
       sourceGroupId: assignment.sourceGroupId || undefined,
       sourceGroupName: assignment.sourceGroupName || undefined,
     },
@@ -439,6 +461,9 @@ export const managementPortalService = {
 
   async completeAssignment(assignmentId: string) {
     if (!this.getProfile()) return;
+    writeJson(ASSIGNMENTS_KEY, this.getCachedAssignments().map((assignment) =>
+      assignment.id === assignmentId ? { ...assignment, status: 'completed' } : assignment,
+    ));
     saveCompletionQueue([...getCompletionQueue(), assignmentId]);
     await this.flushPending();
   },

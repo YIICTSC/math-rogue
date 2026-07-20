@@ -86,7 +86,7 @@ import { generateEnemyName } from './services/geminiService';
 import { generateDungeonMap } from './services/mapGenerator';
 import { parseTransferData, serializeTransferData, storageService } from './services/storageService';
 import { onlineRankingService, type OnlineRankingProfile, type OnlineReward } from './services/onlineRankingService';
-import { getNextRequiredManagedAssignment, managementPortalService, type ManagementProfile } from './services/managementPortalService';
+import { getNextLaunchLockedManagedAssignment, getNextRequiredManagedAssignment, isManagedAssignmentActive, managementPortalService, type ManagementProfile } from './services/managementPortalService';
 import { generateEvent, generateLegacyEvent } from './services/eventService';
 import { createAssignmentRewardCard, createHolographicCard, getUpgradedCard, synthesizeCards } from './utils/cardUtils';
 import { AZUKI_BOSS_FLAG, AZUKI_BOSS_NAME, AZUKI_ENCOUNTER_FLAG, AZUKI_REWARD_CARDS } from './data/azukiBoss';
@@ -1589,19 +1589,41 @@ const App: React.FC = () => {
             try {
                 await managementPortalService.flushPending();
                 let assignments;
+                let syncedAssignments = false;
                 try {
                     assignments = await managementPortalService.fetchAssignments();
+                    syncedAssignments = true;
                 } catch {
                     assignments = managementPortalService.getCachedAssignments();
                 }
-                const nextRequired = getNextRequiredManagedAssignment(assignments);
+                if (currentAssignment?.enforcementLevel === 'launch_lock') {
+                    const currentManagedAssignment = assignments.find((assignment) => assignment.id === currentAssignment.id);
+                    if (!syncedAssignments || !currentManagedAssignment || !isManagedAssignmentActive(currentManagedAssignment)) {
+                        storageService.clearCurrentAssignment();
+                        setCurrentAssignment(null);
+                    }
+                }
+                const nextLaunchLocked = syncedAssignments ? getNextLaunchLockedManagedAssignment(assignments) : null;
+                const nextRequired = nextLaunchLocked || getNextRequiredManagedAssignment(assignments);
                 if (!nextRequired || cancelled) return;
                 const payload = currentAssignment?.id === nextRequired.id
                     ? currentAssignment
                     : await managementPortalService.fetchAssignmentPayload(nextRequired.id);
                 if (cancelled) return;
                 setShowOnlineNameSetup(false);
-                openManagedAssignment(payload);
+                if (nextLaunchLocked) {
+                    storageService.saveCurrentAssignment(payload);
+                    setCurrentAssignment(payload);
+                    setCompletedAssignmentProblemSource(null);
+                    setPendingManagedAssignmentLetter(null);
+                    setShowAssignmentInbox(false);
+                    setShowAssignmentLetter(false);
+                    setPendingMiniGameScreen(null);
+                    setPendingAssignmentStartScreen(null);
+                    setGameState(prev => ({ ...prev, screen: GameScreen.PROBLEM_CHALLENGE }));
+                } else {
+                    openManagedAssignment(payload);
+                }
             } catch {
                 // Temporary network errors must not block locally playable content.
             }
@@ -1661,6 +1683,8 @@ const App: React.FC = () => {
         || (shouldPrioritizeCurrentAssignment ? currentAssignment : (isDailyAssignmentStarted ? dailyAssignment : null));
     const isTeacherAssignmentActive = !!pendingManagedAssignmentLetter || shouldPrioritizeCurrentAssignment;
     const isRequiredTeacherAssignment = isTeacherAssignmentActive && assignmentLetter?.requirementType === 'required';
+    const isLaunchLockedTeacherAssignment = isTeacherAssignmentActive && assignmentLetter?.enforcementLevel === 'launch_lock';
+    const teacherAssignmentConditionLabel = isLaunchLockedTeacherAssignment ? '最優先課題（起動時開始）' : isRequiredTeacherAssignment ? '必須課題' : '任意課題';
 
     const isAssignmentDeadlineActive = useCallback((assignment: AssignmentPayload | null | undefined) => {
         if (!assignment) return false;
@@ -15125,7 +15149,7 @@ const App: React.FC = () => {
                                         <div>{trans(isTeacherAssignmentActive ? '先生から課題が届きました。' : '今日の学習課題です。', languageMode)}</div>
                                         {isTeacherAssignmentActive && assignmentLetter.managementPortal?.sourceGroupName && <div data-allow-japanese>{trans("配信元:", languageMode)} {assignmentLetter.managementPortal.sourceGroupName}</div>}
                                         <div>{trans("期限:", languageMode)} {assignmentLetter.dueAt ? new Date(assignmentLetter.dueAt).toLocaleString(languageMode === 'ENGLISH' ? 'en-US' : 'ja-JP') : trans('未設定', languageMode)}</div>
-                                        {isTeacherAssignmentActive && <div>{trans("条件:", languageMode)} {trans(isRequiredTeacherAssignment ? '必須課題' : '任意課題', languageMode)}</div>}
+                                        {isTeacherAssignmentActive && <div>{trans("条件:", languageMode)} {trans(teacherAssignmentConditionLabel, languageMode)}</div>}
                                         <div>{trans("形式:", languageMode)} {trans(assignmentLetter.gameMode === 'FREE' ? 'フリー' : '問題チャレンジのみ', languageMode)}</div>
                                         <div>{getAssignmentAnswerModeSummary(assignmentLetter, languageMode)}</div>
                                         <div className="mt-2 text-xs text-slate-700">
@@ -15689,7 +15713,7 @@ const App: React.FC = () => {
                                 <div>{trans(isTeacherAssignmentActive ? '先生から課題が届きました。' : '今日の学習課題です。', languageMode)}</div>
                                 {isTeacherAssignmentActive && assignmentLetter.managementPortal?.sourceGroupName && <div data-allow-japanese>{trans("配信元:", languageMode)} {assignmentLetter.managementPortal.sourceGroupName}</div>}
                                 <div>{trans("期限:", languageMode)} {assignmentLetter.dueAt ? new Date(assignmentLetter.dueAt).toLocaleString(languageMode === 'ENGLISH' ? 'en-US' : 'ja-JP') : trans('未設定', languageMode)}</div>
-                                {isTeacherAssignmentActive && <div>{trans("条件:", languageMode)} {trans(isRequiredTeacherAssignment ? '必須課題' : '任意課題', languageMode)}</div>}
+                                {isTeacherAssignmentActive && <div>{trans("条件:", languageMode)} {trans(teacherAssignmentConditionLabel, languageMode)}</div>}
                                 <div>{trans("形式:", languageMode)} {trans(assignmentLetter.gameMode === 'FREE' ? 'フリー' : '問題チャレンジのみ', languageMode)}</div>
                                 <div>{getAssignmentAnswerModeSummary(assignmentLetter, languageMode)}</div>
                                 <div className="mt-2 text-xs text-slate-700">

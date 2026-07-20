@@ -797,6 +797,7 @@ export interface AssignmentPayload {
   customTargetCorrect?: number;
   dueAt: string;
   requirementType?: 'optional' | 'required';
+  enforcementLevel?: 'optional' | 'required' | 'launch_lock';
   gameMode: 'FREE' | 'CHALLENGE_ONLY';
   answerMode: AnswerMode;
   createdAt: string;
@@ -807,6 +808,7 @@ export interface AssignmentPayload {
     description?: string;
     rewardEnabled?: boolean;
     requirementType?: 'optional' | 'required';
+    enforcementLevel?: 'optional' | 'required' | 'launch_lock';
     sourceGroupId?: string;
     sourceGroupName?: string;
   };
