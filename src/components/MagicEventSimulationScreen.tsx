@@ -12,6 +12,7 @@ import {
 import EventScreen from './EventScreen';
 import MagicRomanceEndingScreen from './MagicRomanceEndingScreen';
 import { assetUrl } from '../utils/assetPaths';
+import TranslatedUiTree from './TranslatedUiTree';
 
 interface MagicEventSimulationScreenProps {
   languageMode: LanguageMode;
@@ -190,6 +191,7 @@ const MagicEventSimulationScreen: React.FC<MagicEventSimulationScreenProps> = ({
 
   if (!protagonist || !player) {
     return (
+      <TranslatedUiTree mode={languageMode}>
       <div className="h-full w-full overflow-y-auto bg-slate-950 p-4 text-white custom-scrollbar">
         <div className="mx-auto max-w-6xl">
           <div className="mb-6 flex items-center justify-between gap-3">
@@ -218,10 +220,12 @@ const MagicEventSimulationScreen: React.FC<MagicEventSimulationScreenProps> = ({
           </div>
         </div>
       </div>
+      </TranslatedUiTree>
     );
   }
 
   return (
+    <TranslatedUiTree mode={languageMode}>
     <div className="relative flex h-full w-full flex-col overflow-hidden bg-slate-950 text-white md:flex-row">
       <div className="min-h-0 min-w-0 flex-1">
         {endingActive ? (
@@ -299,6 +303,7 @@ const MagicEventSimulationScreen: React.FC<MagicEventSimulationScreenProps> = ({
         </button>
       </aside>
     </div>
+    </TranslatedUiTree>
   );
 };
 

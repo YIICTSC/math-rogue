@@ -8,6 +8,8 @@ import { HIRAGANA_COMPENDIUM_EXACT } from '../data/hiraganaCompendiumExact';
 import { HIRAGANA_ENDING_EXACT } from '../data/hiraganaEndingExact';
 import { ENGLISH_RUNTIME_EXACT } from '../data/englishRuntimeExact';
 import { ENGLISH_ENDING_EXACT } from '../data/englishEndingExact';
+import { ENGLISH_DEBUG_UI_EXACT, HIRAGANA_DEBUG_UI_EXACT } from '../data/debugUiExact';
+import { ENGLISH_DISPLAY_COPY_EXACT, HIRAGANA_DISPLAY_COPY_EXACT } from '../data/displayCopyExact';
 import { EVENT_DICTIONARY } from './textUtils2';
 
 const BASE_DICTIONARY: Record<string, string> = {
@@ -46,6 +48,7 @@ const BASE_DICTIONARY: Record<string, string> = {
     "やめる": "やめる",
     "再挑戦": "もういちど",
     "タイトルへ戻る": "タイトルへ もどる",
+    "タイトル画面へ": "タイトルがめんへ",
     "しゅくだいがふえた…": "しゅくだいが ふえた…",
     "参加者": "さんかしゃ",
     "更新:": "こうしん:",
@@ -259,7 +262,7 @@ const BASE_DICTIONARY: Record<string, string> = {
     "件はスキップしました。": "けんは スキップしました。",
     "ファイルの読み込みに失敗しました。CSVまたはTSV形式で保存してから読み込んでください。": "ファイルの よみこみに しっぱいしました。CSVまたはTSVけいしきで ほぞんしてから よみこんでください。",
     "残りの単元": "のこりの たんげん",
-    "すべての目標を達成しました。提出画面でPDFを用意してください。": "すべての もくひょうを たっせいしました。ていしゅつがめんで PDF を よういしてください。",
+    "課題達成、お疲れさまでした！よくがんばりました。": "かだい たっせい、おつかれさまでした！よく がんばりました。",
     "ご褒美カードを獲得しました": "ごほうびカードを ゲットしました",
     "ご褒美カード帳": "ごほうびカードちょう",
     "ご褒美カードを削除しますか？": "ごほうびカードを けしますか？",
@@ -3350,6 +3353,7 @@ const ENGLISH_DICTIONARY: Record<string, string> = {
     "やめる": "Cancel",
     "再挑戦": "Retry",
     "タイトルへ戻る": "Back to Title",
+    "タイトル画面へ": "Title Screen",
     "しゅくだいがふえた…": "Game Over",
     "参加者": "Participants",
     "更新:": "Updated:",
@@ -3399,7 +3403,7 @@ const ENGLISH_DICTIONARY: Record<string, string> = {
     "課題をクリアしました": "Assignment cleared",
     "単元をクリアしました": "Unit cleared",
     "残りの単元": "Remaining units",
-    "すべての目標を達成しました。提出画面でPDFを用意してください。": "All goals are complete. Prepare the PDF on the submission screen.",
+    "課題達成、お疲れさまでした！よくがんばりました。": "Assignment complete. Great work!",
     "ご褒美カードを獲得しました": "Reward card obtained",
     "ご褒美カード帳": "Reward Card Album",
     "ご褒美カードを削除しますか？": "Delete this reward card?",
@@ -10416,6 +10420,8 @@ export const trans = (text: string, mode: LanguageMode): string => {
     if (!text) return "";
     if (mode === 'JAPANESE') return text;
     if (mode === 'ENGLISH') {
+        if (ENGLISH_DISPLAY_COPY_EXACT[text]) return ENGLISH_DISPLAY_COPY_EXACT[text];
+        if (ENGLISH_DEBUG_UI_EXACT[text]) return ENGLISH_DEBUG_UI_EXACT[text];
         if (ENGLISH_RUNTIME_EXACT[text]) return ENGLISH_RUNTIME_EXACT[text];
         if (ENGLISH_ENDING_EXACT[text]) return ENGLISH_ENDING_EXACT[text];
         const schoolEventExact = buildEnglishSchoolEventFallback(text);
@@ -10462,6 +10468,8 @@ export const trans = (text: string, mode: LanguageMode): string => {
     }
 
     // 辞書に完全一致がある場合はそれを返す
+    if (HIRAGANA_DISPLAY_COPY_EXACT[text]) return HIRAGANA_DISPLAY_COPY_EXACT[text];
+    if (HIRAGANA_DEBUG_UI_EXACT[text]) return HIRAGANA_DEBUG_UI_EXACT[text];
     if (HIRAGANA_ENDING_EXACT[text]) return HIRAGANA_ENDING_EXACT[text];
     if (HIRAGANA_RUNTIME_EXACT[text]) return HIRAGANA_RUNTIME_EXACT[text];
     if (HIRAGANA_UI_EXACT[text]) return HIRAGANA_UI_EXACT[text];
@@ -10505,6 +10513,10 @@ export const trans = (text: string, mode: LanguageMode): string => {
 };
 
 export const transEventText = (text: string, mode: LanguageMode): string => {
+    if (mode === 'ENGLISH' && ENGLISH_DISPLAY_COPY_EXACT[text]) return ENGLISH_DISPLAY_COPY_EXACT[text];
+    if (mode === 'HIRAGANA' && HIRAGANA_DISPLAY_COPY_EXACT[text]) return HIRAGANA_DISPLAY_COPY_EXACT[text];
+    if (mode === 'ENGLISH' && ENGLISH_DEBUG_UI_EXACT[text]) return ENGLISH_DEBUG_UI_EXACT[text];
+    if (mode === 'HIRAGANA' && HIRAGANA_DEBUG_UI_EXACT[text]) return HIRAGANA_DEBUG_UI_EXACT[text];
     if (!text) return "";
     if (mode === 'HIRAGANA') return buildHiraganaEventFallback(text);
     if (mode !== 'ENGLISH') return trans(text, mode);

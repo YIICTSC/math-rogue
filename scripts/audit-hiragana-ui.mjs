@@ -3,7 +3,9 @@ import path from 'node:path';
 import ts from 'typescript';
 import { createServer } from 'vite';
 
-const EXCLUDED_PATH = /[\\/](mini-games|data)[\\/]|DebugMenuScreen|MiniGame|SchoolDungeonRPG|PokerGame|PaperPlane|MagicEventSimulation/;
+// Keep the exclusion boundary field-specific and narrow. Shared mini-game UI,
+// debug verification screens, and display-oriented data are translation scope.
+const EXCLUDED_PATH = /[\\/]mini-games[\\/]|[\\/]data[\\/]subjects[\\/]|[\\/]components[\\/](?:SchoolDungeonRPG2?|PokerGameScreen|PaperPlaneBattle)\.tsx$/;
 const UI_ATTRIBUTES = new Set(['title', 'aria-label', 'placeholder', 'alt']);
 const KANJI = /[一-龠]/;
 const CONTEXTUAL_MISTRANSLATIONS = [
@@ -31,6 +33,7 @@ const CONTEXTUAL_MISTRANSLATIONS = [
   'いちばんじょう',
   'あぶねえじ',
   'ほうもつ',
+  'ついかときキラ',
 ];
 
 const collectSourceFiles = (directory) => fs.readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
@@ -135,6 +138,7 @@ try {
     'src/data/hiraganaRuntimeExact.ts',
     'src/data/hiraganaUiExact.ts',
     'src/data/hiraganaCompendiumExact.ts',
+    'src/data/displayCopyExact.ts',
     'src/utils/textUtils.ts',
   ]) {
     const source = fs.readFileSync(file, 'utf8');
@@ -153,6 +157,21 @@ try {
       const line = sourceFile.getLineAndCharacterOfPosition(node.getStart(sourceFile)).line + 1;
       failures.push(`${file}:${line} [${category}] ${sourceText}${output ? ` => ${output}` : ''}`);
     };
+    const isWithinTranslatedUiTree = (node) => {
+      let parent = node.parent;
+      while (parent) {
+        if (ts.isJsxElement(parent) && parent.openingElement.tagName.getText(sourceFile) === 'TranslatedUiTree') return true;
+        parent = parent.parent;
+      }
+      return false;
+    };
+    const auditTranslatedLiteral = (node, category, value) => {
+      const output = trans(value, 'HIRAGANA');
+      if (KANJI.test(output)) report(node, `${category} kanji remains`, value, output);
+      for (const mistranslation of CONTEXTUAL_MISTRANSLATIONS) {
+        if (output.includes(mistranslation)) report(node, `${category} contextual mistranslation`, value, output);
+      }
+    };
 
     const visit = (node) => {
       if (ts.isCallExpression(node) && node.expression.getText(sourceFile) === 'trans' && node.arguments[0]) {
@@ -169,11 +188,13 @@ try {
       }
 
       if (ts.isJsxText(node) && KANJI.test(node.text.trim())) {
-        report(node, 'raw JSX text', node.text.trim());
+        if (isWithinTranslatedUiTree(node)) auditTranslatedLiteral(node, 'translated JSX text', node.text.trim());
+        else report(node, 'raw JSX text', node.text.trim());
       }
 
       if (ts.isJsxAttribute(node) && UI_ATTRIBUTES.has(node.name.getText(sourceFile)) && node.initializer && ts.isStringLiteral(node.initializer) && KANJI.test(node.initializer.text)) {
-        report(node, 'raw JSX attribute', `${node.name.getText(sourceFile)}=${node.initializer.text}`);
+        if (isWithinTranslatedUiTree(node)) auditTranslatedLiteral(node, `translated JSX attribute ${node.name.getText(sourceFile)}`, node.initializer.text);
+        else report(node, 'raw JSX attribute', `${node.name.getText(sourceFile)}=${node.initializer.text}`);
       }
 
       ts.forEachChild(node, visit);

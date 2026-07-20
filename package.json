@@ -9,6 +9,8 @@
     "build": "vite build",
     "audit:hiragana": "node scripts/audit-hiragana-ui.mjs",
     "audit:english": "node scripts/audit-english-ui.mjs",
+    "audit:display-copy": "node scripts/audit-display-copy.mjs",
+    "audit:translations": "npm run audit:english && npm run audit:hiragana && npm run audit:display-copy",
     "test:management": "node scripts/verify-management-integration.mjs",
     "build:offline": "node scripts/build-offline.mjs",
     "build:icons": "node scripts/generate-icons.mjs",

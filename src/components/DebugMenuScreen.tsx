@@ -30,6 +30,7 @@ import { ELEMENTARY_EVENT_TITLES } from '../services/eventService';
 import { HIGH_SCHOOL_SUPPORTER_NPC_EVENTS, type SupporterNpcReward } from '../data/supporterNpcEvents';
 import { DODOMEDESU_EVENT_STAGES } from '../data/dodomedesuBoss';
 import React, { useMemo, useState, useCallback, useEffect, useRef } from 'react';
+import TranslatedUiTree from './TranslatedUiTree';
 
 interface DebugMenuScreenProps {
     onStart: (deck: ICard[], relics: Relic[], potions: Potion[]) => void;
@@ -895,6 +896,7 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
     );
 
     return (
+        <TranslatedUiTree mode={initialLanguageMode}>
         <div className="flex flex-col h-full w-full bg-gray-900 text-white relative">
             <div className="bg-red-900/90 border-b-2 border-red-500 p-2 md:p-4 flex justify-between items-center shrink-0 z-20">
                 <h2 className="text-lg md:text-xl font-bold text-red-100 flex items-center">
@@ -2614,6 +2616,7 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
                 )}
             </div>
         </div>
+        </TranslatedUiTree>
     );
 };
 

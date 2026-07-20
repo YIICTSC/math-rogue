@@ -1611,19 +1611,7 @@ const App: React.FC = () => {
                     : await managementPortalService.fetchAssignmentPayload(nextRequired.id);
                 if (cancelled) return;
                 setShowOnlineNameSetup(false);
-                if (nextLaunchLocked) {
-                    storageService.saveCurrentAssignment(payload);
-                    setCurrentAssignment(payload);
-                    setCompletedAssignmentProblemSource(null);
-                    setPendingManagedAssignmentLetter(null);
-                    setShowAssignmentInbox(false);
-                    setShowAssignmentLetter(false);
-                    setPendingMiniGameScreen(null);
-                    setPendingAssignmentStartScreen(null);
-                    setGameState(prev => ({ ...prev, screen: GameScreen.PROBLEM_CHALLENGE }));
-                } else {
-                    openManagedAssignment(payload);
-                }
+                openManagedAssignment(payload);
             } catch {
                 // Temporary network errors must not block locally playable content.
             }
@@ -1684,6 +1672,7 @@ const App: React.FC = () => {
     const isTeacherAssignmentActive = !!pendingManagedAssignmentLetter || shouldPrioritizeCurrentAssignment;
     const isRequiredTeacherAssignment = isTeacherAssignmentActive && assignmentLetter?.requirementType === 'required';
     const isLaunchLockedTeacherAssignment = isTeacherAssignmentActive && assignmentLetter?.enforcementLevel === 'launch_lock';
+    const isBlockingTeacherAssignment = isRequiredTeacherAssignment || isLaunchLockedTeacherAssignment;
     const teacherAssignmentConditionLabel = isLaunchLockedTeacherAssignment ? '最優先課題（起動時開始）' : isRequiredTeacherAssignment ? '必須課題' : '任意課題';
 
     const isAssignmentDeadlineActive = useCallback((assignment: AssignmentPayload | null | undefined) => {
@@ -15156,7 +15145,7 @@ const App: React.FC = () => {
                                             {getAssignmentTargetSummary(assignmentLetter, languageMode)}
                                         </div>
                                     </div>
-                                    <div className={`assignment-letter-actions grid gap-2 ${isRequiredTeacherAssignment ? 'sm:grid-cols-1' : 'sm:grid-cols-3'}`}>
+                                    <div className={`assignment-letter-actions grid gap-2 ${isBlockingTeacherAssignment ? 'sm:grid-cols-1' : 'sm:grid-cols-3'}`}>
                                         <button
                                             onClick={() => {
                                                 setShowAssignmentLetter(false);
@@ -15203,7 +15192,7 @@ const App: React.FC = () => {
                                         >
                                             {trans("課題を始める", languageMode)}
                                         </button>
-                                        {!isRequiredTeacherAssignment && <button
+                                        {!isBlockingTeacherAssignment && <button
                                             data-gamepad-back
                                             onClick={() => {
                                                 if (!isTeacherAssignmentActive && assignmentLetter) {
@@ -15222,7 +15211,7 @@ const App: React.FC = () => {
                                         >
                                             {trans("あとで", languageMode)}
                                         </button>}
-                                        {!isRequiredTeacherAssignment && (isTeacherAssignmentActive ? (
+                                        {!isBlockingTeacherAssignment && (isTeacherAssignmentActive ? (
                                             <button
                                                 onClick={() => {
                                                     storageService.clearCurrentAssignment();
@@ -15720,7 +15709,7 @@ const App: React.FC = () => {
                                     {getAssignmentTargetSummary(assignmentLetter, languageMode)}
                                 </div>
                             </div>
-                            <div className={`assignment-letter-actions grid gap-2 ${isRequiredTeacherAssignment ? 'sm:grid-cols-1' : 'sm:grid-cols-3'}`}>
+                            <div className={`assignment-letter-actions grid gap-2 ${isBlockingTeacherAssignment ? 'sm:grid-cols-1' : 'sm:grid-cols-3'}`}>
                                 <button
                                     data-gamepad-initial-choice
                                     onClick={() => {
@@ -15768,7 +15757,7 @@ const App: React.FC = () => {
                                 >
                                     {trans("課題を始める", languageMode)}
                                 </button>
-                                {!isRequiredTeacherAssignment && <button
+                                {!isBlockingTeacherAssignment && <button
                                     data-gamepad-back
                                     onClick={() => {
                                         if (!isTeacherAssignmentActive && assignmentLetter) {
@@ -15787,7 +15776,7 @@ const App: React.FC = () => {
                                 >
                                     {trans("あとで", languageMode)}
                                 </button>}
-                                {!isRequiredTeacherAssignment && (isTeacherAssignmentActive ? (
+                                {!isBlockingTeacherAssignment && (isTeacherAssignmentActive ? (
                                     <button
                                         data-gamepad-initial-choice
                                         onClick={() => {
@@ -15942,7 +15931,7 @@ const App: React.FC = () => {
                                 </div>
                             ) : (
                                 <div className="mb-4 rounded-xl border border-yellow-400/50 bg-yellow-950/30 p-3 text-sm font-bold leading-6 text-yellow-100">
-                                    {trans("すべての目標を達成しました。提出画面でPDFを用意してください。", languageMode)}
+                                    {trans("課題達成、お疲れさまでした！よくがんばりました。", languageMode)}
                                 </div>
                             )}
                             {assignmentProgressNotice.rewardCard && (
@@ -15960,28 +15949,49 @@ const App: React.FC = () => {
                                     </div>
                                 </div>
                             )}
-                            <div className="grid gap-2 sm:grid-cols-2">
+                            {assignmentProgressNotice.type === 'ASSIGNMENT_COMPLETE' ? (
+                                <div className="grid gap-2 sm:grid-cols-3">
+                                    <button
+                                        onClick={() => {
+                                            if (assignmentProgressNotice.assignment) {
+                                                setCompletedAssignmentProblemSource(assignmentProgressNotice.assignment);
+                                            }
+                                            setAssignmentProgressNotice(null);
+                                            setGameState(prev => ({ ...prev, screen: GameScreen.SUBMISSION }));
+                                        }}
+                                        className="rounded-xl bg-emerald-400 px-4 py-3 text-sm font-black text-slate-950 hover:bg-emerald-300"
+                                    >
+                                        PDF
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            if (assignmentProgressNotice.assignment) {
+                                                setCompletedAssignmentProblemSource(assignmentProgressNotice.assignment);
+                                            }
+                                            setAssignmentProgressNotice(null);
+                                        }}
+                                        className="rounded-xl border border-slate-600 bg-slate-800 px-4 py-3 text-sm font-black text-slate-100 hover:bg-slate-700"
+                                    >
+                                        {trans("続ける", languageMode)}
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            setAssignmentProgressNotice(null);
+                                            returnToTitle();
+                                        }}
+                                        className="rounded-xl border border-amber-400 bg-amber-950 px-4 py-3 text-sm font-black text-amber-100 hover:bg-amber-900"
+                                    >
+                                        {trans("タイトル画面へ", languageMode)}
+                                    </button>
+                                </div>
+                            ) : (
                                 <button
-                                    onClick={() => {
-                                        if (assignmentProgressNotice.type === 'ASSIGNMENT_COMPLETE' && assignmentProgressNotice.assignment) {
-                                            setCompletedAssignmentProblemSource(assignmentProgressNotice.assignment);
-                                        }
-                                        setAssignmentProgressNotice(null);
-                                    }}
-                                    className="rounded-xl border border-slate-600 bg-slate-800 px-4 py-3 text-sm font-black text-slate-100 hover:bg-slate-700"
+                                    onClick={() => setAssignmentProgressNotice(null)}
+                                    className="w-full rounded-xl border border-slate-600 bg-slate-800 px-4 py-3 text-sm font-black text-slate-100 hover:bg-slate-700"
                                 >
                                     {trans("続ける", languageMode)}
                                 </button>
-                                <button
-                                    onClick={() => {
-                                        setAssignmentProgressNotice(null);
-                                        setGameState(prev => ({ ...prev, screen: GameScreen.SUBMISSION }));
-                                    }}
-                                    className="rounded-xl bg-emerald-400 px-4 py-3 text-sm font-black text-slate-950 hover:bg-emerald-300"
-                                >
-                                    {trans("提出PDFを用意", languageMode)}
-                                </button>
-                            </div>
+                            )}
                         </div>
                     </div>
                 )}
