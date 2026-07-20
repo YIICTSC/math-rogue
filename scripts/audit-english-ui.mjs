@@ -6,7 +6,7 @@ import { createServer } from 'vite';
 const EXCLUDED_PATH = /[\\/](mini-games|data)[\\/]|DebugMenuScreen|MiniGame|SchoolDungeonRPG|PokerGame|PaperPlane|MagicEventSimulation|CreditRoll/;
 const UI_ATTRIBUTES = new Set(['title', 'aria-label', 'placeholder', 'alt']);
 const JAPANESE = /[ぁ-んァ-ヶ一-龠々〆ヵヶ]/;
-const GENERIC_FALLBACK = /^(Choose Option|Event Details|School Foe|Choose a fitting event action|You handled the (?:event|situation|moment).*)$/;
+const GENERIC_FALLBACK = /^(Choose Option|Event Details|School Foe|Choose a fitting event action|You handled the (?:event|situation|moment).*|You turned the event into a useful tool for the road ahead\.|You handled the situation carefully and turned the experience into progress\.)$/;
 
 const collectSourceFiles = (directory) => fs.readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
   const target = path.join(directory, entry.name);
@@ -18,7 +18,10 @@ const failures = [];
 const server = await createServer({ server: { middlewareMode: true }, appType: 'custom', logLevel: 'silent' });
 
 try {
-  const { trans, transEventText } = await server.ssrLoadModule('/src/utils/textUtils.ts');
+  const { buildEnglishCardDescription, trans, transEventText } = await server.ssrLoadModule('/src/utils/textUtils.ts');
+  const { CARDS_LIBRARY, RELIC_LIBRARY, POTION_LIBRARY } = await server.ssrLoadModule('/src/constants.ts');
+  const { MAGIC_CARDS } = await server.ssrLoadModule('/src/data/magicCards.ts');
+  const { getEnemyLibraryByTheme } = await server.ssrLoadModule('/src/data/enemyCatalogs.ts');
   const { MINI_GAMES } = await server.ssrLoadModule('/src/miniGameConfig.ts');
   const { TYPING_LESSON_DEFINITIONS } = await server.ssrLoadModule('/src/data/typingLessonConfig.ts');
   const { ONLINE_RANKING_FALLBACKS, ONLINE_RANKING_CATEGORIES } = await server.ssrLoadModule('/src/data/onlineRankingDefinitions.ts');
@@ -37,6 +40,28 @@ try {
   for (const [source, expected] of Object.entries(REQUIRED_EXACT_TRANSLATIONS)) {
     const output = trans(source, 'ENGLISH');
     if (output !== expected) failures.push(`required exact translation ${source} => ${output} (expected ${expected})`);
+  }
+  const compendiumEntries = [
+    ...Object.values(CARDS_LIBRARY).flatMap((card) => [['card name', card.name], [`rendered card description [${card.name}]`, buildEnglishCardDescription(card)]]),
+    ...MAGIC_CARDS.flatMap((card) => [['magic card name', card.name], [`rendered magic card description [${card.name}]`, buildEnglishCardDescription(card)]]),
+    ...Object.values(RELIC_LIBRARY).flatMap((relic) => [['relic name', relic.name], ['relic description', relic.description]]),
+    ...Object.values(POTION_LIBRARY).flatMap((potion) => [['potion name', potion.name], ['potion description', potion.description]]),
+    ...['elementary', 'high-school', 'magic'].flatMap((theme) =>
+      Object.values(getEnemyLibraryByTheme(theme)).flatMap((enemy) => [
+        [`${theme} enemy name`, enemy.name],
+        [`${theme} enemy description`, enemy.description],
+      ])
+    ),
+  ];
+  for (const [category, value] of compendiumEntries) {
+    const output = category.startsWith('rendered ') ? value : trans(value, 'ENGLISH');
+    if (JAPANESE.test(output) || GENERIC_FALLBACK.test(output.trim())) {
+      failures.push(`compendium ${category} ${value} => ${output}`);
+    }
+  }
+  for (const value of ['セーブデータを削除しますか？', '※ボタン長押しでセーブデータを削除できます']) {
+    const output = trans(value, 'ENGLISH');
+    if (JAPANESE.test(output) || GENERIC_FALLBACK.test(output.trim())) failures.push(`minigame delete modal ${value} => ${output}`);
   }
   for (const game of MINI_GAMES) {
     for (const [field, value] of [['name', game.name], ['description', game.description]]) {

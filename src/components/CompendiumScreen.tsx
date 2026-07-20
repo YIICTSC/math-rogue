@@ -218,7 +218,7 @@ const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, 
     }, [enemyCompendiumTheme]);
     const getEnemyDisplayName = (enemy: CompendiumEnemy) => getThemedEnemyDisplayName(enemy, enemyCompendiumTheme);
     const getEnemyDescription = (enemy: CompendiumEnemy) => {
-        if (languageMode === 'ENGLISH') return enemy.description;
+        if (languageMode !== 'JAPANESE') return enemy.description;
         const displayName = getEnemyDisplayName(enemy);
         if (enemyCompendiumTheme === 'high-school') return getHighSchoolEnemyDescription(enemy, displayName);
         if (enemyCompendiumTheme === 'magic') return getMagicEnemyDescription(enemy, displayName);
@@ -424,7 +424,7 @@ const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, 
                                     className={`bg-black/60 border ${isUnlocked ? 'border-gray-600 hover:border-white' : 'border-gray-800'} p-4 rounded flex flex-col items-center text-center cursor-pointer transition-colors aspect-square justify-center`}
                                 >
                                     <div className={`w-12 h-12 bg-gray-800 rounded flex items-center justify-center mb-2 border border-white/30 p-1.5 ${!isUnlocked ? 'grayscale opacity-30' : ''}`}>
-                                        <PotionIcon id={potion.templateId} alt={potion.name} />
+                                        <PotionIcon id={potion.templateId} alt={trans(potion.name, languageMode)} />
                                     </div>
                                     <div className={`font-bold text-xs mb-1 truncate w-full ${isUnlocked ? 'text-white' : 'text-gray-600'}`}>{isUnlocked ? trans(potion.name, languageMode) : '???'}</div>
                                 </div>
@@ -480,6 +480,7 @@ const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, 
                                             visualTheme={enemyCompendiumTheme}
                                             enemyType={enemy.enemyType}
                                             phase={enemy.phase}
+                                            altText={trans(enemyDisplayName, languageMode)}
                                         />
                                     </div>
                                     <div className={`font-bold text-[10px] truncate w-full ${isUnlocked ? 'text-red-200' : 'text-gray-600'}`}>{isUnlocked ? trans(enemyDisplayName, languageMode) : '???'}</div>
@@ -577,10 +578,10 @@ const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, 
                                 ) : <Lock size={64} className="text-gray-600" />
                             )}
                             {selectedItem.type === 'RELIC' && (
-                                selectedItem.unlocked ? <div className="h-24 w-24 rounded-full border border-yellow-500/60 bg-gray-900 p-3 drop-shadow-[0_0_10px_rgba(250,204,21,0.5)]"><RelicIcon id={selectedItem.data.id} alt={selectedItem.data.name} /></div> : <Gem size={80} className="text-gray-700" />
+                                selectedItem.unlocked ? <div className="h-24 w-24 rounded-full border border-yellow-500/60 bg-gray-900 p-3 drop-shadow-[0_0_10px_rgba(250,204,21,0.5)]"><RelicIcon id={selectedItem.data.id} alt={trans(selectedItem.data.name, languageMode)} /></div> : <Gem size={80} className="text-gray-700" />
                             )}
                             {selectedItem.type === 'POTION' && (
-                                selectedItem.unlocked ? <div className="h-24 w-24 rounded border border-white/30 bg-gray-900 p-3 drop-shadow-[0_0_10px_rgba(255,255,255,0.35)]"><PotionIcon id={selectedItem.data.templateId} alt={selectedItem.data.name} /></div> : <FlaskConical size={80} className="text-gray-700" />
+                                selectedItem.unlocked ? <div className="h-24 w-24 rounded border border-white/30 bg-gray-900 p-3 drop-shadow-[0_0_10px_rgba(255,255,255,0.35)]"><PotionIcon id={selectedItem.data.templateId} alt={trans(selectedItem.data.name, languageMode)} /></div> : <FlaskConical size={80} className="text-gray-700" />
                             )}
                             {selectedItem.type === 'ENEMY' && (
                                 <div className={`${ENEMY_ILLUSTRATION_SIZE_CLASS.compendiumDetail} bg-black rounded border border-gray-600 relative`}>

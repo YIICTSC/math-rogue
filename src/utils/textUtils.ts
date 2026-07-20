@@ -4,6 +4,7 @@ import { EVENT_HIRAGANA_EXACT } from '../data/eventHiraganaExact';
 import { HIRAGANA_UI_EXACT } from '../data/hiraganaUiExact';
 import { HIRAGANA_DYNAMIC_UI_RULES } from '../data/hiraganaDynamicUiRules';
 import { HIRAGANA_RUNTIME_EXACT, HIRAGANA_RUNTIME_PARTIAL } from '../data/hiraganaRuntimeExact';
+import { HIRAGANA_COMPENDIUM_EXACT } from '../data/hiraganaCompendiumExact';
 import { ENGLISH_RUNTIME_EXACT } from '../data/englishRuntimeExact';
 import { EVENT_DICTIONARY } from './textUtils2';
 
@@ -6334,7 +6335,8 @@ const translateEnglishEnemyCatalogDescription = (text: string): string | null =>
 
     const routeName = match[1] === "高校編" ? "high school route" : "magic route";
     const enemyName = match[2].trim();
-    const translatedEnemyName = ENGLISH_ENEMY_NAME_DICTIONARY[enemyName]
+    const translatedEnemyName = ENGLISH_RUNTIME_EXACT[enemyName]
+        || ENGLISH_ENEMY_NAME_DICTIONARY[enemyName]
         || ENGLISH_DICTIONARY[enemyName]
         || enemyName.replace(/^ボス\s*[：:]\s*/, "Boss: ");
 
@@ -10429,6 +10431,10 @@ export const trans = (text: string, mode: LanguageMode): string => {
         if (cyberspaceDive) return `Dive into Cyberspace: "${cyberspaceDive[1]}" now costs 0.`;
         const princessCall = text.match(/^お姫様の呼び声：山札から「(.+)」を引き寄せた$/);
         if (princessCall) return `Princess Call: Drew "${princessCall[1]}" from the draw pile.`;
+        const albumStarter = text.match(/^(.+)をカード帳から持ってきた。$/);
+        if (albumStarter) return `Brought ${trans(albumStarter[1], mode)} from the Card Album.`;
+        const missingExperimentCards = text.match(/^実験材料（カード）が(\d+)枚足りない\.\.\.$/);
+        if (missingExperimentCards) return `You need ${missingExperimentCards[1]} more experiment material card(s)...`;
 
         const eventTitleTranslation = translateEnglishEventTitle(text);
         if (eventTitleTranslation) return eventTitleTranslation;
@@ -10453,6 +10459,7 @@ export const trans = (text: string, mode: LanguageMode): string => {
     // 辞書に完全一致がある場合はそれを返す
     if (HIRAGANA_RUNTIME_EXACT[text]) return HIRAGANA_RUNTIME_EXACT[text];
     if (HIRAGANA_UI_EXACT[text]) return HIRAGANA_UI_EXACT[text];
+    if (HIRAGANA_COMPENDIUM_EXACT[text]) return HIRAGANA_COMPENDIUM_EXACT[text];
     if (DICTIONARY[text]) return DICTIONARY[text];
 
     const dynamicUiTranslation = translateHiraganaDynamicUi(text);

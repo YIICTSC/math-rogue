@@ -173,7 +173,7 @@ const MiniGameSelectScreen: React.FC<MiniGameSelectScreenProps> = ({ onSelect, o
             <p className="text-sm text-gray-300 mb-6">
               {languageMode === 'ENGLISH'
                 ? `"${trans(deleteTarget.name, languageMode)}" save data will be deleted and restarted from the beginning.`
-                : `「${deleteTarget.name}」の中断データを削除して最初からやり直します。`}
+                : `「${trans(deleteTarget.name, languageMode)}」${trans('の中断データを削除して最初からやり直します。', languageMode)}`}
               <br/><span className="text-red-400 text-xs">{trans('(この操作は取り消せません)', languageMode)}</span>
             </p>
             <div className="flex gap-4 justify-center">

@@ -21,6 +21,13 @@ const CONTEXTUAL_MISTRANSLATIONS = [
   'いっって',
   'おきんがたりない',
   'じゅほのお',
+  'じターン',
+  'こんターン',
+  'すてさつ',
+  'こうきゅうてき',
+  'しようか。',
+  'ひ0コス',
+  'ぜんダメージぶん',
 ];
 
 const collectSourceFiles = (directory) => fs.readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
@@ -34,6 +41,9 @@ const server = await createServer({ server: { middlewareMode: true }, appType: '
 
 try {
   const { trans } = await server.ssrLoadModule('/src/utils/textUtils.ts');
+  const { CARDS_LIBRARY, RELIC_LIBRARY, POTION_LIBRARY } = await server.ssrLoadModule('/src/constants.ts');
+  const { MAGIC_CARDS } = await server.ssrLoadModule('/src/data/magicCards.ts');
+  const { getEnemyLibraryByTheme } = await server.ssrLoadModule('/src/data/enemyCatalogs.ts');
   const { MINI_GAMES } = await server.ssrLoadModule('/src/miniGameConfig.ts');
   const { TYPING_LESSON_DEFINITIONS } = await server.ssrLoadModule('/src/data/typingLessonConfig.ts');
   const { ONLINE_RANKING_FALLBACKS, ONLINE_RANKING_CATEGORIES } = await server.ssrLoadModule('/src/data/onlineRankingDefinitions.ts');
@@ -45,6 +55,29 @@ try {
   for (const [source, expected] of Object.entries(REQUIRED_EXACT_TRANSLATIONS)) {
     const output = trans(source, 'HIRAGANA');
     if (output !== expected) failures.push(`required exact translation ${source} => ${output} (expected ${expected})`);
+  }
+  const compendiumEntries = [
+    ...Object.values(CARDS_LIBRARY).flatMap((card) => [['card name', card.name], ['card description', card.description]]),
+    ...MAGIC_CARDS.flatMap((card) => [['magic card name', card.name], ['magic card description', card.description]]),
+    ...Object.values(RELIC_LIBRARY).flatMap((relic) => [['relic name', relic.name], ['relic description', relic.description]]),
+    ...Object.values(POTION_LIBRARY).flatMap((potion) => [['potion name', potion.name], ['potion description', potion.description]]),
+    ...['elementary', 'high-school', 'magic'].flatMap((theme) =>
+      Object.values(getEnemyLibraryByTheme(theme)).flatMap((enemy) => [
+        [`${theme} enemy name`, enemy.name],
+        [`${theme} enemy description`, enemy.description],
+      ])
+    ),
+  ];
+  for (const [category, value] of compendiumEntries) {
+    const output = trans(value, 'HIRAGANA');
+    if (KANJI.test(output)) failures.push(`compendium ${category} ${value} => ${output}`);
+    for (const mistranslation of CONTEXTUAL_MISTRANSLATIONS) {
+      if (output.includes(mistranslation)) failures.push(`compendium ${category} [contextual mistranslation] ${value} => ${output}`);
+    }
+  }
+  for (const value of ['セーブデータを削除しますか？', '※ボタン長押しでセーブデータを削除できます']) {
+    const output = trans(value, 'HIRAGANA');
+    if (KANJI.test(output)) failures.push(`minigame delete modal ${value} => ${output}`);
   }
   for (const game of MINI_GAMES) {
     for (const [field, value] of [['name', game.name], ['description', game.description]]) {
@@ -75,6 +108,7 @@ try {
     'src/data/eventHiraganaExact.ts',
     'src/data/hiraganaRuntimeExact.ts',
     'src/data/hiraganaUiExact.ts',
+    'src/data/hiraganaCompendiumExact.ts',
     'src/utils/textUtils.ts',
   ]) {
     const source = fs.readFileSync(file, 'utf8');
