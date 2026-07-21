@@ -8,10 +8,8 @@ export type BgmThemeId = VisualThemeId | 'magic-female' | 'magic-male';
 declare const __APP_ASSET_VERSION__: string | undefined;
 
 const APP_ASSET_VERSION = typeof __APP_ASSET_VERSION__ === 'string' ? __APP_ASSET_VERSION__ : 'dev';
-const versionMagicBgmPath = (path: string) =>
-    path.includes('/bgm/magic') || path.startsWith('bgm/magic')
-        ? `${path}${path.includes('?') ? '&' : '?'}v=${encodeURIComponent(APP_ASSET_VERSION)}`
-        : path;
+const versionBgmPath = (path: string) =>
+    `${path}${path.includes('?') ? '&' : '?'}v=${encodeURIComponent(APP_ASSET_VERSION)}`;
 
 type HtmlSfxEffect = 'magic-transform-voice';
 
@@ -137,9 +135,10 @@ class AudioService {
     }
   }
 
-  public setBgmMode(mode: 'OSCILLATOR' | 'NEW' | 'OLD' | 'STUDY') {
-      if (this.bgmMode === mode) return;
-      this.bgmMode = mode;
+  public setBgmMode(mode: 'OSCILLATOR' | 'MP3' | 'NEW' | 'OLD' | 'STUDY') {
+      const normalizedMode = mode === 'MP3' ? 'NEW' : mode;
+      if (this.bgmMode === normalizedMode) return;
+      this.bgmMode = normalizedMode;
       
       // If currently playing, restart with new mode
       if (this.isPlayingBGM && this.currentBgmType) {
@@ -878,14 +877,17 @@ class AudioService {
       if (!this.isCurrentPlayback(type, playbackGeneration)) return;
       const baseUrl = (import.meta as any).env.BASE_URL;
       const bgmRoot = this.bgmMode === 'NEW' ? 'bgm-new' : 'bgm';
-      const themedPaths = this.bgmTheme !== 'elementary'
+      const resolvedTheme = this.bgmTheme === 'magic-female' && type === 'menu'
+          ? 'magic'
+          : this.bgmTheme;
+      const themedPaths = resolvedTheme !== 'elementary'
           ? [
-              `${baseUrl}${bgmRoot}/${this.bgmTheme}/${type}.mp3`,
-              `/${bgmRoot}/${this.bgmTheme}/${type}.mp3`,
-              `${bgmRoot}/${this.bgmTheme}/${type}.mp3`,
+              `${baseUrl}${bgmRoot}/${resolvedTheme}/${type}.mp3`,
+              `/${bgmRoot}/${resolvedTheme}/${type}.mp3`,
+              `${bgmRoot}/${resolvedTheme}/${type}.mp3`,
           ]
           : [];
-      const sharedMagicPaths = this.bgmTheme.startsWith('magic-')
+      const sharedMagicPaths = resolvedTheme.startsWith('magic-')
           ? [
               `${baseUrl}${bgmRoot}/magic/${type}.mp3`,
               `/${bgmRoot}/magic/${type}.mp3`,
@@ -900,7 +902,7 @@ class AudioService {
           `${bgmRoot}/${type}.mp3`,
           `/${type}.mp3`,
           `${type}.mp3`
-      ].map(versionMagicBgmPath);
+      ].map(versionBgmPath);
       const cacheKey = `${this.bgmMode}:${this.bgmTheme}:${type}`;
       let buffer = this.audioBuffers[cacheKey];
       if (!buffer) {
