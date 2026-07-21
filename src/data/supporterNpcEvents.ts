@@ -1,4 +1,6 @@
 import { SUPPORTER_NPC_ENGLISH_TRANSLATIONS } from './supporterNpcEventTranslations';
+import { ENGLISH_DISPLAY_COPY_EXACT } from './displayCopyExact';
+import { transEventText } from '../utils/textUtils';
 
 export type SupporterNpcReward =
   | 'synthesis'
@@ -67,10 +69,10 @@ const englishQuestion = (
 const encodeJapaneseAnswer = (answer: string) => `jp:${encodeURIComponent(answer)}`;
 
 const translateSupporterNpcQuestion = (source: SupporterNpcQuestion): SupporterNpcQuestion => ({
-  question: SUPPORTER_NPC_ENGLISH_TRANSLATIONS[source.question] || source.question,
-  options: source.options.map(option => SUPPORTER_NPC_ENGLISH_TRANSLATIONS[option] || option) as SupporterNpcQuestion['options'],
+  question: SUPPORTER_NPC_ENGLISH_TRANSLATIONS[source.question] || ENGLISH_DISPLAY_COPY_EXACT[source.question] || transEventText(source.question, 'ENGLISH'),
+  options: source.options.map(option => SUPPORTER_NPC_ENGLISH_TRANSLATIONS[option] || ENGLISH_DISPLAY_COPY_EXACT[option] || transEventText(option, 'ENGLISH')) as SupporterNpcQuestion['options'],
   correctIndex: source.correctIndex,
-  explanation: SUPPORTER_NPC_ENGLISH_TRANSLATIONS[source.explanation] || source.explanation,
+  explanation: SUPPORTER_NPC_ENGLISH_TRANSLATIONS[source.explanation] || ENGLISH_DISPLAY_COPY_EXACT[source.explanation] || transEventText(source.explanation, 'ENGLISH'),
 });
 
 const tsukaponEnglishAnswerTerms: Array<[string, string]> = [

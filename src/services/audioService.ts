@@ -31,7 +31,7 @@ class AudioService {
   private bgmAdvanceMode: 'random' | 'sorted' = 'random';
   private bgmSequence: string[] = [];
   
-  private bgmMode: 'OSCILLATOR' | 'MP3' | 'STUDY' = 'MP3';
+  private bgmMode: 'OSCILLATOR' | 'NEW' | 'OLD' | 'STUDY' = 'NEW';
   private bgmTheme: BgmThemeId = 'elementary';
   private bgmVolume: number = 1;
   private sfxVolume: number = 0.6;
@@ -137,7 +137,7 @@ class AudioService {
     }
   }
 
-  public setBgmMode(mode: 'OSCILLATOR' | 'MP3' | 'STUDY') {
+  public setBgmMode(mode: 'OSCILLATOR' | 'NEW' | 'OLD' | 'STUDY') {
       if (this.bgmMode === mode) return;
       this.bgmMode = mode;
       
@@ -818,7 +818,7 @@ class AudioService {
       this.swing = 0; 
       if (this.bgmMode === 'STUDY') return;
 
-      if (this.bgmMode === 'MP3') {
+      if (this.bgmMode === 'NEW' || this.bgmMode === 'OLD') {
           await this.playMp3(type, loop, playbackGeneration);
       } else {
           this.playOscillatorBGM(type);
@@ -877,22 +877,31 @@ class AudioService {
       if (!this.ctx || !this.bgmGain) return;
       if (!this.isCurrentPlayback(type, playbackGeneration)) return;
       const baseUrl = (import.meta as any).env.BASE_URL;
+      const bgmRoot = this.bgmMode === 'NEW' ? 'bgm-new' : 'bgm';
       const themedPaths = this.bgmTheme !== 'elementary'
           ? [
-              `${baseUrl}bgm/${this.bgmTheme}/${type}.mp3`,
-              `/bgm/${this.bgmTheme}/${type}.mp3`,
-              `bgm/${this.bgmTheme}/${type}.mp3`,
+              `${baseUrl}${bgmRoot}/${this.bgmTheme}/${type}.mp3`,
+              `/${bgmRoot}/${this.bgmTheme}/${type}.mp3`,
+              `${bgmRoot}/${this.bgmTheme}/${type}.mp3`,
+          ]
+          : [];
+      const sharedMagicPaths = this.bgmTheme.startsWith('magic-')
+          ? [
+              `${baseUrl}${bgmRoot}/magic/${type}.mp3`,
+              `/${bgmRoot}/magic/${type}.mp3`,
+              `${bgmRoot}/magic/${type}.mp3`,
           ]
           : [];
       const paths = [
           ...themedPaths,
-          `${baseUrl}bgm/${type}.mp3`,
-          `/bgm/${type}.mp3`,
-          `bgm/${type}.mp3`,
+          ...sharedMagicPaths,
+          `${baseUrl}${bgmRoot}/${type}.mp3`,
+          `/${bgmRoot}/${type}.mp3`,
+          `${bgmRoot}/${type}.mp3`,
           `/${type}.mp3`,
           `${type}.mp3`
       ].map(versionMagicBgmPath);
-      const cacheKey = `${this.bgmTheme}:${type}`;
+      const cacheKey = `${this.bgmMode}:${this.bgmTheme}:${type}`;
       let buffer = this.audioBuffers[cacheKey];
       if (!buffer) {
           for (const path of paths) {
@@ -913,7 +922,7 @@ class AudioService {
           return;
       }
       if (!this.isCurrentPlayback(type, playbackGeneration)) return;
-      if (this.bgmMode !== 'MP3') return;
+      if (this.bgmMode !== 'NEW' && this.bgmMode !== 'OLD') return;
 
       try {
           const source = this.ctx.createBufferSource();

@@ -3,7 +3,10 @@ import path from 'node:path';
 import ts from 'typescript';
 import { createServer } from 'vite';
 
-const EXCLUDED_PATH = /[\\/](mini-games|data)[\\/]|DebugMenuScreen|MiniGame|SchoolDungeonRPG|PokerGame|PaperPlane|MagicEventSimulation|CreditRoll/;
+// Only game-specific mini-game internals and question banks are outside the
+// shared translation contract. Selection, unlock, result, and confirmation UI
+// remain in scope even when their file name contains "MiniGame".
+const EXCLUDED_PATH = /[\\/]mini-games[\\/]|[\\/]data[\\/]subjects[\\/]|[\\/]components[\\/](?:SchoolDungeonRPG2?|PokerGameScreen|PaperPlaneBattle)\.tsx$/;
 const UI_ATTRIBUTES = new Set(['title', 'aria-label', 'placeholder', 'alt']);
 const JAPANESE = /[ぁ-んァ-ヶ一-龠々〆ヵヶ]/;
 const GENERIC_FALLBACK = /^(Choose Option|Event Details|School Foe|Choose a fitting event action|You handled the (?:event|situation|moment).*|You turned the event into a useful tool for the road ahead\.|You handled the situation carefully and turned the experience into progress\.)$/;
@@ -133,6 +136,19 @@ try {
       }
       return false;
     };
+    const isWithinTranslatedUiTree = (node) => {
+      let parent = node.parent;
+      while (parent) {
+        if (ts.isJsxElement(parent) && parent.openingElement.tagName.getText(sourceFile) === 'TranslatedUiTree') return true;
+        parent = parent.parent;
+      }
+      return false;
+    };
+    const auditTranslatedLiteral = (node, category, value) => {
+      const output = trans(value, 'ENGLISH');
+      if (JAPANESE.test(output)) report(node, `${category} Japanese remains`, value, output);
+      if (GENERIC_FALLBACK.test(output.trim())) report(node, `${category} generic fallback`, value, output);
+    };
     const visit = (node) => {
       if (ts.isCallExpression(node) && ['trans', 'transEventText'].includes(node.expression.getText(sourceFile)) && node.arguments[0]) {
         const argument = node.arguments[0];
@@ -149,15 +165,22 @@ try {
           if (GENERIC_FALLBACK.test(output.trim())) report(node, 'dynamic generic fallback translation', sample, output);
         }
       }
-      if (ts.isJsxText(node) && JAPANESE.test(node.text.trim()) && !isExplicitNonEnglishBranch(node)) report(node, 'raw JSX text', node.text.trim());
+      if (ts.isJsxText(node) && JAPANESE.test(node.text.trim()) && !isExplicitNonEnglishBranch(node)) {
+        if (isWithinTranslatedUiTree(node)) auditTranslatedLiteral(node, 'translated JSX text', node.text.trim());
+        else report(node, 'raw JSX text', node.text.trim());
+      }
       if (
         node.parent && ts.isJsxExpression(node.parent) &&
         (ts.isStringLiteral(node) || ts.isNoSubstitutionTemplateLiteral(node)) &&
         JAPANESE.test(node.text) &&
         !isExplicitNonEnglishBranch(node)
-      ) report(node, 'raw JSX expression', node.text);
+      ) {
+        if (isWithinTranslatedUiTree(node)) auditTranslatedLiteral(node, 'translated JSX expression', node.text);
+        else report(node, 'raw JSX expression', node.text);
+      }
       if (ts.isJsxAttribute(node) && UI_ATTRIBUTES.has(node.name.getText(sourceFile)) && node.initializer && ts.isStringLiteral(node.initializer) && JAPANESE.test(node.initializer.text)) {
-        report(node, 'raw JSX attribute', `${node.name.getText(sourceFile)}=${node.initializer.text}`);
+        if (isWithinTranslatedUiTree(node)) auditTranslatedLiteral(node, `translated JSX attribute ${node.name.getText(sourceFile)}`, node.initializer.text);
+        else report(node, 'raw JSX attribute', `${node.name.getText(sourceFile)}=${node.initializer.text}`);
       }
       ts.forEachChild(node, visit);
     };
