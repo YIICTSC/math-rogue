@@ -505,7 +505,7 @@ const EMPTY_RACE_EFFECTS: RaceEffectState = {
 };
 
 const DEFAULT_APP_SETTINGS: AppSettings = {
-    bgmMode: 'MP3',
+    bgmMode: 'NEW',
     bgmVolume: 1,
     seVolume: 1,
     voiceVolume: 1,
@@ -551,7 +551,7 @@ const migrateSavedAudioVolumeDefaults = (saved: AppSettings | null): Partial<App
 };
 
 const normalizeBgmMode = (mode: string | null | undefined): AppSettings['bgmMode'] => (
-    mode === 'STUDY' ? 'STUDY' : 'MP3'
+    mode === 'STUDY' || mode === 'OLD' ? mode : 'NEW'
 );
 
 const normalizeBattleUiSettings = (
@@ -1451,7 +1451,7 @@ const App: React.FC = () => {
             battleUiPortrait: normalizeBattleUiSettings(saved?.battleUiPortrait || baseBattleUi),
             battleUiLandscape: normalizeBattleUiSettings(saved?.battleUiLandscape || baseBattleUi)
         };
-        return storageService.getBgmMode() ? merged : { ...merged, bgmMode: 'MP3' };
+        return storageService.getBgmMode() ? merged : { ...merged, bgmMode: 'NEW' };
     });
     const [battleUiOrientation, setBattleUiOrientation] = useState<'portrait' | 'landscape'>(() => getViewportBattleUiOrientation());
     const activeBattleUiSettings = useMemo(
@@ -4318,7 +4318,11 @@ const App: React.FC = () => {
 
     const toggleBgmMode = () => {
         dismissBgmSwitchHint();
-        const nextMode: AppSettings['bgmMode'] = bgmMode === 'STUDY' ? 'MP3' : 'STUDY';
+        const nextMode: AppSettings['bgmMode'] = bgmMode === 'NEW'
+            ? 'OLD'
+            : bgmMode === 'OLD'
+                ? 'STUDY'
+                : 'NEW';
 
         setBgmMode(nextMode);
         setAppSettings(prev => ({ ...prev, bgmMode: nextMode }));
@@ -15254,9 +15258,11 @@ const App: React.FC = () => {
                                 >
                                     <Music size={13} className="mr-1 shrink-0" />
                                     {trans(
-                                        bgmMode === 'STUDY'
-                                            ? 'BGM: 学習'
-                                            : 'BGM: MP3',
+                                        bgmMode === 'NEW'
+                                            ? 'BGM: 新'
+                                            : bgmMode === 'OLD'
+                                                ? 'BGM: 旧'
+                                                : 'BGM: なし',
                                         languageMode
                                     )}
                                 </button>

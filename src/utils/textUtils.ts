@@ -1052,6 +1052,11 @@ const BASE_DICTIONARY: Record<string, string> = {
     "BGM: 学習": "BGM: がくしゅう",
     "BGM: 電子音": "BGM: ピコピコ",
     "BGM: MP3": "BGM: リアル",
+    "BGM: 新": "BGM: しん",
+    "BGM: 旧": "BGM: きゅう",
+    "BGM: なし": "BGM: なし",
+    "新BGM": "しんBGM",
+    "旧BGM": "きゅうBGM",
     "BGM: 学習(SEのみ)": "BGM: がくしゅう(SEのみ)",
 
     // --- Mini Game Selection ---
@@ -3800,6 +3805,11 @@ const ENGLISH_DICTIONARY: Record<string, string> = {
     "を倒した！": " defeated!",
     "BGM: 学習": "BGM: Study",
     "BGM: MP3": "BGM: MP3",
+    "BGM: 新": "BGM: New",
+    "BGM: 旧": "BGM: Classic",
+    "BGM: なし": "BGM: Off",
+    "新BGM": "New BGM",
+    "旧BGM": "Classic BGM",
     "BGM: 電子音": "BGM: Chiptune",
     "音声": "Audio",
     "表示": "Display",
