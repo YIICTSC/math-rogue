@@ -8669,6 +8669,17 @@ textarea {
   min-height: 0;
 }
 
+.battle-scene-root.battle-ui-custom .battle-hand-area:has(.battle-hand-card-popup),
+.battle-scene-root.battle-ui-custom .battle-hand-area:has(.battle-hand-card-popup) .battle-hand-scroll {
+  overflow: visible !important;
+}
+
+.battle-scene-root.battle-ui-custom .battle-hand-card.battle-hand-card-popup {
+  transform: translateY(clamp(-3.5rem, -7dvh, -2rem)) scale(1.08) !important;
+  transform-origin: center bottom !important;
+  z-index: 800 !important;
+}
+
 @media (orientation: landscape) and (max-height: 560px) {
   .battle-scene-root.battle-ui-custom .battle-view {
     gap: 0.125rem !important;
@@ -8728,17 +8739,17 @@ textarea {
 
   .battle-scene-root.battle-ui-custom .battle-hand-card {
     width: 5.5rem !important;
-    height: 8.25rem !important;
+    height: calc(100% - 0.45rem) !important;
   }
 
   .battle-scene-root.battle-ui-custom .battle-hand-card-inner {
-    transform: scale(calc(0.7 * var(--battle-ui-hand-card-scale, 1))) !important;
+    transform: scale(calc(0.64 * var(--battle-ui-hand-card-scale, 1))) !important;
   }
 }
 
 @media (orientation: portrait) and (max-width: 540px) {
   .battle-scene-root.battle-ui-custom {
-    --battle-ui-enemy-offset-y-baseline: 0px;
+    --battle-ui-enemy-offset-y-baseline: clamp(-48px, -5.5dvh, -34px);
   }
 
   .battle-scene-root.battle-ui-custom .battle-hand-area {
@@ -8750,6 +8761,18 @@ textarea {
   .battle-scene-root.battle-ui-custom .battle-enemies-area {
     min-height: 0 !important;
     overflow: visible !important;
+  }
+
+  .battle-scene-root.battle-ui-custom .battle-player-area {
+    position: relative !important;
+    z-index: 30 !important;
+    flex: 0 0 auto !important;
+    margin-top: 0 !important;
+  }
+
+  .battle-scene-root.battle-ui-custom .battle-hand-scroll {
+    align-items: flex-start !important;
+    padding: 0.3rem 0.5rem 0.45rem !important;
   }
 }
 
