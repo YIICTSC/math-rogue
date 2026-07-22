@@ -21,6 +21,10 @@ ios/
 *.xcodeproj/
 *.xcworkspace/
 DerivedData/
+.codex-ios-derived-data/
+.codex-ios-archives/
+.codex-ios-exports/
+.codex-cache-backup/
 Pods/
 *.ipa
 *.xcarchive

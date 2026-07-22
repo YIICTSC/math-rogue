@@ -9,6 +9,7 @@ import AttackEffectSprite from './AttackEffectSprite';
 import StatusEffectSprite from './StatusEffectSprite';
 import { audioService } from '../services/audioService';
 import { getEnglishFamiliarName, trans } from '../utils/textUtils';
+import { transBattle } from '../utils/ageRatingCopy';
 import { HERO_IMAGE_DATA, CARDS_LIBRARY, STATUS_CARDS } from '../constants';
 import { ENEMY_ILLUSTRATION_SIZE_CLASS } from '../constants/uiSizing';
 import { getUpgradedCard, synthesizeCards } from '../utils/cardUtils';
@@ -2795,7 +2796,7 @@ const FinisherArtPiece: React.FC<{ token: string; seed: string; languageMode: La
                     src={assetUrl(`sprites/high-school/familiars-action/${familiarImageIndex}.webp`)}
                     alt={card.familiarSummon && languageMode === 'ENGLISH'
                         ? getEnglishFamiliarName(card.familiarSummon.name)
-                        : trans(card.familiarSummon?.name || card.name, languageMode)}
+                        : transBattle(card.familiarSummon?.name || card.name, languageMode)}
                     className="absolute left-1/2 top-1/2 h-[150%] w-[150%] -translate-x-1/2 -translate-y-1/2 object-contain drop-shadow-[0_0_24px_rgba(217,70,239,0.95)]"
                 />
             </div>
@@ -2814,7 +2815,7 @@ const FinisherArtPiece: React.FC<{ token: string; seed: string; languageMode: La
         return (
             <img
                 src={assetUrl(`sprites/magic/rule-cards/${heroId}/${index}.webp`)}
-                alt={trans(card.name, languageMode)}
+                alt={transBattle(card.name, languageMode)}
                 className={imgClass}
             />
         );
@@ -2825,7 +2826,7 @@ const FinisherArtPiece: React.FC<{ token: string; seed: string; languageMode: La
         return (
             <img
                 src={assetUrl(`sprites/magic/basic-cards/${heroId}/${art}.webp`)}
-                alt={trans(card.name, languageMode)}
+                alt={transBattle(card.name, languageMode)}
                 className={imgClass}
             />
         );
@@ -2836,19 +2837,19 @@ const FinisherArtPiece: React.FC<{ token: string; seed: string; languageMode: La
         return (
             <img
                 src={assetUrl(`sprites/magic/cards/${index}.webp`)}
-                alt={trans(card.name, languageMode)}
+                alt={transBattle(card.name, languageMode)}
                 className={imgClass}
             />
         );
     }
 
     const cardName = normalized.substring('card:'.length);
-    const candidates = getCardIllustrationPaths(seed, trans(cardName, languageMode), [cardName]);
+    const candidates = getCardIllustrationPaths(seed, transBattle(cardName, languageMode), [cardName]);
     if (!failed && imageIndex < candidates.length) {
         return (
             <img
                 src={candidates[imageIndex]}
-                alt={trans(cardName, languageMode)}
+                alt={transBattle(cardName, languageMode)}
                 className={imgClass}
                 onError={() => {
                     const next = imageIndex + 1;
@@ -2863,7 +2864,7 @@ const FinisherArtPiece: React.FC<{ token: string; seed: string; languageMode: La
 };
 
 export const BattleFinisherCutinOverlay: React.FC<{ card: ICard; languageMode: LanguageMode }> = ({ card, languageMode }) => {
-    const translated = trans(card.name, languageMode);
+    const translated = transBattle(card.name, languageMode);
     const illustrationTokens = useMemo(
         () => extractIllustrationTokens(card),
         [card]
@@ -3414,7 +3415,7 @@ export const BattleFinisherCutinOverlay: React.FC<{ card: ICard; languageMode: L
 };
 
 const FullscreenCardArtModal: React.FC<{ card: ICard; languageMode: LanguageMode; onClose: () => void }> = ({ card, languageMode, onClose }) => {
-    const translated = trans(card.name, languageMode);
+    const translated = transBattle(card.name, languageMode);
     const magicArtUrl = getMagicCardArtUrl(card);
     const imageCandidates = useMemo(
         () => getCardIllustrationPaths(card.id, translated, [card.name]),

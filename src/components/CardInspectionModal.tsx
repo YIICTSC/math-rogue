@@ -3,6 +3,7 @@ import { X } from 'lucide-react';
 import { Card as ICard, LanguageMode } from '../types';
 import { buildEnglishCardDescription, trans } from '../utils/textUtils';
 import Card, { KEYWORD_DEFINITIONS } from './Card';
+import { toAge9BattleText, transBattle } from '../utils/ageRatingCopy';
 
 interface CardInspectionModalProps {
   card: ICard;
@@ -24,7 +25,7 @@ const getCardKeywords = (card: ICard) => {
 };
 
 const getProcessedDescription = (card: ICard, languageMode: LanguageMode) => {
-  if (languageMode === 'ENGLISH') return buildEnglishCardDescription(card);
+  if (languageMode === 'ENGLISH') return toAge9BattleText(buildEnglishCardDescription(card), languageMode);
 
   let desc = trans(card.description, languageMode);
   if (card.magicBoostedEffectText) return desc;
@@ -34,7 +35,7 @@ const getProcessedDescription = (card: ICard, languageMode: LanguageMode) => {
   if (card.weak !== undefined) desc = desc.replace(/へろへろ(\d+)/g, `${trans('へろへろ', languageMode)}${card.weak}`);
   if (card.vulnerable !== undefined) desc = desc.replace(/びくびく(\d+)/g, `${trans('びくびく', languageMode)}${card.vulnerable}`);
   if (card.strength !== undefined) desc = desc.replace(/ムキムキ(\d+)/g, `${trans('ムキムキ', languageMode)}${card.strength}`);
-  return desc;
+  return toAge9BattleText(desc, languageMode);
 };
 
 const CardInspectionModal: React.FC<CardInspectionModalProps> = ({ card, languageMode, onClose, onOpenArt }) => (
@@ -60,14 +61,14 @@ const CardInspectionModal: React.FC<CardInspectionModalProps> = ({ card, languag
         <X size={24} />
       </button>
       <h3 className="text-2xl font-bold text-yellow-400 mb-2 border-b border-gray-600 pb-2">
-        {card.holographic ? `${trans('キラ', languageMode)} ` : ''}{trans(card.name, languageMode)}{card.upgraded ? '+' : ''}
+        {card.holographic ? `${trans('キラ', languageMode)} ` : ''}{transBattle(card.name, languageMode)}{card.upgraded ? '+' : ''}
       </h3>
       <div className="flex gap-2 mb-4 text-xs text-gray-400 font-mono">
         <span className="bg-blue-900/50 px-2 py-1 rounded border border-blue-500/30">
           {trans('コスト', languageMode)}: {card.cost}
         </span>
         <span className="bg-purple-900/50 px-2 py-1 rounded border border-purple-500/30">
-          {trans(card.type, languageMode)}
+          {transBattle(card.type, languageMode)}
         </span>
         {card.holographic && (
           <span className="bg-cyan-900/60 px-2 py-1 rounded border border-cyan-300/50 text-cyan-100">
@@ -82,8 +83,8 @@ const CardInspectionModal: React.FC<CardInspectionModalProps> = ({ card, languag
       <div className="space-y-2">
         {getCardKeywords(card).map((keyword, index) => (
           <div key={index} className="flex flex-col text-left text-sm bg-gray-700/50 p-2 rounded border border-gray-600">
-            <span className="font-bold text-yellow-300 mb-0.5">{trans(keyword.title, languageMode)}</span>
-            <span className="text-gray-300 text-xs">{trans(keyword.desc, languageMode)}</span>
+            <span className="font-bold text-yellow-300 mb-0.5">{transBattle(keyword.title, languageMode)}</span>
+            <span className="text-gray-300 text-xs">{transBattle(keyword.desc, languageMode)}</span>
           </div>
         ))}
       </div>

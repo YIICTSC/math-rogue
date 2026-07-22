@@ -8,6 +8,12 @@
     "dev": "vite --host 0.0.0.0 --port 5173",
     "dev:debug": "VITE_ENABLE_DEBUG_FEATURES=true vite --host 0.0.0.0 --port 5173",
     "build": "vite build",
+    "build:ios": "VITE_APP_PLATFORM=ios VITE_PAID_EDITION=true vite build",
+    "ios:add": "npm run build:ios && cap add ios --packagemanager SPM",
+    "ios:sync": "npm run build:ios && cap sync ios",
+    "ios:open": "cap open ios",
+    "ios:prepare-simulator": "xcrun simctl runtime dyld_shared_cache update --all",
+    "ios:run": "bash scripts/ios-build-launch.sh",
     "audit:hiragana": "node scripts/audit-hiragana-ui.mjs",
     "audit:english": "node scripts/audit-english-ui.mjs",
     "audit:display-copy": "node scripts/audit-display-copy.mjs",
@@ -73,6 +79,8 @@
     }
   },
   "dependencies": {
+    "@capacitor/core": "^8.4.2",
+    "@capacitor/ios": "^8.4.2",
     "@types/katex": "^0.16.8",
     "@vitejs/plugin-react": "^5.1.1",
     "katex": "^0.16.47",
@@ -83,6 +91,7 @@
     "vite": "^7.2.4"
   },
   "devDependencies": {
+    "@capacitor/cli": "^8.4.2",
     "@types/node": "^22.14.0",
     "@vitejs/plugin-react": "^5.0.0",
     "autoprefixer": "^10.5.0",

@@ -83,4 +83,3 @@ const EnemyIllustration: React.FC<EnemyIllustrationProps> = ({ name, seed, alias
 };
 
 export default EnemyIllustration;
-

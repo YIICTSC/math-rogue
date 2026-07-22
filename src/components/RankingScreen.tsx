@@ -194,7 +194,7 @@ const RankingScreen: React.FC<RankingScreenProps> = ({ onBack, languageMode, onR
                 pokerData.length === 0 ? (
                     <div className="flex flex-col items-center justify-center h-64 text-gray-500">
                         <Club size={48} className="mb-4 opacity-50" />
-                        <p>{trans('ポーカーの記録はありません。', languageMode)}</p>
+                        <p>{trans('放課後ポーカーの記録はありません。', languageMode)}</p>
                     </div>
                 ) : (
                     <div className="max-w-4xl mx-auto space-y-3">
@@ -221,7 +221,7 @@ const RankingScreen: React.FC<RankingScreenProps> = ({ onBack, languageMode, onR
 
                                 {/* Middle: Money */}
                                 <div className="flex-grow mb-2 md:mb-0 px-0 md:px-4">
-                                    <div className="text-sm text-gray-400">{trans('最終所持金', languageMode)}</div>
+                                    <div className="text-sm text-gray-400">{trans('最終部活ポイント', languageMode)}</div>
                                     <div className="text-lg font-bold text-yellow-400">
                                         ${entry.money.toLocaleString()}
                                     </div>

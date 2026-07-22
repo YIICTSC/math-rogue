@@ -459,7 +459,7 @@ const UPGRADE_POOLS: UpgradeOffer[] = [
     { type: 'SLOT_1', description: 'スロット +1 (上限突破)', icon: <Plus size={32}/>, color: 'text-green-400' },
     { type: 'SLOT_1_CD_MINUS_1', description: 'スロット +1 / CD -1', icon: <Plus size={32}/>, color: 'text-emerald-400' },
     { type: 'SACRIFICE', description: 'カード売却 (+40G)', icon: <Skull size={32}/>, color: 'text-gray-400' },
-    { type: 'GAMBLE', description: '戦士の賭け（ランダム変化）', icon: <Shuffle size={32}/>, color: 'text-purple-400' },
+    { type: 'GAMBLE', description: '即興アレンジ（ランダム変化）', icon: <Shuffle size={32}/>, color: 'text-purple-400' },
 ];
 
 const getInitialDeck = (): KCard[] => {
