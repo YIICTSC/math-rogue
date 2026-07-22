@@ -2314,6 +2314,13 @@ body,
   padding: env(safe-area-inset-top) 0 0;
 }
 
+@media (orientation: landscape) {
+  .app-shell {
+    padding-right: env(safe-area-inset-right);
+    padding-left: env(safe-area-inset-left);
+  }
+}
+
 body.gamepad-navigation-active .app-shell :is(button, a, input, select, textarea, [tabindex]):focus {
   outline: 3px solid rgba(56, 189, 248, 0.95) !important;
   outline-offset: 3px !important;
