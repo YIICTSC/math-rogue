@@ -15246,7 +15246,7 @@ const App: React.FC = () => {
                             </div>
                         )}
 
-                        <div className="absolute top-2 right-2 z-[10010] flex items-center gap-1.5 sm:gap-2">
+                        <div className="start-menu-toolbar absolute top-2 right-2 z-[10010] flex items-center gap-1.5 sm:gap-2">
                             <div className="relative">
                                 <button
                                     onClick={toggleBgmMode}
@@ -15494,7 +15494,7 @@ const App: React.FC = () => {
                                 <div className="start-menu-actions flex flex-col gap-2 items-center w-full max-w-[320px]">
                                 {hasSave && (
                                     <>
-                                        <div className="text-[10px] text-red-400 font-bold animate-pulse mb-[-8px]">
+                                        <div className="start-menu-resume-warning text-[10px] text-red-400 font-bold animate-pulse mb-[-8px]">
                                             {trans("※ゲームがフリーズする場合、冒険を始めるからやり直してください", languageMode)}
                                         </div>
                                         <button
@@ -17826,4 +17826,3 @@ const App: React.FC = () => {
 };
 
 export default App;
-

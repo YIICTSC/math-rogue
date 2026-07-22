@@ -3127,7 +3127,9 @@ textarea {
   }
 }
 
-@media (orientation: landscape) and (max-height: 520px) and (max-width: 950px) {
+/* Modern large phones reach 956 CSS px in landscape. Keep the start menu's
+   compact layout active through 1024px so it clears the top toolbar. */
+@media (orientation: landscape) and (max-height: 520px) and (max-width: 1024px) {
   .submission-header {
     padding: 0.45rem 0.75rem !important;
   }
@@ -3374,6 +3376,22 @@ textarea {
     text-align: left;
   }
 
+  .start-menu-toolbar {
+    top: 0.375rem !important;
+    right: 0.5rem !important;
+    gap: 0.25rem !important;
+  }
+
+  .start-menu-toolbar button {
+    height: 1.75rem !important;
+    padding-inline: 0.375rem !important;
+  }
+
+  .start-menu-toolbar button.w-9 {
+    width: 1.75rem !important;
+    padding-inline: 0 !important;
+  }
+
   .start-menu-title {
     position: absolute;
     top: 0.35rem;
@@ -3462,6 +3480,10 @@ textarea {
     width: 100%;
     max-width: none;
     gap: 0.375rem;
+  }
+
+  .start-menu-resume-warning {
+    display: none;
   }
 
   .start-menu-typing-button {
