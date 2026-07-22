@@ -4,6 +4,7 @@ import type { MagicEndingGalleryEntry } from './magicEndingService';
 import type { VisualThemeId } from '../data/visualThemes';
 import type { ProblemSetView } from '../utils/localePreferences';
 import { isProblemSetView } from '../utils/localePreferences';
+import { DEBUG_FEATURES_ENABLED } from '../config/runtime';
 
 const STORAGE_KEY_UNLOCKED_CARDS = 'pixel_spire_unlocked_cards_v1';
 const STORAGE_KEY_UNLOCKED_RELICS = 'pixel_spire_unlocked_relics_v1';
@@ -1373,6 +1374,7 @@ export const storageService = {
           GameScreen.VICTORY, GameScreen.COMPENDIUM, GameScreen.HELP,
           GameScreen.CHARACTER_SELECTION, GameScreen.DIFFICULTY_SELECTION, GameScreen.RANKING, GameScreen.PROBLEM_CHALLENGE,
           GameScreen.ASSIGNMENT_CREATE, GameScreen.SUBMISSION, GameScreen.REWARD_CARD_ALBUM,
+          GameScreen.DEBUG_MENU, GameScreen.MAGIC_EVENT_SIMULATION,
           GameScreen.MINI_GAME_SELECT, GameScreen.MINI_GAME_MODE_SELECTION,
           GameScreen.MINI_GAME_POKER, GameScreen.MINI_GAME_SURVIVOR,
           GameScreen.MINI_GAME_DUNGEON, GameScreen.MINI_GAME_DUNGEON_2, GameScreen.MINI_GAME_KOCHO,
@@ -1392,7 +1394,13 @@ export const storageService = {
       const stored = localStorage.getItem(STORAGE_KEY_GAME_STATE);
       if (!stored) return null;
       const parsed = JSON.parse(stored);
-      if (parsed?.screen === GameScreen.ASSIGNMENT_CREATE || parsed?.screen === GameScreen.SUBMISSION || parsed?.screen === GameScreen.REWARD_CARD_ALBUM) {
+      if (
+        parsed?.screen === GameScreen.ASSIGNMENT_CREATE ||
+        parsed?.screen === GameScreen.SUBMISSION ||
+        parsed?.screen === GameScreen.REWARD_CARD_ALBUM ||
+        parsed?.screen === GameScreen.DEBUG_MENU ||
+        parsed?.screen === GameScreen.MAGIC_EVENT_SIMULATION
+      ) {
         localStorage.removeItem(STORAGE_KEY_GAME_STATE);
         return null;
       }
@@ -1408,7 +1416,13 @@ export const storageService = {
         const stored = localStorage.getItem(STORAGE_KEY_GAME_STATE);
         if (!stored) return false;
         const parsed = JSON.parse(stored);
-        if (parsed?.screen === GameScreen.ASSIGNMENT_CREATE || parsed?.screen === GameScreen.SUBMISSION || parsed?.screen === GameScreen.REWARD_CARD_ALBUM) {
+        if (
+          parsed?.screen === GameScreen.ASSIGNMENT_CREATE ||
+          parsed?.screen === GameScreen.SUBMISSION ||
+          parsed?.screen === GameScreen.REWARD_CARD_ALBUM ||
+          parsed?.screen === GameScreen.DEBUG_MENU ||
+          parsed?.screen === GameScreen.MAGIC_EVENT_SIMULATION
+        ) {
           localStorage.removeItem(STORAGE_KEY_GAME_STATE);
           return false;
         }
@@ -1447,33 +1461,54 @@ export const storageService = {
 
   // --- Debug Settings ---
   saveDebugMathSkip: (enabled: boolean) => {
+      if (!DEBUG_FEATURES_ENABLED) {
+          localStorage.removeItem(STORAGE_KEY_DEBUG_MATH_SKIP);
+          return;
+      }
       localStorage.setItem(STORAGE_KEY_DEBUG_MATH_SKIP, JSON.stringify(enabled));
   },
 
   getDebugMathSkip: (): boolean => {
+      if (!DEBUG_FEATURES_ENABLED) return false;
       try {
           return JSON.parse(localStorage.getItem(STORAGE_KEY_DEBUG_MATH_SKIP) || 'false');
       } catch { return false; }
   },
 
   saveDebugHpOne: (enabled: boolean) => {
+      if (!DEBUG_FEATURES_ENABLED) {
+          localStorage.removeItem(STORAGE_KEY_DEBUG_HP_ONE);
+          return;
+      }
       localStorage.setItem(STORAGE_KEY_DEBUG_HP_ONE, JSON.stringify(enabled));
   },
 
   getDebugHpOne: (): boolean => {
+      if (!DEBUG_FEATURES_ENABLED) return false;
       try {
           return JSON.parse(localStorage.getItem(STORAGE_KEY_DEBUG_HP_ONE) || 'false');
       } catch { return false; }
   },
 
   saveDebugMiniGameUnlock: (enabled: boolean) => {
+      if (!DEBUG_FEATURES_ENABLED) {
+          localStorage.removeItem(STORAGE_KEY_DEBUG_MINI_GAME_UNLOCK);
+          return;
+      }
       localStorage.setItem(STORAGE_KEY_DEBUG_MINI_GAME_UNLOCK, JSON.stringify(enabled));
   },
 
   getDebugMiniGameUnlock: (): boolean => {
+      if (!DEBUG_FEATURES_ENABLED) return false;
       try {
           return JSON.parse(localStorage.getItem(STORAGE_KEY_DEBUG_MINI_GAME_UNLOCK) || 'false');
       } catch { return false; }
+  },
+
+  clearDebugSettings: () => {
+      localStorage.removeItem(STORAGE_KEY_DEBUG_MATH_SKIP);
+      localStorage.removeItem(STORAGE_KEY_DEBUG_HP_ONE);
+      localStorage.removeItem(STORAGE_KEY_DEBUG_MINI_GAME_UNLOCK);
   },
 
   saveUiPreviewChecklist: (checklist: UiPreviewChecklist) => {
