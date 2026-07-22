@@ -8591,6 +8591,155 @@ textarea {
     gap: 0.45rem !important;
   }
 }
+/* The title artwork bleeds under the iPhone safe areas. Controls keep their
+   own safe spacing, so fullscreen mode uses the whole display without putting
+   tappable UI under the notch or home indicator. */
+.start-menu-root {
+  position: fixed !important;
+  inset: 0 !important;
+  width: auto !important;
+  height: auto !important;
+}
+
+.start-menu-root .start-menu-toolbar {
+  top: max(0.5rem, env(safe-area-inset-top)) !important;
+  right: max(0.5rem, env(safe-area-inset-right)) !important;
+}
+
+.start-menu-root .start-menu-playtime {
+  bottom: max(0.5rem, env(safe-area-inset-bottom)) !important;
+  left: max(0.5rem, env(safe-area-inset-left)) !important;
+}
+
+.start-menu-root .start-menu-credit-button {
+  right: max(0.75rem, env(safe-area-inset-right)) !important;
+  bottom: max(0.75rem, env(safe-area-inset-bottom)) !important;
+}
+
+@media (orientation: portrait) and (max-width: 540px) {
+  .start-menu-root .start-menu-content {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    min-height: 0;
+    padding:
+      max(3.5rem, calc(env(safe-area-inset-top) + 2.75rem))
+      max(0.75rem, env(safe-area-inset-right))
+      max(4rem, calc(env(safe-area-inset-bottom) + 3rem))
+      max(0.75rem, env(safe-area-inset-left));
+  }
+
+  .start-menu-root .start-menu-title {
+    position: relative;
+    inset: auto;
+    flex: 1 1 7rem;
+    width: 100%;
+    min-height: 5.5rem;
+    margin: 0 0 0.5rem;
+  }
+
+  .start-menu-root .start-menu-title img {
+    height: clamp(6.5rem, 18vh, 9rem);
+    max-width: min(96vw, 34rem);
+  }
+
+  .start-menu-root .start-menu-title .start-menu-title-text {
+    font-size: clamp(2.65rem, 12vw, 4rem);
+  }
+
+  .start-menu-root .start-menu-title .start-menu-title-text-hiragana {
+    font-size: clamp(2.05rem, 9.4vw, 3.15rem);
+  }
+
+  .start-menu-root .start-menu-debug-spacer {
+    display: none;
+  }
+
+  .start-menu-root .start-menu-button-panel {
+    position: relative;
+    inset: auto;
+    flex: 0 1 auto;
+    width: min(100%, 34rem);
+    min-height: 0;
+  }
+
+  .start-menu-root .start-menu-actions {
+    width: 100%;
+    max-width: 30rem;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 560px) {
+  .start-menu-root .start-menu-content {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    gap: clamp(0.75rem, 2.5vw, 2rem);
+    min-width: 0;
+    min-height: 0;
+    padding:
+      max(0.5rem, env(safe-area-inset-top))
+      max(0.75rem, env(safe-area-inset-right))
+      max(0.5rem, env(safe-area-inset-bottom))
+      max(0.75rem, env(safe-area-inset-left));
+  }
+
+  .start-menu-root .start-menu-title {
+    position: relative;
+    inset: auto;
+    flex: 1 1 50%;
+    width: auto;
+    max-width: none;
+    min-width: 0;
+    min-height: 5rem;
+    margin: 0;
+    transform: translateY(-0.75rem);
+  }
+
+  .start-menu-root .start-menu-title img {
+    height: clamp(5.5rem, 26vh, 8rem);
+    max-width: min(48vw, 40rem);
+  }
+
+  .start-menu-root .start-menu-title .start-menu-title-text {
+    font-size: clamp(2.4rem, 6vw, 5rem);
+  }
+
+  .start-menu-root .start-menu-title .start-menu-title-text-hiragana {
+    font-size: clamp(1.9rem, 4.8vw, 4rem);
+  }
+
+  .start-menu-root .start-menu-debug-spacer {
+    display: none;
+  }
+
+  .start-menu-root .start-menu-button-panel {
+    position: relative;
+    inset: auto;
+    flex: 0 1 44%;
+    width: min(44%, 30rem);
+    min-width: 18rem;
+    max-width: 30rem;
+    margin-left: auto;
+    transform: translateY(1rem);
+  }
+
+  .start-menu-root .start-menu-actions {
+    width: 100%;
+    max-width: none;
+  }
+
+  .start-menu-root .start-menu-credit-button {
+    top: auto !important;
+    right: auto !important;
+    bottom: max(3.75rem, calc(env(safe-area-inset-bottom) + 3rem)) !important;
+    left: max(0.75rem, env(safe-area-inset-left)) !important;
+  }
+}
+
 .tsukapon-answer-text::before {
   content: attr(data-answer);
 }

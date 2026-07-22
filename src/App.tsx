@@ -15039,7 +15039,7 @@ const App: React.FC = () => {
                 )}
 
                 {gameState.screen === GameScreen.START_MENU && (
-                    <div className={`w-full h-full bg-gray-900 flex items-center justify-center relative overflow-hidden ${visualTheme === 'high-school' ? 'start-menu-high-school' : visualTheme === 'magic' ? 'start-menu-magic' : ''}`}>
+                    <div className={`start-menu-root w-full h-full bg-gray-900 flex items-center justify-center relative overflow-hidden ${visualTheme === 'high-school' ? 'start-menu-high-school' : visualTheme === 'magic' ? 'start-menu-magic' : ''}`}>
                         <div
                             className={`absolute inset-0 bg-cover bg-[position:38%_center] md:bg-center transition-all duration-700 ease-out ${visualTheme !== 'elementary' ? 'opacity-0 scale-105 blur-sm' : 'opacity-100 scale-100 blur-0'}`}
                             style={{ backgroundImage: `url(${assetUrl('sprites/learning-rogue-title-background.webp')})` }}
