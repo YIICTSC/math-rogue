@@ -107,7 +107,7 @@ import { TypingLessonId } from './data/typingLessonConfig';
 import { getRandomRaceTrickCard, getRaceTrickCard } from './raceTricks';
 import { COOP_SUPPORT_LIBRARY, getRandomCoopSupportCard } from './coopSupportCards';
 import { chooseBattleBackgroundScene, getBattleBackgroundFlavor } from './data/battleBackgrounds';
-import { OFFLINE_DISTRIBUTABLE, OFFLINE_NETWORK_FEATURE_MESSAGE } from './config/runtime';
+import { DAILY_PLAY_LIMIT_ENABLED, DEBUG_FEATURES_ENABLED, OFFLINE_DISTRIBUTABLE, OFFLINE_NETWORK_FEATURE_MESSAGE, PAID_EDITION } from './config/runtime';
 import { getAttackEffectKeyForCard, getMultihitFrameSequence } from './data/attackEffects';
 import { getThemedCharacters, getThemedEnemyDisplayName, MAGIC_HERO_ID_BY_CHARACTER_ID, type VisualThemeId } from './data/visualThemes';
 import { getTrueBossByTheme } from './data/enemyCatalogs';
@@ -3341,7 +3341,7 @@ const App: React.FC = () => {
     const [totalPlaySeconds, setTotalPlaySeconds] = useState(() => storageService.getTotalPlayTime());
     const [dailyPlaySeconds, setDailyPlaySeconds] = useState(() => storageService.getDailyPlayTime());
     const [masteredModes, setMasteredModes] = useState<string[]>(() => storageService.getMasteredModes());
-    const [masteryRewardModal, setMasteryRewardModal] = useState<{ mode: string } | null>(null);
+    const [masteryRewardModal, setMasteryRewardModal] = useState<{ mode: string; rewardCard?: ICard } | null>(null);
     const [showTimeLimitModal, setShowTimeLimitModal] = useState(false);
     const BASE_PLAY_LIMIT_SECONDS = 3600; // 1 Hour
     const isTypingMasteryMode = (modeKey: string) => modeKey.startsWith('TYPING_') || modeKey.startsWith('typing:');
@@ -3355,7 +3355,7 @@ const App: React.FC = () => {
         return `${h.toString().padStart(2, '0')}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
     };
 
-    const isDailyLimitReached = !isDebugHpOne && dailyPlaySeconds >= PLAY_LIMIT_SECONDS;
+    const isDailyLimitReached = DAILY_PLAY_LIMIT_ENABLED && !isDebugHpOne && dailyPlaySeconds >= PLAY_LIMIT_SECONDS;
 
     const VICTORY_GOLD = 25;
 
@@ -3410,7 +3410,7 @@ const App: React.FC = () => {
                 return next;
             });
 
-            if (gameState.challengeMode === 'TYPING') {
+            if (PAID_EDITION || gameState.challengeMode === 'TYPING') {
                 return;
             }
 
@@ -4178,9 +4178,16 @@ const App: React.FC = () => {
         setUnlockedCardNames(unlocked);
         setHasSave(storageService.hasSaveFile());
         setClearCount(storageService.getThemeClearCount(visualTheme));
-        setIsMathDebugSkipped(storageService.getDebugMathSkip());
-        setIsDebugHpOne(storageService.getDebugHpOne());
-        setIsMiniGameDebugUnlocked(storageService.getDebugMiniGameUnlock());
+        if (DEBUG_FEATURES_ENABLED) {
+            setIsMathDebugSkipped(storageService.getDebugMathSkip());
+            setIsDebugHpOne(storageService.getDebugHpOne());
+            setIsMiniGameDebugUnlocked(storageService.getDebugMiniGameUnlock());
+        } else {
+            storageService.clearDebugSettings();
+            setIsMathDebugSkipped(false);
+            setIsDebugHpOne(false);
+            setIsMiniGameDebugUnlocked(false);
+        }
         setTotalMathCorrect(storageService.getMathCorrectCount());
 
         audioService.setBgmMode(appSettings.bgmMode);
@@ -4193,6 +4200,14 @@ const App: React.FC = () => {
             audioService.playBGM('menu');
         }
     }, []);
+
+    useEffect(() => {
+        if (DEBUG_FEATURES_ENABLED) return;
+        if (gameState.screen !== GameScreen.DEBUG_MENU && gameState.screen !== GameScreen.MAGIC_EVENT_SIMULATION) return;
+        storageService.clearDebugSettings();
+        storageService.clearSave();
+        setGameState(prev => ({ ...prev, screen: GameScreen.START_MENU, challengeMode: undefined }));
+    }, [gameState.screen]);
 
     useEffect(() => {
         let pausedForBackground = false;
@@ -4253,6 +4268,7 @@ const App: React.FC = () => {
     }, [totalMathCorrect]);
 
     const handleTitleClick = () => {
+        if (!DEBUG_FEATURES_ENABLED) return;
         const next = titleClickCount + 1;
         setTitleCount(next);
         if (next >= 10) {
@@ -4266,6 +4282,7 @@ const App: React.FC = () => {
 
     const handleLogClick = (e: React.MouseEvent) => {
         e.stopPropagation();
+        if (!DEBUG_FEATURES_ENABLED) return;
         const next = logClickCount + 1;
         setLogClickCount(next);
         if (next >= 10) {
@@ -4430,6 +4447,7 @@ const App: React.FC = () => {
     };
 
     const openDebugMenu = useCallback(() => {
+        if (!DEBUG_FEATURES_ENABLED) return;
         setDebugMenuStartClearCount(storageService.getThemeClearCount(visualTheme));
         setDebugMenuStartMathCorrect(storageService.getMathCorrectCount());
         setGameState(prev => ({ ...prev, screen: GameScreen.DEBUG_MENU }));
@@ -12318,20 +12336,29 @@ const App: React.FC = () => {
         const prevModeCount = modeCorrectCounts[modeKey] || 0;
         const nextModeCount = prevModeCount + correctCount;
         const alreadyMastered = masteredModes.includes(modeKey);
-        const canGrantMasteryBonus = gameState.challengeMode !== 'TYPING' && !isTypingMasteryMode(modeKey);
+        const canGrantMasteryReward = gameState.challengeMode !== 'TYPING' && !isTypingMasteryMode(modeKey);
         setModeCorrectCounts(prev => {
             const next = { ...prev, [modeKey]: (prev[modeKey] || 0) + correctCount };
             storageService.saveModeCorrectCounts(next);
             return next;
         });
-        if (canGrantMasteryBonus && !alreadyMastered && prevModeCount < 100 && nextModeCount >= 100) {
+        if (canGrantMasteryReward && !alreadyMastered && prevModeCount < 100 && nextModeCount >= 100) {
             setMasteredModes(prev => {
                 if (prev.includes(modeKey)) return prev;
                 const next = [...prev, modeKey];
                 storageService.saveMasteredModes(next);
                 return next;
             });
-            setMasteryRewardModal({ mode: modeKey });
+            let rewardCard: ICard | undefined;
+            if (PAID_EDITION) {
+                const createdRewardCard = createRewardCardForAssignment();
+                if (createdRewardCard) {
+                    storageService.saveRewardCardToAlbum(createdRewardCard);
+                    setRewardCardAlbumVersion(prev => prev + 1);
+                    rewardCard = createdRewardCard;
+                }
+            }
+            setMasteryRewardModal({ mode: modeKey, rewardCard });
         }
     };
 
@@ -14953,7 +14980,7 @@ const App: React.FC = () => {
                     </div>
                 )}
 
-                {showTimeLimitModal && (
+                {DAILY_PLAY_LIMIT_ENABLED && showTimeLimitModal && (
                     <div className="app-modal-overlay app-time-limit-modal-overlay fixed inset-0 z-[10000] bg-black/90 flex items-center justify-center p-4 animate-in fade-in duration-300">
                         <div className="app-modal-panel app-time-limit-modal bg-gray-900 border-4 border-red-600 p-8 rounded-2xl max-sm w-full shadow-[0_0_50px_rgba(220,38,38,0.5)] text-center transform scale-110">
                             <TimerOff size={64} className="text-red-500 mx-auto mb-6 animate-pulse" />
@@ -15295,9 +15322,13 @@ const App: React.FC = () => {
 
                         <div className="start-menu-playtime absolute bottom-2 left-2 z-9999 text-gray-500 text-[10px] font-mono flex flex-col gap-0.5">
                             <div>TOTAL TIME: {formatTime(totalPlaySeconds)}</div>
-                            <div className={isDailyLimitReached ? "text-red-500 font-bold" : ""}>
-                                DAILY: {formatTime(dailyPlaySeconds)} / {formatTime(PLAY_LIMIT_SECONDS)}
-                            </div>
+                            {PAID_EDITION ? (
+                                <div className="font-bold text-emerald-400">FULL VERSION: UNLIMITED</div>
+                            ) : (
+                                <div className={isDailyLimitReached ? "text-red-500 font-bold" : ""}>
+                                    DAILY: {formatTime(dailyPlaySeconds)} / {formatTime(PLAY_LIMIT_SECONDS)}
+                                </div>
+                            )}
                         </div>
 
                         <button
@@ -15375,8 +15406,8 @@ const App: React.FC = () => {
 
                         <div className="start-menu-content relative z-10 text-center p-8 w-full flex flex-col items-center">
                             <h1
-                                className="start-menu-title relative mb-7 flex min-h-[104px] w-full max-w-[560px] cursor-pointer select-none items-center justify-center leading-none"
-                                onClick={handleTitleClick}
+                                className={`start-menu-title relative mb-7 flex min-h-[104px] w-full max-w-[560px] select-none items-center justify-center leading-none ${DEBUG_FEATURES_ENABLED ? 'cursor-pointer' : ''}`}
+                                onClick={DEBUG_FEATURES_ENABLED ? handleTitleClick : undefined}
                             >
                                 <img
                                     src={assetUrl('sprites/learning-rogue-logo-emblem.webp')}
@@ -15409,7 +15440,7 @@ const App: React.FC = () => {
                                 </div>
                             )}
 
-                            {isMathDebugSkipped && (
+                            {DEBUG_FEATURES_ENABLED && isMathDebugSkipped && (
                                 <button
                                     type="button"
                                     onClick={disableMathDebugSkip}
@@ -15418,7 +15449,7 @@ const App: React.FC = () => {
                                     {trans("(デバッグ: けいさん スキップ ON)", languageMode)}
                                 </button>
                             )}
-                            {isDebugHpOne && (
+                            {DEBUG_FEATURES_ENABLED && isDebugHpOne && (
                                 <button
                                     type="button"
                                     onClick={disableDebugHpOne}
@@ -15427,7 +15458,7 @@ const App: React.FC = () => {
                                     {trans("(デバッグ: てきHP1 & ぜんかいほう ON)", languageMode)}
                                 </button>
                             )}
-                            {isMiniGameDebugUnlocked && (
+                            {DEBUG_FEATURES_ENABLED && isMiniGameDebugUnlocked && (
                                 <button
                                     type="button"
                                     onClick={disableMiniGameDebugUnlock}
@@ -15617,7 +15648,7 @@ const App: React.FC = () => {
                                     </button>
                                 </div>
 
-                                {isDebugHpOne && (
+                                {DEBUG_FEATURES_ENABLED && isDebugHpOne && (
                                     <button onClick={openDebugMenu} className="w-full py-2 px-4 text-base font-bold border-b-4 border-r-4 rounded-none bg-gray-800 text-red-400 border-red-500 hover:bg-gray-700 cursor-pointer flex items-center justify-center shadow-md mb-2">
                                         <Zap size={18} className="mr-2" /> {trans("デバッグメニュー", languageMode)}
                                     </button>
@@ -15639,7 +15670,7 @@ const App: React.FC = () => {
                                 </div>
 
                                     <button onClick={() => setShowDebugLog(true)} className="start-menu-version text-gray-600 text-[10px] hover:text-gray-400 flex items-center justify-center gap-1 opacity-50 hover:opacity-100 transition-opacity">
-                                        <Terminal size={10} /> v1.0.4 YUSUKE ISHIGE
+                                        <Terminal size={10} /> v1.0.0 YUSUKE ISHIGE
                                     </button>
                                 </div>
                             </div>
@@ -16024,17 +16055,17 @@ const App: React.FC = () => {
                         <div className="app-modal-panel app-debug-modal bg-gray-900 border-2 border-green-500 p-6 rounded-lg max-w-lg w-full shadow-[0_0_20px_rgba(34,197,94,0.3)]" onClick={e => e.stopPropagation()}>
                             <h2
                                 className="text-xl font-bold mb-4 text-green-400 font-mono border-b border-green-800 pb-2 select-none active:text-green-200"
-                                onClick={handleLogClick}
+                                onClick={DEBUG_FEATURES_ENABLED ? handleLogClick : undefined}
                             >
-                                System Update Log v1.0.4
+                                System Release Notes v1.0.0
                             </h2>
                             <div className="space-y-4 text-sm font-mono text-gray-300 max-h-[60vh] overflow-y-auto custom-scrollbar">
                                 <section>
-                                    <h3 className="text-white font-bold mb-1">■ {trans('v1.0.4 アップデート', languageMode)}</h3>
+                                    <h3 className="text-white font-bold mb-1">■ {trans('v1.0.0 製品版リリース', languageMode)}</h3>
                                     <ul className="list-disc pl-5 space-y-1">
-                                        <li>{trans('協力モードの進行、報酬、イベント同期を改善', languageMode)}</li>
-                                        <li>{trans('協力専用UIに参加者名表示を追加', languageMode)}</li>
-                                        <li>{trans('細かなバグ修正と安定性向上', languageMode)}</li>
+                                        <li>{trans('学習問題とカードバトルを組み合わせた冒険モードを収録', languageMode)}</li>
+                                        <li>{trans('小学生編・高校生編・マジック編、協力・レース・ミニゲームに対応', languageMode)}</li>
+                                        <li>{trans('課題連携、学習記録、報酬カード、オンラインランキングを搭載', languageMode)}</li>
                                     </ul>
                                 </section>
                             </div>
@@ -16048,7 +16079,7 @@ const App: React.FC = () => {
                     </div>
                 )}
 
-                {gameState.screen === GameScreen.DEBUG_MENU && (
+                {DEBUG_FEATURES_ENABLED && gameState.screen === GameScreen.DEBUG_MENU && (
                     <div className="absolute inset-0">
                         <DebugMenuScreen
                             onStart={handleDebugStart}
@@ -16072,7 +16103,7 @@ const App: React.FC = () => {
                     </div>
                 )}
 
-                {gameState.screen === GameScreen.MAGIC_EVENT_SIMULATION && (
+                {DEBUG_FEATURES_ENABLED && gameState.screen === GameScreen.MAGIC_EVENT_SIMULATION && (
                     <div className="absolute inset-0">
                         <MagicEventSimulationScreen
                             languageMode={languageMode}
@@ -17092,9 +17123,24 @@ const App: React.FC = () => {
                         <div className="app-modal-panel app-mastery-reward-modal w-full max-w-md bg-slate-900 border-2 border-yellow-400 rounded-xl p-6 text-center">
                             <div className="text-2xl font-black text-yellow-300 mb-3">◎ {trans('マスター達成', languageMode)}</div>
                             <div className="text-white font-bold leading-relaxed mb-5">
-                                {trans('この種類の問題のマスターおめでとう！', languageMode)}<br />
-                                {trans('ゲームの制限時間が5分延長されました！', languageMode)}
+                                {trans('この種類の問題のマスターおめでとう！', languageMode)}
+                                {DAILY_PLAY_LIMIT_ENABLED && <><br />{trans('ゲームの制限時間が5分延長されました！', languageMode)}</>}
                             </div>
+                            {masteryRewardModal.rewardCard && (
+                                <div className="mb-5 rounded-xl border border-cyan-300/50 bg-cyan-950/25 p-3">
+                                    <div className="mb-3 text-center text-sm font-black text-cyan-100">{trans('ご褒美カードを獲得しました', languageMode)}</div>
+                                    <div className="flex justify-center">
+                                        <div className="scale-90">
+                                            <Card
+                                                card={masteryRewardModal.rewardCard}
+                                                onClick={() => {}}
+                                                disabled={false}
+                                                languageMode={languageMode}
+                                            />
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
                             <button
                                 onClick={() => setMasteryRewardModal(null)}
                                 className="w-full bg-yellow-400 text-black font-black py-3 rounded-lg hover:bg-yellow-300 transition-colors"
