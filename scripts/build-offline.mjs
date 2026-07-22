@@ -4,6 +4,7 @@ import path from 'node:path';
 import { build } from 'vite';
 
 process.env.VITE_OFFLINE_DISTRIBUTABLE = 'true';
+process.env.VITE_PAID_EDITION = 'true';
 
 const distDir = path.resolve('dist');
 await rm(distDir, { recursive: true, force: true });

@@ -151,7 +151,9 @@ const getApiBase = () => {
   if (override) return override.replace(/\/$/, '');
   const configured = String(import.meta.env.VITE_RANKING_API_URL || '').trim();
   if (configured) return configured.replace(/\/$/, '');
-  if (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1') return 'http://localhost:3000';
+  if (getPlatform() === 'web' && (window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1')) {
+    return 'http://localhost:3000';
+  }
   return DEFAULT_RANKING_URL;
 };
 

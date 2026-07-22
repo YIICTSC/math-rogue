@@ -150,12 +150,18 @@ npm run preview
 | コマンド | 内容 |
 | --- | --- |
 | `npm run dev` | Vite開発サーバーを起動 |
+| `npm run dev:debug` | ローカル開発限定でデバッグ機能を有効化 |
 | `npm run build` | Web版を本番ビルド |
 | `npm run preview` | 本番ビルドをローカル確認 |
 | `npm run audit:hiragana` | ひらがな表示の監査 |
 | `npm run audit:english` | 英語表示の監査 |
 | `npm run test:management` | 管理システム連携を検証 |
 | `npm run dist:offline` | Windows向けオフライン版を生成 |
+| `npm run build:ios` | 時間制限なしのiOS有料版Web資産を生成 |
+| `npm run ios:sync` | iOS向けWeb資産とネイティブ依存を同期 |
+| `npm run ios:open` | XcodeでiOSプロジェクトを開く |
+| `npm run ios:prepare-simulator` | Simulatorの初回共有キャッシュを生成 |
+| `npm run ios:run` | iPhone Simulatorへビルド・インストール・起動 |
 
 ## 公開構成
 
@@ -175,6 +181,9 @@ ChatGPT Sites（メイン入口）
 - [保護者・教員向けグループ管理システム導入案](./docs/guardian-educator-group-management-introduction-plan.md)
 - [協力プレイの進行仕様](./docs/coop-battle-flow.md)
 - [Xboxコントローラー対応計画](./docs/xbox-controller-support-plan.md)
+- [iOSアプリ化準備](./docs/ios-app-preparation.md)
+- [iOS課金方針](./docs/ios-monetization-plan.md)
+- [Steam・iOS・Android同時展開方針](./docs/cross-platform-distribution.md)
 - [ひらがな表示の整備計画](./docs/hiragana-translation-completion-plan-20260714.md)
 - [英語表示の整備計画](./docs/english-translation-completion-plan-20260714.md)
 

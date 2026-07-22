@@ -47,10 +47,10 @@ export const MINI_GAMES: MiniGameConfig[] = [
   {
     id: 'POKER',
     name: '放課後ポーカー',
-    description: '役を作ってスコアを稼げ！アイテムを駆使するローグライク。',
+    description: 'ポーカー役でスコアを伸ばせ！サポーターを集めるローグライク。',
     screen: GameScreen.MINI_GAME_POKER,
     threshold: 1500,
-    typeLabel: 'POPULAR',
+    typeLabel: 'CARD',
     typeColor: 'bg-purple-600',
     glowColor: 'rgba(168,85,247,0.4)',
     icon: Club,

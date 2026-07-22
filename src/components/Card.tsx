@@ -3,10 +3,11 @@ import { Card as CardType, CardType as EnumCardType, LanguageMode } from '../typ
 import PixelSprite from './PixelSprite';
 import EnemyIllustration from './EnemyIllustration';
 import { buildEnglishCardDescription, getEnglishFamiliarName, trans } from '../utils/textUtils';
-import { getCardIllustrationPaths } from '../utils/cardIllustration';
+import { getAge9CardArtAlias, getCardIllustrationPaths } from '../utils/cardIllustration';
 import { createEnemyIllustrationRef, getStatusCategoryLabel, getStatusCategoryClass, parseEnemyIllustrationRef } from '../utils/cardUtils';
 import { assetUrl } from '../utils/assetPaths';
 import { isLegacySpriteModeEnabled } from '../utils/legacySpriteMode';
+import { toAge9BattleText, transBattle } from '../utils/ageRatingCopy';
 import type { VisualThemeId } from '../data/visualThemes';
 
 interface CardProps {
@@ -41,6 +42,19 @@ const HOLOGRAPHIC_VARIANT_BY_CARD_TYPE: Partial<Record<EnumCardType, NonNullable
   [EnumCardType.POWER]: 'yellow',
   [EnumCardType.SKILL]: 'blue',
   [EnumCardType.SUMMON]: 'purple',
+};
+
+export const getAge9ReplacementArtName = (card: Pick<CardType, 'name' | 'originalNames'>): string | null => {
+  return getAge9CardArtAlias([card.name, ...(card.originalNames || [])]);
+};
+
+export const getAge9ReplacementArt = (card: Pick<CardType, 'name' | 'originalNames'>) => {
+  const artName = getAge9ReplacementArtName(card);
+  return artName ? assetUrl(`card-illustrations/${artName}.webp`) : null;
+};
+
+export const shouldUseAge9ReplacementArt = (card: Pick<CardType, 'name' | 'originalNames'>) => {
+  return getAge9ReplacementArtName(card) !== null;
 };
 
 const getStableHolographicVariant = (card: CardType): NonNullable<CardType['holographicVariant']> => {
@@ -195,6 +209,7 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled, onInspect, languag
   const startPos = useRef({ x: 0, y: 0 });
 
   const translatedCardName = trans(card.name, languageMode);
+  const displayCardName = toAge9BattleText(translatedCardName, languageMode);
   const imageCandidates = useMemo(
     () => getCardIllustrationPaths(card.id, translatedCardName, [card.name]),
     [card.id, card.name, translatedCardName]
@@ -282,7 +297,7 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled, onInspect, languag
   const getTypeText = (type: EnumCardType) => {
     switch (type) {
       case EnumCardType.ATTACK:
-        return trans('攻撃', languageMode);
+        return transBattle('攻撃', languageMode);
       case EnumCardType.SKILL:
         return trans('スキル', languageMode);
       case EnumCardType.POWER:
@@ -296,6 +311,17 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled, onInspect, languag
 
   const renderCardArt = () => {
     const resolvedCardVisualTheme = card.visualTheme ?? 'elementary';
+
+    const age9ReplacementArt = getAge9ReplacementArt(card);
+    if (age9ReplacementArt) {
+      return (
+        <img
+          src={age9ReplacementArt}
+          alt={displayCardName}
+          className="w-full h-full object-cover opacity-95 drop-shadow-md"
+        />
+      );
+    }
 
     if (resolvedCardVisualTheme === 'elementary' && isLegacySpriteModeEnabled() && card.textureRef) {
       return <PixelSprite seed={card.id} name={card.textureRef} className="w-full h-full opacity-90 drop-shadow-md" size={16} />;
@@ -371,7 +397,7 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled, onInspect, languag
       return (
         <img
           src={assetUrl(`sprites/high-school/cards/${card.highSchoolCardArtIndex}.webp`)}
-          alt={translatedCardName}
+          alt={displayCardName}
           className="w-full h-full object-cover opacity-95 drop-shadow-md"
         />
       );
@@ -381,7 +407,7 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled, onInspect, languag
       return (
         <img
           src={assetUrl(`sprites/magic/rule-cards/${card.magicHeroId}/${card.magicRuleCardIndex}.webp`)}
-          alt={translatedCardName}
+          alt={displayCardName}
           className="w-full h-full object-cover opacity-95 drop-shadow-md"
         />
       );
@@ -391,7 +417,7 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled, onInspect, languag
       return (
         <img
           src={assetUrl(`sprites/magic/basic-cards/${card.magicHeroId}/${card.magicBasicCardArt}.webp`)}
-          alt={translatedCardName}
+          alt={displayCardName}
           className="w-full h-full object-cover opacity-95 drop-shadow-md"
         />
       );
@@ -401,7 +427,7 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled, onInspect, languag
       return (
         <img
           src={assetUrl(`sprites/magic/cards/${card.magicCardArtIndex}.webp`)}
-          alt={translatedCardName}
+          alt={displayCardName}
           className="w-full h-full object-cover opacity-95 drop-shadow-md"
         />
       );
@@ -411,7 +437,7 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled, onInspect, languag
       return (
         <img
           src={imageCandidates[imageIndex]}
-          alt={translatedCardName}
+          alt={displayCardName}
           className="w-full h-full object-cover opacity-95 drop-shadow-md"
           onError={() => setImageIndex((prev) => prev + 1)}
         />
@@ -422,7 +448,7 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled, onInspect, languag
       return (
         <img
           src={imageCandidates[imageIndex]}
-          alt={translatedCardName}
+          alt={displayCardName}
           className="w-full h-full object-cover opacity-95 drop-shadow-md"
           onError={() => setImageIndex((prev) => prev + 1)}
         />
@@ -437,7 +463,8 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled, onInspect, languag
   };
 
   const renderDescription = () => {
-    const desc = languageMode === 'ENGLISH' ? buildEnglishCardDescription(card) : trans(card.description, languageMode);
+    const rawDesc = languageMode === 'ENGLISH' ? buildEnglishCardDescription(card) : trans(card.description, languageMode);
+    const desc = toAge9BattleText(rawDesc, languageMode);
     const textClassName = card.holographic ? 'text-cyan-100 font-bold' : card.upgraded ? 'text-green-300 font-bold' : '';
     if (!card.magicBoostedEffectText) {
       return <span className={textClassName}>{desc}</span>;
@@ -462,7 +489,7 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled, onInspect, languag
     );
   };
 
-  const displayName = translatedCardName + (card.upgraded ? '+' : '');
+  const displayName = displayCardName + (card.upgraded ? '+' : '');
   const needsScroll = displayName.length > 6;
   const statusCategoryLabel = getStatusCategoryLabel(card);
   const statusCategoryClass = getStatusCategoryClass(card);
@@ -562,4 +589,3 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled, onInspect, languag
 };
 
 export default Card;
-

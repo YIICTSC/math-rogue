@@ -1420,7 +1420,7 @@ export const generateEvent = (
             title: "席替え",
             description: "今日は席替えの日だ。窓際の一番後ろになれるか...？\nそれとも最前列か。",
             options: [
-                { label: "くじ引きに賭ける", text: "運試し（HP+4 / 35G / HP-6）", action: () => {
+                { label: "席をくじで決める", text: "結果を受け入れる（HP+4 / 35G / HP-6）", action: () => {
                     const roll = Math.random();
                     if (roll < 0.34) {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, maxHp: prev.player.maxHp + 4, currentHp: prev.player.currentHp + 4 } }));
@@ -1938,7 +1938,7 @@ export const generateEvent = (
                         resolveMomentum("無難に場をまとめ、次に活きる手応えを持ち帰った。", "無難に場をまとめ、次に活きる手応えを持ち帰った。", true);
                     }
                 }},
-                { label: "校長のモノマネ演説", text: "賭け（120G / 恒久ムキムキ+1 / 呪い「後悔」）", action: () => {
+                { label: "校長のモノマネ演説", text: "即興挑戦（120G / 恒久ムキムキ+1 / 呪い「後悔」）", action: () => {
                     const roll = Math.random();
                     if (roll < 0.34) {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold + 120 } }));
@@ -5988,7 +5988,7 @@ export const generateEvent = (
                         }, 50);
                     } else if (roll < 0.67) {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold + 140 } }));
-                        setEventResultLog(trans("見世物になってしまったが、賭け金で140G獲得。", languageMode));
+                        setEventResultLog(trans("見物客の応援が集まり、活動費として140G獲得。", languageMode));
                     } else {
                         setGameState(prev => ({ ...prev, player: addPermanentStrengthBonus(prev.player, 1) }));
                         setEventResultLog(trans("つつかれ続けて体幹が鍛えられた。\n恒久ムキムキ+1。", languageMode));

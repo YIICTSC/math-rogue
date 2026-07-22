@@ -27,13 +27,27 @@ const getNameVariants = (value: string): string[] => [
   value.normalize('NFKD'),
 ];
 
-const CARD_ILLUSTRATION_ASSET_VERSION = '20260521-card-art';
+const CARD_ILLUSTRATION_ASSET_VERSION = '20260722-age9-bespoke-card-art';
+
+const AGE_9_CARD_ART_ALIASES = [
+  { source: 'カンチョー', asset: '指さし確認' },
+  { source: '袋叩き', asset: '連続発表' },
+  { source: 'ヘッドロック', asset: 'チームミーティング' },
+  { source: '画鋲投げ', asset: 'クリップ渡し' },
+  { source: '割れた窓ガラス', asset: 'ステンドグラス' },
+] as const;
+
+export const getAge9CardArtAlias = (values: string[]): string | null => {
+  const searchableName = values.filter(Boolean).join(' ');
+  return AGE_9_CARD_ART_ALIASES.find(({ source }) => searchableName.includes(source))?.asset ?? null;
+};
 
 export const getCardIllustrationPaths = (id: string, name: string, aliases: string[] = []): string[] => {
   const baseUrl = (import.meta as any).env.BASE_URL || '/';
   const derivedAliases = deriveNameAliases(name);
   const shouldUseSharedSeedArt = derivedAliases.length > 0 || aliases.some((alias) => deriveNameAliases(alias).length > 0);
-  const rawCandidates = [name, ...derivedAliases, ...aliases, id, ...(shouldUseSharedSeedArt ? ['SEED_SHARED'] : []), 'unknown-card']
+  const age9ArtAlias = getAge9CardArtAlias([name, ...aliases]);
+  const rawCandidates = [age9ArtAlias, name, ...derivedAliases, ...aliases, id, ...(shouldUseSharedSeedArt ? ['SEED_SHARED'] : []), 'unknown-card']
     .filter(Boolean)
     .map((value) => value.trim());
   const candidates = Array.from(

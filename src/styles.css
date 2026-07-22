@@ -2290,7 +2290,7 @@
 
 body {
   font-family: var(--pixel-font);
-  background-color: #202020;
+  background-color: #000;
   -webkit-user-select: none;
   -moz-user-select: none;
   -ms-user-select: none;
@@ -2303,7 +2303,9 @@ html,
 body,
 #root {
   height: 100%;
+  min-height: 100%;
   margin: 0;
+  background-color: #000;
 }
 
 .app-shell {
