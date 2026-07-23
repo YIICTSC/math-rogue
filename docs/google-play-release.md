@@ -17,6 +17,8 @@
 - プライバシーポリシー: https://yiictsc.github.io/math-rogue/privacy.html
 - サポート: https://yiictsc.github.io/math-rogue/support.html
 - 公式サイト: https://yiictsc.github.io/math-rogue/
+- Google Play Console アプリID: `4972358097362152488`
+- 内部テスト参加URL: https://play.google.com/apps/internaltest/4701683331433887790
 
 ## ストア掲載文
 
@@ -101,6 +103,27 @@ Google Playで9〜12歳を対象に含めると、Families Policyへの適合が
 6. リリースを内部テストへ公開する
 7. オプトインURLをテスターへ共有し、Google Playからインストールする
 
+### 2026-07-23 実施状況
+
+- Google Play Consoleに有料ゲーム「学習ローグ」を作成済み
+- パッケージ名: `jp.yusukeishige.learningrogue`
+- `1.0.0 (1)` の署名済みAABを内部テストへ公開済み
+- メーリングリスト「学習ローグ内部テスター」を作成済み
+- `yishigeict@gmail.com` を内部テスターとして割り当て済み
+- 内部テスト参加URL: https://play.google.com/apps/internaltest/4701683331433887790
+
+Google Playへの反映には通常1時間程度、場合によってはそれ以上かかる。初回審査前は、テスター側に一時的なアプリ名 `jp.yusukeishige.learningrogue (unreviewed)` が表示される。
+
+## 新規個人アカウントの本番公開条件
+
+このデベロッパーアカウントでは、本番公開を申請する前にクローズドテストが必要。
+
+- 12人以上のテスターが参加する
+- その状態を連続14日間維持する
+- 条件達成後、Google Play Consoleから製品版へのアクセスを申請する
+
+内部テストの参加者数や期間はこの条件には算入されない。内部テストで動作確認後、クローズドテスト用のテスター12人以上を確保して開始する。
+
 ## テストプレイ確認項目
 
 - 初回起動、縦横回転、ノッチ・パンチホール・ナビゲーションバーの余白
@@ -122,3 +145,4 @@ Google Playで9〜12歳を対象に含めると、Families Policyへの適合が
 - Google Playの対象年齢と「放課後ポーカー」の扱いを確定
 - データ セーフティ、コンテンツレーティング、アプリへのアクセス回答をConsoleへ登録
 - 国・地域と価格を確認し、公開方式を手動公開に設定
+- クローズドテストへ12人以上を登録し、14日間の参加条件を満たす
