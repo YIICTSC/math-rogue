@@ -1,4 +1,6 @@
-const localMapSymbolSrc = (symbol: string) => `${import.meta.env.BASE_URL}map-symbols-commons/${symbol}.svg`;
+import { getAssetBaseUrl } from '../utils/assetPaths';
+
+const localMapSymbolSrc = (symbol: string) => `${getAssetBaseUrl()}map-symbols-commons/${symbol}.svg`;
 
 export type MapSymbolAsset = {
   src: string;

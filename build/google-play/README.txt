@@ -1,0 +1,1 @@
+Google Play listing assets generated from the approved 学習ローグ icon and social card.\n

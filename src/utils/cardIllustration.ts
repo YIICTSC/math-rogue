@@ -1,3 +1,5 @@
+import { getAssetBaseUrl } from './assetPaths';
+
 const INVALID_FILE_CHARS = /[<>:"/\\|?*\x00-\x1F]/g;
 
 export const sanitizeCardIllustrationName = (name: string): string => {
@@ -43,7 +45,7 @@ export const getAge9CardArtAlias = (values: string[]): string | null => {
 };
 
 export const getCardIllustrationPaths = (id: string, name: string, aliases: string[] = []): string[] => {
-  const baseUrl = (import.meta as any).env.BASE_URL || '/';
+  const baseUrl = getAssetBaseUrl();
   const derivedAliases = deriveNameAliases(name);
   const shouldUseSharedSeedArt = derivedAliases.length > 0 || aliases.some((alias) => deriveNameAliases(alias).length > 0);
   const age9ArtAlias = getAge9CardArtAlias([name, ...aliases]);

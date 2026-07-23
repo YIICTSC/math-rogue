@@ -29,3 +29,15 @@ Pods/
 *.ipa
 *.xcarchive
 *.dSYM/
+
+# Generated Android build outputs and local signing material.
+android/.gradle/
+android/local.properties
+android/**/build/
+android/app/src/main/assets/public/
+android/app/src/main/assets/capacitor.config.json
+*.jks
+*.keystore
+*.p12
+*.aab
+*.apk
