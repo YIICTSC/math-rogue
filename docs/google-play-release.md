@@ -123,9 +123,11 @@ Google Play Consoleでは、現在のコンテンツレーティングにより9
 - クローズドテストのAlphaトラックを作成済み
 - Alphaトラックの対象国を日本に設定済み
 - Alphaトラックに「学習ローグ内部テスター」リスト（現在1名）とサポートURLを設定済み
-- Alphaトラックへ `1.0.0 (1)` の既存AABとリリースノートを追加済み
+- Alphaトラックへ `1.0.0 (2)` の最新AABとリリースノートを追加済み
 - Alphaリリースの下書きは保持されているが、アプリ設定が未完了のため、確認画面での確定・公開はGoogle Play Consoleで一時的にブロックされている
-- データ削除申請ページを含む次回ビルドは、Google Playへ再登録できるよう `1.0.0 (2)` とする
+- `1.0.0 (2)` のGitHub Actionsビルドは成功済み（run `30034037326`）
+- ローカルAAB: `build/android-release-v2/app-release.aab`
+- SHA-256: `eba5e66bfb74b5873a14dc83e5d175a8204cd18e2f73b9e58936c2a147e19d56`
 
 Google Playへの反映には通常1時間程度、場合によってはそれ以上かかる。初回審査前は、テスター側に一時的なアプリ名 `jp.yusukeishige.learningrogue (unreviewed)` が表示される。
 
