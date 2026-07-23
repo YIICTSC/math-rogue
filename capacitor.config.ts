@@ -10,6 +10,9 @@ const config: CapacitorConfig = {
     preferredContentMode: 'mobile',
     scrollEnabled: false,
   },
+  android: {
+    backgroundColor: '#000000',
+  },
 };
 
 export default config;

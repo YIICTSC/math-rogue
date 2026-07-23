@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">学習ローグ</string>
+    <string name="title_activity_main">学習ローグ</string>
+    <string name="package_name">jp.yusukeishige.learningrogue</string>
+    <string name="custom_url_scheme">jp.yusukeishige.learningrogue</string>
+</resources>

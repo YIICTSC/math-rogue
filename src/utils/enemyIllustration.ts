@@ -1,3 +1,5 @@
+import { getAssetBaseUrl } from './assetPaths';
+
 const INVALID_FILE_CHARS = /[<>:"/\\|?*\x00-\x1F]/g;
 const BOSS_PREFIX = /^\s*ボス\s*[：:]\s*/;
 
@@ -15,7 +17,7 @@ const getNameVariants = (value: string): string[] => [
 ];
 
 export const getEnemyIllustrationPaths = (name: string, aliases: string[] = []): string[] => {
-  const baseUrl = (import.meta as any).env.BASE_URL || '/';
+  const baseUrl = getAssetBaseUrl();
   const allNames = [name, ...aliases].filter(Boolean).map((v) => v.trim());
   const candidates = Array.from(new Set(
     allNames.flatMap((base) => {
