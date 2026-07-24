@@ -15566,7 +15566,7 @@ const App: React.FC = () => {
                                                 disabled={isAssignmentChallengeOnlyLocked || !childSafetyService.canUsePeerFeatures()}
                                                 onClick={() => {
                                                     if (!childSafetyService.canUsePeerFeatures()) {
-                                                        window.alert('9〜12歳の通信プレイには、保護者アカウントとの連携と許可が必要です。タイトル画面の「プライバシーとデータ」から確認してください。');
+                                                        window.alert('9〜12歳の通信プレイには、保護者または教員・学校が管理するグループとの連携が必要です。タイトル画面の「プライバシーとデータ」から確認してください。');
                                                         return;
                                                     }
                                                     if (redirectToAssignmentChallengeIfLocked()) return;
@@ -15589,7 +15589,7 @@ const App: React.FC = () => {
                                                 disabled={isAssignmentChallengeOnlyLocked || !childSafetyService.canUsePeerFeatures()}
                                                 onClick={() => {
                                                     if (!childSafetyService.canUsePeerFeatures()) {
-                                                        window.alert('9〜12歳の通信プレイには、保護者アカウントとの連携と許可が必要です。タイトル画面の「プライバシーとデータ」から確認してください。');
+                                                        window.alert('9〜12歳の通信プレイには、保護者または教員・学校が管理するグループとの連携が必要です。タイトル画面の「プライバシーとデータ」から確認してください。');
                                                         return;
                                                     }
                                                     if (redirectToAssignmentChallengeIfLocked()) return;
@@ -16201,7 +16201,7 @@ const App: React.FC = () => {
                             <div className="absolute inset-0 flex items-center justify-center bg-slate-950 p-4 text-white">
                                 <div className="max-w-md rounded-2xl border border-amber-500 bg-slate-900 p-6 text-center">
                                     <div className="mb-2 text-xl font-black text-amber-300">{trans("レースモードは無効です", languageMode)}</div>
-                                    <div className="mb-4 text-sm text-slate-200">{OFFLINE_DISTRIBUTABLE ? OFFLINE_NETWORK_FEATURE_MESSAGE : '9〜12歳の通信プレイには、保護者アカウントとの連携と許可が必要です。'}</div>
+                                    <div className="mb-4 text-sm text-slate-200">{OFFLINE_DISTRIBUTABLE ? OFFLINE_NETWORK_FEATURE_MESSAGE : '9〜12歳の通信プレイには、保護者または教員・学校が管理するグループとの連携が必要です。'}</div>
                                     <button onClick={returnToTitle} className="rounded-lg bg-amber-500 px-4 py-2 font-bold text-slate-950">{trans("タイトルへ戻る", languageMode)}</button>
                                 </div>
                             </div>
@@ -16872,7 +16872,7 @@ const App: React.FC = () => {
                             <div className="absolute inset-0 flex items-center justify-center bg-slate-950 p-4 text-white">
                                 <div className="max-w-md rounded-2xl border border-amber-500 bg-slate-900 p-6 text-center">
                                     <div className="mb-2 text-xl font-black text-amber-300">{trans("協力モードは無効です", languageMode)}</div>
-                                    <div className="mb-4 text-sm text-slate-200">{OFFLINE_DISTRIBUTABLE ? OFFLINE_NETWORK_FEATURE_MESSAGE : '9〜12歳の通信プレイには、保護者アカウントとの連携と許可が必要です。'}</div>
+                                    <div className="mb-4 text-sm text-slate-200">{OFFLINE_DISTRIBUTABLE ? OFFLINE_NETWORK_FEATURE_MESSAGE : '9〜12歳の通信プレイには、保護者または教員・学校が管理するグループとの連携が必要です。'}</div>
                                     <button onClick={returnToTitle} className="rounded-lg bg-amber-500 px-4 py-2 font-bold text-slate-950">{trans("タイトルへ戻る", languageMode)}</button>
                                 </div>
                             </div>

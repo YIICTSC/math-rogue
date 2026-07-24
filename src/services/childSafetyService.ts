@@ -97,6 +97,8 @@ export const childSafetyService = {
   },
   canUsePeerFeatures: () => {
     const settings = read();
-    return settings.ageBand !== '9_12' || Boolean(settings.rankingConsentVerifiedAt);
+    return settings.ageBand !== '9_12'
+      || Boolean(settings.rankingConsentVerifiedAt)
+      || Boolean(settings.learningAggregationAuthorizedAt);
   },
 };
