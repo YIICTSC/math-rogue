@@ -2,12 +2,15 @@
   "name": "learning-rogue",
   "private": true,
   "version": "1.0.0",
+  "description": "学習問題とカードバトルを組み合わせた学習ローグライクゲーム",
+  "author": "YIICTSC",
   "type": "module",
   "main": "electron/main.cjs",
   "scripts": {
     "dev": "vite --host 0.0.0.0 --port 5173",
     "dev:debug": "VITE_ENABLE_DEBUG_FEATURES=true vite --host 0.0.0.0 --port 5173",
     "build": "vite build",
+    "build:steam": "node scripts/build-steam.mjs",
     "build:ios": "VITE_APP_PLATFORM=ios VITE_PAID_EDITION=true vite build",
     "build:android": "node scripts/generate-android-asset-manifest.mjs && VITE_APP_PLATFORM=android VITE_PAID_EDITION=true VITE_LARGE_ASSET_BASE_URL=https://yiictsc.github.io/math-rogue/ vite build && node scripts/prepare-android-dist.mjs",
     "ios:add": "npm run build:ios && cap add ios --packagemanager SPM",
@@ -31,6 +34,9 @@
     "cleanup:dist-assets": "node scripts/cleanup-dist-assets.mjs",
     "convert:sprites:webp": "node scripts/convert-sprites-to-webp.mjs",
     "dist:offline": "node scripts/generate-icons.mjs && node scripts/build-offline.mjs && electron-builder --win nsis:x64",
+    "dist:steam:win": "node scripts/generate-icons.mjs && node scripts/build-steam.mjs && electron-builder --config electron-builder.steam.yml --win --x64 && node scripts/verify-steam-build.mjs",
+    "steam:config": "node scripts/generate-steampipe-config.mjs",
+    "steam:verify": "node scripts/verify-steam-build.mjs",
     "preview": "vite preview --host 0.0.0.0 --port 4173"
   },
   "build": {

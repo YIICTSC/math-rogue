@@ -1,0 +1,33 @@
+appId: jp.learningrogue.steam
+productName: 学習ローグ
+
+directories:
+  output: release/steam
+  buildResources: build
+
+files:
+  - dist/**/*
+  - electron/**/*
+  - package.json
+  - "!node_modules{,/**/*}"
+
+asar: true
+npmRebuild: false
+
+electronLanguages:
+  - ja
+  - en-US
+
+protocols:
+  - name: Learning Rogue Assignment
+    schemes:
+      - learning-rogue
+
+win:
+  executableName: LearningRogue
+  signExecutable: false
+  icon: build/icon.ico
+  target:
+    - target: dir
+      arch:
+        - x64

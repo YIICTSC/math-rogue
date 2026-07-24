@@ -43,7 +43,7 @@ const createWindow = (assignmentParam = null) => {
     minWidth: 960,
     minHeight: 640,
     backgroundColor: '#000000',
-    title: '学習ローグ オフライン版',
+    title: '学習ローグ',
     icon: path.join(__dirname, '..', 'build', 'icon.png'),
     autoHideMenuBar: true,
     webPreferences: {
