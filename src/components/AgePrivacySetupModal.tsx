@@ -46,8 +46,8 @@ export default function AgePrivacySetupModal({ open, languageMode, onComplete }:
       </div>
       {selected === '9_12' && <div className="mt-5 rounded-xl border border-amber-500/70 bg-amber-950/45 p-4 text-xs font-bold leading-5 text-amber-100">
         {english
-          ? 'For ages 9–12, learning summaries are sent only after linking with a code issued by a guardian or school. Ranking submission requires separate verified guardian permission.'
-          : '9〜12歳では、保護者または学校が発行したコードで連携した場合だけ学習集計を送信します。確認済みの家庭・学校連携があれば通信プレイを利用できます。ランキング投稿には、別途、確認済みの保護者許可が必要です。'}
+          ? 'For ages 9–12, learning summaries are sent only after linking with a code issued by a guardian or school. Co-op and races are available without that link. Ranking submission requires separate verified guardian permission.'
+          : '9〜12歳では、保護者または学校が発行したコードで連携した場合だけ学習集計を送信します。協力・レースは連携の有無にかかわらず利用できます。ランキング投稿には、別途、確認済みの保護者許可が必要です。'}
       </div>}
       <button type="button" disabled={!selected} onClick={save} className="mt-5 w-full rounded-xl bg-cyan-300 px-4 py-3 font-black text-slate-950 disabled:opacity-40">
         {english ? 'Save and continue' : '保存して続ける'}

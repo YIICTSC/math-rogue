@@ -9,7 +9,7 @@
     "dev:debug": "VITE_ENABLE_DEBUG_FEATURES=true vite --host 0.0.0.0 --port 5173",
     "build": "vite build",
     "build:ios": "VITE_APP_PLATFORM=ios VITE_PAID_EDITION=true vite build",
-    "build:android": "VITE_APP_PLATFORM=android VITE_PAID_EDITION=true VITE_LARGE_ASSET_BASE_URL=https://yiictsc.github.io/math-rogue/ vite build && node scripts/prepare-android-dist.mjs",
+    "build:android": "node scripts/generate-android-asset-manifest.mjs && VITE_APP_PLATFORM=android VITE_PAID_EDITION=true VITE_LARGE_ASSET_BASE_URL=https://yiictsc.github.io/math-rogue/ vite build && node scripts/prepare-android-dist.mjs",
     "ios:add": "npm run build:ios && cap add ios --packagemanager SPM",
     "ios:sync": "npm run build:ios && cap sync ios",
     "ios:open": "cap open ios",
@@ -86,6 +86,8 @@
   "dependencies": {
     "@capacitor/android": "^8.4.2",
     "@capacitor/core": "^8.4.2",
+    "@capacitor/file-transfer": "^2.0.4",
+    "@capacitor/filesystem": "^8.1.2",
     "@capacitor/ios": "^8.4.2",
     "@types/katex": "^0.16.8",
     "@vitejs/plugin-react": "^5.1.1",

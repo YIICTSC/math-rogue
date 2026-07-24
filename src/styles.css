@@ -4562,18 +4562,14 @@ textarea {
   box-shadow: 0 10px 24px rgba(0, 0, 0, 0.32) !important;
 }
 
-.battle-scene-root.battle-ui-custom .battle-control-bar {
-  transform: translateY(var(--battle-ui-control-bar-offset-y, 0px)) !important;
-}
-
 .battle-scene-root.battle-ui-custom {
   --battle-ui-hand-area-base-height: 15rem;
   --battle-ui-player-scale-baseline: 1;
 }
 
 .battle-scene-root.battle-ui-custom .battle-hand-area {
-  height: calc(var(--battle-ui-hand-area-base-height) - var(--battle-ui-control-bar-offset-y, 0px)) !important;
-  margin-top: var(--battle-ui-control-bar-offset-y, 0px) !important;
+  height: var(--battle-ui-hand-area-base-height) !important;
+  margin-top: 0 !important;
 }
 
 .battle-scene-root.battle-ui-custom .battle-hand-card {
@@ -4639,26 +4635,8 @@ textarea {
   }
 }
 
-@media (orientation: portrait) and (max-width: 540px) and (max-height: 820px) {
-  .battle-scene-root.battle-ui-custom {
-    --battle-ui-player-scale-baseline: 1.35;
-  }
-}
-
-@media (orientation: portrait) and (max-width: 540px) and (max-height: 700px) {
-  .battle-scene-root.battle-ui-custom {
-    --battle-ui-player-scale-baseline: 1.35;
-  }
-}
-
-@media (orientation: portrait) and (max-width: 767px) {
-  .battle-scene-root.battle-ui-custom {
-    --battle-ui-enemy-offset-y-baseline: -60px;
-  }
-}
-
 .battle-scene-root.battle-ui-custom .battle-enemies-area > * {
-  transform: translateY(calc(var(--battle-ui-enemy-offset-y, 0px) + var(--battle-ui-enemy-offset-y-baseline, 0px))) scale(var(--battle-ui-enemy-scale, 1)) !important;
+  transform: translateY(var(--battle-ui-enemy-offset-y, 0px)) scale(var(--battle-ui-enemy-scale, 1)) !important;
   transform-origin: center bottom !important;
 }
 
@@ -8682,11 +8660,11 @@ textarea {
 }
 
 .battle-scene-root.battle-ui-custom .battle-hand-area {
-  flex: 0 1 calc(clamp(9rem, 30dvh, var(--battle-ui-hand-area-base-height)) - var(--battle-ui-control-bar-offset-y, 0px)) !important;
+  flex: 0 0 clamp(7rem, calc(clamp(9rem, 30dvh, var(--battle-ui-hand-area-base-height)) - var(--battle-ui-control-bar-offset-y, 0px)), 22rem) !important;
   width: 100%;
   height: auto !important;
-  min-height: clamp(8rem, 24dvh, 10rem) !important;
-  margin-top: var(--battle-ui-control-bar-offset-y, 0px) !important;
+  min-height: 0 !important;
+  margin-top: 0 !important;
 }
 
 .battle-scene-root.battle-ui-custom .battle-hand-scroll {
@@ -8713,11 +8691,11 @@ textarea {
 
   .battle-scene-root.battle-ui-custom .battle-hand-area,
   .battle-scene-root.battle-force-split .battle-hand-area {
-    flex: 0 1 calc(clamp(7.25rem, 33dvh, 8.25rem) - var(--battle-ui-control-bar-offset-y, 0px)) !important;
+    flex: 0 0 clamp(5.5rem, calc(clamp(7.25rem, 33dvh, 8.25rem) - var(--battle-ui-control-bar-offset-y, 0px)), 16rem) !important;
     height: auto !important;
-    min-height: 7.25rem !important;
-    max-height: 8.25rem !important;
-    margin-top: var(--battle-ui-control-bar-offset-y, 0px) !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    margin-top: 0 !important;
   }
 
   .battle-scene-root.battle-ui-custom .battle-actors {
@@ -8772,27 +8750,24 @@ textarea {
   }
 }
 
-@media (orientation: portrait) and (max-width: 540px) {
-  .battle-scene-root.battle-ui-custom {
-    --battle-ui-enemy-offset-y-baseline: clamp(-64px, -7dvh, -48px);
-  }
-
+@media (orientation: portrait) and (max-width: 767px) {
   .battle-scene-root.battle-ui-custom .battle-hand-area {
-    flex-basis: clamp(11rem, 28dvh, 13rem) !important;
-    min-height: 11rem !important;
-    max-height: 13rem !important;
+    flex-basis: clamp(10rem, calc(34dvh - var(--battle-ui-control-bar-offset-y, 0px)), 38rem) !important;
+    min-height: 0 !important;
+    max-height: none !important;
   }
 
   .battle-scene-root.battle-ui-custom .battle-enemies-area {
     min-height: 0 !important;
     overflow: visible !important;
+    margin-top: clamp(8rem, 18dvh, 15rem) !important;
   }
 
   .battle-scene-root.battle-ui-custom .battle-player-area {
     position: relative !important;
     z-index: 30 !important;
     flex: 0 0 auto !important;
-    margin-top: 0 !important;
+    margin-top: auto !important;
   }
 
   .battle-scene-root.battle-ui-custom .battle-hand-scroll {

@@ -2,7 +2,7 @@
 import type { AttackEffectKey, StatusEffectKey } from '../types';
 import type { VisualThemeId } from '../data/visualThemes';
 import { getHumanoidEnemyVoiceProfile, type HumanoidEnemyVoiceAction } from '../data/humanoidEnemyVoiceLines';
-import { getAssetBaseUrl } from '../utils/assetPaths';
+import { assetUrl } from '../utils/assetPaths';
 
 export type BgmThemeId = VisualThemeId | 'magic-female' | 'magic-male';
 
@@ -876,21 +876,20 @@ class AudioService {
   private async playMp3(type: string, loop: boolean, playbackGeneration: number) {
       if (!this.ctx || !this.bgmGain) return;
       if (!this.isCurrentPlayback(type, playbackGeneration)) return;
-      const baseUrl = getAssetBaseUrl();
       const bgmRoot = this.bgmMode === 'NEW' ? 'bgm-new' : 'bgm';
       const resolvedTheme = this.bgmTheme === 'magic-female' && type === 'menu'
           ? 'magic'
           : this.bgmTheme;
       const themedPaths = resolvedTheme !== 'elementary'
           ? [
-              `${baseUrl}${bgmRoot}/${resolvedTheme}/${type}.mp3`,
+              assetUrl(`${bgmRoot}/${resolvedTheme}/${type}.mp3`),
               `/${bgmRoot}/${resolvedTheme}/${type}.mp3`,
               `${bgmRoot}/${resolvedTheme}/${type}.mp3`,
           ]
           : [];
       const sharedMagicPaths = resolvedTheme.startsWith('magic-')
           ? [
-              `${baseUrl}${bgmRoot}/magic/${type}.mp3`,
+              assetUrl(`${bgmRoot}/magic/${type}.mp3`),
               `/${bgmRoot}/magic/${type}.mp3`,
               `${bgmRoot}/magic/${type}.mp3`,
           ]
@@ -898,7 +897,7 @@ class AudioService {
       const paths = [
           ...themedPaths,
           ...sharedMagicPaths,
-          `${baseUrl}${bgmRoot}/${type}.mp3`,
+          assetUrl(`${bgmRoot}/${type}.mp3`),
           `/${bgmRoot}/${type}.mp3`,
           `${bgmRoot}/${type}.mp3`,
           `/${type}.mp3`,
@@ -1086,8 +1085,7 @@ class AudioService {
       if (this.sfxLoadPromises[name]) return this.sfxLoadPromises[name];
 
       const promise = (async () => {
-          const baseUrl = getAssetBaseUrl();
-          const paths = [`${baseUrl}sfx/${name}.mp3`, `/sfx/${name}.mp3`, `sfx/${name}.mp3`];
+          const paths = [assetUrl(`sfx/${name}.mp3`), `/sfx/${name}.mp3`, `sfx/${name}.mp3`];
           for (const path of paths) {
               try {
                   const response = await fetch(path);
@@ -1423,7 +1421,6 @@ class AudioService {
       const safeVoiceName = voiceName.replace(/[^a-z0-9_-]/gi, '').toLowerCase();
       if (!safeHeroId || !safeVoiceName) return Promise.resolve(false);
       this.ctx.resume().catch(() => {});
-      const baseUrl = getAssetBaseUrl();
       const voiceNameForPath = safeVoiceName;
       const name = `magic-voice-${safeHeroId}-${safeVoiceName}`;
       const generation = (this.sfxPlaybackGenerations.get(name) ?? 0) + 1;
@@ -1431,8 +1428,8 @@ class AudioService {
       return this.playHtmlSfx(
           name,
           [
-              `${baseUrl}sfx/magic-voices/${safeHeroId}/${voiceNameForPath}.ogg`,
-              `${baseUrl}sfx/magic-voices/${safeHeroId}/${voiceNameForPath}.wav`,
+              assetUrl(`sfx/magic-voices/${safeHeroId}/${voiceNameForPath}.ogg`),
+              assetUrl(`sfx/magic-voices/${safeHeroId}/${voiceNameForPath}.wav`),
               `/sfx/magic-voices/${safeHeroId}/${voiceNameForPath}.ogg`,
               `/sfx/magic-voices/${safeHeroId}/${voiceNameForPath}.wav`,
               `sfx/magic-voices/${safeHeroId}/${voiceNameForPath}.ogg`,
@@ -1463,15 +1460,14 @@ class AudioService {
       const safeVoiceName = voiceName.replace(/[^a-z0-9_-]/gi, '').toLowerCase();
       if (!safeHeroId || !safeVoiceName) return Promise.resolve(false);
       this.ctx.resume().catch(() => {});
-      const baseUrl = getAssetBaseUrl();
       const name = `high-school-voice-${safeHeroId}-${safeVoiceName}`;
       const generation = (this.sfxPlaybackGenerations.get(name) ?? 0) + 1;
       this.sfxPlaybackGenerations.set(name, generation);
       return this.playHtmlSfx(
           name,
           [
-              `${baseUrl}sfx/high-school-voices/${safeHeroId}/${safeVoiceName}.ogg`,
-              `${baseUrl}sfx/high-school-voices/${safeHeroId}/${safeVoiceName}.wav`,
+              assetUrl(`sfx/high-school-voices/${safeHeroId}/${safeVoiceName}.ogg`),
+              assetUrl(`sfx/high-school-voices/${safeHeroId}/${safeVoiceName}.wav`),
               `/sfx/high-school-voices/${safeHeroId}/${safeVoiceName}.ogg`,
               `/sfx/high-school-voices/${safeHeroId}/${safeVoiceName}.wav`,
               `sfx/high-school-voices/${safeHeroId}/${safeVoiceName}.ogg`,
@@ -1495,15 +1491,14 @@ class AudioService {
       if (!this.ctx || !this.sfxGain || this.isMuted) return Promise.resolve(false);
       this.ctx.resume().catch(() => {});
       const safeAction = action.replace(/[^a-z0-9_-]/gi, '').toLowerCase();
-      const baseUrl = getAssetBaseUrl();
       const name = `enemy-voice-${profile.theme}-${profile.id}-${safeAction}`;
       const generation = (this.sfxPlaybackGenerations.get(name) ?? 0) + 1;
       this.sfxPlaybackGenerations.set(name, generation);
       return this.playHtmlSfx(
           name,
           [
-              `${baseUrl}sfx/enemy-voices/${profile.theme}/${profile.id}/${safeAction}.ogg`,
-              `${baseUrl}sfx/enemy-voices/${profile.theme}/${profile.id}/${safeAction}.wav`,
+              assetUrl(`sfx/enemy-voices/${profile.theme}/${profile.id}/${safeAction}.ogg`),
+              assetUrl(`sfx/enemy-voices/${profile.theme}/${profile.id}/${safeAction}.wav`),
               `/sfx/enemy-voices/${profile.theme}/${profile.id}/${safeAction}.ogg`,
               `/sfx/enemy-voices/${profile.theme}/${profile.id}/${safeAction}.wav`,
               `sfx/enemy-voices/${profile.theme}/${profile.id}/${safeAction}.ogg`,
@@ -1526,15 +1521,14 @@ class AudioService {
       const safeLineId = lineId.replace(/[^a-z0-9_-]/gi, '').toLowerCase();
       if (!safeHeroId || !safeLineId) return false;
       this.ctx.resume().catch(() => {});
-      const baseUrl = getAssetBaseUrl();
       const name = `magic-event-voice-${safeHeroId}-${safeLineId}`;
       const generation = (this.sfxPlaybackGenerations.get(name) ?? 0) + 1;
       this.sfxPlaybackGenerations.set(name, generation);
       return this.playHtmlSfx(
           name,
           [
-              `${baseUrl}sfx/magic-event-voices/${safeHeroId}/${safeLineId}.ogg`,
-              `${baseUrl}sfx/magic-event-voices/${safeHeroId}/${safeLineId}.wav`,
+              assetUrl(`sfx/magic-event-voices/${safeHeroId}/${safeLineId}.ogg`),
+              assetUrl(`sfx/magic-event-voices/${safeHeroId}/${safeLineId}.wav`),
               `/sfx/magic-event-voices/${safeHeroId}/${safeLineId}.ogg`,
               `/sfx/magic-event-voices/${safeHeroId}/${safeLineId}.wav`,
               `sfx/magic-event-voices/${safeHeroId}/${safeLineId}.ogg`,
