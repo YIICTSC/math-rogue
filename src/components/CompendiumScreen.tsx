@@ -301,6 +301,7 @@ const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, 
 
     return (
         <div
+            data-gamepad-initial-scope={`compendium-${activeTab}`}
             className="main-compendium-screen flex flex-col h-full w-full bg-gray-900 bg-cover bg-center text-white relative"
             style={{
                 backgroundImage: `url(${assetUrl(visualTheme === 'magic'
@@ -326,7 +327,7 @@ const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, 
 
                 {/* Tabs */}
                 <div className="compendium-tabs flex gap-2">
-                    <button onClick={() => setActiveTab('CARDS')} className={`px-3 py-1 rounded text-sm font-bold flex items-center ${activeTab === 'CARDS' ? 'bg-amber-600 text-white' : 'bg-gray-700 text-gray-300'}`}>
+                    <button data-gamepad-initial-choice onClick={() => setActiveTab('CARDS')} className={`px-3 py-1 rounded text-sm font-bold flex items-center ${activeTab === 'CARDS' ? 'bg-amber-600 text-white' : 'bg-gray-700 text-gray-300'}`}>
                         <Swords size={14} className="mr-1" /> {trans("カード", languageMode)}
                     </button>
                     <button onClick={() => setActiveTab('RELICS')} className={`px-3 py-1 rounded text-sm font-bold flex items-center ${activeTab === 'RELICS' ? 'bg-amber-600 text-white' : 'bg-gray-700 text-gray-300'}`}>
@@ -351,6 +352,7 @@ const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, 
                 </div>
 
                 <button
+                    data-gamepad-back
                     onClick={onBack}
                     className="compendium-back-button flex items-center bg-gray-700 hover:bg-gray-600 border border-gray-400 px-4 py-2 rounded text-white transition-colors"
                 >

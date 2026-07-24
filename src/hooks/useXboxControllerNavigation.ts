@@ -63,6 +63,10 @@ const ACTION_TO_KEY: Record<NavigationAction, string> = {
 const AXIS_THRESHOLD = 0.55;
 const INITIAL_REPEAT_DELAY_MS = 280;
 const REPEAT_INTERVAL_MS = 110;
+const RIGHT_STICK_SCROLL_THRESHOLD = 0.55;
+const RIGHT_STICK_SCROLL_STEP = 56;
+const OPEN_GAMEPAD_KEYBOARD_EVENT = 'learning-rogue:open-gamepad-keyboard';
+const OPEN_GAMEPAD_SYSTEM_MENU_EVENT = 'learning-rogue:open-gamepad-system-menu';
 const FOCUSABLE_SELECTOR = [
   'button:not(:disabled)',
   'a[href]',
@@ -155,6 +159,16 @@ const isVisibleAndEnabled = (element: HTMLElement): boolean => {
 
 const getTopLeftInitialChoice = (scope: HTMLElement): HTMLElement | null =>
   Array.from(scope.querySelectorAll<HTMLElement>(INITIAL_CHOICE_SELECTOR))
+    .filter(isVisibleAndEnabled)
+    .sort((a, b) => {
+      const rectA = a.getBoundingClientRect();
+      const rectB = b.getBoundingClientRect();
+      if (Math.abs(rectA.top - rectB.top) > 8) return rectA.top - rectB.top;
+      return rectA.left - rectB.left;
+    })[0] ?? null;
+
+const getTopLeftFocusable = (scope: HTMLElement): HTMLElement | null =>
+  Array.from(scope.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTOR))
     .filter(isVisibleAndEnabled)
     .sort((a, b) => {
       const rectA = a.getBoundingClientRect();
@@ -407,9 +421,102 @@ const activateFocusedElement = () => {
     if (first?.matches('button:not(:disabled), a[href], [role="button"]')) first.click();
     return;
   }
+  if (
+    (active instanceof HTMLInputElement && !['button', 'checkbox', 'radio', 'range', 'submit', 'reset'].includes(active.type))
+    || active instanceof HTMLTextAreaElement
+  ) {
+    window.dispatchEvent(new CustomEvent(OPEN_GAMEPAD_KEYBOARD_EVENT, {
+      detail: { target: active },
+    }));
+    return;
+  }
   if (active.matches('button:not(:disabled), a[href], [role="button"], [tabindex]')) {
     active.click();
   }
+};
+
+const dispatchFormValueEvents = (element: HTMLInputElement | HTMLSelectElement) => {
+  element.dispatchEvent(new Event('input', { bubbles: true }));
+  element.dispatchEvent(new Event('change', { bubbles: true }));
+};
+
+const adjustFocusedFormControl = (action: NavigationAction): boolean => {
+  const active = document.activeElement;
+  if (active instanceof HTMLInputElement && active.type === 'range') {
+    if (!['left', 'right', 'up', 'down'].includes(action)) return false;
+    const parsedMin = Number(active.min);
+    const parsedMax = Number(active.max);
+    const min = Number.isFinite(parsedMin) ? parsedMin : 0;
+    const max = Number.isFinite(parsedMax) ? parsedMax : 100;
+    const step = active.step === 'any' ? 1 : Number(active.step || 1);
+    const direction = action === 'right' || action === 'up' ? 1 : -1;
+    active.valueAsNumber = Math.max(min, Math.min(max, active.valueAsNumber + step * direction));
+    dispatchFormValueEvents(active);
+    return true;
+  }
+
+  if (active instanceof HTMLSelectElement) {
+    if (!['left', 'right', 'up', 'down'].includes(action)) return false;
+    const direction = action === 'right' || action === 'down' ? 1 : -1;
+    let nextIndex = active.selectedIndex;
+    do {
+      nextIndex += direction;
+    } while (active.options[nextIndex]?.disabled);
+    if (nextIndex < 0 || nextIndex >= active.options.length) return true;
+    active.selectedIndex = nextIndex;
+    dispatchFormValueEvents(active);
+    return true;
+  }
+
+  return false;
+};
+
+const getScrollableAncestor = (element: Element | null): HTMLElement | null => {
+  let current = element instanceof HTMLElement ? element : null;
+  while (current && current !== document.body) {
+    const style = window.getComputedStyle(current);
+    if (
+      /(auto|scroll)/.test(`${style.overflowY}${style.overflow}`)
+      && current.scrollHeight > current.clientHeight + 2
+    ) {
+      return current;
+    }
+    current = current.parentElement;
+  }
+  return null;
+};
+
+const getLargestVisibleScrollable = (scope: ParentNode = document): HTMLElement | null =>
+  Array.from(scope.querySelectorAll<HTMLElement>('*'))
+    .filter(element => {
+      const style = window.getComputedStyle(element);
+      const rect = element.getBoundingClientRect();
+      return /(auto|scroll)/.test(`${style.overflowY}${style.overflow}`)
+        && element.scrollHeight > element.clientHeight + 2
+        && rect.width > 0
+        && rect.height > 0
+        && style.display !== 'none'
+        && style.visibility !== 'hidden';
+    })
+    .sort((a, b) => {
+      const rectA = a.getBoundingClientRect();
+      const rectB = b.getBoundingClientRect();
+      return rectB.width * rectB.height - rectA.width * rectA.height;
+    })[0] ?? null;
+
+const scrollWithRightStick = (amount: number) => {
+  const modal = getTopmostVisibleGamepadModal();
+  const active = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+  const centerElement = document.elementFromPoint(window.innerWidth / 2, window.innerHeight / 2);
+  const container = getScrollableAncestor(active)
+    ?? getScrollableAncestor(modal)
+    ?? getScrollableAncestor(centerElement)
+    ?? getLargestVisibleScrollable(modal ?? document);
+  if (container) {
+    container.scrollTop += amount;
+    return;
+  }
+  window.scrollBy({ top: amount, behavior: 'auto' });
 };
 
 const triggerShortcutButton = (buttonName: ShortcutButtonName): boolean => {
@@ -553,6 +660,7 @@ const handleActionFallback = (action: NavigationAction) => {
   const modal = getTopmostVisibleGamepadModal();
   if (!modal && handleBattleAction(action)) return;
   if (!modal && handleZonedNavigation(action)) return;
+  if (adjustFocusedFormControl(action)) return;
 
   const keyboardGameplaySurface = document.querySelector(KEYBOARD_GAMEPLAY_SURFACE_SELECTOR);
   if (keyboardGameplaySurface && action !== 'cancel' && !isTextEditingElement(document.activeElement)) {
@@ -597,10 +705,41 @@ const getAxisAction = (gamepad: Gamepad): NavigationAction | null => {
   return y > 0 ? 'down' : 'up';
 };
 
+const getDungeonDirectionKey = (gamepad: Gamepad): string | null => {
+  const axisX = gamepad.axes[0] ?? 0;
+  const axisY = gamepad.axes[1] ?? 0;
+  let dx = Math.abs(axisX) >= AXIS_THRESHOLD ? (axisX > 0 ? 1 : -1) : 0;
+  let dy = Math.abs(axisY) >= AXIS_THRESHOLD ? (axisY > 0 ? 1 : -1) : 0;
+
+  if (gamepad.buttons[BUTTON_INDEX.DPAD_LEFT]?.pressed) dx = -1;
+  if (gamepad.buttons[BUTTON_INDEX.DPAD_RIGHT]?.pressed) dx = 1;
+  if (gamepad.buttons[BUTTON_INDEX.DPAD_UP]?.pressed) dy = -1;
+  if (gamepad.buttons[BUTTON_INDEX.DPAD_DOWN]?.pressed) dy = 1;
+
+  if (dx === -1 && dy === -1) return 'Home';
+  if (dx === 1 && dy === -1) return 'PageUp';
+  if (dx === -1 && dy === 1) return 'End';
+  if (dx === 1 && dy === 1) return 'PageDown';
+  if (dx === -1) return 'ArrowLeft';
+  if (dx === 1) return 'ArrowRight';
+  if (dy === -1) return 'ArrowUp';
+  if (dy === 1) return 'ArrowDown';
+  return null;
+};
+
 export const useXboxControllerNavigation = () => {
   const pressedRef = useRef<Record<string, boolean>>({});
   const heldActionRef = useRef<{ action: NavigationAction | null; firstAt: number; lastAt: number }>({
     action: null,
+    firstAt: 0,
+    lastAt: 0,
+  });
+  const rightStickScrollRef = useRef<{ direction: -1 | 0 | 1; lastAt: number }>({
+    direction: 0,
+    lastAt: 0,
+  });
+  const dungeonDirectionRef = useRef<{ key: string | null; firstAt: number; lastAt: number }>({
+    key: null,
     firstAt: 0,
     lastAt: 0,
   });
@@ -615,6 +754,20 @@ export const useXboxControllerNavigation = () => {
     const focusPendingInitialChoice = () => {
       initialChoiceFrameId = 0;
       if (!document.body.classList.contains('gamepad-connected')) return;
+
+      const modal = getTopmostVisibleGamepadModal();
+      if (modal) {
+        const modalKey = modal.dataset.gamepadInitialScope ?? 'automatic-modal';
+        if (initializedChoiceScopes.get(modal) !== modalKey) {
+          const modalChoice = getTopLeftInitialChoice(modal) ?? getTopLeftFocusable(modal);
+          if (modalChoice) {
+            modalChoice.focus({ preventScroll: true });
+            modalChoice.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+            initializedChoiceScopes.set(modal, modalKey);
+          }
+        }
+        return;
+      }
 
       const scopes = Array.from(document.querySelectorAll<HTMLElement>(INITIAL_CHOICE_SCOPE_SELECTOR))
         .filter(isVisibleAndEnabled);
@@ -651,6 +804,17 @@ export const useXboxControllerNavigation = () => {
 
     const runAction = (action: NavigationAction) => {
       markGamepadNavigation();
+      if (
+        action === 'confirm'
+        && (
+          (document.activeElement instanceof HTMLInputElement
+            && !['button', 'checkbox', 'radio', 'range', 'submit', 'reset'].includes(document.activeElement.type))
+          || document.activeElement instanceof HTMLTextAreaElement
+        )
+      ) {
+        activateFocusedElement();
+        return;
+      }
       // A focused text field or screen-level key handler may consume the
       // synthetic Escape event without closing the visible overlay. When a
       // modal is open, B must always operate the topmost modal directly.
@@ -713,12 +877,19 @@ export const useXboxControllerNavigation = () => {
       if (gamepad && !wasConnected) scheduleInitialChoiceFocus();
 
       if (gamepad) {
+        const dungeonGameplayActive = Boolean(document.querySelector('.mini-game-dungeon-screen'));
         for (const [name, index] of Object.entries(BUTTON_INDEX) as [GamepadButtonName, number][]) {
           const action = BUTTON_TO_ACTION[name];
           const pressed = Boolean(gamepad.buttons[index]?.pressed);
           const key = `button:${index}`;
           if (pressed && !pressedRef.current[key]) {
-            if (SHORTCUT_BUTTONS.includes(name as ShortcutButtonName)) {
+            if (name === 'BACK') {
+              markGamepadNavigation();
+              window.dispatchEvent(new CustomEvent(OPEN_GAMEPAD_SYSTEM_MENU_EVENT));
+            } else if (dungeonGameplayActive && name.startsWith('DPAD_')) {
+              // Dungeon movement is processed once below so simultaneous
+              // horizontal/vertical input becomes one diagonal turn.
+            } else if (SHORTCUT_BUTTONS.includes(name as ShortcutButtonName)) {
               markGamepadNavigation();
               if (!triggerShortcutButton(name as ShortcutButtonName) && action) runAction(action);
             } else if (action) {
@@ -728,20 +899,55 @@ export const useXboxControllerNavigation = () => {
           pressedRef.current[key] = pressed;
         }
 
-        const axisAction = getAxisAction(gamepad);
         const now = performance.now();
-        const held = heldActionRef.current;
-        if (!axisAction) {
+        if (dungeonGameplayActive) {
+          const directionKey = getDungeonDirectionKey(gamepad);
+          const heldDungeon = dungeonDirectionRef.current;
+          if (!directionKey) {
+            dungeonDirectionRef.current = { key: null, firstAt: 0, lastAt: 0 };
+          } else if (heldDungeon.key !== directionKey) {
+            dungeonDirectionRef.current = { key: directionKey, firstAt: now, lastAt: now };
+            markGamepadNavigation();
+            dispatchKeyboardEvent(directionKey);
+          } else if (
+            now - heldDungeon.firstAt >= INITIAL_REPEAT_DELAY_MS
+            && now - heldDungeon.lastAt >= REPEAT_INTERVAL_MS
+          ) {
+            dungeonDirectionRef.current = { ...heldDungeon, lastAt: now };
+            dispatchKeyboardEvent(directionKey);
+          }
           heldActionRef.current = { action: null, firstAt: 0, lastAt: 0 };
-        } else if (held.action !== axisAction) {
-          heldActionRef.current = { action: axisAction, firstAt: now, lastAt: now };
-          runAction(axisAction);
+        } else {
+          const axisAction = getAxisAction(gamepad);
+          const held = heldActionRef.current;
+          if (!axisAction) {
+            heldActionRef.current = { action: null, firstAt: 0, lastAt: 0 };
+          } else if (held.action !== axisAction) {
+            heldActionRef.current = { action: axisAction, firstAt: now, lastAt: now };
+            runAction(axisAction);
+          } else if (
+            now - held.firstAt >= INITIAL_REPEAT_DELAY_MS
+            && now - held.lastAt >= REPEAT_INTERVAL_MS
+          ) {
+            heldActionRef.current = { ...held, lastAt: now };
+            runAction(axisAction);
+          }
+        }
+
+        const rightStickY = gamepad.axes[3] ?? 0;
+        const scrollDirection: -1 | 0 | 1 = Math.abs(rightStickY) >= RIGHT_STICK_SCROLL_THRESHOLD
+          ? rightStickY > 0 ? 1 : -1
+          : 0;
+        const scrollState = rightStickScrollRef.current;
+        if (scrollDirection === 0) {
+          rightStickScrollRef.current = { direction: 0, lastAt: 0 };
         } else if (
-          now - held.firstAt >= INITIAL_REPEAT_DELAY_MS
-          && now - held.lastAt >= REPEAT_INTERVAL_MS
+          scrollState.direction !== scrollDirection
+          || now - scrollState.lastAt >= REPEAT_INTERVAL_MS
         ) {
-          heldActionRef.current = { ...held, lastAt: now };
-          runAction(axisAction);
+          markGamepadNavigation();
+          scrollWithRightStick(scrollDirection * RIGHT_STICK_SCROLL_STEP);
+          rightStickScrollRef.current = { direction: scrollDirection, lastAt: now };
         }
       }
 

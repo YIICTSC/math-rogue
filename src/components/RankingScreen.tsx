@@ -57,7 +57,7 @@ const RankingScreen: React.FC<RankingScreenProps> = ({ onBack, languageMode, onR
   }
 
   return (
-    <div className="main-ranking-screen flex flex-col h-full w-full bg-gray-900 text-white relative">
+    <div data-gamepad-initial-scope={`ranking-${activeTab}`} className="main-ranking-screen flex flex-col h-full w-full bg-gray-900 text-white relative">
         {/* Header */}
         <div className="z-10 bg-black border-b-2 border-gray-600 p-4 flex flex-col md:flex-row justify-between items-center shrink-0 gap-4">
             <div className="flex items-center">
@@ -66,6 +66,7 @@ const RankingScreen: React.FC<RankingScreenProps> = ({ onBack, languageMode, onR
             </div>
 
             <button
+                data-gamepad-initial-choice
                 onClick={() => setRankingScope('ONLINE')}
                 className="flex items-center rounded border border-lime-400 bg-lime-950/70 px-3 py-2 text-xs font-black text-lime-200 hover:bg-lime-900"
             >

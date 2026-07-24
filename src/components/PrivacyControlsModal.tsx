@@ -94,11 +94,11 @@ export default function PrivacyControlsModal(props: Props) {
     window.location.reload();
   };
 
-  return <div className="fixed inset-0 z-[10090] flex items-center justify-center bg-black/90 p-3" role="dialog" aria-modal="true" aria-labelledby="privacy-controls-title">
+  return <div data-gamepad-modal data-gamepad-initial-scope="privacy-controls" className="fixed inset-0 z-[10090] flex items-center justify-center bg-black/90 p-3" role="dialog" aria-modal="true" aria-labelledby="privacy-controls-title">
     <section className="max-h-[calc(100dvh-1.5rem)] w-full max-w-2xl overflow-y-auto rounded-2xl border-4 border-cyan-300 bg-slate-950 p-5 text-white sm:p-7">
       <header className="flex items-start justify-between gap-3">
         <div><ShieldCheck className="mb-2 text-cyan-300" size={34} /><h2 id="privacy-controls-title" className="text-2xl font-black">プライバシーとデータ</h2></div>
-        <button onClick={onClose} className="rounded-lg border border-slate-600 p-2" aria-label="閉じる"><X size={18} /></button>
+        <button data-gamepad-back data-gamepad-initial-choice onClick={onClose} className="rounded-lg border border-slate-600 p-2" aria-label="閉じる"><X size={18} /></button>
       </header>
       <div className="mt-5 grid gap-3 sm:grid-cols-2">
         <article className="rounded-xl border border-slate-700 bg-slate-900 p-4"><small className="text-slate-400">年齢区分</small><strong className="mt-1 block text-lg">{settings.ageBand ? ageLabel[settings.ageBand] : '未設定'}</strong></article>

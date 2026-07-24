@@ -64,7 +64,7 @@ const UnitBoardModal: React.FC<UnitBoardModalProps> = ({ summary, open, onClose,
   };
 
   return (
-    <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/75 p-2 font-mono text-white sm:p-4">
+    <div data-gamepad-modal data-gamepad-initial-scope="unit-board" className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/75 p-2 font-mono text-white sm:p-4">
       <div
         role="dialog"
         aria-modal="true"
@@ -77,6 +77,8 @@ const UnitBoardModal: React.FC<UnitBoardModalProps> = ({ summary, open, onClose,
         }}
       >
         <button
+          data-gamepad-back
+          data-gamepad-initial-choice
           type="button"
           onClick={handleClose}
           onPointerUp={handleClose}

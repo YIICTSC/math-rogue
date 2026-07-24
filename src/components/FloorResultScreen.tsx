@@ -108,6 +108,7 @@ const FloorResultScreen: React.FC<FloorResultScreenProps> = ({ act, stats, story
 
   return (
     <div
+      data-gamepad-initial-scope={`floor-result-${storyIndex}-${isTyping ? 'typing' : 'story'}`}
       className="main-floor-result-screen w-full h-full bg-[#0a0a0a] bg-cover bg-center flex flex-col items-center justify-center p-3 sm:p-6 md:p-8 lg:p-10 relative overflow-hidden font-mono"
       style={visualTheme === 'magic' ? { backgroundImage: `url(${assetUrl('sprites/backgrounds/learning-rogue/magic-act-clear.webp')})` } : undefined}
     >
@@ -191,8 +192,9 @@ const FloorResultScreen: React.FC<FloorResultScreenProps> = ({ act, stats, story
 
         {/* Footer Area */}
         <div className="floor-result-footer mt-2 shrink-0">
-            <button 
-                onClick={handleNext}
+            <button
+              data-gamepad-initial-choice
+              onClick={handleNext}
                 className={`w-full py-3 sm:py-4 md:py-3 rounded-lg font-black text-lg sm:text-xl flex items-center justify-center gap-2 sm:gap-3 transition-all transform active:scale-95 shadow-xl border-b-4 ${isTyping ? 'bg-slate-200 text-slate-900 border-slate-400 hover:bg-white' : 'bg-white text-black border-gray-300 hover:bg-gray-200'}`}
             >
                 {isTyping ? trans("スキップ", languageMode) : trans("次へ進む", languageMode)} <ArrowRight size={20} className="sm:size-6" />{typingMode && ' [Enter]'}

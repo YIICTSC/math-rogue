@@ -40,6 +40,8 @@ const getProcessedDescription = (card: ICard, languageMode: LanguageMode) => {
 
 const CardInspectionModal: React.FC<CardInspectionModalProps> = ({ card, languageMode, onClose, onOpenArt }) => (
   <div
+    data-gamepad-modal
+    data-gamepad-initial-scope="card-inspection"
     className="app-modal-overlay app-card-inspection-modal-overlay fixed inset-0 z-[100] bg-black/90 flex flex-col items-center justify-center p-4 animate-in fade-in duration-200"
     onClick={onClose}
   >
@@ -57,7 +59,7 @@ const CardInspectionModal: React.FC<CardInspectionModalProps> = ({ card, languag
       className="app-modal-panel app-card-inspection-detail bg-gray-800 border-2 border-white p-4 md:p-6 rounded-lg max-w-sm w-full shadow-2xl relative max-h-[50vh] overflow-y-auto custom-scrollbar"
       onClick={(event) => event.stopPropagation()}
     >
-      <button onClick={onClose} className="absolute top-2 right-2 text-gray-400 hover:text-white p-2">
+      <button data-gamepad-back data-gamepad-initial-choice onClick={onClose} className="absolute top-2 right-2 text-gray-400 hover:text-white p-2">
         <X size={24} />
       </button>
       <h3 className="text-2xl font-bold text-yellow-400 mb-2 border-b border-gray-600 pb-2">

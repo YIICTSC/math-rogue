@@ -162,14 +162,14 @@ export default function AssignmentInboxModal({ open, onClose, onSelect, onProfil
   };
 
   return (
-    <div className="fixed inset-0 z-[10060] flex items-center justify-center bg-slate-950/90 p-2 sm:p-4" role="dialog" aria-modal="true" aria-labelledby="assignment-inbox-title">
+    <div data-gamepad-modal data-gamepad-initial-scope={`assignment-inbox-${profile ? 'linked' : 'join'}`} className="fixed inset-0 z-[10060] flex items-center justify-center bg-slate-950/90 p-2 sm:p-4" role="dialog" aria-modal="true" aria-labelledby="assignment-inbox-title">
       <section className="max-h-[96vh] w-full max-w-3xl overflow-y-auto rounded-2xl border-4 border-cyan-300 bg-slate-950 text-slate-100 shadow-[0_0_45px_rgba(34,211,238,0.28)]">
         <header className="sticky top-0 z-10 flex items-center justify-between border-b border-cyan-900 bg-slate-950/95 px-4 py-3 backdrop-blur sm:px-6">
           <div>
             <div className="text-[10px] font-black tracking-[0.28em] text-cyan-300">ASSIGNMENT INBOX</div>
             <h2 id="assignment-inbox-title" className="text-xl font-black sm:text-2xl">{t('課題受信箱')}</h2>
           </div>
-          <button type="button" onClick={onClose} className="rounded-lg border border-slate-600 p-2 text-slate-300 hover:bg-slate-800" aria-label={t('閉じる')}><X size={20} /></button>
+          <button type="button" data-gamepad-back data-gamepad-initial-choice onClick={onClose} className="rounded-lg border border-slate-600 p-2 text-slate-300 hover:bg-slate-800" aria-label={t('閉じる')}><X size={20} /></button>
         </header>
 
         {!profile ? (

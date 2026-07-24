@@ -31,13 +31,13 @@
 | － | 専用対応は未確認／未実装 |
 | 対象外 | 実装対象外。誤適用がないことだけ確認 |
 
-静的確認日: 2026-07-10
+静的・Gamepad APIシミュレーション確認日: 2026-07-25
 
 ## 1. 起動・モード選択
 
 | 画面 | `GameScreen` / コンポーネント | 方式 | 現状 | 実装 | PC確認 | 回帰確認 | 確認内容・メモ |
 | --- | --- | :---: | :---: | :---: | :---: | :---: | --- |
-| スタートメニュー | `START_MENU` / `App.tsx` | G | △ | [ ] | [ ] | [ ] | 方向移動、A決定、Bで戻れる範囲を確認 |
+| スタートメニュー | `START_MENU` / `App.tsx` | G | ○ | [x] | [ ] | [ ] | 保存ありは「つづきから」、保存なしは「冒険を始める」が初期位置 |
 | モード選択 | `MODE_SELECTION` / `ModeSelectionScreen.tsx` | I | ○ | [x] | [ ] | [ ] | 左上のゲームモードが初期位置 |
 | 難易度選択 | `DIFFICULTY_SELECTION` / `DifficultySelectionScreen.tsx` | I | ○ | [x] | [ ] | [ ] | 左上の難易度が初期位置 |
 | キャラクター選択 | `CHARACTER_SELECTION` / `CharacterSelectionScreen.tsx` | I | ○ | [x] | [ ] | [ ] | 左上の選択可能キャラクターが初期位置 |
@@ -79,8 +79,8 @@
 | ミニゲームモード選択 | `MINI_GAME_MODE_SELECTION` / `ModeSelectionScreen.tsx` | I | ○ | [x] | [ ] | [ ] | 共通のモード選択画面で対応 |
 | ポーカー | `MINI_GAME_POKER` / `PokerGameScreen.tsx` | S+I | ○ | [x] | [ ] | [ ] | 手札、Yプレイ、X捨てる、LB/RB並べ替え、説明、対戦、パック、ショップ、結果に対応 |
 | 校庭サバイバー | `MINI_GAME_SURVIVOR` / `SchoolyardSurvivorScreen.tsx` | S+I | ○ | [x] | [ ] | [ ] | 方向移動、B終了、強化選択、問題、ゲームオーバーを実装 |
-| スクールダンジョンRPG | `MINI_GAME_DUNGEON` / `SchoolDungeonRPG.tsx` | S+I | ○ | [x] | [ ] | [ ] | 既存の選択インデックス制御で方向、A決定、Bメニュー、ショップ、報酬、結果に対応 |
-| スクールダンジョンRPG2 | `MINI_GAME_DUNGEON_2` / `SchoolDungeonRPG2.tsx` | S+I | ○ | [x] | [ ] | [ ] | 既存の選択インデックス制御で方向、A決定、Bメニュー、ショップ、報酬、結果に対応 |
+| スクールダンジョンRPG | `MINI_GAME_DUNGEON` / `SchoolDungeonRPG.tsx` | S+I | ○ | [x] | [ ] | [ ] | 8方向移動、A決定、Bメニュー、RT飛び道具、ショップ、報酬、結果をシミュレーション確認 |
+| スクールダンジョンRPG2 | `MINI_GAME_DUNGEON_2` / `SchoolDungeonRPG2.tsx` | S+I | ○ | [x] | [ ] | [ ] | 8方向移動、A決定、Bメニュー、RT飛び道具、ショップ、報酬、結果をシミュレーション確認 |
 | 校長対決 | `MINI_GAME_KOCHO` / `KochoShowdown.tsx` | S+I | ○ | [x] | [ ] | [ ] | 難易度、手札、Y実行、報酬、強化、ショップ、結果に対応 |
 | 紙飛行機バトル | `MINI_GAME_PAPER_PLANE` / `PaperPlaneBattle.tsx` | S+I | ○ | [x] | [ ] | [ ] | セットアップ、手札、移動、Y攻撃、報酬、装備、休暇、格納庫、結果に対応 |
 | 帰宅ダッシュ | `MINI_GAME_GO_HOME` / `GoHomeDash.tsx` | S+I | ○ | [x] | [ ] | [ ] | Aジャンプ、開始、強化選択、問題、ゲームオーバーを実装 |
@@ -92,19 +92,19 @@
 
 | 画面 | `GameScreen` / コンポーネント | 方式 | 現状 | 実装 | PC確認 | 回帰確認 | 確認内容・メモ |
 | --- | --- | :---: | :---: | :---: | :---: | :---: | --- |
-| 課題作成 | `ASSIGNMENT_CREATE` / `AssignmentCreateScreen.tsx` | X | 対象外 | [ ] | [ ] | [ ] | 入力・設定UI。初期位置処理が誤適用されないこと |
-| 提出 | `SUBMISSION` / `SubmissionScreen.tsx` | X | 対象外 | [x] | [ ] | [ ] | 学習実績・提出情報UI。ゲーム内選択肢用の初期位置を適用しない |
-| 報酬カードアルバム | `REWARD_CARD_ALBUM` / `RewardCardAlbumScreen.tsx` | X | 対象外 | [ ] | [ ] | [ ] | 情報閲覧UI。誤適用がないこと |
+| 課題作成 | `ASSIGNMENT_CREATE` / `AssignmentCreateScreen.tsx` | G | ○ | [x] | [ ] | [ ] | 戻るを初期位置に設定。文字入力は画面キーボード |
+| 提出 | `SUBMISSION` / `SubmissionScreen.tsx` | G | ○ | [x] | [ ] | [ ] | 戻るを初期位置に設定。文字入力は画面キーボード |
+| 報酬カードアルバム | `REWARD_CARD_ALBUM` / `RewardCardAlbumScreen.tsx` | G | ○ | [x] | [ ] | [ ] | 戻るを初期位置に設定 |
 | ガーデン | `GARDEN` / `GardenScreen.tsx` | I | ○ | [x] | [ ] | [ ] | 左上の実行可能なゲーム内行動が初期位置 |
-| ランキング | `RANKING` / `RankingScreen.tsx` | X | 対象外 | [ ] | [ ] | [ ] | 情報閲覧UI。誤適用がないこと |
-| 図鑑 | `COMPENDIUM` / `CompendiumScreen.tsx` | X | 対象外 | [ ] | [ ] | [ ] | 情報閲覧UI。誤適用がないこと |
+| ランキング | `RANKING` / `RankingScreen.tsx` | G | ○ | [x] | [ ] | [ ] | Onlineを初期位置に設定。公開名は画面キーボード |
+| 図鑑 | `COMPENDIUM` / `CompendiumScreen.tsx` | G | ○ | [x] | [ ] | [ ] | CARDSを初期位置に設定 |
 
 ## 5. 情報・設定・開発画面
 
 | 画面 | `GameScreen` / コンポーネント | 方式 | 現状 | 実装 | PC確認 | 回帰確認 | 確認内容・メモ |
 | --- | --- | :---: | :---: | :---: | :---: | :---: | --- |
-| ヘルプ | `HELP` / `HelpScreen.tsx` | X | 対象外 | [ ] | [ ] | [ ] | ゲーム内選択肢用の初期位置が発生しないこと |
-| 設定モーダル | `SettingsModal.tsx` | X | 対象外 | [ ] | [ ] | [ ] | 設定項目へ初期位置処理を適用しない。既存操作を維持 |
+| ヘルプ | `HELP` / `HelpScreen.tsx` | G | ○ | [x] | [ ] | [ ] | 戻るを初期位置に設定。右スティックスクロール確認済み |
+| 設定モーダル | `SettingsModal.tsx` | G | ○ | [x] | [ ] | [ ] | タブ初期位置、range/select変更、B終了をシミュレーション確認 |
 | デバッグメニュー | `DEBUG_MENU` / `DebugMenuScreen.tsx` | X | 対象外 | [ ] | [ ] | [ ] | 開発用UI。初期位置処理が誤適用されないこと |
 | 魔法イベントシミュレーション | `MAGIC_EVENT_SIMULATION` / `MagicEventSimulationScreen.tsx` | X | 対象外 | [ ] | [ ] | [ ] | 開発用UI。初期位置処理が誤適用されないこと |
 
@@ -136,7 +136,9 @@
 - [ ] 必要に応じてフォーカス要素が表示範囲内へスクロールされる
 - [ ] 設定・情報・管理UIにゲーム内選択肢用の初期位置処理が誤適用されない
 - [ ] マウス、タッチ、キーボードの既存操作に回帰がない
-- [ ] コントローラー切断・再接続後も操作を再開できる
+- [x] Gamepad APIシミュレーションで切断・再接続後も操作を再開できる
+- [x] View / Backで全ゲーム画面共通メニューを開ける
+- [x] 風来シリーズ2作で8方向移動とRT飛び道具を操作できる
 
 ## 8. 追加画面を実装した時の記入テンプレート
 

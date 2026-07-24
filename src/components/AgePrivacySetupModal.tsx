@@ -26,7 +26,7 @@ export default function AgePrivacySetupModal({ open, languageMode, onComplete }:
     onComplete();
   };
 
-  return <div className="fixed inset-0 z-[10100] flex items-center justify-center bg-black/95 p-3" role="dialog" aria-modal="true" aria-labelledby="age-privacy-title">
+  return <div data-gamepad-modal data-gamepad-initial-scope="age-privacy-setup" className="fixed inset-0 z-[10100] flex items-center justify-center bg-black/95 p-3" role="dialog" aria-modal="true" aria-labelledby="age-privacy-title">
     <section className="max-h-[calc(100dvh-1.5rem)] w-full max-w-xl overflow-y-auto rounded-2xl border-4 border-cyan-300 bg-slate-950 p-5 text-white shadow-[0_0_55px_rgba(34,211,238,0.28)] sm:p-7">
       <ShieldCheck className="mx-auto text-cyan-300" size={42} />
       <div className="mt-2 text-center text-[10px] font-black tracking-[.25em] text-cyan-300">PRIVACY SETUP</div>
@@ -37,8 +37,9 @@ export default function AgePrivacySetupModal({ open, languageMode, onComplete }:
           : 'オンライン機能とデータ保護を正しく切り替えるための確認です。生年月日は保存しません。'}
       </p>
       <div className="mt-5 grid grid-cols-2 gap-3">
-        {labels.map((item) => <button
+        {labels.map((item, index) => <button
           key={item.id}
+          data-gamepad-initial-choice={index === 0 ? true : undefined}
           type="button"
           onClick={() => setSelected(item.id)}
           className={`rounded-xl border-2 px-3 py-4 text-base font-black ${selected === item.id ? 'border-cyan-200 bg-cyan-300 text-slate-950' : 'border-slate-600 bg-slate-900 text-slate-100'}`}

@@ -55,7 +55,7 @@ const MagicRomanceEndingScreen: React.FC<MagicRomanceEndingScreenProps> = ({
   };
 
   return (
-    <div className="magic-romance-ending-screen relative flex h-full w-full items-end justify-center overflow-hidden bg-black p-4 text-white sm:p-8">
+    <div data-gamepad-initial-scope={`magic-romance-ending-${endingIndex}-${lineIndex}`} className="magic-romance-ending-screen relative flex h-full w-full items-end justify-center overflow-hidden bg-black p-4 text-white sm:p-8">
       <img
         src={assetUrl(ending.imagePath)}
         alt={transEventText(ending.title, languageMode)}
@@ -99,6 +99,7 @@ const MagicRomanceEndingScreen: React.FC<MagicRomanceEndingScreenProps> = ({
             {transEventText(currentText, languageMode)}
           </p>
           <button
+            data-gamepad-initial-choice
             onClick={handleNext}
             className="magic-romance-ending-button mt-4 flex w-full items-center justify-center gap-2 rounded-md bg-pink-400 px-5 py-3 font-black text-slate-950 transition-colors hover:bg-pink-300"
           >

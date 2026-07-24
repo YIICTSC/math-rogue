@@ -114,16 +114,16 @@ const SettingsModal: React.FC<Props> = ({
   const updateBattleUi = (next: BattleUiSettings) => onChange(battleUiSettingsKey, next);
 
   return (
-    <div className="app-modal-overlay app-settings-modal-overlay fixed inset-0 z-[10020] bg-black/25 backdrop-blur-[1px] flex items-center justify-center p-3" onClick={onClose}>
-      <div className="app-modal-panel app-settings-modal w-full max-w-2xl max-h-[90dvh] overflow-y-auto rounded-xl border-2 border-cyan-500/50 bg-slate-900/65 text-white shadow-2xl backdrop-blur-sm" onClick={(e) => e.stopPropagation()}>
+    <div data-gamepad-modal data-gamepad-initial-scope={`settings-${tab}`} className="app-modal-overlay app-settings-modal-overlay fixed inset-0 z-[10020] bg-black/25 backdrop-blur-[1px] flex items-center justify-center p-3" onClick={onClose}>
+      <div data-gamepad-navigation-root className="app-modal-panel app-settings-modal w-full max-w-2xl max-h-[90dvh] overflow-y-auto rounded-xl border-2 border-cyan-500/50 bg-slate-900/65 text-white shadow-2xl backdrop-blur-sm" onClick={(e) => e.stopPropagation()}>
         <div className="sticky top-0 bg-slate-900/70 border-b border-slate-700 px-4 py-3 flex items-center justify-between backdrop-blur-sm">
           <h2 className="font-black flex items-center gap-2"><Settings size={16} /> {trans("セッティング", languageMode)}</h2>
-          <button onClick={onClose} className="p-1 rounded hover:bg-slate-700"><X size={16} /></button>
+          <button data-gamepad-back onClick={onClose} className="p-1 rounded hover:bg-slate-700"><X size={16} /></button>
         </div>
 
         <div className="px-3 pt-3 flex gap-2 flex-wrap">
-          {visibleTabs.map(t => (
-            <button key={t.key} onClick={() => onChangeTab(t.key)} className={`px-3 py-1 rounded border text-xs font-bold flex items-center gap-1 ${tab === t.key ? 'bg-cyan-700 border-cyan-300' : 'bg-slate-800 border-slate-600'}`}>
+          {visibleTabs.map((t, index) => (
+            <button key={t.key} data-gamepad-initial-choice={index === 0 ? true : undefined} onClick={() => onChangeTab(t.key)} className={`px-3 py-1 rounded border text-xs font-bold flex items-center gap-1 ${tab === t.key ? 'bg-cyan-700 border-cyan-300' : 'bg-slate-800 border-slate-600'}`}>
               {t.icon}{trans(t.label, languageMode)}
             </button>
           ))}

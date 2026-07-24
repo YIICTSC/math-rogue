@@ -171,10 +171,10 @@ ${mistakeRows.length > 0 ? `<h2>${trans('間違えた問題と再出題結果', 
   };
 
   return (
-    <div className="submission-screen h-full w-full overflow-hidden bg-slate-950 text-white">
+    <div data-gamepad-initial-scope="submission-screen" className="submission-screen h-full w-full overflow-hidden bg-slate-950 text-white">
       <div className="submission-shell flex h-full flex-col bg-[linear-gradient(180deg,#020617,#111827)]">
         <div className="submission-header flex items-center justify-between border-b border-emerald-500/30 px-4 py-3">
-          <button onClick={onBack} className="submission-back flex items-center gap-2 rounded-lg border border-slate-600 bg-slate-900 px-3 py-2 text-sm font-bold text-slate-200 hover:bg-slate-800">
+          <button data-gamepad-back data-gamepad-initial-choice onClick={onBack} className="submission-back flex items-center gap-2 rounded-lg border border-slate-600 bg-slate-900 px-3 py-2 text-sm font-bold text-slate-200 hover:bg-slate-800">
             <ArrowLeft size={16} /> {trans('戻る', languageMode)}
           </button>
           <div className="submission-title flex items-center gap-2 text-emerald-200">

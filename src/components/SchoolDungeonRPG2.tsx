@@ -2170,7 +2170,13 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
         <div className="dungeon-landscape-action-panel hidden landscape:flex md:flex order-3 w-64 flex-col items-center justify-between p-4 bg-[#161616] border-2 border-[#333] rounded-xl shadow-2xl relative shrink-0">
             <div className="flex flex-col items-center gap-8 w-full mt-4">
                 <div className="flex flex-col items-center group">
-                    <button className="w-14 h-14 bg-[#333] rounded-full shadow-[0_4px_0_#111] active:shadow-none active:translate-y-1 transition-all flex items-center justify-center text-white border border-[#555]" onClick={fireRangedWeapon}>
+                    <button
+                        className="w-14 h-14 bg-[#333] rounded-full shadow-[0_4px_0_#111] active:shadow-none active:translate-y-1 transition-all flex items-center justify-center text-white border border-[#555]"
+                        onClick={fireRangedWeapon}
+                        data-gamepad-shortcut="RT"
+                        aria-keyshortcuts="RT"
+                        aria-label={tr("飛び道具を撃つ")}
+                    >
                         <Crosshair size={28}/>
                     </button>
                     <span className="text-[#666] text-xs font-bold mt-1">R-SHOOT</span>
@@ -2211,7 +2217,15 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
                 <div className="absolute bottom-0 right-0 w-10 h-10 bg-[#333] rounded-br-xl border-b border-r border-[#444] active:bg-[#222] cursor-pointer z-0 flex items-center justify-center" onClick={() => handleMoveInput(1, 1)}><ArrowDownRight size={16} className="text-[#444]"/></div>
                 <div className="absolute w-8 h-8 bg-[#2a2a2a] rounded-full z-20 shadow-inner"></div>
             </div>
-            <div className="absolute right-6 top-1/2 -translate-y-[100px] flex flex-col items-center z-10"><button className="w-10 h-10 bg-[#333] rounded-full shadow-[0_2px_0_#111] active:shadow-none active:translate-y-1 transition-all flex items-center justify-center text-white border border-[#555]" onClick={fireRangedWeapon}><Crosshair size={16}/></button></div>
+            <div className="absolute right-6 top-1/2 -translate-y-[100px] flex flex-col items-center z-10">
+                <button
+                    className="w-10 h-10 bg-[#333] rounded-full shadow-[0_2px_0_#111] active:shadow-none active:translate-y-1 transition-all flex items-center justify-center text-white border border-[#555]"
+                    onClick={fireRangedWeapon}
+                    data-gamepad-shortcut="RT"
+                    aria-keyshortcuts="RT"
+                    aria-label={tr("飛び道具を撃つ")}
+                ><Crosshair size={16}/></button>
+            </div>
             <div className="absolute right-2 top-1/2 -translate-y-1/2 flex gap-4 transform -rotate-12">
                 <div className="flex flex-col items-center group"><button className="w-14 h-14 bg-[#8b0000] rounded-full shadow-[0_4px_0_#500000] active:shadow-none active:translate-y-1 transition-all flex items-center justify-center text-[#ffaaaa] font-bold border-2 border-[#a00000]" onClick={toggleMenu}>B</button><span className="text-[#666] text-xs font-bold mt-1">MENU</span></div>
                 <div className="flex flex-col items-center group"><button className="w-14 h-14 bg-[#ff0000] rounded-full shadow-[0_4px_0_#8b0000] active:shadow-none active:translate-y-1 transition-all flex items-center justify-center text-[#ffaaaa] font-bold border-2 border-[#cc0000]" onMouseDown={() => handlePressStart()} onMouseUp={(e) => handlePressEnd(e)} onMouseLeave={(e) => handlePressEnd(e)} onTouchStart={(e) => { e.preventDefault(); handlePressStart(); }} onTouchEnd={(e) => { e.preventDefault(); handlePressEnd(e); }}>A</button><span className="text-[#666] text-xs font-bold mt-1">ACT</span></div>

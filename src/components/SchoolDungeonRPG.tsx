@@ -3476,9 +3476,12 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
             <div className="flex flex-col items-center gap-8 w-full mt-4">
                  {/* SHOOT (R-Trigger style) */}
                  <div className="flex flex-col items-center group">
-                    <button 
-                        className="w-14 h-14 bg-[#333] rounded-full shadow-[0_4px_0_#111] active:shadow-none active:translate-y-1 transition-all flex items-center justify-center text-white border border-[#555]" 
+                    <button
+                        className="w-14 h-14 bg-[#333] rounded-full shadow-[0_4px_0_#111] active:shadow-none active:translate-y-1 transition-all flex items-center justify-center text-white border border-[#555]"
                         onClick={fireRangedWeapon}
+                        data-gamepad-shortcut="RT"
+                        aria-keyshortcuts="RT"
+                        aria-label={tr("飛び道具を撃つ")}
                     >
                         <Crosshair size={28}/>
                     </button>
@@ -3528,7 +3531,13 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
 
             {/* Mobile Shoot Button */}
             <div className="absolute right-6 top-1/2 -translate-y-[100px] flex flex-col items-center z-10 group">
-                <button className="w-10 h-10 bg-[#333] rounded-full shadow-[0_2px_0_#111] active:shadow-none active:translate-y-1 transition-all flex items-center justify-center text-white border border-[#555]" onClick={fireRangedWeapon}><Crosshair size={16}/></button>
+                <button
+                    className="w-10 h-10 bg-[#333] rounded-full shadow-[0_2px_0_#111] active:shadow-none active:translate-y-1 transition-all flex items-center justify-center text-white border border-[#555]"
+                    onClick={fireRangedWeapon}
+                    data-gamepad-shortcut="RT"
+                    aria-keyshortcuts="RT"
+                    aria-label={tr("飛び道具を撃つ")}
+                ><Crosshair size={16}/></button>
             </div>
 
             <div className="absolute right-2 top-1/2 -translate-y-1/2 flex gap-4 transform -rotate-12">

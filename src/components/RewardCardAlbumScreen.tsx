@@ -36,6 +36,7 @@ const RewardCardAlbumScreen: React.FC<RewardCardAlbumScreenProps> = ({
 
   return (
     <div
+      data-gamepad-initial-scope="reward-card-album"
       className="main-reward-card-album-screen h-full w-full overflow-y-auto bg-slate-950 bg-cover bg-center text-white custom-scrollbar"
       style={{ backgroundImage: `url(${assetUrl('banners/reward-card-album-background.png')})` }}
     >
@@ -84,6 +85,8 @@ const RewardCardAlbumScreen: React.FC<RewardCardAlbumScreenProps> = ({
         <div className="mx-auto flex w-full max-w-6xl flex-col gap-4">
           <div className="flex items-center justify-between gap-3">
             <button
+              data-gamepad-back
+              data-gamepad-initial-choice
               onClick={onBack}
               className="flex items-center rounded-lg border border-slate-600 bg-slate-900/90 px-3 py-2 text-sm font-black text-slate-100 hover:bg-slate-800"
             >

@@ -124,6 +124,8 @@ import { generateMagicRomanceSelectionEvent } from './services/magicRomanceEvent
 import { applyMagicRuleOnCardPlay } from './services/magicRuleService';
 import { UI_PREVIEW_GROUPS, UI_PREVIEW_SCREENS } from './data/uiPreviewScreens';
 import { useXboxControllerNavigation } from './hooks/useXboxControllerNavigation';
+import { GamepadVirtualKeyboard } from './components/GamepadVirtualKeyboard';
+import { GamepadSystemMenu } from './components/GamepadSystemMenu';
 import { CREDIT_SECTIONS } from './data/credits';
 import { getSupporterNpcEventByTitle } from './data/supporterNpcEvents';
 
@@ -1245,6 +1247,7 @@ const App: React.FC = () => {
     const debugSupporterNpcQuestionIndexesRef = useRef<Record<string, number>>({});
     const coopTsukaponWinnerRef = useRef<string | null>(null);
     const previousScreenRef = useRef<GameScreen>(GameScreen.START_MENU);
+    const gamepadTestScreenOpenedRef = useRef(false);
     const isLegacyVercelHost = typeof window !== 'undefined' && window.location.hostname === LEGACY_VERCEL_HOST;
     const [showMigrationNotice, setShowMigrationNotice] = useState<boolean>(() => isLegacyVercelHost);
 
@@ -5787,6 +5790,17 @@ const App: React.FC = () => {
             };
         });
     }, [applyUiPreviewBattle, coopBattleKey, coopBattleQueue, coopEnemyTurnCursor, coopPlayerSnapshots, coopSession, coopSupportCards, createUiPreviewEnemies, themedCharacters, uiPreviewBattleConfig]);
+
+    useEffect(() => {
+        if (!DEBUG_FEATURES_ENABLED || gamepadTestScreenOpenedRef.current || typeof window === 'undefined') return;
+        const requestedId = new URLSearchParams(window.location.search).get('gamepadTestScreen');
+        if (!requestedId) return;
+        const preview = UI_PREVIEW_SCREENS.find(item => item.id === requestedId);
+        if (!preview) return;
+        gamepadTestScreenOpenedRef.current = true;
+        handleStartUiPreview(preview.screen, preview.miniGameOutcome);
+        setIsUiPreviewToolbarOpen(false);
+    }, [handleStartUiPreview]);
 
     const closeUiPreview = useCallback(() => {
         crowdfundingBossDebugRef.current = null;
@@ -14808,6 +14822,14 @@ const App: React.FC = () => {
 
     return (
         <div key={`app-shell-${languageMode}`} className={`app-shell w-full h-[100dvh] bg-black overflow-hidden ${appSettings.fontSize === 'large' ? 'text-[105%]' : ''} ${isUiPreviewMode ? 'gamepad-shortcuts-debug' : ''}`}>
+            <GamepadVirtualKeyboard languageMode={languageMode} />
+            <GamepadSystemMenu
+                enabled={gameState.screen !== GameScreen.START_MENU}
+                canQuit={isElectronApp}
+                languageMode={languageMode}
+                onReturnToTitle={returnToTitle}
+                onQuit={quitApp}
+            />
             <div className={`w-full h-full relative overflow-hidden bg-black ${appSettings.lowDataMode ? '' : 'crt-scanline'} ${raceEffects.upsideDownUntil > raceEffectNow ? 'scale-x-[-1]' : ''} ${(raceEffects.deskShakeUntil > raceEffectNow && !appSettings.reduceScreenShake) ? 'animate-[race-desk-shake_0.18s_linear_infinite]' : ''}`}>
                 <style>{`
                     @keyframes race-desk-shake {
@@ -15046,7 +15068,7 @@ const App: React.FC = () => {
                 )}
 
                 {gameState.screen === GameScreen.START_MENU && (
-                    <div className={`start-menu-root w-full h-full bg-gray-900 flex items-center justify-center relative overflow-hidden ${visualTheme === 'high-school' ? 'start-menu-high-school' : visualTheme === 'magic' ? 'start-menu-magic' : ''}`}>
+                    <div data-gamepad-initial-scope="start-menu" className={`start-menu-root w-full h-full bg-gray-900 flex items-center justify-center relative overflow-hidden ${visualTheme === 'high-school' ? 'start-menu-high-school' : visualTheme === 'magic' ? 'start-menu-magic' : ''}`}>
                         <div
                             className={`absolute inset-0 bg-cover bg-[position:38%_center] md:bg-center transition-all duration-700 ease-out ${visualTheme !== 'elementary' ? 'opacity-0 scale-105 blur-sm' : 'opacity-100 scale-100 blur-0'}`}
                             style={{ backgroundImage: `url(${assetUrl('sprites/learning-rogue-title-background.webp')})` }}
@@ -15537,6 +15559,7 @@ const App: React.FC = () => {
                                         </div>
                                         <button
                                             disabled={isAssignmentChallengeOnlyLocked}
+                                            data-gamepad-initial-choice
                                             onClick={continueGame}
                                             className={`w-full py-2 px-4 text-lg font-bold border-b-4 border-r-4 rounded-none flex items-center justify-center shadow-lg relative group overflow-hidden animate-in fade-in ${isDailyLimitReached || isAssignmentChallengeOnlyLocked ? 'bg-gray-800 border-gray-700 text-gray-500 grayscale opacity-70 cursor-not-allowed' : 'bg-blue-900 text-white border-blue-400 hover:bg-blue-800 cursor-pointer'}`}
                                         >
@@ -15546,6 +15569,7 @@ const App: React.FC = () => {
                                     </>
                                 )}
                                 <button
+                                    data-gamepad-initial-choice={!hasSave ? true : undefined}
                                     onClick={() => startGame()}
                                     disabled={isLoading || isAssignmentChallengeOnlyLocked}
                                     className={`w-full py-2 px-4 text-lg font-bold border-b-4 border-r-4 rounded-none transition-all shadow-lg flex items-center justify-center ${isDailyLimitReached || isAssignmentChallengeOnlyLocked ? 'bg-gray-800 border-gray-700 text-gray-500 grayscale opacity-70 cursor-not-allowed' : 'bg-gray-100 text-black border-gray-500 hover:bg-white hover:border-gray-400 hover:translate-x-[1px] hover:translate-y-[1px] active:border-0 active:translate-y-[4px] active:translate-x-[4px]'}`}

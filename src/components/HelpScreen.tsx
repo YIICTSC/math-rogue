@@ -98,7 +98,7 @@ const HelpScreen: React.FC<HelpScreenProps> = ({ onBack, languageMode = 'JAPANES
   const copy = HELP_COPY[visualTheme] ?? HELP_COPY.elementary;
 
   return (
-    <div className="main-help-screen flex flex-col h-full w-full bg-gray-900 text-white relative">
+    <div data-gamepad-initial-scope="help-screen" className="main-help-screen flex flex-col h-full w-full bg-gray-900 text-white relative">
         {/* Header */}
         <div className="z-10 bg-black border-b-2 border-gray-600 p-4 flex justify-between items-center shrink-0">
             <div className="flex items-center">
@@ -106,6 +106,8 @@ const HelpScreen: React.FC<HelpScreenProps> = ({ onBack, languageMode = 'JAPANES
                 <h2 className="text-xl font-bold text-yellow-100">{trans("遊び方 & 用語集", languageMode)}</h2>
             </div>
             <button 
+                data-gamepad-back
+                data-gamepad-initial-choice
                 onClick={onBack}
                 className="flex items-center bg-gray-700 hover:bg-gray-600 border border-gray-400 px-4 py-2 rounded text-white transition-colors text-sm"
             >

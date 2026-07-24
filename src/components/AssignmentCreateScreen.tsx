@@ -348,10 +348,10 @@ const AssignmentCreateScreen: React.FC<AssignmentCreateScreenProps> = ({ onBack,
   const canCopy = selectedUnits.length > 0 || assignment.customProblems.length > 0;
 
   return (
-    <div className="assignment-create-screen h-full w-full overflow-hidden bg-slate-950 text-white">
+    <div data-gamepad-initial-scope="assignment-create-screen" className="assignment-create-screen h-full w-full overflow-hidden bg-slate-950 text-white">
       <div className="assignment-create-shell flex h-full flex-col bg-[radial-gradient(circle_at_top,rgba(14,165,233,0.18),transparent_38%),linear-gradient(180deg,#020617,#0f172a)]">
         <div className="assignment-create-header flex items-center justify-between border-b border-cyan-500/30 px-4 py-3">
-          <button onClick={onBack} className="assignment-create-back flex items-center gap-2 rounded-lg border border-slate-600 bg-slate-900 px-3 py-2 text-sm font-bold text-slate-200 hover:bg-slate-800">
+          <button data-gamepad-back data-gamepad-initial-choice onClick={onBack} className="assignment-create-back flex items-center gap-2 rounded-lg border border-slate-600 bg-slate-900 px-3 py-2 text-sm font-bold text-slate-200 hover:bg-slate-800">
             <ArrowLeft size={16} /> {trans('戻る', languageMode)}
           </button>
           <div className="assignment-create-title flex items-center gap-2 text-cyan-200">
