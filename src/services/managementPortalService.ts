@@ -1,4 +1,5 @@
 import { AnswerMode, AssignmentAnswerResult, AssignmentPayload, AssignmentRangeFilter, GameMode } from '../types';
+import { childSafetyService } from './childSafetyService';
 
 export type ManagementProfile = {
   learnerId: string;
@@ -64,6 +65,7 @@ export type ManagementRelationship = {
 export type LearnerGroupInvitation = {
   organizationName: string;
   groupName: string;
+  organizationType: 'family' | 'school';
 };
 
 type ProgressEvent = {
@@ -131,6 +133,9 @@ const getApiBase = () => {
 };
 
 const request = async <T>(path: string, init: RequestInit = {}, token?: string): Promise<T> => {
+  if (!childSafetyService.canContactRemoteServices()) {
+    throw new Error('年齢区分を選択するまでオンライン連携は利用できません。');
+  }
   const response = await fetch(`${getApiBase()}${path}`, {
     ...init,
     headers: {
@@ -302,17 +307,25 @@ export const managementPortalService = {
       displayName: string;
       code?: string;
       alreadyLinked?: boolean;
+      organizationType: 'family' | 'school';
     }>(`/api/group-invitations/${encodeURIComponent(token)}/learner`, {
       method: 'POST',
-      body: JSON.stringify(input),
+      body: JSON.stringify(childSafetyService.isChild() ? { displayName: '', attendanceNumber: '', ageBand: '9_12' } : input),
     }, currentProfile?.token);
     if (result.alreadyLinked && currentProfile) {
       const profile = { ...currentProfile, displayName: result.displayName || currentProfile.displayName };
       writeJson(PROFILE_KEY, profile);
+      if (childSafetyService.isChild()) {
+        childSafetyService.authorizeLearningAggregation(result.organizationType === 'family' ? 'guardian' : 'school');
+      }
       return profile;
     }
     if (!result.code) throw new Error('端末連携を完了できませんでした。');
-    return this.linkDevice(result.code);
+    const profile = await this.linkDevice(result.code);
+    if (childSafetyService.isChild()) {
+      childSafetyService.authorizeLearningAggregation(result.organizationType === 'family' ? 'guardian' : 'school');
+    }
+    return profile;
   },
 
   async linkDevice(code: string) {
@@ -326,6 +339,11 @@ export const managementPortalService = {
       const relationships = await this.fetchRelationships();
       profile.displayName = relationships.learner.displayName;
       writeJson(PROFILE_KEY, profile);
+      if (childSafetyService.isChild()) {
+        childSafetyService.authorizeLearningAggregation(
+          relationships.relationships.some((item) => item.organizationType === 'family') ? 'guardian' : 'school',
+        );
+      }
     } catch { /* the token is still valid even if the label lookup is offline */ }
     return profile;
   },
@@ -335,6 +353,17 @@ export const managementPortalService = {
     if (!profile) { clearLocalLink(); return; }
     await request('/api/v1/learner-devices/revoke-current', { method: 'POST', body: '{}' }, profile.token);
     clearLocalLink();
+    childSafetyService.revokeLearningAggregation();
+  },
+
+  async revokeLearningConsent() {
+    const profile = this.getProfile();
+    if (!profile) {
+      childSafetyService.revokeLearningAggregation();
+      return;
+    }
+    await request('/api/v1/learner/consent/revoke', { method: 'POST', body: '{}' }, profile.token);
+    childSafetyService.revokeLearningAggregation();
   },
 
   async fetchAssignments() {
@@ -369,7 +398,7 @@ export const managementPortalService = {
   },
 
   queueAnswer(assignment: AssignmentPayload, result: AssignmentAnswerResult) {
-    if (!assignment.managementPortal || !this.getProfile()) return;
+    if (!assignment.managementPortal || !this.getProfile() || !childSafetyService.canUseLearningAggregation()) return;
     const event: ProgressEvent = {
       eventId: makeEventId(),
       assignmentId: assignment.id,
@@ -388,7 +417,7 @@ export const managementPortalService = {
   },
 
   queueLearningActivity(result: AssignmentAnswerResult, assignment?: AssignmentPayload | null) {
-    if (!this.getProfile()) return;
+    if (!this.getProfile() || !childSafetyService.canUseLearningAggregation()) return;
     const managedUnitId = assignment?.units.find((unit) => unit.modes.includes(result.mode))?.id
       || assignment?.managementPortal?.unitId
       || result.mode;
@@ -411,7 +440,7 @@ export const managementPortalService = {
   async flushProgress() {
     const profile = this.getProfile();
     const events = getQueue();
-    if (!profile || events.length === 0 || (typeof navigator !== 'undefined' && !navigator.onLine)) return { accepted: 0, remaining: events.length };
+    if (!profile || !childSafetyService.canUseLearningAggregation() || events.length === 0 || (typeof navigator !== 'undefined' && !navigator.onLine)) return { accepted: 0, remaining: events.length };
     const batch = events.slice(0, 50);
     try {
       const result = await request<{ accepted: number; duplicates: number }>('/api/v1/learner/progress/batch', {
@@ -429,7 +458,7 @@ export const managementPortalService = {
   async flushLearningActivity() {
     const profile = this.getProfile();
     const events = getActivityQueue();
-    if (!profile || events.length === 0 || (typeof navigator !== 'undefined' && !navigator.onLine)) return { accepted: 0, remaining: events.length };
+    if (!profile || !childSafetyService.canUseLearningAggregation() || events.length === 0 || (typeof navigator !== 'undefined' && !navigator.onLine)) return { accepted: 0, remaining: events.length };
     const batch = events.slice(0, 50);
     try {
       const result = await request<{ accepted: number; duplicates: number }>('/api/v1/learner/activity/batch', {
@@ -489,5 +518,25 @@ export const managementPortalService = {
       await request(`/api/v1/learner/rewards/${encodeURIComponent(reward.grantId)}/claim`, { method: 'POST', body: '{}' }, profile.token);
     }
     return rewards.length;
+  },
+  async getRankingConsentProof() {
+    const profile = this.getProfile();
+    if (!profile) throw new Error('保護者が管理する家庭グループとの端末連携が必要です。');
+    const result = await request<{ proof: string; expiresAt: string }>('/api/v1/learner/ranking-consent-proof', {
+      method: 'POST',
+      body: JSON.stringify({ ageBand: '9_12' }),
+    }, profile.token);
+    return result;
+  },
+  async requestDataDeletion() {
+    const profile = this.getProfile();
+    if (!profile) throw new Error('削除対象の学習者との端末連携が必要です。');
+    const result = await request<{ requested: boolean; executeAfter: string }>('/api/v1/learner/data-deletion', {
+      method: 'POST',
+      body: '{}',
+    }, profile.token);
+    clearLocalLink();
+    childSafetyService.revokeLearningAggregation();
+    return result;
   },
 };
