@@ -59,7 +59,7 @@ export default function PrivacyControlsModal(props: Props) {
     try {
       const { proof } = await managementPortalService.getRankingConsentProof();
       await onlineRankingService.verifyChildConsent(proof);
-      setMessage('保護者許可を確認しました。匿名ランキングと通信プレイを利用できます。');
+      setMessage('保護者許可を確認しました。匿名ランキングへ参加できます。');
     } catch (reason) {
       setMessage(reason instanceof Error ? reason.message : '保護者許可を確認できませんでした。');
     } finally { setBusy(false); }
@@ -105,7 +105,7 @@ export default function PrivacyControlsModal(props: Props) {
         <article className="rounded-xl border border-slate-700 bg-slate-900 p-4"><small className="text-slate-400">教員・保護者向け学習集計</small><strong className="mt-1 block text-lg">{managementProfile ? `連携中（${settings.learningAggregationAuthority === 'guardian' ? '保護者' : '学校'}）` : '未連携'}</strong></article>
         <article className="rounded-xl border border-slate-700 bg-slate-900 p-4"><small className="text-slate-400">匿名ランキング</small><strong className="mt-1 block text-lg">{onlineProfile ? `参加中: ${onlineProfile.displayName}` : '未参加'}</strong></article>
         <article className="rounded-xl border border-slate-700 bg-slate-900 p-4"><small className="text-slate-400">9〜12歳のランキング許可</small><strong className="mt-1 block text-lg">{settings.rankingConsentVerifiedAt ? '保護者確認済み' : '未確認・投稿停止'}</strong></article>
-        {settings.ageBand === '9_12' && <article className="rounded-xl border border-slate-700 bg-slate-900 p-4"><small className="text-slate-400">協力・レース通信</small><strong className="mt-1 block text-lg">{childSafetyService.canUsePeerFeatures() ? '成人管理の連携を確認済み' : '家庭または学校との連携が必要'}</strong></article>}
+        <article className="rounded-xl border border-slate-700 bg-slate-900 p-4"><small className="text-slate-400">協力・レース通信</small><strong className="mt-1 block text-lg">年齢に関係なく利用可能</strong></article>
       </div>
       <div className="mt-5 grid gap-2 sm:grid-cols-2">
         {settings.ageBand === '9_12' && onlineProfile && !settings.rankingConsentVerifiedAt && managementProfile && (

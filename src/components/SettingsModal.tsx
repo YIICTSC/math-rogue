@@ -1,10 +1,11 @@
 import React from 'react';
-import { Settings, X, Volume2, Monitor, Wifi } from 'lucide-react';
+import { Settings, X, Volume2, Monitor, Wifi, Download } from 'lucide-react';
 import { LanguageMode } from '../types';
 import { trans } from '../utils/textUtils';
+import { AndroidAssetPackManager } from './AndroidAssetPackManager';
 
 export type BgmMode = 'STUDY' | 'NEW' | 'OLD';
-export type SettingsTab = 'AUDIO' | 'DISPLAY' | 'BATTLE' | 'COMM';
+export type SettingsTab = 'AUDIO' | 'DISPLAY' | 'BATTLE' | 'COMM' | 'ASSETS';
 
 export type BattleUiSettings = {
   controlBarOffsetY: number;
@@ -44,6 +45,7 @@ type Props = {
   onResetWindowState?: () => void;
   onQuitApp?: () => void;
   showCommunication?: boolean;
+  showAssetDownloads?: boolean;
   battleUiOrientation?: 'portrait' | 'landscape';
   languageMode: LanguageMode;
 };
@@ -52,7 +54,8 @@ const tabs: Array<{ key: SettingsTab; label: string; icon: React.ReactNode }> = 
   { key: 'AUDIO', label: '音声', icon: <Volume2 size={14} /> },
   { key: 'DISPLAY', label: '表示', icon: <Monitor size={14} /> },
   { key: 'BATTLE', label: '戦闘UI', icon: <Monitor size={14} /> },
-  { key: 'COMM', label: '通信', icon: <Wifi size={14} /> }
+  { key: 'COMM', label: '通信', icon: <Wifi size={14} /> },
+  { key: 'ASSETS', label: '素材', icon: <Download size={14} /> }
 ];
 
 const BattleSlider: React.FC<{
@@ -97,11 +100,15 @@ const SettingsModal: React.FC<Props> = ({
   onResetWindowState,
   onQuitApp,
   showCommunication = true,
+  showAssetDownloads = false,
   battleUiOrientation = 'portrait',
   languageMode
 }) => {
   if (!open) return null;
-  const visibleTabs = showCommunication ? tabs : tabs.filter(t => t.key !== 'COMM');
+  const visibleTabs = tabs.filter(t =>
+    (showCommunication || t.key !== 'COMM')
+    && (showAssetDownloads || t.key !== 'ASSETS')
+  );
   const battleUiSettingsKey = battleUiOrientation === 'landscape' ? 'battleUiLandscape' : 'battleUiPortrait';
   const activeBattleUi = settings[battleUiSettingsKey] || settings.battleUi;
   const updateBattleUi = (next: BattleUiSettings) => onChange(battleUiSettingsKey, next);
@@ -251,6 +258,10 @@ const SettingsModal: React.FC<Props> = ({
             <>
               <label className="flex items-center gap-2"><input type="checkbox" checked={settings.lowDataMode} onChange={e => onChange('lowDataMode', e.target.checked)} />{trans("低データ通信モード", languageMode)}</label>
             </>
+          )}
+
+          {showAssetDownloads && tab === 'ASSETS' && (
+            <AndroidAssetPackManager languageMode={languageMode} />
           )}
 
         </div>

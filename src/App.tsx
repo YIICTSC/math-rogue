@@ -79,10 +79,12 @@ import P2PRaceSetup from './components/P2PRaceSetup';
 import CoopSetupScreen, { CoopParticipantPayload, CoopStartPayload } from './components/CoopSetupScreen';
 import ModeSelectionScreen from './components/ModeSelectionScreen';
 import SettingsModal, { AppSettings, BattleUiSettings, SettingsTab } from './components/SettingsModal';
+import { AndroidAssetPackStartupModal } from './components/AndroidAssetPackManager';
 import Card from './components/Card';
 import PixelSprite from './components/PixelSprite';
 import { audioService, type BgmThemeId } from './services/audioService';
 import { assetPreloadService } from './services/assetPreloadService';
+import { androidAssetPackService } from './services/androidAssetPackService';
 import { setLegacySpriteModeEnabled } from './utils/legacySpriteMode';
 import { generateEnemyName } from './services/geminiService';
 import { generateDungeonMap } from './services/mapGenerator';
@@ -128,7 +130,6 @@ import { getSupporterNpcEventByTitle } from './data/supporterNpcEvents';
 const PARRY_WINDOW_MS = 650;
 const PARRY_PERFECT_MS = 220;
 const ENEMY_FINISHER_BURST_VOICE_DELAY_MS = 760;
-const PORTRAIT_BATTLE_ENEMY_OFFSET_Y_BASELINE = 60;
 const MAX_CARD_DETAIL_VFX = 80;
 const CROWDFUNDING_BANNER_URL = 'https://camp-fire.jp/projects/954165/view?utm_campaign=cp_po_share_c_msg_mypage_projects_open';
 const CROWDFUNDING_BANNER_IMAGE = assetUrl('banners/campfire-crowdfunding.webp');
@@ -1460,13 +1461,9 @@ const App: React.FC = () => {
     });
     const [battleUiOrientation, setBattleUiOrientation] = useState<'portrait' | 'landscape'>(() => getViewportBattleUiOrientation());
     const activeBattleUiSettings = useMemo(
-        () => {
-            if (battleUiOrientation === 'landscape') return appSettings.battleUiLandscape;
-            return {
-                ...appSettings.battleUiPortrait,
-                enemyOffsetY: appSettings.battleUiPortrait.enemyOffsetY + PORTRAIT_BATTLE_ENEMY_OFFSET_Y_BASELINE
-            };
-        },
+        () => battleUiOrientation === 'landscape'
+            ? appSettings.battleUiLandscape
+            : appSettings.battleUiPortrait,
         [appSettings.battleUiLandscape, appSettings.battleUiPortrait, battleUiOrientation]
     );
     const [totalMathCorrect, setTotalMathCorrect] = useState<number>(0);
@@ -1486,7 +1483,12 @@ const App: React.FC = () => {
             setOnlineNamePromptDismissed(false);
             return;
         }
-        if (!showAgePrivacySetup && !showStudentGradeSurvey && !onlineRankingProfile && !onlineNamePromptDismissed && onlineRankingService.isAvailable()) {
+        if (!showAgePrivacySetup
+            && !showStudentGradeSurvey
+            && !onlineRankingProfile
+            && !onlineNamePromptDismissed
+            && onlineRankingService.isAvailable()
+            && childSafetyService.canSubmitRanking()) {
             setShowOnlineNameSetup(true);
         }
     }, [gameState.screen, onlineNamePromptDismissed, onlineRankingProfile, showAgePrivacySetup, showStudentGradeSurvey]);
@@ -15563,12 +15565,7 @@ const App: React.FC = () => {
                                     {!OFFLINE_DISTRIBUTABLE && (
                                         <>
                                             <button
-                                                disabled={isAssignmentChallengeOnlyLocked || !childSafetyService.canUsePeerFeatures()}
                                                 onClick={() => {
-                                                    if (!childSafetyService.canUsePeerFeatures()) {
-                                                        window.alert('9〜12歳の通信プレイには、保護者または教員・学校が管理するグループとの連携が必要です。タイトル画面の「プライバシーとデータ」から確認してください。');
-                                                        return;
-                                                    }
                                                     if (redirectToAssignmentChallengeIfLocked()) return;
                                                     if (isDailyLimitReached) {
                                                         audioService.playSound('wrong');
@@ -15580,18 +15577,14 @@ const App: React.FC = () => {
                                                     setPendingAssignmentStartScreen(null);
                                                     setGameState(prev => ({ ...prev, screen: GameScreen.COOP_SETUP }));
                                                 }}
-                                                className={`w-full min-w-0 border-b-4 border-r-4 rounded-none flex items-center justify-center shadow-md ${isMobilePortrait ? 'py-1.5 px-0.5 text-[10px]' : 'py-2 px-1 text-xs'} font-bold ${isDailyLimitReached || isAssignmentChallengeOnlyLocked || !childSafetyService.canUsePeerFeatures() ? 'bg-gray-800 border-gray-700 text-gray-500 grayscale opacity-70 cursor-not-allowed' : 'bg-emerald-700/80 text-emerald-100 border-emerald-400 hover:bg-emerald-700 cursor-pointer'}`}
+                                                disabled={isAssignmentChallengeOnlyLocked}
+                                                className={`w-full min-w-0 border-b-4 border-r-4 rounded-none flex items-center justify-center shadow-md ${isMobilePortrait ? 'py-1.5 px-0.5 text-[10px]' : 'py-2 px-1 text-xs'} font-bold ${isDailyLimitReached || isAssignmentChallengeOnlyLocked ? 'bg-gray-800 border-gray-700 text-gray-500 grayscale opacity-70 cursor-not-allowed' : 'bg-emerald-700/80 text-emerald-100 border-emerald-400 hover:bg-emerald-700 cursor-pointer'}`}
                                             >
                                                 <Users className={isMobilePortrait ? 'mr-0.5' : 'mr-1'} size={isMobilePortrait ? 12 : 14} /> {trans("協力", languageMode)}
                                             </button>
 
                                             <button
-                                                disabled={isAssignmentChallengeOnlyLocked || !childSafetyService.canUsePeerFeatures()}
                                                 onClick={() => {
-                                                    if (!childSafetyService.canUsePeerFeatures()) {
-                                                        window.alert('9〜12歳の通信プレイには、保護者または教員・学校が管理するグループとの連携が必要です。タイトル画面の「プライバシーとデータ」から確認してください。');
-                                                        return;
-                                                    }
                                                     if (redirectToAssignmentChallengeIfLocked()) return;
                                                     if (isDailyLimitReached) {
                                                         audioService.playSound('wrong');
@@ -15603,7 +15596,8 @@ const App: React.FC = () => {
                                                     setPendingAssignmentStartScreen(null);
                                                     setGameState(prev => ({ ...prev, screen: GameScreen.RACE_SETUP }));
                                                 }}
-                                                className={`w-full min-w-0 border-b-4 border-r-4 rounded-none flex items-center justify-center shadow-md ${isMobilePortrait ? 'py-1.5 px-0.5 text-[10px]' : 'py-2 px-1 text-xs'} font-bold ${isDailyLimitReached || isAssignmentChallengeOnlyLocked || !childSafetyService.canUsePeerFeatures() ? 'bg-gray-800 border-gray-700 text-gray-500 grayscale opacity-70 cursor-not-allowed' : 'bg-cyan-700/80 text-cyan-100 border-cyan-400 hover:bg-cyan-700 cursor-pointer'}`}
+                                                disabled={isAssignmentChallengeOnlyLocked}
+                                                className={`w-full min-w-0 border-b-4 border-r-4 rounded-none flex items-center justify-center shadow-md ${isMobilePortrait ? 'py-1.5 px-0.5 text-[10px]' : 'py-2 px-1 text-xs'} font-bold ${isDailyLimitReached || isAssignmentChallengeOnlyLocked ? 'bg-gray-800 border-gray-700 text-gray-500 grayscale opacity-70 cursor-not-allowed' : 'bg-cyan-700/80 text-cyan-100 border-cyan-400 hover:bg-cyan-700 cursor-pointer'}`}
                                             >
                                                 <Flag className={isMobilePortrait ? 'mr-0.5' : 'mr-1'} size={isMobilePortrait ? 12 : 14} /> {trans("レース", languageMode)}
                                             </button>
@@ -15678,10 +15672,7 @@ const App: React.FC = () => {
                                         <HelpCircle className="mb-1" size={20} /> {trans("遊び方", languageMode)}
                                     </button>
                                     <button onClick={openDataTransferModal} className="flex-1 bg-gray-800 text-cyan-300 text-xs font-bold border-b-4 border-r-4 border-gray-600 border-cyan-500 hover:bg-gray-700 cursor-pointer flex flex-col items-center justify-center h-14 rounded">
-                                        <Globe className="mb-1" size={20} /> {trans("データ移行", languageMode)}
-                                    </button>
-                                    <button onClick={() => setShowPrivacyControls(true)} className="flex-1 bg-gray-800 text-cyan-200 text-xs font-bold border-b-4 border-r-4 border-gray-600 border-cyan-400 hover:bg-gray-700 cursor-pointer flex flex-col items-center justify-center h-14 rounded">
-                                        <ShieldCheck className="mb-1" size={20} /> {trans("データ保護", languageMode)}
+                                        <ShieldCheck className="mb-1" size={20} /> {trans("データ管理", languageMode)}
                                     </button>
                                 </div>
 
@@ -15866,8 +15857,8 @@ const App: React.FC = () => {
                         <div className="app-modal-panel app-data-transfer-modal w-full max-w-5xl rounded-xl border-2 border-cyan-500 bg-slate-950 p-3 shadow-[0_0_30px_rgba(34,211,238,0.25)] max-h-[94dvh] overflow-y-auto sm:p-5" onClick={e => e.stopPropagation()}>
                             <div className="flex items-start justify-between gap-4 mb-3 sm:mb-5">
                                 <div>
-                                    <h2 className="text-xl font-black text-white sm:text-2xl">{trans("データ移行", languageMode)}</h2>
-                                    <p className="text-xs text-slate-300 mt-1 sm:text-sm">{trans("Vercel版とGitHub版のあいだで保存データを移せます。", languageMode)}</p>
+                                    <h2 className="text-xl font-black text-white sm:text-2xl">{trans("データ移行・保護", languageMode)}</h2>
+                                    <p className="text-xs text-slate-300 mt-1 sm:text-sm">{trans("保存データの移行と、プライバシー・削除設定をまとめて管理します。", languageMode)}</p>
                                 </div>
                                 <button
                                     onClick={() => setShowDataTransferModal(false)}
@@ -15887,6 +15878,24 @@ const App: React.FC = () => {
                                     {transferStatus.message}
                                 </div>
                             )}
+
+                            <section className="mb-3 flex flex-col gap-3 rounded-xl border border-cyan-500/40 bg-cyan-950/25 p-3 sm:mb-5 sm:flex-row sm:items-center sm:justify-between sm:p-4">
+                                <div>
+                                    <h3 className="font-black text-cyan-100">{trans("データ保護・削除設定", languageMode)}</h3>
+                                    <p className="mt-1 text-xs text-slate-300 sm:text-sm">
+                                        {trans("年齢区分、学習集計、匿名ランキング、データ削除を確認できます。", languageMode)}
+                                    </p>
+                                </div>
+                                <button
+                                    onClick={() => {
+                                        setShowDataTransferModal(false);
+                                        setShowPrivacyControls(true);
+                                    }}
+                                    className="shrink-0 rounded-lg border border-cyan-300 bg-cyan-500 px-4 py-2 text-sm font-black text-slate-950 hover:bg-cyan-400"
+                                >
+                                    {trans("保護設定を開く", languageMode)}
+                                </button>
+                            </section>
 
                             <div className="grid gap-3 md:grid-cols-2 md:gap-5">
                                 <section className="rounded-xl border border-slate-700 bg-black/30 p-3 sm:p-4">
@@ -16197,11 +16206,11 @@ const App: React.FC = () => {
 
                 {!OFFLINE_DISTRIBUTABLE && gameState.screen === GameScreen.RACE_SETUP && (
                     <div className="absolute inset-0">
-                        {OFFLINE_DISTRIBUTABLE || !childSafetyService.canUsePeerFeatures() ? (
+                        {OFFLINE_DISTRIBUTABLE ? (
                             <div className="absolute inset-0 flex items-center justify-center bg-slate-950 p-4 text-white">
                                 <div className="max-w-md rounded-2xl border border-amber-500 bg-slate-900 p-6 text-center">
                                     <div className="mb-2 text-xl font-black text-amber-300">{trans("レースモードは無効です", languageMode)}</div>
-                                    <div className="mb-4 text-sm text-slate-200">{OFFLINE_DISTRIBUTABLE ? OFFLINE_NETWORK_FEATURE_MESSAGE : '9〜12歳の通信プレイには、保護者または教員・学校が管理するグループとの連携が必要です。'}</div>
+                                    <div className="mb-4 text-sm text-slate-200">{OFFLINE_NETWORK_FEATURE_MESSAGE}</div>
                                     <button onClick={returnToTitle} className="rounded-lg bg-amber-500 px-4 py-2 font-bold text-slate-950">{trans("タイトルへ戻る", languageMode)}</button>
                                 </div>
                             </div>
@@ -16868,11 +16877,11 @@ const App: React.FC = () => {
 
                 {!OFFLINE_DISTRIBUTABLE && gameState.screen === GameScreen.COOP_SETUP && (
                     <div className="absolute inset-0">
-                        {OFFLINE_DISTRIBUTABLE || !childSafetyService.canUsePeerFeatures() ? (
+                        {OFFLINE_DISTRIBUTABLE ? (
                             <div className="absolute inset-0 flex items-center justify-center bg-slate-950 p-4 text-white">
                                 <div className="max-w-md rounded-2xl border border-amber-500 bg-slate-900 p-6 text-center">
                                     <div className="mb-2 text-xl font-black text-amber-300">{trans("協力モードは無効です", languageMode)}</div>
-                                    <div className="mb-4 text-sm text-slate-200">{OFFLINE_DISTRIBUTABLE ? OFFLINE_NETWORK_FEATURE_MESSAGE : '9〜12歳の通信プレイには、保護者または教員・学校が管理するグループとの連携が必要です。'}</div>
+                                    <div className="mb-4 text-sm text-slate-200">{OFFLINE_NETWORK_FEATURE_MESSAGE}</div>
                                     <button onClick={returnToTitle} className="rounded-lg bg-amber-500 px-4 py-2 font-bold text-slate-950">{trans("タイトルへ戻る", languageMode)}</button>
                                 </div>
                             </div>
@@ -17816,7 +17825,10 @@ const App: React.FC = () => {
                     onCancel={() => setLearnerInvitationToken('')}
                 />
                 <OnlineNameSetupModal
-                    open={showOnlineNameSetup && !showAgePrivacySetup && !showStudentGradeSurvey}
+                    open={showOnlineNameSetup
+                        && !showAgePrivacySetup
+                        && !showStudentGradeSurvey
+                        && childSafetyService.canSubmitRanking()}
                     profile={onlineRankingProfile}
                     initialMode={onlineNameSetupIntent}
                     languageMode={languageMode}
@@ -17878,6 +17890,7 @@ const App: React.FC = () => {
                         </div>
                     </div>
                 )}
+                <AndroidAssetPackStartupModal languageMode={languageMode} />
                 <SettingsModal
                     open={showSettingsModal}
                     tab={settingsTab}
@@ -17893,6 +17906,7 @@ const App: React.FC = () => {
                     onResetWindowState={resetWindowState}
                     onQuitApp={quitApp}
                     showCommunication={!OFFLINE_DISTRIBUTABLE}
+                    showAssetDownloads={androidAssetPackService.isAvailable()}
                     battleUiOrientation={battleUiOrientation}
                     languageMode={languageMode}
                 />
