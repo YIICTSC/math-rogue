@@ -28,6 +28,8 @@ import TypingModeSelectionScreen from './components/TypingModeSelectionScreen';
 import DifficultySelectionScreen from './components/DifficultySelectionScreen';
 import RankingScreen from './components/RankingScreen';
 import OnlineNameSetupModal from './components/OnlineNameSetupModal';
+import AgePrivacySetupModal from './components/AgePrivacySetupModal';
+import PrivacyControlsModal from './components/PrivacyControlsModal';
 import AssignmentInboxModal from './components/AssignmentInboxModal';
 import LearnerGroupInviteModal from './components/LearnerGroupInviteModal';
 import MathChallengeScreen from './components/MathChallengeScreen';
@@ -87,6 +89,7 @@ import { generateDungeonMap } from './services/mapGenerator';
 import { parseTransferData, serializeTransferData, storageService } from './services/storageService';
 import { onlineRankingService, type OnlineRankingProfile, type OnlineReward } from './services/onlineRankingService';
 import { getNextLaunchLockedManagedAssignment, getNextRequiredManagedAssignment, isManagedAssignmentActive, managementPortalService, type ManagementProfile } from './services/managementPortalService';
+import { childSafetyService } from './services/childSafetyService';
 import { generateEvent, generateLegacyEvent } from './services/eventService';
 import { createAssignmentRewardCard, createHolographicCard, getUpgradedCard, synthesizeCards } from './utils/cardUtils';
 import { AZUKI_BOSS_FLAG, AZUKI_BOSS_NAME, AZUKI_ENCOUNTER_FLAG, AZUKI_REWARD_CARDS } from './data/azukiBoss';
@@ -100,7 +103,7 @@ import { getOnlineRankingLabel, getOnlineRankingPeriodLabel } from './data/onlin
 import { formatProblemUnitName } from './utils/problemUnitName';
 import { getDifficultyConfig } from './config/difficulty';
 import { CARD_ERASER_TEMPLATE_ID, CARD_ERASER_NAME, eraseCardEffect, getErasableEffectOptions } from './utils/cardEraser';
-import { RotateCcw, Home, BookOpen, Coins, Trophy, HelpCircle, Infinity, Play, ScrollText, Plus, Minus, X as MultiplyIcon, Divide, Shuffle, Send, Swords, Terminal, Club, Zap, Gamepad2, Brain, Languages, Music, Book, MessageSquare, GraduationCap, Clock, AlertTriangle, TimerOff, X, Check, FlaskConical, Globe, MapPin, ChevronDown, ArrowLeft, Sparkles, Flag, Keyboard, Users, Settings, ClipboardList, FileText, Monitor } from 'lucide-react';
+import { RotateCcw, Home, BookOpen, Coins, Trophy, HelpCircle, Infinity, Play, ScrollText, Plus, Minus, X as MultiplyIcon, Divide, Shuffle, Send, Swords, Terminal, Club, Zap, Gamepad2, Brain, Languages, Music, Book, MessageSquare, GraduationCap, Clock, AlertTriangle, TimerOff, X, Check, FlaskConical, Globe, MapPin, ChevronDown, ArrowLeft, Sparkles, Flag, Keyboard, Users, Settings, ClipboardList, FileText, Monitor, ShieldCheck } from 'lucide-react';
 import { applyAdditionalCardLogic } from './services/cardEffectLogic';
 import { p2pService } from './services/p2pService';
 import { TypingLessonId } from './data/typingLessonConfig';
@@ -1397,6 +1400,8 @@ const App: React.FC = () => {
     const studentGradeOptions = useMemo(() => getStudentGradeOptions(studentGradeMode), [studentGradeMode]);
     const isStudentGradeUnset = !studentProfile.grade?.trim();
     const [showStudentGradeSurvey, setShowStudentGradeSurvey] = useState<boolean>(() => !storageService.getStudentProfile().grade?.trim());
+    const [showAgePrivacySetup, setShowAgePrivacySetup] = useState<boolean>(() => !childSafetyService.hasAgeSelection());
+    const [showPrivacyControls, setShowPrivacyControls] = useState(false);
     const [onlineRankingProfile, setOnlineRankingProfile] = useState<OnlineRankingProfile | null>(() => onlineRankingService.getProfile());
     const [showOnlineNameSetup, setShowOnlineNameSetup] = useState(false);
     const [onlineNameSetupIntent, setOnlineNameSetupIntent] = useState<'manage' | 'rename'>('manage');
@@ -1481,10 +1486,10 @@ const App: React.FC = () => {
             setOnlineNamePromptDismissed(false);
             return;
         }
-        if (!showStudentGradeSurvey && !onlineRankingProfile && !onlineNamePromptDismissed && onlineRankingService.isAvailable()) {
+        if (!showAgePrivacySetup && !showStudentGradeSurvey && !onlineRankingProfile && !onlineNamePromptDismissed && onlineRankingService.isAvailable()) {
             setShowOnlineNameSetup(true);
         }
-    }, [gameState.screen, onlineNamePromptDismissed, onlineRankingProfile, showStudentGradeSurvey]);
+    }, [gameState.screen, onlineNamePromptDismissed, onlineRankingProfile, showAgePrivacySetup, showStudentGradeSurvey]);
 
     useEffect(() => {
         if (gameState.screen !== GameScreen.START_MENU) {
@@ -1582,7 +1587,7 @@ const App: React.FC = () => {
             requiredAssignmentCheckRef.current = false;
             return;
         }
-        if (!managementProfile || showStudentGradeSurvey || requiredAssignmentCheckRef.current) return;
+        if (!managementProfile || showAgePrivacySetup || showStudentGradeSurvey || requiredAssignmentCheckRef.current) return;
         requiredAssignmentCheckRef.current = true;
         let cancelled = false;
         void (async () => {
@@ -1617,7 +1622,7 @@ const App: React.FC = () => {
             }
         })();
         return () => { cancelled = true; };
-    }, [currentAssignment, gameState.screen, managementProfile, openManagedAssignment, showStudentGradeSurvey]);
+    }, [currentAssignment, gameState.screen, managementProfile, openManagedAssignment, showAgePrivacySetup, showStudentGradeSurvey]);
 
     const markDailyAssignmentCompleted = useCallback((assignmentId: string | undefined) => {
         if (!assignmentId || !assignmentId.startsWith('daily-')) return;
@@ -15558,8 +15563,12 @@ const App: React.FC = () => {
                                     {!OFFLINE_DISTRIBUTABLE && (
                                         <>
                                             <button
-                                                disabled={isAssignmentChallengeOnlyLocked}
+                                                disabled={isAssignmentChallengeOnlyLocked || !childSafetyService.canUsePeerFeatures()}
                                                 onClick={() => {
+                                                    if (!childSafetyService.canUsePeerFeatures()) {
+                                                        window.alert('9〜12歳の通信プレイには、保護者アカウントとの連携と許可が必要です。タイトル画面の「プライバシーとデータ」から確認してください。');
+                                                        return;
+                                                    }
                                                     if (redirectToAssignmentChallengeIfLocked()) return;
                                                     if (isDailyLimitReached) {
                                                         audioService.playSound('wrong');
@@ -15571,14 +15580,18 @@ const App: React.FC = () => {
                                                     setPendingAssignmentStartScreen(null);
                                                     setGameState(prev => ({ ...prev, screen: GameScreen.COOP_SETUP }));
                                                 }}
-                                                className={`w-full min-w-0 border-b-4 border-r-4 rounded-none flex items-center justify-center shadow-md ${isMobilePortrait ? 'py-1.5 px-0.5 text-[10px]' : 'py-2 px-1 text-xs'} font-bold ${isDailyLimitReached || isAssignmentChallengeOnlyLocked ? 'bg-gray-800 border-gray-700 text-gray-500 grayscale opacity-70 cursor-not-allowed' : 'bg-emerald-700/80 text-emerald-100 border-emerald-400 hover:bg-emerald-700 cursor-pointer'}`}
+                                                className={`w-full min-w-0 border-b-4 border-r-4 rounded-none flex items-center justify-center shadow-md ${isMobilePortrait ? 'py-1.5 px-0.5 text-[10px]' : 'py-2 px-1 text-xs'} font-bold ${isDailyLimitReached || isAssignmentChallengeOnlyLocked || !childSafetyService.canUsePeerFeatures() ? 'bg-gray-800 border-gray-700 text-gray-500 grayscale opacity-70 cursor-not-allowed' : 'bg-emerald-700/80 text-emerald-100 border-emerald-400 hover:bg-emerald-700 cursor-pointer'}`}
                                             >
                                                 <Users className={isMobilePortrait ? 'mr-0.5' : 'mr-1'} size={isMobilePortrait ? 12 : 14} /> {trans("協力", languageMode)}
                                             </button>
 
                                             <button
-                                                disabled={isAssignmentChallengeOnlyLocked}
+                                                disabled={isAssignmentChallengeOnlyLocked || !childSafetyService.canUsePeerFeatures()}
                                                 onClick={() => {
+                                                    if (!childSafetyService.canUsePeerFeatures()) {
+                                                        window.alert('9〜12歳の通信プレイには、保護者アカウントとの連携と許可が必要です。タイトル画面の「プライバシーとデータ」から確認してください。');
+                                                        return;
+                                                    }
                                                     if (redirectToAssignmentChallengeIfLocked()) return;
                                                     if (isDailyLimitReached) {
                                                         audioService.playSound('wrong');
@@ -15590,7 +15603,7 @@ const App: React.FC = () => {
                                                     setPendingAssignmentStartScreen(null);
                                                     setGameState(prev => ({ ...prev, screen: GameScreen.RACE_SETUP }));
                                                 }}
-                                                className={`w-full min-w-0 border-b-4 border-r-4 rounded-none flex items-center justify-center shadow-md ${isMobilePortrait ? 'py-1.5 px-0.5 text-[10px]' : 'py-2 px-1 text-xs'} font-bold ${isDailyLimitReached || isAssignmentChallengeOnlyLocked ? 'bg-gray-800 border-gray-700 text-gray-500 grayscale opacity-70 cursor-not-allowed' : 'bg-cyan-700/80 text-cyan-100 border-cyan-400 hover:bg-cyan-700 cursor-pointer'}`}
+                                                className={`w-full min-w-0 border-b-4 border-r-4 rounded-none flex items-center justify-center shadow-md ${isMobilePortrait ? 'py-1.5 px-0.5 text-[10px]' : 'py-2 px-1 text-xs'} font-bold ${isDailyLimitReached || isAssignmentChallengeOnlyLocked || !childSafetyService.canUsePeerFeatures() ? 'bg-gray-800 border-gray-700 text-gray-500 grayscale opacity-70 cursor-not-allowed' : 'bg-cyan-700/80 text-cyan-100 border-cyan-400 hover:bg-cyan-700 cursor-pointer'}`}
                                             >
                                                 <Flag className={isMobilePortrait ? 'mr-0.5' : 'mr-1'} size={isMobilePortrait ? 12 : 14} /> {trans("レース", languageMode)}
                                             </button>
@@ -15666,6 +15679,9 @@ const App: React.FC = () => {
                                     </button>
                                     <button onClick={openDataTransferModal} className="flex-1 bg-gray-800 text-cyan-300 text-xs font-bold border-b-4 border-r-4 border-gray-600 border-cyan-500 hover:bg-gray-700 cursor-pointer flex flex-col items-center justify-center h-14 rounded">
                                         <Globe className="mb-1" size={20} /> {trans("データ移行", languageMode)}
+                                    </button>
+                                    <button onClick={() => setShowPrivacyControls(true)} className="flex-1 bg-gray-800 text-cyan-200 text-xs font-bold border-b-4 border-r-4 border-gray-600 border-cyan-400 hover:bg-gray-700 cursor-pointer flex flex-col items-center justify-center h-14 rounded">
+                                        <ShieldCheck className="mb-1" size={20} /> {trans("データ保護", languageMode)}
                                     </button>
                                 </div>
 
@@ -16181,11 +16197,11 @@ const App: React.FC = () => {
 
                 {!OFFLINE_DISTRIBUTABLE && gameState.screen === GameScreen.RACE_SETUP && (
                     <div className="absolute inset-0">
-                        {OFFLINE_DISTRIBUTABLE ? (
+                        {OFFLINE_DISTRIBUTABLE || !childSafetyService.canUsePeerFeatures() ? (
                             <div className="absolute inset-0 flex items-center justify-center bg-slate-950 p-4 text-white">
                                 <div className="max-w-md rounded-2xl border border-amber-500 bg-slate-900 p-6 text-center">
                                     <div className="mb-2 text-xl font-black text-amber-300">{trans("レースモードは無効です", languageMode)}</div>
-                                    <div className="mb-4 text-sm text-slate-200">{OFFLINE_NETWORK_FEATURE_MESSAGE}</div>
+                                    <div className="mb-4 text-sm text-slate-200">{OFFLINE_DISTRIBUTABLE ? OFFLINE_NETWORK_FEATURE_MESSAGE : '9〜12歳の通信プレイには、保護者アカウントとの連携と許可が必要です。'}</div>
                                     <button onClick={returnToTitle} className="rounded-lg bg-amber-500 px-4 py-2 font-bold text-slate-950">{trans("タイトルへ戻る", languageMode)}</button>
                                 </div>
                             </div>
@@ -16852,11 +16868,11 @@ const App: React.FC = () => {
 
                 {!OFFLINE_DISTRIBUTABLE && gameState.screen === GameScreen.COOP_SETUP && (
                     <div className="absolute inset-0">
-                        {OFFLINE_DISTRIBUTABLE ? (
+                        {OFFLINE_DISTRIBUTABLE || !childSafetyService.canUsePeerFeatures() ? (
                             <div className="absolute inset-0 flex items-center justify-center bg-slate-950 p-4 text-white">
                                 <div className="max-w-md rounded-2xl border border-amber-500 bg-slate-900 p-6 text-center">
                                     <div className="mb-2 text-xl font-black text-amber-300">{trans("協力モードは無効です", languageMode)}</div>
-                                    <div className="mb-4 text-sm text-slate-200">{OFFLINE_NETWORK_FEATURE_MESSAGE}</div>
+                                    <div className="mb-4 text-sm text-slate-200">{OFFLINE_DISTRIBUTABLE ? OFFLINE_NETWORK_FEATURE_MESSAGE : '9〜12歳の通信プレイには、保護者アカウントとの連携と許可が必要です。'}</div>
                                     <button onClick={returnToTitle} className="rounded-lg bg-amber-500 px-4 py-2 font-bold text-slate-950">{trans("タイトルへ戻る", languageMode)}</button>
                                 </div>
                             </div>
@@ -17766,9 +17782,23 @@ const App: React.FC = () => {
                         </div>
                     </div>
                 )}
-                {renderStudentGradeSurvey()}
+                <AgePrivacySetupModal
+                    open={showAgePrivacySetup}
+                    languageMode={languageMode}
+                    onComplete={() => setShowAgePrivacySetup(false)}
+                />
+                <PrivacyControlsModal
+                    open={showPrivacyControls && !showAgePrivacySetup}
+                    languageMode={languageMode}
+                    onlineProfile={onlineRankingProfile}
+                    managementProfile={managementProfile}
+                    onClose={() => setShowPrivacyControls(false)}
+                    onOnlineProfileChange={setOnlineRankingProfile}
+                    onManagementProfileChange={setManagementProfile}
+                />
+                {!showAgePrivacySetup && renderStudentGradeSurvey()}
                 <AssignmentInboxModal
-                    open={showAssignmentInbox && !showStudentGradeSurvey}
+                    open={showAssignmentInbox && !showAgePrivacySetup && !showStudentGradeSurvey}
                     onClose={() => setShowAssignmentInbox(false)}
                     onSelect={openManagedAssignment}
                     onProfileChange={setManagementProfile}
@@ -17776,7 +17806,7 @@ const App: React.FC = () => {
                 />
                 <LearnerGroupInviteModal
                     token={learnerInvitationToken}
-                    open={Boolean(learnerInvitationToken) && !showStudentGradeSurvey}
+                    open={Boolean(learnerInvitationToken) && !showAgePrivacySetup && !showStudentGradeSurvey}
                     languageMode={languageMode}
                     onLinked={(profile) => {
                         setManagementProfile(profile);
@@ -17786,7 +17816,7 @@ const App: React.FC = () => {
                     onCancel={() => setLearnerInvitationToken('')}
                 />
                 <OnlineNameSetupModal
-                    open={showOnlineNameSetup && !showStudentGradeSurvey}
+                    open={showOnlineNameSetup && !showAgePrivacySetup && !showStudentGradeSurvey}
                     profile={onlineRankingProfile}
                     initialMode={onlineNameSetupIntent}
                     languageMode={languageMode}

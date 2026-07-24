@@ -3,6 +3,8 @@ import { Check, Dice5, Globe2, Link2, ShieldCheck, Smartphone, X } from 'lucide-
 import { LanguageMode } from '../types';
 import { onlineRankingService, OnlineRankingProfile } from '../services/onlineRankingService';
 import { trans } from '../utils/textUtils';
+import { childSafetyService } from '../services/childSafetyService';
+import { managementPortalService } from '../services/managementPortalService';
 
 interface Props {
   open: boolean;
@@ -129,7 +131,10 @@ const OnlineNameSetupModal: React.FC<Props> = ({ open, languageMode, onClose, on
     setLoading(true);
     setError('');
     try {
-      onRegistered(await onlineRankingService.register(name.trim()));
+      const guardianConsentProof = childSafetyService.isChild()
+        ? (await managementPortalService.getRankingConsentProof()).proof
+        : undefined;
+      onRegistered(await onlineRankingService.register(name.trim(), guardianConsentProof));
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : trans('公開名を登録できませんでした。', languageMode));
     } finally { setLoading(false); }
@@ -141,6 +146,7 @@ const OnlineNameSetupModal: React.FC<Props> = ({ open, languageMode, onClose, on
       <div className="mb-1 pr-9 text-center text-[10px] font-black tracking-[0.24em] text-lime-300 sm:mb-2 sm:pr-0 sm:text-xs sm:tracking-[0.3em]">ONLINE RANKING</div>
       <h2 className="mb-1 pr-9 text-center text-lg font-black leading-tight sm:mb-2 sm:pr-0 sm:text-2xl">{trans('ランキング用の公開名を決めよう', languageMode)}</h2>
       <p className="mx-auto mb-3 max-w-lg text-center text-xs font-bold leading-5 text-slate-300 sm:mb-5 sm:text-sm sm:leading-6">{trans('本名や学校名は使わず、ランキングでみんなに見せる名前を選んでください。あとからでも設定できます。', languageMode)}</p>
+      {childSafetyService.isChild() && <p className="mx-auto mb-3 max-w-lg rounded-xl border border-amber-500/70 bg-amber-950/45 p-3 text-center text-[11px] font-bold leading-5 text-amber-100">{trans('9〜12歳のランキング投稿には、家庭グループで確認済みの保護者許可が必要です。学校連携だけでは投稿されません。', languageMode)}</p>}
       <button data-gamepad-initial-choice onClick={() => setMode('redeem')} className="mx-auto mb-3 flex items-center gap-2 rounded-lg border border-cyan-500/60 bg-cyan-950/60 px-3 py-2 text-[11px] font-black text-cyan-100 sm:mb-5 sm:px-4 sm:text-xs"><Smartphone size={15} />{trans('別の端末からコードで引き継ぐ', languageMode)}</button>
 
       <div className="mb-2 grid grid-cols-3 gap-1.5 sm:mb-4 sm:gap-2">

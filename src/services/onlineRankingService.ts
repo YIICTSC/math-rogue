@@ -2,6 +2,7 @@ import { Card, TargetType, CardType } from '../types';
 import { CARDS_LIBRARY } from '../constants';
 import { storageService } from './storageService';
 import { createAssignmentRewardCard } from '../utils/cardUtils';
+import { childSafetyService } from './childSafetyService';
 
 export type OnlineRankingProfile = {
   id: string;
@@ -158,6 +159,9 @@ const getApiBase = () => {
 };
 
 const request = async <T>(path: string, init: RequestInit = {}, auth = false): Promise<T> => {
+  if (!childSafetyService.canContactRemoteServices()) {
+    throw new Error('年齢区分を選択するまでオンライン機能は利用できません。');
+  }
   const base = getApiBase();
   if (!base) throw new Error('オンラインランキングは準備中です。');
   const profile = onlineRankingService.getProfile();
@@ -429,18 +433,18 @@ const getSnapshot = (periodType: OnlinePeriodType, registeredAt: string) => {
 };
 
 export const onlineRankingService = {
-  isAvailable: () => Boolean(getApiBase()),
+  isAvailable: () => Boolean(getApiBase()) && childSafetyService.canContactRemoteServices(),
   getPlatform,
   getPendingSubmissionCount: () => getQueue().length,
   flushPendingSubmissions,
   markSnapshotsDirty: () => {
     if (typeof window === 'undefined') return;
     window.localStorage.setItem(DIRTY_SNAPSHOT_KEY, String(Date.now()));
-    if (onlineRankingService.getProfile()) scheduleDirtySnapshotSync();
+    if (onlineRankingService.getProfile() && childSafetyService.canSubmitRanking()) scheduleDirtySnapshotSync();
   },
   hasDirtySnapshots: () => typeof window !== 'undefined' && Boolean(window.localStorage.getItem(DIRTY_SNAPSHOT_KEY)),
   syncDirtySnapshots: async () => {
-    if (!onlineRankingService.getProfile() || !onlineRankingService.hasDirtySnapshots()) return;
+    if (!onlineRankingService.getProfile() || !childSafetyService.canSubmitRanking() || !onlineRankingService.hasDirtySnapshots()) return;
     if (typeof navigator !== 'undefined' && !navigator.onLine) return;
     await onlineRankingService.syncCurrentSnapshots();
   },
@@ -464,14 +468,34 @@ export const onlineRankingService = {
     return data.suggestions;
   },
 
-  register: async (displayName: string) => {
+  register: async (displayName: string, guardianConsentProof?: string) => {
+    if (childSafetyService.isChild() && !guardianConsentProof) {
+      throw new Error('9〜12歳のランキング参加には、管理ポータルで確認済みの保護者許可が必要です。');
+    }
     const data = await request<{ player: Omit<OnlineRankingProfile, 'token'>; token: string }>('/api/v1/players/register', {
       method: 'POST',
-      body: JSON.stringify({ displayName, acceptedTerms: true, platform: getPlatform(), source: 'learning-rogue' }),
+      body: JSON.stringify({
+        displayName,
+        acceptedTerms: true,
+        platform: getPlatform(),
+        source: 'learning-rogue',
+        ageBand: childSafetyService.getSettings().ageBand,
+        guardianConsentProof,
+      }),
     });
     const profile = { ...data.player, token: data.token };
     window.localStorage.setItem(PROFILE_KEY, JSON.stringify(profile));
+    if (childSafetyService.isChild()) childSafetyService.authorizeRankingByGuardian();
     return profile;
+  },
+
+  verifyChildConsent: async (guardianConsentProof: string) => {
+    if (!onlineRankingService.getProfile()) throw new Error('ランキングへの参加登録が必要です。');
+    await request<{ verified: boolean; verifiedAt: string }>('/api/v1/players/consent', {
+      method: 'POST',
+      body: JSON.stringify({ guardianConsentProof }),
+    }, true);
+    childSafetyService.authorizeRankingByGuardian();
   },
 
   updateDisplayName: async (displayName: string) => {
@@ -507,7 +531,7 @@ export const onlineRankingService = {
 
   syncCurrentSnapshots: async () => {
     const profile = onlineRankingService.getProfile();
-    if (!profile) return;
+    if (!profile || !childSafetyService.canSubmitRanking()) return;
     if (snapshotSyncPromise) return snapshotSyncPromise;
     const dirtyVersion = window.localStorage.getItem(DIRTY_SNAPSHOT_KEY);
     snapshotSyncPromise = (async () => {
@@ -560,7 +584,7 @@ export const onlineRankingService = {
   },
 
   claimPendingRewards: async (): Promise<OnlineReward[]> => {
-    if (!onlineRankingService.getProfile()) return [];
+    if (!onlineRankingService.getProfile() || !childSafetyService.canSubmitRanking()) return [];
     const pending = await request<{ rewards: OnlineReward[] }>('/api/v1/rewards/pending', {}, true);
     const claimed: OnlineReward[] = [];
     const existingIds = new Set(storageService.getRewardCardAlbum().map((card) => card.id));
@@ -576,5 +600,20 @@ export const onlineRankingService = {
       claimed.push(claimedReward);
     }
     return claimed;
+  },
+  clearLocalProfile: () => {
+    window.localStorage.removeItem(PROFILE_KEY);
+    window.localStorage.removeItem(SUBMISSION_QUEUE_KEY);
+    window.localStorage.removeItem(DIRTY_SNAPSHOT_KEY);
+  },
+  deleteServerData: async () => {
+    const profile = onlineRankingService.getProfile();
+    if (!profile) {
+      onlineRankingService.clearLocalProfile();
+      return;
+    }
+    await request('/api/v1/players/me', { method: 'DELETE' }, true);
+    onlineRankingService.clearLocalProfile();
+    childSafetyService.revokeRankingConsent();
   },
 };

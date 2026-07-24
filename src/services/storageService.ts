@@ -1603,5 +1603,20 @@ export const storageService = {
       localStorage.removeItem(STORAGE_KEY_CUSTOM_IMAGES);
       localStorage.removeItem(STORAGE_KEY_HINT_STREAKS);
       localStorage.removeItem(STORAGE_KEY_HIGHEST_CARD_DAMAGE);
+  },
+
+  clearAllLocalData: () => {
+      const keysToRemove: string[] = [];
+      for (let i = 0; i < localStorage.length; i++) {
+          const key = localStorage.key(i);
+          if (key && (
+              key.startsWith('pixel_spire_')
+              || key.startsWith('learning_rogue_')
+              || key.startsWith('learning-rogue-')
+          )) {
+              keysToRemove.push(key);
+          }
+      }
+      keysToRemove.forEach((key) => localStorage.removeItem(key));
   }
 };
