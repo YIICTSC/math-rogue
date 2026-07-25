@@ -19,6 +19,8 @@
 - コンテンツアンケートを公開済み。軽度のファンタジー戦闘、武器表示、オンライン機能、プリレンダリング素材への生成AI利用を申告した。
 - ストアタグ20件を公開済み。上位は「カードバトル」「ターン制戦略」「ローグライト」「教育」「PvE」。
 - サポート窓口としてGitHub Issuesを登録済み。
+- 開発元・パブリッシャー名を `YIICTSC` に設定し、Steamコミュニティグループ／Creator Homeへリンク済み。
+- Steamコミュニティグループ: `https://steamcommunity.com/groups/yiictsc`（Group ID: `46228409`）
 
 ## ローカルのリリースコマンド
 
@@ -55,6 +57,8 @@ STEAM_APP_ID=000000 STEAM_DEPOT_ID=000001 pnpm run steam:config
 - [x] コンテンツアンケートを保存・公開
 - [x] ストアタグ20件を設定・公開
 - [x] サポート窓口URLを設定
+- [x] 開発元・パブリッシャー名を `YIICTSC` に設定
+- [x] `YIICTSC` コミュニティグループをCreator Homeへリンク
 
 ID取得後、Steamworksの「インストール」設定を以下にする。
 
