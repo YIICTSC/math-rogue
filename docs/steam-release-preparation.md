@@ -1,12 +1,14 @@
 # Steam版リリース準備
 
-更新日: 2026-07-25
+更新日: 2026-07-26
 
 ## 現在地
 
 - Steam AppID: `5013100`
 - Windows Content Depot ID: `5013101`
 - ストアパッケージID: `1738674`
+- Beta TestingパッケージID: `1738673`
+- Developer CompパッケージID: `1738672`
 - 希望販売価格: 日本500円（他地域価格はSteamの推奨換算を基準に設定）
 - Steam専用Webビルドは `VITE_APP_PLATFORM=steam`、`VITE_PAID_EDITION=true` で生成する。
 - Steam版では有料版の時間制限撤廃を適用し、ランキング・課題・協力・レース等の通信機能は維持する。
@@ -24,7 +26,8 @@
 - 2026-07-25時点の最新ソースからWindows x64版を再生成し、Steamビルド検証に合格済み。
 - macOS版SteamCMDを導入・更新し、SteamPipeアップロード設定を生成済み。
 - Windows x64版をSteamPipeへアップロード済み。最新の成功Build IDは `24385958`、Depot Manifest IDは `2863320183767979359`。
-- Build `24385958` のdefaultブランチ反映はSteamworksのWeb確認待ち。SteamCMDの `SetLive default` はSteam側で拒否されるため、Steamworks画面から設定する。
+- Build `24385958` をSteamworks画面からPublic defaultブランチへ反映済み。
+- Developer Compパッケージが用意されているため、開発者アカウントではWindows版Steamクライアントからインストールしてテストできる。Windows実機での起動確認は未実施。
 - Steamストア用の実ゲーム画面7枚（1920×1080）を `release/steam/store-assets/screenshots/` に準備済み。うち追加2枚はチュートリアルを閉じた戦闘画面と、戦闘後の学習問題画面。
 - ImageGenで作成したキービジュアルと正式ロゴを用い、Steam規定寸法のカプセル／ライブラリ／アイコン素材10点を `release/steam/store-assets/generated/` に準備済み。
 
@@ -72,7 +75,9 @@ STEAM_APP_ID=000000 STEAM_DEPOT_ID=000001 pnpm run steam:config
 - [x] macOS版SteamCMDを導入・更新
 - [x] SteamPipeアップロード設定を生成
 - [x] Build `24385958` をSteamPipeへアップロード
-- [ ] Build `24385958` をdefaultブランチへ反映
+- [x] Build `24385958` をPublic defaultブランチへ反映
+- [x] Beta Testing／Developer Compパッケージを確認
+- [ ] Windows版Steamクライアントからインストール・起動・終了を確認
 
 ID取得後、Steamworksの「インストール」設定を以下にする。
 
