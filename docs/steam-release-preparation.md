@@ -23,7 +23,7 @@
 - Steamコミュニティグループ: `https://steamcommunity.com/groups/yiictsc`（Group ID: `46228409`）
 - 2026-07-25時点の最新ソースからWindows x64版を再生成し、Steamビルド検証に合格済み。
 - macOS版SteamCMDを導入・更新し、`internal` ブランチ用のSteamPipeアップロード設定を生成済み。
-- Steamストア用の実ゲーム画面5枚（1920×1080）を `release/steam/store-assets/screenshots/` に準備済み。
+- Steamストア用の実ゲーム画面7枚（1920×1080）を `release/steam/store-assets/screenshots/` に準備済み。うち追加2枚はチュートリアルを閉じた戦闘画面と、戦闘後の学習問題画面。
 - ImageGenで作成したキービジュアルと正式ロゴを用い、Steam規定寸法のカプセル／ライブラリ／アイコン素材10点を `release/steam/store-assets/generated/` に準備済み。
 
 ## ローカルのリリースコマンド
