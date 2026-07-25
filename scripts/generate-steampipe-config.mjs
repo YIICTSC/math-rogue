@@ -21,7 +21,10 @@ await access(contentRoot);
 const root = path.resolve('release/steam/steampipe');
 const scriptsDir = path.join(root, 'scripts');
 await mkdir(scriptsDir, { recursive: true });
-await mkdir(path.join(root, 'output'), { recursive: true });
+const buildOutput = path.join(root, 'output');
+await mkdir(buildOutput, { recursive: true });
+
+const toVdfPath = value => value.replaceAll('\\', '/');
 
 const depotFileName = `depot_build_${depotId}.vdf`;
 const appFileName = `app_build_${appId}.vdf`;
@@ -32,8 +35,8 @@ const appBuild = `"AppBuild"
     "AppID" "${appId}"
     "Desc" "Learning Rogue v${packageJson.version}"
     "Preview" "${preview}"${setLiveLine}
-    "BuildOutput" "../output"
-    "ContentRoot" "../../win-unpacked"
+    "BuildOutput" "${toVdfPath(buildOutput)}"
+    "ContentRoot" "${toVdfPath(contentRoot)}"
     "Depots"
     {
         "${depotId}" "${depotFileName}"
@@ -44,7 +47,7 @@ const appBuild = `"AppBuild"
 const depotBuild = `"DepotBuildConfig"
 {
     "DepotID" "${depotId}"
-    "ContentRoot" "../../win-unpacked"
+    "ContentRoot" "${toVdfPath(contentRoot)}"
     "FileMapping"
     {
         "LocalPath" "*"

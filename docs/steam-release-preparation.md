@@ -22,7 +22,9 @@
 - 開発元・パブリッシャー名を `YIICTSC` に設定し、Steamコミュニティグループ／Creator Homeへリンク済み。
 - Steamコミュニティグループ: `https://steamcommunity.com/groups/yiictsc`（Group ID: `46228409`）
 - 2026-07-25時点の最新ソースからWindows x64版を再生成し、Steamビルド検証に合格済み。
-- macOS版SteamCMDを導入・更新し、`internal` ブランチ用のSteamPipeアップロード設定を生成済み。
+- macOS版SteamCMDを導入・更新し、SteamPipeアップロード設定を生成済み。
+- Windows x64版をSteamPipeへアップロード済み。最新の成功Build IDは `24385958`、Depot Manifest IDは `2863320183767979359`。
+- Build `24385958` のdefaultブランチ反映はSteamworksのWeb確認待ち。SteamCMDの `SetLive default` はSteam側で拒否されるため、Steamworks画面から設定する。
 - Steamストア用の実ゲーム画面7枚（1920×1080）を `release/steam/store-assets/screenshots/` に準備済み。うち追加2枚はチュートリアルを閉じた戦闘画面と、戦闘後の学習問題画面。
 - ImageGenで作成したキービジュアルと正式ロゴを用い、Steam規定寸法のカプセル／ライブラリ／アイコン素材10点を `release/steam/store-assets/generated/` に準備済み。
 
@@ -55,8 +57,8 @@ STEAM_APP_ID=000000 STEAM_DEPOT_ID=000001 pnpm run steam:config
 
 - [x] Steam AppID: `5013100`
 - [x] Windows Content Depot ID: `5013101`
-- [ ] Steamworks SDK（macOS版SteamCMDを含む）
-- [ ] ビルド用SteamアカウントとAppIDへの権限
+- [x] Steamworks SDK（macOS版SteamCMDを含む）
+- [x] ビルド用SteamアカウントとAppIDへの権限
 - [x] 「アプリの変更をSteamに公開」権限
 - [x] 「価格と割引の管理」権限／支払受取アカウント状態
 - [x] 日本500円および地域別価格を審査へ提出
@@ -68,7 +70,9 @@ STEAM_APP_ID=000000 STEAM_DEPOT_ID=000001 pnpm run steam:config
 - [x] `YIICTSC` コミュニティグループをCreator Homeへリンク
 - [x] 最新ソースからWindows x64提出ビルドを再生成・検証
 - [x] macOS版SteamCMDを導入・更新
-- [x] `internal` ブランチ向けSteamPipeアップロード設定を生成
+- [x] SteamPipeアップロード設定を生成
+- [x] Build `24385958` をSteamPipeへアップロード
+- [ ] Build `24385958` をdefaultブランチへ反映
 
 ID取得後、Steamworksの「インストール」設定を以下にする。
 
