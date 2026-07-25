@@ -21,6 +21,9 @@
 - サポート窓口としてGitHub Issuesを登録済み。
 - 開発元・パブリッシャー名を `YIICTSC` に設定し、Steamコミュニティグループ／Creator Homeへリンク済み。
 - Steamコミュニティグループ: `https://steamcommunity.com/groups/yiictsc`（Group ID: `46228409`）
+- 2026-07-25時点の最新ソースからWindows x64版を再生成し、Steamビルド検証に合格済み。
+- macOS版SteamCMDを導入・更新し、`internal` ブランチ用のSteamPipeアップロード設定を生成済み。
+- Steamストア用の実ゲーム画面5枚（1920×1080）を `release/steam/store-assets/screenshots/` に準備済み。
 
 ## ローカルのリリースコマンド
 
@@ -59,6 +62,9 @@ STEAM_APP_ID=000000 STEAM_DEPOT_ID=000001 pnpm run steam:config
 - [x] サポート窓口URLを設定
 - [x] 開発元・パブリッシャー名を `YIICTSC` に設定
 - [x] `YIICTSC` コミュニティグループをCreator Homeへリンク
+- [x] 最新ソースからWindows x64提出ビルドを再生成・検証
+- [x] macOS版SteamCMDを導入・更新
+- [x] `internal` ブランチ向けSteamPipeアップロード設定を生成
 
 ID取得後、Steamworksの「インストール」設定を以下にする。
 
@@ -142,7 +148,7 @@ Steamの基本カプセルには、ゲーム画像、製品名、正式なサブ
 - [ ] Library Capsule
 - [ ] Library Hero（文字なし）
 - [ ] Library Logo（透明背景）
-- [ ] ゲームプレイ中心のスクリーンショット
+- [x] ゲームプレイ中心のスクリーンショット（ローカル準備済み、Steamworksへの登録待ち）
 - [ ] ゲームプレイトレーラー
 
 画像を新規作成する場合はImageGenを使用し、Steam公式テンプレートの最新寸法へ合わせる。
