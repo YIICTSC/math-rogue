@@ -24,6 +24,7 @@
 - 2026-07-25時点の最新ソースからWindows x64版を再生成し、Steamビルド検証に合格済み。
 - macOS版SteamCMDを導入・更新し、`internal` ブランチ用のSteamPipeアップロード設定を生成済み。
 - Steamストア用の実ゲーム画面5枚（1920×1080）を `release/steam/store-assets/screenshots/` に準備済み。
+- ImageGenで作成したキービジュアルと正式ロゴを用い、Steam規定寸法のカプセル／ライブラリ／アイコン素材10点を `release/steam/store-assets/generated/` に準備済み。
 
 ## ローカルのリリースコマンド
 
@@ -33,6 +34,9 @@ pnpm run build:steam
 
 # SteamPipeへ入れるWindows x64フォルダーを作成
 pnpm run dist:steam:win
+
+# Steam規定寸法のカプセル／ライブラリ／アイコン画像を再生成
+pnpm run steam:assets
 
 # SteamworksのIDを使ってSteamPipe VDFを生成（既定はPreview=1）
 STEAM_APP_ID=000000 STEAM_DEPOT_ID=000001 pnpm run steam:config
@@ -141,13 +145,15 @@ STEAM_PREVIEW=0 STEAM_SET_LIVE=internal \
 
 Steamの基本カプセルには、ゲーム画像、製品名、正式なサブタイトル以外の販促文を入れない。Library Heroは文字なし、Library Logoは透明背景のロゴのみとする。
 
-- [ ] Header Capsule
-- [ ] Small Capsule
-- [ ] Main Capsule
-- [ ] Vertical Capsule
-- [ ] Library Capsule
-- [ ] Library Hero（文字なし）
-- [ ] Library Logo（透明背景）
+- [x] Header Capsule（ローカル準備済み、Steamworksへの登録待ち）
+- [x] Small Capsule（ローカル準備済み、Steamworksへの登録待ち）
+- [x] Main Capsule（ローカル準備済み、Steamworksへの登録待ち）
+- [x] Vertical Capsule（ローカル準備済み、Steamworksへの登録待ち）
+- [x] Library Capsule（ローカル準備済み、Steamworksへの登録待ち）
+- [x] Library Header（ローカル準備済み、Steamworksへの登録待ち）
+- [x] Library Hero（文字なし、ローカル準備済み、Steamworksへの登録待ち）
+- [x] Library Logo（透明背景、ローカル準備済み、Steamworksへの登録待ち）
+- [x] Shortcut Icon／App Icon（ローカル準備済み、Steamworksへの登録待ち）
 - [x] ゲームプレイ中心のスクリーンショット（ローカル準備済み、Steamworksへの登録待ち）
 - [ ] ゲームプレイトレーラー
 
