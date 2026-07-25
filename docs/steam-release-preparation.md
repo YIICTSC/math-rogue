@@ -4,12 +4,18 @@
 
 ## 現在地
 
+- Steam AppID: `5013100`
+- Windows Content Depot ID: `5013101`
+- ストアパッケージID: `1738674`
+- 希望販売価格: 日本500円（他地域価格はSteamの推奨換算を基準に設定）
 - Steam専用Webビルドは `VITE_APP_PLATFORM=steam`、`VITE_PAID_EDITION=true` で生成する。
 - Steam版では有料版の時間制限撤廃を適用し、ランキング・課題・協力・レース等の通信機能は維持する。
 - Windows x64版の対象OSはWindows 10以降とする。Electron 23以降はWindows 7／8／8.1をサポートしない。
 - Xbox標準配列のGamepad APIシミュレーションは11項目すべて合格済み。物理コントローラー確認はSteamテストブランチで行う。
 - 初回はWindows x64版を対象とし、macOS／Linux版は別Depotとして後日判断する。
 - Windows x64版の生成・Steam向け設定検証は完了済み。展開後容量は約1.2 GB。
+- 日本価格500円とSteam推奨換算による全41地域価格を審査へ提出済み。審査後は自動反映せず、手動で公開する。
+- Windows 64-bit対応、`LearningRogue.exe` の起動設定、英語・日本語のDepot言語設定はSteamworksへ公開済み。
 
 ## ローカルのリリースコマンド
 
@@ -33,13 +39,16 @@ STEAM_APP_ID=000000 STEAM_DEPOT_ID=000001 pnpm run steam:config
 
 `steam:config` は誤アップロードを避けるため、既定で `"Preview" "1"` を出力する。実際にアップロードする時だけ `STEAM_PREVIEW=0` を指定する。非公開テストブランチへ自動反映する場合は `STEAM_SET_LIVE=<branch-name>` も指定する。defaultブランチはSteamworks画面から設定する。
 
-## Steamworksで先に取得する値
+## Steamworks設定
 
-- [ ] Steam AppID
-- [ ] Windows Content Depot ID
+- [x] Steam AppID: `5013100`
+- [x] Windows Content Depot ID: `5013101`
 - [ ] Steamworks SDK（macOS版SteamCMDを含む）
 - [ ] ビルド用SteamアカウントとAppIDへの権限
-- [ ] 「アプリの変更をSteamに公開」「価格と割引の管理」権限
+- [x] 「アプリの変更をSteamに公開」権限
+- [x] 「価格と割引の管理」権限／支払受取アカウント状態
+- [x] 日本500円および地域別価格を審査へ提出
+- [x] Windows 64-bit、起動オプション、Depot言語設定を公開
 
 ID取得後、Steamworksの「インストール」設定を以下にする。
 
