@@ -4565,6 +4565,7 @@ textarea {
 .battle-scene-root.battle-ui-custom {
   --battle-ui-hand-area-base-height: 15rem;
   --battle-ui-player-scale-baseline: 1;
+  --battle-ui-player-offset-baseline: 0px;
 }
 
 .battle-scene-root.battle-ui-custom .battle-hand-area {
@@ -4641,7 +4642,7 @@ textarea {
 }
 
 .battle-scene-root.battle-ui-custom .battle-player-area > div {
-  transform: translateY(var(--battle-ui-player-offset-y, 0px)) scale(var(--battle-ui-player-scale, 1)) scale(var(--battle-ui-player-scale-baseline, 1)) !important;
+  transform: translateY(calc(var(--battle-ui-player-offset-y, 0px) + var(--battle-ui-player-offset-baseline, 0px))) scale(var(--battle-ui-player-scale, 1)) scale(var(--battle-ui-player-scale-baseline, 1)) !important;
   transform-origin: left bottom !important;
 }
 
@@ -8751,8 +8752,12 @@ textarea {
 }
 
 @media (orientation: portrait) and (max-width: 767px) {
+  .battle-scene-root.battle-ui-custom {
+    --battle-ui-player-offset-baseline: 10px;
+  }
+
   .battle-scene-root.battle-ui-custom .battle-hand-area {
-    flex-basis: clamp(10rem, calc(34dvh - var(--battle-ui-control-bar-offset-y, 0px)), 38rem) !important;
+    flex-basis: clamp(10rem, calc(25.5dvh - var(--battle-ui-control-bar-offset-y, 0px)), 14rem) !important;
     min-height: 0 !important;
     max-height: none !important;
   }
@@ -8760,7 +8765,12 @@ textarea {
   .battle-scene-root.battle-ui-custom .battle-enemies-area {
     min-height: 0 !important;
     overflow: visible !important;
-    margin-top: clamp(8rem, 18dvh, 15rem) !important;
+    margin-top: clamp(2rem, 6dvh, 4rem) !important;
+  }
+
+  .battle-scene-root.battle-ui-custom .battle-enemy-sprite.battle-humanoid-enemy-sprite > div.relative:first-child {
+    transform: scale(1.38) !important;
+    transform-origin: center bottom !important;
   }
 
   .battle-scene-root.battle-ui-custom .battle-player-area {

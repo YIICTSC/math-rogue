@@ -1063,6 +1063,20 @@ const App: React.FC = () => {
     const isElectronApp = Boolean(electronApi?.isElectron);
     const shouldShowCrowdfundingBanner = Date.now() <= CROWDFUNDING_BANNER_END_AT;
 
+    useEffect(() => {
+        const unlockAudioFromUserGesture = () => {
+            void audioService.unlockAudio().catch(() => undefined);
+        };
+
+        window.addEventListener('pointerdown', unlockAudioFromUserGesture, { capture: true, passive: true, once: true });
+        window.addEventListener('keydown', unlockAudioFromUserGesture, { capture: true, once: true });
+
+        return () => {
+            window.removeEventListener('pointerdown', unlockAudioFromUserGesture, { capture: true });
+            window.removeEventListener('keydown', unlockAudioFromUserGesture, { capture: true });
+        };
+    }, []);
+
     const detectMobilePortrait = () => {
         if (typeof window === 'undefined') return false;
         const isTouchLike = ('ontouchstart' in window) || navigator.maxTouchPoints > 0 || window.matchMedia('(pointer: coarse)').matches;
@@ -4931,7 +4945,15 @@ const App: React.FC = () => {
     }, [addLog, eventData, gameState.screen, languageMode]);
 
     const requestGameFullscreen = () => {
+        void audioService.unlockAudio().catch(() => undefined);
         if (typeof document === 'undefined' || document.fullscreenElement) return;
+        const capacitorWindow = window as Window & {
+            Capacitor?: { isNativePlatform?: () => boolean };
+        };
+        const isNativeCapacitor = import.meta.env.VITE_APP_PLATFORM === 'ios'
+            || window.location.protocol === 'capacitor:'
+            || capacitorWindow.Capacitor?.isNativePlatform?.() === true;
+        if (isNativeCapacitor) return;
         const root = document.documentElement as HTMLElement & {
             webkitRequestFullscreen?: () => Promise<void> | void;
         };
