@@ -1,6 +1,6 @@
 # iOSアプリ化準備
 
-更新日: 2026-07-21
+更新日: 2026-07-26
 
 ## 採用構成
 
@@ -45,11 +45,11 @@ Simulator再起動も成功した。`dist`とiOS側のHTML／メインJavaScript
 生成ルールの報酬カードを付与し、アルバムへ保存する。Simulator上でも
 `FULL VERSION: UNLIMITED`表示を確認済み。
 
-Web版を含む本番ビルドは、計算スキップおよびデバッグメニューの導線を常に無効化する。
-旧デバッグ設定は本番起動時に削除し、デバッグ画面のセーブは復元しない。
-ローカル開発時のみ`npm run dev:debug`で明示的に有効化できる。
-Xcode再ビルドとSimulator起動まで成功し、確認画像を
-[`ios-simulator-paid-debug-locked.png`](./ios-simulator-paid-debug-locked.png)に保存した。
+2026-07-26のテスト期間中は、Web・iOS・Android・Steamの全版でデバッグ機能を
+一時的に有効化した。通常画面にはボタンを表示せず、バージョン情報モーダルの題名を
+10回押した場合だけデバッグメニューを表示する。公開確定前に再び無効化すること。
+無効化時の確認画像は
+[`ios-simulator-paid-debug-locked.png`](./ios-simulator-paid-debug-locked.png)に保存している。
 確認画像は[`ios-simulator-paid-edition.png`](./ios-simulator-paid-edition.png)に保存している。
 
 このIntel MacではiOS 26.3 Simulatorの初回起動時にdyld共有キャッシュ生成が走る。
@@ -75,22 +75,12 @@ Bundle IDはApp Store Connectでアプリレコードを作る前に最終確定
 
 ## Releaseアーカイブと署名状態
 
-2026-07-22にApple Developer TeamをXcodeターゲットへ設定し、iOS 26.2 SDK、
-arm64、iOS 15.0以上、Version 1.0.0、Build 1で実機向けReleaseアーカイブに成功した。
-アーカイブは約983MB。Appleが2026-04-28以降の提出に求める
-Xcode 26およびiOS 26 SDK以上の条件を満たしている。
-タイトル画面と製品バージョンも`1.0.0`に統一し、リリースノートを初回製品版の内容へ更新した。
-
-App Store Connect用の書き出し設定は`ios/ExportOptions-AppStore.plist`に保存済み。
-ただし、IPA書き出しはApple側から次の応答があり停止した。
-
-- `No provider associated with App Store Connect user`
-- Teamに`iOS App Store`用プロビジョニングプロファイルの作成権限がない
-- `iOS Distribution`証明書が見つからない
-
-現在はDevelopment証明書と開発用プロビジョニングでのアーカイブまで成功している。
-App Store Connect側でAccount Holderとしてチームが表示されることを確認後、
-XcodeのAccounts画面でアカウントを再読み込みしてIPA書き出しを再実行する。
+2026-07-26にApple Distribution署名とApp Store用プロビジョニングプロファイルを使い、
+iOS 26.2 SDK、arm64、iOS 15.0以上、Version 1.0.0、Build 11でReleaseアーカイブに成功した。
+MP3 172ファイルの同梱、Bundle ID `jp.yusukeishige.learningrogue`、Team
+`STVR67YH4M`を確認した。Build 11はApp Store Connectへアップロード済みで、
+TestFlightの内部・外部テストグループでは「テスト中」、App Reviewでは「審査待ち」。
+リリース方法は引き続き手動公開に設定している。
 
 ## 開発コマンド
 
@@ -122,6 +112,9 @@ IOS_SIMULATOR="iPad Pro 11-inch (M4)" npm run ios:run
 - iOSビルドでは `VITE_APP_PLATFORM=ios` を設定。
 - iOS有料版では `VITE_PAID_EDITION=true` を設定し、Web版だけに1日制限を残す。
 - 既存のImageGen製アイコン原画から1024pxのApp Iconを作成。
+- iOSではHTML AudioによるMP3再生を優先し、Web Audioをフォールバックとして残す。
+- 起動時とフォアグラウンド復帰時に`AVAudioSession`を`.playback`へ設定し、端末の消音
+  スイッチ状態にかかわらずゲームBGMを再生できるようにする。
 
 ## リリース前の重要課題
 
@@ -160,12 +153,12 @@ IOS_SIMULATOR="iPad Pro 11-inch (M4)" npm run ios:run
 
 - [x] Bundle IDと署名Teamの確定
 - [x] 実機向けReleaseアーカイブの生成
-- [ ] App Store Connectの提供者とDistribution署名をXcodeで再読み込み
-- App Store Connectのアプリレコード作成
+- [x] App Store Connectの提供者とDistribution署名をXcodeで再読み込み
+- [x] App Store Connectのアプリレコード作成
 - Privacy ManifestとRequired Reason APIの監査
 - 子ども向け・教育用途を踏まえた年齢区分、プライバシーポリシー、データ収集回答
 - iPhone/iPadのスクリーンショットと審査用説明
-- TestFlight内部テスト
+- [x] TestFlight内部・外部テストへBuild 11を追加
 
 課金モデルの検討結果は[`ios-monetization-plan.md`](./ios-monetization-plan.md)を参照する。
 

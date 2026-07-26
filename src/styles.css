@@ -2359,6 +2359,24 @@ body.gamepad-navigation-active .app-shell .start-menu-high-school :is(button, a,
   filter: brightness(1.22) contrast(1.12) drop-shadow(0 0 7px rgba(254, 240, 138, 0.95));
 }
 
+html.app-platform-steam body:is(.gamepad-navigation-active, .gamepad-connected) .app-shell .start-menu-high-school :is(button, a, input, select, textarea, [tabindex]):focus {
+  border-color: #020617 !important;
+  background: #f8fafc !important;
+  color: #020617 !important;
+  text-shadow: none !important;
+  filter: none !important;
+  outline-color: #fde047 !important;
+  box-shadow:
+    0 0 0 3px #020617,
+    0 0 0 8px #fde047,
+    0 0 34px 12px rgba(253, 224, 71, 0.92) !important;
+}
+
+html.app-platform-steam body:is(.gamepad-navigation-active, .gamepad-connected) .app-shell .start-menu-high-school :is(button, a, [tabindex]):focus svg {
+  color: #020617 !important;
+  filter: none !important;
+}
+
 .main-character-screen .character-selection-photo-enabled {
   z-index: 40 !important;
   overflow: visible !important;

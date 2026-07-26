@@ -4304,7 +4304,7 @@ const App: React.FC = () => {
         }
     };
 
-    const handleLogClick = (e: React.MouseEvent) => {
+    const handleLogClick = (e: React.SyntheticEvent) => {
         e.stopPropagation();
         if (!DEBUG_FEATURES_ENABLED) return;
         const next = logClickCount + 1;
@@ -16122,14 +16122,22 @@ const App: React.FC = () => {
                 )}
 
                 {showDebugLog && (
-                    <div className="app-modal-overlay app-debug-modal-overlay fixed inset-0 z-[10020] bg-black/90 flex items-center justify-center p-4" onClick={() => setShowDebugLog(false)}>
-                        <div className="app-modal-panel app-debug-modal bg-gray-900 border-2 border-green-500 p-6 rounded-lg max-w-lg w-full shadow-[0_0_20px_rgba(34,197,94,0.3)]" onClick={e => e.stopPropagation()}>
-                            <h2
-                                className="text-xl font-bold mb-4 text-green-400 font-mono border-b border-green-800 pb-2 select-none active:text-green-200"
-                                onClick={DEBUG_FEATURES_ENABLED ? handleLogClick : undefined}
-                            >
-                                System Release Notes v1.0.0
-                            </h2>
+                    <div data-gamepad-modal data-gamepad-initial-scope="release-notes" className="app-modal-overlay app-debug-modal-overlay fixed inset-0 z-[10020] bg-black/90 flex items-center justify-center p-4" onClick={() => setShowDebugLog(false)}>
+                        <div data-gamepad-navigation-root className="app-modal-panel app-debug-modal bg-gray-900 border-2 border-green-500 p-6 rounded-lg max-w-lg w-full shadow-[0_0_20px_rgba(34,197,94,0.3)]" onClick={e => e.stopPropagation()}>
+                            {DEBUG_FEATURES_ENABLED ? (
+                                <button
+                                    type="button"
+                                    data-gamepad-initial-choice
+                                    className="mb-4 w-full select-none border-b border-green-800 bg-transparent pb-2 text-left font-mono text-xl font-bold text-green-400 active:text-green-200"
+                                    onClick={handleLogClick}
+                                >
+                                    System Release Notes v1.0.0
+                                </button>
+                            ) : (
+                                <h2 className="mb-4 select-none border-b border-green-800 pb-2 font-mono text-xl font-bold text-green-400">
+                                    System Release Notes v1.0.0
+                                </h2>
+                            )}
                             <div className="space-y-4 text-sm font-mono text-gray-300 max-h-[60vh] overflow-y-auto custom-scrollbar">
                                 <section>
                                     <h3 className="text-white font-bold mb-1">■ {trans('v1.0.0 製品版リリース', languageMode)}</h3>
@@ -16141,6 +16149,7 @@ const App: React.FC = () => {
                                 </section>
                             </div>
                             <button
+                                data-gamepad-back
                                 onClick={() => setShowDebugLog(false)}
                                 className="mt-6 bg-green-900/50 hover:bg-green-800 text-green-300 border border-green-600 px-6 py-2 rounded w-full font-mono transition-colors cursor-pointer"
                             >

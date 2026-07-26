@@ -11,6 +11,7 @@ declare const __APP_ASSET_VERSION__: string | undefined;
 const APP_ASSET_VERSION = typeof __APP_ASSET_VERSION__ === 'string' ? __APP_ASSET_VERSION__ : 'dev';
 const versionBgmPath = (path: string) =>
     `${path}${path.includes('?') ? '&' : '?'}v=${encodeURIComponent(APP_ASSET_VERSION)}`;
+const IS_IOS_BUILD = String(import.meta.env.VITE_APP_PLATFORM || '').trim().toLowerCase() === 'ios';
 
 type HtmlSfxEffect = 'magic-transform-voice';
 
@@ -174,7 +175,13 @@ class AudioService {
       if (this.ctx.state === 'suspended') {
           await this.ctx.resume().catch(() => undefined);
       }
-      if (!this.hasUnlockedAudio) {
+      const needsPlaybackRetry = (
+          this.isPlayingBGM
+          && this.bgmMode !== 'STUDY'
+          && !this.currentSource
+          && !this.currentHtmlAudio
+      );
+      if (!this.hasUnlockedAudio || needsPlaybackRetry) {
           this.hasUnlockedAudio = true;
           await this.restartCurrentBGM();
       }
@@ -903,6 +910,11 @@ class AudioService {
           `/${type}.mp3`,
           `${type}.mp3`
       ].map(versionBgmPath);
+      // WKWebView can leave a decoded Web Audio source silent even after the context is
+      // resumed. Native iOS builds therefore use the media element path first, while the
+      // existing Web Audio decoder remains the fallback for malformed/unsupported files.
+      if (IS_IOS_BUILD && await this.playHtmlAudioMp3(paths, loop, type, playbackGeneration)) return;
+      if (!this.isCurrentPlayback(type, playbackGeneration)) return;
       const cacheKey = `${this.bgmMode}:${this.bgmTheme}:${type}`;
       let buffer = this.audioBuffers[cacheKey];
       if (!buffer) {

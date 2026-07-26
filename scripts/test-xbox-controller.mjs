@@ -178,7 +178,12 @@ const run = async () => {
     ['node_modules/vite/bin/vite.js', '--host', '127.0.0.1', '--port', String(PORT)],
     {
       cwd: process.cwd(),
-      env: { ...process.env, VITE_ENABLE_DEBUG_FEATURES: 'true' },
+      env: {
+        ...process.env,
+        VITE_APP_PLATFORM: 'steam',
+        VITE_PAID_EDITION: 'true',
+        VITE_ENABLE_DEBUG_FEATURES: 'true',
+      },
       stdio: ['ignore', 'pipe', 'pipe'],
     },
   );
@@ -256,6 +261,37 @@ const run = async () => {
       await moveStick(page, 0, 1);
       const afterText = (await activeElementSnapshot(page))?.text;
       expect(beforeText !== afterText, '左スティックでフォーカスが移動しない');
+    });
+
+    await test('Steam高校編の選択位置は色反転し、リリースノート10回押下でデバッグを開ける', async () => {
+      await page.goto(BASE_URL, { waitUntil: 'domcontentloaded' });
+      await page.evaluate(() => localStorage.removeItem('pixel_spire_debug_hp_one_v1'));
+      await page.reload({ waitUntil: 'domcontentloaded' });
+      await page.locator('.start-menu-theme-switch button').filter({ hasText: '高校編' }).click();
+      await connect(page);
+
+      const focused = page.locator('.start-menu-high-school :focus');
+      await focused.waitFor({ state: 'visible' });
+      const focusColors = await focused.evaluate(element => {
+        const style = getComputedStyle(element);
+        return {
+          background: style.backgroundColor,
+          color: style.color,
+          platformClass: document.documentElement.classList.contains('app-platform-steam'),
+        };
+      });
+      expect(focusColors.platformClass, 'Steamプラットフォームクラスが付いていない');
+      expect(focusColors.background === 'rgb(248, 250, 252)', `フォーカス背景が反転していない: ${focusColors.background}`);
+      expect(focusColors.color === 'rgb(2, 6, 23)', `フォーカス文字色が反転していない: ${focusColors.color}`);
+
+      await page.locator('.start-menu-version').click();
+      const releaseNotesTitle = page.locator('.app-debug-modal button').filter({ hasText: 'System Release Notes' });
+      for (let count = 0; count < 10; count += 1) await releaseNotesTitle.click();
+      await page.locator('.app-debug-modal [data-gamepad-back]').click();
+      const debugButton = page.locator('button').filter({ hasText: 'デバッグメニュー' });
+      await debugButton.waitFor({ state: 'visible' });
+      await debugButton.click();
+      await page.getByText('DEBUG', { exact: true }).waitFor({ state: 'visible' });
     });
 
     await test('設定のrangeとselectをコントローラーで変更できる', async () => {

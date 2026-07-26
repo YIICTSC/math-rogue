@@ -27,6 +27,13 @@
 - macOS版SteamCMDを導入・更新し、SteamPipeアップロード設定を生成済み。
 - Windows x64版をSteamPipeへアップロード済み。最新の成功Build IDは `24385958`、Depot Manifest IDは `2863320183767979359`。
 - Build `24385958` をSteamworks画面からPublic defaultブランチへ反映済み。
+- 2026-07-26のテスト版をSteamPipeへアップロード済み。Build IDは `24395548`、
+  Depot Manifest IDは `8597407780415568028`。Public defaultには未反映。
+- Steam専用の高校編タイトル選択は、コントローラーフォーカス時に背景・文字色を
+  反転して視認性を高めた。全版共通で、バージョン情報の題名10回押下による
+  テスト用デバッグ導線を一時的に有効化している。
+- 非公開ブランチ`internal`は未作成。Steamworksのブランチ作成プロンプトが
+  Chrome上で応答待ちになるため、Build `24395548`はアップロード済み・ブランチ未割当。
 - Developer Compパッケージが用意されているため、開発者アカウントではWindows版Steamクライアントからインストールしてテストできる。Windows実機での起動確認は未実施。
 - Steamストア用の実ゲーム画面7枚（1920×1080）を `release/steam/store-assets/screenshots/` に準備済み。うち追加2枚はチュートリアルを閉じた戦闘画面と、戦闘後の学習問題画面。
 - ImageGenで作成したキービジュアルと正式ロゴを用い、Steam規定寸法のカプセル／ライブラリ／アイコン素材10点を `release/steam/store-assets/generated/` に準備済み。

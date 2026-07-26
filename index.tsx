@@ -8,8 +8,9 @@ if (!rootElement) {
   throw new Error("Could not find root element to mount to");
 }
 
-if (String(import.meta.env.VITE_APP_PLATFORM || '').toLowerCase() === 'ios') {
-  document.documentElement.classList.add('app-platform-ios');
+const appPlatform = String(import.meta.env.VITE_APP_PLATFORM || '').toLowerCase();
+if (appPlatform === 'ios' || appPlatform === 'steam') {
+  document.documentElement.classList.add(`app-platform-${appPlatform}`);
 }
 
 const root = ReactDOM.createRoot(rootElement);

@@ -28,6 +28,7 @@
     "audit:translations": "npm run audit:english && npm run audit:hiragana && npm run audit:display-copy",
     "test:management": "node scripts/verify-management-integration.mjs",
     "test:gamepad": "node scripts/test-xbox-controller.mjs",
+    "test:ios-bgm": "node scripts/test-ios-bgm.mjs",
     "build:offline": "node scripts/build-offline.mjs",
     "build:icons": "node scripts/generate-icons.mjs",
     "compress:bgm": "node scripts/compress-bgm.mjs",

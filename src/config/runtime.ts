@@ -16,6 +16,6 @@ export const DISTRIBUTION_PLATFORM: DistributionPlatform = (
 export const PAID_EDITION = import.meta.env.VITE_PAID_EDITION === 'true';
 export const DAILY_PLAY_LIMIT_ENABLED = !PAID_EDITION;
 
-// Debug routes are never available in a production bundle, including the public web build.
-// Local development must opt in explicitly with `npm run dev:debug`.
-export const DEBUG_FEATURES_ENABLED = import.meta.env.DEV && import.meta.env.VITE_ENABLE_DEBUG_FEATURES === 'true';
+// Temporarily enabled in every distribution for release-candidate testing.
+// Access remains hidden behind ten presses on the release-notes modal title.
+export const DEBUG_FEATURES_ENABLED = true;
