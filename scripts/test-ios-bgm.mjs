@@ -65,7 +65,10 @@ try {
   });
 
   const page = await context.newPage();
-  await page.goto(BASE_URL, { waitUntil: 'domcontentloaded' });
+  // App.tsx is intentionally large and a cold Vite transform can take longer
+  // than Playwright's 30-second navigation default on the release Mac.
+  page.setDefaultTimeout(120_000);
+  await page.goto(BASE_URL, { waitUntil: 'domcontentloaded', timeout: 120_000 });
   await page.waitForSelector('.start-menu-root');
   await page.waitForFunction(() => window.__iosBgmPlayAttempts.some(path => path.includes('/bgm-new/menu.mp3')));
 

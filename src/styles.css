@@ -2375,11 +2375,45 @@ html.app-platform-ios {
   }
 
   html.app-platform-ios .app-shell {
-    padding:
-      0
-      max(env(safe-area-inset-right), 62px)
-      0
-      max(env(safe-area-inset-left), 62px);
+    padding: 0;
+  }
+
+  /* Keep each screen root itself unpadded so its background and visual effects
+     cover the whole display. Its immediate content layers keep their full
+     paint box too, but place normal-flow UI inside the horizontal safe area. */
+  html.app-platform-ios .app-screen-stage > .absolute.inset-0 > :not(style, script, .mini-game-dungeon-screen) > :not(style, script, canvas, img, picture, video, svg),
+  html.app-platform-ios .app-screen-stage > :not(style, script, .fixed, .absolute, .mini-game-dungeon-screen) > :not(style, script, canvas, img, picture, video, svg) {
+    box-sizing: border-box;
+    padding-right: max(0.75rem, var(--ios-ui-safe-right)) !important;
+    padding-left: max(0.75rem, var(--ios-ui-safe-left)) !important;
+  }
+
+  html.app-platform-ios .mini-game-dungeon-screen {
+    box-sizing: border-box;
+    padding-right: max(0.75rem, var(--ios-ui-safe-right)) !important;
+    padding-left: max(0.75rem, var(--ios-ui-safe-left)) !important;
+  }
+
+  html.app-platform-ios .ios-safe-edge-left {
+    right: auto !important;
+    left: max(0.75rem, var(--ios-ui-safe-left)) !important;
+  }
+
+  html.app-platform-ios .ios-safe-edge-right,
+  html.app-platform-ios .app-global-settings-button,
+  html.app-platform-ios .battle-scene-root .battle-top-controls,
+  html.app-platform-ios .mini-game-survivor-screen .survivor-pause-button {
+    right: max(0.75rem, var(--ios-ui-safe-right)) !important;
+  }
+
+  html.app-platform-ios .main-floor-result-screen.ios-edge-to-edge,
+  html.app-platform-ios .ios-edge-to-edge .main-challenge-screen {
+    padding-right: 0 !important;
+    padding-left: 0 !important;
+  }
+
+  html.app-platform-ios .main-floor-result-screen.ios-edge-to-edge .floor-result-panel {
+    width: min(94vw, 78rem) !important;
   }
 }
 

@@ -1601,7 +1601,7 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
             changeProblemSetView(problemSetView === 'upper' ? 'standard' : 'upper');
             audioService.playSound('select');
           }}
-          className={`absolute left-3 top-3 z-20 flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-[10px] font-black shadow-lg transition-colors sm:left-4 sm:top-4 sm:text-xs ${
+          className={`ios-safe-edge-left absolute left-3 top-3 z-20 flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-[10px] font-black shadow-lg transition-colors sm:left-4 sm:top-4 sm:text-xs ${
             problemSetView === 'upper'
               ? 'border-yellow-300 bg-yellow-500 text-slate-950 hover:bg-yellow-400'
               : 'border-cyan-300/60 bg-slate-900/85 text-cyan-100 hover:border-cyan-200 hover:bg-cyan-950'
@@ -1616,7 +1616,7 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
             changeProblemSetView(problemSetView === 'nativeEnglish' ? 'standard' : 'nativeEnglish');
             audioService.playSound('select');
           }}
-          className={`absolute right-3 top-3 z-20 flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-[10px] font-black shadow-lg transition-colors sm:right-4 sm:top-4 sm:text-xs ${
+          className={`ios-safe-edge-right absolute right-3 top-3 z-20 flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-[10px] font-black shadow-lg transition-colors sm:right-4 sm:top-4 sm:text-xs ${
             problemSetView === 'nativeEnglish'
               ? 'border-yellow-300 bg-yellow-500 text-slate-950 hover:bg-yellow-400'
               : 'border-indigo-300/60 bg-slate-900/85 text-indigo-100 hover:border-indigo-200 hover:bg-indigo-950'

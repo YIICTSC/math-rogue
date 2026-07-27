@@ -14891,7 +14891,7 @@ const App: React.FC = () => {
                 onReturnToTitle={returnToTitle}
                 onQuit={quitApp}
             />
-            <div className={`w-full h-full relative overflow-hidden bg-black ${appSettings.lowDataMode ? '' : 'crt-scanline'} ${raceEffects.upsideDownUntil > raceEffectNow ? 'scale-x-[-1]' : ''} ${(raceEffects.deskShakeUntil > raceEffectNow && !appSettings.reduceScreenShake) ? 'animate-[race-desk-shake_0.18s_linear_infinite]' : ''}`}>
+            <div className={`app-screen-stage w-full h-full relative overflow-hidden bg-black ${appSettings.lowDataMode ? '' : 'crt-scanline'} ${raceEffects.upsideDownUntil > raceEffectNow ? 'scale-x-[-1]' : ''} ${(raceEffects.deskShakeUntil > raceEffectNow && !appSettings.reduceScreenShake) ? 'animate-[race-desk-shake_0.18s_linear_infinite]' : ''}`}>
                 <style>{`
                     @keyframes race-desk-shake {
                         0% { transform: translate(0, 0); }
@@ -15055,7 +15055,7 @@ const App: React.FC = () => {
                 {showGlobalSettingsGear && gameState.screen !== GameScreen.START_MENU && (
                     <button
                         onClick={() => setShowSettingsModal(true)}
-                        className="absolute top-2 right-2 z-[10010] bg-black/60 hover:bg-black/85 text-white border border-white/50 p-2 rounded-lg shadow-lg"
+                        className="app-global-settings-button absolute top-2 right-2 z-[10010] bg-black/60 hover:bg-black/85 text-white border border-white/50 p-2 rounded-lg shadow-lg"
                         title={trans("セッティング", languageMode)}
                     >
                         <Settings size={16} />
@@ -15424,7 +15424,7 @@ const App: React.FC = () => {
                         <button
                             type="button"
                             onClick={() => setShowCreditsModal(true)}
-                            className={`start-menu-credit-button absolute bottom-3 right-3 z-20 flex items-center gap-1.5 rounded px-3 py-2 text-[11px] font-black tracking-[0.18em] shadow-lg transition-colors focus:outline-none focus:ring-2 ${
+                            className={`start-menu-credit-button ios-safe-edge-left absolute bottom-3 right-3 z-20 flex items-center gap-1.5 rounded px-3 py-2 text-[11px] font-black tracking-[0.18em] shadow-lg transition-colors focus:outline-none focus:ring-2 ${
                                 visualTheme === 'magic'
                                     ? 'border border-fuchsia-200/80 bg-violet-950/75 text-fuchsia-100 shadow-[0_0_18px_rgba(217,70,239,0.26)] hover:bg-fuchsia-200 hover:text-violet-950 focus:ring-fuchsia-200'
                                     : visualTheme === 'high-school'

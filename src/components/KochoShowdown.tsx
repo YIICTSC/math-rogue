@@ -737,6 +737,11 @@ const KochoShowdown: React.FC<{
         stateRef.current = initialState;
         setNewlyUnlockedCard(null);
         storageService.saveKochoState(initialState);
+        // 「再挑戦」は同一画面内の状態リセットなので、画面遷移側のBGM effectは
+        // 再実行されない。ユーザー操作のクリック中に再生を開始し、iOSの
+        // media-element autoplay制限にも確実に通す。
+        audioService.stopBGM();
+        void audioService.playBGM('kocho_setup');
     };
 
     const startKochoRun = (difficultyLevel: number) => {
