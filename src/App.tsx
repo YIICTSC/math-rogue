@@ -14875,8 +14875,14 @@ const App: React.FC = () => {
         );
     };
 
+    const usesIosEdgeToEdgeLayout = [
+        GameScreen.PROBLEM_CHALLENGE,
+        GameScreen.FLOOR_RESULT,
+        GameScreen.MINI_GAME_KOCHO,
+    ].includes(gameState.screen);
+
     return (
-        <div key={`app-shell-${languageMode}`} className={`app-shell w-full h-[100dvh] bg-black overflow-hidden ${appSettings.fontSize === 'large' ? 'text-[105%]' : ''} ${isUiPreviewMode ? 'gamepad-shortcuts-debug' : ''}`}>
+        <div key={`app-shell-${languageMode}`} className={`app-shell w-full h-[100dvh] bg-black overflow-hidden ${usesIosEdgeToEdgeLayout ? 'ios-edge-active' : ''} ${appSettings.fontSize === 'large' ? 'text-[105%]' : ''} ${isUiPreviewMode ? 'gamepad-shortcuts-debug' : ''}`}>
             <GamepadVirtualKeyboard languageMode={languageMode} />
             <GamepadSystemMenu
                 enabled={gameState.screen !== GameScreen.START_MENU}

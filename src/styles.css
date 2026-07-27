@@ -2342,11 +2342,23 @@ body,
     env(safe-area-inset-left);
 }
 
+html.app-platform-ios {
+  --ios-ui-safe-top: env(safe-area-inset-top);
+  --ios-ui-safe-right: env(safe-area-inset-right);
+  --ios-ui-safe-bottom: env(safe-area-inset-bottom);
+  --ios-ui-safe-left: env(safe-area-inset-left);
+}
+
 /* Capacitor's full-screen WKWebView can report zero CSS safe-area values.
    Keep the backdrop edge-to-edge, but reserve interaction space explicitly:
    portrait uses the Dynamic Island and home-indicator insets, while landscape
    only reserves the notched side edges and keeps the full vertical canvas. */
 @media (orientation: portrait) {
+  html.app-platform-ios {
+    --ios-ui-safe-top: max(env(safe-area-inset-top), 62px);
+    --ios-ui-safe-bottom: max(env(safe-area-inset-bottom), 34px);
+  }
+
   html.app-platform-ios .app-shell {
     padding:
       max(env(safe-area-inset-top), 62px)
@@ -2357,12 +2369,139 @@ body,
 }
 
 @media (orientation: landscape) {
+  html.app-platform-ios {
+    --ios-ui-safe-right: max(env(safe-area-inset-right), 62px);
+    --ios-ui-safe-left: max(env(safe-area-inset-left), 62px);
+  }
+
   html.app-platform-ios .app-shell {
     padding:
       0
       max(env(safe-area-inset-right), 62px)
       0
       max(env(safe-area-inset-left), 62px);
+  }
+}
+
+/* Screens opting into edge-to-edge iOS rendering paint their visual layer
+   across the full display. Only their marked UI regions consume safe insets. */
+html.app-platform-ios .app-shell.ios-edge-active {
+  padding: 0;
+}
+
+html.app-platform-ios .ios-safe-ui-x {
+  padding-right: max(0.75rem, var(--ios-ui-safe-right)) !important;
+  padding-left: max(0.75rem, var(--ios-ui-safe-left)) !important;
+}
+
+html.app-platform-ios .ios-safe-ui-header {
+  padding-top: max(0.5rem, var(--ios-ui-safe-top)) !important;
+}
+
+html.app-platform-ios .ios-edge-to-edge .main-challenge-screen {
+  box-sizing: border-box;
+  padding-bottom: max(0.75rem, var(--ios-ui-safe-bottom)) !important;
+  padding-right: max(0.75rem, var(--ios-ui-safe-right)) !important;
+  padding-left: max(0.75rem, var(--ios-ui-safe-left)) !important;
+}
+
+html.app-platform-ios .main-floor-result-screen.ios-edge-to-edge {
+  box-sizing: border-box;
+  padding-top: max(0.75rem, var(--ios-ui-safe-top)) !important;
+  padding-right: max(0.75rem, var(--ios-ui-safe-right)) !important;
+  padding-bottom: max(0.75rem, var(--ios-ui-safe-bottom)) !important;
+  padding-left: max(0.75rem, var(--ios-ui-safe-left)) !important;
+}
+
+html.app-platform-ios .main-floor-result-screen.ios-edge-to-edge .floor-result-panel,
+html.app-platform-ios .ios-edge-to-edge .main-challenge-screen :is(.general-challenge-layout, .basic-challenge-layout) {
+  width: 100% !important;
+  max-width: none !important;
+}
+
+html.app-platform-ios .kocho-header {
+  display: grid !important;
+  grid-template-columns: auto minmax(0, 1fr) auto;
+  gap: 0.5rem;
+  min-width: 0;
+}
+
+html.app-platform-ios .kocho-header-status,
+html.app-platform-ios .kocho-header-title,
+html.app-platform-ios .kocho-header-actions,
+html.app-platform-ios .kocho-header-difficulty,
+html.app-platform-ios .kocho-header-endless,
+html.app-platform-ios .kocho-header-money {
+  min-width: 0;
+  white-space: nowrap;
+}
+
+html.app-platform-ios .kocho-header-title {
+  display: flex;
+  align-items: baseline;
+  gap: 0.5rem;
+  overflow: hidden;
+}
+
+html.app-platform-ios .kocho-header-stage {
+  flex: 0 0 auto;
+  margin-left: 0;
+  white-space: nowrap;
+}
+
+html.app-platform-ios .kocho-header-difficulty {
+  display: flex;
+  flex: 0 0 auto;
+  margin-left: 0.5rem;
+}
+
+html.app-platform-ios .kocho-header-actions {
+  flex-wrap: nowrap;
+}
+
+@media (orientation: landscape) and (max-height: 560px) {
+  html.app-platform-ios .kocho-header {
+    gap: 0.35rem;
+    padding-top: 0.35rem !important;
+    padding-bottom: 0.35rem !important;
+  }
+
+  html.app-platform-ios .kocho-header-title {
+    gap: 0.35rem;
+    font-size: clamp(0.82rem, 2vw, 1.05rem) !important;
+    letter-spacing: 0.06em !important;
+  }
+
+  html.app-platform-ios .kocho-header-stage,
+  html.app-platform-ios .kocho-header-difficulty {
+    font-size: clamp(0.58rem, 1.3vw, 0.72rem) !important;
+  }
+
+  html.app-platform-ios .kocho-header-difficulty {
+    margin-left: 0.35rem;
+    padding: 0.2rem 0.35rem !important;
+  }
+
+  html.app-platform-ios .kocho-header-actions {
+    gap: 0.25rem !important;
+  }
+
+  html.app-platform-ios .kocho-header-actions > button,
+  html.app-platform-ios .kocho-header-money,
+  html.app-platform-ios .kocho-header-endless {
+    gap: 0.2rem !important;
+    padding: 0.3rem 0.4rem !important;
+    font-size: 0.68rem !important;
+  }
+
+  html.app-platform-ios .kocho-header-label {
+    display: none !important;
+  }
+
+  html.app-platform-ios .kocho-header-quit-icon {
+    width: 1.1rem;
+    height: 1.1rem;
+    margin-right: 0 !important;
   }
 }
 

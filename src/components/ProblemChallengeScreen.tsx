@@ -1071,7 +1071,7 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
     return (
       <div
         data-allow-japanese="true"
-        className="w-full h-full relative bg-black bg-cover bg-center flex flex-col"
+        className="ios-edge-to-edge main-problem-challenge-active-screen w-full h-full relative bg-black bg-cover bg-center flex flex-col"
         style={{
           backgroundImage: `url(${assetUrl(visualTheme === 'magic'
             ? 'sprites/backgrounds/learning-rogue/magic-compendium-library.webp'
@@ -1079,7 +1079,7 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
         }}
       >
         <div className="absolute inset-0 bg-slate-950/62 pointer-events-none" />
-        <div className="bg-black/80 border-b-2 border-gray-700 p-2 flex justify-between items-center z-50 shrink-0">
+        <div className="ios-safe-ui-x ios-safe-ui-header bg-black/80 border-b-2 border-gray-700 p-2 flex justify-between items-center z-50 shrink-0">
           <div className="flex gap-4 items-center">
             <div className="text-yellow-400 font-bold flex items-center gap-2">
               <Target size={20}/> {trans('正解数', problemLanguageMode)}: <span className="text-2xl font-mono">{streak}</span>
@@ -1096,7 +1096,7 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
           </button>
         </div>
 
-        <div className="relative z-10">
+        <div className="ios-safe-ui-x relative z-10">
           <MiniBattleBanner key={challengeSubMode.id} streak={streak} />
         </div>
 

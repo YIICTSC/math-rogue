@@ -2695,7 +2695,7 @@ const KochoShowdown: React.FC<{
 
     // --- MAIN RENDER ---
     return (
-        <div data-gamepad-navigation-root data-gamepad-initial-scope={`kocho-${gameState.phase}-${gameState.status}`} className="flex flex-col h-full w-full bg-[#1a1a2e] text-white font-mono relative overflow-hidden">
+        <div data-gamepad-navigation-root data-gamepad-initial-scope={`kocho-${gameState.phase}-${gameState.status}`} className="ios-edge-to-edge kocho-showdown-root flex flex-col h-full w-full bg-[#1a1a2e] text-white font-mono relative overflow-hidden">
             {/* Math Challenge Overlay */}
             {gameState.phase === 'MATH' && (
                  <div className="absolute inset-0 z-[100] w-full h-full pointer-events-auto">
@@ -2704,32 +2704,36 @@ const KochoShowdown: React.FC<{
             )}
 
             {/* Header */}
-            <div className="flex justify-between items-center p-2 md:p-4 bg-black/40 border-b border-indigo-500/30 shrink-0">
-                <button onClick={handleQuit} className="flex items-center text-gray-400 hover:text-white"><ArrowLeft className="mr-2"/> <span className="hidden md:inline">Quit</span></button>
-                <h2 className="text-sm md:text-xl font-bold text-indigo-100 tracking-widest hidden md:block">
-                    {tr('校長対決')} <span className="text-xs text-pink-400 ml-2">{gameState.phase === 'SETUP' ? tr('難易度選択') : gameState.isEndless ? `${tr('補習')} ${gameState.endlessFloor}${tr('限目')}` : `${tr('ステージ')} ${gameState.battleStage}`}</span>
-                </h2>
-                <div className="flex items-center gap-2 md:gap-4">
+            <div className="ios-safe-ui-x ios-safe-ui-header kocho-header flex justify-between items-center p-2 md:p-4 bg-black/40 border-b border-indigo-500/30 shrink-0">
+                <button onClick={handleQuit} className="kocho-header-quit flex items-center text-gray-400 hover:text-white"><ArrowLeft className="kocho-header-quit-icon mr-2"/> <span className="kocho-header-label hidden md:inline">Quit</span></button>
+                <div className="kocho-header-status hidden md:flex items-center min-w-0">
+                    <h2 className="kocho-header-title text-sm md:text-xl font-bold text-indigo-100 tracking-widest">
+                        <span>{tr('校長対決')}</span>
+                        <span className="kocho-header-stage text-xs text-pink-400">{gameState.phase === 'SETUP' ? tr('難易度選択') : gameState.isEndless ? `${tr('補習')} ${gameState.endlessFloor}${tr('限目')}` : `${tr('ステージ')} ${gameState.battleStage}`}</span>
+                    </h2>
                     {gameState.phase !== 'SETUP' && (
-                        <div className="text-xs md:text-sm font-bold text-indigo-200 hidden md:flex items-center gap-2 bg-indigo-950/40 px-2 py-1 rounded border border-indigo-500/40">
-                            Lv.{gameState.difficultyLevel} {tr(getKochoDifficulty(gameState.difficultyLevel).name)}
+                        <div className="kocho-header-difficulty text-xs md:text-sm font-bold text-indigo-200 items-center gap-1 bg-indigo-950/40 px-2 py-1 rounded border border-indigo-500/40">
+                            <span>Lv.{gameState.difficultyLevel}</span>
+                            <span>{tr(getKochoDifficulty(gameState.difficultyLevel).name)}</span>
                         </div>
                     )}
+                </div>
+                <div className="kocho-header-actions flex items-center gap-2 md:gap-4">
                     {gameState.isEndless && (
-                        <div className="text-xs md:text-sm font-bold text-pink-200 flex items-center gap-2 bg-pink-950/50 px-2 py-1 rounded border border-pink-500/50">
+                        <div className="kocho-header-endless text-xs md:text-sm font-bold text-pink-200 flex items-center gap-2 bg-pink-950/50 px-2 py-1 rounded border border-pink-500/50">
                             <Skull size={14}/> {tr('撃破')} {gameState.endlessKills} / {gameState.endlessScore}{tr('点')}
                         </div>
                     )}
                     <button onClick={() => setShowHelpModal(true)} className="flex items-center gap-2 text-indigo-200 hover:text-white transition-colors text-xs md:text-sm font-bold border border-indigo-500/30 px-2 py-1 rounded bg-black/20">
-                        <HelpCircle size={14}/> <span className="hidden md:inline">Help</span>
+                        <HelpCircle size={14}/> <span className="kocho-header-label hidden md:inline">Help</span>
                     </button>
                     <button onClick={() => setShowRelicModal(true)} className="flex items-center gap-2 text-yellow-200 hover:text-white transition-colors text-xs md:text-sm font-bold border border-yellow-500/30 px-2 py-1 rounded bg-black/20">
-                        <Gift size={14}/> <span className="hidden md:inline">Relics</span> ({gameState.relics.length})
+                        <Gift size={14}/> <span className="kocho-header-label hidden md:inline">Relics</span> ({gameState.relics.length})
                     </button>
                     <button onClick={() => setShowItemModal(true)} className="flex items-center gap-2 text-green-200 hover:text-white transition-colors text-xs md:text-sm font-bold border border-green-500/30 px-2 py-1 rounded bg-black/20">
-                        <Package size={14}/> <span className="hidden md:inline">Items</span> ({gameState.consumables.length})
+                        <Package size={14}/> <span className="kocho-header-label hidden md:inline">Items</span> ({gameState.consumables.length})
                     </button>
-                    <div className="text-xs md:text-sm font-bold text-yellow-400 flex items-center gap-2 bg-black/40 px-2 py-1 rounded border border-yellow-500/50">
+                    <div className="kocho-header-money text-xs md:text-sm font-bold text-yellow-400 flex items-center gap-2 bg-black/40 px-2 py-1 rounded border border-yellow-500/50">
                         <Coins size={14}/> {gameState.money} G
                     </div>
                 </div>

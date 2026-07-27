@@ -109,7 +109,7 @@ const FloorResultScreen: React.FC<FloorResultScreenProps> = ({ act, stats, story
   return (
     <div
       data-gamepad-initial-scope={`floor-result-${storyIndex}-${isTyping ? 'typing' : 'story'}`}
-      className="main-floor-result-screen w-full h-full bg-[#0a0a0a] bg-cover bg-center flex flex-col items-center justify-center p-3 sm:p-6 md:p-8 lg:p-10 relative overflow-hidden font-mono"
+      className="ios-edge-to-edge main-floor-result-screen w-full h-full bg-[#0a0a0a] bg-cover bg-center flex flex-col items-center justify-center p-3 sm:p-6 md:p-8 lg:p-10 relative overflow-hidden font-mono"
       style={visualTheme === 'magic' ? { backgroundImage: `url(${assetUrl('sprites/backgrounds/learning-rogue/magic-act-clear.webp')})` } : undefined}
     >
       {visualTheme === 'magic' && <div className="absolute inset-0 bg-slate-950/62 pointer-events-none" />}
