@@ -1,6 +1,6 @@
 
 import React, { useEffect, useRef, useState, useLayoutEffect } from 'react';
-import { ArrowLeft, RotateCcw, Heart, Pause, Sparkles, Zap, Flame, Shield, Swords, Target, Radiation, Droplets, Recycle, Volume2, Music, Mic, Activity, Wind, Maximize2, Minimize2, Crosshair, FastForward, Dice5, Star, Skull } from 'lucide-react';
+import { ArrowLeft, RotateCcw, Heart, LogOut, Sparkles, Zap, Flame, Shield, Swords, Target, Radiation, Droplets, Recycle, Volume2, Music, Mic, Activity, Wind, Maximize2, Minimize2, Crosshair, FastForward, Dice5, Star, Skull } from 'lucide-react';
 import { HERO_IMAGE_DATA } from '../constants';
 import PixelSprite, { SPRITE_TEMPLATES, createPixelSpriteCanvas } from './PixelSprite';
 import { audioService } from '../services/audioService';
@@ -1634,7 +1634,7 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
 
     return (
         <div className="mini-game-survivor-screen flex flex-col h-full w-full bg-[#020617] text-white relative items-center justify-center font-mono overflow-hidden touch-none select-none" ref={containerRef} onTouchStart={(e) => { if (gameState.current !== 'PLAYING') return; const t = e.touches[0]; setJoystickUI({ active: true, startX: t.clientX, startY: t.clientY, curX: t.clientX, curY: t.clientY }); joystickRef.current = { x: 0, y: 0 }; }} onTouchMove={(e) => { if (!joystickUI?.active) return; const t = e.touches[0]; const dx = t.clientX - joystickUI.startX; const dy = t.clientY - joystickUI.startY; const dist = Math.hypot(dx, dy); const max = 50; setJoystickUI(prev => prev ? ({ ...prev, curX: prev.startX + (dist>max ? dx/dist*max : dx), curY: prev.startY + (dist>max ? dy/dist*max : dy) }) : null); joystickRef.current = { x: dx/max, y: dy/max }; }} onTouchEnd={() => { setJoystickUI(null); joystickRef.current = { x: 0, y: 0 }; }}>
-            <div className="absolute top-0 left-0 w-full p-2 flex justify-between items-start pointer-events-none z-10 text-shadow-md">
+            <div className="ios-safe-ui-x ios-safe-ui-header survivor-hud absolute top-0 left-0 w-full p-2 flex justify-between items-start pointer-events-none z-10 text-shadow-md">
                 <div className="flex flex-col gap-1 w-1/3">
                     <div className="bg-black/60 p-2 rounded-xl border border-blue-500/50 backdrop-blur-md">
                         <div className="text-xl font-bold text-blue-400 leading-none flex items-center gap-1"><Zap size={16}/> LV {uiState.level}</div>
@@ -1668,7 +1668,15 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
             )}
             {joystickUI && joystickUI.active && <div className="absolute z-30 pointer-events-none" style={{ left: joystickUI.startX, top: joystickUI.startY, transform: 'translate(-50%, -50%)' }}><div className="w-24 h-24 rounded-full border-4 border-white/30 bg-white/10 backdrop-blur-sm"></div><div className="absolute w-12 h-12 rounded-full bg-white/40 shadow-2xl" style={{ left: '50%', top: '50%', transform: `translate(calc(-50% + ${joystickUI.curX - joystickUI.startX}px), calc(-50% + ${joystickUI.curY - joystickUI.startY}px))` }}></div></div>}
             {uiState.gameOver && (<div data-gamepad-modal data-gamepad-initial-scope="survivor-game-over" className="absolute inset-0 bg-red-950/95 flex flex-col items-center justify-center z-20 pointer-events-auto animate-in fade-in duration-500"><Skull size={80} className="text-red-500 mb-4 animate-bounce"/><h2 className="text-7xl font-black text-white mb-4 tracking-tighter italic">{tr('GAME OVER')}</h2><div className="text-2xl text-yellow-400 mb-8 font-black bg-black/60 px-8 py-2 rounded-full border border-yellow-500">{tr('SURVIVED')}: {Math.floor(uiState.time/60)}:{(uiState.time%60).toString().padStart(2,'0')}</div><div className="flex flex-col gap-4 w-72"><button data-gamepad-initial-choice onClick={handleRestart} className="bg-white text-black px-8 py-4 rounded-2xl font-black text-xl hover:bg-gray-200 flex items-center justify-center shadow-[0_4px_0_#ccc] active:translate-y-1 active:shadow-none transition-all"><RotateCcw className="mr-2"/> {tr('PLAY AGAIN')}</button><button onClick={handleExit} className="bg-black text-white px-8 py-4 rounded-2xl font-black text-xl border-4 border-white/20 hover:bg-gray-900 flex items-center justify-center shadow-2xl transition-all"><ArrowLeft className="mr-2"/> {tr('EXIT TO MENU')}</button></div></div>)}
-            {gameState.current === 'PLAYING' && (<button onClick={handleExit} aria-label={tr('終了')} className="survivor-pause-button absolute top-4 right-4 bg-gray-800/60 hover:bg-red-500/80 text-white p-3 rounded-2xl border-2 border-white/20 z-50 pointer-events-auto shadow-2xl backdrop-blur-lg transition-all"><Pause size={24} /></button>)}
+            {gameState.current === 'PLAYING' && (
+                <button
+                    onClick={handleExit}
+                    aria-label="QUIT"
+                    className="survivor-pause-button absolute top-4 right-4 bg-gray-800/75 hover:bg-red-500/90 text-white px-3 py-2 rounded-xl border-2 border-white/20 z-50 pointer-events-auto shadow-2xl backdrop-blur-lg transition-all inline-flex items-center gap-1.5 font-black text-xs tracking-wider"
+                >
+                    <LogOut size={17} /> QUIT
+                </button>
+            )}
         </div>
     );
 };

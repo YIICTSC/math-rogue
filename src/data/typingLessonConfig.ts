@@ -1,3 +1,5 @@
+import type { LanguageMode } from '../types';
+
 export type TypingLessonId =
   | 'HOME_ROW'
   | 'ALPHABET'
@@ -149,5 +151,136 @@ export const TYPING_LESSON_DEFINITIONS: TypingLessonDefinition[] = [
   }
 ];
 
-export const getTypingLessonDefinition = (lessonId?: string): TypingLessonDefinition =>
-  TYPING_LESSON_DEFINITIONS.find((lesson) => lesson.id === lessonId) ?? TYPING_LESSON_DEFINITIONS[0];
+export const ENGLISH_TYPING_LESSON_DEFINITIONS: TypingLessonDefinition[] = [
+  {
+    id: 'HOME_ROW',
+    title: 'Home Row',
+    shortTitle: 'Home Row',
+    category: 'BEGINNER',
+    description: 'Start with F and J, then build steady left-and-right hand control.',
+    stages: ['F and J', 'Home keys', 'Left and right', 'Short patterns', 'Home-row words']
+  },
+  {
+    id: 'ALPHABET',
+    title: 'Alphabet Keys',
+    shortTitle: 'Alphabet',
+    category: 'BASIC',
+    description: 'Find every letter key and type common letter patterns.',
+    stages: ['A–F', 'G–L', 'M–R', 'S–Z', 'Whole alphabet']
+  },
+  {
+    id: 'NUMBERS_SYMBOLS',
+    title: 'Numbers and Symbols',
+    shortTitle: 'Numbers',
+    category: 'BASIC',
+    description: 'Practice number keys, time, dates and classroom punctuation.',
+    stages: ['1–5', '0–9', 'Time', 'Math symbols', 'Mixed symbols']
+  },
+  {
+    id: 'ROMAJI_VOWELS',
+    title: 'Short Vowels',
+    shortTitle: 'Vowels',
+    category: 'INTERMEDIATE',
+    description: 'Type short words with a, e, i, o and u vowel sounds.',
+    stages: ['Short a', 'Short e', 'Short i', 'Short o', 'Short u']
+  },
+  {
+    id: 'ROMAJI_KA',
+    title: 'CVC Words',
+    shortTitle: 'CVC',
+    category: 'INTERMEDIATE',
+    description: 'Build accuracy with consonant-vowel-consonant words.',
+    stages: ['-at words', '-en words', '-ig words', '-op words', 'Mixed CVC']
+  },
+  {
+    id: 'ROMAJI_SA',
+    title: 'Digraphs',
+    shortTitle: 'Digraphs',
+    category: 'INTERMEDIATE',
+    description: 'Practice common two-letter sounds such as sh, ch, th and wh.',
+    stages: ['sh', 'ch', 'th', 'wh', 'Mixed digraphs']
+  },
+  {
+    id: 'ROMAJI_TA',
+    title: 'Consonant Blends',
+    shortTitle: 'Blends',
+    category: 'INTERMEDIATE',
+    description: 'Keep both consonants clear in blends such as bl, st and cr.',
+    stages: ['L blends', 'R blends', 'S blends', 'Ending blends', 'Mixed blends']
+  },
+  {
+    id: 'ROMAJI_NA_HA',
+    title: 'Sight Words',
+    shortTitle: 'Sight Words',
+    category: 'INTERMEDIATE',
+    description: 'Type high-frequency words that young readers meet every day.',
+    stages: ['Starter words', 'Question words', 'Action words', 'School words', 'Longer sight words']
+  },
+  {
+    id: 'ROMAJI_MA_YA_RA_WA',
+    title: 'Word Families',
+    shortTitle: 'Families',
+    category: 'INTERMEDIATE',
+    description: 'Recognize spelling patterns shared by related word families.',
+    stages: ['-ake / -ame', '-ight', '-ound', '-tion', 'Mixed families']
+  },
+  {
+    id: 'ROMAJI_BASIC',
+    title: 'School Words',
+    shortTitle: 'School',
+    category: 'INTERMEDIATE',
+    description: 'Practice useful words for classrooms, subjects and school life.',
+    stages: ['Supplies', 'People', 'Places', 'Subjects', 'School day']
+  },
+  {
+    id: 'ROMAJI_ADVANCED',
+    title: 'Spelling Patterns',
+    shortTitle: 'Spelling',
+    category: 'ADVANCED',
+    description: 'Practice silent letters, vowel teams and common suffixes.',
+    stages: ['Vowel teams', 'Silent e', 'Silent letters', 'Suffixes', 'Mixed spelling']
+  },
+  {
+    id: 'WORDS',
+    title: 'Academic Words',
+    shortTitle: 'Academic',
+    category: 'INTERMEDIATE',
+    description: 'Type words used in reading, mathematics, science and projects.',
+    stages: ['Reading', 'Math', 'Science', 'Projects', 'Longer words']
+  },
+  {
+    id: 'SENTENCES',
+    title: 'Sentence Typing',
+    shortTitle: 'Sentences',
+    category: 'ADVANCED',
+    description: 'Type complete child-friendly sentences with spaces and capitals.',
+    stages: ['Short sentences', 'School sentences', 'Questions', 'Directions', 'Longer sentences']
+  },
+  {
+    id: 'ENGLISH',
+    title: 'Conversation Typing',
+    shortTitle: 'Conversation',
+    category: 'ADVANCED',
+    description: 'Practice friendly questions and answers used by children at school.',
+    stages: ['Greetings', 'Requests', 'Questions', 'Class discussion', 'Long responses']
+  },
+  {
+    id: 'MIXED',
+    title: 'English Typing Challenge',
+    shortTitle: 'Challenge',
+    category: 'EXPERT',
+    description: 'Combine words, capitals, numbers and punctuation in one challenge.',
+    stages: ['Words and numbers', 'Capitals', 'Punctuation', 'Dates and time', 'Full challenge']
+  }
+];
+
+export const getTypingLessonDefinitions = (languageMode: LanguageMode): TypingLessonDefinition[] =>
+  languageMode === 'ENGLISH' ? ENGLISH_TYPING_LESSON_DEFINITIONS : TYPING_LESSON_DEFINITIONS;
+
+export const getTypingLessonDefinition = (
+  lessonId?: string,
+  languageMode: LanguageMode = 'JAPANESE'
+): TypingLessonDefinition => {
+  const definitions = getTypingLessonDefinitions(languageMode);
+  return definitions.find((lesson) => lesson.id === lessonId) ?? definitions[0];
+};

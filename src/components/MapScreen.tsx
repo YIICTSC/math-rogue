@@ -274,14 +274,16 @@ const MapScreen: React.FC<MapScreenProps> = ({ nodes, currentNodeId, onNodeSelec
             )}
 
             {/* メインマップエリア */}
-            <div ref={scrollRef} className="flex-grow overflow-y-auto relative custom-scrollbar z-10" style={{ scrollBehavior: 'smooth' }}>
-                <div className="relative w-full max-w-2xl mx-auto" style={{ height: `${MAP_HEIGHT * 100 + 300}px` }}>
+            <div ref={scrollRef} className="ios-edge-to-edge-visual flex-grow overflow-y-auto relative custom-scrollbar z-10" style={{ scrollBehavior: 'smooth' }}>
+                <div className="relative w-full" style={{ height: `${MAP_HEIGHT * 100 + 300}px` }}>
                     <div
                         className="pointer-events-none absolute inset-0 z-0 bg-cover bg-top opacity-100"
                         style={{ backgroundImage: `url(${mapBackground})` }}
                     />
                     <div className="pointer-events-none absolute inset-0 z-0 bg-slate-950/20" />
 
+                    {/* 背景は画面端まで描画し、経路と操作ノードだけを安全幅に収める。 */}
+                    <div className="relative z-10 mx-auto h-full w-full max-w-2xl">
                     {/* 経路描画 (SVG) */}
                     <svg className="absolute inset-0 w-full h-full pointer-events-none z-10">
                         <defs>
@@ -442,6 +444,7 @@ const MapScreen: React.FC<MapScreenProps> = ({ nodes, currentNodeId, onNodeSelec
                             </div>
                         );
                     })}
+                    </div>
                 </div>
             </div>
 

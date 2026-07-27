@@ -205,7 +205,7 @@ const MiniGameSelectScreen: React.FC<MiniGameSelectScreenProps> = ({ onSelect, o
         </div>
       )}
 
-      <div className="z-10 w-full h-full flex flex-col items-center p-4 overflow-y-auto custom-scrollbar">
+      <div className="ios-safe-ui-x z-10 w-full h-full flex flex-col items-center p-4 overflow-y-auto custom-scrollbar">
         <div className="w-full max-w-5xl flex flex-col items-center min-h-full justify-start md:justify-center py-8 md:py-4">
           <h2 className="text-2xl md:text-3xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-500 animate-pulse flex items-center shrink-0">
             <Gamepad2 className="mr-2 md:mr-3 text-yellow-400" size={28} /> {trans('ミニゲーム選択', languageMode)}
@@ -234,8 +234,15 @@ const MiniGameSelectScreen: React.FC<MiniGameSelectScreenProps> = ({ onSelect, o
                 </div>
 
                 <div className="flex flex-col items-center md:items-start w-full">
-                  <span className="text-sm md:text-lg font-bold mb-1 text-white transition-colors block">
-                    {trans(game.name, languageMode)}
+                  <span
+                    className="mini-game-title text-sm md:text-lg font-bold mb-1 text-white transition-colors"
+                    aria-label={trans(game.name, languageMode)}
+                  >
+                    {languageMode === 'JAPANESE' || languageMode === 'HIRAGANA'
+                      ? game.titleLines.map((line) => (
+                          <span key={line} className="mini-game-title-line">{trans(line, languageMode)}</span>
+                        ))
+                      : <span className="mini-game-title-line">{trans(game.name, languageMode)}</span>}
                   </span>
                   <span className="text-[9px] md:text-[10px] text-gray-400 group-hover:text-gray-200 leading-tight block">
                     {trans(game.description, languageMode)}

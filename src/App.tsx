@@ -40,6 +40,19 @@ import DebugMenuScreen from './components/DebugMenuScreen';
 import MagicEventSimulationScreen from './components/MagicEventSimulationScreen';
 
 type HighSchoolBattleVoiceAction = 'attack' | 'summon' | 'block' | 'power' | 'damage' | 'item' | 'finish' | 'defeat';
+const NON_FINISH_BATTLE_VOICE_RATE = 0.3;
+const BATTLE_VOICE_REPLY_DELAY_MS = 420;
+
+const shouldPlayNonFinishBattleVoice = () => Math.random() < NON_FINISH_BATTLE_VOICE_RATE;
+
+const playDelayedBattleVoice = (play: () => void, delayMs = 0) => {
+    if (!shouldPlayNonFinishBattleVoice()) return;
+    if (delayMs <= 0) {
+        play();
+        return;
+    }
+    window.setTimeout(play, delayMs);
+};
 
 const getHighSchoolBattleVoiceActionForCard = (card: ICard): HighSchoolBattleVoiceAction => {
     if (card.familiarSummon) return 'summon';
@@ -6901,7 +6914,9 @@ const App: React.FC = () => {
                     const voicedEnemies = enemies.filter(enemy => getHumanoidEnemyVoiceProfile(activeBattleVisualTheme, enemy.name));
                     voicedEnemies.forEach((enemy, index) => {
                         window.setTimeout(() => {
-                            audioService.playHumanoidEnemyVoice(activeBattleVisualTheme, enemy.name, 'spawn');
+                            playDelayedBattleVoice(() => {
+                                audioService.playHumanoidEnemyVoice(activeBattleVisualTheme, enemy.name, 'spawn');
+                            });
                         }, 450 + index * 850);
                     });
                     setTurnLog(getSelfTurnLogLabel());
@@ -7538,7 +7553,9 @@ const App: React.FC = () => {
         if (!isCoopHostRemoteAction) {
             audioService.playSound('select');
             if (gameState.visualTheme === 'high-school') {
-                audioService.playHighSchoolVoice(gameState.player.id, 'item');
+                playDelayedBattleVoice(() => {
+                    audioService.playHighSchoolVoice(gameState.player.id, 'item');
+                });
             }
         }
         if (!isCoopHostRemoteAction && gameState.challengeMode === 'COOP' && coopSession && !coopSession.isHost) {
@@ -7802,10 +7819,14 @@ const App: React.FC = () => {
         const highSchoolVoiceHeroId = gameState.visualTheme === 'high-school' ? actionPlayer.id : undefined;
         const isOwnMagicRuleCard = !!magicVoiceHeroId && card.magicHeroId === magicVoiceHeroId && card.magicRuleCardIndex !== undefined;
         if (!isCoopHostRemoteAction && isOwnMagicRuleCard) {
-            audioService.playMagicVoice(magicVoiceHeroId, 'spell', 3, card.magicRuleCardIndex + 1, actionPlayer.magicTransformed);
+            playDelayedBattleVoice(() => {
+                audioService.playMagicVoice(magicVoiceHeroId, 'spell', 3, card.magicRuleCardIndex + 1, actionPlayer.magicTransformed);
+            });
         }
         if (!isCoopHostRemoteAction && highSchoolVoiceHeroId) {
-            audioService.playHighSchoolVoice(highSchoolVoiceHeroId, getHighSchoolBattleVoiceActionForCard(card));
+            playDelayedBattleVoice(() => {
+                audioService.playHighSchoolVoice(highSchoolVoiceHeroId, getHighSchoolBattleVoiceActionForCard(card));
+            });
         }
 
         if (card.type === CardType.ATTACK) {
@@ -7820,7 +7841,9 @@ const App: React.FC = () => {
             const audioPreviewHitCount = Math.min(cardAttackPreviewHitCount, MAX_CARD_DETAIL_VFX);
             if (!isCoopHostRemoteAction) audioService.playAttackEffectSound(getAttackEffectKeyForCard(card, audioPreviewHitCount), audioPreviewHitCount);
             if (!isCoopHostRemoteAction && magicVoiceHeroId && !isOwnMagicRuleCard) {
-                audioService.playMagicVoice(magicVoiceHeroId, 'attack', 3, undefined, actionPlayer.magicTransformed);
+                playDelayedBattleVoice(() => {
+                    audioService.playMagicVoice(magicVoiceHeroId, 'attack', 3, undefined, actionPlayer.magicTransformed);
+                });
             }
         } else if (!isCoopHostRemoteAction) {
             audioService.playSound('block');
@@ -8319,14 +8342,18 @@ const App: React.FC = () => {
                                             (other.currentHp > 0 || (other.enemyType === 'THE_HEART' && other.phase === 1))
                                         );
                                         if (hasOtherAliveEnemies) {
-                                            audioService.playHumanoidEnemyVoice(prev.visualTheme, e.name, 'defeat');
+                                            playDelayedBattleVoice(() => {
+                                                audioService.playHumanoidEnemyVoice(prev.visualTheme, e.name, 'defeat');
+                                            }, BATTLE_VOICE_REPLY_DELAY_MS);
                                         } else {
                                             lastDefeatedEnemyForFinisherRef.current = { ...e };
                                         }
                                     }
                                 } else if (!voicedEnemyDamageIds.has(e.id)) {
                                     voicedEnemyDamageIds.add(e.id);
-                                    audioService.playHumanoidEnemyVoice(prev.visualTheme, e.name, 'damage');
+                                    playDelayedBattleVoice(() => {
+                                        audioService.playHumanoidEnemyVoice(prev.visualTheme, e.name, 'damage');
+                                    }, BATTLE_VOICE_REPLY_DELAY_MS);
                                 }
                             }
                             if (damage > 0 || logParts.length > 1) {
@@ -9753,11 +9780,13 @@ const App: React.FC = () => {
             if (stateRef.current.parryState?.active) {
                 setGameState(prev => ({ ...prev, parryState: { active: false, enemyId: null, success: false, result: parrySuccess ? parryResult : 'miss' } }));
             }
-            audioService.playHumanoidEnemyVoice(
-                stateRef.current.visualTheme,
-                enemy.name,
-                getHumanoidEnemyVoiceActionForIntent(enemy.nextIntent),
-            );
+            playDelayedBattleVoice(() => {
+                audioService.playHumanoidEnemyVoice(
+                    stateRef.current.visualTheme,
+                    enemy.name,
+                    getHumanoidEnemyVoiceActionForIntent(enemy.nextIntent),
+                );
+            });
             if (isAttackIntent) audioService.playSound('attack');
             else if (enemy.nextIntent.type === EnemyIntentType.DEFEND) audioService.playSound('block');
             else if (enemy.nextIntent.type === EnemyIntentType.BUFF) audioService.playSound('buff');
@@ -10110,12 +10139,16 @@ const App: React.FC = () => {
                     if (enemyHpBeforeAction > 0 && e.currentHp < enemyHpBeforeAction) {
                         if (e.currentHp <= 0) {
                             if (aliveEnemies.length > 0) {
-                                audioService.playHumanoidEnemyVoice(prev.visualTheme, e.name, 'defeat');
+                                playDelayedBattleVoice(() => {
+                                    audioService.playHumanoidEnemyVoice(prev.visualTheme, e.name, 'defeat');
+                                }, BATTLE_VOICE_REPLY_DELAY_MS);
                             } else {
                                 lastDefeatedEnemyForFinisherRef.current = { ...e };
                             }
                         } else {
-                            audioService.playHumanoidEnemyVoice(prev.visualTheme, e.name, 'damage');
+                            playDelayedBattleVoice(() => {
+                                audioService.playHumanoidEnemyVoice(prev.visualTheme, e.name, 'damage');
+                            }, BATTLE_VOICE_REPLY_DELAY_MS);
                         }
                     }
                     if (hasRelic(p, 'BIRD_FACED_URN')) {
@@ -10130,10 +10163,14 @@ const App: React.FC = () => {
                         audioService.playSound('damage');
                         if (prev.visualTheme === 'magic' && lastMagicDamageVoiceActionRef.current !== enemyActionKey) {
                             lastMagicDamageVoiceActionRef.current = enemyActionKey;
-                            audioService.playMagicVoice(getMagicProtagonistId(p), 'damage', 3, undefined, p.magicTransformed);
+                            playDelayedBattleVoice(() => {
+                                audioService.playMagicVoice(getMagicProtagonistId(p), 'damage', 3, undefined, p.magicTransformed);
+                            }, BATTLE_VOICE_REPLY_DELAY_MS);
                         }
                         if (prev.visualTheme === 'high-school') {
-                            audioService.playHighSchoolVoice(p.id, 'damage');
+                            playDelayedBattleVoice(() => {
+                                audioService.playHighSchoolVoice(p.id, 'damage');
+                            }, BATTLE_VOICE_REPLY_DELAY_MS);
                         }
                     }
                     if (didApplyDebuff && intent.type === EnemyIntentType.ATTACK_DEBUFF) audioService.playSound('debuff');
@@ -11530,7 +11567,9 @@ const App: React.FC = () => {
         setLegacyCardSelected(false);
         audioService.playSound('lose');
         if (stateRef.current.visualTheme === 'high-school') {
-            audioService.playHighSchoolVoice(stateRef.current.player.id, 'defeat');
+            playDelayedBattleVoice(() => {
+                audioService.playHighSchoolVoice(stateRef.current.player.id, 'defeat');
+            });
         }
         const currentState = stateRef.current;
         void audioService.switchThemeAndPlayBGM(
@@ -11688,11 +11727,13 @@ const App: React.FC = () => {
                     }
                     if (defeatedEnemyForFinisher) {
                         enemyDefeatVoiceTimerRef.current = setTimeout(() => {
-                            audioService.playHumanoidEnemyVoice(
-                                stateRef.current.visualTheme,
-                                defeatedEnemyForFinisher.name,
-                                'defeat',
-                            );
+                            playDelayedBattleVoice(() => {
+                                audioService.playHumanoidEnemyVoice(
+                                    stateRef.current.visualTheme,
+                                    defeatedEnemyForFinisher.name,
+                                    'defeat',
+                                );
+                            });
                             enemyDefeatVoiceTimerRef.current = null;
                         }, ENEMY_FINISHER_BURST_VOICE_DELAY_MS);
                     }

@@ -1,7 +1,7 @@
 import React from 'react';
 import { ArrowLeft, Keyboard } from 'lucide-react';
 import { LanguageMode } from '../types';
-import { getTypingLessonDefinition, TYPING_LESSON_DEFINITIONS, TypingLessonId } from '../data/typingLessonConfig';
+import { getTypingLessonDefinition, getTypingLessonDefinitions, TypingLessonId } from '../data/typingLessonConfig';
 import { storageService } from '../services/storageService';
 import { trans } from '../utils/textUtils';
 
@@ -29,7 +29,8 @@ const TypingModeSelectionScreen: React.FC<TypingModeSelectionScreenProps> = ({
     languageMode
 }) => {
     const [hoveredLessonId, setHoveredLessonId] = React.useState<string | undefined>(undefined);
-    const current = getTypingLessonDefinition(hoveredLessonId ?? selectedLessonId);
+    const lessonDefinitions = React.useMemo(() => getTypingLessonDefinitions(languageMode), [languageMode]);
+    const current = getTypingLessonDefinition(hoveredLessonId ?? selectedLessonId, languageMode);
     const weakKeys = React.useMemo(() => {
         const all = storageService.getTypingWeakKeys();
         return Object.entries(all[current.id] || {}).sort((a, b) => b[1] - a[1]).slice(0, 5);
@@ -44,18 +45,18 @@ const TypingModeSelectionScreen: React.FC<TypingModeSelectionScreenProps> = ({
             }
             const index = LESSON_SHORTCUT_KEYS.indexOf(e.key.toLowerCase());
             if (index === -1) return;
-            const lesson = TYPING_LESSON_DEFINITIONS[index];
+            const lesson = lessonDefinitions[index];
             if (!lesson) return;
             e.preventDefault();
             onSelect(lesson.id);
         };
         window.addEventListener('keydown', handleKeyDown);
         return () => window.removeEventListener('keydown', handleKeyDown);
-    }, [onSelect, onBack]);
+    }, [lessonDefinitions, onSelect, onBack]);
 
     return (
         <div data-gamepad-initial-scope="typing-mode-selection" className="main-typing-mode-screen flex h-full w-full flex-col bg-slate-950 text-white">
-            <div className="border-b border-slate-700 bg-black/60 px-4 py-3">
+            <div className="ios-safe-ui-x ios-safe-ui-header border-b border-slate-700 bg-black/60 px-4 py-3">
                 <div className="mx-auto flex w-full max-w-7xl items-center justify-between gap-4">
                     <button
                         onClick={onBack}
@@ -78,7 +79,7 @@ const TypingModeSelectionScreen: React.FC<TypingModeSelectionScreenProps> = ({
             <div className="min-h-0 flex-1 overflow-y-auto p-4 custom-scrollbar">
                 <div className="mx-auto grid h-full w-full max-w-7xl grid-cols-1 gap-4 lg:grid-cols-[1.2fr_0.8fr]">
                     <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-3">
-                        {TYPING_LESSON_DEFINITIONS.map((lesson) => {
+                        {lessonDefinitions.map((lesson) => {
                             const isSelected = lesson.id === current.id;
                             return (
                                 <button
@@ -92,9 +93,9 @@ const TypingModeSelectionScreen: React.FC<TypingModeSelectionScreenProps> = ({
                                     <div className="mb-2 flex items-center justify-between gap-2">
                                         <div className="text-lg font-black text-white">{trans(lesson.title, languageMode)}</div>
                                         <div className="flex items-center gap-2">
-                                            {LESSON_SHORTCUT_KEYS[TYPING_LESSON_DEFINITIONS.findIndex(item => item.id === lesson.id)] && (
+                                            {LESSON_SHORTCUT_KEYS[lessonDefinitions.findIndex(item => item.id === lesson.id)] && (
                                                 <div className="rounded-full border border-cyan-300 bg-cyan-950/95 px-2 py-0.5 text-[10px] font-black text-cyan-200">
-                                                    {LESSON_SHORTCUT_KEYS[TYPING_LESSON_DEFINITIONS.findIndex(item => item.id === lesson.id)]}
+                                                    {LESSON_SHORTCUT_KEYS[lessonDefinitions.findIndex(item => item.id === lesson.id)]}
                                                 </div>
                                             )}
                                             <div className={`rounded border px-2 py-0.5 text-[10px] font-black ${tierColorMap[lesson.category]}`}>{lesson.category}</div>
@@ -141,7 +142,9 @@ const TypingModeSelectionScreen: React.FC<TypingModeSelectionScreenProps> = ({
                             )}
                         </div>
                         <div className="mt-5 rounded-xl border border-cyan-500/40 bg-cyan-950/30 p-3 text-xs leading-relaxed text-cyan-100">
-                            {trans('初心者はホームポジション・アルファベットから、慣れたらローマ字・短文・総合へ進めます。進行に応じて1文字から長文まで段階的に広がります。', languageMode)}
+                            {languageMode === 'ENGLISH'
+                                ? 'Start with Home Row and Alphabet Keys, then move through phonics, sight words, spelling and complete sentences. Each lesson grows from short keys or words into longer child-friendly prompts.'
+                                : trans('初心者はホームポジション・アルファベットから、慣れたらローマ字・短文・総合へ進めます。進行に応じて1文字から長文まで段階的に広がります。', languageMode)}
                         </div>
                         <div className="mt-3 text-xs font-bold text-cyan-300">1-9, QWERTY: {trans('選択', languageMode)} / 0 or Esc: {trans('もどる', languageMode)}</div>
                     </div>

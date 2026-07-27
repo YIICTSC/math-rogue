@@ -6,6 +6,7 @@ import { Club, Skull, Compass, Mountain, Crown, Send, LucideIcon, Rocket } from 
 export interface MiniGameConfig {
   id: string;
   name: string;
+  titleLines: string[];
   description: string;
   screen: GameScreen;
   threshold: number;
@@ -20,6 +21,7 @@ export const MINI_GAMES: MiniGameConfig[] = [
   {
     id: 'GO_HOME',
     name: '帰宅ダッシュ',
+    titleLines: ['帰宅', 'ダッシュ'],
     description: '障害物をよけて帰宅せよ！レベルアップで教科を強化。',
     screen: GameScreen.MINI_GAME_GO_HOME,
     threshold: 500,
@@ -32,6 +34,7 @@ export const MINI_GAMES: MiniGameConfig[] = [
   {
     id: 'SURVIVOR',
     name: '校庭サバイバー',
+    titleLines: ['校庭', 'サバイバー'],
     description: '迫りくる敵の大群から生き残れ！ヴァンサバ風アクション。',
     screen: GameScreen.MINI_GAME_SURVIVOR,
     threshold: 1000,
@@ -47,6 +50,7 @@ export const MINI_GAMES: MiniGameConfig[] = [
   {
     id: 'POKER',
     name: '放課後ポーカー',
+    titleLines: ['放課後', 'ポーカー'],
     description: 'ポーカー役でスコアを伸ばせ！サポーターを集めるローグライク。',
     screen: GameScreen.MINI_GAME_POKER,
     threshold: 1500,
@@ -59,6 +63,7 @@ export const MINI_GAMES: MiniGameConfig[] = [
   {
     id: 'DUNGEON',
     name: '風来の小学生',
+    titleLines: ['風来の', '小学生'],
     description: '1000回遊べるランダムダンジョン。GB風ローグライクRPG。',
     screen: GameScreen.MINI_GAME_DUNGEON,
     threshold: 2000,
@@ -71,6 +76,7 @@ export const MINI_GAMES: MiniGameConfig[] = [
   {
     id: 'KOCHO',
     name: '校長対決',
+    titleLines: ['校長', '対決'],
     description: 'ターン制戦略バトル。行動を予約して敵を倒せ！',
     screen: GameScreen.MINI_GAME_KOCHO,
     threshold: 2500,
@@ -83,6 +89,7 @@ export const MINI_GAMES: MiniGameConfig[] = [
   {
     id: 'PAPER_PLANE',
     name: '紙飛行機バトル',
+    titleLines: ['紙飛行機', 'バトル'],
     description: 'パーツを組み合わせて機体をビルド。3x3マスの戦略オートバトル。',
     screen: GameScreen.MINI_GAME_PAPER_PLANE,
     threshold: 3000,
@@ -95,6 +102,7 @@ export const MINI_GAMES: MiniGameConfig[] = [
   {
     id: 'DUNGEON_2',
     name: '風来の小学生2',
+    titleLines: ['風来の', '小学生2'],
     description: '更なる深淵へ...進化したローグライクRPG。',
     screen: GameScreen.MINI_GAME_DUNGEON_2,
     threshold: 3500,

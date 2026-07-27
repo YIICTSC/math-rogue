@@ -262,6 +262,108 @@ const ENGLISH_DRILLS = [
     ['Typing practice makes me faster.', 'We study English in the classroom.', 'Please check your homework carefully.', 'Reading every day helps me learn new words.', 'I will do my best and keep practicing.', 'Our team worked together and won the game.', 'I want to share my idea with the class.', 'Learning new words helps me read longer stories.', 'Please write your answer on this worksheet.', 'I am getting better because I practice every day.']
 ];
 
+const ENGLISH_NATIVE_LESSON_DRILLS: Record<TypingLessonId, string[][]> = {
+    HOME_ROW: [
+        ['f', 'j', 'ff', 'jj', 'fj', 'jf'],
+        ['a', 's', 'd', 'f', 'j', 'k', 'l'],
+        ['asdf', 'jkl', 'fall', 'ask', 'dad', 'sad'],
+        ['flash', 'shall', 'glass', 'salad', 'dash'],
+        ['all falls', 'a sad lad', 'ask dad', 'flash falls']
+    ],
+    ALPHABET: [
+        ['a', 'b', 'c', 'd', 'e', 'f'],
+        ['g', 'h', 'i', 'j', 'k', 'l'],
+        ['m', 'n', 'o', 'p', 'q', 'r'],
+        ['s', 't', 'u', 'v', 'w', 'x', 'y', 'z'],
+        ['abcdefghijklmnopqrstuvwxyz', 'quick brown fox', 'pack my box']
+    ],
+    NUMBERS_SYMBOLS: NUMBER_SYMBOL_DRILLS,
+    ROMAJI_VOWELS: [
+        ['cat', 'map', 'jam', 'bag', 'hat'],
+        ['bed', 'pen', 'red', 'hen', 'web'],
+        ['pig', 'sit', 'fin', 'zip', 'milk'],
+        ['hot', 'fox', 'log', 'top', 'clock'],
+        ['sun', 'cup', 'bus', 'run', 'duck']
+    ],
+    ROMAJI_KA: [
+        ['cat', 'bat', 'hat', 'mat', 'sat'],
+        ['hen', 'pen', 'ten', 'men', 'den'],
+        ['big', 'dig', 'fig', 'pig', 'wig'],
+        ['hop', 'mop', 'pop', 'top', 'stop'],
+        ['map', 'jet', 'fin', 'rock', 'sun']
+    ],
+    ROMAJI_SA: [
+        ['ship', 'shop', 'fish', 'shell', 'brush'],
+        ['chip', 'chat', 'lunch', 'chair', 'teacher'],
+        ['this', 'that', 'three', 'think', 'math'],
+        ['what', 'when', 'where', 'which', 'white'],
+        ['shoes', 'children', 'birthday', 'whisper', 'weather']
+    ],
+    ROMAJI_TA: [
+        ['blue', 'black', 'clap', 'flag', 'plant'],
+        ['crab', 'drum', 'frog', 'green', 'train'],
+        ['skip', 'slide', 'smile', 'star', 'swing'],
+        ['desk', 'hand', 'lamp', 'milk', 'tent'],
+        ['class', 'friend', 'spring', 'street', 'blend']
+    ],
+    ROMAJI_NA_HA: [
+        ['a', 'I', 'the', 'is', 'to', 'we'],
+        ['who', 'what', 'when', 'where', 'why'],
+        ['come', 'look', 'make', 'play', 'read'],
+        ['book', 'class', 'friend', 'school', 'teacher'],
+        ['because', 'every', 'favorite', 'people', 'together']
+    ],
+    ROMAJI_MA_YA_RA_WA: [
+        ['cake', 'game', 'name', 'same', 'take'],
+        ['bright', 'flight', 'light', 'night', 'right'],
+        ['around', 'found', 'ground', 'sound', 'round'],
+        ['action', 'question', 'station', 'motion', 'caption'],
+        ['daylight', 'playground', 'classmate', 'notebook', 'sunshine']
+    ],
+    ROMAJI_BASIC: [
+        ['book', 'desk', 'pen', 'pencil', 'ruler'],
+        ['child', 'friend', 'student', 'teacher', 'helper'],
+        ['classroom', 'library', 'office', 'playground', 'school'],
+        ['art', 'English', 'math', 'music', 'science'],
+        ['homework', 'lunch time', 'recess', 'school bus', 'worksheet']
+    ],
+    ROMAJI_ADVANCED: [
+        ['boat', 'clean', 'read', 'team', 'rain'],
+        ['cake', 'home', 'kite', 'note', 'use'],
+        ['knee', 'knock', 'lamb', 'write', 'wrong'],
+        ['careful', 'helpful', 'reading', 'played', 'quickly'],
+        ['beautiful', 'different', 'favorite', 'question', 'straight']
+    ],
+    WORDS: [
+        ['author', 'chapter', 'detail', 'story', 'title'],
+        ['answer', 'count', 'equal', 'number', 'shape'],
+        ['energy', 'observe', 'planet', 'plant', 'weather'],
+        ['design', 'idea', 'plan', 'project', 'team'],
+        ['information', 'measurement', 'paragraph', 'solution', 'experiment']
+    ],
+    SENTENCES: [
+        ['I can read.', 'We like school.', 'This is my book.', 'The sun is hot.'],
+        ['My friend sits by me.', 'We play outside at recess.', 'I bring a pencil to class.'],
+        ['Can you help me?', 'Where is the library?', 'What time is lunch?'],
+        ['Open your book to page ten.', 'Write your name at the top.', 'Check your answer carefully.'],
+        ['Our class worked together to finish the science project.', 'I practice every day because I want to improve.']
+    ],
+    ENGLISH: [
+        ['Hello!', 'Good morning.', 'How are you?', 'Thank you.'],
+        ['Please help me.', 'May I join you?', 'Can I borrow a pencil?', 'Please say that again.'],
+        ['What do you think?', 'Which book do you like?', 'How did you solve it?'],
+        ['I agree with your idea.', 'I would like to add one point.', 'Let us work as a team.'],
+        ['I think this answer is correct because the details match.', 'Could you explain how you found your answer?']
+    ],
+    MIXED: [
+        ['book 2', 'team 4', 'page 10', 'room 3'],
+        ['Monday', 'English', 'Ms. Green', 'Science Club'],
+        ['Yes, I can.', 'Wait!', 'Is it 8?', 'Great job!'],
+        ['July 28, 2026', 'Room 3B', '9:15 a.m.', 'Score: 88'],
+        ['At 9:15, our class will meet in Room 3B.', 'Great job! You solved 8 out of 10 questions.']
+    ]
+};
+
 const MIXED_DRILLS = [
     ['fj', 'dk', '12', 'cat', 'あ', '45', 'sun', 'い', '34', 'pen', 'う', 'jk'],
     ['book', '7:30', 'か', 'friend', 'きょう', 'desk', '9:15', 'hello', 'school', '23', 'のうと', 'thank you'],
@@ -372,8 +474,16 @@ const buildSequencePrompt = (lessonId: TypingLessonId, stage: number, cardName: 
     };
 };
 
-const buildWordPrompt = (lessonId: TypingLessonId, stage: number, cardName: string, words: string[], guide: string, weakChars: Set<string>): TypingPrompt => {
-    const lesson = getTypingLessonDefinition(lessonId);
+const buildWordPrompt = (
+    lessonId: TypingLessonId,
+    stage: number,
+    cardName: string,
+    words: string[],
+    guide: string,
+    weakChars: Set<string>,
+    languageMode: LanguageMode = 'JAPANESE'
+): TypingPrompt => {
+    const lesson = getTypingLessonDefinition(lessonId, languageMode);
     const entry = pickBiased(words, (candidate) => {
         const normalized = normalizeAnswer(candidate);
         let hits = 0;
@@ -420,10 +530,27 @@ const buildKanaPrompt = (lessonId: TypingLessonId, stage: number, cardName: stri
     };
 };
 
-const buildPromptFromLesson = (lessonId: string | undefined, act: number, floor: number, cardName: string): TypingPrompt => {
+const buildPromptFromLesson = (
+    lessonId: string | undefined,
+    act: number,
+    floor: number,
+    cardName: string,
+    languageMode: LanguageMode
+): TypingPrompt => {
     const resolvedLessonId = (lessonId as TypingLessonId | undefined) ?? 'HOME_ROW';
     const stage = getLessonStage(act, floor);
     const weakChars = buildWeakCharSet(resolvedLessonId);
+    if (languageMode === 'ENGLISH') {
+        return buildWordPrompt(
+            resolvedLessonId,
+            stage,
+            cardName,
+            ENGLISH_NATIVE_LESSON_DRILLS[resolvedLessonId][Math.min(stage, 4)],
+            'Type the prompt exactly. Keep a steady rhythm and use the correct fingers.',
+            weakChars,
+            'ENGLISH'
+        );
+    }
     switch (resolvedLessonId) {
         case 'HOME_ROW':
             return buildSequencePrompt('HOME_ROW', stage, cardName, weakChars);
@@ -687,7 +814,7 @@ const TypingBattleScene: React.FC<TypingBattleSceneProps> = ({
 
     useEffect(() => {
         if (currentCard) {
-            setPrompt(buildPromptFromLesson(lessonId, act, floor, currentCard.name));
+            setPrompt(buildPromptFromLesson(lessonId, act, floor, currentCard.name, languageMode));
             setInput('');
             setStatusMessage(`${trans(currentCard.name, languageMode)} をタイピングで起動`);
         } else {

@@ -1181,7 +1181,7 @@ const GoHomeDash: React.FC<{
         <div className="mini-game-go-home-screen w-full h-full bg-slate-950 text-white font-mono flex flex-col items-center p-4 relative overflow-hidden touch-none select-none"
             onPointerDown={handlePointerDown} onPointerUp={handlePointerUp} onPointerLeave={handlePointerUp}>
             
-            <div className="go-home-hud w-full flex justify-between items-start z-10 pointer-events-none mb-2">
+            <div className="ios-safe-ui-x ios-safe-ui-header go-home-hud w-full flex justify-between items-start z-10 pointer-events-none mb-2">
                 <div className="go-home-hud-left flex flex-col gap-2">
                     <div className="flex gap-1">{[...Array(maxHp)].map((_, i) => (<Heart key={i} size={24} className={`${i < hp ? "text-red-500 fill-current" : "text-slate-800"} drop-shadow-lg`} />))}</div>
                     <div className="bg-black/60 px-3 py-1.5 rounded-xl border-2 border-indigo-500/50 flex flex-col w-48 backdrop-blur-md">
