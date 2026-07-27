@@ -20,6 +20,7 @@ export const UI_PREVIEW_SCREENS: UiPreviewScreenDefinition[] = [
 
     { id: GameScreen.MAP, screen: GameScreen.MAP, label: 'マップ', group: '冒険' },
     { id: GameScreen.BATTLE, screen: GameScreen.BATTLE, label: '戦闘', group: '冒険' },
+    { id: GameScreen.REWARD, screen: GameScreen.REWARD, label: '戦闘後報酬', group: '冒険' },
     { id: GameScreen.REST, screen: GameScreen.REST, label: '休憩', group: '冒険' },
     { id: GameScreen.SHOP, screen: GameScreen.SHOP, label: 'ショップ', group: '冒険' },
     { id: GameScreen.GARDEN, screen: GameScreen.GARDEN, label: 'ガーデン', group: '冒険' },

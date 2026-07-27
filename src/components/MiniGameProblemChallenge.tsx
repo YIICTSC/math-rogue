@@ -33,8 +33,29 @@ const MiniGameProblemChallenge: React.FC<MiniGameProblemChallengeProps> = ({
   assignment: assignmentOverride,
   onAnswerResult,
 }) => {
-  const assignment = assignmentOverride ?? storageService.getCurrentAssignment();
-  const assignmentModePoolForPlay = assignment?.gameMode === 'FREE' ? getAssignmentModePool(assignment) : undefined;
+  const assignmentCandidate = assignmentOverride ?? storageService.getCurrentAssignment();
+  const assignmentSignature = assignmentCandidate
+    ? JSON.stringify({
+        id: assignmentCandidate.id,
+        gameMode: assignmentCandidate.gameMode,
+        answerMode: assignmentCandidate.answerMode,
+        units: assignmentCandidate.units,
+        customProblems: assignmentCandidate.customProblems,
+        managementPortal: assignmentCandidate.managementPortal,
+      })
+    : '';
+  const stableAssignmentRef = React.useRef<{ signature: string; value: AssignmentPayload | null }>({
+    signature: assignmentSignature,
+    value: assignmentCandidate,
+  });
+  if (stableAssignmentRef.current.signature !== assignmentSignature) {
+    stableAssignmentRef.current = { signature: assignmentSignature, value: assignmentCandidate };
+  }
+  const assignment = stableAssignmentRef.current.value;
+  const assignmentModePoolForPlay = React.useMemo(
+    () => assignment?.gameMode === 'FREE' ? getAssignmentModePool(assignment) : undefined,
+    [assignment],
+  );
   const assignmentHasCustomProblems = assignment?.gameMode === 'FREE' && assignment.customProblems.length > 0;
   const effectiveMode = assignmentHasCustomProblems
     ? GameMode.UPPER_TRIVIA

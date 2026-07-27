@@ -127,6 +127,7 @@ const RewardScreen: React.FC<RewardScreenProps> = ({ rewards, onSelectReward, on
   return (
     <div
       data-gamepad-initial-scope="reward-screen"
+      data-gamepad-navigation-root
       className="main-reward-screen flex flex-col items-center justify-center h-full w-full bg-gray-900 bg-cover bg-center text-white relative p-4"
       style={{
         backgroundImage: `url(${assetUrl(visualTheme === 'magic'
@@ -221,7 +222,7 @@ const RewardScreen: React.FC<RewardScreenProps> = ({ rewards, onSelectReward, on
       </div>
 
       <div className={`z-10 flex flex-row items-center gap-8 w-full overflow-x-auto md:justify-center landscape:justify-center custom-scrollbar px-4 pt-20 pb-8 min-h-[420px] snap-x ${isLoading ? 'opacity-50 pointer-events-none' : ''}`}>
-        {rewards.map((reward) => (
+        {rewards.map((reward, rewardIndex) => (
           <div key={reward.id} className="snap-center shrink-0 transform hover:scale-105 transition-transform duration-200 flex justify-center">
             
             {reward.type === 'CARD' && (
@@ -236,7 +237,7 @@ const RewardScreen: React.FC<RewardScreenProps> = ({ rewards, onSelectReward, on
                             languageMode={languageMode}
                         />
                     </div>
-                    <button data-gamepad-initial-choice onClick={() => !interactionDisabled && onSelectReward(reward)} disabled={interactionDisabled} className="mt-4 bg-blue-600 px-6 py-2 text-sm font-bold rounded border hover:bg-blue-500 shadow-lg w-full disabled:cursor-not-allowed disabled:opacity-50">{trans("獲得", languageMode)}</button>
+                    <button data-gamepad-initial-choice data-gamepad-zone="reward-options" data-gamepad-order={rewardIndex} onClick={() => !interactionDisabled && onSelectReward(reward)} disabled={interactionDisabled} className="mt-4 bg-blue-600 px-6 py-2 text-sm font-bold rounded border hover:bg-blue-500 shadow-lg w-full disabled:cursor-not-allowed disabled:opacity-50">{trans("獲得", languageMode)}</button>
                 </div>
             )}
             
@@ -257,7 +258,7 @@ const RewardScreen: React.FC<RewardScreenProps> = ({ rewards, onSelectReward, on
                         <div className="text-yellow-100 font-bold text-lg mb-2 truncate">{trans(reward.value.name, languageMode)}</div>
                         <div className="text-xs text-gray-400 leading-tight h-16 overflow-hidden">{trans(reward.value.description, languageMode)}</div>
                     </div>
-                    <button data-gamepad-initial-choice disabled={interactionDisabled} className="bg-yellow-600 px-6 py-2 text-sm font-bold rounded border hover:bg-yellow-500 w-full mt-2 disabled:cursor-not-allowed disabled:opacity-50">{trans("獲得", languageMode)}</button>
+                    <button data-gamepad-initial-choice data-gamepad-zone="reward-options" data-gamepad-order={rewardIndex} disabled={interactionDisabled} className="bg-yellow-600 px-6 py-2 text-sm font-bold rounded border hover:bg-yellow-500 w-full mt-2 disabled:cursor-not-allowed disabled:opacity-50">{trans("獲得", languageMode)}</button>
                 </div>
             )}
 
@@ -271,7 +272,7 @@ const RewardScreen: React.FC<RewardScreenProps> = ({ rewards, onSelectReward, on
                         <div className="text-yellow-100 font-bold text-2xl mb-2">{reward.value} G</div>
                         <div className="text-xs text-gray-400">{trans(`${currencyLabel}を獲得`, languageMode)}</div>
                     </div>
-                    <button data-gamepad-initial-choice disabled={interactionDisabled} className="bg-yellow-600 px-6 py-2 text-sm font-bold rounded border hover:bg-yellow-500 w-full mt-2 disabled:cursor-not-allowed disabled:opacity-50">{trans("獲得", languageMode)}</button>
+                    <button data-gamepad-initial-choice data-gamepad-zone="reward-options" data-gamepad-order={rewardIndex} disabled={interactionDisabled} className="bg-yellow-600 px-6 py-2 text-sm font-bold rounded border hover:bg-yellow-500 w-full mt-2 disabled:cursor-not-allowed disabled:opacity-50">{trans("獲得", languageMode)}</button>
                 </div>
             )}
 
@@ -292,7 +293,7 @@ const RewardScreen: React.FC<RewardScreenProps> = ({ rewards, onSelectReward, on
                         <div className="text-white font-bold text-lg mb-2 truncate">{trans(reward.value.name, languageMode)}</div>
                         <div className="text-xs text-gray-400 leading-tight h-16 overflow-hidden">{trans(reward.value.description, languageMode)}</div>
                     </div>
-                    <button data-gamepad-initial-choice disabled={interactionDisabled} className="bg-gray-600 px-6 py-2 text-sm font-bold rounded border hover:bg-gray-500 w-full mt-2 disabled:cursor-not-allowed disabled:opacity-50">{trans("獲得", languageMode)}</button>
+                    <button data-gamepad-initial-choice data-gamepad-zone="reward-options" data-gamepad-order={rewardIndex} disabled={interactionDisabled} className="bg-gray-600 px-6 py-2 text-sm font-bold rounded border hover:bg-gray-500 w-full mt-2 disabled:cursor-not-allowed disabled:opacity-50">{trans("獲得", languageMode)}</button>
                 </div>
             )}
 
@@ -310,7 +311,7 @@ const RewardScreen: React.FC<RewardScreenProps> = ({ rewards, onSelectReward, on
                         <div className="text-fuchsia-50 font-bold text-lg mb-2">{trans((reward.value as RaceTrickCard).name, languageMode)}</div>
                         <div className="text-xs text-fuchsia-100/80 leading-tight h-16 overflow-hidden">{trans((reward.value as RaceTrickCard).description, languageMode)}</div>
                     </div>
-                    <button data-gamepad-initial-choice disabled={interactionDisabled} className="bg-fuchsia-600 px-6 py-2 text-sm font-bold rounded border hover:bg-fuchsia-500 w-full mt-2 disabled:cursor-not-allowed disabled:opacity-50">{trans("獲得", languageMode)}</button>
+                    <button data-gamepad-initial-choice data-gamepad-zone="reward-options" data-gamepad-order={rewardIndex} disabled={interactionDisabled} className="bg-fuchsia-600 px-6 py-2 text-sm font-bold rounded border hover:bg-fuchsia-500 w-full mt-2 disabled:cursor-not-allowed disabled:opacity-50">{trans("獲得", languageMode)}</button>
                 </div>
             )}
 
@@ -328,7 +329,7 @@ const RewardScreen: React.FC<RewardScreenProps> = ({ rewards, onSelectReward, on
                         <div className="text-emerald-50 font-bold text-lg mb-2">{trans((reward.value as CoopSupportCard).name, languageMode)}</div>
                         <div className="text-xs text-emerald-100/80 leading-tight h-16 overflow-hidden">{trans((reward.value as CoopSupportCard).description, languageMode)}</div>
                     </div>
-                    <button data-gamepad-initial-choice disabled={interactionDisabled} className="bg-emerald-600 px-6 py-2 text-sm font-bold rounded border hover:bg-emerald-500 w-full mt-2 disabled:cursor-not-allowed disabled:opacity-50">{trans("獲得", languageMode)}</button>
+                    <button data-gamepad-initial-choice data-gamepad-zone="reward-options" data-gamepad-order={rewardIndex} disabled={interactionDisabled} className="bg-emerald-600 px-6 py-2 text-sm font-bold rounded border hover:bg-emerald-500 w-full mt-2 disabled:cursor-not-allowed disabled:opacity-50">{trans("獲得", languageMode)}</button>
                 </div>
             )}
           </div>

@@ -35,6 +35,10 @@
   テスト用デバッグ導線を一時的に有効化している。
 - 非公開ブランチ`internal`を説明「Internal test build」で作成済み。
   2026-07-27にBuild `24395548`をライブ設定し、Steamworksの履歴とブランチ表示で確認済み。
+- 2026-07-27の共通UI・課題安定化・報酬コントローラー修正版からWindows x64版を再生成し、
+  ローカル検証に合格した。実行ファイルは約222.3 MiB、アプリ資産は約883.7 MiB。
+  SteamPipeの`internal`向け設定も生成済み。SteamCMDの保存済み認証がなく、
+  再ログインに失敗したため、このビルドのアップロードは認証情報の更新待ち。
 - Developer Compパッケージが用意されているため、開発者アカウントではWindows版Steamクライアントからインストールしてテストできる。Windows実機での起動確認は未実施。
 - Steamストア用の実ゲーム画面7枚（1920×1080）を `release/steam/store-assets/screenshots/` に準備済み。うち追加2枚はチュートリアルを閉じた戦闘画面と、戦闘後の学習問題画面。
 - ImageGenで作成したキービジュアルと正式ロゴを用い、Steam規定寸法のカプセル／ライブラリ／アイコン素材10点を `release/steam/store-assets/generated/` に準備済み。

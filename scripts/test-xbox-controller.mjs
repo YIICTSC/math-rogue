@@ -372,6 +372,40 @@ const run = async () => {
       await press(page, 'Y');
     });
 
+    await test('戦闘後報酬を左右一列のカーソルで選べる', async () => {
+      await page.goto(
+        `${BASE_URL}/?gamepadTestScreen=REWARD`,
+        { waitUntil: 'domcontentloaded', timeout: 90_000 },
+      );
+      const laterButton = page.locator('button').filter({ hasText: 'あとで決める' }).last();
+      if (await laterButton.isVisible().catch(() => false)) await laterButton.click();
+      const rewards = page.locator('[data-gamepad-zone="reward-options"]');
+      await rewards.first().waitFor({ state: 'visible' });
+      expect(await rewards.count() === 4, `報酬候補数が4ではない: ${await rewards.count()}`);
+      expect(
+        JSON.stringify(await rewards.evaluateAll(elements => elements.map(element => element.dataset.gamepadOrder)))
+          === JSON.stringify(['0', '1', '2', '3']),
+        '報酬候補の横方向順序が連番ではない',
+      );
+      await connect(page);
+      await rewards.first().focus();
+      await press(page, 'RIGHT');
+      expect(
+        await page.evaluate(() => document.activeElement?.getAttribute('data-gamepad-order')) === '1',
+        '右入力で次の報酬へ移動しない',
+      );
+      await press(page, 'RIGHT');
+      expect(
+        await page.evaluate(() => document.activeElement?.getAttribute('data-gamepad-order')) === '2',
+        '右入力2回で3番目の報酬へ移動しない',
+      );
+      await press(page, 'LEFT');
+      expect(
+        await page.evaluate(() => document.activeElement?.getAttribute('data-gamepad-order')) === '1',
+        '左入力で前の報酬へ戻らない',
+      );
+    });
+
     await test('風来の小学生2作品で8方向移動とRT投擲を認識する', async () => {
       for (const screen of ['MINI_GAME_DUNGEON', 'MINI_GAME_DUNGEON_2']) {
         await page.goto(`${BASE_URL}/?gamepadTestScreen=${screen}`, { waitUntil: 'domcontentloaded' });
@@ -428,7 +462,7 @@ const run = async () => {
 
     const previewScreens = [
       'MODE_SELECTION', 'DIFFICULTY_SELECTION', 'CHARACTER_SELECTION', 'RELIC_SELECTION',
-      'DECK_CONSTRUCTION', 'TYPING_MODE_SELECTION', 'MAP', 'REST', 'SHOP', 'GARDEN', 'PROBLEM_CHALLENGE',
+      'DECK_CONSTRUCTION', 'TYPING_MODE_SELECTION', 'MAP', 'REWARD', 'REST', 'SHOP', 'GARDEN', 'PROBLEM_CHALLENGE',
       'MINI_GAME_SELECT', 'DODGEBALL_SHOOTING', 'BASKETBALL_LAYUP',
       'MINI_GAME_GO_HOME', 'MINI_GAME_GO_HOME:GAME_OVER',
       'MINI_GAME_SURVIVOR', 'MINI_GAME_SURVIVOR:GAME_OVER',

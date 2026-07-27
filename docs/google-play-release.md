@@ -7,7 +7,7 @@
 - アプリ名: 学習ローグ
 - パッケージ名: `jp.yusukeishige.learningrogue`
 - バージョン名: `1.0.0`
-- 次回提出バージョンコード: `2`
+- 次回提出バージョンコード: `4`
 - アプリ種別: 有料アプリ
 - 基準価格: 500円
 - 広告: なし
@@ -128,6 +128,9 @@ Google Play Consoleでは、現在のコンテンツレーティングにより9
 - `1.0.0 (2)` のGitHub Actionsビルドは成功済み（run `30034037326`）
 - ローカルAAB: `build/android-release-v2/app-release.aab`
 - SHA-256: `eba5e66bfb74b5873a14dc83e5d175a8204cd18e2f73b9e58936c2a147e19d56`
+- 2026-07-27の共通UI・課題安定化・報酬コントローラー修正版は
+  `1.0.0 (4)` として設定済み。GitHubへのpush後に署名済みAABを生成し、
+  クローズドテストへ差し替える。
 
 Google Playへの反映には通常1時間程度、場合によってはそれ以上かかる。初回審査前は、テスター側に一時的なアプリ名 `jp.yusukeishige.learningrogue (unreviewed)` が表示される。
 

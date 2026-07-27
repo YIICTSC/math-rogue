@@ -2938,14 +2938,24 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
                     </div>
                     <div className="text-sm mb-4 min-h-[3rem]">{getInspectedDescription(inspectedItem)}</div>
                     <div className="text-xs font-bold grid grid-cols-2 gap-2">
-                        <div>分類: {inspectedItem.category}</div>
+                        <div>{tr('分類')}: {tr(
+                            inspectedItem.category === 'WEAPON' ? '武器'
+                            : inspectedItem.category === 'ARMOR' ? '防具'
+                            : inspectedItem.category === 'RANGED' ? '飛び道具'
+                            : inspectedItem.category === 'ACCESSORY' ? '装飾品'
+                            : inspectedItem.category === 'STAFF' ? '杖'
+                            : inspectedItem.category === 'FOOD' ? '食料'
+                            : inspectedItem.category === 'SCROLL' ? '巻物'
+                            : inspectedItem.category === 'POTION' ? '薬'
+                            : inspectedItem.category
+                        )}</div>
                         {inspectedItem.power && (
                             <div>
                                 {tr(inspectedItem.category === 'ARMOR' ? '防御' : '威力')}: {inspectedItem.power + (inspectedItem.plus || 0)}
                                 {inspectedItem.plus ? <span className="text-[9px] font-normal ml-1">({inspectedItem.power}+{inspectedItem.plus})</span> : ''}
                             </div>
                         )}
-                        {inspectedItem.value && <div>効果: {inspectedItem.value}</div>}
+                        {inspectedItem.value && <div>{tr('効果')}: {inspectedItem.value}</div>}
                     </div>
                 </div>
             </div>
@@ -3068,6 +3078,9 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
 
         {/* --- LEFT: D-PAD (PC/Tablet Landscape & Desktop) --- */}
         <div className="dungeon-landscape-dpad-panel hidden landscape:flex md:flex order-1 w-48 md:w-64 flex-col items-center justify-center p-4 bg-[#1a1a2a] border-2 border-[#333] rounded-xl shadow-2xl relative shrink-0">
+            <button onClick={handleQuit} className="dungeon-quit-button absolute left-2 right-2 top-2 flex items-center justify-center gap-1 rounded border border-[#444] bg-[#222] px-2 py-1 text-[10px] font-bold text-[#777] transition-colors hover:border-gray-500 hover:text-white">
+                <LogOut size={12}/> {tr('退出')}
+            </button>
             <div className="w-40 h-40 relative flex items-center justify-center">
                 <div className="w-12 h-12 bg-[#333] z-10 rounded-sm"></div>
                 {/* D-PAD Buttons */}
@@ -3091,7 +3104,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
         <div className="dungeon-game-panel w-full max-w-md md:max-w-full md:flex-1 flex flex-col gap-2 min-h-0 order-2">
             <div className="w-full aspect-[4/3] md:aspect-auto md:flex-1 relative shrink-0 shadow-lg border-2 max-h-[45vh] md:max-h-full flex flex-col overflow-hidden" style={{ backgroundColor: C3, borderColor: C0 }}>
                 <div className="w-full h-full relative overflow-hidden flex flex-col">
-                    <div className="absolute top-0 left-0 w-full h-8 flex justify-between items-center px-2 text-[10px] z-10 border-b" style={{ backgroundColor: C0, color: C3, borderColor: C1 }}>
+                    <div className="dungeon-top-bar absolute top-0 left-0 w-full h-8 flex justify-between items-center px-2 text-[10px] z-10 border-b" style={{ backgroundColor: C0, color: C3, borderColor: C1 }}>
                         <span className="font-bold tracking-widest">{tr(currentTheme.name)}</span>
                         <div className="flex gap-2">
                             <button onClick={() => setShowMap(!showMap)} className="flex items-center gap-1 hover:text-white border px-1 rounded" style={{ borderColor: C3 }}><MapIcon size={10}/> Map</button>
@@ -3509,9 +3522,6 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
             </div>
 
             {/* Quit Button */}
-            <button onClick={handleQuit} className="w-full text-[#555] hover:text-white hover:border-gray-500 border border-[#333] py-2 rounded bg-[#222] text-xs font-bold transition-all flex items-center justify-center gap-2 mb-2">
-                <LogOut size={14}/> QUIT GAME
-            </button>
         </div>
 
         {/* --- BOTTOM: MOBILE ONLY CONTROLLER --- */}

@@ -1,5 +1,15 @@
 // Generated from trans() UI literals. Mini-game content and debug-only screens are excluded.
 export const HIRAGANA_UI_EXACT: Record<string, string> = {
+  "退出": "たいしゅつ",
+  "分類": "ぶんるい",
+  "効果": "こうか",
+  "武器": "ぶき",
+  "防具": "ぼうぐ",
+  "飛び道具": "とびどうぐ",
+  "装飾品": "そうしょくひん",
+  "杖": "つえ",
+  "食料": "しょくりょう",
+  "巻物": "まきもの",
   "クレジットロールを開く": "クレジットロールをひらく",
   "クレジットを閉じる": "クレジットをとじる",
   "クラウドファンディング詳細ページを開く": "クラウドファンディングしょうさいページをひらく",

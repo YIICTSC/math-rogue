@@ -5723,6 +5723,39 @@ const App: React.FC = () => {
                 return prev;
             }
 
+            if (screen === GameScreen.REWARD) {
+                const previewRelic = Object.values(RELIC_LIBRARY)[0];
+                const previewPotion = Object.values(POTION_LIBRARY)[0];
+                return {
+                    ...prev,
+                    screen,
+                    challengeMode: undefined,
+                    rewards: [
+                        {
+                            id: 'ui-preview-reward-card',
+                            type: 'CARD',
+                            value: { ...CARDS_LIBRARY.STRIKE, id: 'ui-preview-reward-card-value' },
+                        },
+                        {
+                            id: 'ui-preview-reward-gold',
+                            type: 'GOLD',
+                            value: 80,
+                        },
+                        ...(previewRelic ? [{
+                            id: 'ui-preview-reward-relic',
+                            type: 'RELIC' as const,
+                            value: { ...previewRelic },
+                        }] : []),
+                        ...(previewPotion ? [{
+                            id: 'ui-preview-reward-potion',
+                            type: 'POTION' as const,
+                            value: { ...previewPotion, id: 'ui-preview-reward-potion-value' },
+                        }] : []),
+                    ],
+                    coopBattleState: null,
+                };
+            }
+
             if (screen === GameScreen.DODGEBALL_SHOOTING || screen === GameScreen.BASKETBALL_LAYUP) {
                 const isBasketballPreview = screen === GameScreen.BASKETBALL_LAYUP;
                 const previewCharacters = isBasketballPreview

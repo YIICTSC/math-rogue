@@ -75,11 +75,12 @@ Bundle IDはApp Store Connectでアプリレコードを作る前に最終確定
 
 ## Releaseアーカイブと署名状態
 
-2026-07-26にApple Distribution署名とApp Store用プロビジョニングプロファイルを使い、
-iOS 26.2 SDK、arm64、iOS 15.0以上、Version 1.0.0、Build 11でReleaseアーカイブに成功した。
+2026-07-27にApple Distribution署名とApp Store用プロビジョニングプロファイルを使い、
+iOS 26.2 SDK、arm64、iOS 15.0以上、Version 1.0.0、Build 12でReleaseアーカイブに成功した。
 MP3 172ファイルの同梱、Bundle ID `jp.yusukeishige.learningrogue`、Team
-`STVR67YH4M`を確認した。Build 11はApp Store Connectへアップロード済みで、
-TestFlightの内部・外部テストグループでは「テスト中」、App Reviewでは「審査待ち」。
+`STVR67YH4M`を確認し、App Store Connectへのアップロードにも成功した。Build 12は
+Apple側で処理後にTestFlightグループとApp Reviewへ割り当てる。Build 11は
+TestFlightの内部・外部テストグループで「テスト中」、App Reviewでは「審査待ち」。
 リリース方法は引き続き手動公開に設定している。
 
 ## 開発コマンド

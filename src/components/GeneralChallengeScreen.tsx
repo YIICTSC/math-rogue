@@ -1780,7 +1780,7 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
             <button
                 type="button"
                 onClick={() => setIsUnitBoardOpen(true)}
-                className="absolute left-3 top-3 z-20 inline-flex h-11 w-11 items-center justify-center rounded-full border border-yellow-100/45 bg-black/35 text-yellow-100 shadow-lg transition hover:bg-black/55"
+                className="unit-board-open-button absolute left-3 top-3 z-20 inline-flex h-11 w-11 items-center justify-center rounded-full border border-yellow-100/45 bg-black/35 text-yellow-100 shadow-lg transition hover:bg-black/55"
                 aria-label={trans('単元板書を開く', languageMode)}
                 title={trans('単元板書', languageMode)}
             >

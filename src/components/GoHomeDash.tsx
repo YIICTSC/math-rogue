@@ -1181,15 +1181,15 @@ const GoHomeDash: React.FC<{
         <div className="mini-game-go-home-screen w-full h-full bg-slate-950 text-white font-mono flex flex-col items-center p-4 relative overflow-hidden touch-none select-none"
             onPointerDown={handlePointerDown} onPointerUp={handlePointerUp} onPointerLeave={handlePointerUp}>
             
-            <div className="w-full flex justify-between items-start z-10 pointer-events-none mb-2">
-                <div className="flex flex-col gap-2">
+            <div className="go-home-hud w-full flex justify-between items-start z-10 pointer-events-none mb-2">
+                <div className="go-home-hud-left flex flex-col gap-2">
                     <div className="flex gap-1">{[...Array(maxHp)].map((_, i) => (<Heart key={i} size={24} className={`${i < hp ? "text-red-500 fill-current" : "text-slate-800"} drop-shadow-lg`} />))}</div>
                     <div className="bg-black/60 px-3 py-1.5 rounded-xl border-2 border-indigo-500/50 flex flex-col w-48 backdrop-blur-md">
                         <div className="flex justify-between text-[10px] font-black text-indigo-300"><span>RANK {level}</span><span>{Math.floor(exp)} / {nextLevelExp}</span></div>
                         <div className="w-full h-1.5 bg-slate-800 rounded-full mt-1 overflow-hidden"><div className="h-full bg-gradient-to-r from-indigo-600 to-purple-400 transition-all" style={{ width: `${(exp / nextLevelExp) * 100}%` }}></div></div>
                     </div>
                 </div>
-                <div className="text-right">
+                <div className="go-home-distance shrink-0 text-right">
                     <div className="text-3xl font-black text-white italic tracking-tighter">{score.toLocaleString()}</div>
                     <div className="text-[8px] text-indigo-400 font-bold uppercase tracking-widest bg-black/40 px-2 py-0.5 rounded">Distance</div>
                 </div>
