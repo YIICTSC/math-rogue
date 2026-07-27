@@ -1,6 +1,6 @@
 # Google Play 公開準備
 
-更新日: 2026-07-23
+更新日: 2026-07-27
 
 ## 基本情報
 
@@ -129,8 +129,14 @@ Google Play Consoleでは、現在のコンテンツレーティングにより9
 - ローカルAAB: `build/android-release-v2/app-release.aab`
 - SHA-256: `eba5e66bfb74b5873a14dc83e5d175a8204cd18e2f73b9e58936c2a147e19d56`
 - 2026-07-27の共通UI・課題安定化・報酬コントローラー修正版は
-  `1.0.0 (4)` として設定済み。GitHubへのpush後に署名済みAABを生成し、
-  クローズドテストへ差し替える。
+  `1.0.0 (4)` として設定済み。
+- GitHub Actions run `30240012684` で署名済みAABの生成に成功し、
+  Alphaクローズドテストへアップロードした。
+- ローカルAAB: `build/android-release-v4/app-release.aab`
+- SHA-256: `96ff8ced6b12e0a72e520ef7ddf7bd77663b49a655c419ac55c4d21df1a90cf8`
+- Google Playの公開概要から、`4 (1.0.0)` を審査へ送信済み。
+  現在は「審査中の変更」。難読化解除ファイル未添付の警告のみで、
+  R8 / ProGuardを使用していない現構成では公開を妨げるエラーではない。
 
 Google Playへの反映には通常1時間程度、場合によってはそれ以上かかる。初回審査前は、テスター側に一時的なアプリ名 `jp.yusukeishige.learningrogue (unreviewed)` が表示される。
 

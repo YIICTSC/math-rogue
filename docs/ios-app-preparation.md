@@ -79,8 +79,9 @@ Bundle IDはApp Store Connectでアプリレコードを作る前に最終確定
 iOS 26.2 SDK、arm64、iOS 15.0以上、Version 1.0.0、Build 12でReleaseアーカイブに成功した。
 MP3 172ファイルの同梱、Bundle ID `jp.yusukeishige.learningrogue`、Team
 `STVR67YH4M`を確認し、App Store Connectへのアップロードにも成功した。Build 12は
-Apple側で処理後にTestFlightグループとApp Reviewへ割り当てる。Build 11は
-TestFlightの内部・外部テストグループで「テスト中」、App Reviewでは「審査待ち」。
+TestFlightの内部・外部テストグループへ追加済みで、外部テストでも「テスト中」。
+App Store版はBuild 11の審査提出を取り下げ、Build 12へ差し替えてApp Reviewへ
+再提出済み（「審査待ち」）。審査メモもBuild 12の修正内容へ更新した。
 リリース方法は引き続き手動公開に設定している。
 
 ## 開発コマンド
