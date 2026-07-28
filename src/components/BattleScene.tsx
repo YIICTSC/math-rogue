@@ -575,7 +575,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
     const closeMagicTransformationTutorial = () => {
         setShowMagicTransformationTutorial(false);
         storageService.saveSeenMagicTransformationTutorial();
-        audioService.playSound('select');
+        audioService.playBattleSound('select');
     };
 
     const nextTutorialStep = () => {
@@ -584,7 +584,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
             closeTutorial();
         } else {
             setTutorialStep(tutorialStep + 1);
-            audioService.playSound('select');
+            audioService.playBattleSound('select');
         }
     };
 
@@ -1018,7 +1018,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
 
     const handleCardClickDual = (card: ICard, disabled: boolean) => {
         if (disabled) {
-            if (isDualMode && (hasChoker || normalityRestricted)) audioService.playSound('wrong');
+            if (isDualMode && (hasChoker || normalityRestricted)) audioService.playBattleSound('wrong');
             return;
         }
 
@@ -1029,11 +1029,11 @@ const BattleScene: React.FC<BattleSceneProps> = ({
 
         if (selectedCardIds.includes(card.id)) {
             setSelectedCardIds(prev => prev.filter(id => id !== card.id));
-            audioService.playSound('select');
+            audioService.playBattleSound('select');
         } else {
             if (selectedCardIds.length < 2) {
                 setSelectedCardIds(prev => [...prev, card.id]);
-                audioService.playSound('select');
+                audioService.playBattleSound('select');
             }
         }
     };
@@ -1046,7 +1046,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
             const c1 = player.hand.find(c => c.id === selectedCardIds[0]);
             if (c1) {
                 if (player.currentEnergy < c1.cost) {
-                    audioService.playSound('wrong');
+                    audioService.playBattleSound('wrong');
                     return;
                 }
                 onPlayCard(c1);
@@ -1066,7 +1066,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
         const requiredCost = isCombo ? comboCost : totalCost;
 
         if (player.currentEnergy < requiredCost) {
-            audioService.playSound('wrong');
+            audioService.playBattleSound('wrong');
             return;
         }
 
@@ -1074,7 +1074,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
             setIsComboing(true);
             const fused = synthesizeCards(c1, c2);
             setSynthesizedCard(fused);
-            audioService.playSound('buff');
+            audioService.playBattleSound('buff');
 
             await new Promise(r => setTimeout(r, 1000));
             const comboPayload = { ...fused, _consumedIds: [c1.id, c2.id] };
@@ -1093,7 +1093,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
 
     const onInspect = (card: ICard) => {
         setInspectedCard(card);
-        audioService.playSound('select');
+        audioService.playBattleSound('select');
     };
     const canUseControllerBattleItems = !actingEnemyId && !selectionState.active && coopCanAct;
     const hasRaceControllerAction = raceTrickCards.some(card => card.effectId !== 'WALLET_SWAP' || raceTargets.length > 0);
@@ -1343,7 +1343,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                             data-gamepad-initial-choice
                             onClick={() => {
                                 setShowFriendshipComboTutorial(false);
-                                audioService.playSound('select');
+                                audioService.playBattleSound('select');
                             }}
                             className="w-full rounded border-2 border-indigo-100 bg-indigo-600 px-4 py-2 text-sm font-black text-white shadow-[2px_2px_0_rgba(0,0,0,1)] transition hover:bg-indigo-500 active:translate-x-[2px] active:translate-y-[2px] active:shadow-none"
                         >
@@ -1368,7 +1368,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                 data-gamepad-initial-choice
                                 onClick={() => {
                                     setShowExhaustCardHint(false);
-                                    audioService.playSound('select');
+                                    audioService.playBattleSound('select');
                                 }}
                                 className="rounded bg-fuchsia-600 px-4 py-2 text-sm font-bold text-white hover:bg-fuchsia-500"
                             >
@@ -2483,7 +2483,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                             type="button"
                             onClick={() => {
                                 setFriendshipComboEnabled(prev => !prev);
-                                audioService.playSound('select');
+                                audioService.playBattleSound('select');
                             }}
                             className={`min-w-[3.25rem] rounded border-2 px-2 py-1.5 text-[10px] font-black shadow-lg transition-all ${
                                 friendshipComboEnabled
@@ -2663,7 +2663,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                                             }
                                                             onPlayCard(card);
                                                         }
-                                                        else if (isChokerDisabled || isNormalityDisabled) audioService.playSound('wrong');
+                                                        else if (isChokerDisabled || isNormalityDisabled) audioService.playBattleSound('wrong');
                                                     }
                                                 }
                                             }}
@@ -2996,7 +2996,7 @@ export const BattleFinisherCutinOverlay: React.FC<{ card: ICard; languageMode: L
         for (let i = 0; i < cutinCount; i++) {
             timers.push(
                 setTimeout(() => {
-                    audioService.playSound('finisher_slash');
+                    audioService.playBattleSound('finisher_slash');
                 }, panelDelays[i] ?? i * delayStepMs)
             );
         }
@@ -3004,7 +3004,7 @@ export const BattleFinisherCutinOverlay: React.FC<{ card: ICard; languageMode: L
         const explosionDelay = Math.max(680, (panelDelays[panelDelays.length - 1] || ((cutinCount - 1) * delayStepMs)) + 220);
         timers.push(
             setTimeout(() => {
-                audioService.playSound('finisher_explosion');
+                audioService.playBattleSound('finisher_explosion');
             }, explosionDelay)
         );
 

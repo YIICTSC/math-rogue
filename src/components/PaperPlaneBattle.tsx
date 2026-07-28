@@ -2597,17 +2597,17 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; languageMode?: LanguageMo
         
         await new Promise(r => setTimeout(r, 600)); 
         setClashState(prev => ({ ...prev, phase: 'IMPACT' }));
-        audioService.playSound('attack'); 
+        audioService.playBattleSound('attack');
         
         let playerHit = false;
         let enemyHit = false;
         clashData.forEach(c => {
              if (c.result === 'PLAYER_HIT') playerHit = true;
              if (c.result === 'ENEMY_HIT') enemyHit = true;
-             if (c.result === 'DRAW') audioService.playSound('block');
+             if (c.result === 'DRAW') audioService.playBattleSound('block');
         });
         if (playerHit) { audioService.playSound('lose'); }
-        if (enemyHit) { audioService.playSound('attack'); }
+        if (enemyHit) { audioService.playBattleSound('attack'); }
 
         await new Promise(r => setTimeout(r, 400)); 
         

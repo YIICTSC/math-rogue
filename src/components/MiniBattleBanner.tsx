@@ -534,12 +534,12 @@ const MiniBattleBanner: React.FC<MiniBattleBannerProps> = ({ streak }) => {
         const panelDelays = buildPanelDelays(nextDisplayCount);
         for (let i = 0; i < nextDisplayCount; i++) {
           timeoutsRef.current.push(window.setTimeout(() => {
-            audioService.playSound('finisher_slash');
+            audioService.playBattleSound('finisher_slash');
           }, panelDelays[i] ?? 0));
         }
         explosionDelay = Math.max(680, (panelDelays[panelDelays.length - 1] || 0) + 220);
         timeoutsRef.current.push(window.setTimeout(() => {
-          audioService.playSound('finisher_explosion');
+          audioService.playBattleSound('finisher_explosion');
         }, explosionDelay));
       }
       setExplosionDelayMs(explosionDelay);
@@ -556,7 +556,7 @@ const MiniBattleBanner: React.FC<MiniBattleBannerProps> = ({ streak }) => {
       const nextHp = Math.max(10, 100 - ((streak % 5) * 20));
       setEnemyHpPct(nextHp);
       setEffectText('Hit!');
-      audioService.playSound('attack');
+      audioService.playBattleSound('attack');
     }
 
     timeoutsRef.current.push(window.setTimeout(() => setIsAttacking(false), 260));

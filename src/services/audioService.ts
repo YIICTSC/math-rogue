@@ -1799,6 +1799,18 @@ class AudioService {
           });
           return;
       }
+      this.playSynthSound(effect);
+  }
+
+  public playBattleSound(effect: CommonSoundEffect) {
+      this.init();
+      if (!this.ctx || !this.sfxGain || this.isMuted) return;
+      if (this.ctx.state !== 'running') {
+          void this.resumeAudioContext().then(ready => {
+              if (ready) this.playBattleSound(effect);
+          });
+          return;
+      }
       const fileByEffect: Record<CommonSoundEffect, { name: string; maxDurationMs: number; overlap?: boolean }> = {
           select: { name: 'attack-effects/flash', maxDurationMs: 420 },
           attack: { name: 'attack-effects/impact', maxDurationMs: 720, overlap: true },

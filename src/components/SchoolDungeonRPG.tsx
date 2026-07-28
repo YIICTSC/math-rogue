@@ -1869,7 +1869,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
           if(dead) { gainXp(dead.xp); addLog(`${dead.name}を倒した！`); }
           else { addLog(`${hitEntity.name}に${dmg}ダメージ！`); addVisualEffect('TEXT', hitEntity.x, hitEntity.y, {value:`${dmg}`}); }
           setEnemies(newEnemies.filter(e => e.hp > 0));
-          audioService.playSound('attack');
+          audioService.playBattleSound('attack');
       } else {
           addLog("外した！");
       }
@@ -2008,7 +2008,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
           }
       });
       setEnemies(newEnemies.filter(e => e.hp > 0));
-      audioService.playSound('attack');
+      audioService.playBattleSound('attack');
   };
 
   // ... LONG PRESS LOGIC ...
@@ -2302,7 +2302,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
               setEnemies(newEnemies.filter(e => e.hp > 0));
           }
           
-          audioService.playSound('attack');
+          audioService.playBattleSound('attack');
       } else {
           if (map[ly][lx] !== 'WALL' && !floorItems.find(i=>i.x===lx && i.y===ly)) {
               setFloorItems(prev => [...prev, {

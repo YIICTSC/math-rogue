@@ -98,17 +98,23 @@ try {
     audioService.handleAppBackground();
     await audioService.handleAppForeground();
     void audioService.playHighSchoolVoiceFile('HS_MALE', 'attack-1', 500);
-    // Force first-play paths to verify that iOS uses packaged files instead of
-    // oscillator-only fallbacks before Web Audio buffers are warm.
+    await new Promise(resolve => window.setTimeout(resolve, 50));
+    // Normal UI and mini-game sounds must remain synthesized. Only the battle
+    // API is allowed to start packaged combat SE on its first play.
     audioService.sfxBuffers = {};
+    const beforeNormalSoundCount = window.__iosBgmPlayAttempts.length;
     audioService.playSound('attack');
-    audioService.playSound('finisher_slash');
-    audioService.playSound('finisher_explosion');
     audioService.playSound('jump');
+    await new Promise(resolve => window.setTimeout(resolve, 50));
+    const normalPackagedAttemptCount = window.__iosBgmPlayAttempts.length - beforeNormalSoundCount;
+    audioService.playBattleSound('attack');
+    audioService.playBattleSound('finisher_slash');
+    audioService.playBattleSound('finisher_explosion');
     return {
       bgmVolume: audioService.getBgmVolume(),
       attempts: [...window.__iosBgmPlayAttempts],
       mediaSourceCount: window.__iosBgmMediaSourceCount,
+      normalPackagedAttemptCount,
     };
   });
   await page.waitForFunction(
@@ -116,19 +122,24 @@ try {
       && window.__iosBgmPlayAttempts.some(path => path.includes('/sfx/high-school-voices/HS_MALE/attack-1'))
       && window.__iosBgmPlayAttempts.some(path => path.includes('/sfx/attack-effects/impact.mp3'))
       && window.__iosBgmPlayAttempts.some(path => path.includes('/sfx/finisher-slash.mp3'))
-      && window.__iosBgmPlayAttempts.some(path => path.includes('/sfx/finisher-explosion.mp3'))
-      && window.__iosBgmPlayAttempts.some(path => path.includes('/sfx/jump.mp3')),
+      && window.__iosBgmPlayAttempts.some(path => path.includes('/sfx/finisher-explosion.mp3')),
     beforeResumeCount,
   );
   if (runtimeState.bgmVolume !== 0.25) throw new Error('BGM volume setting was not retained');
   if (runtimeState.mediaSourceCount < 2) throw new Error('BGM was not rebuilt through the gain node after foreground restore');
+  if (runtimeState.normalPackagedAttemptCount !== 0) throw new Error('Non-battle sound unexpectedly started a packaged SE');
   const attempts = await page.evaluate(() => [...window.__iosBgmPlayAttempts]);
-  process.stdout.write(`✓ iOS BGM, voice and packaged first-play SE verified (${attempts.at(-1)})\n`);
+  process.stdout.write(`✓ iOS BGM and battle-only packaged SE routing verified (${attempts.at(-1)})\n`);
 } catch (error) {
   process.stderr.write(`${error instanceof Error ? error.stack : String(error)}\n${viteOutput}`);
   process.exitCode = 1;
 } finally {
-  await browser?.close().catch(() => undefined);
+  if (browser) {
+    await Promise.race([
+      browser.close().catch(() => undefined),
+      delay(2_000),
+    ]);
+  }
   vite.kill('SIGTERM');
   await Promise.race([once(vite, 'exit'), delay(2_000)]);
   if (vite.exitCode === null) vite.kill('SIGKILL');

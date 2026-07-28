@@ -947,7 +947,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
               }
               return e;
           }).filter(e => !e.dead));
-          msg = "大爆発！"; triggerShake(10); audioService.playSound('attack'); used = true;
+          msg = "大爆発！"; triggerShake(10); audioService.playBattleSound('attack'); used = true;
       } else if (card.templateId === 'ROOM_ATK') {
           if (isPointInRoom(player.x, player.y)) {
               const currentRoom = roomsRef.current.find(r => player.x >= r.x && player.x < r.x + r.w && player.y >= r.y && player.y < r.y + r.h);
@@ -962,7 +962,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
                       }
                       return e;
                   }).filter(e => !e.dead));
-                  msg = "全校放送：下校時刻です！"; audioService.playSound('attack'); used = true;
+                  msg = "全校放送：下校時刻です！"; audioService.playBattleSound('attack'); used = true;
               } else { msg = "部屋の外では使えない。"; audioService.playSound('wrong'); }
           } else { msg = "通路では使えない。"; audioService.playSound('wrong'); }
       } else if (card.templateId === 'THRUST') {
@@ -985,7 +985,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
                   }
                   return e;
               }).filter(e => !e.dead));
-              msg = targets.length > 1 ? "2枚抜き！" : `${targets[0].name}に攻撃！`; audioService.playSound('attack');
+              msg = targets.length > 1 ? "2枚抜き！" : `${targets[0].name}に攻撃！`; audioService.playBattleSound('attack');
           } else { msg = "空を突いた。"; audioService.playSound('select'); }
           used = true;
       } else if (card.templateId === 'PIERCE') {
@@ -1008,7 +1008,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
                   }
                   return e;
               }).filter(e => !e.dead));
-              msg = "貫通弾！"; audioService.playSound('attack');
+              msg = "貫通弾！"; audioService.playBattleSound('attack');
           } else { msg = "空を裂いた。"; audioService.playSound('select'); }
           used = true;
       } else if (card.templateId === 'SPIN') {
@@ -1023,7 +1023,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
               }
               return e;
           }).filter(e => !e.dead));
-          msg = hits > 0 ? "回転斬り！" : "周りに誰もいない。"; audioService.playSound('attack'); used = true;
+          msg = hits > 0 ? "回転斬り！" : "周りに誰もいない。"; audioService.playBattleSound('attack'); used = true;
       } else if (card.type === 'ATTACK') {
           const { x: dx, y: dy } = player.dir; let targets: {x:number, y:number}[] = [];
           if (card.templateId === 'WAVE') {
@@ -1075,13 +1075,13 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
           addCardEffect('drain', player.x, player.y); addVisualEffect('TEXT', player.x, player.y, { value: 'Heal', color: 'green' }); msg = "HP回復！"; audioService.playSound('buff'); used = true;
       } else if (card.type === 'DEFENSE') {
           setPlayer(p => ({ ...p, status: { ...p.status, defenseBuff: (p.status.defenseBuff || 0) + card.power } }));
-          addCardEffect('barrier', player.x, player.y); msg = "防御を固めた！"; audioService.playSound('block'); used = true;
+          addCardEffect('barrier', player.x, player.y); msg = "防御を固めた！"; audioService.playBattleSound('block'); used = true;
       } else if (card.templateId === 'FIRE') {
           const { x: dx, y: dy } = player.dir; let tx = player.x, ty = player.y; let target = null;
           for(let i=1; i<=5; i++) { tx += dx; ty += dy; if (map[ty][tx] === 'WALL') break; const e = enemies.find(en => en.x === tx && en.y === ty); if (e) { target = e; break; } }
           addDirectedCardEffect('beam5', player.x, player.y, player.dir, 3, { duration: 12, maxDuration: 12 }); 
           if (target) { const dmg = baseDmg; const nhp = target.hp - dmg; setEnemies(prev => prev.map(e => e.id === target.id ? { ...e, hp: nhp } : e).filter(e => e.hp > 0)); if (nhp <= 0) { gainXp(target.xp); msg = `${target.name}を燃やした！`; } else msg = `${target.name}に${dmg}ダメージ！`; } else msg = "炎を放った！";
-          audioService.playSound('attack'); used = true;
+          audioService.playBattleSound('attack'); used = true;
       } else if (card.templateId === 'DASH') { setPlayer(p => ({ ...p, status: { ...p.status, speed: 5 } })); msg = "ダッシュ！"; used = true; 
       } else if (card.templateId === 'RAGE') { setPlayer(p => ({ ...p, status: { ...p.status, attackBuff: (p.status.attackBuff || 0) + card.power } })); msg = "攻撃力が上がった！"; audioService.playSound('buff'); used = true;
       } else if (card.templateId === 'INVINCIBLE') { setPlayer(p => ({ ...p, status: { ...p.status, defenseBuff: (p.status.defenseBuff || 0) + 999 } })); msg = "無敵状態になった！"; addVisualEffect('FLASH', 0, 0, { color: 'yellow', duration: 20 }); audioService.playSound('buff'); used = true;
@@ -1511,7 +1511,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
       if (hitEntity) {
           let dmg = 5 + (newRanged.power || 0); if (newRanged.type === 'SHADOW_PIN') { hitEntity.status.frozen = 5; addLog("影を縫いつけた！"); }
           const newEnemies = enemies.map(e => { if (e.id === hitEntity!.id) { const nhp = e.hp - dmg; return { ...e, hp: nhp }; } return e; });
-          const dead = newEnemies.find(e => e.id === hitEntity!.id && e.hp <= 0); if(dead) { gainXp(dead.xp); addLog(`${dead.name}をたおした！`); } else { addLog(`${hitEntity.name}に${dmg}ダメージ！`); addVisualEffect('TEXT', hitEntity.x, hitEntity.y, {value:`${dmg}`}); } setEnemies(newEnemies.filter(e => e.hp > 0)); audioService.playSound('attack');
+          const dead = newEnemies.find(e => e.id === hitEntity!.id && e.hp <= 0); if(dead) { gainXp(dead.xp); addLog(`${dead.name}をたおした！`); } else { addLog(`${hitEntity.name}に${dmg}ダメージ！`); addVisualEffect('TEXT', hitEntity.x, hitEntity.y, {value:`${dmg}`}); } setEnemies(newEnemies.filter(e => e.hp > 0)); audioService.playBattleSound('attack');
       } else addLog("はずした！");
       processTurn(player.x, player.y);
   };
@@ -1553,7 +1553,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
           newEnemies = newEnemies.map(e => { if (e.id === t.id) { const nhp = e.hp - dmg; addLog(`${e.name}に${dmg}ダメージ！`); addVisualEffect('TEXT', e.x, e.y, { value: `${dmg}`, color: 'white' }); if (nhp <= 0 && wType === 'LADLE' && Math.random() < 0.3) { const meat = { ...ITEM_DB['FOOD_MEAT'], name: `${e.name}の肉`, value: 100, id: `meat-${Date.now()}` }; setFloorItems(prev => [...prev, { id: Date.now()+Math.random(), type:'ITEM', x: e.x, y: e.y, char: '!', name: meat.name, hp:0,maxHp:0,baseAttack:0,baseDefense:0,attack:0,defense:0,xp:0,dir:{x:0,y:0}, status:e.status, itemData: meat }]); addLog(`${e.name}を肉に変えた！`, currentTheme.colors.C2); } return { ...e, hp: nhp }; } return e; });
       });
       const deads = newEnemies.filter(e => e.hp <= 0); deads.forEach(d => { if (d.enemyType === 'BOSS') { setGameClear(true); audioService.playSound('win'); saveDungeonScore("Cleared"); storageService.clearDungeonState2(); addVisualEffect('FLASH', 0, 0, { duration: 30, maxDuration: 30 }); } else { addLog(`${d.name}を倒した！ (${d.xp} XP)`); gainXp(d.xp); } });
-      setEnemies(newEnemies.filter(e => e.hp > 0)); audioService.playSound('attack');
+      setEnemies(newEnemies.filter(e => e.hp > 0)); audioService.playBattleSound('attack');
   };
 
   const handlePressStart = () => { if (menuOpen || shopState.active || gameOver || gameClear) return; fastForwardInterval.current = setTimeout(() => setIsFastForwarding(true), 400); };
@@ -1620,7 +1620,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
           let dmg = 2; if (item.category === 'WEAPON' || item.category === 'RANGED') dmg = 5 + (item.power || 0); if (item.category === 'ARMOR') dmg = 3 + (item.power || 0); if (item.type === 'POT_GLUE') { hitEntity.status.frozen = 10; addLog(`${hitEntity.name}はのりで固まった！`); } if (item.type.includes('POISON')) { addLog(`${hitEntity.name}に毒を与えた！`); dmg += 10; } if (item.type === 'SCROLL_SLEEP') { hitEntity.status.sleep = 10; addLog(`${hitEntity.name}は眠ってしまった！`); }
           if (item.category === 'STAFF') { const res = executeStaffEffect(item, hitEntity, hitEntity.x, hitEntity.y); if (res.msg) addLog(res.msg); if (!identifiedTypes.has(item.type)) { setIdentifiedTypes(prev => new Set(prev).add(item.type)); addLog(`${idMap[item.type]}は${item.name}だった！`, "yellow"); } } 
           else { const newEnemies = enemies.map(e => { if (e.id === hitEntity!.id) { const nhp = e.hp - dmg; return { ...e, hp: nhp }; } return e; }); const dead = newEnemies.find(e => e.id === hitEntity!.id && e.hp <= 0); if(dead) { gainXp(dead.xp); addLog(`${dead.name}を倒した！`); } else { addLog(`${hitEntity.name}に${dmg}ダメージ！`); addVisualEffect('TEXT', hitEntity.x, hitEntity.y, {value:`${dmg}`}); } setEnemies(newEnemies.filter(e => e.hp > 0)); }
-          audioService.playSound('attack');
+          audioService.playBattleSound('attack');
       } else { if (map[ly][lx] !== 'WALL' && !floorItems.find(i=>i.x===lx && i.y===ly)) { setFloorItems(prev => [...prev, { id: Date.now() + Math.random(), type: 'ITEM', x: lx, y: ly, char: '!', name: item.name, hp: 0, maxHp: 0, baseAttack: 0, baseDefense: 0, attack: 0, defense: 0, xp: 0, dir:{x:0,y:0}, status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0, poison: 0, trapSight: 0 }, itemData: item }]); addLog("飛んでいった。"); } else addLog("彼方へ消え去った。"); }
       setMenuOpen(false); processTurn(player.x, player.y);
   };

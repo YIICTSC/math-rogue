@@ -1228,7 +1228,7 @@ const KochoShowdown: React.FC<{
                                 status = 'GAME_OVER';
                                 audioService.playSound('lose'); // Play distinct lose sound only on death
                             } else {
-                                audioService.playSound('damage'); // Play less harsh damage sound
+                                audioService.playBattleSound('damage'); // Play less harsh damage sound
                             }
                             hitSomething = true;
                         }
@@ -1292,14 +1292,14 @@ const KochoShowdown: React.FC<{
                                 status = 'GAME_OVER';
                                 audioService.playSound('lose');
                             } else {
-                                audioService.playSound('damage');
+                                audioService.playBattleSound('damage');
                             }
                         }
                     } else if (sName === 'SHIELD') { // PE Teacher
                         logs = [`${e.name}が号令をかけた！(Shield+5)`, ...logs];
                         e.shield += 5;
                         generatedVfx.push({ id: `v_spec_${Date.now()}`, type: 'BLOCK', pos: e.pos });
-                        audioService.playSound('block');
+                        audioService.playBattleSound('block');
                     } else if (sName === 'LULLABY') { // Music Teacher
                         logs = [`${e.name}の子守唄... (Action CD+2)`, ...logs];
                         nextState.specialActionCooldown += 2;
@@ -1992,7 +1992,7 @@ const KochoShowdown: React.FC<{
                         addLog(`シールド +${card.shield}`);
                         addVfx('BLOCK', p.pos);
                     }
-                    audioService.playSound('attack');
+                    audioService.playBattleSound('attack');
                 } else {
                     addLog("空振り...");
                     audioService.playSound('select');
@@ -2036,7 +2036,7 @@ const KochoShowdown: React.FC<{
                 } else if (card.shield && card.shield > 0) {
                     nextPlayer.shield += card.shield;
                     addVfx('BLOCK', p.pos);
-                    audioService.playSound('block');
+                    audioService.playBattleSound('block');
                 }
             }
 

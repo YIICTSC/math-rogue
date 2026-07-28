@@ -7853,7 +7853,7 @@ const App: React.FC = () => {
                 });
             }
         } else if (!isCoopHostRemoteAction) {
-            audioService.playSound('block');
+            audioService.playBattleSound('block');
         }
         if (!isCoopHostRemoteAction) {
             setLastActionType(card.type);
@@ -7933,7 +7933,7 @@ const App: React.FC = () => {
                 const goldAmount = card.gold * magicEffectMultiplier;
                 p.gold += goldAmount;
                 currentLogs.push(`${goldAmount}ゴールドをゲット！`);
-                audioService.playSound('buff');
+                audioService.playBattleSound('buff');
             }
 
             if (card.addPotion && !isGiftBoxCard) {
@@ -8042,7 +8042,7 @@ const App: React.FC = () => {
                 p.floatingText = { id: `summon-${Date.now()}`, text: `-${summonHpCost} / ${familiar.name} 召喚`, color: 'text-fuchsia-300', iconType: 'zap' };
                 currentLogs.push(`${familiar.name}を召喚した（HP-${summonHpCost}）`);
                 nextActiveEffects.push({ id: `vfx-summon-${Date.now()}`, type: 'SHOCKWAVE', targetId: 'player' });
-                audioService.playSound('buff');
+                audioService.playBattleSound('buff');
             }
             if (hasRelic(p, 'INK_BOTTLE')) {
                 const inkCount = (p.relicCounters['INK_BOTTLE_COUNT'] || 0) + 1;
@@ -9794,10 +9794,10 @@ const App: React.FC = () => {
                     getHumanoidEnemyVoiceActionForIntent(enemy.nextIntent),
                 );
             });
-            if (isAttackIntent) audioService.playSound('attack');
-            else if (enemy.nextIntent.type === EnemyIntentType.DEFEND) audioService.playSound('block');
-            else if (enemy.nextIntent.type === EnemyIntentType.BUFF) audioService.playSound('buff');
-            else if (enemy.nextIntent.type === EnemyIntentType.DEBUFF) audioService.playSound('debuff');
+            if (isAttackIntent) audioService.playBattleSound('attack');
+            else if (enemy.nextIntent.type === EnemyIntentType.DEFEND) audioService.playBattleSound('block');
+            else if (enemy.nextIntent.type === EnemyIntentType.BUFF) audioService.playBattleSound('buff');
+            else if (enemy.nextIntent.type === EnemyIntentType.DEBUFF) audioService.playBattleSound('debuff');
             else audioService.playSound('select');
             await new Promise<void>(resolve => {
                 setGameState(prev => {
@@ -9879,7 +9879,7 @@ const App: React.FC = () => {
                                 ? trans("ベストアンサー！音波を完全に跳ね返した！", languageMode)
                                 : trans("ナイス応答！音波を跳ね返した！", languageMode));
                             newLogs.push(`${trans(e.name, languageMode)}に${reflectedDmg}の反射ダメージ`);
-                            audioService.playSound(parryResult === 'perfect' ? 'finisher_slash' : 'buff');
+                            audioService.playBattleSound(parryResult === 'perfect' ? 'finisher_slash' : 'buff');
                             nextActiveEffects.push({ id: `vfx-parry-ring-${Date.now()}`, type: 'SHOCKWAVE', targetId: 'player' });
                             nextActiveEffects.push({ id: `vfx-parry-${Date.now()}`, type: parryResult === 'perfect' ? 'LIGHTNING' : 'FIRE', targetId: e.id, delay: 120 });
                             if (parryResult === 'perfect') {
@@ -10167,7 +10167,7 @@ const App: React.FC = () => {
                     }
                     syncRedSkullState(p);
                     if (didHpDamage) {
-                        audioService.playSound('damage');
+                        audioService.playBattleSound('damage');
                         if (prev.visualTheme === 'magic' && lastMagicDamageVoiceActionRef.current !== enemyActionKey) {
                             lastMagicDamageVoiceActionRef.current = enemyActionKey;
                             playDelayedBattleVoice(() => {
@@ -10180,7 +10180,7 @@ const App: React.FC = () => {
                             }, BATTLE_VOICE_REPLY_DELAY_MS);
                         }
                     }
-                    if (didApplyDebuff && intent.type === EnemyIntentType.ATTACK_DEBUFF) audioService.playSound('debuff');
+                    if (didApplyDebuff && intent.type === EnemyIntentType.ATTACK_DEBUFF) audioService.playBattleSound('debuff');
                     return {
                         ...prev,
                         player: p,
@@ -10256,7 +10256,7 @@ const App: React.FC = () => {
         const participant = slot.peerId ? coopSession?.participants.find(entry => entry.peerId === slot.peerId) : undefined;
         if (!participant || (participant.currentHp ?? participant.maxHp ?? 0) <= 0) return;
         setTurnLog(`${slot.label} の支援`);
-        audioService.playSound('buff');
+        audioService.playBattleSound('buff');
         setGameState(prev => {
             const p = { ...prev.player };
             const nextEnemies = prev.enemies.map(enemy => ({ ...enemy }));
@@ -10561,7 +10561,7 @@ const App: React.FC = () => {
                 ],
             };
         });
-        audioService.playSound('buff');
+        audioService.playBattleSound('buff');
         setLastActionType(CardType.POWER);
         setLastActionTime(Date.now());
         window.setTimeout(() => {
@@ -11670,7 +11670,7 @@ const App: React.FC = () => {
             ? nextPlayers.find(entry => entry.peerId === coopSelfPeerId)
             : null;
 
-        audioService.playSound('buff');
+        audioService.playBattleSound('buff');
         setCoopBattleState(nextBattleState);
         setCoopSession(prev => prev ? {
             ...prev,
@@ -11763,7 +11763,7 @@ const App: React.FC = () => {
                     lastActingEnemyRef.current = null;
                     lastLethalEnemyRef.current = null;
                     lastDefeatedEnemyForFinisherRef.current = null;
-                    audioService.playSound('buff');
+                    audioService.playBattleSound('buff');
                     setGameState(prev => ({
                         ...prev,
                         player: reviveWithTailEffect(prev.player) || prev.player
@@ -11774,7 +11774,7 @@ const App: React.FC = () => {
                     lastActingEnemyRef.current = null;
                     lastLethalEnemyRef.current = null;
                     lastDefeatedEnemyForFinisherRef.current = null;
-                    audioService.playSound('buff');
+                    audioService.playBattleSound('buff');
                     setGameState(prev => ({
                         ...prev,
                         player: {
@@ -11810,7 +11810,7 @@ const App: React.FC = () => {
                 if (lethalEnemy) {
                     const finisherCard = createEnemyFinisherCard(lethalEnemy);
                     setBattleFinisherCutinCard(finisherCard);
-                    audioService.playSound('finisher_slash');
+                    audioService.playBattleSound('finisher_slash');
                     if (defeatSequenceTimerRef.current) {
                         clearTimeout(defeatSequenceTimerRef.current);
                     }

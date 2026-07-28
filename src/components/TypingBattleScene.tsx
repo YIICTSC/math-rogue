@@ -874,7 +874,7 @@ const TypingBattleScene: React.FC<TypingBattleSceneProps> = ({
 
     useEffect(() => {
         if (wrongInputStreak < 20) return;
-        audioService.playSound('wrong');
+        audioService.playBattleSound('wrong');
         setStatusMessage('ミスタイプが続いたため タイトルへ もどります');
         const timer = window.setTimeout(() => {
             onAbort();
@@ -904,7 +904,7 @@ const TypingBattleScene: React.FC<TypingBattleSceneProps> = ({
 
     const handleSuccess = () => {
         if (!prompt || !currentCard) return;
-        audioService.playSound('attack');
+        audioService.playBattleSound('attack');
         setStatusMessage(`${trans(currentCard.name, languageMode)} を自動使用`);
         setWrongInputStreak(0);
         if (lessonId && nextExpectedKey) {
@@ -915,7 +915,7 @@ const TypingBattleScene: React.FC<TypingBattleSceneProps> = ({
     };
 
     const triggerMistypeFeedback = () => {
-        audioService.playSound('wrong');
+        audioService.playBattleSound('wrong');
         setMistypeFlashActive(true);
         setMistypeShakeActive(true);
 
