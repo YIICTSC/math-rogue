@@ -1772,8 +1772,22 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
       </div>
   );
 
+  const layoutTextLength = [
+    currentProblem.question,
+    currentProblem.hint,
+    currentProblem.passage,
+    currentProblem.unitLabel,
+    ...(currentProblem.options || []),
+    ...(currentProblem.speechPrompt?.examples || []),
+  ].reduce((total, value) => total + String(value || '').length, 0);
+  const landscapeDensityClass = layoutTextLength > 520
+    ? 'general-challenge-density-ultra'
+    : layoutTextLength > 260
+      ? 'general-challenge-density-compact'
+      : 'general-challenge-density-normal';
+
   return (
-    <div data-gamepad-initial-scope={`general-challenge-${currentProblemIndex}`} className={`main-challenge-screen flex flex-col h-full w-full ${bgClass} text-white relative items-center justify-center p-2 sm:p-3 md:p-8 font-mono overflow-y-auto overflow-x-hidden`}>
+    <div data-gamepad-initial-scope={`general-challenge-${currentProblemIndex}`} className={`main-challenge-screen ${landscapeDensityClass} flex flex-col h-full w-full ${bgClass} text-white relative items-center justify-center p-2 sm:p-3 md:p-8 font-mono overflow-y-auto overflow-x-hidden`}>
         <div className="absolute inset-0 texture-dark-matter opacity-20 pointer-events-none"></div>
         <RewardHintBanner text={rewardHint} languageMode={languageMode} />
         {unitBoardSummary && (

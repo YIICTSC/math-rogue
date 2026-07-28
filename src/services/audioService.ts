@@ -14,6 +14,21 @@ const versionBgmPath = (path: string) =>
 const IS_IOS_BUILD = String(import.meta.env.VITE_APP_PLATFORM || '').trim().toLowerCase() === 'ios';
 
 type HtmlSfxEffect = 'magic-transform-voice';
+type CommonSoundEffect =
+  | 'select'
+  | 'attack'
+  | 'block'
+  | 'win'
+  | 'lose'
+  | 'correct'
+  | 'wrong'
+  | 'buff'
+  | 'debuff'
+  | 'damage'
+  | 'explosion'
+  | 'finisher_slash'
+  | 'finisher_explosion'
+  | 'jump';
 
 class AudioService {
   private ctx: AudioContext | null = null;
@@ -1214,9 +1229,9 @@ class AudioService {
   public async preloadSfx(names: string[]) {
       this.init();
       if (!this.ctx) return;
-      if (this.ctx.state === 'suspended') {
-          await this.ctx.resume().catch(() => undefined);
-      }
+      // Decoding does not require the context to be running. On iOS, awaiting
+      // resume() outside a user gesture can remain pending indefinitely and used
+      // to prevent every bundled SE from being preloaded.
       await Promise.all(names.map(name => this.loadSfxBuffer(name).catch(() => null)));
   }
 
@@ -1250,6 +1265,7 @@ class AudioService {
           'status-effects/poison',
           'finisher-slash',
           'finisher-explosion',
+          'jump',
       ]);
   }
 
@@ -1447,7 +1463,22 @@ class AudioService {
               return;
           }
 
-          fallback();
+          // Use the packaged file on the first play too. Waiting for a fetch and
+          // falling back immediately made every first mini-game action sound like
+          // the old oscillator-only SE, especially on iOS.
+          void this.playHtmlSfx(
+              name,
+              [
+                  assetUrl(`sfx/${name}.mp3`),
+                  `/sfx/${name}.mp3`,
+                  `sfx/${name}.mp3`,
+              ],
+              maxDurationMs,
+              overlap,
+              generation,
+          ).then(played => {
+              if (!played) fallback();
+          });
           void this.loadSfxBuffer(name);
       };
 
@@ -1678,34 +1709,29 @@ class AudioService {
       }
   }
 
-  public playSound(effect: 'select' | 'attack' | 'block' | 'win' | 'lose' | 'correct' | 'wrong' | 'buff' | 'debuff' | 'damage' | 'explosion' | 'finisher_slash' | 'finisher_explosion') {
-      this.init();
+  private playSynthSound(effect: CommonSoundEffect) {
       if (!this.ctx || !this.sfxGain || this.isMuted) return;
-      if (this.ctx.state !== 'running') {
-          void this.resumeAudioContext().then(ready => {
-              if (ready) this.playSound(effect);
-          });
-          return;
-      }
       const t = this.ctx.currentTime;
       switch(effect) {
           case 'select':
               this.playOsc(1100, t, 0.05, 'triangle', 0.2, this.sfxGain);
               break;
           case 'attack':
+          case 'finisher_slash':
               this.playAttackSynth(t);
               break;
           case 'block':
               this.playOsc(600, t, 0.1, 'square', 0.2, this.sfxGain);
               this.playOsc(850, t, 0.08, 'square', 0.2, this.sfxGain);
               break;
-          case 'win':
+          case 'win': {
               const fanfare = [523.25, 659.25, 783.99, 1046.50, 1318.51, 1567.98];
-              fanfare.forEach((freq, i) => {
-                  this.playOsc(freq, t + i*0.08, 0.4, 'square', 0.2, this.sfxGain!);
+              fanfare.forEach((freq, index) => {
+                  this.playOsc(freq, t + index * 0.08, 0.4, 'square', 0.2, this.sfxGain!);
               });
               break;
-          case 'lose':
+          }
+          case 'lose': {
               const loseOsc = this.ctx.createOscillator();
               loseOsc.type = 'sawtooth';
               loseOsc.frequency.setValueAtTime(300, t);
@@ -1718,12 +1744,13 @@ class AudioService {
               loseOsc.start(t);
               loseOsc.stop(t + 1.0);
               break;
+          }
           case 'correct':
               this.playOsc(880, t, 0.1, 'sine', 0.3, this.sfxGain);
               this.playOsc(1108, t + 0.05, 0.1, 'sine', 0.3, this.sfxGain);
               this.playOsc(1318, t + 0.1, 0.4, 'sine', 0.3, this.sfxGain);
               break;
-          case 'wrong':
+          case 'wrong': {
               const wrongOsc = this.ctx.createOscillator();
               wrongOsc.type = 'sawtooth';
               wrongOsc.frequency.setValueAtTime(150, t);
@@ -1736,6 +1763,7 @@ class AudioService {
               wrongOsc.start(t);
               wrongOsc.stop(t + 0.3);
               break;
+          }
           case 'buff':
               this.playOsc(400, t, 0.1, 'sine', 0.3, this.sfxGain);
               this.playOsc(600, t + 0.1, 0.1, 'sine', 0.3, this.sfxGain);
@@ -1752,15 +1780,46 @@ class AudioService {
               this.playNoise(t, 0.1, 0.5, 'kick');
               break;
           case 'explosion':
+          case 'finisher_explosion':
               this.playExplosionSynth(t);
               break;
-          case 'finisher_slash':
-              this.playSfxMp3('finisher-slash', () => this.playAttackSynth(this.ctx!.currentTime), { maxDurationMs: 900 });
-              break;
-          case 'finisher_explosion':
-              this.playSfxMp3('finisher-explosion', () => this.playExplosionSynth(this.ctx!.currentTime), { maxDurationMs: 1500 });
+          case 'jump':
+              this.playOsc(360, t, 0.08, 'triangle', 0.22, this.sfxGain);
+              this.playOsc(640, t + 0.04, 0.12, 'sine', 0.18, this.sfxGain);
               break;
       }
+  }
+
+  public playSound(effect: CommonSoundEffect) {
+      this.init();
+      if (!this.ctx || !this.sfxGain || this.isMuted) return;
+      if (this.ctx.state !== 'running') {
+          void this.resumeAudioContext().then(ready => {
+              if (ready) this.playSound(effect);
+          });
+          return;
+      }
+      const fileByEffect: Record<CommonSoundEffect, { name: string; maxDurationMs: number; overlap?: boolean }> = {
+          select: { name: 'attack-effects/flash', maxDurationMs: 420 },
+          attack: { name: 'attack-effects/impact', maxDurationMs: 720, overlap: true },
+          block: { name: 'status-effects/block', maxDurationMs: 900 },
+          win: { name: 'attack-effects/graduation', maxDurationMs: 1500 },
+          lose: { name: 'status-effects/weak', maxDurationMs: 1300 },
+          correct: { name: 'status-effects/buff', maxDurationMs: 1100 },
+          wrong: { name: 'status-effects/debuff', maxDurationMs: 1100 },
+          buff: { name: 'status-effects/buff', maxDurationMs: 1100 },
+          debuff: { name: 'status-effects/debuff', maxDurationMs: 1100 },
+          damage: { name: 'attack-effects/impact', maxDurationMs: 800, overlap: true },
+          explosion: { name: 'attack-effects/explosion', maxDurationMs: 1500, overlap: true },
+          finisher_slash: { name: 'finisher-slash', maxDurationMs: 900, overlap: true },
+          finisher_explosion: { name: 'finisher-explosion', maxDurationMs: 1500, overlap: true },
+          jump: { name: 'jump', maxDurationMs: 900, overlap: true },
+      };
+      const file = fileByEffect[effect];
+      this.playSfxMp3(file.name, () => this.playSynthSound(effect), {
+          maxDurationMs: file.maxDurationMs,
+          overlap: file.overlap,
+      });
   }
 }
 

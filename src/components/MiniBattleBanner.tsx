@@ -567,7 +567,7 @@ const MiniBattleBanner: React.FC<MiniBattleBannerProps> = ({ streak }) => {
   }, [cutInDisplayCards.length, cutInSourceCards, enemy, streak, unlockedCutInCards]);
 
   return (
-    <div className="h-24 md:h-28 border-b border-emerald-900/60 bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 px-3 py-2 overflow-hidden">
+    <div className="mini-battle-banner h-24 md:h-28 border-b border-emerald-900/60 bg-gradient-to-r from-slate-950 via-slate-900 to-slate-950 px-3 py-2 overflow-hidden">
       <div className="relative h-full rounded-xl border border-emerald-900/60 bg-black/35 px-3 py-2">
         {finisherCard && cutInDisplayCards.length > 0 && (
           <MiniBattleFinisherOverlay cards={cutInDisplayCards} layout={cutInLayout} finisherCard={finisherCard} explosionDelayMs={explosionDelayMs} />

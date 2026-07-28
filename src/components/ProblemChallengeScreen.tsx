@@ -1079,7 +1079,7 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
         }}
       >
         <div className="absolute inset-0 bg-slate-950/62 pointer-events-none" />
-        <div className="ios-safe-ui-x ios-safe-ui-header bg-black/80 border-b-2 border-gray-700 p-2 flex justify-between items-center z-50 shrink-0">
+        <div className="problem-challenge-active-header ios-safe-ui-x ios-safe-ui-header bg-black/80 border-b-2 border-gray-700 p-2 flex justify-between items-center z-50 shrink-0">
           <div className="flex gap-4 items-center">
             <div className="text-yellow-400 font-bold flex items-center gap-2">
               <Target size={20}/> {trans('正解数', problemLanguageMode)}: <span className="text-2xl font-mono">{streak}</span>
@@ -1096,11 +1096,11 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
           </button>
         </div>
 
-        <div className="ios-safe-ui-x relative z-10">
+        <div className="problem-challenge-mini-battle ios-safe-ui-x relative z-10">
           <MiniBattleBanner key={challengeSubMode.id} streak={streak} />
         </div>
 
-        <div className="relative z-10 flex-1 min-h-0">
+        <div className="problem-challenge-question-stage relative z-10 flex-1 min-h-0">
           {ChallengeScreen === GameScreen.MATH_CHALLENGE && (
             <MathChallengeScreen
               key={`${streak}-${challengeStep}`}

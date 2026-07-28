@@ -420,7 +420,7 @@ const GoHomeDash: React.FC<{
         const p = playerRef.current;
         if (!p.isFalling && p.jumpCount < p.maxJumps) {
             p.vy = JUMP_FORCE; p.isJumping = true; p.jumpCount++; p.jumpActionFrame = 12;
-            audioService.playSound('select'); addParticle(p.x, p.y, '#ffffff');
+            audioService.playSound('jump'); addParticle(p.x, p.y, '#ffffff');
             if (p.jumpBoom) {
                  addVfxRing(p.x, p.y, '#ffffff');
                  obstaclesRef.current = obstaclesRef.current.filter(obs => {

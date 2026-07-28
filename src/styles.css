@@ -2368,6 +2368,304 @@ html.app-platform-ios {
   }
 }
 
+/* Phone portrait pack opening: large packs use a centered 3 + 2 layout so
+   every candidate and its select button stays above the home indicator. */
+@media (orientation: portrait) and (max-width: 640px) {
+  .poker-pack-open-screen {
+    padding: 0.5rem !important;
+  }
+
+  .poker-pack-open-screen .poker-pack-open-content {
+    justify-content: center;
+    height: 100%;
+    max-height: 100%;
+    padding-right: max(0.5rem, var(--ios-ui-safe-right)) !important;
+    padding-bottom: max(1.25rem, var(--ios-ui-safe-bottom)) !important;
+    padding-left: max(0.5rem, var(--ios-ui-safe-left)) !important;
+  }
+
+  .poker-pack-open-title {
+    margin-bottom: 0.25rem !important;
+    font-size: clamp(1.05rem, 5.5vw, 1.45rem) !important;
+    line-height: 1.1 !important;
+    text-align: center;
+  }
+
+  .poker-pack-open-description {
+    margin-bottom: 0.65rem !important;
+    font-size: clamp(0.65rem, 2.8vw, 0.8rem) !important;
+    line-height: 1.25 !important;
+  }
+
+  .poker-pack-choice-grid {
+    display: grid !important;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
+    grid-auto-flow: row;
+    align-content: center;
+    justify-content: center;
+    gap: 1.15rem 0.35rem !important;
+    width: min(100%, 22rem);
+    overflow: visible;
+  }
+
+  .poker-pack-choice {
+    grid-column: span 2;
+    justify-self: center;
+    width: clamp(5.25rem, 27vw, 7rem);
+  }
+
+  .poker-pack-choice-grid > .poker-pack-choice:nth-child(4) {
+    grid-column: 2 / span 2;
+  }
+
+  .poker-pack-choice-grid > .poker-pack-choice:nth-child(5) {
+    grid-column: 4 / span 2;
+  }
+
+  .poker-pack-choice-grid:has(> .poker-pack-choice:nth-child(2):last-child) > .poker-pack-choice:first-child {
+    grid-column: 2 / span 2;
+  }
+
+  .poker-pack-choice-grid:has(> .poker-pack-choice:nth-child(2):last-child) > .poker-pack-choice:last-child {
+    grid-column: 4 / span 2;
+  }
+
+  .poker-pack-card {
+    width: 100% !important;
+    height: auto !important;
+    aspect-ratio: 2 / 3;
+    padding: clamp(0.25rem, 1vw, 0.5rem) !important;
+    border-width: 3px !important;
+  }
+
+  .poker-pack-rank {
+    font-size: clamp(1rem, 5vw, 1.35rem) !important;
+    line-height: 1 !important;
+  }
+
+  .poker-pack-suit {
+    transform: scale(1.1) !important;
+  }
+
+  .poker-pack-enhancement,
+  .poker-pack-item-description {
+    font-size: clamp(0.45rem, 2.1vw, 0.58rem) !important;
+    line-height: 1.1 !important;
+  }
+
+  .poker-pack-item-icon {
+    width: clamp(2.2rem, 11vw, 3rem) !important;
+    height: clamp(2.2rem, 11vw, 3rem) !important;
+    margin-bottom: 0.25rem !important;
+  }
+
+  .poker-pack-item-name {
+    font-size: clamp(0.6rem, 2.8vw, 0.75rem) !important;
+    line-height: 1.1 !important;
+  }
+
+  .poker-pack-select {
+    bottom: -0.8rem !important;
+    padding: 0.2rem 0.65rem !important;
+    font-size: 0.6rem !important;
+  }
+}
+
+/* Problem Challenge on phone landscape: keep the complete question and all
+   controls in one viewport. The mini battle remains visible but yields most of
+   the height to the educational content. */
+@media (orientation: landscape) and (max-width: 1024px) and (max-height: 560px) {
+  .main-problem-challenge-active-screen {
+    overflow: hidden;
+  }
+
+  .main-problem-challenge-active-screen .problem-challenge-active-header {
+    min-height: 2rem;
+    padding-top: 0.2rem !important;
+    padding-bottom: 0.2rem !important;
+    border-bottom-width: 1px;
+  }
+
+  .main-problem-challenge-active-screen .problem-challenge-active-header svg {
+    width: 0.85rem;
+    height: 0.85rem;
+  }
+
+  .main-problem-challenge-active-screen .problem-challenge-active-header .text-2xl {
+    font-size: 1rem !important;
+  }
+
+  .main-problem-challenge-active-screen .problem-challenge-active-header button {
+    padding: 0.2rem 0.55rem !important;
+    font-size: 0.62rem !important;
+  }
+
+  .main-problem-challenge-active-screen .problem-challenge-mini-battle {
+    flex: 0 0 auto;
+  }
+
+  .main-problem-challenge-active-screen .mini-battle-banner {
+    height: 3.35rem !important;
+    padding: 0.2rem 0.4rem !important;
+  }
+
+  .main-problem-challenge-active-screen .mini-battle-banner > div {
+    padding: 0.15rem 0.45rem !important;
+    border-radius: 0.45rem !important;
+  }
+
+  .main-problem-challenge-active-screen .mini-battle-banner > div > .mb-1 {
+    display: none !important;
+  }
+
+  .main-problem-challenge-active-screen .mini-battle-banner .grid {
+    height: 100% !important;
+    gap: 0.4rem !important;
+  }
+
+  .main-problem-challenge-active-screen .mini-battle-banner :is(.h-12, .md\:h-14) {
+    height: 2.25rem !important;
+  }
+
+  .main-problem-challenge-active-screen .mini-battle-banner :is(.w-12, .md\:w-14) {
+    width: 2.25rem !important;
+  }
+
+  .main-problem-challenge-active-screen .mini-battle-banner .w-20,
+  .main-problem-challenge-active-screen .mini-battle-banner .md\:w-28 {
+    width: 4.5rem !important;
+  }
+
+  .main-problem-challenge-active-screen .problem-challenge-question-stage {
+    overflow: hidden;
+  }
+
+  .main-problem-challenge-active-screen .main-challenge-screen {
+    justify-content: center !important;
+    padding: 0.2rem 0.5rem !important;
+    overflow: hidden !important;
+  }
+
+  .main-problem-challenge-active-screen .main-challenge-screen > .z-10,
+  .main-problem-challenge-active-screen .main-challenge-screen .general-challenge-layout,
+  .main-problem-challenge-active-screen .main-challenge-screen .basic-challenge-layout {
+    width: 100% !important;
+    max-width: none !important;
+    height: 100% !important;
+    min-height: 0 !important;
+    gap: 0.4rem !important;
+    padding: 0 !important;
+  }
+
+  .main-problem-challenge-active-screen .main-challenge-screen .general-challenge-layout,
+  .main-problem-challenge-active-screen .main-challenge-screen .basic-challenge-layout {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1.38fr) minmax(12rem, 0.62fr) !important;
+    grid-template-rows: minmax(0, 1fr) !important;
+  }
+
+  .main-problem-challenge-active-screen .main-challenge-screen :is(.general-challenge-question, .basic-challenge-question) {
+    min-height: 0 !important;
+    height: 100% !important;
+    margin: 0 !important;
+    padding: 0.35rem 0.5rem !important;
+    overflow: hidden !important;
+    border-width: 2px !important;
+    border-radius: 0.65rem !important;
+  }
+
+  .main-problem-challenge-active-screen .main-challenge-screen .general-challenge-question h3 {
+    margin-bottom: 0.3rem !important;
+    font-size: clamp(0.9rem, 3.4vw, 1.45rem) !important;
+    line-height: 1.08 !important;
+  }
+
+  .main-problem-challenge-active-screen .main-challenge-screen .general-challenge-question section {
+    max-height: none !important;
+    margin-bottom: 0.25rem !important;
+    padding: 0.25rem 0.4rem !important;
+    overflow: hidden !important;
+  }
+
+  .main-problem-challenge-active-screen .main-challenge-screen .general-challenge-question section > div {
+    margin-bottom: 0.1rem !important;
+    font-size: 0.52rem !important;
+  }
+
+  .main-problem-challenge-active-screen .main-challenge-screen .general-challenge-question section p {
+    font-size: clamp(0.55rem, 1.45vw, 0.72rem) !important;
+    line-height: 1.22 !important;
+  }
+
+  .main-problem-challenge-active-screen .main-challenge-screen.general-challenge-density-compact .general-challenge-question h3 {
+    font-size: clamp(0.78rem, 2.8vw, 1.15rem) !important;
+  }
+
+  .main-problem-challenge-active-screen .main-challenge-screen.general-challenge-density-compact .general-challenge-question section p {
+    font-size: clamp(0.48rem, 1.25vw, 0.62rem) !important;
+    line-height: 1.14 !important;
+  }
+
+  .main-problem-challenge-active-screen .main-challenge-screen.general-challenge-density-ultra .general-challenge-question h3 {
+    font-size: clamp(0.68rem, 2.35vw, 0.95rem) !important;
+    line-height: 1.02 !important;
+  }
+
+  .main-problem-challenge-active-screen .main-challenge-screen.general-challenge-density-ultra .general-challenge-question section p {
+    font-size: clamp(0.4rem, 1vw, 0.52rem) !important;
+    line-height: 1.06 !important;
+  }
+
+  .main-problem-challenge-active-screen .main-challenge-screen .general-challenge-question :is(.mb-4, .mb-3, .mb-2) {
+    margin-bottom: 0.25rem !important;
+  }
+
+  .main-problem-challenge-active-screen .main-challenge-screen .general-challenge-question :is(button, input) {
+    min-height: 1.65rem !important;
+    padding: 0.2rem 0.55rem !important;
+    font-size: 0.68rem !important;
+  }
+
+  .main-problem-challenge-active-screen .main-challenge-screen .general-challenge-question canvas,
+  .main-problem-challenge-active-screen .main-challenge-screen .general-challenge-question img {
+    max-height: 6.5rem !important;
+  }
+
+  .main-problem-challenge-active-screen .main-challenge-screen :is(.general-challenge-input, .general-challenge-options, .basic-challenge-options) {
+    min-height: 0 !important;
+    height: 100% !important;
+    gap: 0.3rem !important;
+    overflow: hidden !important;
+  }
+
+  .main-problem-challenge-active-screen .main-challenge-screen :is(.general-challenge-options, div.basic-challenge-options) {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    grid-template-rows: repeat(4, minmax(0, 1fr)) !important;
+    align-content: stretch !important;
+  }
+
+  .main-problem-challenge-active-screen .main-challenge-screen :is(.general-challenge-options, .basic-challenge-options) button {
+    min-height: 0 !important;
+    height: 100% !important;
+    padding: 0.2rem 0.45rem !important;
+    border-bottom-width: 2px !important;
+    border-radius: 0.55rem !important;
+    font-size: clamp(0.62rem, 1.65vw, 0.82rem) !important;
+    line-height: 1.05 !important;
+  }
+
+  .main-problem-challenge-active-screen .main-challenge-screen .basic-challenge-question h3 {
+    font-size: clamp(1.15rem, 5.2vw, 2.4rem) !important;
+    line-height: 1.05 !important;
+  }
+
+  .main-problem-challenge-active-screen .main-challenge-screen .basic-challenge-question .mb-4,
+  .main-problem-challenge-active-screen .main-challenge-screen .basic-challenge-question .mb-3 {
+    margin-bottom: 0.25rem !important;
+  }
+}
+
 @media (orientation: landscape) {
   html.app-platform-ios {
     --ios-ui-safe-right: max(env(safe-area-inset-right), 62px);

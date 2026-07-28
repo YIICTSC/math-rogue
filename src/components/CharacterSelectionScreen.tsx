@@ -130,9 +130,15 @@ const CharacterSelectionScreen: React.FC<CharacterSelectionScreenProps> = ({ cha
     setShowCamera(true);
     audioService.playSound('select');
 
+    if (!navigator.mediaDevices?.getUserMedia) {
+      setCameraError("この端末ではカメラを利用できません");
+      return;
+    }
+
     try {
-      const stream = await navigator.mediaDevices.getUserMedia({ 
-        video: { facingMode: 'user', width: { ideal: 400 }, height: { ideal: 400 } } 
+      const stream = await navigator.mediaDevices.getUserMedia({
+        audio: false,
+        video: { facingMode: 'user', width: { ideal: 400 }, height: { ideal: 400 } }
       });
       if (videoRef.current) {
         videoRef.current.srcObject = stream;
