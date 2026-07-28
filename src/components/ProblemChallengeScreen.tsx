@@ -1196,7 +1196,7 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
       <div className="absolute inset-0 bg-slate-950/65 pointer-events-none"></div>
       <div className="absolute inset-0 texture-dark-matter opacity-30 pointer-events-none"></div>
 
-      <div className="relative z-10 w-full max-w-6xl mx-auto flex flex-col flex-1 min-h-0 overflow-hidden">
+      <div className="problem-challenge-safe-content relative z-10 w-full max-w-6xl mx-auto flex flex-col flex-1 min-h-0 overflow-hidden">
         <button
           type="button"
           onClick={() => {
@@ -1204,7 +1204,7 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
             setSelectedMathUnitIds([]);
             audioService.playSound('select');
           }}
-          className={`ios-safe-edge-left absolute left-3 top-3 z-20 flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-[10px] font-black shadow-lg transition-colors sm:left-4 sm:top-4 sm:text-xs ${
+          className={`problem-challenge-top-action ios-safe-edge-left absolute left-3 top-3 z-20 flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-[10px] font-black shadow-lg transition-colors sm:left-4 sm:top-4 sm:text-xs ${
             problemSetView === 'upper'
               ? 'border-yellow-300 bg-yellow-500 text-slate-950 hover:bg-yellow-400'
               : 'border-emerald-300/60 bg-slate-900/85 text-emerald-100 hover:border-emerald-200 hover:bg-emerald-950'
@@ -1220,7 +1220,7 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
             setSelectedMathUnitIds([]);
             audioService.playSound('select');
           }}
-          className={`ios-safe-edge-right absolute right-3 top-3 z-20 flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-[10px] font-black shadow-lg transition-colors sm:right-4 sm:top-4 sm:text-xs ${
+          className={`problem-challenge-top-action ios-safe-edge-right absolute right-3 top-3 z-20 flex items-center gap-1.5 rounded-lg border px-2.5 py-1.5 text-[10px] font-black shadow-lg transition-colors sm:right-4 sm:top-4 sm:text-xs ${
             problemSetView === 'nativeEnglish'
               ? 'border-yellow-300 bg-yellow-500 text-slate-950 hover:bg-yellow-400'
               : 'border-indigo-300/60 bg-slate-900/85 text-indigo-100 hover:border-indigo-200 hover:bg-indigo-950'

@@ -2444,6 +2444,23 @@ html.app-platform-ios .ios-edge-to-edge .main-challenge-screen {
   padding-left: max(0.75rem, var(--ios-ui-safe-left)) !important;
 }
 
+html.app-platform-ios .main-problem-challenge-screen .problem-challenge-safe-content {
+  box-sizing: border-box;
+  padding-top: var(--ios-ui-safe-top);
+  padding-bottom: var(--ios-ui-safe-bottom);
+}
+
+html.app-platform-ios .main-problem-challenge-screen .problem-challenge-top-action {
+  top: calc(var(--ios-ui-safe-top) + 0.75rem) !important;
+}
+
+html.app-platform-ios .poker-pack-open-content {
+  box-sizing: border-box;
+  max-height: 100%;
+  padding-top: max(0.75rem, var(--ios-ui-safe-top)) !important;
+  padding-bottom: max(1.25rem, var(--ios-ui-safe-bottom)) !important;
+}
+
 html.app-platform-ios .main-floor-result-screen.ios-edge-to-edge {
   box-sizing: border-box;
   padding-top: max(0.75rem, var(--ios-ui-safe-top)) !important;
@@ -9239,5 +9256,29 @@ textarea {
     right: calc(var(--ios-ui-safe-right) + 0.5rem) !important;
     padding: 0.45rem 0.65rem !important;
     border-radius: 0.65rem !important;
+  }
+}
+
+@media (orientation: portrait) {
+  html.app-platform-ios .main-challenge-screen .unit-board-open-button {
+    box-sizing: border-box !important;
+    top: 0.75rem !important;
+    left: 0.75rem !important;
+    width: 2.75rem !important;
+    min-width: 2.75rem !important;
+    height: 2.75rem !important;
+    min-height: 2.75rem !important;
+    padding: 0 !important;
+    border-radius: 9999px !important;
+  }
+
+  html.app-platform-ios .main-challenge-screen .reward-hint-banner {
+    top: 0.75rem !important;
+    right: 0.75rem !important;
+    left: 4.25rem !important;
+    width: auto !important;
+    max-width: none !important;
+    margin: 0 !important;
+    transform: none !important;
   }
 }

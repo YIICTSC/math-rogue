@@ -733,7 +733,13 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
 
   // --- Game State ---
   const [phase, setPhase] = useState<'BLIND_SELECT' | 'PLAY' | 'SHOP' | 'PACK_OPEN' | 'GAME_OVER' | 'VICTORY_WAIT' | 'VICTORY' | 'MATH'>(
-      debugPreview === 'GAME_OVER' ? 'GAME_OVER' : debugPreview === 'ENDING' ? 'VICTORY_WAIT' : 'BLIND_SELECT'
+      debugPreview === 'GAME_OVER'
+          ? 'GAME_OVER'
+          : debugPreview === 'ENDING'
+              ? 'VICTORY_WAIT'
+              : debugPreview === 'POKER_PACK'
+                  ? 'PACK_OPEN'
+                  : 'BLIND_SELECT'
   );
   const [highScore, setHighScore] = useState(0); 
   const saveDebounceRef = useRef<any>(null);
@@ -773,9 +779,14 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
   });
 
   // Pack Logic
-  const [currentPack, setCurrentPack] = useState<PokerPack | null>(null);
-  const [currentPackIndex, setCurrentPackIndex] = useState<number | null>(null);
-  const [packContent, setPackContent] = useState<(PokerCard | PokerSupporter | PokerConsumable)[]>([]);
+  const previewPack = debugPreview === 'POKER_PACK' ? PACK_LIBRARY[0] ?? null : null;
+  const [currentPack, setCurrentPack] = useState<PokerPack | null>(previewPack);
+  const [currentPackIndex, setCurrentPackIndex] = useState<number | null>(previewPack ? 0 : null);
+  const [packContent, setPackContent] = useState<(PokerCard | PokerSupporter | PokerConsumable)[]>(
+      previewPack
+          ? Array.from({ length: Math.max(1, previewPack.size) }, () => generateRandomPlayingCard(0.4))
+          : []
+  );
 
   // Play Animation State
   const [lastHandScore, setLastHandScore] = useState<{chips: number, mult: number, total: number, name: string} | null>(null);
@@ -2086,11 +2097,11 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
       
       if (phase === 'PACK_OPEN' && currentPack) {
           return (
-              <div data-gamepad-initial-scope="poker-candidate-select" className="flex flex-col h-full w-full bg-slate-900 text-white p-4 items-center justify-center relative font-mono overflow-hidden" style={pokerTableBackgroundStyle}>
+              <div data-gamepad-initial-scope="poker-candidate-select" className="mini-game-poker-screen poker-pack-open-screen flex flex-col h-full w-full bg-slate-900 text-white p-4 items-center justify-center relative font-mono overflow-hidden" style={pokerTableBackgroundStyle}>
                   <div className="absolute inset-0 bg-black/80 z-0"></div>
                   {renderInspectionModal()}
                   
-                  <div className="z-10 flex flex-col items-center w-full max-w-4xl">
+                  <div className="poker-pack-open-content ios-safe-ui-x ios-safe-ui-header z-10 flex flex-col items-center w-full max-w-4xl">
                       <h2 className="text-3xl font-bold mb-3 text-yellow-400">{t("ランダムパックを開封！1つ選ぶ")}</h2>
                       <p className="mb-8 text-center text-sm text-slate-200">{t("購入したパックの内容です。好きな1つを選んで受け取れます。")}</p>
                           <div className="flex flex-wrap justify-center gap-6 animate-in zoom-in duration-500">

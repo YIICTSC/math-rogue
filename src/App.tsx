@@ -1081,8 +1081,11 @@ const App: React.FC = () => {
             void audioService.unlockAudio().catch(() => undefined);
         };
 
-        window.addEventListener('pointerdown', unlockAudioFromUserGesture, { capture: true, passive: true, once: true });
-        window.addEventListener('keydown', unlockAudioFromUserGesture, { capture: true, once: true });
+        // iOS can suspend WKWebView audio again after an interruption or app switch.
+        // Keep the gesture recovery hook active so the first interaction also restores
+        // BGM, effects and voices instead of only unlocking audio at initial launch.
+        window.addEventListener('pointerdown', unlockAudioFromUserGesture, { capture: true, passive: true });
+        window.addEventListener('keydown', unlockAudioFromUserGesture, { capture: true });
 
         return () => {
             window.removeEventListener('pointerdown', unlockAudioFromUserGesture, { capture: true });
@@ -4247,22 +4250,26 @@ const App: React.FC = () => {
     }, [gameState.screen]);
 
     useEffect(() => {
-        let pausedForBackground = false;
         const handleVisibilityChange = () => {
             if (document.hidden) {
-                if (!audioService.isBackgroundPlaybackEnabled()) {
-                    audioService.pauseBGM();
-                    pausedForBackground = true;
-                }
+                audioService.handleAppBackground();
                 return;
             }
-            if (pausedForBackground) {
-                audioService.resumeBGM();
-                pausedForBackground = false;
-            }
+            void audioService.handleAppForeground();
+        };
+        const handleForegroundSignal = () => {
+            if (!document.hidden) void audioService.handleAppForeground();
         };
         document.addEventListener('visibilitychange', handleVisibilityChange);
-        return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
+        document.addEventListener('resume', handleForegroundSignal);
+        window.addEventListener('pageshow', handleForegroundSignal);
+        window.addEventListener('focus', handleForegroundSignal);
+        return () => {
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
+            document.removeEventListener('resume', handleForegroundSignal);
+            window.removeEventListener('pageshow', handleForegroundSignal);
+            window.removeEventListener('focus', handleForegroundSignal);
+        };
     }, []);
 
     useEffect(() => {

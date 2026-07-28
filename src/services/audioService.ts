@@ -47,7 +47,10 @@ class AudioService {
   private currentSource: AudioBufferSourceNode | null = null;
   private currentHtmlAudio: HTMLAudioElement | null = null;
   private activeBgmHtmlAudios: Set<HTMLAudioElement> = new Set();
+  private bgmMediaSources: Map<HTMLAudioElement, MediaElementAudioSourceNode> = new Map();
+  private htmlSfxEffectCleanups: WeakMap<HTMLAudioElement, () => void> = new WeakMap();
   private playbackGeneration: number = 0;
+  private pausedForAppBackground: boolean = false;
 
   // Sequencer State
   private nextNoteTime: number = 0;
@@ -87,6 +90,16 @@ class AudioService {
   }
 
   public init() {
+    if (this.ctx?.state === 'closed') {
+        this.ctx = null;
+        this.masterGain = null;
+        this.bgmGain = null;
+        this.sfxGain = null;
+        this.currentSource = null;
+        this.currentHtmlAudio = null;
+        this.activeBgmHtmlAudios.clear();
+        this.bgmMediaSources.clear();
+    }
     if (this.ctx) {
         if (this.ctx.state === 'suspended') this.ctx.resume().catch(e => console.warn(e));
         return;
@@ -137,6 +150,20 @@ class AudioService {
     }
   }
 
+  private async resumeAudioContext() {
+      this.init();
+      if (!this.ctx) return false;
+      if (this.ctx.state !== 'running') {
+          // On iOS a resume() requested outside a user gesture can stay pending
+          // until the next interaction. Do not let that block BGM reconstruction.
+          await Promise.race([
+              this.ctx.resume().catch(() => undefined),
+              new Promise<void>(resolve => window.setTimeout(resolve, 250)),
+          ]);
+      }
+      return this.ctx.state === 'running';
+  }
+
   public setBgmMode(mode: 'OSCILLATOR' | 'MP3' | 'NEW' | 'OLD' | 'STUDY') {
       const normalizedMode = mode === 'MP3' ? 'NEW' : mode;
       if (this.bgmMode === normalizedMode) return;
@@ -170,19 +197,48 @@ class AudioService {
   }
 
   public async unlockAudio() {
-      this.init();
+      const contextReady = await this.resumeAudioContext();
       if (!this.ctx) return;
-      if (this.ctx.state === 'suspended') {
-          await this.ctx.resume().catch(() => undefined);
-      }
       const needsPlaybackRetry = (
           this.isPlayingBGM
           && this.bgmMode !== 'STUDY'
-          && !this.currentSource
-          && !this.currentHtmlAudio
+          && !this.isBgmPaused
+          && (
+              (!this.currentSource && !this.currentHtmlAudio)
+              || (IS_IOS_BUILD && Boolean(this.currentHtmlAudio?.paused))
+              || !contextReady
+          )
       );
       if (!this.hasUnlockedAudio || needsPlaybackRetry) {
           this.hasUnlockedAudio = true;
+          await this.restartCurrentBGM();
+      }
+  }
+
+  public handleAppBackground() {
+      if (this.backgroundPlaybackEnabled) return;
+      this.pausedForAppBackground = this.isPlayingBGM;
+      this.pauseBGM();
+      this.magicEventVoiceSequenceId += 1;
+      for (const name of Array.from(new Set([
+          ...this.activeSfxSources.keys(),
+          ...this.activeHtmlSfx.keys(),
+      ]))) {
+          this.stopActiveSfx(name);
+      }
+  }
+
+  public async handleAppForeground() {
+      const shouldRestartBgm = (
+          this.pausedForAppBackground
+          && this.isPlayingBGM
+          && Boolean(this.currentBgmType)
+          && this.bgmMode !== 'STUDY'
+      );
+      this.pausedForAppBackground = false;
+      await this.resumeAudioContext();
+      if (shouldRestartBgm) {
+          this.isBgmPaused = false;
           await this.restartCurrentBGM();
       }
   }
@@ -201,10 +257,12 @@ class AudioService {
           this.bgmGain.gain.setTargetAtTime(this.bgmVolume, this.ctx.currentTime, 0.05);
       }
       if (this.currentHtmlAudio) {
-          this.currentHtmlAudio.volume = Math.min(1, this.bgmVolume);
+          this.currentHtmlAudio.volume = this.bgmMediaSources.has(this.currentHtmlAudio)
+              ? 1
+              : Math.min(1, this.bgmVolume);
       }
       this.activeBgmHtmlAudios.forEach(audio => {
-          audio.volume = Math.min(1, this.bgmVolume);
+          audio.volume = this.bgmMediaSources.has(audio) ? 1 : Math.min(1, this.bgmVolume);
       });
   }
 
@@ -961,11 +1019,14 @@ class AudioService {
 
   private async playHtmlAudioMp3(paths: string[], loop: boolean, type: string, playbackGeneration: number) {
       for (const path of paths) {
+          let audio: HTMLAudioElement | null = null;
           try {
-              const audio = new Audio(path);
+              void this.resumeAudioContext();
+              audio = new Audio(path);
               audio.preload = 'auto';
               audio.loop = loop;
-              audio.volume = this.bgmVolume;
+              const routedThroughWebAudio = IS_IOS_BUILD && this.connectHtmlBgmToGain(audio);
+              audio.volume = routedThroughWebAudio ? 1 : Math.min(1, this.bgmVolume);
               audio.onended = () => {
                   if (this.isPlayingBGM && !loop) {
                       if (this.bgmAdvanceMode === 'sorted') {
@@ -979,16 +1040,39 @@ class AudioService {
               if (!this.isCurrentPlayback(type, playbackGeneration)) {
                   audio.pause();
                   audio.currentTime = 0;
+                  this.disconnectHtmlBgm(audio);
                   return true;
               }
               this.currentHtmlAudio = audio;
               this.activeBgmHtmlAudios.add(audio);
               return true;
           } catch {
+              if (audio) this.disconnectHtmlBgm(audio);
               // Try the next URL shape before falling back to synthesized BGM.
           }
       }
       return false;
+  }
+
+  private connectHtmlBgmToGain(audio: HTMLAudioElement) {
+      if (!this.ctx || !this.bgmGain) return false;
+      try {
+          const source = this.ctx.createMediaElementSource(audio);
+          source.connect(this.bgmGain);
+          this.bgmMediaSources.set(audio, source);
+          return true;
+      } catch {
+          return false;
+      }
+  }
+
+  private disconnectHtmlBgm(audio: HTMLAudioElement) {
+      const source = this.bgmMediaSources.get(audio);
+      if (!source) return;
+      try {
+          source.disconnect();
+      } catch {}
+      this.bgmMediaSources.delete(audio);
   }
 
   private isCurrentPlayback(type: string, playbackGeneration: number) {
@@ -1013,6 +1097,7 @@ class AudioService {
           this.currentHtmlAudio.onended = null;
           this.currentHtmlAudio.pause();
           this.currentHtmlAudio.currentTime = 0;
+          this.disconnectHtmlBgm(this.currentHtmlAudio);
           this.currentHtmlAudio = null;
       }
       this.activeBgmHtmlAudios.forEach(audio => {
@@ -1021,6 +1106,7 @@ class AudioService {
               audio.pause();
               audio.currentTime = 0;
           } catch {}
+          this.disconnectHtmlBgm(audio);
       });
       this.activeBgmHtmlAudios.clear();
       this.isPlayingBGM = false;
@@ -1035,10 +1121,18 @@ class AudioService {
       this.isBgmPaused = true;
   }
 
-  public resumeBGM() {
+  public async resumeBGM() {
       if (!this.ctx || !this.isPlayingBGM || !this.isBgmPaused) return;
-      this.ctx.resume().catch(() => {});
-      this.currentHtmlAudio?.play().catch(() => {});
+      await this.resumeAudioContext();
+      const audio = this.currentHtmlAudio;
+      if (audio) {
+          const resumed = await audio.play().then(() => true).catch(() => false);
+          if (!resumed && this.currentBgmType) {
+              this.isBgmPaused = false;
+              await this.restartCurrentBGM();
+              return;
+          }
+      }
       this.isBgmPaused = false;
   }
 
@@ -1177,6 +1271,8 @@ class AudioService {
       for (const audio of htmlAudios) {
           const timer = this.htmlSfxStopTimers.get(audio);
           if (timer) window.clearTimeout(timer);
+          this.htmlSfxEffectCleanups.get(audio)?.();
+          this.htmlSfxEffectCleanups.delete(audio);
           audio.onended = null;
           audio.pause();
           audio.currentTime = 0;
@@ -1217,6 +1313,7 @@ class AudioService {
       generation: number,
       effect?: HtmlSfxEffect,
   ): Promise<boolean> {
+      void this.resumeAudioContext();
       for (const path of paths) {
           let effectCleanup = () => {};
           try {
@@ -1225,6 +1322,7 @@ class AudioService {
               const htmlVolume = this.getHtmlSfxVolume(name);
               audio.volume = effect ? 1 : htmlVolume;
               effectCleanup = this.attachHtmlSfxEffect(audio, htmlVolume, effect);
+              this.htmlSfxEffectCleanups.set(audio, effectCleanup);
               await audio.play();
               if (!overlap && this.sfxPlaybackGenerations.get(name) !== generation) {
                   audio.pause();
@@ -1243,6 +1341,7 @@ class AudioService {
                   audios.delete(audio);
                   if (audios.size === 0) this.activeHtmlSfx.delete(name);
                   effectCleanup();
+                  this.htmlSfxEffectCleanups.delete(audio);
               };
               audio.onended = cleanup;
               const timer = window.setTimeout(() => {
@@ -1336,23 +1435,29 @@ class AudioService {
           return;
       }
 
-      this.ctx.resume().catch(() => {});
       const maxDurationMs = options?.maxDurationMs ?? 1400;
       const overlap = options?.overlap ?? false;
       const generation = (this.sfxPlaybackGenerations.get(name) ?? 0) + 1;
       this.sfxPlaybackGenerations.set(name, generation);
 
-      const cached = this.sfxBuffers[name];
-      if (cached) {
-          if (!this.startSfxSource(name, cached, maxDurationMs, overlap)) fallback();
+      const startPlayback = () => {
+          const cached = this.sfxBuffers[name];
+          if (cached) {
+              if (!this.startSfxSource(name, cached, maxDurationMs, overlap)) fallback();
+              return;
+          }
+
+          fallback();
+          void this.loadSfxBuffer(name);
+      };
+
+      if (this.ctx.state !== 'running') {
+          void this.resumeAudioContext().then(ready => {
+              if (ready) startPlayback();
+          });
           return;
       }
-
-      fallback();
-
-      void (async () => {
-          await this.loadSfxBuffer(name);
-      })();
+      startPlayback();
   }
 
   private playAttackSlashSfx() {
@@ -1576,6 +1681,12 @@ class AudioService {
   public playSound(effect: 'select' | 'attack' | 'block' | 'win' | 'lose' | 'correct' | 'wrong' | 'buff' | 'debuff' | 'damage' | 'explosion' | 'finisher_slash' | 'finisher_explosion') {
       this.init();
       if (!this.ctx || !this.sfxGain || this.isMuted) return;
+      if (this.ctx.state !== 'running') {
+          void this.resumeAudioContext().then(ready => {
+              if (ready) this.playSound(effect);
+          });
+          return;
+      }
       const t = this.ctx.currentTime;
       switch(effect) {
           case 'select':

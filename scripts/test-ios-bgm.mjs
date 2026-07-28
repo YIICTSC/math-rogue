@@ -57,6 +57,15 @@ try {
       name: 'iOS Audio Tester',
     }));
     window.__iosBgmPlayAttempts = [];
+    window.__iosBgmMediaSourceCount = 0;
+    const OriginalAudioContext = window.AudioContext || window.webkitAudioContext;
+    if (OriginalAudioContext?.prototype?.createMediaElementSource) {
+      const originalCreateMediaElementSource = OriginalAudioContext.prototype.createMediaElementSource;
+      OriginalAudioContext.prototype.createMediaElementSource = function createMediaElementSource(element) {
+        window.__iosBgmMediaSourceCount += 1;
+        return originalCreateMediaElementSource.call(this, element);
+      };
+    }
     HTMLMediaElement.prototype.play = function play() {
       window.__iosBgmPlayAttempts.push(this.currentSrc || this.src);
       return Promise.resolve();
@@ -75,13 +84,35 @@ try {
   const initial = await page.evaluate(() => ({
     iosClass: document.documentElement.classList.contains('app-platform-ios'),
     attempts: [...window.__iosBgmPlayAttempts],
+    mediaSourceCount: window.__iosBgmMediaSourceCount,
   }));
   if (!initial.iosClass) throw new Error('iOS platform class is missing');
+  if (initial.mediaSourceCount < 1) throw new Error('iOS BGM is not routed through Web Audio gain');
 
   await page.locator('.start-menu-theme-switch button').filter({ hasText: '高校編' }).evaluate(element => element.click());
   await page.waitForFunction(() => window.__iosBgmPlayAttempts.some(path => path.includes('/bgm-new/high-school/menu.mp3')));
+  const beforeResumeCount = await page.evaluate(() => window.__iosBgmPlayAttempts.length);
+  const runtimeState = await page.evaluate(async () => {
+    const { audioService } = await import('/src/services/audioService.ts');
+    audioService.setBgmVolume(0.25);
+    audioService.handleAppBackground();
+    await audioService.handleAppForeground();
+    void audioService.playHighSchoolVoiceFile('HS_MALE', 'attack-1', 500);
+    return {
+      bgmVolume: audioService.getBgmVolume(),
+      attempts: [...window.__iosBgmPlayAttempts],
+      mediaSourceCount: window.__iosBgmMediaSourceCount,
+    };
+  });
+  await page.waitForFunction(
+    count => window.__iosBgmPlayAttempts.length > count
+      && window.__iosBgmPlayAttempts.some(path => path.includes('/sfx/high-school-voices/HS_MALE/attack-1')),
+    beforeResumeCount,
+  );
+  if (runtimeState.bgmVolume !== 0.25) throw new Error('BGM volume setting was not retained');
+  if (runtimeState.mediaSourceCount < 2) throw new Error('BGM was not rebuilt through the gain node after foreground restore');
   const attempts = await page.evaluate(() => [...window.__iosBgmPlayAttempts]);
-  process.stdout.write(`✓ iOS HTML Audio BGM path selected (${attempts.at(-1)})\n`);
+  process.stdout.write(`✓ iOS BGM gain, switch, foreground restore and voice playback verified (${attempts.at(-1)})\n`);
 } catch (error) {
   process.stderr.write(`${error instanceof Error ? error.stack : String(error)}\n${viteOutput}`);
   process.exitCode = 1;

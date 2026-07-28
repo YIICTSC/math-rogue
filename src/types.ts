@@ -415,7 +415,8 @@ export type MiniGameDebugPreview =
   | 'PAPER_REWARD'
   | 'PAPER_EQUIP'
   | 'PAPER_VACATION'
-  | 'PAPER_HANGAR';
+  | 'PAPER_HANGAR'
+  | 'POKER_PACK';
 
 export enum GameMode {
   // 算数（動的生成）
