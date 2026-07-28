@@ -9558,6 +9558,16 @@ textarea {
 }
 
 @media (orientation: portrait) {
+  html.app-platform-ios .mini-game-go-home-screen > .go-home-hud {
+    top: 0.5rem !important;
+    padding-top: 0.5rem !important;
+  }
+
+  html.app-platform-ios .kocho-problem-overlay .main-challenge-screen .unit-board-open-button,
+  html.app-platform-ios .kocho-problem-overlay .main-challenge-screen .reward-hint-banner {
+    top: calc(var(--ios-ui-safe-top) + 0.75rem) !important;
+  }
+
   html.app-platform-ios .main-challenge-screen .unit-board-open-button {
     box-sizing: border-box !important;
     top: 0.75rem !important;

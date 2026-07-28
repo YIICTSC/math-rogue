@@ -1239,7 +1239,7 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
     const fireWeapon = (type: WeaponType, level: number, evolved: boolean, dmg: number, scale: number, speed: number, duration: number, amount: number, luck: number) => {
         const p = player.current;
         const count = 1 + amount + Math.floor(level/3); 
-        if (Math.random() < 0.3 && gameState.current === 'PLAYING') audioService.playBattleSound('attack');
+        if (Math.random() < 0.3 && gameState.current === 'PLAYING') audioService.playSound('attack');
         
         const angleToMove = Math.atan2(lastDir.current.y, lastDir.current.x);
 

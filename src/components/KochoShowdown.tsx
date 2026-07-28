@@ -3,7 +3,7 @@ import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { ArrowLeft, Play, X, RotateCcw, Swords, Shield, RefreshCw, Zap, Skull, ChevronsRight, ChevronLeft, ChevronRight, Clock, Ghost, ArrowRightLeft, Gift, ShoppingBag, Hammer, Coins, Plus, Crosshair, Heart, Move, AlertTriangle, Hourglass, Maximize2, Minimize2, Wind, Anchor, Flame, Activity, ArrowUp, Dna, Shuffle, Star, HelpCircle, Book, AlertCircle, Flag, Music, Mic, Milk, Battery, ShieldCheck, Bomb, Utensils, PenTool, Circle, ArrowRight, Target, Package } from 'lucide-react';
 import { audioService } from '../services/audioService';
 import { storageService } from '../services/storageService';
-import { AnswerMode, AssignmentAnswerResult, AssignmentPayload, GameMode, LanguageMode, MiniGameDebugPreview } from '../types';
+import { AnswerMode, AssignmentAnswerResult, AssignmentPayload, AttackEffectKey, GameMode, LanguageMode, MiniGameDebugPreview } from '../types';
 import MiniGameProblemChallenge from './MiniGameProblemChallenge';
 import { assetUrl } from '../utils/assetPaths';
 import { trans } from '../utils/textUtils';
@@ -143,6 +143,32 @@ interface KochoGameState {
     endlessKills: number;
     endlessScore: number;
 }
+
+const getKochoAttackSound = (card: KCard, hitCount: number): { effect: AttackEffectKey; hitCount: number } => {
+    const name = card.name;
+    if (card.effectType === 'DRAIN' || name.includes('吸血') || name.includes('金庫破り')) {
+        return { effect: 'drain', hitCount: 1 };
+    }
+    if (name.includes('雷') || name.includes('ショック')) {
+        return { effect: 'lightning', hitCount: 1 };
+    }
+    if (name.includes('消火器') || name.includes('モップ') || name.includes('箒') || name.includes('ほうき') || name.includes('スイープ')) {
+        return { effect: 'wind', hitCount: 1 };
+    }
+    if (name.includes('大声') || name.includes('メガホン') || name.includes('リコーダー') || name.includes('笛') || name.includes('ラジカセ') || name.includes('ホイッスル') || name.includes('放送') || name.includes('校歌') || name.includes('アラーム')) {
+        return { effect: 'soundwave', hitCount: 1 };
+    }
+    if (name.includes('投げ') || name.includes('バレーボール') || name.includes('チョーク') || name.includes('ブーメラン') || name.includes('釣り')) {
+        return { effect: 'projectile', hitCount: 1 };
+    }
+    if (name.includes('スラッシュ') || name.includes('竹刀') || name.includes('定規') || name.includes('赤ペン') || name.includes('校旗') || name.includes('鉄扇')) {
+        return { effect: hitCount > 1 ? 'multihit' : 'slash', hitCount };
+    }
+    if (card.effectType === 'PIERCE' || card.effectType === 'PIERCE_DASH') {
+        return { effect: hitCount > 1 ? 'multihit' : 'slash', hitCount };
+    }
+    return { effect: hitCount > 1 ? 'multihit' : 'impact', hitCount };
+};
 
 type KochoSheetKey = 'characters' | 'effects' | 'backgrounds';
 
@@ -1228,7 +1254,7 @@ const KochoShowdown: React.FC<{
                                 status = 'GAME_OVER';
                                 audioService.playSound('lose'); // Play distinct lose sound only on death
                             } else {
-                                audioService.playBattleSound('damage'); // Play less harsh damage sound
+                                audioService.playAttackEffectSound('impact');
                             }
                             hitSomething = true;
                         }
@@ -1261,6 +1287,8 @@ const KochoShowdown: React.FC<{
                     if (!hitSomething) {
                         logs = [`${e.name}の攻撃は空を切った。`, ...logs];
                         generatedVfx.push({ id: `v_miss_${Date.now()}_${Math.random()}`, type: 'TEXT', pos: player.pos, text: '回避', color: 'text-slate-200' });
+                    } else {
+                        audioService.playAttackEffectSound('slash', Math.max(1, attackTiles.length));
                     }
                     
                     // Trigger Cooldown
@@ -1292,14 +1320,14 @@ const KochoShowdown: React.FC<{
                                 status = 'GAME_OVER';
                                 audioService.playSound('lose');
                             } else {
-                                audioService.playBattleSound('damage');
+                                audioService.playAttackEffectSound('explosion');
                             }
                         }
                     } else if (sName === 'SHIELD') { // PE Teacher
                         logs = [`${e.name}が号令をかけた！(Shield+5)`, ...logs];
                         e.shield += 5;
                         generatedVfx.push({ id: `v_spec_${Date.now()}`, type: 'BLOCK', pos: e.pos });
-                        audioService.playBattleSound('block');
+                        audioService.playStatusEffectSound('block');
                     } else if (sName === 'LULLABY') { // Music Teacher
                         logs = [`${e.name}の子守唄... (Action CD+2)`, ...logs];
                         nextState.specialActionCooldown += 2;
@@ -1992,7 +2020,8 @@ const KochoShowdown: React.FC<{
                         addLog(`シールド +${card.shield}`);
                         addVfx('BLOCK', p.pos);
                     }
-                    audioService.playBattleSound('attack');
+                    const attackSound = getKochoAttackSound(card, hits.length);
+                    audioService.playAttackEffectSound(attackSound.effect, attackSound.hitCount);
                 } else {
                     addLog("空振り...");
                     audioService.playSound('select');
@@ -2036,7 +2065,7 @@ const KochoShowdown: React.FC<{
                 } else if (card.shield && card.shield > 0) {
                     nextPlayer.shield += card.shield;
                     addVfx('BLOCK', p.pos);
-                    audioService.playBattleSound('block');
+                    audioService.playStatusEffectSound('block');
                 }
             }
 
@@ -2703,7 +2732,7 @@ const KochoShowdown: React.FC<{
         <div data-gamepad-navigation-root data-gamepad-initial-scope={`kocho-${gameState.phase}-${gameState.status}`} className="ios-edge-to-edge kocho-showdown-root flex flex-col h-full w-full bg-[#1a1a2e] text-white font-mono relative overflow-hidden">
             {/* Math Challenge Overlay */}
             {gameState.phase === 'MATH' && (
-                 <div className="absolute inset-0 z-[100] w-full h-full pointer-events-auto">
+                 <div className="kocho-problem-overlay absolute inset-0 z-[100] w-full h-full pointer-events-auto">
                      <MiniGameProblemChallenge mode={problemMode} modePool={problemModePool} answerMode={answerMode} assignment={assignment} onAnswerResult={onAnswerResult} onComplete={handleMathComplete} rewardHint={languageMode === 'ENGLISH' ? 'Perfect score: HP +1' : '全問正解でHP+1'} languageMode={languageMode} />
                  </div>
             )}

@@ -1,11 +1,31 @@
 import { chromium } from 'playwright';
 import { spawn } from 'node:child_process';
 import { once } from 'node:events';
+import { readFileSync } from 'node:fs';
 
 const PORT = 4176;
 const BASE_URL = `http://127.0.0.1:${PORT}`;
 const CHROME_PATH = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
 const delay = ms => new Promise(resolve => setTimeout(resolve, ms));
+
+const synthesizedMiniGames = [
+  'src/components/PaperPlaneBattle.tsx',
+  'src/components/SchoolDungeonRPG.tsx',
+  'src/components/SchoolDungeonRPG2.tsx',
+  'src/components/SchoolyardSurvivorScreen.tsx',
+];
+
+for (const sourcePath of synthesizedMiniGames) {
+  const source = readFileSync(sourcePath, 'utf8');
+  if (source.includes('playBattleSound(') || source.includes('playAttackEffectSound(')) {
+    throw new Error(`${sourcePath} must keep the original synthesized mini-game sounds`);
+  }
+}
+
+const kochoSource = readFileSync('src/components/KochoShowdown.tsx', 'utf8');
+if (!kochoSource.includes('playAttackEffectSound(') || !kochoSource.includes('getKochoAttackSound')) {
+  throw new Error('Kocho Showdown attack effects are not routed to packaged combat sounds');
+}
 
 const waitForServer = async () => {
   const deadline = Date.now() + 30_000;
