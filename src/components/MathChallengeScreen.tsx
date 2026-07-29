@@ -280,13 +280,15 @@ const MathChallengeScreen: React.FC<MathChallengeScreenProps> = ({ onComplete, m
   const currentProblem = problems[currentProblemIndex];
 
   return (
-    <div data-gamepad-initial-scope={`math-challenge-${currentProblemIndex}`} className="main-challenge-screen flex flex-col h-full w-full bg-emerald-950 text-white relative items-center justify-center p-8 font-mono">
+    <div data-gamepad-navigation-root data-gamepad-question-screen data-gamepad-initial-scope={`math-challenge-${currentProblemIndex}`} className="main-challenge-screen flex flex-col h-full w-full bg-emerald-950 text-white relative items-center justify-center p-8 font-mono">
         <div className="absolute inset-0 texture-blackboard opacity-20 pointer-events-none"></div>
         <RewardHintBanner text={rewardHint} languageMode={languageMode} />
         {unitBoardSummary && (
             <button
                 type="button"
                 onClick={() => setIsUnitBoardOpen(true)}
+                data-gamepad-zone="challenge-tools"
+                data-gamepad-order={0}
                 className="unit-board-open-button absolute left-3 top-3 z-20 inline-flex h-11 w-11 items-center justify-center rounded-full border border-yellow-100/45 bg-black/35 text-yellow-100 shadow-lg transition hover:bg-black/55"
                 aria-label={trans('単元板書を開く', languageMode)}
                 title={trans('単元板書', languageMode)}
@@ -341,6 +343,8 @@ const MathChallengeScreen: React.FC<MathChallengeScreenProps> = ({ onComplete, m
                     <button
                         key={idx}
                         data-gamepad-initial-choice
+                        data-gamepad-zone="challenge-options"
+                        data-gamepad-order={idx}
                         onClick={() => handleAnswer(opt)}
                         disabled={isAnswered}
                         className={`

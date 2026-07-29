@@ -3646,9 +3646,11 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; languageMode?: LanguageMo
                                         key={ship.id}
                                         role="button"
                                         tabIndex={isUnlocked ? 0 : -1}
+                                        aria-disabled={!isUnlocked}
                                         data-gamepad-initial-choice={isUnlocked && ship.id === unlockedShips[0]?.id ? true : undefined}
                                         data-gamepad-zone="paper-setup-ships"
                                         data-gamepad-order={SHIPS.indexOf(ship)}
+                                        data-gamepad-down-zone="paper-setup-ship-actions"
                                         onClick={() => isUnlocked && setSelectedShipId(ship.id)}
                                         onKeyDown={(event) => { if (isUnlocked && (event.key === 'Enter' || event.key === ' ')) { event.preventDefault(); setSelectedShipId(ship.id); } }}
                                         className={`paper-plane-setup-card border-2 p-2 md:p-6 rounded-lg md:rounded-xl flex flex-col items-center cursor-pointer transition-all relative overflow-hidden ${selectedShipId === ship.id ? 'border-cyan-400 bg-slate-800 shadow-[0_0_20px_rgba(34,211,238,0.3)]' : 'border-slate-600 bg-slate-900 hover:bg-slate-800'} ${!isUnlocked ? 'opacity-50 grayscale' : ''}`}
@@ -3668,7 +3670,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; languageMode?: LanguageMo
                                  )
                              })}
                              <div className="paper-plane-setup-next col-span-full text-center mt-4">
-                                <button onClick={() => setSetupStep('PILOT')} className="bg-cyan-600 hover:bg-cyan-500 px-10 md:px-12 py-2 md:py-3 rounded-full font-bold text-base md:text-lg shadow-lg animate-pulse">{t('次へ')}</button>
+                                <button data-gamepad-zone="paper-setup-ship-actions" data-gamepad-order={0} data-gamepad-up-zone="paper-setup-ships" onClick={() => setSetupStep('PILOT')} className="bg-cyan-600 hover:bg-cyan-500 px-10 md:px-12 py-2 md:py-3 rounded-full font-bold text-base md:text-lg shadow-lg animate-pulse">{t('次へ')}</button>
                              </div>
                          </div>
                     )}
@@ -3691,6 +3693,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; languageMode?: LanguageMo
                                         data-gamepad-initial-choice={i === 0 ? true : undefined}
                                         data-gamepad-zone="paper-setup-pilots"
                                         data-gamepad-order={i}
+                                        data-gamepad-down-zone="paper-setup-pilot-actions"
                                         className={`paper-plane-setup-card relative border-2 p-2 md:p-4 rounded-lg md:rounded-xl cursor-pointer transition-all flex flex-col h-full ${selectedPilotIndex === i ? 'border-yellow-400 bg-slate-800 shadow-[0_0_15px_rgba(250,204,21,0.3)] md:scale-105' : 'border-slate-600 bg-slate-900 hover:border-slate-400'}`}
                                         onClick={() => setSelectedPilotIndex(i)}
                                         onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); setSelectedPilotIndex(i); } }}
@@ -3732,15 +3735,21 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; languageMode?: LanguageMo
                             </div>
                             
                             <div className="paper-plane-pilot-actions flex gap-3 md:gap-4">
-                                <button 
-                                    onClick={handleRerollPilots} 
+                                <button
+                                    data-gamepad-zone="paper-setup-pilot-actions"
+                                    data-gamepad-order={0}
+                                    data-gamepad-up-zone="paper-setup-pilots"
+                                    onClick={handleRerollPilots}
                                     disabled={progress.rerollCount <= 0}
                                     className={`bg-gray-700 hover:bg-gray-600 text-white px-4 md:px-8 py-2 md:py-3 rounded-lg font-bold flex items-center text-sm md:text-base ${progress.rerollCount <= 0 ? 'opacity-50 cursor-not-allowed' : ''}`}
                                 >
                                     <RefreshCw className="mr-2"/> {t('呼び直す')}
                                 </button>
-                                <button 
-                                    onClick={() => setSetupStep('MISSION')} 
+                                <button
+                                    data-gamepad-zone="paper-setup-pilot-actions"
+                                    data-gamepad-order={1}
+                                    data-gamepad-up-zone="paper-setup-pilots"
+                                    onClick={() => setSetupStep('MISSION')}
                                     disabled={selectedPilotIndex === -1}
                                     className={`bg-cyan-600 hover:bg-cyan-500 px-8 md:px-12 py-2 md:py-3 rounded-lg font-bold text-base md:text-lg shadow-lg ${selectedPilotIndex === -1 ? 'opacity-50 cursor-not-allowed' : 'animate-pulse'}`}
                                 >
@@ -3755,14 +3764,21 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; languageMode?: LanguageMo
                             <div className="paper-plane-mission-card w-full bg-slate-800 p-3 md:p-6 rounded-xl border border-slate-600 text-center mb-4 md:mb-8">
                                 <h3 className="text-lg md:text-xl font-bold text-red-400 mb-1 md:mb-2">{t('難易度設定')}</h3>
                                 <div className="flex items-center justify-center gap-6 my-3 md:my-6">
-                                    <button 
+                                    <button
+                                        data-gamepad-initial-choice
+                                        data-gamepad-zone="paper-mission-level"
+                                        data-gamepad-order={0}
+                                        data-gamepad-down-zone="paper-mission-start"
                                         onClick={() => setSelectedMissionLevel(l => Math.max(0, l - 1))}
                                         className="bg-slate-700 p-2 md:p-3 rounded-full hover:bg-slate-600"
                                     >
                                         <ChevronsLeft/>
                                     </button>
                                     <div className="text-5xl md:text-6xl font-black text-white w-20">{selectedMissionLevel}</div>
-                                    <button 
+                                    <button
+                                        data-gamepad-zone="paper-mission-level"
+                                        data-gamepad-order={1}
+                                        data-gamepad-down-zone="paper-mission-start"
                                         onClick={() => {
                                             const shipMax = progress.maxClearedLevel[selectedShipId] ?? -1;
                                             // Can select up to Max Cleared + 1
@@ -3802,7 +3818,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; languageMode?: LanguageMo
                                 </div>
                             </div>
                             
-                            <button onClick={confirmSetup} className="bg-red-600 hover:bg-red-500 text-white w-full py-3 md:py-4 rounded-xl font-bold text-xl md:text-2xl shadow-[0_0_20px_rgba(220,38,38,0.6)] animate-pulse flex items-center justify-center">
+                            <button data-gamepad-zone="paper-mission-start" data-gamepad-order={0} data-gamepad-up-zone="paper-mission-level" onClick={confirmSetup} className="bg-red-600 hover:bg-red-500 text-white w-full py-3 md:py-4 rounded-xl font-bold text-xl md:text-2xl shadow-[0_0_20px_rgba(220,38,38,0.6)] animate-pulse flex items-center justify-center">
                                 <Target className="mr-2"/> {t('出撃開始')}
                             </button>
                         </div>

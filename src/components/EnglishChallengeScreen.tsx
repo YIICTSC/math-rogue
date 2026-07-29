@@ -219,7 +219,7 @@ const EnglishChallengeScreen: React.FC<EnglishChallengeScreenProps> = ({ onCompl
   const isConv = currentProblem.isDialogue;
 
   return (
-    <div data-gamepad-initial-scope={`english-challenge-${currentProblemIndex}`} className="main-challenge-screen flex flex-col h-full w-full bg-indigo-950 text-white relative items-center justify-center p-4 md:p-8 font-mono">
+    <div data-gamepad-navigation-root data-gamepad-question-screen data-gamepad-initial-scope={`english-challenge-${currentProblemIndex}`} className="main-challenge-screen flex flex-col h-full w-full bg-indigo-950 text-white relative items-center justify-center p-4 md:p-8 font-mono">
         <div className="absolute inset-0 texture-dark-matter opacity-20 pointer-events-none"></div>
         <RewardHintBanner text={rewardHint} languageMode={languageMode} />
         
@@ -289,6 +289,8 @@ const EnglishChallengeScreen: React.FC<EnglishChallengeScreenProps> = ({ onCompl
                     <button
                         key={idx}
                         data-gamepad-initial-choice
+                        data-gamepad-zone="challenge-options"
+                        data-gamepad-order={idx}
                         onClick={() => handleAnswer(opt)}
                         disabled={isAnswered}
                         className={`

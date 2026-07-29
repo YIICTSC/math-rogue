@@ -3481,6 +3481,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
                                             data-gamepad-initial-choice={idx === 0 ? true : undefined}
                                             data-gamepad-zone="dungeon-inherit"
                                             data-gamepad-order={idx}
+                                            data-gamepad-down-zone="dungeon-actions"
                                             className={`p-2 border rounded flex items-center justify-between cursor-pointer transition-colors text-xs ${inheritItemIdx === idx ? 'bg-red-900 border-white text-white' : 'bg-gray-800 border-gray-600 text-gray-400 hover:border-red-400'}`}
                                             onClick={() => setInheritItemIdx(idx)}
                                             onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); setInheritItemIdx(idx); } }}
@@ -3500,7 +3501,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
                                 </div>
                             </div>
 
-                            <button data-gamepad-initial-choice={allPossessions.length === 0 ? true : undefined} data-gamepad-zone="dungeon-actions" data-gamepad-order={0} onClick={handleRestart} className="px-6 py-2 bg-red-600 hover:bg-red-500 text-white font-bold rounded border-2 border-white animate-pulse flex items-center justify-center gap-2 w-full max-w-xs">
+                            <button data-gamepad-initial-choice={allPossessions.length === 0 ? true : undefined} data-gamepad-zone="dungeon-actions" data-gamepad-order={0} data-gamepad-up-zone={allPossessions.length > 0 ? 'dungeon-inherit' : undefined} onClick={handleRestart} className="px-6 py-2 bg-red-600 hover:bg-red-500 text-white font-bold rounded border-2 border-white animate-pulse flex items-center justify-center gap-2 w-full max-w-xs">
                                 <RotateCcw size={16}/> {inheritItemIdx !== null ? tr('アイテムを持って再挑戦') : tr('再挑戦')}
                             </button>
                             <button data-gamepad-zone="dungeon-actions" data-gamepad-order={1} onClick={handleQuit} className="mt-4 text-xs hover:underline opacity-50">

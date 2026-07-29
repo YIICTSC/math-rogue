@@ -618,25 +618,46 @@ const handleZonedNavigation = (action: NavigationAction): boolean => {
       return a.getBoundingClientRect().left - b.getBoundingClientRect().left;
     });
 
-  if (action === 'left' || action === 'right') {
-    const currentIndex = zoneElements.indexOf(active);
-    if (currentIndex < 0) return true;
-    const nextIndex = Math.max(0, Math.min(zoneElements.length - 1, currentIndex + (action === 'right' ? 1 : -1)));
-    const next = zoneElements[nextIndex];
-    if (next && next !== active) {
-      next.focus({ preventScroll: true });
-      next.scrollIntoView({ block: 'nearest', inline: 'nearest' });
-    }
-    // Horizontal input is always consumed at the edge of a zone.
-    return true;
-  }
-
   const activeRect = active.getBoundingClientRect();
   const activeCx = activeRect.left + activeRect.width / 2;
   const activeCy = activeRect.top + activeRect.height / 2;
+  const sameZoneCandidates = zoneElements.filter(element => element !== active);
+  let sameZoneTarget: { element: HTMLElement; score: number } | null = null;
+  for (const element of sameZoneCandidates) {
+    const rect = element.getBoundingClientRect();
+    const cx = rect.left + rect.width / 2;
+    const cy = rect.top + rect.height / 2;
+    const dx = cx - activeCx;
+    const dy = cy - activeCy;
+    // Elements in one visual row can have slightly different centers because
+    // of content height or selection transforms. Only treat an element as a
+    // directional neighbor when it sits beyond the corresponding edge.
+    if (action === 'up' && rect.bottom > activeRect.top + 4) continue;
+    if (action === 'down' && rect.top < activeRect.bottom - 4) continue;
+    if (action === 'left' && rect.right > activeRect.left + 4) continue;
+    if (action === 'right' && rect.left < activeRect.right - 4) continue;
+    const primary = action === 'up' || action === 'down' ? Math.abs(dy) : Math.abs(dx);
+    const secondary = action === 'up' || action === 'down' ? Math.abs(dx) : Math.abs(dy);
+    // Prefer the nearest item in the requested row/column. A stronger
+    // secondary penalty prevents a grid edge from skipping diagonally.
+    const score = primary * 2 + secondary * 3;
+    if (!sameZoneTarget || score < sameZoneTarget.score) {
+      sameZoneTarget = { element, score };
+    }
+  }
+  if (sameZoneTarget) {
+    sameZoneTarget.element.focus({ preventScroll: true });
+    sameZoneTarget.element.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+    return true;
+  }
+
   const explicitZone = action === 'up'
     ? active.dataset.gamepadUpZone
-    : active.dataset.gamepadDownZone;
+    : action === 'down'
+      ? active.dataset.gamepadDownZone
+      : action === 'left'
+        ? active.dataset.gamepadLeftZone
+        : active.dataset.gamepadRightZone;
   if (explicitZone) {
     const explicitCandidates = Array.from(root.querySelectorAll<HTMLElement>(`[data-gamepad-zone="${explicitZone}"]`))
       .filter(isVisibleAndEnabled);
@@ -652,6 +673,12 @@ const handleZonedNavigation = (action: NavigationAction): boolean => {
     }
     return true;
   }
+
+  // A horizontal row remains stable at its edge unless the element declares
+  // an explicit neighboring zone. This avoids jumping into unrelated header
+  // controls while still allowing card-to-queue transitions.
+  if (action === 'left' || action === 'right') return true;
+
   const candidates = Array.from(root.querySelectorAll<HTMLElement>('[data-gamepad-zone]'))
     .filter(element => element.dataset.gamepadZone !== activeZone && isVisibleAndEnabled(element));
 
@@ -881,6 +908,14 @@ export const useXboxControllerNavigation = () => {
         return;
       }
       if (action === 'cancel' && clickCancelShortcut()) return;
+      // Interactive overlays sit on top of real-time mini games whose global
+      // key handlers may prevent Arrow key events. Navigate the focused modal
+      // or question grid first so those underlying handlers cannot swallow
+      // Up/Down before focus movement runs.
+      if (
+        (getTopmostVisibleGamepadModal() || document.querySelector('[data-gamepad-question-screen]'))
+        && handleZonedNavigation(action)
+      ) return;
       const handled = dispatchKeyboardEvent(getKeyboardActionKey(action));
       if (!handled) handleActionFallback(action);
     };

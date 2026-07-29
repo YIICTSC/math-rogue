@@ -673,6 +673,7 @@ const createKochoDebugPreviewState = (debugPreview: MiniGameDebugPreview | undef
             phase: 'SHOP',
             status: 'PLAYING',
             money: 180,
+            consumables: CONSUMABLE_DB.slice(0, 2),
             currentUpgradeOffer: UPGRADE_POOLS[1],
             shopInventory: SHOP_RELICS.slice(0, 4),
             pendingPhase: null,
@@ -2875,9 +2876,9 @@ const KochoShowdown: React.FC<{
             
             {/* Item Modal */}
             {showItemModal && (
-                <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4 animate-in fade-in duration-200" onClick={() => setShowItemModal(false)}>
+                <div data-gamepad-modal data-gamepad-navigation-root data-gamepad-initial-scope={`kocho-items-${gameState.consumables.length}`} className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4 animate-in fade-in duration-200" onClick={() => setShowItemModal(false)}>
                     <div className="bg-slate-800 border-4 border-green-500 rounded-lg p-6 w-full max-w-lg shadow-2xl relative" onClick={e => e.stopPropagation()}>
-                        <button onClick={() => setShowItemModal(false)} className="absolute top-4 right-4 text-gray-400 hover:text-white"><X size={24}/></button>
+                        <button data-gamepad-back data-gamepad-zone="kocho-item-close-top" data-gamepad-order={0} data-gamepad-down-zone={gameState.consumables.length > 0 ? 'kocho-items' : 'kocho-item-close'} data-gamepad-initial-choice={gameState.consumables.length === 0 ? true : undefined} onClick={() => setShowItemModal(false)} className="absolute top-4 right-4 text-gray-400 hover:text-white"><X size={24}/></button>
                         <h2 className="text-2xl font-bold text-green-400 mb-6 flex items-center"><Package className="mr-2"/> {tr('アイテム一覧')} ({gameState.consumables.length}/{MAX_CONSUMABLES})</h2>
                         
                         {gameState.consumables.length === 0 ? (
@@ -2895,7 +2896,12 @@ const KochoShowdown: React.FC<{
                                                 <div className="text-sm text-gray-400">{tr(item.desc)}</div>
                                             </div>
                                         </div>
-                                        <button 
+                                        <button
+                                            data-gamepad-initial-choice={i === 0 ? true : undefined}
+                                            data-gamepad-zone="kocho-items"
+                                            data-gamepad-order={i}
+                                            data-gamepad-up-zone="kocho-item-close-top"
+                                            data-gamepad-down-zone="kocho-item-close"
                                             onClick={() => { useConsumable(i); setShowItemModal(false); }}
                                             className="bg-green-600 hover:bg-green-500 text-white font-bold py-2 px-4 rounded transition-colors shadow-lg"
                                         >
@@ -2906,7 +2912,7 @@ const KochoShowdown: React.FC<{
                             </div>
                         )}
                         
-                        <button onClick={() => setShowItemModal(false)} className="mt-8 w-full bg-slate-700 hover:bg-slate-600 text-white font-bold py-3 rounded-lg transition-colors border border-slate-500">{tr('閉じる')}</button>
+                        <button data-gamepad-back data-gamepad-zone="kocho-item-close" data-gamepad-order={0} data-gamepad-up-zone={gameState.consumables.length > 0 ? 'kocho-items' : 'kocho-item-close-top'} onClick={() => setShowItemModal(false)} className="mt-8 w-full bg-slate-700 hover:bg-slate-600 text-white font-bold py-3 rounded-lg transition-colors border border-slate-500">{tr('閉じる')}</button>
                     </div>
                 </div>
             )}
@@ -3191,6 +3197,7 @@ const KochoShowdown: React.FC<{
                                             data-gamepad-zone="kocho-queue"
                                             data-gamepad-order={i}
                                             data-gamepad-up-zone="kocho-top"
+                                            data-gamepad-left-zone="kocho-hand"
                                             role="button"
                                             tabIndex={0}
                                             className="w-12 h-16 md:w-16 md:h-20 bg-slate-800 border border-slate-600 rounded flex flex-col items-center justify-center relative group cursor-pointer hover:border-red-400 shrink-0"
@@ -3212,7 +3219,7 @@ const KochoShowdown: React.FC<{
                                     );
                                 })}
                             </div>
-                            <button data-gamepad-zone="kocho-queue" data-gamepad-order={3} data-gamepad-shortcut={steamControllerLayout ? 'X' : 'Y'} aria-keyshortcuts={steamControllerLayout ? 'X' : 'Y'} onClick={executeQueue} disabled={gameState.queue.length === 0 || animating} className={`w-16 h-16 md:w-20 md:h-20 rounded-full border-4 flex flex-col items-center justify-center font-bold shadow-lg transition-all shrink-0 ${gameState.queue.length > 0 ? 'bg-indigo-600 border-indigo-400 text-white hover:scale-105 active:scale-95 cursor-pointer animate-pulse' : 'bg-gray-800 border-gray-600 text-gray-500 cursor-not-allowed'}`}>
+                            <button data-gamepad-zone="kocho-queue" data-gamepad-order={3} data-gamepad-left-zone="kocho-hand" data-gamepad-shortcut={steamControllerLayout ? 'X' : 'Y'} aria-keyshortcuts={steamControllerLayout ? 'X' : 'Y'} onClick={executeQueue} disabled={gameState.queue.length === 0 || animating} className={`w-16 h-16 md:w-20 md:h-20 rounded-full border-4 flex flex-col items-center justify-center font-bold shadow-lg transition-all shrink-0 ${gameState.queue.length > 0 ? 'bg-indigo-600 border-indigo-400 text-white hover:scale-105 active:scale-95 cursor-pointer animate-pulse' : 'bg-gray-800 border-gray-600 text-gray-500 cursor-not-allowed'}`}>
                                 <Play size={20} className="fill-current mb-1"/> EXEC
                             </button>
                         </div>
@@ -3226,6 +3233,7 @@ const KochoShowdown: React.FC<{
                                     data-gamepad-zone="kocho-hand"
                                     data-gamepad-order={i}
                                     data-gamepad-up-zone="kocho-top"
+                                    data-gamepad-right-zone="kocho-queue"
                                     data-kocho-hand-index={i}
                                     role="button"
                                     tabIndex={0}

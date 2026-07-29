@@ -418,6 +418,84 @@ const run = async () => {
       );
     });
 
+    await test('問題選択肢を上下左右に往復し板書モーダルも操作できる', async () => {
+      await page.goto(`${BASE_URL}/?gamepadTestScreen=MATH_CHALLENGE`, { waitUntil: 'domcontentloaded' });
+      await page.waitForSelector('.main-challenge-screen [data-gamepad-zone="challenge-options"]');
+      await connect(page);
+      const exerciseBoardModal = async () => {
+        await delay(250);
+        expect(
+          await page.evaluate(() => document.activeElement?.getAttribute('data-gamepad-zone')) === 'unit-board-close',
+          `板書を開いた際に閉じるボタンへ初期フォーカスしない: ${JSON.stringify(await activeElementSnapshot(page))}`,
+        );
+        await press(page, 'DOWN');
+        expect(
+          await page.evaluate(() => ['unit-board-pages', 'unit-board-return'].includes(document.activeElement?.getAttribute('data-gamepad-zone'))),
+          '板書モーダル内を下へ移動できない',
+        );
+        await press(page, 'UP');
+        expect(
+          await page.evaluate(() => document.activeElement?.getAttribute('data-gamepad-zone') === 'unit-board-close'),
+          '板書モーダル内を上へ戻れない',
+        );
+        await press(page, 'B');
+        await page.waitForSelector('.unit-board-dialog', { state: 'detached' });
+      };
+      let boardTested = false;
+      if (await page.locator('.unit-board-dialog').count()) {
+        await exerciseBoardModal();
+        boardTested = true;
+      }
+      await page.waitForFunction(() => document.activeElement?.getAttribute('data-gamepad-zone') === 'challenge-options');
+      await delay(250);
+      expect(
+        await page.evaluate(() => document.activeElement?.getAttribute('data-gamepad-zone')) === 'challenge-options',
+        `問題選択肢に初期フォーカスがない: ${JSON.stringify(await activeElementSnapshot(page))}`,
+      );
+
+      expect(
+        await page.evaluate(() => document.activeElement?.getAttribute('data-gamepad-order')) === '0',
+        '問題の左上選択肢に初期フォーカスがない',
+      );
+      const hasHorizontalNeighbor = await page.evaluate(() => {
+        const options = Array.from(document.querySelectorAll('[data-gamepad-zone="challenge-options"]'));
+        if (options.length < 2) return false;
+        const first = options[0].getBoundingClientRect();
+        const second = options[1].getBoundingClientRect();
+        return Math.abs(first.top - second.top) < Math.min(first.height, second.height) * 0.5;
+      });
+      if (hasHorizontalNeighbor) {
+        await press(page, 'RIGHT');
+        expect(
+          await page.evaluate(() => document.activeElement?.getAttribute('data-gamepad-order')) === '1',
+          '問題選択肢を右へ移動できない',
+        );
+        await press(page, 'LEFT');
+        expect(
+          await page.evaluate(() => document.activeElement?.getAttribute('data-gamepad-order')) === '0',
+          '問題選択肢を左へ戻れない',
+        );
+      }
+      await press(page, 'DOWN');
+      expect(
+        await page.evaluate(() => document.activeElement?.getAttribute('data-gamepad-order')) !== '0',
+        '問題選択肢を下へ移動できない',
+      );
+      await press(page, 'UP');
+      expect(
+        await page.evaluate(() => document.activeElement?.getAttribute('data-gamepad-order')) === '0',
+        '問題選択肢を上へ戻れない',
+      );
+
+      const boardButton = page.locator('.unit-board-open-button');
+      if (!boardTested && await boardButton.count()) {
+        await boardButton.focus();
+        await press(page, 'A');
+        await page.waitForSelector('[data-gamepad-modal] .unit-board-dialog');
+        await exerciseBoardModal();
+      }
+    });
+
     await test('ミニゲーム削除・ポーカー専用操作をコントローラーで実行できる', async () => {
       await page.goto(`${BASE_URL}/?gamepadTestScreen=MINI_GAME_SELECT`, { waitUntil: 'domcontentloaded' });
       await connect(page);
@@ -543,6 +621,18 @@ const run = async () => {
         'Aでカードを予約できない',
       );
       await page.waitForFunction(() => document.activeElement?.hasAttribute('data-kocho-hand-index'));
+      const handCount = await page.locator('[data-kocho-hand-index]').count();
+      for (let index = 1; index < handCount; index += 1) await press(page, 'RIGHT');
+      await press(page, 'RIGHT');
+      expect(
+        await page.evaluate(() => document.activeElement?.getAttribute('data-gamepad-zone')) === 'kocho-queue',
+        '手札右端から右入力で予約済みカードへ移動しない',
+      );
+      await press(page, 'LEFT');
+      expect(
+        await page.evaluate(() => document.activeElement?.getAttribute('data-gamepad-zone')) === 'kocho-hand',
+        '予約済みカードから左入力で手札へ戻らない',
+      );
       await press(page, 'UP');
       expect(
         await page.evaluate(() => document.activeElement?.getAttribute('data-gamepad-zone')) === 'kocho-top',
@@ -553,13 +643,55 @@ const run = async () => {
         await page.locator('[data-gamepad-cancel-shortcut]').count() === 0,
         'Bで直前の予約を取り消せない',
       );
+
+      await page.goto(`${BASE_URL}/?gamepadTestScreen=MINI_GAME_KOCHO%3AKOCHO_SHOP`, { waitUntil: 'domcontentloaded' });
+      await page.waitForSelector('.kocho-header-actions');
+      await connect(page);
+      const itemButton = page.locator('[data-gamepad-zone="kocho-top"][data-gamepad-order="3"]');
+      await itemButton.focus();
+      await press(page, 'A');
+      await page.waitForSelector('[data-gamepad-zone="kocho-items"]');
+      await page.waitForFunction(() => document.activeElement?.getAttribute('data-gamepad-zone') === 'kocho-items');
+      expect(
+        await page.evaluate(() => document.activeElement?.getAttribute('data-gamepad-order')) === '0',
+        'アイテムモーダルの先頭アイテムにフォーカスしない',
+      );
+      await press(page, 'DOWN');
+      expect(
+        await page.evaluate(() => document.activeElement?.getAttribute('data-gamepad-order')) === '1',
+        'アイテムモーダルを下へ移動できない',
+      );
+      await press(page, 'UP');
+      expect(
+        await page.evaluate(() => document.activeElement?.getAttribute('data-gamepad-order')) === '0',
+        'アイテムモーダルを上へ戻れない',
+      );
+      await press(page, 'B');
+      expect(await page.locator('[data-gamepad-zone="kocho-items"]').count() === 0, 'Bでアイテムモーダルを閉じられない');
     });
 
-    await test('ダンジョン終了・校長メンテナンス・紙飛行機パーツに初期フォーカスがある', async () => {
+    await test('ダンジョン終了・校長メンテナンス・紙飛行機パーツを上下左右に操作できる', async () => {
       for (const screen of ['MINI_GAME_DUNGEON:GAME_OVER', 'MINI_GAME_DUNGEON_2:GAME_OVER']) {
         await page.goto(`${BASE_URL}/?gamepadTestScreen=${screen}`, { waitUntil: 'domcontentloaded' });
         await connect(page);
         await page.waitForFunction(() => ['dungeon-inherit', 'dungeon-actions'].includes(document.activeElement?.getAttribute('data-gamepad-zone')));
+        const inheritCount = await page.locator('[data-gamepad-zone="dungeon-inherit"]').count();
+        for (let index = 0; index < Math.max(1, inheritCount); index += 1) await press(page, 'DOWN');
+        await page.waitForFunction(() => document.activeElement?.getAttribute('data-gamepad-zone') === 'dungeon-actions');
+        expect(
+          await page.evaluate(() => document.activeElement?.getAttribute('data-gamepad-order')) === '0',
+          `${screen}で再挑戦へフォーカスできない`,
+        );
+        await press(page, 'DOWN');
+        expect(
+          await page.evaluate(() => document.activeElement?.getAttribute('data-gamepad-order')) === '1',
+          `${screen}でEXITへフォーカスできない`,
+        );
+        await press(page, 'UP');
+        expect(
+          await page.evaluate(() => document.activeElement?.getAttribute('data-gamepad-order')) === '0',
+          `${screen}でEXITから再挑戦へ戻れない`,
+        );
       }
       await page.goto(`${BASE_URL}/?gamepadTestScreen=MINI_GAME_KOCHO:KOCHO_UPGRADE`, { waitUntil: 'domcontentloaded' });
       await connect(page);
@@ -575,7 +707,71 @@ const run = async () => {
           expected => expected.includes(document.activeElement?.getAttribute('data-gamepad-zone')),
           zones,
         );
+        const startingOrder = Number(await page.evaluate(() => document.activeElement?.getAttribute('data-gamepad-order') ?? '0'));
+        await press(page, 'RIGHT');
+        expect(
+          Number(await page.evaluate(() => document.activeElement?.getAttribute('data-gamepad-order') ?? '-1')) === startingOrder + 1,
+          `${screen}でパーツを右へ移動できない`,
+        );
+        await press(page, 'DOWN');
+        expect(
+          Number(await page.evaluate(() => document.activeElement?.getAttribute('data-gamepad-order') ?? '-1')) >= startingOrder + 3,
+          `${screen}でパーツを下へ移動できない`,
+        );
+        await press(page, 'UP');
+        expect(
+          Number(await page.evaluate(() => document.activeElement?.getAttribute('data-gamepad-order') ?? '-1')) === startingOrder + 1,
+          `${screen}でパーツを上へ戻れない`,
+        );
       }
+    });
+
+    await test('紙飛行機の機体・パイロット・任務ボタンをコントローラーだけで往復できる', async () => {
+      await page.goto(`${BASE_URL}/?gamepadTestScreen=MINI_GAME_PAPER_PLANE`, { waitUntil: 'domcontentloaded' });
+      await page.waitForSelector('[data-gamepad-zone="paper-setup-ships"]');
+      await connect(page);
+      await page.waitForFunction(() => document.activeElement?.getAttribute('data-gamepad-zone') === 'paper-setup-ships');
+
+      const unlockedShipCount = await page.locator('[data-gamepad-zone="paper-setup-ships"]:not([aria-disabled="true"])').count();
+      const shipRows = Math.max(1, Math.ceil(unlockedShipCount / 3));
+      for (let row = 1; row < shipRows; row += 1) await press(page, 'DOWN');
+      await press(page, 'DOWN');
+      expect(
+        await page.evaluate(() => document.activeElement?.getAttribute('data-gamepad-zone')) === 'paper-setup-ship-actions',
+        '機体選択から「次へ」へ移動できない',
+      );
+      await press(page, 'A');
+      await page.waitForSelector('[data-gamepad-zone="paper-setup-pilots"]');
+      await page.waitForFunction(() => document.activeElement?.getAttribute('data-gamepad-zone') === 'paper-setup-pilots');
+      await press(page, 'A');
+      await press(page, 'DOWN');
+      expect(
+        await page.evaluate(() => document.activeElement?.getAttribute('data-gamepad-zone')) === 'paper-setup-pilot-actions',
+        'パイロット選択から操作ボタンへ移動できない',
+      );
+      await press(page, 'RIGHT');
+      expect(
+        await page.evaluate(() => document.activeElement?.getAttribute('data-gamepad-order')) === '1',
+        'パイロット操作の「次へ」へ移動できない',
+      );
+      await press(page, 'A');
+      await page.waitForSelector('[data-gamepad-zone="paper-mission-level"]');
+      await page.waitForFunction(() => document.activeElement?.getAttribute('data-gamepad-zone') === 'paper-mission-level');
+      await press(page, 'RIGHT');
+      expect(
+        await page.evaluate(() => document.activeElement?.getAttribute('data-gamepad-order')) === '1',
+        '任務レベルを右へ選べない',
+      );
+      await press(page, 'DOWN');
+      expect(
+        await page.evaluate(() => document.activeElement?.getAttribute('data-gamepad-zone')) === 'paper-mission-start',
+        '任務の出撃開始ボタンへ移動できない',
+      );
+      await press(page, 'UP');
+      expect(
+        await page.evaluate(() => document.activeElement?.getAttribute('data-gamepad-zone')) === 'paper-mission-level',
+        '出撃開始から任務レベルへ戻れない',
+      );
     });
 
     await test('Viewボタンのゲームメニューから継続・タイトル復帰を選べる', async () => {

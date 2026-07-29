@@ -64,7 +64,7 @@ const UnitBoardModal: React.FC<UnitBoardModalProps> = ({ summary, open, onClose,
   };
 
   return (
-    <div data-gamepad-modal data-gamepad-initial-scope="unit-board" className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/75 p-2 font-mono text-white sm:p-4">
+    <div data-gamepad-modal data-gamepad-navigation-root data-gamepad-initial-scope={`unit-board-${summary.id}`} className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/75 p-2 font-mono text-white sm:p-4">
       <div
         role="dialog"
         aria-modal="true"
@@ -79,6 +79,9 @@ const UnitBoardModal: React.FC<UnitBoardModalProps> = ({ summary, open, onClose,
         <button
           data-gamepad-back
           data-gamepad-initial-choice
+          data-gamepad-zone="unit-board-close"
+          data-gamepad-order={0}
+          data-gamepad-down-zone={hasMultiplePages ? 'unit-board-pages' : 'unit-board-return'}
           type="button"
           onClick={handleClose}
           onPointerUp={handleClose}
@@ -148,6 +151,10 @@ const UnitBoardModal: React.FC<UnitBoardModalProps> = ({ summary, open, onClose,
               <>
                 <button
                   type="button"
+                  data-gamepad-zone="unit-board-pages"
+                  data-gamepad-order={0}
+                  data-gamepad-up-zone="unit-board-close"
+                  data-gamepad-down-zone="unit-board-return"
                   onClick={handlePageChange(currentPageIndex - 1)}
                   onPointerUp={handlePageChange(currentPageIndex - 1)}
                   disabled={currentPageIndex === 0}
@@ -160,6 +167,10 @@ const UnitBoardModal: React.FC<UnitBoardModalProps> = ({ summary, open, onClose,
                 </span>
                 <button
                   type="button"
+                  data-gamepad-zone="unit-board-pages"
+                  data-gamepad-order={1}
+                  data-gamepad-up-zone="unit-board-close"
+                  data-gamepad-down-zone="unit-board-return"
                   onClick={handlePageChange(currentPageIndex + 1)}
                   onPointerUp={handlePageChange(currentPageIndex + 1)}
                   disabled={currentPageIndex >= pages.length - 1}
@@ -172,6 +183,9 @@ const UnitBoardModal: React.FC<UnitBoardModalProps> = ({ summary, open, onClose,
           </div>
           <button
             type="button"
+            data-gamepad-zone="unit-board-return"
+            data-gamepad-order={0}
+            data-gamepad-up-zone={hasMultiplePages ? 'unit-board-pages' : 'unit-board-close'}
             onClick={handleClose}
             onPointerUp={handleClose}
             className="unit-board-return rounded-md border-b-4 border-emerald-950 bg-emerald-600 px-4 py-1.5 text-xs font-black text-white transition hover:bg-emerald-500 active:translate-y-1 active:border-b-0 sm:px-5 sm:py-2 sm:text-sm"

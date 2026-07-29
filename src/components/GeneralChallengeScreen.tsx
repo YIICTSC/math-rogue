@@ -1787,13 +1787,15 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
       : 'general-challenge-density-normal';
 
   return (
-    <div data-gamepad-initial-scope={`general-challenge-${currentProblemIndex}`} className={`main-challenge-screen ${landscapeDensityClass} flex flex-col h-full w-full ${bgClass} text-white relative items-center justify-center p-2 sm:p-3 md:p-8 font-mono overflow-y-auto overflow-x-hidden`}>
+    <div data-gamepad-navigation-root data-gamepad-question-screen data-gamepad-initial-scope={`general-challenge-${currentProblemIndex}`} className={`main-challenge-screen ${landscapeDensityClass} flex flex-col h-full w-full ${bgClass} text-white relative items-center justify-center p-2 sm:p-3 md:p-8 font-mono overflow-y-auto overflow-x-hidden`}>
         <div className="absolute inset-0 texture-dark-matter opacity-20 pointer-events-none"></div>
         <RewardHintBanner text={rewardHint} languageMode={languageMode} />
         {unitBoardSummary && (
             <button
                 type="button"
                 onClick={() => setIsUnitBoardOpen(true)}
+                data-gamepad-zone="challenge-tools"
+                data-gamepad-order={0}
                 className="unit-board-open-button absolute left-3 top-3 z-20 inline-flex h-11 w-11 items-center justify-center rounded-full border border-yellow-100/45 bg-black/35 text-yellow-100 shadow-lg transition hover:bg-black/55"
                 aria-label={trans('単元板書を開く', languageMode)}
                 title={trans('単元板書', languageMode)}
@@ -1968,6 +1970,8 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
                         <button
                             key={idx}
                             data-gamepad-initial-choice
+                            data-gamepad-zone="challenge-options"
+                            data-gamepad-order={idx}
                             onClick={() => handleAnswer(opt)}
                             disabled={isAnswered}
                             className={`
