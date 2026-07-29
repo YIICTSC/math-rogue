@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { DoorOpen, LogOut, Play, X } from 'lucide-react';
 import { LanguageMode } from '../types';
 import { trans } from '../utils/textUtils';
@@ -21,6 +21,7 @@ export const GamepadSystemMenu: React.FC<Props> = ({
   onQuit,
 }) => {
   const [open, setOpen] = useState(false);
+  const continueButtonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     const handleOpen = () => {
@@ -34,11 +35,20 @@ export const GamepadSystemMenu: React.FC<Props> = ({
     if (!enabled) setOpen(false);
   }, [enabled]);
 
+  useEffect(() => {
+    if (!open) return;
+    const frameId = window.requestAnimationFrame(() => {
+      continueButtonRef.current?.focus({ preventScroll: true });
+    });
+    return () => window.cancelAnimationFrame(frameId);
+  }, [open]);
+
   if (!open) return null;
 
   return (
     <div
       data-gamepad-modal
+      data-gamepad-navigation-root
       data-gamepad-initial-scope="gamepad-system-menu"
       className="app-modal-overlay fixed inset-0 z-[2147483646] flex items-center justify-center bg-black/85 p-4 text-white"
       role="dialog"
@@ -63,8 +73,11 @@ export const GamepadSystemMenu: React.FC<Props> = ({
         </div>
         <div className="grid gap-3">
           <button
+            ref={continueButtonRef}
             type="button"
             data-gamepad-initial-choice
+            data-gamepad-zone="system-menu-actions"
+            data-gamepad-order={0}
             onClick={() => setOpen(false)}
             className="flex items-center justify-center gap-2 rounded-xl border border-cyan-300 bg-cyan-500 px-4 py-3 font-black text-slate-950"
           >
@@ -72,6 +85,8 @@ export const GamepadSystemMenu: React.FC<Props> = ({
           </button>
           <button
             type="button"
+            data-gamepad-zone="system-menu-actions"
+            data-gamepad-order={1}
             onClick={() => {
               setOpen(false);
               onReturnToTitle();
@@ -82,6 +97,8 @@ export const GamepadSystemMenu: React.FC<Props> = ({
           </button>
           <button
             type="button"
+            data-gamepad-zone="system-menu-actions"
+            data-gamepad-order={2}
             disabled={!canQuit}
             onClick={() => {
               setOpen(false);

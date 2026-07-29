@@ -511,6 +511,18 @@ const run = async () => {
       await press(page, 'A');
       await page.waitForSelector('[data-gamepad-zone="poker-hand"]');
       expect(await page.locator('[data-gamepad-multiselect]').count() > 1, 'ポーカー手札にAドラッグ選択対象がない');
+      const firstPokerCard = page.locator('[data-gamepad-zone="poker-hand"][data-gamepad-order="0"]');
+      await firstPokerCard.focus();
+      await press(page, 'RIGHT');
+      expect(
+        await page.evaluate(() => document.activeElement?.getAttribute('data-gamepad-order')) === '1',
+        'ポーカー手札が右1入力で隣の1枚へ移動しない',
+      );
+      await press(page, 'LEFT');
+      expect(
+        await page.evaluate(() => document.activeElement?.getAttribute('data-gamepad-order')) === '0',
+        'ポーカー手札が左1入力で隣の1枚へ戻らない',
+      );
       expect(
         await page.locator('[data-gamepad-shortcut="X"]').filter({ hasText: 'PLAY HAND' }).count() === 1,
         'XがPLAY HANDに割り当てられていない',
@@ -658,6 +670,18 @@ const run = async () => {
           /飛び道具を装備していない|無くなった|はずした|ダメージ|たおした|壁に当たった/.test(logText),
           `${screen}でRT投擲の結果がログに出ない: ${logText}`,
         );
+
+        await press(page, 'BACK');
+        await page.waitForSelector('[aria-label="ゲームメニュー"]');
+        expect(
+          await page.evaluate(() => (
+            document.activeElement?.getAttribute('data-gamepad-zone') === 'system-menu-actions'
+            && document.activeElement?.getAttribute('data-gamepad-order') === '0'
+          )),
+          `${screen}でVIEW MENUの「ゲームを続ける」へフォーカスしない`,
+        );
+        await press(page, 'B');
+        expect(await page.locator('[aria-label="ゲームメニュー"]').count() === 0, `${screen}でVIEW MENUをBで閉じられない`);
       }
     });
 
@@ -787,6 +811,33 @@ const run = async () => {
           Number(await page.evaluate(() => document.activeElement?.getAttribute('data-gamepad-order') ?? '-1')) === startingOrder + 1,
           `${screen}でパーツを上へ戻れない`,
         );
+
+        if (screen.includes('PAPER_HANGAR')) {
+          const shipFirst = page.locator('[data-gamepad-zone="paper-hangar-ship"]:not(.border-dashed)').first();
+          await shipFirst.focus();
+          await press(page, 'A');
+          for (let move = 0; move < 3; move += 1) {
+            if (await page.evaluate(() => document.activeElement?.getAttribute('data-gamepad-zone')) === 'paper-hangar-unequip') break;
+            await press(page, 'DOWN');
+          }
+          expect(
+            await page.evaluate(() => document.activeElement?.getAttribute('data-gamepad-zone')) === 'paper-hangar-unequip',
+            '機体改造で船パーツから「外す」へ移動できない',
+          );
+          await press(page, 'RIGHT');
+          expect(
+            await page.evaluate(() => document.activeElement?.getAttribute('data-gamepad-zone')) === 'paper-hangar-inventory',
+            '機体改造で「外す」からINVENTORYへ移動できない',
+          );
+          await shipFirst.focus();
+          await press(page, 'RIGHT');
+          await press(page, 'RIGHT');
+          await press(page, 'RIGHT');
+          expect(
+            await page.evaluate(() => document.activeElement?.getAttribute('data-gamepad-zone')) === 'paper-hangar-inventory',
+            '機体改造でSHIP右端からINVENTORYへ移動できない',
+          );
+        }
       }
     });
 
@@ -835,6 +886,36 @@ const run = async () => {
       expect(
         await page.evaluate(() => document.activeElement?.getAttribute('data-gamepad-zone')) === 'paper-mission-level',
         '出撃開始から任務レベルへ戻れない',
+      );
+    });
+
+    await test('紙飛行機の機体改造で外すとINVENTORYへ移動できる', async () => {
+      await page.goto(`${BASE_URL}/?gamepadTestScreen=MINI_GAME_PAPER_PLANE:PAPER_HANGAR`, { waitUntil: 'domcontentloaded' });
+      await connect(page);
+      const shipFirst = page.locator('[data-gamepad-zone="paper-hangar-ship"]:not(.border-dashed)').first();
+      await shipFirst.waitFor({ state: 'visible' });
+      await shipFirst.focus();
+      await press(page, 'A');
+      for (let move = 0; move < 3; move += 1) {
+        if (await page.evaluate(() => document.activeElement?.getAttribute('data-gamepad-zone')) === 'paper-hangar-unequip') break;
+        await press(page, 'DOWN');
+      }
+      expect(
+        await page.evaluate(() => document.activeElement?.getAttribute('data-gamepad-zone')) === 'paper-hangar-unequip',
+        '機体改造で船パーツから「外す」へ移動できない',
+      );
+      await press(page, 'RIGHT');
+      expect(
+        await page.evaluate(() => document.activeElement?.getAttribute('data-gamepad-zone')) === 'paper-hangar-inventory',
+        '機体改造で「外す」からINVENTORYへ移動できない',
+      );
+      await shipFirst.focus();
+      await press(page, 'RIGHT');
+      await press(page, 'RIGHT');
+      await press(page, 'RIGHT');
+      expect(
+        await page.evaluate(() => document.activeElement?.getAttribute('data-gamepad-zone')) === 'paper-hangar-inventory',
+        '機体改造でSHIP右端からINVENTORYへ移動できない',
       );
     });
 

@@ -1476,8 +1476,12 @@ const ShipPartView: React.FC<{
     evalContext?: PartEvalContext,
     gamepadZone?: string,
     gamepadOrder?: number,
-    gamepadInitial?: boolean
-}> = ({ part, onClick, onLongPress, languageMode = 'JAPANESE', isEnemy, highlight, pendingReplace, showPower = true, bonusPower = 0, evalContext, gamepadZone, gamepadOrder, gamepadInitial }) => {
+    gamepadInitial?: boolean,
+    gamepadUpZone?: string,
+    gamepadDownZone?: string,
+    gamepadLeftZone?: string,
+    gamepadRightZone?: string
+}> = ({ part, onClick, onLongPress, languageMode = 'JAPANESE', isEnemy, highlight, pendingReplace, showPower = true, bonusPower = 0, evalContext, gamepadZone, gamepadOrder, gamepadInitial, gamepadUpZone, gamepadDownZone, gamepadLeftZone, gamepadRightZone }) => {
 
     const longPressTimer = useRef<any>(null);
     const t = (text: string) => trans(text, languageMode);
@@ -1563,6 +1567,10 @@ const ShipPartView: React.FC<{
                 data-gamepad-zone={gamepadZone}
                 data-gamepad-order={gamepadOrder}
                 data-gamepad-initial-choice={gamepadInitial || undefined}
+                data-gamepad-up-zone={gamepadUpZone}
+                data-gamepad-down-zone={gamepadDownZone}
+                data-gamepad-left-zone={gamepadLeftZone}
+                data-gamepad-right-zone={gamepadRightZone}
                 onClick={onClick}
                 onKeyDown={(event) => { if (onClick && (event.key === 'Enter' || event.key === ' ')) { event.preventDefault(); onClick(); } }}
                 className={`w-full h-full border border-dashed ${pendingReplace ? 'border-yellow-400 bg-yellow-900/30 animate-pulse' : 'border-slate-700 bg-black/20'} rounded flex items-center justify-center cursor-pointer select-none touch-none`}
@@ -1585,6 +1593,10 @@ const ShipPartView: React.FC<{
             data-gamepad-zone={gamepadZone}
             data-gamepad-order={gamepadOrder}
             data-gamepad-initial-choice={gamepadInitial || undefined}
+            data-gamepad-up-zone={gamepadUpZone}
+            data-gamepad-down-zone={gamepadDownZone}
+            data-gamepad-left-zone={gamepadLeftZone}
+            data-gamepad-right-zone={gamepadRightZone}
             onClick={onClick}
             onKeyDown={(event) => { if (onClick && (event.key === 'Enter' || event.key === ' ')) { event.preventDefault(); onClick(); } }}
             onTouchStart={handleTouchStart}
@@ -3993,6 +4005,8 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; languageMode?: LanguageMo
                                             gamepadZone="paper-hangar-ship"
                                             gamepadOrder={i}
                                             gamepadInitial={i === 0}
+                                            gamepadDownZone={i >= player.parts.length - SHIP_WIDTH && hangarSelection?.loc === 'SHIP' ? 'paper-hangar-unequip' : undefined}
+                                            gamepadRightZone={i % SHIP_WIDTH === SHIP_WIDTH - 1 ? 'paper-hangar-inventory' : undefined}
                                             onLongPress={(p) => setTooltipPart(p)}
                                             highlight={hangarSelection?.loc === 'SHIP' && hangarSelection.idx === i}
                                             bonusPower={buffGrid[r][c] + player.passivePower}
@@ -4005,7 +4019,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; languageMode?: LanguageMo
                             })}
                         </div>
                         {hangarSelection?.loc === 'SHIP' && player.parts[hangarSelection.idx].type !== 'EMPTY' && (
-                             <button onClick={handleUnequip} className="mt-6 bg-red-800 hover:bg-red-700 text-white px-6 py-2 rounded font-bold text-sm border border-red-500 flex items-center">
+                             <button data-gamepad-zone="paper-hangar-unequip" data-gamepad-order={0} data-gamepad-up-zone="paper-hangar-ship" data-gamepad-right-zone="paper-hangar-inventory" onClick={handleUnequip} className="mt-6 bg-red-800 hover:bg-red-700 text-white px-6 py-2 rounded font-bold text-sm border border-red-500 flex items-center">
                                  <Download className="mr-2" size={16}/> {t('外す (Unequip)')}
                              </button>
                         )}
@@ -4026,6 +4040,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; languageMode?: LanguageMo
                                         onClick={() => handleHangarAction('INV', i)}
                                         gamepadZone="paper-hangar-inventory"
                                         gamepadOrder={i}
+                                        gamepadLeftZone="paper-hangar-ship"
                                         onLongPress={(p) => setTooltipPart(p)}
                                         highlight={hangarSelection?.loc === 'INV' && hangarSelection.idx === i}
                                     />
@@ -4039,6 +4054,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; languageMode?: LanguageMo
                                 tabIndex={0}
                                 data-gamepad-zone="paper-hangar-inventory"
                                 data-gamepad-order={player.partInventory.length}
+                                data-gamepad-left-zone="paper-hangar-ship"
                                 className="paper-plane-hangar-empty-slot w-16 h-16 md:w-24 md:h-24 relative"
                                 onClick={() => handleHangarAction('INV', player.partInventory.length)}
                                 onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); handleHangarAction('INV', player.partInventory.length); } }}

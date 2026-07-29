@@ -618,6 +618,23 @@ const handleZonedNavigation = (action: NavigationAction): boolean => {
       return a.getBoundingClientRect().left - b.getBoundingClientRect().left;
     });
 
+  if (
+    active.dataset.gamepadLinearAxis === 'horizontal'
+    && (action === 'left' || action === 'right')
+  ) {
+    const activeIndex = zoneElements.indexOf(active);
+    const nextIndex = Math.max(
+      0,
+      Math.min(zoneElements.length - 1, activeIndex + (action === 'right' ? 1 : -1)),
+    );
+    const next = zoneElements[nextIndex];
+    if (next) {
+      next.focus({ preventScroll: true });
+      next.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+    }
+    return true;
+  }
+
   const activeRect = active.getBoundingClientRect();
   const activeCx = activeRect.left + activeRect.width / 2;
   const activeCy = activeRect.top + activeRect.height / 2;
