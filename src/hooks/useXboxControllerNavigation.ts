@@ -835,6 +835,11 @@ export const useXboxControllerNavigation = () => {
     let frameId = 0;
     let initialChoiceFrameId = 0;
     const initializedChoiceScopes = new WeakMap<HTMLElement, string>();
+    let activeModalElement: HTMLElement | null = null;
+    let modalReturnFocus: HTMLElement | null = null;
+    let modalReturnZone: string | null = null;
+    let modalReturnOrder: string | null = null;
+    let lastControllerFocus: HTMLElement | null = null;
 
     const focusPendingInitialChoice = () => {
       initialChoiceFrameId = 0;
@@ -842,6 +847,18 @@ export const useXboxControllerNavigation = () => {
 
       const modal = getTopmostVisibleGamepadModal();
       if (modal) {
+        if (modal !== activeModalElement) {
+          if (!activeModalElement) {
+            modalReturnFocus = lastControllerFocus?.isConnected
+              ? lastControllerFocus
+              : document.activeElement instanceof HTMLElement
+                ? document.activeElement
+                : null;
+            modalReturnZone = modalReturnFocus?.dataset.gamepadZone ?? null;
+            modalReturnOrder = modalReturnFocus?.dataset.gamepadOrder ?? null;
+          }
+          activeModalElement = modal;
+        }
         const modalKey = modal.dataset.gamepadInitialScope ?? 'automatic-modal';
         if (initializedChoiceScopes.get(modal) !== modalKey) {
           const modalChoice = getTopLeftInitialChoice(modal) ?? getTopLeftFocusable(modal);
@@ -852,6 +869,27 @@ export const useXboxControllerNavigation = () => {
           }
         }
         return;
+      }
+      if (activeModalElement) {
+        activeModalElement = null;
+        const restoredTarget = modalReturnFocus?.isConnected
+          ? modalReturnFocus
+          : modalReturnZone
+            ? document.querySelector<HTMLElement>(
+              `[data-gamepad-zone="${CSS.escape(modalReturnZone)}"]${modalReturnOrder === null ? '' : `[data-gamepad-order="${CSS.escape(modalReturnOrder)}"]`}`,
+            )
+            : null;
+        if (restoredTarget && isVisibleAndEnabled(restoredTarget)) {
+          restoredTarget.focus({ preventScroll: true });
+          restoredTarget.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+          modalReturnFocus = null;
+          modalReturnZone = null;
+          modalReturnOrder = null;
+          return;
+        }
+        modalReturnFocus = null;
+        modalReturnZone = null;
+        modalReturnOrder = null;
       }
 
       const scopes = Array.from(document.querySelectorAll<HTMLElement>(INITIAL_CHOICE_SCOPE_SELECTOR))
@@ -1021,6 +1059,9 @@ export const useXboxControllerNavigation = () => {
           const pressed = Boolean(gamepad.buttons[index]?.pressed);
           const key = `button:${index}`;
           if (pressed && !pressedRef.current[key]) {
+            if (document.activeElement instanceof HTMLElement) {
+              lastControllerFocus = document.activeElement;
+            }
             if (name === 'BACK') {
               markGamepadNavigation();
               window.dispatchEvent(new CustomEvent(OPEN_GAMEPAD_SYSTEM_MENU_EVENT));

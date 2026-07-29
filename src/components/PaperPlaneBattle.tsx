@@ -1366,9 +1366,9 @@ const PoolView: React.FC<{ pool: PoolState, onClose: () => void, languageMode?: 
     const allColors = [...pool.genColors, ...pool.coolColors].sort((a,b) => getColorRank(b) - getColorRank(a));
 
     return (
-        <div className="absolute inset-0 bg-black/90 z-50 flex items-center justify-center p-8" onClick={onClose}>
+        <div data-gamepad-modal data-gamepad-navigation-root data-gamepad-initial-scope="paper-pool" className="absolute inset-0 bg-black/90 z-50 flex items-center justify-center p-8" onClick={onClose}>
             <div className="bg-slate-800 p-6 rounded-lg max-w-lg w-full border border-slate-600 shadow-2xl relative" onClick={e => e.stopPropagation()}>
-                <button onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-white"><X size={24}/></button>
+                <button data-gamepad-back data-gamepad-initial-choice onClick={onClose} className="absolute top-4 right-4 text-gray-400 hover:text-white" aria-label={t('閉じる')}><X size={24}/></button>
                 <h3 className="text-xl font-bold mb-6 flex items-center text-white"><Layers className="mr-2"/> Energy Inventory</h3>
                 
                 <div className="mb-6">
@@ -1398,7 +1398,7 @@ const PoolView: React.FC<{ pool: PoolState, onClose: () => void, languageMode?: 
                     <p className="mt-1">{t('休暇・パイロット特性・イベントで追加された数値や色はプールに残り続け、以後の循環にも混ざります。')}</p>
                 </div>
 
-                <button onClick={onClose} className="mt-4 w-full bg-slate-700 hover:bg-slate-600 text-white font-bold py-3 rounded-lg transition-colors">{t('閉じる')}</button>
+                <button data-gamepad-back onClick={onClose} className="mt-4 w-full bg-slate-700 hover:bg-slate-600 text-white font-bold py-3 rounded-lg transition-colors">{t('閉じる')}</button>
             </div>
         </div>
     );
@@ -4202,9 +4202,9 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; languageMode?: LanguageMo
             
             {/* Game Help Modal */}
             {showGameHelp && (
-                 <div className="absolute inset-0 bg-black/90 z-[60] flex items-center justify-center p-4" onClick={() => setShowGameHelp(false)}>
+                 <div data-gamepad-modal data-gamepad-navigation-root data-gamepad-initial-scope="paper-help" className="absolute inset-0 bg-black/90 z-[60] flex items-center justify-center p-4" onClick={() => setShowGameHelp(false)}>
                     <div className="bg-slate-800 border-2 border-yellow-500 p-6 rounded-lg max-w-lg w-full shadow-2xl relative text-sm max-h-[85vh] overflow-y-auto custom-scrollbar" onClick={e => e.stopPropagation()}>
-                        <button onClick={() => setShowGameHelp(false)} className="absolute top-4 right-4 text-gray-400 hover:text-white"><X size={24}/></button>
+                        <button data-gamepad-back data-gamepad-initial-choice onClick={() => setShowGameHelp(false)} className="absolute top-4 right-4 text-gray-400 hover:text-white" aria-label={t('閉じる')}><X size={24}/></button>
                         <h2 className="text-2xl font-bold text-yellow-400 mb-6 flex items-center"><HelpCircle className="mr-2"/> {t('ゲームマニュアル')}</h2>
                         
                         <div className="space-y-6 text-gray-300">
@@ -4250,7 +4250,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; languageMode?: LanguageMo
                             </section>
                         </div>
                         
-                        <button onClick={() => setShowGameHelp(false)} className="mt-8 w-full bg-cyan-700 hover:bg-cyan-600 py-3 rounded text-white font-bold">{t('閉じる')}</button>
+                        <button data-gamepad-back onClick={() => setShowGameHelp(false)} className="mt-8 w-full bg-cyan-700 hover:bg-cyan-600 py-3 rounded text-white font-bold">{t('閉じる')}</button>
                     </div>
                 </div>
             )}
@@ -4327,7 +4327,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; languageMode?: LanguageMo
             
             {/* Hand Help Tooltip */}
             {showHandHelp && (
-                 <div className="absolute inset-0 bg-black/80 z-50 flex items-center justify-center p-4" onClick={() => setShowHandHelp(false)}>
+                 <div data-gamepad-modal data-gamepad-navigation-root data-gamepad-initial-scope="paper-hand-help" className="absolute inset-0 bg-black/80 z-50 flex items-center justify-center p-4" onClick={() => setShowHandHelp(false)}>
                     <div className="bg-slate-800 border-2 border-cyan-500 p-6 rounded-lg max-w-sm w-full shadow-2xl relative text-sm" onClick={e => e.stopPropagation()}>
                         <h3 className="text-lg font-bold text-cyan-400 mb-4 flex items-center"><Info className="mr-2"/> {t('エネルギーカードの仕組み')}</h3>
                         <ul className="list-disc pl-5 space-y-2 text-gray-300">
@@ -4335,7 +4335,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; languageMode?: LanguageMo
                             <li>{t('色: スロットの要求色に合わせる必要があります。')}</li>
                             <li>{t('オレンジ > 青 > 白 の順でランクが高く、上位色は下位のスロットにも使用可能です。')}</li>
                         </ul>
-                        <button onClick={() => setShowHandHelp(false)} className="mt-6 w-full bg-cyan-700 py-2 rounded text-white font-bold">{t('閉じる')}</button>
+                        <button data-gamepad-back data-gamepad-initial-choice onClick={() => setShowHandHelp(false)} className="mt-6 w-full bg-cyan-700 py-2 rounded text-white font-bold">{t('閉じる')}</button>
                     </div>
                 </div>
             )}
@@ -4355,7 +4355,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; languageMode?: LanguageMo
                 {/* Hand */}
                 <div className="flex-1 relative flex flex-col bg-black/20 rounded-lg border border-white/5 overflow-hidden">
                     <div className="absolute top-1 right-1 z-20">
-                         <button onClick={() => setShowHandHelp(true)} className="text-gray-500 hover:text-white"><HelpCircle size={14}/></button>
+                         <button data-gamepad-zone="paper-hand-tools" data-gamepad-order={0} data-gamepad-shortcut="X" aria-keyshortcuts="X" onClick={() => setShowHandHelp(true)} className="text-gray-500 hover:text-white" aria-label={t('エネルギーカードの仕組み')}><HelpCircle size={14}/></button>
                     </div>
                     <div className="flex-1 flex flex-wrap gap-1 content-start overflow-y-auto px-2 py-1 custom-scrollbar">
                         {hand.map((card, cardIndex) => (

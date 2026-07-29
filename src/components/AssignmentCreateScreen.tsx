@@ -1,5 +1,5 @@
 import React, { useMemo, useRef, useState } from 'react';
-import { ArrowLeft, Clipboard, Copy, Download, Plus, Send, Trash2, Upload } from 'lucide-react';
+import { ArrowLeft, Clipboard, Copy, Download, ExternalLink, Plus, Send, Trash2, Upload } from 'lucide-react';
 import { AssignmentCustomProblem, AssignmentPayload, AssignmentUnit, AnswerMode, LanguageMode } from '../types';
 import { SUBJECT_CATEGORIES, SubjectCategoryConfig } from '../subjectConfig';
 import { SubjectCategoryType } from '../subjectConfig';
@@ -8,6 +8,7 @@ import { createAssignmentUrl } from '../utils/assignmentUtils';
 import { trans, transProblemSubjectName } from '../utils/textUtils';
 import { formatProblemUnitName } from '../utils/problemUnitName';
 import { audioService } from '../services/audioService';
+import { getManagementPortalUrl } from '../services/managementPortalService';
 
 interface AssignmentCreateScreenProps {
   onBack: () => void;
@@ -358,13 +359,23 @@ const AssignmentCreateScreen: React.FC<AssignmentCreateScreenProps> = ({ onBack,
             <Clipboard size={18} />
             <h2 className="text-xl font-black tracking-wider">{trans('課題送信', languageMode)}</h2>
           </div>
-          <button
-            onClick={copyUrl}
-            disabled={!canCopy}
-            className={`assignment-create-copy flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-black ${canCopy ? 'bg-cyan-400 text-slate-950 hover:bg-cyan-300' : 'bg-slate-700 text-slate-400 cursor-not-allowed'}`}
-          >
-            <Copy size={16} /> {trans('URLコピー', languageMode)}
-          </button>
+          <div className="flex items-center gap-2">
+            <a
+              href={getManagementPortalUrl()}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="flex items-center gap-2 rounded-lg border border-violet-400 bg-violet-500/15 px-3 py-2 text-sm font-black text-violet-100 hover:bg-violet-500/25"
+            >
+              <ExternalLink size={16} /> {trans('管理ポータル', languageMode)}
+            </a>
+            <button
+              onClick={copyUrl}
+              disabled={!canCopy}
+              className={`assignment-create-copy flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-black ${canCopy ? 'bg-cyan-400 text-slate-950 hover:bg-cyan-300' : 'bg-slate-700 text-slate-400 cursor-not-allowed'}`}
+            >
+              <Copy size={16} /> {trans('URLコピー', languageMode)}
+            </button>
+          </div>
         </div>
 
         <div className="assignment-create-grid grid flex-1 min-h-0 gap-4 overflow-hidden p-4 lg:grid-cols-[1.2fr_1.8fr_1fr]">

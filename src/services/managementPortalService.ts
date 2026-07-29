@@ -132,6 +132,8 @@ const getApiBase = () => {
   return (override || configured || DEFAULT_API_URL).replace(/\/$/, '');
 };
 
+export const getManagementPortalUrl = () => getApiBase();
+
 const request = async <T>(path: string, init: RequestInit = {}, token?: string): Promise<T> => {
   if (!childSafetyService.canContactRemoteServices()) {
     throw new Error('年齢区分を選択するまでオンライン連携は利用できません。');

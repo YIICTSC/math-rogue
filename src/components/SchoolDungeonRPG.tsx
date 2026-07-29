@@ -2956,7 +2956,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
   const { C0, C1, C2, C3 } = currentTheme.colors;
 
   return (
-    <div className="mini-game-dungeon-screen w-full h-full bg-[#101010] flex flex-col landscape:flex-row md:flex-row items-center landscape:items-stretch md:items-stretch justify-center font-mono select-none overflow-hidden touch-none relative p-4 gap-4">
+    <div data-gamepad-navigation-root data-gamepad-initial-scope="dungeon-one-play" className="mini-game-dungeon-screen w-full h-full bg-[#101010] flex flex-col landscape:flex-row md:flex-row items-center landscape:items-stretch md:items-stretch justify-center font-mono select-none overflow-hidden touch-none relative p-4 gap-4">
         
         {inspectedItem && (
             <div className="absolute inset-0 z-50 flex items-center justify-center p-4" style={{ backgroundColor: `${C0}F2` }} onClick={() => setInspectedItem(null)}>
@@ -2999,11 +2999,11 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
 
         {/* Status Screen */}
         {showStatus && (
-            <div className="absolute inset-0 z-50 flex items-center justify-center p-4" style={{ backgroundColor: `${C0}F2` }} onClick={() => setShowStatus(false)}>
+            <div data-gamepad-modal data-gamepad-navigation-root data-gamepad-initial-scope="dungeon-one-status" className="absolute inset-0 z-50 flex items-center justify-center p-4" style={{ backgroundColor: `${C0}F2` }} onClick={() => setShowStatus(false)}>
                 <div className="w-full max-w-md border-4 p-6 shadow-xl overflow-y-auto max-h-[80vh] custom-scrollbar" style={{ backgroundColor: C3, borderColor: C1, color: C0 }} onClick={e => e.stopPropagation()}>
                     <div className="flex justify-between items-center mb-4 border-b-2 pb-2" style={{ borderColor: C1 }}>
                         <h2 className="font-bold text-xl flex items-center"><User className="mr-2"/> {tr('ステータス')}</h2>
-                        <button onClick={() => setShowStatus(false)}><X size={24}/></button>
+                        <button data-gamepad-back data-gamepad-initial-choice onClick={() => setShowStatus(false)} aria-label={tr('閉じる')}><X size={24}/></button>
                     </div>
                     <div className="space-y-4">
                         <div className="grid grid-cols-2 gap-4">
@@ -3060,18 +3060,18 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
                             </div>
                         </div>
                     </div>
-                    <button onClick={() => setShowStatus(false)} className="mt-6 w-full py-2 font-bold rounded" style={{ backgroundColor: C1, color: C3 }}>{tr('閉じる')}</button>
+                    <button data-gamepad-back onClick={() => setShowStatus(false)} className="mt-6 w-full py-2 font-bold rounded" style={{ backgroundColor: C1, color: C3 }}>{tr('閉じる')}</button>
                 </div>
             </div>
         )}
 
         {/* Help Screen */}
         {showHelp && (
-            <div className="absolute inset-0 z-50 flex items-center justify-center p-4" style={{ backgroundColor: `${C0}F2` }} onClick={() => setShowHelp(false)}>
+            <div data-gamepad-modal data-gamepad-navigation-root data-gamepad-initial-scope="dungeon-one-help" className="absolute inset-0 z-50 flex items-center justify-center p-4" style={{ backgroundColor: `${C0}F2` }} onClick={() => setShowHelp(false)}>
                 <div className="w-full max-w-md border-4 p-6 shadow-xl overflow-y-auto max-h-[80vh] custom-scrollbar" style={{ backgroundColor: C3, borderColor: C1, color: C0 }} onClick={e => e.stopPropagation()}>
                     <div className="flex justify-between items-center mb-4 border-b-2 pb-2" style={{ borderColor: C1 }}>
                         <h2 className="font-bold text-xl flex items-center"><HelpCircle className="mr-2"/> {tr('遊び方')}</h2>
-                        <button onClick={() => setShowHelp(false)}><X size={24}/></button>
+                        <button data-gamepad-back data-gamepad-initial-choice onClick={() => setShowHelp(false)} aria-label={tr('閉じる')}><X size={24}/></button>
                     </div>
                     <div className="space-y-4 text-sm">
                         <section>
@@ -3100,7 +3100,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
                             </ul>
                         </section>
                     </div>
-                    <button onClick={() => setShowHelp(false)} className="mt-6 w-full py-2 font-bold rounded" style={{ backgroundColor: C1, color: C3 }}>{tr('閉じる')}</button>
+                    <button data-gamepad-back onClick={() => setShowHelp(false)} className="mt-6 w-full py-2 font-bold rounded" style={{ backgroundColor: C1, color: C3 }}>{tr('閉じる')}</button>
                 </div>
             </div>
         )}
@@ -3136,9 +3136,9 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
                     <div className="dungeon-top-bar absolute top-0 left-0 w-full h-8 flex justify-between items-center px-2 text-[10px] z-10 border-b" style={{ backgroundColor: C0, color: C3, borderColor: C1 }}>
                         <span className="font-bold tracking-widest">{tr(currentTheme.name)}</span>
                         <div className="flex gap-2">
-                            <button onClick={() => setShowMap(!showMap)} className="flex items-center gap-1 hover:text-white border px-1 rounded" style={{ borderColor: C3 }}><MapIcon size={10}/> Map</button>
-                            <button onClick={() => setShowStatus(true)} className="flex items-center gap-1 hover:text-white border px-1 rounded" style={{ borderColor: C3 }}><User size={10}/> Sts</button>
-                            <button onClick={() => setShowHelp(true)} className="flex items-center gap-1 hover:text-white border px-1 rounded" style={{ borderColor: C3 }}><HelpCircle size={10}/> Help</button>
+                            <button data-gamepad-zone="dungeon-one-top" data-gamepad-order={0} data-gamepad-shortcut="LB" aria-keyshortcuts="LB" onClick={() => setShowMap(!showMap)} className="flex items-center gap-1 hover:text-white border px-1 rounded" style={{ borderColor: C3 }}><MapIcon size={10}/> Map</button>
+                            <button data-gamepad-zone="dungeon-one-top" data-gamepad-order={1} data-gamepad-shortcut="RB" aria-keyshortcuts="RB" onClick={() => setShowStatus(true)} className="flex items-center gap-1 hover:text-white border px-1 rounded" style={{ borderColor: C3 }}><User size={10}/> Sts</button>
+                            <button data-gamepad-zone="dungeon-one-top" data-gamepad-order={2} data-gamepad-shortcut="Y" aria-keyshortcuts="Y" onClick={() => setShowHelp(true)} className="flex items-center gap-1 hover:text-white border px-1 rounded" style={{ borderColor: C3 }}><HelpCircle size={10}/> Help</button>
                         </div>
                     </div>
 
@@ -3162,7 +3162,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
 
                     {/* Map Overlay */}
                     {showMap && map.length > 0 && (
-                        <div className="absolute inset-0 z-20 flex items-center justify-center p-8 mt-12" style={{ backgroundColor: `${C0}E6` }}>
+                        <div data-gamepad-modal data-gamepad-navigation-root data-gamepad-initial-scope="dungeon-one-map" className="absolute inset-0 z-20 flex items-center justify-center p-8 mt-12" style={{ backgroundColor: `${C0}E6` }}>
                             <div className="w-full h-full border grid" style={{ borderColor: C3, gridTemplateColumns: `repeat(${MAP_W}, 1fr)` }}>
                                 {map.map((row, y) => row.map((tile, x) => {
                                     const isRevealed = floorMapRevealed || (visitedMap[y] && visitedMap[y][x]);
@@ -3200,7 +3200,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
                                     return <div key={`${x}-${y}`} style={bgStyle}>{content}</div>;
                                 }))}
                             </div>
-                            <button onClick={() => setShowMap(false)} className="absolute bottom-4 border px-2 rounded hover:opacity-80" style={{ color: C3, borderColor: C3 }}>Close</button>
+                            <button data-gamepad-back data-gamepad-initial-choice onClick={() => setShowMap(false)} className="absolute bottom-4 border px-2 rounded hover:opacity-80" style={{ color: C3, borderColor: C3 }}>Close</button>
                         </div>
                     )}
 

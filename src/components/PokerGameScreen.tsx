@@ -2362,9 +2362,9 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
     <div data-gamepad-navigation-root data-gamepad-initial-scope="poker-play" className="mini-game-poker-screen flex flex-col h-full w-full bg-green-900 text-white font-mono relative overflow-hidden" style={pokerTableBackgroundStyle}>
         {renderInspectionModal()}
         {showRulesModal && (
-            <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4" onClick={() => setShowRulesModal(false)}>
+            <div data-gamepad-modal data-gamepad-navigation-root data-gamepad-initial-scope="poker-rules" className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4" onClick={() => setShowRulesModal(false)}>
                 <div className="bg-slate-800 border-4 border-yellow-500 rounded-lg p-6 w-full max-w-3xl max-h-[85vh] overflow-y-auto relative shadow-2xl custom-scrollbar" onClick={e => e.stopPropagation()}>
-                    <button onClick={() => setShowRulesModal(false)} className="absolute top-4 right-4 text-gray-400 hover:text-white"><X size={24}/></button>
+                    <button data-gamepad-back data-gamepad-initial-choice onClick={() => setShowRulesModal(false)} className="absolute top-4 right-4 text-gray-400 hover:text-white" aria-label={t('閉じる')}><X size={24}/></button>
                     <h2 className="text-2xl font-bold text-yellow-400 mb-4 flex items-center"><BookOpen className="mr-2"/> {t('遊び方')}</h2>
                     <div className="bg-slate-900/80 p-4 rounded-lg border border-slate-600 mb-6 text-sm space-y-4">
                         <div><h3 className="font-bold text-white mb-2 flex items-center"><Flag className="mr-2 text-red-400"/> {t('ゲームの目的')}</h3><p className="text-gray-300">{t('ポーカー役を作ってスコアを伸ばそう！')}<span className="text-red-400 font-bold">{t('目標スコア')}</span>{t('を達成しましょう。')}<br/>{t('全8ラウンドをクリアすると卒業(ゲームクリア)です。')}</p></div>
@@ -2378,9 +2378,9 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
         )}
         
         {showHandList && (
-            <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4" onClick={() => setShowHandList(false)}>
+            <div data-gamepad-modal data-gamepad-navigation-root data-gamepad-initial-scope="poker-hands" className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4" onClick={() => setShowHandList(false)}>
                 <div className="bg-slate-800 border-4 border-slate-600 rounded-lg p-6 w-full max-w-2xl max-h-[80vh] overflow-y-auto relative shadow-2xl" onClick={e => e.stopPropagation()}>
-                    <button onClick={() => setShowHandList(false)} className="absolute top-4 right-4 text-gray-400 hover:text-white"><X size={24}/></button>
+                    <button data-gamepad-back data-gamepad-initial-choice onClick={() => setShowHandList(false)} className="absolute top-4 right-4 text-gray-400 hover:text-white" aria-label={t('閉じる')}><X size={24}/></button>
                     <h2 className="text-2xl font-bold text-white mb-4 flex items-center"><BarChart3 className="mr-2"/> {t('組み合わせのレベル')}</h2>
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">{Object.entries(POKER_HAND_LEVELS).map(([key, def]) => { const level = runState.handLevels[key] || 1; const currentChips = def.baseChips + (level - 1) * 10; const currentMult = def.baseMult + (level - 1) * 1; return (<div key={key} className={`p-3 rounded border flex justify-between items-center ${key === lastHandScore?.name ? 'bg-yellow-900/50 border-yellow-500' : 'bg-slate-900 border-slate-700'}`}><div><div className="font-bold text-white">{t(def.name)}</div><div className="text-xs text-blue-300">Lvl {level}</div></div><div className="text-right"><span className="text-blue-400 font-bold">{currentChips}</span><span className="text-gray-500 mx-1">X</span><span className="text-red-500 font-bold">{currentMult}</span></div></div>) })}</div>
                 </div>
@@ -2388,9 +2388,9 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
         )}
 
         {showDeckList && (
-            <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4" onClick={() => setShowDeckList(false)}>
+            <div data-gamepad-modal data-gamepad-navigation-root data-gamepad-initial-scope="poker-deck" className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4" onClick={() => setShowDeckList(false)}>
                 <div className="bg-slate-800 border-4 border-slate-600 rounded-lg p-6 w-full max-w-4xl max-h-[80vh] overflow-y-auto relative shadow-2xl" onClick={e => e.stopPropagation()}>
-                    <button onClick={() => setShowDeckList(false)} className="absolute top-4 right-4 text-gray-400 hover:text-white"><X size={24}/></button>
+                    <button data-gamepad-back data-gamepad-initial-choice onClick={() => setShowDeckList(false)} className="absolute top-4 right-4 text-gray-400 hover:text-white" aria-label={t('閉じる')}><X size={24}/></button>
                     <h2 className="text-2xl font-bold text-white mb-6 flex items-center"><Layers className="mr-2"/> Deck List ({runState.deck.length} remaining)</h2>
                     <div className="space-y-4">{SUITS.map(suit => (<div key={suit} className="flex items-center bg-slate-900/50 p-2 rounded"><div className="w-10 flex-shrink-0 flex justify-center scale-150">{getSuitIcon(suit)}</div><div className="flex flex-wrap gap-1 flex-1 ml-4">{[...runState.deck, ...runState.hand, ...runState.discardPile].filter(c => c.suit === suit || c.enhancement === 'WILD').sort((a, b) => b.rank - a.rank).map((card) => { const isInDeck = runState.deck.some(c => c.id === card.id); return (<div key={card.id} className={`rounded p-1 flex flex-col items-center justify-center h-14 w-10 text-xs border-2 transition-all relative overflow-hidden cursor-pointer ${isInDeck ? 'bg-gray-100 border-gray-300 text-black shadow-md hover:scale-110' : 'bg-black border-gray-700 text-gray-600 opacity-60 grayscale'}`} onContextMenu={(e) => handleContextMenu(e, card, 'CARD', true)} onTouchStart={() => handleTouchStart(card, 'CARD', true)} onTouchEnd={handleTouchEnd}><div className={`font-bold text-sm ${!isInDeck ? 'text-gray-600' : (['HEART', 'DIAMOND'].includes(card.suit) ? 'text-red-600' : 'text-black')}`}>{getRankDisplay(card.rank)}</div><div className="scale-75 opacity-50">{getSuitIcon(card.suit, card.enhancement === 'WILD')}</div>{card.bonusChips > 0 && <div className="absolute top-0 right-0 text-[8px] bg-blue-500 text-white leading-none px-0.5 rounded-bl">+</div>}{card.multMultiplier > 1 && <div className="absolute top-0 left-0 text-[8px] bg-red-500 text-white leading-none px-0.5 rounded-br">x</div>}</div>); })}</div></div>))}</div>
                 </div>

@@ -2831,9 +2831,9 @@ const KochoShowdown: React.FC<{
 
             {/* Help Modal */}
             {showHelpModal && (
-                <div className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4 animate-in fade-in duration-200" onClick={() => setShowHelpModal(false)}>
+                <div data-gamepad-modal data-gamepad-navigation-root data-gamepad-initial-scope="kocho-help" className="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-4 animate-in fade-in duration-200" onClick={() => setShowHelpModal(false)}>
                     <div className="bg-slate-800 border-4 border-indigo-500 rounded-lg p-6 w-full max-w-2xl max-h-[85vh] overflow-y-auto relative shadow-2xl custom-scrollbar" onClick={e => e.stopPropagation()}>
-                        <button onClick={() => setShowHelpModal(false)} className="absolute top-4 right-4 text-gray-400 hover:text-white"><X size={24}/></button>
+                        <button data-gamepad-back data-gamepad-initial-choice onClick={() => setShowHelpModal(false)} className="absolute top-4 right-4 text-gray-400 hover:text-white" aria-label={tr('閉じる')}><X size={24}/></button>
                         <h2 className="text-2xl font-bold text-indigo-300 mb-6 flex items-center"><Book className="mr-2"/> {tr('校長対決の遊び方')}</h2>
                         
                         <div className="space-y-6 text-sm text-gray-300">
@@ -2869,7 +2869,7 @@ const KochoShowdown: React.FC<{
                             </section>
                         </div>
                         
-                        <button onClick={() => setShowHelpModal(false)} className="mt-8 w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 rounded-lg transition-colors border border-indigo-400">{tr('閉じる')}</button>
+                        <button data-gamepad-back onClick={() => setShowHelpModal(false)} className="mt-8 w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-3 rounded-lg transition-colors border border-indigo-400">{tr('閉じる')}</button>
                     </div>
                 </div>
             )}
@@ -3108,11 +3108,11 @@ const KochoShowdown: React.FC<{
                     
                     {/* RELIC MODAL (FULL SCREEN) */}
                     {showRelicModal && (
-                        <div className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center p-4 animate-in fade-in duration-200" onClick={() => setShowRelicModal(false)}>
+                        <div data-gamepad-modal data-gamepad-navigation-root data-gamepad-initial-scope="kocho-relics" className="fixed inset-0 z-50 bg-black/95 flex items-center justify-center p-4 animate-in fade-in duration-200" onClick={() => setShowRelicModal(false)}>
                             <div className="w-full h-full max-w-4xl flex flex-col" onClick={e => e.stopPropagation()}>
                                 <div className="flex justify-between items-center mb-6 border-b border-indigo-500 pb-4">
                                     <h2 className="text-3xl font-bold text-yellow-400 flex items-center"><Gift className="mr-3" size={32}/> {tr('所持レリック一覧')}</h2>
-                                    <button onClick={() => setShowRelicModal(false)} className="text-gray-400 hover:text-white p-2 border-2 border-transparent hover:border-white rounded-full transition-colors"><X size={32}/></button>
+                                    <button data-gamepad-back data-gamepad-initial-choice onClick={() => setShowRelicModal(false)} className="text-gray-400 hover:text-white p-2 border-2 border-transparent hover:border-white rounded-full transition-colors" aria-label={tr('閉じる')}><X size={32}/></button>
                                 </div>
                                 
                                 <div className="flex-grow overflow-y-auto custom-scrollbar pr-2">
@@ -3138,7 +3138,7 @@ const KochoShowdown: React.FC<{
                                     )}
                                 </div>
                                 
-                                <button onClick={() => setShowRelicModal(false)} className="mt-6 w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-4 rounded-lg text-xl transition-colors border-2 border-indigo-400 shadow-lg">{tr('閉じる')}</button>
+                                <button data-gamepad-back onClick={() => setShowRelicModal(false)} className="mt-6 w-full bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-4 rounded-lg text-xl transition-colors border-2 border-indigo-400 shadow-lg">{tr('閉じる')}</button>
                             </div>
                         </div>
                     )}

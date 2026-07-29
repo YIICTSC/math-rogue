@@ -521,6 +521,70 @@ const run = async () => {
       );
     });
 
+    await test('未保証だった上部UIモーダルをAで開きBで閉じて元へ戻れる', async () => {
+      const exerciseModal = async (opener, scope) => {
+        await opener.focus();
+        await press(page, 'A');
+        const modal = page.locator(`[data-gamepad-modal][data-gamepad-initial-scope="${scope}"]`);
+        await modal.waitFor({ state: 'visible' });
+        expect(await modal.locator(':focus').count() === 1, `${scope}の内部へ初期フォーカスしない`);
+        await press(page, 'B');
+        expect(await modal.count() === 0, `${scope}をBで閉じられない`);
+        const restored = await opener.evaluate(element => ({
+          matches: document.activeElement === element,
+          active: document.activeElement?.textContent?.trim() || document.activeElement?.getAttribute?.('aria-label') || '',
+        }));
+        expect(restored.matches, `${scope}を閉じた後に開いたボタンへ戻らない (active=${restored.active})`);
+      };
+
+      await page.goto(`${BASE_URL}/?gamepadTestScreen=MINI_GAME_POKER`, { waitUntil: 'domcontentloaded' });
+      await connect(page);
+      await press(page, 'A');
+      await page.waitForSelector('[data-gamepad-zone="poker-tools"]');
+      await exerciseModal(page.locator('[data-gamepad-zone="poker-tools"][data-gamepad-order="1"]'), 'poker-rules');
+      await exerciseModal(page.locator('[data-gamepad-zone="poker-tools"][data-gamepad-order="2"]'), 'poker-deck');
+      await exerciseModal(page.locator('[data-gamepad-zone="poker-tools"][data-gamepad-order="3"]'), 'poker-hands');
+
+      for (const [screen, shortcuts] of [
+        ['MINI_GAME_DUNGEON', [['LB', 'dungeon-one-map'], ['RB', 'dungeon-one-status'], ['Y', 'dungeon-one-help']]],
+        ['MINI_GAME_DUNGEON_2', [['LB', 'dungeon-two-map'], ['RB', 'dungeon-two-status'], ['LT', 'dungeon-two-deck'], ['Y', 'dungeon-two-help']]],
+      ]) {
+        await page.goto(`${BASE_URL}/?gamepadTestScreen=${screen}`, { waitUntil: 'domcontentloaded' });
+        await page.waitForSelector('.mini-game-dungeon-screen');
+        await connect(page);
+        for (const [button, scope] of shortcuts) {
+          const opener = page.locator(`[data-gamepad-shortcut="${button}"]`).first();
+          await opener.focus();
+          await press(page, button);
+          const modal = page.locator(`[data-gamepad-modal][data-gamepad-initial-scope="${scope}"]`);
+          await modal.waitFor({ state: 'visible' });
+          expect(await modal.locator(':focus').count() === 1, `${scope}の内部へ初期フォーカスしない`);
+          await press(page, 'B');
+          expect(await modal.count() === 0, `${scope}をBで閉じられない`);
+          expect(await opener.evaluate(element => document.activeElement === element), `${scope}を閉じた後に開いたボタンへ戻らない`);
+        }
+      }
+
+      await page.goto(`${BASE_URL}/?gamepadTestScreen=MINI_GAME_KOCHO`, { waitUntil: 'domcontentloaded' });
+      await connect(page);
+      await press(page, 'A');
+      await page.waitForSelector('[data-gamepad-zone="kocho-top"]');
+      await exerciseModal(page.locator('[data-gamepad-zone="kocho-top"][data-gamepad-order="1"]'), 'kocho-help');
+      await exerciseModal(page.locator('[data-gamepad-zone="kocho-top"][data-gamepad-order="2"]'), 'kocho-relics');
+
+      await page.goto(`${BASE_URL}/?gamepadTestScreen=MINI_GAME_PAPER_PLANE`, { waitUntil: 'domcontentloaded' });
+      await page.locator('[data-gamepad-zone="paper-setup-ships"]:not([aria-disabled="true"])').first().click();
+      await page.locator('[data-gamepad-zone="paper-setup-ship-actions"][data-gamepad-order="0"]').click();
+      await page.locator('[data-gamepad-zone="paper-setup-pilots"]:not([aria-disabled="true"])').first().click();
+      await page.locator('[data-gamepad-zone="paper-setup-pilot-actions"][data-gamepad-order="1"]').click();
+      await page.locator('[data-gamepad-zone="paper-mission-start"]').click();
+      await page.waitForSelector('[data-gamepad-zone="paper-top"]');
+      await connect(page);
+      await exerciseModal(page.locator('[data-gamepad-zone="paper-top"][data-gamepad-order="0"]'), 'paper-help');
+      await exerciseModal(page.locator('[data-gamepad-zone="paper-top"][data-gamepad-order="1"]'), 'paper-pool');
+      await exerciseModal(page.locator('[data-gamepad-zone="paper-hand-tools"]'), 'paper-hand-help');
+    });
+
     await test('帰宅ダッシュA長押しとサバイバーの連続アナログ軸を送出する', async () => {
       await page.goto(`${BASE_URL}/?gamepadTestScreen=MINI_GAME_GO_HOME`, { waitUntil: 'domcontentloaded' });
       await connect(page);
