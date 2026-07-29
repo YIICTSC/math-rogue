@@ -1,4 +1,4 @@
-const { app, BrowserWindow, ipcMain } = require('electron');
+const { app, BrowserWindow, ipcMain, Notification } = require('electron');
 const path = require('path');
 
 const ASSIGNMENT_PROTOCOL = 'learning-rogue';
@@ -122,5 +122,27 @@ ipcMain.handle('learning-rogue:reset-window-state', (event) => {
   if (win.isMaximized()) win.unmaximize();
   win.setBounds({ width: 1280, height: 800 });
   win.center();
+  return true;
+});
+
+ipcMain.handle('learning-rogue:notify-assignment', (_event, payload) => {
+  if (!Notification.isSupported()) return false;
+  const notification = new Notification({
+    title: String(payload?.title || '新しい課題が届きました'),
+    body: String(payload?.body || ''),
+    icon: path.join(__dirname, '..', 'build', 'icon.png'),
+  });
+  notification.on('click', () => {
+    if (mainWindow && !mainWindow.isDestroyed()) {
+      if (mainWindow.isMinimized()) mainWindow.restore();
+      mainWindow.show();
+      mainWindow.focus();
+      mainWindow.webContents.send(
+        'learning-rogue:assignment-notification-click',
+        String(payload?.assignmentId || ''),
+      );
+    }
+  });
+  notification.show();
   return true;
 });

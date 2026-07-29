@@ -16,6 +16,6 @@ export const DISTRIBUTION_PLATFORM: DistributionPlatform = (
 export const PAID_EDITION = import.meta.env.VITE_PAID_EDITION === 'true';
 export const DAILY_PLAY_LIMIT_ENABLED = !PAID_EDITION;
 
-// Temporarily enabled across distributions for the current Steam test pass.
-// Disable this again before uploading store production builds.
-export const DEBUG_FEATURES_ENABLED = true;
+// Store and public builds keep debug routes disabled. Local QA can opt in
+// explicitly without changing the production source state.
+export const DEBUG_FEATURES_ENABLED = import.meta.env.VITE_ENABLE_DEBUG_FEATURES === 'true';

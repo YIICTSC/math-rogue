@@ -104,6 +104,7 @@ import { generateDungeonMap } from './services/mapGenerator';
 import { parseTransferData, serializeTransferData, storageService } from './services/storageService';
 import { onlineRankingService, type OnlineRankingProfile, type OnlineReward } from './services/onlineRankingService';
 import { getNextLaunchLockedManagedAssignment, getNextRequiredManagedAssignment, isManagedAssignmentActive, managementPortalService, type ManagementProfile } from './services/managementPortalService';
+import { ASSIGNMENT_NOTIFICATION_OPEN_EVENT } from './services/assignmentNotificationService';
 import { childSafetyService } from './services/childSafetyService';
 import { generateEvent, generateLegacyEvent } from './services/eventService';
 import { createAssignmentRewardCard, createHolographicCard, getUpgradedCard, synthesizeCards } from './utils/cardUtils';
@@ -447,6 +448,8 @@ type LearningRogueElectronApi = {
     getWindowState: () => Promise<{ isFullScreen: boolean; isMaximized: boolean; bounds?: { width: number; height: number; x: number; y: number } }>;
     setFullScreen: (enabled: boolean) => Promise<boolean>;
     resetWindowState: () => Promise<boolean>;
+    notifyAssignment: (payload: { assignmentId: string; title: string; body: string }) => Promise<boolean>;
+    onAssignmentNotificationClick: (listener: (assignmentId: string) => void) => (() => void);
 };
 
 type GalaxyExpressModalState = {
@@ -1599,6 +1602,38 @@ const App: React.FC = () => {
         window.addEventListener('online', flush);
         return () => window.removeEventListener('online', flush);
     }, [managementProfile]);
+
+    useEffect(() => {
+        if (!managementProfile) return;
+        let stopped = false;
+        const syncAssignments = () => {
+            if (stopped || document.visibilityState === 'hidden' || !navigator.onLine) return;
+            void managementPortalService.fetchAssignments().catch(() => undefined);
+        };
+        const handleVisibilityChange = () => {
+            if (document.visibilityState === 'visible') syncAssignments();
+        };
+        syncAssignments();
+        const interval = window.setInterval(syncAssignments, 3 * 60 * 1000);
+        document.addEventListener('visibilitychange', handleVisibilityChange);
+        window.addEventListener('online', syncAssignments);
+        return () => {
+            stopped = true;
+            window.clearInterval(interval);
+            document.removeEventListener('visibilitychange', handleVisibilityChange);
+            window.removeEventListener('online', syncAssignments);
+        };
+    }, [managementProfile]);
+
+    useEffect(() => {
+        const openInboxFromNotification = () => {
+            if (!managementPortalService.getProfile()) return;
+            setShowAssignmentInbox(true);
+            setGameState(prev => ({ ...prev, screen: GameScreen.START_MENU }));
+        };
+        window.addEventListener(ASSIGNMENT_NOTIFICATION_OPEN_EVENT, openInboxFromNotification);
+        return () => window.removeEventListener(ASSIGNMENT_NOTIFICATION_OPEN_EVENT, openInboxFromNotification);
+    }, []);
 
     const openManagedAssignment = useCallback((assignment: AssignmentPayload) => {
         storageService.saveCurrentAssignment(assignment);
@@ -7824,16 +7859,22 @@ const App: React.FC = () => {
         let cardAttackPreviewHitCount = 1;
         const magicVoiceHeroId = gameState.visualTheme === 'magic' ? getMagicProtagonistId(actionPlayer) : undefined;
         const highSchoolVoiceHeroId = gameState.visualTheme === 'high-school' ? actionPlayer.id : undefined;
+        const isOffensiveCard = card.type === CardType.ATTACK || (card.damage ?? 0) > 0 || !!card.damageBasedOnBlock;
         const isOwnMagicRuleCard = !!magicVoiceHeroId && card.magicHeroId === magicVoiceHeroId && card.magicRuleCardIndex !== undefined;
         if (!isCoopHostRemoteAction && isOwnMagicRuleCard) {
-            playDelayedBattleVoice(() => {
+            const playMagicRuleVoice = () => {
                 audioService.playMagicVoice(magicVoiceHeroId, 'spell', 3, card.magicRuleCardIndex + 1, actionPlayer.magicTransformed);
-            });
+            };
+            if (isOffensiveCard) playMagicRuleVoice();
+            else playDelayedBattleVoice(playMagicRuleVoice);
         }
         if (!isCoopHostRemoteAction && highSchoolVoiceHeroId) {
-            playDelayedBattleVoice(() => {
-                audioService.playHighSchoolVoice(highSchoolVoiceHeroId, getHighSchoolBattleVoiceActionForCard(card));
-            });
+            const highSchoolVoiceAction = getHighSchoolBattleVoiceActionForCard(card);
+            const playHighSchoolCardVoice = () => {
+                audioService.playHighSchoolVoice(highSchoolVoiceHeroId, highSchoolVoiceAction);
+            };
+            if (isOffensiveCard) playHighSchoolCardVoice();
+            else playDelayedBattleVoice(playHighSchoolCardVoice);
         }
 
         if (card.type === CardType.ATTACK) {
@@ -7848,9 +7889,11 @@ const App: React.FC = () => {
             const audioPreviewHitCount = Math.min(cardAttackPreviewHitCount, MAX_CARD_DETAIL_VFX);
             if (!isCoopHostRemoteAction) audioService.playAttackEffectSound(getAttackEffectKeyForCard(card, audioPreviewHitCount), audioPreviewHitCount);
             if (!isCoopHostRemoteAction && magicVoiceHeroId && !isOwnMagicRuleCard) {
-                playDelayedBattleVoice(() => {
+                const playMagicAttackVoice = () => {
                     audioService.playMagicVoice(magicVoiceHeroId, 'attack', 3, undefined, actionPlayer.magicTransformed);
-                });
+                };
+                if (isOffensiveCard) playMagicAttackVoice();
+                else playDelayedBattleVoice(playMagicAttackVoice);
             }
         } else if (!isCoopHostRemoteAction) {
             audioService.playBattleSound('block');

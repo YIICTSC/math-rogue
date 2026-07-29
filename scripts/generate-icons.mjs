@@ -10,10 +10,12 @@ const pngToIco = pngToIcoModule.default ?? pngToIcoModule;
 const rootDir = path.resolve(import.meta.dirname, '..');
 const buildDir = path.join(rootDir, 'build');
 const publicDir = path.join(rootDir, 'public');
+const iosAppIconDir = path.join(rootDir, 'ios', 'App', 'App', 'Assets.xcassets', 'AppIcon.appiconset');
 const sourcePath = path.join(buildDir, 'icon-source-imagegen.png');
 
 await mkdir(buildDir, { recursive: true });
 await mkdir(publicDir, { recursive: true });
+await mkdir(iosAppIconDir, { recursive: true });
 
 const source = await readFile(sourcePath);
 const baseIcon = sharp(source).resize(256, 256, {
@@ -38,3 +40,11 @@ const pngBuffers = await Promise.all(
 await writeFile(path.join(buildDir, 'icon.png'), pngBuffers[pngBuffers.length - 1]);
 await writeFile(path.join(buildDir, 'icon.ico'), await pngToIco(pngBuffers));
 await writeFile(path.join(publicDir, 'apple-touch-icon.png'), pngBuffers[pngBuffers.length - 1]);
+await sharp(source)
+  .resize(1024, 1024, {
+    fit: 'cover',
+    kernel: sharp.kernel.lanczos3,
+  })
+  .removeAlpha()
+  .png()
+  .toFile(path.join(iosAppIconDir, 'AppIcon-512@2x.png'));

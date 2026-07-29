@@ -1,5 +1,6 @@
 import { AnswerMode, AssignmentAnswerResult, AssignmentPayload, AssignmentRangeFilter, GameMode } from '../types';
 import { childSafetyService } from './childSafetyService';
+import { assignmentNotificationService } from './assignmentNotificationService';
 
 export type ManagementProfile = {
   learnerId: string;
@@ -373,6 +374,7 @@ export const managementPortalService = {
     if (!profile) throw new Error('管理ポータルとの端末連携が必要です。');
     const result = await request<{ assignments: ManagedAssignment[] }>('/api/v1/learner/assignments', {}, profile.token);
     writeJson(ASSIGNMENTS_KEY, result.assignments);
+    void assignmentNotificationService.observeAssignments(profile.learnerId, result.assignments);
     return result.assignments;
   },
 
