@@ -67,6 +67,11 @@
   SteamPipe Build ID `24446023`、Depot Manifest ID `2531377616869947134`として
   `SetLive=internal`で非公開`internal`ブランチへ反映済み。Steamクライアント側で
   `internal`ベータを選択して最新版をテストできる。
+- 2026-07-29の追加修正コミット`1148b96`では、放課後ポーカーの手札を十字キー
+  1入力につき1枚移動へ固定し、風来シリーズのVIEW MENU初期フォーカス、紙飛行機の
+  SHIP／外す／INVENTORY間の移動を修正した。デバッグ導線をテスト用に一時復活し、
+  対象回帰テストとSteam配布物検証に合格。SteamPipe Build ID `24446368`、
+  Depot Manifest ID `2235682658175646875`として`internal`へ反映済み。
 - Steamストア用の実ゲーム画面7枚（1920×1080）を `release/steam/store-assets/screenshots/` に準備済み。うち追加2枚はチュートリアルを閉じた戦闘画面と、戦闘後の学習問題画面。
 - ImageGenで作成したキービジュアルと正式ロゴを用い、Steam規定寸法のカプセル／ライブラリ／アイコン素材10点を `release/steam/store-assets/generated/` に準備済み。
 
@@ -121,6 +126,7 @@ STEAM_APP_ID=000000 STEAM_DEPOT_ID=000001 pnpm run steam:config
 - [x] Build `24444544` を非公開`internal`ブランチへアップロード
 - [x] Build `24445575` を非公開`internal`ブランチへアップロード
 - [x] Build `24446023` を非公開`internal`ブランチへアップロード
+- [x] Build `24446368` を非公開`internal`ブランチへアップロード
 - [x] Beta Testing／Developer Compパッケージを確認
 - [ ] Windows版Steamクライアントからインストール・起動・終了を確認
 
