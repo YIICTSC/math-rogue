@@ -45,6 +45,7 @@ export const UI_PREVIEW_SCREENS: UiPreviewScreenDefinition[] = [
     { id: `${GameScreen.MINI_GAME_KOCHO}:KOCHO_REWARD`, screen: GameScreen.MINI_GAME_KOCHO, label: '校長対決：報酬', group: 'ミニゲーム', miniGameOutcome: 'KOCHO_REWARD' },
     { id: `${GameScreen.MINI_GAME_KOCHO}:KOCHO_UPGRADE`, screen: GameScreen.MINI_GAME_KOCHO, label: '校長対決：休憩/強化', group: 'ミニゲーム', miniGameOutcome: 'KOCHO_UPGRADE' },
     { id: `${GameScreen.MINI_GAME_KOCHO}:KOCHO_SHOP`, screen: GameScreen.MINI_GAME_KOCHO, label: '校長対決：ショップ', group: 'ミニゲーム', miniGameOutcome: 'KOCHO_SHOP' },
+    { id: `${GameScreen.MINI_GAME_KOCHO}:KOCHO_ITEMS`, screen: GameScreen.MINI_GAME_KOCHO, label: '校長対決：戦闘アイテム', group: 'ミニゲーム', miniGameOutcome: 'KOCHO_ITEMS' },
     { id: `${GameScreen.MINI_GAME_KOCHO}:GAME_OVER`, screen: GameScreen.MINI_GAME_KOCHO, label: '校長対決：ゲームオーバー', group: 'ミニゲーム', miniGameOutcome: 'GAME_OVER' },
     { id: `${GameScreen.MINI_GAME_KOCHO}:ENDING`, screen: GameScreen.MINI_GAME_KOCHO, label: '校長対決：エンディング', group: 'ミニゲーム', miniGameOutcome: 'ENDING' },
     { id: GameScreen.MINI_GAME_PAPER_PLANE, screen: GameScreen.MINI_GAME_PAPER_PLANE, label: '紙飛行機バトル', group: 'ミニゲーム' },

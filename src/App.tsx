@@ -16760,6 +16760,7 @@ const App: React.FC = () => {
                             onAnswerResult={handleAssignmentAnswerResult}
                             languageMode={languageMode}
                             debugPreview={isUiPreviewMode ? uiPreviewMiniGameOutcome : undefined}
+                            isUiPreview={isUiPreviewMode}
                         />
                     </div>
                 )}

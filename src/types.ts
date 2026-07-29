@@ -412,6 +412,7 @@ export type MiniGameDebugPreview =
   | 'KOCHO_REWARD'
   | 'KOCHO_UPGRADE'
   | 'KOCHO_SHOP'
+  | 'KOCHO_ITEMS'
   | 'PAPER_REWARD'
   | 'PAPER_EQUIP'
   | 'PAPER_VACATION'

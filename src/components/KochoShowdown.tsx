@@ -667,6 +667,15 @@ const createKochoDebugPreviewState = (debugPreview: MiniGameDebugPreview | undef
     if (debugPreview === 'ENDING') return { ...initial, phase: 'VICTORY', status: 'VICTORY', battleStage: FINAL_STAGE, pendingPhase: null };
     if (debugPreview === 'KOCHO_REWARD') return { ...initial, phase: 'REWARD', status: 'PLAYING', money: 80, pendingPhase: null };
     if (debugPreview === 'KOCHO_UPGRADE') return { ...initial, phase: 'UPGRADE_EVENT', status: 'PLAYING', money: 80, currentUpgradeOffer: UPGRADE_POOLS[0], pendingPhase: null };
+    if (debugPreview === 'KOCHO_ITEMS') {
+        return {
+            ...initial,
+            phase: 'BATTLE',
+            status: 'PLAYING',
+            consumables: CONSUMABLE_DB.slice(0, 2),
+            pendingPhase: null,
+        };
+    }
     if (debugPreview === 'KOCHO_SHOP') {
         return {
             ...initial,
@@ -692,13 +701,14 @@ const KochoShowdown: React.FC<{
     onAnswerResult?: (result: AssignmentAnswerResult) => void;
     languageMode?: LanguageMode;
     debugPreview?: MiniGameDebugPreview;
-}> = ({ onBack, problemMode = GameMode.MIXED, problemModePool, answerMode = 'CHOICE', assignment, onAnswerResult, languageMode = 'JAPANESE', debugPreview }) => {
+    isUiPreview?: boolean;
+}> = ({ onBack, problemMode = GameMode.MIXED, problemModePool, answerMode = 'CHOICE', assignment, onAnswerResult, languageMode = 'JAPANESE', debugPreview, isUiPreview = false }) => {
     const tr = (text: string) => trans(text, languageMode);
     const steamControllerLayout = DISTRIBUTION_PLATFORM === 'steam';
     
     // State
     const [gameState, setGameState] = useState<KochoGameState>(() => {
-        const saved = storageService.loadKochoState();
+        const saved = isUiPreview ? null : storageService.loadKochoState();
         const initial = saved ? hydrateState(saved) : getInitialState();
         return createKochoDebugPreviewState(debugPreview, initial);
     });

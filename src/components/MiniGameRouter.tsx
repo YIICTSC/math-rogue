@@ -20,6 +20,7 @@ interface MiniGameRouterProps {
     onAnswerResult?: (result: AssignmentAnswerResult) => void;
     languageMode?: LanguageMode;
     debugPreview?: MiniGameDebugPreview;
+    isUiPreview?: boolean;
 }
 
 export interface MiniGameComponentProps {
@@ -32,6 +33,7 @@ export interface MiniGameComponentProps {
     onAnswerResult?: (result: AssignmentAnswerResult) => void;
     languageMode?: LanguageMode;
     debugPreview?: MiniGameDebugPreview;
+    isUiPreview?: boolean;
 }
 
 /**
@@ -48,7 +50,7 @@ const MINI_GAME_MAP: Partial<Record<GameScreen, React.ComponentType<MiniGameComp
     [GameScreen.MINI_GAME_GO_HOME]: GoHomeDash,
 };
 
-const MiniGameRouter: React.FC<MiniGameRouterProps> = ({ screen, onBack, onFinish, problemMode, problemModePool, answerMode, assignment, onAnswerResult, languageMode, debugPreview }) => {
+const MiniGameRouter: React.FC<MiniGameRouterProps> = ({ screen, onBack, onFinish, problemMode, problemModePool, answerMode, assignment, onAnswerResult, languageMode, debugPreview, isUiPreview }) => {
     const Component = MINI_GAME_MAP[screen];
 
     if (!Component) {
@@ -72,6 +74,7 @@ const MiniGameRouter: React.FC<MiniGameRouterProps> = ({ screen, onBack, onFinis
             onAnswerResult={onAnswerResult}
             languageMode={languageMode}
             debugPreview={debugPreview}
+            isUiPreview={isUiPreview}
         />
     );
 };

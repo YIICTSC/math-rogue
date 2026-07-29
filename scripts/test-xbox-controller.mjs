@@ -846,7 +846,7 @@ const run = async () => {
         'Bで直前の予約を取り消せない',
       );
 
-      await page.goto(`${BASE_URL}/?gamepadTestScreen=MINI_GAME_KOCHO%3AKOCHO_SHOP`, { waitUntil: 'domcontentloaded' });
+      await page.goto(`${BASE_URL}/?gamepadTestScreen=MINI_GAME_KOCHO%3AKOCHO_ITEMS`, { waitUntil: 'domcontentloaded' });
       await page.waitForSelector('.kocho-header-actions');
       await connect(page);
       const itemButton = page.locator('[data-gamepad-zone="kocho-top"][data-gamepad-order="3"]');
@@ -878,7 +878,11 @@ const run = async () => {
         await connect(page);
         await page.waitForFunction(() => ['dungeon-inherit', 'dungeon-actions'].includes(document.activeElement?.getAttribute('data-gamepad-zone')));
         const inheritCount = await page.locator('[data-gamepad-zone="dungeon-inherit"]').count();
-        for (let index = 0; index < Math.max(1, inheritCount); index += 1) await press(page, 'DOWN');
+        for (let index = 0; index <= inheritCount; index += 1) {
+          const activeZone = await page.evaluate(() => document.activeElement?.getAttribute('data-gamepad-zone'));
+          if (activeZone === 'dungeon-actions') break;
+          await press(page, 'DOWN');
+        }
         await page.waitForFunction(() => document.activeElement?.getAttribute('data-gamepad-zone') === 'dungeon-actions');
         expect(
           await page.evaluate(() => document.activeElement?.getAttribute('data-gamepad-order')) === '0',

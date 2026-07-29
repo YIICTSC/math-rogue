@@ -2187,7 +2187,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
                                         data-gamepad-initial-choice={idx === 0 ? true : undefined}
                                         data-gamepad-zone="dungeon-inherit"
                                         data-gamepad-order={idx}
-                                        data-gamepad-down-zone="dungeon-actions"
+                                        data-gamepad-down-zone={idx === allPossessions.length - 1 ? 'dungeon-actions' : undefined}
                                         className={`p-2 border rounded flex items-center justify-between cursor-pointer transition-colors text-xs ${inheritItemIdx === idx ? 'bg-red-900 border-white text-white' : 'bg-gray-800 border-gray-600 text-gray-400 hover:border-red-400'}`}
                                         onClick={() => setInheritItemIdx(idx)}
                                         onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); setInheritItemIdx(idx); } }}
