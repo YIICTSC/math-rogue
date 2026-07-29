@@ -56,6 +56,8 @@
   帰宅ダッシュA長押し、サバイバー連続軸、ポーカー複数選択、風来シリーズX斜め固定、
   校長対決の手札／キュー／上部UI、紙飛行機のセットアップ／換装／格納庫を修正した。
   Gamepad APIの対象回帰テストとWindows x64配布物のローカル検証に合格済み。
+- 上記修正版をSteamPipeへアップロードし、Build ID `24444544`、Depot Manifest ID
+  `547586031312152787`を作成した。`SetLive=internal`で非公開`internal`ブランチへ反映済み。
 - Steamストア用の実ゲーム画面7枚（1920×1080）を `release/steam/store-assets/screenshots/` に準備済み。うち追加2枚はチュートリアルを閉じた戦闘画面と、戦闘後の学習問題画面。
 - ImageGenで作成したキービジュアルと正式ロゴを用い、Steam規定寸法のカプセル／ライブラリ／アイコン素材10点を `release/steam/store-assets/generated/` に準備済み。
 
@@ -107,6 +109,7 @@ STEAM_APP_ID=000000 STEAM_DEPOT_ID=000001 pnpm run steam:config
 - [x] Build `24385958` をPublic defaultブランチへ反映
 - [x] Build `24395548` を非公開`internal`ブランチへ反映
 - [x] Build `24442792` を非公開`internal`ブランチへアップロード
+- [x] Build `24444544` を非公開`internal`ブランチへアップロード
 - [x] Beta Testing／Developer Compパッケージを確認
 - [ ] Windows版Steamクライアントからインストール・起動・終了を確認
 
