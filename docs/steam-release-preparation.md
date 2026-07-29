@@ -1,6 +1,6 @@
 # Steam版リリース準備
 
-更新日: 2026-07-26
+更新日: 2026-07-29
 
 ## 現在地
 
@@ -13,7 +13,7 @@
 - Steam専用Webビルドは `VITE_APP_PLATFORM=steam`、`VITE_PAID_EDITION=true` で生成する。
 - Steam版では有料版の時間制限撤廃を適用し、ランキング・課題・協力・レース等の通信機能は維持する。
 - Windows x64版の対象OSはWindows 10以降とする。Electron 23以降はWindows 7／8／8.1をサポートしない。
-- Xbox標準配列のGamepad APIシミュレーションは11項目すべて合格済み。物理コントローラー確認はSteamテストブランチで行う。
+- Xbox標準配列のGamepad APIシミュレーションは14項目すべて合格済み。物理コントローラー確認はSteamテストブランチで行う。
 - 初回はWindows x64版を対象とし、macOS／Linux版は別Depotとして後日判断する。
 - Windows x64版の生成・Steam向け設定検証は完了済み。展開後容量は約1.2 GB。
 - 日本価格500円とSteam推奨換算による全41地域価格を審査へ提出済み。審査後は自動反映せず、手動で公開する。
@@ -39,6 +39,17 @@
   ローカル検証に合格した。実行ファイルは約222.3 MiB、アプリ資産は約883.7 MiB。
   SteamPipeの`internal`向け設定も生成済み。SteamCMDの保存済み認証がなく、
   再ログインに失敗したため、このビルドのアップロードは認証情報の更新待ち。
+- 2026-07-29の最新仕様からWindows x64版を再生成し、Steam向けビルド検証に合格した。
+  実行ファイルは233,106,944 bytes、アプリ資産は926,657,433 bytes。
+  `Preview=0`、`SetLive=internal` のSteamPipe設定を生成済み。
+- 校長対決は、Shogun Showdownのように「選択・キュー・実行・位置調整」を
+  戦闘中に素早く行える専用配置へ変更した。`A`: カードをキューへ追加、
+  `B`: 最後のキューを取消、`X`: 実行、`Y`: ターン進行、`LT/RT`: 左右移動、
+  `LB`: 待機、`RB`: 位置入替。ほかの画面の標準操作は変更していない。
+- 専用配置を含むGamepad APIシミュレーションは14項目すべて合格した。
+- 最新ビルドの`internal`ブランチへのアップロードは、SteamCMDのログイン認証が
+  現在の資格情報で通らないため未完了。Build `24395548` の既存internal版は
+  引き続きテスト可能だが、2026-07-29の専用配置はまだ含まれない。
 - Developer Compパッケージが用意されているため、開発者アカウントではWindows版Steamクライアントからインストールしてテストできる。Windows実機での起動確認は未実施。
 - Steamストア用の実ゲーム画面7枚（1920×1080）を `release/steam/store-assets/screenshots/` に準備済み。うち追加2枚はチュートリアルを閉じた戦闘画面と、戦闘後の学習問題画面。
 - ImageGenで作成したキービジュアルと正式ロゴを用い、Steam規定寸法のカプセル／ライブラリ／アイコン素材10点を `release/steam/store-assets/generated/` に準備済み。
@@ -84,11 +95,13 @@ STEAM_APP_ID=000000 STEAM_DEPOT_ID=000001 pnpm run steam:config
 - [x] 開発元・パブリッシャー名を `YIICTSC` に設定
 - [x] `YIICTSC` コミュニティグループをCreator Homeへリンク
 - [x] 最新ソースからWindows x64提出ビルドを再生成・検証
+- [x] 校長対決のSteam専用コントローラー配置を実装・自動テスト
 - [x] macOS版SteamCMDを導入・更新
 - [x] SteamPipeアップロード設定を生成
 - [x] Build `24385958` をSteamPipeへアップロード
 - [x] Build `24385958` をPublic defaultブランチへ反映
 - [x] Build `24395548` を非公開`internal`ブランチへ反映
+- [ ] 2026-07-29最新ビルドを非公開`internal`ブランチへアップロード
 - [x] Beta Testing／Developer Compパッケージを確認
 - [ ] Windows版Steamクライアントからインストール・起動・終了を確認
 
