@@ -72,6 +72,11 @@
   SHIP／外す／INVENTORY間の移動を修正した。デバッグ導線をテスト用に一時復活し、
   対象回帰テストとSteam配布物検証に合格。SteamPipe Build ID `24446368`、
   Depot Manifest ID `2235682658175646875`として`internal`へ反映済み。
+- 放課後ポーカーのサポーター／消費アイテム枠、詳細モーダル、USE／TRADE、
+  アイテム使用中のカード選択・USE・CANCELをコントローラー対応したコミット
+  `1bad2f1`からWindows x64版を再生成した。対象回帰テスト2件と配布物検証に合格し、
+  SteamPipe Build ID `24446504`、Depot Manifest ID `803976567507969669`として
+  非公開`internal`ブランチへ反映済み。
 - Steamストア用の実ゲーム画面7枚（1920×1080）を `release/steam/store-assets/screenshots/` に準備済み。うち追加2枚はチュートリアルを閉じた戦闘画面と、戦闘後の学習問題画面。
 - ImageGenで作成したキービジュアルと正式ロゴを用い、Steam規定寸法のカプセル／ライブラリ／アイコン素材10点を `release/steam/store-assets/generated/` に準備済み。
 
@@ -127,6 +132,7 @@ STEAM_APP_ID=000000 STEAM_DEPOT_ID=000001 pnpm run steam:config
 - [x] Build `24445575` を非公開`internal`ブランチへアップロード
 - [x] Build `24446023` を非公開`internal`ブランチへアップロード
 - [x] Build `24446368` を非公開`internal`ブランチへアップロード
+- [x] Build `24446504` を非公開`internal`ブランチへアップロード
 - [x] Beta Testing／Developer Compパッケージを確認
 - [ ] Windows版Steamクライアントからインストール・起動・終了を確認
 
