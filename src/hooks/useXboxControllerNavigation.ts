@@ -7,6 +7,7 @@ type GamepadButtonName =
   | 'Y'
   | 'LB'
   | 'RB'
+  | 'LT'
   | 'RT'
   | 'BACK'
   | 'START'
@@ -16,7 +17,7 @@ type GamepadButtonName =
   | 'DPAD_RIGHT';
 
 type NavigationAction = 'up' | 'down' | 'left' | 'right' | 'confirm' | 'cancel' | 'tabPrev' | 'tabNext';
-type ShortcutButtonName = 'X' | 'Y' | 'LB' | 'RB' | 'RT';
+type ShortcutButtonName = 'X' | 'Y' | 'LB' | 'RB' | 'LT' | 'RT';
 
 const BUTTON_TO_ACTION: Partial<Record<GamepadButtonName, NavigationAction>> = {
   A: 'confirm',
@@ -31,7 +32,7 @@ const BUTTON_TO_ACTION: Partial<Record<GamepadButtonName, NavigationAction>> = {
   DPAD_RIGHT: 'right',
 };
 
-const SHORTCUT_BUTTONS: ShortcutButtonName[] = ['X', 'Y', 'LB', 'RB', 'RT'];
+const SHORTCUT_BUTTONS: ShortcutButtonName[] = ['X', 'Y', 'LB', 'RB', 'LT', 'RT'];
 
 const BUTTON_INDEX: Record<GamepadButtonName, number> = {
   A: 0,
@@ -40,6 +41,7 @@ const BUTTON_INDEX: Record<GamepadButtonName, number> = {
   Y: 3,
   LB: 4,
   RB: 5,
+  LT: 6,
   RT: 7,
   BACK: 8,
   START: 9,
@@ -570,6 +572,16 @@ const clickBackLikeControl = () => {
   modal?.click();
 };
 
+const clickCancelShortcut = (): boolean => {
+  const targets = Array.from(document.querySelectorAll<HTMLElement>('[data-gamepad-cancel-shortcut]'))
+    .filter(isVisibleAndEnabled);
+  const target = targets.at(-1);
+  if (!target) return false;
+  target.focus({ preventScroll: true });
+  target.click();
+  return true;
+};
+
 const handleZonedNavigation = (action: NavigationAction): boolean => {
   if (action !== 'up' && action !== 'down' && action !== 'left' && action !== 'right' && action !== 'confirm') return false;
   const active = document.activeElement instanceof HTMLElement ? document.activeElement : null;
@@ -822,6 +834,7 @@ export const useXboxControllerNavigation = () => {
         clickBackLikeControl();
         return;
       }
+      if (action === 'cancel' && clickCancelShortcut()) return;
       const handled = dispatchKeyboardEvent(getKeyboardActionKey(action));
       if (!handled) handleActionFallback(action);
     };
@@ -852,6 +865,7 @@ export const useXboxControllerNavigation = () => {
       const shortcutByKey: Record<string, ShortcutButtonName | undefined> = {
         q: 'LB',
         e: 'RB',
+        u: 'LT',
         r: 'RT',
         x: 'X',
         y: 'Y',

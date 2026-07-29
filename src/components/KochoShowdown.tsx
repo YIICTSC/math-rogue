@@ -7,6 +7,7 @@ import { AnswerMode, AssignmentAnswerResult, AssignmentPayload, AttackEffectKey,
 import MiniGameProblemChallenge from './MiniGameProblemChallenge';
 import { assetUrl } from '../utils/assetPaths';
 import { trans } from '../utils/textUtils';
+import { DISTRIBUTION_PLATFORM } from '../config/runtime';
 
 // --- TYPES ---
 type Facing = 1 | -1; // 1: Right, -1: Left
@@ -689,6 +690,7 @@ const KochoShowdown: React.FC<{
     debugPreview?: MiniGameDebugPreview;
 }> = ({ onBack, problemMode = GameMode.MIXED, problemModePool, answerMode = 'CHOICE', assignment, onAnswerResult, languageMode = 'JAPANESE', debugPreview }) => {
     const tr = (text: string) => trans(text, languageMode);
+    const steamControllerLayout = DISTRIBUTION_PLATFORM === 'steam';
     
     // State
     const [gameState, setGameState] = useState<KochoGameState>(() => {
@@ -3167,7 +3169,20 @@ const KochoShowdown: React.FC<{
                                 {[...Array(3)].map((_, i) => {
                                     const card = gameState.queue[i];
                                     return card ? (
-                                        <div key={i} className="w-12 h-16 md:w-16 md:h-20 bg-slate-800 border border-slate-600 rounded flex flex-col items-center justify-center relative group cursor-pointer hover:border-red-400 shrink-0" onClick={() => handleUnqueueCard(i)}>
+                                        <div
+                                            key={i}
+                                            data-gamepad-cancel-shortcut={steamControllerLayout ? true : undefined}
+                                            role="button"
+                                            tabIndex={0}
+                                            className="w-12 h-16 md:w-16 md:h-20 bg-slate-800 border border-slate-600 rounded flex flex-col items-center justify-center relative group cursor-pointer hover:border-red-400 shrink-0"
+                                            onClick={() => handleUnqueueCard(i)}
+                                            onKeyDown={(event) => {
+                                                if (event.key === 'Enter' || event.key === ' ') {
+                                                    event.preventDefault();
+                                                    handleUnqueueCard(i);
+                                                }
+                                            }}
+                                        >
                                             <div className={`w-full h-1 ${card.color} absolute top-0`}></div>
                                             <div className="text-[9px] md:text-xs text-center font-bold px-1 overflow-hidden whitespace-nowrap text-ellipsis w-full">{tr(card.name)}</div>
                                             <KochoCardActionArt card={card} className="kocho-queue-card-art h-7 w-7 rounded bg-black/40" />
@@ -3178,7 +3193,7 @@ const KochoShowdown: React.FC<{
                                     );
                                 })}
                             </div>
-                            <button data-gamepad-zone="kocho-queue" data-gamepad-order={3} data-gamepad-shortcut="Y" aria-keyshortcuts="Y" onClick={executeQueue} disabled={gameState.queue.length === 0 || animating} className={`w-16 h-16 md:w-20 md:h-20 rounded-full border-4 flex flex-col items-center justify-center font-bold shadow-lg transition-all shrink-0 ${gameState.queue.length > 0 ? 'bg-indigo-600 border-indigo-400 text-white hover:scale-105 active:scale-95 cursor-pointer animate-pulse' : 'bg-gray-800 border-gray-600 text-gray-500 cursor-not-allowed'}`}>
+                            <button data-gamepad-zone="kocho-queue" data-gamepad-order={3} data-gamepad-shortcut={steamControllerLayout ? 'X' : 'Y'} aria-keyshortcuts={steamControllerLayout ? 'X' : 'Y'} onClick={executeQueue} disabled={gameState.queue.length === 0 || animating} className={`w-16 h-16 md:w-20 md:h-20 rounded-full border-4 flex flex-col items-center justify-center font-bold shadow-lg transition-all shrink-0 ${gameState.queue.length > 0 ? 'bg-indigo-600 border-indigo-400 text-white hover:scale-105 active:scale-95 cursor-pointer animate-pulse' : 'bg-gray-800 border-gray-600 text-gray-500 cursor-not-allowed'}`}>
                                 <Play size={20} className="fill-current mb-1"/> EXEC
                             </button>
                         </div>
@@ -3241,15 +3256,15 @@ const KochoShowdown: React.FC<{
 
                         {/* Movement Controls */}
                         <div className="kocho-movement-controls flex justify-center items-center gap-4 py-2 border-t border-indigo-900/30 relative shrink-0">
-                            <button onClick={() => handleMove(-1)} className="bg-slate-700 hover:bg-slate-600 p-4 rounded-full border border-slate-500 active:bg-slate-800 transition-colors shadow-lg"><ChevronLeft size={24}/></button>
+                            <button data-gamepad-shortcut={steamControllerLayout ? 'LT' : undefined} aria-keyshortcuts={steamControllerLayout ? 'LT' : undefined} onClick={() => handleMove(-1)} className="bg-slate-700 hover:bg-slate-600 p-4 rounded-full border border-slate-500 active:bg-slate-800 transition-colors shadow-lg"><ChevronLeft size={24}/></button>
                             <div className="flex flex-col items-center gap-1">
                                 <div className="flex gap-1">
-                                    <button onClick={handleTurn} className="bg-slate-700 hover:bg-slate-600 px-3 py-2 rounded-lg border border-slate-500 text-sm font-bold flex items-center justify-center active:bg-slate-800 transition-colors w-16">TURN</button>
-                                    <button onClick={handleSwapPosition} className={`px-2 py-2 rounded-lg border flex items-center justify-center transition-colors w-12 ${gameState.specialActionCooldown > 0 ? 'bg-gray-800 border-gray-600 text-gray-500' : 'bg-cyan-700 border-cyan-400 text-cyan-100 hover:bg-cyan-600 active:scale-95'}`} title={tr('位置交換 (CD: 3)')}>{gameState.specialActionCooldown > 0 ? <span className="text-xs font-bold">{gameState.specialActionCooldown}</span> : <RefreshCw size={16} />}</button>
+                                    <button data-gamepad-shortcut={steamControllerLayout ? 'Y' : undefined} aria-keyshortcuts={steamControllerLayout ? 'Y' : undefined} onClick={handleTurn} className="bg-slate-700 hover:bg-slate-600 px-3 py-2 rounded-lg border border-slate-500 text-sm font-bold flex items-center justify-center active:bg-slate-800 transition-colors w-16">TURN</button>
+                                    <button data-gamepad-shortcut={steamControllerLayout ? 'RB' : undefined} aria-keyshortcuts={steamControllerLayout ? 'RB' : undefined} onClick={handleSwapPosition} className={`px-2 py-2 rounded-lg border flex items-center justify-center transition-colors w-12 ${gameState.specialActionCooldown > 0 ? 'bg-gray-800 border-gray-600 text-gray-500' : 'bg-cyan-700 border-cyan-400 text-cyan-100 hover:bg-cyan-600 active:scale-95'}`} title={tr('位置交換 (CD: 3)')}>{gameState.specialActionCooldown > 0 ? <span className="text-xs font-bold">{gameState.specialActionCooldown}</span> : <RefreshCw size={16} />}</button>
                                 </div>
-                                <button onClick={handleWait} className="bg-gray-800 hover:bg-gray-700 px-6 py-2 rounded-lg border border-gray-600 text-xs flex items-center justify-center active:bg-gray-900 transition-colors w-28 text-gray-400"><Clock size={12} className="mr-1"/> WAIT</button>
+                                <button data-gamepad-shortcut={steamControllerLayout ? 'LB' : undefined} aria-keyshortcuts={steamControllerLayout ? 'LB' : undefined} onClick={handleWait} className="bg-gray-800 hover:bg-gray-700 px-6 py-2 rounded-lg border border-gray-600 text-xs flex items-center justify-center active:bg-gray-900 transition-colors w-28 text-gray-400"><Clock size={12} className="mr-1"/> WAIT</button>
                             </div>
-                            <button onClick={() => handleMove(1)} className="bg-slate-700 hover:bg-slate-600 p-4 rounded-full border border-slate-500 active:bg-slate-800 transition-colors shadow-lg"><ChevronRight size={24}/></button>
+                            <button data-gamepad-shortcut={steamControllerLayout ? 'RT' : undefined} aria-keyshortcuts={steamControllerLayout ? 'RT' : undefined} onClick={() => handleMove(1)} className="bg-slate-700 hover:bg-slate-600 p-4 rounded-full border border-slate-500 active:bg-slate-800 transition-colors shadow-lg"><ChevronRight size={24}/></button>
                         </div>
                     </div>
                 )}

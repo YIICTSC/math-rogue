@@ -444,6 +444,36 @@ const run = async () => {
       }
     });
 
+    await test('Steam校長対決で対戦アクション型の専用配置を使える', async () => {
+      await page.goto(`${BASE_URL}/?gamepadTestScreen=MINI_GAME_KOCHO`, { waitUntil: 'domcontentloaded' });
+      await page.waitForSelector('.kocho-difficulty-overlay');
+      await connect(page);
+      await press(page, 'A');
+      await page.waitForSelector('.kocho-control-panel');
+      await page.waitForFunction(() => document.activeElement?.getAttribute('data-gamepad-zone') === 'kocho-hand');
+
+      const shortcuts = await page.locator('.kocho-control-panel [data-gamepad-shortcut]').evaluateAll(elements =>
+        elements.map(element => ({
+          shortcut: element.getAttribute('data-gamepad-shortcut'),
+          text: element.textContent?.trim() || '',
+        })),
+      );
+      for (const expected of ['X', 'Y', 'LB', 'RB', 'LT', 'RT']) {
+        expect(shortcuts.some(item => item.shortcut === expected), `校長対決に${expected}の専用操作がない`);
+      }
+
+      await press(page, 'A');
+      expect(
+        await page.locator('[data-gamepad-cancel-shortcut]').count() === 1,
+        'Aでカードを予約できない',
+      );
+      await press(page, 'B');
+      expect(
+        await page.locator('[data-gamepad-cancel-shortcut]').count() === 0,
+        'Bで直前の予約を取り消せない',
+      );
+    });
+
     await test('Viewボタンのゲームメニューから継続・タイトル復帰を選べる', async () => {
       await page.goto(`${BASE_URL}/?gamepadTestScreen=HELP`, { waitUntil: 'domcontentloaded' });
       await connect(page);
