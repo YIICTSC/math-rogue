@@ -142,6 +142,20 @@ SE事前読み込みがiOSのAudioContext再開待ちで停止する問題を解
 Build 19をTestFlightの内部・外部テストグループへ追加し、テスト内容を更新して
 外部テストへ提出した。両グループとも「テスト中」で、テスターへの自動通知を有効にした。
 
+2026-07-29に本番用Build 21を作成した。管理ポータルから新しい課題が配信された場合、
+ユーザーが通知を許可した端末へOS通知を表示し、通知を開くと課題受信画面へ移動する。
+高校編・マジック編の戦闘は、フィニッシュへ到達し得る攻撃カード／攻撃ルールの実行時に
+攻撃ボイスを必ず再生する。本番環境ではバージョン情報10回押下を含むデバッグ導線を
+無効化した。ImageGenで作成済みの正式アイコンからiOS AppIconを再生成し、Build 21へ
+同梱した。
+
+Apple Distribution署名、iOS 26.2 SDK、arm64、iOS 15.0以上、Version 1.0.0、
+Build 21のReleaseアーカイブとApp Store Connectへのアップロードに成功した。
+Build 21はTestFlightの内部・外部テストグループへ追加済みで、両グループとも
+「テスト中」。外部テスターへの自動通知も有効にした。App Store版は旧Build 12の
+審査提出を取り下げ、審査メモを本番仕様へ更新したうえでBuild 21を再提出した。
+2026-07-29 16:35時点のApp Reviewステータスは「審査待ち」、公開方法は手動リリース。
+
 ## 開発コマンド
 
 ```bash
@@ -218,7 +232,8 @@ IOS_SIMULATOR="iPad Pro 11-inch (M4)" npm run ios:run
 - Privacy ManifestとRequired Reason APIの監査
 - 子ども向け・教育用途を踏まえた年齢区分、プライバシーポリシー、データ収集回答
 - iPhone/iPadのスクリーンショットと審査用説明
-- [x] TestFlight内部・外部テストへBuild 11を追加
+- [x] TestFlight内部・外部テストへBuild 21を追加
+- [x] App Store版をBuild 21へ差し替えてApp Reviewへ再提出
 
 課金モデルの検討結果は[`ios-monetization-plan.md`](./ios-monetization-plan.md)を参照する。
 

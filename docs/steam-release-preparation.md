@@ -25,14 +25,16 @@
 - Steamコミュニティグループ: `https://steamcommunity.com/groups/yiictsc`（Group ID: `46228409`）
 - 2026-07-25時点の最新ソースからWindows x64版を再生成し、Steamビルド検証に合格済み。
 - macOS版SteamCMDを導入・更新し、SteamPipeアップロード設定を生成済み。
-- Windows x64版をSteamPipeへアップロード済み。最新の成功Build IDは `24385958`、Depot Manifest IDは `2863320183767979359`。
-- Build `24385958` をSteamworks画面からPublic defaultブランチへ反映済み。
+- Windows x64版をSteamPipeへアップロード済み。最新の成功Build IDは `24447060`、
+  Depot Manifest IDは `5601021714864619945`。
+- Build `24447060` をSteamworks画面からPublic defaultと非公開`internal`の
+  両ブランチへ反映済み。
 - 2026-07-26のテスト版をSteamPipeへアップロード済み。Build IDは `24395548`、
   Depot Manifest IDは `8597407780415568028`。Public defaultには未反映で、
   非公開の`internal`ブランチへ反映済み。
 - Steam専用の高校編タイトル選択は、コントローラーフォーカス時に背景・文字色を
-  反転して視認性を高めた。全版共通で、バージョン情報の題名10回押下による
-  テスト用デバッグ導線を一時的に有効化している。
+  反転して視認性を高めた。本番Build `24447060`では、バージョン情報の題名10回押下を
+  含むデバッグ導線を無効化している。
 - 非公開ブランチ`internal`を説明「Internal test build」で作成済み。
   2026-07-27にBuild `24395548`をライブ設定し、Steamworksの履歴とブランチ表示で確認済み。
 - 2026-07-27の共通UI・課題安定化・報酬コントローラー修正版からWindows x64版を再生成し、
@@ -77,6 +79,11 @@
   `1bad2f1`からWindows x64版を再生成した。対象回帰テスト2件と配布物検証に合格し、
   SteamPipe Build ID `24446504`、Depot Manifest ID `803976567507969669`として
   非公開`internal`ブランチへ反映済み。
+- 管理課題のOS通知、高校編／マジック編の必須攻撃ボイス、本番デバッグ無効化、
+  ImageGen由来の正式ショートカットアイコンを含むコミット`93eac9f`から
+  Windows x64版を再生成した。Steam配布物検証に合格し、SteamPipe Build ID
+  `24447060`、Depot Manifest ID `5601021714864619945`としてアップロードした。
+  `internal`とPublic defaultの両ブランチを同じBuildへ更新済み。
 - Steamストア用の実ゲーム画面7枚（1920×1080）を `release/steam/store-assets/screenshots/` に準備済み。うち追加2枚はチュートリアルを閉じた戦闘画面と、戦闘後の学習問題画面。
 - ImageGenで作成したキービジュアルと正式ロゴを用い、Steam規定寸法のカプセル／ライブラリ／アイコン素材10点を `release/steam/store-assets/generated/` に準備済み。
 
@@ -133,6 +140,8 @@ STEAM_APP_ID=000000 STEAM_DEPOT_ID=000001 pnpm run steam:config
 - [x] Build `24446023` を非公開`internal`ブランチへアップロード
 - [x] Build `24446368` を非公開`internal`ブランチへアップロード
 - [x] Build `24446504` を非公開`internal`ブランチへアップロード
+- [x] Build `24447060` を非公開`internal`ブランチへアップロード
+- [x] Build `24447060` をPublic defaultブランチへ反映
 - [x] Beta Testing／Developer Compパッケージを確認
 - [ ] Windows版Steamクライアントからインストール・起動・終了を確認
 
@@ -219,7 +228,7 @@ Steamの基本カプセルには、ゲーム画像、製品名、正式なサブ
 - [x] Library Header（ローカル準備済み、Steamworksへの登録待ち）
 - [x] Library Hero（文字なし、ローカル準備済み、Steamworksへの登録待ち）
 - [x] Library Logo（透明背景、ローカル準備済み、Steamworksへの登録待ち）
-- [x] Shortcut Icon／App Icon（ローカル準備済み、Steamworksへの登録待ち）
+- [x] Shortcut Icon／App Icon（Windows実行ファイルとElectronウィンドウへ反映済み）
 - [x] ゲームプレイ中心のスクリーンショット（ローカル準備済み、Steamworksへの登録待ち）
 - [ ] ゲームプレイトレーラー
 
