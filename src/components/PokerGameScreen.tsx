@@ -1905,9 +1905,27 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
       const editionEffect = edition === 'FOIL' ? '+50 Base' : edition === 'HOLOGRAPHIC' ? '+10 Mult' : edition === 'POLYCHROME' ? 'x1.5 Mult' : '';
 
       return (
-          <div className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-4 animate-in fade-in duration-200" onClick={() => setInspectedItem(null)}>
+          <div
+              data-gamepad-modal
+              data-gamepad-navigation-root
+              data-gamepad-initial-scope="poker-inspection"
+              role="dialog"
+              aria-modal="true"
+              className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-4 animate-in fade-in duration-200"
+              onClick={() => setInspectedItem(null)}
+          >
               <div className="bg-slate-800 border-2 border-white p-6 rounded-lg max-w-sm w-full shadow-2xl relative" onClick={e => e.stopPropagation()}>
-                  <button onClick={() => setInspectedItem(null)} className="absolute top-2 right-2 text-gray-400 hover:text-white"><X size={24}/></button>
+                  <button
+                      data-gamepad-back
+                      data-gamepad-initial-choice={!isConsumable ? true : undefined}
+                      data-gamepad-zone="poker-inspection-close"
+                      data-gamepad-order={0}
+                      onClick={() => setInspectedItem(null)}
+                      className="absolute top-2 right-2 text-gray-400 hover:text-white"
+                      aria-label={t('閉じる')}
+                  >
+                      <X size={24}/>
+                  </button>
                   {isCard ? (
                       <div className="flex flex-col items-center mb-4">
                           <div className="w-32 h-48 bg-white text-black rounded-lg border-4 border-yellow-300 shadow-xl flex flex-col items-center justify-between p-2 mb-4" style={getPokerCardFaceStyle(cardItem)}>
@@ -1970,13 +1988,19 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
                   {/* Owned Item Actions */}
                   {isOwned && isConsumable && index !== undefined && (
                       <div className="flex gap-2 mt-6">
-                          <button 
+                          <button
+                              data-gamepad-initial-choice
+                              data-gamepad-zone="poker-inspection-actions"
+                              data-gamepad-order={0}
+                              data-gamepad-right-zone="poker-inspection-actions"
                               onClick={() => { useConsumable(consumableItem, index); setInspectedItem(null); }}
                               className="flex-1 bg-blue-600 hover:bg-blue-500 text-white font-bold py-2 px-4 rounded border-2 border-blue-400 shadow-lg flex items-center justify-center animate-pulse"
                           >
                               <Sparkles size={16} className="mr-1" /> USE
                           </button>
-                          <button 
+                          <button
+                              data-gamepad-zone="poker-inspection-actions"
+                              data-gamepad-order={1}
                               onClick={sellItem}
                               className="flex-1 bg-red-600 hover:bg-red-500 text-white font-bold py-2 px-4 rounded border-2 border-red-400 shadow-lg flex items-center justify-center"
                           >
@@ -1986,7 +2010,9 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
                   )}
                   
                   {isOwned && isSupporter && index !== undefined && (
-                      <button 
+                      <button
+                        data-gamepad-zone="poker-inspection-actions"
+                        data-gamepad-order={0}
                         onClick={sellItem}
                         className="mt-6 w-full bg-red-600 hover:bg-red-500 text-white font-bold py-2 px-4 rounded border-2 border-red-400 shadow-lg flex items-center justify-center"
                       >
@@ -2466,11 +2492,20 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
         <div className={`w-full bg-black/40 border-b border-black/50 p-2 flex justify-between items-center z-10 shrink-0 min-h-[64px] ${getPokerTutorialHighlightClass('supporters')}`}>
             <div className="flex gap-2 items-center flex-1 justify-center">
                 {runState.supporters.map((s, i) => (
-                    <div 
-                        key={i} 
-                        className={`w-10 h-10 md:w-12 md:h-12 bg-slate-800 border-2 rounded flex items-center justify-center relative group cursor-pointer hover:bg-slate-700 transition-colors ${s.edition === 'POLYCHROME' ? 'border-yellow-400 animate-pulse' : s.edition === 'HOLOGRAPHIC' ? 'border-red-400' : s.edition === 'FOIL' ? 'border-blue-400' : 'border-slate-600'}`} 
-                        onClick={() => setInspectedItem({ item: s, type: 'SUPPORTER', isOwned: true, index: i })} 
-                        onContextMenu={(e) => handleContextMenu(e, s, 'SUPPORTER', true, i)} 
+                    <div
+                        key={i}
+                        role="button"
+                        tabIndex={0}
+                        aria-label={`${t('サポーター')}: ${t(s.name)}`}
+                        data-gamepad-zone="poker-supporters"
+                        data-gamepad-order={i}
+                        data-gamepad-linear-axis="horizontal"
+                        data-gamepad-right-zone="poker-consumables"
+                        data-gamepad-down-zone={selectedConsumable ? 'poker-consumable-use' : 'poker-hand'}
+                        className={`w-10 h-10 md:w-12 md:h-12 bg-slate-800 border-2 rounded flex items-center justify-center relative group cursor-pointer hover:bg-slate-700 transition-colors ${s.edition === 'POLYCHROME' ? 'border-yellow-400 animate-pulse' : s.edition === 'HOLOGRAPHIC' ? 'border-red-400' : s.edition === 'FOIL' ? 'border-blue-400' : 'border-slate-600'}`}
+                        onClick={() => setInspectedItem({ item: s, type: 'SUPPORTER', isOwned: true, index: i })}
+                        onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); setInspectedItem({ item: s, type: 'SUPPORTER', isOwned: true, index: i }); } }}
+                        onContextMenu={(e) => handleContextMenu(e, s, 'SUPPORTER', true, i)}
                         onTouchStart={() => handleTouchStart(s, 'SUPPORTER', true, i)} 
                         onTouchEnd={handleTouchEnd}
                     >
@@ -2482,7 +2517,28 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
                 ))}
             </div>
             <div className="flex gap-2 items-center border-l border-white/20 pl-2">
-                {runState.consumables.map((c, i) => (<div key={i} className="w-10 h-10 md:w-12 md:h-12 bg-slate-800 border-2 border-purple-500 rounded flex items-center justify-center relative group cursor-pointer hover:scale-110 transition-transform" onClick={() => setInspectedItem({ item: c, type: 'CONSUMABLE', isOwned: true, index: i })} onContextMenu={(e) => handleContextMenu(e, c, 'CONSUMABLE', true, i)} onTouchStart={() => handleTouchStart(c, 'CONSUMABLE', true, i)} onTouchEnd={handleTouchEnd}>{renderPokerItemIcon(c.icon, c.name, 'w-8 h-8', c.id)}{selectedConsumable === c && <div className="absolute inset-0 bg-white/30 rounded animate-pulse"></div>}</div>))}
+                {runState.consumables.map((c, i) => (
+                    <div
+                        key={i}
+                        role="button"
+                        tabIndex={0}
+                        aria-label={`${t('アイテム')}: ${t(c.name)}`}
+                        data-gamepad-zone="poker-consumables"
+                        data-gamepad-order={i}
+                        data-gamepad-linear-axis="horizontal"
+                        data-gamepad-left-zone="poker-supporters"
+                        data-gamepad-down-zone={selectedConsumable ? 'poker-consumable-use' : 'poker-hand'}
+                        className="w-10 h-10 md:w-12 md:h-12 bg-slate-800 border-2 border-purple-500 rounded flex items-center justify-center relative group cursor-pointer hover:scale-110 transition-transform"
+                        onClick={() => setInspectedItem({ item: c, type: 'CONSUMABLE', isOwned: true, index: i })}
+                        onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); setInspectedItem({ item: c, type: 'CONSUMABLE', isOwned: true, index: i }); } }}
+                        onContextMenu={(e) => handleContextMenu(e, c, 'CONSUMABLE', true, i)}
+                        onTouchStart={() => handleTouchStart(c, 'CONSUMABLE', true, i)}
+                        onTouchEnd={handleTouchEnd}
+                    >
+                        {renderPokerItemIcon(c.icon, c.name, 'w-8 h-8', c.id)}
+                        {selectedConsumable === c && <div className="absolute inset-0 bg-white/30 rounded animate-pulse"></div>}
+                    </div>
+                ))}
                 {[...Array(Math.max(0, 2 - runState.consumables.length))].map((_, i) => (
                     <div key={`consumable-empty-${i}`} className="w-10 h-10 md:w-12 md:h-12 rounded border border-dashed border-slate-700/70 bg-slate-900/20" />
                 ))}
@@ -2506,7 +2562,29 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
                 <div className="absolute top-4 bg-purple-900/80 p-2 rounded text-center border border-purple-400 z-40">
                     <div className="text-sm font-bold text-purple-200">{t('Using')}: {t(selectedConsumable.name)}</div>
                     <div className="text-xs mb-2">{t('Select cards then click USE')}</div>
-                    <div className="flex gap-2 justify-center"><button onClick={applyTarot} className="bg-purple-600 px-3 py-1 rounded text-xs font-bold hover:bg-purple-500">USE</button><button onClick={() => { setSelectedConsumable(null); setSelectedCards([]); }} className="bg-gray-600 px-3 py-1 rounded text-xs hover:bg-gray-500">CANCEL</button></div>
+                    <div className="flex gap-2 justify-center">
+                        <button
+                            data-gamepad-zone="poker-consumable-use"
+                            data-gamepad-order={0}
+                            data-gamepad-right-zone="poker-consumable-cancel"
+                            data-gamepad-down-zone="poker-hand"
+                            onClick={applyTarot}
+                            className="bg-purple-600 px-3 py-1 rounded text-xs font-bold hover:bg-purple-500"
+                        >
+                            USE
+                        </button>
+                        <button
+                            data-gamepad-zone="poker-consumable-cancel"
+                            data-gamepad-order={0}
+                            data-gamepad-left-zone="poker-consumable-use"
+                            data-gamepad-down-zone="poker-hand"
+                            data-gamepad-cancel-shortcut
+                            onClick={() => { setSelectedConsumable(null); setSelectedCards([]); }}
+                            className="bg-gray-600 px-3 py-1 rounded text-xs hover:bg-gray-500"
+                        >
+                            CANCEL
+                        </button>
+                    </div>
                 </div>
             )}
         </div>
@@ -2516,7 +2594,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
                 const isSelected = selectedCards.includes(card.id);
                 return (
                     <div
-                        key={card.id} data-card-id={card.id} data-gamepad-multiselect data-gamepad-linear-axis="horizontal" data-gamepad-initial-choice={idx === 0 ? true : undefined} data-gamepad-zone="poker-hand" data-gamepad-order={idx} role="button" tabIndex={0} onPointerDown={(e) => handlePointerDown(e, card.id)} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); toggleSelect(card.id); } }} onContextMenu={(e) => handleContextMenu(e, card, 'CARD', true)} onTouchStart={() => handleTouchStart(card, 'CARD', true)} onTouchEnd={handleTouchEnd}
+                        key={card.id} data-card-id={card.id} data-gamepad-multiselect data-gamepad-linear-axis="horizontal" data-gamepad-up-zone={selectedConsumable ? 'poker-consumable-use' : runState.supporters.length > 0 ? 'poker-supporters' : 'poker-consumables'} data-gamepad-initial-choice={idx === 0 ? true : undefined} data-gamepad-zone="poker-hand" data-gamepad-order={idx} role="button" tabIndex={0} onPointerDown={(e) => handlePointerDown(e, card.id)} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); toggleSelect(card.id); } }} onContextMenu={(e) => handleContextMenu(e, card, 'CARD', true)} onTouchStart={() => handleTouchStart(card, 'CARD', true)} onTouchEnd={handleTouchEnd}
                         className={`w-20 h-32 md:w-28 md:h-40 rounded-lg border-2 shadow-xl flex flex-col items-center justify-between p-2 cursor-pointer transition-transform duration-200 -ml-4 first:ml-0 relative ${isSelected ? '-translate-y-6 z-20 border-yellow-400 ring-2 ring-yellow-400' : 'border-gray-400 hover:-translate-y-2 z-10'} ${selectedConsumable ? 'hover:ring-2 hover:ring-purple-400' : ''} ${card.enhancement === 'GOLD' ? 'bg-amber-100 border-amber-500' : ''} ${card.enhancement === 'STEEL' ? 'bg-slate-300 border-slate-500' : ''} ${card.enhancement === 'GLASS' ? 'bg-cyan-100/80 border-cyan-300 backdrop-blur-sm' : ''} ${!card.enhancement ? 'bg-gray-100' : ''}`}
                         style={getPokerCardFaceStyle(card)}
                     >

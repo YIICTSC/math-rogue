@@ -533,6 +533,120 @@ const run = async () => {
       );
     });
 
+    await test('放課後ポーカーのサポーター・アイテム・使用操作をコントローラーで完結できる', async () => {
+      const pokerUrl = `${BASE_URL}/?gamepadTestScreen=MINI_GAME_POKER`;
+      await page.goto(pokerUrl, { waitUntil: 'domcontentloaded' });
+      await connect(page);
+      if (await page.locator('[data-gamepad-zone="poker-hand"]').count() === 0) {
+        await press(page, 'A');
+      }
+      await page.waitForSelector('[data-gamepad-zone="poker-hand"]');
+      await page.waitForFunction(() => Boolean(localStorage.getItem('pixel_spire_poker_state_v1')));
+      await delay(700);
+      await page.evaluate(() => {
+        const storageKey = 'pixel_spire_poker_state_v1';
+        const state = JSON.parse(localStorage.getItem(storageKey) || 'null');
+        if (!state) throw new Error('ポーカーの保存状態を作成できない');
+        state.supporters = [{ id: 'SUP_PIGGY' }];
+        state.consumables = [{ id: 'STA_GOLD_SPRAY' }];
+        localStorage.setItem(storageKey, JSON.stringify(state));
+      });
+      await page.reload({ waitUntil: 'domcontentloaded' });
+      await connect(page);
+
+      const handCard = page.locator('[data-gamepad-zone="poker-hand"]').first();
+      const supporter = page.locator('[data-gamepad-zone="poker-supporters"]').first();
+      const consumable = page.locator('[data-gamepad-zone="poker-consumables"]').first();
+      await handCard.waitFor({ state: 'visible' });
+      await supporter.waitFor({ state: 'visible' });
+      await consumable.waitFor({ state: 'visible' });
+
+      await handCard.focus();
+      await press(page, 'UP');
+      expect(
+        await page.evaluate(() => document.activeElement?.getAttribute('data-gamepad-zone')) === 'poker-supporters',
+        '手札からサポーター枠へ移動できない',
+      );
+      await press(page, 'A');
+      const inspection = page.locator('[data-gamepad-modal][data-gamepad-initial-scope="poker-inspection"]');
+      await inspection.waitFor({ state: 'visible' });
+      expect(await inspection.locator(':focus').count() === 1, 'サポーター詳細内へフォーカスしない');
+      await press(page, 'B');
+      expect(await inspection.count() === 0, 'サポーター詳細をBで閉じられない');
+      expect(
+        await page.evaluate(() => document.activeElement?.getAttribute('data-gamepad-zone')) === 'poker-supporters',
+        'サポーター詳細から元の枠へ戻らない',
+      );
+
+      await press(page, 'RIGHT');
+      expect(
+        await page.evaluate(() => document.activeElement?.getAttribute('data-gamepad-zone')) === 'poker-consumables',
+        'サポーター枠からアイテム枠へ移動できない',
+      );
+      await press(page, 'A');
+      await inspection.waitFor({ state: 'visible' });
+      expect(
+        await page.evaluate(() => (
+          document.activeElement?.getAttribute('data-gamepad-zone') === 'poker-inspection-actions'
+          && document.activeElement?.getAttribute('data-gamepad-order') === '0'
+        )),
+        'アイテム詳細のUSEへ初期フォーカスしない',
+      );
+      await press(page, 'RIGHT');
+      expect(
+        await page.evaluate(() => document.activeElement?.getAttribute('data-gamepad-order')) === '1',
+        'アイテム詳細でUSEからTRADEへ移動できない',
+      );
+      await press(page, 'LEFT');
+      await press(page, 'B');
+      expect(await inspection.count() === 0, 'アイテム詳細をBで閉じられない');
+      expect(
+        await page.evaluate(() => document.activeElement?.getAttribute('data-gamepad-zone')) === 'poker-consumables',
+        'アイテム詳細から元の枠へ戻らない',
+      );
+
+      await press(page, 'A');
+      await inspection.waitFor({ state: 'visible' });
+      await press(page, 'A');
+      await page.waitForSelector('[data-gamepad-zone="poker-consumable-use"]');
+      await press(page, 'B');
+      expect(
+        await page.locator('[data-gamepad-zone="poker-consumable-use"]').count() === 0,
+        'アイテム使用選択をBで取り消せない',
+      );
+
+      await consumable.focus();
+      await press(page, 'A');
+      await inspection.waitFor({ state: 'visible' });
+      await press(page, 'A');
+      await page.waitForSelector('[data-gamepad-zone="poker-consumable-use"]');
+      await consumable.focus();
+      await press(page, 'DOWN');
+      expect(
+        await page.evaluate(() => document.activeElement?.getAttribute('data-gamepad-zone')) === 'poker-consumable-use',
+        'アイテム枠から使用操作へ移動できない',
+      );
+      await press(page, 'DOWN');
+      expect(
+        await page.evaluate(() => document.activeElement?.getAttribute('data-gamepad-zone')) === 'poker-hand',
+        '使用操作からカード選択へ移動できない',
+      );
+      await press(page, 'A');
+      await press(page, 'UP');
+      expect(
+        await page.evaluate(() => document.activeElement?.getAttribute('data-gamepad-zone')) === 'poker-consumable-use',
+        'カード選択からUSEへ戻れない',
+      );
+      await press(page, 'A');
+      await delay(500);
+      const remainingConsumables = await page.locator('[data-gamepad-zone="poker-consumables"]').count();
+      const finalFocus = await activeElementSnapshot(page);
+      expect(
+        remainingConsumables === 0,
+        `USEでアイテムを適用・消費できない (active=${finalFocus?.zone}:${finalFocus?.text})`,
+      );
+    });
+
     await test('未保証だった上部UIモーダルをAで開きBで閉じて元へ戻れる', async () => {
       const exerciseModal = async (opener, scope) => {
         await opener.focus();

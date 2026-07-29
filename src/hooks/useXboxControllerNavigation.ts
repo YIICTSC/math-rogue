@@ -623,16 +623,17 @@ const handleZonedNavigation = (action: NavigationAction): boolean => {
     && (action === 'left' || action === 'right')
   ) {
     const activeIndex = zoneElements.indexOf(active);
-    const nextIndex = Math.max(
-      0,
-      Math.min(zoneElements.length - 1, activeIndex + (action === 'right' ? 1 : -1)),
-    );
-    const next = zoneElements[nextIndex];
+    const requestedIndex = activeIndex + (action === 'right' ? 1 : -1);
+    const next = zoneElements[requestedIndex];
     if (next) {
       next.focus({ preventScroll: true });
       next.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+      return true;
     }
-    return true;
+    const hasExplicitEdgeZone = action === 'left'
+      ? Boolean(active.dataset.gamepadLeftZone)
+      : Boolean(active.dataset.gamepadRightZone);
+    if (!hasExplicitEdgeZone) return true;
   }
 
   const activeRect = active.getBoundingClientRect();
