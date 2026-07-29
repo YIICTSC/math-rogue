@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
+import { App as CapacitorApp } from '@capacitor/app';
+import type { PluginListenerHandle } from '@capacitor/core';
 import {
     GameState, GameScreen, Enemy, Card as ICard, ActiveFamiliar,
     CardType, TargetType, EnemyIntentType, NodeType, MapNode, RewardItem, Relic, Potion, Player, EnemyIntent, Character, FloatingText, RankingEntry, GameMode, LanguageMode, AnswerMode, SelectionState, VisualEffectInstance, GardenSlot, VFXType, ActStats, RaceTrickCard, RaceTrickEffectId, CoopSupportCard, CoopBattleState, CoopBattleTurnSlot, CoopBattlePlayerState, CoopSharedState, CoopTreasurePool, AssignmentPayload, AssignmentAnswerResult, StudentProfile, MiniGameDebugPreview
@@ -4285,6 +4287,7 @@ const App: React.FC = () => {
     }, [gameState.screen]);
 
     useEffect(() => {
+        let appStateHandle: PluginListenerHandle | undefined;
         const handleVisibilityChange = () => {
             if (document.hidden) {
                 audioService.handleAppBackground();
@@ -4299,11 +4302,23 @@ const App: React.FC = () => {
         document.addEventListener('resume', handleForegroundSignal);
         window.addEventListener('pageshow', handleForegroundSignal);
         window.addEventListener('focus', handleForegroundSignal);
+        void CapacitorApp.addListener('appStateChange', ({ isActive }) => {
+            if (isActive) {
+                void audioService.handleAppForeground();
+            } else {
+                audioService.handleAppBackground();
+            }
+        }).then(handle => {
+            appStateHandle = handle;
+        }).catch(() => {
+            // Browser and Electron builds continue to use visibility/focus events.
+        });
         return () => {
             document.removeEventListener('visibilitychange', handleVisibilityChange);
             document.removeEventListener('resume', handleForegroundSignal);
             window.removeEventListener('pageshow', handleForegroundSignal);
             window.removeEventListener('focus', handleForegroundSignal);
+            void appStateHandle?.remove();
         };
     }, []);
 
@@ -9943,9 +9958,16 @@ const App: React.FC = () => {
                                     const livingEnemies = newEnemies.filter(le => le.currentHp > 0);
                                     const target = livingEnemies[Math.floor(Math.random() * livingEnemies.length)];
                                     if (target) {
-                                        target.currentHp -= p.powers['STATIC_DISCHARGE'];
-                                        newLogs.push(trans("静電放電発動！", languageMode));
-                                        nextActiveEffects.push({ id: `vfx-static-${Date.now()}`, type: 'FIRE', targetId: target.id });
+                                        const staticDischargeDamage = p.powers['STATIC_DISCHARGE'] * 5;
+                                        target.currentHp -= staticDischargeDamage;
+                                        target.floatingText = {
+                                            id: `static-${Date.now()}-${target.id}`,
+                                            text: `-${staticDischargeDamage}`,
+                                            color: 'text-yellow-300',
+                                            iconType: 'zap'
+                                        };
+                                        newLogs.push(`${trans("摩擦熱", languageMode)}：${staticDischargeDamage}ダメージ！`);
+                                        nextActiveEffects.push({ id: `vfx-static-${Date.now()}`, type: 'LIGHTNING', targetId: target.id });
                                     }
                                 }
                             }

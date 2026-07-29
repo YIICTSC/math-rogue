@@ -66,6 +66,8 @@ class AudioService {
   private htmlSfxEffectCleanups: WeakMap<HTMLAudioElement, () => void> = new WeakMap();
   private playbackGeneration: number = 0;
   private pausedForAppBackground: boolean = false;
+  private backgroundSuspendPromise: Promise<void> = Promise.resolve();
+  private foregroundRecoveryPromise: Promise<void> | null = null;
 
   // Sequencer State
   private nextNoteTime: number = 0;
@@ -165,18 +167,25 @@ class AudioService {
     }
   }
 
-  private async resumeAudioContext() {
-      this.init();
-      if (!this.ctx) return false;
-      if (this.ctx.state !== 'running') {
-          // On iOS a resume() requested outside a user gesture can stay pending
-          // until the next interaction. Do not let that block BGM reconstruction.
+  private async resumeAudioContext(attempts = 1) {
+      const retryCount = Math.max(1, attempts);
+      for (let attempt = 0; attempt < retryCount; attempt++) {
+          this.init();
+          if (!this.ctx) return false;
+          if ((this.ctx.state as AudioContextState) === 'running') return true;
+          // WKWebView can complete a background suspend after the first foreground
+          // resume request. Retrying after the suspend has settled prevents the
+          // context from being left permanently silent.
           await Promise.race([
               this.ctx.resume().catch(() => undefined),
-              new Promise<void>(resolve => window.setTimeout(resolve, 250)),
+              new Promise<void>(resolve => window.setTimeout(resolve, 300)),
           ]);
+          if ((this.ctx.state as AudioContextState) === 'running') return true;
+          if (attempt + 1 < retryCount) {
+              await new Promise<void>(resolve => window.setTimeout(resolve, 150 * (attempt + 1)));
+          }
       }
-      return this.ctx.state === 'running';
+      return this.ctx?.state === 'running';
   }
 
   public setBgmMode(mode: 'OSCILLATOR' | 'MP3' | 'NEW' | 'OLD' | 'STUDY') {
@@ -212,7 +221,7 @@ class AudioService {
   }
 
   public async unlockAudio() {
-      const contextReady = await this.resumeAudioContext();
+      const contextReady = await this.resumeAudioContext(IS_IOS_BUILD ? 3 : 1);
       if (!this.ctx) return;
       const needsPlaybackRetry = (
           this.isPlayingBGM
@@ -232,8 +241,13 @@ class AudioService {
 
   public handleAppBackground() {
       if (this.backgroundPlaybackEnabled) return;
-      this.pausedForAppBackground = this.isPlayingBGM;
-      this.pauseBGM();
+      this.pausedForAppBackground = this.pausedForAppBackground || this.isPlayingBGM;
+      const previousSuspend = this.backgroundSuspendPromise;
+      const currentSuspend = this.pauseBGM();
+      // Both Capacitor and document visibility can report the same transition.
+      // Preserve every in-flight suspend instead of replacing the first promise
+      // with an already-resolved duplicate call.
+      this.backgroundSuspendPromise = Promise.all([previousSuspend, currentSuspend]).then(() => undefined);
       this.magicEventVoiceSequenceId += 1;
       for (const name of Array.from(new Set([
           ...this.activeSfxSources.keys(),
@@ -244,17 +258,32 @@ class AudioService {
   }
 
   public async handleAppForeground() {
-      const shouldRestartBgm = (
-          this.pausedForAppBackground
-          && this.isPlayingBGM
-          && Boolean(this.currentBgmType)
-          && this.bgmMode !== 'STUDY'
-      );
-      this.pausedForAppBackground = false;
-      await this.resumeAudioContext();
-      if (shouldRestartBgm) {
-          this.isBgmPaused = false;
-          await this.restartCurrentBGM();
+      if (this.foregroundRecoveryPromise) return this.foregroundRecoveryPromise;
+      const recovery = (async () => {
+          const shouldRestartBgm = (
+              this.pausedForAppBackground
+              && this.isPlayingBGM
+              && Boolean(this.currentBgmType)
+              && this.bgmMode !== 'STUDY'
+          );
+          this.pausedForAppBackground = false;
+          // Wait for the background suspend request before asking iOS to resume.
+          // Without this ordering, suspend() can win the race and silence both
+          // Web Audio SE and MP3 BGM after returning to the app.
+          await this.backgroundSuspendPromise.catch(() => undefined);
+          await this.resumeAudioContext(IS_IOS_BUILD ? 4 : 1);
+          if (shouldRestartBgm) {
+              this.isBgmPaused = false;
+              await this.restartCurrentBGM();
+          }
+      })();
+      this.foregroundRecoveryPromise = recovery;
+      try {
+          await recovery;
+      } finally {
+          if (this.foregroundRecoveryPromise === recovery) {
+              this.foregroundRecoveryPromise = null;
+          }
       }
   }
 
@@ -1070,7 +1099,10 @@ class AudioService {
   }
 
   private connectHtmlBgmToGain(audio: HTMLAudioElement) {
-      if (!this.ctx || !this.bgmGain) return false;
+      // A media element routed into a suspended WKWebView AudioContext is silent.
+      // Keep it on the native media path until Web Audio has actually recovered;
+      // the element's own volume still observes the in-game BGM setting.
+      if (!this.ctx || !this.bgmGain || this.ctx.state !== 'running') return false;
       try {
           const source = this.ctx.createMediaElementSource(audio);
           source.connect(this.bgmGain);
@@ -1129,11 +1161,11 @@ class AudioService {
       this.currentBgmType = null;
   }
 
-  public pauseBGM() {
-      if (!this.ctx || !this.isPlayingBGM || this.isBgmPaused) return;
-      this.ctx.suspend().catch(() => {});
+  public pauseBGM(): Promise<void> {
+      if (!this.ctx || !this.isPlayingBGM || this.isBgmPaused) return Promise.resolve();
       this.currentHtmlAudio?.pause();
       this.isBgmPaused = true;
+      return this.ctx.suspend().then(() => undefined).catch(() => undefined);
   }
 
   public async resumeBGM() {

@@ -78,6 +78,7 @@ try {
     }));
     window.__iosBgmPlayAttempts = [];
     window.__iosBgmMediaSourceCount = 0;
+    window.__iosOscillatorStartCount = 0;
     const OriginalAudioContext = window.AudioContext || window.webkitAudioContext;
     if (OriginalAudioContext?.prototype?.createMediaElementSource) {
       const originalCreateMediaElementSource = OriginalAudioContext.prototype.createMediaElementSource;
@@ -91,6 +92,11 @@ try {
       return Promise.resolve();
     };
     HTMLMediaElement.prototype.pause = function pause() {};
+    const originalOscillatorStart = OscillatorNode.prototype.start;
+    OscillatorNode.prototype.start = function start(...args) {
+      window.__iosOscillatorStartCount += 1;
+      return originalOscillatorStart.apply(this, args);
+    };
   });
 
   const page = await context.newPage();
@@ -100,6 +106,11 @@ try {
   await page.goto(BASE_URL, { waitUntil: 'domcontentloaded', timeout: 120_000 });
   await page.waitForSelector('.start-menu-root');
   await page.waitForFunction(() => window.__iosBgmPlayAttempts.some(path => path.includes('/bgm-new/menu.mp3')));
+  // Initial autoplay can use the direct HTML media path while iOS still has
+  // Web Audio locked. The first interaction must unlock it and rebuild the BGM
+  // through the gain node.
+  await page.locator('.start-menu-root').dispatchEvent('pointerdown');
+  await page.waitForFunction(() => window.__iosBgmMediaSourceCount >= 1);
 
   const initial = await page.evaluate(() => ({
     iosClass: document.documentElement.classList.contains('app-platform-ios'),
@@ -115,8 +126,20 @@ try {
   const runtimeState = await page.evaluate(async () => {
     const { audioService } = await import('/src/services/audioService.ts');
     audioService.setBgmVolume(0.25);
+    const context = audioService.ctx;
+    const originalSuspend = context.suspend.bind(context);
+    // Reproduce the WKWebView ordering that caused the regression: the native
+    // background suspend completes after the first foreground event arrives.
+    context.suspend = async () => {
+      await new Promise(resolve => window.setTimeout(resolve, 80));
+      return originalSuspend();
+    };
+    audioService.handleAppBackground();
     audioService.handleAppBackground();
     await audioService.handleAppForeground();
+    const oscillatorCountBeforeSe = window.__iosOscillatorStartCount;
+    audioService.playSound('select');
+    await new Promise(resolve => window.setTimeout(resolve, 30));
     void audioService.playHighSchoolVoiceFile('HS_MALE', 'attack-1', 500);
     await new Promise(resolve => window.setTimeout(resolve, 50));
     // Normal UI and mini-game sounds must remain synthesized. Only the battle
@@ -135,6 +158,8 @@ try {
       attempts: [...window.__iosBgmPlayAttempts],
       mediaSourceCount: window.__iosBgmMediaSourceCount,
       normalPackagedAttemptCount,
+      contextState: context.state,
+      oscillatorSeStarted: window.__iosOscillatorStartCount > oscillatorCountBeforeSe,
     };
   });
   await page.waitForFunction(
@@ -147,6 +172,8 @@ try {
   );
   if (runtimeState.bgmVolume !== 0.25) throw new Error('BGM volume setting was not retained');
   if (runtimeState.mediaSourceCount < 2) throw new Error('BGM was not rebuilt through the gain node after foreground restore');
+  if (runtimeState.contextState !== 'running') throw new Error(`AudioContext remained ${runtimeState.contextState} after foreground restore`);
+  if (!runtimeState.oscillatorSeStarted) throw new Error('Synthesized SE did not resume after foreground restore');
   if (runtimeState.normalPackagedAttemptCount !== 0) throw new Error('Non-battle sound unexpectedly started a packaged SE');
   const attempts = await page.evaluate(() => [...window.__iosBgmPlayAttempts]);
   process.stdout.write(`✓ iOS BGM and battle-only packaged SE routing verified (${attempts.at(-1)})\n`);

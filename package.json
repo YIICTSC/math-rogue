@@ -29,6 +29,7 @@
     "test:management": "node scripts/verify-management-integration.mjs",
     "test:assignment-notifications": "node scripts/test-assignment-notifications.mjs",
     "test:required-battle-voices": "node scripts/verify-required-battle-voices.mjs",
+    "test:triggered-card-damage": "node scripts/verify-triggered-card-damage.mjs",
     "test:production-debug-lock": "node scripts/verify-production-debug-lock.mjs",
     "test:gamepad": "node scripts/test-xbox-controller.mjs",
     "test:ios-bgm": "node scripts/test-ios-bgm.mjs",
@@ -98,6 +99,7 @@
   },
   "dependencies": {
     "@capacitor/android": "^8.4.2",
+    "@capacitor/app": "8.1.1",
     "@capacitor/core": "^8.4.2",
     "@capacitor/file-transfer": "^2.0.4",
     "@capacitor/filesystem": "^8.1.2",
