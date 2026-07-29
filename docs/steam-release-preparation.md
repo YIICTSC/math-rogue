@@ -41,15 +41,16 @@
   再ログインに失敗したため、このビルドのアップロードは認証情報の更新待ち。
 - 2026-07-29の最新仕様からWindows x64版を再生成し、Steam向けビルド検証に合格した。
   実行ファイルは233,106,944 bytes、アプリ資産は926,657,433 bytes。
-  `Preview=0`、`SetLive=internal` のSteamPipe設定を生成済み。
+  `Preview=0`、`SetLive=internal` のSteamPipe設定でアップロードした。
 - 校長対決は、Shogun Showdownのように「選択・キュー・実行・位置調整」を
   戦闘中に素早く行える専用配置へ変更した。`A`: カードをキューへ追加、
   `B`: 最後のキューを取消、`X`: 実行、`Y`: ターン進行、`LT/RT`: 左右移動、
   `LB`: 待機、`RB`: 位置入替。ほかの画面の標準操作は変更していない。
 - 専用配置を含むGamepad APIシミュレーションは14項目すべて合格した。
-- 最新ビルドの`internal`ブランチへのアップロードは、SteamCMDのログイン認証が
-  現在の資格情報で通らないため未完了。Build `24395548` の既存internal版は
-  引き続きテスト可能だが、2026-07-29の専用配置はまだ含まれない。
+- 最新ビルドを2026-07-29にSteamPipeへアップロードした。Build IDは
+  `24442792`、Depot Manifest IDは `6474451404999003800`。
+  `internal`ブランチへ自動反映する設定で成功しており、今回の専用配置を
+  Steamクライアントからテストできる。
 - Developer Compパッケージが用意されているため、開発者アカウントではWindows版Steamクライアントからインストールしてテストできる。Windows実機での起動確認は未実施。
 - Steamストア用の実ゲーム画面7枚（1920×1080）を `release/steam/store-assets/screenshots/` に準備済み。うち追加2枚はチュートリアルを閉じた戦闘画面と、戦闘後の学習問題画面。
 - ImageGenで作成したキービジュアルと正式ロゴを用い、Steam規定寸法のカプセル／ライブラリ／アイコン素材10点を `release/steam/store-assets/generated/` に準備済み。
@@ -101,7 +102,7 @@ STEAM_APP_ID=000000 STEAM_DEPOT_ID=000001 pnpm run steam:config
 - [x] Build `24385958` をSteamPipeへアップロード
 - [x] Build `24385958` をPublic defaultブランチへ反映
 - [x] Build `24395548` を非公開`internal`ブランチへ反映
-- [ ] 2026-07-29最新ビルドを非公開`internal`ブランチへアップロード
+- [x] Build `24442792` を非公開`internal`ブランチへアップロード
 - [x] Beta Testing／Developer Compパッケージを確認
 - [ ] Windows版Steamクライアントからインストール・起動・終了を確認
 
