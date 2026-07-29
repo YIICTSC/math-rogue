@@ -210,13 +210,19 @@ const MiniGameSelectScreen: React.FC<MiniGameSelectScreenProps> = ({ onSelect, o
           <h2 className="text-2xl md:text-3xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-500 animate-pulse flex items-center shrink-0">
             <Gamepad2 className="mr-2 md:mr-3 text-yellow-400" size={28} /> {trans('ミニゲーム選択', languageMode)}
           </h2>
-          <p className="text-xs text-gray-500 mb-6 animate-pulse text-center">{trans('※ボタン長押しでセーブデータを削除できます', languageMode)}</p>
+          <p className="text-xs text-gray-500 mb-6 animate-pulse text-center">
+            {languageMode === 'ENGLISH'
+              ? 'Hold the button, or focus a game and press Y, to delete its save data.'
+              : '※ボタン長押し、またはゲームに合わせてYボタンでセーブデータを削除できます'}
+          </p>
           
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3 w-full mb-8 shrink-0 px-1 md:px-2">
             {MINI_GAMES.map((game) => (
               <button
                 key={game.id}
                 data-gamepad-initial-choice={game.id === firstUnlockedGameId ? true : undefined}
+                data-gamepad-delete-target={isUnlocked(game) ? true : undefined}
+                aria-keyshortcuts={isUnlocked(game) ? 'Y' : undefined}
                 {...bindPress(game)}
                 className={`group relative bg-slate-800 border-4 border-slate-600 hover:border-white p-2 md:p-4 rounded-xl flex flex-col md:flex-row items-center justify-center md:justify-start text-center md:text-left transition-all shadow-xl overflow-hidden h-36 md:h-32 ${!isUnlocked(game) ? 'grayscale opacity-60' : 'hover:bg-slate-700'}`}
                 style={{ 

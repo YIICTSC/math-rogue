@@ -43,6 +43,7 @@ const installVirtualGamepad = async page => {
       }));
       localStorage.setItem('pixel_spire_seen_battle_tutorial_v1', 'true');
       localStorage.setItem('pixel_spire_seen_poker_tutorial_v1', 'true');
+      localStorage.setItem('pixel_spire_math_correct_count_v1', '999');
       localStorage.setItem('learning_rogue_online_ranking_profile_v1', JSON.stringify({
         id: 'controller-test',
         publicCode: 'PAD-TEST',
@@ -320,6 +321,12 @@ const run = async () => {
       await press(page, 'RIGHT');
       const selectAfter = await select.inputValue();
       expect(selectAfter !== selectBefore, 'selectが変更されない');
+      const checkbox = page.locator('.app-settings-modal-overlay input[type="checkbox"]').first();
+      await checkbox.waitFor({ state: 'visible' });
+      const checkboxBefore = await checkbox.isChecked();
+      await checkbox.focus();
+      await press(page, 'A');
+      expect(await checkbox.isChecked() !== checkboxBefore, 'Aでチェックボックスを切り替えられない');
       await press(page, 'B');
       expect(await page.locator('.app-settings-modal-overlay').count() === 0, 'Bで設定が閉じない');
     });
@@ -404,6 +411,67 @@ const run = async () => {
         await page.evaluate(() => document.activeElement?.getAttribute('data-gamepad-order')) === '1',
         '左入力で前の報酬へ戻らない',
       );
+      await press(page, 'DOWN');
+      expect(
+        await page.evaluate(() => document.activeElement?.getAttribute('data-gamepad-zone')) === 'reward-skip',
+        '下入力で「これ以上受け取らずに進む」へ移動しない',
+      );
+    });
+
+    await test('ミニゲーム削除・ポーカー専用操作をコントローラーで実行できる', async () => {
+      await page.goto(`${BASE_URL}/?gamepadTestScreen=MINI_GAME_SELECT`, { waitUntil: 'domcontentloaded' });
+      await connect(page);
+      const deletable = page.locator('[data-gamepad-delete-target]').first();
+      await deletable.waitFor({ state: 'visible' });
+      await deletable.focus();
+      await press(page, 'Y');
+      expect(await page.locator('.app-delete-confirm-modal').isVisible(), 'Yでミニゲーム削除確認が開かない');
+      await press(page, 'B');
+
+      await page.goto(`${BASE_URL}/?gamepadTestScreen=MINI_GAME_POKER`, { waitUntil: 'domcontentloaded' });
+      await connect(page);
+      await press(page, 'A');
+      await page.waitForSelector('[data-gamepad-zone="poker-hand"]');
+      expect(await page.locator('[data-gamepad-multiselect]').count() > 1, 'ポーカー手札にAドラッグ選択対象がない');
+      expect(
+        await page.locator('[data-gamepad-shortcut="X"]').filter({ hasText: 'PLAY HAND' }).count() === 1,
+        'XがPLAY HANDに割り当てられていない',
+      );
+      expect(
+        await page.locator('[data-gamepad-shortcut="Y"]').filter({ hasText: 'DISCARD' }).count() === 1,
+        'YがDISCARDに割り当てられていない',
+      );
+    });
+
+    await test('帰宅ダッシュA長押しとサバイバーの連続アナログ軸を送出する', async () => {
+      await page.goto(`${BASE_URL}/?gamepadTestScreen=MINI_GAME_GO_HOME`, { waitUntil: 'domcontentloaded' });
+      await connect(page);
+      await press(page, 'A');
+      await page.waitForSelector('[data-gamepad-go-home-live="true"]');
+      await page.evaluate(() => {
+        window.__jumpEvents = [];
+        window.addEventListener('keydown', event => { if (event.code === 'Space') window.__jumpEvents.push(['down', performance.now()]); });
+        window.addEventListener('keyup', event => { if (event.code === 'Space') window.__jumpEvents.push(['up', performance.now()]); });
+      });
+      await press(page, 'A', 420);
+      const jumpEvents = await page.evaluate(() => window.__jumpEvents);
+      expect(jumpEvents.some(([type]) => type === 'down') && jumpEvents.some(([type]) => type === 'up'), 'A長押しのSpace押下・解放が送出されない');
+      const downAt = jumpEvents.find(([type]) => type === 'down')?.[1] ?? 0;
+      const upAt = jumpEvents.find(([type]) => type === 'up')?.[1] ?? 0;
+      expect(upAt - downAt >= 300, `A長押し時間が維持されない: ${upAt - downAt}ms`);
+
+      await page.goto(`${BASE_URL}/?gamepadTestScreen=MINI_GAME_SURVIVOR`, { waitUntil: 'domcontentloaded' });
+      await page.waitForSelector('.mini-game-survivor-screen');
+      await page.evaluate(() => {
+        window.__survivorAxes = [];
+        window.addEventListener('learning-rogue:gamepad-axes', event => window.__survivorAxes.push(event.detail));
+      });
+      await connect(page);
+      await moveStick(page, 0.72, -0.41, 240);
+      expect(
+        await page.evaluate(() => window.__survivorAxes.some(axis => Math.abs(axis.x - 0.72) < 0.05 && Math.abs(axis.y + 0.41) < 0.05)),
+        'サバイバーへ連続アナログ軸が送られない',
+      );
     });
 
     await test('風来の小学生2作品で8方向移動とRT投擲を認識する', async () => {
@@ -431,9 +499,16 @@ const run = async () => {
 
         const capturedKeys = await page.evaluate(() => window.__gamepadTestKeys);
         for (const expectedKey of directions.map(([, , key]) => key)) {
-          expect(capturedKeys.includes(expectedKey), `${screen}で${expectedKey}が送出されない`);
+          expect(capturedKeys.includes(expectedKey), `${screen}で${expectedKey}が送出されない: ${JSON.stringify(capturedKeys)}`);
         }
         expect(capturedKeys.filter(key => key === 'PageDown').length >= 2, `${screen}で方向パッドの右下同時入力が斜めにならない`);
+
+        const beforeDiagonalLock = capturedKeys.length;
+        await pressTogether(page, ['X', 'RIGHT']);
+        await pressTogether(page, ['X', 'RIGHT', 'DOWN']);
+        const diagonalLockKeys = (await page.evaluate(() => window.__gamepadTestKeys)).slice(beforeDiagonalLock);
+        expect(!diagonalLockKeys.includes('ArrowRight'), `${screen}でX押下中に直進入力が通ってしまう`);
+        expect(diagonalLockKeys.includes('PageDown'), `${screen}でX押下中の斜め入力が通らない`);
 
         await press(page, 'RT');
         const logText = await page.locator('.dungeon-log-panel').innerText();
@@ -467,11 +542,40 @@ const run = async () => {
         await page.locator('[data-gamepad-cancel-shortcut]').count() === 1,
         'Aでカードを予約できない',
       );
+      await page.waitForFunction(() => document.activeElement?.hasAttribute('data-kocho-hand-index'));
+      await press(page, 'UP');
+      expect(
+        await page.evaluate(() => document.activeElement?.getAttribute('data-gamepad-zone')) === 'kocho-top',
+        '上入力で校長対決の上部UIへ移動しない',
+      );
       await press(page, 'B');
       expect(
         await page.locator('[data-gamepad-cancel-shortcut]').count() === 0,
         'Bで直前の予約を取り消せない',
       );
+    });
+
+    await test('ダンジョン終了・校長メンテナンス・紙飛行機パーツに初期フォーカスがある', async () => {
+      for (const screen of ['MINI_GAME_DUNGEON:GAME_OVER', 'MINI_GAME_DUNGEON_2:GAME_OVER']) {
+        await page.goto(`${BASE_URL}/?gamepadTestScreen=${screen}`, { waitUntil: 'domcontentloaded' });
+        await connect(page);
+        await page.waitForFunction(() => ['dungeon-inherit', 'dungeon-actions'].includes(document.activeElement?.getAttribute('data-gamepad-zone')));
+      }
+      await page.goto(`${BASE_URL}/?gamepadTestScreen=MINI_GAME_KOCHO:KOCHO_UPGRADE`, { waitUntil: 'domcontentloaded' });
+      await connect(page);
+      await page.waitForFunction(() => document.activeElement?.getAttribute('data-gamepad-zone') === 'kocho-maintenance-cards');
+
+      for (const [screen, zones] of [
+        ['MINI_GAME_PAPER_PLANE:PAPER_EQUIP', ['paper-equip-parts']],
+        ['MINI_GAME_PAPER_PLANE:PAPER_HANGAR', ['paper-hangar-ship', 'paper-hangar-inventory']],
+      ]) {
+        await page.goto(`${BASE_URL}/?gamepadTestScreen=${screen}`, { waitUntil: 'domcontentloaded' });
+        await connect(page);
+        await page.waitForFunction(
+          expected => expected.includes(document.activeElement?.getAttribute('data-gamepad-zone')),
+          zones,
+        );
+      }
     });
 
     await test('Viewボタンのゲームメニューから継続・タイトル復帰を選べる', async () => {

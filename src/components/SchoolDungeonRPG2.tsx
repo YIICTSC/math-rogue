@@ -436,6 +436,15 @@ const computeDijkstraMap = (map: TileType[][], targetX: number, targetY: number)
 const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMode = GameMode.MIXED, problemModePool, answerMode = 'CHOICE', assignment, onAnswerResult, languageMode = 'JAPANESE', debugPreview }) => {
   const tr = (text: string) => trans(text, languageMode);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const diagonalLockRef = useRef(false);
+
+  useEffect(() => {
+    const handleDiagonalLock = (event: Event) => {
+      diagonalLockRef.current = Boolean((event as CustomEvent<{ active?: boolean }>).detail?.active);
+    };
+    window.addEventListener('learning-rogue:dungeon-diagonal-lock', handleDiagonalLock);
+    return () => window.removeEventListener('learning-rogue:dungeon-diagonal-lock', handleDiagonalLock);
+  }, []);
   const [map, setMap] = useState<TileType[][]>([]);
   const [visitedMap, setVisitedMap] = useState<boolean[][]>([]);
   const [floorMapRevealed, setFloorMapRevealed] = useState(false);
@@ -1773,8 +1782,28 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
                   const sprite = spriteCache.current[spriteKey]; const offX = (player.offset?.x || 0) * SCALE; const offY = (player.offset?.y || 0) * SCALE;
                   if (drawPlayerFromSheets(ctx, player, sx + offX, sy + offY, ts)) {
                       // drawn from fixed sheet
-                  } else if (sprite) { if (flip) { ctx.save(); ctx.translate(sx + ts + offX, sy + offY); ctx.scale(-1, 1); ctx.drawImage(sprite, 0, 0, ts, ts); ctx.restore(); } else ctx.drawImage(sprite, sx + offX, sy + offY, ts, ts); } 
+                  } else if (sprite) { if (flip) { ctx.save(); ctx.translate(sx + ts + offX, sy + offY); ctx.scale(-1, 1); ctx.drawImage(sprite, 0, 0, ts, ts); ctx.restore(); } else ctx.drawImage(sprite, sx + offX, sy + offY, ts, ts); }
                   else { ctx.fillStyle = C0; ctx.fillRect(sx + 3*SCALE + offX, sy + 3*SCALE + offY, 10*SCALE, 10*SCALE); }
+                  if (diagonalLockRef.current) {
+                      ctx.save();
+                      ctx.font = `bold ${Math.max(12, Math.floor(ts * 0.42))}px monospace`;
+                      ctx.textAlign = 'center';
+                      ctx.textBaseline = 'middle';
+                      ctx.lineWidth = Math.max(2, SCALE);
+                      ctx.strokeStyle = '#06111f';
+                      ctx.fillStyle = '#38bdf8';
+                      const arrows: Array<[string, number, number]> = [
+                          ['↖', sx + ts * 0.12, sy + ts * 0.12],
+                          ['↗', sx + ts * 0.88, sy + ts * 0.12],
+                          ['↙', sx + ts * 0.12, sy + ts * 0.88],
+                          ['↘', sx + ts * 0.88, sy + ts * 0.88],
+                      ];
+                      arrows.forEach(([arrow, x, y]) => {
+                          ctx.strokeText(arrow, x, y);
+                          ctx.fillText(arrow, x, y);
+                      });
+                      ctx.restore();
+                  }
               }
           }
       }
@@ -2142,7 +2171,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
                 )}
                 {gameClear && (<div className="absolute inset-0 flex flex-col items-center justify-center z-40 p-4 text-center" style={{ backgroundColor: `${C0}F2`, color: C3 }}><Award size={48} className="mb-4" style={{ color: C2 }}/><h2 className="text-2xl font-bold mb-4">GRADUATION!</h2><p className="mb-2">{tr('ついに校長を説得した！')}</p><p className="mb-8">{tr('君は伝説の小学生となった。')}</p><div className="flex flex-col gap-4 w-full"><button onClick={startEndlessMode} className="border-2 px-4 py-3 animate-pulse font-bold" style={{ borderColor: C3, color: C3, backgroundColor: 'transparent' }}>{tr('中学生編へ (エンドレス)')}</button><button onClick={handleQuit} className="border-2 px-4 py-2 text-sm" style={{ borderColor: C1, color: C3 }}>{tr('タイトルへ戻る')}</button></div></div>)}
                 {gameOver && (
-                    <div className="absolute inset-0 flex flex-col items-center justify-center z-40 p-4 text-center" style={{ backgroundColor: `${C0}E6`, color: C3 }}>
+                    <div data-gamepad-modal data-gamepad-initial-scope="dungeon-2-game-over" data-gamepad-navigation-root className="absolute inset-0 flex flex-col items-center justify-center z-40 p-4 text-center" style={{ backgroundColor: `${C0}E6`, color: C3 }}>
                         <Skull size={48} className="mb-2" style={{ color: C1 }}/>
                         <h2 className="text-xl font-bold mb-1">GAME OVER</h2>
                         <p className="text-[10px] mb-4 opacity-70">Floor: {floor} / Level: {level}</p>
@@ -2151,10 +2180,16 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
                             <h3 className="text-red-400 font-bold text-xs mb-2">{tr('引き継ぐアイテムを選択')}</h3>
                             <div className="flex-grow overflow-y-auto max-h-48 custom-scrollbar space-y-1 pr-1">
                                 {allPossessions.map((item, idx) => (
-                                    <div 
+                                    <div
                                         key={idx}
+                                        role="button"
+                                        tabIndex={0}
+                                        data-gamepad-initial-choice={idx === 0 ? true : undefined}
+                                        data-gamepad-zone="dungeon-inherit"
+                                        data-gamepad-order={idx}
                                         className={`p-2 border rounded flex items-center justify-between cursor-pointer transition-colors text-xs ${inheritItemIdx === idx ? 'bg-red-900 border-white text-white' : 'bg-gray-800 border-gray-600 text-gray-400 hover:border-red-400'}`}
                                         onClick={() => setInheritItemIdx(idx)}
+                                        onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); setInheritItemIdx(idx); } }}
                                     >
                                         <div className="flex items-center gap-2">
                                             {item.category === 'WEAPON' && <Sword size={14} />}
@@ -2171,10 +2206,10 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
                             </div>
                         </div>
 
-                        <button onClick={handleRestart} className="px-6 py-2 bg-red-600 hover:bg-red-500 text-white font-bold rounded border-2 border-white animate-pulse flex items-center justify-center gap-2 w-full max-w-xs">
+                        <button data-gamepad-initial-choice={allPossessions.length === 0 ? true : undefined} data-gamepad-zone="dungeon-actions" data-gamepad-order={0} onClick={handleRestart} className="px-6 py-2 bg-red-600 hover:bg-red-500 text-white font-bold rounded border-2 border-white animate-pulse flex items-center justify-center gap-2 w-full max-w-xs">
                             <RotateCcw size={16}/> {inheritItemIdx !== null ? tr('アイテムを持って再挑戦') : tr('再挑戦')}
                         </button>
-                        <button onClick={handleQuit} className="mt-4 text-xs hover:underline opacity-50">EXIT</button>
+                        <button data-gamepad-zone="dungeon-actions" data-gamepad-order={1} onClick={handleQuit} className="mt-4 text-xs hover:underline opacity-50">EXIT</button>
                     </div>
                 )}
             </div>

@@ -589,6 +589,7 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
 
     const keys = useRef<Record<string, boolean>>({});
     const joystickRef = useRef<{ x: number, y: number }>({ x: 0, y: 0 });
+    const gamepadJoystickRef = useRef<{ x: number, y: number }>({ x: 0, y: 0 });
     const [joystickUI, setJoystickUI] = useState<{ active: boolean, startX: number, startY: number, curX: number, curY: number } | null>(null);
     const spriteCache = useRef<Record<string, HTMLCanvasElement>>({});
     const lastDir = useRef<{x:number, y:number}>({x:1, y:0}); 
@@ -605,6 +606,21 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
         window.addEventListener('resize', updateSize);
         updateSize();
         return () => window.removeEventListener('resize', updateSize);
+    }, []);
+
+    useEffect(() => {
+        const handleGamepadAxes = (event: Event) => {
+            const detail = (event as CustomEvent<{ x?: number; y?: number }>).detail;
+            gamepadJoystickRef.current = {
+                x: Math.max(-1, Math.min(1, Number(detail?.x) || 0)),
+                y: Math.max(-1, Math.min(1, Number(detail?.y) || 0)),
+            };
+        };
+        window.addEventListener('learning-rogue:gamepad-axes', handleGamepadAxes);
+        return () => {
+            window.removeEventListener('learning-rogue:gamepad-axes', handleGamepadAxes);
+            gamepadJoystickRef.current = { x: 0, y: 0 };
+        };
     }, []);
 
     const generateFromTemplate = (templateName: string, mainColor: string, highlightColor: string): HTMLCanvasElement => {
@@ -870,7 +886,11 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
         if (keys.current['ArrowDown'] || keys.current['KeyS']) dy = 1;
         if (keys.current['ArrowLeft'] || keys.current['KeyA']) dx = -1;
         if (keys.current['ArrowRight'] || keys.current['KeyD']) dx = 1;
-        if (joystickRef.current.x !== 0 || joystickRef.current.y !== 0) { dx = joystickRef.current.x; dy = joystickRef.current.y; }
+        if (joystickRef.current.x !== 0 || joystickRef.current.y !== 0) {
+            dx = joystickRef.current.x; dy = joystickRef.current.y;
+        } else if (gamepadJoystickRef.current.x !== 0 || gamepadJoystickRef.current.y !== 0) {
+            dx = gamepadJoystickRef.current.x; dy = gamepadJoystickRef.current.y;
+        }
         
         if (dx !== 0 || dy !== 0) {
             const len = Math.sqrt(dx*dx + dy*dy);

@@ -360,7 +360,9 @@ const RewardScreen: React.FC<RewardScreenProps> = ({ rewards, onSelectReward, on
         {skipDisabled && skipDisabledMessage && (
           <div className="mb-2 text-center text-xs font-bold text-yellow-300">{trans(skipDisabledMessage, languageMode)}</div>
         )}
-        <button 
+        <button
+          data-gamepad-zone="reward-skip"
+          data-gamepad-order={0}
           onClick={interactionDisabled || skipDisabled ? undefined : onSkip}
           disabled={isLoading || interactionDisabled || skipDisabled}
           className="text-gray-400 hover:text-white border-b border-transparent hover:border-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed text-xs md:text-sm"

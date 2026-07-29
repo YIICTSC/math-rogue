@@ -69,6 +69,8 @@ const RIGHT_STICK_SCROLL_THRESHOLD = 0.55;
 const RIGHT_STICK_SCROLL_STEP = 56;
 const OPEN_GAMEPAD_KEYBOARD_EVENT = 'learning-rogue:open-gamepad-keyboard';
 const OPEN_GAMEPAD_SYSTEM_MENU_EVENT = 'learning-rogue:open-gamepad-system-menu';
+const GAMEPAD_AXES_EVENT = 'learning-rogue:gamepad-axes';
+const DUNGEON_DIAGONAL_LOCK_EVENT = 'learning-rogue:dungeon-diagonal-lock';
 const FOCUSABLE_SELECTOR = [
   'button:not(:disabled)',
   'a[href]',
@@ -420,7 +422,7 @@ const activateFocusedElement = () => {
   if (!isHTMLElement(active) || active === document.body || active === document.documentElement) {
     const first = getInitialFocusableElement();
     first?.focus({ preventScroll: true });
-    if (first?.matches('button:not(:disabled), a[href], [role="button"]')) first.click();
+    if (first?.matches('button:not(:disabled), a[href], input:not(:disabled), [role="button"]')) first.click();
     return;
   }
   if (
@@ -432,7 +434,7 @@ const activateFocusedElement = () => {
     }));
     return;
   }
-  if (active.matches('button:not(:disabled), a[href], [role="button"], [tabindex]')) {
+  if (active.matches('button:not(:disabled), a[href], input:not(:disabled), [role="button"], [tabindex]')) {
     active.click();
   }
 };
@@ -523,6 +525,19 @@ const scrollWithRightStick = (amount: number) => {
 
 const triggerShortcutButton = (buttonName: ShortcutButtonName): boolean => {
   const modal = getTopmostVisibleGamepadModal();
+  const active = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+  if (
+    buttonName === 'Y'
+    && !modal
+    && active?.matches('[data-gamepad-delete-target]')
+  ) {
+    active.dispatchEvent(new MouseEvent('contextmenu', {
+      bubbles: true,
+      cancelable: true,
+      view: window,
+    }));
+    return true;
+  }
   if (!modal && triggerBattleShortcut(buttonName)) return true;
   const shortcutRoot: ParentNode = modal ?? document;
   const targets = Array.from(shortcutRoot.querySelectorAll<HTMLElement>(`[data-gamepad-shortcut~="${buttonName}"]`))
@@ -619,6 +634,24 @@ const handleZonedNavigation = (action: NavigationAction): boolean => {
   const activeRect = active.getBoundingClientRect();
   const activeCx = activeRect.left + activeRect.width / 2;
   const activeCy = activeRect.top + activeRect.height / 2;
+  const explicitZone = action === 'up'
+    ? active.dataset.gamepadUpZone
+    : active.dataset.gamepadDownZone;
+  if (explicitZone) {
+    const explicitCandidates = Array.from(root.querySelectorAll<HTMLElement>(`[data-gamepad-zone="${explicitZone}"]`))
+      .filter(isVisibleAndEnabled);
+    const explicitTarget = explicitCandidates.sort((a, b) => {
+      const rectA = a.getBoundingClientRect();
+      const rectB = b.getBoundingClientRect();
+      return Math.abs((rectA.left + rectA.width / 2) - activeCx)
+        - Math.abs((rectB.left + rectB.width / 2) - activeCx);
+    })[0];
+    if (explicitTarget) {
+      explicitTarget.focus({ preventScroll: true });
+      explicitTarget.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+    }
+    return true;
+  }
   const candidates = Array.from(root.querySelectorAll<HTMLElement>('[data-gamepad-zone]'))
     .filter(element => element.dataset.gamepadZone !== activeZone && isVisibleAndEnabled(element));
 
@@ -675,7 +708,16 @@ const handleActionFallback = (action: NavigationAction) => {
   if (adjustFocusedFormControl(action)) return;
 
   const keyboardGameplaySurface = document.querySelector(KEYBOARD_GAMEPLAY_SURFACE_SELECTOR);
-  if (keyboardGameplaySurface && action !== 'cancel' && !isTextEditingElement(document.activeElement)) {
+  const interactiveOverlayActive = Boolean(
+    modal
+    || document.querySelector('.main-challenge-screen, [data-gamepad-question-screen]'),
+  );
+  if (
+    keyboardGameplaySurface
+    && !interactiveOverlayActive
+    && action !== 'cancel'
+    && !isTextEditingElement(document.activeElement)
+  ) {
     return;
   }
 
@@ -717,7 +759,7 @@ const getAxisAction = (gamepad: Gamepad): NavigationAction | null => {
   return y > 0 ? 'down' : 'up';
 };
 
-const getDungeonDirectionKey = (gamepad: Gamepad): string | null => {
+const getDungeonDirectionKey = (gamepad: Gamepad, diagonalOnly = false): string | null => {
   const axisX = gamepad.axes[0] ?? 0;
   const axisY = gamepad.axes[1] ?? 0;
   let dx = Math.abs(axisX) >= AXIS_THRESHOLD ? (axisX > 0 ? 1 : -1) : 0;
@@ -728,6 +770,7 @@ const getDungeonDirectionKey = (gamepad: Gamepad): string | null => {
   if (gamepad.buttons[BUTTON_INDEX.DPAD_UP]?.pressed) dy = -1;
   if (gamepad.buttons[BUTTON_INDEX.DPAD_DOWN]?.pressed) dy = 1;
 
+  if (diagonalOnly && (dx === 0 || dy === 0)) return null;
   if (dx === -1 && dy === -1) return 'Home';
   if (dx === 1 && dy === -1) return 'PageUp';
   if (dx === -1 && dy === 1) return 'End';
@@ -755,6 +798,9 @@ export const useXboxControllerNavigation = () => {
     firstAt: 0,
     lastAt: 0,
   });
+  const goHomeJumpHeldRef = useRef(false);
+  const pokerDragSelectionRef = useRef<HTMLElement | null>(null);
+  const dungeonDiagonalLockRef = useRef(false);
 
   useEffect(() => {
     if (typeof window === 'undefined' || !('getGamepads' in navigator)) return;
@@ -839,6 +885,29 @@ export const useXboxControllerNavigation = () => {
       if (!handled) handleActionFallback(action);
     };
 
+    const dispatchGoHomeJump = (pressed: boolean) => {
+      if (pressed === goHomeJumpHeldRef.current) return;
+      goHomeJumpHeldRef.current = pressed;
+      window.dispatchEvent(new KeyboardEvent(pressed ? 'keydown' : 'keyup', {
+        key: ' ',
+        code: 'Space',
+        bubbles: true,
+        cancelable: true,
+      }));
+    };
+
+    const extendPokerSelection = (gamepad: Gamepad) => {
+      if (!gamepad.buttons[BUTTON_INDEX.A]?.pressed) {
+        pokerDragSelectionRef.current = null;
+        return;
+      }
+      const active = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+      if (!active?.matches('[data-gamepad-multiselect]')) return;
+      if (pokerDragSelectionRef.current === active) return;
+      pokerDragSelectionRef.current = active;
+      active.click();
+    };
+
     const handleKeyboardEmulation = (event: KeyboardEvent) => {
       const debugPreviewActive = Boolean(document.querySelector('.app-shell.gamepad-shortcuts-debug'));
       if (!debugPreviewActive || !event.isTrusted) return;
@@ -889,9 +958,29 @@ export const useXboxControllerNavigation = () => {
       const wasConnected = document.body.classList.contains('gamepad-connected');
       document.body.classList.toggle('gamepad-connected', Boolean(gamepad));
       if (gamepad && !wasConnected) scheduleInitialChoiceFocus();
+      if (!gamepad && wasConnected) {
+        dispatchGoHomeJump(false);
+        pokerDragSelectionRef.current = null;
+        window.dispatchEvent(new CustomEvent(GAMEPAD_AXES_EVENT, { detail: { x: 0, y: 0 } }));
+        if (dungeonDiagonalLockRef.current) {
+          dungeonDiagonalLockRef.current = false;
+          window.dispatchEvent(new CustomEvent(DUNGEON_DIAGONAL_LOCK_EVENT, { detail: { active: false } }));
+        }
+      }
 
       if (gamepad) {
-        const dungeonGameplayActive = Boolean(document.querySelector('.mini-game-dungeon-screen'));
+        const dungeonGameplayActive = Boolean(document.querySelector('.mini-game-dungeon-screen'))
+          && !getTopmostVisibleGamepadModal()
+          && !document.querySelector('.main-challenge-screen, [data-gamepad-question-screen]');
+        const goHomeGameplayActive = Boolean(document.querySelector('[data-gamepad-go-home-live="true"]'))
+          && !getTopmostVisibleGamepadModal()
+          && !document.querySelector('.main-challenge-screen, [data-gamepad-question-screen]');
+        const aPressed = Boolean(gamepad.buttons[BUTTON_INDEX.A]?.pressed);
+        if (goHomeGameplayActive) {
+          dispatchGoHomeJump(aPressed);
+        } else {
+          dispatchGoHomeJump(false);
+        }
         for (const [name, index] of Object.entries(BUTTON_INDEX) as [GamepadButtonName, number][]) {
           const action = BUTTON_TO_ACTION[name];
           const pressed = Boolean(gamepad.buttons[index]?.pressed);
@@ -900,6 +989,8 @@ export const useXboxControllerNavigation = () => {
             if (name === 'BACK') {
               markGamepadNavigation();
               window.dispatchEvent(new CustomEvent(OPEN_GAMEPAD_SYSTEM_MENU_EVENT));
+            } else if (goHomeGameplayActive && name === 'A') {
+              // Held Space is emitted above so jump height follows the A-button hold duration.
             } else if (dungeonGameplayActive && name.startsWith('DPAD_')) {
               // Dungeon movement is processed once below so simultaneous
               // horizontal/vertical input becomes one diagonal turn.
@@ -908,6 +999,7 @@ export const useXboxControllerNavigation = () => {
               if (!triggerShortcutButton(name as ShortcutButtonName) && action) runAction(action);
             } else if (action) {
               runAction(action);
+              if (action === 'left' || action === 'right') extendPokerSelection(gamepad);
             }
           }
           pressedRef.current[key] = pressed;
@@ -915,7 +1007,14 @@ export const useXboxControllerNavigation = () => {
 
         const now = performance.now();
         if (dungeonGameplayActive) {
-          const directionKey = getDungeonDirectionKey(gamepad);
+          const diagonalOnly = Boolean(gamepad.buttons[BUTTON_INDEX.X]?.pressed);
+          if (diagonalOnly !== dungeonDiagonalLockRef.current) {
+            dungeonDiagonalLockRef.current = diagonalOnly;
+            window.dispatchEvent(new CustomEvent(DUNGEON_DIAGONAL_LOCK_EVENT, {
+              detail: { active: diagonalOnly },
+            }));
+          }
+          const directionKey = getDungeonDirectionKey(gamepad, diagonalOnly);
           const heldDungeon = dungeonDirectionRef.current;
           if (!directionKey) {
             dungeonDirectionRef.current = { key: null, firstAt: 0, lastAt: 0 };
@@ -932,6 +1031,25 @@ export const useXboxControllerNavigation = () => {
           }
           heldActionRef.current = { action: null, firstAt: 0, lastAt: 0 };
         } else {
+          if (dungeonDiagonalLockRef.current) {
+            dungeonDiagonalLockRef.current = false;
+            window.dispatchEvent(new CustomEvent(DUNGEON_DIAGONAL_LOCK_EVENT, {
+              detail: { active: false },
+            }));
+          }
+          const survivor = !getTopmostVisibleGamepadModal()
+            && !document.querySelector('.main-challenge-screen, [data-gamepad-question-screen]')
+            ? document.querySelector('.mini-game-survivor-screen')
+            : null;
+          if (survivor) {
+            const rawX = gamepad.axes[0] ?? 0;
+            const rawY = gamepad.axes[1] ?? 0;
+            const x = Math.abs(rawX) < 0.16 ? 0 : rawX;
+            const y = Math.abs(rawY) < 0.16 ? 0 : rawY;
+            window.dispatchEvent(new CustomEvent(GAMEPAD_AXES_EVENT, {
+              detail: { x, y },
+            }));
+          }
           const axisAction = getAxisAction(gamepad);
           const held = heldActionRef.current;
           if (!axisAction) {
@@ -939,12 +1057,14 @@ export const useXboxControllerNavigation = () => {
           } else if (held.action !== axisAction) {
             heldActionRef.current = { action: axisAction, firstAt: now, lastAt: now };
             runAction(axisAction);
+            extendPokerSelection(gamepad);
           } else if (
             now - held.firstAt >= INITIAL_REPEAT_DELAY_MS
             && now - held.lastAt >= REPEAT_INTERVAL_MS
           ) {
             heldActionRef.current = { ...held, lastAt: now };
             runAction(axisAction);
+            extendPokerSelection(gamepad);
           }
         }
 
@@ -976,6 +1096,9 @@ export const useXboxControllerNavigation = () => {
       window.cancelAnimationFrame(frameId);
       if (initialChoiceFrameId) window.cancelAnimationFrame(initialChoiceFrameId);
       initialChoiceObserver.disconnect();
+      dispatchGoHomeJump(false);
+      window.dispatchEvent(new CustomEvent(GAMEPAD_AXES_EVENT, { detail: { x: 0, y: 0 } }));
+      window.dispatchEvent(new CustomEvent(DUNGEON_DIAGONAL_LOCK_EVENT, { detail: { active: false } }));
       window.removeEventListener('pointerdown', clearGamepadNavigation);
       window.removeEventListener('keydown', clearGamepadNavigation);
       window.removeEventListener('keydown', handleKeyboardEmulation);

@@ -1179,6 +1179,7 @@ const GoHomeDash: React.FC<{
 
     return (
         <div className="mini-game-go-home-screen w-full h-full bg-slate-950 text-white font-mono flex flex-col items-center p-4 relative overflow-hidden touch-none select-none"
+            data-gamepad-go-home-live={gameState === 'PLAYING' ? 'true' : undefined}
             onPointerDown={handlePointerDown} onPointerUp={handlePointerUp} onPointerLeave={handlePointerUp}>
             
             <div className="ios-safe-ui-x ios-safe-ui-header go-home-hud w-full flex justify-between items-start z-10 pointer-events-none mb-2">
@@ -1212,7 +1213,12 @@ const GoHomeDash: React.FC<{
 
             <div className="mt-4 flex flex-col items-center gap-2 pointer-events-none opacity-50 text-[10px] uppercase font-black tracking-widest">
                 <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-1"><Move size={12}/>{t('クリックかタップでジャンプ')}</div>
+                    <div className="flex items-center gap-1">
+                        <Move size={12}/>
+                        {languageMode === 'ENGLISH'
+                            ? 'CLICK / TAP / A: JUMP (HOLD TO ADJUST HEIGHT)'
+                            : t('クリック・タップ・Aでジャンプ（長押しで高さ調整）')}
+                    </div>
                 </div>
             </div>
 
@@ -1235,9 +1241,9 @@ const GoHomeDash: React.FC<{
             {gameState === 'LEVEL_UP' && (
                 <div data-gamepad-modal data-gamepad-initial-scope={`go-home-level-up-${level}`} className="absolute inset-0 z-[60] flex flex-col items-center justify-center bg-indigo-950/95 p-4 backdrop-blur-md animate-in fade-in" onPointerDown={e => e.stopPropagation()}>
                     <div className="flex items-center gap-4 mb-10 animate-bounce"><Star size={40} className="text-yellow-400 fill-current" /><h2 className="text-5xl font-black text-white italic tracking-tighter uppercase">Grade Up!</h2><Star size={40} className="text-yellow-400 fill-current" /></div>
-                    <div className="grid grid-cols-1 gap-4 w-full max-sm overflow-y-auto max-h-[60vh] p-2 custom-scrollbar">
-                        {upgradeOptions.map(card => (
-                            <div key={card.id} data-gamepad-initial-choice role="button" tabIndex={0} onClick={(e) => { e.stopPropagation(); selectUpgrade(card); }} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); selectUpgrade(card); } }} className="bg-slate-800 border-2 border-slate-600 rounded-3xl p-4 flex items-center text-left transition-all transform hover:scale-102 hover:border-yellow-400 shadow-xl group">
+                    <div className="grid grid-cols-1 gap-4 w-full max-sm overflow-y-auto max-h-[60vh] p-2 custom-scrollbar" data-gamepad-navigation-root>
+                        {upgradeOptions.map((card, index) => (
+                            <div key={card.id} data-gamepad-initial-choice={index === 0 ? true : undefined} data-gamepad-zone="go-home-upgrades" data-gamepad-order={index} role="button" tabIndex={0} onClick={(e) => { e.stopPropagation(); selectUpgrade(card); }} onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); selectUpgrade(card); } }} className="bg-slate-800 border-2 border-slate-600 rounded-3xl p-4 flex items-center text-left transition-all transform hover:scale-102 hover:border-yellow-400 shadow-xl group">
                                 <div className="p-3 bg-black/40 rounded-2xl mr-4 border border-slate-700 group-hover:border-yellow-500/50">{getSubjectIcon(card.iconType)}</div>
                                 <div className="flex-grow"><h3 className="text-lg font-black text-white leading-tight">{t(card.name)}</h3><p className="text-[10px] text-slate-400 font-bold leading-tight mt-1">{t(card.description)}</p></div>
                                 <ChevronRight size={20} className="text-slate-600 group-hover:text-yellow-400 transition-colors ml-2"/>

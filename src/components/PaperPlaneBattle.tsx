@@ -1404,7 +1404,7 @@ const PoolView: React.FC<{ pool: PoolState, onClose: () => void, languageMode?: 
     );
 };
 
-const EnergyCardView: React.FC<{ card: EnergyCard, onClick?: () => void, selected?: boolean, small?: boolean }> = ({ card, onClick, selected, small }) => {
+const EnergyCardView: React.FC<{ card: EnergyCard, onClick?: () => void, selected?: boolean, small?: boolean, gamepadOrder?: number }> = ({ card, onClick, selected, small, gamepadOrder }) => {
     const bgColor = card.color === 'ORANGE' ? 'bg-orange-500' : card.color === 'BLUE' ? 'bg-blue-500' : 'bg-slate-200 text-black';
     const borderColor = card.color === 'ORANGE' ? 'border-orange-700' : card.color === 'BLUE' ? 'border-blue-700' : 'border-slate-400';
     
@@ -1418,6 +1418,8 @@ const EnergyCardView: React.FC<{ card: EnergyCard, onClick?: () => void, selecte
     return (
         <div
             data-gamepad-zone="paper-hand"
+            data-gamepad-order={gamepadOrder}
+            data-paper-card-index={gamepadOrder}
             role="button"
             tabIndex={0}
             onClick={onClick}
@@ -1471,8 +1473,11 @@ const ShipPartView: React.FC<{
     pendingReplace?: boolean,
     showPower?: boolean,
     bonusPower?: number,
-    evalContext?: PartEvalContext
-}> = ({ part, onClick, onLongPress, languageMode = 'JAPANESE', isEnemy, highlight, pendingReplace, showPower = true, bonusPower = 0, evalContext }) => {
+    evalContext?: PartEvalContext,
+    gamepadZone?: string,
+    gamepadOrder?: number,
+    gamepadInitial?: boolean
+}> = ({ part, onClick, onLongPress, languageMode = 'JAPANESE', isEnemy, highlight, pendingReplace, showPower = true, bonusPower = 0, evalContext, gamepadZone, gamepadOrder, gamepadInitial }) => {
 
     const longPressTimer = useRef<any>(null);
     const t = (text: string) => trans(text, languageMode);
@@ -1552,8 +1557,14 @@ const ShipPartView: React.FC<{
 
     if (part.type === 'EMPTY') {
         return (
-            <div 
+            <div
+                role={onClick ? 'button' : undefined}
+                tabIndex={onClick ? 0 : undefined}
+                data-gamepad-zone={gamepadZone}
+                data-gamepad-order={gamepadOrder}
+                data-gamepad-initial-choice={gamepadInitial || undefined}
                 onClick={onClick}
+                onKeyDown={(event) => { if (onClick && (event.key === 'Enter' || event.key === ' ')) { event.preventDefault(); onClick(); } }}
                 className={`w-full h-full border border-dashed ${pendingReplace ? 'border-yellow-400 bg-yellow-900/30 animate-pulse' : 'border-slate-700 bg-black/20'} rounded flex items-center justify-center cursor-pointer select-none touch-none`}
                 style={{ WebkitUserSelect: 'none', WebkitTouchCallout: 'none' }}
             >
@@ -1568,8 +1579,14 @@ const ShipPartView: React.FC<{
     const partSprite = getPaperPlanePartSprite(part.name);
 
     return (
-        <div 
+        <div
+            role={onClick ? 'button' : undefined}
+            tabIndex={onClick ? 0 : undefined}
+            data-gamepad-zone={gamepadZone}
+            data-gamepad-order={gamepadOrder}
+            data-gamepad-initial-choice={gamepadInitial || undefined}
             onClick={onClick}
+            onKeyDown={(event) => { if (onClick && (event.key === 'Enter' || event.key === ' ')) { event.preventDefault(); onClick(); } }}
             onTouchStart={handleTouchStart}
             onTouchEnd={handleTouchEnd}
             onContextMenu={handleContextMenu}
@@ -2333,6 +2350,9 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; languageMode?: LanguageMo
         else {
             setSelectedCardId(id);
             audioService.playSound('select');
+            window.requestAnimationFrame(() => {
+                document.querySelector<HTMLElement>('[data-gamepad-zone="paper-battle-parts"]')?.focus({ preventScroll: true });
+            });
         }
     };
 
@@ -2436,6 +2456,13 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; languageMode?: LanguageMo
         setHand(currentHandList);
         setSelectedCardId(null);
         if (part.specialEffect !== 'RANK_UP') audioService.playSound('buff');
+        window.requestAnimationFrame(() => {
+            const nextIndex = Math.min(
+                noConsumeTriggered ? cardIndex + 1 : cardIndex,
+                Math.max(0, currentHandList.length - 1),
+            );
+            document.querySelector<HTMLElement>(`[data-paper-card-index="${nextIndex}"]`)?.focus({ preventScroll: true });
+        });
     };
 
     const handleMove = (dir: -1 | 1) => {
@@ -3539,6 +3566,8 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; languageMode?: LanguageMo
                                         part={part}
                                         languageMode={languageMode}
                                         onClick={() => handlePartClick((pRelIdx * 3) + i)}
+                                        gamepadZone="paper-battle-parts"
+                                        gamepadOrder={(pRelIdx * 3) + i}
                                         onLongPress={(p) => setTooltipPart(p)}
                                         highlight={!!selectedCardId}
                                         pendingReplace={!!pendingPart}
@@ -3591,10 +3620,10 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; languageMode?: LanguageMo
         const unlockedShips = SHIPS.filter(s => progress.rank >= s.unlockRank);
 
         return (
-            <div data-gamepad-initial-scope={`paper-setup-${setupStep}`} className="paper-plane-setup-screen w-full h-full bg-slate-900 text-white p-2 md:p-4 flex flex-col font-mono overflow-hidden md:overflow-y-auto relative">
+            <div data-gamepad-navigation-root data-gamepad-initial-scope={`paper-setup-${setupStep}`} className="paper-plane-setup-screen w-full h-full bg-slate-900 text-white p-2 md:p-4 flex flex-col font-mono overflow-hidden md:overflow-y-auto relative">
                 <PaperPlaneSceneBackdrop sprite={PAPER_PLANE_SCENE_BACKGROUNDS.setup} alpha={0.22} />
                 <div className="paper-plane-setup-header relative z-10 flex items-center mb-2 md:mb-6">
-                     <button onClick={onBack} className="text-gray-400 hover:text-white mr-2 md:mr-4"><ArrowLeft size={20}/></button>
+                     <button data-gamepad-zone="paper-setup-top" data-gamepad-order={0} onClick={onBack} className="text-gray-400 hover:text-white mr-2 md:mr-4"><ArrowLeft size={20}/></button>
                      <h2 className="text-lg md:text-2xl font-bold text-cyan-400">MISSION BRIEFING</h2>
                      <div className="ml-auto text-[10px] md:text-sm bg-indigo-900 px-2 md:px-3 py-1 rounded-full border border-indigo-500 flex items-center">
                          <Star size={14} className="mr-1 text-yellow-400"/> {t('ランク')}: {progress.rank}
@@ -3602,9 +3631,9 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; languageMode?: LanguageMo
                 </div>
 
                 <div className="paper-plane-setup-tabs relative z-10 flex justify-center mb-3 md:mb-8 gap-2 md:gap-4 border-b border-gray-700 pb-1 md:pb-2">
-                     <button onClick={() => setSetupStep('SHIP')} className={`px-3 md:px-4 py-1.5 md:py-2 rounded-t-lg font-bold text-xs md:text-base transition-colors ${setupStep==='SHIP'?'bg-cyan-700 text-white':'bg-slate-800 text-gray-500'}`}>{t('機体')}</button>
-                     <button onClick={() => setSetupStep('PILOT')} className={`px-3 md:px-4 py-1.5 md:py-2 rounded-t-lg font-bold text-xs md:text-base transition-colors ${setupStep==='PILOT'?'bg-cyan-700 text-white':'bg-slate-800 text-gray-500'}`}>{t('パイロット')}</button>
-                     <button onClick={() => setSetupStep('MISSION')} className={`px-3 md:px-4 py-1.5 md:py-2 rounded-t-lg font-bold text-xs md:text-base transition-colors ${setupStep==='MISSION'?'bg-cyan-700 text-white':'bg-slate-800 text-gray-500'}`}>{t('任務')}</button>
+                     <button data-gamepad-zone="paper-setup-tabs" data-gamepad-order={0} onClick={() => setSetupStep('SHIP')} className={`px-3 md:px-4 py-1.5 md:py-2 rounded-t-lg font-bold text-xs md:text-base transition-colors ${setupStep==='SHIP'?'bg-cyan-700 text-white':'bg-slate-800 text-gray-500'}`}>{t('機体')}</button>
+                     <button data-gamepad-zone="paper-setup-tabs" data-gamepad-order={1} onClick={() => setSetupStep('PILOT')} className={`px-3 md:px-4 py-1.5 md:py-2 rounded-t-lg font-bold text-xs md:text-base transition-colors ${setupStep==='PILOT'?'bg-cyan-700 text-white':'bg-slate-800 text-gray-500'}`}>{t('パイロット')}</button>
+                     <button data-gamepad-zone="paper-setup-tabs" data-gamepad-order={2} onClick={() => setSetupStep('MISSION')} className={`px-3 md:px-4 py-1.5 md:py-2 rounded-t-lg font-bold text-xs md:text-base transition-colors ${setupStep==='MISSION'?'bg-cyan-700 text-white':'bg-slate-800 text-gray-500'}`}>{t('任務')}</button>
                 </div>
 
                 <div className="paper-plane-setup-content relative z-10 flex-1 min-h-0 max-w-4xl mx-auto w-full">
@@ -3613,9 +3642,15 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; languageMode?: LanguageMo
                              {SHIPS.map(ship => {
                                  const isUnlocked = progress.rank >= ship.unlockRank;
                                  return (
-                                     <div 
-                                        key={ship.id} 
+                                     <div
+                                        key={ship.id}
+                                        role="button"
+                                        tabIndex={isUnlocked ? 0 : -1}
+                                        data-gamepad-initial-choice={isUnlocked && ship.id === unlockedShips[0]?.id ? true : undefined}
+                                        data-gamepad-zone="paper-setup-ships"
+                                        data-gamepad-order={SHIPS.indexOf(ship)}
                                         onClick={() => isUnlocked && setSelectedShipId(ship.id)}
+                                        onKeyDown={(event) => { if (isUnlocked && (event.key === 'Enter' || event.key === ' ')) { event.preventDefault(); setSelectedShipId(ship.id); } }}
                                         className={`paper-plane-setup-card border-2 p-2 md:p-6 rounded-lg md:rounded-xl flex flex-col items-center cursor-pointer transition-all relative overflow-hidden ${selectedShipId === ship.id ? 'border-cyan-400 bg-slate-800 shadow-[0_0_20px_rgba(34,211,238,0.3)]' : 'border-slate-600 bg-slate-900 hover:bg-slate-800'} ${!isUnlocked ? 'opacity-50 grayscale' : ''}`}
                                      >
                                          <div className={`w-full h-16 md:h-32 ${ship.color} mb-2 md:mb-4 rounded-lg flex items-center justify-center relative overflow-hidden`}>
@@ -3649,10 +3684,16 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; languageMode?: LanguageMo
 
                             <div className="paper-plane-pilot-grid grid grid-cols-3 gap-2 md:gap-6 w-full mb-2 md:mb-6">
                                 {pilotOptions.map((pilot, i) => (
-                                    <div 
+                                    <div
                                         key={i}
+                                        role="button"
+                                        tabIndex={0}
+                                        data-gamepad-initial-choice={i === 0 ? true : undefined}
+                                        data-gamepad-zone="paper-setup-pilots"
+                                        data-gamepad-order={i}
                                         className={`paper-plane-setup-card relative border-2 p-2 md:p-4 rounded-lg md:rounded-xl cursor-pointer transition-all flex flex-col h-full ${selectedPilotIndex === i ? 'border-yellow-400 bg-slate-800 shadow-[0_0_15px_rgba(250,204,21,0.3)] md:scale-105' : 'border-slate-600 bg-slate-900 hover:border-slate-400'}`}
                                         onClick={() => setSelectedPilotIndex(i)}
+                                        onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); setSelectedPilotIndex(i); } }}
                                     >
                                         <div className="absolute top-2 right-2">
                                             <button 
@@ -3848,7 +3889,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; languageMode?: LanguageMo
          const buffGrid = calculateBuffGrid(player.parts);
 
          return (
-             <div className="paper-plane-equip-screen w-full h-full bg-slate-900 text-white p-4 font-mono flex flex-col items-center relative overflow-y-auto">
+             <div data-gamepad-navigation-root data-gamepad-initial-scope="paper-reward-equip" className="paper-plane-equip-screen w-full h-full bg-slate-900 text-white p-4 font-mono flex flex-col items-center relative overflow-y-auto">
                  <PaperPlaneSceneBackdrop sprite={PAPER_PLANE_SCENE_BACKGROUNDS.reward} alpha={0.18} />
                  <RenderTooltip />
                  <div className="paper-plane-equip-header text-center mb-6 mt-4">
@@ -3876,10 +3917,14 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; languageMode?: LanguageMo
                                  const r = Math.floor(i / SHIP_WIDTH);
                                  const c = i % SHIP_WIDTH;
                                  return (
-                                     <div key={i} className="w-16 h-16 md:w-20 md:h-20" onClick={() => handlePartEquip(i)}>
+                                     <div key={i} className="w-16 h-16 md:w-20 md:h-20">
                                          <ShipPartView
                                              part={p}
                                              languageMode={languageMode}
+                                             onClick={() => handlePartEquip(i)}
+                                             gamepadZone="paper-equip-parts"
+                                             gamepadOrder={i}
+                                             gamepadInitial={i === 0}
                                              pendingReplace={true}
                                              onLongPress={(p) => setTooltipPart(p)}
                                              bonusPower={buffGrid[r][c] + player.passivePower}
@@ -3892,10 +3937,10 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; languageMode?: LanguageMo
                  </div>
 
                  <div className="paper-plane-equip-actions flex gap-4 shrink-0 pb-8">
-                     <button onClick={handleStorePart} className="bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-lg font-bold shadow-lg flex items-center">
+                     <button data-gamepad-zone="paper-equip-actions" data-gamepad-order={0} onClick={handleStorePart} className="bg-blue-600 hover:bg-blue-500 text-white px-8 py-3 rounded-lg font-bold shadow-lg flex items-center">
                          <Archive size={20} className="mr-2"/> {t('格納庫に保管')}
                      </button>
-                     <button onClick={handleDiscardReward} className="bg-red-600 hover:bg-red-500 text-white px-8 py-3 rounded-lg font-bold shadow-lg flex items-center">
+                     <button data-gamepad-zone="paper-equip-actions" data-gamepad-order={1} onClick={handleDiscardReward} className="bg-red-600 hover:bg-red-500 text-white px-8 py-3 rounded-lg font-bold shadow-lg flex items-center">
                          <Trash2 size={20} className="mr-2"/> {t('破棄して進む')}
                      </button>
                  </div>
@@ -3907,7 +3952,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; languageMode?: LanguageMo
         const buffGrid = calculateBuffGrid(player.parts);
 
         return (
-            <div className="paper-plane-hangar-screen w-full h-full bg-slate-900 text-white p-4 font-mono flex flex-col items-center relative overflow-hidden">
+            <div data-gamepad-navigation-root data-gamepad-initial-scope="paper-hangar" className="paper-plane-hangar-screen w-full h-full bg-slate-900 text-white p-4 font-mono flex flex-col items-center relative overflow-hidden">
                 <PaperPlaneSceneBackdrop sprite={PAPER_PLANE_SCENE_BACKGROUNDS.hangar} alpha={0.2} />
                 <RenderTooltip />
                 <div className="paper-plane-hangar-header text-center mb-4 mt-2 shrink-0">
@@ -3929,6 +3974,9 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; languageMode?: LanguageMo
                                             part={p}
                                             languageMode={languageMode}
                                             onClick={() => handleHangarAction('SHIP', i)}
+                                            gamepadZone="paper-hangar-ship"
+                                            gamepadOrder={i}
+                                            gamepadInitial={i === 0}
                                             onLongPress={(p) => setTooltipPart(p)}
                                             highlight={hangarSelection?.loc === 'SHIP' && hangarSelection.idx === i}
                                             bonusPower={buffGrid[r][c] + player.passivePower}
@@ -3960,6 +4008,8 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; languageMode?: LanguageMo
                                         part={p}
                                         languageMode={languageMode}
                                         onClick={() => handleHangarAction('INV', i)}
+                                        gamepadZone="paper-hangar-inventory"
+                                        gamepadOrder={i}
                                         onLongPress={(p) => setTooltipPart(p)}
                                         highlight={hangarSelection?.loc === 'INV' && hangarSelection.idx === i}
                                     />
@@ -3969,8 +4019,13 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; languageMode?: LanguageMo
                                 </div>
                             ))}
                             <div
+                                role="button"
+                                tabIndex={0}
+                                data-gamepad-zone="paper-hangar-inventory"
+                                data-gamepad-order={player.partInventory.length}
                                 className="paper-plane-hangar-empty-slot w-16 h-16 md:w-24 md:h-24 relative"
                                 onClick={() => handleHangarAction('INV', player.partInventory.length)}
+                                onKeyDown={(event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); handleHangarAction('INV', player.partInventory.length); } }}
                             >
                                 <ShipPartView
                                     part={createEmptyPart('hangar_inventory_empty')}
@@ -3982,7 +4037,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; languageMode?: LanguageMo
                     </div>
                 </div>
 
-                <button onClick={() => { setPhase('VACATION'); setHangarSelection(null); }} className="paper-plane-hangar-back bg-gray-600 hover:bg-gray-500 text-white px-8 py-3 rounded-lg font-bold shadow-lg flex items-center mt-4 shrink-0">
+                <button data-gamepad-zone="paper-hangar-actions" data-gamepad-order={0} onClick={() => { setPhase('VACATION'); setHangarSelection(null); }} className="paper-plane-hangar-back bg-gray-600 hover:bg-gray-500 text-white px-8 py-3 rounded-lg font-bold shadow-lg flex items-center mt-4 shrink-0">
                     <ArrowLeft size={20} className="mr-2"/> {t('休暇に戻る')}
                 </button>
             </div>
@@ -4195,8 +4250,8 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; languageMode?: LanguageMo
                     {isEndless && <span className="ml-2 text-purple-400 text-xs border border-purple-500 px-1 rounded">ENDLESS</span>}
                 </div>
                 <div className="flex gap-2">
-                    <button onClick={() => setShowGameHelp(true)} className="bg-slate-800 border border-slate-600 px-2 py-1 rounded text-xs hover:bg-slate-700 flex items-center"><HelpCircle size={14} className="mr-1"/> HELP</button>
-                    <button onClick={() => setShowPool(!showPool)} className="bg-slate-800 border border-slate-600 px-2 py-1 rounded text-xs hover:bg-slate-700">POOL</button>
+                    <button data-gamepad-zone="paper-top" data-gamepad-order={0} onClick={() => setShowGameHelp(true)} className="bg-slate-800 border border-slate-600 px-2 py-1 rounded text-xs hover:bg-slate-700 flex items-center"><HelpCircle size={14} className="mr-1"/> HELP</button>
+                    <button data-gamepad-zone="paper-top" data-gamepad-order={1} onClick={() => setShowPool(!showPool)} className="bg-slate-800 border border-slate-600 px-2 py-1 rounded text-xs hover:bg-slate-700">POOL</button>
                 </div>
             </div>
 
@@ -4287,13 +4342,14 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; languageMode?: LanguageMo
                          <button onClick={() => setShowHandHelp(true)} className="text-gray-500 hover:text-white"><HelpCircle size={14}/></button>
                     </div>
                     <div className="flex-1 flex flex-wrap gap-1 content-start overflow-y-auto px-2 py-1 custom-scrollbar">
-                        {hand.map(card => (
+                        {hand.map((card, cardIndex) => (
                             <EnergyCardView 
                                 key={card.id} 
                                 card={card} 
                                 onClick={() => handleCardSelect(card.id)} 
                                 selected={selectedCardId === card.id}
                                 small={true}
+                                gamepadOrder={cardIndex}
                             />
                         ))}
                         {hand.length === 0 && <div className="text-gray-600 text-xs w-full text-center mt-8">NO ENERGY</div>}
