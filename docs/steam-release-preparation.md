@@ -62,6 +62,11 @@
   コントローラーフォーカス再修正版をWindows x64で再生成し、対象回帰テスト5項目と
   Steam配布物検証に合格した。SteamPipe Build ID `24445575`、Depot Manifest ID
   `8015492186608577460`として、非公開`internal`ブランチへ反映済み。
+- 2026-07-29の上部UIモーダル15導線・フォーカス復帰・課題配信画面の管理ポータル導線を
+  含むコミット`cc80c10`からWindows x64版を再生成した。Steam配布物検証に合格し、
+  SteamPipe Build ID `24446023`、Depot Manifest ID `2531377616869947134`として
+  `SetLive=internal`で非公開`internal`ブランチへ反映済み。Steamクライアント側で
+  `internal`ベータを選択して最新版をテストできる。
 - Steamストア用の実ゲーム画面7枚（1920×1080）を `release/steam/store-assets/screenshots/` に準備済み。うち追加2枚はチュートリアルを閉じた戦闘画面と、戦闘後の学習問題画面。
 - ImageGenで作成したキービジュアルと正式ロゴを用い、Steam規定寸法のカプセル／ライブラリ／アイコン素材10点を `release/steam/store-assets/generated/` に準備済み。
 
@@ -115,6 +120,7 @@ STEAM_APP_ID=000000 STEAM_DEPOT_ID=000001 pnpm run steam:config
 - [x] Build `24442792` を非公開`internal`ブランチへアップロード
 - [x] Build `24444544` を非公開`internal`ブランチへアップロード
 - [x] Build `24445575` を非公開`internal`ブランチへアップロード
+- [x] Build `24446023` を非公開`internal`ブランチへアップロード
 - [x] Beta Testing／Developer Compパッケージを確認
 - [ ] Windows版Steamクライアントからインストール・起動・終了を確認
 
