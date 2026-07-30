@@ -90,6 +90,11 @@
   コミット`6239caa`から本番Windows x64版を再生成し、Steam配布物検証に合格した。
   SteamPipe Build ID `24462204`、Depot Manifest ID `5658717221692985068`として
   アップロードし、`internal`とPublic defaultの両ブランチへ反映済み。
+- iPhone横画面のマジック編レリック表示と変身後ボイスを改善した共通本番ソース
+  コミット`bd46ab7`からWindows x64版を再生成し、Steam配布物検証に合格した。
+  2026-07-30にSteamPipe Build ID `24465098`としてアップロードし、
+  非公開`internal`ブランチへ反映した。Steamworksのビルド一覧で
+  `internal`がBuild ID `24465098`を参照し、使用状況100%であることを確認済み。
 - 実ゲーム画面7枚をSteamworksへ登録し、スクリーンショット必須条件を満たした。
 - カプセル／ライブラリ素材はSteamworks登録欄まで確認済み。Chrome拡張の
   「ファイルのURLへのアクセスを許可」は有効化済み。ただしSteamworksの画像欄は
@@ -172,6 +177,7 @@ STEAM_APP_ID=000000 STEAM_DEPOT_ID=000001 pnpm run steam:config
 - [x] Build `24447060` をPublic defaultブランチへ反映
 - [x] Build `24462204` を非公開`internal`ブランチへアップロード
 - [x] Build `24462204` をPublic defaultブランチへ反映
+- [x] Build `24465098` を非公開`internal`ブランチへアップロード
 - [x] Beta Testing／Developer Compパッケージを確認
 - [ ] Windows版Steamクライアントからインストール・起動・終了を確認
 

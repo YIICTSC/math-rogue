@@ -173,6 +173,19 @@ App ReviewのBuild 21から22への差し替えは、App Store Connectの配信�
 審査メモをBuild 22の修正内容へ更新し、2026-07-30にApp Reviewへ再提出済み。
 現在のステータスは「審査待ち」、公開方法は手動リリース。
 
+同日、マジック編のiPhone横画面で主人公専用レリックの名称・説明・所持数を
+1行で表示するレイアウトへ調整し、変身後ボイスから遅延・フィルタ・フィードバックを
+除去して原音再生へ統一したBuild 23を作成した。Apple Distribution署名、
+iOS 26.2 SDK、arm64、iOS 15.0以上、Version 1.0.0でReleaseアーカイブを生成し、
+App Store Connectへのアップロードに成功した。アーカイブは
+`build/ios/LearningRogue-1.0.0-23.xcarchive`。
+
+Build 23を内部テスト「学習ローグ テストプレイ」と外部テスト
+「学習ローグ 外部テスト」へ追加し、テスト内容を更新して外部TestFlight審査へ
+提出した。App Store版はBuild 22の審査提出を取り下げ、Build 23へ差し替え、
+審査メモも最新の修正内容へ更新して2026-07-30 13:01に再提出した。
+現在のApp Reviewステータスは「審査待ち」、公開方法は手動リリース。
+
 ## 開発コマンド
 
 ```bash
@@ -254,6 +267,9 @@ IOS_SIMULATOR="iPad Pro 11-inch (M4)" npm run ios:run
 - [x] Build 22のReleaseアーカイブ生成とApp Store Connectへのアップロード
 - [x] TestFlight内部・外部テストへBuild 22を追加し、外部テスト審査へ提出
 - [x] App Store版をBuild 22へ差し替えてApp Reviewへ再提出
+- [x] Build 23のReleaseアーカイブ生成とApp Store Connectへのアップロード
+- [x] TestFlight内部・外部テストへBuild 23を追加し、外部テスト審査へ提出
+- [x] App Store版をBuild 23へ差し替えてApp Reviewへ再提出
 
 課金モデルの検討結果は[`ios-monetization-plan.md`](./ios-monetization-plan.md)を参照する。
 
