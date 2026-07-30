@@ -1,4 +1,4 @@
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { copyFile, mkdir, readFile, writeFile } from 'node:fs/promises';
 import path from 'node:path';
 import sharp from 'sharp';
 
@@ -7,6 +7,7 @@ const sourcePath = path.join(rootDir, 'build', 'icon-source-imagegen.png');
 const socialCardPath = path.join(rootDir, 'docs', 'images', 'learning-rogue-social-card.png');
 const resourceDir = path.join(rootDir, 'android', 'app', 'src', 'main', 'res');
 const playAssetDir = path.join(rootDir, 'build', 'google-play');
+const playScreenshotDir = path.join(playAssetDir, 'screenshots');
 const source = await readFile(sourcePath);
 
 const densities = {
@@ -99,6 +100,28 @@ await sharp(socialCardPath)
   .png()
   .toFile(path.join(playAssetDir, 'feature-graphic-1024x500.png'));
 
+const playScreenshots = [
+  ['03-adventure-map.jpg', '01-adventure-map.jpg'],
+  ['04-card-battle.jpg', '02-card-battle.jpg'],
+  ['05-learning-quiz.jpg', '03-learning-quiz.jpg'],
+  ['06-card-battle.jpg', '04-card-battle.jpg'],
+  ['07-learning-quiz.jpg', '05-learning-quiz.jpg'],
+];
+await mkdir(playScreenshotDir, { recursive: true });
+await Promise.all(
+  playScreenshots.map(([sourceName, targetName]) =>
+    copyFile(
+      path.join(rootDir, 'release', 'steam', 'store-assets', 'screenshots', sourceName),
+      path.join(playScreenshotDir, targetName),
+    ).catch(async (error) => {
+      if (error.code !== 'ENOENT') throw error;
+      // Store screenshots are checked in so clean clones can regenerate icons
+      // before a fresh Steam screenshot capture has been prepared.
+      await readFile(path.join(playScreenshotDir, targetName));
+    }),
+  ),
+);
+
 await writeFile(
   path.join(playAssetDir, 'README.txt'),
   [
@@ -109,6 +132,10 @@ await writeFile(
     '',
     'feature-graphic-1024x500.png',
     '  Google Play feature graphic, 1024 x 500 px, RGB PNG',
+    '',
+    'screenshots/01-adventure-map.jpg ... 05-learning-quiz.jpg',
+    '  Actual gameplay screenshots, 1920 x 1080 px.',
+    '  Upload the set to phone, 7-inch tablet, and 10-inch tablet listings.',
     '',
     'Store copy, data-safety draft, and release checklist:',
     '  ../../docs/google-play-release.md',
