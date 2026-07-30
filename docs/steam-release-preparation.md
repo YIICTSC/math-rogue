@@ -101,6 +101,10 @@
   `scripts/generate-steam-trailer.swift`。VideoToolboxを利用できない場合は
   `scripts/generate-steam-trailer-ffmpeg.sh` を使用する。完成ファイルは
   `release/steam/store-assets/trailer/learning-rogue-gameplay-trailer.mp4`。
+- Steamworksに予告編枠を作成し、公開表示名を
+  「学習ローグ ゲームプレイトレーラー」に設定済み。動画欄は
+  ドラッグ＆ドロップ専用でブラウザ自動操作からローカルファイルを渡せないため、
+  完成MP4の投入のみ保留。
 - Steamworksのリリースチェックリストでは、基本情報、説明、コンテンツアンケート、
   システム要件、コントローラー説明、スクリーンショット、サポート、タグ、
   ビルド／デポ設定が完了済み。未完了は予定リリース日、カプセル画像、
@@ -254,7 +258,7 @@ Steamの基本カプセルには、ゲーム画像、製品名、正式なサブ
 - [x] Library Logo（透明背景、ローカル準備済み、Steamworksへの登録待ち）
 - [x] Shortcut Icon／App Icon（Windows実行ファイルとElectronウィンドウへ反映済み）
 - [x] ゲームプレイ中心のスクリーンショット（7枚をSteamworksへ登録済み）
-- [x] ゲームプレイトレーラー（ローカル生成・映像／音声検証済み、Steamworksへの登録待ち）
+- [x] ゲームプレイトレーラー（ローカル生成・映像／音声検証・Steamworks枠作成済み、MP4投入待ち）
 
 画像を新規作成する場合はImageGenを使用し、Steam公式テンプレートの最新寸法へ合わせる。
 
