@@ -165,9 +165,11 @@ Build 21はTestFlightの内部・外部テストグループへ追加済みで�
 
 Apple Distribution署名、iOS 26.2 SDK、arm64、iOS 15.0以上、Version 1.0.0、
 Build 22のReleaseアーカイブ生成とApp Store Connectへのアップロードに成功した。
-アーカイブは`build/ios/LearningRogue-1.0.0-22.xcarchive`。TestFlightグループへの
-割り当てとApp ReviewのBuild 21から22への差し替えは、App Store Connectへの
-再ログイン後に行う。
+アーカイブは`build/ios/LearningRogue-1.0.0-22.xcarchive`。Build 22を内部テスト
+「学習ローグ テストプレイ」と外部テスト「学習ローグ 外部テスト」へ追加し、
+テスト内容を更新して外部TestFlight審査へ提出した。外部グループは2名。
+App ReviewのBuild 21から22への差し替えは、App Store Connectの配信ページ本文が
+読み込まれないため未完了。
 
 ## 開発コマンド
 
@@ -248,7 +250,7 @@ IOS_SIMULATOR="iPad Pro 11-inch (M4)" npm run ios:run
 - [x] TestFlight内部・外部テストへBuild 21を追加
 - [x] App Store版をBuild 21へ差し替えてApp Reviewへ再提出
 - [x] Build 22のReleaseアーカイブ生成とApp Store Connectへのアップロード
-- [ ] TestFlight内部・外部テストへBuild 22を追加
+- [x] TestFlight内部・外部テストへBuild 22を追加し、外部テスト審査へ提出
 - [ ] App Store版をBuild 22へ差し替えてApp Reviewへ再提出
 
 課金モデルの検討結果は[`ios-monetization-plan.md`](./ios-monetization-plan.md)を参照する。
