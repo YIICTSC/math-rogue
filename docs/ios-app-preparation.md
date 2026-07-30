@@ -156,6 +156,19 @@ Build 21はTestFlightの内部・外部テストグループへ追加済みで�
 審査提出を取り下げ、審査メモを本番仕様へ更新したうえでBuild 21を再提出した。
 2026-07-29 16:35時点のApp Reviewステータスは「審査待ち」、公開方法は手動リリース。
 
+2026-07-30にBuild 22を作成した。摩擦熱と幾何学模様を含む被弾時発動カードは、
+説明どおりスタックごとに5ダメージを与えるようランタイム処理を修正し、同系統カードを
+検査する回帰テストを追加した。iOSではCapacitorのアプリ状態通知を監視し、
+バックグラウンド移行時に音声を一時停止、フォアグラウンド復帰時に
+`AVAudioSession`、Web Audio、HTML Audioを順序付きで再開するようにした。
+再開失敗時の再試行と、HTMLメディア要素への直接フォールバックも追加した。
+
+Apple Distribution署名、iOS 26.2 SDK、arm64、iOS 15.0以上、Version 1.0.0、
+Build 22のReleaseアーカイブ生成とApp Store Connectへのアップロードに成功した。
+アーカイブは`build/ios/LearningRogue-1.0.0-22.xcarchive`。TestFlightグループへの
+割り当てとApp ReviewのBuild 21から22への差し替えは、App Store Connectへの
+再ログイン後に行う。
+
 ## 開発コマンド
 
 ```bash
@@ -234,6 +247,9 @@ IOS_SIMULATOR="iPad Pro 11-inch (M4)" npm run ios:run
 - iPhone/iPadのスクリーンショットと審査用説明
 - [x] TestFlight内部・外部テストへBuild 21を追加
 - [x] App Store版をBuild 21へ差し替えてApp Reviewへ再提出
+- [x] Build 22のReleaseアーカイブ生成とApp Store Connectへのアップロード
+- [ ] TestFlight内部・外部テストへBuild 22を追加
+- [ ] App Store版をBuild 22へ差し替えてApp Reviewへ再提出
 
 課金モデルの検討結果は[`ios-monetization-plan.md`](./ios-monetization-plan.md)を参照する。
 

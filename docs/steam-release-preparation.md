@@ -1,6 +1,6 @@
 # Steam版リリース準備
 
-更新日: 2026-07-29
+更新日: 2026-07-30
 
 ## 現在地
 
@@ -86,6 +86,11 @@
   `internal`とPublic defaultの両ブランチを同じBuildへ更新済み。
 - Steamストア用の実ゲーム画面7枚（1920×1080）を `release/steam/store-assets/screenshots/` に準備済み。うち追加2枚はチュートリアルを閉じた戦闘画面と、戦闘後の学習問題画面。
 - ImageGenで作成したキービジュアルと正式ロゴを用い、Steam規定寸法のカプセル／ライブラリ／アイコン素材10点を `release/steam/store-assets/generated/` に準備済み。
+- 摩擦熱などの被弾時発動カード、音声復帰安定化、最終コントローラー修正を含む
+  コミット`6239caa`から本番Windows x64版を再生成し、Steam配布物検証に合格した。
+  SteamPipe Build ID `24462204`、Depot Manifest ID `5658717221692985068`として
+  アップロードし、`internal`とPublic defaultの両ブランチへ反映済み。
+- 実ゲーム画面7枚をSteamworksへ登録し、スクリーンショット必須条件を満たした。
 
 ## ローカルのリリースコマンド
 
@@ -142,6 +147,8 @@ STEAM_APP_ID=000000 STEAM_DEPOT_ID=000001 pnpm run steam:config
 - [x] Build `24446504` を非公開`internal`ブランチへアップロード
 - [x] Build `24447060` を非公開`internal`ブランチへアップロード
 - [x] Build `24447060` をPublic defaultブランチへ反映
+- [x] Build `24462204` を非公開`internal`ブランチへアップロード
+- [x] Build `24462204` をPublic defaultブランチへ反映
 - [x] Beta Testing／Developer Compパッケージを確認
 - [ ] Windows版Steamクライアントからインストール・起動・終了を確認
 
@@ -229,7 +236,7 @@ Steamの基本カプセルには、ゲーム画像、製品名、正式なサブ
 - [x] Library Hero（文字なし、ローカル準備済み、Steamworksへの登録待ち）
 - [x] Library Logo（透明背景、ローカル準備済み、Steamworksへの登録待ち）
 - [x] Shortcut Icon／App Icon（Windows実行ファイルとElectronウィンドウへ反映済み）
-- [x] ゲームプレイ中心のスクリーンショット（ローカル準備済み、Steamworksへの登録待ち）
+- [x] ゲームプレイ中心のスクリーンショット（7枚をSteamworksへ登録済み）
 - [ ] ゲームプレイトレーラー
 
 画像を新規作成する場合はImageGenを使用し、Steam公式テンプレートの最新寸法へ合わせる。
