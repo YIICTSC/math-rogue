@@ -101,6 +101,8 @@
   `scripts/generate-steam-trailer.swift`。VideoToolboxを利用できない場合は
   `scripts/generate-steam-trailer-ffmpeg.sh` を使用する。完成ファイルは
   `release/steam/store-assets/trailer/learning-rogue-gameplay-trailer.mp4`。
+  現在のリモートGUIセッションではVideoToolboxエンコーダを利用できず、
+  シェル側の名前解決不調によりffmpegも取得できないため、完成MP4の再生成は保留。
 - Steamworksに予告編枠を作成し、公開表示名を
   「学習ローグ ゲームプレイトレーラー」に設定済み。動画欄は
   ドラッグ＆ドロップ専用でブラウザ自動操作からローカルファイルを渡せないため、
