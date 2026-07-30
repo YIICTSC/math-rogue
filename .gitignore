@@ -13,6 +13,7 @@ tmp/
 
 # Local App Store screenshot capture iterations. Final storefront images live in App Store Connect.
 build/app-store-screenshots/build*/
+build/steam-trailer-previews/
 
 # Generated voice source files are too large for the repo. Commit compressed OGG files instead.
 public/sfx/magic-voices/**/*.wav
