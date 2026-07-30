@@ -169,7 +169,9 @@ Build 22のReleaseアーカイブ生成とApp Store Connectへのアップロー
 「学習ローグ テストプレイ」と外部テスト「学習ローグ 外部テスト」へ追加し、
 テスト内容を更新して外部TestFlight審査へ提出した。外部グループは2名。
 App ReviewのBuild 21から22への差し替えは、App Store Connectの配信ページ本文が
-読み込まれないため未完了。
+読み込まれない状態を解消後、Build 21の審査提出を取り下げてBuild 22へ差し替えた。
+審査メモをBuild 22の修正内容へ更新し、2026-07-30にApp Reviewへ再提出済み。
+現在のステータスは「審査待ち」、公開方法は手動リリース。
 
 ## 開発コマンド
 
@@ -251,7 +253,7 @@ IOS_SIMULATOR="iPad Pro 11-inch (M4)" npm run ios:run
 - [x] App Store版をBuild 21へ差し替えてApp Reviewへ再提出
 - [x] Build 22のReleaseアーカイブ生成とApp Store Connectへのアップロード
 - [x] TestFlight内部・外部テストへBuild 22を追加し、外部テスト審査へ提出
-- [ ] App Store版をBuild 22へ差し替えてApp Reviewへ再提出
+- [x] App Store版をBuild 22へ差し替えてApp Reviewへ再提出
 
 課金モデルの検討結果は[`ios-monetization-plan.md`](./ios-monetization-plan.md)を参照する。
 
