@@ -95,12 +95,12 @@
   「ファイルのURLへのアクセスを許可」は有効化済み。ただしSteamworksの画像欄は
   非表示のファイル入力とドラッグ＆ドロップのみで、ブラウザ自動操作から
   ファイル選択イベントを取得できないため、登録操作のみ保留。
-- 実ゲーム画面7枚とゲーム内BGMから、28秒・1920×1080・H.264/AACの
-  ストア用トレーラーを生成し、向き・字幕・BGMを検証済み。生成スクリプトは
-  `scripts/generate-steam-trailer.swift`。端末再起動中はVideoToolboxの
-  エンコーダが利用できないため、再生成後の出力
-  `release/steam/store-assets/trailer/learning-rogue-gameplay-trailer.mp4`
-  をSteamworksへ登録する。
+- 実ゲーム画面7枚とゲーム内BGMから、28秒・1920×1080・30fps・
+  H.264 High/AAC LC（約8.1Mbps）のストア用トレーラーを生成し、
+  向き・字幕・BGM・4地点のプレビューを検証済み。標準生成スクリプトは
+  `scripts/generate-steam-trailer.swift`。VideoToolboxを利用できない場合は
+  `scripts/generate-steam-trailer-ffmpeg.sh` を使用する。完成ファイルは
+  `release/steam/store-assets/trailer/learning-rogue-gameplay-trailer.mp4`。
 - Steamworksのリリースチェックリストでは、基本情報、説明、コンテンツアンケート、
   システム要件、コントローラー説明、スクリーンショット、サポート、タグ、
   ビルド／デポ設定が完了済み。未完了は予定リリース日、カプセル画像、
@@ -254,7 +254,7 @@ Steamの基本カプセルには、ゲーム画像、製品名、正式なサブ
 - [x] Library Logo（透明背景、ローカル準備済み、Steamworksへの登録待ち）
 - [x] Shortcut Icon／App Icon（Windows実行ファイルとElectronウィンドウへ反映済み）
 - [x] ゲームプレイ中心のスクリーンショット（7枚をSteamworksへ登録済み）
-- [ ] ゲームプレイトレーラー（生成スクリプトとプレビュー検証済み。エンコーダ復帰後に再生成・Steamworks登録）
+- [x] ゲームプレイトレーラー（ローカル生成・映像／音声検証済み、Steamworksへの登録待ち）
 
 画像を新規作成する場合はImageGenを使用し、Steam公式テンプレートの最新寸法へ合わせる。
 
