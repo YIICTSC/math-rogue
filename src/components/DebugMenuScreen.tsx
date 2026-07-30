@@ -1981,7 +1981,7 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
                                         <h3 className="text-fuchsia-300 font-bold flex items-center">
                                             <Volume2 size={18} className="mr-2" /> マジック編 戦闘ボイス確認
                                         </h3>
-                                        <div className="text-xs text-gray-400">17人 / attack・damage・spell / 変身後エフェクト</div>
+                                        <div className="text-xs text-gray-400">17人 / attack・damage・spell / 変身後も原音</div>
                                     </div>
                                     <div className="grid grid-cols-1 lg:grid-cols-[260px_1fr] gap-4">
                                         <div className="bg-black/35 border border-gray-700 rounded-lg p-3 space-y-2">
@@ -2621,4 +2621,3 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
 };
 
 export default DebugMenuScreen;
-

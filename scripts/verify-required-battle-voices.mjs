@@ -3,6 +3,7 @@ import path from 'node:path';
 
 const root = process.cwd();
 const appSource = await readFile(path.join(root, 'src', 'App.tsx'), 'utf8');
+const audioServiceSource = await readFile(path.join(root, 'src', 'services', 'audioService.ts'), 'utf8');
 
 const requiredSourceFragments = [
   "const isOffensiveCard = card.type === CardType.ATTACK",
@@ -15,6 +16,14 @@ for (const fragment of requiredSourceFragments) {
   if (!appSource.includes(fragment)) {
     throw new Error(`Mandatory battle voice branch is missing: ${fragment}`);
   }
+}
+
+if (audioServiceSource.includes('magic-transform-voice') || audioServiceSource.includes('attachHtmlSfxEffect')) {
+  throw new Error('Transformed Magic voices must use the original voice without delay/filter effects.');
+}
+
+if (!audioServiceSource.includes('audio.volume = htmlVolume;')) {
+  throw new Error('Magic voices are not routed through the normal voice-volume path.');
 }
 
 const verifyVoiceFamily = async (family, requiredNames) => {

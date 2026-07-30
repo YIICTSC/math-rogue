@@ -444,6 +444,21 @@ const dispatchFormValueEvents = (element: HTMLInputElement | HTMLSelectElement) 
   element.dispatchEvent(new Event('change', { bubbles: true }));
 };
 
+const setNativeFormControlValue = (
+  element: HTMLInputElement | HTMLSelectElement,
+  value: string,
+) => {
+  const prototype = element instanceof HTMLInputElement
+    ? HTMLInputElement.prototype
+    : HTMLSelectElement.prototype;
+  const setter = Object.getOwnPropertyDescriptor(prototype, 'value')?.set;
+  if (setter) {
+    setter.call(element, value);
+  } else {
+    element.value = value;
+  }
+};
+
 const adjustFocusedFormControl = (action: NavigationAction): boolean => {
   const active = document.activeElement;
   if (active instanceof HTMLInputElement && active.type === 'range') {
@@ -452,9 +467,15 @@ const adjustFocusedFormControl = (action: NavigationAction): boolean => {
     const parsedMax = Number(active.max);
     const min = Number.isFinite(parsedMin) ? parsedMin : 0;
     const max = Number.isFinite(parsedMax) ? parsedMax : 100;
-    const step = active.step === 'any' ? 1 : Number(active.step || 1);
+    const parsedStep = active.step === 'any' ? 1 : Number(active.step || 1);
+    const step = Number.isFinite(parsedStep) && parsedStep > 0 ? parsedStep : 1;
+    const current = Number.isFinite(active.valueAsNumber) ? active.valueAsNumber : min;
     const direction = action === 'right' || action === 'up' ? 1 : -1;
-    active.valueAsNumber = Math.max(min, Math.min(max, active.valueAsNumber + step * direction));
+    const next = Math.max(min, Math.min(max, current + step * direction));
+    // React tracks controlled input values through an instance-level setter.
+    // Calling the native prototype setter keeps the tracker at the previous
+    // value so the following input/change events reach the component.
+    setNativeFormControlValue(active, String(next));
     dispatchFormValueEvents(active);
     return true;
   }
@@ -467,7 +488,7 @@ const adjustFocusedFormControl = (action: NavigationAction): boolean => {
       nextIndex += direction;
     } while (active.options[nextIndex]?.disabled);
     if (nextIndex < 0 || nextIndex >= active.options.length) return true;
-    active.selectedIndex = nextIndex;
+    setNativeFormControlValue(active, active.options[nextIndex].value);
     dispatchFormValueEvents(active);
     return true;
   }
@@ -866,12 +887,16 @@ export const useXboxControllerNavigation = () => {
       const modal = getTopmostVisibleGamepadModal();
       if (modal) {
         if (modal !== activeModalElement) {
-          if (!activeModalElement) {
+          const activeElement = document.activeElement instanceof HTMLElement
+            ? document.activeElement
+            : null;
+          const shouldCaptureReturnFocus = !activeModalElement
+            || !activeModalElement.isConnected
+            || (activeElement !== null && !activeModalElement.contains(activeElement));
+          if (shouldCaptureReturnFocus) {
             modalReturnFocus = lastControllerFocus?.isConnected
               ? lastControllerFocus
-              : document.activeElement instanceof HTMLElement
-                ? document.activeElement
-                : null;
+              : activeElement;
             modalReturnZone = modalReturnFocus?.dataset.gamepadZone ?? null;
             modalReturnOrder = modalReturnFocus?.dataset.gamepadOrder ?? null;
           }
@@ -900,6 +925,13 @@ export const useXboxControllerNavigation = () => {
         if (restoredTarget && isVisibleAndEnabled(restoredTarget)) {
           restoredTarget.focus({ preventScroll: true });
           restoredTarget.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+          const restoredScope = restoredTarget.closest<HTMLElement>(INITIAL_CHOICE_SCOPE_SELECTOR);
+          if (restoredScope) {
+            initializedChoiceScopes.set(
+              restoredScope,
+              restoredScope.dataset.gamepadInitialScope ?? '',
+            );
+          }
           modalReturnFocus = null;
           modalReturnZone = null;
           modalReturnOrder = null;
@@ -915,7 +947,10 @@ export const useXboxControllerNavigation = () => {
       // A newly opened modal should win over its underlying screen.
       for (const scope of scopes.reverse()) {
         const scopeKey = scope.dataset.gamepadInitialScope ?? '';
-        if (initializedChoiceScopes.get(scope) === scopeKey) continue;
+        const activeElement = document.activeElement instanceof HTMLElement
+          ? document.activeElement
+          : null;
+        if (initializedChoiceScopes.get(scope) === scopeKey && activeElement && scope.contains(activeElement)) continue;
         const choice = getTopLeftInitialChoice(scope);
         if (!choice) continue;
         choice.focus({ preventScroll: true });
@@ -1048,7 +1083,24 @@ export const useXboxControllerNavigation = () => {
       const gamepad = Array.from(gamepads).find(Boolean);
       const wasConnected = document.body.classList.contains('gamepad-connected');
       document.body.classList.toggle('gamepad-connected', Boolean(gamepad));
-      if (gamepad && !wasConnected) scheduleInitialChoiceFocus();
+      if (gamepad && !wasConnected) {
+        // Focus immediately on connection as well as on the next frame. On
+        // large challenge screens a queued animation frame can be delayed long
+        // enough for the controller to appear connected while focus stays on
+        // <body>.
+        focusPendingInitialChoice();
+        scheduleInitialChoiceFocus();
+      }
+      if (
+        gamepad
+        && (
+          document.activeElement === document.body
+          || !(document.activeElement instanceof HTMLElement)
+          || !isVisibleAndEnabled(document.activeElement)
+        )
+      ) {
+        scheduleInitialChoiceFocus();
+      }
       if (!gamepad && wasConnected) {
         dispatchGoHomeJump(false);
         pokerDragSelectionRef.current = null;

@@ -141,7 +141,7 @@ export const HIRAGANA_DEBUG_UI_EXACT: Record<string, string> = {
   '話者:': 'わしゃ:',
   '出現声': 'しゅつげんごえ',
   'マジック編 戦闘ボイス確認': 'マジックへん せんとうボイスかくにん',
-  '17人 / attack・damage・spell / 変身後エフェクト': '17にん / attack・damage・spell / へんしんごエフェクト',
+  '17人 / attack・damage・spell / 変身後も原音': '17にん / attack・damage・spell / へんしんごもげんおん',
   '高校編 戦闘ボイス確認': 'こうこうへん せんとうボイスかくにん',
   '9人 / 8カテゴリ / 各5種 / 要修正': '9にん / 8カテゴリ / かく5しゅ / ようしゅうせい',
   '要修正リスト': 'ようしゅうせいリスト',

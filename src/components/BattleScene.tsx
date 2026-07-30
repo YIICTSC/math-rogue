@@ -1625,8 +1625,8 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                     player.relics.map(r => {
                                         const counter = getRelicCounter(r.id);
                                         return (
-                                            <div key={r.id} className="bg-black/40 p-3 rounded border border-gray-600 flex items-start gap-3">
-                                                <div className="bg-gray-700 p-1.5 rounded-full border border-yellow-600 shrink-0 relative h-10 w-10">
+                                            <div key={r.id} className="battle-relic-list-row bg-black/40 p-3 rounded border border-gray-600 flex items-start gap-3">
+                                                <div className="battle-relic-list-icon bg-gray-700 p-1.5 rounded-full border border-yellow-600 shrink-0 relative h-10 w-10">
                                                     <RelicIcon id={r.id} alt={trans(r.name, languageMode)} />
                                                     {counter !== undefined && counter > 0 && (
                                                         <div className="absolute -top-2 -right-2 bg-red-600 text-white text-[10px] w-5 h-5 rounded-full flex items-center justify-center font-bold border border-white shadow-md">
@@ -1634,11 +1634,11 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                                         </div>
                                                     )}
                                                 </div>
-                                                <div>
-                                                    <div className="font-bold text-yellow-100 text-sm mb-1">{trans(r.name, languageMode)}</div>
-                                                    <div className="text-xs text-gray-400 leading-tight">{trans(r.description, languageMode)}</div>
+                                                <div className="battle-relic-list-copy">
+                                                    <div className="battle-relic-list-name font-bold text-yellow-100 text-sm mb-1">{trans(r.name, languageMode)}</div>
+                                                    <div className="battle-relic-list-description text-xs text-gray-400 leading-tight">{trans(r.description, languageMode)}</div>
                                                     {counter !== undefined && counter > 0 && (
-                                                        <div className="text-[10px] text-blue-300 mt-1">
+                                                        <div className="battle-relic-list-counter text-[10px] text-blue-300 mt-1">
                                                             Counter: {counter}
                                                         </div>
                                                     )}

@@ -13,7 +13,6 @@ const versionBgmPath = (path: string) =>
     `${path}${path.includes('?') ? '&' : '?'}v=${encodeURIComponent(APP_ASSET_VERSION)}`;
 const IS_IOS_BUILD = String(import.meta.env.VITE_APP_PLATFORM || '').trim().toLowerCase() === 'ios';
 
-type HtmlSfxEffect = 'magic-transform-voice';
 type CommonSoundEffect =
   | 'select'
   | 'attack'
@@ -63,7 +62,6 @@ class AudioService {
   private currentHtmlAudio: HTMLAudioElement | null = null;
   private activeBgmHtmlAudios: Set<HTMLAudioElement> = new Set();
   private bgmMediaSources: Map<HTMLAudioElement, MediaElementAudioSourceNode> = new Map();
-  private htmlSfxEffectCleanups: WeakMap<HTMLAudioElement, () => void> = new WeakMap();
   private playbackGeneration: number = 0;
   private pausedForAppBackground: boolean = false;
   private backgroundSuspendPromise: Promise<void> = Promise.resolve();
@@ -1319,8 +1317,6 @@ class AudioService {
       for (const audio of htmlAudios) {
           const timer = this.htmlSfxStopTimers.get(audio);
           if (timer) window.clearTimeout(timer);
-          this.htmlSfxEffectCleanups.get(audio)?.();
-          this.htmlSfxEffectCleanups.delete(audio);
           audio.onended = null;
           audio.pause();
           audio.currentTime = 0;
@@ -1359,23 +1355,18 @@ class AudioService {
       maxDurationMs: number,
       overlap: boolean,
       generation: number,
-      effect?: HtmlSfxEffect,
   ): Promise<boolean> {
       void this.resumeAudioContext();
       for (const path of paths) {
-          let effectCleanup = () => {};
           try {
               const audio = new Audio(path);
               audio.preload = 'auto';
               const htmlVolume = this.getHtmlSfxVolume(name);
-              audio.volume = effect ? 1 : htmlVolume;
-              effectCleanup = this.attachHtmlSfxEffect(audio, htmlVolume, effect);
-              this.htmlSfxEffectCleanups.set(audio, effectCleanup);
+              audio.volume = htmlVolume;
               await audio.play();
               if (!overlap && this.sfxPlaybackGenerations.get(name) !== generation) {
                   audio.pause();
                   audio.currentTime = 0;
-                  effectCleanup();
                   return true;
               }
               if (!overlap) this.stopActiveSfx(name);
@@ -1388,8 +1379,6 @@ class AudioService {
                   if (timer) window.clearTimeout(timer);
                   audios.delete(audio);
                   if (audios.size === 0) this.activeHtmlSfx.delete(name);
-                  effectCleanup();
-                  this.htmlSfxEffectCleanups.delete(audio);
               };
               audio.onended = cleanup;
               const timer = window.setTimeout(() => {
@@ -1420,52 +1409,10 @@ class AudioService {
                   this.htmlSfxStopTimers.set(audio, settleTimer);
               });
           } catch {
-              effectCleanup();
               // Try the next URL shape before falling back to WebAudio or synth.
           }
       }
       return false;
-  }
-
-  private attachHtmlSfxEffect(audio: HTMLAudioElement, volume: number, effect?: HtmlSfxEffect) {
-      if (!effect || !this.ctx || !this.sfxGain) return () => {};
-      try {
-          const source = this.ctx.createMediaElementSource(audio);
-          const dryGain = this.ctx.createGain();
-          const wetGain = this.ctx.createGain();
-          const delay = this.ctx.createDelay(0.5);
-          const feedback = this.ctx.createGain();
-          const filter = this.ctx.createBiquadFilter();
-
-          dryGain.gain.value = volume;
-          wetGain.gain.value = volume * 0.2;
-          delay.delayTime.value = 0.18;
-          feedback.gain.value = 0.24;
-          filter.type = 'lowpass';
-          filter.frequency.value = 2800;
-          filter.Q.value = 0.6;
-
-          source.connect(dryGain);
-          dryGain.connect(this.sfxGain);
-          source.connect(delay);
-          delay.connect(filter);
-          filter.connect(wetGain);
-          wetGain.connect(this.sfxGain);
-          filter.connect(feedback);
-          feedback.connect(delay);
-
-          return () => {
-              try { source.disconnect(); } catch {}
-              try { dryGain.disconnect(); } catch {}
-              try { wetGain.disconnect(); } catch {}
-              try { delay.disconnect(); } catch {}
-              try { feedback.disconnect(); } catch {}
-              try { filter.disconnect(); } catch {}
-          };
-      } catch {
-          audio.volume = volume;
-          return () => {};
-      }
   }
 
   private isVoiceSfxName(name: string) {
@@ -1593,7 +1540,7 @@ class AudioService {
       this.playMagicVoiceFile(heroId, voiceName, 2200, transformed);
   }
 
-  public playMagicVoiceFile(heroId: string | undefined, voiceName: string | undefined, maxDurationMs = 2200, transformed = false) {
+  public playMagicVoiceFile(heroId: string | undefined, voiceName: string | undefined, maxDurationMs = 2200, _transformed = false) {
       if (!heroId || !voiceName) return Promise.resolve(false);
       this.init();
       if (!this.ctx || !this.sfxGain || this.isMuted) return Promise.resolve(false);
@@ -1618,7 +1565,6 @@ class AudioService {
           maxDurationMs,
           false,
           generation,
-          transformed ? 'magic-transform-voice' : undefined,
       );
   }
 

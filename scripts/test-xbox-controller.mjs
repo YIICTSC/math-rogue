@@ -199,16 +199,38 @@ const run = async () => {
       executablePath: CHROME_PATH,
     });
     const context = await browser.newContext({ viewport: { width: 1440, height: 900 } });
-    const page = await context.newPage();
-    await installVirtualGamepad(page);
-    page.on('console', message => {
-      if (message.type() === 'error') process.stderr.write(`[browser] ${message.text()}\n`);
-    });
+    const configureTestPage = async targetPage => {
+      // App.tsx is intentionally large and the first Vite/Babel transform can
+      // exceed Playwright's 30-second navigation default on this Intel Mac.
+      targetPage.setDefaultNavigationTimeout(90_000);
+      targetPage.setDefaultTimeout(90_000);
+      await installVirtualGamepad(targetPage);
+      targetPage.on('console', message => {
+        if (message.type() === 'error') process.stderr.write(`[browser] ${message.text()}\n`);
+      });
+    };
+    let page = await context.newPage();
+    await configureTestPage(page);
+    const resetTestPage = async ({ clearStorage = false } = {}) => {
+      if (clearStorage && page.url().startsWith(BASE_URL)) {
+        await page.evaluate(() => {
+          localStorage.clear();
+          sessionStorage.clear();
+        });
+      }
+      await page.close();
+      page = await context.newPage();
+      await configureTestPage(page);
+    };
 
     const results = [];
     const test = async (name, callback) => {
       if (testFilter && !testFilter.test(name)) return;
       try {
+        // Keep each controller scenario independent. Several mini-games persist
+        // their current phase, which otherwise makes a later preview inherit a
+        // previous test's modal or battle screen.
+        await resetTestPage({ clearStorage: true });
         await callback();
         results.push({ name, ok: true });
         process.stdout.write(`✓ ${name}\n`);
@@ -373,8 +395,27 @@ const run = async () => {
       await press(page, 'B');
       expect(await page.locator('[data-gamepad-initial-scope^="battle-controller-items"]').count() === 0, 'Bで戦闘アイテム一覧が閉じない');
       await press(page, 'RT');
+      await page.waitForFunction(
+        () => document.activeElement?.getAttribute('data-gamepad-zone') === 'battle-enemies',
+        undefined,
+        { timeout: 3_000 },
+      ).catch(() => {});
       const activeAfterRt = await activeElementSnapshot(page);
-      expect(activeAfterRt?.zone === 'battle-enemies', `RT後のゾーンが敵ではない: ${activeAfterRt?.zone}`);
+      const battleRtDiagnostics = await page.evaluate(() => ({
+        active: document.activeElement?.outerHTML.slice(0, 240) ?? null,
+        enemies: document.querySelectorAll('[data-gamepad-zone="battle-enemies"]').length,
+        visibleModals: Array.from(document.querySelectorAll('[data-gamepad-modal], [role="dialog"][aria-modal="true"], .app-modal-overlay'))
+          .filter(element => {
+            const rect = element.getBoundingClientRect();
+            const style = getComputedStyle(element);
+            return style.visibility !== 'hidden' && style.display !== 'none' && rect.width > 0 && rect.height > 0;
+          })
+          .map(element => `${element.tagName}.${element.className}`.slice(0, 180)),
+      }));
+      expect(
+        activeAfterRt?.zone === 'battle-enemies',
+        `RT後のゾーンが敵ではない: ${activeAfterRt?.zone}; ${JSON.stringify(battleRtDiagnostics)}`,
+      );
       await press(page, 'RB');
       await press(page, 'Y');
     });
@@ -446,11 +487,28 @@ const run = async () => {
         await exerciseBoardModal();
         boardTested = true;
       }
-      await page.waitForFunction(() => document.activeElement?.getAttribute('data-gamepad-zone') === 'challenge-options');
+      await page.waitForFunction(
+        () => document.activeElement?.getAttribute('data-gamepad-zone') === 'challenge-options',
+        undefined,
+        { timeout: 5_000 },
+      ).catch(() => {});
       await delay(250);
+      const challengeFocusDiagnostics = await page.evaluate(() => ({
+        connected: document.body.classList.contains('gamepad-connected'),
+        scopeCount: document.querySelectorAll('[data-gamepad-initial-scope]').length,
+        choiceCount: document.querySelectorAll('[data-gamepad-initial-choice]').length,
+        optionCount: document.querySelectorAll('[data-gamepad-zone="challenge-options"]').length,
+        visibleModals: Array.from(document.querySelectorAll('[data-gamepad-modal], [role="dialog"][aria-modal="true"], .app-modal-overlay'))
+          .filter(element => {
+            const rect = element.getBoundingClientRect();
+            const style = getComputedStyle(element);
+            return style.visibility !== 'hidden' && style.display !== 'none' && rect.width > 0 && rect.height > 0;
+          })
+          .map(element => `${element.tagName}.${element.className}`.slice(0, 180)),
+      }));
       expect(
         await page.evaluate(() => document.activeElement?.getAttribute('data-gamepad-zone')) === 'challenge-options',
-        `問題選択肢に初期フォーカスがない: ${JSON.stringify(await activeElementSnapshot(page))}`,
+        `問題選択肢に初期フォーカスがない: ${JSON.stringify(await activeElementSnapshot(page))}; ${JSON.stringify(challengeFocusDiagnostics)}`,
       );
 
       expect(
@@ -714,6 +772,7 @@ const run = async () => {
     await test('帰宅ダッシュA長押しとサバイバーの連続アナログ軸を送出する', async () => {
       await page.goto(`${BASE_URL}/?gamepadTestScreen=MINI_GAME_GO_HOME`, { waitUntil: 'domcontentloaded' });
       await connect(page);
+      await page.waitForFunction(() => document.activeElement?.hasAttribute('data-gamepad-initial-choice'));
       await press(page, 'A');
       await page.waitForSelector('[data-gamepad-go-home-live="true"]');
       await page.evaluate(() => {
@@ -748,7 +807,20 @@ const run = async () => {
         await page.waitForSelector('.mini-game-dungeon-screen');
         await page.evaluate(() => {
           window.__gamepadTestKeys = [];
-          window.addEventListener('keydown', event => window.__gamepadTestKeys.push(event.key));
+          const directionKeys = new Set([
+            'Home', 'ArrowUp', 'PageUp', 'ArrowLeft',
+            'ArrowRight', 'End', 'ArrowDown', 'PageDown',
+          ]);
+          window.__gamepadDirectionCapture = event => {
+            if (!directionKeys.has(event.key)) return;
+            window.__gamepadTestKeys.push(event.key);
+            // Keep the randomly generated preview map stationary while all
+            // eight mappings are sampled. Otherwise a trap/question tile can
+            // open an overlay midway through the controller matrix.
+            event.preventDefault();
+            event.stopImmediatePropagation();
+          };
+          window.addEventListener('keydown', window.__gamepadDirectionCapture, true);
         });
         await connect(page);
 
@@ -778,6 +850,10 @@ const run = async () => {
         expect(!diagonalLockKeys.includes('ArrowRight'), `${screen}でX押下中に直進入力が通ってしまう`);
         expect(diagonalLockKeys.includes('PageDown'), `${screen}でX押下中の斜め入力が通らない`);
 
+        await page.evaluate(() => {
+          window.removeEventListener('keydown', window.__gamepadDirectionCapture, true);
+          delete window.__gamepadDirectionCapture;
+        });
         await press(page, 'RT');
         const logText = await page.locator('.dungeon-log-panel').innerText();
         expect(
