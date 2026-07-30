@@ -9,7 +9,9 @@
 - 現在の公開リリース: `9 (1.0.0)`
 - リリースノート: 学習ローグ 1.0.0 Androidクローズドテスト版
 - メーリングリスト: 学習ローグ内部テスター
-- 登録済みテスター: 2名
+- 登録済みテスター: 4名
+- Googleフォーム回答: 3件（うち2件を今回登録、1件はPlay Console入力確定待ち）
+- 応募フォーム: https://docs.google.com/forms/d/e/1FAIpQLSf6FH3FMp70YJgiBSbMDLq46sABfUouNjdzCqrlX7ztGL6UwA/viewform
 - フィードバック先: https://yiictsc.github.io/math-rogue/support.html
 - ウェブ参加リンク: https://play.google.com/apps/testing/jp.yusukeishige.learningrogue
 - Android端末用リンク: https://play.google.com/store/apps/details?id=jp.yusukeishige.learningrogue
@@ -34,8 +36,8 @@
 | --- | --- |
 | 1 | 登録済み |
 | 2 | 登録済み |
-| 3 | 募集中 |
-| 4 | 募集中 |
+| 3 | 登録済み |
+| 4 | 登録済み |
 | 5 | 募集中 |
 | 6 | 募集中 |
 | 7 | 募集中 |

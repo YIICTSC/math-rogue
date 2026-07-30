@@ -25,9 +25,11 @@
 
 ### Android
 
+- 応募フォーム: https://docs.google.com/forms/d/e/1FAIpQLSf6FH3FMp70YJgiBSbMDLq46sABfUouNjdzCqrlX7ztGL6UwA/viewform
 - ウェブ参加リンク: https://play.google.com/apps/testing/jp.yusukeishige.learningrogue
 - Android端末用リンク: https://play.google.com/store/apps/details?id=jp.yusukeishige.learningrogue
 - Alphaトラックは有効で、日本を対象に `9 (1.0.0)` が公開済み。
+- Android応募は継続して受け付ける。Googleフォームの新規回答を定期確認し、Google Play Consoleのメーリングリストへ追加する。
 - 現在は「学習ローグ内部テスター」メーリングリストに登録されたGoogleアカウントだけが参加できる。
 - 先に支援者がGoogle Playで使用しているGoogleアカウントのメールアドレスを登録し、その後にウェブ参加リンクを開いて「テスターになる」を選んでもらう。
 - 参加リンクを知っているだけでは、登録されていないGoogleアカウントからは参加できない。
@@ -90,4 +92,3 @@ Apple Accountのパスワード、Googleアカウントのパスワード、Stea
 - [ ] 配布するビルドでデバッグ導線が無効であることを確認
 - [ ] 既知の問題とフィードバック先をメールへ記載
 - [ ] 送信前に宛先をBCCまたは個別送信にし、支援者同士へメールアドレスを開示しない
-
