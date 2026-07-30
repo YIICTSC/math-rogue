@@ -1,18 +1,20 @@
 # Google Play クローズドテスト運用
 
-更新日: 2026-07-23
+更新日: 2026-07-30
 
 ## 現在の状態
 
 - トラック: クローズドテスト - Alpha
 - 対象国: 日本
-- 現在の下書きApp Bundle: `1.0.0 (2)`
-- リリースノート: 学習ローグ 1.0.0 初回Androidクローズドテスト版
+- 現在の公開リリース: `9 (1.0.0)`
+- リリースノート: 学習ローグ 1.0.0 Androidクローズドテスト版
 - メーリングリスト: 学習ローグ内部テスター
-- 登録済みテスター: 1名
+- 登録済みテスター: 2名
 - フィードバック先: https://yiictsc.github.io/math-rogue/support.html
-- 公開状態: 非アクティブ
-- ブロック理由: Google Play Consoleのアプリ設定が未完了
+- ウェブ参加リンク: https://play.google.com/apps/testing/jp.yusukeishige.learningrogue
+- Android端末用リンク: https://play.google.com/store/apps/details?id=jp.yusukeishige.learningrogue
+- 公開状態: Alphaトラックで選択したテスターへ公開済み
+- 公開日時: 2026-07-30 13:18
 
 ## 本番公開条件
 
@@ -31,7 +33,7 @@
 | 枠 | 状態 |
 | --- | --- |
 | 1 | 登録済み |
-| 2 | 募集中 |
+| 2 | 登録済み |
 | 3 | 募集中 |
 | 4 | 募集中 |
 | 5 | 募集中 |
