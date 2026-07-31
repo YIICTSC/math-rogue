@@ -1,7 +1,7 @@
 import React from 'react';
 import { X } from 'lucide-react';
 import { Card as ICard, LanguageMode } from '../types';
-import { buildEnglishCardDescription, trans } from '../utils/textUtils';
+import { buildEnglishCardDescription, buildEnglishCardName, trans } from '../utils/textUtils';
 import Card, { KEYWORD_DEFINITIONS } from './Card';
 import { toAge9BattleText, transBattle } from '../utils/ageRatingCopy';
 
@@ -63,7 +63,9 @@ const CardInspectionModal: React.FC<CardInspectionModalProps> = ({ card, languag
         <X size={24} />
       </button>
       <h3 className="text-2xl font-bold text-yellow-400 mb-2 border-b border-gray-600 pb-2">
-        {card.holographic ? `${trans('キラ', languageMode)} ` : ''}{transBattle(card.name, languageMode)}{card.upgraded ? '+' : ''}
+        {card.holographic ? `${trans('キラ', languageMode)} ` : ''}
+        {languageMode === 'ENGLISH' ? buildEnglishCardName(card) : transBattle(card.name, languageMode)}
+        {card.upgraded ? '+' : ''}
       </h3>
       <div className="flex gap-2 mb-4 text-xs text-gray-400 font-mono">
         <span className="bg-blue-900/50 px-2 py-1 rounded border border-blue-500/30">

@@ -34,6 +34,8 @@
     "test:gamepad": "node scripts/test-xbox-controller.mjs",
     "test:ios-bgm": "node scripts/test-ios-bgm.mjs",
     "test:ios-magic-rule-panel": "node scripts/verify-ios-magic-rule-panel.mjs",
+    "test:assignment-reward-synthesis": "node scripts/test-assignment-reward-and-english-synthesis.mjs",
+    "test:assignment-reward-runtime": "node scripts/test-assignment-reward-runtime.mjs",
     "build:offline": "node scripts/build-offline.mjs",
     "build:icons": "node scripts/generate-icons.mjs",
     "compress:bgm": "node scripts/compress-bgm.mjs",

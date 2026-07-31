@@ -1284,6 +1284,7 @@ const App: React.FC = () => {
     const coopTsukaponWinnerRef = useRef<string | null>(null);
     const previousScreenRef = useRef<GameScreen>(GameScreen.START_MENU);
     const gamepadTestScreenOpenedRef = useRef(false);
+    const assignmentRewardPreviewOpenedRef = useRef(false);
     const isLegacyVercelHost = typeof window !== 'undefined' && window.location.hostname === LEGACY_VERCEL_HOST;
     const [showMigrationNotice, setShowMigrationNotice] = useState<boolean>(() => isLegacyVercelHost);
 
@@ -5927,6 +5928,28 @@ const App: React.FC = () => {
         handleStartUiPreview(preview.screen, preview.miniGameOutcome);
         setIsUiPreviewToolbarOpen(false);
     }, [handleStartUiPreview]);
+
+    useEffect(() => {
+        if (
+            !DEBUG_FEATURES_ENABLED
+            || assignmentRewardPreviewOpenedRef.current
+            || typeof window === 'undefined'
+        ) return;
+        const shouldOpen = new URLSearchParams(window.location.search).get('assignmentRewardPreview') === '1';
+        if (!shouldOpen) return;
+        assignmentRewardPreviewOpenedRef.current = true;
+        setIsUiPreviewMode(true);
+        setIsUiPreviewToolbarOpen(false);
+        setAssignmentProgressNotice({
+            type: 'ASSIGNMENT_COMPLETE',
+            unitName: '算数 小6 1学期',
+            remainingUnitNames: [],
+            rewardCard: {
+                ...CARDS_LIBRARY.STRIKE,
+                id: 'ui-preview-assignment-reward-card',
+            },
+        });
+    }, []);
 
     const closeUiPreview = useCallback(() => {
         crowdfundingBossDebugRef.current = null;
@@ -16233,38 +16256,49 @@ const App: React.FC = () => {
                 )}
 
                 {assignmentProgressNotice && (
-                    <div className="fixed inset-0 z-[10040] flex items-center justify-center bg-black/80 p-4">
-                        <div className="w-full max-w-lg rounded-2xl border-4 border-emerald-300 bg-slate-950 p-5 text-white shadow-[0_0_40px_rgba(52,211,153,0.35)]">
-                            <div className="mb-2 text-center text-xs font-black tracking-[0.3em] text-emerald-300">
-                                {assignmentProgressNotice.type === 'ASSIGNMENT_COMPLETE' ? 'ASSIGNMENT CLEAR' : 'UNIT CLEAR'}
+                    <div
+                        data-gamepad-modal
+                        data-gamepad-initial-scope={`assignment-progress-${assignmentProgressNotice.type.toLowerCase()}`}
+                        className="assignment-progress-overlay fixed inset-0 z-[10040] flex items-center justify-center bg-black/80 p-4"
+                    >
+                        <div
+                            data-gamepad-navigation-root
+                            className={`assignment-progress-panel w-full rounded-2xl border-4 border-emerald-300 bg-slate-950 p-5 text-white shadow-[0_0_40px_rgba(52,211,153,0.35)] ${assignmentProgressNotice.rewardCard ? 'assignment-progress-panel-with-card' : ''}`}
+                        >
+                            <div className="assignment-progress-heading">
+                                <div className="mb-2 text-center text-xs font-black tracking-[0.3em] text-emerald-300">
+                                    {assignmentProgressNotice.type === 'ASSIGNMENT_COMPLETE' ? 'ASSIGNMENT CLEAR' : 'UNIT CLEAR'}
+                                </div>
+                                <h2 className="mb-3 text-center text-2xl font-black">
+                                    {trans(assignmentProgressNotice.type === 'ASSIGNMENT_COMPLETE' ? '課題をクリアしました' : '単元をクリアしました', languageMode)}
+                                </h2>
                             </div>
-                            <h2 className="mb-3 text-center text-2xl font-black">
-                                {trans(assignmentProgressNotice.type === 'ASSIGNMENT_COMPLETE' ? '課題をクリアしました' : '単元をクリアしました', languageMode)}
-                            </h2>
-                            {assignmentProgressNotice.unitName && (
-                                <div className="mb-3 rounded-xl border border-emerald-500/40 bg-emerald-950/40 px-3 py-2 text-center text-sm font-black text-emerald-100">
-                                    {formatAssignmentProgressUnitName(assignmentProgressNotice.unitName, languageMode)}
-                                </div>
-                            )}
-                            {assignmentProgressNotice.remainingUnitNames.length > 0 ? (
-                                <div className="mb-4 rounded-xl border border-slate-700 bg-slate-900 p-3">
-                                    <div className="mb-2 text-xs font-black text-slate-400">{trans("残りの単元", languageMode)}</div>
-                                    <div className="space-y-1 text-sm font-bold text-slate-100">
-                                        {assignmentProgressNotice.remainingUnitNames.map(name => (
-                                            <div key={name}>{formatAssignmentProgressUnitName(name, languageMode)}</div>
-                                        ))}
+                            <div className="assignment-progress-details">
+                                {assignmentProgressNotice.unitName && (
+                                    <div className="mb-3 rounded-xl border border-emerald-500/40 bg-emerald-950/40 px-3 py-2 text-center text-sm font-black text-emerald-100">
+                                        {formatAssignmentProgressUnitName(assignmentProgressNotice.unitName, languageMode)}
                                     </div>
-                                </div>
-                            ) : (
-                                <div className="mb-4 rounded-xl border border-yellow-400/50 bg-yellow-950/30 p-3 text-sm font-bold leading-6 text-yellow-100">
-                                    {trans("課題達成、お疲れさまでした！よくがんばりました。", languageMode)}
-                                </div>
-                            )}
+                                )}
+                                {assignmentProgressNotice.remainingUnitNames.length > 0 ? (
+                                    <div className="mb-4 rounded-xl border border-slate-700 bg-slate-900 p-3">
+                                        <div className="mb-2 text-xs font-black text-slate-400">{trans("残りの単元", languageMode)}</div>
+                                        <div className="space-y-1 text-sm font-bold text-slate-100">
+                                            {assignmentProgressNotice.remainingUnitNames.map(name => (
+                                                <div key={name}>{formatAssignmentProgressUnitName(name, languageMode)}</div>
+                                            ))}
+                                        </div>
+                                    </div>
+                                ) : (
+                                    <div className="mb-4 rounded-xl border border-yellow-400/50 bg-yellow-950/30 p-3 text-sm font-bold leading-6 text-yellow-100">
+                                        {trans("課題達成、お疲れさまでした！よくがんばりました。", languageMode)}
+                                    </div>
+                                )}
+                            </div>
                             {assignmentProgressNotice.rewardCard && (
-                                <div className="mb-4 rounded-xl border border-cyan-300/50 bg-cyan-950/25 p-3">
+                                <div className="assignment-progress-reward mb-4 rounded-xl border border-cyan-300/50 bg-cyan-950/25 p-3">
                                     <div className="mb-3 text-center text-sm font-black text-cyan-100">{trans("ご褒美カードを獲得しました", languageMode)}</div>
                                     <div className="flex justify-center">
-                                        <div className="scale-90">
+                                        <div data-gamepad-ignore className="assignment-progress-card pointer-events-none scale-90">
                                             <Card
                                                 card={assignmentProgressNotice.rewardCard}
                                                 onClick={() => {}}
@@ -16276,8 +16310,11 @@ const App: React.FC = () => {
                                 </div>
                             )}
                             {assignmentProgressNotice.type === 'ASSIGNMENT_COMPLETE' ? (
-                                <div className="grid gap-2 sm:grid-cols-3">
+                                <div className="assignment-progress-actions grid gap-2 sm:grid-cols-3">
                                     <button
+                                        data-gamepad-initial-choice
+                                        data-gamepad-zone="assignment-progress-actions"
+                                        data-gamepad-order={0}
                                         onClick={() => {
                                             if (assignmentProgressNotice.assignment) {
                                                 setCompletedAssignmentProblemSource(assignmentProgressNotice.assignment);
@@ -16290,6 +16327,8 @@ const App: React.FC = () => {
                                         PDF
                                     </button>
                                     <button
+                                        data-gamepad-zone="assignment-progress-actions"
+                                        data-gamepad-order={1}
                                         onClick={() => {
                                             if (assignmentProgressNotice.assignment) {
                                                 setCompletedAssignmentProblemSource(assignmentProgressNotice.assignment);
@@ -16301,6 +16340,9 @@ const App: React.FC = () => {
                                         {trans("続ける", languageMode)}
                                     </button>
                                     <button
+                                        data-gamepad-back
+                                        data-gamepad-zone="assignment-progress-actions"
+                                        data-gamepad-order={2}
                                         onClick={() => {
                                             setAssignmentProgressNotice(null);
                                             returnToTitle();
@@ -16312,8 +16354,12 @@ const App: React.FC = () => {
                                 </div>
                             ) : (
                                 <button
+                                    data-gamepad-initial-choice
+                                    data-gamepad-back
+                                    data-gamepad-zone="assignment-progress-actions"
+                                    data-gamepad-order={0}
                                     onClick={() => setAssignmentProgressNotice(null)}
-                                    className="w-full rounded-xl border border-slate-600 bg-slate-800 px-4 py-3 text-sm font-black text-slate-100 hover:bg-slate-700"
+                                    className="assignment-progress-actions w-full rounded-xl border border-slate-600 bg-slate-800 px-4 py-3 text-sm font-black text-slate-100 hover:bg-slate-700"
                                 >
                                     {trans("続ける", languageMode)}
                                 </button>

@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Card as CardType, CardType as EnumCardType, LanguageMode } from '../types';
 import PixelSprite from './PixelSprite';
 import EnemyIllustration from './EnemyIllustration';
-import { buildEnglishCardDescription, getEnglishFamiliarName, trans } from '../utils/textUtils';
+import { buildEnglishCardDescription, buildEnglishCardName, getEnglishFamiliarName, trans } from '../utils/textUtils';
 import { getAge9CardArtAlias, getCardIllustrationPaths } from '../utils/cardIllustration';
 import { createEnemyIllustrationRef, getStatusCategoryLabel, getStatusCategoryClass, parseEnemyIllustrationRef } from '../utils/cardUtils';
 import { assetUrl } from '../utils/assetPaths';
@@ -208,7 +208,9 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled, onInspect, languag
   const isLongPressActive = useRef(false);
   const startPos = useRef({ x: 0, y: 0 });
 
-  const translatedCardName = trans(card.name, languageMode);
+  const translatedCardName = languageMode === 'ENGLISH'
+    ? buildEnglishCardName(card)
+    : trans(card.name, languageMode);
   const displayCardName = toAge9BattleText(translatedCardName, languageMode);
   const imageCandidates = useMemo(
     () => getCardIllustrationPaths(card.id, translatedCardName, [card.name]),

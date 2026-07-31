@@ -9779,3 +9779,101 @@ textarea {
     transform: none !important;
   }
 }
+
+/* Assignment completion must stay actionable on short phone landscapes. */
+.assignment-progress-panel {
+  max-width: 32rem;
+  max-height: calc(100dvh - 2rem);
+  overflow-y: auto;
+}
+
+@media (orientation: landscape) and (max-height: 560px) and (max-width: 1100px) {
+  .assignment-progress-overlay {
+    box-sizing: border-box;
+    padding:
+      max(0.5rem, env(safe-area-inset-top))
+      max(0.75rem, env(safe-area-inset-right))
+      max(0.5rem, env(safe-area-inset-bottom))
+      max(0.75rem, env(safe-area-inset-left));
+  }
+
+  .assignment-progress-panel.assignment-progress-panel-with-card {
+    display: grid;
+    grid-template-areas:
+      "reward heading"
+      "reward details"
+      "reward actions";
+    grid-template-columns: minmax(12rem, 0.78fr) minmax(19rem, 1.22fr);
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    column-gap: 0.75rem;
+    row-gap: 0.35rem;
+    width: min(54rem, 100%);
+    max-width: 54rem;
+    max-height: calc(100dvh - max(1rem, env(safe-area-inset-top) + env(safe-area-inset-bottom)));
+    padding: 0.7rem;
+    overflow: hidden;
+  }
+
+  .assignment-progress-panel-with-card .assignment-progress-heading {
+    grid-area: heading;
+    align-self: end;
+  }
+
+  .assignment-progress-panel-with-card .assignment-progress-heading > div {
+    margin-bottom: 0.2rem;
+    font-size: 0.65rem;
+  }
+
+  .assignment-progress-panel-with-card .assignment-progress-heading h2 {
+    margin-bottom: 0.35rem;
+    font-size: clamp(1.05rem, 4.2vh, 1.45rem);
+    line-height: 1.1;
+  }
+
+  .assignment-progress-panel-with-card .assignment-progress-details {
+    grid-area: details;
+    min-height: 0;
+    overflow-y: auto;
+  }
+
+  .assignment-progress-panel-with-card .assignment-progress-details > div {
+    margin-bottom: 0.4rem;
+    padding: 0.45rem 0.65rem;
+    font-size: 0.75rem;
+    line-height: 1.15rem;
+  }
+
+  .assignment-progress-panel-with-card .assignment-progress-reward {
+    grid-area: reward;
+    display: flex;
+    min-height: 0;
+    margin: 0;
+    padding: 0.45rem;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .assignment-progress-panel-with-card .assignment-progress-reward > div:first-child {
+    margin-bottom: 0.15rem;
+    font-size: 0.72rem;
+  }
+
+  .assignment-progress-panel-with-card .assignment-progress-card {
+    margin-block: -0.6rem;
+    transform: scale(0.78);
+    transform-origin: center;
+  }
+
+  .assignment-progress-panel-with-card .assignment-progress-actions {
+    grid-area: actions;
+    grid-template-columns: 1fr;
+    gap: 0.35rem;
+  }
+
+  .assignment-progress-panel-with-card .assignment-progress-actions button {
+    min-height: 2.35rem;
+    padding: 0.45rem 0.75rem;
+  }
+}

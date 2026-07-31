@@ -10500,6 +10500,10 @@ export const trans = (text: string, mode: LanguageMode): string => {
         if (ENGLISH_ITEM_NAME_DICTIONARY[text]) return ENGLISH_ITEM_NAME_DICTIONARY[text];
         if (ENGLISH_ENEMY_NAME_DICTIONARY[text]) return ENGLISH_ENEMY_NAME_DICTIONARY[text];
 
+        const removeAndroidAssetPack = text.match(/^(.+)を端末から削除しますか？$/);
+        if (removeAndroidAssetPack) {
+            return `Remove ${trans(removeAndroidAssetPack[1], mode)} from this device?`;
+        }
         const newSeed = text.match(/^新しい種「(.+)」を手に入れた！$/);
         if (newSeed) return `Obtained a new Seed: "${newSeed[1]}"!`;
         const cyberspaceDive = text.match(/^電脳世界へのダイブ：「(.+)」を0コスト化$/);
@@ -10574,6 +10578,75 @@ export const trans = (text: string, mode: LanguageMode): string => {
     result = result.replace(/,/g, "、");
 
     return result;
+};
+
+const CARD_NAME_GENERIC_ENGLISH = /^(Choose Option|Event Details|School Foe|Item)$/;
+
+const hashCardName = (value: string): number => {
+    let hash = 2166136261;
+    for (let index = 0; index < value.length; index += 1) {
+        hash ^= value.charCodeAt(index);
+        hash = Math.imul(hash, 16777619);
+    }
+    return hash >>> 0;
+};
+
+const compactEnglishCardName = (value: string): string => (
+    value
+        .replace(/[^A-Za-z0-9]+/g, '')
+        .replace(/^\d+/, '')
+);
+
+const translateSynthesisSourceName = (name: string, fallbackIndex: number): string => {
+    const translated = trans(name, 'ENGLISH').trim();
+    if (
+        translated &&
+        !JAPANESE_TEXT_PATTERN.test(translated) &&
+        !CARD_NAME_GENERIC_ENGLISH.test(translated)
+    ) {
+        return translated;
+    }
+    return `MysteryCard${fallbackIndex + 1}`;
+};
+
+/**
+ * Keeps synthesized cards playful in English without changing their canonical
+ * Japanese name or effect keys. Effects continue to resolve from originalNames.
+ */
+export const buildEnglishCardName = (
+    card: Pick<Card, 'name' | 'originalNames'>,
+): string => {
+    const sources = Array.from(new Set((card.originalNames || []).filter(Boolean)));
+    if (sources.length < 2) return trans(card.name, 'ENGLISH');
+
+    const translatedSources = sources.map(translateSynthesisSourceName);
+    const compactSources = translatedSources.map(compactEnglishCardName);
+    const seed = hashCardName(`${card.name}|${sources.join('|')}`);
+    const takeHead = (value: string) => {
+        const max = Math.max(3, Math.ceil(value.length * 0.55));
+        const length = Math.min(value.length, 3 + (seed % Math.max(1, max - 2)));
+        return value.slice(0, length);
+    };
+    const takeMiddle = (value: string, index: number) => {
+        if (value.length <= 4) return value;
+        const width = Math.min(4, Math.max(2, Math.floor(value.length / 3)));
+        const available = Math.max(1, value.length - width);
+        const start = (seed >>> (index * 3)) % available;
+        return value.slice(start, start + width);
+    };
+    const takeTail = (value: string) => {
+        const length = Math.min(value.length, 3 + ((seed >>> 8) % 3));
+        return value.slice(-length);
+    };
+
+    const first = compactSources[0] || 'Myst';
+    const last = compactSources[compactSources.length - 1] || 'Card';
+    const middle = compactSources.length > 2
+        ? compactSources.slice(1, -1).map((value, index) => takeMiddle(value || 'Mix', index + 1)).join('')
+        : '';
+    const mashup = `${takeHead(first)}${middle}${takeTail(last).toLowerCase()}`;
+    if (!mashup) return 'Mystery Mash';
+    return `${mashup.charAt(0).toUpperCase()}${mashup.slice(1)}`;
 };
 
 export const transEventText = (text: string, mode: LanguageMode): string => {
