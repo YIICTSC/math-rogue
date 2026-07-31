@@ -98,7 +98,7 @@ export const ENGLISH_DISPLAY_COPY_EXACT: Record<string, string> = {
   "誰かの靴が散乱している。揃えてあげる？": "Someone's shoes are scattered around. Will you arrange it for me?",
   "本を借りる（無断）": "Borrow a book (without permission)",
   "善行（角笛 / HP+8 / カード削除）": "Good deeds (horn / HP +8 / card deletion)",
-  "検査（スネッコアイ / 虚無 / HP+6）": "Inspection (Snekko Eye / Void / HP+6)",
+  "検査（ぐるぐるメガネ / 虚無 / HP+6）": "Inspection (Swirly Glasses / Void / HP+6)",
   "検査から逃げる": "escape from inspection",
   "新しいメモを書き足す": "add new notes",
   "読書を教わる": "taught to read",

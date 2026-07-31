@@ -188,6 +188,19 @@ Build 23を内部テスト「学習ローグ テストプレイ」と外部テ�
 外部テストの公開リンクは
 `https://testflight.apple.com/join/Swgfe66z`で、参加上限は100人。
 
+同日、Build 24を作成した。iPhone横画面のマジック編では、主人公固有レリックの
+閉じた要約表示を縦画面と同じコンパクトな2行構成へ変更した。名称、3枠の進捗、
+残り数をそれぞれ折り返さず表示し、横画面で文字列が縦に崩れたりパネルが間延び
+したりしないようiOSのマジック編だけにレイアウトを限定した。詳細を開いた場合の
+従来幅は維持する。専用レイアウト回帰検査と本番デバッグ無効化検査に合格し、
+iOS向けVite本番ビルドとCapacitor同期を実施した。
+
+Apple Distribution署名、App Store用プロビジョニングプロファイル、
+iOS 26.2 SDK、arm64、iOS 15.0以上、Version 1.0.0、Build 24で
+ReleaseアーカイブとApp Store向け検証に成功した。アーカイブは
+`build/ios/LearningRogue-1.0.0-24.xcarchive`。2026-07-30 15:33に
+App Store Connectへのアップロードに成功し、Apple側のビルド処理を待っている。
+
 ## 開発コマンド
 
 ```bash
@@ -272,6 +285,12 @@ IOS_SIMULATOR="iPad Pro 11-inch (M4)" npm run ios:run
 - [x] Build 23のReleaseアーカイブ生成とApp Store Connectへのアップロード
 - [x] TestFlight内部・外部テストへBuild 23を追加し、外部テスト審査へ提出
 - [x] App Store版をBuild 23へ差し替えてApp Reviewへ再提出
+- [x] Build 24のReleaseアーカイブ生成とApp Store Connectへのアップロード
+- [x] TestFlight内部・外部テストへBuild 24を追加
+- [x] App Store版をBuild 24へ差し替えてApp Reviewへ再提出
+- [x] Build 25のReleaseアーカイブ生成とApp Store Connectへのアップロード
+- [x] TestFlight内部・外部テストへBuild 25を追加
+- [x] App Store版をBuild 25へ差し替えてApp Reviewへ再提出
 
 課金モデルの検討結果は[`ios-monetization-plan.md`](./ios-monetization-plan.md)を参照する。
 

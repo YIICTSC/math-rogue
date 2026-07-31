@@ -3650,7 +3650,7 @@ export const generateEvent = (
             title: "保健室の視力検査",
             description: "「C」の向きを答えてください。全問正解でお宝です。",
             options: [
-                { label: "真面目に受ける", text: "検査（スネッコアイ / 虚無 / HP+6）", action: () => {
+                { label: "真面目に受ける", text: "検査（ぐるぐるメガネ / 虚無 / HP+6）", action: () => {
                     const roll = Math.random();
                     if (roll < 0.34) {
                         setGameState(prev => ({

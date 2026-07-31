@@ -47,13 +47,14 @@ const BATTLE_VOICE_REPLY_DELAY_MS = 420;
 
 const shouldPlayNonFinishBattleVoice = () => Math.random() < NON_FINISH_BATTLE_VOICE_RATE;
 
-const playDelayedBattleVoice = (play: () => void, delayMs = 0) => {
-    if (!shouldPlayNonFinishBattleVoice()) return;
+const playDelayedBattleVoice = (play: () => void, delayMs = 0): boolean => {
+    if (!shouldPlayNonFinishBattleVoice()) return false;
     if (delayMs <= 0) {
         play();
-        return;
+        return true;
     }
     window.setTimeout(play, delayMs);
+    return true;
 };
 
 const getHighSchoolBattleVoiceActionForCard = (card: ICard): HighSchoolBattleVoiceAction => {
@@ -7874,22 +7875,21 @@ const App: React.FC = () => {
         let cardAttackPreviewHitCount = 1;
         const magicVoiceHeroId = gameState.visualTheme === 'magic' ? getMagicProtagonistId(actionPlayer) : undefined;
         const highSchoolVoiceHeroId = gameState.visualTheme === 'high-school' ? actionPlayer.id : undefined;
-        const isOffensiveCard = card.type === CardType.ATTACK || (card.damage ?? 0) > 0 || !!card.damageBasedOnBlock;
         const isOwnMagicRuleCard = !!magicVoiceHeroId && card.magicHeroId === magicVoiceHeroId && card.magicRuleCardIndex !== undefined;
+        let didPlayCardVoice = false;
         if (!isCoopHostRemoteAction && isOwnMagicRuleCard) {
             const playMagicRuleVoice = () => {
                 audioService.playMagicVoice(magicVoiceHeroId, 'spell', 3, card.magicRuleCardIndex + 1, actionPlayer.magicTransformed);
             };
-            if (isOffensiveCard) playMagicRuleVoice();
-            else playDelayedBattleVoice(playMagicRuleVoice);
+            playMagicRuleVoice();
+            didPlayCardVoice = true;
         }
         if (!isCoopHostRemoteAction && highSchoolVoiceHeroId) {
             const highSchoolVoiceAction = getHighSchoolBattleVoiceActionForCard(card);
             const playHighSchoolCardVoice = () => {
                 audioService.playHighSchoolVoice(highSchoolVoiceHeroId, highSchoolVoiceAction);
             };
-            if (isOffensiveCard) playHighSchoolCardVoice();
-            else playDelayedBattleVoice(playHighSchoolCardVoice);
+            didPlayCardVoice = playDelayedBattleVoice(playHighSchoolCardVoice);
         }
 
         if (card.type === CardType.ATTACK) {
@@ -7907,8 +7907,7 @@ const App: React.FC = () => {
                 const playMagicAttackVoice = () => {
                     audioService.playMagicVoice(magicVoiceHeroId, 'attack', 3, undefined, actionPlayer.magicTransformed);
                 };
-                if (isOffensiveCard) playMagicAttackVoice();
-                else playDelayedBattleVoice(playMagicAttackVoice);
+                didPlayCardVoice = playDelayedBattleVoice(playMagicAttackVoice);
             }
         } else if (!isCoopHostRemoteAction) {
             audioService.playBattleSound('block');
@@ -7928,6 +7927,7 @@ const App: React.FC = () => {
             }
         }
         lastPlayedCardRef.current = card;
+        lastPlayedCardVoicePlayedRef.current = didPlayCardVoice;
         if (!isCoopHostRemoteAction && gameState.challengeMode === 'COOP' && coopSession && !coopSession.isHost) {
             queueCoopBattleEvent({ type: 'COOP_BATTLE_PLAY_CARD', cardId: card.id, playedCard: { ...card } });
             return;
@@ -10747,7 +10747,52 @@ const App: React.FC = () => {
     }
 
     useEffect(() => {
+        const battleHasEnded = gameState.screen !== GameScreen.BATTLE || gameState.enemies.length === 0;
+        if (!battleHasEnded) return;
+
+        // Card-effect pickers must never survive the battle that created them.
+        // Besides obscuring the reward screen, a stale picker could still mutate
+        // the deck after victory when its focused button was confirmed.
+        setWeatherScryModal(null);
+        setGalaxyExpressModal(null);
+        setGoldFishModal(null);
+        setDreamCatcherModal(null);
+        setGameState(prev => {
+            const pendingModalFlags = [
+                'WEATHER_PENDING_MODAL',
+                'GALAXY_PENDING_MODAL',
+                'GOLD_FISH_PENDING_MODAL',
+                'DREAM_CATCHER_PENDING_MODAL',
+            ];
+            const hasPendingModalFlag = pendingModalFlags.some(flag => Boolean(prev.player.turnFlags[flag]));
+            const hasActiveSelection = prev.selectionState.active;
+            const coopSelections = prev.coopBattleState?.selectionStateByPeerId as Record<string, SelectionState> | undefined;
+            const hasCoopSelection = Object.values(coopSelections ?? {})
+                .some(selection => selection.active);
+            if (!hasPendingModalFlag && !hasActiveSelection && !hasCoopSelection) return prev;
+
+            const turnFlags = { ...prev.player.turnFlags };
+            pendingModalFlags.forEach(flag => { turnFlags[flag] = false; });
+            const selectionStateByPeerId: Record<string, SelectionState> | undefined = coopSelections
+                ? Object.fromEntries(Object.entries(coopSelections).map(([peerId, selection]) => [
+                    peerId,
+                    { ...selection, active: false, amount: 0 },
+                ]))
+                : coopSelections;
+            return {
+                ...prev,
+                player: { ...prev.player, turnFlags },
+                selectionState: { ...prev.selectionState, active: false, amount: 0 },
+                coopBattleState: prev.coopBattleState
+                    ? { ...prev.coopBattleState, selectionStateByPeerId }
+                    : prev.coopBattleState,
+            };
+        });
+    }, [gameState.enemies.length, gameState.screen]);
+
+    useEffect(() => {
         if (gameState.screen !== GameScreen.BATTLE) return;
+        if (gameState.enemies.length === 0) return;
         if (weatherScryModal || galaxyExpressModal || goldFishModal || dreamCatcherModal) return;
         if (!gameState.player.turnFlags['WEATHER_PENDING_MODAL']) return;
 
@@ -10763,10 +10808,11 @@ const App: React.FC = () => {
                 turnFlags: { ...prev.player.turnFlags, WEATHER_PENDING_MODAL: false }
             }
         }));
-    }, [dreamCatcherModal, galaxyExpressModal, gameState.player.drawPile, gameState.player.turnFlags, gameState.screen, goldFishModal, weatherScryModal]);
+    }, [dreamCatcherModal, galaxyExpressModal, gameState.enemies.length, gameState.player.drawPile, gameState.player.turnFlags, gameState.screen, goldFishModal, weatherScryModal]);
 
     useEffect(() => {
         if (gameState.screen !== GameScreen.BATTLE) return;
+        if (gameState.enemies.length === 0) return;
         if (weatherScryModal || galaxyExpressModal || goldFishModal || dreamCatcherModal) return;
         if (!gameState.player.turnFlags['GALAXY_PENDING_MODAL']) return;
 
@@ -10781,10 +10827,11 @@ const App: React.FC = () => {
                 turnFlags: { ...prev.player.turnFlags, GALAXY_PENDING_MODAL: false }
             }
         }));
-    }, [dreamCatcherModal, galaxyExpressModal, gameState.player.drawPile, gameState.player.turnFlags, gameState.screen, goldFishModal, weatherScryModal]);
+    }, [dreamCatcherModal, galaxyExpressModal, gameState.enemies.length, gameState.player.drawPile, gameState.player.turnFlags, gameState.screen, goldFishModal, weatherScryModal]);
 
     useEffect(() => {
         if (gameState.screen !== GameScreen.BATTLE) return;
+        if (gameState.enemies.length === 0) return;
         if (weatherScryModal || galaxyExpressModal || goldFishModal || dreamCatcherModal) return;
         if (!gameState.player.turnFlags['GOLD_FISH_PENDING_MODAL']) return;
 
@@ -10803,7 +10850,7 @@ const App: React.FC = () => {
                 turnFlags: { ...prev.player.turnFlags, GOLD_FISH_PENDING_MODAL: false }
             }
         }));
-    }, [dreamCatcherModal, galaxyExpressModal, gameState.player.hand, gameState.player.turnFlags, gameState.screen, goldFishModal, weatherScryModal]);
+    }, [dreamCatcherModal, galaxyExpressModal, gameState.enemies.length, gameState.player.hand, gameState.player.turnFlags, gameState.screen, goldFishModal, weatherScryModal]);
 
     useEffect(() => {
         if (gameState.screen !== GameScreen.BATTLE) return;
@@ -10836,6 +10883,7 @@ const App: React.FC = () => {
 
     useEffect(() => {
         if (gameState.screen !== GameScreen.BATTLE) return;
+        if (gameState.enemies.length === 0) return;
         if (weatherScryModal || galaxyExpressModal || goldFishModal || dreamCatcherModal) return;
         if (!gameState.player.turnFlags['DREAM_CATCHER_PENDING_MODAL']) return;
 
@@ -10854,7 +10902,7 @@ const App: React.FC = () => {
                 turnFlags: { ...prev.player.turnFlags, DREAM_CATCHER_PENDING_MODAL: false }
             }
         }));
-    }, [dreamCatcherModal, galaxyExpressModal, gameState.player.drawPile, gameState.player.turnFlags, gameState.screen, goldFishModal, weatherScryModal]);
+    }, [dreamCatcherModal, galaxyExpressModal, gameState.enemies.length, gameState.player.drawPile, gameState.player.turnFlags, gameState.screen, goldFishModal, weatherScryModal]);
 
     useEffect(() => {
         if (gameState.screen !== GameScreen.EVENT) return;
@@ -11485,6 +11533,7 @@ const App: React.FC = () => {
 
     const stateRef = useRef(gameState);
     const lastPlayedCardRef = useRef<ICard | null>(null);
+    const lastPlayedCardVoicePlayedRef = useRef(false);
     const victorySequenceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const defeatSequenceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
     const enemyDefeatVoiceTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -11639,9 +11688,7 @@ const App: React.FC = () => {
         setLegacyCardSelected(false);
         audioService.playSound('lose');
         if (stateRef.current.visualTheme === 'high-school') {
-            playDelayedBattleVoice(() => {
-                audioService.playHighSchoolVoice(stateRef.current.player.id, 'defeat');
-            });
+            audioService.playHighSchoolVoice(stateRef.current.player.id, 'defeat');
         }
         const currentState = stateRef.current;
         void audioService.switchThemeAndPlayBGM(
@@ -11790,9 +11837,28 @@ const App: React.FC = () => {
 
                 if (lastPlayedCardRef.current) {
                     const finisherCard = { ...lastPlayedCardRef.current };
+                    const finisherVoiceAlreadyPlayed = lastPlayedCardVoicePlayedRef.current;
                     const defeatedEnemyForFinisher = lastDefeatedEnemyForFinisherRef.current;
                     lastPlayedCardRef.current = null;
+                    lastPlayedCardVoicePlayedRef.current = false;
                     lastDefeatedEnemyForFinisherRef.current = null;
+                    const finisherIsOffensive =
+                        finisherCard.type === CardType.ATTACK
+                        || (finisherCard.damage ?? 0) > 0
+                        || !!finisherCard.damageBasedOnBlock;
+                    if (
+                        stateRef.current.visualTheme === 'magic'
+                        && finisherIsOffensive
+                        && !finisherVoiceAlreadyPlayed
+                    ) {
+                        audioService.playMagicVoice(
+                            getMagicProtagonistId(stateRef.current.player),
+                            finisherCard.magicRuleCardIndex !== undefined ? 'spell' : 'attack',
+                            3,
+                            finisherCard.magicRuleCardIndex !== undefined ? finisherCard.magicRuleCardIndex + 1 : undefined,
+                            stateRef.current.player.magicTransformed,
+                        );
+                    }
                     setBattleFinisherCutinCard(finisherCard);
                     if (enemyDefeatVoiceTimerRef.current) {
                         clearTimeout(enemyDefeatVoiceTimerRef.current);
@@ -17445,7 +17511,7 @@ const App: React.FC = () => {
                 )}
 
                 {weatherScryModal && (
-                    <div className="app-modal-overlay app-weather-scry-modal-overlay fixed inset-0 z-[230] bg-black/70 flex items-center justify-center p-4">
+                    <div data-gamepad-modal data-gamepad-initial-scope="battle-weather-scry" className="app-modal-overlay app-weather-scry-modal-overlay fixed inset-0 z-[230] bg-black/70 flex items-center justify-center p-4">
                         <div className="app-modal-panel app-card-choice-modal app-weather-scry-modal w-full max-w-lg rounded-xl border-2 border-cyan-400 bg-slate-900 text-white p-4">
                             <h3 className="text-xl font-bold mb-2">{trans("天気予報", languageMode)}</h3>
                             <p className="text-sm text-slate-300 mb-3">{trans('山札に戻すか、捨て札に送るかを選択してください', languageMode)}</p>
@@ -17457,12 +17523,17 @@ const App: React.FC = () => {
                                             <div className="text-sm font-bold mb-2">{idx + 1}. {trans(card.name, languageMode)}</div>
                                             <div className="flex gap-2">
                                                 <button
+                                                    data-gamepad-initial-choice={idx === 0 ? true : undefined}
+                                                    data-gamepad-zone="weather-scry-options"
+                                                    data-gamepad-order={idx * 2}
                                                     onClick={() => toggleWeatherScryCard(card.id, true)}
                                                     className={`flex-1 rounded px-2 py-1 text-sm ${keep ? 'bg-emerald-600' : 'bg-slate-700 hover:bg-slate-600'}`}
                                                 >
                                                     {trans('山札に戻す', languageMode)}
                                                 </button>
                                                 <button
+                                                    data-gamepad-zone="weather-scry-options"
+                                                    data-gamepad-order={idx * 2 + 1}
                                                     onClick={() => toggleWeatherScryCard(card.id, false)}
                                                     className={`flex-1 rounded px-2 py-1 text-sm ${!keep ? 'bg-rose-600' : 'bg-slate-700 hover:bg-slate-600'}`}
                                                 >
@@ -17474,6 +17545,9 @@ const App: React.FC = () => {
                                 })}
                             </div>
                             <button
+                                data-gamepad-initial-choice={weatherScryModal.cards.length === 0 ? true : undefined}
+                                data-gamepad-zone="weather-scry-confirm"
+                                data-gamepad-order={0}
                                 onClick={applyWeatherScrySelection}
                                 className="mt-4 w-full rounded bg-cyan-700 hover:bg-cyan-600 py-2 font-bold"
                             >
@@ -17584,7 +17658,7 @@ const App: React.FC = () => {
                 )}
 
                 {galaxyExpressModal && (
-                    <div className="app-modal-overlay app-galaxy-express-modal-overlay fixed inset-0 z-[231] bg-black/70 flex items-center justify-center p-4">
+                    <div data-gamepad-modal data-gamepad-initial-scope="battle-galaxy-express" className="app-modal-overlay app-galaxy-express-modal-overlay fixed inset-0 z-[231] bg-black/70 flex items-center justify-center p-4">
                         <div className="app-modal-panel app-card-choice-modal app-galaxy-express-modal w-full max-w-2xl rounded-xl border-2 border-sky-400 bg-slate-950 text-white p-4">
                             <h3 className="text-xl font-bold mb-2">{trans("銀河鉄道の夜", languageMode)}</h3>
                             <p className="text-sm text-slate-300 mb-3">{trans('1枚選んで手札に加え、残りは捨て札に送ります', languageMode)}</p>
@@ -17592,6 +17666,9 @@ const App: React.FC = () => {
                                 {galaxyExpressModal.cards.map((card, idx) => (
                                     <button
                                         key={card.id}
+                                        data-gamepad-initial-choice={idx === 0 ? true : undefined}
+                                        data-gamepad-zone="galaxy-express-options"
+                                        data-gamepad-order={idx}
                                         onClick={() => applyGalaxyExpressSelection(card.id)}
                                         className="rounded border border-slate-600 bg-slate-800/80 p-3 text-left hover:border-sky-400 hover:bg-slate-700/80 transition-colors"
                                     >
@@ -17606,14 +17683,17 @@ const App: React.FC = () => {
                 )}
 
                 {goldFishModal && (
-                    <div className="app-modal-overlay app-gold-fish-modal-overlay fixed inset-0 z-[231] bg-black/70 flex items-center justify-center p-4">
+                    <div data-gamepad-modal data-gamepad-initial-scope="battle-gold-fish" className="app-modal-overlay app-gold-fish-modal-overlay fixed inset-0 z-[231] bg-black/70 flex items-center justify-center p-4">
                         <div className="app-modal-panel app-card-choice-modal app-gold-fish-modal w-full max-w-xl rounded-xl border-2 border-rose-400 bg-slate-950 text-white p-4">
                             <h3 className="text-xl font-bold mb-2">{trans(goldFishModal.title, languageMode)}</h3>
                             <p className="text-sm text-slate-300 mb-3">{goldFishModal.description}</p>
                             <div className="space-y-2 max-h-[55vh] overflow-y-auto pr-1">
-                                {goldFishModal.cards.map(card => (
+                                {goldFishModal.cards.map((card, idx) => (
                                     <button
                                         key={card.id}
+                                        data-gamepad-initial-choice={idx === 0 ? true : undefined}
+                                        data-gamepad-zone="gold-fish-options"
+                                        data-gamepad-order={idx}
                                         onClick={() => applyGoldFishSelection(card.id)}
                                         className="w-full rounded border border-slate-600 bg-slate-800/80 p-3 text-left hover:border-rose-400 hover:bg-slate-700/80 transition-colors"
                                     >
@@ -17627,14 +17707,17 @@ const App: React.FC = () => {
                 )}
 
                 {dreamCatcherModal && (
-                    <div className="app-modal-overlay app-dream-catcher-modal-overlay fixed inset-0 z-[231] bg-black/70 flex items-center justify-center p-4">
+                    <div data-gamepad-modal data-gamepad-initial-scope="battle-dream-catcher" className="app-modal-overlay app-dream-catcher-modal-overlay fixed inset-0 z-[231] bg-black/70 flex items-center justify-center p-4">
                         <div className="app-modal-panel app-card-choice-modal app-dream-catcher-modal w-full max-w-2xl rounded-xl border-2 border-violet-400 bg-slate-950 text-white p-4">
                             <h3 className="text-xl font-bold mb-2">{trans(dreamCatcherModal.title, languageMode)}</h3>
                             <p className="text-sm text-slate-300 mb-3">{dreamCatcherModal.description}</p>
                             <div className="grid gap-2 sm:grid-cols-2 max-h-[60vh] overflow-y-auto pr-1">
-                                {dreamCatcherModal.cards.map(card => (
+                                {dreamCatcherModal.cards.map((card, idx) => (
                                     <button
                                         key={card.id}
+                                        data-gamepad-initial-choice={idx === 0 ? true : undefined}
+                                        data-gamepad-zone="dream-catcher-options"
+                                        data-gamepad-order={idx}
                                         onClick={() => applyDreamCatcherSelection(card.id)}
                                         className="rounded border border-slate-600 bg-slate-800/80 p-3 text-left hover:border-violet-400 hover:bg-slate-700/80 transition-colors"
                                     >

@@ -90,6 +90,7 @@ export const applyAdditionalCardLogic = (
         }
         return newC;
     };
+    const copyRepetitionCount = Math.max(1, Math.floor(card.promptsCopy || 1));
 
     // カード名に基づいた特殊ロジックの分岐 (合成カード対応)
     const targetNames = (card.originalNames && card.originalNames.length > 0) ? card.originalNames : [card.name];
@@ -261,16 +262,18 @@ export const applyAdditionalCardLogic = (
             case 'カンニング': {
                 const pool = p.hand.filter(c => c.id !== card.id && c.type === CardType.ATTACK);
                 if (pool.length > 0) {
-                    addCardToHand(pool[Math.floor(Math.random() * pool.length)], false);
-                    currentLogs.push(trans("カンニング：攻撃カードをコピーした", languageMode));
+                    const pick = pool[Math.floor(Math.random() * pool.length)];
+                    for (let i = 0; i < copyRepetitionCount; i++) addCardToHand(pick, false);
+                    currentLogs.push(trans(`カンニング：攻撃カードを${copyRepetitionCount}枚コピーした`, languageMode));
                 }
                 break;
             }
             case 'お人形遊び': {
                 const pool = p.hand.filter(c => c.id !== card.id && c.type === CardType.SKILL);
                 if (pool.length > 0) {
-                    addCardToHand(pool[Math.floor(Math.random() * pool.length)], false);
-                    currentLogs.push(trans("お人形遊び：スキルカードをコピーした", languageMode));
+                    const pick = pool[Math.floor(Math.random() * pool.length)];
+                    for (let i = 0; i < copyRepetitionCount; i++) addCardToHand(pick, false);
+                    currentLogs.push(trans(`お人形遊び：スキルカードを${copyRepetitionCount}枚コピーした`, languageMode));
                 }
                 break;
             }
@@ -279,9 +282,8 @@ export const applyAdditionalCardLogic = (
                 const pool = p.hand.filter(c => c.id !== card.id && (c.type === CardType.ATTACK || c.type === CardType.POWER));
                 if (pool.length > 0) {
                     const pick = pool[Math.floor(Math.random() * pool.length)];
-                    addCardToHand(pick, false);
-                    addCardToHand(pick, false);
-                    currentLogs.push(trans("二本鉛筆：カードを2枚コピーした", languageMode));
+                    for (let i = 0; i < copyRepetitionCount; i++) addCardToHand(pick, false);
+                    currentLogs.push(trans(`二本鉛筆：カードを${copyRepetitionCount}枚コピーした`, languageMode));
                 }
                 break;
             }
@@ -289,23 +291,24 @@ export const applyAdditionalCardLogic = (
                 const pool = p.hand.filter(c => c.id !== card.id);
                 if (pool.length > 0) {
                     const pick = pool[Math.floor(Math.random() * pool.length)];
-                    addCardToHand(pick, false);
+                    for (let i = 0; i < copyRepetitionCount; i++) addCardToHand(pick, false);
                     const tossPool = p.hand.filter(c => c.id !== pick.id && c.id !== card.id);
                     if (tossPool.length > 0) {
                         const toss = tossPool[Math.floor(Math.random() * tossPool.length)];
                         p.hand = p.hand.filter(c => c.id !== toss.id);
                         p.discardPile.push(toss);
                     }
-                    currentLogs.push(trans("フォークダンス：コピーして1枚捨てた", languageMode));
+                    currentLogs.push(trans(`フォークダンス：${copyRepetitionCount}枚コピーして1枚捨てた`, languageMode));
                 }
                 break;
             }
             case '鏡 (星新一)': {
                 const pool = p.hand.filter(c => c.id !== card.id);
                 if (pool.length > 0) {
-                    addCardToHand(pool[Math.floor(Math.random() * pool.length)], false);
+                    const pick = pool[Math.floor(Math.random() * pool.length)];
+                    for (let i = 0; i < copyRepetitionCount; i++) addCardToHand(pick, false);
                     p.powers['VULNERABLE'] = (p.powers['VULNERABLE'] || 0) + 1;
-                    currentLogs.push(trans("鏡：コピーしたが、自分がびくびく1", languageMode));
+                    currentLogs.push(trans(`鏡：${copyRepetitionCount}枚コピーしたが、自分がびくびく1`, languageMode));
                 }
                 break;
             }
@@ -313,9 +316,12 @@ export const applyAdditionalCardLogic = (
                 const highCost = p.hand.filter(c => c.id !== card.id && c.cost >= 2);
                 const pool = highCost.length > 0 ? highCost : p.hand.filter(c => c.id !== card.id);
                 if (pool.length > 0) {
-                    const copied = addCardToHand(pool[Math.floor(Math.random() * pool.length)], false);
-                    copied.cost = 0;
-                    currentLogs.push(trans("きてんの窓：高コスト優先コピーを0コスト化", languageMode));
+                    const pick = pool[Math.floor(Math.random() * pool.length)];
+                    for (let i = 0; i < copyRepetitionCount; i++) {
+                        const copied = addCardToHand(pick, false);
+                        copied.cost = 0;
+                    }
+                    currentLogs.push(trans(`きてんの窓：高コスト優先で${copyRepetitionCount}枚コピーし0コスト化`, languageMode));
                 }
                 break;
             }
@@ -416,11 +422,14 @@ export const applyAdditionalCardLogic = (
             }
             case '影分身の術': {
                 const attacks = p.hand.filter(c => c.type === CardType.ATTACK && c.id !== card.id);
-                attacks.forEach(atk => {
-                    const clone = { ...atk, id: `clone-${Date.now()}-${Math.random()}` };
-                    if (p.hand.length < 10) p.hand.push(clone);
-                });
-                currentLogs.push(trans("影分身の術：手札の攻撃をすべて複製した！", languageMode));
+                const copySets = Math.max(1, Math.ceil(copyRepetitionCount / 5));
+                for (let set = 0; set < copySets; set++) {
+                    attacks.forEach(atk => {
+                        const clone = { ...atk, id: `clone-${Date.now()}-${Math.random()}` };
+                        if (p.hand.length < 10) p.hand.push(clone);
+                    });
+                }
+                currentLogs.push(trans(`影分身の術：手札の攻撃をすべて${copySets}組複製した！`, languageMode));
                 nextActiveEffects.push({ id: `vfx-clone-${Date.now()}`, type: 'BUFF', targetId: 'player' });
                 break;
             }

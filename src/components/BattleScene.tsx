@@ -990,6 +990,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
     };
 
     const findRelic = (relicId: string) => player.relics.find(r => r.id === relicId);
+    const hasObservationNotes = !!findRelic('FROZEN_EYE');
     const hasChoker = !!findRelic('VELVET_CHOKER');
 
     const hasNormality = player.hand.some(c => c.name === '退屈' || c.name === 'NORMALITY');
@@ -1660,11 +1661,25 @@ const BattleScene: React.FC<BattleSceneProps> = ({
 
                 {/* Tooltip Modal Overlay */}
                 {tooltip && (
-                    <div className="app-modal-overlay fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-4" onClick={() => setTooltip(null)}>
+                    <div
+                        data-gamepad-modal
+                        data-gamepad-initial-scope={`battle-info-${tooltip.title}`}
+                        className="app-modal-overlay fixed inset-0 z-[100] flex items-center justify-center bg-black/60 p-4"
+                        onClick={() => setTooltip(null)}
+                    >
                         <div className="app-modal-panel app-tooltip-modal bg-black border-2 border-white p-4 rounded max-w-xs shadow-2xl animate-in fade-in zoom-in duration-200" onClick={e => e.stopPropagation()}>
                             <h3 className="text-yellow-400 font-bold mb-2 text-lg border-b border-gray-600 pb-1">{trans(tooltip.title, languageMode)}</h3>
                             <p className="text-white text-sm whitespace-pre-wrap">{trans(tooltip.msg, languageMode)}</p>
-                            <button onClick={() => setTooltip(null)} className="mt-4 w-full bg-gray-700 hover:bg-gray-600 text-white text-xs py-2 rounded">{trans("閉じる", languageMode)}</button>
+                            <button
+                                data-gamepad-back
+                                data-gamepad-initial-choice
+                                data-gamepad-zone="battle-info-actions"
+                                data-gamepad-order={0}
+                                onClick={() => setTooltip(null)}
+                                className="mt-4 w-full bg-gray-700 hover:bg-gray-600 text-white text-xs py-2 rounded"
+                            >
+                                {trans("閉じる", languageMode)}
+                            </button>
                         </div>
                     </div>
                 )}
@@ -1774,6 +1789,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                     key={enemy.id}
                                     data-gamepad-zone="battle-enemies"
                                     data-gamepad-order={visualEnemies.indexOf(enemy)}
+                                    data-gamepad-up-zone={!hideEnemyIntents ? 'battle-enemy-intents' : undefined}
                                     role="button"
                                     tabIndex={!isFinisherActive && coopCanAct ? 0 : -1}
                                     onClick={() => {
@@ -1795,8 +1811,31 @@ const BattleScene: React.FC<BattleSceneProps> = ({
 
                                     {!isFinisherActive && (
                                         <div
+                                            data-gamepad-zone={!hideEnemyIntents ? 'battle-enemy-intents' : undefined}
+                                            data-gamepad-order={!hideEnemyIntents ? visualEnemies.indexOf(enemy) : undefined}
+                                            data-gamepad-down-zone={!hideEnemyIntents ? 'battle-enemies' : undefined}
+                                            role={!hideEnemyIntents ? 'button' : undefined}
+                                            tabIndex={!hideEnemyIntents ? 0 : -1}
+                                            aria-label={!hideEnemyIntents
+                                                ? trans(hasObservationNotes ? `観察メモ：${getIntentHoverText(enemy)}` : '敵の次の行動です。', languageMode)
+                                                : undefined}
                                             className={`battle-enemy-intent absolute ${isTrueBossPhase2 ? '-top-1 md:-top-6' : '-top-6'} ${dodomedesuIntentPosition} left-1/2 -translate-x-1/2 z-30 transition-all duration-300 text-xs font-extrabold px-1.5 py-0.5 rounded border-2 animate-bounce whitespace-nowrap shadow-xl flex items-center justify-center min-w-[40px] ${hideEnemyIntents ? 'bg-slate-900 text-slate-100 border-slate-500' : enemy.nextIntent.type === 'PIERCE_ATTACK' ? 'bg-red-800 text-white border-yellow-400 scale-125 ring-2 ring-red-400 shadow-red-900/50' : 'bg-white text-black border-red-600'}`}
-                                            onClick={(e) => { e.stopPropagation(); showInfo(trans("敵", languageMode), trans("敵の次の行動です。", languageMode)); }}
+                                            onClick={(e) => {
+                                                e.stopPropagation();
+                                                showInfo(
+                                                    hasObservationNotes && !hideEnemyIntents ? '観察メモ：行動予告' : '敵',
+                                                    hasObservationNotes && !hideEnemyIntents ? getIntentHoverText(enemy) : '敵の次の行動です。'
+                                                );
+                                            }}
+                                            onKeyDown={(event) => {
+                                                if (hideEnemyIntents || (event.key !== 'Enter' && event.key !== ' ')) return;
+                                                event.preventDefault();
+                                                event.stopPropagation();
+                                                showInfo(
+                                                    hasObservationNotes ? '観察メモ：行動予告' : '敵',
+                                                    hasObservationNotes ? getIntentHoverText(enemy) : '敵の次の行動です。'
+                                                );
+                                            }}
                                             title={hideEnemyIntents ? "???" : trans(getIntentHoverText(enemy), languageMode)}
                                         >
                                             {hideEnemyIntents ? (
@@ -1831,6 +1870,9 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                                         <><Zap size={12} className="mr-1 text-yellow-500 fill-yellow-500" /> !</>
                                                     )}
                                                     {enemy.nextIntent.type === 'UNKNOWN' && <span className="text-gray-600">?</span>}
+                                                    {hasObservationNotes && (
+                                                        <Info size={10} className="ml-1 text-cyan-600" aria-hidden="true" />
+                                                    )}
                                                 </>
                                             )}
                                         </div>

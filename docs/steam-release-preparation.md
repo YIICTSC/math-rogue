@@ -95,16 +95,24 @@
   2026-07-30にSteamPipe Build ID `24465098`としてアップロードし、
   非公開`internal`ブランチへ反映した。Steamworksのビルド一覧で
   `internal`がBuild ID `24465098`を参照し、使用状況100%であることを確認済み。
+- 観察メモの行動予告詳細、コピー系カード強化、戦闘終了時の特殊カード選択モーダル
+  解消、戦闘ボイス頻度、イベント内名称を含む共通ソースからWindows x64版を再生成し、
+  Steam配布物検証に合格した。2026-07-31にSteamPipe Build ID `24486437`として
+  アップロードし、非公開`internal`ブランチへ反映した。
 - クラウドファンディング支援者への先行配布にはBeta Testingパッケージの
   Steamキーを使用する方針。2026-07-30時点では、アプリ作成から3週間経過するまで
   キーリクエストを利用できないというSteamworks側の制限が表示されている。
   `internal`ブランチだけでは未所有の支援者へ配布できないため、解禁後に必要数を
   申請し、1名につき1キーを個別送付する。
 - 実ゲーム画面7枚をSteamworksへ登録し、スクリーンショット必須条件を満たした。
-- カプセル／ライブラリ素材はSteamworks登録欄まで確認済み。Chrome拡張の
-  「ファイルのURLへのアクセスを許可」は有効化済み。ただしSteamworksの画像欄は
-  非表示のファイル入力とドラッグ＆ドロップのみで、ブラウザ自動操作から
-  ファイル選択イベントを取得できないため、登録操作のみ保留。
+- 英語版のHeader／Small／Main／Vertical CapsuleをSteamworksへ登録済み。
+  画像規約8項目への同意とアップロード確認を完了し、Steamworksのストアアセット欄が
+  完了表示になったことを確認した。
+- 英語版ライブラリアセット4点とアイコン2点はSteam公式仕様に適合することを
+  2026-07-30に再確認した。Library Capsule 600×900、Library Header 920×430、
+  Library Hero 3840×1240（文字なし）、Library Logo 1280×720（透明背景）、
+  Shortcut Icon 256×256 PNG、App Icon 184×184 JPG。Library Capsule／Logoは
+  Steamworksで種別認識済み、Header／Heroは正しい画像種別の選択と一括アップロード待ち。
 - 実ゲーム画面7枚とゲーム内BGMから、28秒・1920×1080・30fps・
   H.264 High/AAC LC（約8.1Mbps）のストア用トレーラーを生成し、
   向き・字幕・BGM・4地点のプレビューを検証済み。標準生成スクリプトは
@@ -261,10 +269,10 @@ STEAM_PREVIEW=0 STEAM_SET_LIVE=internal \
 
 Steamの基本カプセルには、ゲーム画像、製品名、正式なサブタイトル以外の販促文を入れない。Library Heroは文字なし、Library Logoは透明背景のロゴのみとする。
 
-- [x] Header Capsule（ローカル準備済み、Steamworksへの登録待ち）
-- [x] Small Capsule（ローカル準備済み、Steamworksへの登録待ち）
-- [x] Main Capsule（ローカル準備済み、Steamworksへの登録待ち）
-- [x] Vertical Capsule（ローカル準備済み、Steamworksへの登録待ち）
+- [x] Header Capsule（英語版をSteamworksへ登録済み）
+- [x] Small Capsule（英語版をSteamworksへ登録済み）
+- [x] Main Capsule（英語版をSteamworksへ登録済み）
+- [x] Vertical Capsule（英語版をSteamworksへ登録済み）
 - [x] Library Capsule（ローカル準備済み、Steamworksへの登録待ち）
 - [x] Library Header（ローカル準備済み、Steamworksへの登録待ち）
 - [x] Library Hero（文字なし、ローカル準備済み、Steamworksへの登録待ち）

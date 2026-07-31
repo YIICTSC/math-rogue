@@ -67,16 +67,16 @@ const MagicRulePanel: React.FC<MagicRulePanelProps> = ({ player, languageMode })
   return (
     <>
       <details
-        className="magic-rule-panel-mobile pointer-events-auto absolute left-2 top-14 z-40 overflow-hidden rounded-xl border-2 border-fuchsia-300/70 bg-slate-950/95 text-white shadow-[0_0_20px_rgba(217,70,239,0.3)]"
+        className="magic-rule-panel-mobile ios-edge-to-edge-visual pointer-events-auto absolute left-2 top-14 z-40 overflow-hidden rounded-xl border-2 border-fuchsia-300/70 bg-slate-950/95 text-white shadow-[0_0_20px_rgba(217,70,239,0.3)]"
         style={panelStyle}
       >
-        <summary className="flex min-h-11 cursor-pointer items-center gap-2 px-2.5 py-1.5">
+        <summary className="magic-rule-panel-mobile-summary flex min-h-11 cursor-pointer items-center gap-2 px-2.5 py-1.5">
           <Sparkles size={14} className="shrink-0 text-fuchsia-300" />
-          <div className="min-w-0">
-            <div className="truncate text-xs font-black">{trans(config.name, languageMode)}</div>
-            <div className="flex items-center gap-1 text-[10px] font-black text-fuchsia-200">
-              <span>{[0, 1, 2].map(index => index < progress ? '◆' : '◇').join('')}</span>
-              <span className="text-amber-200">{remaining > 0
+          <div className="magic-rule-panel-mobile-copy min-w-0">
+            <div className="magic-rule-panel-mobile-name truncate text-xs font-black">{trans(config.name, languageMode)}</div>
+            <div className="magic-rule-panel-mobile-progress flex items-center gap-1 text-[10px] font-black text-fuchsia-200">
+              <span className="magic-rule-panel-mobile-slots">{[0, 1, 2].map(index => index < progress ? '◆' : '◇').join('')}</span>
+              <span className="magic-rule-panel-mobile-remaining text-amber-200">{remaining > 0
                 ? (languageMode === 'ENGLISH' ? `${remaining} remaining` : `${trans("あと", languageMode)}${remaining}`)
                 : trans('完成', languageMode)}</span>
             </div>

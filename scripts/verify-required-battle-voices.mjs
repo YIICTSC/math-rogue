@@ -6,15 +6,20 @@ const appSource = await readFile(path.join(root, 'src', 'App.tsx'), 'utf8');
 const audioServiceSource = await readFile(path.join(root, 'src', 'services', 'audioService.ts'), 'utf8');
 
 const requiredSourceFragments = [
-  "const isOffensiveCard = card.type === CardType.ATTACK",
-  "if (isOffensiveCard) playMagicRuleVoice();",
-  "if (isOffensiveCard) playHighSchoolCardVoice();",
-  "if (isOffensiveCard) playMagicAttackVoice();",
+  'const NON_FINISH_BATTLE_VOICE_RATE = 0.3;',
+  'playMagicRuleVoice();',
+  'didPlayCardVoice = true;',
+  'didPlayCardVoice = playDelayedBattleVoice(playHighSchoolCardVoice);',
+  'didPlayCardVoice = playDelayedBattleVoice(playMagicAttackVoice);',
+  "audioService.playHighSchoolVoice(stateRef.current.player.id, 'finish');",
+  "audioService.playHighSchoolVoice(stateRef.current.player.id, 'defeat');",
+  "stateRef.current.visualTheme === 'magic'",
+  '&& !finisherVoiceAlreadyPlayed',
 ];
 
 for (const fragment of requiredSourceFragments) {
   if (!appSource.includes(fragment)) {
-    throw new Error(`Mandatory battle voice branch is missing: ${fragment}`);
+    throw new Error(`Battle voice frequency/finisher branch is missing: ${fragment}`);
   }
 }
 

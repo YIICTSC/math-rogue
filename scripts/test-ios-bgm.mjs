@@ -77,8 +77,10 @@ try {
       name: 'iOS Audio Tester',
     }));
     window.__iosBgmPlayAttempts = [];
+    window.__iosBgmPauseCount = 0;
     window.__iosBgmMediaSourceCount = 0;
     window.__iosOscillatorStartCount = 0;
+    const playingMedia = new WeakSet();
     const OriginalAudioContext = window.AudioContext || window.webkitAudioContext;
     if (OriginalAudioContext?.prototype?.createMediaElementSource) {
       const originalCreateMediaElementSource = OriginalAudioContext.prototype.createMediaElementSource;
@@ -88,10 +90,20 @@ try {
       };
     }
     HTMLMediaElement.prototype.play = function play() {
+      playingMedia.add(this);
       window.__iosBgmPlayAttempts.push(this.currentSrc || this.src);
       return Promise.resolve();
     };
-    HTMLMediaElement.prototype.pause = function pause() {};
+    HTMLMediaElement.prototype.pause = function pause() {
+      playingMedia.delete(this);
+      window.__iosBgmPauseCount += 1;
+    };
+    Object.defineProperty(HTMLMediaElement.prototype, 'paused', {
+      configurable: true,
+      get() {
+        return !playingMedia.has(this);
+      },
+    });
     const originalOscillatorStart = OscillatorNode.prototype.start;
     OscillatorNode.prototype.start = function start(...args) {
       window.__iosOscillatorStartCount += 1;
@@ -106,11 +118,16 @@ try {
   await page.goto(BASE_URL, { waitUntil: 'domcontentloaded', timeout: 120_000 });
   await page.waitForSelector('.start-menu-root');
   await page.waitForFunction(() => window.__iosBgmPlayAttempts.some(path => path.includes('/bgm-new/menu.mp3')));
-  // Initial autoplay can use the direct HTML media path while iOS still has
-  // Web Audio locked. The first interaction must unlock it and rebuild the BGM
-  // through the gain node.
+  // iOS BGM must remain on the native media element path even after Web Audio
+  // unlocks. This prevents CarPlay/Bluetooth route changes from repeatedly
+  // detaching and rebuffering the BGM stream.
+  const attemptsBeforeTitleTouch = await page.evaluate(() => window.__iosBgmPlayAttempts.length);
   await page.locator('.start-menu-root').dispatchEvent('pointerdown');
-  await page.waitForFunction(() => window.__iosBgmMediaSourceCount >= 1);
+  await delay(100);
+  const attemptsAfterTitleTouch = await page.evaluate(() => window.__iosBgmPlayAttempts.length);
+  if (attemptsAfterTitleTouch !== attemptsBeforeTitleTouch) {
+    throw new Error('A title-screen touch restarted an already healthy iOS BGM stream');
+  }
 
   const initial = await page.evaluate(() => ({
     iosClass: document.documentElement.classList.contains('app-platform-ios'),
@@ -118,7 +135,7 @@ try {
     mediaSourceCount: window.__iosBgmMediaSourceCount,
   }));
   if (!initial.iosClass) throw new Error('iOS platform class is missing');
-  if (initial.mediaSourceCount < 1) throw new Error('iOS BGM is not routed through Web Audio gain');
+  if (initial.mediaSourceCount !== 0) throw new Error('iOS BGM was unexpectedly routed through Web Audio');
 
   await page.locator('.start-menu-theme-switch button').filter({ hasText: '高校編' }).evaluate(element => element.click());
   await page.waitForFunction(() => window.__iosBgmPlayAttempts.some(path => path.includes('/bgm-new/high-school/menu.mp3')));
@@ -128,6 +145,31 @@ try {
     audioService.setBgmVolume(0.25);
     const context = audioService.ctx;
     const originalSuspend = context.suspend.bind(context);
+    const originalResume = context.resume.bind(context);
+    // CarPlay can keep Web Audio suspended while direct HTML BGM remains
+    // healthy. A screen touch must not restart that music stream.
+    await originalSuspend();
+    context.resume = async () => undefined;
+    const attemptsBeforeCarPlayTouch = window.__iosBgmPlayAttempts.length;
+    await audioService.unlockAudio();
+    const attemptsAfterCarPlayTouch = window.__iosBgmPlayAttempts.length;
+    context.resume = originalResume;
+    await originalResume();
+
+    // A touch-triggered unlock can still be in flight when the app backgrounds.
+    // The stale recovery must not win after the background pause.
+    await originalSuspend();
+    context.resume = async () => {
+      await new Promise(resolve => window.setTimeout(resolve, 80));
+      return originalResume();
+    };
+    const attemptsBeforeBackgroundRace = window.__iosBgmPlayAttempts.length;
+    const unlockPromise = audioService.unlockAudio();
+    await new Promise(resolve => window.setTimeout(resolve, 10));
+    audioService.handleAppBackground();
+    await unlockPromise;
+    const attemptsAfterBackgroundRace = window.__iosBgmPlayAttempts.length;
+    context.resume = originalResume;
     // Reproduce the WKWebView ordering that caused the regression: the native
     // background suspend completes after the first foreground event arrives.
     context.suspend = async () => {
@@ -136,6 +178,7 @@ try {
     };
     audioService.handleAppBackground();
     audioService.handleAppBackground();
+    const pauseCountAfterBackground = window.__iosBgmPauseCount;
     await audioService.handleAppForeground();
     const oscillatorCountBeforeSe = window.__iosOscillatorStartCount;
     audioService.playSound('select');
@@ -157,7 +200,12 @@ try {
       bgmVolume: audioService.getBgmVolume(),
       attempts: [...window.__iosBgmPlayAttempts],
       mediaSourceCount: window.__iosBgmMediaSourceCount,
+      pauseCountAfterBackground,
       normalPackagedAttemptCount,
+      attemptsBeforeCarPlayTouch,
+      attemptsAfterCarPlayTouch,
+      attemptsBeforeBackgroundRace,
+      attemptsAfterBackgroundRace,
       contextState: context.state,
       oscillatorSeStarted: window.__iosOscillatorStartCount > oscillatorCountBeforeSe,
     };
@@ -171,10 +219,17 @@ try {
     beforeResumeCount,
   );
   if (runtimeState.bgmVolume !== 0.25) throw new Error('BGM volume setting was not retained');
-  if (runtimeState.mediaSourceCount < 2) throw new Error('BGM was not rebuilt through the gain node after foreground restore');
+  if (runtimeState.mediaSourceCount !== 0) throw new Error('Foreground restore moved iOS BGM into Web Audio');
+  if (runtimeState.pauseCountAfterBackground < 1) throw new Error('iOS BGM did not pause when the app entered background');
   if (runtimeState.contextState !== 'running') throw new Error(`AudioContext remained ${runtimeState.contextState} after foreground restore`);
   if (!runtimeState.oscillatorSeStarted) throw new Error('Synthesized SE did not resume after foreground restore');
   if (runtimeState.normalPackagedAttemptCount !== 0) throw new Error('Non-battle sound unexpectedly started a packaged SE');
+  if (runtimeState.attemptsAfterCarPlayTouch !== runtimeState.attemptsBeforeCarPlayTouch) {
+    throw new Error('Suspended CarPlay Web Audio caused the active HTML BGM to restart');
+  }
+  if (runtimeState.attemptsAfterBackgroundRace !== runtimeState.attemptsBeforeBackgroundRace) {
+    throw new Error('A stale title gesture restarted BGM after the app entered background');
+  }
   const attempts = await page.evaluate(() => [...window.__iosBgmPlayAttempts]);
   process.stdout.write(`✓ iOS BGM and battle-only packaged SE routing verified (${attempts.at(-1)})\n`);
 } catch (error) {

@@ -66,6 +66,8 @@ class AudioService {
   private pausedForAppBackground: boolean = false;
   private backgroundSuspendPromise: Promise<void> = Promise.resolve();
   private foregroundRecoveryPromise: Promise<void> | null = null;
+  private appIsActive: boolean = true;
+  private appLifecycleGeneration: number = 0;
 
   // Sequencer State
   private nextNoteTime: number = 0;
@@ -219,7 +221,17 @@ class AudioService {
   }
 
   public async unlockAudio() {
+      if (!this.appIsActive || (typeof document !== 'undefined' && document.hidden)) return;
+      const lifecycleGeneration = this.appLifecycleGeneration;
       const contextReady = await this.resumeAudioContext(IS_IOS_BUILD ? 3 : 1);
+      // A pointer event can start this asynchronous recovery immediately before
+      // iOS backgrounds the app. Never let that stale gesture restart BGM after
+      // the background pause has won.
+      if (
+          !this.appIsActive
+          || lifecycleGeneration !== this.appLifecycleGeneration
+          || (typeof document !== 'undefined' && document.hidden)
+      ) return;
       if (!this.ctx) return;
       const needsPlaybackRetry = (
           this.isPlayingBGM
@@ -228,17 +240,24 @@ class AudioService {
           && (
               (!this.currentSource && !this.currentHtmlAudio)
               || (IS_IOS_BUILD && Boolean(this.currentHtmlAudio?.paused))
-              || !contextReady
+              // iOS BGM is played directly by HTMLAudioElement. CarPlay can keep
+              // Web Audio suspended while that element is healthy, so a suspended
+              // context must not restart the music on every screen touch.
+              || (!IS_IOS_BUILD && !contextReady)
           )
       );
-      if (!this.hasUnlockedAudio || needsPlaybackRetry) {
-          this.hasUnlockedAudio = true;
+      this.hasUnlockedAudio = true;
+      if (needsPlaybackRetry) {
           await this.restartCurrentBGM();
       }
   }
 
   public handleAppBackground() {
       if (this.backgroundPlaybackEnabled) return;
+      if (this.appIsActive) {
+          this.appIsActive = false;
+          this.appLifecycleGeneration += 1;
+      }
       this.pausedForAppBackground = this.pausedForAppBackground || this.isPlayingBGM;
       const previousSuspend = this.backgroundSuspendPromise;
       const currentSuspend = this.pauseBGM();
@@ -256,7 +275,12 @@ class AudioService {
   }
 
   public async handleAppForeground() {
+      if (!this.appIsActive) {
+          this.appIsActive = true;
+          this.appLifecycleGeneration += 1;
+      }
       if (this.foregroundRecoveryPromise) return this.foregroundRecoveryPromise;
+      const lifecycleGeneration = this.appLifecycleGeneration;
       const recovery = (async () => {
           const shouldRestartBgm = (
               this.pausedForAppBackground
@@ -270,7 +294,12 @@ class AudioService {
           // Web Audio SE and MP3 BGM after returning to the app.
           await this.backgroundSuspendPromise.catch(() => undefined);
           await this.resumeAudioContext(IS_IOS_BUILD ? 4 : 1);
-          if (shouldRestartBgm) {
+          if (
+              shouldRestartBgm
+              && this.appIsActive
+              && lifecycleGeneration === this.appLifecycleGeneration
+              && (typeof document === 'undefined' || !document.hidden)
+          ) {
               this.isBgmPaused = false;
               await this.restartCurrentBGM();
           }
@@ -1067,7 +1096,12 @@ class AudioService {
               audio = new Audio(path);
               audio.preload = 'auto';
               audio.loop = loop;
-              const routedThroughWebAudio = IS_IOS_BUILD && this.connectHtmlBgmToGain(audio);
+              // Keep iOS BGM on the media element's native playback path. Routing
+              // it through WKWebView's AudioContext makes the stream repeatedly
+              // detach and rebuffer when iOS changes output routes (CarPlay,
+              // Bluetooth, AirPlay), which sounds like short chopped fragments.
+              // SFX/voices can remain on Web Audio; BGM volume is applied directly.
+              const routedThroughWebAudio = !IS_IOS_BUILD && this.connectHtmlBgmToGain(audio);
               audio.volume = routedThroughWebAudio ? 1 : Math.min(1, this.bgmVolume);
               audio.onended = () => {
                   if (this.isPlayingBGM && !loop) {
@@ -1160,9 +1194,14 @@ class AudioService {
   }
 
   public pauseBGM(): Promise<void> {
-      if (!this.ctx || !this.isPlayingBGM || this.isBgmPaused) return Promise.resolve();
-      this.currentHtmlAudio?.pause();
+      if (!this.isPlayingBGM || this.isBgmPaused) return Promise.resolve();
+      this.activeBgmHtmlAudios.forEach(audio => {
+          try {
+              audio.pause();
+          } catch {}
+      });
       this.isBgmPaused = true;
+      if (!this.ctx) return Promise.resolve();
       return this.ctx.suspend().then(() => undefined).catch(() => undefined);
   }
 
