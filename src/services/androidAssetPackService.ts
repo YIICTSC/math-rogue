@@ -55,9 +55,10 @@ export type AndroidAssetPackSnapshot = {
 const STATE_CHANGED_EVENT = 'learning-rogue:android-asset-packs-changed';
 const PROMPT_SEEN_KEY = 'learning_rogue_android_asset_pack_prompt_seen_v1';
 const MAX_CONCURRENT_DOWNLOADS = 4;
+const MAX_DOWNLOAD_ATTEMPTS = 3;
 
 const encodeHostedPath = (path: string) =>
-  path.split('/').map(segment => encodeURIComponent(segment)).join('/');
+  path.normalize('NFC').split('/').map(segment => encodeURIComponent(segment)).join('/');
 
 const getTransferProgressKey = (url: string) => {
   try {
@@ -71,6 +72,15 @@ const formatError = (reason: unknown) => {
   if (reason instanceof Error) return reason.message;
   if (reason && typeof reason === 'object' && 'message' in reason) return String(reason.message);
   return '素材のダウンロードに失敗しました。通信状態と空き容量を確認してください。';
+};
+
+const wait = (milliseconds: number) => new Promise(resolve => window.setTimeout(resolve, milliseconds));
+
+const isRetryableDownloadError = (reason: unknown) => {
+  const message = formatError(reason);
+  const status = Number(message.match(/HTTP error:\s*(\d{3})/i)?.[1] || 0);
+  if (!status) return true;
+  return status === 408 || status === 429 || status >= 500;
 };
 
 class AndroidAssetPackService {
@@ -211,18 +221,30 @@ class AndroidAssetPackService {
           const progressKey = getTransferProgressKey(remoteUrl);
           transferredByUrl.set(progressKey, 0);
           try {
-            await FileTransfer.downloadFile({
-              url: remoteUrl,
-              path: `${directoryUri}/${localFileName}`,
-              progress: true,
-              connectTimeout: 30_000,
-              readTimeout: 120_000,
-            });
-            const downloaded = await Filesystem.stat({ path: localPath, directory: Directory.Data });
-            if (downloaded.size !== file.size) {
-              await Filesystem.deleteFile({ path: localPath, directory: Directory.Data }).catch(() => undefined);
-              throw new Error(`${file.path} の検証に失敗しました。再試行してください。`);
+            let lastError: unknown = null;
+            for (let attempt = 1; attempt <= MAX_DOWNLOAD_ATTEMPTS; attempt += 1) {
+              try {
+                await FileTransfer.downloadFile({
+                  url: remoteUrl,
+                  path: `${directoryUri}/${localFileName}`,
+                  progress: true,
+                  connectTimeout: 30_000,
+                  readTimeout: 120_000,
+                });
+                const downloaded = await Filesystem.stat({ path: localPath, directory: Directory.Data });
+                if (downloaded.size !== file.size) {
+                  throw new Error('ダウンロードしたファイルのサイズが一致しません。');
+                }
+                lastError = null;
+                break;
+              } catch (reason) {
+                lastError = reason;
+                await Filesystem.deleteFile({ path: localPath, directory: Directory.Data }).catch(() => undefined);
+                if (attempt >= MAX_DOWNLOAD_ATTEMPTS || !isRetryableDownloadError(reason)) break;
+                await wait(1_000 * attempt);
+              }
             }
+            if (lastError) throw new Error(`${file.path}: ${formatError(lastError)}`);
           } catch (reason) {
             aborted = true;
             throw reason;
@@ -252,6 +274,14 @@ class AndroidAssetPackService {
       ));
       const failure = results.find((result): result is PromiseRejectedResult => result.status === 'rejected');
       if (failure) throw failure.reason;
+      const expectedLocalFiles = new Set(pack.files.map(file => getAndroidAssetLocalFileName(file.path)));
+      const directoryEntries = await Filesystem.readdir({ path: packDirectory, directory: Directory.Data });
+      await Promise.all(directoryEntries.files
+        .filter(entry => !expectedLocalFiles.has(entry.name))
+        .map(entry => Filesystem.deleteFile({
+          path: `${packDirectory}/${entry.name}`,
+          directory: Directory.Data,
+        }).catch(() => undefined)));
       const rootUri = (await Filesystem.getUri({ path: ANDROID_ASSET_PACK_ROOT, directory: Directory.Data })).uri;
       const current = readAndroidAssetPackInstallState();
       const next = {

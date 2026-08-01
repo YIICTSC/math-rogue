@@ -9,6 +9,7 @@ import { assetUrl } from '../utils/assetPaths';
 import { isLegacySpriteModeEnabled } from '../utils/legacySpriteMode';
 import { toAge9BattleText, transBattle } from '../utils/ageRatingCopy';
 import type { VisualThemeId } from '../data/visualThemes';
+import ResilientAssetImage from './ResilientAssetImage';
 
 interface CardProps {
   card: CardType;
@@ -123,8 +124,11 @@ const CompositeArtPiece: React.FC<{
   if (refToken.startsWith('magic-rule:')) {
     const [, heroId, index] = refToken.split(':');
     return (
-      <img
-        src={assetUrl(`sprites/magic/rule-cards/${heroId}/${index}.webp`)}
+      <ResilientAssetImage
+        sources={[
+          assetUrl(`sprites/magic/rule-cards/${heroId}/${index}.webp`),
+          ...getCardIllustrationPaths(seed, heroId, []),
+        ]}
         alt={heroId}
         className="w-full h-full object-cover opacity-95"
       />
@@ -134,8 +138,11 @@ const CompositeArtPiece: React.FC<{
   if (refToken.startsWith('magic-basic:')) {
     const [, heroId, art] = refToken.split(':');
     return (
-      <img
-        src={assetUrl(`sprites/magic/basic-cards/${heroId}/${art}.webp`)}
+      <ResilientAssetImage
+        sources={[
+          assetUrl(`sprites/magic/basic-cards/${heroId}/${art}.webp`),
+          ...getCardIllustrationPaths(seed, heroId, []),
+        ]}
         alt={heroId}
         className="w-full h-full object-cover opacity-95"
       />
@@ -145,8 +152,11 @@ const CompositeArtPiece: React.FC<{
   if (refToken.startsWith('magic-card:')) {
     const index = refToken.substring('magic-card:'.length);
     return (
-      <img
-        src={assetUrl(`sprites/magic/cards/${index}.webp`)}
+      <ResilientAssetImage
+        sources={[
+          assetUrl(`sprites/magic/cards/${index}.webp`),
+          ...getCardIllustrationPaths(seed, 'magic-card', []),
+        ]}
         alt="magic card"
         className="w-full h-full object-cover opacity-95"
       />
@@ -175,8 +185,11 @@ const CompositeArtPiece: React.FC<{
       );
     }
     return (
-      <img
-        src={assetUrl(path)}
+      <ResilientAssetImage
+        sources={[
+          assetUrl(path),
+          ...getCardIllustrationPaths(seed, 'card illustration', []),
+        ]}
         alt="card illustration"
         className={`w-full h-full object-cover opacity-95 ${isDodomedesuCardArt ? 'object-top' : ''}`}
       />
@@ -317,8 +330,8 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled, onInspect, languag
     const age9ReplacementArt = getAge9ReplacementArt(card);
     if (age9ReplacementArt) {
       return (
-        <img
-          src={age9ReplacementArt}
+        <ResilientAssetImage
+          sources={[age9ReplacementArt, ...imageCandidates]}
           alt={displayCardName}
           className="w-full h-full object-cover opacity-95 drop-shadow-md"
         />
@@ -336,8 +349,11 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled, onInspect, languag
       return (
         <div className="relative h-full w-full overflow-hidden bg-[radial-gradient(circle_at_55%_45%,rgba(236,72,153,0.32),rgba(15,23,42,0.78)_55%,rgba(0,0,0,0.95))]">
           <div className="absolute inset-0 bg-[linear-gradient(135deg,rgba(248,250,252,0.18),transparent_28%,rgba(239,68,68,0.22)_52%,transparent_70%)]" />
-          <img
-            src={assetUrl(`sprites/high-school/familiars-action/${card.familiarSummon.imageIndex}.webp`)}
+          <ResilientAssetImage
+            sources={[
+              assetUrl(`sprites/high-school/familiars-action/${card.familiarSummon.imageIndex}.webp`),
+              ...imageCandidates,
+            ]}
             alt={languageMode === 'ENGLISH' ? getEnglishFamiliarName(card.familiarSummon.name) : trans(card.familiarSummon.name, languageMode)}
             className="absolute left-1/2 top-[18%] h-[205%] w-[205%] -translate-x-1/2 -translate-y-1/2 object-contain opacity-100 drop-shadow-[0_0_12px_rgba(244,114,182,0.85)]"
             style={{ transform: 'translate(-50%, -50%)' }}
@@ -397,8 +413,11 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled, onInspect, languag
 
     if (card.highSchoolCardArtIndex !== undefined) {
       return (
-        <img
-          src={assetUrl(`sprites/high-school/cards/${card.highSchoolCardArtIndex}.webp`)}
+        <ResilientAssetImage
+          sources={[
+            assetUrl(`sprites/high-school/cards/${card.highSchoolCardArtIndex}.webp`),
+            ...imageCandidates,
+          ]}
           alt={displayCardName}
           className="w-full h-full object-cover opacity-95 drop-shadow-md"
         />
@@ -407,8 +426,11 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled, onInspect, languag
 
     if (usesMagicRuleCardArt && card.magicRuleCardIndex !== undefined && card.magicHeroId) {
       return (
-        <img
-          src={assetUrl(`sprites/magic/rule-cards/${card.magicHeroId}/${card.magicRuleCardIndex}.webp`)}
+        <ResilientAssetImage
+          sources={[
+            assetUrl(`sprites/magic/rule-cards/${card.magicHeroId}/${card.magicRuleCardIndex}.webp`),
+            ...imageCandidates,
+          ]}
           alt={displayCardName}
           className="w-full h-full object-cover opacity-95 drop-shadow-md"
         />
@@ -417,8 +439,11 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled, onInspect, languag
 
     if (card.magicBasicCardArt && card.magicHeroId) {
       return (
-        <img
-          src={assetUrl(`sprites/magic/basic-cards/${card.magicHeroId}/${card.magicBasicCardArt}.webp`)}
+        <ResilientAssetImage
+          sources={[
+            assetUrl(`sprites/magic/basic-cards/${card.magicHeroId}/${card.magicBasicCardArt}.webp`),
+            ...imageCandidates,
+          ]}
           alt={displayCardName}
           className="w-full h-full object-cover opacity-95 drop-shadow-md"
         />
@@ -427,8 +452,11 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled, onInspect, languag
 
     if (card.magicCardArtIndex !== undefined) {
       return (
-        <img
-          src={assetUrl(`sprites/magic/cards/${card.magicCardArtIndex}.webp`)}
+        <ResilientAssetImage
+          sources={[
+            assetUrl(`sprites/magic/cards/${card.magicCardArtIndex}.webp`),
+            ...imageCandidates,
+          ]}
           alt={displayCardName}
           className="w-full h-full object-cover opacity-95 drop-shadow-md"
         />

@@ -15,7 +15,7 @@ export type AndroidAssetPackInstallState = {
 const isAndroidBuild = String(import.meta.env.VITE_APP_PLATFORM || '').trim().toLowerCase() === 'android';
 
 export const getAndroidAssetPackId = (path: string): AndroidAssetPackId => {
-  const normalizedPath = path.replace(/^\/+/, '').toLowerCase();
+  const normalizedPath = path.normalize('NFC').replace(/^\/+/, '').toLowerCase();
   const isAudio = normalizedPath.startsWith('bgm/')
     || normalizedPath.startsWith('bgm-new/')
     || normalizedPath.startsWith('sfx/');
@@ -29,7 +29,7 @@ export const getAndroidAssetPackId = (path: string): AndroidAssetPackId => {
 };
 
 export const getAndroidAssetLocalFileName = (path: string): string => {
-  const normalizedPath = path.replace(/^\/+/, '');
+  const normalizedPath = path.normalize('NFC').replace(/^\/+/, '');
   let first = 2166136261;
   let second = 2246822507;
   for (let index = 0; index < normalizedPath.length; index += 1) {
@@ -59,7 +59,7 @@ export const readAndroidAssetPackInstallState = (): AndroidAssetPackInstallState
 
 export const resolveDownloadedAndroidAssetUrl = (path: string): string | null => {
   if (!isAndroidBuild || typeof window === 'undefined') return null;
-  const normalizedPath = path.replace(/^\/+/, '');
+  const normalizedPath = path.normalize('NFC').replace(/^\/+/, '');
   if (!normalizedPath.includes('/')) return null;
   const packId = getAndroidAssetPackId(normalizedPath);
   const state = readAndroidAssetPackInstallState();
@@ -83,7 +83,7 @@ const shouldVersionAsset = (path: string): boolean =>
 
 export const assetUrl = (path: string): string => {
   if (/^(data:|blob:|https?:)/.test(path)) return path;
-  const normalizedPath = path.replace(/^\/+/, '');
+  const normalizedPath = path.normalize('NFC').replace(/^\/+/, '');
   const downloadedUrl = resolveDownloadedAndroidAssetUrl(normalizedPath);
   if (downloadedUrl) return downloadedUrl;
   const url = `${getAssetBaseUrl()}${normalizedPath}`;

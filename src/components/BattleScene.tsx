@@ -12,7 +12,7 @@ import { getEnglishFamiliarName, trans } from '../utils/textUtils';
 import { transBattle } from '../utils/ageRatingCopy';
 import { HERO_IMAGE_DATA, CARDS_LIBRARY, STATUS_CARDS } from '../constants';
 import { ENEMY_ILLUSTRATION_SIZE_CLASS } from '../constants/uiSizing';
-import { getUpgradedCard, synthesizeCards } from '../utils/cardUtils';
+import { getUpgradedCard, normalizeIllustrationRefToken, parseEnemyIllustrationRef, synthesizeCards } from '../utils/cardUtils';
 import { getCardIllustrationPaths } from '../utils/cardIllustration';
 import { getMagicCardArtUrl } from '../utils/cardArtPaths';
 import React, { useEffect, useMemo, useState, useRef } from 'react';
@@ -25,6 +25,7 @@ import { boostMagicCardForTransformation } from '../data/magicCards';
 import { assetUrl } from '../utils/assetPaths';
 import type { BattleUiSettings } from './SettingsModal';
 import MagicRulePanel from './MagicRulePanel';
+import ResilientAssetImage from './ResilientAssetImage';
 
 const MAGIC_MALE_ACTION_SCALE: Record<string, {
     before: { attack: number; skill: number };
@@ -2798,15 +2799,7 @@ const extractIllustrationTokens = (card: ICard): string[] => {
 const FinisherArtPiece: React.FC<{ token: string; seed: string; languageMode: LanguageMode; card: ICard; fitMode?: 'cover' | 'contain' }> = ({ token, seed, languageMode, card, fitMode = 'cover' }) => {
     const [imageIndex, setImageIndex] = useState(0);
     const [failed, setFailed] = useState(false);
-    const normalized = token.startsWith('enemy:')
-        || token.startsWith('card:')
-        || token.startsWith('pixel:')
-        || token.startsWith('familiar:')
-        || token.startsWith('magic-rule:')
-        || token.startsWith('magic-basic:')
-        || token.startsWith('magic-card:')
-        ? token
-        : `card:${token}`;
+    const normalized = normalizeIllustrationRefToken(token);
 
     useEffect(() => {
         setImageIndex(0);
@@ -2814,14 +2807,15 @@ const FinisherArtPiece: React.FC<{ token: string; seed: string; languageMode: La
     }, [normalized]);
 
     if (normalized.startsWith('enemy:')) {
-        const name = normalized.substring('enemy:'.length);
+        const enemyRef = parseEnemyIllustrationRef(normalized);
+        const name = enemyRef?.name || normalized.substring('enemy:'.length).split('|')[0];
         return (
             <EnemyIllustration
                 name={name}
                 seed={seed}
-                visualTheme={card.visualTheme}
-                enemyType={card.enemyIllustrationEnemyType}
-                phase={card.enemyIllustrationPhase}
+                visualTheme={enemyRef?.visualTheme || card.visualTheme}
+                enemyType={enemyRef?.enemyType || card.enemyIllustrationEnemyType}
+                phase={enemyRef?.phase ?? card.enemyIllustrationPhase}
                 action={card.capture && card.visualTheme && card.visualTheme !== 'elementary' ? 'attack' : 'idle'}
                 className="w-full h-full"
                 size={32}
@@ -2852,11 +2846,28 @@ const FinisherArtPiece: React.FC<{ token: string; seed: string; languageMode: La
 
     const imgClass = fitMode === 'contain' ? 'w-full h-full object-contain' : 'w-full h-full object-cover';
 
+    if (normalized.startsWith('asset:')) {
+        const path = normalized.substring('asset:'.length);
+        return (
+            <ResilientAssetImage
+                sources={[
+                    assetUrl(path),
+                    ...getCardIllustrationPaths(seed, card.name, card.originalNames || []),
+                ]}
+                alt={transBattle(card.name, languageMode)}
+                className={imgClass}
+            />
+        );
+    }
+
     if (normalized.startsWith('magic-rule:')) {
         const [, heroId, index] = normalized.split(':');
         return (
-            <img
-                src={assetUrl(`sprites/magic/rule-cards/${heroId}/${index}.webp`)}
+            <ResilientAssetImage
+                sources={[
+                    assetUrl(`sprites/magic/rule-cards/${heroId}/${index}.webp`),
+                    ...getCardIllustrationPaths(seed, card.name, card.originalNames || []),
+                ]}
                 alt={transBattle(card.name, languageMode)}
                 className={imgClass}
             />
@@ -2866,8 +2877,11 @@ const FinisherArtPiece: React.FC<{ token: string; seed: string; languageMode: La
     if (normalized.startsWith('magic-basic:')) {
         const [, heroId, art] = normalized.split(':');
         return (
-            <img
-                src={assetUrl(`sprites/magic/basic-cards/${heroId}/${art}.webp`)}
+            <ResilientAssetImage
+                sources={[
+                    assetUrl(`sprites/magic/basic-cards/${heroId}/${art}.webp`),
+                    ...getCardIllustrationPaths(seed, card.name, card.originalNames || []),
+                ]}
                 alt={transBattle(card.name, languageMode)}
                 className={imgClass}
             />
@@ -2877,8 +2891,11 @@ const FinisherArtPiece: React.FC<{ token: string; seed: string; languageMode: La
     if (normalized.startsWith('magic-card:')) {
         const index = normalized.substring('magic-card:'.length);
         return (
-            <img
-                src={assetUrl(`sprites/magic/cards/${index}.webp`)}
+            <ResilientAssetImage
+                sources={[
+                    assetUrl(`sprites/magic/cards/${index}.webp`),
+                    ...getCardIllustrationPaths(seed, card.name, card.originalNames || []),
+                ]}
                 alt={transBattle(card.name, languageMode)}
                 className={imgClass}
             />

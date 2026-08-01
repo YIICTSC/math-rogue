@@ -5246,6 +5246,7 @@ Object.assign(ENGLISH_CARD_NAME_DICTIONARY, {
 });
 
 Object.assign(ENGLISH_DICTIONARY, {
+    "天気予報：明日の運勢を占った（山札並び替え）": "Weather Forecast: Read tomorrow's outlook and rearranged the draw pile.",
     "焼却炉": "Incinerator",
     // Main route: high-school / magic UI
     "完成条件": "Completion",
@@ -6405,6 +6406,8 @@ const buildEnglishTokenPhrase = (text: string): string | null => {
 };
 
 const ENGLISH_TEXT_PATTERNS: Array<[RegExp, string]> = [
+    [/^天気予報：明日の運勢を占った（山札並び替え）$/, 'Weather Forecast: Read tomorrow\'s outlook and rearranged the draw pile.'],
+    [/^(.+)は恐怖で震えている（筋力-3）$/, '$1 trembles in fear (Strength -3).'],
     [/^召喚効果：次のターン開始時に(.+)枚ドロー$/, 'Summon Effect: Draw $1 card(s) at the start of the next turn.'],
     [/^鏡：コピーしたが、自分がびくびく(.+)$/, 'Mirror: Copied the card, but gained $1 Vulnerable.'],
     [/^キラキラの粉：敵をへろへろ(.+)にした$/, 'Sparkling Powder: Applied $1 Weak to the enemy.'],
@@ -7067,6 +7070,23 @@ const EVENT_PHRASE_TRANSLATIONS: Record<string, string> = {
 };
 
 const MAGIC_EVENT_NAME_TRANSLATIONS: Record<string, string> = {
+    "星宮あかり": "Akari Hoshimiya",
+    "水城しずく": "Shizuku Mizuki",
+    "花咲ひより": "Hiyori Hanasaki",
+    "火神つばさ": "Tsubasa Kagami",
+    "黒羽れい": "Rei Kuroha",
+    "翠川まどか": "Madoka Midorikawa",
+    "風森こはる": "Koharu Kazamori",
+    "紫藤みらい": "Mirai Shido",
+    "白峰セラ": "Sera Shiramine",
+    "朝霧 蓮": "Ren Asagiri",
+    "御影 颯真": "Soma Mikage",
+    "白石 湊": "Minato Shiraishi",
+    "天音 理玖": "Riku Amane",
+    "黒瀬 大和": "Yamato Kurose",
+    "神代 レオン": "Leon Kamishiro",
+    "エリオット・ノクス": "Elliot Nox",
+    "九条 朔夜": "Sakuya Kujo",
     "あかり": "Akari",
     "しずく": "Shizuku",
     "ひより": "Hiyori",
@@ -7084,6 +7104,63 @@ const MAGIC_EVENT_NAME_TRANSLATIONS: Record<string, string> = {
     "レオン": "Leon",
     "エリオット": "Elliot",
     "朔夜": "Sakuya",
+};
+
+const MAGIC_EVENT_METADATA_TRANSLATIONS: Record<string, string> = {
+    "幼なじみ": "Childhood Friend",
+    "生徒会長": "Student Council President",
+    "後輩": "Junior Student",
+    "先輩": "Senior Student",
+    "不良少年": "Rebellious Student",
+    "ライバル魔法使い": "Rival Mage",
+    "謎の転校生": "Mysterious Transfer Student",
+    "敵幹部": "Enemy Officer",
+    "星冠の魔法騎士": "Star-Crowned Magic Knight",
+    "月鏡の水晶騎士": "Moon-Mirror Crystal Knight",
+    "命花の治癒術師": "Life-Bloom Healer",
+    "神鍛の炎戦士": "Divine-Forge Flame Warrior",
+    "深紅の符術姫": "Crimson Sigil Princess",
+    "時環の錬金術師": "Time-Ring Alchemist",
+    "翠嵐の精霊弓士": "Emerald-Gale Spirit Archer",
+    "夢幻の舞台魔術師": "Dream-Stage Magician",
+    "星界の光術師": "Astral Light Mage",
+    "国語・発表": "Japanese / Presentation",
+    "数学・天文": "Math / Astronomy",
+    "生物・保健": "Biology / Health",
+    "体育・物理": "PE / Physics",
+    "日本史・古典": "Japanese History / Classics",
+    "情報・化学": "Information Science / Chemistry",
+    "地理・環境": "Geography / Environment",
+    "音楽・美術": "Music / Art",
+    "英語・倫理": "English / Ethics",
+    "風の防護・国語": "Wind Protection / Japanese",
+    "氷の秩序・数学": "Ice Order / Math",
+    "水の治癒・生物": "Water Healing / Biology",
+    "時間観測・情報": "Time Observation / Information Science",
+    "炎拳・体育": "Flame Fist / PE",
+    "音と幻術・音楽": "Sound and Illusions / Music",
+    "星界魔法・英語": "Astral Magic / English",
+    "闇と封印・歴史": "Darkness and Sealing / History",
+};
+
+const translateMagicEventDescriptor = (text: string): string => {
+    if (MAGIC_EVENT_METADATA_TRANSLATIONS[text]) return MAGIC_EVENT_METADATA_TRANSLATIONS[text];
+    const translated = applyEnglishPhraseTable(text, {
+        ...MAGIC_EVENT_NAME_TRANSLATIONS,
+        ...MAGIC_EVENT_PHRASE_TRANSLATIONS,
+        "親友ルート": "best-friend route",
+        "相棒ルート": "partner route",
+        "友情ルート": "friendship route",
+        "互いを補う": "that complements each other",
+        "互いを支える": "that supports each other",
+        "響き合う": "in harmony",
+        "育つ": "that grows",
+        "重なる": "that comes together",
+        "競い合って伸びる": "that grows through friendly rivalry",
+        "ぶつかりながら深まる": "that deepens through conflict",
+        "仲間を信じる": "about trusting companions",
+    });
+    return JAPANESE_TEXT_PATTERN.test(translated) ? "Friendship route" : translated;
 };
 
 const MAGIC_EVENT_PHRASE_TRANSLATIONS: Record<string, string> = {
@@ -7139,6 +7216,20 @@ const buildEnglishMagicEventFallback = (text: string): string | null => {
     const trimmed = text.trim();
     if (!trimmed || !JAPANESE_TEXT_PATTERN.test(trimmed)) return null;
     const hasMagicCharacterName = Object.keys(MAGIC_EVENT_NAME_TRANSLATIONS).some(name => trimmed.includes(name));
+    if (MAGIC_EVENT_METADATA_TRANSLATIONS[trimmed]) return MAGIC_EVENT_METADATA_TRANSLATIONS[trimmed];
+    const relationshipLabel = trimmed.match(/^(.+)（(.+)）$/);
+    if (relationshipLabel) {
+        const name = MAGIC_EVENT_NAME_TRANSLATIONS[relationshipLabel[1]] || relationshipLabel[1];
+        return `${name} (${translateMagicEventDescriptor(relationshipLabel[2])})`;
+    }
+    const romanceProgress = trimmed.match(/^好感度 (\d+)\/100 \/ 第(\d+)段階 \/ (.+)$/);
+    if (romanceProgress) return `Affection ${romanceProgress[1]}/100 / Stage ${romanceProgress[2]} / ${translateMagicEventDescriptor(romanceProgress[3])}`;
+    const romanceComplete = trimmed.match(/^好感度 (\d+)\/100 \/ 5段階完了$/);
+    if (romanceComplete) return `Affection ${romanceComplete[1]}/100 / All 5 stages complete`;
+    const romanceLocked = trimmed.match(/^好感度 (\d+)\/100 \/ 第(\d+)章で第(\d+)段階解放$/);
+    if (romanceLocked) return `Affection ${romanceLocked[1]}/100 / Stage ${romanceLocked[3]} unlocks in Act ${romanceLocked[2]}`;
+    const friendshipProgress = trimmed.match(/^絆 (\d+)\/100 \/ (.+)$/);
+    if (friendshipProgress) return `Bond ${friendshipProgress[1]}/100 / ${translateMagicEventDescriptor(friendshipProgress[2])}`;
     if (trimmed.includes('\n')) {
         const lines = trimmed.split(/\n/).map(line => buildEnglishMagicEventFallback(line) || line);
         if (lines.some((line, index) => line !== trimmed.split(/\n/)[index]) && !JAPANESE_TEXT_PATTERN.test(lines.join('\n'))) {
@@ -7311,6 +7402,8 @@ const EVENT_INLINE_NAME_TRANSLATIONS: Record<string, string> = {
 };
 
 const translateEnglishNameInline = (name: string): string => {
+    if (MAGIC_EVENT_NAME_TRANSLATIONS[name]) return MAGIC_EVENT_NAME_TRANSLATIONS[name];
+    if (MAGIC_EVENT_METADATA_TRANSLATIONS[name]) return MAGIC_EVENT_METADATA_TRANSLATIONS[name];
     if (EVENT_INLINE_NAME_TRANSLATIONS[name]) return EVENT_INLINE_NAME_TRANSLATIONS[name];
     if (EVENT_TITLE_ENGLISH_FALLBACK[name]) return EVENT_TITLE_ENGLISH_FALLBACK[name];
     const sanitized = sanitizeEnglishText(name).replace(/^"|"$/g, '').trim();
@@ -7573,6 +7666,36 @@ Object.assign(ENGLISH_DICTIONARY, {
     "親友の証を結ぶ": "Seal the Proof of Best Friends",
     "一緒に復習する": "Review Together",
     "魔力を整える": "Steady Your Magic Power",
+    "いったん退いて作戦を練る": "Fall Back and Rethink the Plan",
+    "まっすぐ気持ちを伝える": "Share Your Feelings Honestly",
+    "一緒に行動する提案をする": "Suggest Working Together",
+    "二人きりの寄り道へ誘う": "Invite Them on a Detour Together",
+    "二人だけの約束を交わす": "Make a Promise Between the Two of You",
+    "二人で動こうと誘う": "Ask Them to Team Up",
+    "今日は二人で寄り道する": "Take a Detour Together Today",
+    "休憩へ連れ出す": "Take Them Out for a Break",
+    "休憩用の魔法菓子を分ける": "Share Some Magic Snacks",
+    "使命と恋を両方選ぶ": "Choose Both Duty and Love",
+    "使命も彼女も諦めないと誓う": "Promise Not to Give Up on Her or the Mission",
+    "卒業後も隣にいたいと告げる": "Say You Want to Stay by Her Side After Graduation",
+    "卒業後も隣にいてほしいと告げる": "Ask Her to Stay by Your Side After Graduation",
+    "危険でも手を離さない": "Do Not Let Go, Even in Danger",
+    "彼女の不安を受け止める": "Acknowledge Her Fears",
+    "彼女の夢を聞き出す": "Ask About Her Dream",
+    "彼女の得意分野を頼る": "Rely on Her Expertise",
+    "彼女を守る作戦を組み直す": "Rework the Plan to Protect Her",
+    "得意分野を教えてもらう": "Ask Them to Teach Their Specialty",
+    "必ず連れて帰ると告げる": "Promise to Bring Her Home",
+    "思い出を形に残そうと提案する": "Suggest Making a Keepsake",
+    "相手の不安を受け止める": "Acknowledge Their Fears",
+    "相手の夢を最後まで聞く": "Listen to Their Dream to the End",
+    "背中を預けて共闘する": "Fight Together Back-to-Back",
+    "自分から二人の約束を結ぶ": "Make a Promise Together",
+    "自分から手伝うと申し出る": "Offer to Help",
+    "自分が前に出て共闘する": "Step Forward and Fight Together",
+    "自分の弱点も打ち明ける": "Share Your Own Weaknesses Too",
+    "自分の弱点を先に打ち明ける": "Share Your Weakness First",
+    "記念になる魔法写真を撮る": "Take a Magic Photo as a Keepsake",
     "一緒に帰る": "Go Home Together",
     "勉強の続きをする": "Continue Studying",
     "放課後、誰と過ごす？": "After School, Who Will You Spend Time With?",
@@ -10514,6 +10637,8 @@ export const trans = (text: string, mode: LanguageMode): string => {
         if (albumStarter) return `Brought ${trans(albumStarter[1], mode)} from the Card Album.`;
         const missingExperimentCards = text.match(/^実験材料（カード）が(\d+)枚足りない\.\.\.$/);
         if (missingExperimentCards) return `You need ${missingExperimentCards[1]} more experiment material card(s)...`;
+        const fearStrengthLoss = text.match(/^(.+)は恐怖で震えている（筋力-3）$/);
+        if (fearStrengthLoss) return `${trans(fearStrengthLoss[1], mode)} trembles in fear (Strength -3).`;
 
         const eventTitleTranslation = translateEnglishEventTitle(text);
         if (eventTitleTranslation) return eventTitleTranslation;

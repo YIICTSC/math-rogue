@@ -2,6 +2,7 @@ import { createHash } from 'node:crypto';
 import { createReadStream } from 'node:fs';
 import { mkdir, readdir, stat, writeFile } from 'node:fs/promises';
 import path from 'node:path';
+import { isSourceAsset } from './source-asset-exclusions.mjs';
 
 const publicDir = path.resolve('public');
 const manifestPath = path.join(publicDir, 'android-asset-pack-manifest.json');
@@ -10,6 +11,7 @@ const hostedBaseUrl = 'https://yiictsc.github.io/math-rogue/';
 const runtimeExtensions = new Set(['.mp3', '.ogg', '.png', '.svg', '.ttf', '.webp']);
 
 const getLocalFileName = (assetPath) => {
+  assetPath = assetPath.normalize('NFC');
   let first = 2166136261;
   let second = 2246822507;
   for (let index = 0; index < assetPath.length; index += 1) {
@@ -100,9 +102,10 @@ const files = (await walk(publicDir))
   .filter(filePath => !filePath.endsWith('-source.webp'))
   .map(filePath => ({
     filePath,
-    path: path.relative(publicDir, filePath).split(path.sep).join('/'),
+    path: path.relative(publicDir, filePath).split(path.sep).join('/').normalize('NFC'),
   }))
-  .filter(file => file.path.includes('/'));
+  .filter(file => file.path.includes('/'))
+  .filter(file => !isSourceAsset(file.path));
 
 const packs = Object.fromEntries(Object.entries(packDefinitions).map(([id, definition]) => [
   id,

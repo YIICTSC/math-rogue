@@ -3,6 +3,20 @@ import { Card, CardType, TargetType } from '../types';
 import { CARDS_LIBRARY } from '../constants';
 
 const MAX_ILLUSTRATION_REFS = 8;
+const ILLUSTRATION_REF_PREFIXES = [
+    'enemy:',
+    'card:',
+    'pixel:',
+    'familiar:',
+    'asset:',
+    'magic-rule:',
+    'magic-basic:',
+    'magic-card:',
+] as const;
+
+export const normalizeIllustrationRefToken = (token: string): string => (
+    ILLUSTRATION_REF_PREFIXES.some(prefix => token.startsWith(prefix)) ? token : `card:${token}`
+);
 const uniqueStrings = (values: string[]): string[] => {
     const seen = new Set<string>();
     const result: string[] = [];

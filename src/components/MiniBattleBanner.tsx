@@ -6,7 +6,9 @@ import EnemyIllustration from './EnemyIllustration';
 import { audioService } from '../services/audioService';
 import { storageService } from '../services/storageService';
 import { getCardIllustrationPaths } from '../utils/cardIllustration';
-import { synthesizeCards } from '../utils/cardUtils';
+import { parseEnemyIllustrationRef, synthesizeCards } from '../utils/cardUtils';
+import { assetUrl } from '../utils/assetPaths';
+import ResilientAssetImage from './ResilientAssetImage';
 
 interface MiniBattleBannerProps {
   streak: number;
@@ -100,7 +102,19 @@ const toIllustrationTokens = (card: BattleCard): string[] => {
 const CutInArtToken: React.FC<{ token: string; fallbackName: string; card: BattleCard }> = ({ token, fallbackName, card }) => {
   const [pathIndex, setPathIndex] = useState(0);
   const [failed, setFailed] = useState(false);
-  const mode = token.startsWith('enemy:') ? 'enemy' : token.startsWith('pixel:') ? 'pixel' : 'card';
+  const mode = token.startsWith('enemy:')
+    ? 'enemy'
+    : token.startsWith('pixel:')
+      ? 'pixel'
+      : token.startsWith('asset:')
+        ? 'asset'
+        : token.startsWith('magic-rule:')
+          ? 'magic-rule'
+          : token.startsWith('magic-basic:')
+            ? 'magic-basic'
+            : token.startsWith('magic-card:')
+              ? 'magic-card'
+              : 'card';
   const tokenValue = token.includes(':') ? token.split(':').slice(1).join(':') : token;
   const imagePaths = useMemo(
     () => getCardIllustrationPaths(tokenValue, tokenValue, [fallbackName]),
@@ -113,16 +127,42 @@ const CutInArtToken: React.FC<{ token: string; fallbackName: string; card: Battl
   }, [token, fallbackName]);
 
   if (mode === 'enemy') {
+    const enemyRef = parseEnemyIllustrationRef(token);
     return (
       <EnemyIllustration
-        name={tokenValue}
+        name={enemyRef?.name || tokenValue.split('|')[0]}
         seed={`${fallbackName}-${tokenValue}`}
-        visualTheme={card.visualTheme}
-        enemyType={card.enemyIllustrationEnemyType}
-        phase={card.enemyIllustrationPhase}
+        visualTheme={enemyRef?.visualTheme || card.visualTheme}
+        enemyType={enemyRef?.enemyType || card.enemyIllustrationEnemyType}
+        phase={enemyRef?.phase ?? card.enemyIllustrationPhase}
         action={card.capture && card.visualTheme && card.visualTheme !== 'elementary' ? 'attack' : 'idle'}
         className="h-full w-full"
         size={16}
+      />
+    );
+  }
+
+  const directSource = (() => {
+    if (mode === 'asset') return assetUrl(token.substring('asset:'.length));
+    if (mode === 'magic-rule') {
+      const [, heroId, index] = token.split(':');
+      return assetUrl(`sprites/magic/rule-cards/${heroId}/${index}.webp`);
+    }
+    if (mode === 'magic-basic') {
+      const [, heroId, art] = token.split(':');
+      return assetUrl(`sprites/magic/basic-cards/${heroId}/${art}.webp`);
+    }
+    if (mode === 'magic-card') return assetUrl(`sprites/magic/cards/${token.substring('magic-card:'.length)}.webp`);
+    return null;
+  })();
+
+  if (directSource) {
+    return (
+      <ResilientAssetImage
+        sources={[directSource, ...imagePaths]}
+        alt={fallbackName}
+        className="h-full w-full object-cover"
+        draggable={false}
       />
     );
   }
