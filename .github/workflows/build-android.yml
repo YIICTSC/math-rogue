@@ -12,6 +12,9 @@ on:
       - src/**
       - public/**
       - scripts/prepare-android-dist.mjs
+      - scripts/generate-android-asset-manifest.mjs
+      - scripts/source-asset-exclusions.mjs
+      - scripts/verify-android-asset-manifest.mjs
       - scripts/generate-android-icons.mjs
       - capacitor.config.ts
       - package.json
