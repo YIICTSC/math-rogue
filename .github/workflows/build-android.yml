@@ -54,6 +54,9 @@ jobs:
           npm install --global pnpm@11.9.0
           pnpm install --frozen-lockfile
 
+      - name: Install runtime audit browser
+        run: pnpm exec playwright install --with-deps chromium
+
       - name: Build paid Android web assets
         run: pnpm run build:android
 
