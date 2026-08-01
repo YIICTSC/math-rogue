@@ -97,7 +97,7 @@ const hashFile = (filePath) => new Promise((resolve, reject) => {
   stream.on('end', () => resolve(hash.digest('hex')));
 });
 
-const files = (await walk(publicDir))
+const discoveredFiles = (await walk(publicDir))
   .filter(filePath => runtimeExtensions.has(path.extname(filePath).toLowerCase()))
   .filter(filePath => !filePath.endsWith('-source.webp'))
   .map(filePath => ({
@@ -106,6 +106,12 @@ const files = (await walk(publicDir))
   }))
   .filter(file => file.path.includes('/'))
   .filter(file => !isSourceAsset(file.path));
+
+// Git can contain canonically equivalent Unicode filenames (for example an
+// NFC name and the same Japanese name expressed as NFD). macOS presents those
+// as one file, while the Linux CI runner checks out both. Runtime lookups are
+// NFC-normalized, so keep one manifest entry for each normalized asset path.
+const files = [...new Map(discoveredFiles.map(file => [file.path, file])).values()];
 
 const packs = Object.fromEntries(Object.entries(packDefinitions).map(([id, definition]) => [
   id,
