@@ -198,9 +198,8 @@ ${mistakeRows.length > 0 ? `<h2>${trans('間違えた問題と再出題結果', 
                   type="button"
                   onClick={onRequestGradeChange}
                   className="flex w-full items-center justify-between gap-2 rounded-lg border border-slate-600 bg-slate-900 px-2 py-2 text-left text-sm font-bold hover:border-cyan-300"
-                  data-allow-japanese
                 >
-                  <span>{profile.grade || trans('未設定', languageMode)}</span>
+                  <span>{profile.grade ? trans(profile.grade, languageMode) : trans('未設定', languageMode)}</span>
                   <span className="shrink-0 text-[10px] text-cyan-200">{trans('変更', languageMode)}</span>
                 </button>
               </label>

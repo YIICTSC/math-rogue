@@ -1,0 +1,97 @@
+import { chromium } from 'playwright';
+import { spawn } from 'node:child_process';
+import { createServer as createNetServer } from 'node:net';
+
+const getAvailablePort = () => new Promise((resolve, reject) => {
+  const probe = createNetServer();
+  probe.unref();
+  probe.once('error', reject);
+  probe.listen(0, '127.0.0.1', () => {
+    const address = probe.address();
+    const port = typeof address === 'object' && address ? address.port : null;
+    probe.close((error) => error ? reject(error) : resolve(port));
+  });
+});
+
+const PORT = await getAvailablePort();
+if (!PORT) throw new Error('Could not allocate a port for the English runtime audit.');
+const BASE_URL = `http://127.0.0.1:${PORT}`;
+const CHROME_PATH = '/Applications/Google Chrome.app/Contents/MacOS/Google Chrome';
+
+const delay = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+const waitForServer = async () => {
+  const deadline = Date.now() + 30_000;
+  while (Date.now() < deadline) {
+    try {
+      const response = await fetch(BASE_URL);
+      if (response.ok) return;
+    } catch {
+      // Vite is still starting.
+    }
+    await delay(200);
+  }
+  throw new Error('English runtime audit server did not start within 30 seconds.');
+};
+
+const server = spawn(process.execPath, ['./node_modules/vite/bin/vite.js', '--host', '127.0.0.1', '--port', String(PORT)], {
+  stdio: 'ignore',
+});
+
+const stopServer = async () => {
+  if (!server.pid || server.exitCode !== null) return;
+  server.kill('SIGTERM');
+  await Promise.race([
+    new Promise((resolve) => server.once('close', resolve)),
+    delay(2_000),
+  ]);
+  if (server.exitCode === null) {
+    server.kill('SIGKILL');
+  }
+};
+
+let browser;
+let auditError = null;
+try {
+  await waitForServer();
+  browser = await chromium.launch({ headless: true, executablePath: CHROME_PATH });
+  const context = await browser.newContext({ viewport: { width: 1280, height: 800 } });
+  const page = await context.newPage();
+  await page.addInitScript(() => {
+    localStorage.setItem('pixel_spire_language_mode_v1', 'ENGLISH');
+  });
+  await page.goto(BASE_URL, { waitUntil: 'domcontentloaded', timeout: 90_000 });
+  await page.getByRole('heading', { name: 'Learning Rogue' }).waitFor({ state: 'visible' });
+  await page.waitForTimeout(300);
+
+  const state = await page.evaluate(() => ({
+    screen: document.documentElement.dataset.translationAuditScreen || 'UNKNOWN',
+    entries: JSON.parse(document.documentElement.dataset.translationAuditEntries || '[]'),
+  }));
+
+  if (state.entries.length > 0) {
+    console.error(JSON.stringify(state.entries, null, 2));
+    throw new Error(`English runtime audit found ${state.entries.length} issue(s) on ${state.screen}.`);
+  }
+  console.log('English runtime audit sentinel passed on the normal English title screen.');
+} catch (error) {
+  auditError = error;
+} finally {
+  await stopServer();
+  if (browser) {
+    await Promise.race([
+      browser.close().catch(() => undefined),
+      delay(3_000),
+    ]);
+  }
+}
+
+if (auditError) {
+  console.error(auditError);
+  process.exit(1);
+}
+
+// Playwright can retain a Chrome transport handle on macOS even after
+// browser.close() resolves or times out. The audit result is final at this
+// point, so terminate explicitly to keep parent build chains deterministic.
+process.exit(0);

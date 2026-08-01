@@ -230,7 +230,7 @@ const P2PRaceSetup: React.FC<P2PRaceSetupProps> = ({ player, visualTheme, langua
     return (
         <div data-gamepad-initial-scope={`race-setup-${mode}-${battleCode ? 'room' : 'entry'}`} className="main-p2p-setup-screen fixed inset-0 z-[200] bg-slate-950/95 flex items-center justify-center p-4 text-white">
             <div className="main-p2p-setup-panel bg-slate-900 border-2 border-indigo-500 rounded-2xl w-full max-w-lg p-6 relative">
-                <button onClick={handleBack} className="absolute top-3 right-3 text-gray-400 hover:text-white"><X size={22} /></button>
+                <button data-gamepad-back aria-label={t('戻る')} onClick={handleBack} className="absolute top-3 right-3 text-gray-400 hover:text-white"><X size={22} /></button>
 
                 <h2 className="text-2xl font-black mb-4">{t('レースモード')}</h2>
 

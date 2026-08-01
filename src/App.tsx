@@ -114,6 +114,7 @@ import { createAssignmentRewardCard, createHolographicCard, getUpgradedCard, syn
 import { AZUKI_BOSS_FLAG, AZUKI_BOSS_NAME, AZUKI_ENCOUNTER_FLAG, AZUKI_REWARD_CARDS } from './data/azukiBoss';
 import { DODOMEDESU_BOSS_ACTIVE_FLAG, DODOMEDESU_BOSS_READY_FLAG, DODOMEDESU_EVENT_STAGE_FLAG, DODOMEDESU_EVENT_STAGES, DODOMEDESU_NAME, DODOMEDESU_REWARD_CARDS, GENZO_NAME } from './data/dodomedesuBoss';
 import { sanitizeEnglishText, trans, transEventText } from './utils/textUtils';
+import { auditLateDomTranslation } from './utils/translationAudit';
 import { assetUrl } from './utils/assetPaths';
 import { getAssignmentFromUrl, getAssignmentModePool, getAssignmentRepresentativeMode } from './utils/assignmentUtils';
 import { createDailyAssignment, getCurrentSchoolYear, getStudentGradeOptions, isAdultProfile, promoteStudentProfileForSchoolYear } from './utils/dailyAssignmentUtils';
@@ -1319,6 +1320,10 @@ const App: React.FC = () => {
 
     const [languageMode, setLanguageMode] = useState<LanguageMode>(() => getInitialLanguageMode(storageService.getLanguageMode()));
     useEffect(() => {
+        if (typeof document === 'undefined') return;
+        document.documentElement.dataset.translationAuditScreen = String(gameState.screen);
+    }, [gameState.screen]);
+    useEffect(() => {
         if (languageMode !== 'ENGLISH' || typeof document === 'undefined') return;
 
         const shouldSkip = (element: Element | null) => {
@@ -1339,13 +1344,16 @@ const App: React.FC = () => {
                 const current = element.getAttribute(attribute);
                 if (!current) return;
                 const next = sanitizeEnglishText(current);
+                auditLateDomTranslation(current, next, `attribute:${attribute}`);
                 if (next !== current) element.setAttribute(attribute, next);
             });
         };
 
         const sanitizeTextNode = (node: Node) => {
             if (node.nodeType !== Node.TEXT_NODE || shouldSkip(node.parentElement)) return;
-            const next = sanitizeEnglishText(node.textContent || '');
+            const current = node.textContent || '';
+            const next = sanitizeEnglishText(current);
+            auditLateDomTranslation(current, next, 'dom:text');
             if (next !== node.textContent) node.textContent = next;
         };
 

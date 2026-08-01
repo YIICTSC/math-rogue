@@ -9,7 +9,7 @@ import { createServer } from 'vite';
 const EXCLUDED_PATH = /[\\/]mini-games[\\/]|[\\/]data[\\/]subjects[\\/]|[\\/]components[\\/](?:SchoolDungeonRPG2?|PokerGameScreen|PaperPlaneBattle)\.tsx$/;
 const UI_ATTRIBUTES = new Set(['title', 'aria-label', 'placeholder', 'alt']);
 const JAPANESE = /[ぁ-んァ-ヶ一-龠々〆ヵヶ]/;
-const GENERIC_FALLBACK = /^(Choose Option|Event Details|School Foe|Choose a fitting event action|You handled the (?:event|situation|moment).*|You turned the event into a useful tool for the road ahead\.|You handled the situation carefully and turned the experience into progress\.)$/;
+const GENERIC_FALLBACK = /(?:^|\b)(Choose Option|Event Details|School Foe|Choose a fitting event action|The short break helped your body and mind recover\.|You handled the (?:event|situation|moment).*|You turned the event into a useful tool for the road ahead\.|You handled the situation carefully and turned the experience into progress\.)(?:$|\b)/;
 
 const collectSourceFiles = (directory) => fs.readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
   const target = path.join(directory, entry.name);
@@ -29,6 +29,7 @@ try {
   const { TYPING_LESSON_DEFINITIONS } = await server.ssrLoadModule('/src/data/typingLessonConfig.ts');
   const { ONLINE_RANKING_FALLBACKS, ONLINE_RANKING_CATEGORIES } = await server.ssrLoadModule('/src/data/onlineRankingDefinitions.ts');
   const { getDebugMagicEndingGalleryEntries } = await server.ssrLoadModule('/src/services/magicEndingService.ts');
+  const { HELP_COPY } = await server.ssrLoadModule('/src/components/HelpScreen.tsx');
   const REQUIRED_EXACT_TRANSLATIONS = {
     '課題連携': 'Assignment Link',
     '空き': 'Empty Slot',
@@ -40,6 +41,10 @@ try {
     '校長最終通告': "Principal's Final Warning",
     '校長先生': 'Principal',
     '校長': 'Principal',
+    'BGM音量': 'BGM Volume',
+    'SE音量': 'SE Volume',
+    'ボイス音量': 'Voice Volume',
+    'データ移行・保護': 'Data Transfer & Protection',
   };
   for (const [source, expected] of Object.entries(REQUIRED_EXACT_TRANSLATIONS)) {
     const output = trans(source, 'ENGLISH');
@@ -114,6 +119,22 @@ try {
     const output = trans(category.label, 'ENGLISH');
     if (JAPANESE.test(output) || GENERIC_FALLBACK.test(output.trim())) failures.push(`online ranking category ${category.label} => ${output}`);
   }
+  for (const [theme, copy] of Object.entries(HELP_COPY)) {
+    const helpValues = [
+      copy.introTitle,
+      ...copy.introLines,
+      copy.finalGoal,
+      copy.restTitle,
+      ...copy.restOptions.flatMap((option) => [option.title, option.body, option.subBody || '']),
+      ...Object.values(copy.mapLabels),
+    ].filter(Boolean);
+    for (const value of helpValues) {
+      const output = trans(value, 'ENGLISH');
+      if (JAPANESE.test(output) || GENERIC_FALLBACK.test(output.trim())) {
+        failures.push(`help ${theme} ${value} => ${output}`);
+      }
+    }
+  }
   for (const file of collectSourceFiles('src')) {
     if (EXCLUDED_PATH.test(file)) continue;
     const source = fs.readFileSync(file, 'utf8');
@@ -153,17 +174,30 @@ try {
       if (ts.isCallExpression(node) && ['trans', 'transEventText'].includes(node.expression.getText(sourceFile)) && node.arguments[0]) {
         const argument = node.arguments[0];
         const translator = node.expression.getText(sourceFile) === 'transEventText' ? transEventText : trans;
-        if (ts.isStringLiteral(argument) || ts.isNoSubstitutionTemplateLiteral(argument)) {
-          const output = translator(argument.text, 'ENGLISH');
-          if (JAPANESE.test(output)) report(node, 'Japanese remains', argument.text, output);
-          if (GENERIC_FALLBACK.test(output.trim())) report(node, 'generic fallback translation', argument.text, output);
-        } else if (ts.isTemplateExpression(argument)) {
-          let sample = argument.head.text;
-          for (const span of argument.templateSpans) sample += `1${span.literal.text}`;
-          const output = translator(sample, 'ENGLISH');
-          if (JAPANESE.test(output)) report(node, 'dynamic Japanese remains', sample, output);
-          if (GENERIC_FALLBACK.test(output.trim())) report(node, 'dynamic generic fallback translation', sample, output);
-        }
+        const auditTranslationArgument = (candidate) => {
+          if (isExplicitNonEnglishBranch(candidate)) return;
+          if (ts.isStringLiteral(candidate) || ts.isNoSubstitutionTemplateLiteral(candidate)) {
+            const output = translator(candidate.text, 'ENGLISH');
+            if (JAPANESE.test(output)) report(candidate, 'Japanese remains', candidate.text, output);
+            if (GENERIC_FALLBACK.test(output.trim())) report(candidate, 'generic fallback translation', candidate.text, output);
+            return;
+          }
+          if (ts.isTemplateExpression(candidate)) {
+            let sample = candidate.head.text;
+            for (const span of candidate.templateSpans) sample += `1${span.literal.text}`;
+            const output = translator(sample, 'ENGLISH');
+            if (JAPANESE.test(output)) report(candidate, 'dynamic Japanese remains', sample, output);
+            if (GENERIC_FALLBACK.test(output.trim())) report(candidate, 'dynamic generic fallback translation', sample, output);
+            return;
+          }
+          if (ts.isConditionalExpression(candidate)) {
+            auditTranslationArgument(candidate.whenTrue);
+            auditTranslationArgument(candidate.whenFalse);
+          } else if (ts.isParenthesizedExpression(candidate) || ts.isAsExpression(candidate)) {
+            auditTranslationArgument(candidate.expression);
+          }
+        };
+        auditTranslationArgument(argument);
       }
       if (ts.isJsxText(node) && JAPANESE.test(node.text.trim()) && !isExplicitNonEnglishBranch(node)) {
         if (isWithinTranslatedUiTree(node)) auditTranslatedLiteral(node, 'translated JSX text', node.text.trim());
@@ -191,7 +225,7 @@ try {
 }
 
 if (failures.length > 0) {
-  console.error(failures.join('\n'));
+  console.error(failures.map((failure) => failure.replace(/\n/g, '\\n')).join('\n'));
   console.error(`English UI audit failed: ${failures.length} issue(s).`);
   process.exit(1);
 }

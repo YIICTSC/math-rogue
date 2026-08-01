@@ -7,6 +7,8 @@ import { HIRAGANA_RUNTIME_EXACT, HIRAGANA_RUNTIME_PARTIAL } from '../data/hiraga
 import { HIRAGANA_COMPENDIUM_EXACT } from '../data/hiraganaCompendiumExact';
 import { HIRAGANA_ENDING_EXACT } from '../data/hiraganaEndingExact';
 import { ENGLISH_RUNTIME_EXACT } from '../data/englishRuntimeExact';
+import { ENGLISH_EVENT_NARRATIVE_EXACT } from '../data/englishEventNarrativeExact';
+import { auditEnglishTranslationResult, GENERIC_ENGLISH_FALLBACK_PATTERN, JAPANESE_VISIBLE_TEXT_PATTERN } from './translationAudit';
 import { ENGLISH_ENDING_EXACT } from '../data/englishEndingExact';
 import { ENGLISH_DEBUG_UI_EXACT, HIRAGANA_DEBUG_UI_EXACT } from '../data/debugUiExact';
 import { ENGLISH_DISPLAY_COPY_EXACT, HIRAGANA_DISPLAY_COPY_EXACT } from '../data/displayCopyExact';
@@ -3823,6 +3825,7 @@ const ENGLISH_DICTIONARY: Record<string, string> = {
     "BGMモード": "BGM Mode",
     "BGM音量": "BGM Volume",
     "SE音量": "SE Volume",
+    "ボイス音量": "Voice Volume",
     "マイク": "Microphone",
     "マイクON": "Microphone On",
     "入力デバイス": "Input Device",
@@ -6147,6 +6150,8 @@ Object.assign(ENGLISH_DICTIONARY, {
     "低データ通信モード": "Low Data Mode",
     "戦闘UI": "Battle UI",
     "戦闘画面のUI調整": "Battle Screen UI Adjustment",
+    "横画面": "Landscape",
+    "縦画面": "Portrait",
     "戦闘中にこの設定を開くと、変更が画面へすぐ反映されます。": "Open these settings during battle to preview changes immediately.",
     "手札上部バーの高さ": "Top Hand Bar Height",
     "手札上部バー上下位置": "Top Hand Bar Vertical Position",
@@ -7712,6 +7717,19 @@ Object.assign(ENGLISH_DICTIONARY, {
 });
 
 const EVENT_SENTENCE_TRANSLATIONS: Array<[RegExp, (match: RegExpMatchArray) => string]> = [
+    [/^(\d+)G(?:失う|失った)。?$/, ([, amount]) => `Lost ${amount}G.`],
+    [/^HPが(\d+)回復(?:した)?。?$/, ([, amount]) => `Healed ${amount} HP.`],
+    [/^最大HP\+(\d+)。?$/, ([, amount]) => `Max HP +${amount}.`],
+    [/^恒久ムキムキ\+(\d+)。?$/, ([, amount]) => `Permanent Strength +${amount}.`],
+    [/^最大エナジー\+(\d+)、HP-(\d+)。?$/, ([, energy, hp]) => `Max Energy +${energy}; lost ${hp} HP.`],
+    [/^ポーションを入手(?:した)?。?$/, () => 'Obtained a potion.'],
+    [/^コモンレリックを得た。?$/, () => 'Obtained a common relic.'],
+    [/^カードを(\d+)枚入手。?$/, ([, amount]) => `Obtained ${amount} card${amount === '1' ? '' : 's'}.`],
+    [/^カード(\d+)枚が別のカードに変化した。?$/, ([, amount]) => `${amount} card${amount === '1' ? '' : 's'} transformed into a different card.`],
+    [/^HP-(\d+)、レリック「(.+)」を得た。?$/, ([, hp, item]) => `Lost ${hp} HP and gained the relic "${translateEnglishNameInline(item)}".`],
+    [/^HP-(\d+)、「(.+)」を習得。?$/, ([, hp, card]) => `Lost ${hp} HP and learned "${translateEnglishNameInline(card)}".`],
+    [/^先生から(\d+)Gもらった。?$/, ([, amount]) => `The teacher gave you ${amount}G.`],
+    [/^恒久ムキムキ\+(\d+)、呪い「(.+)」。?$/, ([, amount, curse]) => `Permanent Strength +${amount}; received the curse "${translateEnglishNameInline(curse)}".`],
     [/^最大HPと現在HPが(\d+)増えた。?$/, ([, amount]) => `Max HP and current HP +${amount}.`],
     [/^最大HPと現在HPが(\d+)増えた$/, ([, amount]) => `Max HP and current HP +${amount}.`],
     [/^カードを(\d+)枚強化(?:した)?。?$/, ([, amount]) => `Upgraded ${amount} cards.`],
@@ -8375,14 +8393,14 @@ function isUsableEnglishEventTranslation(translated: string | null | undefined, 
 function translateEventSentence(text: string): string {
     const trimmed = text.trim().replace(/<br\s*\/?>/gi, '\n');
     if (!trimmed) return "";
+    // Dynamic templates may already supply an English narrative fragment.
+    // Keep it intact instead of sending it through Japanese fallback prose.
+    if (!JAPANESE_TEXT_PATTERN.test(trimmed)) return trimmed;
     if (ENGLISH_DICTIONARY[trimmed]) return ENGLISH_DICTIONARY[trimmed];
+    if (ENGLISH_EVENT_NARRATIVE_EXACT[trimmed]) return ENGLISH_EVENT_NARRATIVE_EXACT[trimmed];
     if (EVENT_SENTENCE_EXACT[trimmed]) return EVENT_SENTENCE_EXACT[trimmed];
-    const schoolEventFallback = buildEnglishSchoolEventFallback(trimmed);
-    if (schoolEventFallback) return schoolEventFallback;
     const optionEffectText = buildEnglishEventOptionEffectText(trimmed);
     if (optionEffectText) return optionEffectText;
-    const actionFallback = buildEnglishEventActionFallback(trimmed);
-    if (actionFallback) return actionFallback;
     if (EVENT_TITLE_ENGLISH_FALLBACK[trimmed]) return EVENT_TITLE_ENGLISH_FALLBACK[trimmed];
     for (const [pattern, formatter] of EVENT_SENTENCE_TRANSLATIONS) {
         const match = trimmed.match(pattern);
@@ -8414,13 +8432,20 @@ function translateEventSentence(text: string): string {
         .replace(/\s+/g, ' ')
         .trim();
     const cleanedAlphaCount = (cleaned.match(/[A-Za-z]/g) ?? []).length;
-    return cleaned &&
+    if (cleaned &&
         cleanedAlphaCount >= Math.max(12, Math.floor(trimmed.length * 0.5)) &&
         !/[、。！？]/.test(cleaned) &&
         !/^[\s,.;:!、。！？ー…-]+$/.test(cleaned) &&
-        !/,\s*\.?$/.test(cleaned)
-        ? cleaned
-        : buildEnglishEventSentenceFallback(trimmed);
+        !/,\s*\.?$/.test(cleaned)) return cleaned;
+
+    // These heuristics intentionally come last. They are useful as an
+    // emergency rendering fallback, but must never override exact narrative
+    // translations or parseable mechanical effects.
+    const schoolEventFallback = buildEnglishSchoolEventFallback(trimmed);
+    if (schoolEventFallback) return schoolEventFallback;
+    const actionFallback = buildEnglishEventActionFallback(trimmed);
+    if (actionFallback) return actionFallback;
+    return buildEnglishEventSentenceFallback(trimmed);
 }
 
 const buildEnglishEventFullTranslation = (text: string): string | null => {
@@ -9291,7 +9316,7 @@ export const buildEnglishCardDescription = (card: Card): string => {
     return `${parts.join(". ")}.`;
 };
 
-export const sanitizeEnglishText = (text: string): string => {
+const sanitizeEnglishTextCore = (text: string): string => {
     if (!text || !JAPANESE_TEXT_PATTERN.test(text)) return text;
 
     const prefixedBossName = text.match(/^ボス[:：]\s*(.+)$/);
@@ -9380,6 +9405,12 @@ export const sanitizeEnglishText = (text: string): string => {
     if (/敵|生徒|犬|カラス|幽霊|魔|妖精|怪|スライム|時計|鉛筆|ノート|教科書|リコーダー/.test(text)) return "School Foe";
     if (text.length <= 8) return "Choose Option";
     return "Event Details";
+};
+
+export const sanitizeEnglishText = (text: string): string => {
+    const output = sanitizeEnglishTextCore(text);
+    auditEnglishTranslationResult(text, output, 'sanitizeEnglishText');
+    return output;
 };
 
 // 置換用キーワードのリスト（長い順にソートして置換ミスを防ぐ）
@@ -10603,25 +10634,40 @@ const translateHiraganaDynamicUi = (text: string): string | null => {
     return null;
 };
 
-export const trans = (text: string, mode: LanguageMode): string => {
+const transCore = (text: string, mode: LanguageMode): string => {
     if (!text) return "";
     if (mode === 'JAPANESE') return text;
     if (mode === 'ENGLISH') {
         if (ENGLISH_DISPLAY_COPY_EXACT[text]) return ENGLISH_DISPLAY_COPY_EXACT[text];
         if (ENGLISH_DEBUG_UI_EXACT[text]) return ENGLISH_DEBUG_UI_EXACT[text];
         if (ENGLISH_RUNTIME_EXACT[text]) return ENGLISH_RUNTIME_EXACT[text];
+        if (ENGLISH_EVENT_NARRATIVE_EXACT[text]) return ENGLISH_EVENT_NARRATIVE_EXACT[text];
         if (ENGLISH_ENDING_EXACT[text]) return ENGLISH_ENDING_EXACT[text];
-        const schoolEventExact = buildEnglishSchoolEventFallback(text);
-        if (schoolEventExact) return schoolEventExact;
-
-        const enemyCatalogDescription = translateEnglishEnemyCatalogDescription(text);
-        if (enemyCatalogDescription) return enemyCatalogDescription;
-
         if (ENGLISH_DICTIONARY[text]) return ENGLISH_DICTIONARY[text];
         if (ENGLISH_CARD_NAME_DICTIONARY[text]) return ENGLISH_CARD_NAME_DICTIONARY[text];
         if (ENGLISH_GENERATED_CARD_NAME_DICTIONARY[text]) return ENGLISH_GENERATED_CARD_NAME_DICTIONARY[text];
         if (ENGLISH_ITEM_NAME_DICTIONARY[text]) return ENGLISH_ITEM_NAME_DICTIONARY[text];
         if (ENGLISH_ENEMY_NAME_DICTIONARY[text]) return ENGLISH_ENEMY_NAME_DICTIONARY[text];
+
+        if (text.includes('\n')) {
+            const translatedLines = text.split('\n').map((line) => translateEventSentence(line));
+            if (translatedLines.every((line) => (
+                !JAPANESE_VISIBLE_TEXT_PATTERN.test(line) &&
+                !GENERIC_ENGLISH_FALLBACK_PATTERN.test(line.trim())
+            ))) {
+                return translatedLines.join('\n');
+            }
+        }
+
+        // School event outcomes are frequently composed from a narrative line
+        // and a mechanical-result line.  Translate those lines first so the
+        // legacy school-event fallback cannot hide a missing exact translation
+        // behind generic English prose.
+        const schoolEventExact = buildEnglishSchoolEventFallback(text);
+        if (schoolEventExact) return schoolEventExact;
+
+        const enemyCatalogDescription = translateEnglishEnemyCatalogDescription(text);
+        if (enemyCatalogDescription) return enemyCatalogDescription;
 
         const removeAndroidAssetPack = text.match(/^(.+)を端末から削除しますか？$/);
         if (removeAndroidAssetPack) {
@@ -10639,6 +10685,14 @@ export const trans = (text: string, mode: LanguageMode): string => {
         if (missingExperimentCards) return `You need ${missingExperimentCards[1]} more experiment material card(s)...`;
         const fearStrengthLoss = text.match(/^(.+)は恐怖で震えている（筋力-3）$/);
         if (fearStrengthLoss) return `${trans(fearStrengthLoss[1], mode)} trembles in fear (Strength -3).`;
+        const resonanceSynthesis = text.match(/^この(\d+)枚を共鳴合成しますか？（元のカードは消えます）$/);
+        if (resonanceSynthesis) return `Fuse these ${resonanceSynthesis[1]} cards by Resonance? (The original cards will be consumed.)`;
+        const experimentSynthesis = text.match(/^この(\d+)枚を実験（合成）しますか？（元のカードは消えます）$/);
+        if (experimentSynthesis) return `Experiment (synthesize) with these ${experimentSynthesis[1]} cards? (The original cards will be consumed.)`;
+        const randomResonanceSynthesis = text.match(/^ランダムな(\d+)枚で共鳴合成しますか？$/);
+        if (randomResonanceSynthesis) return `Fuse ${randomResonanceSynthesis[1]} random cards by Resonance?`;
+        const randomExperimentSynthesis = text.match(/^ランダムな(\d+)枚で実験しますか？$/);
+        if (randomExperimentSynthesis) return `Experiment with ${randomExperimentSynthesis[1]} random cards?`;
 
         const eventTitleTranslation = translateEnglishEventTitle(text);
         if (eventTitleTranslation) return eventTitleTranslation;
@@ -10703,6 +10757,12 @@ export const trans = (text: string, mode: LanguageMode): string => {
     result = result.replace(/,/g, "、");
 
     return result;
+};
+
+export const trans = (text: string, mode: LanguageMode): string => {
+    const output = transCore(text, mode);
+    if (mode === 'ENGLISH') auditEnglishTranslationResult(text, output, 'trans');
+    return output;
 };
 
 const CARD_NAME_GENERIC_ENGLISH = /^(Choose Option|Event Details|School Foe|Item)$/;
@@ -10774,7 +10834,7 @@ export const buildEnglishCardName = (
     return `${mashup.charAt(0).toUpperCase()}${mashup.slice(1)}`;
 };
 
-export const transEventText = (text: string, mode: LanguageMode): string => {
+const transEventTextCore = (text: string, mode: LanguageMode): string => {
     if (mode === 'ENGLISH' && ENGLISH_DISPLAY_COPY_EXACT[text]) return ENGLISH_DISPLAY_COPY_EXACT[text];
     if (mode === 'HIRAGANA' && HIRAGANA_DISPLAY_COPY_EXACT[text]) return HIRAGANA_DISPLAY_COPY_EXACT[text];
     if (mode === 'ENGLISH' && ENGLISH_DEBUG_UI_EXACT[text]) return ENGLISH_DEBUG_UI_EXACT[text];
@@ -10836,6 +10896,12 @@ export const transEventText = (text: string, mode: LanguageMode): string => {
         return "You handled the situation carefully and turned the experience into progress.";
     }
     return base;
+};
+
+export const transEventText = (text: string, mode: LanguageMode): string => {
+    const output = transEventTextCore(text, mode);
+    if (mode === 'ENGLISH') auditEnglishTranslationResult(text, output, 'transEventText');
+    return output;
 };
 
 export const transProblemSubjectName = (text: string, mode: LanguageMode): string => {

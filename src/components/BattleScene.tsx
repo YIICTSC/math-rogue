@@ -939,7 +939,13 @@ const BattleScene: React.FC<BattleSceneProps> = ({
         const duration = familiar.duration === 'BATTLE' ? '戦闘終了まで' : `${familiar.duration}ターン`;
         showInfo(
             trans(familiar.name, languageMode),
-            trans(`召喚カード効果\n発動条件: ${getFamiliarTriggerText(familiar)}\n効果: ${getFamiliarEffectText(familiar)}\n持続: ${duration}\n経過ターン: ${familiar.turnsActive}`, languageMode)
+            [
+                trans('召喚カード効果', languageMode),
+                `${trans('発動条件', languageMode)}: ${trans(getFamiliarTriggerText(familiar), languageMode)}`,
+                `${trans('効果', languageMode)}: ${trans(getFamiliarEffectText(familiar), languageMode)}`,
+                `${trans('持続', languageMode)}: ${trans(duration, languageMode)}`,
+                `${trans('経過ターン', languageMode)}: ${familiar.turnsActive}`,
+            ].join('\n')
         );
     };
 

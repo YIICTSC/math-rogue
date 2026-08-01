@@ -11,7 +11,7 @@ interface HelpScreenProps {
   visualTheme?: VisualThemeId;
 }
 
-const HELP_COPY: Record<VisualThemeId, {
+export const HELP_COPY: Record<VisualThemeId, {
   introTitle: string;
   introLines: string[];
   finalGoal: string;
