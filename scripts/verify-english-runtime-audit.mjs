@@ -1,6 +1,7 @@
 import { chromium } from 'playwright';
 import { spawn } from 'node:child_process';
 import { createServer as createNetServer } from 'node:net';
+import { existsSync } from 'node:fs';
 
 const getAvailablePort = () => new Promise((resolve, reject) => {
   const probe = createNetServer();
@@ -54,7 +55,11 @@ let browser;
 let auditError = null;
 try {
   await waitForServer();
-  browser = await chromium.launch({ headless: true, executablePath: CHROME_PATH });
+  const launchOptions = { headless: true };
+  if (existsSync(CHROME_PATH)) {
+    launchOptions.executablePath = CHROME_PATH;
+  }
+  browser = await chromium.launch(launchOptions);
   const context = await browser.newContext({ viewport: { width: 1280, height: 800 } });
   const page = await context.newPage();
   await page.addInitScript(() => {
