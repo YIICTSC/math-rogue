@@ -6,10 +6,13 @@ import { createServer } from 'vite';
 // Only game-specific mini-game internals and question banks are outside the
 // shared translation contract. Selection, unlock, result, and confirmation UI
 // remain in scope even when their file name contains "MiniGame".
-const EXCLUDED_PATH = /[\\/]mini-games[\\/]|[\\/]data[\\/]subjects[\\/]|[\\/]components[\\/](?:SchoolDungeonRPG2?|PokerGameScreen|PaperPlaneBattle)\.tsx$/;
+// Game-specific mini-game UI is release-visible and must pass the same gate as
+// the main modes. Only curriculum source questions remain exempt because their
+// Japanese wording can be the subject of the exercise itself.
+const EXCLUDED_PATH = /[\\/]data[\\/]subjects[\\/]/;
 const UI_ATTRIBUTES = new Set(['title', 'aria-label', 'placeholder', 'alt']);
 const JAPANESE = /[ぁ-んァ-ヶ一-龠々〆ヵヶ]/;
-const GENERIC_FALLBACK = /(?:^|\b)(Choose Option|Event Details|School Foe|Choose a fitting event action|The short break helped your body and mind recover\.|You handled the (?:event|situation|moment).*|You turned the event into a useful tool for the road ahead\.|You handled the situation carefully and turned the experience into progress\.)(?:$|\b)/;
+const GENERIC_FALLBACK = /(?:Choose Option|Event Details|School Foe|Choose a fitting event action|The short break helped your body and mind recover\.|You handled the (?:event|situation|moment).*|You turned the event into a useful tool for the road ahead\.|You handled the situation carefully and turned the experience into progress\.)/;
 
 const collectSourceFiles = (directory) => fs.readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
   const target = path.join(directory, entry.name);
@@ -30,6 +33,7 @@ try {
   const { ONLINE_RANKING_FALLBACKS, ONLINE_RANKING_CATEGORIES } = await server.ssrLoadModule('/src/data/onlineRankingDefinitions.ts');
   const { getDebugMagicEndingGalleryEntries } = await server.ssrLoadModule('/src/services/magicEndingService.ts');
   const { HELP_COPY } = await server.ssrLoadModule('/src/components/HelpScreen.tsx');
+  const { BATTLE_BACKGROUND_SCENES, MAGIC_BATTLE_BACKGROUND_SCENES } = await server.ssrLoadModule('/src/data/battleBackgrounds.ts');
   const REQUIRED_EXACT_TRANSLATIONS = {
     '課題連携': 'Assignment Link',
     '空き': 'Empty Slot',
@@ -66,6 +70,14 @@ try {
     const output = category.startsWith('rendered ') ? value : trans(value, 'ENGLISH');
     if (JAPANESE.test(output) || GENERIC_FALLBACK.test(output.trim())) {
       failures.push(`compendium ${category} ${value} => ${output}`);
+    }
+  }
+  for (const scene of [...BATTLE_BACKGROUND_SCENES, ...MAGIC_BATTLE_BACKGROUND_SCENES]) {
+    for (const value of scene.flavorTexts) {
+      const output = trans(value, 'ENGLISH');
+      if (JAPANESE.test(output) || GENERIC_FALLBACK.test(output.trim())) {
+        failures.push(`battle background ${scene.id} ${value} => ${output}`);
+      }
     }
   }
   for (const value of ['セーブデータを削除しますか？', '※ボタン長押しでセーブデータを削除できます']) {

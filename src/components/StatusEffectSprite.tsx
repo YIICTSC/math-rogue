@@ -59,7 +59,7 @@ const StatusEffectSprite: React.FC<StatusEffectSpriteProps> = ({
                 backgroundPosition: `${posX}px ${posY}px`,
                 ...style
             }}
-            aria-label={definition.label}
+            aria-hidden="true"
         />
     );
 };

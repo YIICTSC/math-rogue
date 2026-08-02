@@ -649,8 +649,8 @@ const FullscreenCardArtModal: React.FC<{ card: ICard; languageMode: LanguageMode
     const translated = trans(card.name, languageMode);
     const magicArtUrl = getMagicCardArtUrl(card);
     const imageCandidates = useMemo(
-        () => getCardIllustrationPaths(card.id, translated, [card.name]),
-        [card.id, card.name, translated]
+        () => getCardIllustrationPaths(card.id, translated, [card.name, ...(card.originalNames || [])]),
+        [card.id, card.name, card.originalNames, translated]
     );
     const [imageIndex, setImageIndex] = useState(0);
 
@@ -863,7 +863,7 @@ const CompendiumBgmModeModal: React.FC<{ cards: ICard[]; languageMode: LanguageM
         : null;
     const magicArtUrl = activeCard ? getMagicCardArtUrl(activeCard) : null;
     const imageCandidates = useMemo(
-        () => activeCard ? getCardIllustrationPaths(activeCard.id, translated, [activeCard.name]) : [],
+        () => activeCard ? getCardIllustrationPaths(activeCard.id, translated, [activeCard.name, ...(activeCard.originalNames || [])]) : [],
         [activeCard, translated]
     );
 

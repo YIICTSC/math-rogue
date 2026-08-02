@@ -241,7 +241,7 @@ const MiniGameSelectScreen: React.FC<MiniGameSelectScreenProps> = ({ onSelect, o
 
                 <div className="flex flex-col items-center md:items-start w-full">
                   <span
-                    className="mini-game-title text-sm md:text-lg font-bold mb-1 text-white transition-colors"
+                    className={`mini-game-title text-sm md:text-lg font-bold mb-1 text-white transition-colors ${languageMode === 'ENGLISH' ? 'mini-game-title-english' : ''}`}
                     aria-label={trans(game.name, languageMode)}
                   >
                     {languageMode === 'JAPANESE' || languageMode === 'HIRAGANA'

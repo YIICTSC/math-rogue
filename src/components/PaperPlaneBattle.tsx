@@ -4446,7 +4446,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; languageMode?: LanguageMo
                             <div className="paper-plane-game-over-content">
                                 <Skull size={64} className="paper-plane-result-icon text-red-500 mx-auto mb-4"/>
                                 <h2 className="paper-plane-result-title text-4xl font-bold text-red-500 mb-2">{t('撃墜')}</h2>
-                                <p className="paper-plane-result-subtitle text-gray-400 mb-6">ステージ {stage}</p>
+                                <p className="paper-plane-result-subtitle text-gray-400 mb-6">{t('ステージ')} {stage}</p>
                                 <div className="paper-plane-result-actions flex flex-col gap-4">
                                     <button
                                         data-gamepad-initial-choice

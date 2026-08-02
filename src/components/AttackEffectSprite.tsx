@@ -75,7 +75,7 @@ const AttackEffectSprite: React.FC<AttackEffectSpriteProps> = ({
                 backgroundPosition: `${posX}px ${posY}px`,
                 ...style
             }}
-            aria-label={definition.label}
+            aria-hidden="true"
         />
     );
 };

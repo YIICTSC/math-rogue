@@ -9692,6 +9692,31 @@ textarea {
   white-space: nowrap;
 }
 
+.mini-game-title-english {
+  width: 100%;
+  min-height: 2.1em;
+  font-size: clamp(0.68rem, 2.8vw, 1.05rem);
+  line-height: 1.05;
+}
+
+.mini-game-title-english .mini-game-title-line {
+  display: -webkit-box;
+  overflow: hidden;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  word-break: normal;
+  hyphens: auto;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+}
+
+@media (min-width: 768px) {
+  .mini-game-title-english {
+    font-size: clamp(0.72rem, 1.5vw, 1.05rem);
+  }
+}
+
 @media (orientation: landscape) {
   html.app-platform-ios .main-challenge-screen .unit-board-open-button {
     box-sizing: border-box !important;
@@ -9875,5 +9900,60 @@ textarea {
   .assignment-progress-panel-with-card .assignment-progress-actions button {
     min-height: 2.35rem;
     padding: 0.45rem 0.75rem;
+  }
+}
+/* Ranking rewards use the scarce height of a phone in landscape as two
+   columns: ranking summary on the left, reward card on the right. */
+@media (orientation: landscape) and (max-height: 560px) and (max-width: 1100px) {
+  .ranking-reward-modal {
+    padding-left: max(0.75rem, var(--app-safe-left));
+    padding-right: max(0.75rem, var(--app-safe-right));
+    padding-top: max(0.5rem, var(--app-safe-top));
+    padding-bottom: max(0.5rem, var(--app-safe-bottom));
+  }
+
+  .ranking-reward-dialog {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(13rem, 0.72fr);
+    grid-template-areas:
+      "summary card"
+      "action action";
+    column-gap: 1rem;
+    row-gap: 0.5rem;
+    width: min(48rem, 100%);
+    max-width: none;
+    max-height: calc(100dvh - max(1rem, var(--app-safe-top) + var(--app-safe-bottom)));
+    padding: 0.75rem 1rem;
+  }
+
+  .ranking-reward-summary {
+    grid-area: summary;
+    min-width: 0;
+  }
+
+  .ranking-reward-rank {
+    margin-bottom: 0.5rem;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
+
+  .ranking-reward-card {
+    grid-area: card;
+    align-self: center;
+    width: 100%;
+    margin-bottom: 0;
+    padding: 0.5rem;
+  }
+
+  .ranking-reward-card .relative.w-32.h-48 {
+    transform: scale(0.78);
+    transform-origin: center;
+    margin: -1.4rem 0;
+  }
+
+  .ranking-reward-action {
+    grid-area: action;
+    padding-top: 0.55rem;
+    padding-bottom: 0.55rem;
   }
 }

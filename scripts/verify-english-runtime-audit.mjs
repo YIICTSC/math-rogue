@@ -1,7 +1,7 @@
 import { chromium } from 'playwright';
 import { spawn } from 'node:child_process';
 import { createServer as createNetServer } from 'node:net';
-import { existsSync } from 'node:fs';
+import { existsSync, readdirSync } from 'node:fs';
 
 const getAvailablePort = () => new Promise((resolve, reject) => {
   const probe = createNetServer();
@@ -79,6 +79,39 @@ try {
     throw new Error(`English runtime audit found ${state.entries.length} issue(s) on ${state.screen}.`);
   }
   console.log('English runtime audit sentinel passed on the normal English title screen.');
+
+  const dedicatedCardArtNames = readdirSync('public/card-illustrations', { withFileTypes: true })
+    .filter((entry) => entry.isFile() && entry.name.endsWith('.webp'))
+    .map((entry) => entry.name.slice(0, -'.webp'.length));
+  const cardArtAudit = await page.evaluate(async (assetNames) => {
+    const [{ CARDS_LIBRARY }, { getAge9CardArtAlias, getCardIllustrationPaths }, { buildEnglishCardName }] = await Promise.all([
+      import('/src/constants.ts'),
+      import('/src/utils/cardIllustration.ts'),
+      import('/src/utils/textUtils.ts'),
+    ]);
+    const available = new Set(assetNames);
+    const failures = [];
+    let auditedCount = 0;
+    for (const [id, template] of Object.entries(CARDS_LIBRARY)) {
+      if (!available.has(template.name)) continue;
+      auditedCount += 1;
+      const card = { ...template, id };
+      const translatedName = buildEnglishCardName(card);
+      const paths = getCardIllustrationPaths(id, translatedName, [template.name, ...(template.originalNames || [])]);
+      const firstFile = decodeURIComponent(new URL(paths[0], location.href).pathname.split('/').pop() || '').replace(/\.webp$/, '');
+      const expectedFile = getAge9CardArtAlias([template.name, ...(template.originalNames || [])]) || template.name;
+      if (firstFile !== expectedFile) {
+        failures.push({ id, name: template.name, translatedName, expectedFile, firstFile });
+      }
+    }
+    return { auditedCount, failures };
+  }, dedicatedCardArtNames);
+
+  if (cardArtAudit.failures.length > 0) {
+    console.error(JSON.stringify(cardArtAudit.failures, null, 2));
+    throw new Error(`English card-art audit found ${cardArtAudit.failures.length} unstable illustration reference(s).`);
+  }
+  console.log(`English card-art audit passed for ${cardArtAudit.auditedCount} cards with dedicated illustration assets.`);
 } catch (error) {
   auditError = error;
 } finally {

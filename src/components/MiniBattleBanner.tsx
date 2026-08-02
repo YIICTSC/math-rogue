@@ -9,6 +9,7 @@ import { getCardIllustrationPaths } from '../utils/cardIllustration';
 import { parseEnemyIllustrationRef, synthesizeCards } from '../utils/cardUtils';
 import { assetUrl } from '../utils/assetPaths';
 import ResilientAssetImage from './ResilientAssetImage';
+import { isLegacySpriteModeEnabled } from '../utils/legacySpriteMode';
 
 interface MiniBattleBannerProps {
   streak: number;
@@ -95,8 +96,10 @@ const toIllustrationTokens = (card: BattleCard): string[] => {
   ].filter(Boolean) as string[];
   if (enemyNames.length > 0) return [`enemy:${enemyNames[0]}`];
   if (card.capture && card.textureRef && !card.textureRef.includes('|')) return [`enemy:${card.textureRef}`];
+  if (isLegacySpriteModeEnabled() && card.textureRef) return [`pixel:${card.textureRef}`];
+  if (card.name) return [`card:${card.name}`];
   if (card.textureRef) return [`pixel:${card.textureRef}`];
-  return [`card:${card.name}`];
+  return [];
 };
 
 const CutInArtToken: React.FC<{ token: string; fallbackName: string; card: BattleCard }> = ({ token, fallbackName, card }) => {

@@ -1,4 +1,5 @@
 import { getAssetBaseUrl } from './assetPaths';
+import { CARD_ILLUSTRATION_MANIFEST } from '../data/cardIllustrationManifest';
 
 const INVALID_FILE_CHARS = /[<>:"/\\|?*\x00-\x1F]/g;
 
@@ -29,7 +30,7 @@ const getNameVariants = (value: string): string[] => [
   value.normalize('NFKD'),
 ];
 
-const CARD_ILLUSTRATION_ASSET_VERSION = '20260722-age9-bespoke-card-art';
+const CARD_ILLUSTRATION_ASSET_VERSION = '20260801-english-stable-card-art';
 
 const AGE_9_CARD_ART_ALIASES = [
   { source: 'カンチョー', asset: '指さし確認' },
@@ -49,7 +50,12 @@ export const getCardIllustrationPaths = (id: string, name: string, aliases: stri
   const derivedAliases = deriveNameAliases(name);
   const shouldUseSharedSeedArt = derivedAliases.length > 0 || aliases.some((alias) => deriveNameAliases(alias).length > 0);
   const age9ArtAlias = getAge9CardArtAlias([name, ...aliases]);
-  const rawCandidates = [age9ArtAlias, name, ...derivedAliases, ...aliases, id, ...(shouldUseSharedSeedArt ? ['SEED_SHARED'] : []), 'unknown-card']
+  // `name` can be translated for display. The aliases contain the stable,
+  // untranslated card names used by the shipped illustration files, so try
+  // them before the localized label. This avoids a long chain of 404s and
+  // prevents English mode from falling through to the unknown-card artwork.
+  const stableAliasCandidates = aliases.flatMap((alias) => [alias, ...deriveNameAliases(alias)]);
+  const rawCandidates = [age9ArtAlias, ...stableAliasCandidates, name, ...derivedAliases, id, ...(shouldUseSharedSeedArt ? ['SEED_SHARED'] : []), 'unknown-card']
     .filter(Boolean)
     .map((value) => value.trim());
   const candidates = Array.from(
@@ -59,8 +65,12 @@ export const getCardIllustrationPaths = (id: string, name: string, aliases: stri
       )
     )
   );
-  const extensions = ['webp', 'png', 'jpg', 'jpeg', 'svg'];
-  return candidates.flatMap((fileName) =>
-    extensions.map((ext) => `${baseUrl}card-illustrations/${encodeURIComponent(`${fileName}.${ext}`)}?v=${CARD_ILLUSTRATION_ASSET_VERSION}`)
+  const resolvedFiles = candidates
+    .map((fileName) => CARD_ILLUSTRATION_MANIFEST[fileName])
+    .filter((fileName): fileName is string => Boolean(fileName));
+  const unknownFile = CARD_ILLUSTRATION_MANIFEST['unknown-card'];
+  const files = Array.from(new Set([...resolvedFiles, ...(unknownFile ? [unknownFile] : [])]));
+  return files.map((fileName) =>
+    `${baseUrl}card-illustrations/${encodeURIComponent(fileName)}?v=${CARD_ILLUSTRATION_ASSET_VERSION}`
   );
 };

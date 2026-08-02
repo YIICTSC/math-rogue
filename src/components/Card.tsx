@@ -226,8 +226,8 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled, onInspect, languag
     : trans(card.name, languageMode);
   const displayCardName = toAge9BattleText(translatedCardName, languageMode);
   const imageCandidates = useMemo(
-    () => getCardIllustrationPaths(card.id, translatedCardName, [card.name]),
-    [card.id, card.name, translatedCardName]
+    () => getCardIllustrationPaths(card.id, translatedCardName, [card.name, ...(card.originalNames || [])]),
+    [card.id, card.name, card.originalNames, translatedCardName]
   );
 
   const enemyIllustrationNames = useMemo(() => {

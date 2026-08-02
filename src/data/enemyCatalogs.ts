@@ -85,6 +85,19 @@ export const MAGIC_ENEMY_LIBRARY: EnemyCatalog = createCatalog(
   getMagicTier,
 );
 
+// These variants are reserved for the explicit Act 4 true-boss encounter.
+// Keep them in the full catalog for the compendium, but never include them in
+// the random pool used by regular, elite, or ordinary chapter-boss battles.
+const MAGIC_TRUE_BOSS_NAMES = new Set<string>([
+  MAGIC_HUMANOID_ENEMY_VARIANTS[20].name,
+  MAGIC_HUMANOID_ENEMY_VARIANTS[21].name,
+]);
+
+export const isTrueBossOnlyEnemy = (
+  theme: VisualThemeId,
+  enemyName: string,
+): boolean => theme === 'magic' && MAGIC_TRUE_BOSS_NAMES.has(enemyName);
+
 export const ENEMY_LIBRARY_BY_THEME: Record<VisualThemeId, EnemyCatalog> = {
   elementary: ENEMY_LIBRARY,
   'high-school': HIGH_SCHOOL_ENEMY_LIBRARY,
@@ -124,9 +137,15 @@ export const getEnemyNamesByAct = (
   const library = getEnemyLibraryByTheme(theme);
   const tier = Math.max(1, Math.min(3, act)) as 1 | 2 | 3;
   return Object.values(library)
-    .filter(enemy => enemy.tier === tier)
+    .filter(enemy => enemy.tier === tier && !isTrueBossOnlyEnemy(theme, enemy.name))
     .map(enemy => enemy.name);
 };
+
+export const getRegularEnemyNamesByTheme = (theme: VisualThemeId = 'elementary'): string[] => (
+  Object.values(getEnemyLibraryByTheme(theme))
+    .filter(enemy => !isTrueBossOnlyEnemy(theme, enemy.name))
+    .map(enemy => enemy.name)
+);
 
 export const getAllEnemyNamesByTheme = (theme: VisualThemeId = 'elementary'): string[] => (
   Object.values(getEnemyLibraryByTheme(theme)).map(enemy => enemy.name)

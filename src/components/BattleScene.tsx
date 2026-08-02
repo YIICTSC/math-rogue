@@ -3483,8 +3483,8 @@ const FullscreenCardArtModal: React.FC<{ card: ICard; languageMode: LanguageMode
     const translated = transBattle(card.name, languageMode);
     const magicArtUrl = getMagicCardArtUrl(card);
     const imageCandidates = useMemo(
-        () => getCardIllustrationPaths(card.id, translated, [card.name]),
-        [card.id, card.name, translated]
+        () => getCardIllustrationPaths(card.id, translated, [card.name, ...(card.originalNames || [])]),
+        [card.id, card.name, card.originalNames, translated]
     );
     const enemyIllustrationNames = useMemo(() => {
         const explicit = [

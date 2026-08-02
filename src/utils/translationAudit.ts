@@ -29,7 +29,7 @@ export const JAPANESE_VISIBLE_TEXT_PATTERN = /[ぁ-ゖァ-ヺ㐀-鿿々〆ヵヶ
 
 // These phrases are emergency placeholders, not translations. They must never
 // make a translation audit look green merely because they contain no Japanese.
-export const GENERIC_ENGLISH_FALLBACK_PATTERN = /(?:^|\b)(?:Choose Option|Event Details|School Foe|Choose a fitting event action|Discovery\.|A magical academy event unfolds\.?|Choose a Thoughtful Response|The short break helped your body and mind recover\.|You handled the (?:event|situation|moment).*|You turned the event into a useful tool for the road ahead\.|You handled the situation carefully and turned the experience into progress\.)(?:$|\b)/;
+export const GENERIC_ENGLISH_FALLBACK_PATTERN = /(?:Choose Option|Event Details|School Foe|Choose a fitting event action|Discovery\.|A magical academy event unfolds\.?|Choose a Thoughtful Response|The short break helped your body and mind recover\.|You handled the (?:event|situation|moment).*|You turned the event into a useful tool for the road ahead\.|You handled the situation carefully and turned the experience into progress\.)/;
 
 const normalize = (value: string) => value.replace(/\s+/g, ' ').trim();
 

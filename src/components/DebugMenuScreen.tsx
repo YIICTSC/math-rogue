@@ -40,6 +40,7 @@ interface DebugMenuScreenProps {
     onStartProblemUiPreview: (mode: GameMode, modePool?: string[]) => void;
     onStartEventUiPreview: (theme: VisualThemeId, title: string) => void;
     onStartCrowdfundingBoss: (boss: 'AZUKI' | 'DODOMEDESU') => void;
+    onPreviewRankingReward: () => void;
     onBack: () => void;
     onTimeUpdate: (newDailySeconds: number) => void;
     onAddClearCount: () => void;
@@ -261,6 +262,7 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
     onStartProblemUiPreview,
     onStartEventUiPreview,
     onStartCrowdfundingBoss,
+    onPreviewRankingReward,
     onBack,
     onTimeUpdate,
     onAddClearCount,
@@ -904,6 +906,12 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
                 </h2>
                 <div className="flex gap-2 md:gap-4 text-sm md:text-base">
                     <button onClick={onBack} className="text-gray-300 hover:text-white underline">{trans("戻る", initialLanguageMode)}</button>
+                    <button
+                        onClick={onPreviewRankingReward}
+                        className="bg-yellow-700 hover:bg-yellow-600 text-white px-3 py-1 md:px-4 md:py-2 rounded font-bold border border-yellow-300 text-xs"
+                    >
+                        RANK REWARD
+                    </button>
                     <button
                         onClick={onStartMagicEventSimulation}
                         className="bg-fuchsia-800 hover:bg-fuchsia-700 text-white px-3 py-1 md:px-4 md:py-2 rounded font-bold flex items-center shadow-lg border border-fuchsia-400 text-xs"

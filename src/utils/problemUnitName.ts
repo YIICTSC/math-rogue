@@ -47,6 +47,11 @@ export const shouldKeepJapaneseProblemUnitName = (
   return hasJapaneseScript(name);
 };
 
+// The two player-facing problem selection screens intentionally show the
+// curriculum's original Japanese unit label in every language mode. Subject
+// names, controls, and explanatory copy continue to use the selected locale.
+export const formatProblemSelectionUnitName = (name: string) => name;
+
 export const formatProblemUnitName = (
   name: string,
   languageMode: LanguageMode,

@@ -5,7 +5,10 @@ import { createServer } from 'vite';
 
 // Keep the exclusion boundary field-specific and narrow. Shared mini-game UI,
 // debug verification screens, and display-oriented data are translation scope.
-const EXCLUDED_PATH = /[\\/]mini-games[\\/]|[\\/]data[\\/]subjects[\\/]|[\\/]components[\\/](?:SchoolDungeonRPG2?|PokerGameScreen|PaperPlaneBattle)\.tsx$/;
+// Game-specific mini-game UI is release-visible and must pass the same gate as
+// the main modes. Only curriculum source questions remain exempt because their
+// kanji can be the subject of the exercise itself.
+const EXCLUDED_PATH = /[\\/]data[\\/]subjects[\\/]/;
 const UI_ATTRIBUTES = new Set(['title', 'aria-label', 'placeholder', 'alt']);
 const KANJI = /[一-龠]/;
 const CONTEXTUAL_MISTRANSLATIONS = [

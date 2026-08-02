@@ -91,10 +91,8 @@ export const childSafetyService = {
     const settings = read();
     return settings.ageBand !== '9_12' || Boolean(settings.learningAggregationAuthorizedAt);
   },
-  canSubmitRanking: () => {
-    const settings = read();
-    return settings.ageBand !== '9_12' || Boolean(settings.rankingConsentVerifiedAt);
-  },
+  // 公開ランキングは匿名情報だけを扱い、年齢区分による投稿制限を設けない。
+  canSubmitRanking: () => true,
   // 協力・レースは年齢区分やランキング同意とは独立したゲーム機能。
   // 匿名ランキング投稿と学習集計だけを、それぞれの同意設定で制御する。
   canUsePeerFeatures: () => true,

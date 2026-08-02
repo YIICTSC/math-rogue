@@ -49,6 +49,7 @@ export type OnlineReward = {
 };
 
 const PROFILE_KEY = 'learning_rogue_online_ranking_profile_v1';
+const INITIAL_PROMPT_DECLINED_KEY = 'learning_rogue_online_ranking_initial_prompt_declined_v1';
 const API_OVERRIDE_KEY = 'learning_rogue_online_ranking_api_v1';
 const SUBMISSION_QUEUE_KEY = 'learning_rogue_online_submission_queue_v1';
 const DIRTY_SNAPSHOT_KEY = 'learning_rogue_online_snapshot_dirty_v1';
@@ -434,6 +435,13 @@ const getSnapshot = (periodType: OnlinePeriodType, registeredAt: string) => {
 
 export const onlineRankingService = {
   isAvailable: () => Boolean(getApiBase()) && childSafetyService.canContactRemoteServices(),
+  hasDeclinedInitialPrompt: () => typeof window !== 'undefined' && window.localStorage.getItem(INITIAL_PROMPT_DECLINED_KEY) === '1',
+  declineInitialPrompt: () => {
+    if (typeof window !== 'undefined') window.localStorage.setItem(INITIAL_PROMPT_DECLINED_KEY, '1');
+  },
+  clearInitialPromptDecline: () => {
+    if (typeof window !== 'undefined') window.localStorage.removeItem(INITIAL_PROMPT_DECLINED_KEY);
+  },
   getPlatform,
   getPendingSubmissionCount: () => getQueue().length,
   flushPendingSubmissions,
@@ -468,10 +476,7 @@ export const onlineRankingService = {
     return data.suggestions;
   },
 
-  register: async (displayName: string, guardianConsentProof?: string) => {
-    if (childSafetyService.isChild() && !guardianConsentProof) {
-      throw new Error('9〜12歳のランキング参加には、管理ポータルで確認済みの保護者許可が必要です。');
-    }
+  register: async (displayName: string) => {
     const data = await request<{ player: Omit<OnlineRankingProfile, 'token'>; token: string }>('/api/v1/players/register', {
       method: 'POST',
       body: JSON.stringify({
@@ -480,12 +485,11 @@ export const onlineRankingService = {
         platform: getPlatform(),
         source: 'learning-rogue',
         ageBand: childSafetyService.getSettings().ageBand,
-        guardianConsentProof,
       }),
     });
     const profile = { ...data.player, token: data.token };
     window.localStorage.setItem(PROFILE_KEY, JSON.stringify(profile));
-    if (childSafetyService.isChild()) childSafetyService.authorizeRankingByGuardian();
+    onlineRankingService.clearInitialPromptDecline();
     return profile;
   },
 

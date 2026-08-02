@@ -1454,7 +1454,7 @@ const App: React.FC = () => {
     const [onlineRankingProfile, setOnlineRankingProfile] = useState<OnlineRankingProfile | null>(() => onlineRankingService.getProfile());
     const [showOnlineNameSetup, setShowOnlineNameSetup] = useState(false);
     const [onlineNameSetupIntent, setOnlineNameSetupIntent] = useState<'manage' | 'rename'>('manage');
-    const [onlineNamePromptDismissed, setOnlineNamePromptDismissed] = useState(false);
+    const [onlineNamePromptDismissed, setOnlineNamePromptDismissed] = useState(() => onlineRankingService.hasDeclinedInitialPrompt());
     const [rankingRewardNotices, setRankingRewardNotices] = useState<OnlineReward[]>([]);
     const rankingRewardCheckedRef = useRef(false);
     const [managementProfile, setManagementProfile] = useState<ManagementProfile | null>(() => managementPortalService.getProfile());
@@ -1527,10 +1527,7 @@ const App: React.FC = () => {
     }, [isStudentGradeUnset]);
 
     useEffect(() => {
-        if (gameState.screen !== GameScreen.START_MENU) {
-            setOnlineNamePromptDismissed(false);
-            return;
-        }
+        if (gameState.screen !== GameScreen.START_MENU) return;
         if (!showAgePrivacySetup
             && !showStudentGradeSurvey
             && !onlineRankingProfile
@@ -1906,9 +1903,12 @@ const App: React.FC = () => {
         return true;
     }, [isAssignmentChallengeOnlyLocked, totalMathCorrect]);
 
-    const [isMathDebugSkipped, setIsMathDebugSkipped] = useState<boolean>(false);
-    const [isDebugHpOne, setIsDebugHpOne] = useState<boolean>(false);
-    const [isMiniGameDebugUnlocked, setIsMiniGameDebugUnlocked] = useState<boolean>(false);
+    // Local QA builds persist their debug toggles across reloads so a full-route
+    // language audit is not interrupted every time Vite refreshes the page.
+    // The storage getters always return false in production builds.
+    const [isMathDebugSkipped, setIsMathDebugSkipped] = useState<boolean>(() => DEBUG_FEATURES_ENABLED || storageService.getDebugMathSkip());
+    const [isDebugHpOne, setIsDebugHpOne] = useState<boolean>(() => DEBUG_FEATURES_ENABLED || storageService.getDebugHpOne());
+    const [isMiniGameDebugUnlocked, setIsMiniGameDebugUnlocked] = useState<boolean>(() => DEBUG_FEATURES_ENABLED || storageService.getDebugMiniGameUnlock());
     const [titleClickCount, setTitleCount] = useState<number>(0);
     const [logClickCount, setLogClickCount] = useState<number>(0);
     const [debugLoadout, setDebugLoadout] = useState<{ deck: ICard[], relics: Relic[], potions: Potion[] } | null>(null);
@@ -4266,9 +4266,15 @@ const App: React.FC = () => {
         setHasSave(storageService.hasSaveFile());
         setClearCount(storageService.getThemeClearCount(visualTheme));
         if (DEBUG_FEATURES_ENABLED) {
-            setIsMathDebugSkipped(storageService.getDebugMathSkip());
-            setIsDebugHpOne(storageService.getDebugHpOne());
-            setIsMiniGameDebugUnlocked(storageService.getDebugMiniGameUnlock());
+            // `dev:debug` is a dedicated local QA build. Always start it with
+            // the route-shortening switches enabled; production builds never
+            // enter this branch because their compile-time flag is false.
+            setIsMathDebugSkipped(true);
+            setIsDebugHpOne(true);
+            setIsMiniGameDebugUnlocked(true);
+            storageService.saveDebugMathSkip(true);
+            storageService.saveDebugHpOne(true);
+            storageService.saveDebugMiniGameUnlock(true);
         } else {
             storageService.clearDebugSettings();
             setIsMathDebugSkipped(false);
@@ -16441,6 +16447,18 @@ const App: React.FC = () => {
                             onStartProblemUiPreview={handleStartProblemUiPreview}
                             onStartEventUiPreview={handleStartEventUiPreview}
                             onStartCrowdfundingBoss={handleStartCrowdfundingBoss}
+                            onPreviewRankingReward={() => {
+                                const template = Object.values(CARDS_LIBRARY)[0];
+                                if (!template) return;
+                                setRankingRewardNotices([{
+                                    id: 'debug-ranking-reward',
+                                    rankingId: 'math_correct_total',
+                                    periodType: 'weekly',
+                                    periodKey: 'QA PREVIEW',
+                                    awardedRank: 1,
+                                    card: { ...template, id: 'debug-ranking-reward-card', rewardCard: true, rewardSource: 'RANKING' },
+                                }]);
+                            }}
                             onBack={returnToTitle}
                             onTimeUpdate={handleTimeUpdate}
                             onAddClearCount={handleDebugAddClearCount}
@@ -16654,15 +16672,6 @@ const App: React.FC = () => {
                                     </button>
                                 </div>
 
-                                {!onlineRankingProfile && onlineRankingService.isAvailable() && (
-                                    <button
-                                        type="button"
-                                        onClick={() => setShowOnlineNameSetup(true)}
-                                        className="mt-2 flex w-full items-center justify-center gap-2 rounded border border-lime-400/70 bg-lime-950/80 px-3 py-2 text-xs font-black text-lime-100 shadow-[0_0_16px_rgba(163,230,53,0.16)] hover:bg-lime-900"
-                                    >
-                                        <Trophy size={16} /> {trans("オンラインランキング参加名を決める", languageMode)}
-                                    </button>
-                                )}
                             </div>
                             {coopPartyHudOpen && (
                                 <div className="space-y-1.5 sm:space-y-2">
@@ -18182,6 +18191,12 @@ const App: React.FC = () => {
                         setOnlineNameSetupIntent('manage');
                         setOnlineNamePromptDismissed(true);
                     }}
+                    onDecline={!onlineRankingProfile ? () => {
+                        onlineRankingService.declineInitialPrompt();
+                        setOnlineNamePromptDismissed(true);
+                        setShowOnlineNameSetup(false);
+                        setOnlineNameSetupIntent('manage');
+                    } : undefined}
                     onRegistered={(profile) => {
                         setOnlineRankingProfile(profile);
                         setShowOnlineNameSetup(false);
@@ -18191,11 +18206,12 @@ const App: React.FC = () => {
                     }}
                 />
                 {rankingRewardNotices[0] && (
-                    <div className="fixed inset-0 z-[10038] flex items-center justify-center bg-black/90 p-4">
-                        <div className="max-h-[calc(100dvh-2rem)] w-full max-w-lg overflow-y-auto rounded-2xl border-4 border-yellow-300 bg-gradient-to-b from-slate-900 to-black p-6 text-center text-white shadow-[0_0_55px_rgba(250,204,21,0.42)] custom-scrollbar">
+                    <div className="ranking-reward-modal fixed inset-0 z-[10038] flex items-center justify-center bg-black/90 p-4">
+                        <div className="ranking-reward-dialog max-h-[calc(100dvh-2rem)] w-full max-w-lg overflow-y-auto rounded-2xl border-4 border-yellow-300 bg-gradient-to-b from-slate-900 to-black p-6 text-center text-white shadow-[0_0_55px_rgba(250,204,21,0.42)] custom-scrollbar">
+                            <div className="ranking-reward-summary">
                             <div className="mb-2 text-xs font-black tracking-[0.32em] text-yellow-300">RANK IN!</div>
                             <h2 className="mb-2 text-3xl font-black text-yellow-100">{trans("ランキング入賞！", languageMode)}</h2>
-                            <div className="mb-5 rounded-xl border border-yellow-300/40 bg-yellow-950/35 px-4 py-3">
+                            <div className="ranking-reward-rank mb-5 rounded-xl border border-yellow-300/40 bg-yellow-950/35 px-4 py-3">
                                 <div className="text-lg font-black text-yellow-100">{trans(getOnlineRankingLabel(rankingRewardNotices[0].rankingId), languageMode)}</div>
                                 <div className="mt-1 text-xs font-bold text-yellow-200/80">
                                     {trans(getOnlineRankingPeriodLabel(rankingRewardNotices[0].periodType), languageMode)}
@@ -18212,7 +18228,8 @@ const App: React.FC = () => {
                             <p className="mb-4 text-sm font-bold leading-6 text-slate-300">
                                 {trans("入賞記念のご褒美カードを獲得しました！", languageMode)}
                             </p>
-                            <div className="mx-auto mb-5 max-w-xs rounded-2xl border-2 border-cyan-300 bg-cyan-950/60 p-3 shadow-[0_0_30px_rgba(34,211,238,0.25)]">
+                            </div>
+                            <div className="ranking-reward-card mx-auto mb-5 max-w-xs rounded-2xl border-2 border-cyan-300 bg-cyan-950/60 p-3 shadow-[0_0_30px_rgba(34,211,238,0.25)]">
                                 <div className="mb-3 text-[10px] font-black tracking-[0.22em] text-cyan-200">REWARD CARD</div>
                                 <div className="flex justify-center">
                                     <div className="scale-90">
@@ -18228,7 +18245,7 @@ const App: React.FC = () => {
                             <button
                                 type="button"
                                 onClick={() => setRankingRewardNotices((notices) => notices.slice(1))}
-                                className="w-full rounded-xl bg-yellow-300 px-5 py-3 text-lg font-black text-slate-950 hover:bg-yellow-200"
+                                className="ranking-reward-action w-full rounded-xl bg-yellow-300 px-5 py-3 text-lg font-black text-slate-950 hover:bg-yellow-200"
                             >
                                 {rankingRewardNotices.length > 1 ? trans("次のカードを見る", languageMode) : trans("カード帳にしまう", languageMode)}
                             </button>

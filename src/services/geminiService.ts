@@ -1,6 +1,6 @@
 
 import type { VisualThemeId } from '../data/visualThemes';
-import { getAllEnemyNamesByTheme, getEnemyNamesByAct } from '../data/enemyCatalogs';
+import { getEnemyNamesByAct, getRegularEnemyNamesByTheme } from '../data/enemyCatalogs';
 
 // Local data lists to replace AI generation
 export const ENEMIES_ACT1 = [
@@ -69,7 +69,7 @@ export const generateFlavorText = async (context: string): Promise<string> => {
 export const generateEnemyName = async (floor: number, act: number = 1, visualTheme: VisualThemeId = 'elementary'): Promise<string> => {
   if (visualTheme !== 'elementary') {
     const themedNames = getEnemyNamesByAct(visualTheme, act);
-    return getRandom(themedNames.length > 0 ? themedNames : getAllEnemyNamesByTheme(visualTheme));
+    return getRandom(themedNames.length > 0 ? themedNames : getRegularEnemyNamesByTheme(visualTheme));
   }
   if (act === 1) return getRandom(ENEMIES_ACT1);
   if (act === 2) return getRandom(ENEMIES_ACT2);

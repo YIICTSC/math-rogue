@@ -56,17 +56,6 @@ export default function PrivacyControlsModal(props: Props) {
     } finally { setBusy(false); }
   };
 
-  const verifyRankingConsent = async () => {
-    setBusy(true); setMessage('');
-    try {
-      const { proof } = await managementPortalService.getRankingConsentProof();
-      await onlineRankingService.verifyChildConsent(proof);
-      setMessage('保護者許可を確認しました。匿名ランキングへ参加できます。');
-    } catch (reason) {
-      setMessage(reason instanceof Error ? reason.message : '保護者許可を確認できませんでした。');
-    } finally { setBusy(false); }
-  };
-
   const unlink = async () => {
     if (!window.confirm('教員・保護者向け集計との端末連携を解除しますか？')) return;
     setBusy(true); setMessage('');
@@ -106,15 +95,10 @@ export default function PrivacyControlsModal(props: Props) {
         <article className="rounded-xl border border-slate-700 bg-slate-900 p-4"><small className="text-slate-400">{t('年齢区分')}</small><strong className="mt-1 block text-lg">{settings.ageBand ? t(ageLabel[settings.ageBand]) : t('未設定')}</strong></article>
         <article className="rounded-xl border border-slate-700 bg-slate-900 p-4"><small className="text-slate-400">{t('教員・保護者向け学習集計')}</small><strong className="mt-1 block text-lg">{managementProfile ? `${t('連携中')}（${settings.learningAggregationAuthority === 'guardian' ? t('保護者') : t('学校')}）` : t('未連携')}</strong></article>
         <article className="rounded-xl border border-slate-700 bg-slate-900 p-4"><small className="text-slate-400">{t('匿名ランキング')}</small><strong className="mt-1 block text-lg">{onlineProfile ? `${t('参加中')}: ${onlineProfile.displayName}` : t('未参加')}</strong></article>
-        <article className="rounded-xl border border-slate-700 bg-slate-900 p-4"><small className="text-slate-400">{t('9〜12歳のランキング許可')}</small><strong className="mt-1 block text-lg">{settings.rankingConsentVerifiedAt ? t('保護者確認済み') : t('未確認・投稿停止')}</strong></article>
+        <article className="rounded-xl border border-slate-700 bg-slate-900 p-4"><small className="text-slate-400">{t('公開ランキング')}</small><strong className="mt-1 block text-lg">{t('年齢に関係なく利用可能')}</strong></article>
         <article className="rounded-xl border border-slate-700 bg-slate-900 p-4"><small className="text-slate-400">{t('協力・レース通信')}</small><strong className="mt-1 block text-lg">{t('年齢に関係なく利用可能')}</strong></article>
       </div>
       <div className="mt-5 grid gap-2 sm:grid-cols-2">
-        {settings.ageBand === '9_12' && onlineProfile && !settings.rankingConsentVerifiedAt && managementProfile && (
-          <button disabled={busy} onClick={() => void verifyRankingConsent()} className="flex items-center justify-center gap-2 rounded-xl border border-cyan-400 bg-cyan-950 px-4 py-3 font-black text-cyan-100">
-            <ShieldCheck size={17} />{t('保護者許可を確認')}
-          </button>
-        )}
         {managementProfile && <button disabled={busy} onClick={() => void unlink()} className="flex items-center justify-center gap-2 rounded-xl border border-slate-500 bg-slate-800 px-4 py-3 font-black"><Unlink size={17} />{t('端末連携を解除')}</button>}
         {managementProfile && settings.learningAggregationAuthorizedAt && <button disabled={busy} onClick={() => void revokeLearningConsent()} className="flex items-center justify-center gap-2 rounded-xl border border-amber-500 bg-amber-950 px-4 py-3 font-black text-amber-100"><ShieldCheck size={17} />{t('学習集計の許可を取り消す')}</button>}
         {managementProfile && <button disabled={busy} onClick={() => void requestLearningDeletion()} className="flex items-center justify-center gap-2 rounded-xl border border-rose-500 bg-rose-950 px-4 py-3 font-black text-rose-100"><Trash2 size={17} />{t('学習集計データを削除申請')}</button>}

@@ -10,9 +10,19 @@ release/
 coverage/
 tmp/
 .codex-logs/
+.codex-artifacts/
+
+# Local translation audit reports and browser evidence are review artifacts,
+# not runtime assets and must not be shipped or pushed with game releases.
+docs/language-check-all-elements.md
+docs/language-check/
+docs/local-debug-english-e2e-evidence.json
 
 # Local App Store screenshot capture iterations. Final storefront images live in App Store Connect.
 build/app-store-screenshots/build*/
+build/app-store-screenshots-*/
+build/google-play-screenshots-*/
+build/steam-store-screenshots-*/
 build/steam-trailer-previews/
 
 # Generated voice source files are too large for the repo. Commit compressed OGG files instead.

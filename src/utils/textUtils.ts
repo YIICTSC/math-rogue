@@ -5,13 +5,19 @@ import { HIRAGANA_UI_EXACT } from '../data/hiraganaUiExact';
 import { HIRAGANA_DYNAMIC_UI_RULES } from '../data/hiraganaDynamicUiRules';
 import { HIRAGANA_RUNTIME_EXACT, HIRAGANA_RUNTIME_PARTIAL } from '../data/hiraganaRuntimeExact';
 import { HIRAGANA_COMPENDIUM_EXACT } from '../data/hiraganaCompendiumExact';
+import { HIRAGANA_REVIEW_EXACT } from '../data/hiraganaReviewExact';
 import { HIRAGANA_ENDING_EXACT } from '../data/hiraganaEndingExact';
 import { ENGLISH_RUNTIME_EXACT } from '../data/englishRuntimeExact';
+import { ENGLISH_BATTLE_BACKGROUND_EXACT } from '../data/englishBattleBackgroundExact';
 import { ENGLISH_EVENT_NARRATIVE_EXACT } from '../data/englishEventNarrativeExact';
 import { auditEnglishTranslationResult, GENERIC_ENGLISH_FALLBACK_PATTERN, JAPANESE_VISIBLE_TEXT_PATTERN } from './translationAudit';
 import { ENGLISH_ENDING_EXACT } from '../data/englishEndingExact';
 import { ENGLISH_DEBUG_UI_EXACT, HIRAGANA_DEBUG_UI_EXACT } from '../data/debugUiExact';
 import { ENGLISH_DISPLAY_COPY_EXACT, HIRAGANA_DISPLAY_COPY_EXACT } from '../data/displayCopyExact';
+import { ENGLISH_MAGIC_CARD_RULE_EXACT } from '../data/englishMagicCardRuleExact';
+import { ENGLISH_IDENTIFIER_EXACT } from '../data/englishIdentifierExact';
+import { ENGLISH_MINIGAME_EXACT } from '../data/englishMinigameExact';
+import { ENGLISH_REVIEW_EXACT } from '../data/englishReviewExact';
 import { EVENT_DICTIONARY } from './textUtils2';
 
 const BASE_DICTIONARY: Record<string, string> = {
@@ -4679,22 +4685,22 @@ const ENGLISH_GENERATED_CARD_NAME_DICTIONARY: Record<string, string> = {
     "香華のジャスミン": "Fragrant Jasmine",
     "至高の盆栽": "Ultimate Bonsai",
     "ユグドラシル": "Yggdrasil",
-    "四字熟語": "Japanese Syukugo",
-    "ことわざの知恵": "Japanese Kotowaza",
-    "五感の表現": "Japanese Gokan",
-    "万葉の歌": "Japanese Manyo",
-    "観察日記": "Japanese Nikki",
-    "止め・跳ね・払い": "Japanese Syodo",
-    "精神統一": "Japanese Syuji",
-    "言の葉": "Japanese Kotonoha",
-    "五七五": "Japanese Haiku",
-    "主語と述語": "Japanese Bunpo",
-    "朗読": "Japanese Rodoku",
-    "五光": "Japanese Goko",
-    "読書感想文": "Japanese Sakubun",
-    "文字の嵐": "Japanese Moji",
-    "行間を読む": "Japanese Yomitoki",
-    "天礼": "Japanese Tenrei",
+    "四字熟語": "Four-Character Idiom",
+    "ことわざの知恵": "Proverb Wisdom",
+    "五感の表現": "Five-Senses Expression",
+    "万葉の歌": "Man'yoshu Verse",
+    "観察日記": "Observation Journal",
+    "止め・跳ね・払い": "Brushstroke Basics",
+    "精神統一": "Focused Mind",
+    "言の葉": "Words in Bloom",
+    "五七五": "Haiku Rhythm",
+    "主語と述語": "Subject and Predicate",
+    "朗読": "Recitation",
+    "五光": "Five Lights",
+    "読書感想文": "Book Reflection",
+    "文字の嵐": "Wordstorm",
+    "行間を読む": "Read Between the Lines",
+    "天礼": "Heavenly Script",
     "暗算": "Math Calc Speed",
     "三角定規": "Math Triangle",
     "九九の連鎖": "Math Kuku",
@@ -4780,9 +4786,9 @@ const ENGLISH_GENERATED_CARD_NAME_DICTIONARY: Record<string, string> = {
     "消防署見学": "Outdoor Fire Truck",
     "工事現場の重機": "Outdoor Construction",
     "夜の怖い話": "Outdoor Ghost Story",
-    "おじいちゃんの教え": "Outdoor Grandpa Wisdom",
+    "おじいちゃんの教え": "Grandpa's Wisdom",
     "カぶとむし相撲": "Outdoor Kabuto Wrestle",
-    "綿菓子の雲": "Outdoor Candy Sugar",
+    "綿菓子の雲": "Cotton Candy Cloud",
     "風船割り": "Outdoor Balloon Pop",
     "初詣の願い事": "Outdoor Shrine Pray",
     "壁への落書き": "Outdoor Crayon Wall",
@@ -4839,10 +4845,10 @@ const ENGLISH_GENERATED_CARD_NAME_DICTIONARY: Record<string, string> = {
     "ドラグニル・バースト": "Boys Dragon Buster",
     "虚空の断罪": "Boys Void Slash",
     "雷神の鉄拳": "Boys Thunder Fist",
-    "影縫いの太刀": "Boys Shadow Bind",
+    "影縫いの太刀": "Shadow-Stitch Blade",
     "電脳世界へのダイブ": "Boys Mecha Dive",
     "暗黒の特異点": "Boys Black Hole",
-    "侍の魂": "Boys Samurai Spirit",
+    "侍の魂": "Samurai Spirit",
     "忍法・隠れ身": "Boys Ninja Vanish",
     "フルドライブ": "Boys Robot Boost",
     "無尽蔵の剣線": "Boys Blade Storm",
@@ -4862,7 +4868,7 @@ const ENGLISH_GENERATED_CARD_NAME_DICTIONARY: Record<string, string> = {
     "プラズマ・ブレード": "Boys Cyber Blade",
     "竜の眼光": "Boys Dragon Eye",
     "虚無の鎧": "Boys Void Armor",
-    "雷鳴の轟き": "Boys Thunder Storm",
+    "雷鳴の轟き": "Thunderclap Storm",
     "賞金稼ぎ": "Boys Soldier Hunt",
     "鉄壁の陣": "Boys Iron Wall",
     "焔の突撃": "Boys Flame Drive",
@@ -4877,7 +4883,7 @@ const ENGLISH_GENERATED_CARD_NAME_DICTIONARY: Record<string, string> = {
     "終焉の審判": "Boys Judgement",
     "幻影の刃": "Boys Phantom Edge",
     "コア・ストライク": "Boys Core Strike",
-    "自動防衛システム": "Boys Defence Sys",
+    "自動防衛システム": "Automated Defense System",
     "無限の剣舞": "Boys Infinite Blade",
     "マッスル・ビルド": "Boys Strength Up",
     "孤狼の群れ": "Boys Wolf Pack",
@@ -6411,6 +6417,8 @@ const buildEnglishTokenPhrase = (text: string): string | null => {
 };
 
 const ENGLISH_TEXT_PATTERNS: Array<[RegExp, string]> = [
+    [/^第(\d+)章へ進んだ。体力が全回復した！$/, 'Advanced to Act $1. HP fully restored!'],
+    [/^褒められた！HP全回復。\n「(.+)」を捨て去った。$/, 'You earned praise! HP fully restored.\nRemoved “$1”.'],
     [/^天気予報：明日の運勢を占った（山札並び替え）$/, 'Weather Forecast: Read tomorrow\'s outlook and rearranged the draw pile.'],
     [/^(.+)は恐怖で震えている（筋力-3）$/, '$1 trembles in fear (Strength -3).'],
     [/^召喚効果：次のターン開始時に(.+)枚ドロー$/, 'Summon Effect: Draw $1 card(s) at the start of the next turn.'],
@@ -9313,7 +9321,19 @@ export const buildEnglishCardDescription = (card: Card): string => {
     if (card.eraserOnly) parts.push("Can only be used at rest sites to remove one unwanted card effect");
 
     if (parts.length === 0) return trans(card.description, 'ENGLISH');
-    return `${parts.join(". ")}.`;
+
+    // Structured fields are the authoritative source for the ordinary effect,
+    // but some cards append a second line with mechanics that do not have a
+    // dedicated Card field. Magic protagonist cards use this for their unique
+    // rule progression. Keep those translated lines instead of silently
+    // dropping them when the English effect sentence is rebuilt above.
+    const supplementalLines = card.description
+        .split('\n')
+        .slice(1)
+        .map((line) => line.trim())
+        .filter(Boolean)
+        .map((line) => trans(line, 'ENGLISH'));
+    return [`${parts.join(". ")}.`, ...supplementalLines].join('\n');
 };
 
 const sanitizeEnglishTextCore = (text: string): string => {
@@ -9333,6 +9353,12 @@ const sanitizeEnglishTextCore = (text: string): string => {
 
     const exactTranslation = ENGLISH_DICTIONARY[text] || translateEnglishEventTitle(text) || ENGLISH_CARD_NAME_DICTIONARY[text] || ENGLISH_GENERATED_CARD_NAME_DICTIONARY[text] || ENGLISH_ITEM_NAME_DICTIONARY[text] || ENGLISH_ENEMY_NAME_DICTIONARY[text];
     if (exactTranslation) return exactTranslation;
+
+    const advancedAct = text.match(/^第(\d+)章へ進んだ。体力が全回復した！$/);
+    if (advancedAct) return `Advanced to Act ${advancedAct[1]}. HP fully restored!`;
+
+    const praisedAndRemoved = text.match(/^褒められた！HP全回復。\n「(.+)」を捨て去った。$/);
+    if (praisedAndRemoved) return `You earned praise! HP fully restored.\nRemoved “${praisedAndRemoved[1]}”.`;
 
     const familiarContract = text.match(/^(.+)の契約$/);
     if (familiarContract) return `${getEnglishFamiliarName(familiarContract[1])} Contract`;
@@ -10641,13 +10667,62 @@ const transCore = (text: string, mode: LanguageMode): string => {
         if (ENGLISH_DISPLAY_COPY_EXACT[text]) return ENGLISH_DISPLAY_COPY_EXACT[text];
         if (ENGLISH_DEBUG_UI_EXACT[text]) return ENGLISH_DEBUG_UI_EXACT[text];
         if (ENGLISH_RUNTIME_EXACT[text]) return ENGLISH_RUNTIME_EXACT[text];
+        if (ENGLISH_BATTLE_BACKGROUND_EXACT[text]) return ENGLISH_BATTLE_BACKGROUND_EXACT[text];
         if (ENGLISH_EVENT_NARRATIVE_EXACT[text]) return ENGLISH_EVENT_NARRATIVE_EXACT[text];
         if (ENGLISH_ENDING_EXACT[text]) return ENGLISH_ENDING_EXACT[text];
+        if (ENGLISH_MAGIC_CARD_RULE_EXACT[text]) return ENGLISH_MAGIC_CARD_RULE_EXACT[text];
+        if (ENGLISH_REVIEW_EXACT[text]) return ENGLISH_REVIEW_EXACT[text];
+        if (ENGLISH_MINIGAME_EXACT[text]) return ENGLISH_MINIGAME_EXACT[text];
+        if (ENGLISH_IDENTIFIER_EXACT[text]) return ENGLISH_IDENTIFIER_EXACT[text];
         if (ENGLISH_DICTIONARY[text]) return ENGLISH_DICTIONARY[text];
         if (ENGLISH_CARD_NAME_DICTIONARY[text]) return ENGLISH_CARD_NAME_DICTIONARY[text];
         if (ENGLISH_GENERATED_CARD_NAME_DICTIONARY[text]) return ENGLISH_GENERATED_CARD_NAME_DICTIONARY[text];
         if (ENGLISH_ITEM_NAME_DICTIONARY[text]) return ENGLISH_ITEM_NAME_DICTIONARY[text];
         if (ENGLISH_ENEMY_NAME_DICTIONARY[text]) return ENGLISH_ENEMY_NAME_DICTIONARY[text];
+
+        const advancedAct = text.match(/^第(\d+)章へ進んだ。体力が全回復した！$/);
+        if (advancedAct) return `Advanced to Act ${advancedAct[1]}. HP fully restored!`;
+        const praisedAndRemoved = text.match(/^褒められた！HP全回復。\n「(.+)」を捨て去った。$/);
+        if (praisedAndRemoved) return `You earned praise! HP fully restored.\nRemoved “${praisedAndRemoved[1]}”.`;
+
+        const initialPoolCards = text.match(/^初期プールに「(.+)」のカードを(\d+)枚追加$/);
+        if (initialPoolCards) {
+            const color = ({ '白': 'White', '青': 'Blue', '橙': 'Orange' } as Record<string, string>)[initialPoolCards[1]] || trans(initialPoolCards[1], mode);
+            return `Add ${initialPoolCards[2]} ${color} card(s) to the starting pool.`;
+        }
+        const winHeal = text.match(/^戦闘勝利時、HPを(\d+)回復$/);
+        if (winHeal) return `Heal ${winHeal[1]} HP after each battle victory.`;
+        const winCoinBonus = text.match(/^戦闘勝利時の獲得コイン\+(\d+)%$/);
+        if (winCoinBonus) return `Gain ${winCoinBonus[1]}% more coins after each battle victory.`;
+        const openingDamage = text.match(/^バトル開始時に敵に(\d+)ダメージ$/);
+        if (openingDamage) return `Deal ${openingDamage[1]} damage to the enemy at the start of battle.`;
+        const firstTurnDraw = text.match(/^一番最初のターンに手札を(\d+)枚多く引く$/);
+        if (firstTurnDraw) return `Draw ${firstTurnDraw[1]} extra card(s) on the first turn.`;
+        if (text === '最初のターンに装填するカードの効果値が倍になる') return 'Double the value of cards loaded on the first turn.';
+        const simpleHeal = text.match(/^HPを(\d+)回復する。$/);
+        if (simpleHeal) return `Heal ${simpleHeal[1]} HP.`;
+        const energyPoolValue = text.match(/^エネルギー生成プールに「(.+)」を追加。$/);
+        if (energyPoolValue) return `Add “${energyPoolValue[1]}” to the Energy generation pool.`;
+        const generationPoolColor = text.match(/^生成プールに「(.+)」を追加。$/);
+        if (generationPoolColor) {
+            const color = ({ '白': 'White', '青': 'Blue', 'オレンジ': 'Orange' } as Record<string, string>)[generationPoolColor[1]] || generationPoolColor[1];
+            return `Add ${color} to the generation pool.`;
+        }
+        if (text === '永続的な攻撃力ボーナスを得る。') return 'Gain a permanent Attack bonus.';
+        const maxHpReward = text.match(/^最大HPが(.+)上がった。$/);
+        if (maxHpReward) return `Max HP increased by ${maxHpReward[1]}.`;
+        const goldReward = text.match(/^(.+)Gを得た。$/);
+        if (goldReward) return `Gained ${goldReward[1]}G.`;
+        const permanentStrengthReward = text.match(/^戦闘開始時の恒久ムキムキが(.+)増えた。$/);
+        if (permanentStrengthReward) return `Permanent starting Strength increased by ${permanentStrengthReward[1]}.`;
+        const paperPlaneMissionUnlock = text.match(/^このランクをクリアすると Lv(.+) が解放されます！$/);
+        if (paperPlaneMissionUnlock) return `Clear this rank to unlock Lv ${paperPlaneMissionUnlock[1]}!`;
+        const pokerScoringTotal = text.match(/^得点カード合計 \((.+)枚\)$/);
+        if (pokerScoringTotal) return `Scoring cards total (${pokerScoringTotal[1]} cards)`;
+        const magicHeroProfile = text.match(/^【(.+)属性】(.+)。(.+)を得意とする魔法少女。(.+)$/s);
+        if (magicHeroProfile) {
+            return `[${trans(magicHeroProfile[1], mode)} Attribute] ${trans(magicHeroProfile[2], mode)}. A magical girl specializing in ${trans(magicHeroProfile[3], mode)}. ${trans(magicHeroProfile[4], mode)}`;
+        }
 
         if (text.includes('\n')) {
             const translatedLines = text.split('\n').map((line) => translateEventSentence(line));
@@ -10721,6 +10796,7 @@ const transCore = (text: string, mode: LanguageMode): string => {
     if (HIRAGANA_RUNTIME_EXACT[text]) return HIRAGANA_RUNTIME_EXACT[text];
     if (HIRAGANA_UI_EXACT[text]) return HIRAGANA_UI_EXACT[text];
     if (HIRAGANA_COMPENDIUM_EXACT[text]) return HIRAGANA_COMPENDIUM_EXACT[text];
+    if (HIRAGANA_REVIEW_EXACT[text]) return HIRAGANA_REVIEW_EXACT[text];
     if (DICTIONARY[text]) return DICTIONARY[text];
 
     const dynamicUiTranslation = translateHiraganaDynamicUi(text);
@@ -10759,8 +10835,30 @@ const transCore = (text: string, mode: LanguageMode): string => {
     return result;
 };
 
+const stripGenericEnglishScaffolding = (value: string): string => {
+    const genericPrefixes = [
+        'You handled the moment and carried its outcome into what came next.',
+        'You turned the event into a useful tool for the road ahead.',
+        'The short break helped your body and mind recover.',
+        'You refined what you learned and turned it into a practical advantage.',
+        'You cleared away something unnecessary and made room to move forward.',
+    ];
+    for (const prefix of genericPrefixes) {
+        if (!value.startsWith(prefix)) continue;
+        const remainder = value.slice(prefix.length).trim();
+        // Keep a generic narrative only when it is the whole translation. If a
+        // parser already recovered concrete game mechanics, the generic lead-in
+        // obscures useful information and makes many unrelated cards identical.
+        if (/^(?:Deal|Gain|Heal|Draw|Discard|Apply|Exhaust|Upgrade|Remove|Removed|Lose|Increase|Decrease|Double|Add|Create|Copy|Prevent|Set|Obtain|Receive|["'])/i.test(remainder)) {
+            return remainder;
+        }
+    }
+    return value;
+};
+
 export const trans = (text: string, mode: LanguageMode): string => {
-    const output = transCore(text, mode);
+    const rawOutput = transCore(text, mode);
+    const output = mode === 'ENGLISH' ? stripGenericEnglishScaffolding(rawOutput) : rawOutput;
     if (mode === 'ENGLISH') auditEnglishTranslationResult(text, output, 'trans');
     return output;
 };
@@ -10844,6 +10942,7 @@ const transEventTextCore = (text: string, mode: LanguageMode): string => {
     if (mode !== 'ENGLISH') return trans(text, mode);
     if (ENGLISH_RUNTIME_EXACT[text]) return ENGLISH_RUNTIME_EXACT[text];
     if (ENGLISH_ENDING_EXACT[text]) return ENGLISH_ENDING_EXACT[text];
+    if (ENGLISH_REVIEW_EXACT[text]) return ENGLISH_REVIEW_EXACT[text];
 
     const earlyExact = buildEnglishSchoolEventFallback(text);
     if (earlyExact) return earlyExact;
@@ -10899,7 +10998,8 @@ const transEventTextCore = (text: string, mode: LanguageMode): string => {
 };
 
 export const transEventText = (text: string, mode: LanguageMode): string => {
-    const output = transEventTextCore(text, mode);
+    const rawOutput = transEventTextCore(text, mode);
+    const output = mode === 'ENGLISH' ? stripGenericEnglishScaffolding(rawOutput) : rawOutput;
     if (mode === 'ENGLISH') auditEnglishTranslationResult(text, output, 'transEventText');
     return output;
 };

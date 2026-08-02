@@ -15,7 +15,7 @@ import { trans, transProblemSubjectName } from '../utils/textUtils';
 import { assetUrl } from '../utils/assetPaths';
 import { saveAnswerModePreference } from '../utils/answerMode';
 import { getInitialProblemSetView, type ProblemSetView } from '../utils/localePreferences';
-import { formatProblemUnitName } from '../utils/problemUnitName';
+import { formatProblemSelectionUnitName } from '../utils/problemUnitName';
 import type { VisualThemeId } from '../data/visualThemes';
 
 interface ModeSelectionScreenProps {
@@ -1030,8 +1030,8 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
 
   const isMastered = (mode: string) => !!modeMasteryMap[mode];
   const getCategoryLabel = (id: SubjectCategoryType) => transProblemSubjectName(CATEGORY_LABELS[id] || id, languageMode);
-  const getSubLabel = (_id: string, fallback: string, categoryId: SubjectCategoryType = selectedCategory.id) => formatProblemUnitName(fallback, languageMode, categoryId);
-  const getUnitLabel = (name: string, categoryId: SubjectCategoryType = selectedCategory.id) => formatProblemUnitName(name, languageMode, categoryId);
+  const getSubLabel = (_id: string, fallback: string, _categoryId: SubjectCategoryType = selectedCategory.id) => formatProblemSelectionUnitName(fallback);
+  const getUnitLabel = (name: string, _categoryId: SubjectCategoryType = selectedCategory.id) => formatProblemSelectionUnitName(name);
   const getUnitCorrectCount = (unit: { mode?: string; modes?: string[] }) => {
     if (unit.modes && unit.modes.length > 0) {
       return unit.modes.reduce((total, mode) => total + (modeCorrectCounts[mode] || 0), 0);
