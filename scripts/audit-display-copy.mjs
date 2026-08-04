@@ -99,3 +99,4 @@ if (failures.length) {
   process.exit(1);
 }
 console.log(`Display copy audit passed: ${entries.length} static entries and supporter NPC question sets.`);
+process.exit(0);

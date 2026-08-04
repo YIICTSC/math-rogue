@@ -63,7 +63,13 @@ assert.doesNotMatch(app.slice(app.indexOf('<LearnerGroupInviteModal'), app.index
 assert.match(modal, /const latestProfile = managementPortalService\.getProfile\(\)/);
 assert.match(app, /getNextRequiredManagedAssignment/);
 assert.match(app, /getNextLaunchLockedManagedAssignment/);
-assert.match(app, /syncedAssignments \? getNextLaunchLockedManagedAssignment/);
+assert.match(app, /managedAssignmentsRevision/);
+assert.match(app, /setManagedAssignmentsRevision\(version => version \+ 1\)/);
+assert.match(app, /CapacitorApp\.addListener\('appStateChange'/);
+assert.match(app, /const nextLaunchLocked = getNextLaunchLockedManagedAssignment\(assignments\)/);
+assert.match(app, /payload = toAssignmentPayload\(nextRequired\)/);
+assert.match(app, /requiredAssignmentCheckRef\.current = false/);
+assert.match(app, /A fresher assignment revision may arrive while payload details are being/);
 assert.match(app, /storageService\.clearCurrentAssignment/);
 assert.match(app, /screen: GameScreen\.PROBLEM_CHALLENGE/);
 assert.match(app, /isRequiredTeacherAssignment/);

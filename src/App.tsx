@@ -107,7 +107,7 @@ import { generateEnemyName } from './services/geminiService';
 import { generateDungeonMap } from './services/mapGenerator';
 import { parseTransferData, serializeTransferData, storageService } from './services/storageService';
 import { onlineRankingService, type OnlineRankingProfile, type OnlineReward } from './services/onlineRankingService';
-import { getNextLaunchLockedManagedAssignment, getNextRequiredManagedAssignment, isManagedAssignmentActive, managementPortalService, type ManagementProfile } from './services/managementPortalService';
+import { getNextLaunchLockedManagedAssignment, getNextRequiredManagedAssignment, isManagedAssignmentActive, managementPortalService, toAssignmentPayload, type ManagementProfile } from './services/managementPortalService';
 import { ASSIGNMENT_NOTIFICATION_OPEN_EVENT } from './services/assignmentNotificationService';
 import { childSafetyService } from './services/childSafetyService';
 import { generateEvent, generateLegacyEvent } from './services/eventService';
@@ -1468,6 +1468,7 @@ const App: React.FC = () => {
     const [managementProfile, setManagementProfile] = useState<ManagementProfile | null>(() => managementPortalService.getProfile());
     const [learnerInvitationToken, setLearnerInvitationToken] = useState(() => managementPortalService.getLearnerInvitationToken());
     const requiredAssignmentCheckRef = useRef(false);
+    const [managedAssignmentsRevision, setManagedAssignmentsRevision] = useState(0);
     const [showAssignmentInbox, setShowAssignmentInbox] = useState(false);
     const [currentAssignment, setCurrentAssignment] = useState<AssignmentPayload | null>(() => storageService.getCurrentAssignment());
     const [assignmentProgressVersion, setAssignmentProgressVersion] = useState(0);
@@ -1616,6 +1617,7 @@ const App: React.FC = () => {
         if (!managementProfile) return;
         const flush = () => { void managementPortalService.flushPending(); };
         flush();
+        void managementPortalService.enableAssignmentPushNotifications().catch(() => undefined);
         window.addEventListener('online', flush);
         return () => window.removeEventListener('online', flush);
     }, [managementProfile]);
@@ -1623,22 +1625,46 @@ const App: React.FC = () => {
     useEffect(() => {
         if (!managementProfile) return;
         let stopped = false;
+        let appStateHandle: PluginListenerHandle | undefined;
         const syncAssignments = () => {
             if (stopped || document.visibilityState === 'hidden' || !navigator.onLine) return;
-            void managementPortalService.fetchAssignments().catch(() => undefined);
+            void managementPortalService.fetchAssignments()
+                .then(() => {
+                    if (!stopped) setManagedAssignmentsRevision(version => version + 1);
+                })
+                .catch(() => undefined);
         };
         const handleVisibilityChange = () => {
             if (document.visibilityState === 'visible') syncAssignments();
         };
+        const handleForegroundSignal = () => syncAssignments();
         syncAssignments();
         const interval = window.setInterval(syncAssignments, 3 * 60 * 1000);
         document.addEventListener('visibilitychange', handleVisibilityChange);
+        document.addEventListener('resume', handleForegroundSignal);
+        window.addEventListener('pageshow', handleForegroundSignal);
+        window.addEventListener('focus', handleForegroundSignal);
         window.addEventListener('online', syncAssignments);
+        void CapacitorApp.addListener('appStateChange', ({ isActive }) => {
+            if (isActive) syncAssignments();
+        }).then(handle => {
+            if (stopped) {
+                void handle.remove();
+            } else {
+                appStateHandle = handle;
+            }
+        }).catch(() => {
+            // Browser and Electron builds continue to use visibility/focus events.
+        });
         return () => {
             stopped = true;
             window.clearInterval(interval);
             document.removeEventListener('visibilitychange', handleVisibilityChange);
+            document.removeEventListener('resume', handleForegroundSignal);
+            window.removeEventListener('pageshow', handleForegroundSignal);
+            window.removeEventListener('focus', handleForegroundSignal);
             window.removeEventListener('online', syncAssignments);
+            void appStateHandle?.remove();
         };
     }, [managementProfile]);
 
@@ -1670,46 +1696,51 @@ const App: React.FC = () => {
     }, [showAssignmentLetter]);
 
     useEffect(() => {
-        if (gameState.screen !== GameScreen.START_MENU) {
-            requiredAssignmentCheckRef.current = false;
-            return;
-        }
+        if (gameState.screen !== GameScreen.START_MENU) return;
         if (!managementProfile || showAgePrivacySetup || showStudentGradeSurvey || requiredAssignmentCheckRef.current) return;
         requiredAssignmentCheckRef.current = true;
         let cancelled = false;
         void (async () => {
             try {
-                await managementPortalService.flushPending();
-                let assignments;
-                let syncedAssignments = false;
-                try {
-                    assignments = await managementPortalService.fetchAssignments();
-                    syncedAssignments = true;
-                } catch {
-                    assignments = managementPortalService.getCachedAssignments();
-                }
+                const assignments = managementPortalService.getCachedAssignments();
                 if (currentAssignment?.enforcementLevel === 'launch_lock') {
                     const currentManagedAssignment = assignments.find((assignment) => assignment.id === currentAssignment.id);
-                    if (!syncedAssignments || !currentManagedAssignment || !isManagedAssignmentActive(currentManagedAssignment)) {
+                    if (!currentManagedAssignment || !isManagedAssignmentActive(currentManagedAssignment)) {
                         storageService.clearCurrentAssignment();
                         setCurrentAssignment(null);
                     }
                 }
-                const nextLaunchLocked = syncedAssignments ? getNextLaunchLockedManagedAssignment(assignments) : null;
+                const nextLaunchLocked = getNextLaunchLockedManagedAssignment(assignments);
                 const nextRequired = nextLaunchLocked || getNextRequiredManagedAssignment(assignments);
                 if (!nextRequired || cancelled) return;
-                const payload = currentAssignment?.id === nextRequired.id
-                    ? currentAssignment
-                    : await managementPortalService.fetchAssignmentPayload(nextRequired.id);
+                let payload = currentAssignment?.id === nextRequired.id ? currentAssignment : null;
+                if (!payload) {
+                    try {
+                        payload = await managementPortalService.fetchAssignmentPayload(nextRequired.id);
+                    } catch {
+                        // The list response is cached before this check. Even if the detail
+                        // request briefly fails, a launch-locked assignment must still open
+                        // on the first launch instead of waiting for another app restart.
+                        payload = toAssignmentPayload(nextRequired);
+                    }
+                }
                 if (cancelled) return;
                 setShowOnlineNameSetup(false);
                 openManagedAssignment(payload);
             } catch {
                 // Temporary network errors must not block locally playable content.
+            } finally {
+                requiredAssignmentCheckRef.current = false;
             }
         })();
-        return () => { cancelled = true; };
-    }, [currentAssignment, gameState.screen, managementProfile, openManagedAssignment, showAgePrivacySetup, showStudentGradeSurvey]);
+        return () => {
+            cancelled = true;
+            // A fresher assignment revision may arrive while payload details are being
+            // resolved. Release the in-flight guard so that revision can be enforced
+            // immediately instead of being deferred until the next app launch.
+            requiredAssignmentCheckRef.current = false;
+        };
+    }, [currentAssignment, gameState.screen, managedAssignmentsRevision, managementProfile, openManagedAssignment, showAgePrivacySetup, showStudentGradeSurvey]);
 
     const markDailyAssignmentCompleted = useCallback((assignmentId: string | undefined) => {
         if (!assignmentId || !assignmentId.startsWith('daily-')) return;

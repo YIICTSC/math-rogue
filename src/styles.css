@@ -5517,6 +5517,14 @@ textarea {
   z-index: 800 !important;
 }
 
+/* Forced hand choices (discard/copy/exhaust) must remain a native horizontal
+   scroll area on touch devices. Unlike the inspection popup, these cards stay
+   inside the hand strip and use a glow to communicate that they are selectable. */
+.battle-hand-card.battle-hand-card-selection-option {
+  z-index: 800 !important;
+  filter: drop-shadow(0 0 0.45rem rgba(250, 204, 21, 0.82));
+}
+
 .battle-hand-card.battle-hand-card-combo-selected {
   z-index: 650 !important;
   filter: drop-shadow(0 0 0.45rem rgba(129, 140, 248, 0.9));
@@ -9735,6 +9743,12 @@ textarea {
 
 .battle-scene-root.battle-ui-custom .battle-hand-card.battle-hand-card-popup {
   transform: translateY(clamp(-3.5rem, -7dvh, -2rem)) scale(1.08) !important;
+  transform-origin: center bottom !important;
+  z-index: 800 !important;
+}
+
+.battle-scene-root.battle-ui-custom .battle-hand-card.battle-hand-card-selection-option {
+  transform: translateY(-0.45rem) scale(1.025) !important;
   transform-origin: center bottom !important;
   z-index: 800 !important;
 }

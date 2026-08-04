@@ -33,6 +33,7 @@ windowMock.Notification = MockNotification;
 const {
   assignmentNotificationService,
   ASSIGNMENT_NOTIFICATION_OPEN_EVENT,
+  getOutstandingAssignmentCount,
 } = await import('../src/services/assignmentNotificationService.ts');
 
 const baseAssignment = {
@@ -59,6 +60,16 @@ const newAssignment = {
   unitLabel: 'ひき算',
   sourceGroupName: '1年A組',
 };
+
+if (getOutstandingAssignmentCount([baseAssignment, newAssignment]) !== 2) {
+  throw new Error('未完了課題のバッジ件数を計算できない');
+}
+if (getOutstandingAssignmentCount([
+  { ...baseAssignment, status: 'completed' },
+  { ...newAssignment, correctCount: newAssignment.targetCorrect },
+]) !== 0) {
+  throw new Error('完了済み課題をバッジ件数から除外できない');
+}
 
 const baseline = await assignmentNotificationService.observeAssignments('learner-1', [baseAssignment]);
 const delivered = await assignmentNotificationService.observeAssignments('learner-1', [newAssignment, baseAssignment]);

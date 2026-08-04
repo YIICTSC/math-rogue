@@ -1,6 +1,6 @@
 import { AnswerMode, AssignmentAnswerResult, AssignmentPayload, AssignmentRangeFilter, GameMode } from '../types';
 import { childSafetyService } from './childSafetyService';
-import { assignmentNotificationService } from './assignmentNotificationService';
+import { assignmentNotificationService, enableRemoteAssignmentNotifications } from './assignmentNotificationService';
 
 export type ManagementProfile = {
   learnerId: string;
@@ -356,6 +356,15 @@ export const managementPortalService = {
     childSafetyService.revokeLearningAggregation();
   },
 
+  async enableAssignmentPushNotifications() {
+    const profile = this.getProfile();
+    if (!profile) return false;
+    return enableRemoteAssignmentNotifications(({ provider, token }) => request('/api/v1/learner/notification-token', {
+      method: 'POST',
+      body: JSON.stringify({ provider, token }),
+    }, profile.token));
+  },
+
   async revokeLearningConsent() {
     const profile = this.getProfile();
     if (!profile) {
@@ -371,7 +380,7 @@ export const managementPortalService = {
     if (!profile) throw new Error('管理ポータルとの端末連携が必要です。');
     const result = await request<{ assignments: ManagedAssignment[] }>('/api/v1/learner/assignments', {}, profile.token);
     writeJson(ASSIGNMENTS_KEY, result.assignments);
-    void assignmentNotificationService.observeAssignments(profile.learnerId, result.assignments);
+    await assignmentNotificationService.observeAssignments(profile.learnerId, result.assignments);
     return result.assignments;
   },
 
@@ -503,9 +512,11 @@ export const managementPortalService = {
 
   async completeAssignment(assignmentId: string) {
     if (!this.getProfile()) return;
-    writeJson(ASSIGNMENTS_KEY, this.getCachedAssignments().map((assignment) =>
+    const nextAssignments = this.getCachedAssignments().map((assignment) =>
       assignment.id === assignmentId ? { ...assignment, status: 'completed' } : assignment,
-    ));
+    );
+    writeJson(ASSIGNMENTS_KEY, nextAssignments);
+    await assignmentNotificationService.markAssignmentComplete(assignmentId, nextAssignments);
     saveCompletionQueue([...getCompletionQueue(), assignmentId]);
     await this.flushPending();
   },

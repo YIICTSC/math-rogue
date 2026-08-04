@@ -215,3 +215,4 @@ if (failures.length > 0) {
 }
 
 console.log('Hiragana UI audit passed.');
+process.exit(0);

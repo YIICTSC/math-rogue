@@ -2674,11 +2674,11 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                 className={`battle-hand-card inline-block align-middle transition-all duration-500 ease-out w-28 h-44 md:w-32 md:h-48 shrink-0 relative
                             ml-0
                             md:group-hover/hand:-ml-2 md:group-active/hand:-ml-2
-                            ${isSelectedActive ? 'battle-hand-card-popup cursor-pointer z-[800]' : isSelectedDual ? 'battle-hand-card-combo-selected cursor-pointer z-[650]' : 'hover:-translate-y-4 hover:z-[700]'}
+                            ${isSelectedActive ? 'battle-hand-card-selection-option cursor-pointer z-[800]' : isSelectedDual ? 'battle-hand-card-combo-selected cursor-pointer z-[650]' : 'hover:-translate-y-4 hover:z-[700]'}
                             ${tutorialStep === 4 ? 'ring-4 ring-blue-500 ring-offset-2 ring-offset-transparent animate-pulse rounded-lg' : ''}
                         `}
                                 style={{
-                                    transform: isSelectedActive ? 'translateY(-24px) scale(1.1)' : isSelectedDual ? 'translateY(-7px) scale(1.025)' : `rotate(${rotation}deg) translateY(${translateY}px)`,
+                                    transform: isSelectedActive ? 'translateY(-7px) scale(1.025)' : isSelectedDual ? 'translateY(-7px) scale(1.025)' : `rotate(${rotation}deg) translateY(${translateY}px)`,
                                     zIndex: cardZIndex
                                 }}
                             >
