@@ -8,6 +8,31 @@ export interface UiPreviewScreenDefinition {
     miniGameOutcome?: MiniGameDebugPreview;
 }
 
+export type BattleModalPreviewId =
+    | 'WEATHER_SCRY'
+    | 'GALAXY_EXPRESS'
+    | 'GOLD_FISH'
+    | 'DREAM_CATCHER'
+    | 'ORRERY'
+    | 'PEACE_PIPE'
+    | 'EVENT_SYNTHESIS'
+    | 'EVENT_UPGRADE'
+    | 'EVENT_ORGANIZE'
+    | 'EVENT_DUPLICATE';
+
+export const BATTLE_MODAL_PREVIEWS: Array<{ id: BattleModalPreviewId; label: string; description: string }> = [
+    { id: 'WEATHER_SCRY', label: '天気予報', description: '山札上のカードを戻す／捨てる' },
+    { id: 'GALAXY_EXPRESS', label: '銀河鉄道の夜', description: '山札上から1枚を手札に加える' },
+    { id: 'GOLD_FISH', label: '金魚すくい', description: '捨て札から1枚を選ぶ' },
+    { id: 'DREAM_CATCHER', label: 'ドリーム・キャッチャー', description: '山札から好きな1枚を選ぶ' },
+    { id: 'ORRERY', label: '小型天球儀', description: 'レリックのカード選択' },
+    { id: 'PEACE_PIPE', label: '平和のパイプ', description: 'レリックのカード選択' },
+    { id: 'EVENT_SYNTHESIS', label: 'カード合成', description: '2枚選択と決定／キャンセル' },
+    { id: 'EVENT_UPGRADE', label: 'イベント：強化', description: 'デッキ内の1枚を選ぶ' },
+    { id: 'EVENT_ORGANIZE', label: 'イベント：整理', description: 'カードコスト変更対象を選ぶ' },
+    { id: 'EVENT_DUPLICATE', label: 'イベント：複製', description: '複製対象のカードを選ぶ' },
+];
+
 export const UI_PREVIEW_SCREENS: UiPreviewScreenDefinition[] = [
     { id: GameScreen.START_MENU, screen: GameScreen.START_MENU, label: 'タイトル', group: 'メインモード' },
     { id: GameScreen.MODE_SELECTION, screen: GameScreen.MODE_SELECTION, label: '学習モード選択', group: 'メインモード' },

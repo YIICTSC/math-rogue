@@ -269,6 +269,148 @@
   src: url('/fonts/DotGothic16-Regular.ttf') format('truetype');
 }
 
+.themed-ending-sequence {
+  padding-top: max(1rem, env(safe-area-inset-top));
+  padding-right: max(1rem, env(safe-area-inset-right));
+  padding-bottom: max(1rem, env(safe-area-inset-bottom));
+  padding-left: max(1rem, env(safe-area-inset-left));
+}
+
+.themed-ending-sequence-art {
+  flex-basis: 58%;
+}
+
+@media (orientation: landscape) {
+  .themed-ending-sequence-foreground {
+    object-fit: cover;
+    object-position: center;
+  }
+}
+
+.themed-ending-sequence-panel {
+  display: flex;
+  max-height: 42%;
+  min-height: 0;
+  flex-direction: column;
+  margin-bottom: max(0rem, env(safe-area-inset-bottom));
+}
+
+.themed-ending-sequence-panel > p {
+  min-height: 0;
+  flex: 1 1 auto;
+  overscroll-behavior: contain;
+}
+
+@media (orientation: landscape) and (max-height: 540px) {
+  .themed-ending-sequence {
+    padding-top: max(0.35rem, env(safe-area-inset-top));
+    padding-right: max(0.5rem, env(safe-area-inset-right));
+    padding-bottom: max(0.35rem, env(safe-area-inset-bottom));
+    padding-left: max(0.5rem, env(safe-area-inset-left));
+  }
+
+  .themed-ending-sequence-art {
+    flex-basis: 56%;
+  }
+
+  .themed-ending-sequence-panel {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1fr) minmax(8rem, 11rem);
+    grid-template-areas: "meta action" "title action" "text action";
+    max-height: 44%;
+    padding: 0.45rem 0.7rem !important;
+    column-gap: 0.75rem;
+    overflow: hidden;
+  }
+
+  .themed-ending-sequence-panel > div { grid-area: meta; margin-bottom: 0.1rem !important; font-size: 0.62rem !important; }
+  .themed-ending-sequence-panel > h1 { grid-area: title; font-size: clamp(0.9rem, 2.4vw, 1.2rem) !important; line-height: 1.1 !important; }
+  .themed-ending-sequence-panel > p { grid-area: text; margin-top: 0.2rem !important; max-height: none !important; font-size: clamp(0.65rem, 1.7vw, 0.82rem) !important; line-height: 1.35 !important; }
+  .themed-ending-sequence-panel > button {
+    grid-area: action;
+    width: 100%;
+    min-width: 0;
+    margin-top: 0;
+    align-self: stretch;
+    padding: 0.45rem 0.6rem !important;
+    font-size: 0.75rem !important;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 540px) {
+  .ending-screen {
+    overflow: hidden !important;
+    padding-top: max(0.35rem, env(safe-area-inset-top)) !important;
+    padding-right: max(0.6rem, env(safe-area-inset-right)) !important;
+    padding-bottom: max(0.35rem, env(safe-area-inset-bottom)) !important;
+    padding-left: max(0.6rem, env(safe-area-inset-left)) !important;
+  }
+
+  .ending-content {
+    display: flex;
+    max-height: 100%;
+    min-height: 0;
+    flex-direction: column;
+    padding-top: 0.25rem !important;
+    padding-bottom: 0.25rem !important;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  .ending-main {
+    display: flex;
+    min-height: 0;
+    flex: 1 1 auto;
+    flex-direction: column;
+  }
+
+  .ending-title {
+    margin-bottom: 0.25rem !important;
+    font-size: clamp(1.35rem, 4.5vw, 2.1rem) !important;
+    line-height: 1.05 !important;
+  }
+
+  .ending-message {
+    margin-bottom: 0.4rem !important;
+    font-size: clamp(0.7rem, 1.8vw, 0.9rem) !important;
+    line-height: 1.3 !important;
+  }
+
+  .ending-unlocked-card,
+  .ending-legacy {
+    margin-bottom: 0.4rem !important;
+    padding: 0.4rem !important;
+  }
+
+  .ending-unlocked-card-body {
+    display: grid !important;
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+
+  .ending-card-preview {
+    transform: scale(0.48);
+    width: 6rem;
+    height: 5.2rem;
+    transform-origin: top center;
+  }
+
+  .ending-actions {
+    display: grid !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 0.5rem !important;
+    margin-top: auto !important;
+    padding-bottom: 0 !important;
+  }
+
+  .ending-actions button {
+    width: 100% !important;
+    max-width: none !important;
+    padding: 0.55rem 0.75rem !important;
+    font-size: clamp(0.7rem, 1.8vw, 0.9rem) !important;
+    line-height: 1.15 !important;
+  }
+}
+
 @media (min-width: 900px) {
   .magic-romance-ending-screen {
     align-items: center !important;
@@ -1167,7 +1309,10 @@
   .paper-plane-ship-grid .paper-plane-setup-card p {
     display: block !important;
     min-height: 2.2em !important;
+    max-height: 2.4em !important;
     margin-bottom: 0.35rem !important;
+    overflow-y: auto !important;
+    overscroll-behavior: contain;
     font-size: 0.62rem !important;
     line-height: 1.15 !important;
   }
@@ -1245,8 +1390,10 @@
   .paper-plane-pilot-main-trait {
     grid-area: main;
     min-height: 3.25rem !important;
+    max-height: 3.25rem !important;
     padding: 0.35rem !important;
     margin-top: 0 !important;
+    overflow-y: auto !important;
   }
 
   .paper-plane-pilot-random-trait {
@@ -1255,7 +1402,9 @@
     margin-top: 0 !important;
     min-height: 4.35rem !important;
     max-height: 4.35rem !important;
-    overflow: hidden !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    overscroll-behavior: contain;
     font-size: 0.72rem !important;
     line-height: 1.2 !important;
   }
@@ -1265,10 +1414,8 @@
   }
 
   .paper-plane-pilot-random-trait > div:not(:first-child) {
-    display: -webkit-box !important;
-    -webkit-line-clamp: 2;
-    -webkit-box-orient: vertical;
-    overflow: hidden !important;
+    display: block !important;
+    overflow: visible !important;
   }
 
   .paper-plane-pilot-random-trait .text-gray-400,
@@ -2546,6 +2693,66 @@ html.app-platform-ios {
     padding: 0.2rem 0.65rem !important;
     font-size: 0.6rem !important;
   }
+}
+
+/* Phone landscape pack opening: keep all five candidates, including their
+   selection buttons, inside one safe-area-aware row. */
+@media (orientation: landscape) and (max-height: 540px) and (max-width: 1100px) {
+  .poker-pack-open-screen { padding: 0 !important; }
+
+  .poker-pack-open-content {
+    height: 100%;
+    max-width: none !important;
+    justify-content: center;
+    padding-top: max(0.35rem, env(safe-area-inset-top)) !important;
+    padding-right: max(0.75rem, env(safe-area-inset-right)) !important;
+    padding-bottom: max(1.1rem, env(safe-area-inset-bottom)) !important;
+    padding-left: max(0.75rem, env(safe-area-inset-left)) !important;
+  }
+
+  .poker-pack-open-title {
+    margin-bottom: 0.15rem !important;
+    font-size: clamp(0.95rem, 3.2vw, 1.35rem) !important;
+    line-height: 1.05 !important;
+  }
+
+  .poker-pack-open-description {
+    margin-bottom: 0.45rem !important;
+    font-size: clamp(0.58rem, 1.5vw, 0.75rem) !important;
+    line-height: 1.15 !important;
+  }
+
+  .poker-pack-choice-grid {
+    display: grid !important;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    align-items: center;
+    gap: clamp(0.3rem, 1.25vw, 0.8rem) !important;
+    width: min(100%, 48rem);
+    min-height: 0;
+  }
+
+  .poker-pack-choice {
+    justify-self: center;
+    width: min(100%, 7.2rem);
+    min-width: 0;
+  }
+
+  .poker-pack-card {
+    width: 100% !important;
+    height: auto !important;
+    max-height: min(64dvh, 14rem);
+    aspect-ratio: 2 / 3;
+    padding: 0.3rem !important;
+    border-width: 3px !important;
+  }
+
+  .poker-pack-rank { font-size: clamp(0.85rem, 2.6vw, 1.25rem) !important; line-height: 1 !important; }
+  .poker-pack-suit { transform: scale(0.95) !important; }
+  .poker-pack-enhancement,
+  .poker-pack-item-description { overflow-y: auto; font-size: clamp(0.42rem, 1.25vw, 0.58rem) !important; line-height: 1.05 !important; }
+  .poker-pack-item-icon { width: clamp(2rem, 6dvh, 2.8rem) !important; height: clamp(2rem, 6dvh, 2.8rem) !important; margin-bottom: 0.2rem !important; }
+  .poker-pack-item-name { font-size: clamp(0.55rem, 1.45vw, 0.72rem) !important; line-height: 1.05 !important; }
+  .poker-pack-select { bottom: -0.85rem !important; padding: 0.2rem 0.55rem !important; font-size: 0.6rem !important; }
 }
 
 /* Problem Challenge on phone landscape: keep the complete question and all
@@ -5310,6 +5517,11 @@ textarea {
   z-index: 800 !important;
 }
 
+.battle-hand-card.battle-hand-card-combo-selected {
+  z-index: 650 !important;
+  filter: drop-shadow(0 0 0.45rem rgba(129, 140, 248, 0.9));
+}
+
 .battle-hand-card.battle-hand-card-popup .battle-hand-card-inner,
 .battle-hand-card:hover .battle-hand-card-inner,
 .battle-hand-card:focus-within .battle-hand-card-inner {
@@ -7322,6 +7534,49 @@ textarea {
     overscroll-behavior: contain;
   }
 
+  .app-battle-special-modal-overlay,
+  .app-potion-replace-modal-overlay {
+    align-items: center !important;
+    justify-content: center !important;
+    padding-top: max(0.5rem, env(safe-area-inset-top)) !important;
+    padding-right: max(0.5rem, env(safe-area-inset-right)) !important;
+    padding-bottom: max(0.5rem, env(safe-area-inset-bottom)) !important;
+    padding-left: max(0.5rem, env(safe-area-inset-left)) !important;
+  }
+
+  .app-battle-special-modal-overlay .app-modal-panel,
+  .app-potion-replace-modal-overlay .app-modal-panel {
+    margin: auto !important;
+  }
+
+  .app-codex-selection-modal {
+    width: min(88vw, 44rem) !important;
+    max-width: min(88vw, 44rem) !important;
+    max-height: calc(100dvh - 1rem) !important;
+    padding: 0.55rem 0.75rem !important;
+  }
+
+  .app-codex-selection-modal h3 {
+    margin-bottom: 0.1rem !important;
+    font-size: clamp(0.95rem, 2.5vw, 1.25rem) !important;
+  }
+
+  .app-codex-selection-options {
+    max-height: min(62dvh, 15rem);
+    flex-wrap: nowrap !important;
+    gap: 0.55rem !important;
+  }
+
+  .app-codex-selection-options > div {
+    transform: scale(0.78) !important;
+    transform-origin: center center;
+    margin: -1.6rem -0.9rem;
+  }
+
+  .app-codex-selection-modal > button:last-child {
+    padding: 0.4rem 1.25rem !important;
+  }
+
   .app-start-over-modal-overlay {
     align-items: center !important;
   }
@@ -8692,7 +8947,7 @@ textarea {
     margin: 0 !important;
     padding: 0.65rem !important;
     max-height: calc(100vh - 1.5rem) !important;
-    overflow: hidden !important;
+    overflow: visible !important;
   }
 
   .ending-unlocked-title {
@@ -8712,10 +8967,11 @@ textarea {
   }
 
   .ending-card-preview {
-    transform: scale(0.86) !important;
+    width: 8rem !important;
+    height: 12rem !important;
+    transform: none !important;
     transform-origin: center center !important;
-    margin-top: -0.4rem !important;
-    margin-bottom: -0.7rem !important;
+    margin: 0 auto !important;
   }
 
   .ending-unlocked-card p {
@@ -9054,6 +9310,47 @@ textarea {
     grid-column: 1 !important;
     grid-row: 1 !important;
     margin: 0 !important;
+    min-width: 0 !important;
+    padding: clamp(0.65rem, 1.2vw, 1rem) !important;
+    overflow: visible !important;
+  }
+
+  .ending-unlocked-card-body {
+    display: grid !important;
+    grid-template-columns: 8.5rem minmax(0, 1fr) !important;
+    align-items: center !important;
+    gap: 0.75rem !important;
+  }
+
+  .ending-card-preview {
+    width: 8rem !important;
+    height: 12rem !important;
+    transform: none !important;
+    transform-origin: center center !important;
+    margin: 0 auto !important;
+  }
+
+  .ending-unlocked-title {
+    white-space: nowrap !important;
+    font-size: clamp(0.72rem, 1.25vw, 1rem) !important;
+  }
+
+  .ending-title {
+    max-width: 100% !important;
+    overflow-wrap: anywhere !important;
+    font-size: clamp(1.55rem, 3.4vw, 2.8rem) !important;
+    line-height: 1.05 !important;
+  }
+
+  .ending-message {
+    font-size: clamp(0.78rem, 1.5vw, 1rem) !important;
+    line-height: 1.35 !important;
+  }
+
+  .ending-actions button {
+    min-width: 0 !important;
+    white-space: normal !important;
+    overflow-wrap: anywhere !important;
   }
 
   .ending-main {
@@ -9440,6 +9737,34 @@ textarea {
   transform: translateY(clamp(-3.5rem, -7dvh, -2rem)) scale(1.08) !important;
   transform-origin: center bottom !important;
   z-index: 800 !important;
+}
+
+.kocho-card-title-marquee {
+  min-width: 0;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.kocho-card-title-marquee-track {
+  display: flex;
+  width: max-content;
+  min-width: 100%;
+  justify-content: center;
+  gap: 1.5rem;
+}
+
+.kocho-card-title-marquee-track.is-moving {
+  justify-content: flex-start;
+  animation: kocho-card-title-marquee 5.5s ease-in-out infinite;
+}
+
+@keyframes kocho-card-title-marquee {
+  0%, 18% { transform: translateX(0); }
+  82%, 100% { transform: translateX(calc(-50% - 0.75rem)); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .kocho-card-title-marquee-track.is-moving { animation: none; }
 }
 
 @media (orientation: landscape) and (max-height: 560px) {

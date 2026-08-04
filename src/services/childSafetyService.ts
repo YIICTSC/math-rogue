@@ -86,7 +86,8 @@ export const childSafetyService = {
     write(next);
     return next;
   },
-  canContactRemoteServices: () => Boolean(read().ageBand),
+  // 年齢区分は収集しない。個別機能の許可はランキング参加または管理者コード連携で判定する。
+  canContactRemoteServices: () => true,
   canUseLearningAggregation: () => {
     const settings = read();
     return settings.ageBand !== '9_12' || Boolean(settings.learningAggregationAuthorizedAt);

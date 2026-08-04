@@ -3514,7 +3514,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
 
             <div className="dungeon-log-panel w-full h-16 p-1 text-[9px] mb-1 rounded border-2 font-mono leading-tight flex flex-col justify-end shrink-0 shadow-inner overflow-hidden" style={{ backgroundColor: C0, color: C3, borderColor: C1 }}>
                 {logs.slice(-4).map((l) => (
-                    <div key={l.id} style={{ color: l.color || C3 }} className="dungeon-log-entry truncate">{l.message}</div>
+                    <div key={l.id} style={{ color: l.color || C3 }} className="dungeon-log-entry truncate">{tr(l.message)}</div>
                 ))}
             </div>
         </div>

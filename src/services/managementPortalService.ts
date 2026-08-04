@@ -136,9 +136,6 @@ const getApiBase = () => {
 export const getManagementPortalUrl = () => getApiBase();
 
 const request = async <T>(path: string, init: RequestInit = {}, token?: string): Promise<T> => {
-  if (!childSafetyService.canContactRemoteServices()) {
-    throw new Error('年齢区分を選択するまでオンライン連携は利用できません。');
-  }
   const response = await fetch(`${getApiBase()}${path}`, {
     ...init,
     headers: {

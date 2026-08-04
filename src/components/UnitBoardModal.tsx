@@ -22,7 +22,8 @@ const UnitBoardModal: React.FC<UnitBoardModalProps> = ({ summary, open, onClose,
   if (!open || !summary) return null;
 
   const isNativeEnglishBoard = summary.id.startsWith('NATIVE_');
-  const translate = (text: string) => isNativeEnglishBoard || languageMode === 'HIRAGANA'
+  const keepJapaneseBoard = languageMode === 'ENGLISH' && !isNativeEnglishBoard;
+  const translate = (text: string) => isNativeEnglishBoard || keepJapaneseBoard || languageMode === 'HIRAGANA'
     ? text
     : trans(text, languageMode);
   const pages: UnitBoardSummaryPage[] = [

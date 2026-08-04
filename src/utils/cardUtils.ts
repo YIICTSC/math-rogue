@@ -392,6 +392,40 @@ const mergeCardGeneration = <T extends { cardName: string; count: number; cost0?
     return { ...adds[0], count: totalCount };
 };
 
+const getSynthesisDepth = (card: Card): number => {
+    if (card.synthesisDepth !== undefined) return Math.max(0, card.synthesisDepth);
+    return card.id.startsWith('synth-') || (card.originalNames?.length ?? 0) > 0 ? 1 : 0;
+};
+
+const consolidateSynthNumericParts = (parts: string[]): string[] => {
+    const rules: Array<{ pattern: RegExp; format: (total: number) => string }> = [
+        { pattern: /^エナジー\+(\d+)$/, format: total => `エナジー+${total}` },
+        { pattern: /^次ターンエナジー\+(\d+)$/, format: total => `次ターンエナジー+${total}` },
+        { pattern: /^次ターンドロー\+(\d+)$/, format: total => `次ターンドロー+${total}` },
+        { pattern: /^使用後ドロー\+(\d+)$/, format: total => `使用後ドロー+${total}` },
+        { pattern: /^ブロック(\d+)$/, format: total => `ブロック${total}` },
+        { pattern: /^ムキムキ(\d+)$/, format: total => `ムキムキ${total}` },
+        { pattern: /^(\d+)枚引く$/, format: total => `${total}枚引く` },
+        { pattern: /^HP(\d+)回復$/, format: total => `HP${total}回復` },
+    ];
+    const consolidated = [...parts];
+    rules.forEach(({ pattern, format }) => {
+        const matches = consolidated
+            .map((part, index) => {
+                const match = part.match(pattern);
+                return match ? { index, amount: Number(match[1]) } : null;
+            })
+            .filter((match): match is { index: number; amount: number } => match !== null);
+        if (matches.length < 2) return;
+        const firstIndex = matches[0].index;
+        consolidated[firstIndex] = format(matches.reduce((total, match) => total + match.amount, 0));
+        for (let index = matches.length - 1; index >= 1; index -= 1) {
+            consolidated.splice(matches[index].index, 1);
+        }
+    });
+    return consolidated;
+};
+
 const describeSynthPower = (id: string | undefined, amount: number): string => {
     switch (id) {
         case 'DEXTERITY': return `カチカチ${amount}`;
@@ -500,17 +534,21 @@ export const synthesizeCards = (c1: Card, c2: Card, c3?: Card): Card => {
     // 1. Name Synthesis
     const len1 = Math.floor(Math.random() * 3) + 2;
     const len2 = Math.floor(Math.random() * 3) + 2;
-    const part1 = c1.name.substring(0, Math.min(len1, c1.name.length));
+    const sourceNamePart = (card: Card, position: 'PREFIX' | 'MIDDLE' | 'SUFFIX') => {
+        if (getSynthesisDepth(card) > 0) return card.name;
+        if (position === 'PREFIX') return card.name.substring(0, Math.min(len1, card.name.length));
+        if (position === 'MIDDLE') return card.name.substring(Math.floor(card.name.length / 3), Math.floor(2 * card.name.length / 3) + 1);
+        return card.name.substring(Math.max(0, card.name.length - len2));
+    };
+    const part1 = sourceNamePart(c1, 'PREFIX');
 
     let newName = "";
     if (c3) {
-        const part2 = c2.name.substring(Math.floor(c2.name.length / 3), Math.floor(2 * c2.name.length / 3) + 1);
-        const part3 = c3.name.substring(Math.max(0, c3.name.length - len2));
+        const part2 = sourceNamePart(c2, 'MIDDLE');
+        const part3 = sourceNamePart(c3, 'SUFFIX');
         newName = part1 + part2 + part3;
-        // Trim if too long
-        if (newName.length > 10) newName = newName.substring(0, 10);
     } else {
-        const part2 = c2.name.substring(Math.max(0, c2.name.length - len2));
+        const part2 = sourceNamePart(c2, 'SUFFIX');
         newName = part1 + part2;
     }
 
@@ -674,9 +712,6 @@ export const synthesizeCards = (c1: Card, c2: Card, c3?: Card): Card => {
         else if (newTarget === TargetType.RANDOM_ENEMY) text = `ランダム${newDamage}ダメージ`;
         else if (newTarget === TargetType.SELF) text = `自分に${text}`;
 
-        if (newTotalHits > 1) {
-            text += `x${newTotalHits}`;
-        }
         if (newStrengthScaling > 1) text += `/ムキムキx${newStrengthScaling}`;
         parts.push(text);
     }
@@ -878,8 +913,10 @@ export const synthesizeCards = (c1: Card, c2: Card, c3?: Card): Card => {
         parts.push(`専用ルールを素材順に進める(${stepLabels}扱い)`);
     }
 
-    let description = parts.join("。") + (parts.length > 0 ? "。" : "");
-    if (parts.length === 0) description = "効果なし。";
+    const consolidatedParts = consolidateSynthNumericParts(parts);
+    if (newTotalHits > 1) consolidatedParts.push(`×${newTotalHits}`);
+    let description = consolidatedParts.join("。") + (consolidatedParts.length > 0 ? "。" : "");
+    if (consolidatedParts.length === 0) description = "効果なし。";
 
     // 9. Visual Synthesis (Texture Ref)
     const shapeSource = c1.textureRef ? c1.textureRef.split('|')[0] : getShapeFromCard(c1);
@@ -915,6 +952,7 @@ export const synthesizeCards = (c1: Card, c2: Card, c3?: Card): Card => {
         rarity: 'SPECIAL',
 
         originalNames: originalNames, // Add this
+        synthesisDepth: Math.max(...sourceCards.map(getSynthesisDepth)) + 1,
 
         // Basic
         damage: newDamage || undefined,

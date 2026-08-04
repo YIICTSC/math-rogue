@@ -55,7 +55,7 @@ const MagicRomanceEndingScreen: React.FC<MagicRomanceEndingScreenProps> = ({
   };
 
   return (
-    <div data-gamepad-initial-scope={`magic-romance-ending-${endingIndex}-${lineIndex}`} className="magic-romance-ending-screen relative flex h-full w-full items-end justify-center overflow-hidden bg-black p-4 text-white sm:p-8">
+    <div data-gamepad-initial-scope={`magic-romance-ending-${endingIndex}-${lineIndex}`} className="magic-romance-ending-screen relative flex h-full w-full items-end justify-center overflow-hidden bg-black p-4 text-white sm:p-8" style={{ paddingBottom: 'max(1rem, env(safe-area-inset-bottom))' }}>
       <img
         src={assetUrl(ending.imagePath)}
         alt={transEventText(ending.title, languageMode)}

@@ -76,6 +76,27 @@ try {
   assert(englishName === buildEnglishCardName(synthesized), 'English mashup name is not stable');
   assert(englishName.length >= 6, `English mashup is too short: ${englishName}`);
 
+  const pencilAttack = { ...attack, id: 'PENCIL_ATTACK', name: 'えんぴつ攻撃' };
+  const notebookGuard = { ...skill, id: 'NOTEBOOK_GUARD', name: 'ノートで防御' };
+  const originalRandom = Math.random;
+  Math.random = () => 0.99;
+  const firstGeneration = synthesizeCards(pencilAttack, notebookGuard);
+  const laterGeneration = synthesizeCards(pencilAttack, firstGeneration);
+  Math.random = originalRandom;
+  assert(laterGeneration.name.startsWith('えんぴつ'), `new source fragment did not remain first: ${laterGeneration.name}`);
+  assert(laterGeneration.name.endsWith(firstGeneration.name), `existing synthesized name was shortened: ${laterGeneration.name}`);
+  assert(laterGeneration.name.length > firstGeneration.name.length, `synthesized name did not grow: ${laterGeneration.name}`);
+  assert(laterGeneration.synthesisDepth === 2, `synthesis generation was not recorded: ${laterGeneration.synthesisDepth}`);
+
+  const repeatedEnergy = synthesizeCards(
+    { ...skill, id: 'ENERGY_ONE', name: '充電', energy: 1, description: 'エナジー+1。' },
+    { ...attack, id: 'SWORD_BOOMERANG', name: 'ブーメラン', playCopies: 1 },
+  );
+  assert(repeatedEnergy.description.includes('エナジー+2'), `numeric energy effects were not consolidated: ${repeatedEnergy.description}`);
+  assert(!repeatedEnergy.description.includes('エナジー+1。エナジー+1'), `energy effect is still duplicated: ${repeatedEnergy.description}`);
+  assert(repeatedEnergy.description.endsWith('×2。'), `whole-card repeat count is not at the end: ${repeatedEnergy.description}`);
+  assert(!/\d+ダメージx2/.test(repeatedEnergy.description), `repeat count is still attached only to damage: ${repeatedEnergy.description}`);
+
   const magicEventSources = ['src/data/magicRomanceDialogue.ts', 'src/services/magicRomanceEventService.ts'];
   const magicChoiceLabels = Array.from(new Set(magicEventSources.flatMap(file =>
     Array.from(fs.readFileSync(file, 'utf8').matchAll(/label: '([^']+)'/g), match => match[1])

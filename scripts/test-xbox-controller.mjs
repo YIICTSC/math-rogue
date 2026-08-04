@@ -248,7 +248,7 @@ const run = async () => {
       expect(await page.evaluate(() => document.body.classList.contains('gamepad-connected')), '再接続後の接続クラスがない');
     });
 
-    await test('初回年齢設定をコントローラーだけで開始できる', async () => {
+    await test('年齢区分を要求せず学年設定をコントローラーだけで開始できる', async () => {
       await page.goto(`${BASE_URL}/?gamepadFresh=1`, { waitUntil: 'domcontentloaded' });
       await page.evaluate(() => {
         localStorage.removeItem('learning_rogue_child_safety_v1');
@@ -256,12 +256,13 @@ const run = async () => {
       });
       await page.reload({ waitUntil: 'domcontentloaded' });
       await connect(page);
-      await page.waitForSelector('#age-privacy-title');
+      expect(await page.locator('#age-privacy-title').count() === 0, '廃止した年齢区分モーダルが表示されている');
+      await page.getByRole('heading', { name: /現在の学年|current grade/i }).waitFor();
       const active = await activeElementSnapshot(page);
-      expect(active?.visible, '年齢選択に初期フォーカスがない');
-      expect(/9|12|ages/i.test(active?.text || ''), `年齢選択の先頭候補ではない: ${active?.text || 'なし'}`);
+      expect(active?.visible, '学年選択に初期フォーカスがない');
+      expect(/小学1年生|Grade 1/i.test(active?.text || ''), `学年選択の先頭候補ではない: ${active?.text || 'なし'}`);
       await press(page, 'A');
-      expect(await page.locator('button:has-text("保存して続ける"):not(:disabled)').count() === 1, '年齢選択後に保存可能にならない');
+      expect(await page.getByRole('heading', { name: /現在の学年|current grade/i }).count() === 0, '学年選択を完了できない');
     });
 
     await test('タイトルは接続時に主要ボタンへ初期フォーカスする', async () => {
@@ -1111,6 +1112,22 @@ const run = async () => {
         await page.evaluate(() => document.activeElement?.getAttribute('data-gamepad-zone')) === 'paper-hangar-inventory',
         '機体改造でSHIP右端からINVENTORYへ移動できない',
       );
+    });
+
+    await test('紙飛行機のパーツ説明をYで開きBで閉じられる', async () => {
+      await page.goto(`${BASE_URL}/?gamepadTestScreen=MINI_GAME_PAPER_PLANE:PAPER_HANGAR`, { waitUntil: 'domcontentloaded' });
+      await connect(page);
+      const detailTarget = page.locator('[data-gamepad-detail-target]').first();
+      await detailTarget.waitFor({ state: 'visible' });
+      await detailTarget.focus();
+      await press(page, 'Y');
+      await page.waitForSelector('[data-gamepad-initial-scope="paper-part-detail"]');
+      expect(
+        await page.evaluate(() => document.activeElement?.getAttribute('data-gamepad-zone')) === 'paper-part-detail',
+        'パーツ説明を開いた後に閉じるボタンへフォーカスできない',
+      );
+      await press(page, 'B');
+      await page.waitForSelector('[data-gamepad-initial-scope="paper-part-detail"]', { state: 'detached' });
     });
 
     await test('Viewボタンのゲームメニューから継続・タイトル復帰を選べる', async () => {

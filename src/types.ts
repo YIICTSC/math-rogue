@@ -117,6 +117,7 @@ export interface Card {
   rarity: 'COMMON' | 'UNCOMMON' | 'RARE' | 'LEGENDARY' | 'SPECIAL';
   price?: number;
   originalNames?: string[]; // 合成前のカード名を保持する (特殊効果継承用)
+  synthesisDepth?: number; // 合成済み名を次の合成で全文字残すための世代数
 
   battleBaseCost?: number;
   battleBaseDamage?: number;

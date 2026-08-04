@@ -7415,6 +7415,7 @@ const EVENT_INLINE_NAME_TRANSLATIONS: Record<string, string> = {
 };
 
 const translateEnglishNameInline = (name: string): string => {
+    if (ENGLISH_MINIGAME_EXACT[name]) return ENGLISH_MINIGAME_EXACT[name];
     if (MAGIC_EVENT_NAME_TRANSLATIONS[name]) return MAGIC_EVENT_NAME_TRANSLATIONS[name];
     if (MAGIC_EVENT_METADATA_TRANSLATIONS[name]) return MAGIC_EVENT_METADATA_TRANSLATIONS[name];
     if (EVENT_INLINE_NAME_TRANSLATIONS[name]) return EVENT_INLINE_NAME_TRANSLATIONS[name];
@@ -10660,6 +10661,68 @@ const translateHiraganaDynamicUi = (text: string): string | null => {
     return null;
 };
 
+const translateEnglishMiniGameRuntimeLog = (text: string): string | null => {
+    if (!JAPANESE_VISIBLE_TEXT_PATTERN.test(text)) return null;
+    const name = (value: string) => translateEnglishNameInline(value.trim());
+    const rules: Array<[RegExp, (...matches: string[]) => string]> = [
+        [/^(.+?)！$/, (_, action) => {
+            const exact = ENGLISH_MINIGAME_EXACT[action.trim()];
+            return exact ? `${exact.replace(/[.!?]+$/, '')}!` : '';
+        }],
+        [/^バトル開始！\s*敵[:：]\s*(.+)$/, (_, enemy) => `Battle started! Enemy: ${name(enemy)}`],
+        [/^先制攻撃！敵に(\d+)ダメージ！$/, (_, damage) => `First strike! Dealt ${damage} damage to the enemy!`],
+        [/^増幅！ランク(\d+)のカードを生成！(?:\(一時的\)|（一時的）)$/, (_, rank) => `Amplified! Created a temporary Rank ${rank} card!`],
+        [/^ハイテンション！燃料\+(\d+)$/, (_, amount) => `High spirits! Fuel +${amount}`],
+        [/^勝利の余韻！HPを(\d+)回復$/, (_, amount) => `Victory recovery! Restored ${amount} HP.`],
+        [/^おこづかい！コインボーナス\+(\d+)%$/, (_, amount) => `Allowance bonus! Coins +${amount}%`],
+        [/^【反撃】(.+?)！敵に(\d+)ダメージ！$/, (_, source, damage) => `[Counter] ${name(source)} dealt ${damage} damage to the enemy!`],
+        [/^敵の防御値を(\d+)削った！$/, (_, amount) => `Reduced the enemy's guard by ${amount}!`],
+        [/^強敵\s+(.+?)\s+が現れた！$/, (_, enemy) => `A powerful enemy appeared: ${name(enemy)}!`],
+        [/^(.+?)\s*に\s*(\d+)\s*ダメージ！$/, (_, enemy, damage) => `Dealt ${damage} damage to ${name(enemy)}!`],
+        [/^(.+?)の攻撃！(\d+)ダメージ！$/, (_, enemy, damage) => `${name(enemy)} attacked for ${damage} damage!`],
+        [/^(.+?)の炎！$/, (_, enemy) => `${name(enemy)} used a flame attack!`],
+        [/^(.+?)の魔法！混乱した！$/, (_, enemy) => `${name(enemy)} used magic! You became confused!`],
+        [/^(.+?)をスタンさせた！$/, (_, enemy) => `Stunned ${name(enemy)}!`],
+        [/^(.+?)を吹き飛ばした！$/, (_, enemy) => `Knocked ${name(enemy)} away!`],
+        [/^(.+?)を引き寄せた！$/, (_, enemy) => `Pulled ${name(enemy)} closer!`],
+        [/^(.+?)を押し出した！$/, (_, enemy) => `Pushed ${name(enemy)} away!`],
+        [/^(.+?)を背後に押し出した！$/, (_, enemy) => `Pushed ${name(enemy)} behind you!`],
+        [/^シールド\s*\+(\d+)$/, (_, amount) => `Shield +${amount}`],
+        [/^計算ボーナス[:：]\s*HP\+(\d+)$/, (_, amount) => `Math bonus: HP +${amount}`],
+        [/^レベルが(\d+)に上がった！$/, (_, level) => `Level increased to ${level}!`],
+        [/^(\d+)問正解。$/, (_, count) => `${count} correct answer(s).`],
+        [/^計算全問正解！満腹度が(\d+)回復した！$/, (_, amount) => `Perfect math score! Fullness restored by ${amount}!`],
+        [/^(\d+)円を拾った！$/, (_, amount) => `Picked up ${amount} yen!`],
+        [/^(.+?)を拾った！$/, (_, item) => `Picked up ${name(item)}!`],
+        [/^(.+?)を買った！$/, (_, item) => `Bought ${name(item)}!`],
+        [/^(.+?)を購入！$/, (_, item) => `Purchased ${name(item)}!`],
+        [/^(.+?)を(\d+)円で売った。$/, (_, item, amount) => `Sold ${name(item)} for ${amount} yen.`],
+        [/^(.+?)を装備した。$/, (_, item) => `Equipped ${name(item)}.`],
+        [/^(.+?)を外した。$/, (_, item) => `Unequipped ${name(item)}.`],
+        [/^(.+?)を足元に置いた。$/, (_, item) => `Placed ${name(item)} at your feet.`],
+        [/^(.+?)が無くなった！$/, (_, item) => `${name(item)} ran out!`],
+        [/^(.+?)を倒した！(?:\s*\((\d+) XP\))?$/, (_, enemy, xp = '') => `Defeated ${name(enemy)}!${xp ? ` (${xp} XP)` : ''}`],
+        [/^(.+?)に毒を与えた！$/, (_, enemy) => `Poisoned ${name(enemy)}!`],
+        [/^(.+?)は眠ってしまった！$/, (_, enemy) => `${name(enemy)} fell asleep!`],
+        [/^(.+?)はのりで固まった！$/, (_, enemy) => `${name(enemy)} was immobilized by glue!`],
+        [/^(.+?)は(.+?)だった！$/, (_, unidentified, identified) => `${name(unidentified)} was identified as ${name(identified)}!`],
+        [/^HPが(\d+)回復した！$/, (_, amount) => `Restored ${amount} HP!`],
+        [/^最大HPが上がった！$/, () => 'Max HP increased!'],
+        [/^ランク(\d+)のカードを生成！$/, (_, rank) => `Created a Rank ${rank} card!`],
+        [/^パーツを「(.+?)」(?:を)?格納庫へ送りました。$/, (_, item) => `Sent ${name(item)} to the hangar.`],
+        [/^パーツを「(.+?)」に換装しました！$/, (_, item) => `Equipped ${name(item)}!`],
+        [/^スターコインが足りません！\s*\((\d+)必要\)$/, (_, amount) => `Not enough Star Coins! (${amount} required)`],
+    ];
+    for (const [pattern, build] of rules) {
+        const match = text.match(pattern);
+        if (match) {
+            const translated = build(...match);
+            if (translated) return translated;
+        }
+    }
+    return null;
+};
+
 const transCore = (text: string, mode: LanguageMode): string => {
     if (!text) return "";
     if (mode === 'JAPANESE') return text;
@@ -10679,6 +10742,9 @@ const transCore = (text: string, mode: LanguageMode): string => {
         if (ENGLISH_GENERATED_CARD_NAME_DICTIONARY[text]) return ENGLISH_GENERATED_CARD_NAME_DICTIONARY[text];
         if (ENGLISH_ITEM_NAME_DICTIONARY[text]) return ENGLISH_ITEM_NAME_DICTIONARY[text];
         if (ENGLISH_ENEMY_NAME_DICTIONARY[text]) return ENGLISH_ENEMY_NAME_DICTIONARY[text];
+
+        const miniGameRuntimeLog = translateEnglishMiniGameRuntimeLog(text);
+        if (miniGameRuntimeLog) return miniGameRuntimeLog;
 
         const advancedAct = text.match(/^第(\d+)章へ進んだ。体力が全回復した！$/);
         if (advancedAct) return `Advanced to Act ${advancedAct[1]}. HP fully restored!`;

@@ -7,7 +7,7 @@ import Card from './Card';
 import AttackEffectSprite from './AttackEffectSprite';
 import StatusEffectSprite from './StatusEffectSprite';
 import EnemyIllustration from './EnemyIllustration';
-import { ArrowRight, Trash2, Plus, Gem, FlaskConical, Swords, Shield, Zap, Search, Beaker, RotateCcw, Skull, Clock, History, Languages, FileText, BookOpen, MessageSquare, HelpCircle, AlertCircle, Copy, Check, X, Volume2, Sparkles, Monitor } from 'lucide-react';
+import { ArrowRight, Trash2, Plus, Gem, FlaskConical, Swords, Shield, Zap, Search, Beaker, RotateCcw, Skull, Clock, History, Languages, FileText, BookOpen, MessageSquare, HelpCircle, AlertCircle, Copy, Check, X, Volume2, Sparkles, Monitor, Layers } from 'lucide-react';
 import { createHolographicCard, synthesizeCards } from '../utils/cardUtils';
 import { storageService, type UiPreviewCheckTarget, type UiPreviewChecklist } from '../services/storageService';
 import { audioService } from '../services/audioService';
@@ -23,7 +23,7 @@ import { getMagicRomanceVoiceLines } from '../services/magicRomanceEventService'
 import { getMagicEndingVoiceLine } from '../services/magicEndingService';
 import { MAGIC_ART_CONSISTENCY_TARGETS } from '../data/magicArtConsistencyTargets';
 import { assetUrl } from '../utils/assetPaths';
-import { UI_PREVIEW_GROUPS, UI_PREVIEW_SCREENS } from '../data/uiPreviewScreens';
+import { BATTLE_MODAL_PREVIEWS, UI_PREVIEW_GROUPS, UI_PREVIEW_SCREENS, type BattleModalPreviewId } from '../data/uiPreviewScreens';
 import { getDebugProblemUnitGroups } from './ProblemChallengeScreen';
 import { SUBJECT_DATA, type GeneralProblem } from '../data/subjectData';
 import { ELEMENTARY_EVENT_TITLES } from '../services/eventService';
@@ -39,6 +39,7 @@ interface DebugMenuScreenProps {
     onStartUiPreview: (screen: GameScreen, miniGameOutcome?: MiniGameDebugPreview) => void;
     onStartProblemUiPreview: (mode: GameMode, modePool?: string[]) => void;
     onStartEventUiPreview: (theme: VisualThemeId, title: string) => void;
+    onStartBattleModalPreview: (modalId: BattleModalPreviewId) => void;
     onStartCrowdfundingBoss: (boss: 'AZUKI' | 'DODOMEDESU') => void;
     onPreviewRankingReward: () => void;
     onBack: () => void;
@@ -261,6 +262,7 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
     onStartUiPreview,
     onStartProblemUiPreview,
     onStartEventUiPreview,
+    onStartBattleModalPreview,
     onStartCrowdfundingBoss,
     onPreviewRankingReward,
     onBack,
@@ -1525,6 +1527,29 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
                                         </span>
                                     </div>
                                 </div>
+                                <section className="rounded-xl border border-violet-600/70 bg-violet-950/25 p-4">
+                                    <h4 className="mb-2 flex items-center gap-2 text-sm font-black text-violet-200">
+                                        <Layers size={18} /> 戦闘特殊モーダル確認
+                                    </h4>
+                                    <p className="mb-3 text-xs leading-relaxed text-slate-300">
+                                        {debugLanguageMode === 'ENGLISH'
+                                            ? 'Open each production battle modal to verify landscape centering, scrolling, controller navigation, confirm, and back behavior.'
+                                            : '実戦と同じモーダルを開きます。横画面の中央配置、スクロール、十字キー／スティック、決定・戻るをここから個別に確認できます。'}
+                                    </p>
+                                    <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                                        {BATTLE_MODAL_PREVIEWS.map((modal) => (
+                                            <button
+                                                key={modal.id}
+                                                type="button"
+                                                onClick={() => onStartBattleModalPreview(modal.id)}
+                                                className="rounded-lg border border-violet-400/50 bg-slate-950/80 px-3 py-3 text-left transition-colors hover:border-violet-200 hover:bg-violet-900/45"
+                                            >
+                                                <span className="block text-sm font-black text-violet-100">{modal.label}</span>
+                                                <span className="mt-1 block text-[10px] leading-relaxed text-slate-400">{modal.description}</span>
+                                            </button>
+                                        ))}
+                                    </div>
+                                </section>
                                 <section className="rounded-xl border border-emerald-600/70 bg-emerald-950/25 p-4">
                                     <h4 className="mb-3 flex items-center gap-2 text-sm font-black text-emerald-300">
                                         <BookOpen size={18} /> 問題UI・単元指定

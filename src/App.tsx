@@ -30,7 +30,6 @@ import TypingModeSelectionScreen from './components/TypingModeSelectionScreen';
 import DifficultySelectionScreen from './components/DifficultySelectionScreen';
 import RankingScreen from './components/RankingScreen';
 import OnlineNameSetupModal from './components/OnlineNameSetupModal';
-import AgePrivacySetupModal from './components/AgePrivacySetupModal';
 import PrivacyControlsModal from './components/PrivacyControlsModal';
 import AssignmentInboxModal from './components/AssignmentInboxModal';
 import LearnerGroupInviteModal from './components/LearnerGroupInviteModal';
@@ -84,6 +83,8 @@ import DodgeballShooting from './components/DodgeballShooting';
 import BasketballLayupShooting from './components/BasketballLayupShooting';
 import FinalBridgeScreen from './components/FinalBridgeScreen';
 import MagicRomanceEndingScreen from './components/MagicRomanceEndingScreen';
+import ThemedEndingSequenceScreen from './components/ThemedEndingSequenceScreen';
+import { buildThemedEndingGalleryEntry } from './data/themedEndingSequences';
 import { getMagicEndingGalleryEntries, hasMagicEnding } from './services/magicEndingService';
 import ProblemChallengeScreen from './components/ProblemChallengeScreen';
 import AssignmentCreateScreen from './components/AssignmentCreateScreen';
@@ -118,7 +119,7 @@ import { auditLateDomTranslation } from './utils/translationAudit';
 import { assetUrl } from './utils/assetPaths';
 import { getAssignmentFromUrl, getAssignmentModePool, getAssignmentRepresentativeMode } from './utils/assignmentUtils';
 import { createDailyAssignment, getCurrentSchoolYear, getStudentGradeOptions, isAdultProfile, promoteStudentProfileForSchoolYear } from './utils/dailyAssignmentUtils';
-import { getInitialLanguageMode, isEnglishDeviceLocale, isJapaneseDeviceLocale } from './utils/localePreferences';
+import { getInitialLanguageMode } from './utils/localePreferences';
 import { getOnlineRankingLabel, getOnlineRankingPeriodLabel } from './data/onlineRankingDefinitions';
 import { formatProblemUnitName } from './utils/problemUnitName';
 import { getDifficultyConfig } from './config/difficulty';
@@ -140,7 +141,7 @@ import { MAGIC_HEROES } from './data/magicHeroes';
 import { createMagicRuleState, createMagicStartingDeck, getMagicRuleConfig } from './data/magicLoadouts';
 import { generateMagicRomanceSelectionEvent } from './services/magicRomanceEventService';
 import { applyMagicRuleOnCardPlay } from './services/magicRuleService';
-import { UI_PREVIEW_GROUPS, UI_PREVIEW_SCREENS } from './data/uiPreviewScreens';
+import { BATTLE_MODAL_PREVIEWS, UI_PREVIEW_GROUPS, UI_PREVIEW_SCREENS, type BattleModalPreviewId } from './data/uiPreviewScreens';
 import { useXboxControllerNavigation } from './hooks/useXboxControllerNavigation';
 import { GamepadVirtualKeyboard } from './components/GamepadVirtualKeyboard';
 import { GamepadSystemMenu } from './components/GamepadSystemMenu';
@@ -171,8 +172,8 @@ const getDefaultDailyAssignmentProfile = (languageMode: LanguageMode): StudentPr
 });
 
 const getInitialStudentGradeMode = (languageMode: LanguageMode): LanguageMode => {
-    if (isJapaneseDeviceLocale()) return 'JAPANESE';
-    if (isEnglishDeviceLocale()) return 'ENGLISH';
+    // 初回モーダルも、タイトル画面で選ばれている表示言語に揃える。
+    // 端末ロケールを優先すると、英語画面へ日本語が一瞬露出して後段翻訳に頼ることになる。
     return languageMode;
 };
 
@@ -1285,6 +1286,7 @@ const App: React.FC = () => {
     const coopTsukaponWinnerRef = useRef<string | null>(null);
     const previousScreenRef = useRef<GameScreen>(GameScreen.START_MENU);
     const gamepadTestScreenOpenedRef = useRef(false);
+    const battleModalPreviewOpenedRef = useRef(false);
     const assignmentRewardPreviewOpenedRef = useRef(false);
     const isLegacyVercelHost = typeof window !== 'undefined' && window.location.hostname === LEGACY_VERCEL_HOST;
     const [showMigrationNotice, setShowMigrationNotice] = useState<boolean>(() => isLegacyVercelHost);
@@ -1414,8 +1416,13 @@ const App: React.FC = () => {
     const [selectedCharName, setSelectedCharName] = useState<string>("わんぱく小学生");
     const [legacyCardSelected, setLegacyCardSelected] = useState<boolean>(false);
     const [newlyUnlockedCard, setNewlyUnlockedCard] = useState<ICard | null>(null); // New State
+    const [themedEndingSequenceComplete, setThemedEndingSequenceComplete] = useState(false);
     const [newlyUnlockedCharacters, setNewlyUnlockedCharacters] = useState<Character[]>([]);
     const [newlyUnlockedMiniGames, setNewlyUnlockedMiniGames] = useState<(typeof MINI_GAMES)[number][]>([]);
+
+    useEffect(() => {
+        if (gameState.screen !== GameScreen.ENDING) setThemedEndingSequenceComplete(false);
+    }, [gameState.screen]);
 
     useEffect(() => {
         window.localStorage.setItem('learning-rogue-visual-theme', visualTheme);
@@ -1449,7 +1456,8 @@ const App: React.FC = () => {
     const studentGradeOptions = useMemo(() => getStudentGradeOptions(studentGradeMode), [studentGradeMode]);
     const isStudentGradeUnset = !studentProfile.grade?.trim();
     const [showStudentGradeSurvey, setShowStudentGradeSurvey] = useState<boolean>(() => !storageService.getStudentProfile().grade?.trim());
-    const [showAgePrivacySetup, setShowAgePrivacySetup] = useState<boolean>(() => !childSafetyService.hasAgeSelection());
+    // 年齢そのものは収集しない。学習集計は管理者発行コードによる明示的な連携で制御する。
+    const showAgePrivacySetup = false;
     const [showPrivacyControls, setShowPrivacyControls] = useState(false);
     const [onlineRankingProfile, setOnlineRankingProfile] = useState<OnlineRankingProfile | null>(() => onlineRankingService.getProfile());
     const [showOnlineNameSetup, setShowOnlineNameSetup] = useState(false);
@@ -5812,10 +5820,17 @@ const App: React.FC = () => {
             if (screen === GameScreen.REWARD) {
                 const previewRelic = Object.values(RELIC_LIBRARY)[0];
                 const previewPotion = Object.values(POTION_LIBRARY)[0];
+                const previewPotions = Object.values(POTION_LIBRARY)
+                    .slice(0, 3)
+                    .map((potion, index) => ({ ...potion, id: `ui-preview-owned-potion-${index}` }));
                 return {
                     ...prev,
                     screen,
                     challengeMode: undefined,
+                    player: {
+                        ...prev.player,
+                        potions: previewPotions,
+                    },
                     rewards: [
                         {
                             id: 'ui-preview-reward-card',
@@ -5932,6 +5947,61 @@ const App: React.FC = () => {
         });
     }, [applyUiPreviewBattle, coopBattleKey, coopBattleQueue, coopEnemyTurnCursor, coopPlayerSnapshots, coopSession, coopSupportCards, createUiPreviewEnemies, themedCharacters, uiPreviewBattleConfig]);
 
+    const handleStartBattleModalPreview = useCallback((modalId: BattleModalPreviewId) => {
+        const previewCards = Object.values(CARDS_LIBRARY)
+            .filter(card => card.type !== CardType.STATUS && card.type !== CardType.CURSE)
+            .slice(0, 8)
+            .map((card, index) => ({ ...card, id: `modal-preview-${modalId}-${index}` } as ICard));
+        const cards = previewCards.length > 0
+            ? previewCards
+            : [{ ...CARDS_LIBRARY.STRIKE, id: `modal-preview-${modalId}-fallback` } as ICard];
+
+        handleStartUiPreview(GameScreen.BATTLE);
+        setWeatherScryModal(null);
+        setGalaxyExpressModal(null);
+        setGoldFishModal(null);
+        setDreamCatcherModal(null);
+        setOrreryModal(null);
+        setPeacePipeModal(null);
+        setEventSynthesisModal(null);
+        setEventCardChoiceModal(null);
+
+        window.setTimeout(() => {
+            switch (modalId) {
+                case 'WEATHER_SCRY':
+                    setWeatherScryModal({ cards: cards.slice(0, 5), keepMap: Object.fromEntries(cards.slice(0, 5).map(card => [card.id, true])) });
+                    break;
+                case 'GALAXY_EXPRESS':
+                    setGalaxyExpressModal({ cards: cards.slice(0, 5) });
+                    break;
+                case 'GOLD_FISH':
+                    setGoldFishModal({ title: '金魚すくい', description: '捨て札から手札に戻すカードを1枚選んでください。', cards: cards.slice(0, 5) });
+                    break;
+                case 'DREAM_CATCHER':
+                    setDreamCatcherModal({ title: 'ドリーム・キャッチャー', description: '山札から手札に加えるカードを1枚選んでください。', cards });
+                    break;
+                case 'ORRERY':
+                    setOrreryModal({ title: '小型天球儀', description: '次に手札に加えるカードを1枚選んでください。', cards: cards.slice(0, 5) });
+                    break;
+                case 'PEACE_PIPE':
+                    setPeacePipeModal({ title: '平和のパイプ', description: 'この戦闘で保留するカードを1枚選んでください。', cards: cards.slice(0, 5) });
+                    break;
+                case 'EVENT_SYNTHESIS':
+                    setEventSynthesisModal({ cards, selectedIds: [] });
+                    break;
+                case 'EVENT_UPGRADE':
+                    setEventCardChoiceModal({ mode: 'UPGRADE', cards });
+                    break;
+                case 'EVENT_ORGANIZE':
+                    setEventCardChoiceModal({ mode: 'ORGANIZE', cards });
+                    break;
+                case 'EVENT_DUPLICATE':
+                    setEventCardChoiceModal({ mode: 'DUPLICATE', cards });
+                    break;
+            }
+        }, 0);
+    }, [handleStartUiPreview]);
+
     useEffect(() => {
         if (!DEBUG_FEATURES_ENABLED || gamepadTestScreenOpenedRef.current || typeof window === 'undefined') return;
         const requestedId = new URLSearchParams(window.location.search).get('gamepadTestScreen');
@@ -5942,6 +6012,15 @@ const App: React.FC = () => {
         handleStartUiPreview(preview.screen, preview.miniGameOutcome);
         setIsUiPreviewToolbarOpen(false);
     }, [handleStartUiPreview]);
+
+    useEffect(() => {
+        if (!DEBUG_FEATURES_ENABLED || battleModalPreviewOpenedRef.current || typeof window === 'undefined') return;
+        const requestedId = new URLSearchParams(window.location.search).get('battleModalPreview') as BattleModalPreviewId | null;
+        if (!requestedId || !BATTLE_MODAL_PREVIEWS.some(item => item.id === requestedId)) return;
+        battleModalPreviewOpenedRef.current = true;
+        handleStartBattleModalPreview(requestedId);
+        setIsUiPreviewToolbarOpen(false);
+    }, [handleStartBattleModalPreview]);
 
     useEffect(() => {
         if (
@@ -15046,7 +15125,7 @@ const App: React.FC = () => {
     const renderStudentGradeSurvey = () => {
         if (!showStudentGradeSurvey) return null;
         return (
-            <div className="fixed inset-0 z-[10035] flex items-center justify-center bg-black/85 p-4">
+            <div data-gamepad-modal data-gamepad-navigation-root data-gamepad-initial-scope="student-grade" className="fixed inset-0 z-[10035] flex items-center justify-center bg-black/85 p-4">
                 <div className="w-full max-w-2xl rounded-2xl border-4 border-cyan-300 bg-slate-950 p-5 text-white shadow-[0_0_40px_rgba(34,211,238,0.32)]">
                     <div className="mb-2 text-center text-xs font-black tracking-[0.3em] text-cyan-300">PROFILE</div>
                     <h2 className="mb-3 text-center text-2xl font-black">{trans("現在の学年を選んでください", studentGradeMode)}</h2>
@@ -15061,6 +15140,9 @@ const App: React.FC = () => {
                                     type="button"
                                     onClick={() => setStudentGradeMode(option.mode)}
                                     data-allow-japanese
+                                    data-gamepad-zone="student-grade-language"
+                                    data-gamepad-order={option.mode === 'JAPANESE' ? 0 : 1}
+                                    data-gamepad-down-zone="student-grade-options"
                                     className={`rounded-lg px-4 py-2 text-sm font-black transition-colors ${
                                         studentGradeMode === option.mode
                                             ? 'bg-cyan-300 text-slate-950'
@@ -15079,10 +15161,14 @@ const App: React.FC = () => {
                         {studentGradeOptions.map((grade) => (
                             <button
                                 key={grade}
+                                data-gamepad-zone="student-grade-options"
+                                data-gamepad-order={studentGradeOptions.indexOf(grade)}
+                                data-gamepad-up-zone="student-grade-language"
+                                data-gamepad-initial-choice={studentGradeOptions.indexOf(grade) === 0 ? true : undefined}
                                 onClick={() => saveStudentGrade(grade)}
                                 className="rounded-xl border border-cyan-500/50 bg-slate-900 px-3 py-3 text-sm font-black text-cyan-50 hover:bg-cyan-900/70"
                             >
-                                {grade}
+                                {trans(grade, studentGradeMode)}
                             </button>
                         ))}
                     </div>
@@ -16184,7 +16270,7 @@ const App: React.FC = () => {
                                 <div>
                                     <h3 className="font-black text-cyan-100">{trans("データ保護・削除設定", languageMode)}</h3>
                                     <p className="mt-1 text-xs text-slate-300 sm:text-sm">
-                                        {trans("年齢区分、学習集計、匿名ランキング、データ削除を確認できます。", languageMode)}
+                                        {trans("学習集計、匿名ランキング、データ削除を確認できます。", languageMode)}
                                     </p>
                                 </div>
                                 <button
@@ -16446,6 +16532,7 @@ const App: React.FC = () => {
                             onStartUiPreview={handleStartUiPreview}
                             onStartProblemUiPreview={handleStartProblemUiPreview}
                             onStartEventUiPreview={handleStartEventUiPreview}
+                            onStartBattleModalPreview={handleStartBattleModalPreview}
                             onStartCrowdfundingBoss={handleStartCrowdfundingBoss}
                             onPreviewRankingReward={() => {
                                 const template = Object.values(CARDS_LIBRARY)[0];
@@ -17574,7 +17661,7 @@ const App: React.FC = () => {
                 )}
 
                 {weatherScryModal && (
-                    <div data-gamepad-modal data-gamepad-initial-scope="battle-weather-scry" className="app-modal-overlay app-weather-scry-modal-overlay fixed inset-0 z-[230] bg-black/70 flex items-center justify-center p-4">
+                    <div data-gamepad-modal data-gamepad-initial-scope="battle-weather-scry" className="app-modal-overlay app-battle-special-modal-overlay app-weather-scry-modal-overlay fixed inset-0 z-[230] bg-black/70 flex items-center justify-center p-4">
                         <div className="app-modal-panel app-card-choice-modal app-weather-scry-modal w-full max-w-lg rounded-xl border-2 border-cyan-400 bg-slate-900 text-white p-4">
                             <h3 className="text-xl font-bold mb-2">{trans("天気予報", languageMode)}</h3>
                             <p className="text-sm text-slate-300 mb-3">{trans('山札に戻すか、捨て札に送るかを選択してください', languageMode)}</p>
@@ -17621,7 +17708,7 @@ const App: React.FC = () => {
                 )}
 
                 {eventSynthesisModal && (
-                    <div className="app-modal-overlay app-event-synthesis-modal-overlay fixed inset-0 z-[232] bg-black/75 flex items-center justify-center p-3 sm:p-4">
+                    <div data-gamepad-modal data-gamepad-initial-scope="battle-event-synthesis" className="app-modal-overlay app-battle-special-modal-overlay app-event-synthesis-modal-overlay fixed inset-0 z-[232] bg-black/75 flex items-center justify-center p-3 sm:p-4">
                         <div className="app-modal-panel app-card-choice-modal app-event-synthesis-modal w-full max-w-4xl rounded-xl border-2 border-purple-400 bg-slate-950 text-white p-4 shadow-2xl">
                             <h3 className="text-xl font-black mb-2 text-purple-100">{trans('つかぽんのカード合成', languageMode)}</h3>
                             <p className="text-sm text-slate-300 mb-3">
@@ -17631,7 +17718,7 @@ const App: React.FC = () => {
                                 {trans('選択中', languageMode)}: {eventSynthesisModal.selectedIds.length} / 2
                             </div>
                             <div className="grid max-h-[58vh] grid-cols-2 gap-3 overflow-y-auto pr-1 sm:grid-cols-3 md:grid-cols-4">
-                                {eventSynthesisModal.cards.map(card => {
+                                {eventSynthesisModal.cards.map((card, index) => {
                                     const selected = eventSynthesisModal.selectedIds.includes(card.id);
                                     return (
                                         <div key={card.id} className={`rounded-xl border-2 p-1 transition-colors ${selected ? 'border-yellow-300 bg-yellow-300/15' : 'border-slate-700 bg-slate-900/80 hover:border-purple-300'}`}>
@@ -17641,6 +17728,8 @@ const App: React.FC = () => {
                                                     onClick={() => toggleEventSynthesisCard(card.id)}
                                                     disabled={false}
                                                     languageMode={languageMode}
+                                                    gamepadZone="event-synthesis-cards"
+                                                    gamepadOrder={index}
                                                 />
                                             </div>
                                         </div>
@@ -17650,6 +17739,8 @@ const App: React.FC = () => {
                             <div className="mt-4 flex flex-col gap-2 sm:flex-row">
                                 <button
                                     type="button"
+                                    data-gamepad-zone="event-synthesis-actions"
+                                    data-gamepad-order={0}
                                     onClick={confirmEventSynthesis}
                                     disabled={eventSynthesisModal.selectedIds.length !== 2}
                                     className="flex-1 rounded bg-purple-600 px-4 py-3 font-black text-white transition-colors hover:bg-purple-500 disabled:cursor-not-allowed disabled:bg-slate-700 disabled:text-slate-400"
@@ -17658,6 +17749,9 @@ const App: React.FC = () => {
                                 </button>
                                 <button
                                     type="button"
+                                    data-gamepad-back
+                                    data-gamepad-zone="event-synthesis-actions"
+                                    data-gamepad-order={1}
                                     onClick={skipEventSynthesis}
                                     className="rounded bg-slate-700 px-4 py-3 font-bold text-slate-100 transition-colors hover:bg-slate-600"
                                 >
@@ -17687,8 +17781,9 @@ const App: React.FC = () => {
                 )}
 
                 {eventCardChoiceModal && (
-                    <div className="app-modal-overlay fixed inset-0 z-[233] flex items-center justify-center bg-black/75 p-3 sm:p-4">
-                        <div className="app-modal-panel w-full max-w-4xl rounded-xl border-2 border-amber-400 bg-slate-950 p-4 text-white shadow-2xl">
+                    <div data-gamepad-modal data-gamepad-initial-scope="battle-event-card-choice" className="app-modal-overlay app-battle-special-modal-overlay fixed inset-0 z-[233] flex items-center justify-center bg-black/75 p-3 sm:p-4">
+                        <div className="app-modal-panel app-card-choice-modal relative w-full max-w-4xl rounded-xl border-2 border-amber-400 bg-slate-950 p-4 text-white shadow-2xl">
+                            <button type="button" data-gamepad-back onClick={() => setEventCardChoiceModal(null)} className="absolute right-2 top-2 rounded p-2 text-slate-400 hover:bg-slate-800 hover:text-white" aria-label={trans('戻る', languageMode)}><X size={20} /></button>
                             <h3 className="mb-2 text-xl font-black text-amber-100">
                                 {eventCardChoiceModal.mode === 'UPGRADE'
                                     ? languageMode === 'ENGLISH' ? "Akame's Card Upgrade" : 'あかめのカード強化'
@@ -17708,10 +17803,10 @@ const App: React.FC = () => {
                                             : languageMode === 'ENGLISH' ? 'Choose one card to reduce its cost by 1.' : 'コストを1下げるカードを1枚選んでください。'}
                             </p>
                             <div className="grid max-h-[58vh] grid-cols-2 gap-3 overflow-y-auto pr-1 sm:grid-cols-3 md:grid-cols-4">
-                                {eventCardChoiceModal.cards.map(card => (
+                                {eventCardChoiceModal.cards.map((card, index) => (
                                     <div key={card.id} className="rounded-xl border-2 border-slate-700 bg-slate-900/80 p-1 transition-colors hover:border-amber-300">
                                         <div className="origin-top scale-[0.82]">
-                                            <Card card={card} onClick={() => applyEventCardChoice(card)} disabled={false} languageMode={languageMode} />
+                                            <Card card={card} onClick={() => applyEventCardChoice(card)} disabled={false} languageMode={languageMode} gamepadZone="event-card-choice-options" gamepadOrder={index} />
                                         </div>
                                     </div>
                                 ))}
@@ -17721,7 +17816,7 @@ const App: React.FC = () => {
                 )}
 
                 {galaxyExpressModal && (
-                    <div data-gamepad-modal data-gamepad-initial-scope="battle-galaxy-express" className="app-modal-overlay app-galaxy-express-modal-overlay fixed inset-0 z-[231] bg-black/70 flex items-center justify-center p-4">
+                    <div data-gamepad-modal data-gamepad-initial-scope="battle-galaxy-express" className="app-modal-overlay app-battle-special-modal-overlay app-galaxy-express-modal-overlay fixed inset-0 z-[231] bg-black/70 flex items-center justify-center p-4">
                         <div className="app-modal-panel app-card-choice-modal app-galaxy-express-modal w-full max-w-2xl rounded-xl border-2 border-sky-400 bg-slate-950 text-white p-4">
                             <h3 className="text-xl font-bold mb-2">{trans("銀河鉄道の夜", languageMode)}</h3>
                             <p className="text-sm text-slate-300 mb-3">{trans('1枚選んで手札に加え、残りは捨て札に送ります', languageMode)}</p>
@@ -17746,7 +17841,7 @@ const App: React.FC = () => {
                 )}
 
                 {goldFishModal && (
-                    <div data-gamepad-modal data-gamepad-initial-scope="battle-gold-fish" className="app-modal-overlay app-gold-fish-modal-overlay fixed inset-0 z-[231] bg-black/70 flex items-center justify-center p-4">
+                    <div data-gamepad-modal data-gamepad-initial-scope="battle-gold-fish" className="app-modal-overlay app-battle-special-modal-overlay app-gold-fish-modal-overlay fixed inset-0 z-[231] bg-black/70 flex items-center justify-center p-4">
                         <div className="app-modal-panel app-card-choice-modal app-gold-fish-modal w-full max-w-xl rounded-xl border-2 border-rose-400 bg-slate-950 text-white p-4">
                             <h3 className="text-xl font-bold mb-2">{trans(goldFishModal.title, languageMode)}</h3>
                             <p className="text-sm text-slate-300 mb-3">{goldFishModal.description}</p>
@@ -17770,7 +17865,7 @@ const App: React.FC = () => {
                 )}
 
                 {dreamCatcherModal && (
-                    <div data-gamepad-modal data-gamepad-initial-scope="battle-dream-catcher" className="app-modal-overlay app-dream-catcher-modal-overlay fixed inset-0 z-[231] bg-black/70 flex items-center justify-center p-4">
+                    <div data-gamepad-modal data-gamepad-initial-scope="battle-dream-catcher" className="app-modal-overlay app-battle-special-modal-overlay app-dream-catcher-modal-overlay fixed inset-0 z-[231] bg-black/70 flex items-center justify-center p-4">
                         <div className="app-modal-panel app-card-choice-modal app-dream-catcher-modal w-full max-w-2xl rounded-xl border-2 border-violet-400 bg-slate-950 text-white p-4">
                             <h3 className="text-xl font-bold mb-2">{trans(dreamCatcherModal.title, languageMode)}</h3>
                             <p className="text-sm text-slate-300 mb-3">{dreamCatcherModal.description}</p>
@@ -17794,14 +17889,17 @@ const App: React.FC = () => {
                 )}
 
                 {orreryModal && (
-                    <div className="app-modal-overlay app-orrery-modal-overlay fixed inset-0 z-[231] bg-black/70 flex items-center justify-center p-4">
+                    <div data-gamepad-modal data-gamepad-initial-scope="battle-orrery" className="app-modal-overlay app-battle-special-modal-overlay app-orrery-modal-overlay fixed inset-0 z-[231] bg-black/70 flex items-center justify-center p-4">
                         <div className="app-modal-panel app-card-choice-modal app-orrery-modal w-full max-w-2xl rounded-xl border-2 border-amber-400 bg-slate-950 text-white p-4">
                             <h3 className="text-xl font-bold mb-2">{trans(orreryModal.title, languageMode)}</h3>
                             <p className="text-sm text-slate-300 mb-3">{orreryModal.description}</p>
                             <div className="grid gap-2 sm:grid-cols-2 max-h-[60vh] overflow-y-auto pr-1">
-                                {orreryModal.cards.map(card => (
+                                {orreryModal.cards.map((card, index) => (
                                     <button
                                         key={card.id}
+                                        data-gamepad-initial-choice={index === 0 ? true : undefined}
+                                        data-gamepad-zone="orrery-options"
+                                        data-gamepad-order={index}
                                         onClick={() => applyOrrerySelection(card.id)}
                                         className="rounded border border-slate-600 bg-slate-800/80 p-3 text-left hover:border-amber-400 hover:bg-slate-700/80 transition-colors"
                                     >
@@ -17815,14 +17913,17 @@ const App: React.FC = () => {
                 )}
 
                 {peacePipeModal && (
-                    <div className="app-modal-overlay app-peace-pipe-modal-overlay fixed inset-0 z-[231] bg-black/70 flex items-center justify-center p-4">
+                    <div data-gamepad-modal data-gamepad-initial-scope="battle-peace-pipe" className="app-modal-overlay app-battle-special-modal-overlay app-peace-pipe-modal-overlay fixed inset-0 z-[231] bg-black/70 flex items-center justify-center p-4">
                         <div className="app-modal-panel app-card-choice-modal app-peace-pipe-modal w-full max-w-2xl rounded-xl border-2 border-emerald-400 bg-slate-950 text-white p-4">
                             <h3 className="text-xl font-bold mb-2">{trans(peacePipeModal.title, languageMode)}</h3>
                             <p className="text-sm text-slate-300 mb-3">{peacePipeModal.description}</p>
                             <div className="grid gap-2 sm:grid-cols-2 max-h-[60vh] overflow-y-auto pr-1">
-                                {peacePipeModal.cards.map(card => (
+                                {peacePipeModal.cards.map((card, index) => (
                                     <button
                                         key={card.id}
+                                        data-gamepad-initial-choice={index === 0 ? true : undefined}
+                                        data-gamepad-zone="peace-pipe-options"
+                                        data-gamepad-order={index}
                                         onClick={() => applyPeacePipeSelection(card.id)}
                                         className="rounded border border-slate-600 bg-slate-800/80 p-3 text-left hover:border-emerald-400 hover:bg-slate-700/80 transition-colors"
                                     >
@@ -17832,6 +17933,9 @@ const App: React.FC = () => {
                                 ))}
                             </div>
                             <button
+                                data-gamepad-back
+                                data-gamepad-zone="peace-pipe-skip"
+                                data-gamepad-order={0}
                                 onClick={() => applyPeacePipeSelection(null)}
                                 className="mt-4 w-full rounded bg-slate-700 hover:bg-slate-600 py-2 font-bold"
                             >
@@ -18030,7 +18134,26 @@ const App: React.FC = () => {
                     </div>
                 )}
 
-                {gameState.screen === GameScreen.ENDING && (
+                {gameState.screen === GameScreen.ENDING && coopSyncedVisualTheme !== 'magic' && !themedEndingSequenceComplete && (
+                    <ThemedEndingSequenceScreen
+                        theme={coopSyncedVisualTheme}
+                        characterId={gameState.player.id}
+                        characterName={themedCharacters.find(character => character.id === gameState.player.id)?.name ?? selectedCharName}
+                        languageMode={languageMode}
+                        onComplete={(variant) => {
+                            const characterName = themedCharacters.find(character => character.id === gameState.player.id)?.name ?? selectedCharName;
+                            storageService.saveThemedEndingGalleryEntry(buildThemedEndingGalleryEntry(
+                                coopSyncedVisualTheme,
+                                gameState.player.id,
+                                characterName,
+                                variant,
+                            ));
+                            setThemedEndingSequenceComplete(true);
+                        }}
+                    />
+                )}
+
+                {gameState.screen === GameScreen.ENDING && (coopSyncedVisualTheme === 'magic' || themedEndingSequenceComplete) && (
                     <div
                         data-gamepad-initial-scope="main-ending"
                         className="ending-screen w-full h-full bg-yellow-900 bg-cover bg-center flex flex-col items-center justify-start text-center text-white p-4 overflow-y-auto custom-scrollbar relative"
@@ -18145,11 +18268,6 @@ const App: React.FC = () => {
                         </div>
                     </div>
                 )}
-                <AgePrivacySetupModal
-                    open={showAgePrivacySetup}
-                    languageMode={languageMode}
-                    onComplete={() => setShowAgePrivacySetup(false)}
-                />
                 <PrivacyControlsModal
                     open={showPrivacyControls && !showAgePrivacySetup}
                     languageMode={languageMode}

@@ -19,6 +19,16 @@ interface EnemyIllustrationProps {
 }
 
 const EnemyIllustration: React.FC<EnemyIllustrationProps> = ({ name, seed, aliases = [], className = '', size = 16, visualTheme = 'elementary', enemyType = 'GENERIC', phase, action = 'idle', altText = name }) => {
+  const isElementaryTruePrincipal = visualTheme === 'elementary'
+    && (name.includes('真・校長') || aliases.some(alias => alias.includes('真・校長')));
+  if (isElementaryTruePrincipal) {
+    return (
+      <div className={`relative ${className}`} role="img" aria-label={altText}>
+        <PixelSprite seed={seed} name="真・校長先生" className="w-full h-full" size={size} />
+      </div>
+    );
+  }
+
   if (visualTheme === 'elementary' && isLegacySpriteModeEnabled()) {
     return (
       <div className={`relative ${className}`}>

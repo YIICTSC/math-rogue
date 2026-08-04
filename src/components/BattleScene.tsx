@@ -1025,7 +1025,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
     });
 
     const handleCardClickDual = (card: ICard, disabled: boolean) => {
-        if (disabled) {
+        if (disabled || isComboing) {
             if (isDualMode && (hasChoker || normalityRestricted)) audioService.playBattleSound('wrong');
             return;
         }
@@ -1040,18 +1040,22 @@ const BattleScene: React.FC<BattleSceneProps> = ({
             audioService.playBattleSound('select');
         } else {
             if (selectedCardIds.length < 2) {
-                setSelectedCardIds(prev => [...prev, card.id]);
+                const nextSelectedIds = [...selectedCardIds, card.id];
+                setSelectedCardIds(nextSelectedIds);
                 audioService.playBattleSound('select');
+                if (nextSelectedIds.length === 2) {
+                    window.setTimeout(() => { void executeDualTurn(nextSelectedIds); }, 0);
+                }
             }
         }
     };
 
-    const executeDualTurn = async () => {
+    const executeDualTurn = async (requestedCardIds: string[] = selectedCardIds) => {
         if (!friendshipComboEnabled) return;
-        if (selectedCardIds.length === 0) return;
+        if (requestedCardIds.length === 0 || isComboing) return;
 
-        if (selectedCardIds.length === 1) {
-            const c1 = player.hand.find(c => c.id === selectedCardIds[0]);
+        if (requestedCardIds.length === 1) {
+            const c1 = player.hand.find(c => c.id === requestedCardIds[0]);
             if (c1) {
                 if (player.currentEnergy < c1.cost) {
                     audioService.playBattleSound('wrong');
@@ -1063,8 +1067,8 @@ const BattleScene: React.FC<BattleSceneProps> = ({
             return;
         }
 
-        const c1 = player.hand.find(c => c.id === selectedCardIds[0]);
-        const c2 = player.hand.find(c => c.id === selectedCardIds[1]);
+        const c1 = player.hand.find(c => c.id === requestedCardIds[0]);
+        const c2 = player.hand.find(c => c.id === requestedCardIds[1]);
 
         if (!c1 || !c2) return;
 
@@ -1084,13 +1088,13 @@ const BattleScene: React.FC<BattleSceneProps> = ({
             setSynthesizedCard(fused);
             audioService.playBattleSound('buff');
 
-            await new Promise(r => setTimeout(r, 1000));
+            await new Promise(r => setTimeout(r, 240));
             const comboPayload = { ...fused, _consumedIds: [c1.id, c2.id] };
             onPlaySynthesizedCard(comboPayload);
 
         } else {
             onPlayCard(c1);
-            await new Promise(r => setTimeout(r, 500));
+            await new Promise(r => setTimeout(r, 160));
             onPlayCard(c2);
         }
 
@@ -1339,13 +1343,13 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                             {trans("友情コンボ", languageMode)}
                         </div>
                         <p className="mb-3 text-sm leading-relaxed text-slate-100">
-                            {trans("パートナーがいる戦闘では、手札からカードを2枚まで選べます。同じ種類のカードを2枚選んで", languageMode)}<span className="font-bold text-yellow-300">{trans("友情コンボ", languageMode)}</span>{trans("を押すと、2枚を合成した強力なカードとして発動します。", languageMode)}
+                            {trans("パートナーがいる戦闘で友情コンボをONにすると、手札から同じ種類のカードを2枚選べます。2枚目を選んだ瞬間、", languageMode)}<span className="font-bold text-yellow-300">{trans("友情コンボ", languageMode)}</span>{trans("が自動発動し、2枚を合成した強力なカードとして使用されます。", languageMode)}
                         </p>
                         <div className="mb-4 rounded border border-indigo-400/40 bg-indigo-950/35 p-3 text-xs leading-relaxed text-indigo-50">
                             {trans("発動条件: パートナーが生存中 / 2枚のカード種別が同じ / 召喚カード以外。消費エナジーは2枚の合計ではなく、2枚のうち高い方のコストです。", languageMode)}
                         </div>
                         <p className="mb-4 text-xs leading-relaxed text-slate-300">
-                            {trans("使わないときは友情コンボボタン右側の切替をOFFにすると、通常モードと同じくカードを1枚ずつクリックで使用できます。", languageMode)}
+                            {trans("友情コンボがONの間も、1枚目を選んだ後に手札を左右に動かして2枚目を選べます。通常どおり1枚ずつ使う場合は、友情コンボボタン右側の切替をOFFにしてください。", languageMode)}
                         </p>
                         <button
                             data-gamepad-initial-choice
@@ -1512,22 +1516,27 @@ const BattleScene: React.FC<BattleSceneProps> = ({
 
                 {/* Codex Selection Modal */}
                 {codexOptions && (
-                    <div className="app-modal-overlay fixed inset-0 z-[100] bg-black/80 flex flex-col items-center justify-center p-4 animate-in fade-in duration-200">
-                        <h3 className="text-2xl font-bold text-yellow-400 mb-4 drop-shadow-[0_0_10px_rgba(250,204,21,0.5)]">{trans("秘密の攻略本", languageMode)}</h3>
-                        <p className="text-gray-300 mb-6 text-sm">{trans("手札に加えるカードを1枚選んでください", languageMode)}</p>
-                        <div className="flex flex-wrap justify-center gap-4 mb-8">
-                            {codexOptions.map((card) => (
-                                <div key={card.id} className="scale-100 hover:scale-105 transition-transform cursor-pointer" onClick={() => onCodexSelect(card)}>
-                                    <Card card={card} onClick={() => onCodexSelect(card)} disabled={false} languageMode={languageMode} onInspect={onInspect} />
-                                </div>
-                            ))}
+                    <div data-gamepad-modal data-gamepad-initial-scope="battle-secret-codex" className="app-modal-overlay app-battle-special-modal-overlay app-codex-selection-modal-overlay fixed inset-0 z-[230] flex items-center justify-center bg-black/80 p-4 animate-in fade-in duration-200">
+                        <div className="app-modal-panel app-card-choice-modal app-codex-selection-modal w-full max-w-4xl rounded-xl border-2 border-yellow-400/80 bg-slate-950/96 p-4 text-center shadow-2xl">
+                            <h3 className="text-2xl font-bold text-yellow-400 mb-2 drop-shadow-[0_0_10px_rgba(250,204,21,0.5)]">{trans("秘密の攻略本", languageMode)}</h3>
+                            <p className="text-gray-300 mb-4 text-sm">{trans("手札に加えるカードを1枚選んでください", languageMode)}</p>
+                            <div className="app-codex-selection-options flex flex-wrap justify-center gap-4 mb-4 overflow-y-auto">
+                                {codexOptions.map((card, index) => (
+                                    <div key={card.id} className="scale-100 hover:scale-105 transition-transform cursor-pointer">
+                                        <Card card={card} onClick={() => onCodexSelect(card)} disabled={false} languageMode={languageMode} onInspect={onInspect} gamepadZone="battle-secret-codex-options" gamepadOrder={index} />
+                                    </div>
+                                ))}
+                            </div>
+                            <button
+                                data-gamepad-back
+                                data-gamepad-zone="battle-secret-codex-actions"
+                                data-gamepad-order={0}
+                                onClick={() => onCodexSelect(null)}
+                                className="bg-gray-600 hover:bg-green-500 text-white px-8 py-2 rounded font-bold border border-gray-400"
+                            >
+                                {trans("スキップ", languageMode)}
+                            </button>
                         </div>
-                        <button
-                            onClick={() => onCodexSelect(null)}
-                            className="bg-gray-600 hover:bg-green-500 text-white px-8 py-2 rounded font-bold border border-gray-400"
-                        >
-                            {trans("スキップ", languageMode)}
-                        </button>
                     </div>
                 )}
 
@@ -2517,7 +2526,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                             data-gamepad-order={0}
                             data-gamepad-shortcut="RB"
                             aria-keyshortcuts="RB"
-                            onClick={executeDualTurn}
+                            onClick={() => { void executeDualTurn(); }}
                             disabled={!friendshipComboEnabled || !!actingEnemyId || selectionState.active || selectedCardIds.length === 0}
                             className={`
                                 bg-indigo-600 border-2 border-indigo-300 px-3 py-1.5 text-xs font-bold shadow-lg transition-all rounded flex items-center gap-1
@@ -2665,11 +2674,11 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                 className={`battle-hand-card inline-block align-middle transition-all duration-500 ease-out w-28 h-44 md:w-32 md:h-48 shrink-0 relative
                             ml-0
                             md:group-hover/hand:-ml-2 md:group-active/hand:-ml-2
-                            ${isSelectedActive || isSelectedDual ? 'battle-hand-card-popup cursor-pointer -translate-y-8 z-[800] scale-110' : 'hover:-translate-y-4 hover:z-[700]'}
+                            ${isSelectedActive ? 'battle-hand-card-popup cursor-pointer z-[800]' : isSelectedDual ? 'battle-hand-card-combo-selected cursor-pointer z-[650]' : 'hover:-translate-y-4 hover:z-[700]'}
                             ${tutorialStep === 4 ? 'ring-4 ring-blue-500 ring-offset-2 ring-offset-transparent animate-pulse rounded-lg' : ''}
                         `}
                                 style={{
-                                    transform: isSelectedActive || isSelectedDual ? 'translateY(-24px) scale(1.1)' : `rotate(${rotation}deg) translateY(${translateY}px)`,
+                                    transform: isSelectedActive ? 'translateY(-24px) scale(1.1)' : isSelectedDual ? 'translateY(-7px) scale(1.025)' : `rotate(${rotation}deg) translateY(${translateY}px)`,
                                     zIndex: cardZIndex
                                 }}
                             >

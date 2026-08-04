@@ -178,18 +178,23 @@ const RewardScreen: React.FC<RewardScreenProps> = ({ rewards, onSelectReward, on
 
       {/* Replacement Modal */}
       {replaceReward && (
-           <div className="app-modal-overlay fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4" onClick={() => setReplaceReward(null)}>
-               <div className="app-modal-panel app-potion-replace-modal bg-gray-900 border-2 border-white p-6 rounded shadow-2xl max-sm w-full text-center animate-in fade-in zoom-in duration-200" onClick={e => e.stopPropagation()}>
-                   <div className="absolute top-2 right-2 cursor-pointer" onClick={() => setReplaceReward(null)}>
+           <div data-gamepad-modal data-gamepad-initial-scope="reward-potion-replace" className="app-modal-overlay app-potion-replace-modal-overlay fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4" onClick={() => setReplaceReward(null)}>
+               <div className="app-modal-panel app-potion-replace-modal relative bg-gray-900 border-2 border-white p-6 rounded shadow-2xl max-sm w-full text-center animate-in fade-in zoom-in duration-200" onClick={e => e.stopPropagation()}>
+                   <button type="button" data-gamepad-back className="absolute top-2 right-2 cursor-pointer" onClick={() => setReplaceReward(null)} aria-label={trans('やめる', languageMode)}>
                        <X size={24} className="text-gray-400 hover:text-white" />
-                   </div>
+                   </button>
                    <h3 className="text-xl font-bold text-white mb-4">{trans("ポーションがいっぱいです", languageMode)}</h3>
                    <p className="text-sm text-gray-300 mb-6">{trans("どれを捨てて入れ替えますか？", languageMode)}</p>
                    
                    <div className="flex justify-center gap-4 mb-4">
-                        {currentPotions.map(p => (
-                            <div 
-                                key={p.id} 
+                        {currentPotions.map((p, index) => (
+                            <div
+                                key={p.id}
+                                role="button"
+                                tabIndex={0}
+                                data-gamepad-initial-choice={index === 0 ? true : undefined}
+                                data-gamepad-zone="reward-potion-replace-options"
+                                data-gamepad-order={index}
                                 className="relative flex flex-col items-center cursor-pointer hover:scale-110 transition-transform"
                                 onClick={() => confirmReplace(p.id)}
                             >
@@ -202,7 +207,7 @@ const RewardScreen: React.FC<RewardScreenProps> = ({ rewards, onSelectReward, on
                         ))}
                    </div>
                    
-                   <button onClick={() => setReplaceReward(null)} className="mt-4 text-sm text-gray-500 hover:text-white underline">
+                   <button data-gamepad-back data-gamepad-zone="reward-potion-replace-cancel" data-gamepad-order={0} onClick={() => setReplaceReward(null)} className="mt-4 text-sm text-gray-500 hover:text-white underline">
                        {trans("やめる", languageMode)}{typingMode && ' [0]'}
                    </button>
                </div>

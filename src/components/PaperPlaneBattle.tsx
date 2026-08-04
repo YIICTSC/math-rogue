@@ -1597,6 +1597,7 @@ const ShipPartView: React.FC<{
             data-gamepad-down-zone={gamepadDownZone}
             data-gamepad-left-zone={gamepadLeftZone}
             data-gamepad-right-zone={gamepadRightZone}
+            data-gamepad-detail-target={onLongPress ? true : undefined}
             onClick={onClick}
             onKeyDown={(event) => { if (onClick && (event.key === 'Enter' || event.key === ' ')) { event.preventDefault(); onClick(); } }}
             onTouchStart={handleTouchStart}
@@ -1763,6 +1764,32 @@ const loadProgress = () => {
 
 const PaperPlaneBattle: React.FC<{ onBack: () => void; languageMode?: LanguageMode; debugPreview?: MiniGameDebugPreview }> = ({ onBack, languageMode = 'JAPANESE', debugPreview }) => {
     const t = (text: string) => trans(text, languageMode);
+    const isGenericEnglish = (text: string) => /^(?:Choose Option|Event Details|Item|Details(?:None)?)$/i.test(text.trim());
+    const paperPartTypeLabel = (type: ShipPart['type']) => ({
+        CANNON: 'Cannon', MISSILE: 'Missile', SHIELD: 'Shield', ENGINE: 'Engine', AMPLIFIER: 'Amplifier', EMPTY: 'Empty Slot',
+    }[type] || 'Part');
+    const translatePartName = (part: ShipPart) => {
+        if (languageMode !== 'ENGLISH') return t(part.name);
+        const translated = t(part.name);
+        if (!isGenericEnglish(translated)) return translated;
+        const effect = part.specialEffect
+            ? part.specialEffect.toLowerCase().split('_').map(word => word[0]?.toUpperCase() + word.slice(1)).join(' ')
+            : '';
+        return effect ? `${effect} ${paperPartTypeLabel(part.type)}` : `${paperPartTypeLabel(part.type)} Part`;
+    };
+    const translatePartDescription = (part: ShipPart) => {
+        if (languageMode !== 'ENGLISH') return t(part.description || '詳細なし');
+        const translated = t(part.description || '詳細なし');
+        if (!isGenericEnglish(translated)) return translated;
+        return ({
+            CANNON: 'Converts loaded Energy into direct attack power.',
+            MISSILE: 'A high-output weapon powered mainly by Blue or Orange Energy.',
+            SHIELD: 'Converts loaded Energy into Shield to reduce incoming damage.',
+            ENGINE: 'Converts output into Shield and restores Fuel.',
+            AMPLIFIER: 'Boosts the output of adjacent parts.',
+            EMPTY: 'No part is installed in this slot.',
+        } as Record<string, string>)[part.type] || 'A configurable paper-plane part.';
+    };
     useEffect(() => {
         const handleEscape = (event: KeyboardEvent) => {
             if (event.code !== 'Escape') return;
@@ -3411,9 +3438,9 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; languageMode?: LanguageMo
         };
 
         return (
-            <div className="absolute inset-0 bg-black/80 z-[60] flex items-center justify-center p-4" onClick={() => setTooltipPart(null)}>
+            <div data-gamepad-modal data-gamepad-navigation-root data-gamepad-initial-scope="paper-part-detail" className="absolute inset-0 bg-black/80 z-[60] flex items-center justify-center p-4" onClick={() => setTooltipPart(null)}>
                 <div className="bg-slate-800 border-2 border-white p-6 rounded-lg max-w-sm w-full shadow-2xl relative" onClick={e => e.stopPropagation()}>
-                    <button onClick={() => setTooltipPart(null)} className="absolute top-2 right-2 text-gray-400 hover:text-white"><X size={24}/></button>
+                    <button data-gamepad-zone="paper-part-detail" data-gamepad-order={0} data-gamepad-back data-gamepad-initial-choice onClick={() => setTooltipPart(null)} className="absolute top-2 right-2 text-gray-400 hover:text-white" aria-label={t('閉じる')}><X size={24}/></button>
                     
                     <div className="mb-2">
                         <span className={`text-xs font-bold px-2 py-0.5 rounded ${
@@ -3427,12 +3454,12 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; languageMode?: LanguageMo
                         </span>
                     </div>
 
-                    <h3 className="text-xl font-bold text-yellow-400 mb-2 border-b border-gray-600 pb-2">{tooltipPart.name}</h3>
-                    
-                    <div className="text-sm text-gray-300 mb-4 min-h-[3em]">{tooltipPart.description || "詳細なし"}</div>
-                    
+                    <h3 className="text-xl font-bold text-yellow-400 mb-2 border-b border-gray-600 pb-2">{translatePartName(tooltipPart)}</h3>
+
+                    <div className="text-sm text-gray-300 mb-4 min-h-[3em]">{translatePartDescription(tooltipPart)}</div>
+
                     <div className="bg-slate-700/50 p-2 rounded mb-4 text-xs text-white whitespace-pre-wrap border-l-2 border-yellow-500">
-                        {getTypeDescription(tooltipPart)}
+                        {languageMode === 'ENGLISH' ? translatePartDescription(tooltipPart) : getTypeDescription(tooltipPart)}
                     </div>
 
                     <div className="bg-black/40 p-2 rounded text-xs text-cyan-300 font-mono">
@@ -3445,10 +3472,10 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; languageMode?: LanguageMo
                              </>
                         ) : tooltipPart.type !== 'AMPLIFIER' ? (
                             <>
-                                <div>{t('倍率')}: x{tooltipPart.multiplier}</div>
+                                <div>{t('倍率')}: x{Number(tooltipPart.multiplier.toFixed(2))}</div>
                                 <div>{t('起動ボーナス')}: +{tooltipPart.basePower}</div>
                                 <div className="mt-2 text-gray-500">
-                                    Output = (Energy * {tooltipPart.multiplier}) + {tooltipPart.basePower}(if full)
+                                    Output = (Energy × {Number(tooltipPart.multiplier.toFixed(2))}) + {tooltipPart.basePower} (when full)
                                     {player.passivePower > 0 && <div className="text-purple-400">+ {player.passivePower} (Passive)</div>}
                                 </div>
                             </>
@@ -3727,13 +3754,13 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; languageMode?: LanguageMo
                                             <div className="paper-plane-pilot-name font-bold text-[10px] md:text-lg leading-tight text-center pr-4 md:pr-0">{t(pilot.name)}</div>
                                         </div>
 
-                                        <div className="paper-plane-pilot-main-trait text-[9px] md:text-sm bg-slate-800 border border-yellow-500/30 p-1.5 md:p-3 rounded mt-auto w-full min-h-[64px] md:min-h-[92px] flex flex-col justify-start">
+                                        <div className="paper-plane-pilot-main-trait paper-plane-scrollable-copy text-[9px] md:text-sm bg-slate-800 border border-yellow-500/30 p-1.5 md:p-3 rounded mt-auto w-full min-h-[64px] md:min-h-[92px] flex flex-col justify-start overflow-y-auto overscroll-contain">
                                             <div className="font-bold text-yellow-400 mb-1 flex items-center leading-tight"><Zap size={12} className="mr-1 shrink-0 md:w-3.5 md:h-3.5"/> {t(pilot.intrinsicTalent.name)}</div>
                                             <div className="text-gray-300 leading-tight md:leading-relaxed font-bold">{t(pilot.intrinsicTalent.description)}</div>
                                         </div>
                                         
                                         {pilot.randomTalents && pilot.randomTalents.length > 0 && (
-                                            <div className="paper-plane-pilot-random-trait text-[8px] md:text-xs bg-indigo-900/40 p-1.5 md:p-2 rounded mt-1 md:mt-2 w-full leading-tight">
+                                            <div className="paper-plane-pilot-random-trait paper-plane-scrollable-copy text-[8px] md:text-xs bg-indigo-900/40 p-1.5 md:p-2 rounded mt-1 md:mt-2 w-full leading-tight overflow-y-auto overscroll-contain">
                                                 <div className="font-bold text-indigo-300 mb-0.5 md:mb-1 flex items-center"><Star size={10} className="mr-1 shrink-0 md:w-3 md:h-3"/> {t('ランダム特性')}</div>
                                                 {pilot.randomTalents.map((t, idx) => (
                                                     <div key={idx} className="mb-0.5 md:mb-1 last:mb-0">
@@ -3904,7 +3931,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; languageMode?: LanguageMo
                                  <ShipPartView part={part} languageMode={languageMode} onLongPress={(p) => setTooltipPart(p)} />
                              </div>
                              <div className="font-bold text-cyan-300 mb-1 text-sm md:text-base">{t(part.name)}</div>
-                             <div className="text-[10px] text-gray-400 text-center h-10 overflow-hidden leading-tight">{t(part.description)}</div>
+                             <div className="paper-plane-scrollable-copy h-10 overflow-y-auto overscroll-contain text-center text-[10px] leading-tight text-gray-400">{t(part.description)}</div>
                              <button className="mt-2 bg-cyan-600 px-4 py-1 rounded text-xs font-bold group-hover:bg-cyan-500">{t('獲得')}</button>
                          </div>
                      ))}
@@ -3934,7 +3961,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; languageMode?: LanguageMo
                              </div>
                              <div className="text-left">
                                  <div className="font-bold text-white">{t(pendingPart.name)}</div>
-                                 <div className="text-xs text-gray-400">{t(pendingPart.description)}</div>
+                                 <div className="paper-plane-scrollable-copy max-h-16 overflow-y-auto overscroll-contain text-xs text-gray-400">{t(pendingPart.description)}</div>
                              </div>
                          </div>
                      )}
@@ -4178,7 +4205,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; languageMode?: LanguageMo
                                         </div>
                                         <div className="w-full">
                                             <div className="font-bold text-sm mb-1 truncate text-cyan-100">{t(event.name)}</div>
-                                            <div className="text-[10px] text-gray-400 leading-tight line-clamp-2 min-h-[2.5em]">{t(event.description)}</div>
+                                            <div className="paper-plane-scrollable-copy max-h-12 min-h-[2.5em] overflow-y-auto overscroll-contain text-[10px] leading-tight text-gray-400">{t(event.description)}</div>
                                         </div>
                                     </button>
                                 ))}
@@ -4337,7 +4364,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; languageMode?: LanguageMo
 
                 {/* Logs */}
                 <div className="absolute bottom-2 right-2 w-48 pointer-events-none opacity-70 z-20">
-                    {logs.map((l, i) => <div key={i} className="text-[10px] text-right bg-black/50 mb-0.5 px-1 rounded">{l}</div>)}
+                    {logs.map((l, i) => <div key={i} className="text-[10px] text-right bg-black/50 mb-0.5 px-1 rounded">{t(l)}</div>)}
                 </div>
             </div>
             

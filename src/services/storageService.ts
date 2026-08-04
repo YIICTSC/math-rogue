@@ -1,6 +1,7 @@
 
 import { AssignmentAnswerRecord, AssignmentPayload, GameState, GameScreen, RankingEntry, Card, PokerScoreEntry, SurvivorScoreEntry, DungeonScoreEntry, PokerRunState, KochoScoreEntry, PaperPlaneScoreEntry, LanguageMode, GoHomeScoreEntry, StudentProfile } from '../types';
 import type { MagicEndingGalleryEntry } from './magicEndingService';
+import type { ThemedEndingGalleryEntry } from '../data/themedEndingSequences';
 import type { VisualThemeId } from '../data/visualThemes';
 import type { ProblemSetView } from '../utils/localePreferences';
 import { isProblemSetView } from '../utils/localePreferences';
@@ -11,6 +12,7 @@ const STORAGE_KEY_UNLOCKED_RELICS = 'pixel_spire_unlocked_relics_v1';
 const STORAGE_KEY_UNLOCKED_POTIONS = 'pixel_spire_unlocked_potions_v1';
 const STORAGE_KEY_DEFEATED_ENEMIES = 'pixel_spire_defeated_enemies_v1';
 const STORAGE_KEY_MAGIC_ENDING_GALLERY = 'pixel_spire_magic_ending_gallery_v1';
+const STORAGE_KEY_THEMED_ENDING_GALLERY = 'pixel_spire_themed_ending_gallery_v1';
 
 const STORAGE_KEY_GAME_STATE = 'pixel_spire_save_state_v1';
 const STORAGE_KEY_CLEAR_COUNT = 'pixel_spire_clear_count_v1';
@@ -643,6 +645,31 @@ export const storageService = {
       localStorage.setItem(STORAGE_KEY_MAGIC_ENDING_GALLERY, JSON.stringify(Array.from(byId.values())));
     } catch (e) {
       console.warn("Failed to save magic ending gallery", e);
+    }
+  },
+
+  getThemedEndingGallery: (): ThemedEndingGalleryEntry[] => {
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY_THEMED_ENDING_GALLERY);
+      const parsed = stored ? JSON.parse(stored) : [];
+      return Array.isArray(parsed) ? parsed : [];
+    } catch (e) {
+      return [];
+    }
+  },
+
+  saveThemedEndingGalleryEntry: (entry: ThemedEndingGalleryEntry) => {
+    try {
+      const current = storageService.getThemedEndingGallery();
+      const byId = new Map(current.map(item => [item.id, item]));
+      byId.set(entry.id, {
+        ...byId.get(entry.id),
+        ...entry,
+        unlockedAt: byId.get(entry.id)?.unlockedAt ?? entry.unlockedAt,
+      });
+      localStorage.setItem(STORAGE_KEY_THEMED_ENDING_GALLERY, JSON.stringify(Array.from(byId.values())));
+    } catch (e) {
+      console.warn('Failed to save themed ending gallery', e);
     }
   },
 
@@ -1559,6 +1586,7 @@ export const storageService = {
       localStorage.removeItem(STORAGE_KEY_UNLOCKED_POTIONS);
       localStorage.removeItem(STORAGE_KEY_DEFEATED_ENEMIES);
       localStorage.removeItem(STORAGE_KEY_MAGIC_ENDING_GALLERY);
+      localStorage.removeItem(STORAGE_KEY_THEMED_ENDING_GALLERY);
       localStorage.removeItem(STORAGE_KEY_GAME_STATE);
       localStorage.removeItem(STORAGE_KEY_CLEAR_COUNT);
       localStorage.removeItem(STORAGE_KEY_THEME_CLEAR_COUNTS);

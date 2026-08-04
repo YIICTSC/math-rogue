@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useCallback, useLayoutEffect } from 'react';
 import { ArrowLeft, Play, X, RotateCcw, Swords, Shield, RefreshCw, Zap, Skull, ChevronsRight, ChevronLeft, ChevronRight, Clock, Ghost, ArrowRightLeft, Gift, ShoppingBag, Hammer, Coins, Plus, Crosshair, Heart, Move, AlertTriangle, Hourglass, Maximize2, Minimize2, Wind, Anchor, Flame, Activity, ArrowUp, Dna, Shuffle, Star, HelpCircle, Book, AlertCircle, Flag, Music, Mic, Milk, Battery, ShieldCheck, Bomb, Utensils, PenTool, Circle, ArrowRight, Target, Package } from 'lucide-react';
 import { audioService } from '../services/audioService';
 import { storageService } from '../services/storageService';
@@ -238,6 +238,31 @@ const KochoSheetSprite: React.FC<{
         }}
     />
 );
+
+const KochoMarqueeText: React.FC<{ text: string; className?: string }> = ({ text, className = '' }) => {
+    const viewportRef = useRef<HTMLDivElement>(null);
+    const measureRef = useRef<HTMLSpanElement>(null);
+    const [overflowing, setOverflowing] = useState(false);
+
+    useLayoutEffect(() => {
+        const measure = () => setOverflowing(
+            Boolean(viewportRef.current && measureRef.current && measureRef.current.scrollWidth > viewportRef.current.clientWidth + 1)
+        );
+        measure();
+        const observer = typeof ResizeObserver !== 'undefined' ? new ResizeObserver(measure) : null;
+        if (observer && viewportRef.current) observer.observe(viewportRef.current);
+        return () => observer?.disconnect();
+    }, [text]);
+
+    return (
+        <div ref={viewportRef} className={`kocho-card-title-marquee ${className}`} title={text}>
+            <div className={overflowing ? 'kocho-card-title-marquee-track is-moving' : 'kocho-card-title-marquee-track'}>
+                <span ref={measureRef}>{text}</span>
+                {overflowing && <span aria-hidden="true">{text}</span>}
+            </div>
+        </div>
+    );
+};
 
 const KOCHO_ACTION_CARD_NAMES = [
     '定規スラッシュ', 'コンパス突き', 'ダッシュ', 'バックステップ', '大声',
@@ -3175,7 +3200,7 @@ const KochoShowdown: React.FC<{
                             )}
                             <div className="absolute top-4 left-1/2 -translate-x-1/2 w-full max-w-lg text-center pointer-events-none z-10">
                                 {gameState.logs.map((log, i) => (
-                                    <div key={i} className={`text-sm ${i===0 ? 'text-white font-bold text-shadow-md' : 'text-gray-500'} transition-opacity duration-500`}>{log}</div>
+                                    <div key={i} className={`text-sm ${i===0 ? 'text-white font-bold text-shadow-md' : 'text-gray-500'} transition-opacity duration-500`}>{tr(log)}</div>
                                 ))}
                             </div>
 
@@ -3220,7 +3245,7 @@ const KochoShowdown: React.FC<{
                                             }}
                                         >
                                             <div className={`w-full h-1 ${card.color} absolute top-0`}></div>
-                                            <div className="text-[9px] md:text-xs text-center font-bold px-1 overflow-hidden whitespace-nowrap text-ellipsis w-full">{tr(card.name)}</div>
+                                            <KochoMarqueeText text={tr(card.name)} className="text-[9px] md:text-xs text-center font-bold px-1 w-full" />
                                             <KochoCardActionArt card={card} className="kocho-queue-card-art h-7 w-7 rounded bg-black/40" />
                                             <X size={12} className="absolute -top-1 -right-1 bg-red-500 rounded-full text-white opacity-0 group-hover:opacity-100"/>
                                         </div>
@@ -3259,7 +3284,7 @@ const KochoShowdown: React.FC<{
                                     </div>
 
                                     <div className="flex flex-col h-full w-full pt-2">
-                                        <div className="text-[11px] md:text-xs font-bold text-center leading-tight truncate px-3">{tr(card.name)}</div>
+                                        <KochoMarqueeText text={tr(card.name)} className="text-[11px] md:text-xs font-bold text-center leading-tight px-3" />
                                         <KochoCardActionArt card={card} className="kocho-hand-card-art mx-auto my-1 h-12 w-12 md:h-14 md:w-14 rounded-lg bg-black/40 border border-slate-700" />
                                         <div className="text-[9px] md:text-[10px] text-gray-300 text-center leading-tight min-h-[2.4em] max-h-[2.4em] overflow-hidden">{tr(card.description)}</div>
                                         <div className="flex justify-center gap-1 mt-1">

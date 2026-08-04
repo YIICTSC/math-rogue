@@ -2427,7 +2427,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
             <div
                 data-gamepad-modal
                 data-gamepad-initial-scope={`poker-tutorial-${tutorialStepIndex}`}
-                className="fixed inset-0 z-[55] pointer-events-none"
+                className="fixed inset-0 z-[10080] pointer-events-none"
             >
                 <div className="absolute inset-0 bg-black/55" />
                 <div className={getPokerTutorialPanelClass()}>

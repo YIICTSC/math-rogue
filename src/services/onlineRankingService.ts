@@ -160,9 +160,6 @@ const getApiBase = () => {
 };
 
 const request = async <T>(path: string, init: RequestInit = {}, auth = false): Promise<T> => {
-  if (!childSafetyService.canContactRemoteServices()) {
-    throw new Error('年齢区分を選択するまでオンライン機能は利用できません。');
-  }
   const base = getApiBase();
   if (!base) throw new Error('オンラインランキングは準備中です。');
   const profile = onlineRankingService.getProfile();
@@ -484,7 +481,6 @@ export const onlineRankingService = {
         acceptedTerms: true,
         platform: getPlatform(),
         source: 'learning-rogue',
-        ageBand: childSafetyService.getSettings().ageBand,
       }),
     });
     const profile = { ...data.player, token: data.token };

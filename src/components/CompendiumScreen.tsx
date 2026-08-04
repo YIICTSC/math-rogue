@@ -19,6 +19,8 @@ import { getHumanoidEnemyVoiceProfile, type HumanoidEnemyVoiceAction } from '../
 import { MAGIC_CARDS } from '../data/magicCards';
 import { getMagicCardArtUrl } from '../utils/cardArtPaths';
 import { getDebugMagicEndingGalleryEntries, type MagicEndingGalleryEntry } from '../services/magicEndingService';
+import { getThemedEndingCharacterName, getThemedEndingToneLabel, type ThemedEndingGalleryEntry } from '../data/themedEndingSequences';
+import ThemedEndingSequenceScreen from './ThemedEndingSequenceScreen';
 
 interface CompendiumScreenProps {
     unlockedCardNames: string[];
@@ -148,6 +150,7 @@ const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, 
     const [unlockedPotions, setUnlockedPotions] = useState<string[]>([]);
     const [defeatedEnemies, setDefeatedEnemies] = useState<string[]>([]);
     const [magicEndings, setMagicEndings] = useState<MagicEndingGalleryEntry[]>([]);
+    const [themedEndings, setThemedEndings] = useState<ThemedEndingGalleryEntry[]>([]);
     const [enemyCompendiumTheme, setEnemyCompendiumTheme] = useState<VisualThemeId>(visualTheme);
 
     const [selectedItem, setSelectedItem] = useState<{
@@ -157,6 +160,7 @@ const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, 
     } | null>(null);
     const [fullscreenArtCard, setFullscreenArtCard] = useState<ICard | null>(null);
     const [selectedEnding, setSelectedEnding] = useState<MagicEndingGalleryEntry | null>(null);
+    const [selectedThemedEnding, setSelectedThemedEnding] = useState<ThemedEndingGalleryEntry | null>(null);
     const [showBgmMode, setShowBgmMode] = useState(false);
 
     const longPressTimer = useRef<any>(null);
@@ -186,6 +190,7 @@ const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, 
         setUnlockedPotions(storageService.getUnlockedPotions());
         setDefeatedEnemies(storageService.getDefeatedEnemies());
         setMagicEndings(storageService.getMagicEndingGallery());
+        setThemedEndings(storageService.getThemedEndingGallery());
     }, []);
 
     useEffect(() => {
@@ -270,6 +275,10 @@ const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, 
         () => [...visibleMagicEndings].sort((a, b) => b.unlockedAt - a.unlockedAt || a.heroName.localeCompare(b.heroName) || a.title.localeCompare(b.title)),
         [visibleMagicEndings]
     );
+    const sortedThemedEndings = useMemo(
+        () => [...themedEndings].sort((a, b) => b.unlockedAt - a.unlockedAt || a.characterName.localeCompare(b.characterName) || a.variant.id.localeCompare(b.variant.id)),
+        [themedEndings]
+    );
 
     const handleItemClick = (type: 'CARD' | 'RELIC' | 'POTION' | 'ENEMY', data: any, unlocked: boolean) => {
         if (type === 'ENEMY' && unlocked) {
@@ -321,7 +330,7 @@ const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, 
                         {activeTab === 'RELICS' && <p className="text-xs text-gray-400">{trans("収集率", languageMode)}: {unlockedRelicsCount}/{totalRelics} ({relicsPercentage}%) {isDebug && "(DEBUG ON)"}</p>}
                         {activeTab === 'POTIONS' && <p className="text-xs text-gray-400">{trans("収集率", languageMode)}: {unlockedPotionsCount}/{totalPotions} ({potionsPercentage}%) {isDebug && "(DEBUG ON)"}</p>}
                         {activeTab === 'ENEMIES' && <p className="text-xs text-gray-400">{trans("収集率", languageMode)}: {defeatedEnemiesCount}/{totalEnemies} ({enemiesPercentage}%) {isDebug && "(DEBUG ON)"}</p>}
-                        {activeTab === 'ENDINGS' && <p className="text-xs text-gray-400">{trans("到達済み", languageMode)}: {sortedMagicEndings.length} {trans("件", languageMode)} {isDebug && "(DEBUG ON)"}</p>}
+                        {activeTab === 'ENDINGS' && <p className="text-xs text-gray-400">{trans("到達済み", languageMode)}: {sortedMagicEndings.length + sortedThemedEndings.length} {trans("件", languageMode)} {isDebug && "(DEBUG ON)"}</p>}
                     </div>
                 </div>
 
@@ -495,8 +504,39 @@ const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, 
                 )}
 
                 {activeTab === 'ENDINGS' && (
-                    sortedMagicEndings.length > 0 ? (
+                    sortedMagicEndings.length + sortedThemedEndings.length > 0 ? (
                         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                            {sortedThemedEndings.map((ending) => {
+                                const firstPage = ending.variant.pages[0];
+                                const title = languageMode === 'ENGLISH' ? firstPage.titleEnglish : languageMode === 'HIRAGANA' ? firstPage.titleHiragana : firstPage.title;
+                                const text = languageMode === 'ENGLISH' ? firstPage.textEnglish : languageMode === 'HIRAGANA' ? firstPage.textHiragana : firstPage.text;
+                                const themeLabel = ending.theme === 'high-school'
+                                    ? languageMode === 'ENGLISH' ? 'High School' : languageMode === 'HIRAGANA' ? 'こうこうへん' : '高校編'
+                                    : languageMode === 'ENGLISH' ? 'Elementary' : languageMode === 'HIRAGANA' ? 'しょうがくせいへん' : '小学生編';
+                                const characterLabel = getThemedEndingCharacterName(ending.theme, ending.characterId, languageMode);
+                                const toneLabel = getThemedEndingToneLabel(ending.variant.tone, languageMode);
+                                return (
+                                    <button
+                                        key={ending.id}
+                                        onClick={() => setSelectedThemedEnding(ending)}
+                                        className="group overflow-hidden rounded-lg border border-amber-300/40 bg-slate-950/80 text-left shadow-xl transition hover:border-amber-200 hover:bg-slate-900"
+                                    >
+                                        <div className="relative aspect-[16/10] overflow-hidden bg-black">
+                                            <img src={assetUrl(firstPage.imagePath)} alt={title} className="h-full w-full object-cover transition duration-300 group-hover:scale-105" />
+                                            <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/15 to-transparent" />
+                                            <div className="absolute bottom-2 left-2 right-2 flex items-center justify-between gap-2">
+                                                <span className="rounded bg-amber-300 px-2 py-1 text-[10px] font-black text-slate-950">{themeLabel}</span>
+                                                <span className="flex items-center rounded bg-black/70 px-2 py-1 text-[10px] font-bold text-white"><Play size={12} className="mr-1" /> PLAY</span>
+                                            </div>
+                                        </div>
+                                        <div className="p-3">
+                                            <div className="text-[11px] font-bold text-amber-200">{characterLabel} / {toneLabel}</div>
+                                            <div className="mt-1 line-clamp-2 text-sm font-black text-white">{title}</div>
+                                            <div className="mt-2 line-clamp-2 text-xs leading-relaxed text-slate-300">{text}</div>
+                                        </div>
+                                    </button>
+                                );
+                            })}
                             {sortedMagicEndings.map((ending) => (
                                 <button
                                     key={ending.id}
@@ -535,9 +575,9 @@ const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, 
                     ) : (
                         <div className="mx-auto flex min-h-[45vh] max-w-xl flex-col items-center justify-center rounded-lg border border-white/10 bg-black/55 p-8 text-center">
                             <Lock size={38} className="mb-4 text-slate-500" />
-                            <h3 className="text-xl font-black text-white">{trans("マジック編エンディング未到達", languageMode)}</h3>
+                            <h3 className="text-xl font-black text-white">{trans("エンディング未到達", languageMode)}</h3>
                             <p className="mt-3 text-sm leading-relaxed text-slate-300">
-                                {trans("マジック編で恋愛エンド、修羅場エンド、友情エンドに到達すると、ここでイラストとボイス付きイベントを振り返れます。", languageMode)}
+                                {trans("各編のラスボスを倒してエンディングに到達すると、ここでイラストと物語を振り返れます。", languageMode)}
                             </p>
                         </div>
                     )
@@ -633,6 +673,19 @@ const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, 
                     languageMode={languageMode}
                     onClose={() => setSelectedEnding(null)}
                 />
+            )}
+            {selectedThemedEnding && (
+                <div className="fixed inset-0 z-[75]">
+                    <ThemedEndingSequenceScreen
+                        theme={selectedThemedEnding.theme}
+                        characterId={selectedThemedEnding.characterId}
+                        characterName={selectedThemedEnding.characterName}
+                        languageMode={languageMode}
+                        variantId={selectedThemedEnding.variant.id}
+                        onComplete={() => setSelectedThemedEnding(null)}
+                    />
+                    <button data-gamepad-back onClick={() => setSelectedThemedEnding(null)} className="absolute right-3 top-3 z-20 rounded-full border border-white/20 bg-black/70 p-2.5 text-white/90 hover:text-white"><X size={24} /></button>
+                </div>
             )}
             {showBgmMode && (
                 <CompendiumBgmModeModal

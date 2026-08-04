@@ -547,12 +547,25 @@ const scrollWithRightStick = (amount: number) => {
 const triggerShortcutButton = (buttonName: ShortcutButtonName): boolean => {
   const modal = getTopmostVisibleGamepadModal();
   const active = document.activeElement instanceof HTMLElement ? document.activeElement : null;
+  const detailTarget = active?.closest<HTMLElement>('[data-gamepad-detail-target]')
+    ?? document.querySelector<HTMLElement>('[data-gamepad-detail-target]:focus');
   if (
     buttonName === 'Y'
     && !modal
     && active?.matches('[data-gamepad-delete-target]')
   ) {
     active.dispatchEvent(new MouseEvent('contextmenu', {
+      bubbles: true,
+      cancelable: true,
+      view: window,
+    }));
+    return true;
+  }
+  if (
+    buttonName === 'Y'
+    && detailTarget
+  ) {
+    detailTarget.dispatchEvent(new MouseEvent('contextmenu', {
       bubbles: true,
       cancelable: true,
       view: window,

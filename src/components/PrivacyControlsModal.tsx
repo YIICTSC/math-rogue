@@ -17,13 +17,6 @@ type Props = {
   onManagementProfileChange: (profile: ManagementProfile | null) => void;
 };
 
-const ageLabel: Record<string, string> = {
-  '9_12': '9〜12歳',
-  '13_15': '13〜15歳',
-  '16_17': '16〜17歳',
-  '18_PLUS': '18歳以上',
-};
-
 export default function PrivacyControlsModal(props: Props) {
   const { open, languageMode, onClose, onlineProfile, managementProfile, onOnlineProfileChange, onManagementProfileChange } = props;
   const t = (text: string) => trans(text, languageMode);
@@ -92,11 +85,10 @@ export default function PrivacyControlsModal(props: Props) {
         <button data-gamepad-back data-gamepad-initial-choice onClick={onClose} className="rounded-lg border border-slate-600 p-2" aria-label={t('閉じる')}><X size={18} /></button>
       </header>
       <div className="mt-5 grid gap-3 sm:grid-cols-2">
-        <article className="rounded-xl border border-slate-700 bg-slate-900 p-4"><small className="text-slate-400">{t('年齢区分')}</small><strong className="mt-1 block text-lg">{settings.ageBand ? t(ageLabel[settings.ageBand]) : t('未設定')}</strong></article>
         <article className="rounded-xl border border-slate-700 bg-slate-900 p-4"><small className="text-slate-400">{t('教員・保護者向け学習集計')}</small><strong className="mt-1 block text-lg">{managementProfile ? `${t('連携中')}（${settings.learningAggregationAuthority === 'guardian' ? t('保護者') : t('学校')}）` : t('未連携')}</strong></article>
         <article className="rounded-xl border border-slate-700 bg-slate-900 p-4"><small className="text-slate-400">{t('匿名ランキング')}</small><strong className="mt-1 block text-lg">{onlineProfile ? `${t('参加中')}: ${onlineProfile.displayName}` : t('未参加')}</strong></article>
-        <article className="rounded-xl border border-slate-700 bg-slate-900 p-4"><small className="text-slate-400">{t('公開ランキング')}</small><strong className="mt-1 block text-lg">{t('年齢に関係なく利用可能')}</strong></article>
-        <article className="rounded-xl border border-slate-700 bg-slate-900 p-4"><small className="text-slate-400">{t('協力・レース通信')}</small><strong className="mt-1 block text-lg">{t('年齢に関係なく利用可能')}</strong></article>
+        <article className="rounded-xl border border-slate-700 bg-slate-900 p-4"><small className="text-slate-400">{t('公開ランキング')}</small><strong className="mt-1 block text-lg">{t('任意参加・匿名公開名')}</strong></article>
+        <article className="rounded-xl border border-slate-700 bg-slate-900 p-4"><small className="text-slate-400">{t('協力・レース通信')}</small><strong className="mt-1 block text-lg">{t('自由入力チャットなし')}</strong></article>
       </div>
       <div className="mt-5 grid gap-2 sm:grid-cols-2">
         {managementProfile && <button disabled={busy} onClick={() => void unlink()} className="flex items-center justify-center gap-2 rounded-xl border border-slate-500 bg-slate-800 px-4 py-3 font-black"><Unlink size={17} />{t('端末連携を解除')}</button>}
