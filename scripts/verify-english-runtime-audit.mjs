@@ -80,26 +80,32 @@ try {
   }
   console.log('English runtime audit sentinel passed on the normal English title screen.');
 
+  const normalizeAssetName = (value) => value.normalize('NFC');
   const dedicatedCardArtNames = readdirSync('public/card-illustrations', { withFileTypes: true })
     .filter((entry) => entry.isFile() && entry.name.endsWith('.webp'))
-    .map((entry) => entry.name.slice(0, -'.webp'.length));
+    .map((entry) => normalizeAssetName(entry.name.slice(0, -'.webp'.length)));
   const cardArtAudit = await page.evaluate(async (assetNames) => {
     const [{ CARDS_LIBRARY }, { getAge9CardArtAlias, getCardIllustrationPaths }, { buildEnglishCardName }] = await Promise.all([
       import('/src/constants.ts'),
       import('/src/utils/cardIllustration.ts'),
       import('/src/utils/textUtils.ts'),
     ]);
-    const available = new Set(assetNames);
+    const normalizeAssetName = (value) => value.normalize('NFC');
+    const available = new Set(assetNames.map(normalizeAssetName));
     const failures = [];
     let auditedCount = 0;
     for (const [id, template] of Object.entries(CARDS_LIBRARY)) {
-      if (!available.has(template.name)) continue;
+      if (!available.has(normalizeAssetName(template.name))) continue;
       auditedCount += 1;
       const card = { ...template, id };
       const translatedName = buildEnglishCardName(card);
       const paths = getCardIllustrationPaths(id, translatedName, [template.name, ...(template.originalNames || [])]);
-      const firstFile = decodeURIComponent(new URL(paths[0], location.href).pathname.split('/').pop() || '').replace(/\.webp$/, '');
-      const expectedFile = getAge9CardArtAlias([template.name, ...(template.originalNames || [])]) || template.name;
+      const firstFile = normalizeAssetName(
+        decodeURIComponent(new URL(paths[0], location.href).pathname.split('/').pop() || '').replace(/\.webp$/, '')
+      );
+      const expectedFile = normalizeAssetName(
+        getAge9CardArtAlias([template.name, ...(template.originalNames || [])]) || template.name
+      );
       if (firstFile !== expectedFile) {
         failures.push({ id, name: template.name, translatedName, expectedFile, firstFile });
       }
