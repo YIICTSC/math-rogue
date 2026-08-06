@@ -591,6 +591,8 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
       setIdentifiedTypes(new Set(save.identifiedTypes || [])); 
       setIsEndless(save.isEndless);
       turnCounter.current = save.turnCounter;
+      setShopState(save.shopState || { active: false, merchantId: null, mode: 'BUY' });
+      setSynthState(save.synthState || { active: false, mode: 'SYNTH', step: 'SELECT_BASE', baseIndex: null });
       if (save.dungeonDeck) {
           const hydrateCards = (cards: any[]) => cards.map(c => {
               const template = DUNGEON_CARD_DB.find(t => t.templateId === c.templateId);
@@ -603,20 +605,32 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
       addLog("冒険を再開した。", currentTheme.colors.C2);
   };
 
-  const saveData = useCallback(() => {
+  const saveData = useCallback((immediate = false) => {
       if (debugPreview || gameOver || gameClear) return;
-      if (saveDebounceRef.current) clearTimeout(saveDebounceRef.current);
-      saveDebounceRef.current = setTimeout(() => {
+      const persist = () => {
           const state = {
-              map, visitedMap, floorMapRevealed, rooms: roomsRef.current, 
+              map, visitedMap, floorMapRevealed, rooms: roomsRef.current,
               player, enemies, floorItems, traps, inventory,
               floor, level, belly, maxBelly, idMap, identifiedTypes: Array.from(identifiedTypes),
               isEndless, turnCounter: turnCounter.current,
-              dungeonDeck, dungeonHand, dungeonDiscard 
+              dungeonDeck, dungeonHand, dungeonDiscard,
+              shopState, synthState
           };
           storageService.saveDungeonState2(state);
-      }, 500); 
-  }, [map, visitedMap, floorMapRevealed, player, enemies, floorItems, traps, inventory, floor, level, belly, maxBelly, idMap, identifiedTypes, isEndless, debugPreview, gameOver, gameClear, dungeonDeck, dungeonHand, dungeonDiscard]);
+      };
+      if (immediate) {
+          persist();
+          return;
+      }
+      if (saveDebounceRef.current) clearTimeout(saveDebounceRef.current);
+      saveDebounceRef.current = setTimeout(persist, 500);
+  }, [map, visitedMap, floorMapRevealed, player, enemies, floorItems, traps, inventory, floor, level, belly, maxBelly, idMap, identifiedTypes, isEndless, shopState, synthState, debugPreview, gameOver, gameClear, dungeonDeck, dungeonHand, dungeonDiscard]);
+
+  useEffect(() => {
+      const handlePageHide = () => saveData(true);
+      window.addEventListener('pagehide', handlePageHide);
+      return () => window.removeEventListener('pagehide', handlePageHide);
+  }, [saveData]);
 
   const stableSpriteIndex = (value: string, modulo: number) => {
       let hash = 0;
@@ -831,7 +845,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
       });
   }, [player.x, player.y]);
 
-  useEffect(() => { if (!gameOver && !gameClear) saveData(); }, [player, inventory, floor, level, belly, enemies, floorItems, traps, gameOver, gameClear, saveData]);
+  useEffect(() => { if (!gameOver && !gameClear) saveData(); }, [player, inventory, floor, level, belly, enemies, floorItems, traps, shopState, synthState, gameOver, gameClear, saveData]);
 
   useEffect(() => {
       if (menuListRef.current) {
@@ -1170,7 +1184,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
     setInheritItemIdx(null);
   };
 
-  const handleQuit = () => { saveData(); onBack(); };
+  const handleQuit = () => { saveData(true); onBack(); };
   const isPointInRoom = (x: number, y: number) => (roomsRef.current || []).some(r => x >= r.x && x < r.x + r.w && y >= r.y && y < r.y + r.h);
   const createShopkeeper = (x: number, y: number): Entity => {
       const shopItems: Item[] = [];

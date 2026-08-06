@@ -1039,6 +1039,7 @@ export interface PokerBlind {
 }
 
 export interface PokerRunState {
+  phase?: PokerPhase;
   deck: PokerCard[];
   money: number;
   ante: number;
@@ -1061,6 +1062,8 @@ export interface PokerRunState {
   shopVoucher: PokerVoucher | null;
   voucherRestockedAnte: number;
 }
+
+export type PokerPhase = 'BLIND_SELECT' | 'PLAY' | 'SHOP' | 'PACK_OPEN' | 'GAME_OVER' | 'VICTORY_WAIT' | 'VICTORY' | 'MATH';
 
 export interface PokerScoreEntry {
   id: string;

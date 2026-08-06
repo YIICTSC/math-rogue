@@ -1024,6 +1024,17 @@ const BattleScene: React.FC<BattleSceneProps> = ({
         return 0;
     });
 
+    const getEffectiveBattleCard = (card: ICard): ICard => {
+        let effectiveCard = { ...card };
+        if (player.magicTransformed && !card.transformedOnly) {
+            effectiveCard = boostMagicCardForTransformation(effectiveCard, 0, 0);
+        }
+        if (player.powers['CORRUPTION'] && card.type === CardType.SKILL) {
+            effectiveCard.cost = 0;
+        }
+        return effectiveCard;
+    };
+
     const handleCardClickDual = (card: ICard, disabled: boolean) => {
         if (disabled || isComboing) {
             if (isDualMode && (hasChoker || normalityRestricted)) audioService.playBattleSound('wrong');
@@ -1057,7 +1068,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
         if (requestedCardIds.length === 1) {
             const c1 = player.hand.find(c => c.id === requestedCardIds[0]);
             if (c1) {
-                if (player.currentEnergy < c1.cost) {
+                if (player.currentEnergy < getEffectiveBattleCard(c1).cost) {
                     audioService.playBattleSound('wrong');
                     return;
                 }
@@ -1072,9 +1083,11 @@ const BattleScene: React.FC<BattleSceneProps> = ({
 
         if (!c1 || !c2) return;
 
+        const effectiveC1 = getEffectiveBattleCard(c1);
+        const effectiveC2 = getEffectiveBattleCard(c2);
         const isCombo = friendshipComboEnabled && c1.type === c2.type && !c1.familiarSummon && !c2.familiarSummon;
-        const comboCost = Math.max(c1.cost, c2.cost);
-        const totalCost = c1.cost + c2.cost;
+        const comboCost = Math.max(effectiveC1.cost, effectiveC2.cost);
+        const totalCost = effectiveC1.cost + effectiveC2.cost;
         const requiredCost = isCombo ? comboCost : totalCost;
 
         if (player.currentEnergy < requiredCost) {
@@ -1089,7 +1102,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
             audioService.playBattleSound('buff');
 
             await new Promise(r => setTimeout(r, 240));
-            const comboPayload = { ...fused, _consumedIds: [c1.id, c2.id] };
+            const comboPayload = { ...fused, cost: comboCost, _consumedIds: [c1.id, c2.id] };
             onPlaySynthesizedCard(comboPayload);
 
         } else {
@@ -2646,13 +2659,8 @@ const BattleScene: React.FC<BattleSceneProps> = ({
 
                         const specialDisabled = isClashDisabled || isGrandFinaleDisabled || isChokerDisabled || isNormalityDisabled || isDiscardCostDisabled;
 
-                        let displayCard = { ...card };
-                        if (player.magicTransformed && !card.transformedOnly) {
-                            displayCard = boostMagicCardForTransformation(displayCard, 0, 0);
-                        }
-                        if (player.powers['CORRUPTION'] && card.type === CardType.SKILL) {
-                            displayCard.cost = 0;
-                        }
+                        const displayCard = getEffectiveBattleCard(card);
+                        const isEnergyDisabled = player.currentEnergy < displayCard.cost;
 
                         const mid = (player.hand.length - 1) / 2;
                         const dist = i - mid;
@@ -2730,7 +2738,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                                 selectionState.active
                                                     ? false
                                                     : (isFriendshipComboSelectionMode
-                                                        ? (!!actingEnemyId || card.unplayable || specialDisabled || selfDown || !coopCanAct)
+                                                        ? (isEnergyDisabled || !!actingEnemyId || card.unplayable || specialDisabled || selfDown || !coopCanAct)
                                                         : (player.currentEnergy < displayCard.cost || !!actingEnemyId || card.unplayable || specialDisabled || selfDown || !coopCanAct)
                                                     )
                                             }

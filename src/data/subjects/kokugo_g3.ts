@@ -213,8 +213,9 @@ const makeRefinedProblem = (unitId: string, n: number): GeneralProblem => {
   KOKUGO_G3_UNIT_DATA[unitId] = Array.from({ length: 50 }, (_, n) => {
     const problem=makeRefinedProblem(unitId,n);
     if(unitId!=='KOKUGO_G3_U04')return problem;
-    const text=storyRows[n%10].text;
-    const title=storyRows[n%10].title;
+    const storyIndex=Math.floor(n/5)%storyRows.length;
+    const text=storyRows[storyIndex].text;
+    const title=storyRows[storyIndex].title;
     return{...problem,question:problem.question.replace(`物語「${text}」`,`物語「${title}」`),passage:text,passageTitle:`物語「${title}」本文`};
   });
 });

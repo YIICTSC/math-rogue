@@ -382,8 +382,9 @@ KOKUGO_G2_UNIT_DATA.KOKUGO_G2_U01 = Array.from({ length: 66 }, (_, n) => makeRef
   KOKUGO_G2_UNIT_DATA[unitId] = Array.from({ length: 50 }, (_, n) => {
     const problem=makeRefinedG2Problem(unitId,n);
     if(unitId!=='KOKUGO_G2_U06'&&unitId!=='KOKUGO_G2_U10')return problem;
-    const text=refinedStories[n%10].text;
-    const label=`${n%10+1}`;
+    const storyIndex=Math.floor(n/5)%refinedStories.length;
+    const text=refinedStories[storyIndex].text;
+    const label=`${storyIndex+1}`;
     return{...problem,question:problem.question.replace(`物語「${text}」`,`物語 ${label}`).replace(`話「${text}」`,`話 ${label}`),passage:text,passageTitle:`物語 ${label}の 本文`};
   });
 });

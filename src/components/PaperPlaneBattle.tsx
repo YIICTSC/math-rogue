@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { ArrowLeft, Send, Wind, Trophy, Zap, Shield, Move, RefreshCw, Layers, Crosshair, Skull, Heart, ChevronsRight, ChevronsLeft, Info, Play, X, Box, Calendar, Hammer, ShoppingBag, Fuel, Palette, Star, Gift, HelpCircle, ArrowRight, Trash2, Settings, Archive, Download, Activity, Radiation, Droplets, Recycle, Repeat, User, Lock, Users, Target, UserPlus, Gauge, Swords, Dice5, Ghost, Rocket, Fan, Cpu } from 'lucide-react';
 import { audioService } from '../services/audioService';
 import { storageService, PaperPlaneProgress } from '../services/storageService';
@@ -1790,16 +1790,6 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; languageMode?: LanguageMo
             EMPTY: 'No part is installed in this slot.',
         } as Record<string, string>)[part.type] || 'A configurable paper-plane part.';
     };
-    useEffect(() => {
-        const handleEscape = (event: KeyboardEvent) => {
-            if (event.code !== 'Escape') return;
-            event.preventDefault();
-            onBack();
-        };
-        window.addEventListener('keydown', handleEscape);
-        return () => window.removeEventListener('keydown', handleEscape);
-    }, [onBack]);
-
     const savedData = loadInitialState();
     const isDebugPaperPlaneUi = Boolean(debugPreview?.startsWith('PAPER_'));
     const debugPlayer = isDebugPaperPlaneUi ? createDebugPaperPlanePlayer() : null;
@@ -1874,6 +1864,13 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; languageMode?: LanguageMo
 
     // --- AUTO SAVE ---
     const saveDebounceRef = useRef<any>(null);
+    const saveStateNow = useCallback(() => {
+        if (debugPreview || phase === 'GAME_OVER' || phase === 'SETUP' || phase === 'TUTORIAL') return;
+        storageService.savePaperPlaneState({
+            phase, stage, turn, pool, hand, player, enemy, enemyIntents, isEndless,
+            vacationEvents, vacationLog, pendingPart, rewardOptions, earnedCoins, selectedMissionLevel, battleStats
+        });
+    }, [debugPreview, phase, stage, turn, pool, hand, player, enemy, enemyIntents, isEndless, vacationEvents, vacationLog, pendingPart, rewardOptions, earnedCoins, selectedMissionLevel, battleStats]);
 
     useEffect(() => {
         if (debugPreview) return;
@@ -1881,15 +1878,30 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; languageMode?: LanguageMo
             storageService.clearPaperPlaneState();
         } else if (phase !== 'TUTORIAL' && phase !== 'SETUP') {
             if (saveDebounceRef.current) clearTimeout(saveDebounceRef.current);
-            saveDebounceRef.current = setTimeout(() => {
-                const stateToSave = {
-                    phase, stage, turn, pool, hand, player, enemy, enemyIntents, isEndless,
-                    vacationEvents, vacationLog, pendingPart, rewardOptions, earnedCoins, selectedMissionLevel, battleStats
-                };
-                storageService.savePaperPlaneState(stateToSave);
-            }, 1000); 
+            saveDebounceRef.current = setTimeout(saveStateNow, 1000);
         }
-    }, [phase, stage, turn, pool, hand, player, enemy, enemyIntents, vacationEvents, vacationLog, pendingPart, rewardOptions, earnedCoins, isEndless, selectedMissionLevel, battleStats, debugPreview]);
+    }, [phase, debugPreview, saveStateNow]);
+
+    useEffect(() => {
+        const handlePageHide = () => saveStateNow();
+        window.addEventListener('pagehide', handlePageHide);
+        return () => window.removeEventListener('pagehide', handlePageHide);
+    }, [saveStateNow]);
+
+    const handleBack = useCallback(() => {
+        saveStateNow();
+        onBack();
+    }, [onBack, saveStateNow]);
+
+    useEffect(() => {
+        const handleEscape = (event: KeyboardEvent) => {
+            if (event.code !== 'Escape') return;
+            event.preventDefault();
+            handleBack();
+        };
+        window.addEventListener('keydown', handleEscape);
+        return () => window.removeEventListener('keydown', handleEscape);
+    }, [handleBack]);
 
     // --- SCORE SAVING ---
     const scoreSavedRef = useRef(false);
@@ -3662,7 +3674,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; languageMode?: LanguageMo
             <div data-gamepad-navigation-root data-gamepad-initial-scope={`paper-setup-${setupStep}`} className="paper-plane-setup-screen w-full h-full bg-slate-900 text-white p-2 md:p-4 flex flex-col font-mono overflow-hidden md:overflow-y-auto relative">
                 <PaperPlaneSceneBackdrop sprite={PAPER_PLANE_SCENE_BACKGROUNDS.setup} alpha={0.22} />
                 <div className="paper-plane-setup-header relative z-10 flex items-center mb-2 md:mb-6">
-                     <button data-gamepad-zone="paper-setup-top" data-gamepad-order={0} onClick={onBack} className="text-gray-400 hover:text-white mr-2 md:mr-4"><ArrowLeft size={20}/></button>
+                     <button data-gamepad-zone="paper-setup-top" data-gamepad-order={0} onClick={handleBack} className="text-gray-400 hover:text-white mr-2 md:mr-4"><ArrowLeft size={20}/></button>
                      <h2 className="text-lg md:text-2xl font-bold text-cyan-400">MISSION BRIEFING</h2>
                      <div className="ml-auto text-[10px] md:text-sm bg-indigo-900 px-2 md:px-3 py-1 rounded-full border border-indigo-500 flex items-center">
                          <Star size={14} className="mr-1 text-yellow-400"/> {t('ランク')}: {progress.rank}
@@ -3887,7 +3899,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; languageMode?: LanguageMo
                 <button onClick={() => { setPhase('SETUP'); initPilotRoll(); }} className="relative z-10 bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-3 px-8 rounded shadow-lg animate-pulse flex items-center">
                     <Play className="mr-2"/> {t('出撃準備')}
                 </button>
-                <button onClick={onBack} className="relative z-10 mt-4 text-gray-500 hover:text-white underline text-xs">{t('戻る')}</button>
+                <button onClick={handleBack} className="relative z-10 mt-4 text-gray-500 hover:text-white underline text-xs">{t('戻る')}</button>
             </div>
         );
     }
@@ -4465,7 +4477,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; languageMode?: LanguageMo
                                     >
                                         <Settings className="mr-2"/> {t('機体選択へ')}
                                     </button>
-                                    <button onClick={onBack} className="bg-cyan-600 px-8 py-3 rounded text-xl font-bold border-2 border-cyan-400">{t('タイトルへ戻る')}</button>
+                                    <button onClick={handleBack} className="bg-cyan-600 px-8 py-3 rounded text-xl font-bold border-2 border-cyan-400">{t('タイトルへ戻る')}</button>
                                 </div>
                             </div>
                         )}
@@ -4482,7 +4494,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; languageMode?: LanguageMo
                                     >
                                         <Settings className="mr-2"/> {t('機体選択へ')}
                                     </button>
-                                    <button onClick={onBack} className="mt-2 bg-gray-600 px-8 py-3 rounded text-xl font-bold">{t('タイトルへ戻る')}</button>
+                                    <button onClick={handleBack} className="mt-2 bg-gray-600 px-8 py-3 rounded text-xl font-bold">{t('タイトルへ戻る')}</button>
                                 </div>
                             </div>
                         )}
