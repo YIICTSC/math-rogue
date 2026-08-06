@@ -10452,3 +10452,18 @@ textarea {
     font-size: clamp(1.4rem, 3.5vw, 2.8rem) !important;
   }
 }
+
+/* The trace guide sits below the transparent handwriting canvas, so learner
+   strokes remain clearly visible above the faint model character. */
+.kanji-writing-canvas-frame {
+  container-type: inline-size;
+  overflow: hidden;
+}
+
+.kanji-trace-guide {
+  color: rgba(100, 116, 139, 0.28);
+  font-size: min(60cqw, 15rem);
+  font-weight: 700;
+  line-height: 1;
+  user-select: none;
+}

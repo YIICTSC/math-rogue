@@ -42,6 +42,7 @@ const KanjiChallengeScreen: React.FC<KanjiChallengeScreenProps> = ({ onComplete,
   const [inputAnswer, setInputAnswer] = useState('');
   const [isAnswered, setIsAnswered] = useState(false);
   const [feedback, setFeedback] = useState<'CORRECT' | 'WRONG' | null>(null);
+  const [writingWrongStreak, setWritingWrongStreak] = useState(0);
   const inputRef = React.useRef<HTMLInputElement>(null);
   const questionStartedAtRef = React.useRef(Date.now());
 
@@ -149,6 +150,9 @@ const KanjiChallengeScreen: React.FC<KanjiChallengeScreenProps> = ({ onComplete,
       ? currentProblem.actualWrittenAnswer
       : currentProblem.actualCorrectAnswer;
     const isCorrect = normalize(option) === normalize(expectedAnswer);
+    if (resolvedAnswerMode === 'WRITING') {
+      setWritingWrongStreak((previous) => isCorrect ? 0 : previous + 1);
+    }
     const answerResult = {
       mode,
       correct: isCorrect,
@@ -227,6 +231,8 @@ const KanjiChallengeScreen: React.FC<KanjiChallengeScreenProps> = ({ onComplete,
       : writingPromptLength === 4
         ? 'kanji-writing-answer-4'
         : '';
+  const showTraceGuide = resolvedAnswerMode === 'WRITING'
+    && (currentProblemIndex < 2 || writingWrongStreak >= 1);
 
   return (
     <div data-gamepad-navigation-root data-gamepad-question-screen data-gamepad-initial-scope={`kanji-challenge-${currentProblemIndex}`} className="main-challenge-screen kanji-challenge-screen flex flex-col h-full w-full bg-cyan-950 text-white relative items-center justify-center p-8 font-mono">
@@ -264,6 +270,7 @@ const KanjiChallengeScreen: React.FC<KanjiChallengeScreenProps> = ({ onComplete,
                 expectedAnswer={currentProblem.actualWrittenAnswer}
                 disabled={isAnswered}
                 languageMode={languageMode}
+                showTraceGuide={showTraceGuide}
                 onSubmit={handleAnswer}
               />
             ) : resolvedAnswerMode === 'INPUT' ? (
