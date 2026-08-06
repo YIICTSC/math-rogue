@@ -110,6 +110,15 @@ export const matchesAssignmentRangeFilter = (problem: FilterableProblem, filter:
 export const matchesKanjiAssignmentRangeFilter = (problem: KanjiProblem, filter: AssignmentRangeFilter | null | undefined) => {
   if (!filter || filter.kind !== 'kanji' || filter.values.length === 0) return true;
   const text = `${problem.question} ${problem.hint || ''}`;
+  // 管理ポータルの漢字指定は、選択した漢字を values にそのまま格納する。
+  // 旧仕様の出題種別（reading / writing など）も引き続き解釈する。
+  const legacyKinds = new Set(['reading', 'writing', 'meaning', 'idiom']);
+  const selectedCharacters = filter.values.filter((value) => (
+    !legacyKinds.has(value) && Array.from(value).some((character) => /[一-龯々]/.test(character))
+  ));
+  if (selectedCharacters.length > 0) {
+    return selectedCharacters.some((character) => problem.question.includes(character));
+  }
   if (filter.values.includes('reading')) return /読み|よみ|なんと|何と読む|ふりがな/.test(text);
   if (filter.values.includes('writing')) return /漢字|かんじ|書|どの字/.test(text) && !/意味/.test(text);
   if (filter.values.includes('meaning')) return /意味|使い分け|使い方|文に合う/.test(text);

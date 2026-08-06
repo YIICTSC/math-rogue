@@ -188,10 +188,10 @@ const isKanjiAssignment = (assignment: AssignmentPayload | null | undefined) => 
 
 const getAssignmentAnswerModeSummary = (assignment: AssignmentPayload | null | undefined, languageMode: LanguageMode) => {
     if (languageMode === 'ENGLISH') {
-        const answerModeLabel = assignment?.answerMode === 'INPUT' ? 'Input' : 'Multiple choice';
+        const answerModeLabel = assignment?.answerMode === 'INPUT' ? 'Input' : assignment?.answerMode === 'WRITING' ? 'Writing' : 'Multiple choice';
         return `${isKanjiAssignment(assignment) ? 'Kanji answer mode' : 'Answer mode'}: ${answerModeLabel}`;
     }
-    const answerModeLabel = assignment?.answerMode === 'INPUT' ? '入力' : '4択';
+    const answerModeLabel = assignment?.answerMode === 'INPUT' ? '入力' : assignment?.answerMode === 'WRITING' ? '書き' : '4択';
     return `${trans(isKanjiAssignment(assignment) ? '漢字の答え方' : '答え方', languageMode)}: ${trans(answerModeLabel, languageMode)}`;
 };
 

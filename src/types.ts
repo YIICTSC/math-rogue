@@ -746,7 +746,7 @@ export enum GameMode {
 }
 
 export type LanguageMode = 'JAPANESE' | 'HIRAGANA' | 'ENGLISH';
-export type AnswerMode = 'CHOICE' | 'INPUT';
+export type AnswerMode = 'CHOICE' | 'INPUT' | 'WRITING';
 
 export enum NodeType {
   COMBAT = 'COMBAT',

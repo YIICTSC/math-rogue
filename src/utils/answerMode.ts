@@ -2,9 +2,12 @@ import { AnswerMode } from '../types';
 
 const STORAGE_KEY_ANSWER_MODE = 'learning_rogue_answer_mode_v1';
 
-export const normalizeAnswerMode = (mode?: string | null): AnswerMode => (
-  mode === 'INPUT' ? 'INPUT' : 'CHOICE'
-);
+export const normalizeAnswerMode = (mode?: string | null): AnswerMode => {
+  const normalized = String(mode || '').toUpperCase();
+  if (normalized === 'INPUT') return 'INPUT';
+  if (normalized === 'WRITING') return 'WRITING';
+  return 'CHOICE';
+};
 
 export const saveAnswerModePreference = (mode: AnswerMode) => {
   try {
@@ -25,7 +28,7 @@ export const getAnswerModePreference = (): AnswerMode => {
 export const resolveAnswerMode = (mode?: AnswerMode, allowStoredFallback: boolean = false): AnswerMode => {
   if (allowStoredFallback) {
     const stored = getAnswerModePreference();
-    if (stored === 'INPUT') return 'INPUT';
+    if (stored === 'INPUT' || stored === 'WRITING') return stored;
   }
   return normalizeAnswerMode(mode);
 };
