@@ -238,7 +238,9 @@ export const toAssignmentPayload = (assignment: ManagedAssignment): AssignmentPa
     requirementType: assignment.requirementType === 'required' ? 'required' : 'optional',
     enforcementLevel: assignment.enforcementLevel === 'launch_lock' ? 'launch_lock' : assignment.enforcementLevel === 'required' ? 'required' : 'optional',
     gameMode: assignment.enforcementLevel === 'launch_lock' || assignment.playMode === 'problem_only' ? 'CHALLENGE_ONLY' : 'FREE',
-    answerMode: (String(assignment.answerMode).toUpperCase() === 'INPUT' ? 'INPUT' : 'CHOICE') as AnswerMode,
+    answerMode: (['INPUT', 'WRITING'].includes(String(assignment.answerMode).toUpperCase())
+      ? String(assignment.answerMode).toUpperCase()
+      : 'CHOICE') as AnswerMode,
     createdAt: new Date().toISOString(),
     managementPortal: {
       version: Number(assignment.version || 1),

@@ -6,6 +6,7 @@ import { storageService } from '../services/storageService';
 import { HARD_KANJI_DATA, KANJI_DATA, KANKEN_DATA, KanjiProblem } from '../data/kanjiData';
 import { resolveAnswerMode } from '../utils/answerMode';
 import RewardHintBanner from './RewardHintBanner';
+import KanjiHandwritingInput from './KanjiHandwritingInput';
 import { trans } from '../utils/textUtils';
 import { assignmentFilterForMode, matchesKanjiAssignmentRangeFilter } from '../utils/assignmentRangeFilters';
 
@@ -26,6 +27,7 @@ interface KanjiChallengeScreenProps {
 
 interface ExtendedKanjiProblem extends KanjiProblem {
   actualCorrectAnswer: string;
+  actualWrittenAnswer: string;
   problemKey?: string;
   isAssignmentRetry?: boolean;
   retryOfProblemKey?: string;
@@ -79,9 +81,11 @@ const KanjiChallengeScreen: React.FC<KanjiChallengeScreenProps> = ({ onComplete,
     if (reviewProblem) {
       setProblems([{
         question: reviewProblem.question,
+        answer: reviewProblem.correctAnswer,
         options: [...new Set([reviewProblem.correctAnswer, ...(reviewProblem.options || [])])].slice(0, 4).sort(() => Math.random() - 0.5),
         hint: undefined,
         actualCorrectAnswer: reviewProblem.correctAnswer,
+        actualWrittenAnswer: reviewProblem.question,
         problemKey: reviewProblem.problemKey,
         isAssignmentRetry: true,
         retryOfProblemKey: reviewProblem.problemKey,
@@ -124,13 +128,14 @@ const KanjiChallengeScreen: React.FC<KanjiChallengeScreenProps> = ({ onComplete,
                 ...p,
                 problemKey: `${mode}:${p.question}`,
                 actualCorrectAnswer: correctAnswer,
+                actualWrittenAnswer: p.question,
                 // 表示用にはシャッフルした選択肢を渡す
                 options: [...contextualOptions].sort(() => Math.random() - 0.5)
             };
         });
         
     setProblems(shuffled);
-  }, [mode, debugSkip, isChallenge, reviewProblem, assignmentUnits]);
+  }, [mode, debugSkip, isChallenge, reviewProblem, assignmentUnits, resolvedAnswerMode]);
 
   const handleAnswer = (option: string) => {
     if (isAnswered) return;
@@ -138,15 +143,19 @@ const KanjiChallengeScreen: React.FC<KanjiChallengeScreenProps> = ({ onComplete,
     setSelectedOption(option);
     setIsAnswered(true);
     
-    // 選択された文字列と、保持していた正解文字列を正規化して比較
-    const isCorrect = normalize(option) === normalize(problems[currentProblemIndex].actualCorrectAnswer);
+    // 「書き」では読みではなく、送り仮名を含む元の表記全体を正解とする。
+    const currentProblem = problems[currentProblemIndex];
+    const expectedAnswer = resolvedAnswerMode === 'WRITING'
+      ? currentProblem.actualWrittenAnswer
+      : currentProblem.actualCorrectAnswer;
+    const isCorrect = normalize(option) === normalize(expectedAnswer);
     const answerResult = {
       mode,
       correct: isCorrect,
       elapsedMs: Date.now() - questionStartedAtRef.current,
       problemKey: problems[currentProblemIndex].problemKey || `${mode}:${problems[currentProblemIndex].question}`,
       question: problems[currentProblemIndex].question,
-      correctAnswer: problems[currentProblemIndex].actualCorrectAnswer,
+      correctAnswer: expectedAnswer,
       selectedAnswer: option,
       isRetry: problems[currentProblemIndex].isAssignmentRetry,
       retryOfProblemKey: problems[currentProblemIndex].retryOfProblemKey,
@@ -222,8 +231,11 @@ const KanjiChallengeScreen: React.FC<KanjiChallengeScreenProps> = ({ onComplete,
                         <div className="text-xs text-gray-200 leading-relaxed">{currentProblem.hint}</div>
                     </div>
                 )}
-                <div className="text-xs text-gray-400 mb-2">{trans('この漢字の読み方は？', languageMode)}</div>
-                <h3 className="text-7xl font-bold text-white tracking-widest font-serif">{currentProblem.question}</h3>
+                <div className="text-xs text-gray-400 mb-2">{trans(resolvedAnswerMode === 'WRITING' ? 'この読みを漢字で書こう' : 'この漢字の読み方は？', languageMode)}</div>
+                <h3 className="text-7xl font-bold text-white tracking-widest font-serif">{resolvedAnswerMode === 'WRITING' ? currentProblem.answer : currentProblem.question}</h3>
+                {resolvedAnswerMode === 'WRITING' && (
+                  <div className="mt-3 text-xs text-cyan-200">{trans('漢字と送り仮名を手書きしてください', languageMode)}</div>
+                )}
                 
                 {feedback && (
                     <div className="absolute inset-0 flex items-center justify-center bg-black/80 z-20 animate-in zoom-in duration-200">
@@ -236,7 +248,15 @@ const KanjiChallengeScreen: React.FC<KanjiChallengeScreenProps> = ({ onComplete,
                 )}
             </div>
 
-            {resolvedAnswerMode === 'INPUT' ? (
+            {resolvedAnswerMode === 'WRITING' ? (
+              <KanjiHandwritingInput
+                key={`${currentProblem.problemKey || currentProblem.question}:${currentProblemIndex}`}
+                expectedAnswer={currentProblem.actualWrittenAnswer}
+                disabled={isAnswered}
+                languageMode={languageMode}
+                onSubmit={handleAnswer}
+              />
+            ) : resolvedAnswerMode === 'INPUT' ? (
               <form onSubmit={handleInputSubmit} className="basic-challenge-options space-y-3">
                 <input
                   ref={inputRef}

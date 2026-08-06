@@ -1,4 +1,4 @@
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { ArrowLeft, Clipboard, Copy, Download, ExternalLink, Plus, Send, Trash2, Upload } from 'lucide-react';
 import { AssignmentCustomProblem, AssignmentPayload, AssignmentUnit, AnswerMode, LanguageMode } from '../types';
 import { SUBJECT_CATEGORIES, SubjectCategoryConfig } from '../subjectConfig';
@@ -193,6 +193,10 @@ const AssignmentCreateScreen: React.FC<AssignmentCreateScreenProps> = ({ onBack,
     [customProblems],
   );
   const validCustomProblemCount = validCustomProblems.length;
+  const hasKanjiUnit = selectedUnits.some((unit) => unit.modes.some((mode) => /KANJI|KANKEN/.test(String(mode))));
+  useEffect(() => {
+    if (!hasKanjiUnit && answerMode === 'WRITING') setAnswerMode('CHOICE');
+  }, [answerMode, hasKanjiUnit]);
   const effectiveCustomTargetCorrect = validCustomProblemCount > 0
     ? Math.min(validCustomProblemCount, Math.max(1, Math.floor(customTargetCorrect || 1)))
     : Math.max(1, Math.floor(customTargetCorrect || DEFAULT_TARGET_CORRECT));
@@ -400,10 +404,10 @@ const AssignmentCreateScreen: React.FC<AssignmentCreateScreenProps> = ({ onBack,
             </div>
             <div className="mb-4">
               <div className="mb-1 text-xs font-bold text-slate-400">{trans('答え方', languageMode)}</div>
-              <div className="grid grid-cols-2 gap-2">
-                {(['CHOICE', 'INPUT'] as const).map((mode) => (
+              <div className={`grid ${hasKanjiUnit ? 'grid-cols-3' : 'grid-cols-2'} gap-2`}>
+                {(hasKanjiUnit ? ['CHOICE', 'INPUT', 'WRITING'] : ['CHOICE', 'INPUT']).map((mode) => (
                   <button key={mode} onClick={() => setAnswerMode(mode)} className={`rounded-lg border px-2 py-2 text-xs font-black ${answerMode === mode ? 'border-yellow-300 bg-yellow-400 text-slate-950' : 'border-slate-600 bg-slate-800 text-slate-200'}`}>
-                    {trans(mode === 'CHOICE' ? '4択' : '入力', languageMode)}
+                    {trans(mode === 'CHOICE' ? '4択' : mode === 'WRITING' ? '書き' : '入力', languageMode)}
                   </button>
                 ))}
               </div>

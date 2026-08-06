@@ -1008,6 +1008,11 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
   const isUnitCategory = selectedCategory.id === 'MATH_GRADES' || selectedCategory.id === 'KOKUGO_GRADES' || selectedCategory.id === 'ENGLISH' || selectedCategory.id === 'LIFE' || selectedCategory.id === 'SCIENCE' || selectedCategory.id === 'SOCIAL' || selectedCategory.id === 'SUMMARY' || isNativeEnglishCategory(selectedCategory.id);
   const [answerMode, setAnswerMode] = useState<AnswerMode>('CHOICE');
   const canSelectAnswerMode = selectedCategory.id === 'MATH' || selectedCategory.id === 'UPPER_MATH' || selectedCategory.id === 'KANJI' || selectedCategory.id === 'KANKEN' || selectedCategory.id === 'HARD_KANJI';
+  const canSelectWritingAnswerMode = selectedCategory.id === 'KANJI' || selectedCategory.id === 'KANKEN' || selectedCategory.id === 'HARD_KANJI';
+
+  useEffect(() => {
+    if (!canSelectWritingAnswerMode && answerMode === 'WRITING') setAnswerMode('CHOICE');
+  }, [answerMode, canSelectWritingAnswerMode]);
 
   useEffect(() => {
     const nextCategory = displayedCategories.find((cat) => cat.id === selectedCategory.id) || defaultDisplayedCategory;
@@ -1117,8 +1122,12 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
     return (
       <div className="rounded-lg border border-slate-700 bg-slate-950/60 p-2">
         <div className="mb-1 text-[10px] font-bold text-slate-400">{trans('答え方', languageMode)}</div>
-        <div className="grid grid-cols-2 gap-1.5">
-          {([
+        <div className={`grid ${canSelectWritingAnswerMode ? 'grid-cols-3' : 'grid-cols-2'} gap-1.5`}>
+          {(canSelectWritingAnswerMode ? [
+            ['CHOICE', '4択'],
+            ['INPUT', '入力'],
+            ['WRITING', '書き'],
+          ] : [
             ['CHOICE', '4択'],
             ['INPUT', '入力'],
           ] as const).map(([mode, label]) => (
@@ -1677,7 +1686,7 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
             )}
             {canSelectAnswerMode && (
               <div className="bg-black/40 rounded-xl border border-slate-800 p-3 text-xs text-slate-300">
-                {trans('答え方', languageMode)}: <span className="font-bold text-white">{trans(answerMode === 'CHOICE' ? '4択' : '入力', languageMode)}</span>
+                {trans('答え方', languageMode)}: <span className="font-bold text-white">{trans(answerMode === 'CHOICE' ? '4択' : answerMode === 'WRITING' ? '書き' : '入力', languageMode)}</span>
               </div>
             )}
             {selectedCategory.uiType === 'grade_term' && !isUnitCategory && (
