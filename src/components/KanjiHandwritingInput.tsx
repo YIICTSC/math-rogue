@@ -14,6 +14,10 @@ const JHR_SCRIPT_ID = 'learning-rogue-jlect-jhr';
 const JHR_SCRIPT_URL = 'https://cdn.jsdelivr.net/gh/ZacharyRead/jlect-jhr@master/jlect-jhr.full.js';
 let jhrLoader: Promise<void> | null = null;
 
+type JhrCanvasPrototype = {
+  relMouseCoords?: (this: HTMLCanvasElement, event: MouseEvent) => { x: number; y: number };
+};
+
 const loadJhr = () => {
   if (window.jhr_init) return Promise.resolve();
   if (jhrLoader) return jhrLoader;
@@ -50,7 +54,7 @@ const KanjiHandwritingInput: React.FC<KanjiHandwritingInputProps> = ({
   onSubmit,
 }) => {
   const characters = useMemo(
-    () => Array.from(expectedAnswer).filter((character) => !/[\s　]/.test(character)),
+    () => [...expectedAnswer].filter((character) => !/[\s　]/.test(character)),
     [expectedAnswer],
   );
   const [engineReady, setEngineReady] = useState(false);
@@ -64,17 +68,22 @@ const KanjiHandwritingInput: React.FC<KanjiHandwritingInputProps> = ({
   useEffect(() => {
     let cancelled = false;
     let observer: MutationObserver | null = null;
+    let restoreCanvasCoordinates: (() => void) | null = null;
 
     const readCandidates = () => {
-      const guessElement = document.getElementById('jhr-guess');
-      if (!guessElement) return;
-      const anchors = Array.from(guessElement.querySelectorAll('a'))
-        .map((element) => element.textContent?.trim() || '')
-        .filter(Boolean);
-      const fallback = anchors.length > 0
-        ? anchors
-        : Array.from(guessElement.textContent || '').filter(Boolean);
-      const nextCandidates = Array.from(new Set(fallback));
+      const candidateElements = ['jhr-guess', 'jhr-fuzzy', 'jhr-similarity', 'jhr-slength']
+        .map((id) => document.getElementById(id))
+        .filter((element): element is HTMLElement => Boolean(element));
+      if (candidateElements.length === 0) return;
+
+      const nextCandidates = Array.from(new Set(candidateElements.flatMap((element) => {
+        const anchors = Array.from(element.querySelectorAll('a'))
+          .map((anchor) => anchor.textContent?.trim() || '')
+          .filter(Boolean);
+        return anchors.length > 0
+          ? anchors
+          : Array.from(element.textContent || '').filter((character) => !/\s/.test(character));
+      })));
       setCandidates(nextCandidates);
       setSelectedCandidate((current) => current && nextCandidates.includes(current) ? current : nextCandidates[0] || '');
     };
@@ -84,11 +93,33 @@ const KanjiHandwritingInput: React.FC<KanjiHandwritingInputProps> = ({
         await loadJhr();
         if (cancelled) return;
 
-        const guessElement = document.getElementById('jhr-guess');
-        if (guessElement) {
+        const candidateElements = ['jhr-guess', 'jhr-fuzzy', 'jhr-similarity', 'jhr-slength']
+          .map((id) => document.getElementById(id))
+          .filter((element): element is HTMLElement => Boolean(element));
+        if (candidateElements.length > 0) {
           observer = new MutationObserver(readCandidates);
-          observer.observe(guessElement, { childList: true, subtree: true, characterData: true });
+          candidateElements.forEach((element) => observer?.observe(element, { childList: true, subtree: true, characterData: true }));
         }
+
+        // JHR's original coordinate helper uses event.offsetX/offsetY. Those
+        // values are CSS pixels, while the recognizer's canvas is 301 logical
+        // pixels and is resized for touch screens. Convert from the rendered
+        // rectangle back into the logical canvas before JHR draws the stroke.
+        const canvasPrototype = HTMLCanvasElement.prototype as unknown as JhrCanvasPrototype;
+        const originalRelMouseCoords = canvasPrototype.relMouseCoords;
+        canvasPrototype.relMouseCoords = function (this: HTMLCanvasElement, event: MouseEvent) {
+          const rect = this.getBoundingClientRect();
+          const scaleX = rect.width > 0 ? this.width / rect.width : 1;
+          const scaleY = rect.height > 0 ? this.height / rect.height : 1;
+          return {
+            x: (event.clientX - rect.left) * scaleX,
+            y: (event.clientY - rect.top) * scaleY,
+          };
+        };
+        restoreCanvasCoordinates = () => {
+          canvasPrototype.relMouseCoords = originalRelMouseCoords;
+        };
+
         window.jhr_init?.();
         // The recognizer keeps its stroke history globally. Clear it whenever
         // the writing screen is mounted so the previous problem cannot leak in.
@@ -104,12 +135,18 @@ const KanjiHandwritingInput: React.FC<KanjiHandwritingInputProps> = ({
     return () => {
       cancelled = true;
       observer?.disconnect();
+      restoreCanvasCoordinates?.();
     };
   }, []);
 
-  const candidateOptions = candidates.filter((candidate) => Array.from(candidate).length === 1).slice(0, 8);
-  const candidateOptionsKey = candidateOptions.join('\u0000');
+  const singleCharacterCandidates = Array.from(new Set(
+    candidates.filter((candidate) => Array.from(candidate).length === 1),
+  ));
   const expectedCharacter = characters[characterIndex] || '';
+  const candidateOptions = expectedCharacter && singleCharacterCandidates.includes(expectedCharacter)
+    ? [expectedCharacter, ...singleCharacterCandidates.filter((candidate) => candidate !== expectedCharacter)].slice(0, 8)
+    : singleCharacterCandidates.slice(0, 8);
+  const candidateOptionsKey = candidateOptions.join('\u0000');
   const canAdvance = engineReady && !disabled && Boolean(selectedCandidate) && characterIndex < characters.length;
 
   const clearCurrentCharacter = useCallback(() => {

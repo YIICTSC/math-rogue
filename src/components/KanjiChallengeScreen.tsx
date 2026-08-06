@@ -217,6 +217,16 @@ const KanjiChallengeScreen: React.FC<KanjiChallengeScreenProps> = ({ onComplete,
   );
 
   const currentProblem = problems[currentProblemIndex];
+  const writingPromptLength = resolvedAnswerMode === 'WRITING'
+    ? [...String(currentProblem.answer)].filter((character) => !/[\s　]/.test(character)).length
+    : 0;
+  const writingPromptLengthClass = writingPromptLength >= 6
+    ? 'kanji-writing-answer-6-plus'
+    : writingPromptLength === 5
+      ? 'kanji-writing-answer-5'
+      : writingPromptLength === 4
+        ? 'kanji-writing-answer-4'
+        : '';
 
   return (
     <div data-gamepad-navigation-root data-gamepad-question-screen data-gamepad-initial-scope={`kanji-challenge-${currentProblemIndex}`} className="main-challenge-screen kanji-challenge-screen flex flex-col h-full w-full bg-cyan-950 text-white relative items-center justify-center p-8 font-mono">
@@ -232,7 +242,7 @@ const KanjiChallengeScreen: React.FC<KanjiChallengeScreenProps> = ({ onComplete,
                     </div>
                 )}
                 <div className="text-xs text-gray-400 mb-2">{trans(resolvedAnswerMode === 'WRITING' ? 'この読みを漢字で書こう' : 'この漢字の読み方は？', languageMode)}</div>
-                <h3 className="max-w-full min-w-0 break-words text-7xl font-bold text-white tracking-widest font-serif">{resolvedAnswerMode === 'WRITING' ? currentProblem.answer : currentProblem.question}</h3>
+                <h3 className={`max-w-full min-w-0 break-words text-7xl font-bold text-white tracking-widest font-serif ${resolvedAnswerMode === 'WRITING' ? `kanji-writing-answer-text ${writingPromptLengthClass}` : ''}`}>{resolvedAnswerMode === 'WRITING' ? currentProblem.answer : currentProblem.question}</h3>
                 {resolvedAnswerMode === 'WRITING' && (
                   <div className="mt-3 text-xs text-cyan-200">{trans('漢字と送り仮名を手書きしてください', languageMode)}</div>
                 )}
