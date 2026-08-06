@@ -41,6 +41,8 @@ jobs:
         run: pnpm exec playwright install --with-deps chromium
 
       - name: Build
+        env:
+          VITE_ENABLE_DEBUG_FEATURES: 'true'
         run: pnpm run build
 
       - name: Rebase public sprite paths for GitHub Pages
