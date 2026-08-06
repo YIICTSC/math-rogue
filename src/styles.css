@@ -10410,3 +10410,45 @@ textarea {
     width: min(100%, 420px, max(180px, calc(100dvh - 12rem))) !important;
   }
 }
+
+/* Long kana prompts must remain a single visual line. Reduce only the
+   writing-mode prompt so four or more characters do not reveal a line break. */
+.kanji-challenge-screen .kanji-writing-answer-text {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+  overflow-wrap: normal !important;
+  text-overflow: clip;
+  white-space: nowrap !important;
+  word-break: normal !important;
+  letter-spacing: 0.06em;
+}
+
+@media (orientation: portrait) {
+  .kanji-challenge-screen .kanji-writing-answer-4 {
+    font-size: clamp(2.15rem, 17vw, 4rem) !important;
+  }
+
+  .kanji-challenge-screen .kanji-writing-answer-5 {
+    font-size: clamp(1.85rem, 13vw, 3.25rem) !important;
+  }
+
+  .kanji-challenge-screen .kanji-writing-answer-6-plus {
+    font-size: clamp(1.45rem, 10vw, 2.8rem) !important;
+  }
+}
+
+@media (orientation: landscape) {
+  .kanji-challenge-screen .kanji-writing-answer-4 {
+    font-size: clamp(2.2rem, 5.3vw, 4rem) !important;
+  }
+
+  .kanji-challenge-screen .kanji-writing-answer-5 {
+    font-size: clamp(1.8rem, 4.3vw, 3.2rem) !important;
+  }
+
+  .kanji-challenge-screen .kanji-writing-answer-6-plus {
+    font-size: clamp(1.4rem, 3.5vw, 2.8rem) !important;
+  }
+}
