@@ -13,7 +13,7 @@ declare global {
 const JHR_SCRIPT_ID = 'learning-rogue-jlect-jhr';
 const JHR_SCRIPT_URL = 'https://cdn.jsdelivr.net/gh/ZacharyRead/jlect-jhr@master/jlect-jhr.full.js';
 const INACTIVITY_TIMEOUT_MS = 6000;
-const RECOGNITION_SETTLE_TIMEOUT_MS = 1200;
+const RECOGNITION_SETTLE_TIMEOUT_MS = 600;
 let jhrLoader: Promise<void> | null = null;
 
 type JhrCanvasPrototype = {
@@ -72,6 +72,7 @@ const KanjiHandwritingInput: React.FC<KanjiHandwritingInputProps> = ({
   const autoAdvanceTimerRef = useRef<number | null>(null);
   const inactivityTimerRef = useRef<number | null>(null);
   const candidateOptionsRef = useRef<string[]>([]);
+  const advanceWithCandidateRef = useRef<(candidate: string) => void>(() => {});
   const hasStartedWritingRef = useRef(false);
   const isPointerDownRef = useRef(false);
   const disabledRef = useRef(disabled);
@@ -194,8 +195,15 @@ const KanjiHandwritingInput: React.FC<KanjiHandwritingInputProps> = ({
       if (!isPointerDownRef.current) {
         // Candidates are intentionally not shown to the learner. If the
         // expected character has not been recognized before the timeout,
-        // submit the best recognized candidate (or an empty answer).
-        onSubmit(candidateOptionsRef.current[0] || '');
+        // advance only the current character. Calling onSubmit here would
+        // submit a single first character as the answer for a multi-character
+        // problem before the remaining characters have been written.
+        const candidate = candidateOptionsRef.current[0] || '';
+        if (candidate) {
+          advanceWithCandidateRef.current(candidate);
+        } else {
+          onSubmit('');
+        }
         return;
       }
       // Do not judge while a finger or stylus is still down. Wait again
@@ -267,6 +275,10 @@ const KanjiHandwritingInput: React.FC<KanjiHandwritingInputProps> = ({
     clearCurrentCharacter();
   }, [characterIndex, characters.length, clearCurrentCharacter, disabled, engineReady, onSubmit, writtenCharacters]);
 
+  useEffect(() => {
+    advanceWithCandidateRef.current = advanceWithCandidate;
+  }, [advanceWithCandidate]);
+
   // あいまい候補は1画目の途中でも現れるため、自動確定には使わない。
   // 完全一致候補が出て、指・ペンを離してから認識が安定した時だけ進める。
   useEffect(() => {
@@ -301,7 +313,7 @@ const KanjiHandwritingInput: React.FC<KanjiHandwritingInputProps> = ({
             className="flex shrink-0 items-center gap-1 rounded border border-cyan-300/60 bg-slate-800 px-2 py-1 text-xs font-bold text-cyan-100 transition-colors hover:bg-slate-700 disabled:opacity-40"
           >
             {traceModeEnabled ? <EyeOff size={14} /> : <Eye size={14} />}
-            {trans('模写モード', languageMode)}
+            {trans('模写', languageMode)}
           </button>
           <button
             type="button"
