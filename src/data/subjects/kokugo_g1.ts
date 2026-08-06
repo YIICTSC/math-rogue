@@ -741,8 +741,9 @@ KOKUGO_G1_UNIT_DATA.KOKUGO_G1_U06 = Array.from({ length: 83 }, (_, n) => makeRef
   KOKUGO_G1_UNIT_DATA[unitId] = Array.from({ length: 50 }, (_, n) => {
     const problem=makeRefinedLanguageProblem(unitId,n);
     if(unitId!=='KOKUGO_G1_U07')return problem;
-    const text=refinedStories[n%10].text;
-    const label=`おはなし ${n%10+1}`;
+    const storyIndex=Math.floor(n/5)%refinedStories.length;
+    const text=refinedStories[storyIndex].text;
+    const label=`おはなし ${storyIndex+1}`;
     return{...problem,question:problem.question.replace(`「${text}」`,label),passage:text,passageTitle:`${label}の ぶん`};
   });
 });

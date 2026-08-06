@@ -4,7 +4,7 @@ import { ArrowLeft, X, Club, Diamond, Heart, Spade, ShoppingBag, BarChart3, Arro
 import { audioService } from '../services/audioService';
 import PixelSprite from './PixelSprite';
 import {
-    AnswerMode, AssignmentAnswerResult, AssignmentPayload, PokerCard, PokerRunState, PokerBlind, PokerSupporter, PokerConsumable, PokerSuit, PokerRank, PokerScoringContext, PokerPack, PokerVoucher, GameMode, LanguageMode, MiniGameDebugPreview
+    AnswerMode, AssignmentAnswerResult, AssignmentPayload, PokerCard, PokerRunState, PokerPhase, PokerBlind, PokerSupporter, PokerConsumable, PokerSuit, PokerRank, PokerScoringContext, PokerPack, PokerVoucher, GameMode, LanguageMode, MiniGameDebugPreview
 } from '../types';
 import { POKER_HAND_LEVELS, SUPPORTERS_LIBRARY, CONSUMABLES_LIBRARY, PACK_LIBRARY, POKER_ENHANCEMENTS, VOUCHERS_LIBRARY, EXPANDED_SUPPORTER_IDS } from '../constants';
 import { storageService } from '../services/storageService';
@@ -732,7 +732,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
   };
 
   // --- Game State ---
-  const [phase, setPhase] = useState<'BLIND_SELECT' | 'PLAY' | 'SHOP' | 'PACK_OPEN' | 'GAME_OVER' | 'VICTORY_WAIT' | 'VICTORY' | 'MATH'>(
+  const [phase, setPhase] = useState<PokerPhase>(
       debugPreview === 'GAME_OVER'
           ? 'GAME_OVER'
           : debugPreview === 'ENDING'
@@ -920,7 +920,8 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
           initRun();
       } else {
           setRunState(hydrateState(saved));
-          if (saved.hand.length > 0) setPhase('PLAY');
+          if (saved.phase) setPhase(saved.phase);
+          else if (saved.hand.length > 0) setPhase('PLAY');
           else if (saved.shopInventory.length > 0) setPhase('SHOP');
           else setPhase('BLIND_SELECT');
           
@@ -928,12 +929,23 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
       }
   }, []);
 
+  const saveStateNow = useCallback(() => {
+      if (debugPreview || phase === 'GAME_OVER' || phase === 'VICTORY') return;
+      storageService.savePokerState({ ...runState, phase });
+  }, [debugPreview, phase, runState]);
+
   const saveData = useCallback(() => {
       if (saveDebounceRef.current) clearTimeout(saveDebounceRef.current);
       saveDebounceRef.current = setTimeout(() => {
-          storageService.savePokerState(runState);
-      }, 500); 
-  }, [runState]);
+          saveStateNow();
+      }, 500);
+  }, [saveStateNow]);
+
+  useEffect(() => {
+      const handlePageHide = () => saveStateNow();
+      window.addEventListener('pagehide', handlePageHide);
+      return () => window.removeEventListener('pagehide', handlePageHide);
+  }, [saveStateNow]);
 
   useEffect(() => {
       if (phase !== 'GAME_OVER' && phase !== 'VICTORY') {
@@ -972,7 +984,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
   };
 
   const handleQuit = () => {
-      saveData();
+      saveStateNow();
       onBack();
   };
 

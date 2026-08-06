@@ -551,25 +551,38 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
       setIdentifiedTypes(new Set(save.identifiedTypes));
       setIsEndless(save.isEndless);
       turnCounter.current = save.turnCounter;
+      setShopState(save.shopState || { active: false, merchantId: null, mode: 'BUY' });
+      setSynthState(save.synthState || { active: false, mode: 'SYNTH', step: 'SELECT_BASE', baseIndex: null });
       addLog("冒険を再開した。", currentTheme.colors.C2);
   };
 
-  const saveData = useCallback(() => {
+  const saveData = useCallback((immediate = false) => {
       if (debugPreview || gameOver || gameClear) return;
-      if (saveDebounceRef.current) clearTimeout(saveDebounceRef.current);
-      
-      saveDebounceRef.current = setTimeout(() => {
+      const persist = () => {
           const state = {
-              map, visitedMap, floorMapRevealed, 
+              map, visitedMap, floorMapRevealed,
               rooms: roomsRef.current, // Save rooms
               player, enemies, floorItems, traps, inventory,
               floor, level, belly, maxBelly,
               idMap, identifiedTypes: Array.from(identifiedTypes),
-              isEndless, turnCounter: turnCounter.current
+              isEndless, turnCounter: turnCounter.current,
+              shopState, synthState
           };
           storageService.saveDungeonState(state);
-      }, 500); // 500ms debounce
-  }, [map, visitedMap, floorMapRevealed, player, enemies, floorItems, traps, inventory, floor, level, belly, maxBelly, idMap, identifiedTypes, isEndless, debugPreview, gameOver, gameClear]);
+      };
+      if (immediate) {
+          persist();
+          return;
+      }
+      if (saveDebounceRef.current) clearTimeout(saveDebounceRef.current);
+      saveDebounceRef.current = setTimeout(persist, 500);
+  }, [map, visitedMap, floorMapRevealed, player, enemies, floorItems, traps, inventory, floor, level, belly, maxBelly, idMap, identifiedTypes, isEndless, shopState, synthState, debugPreview, gameOver, gameClear]);
+
+  useEffect(() => {
+      const handlePageHide = () => saveData(true);
+      window.addEventListener('pagehide', handlePageHide);
+      return () => window.removeEventListener('pagehide', handlePageHide);
+  }, [saveData]);
 
   // Update Visited Map when player moves
   useEffect(() => {
@@ -601,7 +614,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
       if (!gameOver && !gameClear) {
           saveData();
       }
-  }, [player, inventory, floor, level, belly, enemies, floorItems, traps, gameOver, gameClear, saveData]);
+  }, [player, inventory, floor, level, belly, enemies, floorItems, traps, shopState, synthState, gameOver, gameClear, saveData]);
 
   // Auto-scroll menu
   useEffect(() => {
@@ -1007,7 +1020,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
   };
 
   const handleQuit = () => {
-      saveData();
+      saveData(true);
       onBack();
   };
 

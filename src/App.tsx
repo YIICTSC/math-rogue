@@ -8671,6 +8671,11 @@ const App: React.FC = () => {
                                         ...capturedEffectTemplate, // ランダムカードのプロパティをベースにする
                                         id: `captured-${e.id}-${Date.now()}`,
                                         name: capturedDisplayName,
+                                        // 表示名は敵名に置き換えるが、元カードの効果名は判定用に残す。
+                                        originalNames: Array.from(new Set([
+                                            ...(randomCardTemplate.originalNames || []),
+                                            randomCardTemplate.name,
+                                        ])),
                                         textureRef: randomCardTemplate.textureRef,
                                         enemyIllustrationName: e.name,
                                         enemyIllustrationEnemyType: e.enemyType,

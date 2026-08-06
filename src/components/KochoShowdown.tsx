@@ -126,6 +126,7 @@ interface KochoGameState {
     player: KEntity;
     enemies: KEntity[];
     hand: KCard[];
+    rewardCards: KCard[];
     queue: KCard[]; // Max 3
     consumables: KConsumable[]; // Max 3
     fieldItems: KFieldItem[]; // Items on the ground
@@ -638,6 +639,7 @@ const hydrateState = (state: any): KochoGameState => {
     return {
         ...state,
         hand: restoreCards(state.hand),
+        rewardCards: restoreCards(state.rewardCards || []),
         queue: restoreCards(state.queue),
         consumables: restoreConsumables(state.consumables || []),
         fieldItems: restoreFieldItems(state.fieldItems || []),
@@ -668,6 +670,7 @@ const getInitialState = (): KochoGameState => ({
     player: { id: 'p1', type: 'PLAYER', name: '勇者', pos: 3, facing: 1, maxHp: 10, hp: 10, spriteName: 'HERO_SIDE|赤', shield: 0, barrier: 0, strength: 0 },
     enemies: [],
     hand: getInitialDeck(),
+    rewardCards: [],
     queue: [],
     consumables: [],
     fieldItems: [],
@@ -732,11 +735,9 @@ const KochoShowdown: React.FC<{
     const steamControllerLayout = DISTRIBUTION_PLATFORM === 'steam';
     
     // State
-    const [gameState, setGameState] = useState<KochoGameState>(() => {
-        const saved = isUiPreview ? null : storageService.loadKochoState();
-        const initial = saved ? hydrateState(saved) : getInitialState();
-        return createKochoDebugPreviewState(debugPreview, initial);
-    });
+    const savedKochoState = isUiPreview ? null : storageService.loadKochoState();
+    const initialKochoState = savedKochoState ? hydrateState(savedKochoState) : getInitialState();
+    const [gameState, setGameState] = useState<KochoGameState>(() => createKochoDebugPreviewState(debugPreview, initialKochoState));
 
     const [vfxList, setVfxList] = useState<KochoVFX[]>([]);
     const [hitStopActive, setHitStopActive] = useState(false);
@@ -766,7 +767,7 @@ const KochoShowdown: React.FC<{
     const [rewardCards, setRewardCards] = useState<KCard[]>(() =>
         debugPreview === 'KOCHO_REWARD'
             ? getUnlockedKochoCardTemplates().slice(0, 3).map((card, index) => ({ ...card, id: `debug_reward_${index}`, currentCooldown: 0, usedSlots: 0 }))
-            : []
+            : initialKochoState.rewardCards || []
     );
     const [newlyUnlockedCard, setNewlyUnlockedCard] = useState<(typeof KOCHO_UNLOCKABLE_CARD_DB)[number] | null>(
         debugPreview === 'ENDING' ? KOCHO_UNLOCKABLE_CARD_DB[0] ?? null : null
@@ -793,15 +794,23 @@ const KochoShowdown: React.FC<{
         };
     }, []);
 
+    const saveStateNow = useCallback(() => {
+        if (debugPreview || gameState.status === 'GAME_OVER' || gameState.status === 'VICTORY') return;
+        storageService.saveKochoState({ ...gameState, rewardCards });
+    }, [debugPreview, gameState, rewardCards]);
+
     useEffect(() => {
         if (gameState.status !== 'GAME_OVER' && gameState.status !== 'VICTORY') {
             if (saveDebounceRef.current) clearTimeout(saveDebounceRef.current);
-            saveDebounceRef.current = setTimeout(() => {
-                const stateToSave = { ...gameState };
-                storageService.saveKochoState(stateToSave);
-            }, 500);
+            saveDebounceRef.current = setTimeout(saveStateNow, 500);
         }
-    }, [gameState]);
+    }, [gameState, rewardCards, saveStateNow]);
+
+    useEffect(() => {
+        const handlePageHide = () => saveStateNow();
+        window.addEventListener('pagehide', handlePageHide);
+        return () => window.removeEventListener('pagehide', handlePageHide);
+    }, [saveStateNow]);
 
     // Initialization (Only if starting fresh or reset)
     useEffect(() => {
@@ -839,7 +848,7 @@ const KochoShowdown: React.FC<{
         startWave(1, 0, 1);
     };
     const handleQuit = () => {
-        // Save handled by effect, ensure cleared if needed or just save current state
+        saveStateNow();
         onBack();
     };
 
@@ -2393,12 +2402,14 @@ const KochoShowdown: React.FC<{
             options.push({ ...template, id: `rew_${Date.now()}_${i}`, currentCooldown: 0, usedSlots: 0 });
         }
         setRewardCards(options);
+        setGameState(prev => ({ ...prev, rewardCards: options }));
     };
 
     const selectReward = (card: KCard) => {
         setGameState(prev => ({
             ...prev,
             hand: [...prev.hand, card],
+            rewardCards: [],
             status: 'PLAYING'
         }));
         setTimeout(() => handlePhaseComplete(), 100);
