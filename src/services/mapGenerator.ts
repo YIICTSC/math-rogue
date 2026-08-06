@@ -1,14 +1,11 @@
 
 
 import { MapNode, NodeType } from '../types';
-import { DEBUG_FEATURES_ENABLED } from '../config/runtime';
 import { getDifficultyConfig } from '../config/difficulty';
 
-// Local QA builds keep the full title -> act -> ending flow, but shorten each
-// act so repeated end-to-end translation/art passes remain practical. The
-// production value is unchanged because DEBUG_FEATURES_ENABLED is compile-time
-// false in every distributable build.
-export const MAP_HEIGHT = DEBUG_FEATURES_ENABLED ? 4 : 15; // Number of floors including Boss
+// Keep the normal Learning Rogue route length in every distributable build.
+// Debug access must never change the stage structure before the player opts in.
+export const MAP_HEIGHT = 15; // Number of floors including Boss
 export const MAP_WIDTH = 7;   // Max width of the grid
 
 const getRandomInt = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min;
