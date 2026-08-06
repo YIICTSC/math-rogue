@@ -4,6 +4,7 @@ import { GAME_STORIES } from '../data/stories';
 import { FLAVOR_TEXTS, ENEMY_NAMES } from '../services/geminiService';
 import { AttackEffectKey, StatusEffectKey, Card as ICard, Relic, Potion, CardType, TargetType, LanguageMode, GameScreen, GameMode, MiniGameDebugPreview } from '../types';
 import Card from './Card';
+import CaptureCardSimulator from './CaptureCardSimulator';
 import AttackEffectSprite from './AttackEffectSprite';
 import StatusEffectSprite from './StatusEffectSprite';
 import EnemyIllustration from './EnemyIllustration';
@@ -276,8 +277,8 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
     focusedUiPreviewScreenId,
     focusedSupporterNpcEventTitle
 }) => {
-    const [activeTab, setActiveTab] = useState<'CARDS' | 'RELICS' | 'POTIONS' | 'SYNTHESIS' | 'SYSTEM' | 'UI_PREVIEW' | 'PROBLEM_DEBUG' | 'EFFECTS' | 'MAGIC_VOICES' | 'ENEMY_VOICE_AUDIT' | 'MAGIC_ART_AUDIT' | 'EVENTS' | 'HUMANOID_SPRITES' | 'TRANSLATION'>(focusedSupporterNpcEventTitle ? 'EVENTS' : focusedUiPreviewScreenId ? 'UI_PREVIEW' : 'CARDS');
-    const showLoadoutPanel = activeTab === 'CARDS' || activeTab === 'RELICS' || activeTab === 'POTIONS' || activeTab === 'SYNTHESIS';
+    const [activeTab, setActiveTab] = useState<'CARDS' | 'RELICS' | 'POTIONS' | 'SYNTHESIS' | 'CAPTURE_SIM' | 'SYSTEM' | 'UI_PREVIEW' | 'PROBLEM_DEBUG' | 'EFFECTS' | 'MAGIC_VOICES' | 'ENEMY_VOICE_AUDIT' | 'MAGIC_ART_AUDIT' | 'EVENTS' | 'HUMANOID_SPRITES' | 'TRANSLATION'>(focusedSupporterNpcEventTitle ? 'EVENTS' : focusedUiPreviewScreenId ? 'UI_PREVIEW' : 'CARDS');
+    const showLoadoutPanel = activeTab === 'CARDS' || activeTab === 'RELICS' || activeTab === 'POTIONS' || activeTab === 'SYNTHESIS' || activeTab === 'CAPTURE_SIM';
     const focusedUiPreviewItemRef = useRef<HTMLDivElement | null>(null);
     const focusedSupporterNpcEventRef = useRef<HTMLDivElement | null>(null);
     const [searchTerm, setSearchTerm] = useState("");
@@ -548,6 +549,21 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
             setSelectedDeck(prev => [...prev, newCard]);
         }
     }, [activeTab, addHolographicCards, synthSlot1, synthSlot2]);
+
+    const addCapturedSimulatorCard = useCallback((card: ICard) => {
+        setSelectedDeck(prev => [...prev, card]);
+        setActiveTab('CARDS');
+    }, []);
+
+    const setCaptureSimulatorTestDeck = useCallback((capturedCard: ICard) => {
+        const timestamp = Date.now();
+        const starterCards = ['STRIKE', 'STRIKE', 'DEFEND', 'DEFEND'].map((cardId, index) => ({
+            ...CARDS_LIBRARY[cardId],
+            id: `debug-capture-starter-${timestamp}-${index}`,
+        }));
+        setSelectedDeck([capturedCard, ...starterCards]);
+        setActiveTab('CARDS');
+    }, []);
 
     const handleRemoveCard = useCallback((index: number) => {
         setSelectedDeck(prev => {
@@ -942,6 +958,7 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
                         <button onClick={() => setActiveTab('RELICS')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'RELICS' ? 'bg-gray-700 text-white' : 'text-gray-400 hover:bg-gray-750'}`}>レリック</button>
                         <button onClick={() => setActiveTab('POTIONS')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'POTIONS' ? 'bg-gray-700 text-white' : 'text-gray-400 hover:bg-gray-750'}`}>ポーション</button>
                         <button onClick={() => setActiveTab('SYNTHESIS')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'SYNTHESIS' ? 'bg-purple-900 text-white' : 'text-purple-400 hover:bg-gray-750'}`}>合成</button>
+                        <button onClick={() => setActiveTab('CAPTURE_SIM')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'CAPTURE_SIM' ? 'bg-amber-900 text-white' : 'text-amber-400 hover:bg-gray-750'}`}>{trans('捕獲SIM', initialLanguageMode)}</button>
                         <button onClick={() => setActiveTab('SYSTEM')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'SYSTEM' ? 'bg-indigo-900 text-white' : 'text-indigo-400 hover:bg-gray-750'}`}>システム</button>
                         <button onClick={() => setActiveTab('UI_PREVIEW')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'UI_PREVIEW' ? 'bg-sky-900 text-white' : 'text-sky-400 hover:bg-gray-750'}`}>UI実寸</button>
                         <button onClick={() => setActiveTab('PROBLEM_DEBUG')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'PROBLEM_DEBUG' ? 'bg-lime-900 text-white' : 'text-lime-400 hover:bg-gray-750'}`}>問題デバッグ</button>
@@ -979,6 +996,15 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
                     )}
 
                     <div className="flex-grow overflow-y-auto p-2 md:p-4 custom-scrollbar min-h-0">
+                        {activeTab === 'CAPTURE_SIM' && (
+                            <CaptureCardSimulator
+                                cards={allCards}
+                                languageMode={initialLanguageMode}
+                                onAddToDeck={addCapturedSimulatorCard}
+                                onSetTestDeck={setCaptureSimulatorTestDeck}
+                            />
+                        )}
+
                         {activeTab === 'TRANSLATION' && (
                             <div className="space-y-4">
                                 <div className="flex flex-wrap gap-2 items-center bg-black/30 p-2 rounded-lg border border-gray-700 sticky top-0 z-10 backdrop-blur-md">
