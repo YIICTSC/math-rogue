@@ -278,25 +278,35 @@ const KanjiHandwritingInput: React.FC<KanjiHandwritingInputProps> = ({
 
   return (
     <div className="kanji-handwriting-input min-w-0 max-w-full space-y-3 overflow-y-auto rounded-xl border-4 border-cyan-500/70 bg-slate-950/80 p-3 text-left shadow-xl">
-      <div className="flex min-w-0 flex-wrap items-center justify-between gap-2 text-sm font-black text-cyan-100">
-        <div className="flex min-w-0 items-center gap-2">
-          <PenLine size={18} />
-          {trans('答えを1文字ずつ手書き', languageMode)}
+      <div className="flex min-w-0 flex-nowrap items-center justify-between gap-2 text-sm font-black text-cyan-100">
+        <div className="flex shrink-0 items-center" aria-label={trans('手書き', languageMode)}>
+          <PenLine size={18} aria-hidden="true" />
         </div>
-        <button
-          type="button"
-          onClick={() => setTraceModeEnabled((current) => !current)}
-          disabled={disabled || !engineReady}
-          aria-pressed={traceModeEnabled}
-          className="flex shrink-0 items-center gap-1 rounded border border-cyan-300/60 bg-slate-800 px-2 py-1 text-xs font-bold text-cyan-100 transition-colors hover:bg-slate-700 disabled:opacity-40"
-        >
-          {traceModeEnabled ? <EyeOff size={14} /> : <Eye size={14} />}
-          {trans('模写モード', languageMode)}
-        </button>
+        <div className="flex shrink-0 items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setTraceModeEnabled((current) => !current)}
+            disabled={disabled || !engineReady}
+            aria-pressed={traceModeEnabled}
+            className="flex shrink-0 items-center gap-1 rounded border border-cyan-300/60 bg-slate-800 px-2 py-1 text-xs font-bold text-cyan-100 transition-colors hover:bg-slate-700 disabled:opacity-40"
+          >
+            {traceModeEnabled ? <EyeOff size={14} /> : <Eye size={14} />}
+            {trans('模写モード', languageMode)}
+          </button>
+          <button
+            type="button"
+            id="jhr-clear"
+            onClick={clearCurrentCharacter}
+            disabled={!engineReady || disabled}
+            className="flex shrink-0 items-center gap-1 rounded border border-slate-500 bg-slate-800 px-2 py-1 text-xs font-bold text-slate-100 shadow-lg transition-colors hover:bg-slate-700 disabled:opacity-40"
+          >
+            <Eraser size={13} /> {trans('消去', languageMode)}
+          </button>
+        </div>
       </div>
       <div className="kanji-writing-canvas-frame relative mx-auto flex w-full max-w-[420px] min-w-0 justify-center rounded-lg border-2 border-cyan-300/60 bg-white p-2">
         {traceModeEnabled && !disabled && expectedCharacter && (
-          <span aria-hidden="true" className="kanji-trace-guide pointer-events-none absolute inset-0 z-0 flex items-center justify-center font-serif">
+          <span aria-hidden="true" className="kanji-trace-guide pointer-events-none absolute inset-2 z-20 flex items-center justify-center font-serif">
             {expectedCharacter}
           </span>
         )}
@@ -312,15 +322,6 @@ const KanjiHandwritingInput: React.FC<KanjiHandwritingInputProps> = ({
           className="relative z-10 block aspect-square h-auto w-full max-w-[420px] touch-none cursor-crosshair"
           style={{ background: 'linear-gradient(90deg, transparent 49.7%, #cbd5e1 49.7%, #cbd5e1 50.3%, transparent 50.3%), linear-gradient(0deg, transparent 49.7%, #cbd5e1 49.7%, #cbd5e1 50.3%, transparent 50.3%)' }}
         />
-        <button
-          type="button"
-          id="jhr-clear"
-          onClick={clearCurrentCharacter}
-          disabled={!engineReady || disabled}
-          className="absolute right-3 top-3 z-20 flex shrink-0 items-center gap-1 rounded border border-slate-500 bg-slate-800/95 px-2 py-1 text-xs font-bold text-slate-100 shadow-lg transition-colors hover:bg-slate-700 disabled:opacity-40"
-        >
-          <Eraser size={13} /> {trans('消去', languageMode)}
-        </button>
       </div>
       <div className="flex min-w-0 items-start gap-2 text-xs text-slate-300">
         <span className="min-w-0 flex-1">

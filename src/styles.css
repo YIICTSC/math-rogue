@@ -10453,17 +10453,27 @@ textarea {
   }
 }
 
-/* The trace guide sits below the transparent handwriting canvas, so learner
-   strokes remain clearly visible above the faint model character. */
+/* Keep the trace guide above the recognizer canvas. The guide is deliberately
+   translucent and pointer-transparent, so strokes remain visible and the
+   canvas still receives touch and pen input. */
 .kanji-writing-canvas-frame {
+  box-sizing: border-box;
   container-type: inline-size;
   overflow: hidden;
 }
 
+.kanji-challenge-screen .kanji-handwriting-input .kanji-writing-canvas-frame > canvas {
+  box-sizing: border-box;
+  display: block;
+  max-width: 100% !important;
+  min-width: 0;
+}
+
 .kanji-trace-guide {
-  color: rgba(100, 116, 139, 0.28);
+  color: rgb(100, 116, 139);
   font-size: min(60cqw, 15rem);
   font-weight: 700;
   line-height: 1;
+  opacity: 0.28;
   user-select: none;
 }
