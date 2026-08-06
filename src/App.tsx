@@ -1942,12 +1942,14 @@ const App: React.FC = () => {
         return true;
     }, [isAssignmentChallengeOnlyLocked, totalMathCorrect]);
 
-    // Local QA builds persist their debug toggles across reloads so a full-route
-    // language audit is not interrupted every time Vite refreshes the page.
-    // The storage getters always return false in production builds.
-    const [isMathDebugSkipped, setIsMathDebugSkipped] = useState<boolean>(() => DEBUG_FEATURES_ENABLED || storageService.getDebugMathSkip());
-    const [isDebugHpOne, setIsDebugHpOne] = useState<boolean>(() => DEBUG_FEATURES_ENABLED || storageService.getDebugHpOne());
-    const [isMiniGameDebugUnlocked, setIsMiniGameDebugUnlocked] = useState<boolean>(() => DEBUG_FEATURES_ENABLED || storageService.getDebugMiniGameUnlock());
+    // GitHub Pages ships the debug code so it can be reached during QA, but it
+    // must still start as a normal game. The hidden release-note gesture is
+    // what activates the rest of the debug surface for the current session.
+    const [isDebugMode, setIsDebugMode] = useState(false);
+    const isDebugModeActive = DEBUG_FEATURES_ENABLED && isDebugMode;
+    const [isMathDebugSkipped, setIsMathDebugSkipped] = useState(false);
+    const [isDebugHpOne, setIsDebugHpOne] = useState(false);
+    const [isMiniGameDebugUnlocked, setIsMiniGameDebugUnlocked] = useState(false);
     const [titleClickCount, setTitleCount] = useState<number>(0);
     const [logClickCount, setLogClickCount] = useState<number>(0);
     const [debugLoadout, setDebugLoadout] = useState<{ deck: ICard[], relics: Relic[], potions: Potion[] } | null>(null);
@@ -4304,22 +4306,14 @@ const App: React.FC = () => {
         setUnlockedCardNames(unlocked);
         setHasSave(storageService.hasSaveFile());
         setClearCount(storageService.getThemeClearCount(visualTheme));
-        if (DEBUG_FEATURES_ENABLED) {
-            // `dev:debug` is a dedicated local QA build. Always start it with
-            // the route-shortening switches enabled; production builds never
-            // enter this branch because their compile-time flag is false.
-            setIsMathDebugSkipped(true);
-            setIsDebugHpOne(true);
-            setIsMiniGameDebugUnlocked(true);
-            storageService.saveDebugMathSkip(true);
-            storageService.saveDebugHpOne(true);
-            storageService.saveDebugMiniGameUnlock(true);
-        } else {
-            storageService.clearDebugSettings();
-            setIsMathDebugSkipped(false);
-            setIsDebugHpOne(false);
-            setIsMiniGameDebugUnlocked(false);
-        }
+        // Never inherit debug switches from a previous QA session on launch.
+        // GitHub Pages exposes the hidden entry point, not an active debug
+        // session. Store builds also clear these keys as before.
+        storageService.clearDebugSettings();
+        setIsDebugMode(false);
+        setIsMathDebugSkipped(false);
+        setIsDebugHpOne(false);
+        setIsMiniGameDebugUnlocked(false);
         setTotalMathCorrect(storageService.getMathCorrectCount());
 
         audioService.setBgmMode(appSettings.bgmMode);
@@ -4334,12 +4328,12 @@ const App: React.FC = () => {
     }, []);
 
     useEffect(() => {
-        if (DEBUG_FEATURES_ENABLED) return;
+        if (isDebugModeActive) return;
         if (gameState.screen !== GameScreen.DEBUG_MENU && gameState.screen !== GameScreen.MAGIC_EVENT_SIMULATION) return;
         storageService.clearDebugSettings();
         storageService.clearSave();
         setGameState(prev => ({ ...prev, screen: GameScreen.START_MENU, challengeMode: undefined }));
-    }, [gameState.screen]);
+    }, [gameState.screen, isDebugModeActive]);
 
     useEffect(() => {
         let appStateHandle: PluginListenerHandle | undefined;
@@ -4435,10 +4429,14 @@ const App: React.FC = () => {
         const next = logClickCount + 1;
         setLogClickCount(next);
         if (next >= 10) {
-            const newState = !isDebugHpOne;
-            setIsDebugHpOne(newState);
-            storageService.saveDebugHpOne(newState);
+            setIsDebugMode(true);
+            setIsDebugHpOne(true);
+            setIsMiniGameDebugUnlocked(true);
+            storageService.saveDebugHpOne(true);
+            storageService.saveDebugMiniGameUnlock(true);
             setLogClickCount(0);
+            setShowDebugLog(false);
+            setGameState(prev => ({ ...prev, screen: GameScreen.DEBUG_MENU }));
             audioService.playSound('select');
         }
     };
@@ -4596,11 +4594,11 @@ const App: React.FC = () => {
     };
 
     const openDebugMenu = useCallback(() => {
-        if (!DEBUG_FEATURES_ENABLED) return;
+        if (!isDebugModeActive) return;
         setDebugMenuStartClearCount(storageService.getThemeClearCount(visualTheme));
         setDebugMenuStartMathCorrect(storageService.getMathCorrectCount());
         setGameState(prev => ({ ...prev, screen: GameScreen.DEBUG_MENU }));
-    }, [visualTheme]);
+    }, [isDebugModeActive, visualTheme]);
 
     const handleDebugAddClearCount = useCallback(() => {
         storageService.incrementThemeClearCount(visualTheme);
@@ -6035,6 +6033,7 @@ const App: React.FC = () => {
 
     useEffect(() => {
         if (!DEBUG_FEATURES_ENABLED || gamepadTestScreenOpenedRef.current || typeof window === 'undefined') return;
+        if (!isDebugModeActive) return;
         const requestedId = new URLSearchParams(window.location.search).get('gamepadTestScreen');
         if (!requestedId) return;
         const preview = UI_PREVIEW_SCREENS.find(item => item.id === requestedId);
@@ -6042,16 +6041,17 @@ const App: React.FC = () => {
         gamepadTestScreenOpenedRef.current = true;
         handleStartUiPreview(preview.screen, preview.miniGameOutcome);
         setIsUiPreviewToolbarOpen(false);
-    }, [handleStartUiPreview]);
+    }, [handleStartUiPreview, isDebugModeActive]);
 
     useEffect(() => {
         if (!DEBUG_FEATURES_ENABLED || battleModalPreviewOpenedRef.current || typeof window === 'undefined') return;
+        if (!isDebugModeActive) return;
         const requestedId = new URLSearchParams(window.location.search).get('battleModalPreview') as BattleModalPreviewId | null;
         if (!requestedId || !BATTLE_MODAL_PREVIEWS.some(item => item.id === requestedId)) return;
         battleModalPreviewOpenedRef.current = true;
         handleStartBattleModalPreview(requestedId);
         setIsUiPreviewToolbarOpen(false);
-    }, [handleStartBattleModalPreview]);
+    }, [handleStartBattleModalPreview, isDebugModeActive]);
 
     useEffect(() => {
         if (
@@ -6059,6 +6059,7 @@ const App: React.FC = () => {
             || assignmentRewardPreviewOpenedRef.current
             || typeof window === 'undefined'
         ) return;
+        if (!isDebugModeActive) return;
         const shouldOpen = new URLSearchParams(window.location.search).get('assignmentRewardPreview') === '1';
         if (!shouldOpen) return;
         assignmentRewardPreviewOpenedRef.current = true;
@@ -6073,7 +6074,7 @@ const App: React.FC = () => {
                 id: 'ui-preview-assignment-reward-card',
             },
         });
-    }, []);
+    }, [isDebugModeActive]);
 
     const closeUiPreview = useCallback(() => {
         crowdfundingBossDebugRef.current = null;
@@ -15877,7 +15878,7 @@ const App: React.FC = () => {
                                     {trans("(デバッグ: けいさん スキップ ON)", languageMode)}
                                 </button>
                             )}
-                            {DEBUG_FEATURES_ENABLED && isDebugHpOne && (
+                            {isDebugModeActive && isDebugHpOne && (
                                 <button
                                     type="button"
                                     onClick={disableDebugHpOne}
@@ -15886,7 +15887,7 @@ const App: React.FC = () => {
                                     {trans("(デバッグ: てきHP1 & ぜんかいほう ON)", languageMode)}
                                 </button>
                             )}
-                            {DEBUG_FEATURES_ENABLED && isMiniGameDebugUnlocked && (
+                            {isDebugModeActive && isMiniGameDebugUnlocked && (
                                 <button
                                     type="button"
                                     onClick={disableMiniGameDebugUnlock}
@@ -16078,7 +16079,7 @@ const App: React.FC = () => {
                                     </button>
                                 </div>
 
-                                {DEBUG_FEATURES_ENABLED && isDebugHpOne && (
+                                {isDebugModeActive && (
                                     <button onClick={openDebugMenu} className="w-full py-2 px-4 text-base font-bold border-b-4 border-r-4 rounded-none bg-gray-800 text-red-400 border-red-500 hover:bg-gray-700 cursor-pointer flex items-center justify-center shadow-md mb-2">
                                         <Zap size={18} className="mr-2" /> {trans("デバッグメニュー", languageMode)}
                                     </button>
