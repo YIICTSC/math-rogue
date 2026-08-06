@@ -65,6 +65,7 @@ const KanjiHandwritingInput: React.FC<KanjiHandwritingInputProps> = ({
   const [engineError, setEngineError] = useState(false);
   const [characterIndex, setCharacterIndex] = useState(0);
   const [candidates, setCandidates] = useState<string[]>([]);
+  const [exactCandidates, setExactCandidates] = useState<string[]>([]);
   const [writtenCharacters, setWrittenCharacters] = useState<string[]>([]);
   const [traceModeEnabled, setTraceModeEnabled] = useState(showTraceGuide);
   const [hasStartedWriting, setHasStartedWriting] = useState(false);
@@ -87,15 +88,19 @@ const KanjiHandwritingInput: React.FC<KanjiHandwritingInputProps> = ({
         .filter((element): element is HTMLElement => Boolean(element));
       if (candidateElements.length === 0) return;
 
-      const nextCandidates = Array.from(new Set(candidateElements.flatMap((element) => {
+      const extractCandidates = (element: HTMLElement) => {
         const anchors = Array.from(element.querySelectorAll('a'))
           .map((anchor) => anchor.textContent?.trim() || '')
           .filter(Boolean);
         return anchors.length > 0
           ? anchors
           : Array.from(element.textContent || '').filter((character) => !/\s/.test(character));
-      })));
+      };
+      const nextCandidates = Array.from(new Set(candidateElements.flatMap(extractCandidates)));
+      const exactElement = document.getElementById('jhr-guess');
+      const nextExactCandidates = exactElement instanceof HTMLElement ? extractCandidates(exactElement) : [];
       setCandidates(nextCandidates);
+      setExactCandidates(nextExactCandidates);
     };
 
     const initialize = async () => {
@@ -152,11 +157,15 @@ const KanjiHandwritingInput: React.FC<KanjiHandwritingInputProps> = ({
   const singleCharacterCandidates = Array.from(new Set(
     candidates.filter((candidate) => Array.from(candidate).length === 1),
   ));
+  const singleCharacterExactCandidates = Array.from(new Set(
+    exactCandidates.filter((candidate) => Array.from(candidate).length === 1),
+  ));
   const expectedCharacter = characters[characterIndex] || '';
   const candidateOptions = expectedCharacter && singleCharacterCandidates.includes(expectedCharacter)
     ? [expectedCharacter, ...singleCharacterCandidates.filter((candidate) => candidate !== expectedCharacter)].slice(0, 8)
     : singleCharacterCandidates.slice(0, 8);
   const candidateOptionsKey = candidateOptions.join('\u0000');
+  const exactCandidateOptionsKey = singleCharacterExactCandidates.join('\u0000');
 
   useEffect(() => {
     candidateOptionsRef.current = candidateOptions;
@@ -234,6 +243,7 @@ const KanjiHandwritingInput: React.FC<KanjiHandwritingInputProps> = ({
     setHasStartedWriting(false);
     window.erase?.();
     setCandidates([]);
+    setExactCandidates([]);
   }, [clearInactivityTimer]);
 
   useEffect(() => () => {
@@ -257,10 +267,10 @@ const KanjiHandwritingInput: React.FC<KanjiHandwritingInputProps> = ({
     clearCurrentCharacter();
   }, [characterIndex, characters.length, clearCurrentCharacter, disabled, engineReady, onSubmit, writtenCharacters]);
 
-  // 認識候補に現在の正答が含まれていても、書いている最中は確定しない。
-  // 指・ペンを離してから認識が安定する時間を置いて次の文字へ進める。
+  // あいまい候補は1画目の途中でも現れるため、自動確定には使わない。
+  // 完全一致候補が出て、指・ペンを離してから認識が安定した時だけ進める。
   useEffect(() => {
-    if (!engineReady || disabled || !hasStartedWritingRef.current || isPointerDownRef.current || !expectedCharacter || !candidateOptions.includes(expectedCharacter)) return;
+    if (!engineReady || disabled || !hasStartedWritingRef.current || isPointerDownRef.current || !expectedCharacter || !singleCharacterExactCandidates.includes(expectedCharacter)) return;
     if (autoAdvanceTimerRef.current !== null) return;
 
     autoAdvanceTimerRef.current = window.setTimeout(() => {
@@ -274,7 +284,7 @@ const KanjiHandwritingInput: React.FC<KanjiHandwritingInputProps> = ({
         autoAdvanceTimerRef.current = null;
       }
     };
-  }, [advanceWithCandidate, candidateOptionsKey, disabled, engineReady, expectedCharacter, pointerReleasedVersion]);
+  }, [advanceWithCandidate, disabled, engineReady, exactCandidateOptionsKey, expectedCharacter, pointerReleasedVersion]);
 
   return (
     <div className="kanji-handwriting-input min-w-0 max-w-full space-y-3 overflow-y-auto rounded-xl border-4 border-cyan-500/70 bg-slate-950/80 p-3 text-left shadow-xl">
