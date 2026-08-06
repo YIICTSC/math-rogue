@@ -219,12 +219,12 @@ const KanjiChallengeScreen: React.FC<KanjiChallengeScreenProps> = ({ onComplete,
   const currentProblem = problems[currentProblemIndex];
 
   return (
-    <div data-gamepad-navigation-root data-gamepad-question-screen data-gamepad-initial-scope={`kanji-challenge-${currentProblemIndex}`} className="main-challenge-screen flex flex-col h-full w-full bg-cyan-950 text-white relative items-center justify-center p-8 font-mono">
+    <div data-gamepad-navigation-root data-gamepad-question-screen data-gamepad-initial-scope={`kanji-challenge-${currentProblemIndex}`} className="main-challenge-screen kanji-challenge-screen flex flex-col h-full w-full bg-cyan-950 text-white relative items-center justify-center p-8 font-mono">
         <div className="absolute inset-0 texture-dark-matter opacity-20 pointer-events-none"></div>
         <RewardHintBanner text={rewardHint} languageMode={languageMode} />
         
-        <div className="basic-challenge-layout z-10 w-full max-w-md text-center">
-            <div className="basic-challenge-question bg-black/40 border-4 border-white p-8 rounded-lg mb-8 shadow-2xl relative overflow-hidden flex flex-col items-center justify-center min-h-[260px]">
+        <div className="basic-challenge-layout kanji-challenge-layout z-10 w-full max-w-md text-center">
+            <div className="basic-challenge-question kanji-challenge-question min-w-0 bg-black/40 border-4 border-white p-8 rounded-lg mb-8 shadow-2xl relative overflow-hidden flex flex-col items-center justify-center min-h-[260px]">
                 {currentProblem.hint && (storageService.getHintStreaks()[mode] || 0) < 3 && (
                     <div className="bg-blue-900/40 p-2 rounded border border-blue-500/30 mb-4 w-full animate-in fade-in slide-in-from-top-2">
                         <div className="text-[10px] text-blue-300 font-bold mb-1">{trans('ヒント', languageMode)}</div>
@@ -232,7 +232,7 @@ const KanjiChallengeScreen: React.FC<KanjiChallengeScreenProps> = ({ onComplete,
                     </div>
                 )}
                 <div className="text-xs text-gray-400 mb-2">{trans(resolvedAnswerMode === 'WRITING' ? 'この読みを漢字で書こう' : 'この漢字の読み方は？', languageMode)}</div>
-                <h3 className="text-7xl font-bold text-white tracking-widest font-serif">{resolvedAnswerMode === 'WRITING' ? currentProblem.answer : currentProblem.question}</h3>
+                <h3 className="max-w-full min-w-0 break-words text-7xl font-bold text-white tracking-widest font-serif">{resolvedAnswerMode === 'WRITING' ? currentProblem.answer : currentProblem.question}</h3>
                 {resolvedAnswerMode === 'WRITING' && (
                   <div className="mt-3 text-xs text-cyan-200">{trans('漢字と送り仮名を手書きしてください', languageMode)}</div>
                 )}

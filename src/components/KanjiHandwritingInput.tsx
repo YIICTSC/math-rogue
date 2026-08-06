@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Eraser, PenLine } from 'lucide-react';
 import { LanguageMode } from '../types';
 import { trans } from '../utils/textUtils';
@@ -59,6 +59,7 @@ const KanjiHandwritingInput: React.FC<KanjiHandwritingInputProps> = ({
   const [candidates, setCandidates] = useState<string[]>([]);
   const [selectedCandidate, setSelectedCandidate] = useState('');
   const [writtenCharacters, setWrittenCharacters] = useState<string[]>([]);
+  const autoAdvanceTimerRef = useRef<number | null>(null);
 
   useEffect(() => {
     let cancelled = false;
@@ -107,17 +108,19 @@ const KanjiHandwritingInput: React.FC<KanjiHandwritingInputProps> = ({
   }, []);
 
   const candidateOptions = candidates.filter((candidate) => Array.from(candidate).length === 1).slice(0, 8);
+  const candidateOptionsKey = candidateOptions.join('\u0000');
+  const expectedCharacter = characters[characterIndex] || '';
   const canAdvance = engineReady && !disabled && Boolean(selectedCandidate) && characterIndex < characters.length;
 
-  const clearCurrentCharacter = () => {
+  const clearCurrentCharacter = useCallback(() => {
     window.erase?.();
     setCandidates([]);
     setSelectedCandidate('');
-  };
+  }, []);
 
-  const advance = () => {
-    if (!canAdvance) return;
-    const nextWrittenCharacters = [...writtenCharacters, selectedCandidate];
+  const advanceWithCandidate = useCallback((candidate: string) => {
+    if (!engineReady || disabled || !candidate || characterIndex >= characters.length) return;
+    const nextWrittenCharacters = [...writtenCharacters, candidate];
     if (characterIndex >= characters.length - 1) {
       onSubmit(nextWrittenCharacters.join(''));
       return;
@@ -125,25 +128,45 @@ const KanjiHandwritingInput: React.FC<KanjiHandwritingInputProps> = ({
     setWrittenCharacters(nextWrittenCharacters);
     setCharacterIndex((current) => current + 1);
     clearCurrentCharacter();
+  }, [characterIndex, characters.length, clearCurrentCharacter, disabled, engineReady, onSubmit, writtenCharacters]);
+
+  // 認識候補に現在の正答が含まれていれば、候補選択と次の文字への移動を自動化する。
+  // 候補が一瞬で切り替わる認識エンジンのため、短い待ち時間を置いてから確定する。
+  useEffect(() => {
+    if (!engineReady || disabled || !expectedCharacter || !candidateOptions.includes(expectedCharacter)) return;
+    if (autoAdvanceTimerRef.current !== null) return;
+
+    autoAdvanceTimerRef.current = window.setTimeout(() => {
+      autoAdvanceTimerRef.current = null;
+      advanceWithCandidate(expectedCharacter);
+    }, 140);
+
+    return () => {
+      if (autoAdvanceTimerRef.current !== null) {
+        window.clearTimeout(autoAdvanceTimerRef.current);
+        autoAdvanceTimerRef.current = null;
+      }
+    };
+  }, [advanceWithCandidate, candidateOptionsKey, disabled, engineReady, expectedCharacter]);
+
+  const advance = () => {
+    if (!canAdvance) return;
+    advanceWithCandidate(selectedCandidate);
   };
 
   return (
-    <div className="space-y-3 rounded-xl border-4 border-cyan-500/70 bg-slate-950/80 p-3 text-left shadow-xl">
-      <div className="flex items-center gap-2 text-sm font-black text-cyan-100">
+    <div className="kanji-handwriting-input min-w-0 max-w-full space-y-3 overflow-y-auto rounded-xl border-4 border-cyan-500/70 bg-slate-950/80 p-3 text-left shadow-xl">
+      <div className="flex min-w-0 flex-wrap items-center gap-2 text-sm font-black text-cyan-100">
         <PenLine size={18} />
         {trans('答えを1文字ずつ手書き', languageMode)}
       </div>
-      <div className="flex items-center justify-between text-xs font-bold text-cyan-100">
-        <span>{characterIndex + 1} / {Math.max(characters.length, 1)} {trans('文字目', languageMode)}</span>
-        {writtenCharacters.length > 0 && <span className="text-slate-400">{writtenCharacters.join('')}</span>}
-      </div>
-      <div className="flex justify-center rounded-lg border-2 border-cyan-300/60 bg-white p-2">
+      <div className="flex min-w-0 justify-center rounded-lg border-2 border-cyan-300/60 bg-white p-2">
         <canvas
           id="can"
           width="301"
           height="301"
           aria-label={trans('漢字を書く入力欄', languageMode)}
-          className="h-[min(82vw,420px)] w-[min(82vw,420px)] touch-none cursor-crosshair"
+          className="block aspect-square h-auto w-full max-w-[420px] touch-none cursor-crosshair"
           style={{ background: 'linear-gradient(90deg, transparent 49.7%, #cbd5e1 49.7%, #cbd5e1 50.3%, transparent 50.3%), linear-gradient(0deg, transparent 49.7%, #cbd5e1 49.7%, #cbd5e1 50.3%, transparent 50.3%)' }}
         />
       </div>
