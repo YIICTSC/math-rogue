@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Eraser, PenLine } from 'lucide-react';
+import { Eraser, Eye, EyeOff, PenLine } from 'lucide-react';
 import { LanguageMode } from '../types';
 import { trans } from '../utils/textUtils';
 
@@ -12,6 +12,8 @@ declare global {
 
 const JHR_SCRIPT_ID = 'learning-rogue-jlect-jhr';
 const JHR_SCRIPT_URL = 'https://cdn.jsdelivr.net/gh/ZacharyRead/jlect-jhr@master/jlect-jhr.full.js';
+const INACTIVITY_TIMEOUT_MS = 6000;
+const RECOGNITION_SETTLE_TIMEOUT_MS = 1200;
 let jhrLoader: Promise<void> | null = null;
 
 type JhrCanvasPrototype = {
@@ -44,6 +46,7 @@ interface KanjiHandwritingInputProps {
   expectedAnswer: string;
   disabled?: boolean;
   languageMode: LanguageMode;
+  showTraceGuide?: boolean;
   onSubmit: (answer: string) => void;
 }
 
@@ -51,6 +54,7 @@ const KanjiHandwritingInput: React.FC<KanjiHandwritingInputProps> = ({
   expectedAnswer,
   disabled = false,
   languageMode,
+  showTraceGuide = false,
   onSubmit,
 }) => {
   const characters = useMemo(
@@ -61,9 +65,16 @@ const KanjiHandwritingInput: React.FC<KanjiHandwritingInputProps> = ({
   const [engineError, setEngineError] = useState(false);
   const [characterIndex, setCharacterIndex] = useState(0);
   const [candidates, setCandidates] = useState<string[]>([]);
-  const [selectedCandidate, setSelectedCandidate] = useState('');
   const [writtenCharacters, setWrittenCharacters] = useState<string[]>([]);
+  const [traceModeEnabled, setTraceModeEnabled] = useState(showTraceGuide);
+  const [hasStartedWriting, setHasStartedWriting] = useState(false);
   const autoAdvanceTimerRef = useRef<number | null>(null);
+  const inactivityTimerRef = useRef<number | null>(null);
+  const candidateOptionsRef = useRef<string[]>([]);
+  const hasStartedWritingRef = useRef(false);
+  const isPointerDownRef = useRef(false);
+  const disabledRef = useRef(disabled);
+  const [pointerReleasedVersion, setPointerReleasedVersion] = useState(0);
 
   useEffect(() => {
     let cancelled = false;
@@ -85,7 +96,6 @@ const KanjiHandwritingInput: React.FC<KanjiHandwritingInputProps> = ({
           : Array.from(element.textContent || '').filter((character) => !/\s/.test(character));
       })));
       setCandidates(nextCandidates);
-      setSelectedCandidate((current) => current && nextCandidates.includes(current) ? current : nextCandidates[0] || '');
     };
 
     const initialize = async () => {
@@ -147,18 +157,98 @@ const KanjiHandwritingInput: React.FC<KanjiHandwritingInputProps> = ({
     ? [expectedCharacter, ...singleCharacterCandidates.filter((candidate) => candidate !== expectedCharacter)].slice(0, 8)
     : singleCharacterCandidates.slice(0, 8);
   const candidateOptionsKey = candidateOptions.join('\u0000');
-  const canAdvance = engineReady && !disabled && Boolean(selectedCandidate) && characterIndex < characters.length;
+
+  useEffect(() => {
+    candidateOptionsRef.current = candidateOptions;
+  }, [candidateOptionsKey]);
+
+  useEffect(() => {
+    disabledRef.current = disabled;
+  }, [disabled]);
+
+  useEffect(() => {
+    setTraceModeEnabled(showTraceGuide);
+  }, [showTraceGuide]);
+
+  const clearInactivityTimer = useCallback(() => {
+    if (inactivityTimerRef.current !== null) {
+      window.clearTimeout(inactivityTimerRef.current);
+      inactivityTimerRef.current = null;
+    }
+  }, []);
+
+  const scheduleInactivityTimeout = useCallback(() => {
+    clearInactivityTimer();
+    const judgeAfterInactivity = () => {
+      inactivityTimerRef.current = null;
+      if (!hasStartedWritingRef.current || disabledRef.current) return;
+      if (!isPointerDownRef.current) {
+        // Candidates are intentionally not shown to the learner. If the
+        // expected character has not been recognized before the timeout,
+        // submit the best recognized candidate (or an empty answer).
+        onSubmit(candidateOptionsRef.current[0] || '');
+        return;
+      }
+      // Do not judge while a finger or stylus is still down. Wait again
+      // after the stroke is released so the final stroke cannot be cut off.
+      inactivityTimerRef.current = window.setTimeout(judgeAfterInactivity, INACTIVITY_TIMEOUT_MS);
+    };
+    inactivityTimerRef.current = window.setTimeout(judgeAfterInactivity, INACTIVITY_TIMEOUT_MS);
+  }, [clearInactivityTimer, onSubmit]);
+
+  const beginWriting = useCallback(() => {
+    if (disabled || !engineReady) return;
+    isPointerDownRef.current = true;
+    if (autoAdvanceTimerRef.current !== null) {
+      window.clearTimeout(autoAdvanceTimerRef.current);
+      autoAdvanceTimerRef.current = null;
+    }
+    hasStartedWritingRef.current = true;
+    setHasStartedWriting(true);
+    scheduleInactivityTimeout();
+  }, [disabled, engineReady, scheduleInactivityTimeout]);
+
+  const continueWriting = useCallback((event: React.PointerEvent<HTMLCanvasElement>) => {
+    if (event.buttons > 0 && hasStartedWritingRef.current) {
+      isPointerDownRef.current = true;
+      scheduleInactivityTimeout();
+    }
+  }, [scheduleInactivityTimeout]);
+
+  const finishWritingStroke = useCallback(() => {
+    isPointerDownRef.current = false;
+    setPointerReleasedVersion((current) => current + 1);
+    if (hasStartedWritingRef.current && !disabledRef.current) {
+      scheduleInactivityTimeout();
+    }
+  }, [scheduleInactivityTimeout]);
 
   const clearCurrentCharacter = useCallback(() => {
+    clearInactivityTimer();
+    if (autoAdvanceTimerRef.current !== null) {
+      window.clearTimeout(autoAdvanceTimerRef.current);
+      autoAdvanceTimerRef.current = null;
+    }
+    isPointerDownRef.current = false;
+    hasStartedWritingRef.current = false;
+    setHasStartedWriting(false);
     window.erase?.();
     setCandidates([]);
-    setSelectedCandidate('');
-  }, []);
+  }, [clearInactivityTimer]);
+
+  useEffect(() => () => {
+    clearInactivityTimer();
+    if (autoAdvanceTimerRef.current !== null) {
+      window.clearTimeout(autoAdvanceTimerRef.current);
+      autoAdvanceTimerRef.current = null;
+    }
+  }, [clearInactivityTimer]);
 
   const advanceWithCandidate = useCallback((candidate: string) => {
     if (!engineReady || disabled || !candidate || characterIndex >= characters.length) return;
     const nextWrittenCharacters = [...writtenCharacters, candidate];
     if (characterIndex >= characters.length - 1) {
+      clearCurrentCharacter();
       onSubmit(nextWrittenCharacters.join(''));
       return;
     }
@@ -167,16 +257,16 @@ const KanjiHandwritingInput: React.FC<KanjiHandwritingInputProps> = ({
     clearCurrentCharacter();
   }, [characterIndex, characters.length, clearCurrentCharacter, disabled, engineReady, onSubmit, writtenCharacters]);
 
-  // 認識候補に現在の正答が含まれていれば、候補選択と次の文字への移動を自動化する。
-  // 候補が一瞬で切り替わる認識エンジンのため、短い待ち時間を置いてから確定する。
+  // 認識候補に現在の正答が含まれていても、書いている最中は確定しない。
+  // 指・ペンを離してから認識が安定する時間を置いて次の文字へ進める。
   useEffect(() => {
-    if (!engineReady || disabled || !expectedCharacter || !candidateOptions.includes(expectedCharacter)) return;
+    if (!engineReady || disabled || !hasStartedWritingRef.current || isPointerDownRef.current || !expectedCharacter || !candidateOptions.includes(expectedCharacter)) return;
     if (autoAdvanceTimerRef.current !== null) return;
 
     autoAdvanceTimerRef.current = window.setTimeout(() => {
       autoAdvanceTimerRef.current = null;
       advanceWithCandidate(expectedCharacter);
-    }, 140);
+    }, RECOGNITION_SETTLE_TIMEOUT_MS);
 
     return () => {
       if (autoAdvanceTimerRef.current !== null) {
@@ -184,68 +274,67 @@ const KanjiHandwritingInput: React.FC<KanjiHandwritingInputProps> = ({
         autoAdvanceTimerRef.current = null;
       }
     };
-  }, [advanceWithCandidate, candidateOptionsKey, disabled, engineReady, expectedCharacter]);
-
-  const advance = () => {
-    if (!canAdvance) return;
-    advanceWithCandidate(selectedCandidate);
-  };
+  }, [advanceWithCandidate, candidateOptionsKey, disabled, engineReady, expectedCharacter, pointerReleasedVersion]);
 
   return (
     <div className="kanji-handwriting-input min-w-0 max-w-full space-y-3 overflow-y-auto rounded-xl border-4 border-cyan-500/70 bg-slate-950/80 p-3 text-left shadow-xl">
-      <div className="flex min-w-0 flex-wrap items-center gap-2 text-sm font-black text-cyan-100">
-        <PenLine size={18} />
-        {trans('答えを1文字ずつ手書き', languageMode)}
+      <div className="flex min-w-0 flex-wrap items-center justify-between gap-2 text-sm font-black text-cyan-100">
+        <div className="flex min-w-0 items-center gap-2">
+          <PenLine size={18} />
+          {trans('答えを1文字ずつ手書き', languageMode)}
+        </div>
+        <button
+          type="button"
+          onClick={() => setTraceModeEnabled((current) => !current)}
+          disabled={disabled || !engineReady}
+          aria-pressed={traceModeEnabled}
+          className="flex shrink-0 items-center gap-1 rounded border border-cyan-300/60 bg-slate-800 px-2 py-1 text-xs font-bold text-cyan-100 transition-colors hover:bg-slate-700 disabled:opacity-40"
+        >
+          {traceModeEnabled ? <EyeOff size={14} /> : <Eye size={14} />}
+          {trans('模写モード', languageMode)}
+        </button>
       </div>
-      <div className="flex min-w-0 justify-center rounded-lg border-2 border-cyan-300/60 bg-white p-2">
+      <div className="kanji-writing-canvas-frame relative mx-auto flex w-full max-w-[420px] min-w-0 justify-center rounded-lg border-2 border-cyan-300/60 bg-white p-2">
+        {traceModeEnabled && !disabled && expectedCharacter && (
+          <span aria-hidden="true" className="kanji-trace-guide pointer-events-none absolute inset-0 z-0 flex items-center justify-center font-serif">
+            {expectedCharacter}
+          </span>
+        )}
         <canvas
           id="can"
           width="301"
           height="301"
           aria-label={trans('漢字を書く入力欄', languageMode)}
-          className="block aspect-square h-auto w-full max-w-[420px] touch-none cursor-crosshair"
+          onPointerDown={beginWriting}
+          onPointerMove={continueWriting}
+          onPointerUp={finishWritingStroke}
+          onPointerCancel={finishWritingStroke}
+          className="relative z-10 block aspect-square h-auto w-full max-w-[420px] touch-none cursor-crosshair"
           style={{ background: 'linear-gradient(90deg, transparent 49.7%, #cbd5e1 49.7%, #cbd5e1 50.3%, transparent 50.3%), linear-gradient(0deg, transparent 49.7%, #cbd5e1 49.7%, #cbd5e1 50.3%, transparent 50.3%)' }}
         />
+        <button
+          type="button"
+          id="jhr-clear"
+          onClick={clearCurrentCharacter}
+          disabled={!engineReady || disabled}
+          className="absolute right-3 top-3 z-20 flex shrink-0 items-center gap-1 rounded border border-slate-500 bg-slate-800/95 px-2 py-1 text-xs font-bold text-slate-100 shadow-lg transition-colors hover:bg-slate-700 disabled:opacity-40"
+        >
+          <Eraser size={13} /> {trans('消去', languageMode)}
+        </button>
       </div>
-      <div className="flex items-center justify-between gap-2 text-xs text-slate-300">
-        <span>
+      <div className="flex min-w-0 items-start gap-2 text-xs text-slate-300">
+        <span className="min-w-0 flex-1">
           {engineError
             ? trans('手書き認識エンジンを読み込めませんでした。通信を確認してください。', languageMode)
             : !engineReady
               ? trans('手書き認識エンジンを準備中…', languageMode)
-              : candidateOptions.length > 0
-                ? trans('候補を選んでください', languageMode)
+              : hasStartedWriting
+                ? trans('認識中…', languageMode)
                 : trans('マスの中に文字を書いてください', languageMode)}
         </span>
-        <button type="button" id="jhr-clear" onClick={clearCurrentCharacter} disabled={!engineReady || disabled} className="flex shrink-0 items-center gap-1 rounded border border-slate-500 bg-slate-800 px-2 py-1 font-bold text-slate-100 disabled:opacity-40">
-          <Eraser size={13} /> {trans('消去', languageMode)}
-        </button>
       </div>
-      {candidateOptions.length > 0 && (
-        <div className="grid grid-cols-4 gap-2" aria-label={trans('認識候補', languageMode)}>
-          {candidateOptions.map((candidate, index) => (
-            <button
-              key={`${candidate}-${index}`}
-              type="button"
-              onClick={() => setSelectedCandidate(candidate)}
-              disabled={disabled}
-              className={`rounded-lg border-2 py-2 text-2xl font-black text-slate-950 transition-colors ${selectedCandidate === candidate ? 'border-yellow-300 bg-yellow-300' : 'border-slate-300 bg-white hover:border-cyan-500'}`}
-            >
-              {candidate}
-            </button>
-          ))}
-        </div>
-      )}
-      <button
-        type="button"
-        onClick={advance}
-        disabled={!canAdvance}
-        className="w-full rounded-lg border-b-4 border-cyan-950 bg-cyan-700 py-3 text-xl font-bold transition-all hover:bg-cyan-600 active:translate-y-1 active:border-b-0 disabled:cursor-not-allowed disabled:opacity-50"
-      >
-        {characterIndex >= characters.length - 1 ? trans('決定', languageMode) : trans('次の文字', languageMode)}
-      </button>
       <div className="text-center text-[10px] leading-4 text-slate-500">
-        {trans('漢字・熟語・送り仮名を、1文字ずつ手書き認識して答え全体を判定します。', languageMode)}{' '}
+        {trans('正しく認識すると自動で次へ進みます', languageMode)}{' '}
         <a href="https://github.com/ZacharyRead/jlect-jhr" target="_blank" rel="noreferrer" className="underline hover:text-cyan-300">JLect JHR</a>
       </div>
       <div className="hidden" aria-hidden="true">
