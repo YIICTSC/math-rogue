@@ -112,6 +112,9 @@ import { ASSIGNMENT_NOTIFICATION_OPEN_EVENT } from './services/assignmentNotific
 import { childSafetyService } from './services/childSafetyService';
 import { generateEvent, generateLegacyEvent } from './services/eventService';
 import { createAssignmentRewardCard, createHolographicCard, getUpgradedCard, synthesizeCards } from './utils/cardUtils';
+import { getCardIllustrationPaths } from './utils/cardIllustration';
+import { getMagicCardArtUrl } from './utils/cardArtPaths';
+import { getEnemyIllustrationPaths } from './utils/enemyIllustration';
 import { AZUKI_BOSS_FLAG, AZUKI_BOSS_NAME, AZUKI_ENCOUNTER_FLAG, AZUKI_REWARD_CARDS } from './data/azukiBoss';
 import { DODOMEDESU_BOSS_ACTIVE_FLAG, DODOMEDESU_BOSS_READY_FLAG, DODOMEDESU_EVENT_STAGE_FLAG, DODOMEDESU_EVENT_STAGES, DODOMEDESU_NAME, DODOMEDESU_REWARD_CARDS, GENZO_NAME } from './data/dodomedesuBoss';
 import { sanitizeEnglishText, trans, transEventText } from './utils/textUtils';
@@ -133,7 +136,7 @@ import { COOP_SUPPORT_LIBRARY, getRandomCoopSupportCard } from './coopSupportCar
 import { chooseBattleBackgroundScene, getBattleBackgroundFlavor } from './data/battleBackgrounds';
 import { DAILY_PLAY_LIMIT_ENABLED, DEBUG_FEATURES_ENABLED, OFFLINE_DISTRIBUTABLE, OFFLINE_NETWORK_FEATURE_MESSAGE, PAID_EDITION, WEB_PERFORMANCE_MODE } from './config/runtime';
 import { getAttackEffectKeyForCard, getMultihitFrameSequence } from './data/attackEffects';
-import { getThemedCharacters, getThemedEnemyDisplayName, MAGIC_HERO_ID_BY_CHARACTER_ID, type VisualThemeId } from './data/visualThemes';
+import { getThemedCharacters, getThemedEnemyDisplayName, getThemedHumanoidEnemySpritePath, getThemedMonsterEnemySpritePath, MAGIC_HERO_ID_BY_CHARACTER_ID, type VisualThemeId } from './data/visualThemes';
 import { getTrueBossByTheme } from './data/enemyCatalogs';
 import { getHumanoidEnemyVoiceProfile, type HumanoidEnemyVoiceAction } from './data/humanoidEnemyVoiceLines';
 import { boostMagicCardForTransformation, getMagicCardsForHero } from './data/magicCards';
@@ -260,6 +263,37 @@ const getBgmThemeForPlayer = (
     if (player?.magicProtagonistGender === 'female') return 'magic-female';
     if (player?.magicProtagonistGender === 'male') return 'magic-male';
     return theme;
+};
+
+const getBattleEnemyTransitionAssetPaths = (
+    enemy: Pick<Enemy, 'name' | 'enemyType' | 'phase'>,
+    visualTheme: VisualThemeId,
+): string[] => {
+    if (visualTheme === 'high-school' && enemy.enemyType === 'AZUKI') {
+        return [assetUrl('sprites/high-school/azuki/idle.webp')];
+    }
+    if (visualTheme === 'high-school' && enemy.enemyType === 'DODOMEDESU') {
+        return [assetUrl('enemy-illustrations/ドドメデス.webp')];
+    }
+    if (visualTheme === 'high-school' && enemy.enemyType === 'GENZO') {
+        return [assetUrl('enemy-illustrations/ゲンゾー.webp')];
+    }
+
+    const humanoidPath = getThemedHumanoidEnemySpritePath(enemy, visualTheme, 'idle');
+    if (humanoidPath) return [humanoidPath];
+    const monsterPath = getThemedMonsterEnemySpritePath(enemy, visualTheme);
+    if (monsterPath) return [monsterPath];
+    return getEnemyIllustrationPaths(enemy.name);
+};
+
+const getBattleCardTransitionAssetPaths = (card: ICard): string[] => {
+    const magicCardArt = getMagicCardArtUrl(card);
+    const cardIllustration = getCardIllustrationPaths(
+        card.id,
+        card.name,
+        [card.name, ...(card.originalNames || [])],
+    )[0];
+    return [magicCardArt, cardIllustration].filter((path): path is string => Boolean(path));
 };
 
 type CreditDecorationSprite = {
@@ -3225,8 +3259,10 @@ const App: React.FC = () => {
         if (gameState.challengeMode !== 'COOP' || !coopSession || coopSession.isHost) return;
         const bgmType = getBgmForScreen(gameState);
         if (!bgmType) return;
+        const bgmTheme = getBgmThemeForPlayer(gameState.visualTheme || visualTheme, gameState.player);
+        audioService.prepareBGM(bgmType, bgmTheme);
         void (async () => {
-            await audioService.setBgmTheme(getBgmThemeForPlayer(gameState.visualTheme || visualTheme, gameState.player));
+            await audioService.setBgmTheme(bgmTheme);
             await audioService.playBGM(bgmType);
         })();
     }, [coopSession, gameState, getBgmForScreen, visualTheme]);
@@ -3236,8 +3272,10 @@ const App: React.FC = () => {
         if (gameState.screen === GameScreen.TREASURE) return;
         const bgmType = getBgmForScreen(gameState);
         if (!bgmType) return;
+        const bgmTheme = getBgmThemeForPlayer(gameState.visualTheme || visualTheme, gameState.player);
+        audioService.prepareBGM(bgmType, bgmTheme);
         void (async () => {
-            await audioService.setBgmTheme(getBgmThemeForPlayer(gameState.visualTheme || visualTheme, gameState.player));
+            await audioService.setBgmTheme(bgmTheme);
             await audioService.playBGM(bgmType);
         })();
     }, [gameState.screen, gameState.currentMapNodeId, gameState.challengeMode, gameState.enemies, gameState.player.magicProtagonistGender, gameState.visualTheme, getBgmForScreen, visualTheme]);
@@ -7093,6 +7131,19 @@ const App: React.FC = () => {
                         e.floatingText = { id: `rel-mask-${Date.now()}-${e.id}`, text: 'へろへろ', color: 'text-gray-400' };
                     });
                 }
+
+                // Warm only the assets that will be visible in the next battle.
+                // The request starts before the screen state changes, while the
+                // browser cache is shared with the mounted scene components.
+                assetPreloadService.preloadTransitionAssets([
+                    battleBackgroundScene.image,
+                    ...enemies.flatMap(enemy => getBattleEnemyTransitionAssetPaths(enemy, activeBattleVisualTheme)),
+                    ...p.hand.slice(0, 5).flatMap(getBattleCardTransitionAssetPaths),
+                ]);
+                audioService.prepareBGM(
+                    bgmType,
+                    getBgmThemeForPlayer(activeBattleVisualTheme, p),
+                );
 
                 const eventBattleLogs: string[] = [];
 

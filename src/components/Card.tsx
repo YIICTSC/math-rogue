@@ -180,6 +180,8 @@ const CompositeArtPiece: React.FC<{
             src={assetUrl(path)}
             alt="Azuki card illustration"
             className="relative z-10 h-full w-full scale-[1.2] object-contain drop-shadow-[0_5px_4px_rgba(25,45,50,0.6)]"
+            loading="eager"
+            fetchPriority="high"
             decoding="async"
           />
         </div>
@@ -205,6 +207,8 @@ const CompositeArtPiece: React.FC<{
         src={candidates[imageIndex]}
         alt={trans(cardName, languageMode)}
         className="w-full h-full object-cover opacity-95"
+        loading="eager"
+        fetchPriority="high"
         decoding="async"
         onError={() => {
           const next = imageIndex + 1;
@@ -471,6 +475,8 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled, onInspect, languag
           src={imageCandidates[imageIndex]}
           alt={displayCardName}
           className="w-full h-full object-cover opacity-95 drop-shadow-md"
+          loading="eager"
+          fetchPriority="high"
           decoding="async"
           onError={() => setImageIndex((prev) => prev + 1)}
         />
@@ -483,6 +489,8 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled, onInspect, languag
           src={imageCandidates[imageIndex]}
           alt={displayCardName}
           className="w-full h-full object-cover opacity-95 drop-shadow-md"
+          loading="eager"
+          fetchPriority="high"
           decoding="async"
           onError={() => setImageIndex((prev) => prev + 1)}
         />

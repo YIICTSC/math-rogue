@@ -66,6 +66,8 @@ class AudioService {
   private currentSource: AudioBufferSourceNode | null = null;
   private currentHtmlAudio: HTMLAudioElement | null = null;
   private activeBgmHtmlAudios: Set<HTMLAudioElement> = new Set();
+  private preparedBgmHtmlAudios: Map<string, HTMLAudioElement> = new Map();
+  private readonly maxPreparedBgmAudios = 3;
   private bgmMediaSources: Map<HTMLAudioElement, MediaElementAudioSourceNode> = new Map();
   private playbackGeneration: number = 0;
   private pausedForAppBackground: boolean = false;
@@ -120,6 +122,13 @@ class AudioService {
         this.currentSource = null;
         this.currentHtmlAudio = null;
         this.activeBgmHtmlAudios.clear();
+        this.preparedBgmHtmlAudios.forEach(audio => {
+            try {
+                audio.pause();
+                audio.src = '';
+            } catch {}
+        });
+        this.preparedBgmHtmlAudios.clear();
         this.bgmMediaSources.clear();
     }
     if (this.ctx) {
@@ -344,6 +353,54 @@ class AudioService {
 
   public getBgmVolume() {
       return this.bgmVolume;
+  }
+
+  /**
+   * Start fetching the next web BGM without changing the current playback.
+   * Native builds keep their existing audio path and do not create an extra
+   * media element.
+   */
+  public prepareBGM(type: string, theme: BgmThemeId = this.bgmTheme) {
+      if (!WEB_PERFORMANCE_MODE || typeof document === 'undefined') return;
+      if (this.bgmMode !== 'NEW' && this.bgmMode !== 'OLD') return;
+
+      const bgmRoot = this.bgmMode === 'NEW' ? 'bgm-new' : 'bgm';
+      const resolvedTheme = theme === 'magic-female' && type === 'menu'
+          ? 'magic'
+          : theme;
+      const path = versionBgmPath(this.getCanonicalWebBgmPath(bgmRoot, resolvedTheme, type));
+      const existing = this.preparedBgmHtmlAudios.get(path);
+      if (existing) {
+          this.preparedBgmHtmlAudios.delete(path);
+          this.preparedBgmHtmlAudios.set(path, existing);
+          return;
+      }
+
+      this.evictPreparedBgmAudioIfNeeded();
+
+      const audio = document.createElement('audio');
+      audio.preload = 'auto';
+      audio.loop = true;
+      audio.volume = Math.min(1, this.bgmVolume);
+      (audio as HTMLAudioElement & { fetchPriority?: 'high' | 'low' | 'auto' }).fetchPriority = 'high';
+      audio.src = path;
+      this.preparedBgmHtmlAudios.set(path, audio);
+      audio.load();
+  }
+
+  private evictPreparedBgmAudioIfNeeded() {
+      while (this.preparedBgmHtmlAudios.size >= this.maxPreparedBgmAudios) {
+          const entry = Array.from(this.preparedBgmHtmlAudios.entries())
+              .find(([, audio]) => audio !== this.currentHtmlAudio);
+          if (!entry) return;
+          const [path, audio] = entry;
+          this.preparedBgmHtmlAudios.delete(path);
+          try {
+              audio.pause();
+              audio.src = '';
+          } catch {}
+          this.disconnectHtmlBgm(audio);
+      }
   }
 
   public setSfxVolume(volume: number) {
@@ -1115,15 +1172,27 @@ class AudioService {
 
   private async playHtmlAudioMp3(paths: string[], loop: boolean, type: string, playbackGeneration: number) {
       for (const path of paths) {
-          let audio: HTMLAudioElement | null = null;
+          let audio: HTMLAudioElement | null = WEB_PERFORMANCE_MODE
+              ? this.preparedBgmHtmlAudios.get(path) || null
+              : null;
           try {
               void this.resumeAudioContext();
-              // Let the browser request the current BGM when playback starts.
-              // Avoid a separate preload request competing with visible assets.
-              audio = document.createElement('audio');
-              audio.preload = 'metadata';
+              // Web transitions can prepare the exact next BGM before the new
+              // scene mounts. Reuse that element so playback does not restart
+              // from metadata-only loading on every screen change.
+              if (!audio) {
+                  audio = document.createElement('audio');
+                  audio.preload = 'metadata';
+                  audio.src = path;
+              } else {
+                  audio.preload = 'auto';
+                  try {
+                      audio.currentTime = 0;
+                  } catch {}
+              }
               audio.loop = loop;
-              audio.src = path;
+              audio.volume = Math.min(1, this.bgmVolume);
+              (audio as HTMLAudioElement & { fetchPriority?: 'high' | 'low' | 'auto' }).fetchPriority = 'high';
               // Keep iOS BGM on the media element's native playback path. Routing
               // it through WKWebView's AudioContext makes the stream repeatedly
               // detach and rebuffer when iOS changes output routes (CarPlay,
@@ -1179,7 +1248,11 @@ class AudioService {
       try {
           source.disconnect();
       } catch {}
-      this.bgmMediaSources.delete(audio);
+      // A prepared web element can be connected again on the next transition.
+      // Non-prepared elements are one-shot and can release their source node.
+      if (!Array.from(this.preparedBgmHtmlAudios.values()).includes(audio)) {
+          this.bgmMediaSources.delete(audio);
+      }
   }
 
   private isCurrentPlayback(type: string, playbackGeneration: number) {

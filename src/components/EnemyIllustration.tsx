@@ -77,6 +77,8 @@ const EnemyIllustration: React.FC<EnemyIllustrationProps> = ({ name, seed, alias
         src={imagePaths[pathIndex]}
         alt={altText}
         className={`absolute inset-0 w-full h-full object-contain ${imageStatus === 'error' ? 'opacity-0 pointer-events-none' : ''}`}
+        loading="eager"
+        fetchPriority="high"
         decoding="async"
         onLoad={() => setImageStatus('loading')}
         onError={() => {

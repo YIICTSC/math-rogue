@@ -24,6 +24,8 @@ const ResilientAssetImage: React.FC<ResilientAssetImageProps> = ({ sources, fall
     <img
       {...props}
       src={candidates[sourceIndex]}
+      loading={props.loading ?? 'eager'}
+      fetchPriority={props.fetchPriority ?? 'high'}
       decoding={props.decoding ?? 'async'}
       onError={(event) => {
         props.onError?.(event);
