@@ -3,6 +3,7 @@ import type { AttackEffectKey, StatusEffectKey } from '../types';
 import type { VisualThemeId } from '../data/visualThemes';
 import { getHumanoidEnemyVoiceProfile, type HumanoidEnemyVoiceAction } from '../data/humanoidEnemyVoiceLines';
 import { assetUrl } from '../utils/assetPaths';
+import { WEB_PERFORMANCE_MODE } from '../config/runtime';
 
 export type BgmThemeId = VisualThemeId | 'magic-female' | 'magic-male';
 
@@ -1039,10 +1040,10 @@ class AudioService {
           `/${type}.mp3`,
           `${type}.mp3`
       ].map(versionBgmPath);
-      // WKWebView can leave a decoded Web Audio source silent even after the context is
-      // resumed. Native iOS builds therefore use the media element path first, while the
-      // existing Web Audio decoder remains the fallback for malformed/unsupported files.
-      if (IS_IOS_BUILD && await this.playHtmlAudioMp3(paths, loop, type, playbackGeneration)) return;
+      // Native iOS and the GitHub Pages build use the media element path first.
+      // It can start streaming before the whole MP3 has been fetched and decoded.
+      // Keep the Web Audio decoder as a fallback for unsupported or blocked media.
+      if ((IS_IOS_BUILD || WEB_PERFORMANCE_MODE) && await this.playHtmlAudioMp3(paths, loop, type, playbackGeneration)) return;
       if (!this.isCurrentPlayback(type, playbackGeneration)) return;
       const cacheKey = `${this.bgmMode}:${this.bgmTheme}:${type}`;
       let buffer = this.audioBuffers[cacheKey];
