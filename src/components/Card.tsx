@@ -10,6 +10,7 @@ import { isLegacySpriteModeEnabled } from '../utils/legacySpriteMode';
 import { toAge9BattleText, transBattle } from '../utils/ageRatingCopy';
 import type { VisualThemeId } from '../data/visualThemes';
 import ResilientAssetImage from './ResilientAssetImage';
+import { WEB_PERFORMANCE_MODE } from '../config/runtime';
 
 interface CardProps {
   card: CardType;
@@ -180,6 +181,9 @@ const CompositeArtPiece: React.FC<{
             src={assetUrl(path)}
             alt="Azuki card illustration"
             className="relative z-10 h-full w-full scale-[1.2] object-contain drop-shadow-[0_5px_4px_rgba(25,45,50,0.6)]"
+            loading={WEB_PERFORMANCE_MODE ? 'eager' : undefined}
+            decoding="async"
+            fetchPriority={WEB_PERFORMANCE_MODE ? 'high' : undefined}
           />
         </div>
       );
@@ -204,6 +208,9 @@ const CompositeArtPiece: React.FC<{
         src={candidates[imageIndex]}
         alt={trans(cardName, languageMode)}
         className="w-full h-full object-cover opacity-95"
+        loading={WEB_PERFORMANCE_MODE ? 'eager' : undefined}
+        decoding="async"
+        fetchPriority={WEB_PERFORMANCE_MODE ? 'high' : undefined}
         onError={() => {
           const next = imageIndex + 1;
           if (next < candidates.length) setImageIndex(next);
@@ -469,6 +476,9 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled, onInspect, languag
           src={imageCandidates[imageIndex]}
           alt={displayCardName}
           className="w-full h-full object-cover opacity-95 drop-shadow-md"
+          loading={WEB_PERFORMANCE_MODE ? 'eager' : undefined}
+          decoding="async"
+          fetchPriority={WEB_PERFORMANCE_MODE ? 'high' : undefined}
           onError={() => setImageIndex((prev) => prev + 1)}
         />
       );
@@ -480,6 +490,9 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled, onInspect, languag
           src={imageCandidates[imageIndex]}
           alt={displayCardName}
           className="w-full h-full object-cover opacity-95 drop-shadow-md"
+          loading={WEB_PERFORMANCE_MODE ? 'eager' : undefined}
+          decoding="async"
+          fetchPriority={WEB_PERFORMANCE_MODE ? 'high' : undefined}
           onError={() => setImageIndex((prev) => prev + 1)}
         />
       );

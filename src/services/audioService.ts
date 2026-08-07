@@ -1094,8 +1094,14 @@ class AudioService {
           let audio: HTMLAudioElement | null = null;
           try {
               void this.resumeAudioContext();
-              audio = new Audio(path);
+              // Set preload before src so the browser can schedule the current
+              // BGM immediately. GitHub Pages uses the media element path to
+              // stream the track instead of waiting for a full Web Audio decode.
+              audio = document.createElement('audio');
               audio.preload = 'auto';
+              if (WEB_PERFORMANCE_MODE) audio.setAttribute('fetchpriority', 'high');
+              audio.src = path;
+              audio.load();
               audio.loop = loop;
               // Keep iOS BGM on the media element's native playback path. Routing
               // it through WKWebView's AudioContext makes the stream repeatedly

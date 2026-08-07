@@ -4,6 +4,7 @@ import { getEnemyIllustrationPaths } from '../utils/enemyIllustration';
 import { isLegacySpriteModeEnabled } from '../utils/legacySpriteMode';
 import { getThemedHumanoidEnemySpritePath, getThemedMonsterEnemySpritePath, type HighSchoolEnemyAction, type VisualThemeId } from '../data/visualThemes';
 import { assetUrl } from '../utils/assetPaths';
+import { WEB_PERFORMANCE_MODE } from '../config/runtime';
 
 interface EnemyIllustrationProps {
   name: string;
@@ -77,6 +78,9 @@ const EnemyIllustration: React.FC<EnemyIllustrationProps> = ({ name, seed, alias
         src={imagePaths[pathIndex]}
         alt={altText}
         className={`absolute inset-0 w-full h-full object-contain ${imageStatus === 'error' ? 'opacity-0 pointer-events-none' : ''}`}
+        loading={WEB_PERFORMANCE_MODE ? 'eager' : undefined}
+        decoding="async"
+        fetchPriority={WEB_PERFORMANCE_MODE ? 'high' : undefined}
         onLoad={() => setImageStatus('loading')}
         onError={() => {
           if (pathIndex + 1 < imagePaths.length) {
