@@ -13,6 +13,10 @@ const APP_ASSET_VERSION = typeof __APP_ASSET_VERSION__ === 'string' ? __APP_ASSE
 const versionBgmPath = (path: string) =>
     `${path}${path.includes('?') ? '&' : '?'}v=${encodeURIComponent(APP_ASSET_VERSION)}`;
 const IS_IOS_BUILD = String(import.meta.env.VITE_APP_PLATFORM || '').trim().toLowerCase() === 'ios';
+const THEMED_BGM_TYPES = new Set([
+    'battle', 'mid_boss', 'boss', 'final_boss', 'menu', 'map', 'shop', 'event',
+    'rest', 'reward', 'victory', 'game_over', 'math', 'relic_select',
+]);
 
 type CommonSoundEffect =
   | 'select'
@@ -1010,6 +1014,21 @@ class AudioService {
       await this.playBGM(parsed.type as any, false);
   }
 
+  private getCanonicalWebBgmPath(bgmRoot: string, resolvedTheme: string, type: string): string {
+      if (resolvedTheme === 'elementary') {
+          return assetUrl(`${bgmRoot}/${type}.mp3`);
+      }
+      if (resolvedTheme === 'magic') {
+          return type === 'menu'
+              ? assetUrl(`${bgmRoot}/magic/menu.mp3`)
+              : assetUrl(`${bgmRoot}/${type}.mp3`);
+      }
+      if (THEMED_BGM_TYPES.has(type)) {
+          return assetUrl(`${bgmRoot}/${resolvedTheme}/${type}.mp3`);
+      }
+      return assetUrl(`${bgmRoot}/${type}.mp3`);
+  }
+
   private async playMp3(type: string, loop: boolean, playbackGeneration: number) {
       if (!this.ctx || !this.bgmGain) return;
       if (!this.isCurrentPlayback(type, playbackGeneration)) return;
@@ -1040,15 +1059,20 @@ class AudioService {
           `/${type}.mp3`,
           `${type}.mp3`
       ].map(versionBgmPath);
+      // GitHub Pages has one canonical asset base URL. Avoid trying several
+      // root-relative variants and waiting for failed requests between them.
+      const webPlaybackPaths = WEB_PERFORMANCE_MODE
+          ? [versionBgmPath(this.getCanonicalWebBgmPath(bgmRoot, resolvedTheme, type))]
+          : paths;
       // Native iOS and the GitHub Pages build use the media element path first.
       // It can start streaming before the whole MP3 has been fetched and decoded.
       // Keep the Web Audio decoder as a fallback for unsupported or blocked media.
-      if ((IS_IOS_BUILD || WEB_PERFORMANCE_MODE) && await this.playHtmlAudioMp3(paths, loop, type, playbackGeneration)) return;
+      if ((IS_IOS_BUILD || WEB_PERFORMANCE_MODE) && await this.playHtmlAudioMp3(IS_IOS_BUILD ? paths : webPlaybackPaths, loop, type, playbackGeneration)) return;
       if (!this.isCurrentPlayback(type, playbackGeneration)) return;
       const cacheKey = `${this.bgmMode}:${this.bgmTheme}:${type}`;
       let buffer = this.audioBuffers[cacheKey];
       if (!buffer) {
-          for (const path of paths) {
+          for (const path of WEB_PERFORMANCE_MODE ? webPlaybackPaths : paths) {
               try {
                   const response = await fetch(path);
                   if (response.ok) {
