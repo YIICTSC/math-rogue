@@ -68,17 +68,7 @@ const normalizeAssetPath = (path: string): string =>
 
 const buildCriticalAssetPaths = (visualTheme: VisualThemeId): string[] => {
     const paths = WEB_PERFORMANCE_MODE
-        ? [
-            // Keep the first map and likely first battles responsive. The
-            // browser will fetch later screens naturally when they appear.
-            'sprites/backgrounds/learning-rogue/map-campus.webp',
-            'sprites/backgrounds/learning-rogue/selection-entrance.webp',
-            'sprites/backgrounds/learning-rogue/battle-classroom.webp',
-            'sprites/backgrounds/learning-rogue/battle-hallway.webp',
-            'sprites/backgrounds/learning-rogue/battle-gym.webp',
-            ...ATTACK_EFFECT_KEYS.map(key => `sprites/attack-vfx-${key}.webp`),
-            ...STATUS_EFFECT_KEYS.map(key => `sprites/status-vfx-${key}.webp`),
-        ]
+        ? []
         : [
             ...BATTLE_BACKGROUND_SCENES.map(scene => scene.image),
             ...SCREEN_BACKGROUND_PATHS,
