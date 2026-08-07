@@ -1,4 +1,5 @@
-import { getAssetBaseUrl } from './assetPaths';
+import { ENEMY_ILLUSTRATION_MANIFEST } from '../data/enemyIllustrationManifest';
+import { assetUrl } from './assetPaths';
 
 const INVALID_FILE_CHARS = /[<>:"/\\|?*\x00-\x1F]/g;
 const BOSS_PREFIX = /^\s*ボス\s*[：:]\s*/;
@@ -17,7 +18,6 @@ const getNameVariants = (value: string): string[] => [
 ];
 
 export const getEnemyIllustrationPaths = (name: string, aliases: string[] = []): string[] => {
-  const baseUrl = getAssetBaseUrl();
   const allNames = [name, ...aliases].filter(Boolean).map((v) => v.trim());
   const candidates = Array.from(new Set(
     allNames.flatMap((base) => {
@@ -27,8 +27,13 @@ export const getEnemyIllustrationPaths = (name: string, aliases: string[] = []):
         .map((variant) => sanitizeEnemyIllustrationName(variant));
     })
   ));
-  const extensions = ['svg', 'jpg', 'jpeg', 'png', 'webp'];
-  return candidates.flatMap((fileName) =>
-    extensions.map((ext) => `${baseUrl}enemy-illustrations/${encodeURIComponent(`${fileName}.${ext}`)}`)
-  );
+  const resolvedPaths = candidates
+    .map((fileName) => ENEMY_ILLUSTRATION_MANIFEST[fileName])
+    .filter((fileName): fileName is string => Boolean(fileName))
+    .map((fileName) => assetUrl(`enemy-illustrations/${encodeURIComponent(fileName)}`));
+  if (resolvedPaths.length > 0) return Array.from(new Set(resolvedPaths));
+
+  // Keep one deterministic fallback for generated or user-provided enemy names.
+  const fallbackName = sanitizeEnemyIllustrationName(allNames[0] || name);
+  return [assetUrl(`enemy-illustrations/${encodeURIComponent(`${fallbackName}.svg`)}`)];
 };
