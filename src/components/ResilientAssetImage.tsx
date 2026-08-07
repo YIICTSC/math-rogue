@@ -1,5 +1,4 @@
 import React, { useEffect, useMemo, useState } from 'react';
-import { WEB_PERFORMANCE_MODE } from '../config/runtime';
 
 interface ResilientAssetImageProps extends Omit<React.ImgHTMLAttributes<HTMLImageElement>, 'src'> {
   sources: Array<string | null | undefined>;
@@ -25,9 +24,7 @@ const ResilientAssetImage: React.FC<ResilientAssetImageProps> = ({ sources, fall
     <img
       {...props}
       src={candidates[sourceIndex]}
-      loading={props.loading ?? (WEB_PERFORMANCE_MODE ? 'eager' : undefined)}
       decoding={props.decoding ?? 'async'}
-      fetchPriority={props.fetchPriority ?? (WEB_PERFORMANCE_MODE ? 'high' : undefined)}
       onError={(event) => {
         props.onError?.(event);
         setSourceIndex((current) => current + 1);

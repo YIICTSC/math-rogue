@@ -26,7 +26,6 @@ import { assetUrl } from '../utils/assetPaths';
 import type { BattleUiSettings } from './SettingsModal';
 import MagicRulePanel from './MagicRulePanel';
 import ResilientAssetImage from './ResilientAssetImage';
-import { WEB_PERFORMANCE_MODE } from '../config/runtime';
 
 const MAGIC_MALE_ACTION_SCALE: Record<string, {
     before: { attack: number; skill: number };
@@ -1488,9 +1487,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                             alt=""
                             aria-hidden="true"
                             className="pointer-events-none absolute inset-0 h-full w-full object-cover object-center opacity-76"
-                            loading={WEB_PERFORMANCE_MODE ? 'eager' : undefined}
                             decoding="async"
-                            fetchPriority={WEB_PERFORMANCE_MODE ? 'high' : undefined}
                         />
                         <div className="pointer-events-none absolute inset-0 bg-slate-950/45" />
                     </>
@@ -2863,9 +2860,7 @@ const FinisherArtPiece: React.FC<{ token: string; seed: string; languageMode: La
                         ? getEnglishFamiliarName(card.familiarSummon.name)
                         : transBattle(card.familiarSummon?.name || card.name, languageMode)}
                     className="absolute left-1/2 top-1/2 h-[150%] w-[150%] -translate-x-1/2 -translate-y-1/2 object-contain drop-shadow-[0_0_24px_rgba(217,70,239,0.95)]"
-                    loading={WEB_PERFORMANCE_MODE ? 'eager' : undefined}
                     decoding="async"
-                    fetchPriority={WEB_PERFORMANCE_MODE ? 'high' : undefined}
                 />
             </div>
         );
@@ -2942,9 +2937,7 @@ const FinisherArtPiece: React.FC<{ token: string; seed: string; languageMode: La
                 src={candidates[imageIndex]}
                 alt={transBattle(cardName, languageMode)}
                 className={imgClass}
-                loading={WEB_PERFORMANCE_MODE ? 'eager' : undefined}
                 decoding="async"
-                fetchPriority={WEB_PERFORMANCE_MODE ? 'high' : undefined}
                 onError={() => {
                     const next = imageIndex + 1;
                     if (next < candidates.length) setImageIndex(next);
