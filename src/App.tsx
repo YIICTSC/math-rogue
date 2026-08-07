@@ -131,7 +131,7 @@ import { TypingLessonId } from './data/typingLessonConfig';
 import { getRandomRaceTrickCard, getRaceTrickCard } from './raceTricks';
 import { COOP_SUPPORT_LIBRARY, getRandomCoopSupportCard } from './coopSupportCards';
 import { chooseBattleBackgroundScene, getBattleBackgroundFlavor } from './data/battleBackgrounds';
-import { DAILY_PLAY_LIMIT_ENABLED, DEBUG_FEATURES_ENABLED, OFFLINE_DISTRIBUTABLE, OFFLINE_NETWORK_FEATURE_MESSAGE, PAID_EDITION } from './config/runtime';
+import { DAILY_PLAY_LIMIT_ENABLED, DEBUG_FEATURES_ENABLED, OFFLINE_DISTRIBUTABLE, OFFLINE_NETWORK_FEATURE_MESSAGE, PAID_EDITION, WEB_PERFORMANCE_MODE } from './config/runtime';
 import { getAttackEffectKeyForCard, getMultihitFrameSequence } from './data/attackEffects';
 import { getThemedCharacters, getThemedEnemyDisplayName, MAGIC_HERO_ID_BY_CHARACTER_ID, type VisualThemeId } from './data/visualThemes';
 import { getTrueBossByTheme } from './data/enemyCatalogs';
@@ -1579,7 +1579,9 @@ const App: React.FC = () => {
         if (!gameAssetPreloadPromisesRef.current[preloadKey]) {
             setIsPreloadingGameAssets(true);
             gameAssetPreloadPromisesRef.current[preloadKey] = Promise.all([
-                audioService.preloadEssentialSfx(),
+                // Web browsers can load the small SFX files on first use. Do
+                // not compete with the first playable screen for 29 decodes.
+                WEB_PERFORMANCE_MODE ? Promise.resolve() : audioService.preloadEssentialSfx(),
                 assetPreloadService.preloadEssentialGameAssets(preloadKey),
             ])
                 .then(() => undefined)

@@ -43,6 +43,7 @@ jobs:
       - name: Build
         env:
           VITE_ENABLE_DEBUG_FEATURES: 'true'
+          VITE_WEB_PERFORMANCE_MODE: 'true'
         run: pnpm run build
 
       - name: Rebase public sprite paths for GitHub Pages

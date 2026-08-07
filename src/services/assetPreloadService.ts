@@ -2,6 +2,7 @@ import { BATTLE_BACKGROUND_SCENES } from '../data/battleBackgrounds';
 import { MAGIC_ASSET_PATHS } from '../data/magicAssetManifest';
 import type { VisualThemeId } from '../data/visualThemes';
 import { assetUrl } from '../utils/assetPaths';
+import { WEB_PERFORMANCE_MODE } from '../config/runtime';
 
 const ATTACK_EFFECT_KEYS = [
     'slash',
@@ -66,12 +67,46 @@ const normalizeAssetPath = (path: string): string =>
     isResolvedAssetUrl(path) ? path : assetUrl(path);
 
 const buildCriticalAssetPaths = (visualTheme: VisualThemeId): string[] => {
-    const paths = [
-        ...BATTLE_BACKGROUND_SCENES.map(scene => scene.image),
-        ...SCREEN_BACKGROUND_PATHS,
-        ...ATTACK_EFFECT_KEYS.map(key => `sprites/attack-vfx-${key}.webp`),
-        ...STATUS_EFFECT_KEYS.map(key => `sprites/status-vfx-${key}.webp`),
-    ];
+    const paths = WEB_PERFORMANCE_MODE
+        ? [
+            // Keep the first map and likely first battles responsive. The
+            // browser will fetch later screens naturally when they appear.
+            'sprites/backgrounds/learning-rogue/map-campus.webp',
+            'sprites/backgrounds/learning-rogue/selection-entrance.webp',
+            'sprites/backgrounds/learning-rogue/battle-classroom.webp',
+            'sprites/backgrounds/learning-rogue/battle-hallway.webp',
+            'sprites/backgrounds/learning-rogue/battle-gym.webp',
+            ...ATTACK_EFFECT_KEYS.map(key => `sprites/attack-vfx-${key}.webp`),
+            ...STATUS_EFFECT_KEYS.map(key => `sprites/status-vfx-${key}.webp`),
+        ]
+        : [
+            ...BATTLE_BACKGROUND_SCENES.map(scene => scene.image),
+            ...SCREEN_BACKGROUND_PATHS,
+            ...ATTACK_EFFECT_KEYS.map(key => `sprites/attack-vfx-${key}.webp`),
+            ...STATUS_EFFECT_KEYS.map(key => `sprites/status-vfx-${key}.webp`),
+        ];
+
+    if (WEB_PERFORMANCE_MODE) {
+        if (visualTheme === 'high-school') {
+            paths.push(
+                'sprites/high-school/title-background.webp',
+                'sprites/backgrounds/learning-rogue/high-school-map.webp',
+            );
+        }
+
+        if (visualTheme === 'magic') {
+            paths.push(
+                'sprites/magic/title-background.webp',
+                'sprites/backgrounds/learning-rogue/magic-map-act1.webp',
+                'sprites/backgrounds/learning-rogue/magic-selection-entrance.webp',
+                'sprites/backgrounds/learning-rogue/magic-battle-classroom.webp',
+                'sprites/backgrounds/learning-rogue/magic-battle-hallway.webp',
+                'sprites/backgrounds/learning-rogue/magic-battle-gym.webp',
+            );
+        }
+
+        return paths;
+    }
 
     if (visualTheme === 'high-school') {
         paths.push(
@@ -104,6 +139,8 @@ const buildCriticalAssetPaths = (visualTheme: VisualThemeId): string[] => {
 };
 
 const buildDeferredAssetPaths = (visualTheme: VisualThemeId): string[] => {
+    if (WEB_PERFORMANCE_MODE) return [];
+
     if (visualTheme === 'high-school') {
         return [
             ...range(9).flatMap(index => [
@@ -146,6 +183,12 @@ class AssetPreloadService {
     preloadDeferredGameAssets(visualTheme: VisualThemeId): Promise<void> {
         const cached = this.deferredPromises.get(visualTheme);
         if (cached) return cached;
+
+        if (WEB_PERFORMANCE_MODE) {
+            const promise = Promise.resolve();
+            this.deferredPromises.set(visualTheme, promise);
+            return promise;
+        }
 
         const promise = this.waitForIdle(1200)
             .then(() => this.preloadImages(buildDeferredAssetPaths(visualTheme), this.deferredPreloadConcurrency));
