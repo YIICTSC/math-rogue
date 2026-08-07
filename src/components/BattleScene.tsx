@@ -1487,6 +1487,8 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                             alt=""
                             aria-hidden="true"
                             className="pointer-events-none absolute inset-0 h-full w-full object-cover object-center opacity-76"
+                            loading="eager"
+                            fetchPriority="high"
                             decoding="async"
                         />
                         <div className="pointer-events-none absolute inset-0 bg-slate-950/45" />

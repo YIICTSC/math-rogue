@@ -186,15 +186,29 @@ class AssetPreloadService {
         return promise;
     }
 
+    /**
+     * Warm only the assets that are about to become visible. This is used by
+     * the web transition path; native builds keep their existing preload plan.
+     */
+    preloadTransitionAssets(paths: string[]): void {
+        if (!WEB_PERFORMANCE_MODE) return;
+        const sources = Array.from(new Set(paths.filter(Boolean).map(normalizeAssetPath)));
+        void this.preloadImagesInBackgroundBatches(sources, 3, 'high');
+    }
+
     private preloadImages(paths: string[], concurrency: number): Promise<void> {
         const sources = Array.from(new Set(paths.map(normalizeAssetPath)));
         return this.preloadImagesInBackgroundBatches(sources, concurrency);
     }
 
-    private async preloadImagesInBackgroundBatches(sources: string[], concurrency: number): Promise<void> {
+    private async preloadImagesInBackgroundBatches(
+        sources: string[],
+        concurrency: number,
+        fetchPriority: 'high' | 'low' = 'low',
+    ): Promise<void> {
         for (let index = 0; index < sources.length; index += concurrency) {
             const batch = sources.slice(index, index + concurrency);
-            await Promise.all(batch.map(src => this.preloadImage(src)));
+            await Promise.all(batch.map(src => this.preloadImage(src, fetchPriority)));
             await this.yieldToMainThread();
         }
     }
@@ -223,7 +237,7 @@ class AssetPreloadService {
         });
     }
 
-    private preloadImage(src: string): Promise<void> {
+    private preloadImage(src: string, fetchPriority: 'high' | 'low' = 'low'): Promise<void> {
         const cached = this.imagePromises.get(src);
         if (cached) return cached;
 
@@ -240,11 +254,16 @@ class AssetPreloadService {
             }, 15000);
             const finish = () => {
                 window.clearTimeout(timeoutId);
+                const decode = image.decode?.();
+                if (decode) {
+                    void decode.catch(() => undefined).finally(resolve);
+                    return;
+                }
                 resolve();
             };
             image.decoding = 'async';
             image.loading = 'eager';
-            (image as HTMLImageElement & { fetchPriority?: 'high' | 'low' | 'auto' }).fetchPriority = 'low';
+            (image as HTMLImageElement & { fetchPriority?: 'high' | 'low' | 'auto' }).fetchPriority = fetchPriority;
             image.onload = finish;
             image.onerror = finish;
             image.src = src;
