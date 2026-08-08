@@ -13,6 +13,7 @@ const APP_ASSET_VERSION = typeof __APP_ASSET_VERSION__ === 'string' ? __APP_ASSE
 const versionBgmPath = (path: string) =>
     `${path}${path.includes('?') ? '&' : '?'}v=${encodeURIComponent(APP_ASSET_VERSION)}`;
 const IS_IOS_BUILD = String(import.meta.env.VITE_APP_PLATFORM || '').trim().toLowerCase() === 'ios';
+const WEB_OPUS_AUDIO_MIME = 'audio/ogg; codecs="opus"';
 const THEMED_BGM_TYPES = new Set([
     'battle', 'mid_boss', 'boss', 'final_boss', 'menu', 'map', 'shop', 'event',
     'rest', 'reward', 'victory', 'game_over', 'math', 'relic_select',
@@ -68,6 +69,7 @@ class AudioService {
   private activeBgmHtmlAudios: Set<HTMLAudioElement> = new Set();
   private preparedBgmHtmlAudios: Map<string, HTMLAudioElement> = new Map();
   private readonly maxPreparedBgmAudios = 3;
+  private webOpusSupport: boolean | null = null;
   private bgmMediaSources: Map<HTMLAudioElement, MediaElementAudioSourceNode> = new Map();
   private playbackGeneration: number = 0;
   private pausedForAppBackground: boolean = false;
@@ -368,7 +370,7 @@ class AudioService {
       const resolvedTheme = theme === 'magic-female' && type === 'menu'
           ? 'magic'
           : theme;
-      const path = versionBgmPath(this.getCanonicalWebBgmPath(bgmRoot, resolvedTheme, type));
+      const path = this.getWebBgmPaths(bgmRoot, resolvedTheme, type)[0];
       const existing = this.preparedBgmHtmlAudios.get(path);
       if (existing) {
           this.preparedBgmHtmlAudios.delete(path);
@@ -1071,19 +1073,35 @@ class AudioService {
       await this.playBGM(parsed.type as any, false);
   }
 
-  private getCanonicalWebBgmPath(bgmRoot: string, resolvedTheme: string, type: string): string {
+  private supportsWebOpusAudio() {
+      if (!WEB_PERFORMANCE_MODE || typeof document === 'undefined') return false;
+      if (this.webOpusSupport !== null) return this.webOpusSupport;
+      const audio = document.createElement('audio');
+      this.webOpusSupport = audio.canPlayType(WEB_OPUS_AUDIO_MIME) !== '';
+      return this.webOpusSupport;
+  }
+
+  private getCanonicalWebBgmAssetPath(bgmRoot: string, resolvedTheme: string, type: string): string {
       if (resolvedTheme === 'elementary') {
-          return assetUrl(`${bgmRoot}/${type}.mp3`);
+          return `${bgmRoot}/${type}.mp3`;
       }
       if (resolvedTheme === 'magic') {
           return type === 'menu'
-              ? assetUrl(`${bgmRoot}/magic/menu.mp3`)
-              : assetUrl(`${bgmRoot}/${type}.mp3`);
+              ? `${bgmRoot}/magic/menu.mp3`
+              : `${bgmRoot}/${type}.mp3`;
       }
       if (THEMED_BGM_TYPES.has(type)) {
-          return assetUrl(`${bgmRoot}/${resolvedTheme}/${type}.mp3`);
+          return `${bgmRoot}/${resolvedTheme}/${type}.mp3`;
       }
-      return assetUrl(`${bgmRoot}/${type}.mp3`);
+      return `${bgmRoot}/${type}.mp3`;
+  }
+
+  private getWebBgmPaths(bgmRoot: string, resolvedTheme: string, type: string): string[] {
+      const assetPath = this.getCanonicalWebBgmAssetPath(bgmRoot, resolvedTheme, type);
+      const mp3Path = versionBgmPath(assetUrl(assetPath));
+      if (!this.supportsWebOpusAudio()) return [mp3Path];
+      const opusPath = versionBgmPath(assetUrl(`web-audio/${assetPath.replace(/\.mp3$/i, '.ogg')}`));
+      return [opusPath, mp3Path];
   }
 
   private async playMp3(type: string, loop: boolean, playbackGeneration: number) {
@@ -1119,7 +1137,7 @@ class AudioService {
       // GitHub Pages has one canonical asset base URL. Avoid trying several
       // root-relative variants and waiting for failed requests between them.
       const webPlaybackPaths = WEB_PERFORMANCE_MODE
-          ? [versionBgmPath(this.getCanonicalWebBgmPath(bgmRoot, resolvedTheme, type))]
+          ? this.getWebBgmPaths(bgmRoot, resolvedTheme, type)
           : paths;
       // Native iOS and the GitHub Pages build use the media element path first.
       // It can start streaming before the whole MP3 has been fetched and decoded.
@@ -1371,12 +1389,25 @@ class AudioService {
       this.playNoise(t + 0.03, 0.2, 0.7, 'snare');
   }
 
+  private getSfxPlaybackPaths(name: string): string[] {
+      const canonicalMp3Paths = [
+          assetUrl(`sfx/${name}.mp3`),
+          `/sfx/${name}.mp3`,
+          `sfx/${name}.mp3`,
+      ];
+      if (!WEB_PERFORMANCE_MODE || !this.supportsWebOpusAudio()) return canonicalMp3Paths;
+      return [
+          assetUrl(`web-audio/sfx/${name}.ogg`),
+          canonicalMp3Paths[0],
+      ];
+  }
+
   private async loadSfxBuffer(name: string) {
       if (this.sfxBuffers[name]) return this.sfxBuffers[name];
       if (this.sfxLoadPromises[name]) return this.sfxLoadPromises[name];
 
       const promise = (async () => {
-          const paths = [assetUrl(`sfx/${name}.mp3`), `/sfx/${name}.mp3`, `sfx/${name}.mp3`];
+          const paths = this.getSfxPlaybackPaths(name);
           for (const path of paths) {
               try {
                   const response = await fetch(path);
@@ -1587,11 +1618,7 @@ class AudioService {
           // the old oscillator-only SE, especially on iOS.
           void this.playHtmlSfx(
               name,
-              [
-                  assetUrl(`sfx/${name}.mp3`),
-                  `/sfx/${name}.mp3`,
-                  `sfx/${name}.mp3`,
-              ],
+              this.getSfxPlaybackPaths(name),
               maxDurationMs,
               overlap,
               generation,
