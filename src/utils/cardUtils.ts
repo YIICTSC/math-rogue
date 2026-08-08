@@ -558,6 +558,9 @@ export const synthesizeCards = (c1: Card, c2: Card, c3?: Card): Card => {
     // 3. Helper for Summation
     const sum = (k: keyof Card) => ((c1[k] as number) || 0) + ((c2[k] as number) || 0) + ((c3?.[k] as number) || 0);
     const sourceCards = [c1, c2, c3].filter(Boolean) as Card[];
+    const newExpansionEffects = uniqueStrings(sourceCards.flatMap(card => (
+        card.expansionEffects?.length ? card.expansionEffects : card.expansionEffect ? [card.expansionEffect] : []
+    )).map(effect => JSON.stringify(effect))).map(effect => JSON.parse(effect) as NonNullable<Card['expansionEffect']>);
 
     // Basic Stats
     const newDamage = sum('damage');
@@ -784,6 +787,11 @@ export const synthesizeCards = (c1: Card, c2: Card, c3?: Card): Card => {
     if (seedSource?.grownCardId) parts.push(`${getDisplayCardName(seedSource.grownCardId)}に成長`);
     if (familiarSource?.familiarSummon) parts.push(`${familiarSource.familiarSummon.name}召喚`);
 
+    const expansionDescriptions = uniqueStrings(sourceCards.flatMap(card => (
+        card.description.match(/【固有共鳴\d{3}】[^。]+。/g) || []
+    )));
+    parts.push(...expansionDescriptions.map(sentence => sentence.replace(/。$/, '')));
+
     // Special Logic Descriptions (Manual map for effects not covered by stats)
     const specialDescMap: Record<string, string> = {
         '発見': 'ランダムなカードを3枚生成', 'DISCOVERY': 'ランダムなカードを3枚生成',
@@ -953,6 +961,8 @@ export const synthesizeCards = (c1: Card, c2: Card, c3?: Card): Card => {
 
         originalNames: originalNames, // Add this
         synthesisDepth: Math.max(...sourceCards.map(getSynthesisDepth)) + 1,
+        expansionEffect: newExpansionEffects[0],
+        expansionEffects: newExpansionEffects.length > 0 ? newExpansionEffects : undefined,
 
         // Basic
         damage: newDamage || undefined,

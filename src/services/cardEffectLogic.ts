@@ -92,10 +92,15 @@ export const applyAdditionalCardLogic = (
         return newC;
     };
 
-    const expansion = card.expansionEffect;
-    if (expansion) {
+    const expansionEffects = card.expansionEffects?.length
+        ? card.expansionEffects
+        : card.expansionEffect
+            ? [card.expansionEffect]
+            : [];
+    if (expansionEffects.length > 0) {
         const handIndex = p.hand.findIndex(c => c.id === card.id);
         const otherCards = p.hand.filter(c => c.id !== card.id);
+        const handCountAtPlay = p.hand.length;
         const energyAfter = Math.max(0, p.currentEnergy - effectiveCost);
         const livingEnemies = e_list.filter(enemy => enemy.currentHp > 0);
         const attackIntentTypes = new Set([
@@ -104,12 +109,12 @@ export const applyAdditionalCardLogic = (
             EnemyIntentType.ATTACK_DEFEND,
             EnemyIntentType.PIERCE_ATTACK,
         ]);
-        const conditionMet = (() => {
+        const conditionMet = (expansion: NonNullable<ICard['expansionEffect']>) => {
             switch (expansion.condition) {
                 case 'LEFTMOST': return handIndex === 0;
-                case 'RIGHTMOST': return handIndex === p.hand.length - 1;
-                case 'HAND_EVEN': return p.hand.length % 2 === 0;
-                case 'HAND_ODD': return p.hand.length % 2 === 1;
+                case 'RIGHTMOST': return handIndex === handCountAtPlay - 1;
+                case 'HAND_EVEN': return handCountAtPlay % 2 === 0;
+                case 'HAND_ODD': return handCountAtPlay % 2 === 1;
                 case 'ENERGY_ZERO_AFTER': return energyAfter === 0;
                 case 'ENERGY_EVEN_AFTER': return energyAfter % 2 === 0;
                 case 'NO_BLOCK': return p.block === 0;
@@ -124,7 +129,7 @@ export const applyAdditionalCardLogic = (
                 case 'HIGHEST_COST_IN_HAND': return p.hand.every(other => other.cost <= card.cost);
                 default: return false;
             }
-        })();
+        };
 
         const drawOne = () => {
             if (p.drawPile.length === 0 && p.discardPile.length > 0) {
@@ -137,8 +142,9 @@ export const applyAdditionalCardLogic = (
             else p.discardPile.push(drawn);
         };
 
-        if (conditionMet) {
-            switch (expansion.reward) {
+        expansionEffects.forEach((expansion) => {
+            if (conditionMet(expansion)) {
+                switch (expansion.reward) {
                 case 'DRAW': drawOne(); break;
                 case 'BLOCK': p.block += 5; break;
                 case 'ENERGY': p.currentEnergy += 1; break;
@@ -170,16 +176,20 @@ export const applyAdditionalCardLogic = (
                 }
                 case 'DISCOUNT_HAND': {
                     const target = otherCards.reduce<ICard | null>((best, other) => !best || other.cost > best.cost ? other : best, null);
-                    if (target) target.cost = Math.max(0, target.cost - 1);
+                    if (target) {
+                        const targetIndex = p.hand.findIndex(other => other.id === target.id);
+                        if (targetIndex >= 0) p.hand[targetIndex] = { ...p.hand[targetIndex], cost: Math.max(0, p.hand[targetIndex].cost - 1) };
+                    }
                     break;
                 }
-                case 'HAND_COUNT_BLOCK': p.block += p.hand.length; break;
+                case 'HAND_COUNT_BLOCK': p.block += handCountAtPlay; break;
+                }
+                currentLogs.push(trans(`固有共鳴${String(expansion.serial).padStart(3, '0')}が発動！`, languageMode));
+                nextActiveEffects.push({ id: `vfx-expansion-${expansion.serial}-${Date.now()}`, type: 'BUFF', targetId: 'player' });
+            } else {
+                currentLogs.push(trans(`固有共鳴${String(expansion.serial).padStart(3, '0')}は条件未達`, languageMode));
             }
-            currentLogs.push(trans(`固有共鳴${String(expansion.serial).padStart(3, '0')}が発動！`, languageMode));
-            nextActiveEffects.push({ id: `vfx-expansion-${expansion.serial}-${Date.now()}`, type: 'BUFF', targetId: 'player' });
-        } else {
-            currentLogs.push(trans(`固有共鳴${String(expansion.serial).padStart(3, '0')}は条件未達`, languageMode));
-        }
+        });
     }
     // カード名に基づいた特殊ロジックの分岐 (合成カード対応)
     const targetNames = (card.originalNames && card.originalNames.length > 0) ? card.originalNames : [card.name];

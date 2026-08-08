@@ -128,6 +128,7 @@ export interface Card {
   battleRestore?: Partial<Card>;
   eraserOnly?: boolean;
   expansionEffect?: ExpansionEffectSpec;
+  expansionEffects?: ExpansionEffectSpec[];
 }
 
 export type ExpansionCondition =
