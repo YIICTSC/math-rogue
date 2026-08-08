@@ -134,7 +134,7 @@ import { TypingLessonId } from './data/typingLessonConfig';
 import { getRandomRaceTrickCard, getRaceTrickCard } from './raceTricks';
 import { COOP_SUPPORT_LIBRARY, getRandomCoopSupportCard } from './coopSupportCards';
 import { chooseBattleBackgroundScene, getBattleBackgroundFlavor } from './data/battleBackgrounds';
-import { DAILY_PLAY_LIMIT_ENABLED, DEBUG_FEATURES_ENABLED, OFFLINE_DISTRIBUTABLE, OFFLINE_NETWORK_FEATURE_MESSAGE, PAID_EDITION, WEB_PERFORMANCE_MODE } from './config/runtime';
+import { DAILY_PLAY_LIMIT_ENABLED, DEBUG_FEATURES_ENABLED, OFFLINE_DISTRIBUTABLE, OFFLINE_NETWORK_FEATURE_MESSAGE, PAID_EDITION, WEB_PERFORMANCE_MODE, WEB_PRELOAD_ENABLED } from './config/runtime';
 import { getAttackEffectKeyForCard, getMultihitFrameSequence } from './data/attackEffects';
 import { getThemedCharacters, getThemedEnemyDisplayName, getThemedHumanoidEnemySpritePath, getThemedMonsterEnemySpritePath, MAGIC_HERO_ID_BY_CHARACTER_ID, type VisualThemeId } from './data/visualThemes';
 import { getTrueBossByTheme } from './data/enemyCatalogs';
@@ -1609,6 +1609,8 @@ const App: React.FC = () => {
     const gameAssetPreloadPromisesRef = useRef<Partial<Record<VisualThemeId, Promise<void>>>>({});
     const deferredGameAssetPreloadStartedRef = useRef<Partial<Record<VisualThemeId, boolean>>>({});
     const startGameAssetPreload = useCallback(() => {
+        if (WEB_PERFORMANCE_MODE && !WEB_PRELOAD_ENABLED) return;
+
         const preloadKey = visualTheme;
         if (!gameAssetPreloadPromisesRef.current[preloadKey]) {
             setIsPreloadingGameAssets(true);

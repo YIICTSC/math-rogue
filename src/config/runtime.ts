@@ -23,3 +23,7 @@ export const DEBUG_FEATURES_ENABLED = import.meta.env.VITE_ENABLE_DEBUG_FEATURES
 // GitHub Pages can opt into a network-friendly loading path without changing
 // the native store builds or the offline desktop distribution.
 export const WEB_PERFORMANCE_MODE = import.meta.env.VITE_WEB_PERFORMANCE_MODE === 'true';
+
+// The Pages deployment can disable explicit asset warmups for loading
+// comparisons. The default keeps existing local and native builds unchanged.
+export const WEB_PRELOAD_ENABLED = import.meta.env.VITE_WEB_PRELOAD_ENABLED !== 'false';
