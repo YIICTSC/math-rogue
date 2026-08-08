@@ -3,7 +3,7 @@ import type { AttackEffectKey, StatusEffectKey } from '../types';
 import type { VisualThemeId } from '../data/visualThemes';
 import { getHumanoidEnemyVoiceProfile, type HumanoidEnemyVoiceAction } from '../data/humanoidEnemyVoiceLines';
 import { assetUrl } from '../utils/assetPaths';
-import { WEB_PERFORMANCE_MODE } from '../config/runtime';
+import { WEB_PERFORMANCE_MODE, WEB_PRELOAD_ENABLED } from '../config/runtime';
 
 export type BgmThemeId = VisualThemeId | 'magic-female' | 'magic-male';
 
@@ -363,7 +363,7 @@ class AudioService {
    * media element.
    */
   public prepareBGM(type: string, theme: BgmThemeId = this.bgmTheme) {
-      if (!WEB_PERFORMANCE_MODE || typeof document === 'undefined') return;
+      if (!WEB_PERFORMANCE_MODE || !WEB_PRELOAD_ENABLED || typeof document === 'undefined') return;
       if (this.bgmMode !== 'NEW' && this.bgmMode !== 'OLD') return;
 
       const bgmRoot = this.bgmMode === 'NEW' ? 'bgm-new' : 'bgm';

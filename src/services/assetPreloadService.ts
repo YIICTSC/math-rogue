@@ -2,7 +2,7 @@ import { BATTLE_BACKGROUND_SCENES } from '../data/battleBackgrounds';
 import { MAGIC_ASSET_PATHS } from '../data/magicAssetManifest';
 import type { VisualThemeId } from '../data/visualThemes';
 import { assetUrl } from '../utils/assetPaths';
-import { WEB_PERFORMANCE_MODE } from '../config/runtime';
+import { WEB_PERFORMANCE_MODE, WEB_PRELOAD_ENABLED } from '../config/runtime';
 
 const ATTACK_EFFECT_KEYS = [
     'slash',
@@ -67,6 +67,8 @@ const normalizeAssetPath = (path: string): string =>
     isResolvedAssetUrl(path) ? path : assetUrl(path);
 
 const buildCriticalAssetPaths = (visualTheme: VisualThemeId): string[] => {
+    if (WEB_PERFORMANCE_MODE && !WEB_PRELOAD_ENABLED) return [];
+
     const paths = WEB_PERFORMANCE_MODE
         ? []
         : [
@@ -165,6 +167,12 @@ class AssetPreloadService {
         const cached = this.essentialPromises.get(visualTheme);
         if (cached) return cached;
 
+        if (WEB_PERFORMANCE_MODE && !WEB_PRELOAD_ENABLED) {
+            const promise = Promise.resolve();
+            this.essentialPromises.set(visualTheme, promise);
+            return promise;
+        }
+
         const promise = this.preloadImages(buildCriticalAssetPaths(visualTheme), this.criticalPreloadConcurrency);
         this.essentialPromises.set(visualTheme, promise);
         return promise;
@@ -191,7 +199,7 @@ class AssetPreloadService {
      * the web transition path; native builds keep their existing preload plan.
      */
     preloadTransitionAssets(paths: string[]): void {
-        if (!WEB_PERFORMANCE_MODE) return;
+        if (!WEB_PERFORMANCE_MODE || !WEB_PRELOAD_ENABLED) return;
         const sources = Array.from(new Set(paths.filter(Boolean).map(normalizeAssetPath)));
         void this.preloadImagesInBackgroundBatches(sources, 3, 'high');
     }
