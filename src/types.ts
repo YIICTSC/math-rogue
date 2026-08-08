@@ -127,6 +127,47 @@ export interface Card {
   battleBonusDrawOnPlay?: number;
   battleRestore?: Partial<Card>;
   eraserOnly?: boolean;
+  expansionEffect?: ExpansionEffectSpec;
+}
+
+export type ExpansionCondition =
+  | 'LEFTMOST'
+  | 'RIGHTMOST'
+  | 'HAND_EVEN'
+  | 'HAND_ODD'
+  | 'ENERGY_ZERO_AFTER'
+  | 'ENERGY_EVEN_AFTER'
+  | 'NO_BLOCK'
+  | 'LOW_HP'
+  | 'ENEMY_ATTACKING'
+  | 'ENEMY_NOT_ATTACKING'
+  | 'DRAW_EVEN'
+  | 'DISCARD_ODD'
+  | 'NO_ATTACK_PLAYED'
+  | 'THIRD_OR_LATER'
+  | 'SAME_TYPE_IN_HAND'
+  | 'HIGHEST_COST_IN_HAND';
+
+export type ExpansionReward =
+  | 'DRAW'
+  | 'BLOCK'
+  | 'ENERGY'
+  | 'HEAL'
+  | 'NEXT_DRAW'
+  | 'NEXT_ENERGY'
+  | 'STRENGTH'
+  | 'DEXTERITY'
+  | 'POISON_RANDOM'
+  | 'WEAK_ALL'
+  | 'RECOVER_DISCARD'
+  | 'UPGRADE_HAND'
+  | 'DISCOUNT_HAND'
+  | 'HAND_COUNT_BLOCK';
+
+export interface ExpansionEffectSpec {
+  serial: number;
+  condition: ExpansionCondition;
+  reward: ExpansionReward;
 }
 
 export type FamiliarTrigger =
@@ -773,6 +814,13 @@ export interface SelectionState {
   type: 'DISCARD' | 'COPY' | 'EXHAUST';
   amount: number;
   originCardId?: string;
+  copyTargetTypes?: CardType[];
+  copyTargetMinCost?: number;
+  copyTargetFallbackToAny?: boolean;
+  copiesPerSelection?: number;
+  copiedCardCost?: number;
+  copyThenDiscardAmount?: number;
+  copySelfVulnerableOnResolve?: number;
 }
 
 export interface AssignmentUnit {

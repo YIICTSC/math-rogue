@@ -11,6 +11,7 @@ import { getTypingLessonDefinition, TypingLessonId } from '../data/typingLessonC
 import { PotionIcon, RelicIcon } from './ItemIcon';
 import { getBattleBackgroundSceneById } from '../data/battleBackgrounds';
 import { getThemedCharacterSpritePath, getThemedEnemyDisplayName, type HighSchoolEnemyAction, type VisualThemeId } from '../data/visualThemes';
+import { isCardEligibleForCopySelection } from '../utils/cardCopySelection';
 import type { BattleUiSettings } from './SettingsModal';
 
 interface TypingBattleSceneProps {
@@ -1194,13 +1195,24 @@ const TypingBattleScene: React.FC<TypingBattleSceneProps> = ({
                             <button onClick={onCancelSelection} className="rounded border border-rose-500/60 px-2 py-1 text-rose-200 hover:bg-rose-900/30">{trans('選択をやめる', languageMode)}</button>
                         </div>
                         <div className="flex gap-3 overflow-x-auto pb-2">
-                            {player.hand.map(card => (
-                                <button key={card.id} onClick={() => onHandSelection(card)} className="shrink-0 rounded border border-indigo-400/50 bg-slate-950/70 p-1">
-                                    <div className="origin-top-left scale-[0.75]">
-                                        <Card card={card} onClick={() => {}} disabled={false} />
-                                    </div>
-                                </button>
-                            ))}
+                            {player.hand.map(card => {
+                                const copyTargetDisabled = selectionState.type === 'COPY'
+                                    && !isCardEligibleForCopySelection(card, selectionState, player.hand);
+                                return (
+                                    <button
+                                        key={card.id}
+                                        onClick={() => onHandSelection(card)}
+                                        disabled={copyTargetDisabled}
+                                        className={`shrink-0 rounded border p-1 ${copyTargetDisabled
+                                            ? 'cursor-not-allowed border-slate-700 bg-slate-950/40 opacity-35'
+                                            : 'border-indigo-400/50 bg-slate-950/70'}`}
+                                    >
+                                        <div className="origin-top-left scale-[0.75]">
+                                            <Card card={card} onClick={() => {}} disabled={copyTargetDisabled} />
+                                        </div>
+                                    </button>
+                                );
+                            })}
                         </div>
                     </div>
                 )}
