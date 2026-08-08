@@ -1,7 +1,7 @@
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { HelpCircle, ArrowRight } from 'lucide-react';
-import { assetUrl } from '../utils/assetPaths';
+import { assetUrl, getWebpFirstAssetPaths } from '../utils/assetPaths';
 import { LanguageMode } from '../types';
 import { trans } from '../utils/textUtils';
 import type { VisualThemeId } from '../data/visualThemes';
@@ -88,9 +88,9 @@ const EventScreen: React.FC<EventScreenProps> = ({ title, description, options, 
     const match = imageKey?.match(/^high-school-event-(\d+)$/);
     return match ? Number(match[1]) : null;
   }, [imageKey]);
-  const highSchoolSupporterNpcImage = useMemo(() => {
+  const highSchoolSupporterNpcImages = useMemo(() => {
     const match = imageKey?.match(/^high-school-supporter-npc\/([^/]+)$/);
-    return match ? assetUrl(`sprites/high-school/supporter-npcs/${match[1]}`) : null;
+    return match ? getWebpFirstAssetPaths(`sprites/high-school/supporter-npcs/${match[1]}`) : [];
   }, [imageKey]);
   const magicEventIndex = useMemo(() => {
     const match = imageKey?.match(/^magic-event-(\d+)$/);
@@ -135,9 +135,9 @@ const EventScreen: React.FC<EventScreenProps> = ({ title, description, options, 
         assetUrl('event-illustrations/default.webp'),
       ];
     }
-    if (highSchoolSupporterNpcImage) {
+    if (highSchoolSupporterNpcImages.length > 0) {
       return [
-        highSchoolSupporterNpcImage,
+        ...highSchoolSupporterNpcImages,
         assetUrl('event-illustrations/default.webp'),
       ];
     }
@@ -163,7 +163,7 @@ const EventScreen: React.FC<EventScreenProps> = ({ title, description, options, 
       assetUrl(`event-illustrations/${encodedTitle}.svg`),
       assetUrl('event-illustrations/default.webp')
     ];
-  }, [highSchoolEventIndex, highSchoolSupporterNpcImage, magicEventIndex, magicFriendshipImages, magicRomanceImage, imageKey, title, visualTheme]);
+  }, [highSchoolEventIndex, highSchoolSupporterNpcImages, magicEventIndex, magicFriendshipImages, magicRomanceImage, imageKey, title, visualTheme]);
   const [imageIndex, setImageIndex] = useState(0);
   const [choiceLocked, setChoiceLocked] = useState(false);
   const [continueLocked, setContinueLocked] = useState(false);

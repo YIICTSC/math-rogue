@@ -90,3 +90,8 @@ export const assetUrl = (path: string): string => {
   if (!shouldVersionAsset(normalizedPath)) return url;
   return `${url}${url.includes('?') ? '&' : '?'}v=${encodeURIComponent(APP_ASSET_VERSION)}`;
 };
+
+export const getWebpFirstAssetPaths = (path: string): string[] => {
+  const webpPath = path.replace(/\.(?:png|jpe?g)$/i, '.webp');
+  return Array.from(new Set([webpPath, path])).map(assetUrl);
+};

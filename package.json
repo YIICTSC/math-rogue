@@ -56,6 +56,7 @@
     "build:icons": "node scripts/generate-icons.mjs",
     "compress:bgm": "node scripts/compress-bgm.mjs",
     "generate:web-audio": "node scripts/generate-web-audio-assets.mjs",
+    "convert:images:webp": "node scripts/convert-public-raster-to-webp.mjs",
     "cleanup:dist-assets": "node scripts/cleanup-dist-assets.mjs",
     "convert:sprites:webp": "node scripts/convert-sprites-to-webp.mjs",
     "dist:offline": "pnpm run audit:english:gate && node scripts/generate-icons.mjs && node scripts/build-offline.mjs && electron-builder --win nsis:x64",
