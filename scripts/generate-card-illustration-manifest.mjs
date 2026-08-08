@@ -8,7 +8,16 @@ const supportedExtension = /\.(?:webp|png|jpe?g|svg)$/i;
 
 const files = fs.readdirSync(assetDirectory)
   .filter((file) => supportedExtension.test(file))
-  .sort((left, right) => left.localeCompare(right, 'ja'));
+  .sort((left, right) => {
+    const leftBase = left.replace(supportedExtension, '');
+    const rightBase = right.replace(supportedExtension, '');
+    if (leftBase === rightBase) {
+      const leftIsWebp = left.toLowerCase().endsWith('.webp');
+      const rightIsWebp = right.toLowerCase().endsWith('.webp');
+      if (leftIsWebp !== rightIsWebp) return leftIsWebp ? -1 : 1;
+    }
+    return left.localeCompare(right, 'ja');
+  });
 
 const entries = new Map();
 for (const file of files) {

@@ -111,7 +111,11 @@ const discoveredFiles = (await walk(publicDir))
 // NFC name and the same Japanese name expressed as NFD). macOS presents those
 // as one file, while the Linux CI runner checks out both. Runtime lookups are
 // NFC-normalized, so keep one manifest entry for each normalized asset path.
-const files = [...new Map(discoveredFiles.map(file => [file.path, file])).values()];
+const files = [...new Map(
+  discoveredFiles
+    .filter(file => !file.path.startsWith('web-audio/'))
+    .map(file => [file.path, file])
+).values()];
 
 const packs = Object.fromEntries(Object.entries(packDefinitions).map(([id, definition]) => [
   id,

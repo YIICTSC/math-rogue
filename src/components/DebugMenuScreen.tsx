@@ -23,7 +23,7 @@ import { getMagicRomanceDialogue, getMagicRomanceEndingText, type MagicRomanceEn
 import { getMagicRomanceVoiceLines } from '../services/magicRomanceEventService';
 import { getMagicEndingVoiceLine } from '../services/magicEndingService';
 import { MAGIC_ART_CONSISTENCY_TARGETS } from '../data/magicArtConsistencyTargets';
-import { assetUrl } from '../utils/assetPaths';
+import { assetUrl, getWebpFirstAssetPaths } from '../utils/assetPaths';
 import { BATTLE_MODAL_PREVIEWS, UI_PREVIEW_GROUPS, UI_PREVIEW_SCREENS, type BattleModalPreviewId } from '../data/uiPreviewScreens';
 import { getDebugProblemUnitGroups } from './ProblemChallengeScreen';
 import { SUBJECT_DATA, type GeneralProblem } from '../data/subjectData';
@@ -32,6 +32,7 @@ import { HIGH_SCHOOL_SUPPORTER_NPC_EVENTS, type SupporterNpcReward } from '../da
 import { DODOMEDESU_EVENT_STAGES } from '../data/dodomedesuBoss';
 import React, { useMemo, useState, useCallback, useEffect, useRef } from 'react';
 import TranslatedUiTree from './TranslatedUiTree';
+import ResilientAssetImage from './ResilientAssetImage';
 
 interface DebugMenuScreenProps {
     onStart: (deck: ICard[], relics: Relic[], potions: Potion[]) => void;
@@ -2364,8 +2365,8 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
                                                 className={`overflow-hidden rounded-lg border bg-black/35 ${isFocusedSupporterNpcEvent ? 'border-yellow-200 ring-2 ring-yellow-300 ring-offset-2 ring-offset-slate-950' : 'border-yellow-700/70'}`}
                                             >
                                                 <div className="aspect-square bg-slate-950">
-                                                    <img
-                                                        src={assetUrl(`sprites/high-school/supporter-npcs/${event.imageFile}`)}
+                                                    <ResilientAssetImage
+                                                        sources={getWebpFirstAssetPaths(`sprites/high-school/supporter-npcs/${event.imageFile}`)}
                                                         alt={event.npcName}
                                                         className="h-full w-full object-cover"
                                                         draggable={false}

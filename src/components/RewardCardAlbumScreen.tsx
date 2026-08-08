@@ -38,7 +38,7 @@ const RewardCardAlbumScreen: React.FC<RewardCardAlbumScreenProps> = ({
     <div
       data-gamepad-initial-scope="reward-card-album"
       className="main-reward-card-album-screen h-full w-full overflow-y-auto bg-slate-950 bg-cover bg-center text-white custom-scrollbar"
-      style={{ backgroundImage: `url(${assetUrl('banners/reward-card-album-background.png')})` }}
+      style={{ backgroundImage: `url(${assetUrl('banners/reward-card-album-background.webp')})` }}
     >
       <div className="min-h-full bg-slate-950/58 p-4">
         {inspectedCard && (

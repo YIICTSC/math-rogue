@@ -33,10 +33,10 @@ export const KEYWORD_DEFINITIONS: Record<string, { title: string; desc: string }
 
 const MAX_ILLUSTRATION_REFS = 8;
 const HOLOGRAPHIC_PRISM_ASSETS: Record<NonNullable<CardType['holographicVariant']>, string> = {
-  red: 'card-illustrations/holographic-prism-red.png',
-  yellow: 'card-illustrations/holographic-prism-yellow.png',
-  blue: 'card-illustrations/holographic-prism-blue.png',
-  purple: 'card-illustrations/holographic-prism-purple.png',
+  red: 'card-illustrations/holographic-prism-red.webp',
+  yellow: 'card-illustrations/holographic-prism-yellow.webp',
+  blue: 'card-illustrations/holographic-prism-blue.webp',
+  purple: 'card-illustrations/holographic-prism-purple.webp',
 };
 const HOLOGRAPHIC_VARIANT_BY_CARD_TYPE: Partial<Record<EnumCardType, NonNullable<CardType['holographicVariant']>>> = {
   [EnumCardType.ATTACK]: 'red',
