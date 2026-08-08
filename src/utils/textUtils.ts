@@ -18,6 +18,7 @@ import { ENGLISH_MAGIC_CARD_RULE_EXACT } from '../data/englishMagicCardRuleExact
 import { ENGLISH_IDENTIFIER_EXACT } from '../data/englishIdentifierExact';
 import { ENGLISH_MINIGAME_EXACT } from '../data/englishMinigameExact';
 import { ENGLISH_REVIEW_EXACT } from '../data/englishReviewExact';
+import { EXPANSION_CARD_ENGLISH_NAMES } from '../data/expansionCardTranslations';
 import { EVENT_DICTIONARY } from './textUtils2';
 
 const BASE_DICTIONARY: Record<string, string> = {
@@ -5150,7 +5151,7 @@ const ENGLISH_GENERATED_CARD_NAME_DICTIONARY: Record<string, string> = {
     "逆ギレ": "Berserk",
 };
 
-Object.assign(ENGLISH_CARD_NAME_DICTIONARY, {
+Object.assign(ENGLISH_CARD_NAME_DICTIONARY, EXPANSION_CARD_ENGLISH_NAMES, {
     "つまみ食い": "Sneak Snack",
     "牛乳一気飲み": "Milk Chug",
     "えんぴつの削りかす": "Pencil Shavings",
