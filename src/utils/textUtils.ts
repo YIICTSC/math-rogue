@@ -18,7 +18,8 @@ import { ENGLISH_MAGIC_CARD_RULE_EXACT } from '../data/englishMagicCardRuleExact
 import { ENGLISH_IDENTIFIER_EXACT } from '../data/englishIdentifierExact';
 import { ENGLISH_MINIGAME_EXACT } from '../data/englishMinigameExact';
 import { ENGLISH_REVIEW_EXACT } from '../data/englishReviewExact';
-import { EXPANSION_CARD_ENGLISH_NAMES } from '../data/expansionCardTranslations';
+import { describeExpansionEffectEnglish, EXPANSION_CARD_ENGLISH_NAMES, translateExpansionCardEnglish } from '../data/expansionCardTranslations';
+import { translateExpansionCardHiragana } from '../data/expansionCardHiragana';
 import { EVENT_DICTIONARY } from './textUtils2';
 
 const BASE_DICTIONARY: Record<string, string> = {
@@ -9416,6 +9417,12 @@ export const buildEnglishCardDescription = (card: Card): string => {
     if (card.exhaust) parts.push("Exhaust");
     if (card.innate) parts.push("Innate");
     if (card.eraserOnly) parts.push("Can only be used at rest sites to remove one unwanted card effect");
+    const expansionEffects = card.expansionEffects?.length
+        ? card.expansionEffects
+        : card.expansionEffect
+            ? [card.expansionEffect]
+            : [];
+    expansionEffects.forEach(effect => parts.push(describeExpansionEffectEnglish(effect)));
 
     if (parts.length === 0) return trans(card.description, 'ENGLISH');
 
@@ -11019,10 +11026,27 @@ const stripGenericEnglishScaffolding = (value: string): string => {
 };
 
 export const trans = (text: string, mode: LanguageMode): string => {
+    if (mode === 'ENGLISH') {
+        const expansionTranslation = translateExpansionCardEnglish(text);
+        if (expansionTranslation) return expansionTranslation;
+    }
+    if (mode === 'HIRAGANA') {
+        const expansionTranslation = translateExpansionCardHiragana(text);
+        if (expansionTranslation) return expansionTranslation;
+    }
     const rawOutput = transCore(text, mode);
     const output = mode === 'ENGLISH' ? stripGenericEnglishScaffolding(rawOutput) : rawOutput;
     if (mode === 'ENGLISH') auditEnglishTranslationResult(text, output, 'trans');
     return output;
+};
+
+export const buildHiraganaCardDescription = (card: Card): string => {
+    const hasExpansionEffect = Boolean(card.expansionEffects?.length || card.expansionEffect);
+    if (!hasExpansionEffect) return trans(card.description, 'HIRAGANA');
+    return card.description
+        .split(/(?<=。)/)
+        .map(segment => translateExpansionCardHiragana(segment) || trans(segment, 'HIRAGANA'))
+        .join('');
 };
 
 const CARD_NAME_GENERIC_ENGLISH = /^(Choose Option|Event Details|School Foe|Item)$/;

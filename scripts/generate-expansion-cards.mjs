@@ -51,11 +51,13 @@ const rows = fs.readFileSync(sourcePath, 'utf8').split(/\r?\n/).flatMap((line) =
     name: cells[2],
     type: cells[3],
     rarity: cells[4],
-    cost: cells[5] === '-' ? 0 : Number(cells[5]),
+    cost: cells[5] === '-' ? 0 : cells[5] === 'X' ? 3 : Number(cells[5]),
   }];
 });
 
 if (rows.length !== 224) throw new Error(`Expected 224 expansion rows, got ${rows.length}`);
+const invalidCostRows = rows.filter(row => !Number.isFinite(row.cost));
+if (invalidCostRows.length > 0) throw new Error(`Expansion cards contain invalid costs: ${invalidCostRows.map(row => row.id).join(', ')}`);
 
 const quote = (value) => JSON.stringify(value);
 const generatedEffects = new Map();

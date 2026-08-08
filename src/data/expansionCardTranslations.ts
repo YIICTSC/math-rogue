@@ -1,3 +1,5 @@
+import type { ExpansionEffectSpec } from '../types';
+
 export const EXPANSION_CARD_ENGLISH_NAMES: Record<string, string> = {
   '音読リズム': 'Read-Aloud Rhythm',
   '要点マーカー': 'Key Point Marker',
@@ -223,4 +225,96 @@ export const EXPANSION_CARD_ENGLISH_NAMES: Record<string, string> = {
   'みんなの寄せ書き': 'Messages from Everyone',
   '旧校舎の鍵': 'Key to the Old Schoolhouse',
   '卒業アルバム': 'Graduation Album',
+};
+
+const EXPANSION_CONDITION_ENGLISH: Readonly<Record<ExpansionEffectSpec['condition'], string>> = Object.freeze({
+  LEFTMOST: 'When played from the leftmost position in your hand',
+  RIGHTMOST: 'When played from the rightmost position in your hand',
+  HAND_EVEN: 'When your hand size before playing this card is even',
+  HAND_ODD: 'When your hand size before playing this card is odd',
+  ENERGY_ZERO_AFTER: 'When playing this card leaves you with 0 Energy',
+  ENERGY_EVEN_AFTER: 'When your remaining Energy after playing this card is even',
+  NO_BLOCK: 'When played while you have 0 Block',
+  LOW_HP: 'When your HP is half or lower',
+  ENEMY_ATTACKING: 'When any living enemy intends to attack',
+  ENEMY_NOT_ATTACKING: 'When no living enemy intends to attack',
+  DRAW_EVEN: 'When your draw pile size is even',
+  DISCARD_ODD: 'When your discard pile size is odd',
+  NO_ATTACK_PLAYED: 'When you have not played an Attack this turn',
+  THIRD_OR_LATER: 'When played as your third or later card this turn',
+  SAME_TYPE_IN_HAND: 'When another card of the same type is in your hand',
+  HIGHEST_COST_IN_HAND: 'When this card is tied for the highest cost in your hand',
+});
+
+const EXPANSION_REWARD_ENGLISH: Readonly<Record<ExpansionEffectSpec['reward'], string>> = Object.freeze({
+  DRAW: 'draw 1 card',
+  BLOCK: 'gain 5 Block',
+  ENERGY: 'gain 1 Energy',
+  HEAL: 'heal 3 HP',
+  NEXT_DRAW: 'draw 1 extra card next turn',
+  NEXT_ENERGY: 'gain 1 Energy next turn',
+  STRENGTH: 'gain 1 Strength',
+  DEXTERITY: 'gain 1 Dexterity',
+  POISON_RANDOM: 'apply 3 Poison to a random living enemy',
+  WEAK_ALL: 'apply 1 Weak to all living enemies',
+  RECOVER_DISCARD: 'return 1 card from your discard pile to your hand',
+  UPGRADE_HAND: 'upgrade 1 other card in your hand',
+  DISCOUNT_HAND: 'reduce the cost of 1 other card in your hand by 1',
+  HAND_COUNT_BLOCK: 'gain Block equal to your hand size before playing this card',
+});
+
+export const describeExpansionEffectEnglish = (effect: ExpansionEffectSpec): string => (
+  `${EXPANSION_CONDITION_ENGLISH[effect.condition]}, ${EXPANSION_REWARD_ENGLISH[effect.reward]} (Unique Resonance ${String(effect.serial).padStart(3, '0')})`
+);
+
+const EXPANSION_CONDITION_ENGLISH_BY_JAPANESE: Readonly<Record<string, string>> = Object.freeze({
+  '手札の左端から使用した時': EXPANSION_CONDITION_ENGLISH.LEFTMOST,
+  '手札の右端から使用した時': EXPANSION_CONDITION_ENGLISH.RIGHTMOST,
+  '使用前の手札枚数が偶数の時': EXPANSION_CONDITION_ENGLISH.HAND_EVEN,
+  '使用前の手札枚数が奇数の時': EXPANSION_CONDITION_ENGLISH.HAND_ODD,
+  '使用後のエナジーが0になる時': EXPANSION_CONDITION_ENGLISH.ENERGY_ZERO_AFTER,
+  '使用後のエナジーが偶数になる時': EXPANSION_CONDITION_ENGLISH.ENERGY_EVEN_AFTER,
+  '使用時のブロックが0の時': EXPANSION_CONDITION_ENGLISH.NO_BLOCK,
+  'HPが半分以下の時': EXPANSION_CONDITION_ENGLISH.LOW_HP,
+  '生存中の敵が攻撃予定の時': EXPANSION_CONDITION_ENGLISH.ENEMY_ATTACKING,
+  '生存中の敵が全員攻撃予定でない時': EXPANSION_CONDITION_ENGLISH.ENEMY_NOT_ATTACKING,
+  '山札の枚数が偶数の時': EXPANSION_CONDITION_ENGLISH.DRAW_EVEN,
+  '捨て札の枚数が奇数の時': EXPANSION_CONDITION_ENGLISH.DISCARD_ODD,
+  'このターンにまだ攻撃していない時': EXPANSION_CONDITION_ENGLISH.NO_ATTACK_PLAYED,
+  'このターン3枚目以降に使用した時': EXPANSION_CONDITION_ENGLISH.THIRD_OR_LATER,
+  '手札に同じ種別の別カードがある時': EXPANSION_CONDITION_ENGLISH.SAME_TYPE_IN_HAND,
+  '手札内で最高コストの時': EXPANSION_CONDITION_ENGLISH.HIGHEST_COST_IN_HAND,
+});
+
+const EXPANSION_REWARD_ENGLISH_BY_JAPANESE: Readonly<Record<string, string>> = Object.freeze({
+  'カードを1枚引く': EXPANSION_REWARD_ENGLISH.DRAW,
+  'ブロック5を得る': EXPANSION_REWARD_ENGLISH.BLOCK,
+  'エナジー1を得る': EXPANSION_REWARD_ENGLISH.ENERGY,
+  'HPを3回復する': EXPANSION_REWARD_ENGLISH.HEAL,
+  '次ターンのドロー+1': EXPANSION_REWARD_ENGLISH.NEXT_DRAW,
+  '次ターンのエナジー+1': EXPANSION_REWARD_ENGLISH.NEXT_ENERGY,
+  'ムキムキ1を得る': EXPANSION_REWARD_ENGLISH.STRENGTH,
+  'カチカチ1を得る': EXPANSION_REWARD_ENGLISH.DEXTERITY,
+  'ランダムな敵にドクドク3を与える': EXPANSION_REWARD_ENGLISH.POISON_RANDOM,
+  '敵全体にへろへろ1を与える': EXPANSION_REWARD_ENGLISH.WEAK_ALL,
+  '捨て札から1枚を手札へ戻す': EXPANSION_REWARD_ENGLISH.RECOVER_DISCARD,
+  '手札の別カード1枚を強化する': EXPANSION_REWARD_ENGLISH.UPGRADE_HAND,
+  '手札の別カード1枚のコストを1下げる': EXPANSION_REWARD_ENGLISH.DISCOUNT_HAND,
+  '使用前の手札枚数と同じブロックを得る': EXPANSION_REWARD_ENGLISH.HAND_COUNT_BLOCK,
+});
+
+export const translateExpansionCardEnglish = (text: string): string | undefined => {
+  const exactName = EXPANSION_CARD_ENGLISH_NAMES[text];
+  if (exactName) return exactName;
+
+  const logMatch = text.match(/^固有共鳴(\d{1,3})(が発動！|は条件未達)$/);
+  if (logMatch) return `Unique Resonance ${logMatch[1]} ${logMatch[2] === 'が発動！' ? 'activated!' : 'condition not met'}`;
+
+  const match = text.match(/^(?:(\d+)ダメージ。|ブロック(\d+)。)?【固有共鳴(\d{3})】(.+)、(.+)。$/);
+  if (!match) return undefined;
+  const condition = EXPANSION_CONDITION_ENGLISH_BY_JAPANESE[match[4]];
+  const reward = EXPANSION_REWARD_ENGLISH_BY_JAPANESE[match[5]];
+  if (!condition || !reward) return undefined;
+  const base = match[1] ? `Deal ${match[1]} damage. ` : match[2] ? `Gain ${match[2]} Block. ` : '';
+  return `${base}${condition}, ${reward} (Unique Resonance ${match[3]}).`;
 };
