@@ -1,13 +1,16 @@
-const SHELL_CACHE = 'learning-rogue-shell-v2';
-const RUNTIME_CACHE = 'learning-rogue-runtime-v2';
+const SHELL_CACHE = 'learning-rogue-shell-v3';
+const RUNTIME_CACHE = 'learning-rogue-runtime-v3';
 const THEME_CACHE_PREFIX = 'learning-rogue-theme-';
+const THEME_CACHE_VERSION = 'v3';
 
 const isSameOrigin = (url) => url.origin === self.location.origin;
 const isNavigationRequest = (request) => request.mode === 'navigate';
 const isCacheableAsset = (url) => {
   if (url.pathname.endsWith('/web-asset-manifest.json')) return false;
-  return /\.(?:css|js|mjs|png|jpe?g|svg|webp|gif|woff2?|ttf|otf|mp3|ogg|wav)$/i.test(url.pathname)
-    || /\/(?:sprites|card-illustrations|enemy-illustrations|event-illustrations|ui|bgm|bgm-new|sfx|fonts)\//i.test(url.pathname);
+  const isAudioPath = /\/(?:bgm|bgm-new|sfx)\//i.test(url.pathname);
+  if (isAudioPath) return /\.ogg$/i.test(url.pathname);
+  return /\.(?:css|js|mjs|png|jpe?g|svg|webp|gif|woff2?|ttf|otf)$/i.test(url.pathname)
+    || /\/(?:sprites|card-illustrations|enemy-illustrations|event-illustrations|ui|fonts)\//i.test(url.pathname);
 };
 
 self.addEventListener('install', (event) => {
@@ -27,8 +30,16 @@ self.addEventListener('activate', (event) => {
   event.waitUntil((async () => {
     const cacheNames = await caches.keys();
     await Promise.all(cacheNames
-      .filter((name) => name.startsWith('learning-rogue-shell-') || name.startsWith('learning-rogue-runtime-'))
-      .filter((name) => name !== SHELL_CACHE && name !== RUNTIME_CACHE)
+      .filter((name) => (
+        name.startsWith('learning-rogue-shell-')
+        || name.startsWith('learning-rogue-runtime-')
+        || name.startsWith(THEME_CACHE_PREFIX)
+      ))
+      .filter((name) => (
+        name !== SHELL_CACHE
+        && name !== RUNTIME_CACHE
+        && !name.endsWith(`-${THEME_CACHE_VERSION}`)
+      ))
       .map((name) => caches.delete(name)));
     await self.clients.claim();
   })());

@@ -7,7 +7,7 @@ const publicDir = path.resolve('public');
 const manifestPath = path.join(publicDir, 'web-asset-manifest.json');
 const runtimeExtensions = new Set([
   '.png', '.svg', '.ttf', '.otf', '.woff', '.woff2', '.webp',
-  '.mp3', '.ogg',
+  '.ogg',
 ]);
 
 const walk = async (directory) => {

@@ -38,8 +38,8 @@ export type WebThemeDownloadProgress = WebThemeCacheStats & {
 };
 
 const CACHE_PREFIX = 'learning-rogue-theme-';
-const CACHE_VERSION = 'v2';
-const LEGACY_CACHE_VERSION = 'v1';
+const CACHE_VERSION = 'v3';
+const LEGACY_CACHE_VERSIONS = ['v2', 'v1'];
 const MANIFEST_PATH = 'web-asset-manifest.json';
 const MAX_CONCURRENT_DOWNLOADS = 4;
 
@@ -53,8 +53,8 @@ export const isWebAssetCacheAvailable = () => (
 );
 
 const getPackCacheName = (packId: WebAssetPackId) => `${CACHE_PREFIX}${packId}-${CACHE_VERSION}`;
-const getLegacyThemeCacheName = (packId: WebAssetPackId) => (
-  packId === 'common' ? null : `${CACHE_PREFIX}${packId}-${LEGACY_CACHE_VERSION}`
+const getLegacyCacheNames = (packId: WebAssetPackId) => (
+  LEGACY_CACHE_VERSIONS.map(version => `${CACHE_PREFIX}${packId}-${version}`)
 );
 
 const formatError = (reason: unknown) => (
@@ -82,8 +82,7 @@ export const getWebAssetManifest = async (): Promise<WebAssetManifest> => {
 
 const getCache = async (packId: WebAssetPackId) => {
   if (!isWebAssetCacheAvailable()) throw new Error('Web版の保存領域を利用できません。');
-  const legacyCacheName = getLegacyThemeCacheName(packId);
-  if (legacyCacheName) await window.caches.delete(legacyCacheName);
+  await Promise.all(getLegacyCacheNames(packId).map(cacheName => window.caches.delete(cacheName)));
   return window.caches.open(getPackCacheName(packId));
 };
 
@@ -196,8 +195,7 @@ export const downloadAssetPack = async (
 export const deleteAssetPack = async (packId: WebAssetPackId) => {
   if (!isWebAssetCacheAvailable()) return;
   await window.caches.delete(getPackCacheName(packId));
-  const legacyCacheName = getLegacyThemeCacheName(packId);
-  if (legacyCacheName) await window.caches.delete(legacyCacheName);
+  await Promise.all(getLegacyCacheNames(packId).map(cacheName => window.caches.delete(cacheName)));
 };
 
 export const registerWebServiceWorker = async () => {
