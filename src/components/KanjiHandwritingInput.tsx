@@ -66,12 +66,18 @@ const KanjiHandwritingInput: React.FC<KanjiHandwritingInputProps> = ({
   const [characterIndex, setCharacterIndex] = useState(0);
   const [candidates, setCandidates] = useState<string[]>([]);
   const [exactCandidates, setExactCandidates] = useState<string[]>([]);
+  const [wrongOrderCandidates, setWrongOrderCandidates] = useState<string[]>([]);
   const [writtenCharacters, setWrittenCharacters] = useState<string[]>([]);
   const [traceModeEnabled, setTraceModeEnabled] = useState(showTraceGuide);
   const [hasStartedWriting, setHasStartedWriting] = useState(false);
+  const [strokeOrderCheckEnabled, setStrokeOrderCheckEnabled] = useState(true);
+  const [strokeOrderFeedback, setStrokeOrderFeedback] = useState(false);
   const autoAdvanceTimerRef = useRef<number | null>(null);
   const inactivityTimerRef = useRef<number | null>(null);
   const candidateOptionsRef = useRef<string[]>([]);
+  const exactCandidatesRef = useRef<string[]>([]);
+  const wrongOrderCandidatesRef = useRef<string[]>([]);
+  const strokeOrderCheckEnabledRef = useRef(true);
   const advanceWithCandidateRef = useRef<(candidate: string) => void>(() => {});
   const hasStartedWritingRef = useRef(false);
   const isPointerDownRef = useRef(false);
@@ -84,7 +90,7 @@ const KanjiHandwritingInput: React.FC<KanjiHandwritingInputProps> = ({
     let restoreCanvasCoordinates: (() => void) | null = null;
 
     const readCandidates = () => {
-      const candidateElements = ['jhr-guess', 'jhr-fuzzy', 'jhr-similarity', 'jhr-slength']
+      const candidateElements = ['jhr-guess', 'jhr-fuzzy', 'jhr-similarity', 'jhr-slength', 'jhr-wrongorder']
         .map((id) => document.getElementById(id))
         .filter((element): element is HTMLElement => Boolean(element));
       if (candidateElements.length === 0) return;
@@ -97,11 +103,18 @@ const KanjiHandwritingInput: React.FC<KanjiHandwritingInputProps> = ({
           ? anchors
           : Array.from(element.textContent || '').filter((character) => !/\s/.test(character));
       };
-      const nextCandidates = Array.from(new Set(candidateElements.flatMap(extractCandidates)));
+      const nextCandidates = Array.from(new Set(
+        candidateElements
+          .filter((element) => element.id !== 'jhr-wrongorder')
+          .flatMap(extractCandidates),
+      ));
       const exactElement = document.getElementById('jhr-guess');
+      const wrongOrderElement = document.getElementById('jhr-wrongorder');
       const nextExactCandidates = exactElement instanceof HTMLElement ? extractCandidates(exactElement) : [];
+      const nextWrongOrderCandidates = wrongOrderElement instanceof HTMLElement ? extractCandidates(wrongOrderElement) : [];
       setCandidates(nextCandidates);
       setExactCandidates(nextExactCandidates);
+      setWrongOrderCandidates(nextWrongOrderCandidates);
     };
 
     const initialize = async () => {
@@ -109,7 +122,7 @@ const KanjiHandwritingInput: React.FC<KanjiHandwritingInputProps> = ({
         await loadJhr();
         if (cancelled) return;
 
-        const candidateElements = ['jhr-guess', 'jhr-fuzzy', 'jhr-similarity', 'jhr-slength']
+        const candidateElements = ['jhr-guess', 'jhr-fuzzy', 'jhr-similarity', 'jhr-slength', 'jhr-wrongorder']
           .map((id) => document.getElementById(id))
           .filter((element): element is HTMLElement => Boolean(element));
         if (candidateElements.length > 0) {
@@ -161,16 +174,32 @@ const KanjiHandwritingInput: React.FC<KanjiHandwritingInputProps> = ({
   const singleCharacterExactCandidates = Array.from(new Set(
     exactCandidates.filter((candidate) => Array.from(candidate).length === 1),
   ));
+  const singleCharacterWrongOrderCandidates = Array.from(new Set(
+    wrongOrderCandidates.filter((candidate) => Array.from(candidate).length === 1),
+  ));
   const expectedCharacter = characters[characterIndex] || '';
   const candidateOptions = expectedCharacter && singleCharacterCandidates.includes(expectedCharacter)
     ? [expectedCharacter, ...singleCharacterCandidates.filter((candidate) => candidate !== expectedCharacter)].slice(0, 8)
     : singleCharacterCandidates.slice(0, 8);
   const candidateOptionsKey = candidateOptions.join('\u0000');
   const exactCandidateOptionsKey = singleCharacterExactCandidates.join('\u0000');
+  const wrongOrderCandidateOptionsKey = singleCharacterWrongOrderCandidates.join('\u0000');
 
   useEffect(() => {
     candidateOptionsRef.current = candidateOptions;
   }, [candidateOptionsKey]);
+
+  useEffect(() => {
+    exactCandidatesRef.current = singleCharacterExactCandidates;
+  }, [exactCandidateOptionsKey]);
+
+  useEffect(() => {
+    wrongOrderCandidatesRef.current = singleCharacterWrongOrderCandidates;
+  }, [wrongOrderCandidateOptionsKey]);
+
+  useEffect(() => {
+    strokeOrderCheckEnabledRef.current = strokeOrderCheckEnabled;
+  }, [strokeOrderCheckEnabled]);
 
   useEffect(() => {
     disabledRef.current = disabled;
@@ -187,12 +216,37 @@ const KanjiHandwritingInput: React.FC<KanjiHandwritingInputProps> = ({
     }
   }, []);
 
+  const clearCurrentCharacter = useCallback(() => {
+    clearInactivityTimer();
+    if (autoAdvanceTimerRef.current !== null) {
+      window.clearTimeout(autoAdvanceTimerRef.current);
+      autoAdvanceTimerRef.current = null;
+    }
+    isPointerDownRef.current = false;
+    hasStartedWritingRef.current = false;
+    setHasStartedWriting(false);
+    setStrokeOrderFeedback(false);
+    window.erase?.();
+    setCandidates([]);
+    setExactCandidates([]);
+    setWrongOrderCandidates([]);
+  }, [clearInactivityTimer]);
+
   const scheduleInactivityTimeout = useCallback(() => {
     clearInactivityTimer();
     const judgeAfterInactivity = () => {
       inactivityTimerRef.current = null;
       if (!hasStartedWritingRef.current || disabledRef.current) return;
       if (!isPointerDownRef.current) {
+        const isExpectedCharacterInWrongOrder = strokeOrderCheckEnabledRef.current
+          && wrongOrderCandidatesRef.current.includes(expectedCharacter)
+          && !exactCandidatesRef.current.includes(expectedCharacter);
+        if (isExpectedCharacterInWrongOrder) {
+          clearCurrentCharacter();
+          setStrokeOrderFeedback(true);
+          return;
+        }
+
         // Candidates are intentionally not shown to the learner. If the
         // expected character has not been recognized before the timeout,
         // advance only the current character. Calling onSubmit here would
@@ -211,10 +265,11 @@ const KanjiHandwritingInput: React.FC<KanjiHandwritingInputProps> = ({
       inactivityTimerRef.current = window.setTimeout(judgeAfterInactivity, INACTIVITY_TIMEOUT_MS);
     };
     inactivityTimerRef.current = window.setTimeout(judgeAfterInactivity, INACTIVITY_TIMEOUT_MS);
-  }, [clearInactivityTimer, onSubmit]);
+  }, [clearCurrentCharacter, clearInactivityTimer, expectedCharacter, onSubmit]);
 
   const beginWriting = useCallback(() => {
     if (disabled || !engineReady) return;
+    setStrokeOrderFeedback(false);
     isPointerDownRef.current = true;
     if (autoAdvanceTimerRef.current !== null) {
       window.clearTimeout(autoAdvanceTimerRef.current);
@@ -239,20 +294,6 @@ const KanjiHandwritingInput: React.FC<KanjiHandwritingInputProps> = ({
       scheduleInactivityTimeout();
     }
   }, [scheduleInactivityTimeout]);
-
-  const clearCurrentCharacter = useCallback(() => {
-    clearInactivityTimer();
-    if (autoAdvanceTimerRef.current !== null) {
-      window.clearTimeout(autoAdvanceTimerRef.current);
-      autoAdvanceTimerRef.current = null;
-    }
-    isPointerDownRef.current = false;
-    hasStartedWritingRef.current = false;
-    setHasStartedWriting(false);
-    window.erase?.();
-    setCandidates([]);
-    setExactCandidates([]);
-  }, [clearInactivityTimer]);
 
   useEffect(() => () => {
     clearInactivityTimer();
@@ -307,6 +348,21 @@ const KanjiHandwritingInput: React.FC<KanjiHandwritingInputProps> = ({
         <div className="flex shrink-0 items-center gap-2">
           <button
             type="button"
+            onClick={() => {
+              setStrokeOrderCheckEnabled((current) => !current);
+              setStrokeOrderFeedback(false);
+            }}
+            disabled={disabled || !engineReady}
+            aria-pressed={strokeOrderCheckEnabled}
+            aria-label={trans('書き順判定', languageMode)}
+            className={`flex shrink-0 items-center gap-1 rounded border px-2 py-1 text-xs font-bold transition-colors disabled:opacity-40 ${strokeOrderCheckEnabled
+              ? 'border-amber-300/70 bg-amber-950/60 text-amber-100 hover:bg-amber-900/70'
+              : 'border-slate-500 bg-slate-800 text-slate-300 hover:bg-slate-700'}`}
+          >
+            {trans('書き順判定', languageMode)} {strokeOrderCheckEnabled ? 'ON' : 'OFF'}
+          </button>
+          <button
+            type="button"
             onClick={() => setTraceModeEnabled((current) => !current)}
             disabled={disabled || !engineReady}
             aria-pressed={traceModeEnabled}
@@ -326,6 +382,11 @@ const KanjiHandwritingInput: React.FC<KanjiHandwritingInputProps> = ({
           </button>
         </div>
       </div>
+      {strokeOrderFeedback && (
+        <div role="alert" className="rounded border border-amber-300/60 bg-amber-950/60 px-2 py-1 text-center text-xs font-bold text-amber-100">
+          {trans('文字は合っていますが、書き順を見直してください', languageMode)}
+        </div>
+      )}
       <div className="kanji-writing-canvas-frame relative mx-auto flex w-full max-w-[420px] min-w-0 justify-center rounded-lg border-2 border-cyan-300/60 bg-white p-2">
         {traceModeEnabled && !disabled && expectedCharacter && (
           <span aria-hidden="true" className="kanji-trace-guide pointer-events-none absolute inset-2 z-20 flex items-center justify-center font-serif">

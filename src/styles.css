@@ -2,6 +2,20 @@
 @tailwind components;
 @tailwind utilities;
 
+/*
+ * The handwriting recognizer does not prescribe a display typeface, but the
+ * trace guide should look like a Japanese handwriting/textbook reference.
+ * Klee One is loaded from Google Fonts when available and falls back to the
+ * platform's Japanese serif fonts when the app is offline.
+ */
+@font-face {
+  font-family: 'Klee One';
+  font-style: normal;
+  font-weight: 400 600;
+  font-display: swap;
+  src: url('https://fonts.gstatic.com/s/kleeone/v13/LDIxapCLNRc6A8oT4q4A.ttf') format('truetype');
+}
+
 .credits-roll-track {
   animation: credits-roll 28s linear infinite;
   padding-bottom: 72%;
@@ -10472,7 +10486,8 @@ textarea {
 .kanji-trace-guide {
   color: rgb(100, 116, 139);
   font-size: min(60cqw, 15rem);
-  font-weight: 700;
+  font-family: 'Klee One', 'Hiragino Mincho ProN', 'Yu Mincho', 'Noto Serif JP', serif;
+  font-weight: 600;
   line-height: 1;
   opacity: 0.28;
   user-select: none;

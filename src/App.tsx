@@ -675,6 +675,21 @@ const COOP_LOCAL_SETUP_SCREEN_SET = new Set<GameScreen>([
     GameScreen.RELIC_SELECTION
 ]);
 
+const MAIN_ADVENTURE_RESUME_SELECTION_SCREEN_SET = new Set<GameScreen>([
+    GameScreen.MAP,
+    GameScreen.BATTLE,
+    GameScreen.MATH_CHALLENGE,
+    GameScreen.KANJI_CHALLENGE,
+    GameScreen.ENGLISH_CHALLENGE,
+    GameScreen.GENERAL_CHALLENGE,
+    GameScreen.REWARD,
+    GameScreen.REST,
+    GameScreen.SHOP,
+    GameScreen.EVENT,
+    GameScreen.TREASURE,
+    GameScreen.GARDEN
+]);
+
 const shouldPreserveLocalCoopScreen = (localScreen: GameScreen, incomingScreen: GameScreen) => {
     if (COOP_LOCAL_SETUP_SCREEN_SET.has(localScreen) && localScreen !== incomingScreen) {
         return true;
@@ -1294,6 +1309,7 @@ const App: React.FC = () => {
     });
     const [pendingMiniGameScreen, setPendingMiniGameScreen] = useState<GameScreen | null>(null);
     const [pendingAssignmentStartScreen, setPendingAssignmentStartScreen] = useState<GameScreen | null>(null);
+    const [pendingResumeProblemSelection, setPendingResumeProblemSelection] = useState(false);
     const [miniGameProblemMode, setMiniGameProblemMode] = useState<GameMode>(GameMode.MIXED);
     const [miniGameProblemModePool, setMiniGameProblemModePool] = useState<string[] | undefined>(undefined);
     const [miniGameAnswerMode, setMiniGameAnswerMode] = useState<AnswerMode>('CHOICE');
@@ -5140,6 +5156,7 @@ const App: React.FC = () => {
             return;
         }
         setShowStartOverConfirm(false);
+        setPendingResumeProblemSelection(false);
         const saved = storageService.loadGame();
         if (saved) {
             const savedVisualTheme = VISUAL_THEMES.includes(saved.visualTheme as VisualThemeId)
@@ -5209,16 +5226,13 @@ const App: React.FC = () => {
                 saved.currentEventTitle = undefined;
             }
 
-            const assignmentForContinue = shouldPrioritizeCurrentAssignment
-                ? activeAssignment
-                : (!isDailyAssignmentDismissed ? dailyAssignment : null);
+            // Continuing a main-mode adventure must preserve the saved problem source.
+            // Daily assignments are offered from new problem-selection flows, but must
+            // not silently replace the user's saved mode when resuming.
+            const assignmentForContinue = shouldPrioritizeCurrentAssignment ? activeAssignment : null;
             if (assignmentForContinue && isAssignmentDeadlineActive(assignmentForContinue)) {
                 setAssignmentLetterSource('selection');
                 setShowAssignmentLetter(true);
-                if (!shouldPrioritizeCurrentAssignment) {
-                    setDismissedDailyAssignmentId(null);
-                    setStartedDailyAssignmentId(assignmentForContinue.id);
-                }
                 if (assignmentForContinue.gameMode === 'CHALLENGE_ONLY') {
                     saved.screen = GameScreen.PROBLEM_CHALLENGE;
                     saved.challengeMode = undefined;
@@ -5230,6 +5244,13 @@ const App: React.FC = () => {
                     saved.modePool = assignmentConfig.modePool;
                     saved.answerMode = assignmentConfig.answerMode || saved.answerMode || 'CHOICE';
                 }
+            }
+
+            const shouldReselectMainProblem = !assignmentForContinue
+                && !saved.challengeMode
+                && MAIN_ADVENTURE_RESUME_SELECTION_SCREEN_SET.has(saved.screen);
+            if (shouldReselectMainProblem) {
+                setPendingResumeProblemSelection(true);
             }
 
             saved.visualTheme = savedVisualTheme;
@@ -5565,6 +5586,18 @@ const App: React.FC = () => {
         if (isDailyLimitReached) {
             audioService.playSound('wrong');
             setShowTimeLimitModal(true);
+            return;
+        }
+        if (pendingResumeProblemSelection) {
+            setCompletedAssignmentProblemSource(null);
+            audioService.playSound('select');
+            setPendingResumeProblemSelection(false);
+            setGameState(prev => ({
+                ...prev,
+                mode,
+                modePool,
+                answerMode,
+            }));
             return;
         }
         setCompletedAssignmentProblemSource(null);
@@ -17082,6 +17115,19 @@ const App: React.FC = () => {
                             languageMode={languageMode}
                             debugPreview={isUiPreviewMode ? uiPreviewMiniGameOutcome : undefined}
                             isUiPreview={isUiPreviewMode}
+                        />
+                    </div>
+                )}
+
+                {pendingResumeProblemSelection && (
+                    <div className="absolute inset-0 z-[80]">
+                        <ModeSelectionScreen
+                            onSelectMode={handleModeSelect}
+                            onBack={() => setPendingResumeProblemSelection(false)}
+                            languageMode={languageMode}
+                            modeMasteryMap={Object.fromEntries(Object.entries(modeCorrectCounts).map(([mode, count]) => [mode, count >= 100]))}
+                            modeCorrectCounts={modeCorrectCounts}
+                            visualTheme={visualTheme}
                         />
                     </div>
                 )}
