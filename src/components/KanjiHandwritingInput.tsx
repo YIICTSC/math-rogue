@@ -364,6 +364,21 @@ const KanjiHandwritingInput: React.FC<KanjiHandwritingInputProps> = ({
           </button>
           <button
             type="button"
+            onClick={() => {
+              setStrokeOrderCheckEnabled((current) => !current);
+              setStrokeOrderFeedback(false);
+            }}
+            disabled={disabled || !engineReady}
+            aria-pressed={strokeOrderCheckEnabled}
+            aria-label={trans('書き順判定', languageMode)}
+            className={`flex shrink-0 items-center gap-1 rounded border px-2 py-1 text-xs font-bold transition-colors disabled:opacity-40 ${strokeOrderCheckEnabled
+              ? 'border-amber-300/70 bg-amber-950/60 text-amber-100 hover:bg-amber-900/70'
+              : 'border-slate-500 bg-slate-800 text-slate-300 hover:bg-slate-700'}`}
+          >
+            {trans('書き順判定', languageMode)} {strokeOrderCheckEnabled ? 'ON' : 'OFF'}
+          </button>
+          <button
+            type="button"
             onClick={() => setTraceModeEnabled((current) => !current)}
             disabled={disabled || !engineReady}
             aria-pressed={traceModeEnabled}

@@ -127,6 +127,7 @@ import { getOnlineRankingLabel, getOnlineRankingPeriodLabel } from './data/onlin
 import { formatProblemUnitName } from './utils/problemUnitName';
 import { getDifficultyConfig } from './config/difficulty';
 import { CARD_ERASER_TEMPLATE_ID, CARD_ERASER_NAME, eraseCardEffect, getErasableEffectOptions } from './utils/cardEraser';
+import { createCardCopySelectionState, isCardEligibleForCopySelection } from './utils/cardCopySelection';
 import { RotateCcw, Home, BookOpen, Coins, Trophy, HelpCircle, Infinity, Play, ScrollText, Plus, Minus, X as MultiplyIcon, Divide, Shuffle, Send, Swords, Terminal, Club, Zap, Gamepad2, Brain, Languages, Music, Book, MessageSquare, GraduationCap, Clock, AlertTriangle, TimerOff, X, Check, FlaskConical, Globe, MapPin, ChevronDown, ArrowLeft, Sparkles, Flag, Keyboard, Users, Settings, ClipboardList, FileText, Monitor, ShieldCheck } from 'lucide-react';
 import { applyAdditionalCardLogic } from './services/cardEffectLogic';
 import { p2pService } from './services/p2pService';
@@ -7500,7 +7501,7 @@ const App: React.FC = () => {
                 : null;
             const actorPlayer = actorEntry?.player ?? prev.player;
             const selectedCard = actorPlayer.hand.find(handCard => handCard.id === card.id) ?? card;
-            const p = { ...actorPlayer, hand: [...actorPlayer.hand], discardPile: [...actorPlayer.discardPile] };
+            const p = { ...actorPlayer, hand: [...actorPlayer.hand], discardPile: [...actorPlayer.discardPile], powers: { ...actorPlayer.powers } };
             const selectionPeerId = prev.challengeMode === 'COOP' ? (coopActorPeerId || coopSelfPeerId) : undefined;
             const mode = selectionPeerId
                 ? (prev.coopBattleState?.selectionStateByPeerId?.[selectionPeerId] || prev.selectionState)
@@ -7533,10 +7534,28 @@ const App: React.FC = () => {
                 };
             }
             if (mode.type === 'COPY') {
-                const copy = { ...selectedCard, id: `copy-${Date.now()}` };
-                if (p.hand.length < HAND_SIZE + 5) p.hand.push(copy);
+                if (!isCardEligibleForCopySelection(selectedCard, mode, actorPlayer.hand)) return prev;
+
+                const copiesPerSelection = Math.max(1, Math.floor(mode.copiesPerSelection || 1));
+                for (let copyIndex = 0; copyIndex < copiesPerSelection; copyIndex++) {
+                    if (p.hand.length >= HAND_SIZE + 5) break;
+                    const copy = {
+                        ...selectedCard,
+                        id: `copy-${Date.now()}-${copyIndex}-${Math.random()}`,
+                        cost: mode.copiedCardCost ?? selectedCard.cost,
+                    };
+                    p.hand.push(copy);
+                }
                 const newAmount = mode.amount - 1;
-                const nextSelectionState = { ...mode, active: newAmount > 0, amount: newAmount };
+                if (newAmount <= 0 && mode.copySelfVulnerableOnResolve) {
+                    p.powers['VULNERABLE'] = (p.powers['VULNERABLE'] || 0) + mode.copySelfVulnerableOnResolve;
+                }
+                const discardAmount = Math.min(mode.copyThenDiscardAmount || 0, p.hand.length);
+                const nextSelectionState: SelectionState = newAmount > 0
+                    ? { ...mode, active: true, amount: newAmount }
+                    : discardAmount > 0
+                        ? { active: true, type: 'DISCARD', amount: discardAmount, originCardId: mode.originCardId }
+                        : { ...mode, active: false, amount: 0 };
                 const updatedBattleState = prev.challengeMode === 'COOP'
                     ? (coopActorPeerId
                         ? updateCoopBattleStateForPeer(prev.coopBattleState, coopActorPeerId, p, actorEntry?.selectedEnemyId ?? prev.selectedEnemyId)
@@ -8193,7 +8212,7 @@ const App: React.FC = () => {
 
             // --- カード固有の拡張ロジック ---
             // ここに外部サービスからの呼び出しを追加
-            const additionalResult = applyAdditionalCardLogic(card, p, enemies, languageMode, currentLogs, nextActiveEffects);
+            const additionalResult = applyAdditionalCardLogic(card, p, enemies, languageMode, currentLogs, nextActiveEffects, effectiveCost);
             Object.assign(p, additionalResult.player);
             enemies = additionalResult.enemies;
             const protagonistId = getMagicProtagonistId(p);
@@ -9439,30 +9458,8 @@ const App: React.FC = () => {
                 } else if (!isConsumedOnUse && (shouldExhaust || card.promptsExhaust === 99)) {
                     if (p.powers['FEEL_NO_PAIN']) p.block += p.powers['FEEL_NO_PAIN'];
                 }
-                const automaticCopyKeys = [
-                    'カンニング',
-                    'HOLOGRAM',
-                    'お人形遊び',
-                    'GIRLS_DOLL_HOUSE',
-                    '二本鉛筆',
-                    '二刀流',
-                    'DUAL_WIELD',
-                    'フォークダンス',
-                    'PE_DANCE',
-                    '鏡 (星新一)',
-                    'KAGAMI_HOSHI',
-                    'きてんの窓',
-                    'KITSUNE_NO_MADO',
-                    '影分身の術',
-                    'BOYS_SHADOW_CLONE',
-                ];
-                const isAutomaticCopyCard = automaticCopyKeys.some(key =>
-                    card.name === key ||
-                    card.originalNames?.includes(key) ||
-                    card.id?.includes(key)
-                );
                 if (card.promptsDiscard) nextSelectionState = { active: true, type: 'DISCARD', amount: card.promptsDiscard, originCardId: card.id };
-                if (card.promptsCopy && !isAutomaticCopyCard) nextSelectionState = { active: true, type: 'COPY', amount: card.promptsCopy, originCardId: card.id };
+                if (card.promptsCopy) nextSelectionState = createCardCopySelectionState(card, p.hand);
                 if (card.promptsExhaust && card.promptsExhaust !== 99) {
                     nextSelectionState = { active: true, type: 'EXHAUST', amount: card.promptsExhaust, originCardId: card.id };
                     currentLogs.push(trans("廃棄するカードを選択してください。", languageMode));
@@ -11341,8 +11338,10 @@ const App: React.FC = () => {
             if (current.screen !== GameScreen.BATTLE || current.challengeMode !== 'TYPING') return;
             if (!current.selectionState.active) return;
 
-            const nextCard = current.player.hand[0];
             const { selectionState } = current;
+            const nextCard = selectionState.type === 'COPY'
+                ? current.player.hand.find(handCard => isCardEligibleForCopySelection(handCard, selectionState, current.player.hand))
+                : current.player.hand[0];
 
             if (selectionState.type === 'DISCARD') {
                 if (!selectionState.originCardId || !nextCard) {
@@ -12679,6 +12678,12 @@ const App: React.FC = () => {
         const rewardPrefix = `${rewardScope}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
         const getRewardCardTemplateKey = (card: ICard) => card.originalNames?.[0] || card.name || card.id;
         const pickedCardTemplateIds = new Set<string>();
+        const unlockedCardNames = new Set(storageService.getUnlockedCards().map(name => name.trim()));
+        // 追加カードのうち、通常プールでは除外される特殊カードにも、
+        // アンロック後に通常報酬から入手できる経路を用意する。
+        const expansionSpecialRewardCards = Object.values(ADDITIONAL_CARDS).filter(card =>
+            card.rarity === 'SPECIAL' && unlockedCardNames.has(card.name.trim())
+        );
         const isAzukiBossReward = nodeType === NodeType.BOSS && Boolean(player.turnFlags[AZUKI_BOSS_FLAG]);
         const isDodomedesuBossReward = nodeType === NodeType.BOSS && Boolean(player.turnFlags[DODOMEDESU_BOSS_ACTIVE_FLAG]);
 
@@ -12728,15 +12733,21 @@ const App: React.FC = () => {
         const holographicRewardSlot = Math.random() < HOLOGRAPHIC_REWARD_CARD_CHANCE
             ? Math.floor(Math.random() * 3)
             : -1;
+        const expansionSpecialRewardSlot = expansionSpecialRewardCards.length > 0 && Math.random() < 0.2
+            ? Math.floor(Math.random() * 3)
+            : -1;
 
         for (let i = 0; i < 3; i++) {
-            if (baseRewardCards.length === 0 && !(isLibrarian && i === 0) && !(isGardener && i === 0)) break;
+            const isExpansionSpecialSlot = i === expansionSpecialRewardSlot;
+            if (baseRewardCards.length === 0 && !isExpansionSpecialSlot && !(isLibrarian && i === 0) && !(isGardener && i === 0)) break;
             const roll = Math.random() * 100;
             let targetRarity = 'COMMON';
             if (roll > 95) targetRarity = 'LEGENDARY'; else if (roll > 80) targetRarity = 'RARE'; else if (roll > 50) targetRarity = 'UNCOMMON';
 
             let pool;
-            if (isLibrarian && i === 0 && Math.random() < 0.7) {
+            if (isExpansionSpecialSlot) {
+                pool = expansionSpecialRewardCards;
+            } else if (isLibrarian && i === 0 && Math.random() < 0.7) {
                 pool = Object.values(LIBRARIAN_CARDS);
             } else if (isGardener && i === 0 && Math.random() < 0.7) {
                 pool = Object.values(GARDEN_SEEDS);
@@ -12752,7 +12763,9 @@ const App: React.FC = () => {
             }
 
             const uniquePool = pool.filter(card => !pickedCardTemplateIds.has(getRewardCardTemplateKey(card)));
-            const fallbackBasePool = isHighSchoolReward && i !== familiarRewardSlot && nonFamiliarCards.length > 0
+            const fallbackBasePool = isExpansionSpecialSlot
+                ? expansionSpecialRewardCards
+                : isHighSchoolReward && i !== familiarRewardSlot && nonFamiliarCards.length > 0
                 ? nonFamiliarCards
                 : (!isHighSchoolReward ? baseRewardCards : allPossibleCards);
             const fallbackUniquePool = fallbackBasePool.filter(card => !pickedCardTemplateIds.has(getRewardCardTemplateKey(card)));

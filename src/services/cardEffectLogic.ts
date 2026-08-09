@@ -1,8 +1,10 @@
 
 import { Player, Enemy, Card as ICard, CardType, TargetType, VisualEffectInstance, EnemyIntentType, LanguageMode } from '../types';
 import { CARDS_LIBRARY, RELIC_LIBRARY } from '../constants';
+import { ADDITIONAL_CARDS } from '../constants1';
 import { trans } from '../utils/textUtils';
 import { getUpgradedCard } from '../utils/cardUtils';
+import { storageService } from './storageService';
 
 // ヘルパー関数: デバフの付与
 const applyDebuff = (enemy: Enemy, type: 'WEAK' | 'VULNERABLE' | 'POISON', amount: number) => {
@@ -51,6 +53,16 @@ const APP_CANONICAL_CARD_LOGIC_KEY_LIST = [
     'OUT_RAINBOW_CHASE',
 ];
 const APP_CANONICAL_CARD_LOGIC_KEYS = new Set(APP_CANONICAL_CARD_LOGIC_KEY_LIST);
+const ADDITIONAL_CARD_NAMES = new Set(Object.values(ADDITIONAL_CARDS).map(card => card.name.trim()));
+
+const getAvailableSpecialCards = () => {
+    const unlockedCardNames = new Set(storageService.getUnlockedCards().map(name => name.trim()));
+    return Object.values(CARDS_LIBRARY).filter(card =>
+        card.rarity === 'SPECIAL' &&
+        !card.isSeed &&
+        (!ADDITIONAL_CARD_NAMES.has(card.name.trim()) || unlockedCardNames.has(card.name.trim()))
+    );
+};
 
 const isHandledByAppCardLogic = (card: ICard): boolean => {
     const keys = [card.name, ...(card.originalNames ?? [])].filter(Boolean);
@@ -68,7 +80,8 @@ export const applyAdditionalCardLogic = (
     enemies: Enemy[],
     languageMode: LanguageMode,
     currentLogs: string[],
-    nextActiveEffects: VisualEffectInstance[]
+    nextActiveEffects: VisualEffectInstance[],
+    effectiveCost: number = card.cost
 ): { player: Player; enemies: Enemy[] } => {
     const p = { ...player };
     const e_list = [...enemies];
@@ -90,8 +103,106 @@ export const applyAdditionalCardLogic = (
         }
         return newC;
     };
-    const copyRepetitionCount = Math.max(1, Math.floor(card.promptsCopy || 1));
 
+    const expansionEffects = card.expansionEffects?.length
+        ? card.expansionEffects
+        : card.expansionEffect
+            ? [card.expansionEffect]
+            : [];
+    if (expansionEffects.length > 0) {
+        const handIndex = p.hand.findIndex(c => c.id === card.id);
+        const otherCards = p.hand.filter(c => c.id !== card.id);
+        const handCountAtPlay = p.hand.length;
+        const energyAfter = Math.max(0, p.currentEnergy - effectiveCost);
+        const livingEnemies = e_list.filter(enemy => enemy.currentHp > 0);
+        const attackIntentTypes = new Set([
+            EnemyIntentType.ATTACK,
+            EnemyIntentType.ATTACK_DEBUFF,
+            EnemyIntentType.ATTACK_DEFEND,
+            EnemyIntentType.PIERCE_ATTACK,
+        ]);
+        const conditionMet = (expansion: NonNullable<ICard['expansionEffect']>) => {
+            switch (expansion.condition) {
+                case 'LEFTMOST': return handIndex === 0;
+                case 'RIGHTMOST': return handIndex === handCountAtPlay - 1;
+                case 'HAND_EVEN': return handCountAtPlay % 2 === 0;
+                case 'HAND_ODD': return handCountAtPlay % 2 === 1;
+                case 'ENERGY_ZERO_AFTER': return energyAfter === 0;
+                case 'ENERGY_EVEN_AFTER': return energyAfter % 2 === 0;
+                case 'NO_BLOCK': return p.block === 0;
+                case 'LOW_HP': return p.currentHp * 2 <= p.maxHp;
+                case 'ENEMY_ATTACKING': return livingEnemies.some(enemy => attackIntentTypes.has(enemy.nextIntent.type));
+                case 'ENEMY_NOT_ATTACKING': return livingEnemies.length > 0 && livingEnemies.every(enemy => !attackIntentTypes.has(enemy.nextIntent.type));
+                case 'DRAW_EVEN': return p.drawPile.length % 2 === 0;
+                case 'DISCARD_ODD': return p.discardPile.length % 2 === 1;
+                case 'NO_ATTACK_PLAYED': return p.attacksPlayedThisTurn === 0;
+                case 'THIRD_OR_LATER': return p.cardsPlayedThisTurn >= 2;
+                case 'SAME_TYPE_IN_HAND': return otherCards.some(other => other.type === card.type);
+                case 'HIGHEST_COST_IN_HAND': return p.hand.every(other => other.cost <= card.cost);
+                default: return false;
+            }
+        };
+
+        const drawOne = () => {
+            if (p.drawPile.length === 0 && p.discardPile.length > 0) {
+                p.drawPile = shuffle([...p.discardPile]);
+                p.discardPile = [];
+            }
+            const drawn = p.drawPile.pop();
+            if (!drawn) return;
+            if (p.hand.length < 10) p.hand.push(drawn);
+            else p.discardPile.push(drawn);
+        };
+
+        expansionEffects.forEach((expansion) => {
+            if (conditionMet(expansion)) {
+                switch (expansion.reward) {
+                case 'DRAW': drawOne(); break;
+                case 'BLOCK': p.block += 5; break;
+                case 'ENERGY': p.currentEnergy += 1; break;
+                case 'HEAL': p.currentHp = Math.min(p.maxHp, p.currentHp + 3); break;
+                case 'NEXT_DRAW': p.nextTurnDraw += 1; break;
+                case 'NEXT_ENERGY': p.nextTurnEnergy += 1; break;
+                case 'STRENGTH': p.strength += 1; break;
+                case 'DEXTERITY': p.powers['DEXTERITY'] = (p.powers['DEXTERITY'] || 0) + 1; break;
+                case 'POISON_RANDOM': {
+                    if (livingEnemies.length > 0) {
+                        const enemy = livingEnemies[Math.floor(Math.random() * livingEnemies.length)];
+                        applyDebuff(enemy, 'POISON', 3);
+                    }
+                    break;
+                }
+                case 'WEAK_ALL': livingEnemies.forEach(enemy => applyDebuff(enemy, 'WEAK', 1)); break;
+                case 'RECOVER_DISCARD': {
+                    const recovered = p.discardPile.pop();
+                    if (recovered) {
+                        if (p.hand.length < 10) p.hand.push(recovered);
+                        else p.drawPile.push(recovered);
+                    }
+                    break;
+                }
+                case 'UPGRADE_HAND': {
+                    const index = p.hand.findIndex(other => other.id !== card.id && !other.upgraded);
+                    if (index >= 0) p.hand[index] = getUpgradedCard(p.hand[index]);
+                    break;
+                }
+                case 'DISCOUNT_HAND': {
+                    const target = otherCards.reduce<ICard | null>((best, other) => !best || other.cost > best.cost ? other : best, null);
+                    if (target) {
+                        const targetIndex = p.hand.findIndex(other => other.id === target.id);
+                        if (targetIndex >= 0) p.hand[targetIndex] = { ...p.hand[targetIndex], cost: Math.max(0, p.hand[targetIndex].cost - 1) };
+                    }
+                    break;
+                }
+                case 'HAND_COUNT_BLOCK': p.block += handCountAtPlay; break;
+                }
+                currentLogs.push(trans(`固有共鳴${String(expansion.serial).padStart(3, '0')}が発動！`, languageMode));
+                nextActiveEffects.push({ id: `vfx-expansion-${expansion.serial}-${Date.now()}`, type: 'BUFF', targetId: 'player' });
+            } else {
+                currentLogs.push(trans(`固有共鳴${String(expansion.serial).padStart(3, '0')}は条件未達`, languageMode));
+            }
+        });
+    }
     // カード名に基づいた特殊ロジックの分岐 (合成カード対応)
     const targetNames = (card.originalNames && card.originalNames.length > 0) ? card.originalNames : [card.name];
 
@@ -259,70 +370,14 @@ export const applyAdditionalCardLogic = (
                 currentLogs.push(trans("学芸会の主役：カードを使う度ブロック獲得！", languageMode));
                 break;
             }
-            case 'カンニング': {
-                const pool = p.hand.filter(c => c.id !== card.id && c.type === CardType.ATTACK);
-                if (pool.length > 0) {
-                    const pick = pool[Math.floor(Math.random() * pool.length)];
-                    for (let i = 0; i < copyRepetitionCount; i++) addCardToHand(pick, false);
-                    currentLogs.push(trans(`カンニング：攻撃カードを${copyRepetitionCount}枚コピーした`, languageMode));
-                }
-                break;
-            }
-            case 'お人形遊び': {
-                const pool = p.hand.filter(c => c.id !== card.id && c.type === CardType.SKILL);
-                if (pool.length > 0) {
-                    const pick = pool[Math.floor(Math.random() * pool.length)];
-                    for (let i = 0; i < copyRepetitionCount; i++) addCardToHand(pick, false);
-                    currentLogs.push(trans(`お人形遊び：スキルカードを${copyRepetitionCount}枚コピーした`, languageMode));
-                }
-                break;
-            }
+            case 'カンニング':
+            case 'お人形遊び':
             case '二刀流':
-            case '二本鉛筆': {
-                const pool = p.hand.filter(c => c.id !== card.id && (c.type === CardType.ATTACK || c.type === CardType.POWER));
-                if (pool.length > 0) {
-                    const pick = pool[Math.floor(Math.random() * pool.length)];
-                    for (let i = 0; i < copyRepetitionCount; i++) addCardToHand(pick, false);
-                    currentLogs.push(trans(`二本鉛筆：カードを${copyRepetitionCount}枚コピーした`, languageMode));
-                }
-                break;
-            }
-            case 'フォークダンス': {
-                const pool = p.hand.filter(c => c.id !== card.id);
-                if (pool.length > 0) {
-                    const pick = pool[Math.floor(Math.random() * pool.length)];
-                    for (let i = 0; i < copyRepetitionCount; i++) addCardToHand(pick, false);
-                    const tossPool = p.hand.filter(c => c.id !== pick.id && c.id !== card.id);
-                    if (tossPool.length > 0) {
-                        const toss = tossPool[Math.floor(Math.random() * tossPool.length)];
-                        p.hand = p.hand.filter(c => c.id !== toss.id);
-                        p.discardPile.push(toss);
-                    }
-                    currentLogs.push(trans(`フォークダンス：${copyRepetitionCount}枚コピーして1枚捨てた`, languageMode));
-                }
-                break;
-            }
-            case '鏡 (星新一)': {
-                const pool = p.hand.filter(c => c.id !== card.id);
-                if (pool.length > 0) {
-                    const pick = pool[Math.floor(Math.random() * pool.length)];
-                    for (let i = 0; i < copyRepetitionCount; i++) addCardToHand(pick, false);
-                    p.powers['VULNERABLE'] = (p.powers['VULNERABLE'] || 0) + 1;
-                    currentLogs.push(trans(`鏡：${copyRepetitionCount}枚コピーしたが、自分がびくびく1`, languageMode));
-                }
-                break;
-            }
+            case '二本鉛筆':
+            case 'フォークダンス':
+            case '鏡 (星新一)':
             case 'きてんの窓': {
-                const highCost = p.hand.filter(c => c.id !== card.id && c.cost >= 2);
-                const pool = highCost.length > 0 ? highCost : p.hand.filter(c => c.id !== card.id);
-                if (pool.length > 0) {
-                    const pick = pool[Math.floor(Math.random() * pool.length)];
-                    for (let i = 0; i < copyRepetitionCount; i++) {
-                        const copied = addCardToHand(pick, false);
-                        copied.cost = 0;
-                    }
-                    currentLogs.push(trans(`きてんの窓：高コスト優先で${copyRepetitionCount}枚コピーし0コスト化`, languageMode));
-                }
+                // Copy resolution is handled by the shared hand-selection flow.
                 break;
             }
             case 'スポーツ王': {
@@ -421,15 +476,6 @@ export const applyAdditionalCardLogic = (
                 break;
             }
             case '影分身の術': {
-                const attacks = p.hand.filter(c => c.type === CardType.ATTACK && c.id !== card.id);
-                const copySets = Math.max(1, Math.ceil(copyRepetitionCount / 5));
-                for (let set = 0; set < copySets; set++) {
-                    attacks.forEach(atk => {
-                        const clone = { ...atk, id: `clone-${Date.now()}-${Math.random()}` };
-                        if (p.hand.length < 10) p.hand.push(clone);
-                    });
-                }
-                currentLogs.push(trans(`影分身の術：手札の攻撃をすべて${copySets}組複製した！`, languageMode));
                 nextActiveEffects.push({ id: `vfx-clone-${Date.now()}`, type: 'BUFF', targetId: 'player' });
                 break;
             }
@@ -443,10 +489,10 @@ export const applyAdditionalCardLogic = (
 
             // --- 可愛いカード (GIRLS) ---
             case 'おとぎ話の扉': {
-                const specials = Object.values(CARDS_LIBRARY).filter(c => c.rarity === 'SPECIAL' && !c.isSeed);
+                const specials = getAvailableSpecialCards();
                 for (let i = 0; i < 3; i++) {
                     const pick = specials[Math.floor(Math.random() * specials.length)];
-                    addCardToHand(pick);
+                    if (pick) addCardToHand(pick);
                 }
                 currentLogs.push(trans("おとぎ話の扉：特別なカードを3枚生成した", languageMode));
                 nextActiveEffects.push({ id: `vfx-fairy-${Date.now()}`, type: 'BUFF', targetId: 'player' });

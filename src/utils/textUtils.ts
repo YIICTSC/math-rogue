@@ -18,6 +18,8 @@ import { ENGLISH_MAGIC_CARD_RULE_EXACT } from '../data/englishMagicCardRuleExact
 import { ENGLISH_IDENTIFIER_EXACT } from '../data/englishIdentifierExact';
 import { ENGLISH_MINIGAME_EXACT } from '../data/englishMinigameExact';
 import { ENGLISH_REVIEW_EXACT } from '../data/englishReviewExact';
+import { describeExpansionEffectEnglish, EXPANSION_CARD_ENGLISH_NAMES, translateExpansionCardEnglish } from '../data/expansionCardTranslations';
+import { translateExpansionCardHiragana } from '../data/expansionCardHiragana';
 import { EVENT_DICTIONARY } from './textUtils2';
 
 const BASE_DICTIONARY: Record<string, string> = {
@@ -455,6 +457,7 @@ const BASE_DICTIONARY: Record<string, string> = {
 
     "スターライト・シンフォニー": "スターライト・シンフォニー",
     "ハートフル・ブルーム": "ハートフル・ブルーム",
+    "ピンク・ペタルガード": "ピンク・ペタルガード",
     "恋するマカロン・ヒール": "こいする マカロン・ヒール",
     "ミラクル・ステッキ": "ミラクル・ステッキ",
     "夢見るリボン・バインド": "ゆめみる リボン・バインド",
@@ -4988,6 +4991,7 @@ const ENGLISH_GENERATED_CARD_NAME_DICTIONARY: Record<string, string> = {
     "ラスト・ファンタジー": "Boys Final Fantasy",
     "スターライト・シンフォニー": "Girls Star Symphony",
     "ハートフル・ブルーム": "Girls Heart Bloom",
+    "ピンク・ペタルガード": "Girls Pink Petal Guard",
     "恋するマカロン・ヒール": "Girls Macaron Heal",
     "ミラクル・ステッキ": "Girls Magic Wand",
     "夢見るリボン・バインド": "Girls Ribbon Bind",
@@ -5154,7 +5158,7 @@ const ENGLISH_GENERATED_CARD_NAME_DICTIONARY: Record<string, string> = {
     "逆ギレ": "Berserk",
 };
 
-Object.assign(ENGLISH_CARD_NAME_DICTIONARY, {
+Object.assign(ENGLISH_CARD_NAME_DICTIONARY, EXPANSION_CARD_ENGLISH_NAMES, {
     "つまみ食い": "Sneak Snack",
     "牛乳一気飲み": "Milk Chug",
     "えんぴつの削りかす": "Pencil Shavings",
@@ -5306,6 +5310,7 @@ Object.assign(ENGLISH_CARD_NAME_DICTIONARY, {
     "逆ギレ": "Angry Comeback",
     "スターライト・シンフォニー": "Starlight Symphony",
     "ハートフル・ブルーム": "Heartful Bloom",
+    "ピンク・ペタルガード": "Pink Petal Guard",
     "恋するマカロン・ヒール": "Macaron Heal of Love",
     "ミラクル・ステッキ": "Miracle Wand",
     "夢見るリボン・バインド": "Dreaming Ribbon Bind",
@@ -6219,6 +6224,7 @@ Object.assign(ENGLISH_DICTIONARY, {
     "この端末の保存データを圧縮コードとして出力します。": "Export this device's save data as a compressed code.",
     "保存キー数": "Save Keys",
     "コピー": "Copy",
+    "コピーするカードを選択してください": "Choose a card to copy",
     "ダウンロード": "Download",
     "インポート": "Import",
     "別の端末で出力した圧縮コードかJSONを貼り付けるか、保存ファイルを読み込んでください。": "Paste a compressed code or JSON from another device, or load a save file.",
@@ -9417,6 +9423,12 @@ export const buildEnglishCardDescription = (card: Card): string => {
     if (card.exhaust) parts.push("Exhaust");
     if (card.innate) parts.push("Innate");
     if (card.eraserOnly) parts.push("Can only be used at rest sites to remove one unwanted card effect");
+    const expansionEffects = card.expansionEffects?.length
+        ? card.expansionEffects
+        : card.expansionEffect
+            ? [card.expansionEffect]
+            : [];
+    expansionEffects.forEach(effect => parts.push(describeExpansionEffectEnglish(effect)));
 
     if (parts.length === 0) return trans(card.description, 'ENGLISH');
 
@@ -11020,10 +11032,27 @@ const stripGenericEnglishScaffolding = (value: string): string => {
 };
 
 export const trans = (text: string, mode: LanguageMode): string => {
+    if (mode === 'ENGLISH') {
+        const expansionTranslation = translateExpansionCardEnglish(text);
+        if (expansionTranslation) return expansionTranslation;
+    }
+    if (mode === 'HIRAGANA') {
+        const expansionTranslation = translateExpansionCardHiragana(text);
+        if (expansionTranslation) return expansionTranslation;
+    }
     const rawOutput = transCore(text, mode);
     const output = mode === 'ENGLISH' ? stripGenericEnglishScaffolding(rawOutput) : rawOutput;
     if (mode === 'ENGLISH') auditEnglishTranslationResult(text, output, 'trans');
     return output;
+};
+
+export const buildHiraganaCardDescription = (card: Card): string => {
+    const hasExpansionEffect = Boolean(card.expansionEffects?.length || card.expansionEffect);
+    if (!hasExpansionEffect) return trans(card.description, 'HIRAGANA');
+    return card.description
+        .split(/(?<=。)/)
+        .map(segment => translateExpansionCardHiragana(segment) || trans(segment, 'HIRAGANA'))
+        .join('');
 };
 
 const CARD_NAME_GENERIC_ENGLISH = /^(Choose Option|Event Details|School Foe|Item)$/;

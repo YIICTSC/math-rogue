@@ -1,7 +1,9 @@
 
 import { Card, CardType, TargetType } from './types';
+import { EXPANSION_CARDS } from './data/expansionCards';
 
 export const ADDITIONAL_CARDS: Record<string, Omit<Card, 'id'>> = {
+  ...EXPANSION_CARDS,
   // --- 国語系 (20枚) ---
   KOKUGO_SYUKUGO: { name: '四字熟語', cost: 1, type: CardType.ATTACK, target: TargetType.ENEMY, description: '4ダメージを4回与える。', damage: 4, playCopies: 3, rarity: 'COMMON', textureRef: 'NOTEBOOK|灰|ATTACK' },
   KOKUGO_KOTOWAZA: { name: 'ことわざの知恵', cost: 1, type: CardType.SKILL, target: TargetType.SELF, description: 'ブロック7。カードを1枚引く。', block: 7, draw: 1, rarity: 'COMMON', textureRef: 'NOTEBOOK|白|SKILL' },
@@ -199,7 +201,7 @@ export const ADDITIONAL_CARDS: Record<string, Omit<Card, 'id'>> = {
   OUT_FIRST_SUN: { name: '初日の出', cost: 5, type: CardType.POWER, target: TargetType.SELF, description: 'ターン開始時にエナジー2を得る。', applyPower: { id: 'BERSERK_POWER', amount: 2 }, rarity: 'LEGENDARY', textureRef: 'GEM|金|POWER' },
   OUT_SNOW_MAN: { name: '巨大雪だるま', cost: 5, type: CardType.SKILL, target: TargetType.SELF, description: 'ブロック50。廃棄。', block: 50, exhaust: true, rarity: 'RARE', textureRef: 'SHIELD|白|SKILL' },
   OUT_SOCCER_STREET: { name: '路地のストリートサッカー', cost: 4, type: CardType.ATTACK, target: TargetType.ENEMY, description: '8ダメージを4回。1枚引く。', damage: 8, playCopies: 3, draw: 1, rarity: 'UNCOMMON', textureRef: 'FIST|白|ATTACK' },
-  OUT_RADIO_STATION: { name: '地元のラジオ局', cost: 4, type: CardType.SKILL, target: TargetType.SELF, description: '手札のランダムなカード3枚をコピーする。', promptsCopy: 3, rarity: 'RARE', textureRef: 'MIC|灰|SKILL' },
+  OUT_RADIO_STATION: { name: '地元のラジオ局', cost: 4, type: CardType.SKILL, target: TargetType.SELF, description: '手札のカードを3枚選び、それぞれコピーする。', promptsCopy: 3, rarity: 'RARE', textureRef: 'MIC|灰|SKILL' },
   OUT_ZOO_TRIP: { name: '動物園のライオン', cost: 5, type: CardType.ATTACK, target: TargetType.ENEMY, description: '25ダメージ。対象にびくびく5。', damage: 25, vulnerable: 5, rarity: 'RARE', textureRef: 'BEAST|黄|ATTACK' },
   OUT_AQUARIUM: { name: '水族館のサメ', cost: 5, type: CardType.ATTACK, target: TargetType.ENEMY, description: '15ダメージを3回。HP5回復。', damage: 15, playCopies: 2, heal: 5, rarity: 'RARE', textureRef: 'BEAST|青|ATTACK' },
   OUT_TOY_STORE: { name: '夢のおもちゃ屋', cost: 4, type: CardType.SKILL, target: TargetType.SELF, description: 'ランダムなレジェンダリーカードを1枚生成する。', rarity: 'LEGENDARY', textureRef: 'BACKPACK|虹|SKILL' },
@@ -237,7 +239,7 @@ export const ADDITIONAL_CARDS: Record<string, Omit<Card, 'id'>> = {
   BOYS_SAMURAI_AURA: { name: '戦意高揚', cost: 1, type: CardType.POWER, target: TargetType.SELF, description: '毎ターン開始時、ムキムキ1、カチカチ1を得る。', strength: 1, applyPower: { id: 'DEXTERITY', amount: 1 }, rarity: 'RARE', textureRef: 'HUMANOID|赤|POWER' },
   BOYS_METEOR: { name: '流星の鉄槌', cost: 2, type: CardType.ATTACK, target: TargetType.ENEMY, description: '18ダメージ。倒すと最大HP+3。', damage: 18, fatalMaxHp: 3, rarity: 'UNCOMMON', textureRef: 'GEM|黄|ATTACK' },
   BOYS_REVENGE: { name: 'リベンジ・バースト', cost: 1, type: CardType.ATTACK, target: TargetType.ENEMY, description: '今ターン失ったHPの2倍のダメージを与える。', damage: 0, rarity: 'RARE', textureRef: 'FIST|黒|ATTACK' },
-  BOYS_SHADOW_CLONE: { name: '影分身の術', cost: 2, type: CardType.SKILL, target: TargetType.SELF, description: '手札の全アタックカードをコピーする。', promptsCopy: 5, rarity: 'LEGENDARY', textureRef: 'HUMANOID|灰|SKILL' },
+  BOYS_SHADOW_CLONE: { name: '影分身の術', cost: 2, type: CardType.SKILL, target: TargetType.SELF, description: '手札のアタックカードを1枚選び、5枚コピーする。', promptsCopy: 5, rarity: 'LEGENDARY', textureRef: 'HUMANOID|灰|SKILL' },
   BOYS_BATTLE_STANCE: { name: '修羅の構え', cost: 0, type: CardType.SKILL, target: TargetType.SELF, description: '次のアタックは2回発動する。自分に2ダメージ。', selfDamage: 2, rarity: 'UNCOMMON', textureRef: 'FIST|赤|SKILL' },
   BOYS_HEAVY_SMASH: { name: '超重力粉砕', cost: 3, type: CardType.ATTACK, target: TargetType.ENEMY, description: '50ダメージ。廃棄。', damage: 50, exhaust: true, rarity: 'RARE', textureRef: 'FIST|黒|ATTACK' },
   BOYS_CYBER_BLADE: { name: 'プラズマ・ブレード', cost: 1, type: CardType.ATTACK, target: TargetType.ENEMY, description: '12ダメージ。このカードは常に強化状態で生成される。', damage: 12, rarity: 'COMMON', textureRef: 'SWORD|青|ATTACK' },
@@ -267,7 +269,7 @@ export const ADDITIONAL_CARDS: Record<string, Omit<Card, 'id'>> = {
 
   // --- 女子向け可愛いキラキラしたカード (50枚) ---
   GIRLS_STAR_SYMPHONY: { name: 'スターライト・シンフォニー', cost: 1, type: CardType.SKILL, target: TargetType.ALL_ENEMIES, description: '敵全体をへろへろ2、びくびく2にする。', weak: 2, vulnerable: 2, rarity: 'RARE', textureRef: 'GEM|黄|SKILL' },
-  GIRLS_HEART_BLOOM: { name: 'ハートフル・ブルーム', cost: 1, type: CardType.SKILL, target: TargetType.SELF, description: 'HPを8回復。ブロック8。', heal: 8, block: 8, rarity: 'UNCOMMON', textureRef: 'PLANT|桃|SKILL' },
+  GIRLS_HEART_BLOOM: { name: 'ピンク・ペタルガード', cost: 1, type: CardType.SKILL, target: TargetType.SELF, description: 'HPを8回復。ブロック8。', heal: 8, block: 8, rarity: 'UNCOMMON', textureRef: 'PLANT|桃|SKILL' },
   GIRLS_MACARON_HEAL: { name: '恋するマカロン・ヒール', cost: 0, type: CardType.SKILL, target: TargetType.SELF, description: 'HPを5回復。廃棄。', heal: 5, exhaust: true, rarity: 'COMMON', textureRef: 'BACKPACK|桃|SKILL' },
   GIRLS_MAGIC_WAND: { name: 'ミラクル・ステッキ', cost: 1, type: CardType.ATTACK, target: TargetType.ENEMY, description: '10ダメージ。カードを1枚引く。', damage: 10, draw: 1, rarity: 'COMMON', textureRef: 'GEM|白|ATTACK' },
   GIRLS_RIBBON_BIND: { name: '夢見るリボン・バインド', cost: 1, type: CardType.SKILL, target: TargetType.ENEMY, description: '対象の攻撃力を3下げる。', strength: -3, rarity: 'UNCOMMON', textureRef: 'PLANT|桃|SKILL' },

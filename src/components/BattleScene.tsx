@@ -23,6 +23,7 @@ import { getStatusEffectKeyForVfx } from '../data/statusEffects';
 import { getThemedCharacterSpritePath, getThemedEnemyDisplayName, getThemedEnemyVariant, getThemedHumanoidEnemyVariant, type HighSchoolEnemyAction, type HighSchoolHeroAction, type VisualThemeId } from '../data/visualThemes';
 import { boostMagicCardForTransformation } from '../data/magicCards';
 import { assetUrl } from '../utils/assetPaths';
+import { isCardEligibleForCopySelection } from '../utils/cardCopySelection';
 import type { BattleUiSettings } from './SettingsModal';
 import MagicRulePanel from './MagicRulePanel';
 import ResilientAssetImage from './ResilientAssetImage';
@@ -1607,7 +1608,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                     <div className="battle-selection-notice absolute left-1/2 top-[34%] -translate-x-1/2 -translate-y-1/2 bg-black/80 z-40 text-center py-2 px-6 border-b-2 border-yellow-500 animate-pulse rounded shadow-xl pointer-events-auto flex flex-col items-center gap-2">
                         <span className="text-yellow-400 font-bold text-sm">
                             {selectionState.type === 'DISCARD' && `${trans("捨てる", languageMode)} (${selectionState.amount})`}
-                            {selectionState.type === 'COPY' && `コピー (${selectionState.amount})`}
+                            {selectionState.type === 'COPY' && `${trans("コピーするカードを選択してください", languageMode)} (${selectionState.amount})`}
                             {selectionState.type === 'EXHAUST' && `${trans("廃棄", languageMode)} (${selectionState.amount})`}
                         </span>
                         {selectionState.type !== 'DISCARD' && (
@@ -2660,7 +2661,10 @@ const BattleScene: React.FC<BattleSceneProps> = ({
 
                         const isFriendshipComboSelectionMode = isDualMode && friendshipComboEnabled;
                         const isSelectedDual = isFriendshipComboSelectionMode && selectedCardIds.includes(card.id);
-                        const isSelectedActive = selectionState.active;
+                        const isCopySelectionTargetDisabled = selectionState.active
+                            && selectionState.type === 'COPY'
+                            && !isCardEligibleForCopySelection(card, selectionState, player.hand);
+                        const isSelectedActive = selectionState.active && !isCopySelectionTargetDisabled;
 
                         const specialDisabled = isClashDisabled || isGrandFinaleDisabled || isChokerDisabled || isNormalityDisabled || isDiscardCostDisabled;
 
@@ -2719,7 +2723,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                             onClick={() => {
                                                 if (selfDown || !coopCanAct) return;
                                                 if (selectionState.active) {
-                                                    onHandSelection(card);
+                                                    if (!isCopySelectionTargetDisabled) onHandSelection(card);
                                                 } else {
                                                     if (isFriendshipComboSelectionMode) {
                                                         handleCardClickDual(card, specialDisabled);
@@ -2741,7 +2745,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                             onInspect={onInspect}
                                             disabled={
                                                 selectionState.active
-                                                    ? false
+                                                    ? isCopySelectionTargetDisabled
                                                     : (isFriendshipComboSelectionMode
                                                         ? (isEnergyDisabled || !!actingEnemyId || card.unplayable || specialDisabled || selfDown || !coopCanAct)
                                                         : (player.currentEnergy < displayCard.cost || !!actingEnemyId || card.unplayable || specialDisabled || selfDown || !coopCanAct)

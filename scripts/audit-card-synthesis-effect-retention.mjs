@@ -9,6 +9,7 @@ const files = {
   app: 'src/App.tsx',
   logic: 'src/services/cardEffectLogic.ts',
   utils: 'src/utils/cardUtils.ts',
+  types: 'src/types.ts',
 };
 
 const source = Object.fromEntries(
@@ -31,6 +32,11 @@ const getCardEffectLogicCases = () => {
     keys.add(match[1]);
   }
   return keys;
+};
+
+const getExpansionSwitchCases = () => {
+  const block = source.types.match(/export type ExpansionCondition([\s\S]*?)export interface ExpansionEffectSpec/)?.[1] || '';
+  return new Set(Array.from(block.matchAll(/'([^']+)'/g), match => match[1]));
 };
 
 const getPotentiallyUnsafeConditions = (fileKey, filePath, text) => {
@@ -59,8 +65,9 @@ const getPotentiallyUnsafeConditions = (fileKey, filePath, text) => {
 
 const specialDescMapKeys = getSpecialDescMapKeys();
 const cardEffectLogicCases = getCardEffectLogicCases();
+const expansionSwitchCases = getExpansionSwitchCases();
 const missingLogicCases = [...cardEffectLogicCases]
-  .filter((key) => !specialDescMapKeys.has(key))
+  .filter((key) => !specialDescMapKeys.has(key) && !expansionSwitchCases.has(key))
   .sort((a, b) => a.localeCompare(b, 'ja'));
 
 const unsafeConditions = [

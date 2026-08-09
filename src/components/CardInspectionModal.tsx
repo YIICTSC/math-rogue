@@ -1,7 +1,7 @@
 import React from 'react';
 import { X } from 'lucide-react';
 import { Card as ICard, LanguageMode } from '../types';
-import { buildEnglishCardDescription, buildEnglishCardName, trans } from '../utils/textUtils';
+import { buildEnglishCardDescription, buildEnglishCardName, buildHiraganaCardDescription, trans } from '../utils/textUtils';
 import Card, { KEYWORD_DEFINITIONS } from './Card';
 import { toAge9BattleText, transBattle } from '../utils/ageRatingCopy';
 
@@ -26,6 +26,7 @@ const getCardKeywords = (card: ICard) => {
 
 const getProcessedDescription = (card: ICard, languageMode: LanguageMode) => {
   if (languageMode === 'ENGLISH') return toAge9BattleText(buildEnglishCardDescription(card), languageMode);
+  if (languageMode === 'HIRAGANA') return toAge9BattleText(buildHiraganaCardDescription(card), languageMode);
 
   let desc = trans(card.description, languageMode);
   if (card.magicBoostedEffectText) return desc;

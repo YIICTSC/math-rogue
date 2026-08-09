@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { Card as CardType, CardType as EnumCardType, LanguageMode } from '../types';
 import PixelSprite from './PixelSprite';
 import EnemyIllustration from './EnemyIllustration';
-import { buildEnglishCardDescription, buildEnglishCardName, getEnglishFamiliarName, trans } from '../utils/textUtils';
+import { buildEnglishCardDescription, buildEnglishCardName, buildHiraganaCardDescription, getEnglishFamiliarName, trans } from '../utils/textUtils';
 import { getAge9CardArtAlias, getCardIllustrationPaths } from '../utils/cardIllustration';
 import { createEnemyIllustrationRef, getStatusCategoryLabel, getStatusCategoryClass, parseEnemyIllustrationRef } from '../utils/cardUtils';
 import { assetUrl } from '../utils/assetPaths';
@@ -505,7 +505,11 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled, onInspect, languag
   };
 
   const renderDescription = () => {
-    const rawDesc = languageMode === 'ENGLISH' ? buildEnglishCardDescription(card) : trans(card.description, languageMode);
+    const rawDesc = languageMode === 'ENGLISH'
+      ? buildEnglishCardDescription(card)
+      : languageMode === 'HIRAGANA'
+        ? buildHiraganaCardDescription(card)
+        : card.description;
     const desc = toAge9BattleText(rawDesc, languageMode);
     const textClassName = card.holographic ? 'text-cyan-100 font-bold' : card.upgraded ? 'text-green-300 font-bold' : '';
     if (!card.magicBoostedEffectText) {
