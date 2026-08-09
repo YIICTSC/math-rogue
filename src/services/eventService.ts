@@ -1199,10 +1199,14 @@ export const generateEvent = (
                 { label: "写し取る", text: "危ない部分だけ抜き書きする", action: () => {
                     const roll = Math.random();
                     if (roll < 0.34) {
-                        const pool = Object.values(CARDS_LIBRARY).filter(c => c.rarity === 'RARE');
+                        const pool = Object.values(CARDS_LIBRARY).filter(c => c.rarity === 'RARE' && isCardAvailable(c, unlockedCardNames));
                         const pick = pool[Math.floor(Math.random() * pool.length)];
-                        setGameState(prev => ({ ...prev, player: addCardWithEventRelics(prev.player, { ...pick, id: `book-copy-${Date.now()}` } as Card) }));
-                        setEventResultLog(trans(`禁書の知識を抜き出した。「${pick.name}」を入手。`, languageMode));
+                        if (pick) {
+                            setGameState(prev => ({ ...prev, player: addCardWithEventRelics(prev.player, { ...pick, id: `book-copy-${Date.now()}` } as Card) }));
+                            setEventResultLog(trans(`禁書の知識を抜き出した。「${pick.name}」を入手。`, languageMode));
+                        } else {
+                            resolveMomentum("本の余韻が静かに残り、次に活きる手応えを得た。", "本の余韻が静かに残り、次に活きる手応えを得た。", true);
+                        }
                     } else if (roll < 0.67) {
                         setGameState(prev => ({ ...prev, player: { ...prev.player, maxHp: prev.player.maxHp + 2, currentHp: prev.player.currentHp + 2 } }));
                         setEventResultLog(trans("知識が自信になった。最大HP+2。", languageMode));
@@ -2408,9 +2412,11 @@ export const generateEvent = (
                     const roll = Math.random();
                     if (roll < 0.34) {
                         setGameState(prev => {
-                            const keys = Object.keys(CARDS_LIBRARY).filter(k => CARDS_LIBRARY[k].rarity === 'RARE');
+                            const keys = Object.keys(CARDS_LIBRARY).filter(k => CARDS_LIBRARY[k].rarity === 'RARE' && isCardAvailable(CARDS_LIBRARY[k] as Card, unlockedCardNames));
                             const card = CARDS_LIBRARY[keys[Math.floor(Math.random() * keys.length)]];
-                            return { ...prev, player: addCardWithEventRelics(prev.player, { ...card, id: `mat-rare-${Date.now()}` } as Card) };
+                            return card
+                                ? { ...prev, player: addCardWithEventRelics(prev.player, { ...card, id: `mat-rare-${Date.now()}` } as Card) }
+                                : prev;
                         });
                         setEventResultLog(trans("隠しレアカードを発見した！", languageMode));
                     } else if (roll < 0.67) {
@@ -6604,9 +6610,9 @@ export const generateEvent = (
                             const deck = [...prev.player.deck];
                             if (deck.length === 0) return prev;
                             const idx = Math.floor(Math.random() * deck.length);
-                            const pool = Object.values(CARDS_LIBRARY).filter(c => c.rarity === 'UNCOMMON');
+                            const pool = Object.values(CARDS_LIBRARY).filter(c => c.rarity === 'UNCOMMON' && isCardAvailable(c, unlockedCardNames));
                             const pick = pool[Math.floor(Math.random() * pool.length)];
-                            deck[idx] = { ...pick, id: `chef-new-${Date.now()}` } as Card;
+                            if (pick) deck[idx] = { ...pick, id: `chef-new-${Date.now()}` } as Card;
                             return { ...prev, player: { ...prev.player, deck } };
                         });
                         setEventResultLog(trans("新しいメニューがひらめいた。\nカード1枚が別のカードに変化した。", languageMode));

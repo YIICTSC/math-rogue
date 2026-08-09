@@ -12643,6 +12643,12 @@ const App: React.FC = () => {
         const rewardPrefix = `${rewardScope}-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
         const getRewardCardTemplateKey = (card: ICard) => card.originalNames?.[0] || card.name || card.id;
         const pickedCardTemplateIds = new Set<string>();
+        const unlockedCardNames = new Set(storageService.getUnlockedCards().map(name => name.trim()));
+        // 追加カードのうち、通常プールでは除外される特殊カードにも、
+        // アンロック後に通常報酬から入手できる経路を用意する。
+        const expansionSpecialRewardCards = Object.values(ADDITIONAL_CARDS).filter(card =>
+            card.rarity === 'SPECIAL' && unlockedCardNames.has(card.name.trim())
+        );
         const isAzukiBossReward = nodeType === NodeType.BOSS && Boolean(player.turnFlags[AZUKI_BOSS_FLAG]);
         const isDodomedesuBossReward = nodeType === NodeType.BOSS && Boolean(player.turnFlags[DODOMEDESU_BOSS_ACTIVE_FLAG]);
 
@@ -12692,15 +12698,21 @@ const App: React.FC = () => {
         const holographicRewardSlot = Math.random() < HOLOGRAPHIC_REWARD_CARD_CHANCE
             ? Math.floor(Math.random() * 3)
             : -1;
+        const expansionSpecialRewardSlot = expansionSpecialRewardCards.length > 0 && Math.random() < 0.2
+            ? Math.floor(Math.random() * 3)
+            : -1;
 
         for (let i = 0; i < 3; i++) {
-            if (baseRewardCards.length === 0 && !(isLibrarian && i === 0) && !(isGardener && i === 0)) break;
+            const isExpansionSpecialSlot = i === expansionSpecialRewardSlot;
+            if (baseRewardCards.length === 0 && !isExpansionSpecialSlot && !(isLibrarian && i === 0) && !(isGardener && i === 0)) break;
             const roll = Math.random() * 100;
             let targetRarity = 'COMMON';
             if (roll > 95) targetRarity = 'LEGENDARY'; else if (roll > 80) targetRarity = 'RARE'; else if (roll > 50) targetRarity = 'UNCOMMON';
 
             let pool;
-            if (isLibrarian && i === 0 && Math.random() < 0.7) {
+            if (isExpansionSpecialSlot) {
+                pool = expansionSpecialRewardCards;
+            } else if (isLibrarian && i === 0 && Math.random() < 0.7) {
                 pool = Object.values(LIBRARIAN_CARDS);
             } else if (isGardener && i === 0 && Math.random() < 0.7) {
                 pool = Object.values(GARDEN_SEEDS);
@@ -12716,7 +12728,9 @@ const App: React.FC = () => {
             }
 
             const uniquePool = pool.filter(card => !pickedCardTemplateIds.has(getRewardCardTemplateKey(card)));
-            const fallbackBasePool = isHighSchoolReward && i !== familiarRewardSlot && nonFamiliarCards.length > 0
+            const fallbackBasePool = isExpansionSpecialSlot
+                ? expansionSpecialRewardCards
+                : isHighSchoolReward && i !== familiarRewardSlot && nonFamiliarCards.length > 0
                 ? nonFamiliarCards
                 : (!isHighSchoolReward ? baseRewardCards : allPossibleCards);
             const fallbackUniquePool = fallbackBasePool.filter(card => !pickedCardTemplateIds.has(getRewardCardTemplateKey(card)));
