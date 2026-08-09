@@ -3,6 +3,8 @@ import { Settings, X, Volume2, Monitor, Wifi, Download } from 'lucide-react';
 import { LanguageMode } from '../types';
 import { trans } from '../utils/textUtils';
 import { AndroidAssetPackManager } from './AndroidAssetPackManager';
+import { WebAssetCacheManager } from './WebAssetCacheManager';
+import type { VisualThemeId } from '../data/visualThemes';
 
 export type BgmMode = 'STUDY' | 'NEW' | 'OLD';
 export type SettingsTab = 'AUDIO' | 'DISPLAY' | 'BATTLE' | 'COMM' | 'ASSETS';
@@ -46,6 +48,8 @@ type Props = {
   onQuitApp?: () => void;
   showCommunication?: boolean;
   showAssetDownloads?: boolean;
+  showWebAssetDownloads?: boolean;
+  visualTheme?: VisualThemeId;
   battleUiOrientation?: 'portrait' | 'landscape';
   languageMode: LanguageMode;
 };
@@ -101,13 +105,15 @@ const SettingsModal: React.FC<Props> = ({
   onQuitApp,
   showCommunication = true,
   showAssetDownloads = false,
+  showWebAssetDownloads = false,
+  visualTheme = 'elementary',
   battleUiOrientation = 'portrait',
   languageMode
 }) => {
   if (!open) return null;
   const visibleTabs = tabs.filter(t =>
     (showCommunication || t.key !== 'COMM')
-    && (showAssetDownloads || t.key !== 'ASSETS')
+    && (showAssetDownloads || showWebAssetDownloads || t.key !== 'ASSETS')
   );
   const battleUiSettingsKey = battleUiOrientation === 'landscape' ? 'battleUiLandscape' : 'battleUiPortrait';
   const activeBattleUi = settings[battleUiSettingsKey] || settings.battleUi;
@@ -262,6 +268,10 @@ const SettingsModal: React.FC<Props> = ({
 
           {showAssetDownloads && tab === 'ASSETS' && (
             <AndroidAssetPackManager languageMode={languageMode} />
+          )}
+
+          {showWebAssetDownloads && tab === 'ASSETS' && (
+            <WebAssetCacheManager languageMode={languageMode} theme={visualTheme} />
           )}
 
         </div>

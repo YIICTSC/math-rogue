@@ -2,6 +2,7 @@ import './styles.css';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import App from './App';
+import { registerWebServiceWorker } from './services/webAssetCacheService';
 
 const rootElement = document.getElementById('root');
 if (!rootElement) {
@@ -14,3 +15,5 @@ root.render(
     <App />
   </React.StrictMode>
 );
+
+void registerWebServiceWorker();

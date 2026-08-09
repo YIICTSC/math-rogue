@@ -11124,6 +11124,21 @@ export const buildEnglishCardName = (
     return `${mashup.charAt(0).toUpperCase()}${mashup.slice(1)}`;
 };
 
+Object.assign(ENGLISH_DICTIONARY, {
+    "Wi-Fi接続時に画像素材を保存すると、次回から画像の読み込みを短縮できます。": "Save image assets on Wi-Fi to shorten image loading next time.",
+    "小学校テーマの画像を保存します。": "Save the elementary-school theme images.",
+    "高校テーマの画像を保存します。": "Save the high-school theme images.",
+    "マジックテーマの画像を保存します。": "Save the magic theme images.",
+    "テーマを選んで保存": "Choose a theme to save",
+    "保存領域を保護": "Protect storage",
+    "再確認": "Check again",
+    "保存領域を保護しています。": "Storage is protected.",
+    "保存領域を保護できませんでした。": "Storage could not be protected.",
+    "中断後は同じボタンから再開できます。素材はブラウザの専用領域に保存されます。": "You can resume with the same button after an interruption. Assets are saved in the browser's dedicated storage.",
+    "更新": "Refresh",
+    "確認中": "Checking",
+});
+
 const transEventTextCore = (text: string, mode: LanguageMode): string => {
     if (mode === 'ENGLISH' && ENGLISH_DISPLAY_COPY_EXACT[text]) return ENGLISH_DISPLAY_COPY_EXACT[text];
     if (mode === 'HIRAGANA' && HIRAGANA_DISPLAY_COPY_EXACT[text]) return HIRAGANA_DISPLAY_COPY_EXACT[text];
