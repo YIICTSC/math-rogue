@@ -1,8 +1,10 @@
 
 import { Player, Enemy, Card as ICard, CardType, TargetType, VisualEffectInstance, EnemyIntentType, LanguageMode } from '../types';
 import { CARDS_LIBRARY, RELIC_LIBRARY } from '../constants';
+import { ADDITIONAL_CARDS } from '../constants1';
 import { trans } from '../utils/textUtils';
 import { getUpgradedCard } from '../utils/cardUtils';
+import { storageService } from './storageService';
 
 // ヘルパー関数: デバフの付与
 const applyDebuff = (enemy: Enemy, type: 'WEAK' | 'VULNERABLE' | 'POISON', amount: number) => {
@@ -51,6 +53,16 @@ const APP_CANONICAL_CARD_LOGIC_KEY_LIST = [
     'OUT_RAINBOW_CHASE',
 ];
 const APP_CANONICAL_CARD_LOGIC_KEYS = new Set(APP_CANONICAL_CARD_LOGIC_KEY_LIST);
+const ADDITIONAL_CARD_NAMES = new Set(Object.values(ADDITIONAL_CARDS).map(card => card.name.trim()));
+
+const getAvailableSpecialCards = () => {
+    const unlockedCardNames = new Set(storageService.getUnlockedCards().map(name => name.trim()));
+    return Object.values(CARDS_LIBRARY).filter(card =>
+        card.rarity === 'SPECIAL' &&
+        !card.isSeed &&
+        (!ADDITIONAL_CARD_NAMES.has(card.name.trim()) || unlockedCardNames.has(card.name.trim()))
+    );
+};
 
 const isHandledByAppCardLogic = (card: ICard): boolean => {
     const keys = [card.name, ...(card.originalNames ?? [])].filter(Boolean);
@@ -477,10 +489,10 @@ export const applyAdditionalCardLogic = (
 
             // --- 可愛いカード (GIRLS) ---
             case 'おとぎ話の扉': {
-                const specials = Object.values(CARDS_LIBRARY).filter(c => c.rarity === 'SPECIAL' && !c.isSeed);
+                const specials = getAvailableSpecialCards();
                 for (let i = 0; i < 3; i++) {
                     const pick = specials[Math.floor(Math.random() * specials.length)];
-                    addCardToHand(pick);
+                    if (pick) addCardToHand(pick);
                 }
                 currentLogs.push(trans("おとぎ話の扉：特別なカードを3枚生成した", languageMode));
                 nextActiveEffects.push({ id: `vfx-fairy-${Date.now()}`, type: 'BUFF', targetId: 'player' });
