@@ -3,6 +3,11 @@ import { spawn } from 'node:child_process';
 import { createServer as createNetServer } from 'node:net';
 import { existsSync, readdirSync } from 'node:fs';
 
+if (process.env.VERCEL === '1' || process.env.VERCEL === 'true') {
+  console.warn('English runtime audit skipped on Vercel because the build image does not provide a Playwright browser.');
+  process.exit(0);
+}
+
 const getAvailablePort = () => new Promise((resolve, reject) => {
   const probe = createNetServer();
   probe.unref();
