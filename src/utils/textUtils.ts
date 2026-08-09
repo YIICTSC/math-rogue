@@ -11125,6 +11125,13 @@ export const buildEnglishCardName = (
 };
 
 Object.assign(ENGLISH_DICTIONARY, {
+    "共通素材": "Shared assets",
+    "共通の画像・UI・BGM・SEを保存します。": "Save shared images, UI, BGM, and sound effects.",
+    "小学生編の画像を保存します。共通BGM・SEは共通素材に含まれます。": "Save elementary-school images. Shared BGM and sound effects are in Shared assets.",
+    "高校生編の画像・BGM・ボイスを保存します。": "Save high-school images, BGM, and voices.",
+    "マジック編の画像・BGM・ボイスを保存します。": "Save magic-theme images, BGM, and voices.",
+    "共通素材と各編の画像・音声を保存すると、次回から通信を減らせます。": "Saving shared assets and each edition's images and audio reduces network use next time.",
+    "保存する素材を選んでください": "Choose the assets to save",
     "Wi-Fi接続時に画像素材を保存すると、次回から画像の読み込みを短縮できます。": "Save image assets on Wi-Fi to shorten image loading next time.",
     "小学校テーマの画像を保存します。": "Save the elementary-school theme images.",
     "高校テーマの画像を保存します。": "Save the high-school theme images.",

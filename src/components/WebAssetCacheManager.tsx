@@ -4,24 +4,26 @@ import type { LanguageMode } from '../types';
 import type { VisualThemeId } from '../data/visualThemes';
 import { trans } from '../utils/textUtils';
 import {
-  deleteThemeAssets,
-  downloadThemeAssets,
-  getThemeCacheStats,
+  downloadAssetPack,
+  deleteAssetPack,
+  getAssetPackCacheStats,
   getWebAssetManifest,
   getWebStorageEstimate,
   isPersistentWebStorage,
   isWebAssetCacheAvailable,
   requestPersistentWebStorage,
+  type WebAssetPackId,
   type WebAssetManifest,
   type WebStorageEstimate,
   type WebThemeCacheStats,
   type WebThemeDownloadProgress,
 } from '../services/webAssetCacheService';
 
-const THEMES: Array<{ id: VisualThemeId; label: string; description: string }> = [
-  { id: 'elementary', label: '小学生編', description: '小学校テーマの画像を保存します。' },
-  { id: 'high-school', label: '高校生編', description: '高校テーマの画像を保存します。' },
-  { id: 'magic', label: 'マジック編', description: 'マジックテーマの画像を保存します。' },
+const PACKS: Array<{ id: WebAssetPackId; label: string; description: string }> = [
+  { id: 'common', label: '共通素材', description: '共通の画像・UI・BGM・SEを保存します。' },
+  { id: 'elementary', label: '小学生編', description: '小学生編の画像を保存します。共通BGM・SEは共通素材に含まれます。' },
+  { id: 'high-school', label: '高校生編', description: '高校生編の画像・BGM・ボイスを保存します。' },
+  { id: 'magic', label: 'マジック編', description: 'マジック編の画像・BGM・ボイスを保存します。' },
 ];
 
 const EMPTY_STATS: WebThemeCacheStats = { cachedFiles: 0, totalFiles: 0, cachedBytes: 0, totalBytes: 0 };
@@ -44,8 +46,9 @@ type Props = {
 
 export const WebAssetCacheManager: React.FC<Props> = ({ languageMode, theme }) => {
   const [manifest, setManifest] = useState<WebAssetManifest | null>(null);
-  const [selectedTheme, setSelectedTheme] = useState<VisualThemeId>(theme);
-  const [stats, setStats] = useState<Record<VisualThemeId, WebThemeCacheStats>>({
+  const [selectedPack, setSelectedPack] = useState<WebAssetPackId>(theme);
+  const [stats, setStats] = useState<Record<WebAssetPackId, WebThemeCacheStats>>({
+    common: EMPTY_STATS,
     elementary: EMPTY_STATS,
     'high-school': EMPTY_STATS,
     magic: EMPTY_STATS,
@@ -57,18 +60,18 @@ export const WebAssetCacheManager: React.FC<Props> = ({ languageMode, theme }) =
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const refresh = useCallback(async (nextTheme: VisualThemeId = selectedTheme) => {
+  const refresh = useCallback(async (nextPack: WebAssetPackId = selectedPack) => {
     setLoading(true);
     setError(null);
     try {
       const [nextManifest, nextStats, nextEstimate, nextPersistent] = await Promise.all([
         getWebAssetManifest(),
-        getThemeCacheStats(nextTheme),
+        getAssetPackCacheStats(nextPack),
         getWebStorageEstimate(),
         isPersistentWebStorage(),
       ]);
       setManifest(nextManifest);
-      setStats(current => ({ ...current, [nextTheme]: nextStats }));
+      setStats(current => ({ ...current, [nextPack]: nextStats }));
       setStorageEstimate(nextEstimate);
       setPersistent(nextPersistent);
     } catch (reason) {
@@ -76,30 +79,30 @@ export const WebAssetCacheManager: React.FC<Props> = ({ languageMode, theme }) =
     } finally {
       setLoading(false);
     }
-  }, [languageMode, selectedTheme]);
+  }, [languageMode, selectedPack]);
 
   useEffect(() => {
-    setSelectedTheme(theme);
+    setSelectedPack(theme);
   }, [theme]);
 
   useEffect(() => {
-    void refresh(selectedTheme);
-  }, [refresh, selectedTheme]);
+    void refresh(selectedPack);
+  }, [refresh, selectedPack]);
 
-  const selectedThemeInfo = useMemo(
-    () => THEMES.find(item => item.id === selectedTheme) || THEMES[0],
-    [selectedTheme],
+  const selectedPackInfo = useMemo(
+    () => PACKS.find(item => item.id === selectedPack) || PACKS[0],
+    [selectedPack],
   );
-  const selectedStats = stats[selectedTheme];
-  const selectedManifest = manifest?.themes[selectedTheme];
+  const selectedStats = stats[selectedPack];
+  const selectedManifest = manifest?.packs[selectedPack];
   const isDownloading = busy && progress !== null;
 
   const handleDownload = async () => {
     setBusy(true);
     setError(null);
     try {
-      const nextStats = await downloadThemeAssets(selectedTheme, setProgress);
-      setStats(current => ({ ...current, [selectedTheme]: nextStats }));
+      const nextStats = await downloadAssetPack(selectedPack, setProgress);
+      setStats(current => ({ ...current, [selectedPack]: nextStats }));
       setStorageEstimate(await getWebStorageEstimate());
       setProgress(null);
     } catch (reason) {
@@ -111,12 +114,12 @@ export const WebAssetCacheManager: React.FC<Props> = ({ languageMode, theme }) =
   };
 
   const handleDelete = async () => {
-    if (!window.confirm(trans(`${selectedThemeInfo.label}の素材を端末から削除しますか？`, languageMode))) return;
+    if (!window.confirm(trans(`${selectedPackInfo.label}を端末から削除しますか？`, languageMode))) return;
     setBusy(true);
     setError(null);
     try {
-      await deleteThemeAssets(selectedTheme);
-      setStats(current => ({ ...current, [selectedTheme]: EMPTY_STATS }));
+      await deleteAssetPack(selectedPack);
+      setStats(current => ({ ...current, [selectedPack]: EMPTY_STATS }));
       setStorageEstimate(await getWebStorageEstimate());
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : trans('削除に失敗しました。', languageMode));
@@ -138,7 +141,7 @@ export const WebAssetCacheManager: React.FC<Props> = ({ languageMode, theme }) =
         <div className="flex items-start justify-between gap-3">
           <div>
             <div className="flex items-center gap-2 font-black"><HardDrive size={16} />{trans('オフライン素材', languageMode)}</div>
-            <p className="mt-1 text-xs text-slate-300">{trans('Wi-Fi接続時に画像素材を保存すると、次回から画像の読み込みを短縮できます。', languageMode)}</p>
+            <p className="mt-1 text-xs text-slate-300">{trans('共通素材と各編の画像・音声を保存すると、次回から通信を減らせます。', languageMode)}</p>
           </div>
           {storageEstimate && storageEstimate.quota > 0 && (
             <div className="shrink-0 text-right text-xs text-cyan-100">
@@ -169,17 +172,17 @@ export const WebAssetCacheManager: React.FC<Props> = ({ languageMode, theme }) =
       )}
 
       <div className="rounded-lg border border-slate-700 bg-black/20 p-3">
-        <div className="mb-2 font-black text-cyan-100">{trans('テーマを選んで保存', languageMode)}</div>
-        <div className="grid gap-2 sm:grid-cols-3">
-          {THEMES.map(item => {
+        <div className="mb-2 font-black text-cyan-100">{trans('保存する素材を選んでください', languageMode)}</div>
+        <div className="grid gap-2 sm:grid-cols-2 lg:grid-cols-4">
+          {PACKS.map(item => {
             const itemStats = stats[item.id];
-            const itemManifest = manifest?.themes[item.id];
-            const selected = selectedTheme === item.id;
+            const itemManifest = manifest?.packs[item.id];
+            const selected = selectedPack === item.id;
             return (
               <button
                 key={item.id}
                 type="button"
-                onClick={() => setSelectedTheme(item.id)}
+                onClick={() => setSelectedPack(item.id)}
                 className={`rounded-lg border p-3 text-left transition-colors ${selected ? 'border-cyan-300 bg-cyan-950/70' : 'border-slate-600 bg-slate-900/70 hover:border-slate-400'}`}
               >
                 <div className="flex items-center gap-1.5 font-bold">
@@ -199,7 +202,7 @@ export const WebAssetCacheManager: React.FC<Props> = ({ languageMode, theme }) =
       <div className="rounded-lg border border-sky-500/40 bg-slate-950/70 p-3">
         <div className="flex items-start justify-between gap-3">
           <div>
-            <div className="font-black text-white">{trans(selectedThemeInfo.label, languageMode)}</div>
+            <div className="font-black text-white">{trans(selectedPackInfo.label, languageMode)}</div>
             <p className="mt-1 text-xs text-slate-400">{trans('中断後は同じボタンから再開できます。素材はブラウザの専用領域に保存されます。', languageMode)}</p>
           </div>
           <div className="shrink-0 text-right text-xs text-cyan-100">

@@ -7,8 +7,10 @@ export type WebAssetManifestFile = {
   size: number;
 };
 
-export type WebAssetThemeManifest = {
-  id: VisualThemeId;
+export type WebAssetPackId = 'common' | VisualThemeId;
+
+export type WebAssetPackManifest = {
+  id: WebAssetPackId;
   totalBytes: number;
   files: WebAssetManifestFile[];
 };
@@ -16,7 +18,7 @@ export type WebAssetThemeManifest = {
 export type WebAssetManifest = {
   schemaVersion: number;
   contentVersion: string;
-  themes: Record<VisualThemeId, WebAssetThemeManifest>;
+  packs: Record<WebAssetPackId, WebAssetPackManifest>;
 };
 
 export type WebThemeCacheStats = {
@@ -36,7 +38,8 @@ export type WebThemeDownloadProgress = WebThemeCacheStats & {
 };
 
 const CACHE_PREFIX = 'learning-rogue-theme-';
-const CACHE_VERSION = 'v1';
+const CACHE_VERSION = 'v2';
+const LEGACY_CACHE_VERSION = 'v1';
 const MANIFEST_PATH = 'web-asset-manifest.json';
 const MAX_CONCURRENT_DOWNLOADS = 4;
 
@@ -49,7 +52,10 @@ export const isWebAssetCacheAvailable = () => (
   && 'caches' in window
 );
 
-const getThemeCacheName = (theme: VisualThemeId) => `${CACHE_PREFIX}${theme}-${CACHE_VERSION}`;
+const getPackCacheName = (packId: WebAssetPackId) => `${CACHE_PREFIX}${packId}-${CACHE_VERSION}`;
+const getLegacyThemeCacheName = (packId: WebAssetPackId) => (
+  packId === 'common' ? null : `${CACHE_PREFIX}${packId}-${LEGACY_CACHE_VERSION}`
+);
 
 const formatError = (reason: unknown) => (
   reason instanceof Error ? reason.message : '素材の保存に失敗しました。通信状態と空き容量を確認してください。'
@@ -63,7 +69,7 @@ export const getWebAssetManifest = async (): Promise<WebAssetManifest> => {
       .then(async response => {
         if (!response.ok) throw new Error('素材一覧を取得できません');
         const manifest = await response.json() as WebAssetManifest;
-        if (manifest.schemaVersion !== 1) throw new Error('素材一覧の形式が対応外です。');
+        if (manifest.schemaVersion !== 2) throw new Error('素材一覧の形式が対応外です。');
         return manifest;
       })
       .catch(reason => {
@@ -74,21 +80,23 @@ export const getWebAssetManifest = async (): Promise<WebAssetManifest> => {
   return manifestPromise;
 };
 
-const getCache = async (theme: VisualThemeId) => {
+const getCache = async (packId: WebAssetPackId) => {
   if (!isWebAssetCacheAvailable()) throw new Error('Web版の保存領域を利用できません。');
-  return window.caches.open(getThemeCacheName(theme));
+  const legacyCacheName = getLegacyThemeCacheName(packId);
+  if (legacyCacheName) await window.caches.delete(legacyCacheName);
+  return window.caches.open(getPackCacheName(packId));
 };
 
 const getFileRequest = (file: WebAssetManifestFile) => new Request(assetUrl(file.path), { credentials: 'same-origin' });
 
-export const getThemeCacheStats = async (theme: VisualThemeId): Promise<WebThemeCacheStats> => {
+export const getAssetPackCacheStats = async (packId: WebAssetPackId): Promise<WebThemeCacheStats> => {
   const manifest = await getWebAssetManifest();
-  const themeManifest = manifest.themes[theme];
-  if (!themeManifest) throw new Error('テーマ素材が見つかりません。');
-  const cache = await getCache(theme);
+  const pack = manifest.packs[packId];
+  if (!pack) throw new Error('素材パックが見つかりません。');
+  const cache = await getCache(packId);
   let cachedFiles = 0;
   let cachedBytes = 0;
-  for (const file of themeManifest.files) {
+  for (const file of pack.files) {
     if (await cache.match(getFileRequest(file))) {
       cachedFiles += 1;
       cachedBytes += file.size;
@@ -96,9 +104,9 @@ export const getThemeCacheStats = async (theme: VisualThemeId): Promise<WebTheme
   }
   return {
     cachedFiles,
-    totalFiles: themeManifest.files.length,
+    totalFiles: pack.files.length,
     cachedBytes,
-    totalBytes: themeManifest.totalBytes,
+    totalBytes: pack.totalBytes,
   };
 };
 
@@ -130,24 +138,24 @@ export const isPersistentWebStorage = async (): Promise<boolean | null> => {
   }
 };
 
-export const downloadThemeAssets = async (
-  theme: VisualThemeId,
+export const downloadAssetPack = async (
+  packId: WebAssetPackId,
   onProgress?: (progress: WebThemeDownloadProgress) => void,
   signal?: AbortSignal,
 ): Promise<WebThemeCacheStats> => {
   const manifest = await getWebAssetManifest();
-  const themeManifest = manifest.themes[theme];
-  if (!themeManifest) throw new Error('テーマ素材が見つかりません。');
-  const cache = await getCache(theme);
+  const pack = manifest.packs[packId];
+  if (!pack) throw new Error('素材パックが見つかりません。');
+  const cache = await getCache(packId);
   const progress: WebThemeDownloadProgress = {
     cachedFiles: 0,
-    totalFiles: themeManifest.files.length,
+    totalFiles: pack.files.length,
     cachedBytes: 0,
-    totalBytes: themeManifest.totalBytes,
+    totalBytes: pack.totalBytes,
   };
   const pendingFiles: WebAssetManifestFile[] = [];
 
-  for (const file of themeManifest.files) {
+  for (const file of pack.files) {
     if (await cache.match(getFileRequest(file))) {
       progress.cachedFiles += 1;
       progress.cachedBytes += file.size;
@@ -180,14 +188,16 @@ export const downloadThemeAssets = async (
   const results = await Promise.allSettled(workers);
   const failure = results.find((result): result is PromiseRejectedResult => result.status === 'rejected');
   if (failure) throw new Error(formatError(failure.reason));
-  const completed = await getThemeCacheStats(theme);
+  const completed = await getAssetPackCacheStats(packId);
   onProgress?.(completed);
   return completed;
 };
 
-export const deleteThemeAssets = async (theme: VisualThemeId) => {
+export const deleteAssetPack = async (packId: WebAssetPackId) => {
   if (!isWebAssetCacheAvailable()) return;
-  await window.caches.delete(getThemeCacheName(theme));
+  await window.caches.delete(getPackCacheName(packId));
+  const legacyCacheName = getLegacyThemeCacheName(packId);
+  if (legacyCacheName) await window.caches.delete(legacyCacheName);
 };
 
 export const registerWebServiceWorker = async () => {
