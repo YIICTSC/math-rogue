@@ -341,11 +341,27 @@ const KanjiHandwritingInput: React.FC<KanjiHandwritingInputProps> = ({
 
   return (
     <div className="kanji-handwriting-input min-w-0 max-w-full space-y-3 overflow-y-auto rounded-xl border-4 border-cyan-500/70 bg-slate-950/80 p-3 text-left shadow-xl">
-      <div className="flex min-w-0 flex-nowrap items-center justify-between gap-2 text-sm font-black text-cyan-100">
+      <div className="flex min-w-0 flex-nowrap items-center justify-between gap-1 text-sm font-black text-cyan-100">
         <div className="flex shrink-0 items-center" aria-label={trans('手書き', languageMode)}>
           <PenLine size={18} aria-hidden="true" />
         </div>
-        <div className="flex shrink-0 items-center gap-2">
+        <div className="flex min-w-0 shrink items-center justify-end gap-1">
+          <button
+            type="button"
+            onClick={() => {
+              setStrokeOrderCheckEnabled((current) => !current);
+              setStrokeOrderFeedback(false);
+            }}
+            disabled={disabled || !engineReady}
+            aria-pressed={strokeOrderCheckEnabled}
+            aria-label={trans('書き順判定', languageMode)}
+            title={trans('書き順判定', languageMode)}
+            className={`flex shrink-0 items-center rounded border px-1.5 py-1 text-[11px] font-bold whitespace-nowrap transition-colors disabled:opacity-40 ${strokeOrderCheckEnabled
+              ? 'border-amber-300/70 bg-amber-950/60 text-amber-100 hover:bg-amber-900/70'
+              : 'border-slate-500 bg-slate-800 text-slate-300 hover:bg-slate-700'}`}
+          >
+            {trans('書き順', languageMode)}{strokeOrderCheckEnabled ? 'ON' : 'OFF'}
+          </button>
           <button
             type="button"
             onClick={() => {
@@ -366,19 +382,22 @@ const KanjiHandwritingInput: React.FC<KanjiHandwritingInputProps> = ({
             onClick={() => setTraceModeEnabled((current) => !current)}
             disabled={disabled || !engineReady}
             aria-pressed={traceModeEnabled}
-            className="flex shrink-0 items-center gap-1 rounded border border-cyan-300/60 bg-slate-800 px-2 py-1 text-xs font-bold text-cyan-100 transition-colors hover:bg-slate-700 disabled:opacity-40"
+            aria-label={trans('模写', languageMode)}
+            title={trans('模写', languageMode)}
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded border border-cyan-300/60 bg-slate-800 p-1 text-cyan-100 transition-colors hover:bg-slate-700 disabled:opacity-40"
           >
-            {traceModeEnabled ? <EyeOff size={14} /> : <Eye size={14} />}
-            {trans('模写', languageMode)}
+            {traceModeEnabled ? <EyeOff size={16} /> : <Eye size={16} />}
           </button>
           <button
             type="button"
             id="jhr-clear"
             onClick={clearCurrentCharacter}
             disabled={!engineReady || disabled}
-            className="flex shrink-0 items-center gap-1 rounded border border-slate-500 bg-slate-800 px-2 py-1 text-xs font-bold text-slate-100 shadow-lg transition-colors hover:bg-slate-700 disabled:opacity-40"
+            aria-label={trans('消去', languageMode)}
+            title={trans('消去', languageMode)}
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded border border-slate-500 bg-slate-800 p-1 text-slate-100 shadow-lg transition-colors hover:bg-slate-700 disabled:opacity-40"
           >
-            <Eraser size={13} /> {trans('消去', languageMode)}
+            <Eraser size={16} />
           </button>
         </div>
       </div>

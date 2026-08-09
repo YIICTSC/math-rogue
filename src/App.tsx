@@ -5227,10 +5227,12 @@ const App: React.FC = () => {
             }
 
             // Continuing a main-mode adventure must preserve the saved problem source.
-            // Daily assignments are offered from new problem-selection flows, but must
-            // not silently replace the user's saved mode when resuming.
-            const assignmentForContinue = shouldPrioritizeCurrentAssignment ? activeAssignment : null;
-            if (assignmentForContinue && isAssignmentDeadlineActive(assignmentForContinue)) {
+            // Only an assignment that the learner has already selected is restored here;
+            // an unselected daily assignment must not silently replace the saved mode.
+            const assignmentForContinue = activeAssignment && isAssignmentDeadlineActive(activeAssignment)
+                ? activeAssignment
+                : null;
+            if (assignmentForContinue) {
                 setAssignmentLetterSource('selection');
                 setShowAssignmentLetter(true);
                 if (assignmentForContinue.gameMode === 'CHALLENGE_ONLY') {
