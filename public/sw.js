@@ -1,5 +1,5 @@
-const SHELL_CACHE = 'learning-rogue-shell-v1';
-const RUNTIME_CACHE = 'learning-rogue-runtime-v1';
+const SHELL_CACHE = 'learning-rogue-shell-v2';
+const RUNTIME_CACHE = 'learning-rogue-runtime-v2';
 const THEME_CACHE_PREFIX = 'learning-rogue-theme-';
 
 const isSameOrigin = (url) => url.origin === self.location.origin;
@@ -19,6 +19,7 @@ self.addEventListener('install', (event) => {
       new URL('index.html', scopeUrl).href,
     ];
     await Promise.all(shellUrls.map((url) => cache.add(url).catch(() => undefined)));
+    await self.skipWaiting();
   })());
 });
 
