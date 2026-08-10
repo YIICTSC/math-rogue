@@ -3044,17 +3044,18 @@ const App: React.FC = () => {
 
         let drawCount = HAND_SIZE;
         if (p.relics.find(r => r.id === 'SNAKE_RING')) drawCount += 2;
+        if (p.relics.find(r => r.id === 'SNECKO_EYE')) drawCount += 2;
 
         for (let i = 0; i < drawCount; i++) {
             const drawn = p.drawPile.pop();
-            if (drawn) p.hand.push(drawn);
+            if (drawn) p.hand.push(randomizeCardCostForRelics(p, drawn));
         }
 
         if (p.relics.find(r => r.id === 'ENCHIRIDION')) {
             const powerPool = getFilteredCardPool(p.id).filter(c => c.type === CardType.POWER);
             if (powerPool.length > 0) {
                 const power = powerPool[Math.floor(Math.random() * powerPool.length)];
-                p.hand.push({ ...power, id: `ench-${Date.now()}`, cost: 0 });
+                p.hand.push(randomizeCardCostForRelics(p, { ...power, id: `ench-${Date.now()}`, cost: 0 }));
             }
         }
 
@@ -3062,19 +3063,23 @@ const App: React.FC = () => {
             const attacks = p.drawPile.filter(c => c.type === CardType.ATTACK);
             if (attacks.length > 0) {
                 const randomAttack = attacks[Math.floor(Math.random() * attacks.length)];
-                p.hand.push({ ...randomAttack, cost: 0, id: `whistle-${Date.now()}` });
+                p.hand.push(randomizeCardCostForRelics(p, { ...randomAttack, cost: 0, id: `whistle-${Date.now()}` }));
             } else {
-                p.hand.push({ ...CARDS_LIBRARY['STRIKE'], cost: 0, id: `whistle-fallback-${Date.now()}` });
+                p.hand.push(randomizeCardCostForRelics(p, { ...CARDS_LIBRARY['STRIKE'], cost: 0, id: `whistle-fallback-${Date.now()}` }));
             }
         }
 
         const innateCards = p.drawPile.filter(c => c.innate);
         innateCards.forEach(c => {
             p.drawPile = p.drawPile.filter(dc => dc.id !== c.id);
-            p.hand.push(c);
+            p.hand.push(randomizeCardCostForRelics(p, c));
         });
 
         applyRelicPreparationEffects(p, nodeType);
+
+        if (p.relics.find(r => r.id === 'FLASHCARD') && drawCount >= 3) {
+            p.relicCounters['FLASHCARD_READY'] = 1;
+        }
 
         p.hpLostThisTurn = 0;
         return p;
@@ -4695,13 +4700,20 @@ const App: React.FC = () => {
         return card ? { ...card } : null;
     };
 
+    const randomizeCardCostForRelics = (player: Player, card: ICard): ICard => {
+        if ((hasRelic(player, 'SNECKO_EYE') || player.powers['CONFUSED'] > 0) && card.cost >= 0) {
+            return { ...card, cost: Math.floor(Math.random() * 4) };
+        }
+        return card;
+    };
+
     // Relic effects are kept in one place so that newly added relics cannot
     // silently become description-only data.  Relic counters are deliberately
     // used for battle-local state because Player is persisted between floors.
     const addRelicDraw = (player: Player, count: number) => {
         for (let i = 0; i < count; i += 1) {
             const drawn = drawOneCard(player);
-            if (drawn) player.hand.push(drawn);
+            if (drawn) player.hand.push(randomizeCardCostForRelics(player, drawn));
         }
     };
 
@@ -4776,6 +4788,8 @@ const App: React.FC = () => {
         counter('BINDER_USED', 0);
         counter('DAMAGE_RELIC_THIS_TURN', 0);
         counter('RELIC_TURN_NUMBER', 1);
+        counter('FLASHCARD_READY', 0);
+        counter('TRANSPARENT_SHEET_READY', has('TRANSPARENT_SHEET') ? 1 : 0);
 
         if (has('BAG_OF_PREP')) {
             const skills = player.drawPile.filter(card => card.type === CardType.SKILL && !card.unplayable);
@@ -4891,6 +4905,7 @@ const App: React.FC = () => {
         let drawBonus = 0;
         let energyBonus = 0;
         if (has('DESK_CALENDAR') && turnNumber === 3) drawBonus += 2;
+        if (has('SNECKO_EYE')) drawBonus += 2;
         if (has('PENCIL_SHARPENER') && player.hand.length <= 3) drawBonus += 1;
         if (has('CHALKBOARD_CLOCK') && enemies.some(enemy => enemy.weak > 0)) drawBonus += 1;
         if (has('BLACKBOARD_ERASER') && enemies.some(enemy => enemy.weak > 0)) player.block += 4;
@@ -4922,6 +4937,9 @@ const App: React.FC = () => {
         if (has('ORIGAMI_CRANE')) player.relicCounters['ORIGAMI_CRANE_USED'] = 0;
         if (has('ERASER')) player.relicCounters['ERASER_USED'] = 0;
         if (has('MAGNET')) player.relicCounters['MAGNET_COUNT'] = 0;
+        player.relicCounters['SCHOOL_ROOF_FLAG_READY'] = has('SCHOOL_ROOF_FLAG') && player.currentHp <= player.maxHp / 2 ? 1 : 0;
+        player.relicCounters['FLASHCARD_READY'] = 0;
+        player.relicCounters['TRANSPARENT_SHEET_READY'] = has('TRANSPARENT_SHEET') ? 1 : 0;
         if (has('CONTACT_BOOK_STAMP') && player.relicCounters['DAMAGE_RELIC_THIS_TURN'] === 0) {
             const streak = (player.relicCounters['CONTACT_BOOK_STREAK'] || 0) + 1;
             player.relicCounters['CONTACT_BOOK_STREAK'] = streak;
@@ -7772,7 +7790,7 @@ const App: React.FC = () => {
                     const p = { ...prev.player };
                     let restLog = [...nextState.narrativeLog];
                     if (p.relics.find(r => r.id === 'LUXURY_FUTON')) {
-                        const heal = Math.floor(p.currentHp / 5) * 2;
+                        const heal = Math.floor(p.deck.length / 5) * 2;
                         if (heal > 0) {
                             p.currentHp = Math.min(p.maxHp, p.currentHp + heal);
                         }
@@ -8678,7 +8696,8 @@ const App: React.FC = () => {
         if (adjustedCard.type === CardType.ATTACK && actionPlayer.relicCounters['PENCIL_LEAD_ACTIVE'] === 1) {
             adjustedCard.cost = 0;
         }
-        if (adjustedCard.type === CardType.ATTACK && actionPlayer.relicCounters['SCHOOL_ROOF_FLAG_READY'] === 1) {
+        const schoolRoofFlagApplied = actionPlayer.relicCounters['SCHOOL_ROOF_FLAG_READY'] === 1;
+        if (schoolRoofFlagApplied) {
             adjustedCard.cost = 0;
         }
         if (adjustedCard.type === CardType.ATTACK && (actionPlayer.relicCounters['RULER_CASE_DAMAGE'] || 0) > 0) {
@@ -8687,10 +8706,14 @@ const App: React.FC = () => {
         if (adjustedCard.type === CardType.SKILL && hasRelic(actionPlayer, 'PEN_ROLL') && actionPlayer.hand.length >= 4) {
             adjustedCard.block = (adjustedCard.block || 0) + 2;
         }
-        if (adjustedCard.type === CardType.SKILL && hasRelic(actionPlayer, 'TRANSPARENT_SHEET') && actionPlayer.hand.length >= 5) {
+        const transparentSheetApplied = adjustedCard.type === CardType.SKILL
+            && actionPlayer.relicCounters['TRANSPARENT_SHEET_READY'] === 1
+            && actionPlayer.hand.length >= 5;
+        if (transparentSheetApplied) {
             adjustedCard.block = (adjustedCard.block || 0) + 3;
         }
-        if (adjustedCard.type === CardType.SKILL && actionPlayer.relicCounters['FLASHCARD_READY'] === 1) {
+        const flashcardApplied = adjustedCard.type === CardType.SKILL && actionPlayer.relicCounters['FLASHCARD_READY'] === 1;
+        if (flashcardApplied) {
             adjustedCard.block = (adjustedCard.block || 0) + 4;
         }
         if (actionPlayer.relicCounters[`HANDWRITING_${adjustedCard.id}`] === 1) {
@@ -8984,7 +9007,7 @@ const App: React.FC = () => {
                     p.relicCounters['INK_BOTTLE_COUNT'] = 0;
                     const drawn = drawOneCard(p);
                     if (drawn) {
-                        p.hand.push(drawn);
+                        p.hand.push(randomizeCardCostForRelics(p, drawn));
                         currentLogs.push(trans("インク瓶：カードを1枚引いた", languageMode));
                     }
                 } else {
@@ -9019,8 +9042,10 @@ const App: React.FC = () => {
                 delete p.relicCounters['ERASER_CAP_READY'];
                 delete p.relicCounters['TEXTBOOK_READY'];
                 delete p.relicCounters['DUAL_PENCIL_SKILL_READY'];
+                if (transparentSheetApplied) delete p.relicCounters['TRANSPARENT_SHEET_READY'];
+                if (flashcardApplied) delete p.relicCounters['FLASHCARD_READY'];
             }
-            delete p.relicCounters['FLASHCARD_READY'];
+            if (schoolRoofFlagApplied) delete p.relicCounters['SCHOOL_ROOF_FLAG_READY'];
             delete p.relicCounters['NEXT_CARD_EFFECT_BONUS'];
             if (p.cardsPlayedThisTurn === 1) delete p.relicCounters['TEXTBOOK_READY'];
 
@@ -10378,7 +10403,7 @@ const App: React.FC = () => {
             delete p.relicCounters['THREE_COLOR_RIBBON_RETAIN'];
             let drawCount = HAND_SIZE + (p.powers['TOOLS_OF_THE_TRADE'] ? 1 : 0) + p.nextTurnDraw + drawBonus;
             drawCount = Math.max(0, Math.floor(drawCount));
-            if (hasRelic(p, 'FLASHCARD') && drawCount >= 3) p.relicCounters['FLASHCARD_READY'] = 1;
+            p.relicCounters['FLASHCARD_READY'] = hasRelic(p, 'FLASHCARD') && drawCount >= 3 ? 1 : 0;
             if (hasRelic(p, 'DUAL_PENCIL')) {
                 p.relicCounters['DUAL_PENCIL_ATTACK_READY'] = 1;
                 p.relicCounters['DUAL_PENCIL_SKILL_READY'] = 1;
@@ -10392,7 +10417,7 @@ const App: React.FC = () => {
                 }
                 const drawnCard = newDrawPile.pop();
                 if (drawnCard) {
-                    const card = { ...drawnCard };
+                    const card = randomizeCardCostForRelics(p, drawnCard);
                     if (card.type === CardType.CURSE && p.relicCounters['CORRECTION_TAPE_READY'] === 1) {
                         p.relicCounters['CORRECTION_TAPE_READY'] = 0;
                         i -= 1;
@@ -10401,9 +10426,6 @@ const App: React.FC = () => {
                     if (card.name === '虚無' || card.name === 'VOID' || card.originalNames?.includes('虚無') || card.originalNames?.includes('VOID')) {
                         p.currentEnergy = Math.max(0, p.currentEnergy - 1);
                         p.floatingText = { id: `void-turn-${Date.now()}-${i}`, text: '-1 Energy', color: 'text-red-500', iconType: 'zap' };
-                    }
-                    if ((p.relics.find(r => r.id === 'SNECKO_EYE') || p.powers['CONFUSED'] > 0) && card.cost >= 0) {
-                        card.cost = Math.floor(Math.random() * 4);
                     }
                     newHand.push(card);
                     if (p.powers['EVOLVE'] && (card.type === CardType.STATUS || card.type === CardType.CURSE)) {
@@ -10416,13 +10438,10 @@ const App: React.FC = () => {
                             }
                             const extraCardRaw = newDrawPile.pop();
                             if (extraCardRaw) {
-                                const extraCard = { ...extraCardRaw };
+                                const extraCard = randomizeCardCostForRelics(p, extraCardRaw);
                                 if (extraCard.name === '虚無' || extraCard.name === 'VOID') {
                                     p.currentEnergy = Math.max(0, p.currentEnergy - 1);
                                     p.floatingText = { id: `void-evolve-${Date.now()}-${k}`, text: '-1 Energy', color: 'text-red-500', iconType: 'zap' };
-                                }
-                                if ((p.relics.find(r => r.id === 'SNECKO_EYE') || p.powers['CONFUSED'] > 0) && extraCard.cost >= 0) {
-                                    extraCard.cost = Math.floor(Math.random() * 4);
                                 }
                                 newHand.push(extraCard);
                             }
@@ -10472,15 +10491,9 @@ const App: React.FC = () => {
             if (!p.powers['BARRICADE']) {
                 p.block = 0;
             }
-            if (hasRelic(p, 'ORICHALCUM') && p.block === 0) p.block = 6;
             if (hasRelic(p, 'ORNAMENTAL_FAN') && p.relicCounters['ORNAMENTAL_FAN_BLOCK'] > 0) {
                 p.block += p.relicCounters['ORNAMENTAL_FAN_BLOCK'];
                 delete p.relicCounters['ORNAMENTAL_FAN_BLOCK'];
-            }
-            if (hasRelic(p, 'THREE_WAY_RULER')) {
-                [CardType.ATTACK, CardType.SKILL, CardType.POWER].forEach(type => {
-                    if (!p.typesPlayedThisTurn.includes(type)) p.block += 2;
-                });
             }
             p.hand = newHand;
             p.drawPile = newDrawPile;
@@ -10627,9 +10640,7 @@ const App: React.FC = () => {
                 delete p.relicCounters['THREE_COLOR_RIBBON_RETAIN'];
             }
             const retainedCards = p.hand.filter(card => retainedIds.has(card.id));
-            retainedCards.forEach(card => {
-                if (hasRelic(p, 'STAPLER')) card.cost = 0;
-            });
+            if (hasRelic(p, 'STAPLER') && retainedCards[0]) retainedCards[0].cost = 0;
             const discardedCards = p.hand.filter(card => !retainedIds.has(card.id));
             discardedCards.forEach(c => {
                 if (c.name === 'カンニングペーパー' || c.name === 'STRATEGIST') {
@@ -10639,6 +10650,11 @@ const App: React.FC = () => {
             if (hasRelic(p, 'ORICHALCUM') && p.block <= 0) {
                 p.block = 6;
                 newLogs.push("厚紙シールド: ブロック+6");
+            }
+            if (hasRelic(p, 'THREE_WAY_RULER')) {
+                const missingTypes = [CardType.ATTACK, CardType.SKILL, CardType.POWER]
+                    .filter(type => !p.typesPlayedThisTurn.includes(type)).length;
+                if (missingTypes > 0) p.block += missingTypes * 2;
             }
             if (p.powers['METALLICIZE']) {
                 p.block += p.powers['METALLICIZE'];
