@@ -635,6 +635,10 @@ export const applyAdditionalCardLogic = (
                     p.relics.push(relic);
                     if (relic.id === 'OLD_COIN') p.gold += 300;
                     if (relic.id === 'WAFFLE') { p.maxHp += 7; p.currentHp = p.maxHp; }
+                    if (['SOZU', 'CURSED_KEY', 'PHILOSOPHER_STONE', 'VELVET_CHOKER'].includes(relic.id)) p.maxEnergy += 1;
+                    if (relic.id === 'PREPAID_CARD') { p.gold += 150; p.relicCounters['PREPAID_CARD_NO_SKIP'] = 1; }
+                    if (relic.id === 'MATRYOSHKA') p.relicCounters['MATRYOSHKA'] = 2;
+                    if (relic.id === 'HAPPY_FLOWER') p.relicCounters['HAPPY_FLOWER'] = 0;
                     currentLogs.push(trans(`地図の通りにお宝「${relic.name}」を発見！`, languageMode));
                     nextActiveEffects.push({ id: `vfx-map-relic-${Date.now()}`, type: 'BUFF', targetId: 'player' });
                 }

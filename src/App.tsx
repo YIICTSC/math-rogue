@@ -2995,8 +2995,11 @@ const App: React.FC = () => {
         if (p.relics.find(r => r.id === 'HACHIMAKI')) p.powers['DEXTERITY'] = (p.powers['DEXTERITY'] || 0) + 1;
         if (p.relics.find(r => r.id === 'SEED_PACK')) p.powers['THORNS'] = (p.powers['THORNS'] || 0) + 3;
         if (p.relics.find(r => r.id === 'HOLY_WATER')) p.currentEnergy += 1;
+        if (p.relicCounters['ANCIENT_TEA_SET_ACTIVE'] === 1) {
+            p.currentEnergy += 2;
+            delete p.relicCounters['ANCIENT_TEA_SET_ACTIVE'];
+        }
         if (p.relics.find(r => r.id === 'ANCHOR')) p.block += 10;
-        if (p.relics.find(r => r.id === 'LANTERN')) p.currentEnergy += 1;
         if (p.relics.find(r => r.id === 'BRONZE_SCALES')) p.powers['THORNS'] = (p.powers['THORNS'] || 0) + 3;
         if (p.relics.find(r => r.id === 'BLOOD_VIAL')) p.currentHp = Math.min(p.maxHp, p.currentHp + 2);
         if (p.relics.find(r => r.id === 'BIG_LADLE')) {
@@ -3040,7 +3043,6 @@ const App: React.FC = () => {
         syncRedSkullState(p);
 
         let drawCount = HAND_SIZE;
-        if (p.relics.find(r => r.id === 'BAG_OF_PREP') || p.relics.find(r => r.id === 'BAG_OF_PREPARATION')) drawCount += 2;
         if (p.relics.find(r => r.id === 'SNAKE_RING')) drawCount += 2;
 
         for (let i = 0; i < drawCount; i++) {
@@ -3071,6 +3073,8 @@ const App: React.FC = () => {
             p.drawPile = p.drawPile.filter(dc => dc.id !== c.id);
             p.hand.push(c);
         });
+
+        applyRelicPreparationEffects(p, nodeType);
 
         p.hpLostThisTurn = 0;
         return p;
@@ -4674,6 +4678,11 @@ const App: React.FC = () => {
     }, []);
 
     const hasRelic = (player: Player, relicId: string) => player.relics.some(r => r.id === relicId);
+    const getAvailableRelicPool = (player: Player, rarities: Relic['rarity'][] = ['COMMON', 'UNCOMMON', 'RARE', 'SHOP']) => {
+        const owned = new Set(player.relics.map(relic => relic.id));
+        return Object.values(RELIC_LIBRARY).filter(relic => rarities.includes(relic.rarity) && !owned.has(relic.id));
+    };
+    const getTreasureGoldAmount = (player: Player, base: number) => base + (hasRelic(player, 'TREASURE_MAP') ? 30 : 0);
     const getPotionCapacity = (player: Player) => hasRelic(player, 'CAULDRON') ? 5 : 3;
 
     const drawOneCard = (player: Player): ICard | null => {
@@ -4684,6 +4693,416 @@ const App: React.FC = () => {
         }
         const card = player.drawPile.pop();
         return card ? { ...card } : null;
+    };
+
+    // Relic effects are kept in one place so that newly added relics cannot
+    // silently become description-only data.  Relic counters are deliberately
+    // used for battle-local state because Player is persisted between floors.
+    const addRelicDraw = (player: Player, count: number) => {
+        for (let i = 0; i < count; i += 1) {
+            const drawn = drawOneCard(player);
+            if (drawn) player.hand.push(drawn);
+        }
+    };
+
+    const addRelicSkill = (player: Player, cost = 0) => {
+        const pool = getFilteredCardPool(player.id).filter(card => card.type === CardType.SKILL && !card.unplayable);
+        const template = pool[Math.floor(Math.random() * pool.length)];
+        if (!template) return;
+        const card = { ...template, id: `relic-skill-${Date.now()}-${Math.random()}`, cost };
+        if (player.hand.length < HAND_SIZE + 5) player.hand.push(card);
+        else player.discardPile.push(card);
+    };
+
+    const makeCardCostZero = (card: ICard): ICard => ({ ...card, cost: 0 });
+    const makeCardCostReduced = (card: ICard, amount: number): ICard => ({ ...card, cost: Math.max(0, card.cost - amount) });
+
+    const upgradeRandomCardInZones = (player: Player) => {
+        const candidates = [
+            ...player.hand,
+            ...player.drawPile,
+            ...player.discardPile,
+            ...player.deck,
+        ].filter(card => !card.upgraded);
+        const target = candidates[Math.floor(Math.random() * candidates.length)];
+        if (!target) return false;
+        const upgrade = (card: ICard) => card.id === target.id ? getUpgradedCard(card) : card;
+        player.hand = player.hand.map(upgrade);
+        player.drawPile = player.drawPile.map(upgrade);
+        player.discardPile = player.discardPile.map(upgrade);
+        player.deck = player.deck.map(upgrade);
+        return true;
+    };
+
+    const applyRelicPreparationEffects = (player: Player, nodeType: NodeType) => {
+        const has = (id: string) => hasRelic(player, id);
+        const counter = (key: string, value = 1) => { player.relicCounters[key] = value; };
+
+        counter('MORNING_FLAG_READY', has('MORNING_FLAG') ? 1 : 0);
+        counter('ERASER_CAP_READY', has('ERASER_CAP') ? 1 : 0);
+        counter('TEXTBOOK_READY', has('TEXTBOOK') ? 1 : 0);
+        counter('SCHOOL_ROOF_FLAG_READY', has('SCHOOL_ROOF_FLAG') && player.currentHp <= player.maxHp / 2 ? 1 : 0);
+        counter('INVISIBLE_INK_READY', has('INVISIBLE_INK') ? 1 : 0);
+        counter('PENCIL_LEAD_READY', 0);
+        counter('LANTERN_READY', has('LANTERN') ? 1 : 0);
+        counter('PROTRACTOR_READY', has('PROTRACTOR') ? 1 : 0);
+        counter('THERMOMETER_READY', has('THERMOMETER') ? 1 : 0);
+        counter('RAIN_COVER_READY', has('RAIN_COVER') ? 1 : 0);
+        counter('LUCKY_CHARM_READY', has('LUCKY_CHARM') ? 1 : 0);
+        counter('FIRE_DRILL_READY', has('FIRE_DRILL') ? 1 : 0);
+        counter('CORRECTION_TAPE_READY', has('CORRECTION_TAPE') ? 1 : 0);
+        counter('HOURGLASS_OF_RECESS_READY', has('HOURGLASS_OF_RECESS') ? 1 : 0);
+        counter('DIARY_DAMAGED', 0);
+        counter('KITCHEN_TIMER_DAMAGED', 0);
+        counter('VENDING_TOKEN_USED', 0);
+        counter('DESK_DRAWER_USED', 0);
+        counter('FIRST_AID_BAG_USED', 0);
+        counter('POTIONS_USED', 0);
+        counter('MINT_CASE_READY', 0);
+        counter('CONTACT_BOOK_STREAK', 0);
+        counter('HERO_BADGE_DAMAGED', 0);
+        counter('HERO_BADGE_STACK', player.relicCounters['HERO_BADGE_STACK'] || 0);
+        counter('STOPWATCH_USED', 0);
+        counter('ANIMAL_CARE_BADGE_HEALS', 0);
+        counter('WORM_BOX_GOLD', 0);
+        counter('SCIENCE_BEAKER_COUNT', 0);
+        counter('WHITE_CHALK_USED', 0);
+        counter('CHALK_USED', 0);
+        counter('ORIGAMI_CRANE_USED', 0);
+        counter('ERASER_USED', 0);
+        counter('MAGNET_COUNT', 0);
+        counter('ORIGAMI_CRANE_USED', 0);
+        counter('ERASER_USED', 0);
+        counter('BINDER_USED', 0);
+        counter('DAMAGE_RELIC_THIS_TURN', 0);
+        counter('RELIC_TURN_NUMBER', 1);
+
+        if (has('BAG_OF_PREP')) {
+            const skills = player.drawPile.filter(card => card.type === CardType.SKILL && !card.unplayable);
+            const selected = skills[Math.floor(Math.random() * skills.length)];
+            if (selected) {
+                player.drawPile = player.drawPile.filter(card => card.id !== selected.id);
+                player.hand.push({ ...selected, cost: 0 });
+            }
+        }
+        if (has('BAG_OF_PREPARATION')) {
+            const retained = player.drawPile.pop();
+            if (retained) {
+                player.hand.push(retained);
+                counter(`RETAIN_CARD_${retained.id}`, 1);
+            }
+        }
+        if (has('NAME_STAMP')) upgradeRandomCardInZones(player);
+        if (has('LATE_SLIP')) {
+            const discarded = player.hand.shift();
+            if (discarded) {
+                player.discardPile.push(discarded);
+                applyRelicDiscardEffects(player, discarded, []);
+            }
+            player.currentEnergy += 1;
+        }
+        if (has('FORBIDDEN_NOTE')) {
+            addRelicDraw(player, 3);
+            counter('FORBIDDEN_NOTE_DAZED', 1);
+        }
+        if (has('TIME_CAPSULE')) {
+            addRelicDraw(player, 3);
+            counter('TIME_CAPSULE_DISCARD', 1);
+        }
+        if (has('PRINCIPAL_SEAL')) player.currentEnergy += 2;
+        if (has('BROKEN_CLOCK')) player.currentEnergy += 2;
+        if (has('SCHOOL_DIE')) {
+            const roll = Math.floor(Math.random() * 3);
+            player.currentEnergy += roll;
+            if (roll === 0) addRelicDraw(player, 1);
+        }
+        if (has('PAPER_CROWN') && player.relics.length <= 5) player.strength += 1;
+        if (has('WEIGHT_SCALE')) player.block += Math.min(10, Math.floor(Math.max(0, player.maxHp - player.currentHp) / 5));
+        if (has('SCHOOL_EMBLEM_KEYCHAIN')) player.block += Math.floor(player.relics.length / 5);
+        if (has('FILE_FOLDER') && player.deck.length <= 15) player.block += 5;
+        if (has('TEAM_ARMLET') && (nodeType === NodeType.ELITE || nodeType === NodeType.BOSS)) player.strength += 1;
+        if (has('ZERO_POINT_TEST') && player.relicCounters['ZERO_POINT_NEXT_BATTLE'] === 1) {
+            player.strength += 3;
+            delete player.relicCounters['ZERO_POINT_NEXT_BATTLE'];
+        }
+        if (has('MAKEUP_TEST') && player.relicCounters['MAKEUP_TEST_BLOCK'] === 1) {
+            player.block += 8;
+            delete player.relicCounters['MAKEUP_TEST_BLOCK'];
+        }
+        if (player.relicCounters['HALL_PASS_DRAW'] === 1 || player.relicCounters['ANNOUNCEMENT_LETTER_DRAW'] === 1) {
+            addRelicDraw(player, 1);
+            delete player.relicCounters['HALL_PASS_DRAW'];
+            delete player.relicCounters['ANNOUNCEMENT_LETTER_DRAW'];
+        }
+        if (has('RECESS_TOKEN') && player.relicCounters['RECESS_TOKEN_ENERGY'] === 1) {
+            player.currentEnergy += 1;
+            delete player.relicCounters['RECESS_TOKEN_ENERGY'];
+        }
+        if (has('PTA_HANDOUT') && player.relicCounters['PTA_HANDOUT_ENERGY'] === 1) {
+            player.currentEnergy += 1;
+            delete player.relicCounters['PTA_HANDOUT_ENERGY'];
+        }
+        if (has('PERFECT_SCORE_CERTIFICATE') && player.relicCounters['PERFECT_SCORE_ENERGY'] === 1) {
+            player.currentEnergy += 2;
+            delete player.relicCounters['PERFECT_SCORE_ENERGY'];
+        }
+        if (has('EXTRA_HOMEWORK') && player.relicCounters['EXTRA_HOMEWORK_SHAME'] === 1 && player.hand.length > 0) {
+            const index = Math.floor(Math.random() * player.hand.length);
+            player.hand[index] = { ...CURSE_CARDS.SHAME, id: `extra-homework-shame-${Date.now()}` };
+            delete player.relicCounters['EXTRA_HOMEWORK_SHAME'];
+        }
+        if (has('PENCIL_CASE')) {
+            const types = new Set(player.hand.map(card => card.type));
+            if (types.has(CardType.ATTACK) && types.has(CardType.SKILL) && types.has(CardType.POWER)) player.currentEnergy += 1;
+        }
+        if (has('QUESTION_CARD')) {
+            const attack = player.hand.find(card => card.type === CardType.ATTACK && !card.unplayable);
+            if (attack) player.hand = player.hand.map(card => card.id === attack.id ? makeCardCostZero(card) : card);
+        }
+        if (has('NOTEBOOK') && player.drawPile.length > 0) {
+            const top = player.drawPile[player.drawPile.length - 1];
+            player.drawPile[player.drawPile.length - 1] = makeCardCostReduced(top, 1);
+        }
+        if (has('RING_NOTE') && player.hand.length > 0) {
+            const target = player.hand[Math.floor(Math.random() * player.hand.length)];
+            counter(`RETAIN_CARD_${target.id}`, 1);
+        }
+    };
+
+    const applyRelicBattleStartEnemyEffects = (player: Player, enemies: Enemy[], nodeType: NodeType) => {
+        const has = (id: string) => hasRelic(player, id);
+        if (has('CLASS_ROSTER') && enemies.length >= 3) addRelicDraw(player, 1);
+        if (has('CLASS_FLAG')) {
+            if (enemies.length === 1) player.block += 5;
+            else if (enemies.length >= 2) player.powers['DEXTERITY'] = (player.powers['DEXTERITY'] || 0) + 1;
+        }
+        if (has('SCHOOL_MAP') && enemies.some(enemy => [EnemyIntentType.ATTACK, EnemyIntentType.ATTACK_DEBUFF, EnemyIntentType.ATTACK_DEFEND, EnemyIntentType.PIERCE_ATTACK].includes(enemy.nextIntent.type))) player.block += 8;
+        if (has('SCHOOL_GATE_KEY') && nodeType === NodeType.ELITE) enemies.forEach(enemy => { enemy.weak += 1; });
+        if (has('SCHOOLBELL')) player.relicCounters['SCHOOLBELL_ACTIVE'] = 1;
+        if (has('SCIENCE_EXPERIMENT_KIT')) {
+            enemies.forEach(enemy => { enemy.poison += 2; });
+            player.currentHp = Math.max(1, player.currentHp - 2);
+            player.hpLostThisTurn = (player.hpLostThisTurn || 0) + 2;
+        }
+    };
+
+    const applyRelicTurnStartEffects = (player: Player, enemies: Enemy[], turnNumber: number, logs: string[], effects: VisualEffectInstance[]) => {
+        const has = (id: string) => hasRelic(player, id);
+        let drawBonus = 0;
+        let energyBonus = 0;
+        if (has('DESK_CALENDAR') && turnNumber === 3) drawBonus += 2;
+        if (has('PENCIL_SHARPENER') && player.hand.length <= 3) drawBonus += 1;
+        if (has('CHALKBOARD_CLOCK') && enemies.some(enemy => enemy.weak > 0)) drawBonus += 1;
+        if (has('BLACKBOARD_ERASER') && enemies.some(enemy => enemy.weak > 0)) player.block += 4;
+        if (has('SCHOOLBELL') && turnNumber === 5) enemies.forEach(enemy => { enemy.vulnerable += 1; });
+        if (has('SLEEPY_EYE') && turnNumber === 1) energyBonus += 2;
+        if (has('BROKEN_CLOCK')) energyBonus += 2;
+        if (has('CLASS_PRESIDENT_BADGE')) {
+            if (player.hand.length >= 5) player.strength += 2;
+            else player.block += 8;
+        }
+        if (has('STAR_PROJECTOR') && turnNumber % 4 === 0) {
+            enemies.forEach(enemy => { enemy.currentHp -= 8; });
+            drawBonus += 2;
+        }
+        if (has('LAST_BELL') && turnNumber === 7) enemies.forEach(enemy => { enemy.currentHp -= 30; });
+        if (has('LAST_BELL') && turnNumber < 7) energyBonus -= 1;
+        if (has('ALUMNI_PIN')) {
+            const types = new Set(player.deck.map(card => card.type));
+            if (types.size >= 4) drawBonus += 1;
+            else energyBonus += 1;
+        }
+        if (has('SLEEPY_EYE') && turnNumber === 2) player.relicCounters['SLEEPY_EYE_PENALTY'] = 1;
+        if (has('PENCIL_LEAD') && (player.relicCounters['PENCIL_LEAD_READY'] || 0) > 0) player.relicCounters['PENCIL_LEAD_ACTIVE'] = 1;
+        if (has('SCIENCE_BEAKER')) player.relicCounters['SCIENCE_BEAKER_COUNT'] = 0;
+        if (has('CHALK')) player.relicCounters['CHALK_USED'] = 0;
+        if (has('WHITE_CHALK')) player.relicCounters['WHITE_CHALK_USED'] = 0;
+        if (has('SCHOOL_MASCOT')) player.relicCounters['SCHOOL_MASCOT_USED'] = 0;
+        if (has('RAINBOW_PENCIL')) player.relicCounters['RAINBOW_PENCIL_USED'] = 0;
+        if (has('ORIGAMI_CRANE')) player.relicCounters['ORIGAMI_CRANE_USED'] = 0;
+        if (has('ERASER')) player.relicCounters['ERASER_USED'] = 0;
+        if (has('MAGNET')) player.relicCounters['MAGNET_COUNT'] = 0;
+        if (has('CONTACT_BOOK_STAMP') && player.relicCounters['DAMAGE_RELIC_THIS_TURN'] === 0) {
+            const streak = (player.relicCounters['CONTACT_BOOK_STREAK'] || 0) + 1;
+            player.relicCounters['CONTACT_BOOK_STREAK'] = streak;
+            if (streak >= 3) {
+                player.currentHp = Math.min(player.maxHp, player.currentHp + 4);
+                player.relicCounters['CONTACT_BOOK_STREAK'] = 0;
+            }
+        }
+        // Evaluate the previous turn before clearing the flag for the new turn.
+        player.relicCounters['DAMAGE_RELIC_THIS_TURN'] = 0;
+        player.relicCounters['RELIC_TURN_NUMBER'] = turnNumber;
+        if (has('PROTRACTOR')) player.relicCounters['PROTRACTOR_READY'] = 1;
+        if (has('THERMOMETER')) player.relicCounters['THERMOMETER_READY'] = 1;
+        player.relicCounters['RELIC_TURN_DRAW_BONUS'] = drawBonus;
+        player.relicCounters['RELIC_TURN_ENERGY_BONUS'] = energyBonus;
+        if (drawBonus > 0) logs.push(`レリック効果でカード+${drawBonus}`);
+        if (energyBonus > 0) effects.push({ id: `vfx-relic-energy-${Date.now()}`, type: 'BUFF', targetId: 'player' });
+    };
+
+    const applyRelicEndTurnEffects = (player: Player, enemies: Enemy[], logs: string[]) => {
+        const has = (id: string) => hasRelic(player, id);
+        if (has('RED_PENCIL') && player.attacksPlayedThisTurn === 0) player.block += 5;
+        if (has('LUNCH_BELL') && player.hand.length === 0) player.nextTurnDraw += 2;
+        if (has('CLASS_NEWSPAPER') && [CardType.ATTACK, CardType.SKILL, CardType.POWER].every(type => player.typesPlayedThisTurn.includes(type))) player.nextTurnDraw += 1;
+        if (has('KITCHEN_TIMER') && player.relicCounters['DIARY_DAMAGED'] === 0) player.nextTurnDraw += 1;
+        if (has('POCKET_CALCULATOR')) player.gold += Math.floor(player.block / 5);
+        if (has('ABACUS')) player.gold += Math.max(0, player.currentEnergy) * 2;
+        if (has('ORNAMENTAL_FAN') && player.block > 0) player.relicCounters['ORNAMENTAL_FAN_BLOCK'] = Math.floor(player.block * 0.2);
+        if (has('LUNCH_BELL') && player.hand.length === 0) logs.push('給食チャイム：次のターンに2枚ドロー');
+        if (has('SLEEPY_EYE') && player.relicCounters['SLEEPY_EYE_PENALTY'] === 1) {
+            player.currentEnergy = Math.max(0, player.currentEnergy - 1);
+            delete player.relicCounters['SLEEPY_EYE_PENALTY'];
+        }
+        if (has('DETENTION_CARD') && player.hand.length === 0) {
+            player.nextTurnEnergy += 1;
+            player.relicCounters['DETENTION_DRAW_PENALTY'] = 1;
+        }
+        if (has('BROKEN_CLOCK')) player.currentHp = Math.max(1, player.currentHp - 3);
+        if (has('TIME_CAPSULE') && player.relicCounters['TIME_CAPSULE_DISCARD'] === 1 && (player.relicCounters['RELIC_TURN_NUMBER'] || 0) === 1) {
+            player.hand.forEach(card => {
+                player.discardPile.push(card);
+                applyRelicDiscardEffects(player, card, enemies);
+            });
+            player.hand = [];
+            delete player.relicCounters['TIME_CAPSULE_DISCARD'];
+        }
+        if (has('FORBIDDEN_NOTE') && (player.relicCounters['RELIC_TURN_NUMBER'] || 0) === 1) {
+            player.discardPile.push({ ...STATUS_CARDS.DAZED, id: `forbidden-dazed-${Date.now()}` });
+            delete player.relicCounters['FORBIDDEN_NOTE_DAZED'];
+        }
+        if (has('LUNCH_TICKET') && player.relicCounters['LUNCH_TICKET_ENERGY'] === 1) delete player.relicCounters['LUNCH_TICKET_ENERGY'];
+    };
+
+    const applyRelicCardPlayEffects = (player: Player, card: ICard, enemies: Enemy[], logs: string[]) => {
+        const has = (id: string) => hasRelic(player, id);
+        if (has('LANTERN') && player.relicCounters['LANTERN_READY'] === 1) {
+            addRelicDraw(player, 1);
+            delete player.relicCounters['LANTERN_READY'];
+        }
+        if (has('FOUNTAIN_PEN') && card.upgraded && player.relicCounters['FOUNTAIN_PEN_USED'] !== 1) {
+            player.currentEnergy += 1;
+            player.relicCounters['FOUNTAIN_PEN_USED'] = 1;
+        }
+        if (has('CALLIGRAPHY_BRUSH') && card.upgraded) enemies.forEach(enemy => { enemy.currentHp -= 2; });
+        if (has('CHALK') && card.type === CardType.POWER && player.relicCounters['CHALK_USED'] === 0) {
+            enemies.forEach(enemy => { enemy.vulnerable += 1; });
+            player.relicCounters['CHALK_USED'] = 1;
+        }
+        if (has('WHITE_CHALK') && player.relicCounters['WHITE_CHALK_USED'] === 0 && [card.weak, card.vulnerable, card.poison].some(value => (value || 0) > 0)) {
+            enemies.forEach(enemy => { enemy.currentHp -= 2; });
+            player.relicCounters['WHITE_CHALK_USED'] = 1;
+        }
+        if (has('STAMP_CARD')) {
+            const count = (player.relicCounters['STAMP_CARD_COUNT'] || 0) + 1;
+            player.relicCounters['STAMP_CARD_COUNT'] = count;
+            if (count % 10 === 0) player.gold += 10;
+        }
+        if (has('SCISSORS') && player.relicCounters['SCISSORS_SKIP_REWARD'] === 1) {
+            player.gold += 5;
+            delete player.relicCounters['SCISSORS_SKIP_REWARD'];
+        }
+        if (has('CARBON_PAPER') && card.type === CardType.SKILL) {
+            const count = (player.relicCounters['CARBON_PAPER_COUNT'] || 0) + 1;
+            player.relicCounters['CARBON_PAPER_COUNT'] = count;
+            if (count % 5 === 0) {
+                const attack = player.hand.find(candidate => candidate.type === CardType.ATTACK && !candidate.upgraded);
+                if (attack) player.hand = player.hand.map(candidate => candidate.id === attack.id ? getUpgradedCard(candidate) : candidate);
+            }
+        }
+        if (has('PENCIL_LEAD') && card.type === CardType.ATTACK) {
+            const count = (player.relicCounters['PENCIL_LEAD_COUNT'] || 0) + 1;
+            player.relicCounters['PENCIL_LEAD_COUNT'] = count;
+            if (count % 5 === 0) player.relicCounters['PENCIL_LEAD_ACTIVE'] = 1;
+        }
+        if (has('RULER_CASE') && card.type === CardType.ATTACK) {
+            const previous = player.relicCounters['RULER_CASE_LAST_ATTACK'] || 0;
+            player.relicCounters['RULER_CASE_LAST_ATTACK'] = 1;
+            if (previous === 1) player.relicCounters['RULER_CASE_DAMAGE'] = 3;
+        } else if (card.type !== CardType.ATTACK) {
+            delete player.relicCounters['RULER_CASE_LAST_ATTACK'];
+            delete player.relicCounters['RULER_CASE_DAMAGE'];
+        }
+        if (has('SHURIKEN') && card.type === CardType.ATTACK) {
+            const targetKeys = Object.keys(player.relicCounters).filter(key => key.startsWith('SHURIKEN_TARGET_'));
+            if (targetKeys.length >= 2 && player.relicCounters['SHURIKEN_GAINED'] !== (player.relicCounters['RELIC_TURN_NUMBER'] || 0)) {
+                player.strength += 1;
+                player.relicCounters['SHURIKEN_GAINED'] = player.relicCounters['RELIC_TURN_NUMBER'] || 0;
+            }
+        }
+        if (has('RAINBOW_PENCIL') && player.relicCounters['RAINBOW_PENCIL_USED'] !== 1 && [CardType.ATTACK, CardType.SKILL, CardType.POWER].every(type => player.typesPlayedThisTurn.includes(type))) {
+            player.powers['DEXTERITY'] = (player.powers['DEXTERITY'] || 0) + 1;
+            player.relicCounters['RAINBOW_PENCIL_USED'] = 1;
+        }
+        if (has('HANDWRITING_SHEET')) {
+            const key = `HANDWRITING_${card.id}`;
+            player.relicCounters[key] = (player.relicCounters[key] || 0) + 1;
+            if (player.relicCounters[key] === 2) {
+                const upgraded = getUpgradedCard(card);
+                Object.assign(card, upgraded);
+                player.hand = player.hand.map(candidate => candidate.id === card.id ? upgraded : candidate);
+                player.relicCounters[key] = 0;
+            }
+        }
+        if (has('THREE_COLOR_RIBBON') && player.cardsPlayedThisTurn === 6) player.relicCounters['THREE_COLOR_RIBBON_RETAIN'] = 1;
+        if (has('STOPWATCH') && player.cardsPlayedThisTurn === 3 && player.relicCounters['STOPWATCH_USED'] !== 1) {
+            player.currentEnergy += 1;
+            player.relicCounters['STOPWATCH_USED'] = 1;
+        }
+        if (has('METRONOME')) {
+            const previousCost = player.relicCounters['METRONOME_COST'];
+            if (previousCost !== undefined && previousCost === card.cost) addRelicDraw(player, 1);
+            player.relicCounters['METRONOME_COST'] = card.cost;
+        }
+        if (has('RAIN_COVER') && player.relicCounters['RAIN_COVER_READY'] === 0) player.relicCounters['RAIN_COVER_READY'] = 1;
+    };
+
+    const applyRelicDamageTakenEffects = (player: Player, enemies: Enemy[], damage: number, didHpDamage: boolean) => {
+        if (!didHpDamage || damage <= 0) return;
+        if (hasRelic(player, 'DIARY') || hasRelic(player, 'KITCHEN_TIMER')) player.relicCounters['DIARY_DAMAGED'] = 1;
+        player.relicCounters['HERO_BADGE_DAMAGED'] = 1;
+        if (hasRelic(player, 'HOURGLASS_OF_RECESS') && player.relicCounters['HOURGLASS_OF_RECESS_READY'] === 1 && player.currentHp <= player.maxHp / 2) {
+            player.block += 12;
+            delete player.relicCounters['HOURGLASS_OF_RECESS_READY'];
+        }
+        if (hasRelic(player, 'FIRE_DRILL') && player.currentHp <= 0 && player.relicCounters['FIRE_DRILL_READY'] === 1) {
+            player.currentHp = 1;
+            player.block += 8;
+            delete player.relicCounters['FIRE_DRILL_READY'];
+        }
+        if (hasRelic(player, 'SCHOOL_MASCOT') && player.relicCounters['SCHOOL_MASCOT_USED'] !== 1) {
+            addRelicSkill(player, 0);
+            player.relicCounters['SCHOOL_MASCOT_USED'] = 1;
+        }
+        player.relicCounters['DAMAGE_RELIC_THIS_TURN'] = 1;
+    };
+
+    const applyRelicDiscardEffects = (player: Player, card: ICard, enemies: Enemy[], exhausted = false) => {
+        if (hasRelic(player, 'ORIGAMI_CRANE') && player.relicCounters['ORIGAMI_CRANE_USED'] === 0) {
+            player.block += 3;
+            player.relicCounters['ORIGAMI_CRANE_USED'] = 1;
+        }
+        if (hasRelic(player, 'CUTOUT_ART') && card.type !== CardType.POWER) player.relicCounters['NEXT_ATTACK_EXTRA_ACTIVATION'] = 1;
+        if (hasRelic(player, 'MAGNET') && player.relicCounters['MAGNET_COUNT'] < 3) {
+            const target = enemies.find(enemy => enemy.currentHp > 0);
+            if (target) {
+                target.currentHp -= 1;
+                player.relicCounters['MAGNET_COUNT'] += 1;
+            }
+        }
+        if (hasRelic(player, 'BINDER') && player.relicCounters['BINDER_USED'] === 0) {
+            // A normal discard is already in the discard pile; for an exhaust, return
+            // the first exhausted card there instead of silently losing it.
+            if (exhausted) player.discardPile.push({ ...card, id: `binder-${Date.now()}-${Math.random()}` });
+            player.relicCounters['BINDER_USED'] = 1;
+        }
+        if (hasRelic(player, 'ERASER') && player.relicCounters['ERASER_USED'] === 0 && player.discardPile.length > 0) {
+            const index = Math.floor(Math.random() * player.discardPile.length);
+            const recovered = player.discardPile.splice(index, 1)[0];
+            if (recovered && player.hand.length < HAND_SIZE + 5) player.hand.push(recovered);
+            player.relicCounters['ERASER_USED'] = 1;
+        }
     };
 
     const createFamiliarFinisherCard = (familiar: ActiveFamiliar): ICard => ({
@@ -4851,7 +5270,8 @@ const App: React.FC = () => {
 
     const addCardToDeckWithRelics = (player: Player, card: ICard, options?: { addToDiscard?: boolean }) => {
         const addToDiscard = options?.addToDiscard ?? false;
-        const base = { ...card, id: card.id || `gain-${Date.now()}-${Math.random()}` };
+        const shouldUpgrade = hasRelic(player, 'GLUE_STICK') || hasRelic(player, 'FIELD_TRIP_GUIDE');
+        const base = shouldUpgrade ? getUpgradedCard({ ...card, id: card.id || `gain-${Date.now()}-${Math.random()}` }) : { ...card, id: card.id || `gain-${Date.now()}-${Math.random()}` };
         player.deck = [...player.deck, base];
         if (addToDiscard) player.discardPile = [...player.discardPile, { ...base, id: `discard-${Date.now()}-${Math.random()}` }];
 
@@ -4868,6 +5288,13 @@ const App: React.FC = () => {
         }
     };
 
+    const addPotionToPlayer = (player: Player, potion: Potion) => {
+        if (player.potions.length >= getPotionCapacity(player)) return false;
+        player.potions = [...player.potions, potion];
+        if (hasRelic(player, 'LUNCH_MENU')) player.currentHp = Math.min(player.maxHp, player.currentHp + 3);
+        return true;
+    };
+
     const applyExtendedRelicAcquireEffects = (player: Player, relic: Relic) => {
         if (relic.id === 'DOLLYS_MIRROR') {
             player.relicCounters['DOLLYS_MIRROR_CHARGES'] = 1;
@@ -4879,7 +5306,7 @@ const App: React.FC = () => {
             if (player.potions.length < getPotionCapacity(player)) {
                 const allPotions = Object.values(POTION_LIBRARY);
                 const potion = { ...allPotions[Math.floor(Math.random() * allPotions.length)], id: `tiny-house-pot-${Date.now()}` };
-                player.potions = [...player.potions, potion];
+                addPotionToPlayer(player, potion);
             }
             const upgradeable = player.deck.filter(c => !c.upgraded);
             if (upgradeable.length > 0) {
@@ -4890,6 +5317,34 @@ const App: React.FC = () => {
         if (relic.id === 'ORRERY') {
             player.relicCounters['ORRERY_PENDING'] = 1;
         }
+        if (relic.id === 'PREPAID_CARD') {
+            player.gold += 150;
+            player.relicCounters['PREPAID_CARD_NO_SKIP'] = 1;
+        }
+        if (relic.id === 'BAG_OF_PREP' || relic.id === 'BAG_OF_PREPARATION') {
+            player.relicCounters['RELIC_START_DRAW_CONFIGURED'] = 1;
+        }
+        if (relic.id === 'SCHOOL_DIE') player.relicCounters['SCHOOL_DIE_ACQUIRED'] = 1;
+        if (relic.id === 'COMMUTER_PASS') player.relicCounters['COMMUTER_PASS_READY'] = 1;
+        if (relic.id === 'CANTEEN_COUPON') player.relicCounters['CANTEEN_COUPON_READY'] = 1;
+        if (relic.id === 'CLASSROOM_KEY') player.relicCounters['CLASSROOM_KEY_READY'] = 1;
+        if (relic.id === 'LIBRARY_PASS') player.relicCounters['LIBRARY_PASS_READY'] = 1;
+        if (relic.id === 'LUNCH_TICKET') player.relicCounters['LUNCH_TICKET_RELIC'] = 1;
+        if (relic.id === 'SECRET_STAMP') player.relicCounters['SECRET_STAMP_READY'] = 1;
+        if (relic.id === 'SLEEPING_BAG') player.relicCounters['SLEEPING_BAG_ACTIVE'] = 1;
+        if (relic.id === 'SCHOOL_ARCHIVE') player.relicCounters['SCHOOL_ARCHIVE_ACTIVE'] = 1;
+    };
+
+    const applyRelicShopAcquireEffects = (player: Player, relic: Relic) => {
+        if (relic.id === 'LIBRARY_PASS') player.relicCounters['LIBRARY_PASS_POTION_DISCOUNT'] = 1;
+        if (relic.id === 'CLASSROOM_KEY' && player.relicCounters['CLASSROOM_KEY_READY'] === 1) {
+            const allPotions = Object.values(POTION_LIBRARY);
+            if (player.potions.length < getPotionCapacity(player)) {
+                player.potions.push({ ...allPotions[Math.floor(Math.random() * allPotions.length)], id: `classroom-key-${Date.now()}` });
+            } else player.gold += 50;
+            delete player.relicCounters['CLASSROOM_KEY_READY'];
+        }
+        if (relic.id === 'SECRET_STAMP') upgradeRandomCardInZones(player);
     };
 
     const clearBigLadleTemp = (player: Player): Player => {
@@ -4962,7 +5417,7 @@ const App: React.FC = () => {
         ),
         deck: player.deck.map(restoreBattleOnlyCard)
     });
-    const buildPostBattlePlayer = (player: Player, withVictoryRecovery: boolean): Player => {
+    const buildPostBattlePlayer = (player: Player, withVictoryRecovery: boolean, nodeType?: NodeType): Player => {
         let hpRegen = 0;
         if (withVictoryRecovery) {
             if (player.relics.find(r => r.id === 'BURNING_BLOOD')) hpRegen = 6;
@@ -4971,6 +5426,77 @@ const App: React.FC = () => {
         const nextPlayer = clearBattleOnlyCardState(clearBigLadleTemp({ ...player }));
         if (withVictoryRecovery && hpRegen > 0) {
             nextPlayer.currentHp = Math.min(nextPlayer.maxHp, nextPlayer.currentHp + hpRegen);
+        }
+        if (withVictoryRecovery) {
+            const noDamage = player.relicCounters['DIARY_DAMAGED'] !== 1;
+            if (hasRelic(player, 'DIARY') && noDamage) nextPlayer.currentHp = Math.min(nextPlayer.maxHp, nextPlayer.currentHp + 5);
+            if (hasRelic(player, 'PLANT_DIARY') && player.cardsPlayedThisTurn >= 10) nextPlayer.currentHp = Math.min(nextPlayer.maxHp, nextPlayer.currentHp + 4);
+            if (hasRelic(player, 'VENDING_TOKEN') && (player.relicCounters['POTIONS_USED'] || 0) === 0) nextPlayer.gold += 20;
+            if (hasRelic(player, 'HANKO') && player.currentHp >= player.maxHp) nextPlayer.gold += 15;
+            if (hasRelic(player, 'HEALTH_RECORD') && player.maxHp - player.currentHp >= 30) nextPlayer.maxHp += 2;
+            if (hasRelic(player, 'HERO_BADGE')) {
+                if (player.relicCounters['HERO_BADGE_DAMAGED'] !== 1) {
+                    nextPlayer.maxHp += 2;
+                    nextPlayer.relicCounters['HERO_BADGE_STACK'] = (nextPlayer.relicCounters['HERO_BADGE_STACK'] || 0) + 2;
+                } else {
+                    const stack = nextPlayer.relicCounters['HERO_BADGE_STACK'] || 0;
+                    const retained = Math.floor(stack / 2);
+                    nextPlayer.maxHp = Math.max(1, nextPlayer.maxHp - (stack - retained));
+                    nextPlayer.currentHp = Math.min(nextPlayer.currentHp, nextPlayer.maxHp);
+                    nextPlayer.relicCounters['HERO_BADGE_STACK'] = retained;
+                }
+            }
+            if (hasRelic(player, 'RECESS_TOKEN')) nextPlayer.relicCounters['RECESS_TOKEN_ENERGY'] = 1;
+            if (hasRelic(player, 'EXTRA_HOMEWORK')) {
+                nextPlayer.gold += 30;
+                nextPlayer.relicCounters['EXTRA_HOMEWORK_SHAME'] = 1;
+            }
+            if (hasRelic(player, 'ENVELOPE')) {
+                const wins = (nextPlayer.relicCounters['ENVELOPE_WINS'] || 0) + 1;
+                nextPlayer.relicCounters['ENVELOPE_WINS'] = wins;
+                if (wins % 3 === 0) nextPlayer.gold += 20;
+            }
+            if (hasRelic(player, 'BIRTHDAY_CANDLE') && nodeType !== NodeType.BOSS) {
+                const wins = nextPlayer.relicCounters['BIRTHDAY_CANDLE_WINS'] || 0;
+                if (wins < 10) {
+                    nextPlayer.maxHp += 1;
+                    nextPlayer.relicCounters['BIRTHDAY_CANDLE_WINS'] = wins + 1;
+                }
+            }
+            if (hasRelic(player, 'SCHOOL_CALENDAR')) {
+                const wins = (nextPlayer.relicCounters['SCHOOL_CALENDAR_WINS'] || 0) + 1;
+                nextPlayer.relicCounters['SCHOOL_CALENDAR_WINS'] = wins;
+                if (wins % 4 === 0) nextPlayer.maxHp += 2;
+            }
+            if (hasRelic(player, 'CLUB_STAMP_CARD')) {
+                const wins = (nextPlayer.relicCounters['CLUB_STAMP_WINS'] || 0) + 1;
+                nextPlayer.relicCounters['CLUB_STAMP_WINS'] = wins;
+                if (wins % 5 === 0) {
+                    const common = getFilteredCardPool(nextPlayer.id).filter(card => card.rarity === 'COMMON' && card.type !== CardType.STATUS && card.type !== CardType.CURSE);
+                    const card = common[Math.floor(Math.random() * common.length)];
+                    if (card) addCardToDeckWithRelics(nextPlayer, { ...card, id: `club-stamp-${Date.now()}` });
+                }
+            }
+            if (hasRelic(player, 'CLUB_CARD') && nodeType === NodeType.ELITE) nextPlayer.gold += 30;
+            if (hasRelic(player, 'MEDAL_CASE') && (nodeType === NodeType.ELITE || nodeType === NodeType.BOSS)) nextPlayer.maxHp += 3;
+            if (hasRelic(player, 'GOLDEN_LUNCHBOX')) {
+                nextPlayer.gold += 50;
+                nextPlayer.maxHp = Math.max(1, nextPlayer.maxHp - 10);
+                nextPlayer.currentHp = Math.min(nextPlayer.currentHp, nextPlayer.maxHp);
+            }
+            if (hasRelic(player, 'GRADUATION_ALBUM') && nodeType === NodeType.BOSS) {
+                const targets = shuffle([...nextPlayer.deck]).slice(0, 2);
+                nextPlayer.deck = nextPlayer.deck.map(card => targets.some(target => target.id === card.id) ? getUpgradedCard(card) : card);
+            }
+            if (hasRelic(player, 'MYSTERY_RUBBER')) {
+                upgradeRandomCardInZones(nextPlayer);
+                addCardToDeckWithRelics(nextPlayer, { ...CURSE_CARDS.PAIN, id: `mystery-rubber-curse-${Date.now()}` });
+            }
+            if (hasRelic(player, 'REPORT_CARD') && noDamage) nextPlayer.relicCounters['REPORT_CARD_UPGRADE'] = 1;
+            if (hasRelic(player, 'ANNOUNCEMENT_LETTER') && nextPlayer.relicCounters['ANNOUNCEMENT_LETTER_SKIP'] === 1) {
+                nextPlayer.relicCounters['ANNOUNCEMENT_LETTER_DRAW'] = 1;
+                delete nextPlayer.relicCounters['ANNOUNCEMENT_LETTER_SKIP'];
+            }
         }
         if (withVictoryRecovery && nextPlayer.partner) {
             nextPlayer.partner = {
@@ -5014,10 +5540,11 @@ const App: React.FC = () => {
         }, extraText);
 
     useEffect(() => {
-        if (gameState.screen === GameScreen.EVENT) return;
         setGameState(prev => {
-            const p = { ...prev.player, relicCounters: { ...prev.player.relicCounters }, deck: [...prev.player.deck], potions: [...prev.player.potions], discardPile: [...prev.player.discardPile] };
+            const uniqueRelics = Array.from(new Map(prev.player.relics.map(relic => [relic.id, relic])).values());
+            const p = { ...prev.player, relics: uniqueRelics, relicCounters: { ...prev.player.relicCounters }, deck: [...prev.player.deck], potions: [...prev.player.potions], discardPile: [...prev.player.discardPile] };
             let changed = false;
+            if (uniqueRelics.length !== prev.player.relics.length) changed = true;
             if (hasRelic(p, 'DOLLYS_MIRROR') && !p.relicCounters['DOLLYS_MIRROR_INIT']) {
                 p.relicCounters['DOLLYS_MIRROR_CHARGES'] = Math.max(1, p.relicCounters['DOLLYS_MIRROR_CHARGES'] || 0);
                 p.relicCounters['DOLLYS_MIRROR_INIT'] = 1;
@@ -5038,7 +5565,6 @@ const App: React.FC = () => {
     }, [gameState.player.relics, gameState.screen]);
 
     useEffect(() => {
-        if (gameState.screen === GameScreen.EVENT) return;
         if (orreryModal || gameState.player.relicCounters['ORRERY_PENDING'] !== 1) return;
         const pool = getFilteredCardPool(gameState.player.id);
         if (pool.length === 0) return;
@@ -5076,8 +5602,16 @@ const App: React.FC = () => {
                 if (n.id === prev.currentMapNodeId) return { ...n, completed: true };
                 return n;
             });
+            const p = { ...prev.player, relicCounters: { ...prev.player.relicCounters } };
+            const completedNode = prev.map.find(node => node.id === prev.currentMapNodeId);
+            if (completedNode?.type === NodeType.EVENT) {
+                if (hasRelic(p, 'FIELD_TRIP_BADGE')) p.gold += 15;
+                if (hasRelic(p, 'SECRET_BASE_MAP')) p.currentHp = Math.min(p.maxHp, p.currentHp + 3);
+                if (hasRelic(p, 'PTA_HANDOUT')) p.relicCounters['PTA_HANDOUT_ENERGY'] = 1;
+            }
             return {
                 ...prev,
+                player: p,
                 map: newMap,
                 screen: GameScreen.MAP,
                 currentEventTitle: undefined
@@ -7169,6 +7703,7 @@ const App: React.FC = () => {
                         e.floatingText = { id: `rel-mask-${Date.now()}-${e.id}`, text: 'へろへろ', color: 'text-gray-400' };
                     });
                 }
+                applyRelicBattleStartEnemyEffects(p, enemies, node.type);
 
                 // Warm only the assets that will be visible in the next battle.
                 // The request starts before the screen state changes, while the
@@ -7314,7 +7849,7 @@ const App: React.FC = () => {
                 }
                 setShopCards(cards);
 
-                const allRelics = Object.values(RELIC_LIBRARY).filter(r => r.rarity === 'SHOP' || r.rarity === 'COMMON' || r.rarity === 'UNCOMMON' || r.rarity === 'RARE');
+                const allRelics = getAvailableRelicPool(nextState.player, ['SHOP', 'COMMON', 'UNCOMMON', 'RARE']);
                 const relicOptions = shuffle(allRelics).slice(0, 2);
                 setShopRelics(relicOptions);
 
@@ -7332,7 +7867,7 @@ const App: React.FC = () => {
                     if (tinyChestProgress >= 4) {
                         p.relicCounters['TINY_CHEST_PROGRESS'] = 0;
                         if (gameState.challengeMode === 'COOP' && coopSession) {
-                            setTreasurePools(buildCoopTreasurePools(coopSession.participants.length));
+                            setTreasurePools(buildCoopTreasurePools(coopSession.participants.length, [nextState.player, ...coopSession.participants.slice(1).map(participant => coopPlayerSnapshots[participant.peerId]).filter(Boolean) as Player[]]));
                             setCoopSession(prev => {
                                 if (!prev) return prev;
                                 const nextParticipants = prev.participants.map(participant => ({ ...participant, treasureResolved: false }));
@@ -7343,9 +7878,10 @@ const App: React.FC = () => {
                             });
                         } else {
                             const rewards: RewardItem[] = [];
-                            const allRelics = Object.values(RELIC_LIBRARY).filter(r => r.rarity === 'COMMON' || r.rarity === 'UNCOMMON' || r.rarity === 'RARE');
-                            rewards.push({ type: 'RELIC', value: shuffle([...allRelics])[0], id: `tiny-chest-relic-${Date.now()}` });
-                            rewards.push({ type: 'GOLD', value: 50 + Math.floor(Math.random() * 50), id: `tiny-chest-gold-${Date.now()}` });
+                            const allRelics = getAvailableRelicPool(p, ['COMMON', 'UNCOMMON', 'RARE']);
+                            const relic = shuffle([...allRelics])[0];
+                            if (relic) rewards.push({ type: 'RELIC', value: relic, id: `tiny-chest-relic-${Date.now()}` });
+                            rewards.push({ type: 'GOLD', value: getTreasureGoldAmount(p, 50 + Math.floor(Math.random() * 50)), id: `tiny-chest-gold-${Date.now()}` });
                             setTreasureRewards(rewards);
                         }
                         setTreasureOpened(false);
@@ -7395,7 +7931,7 @@ const App: React.FC = () => {
             } else if (node.type === NodeType.TREASURE) {
                 const p = nextState.player;
                 if (gameState.challengeMode === 'COOP' && coopSession) {
-                    setTreasurePools(buildCoopTreasurePools(coopSession.participants.length));
+                    setTreasurePools(buildCoopTreasurePools(coopSession.participants.length, [nextState.player, ...coopSession.participants.slice(1).map(participant => coopPlayerSnapshots[participant.peerId]).filter(Boolean) as Player[]]));
                     setCoopSession(prev => {
                         if (!prev) return prev;
                         const nextParticipants = prev.participants.map(participant => ({ ...participant, treasureResolved: false }));
@@ -7412,13 +7948,14 @@ const App: React.FC = () => {
                     }
 
                     const rewards: RewardItem[] = [];
-                    const allRelics = Object.values(RELIC_LIBRARY).filter(r => r.rarity === 'COMMON' || r.rarity === 'UNCOMMON' || r.rarity === 'RARE');
+                    const allRelics = getAvailableRelicPool(p, ['COMMON', 'UNCOMMON', 'RARE']);
 
-                    for (let i = 0; i < numRelics; i++) {
-                        rewards.push({ type: 'RELIC', value: shuffle([...allRelics])[0], id: `tr-relic-${Date.now()}-${i}` });
-                    }
+                    const relicChoices = shuffle([...allRelics]).slice(0, numRelics);
+                    relicChoices.forEach((relic, i) => {
+                        rewards.push({ type: 'RELIC', value: relic, id: `tr-relic-${Date.now()}-${i}` });
+                    });
 
-                    rewards.push({ type: 'GOLD', value: 50 + Math.floor(Math.random() * 50), id: `tr-gold-${Date.now()}` });
+                    rewards.push({ type: 'GOLD', value: getTreasureGoldAmount(p, 50 + Math.floor(Math.random() * 50)), id: `tr-gold-${Date.now()}` });
                     setTreasureRewards(rewards);
                 }
                 setTreasureOpened(false);
@@ -7480,14 +8017,29 @@ const App: React.FC = () => {
         }));
     };
 
-    const applyDebuff = (enemy: Enemy, type: 'WEAK' | 'VULNERABLE' | 'POISON', amount: number) => {
+    const applyDebuff = (enemy: Enemy, type: 'WEAK' | 'VULNERABLE' | 'POISON', amount: number, player?: Player, enemyCount = 1) => {
         if (enemy.artifact > 0) {
             enemy.artifact--;
             return;
         }
-        if (type === 'WEAK') enemy.weak += amount;
-        if (type === 'VULNERABLE') enemy.vulnerable += amount;
-        if (type === 'POISON') enemy.poison += amount;
+        const adjustedAmount = amount + (player && hasRelic(player, 'GYM_MEGAPHONE') && enemyCount >= 2 ? 1 : 0);
+        if (type === 'WEAK') enemy.weak += adjustedAmount;
+        if (type === 'VULNERABLE') enemy.vulnerable += adjustedAmount;
+        if (type === 'POISON') {
+            enemy.poison += adjustedAmount;
+            if (player && hasRelic(player, 'WORM_BOX')) {
+                const earned = Math.min(10, (player.relicCounters['WORM_BOX_GOLD'] || 0) + 1);
+                player.relicCounters['WORM_BOX_GOLD'] = earned;
+                if (earned > (player.relicCounters['WORM_BOX_GOLD_PAID'] || 0)) {
+                    player.gold += 1;
+                    player.relicCounters['WORM_BOX_GOLD_PAID'] = earned;
+                }
+            }
+        }
+        if (player && hasRelic(player, 'SCIENCE_BEAKER') && player.relicCounters['SCIENCE_BEAKER_COUNT'] < 5) {
+            enemy.currentHp -= 1;
+            player.relicCounters['SCIENCE_BEAKER_COUNT'] += 1;
+        }
     };
 
     const handleHandSelection = (card: ICard, coopActorPeerId?: string) => {
@@ -7510,11 +8062,13 @@ const App: React.FC = () => {
                 p.hand = p.hand.filter(c => c.id !== selectedCard.id);
                 if (mode.type === 'DISCARD') {
                     p.discardPile.push(selectedCard);
+                    applyRelicDiscardEffects(p, selectedCard, prev.enemies);
                     if (selectedCard.name === 'カンニングペーパー' || selectedCard.name === 'STRATEGIST') {
                         p.nextTurnEnergy += 2;
                         p.floatingText = { id: `strat-${Date.now()}-${Math.random()}`, text: '+2 Next Turn', color: 'text-yellow-400', iconType: 'zap' };
                     }
                 } else if (mode.type === 'EXHAUST') {
+                    applyRelicDiscardEffects(p, selectedCard, prev.enemies, true);
                     if (p.powers['FEEL_NO_PAIN']) p.block += p.powers['FEEL_NO_PAIN'];
                 }
                 const newAmount = mode.amount - 1;
@@ -7847,6 +8401,7 @@ const App: React.FC = () => {
                 p.deck = p.deck.filter(card => card.id !== selectedCardId);
                 if (removed) {
                     narrativeLog.push(`和解のパイプで「${trans(removed.name, languageMode)}」を取り除いた。`);
+                    if (hasRelic(p, 'INK_ERASER') && (removed.type === CardType.CURSE || removed.rarity === 'SPECIAL')) p.maxHp += 2;
                 }
             } else {
                 narrativeLog.push(`和解のパイプは使わなかった。`);
@@ -7861,6 +8416,13 @@ const App: React.FC = () => {
         if (gameState.screen !== GameScreen.BATTLE) return;
         if (weatherScryModal || galaxyExpressModal || goldFishModal || dreamCatcherModal) return;
         const isCoopHostRemoteAction = !!coopActorPeerId && gameState.challengeMode === 'COOP' && !!coopSession?.isHost;
+        const potionOwner = coopActorPeerId
+            ? gameState.coopBattleState?.players.find(entry => entry.peerId === coopActorPeerId)?.player
+            : gameState.player;
+        if (potionOwner && hasRelic(potionOwner, 'SOZU')) {
+            if (!isCoopHostRemoteAction) audioService.playSound('wrong');
+            return;
+        }
         if (!isCoopHostRemoteAction && gameState.challengeMode === 'COOP' && coopSession && !coopSession.isHost && coopPendingHostActionRef.current) {
             audioService.playSound('wrong');
             return;
@@ -7890,6 +8452,7 @@ const App: React.FC = () => {
             const nextActiveEffects: VisualEffectInstance[] = [];
 
             p.potions = p.potions.filter(pt => pt.id !== potion.id);
+            p.relicCounters['POTIONS_USED'] = (p.relicCounters['POTIONS_USED'] || 0) + 1;
             const target = enemies.find(e => e.id === actorSelectedEnemyId) || enemies[0];
             const drawCards = (count: number) => {
                 for (let i = 0; i < count; i++) {
@@ -7909,6 +8472,15 @@ const App: React.FC = () => {
                 newLogs.push(trans("竹とんぼでHP5回復", languageMode));
                 nextActiveEffects.push({ id: `vfx-pot-heal-${Date.now()}`, type: 'HEAL', targetId: 'player' });
             }
+            if (hasRelic(p, 'DESK_DRAWER') && p.relicCounters['DESK_DRAWER_USED'] === 0) {
+                drawCards(1);
+                p.relicCounters['DESK_DRAWER_USED'] = 1;
+            }
+            if (hasRelic(p, 'FIRST_AID_BAG') && p.relicCounters['FIRST_AID_BAG_USED'] === 0) {
+                p.block += 4;
+                p.relicCounters['FIRST_AID_BAG_USED'] = 1;
+            }
+            if (hasRelic(p, 'MINT_CASE')) p.relicCounters['MINT_CASE_READY'] = 1;
 
             if (potion.templateId === 'FIRE_POTION' && target) {
                 target.currentHp -= 20;
@@ -7928,12 +8500,12 @@ const App: React.FC = () => {
                 newLogs.push(`${trans("エナジー", languageMode)}+2`);
                 nextActiveEffects.push({ id: `vfx-pot-zap-${Date.now()}`, type: 'BUFF', targetId: 'player' });
             } else if (potion.templateId === 'WEAK_POTION' && target) {
-                applyDebuff(target, 'WEAK', 3);
+                applyDebuff(target, 'WEAK', 3, p, enemies.length);
                 newLogs.push(`${trans(target.name, languageMode)}に${trans("へろへろ", languageMode)}3を${trans("付与", languageMode)}`);
                 nextActiveEffects.push({ id: `vfx-pot-dbuff-${Date.now()}`, type: 'DEBUFF', targetId: target.id });
             } else if (potion.templateId === 'POISON_POTION') {
                 if (target) {
-                    applyDebuff(target, 'POISON', 6);
+                    applyDebuff(target, 'POISON', 6, p, enemies.length);
                     newLogs.push(`${trans(target.name, languageMode)}に${trans("ドクドク", languageMode)}6を${trans("付与", languageMode)}`);
                     nextActiveEffects.push({ id: `vfx-pot-psn-${Date.now()}`, type: 'DEBUFF', targetId: target.id, statusEffectKey: 'poison' });
                 }
@@ -7952,6 +8524,7 @@ const App: React.FC = () => {
                 const discardCount = cardsToDiscard.length;
                 cardsToDiscard.forEach(c => {
                     p.discardPile.push(c);
+                    applyRelicDiscardEffects(p, c, enemies);
                     if (c.name === 'カンニングペーパー' || c.name === 'STRATEGIST') {
                         p.nextTurnEnergy += 2;
                         p.floatingText = { id: `strat-pot-${Date.now()}`, text: '+2 Next Turn', color: 'text-yellow-400', iconType: 'zap' };
@@ -7973,7 +8546,7 @@ const App: React.FC = () => {
                 for (let i = p.potions.length; i < capacity; i++) {
                     const allPotions = Object.values(POTION_LIBRARY);
                     const randomPot = { ...allPotions[Math.floor(Math.random() * allPotions.length)], id: `entropy-${Date.now()}-${i}` };
-                    p.potions.push(randomPot);
+                    addPotionToPlayer(p, randomPot);
                 }
                 newLogs.push(trans("小箱からポーション充填", languageMode));
             } else if (potion.templateId === 'STUDY_SESSION_DRINK') {
@@ -8005,7 +8578,7 @@ const App: React.FC = () => {
                 newLogs.push('Cleanse debuffs, Draw +1');
                 nextActiveEffects.push({ id: `vfx-pot-gargle-${Date.now()}`, type: 'HEAL', targetId: 'player' });
             } else if (potion.templateId === 'CHALK_DUST_VIAL') {
-                enemies.forEach(e => applyDebuff(e, 'VULNERABLE', 2));
+                enemies.forEach(e => applyDebuff(e, 'VULNERABLE', 2, p, enemies.length));
                 newLogs.push('All enemies Vulnerable +2');
                 nextActiveEffects.push({ id: `vfx-pot-chalk-${Date.now()}`, type: 'DEBUFF', targetId: target ? target.id : 'player' });
             } else if (potion.templateId === 'TIMETABLE_ELIXIR') {
@@ -8092,13 +8665,59 @@ const App: React.FC = () => {
             audioService.playSound('wrong');
             return;
         }
-        let effectiveCost = card.cost;
-        if (actionPlayer.powers['CORRUPTION'] && card.type === CardType.SKILL) {
+        const adjustedCard: ICard = { ...card };
+        if (adjustedCard.type === CardType.ATTACK && actionPlayer.relicCounters['MORNING_FLAG_READY'] === 1) {
+            adjustedCard.cost = Math.max(0, adjustedCard.cost - 1);
+        }
+        if (adjustedCard.type === CardType.SKILL && actionPlayer.relicCounters['ERASER_CAP_READY'] === 1) {
+            adjustedCard.cost = 0;
+        }
+        if (actionPlayer.relicCounters['TEXTBOOK_READY'] === 1) {
+            adjustedCard.cost = Math.max(0, adjustedCard.cost - 1);
+        }
+        if (adjustedCard.type === CardType.ATTACK && actionPlayer.relicCounters['PENCIL_LEAD_ACTIVE'] === 1) {
+            adjustedCard.cost = 0;
+        }
+        if (adjustedCard.type === CardType.ATTACK && actionPlayer.relicCounters['SCHOOL_ROOF_FLAG_READY'] === 1) {
+            adjustedCard.cost = 0;
+        }
+        if (adjustedCard.type === CardType.ATTACK && (actionPlayer.relicCounters['RULER_CASE_DAMAGE'] || 0) > 0) {
+            adjustedCard.damage = (adjustedCard.damage || 0) + actionPlayer.relicCounters['RULER_CASE_DAMAGE'];
+        }
+        if (adjustedCard.type === CardType.SKILL && hasRelic(actionPlayer, 'PEN_ROLL') && actionPlayer.hand.length >= 4) {
+            adjustedCard.block = (adjustedCard.block || 0) + 2;
+        }
+        if (adjustedCard.type === CardType.SKILL && hasRelic(actionPlayer, 'TRANSPARENT_SHEET') && actionPlayer.hand.length >= 5) {
+            adjustedCard.block = (adjustedCard.block || 0) + 3;
+        }
+        if (adjustedCard.type === CardType.SKILL && actionPlayer.relicCounters['FLASHCARD_READY'] === 1) {
+            adjustedCard.block = (adjustedCard.block || 0) + 4;
+        }
+        if (actionPlayer.relicCounters[`HANDWRITING_${adjustedCard.id}`] === 1) {
+            Object.assign(adjustedCard, getUpgradedCard(adjustedCard));
+        }
+        if (actionPlayer.relicCounters['NEXT_CARD_EFFECT_BONUS'] === 4) {
+            adjustedCard.damage = (adjustedCard.damage || 0) + 4;
+            adjustedCard.block = (adjustedCard.block || 0) + 4;
+            adjustedCard.weak = (adjustedCard.weak || 0) + 4;
+            adjustedCard.vulnerable = (adjustedCard.vulnerable || 0) + 4;
+            adjustedCard.poison = (adjustedCard.poison || 0) + 4;
+        }
+        if (adjustedCard.type === CardType.ATTACK && actionPlayer.relicCounters['DUAL_PENCIL_ATTACK_READY'] === 1) {
+            adjustedCard.damage = (adjustedCard.damage || 0) + 2;
+        }
+        if (adjustedCard.type === CardType.SKILL && actionPlayer.relicCounters['DUAL_PENCIL_SKILL_READY'] === 1) {
+            adjustedCard.block = (adjustedCard.block || 0) + 2;
+        }
+        let effectiveCost = adjustedCard.cost;
+        if (actionPlayer.powers['CORRUPTION'] && adjustedCard.type === CardType.SKILL) {
             effectiveCost = 0;
         }
-        if (card.type === CardType.ATTACK && actionPlayer.turnFlags['NEXT_ATTACK_COST_DOWN']) {
+        if (adjustedCard.type === CardType.ATTACK && actionPlayer.turnFlags['NEXT_ATTACK_COST_DOWN']) {
             effectiveCost = Math.max(0, effectiveCost - 1);
         }
+
+        card = adjustedCard;
 
         if (actionPlayer.currentEnergy < effectiveCost && !actionPlayer.partner) return;
         if (gameState.enemies.length === 0) return;
@@ -8254,7 +8873,7 @@ const App: React.FC = () => {
             if (card.addPotion && !isGiftBoxCard) {
                 const allPotions = Object.values(POTION_LIBRARY);
                 const potion = { ...allPotions[Math.floor(Math.random() * allPotions.length)], id: `event-pot-${Date.now()}` };
-                if (p.potions.length < getPotionCapacity(p)) p.potions.push(potion);
+                addPotionToPlayer(p, potion);
                 currentLogs.push(`${trans(potion.name, languageMode)}をゲット！`);
             }
 
@@ -8312,7 +8931,7 @@ const App: React.FC = () => {
                 for (let i = 0; i < 2; i++) {
                     if (p.potions.length >= getPotionCapacity(p)) break;
                     const potion = { ...allPotions[Math.floor(Math.random() * allPotions.length)], id: `gift-pot-${Date.now()}-${i}` };
-                    p.potions.push(potion);
+                    addPotionToPlayer(p, potion);
                     currentLogs.push(`${trans(potion.name, languageMode)}をゲット！`);
                 }
             }
@@ -8380,6 +8999,30 @@ const App: React.FC = () => {
             if (card.type === CardType.ATTACK) {
                 p.attacksPlayedThisTurn++;
             }
+
+            // Consume a previously prepared ruler bonus before evaluating this
+            // attack as the next link in a consecutive-attack chain.
+            if (card.type === CardType.ATTACK && (p.relicCounters['RULER_CASE_DAMAGE'] || 0) > 0) {
+                delete p.relicCounters['RULER_CASE_DAMAGE'];
+            }
+            applyRelicCardPlayEffects(p, card, enemies, currentLogs);
+            if (card.type === CardType.ATTACK) {
+                delete p.relicCounters['MORNING_FLAG_READY'];
+                delete p.relicCounters['PENCIL_LEAD_ACTIVE'];
+                delete p.relicCounters['DUAL_PENCIL_ATTACK_READY'];
+                if (p.relicCounters['INVISIBLE_INK_READY'] === 1) {
+                    p.relicCounters['INVISIBLE_INK_ACTIVE'] = 1;
+                    delete p.relicCounters['INVISIBLE_INK_READY'];
+                }
+            }
+            if (card.type === CardType.SKILL) {
+                delete p.relicCounters['ERASER_CAP_READY'];
+                delete p.relicCounters['TEXTBOOK_READY'];
+                delete p.relicCounters['DUAL_PENCIL_SKILL_READY'];
+            }
+            delete p.relicCounters['FLASHCARD_READY'];
+            delete p.relicCounters['NEXT_CARD_EFFECT_BONUS'];
+            if (p.cardsPlayedThisTurn === 1) delete p.relicCounters['TEXTBOOK_READY'];
 
             if (p.relics.find(r => r.id === 'ORANGE_PELLETS')) {
                 if (p.typesPlayedThisTurn.includes(CardType.ATTACK) &&
@@ -8451,6 +9094,7 @@ const App: React.FC = () => {
                 const count = cardsToDiscard.length;
                 cardsToDiscard.forEach(c => {
                     p.discardPile.push(c);
+                    applyRelicDiscardEffects(p, c, enemies);
                     if (c.name === 'カンニングペーパー' || c.name === 'STRATEGIST') {
                         p.nextTurnEnergy += 2;
                         currentLogs.push(`${trans("カンニングペーパー", languageMode)}: +2 Next Turn Energy`);
@@ -8566,6 +9210,15 @@ const App: React.FC = () => {
                         if (target) targets = [target];
                     }
 
+                    if (card.type === CardType.ATTACK && p.relics.some(relic => relic.id === 'SHURIKEN')) {
+                        targets.forEach(target => { p.relicCounters[`SHURIKEN_TARGET_${target.id}`] = 1; });
+                        const distinctTargets = Object.keys(p.relicCounters).filter(key => key.startsWith('SHURIKEN_TARGET_')).length;
+                        if (distinctTargets >= 2 && p.relicCounters['SHURIKEN_GAINED'] !== (p.relicCounters['RELIC_TURN_NUMBER'] || 0)) {
+                            p.strength += 1;
+                            p.relicCounters['SHURIKEN_GAINED'] = p.relicCounters['RELIC_TURN_NUMBER'] || 0;
+                        }
+                    }
+
                     if (card.damage || card.damageBasedOnBlock || card.damagePerCardInHand || card.damagePerAttackPlayed || card.damagePerStrike || card.damagePerCardInDraw) {
                         targets.forEach(e => {
                             if (e.currentHp <= 0) return;
@@ -8605,7 +9258,7 @@ const App: React.FC = () => {
                                 damage = Math.floor(damage * 1.5);
                                 logParts.push(`x1.5(${trans("びくびく", languageMode)})`);
                             }
-                            if (p.powers['ENVENOM']) applyDebuff(e, 'POISON', p.powers['ENVENOM']);
+                            if (p.powers['ENVENOM']) applyDebuff(e, 'POISON', p.powers['ENVENOM'], p, enemies.length);
                             if (e.enemyType === 'AZUKI' && card.type === CardType.ATTACK) {
                                 damage = 0;
                                 if (act === 0 && h === 0) {
@@ -8614,9 +9267,16 @@ const App: React.FC = () => {
                                         : 'あずきは通常のアタックを遊ぶようにかわした！');
                                 }
                             }
-                            if (e.block >= damage) { e.block -= damage; damage = 0; }
+                            if (p.relicCounters['INVISIBLE_INK_ACTIVE'] === 1 && card.type === CardType.ATTACK) {
+                                p.relicCounters['INVISIBLE_INK_ACTIVE'] = 0;
+                            } else if (e.block >= damage) { e.block -= damage; damage = 0; }
                             else { damage -= e.block; e.block = 0; }
                             e.currentHp -= damage;
+                            if (e.currentHp <= 0 && e.poison > 0 && hasRelic(p, 'ANIMAL_CARE_BADGE') && p.relicCounters['ANIMAL_CARE_BADGE_HEALS'] < 3) {
+                                p.currentHp = Math.min(p.maxHp, p.currentHp + 4);
+                                p.relicCounters['ANIMAL_CARE_BADGE_HEALS'] += 1;
+                            }
+                            if (e.currentHp <= 0 && hasRelic(p, 'GYMNASIUM_FLAG')) p.relicCounters['NEXT_CARD_EFFECT_BONUS'] = 4;
                             if (!coopActorPeerId && damage > 0) storageService.saveHighestCardDamage(damage, card.name);
 
                             let finalVfx: VFXType = baseVfx as VFXType;
@@ -8934,20 +9594,20 @@ const App: React.FC = () => {
                             nextActiveEffects.push({ id: `vfx-self-dbuff-${Date.now()}`, type: 'DEBUFF', targetId: 'player', delay: hitDelay, statusEffectKey: 'vulnerable' });
                         } else {
                             targets.forEach(e => {
-                                applyDebuff(e, 'VULNERABLE', vulnerableAmount);
+                                applyDebuff(e, 'VULNERABLE', vulnerableAmount, p, enemies.length);
                                 nextActiveEffects.push({ id: `vfx-dbuff-${Date.now()}-${e.id}`, type: 'DEBUFF', targetId: e.id, delay: hitDelay, statusEffectKey: 'vulnerable' });
                             });
                         }
                     }
                     if (card.weak) targets.forEach(e => {
-                        applyDebuff(e, 'WEAK', card.weak! * magicEffectMultiplier);
+                        applyDebuff(e, 'WEAK', card.weak! * magicEffectMultiplier, p, enemies.length);
                         nextActiveEffects.push({ id: `vfx-dbuff-${Date.now()}-${e.id}`, type: 'DEBUFF', targetId: e.id, delay: hitDelay, statusEffectKey: 'weak' });
                     });
                     if (card.poison) {
                         let amt = card.poison * magicEffectMultiplier;
                         if (p.relics.find(r => r.id === 'SNAKE_SKULL')) amt += 1;
                         targets.forEach(e => {
-                            applyDebuff(e, 'POISON', amt);
+                            applyDebuff(e, 'POISON', amt, p, enemies.length);
                             nextActiveEffects.push({ id: `vfx-dbuff-p-${Date.now()}-${e.id}`, type: 'DEBUFF', targetId: e.id, delay: hitDelay, statusEffectKey: 'poison' });
                         });
                         if (h < hitsToLog) currentLogs.push(`${trans("ドクドク", languageMode)}${amt}${trans("を付与", languageMode)}`);
@@ -9240,7 +9900,7 @@ const App: React.FC = () => {
                         for (let i = 0; i < 2; i++) {
                             if (p.potions.length >= getPotionCapacity(p)) break;
                             const potion = { ...allPotions[Math.floor(Math.random() * allPotions.length)], id: `fish-catch-${Date.now()}-${i}` };
-                            p.potions.push(potion);
+                            addPotionToPlayer(p, potion);
                             currentLogs.push(`${trans(potion.name, languageMode)}をゲット！`);
                         }
                     }
@@ -9327,6 +9987,7 @@ const App: React.FC = () => {
                         cardsToScrape.forEach(c => {
                             p.hand = p.hand.filter(h => h.id !== c.id);
                             p.discardPile.push(c);
+                            applyRelicDiscardEffects(p, c, enemies);
                             if (c.name === 'カンニングペーパー' || c.name === 'STRATEGIST') {
                                 p.nextTurnEnergy += 2;
                                 currentLogs.push(`${trans("カンニングペーパー", languageMode)}: +2 Next Turn Energy`);
@@ -9398,8 +10059,6 @@ const App: React.FC = () => {
                 p.relicCounters['ATTACK_COUNT'] = (p.relicCounters['ATTACK_COUNT'] || 0) + 1;
                 if (p.relicCounters['ATTACK_COUNT'] % 3 === 0) {
                     if (p.relics.find(r => r.id === 'KUNAI')) { p.powers['DEXTERITY'] = (p.powers['DEXTERITY'] || 0) + 1; p.floatingText = { id: `kunai-${Date.now()}`, text: `${trans("カチカチ", languageMode)}+1`, color: 'text-blue-400', iconType: 'shield' }; nextActiveEffects.push({ id: `vfx-kunai-${Date.now()}`, type: 'BLOCK', targetId: 'player' }); }
-                    if (p.relics.find(r => r.id === 'SHURIKEN')) { p.strength += 1; p.floatingText = { id: `shuri-${Date.now()}`, text: `${trans("ムキムキ", languageMode)}+1`, color: 'text-red-400', iconType: 'sword' }; nextActiveEffects.push({ id: `vfx-shuri-${Date.now()}`, type: 'BUFF', targetId: 'player', statusEffectKey: 'strength' }); }
-                    if (p.relics.find(r => r.id === 'ORNAMENTAL_FAN')) { p.block += 4; p.floatingText = { id: `fan-${Date.now()}`, text: '+4 Block', color: 'text-blue-400', iconType: 'shield' }; nextActiveEffects.push({ id: `vfx-fan-${Date.now()}`, type: 'BLOCK', targetId: 'player' }); }
                     // Compass (Calipers) Effect: Draw 1 card every 3 attacks
                     if (p.relics.find(r => r.id === 'CALIPERS')) {
                         if (p.drawPile.length === 0) {
@@ -9435,7 +10094,9 @@ const App: React.FC = () => {
 
                     if (!isConsumedOnUse && !shouldExhaust && !(c.type === CardType.POWER) && !(c.promptsExhaust === 99)) {
                         p.discardPile.push(c);
+                        applyRelicDiscardEffects(p, c, enemies);
                     } else if (!isConsumedOnUse && (shouldExhaust || c.promptsExhaust === 99)) {
+                        applyRelicDiscardEffects(p, c, enemies, true);
                         if (p.powers['FEEL_NO_PAIN']) p.block += p.powers['FEEL_NO_PAIN'];
                     }
                 });
@@ -9455,7 +10116,9 @@ const App: React.FC = () => {
                 }
                 if (!isConsumedOnUse && !shouldExhaust && !(card.type === CardType.POWER) && !(card.promptsExhaust === 99)) {
                     p.discardPile.push(card);
+                    applyRelicDiscardEffects(p, card, enemies);
                 } else if (!isConsumedOnUse && (shouldExhaust || card.promptsExhaust === 99)) {
+                    applyRelicDiscardEffects(p, card, enemies, true);
                     if (p.powers['FEEL_NO_PAIN']) p.block += p.powers['FEEL_NO_PAIN'];
                 }
                 if (card.promptsDiscard) nextSelectionState = { active: true, type: 'DISCARD', amount: card.promptsDiscard, originCardId: card.id };
@@ -9477,11 +10140,13 @@ const App: React.FC = () => {
                     ) {
                         const cardsToExhaust = p.hand.filter(c => c.type !== CardType.ATTACK);
                         if (p.powers['FEEL_NO_PAIN']) p.block += p.powers['FEEL_NO_PAIN'] * cardsToExhaust.length;
+                        cardsToExhaust.forEach(c => applyRelicDiscardEffects(p, c, enemies, true));
                         p.hand = p.hand.filter(c => c.type === CardType.ATTACK);
                         currentLogs.push(trans("非攻撃カードを廃棄した", languageMode));
                     } else if (card.name === '大掃除' || card.name === 'FIEND_FIRE' || card.originalNames?.includes('大掃除') || card.originalNames?.includes('FIEND_FIRE')) {
                         const count = p.hand.length;
                         if (p.powers['FEEL_NO_PAIN']) p.block += p.powers['FEEL_NO_PAIN'] * count;
+                        p.hand.forEach(c => applyRelicDiscardEffects(p, c, enemies, true));
                         p.hand = [];
                     }
                 }
@@ -9613,6 +10278,20 @@ const App: React.FC = () => {
                 p.relicCounters['POCKETWATCH_PENDING'] = 0;
             }
 
+            p.cardsPlayedThisTurn = 0;
+            p.attacksPlayedThisTurn = 0;
+            p.typesPlayedThisTurn = [];
+            Object.keys(p.relicCounters)
+                .filter(key => key.startsWith('SHURIKEN_TARGET_'))
+                .forEach(key => delete p.relicCounters[key]);
+            applyRelicTurnStartEffects(p, prev.enemies, prev.turn + 1, currentLogs, nextActiveEffects);
+            drawBonus += p.relicCounters['RELIC_TURN_DRAW_BONUS'] || 0;
+            extraEnergy += p.relicCounters['RELIC_TURN_ENERGY_BONUS'] || 0;
+            if (p.relicCounters['DETENTION_DRAW_PENALTY'] === 1) {
+                drawBonus = Math.max(0, drawBonus - 1);
+                delete p.relicCounters['DETENTION_DRAW_PENALTY'];
+            }
+
             if (p.turnFlags['NURSE_ROOM_GEL_NEXT_BLOCK']) {
                 p.block += 8;
                 p.floatingText = { id: `nurse-gel-${Date.now()}`, text: '+8', color: 'text-blue-400', iconType: 'shield' };
@@ -9685,14 +10364,25 @@ const App: React.FC = () => {
             let newDrawPile = [...p.drawPile];
             let newDiscardPile = [...p.discardPile];
             let newHand: ICard[] = [];
-            if (p.relics.find(r => r.id === 'BOOKMARK') && p.hand.length > 0) {
-                newHand.push(p.hand[0]);
-                newDiscardPile = [...newDiscardPile, ...p.hand.slice(1)];
-            } else {
-                newDiscardPile = [...newDiscardPile, ...p.hand];
-            }
+            const retainedIds = new Set<string>();
+            if (p.relics.find(r => r.id === 'BOOKMARK') && p.hand[0]) retainedIds.add(p.hand[0].id);
+            Object.keys(p.relicCounters)
+                .filter(key => key.startsWith('RETAIN_CARD_'))
+                .forEach(key => retainedIds.add(key.replace('RETAIN_CARD_', '')));
+            if (p.relicCounters['THREE_COLOR_RIBBON_RETAIN'] === 1) p.hand.slice(0, 3).forEach(card => retainedIds.add(card.id));
+            newHand.push(...p.hand.filter(card => retainedIds.has(card.id)));
+            newDiscardPile = [...newDiscardPile, ...p.hand.filter(card => !retainedIds.has(card.id))];
+            Object.keys(p.relicCounters)
+                .filter(key => key.startsWith('RETAIN_CARD_'))
+                .forEach(key => delete p.relicCounters[key]);
+            delete p.relicCounters['THREE_COLOR_RIBBON_RETAIN'];
             let drawCount = HAND_SIZE + (p.powers['TOOLS_OF_THE_TRADE'] ? 1 : 0) + p.nextTurnDraw + drawBonus;
             drawCount = Math.max(0, Math.floor(drawCount));
+            if (hasRelic(p, 'FLASHCARD') && drawCount >= 3) p.relicCounters['FLASHCARD_READY'] = 1;
+            if (hasRelic(p, 'DUAL_PENCIL')) {
+                p.relicCounters['DUAL_PENCIL_ATTACK_READY'] = 1;
+                p.relicCounters['DUAL_PENCIL_SKILL_READY'] = 1;
+            }
             p.nextTurnDraw = 0;
             for (let i = 0; i < drawCount; i++) {
                 if (newDrawPile.length === 0) {
@@ -9703,6 +10393,11 @@ const App: React.FC = () => {
                 const drawnCard = newDrawPile.pop();
                 if (drawnCard) {
                     const card = { ...drawnCard };
+                    if (card.type === CardType.CURSE && p.relicCounters['CORRECTION_TAPE_READY'] === 1) {
+                        p.relicCounters['CORRECTION_TAPE_READY'] = 0;
+                        i -= 1;
+                        continue;
+                    }
                     if (card.name === '虚無' || card.name === 'VOID' || card.originalNames?.includes('虚無') || card.originalNames?.includes('VOID')) {
                         p.currentEnergy = Math.max(0, p.currentEnergy - 1);
                         p.floatingText = { id: `void-turn-${Date.now()}-${i}`, text: '-1 Energy', color: 'text-red-500', iconType: 'zap' };
@@ -9777,13 +10472,20 @@ const App: React.FC = () => {
             if (!p.powers['BARRICADE']) {
                 p.block = 0;
             }
+            if (hasRelic(p, 'ORICHALCUM') && p.block === 0) p.block = 6;
+            if (hasRelic(p, 'ORNAMENTAL_FAN') && p.relicCounters['ORNAMENTAL_FAN_BLOCK'] > 0) {
+                p.block += p.relicCounters['ORNAMENTAL_FAN_BLOCK'];
+                delete p.relicCounters['ORNAMENTAL_FAN_BLOCK'];
+            }
+            if (hasRelic(p, 'THREE_WAY_RULER')) {
+                [CardType.ATTACK, CardType.SKILL, CardType.POWER].forEach(type => {
+                    if (!p.typesPlayedThisTurn.includes(type)) p.block += 2;
+                });
+            }
             p.hand = newHand;
             p.drawPile = newDrawPile;
             p.discardPile = newDiscardPile;
-            p.cardsPlayedThisTurn = 0;
-            p.attacksPlayedThisTurn = 0;
             p.turnFlags = {};
-            p.typesPlayedThisTurn = [];
             p.relicCounters['ATTACK_COUNT'] = 0;
             syncRedSkullState(p);
             const selectionPeerId = prev.challengeMode === 'COOP' ? (coopActorPeerId || coopSelfPeerId) : undefined;
@@ -9911,10 +10613,24 @@ const App: React.FC = () => {
                 newLogs.push(`変身の反動でHP-${hpLoss}`);
                 nextActiveEffects.push({ id: `vfx-magic-drain-${Date.now()}`, type: 'SLASH', targetId: 'player' });
             }
+            applyRelicEndTurnEffects(p, prev.enemies, newLogs);
             if (hasRelic(p, 'POCKETWATCH')) {
                 p.relicCounters['POCKETWATCH_PENDING'] = p.cardsPlayedThisTurn <= 3 ? 1 : 0;
             }
-            const discardedCards = p.relics.find(r => r.id === 'BOOKMARK') ? p.hand.slice(1) : p.hand;
+            const retainedIds = new Set<string>();
+            if (hasRelic(p, 'BOOKMARK') && p.hand[0]) retainedIds.add(p.hand[0].id);
+            Object.keys(p.relicCounters)
+                .filter(key => key.startsWith('RETAIN_CARD_'))
+                .forEach(key => retainedIds.add(key.replace('RETAIN_CARD_', '')));
+            if (p.relicCounters['THREE_COLOR_RIBBON_RETAIN'] === 1) {
+                p.hand.slice(0, 3).forEach(card => retainedIds.add(card.id));
+                delete p.relicCounters['THREE_COLOR_RIBBON_RETAIN'];
+            }
+            const retainedCards = p.hand.filter(card => retainedIds.has(card.id));
+            retainedCards.forEach(card => {
+                if (hasRelic(p, 'STAPLER')) card.cost = 0;
+            });
+            const discardedCards = p.hand.filter(card => !retainedIds.has(card.id));
             discardedCards.forEach(c => {
                 if (c.name === 'カンニングペーパー' || c.name === 'STRATEGIST') {
                     p.nextTurnEnergy += 2;
@@ -10008,6 +10724,14 @@ const App: React.FC = () => {
                     if (defeatedByPoison > 0) {
                         p.currentHp = Math.min(p.maxHp, p.currentHp + defeatedByPoison * 2);
                         nextLogs.push(`鳥の壺: HPを${defeatedByPoison * 2}回復`);
+                    }
+                }
+                if (hasRelic(p, 'ANIMAL_CARE_BADGE')) {
+                    const defeatedByPoison = prev.enemies.filter(enemy => enemy.currentHp > 0 && enemy.poison > 0).length - nextEnemies.filter(enemy => enemy.currentHp > 0).length;
+                    const heals = Math.max(0, Math.min(3 - (p.relicCounters['ANIMAL_CARE_BADGE_HEALS'] || 0), defeatedByPoison));
+                    if (heals > 0) {
+                        p.currentHp = Math.min(p.maxHp, p.currentHp + heals * 4);
+                        p.relicCounters['ANIMAL_CARE_BADGE_HEALS'] = (p.relicCounters['ANIMAL_CARE_BADGE_HEALS'] || 0) + heals;
                     }
                 }
                 return {
@@ -10162,6 +10886,16 @@ const App: React.FC = () => {
                         if (p.powers['INTANGIBLE'] > 0) {
                             damage = 1;
                             logParts.push(`= 1(${trans("スケスケ", languageMode)})`);
+                        }
+                        if (p.relicCounters['PROTRACTOR_READY'] === 1) {
+                            damage = Math.max(0, damage - 2);
+                            delete p.relicCounters['PROTRACTOR_READY'];
+                            logParts.push('-2(分度器)');
+                        }
+                        if (p.relicCounters['THERMOMETER_READY'] === 1 && p.currentHp <= p.maxHp * 0.3) {
+                            damage = Math.max(0, damage - 2);
+                            delete p.relicCounters['THERMOMETER_READY'];
+                            logParts.push('-2(体温計)');
                         }
                         if (parrySuccess) {
                             const reflectedDmg = parryResult === 'perfect' ? damage : Math.ceil(damage * 0.5);
@@ -10409,14 +11143,28 @@ const App: React.FC = () => {
                                 newLogs.push(`${targetName}は${trans("キラキラでデバフを防いだ", languageMode)}`);
                                 return;
                             }
+                            if (target === p && hasRelic(target, 'LUCKY_CHARM') && target.relicCounters['LUCKY_CHARM_READY'] === 1) {
+                                target.relicCounters['LUCKY_CHARM_READY'] = 0;
+                                newLogs.push(`${targetName}のお守りがデバフを無効化した`);
+                                return;
+                            }
+                            let effectiveDebuffAmount = debuffAmt;
+                            if (target === p && target.relicCounters['RAIN_COVER_READY'] === 1) {
+                                effectiveDebuffAmount = Math.max(0, effectiveDebuffAmount - 1);
+                                target.relicCounters['RAIN_COVER_READY'] = 0;
+                            }
+                            if (target === p && target.relicCounters['MINT_CASE_READY'] === 1) {
+                                effectiveDebuffAmount = Math.max(0, effectiveDebuffAmount - 1);
+                                target.relicCounters['MINT_CASE_READY'] = 0;
+                            }
                             if (type === 'WEAK') {
-                                target.powers['WEAK'] = (target.powers['WEAK'] || 0) + debuffAmt;
-                                newLogs.push(`${targetName}は${trans("へろへろ", languageMode)}${debuffAmt}`);
+                                target.powers['WEAK'] = (target.powers['WEAK'] || 0) + effectiveDebuffAmount;
+                                newLogs.push(`${targetName}は${trans("へろへろ", languageMode)}${effectiveDebuffAmount}`);
                                 didApplyDebuff = true;
                             }
                             if (type === 'VULNERABLE') {
-                                target.powers['VULNERABLE'] = (target.powers['VULNERABLE'] || 0) + debuffAmt;
-                                newLogs.push(`${targetName}は${trans("びくびく", languageMode)}${debuffAmt}`);
+                                target.powers['VULNERABLE'] = (target.powers['VULNERABLE'] || 0) + effectiveDebuffAmount;
+                                newLogs.push(`${targetName}は${trans("びくびく", languageMode)}${effectiveDebuffAmount}`);
                                 didApplyDebuff = true;
                             }
                             if (type === 'CONFUSED') {
@@ -10471,6 +11219,7 @@ const App: React.FC = () => {
                         }
                     }
                     syncRedSkullState(p);
+                    applyRelicDamageTakenEffects(p, newEnemies, damage, didHpDamage);
                     if (didHpDamage) {
                         audioService.playBattleSound('damage');
                         if (prev.visualTheme === 'magic' && lastMagicDamageVoiceActionRef.current !== enemyActionKey) {
@@ -11800,7 +12549,8 @@ const App: React.FC = () => {
             audioService.playHighSchoolVoice(stateRef.current.player.id, 'finish');
         }
         setGameState(prev => {
-            const nextPlayer = buildPostBattlePlayer(prev.player, true);
+            const completedNodeType = prev.map.find(node => node.id === prev.currentMapNodeId)?.type;
+            const nextPlayer = buildPostBattlePlayer(prev.player, true, completedNodeType);
 
             if (crowdfundingBossDebugRef.current === 'AZUKI') {
                 const rewardPrefix = `debug-azuki-${Date.now()}`;
@@ -12282,6 +13032,8 @@ const App: React.FC = () => {
         setGameState(prev => {
             const currentNode = prev.map.find(n => n.id === prev.currentMapNodeId);
             let nextPlayer = { ...prev.player };
+            if (hasRelic(nextPlayer, 'SCISSORS') && prev.rewards.some(reward => reward.type === 'CARD')) nextPlayer.gold += 5;
+            if (hasRelic(nextPlayer, 'ANNOUNCEMENT_LETTER') && prev.rewards.some(reward => reward.type === 'CARD')) nextPlayer.relicCounters = { ...nextPlayer.relicCounters, ANNOUNCEMENT_LETTER_SKIP: 1 };
             if (prev.visualTheme !== 'magic' && nextPlayer.id === 'GARDENER' && nextPlayer.garden) {
                 nextPlayer.garden = nextPlayer.garden.map(slot =>
                     slot.plantedCard ? { ...slot, growth: Math.min(slot.maxGrowth, slot.growth + 1) } : slot
@@ -12492,6 +13244,30 @@ const App: React.FC = () => {
         if (correctCount === 1) bonusGold = 15;
         else if (correctCount === 2) bonusGold = 30;
         else if (correctCount === 3) bonusGold = 50;
+        setGameState(prev => {
+            const p = { ...prev.player, relicCounters: { ...prev.player.relicCounters }, deck: [...prev.player.deck] };
+            if (correctCount > 0) {
+                const streak = (p.relicCounters['PROBLEM_CORRECT_STREAK'] || 0) + correctCount;
+                p.relicCounters['PROBLEM_CORRECT_STREAK'] = streak;
+                if (hasRelic(p, 'GOLD_STAR_STICKER') && streak >= 3) {
+                    p.currentHp = Math.min(p.maxHp, p.currentHp + 3);
+                    p.relicCounters['PROBLEM_CORRECT_STREAK'] = 0;
+                }
+                if (hasRelic(p, 'PERFECT_SCORE_CERTIFICATE') && streak >= 3) {
+                    p.relicCounters['PERFECT_SCORE_ENERGY'] = 1;
+                    p.relicCounters['PROBLEM_CORRECT_STREAK'] = 0;
+                }
+                if (hasRelic(p, 'MAKEUP_TEST')) p.relicCounters['MAKEUP_TEST_BLOCK'] = 1;
+            } else {
+                p.relicCounters['PROBLEM_CORRECT_STREAK'] = 0;
+                p.relicCounters['ZERO_POINT_NEXT_BATTLE'] = hasRelic(p, 'ZERO_POINT_TEST') ? 1 : 0;
+                if (hasRelic(p, 'MAKEUP_EXAM_PASS') && p.relicCounters['MAKEUP_EXAM_USED'] !== 1) {
+                    upgradeRandomCardInZones(p);
+                    p.relicCounters['MAKEUP_EXAM_USED'] = 1;
+                }
+            }
+            return { ...prev, player: p };
+        });
         if (gameState.player.relics.find(r => r.id === 'CALCULATOR')) {
             const healAmount = correctCount * 2;
             if (healAmount > 0) {
@@ -12684,6 +13460,10 @@ const App: React.FC = () => {
         const expansionSpecialRewardCards = Object.values(ADDITIONAL_CARDS).filter(card =>
             card.rarity === 'SPECIAL' && unlockedCardNames.has(card.name.trim())
         );
+        const rewardCardCount = Math.max(
+            1,
+            3 + (hasRelic(player, 'SCHOOL_ARCHIVE') ? 2 : 0) - (hasRelic(player, 'PRINCIPAL_SEAL') ? 1 : 0)
+        );
         const isAzukiBossReward = nodeType === NodeType.BOSS && Boolean(player.turnFlags[AZUKI_BOSS_FLAG]);
         const isDodomedesuBossReward = nodeType === NodeType.BOSS && Boolean(player.turnFlags[DODOMEDESU_BOSS_ACTIVE_FLAG]);
 
@@ -12728,16 +13508,16 @@ const App: React.FC = () => {
             ? allPossibleCards
             : (nonFamiliarCards.length > 0 ? nonFamiliarCards : []);
         const familiarRewardSlot = isHighSchoolReward && familiarCards.length > 0 && Math.random() < 0.55
-            ? Math.floor(Math.random() * 3)
+            ? Math.floor(Math.random() * rewardCardCount)
             : -1;
         const holographicRewardSlot = Math.random() < HOLOGRAPHIC_REWARD_CARD_CHANCE
-            ? Math.floor(Math.random() * 3)
+            ? Math.floor(Math.random() * rewardCardCount)
             : -1;
         const expansionSpecialRewardSlot = expansionSpecialRewardCards.length > 0 && Math.random() < 0.2
-            ? Math.floor(Math.random() * 3)
+            ? Math.floor(Math.random() * rewardCardCount)
             : -1;
 
-        for (let i = 0; i < 3; i++) {
+        for (let i = 0; i < rewardCardCount; i++) {
             const isExpansionSpecialSlot = i === expansionSpecialRewardSlot;
             if (baseRewardCards.length === 0 && !isExpansionSpecialSlot && !(isLibrarian && i === 0) && !(isGardener && i === 0)) break;
             const roll = Math.random() * 100;
@@ -12791,6 +13571,12 @@ const App: React.FC = () => {
             if (replaceIndex >= 0) rewards[replaceIndex] = eraserReward;
             else rewards.push(eraserReward);
         }
+        if (hasRelic(player, 'DIRECTION_COMPASS')) {
+            const cardRewards = rewards.filter(reward => reward.type === 'CARD').slice(0, rewardCardCount);
+            if (cardRewards.length >= 3 && new Set(cardRewards.map(reward => reward.value?.type)).size === 3) {
+                player.relicCounters['DIRECTION_COMPASS_HEAL'] = 1;
+            }
+        }
         }
 
         if (challengeMode === 'RACE' && Math.random() < 0.3) {
@@ -12810,9 +13596,7 @@ const App: React.FC = () => {
 
         if (nodeType === NodeType.ELITE || nodeType === NodeType.BOSS) {
             const rarity = nodeType === NodeType.BOSS ? 'RARE' : 'UNCOMMON';
-            const allRelics = Object.values(RELIC_LIBRARY).filter(r => r.rarity === rarity || r.rarity === 'COMMON' || r.rarity === 'RARE');
-            const owned = player.relics.map(r => r.id);
-            const available = allRelics.filter(r => !owned.includes(r.id));
+            const available = getAvailableRelicPool(player, [rarity, 'COMMON', 'RARE']);
             if (available.length > 0) {
                 const relic = available[Math.floor(Math.random() * available.length)];
                 rewards.push({ type: 'RELIC', value: relic, id: `${rewardPrefix}-relic` });
@@ -13005,11 +13789,12 @@ const App: React.FC = () => {
     }, [activeAssignment, addMiniGameUnlockCorrectCount, correctCustomAssignmentProblemIds, createRewardCardForAssignment, currentAssignment, currentAssignmentAnswers, effectiveAssignment, languageMode, markDailyAssignmentCompleted]);
 
     const removeRewardFromList = useCallback((rewards: RewardItem[], item: RewardItem) => {
-        if (shouldClearAllCardRewards(item)) {
+        const cannotSkipCards = hasRelic(gameState.player, 'PREPAID_CARD') || hasRelic(gameState.player, 'SCHOOL_ARCHIVE');
+        if (shouldClearAllCardRewards(item) && !cannotSkipCards) {
             return rewards.filter(reward => reward.type !== 'CARD');
         }
         return rewards.filter(reward => reward.id !== item.id);
-    }, []);
+    }, [gameState.player]);
 
     const applyRewardToLocalPlayer = useCallback((item: RewardItem, replacePotionId?: string, nextRewardsOverride?: RewardItem[]) => {
         if (item.type === 'RACE_TRICK') {
@@ -13022,9 +13807,23 @@ const App: React.FC = () => {
             let p = { ...prev.player };
             const nextRewards = nextRewardsOverride ?? removeRewardFromList(prev.rewards, item);
             if (item.type === 'CARD') {
-                addCardToDeckWithRelics(p, item.value);
-                storageService.saveUnlockedCard(item.value.name);
+                const rewardCard = p.relicCounters['REPORT_CARD_UPGRADE'] === 1 ? getUpgradedCard(item.value) : item.value;
+                addCardToDeckWithRelics(p, rewardCard);
+                delete p.relicCounters['REPORT_CARD_UPGRADE'];
+                if (p.relicCounters['DIRECTION_COMPASS_HEAL'] === 1) {
+                    p.currentHp = Math.min(p.maxHp, p.currentHp + 5);
+                    delete p.relicCounters['DIRECTION_COMPASS_HEAL'];
+                }
+                if (hasRelic(p, 'LUCKY_PENCIL')) {
+                    const count = (p.relicCounters['LUCKY_PENCIL_COUNT'] || 0) + 1;
+                    p.relicCounters['LUCKY_PENCIL_COUNT'] = count;
+                    if (count % 3 === 0) p.maxHp += 3;
+                }
+                storageService.saveUnlockedCard(rewardCard.name);
             } else if (item.type === 'RELIC') {
+                if (p.relics.some(relic => relic.id === item.value?.id)) {
+                    return { ...prev, rewards: nextRewards };
+                }
                 p.relics = [...p.relics, item.value];
                 if (item.value.id === 'SOZU') p.maxEnergy += 1;
                 if (item.value.id === 'CURSED_KEY') p.maxEnergy += 1;
@@ -13035,13 +13834,17 @@ const App: React.FC = () => {
                 if (item.value.id === 'MATRYOSHKA') p.relicCounters['MATRYOSHKA'] = 2;
                 if (item.value.id === 'HAPPY_FLOWER') p.relicCounters['HAPPY_FLOWER'] = 0;
                 applyExtendedRelicAcquireEffects(p, item.value);
+                if (item.value.id === 'LOST_AND_FOUND' && prev.map.find(node => node.id === prev.currentMapNodeId)?.type === NodeType.ELITE) {
+                    p.currentHp = Math.min(p.maxHp, p.currentHp + 8);
+                }
                 storageService.saveUnlockedRelic(item.value.id);
             } else if (item.type === 'GOLD') {
                 p.gold += item.value;
             } else if (item.type === 'POTION') {
                 if (p.potions.length < getPotionCapacity(p) || replacePotionId) {
                     if (replacePotionId) p.potions = p.potions.filter(pt => pt.id !== replacePotionId);
-                    p.potions = [...p.potions, item.value];
+                    addPotionToPlayer(p, item.value);
+                    if (hasRelic(p, 'LUNCH_TICKET')) p.relicCounters['LUNCH_TICKET_ENERGY'] = 1;
                     storageService.saveUnlockedPotion(item.value.templateId);
                 } else {
                     return prev;
@@ -13062,6 +13865,8 @@ const App: React.FC = () => {
                 return;
             }
             if (item.type === 'RELIC') {
+                if (!item.value) return;
+                if (nextPlayer.relics.some(relic => relic.id === item.value?.id)) return;
                 nextPlayer.relics = [...nextPlayer.relics, item.value];
                 storageService.saveUnlockedRelic(item.value.id);
                 if (item.value.id === 'SOZU') nextPlayer.maxEnergy += 1;
@@ -13078,7 +13883,9 @@ const App: React.FC = () => {
                 applyExtendedRelicAcquireEffects(nextPlayer, item.value);
             }
         });
-        if (addCurse) {
+        if (addCurse && hasRelic(nextPlayer, 'MASTER_KEY')) {
+            nextPlayer.currentHp = Math.max(1, nextPlayer.currentHp - 10);
+        } else if (addCurse) {
             const curse = { ...CURSE_CARDS.PAIN, id: `curse-${Date.now()}` };
             addCardToDeckWithRelics(nextPlayer, curse, { addToDiscard: true });
         }
@@ -13096,17 +13903,19 @@ const App: React.FC = () => {
             id: `treasure-penalty-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`,
         };
     }, []);
-    const buildTreasureRewardBundle = useCallback((): RewardItem[] => {
+    const buildTreasureRewardBundle = useCallback((owner?: Player): RewardItem[] => {
         const rewards: RewardItem[] = [];
-        const allRelics = Object.values(RELIC_LIBRARY).filter(r => r.rarity === 'COMMON' || r.rarity === 'UNCOMMON' || r.rarity === 'RARE');
-        rewards.push({ type: 'RELIC', value: shuffle([...allRelics])[0], id: `tr-relic-${Date.now()}-${Math.random().toString(36).slice(2, 8)}` });
-        rewards.push({ type: 'GOLD', value: 50 + Math.floor(Math.random() * 50), id: `tr-gold-${Date.now()}-${Math.random().toString(36).slice(2, 8)}` });
+        const treasureOwner = owner || gameState.player;
+        const allRelics = getAvailableRelicPool(treasureOwner, ['COMMON', 'UNCOMMON', 'RARE']);
+        const relic = shuffle([...allRelics])[0];
+        if (relic) rewards.push({ type: 'RELIC', value: relic, id: `tr-relic-${Date.now()}-${Math.random().toString(36).slice(2, 8)}` });
+        rewards.push({ type: 'GOLD', value: getTreasureGoldAmount(treasureOwner, 50 + Math.floor(Math.random() * 50)), id: `tr-gold-${Date.now()}-${Math.random().toString(36).slice(2, 8)}` });
         return rewards;
-    }, []);
-    const buildCoopTreasurePools = useCallback((count: number): CoopTreasurePool[] => (
+    }, [gameState.player]);
+    const buildCoopTreasurePools = useCallback((count: number, owners: Player[] = []): CoopTreasurePool[] => (
         Array.from({ length: count }, (_, index) => ({
             id: `coop-treasure-${Date.now()}-${index}-${Math.random().toString(36).slice(2, 8)}`,
-            rewards: buildTreasureRewardBundle(),
+            rewards: buildTreasureRewardBundle(owners[index]),
             claimedByPeerId: null,
             claimedByName: null
         }))
@@ -13125,16 +13934,25 @@ const App: React.FC = () => {
             ...sourcePlayer,
             relicCounters: { ...sourcePlayer.relicCounters }
         };
-        const allRelics = Object.values(RELIC_LIBRARY).filter(r => r.rarity === 'COMMON' || r.rarity === 'UNCOMMON' || r.rarity === 'RARE');
+        const allRelics = getAvailableRelicPool(workingPlayer, ['COMMON', 'UNCOMMON', 'RARE']);
         const claimRewards = [...pool.rewards];
+        const baseRelicIndex = claimRewards.findIndex(reward => reward.type === 'RELIC');
+        if (baseRelicIndex >= 0 && (!claimRewards[baseRelicIndex].value || workingPlayer.relics.some(relic => relic.id === claimRewards[baseRelicIndex].value.id))) {
+            const replacement = allRelics.find(relic => !claimRewards.some(reward => reward.type === 'RELIC' && reward.value?.id === relic.id));
+            if (replacement) claimRewards[baseRelicIndex] = { ...claimRewards[baseRelicIndex], value: replacement };
+            else claimRewards.splice(baseRelicIndex, 1);
+        }
         const matryoshkaCharges = workingPlayer.relicCounters['MATRYOSHKA'] || 0;
         if (matryoshkaCharges > 0) {
             workingPlayer.relicCounters['MATRYOSHKA'] = matryoshkaCharges - 1;
-            claimRewards.push({
-                type: 'RELIC',
-                value: shuffle([...allRelics])[0],
-                id: `coop-tr-matryoshka-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
-            });
+            const extraRelic = shuffle([...allRelics].filter(relic => !claimRewards.some(reward => reward.type === 'RELIC' && reward.value?.id === relic.id)))[0];
+            if (extraRelic) {
+                claimRewards.push({
+                    type: 'RELIC',
+                    value: extraRelic,
+                    id: `coop-tr-matryoshka-${Date.now()}-${Math.random().toString(36).slice(2, 8)}`
+                });
+            }
         }
         const addCurse = !!workingPlayer.relics.find(relic => relic.id === 'CURSED_KEY');
         const nextPlayer = applyTreasureRewardsToPlayer(workingPlayer, claimRewards, addCurse);
@@ -13589,8 +14407,14 @@ const App: React.FC = () => {
         applyCoopSupportEffect(card, targetPeerId, coopSelfPeerId || undefined);
     }, [applyCoopSupportEffect, coopSelfPeerId, coopSession]);
     const applyRestAction = () => {
-        const heal = Math.floor(gameState.player.maxHp * 0.3);
-        setGameState(prev => ({ ...prev, player: { ...prev.player, currentHp: Math.min(prev.player.maxHp, prev.player.currentHp + heal) } }));
+        setGameState(prev => {
+            const p = { ...prev.player, relicCounters: { ...prev.player.relicCounters } };
+            const heal = hasRelic(p, 'SLEEPING_BAG')
+                ? p.maxHp
+                : Math.floor(p.maxHp * 0.3) + (hasRelic(p, 'INFIRMARY_BLANKET') ? 8 : 0);
+            p.currentHp = Math.min(p.maxHp, hasRelic(p, 'SLEEPING_BAG') ? p.maxHp : p.currentHp + heal);
+            return { ...prev, player: p };
+        });
     };
 
     const handleRestAction = () => {
@@ -13608,12 +14432,21 @@ const App: React.FC = () => {
             ...prev,
             player: {
                 ...prev.player,
-                deck: prev.player.deck.map(c => c.id === card.id ? upgraded : c)
+                maxHp: prev.player.maxHp + (hasRelic(prev.player, 'STANDING_UMBRELLA') && prev.player.relicCounters['STANDING_UMBRELLA_ACT'] !== prev.act ? 2 : 0),
+                deck: prev.player.deck.map(c => c.id === card.id ? upgraded : c),
+                relicCounters: {
+                    ...prev.player.relicCounters,
+                    ...(hasRelic(prev.player, 'STANDING_UMBRELLA') && prev.player.relicCounters['STANDING_UMBRELLA_ACT'] !== prev.act
+                        ? { STANDING_UMBRELLA_ACT: prev.act }
+                        : {}),
+                    ...(hasRelic(prev.player, 'HALL_PASS') ? { HALL_PASS_DRAW: 1 } : {})
+                }
             }
         }));
     };
 
     const handleUpgradeCard = (card: ICard) => {
+        if (hasRelic(gameState.player, 'SLEEPING_BAG')) return;
         if (gameState.challengeMode === 'COOP' && coopSession && !coopSession.isHost) {
             p2pService.send({ type: 'COOP_REST_ACTION', action: 'UPGRADE', cardId: card.id });
             applyUpgradeCard(card);
@@ -13698,9 +14531,12 @@ const App: React.FC = () => {
             setGameState(prev => {
                 let price = card.price || 50;
                 if (prev.player.relics.find(r => r.id === 'MEMBERSHIP_CARD')) price = Math.floor(price * 0.5);
+                if (prev.player.relicCounters['COMMUTER_PASS_READY'] === 1) price = Math.max(0, price - 25);
                 if (raceEffects.shopMarkupUntil > raceEffectNow) price = Math.floor(price * 1.25);
                 if (prev.player.turnFlags['ICHI_NEXT_SHOP_DISCOUNT']) price = Math.floor(price * 0.8);
                 const newP = { ...prev.player, gold: prev.player.gold - price };
+                newP.relicCounters = { ...newP.relicCounters, SHOP_CARD_PURCHASES: (newP.relicCounters['SHOP_CARD_PURCHASES'] || 0) + 1 };
+                if (newP.relicCounters['COMMUTER_PASS_READY'] === 1) newP.relicCounters = { ...newP.relicCounters, COMMUTER_PASS_READY: 0 };
                 addCardToDeckWithRelics(newP, { ...card, id: `buy-${Date.now()}` }, { addToDiscard: true });
                 return { ...prev, player: newP };
             });
@@ -13711,9 +14547,12 @@ const App: React.FC = () => {
         setGameState(prev => {
             let price = card.price || 50;
             if (prev.player.relics.find(r => r.id === 'MEMBERSHIP_CARD')) price = Math.floor(price * 0.5);
+            if (prev.player.relicCounters['COMMUTER_PASS_READY'] === 1) price = Math.max(0, price - 25);
             if (raceEffects.shopMarkupUntil > raceEffectNow) price = Math.floor(price * 1.25);
             if (prev.player.turnFlags['ICHI_NEXT_SHOP_DISCOUNT']) price = Math.floor(price * 0.8);
             const newP = { ...prev.player, gold: prev.player.gold - price };
+            newP.relicCounters = { ...newP.relicCounters, SHOP_CARD_PURCHASES: (newP.relicCounters['SHOP_CARD_PURCHASES'] || 0) + 1 };
+            if (newP.relicCounters['COMMUTER_PASS_READY'] === 1) newP.relicCounters = { ...newP.relicCounters, COMMUTER_PASS_READY: 0 };
             addCardToDeckWithRelics(newP, { ...card, id: `buy-${Date.now()}` }, { addToDiscard: true });
             return { ...prev, player: newP };
         });
@@ -13724,14 +14563,19 @@ const App: React.FC = () => {
     };
 
     const handleShopBuyRelic = (relic: Relic) => {
+        if (gameState.player.relics.some(owned => owned.id === relic.id)) {
+            setShopRelics(prev => prev.filter(entry => entry.id !== relic.id));
+            return;
+        }
         if (gameState.challengeMode === 'COOP' && coopSession && !coopSession.isHost) {
             p2pService.send({ type: 'COOP_SHOP_ACTION', action: 'BUY_RELIC', itemId: relic.id });
             setGameState(prev => {
+                if (prev.player.relics.some(owned => owned.id === relic.id)) return prev;
                 let price = relic.price || 150;
                 if (prev.player.relics.find(r => r.id === 'MEMBERSHIP_CARD')) price = Math.floor(price * 0.5);
                 if (raceEffects.shopMarkupUntil > raceEffectNow) price = Math.floor(price * 1.25);
                 if (prev.player.turnFlags['ICHI_NEXT_SHOP_DISCOUNT']) price = Math.floor(price * 0.8);
-                const newP = { ...prev.player, gold: prev.player.gold - price, relics: [...prev.player.relics, relic] };
+                const newP = { ...prev.player, gold: prev.player.gold - price, relics: [...prev.player.relics, relic], relicCounters: { ...prev.player.relicCounters, SHOP_RELIC_PURCHASES: (prev.player.relicCounters['SHOP_RELIC_PURCHASES'] || 0) + 1 } };
                 if (relic.id === 'SOZU') newP.maxEnergy += 1;
                 if (relic.id === 'CURSED_KEY') newP.maxEnergy += 1;
                 if (relic.id === 'PHILOSOPHER_STONE') newP.maxEnergy += 1;
@@ -13741,6 +14585,7 @@ const App: React.FC = () => {
                 if (relic.id === 'MATRYOSHKA') newP.relicCounters['MATRYOSHKA'] = 2;
                 if (relic.id === 'HAPPY_FLOWER') newP.relicCounters['HAPPY_FLOWER'] = 0;
                 applyExtendedRelicAcquireEffects(newP, relic);
+                applyRelicShopAcquireEffects(newP, relic);
                 return { ...prev, player: newP };
             });
             setShopRelics(prev => prev.filter(entry => entry.id !== relic.id));
@@ -13748,11 +14593,12 @@ const App: React.FC = () => {
             return;
         }
         setGameState(prev => {
+            if (prev.player.relics.some(owned => owned.id === relic.id)) return prev;
             let price = relic.price || 150;
             if (prev.player.relics.find(r => r.id === 'MEMBERSHIP_CARD')) price = Math.floor(price * 0.5);
             if (raceEffects.shopMarkupUntil > raceEffectNow) price = Math.floor(price * 1.25);
             if (prev.player.turnFlags['ICHI_NEXT_SHOP_DISCOUNT']) price = Math.floor(price * 0.8);
-            const newP = { ...prev.player, gold: prev.player.gold - price, relics: [...prev.player.relics, relic] };
+            const newP = { ...prev.player, gold: prev.player.gold - price, relics: [...prev.player.relics, relic], relicCounters: { ...prev.player.relicCounters, SHOP_RELIC_PURCHASES: (prev.player.relicCounters['SHOP_RELIC_PURCHASES'] || 0) + 1 } };
             if (relic.id === 'SOZU') newP.maxEnergy += 1;
             if (relic.id === 'CURSED_KEY') newP.maxEnergy += 1;
             if (relic.id === 'PHILOSOPHER_STONE') newP.maxEnergy += 1;
@@ -13762,6 +14608,7 @@ const App: React.FC = () => {
             if (relic.id === 'MATRYOSHKA') newP.relicCounters['MATRYOSHKA'] = 2;
             if (relic.id === 'HAPPY_FLOWER') newP.relicCounters['HAPPY_FLOWER'] = 0;
             applyExtendedRelicAcquireEffects(newP, relic);
+            applyRelicShopAcquireEffects(newP, relic);
             return { ...prev, player: newP };
         });
         if (gameState.challengeMode === 'COOP') {
@@ -13777,13 +14624,20 @@ const App: React.FC = () => {
                 if (prev.player.potions.length < getPotionCapacity(prev.player) || replacePotionId) {
                     let price = potion.price || 50;
                     if (prev.player.relics.find(r => r.id === 'MEMBERSHIP_CARD')) price = Math.floor(price * 0.5);
+                    if (prev.player.relicCounters['LIBRARY_PASS_POTION_DISCOUNT'] === 1) price = Math.max(0, price - 20);
+                    if (prev.player.relicCounters['CANTEEN_COUPON_READY'] === 1) price = 0;
                     if (raceEffects.shopMarkupUntil > raceEffectNow) price = Math.floor(price * 1.25);
                     if (prev.player.turnFlags['ICHI_NEXT_SHOP_DISCOUNT']) price = Math.floor(price * 0.8);
                     let newPotions = [...prev.player.potions];
                     if (replacePotionId) {
                         newPotions = newPotions.filter(pt => pt.id !== replacePotionId);
                     }
-                    return { ...prev, player: { ...prev.player, gold: prev.player.gold - price, potions: [...newPotions, { ...potion, id: `buy-pot-${Date.now()}` }] } };
+                    const nextPlayer = { ...prev.player, gold: prev.player.gold - price, potions: newPotions, relicCounters: { ...prev.player.relicCounters } };
+                    nextPlayer.relicCounters['SHOP_POTION_PURCHASES'] = (nextPlayer.relicCounters['SHOP_POTION_PURCHASES'] || 0) + 1;
+                    addPotionToPlayer(nextPlayer, { ...potion, id: `buy-pot-${Date.now()}` });
+                    delete nextPlayer.relicCounters['LIBRARY_PASS_POTION_DISCOUNT'];
+                    delete nextPlayer.relicCounters['CANTEEN_COUPON_READY'];
+                    return { ...prev, player: nextPlayer };
                 }
                 return prev;
             });
@@ -13795,13 +14649,20 @@ const App: React.FC = () => {
             if (prev.player.potions.length < getPotionCapacity(prev.player) || replacePotionId) {
                 let price = potion.price || 50;
                 if (prev.player.relics.find(r => r.id === 'MEMBERSHIP_CARD')) price = Math.floor(price * 0.5);
+                if (prev.player.relicCounters['LIBRARY_PASS_POTION_DISCOUNT'] === 1) price = Math.max(0, price - 20);
+                if (prev.player.relicCounters['CANTEEN_COUPON_READY'] === 1) price = 0;
                 if (raceEffects.shopMarkupUntil > raceEffectNow) price = Math.floor(price * 1.25);
                 if (prev.player.turnFlags['ICHI_NEXT_SHOP_DISCOUNT']) price = Math.floor(price * 0.8);
                 let newPotions = [...prev.player.potions];
                 if (replacePotionId) {
                     newPotions = newPotions.filter(pt => pt.id !== replacePotionId);
                 }
-                return { ...prev, player: { ...prev.player, gold: prev.player.gold - price, potions: [...newPotions, { ...potion, id: `buy-pot-${Date.now()}` }] } };
+                const nextPlayer = { ...prev.player, gold: prev.player.gold - price, potions: newPotions, relicCounters: { ...prev.player.relicCounters } };
+                nextPlayer.relicCounters['SHOP_POTION_PURCHASES'] = (nextPlayer.relicCounters['SHOP_POTION_PURCHASES'] || 0) + 1;
+                addPotionToPlayer(nextPlayer, { ...potion, id: `buy-pot-${Date.now()}` });
+                delete nextPlayer.relicCounters['LIBRARY_PASS_POTION_DISCOUNT'];
+                delete nextPlayer.relicCounters['CANTEEN_COUPON_READY'];
+                return { ...prev, player: nextPlayer };
             }
             return prev;
         });
@@ -13822,6 +14683,7 @@ const App: React.FC = () => {
                     newMaxHp -= 3;
                 }
                 const newDeck = p.deck.filter(c => c.id !== cardId);
+                if (card && hasRelic(p, 'INK_ERASER') && (card.type === CardType.CURSE || card.rarity === 'SPECIAL')) p.maxHp += 2;
                 const newHp = Math.min(p.currentHp, newMaxHp);
                 return { ...prev, shopRemoveCount: (prev.shopRemoveCount || 0) + 1, player: { ...p, gold: p.gold - cost, deck: newDeck, maxHp: newMaxHp, currentHp: newHp } };
             });
@@ -13835,6 +14697,7 @@ const App: React.FC = () => {
                 newMaxHp -= 3;
             }
             const newDeck = p.deck.filter(c => c.id !== cardId);
+            if (card && hasRelic(p, 'INK_ERASER') && (card.type === CardType.CURSE || card.rarity === 'SPECIAL')) p.maxHp += 2;
             const newHp = Math.min(p.currentHp, newMaxHp);
             return { ...prev, shopRemoveCount: (prev.shopRemoveCount || 0) + 1, player: { ...p, gold: p.gold - cost, deck: newDeck, maxHp: newMaxHp, currentHp: newHp } };
         });
@@ -13842,10 +14705,13 @@ const App: React.FC = () => {
 
     const handleShopLeave = () => {
         setGameState(prev => {
-            if (!prev.player.turnFlags['ICHI_NEXT_SHOP_DISCOUNT']) return prev;
-            const turnFlags = { ...prev.player.turnFlags };
-            delete turnFlags.ICHI_NEXT_SHOP_DISCOUNT;
-            return { ...prev, player: { ...prev.player, turnFlags } };
+            const p = { ...prev.player, turnFlags: { ...prev.player.turnFlags }, relicCounters: { ...prev.player.relicCounters } };
+            if (hasRelic(p, 'LIBRARY_LOAN_CARD') && (p.relicCounters['SHOP_CARD_PURCHASES'] || 0) === 0) p.gold += 10;
+            p.relicCounters['SHOP_CARD_PURCHASES'] = 0;
+            p.relicCounters['SHOP_RELIC_PURCHASES'] = 0;
+            p.relicCounters['SHOP_POTION_PURCHASES'] = 0;
+            delete p.turnFlags.ICHI_NEXT_SHOP_DISCOUNT;
+            return { ...prev, player: p };
         });
         if (gameState.challengeMode === 'COOP' && coopSession && coopSelfPeerId) {
             setCoopSession(prev => {
@@ -17566,7 +18432,7 @@ const App: React.FC = () => {
 
                 {gameState.screen === GameScreen.REWARD && (
                     <div className="absolute inset-0">
-                        <RewardScreen rewards={gameState.rewards} onSelectReward={handleRewardSelection} onSkip={finishRewardPhase} isLoading={isLoading || coopAwaitingRewardSync} currentPotions={gameState.player.potions} potionCapacity={getPotionCapacity(gameState.player)} languageMode={languageMode} typingMode={gameState.challengeMode === 'TYPING'} dummyRewards={raceRewardDummyDisplay} autoSkipWhenEmpty={gameState.challengeMode !== 'COOP'} skipDisabled={coopRewardSkipDisabled} skipDisabledMessage={coopAwaitingRewardSync ? 'ホストが報酬を確定するまで待っています' : (coopRewardSkipDisabled ? '他のプレイヤーの報酬完了を待っています' : undefined)} interactionDisabled={coopLocalProgressInteractionDisabled} interactionDisabledMessage={coopInteractionDisabledMessage} visualTheme={gameState.visualTheme || visualTheme} />
+                        <RewardScreen rewards={gameState.rewards} onSelectReward={handleRewardSelection} onSkip={finishRewardPhase} isLoading={isLoading || coopAwaitingRewardSync} currentPotions={gameState.player.potions} potionCapacity={getPotionCapacity(gameState.player)} languageMode={languageMode} typingMode={gameState.challengeMode === 'TYPING'} dummyRewards={raceRewardDummyDisplay} autoSkipWhenEmpty={gameState.challengeMode !== 'COOP'} skipDisabled={coopRewardSkipDisabled || hasRelic(gameState.player, 'PREPAID_CARD') || hasRelic(gameState.player, 'SCHOOL_ARCHIVE')} skipDisabledMessage={coopAwaitingRewardSync ? 'ホストが報酬を確定するまで待っています' : ((hasRelic(gameState.player, 'PREPAID_CARD') || hasRelic(gameState.player, 'SCHOOL_ARCHIVE')) ? 'このレリックの効果でカード報酬をスキップできません' : (coopRewardSkipDisabled ? '他のプレイヤーの報酬完了を待っています' : undefined))} interactionDisabled={coopLocalProgressInteractionDisabled} interactionDisabledMessage={coopInteractionDisabledMessage} visualTheme={gameState.visualTheme || visualTheme} />
                     </div>
                 )}
 
