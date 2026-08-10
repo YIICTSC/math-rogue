@@ -70,7 +70,7 @@ const CardInspectionModal: React.FC<CardInspectionModalProps> = ({ card, languag
       </h3>
       <div className="flex gap-2 mb-4 text-xs text-gray-400 font-mono">
         <span className="bg-blue-900/50 px-2 py-1 rounded border border-blue-500/30">
-          {trans('コスト', languageMode)}: {card.cost}
+          {trans('コスト', languageMode)}: {card.xCost ? 'X' : card.cost}
         </span>
         <span className="bg-purple-900/50 px-2 py-1 rounded border border-purple-500/30">
           {transBattle(card.type, languageMode)}

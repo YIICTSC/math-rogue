@@ -19,6 +19,7 @@ export interface Card {
   id: string;
   name: string;
   cost: number;
+  xCost?: boolean;
   type: CardType;
   target?: TargetType;
   description: string;
@@ -66,6 +67,11 @@ export interface Card {
   poisonMultiplier?: number;
 
   damageBasedOnBlock?: boolean;
+  damageBasedOnBlockMultiplier?: number;
+  damageBasedOnHpLostThisTurn?: number;
+  lowHpCostZero?: boolean;
+  lowHpDamageMultiplier?: number;
+  removeEnemyBlock?: boolean;
   doubleBlock?: boolean;
   fatalMaxHp?: number;
   innate?: boolean;
@@ -98,7 +104,11 @@ export interface Card {
   promptsCopy?: number;
   promptsExhaust?: number;
   damagePerAttackPlayed?: number;
+  damagePerCardPlayed?: number;
+  damagePerCardPlayedBattle?: number;
+  damagePerAttackInHand?: number;
   damagePerCardInHand?: number;
+  damagePerCardInDeck?: number;
   damagePerStrike?: number;
   damagePerCardInDraw?: number;
   playCopies?: number;
@@ -120,6 +130,7 @@ export interface Card {
   synthesisDepth?: number; // 合成済み名を次の合成で全文字残すための世代数
 
   battleBaseCost?: number;
+  battleBaseXCost?: boolean;
   battleBaseDamage?: number;
   battleBaseBlock?: number;
   battleBaseDescription?: string;
@@ -348,6 +359,7 @@ export interface Player {
   powers: Record<string, number>;
   echoes: number;
   cardsPlayedThisTurn: number;
+  cardsPlayedThisBattle?: number;
   attacksPlayedThisTurn: number;
   typesPlayedThisTurn: CardType[];
   nextTurnEnergy: number;

@@ -254,7 +254,7 @@
 |小学生編|ANGER|キレる|0|ATTACK|ENEMY|6ダメージ。捨て札に「キレる」を1枚加える。|damage=6; addCardToDiscard={cardName:"ANGER",count:1}|
 |小学生編|EMPTY_FIST|グーパンチ|1|ATTACK|ENEMY|9ダメージ。次のターン、エナジー1を得る。|damage=9; nextTurnEnergy=1|
 |小学生編|WHIRLWIND|グルグルバット|2|ATTACK|ALL_ENEMIES|全体8ダメージを2回。|damage=8; playCopies=1|
-|小学生編|OUT_ARCADE_MASTER|ゲーセンの達人|2|ATTACK|ENEMY|コンボ：今ターン使ったカード1枚につき8ダメージ。|damagePerAttackPlayed=8|
+|小学生編|OUT_ARCADE_MASTER|ゲーセンの達人|2|ATTACK|ENEMY|コンボ：今ターン使ったカード1枚につき8ダメージ。|damagePerCardPlayed=8|
 |小学生編|BLUDGEON|げんこつ|3|ATTACK|ENEMY|32ダメージを与える。|damage=32|
 |小学生編|BOYS_CORE_STRIKE|コア・ストライク|1|ATTACK|ENEMY|10ダメージ。エナジー1を得る。|damage=10; energy=1|
 |小学生編|KOKORO_SOSEKI|こころ|1|SKILL|ENEMY|敵の攻撃力を2下げる。廃棄。|exhaust=true; strength=-2|
@@ -286,7 +286,7 @@
 |小学生編|PE_BALL|ドッジボール投球|1|ATTACK|ENEMY|12ダメージ。|damage=12|
 |小学生編|BOYS_DRAGON_BUSTER|ドラグニル・バースト|3|ATTACK|ENEMY|35ダメージ。対象にびくびく2。|damage=35; vulnerable=2|
 |小学生編|GIRLS_DREAM_CATCHER|ドリーム・キャッチャー|1|SKILL|SELF|山札から好きなカードを1枚手札に加える。|App:名称/ID分岐|
-|小学生編|MINE_BLAST_G|トロッコ (芥川)|1|ATTACK|ENEMY|今ターン使用したカード枚数分、ダメージを与える。|damagePerAttackPlayed=4|
+|小学生編|MINE_BLAST_G|トロッコ (芥川)|1|ATTACK|ENEMY|今ターン使用したカード1枚につき4ダメージ。|damagePerCardPlayed=4|
 |小学生編|GIRLS_RAINBOW_MAGIC|なないろマジック|1|SKILL|SELF|手札のランダムなカードのコストを0にする。|App:名称/ID分岐|
 |小学生編|NEZUMI_NO_YOMEIRI|ねずみの嫁入り|1|SKILL|SELF|この戦闘中、被ダメージを1軽減する。|applyPower={id:"BUFFER",amount:1}|
 |小学生編|DEFEND|ノートで防御|1|SKILL|SELF|ブロックを5得る。|block=5; App:名称/ID分岐|
@@ -332,12 +332,12 @@
 |小学生編|YODAKA_NO_HOSHI|よだかの星|1|ATTACK|ALL_ENEMIES|自分に4ダメージ。全体に15ダメージ。|damage=15; selfDamage=4|
 |小学生編|OUT_MORNING_EXERCISE|ラジオ体操皆勤賞|2|POWER|SELF|ムキムキ2、カチカチ2を得る。|strength=2; applyPower={id:"DEXTERITY",amount:2}|
 |小学生編|OUT_RADIO_CONTROL|ラジコン操作|4|ATTACK|RANDOM_ENEMY|9ダメージを5回与える。|damage=9; playCopies=4|
-|小学生編|BOYS_FINAL_FANTASY|ラスト・ファンタジー|3|ATTACK|ENEMY|この戦闘で使ったカード1枚につき5ダメージ。|damagePerAttackPlayed=5|
+|小学生編|BOYS_FINAL_FANTASY|ラスト・ファンタジー|3|ATTACK|ENEMY|この戦闘で使ったカード1枚につき5ダメージ。|damagePerCardPlayedBattle=5|
 |小学生編|GIRLS_LOVELY_KISS|ラブリー・キッス|1|ATTACK|ENEMY|8ダメージ。HPを全ダメージ分回復。|damage=8; lifesteal=true|
 |小学生編|CLOTHESLINE|ラリアット|2|ATTACK|ENEMY|12ダメージ。対象にへろへろ2を与える。|damage=12; weak=2|
 |小学生編|BASH|ランドセルタックル|2|ATTACK|ENEMY|8ダメージ。対象にびくびく2を与える。|damage=8; vulnerable=2|
 |小学生編|RIKA_LITMUS|リトマス試験紙|1|SKILL|ENEMY|対象にへろへろ2、びくびく2を付与。|vulnerable=2; weak=2|
-|小学生編|BOYS_REVENGE|リベンジ・バースト|1|ATTACK|ENEMY|今ターン失ったHPの2倍のダメージを与える。|damage=0; App:名称/ID分岐|
+|小学生編|BOYS_REVENGE|リベンジ・バースト|1|ATTACK|ENEMY|今ターン失ったHPの2倍のダメージを与える。|damageBasedOnHpLostThisTurn=2|
 |小学生編|BEAM_CELL|レーザーポインター|0|ATTACK|ENEMY|4ダメージ。びくびく1を与える。|damage=4; vulnerable=1|
 |小学生編|OUT_ROLLER_BLADE|ローラーシューズ|2|SKILL|SELF|このターン、全手札のコストを0にする。|cardEffectLogic:名称分岐; App:名称/ID分岐|
 |小学生編|ENVENOM|悪口|2|POWER|SELF|攻撃時ドクドク1付与。|applyPower={id:"ENVENOM",amount:1}|
@@ -424,7 +424,7 @@
 |小学生編|OUT_HAUNTED_HOUSE|近所の幽霊屋敷|3|SKILL|ENEMY|対象をびくびく6にする。|vulnerable=6|
 |小学生編|OUT_GOLD_FISH|金魚すくい|1|SKILL|SELF|アタックを1枚選ぶ。この戦闘中、それは強化され、0コスト、+6ダメージ、廃棄を得る。|cardEffectLogic:名称分岐; App:名称/ID分岐|
 |小学生編|GALAXY_EXPRESS|銀河鉄道の夜|1|SKILL|SELF|山札の上から5枚を見る。1枚選び手札に加え、残りを捨てる。|draw=1; App:名称/ID分岐|
-|小学生編|SANSU_KUKU|九九の連鎖|2|ATTACK|ENEMY|9ダメージ。今ターン使用した攻撃枚数分ダメージ追加。|damage=9; damagePerAttackPlayed=2|
+|小学生編|SANSU_KUKU|九九の連鎖|2|ATTACK|ENEMY|9ダメージ。今ターン使用した攻撃1枚につき2ダメージ追加。|damage=9; damagePerAttackPlayed=2|
 |小学生編|OUT_SECRET_BASE|空き地の秘密基地|3|POWER|SELF|ターン終了時、ブロック8を得る。|applyPower={id:"METALLICIZE",amount:8}|
 |小学生編|CAUSTIC_WASABI|劇薬ワサビ|1|SKILL|ENEMY|ドクドクを3倍にする。廃棄。|exhaust=true; poisonMultiplier=3|
 |小学生編|HOT_CHILI|激辛トウガラシ|1|POWER||ムキムキ3を得る。|strength=3|
@@ -438,7 +438,7 @@
 |小学生編|MYSTIC_MUSHROOM|幻覚キノコ|1|SKILL||ランダムなカード2枚を手札に加える。廃棄。|exhaust=true; addCardToHand={cardName:"DISCOVERY",count:1}; App:名称/ID分岐|
 |小学生編|KOKUGO_KOTONOHA|言の葉|1|SKILL|ENEMY|ドクドク5を与える。|poison=5|
 |小学生編|SYAKAI_TEMPLE|古い寺院|1|SKILL|SELF|全デバフを解除する。|applyPower={id:"CLEAR_DEBUFFS",amount:1}|
-|小学生編|BOYS_WOLF_PACK|孤狼の群れ|2|ATTACK|ENEMY|9ダメージ。手札のアタック1枚につき+3。|damage=9|
+|小学生編|BOYS_WOLF_PACK|孤狼の群れ|2|ATTACK|ENEMY|9ダメージ。手札のアタック1枚につき+3。|damage=9; damagePerAttackInHand=3|
 |小学生編|TORA_HO|虎咆|2|ATTACK|ALL_ENEMIES|全体12ダメージ。びくびく1。|damage=12; vulnerable=1|
 |小学生編|KOKUGO_GOKAN|五感の表現|1|SKILL|ALL_ENEMIES|敵全体をへろへろ2にする。|weak=2|
 |小学生編|KOKUGO_GOKO|五光|2|ATTACK|ENEMY|20ダメージ。キラキラ1を得る。|damage=20; applyPower={id:"ARTIFACT",amount:1}|
@@ -463,7 +463,7 @@
 |小学生編|OUT_SAND_CASTLE|砂浜の城|2|SKILL|SELF|ブロック30。次ターンのエナジー-1。|block=30; nextTurnEnergy=-1|
 |小学生編|REBOOT|再起動|0|SKILL|SELF|捨て札を山札に戻し、4枚引く。廃棄。|draw=4; exhaust=true; shuffleHandToDraw=true|
 |小学生編|OUT_KICKBOARD|最強のキックボード|3|ATTACK|ENEMY|30ダメージ。|damage=30|
-|小学生編|OUT_TRADING_CARD|最強の激レアカード|2|ATTACK|ENEMY|デッキのカード枚数ダメージ。|damagePerCardInDraw=1|
+|小学生編|OUT_TRADING_CARD|最強の激レアカード|2|ATTACK|ENEMY|デッキのカード枚数分ダメージ。|damagePerCardInDeck=1|
 |小学生編|OUT_PAPER_PLANE_ULTRA|最強の紙飛行機|4|ATTACK|ALL_ENEMIES|全体に20ダメージ。|damage=20|
 |小学生編|OUT_SUMMER_HOMEWORK|最後の宿題|5|ATTACK|ALL_ENEMIES|全体に50ダメージ。廃棄。|damage=50; exhaust=true|
 |小学生編|RIKA_BACTERIA|細菌の増殖|1|SKILL|ENEMY|ドクドクを3倍にする。廃棄。|exhaust=true; poisonMultiplier=3|
@@ -509,7 +509,7 @@
 |小学生編|ACCURACY|集中力|1|POWER|SELF|えんぴつの削りかすのダメージ+4。|applyPower={id:"ACCURACY",amount:4}|
 |小学生編|CHARGE_BATTERY|充電|1|SKILL|SELF|ブロック7。次ターンエナジー+1。|block=7; nextTurnEnergy=1|
 |小学生編|HEAVY_BLADE|重いバット|2|ATTACK|ENEMY|14ダメージ。ムキムキ効果3倍。|damage=14; strengthScaling=3|
-|小学生編|BOYS_GRAVITY_PRESS|重力100倍プレス|2|ATTACK|ENEMY|現在のブロック値の2倍のダメージ。|damageBasedOnBlock=true|
+|小学生編|BOYS_GRAVITY_PRESS|重力100倍プレス|2|ATTACK|ENEMY|現在のブロック値の2倍のダメージ。|damageBasedOnBlock=true; damageBasedOnBlockMultiplier=2|
 |小学生編|RIKA_GRAVITY|重力の法則|2|ATTACK|ENEMY|15ダメージ。対象の攻撃力を2下げる。|damage=15; strength=-2|
 |小学生編|DIE_DIE_DIE|宿題宿題|1|ATTACK|ALL_ENEMIES|全体13ダメージ。廃棄。|damage=13; exhaust=true|
 |小学生編|OUT_PIZZA_PARTY|出前ピザパーティー|2|SKILL|SELF|自分とパートナーのHPを全回復。使い切り。|heal=99; exhaust=true; consumedOnUse=true; cardEffectLogic:名称分岐; App:名称/ID分岐|
@@ -685,7 +685,7 @@
 |小学生編|BOUNTY_PERSIMMON|豊穣のカキ|1|SKILL||次のターン、追加で2枚引く。廃棄。|exhaust=true; nextTurnDraw=2|
 |小学生編|BOTCHAN|坊っちゃん|1|ATTACK|ENEMY|8ダメージ。敵を「びくびく」状態に。|damage=8; vulnerable=1|
 |小学生編|WILD_STRIKE|暴れる|1|ATTACK|ENEMY|12ダメージ。山札に「ケガ」を加える。|damage=12; addCardToDraw={cardName:"WOUND",count:1}|
-|小学生編|OUT_MY_HERO|僕だけのヒーロー|7|ATTACK|ENEMY|50ダメージ。自分のHPが半分以下の時、コスト0になりダメージが2倍になる。|damage=50; cardEffectLogic:名称分岐|
+|小学生編|OUT_MY_HERO|僕だけのヒーロー|7|ATTACK|ENEMY|50ダメージ。自分のHPが半分以下の時、コスト0になりダメージが2倍になる。|damage=50; lowHpCostZero=true; lowHpDamageMultiplier=2|
 |小学生編|OUT_SNOWBALL_WAR|本気の雪合戦|3|ATTACK|ENEMY|8ダメージを4回与える。|damage=8; playCopies=3|
 |小学生編|GIRLS_CHOCO_VALENTINE|本命チョコ|2|ATTACK|ENEMY|15ダメージ。対象を1ターンスタンさせる。廃棄。|damage=15; exhaust=true; App:名称/ID分岐|
 |小学生編|STATIC_DISCHARGE|摩擦熱|1|POWER|SELF|被ダメ時、ランダムに5ダメージ。|applyPower={id:"STATIC_DISCHARGE",amount:1}|

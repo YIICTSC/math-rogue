@@ -112,6 +112,7 @@ import { ASSIGNMENT_NOTIFICATION_OPEN_EVENT } from './services/assignmentNotific
 import { childSafetyService } from './services/childSafetyService';
 import { generateEvent, generateLegacyEvent } from './services/eventService';
 import { createAssignmentRewardCard, createHolographicCard, getUpgradedCard, synthesizeCards } from './utils/cardUtils';
+import { getCardDamage, getCardPlayCost } from './utils/cardDamage';
 import { getCardIllustrationPaths } from './utils/cardIllustration';
 import { getMagicCardArtUrl } from './utils/cardArtPaths';
 import { getEnemyIllustrationPaths } from './utils/enemyIllustration';
@@ -893,21 +894,30 @@ const estimateBossScalingSingleCardDamage = (deck: ICard[], effectMultiplier = 1
         (
             card.damage !== undefined ||
             card.damageBasedOnBlock ||
+            card.damageBasedOnHpLostThisTurn ||
             card.damagePerCardInHand ||
+            card.damagePerAttackInHand ||
             card.damagePerAttackPlayed ||
+            card.damagePerCardPlayed ||
+            card.damagePerCardPlayedBattle ||
+            card.damagePerCardInDeck ||
             card.damagePerStrike ||
             card.damagePerCardInDraw
         )
     );
 
     return Math.max(0, ...damageCards.map(card => {
-        let perHit = card.damage || 0;
-
-        if (card.damageBasedOnBlock) perHit += assumedBlock;
-        if (card.damagePerCardInHand) perHit += Math.max(0, assumedHand - 1) * card.damagePerCardInHand;
-        if (card.damagePerAttackPlayed) perHit += assumedPriorAttacks * card.damagePerAttackPlayed;
-        if (card.damagePerStrike) perHit += strikeCount * card.damagePerStrike;
-        if (card.damagePerCardInDraw) perHit += assumedDrawPile * card.damagePerCardInDraw;
+        const perHit = getCardDamage(card, {
+            block: assumedBlock,
+            handCountExcludingSelf: Math.max(0, assumedHand - 1),
+            attackCountInHand: Math.max(0, assumedHand - 1) * (attackCount / Math.max(1, deckSize)),
+            attacksPlayedThisTurn: assumedPriorAttacks,
+            cardsPlayedThisTurn: assumedPriorAttacks,
+            cardsPlayedThisBattle: assumedPriorAttacks,
+            strikeCount,
+            deckCount: deckSize,
+            drawPileCount: assumedDrawPile,
+        });
 
         let hits = 1 + (card.playCopies || 0);
         if (card.hitsPerSkillInHand) hits = Math.max(1, assumedSkillsInHand);
@@ -1192,6 +1202,7 @@ const App: React.FC = () => {
         powers: {},
         echoes: 0,
         cardsPlayedThisTurn: 0,
+        cardsPlayedThisBattle: 0,
         attacksPlayedThisTurn: 0,
         typesPlayedThisTurn: [],
         relicCounters: {},
@@ -2976,6 +2987,7 @@ const App: React.FC = () => {
             typesPlayedThisTurn: [],
             echoes: 0,
             cardsPlayedThisTurn: 0,
+            cardsPlayedThisBattle: 0,
             attacksPlayedThisTurn: 0,
             codexBuffer: [],
             familiars: [],
@@ -3024,15 +3036,17 @@ const App: React.FC = () => {
             }
         }
         if (p.turnFlags['DODOME_CHAOS_NEXT_BATTLE']) {
-            const candidates = p.drawPile.filter(card => card.cost > 0 && !card.unplayable);
+            const candidates = p.drawPile.filter(card => (card.xCost || card.cost > 0) && !card.unplayable);
             const selected = candidates[Math.floor(Math.random() * candidates.length)];
             if (selected) {
                 p.drawPile = p.drawPile.map(card => card.id === selected.id
                     ? {
                         ...card,
-                        battleRestore: card.battleRestore ?? { cost: card.cost },
+                        battleRestore: card.battleRestore ?? { cost: card.cost, xCost: card.xCost },
                         battleBaseCost: card.battleBaseCost ?? card.cost,
-                        cost: 0
+                        battleBaseXCost: card.battleBaseXCost ?? card.xCost,
+                        cost: 0,
+                        xCost: false
                     }
                     : card);
             }
@@ -3055,7 +3069,7 @@ const App: React.FC = () => {
             const powerPool = getFilteredCardPool(p.id).filter(c => c.type === CardType.POWER);
             if (powerPool.length > 0) {
                 const power = powerPool[Math.floor(Math.random() * powerPool.length)];
-                p.hand.push(randomizeCardCostForRelics(p, { ...power, id: `ench-${Date.now()}`, cost: 0 }));
+                p.hand.push(randomizeCardCostForRelics(p, { ...power, id: `ench-${Date.now()}`, cost: 0, xCost: false }));
             }
         }
 
@@ -3063,9 +3077,9 @@ const App: React.FC = () => {
             const attacks = p.drawPile.filter(c => c.type === CardType.ATTACK);
             if (attacks.length > 0) {
                 const randomAttack = attacks[Math.floor(Math.random() * attacks.length)];
-                p.hand.push(randomizeCardCostForRelics(p, { ...randomAttack, cost: 0, id: `whistle-${Date.now()}` }));
+                p.hand.push(randomizeCardCostForRelics(p, { ...randomAttack, cost: 0, xCost: false, id: `whistle-${Date.now()}` }));
             } else {
-                p.hand.push(randomizeCardCostForRelics(p, { ...CARDS_LIBRARY['STRIKE'], cost: 0, id: `whistle-fallback-${Date.now()}` }));
+                p.hand.push(randomizeCardCostForRelics(p, { ...CARDS_LIBRARY['STRIKE'], cost: 0, xCost: false, id: `whistle-fallback-${Date.now()}` }));
             }
         }
 
@@ -4701,7 +4715,7 @@ const App: React.FC = () => {
     };
 
     const randomizeCardCostForRelics = (player: Player, card: ICard): ICard => {
-        if ((hasRelic(player, 'SNECKO_EYE') || player.powers['CONFUSED'] > 0) && card.cost >= 0) {
+        if (!card.xCost && (hasRelic(player, 'SNECKO_EYE') || player.powers['CONFUSED'] > 0) && card.cost >= 0) {
             return { ...card, cost: Math.floor(Math.random() * 4) };
         }
         return card;
@@ -4726,7 +4740,7 @@ const App: React.FC = () => {
         else player.discardPile.push(card);
     };
 
-    const makeCardCostZero = (card: ICard): ICard => ({ ...card, cost: 0 });
+    const makeCardCostZero = (card: ICard): ICard => ({ ...card, cost: 0, xCost: false });
     const makeCardCostReduced = (card: ICard, amount: number): ICard => ({ ...card, cost: Math.max(0, card.cost - amount) });
 
     const upgradeRandomCardInZones = (player: Player) => {
@@ -4796,7 +4810,7 @@ const App: React.FC = () => {
             const selected = skills[Math.floor(Math.random() * skills.length)];
             if (selected) {
                 player.drawPile = player.drawPile.filter(card => card.id !== selected.id);
-                player.hand.push({ ...selected, cost: 0 });
+                player.hand.push({ ...selected, cost: 0, xCost: false });
             }
         }
         if (has('BAG_OF_PREPARATION')) {
@@ -5388,6 +5402,10 @@ const App: React.FC = () => {
             nextCard.cost = nextCard.battleBaseCost;
             delete nextCard.battleBaseCost;
         }
+        if (nextCard.battleBaseXCost !== undefined) {
+            nextCard.xCost = nextCard.battleBaseXCost;
+            delete nextCard.battleBaseXCost;
+        }
         if (nextCard.battleBaseDamage !== undefined) {
             nextCard.damage = nextCard.battleBaseDamage;
             delete nextCard.battleBaseDamage;
@@ -5419,6 +5437,7 @@ const App: React.FC = () => {
         powers: {},
         echoes: 0,
         cardsPlayedThisTurn: 0,
+        cardsPlayedThisBattle: 0,
         attacksPlayedThisTurn: 0,
         typesPlayedThisTurn: [],
         turnFlags: {},
@@ -5539,6 +5558,7 @@ const App: React.FC = () => {
             ...card,
             battleRestore: card.battleRestore ?? {
                 cost: card.cost,
+                xCost: card.xCost,
                 damage: card.damage,
                 block: card.block,
                 description: card.description,
@@ -5554,7 +5574,9 @@ const App: React.FC = () => {
                 addCardToHand: card.addCardToHand ? { ...card.addCardToHand } : undefined
             },
             battleBaseCost: card.battleBaseCost ?? card.cost,
-            cost: 0
+            battleBaseXCost: card.battleBaseXCost ?? card.xCost,
+            cost: 0,
+            xCost: false
         }, extraText);
 
     useEffect(() => {
@@ -8301,6 +8323,7 @@ const App: React.FC = () => {
                     ...upgraded,
                     battleRestore: {
                         cost: originalCard.cost,
+                        xCost: originalCard.xCost,
                         damage: originalCard.damage,
                         block: originalCard.block,
                         description: originalCard.description,
@@ -8316,9 +8339,11 @@ const App: React.FC = () => {
                         addCardToHand: originalCard.addCardToHand ? { ...originalCard.addCardToHand } : undefined
                     },
                     battleBaseCost: upgraded.battleBaseCost ?? upgraded.cost,
+                    battleBaseXCost: upgraded.battleBaseXCost ?? upgraded.xCost,
                     battleBaseDamage: upgraded.battleBaseDamage ?? upgraded.damage,
                     battleBaseExhaust: upgraded.battleBaseExhaust ?? upgraded.exhaust,
                     cost: 0,
+                    xCost: false,
                     damage: (upgraded.damage || 0) + 6,
                     exhaust: true
                 }, battleText);
@@ -8684,21 +8709,31 @@ const App: React.FC = () => {
             return;
         }
         const adjustedCard: ICard = { ...card };
+        if (adjustedCard.lowHpCostZero && actionPlayer.currentHp * 2 <= actionPlayer.maxHp) {
+            adjustedCard.cost = 0;
+            adjustedCard.xCost = false;
+            if (adjustedCard.lowHpDamageMultiplier) {
+                adjustedCard.damage = (adjustedCard.damage || 0) * adjustedCard.lowHpDamageMultiplier;
+            }
+        }
         if (adjustedCard.type === CardType.ATTACK && actionPlayer.relicCounters['MORNING_FLAG_READY'] === 1) {
             adjustedCard.cost = Math.max(0, adjustedCard.cost - 1);
         }
         if (adjustedCard.type === CardType.SKILL && actionPlayer.relicCounters['ERASER_CAP_READY'] === 1) {
             adjustedCard.cost = 0;
+            adjustedCard.xCost = false;
         }
         if (actionPlayer.relicCounters['TEXTBOOK_READY'] === 1) {
             adjustedCard.cost = Math.max(0, adjustedCard.cost - 1);
         }
         if (adjustedCard.type === CardType.ATTACK && actionPlayer.relicCounters['PENCIL_LEAD_ACTIVE'] === 1) {
             adjustedCard.cost = 0;
+            adjustedCard.xCost = false;
         }
         const schoolRoofFlagApplied = actionPlayer.relicCounters['SCHOOL_ROOF_FLAG_READY'] === 1;
         if (schoolRoofFlagApplied) {
             adjustedCard.cost = 0;
+            adjustedCard.xCost = false;
         }
         if (adjustedCard.type === CardType.ATTACK && (actionPlayer.relicCounters['RULER_CASE_DAMAGE'] || 0) > 0) {
             adjustedCard.damage = (adjustedCard.damage || 0) + actionPlayer.relicCounters['RULER_CASE_DAMAGE'];
@@ -8732,7 +8767,7 @@ const App: React.FC = () => {
         if (adjustedCard.type === CardType.SKILL && actionPlayer.relicCounters['DUAL_PENCIL_SKILL_READY'] === 1) {
             adjustedCard.block = (adjustedCard.block || 0) + 2;
         }
-        let effectiveCost = adjustedCard.cost;
+        let effectiveCost = getCardPlayCost(adjustedCard, actionPlayer.currentEnergy);
         if (actionPlayer.powers['CORRUPTION'] && adjustedCard.type === CardType.SKILL) {
             effectiveCost = 0;
         }
@@ -8839,6 +8874,7 @@ const App: React.FC = () => {
             const actorPlayer = actorEntry?.player ?? prev.player;
             const actorSelectedEnemyId = actorEntry?.selectedEnemyId ?? actionSelectedEnemyId;
             let p = { ...actorPlayer, hand: [...actorPlayer.hand], drawPile: [...actorPlayer.drawPile], discardPile: [...actorPlayer.discardPile], deck: [...actorPlayer.deck], powers: { ...actorPlayer.powers } };
+            const hpLostAtCardPlay = p.hpLostThisTurn || 0;
             const magicEffectMultiplier = p.magicTransformed ? 2 : 1;
             let enemies = prev.enemies.map(e => ({ ...e }));
             const currentLogs: string[] = [`> ${trans(card.name, languageMode)} ${trans("を使用", languageMode)}`];
@@ -8987,6 +9023,7 @@ const App: React.FC = () => {
                 delete p.turnFlags['NEXT_ATTACK_COST_DOWN'];
             }
             p.cardsPlayedThisTurn++;
+            p.cardsPlayedThisBattle = (p.cardsPlayedThisBattle || 0) + 1;
             if (card.familiarSummon) {
                 const summonHpCost = card.familiarSummon.hpCost;
                 p.currentHp = Math.max(0, p.currentHp - summonHpCost);
@@ -9067,7 +9104,7 @@ const App: React.FC = () => {
             if (card.name === '理科室の調合' || card.name === '錬金術' || card.name === 'ALCHEMIZE' || card.originalNames?.includes('理科室の調合') || card.originalNames?.includes('錬金術') || card.originalNames?.includes('ALCHEMIZE')) {
                 const possibleCards = getFilteredCardPool(p.id).filter(c => c.rarity !== 'SPECIAL');
                 const randomCardTemplate = possibleCards[Math.floor(Math.random() * possibleCards.length)];
-                let newC = { ...randomCardTemplate, id: `alch-${Date.now()}`, cost: 0 } as ICard;
+                let newC = { ...randomCardTemplate, id: `alch-${Date.now()}`, cost: 0, xCost: false } as ICard;
                 if (p.powers['MASTER_REALITY']) newC = getUpgradedCard(newC);
 
                 if (p.hand.length < HAND_SIZE + 5) {
@@ -9140,7 +9177,7 @@ const App: React.FC = () => {
                             p.currentEnergy = Math.max(0, p.currentEnergy - 1);
                             p.floatingText = { id: `void-turn-${Date.now()}-${i}`, text: '-1 Energy', color: 'text-red-500', iconType: 'zap' };
                         }
-                        if ((p.relics.find(r => r.id === 'SNECKO_EYE') || p.powers['CONFUSED'] > 0) && card.cost >= 0) {
+                        if (!card.xCost && (p.relics.find(r => r.id === 'SNECKO_EYE') || p.powers['CONFUSED'] > 0) && card.cost >= 0) {
                             card.cost = Math.floor(Math.random() * 4);
                         }
                         p.hand.push(card);
@@ -9178,7 +9215,7 @@ const App: React.FC = () => {
             let activations = 1;
             if (p.echoes > 0) { activations++; p.echoes--; currentLogs.push(trans("反響で再発動！", languageMode)); }
             if (card.type === CardType.SKILL && p.powers['BURST'] > 0) { activations++; p.powers['BURST']--; currentLogs.push(trans("スキル二度押しで再発動！", languageMode)); }
-            if (card.type === CardType.ATTACK && p.relics.find(r => r.id === 'NECRONOMICON') && card.cost >= 2 && !p.turnFlags['NECRONOMICON_USED']) {
+            if (card.type === CardType.ATTACK && p.relics.find(r => r.id === 'NECRONOMICON') && effectiveCost >= 2 && !p.turnFlags['NECRONOMICON_USED']) {
                 activations++;
                 p.turnFlags['NECRONOMICON_USED'] = true;
                 currentLogs.push(trans("ネクロノミコンで再発動！", languageMode));
@@ -9244,17 +9281,29 @@ const App: React.FC = () => {
                         }
                     }
 
-                    if (card.damage || card.damageBasedOnBlock || card.damagePerCardInHand || card.damagePerAttackPlayed || card.damagePerStrike || card.damagePerCardInDraw) {
+                    if (card.removeEnemyBlock) {
+                        targets.forEach(target => { target.block = 0; });
+                        if (h === 0) currentLogs.push(trans("敵のブロックを解除した！", languageMode));
+                    }
+
+                    if (card.damage || card.damageBasedOnBlock || card.damageBasedOnHpLostThisTurn || card.damagePerCardInHand || card.damagePerAttackInHand || card.damagePerAttackPlayed || card.damagePerCardPlayed || card.damagePerCardPlayedBattle || card.damagePerCardInDeck || card.damagePerStrike || card.damagePerCardInDraw) {
                         targets.forEach(e => {
                             if (e.currentHp <= 0) return;
                             const hpBeforeDamage = e.currentHp;
-                            let baseDamage = (card.damage || 0);
+                            let baseDamage = getCardDamage(card, {
+                                block: p.block,
+                                hpLostThisTurn: hpLostAtCardPlay,
+                                handCountExcludingSelf: p.hand.filter(c => c.id !== card.id).length,
+                                attackCountInHand: p.hand.filter(c => c.id !== card.id && c.type === CardType.ATTACK).length,
+                                attacksPlayedThisTurn: p.attacksPlayedThisTurn,
+                                cardsPlayedThisTurn: p.cardsPlayedThisTurn,
+                                cardsPlayedThisBattle: p.cardsPlayedThisBattle,
+                                strikeCount: p.deck.filter(c => c.name === 'えんぴつ攻撃' || c.originalNames?.includes('えんぴつ攻撃')).length,
+                                deckCount: p.deck.length,
+                                drawPileCount: p.drawPile.length,
+                            });
                             let logParts: string[] = [`${baseDamage}`];
-                            if (card.damageBasedOnBlock) { baseDamage += p.block; logParts[0] = `${baseDamage}(Block)`; }
-                            if (card.damagePerCardInHand) baseDamage += (p.hand.filter(c => c.id !== card.id).length) * card.damagePerCardInHand!;
-                            if (card.damagePerAttackPlayed) baseDamage += (p.attacksPlayedThisTurn) * card.damagePerAttackPlayed!;
-                            if (card.damagePerStrike) baseDamage += (p.deck.filter(c => c.name === 'えんぴつ攻撃' || c.originalNames?.includes('えんぴつ攻撃')).length) * card.damagePerStrike!;
-                            if (card.damagePerCardInDraw) baseDamage += p.drawPile.length * card.damagePerCardInDraw!;
+                            if (card.damageBasedOnBlock) logParts[0] = `${baseDamage}(Block)`;
                             if ((card.name === 'えんぴつの削りかす' || card.name === 'SHIV' || card.originalNames?.includes('えんぴつの削りかす') || card.originalNames?.includes('SHIV')) && p.powers['ACCURACY']) {
                                 baseDamage += p.powers['ACCURACY'];
                                 logParts.push(`+${p.powers['ACCURACY']}(精度)`);
@@ -9770,7 +9819,7 @@ const App: React.FC = () => {
                         }
                     }
                     if (card.name === '初詣の願い事' || card.originalNames?.includes('初詣の願い事') || card.id?.includes('OUT_SHRINE_PRAY')) {
-                        p.hand = p.hand.map(hc => hc.id === card.id ? hc : { ...hc, cost: 0 });
+                        p.hand = p.hand.map(hc => hc.id === card.id ? hc : { ...hc, cost: 0, xCost: false });
                         currentLogs.push(trans("手札の全カードのコストを0にした！", languageMode));
                     }
                     if (card.name === 'ローラーシューズ' || card.originalNames?.includes('ローラーシューズ') || card.id?.includes('OUT_ROLLER_BLADE')) {
@@ -9844,7 +9893,7 @@ const App: React.FC = () => {
                         const candidates = p.hand.filter(c => c.id !== card.id && c.cost > 0);
                         if (candidates.length > 0) {
                             const target = candidates[Math.floor(Math.random() * candidates.length)];
-                            p.hand = p.hand.map(hc => hc.id === target.id ? { ...hc, cost: 0 } : hc);
+                            p.hand = p.hand.map(hc => hc.id === target.id ? { ...hc, cost: 0, xCost: false } : hc);
                             currentLogs.push(`${trans(target.name, languageMode)}のコストを0にした！`);
                         }
                     }
@@ -9888,8 +9937,8 @@ const App: React.FC = () => {
                         currentLogs.push(trans("次のアタックのコストが1下がる", languageMode));
                     }
                     if (card.name === 'リベンジ・バースト' || card.originalNames?.includes('リベンジ・バースト') || card.id?.includes('BOYS_REVENGE')) {
-                        card.damage = Math.max(0, (p.hpLostThisTurn || 0) * 2);
-                        currentLogs.push(trans(`今ターン失ったHPを力に変えた！ (${card.damage}ダメージ)`, languageMode));
+                        const revengeDamage = Math.max(0, hpLostAtCardPlay * (card.damageBasedOnHpLostThisTurn || 2));
+                        currentLogs.push(trans(`今ターン失ったHPを力に変えた！ (${revengeDamage}ダメージ)`, languageMode));
                     }
                     if (card.name === '修羅の構え' || card.originalNames?.includes('修羅の構え') || card.id?.includes('BOYS_BATTLE_STANCE')) {
                         p.turnFlags = { ...p.turnFlags, NEXT_ATTACK_EXTRA_ACTIVATION: true };
@@ -9976,7 +10025,7 @@ const App: React.FC = () => {
                                         p.currentEnergy = Math.max(0, p.currentEnergy - 1);
                                         p.floatingText = { id: `void-turn-${Date.now()}-${j}`, text: '-1 Energy', color: 'text-red-500', iconType: 'zap' };
                                     }
-                                    if ((p.relics.find(r => r.id === 'SNECKO_EYE') || p.powers['CONFUSED'] > 0) && card.cost >= 0) {
+                                    if (!card.xCost && (p.relics.find(r => r.id === 'SNECKO_EYE') || p.powers['CONFUSED'] > 0) && card.cost >= 0) {
                                         card.cost = Math.floor(Math.random() * 4);
                                     }
                                     p.hand.push(card);
@@ -10030,7 +10079,10 @@ const App: React.FC = () => {
                             const template = CARDS_LIBRARY[card.addCardToHand.cardName];
                             if (template) {
                                 let newC = { ...template, id: `gen-hand-${Date.now()}-${act}-${h}-${c}-${Math.random()}` };
-                                if (card.addCardToHand.cost0) newC.cost = 0;
+                                if (card.addCardToHand.cost0) {
+                                    newC.cost = 0;
+                                    newC.xCost = false;
+                                }
                                 if (p.powers['MASTER_REALITY']) newC = getUpgradedCard(newC);
                                 if (p.hand.length < HAND_SIZE + 5) {
                                     p.hand.push(newC);
@@ -10462,7 +10514,7 @@ const App: React.FC = () => {
 
             if (p.powers['CREATIVE_AI']) {
                 const powerPool = getFilteredCardPool(p.id).filter(c => c.type === CardType.POWER);
-                const power = { ...powerPool[Math.floor(Math.random() * powerPool.length)], id: `ai-${Date.now()}`, cost: 0 };
+                const power = { ...powerPool[Math.floor(Math.random() * powerPool.length)], id: `ai-${Date.now()}`, cost: 0, xCost: false };
                 newHand.push(power);
                 nextActiveEffects.push({ id: `vfx-ai-${Date.now()}`, type: 'BUFF', targetId: 'player' });
             }
@@ -10640,7 +10692,10 @@ const App: React.FC = () => {
                 delete p.relicCounters['THREE_COLOR_RIBBON_RETAIN'];
             }
             const retainedCards = p.hand.filter(card => retainedIds.has(card.id));
-            if (hasRelic(p, 'STAPLER') && retainedCards[0]) retainedCards[0].cost = 0;
+            if (hasRelic(p, 'STAPLER') && retainedCards[0]) {
+                retainedCards[0].cost = 0;
+                retainedCards[0].xCost = false;
+            }
             const discardedCards = p.hand.filter(card => !retainedIds.has(card.id));
             discardedCards.forEach(c => {
                 if (c.name === 'カンニングペーパー' || c.name === 'STRATEGIST') {
@@ -12094,7 +12149,7 @@ const App: React.FC = () => {
     };
 
     const handleTypingAutoPlayCard = (card: ICard) => {
-        handlePlayCard({ ...card, cost: 0, unplayable: false });
+        handlePlayCard({ ...card, cost: 0, xCost: false, unplayable: false });
     };
 
     useEffect(() => {

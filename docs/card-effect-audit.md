@@ -3,7 +3,7 @@
 静的解析ベースで、**カード定義**と**実装コード**の対応を確認した一覧です（実機プレイ検証ではありません）。
 
 - 対象カード総数: **608**
-- `OK`: **594** / `要確認`: **14**
+- `OK`: **608** / `要確認`: **0**
 
 ## 効果の被り（同一効果シグネチャ上位）
 - 18枚: 鼻水、パニック、星のプレゼント、魅惑のカカオ、ゼロの発見、ガチャの神引き、図書室での昼寝、手作りの宝地図 …ほか10枚
@@ -45,7 +45,7 @@
 |`OUT_GRANDMA_GIFT`|おばあちゃんの小遣い|120ゴールドを得る。廃棄。|OK|汎用処理で解決|`gold, exhaust`|
 |`OUT_GRANDMA_CAKE`|おばあちゃんの手作りケーキ|HP30回復。最大HP+5。廃棄。|OK|汎用処理で解決|`heal, fatalMaxHp, exhaust`|
 |`OMUSUBI_KORORIN`|おむすびころりん|E1を得る。ランダムな敵に5ダメージ。|OK|汎用処理で解決|`energy, damage`|
-|`GIRLS_SWEET_DREAM`|おやすみスウィート|敵全体を2ターン行動不能にする。廃棄。|要確認|効果フィールド不足; 説明文と実装差分の可能性|`exhaust`|
+|`GIRLS_SWEET_DREAM`|おやすみスウィート|敵全体を2ターン行動不能にする。廃棄。|OK|追加ロジックあり|`exhaust`|
 |`OI_DETEKOI`|おーい、でてこい|18ダメージ。次ターンE+1。|OK|汎用処理で解決|`damage, nextTurnEnergy`|
 |`GIRLS_DOLL_HOUSE`|お人形遊び|手札のカード1枚をコピーする。|OK|汎用処理で解決|`promptsCopy`|
 |`SYAKAI_CASTLE`|お城の守り|ブロック20。廃棄。|OK|汎用処理で解決|`block, exhaust`|
@@ -77,7 +77,7 @@
 |`SANSU_SOROBAN`|そろばん|エネルギー1を得る。手札を1枚捨てる。|OK|汎用処理で解決|`energy, promptsDiscard`|
 |`BITE`|つまみ食い|7ダメージ。HP2回復。|OK|汎用処理で解決|`damage, heal`|
 |`DOKKO_CHAN`|どっこいしょ|ブロック5。手札の全カードを強化する。|OK|汎用処理で解決|`block, upgradeHand`|
-|`GIRLS_RAINBOW_MAGIC`|なないろマジック|手札のランダムなカードのコストを0にする。|要確認|効果フィールド不足|`-`|
+|`GIRLS_RAINBOW_MAGIC`|なないろマジック|手札のランダムなカードのコストを0にする。|OK|追加ロジックあり|`-`|
 |`NEZUMI_NO_YOMEIRI`|ねずみの嫁入り|この戦闘中、被ダメージを1軽減する。|OK|汎用処理で解決|`applyPower`|
 |`NEVERENDING_STORY`|はてしない物語|ターンの開始時、全てのカードのコストを1下げる。|OK|汎用処理で解決|`applyPower`|
 |`SLICE`|ひっかく|6ダメージ。|OK|汎用処理で解決|`damage`|
@@ -128,7 +128,7 @@
 |`WHIRLWIND`|グルグルバット|全体8ダメージを2回。|OK|汎用処理で解決|`damage, playCopies`|
 |`EMPTY_FIST`|グーパンチ|9ダメージ。次のターン、エネルギー1を得る。|OK|汎用処理で解決|`damage, nextTurnEnergy`|
 |`WOUND`|ケガ|使用不可。|OK|汎用処理で解決|`unplayable`|
-|`OUT_ARCADE_MASTER`|ゲーセンの達人|コンボ：今ターン使ったカード1枚につき8ダメージ。|OK|汎用処理で解決|`damagePerAttackPlayed`|
+|`OUT_ARCADE_MASTER`|ゲーセンの達人|コンボ：今ターン使ったカード1枚につき8ダメージ。|OK|汎用処理で解決|`damagePerCardPlayed`|
 |`BOYS_CORE_STRIKE`|コア・ストライク|10ダメージ。エネルギー1を得る。|OK|汎用処理で解決|`damage, energy`|
 |`PEPPER_SEED`|コショウの種|ブロック3。菜園に植えると「爆炎のコショウ」に成長する。|OK|汎用処理で解決|`block, isSeed, growthRequired, grownCardId`|
 |`COSMOS_SEED`|コスモスの種|ブロック3。菜園に植えると「秋空のコスモス」に成長する。|OK|汎用処理で解決|`block, isSeed, growthRequired, grownCardId`|
@@ -144,7 +144,7 @@
 |`OUT_JUNGLE_GYM`|ジャングルジムの頂上|ブロック20。次ターンのエネルギー+1。|OK|汎用処理で解決|`block, nextTurnEnergy`|
 |`LEAP`|ジャンプ|ブロック9を得る。|OK|汎用処理で解決|`block`|
 |`GIRLS_JEWEL_SHINE`|ジュエル・シャイン|ターン開始時にキラキラ1を得る。|OK|汎用処理で解決|`applyPower`|
-|`OUT_STAMP_COLLECT`|スタンプラリー|クエスト: この戦闘中、あと5枚カードを使う。達成でカードを2枚引き、エネルギー1を得る。廃棄。|要確認|効果フィールド不足|`exhaust`|
+|`OUT_STAMP_COLLECT`|スタンプラリー|クエスト: この戦闘中、あと5枚カードを使う。達成でカードを2枚引き、エネルギー1を得る。廃棄。|OK|追加ロジックあり|`exhaust`|
 |`PE_CHAMPION`|スポーツ王|ムキムキ2、カチカチ2を得る。|OK|追加ロジックあり|`strength, applyPower`|
 |`GAUCHE_CELLO`|セロ弾きのゴーシュ|ブロック10。次ターン2枚引く。|OK|汎用処理で解決|`block, nextTurnDraw`|
 |`SANSU_ZERO`|ゼロの発見|「発見」と同じくランダムなカード3枚を手札に加える。廃棄。|OK|追加ロジックあり|`exhaust`|
@@ -159,10 +159,10 @@
 |`GIRLS_CAKE_TOPPER`|デコレーション・ケーキ|カードを使用する度、HPを1回復。|OK|追加ロジックあり|`applyPower`|
 |`CHILI_SEED`|トウガラシの種|ブロック3。菜園に植えると「激辛トウガラシ」に成長する。|OK|汎用処理で解決|`block, isSeed, growthRequired, grownCardId`|
 |`TOMATO_SEED`|トマトの種|ブロック3。菜園に植えると「完熟トマト」に成長する。|OK|汎用処理で解決|`block, isSeed, growthRequired, grownCardId`|
-|`MINE_BLAST_G`|トロッコ (芥川)|今ターン使用したカード枚数分、ダメージを与える。|OK|汎用処理で解決|`damagePerAttackPlayed`|
+|`MINE_BLAST_G`|トロッコ (芥川)|今ターン使用したカード1枚につき4ダメージ。|OK|汎用処理で解決|`damagePerCardPlayed`|
 |`CLUMSINESS`|ドジ|使用不可。廃棄。|OK|汎用処理で解決|`unplayable, exhaust`|
 |`PE_BALL`|ドッジボール投球|12ダメージ。|OK|汎用処理で解決|`damage`|
-|`GIRLS_DREAM_CATCHER`|ドリーム・キャッチャー|山札から好きなカードを1枚手札に加える。|要確認|効果フィールド不足|`-`|
+|`GIRLS_DREAM_CATCHER`|ドリーム・キャッチャー|山札から好きなカードを1枚手札に加える。|OK|追加ロジックあり|`-`|
 |`GARLIC_SEED`|ニンニクの種|ブロック3。菜園に植えると「魔除けのニンニク」に成長する。|OK|汎用処理で解決|`block, isSeed, growthRequired, grownCardId`|
 |`DEFEND`|ノートで防御|ブロックを5得る。|OK|汎用処理で解決|`block`|
 |`SHIELD_BLOCK`|ノートで防御|ブロックを7得る。|OK|汎用処理で解決|`block`|
@@ -177,7 +177,7 @@
 |`BURST`|バースト|次のスキルを2回発動。|OK|汎用処理で解決|`applyPower`|
 |`OFFERING`|パシリ|自分に6ダメージ。E2と3枚ドロー。廃棄。|OK|汎用処理で解決|`selfDamage, energy, draw, exhaust`|
 |`OUT_CANDY_BOMB`|パチパチキャンディ|4ダメージを7回与える。|OK|汎用処理で解決|`damage, playCopies`|
-|`MADNESS`|パニック|手札のランダムなカード1枚のコストを0にする。廃棄。|要確認|効果フィールド不足|`exhaust`|
+|`MADNESS`|パニック|手札のランダムなカード1枚のコストを0にする。廃棄。|OK|追加ロジックあり|`exhaust`|
 |`SANSU_PERCENT`|パーセント増量|現在のブロック値を1.5倍にする。|OK|汎用処理で解決|`blockMultiplier`|
 |`CYPRESS_SEED`|ヒノキの種|ブロック3。菜園に植えると「鉄壁のヒノキ」に成長する。|OK|汎用処理で解決|`block, isSeed, growthRequired, grownCardId`|
 |`SUNFLOWER`|ヒマワリ|エネルギー1。1枚引く。廃棄。|OK|汎用処理で解決|`energy, draw, exhaust`|
@@ -211,13 +211,13 @@
 |`LILY_SEED`|ユリの種|ブロック3。菜園に植えると「純白のユリ」に成長する。|OK|汎用処理で解決|`block, isSeed, growthRequired, grownCardId`|
 |`OUT_MORNING_EXERCISE`|ラジオ体操皆勤賞|ムキムキ2、カチカチ2を得る。|OK|汎用処理で解決|`strength, applyPower`|
 |`OUT_RADIO_CONTROL`|ラジコン操作|9ダメージを5回与える。|OK|汎用処理で解決|`damage, playCopies`|
-|`BOYS_FINAL_FANTASY`|ラスト・ファンタジー|この戦闘で使ったカード1枚につき5ダメージ。|OK|汎用処理で解決|`damagePerAttackPlayed`|
+|`BOYS_FINAL_FANTASY`|ラスト・ファンタジー|この戦闘で使ったカード1枚につき5ダメージ。|OK|汎用処理で解決|`damagePerCardPlayedBattle`|
 |`GIRLS_LOVELY_KISS`|ラブリー・キッス|8ダメージ。HPを全ダメージ分回復。|OK|汎用処理で解決|`damage, lifesteal`|
 |`LAVENDER_SEED`|ラベンダーの種|ブロック3。菜園に植えると「安らぎのラベンダー」に成長する。|OK|汎用処理で解決|`block, isSeed, growthRequired, grownCardId`|
 |`CLOTHESLINE`|ラリアット|12ダメージ。対象にへろへろ2を与える。|OK|汎用処理で解決|`damage, weak`|
 |`BASH`|ランドセルタックル|8ダメージ。対象にびくびく2を与える。|OK|汎用処理で解決|`damage, vulnerable`|
 |`RIKA_LITMUS`|リトマス試験紙|対象にへろへろ2、びくびく2を付与。|OK|汎用処理で解決|`weak, vulnerable`|
-|`BOYS_REVENGE`|リベンジ・バースト|今ターン失ったHPの2倍のダメージを与える。|OK|汎用処理で解決|`damage`|
+|`BOYS_REVENGE`|リベンジ・バースト|今ターン失ったHPの2倍のダメージを与える。|OK|汎用処理で解決|`damageBasedOnHpLostThisTurn=2`|
 |`APPLE_SEED`|リンゴの種|ブロック3。菜園に植えると「禁断のリンゴ」に成長する。|OK|汎用処理で解決|`block, isSeed, growthRequired, grownCardId`|
 |`BEAM_CELL`|レーザーポインター|4ダメージ。びくびく1を与える。|OK|汎用処理で解決|`damage, vulnerable`|
 |`OUT_ROLLER_BLADE`|ローラーシューズ|このターン、全手札のコストを0にする。|OK|追加ロジックあり|`-`|
@@ -237,7 +237,7 @@
 |`WORLD_TREE_SEED`|世界樹の種|ブロック3。菜園に植えると「ユグドラシル」に成長する。|OK|汎用処理で解決|`block, isSeed, growthRequired, grownCardId`|
 |`SYAKAI_HERITAGE`|世界遺産登録|最大HPを5増やす。廃棄。|OK|追加ロジックあり|`fatalMaxHp, exhaust`|
 |`KOKUGO_BUNPO`|主語と述語|カードを使用する度、ブロック1を得る。|OK|汎用処理で解決|`applyPower`|
-|`SANSU_KUKU`|九九の連鎖|9ダメージ。今ターン使用した攻撃枚数分ダメージ追加。|OK|汎用処理で解決|`damage, damagePerAttackPlayed`|
+|`SANSU_KUKU`|九九の連鎖|9ダメージ。今ターン使用した攻撃1枚につき2ダメージ追加。|OK|汎用処理で解決|`damage, damagePerAttackPlayed=2`|
 |`THIRD_EYE`|予習|ブロック7。1枚引き、1枚捨てる。|OK|汎用処理で解決|`block, draw, promptsDiscard`|
 |`ECHO_FORM`|予習復習|毎ターン、最初のカードを2回使用。|OK|汎用処理で解決|`applyPower`|
 |`PE_TEAM`|二人三脚|ムキムキ1、カチカチ1を得る。|OK|汎用処理で解決|`strength`|
@@ -260,7 +260,7 @@
 |`SANSU_MULTIPLICATION`|倍々ゲーム|ムキムキを倍にする。廃棄。|OK|汎用処理で解決|`doubleStrength, exhaust`|
 |`ACROBATICS`|側転|3枚引く。1枚捨てる。|OK|汎用処理で解決|`draw, promptsDiscard`|
 |`OUT_UMBRELLA_SWORD`|傘チャンバラ|12ダメージを3回。ブロック12。|OK|汎用処理で解決|`damage, playCopies, block`|
-|`OUT_MY_HERO`|僕だけのヒーロー|50ダメージ。自分のHPが半分以下の時、コスト0になりダメージが2倍になる。|OK|追加ロジックあり|`damage`|
+|`OUT_MY_HERO`|僕だけのヒーロー|50ダメージ。自分のHPが半分以下の時、コスト0になりダメージが2倍になる。|OK|汎用処理で解決|`damage, lowHpCostZero, lowHpDamageMultiplier=2`|
 |`GIRLS_CUPCAKE_BOOST`|元気が出るカップケーキ|ムキムキ2を得る。廃棄。|OK|汎用処理で解決|`strength, exhaust`|
 |`CHARGE_BATTERY`|充電|ブロック7。次ターンエナジー+1。|OK|汎用処理で解決|`block, nextTurnEnergy`|
 |`NEUTRALIZE`|先生に報告|3ダメージ。対象にへろへろ1を与える。|OK|汎用処理で解決|`damage, weak`|
@@ -298,7 +298,7 @@
 |`DEMON_FORM`|反抗期|ターン開始時にムキムキ2を得る。|OK|汎用処理で解決|`applyPower`|
 |`DEVA_FORM`|受験勉強|ターン開始時、エネルギーを得る。毎ターン増加。|OK|汎用処理で解決|`applyPower`|
 |`CLASH`|口喧嘩|14ダメージ。手札がアタックのみの時のみ使用可。|OK|汎用処理で解決|`damage, playCondition`|
-|`SYAKAI_TEMPLE`|古い寺院|全デバフを解除する。|要確認|説明文と実装差分の可能性|`applyPower`|
+|`SYAKAI_TEMPLE`|古い寺院|全デバフを解除する。|OK|汎用処理で解決|`applyPower`|
 |`RAGNAROK`|台風|5ダメージを5回与える。|OK|汎用処理で解決|`damage, playCopies`|
 |`WAGAHAI_NEKO`|吾輩は猫である|ブロック3。カード1枚引く。|OK|汎用処理で解決|`block, draw`|
 |`LUCKY_CLOVER`|四つ葉のクローバー|キラキラ2を得る。廃棄。|OK|汎用処理で解決|`applyPower, exhaust`|
@@ -306,7 +306,7 @@
 |`OUT_LIBRARY_SLEEP`|図書室での昼寝|全デバフを解除し、HPを全回復。廃棄。|OK|追加ロジックあり|`exhaust`|
 |`KOKUGO_DICTIONARY`|国語辞典|手札のカードを2枚コピーする。廃棄。|OK|追加ロジックあり|`promptsCopy, exhaust`|
 |`PROSTRATE`|土下座|ブロック4。エネルギー1を得る。|OK|汎用処理で解決|`block, energy`|
-|`OUT_RADIO_STATION`|地元のラジオ局|手札のランダムなカード3枚をコピーする。|要確認|説明文と実装差分の可能性|`promptsCopy`|
+|`OUT_RADIO_STATION`|地元のラジオ局|手札のランダムなカード3枚をコピーする。|OK|追加ロジックあり|`promptsCopy`|
 |`BOTCHAN`|坊っちゃん|8ダメージ。敵を「びくびく」状態に。|OK|汎用処理で解決|`damage, vulnerable`|
 |`OUT_CRAYON_WALL`|壁への落書き|毎ターン敵全体にドクドク3。|OK|汎用処理で解決|`applyPower`|
 |`OUT_WOOD_CRAFT`|夏休みの工作|ターン終了時、ブロック10を得る。|OK|汎用処理で解決|`applyPower`|
@@ -332,7 +332,7 @@
 |`RIKA_PLANETS`|太陽系の公転|ターン終了時、敵全体に3ダメージ。|OK|汎用処理で解決|`applyPower`|
 |`GIRLS_MIRACLE_RIBBON`|奇跡のリボン|エナジーを全回復。廃棄。|OK|追加ロジックあり|`energy, exhaust`|
 |`YOSEI_HOSHI`|妖精 (星新一)|HPを10回復。手札のカード1枚を廃棄する。|OK|汎用処理で解決|`heal, promptsExhaust`|
-|`BOYS_WOLF_PACK`|孤狼の群れ|9ダメージ。手札のアタック1枚につき+3。|OK|汎用処理で解決|`damage`|
+|`BOYS_WOLF_PACK`|孤狼の群れ|9ダメージ。手札のアタック1枚につき+3。|OK|汎用処理で解決|`damage, damagePerAttackInHand=3`|
 |`SYAKAI_VOTE`|学級委員選挙|手札をすべて強化する。|OK|追加ロジックあり|`upgradeHand`|
 |`LESSON_LEARNED`|学習|10ダメージ。たおすと最大HPが恒久的に2増加する。廃棄。|OK|汎用処理で解決|`damage, fatalMaxHp, exhaust`|
 |`GENETIC_ALGORITHM`|学習アルゴリズム|ブロック1。この戦闘で使用すると、このカードのブロック値が恒久的に2増加する。廃棄。|OK|汎用処理で解決|`block, exhaust`|
@@ -406,8 +406,8 @@
 |`DOOM_AND_GLOOM`|日曜の夜|全体10ダメージ。|OK|汎用処理で解決|`damage`|
 |`EARLY_PLUM`|早咲きのウメ|次のターン、エネルギー1を得る。廃棄。|OK|汎用処理で解決|`nextTurnEnergy, exhaust`|
 |`QUICK_SLASH`|早弁|6ダメージ。カードを2枚引く。|OK|汎用処理で解決|`damage, draw`|
-|`EXPULSION`|早退|敵のHPが30以下ならすぐにたおす。|要確認|効果フィールド不足; 説明文と実装差分の可能性|`-`|
-|`HOSHI_PRESENT`|星のプレゼント|ランダムなポーションを1つ得る。廃棄。|要確認|効果フィールド不足|`exhaust`|
+|`EXPULSION`|早退|敵のHPが30以下ならすぐにたおす。|OK|追加ロジックあり|`-`|
+|`HOSHI_PRESENT`|星のプレゼント|ランダムなポーションを1つ得る。廃棄。|OK|汎用処理で解決|`addPotion, exhaust`|
 |`HOSHI_NO_OJI`|星の王子さま|最大HP+2。HP2回復。廃棄。|OK|汎用処理で解決|`fatalMaxHp, heal, exhaust`|
 |`GIRLS_STAR_DUST`|星屑のきらめき|対象にびくびく2。カードを1枚引く。|OK|汎用処理で解決|`vulnerable, draw`|
 |`TIME_THIEF`|時間どろぼう|5ダメージ。敵の次の行動を1ターン遅らせる。|OK|汎用処理で解決|`damage`|
@@ -415,7 +415,7 @@
 |`BOYS_BLACK_HOLE`|暗黒の特異点|敵全体をへろへろ3、びくびく3にする。|OK|汎用処理で解決|`weak, vulnerable`|
 |`WILD_STRIKE`|暴れる|12ダメージ。山札に「ケガ」を加える。|OK|汎用処理で解決|`damage, addCardToDraw`|
 |`OUT_KICKBOARD`|最強のキックボード|30ダメージ。|OK|汎用処理で解決|`damage`|
-|`OUT_TRADING_CARD`|最強の激レアカード|デッキのカード枚数ダメージ。|OK|汎用処理で解決|`damagePerCardInDraw`|
+|`OUT_TRADING_CARD`|最強の激レアカード|デッキのカード枚数分ダメージ。|OK|汎用処理で解決|`damagePerCardInDeck=1`|
 |`OUT_PAPER_PLANE_ULTRA`|最強の紙飛行機|全体に20ダメージ。|OK|汎用処理で解決|`damage`|
 |`OUT_SUMMER_HOMEWORK`|最後の宿題|全体に50ダメージ。廃棄。|OK|汎用処理で解決|`damage, exhaust`|
 |`GIRLS_MOON_SERENADE`|月光のセレナーデ|エネルギー1を得る。2枚引く。廃棄。|OK|汎用処理で解決|`energy, draw, exhaust`|
@@ -462,7 +462,7 @@
 |`KOKUGO_KANJI_TEST`|漢字小テスト|3ダメージ。カードを1枚引く。廃棄。|OK|汎用処理で解決|`damage, draw, exhaust`|
 |`HOT_CHILI`|激辛トウガラシ|ムキムキ3を得る。|OK|汎用処理で解決|`strength`|
 |`LIMIT_BREAK`|火事場の馬鹿力|ムキムキを倍にする。廃棄。|OK|汎用処理で解決|`doubleStrength, exhaust`|
-|`MELTER`|炭酸ジュース|10ダメージ。対象のブロックを除去。|要確認|説明文と実装差分の可能性|`damage`|
+|`MELTER`|炭酸ジュース|10ダメージ。対象のブロックを除去。|OK|汎用処理で解決|`damage, removeEnemyBlock`|
 |`BOYS_BLAZING_FIST`|烈火拳|7ダメージ。ムキムキ1を得る。|OK|汎用処理で解決|`damage, strength`|
 |`BOYS_FLAME_DRIVE`|焔の突撃|14ダメージ。自分に1ダメージ。|OK|汎用処理で解決|`damage, selfDamage`|
 |`BOYS_BLADE_STORM`|無尽蔵の剣線|5ダメージを5回。|OK|汎用処理で解決|`damage, playCopies`|
@@ -573,7 +573,7 @@
 |`HASHIRE_MELOS`|走れメロス|次ターンE+1。カードを1枚引く。|OK|汎用処理で解決|`nextTurnEnergy, draw`|
 |`GOSHI_REVENGE`|走れメロス・ラストスパート|15ダメージ。|OK|汎用処理で解決|`damage`|
 |`BOYS_HEAVY_SMASH`|超重力粉砕|50ダメージ。廃棄。|OK|汎用処理で解決|`damage, exhaust`|
-|`BOYS_RAILGUN`|超電磁加速砲|24ダメージ。対象のブロックを除去。|要確認|説明文と実装差分の可能性|`damage`|
+|`BOYS_RAILGUN`|超電磁加速砲|24ダメージ。対象のブロックを除去。|OK|汎用処理で解決|`damage, removeEnemyBlock`|
 |`OUT_PARK_SLIDE`|超高速すべり台|35ダメージ。1枚引く。|OK|汎用処理で解決|`damage, draw`|
 |`TRIP`|足払い|敵全体にびくびく2を与える。|OK|汎用処理で解決|`vulnerable`|
 |`LEG_SWEEP`|足払い|へろへろ2を与える。ブロック11。|OK|汎用処理で解決|`weak, block`|
@@ -592,7 +592,7 @@
 |`EVOLVE`|進級|状態異常カードを引いた時、カードを引く。|OK|汎用処理で解決|`applyPower`|
 |`JACHI_BOGYAKU`|邪智暴虐|びくびく2を与える。|OK|汎用処理で解決|`vulnerable`|
 |`HEAVY_BLADE`|重いバット|14ダメージ。ムキムキ効果3倍。|OK|汎用処理で解決|`damage, strengthScaling`|
-|`BOYS_GRAVITY_PRESS`|重力100倍プレス|現在のブロック値の2倍のダメージ。|OK|汎用処理で解決|`damageBasedOnBlock`|
+|`BOYS_GRAVITY_PRESS`|重力100倍プレス|現在のブロック値の2倍のダメージ。|OK|汎用処理で解決|`damageBasedOnBlock, damageBasedOnBlockMultiplier=2`|
 |`RIKA_GRAVITY`|重力の法則|15ダメージ。対象の攻撃力を2下げる。|OK|汎用処理で解決|`damage, strength`|
 |`OUT_GOLD_FISH`|金魚すくい|アタックを1枚選ぶ。この戦闘中、それは強化され、0コスト、+6ダメージ、廃棄を得る。|OK|追加ロジックあり|`-`|
 |`IMPERVIOUS`|鉄壁|ブロック30を得る。廃棄。|OK|汎用処理で解決|`block, exhaust`|
@@ -604,7 +604,7 @@
 |`INFINITE_BLADES`|鉛筆削り|毎ターン手札にえんぴつの削りかすを加える。|OK|汎用処理で解決|`applyPower`|
 |`GALAXY_EXPRESS`|銀河鉄道の夜|山札の上から5枚を見る。1枚選び手札に加え、残りを捨てる。|OK|汎用処理で解決|`draw`|
 |`ZENITEN_DO`|銭天堂|手札に「やる気スイッチ(コスト0)」を加える。|OK|汎用処理で解決|`addCardToHand`|
-|`ALCHEMIZE`|錬金術|ランダムなカード1枚を0コストで手札に加える。|要確認|効果フィールド不足|`-`|
+|`ALCHEMIZE`|錬金術|ランダムなカード1枚を0コストで手札に加える。|OK|追加ロジックあり|`-`|
 |`KAGAMI_HOSHI`|鏡 (星新一)|手札のカード1枚をコピーして手札に加える。|OK|汎用処理で解決|`promptsCopy`|
 |`CLOAK_AND_DAGGER`|隠し芸|ブロック6。えんぴつの削りかす1枚得る。|OK|汎用処理で解決|`block, addCardToHand`|
 |`WARCRY`|雄叫び|2枚引き、1枚捨てる。廃棄される。|OK|汎用処理で解決|`draw, promptsDiscard, exhaust`|
@@ -629,7 +629,7 @@
 |`FRAGRANT_JASMINE`|香華のジャスミン|ターン開始時に追加で2枚引く。|OK|汎用処理で解決|`applyPower`|
 |`OUT_DAGASHI_ALL`|駄菓子屋の全買い|60ゴールドを得る。カードを3枚引く。廃棄。|OK|汎用処理で解決|`gold, draw, exhaust`|
 |`INJURY`|骨折|使用不可。|OK|汎用処理で解決|`unplayable`|
-|`SWEET_CACAO`|魅惑のカカオ|手札を全て捨て、同数引く。廃棄。|要確認|効果フィールド不足; 説明文と実装差分の可能性|`exhaust`|
+|`SWEET_CACAO`|魅惑のカカオ|手札を全て捨て、同数引く。廃棄。|OK|追加ロジックあり|`exhaust`|
 |`TULIP_DRAW`|魅惑のチューリップ|ターン開始時にカードを1枚引く。|OK|汎用処理で解決|`applyPower`|
 |`SANSU_FORMULA`|魔法の方程式|カードを2枚引き、エネルギー1を得る。|OK|汎用処理で解決|`draw, energy`|
 |`GIRLS_MAGIC_CIRCLE`|魔法陣の展開|毎ターン開始時、エネルギー1を得る。|OK|汎用処理で解決|`applyPower`|
@@ -637,7 +637,7 @@
 |`OUT_BIRD_WATCH`|鳥になった気分|手札のカードを2枚コピーする。廃棄。|OK|汎用処理で解決|`promptsCopy, exhaust`|
 |`TSURU_ONGAESHI`|鶴の恩返し|HPを6失い、2枚引く。|OK|汎用処理で解決|`draw, selfDamage`|
 |`GOLDEN_WHEAT`|黄金の小麦|10ダメージ。これで倒すと最大HP+4。廃棄。|OK|汎用処理で解決|`damage, fatalMaxHp, exhaust`|
-|`SLIMED`|鼻水|使用すると廃棄される。|要確認|効果フィールド不足|`exhaust`|
+|`SLIMED`|鼻水|使用すると廃棄される。|OK|汎用処理で解決|`exhaust`|
 
 ## 効果アレンジ提案（被り解消）
 - ダメージ単発カード群は「条件付き追加効果（状態異常時+α）」を割り振って役割分担。

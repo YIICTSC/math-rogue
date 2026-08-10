@@ -9376,12 +9376,20 @@ export const buildEnglishCardDescription = (card: Card): string => {
         const hitText = hits > 1 ? ` ${hits} times` : "";
         parts.push(`Deal ${card.damage} damage${targetText}${hitText}`);
     }
-    if (card.damagePerAttackPlayed) parts.push(`Deal extra damage for each Attack played this turn`);
+    if (card.damagePerAttackPlayed) parts.push(`Deal ${card.damagePerAttackPlayed} extra damage for each Attack played this turn`);
+    if (card.damagePerCardPlayed) parts.push(`Deal ${card.damagePerCardPlayed} extra damage for each card played this turn`);
+    if (card.damagePerCardPlayedBattle) parts.push(`Deal ${card.damagePerCardPlayedBattle} damage for each card played this battle`);
+    if (card.damagePerAttackInHand) parts.push(`Deal ${card.damagePerAttackInHand} extra damage for each Attack in your hand`);
     if (card.hitsPerAttackPlayed) parts.push(`Hit once for each Attack played this turn`);
     if (card.hitsPerSkillInHand) parts.push(`Hit once for each Skill in your hand`);
     if (card.damagePerCardInHand) parts.push(`Deal damage for each card in your hand`);
+    if (card.damagePerCardInDeck) parts.push(`Deal ${card.damagePerCardInDeck} damage for each card in your deck`);
     if (card.damagePerCardInDraw) parts.push(`Deal damage for each card in your draw pile`);
-    if (card.damageBasedOnBlock) parts.push("Deal damage equal to your current Block");
+    if (card.damageBasedOnHpLostThisTurn) parts.push(`Deal ${card.damageBasedOnHpLostThisTurn} times the HP you lost this turn as damage`);
+    if (card.damageBasedOnBlock) parts.push(card.damageBasedOnBlockMultiplier && card.damageBasedOnBlockMultiplier !== 1
+        ? `Deal damage equal to ${card.damageBasedOnBlockMultiplier} times your current Block`
+        : "Deal damage equal to your current Block");
+    if (card.removeEnemyBlock) parts.push("Remove the target's Block");
 
     if (card.block !== undefined && card.block > 0) parts.push(`Gain ${card.block} Block`);
     if (card.doubleBlock) parts.push("Double your current Block");

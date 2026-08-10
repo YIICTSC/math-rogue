@@ -121,7 +121,7 @@ const CaptureCardSimulator: React.FC<CaptureCardSimulatorProps> = ({
                     >
                         {filteredSourceCards.map(card => (
                             <option key={card.id} value={card.id}>
-                                {trans(card.name, languageMode)} / {trans('コスト', languageMode)}{card.cost}
+                                {trans(card.name, languageMode)} / {trans('コスト', languageMode)}{card.xCost ? 'X' : card.cost}
                             </option>
                         ))}
                     </select>

@@ -257,6 +257,7 @@ export const applyAdditionalCardLogic = (
                 if (pool.length > 0) {
                     const pick = pool[Math.floor(Math.random() * pool.length)];
                     pick.cost = 0;
+                    pick.xCost = false;
                     currentLogs.push(trans(`パニック：「${pick.name}」が0コストになった`, languageMode));
                     nextActiveEffects.push({ id: `vfx-panic-${Date.now()}`, type: 'BUFF', targetId: 'player' });
                 }

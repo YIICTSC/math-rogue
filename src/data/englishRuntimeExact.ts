@@ -176,6 +176,7 @@ export const ENGLISH_RUNTIME_EXACT: Record<string, string> = {
   '高校編に出現する敵 体育館ライトの怪。': 'A haunted gymnasium light that appears in High School Mode.',
   '敵全体を2ターン眠らせた！': 'Put all enemies to Sleep for 2 turns!',
   '敵全体のブロックを解除した！': 'Removed Block from all enemies!',
+  '敵のブロックを解除した！': "Removed the enemy's Block!",
   'ゲーム本体はインストール済みです。画像・音声は必要な種類だけ追加で保存できます。': 'The core game is installed. Download only the image and audio packs you need.',
   'カードを使用するために必要。ターン毎に回復する。': 'Required to play cards. Restored at the start of each turn.',
   '人体模型：スケスケ状態になった！': 'Anatomy Model: Became Transparent!',

@@ -224,7 +224,10 @@ export const getUpgradedCard = (card: Card): Card => {
     }
 
     // Specific Card Upgrade Logic overrides
-    if (hasCardIdentity('防具ごと体当たり', 'BODY_SLAM')) newCard.cost = 0;
+    if (hasCardIdentity('防具ごと体当たり', 'BODY_SLAM')) {
+        newCard.cost = 0;
+        newCard.xCost = false;
+    }
     if (hasCardIdentity('限界突破', 'LIMIT_BREAK')) newCard.exhaust = false;
     if (hasCardIdentity('触媒', 'CATALYST')) newCard.poisonMultiplier = 3;
 
@@ -308,6 +311,12 @@ const applyHolographicBonus = (card: Card): Card => {
     if (next.fatalEnergy !== undefined && next.fatalEnergy > 0) next.fatalEnergy = boostHolographicValue(next.fatalEnergy);
     if (next.fatalPermanentDamage !== undefined && next.fatalPermanentDamage > 0) next.fatalPermanentDamage = boostHolographicValue(next.fatalPermanentDamage);
     if (next.fatalMaxHp !== undefined && next.fatalMaxHp > 0) next.fatalMaxHp = boostHolographicValue(next.fatalMaxHp);
+    if (next.damageBasedOnBlockMultiplier !== undefined && next.damageBasedOnBlockMultiplier > 0) next.damageBasedOnBlockMultiplier = boostHolographicValue(next.damageBasedOnBlockMultiplier);
+    if (next.damageBasedOnHpLostThisTurn !== undefined && next.damageBasedOnHpLostThisTurn > 0) next.damageBasedOnHpLostThisTurn = boostHolographicValue(next.damageBasedOnHpLostThisTurn);
+    if (next.damagePerCardPlayed !== undefined && next.damagePerCardPlayed > 0) next.damagePerCardPlayed = boostHolographicValue(next.damagePerCardPlayed);
+    if (next.damagePerCardPlayedBattle !== undefined && next.damagePerCardPlayedBattle > 0) next.damagePerCardPlayedBattle = boostHolographicValue(next.damagePerCardPlayedBattle);
+    if (next.damagePerAttackInHand !== undefined && next.damagePerAttackInHand > 0) next.damagePerAttackInHand = boostHolographicValue(next.damagePerAttackInHand);
+    if (next.damagePerCardInDeck !== undefined && next.damagePerCardInDeck > 0) next.damagePerCardInDeck = boostHolographicValue(next.damagePerCardInDeck);
     if (next.nextTurnEnergy !== undefined && next.nextTurnEnergy > 0) next.nextTurnEnergy = boostHolographicValue(next.nextTurnEnergy);
     if (next.nextTurnDraw !== undefined && next.nextTurnDraw > 0) next.nextTurnDraw = boostHolographicValue(next.nextTurnDraw);
     if (next.promptsCopy !== undefined && next.promptsCopy > 0) next.promptsCopy = boostHolographicValue(next.promptsCopy);
@@ -329,10 +338,16 @@ const applyHolographicBonus = (card: Card): Card => {
     syncedDesc = syncHolographicNumber(syncedDesc, base.fatalEnergy, next.fatalEnergy, [/倒すとE\d+/, /撃破時.*?E\d+/]);
     syncedDesc = syncHolographicNumber(syncedDesc, base.fatalPermanentDamage, next.fatalPermanentDamage, [/永久に\d+ダメージ/, /撃破時.*?\d+ダメージ/]);
     syncedDesc = syncHolographicNumber(syncedDesc, base.fatalMaxHp, next.fatalMaxHp, [/最大HP[+＋]\d+/, /最大HPを?\d+増/]);
+    syncedDesc = syncHolographicNumber(syncedDesc, base.damageBasedOnBlockMultiplier, next.damageBasedOnBlockMultiplier, [/ブロック値の\d+倍/]);
+    syncedDesc = syncHolographicNumber(syncedDesc, base.damageBasedOnHpLostThisTurn, next.damageBasedOnHpLostThisTurn, [/HPの\d+倍/]);
     syncedDesc = syncHolographicNumber(syncedDesc, base.nextTurnEnergy, next.nextTurnEnergy, [/次(?:の)?ターン.*?(?:E|エナジー|エネルギー)[+＋]?\d+/]);
     syncedDesc = syncHolographicNumber(syncedDesc, base.nextTurnDraw, next.nextTurnDraw, [/次(?:の)?ターン.*?\d+枚引く/, /次(?:の)?ターン.*?ドロー[+＋]?\d+/]);
     syncedDesc = syncHolographicNumber(syncedDesc, base.promptsCopy, next.promptsCopy, [/\d+枚コピー/]);
     syncedDesc = syncHolographicNumber(syncedDesc, base.damagePerAttackPlayed, next.damagePerAttackPlayed, [/攻撃.*?\d+ダメージ/]);
+    syncedDesc = syncHolographicNumber(syncedDesc, base.damagePerCardPlayed, next.damagePerCardPlayed, [/カード.*?\d+ダメージ/]);
+    syncedDesc = syncHolographicNumber(syncedDesc, base.damagePerCardPlayedBattle, next.damagePerCardPlayedBattle, [/カード.*?\d+ダメージ/]);
+    syncedDesc = syncHolographicNumber(syncedDesc, base.damagePerAttackInHand, next.damagePerAttackInHand, [/アタック.*?\+\d+/]);
+    syncedDesc = syncHolographicNumber(syncedDesc, base.damagePerCardInDeck, next.damagePerCardInDeck, [/デッキ.*?\d+ダメージ/]);
     syncedDesc = syncHolographicNumber(syncedDesc, base.damagePerCardInHand, next.damagePerCardInHand, [/手札.*?\d+ダメージ/]);
     syncedDesc = syncHolographicNumber(syncedDesc, base.damagePerStrike, next.damagePerStrike, [/ストライク.*?\d+ダメージ/]);
     syncedDesc = syncHolographicNumber(syncedDesc, base.damagePerCardInDraw, next.damagePerCardInDraw, [/山札.*?\d+ダメージ/]);
@@ -539,12 +554,13 @@ export const synthesizeCards = (c1: Card, c2: Card, c3?: Card): Card => {
         newName = part1 + part2;
     }
 
-    // 2. Cost Logic (Max of all)
-    const newCost = Math.max(c1.cost, c2.cost, c3?.cost || 0);
+    const sourceCards = [c1, c2, c3].filter(Boolean) as Card[];
+    // 2. Cost Logic (X cards retain X semantics when synthesized)
+    const newXCost = sourceCards.some(card => card.xCost);
+    const newCost = newXCost ? 0 : Math.max(c1.cost, c2.cost, c3?.cost || 0);
 
     // 3. Helper for Summation
     const sum = (k: keyof Card) => ((c1[k] as number) || 0) + ((c2[k] as number) || 0) + ((c3?.[k] as number) || 0);
-    const sourceCards = [c1, c2, c3].filter(Boolean) as Card[];
     const newExpansionEffects = uniqueStrings(sourceCards.flatMap(card => (
         card.expansionEffects?.length ? card.expansionEffects : card.expansionEffect ? [card.expansionEffect] : []
     )).map(effect => JSON.stringify(effect))).map(effect => JSON.parse(effect) as NonNullable<Card['expansionEffect']>);
@@ -586,7 +602,12 @@ export const synthesizeCards = (c1: Card, c2: Card, c3?: Card): Card => {
     const newDamagePerStrike = sum('damagePerStrike');
     const newDamagePerCardInHand = sum('damagePerCardInHand');
     const newDamagePerAttackPlayed = sum('damagePerAttackPlayed');
+    const newDamagePerCardPlayed = sum('damagePerCardPlayed');
+    const newDamagePerCardPlayedBattle = sum('damagePerCardPlayedBattle');
+    const newDamagePerAttackInHand = sum('damagePerAttackInHand');
+    const newDamagePerCardInDeck = sum('damagePerCardInDeck');
     const newDamagePerCardInDraw = sum('damagePerCardInDraw');
+    const newDamageBasedOnHpLostThisTurn = sum('damageBasedOnHpLostThisTurn');
 
     // Next Turn Effects
     const newNextTurnEnergy = sum('nextTurnEnergy');
@@ -609,6 +630,18 @@ export const synthesizeCards = (c1: Card, c2: Card, c3?: Card): Card => {
     const newDoubleStrength = c1.doubleStrength || c2.doubleStrength || c3?.doubleStrength;
     const newCapture = c1.capture || c2.capture || c3?.capture;
     const newDamageBasedOnBlock = c1.damageBasedOnBlock || c2.damageBasedOnBlock || c3?.damageBasedOnBlock;
+    const newRemoveEnemyBlock = c1.removeEnemyBlock || c2.removeEnemyBlock || c3?.removeEnemyBlock;
+    const blockDamageMultipliers = sourceCards
+        .filter(card => card.damageBasedOnBlock)
+        .map(card => card.damageBasedOnBlockMultiplier || 1);
+    const newDamageBasedOnBlockMultiplier = blockDamageMultipliers.length > 0
+        ? blockDamageMultipliers.reduce((acc, value) => acc + value, 0)
+        : undefined;
+    const newLowHpCostZero = c1.lowHpCostZero || c2.lowHpCostZero || c3?.lowHpCostZero;
+    const lowHpDamageMultipliers = sourceCards
+        .map(card => card.lowHpDamageMultiplier)
+        .filter((value): value is number => value !== undefined && value > 0);
+    const newLowHpDamageMultiplier = lowHpDamageMultipliers.length > 0 ? Math.max(...lowHpDamageMultipliers) : undefined;
     const newShuffleHandToDraw = c1.shuffleHandToDraw || c2.shuffleHandToDraw || c3?.shuffleHandToDraw;
     const newAddPotion = c1.addPotion || c2.addPotion || c3?.addPotion;
     const newConsumedOnUse = c1.consumedOnUse || c2.consumedOnUse || c3?.consumedOnUse;
@@ -968,6 +1001,7 @@ export const synthesizeCards = (c1: Card, c2: Card, c3?: Card): Card => {
         id: `synth-${Date.now()}-${Math.random()}`,
         name: newName,
         cost: newCost,
+        xCost: newXCost || undefined,
         type: newType,
         target: newTarget,
         description: description,
@@ -1011,6 +1045,11 @@ export const synthesizeCards = (c1: Card, c2: Card, c3?: Card): Card => {
         doubleStrength: newDoubleStrength,
         capture: newCapture,
         damageBasedOnBlock: newDamageBasedOnBlock,
+        damageBasedOnBlockMultiplier: newDamageBasedOnBlockMultiplier,
+        damageBasedOnHpLostThisTurn: newDamageBasedOnHpLostThisTurn || undefined,
+        lowHpCostZero: newLowHpCostZero,
+        lowHpDamageMultiplier: newLowHpDamageMultiplier,
+        removeEnemyBlock: newRemoveEnemyBlock,
         shuffleHandToDraw: newShuffleHandToDraw,
         applyPower: newApplyPower,
         battleBonusDrawOnPlay: newBattleBonusDrawOnPlay || undefined,
@@ -1032,6 +1071,10 @@ export const synthesizeCards = (c1: Card, c2: Card, c3?: Card): Card => {
         damagePerStrike: newDamagePerStrike || undefined,
         damagePerCardInHand: newDamagePerCardInHand || undefined,
         damagePerAttackPlayed: newDamagePerAttackPlayed || undefined,
+        damagePerCardPlayed: newDamagePerCardPlayed || undefined,
+        damagePerCardPlayedBattle: newDamagePerCardPlayedBattle || undefined,
+        damagePerAttackInHand: newDamagePerAttackInHand || undefined,
+        damagePerCardInDeck: newDamagePerCardInDeck || undefined,
         damagePerCardInDraw: newDamagePerCardInDraw || undefined,
         hitsPerSkillInHand: newHitsPerSkillInHand || undefined,
         hitsPerAttackPlayed: newHitsPerAttackPlayed || undefined,

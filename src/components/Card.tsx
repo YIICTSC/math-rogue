@@ -588,7 +588,7 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled, onInspect, languag
       {/* Header: fixed */}
       <div className="flex items-center relative z-30 mb-1 h-6 overflow-hidden shrink-0">
         <div className={`w-6 h-6 flex items-center justify-center rounded text-[11px] border border-white font-bold shrink-0 shadow-sm mr-1 ${card.holographic ? 'bg-cyan-300 text-slate-950' : card.upgraded && card.cost < 99 ? 'bg-green-600 text-white' : 'bg-blue-600 text-white'}`}>
-          {card.cost}
+          {card.xCost ? 'X' : card.cost}
         </div>
 
         {needsScroll ? (

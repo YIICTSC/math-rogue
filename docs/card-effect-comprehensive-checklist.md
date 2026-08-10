@@ -199,7 +199,7 @@
 |[ ]|OK|`BOYS_SPACE_WARP`|次元跳躍|手札と山札の全ての状態異常・呪いを消滅させ、その数だけムキムキを永続強化する。廃棄。|`ADDITIONAL_CARDS`|追加ロジックあり|
 |[ ]|OK|`OUT_TREASURE_MAP`|手作りの宝地図|ランダムなレリックを1つ入手する。廃棄。|`ADDITIONAL_CARDS`|追加ロジックあり|
 |[ ]|OK|`OUT_SHRINE_PRAY`|初詣の願い事|手札の全カードのコストを0にする。廃棄。|`ADDITIONAL_CARDS`|追加ロジックあり|
-|[ ]|OK|`HOSHI_PRESENT`|星のプレゼント|ランダムなポーションを1つ得る。廃棄。|`LIBRARIAN_CARDS`|汎用効果フィールド|
+|[ ]|OK|`HOSHI_PRESENT`|星のプレゼント|ランダムなポーションを1つ得る。廃棄。|`LIBRARIAN_CARDS`|addPotion=true; exhaust=true|
 |[ ]|OK|`VAULT`|大ジャンプ|追加ターンを得る。廃棄。|`CARDS_LIBRARY`|追加ロジックあり|
 |[ ]|OK|`OUT_SCARE_CROW`|田んぼのかかし|敵全体を2ターン行動不能にする。廃棄。|`ADDITIONAL_CARDS`|追加ロジックあり|
 |[ ]|OK|`SLIMED`|鼻水|【即時痛み型】使用すると廃棄される。|`STATUS_CARDS`|汎用効果フィールド|
@@ -277,16 +277,16 @@
 
 |実機確認|判定|ID|カード名|説明|収集元|根拠|
 |---|---|---|---|---|---|---|
-|[ ]|OK|`OUT_ARCADE_MASTER`|ゲーセンの達人|コンボ：今ターン使ったカード1枚につき8ダメージ。|`ADDITIONAL_CARDS`|汎用効果フィールド|
-|[ ]|OK|`MINE_BLAST_G`|トロッコ (芥川)|今ターン使用したカード枚数分、ダメージを与える。|`LIBRARIAN_CARDS`|汎用効果フィールド|
-|[ ]|OK|`BOYS_FINAL_FANTASY`|ラスト・ファンタジー|この戦闘で使ったカード1枚につき5ダメージ。|`ADDITIONAL_CARDS`|汎用効果フィールド|
+|[ ]|OK|`OUT_ARCADE_MASTER`|ゲーセンの達人|コンボ：今ターン使ったカード1枚につき8ダメージ。|`ADDITIONAL_CARDS`|damagePerCardPlayed|
+|[ ]|OK|`MINE_BLAST_G`|トロッコ (芥川)|今ターン使用したカード1枚につき4ダメージ。|`LIBRARIAN_CARDS`|damagePerCardPlayed|
+|[ ]|OK|`BOYS_FINAL_FANTASY`|ラスト・ファンタジー|この戦闘で使ったカード1枚につき5ダメージ。|`ADDITIONAL_CARDS`|damagePerCardPlayedBattle|
 
 #### 山札枚数参照ダメージ (2枚)
 
 |実機確認|判定|ID|カード名|説明|収集元|根拠|
 |---|---|---|---|---|---|---|
 |[ ]|OK|`OUT_Kite_FLYING`|お正月の凧揚げ|山札の枚数×2ダメージ。|`ADDITIONAL_CARDS`|汎用効果フィールド|
-|[ ]|OK|`OUT_TRADING_CARD`|最強の激レアカード|デッキのカード枚数ダメージ。|`ADDITIONAL_CARDS`|汎用効果フィールド|
+|[ ]|OK|`OUT_TRADING_CARD`|最強の激レアカード|デッキのカード枚数分ダメージ。|`ADDITIONAL_CARDS`|damagePerCardInDeck|
 
 #### 固定ダメージ + 与ダメージ吸収 + 廃棄 (1枚)
 
@@ -799,8 +799,8 @@
 |[ ]|OK|`BOYS_CYBER_BLADE`|プラズマ・ブレード|12ダメージ。このカードは常に強化状態で生成される。|`ADDITIONAL_CARDS`|汎用効果フィールド|
 |[ ]|OK|`HS_STARTER_EDGE`|ペンブレード|7ダメージを与える。|`CARDS_LIBRARY`|汎用効果フィールド|
 |[ ]|OK|`YATSUATARI`|むしゃくしゃ|8ダメージ。使用する度、この戦闘中ダメージ+5。|`CARDS_LIBRARY`|追加ロジックあり|
-|[ ]|OK|`BOYS_REVENGE`|リベンジ・バースト|今ターン失ったHPの2倍のダメージを与える。|`ADDITIONAL_CARDS`|追加ロジックあり|
-|[ ]|OK|`BOYS_WOLF_PACK`|孤狼の群れ|9ダメージ。手札のアタック1枚につき+3。|`ADDITIONAL_CARDS`|汎用効果フィールド|
+|[ ]|OK|`BOYS_REVENGE`|リベンジ・バースト|今ターン失ったHPの2倍のダメージを与える。|`ADDITIONAL_CARDS`|damageBasedOnHpLostThisTurn=2|
+|[ ]|OK|`BOYS_WOLF_PACK`|孤狼の群れ|9ダメージ。手札のアタック1枚につき+3。|`ADDITIONAL_CARDS`|damagePerAttackInHand=3|
 |[ ]|OK|`OUT_KICKBOARD`|最強のキックボード|30ダメージ。|`ADDITIONAL_CARDS`|汎用効果フィールド|
 |[ ]|OK|`OUT_PAPER_PLANE_ULTRA`|最強の紙飛行機|全体に20ダメージ。|`ADDITIONAL_CARDS`|汎用効果フィールド|
 |[ ]|OK|`CLEAVE`|雑巾がけ|敵全体に8ダメージ。|`CARDS_LIBRARY`|汎用効果フィールド|
@@ -809,12 +809,12 @@
 |[ ]|OK|`CONSECRATE`|掃除の時間|全体5ダメージ。|`CARDS_LIBRARY`|汎用効果フィールド|
 |[ ]|OK|`GOSHI_REVENGE`|走れメロス・ラストスパート|15ダメージ。|`LIBRARIAN_CARDS`|汎用効果フィールド|
 |[ ]|OK|`CARNAGE`|袋叩き|20ダメージ。|`CARDS_LIBRARY`|汎用効果フィールド|
-|[ ]|OK|`MELTER`|炭酸ジュース|10ダメージ。対象のブロックを除去。|`CARDS_LIBRARY`|汎用効果フィールド|
-|[ ]|OK|`BOYS_RAILGUN`|超電磁加速砲|24ダメージ。対象のブロックを除去。|`ADDITIONAL_CARDS`|汎用効果フィールド|
+|[ ]|OK|`MELTER`|炭酸ジュース|10ダメージ。対象のブロックを除去。|`CARDS_LIBRARY`|damage=10; removeEnemyBlock=true|
+|[ ]|OK|`BOYS_RAILGUN`|超電磁加速砲|24ダメージ。対象のブロックを除去。|`ADDITIONAL_CARDS`|damage=24; removeEnemyBlock=true|
 |[ ]|OK|`PE_VAULTING`|跳び箱10段|18ダメージ。|`ADDITIONAL_CARDS`|汎用効果フィールド|
 |[ ]|OK|`DOOM_AND_GLOOM`|日曜の夜|全体10ダメージ。|`CARDS_LIBRARY`|汎用効果フィールド|
 |[ ]|OK|`OUT_MUSEUM_TRIP`|博物館の恐竜|38ダメージ。|`ADDITIONAL_CARDS`|汎用効果フィールド|
-|[ ]|OK|`OUT_MY_HERO`|僕だけのヒーロー|50ダメージ。自分のHPが半分以下の時、コスト0になりダメージが2倍になる。|`ADDITIONAL_CARDS`|汎用効果フィールド|
+|[ ]|OK|`OUT_MY_HERO`|僕だけのヒーロー|50ダメージ。自分のHPが半分以下の時、コスト0になりダメージが2倍になる。|`ADDITIONAL_CARDS`|lowHpCostZero=true; lowHpDamageMultiplier=2|
 |[ ]|OK|`GIRLS_CHOCO_VALENTINE`|本命チョコ|15ダメージ。対象を1ターンスタンさせる。廃棄。|`ADDITIONAL_CARDS`|追加ロジックあり|
 |[ ]|OK|`HYPERBEAM`|目からビーム|全体26ダメージ。|`CARDS_LIBRARY`|汎用効果フィールド|
 |[ ]|OK|`RASHOMON`|羅生門|10ダメージ。敵をたおすと手札のカード1枚を廃棄する。|`LIBRARIAN_CARDS`|追加ロジックあり|
@@ -825,7 +825,7 @@
 
 |実機確認|判定|ID|カード名|説明|収集元|根拠|
 |---|---|---|---|---|---|---|
-|[ ]|OK|`BOYS_GRAVITY_PRESS`|重力100倍プレス|現在のブロック値の2倍のダメージ。|`ADDITIONAL_CARDS`|汎用効果フィールド|
+|[ ]|OK|`BOYS_GRAVITY_PRESS`|重力100倍プレス|現在のブロック値の2倍のダメージ。|`ADDITIONAL_CARDS`|damageBasedOnBlockMultiplier=2|
 
 ### バフ/デバフ/パワー
 
