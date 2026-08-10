@@ -10833,6 +10833,11 @@ const App: React.FC = () => {
                     const nextActiveEffects: VisualEffectInstance[] = [];
                     let didHpDamage = false;
                     let didApplyDebuff = false;
+                    // Damage is calculated only for attack intents, but the
+                    // relic damage-taken hook runs for every enemy intent.
+                    // Keep a zero value for non-attack intents so an enemy
+                    // debuff/buff turn cannot crash the battle transition.
+                    let damage = 0;
                     let nextCoopBattleState = prev.coopBattleState
                         ? {
                             ...prev.coopBattleState,
@@ -10870,7 +10875,7 @@ const App: React.FC = () => {
                             baseDamage += e.strength;
                             logParts.push(`${e.strength >= 0 ? '+' : ''}${e.strength}(${trans("筋力", languageMode)})`);
                         }
-                        let damage = baseDamage;
+                        damage = baseDamage;
                         if (e.enemyType === 'DODOMEDESU' && !newEnemies.some(enemy => enemy.enemyType === 'GENZO' && enemy.currentHp > 0)) {
                             damage = Math.max(1, Math.floor(damage * 0.6));
                             logParts.push('x0.6(ゲンゾー撃破)');
