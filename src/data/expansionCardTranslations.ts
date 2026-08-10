@@ -242,7 +242,7 @@ const EXPANSION_CONDITION_ENGLISH: Readonly<Record<ExpansionEffectSpec['conditio
   DISCARD_ODD: 'When your discard pile size is odd',
   NO_ATTACK_PLAYED: 'When you have not played an Attack this turn',
   THIRD_OR_LATER: 'When played as your third or later card this turn',
-  SAME_TYPE_IN_HAND: 'When another card of the same type is in your hand',
+  SAME_TYPE_IN_HAND: 'When your hand contains a card of the same type',
   HIGHEST_COST_IN_HAND: 'When this card is tied for the highest cost in your hand',
 });
 
@@ -263,9 +263,22 @@ const EXPANSION_REWARD_ENGLISH: Readonly<Record<ExpansionEffectSpec['reward'], s
   HAND_COUNT_BLOCK: 'gain Block equal to your hand size before playing this card',
 });
 
-export const describeExpansionEffectEnglish = (effect: ExpansionEffectSpec): string => (
-  `${EXPANSION_CONDITION_ENGLISH[effect.condition]}, ${EXPANSION_REWARD_ENGLISH[effect.reward]} (Unique Resonance ${String(effect.serial).padStart(3, '0')})`
-);
+const EXPANSION_CARD_TYPE_ENGLISH: Readonly<Record<string, string>> = Object.freeze({
+  ATTACK: 'Attack',
+  SKILL: 'Skill',
+  POWER: 'Power',
+  SUMMON: 'Summon',
+  STATUS: 'Status',
+  CURSE: 'Curse',
+});
+
+export const describeExpansionEffectEnglish = (effect: ExpansionEffectSpec, cardType?: string): string => {
+  const cardTypeLabel = cardType ? EXPANSION_CARD_TYPE_ENGLISH[cardType] : undefined;
+  const condition = effect.condition === 'SAME_TYPE_IN_HAND' && cardTypeLabel
+    ? `When your hand contains ${cardTypeLabel === 'Attack' ? 'an' : 'a'} ${cardTypeLabel} card`
+    : EXPANSION_CONDITION_ENGLISH[effect.condition];
+  return `${condition}, ${EXPANSION_REWARD_ENGLISH[effect.reward]}`;
+};
 
 const EXPANSION_CONDITION_ENGLISH_BY_JAPANESE: Readonly<Record<string, string>> = Object.freeze({
   '手札の左端から使用した時': EXPANSION_CONDITION_ENGLISH.LEFTMOST,
@@ -282,7 +295,12 @@ const EXPANSION_CONDITION_ENGLISH_BY_JAPANESE: Readonly<Record<string, string>> 
   '捨て札の枚数が奇数の時': EXPANSION_CONDITION_ENGLISH.DISCARD_ODD,
   'このターンにまだ攻撃していない時': EXPANSION_CONDITION_ENGLISH.NO_ATTACK_PLAYED,
   'このターン3枚目以降に使用した時': EXPANSION_CONDITION_ENGLISH.THIRD_OR_LATER,
-  '手札に同じ種別の別カードがある時': EXPANSION_CONDITION_ENGLISH.SAME_TYPE_IN_HAND,
+  '手札に攻撃カードがある時': 'When your hand contains an Attack card',
+  '手札にスキルカードがある時': 'When your hand contains a Skill card',
+  '手札にパワーカードがある時': 'When your hand contains a Power card',
+  '手札にサモンカードがある時': 'When your hand contains a Summon card',
+  '手札に状態カードがある時': 'When your hand contains a Status card',
+  '手札に呪いカードがある時': 'When your hand contains a Curse card',
   '手札内で最高コストの時': EXPANSION_CONDITION_ENGLISH.HIGHEST_COST_IN_HAND,
 });
 
@@ -310,11 +328,11 @@ export const translateExpansionCardEnglish = (text: string): string | undefined 
   const logMatch = text.match(/^固有共鳴(\d{1,3})(が発動！|は条件未達)$/);
   if (logMatch) return `Unique Resonance ${logMatch[1]} ${logMatch[2] === 'が発動！' ? 'activated!' : 'condition not met'}`;
 
-  const match = text.match(/^(?:(\d+)ダメージ。|ブロック(\d+)。)?【固有共鳴(\d{3})】(.+)、(.+)。$/);
+  const match = text.match(/^(?:(\d+)ダメージ。|ブロック(\d+)。)?(?:【固有共鳴(\d{3})】)?(.+)、(.+)。$/);
   if (!match) return undefined;
   const condition = EXPANSION_CONDITION_ENGLISH_BY_JAPANESE[match[4]];
   const reward = EXPANSION_REWARD_ENGLISH_BY_JAPANESE[match[5]];
   if (!condition || !reward) return undefined;
   const base = match[1] ? `Deal ${match[1]} damage. ` : match[2] ? `Gain ${match[2]} Block. ` : '';
-  return `${base}${condition}, ${reward} (Unique Resonance ${match[3]}).`;
+  return `${base}${condition}, ${reward}.`;
 };

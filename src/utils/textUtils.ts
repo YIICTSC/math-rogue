@@ -9451,7 +9451,7 @@ export const buildEnglishCardDescription = (card: Card): string => {
         : card.expansionEffect
             ? [card.expansionEffect]
             : [];
-    expansionEffects.forEach(effect => parts.push(describeExpansionEffectEnglish(effect)));
+    expansionEffects.forEach(effect => parts.push(describeExpansionEffectEnglish(effect, card.type)));
 
     if (parts.length === 0) return trans(card.description, 'ENGLISH');
 

@@ -21,7 +21,7 @@ const conditions = [
   ['DISCARD_ODD', '捨て札の枚数が奇数の時'],
   ['NO_ATTACK_PLAYED', 'このターンにまだ攻撃していない時'],
   ['THIRD_OR_LATER', 'このターン3枚目以降に使用した時'],
-  ['SAME_TYPE_IN_HAND', '手札に同じ種別の別カードがある時'],
+  ['SAME_TYPE_IN_HAND', '手札に該当するカードがある時'],
   ['HIGHEST_COST_IN_HAND', '手札内で最高コストの時'],
 ];
 
@@ -41,6 +41,15 @@ const rewards = [
   ['DISCOUNT_HAND', '手札の別カード1枚のコストを1下げる'],
   ['HAND_COUNT_BLOCK', '使用前の手札枚数と同じブロックを得る'],
 ];
+
+const cardTypeLabels = {
+  ATTACK: '攻撃',
+  SKILL: 'スキル',
+  POWER: 'パワー',
+  SUMMON: 'サモン',
+  STATUS: '状態',
+  CURSE: '呪い',
+};
 
 const rows = fs.readFileSync(sourcePath, 'utf8').split(/\r?\n/).flatMap((line) => {
   if (!/^\|\d{3}\|/.test(line)) return [];
@@ -77,7 +86,12 @@ const entries = rows.map((row, index) => {
       ? `ブロック${baseValue}。`
       : '';
   const exhaust = row.type === 'STATUS' || row.type === 'CURSE' ? 'exhaust: true, ' : '';
-  const description = `${baseText}【固有共鳴${String(row.serial).padStart(3, '0')}】${conditionText}、${rewardText}。`;
+  const visibleConditionText = condition === 'SAME_TYPE_IN_HAND'
+    ? `手札に${cardTypeLabels[row.type] || '該当する'}カードがある時`
+    : conditionText;
+  const expansionDescription = `${visibleConditionText}、${rewardText}。`;
+  // 番号ラベルは表示せず、固有共鳴の条件と追加効果だけを説明する。
+  const description = `${baseText}${expansionDescription}`;
   generatedEffects.set(row.id, description);
   return `  ${row.id}: { name: ${quote(row.name)}, cost: ${row.cost}, type: CardType.${row.type}, target: ${target}, description: ${quote(description)}, ${base}${exhaust}rarity: ${quote(row.rarity)}, expansionEffect: { serial: ${row.serial}, condition: ${quote(condition)}, reward: ${quote(reward)} } },`;
 });

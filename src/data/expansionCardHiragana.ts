@@ -240,7 +240,12 @@ const EXPANSION_CONDITION_HIRAGANA: Readonly<Record<string, string>> = Object.fr
   '捨て札の枚数が奇数の時': 'すてふだのまいすうがきすうのとき',
   'このターンにまだ攻撃していない時': 'このターンにまだこうげきしていないとき',
   'このターン3枚目以降に使用した時': 'このターン3まいめいこうにしようしたとき',
-  '手札に同じ種別の別カードがある時': 'てふだにおなじしゅべつのべつカードがあるとき',
+  '手札に攻撃カードがある時': 'てふだにこうげきカードがあるとき',
+  '手札にスキルカードがある時': 'てふだにスキルカードがあるとき',
+  '手札にパワーカードがある時': 'てふだにパワーカードがあるとき',
+  '手札にサモンカードがある時': 'てふだにサモンカードがあるとき',
+  '手札に状態カードがある時': 'てふだにじょうたいカードがあるとき',
+  '手札に呪いカードがある時': 'てふだにのろいカードがあるとき',
   '手札内で最高コストの時': 'てふだないでさいこうコストのとき',
 });
 
@@ -270,11 +275,11 @@ export const translateExpansionCardHiragana = (text: string): string | undefined
     return `こゆうきょうめい${logMatch[1]}${logMatch[2] === 'が発動！' ? 'がはつどう！' : 'はじょうけんみたつ'}`;
   }
 
-  const match = text.match(/^(?:(\d+)ダメージ。|ブロック(\d+)。)?【固有共鳴(\d{3})】(.+)、(.+)。$/);
+  const match = text.match(/^(?:(\d+)ダメージ。|ブロック(\d+)。)?(?:【固有共鳴(\d{3})】)?(.+)、(.+)。$/);
   if (!match) return undefined;
   const condition = EXPANSION_CONDITION_HIRAGANA[match[4]];
   const reward = EXPANSION_REWARD_HIRAGANA[match[5]];
   if (!condition || !reward) return undefined;
   const base = match[1] ? `${match[1]}ダメージ。` : match[2] ? `ブロック${match[2]}。` : '';
-  return `${base}【こゆうきょうめい${match[3]}】${condition}、${reward}。`;
+  return `${base}${condition}、${reward}。`;
 };

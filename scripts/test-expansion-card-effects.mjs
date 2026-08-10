@@ -175,6 +175,18 @@ try {
         return JSON.stringify({ player: localizedResult.player, enemies: localizedResult.enemies });
       });
       assert(new Set(languageResults).size === 1, `${card.id} effect state changes between language modes`);
+      if (card.expansionEffect.condition === 'SAME_TYPE_IN_HAND') {
+        const typeLabel = {
+          ATTACK: '攻撃',
+          SKILL: 'スキル',
+          POWER: 'パワー',
+          SUMMON: 'サモン',
+          STATUS: '状態',
+          CURSE: '呪い',
+        }[card.type];
+        assert(card.description.includes(`手札に${typeLabel}カードがある時`), `${card.id} did not use the concise card-type condition text`);
+        assert(!card.description.includes('同じ種別の別カード'), `${card.id} retained the verbose card-type condition text`);
+      }
     }
   } finally {
     Math.random = originalRandom;
@@ -184,7 +196,8 @@ try {
   for (const card of cards) {
     const synthesized = synthesizeCards(card, ordinary);
     assert(synthesized.expansionEffects?.some(effect => effect.serial === card.expansionEffect.serial), `${card.id} lost its expansion effect during synthesis`);
-    assert(synthesized.description.includes(`【固有共鳴${String(card.expansionEffect.serial).padStart(3, '0')}】`), `${card.id} lost its expansion description during synthesis`);
+    assert(!synthesized.description.includes('固有共鳴'), `${card.id} exposed its expansion label during synthesis`);
+    assert(synthesized.description.includes(card.description.split('。').slice(-2, -1)[0]), `${card.id} lost its expansion condition or reward during synthesis`);
   }
 
   const left = cards.find(card => card.expansionEffect.serial === 1);
@@ -214,31 +227,35 @@ try {
     const description = buildHiraganaCardDescription(card);
     const englishDescription = buildEnglishCardDescription(card);
     const directEnglishDescription = trans(card.description, 'ENGLISH');
-    const expectedEnglishEffect = describeExpansionEffectEnglish(card.expansionEffect);
     const activationLog = trans(`固有共鳴${String(card.expansionEffect.serial).padStart(3, '0')}が発動！`, 'HIRAGANA');
     const unmetLog = trans(`固有共鳴${String(card.expansionEffect.serial).padStart(3, '0')}は条件未達`, 'HIRAGANA');
     assert(name === EXPANSION_CARD_HIRAGANA_NAMES[card.name], `${card.id} did not use its exact hiragana name`);
     assert(!kanjiPattern.test(name), `${card.id} hiragana name contains kanji: ${name}`);
     assert(!kanjiPattern.test(description), `${card.id} hiragana description contains kanji: ${description}`);
-    assert(description.includes(`こゆうきょうめい${String(card.expansionEffect.serial).padStart(3, '0')}`), `${card.id} hiragana description lost its resonance number`);
+    assert(!description.includes('こゆうきょうめい'), `${card.id} exposed its expansion label in hiragana description`);
+    assert(description.includes('、'), `${card.id} hiragana description lost its expansion condition or reward`);
     assert(!kanjiPattern.test(activationLog), `${card.id} activation log contains kanji: ${activationLog}`);
     assert(!kanjiPattern.test(unmetLog), `${card.id} unmet log contains kanji: ${unmetLog}`);
     assert(!japanesePattern.test(englishDescription), `${card.id} English card description contains Japanese: ${englishDescription}`);
     assert(!japanesePattern.test(directEnglishDescription), `${card.id} direct English description contains Japanese: ${directEnglishDescription}`);
-    assert(englishDescription.includes(expectedEnglishEffect), `${card.id} English card description lost or changed its condition/reward: ${englishDescription}`);
-    assert(directEnglishDescription.includes(`Unique Resonance ${String(card.expansionEffect.serial).padStart(3, '0')}`), `${card.id} direct English description lost its resonance number`);
+    assert(!englishDescription.includes('Unique Resonance'), `${card.id} exposed its expansion label in English description: ${englishDescription}`);
+    assert(!directEnglishDescription.includes('Unique Resonance'), `${card.id} direct English description exposed its resonance number`);
+    assert(englishDescription.includes(describeExpansionEffectEnglish(card.expansionEffect, card.type)), `${card.id} English card description lost its expansion condition or reward: ${englishDescription}`);
+    assert(directEnglishDescription.includes(describeExpansionEffectEnglish(card.expansionEffect, card.type)), `${card.id} direct English description lost its expansion condition or reward: ${directEnglishDescription}`);
   }
 
   const combinedEnglish = buildEnglishCardDescription(combined);
   const combinedHiragana = buildHiraganaCardDescription(combined);
-  assert(combined.expansionEffects.every(effect => combinedEnglish.includes(describeExpansionEffectEnglish(effect))), 'synthesized English description did not retain every expansion effect');
-  assert(combined.expansionEffects.every(effect => combinedHiragana.includes(`こゆうきょうめい${String(effect.serial).padStart(3, '0')}`)), 'synthesized hiragana description did not retain every expansion effect');
+  assert(!combinedEnglish.includes('Unique Resonance'), 'synthesized English description exposed an expansion label');
+  assert(!combinedHiragana.includes('こゆうきょうめい'), 'synthesized hiragana description exposed an expansion label');
+  assert(combined.expansionEffects.every(effect => combinedEnglish.includes(describeExpansionEffectEnglish(effect, combined.type))), 'synthesized English description lost an expansion condition or reward');
+  assert((combinedHiragana.match(/、/g) || []).length >= combined.expansionEffects.length, 'synthesized hiragana description lost an expansion condition or reward');
   assert(!japanesePattern.test(combinedEnglish), `synthesized English description contains Japanese: ${combinedEnglish}`);
   assert(!kanjiPattern.test(combinedHiragana), `synthesized hiragana description contains kanji: ${combinedHiragana}`);
 
   console.log('Expansion card audit passed: 224/224 effects activate and apply their rewards.');
-  console.log('Expansion synthesis audit passed: all effects and descriptions are retained, including multi-effect synthesis.');
-  console.log('Expansion translation audit passed: 224 names, effects, logs, and synthesized effects are exact in English and hiragana.');
+  console.log('Expansion synthesis audit passed: all effects and condition/reward descriptions are retained without expansion labels.');
+  console.log('Expansion translation audit passed: 224 names, effects, conditions, and logs are exact in English and hiragana.');
   console.log('Language parity audit passed: Japanese, English, and hiragana produce identical battle state for all 224 effects and synthesis.');
 } finally {
   await server.close();

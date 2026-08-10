@@ -79,7 +79,10 @@ export const parseEnemyIllustrationRef = (refToken: string): {
 
 const toIllustrationRefs = (card: Card): string[] => {
     if (card.illustrationRefs && card.illustrationRefs.length > 0) {
-        return card.illustrationRefs.filter(Boolean).slice(0, MAX_ILLUSTRATION_REFS);
+        const refs = card.illustrationRefs.filter(Boolean).slice(-MAX_ILLUSTRATION_REFS);
+        if (refs.length < MAX_ILLUSTRATION_REFS || card.illustrationRefWriteIndex === undefined) return refs;
+        const start = ((card.illustrationRefWriteIndex % refs.length) + refs.length) % refs.length;
+        return [...refs.slice(start), ...refs.slice(0, start)];
     }
 
     if (card.magicRuleCardArt && card.magicHeroId && card.magicRuleCardIndex !== undefined) {
@@ -117,27 +120,11 @@ const toIllustrationRefs = (card: Card): string[] => {
     return [];
 };
 
-const mergeIllustrationRefsCircular = (c1: Card, c2: Card, c3?: Card): { refs: string[]; writeIndex: number } => {
-    const refs = [...toIllustrationRefs(c1)];
-    let writeIndex = c1.illustrationRefWriteIndex || 0;
-    if (refs.length < MAX_ILLUSTRATION_REFS) {
-        writeIndex = refs.length % MAX_ILLUSTRATION_REFS;
-    }
-
-    const append = (token: string) => {
-        if (refs.length < MAX_ILLUSTRATION_REFS) {
-            refs.push(token);
-            writeIndex = refs.length % MAX_ILLUSTRATION_REFS;
-            return;
-        }
-        refs[writeIndex] = token;
-        writeIndex = (writeIndex + 1) % MAX_ILLUSTRATION_REFS;
-    };
-
-    toIllustrationRefs(c2).forEach(append);
-    if (c3) toIllustrationRefs(c3).forEach(append);
-
-    return { refs, writeIndex };
+const mergeIllustrationRefsLatest = (c1: Card, c2: Card, c3?: Card): { refs: string[]; writeIndex: number } => {
+    const refs = [c1, c2, c3].filter(Boolean).flatMap(card => toIllustrationRefs(card as Card));
+    // Names retain the complete synthesis history; artwork only carries the
+    // latest eight source references to keep composite rendering bounded.
+    return { refs: refs.slice(-MAX_ILLUSTRATION_REFS), writeIndex: 0 };
 };
 
 const STATUS_PAIN_IDS = new Set(['BURN', 'INJURY', 'SLIMED', 'WOUND', 'PAIN', 'DECAY']);
@@ -393,8 +380,8 @@ const mergeCardGeneration = <T extends { cardName: string; count: number; cost0?
 };
 
 const getSynthesisDepth = (card: Card): number => {
-    if (card.synthesisDepth !== undefined) return Math.max(0, card.synthesisDepth);
-    return card.id.startsWith('synth-') || (card.originalNames?.length ?? 0) > 0 ? 1 : 0;
+    const hasSynthesisHistory = card.id.startsWith('synth-') || (card.originalNames?.length ?? 0) > 0;
+    return Math.max(0, card.synthesisDepth ?? 0, hasSynthesisHistory ? 1 : 0);
 };
 
 const consolidateSynthNumericParts = (parts: string[]): string[] => {
@@ -787,9 +774,36 @@ export const synthesizeCards = (c1: Card, c2: Card, c3?: Card): Card => {
     if (seedSource?.grownCardId) parts.push(`${getDisplayCardName(seedSource.grownCardId)}に成長`);
     if (familiarSource?.familiarSummon) parts.push(`${familiarSource.familiarSummon.name}召喚`);
 
-    const expansionDescriptions = uniqueStrings(sourceCards.flatMap(card => (
-        card.description.match(/【固有共鳴\d{3}】[^。]+。/g) || []
-    )));
+    const expansionConditionTexts = [
+        '手札の左端から使用した時',
+        '手札の右端から使用した時',
+        '使用前の手札枚数が偶数の時',
+        '使用前の手札枚数が奇数の時',
+        '使用後のエナジーが0になる時',
+        '使用後のエナジーが偶数になる時',
+        '使用時のブロックが0の時',
+        'HPが半分以下の時',
+        '生存中の敵が攻撃予定の時',
+        '生存中の敵が全員攻撃予定でない時',
+        '山札の枚数が偶数の時',
+        '捨て札の枚数が奇数の時',
+        'このターンにまだ攻撃していない時',
+        'このターン3枚目以降に使用した時',
+        '手札に攻撃カードがある時',
+        '手札にスキルカードがある時',
+        '手札にパワーカードがある時',
+        '手札にサモンカードがある時',
+        '手札に状態カードがある時',
+        '手札に呪いカードがある時',
+        '手札内で最高コストの時',
+    ];
+    const expansionDescriptions = uniqueStrings(sourceCards.flatMap(card => {
+        const hasExpansionEffect = Boolean(card.expansionEffects?.length || card.expansionEffect);
+        if (!hasExpansionEffect) return [];
+        return (card.description.match(/[^。]+。/g) || [])
+            .map(sentence => sentence.replace(/^【固有共鳴\d{3}】/, ''))
+            .filter(sentence => expansionConditionTexts.some(condition => sentence.startsWith(condition)));
+    }));
     parts.push(...expansionDescriptions.map(sentence => sentence.replace(/。$/, '')));
 
     // Special Logic Descriptions (Manual map for effects not covered by stats)
@@ -934,7 +948,7 @@ export const synthesizeCards = (c1: Card, c2: Card, c3?: Card): Card => {
 
     const newTextureRef = `${shapeSource}|${colorSource}|${typeSource}`;
 
-    const { refs: mergedIllustrationRefs, writeIndex: illustrationRefWriteIndex } = mergeIllustrationRefsCircular(c1, c2, c3);
+    const { refs: mergedIllustrationRefs, writeIndex: illustrationRefWriteIndex } = mergeIllustrationRefsLatest(c1, c2, c3);
 
     // 10. Inherit Original Names for Special Logic
     const originalNameCandidates: string[] = [];

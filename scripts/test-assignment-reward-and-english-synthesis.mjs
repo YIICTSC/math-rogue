@@ -88,6 +88,26 @@ try {
   assert(laterGeneration.name.length > firstGeneration.name.length, `synthesized name did not grow: ${laterGeneration.name}`);
   assert(laterGeneration.synthesisDepth === 2, `synthesis generation was not recorded: ${laterGeneration.synthesisDepth}`);
 
+  let longChain = synthesizeCards(
+    { ...pencilAttack, id: 'CHAIN_01', name: '連結01', illustrationRefs: ['asset:chain-01'] },
+    { ...skill, id: 'CHAIN_02', name: '連結02', illustrationRefs: ['asset:chain-02'] },
+  );
+  for (let index = 3; index <= 10; index += 1) {
+    const previous = longChain;
+    longChain = synthesizeCards(previous, {
+      ...skill,
+      id: `CHAIN_${String(index).padStart(2, '0')}`,
+      name: `連結${String(index).padStart(2, '0')}`,
+      illustrationRefs: [`asset:chain-${String(index).padStart(2, '0')}`],
+    });
+    assert(longChain.name.startsWith(previous.name), `long synthesis name stopped growing at ${index}: ${longChain.name}`);
+    assert(longChain.name.length > previous.name.length, `long synthesis name did not grow at ${index}: ${longChain.name}`);
+  }
+  assert(longChain.originalNames?.length === 10, `long synthesis name history lost sources: ${longChain.originalNames?.length}`);
+  assert(longChain.illustrationRefs?.length === 8, `long synthesis artwork did not cap at the latest 8 refs: ${longChain.illustrationRefs?.length}`);
+  assert(longChain.illustrationRefs?.[0] === 'asset:chain-03', `long synthesis artwork did not start at the latest 8 refs: ${longChain.illustrationRefs?.join(',')}`);
+  assert(longChain.illustrationRefs?.[7] === 'asset:chain-10', `long synthesis artwork did not retain the newest ref: ${longChain.illustrationRefs?.join(',')}`);
+
   const repeatedEnergy = synthesizeCards(
     { ...skill, id: 'ENERGY_ONE', name: '充電', energy: 1, description: 'エナジー+1。' },
     { ...attack, id: 'SWORD_BOOMERANG', name: 'ブーメラン', playCopies: 1 },
