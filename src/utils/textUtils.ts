@@ -20,6 +20,11 @@ import { ENGLISH_MINIGAME_EXACT } from '../data/englishMinigameExact';
 import { ENGLISH_REVIEW_EXACT } from '../data/englishReviewExact';
 import { describeExpansionEffectEnglish, EXPANSION_CARD_ENGLISH_NAMES, translateExpansionCardEnglish } from '../data/expansionCardTranslations';
 import { translateExpansionCardHiragana } from '../data/expansionCardHiragana';
+import {
+    RELIC_ENGLISH_DESCRIPTION_TRANSLATIONS,
+    RELIC_ENGLISH_NAME_TRANSLATIONS,
+    RELIC_HIRAGANA_TRANSLATIONS,
+} from '../data/relicTranslations.generated';
 import { EVENT_DICTIONARY } from './textUtils2';
 
 const BASE_DICTIONARY: Record<string, string> = {
@@ -6325,6 +6330,24 @@ const ENGLISH_ITEM_NAME_DICTIONARY: Record<string, string> = {
     "チョークダスト": "Chalk Dust",
     "時間割エリクサー": "Timetable Elixir",
 };
+
+Object.assign(ENGLISH_ITEM_NAME_DICTIONARY, RELIC_ENGLISH_NAME_TRANSLATIONS);
+Object.assign(ENGLISH_DICTIONARY, RELIC_ENGLISH_DESCRIPTION_TRANSLATIONS);
+Object.assign(ENGLISH_DICTIONARY, {
+    "戦闘開始時、山札からランダムなスキルを1枚手札に加え、コストを0にする。": "At the start of battle, add a random Skill from your draw pile to your hand at 0 cost.",
+    "ターン終了時にブロックが残っていれば、その20%を次のターンへ持ち越す。": "At the end of turn, carry 20% of your remaining Block into the next turn.",
+    "戦闘開始時、山札の一番上のカードを保留する。": "At the start of battle, Retain the top card of your draw pile.",
+});
+Object.assign(DICTIONARY, RELIC_HIRAGANA_TRANSLATIONS);
+Object.assign(DICTIONARY, {
+    "戦闘開始後、最初にカードを使った時、カードを1枚引く。": "バトルの あと、さいしょに カードを つかったとき、カードを 1まい ひく。",
+    "1ターンに異なる敵を2体以上攻撃した時、ムキムキ1を得る。": "1ターンに ちがう てきを 2たい いじょう こうげきしたとき、ムキムキ1を ゲット。",
+    "ターン終了時にブロックが残っていれば、その20%を次のターンへ持ち越す。": "ターンの おわりに ブロックが のこっていれば、その20%を つぎの ターンへ もちこす。",
+    "戦闘開始時、山札の一番上のカードを保留する。": "バトルの はじめに、やまふだの いちばん うえの カードを ほりゅうする。",
+    "戦闘中に初めてカードを廃棄した時、そのカードを捨て札に戻す。": "せんとうちゅうに はじめて カードを はいきしたとき、そのカードを すてふだに もどす。",
+    "戦闘開始時、山札の一番上のカードのコストが1減る。": "せんとうかいしじ、やまふだの いちばん うえの カードの コストが 1 へる。",
+    "カードを捨てた時、捨て札からランダムなカードを1枚手札に戻す。各ターン1回。": "カードを すてたとき、すてふだから ランダムな カードを 1まい てふだに もどす。かくターン 1かい。",
+});
 
 const ENGLISH_ENEMY_NAME_DICTIONARY: Record<string, string> = {
     "裏返しの給食エプロン": "Inside-Out Lunch Apron",
