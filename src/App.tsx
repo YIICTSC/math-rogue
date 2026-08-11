@@ -908,6 +908,7 @@ const estimateBossScalingSingleCardDamage = (deck: ICard[], effectMultiplier = 1
 
     return Math.max(0, ...damageCards.map(card => {
         const perHit = getCardDamage(card, {
+            energySpent: card.xCost ? 1 : undefined,
             block: assumedBlock,
             handCountExcludingSelf: Math.max(0, assumedHand - 1),
             attackCountInHand: Math.max(0, assumedHand - 1) * (attackCount / Math.max(1, deckSize)),
@@ -9291,6 +9292,7 @@ const App: React.FC = () => {
                             if (e.currentHp <= 0) return;
                             const hpBeforeDamage = e.currentHp;
                             let baseDamage = getCardDamage(card, {
+                                energySpent: card.xCost ? effectiveCost : undefined,
                                 block: p.block,
                                 hpLostThisTurn: hpLostAtCardPlay,
                                 handCountExcludingSelf: p.hand.filter(c => c.id !== card.id).length,
