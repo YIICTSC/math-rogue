@@ -127,6 +127,16 @@ const HIGH_SCHOOL_IDLE_SPRITE_SCALE_BY_INDEX: Record<number, number> = {
   8: 1.01,
 };
 
+const HIGH_SCHOOL_IDLE_SPRITE_EXTENSION_BY_INDEX: Record<number, 'png' | 'webp'> = {
+  // The caretaker sheet is kept lossless so transparent pixels do not reveal
+  // codec matte colors between the 2x2 frames.
+  1: 'png',
+};
+
+export const HIGH_SCHOOL_IDLE_SPRITE_ASSET_PATHS = Array.from({ length: 9 }, (_, index) => (
+  `sprites/high-school/characters-idle-sheets/${index}.${HIGH_SCHOOL_IDLE_SPRITE_EXTENSION_BY_INDEX[index] ?? 'webp'}`
+));
+
 type BattleHeroAnimationProfile = Partial<Record<BattleHeroAnimationAction, string>>;
 
 // Character-specific sheets are opt-in. Missing actions intentionally fall back
@@ -212,7 +222,8 @@ export const getThemedCharacterIdleSpriteSheetPath = (
 ) => {
   if (theme !== 'high-school') return null;
   const imageIndex = HIGH_SCHOOL_CHARACTER_INDEX_BY_ID[characterId ?? 'WARRIOR'] ?? 0;
-  return assetUrl(`sprites/high-school/characters-idle-sheets/${imageIndex}.webp`);
+  const extension = HIGH_SCHOOL_IDLE_SPRITE_EXTENSION_BY_INDEX[imageIndex] ?? 'webp';
+  return assetUrl(`sprites/high-school/characters-idle-sheets/${imageIndex}.${extension}`);
 };
 
 export const getThemedCharacterIdleSpriteScale = (
