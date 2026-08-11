@@ -3,6 +3,7 @@ import { RotateCcw, Sparkles } from 'lucide-react';
 import { CHARACTERS } from '../constants';
 import { MAGIC_MALE_PROTAGONISTS } from '../data/magicHeroes';
 import {
+    BATTLE_SPECIAL_IDLE_DURATION_MS,
     getThemedCharacterAnimationSheetPath,
     getThemedCharacterIdleSpriteScale,
     getThemedCharacterIdleSpriteSheetPath,
@@ -93,7 +94,7 @@ const getAnimationSheetClassName = (action: PreviewAction, isIdleFallback: boole
 const getAnimationSheetDuration = (action: PreviewAction) => {
     if (action === 'hit') return '380ms';
     if (action === 'low-hp') return '2400ms';
-    if (action === 'idle-special') return '3200ms';
+    if (action === 'idle-special') return `${BATTLE_SPECIAL_IDLE_DURATION_MS}ms`;
     if (action === 'power') return '760ms';
     return '620ms';
 };
@@ -180,6 +181,13 @@ const CharacterAnimationPreview: React.FC<CharacterAnimationPreviewProps> = ({ l
                     >
                         <RotateCcw size={14} /> {translate('アクション再生')}
                     </button>
+                </div>
+
+                <div className="mt-3 rounded-lg border border-amber-700/60 bg-amber-950/20 p-3 text-xs leading-relaxed text-amber-100">
+                    <div className="font-black text-amber-200">{translate('戦闘中の固有待機')}</div>
+                    <p className="mt-1">{translate('通常状態が6.5秒続くと再生を開始します。')}</p>
+                    <p>{translate('1回の再生時間は3.2秒です。終了後、再び6.5秒の待機時間を測ります。')}</p>
+                    <p className="text-amber-200/80">{translate('攻撃・スキル・被弾・低HP・カード選択中・敵行動中・必殺・戦闘不能・スマホ縦画面の仲間演出中は再生しません。')}</p>
                 </div>
 
                 <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-3">

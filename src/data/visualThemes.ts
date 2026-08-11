@@ -8,6 +8,9 @@ export type HighSchoolHeroAction = 'idle' | 'attack' | 'skill';
 export type HighSchoolEnemyAction = HighSchoolHeroAction;
 export type BattleHeroAnimationAction = 'idle-special' | 'attack' | 'skill' | 'hit' | 'low-hp';
 
+export const BATTLE_SPECIAL_IDLE_TRIGGER_DELAY_MS = 6500;
+export const BATTLE_SPECIAL_IDLE_DURATION_MS = 3200;
+
 const HIGH_SCHOOL_CHARACTER_ORDER = [
   'WARRIOR',
   'CARETAKER',

@@ -20,7 +20,7 @@ import { storageService } from '../services/storageService';
 import { PotionIcon, RelicIcon } from './ItemIcon';
 import { getBattleBackgroundSceneById } from '../data/battleBackgrounds';
 import { getStatusEffectKeyForVfx } from '../data/statusEffects';
-import { getThemedCharacterAnimationSheetPath, getThemedCharacterIdleSpriteScale, getThemedCharacterIdleSpriteSheetPath, getThemedCharacterSpritePath, getThemedEnemyDisplayName, getThemedEnemyVariant, getThemedHumanoidEnemyVariant, type BattleHeroAnimationAction, type HighSchoolEnemyAction, type HighSchoolHeroAction, type VisualThemeId } from '../data/visualThemes';
+import { BATTLE_SPECIAL_IDLE_DURATION_MS, BATTLE_SPECIAL_IDLE_TRIGGER_DELAY_MS, getThemedCharacterAnimationSheetPath, getThemedCharacterIdleSpriteScale, getThemedCharacterIdleSpriteSheetPath, getThemedCharacterSpritePath, getThemedEnemyDisplayName, getThemedEnemyVariant, getThemedHumanoidEnemyVariant, type BattleHeroAnimationAction, type HighSchoolEnemyAction, type HighSchoolHeroAction, type VisualThemeId } from '../data/visualThemes';
 import { boostMagicCardForTransformation } from '../data/magicCards';
 import { assetUrl } from '../utils/assetPaths';
 import { isCardEligibleForCopySelection } from '../utils/cardCopySelection';
@@ -857,13 +857,13 @@ const BattleScene: React.FC<BattleSceneProps> = ({
             return;
         }
         if (isSpecialIdleActive) return;
-        const startTimer = window.setTimeout(() => setIsSpecialIdleActive(true), 6500);
+        const startTimer = window.setTimeout(() => setIsSpecialIdleActive(true), BATTLE_SPECIAL_IDLE_TRIGGER_DELAY_MS);
         return () => window.clearTimeout(startTimer);
     }, [canUseSpecialIdle, isSpecialIdleActive]);
 
     useEffect(() => {
         if (!isSpecialIdleActive) return;
-        const endTimer = window.setTimeout(() => setIsSpecialIdleActive(false), 3200);
+        const endTimer = window.setTimeout(() => setIsSpecialIdleActive(false), BATTLE_SPECIAL_IDLE_DURATION_MS);
         return () => window.clearTimeout(endTimer);
     }, [isSpecialIdleActive]);
 
@@ -912,7 +912,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
         : heroAnimationAction === 'low-hp'
             ? '2400ms'
             : heroAnimationAction === 'idle-special'
-                ? '3200ms'
+                ? `${BATTLE_SPECIAL_IDLE_DURATION_MS}ms`
                 : lastActionType === CardType.POWER
                     ? '760ms'
                     : '620ms';
