@@ -145,12 +145,36 @@ type BattleHeroAnimationProfile = Partial<Record<BattleHeroAnimationAction, stri
 // Character-specific sheets are opt-in. Missing actions intentionally fall back
 // to the existing portrait/CSS presentation until their art is prepared.
 const HIGH_SCHOOL_CHARACTER_ANIMATION_PROFILES: Record<string, BattleHeroAnimationProfile> = {
+  WARRIOR: {
+    'idle-special': 'sprites/high-school/characters-idle-special/0.webp',
+  },
   CARETAKER: {
     'idle-special': 'sprites/high-school/characters-idle-special/1-rabbit-care.webp',
     attack: 'sprites/high-school/characters-attack-sheets/1.webp',
     skill: 'sprites/high-school/characters-skill-sheets/1.webp',
     hit: 'sprites/high-school/characters-hit-sheets/1.webp',
     'low-hp': 'sprites/high-school/characters-low-hp-sheets/1.webp',
+  },
+  ASSASSIN: {
+    'idle-special': 'sprites/high-school/characters-idle-special/2.webp',
+  },
+  MAGE: {
+    'idle-special': 'sprites/high-school/characters-idle-special/3.webp',
+  },
+  DODGEBALL: {
+    'idle-special': 'sprites/high-school/characters-idle-special/4.webp',
+  },
+  BARD: {
+    'idle-special': 'sprites/high-school/characters-idle-special/5.webp',
+  },
+  LIBRARIAN: {
+    'idle-special': 'sprites/high-school/characters-idle-special/6.webp',
+  },
+  CHEF: {
+    'idle-special': 'sprites/high-school/characters-idle-special/7.webp',
+  },
+  GARDENER: {
+    'idle-special': 'sprites/high-school/characters-idle-special/8.webp',
   },
 };
 
