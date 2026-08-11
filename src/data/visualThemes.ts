@@ -173,6 +173,15 @@ export const getThemedCharacterSpritePath = (
   return fallbackImageData;
 };
 
+export const getThemedCharacterIdleSpriteSheetPath = (
+  theme: VisualThemeId,
+  characterId: string | undefined,
+) => {
+  if (theme !== 'high-school') return null;
+  const imageIndex = HIGH_SCHOOL_CHARACTER_INDEX_BY_ID[characterId ?? 'WARRIOR'] ?? 0;
+  return assetUrl(`sprites/high-school/characters-idle-sheets/${imageIndex}.webp`);
+};
+
 export const HIGH_SCHOOL_ENEMY_VARIANTS = [
   { name: '予備校の亡霊', imageIndex: 0 },
   { name: '風紀委員の騎士', imageIndex: 1 },

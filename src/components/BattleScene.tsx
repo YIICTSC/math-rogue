@@ -20,7 +20,7 @@ import { storageService } from '../services/storageService';
 import { PotionIcon, RelicIcon } from './ItemIcon';
 import { getBattleBackgroundSceneById } from '../data/battleBackgrounds';
 import { getStatusEffectKeyForVfx } from '../data/statusEffects';
-import { getThemedCharacterSpritePath, getThemedEnemyDisplayName, getThemedEnemyVariant, getThemedHumanoidEnemyVariant, type HighSchoolEnemyAction, type HighSchoolHeroAction, type VisualThemeId } from '../data/visualThemes';
+import { getThemedCharacterIdleSpriteSheetPath, getThemedCharacterSpritePath, getThemedEnemyDisplayName, getThemedEnemyVariant, getThemedHumanoidEnemyVariant, type HighSchoolEnemyAction, type HighSchoolHeroAction, type VisualThemeId } from '../data/visualThemes';
 import { boostMagicCardForTransformation } from '../data/magicCards';
 import { assetUrl } from '../utils/assetPaths';
 import { isCardEligibleForCopySelection } from '../utils/cardCopySelection';
@@ -489,6 +489,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
     }, [coopSupportCards.length]);
 
     const [isActing, setIsActing] = useState(false);
+    const [isPlayerHit, setIsPlayerHit] = useState(false);
     const [isShaking, setIsShaking] = useState(false);
     const [showDeck, setShowDeck] = useState(false);
     const [showRelicList, setShowRelicList] = useState(false);
@@ -512,6 +513,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
     const logContainerRef = useRef<HTMLDivElement>(null);
     const prevHandIdsRef = useRef<string[]>([]);
     const drawEntryTimeoutsRef = useRef<number[]>([]);
+    const previousPlayerHpRef = useRef<number | null>(null);
 
     // --- BATTLE TUTORIAL STATE ---
     const [tutorialStep, setTutorialStep] = useState<number | null>(null);
@@ -673,10 +675,28 @@ const BattleScene: React.FC<BattleSceneProps> = ({
             setIsActing(true);
             const timer = setTimeout(() => {
                 setIsActing(false);
-            }, 300);
+            }, lastActionType === CardType.POWER ? 760 : 620);
             return () => clearTimeout(timer);
         }
     }, [lastActionTime]);
+
+    useEffect(() => {
+        const previousHp = previousPlayerHpRef.current;
+        previousPlayerHpRef.current = player.currentHp;
+
+        if (
+            previousHp === null ||
+            player.currentHp >= previousHp ||
+            (visualTheme !== 'high-school' && visualTheme !== 'magic')
+        ) return;
+
+        setIsPlayerHit(true);
+        const timer = window.setTimeout(() => setIsPlayerHit(false), 380);
+        return () => {
+            window.clearTimeout(timer);
+            setIsPlayerHit(false);
+        };
+    }, [player.currentHp, visualTheme]);
 
     // Reset local selection when turn ends or player state changes drastically
     useEffect(() => {
@@ -757,13 +777,16 @@ const BattleScene: React.FC<BattleSceneProps> = ({
         [drawEntryAnimations]
     );
 
-    const getActionClass = () => {
-        if (!isActing) return '';
+    const getActionClass = (target: 'player' | 'partner' = 'player') => {
+        const supportsHeroAnimation = visualTheme === 'high-school' || visualTheme === 'magic';
+        if (!supportsHeroAnimation) return '';
+        if (target === 'player' && isPlayerHit) return 'battle-hero-hit z-30';
+        if (!isActing) return target === 'player' ? 'battle-hero-idle' : '';
         switch (lastActionType) {
-            case CardType.ATTACK: return '-translate-y-12 scale-105 z-30';
-            case CardType.SKILL: return '-translate-x-2 scale-95 brightness-150 sepia-0';
-            case CardType.POWER: return 'scale-110 -translate-y-2 brightness-125 drop-shadow-[0_0_10px_rgba(255,255,0,0.8)]';
-            default: return '';
+            case CardType.ATTACK: return 'battle-hero-attack z-30';
+            case CardType.SKILL: return 'battle-hero-skill z-30';
+            case CardType.POWER: return 'battle-hero-power z-30';
+            default: return target === 'player' ? 'battle-hero-idle' : '';
         }
     };
 
@@ -783,6 +806,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
         player.magicProtagonistId,
         player.magicProtagonistGender,
     );
+    const idleSpriteSheetSource = getThemedCharacterIdleSpriteSheetPath(visualTheme, player.id);
     const isMagicMalePlayerSprite = visualTheme === 'magic'
         && player.magicProtagonistGender === 'male';
     const magicMalePlayerSpriteScale = isMagicMalePlayerSprite && highSchoolHeroAction !== 'idle'
@@ -825,7 +849,11 @@ const BattleScene: React.FC<BattleSceneProps> = ({
         : playerSpriteSource;
     const displayedPlayerSpriteKey = mobileActiveFamiliar
         ? `${mobileActiveFamiliar.instanceId}-${mobileFamiliarPresentation?.phase}`
-        : `hero-${player.id}-${highSchoolHeroAction}`;
+        : `hero-${player.id}-${highSchoolHeroAction}-${lastActionTime}`;
+    const shouldRenderIdleSpriteSheet = !!idleSpriteSheetSource
+        && !mobileActiveFamiliar
+        && highSchoolHeroAction === 'idle'
+        && !isPlayerHit;
     const getActiveFamiliarDisplay = (queue?: ActiveFamiliar[]) => {
         if (visualTheme !== 'high-school') return null;
         const now = Date.now();
@@ -2110,17 +2138,27 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                         />
                                     </div>
                                 )}
-                                <img
-                                    key={displayedPlayerSpriteKey}
-                                    src={displayedPlayerSpriteSource}
-                                    alt={mobileActiveFamiliar ? trans(mobileActiveFamiliar.name, languageMode) : trans('主人公', languageMode)}
-                                    className={`relative z-10 w-full h-full transition-all duration-300 ease-out animate-in fade-in zoom-in-95 ${mobileActiveFamiliar ? `object-contain drop-shadow-[0_0_14px_rgba(217,70,239,0.95)] ${mobileFamiliarPresentation?.phase === 'action' ? 'animate-pulse' : ''}` : isMagicMalePlayerSprite ? 'magic-male-battle-sprite object-contain' : 'pixel-art'} ${visualTheme === 'high-school' && !mobileActiveFamiliar ? '-scale-x-100' : ''}`}
-                                    style={mobileActiveFamiliar
-                                        ? undefined
-                                        : isMagicMalePlayerSprite
-                                            ? { '--magic-male-sprite-scale': magicMalePlayerSpriteScale } as React.CSSProperties
-                                            : { imageRendering: 'pixelated' }}
-                                />
+                                {shouldRenderIdleSpriteSheet ? (
+                                    <div
+                                        key={idleSpriteSheetSource}
+                                        role="img"
+                                        aria-label={trans('主人公', languageMode)}
+                                        className="battle-hero-idle-sprite-sheet relative z-10 w-full h-full -scale-x-100"
+                                        style={{ backgroundImage: `url(${idleSpriteSheetSource})` }}
+                                    />
+                                ) : (
+                                    <img
+                                        key={displayedPlayerSpriteKey}
+                                        src={displayedPlayerSpriteSource}
+                                        alt={mobileActiveFamiliar ? trans(mobileActiveFamiliar.name, languageMode) : trans('主人公', languageMode)}
+                                        className={`relative z-10 w-full h-full transition-all duration-300 ease-out animate-in fade-in zoom-in-95 ${mobileActiveFamiliar ? `object-contain drop-shadow-[0_0_14px_rgba(217,70,239,0.95)] ${mobileFamiliarPresentation?.phase === 'action' ? 'animate-pulse' : ''}` : isMagicMalePlayerSprite ? 'magic-male-battle-sprite object-contain' : 'pixel-art'} ${visualTheme === 'high-school' && !mobileActiveFamiliar ? '-scale-x-100' : ''}`}
+                                        style={mobileActiveFamiliar
+                                            ? undefined
+                                            : isMagicMalePlayerSprite
+                                                ? { '--magic-male-sprite-scale': magicMalePlayerSpriteScale } as React.CSSProperties
+                                                : { imageRendering: 'pixelated' }}
+                                    />
+                                )}
                                 <FloatingTextOverlay data={player.floatingText} languageMode={languageMode} />
                                 {(isCoopBattleView ? selfScopedEffects.length > 0 : shouldRenderPlayerScopedVfxOnSelf) && (
                                     <VFXOverlay effects={isCoopBattleView ? selfScopedEffects : activeEffects} targetId={isCoopBattleView && coopSelfPeerId ? coopSelfPeerId : "player"} />
@@ -2128,7 +2166,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                             </div>
 
                             {player.partner && player.partner.currentHp > 0 && (
-                                <div className={`order-3 w-16 h-16 md:w-20 md:h-20 relative transition-all duration-150 ease-out ${isTrueBossPhase2SpecialLayout ? 'mr-0 md:mr-2 -ml-3 md:-ml-6 mb-1 md:mb-0' : 'mr-2 -ml-6'} z-0 ${getActionClass()}`} onClick={() => showInfo(trans(player.partner!.name, languageMode), trans("パートナー。\n倒れるとデッキが1枚しか使えなくなります。", languageMode))}>
+                                <div className={`order-3 w-16 h-16 md:w-20 md:h-20 relative transition-all duration-150 ease-out ${isTrueBossPhase2SpecialLayout ? 'mr-0 md:mr-2 -ml-3 md:-ml-6 mb-1 md:mb-0' : 'mr-2 -ml-6'} z-0 ${getActionClass('partner')}`} onClick={() => showInfo(trans(player.partner!.name, languageMode), trans("パートナー。\n倒れるとデッキが1枚しか使えなくなります。", languageMode))}>
                                     <img
                                         src={player.partner.imageData}
                                         alt="Partner"
