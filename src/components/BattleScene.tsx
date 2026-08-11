@@ -489,6 +489,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
     }, [coopSupportCards.length]);
 
     const [isActing, setIsActing] = useState(false);
+    const [isPlayerHit, setIsPlayerHit] = useState(false);
     const [isShaking, setIsShaking] = useState(false);
     const [showDeck, setShowDeck] = useState(false);
     const [showRelicList, setShowRelicList] = useState(false);
@@ -512,6 +513,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
     const logContainerRef = useRef<HTMLDivElement>(null);
     const prevHandIdsRef = useRef<string[]>([]);
     const drawEntryTimeoutsRef = useRef<number[]>([]);
+    const previousPlayerHpRef = useRef<number | null>(null);
 
     // --- BATTLE TUTORIAL STATE ---
     const [tutorialStep, setTutorialStep] = useState<number | null>(null);
@@ -678,6 +680,20 @@ const BattleScene: React.FC<BattleSceneProps> = ({
         }
     }, [lastActionTime]);
 
+    useEffect(() => {
+        const previousHp = previousPlayerHpRef.current;
+        previousPlayerHpRef.current = player.currentHp;
+
+        if (previousHp === null || player.currentHp >= previousHp) return;
+
+        setIsPlayerHit(true);
+        const timer = window.setTimeout(() => setIsPlayerHit(false), 380);
+        return () => {
+            window.clearTimeout(timer);
+            setIsPlayerHit(false);
+        };
+    }, [player.currentHp]);
+
     // Reset local selection when turn ends or player state changes drastically
     useEffect(() => {
         if (actingEnemyId) {
@@ -812,6 +828,19 @@ const BattleScene: React.FC<BattleSceneProps> = ({
     const mobileActiveFamiliar = isTouchPortraitViewport && visualTheme === 'high-school'
         ? familiarActionSequence[mobileFamiliarPresentation?.index ?? -1] || null
         : null;
+    const heroActionClass = mobileActiveFamiliar
+        ? ''
+        : isPlayerHit
+            ? 'battle-hero-hit z-30'
+            : !isActing
+                ? ''
+                : lastActionType === CardType.ATTACK
+                    ? 'battle-hero-attack z-30'
+                    : lastActionType === CardType.SKILL
+                        ? 'battle-hero-skill z-30'
+                        : lastActionType === CardType.POWER
+                            ? 'battle-hero-power z-30'
+                            : '';
     const displayedPlayerSpriteSource = mobileActiveFamiliar
         ? assetUrl(`sprites/high-school/${mobileFamiliarPresentation?.phase === 'action' ? 'familiars-action' : 'familiars'}/${mobileActiveFamiliar.imageIndex}.webp`)
         : playerSpriteSource;
@@ -2039,7 +2068,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                     <div ref={playerAreaRef} className={isTrueBossPhase2SpecialLayout ? "battle-player-area relative z-20 flex items-end pl-2 pb-2 shrink-0" : "battle-player-area flex items-end pl-2 pb-2 shrink-0 mt-auto"}>
                         <div ref={playerGroupRef} className={isTrueBossPhase2SpecialLayout ? "flex flex-col items-start md:flex-row md:items-end relative max-w-[48vw] md:max-w-none" : "flex items-end relative"}>
 
-                            <div ref={playerSpriteRef} className={`battle-player-sprite order-1 ${visualTheme !== 'elementary' ? 'w-40 h-40 md:w-48 md:h-48' : 'w-20 h-20 md:w-24 md:h-24'} relative transition-all duration-150 ease-out ${isTrueBossPhase2SpecialLayout ? 'mr-0 md:mr-2 mb-1 md:mb-0' : 'mr-2'} ${selectedSupportCard ? 'ring-2 ring-emerald-300 rounded-lg cursor-pointer' : ''}`} onClick={() => {
+                            <div ref={playerSpriteRef} className={`battle-player-sprite order-1 ${visualTheme !== 'elementary' ? 'w-40 h-40 md:w-48 md:h-48' : 'w-20 h-20 md:w-24 md:h-24'} relative transition-all duration-150 ease-out ${isTrueBossPhase2SpecialLayout ? 'mr-0 md:mr-2 mb-1 md:mb-0' : 'mr-2'} ${heroActionClass} ${selectedSupportCard ? 'ring-2 ring-emerald-300 rounded-lg cursor-pointer' : ''}`} onClick={() => {
                                 if (selectedSupportCard && onUseCoopSupport) {
                                     onUseCoopSupport(selectedSupportCard);
                                     setSelectedSupportCard(null);
