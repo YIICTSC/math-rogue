@@ -547,6 +547,8 @@ type RaceEffectState = {
     hideEnemyIntentsOnce: boolean;
 };
 
+const PORTRAIT_PLAYER_SCALE_BASELINE = 1.4;
+
 const EMPTY_RACE_EFFECTS: RaceEffectState = {
     paperStormUntil: 0,
     chalkDustUntil: 0,
@@ -601,6 +603,7 @@ const DEFAULT_APP_SETTINGS: AppSettings = {
         playerOffsetY: 0,
         statsScale: 1
     },
+    portraitPlayerScaleBase: PORTRAIT_PLAYER_SCALE_BASELINE,
     lowDataMode: false
 };
 
@@ -625,6 +628,26 @@ const normalizeBattleUiSettings = (
     controlBarOffsetY: saved?.controlBarOffsetY ?? DEFAULT_APP_SETTINGS.battleUi.controlBarOffsetY,
     handCardScale: saved?.handCardScale ?? DEFAULT_APP_SETTINGS.battleUi.handCardScale
 });
+
+const normalizePortraitBattleUiSettings = (
+    saved?: (Partial<BattleUiSettings> & { controlBarHeightRem?: number }) | null
+): BattleUiSettings => {
+    const normalized = normalizeBattleUiSettings(saved);
+    if (!saved?.playerScale || !Number.isFinite(saved.playerScale)) {
+        return normalized;
+    }
+
+    // The portrait UI used 1.4 as the practical default before the scale
+    // baseline was made explicit. Expose that legacy default as 1.0 while
+    // leaving other user-selected values unchanged.
+    const playerScale = Math.abs(saved.playerScale - PORTRAIT_PLAYER_SCALE_BASELINE) < 0.001
+        ? 1
+        : saved.playerScale;
+    return {
+        ...normalized,
+        playerScale
+    };
+};
 
 const getViewportBattleUiOrientation = (): 'portrait' | 'landscape' => {
     if (typeof window === 'undefined') return 'portrait';
@@ -1568,14 +1591,21 @@ const App: React.FC = () => {
         const saved = storageService.getAppSettings<AppSettings>();
         const savedBattleUi = saved?.battleUi as (Partial<AppSettings['battleUi']> & { controlBarHeightRem?: number }) | undefined;
         const baseBattleUi = normalizeBattleUiSettings(savedBattleUi);
+        const savedPortraitBattleUi = saved?.battleUiPortrait as (Partial<AppSettings['battleUiPortrait']> & { controlBarHeightRem?: number }) | undefined;
+        const portraitBattleUi = !saved
+            ? normalizeBattleUiSettings(DEFAULT_APP_SETTINGS.battleUiPortrait)
+            : saved.portraitPlayerScaleBase === PORTRAIT_PLAYER_SCALE_BASELINE
+                ? normalizeBattleUiSettings(savedPortraitBattleUi || baseBattleUi)
+                : normalizePortraitBattleUiSettings(savedPortraitBattleUi || baseBattleUi);
         const merged = {
             ...DEFAULT_APP_SETTINGS,
             ...(saved || {}),
             bgmMode: normalizeBgmMode(saved?.bgmMode || storageService.getBgmMode()),
             ...migrateSavedAudioVolumeDefaults(saved),
             battleUi: baseBattleUi,
-            battleUiPortrait: normalizeBattleUiSettings(saved?.battleUiPortrait || baseBattleUi),
-            battleUiLandscape: normalizeBattleUiSettings(saved?.battleUiLandscape || baseBattleUi)
+            battleUiPortrait: portraitBattleUi,
+            battleUiLandscape: normalizeBattleUiSettings(saved?.battleUiLandscape || baseBattleUi),
+            portraitPlayerScaleBase: PORTRAIT_PLAYER_SCALE_BASELINE
         };
         return storageService.getBgmMode() ? merged : { ...merged, bgmMode: 'NEW' };
     });
@@ -18066,7 +18096,7 @@ const App: React.FC = () => {
                 )}
 
                 {pendingResumeProblemSelection && (
-                    <div className="absolute inset-0 z-[80]">
+                    <div className="absolute inset-0 z-[1200] isolate bg-slate-950">
                         <ModeSelectionScreen
                             onSelectMode={handleModeSelect}
                             onBack={() => setPendingResumeProblemSelection(false)}

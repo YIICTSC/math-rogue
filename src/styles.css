@@ -9883,6 +9883,7 @@ textarea {
 
 @media (orientation: portrait) and (max-width: 767px) {
   .battle-scene-root.battle-ui-custom {
+    --battle-ui-player-scale-baseline: 1.4;
     --battle-ui-player-offset-baseline: 10px;
   }
 
