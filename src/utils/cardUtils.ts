@@ -238,7 +238,7 @@ export const getUpgradedCard = (card: Card): Card => {
     };
 
     if (card.damage !== undefined && newCard.damage !== undefined && card.damage !== newCard.damage) {
-        replaceOnce(/(\d+)(ダメージ)/, (_m, _n, label) => `${newCard.damage}${label}`);
+        replaceOnce(/(\d+)(?:×X)?(ダメージ)/, (_m, _n, label) => `${newCard.damage}${card.xCost ? '×X' : ''}${label}`);
     }
     if (card.block !== undefined && newCard.block !== undefined && card.block !== newCard.block) {
         replaceOnce(/(ブロック(?:を)?)(\d+)/, (_m, label) => `${label}${newCard.block}`);
@@ -730,9 +730,10 @@ export const synthesizeCards = (c1: Card, c2: Card, c3?: Card): Card => {
     const parts: string[] = [];
 
     if (newDamage > 0) {
-        let text = `${newDamage}ダメージ`;
-        if (newTarget === TargetType.ALL_ENEMIES) text = `全体${newDamage}ダメージ`;
-        else if (newTarget === TargetType.RANDOM_ENEMY) text = `ランダム${newDamage}ダメージ`;
+        const xCostText = newXCost ? '×X' : '';
+        let text = `${newDamage}${xCostText}ダメージ`;
+        if (newTarget === TargetType.ALL_ENEMIES) text = `全体${newDamage}${xCostText}ダメージ`;
+        else if (newTarget === TargetType.RANDOM_ENEMY) text = `ランダム${newDamage}${xCostText}ダメージ`;
         else if (newTarget === TargetType.SELF) text = `自分に${text}`;
 
         if (newStrengthScaling > 1) text += `/ムキムキx${newStrengthScaling}`;
@@ -1001,7 +1002,10 @@ export const synthesizeCards = (c1: Card, c2: Card, c3?: Card): Card => {
         id: `synth-${Date.now()}-${Math.random()}`,
         name: newName,
         cost: newCost,
-        xCost: newXCost || undefined,
+        // A synthesized card containing any X-cost source remains an X-cost
+        // card. Its numeric cost stays 0 because the battle loop resolves X
+        // from the player's currently available Energy.
+        xCost: newXCost,
         type: newType,
         target: newTarget,
         description: description,

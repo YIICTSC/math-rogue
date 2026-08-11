@@ -37,7 +37,9 @@ const server = await createServer({
 });
 
 try {
-  const { normalizeIllustrationRefToken, synthesizeCards } = await server.ssrLoadModule('/src/utils/cardUtils.ts');
+  const { getUpgradedCard, normalizeIllustrationRefToken, synthesizeCards } = await server.ssrLoadModule('/src/utils/cardUtils.ts');
+  const { getCardDamage } = await server.ssrLoadModule('/src/utils/cardDamage.ts');
+  const { EXPANSION_CARDS } = await server.ssrLoadModule('/src/data/expansionCards.ts');
   const { buildEnglishCardName, transEventText } = await server.ssrLoadModule('/src/utils/textUtils.ts');
   const { CardType, TargetType } = await server.ssrLoadModule('/src/types.ts');
 
@@ -116,6 +118,17 @@ try {
   assert(!repeatedEnergy.description.includes('エナジー+1。エナジー+1'), `energy effect is still duplicated: ${repeatedEnergy.description}`);
   assert(repeatedEnergy.description.endsWith('×2。'), `whole-card repeat count is not at the end: ${repeatedEnergy.description}`);
   assert(!/\d+ダメージx2/.test(repeatedEnergy.description), `repeat count is still attached only to damage: ${repeatedEnergy.description}`);
+
+  const xAttack = { id: 'X_ATTACK', ...EXPANSION_CARDS.EXP_ELEM_PE_07 };
+  const synthesizedX = synthesizeCards(xAttack, attack);
+  assert(synthesizedX.xCost === true, 'X-cost flag was lost during synthesis');
+  assert(synthesizedX.cost === 0, `synthesized X-cost card received a fixed cost: ${synthesizedX.cost}`);
+  assert(synthesizedX.description.includes('×Xダメージ'), `synthesized X-cost description lost X scaling: ${synthesizedX.description}`);
+  assert(getCardDamage(synthesizedX, { energySpent: 3 }) === (synthesizedX.damage || 0) * 3, 'synthesized X-cost damage does not scale with spent Energy');
+
+  const upgradedX = getUpgradedCard(xAttack);
+  assert(upgradedX.xCost === true, 'X-cost flag was lost during upgrade');
+  assert(upgradedX.description.includes('×Xダメージ'), `upgraded X-cost description lost X scaling: ${upgradedX.description}`);
 
   const magicEventSources = ['src/data/magicRomanceDialogue.ts', 'src/services/magicRomanceEventService.ts'];
   const magicChoiceLabels = Array.from(new Set(magicEventSources.flatMap(file =>
