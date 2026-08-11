@@ -20,7 +20,7 @@ import { storageService } from '../services/storageService';
 import { PotionIcon, RelicIcon } from './ItemIcon';
 import { getBattleBackgroundSceneById } from '../data/battleBackgrounds';
 import { getStatusEffectKeyForVfx } from '../data/statusEffects';
-import { getThemedCharacterIdleSpriteSheetPath, getThemedCharacterSpritePath, getThemedEnemyDisplayName, getThemedEnemyVariant, getThemedHumanoidEnemyVariant, type HighSchoolEnemyAction, type HighSchoolHeroAction, type VisualThemeId } from '../data/visualThemes';
+import { getThemedCharacterIdleSpriteScale, getThemedCharacterIdleSpriteSheetPath, getThemedCharacterSpritePath, getThemedEnemyDisplayName, getThemedEnemyVariant, getThemedHumanoidEnemyVariant, type HighSchoolEnemyAction, type HighSchoolHeroAction, type VisualThemeId } from '../data/visualThemes';
 import { boostMagicCardForTransformation } from '../data/magicCards';
 import { assetUrl } from '../utils/assetPaths';
 import { isCardEligibleForCopySelection } from '../utils/cardCopySelection';
@@ -489,7 +489,6 @@ const BattleScene: React.FC<BattleSceneProps> = ({
     }, [coopSupportCards.length]);
 
     const [isActing, setIsActing] = useState(false);
-    const [isPlayerHit, setIsPlayerHit] = useState(false);
     const [isShaking, setIsShaking] = useState(false);
     const [showDeck, setShowDeck] = useState(false);
     const [showRelicList, setShowRelicList] = useState(false);
@@ -513,7 +512,6 @@ const BattleScene: React.FC<BattleSceneProps> = ({
     const logContainerRef = useRef<HTMLDivElement>(null);
     const prevHandIdsRef = useRef<string[]>([]);
     const drawEntryTimeoutsRef = useRef<number[]>([]);
-    const previousPlayerHpRef = useRef<number | null>(null);
 
     // --- BATTLE TUTORIAL STATE ---
     const [tutorialStep, setTutorialStep] = useState<number | null>(null);
@@ -680,24 +678,6 @@ const BattleScene: React.FC<BattleSceneProps> = ({
         }
     }, [lastActionTime]);
 
-    useEffect(() => {
-        const previousHp = previousPlayerHpRef.current;
-        previousPlayerHpRef.current = player.currentHp;
-
-        if (
-            previousHp === null ||
-            player.currentHp >= previousHp ||
-            (visualTheme !== 'high-school' && visualTheme !== 'magic')
-        ) return;
-
-        setIsPlayerHit(true);
-        const timer = window.setTimeout(() => setIsPlayerHit(false), 380);
-        return () => {
-            window.clearTimeout(timer);
-            setIsPlayerHit(false);
-        };
-    }, [player.currentHp, visualTheme]);
-
     // Reset local selection when turn ends or player state changes drastically
     useEffect(() => {
         if (actingEnemyId) {
@@ -777,19 +757,6 @@ const BattleScene: React.FC<BattleSceneProps> = ({
         [drawEntryAnimations]
     );
 
-    const getActionClass = (target: 'player' | 'partner' = 'player') => {
-        const supportsHeroAnimation = visualTheme === 'high-school' || visualTheme === 'magic';
-        if (!supportsHeroAnimation) return '';
-        if (target === 'player' && isPlayerHit) return 'battle-hero-hit z-30';
-        if (!isActing) return target === 'player' ? 'battle-hero-idle' : '';
-        switch (lastActionType) {
-            case CardType.ATTACK: return 'battle-hero-attack z-30';
-            case CardType.SKILL: return 'battle-hero-skill z-30';
-            case CardType.POWER: return 'battle-hero-power z-30';
-            default: return target === 'player' ? 'battle-hero-idle' : '';
-        }
-    };
-
     const highSchoolHeroAction: HighSchoolHeroAction = !isActing
         ? 'idle'
         : lastActionType === CardType.ATTACK
@@ -807,6 +774,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
         player.magicProtagonistGender,
     );
     const idleSpriteSheetSource = getThemedCharacterIdleSpriteSheetPath(visualTheme, player.id);
+    const idleSpriteSheetScale = getThemedCharacterIdleSpriteScale(visualTheme, player.id);
     const isMagicMalePlayerSprite = visualTheme === 'magic'
         && player.magicProtagonistGender === 'male';
     const magicMalePlayerSpriteScale = isMagicMalePlayerSprite && highSchoolHeroAction !== 'idle'
@@ -852,8 +820,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
         : `hero-${player.id}-${highSchoolHeroAction}-${lastActionTime}`;
     const shouldRenderIdleSpriteSheet = !!idleSpriteSheetSource
         && !mobileActiveFamiliar
-        && highSchoolHeroAction === 'idle'
-        && !isPlayerHit;
+        && highSchoolHeroAction === 'idle';
     const getActiveFamiliarDisplay = (queue?: ActiveFamiliar[]) => {
         if (visualTheme !== 'high-school') return null;
         const now = Date.now();
@@ -2072,7 +2039,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                     <div ref={playerAreaRef} className={isTrueBossPhase2SpecialLayout ? "battle-player-area relative z-20 flex items-end pl-2 pb-2 shrink-0" : "battle-player-area flex items-end pl-2 pb-2 shrink-0 mt-auto"}>
                         <div ref={playerGroupRef} className={isTrueBossPhase2SpecialLayout ? "flex flex-col items-start md:flex-row md:items-end relative max-w-[48vw] md:max-w-none" : "flex items-end relative"}>
 
-                            <div ref={playerSpriteRef} className={`battle-player-sprite order-1 ${visualTheme !== 'elementary' ? 'w-40 h-40 md:w-48 md:h-48' : 'w-20 h-20 md:w-24 md:h-24'} relative transition-all duration-150 ease-out ${isTrueBossPhase2SpecialLayout ? 'mr-0 md:mr-2 mb-1 md:mb-0' : 'mr-2'} ${getActionClass()} ${selectedSupportCard ? 'ring-2 ring-emerald-300 rounded-lg cursor-pointer' : ''}`} onClick={() => {
+                            <div ref={playerSpriteRef} className={`battle-player-sprite order-1 ${visualTheme !== 'elementary' ? 'w-40 h-40 md:w-48 md:h-48' : 'w-20 h-20 md:w-24 md:h-24'} relative transition-all duration-150 ease-out ${isTrueBossPhase2SpecialLayout ? 'mr-0 md:mr-2 mb-1 md:mb-0' : 'mr-2'} ${selectedSupportCard ? 'ring-2 ring-emerald-300 rounded-lg cursor-pointer' : ''}`} onClick={() => {
                                 if (selectedSupportCard && onUseCoopSupport) {
                                     onUseCoopSupport(selectedSupportCard);
                                     setSelectedSupportCard(null);
@@ -2144,7 +2111,10 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                         role="img"
                                         aria-label={trans('主人公', languageMode)}
                                         className="battle-hero-idle-sprite-sheet relative z-10 w-full h-full -scale-x-100"
-                                        style={{ backgroundImage: `url(${idleSpriteSheetSource})` }}
+                                        style={{
+                                            backgroundImage: `url(${idleSpriteSheetSource})`,
+                                            '--battle-hero-idle-sprite-scale': idleSpriteSheetScale,
+                                        } as React.CSSProperties}
                                     />
                                 ) : (
                                     <img
@@ -2166,7 +2136,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                             </div>
 
                             {player.partner && player.partner.currentHp > 0 && (
-                                <div className={`order-3 w-16 h-16 md:w-20 md:h-20 relative transition-all duration-150 ease-out ${isTrueBossPhase2SpecialLayout ? 'mr-0 md:mr-2 -ml-3 md:-ml-6 mb-1 md:mb-0' : 'mr-2 -ml-6'} z-0 ${getActionClass('partner')}`} onClick={() => showInfo(trans(player.partner!.name, languageMode), trans("パートナー。\n倒れるとデッキが1枚しか使えなくなります。", languageMode))}>
+                                <div className={`order-3 w-16 h-16 md:w-20 md:h-20 relative transition-all duration-150 ease-out ${isTrueBossPhase2SpecialLayout ? 'mr-0 md:mr-2 -ml-3 md:-ml-6 mb-1 md:mb-0' : 'mr-2 -ml-6'} z-0`} onClick={() => showInfo(trans(player.partner!.name, languageMode), trans("パートナー。\n倒れるとデッキが1枚しか使えなくなります。", languageMode))}>
                                     <img
                                         src={player.partner.imageData}
                                         alt="Partner"
