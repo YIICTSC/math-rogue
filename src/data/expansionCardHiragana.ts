@@ -275,11 +275,17 @@ export const translateExpansionCardHiragana = (text: string): string | undefined
     return `こゆうきょうめい${logMatch[1]}${logMatch[2] === 'が発動！' ? 'がはつどう！' : 'はじょうけんみたつ'}`;
   }
 
-  const match = text.match(/^(?:(\d+)ダメージ。|ブロック(\d+)。)?(?:【固有共鳴(\d{3})】)?(.+)、(.+)。$/);
+  const match = text.match(/^(?:(\d+)×Xダメージ。|(\d+)ダメージ。|ブロック(\d+)。)?(?:【固有共鳴(\d{3})】)?(.+)、(.+)。$/);
   if (!match) return undefined;
-  const condition = EXPANSION_CONDITION_HIRAGANA[match[4]];
-  const reward = EXPANSION_REWARD_HIRAGANA[match[5]];
+  const condition = EXPANSION_CONDITION_HIRAGANA[match[5]];
+  const reward = EXPANSION_REWARD_HIRAGANA[match[6]];
   if (!condition || !reward) return undefined;
-  const base = match[1] ? `${match[1]}ダメージ。` : match[2] ? `ブロック${match[2]}。` : '';
+  const base = match[1]
+    ? `${match[1]}×Xダメージ。`
+    : match[2]
+      ? `${match[2]}ダメージ。`
+      : match[3]
+        ? `ブロック${match[3]}。`
+        : '';
   return `${base}${condition}、${reward}。`;
 };

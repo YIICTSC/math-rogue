@@ -328,11 +328,17 @@ export const translateExpansionCardEnglish = (text: string): string | undefined 
   const logMatch = text.match(/^固有共鳴(\d{1,3})(が発動！|は条件未達)$/);
   if (logMatch) return `Unique Resonance ${logMatch[1]} ${logMatch[2] === 'が発動！' ? 'activated!' : 'condition not met'}`;
 
-  const match = text.match(/^(?:(\d+)ダメージ。|ブロック(\d+)。)?(?:【固有共鳴(\d{3})】)?(.+)、(.+)。$/);
+  const match = text.match(/^(?:(\d+)×Xダメージ。|(\d+)ダメージ。|ブロック(\d+)。)?(?:【固有共鳴(\d{3})】)?(.+)、(.+)。$/);
   if (!match) return undefined;
-  const condition = EXPANSION_CONDITION_ENGLISH_BY_JAPANESE[match[4]];
-  const reward = EXPANSION_REWARD_ENGLISH_BY_JAPANESE[match[5]];
+  const condition = EXPANSION_CONDITION_ENGLISH_BY_JAPANESE[match[5]];
+  const reward = EXPANSION_REWARD_ENGLISH_BY_JAPANESE[match[6]];
   if (!condition || !reward) return undefined;
-  const base = match[1] ? `Deal ${match[1]} damage. ` : match[2] ? `Gain ${match[2]} Block. ` : '';
+  const base = match[1]
+    ? `Deal ${match[1]} damage per Energy spent. `
+    : match[2]
+      ? `Deal ${match[2]} damage. `
+      : match[3]
+        ? `Gain ${match[3]} Block. `
+        : '';
   return `${base}${condition}, ${reward}.`;
 };

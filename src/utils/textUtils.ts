@@ -9374,7 +9374,9 @@ export const buildEnglishCardDescription = (card: Card): string => {
     if (card.damage !== undefined && card.damage > 0) {
         const hits = (card.playCopies ?? 0) + 1;
         const hitText = hits > 1 ? ` ${hits} times` : "";
-        parts.push(`Deal ${card.damage} damage${targetText}${hitText}`);
+        parts.push(card.xCost
+            ? `Deal ${card.damage} damage per Energy spent${targetText}${hitText}`
+            : `Deal ${card.damage} damage${targetText}${hitText}`);
     }
     if (card.damagePerAttackPlayed) parts.push(`Deal ${card.damagePerAttackPlayed} extra damage for each Attack played this turn`);
     if (card.damagePerCardPlayed) parts.push(`Deal ${card.damagePerCardPlayed} extra damage for each card played this turn`);

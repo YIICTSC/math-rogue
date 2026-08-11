@@ -82,7 +82,7 @@ const entries = rows.map((row, index) => {
       ? `block: ${baseValue}, `
       : '';
   const baseText = row.type === 'ATTACK'
-    ? `${baseValue}ダメージ。`
+    ? `${baseValue}${row.xCost ? '×X' : ''}ダメージ。`
     : row.type === 'SKILL' || row.type === 'POWER'
       ? `ブロック${baseValue}。`
       : '';

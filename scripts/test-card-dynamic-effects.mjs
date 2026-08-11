@@ -27,6 +27,8 @@ try {
     const card = EXPANSION_CARDS[id];
     assert(card?.xCost === true && card.cost === 0, `${id} is not an X-cost card`);
     assert(getCardPlayCost(card, 3) === 3, `${id} does not spend all available energy`);
+    assert(getCardDamage(card, { energySpent: 1 }) === card.damage, `${id} does not deal its base damage at X=1`);
+    assert(getCardDamage(card, { energySpent: 3 }) === card.damage * 3, `${id} does not scale damage with X=3`);
   }
 
   const gravity = ADDITIONAL_CARDS.BOYS_GRAVITY_PRESS;
