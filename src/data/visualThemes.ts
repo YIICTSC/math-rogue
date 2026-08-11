@@ -112,6 +112,20 @@ const HIGH_SCHOOL_CHARACTER_INDEX_BY_ID: Record<string, number> = {
   GARDENER: HIGH_SCHOOL_CHARACTER_CONFIG.GARDENER.imageIndex,
 };
 
+// The idle sheets use a larger per-frame canvas than the original portraits.
+// Keep each protagonist's visible height aligned with its portrait-only size.
+const HIGH_SCHOOL_IDLE_SPRITE_SCALE_BY_INDEX: Record<number, number> = {
+  0: 1.05,
+  1: 0.93,
+  2: 1.12,
+  3: 0.94,
+  4: 0.96,
+  5: 1,
+  6: 1.04,
+  7: 1,
+  8: 1.01,
+};
+
 export const getHighSchoolCharacterSpritePath = (
   characterId: string | undefined,
   action: HighSchoolHeroAction,
@@ -180,6 +194,15 @@ export const getThemedCharacterIdleSpriteSheetPath = (
   if (theme !== 'high-school') return null;
   const imageIndex = HIGH_SCHOOL_CHARACTER_INDEX_BY_ID[characterId ?? 'WARRIOR'] ?? 0;
   return assetUrl(`sprites/high-school/characters-idle-sheets/${imageIndex}.webp`);
+};
+
+export const getThemedCharacterIdleSpriteScale = (
+  theme: VisualThemeId,
+  characterId: string | undefined,
+) => {
+  if (theme !== 'high-school') return 1;
+  const imageIndex = HIGH_SCHOOL_CHARACTER_INDEX_BY_ID[characterId ?? 'WARRIOR'] ?? 0;
+  return HIGH_SCHOOL_IDLE_SPRITE_SCALE_BY_INDEX[imageIndex] ?? 1;
 };
 
 export const HIGH_SCHOOL_ENEMY_VARIANTS = [
