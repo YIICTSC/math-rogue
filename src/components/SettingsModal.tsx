@@ -29,6 +29,7 @@ export type AppSettings = {
   battleUi: BattleUiSettings;
   battleUiPortrait: BattleUiSettings;
   battleUiLandscape: BattleUiSettings;
+  portraitPlayerScaleBase?: number;
   lowDataMode: boolean;
 };
 
