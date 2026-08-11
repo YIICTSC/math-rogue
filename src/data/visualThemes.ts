@@ -6,6 +6,7 @@ import { MAGIC_HEROES, MAGIC_MALE_PROTAGONISTS } from './magicHeroes';
 export type VisualThemeId = 'elementary' | 'high-school' | 'magic';
 export type HighSchoolHeroAction = 'idle' | 'attack' | 'skill';
 export type HighSchoolEnemyAction = HighSchoolHeroAction;
+export type BattleHeroAnimationAction = 'idle-special' | 'attack' | 'skill' | 'hit' | 'low-hp';
 
 const HIGH_SCHOOL_CHARACTER_ORDER = [
   'WARRIOR',
@@ -126,6 +127,24 @@ const HIGH_SCHOOL_IDLE_SPRITE_SCALE_BY_INDEX: Record<number, number> = {
   8: 1.01,
 };
 
+type BattleHeroAnimationProfile = Partial<Record<BattleHeroAnimationAction, string>>;
+
+// Character-specific sheets are opt-in. Missing actions intentionally fall back
+// to the existing portrait/CSS presentation until their art is prepared.
+const HIGH_SCHOOL_CHARACTER_ANIMATION_PROFILES: Record<string, BattleHeroAnimationProfile> = {
+  CARETAKER: {
+    'idle-special': 'sprites/high-school/characters-idle-special/1-rabbit-care.webp',
+    attack: 'sprites/high-school/characters-attack-sheets/1.webp',
+    skill: 'sprites/high-school/characters-skill-sheets/1.webp',
+    hit: 'sprites/high-school/characters-hit-sheets/1.webp',
+    'low-hp': 'sprites/high-school/characters-low-hp-sheets/1.webp',
+  },
+};
+
+export const HIGH_SCHOOL_CHARACTER_ANIMATION_ASSET_PATHS = Object.values(HIGH_SCHOOL_CHARACTER_ANIMATION_PROFILES)
+  .flatMap(profile => Object.values(profile))
+  .filter((path): path is string => !!path);
+
 export const getHighSchoolCharacterSpritePath = (
   characterId: string | undefined,
   action: HighSchoolHeroAction,
@@ -203,6 +222,16 @@ export const getThemedCharacterIdleSpriteScale = (
   if (theme !== 'high-school') return 1;
   const imageIndex = HIGH_SCHOOL_CHARACTER_INDEX_BY_ID[characterId ?? 'WARRIOR'] ?? 0;
   return HIGH_SCHOOL_IDLE_SPRITE_SCALE_BY_INDEX[imageIndex] ?? 1;
+};
+
+export const getThemedCharacterAnimationSheetPath = (
+  theme: VisualThemeId,
+  characterId: string | undefined,
+  action: BattleHeroAnimationAction,
+) => {
+  if (theme !== 'high-school') return null;
+  const path = HIGH_SCHOOL_CHARACTER_ANIMATION_PROFILES[characterId ?? '']?.[action];
+  return path ? assetUrl(path) : null;
 };
 
 export const HIGH_SCHOOL_ENEMY_VARIANTS = [

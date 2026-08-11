@@ -20,7 +20,7 @@ import { storageService } from '../services/storageService';
 import { PotionIcon, RelicIcon } from './ItemIcon';
 import { getBattleBackgroundSceneById } from '../data/battleBackgrounds';
 import { getStatusEffectKeyForVfx } from '../data/statusEffects';
-import { getThemedCharacterIdleSpriteScale, getThemedCharacterIdleSpriteSheetPath, getThemedCharacterSpritePath, getThemedEnemyDisplayName, getThemedEnemyVariant, getThemedHumanoidEnemyVariant, type HighSchoolEnemyAction, type HighSchoolHeroAction, type VisualThemeId } from '../data/visualThemes';
+import { getThemedCharacterAnimationSheetPath, getThemedCharacterIdleSpriteScale, getThemedCharacterIdleSpriteSheetPath, getThemedCharacterSpritePath, getThemedEnemyDisplayName, getThemedEnemyVariant, getThemedHumanoidEnemyVariant, type BattleHeroAnimationAction, type HighSchoolEnemyAction, type HighSchoolHeroAction, type VisualThemeId } from '../data/visualThemes';
 import { boostMagicCardForTransformation } from '../data/magicCards';
 import { assetUrl } from '../utils/assetPaths';
 import { isCardEligibleForCopySelection } from '../utils/cardCopySelection';
@@ -490,6 +490,8 @@ const BattleScene: React.FC<BattleSceneProps> = ({
 
     const [isActing, setIsActing] = useState(false);
     const [isPlayerHit, setIsPlayerHit] = useState(false);
+    const [isLowHp, setIsLowHp] = useState(() => player.maxHp > 0 && player.currentHp / player.maxHp <= 0.35);
+    const [isSpecialIdleActive, setIsSpecialIdleActive] = useState(false);
     const [isShaking, setIsShaking] = useState(false);
     const [showDeck, setShowDeck] = useState(false);
     const [showRelicList, setShowRelicList] = useState(false);
@@ -694,6 +696,15 @@ const BattleScene: React.FC<BattleSceneProps> = ({
         };
     }, [player.currentHp]);
 
+    useEffect(() => {
+        const hpRatio = player.maxHp > 0 ? player.currentHp / player.maxHp : 1;
+        setIsLowHp((previous) => {
+            if (hpRatio <= 0.35) return true;
+            if (hpRatio >= 0.45) return false;
+            return previous;
+        });
+    }, [player.currentHp, player.maxHp]);
+
     // Reset local selection when turn ends or player state changes drastically
     useEffect(() => {
         if (actingEnemyId) {
@@ -828,10 +839,54 @@ const BattleScene: React.FC<BattleSceneProps> = ({
     const mobileActiveFamiliar = isTouchPortraitViewport && visualTheme === 'high-school'
         ? familiarActionSequence[mobileFamiliarPresentation?.index ?? -1] || null
         : null;
+
+    const specialIdleSheetSource = getThemedCharacterAnimationSheetPath(visualTheme as VisualThemeId, player.id, 'idle-special');
+    const canUseSpecialIdle = !!specialIdleSheetSource
+        && !mobileActiveFamiliar
+        && !isActing
+        && !isPlayerHit
+        && !isLowHp
+        && !selectionState.active
+        && !actingEnemyId
+        && !isFinisherActive
+        && !selfDown;
+
+    useEffect(() => {
+        if (!canUseSpecialIdle) {
+            setIsSpecialIdleActive(false);
+            return;
+        }
+        if (isSpecialIdleActive) return;
+        const startTimer = window.setTimeout(() => setIsSpecialIdleActive(true), 6500);
+        return () => window.clearTimeout(startTimer);
+    }, [canUseSpecialIdle, isSpecialIdleActive]);
+
+    useEffect(() => {
+        if (!isSpecialIdleActive) return;
+        const endTimer = window.setTimeout(() => setIsSpecialIdleActive(false), 3200);
+        return () => window.clearTimeout(endTimer);
+    }, [isSpecialIdleActive]);
+
+    const heroAnimationAction: BattleHeroAnimationAction = isPlayerHit
+        ? 'hit'
+        : isActing && lastActionType === CardType.ATTACK
+            ? 'attack'
+            : isActing && (lastActionType === CardType.SKILL || lastActionType === CardType.POWER)
+                ? 'skill'
+                : isLowHp
+                    ? 'low-hp'
+                    : 'idle-special';
+    const shouldUseHeroAnimationSheet = !mobileActiveFamiliar
+        && (isPlayerHit || isLowHp || isActing || isSpecialIdleActive);
+    const heroAnimationSheetSource = shouldUseHeroAnimationSheet
+        ? getThemedCharacterAnimationSheetPath(visualTheme as VisualThemeId, player.id, heroAnimationAction)
+        : null;
     const heroActionClass = mobileActiveFamiliar
         ? ''
         : isPlayerHit
             ? 'battle-hero-hit z-30'
+            : isLowHp && !isActing
+                ? 'battle-hero-low-hp z-20'
             : !isActing
                 ? ''
                 : lastActionType === CardType.ATTACK
@@ -846,10 +901,26 @@ const BattleScene: React.FC<BattleSceneProps> = ({
         : playerSpriteSource;
     const displayedPlayerSpriteKey = mobileActiveFamiliar
         ? `${mobileActiveFamiliar.instanceId}-${mobileFamiliarPresentation?.phase}`
-        : `hero-${player.id}-${highSchoolHeroAction}-${lastActionTime}`;
+        : `hero-${player.id}-${heroAnimationAction}-${lastActionTime}-${player.currentHp}`;
+    const shouldRenderHeroAnimationSheet = !!heroAnimationSheetSource && !mobileActiveFamiliar;
     const shouldRenderIdleSpriteSheet = !!idleSpriteSheetSource
+        && !shouldRenderHeroAnimationSheet
         && !mobileActiveFamiliar
         && highSchoolHeroAction === 'idle';
+    const heroAnimationSheetDuration = heroAnimationAction === 'hit'
+        ? '380ms'
+        : heroAnimationAction === 'low-hp'
+            ? '2400ms'
+            : heroAnimationAction === 'idle-special'
+                ? '3200ms'
+                : lastActionType === CardType.POWER
+                    ? '760ms'
+                    : '620ms';
+    const heroAnimationSheetClassName = heroAnimationAction === 'idle-special'
+        ? 'battle-hero-special-idle-sprite-sheet'
+        : heroAnimationAction === 'low-hp'
+            ? 'battle-hero-low-hp-sprite-sheet'
+            : 'battle-hero-action-sprite-sheet';
     const getActiveFamiliarDisplay = (queue?: ActiveFamiliar[]) => {
         if (visualTheme !== 'high-school') return null;
         const now = Date.now();
@@ -2134,7 +2205,19 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                         />
                                     </div>
                                 )}
-                                {shouldRenderIdleSpriteSheet ? (
+                                {shouldRenderHeroAnimationSheet ? (
+                                    <div
+                                        key={`${displayedPlayerSpriteKey}-${heroAnimationSheetSource}`}
+                                        role="img"
+                                        aria-label={trans('主人公', languageMode)}
+                                        className={`${heroAnimationSheetClassName} relative z-10 w-full h-full -scale-x-100`}
+                                        style={{
+                                            backgroundImage: `url(${heroAnimationSheetSource})`,
+                                            '--battle-hero-animation-sheet-scale': heroAnimationAction === 'idle-special' ? idleSpriteSheetScale : 1,
+                                            '--battle-hero-animation-sheet-duration': heroAnimationSheetDuration,
+                                        } as React.CSSProperties}
+                                    />
+                                ) : shouldRenderIdleSpriteSheet ? (
                                     <div
                                         key={idleSpriteSheetSource}
                                         role="img"

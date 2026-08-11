@@ -3448,6 +3448,21 @@ textarea {
   animation: battle-hero-hit 380ms cubic-bezier(0.3, 0.8, 0.3, 1) both;
 }
 
+@keyframes battle-hero-low-hp-pulse {
+  0%, 100% {
+    filter: saturate(0.9) brightness(0.98);
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    filter: saturate(0.72) brightness(0.9);
+    transform: translate3d(0, -2px, 0) scale(0.985);
+  }
+}
+
+.battle-scene-root .battle-hero-low-hp {
+  animation: battle-hero-low-hp-pulse 1800ms ease-in-out infinite;
+}
+
 .battle-scene-root .battle-hero-skill::before,
 .battle-scene-root .battle-hero-power::before {
   content: '';
@@ -3513,11 +3528,41 @@ textarea {
   58%, 100% { opacity: 0; transform: rotate(-15deg) translateX(50%); }
 }
 
+/* Optional character-specific sheets. Each sheet is a 2x2 sequence:
+   top-left, top-right, bottom-left, bottom-right. */
+.battle-scene-root .battle-hero-action-sprite-sheet,
+.battle-scene-root .battle-hero-special-idle-sprite-sheet,
+.battle-scene-root .battle-hero-low-hp-sprite-sheet {
+  background-repeat: no-repeat;
+  background-position: 0 0;
+  background-size: 200% 200%;
+  image-rendering: pixelated;
+  scale: var(--battle-hero-animation-sheet-scale, 1);
+  transform-origin: center bottom;
+  animation-name: battle-hero-sheet-frames;
+  animation-duration: var(--battle-hero-animation-sheet-duration, 620ms);
+  animation-timing-function: steps(1, end);
+  animation-fill-mode: both;
+}
+
+.battle-scene-root .battle-hero-special-idle-sprite-sheet,
+.battle-scene-root .battle-hero-low-hp-sprite-sheet {
+  animation-iteration-count: infinite;
+}
+
+@keyframes battle-hero-sheet-frames {
+  0%, 19.99% { background-position: 0 0; }
+  20%, 44.99% { background-position: 100% 0; }
+  45%, 69.99% { background-position: 0 100%; }
+  70%, 100% { background-position: 100% 100%; }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .battle-scene-root .battle-hero-attack,
   .battle-scene-root .battle-hero-skill,
   .battle-scene-root .battle-hero-power,
-  .battle-scene-root .battle-hero-hit {
+  .battle-scene-root .battle-hero-hit,
+  .battle-scene-root .battle-hero-low-hp {
     animation: none !important;
     transform: none !important;
     filter: none !important;
@@ -3528,6 +3573,14 @@ textarea {
   .battle-scene-root .battle-hero-power::before {
     animation: none !important;
     opacity: 0 !important;
+  }
+
+  .battle-scene-root .battle-hero-action-sprite-sheet,
+  .battle-scene-root .battle-hero-special-idle-sprite-sheet,
+  .battle-scene-root .battle-hero-low-hp-sprite-sheet {
+    animation: none !important;
+    transform: none !important;
+    filter: none !important;
   }
 
 }

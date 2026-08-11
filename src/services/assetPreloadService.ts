@@ -1,6 +1,6 @@
 import { BATTLE_BACKGROUND_SCENES } from '../data/battleBackgrounds';
 import { MAGIC_ASSET_PATHS } from '../data/magicAssetManifest';
-import type { VisualThemeId } from '../data/visualThemes';
+import { HIGH_SCHOOL_CHARACTER_ANIMATION_ASSET_PATHS, type VisualThemeId } from '../data/visualThemes';
 import { assetUrl } from '../utils/assetPaths';
 import { WEB_PERFORMANCE_MODE, WEB_PRELOAD_ENABLED } from '../config/runtime';
 
@@ -84,6 +84,7 @@ const buildCriticalAssetPaths = (visualTheme: VisualThemeId): string[] => {
                 'sprites/high-school/title-background.webp',
                 'sprites/backgrounds/learning-rogue/high-school-map.webp',
                 ...range(9).map(index => `sprites/high-school/characters-idle-sheets/${index}.webp`),
+                ...HIGH_SCHOOL_CHARACTER_ANIMATION_ASSET_PATHS,
             );
         }
 
@@ -106,6 +107,7 @@ const buildCriticalAssetPaths = (visualTheme: VisualThemeId): string[] => {
             ...HIGH_SCHOOL_BACKGROUND_PATHS,
             ...range(9).map(index => `sprites/high-school/characters/${index}.webp`),
             ...range(9).map(index => `sprites/high-school/characters-idle-sheets/${index}.webp`),
+            ...HIGH_SCHOOL_CHARACTER_ANIMATION_ASSET_PATHS,
             ...range(12).map(index => `sprites/high-school/enemies/${index}.webp`),
             ...range(12).map(index => `sprites/high-school/humanoid-enemies/${index}.webp`),
         );

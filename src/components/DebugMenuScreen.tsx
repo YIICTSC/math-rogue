@@ -33,6 +33,7 @@ import { DODOMEDESU_EVENT_STAGES } from '../data/dodomedesuBoss';
 import React, { useMemo, useState, useCallback, useEffect, useRef } from 'react';
 import TranslatedUiTree from './TranslatedUiTree';
 import ResilientAssetImage from './ResilientAssetImage';
+import CharacterAnimationPreview from './CharacterAnimationPreview';
 
 interface DebugMenuScreenProps {
     onStart: (deck: ICard[], relics: Relic[], potions: Potion[]) => void;
@@ -278,7 +279,7 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
     focusedUiPreviewScreenId,
     focusedSupporterNpcEventTitle
 }) => {
-    const [activeTab, setActiveTab] = useState<'CARDS' | 'RELICS' | 'POTIONS' | 'SYNTHESIS' | 'CAPTURE_SIM' | 'SYSTEM' | 'UI_PREVIEW' | 'PROBLEM_DEBUG' | 'EFFECTS' | 'MAGIC_VOICES' | 'ENEMY_VOICE_AUDIT' | 'MAGIC_ART_AUDIT' | 'EVENTS' | 'HUMANOID_SPRITES' | 'TRANSLATION'>(focusedSupporterNpcEventTitle ? 'EVENTS' : focusedUiPreviewScreenId ? 'UI_PREVIEW' : 'CARDS');
+    const [activeTab, setActiveTab] = useState<'CARDS' | 'RELICS' | 'POTIONS' | 'SYNTHESIS' | 'CAPTURE_SIM' | 'SYSTEM' | 'UI_PREVIEW' | 'PROBLEM_DEBUG' | 'EFFECTS' | 'MAGIC_VOICES' | 'ENEMY_VOICE_AUDIT' | 'MAGIC_ART_AUDIT' | 'EVENTS' | 'HUMANOID_SPRITES' | 'CHARACTER_ANIMATIONS' | 'TRANSLATION'>(focusedSupporterNpcEventTitle ? 'EVENTS' : focusedUiPreviewScreenId ? 'UI_PREVIEW' : 'CARDS');
     const showLoadoutPanel = activeTab === 'CARDS' || activeTab === 'RELICS' || activeTab === 'POTIONS' || activeTab === 'SYNTHESIS' || activeTab === 'CAPTURE_SIM';
     const focusedUiPreviewItemRef = useRef<HTMLDivElement | null>(null);
     const focusedSupporterNpcEventRef = useRef<HTMLDivElement | null>(null);
@@ -969,6 +970,7 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
                         <button onClick={() => setActiveTab('MAGIC_ART_AUDIT')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'MAGIC_ART_AUDIT' ? 'bg-pink-900 text-white' : 'text-pink-400 hover:bg-gray-750'}`}>魔法絵不整合</button>
                         <button onClick={() => setActiveTab('EVENTS')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'EVENTS' ? 'bg-cyan-900 text-white' : 'text-cyan-400 hover:bg-gray-750'}`}>高校編イベント</button>
                         <button onClick={() => setActiveTab('HUMANOID_SPRITES')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'HUMANOID_SPRITES' ? 'bg-rose-900 text-white' : 'text-rose-400 hover:bg-gray-750'}`}>高校人型敵</button>
+                        <button onClick={() => setActiveTab('CHARACTER_ANIMATIONS')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'CHARACTER_ANIMATIONS' ? 'bg-cyan-900 text-white' : 'text-cyan-400 hover:bg-gray-750'}`}>キャラ動作</button>
                         <button onClick={() => setActiveTab('TRANSLATION')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'TRANSLATION' ? 'bg-emerald-900 text-white' : 'text-emerald-400 hover:bg-gray-750'}`}>翻訳確認</button>
                     </div>
 
@@ -1005,6 +1007,8 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
                                 onSetTestDeck={setCaptureSimulatorTestDeck}
                             />
                         )}
+
+                        {activeTab === 'CHARACTER_ANIMATIONS' && <CharacterAnimationPreview />}
 
                         {activeTab === 'TRANSLATION' && (
                             <div className="space-y-4">
