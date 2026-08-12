@@ -215,6 +215,35 @@ export const HIGH_SCHOOL_CHARACTER_ANIMATION_ASSET_PATHS = Object.values(HIGH_SC
   .flatMap(profile => Object.values(profile))
   .filter((path): path is string => !!path);
 
+const MAGIC_ANIMATION_ACTIONS: Exclude<BattleHeroAnimationAction, 'idle-special'>[] = [
+  'attack',
+  'skill',
+  'hit',
+  'low-hp',
+];
+
+const MAGIC_FEMALE_ANIMATION_ASSET_PATHS = MAGIC_ANIMATION_ACTIONS.flatMap(action => (
+  Array.from({ length: 9 }, (_, index) => {
+    const heroine = String(index + 1).padStart(2, '0');
+    return [
+      `sprites/magic/characters-${action}-sheets/heroine-${heroine}-before.webp`,
+      `sprites/magic/characters-${action}-sheets/heroine-${heroine}-after.webp`,
+    ];
+  }).flat()
+));
+
+const MAGIC_MALE_ANIMATION_ASSET_PATHS = MAGIC_ANIMATION_ACTIONS.flatMap(action => (
+  MAGIC_MALE_PROTAGONISTS.flatMap(protagonist => [
+    `sprites/magic/male-characters-${action}-sheets/${protagonist.assetId}-before.webp`,
+    `sprites/magic/male-characters-${action}-sheets/${protagonist.assetId}-after.webp`,
+  ])
+));
+
+export const MAGIC_CHARACTER_ANIMATION_ASSET_PATHS = [
+  ...MAGIC_FEMALE_ANIMATION_ASSET_PATHS,
+  ...MAGIC_MALE_ANIMATION_ASSET_PATHS,
+];
+
 export const getHighSchoolCharacterSpritePath = (
   characterId: string | undefined,
   action: HighSchoolHeroAction,
@@ -299,10 +328,24 @@ export const getThemedCharacterAnimationSheetPath = (
   theme: VisualThemeId,
   characterId: string | undefined,
   action: BattleHeroAnimationAction,
+  transformed = false,
+  magicProtagonistId?: string,
+  magicProtagonistGender?: 'female' | 'male',
 ) => {
-  if (theme !== 'high-school') return null;
-  const path = HIGH_SCHOOL_CHARACTER_ANIMATION_PROFILES[characterId ?? '']?.[action];
-  return path ? assetUrl(path) : null;
+  if (theme === 'high-school') {
+    const path = HIGH_SCHOOL_CHARACTER_ANIMATION_PROFILES[characterId ?? '']?.[action];
+    return path ? assetUrl(path) : null;
+  }
+  if (theme !== 'magic' || action === 'idle-special') return null;
+  const form = transformed ? 'after' : 'before';
+  if (magicProtagonistGender === 'male') {
+    const protagonist = MAGIC_MALE_PROTAGONISTS.find(entry => entry.id === magicProtagonistId);
+    return protagonist
+      ? assetUrl(`sprites/magic/male-characters-${action}-sheets/${protagonist.assetId}-${form}.webp`)
+      : null;
+  }
+  const imageIndex = (HIGH_SCHOOL_CHARACTER_INDEX_BY_ID[characterId ?? 'WARRIOR'] ?? 0) + 1;
+  return assetUrl(`sprites/magic/characters-${action}-sheets/heroine-${String(imageIndex).padStart(2, '0')}-${form}.webp`);
 };
 
 export const HIGH_SCHOOL_ENEMY_VARIANTS = [

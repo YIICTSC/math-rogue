@@ -136,7 +136,14 @@ const CharacterAnimationPreview: React.FC<CharacterAnimationPreviewProps> = ({ l
             ? 'skill'
             : action;
     const requestedSheetSource = requestedAnimationAction
-        ? getThemedCharacterAnimationSheetPath(theme, selectedCharacter.id, requestedAnimationAction)
+        ? getThemedCharacterAnimationSheetPath(
+            theme,
+            selectedCharacter.id,
+            requestedAnimationAction,
+            transformed,
+            selectedCharacter.magicProtagonistId,
+            selectedCharacter.magicProtagonistGender,
+        )
         : idleSheetSource;
     const isIdleFallback = action === 'idle-special' && !requestedSheetSource && !!idleSheetSource;
     const sheetSource = requestedSheetSource ?? (isIdleFallback ? idleSheetSource : null);
@@ -307,7 +314,14 @@ const CharacterAnimationPreview: React.FC<CharacterAnimationPreviewProps> = ({ l
                                     : option.id;
                             const available = option.id === 'idle'
                                 ? !!idleSheetSource
-                                : !!(optionAnimationAction && getThemedCharacterAnimationSheetPath(theme, selectedCharacter.id, optionAnimationAction));
+                                : !!(optionAnimationAction && getThemedCharacterAnimationSheetPath(
+                                    theme,
+                                    selectedCharacter.id,
+                                    optionAnimationAction,
+                                    transformed,
+                                    selectedCharacter.magicProtagonistId,
+                                    selectedCharacter.magicProtagonistGender,
+                                ));
                             return (
                                 <button
                                     type="button"

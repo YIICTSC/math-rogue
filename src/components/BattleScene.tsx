@@ -840,7 +840,14 @@ const BattleScene: React.FC<BattleSceneProps> = ({
         ? familiarActionSequence[mobileFamiliarPresentation?.index ?? -1] || null
         : null;
 
-    const specialIdleSheetSource = getThemedCharacterAnimationSheetPath(visualTheme as VisualThemeId, player.id, 'idle-special');
+    const specialIdleSheetSource = getThemedCharacterAnimationSheetPath(
+        visualTheme as VisualThemeId,
+        player.id,
+        'idle-special',
+        !!player.magicTransformed,
+        player.magicProtagonistId,
+        player.magicProtagonistGender,
+    );
     const canUseSpecialIdle = !!specialIdleSheetSource
         && !mobileActiveFamiliar
         && !isActing
@@ -879,7 +886,14 @@ const BattleScene: React.FC<BattleSceneProps> = ({
     const shouldUseHeroAnimationSheet = !mobileActiveFamiliar
         && (isPlayerHit || isLowHp || isActing || isSpecialIdleActive);
     const heroAnimationSheetSource = shouldUseHeroAnimationSheet
-        ? getThemedCharacterAnimationSheetPath(visualTheme as VisualThemeId, player.id, heroAnimationAction)
+        ? getThemedCharacterAnimationSheetPath(
+            visualTheme as VisualThemeId,
+            player.id,
+            heroAnimationAction,
+            !!player.magicTransformed,
+            player.magicProtagonistId,
+            player.magicProtagonistGender,
+        )
         : null;
     const heroActionClass = mobileActiveFamiliar
         ? ''
@@ -2210,7 +2224,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                         key={`${displayedPlayerSpriteKey}-${heroAnimationSheetSource}`}
                                         role="img"
                                         aria-label={trans('主人公', languageMode)}
-                                        className={`${heroAnimationSheetClassName} relative z-10 w-full h-full -scale-x-100`}
+                                        className={`${heroAnimationSheetClassName} relative z-10 w-full h-full ${visualTheme === 'high-school' ? '-scale-x-100' : ''}`}
                                         style={{
                                             backgroundImage: `url(${heroAnimationSheetSource})`,
                                             '--battle-hero-animation-sheet-scale': heroAnimationAction === 'idle-special' ? idleSpriteSheetScale : 1,
