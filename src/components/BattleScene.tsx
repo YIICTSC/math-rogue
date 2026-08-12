@@ -800,7 +800,13 @@ const BattleScene: React.FC<BattleSceneProps> = ({
         player.magicProtagonistId,
         player.magicProtagonistGender,
     );
-    const idleSpriteSheetSource = getThemedCharacterIdleSpriteSheetPath(visualTheme, player.id);
+    const idleSpriteSheetSource = getThemedCharacterIdleSpriteSheetPath(
+        visualTheme,
+        player.id,
+        !!player.magicTransformed,
+        player.magicProtagonistId,
+        player.magicProtagonistGender,
+    );
     const idleSpriteSheetScale = getThemedCharacterIdleSpriteScale(visualTheme, player.id);
     const isMagicMalePlayerSprite = visualTheme === 'magic'
         && player.magicProtagonistGender === 'male';

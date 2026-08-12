@@ -128,7 +128,13 @@ const CharacterAnimationPreview: React.FC<CharacterAnimationPreviewProps> = ({ l
         return <div className="rounded-xl border border-red-700 bg-red-950/40 p-4 text-sm text-red-200">{translate('表示できるキャラクターがありません。')}</div>;
     }
 
-    const idleSheetSource = getThemedCharacterIdleSpriteSheetPath(theme, selectedCharacter.id);
+    const idleSheetSource = getThemedCharacterIdleSpriteSheetPath(
+        theme,
+        selectedCharacter.id,
+        transformed,
+        selectedCharacter.magicProtagonistId,
+        selectedCharacter.magicProtagonistGender,
+    );
     const idleSheetScale = getThemedCharacterIdleSpriteScale(theme, selectedCharacter.id);
     const requestedAnimationAction: BattleHeroAnimationAction | null = action === 'idle'
         ? null
