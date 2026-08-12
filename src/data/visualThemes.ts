@@ -142,11 +142,16 @@ export const HIGH_SCHOOL_IDLE_SPRITE_ASSET_PATHS = Array.from({ length: 9 }, (_,
 
 type BattleHeroAnimationProfile = Partial<Record<BattleHeroAnimationAction, string>>;
 
-// Character-specific sheets are opt-in. Missing actions intentionally fall back
-// to the existing portrait/CSS presentation until their art is prepared.
+// Character-specific sheets are opt-in. Every high-school character now has a
+// dedicated sheet for each battle action; the renderer still falls back safely
+// if a future character is added before its assets are prepared.
 const HIGH_SCHOOL_CHARACTER_ANIMATION_PROFILES: Record<string, BattleHeroAnimationProfile> = {
   WARRIOR: {
     'idle-special': 'sprites/high-school/characters-idle-special/0.webp',
+    attack: 'sprites/high-school/characters-attack-sheets/0.webp',
+    skill: 'sprites/high-school/characters-skill-sheets/0.webp',
+    hit: 'sprites/high-school/characters-hit-sheets/0.webp',
+    'low-hp': 'sprites/high-school/characters-low-hp-sheets/0.webp',
   },
   CARETAKER: {
     'idle-special': 'sprites/high-school/characters-idle-special/1-rabbit-care.webp',
@@ -157,24 +162,52 @@ const HIGH_SCHOOL_CHARACTER_ANIMATION_PROFILES: Record<string, BattleHeroAnimati
   },
   ASSASSIN: {
     'idle-special': 'sprites/high-school/characters-idle-special/2.webp',
+    attack: 'sprites/high-school/characters-attack-sheets/2.webp',
+    skill: 'sprites/high-school/characters-skill-sheets/2.webp',
+    hit: 'sprites/high-school/characters-hit-sheets/2.webp',
+    'low-hp': 'sprites/high-school/characters-low-hp-sheets/2.webp',
   },
   MAGE: {
     'idle-special': 'sprites/high-school/characters-idle-special/3.webp',
+    attack: 'sprites/high-school/characters-attack-sheets/3.webp',
+    skill: 'sprites/high-school/characters-skill-sheets/3.webp',
+    hit: 'sprites/high-school/characters-hit-sheets/3.webp',
+    'low-hp': 'sprites/high-school/characters-low-hp-sheets/3.webp',
   },
   DODGEBALL: {
     'idle-special': 'sprites/high-school/characters-idle-special/4.webp',
+    attack: 'sprites/high-school/characters-attack-sheets/4.webp',
+    skill: 'sprites/high-school/characters-skill-sheets/4.webp',
+    hit: 'sprites/high-school/characters-hit-sheets/4.webp',
+    'low-hp': 'sprites/high-school/characters-low-hp-sheets/4.webp',
   },
   BARD: {
     'idle-special': 'sprites/high-school/characters-idle-special/5.webp',
+    attack: 'sprites/high-school/characters-attack-sheets/5.webp',
+    skill: 'sprites/high-school/characters-skill-sheets/5.webp',
+    hit: 'sprites/high-school/characters-hit-sheets/5.webp',
+    'low-hp': 'sprites/high-school/characters-low-hp-sheets/5.webp',
   },
   LIBRARIAN: {
     'idle-special': 'sprites/high-school/characters-idle-special/6.webp',
+    attack: 'sprites/high-school/characters-attack-sheets/6.webp',
+    skill: 'sprites/high-school/characters-skill-sheets/6.webp',
+    hit: 'sprites/high-school/characters-hit-sheets/6.webp',
+    'low-hp': 'sprites/high-school/characters-low-hp-sheets/6.webp',
   },
   CHEF: {
     'idle-special': 'sprites/high-school/characters-idle-special/7.webp',
+    attack: 'sprites/high-school/characters-attack-sheets/7.webp',
+    skill: 'sprites/high-school/characters-skill-sheets/7.webp',
+    hit: 'sprites/high-school/characters-hit-sheets/7.webp',
+    'low-hp': 'sprites/high-school/characters-low-hp-sheets/7.webp',
   },
   GARDENER: {
     'idle-special': 'sprites/high-school/characters-idle-special/8.webp',
+    attack: 'sprites/high-school/characters-attack-sheets/8.webp',
+    skill: 'sprites/high-school/characters-skill-sheets/8.webp',
+    hit: 'sprites/high-school/characters-hit-sheets/8.webp',
+    'low-hp': 'sprites/high-school/characters-low-hp-sheets/8.webp',
   },
 };
 
