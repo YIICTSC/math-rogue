@@ -3595,6 +3595,35 @@ textarea {
   animation: battle-hero-idle-frames 4.8s steps(1, end) infinite;
 }
 
+/* The debug action gallery is also used on narrow portrait phones.  Keep the
+   preview and controls inside the modal's width instead of creating a hidden
+   horizontal track. */
+.character-animation-preview,
+.character-animation-preview * {
+  min-width: 0;
+  box-sizing: border-box;
+}
+
+.character-animation-preview-battle {
+  isolation: isolate;
+}
+
+@media (orientation: portrait) and (max-width: 640px) {
+  .character-animation-preview-battle {
+    min-height: clamp(18rem, 72vw, 24rem) !important;
+  }
+
+  .character-animation-preview-battle .character-animation-preview-sprite {
+    height: clamp(13rem, 58vw, 18rem) !important;
+    width: clamp(13rem, 58vw, 18rem) !important;
+  }
+
+  .character-animation-preview-battle [class*="text-"] {
+    max-width: calc(100% - 1rem);
+    overflow-wrap: anywhere;
+  }
+}
+
 @keyframes battle-hero-idle-frames {
   0%, 34.99% { background-position: 0 0; }
   35%, 54.99% { background-position: 100% 0; }

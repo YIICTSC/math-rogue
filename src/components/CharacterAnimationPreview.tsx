@@ -176,8 +176,8 @@ const CharacterAnimationPreview: React.FC<CharacterAnimationPreviewProps> = ({ l
                 : '専用シート未導入：既存アクション表示へフォールバック';
 
     return (
-        <div className="space-y-4">
-            <div className="rounded-xl border border-cyan-700/70 bg-slate-950/50 p-3 md:p-4">
+        <div className="character-animation-preview w-full min-w-0 space-y-4 overflow-x-hidden">
+            <div className="min-w-0 rounded-xl border border-cyan-700/70 bg-slate-950/50 p-3 md:p-4">
                 <div className="flex flex-col gap-2 md:flex-row md:items-start md:justify-between">
                     <div>
                         <h3 className="flex items-center gap-2 text-base font-black text-cyan-200">
@@ -203,7 +203,7 @@ const CharacterAnimationPreview: React.FC<CharacterAnimationPreviewProps> = ({ l
                     <p className="text-amber-200/80">{translate('攻撃・スキル・被弾・低HP・カード選択中・敵行動中・必殺・戦闘不能・スマホ縦画面の仲間演出中は再生しません。')}</p>
                 </div>
 
-                <div className="mt-4 grid grid-cols-1 gap-3 md:grid-cols-3">
+                <div className="mt-4 grid min-w-0 grid-cols-1 gap-3 md:grid-cols-3">
                     <label className="flex flex-col gap-1 text-xs font-bold text-slate-300">
                         {translate('編')}
                         <select
@@ -258,9 +258,9 @@ const CharacterAnimationPreview: React.FC<CharacterAnimationPreviewProps> = ({ l
                 )}
             </div>
 
-            <div className="grid grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(18rem,28rem)]">
-                <div className="rounded-xl border border-slate-700 bg-slate-950/70 p-3 md:p-5">
-                    <div className="mb-3 flex flex-wrap items-end justify-between gap-2 border-b border-slate-700 pb-3">
+            <div className="grid min-w-0 grid-cols-1 gap-4 xl:grid-cols-[minmax(0,1fr)_minmax(18rem,28rem)]">
+                <div className="min-w-0 rounded-xl border border-slate-700 bg-slate-950/70 p-3 md:p-5">
+                    <div className="mb-3 flex min-w-0 flex-wrap items-end justify-between gap-2 border-b border-slate-700 pb-3">
                         <div>
                             <div className="text-lg font-black text-white">{translate(selectedCharacter.name)}</div>
                             <div className="text-xs text-slate-400">{translate(selectedAction.description)}</div>
@@ -270,11 +270,23 @@ const CharacterAnimationPreview: React.FC<CharacterAnimationPreviewProps> = ({ l
                         </div>
                     </div>
 
-                    <div className={`battle-scene-root ${theme === 'high-school' ? 'battle-high-school' : theme === 'magic' ? 'battle-magic' : ''} character-animation-preview-battle relative flex min-h-[20rem] items-end justify-center overflow-hidden rounded-xl border border-slate-700 bg-gradient-to-b from-slate-900 via-slate-950 to-black p-4 md:min-h-[28rem]`}>
+                    <div
+                        role="button"
+                        tabIndex={0}
+                        aria-label={translate('キャラクター表示をタッチしてアクションを再生')}
+                        onClick={() => setReplayKey(previous => previous + 1)}
+                        onKeyDown={event => {
+                            if (event.key === 'Enter' || event.key === ' ') {
+                                event.preventDefault();
+                                setReplayKey(previous => previous + 1);
+                            }
+                        }}
+                        className={`battle-scene-root ${theme === 'high-school' ? 'battle-high-school' : theme === 'magic' ? 'battle-magic' : ''} character-animation-preview-battle group relative flex min-h-[20rem] w-full cursor-pointer touch-manipulation items-end justify-center overflow-hidden rounded-xl border border-slate-700 bg-gradient-to-b from-slate-900 via-slate-950 to-black p-2 outline-none focus:border-cyan-400 focus:ring-2 focus:ring-cyan-500/50 sm:p-4 md:min-h-[28rem]`}
+                    >
                         <div className="pointer-events-none absolute inset-x-0 bottom-0 h-1/3 bg-[radial-gradient(ellipse_at_center,rgba(34,211,238,0.16),transparent_70%)]" />
                         <div
                             key={`${selectedCharacter.id}-${action}-${transformed}-${replayKey}`}
-                            className={`character-animation-preview-sprite relative z-10 h-64 w-64 md:h-80 md:w-80 ${actionClassName}`}
+                            className={`character-animation-preview-sprite relative z-10 h-[clamp(14rem,62vw,20rem)] w-[clamp(14rem,62vw,20rem)] max-w-full ${actionClassName}`}
                             style={{
                                 '--battle-hero-animation-sheet-duration': getAnimationSheetDuration(action),
                                 '--battle-hero-animation-sheet-scale': action === 'idle-special' ? idleSheetScale : 1,
@@ -299,6 +311,9 @@ const CharacterAnimationPreview: React.FC<CharacterAnimationPreviewProps> = ({ l
                                 />
                             )}
                         </div>
+                        <div className="pointer-events-none absolute inset-x-0 bottom-2 z-20 mx-auto w-fit rounded-full border border-cyan-300/30 bg-slate-950/70 px-3 py-1 text-[10px] font-bold text-cyan-100 opacity-80 transition-opacity group-hover:opacity-100 sm:bottom-3">
+                            {translate('キャラクター表示をタッチで再生')}
+                        </div>
                     </div>
 
                     <div className="mt-3 grid grid-cols-2 gap-2 text-[11px] text-slate-300 md:grid-cols-4">
@@ -309,9 +324,9 @@ const CharacterAnimationPreview: React.FC<CharacterAnimationPreviewProps> = ({ l
                     </div>
                 </div>
 
-                <div className="rounded-xl border border-slate-700 bg-slate-950/50 p-3 md:p-4">
+                <div className="min-w-0 rounded-xl border border-slate-700 bg-slate-950/50 p-3 md:p-4">
                     <h4 className="mb-3 text-sm font-black text-slate-200">{translate('アクション一覧')}</h4>
-                    <div className="space-y-2">
+                    <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 xl:grid-cols-1">
                         {PREVIEW_ACTIONS.map(option => {
                             const optionAnimationAction: BattleHeroAnimationAction | null = option.id === 'idle'
                                 ? null
@@ -336,11 +351,11 @@ const CharacterAnimationPreview: React.FC<CharacterAnimationPreviewProps> = ({ l
                                         setAction(option.id);
                                         setReplayKey(previous => previous + 1);
                                     }}
-                                    className={`flex w-full items-center justify-between rounded-lg border px-3 py-2 text-left transition-colors ${action === option.id ? 'border-cyan-400 bg-cyan-950/70 text-cyan-100' : 'border-slate-700 bg-black/20 text-slate-300 hover:border-slate-500'}`}
+                                    className={`flex min-w-0 w-full items-center justify-between rounded-lg border px-3 py-2 text-left transition-colors ${action === option.id ? 'border-cyan-400 bg-cyan-950/70 text-cyan-100' : 'border-slate-700 bg-black/20 text-slate-300 hover:border-slate-500'}`}
                                 >
-                                    <span>
-                                        <span className="block text-xs font-black">{translate(option.label)}</span>
-                                        <span className="block text-[10px] text-slate-500">{translate(option.description)}</span>
+                                    <span className="min-w-0">
+                                        <span className="block break-words text-xs font-black">{translate(option.label)}</span>
+                                        <span className="block break-words text-[10px] text-slate-500">{translate(option.description)}</span>
                                     </span>
                                     <span className={`ml-2 shrink-0 rounded px-1.5 py-0.5 text-[9px] font-black ${available ? 'bg-emerald-950 text-emerald-300' : 'bg-amber-950 text-amber-300'}`}>
                                         {translate(available ? '専用あり' : 'フォールバック')}
