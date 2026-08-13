@@ -4778,8 +4778,7 @@ const App: React.FC = () => {
         const template = pool[Math.floor(Math.random() * pool.length)];
         if (!template) return;
         const card = { ...template, id: `relic-skill-${Date.now()}-${Math.random()}`, cost };
-        if (player.hand.length < HAND_SIZE + 5) player.hand.push(card);
-        else player.discardPile.push(card);
+        player.hand.push(card);
     };
 
     const makeCardCostZero = (card: ICard): ICard => ({ ...card, cost: 0, xCost: false });
@@ -5175,7 +5174,7 @@ const App: React.FC = () => {
         if (hasRelic(player, 'ERASER') && player.relicCounters['ERASER_USED'] === 0 && player.discardPile.length > 0) {
             const index = Math.floor(Math.random() * player.discardPile.length);
             const recovered = player.discardPile.splice(index, 1)[0];
-            if (recovered && player.hand.length < HAND_SIZE + 5) player.hand.push(recovered);
+            if (recovered) player.hand.push(recovered);
             player.relicCounters['ERASER_USED'] = 1;
         }
     };
@@ -8175,7 +8174,6 @@ const App: React.FC = () => {
 
                 const copiesPerSelection = Math.max(1, Math.floor(mode.copiesPerSelection || 1));
                 for (let copyIndex = 0; copyIndex < copiesPerSelection; copyIndex++) {
-                    if (p.hand.length >= HAND_SIZE + 5) break;
                     const copy = {
                         ...selectedCard,
                         id: `copy-${Date.now()}-${copyIndex}-${Math.random()}`,
@@ -8321,8 +8319,7 @@ const App: React.FC = () => {
                 if ((p.relics.find(r => r.id === 'SNECKO_EYE') || p.powers['CONFUSED'] > 0) && picked.cost >= 0) {
                     picked.cost = Math.floor(Math.random() * 4);
                 }
-                if (p.hand.length < HAND_SIZE + 5) p.hand.push(picked);
-                else p.discardPile.push(picked);
+                p.hand.push(picked);
             }
             p.discardPile.push(...discardCards);
 
@@ -8441,8 +8438,7 @@ const App: React.FC = () => {
                 if ((p.relics.find(r => r.id === 'SNECKO_EYE') || p.powers['CONFUSED'] > 0) && chosen.cost >= 0) {
                     chosen.cost = Math.floor(Math.random() * 4);
                 }
-                if (p.hand.length < HAND_SIZE + 5) p.hand.push(chosen);
-                else p.discardPile = [...p.discardPile, chosen];
+                p.hand.push(chosen);
                 return {
                     ...prev,
                     player: coopActorPeerId ? prev.player : p,
@@ -9142,11 +9138,7 @@ const App: React.FC = () => {
                 let newC = { ...randomCardTemplate, id: `alch-${Date.now()}`, cost: 0, xCost: false } as ICard;
                 if (p.powers['MASTER_REALITY']) newC = getUpgradedCard(newC);
 
-                if (p.hand.length < HAND_SIZE + 5) {
-                    p.hand.push(newC);
-                } else {
-                    p.discardPile.push(newC);
-                }
+                p.hand.push(newC);
                 currentLogs.push(`${trans("理科室の調合", languageMode)}: ${trans(newC.name, languageMode)}を生成`);
                 nextActiveEffects.push({ id: `vfx-alch-${Date.now()}`, type: 'BUFF', targetId: 'player' });
             }
@@ -9166,11 +9158,7 @@ const App: React.FC = () => {
                     for (let i = 0; i < 3; i++) {
                         let newCard = { ...possibleCards[Math.floor(Math.random() * possibleCards.length)], id: `disc-${Date.now()}-${i}` } as ICard;
                         if (p.powers['MASTER_REALITY']) newCard = getUpgradedCard(newCard);
-                        if (p.hand.length < HAND_SIZE + 5) {
-                            p.hand.push(newCard);
-                        } else {
-                            p.discardPile.push(newCard);
-                        }
+                        p.hand.push(newCard);
                         currentLogs.push(`${trans(newCard.name, languageMode)}を手札に加えた！`);
                     }
                 }
@@ -9791,8 +9779,7 @@ const App: React.FC = () => {
                         if (legendaryPool.length > 0) {
                             let newCard = { ...legendaryPool[Math.floor(Math.random() * legendaryPool.length)], id: `toy-store-${Date.now()}` };
                             if (p.powers['MASTER_REALITY']) newCard = getUpgradedCard(newCard);
-                            if (p.hand.length < HAND_SIZE + 5) p.hand.push(newCard);
-                            else p.discardPile.push(newCard);
+                            p.hand.push(newCard);
                             currentLogs.push(`${trans(newCard.name, languageMode)}を生成した！`);
                         }
                     }
@@ -9802,8 +9789,7 @@ const App: React.FC = () => {
                             if (pool.length === 0) break;
                             let newCard = { ...pool[Math.floor(Math.random() * pool.length)], id: `mystic-mushroom-${Date.now()}-${j}` };
                             if (p.powers['MASTER_REALITY']) newCard = getUpgradedCard(newCard);
-                            if (p.hand.length < HAND_SIZE + 5) p.hand.push(newCard);
-                            else p.discardPile.push(newCard);
+                            p.hand.push(newCard);
                         }
                         currentLogs.push(trans("ランダムなカード2枚を手札に加えた！", languageMode));
                     }
@@ -9820,8 +9806,7 @@ const App: React.FC = () => {
                         if (deckLegendaries.length > 0) {
                             const target = deckLegendaries[Math.floor(Math.random() * deckLegendaries.length)];
                             const copy = { ...target, id: `gacha-luck-${Date.now()}` };
-                            if (p.hand.length < HAND_SIZE + 5) p.hand.push(copy);
-                            else p.discardPile.push(copy);
+                            p.hand.push(copy);
                             currentLogs.push(`${trans(copy.name, languageMode)}を手札に加えた！`);
                         }
                     }
@@ -9855,8 +9840,7 @@ const App: React.FC = () => {
                         if (capturedCards.length > 0) {
                             const target = capturedCards[Math.floor(Math.random() * capturedCards.length)];
                             const copy = { ...target, id: `bug-box-${Date.now()}` };
-                            if (p.hand.length < HAND_SIZE + 5) p.hand.push(copy);
-                            else p.discardPile.push(copy);
+                            p.hand.push(copy);
                             currentLogs.push(`${trans(copy.name, languageMode)}を手札に加えた！`);
                         }
                     }
@@ -9884,8 +9868,7 @@ const App: React.FC = () => {
                             if (pool.length === 0) break;
                             let newCard = { ...pool[Math.floor(Math.random() * pool.length)], id: `super-gacha-${Date.now()}-${j}` };
                             if (p.powers['MASTER_REALITY']) newCard = getUpgradedCard(newCard);
-                            if (p.hand.length < HAND_SIZE + 5) p.hand.push(newCard);
-                            else p.discardPile.push(newCard);
+                            p.hand.push(newCard);
                         }
                         currentLogs.push(trans("ランダムなカード10枚を加えた！", languageMode));
                     }
@@ -9936,8 +9919,7 @@ const App: React.FC = () => {
                             if (specialPool.length === 0) break;
                             let newCard = { ...specialPool[Math.floor(Math.random() * specialPool.length)], id: `fairy-tale-${Date.now()}-${j}` };
                             if (p.powers['MASTER_REALITY']) newCard = getUpgradedCard(newCard);
-                            if (p.hand.length < HAND_SIZE + 5) p.hand.push(newCard);
-                            else p.discardPile.push(newCard);
+                            p.hand.push(newCard);
                         }
                         currentLogs.push(trans("ランダムなスペシャルカードを3枚加えた！", languageMode));
                     }
@@ -10100,11 +10082,7 @@ const App: React.FC = () => {
                                     newC.xCost = false;
                                 }
                                 if (p.powers['MASTER_REALITY']) newC = getUpgradedCard(newC);
-                                if (p.hand.length < HAND_SIZE + 5) {
-                                    p.hand.push(newC);
-                                } else {
-                                    p.discardPile.push(newC);
-                                }
+                                p.hand.push(newC);
                             }
                         }
                     }

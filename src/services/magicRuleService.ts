@@ -22,12 +22,9 @@ const heal = (player: Player, amount: number) => {
 
 const drawFromPile = (player: Player, count: number) => {
   for (let index = 0; index < count; index++) {
-    if (player.drawPile.length === 0 && player.discardPile.length > 0) {
-      player.drawPile = [...player.discardPile].sort(() => Math.random() - 0.5);
-      player.discardPile = [];
-    }
     const drawn = player.drawPile.pop();
-    if (drawn) player.hand.push(drawn);
+    if (!drawn) break;
+    player.hand.push(drawn);
   }
 };
 

@@ -1340,12 +1340,12 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                 {languageMode === 'ENGLISH' ? (
                                     <p className="text-white text-sm leading-relaxed mb-4 text-center">
                                         Playing cards costs Energy.<br />
-                                        When your draw pile runs out, your discard pile is shuffled back in.
+                                        At the start of each turn, your discard pile is shuffled back into the draw pile. During a turn, drawing stops when the draw pile is empty.
                                     </p>
                                 ) : (
                                     <p className="text-white text-sm leading-relaxed mb-4 text-center">
                                         カードを つかうには <span className="text-yellow-400 font-bold">エナジー</span>が ひつようです。<br />
-                                        やまふだが なくなると、すてふだが シャッフルされて もどってきます。
+                                        ターンの はじめに、すてふだが シャッフルされて やまふだに もどります。ターンの とちゅうで やまふだが なくなったら、ドローは そこで おわります。
                                     </p>
                                 )}
                                 <div className="flex justify-between items-center">
@@ -2688,7 +2688,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                     </div>
                     <div className="text-[9px] text-gray-400 flex flex-col leading-tight">
                         <span onClick={() => setShowDeck(true)} className="cursor-pointer hover:text-white flex items-center"><Layers size={10} className="mr-1" /> {player.drawPile.length}</span>
-                        <span className="flex items-center" onClick={() => showInfo(trans("捨て札", languageMode), trans("使用済みカード。山札が切れるとリシャッフルされる。", languageMode))}><X size={10} className="mr-1" /> {player.discardPile.length}</span>
+                        <span className="flex items-center" onClick={() => showInfo(trans("捨て札", languageMode), trans("使用済みカード。次のターン開始時に山札へ戻る。", languageMode))}><X size={10} className="mr-1" /> {player.discardPile.length}</span>
                     </div>
                 </div>
 

@@ -96,11 +96,7 @@ export const applyAdditionalCardLogic = (
         if (p.powers['MASTER_REALITY']) {
             newC = getUpgradedCard(newC);
         }
-        if (p.hand.length < 10) {
-            p.hand.push(newC);
-        } else {
-            p.discardPile.push(newC);
-        }
+        p.hand.push(newC);
         return newC;
     };
 
@@ -144,14 +140,11 @@ export const applyAdditionalCardLogic = (
         };
 
         const drawOne = () => {
-            if (p.drawPile.length === 0 && p.discardPile.length > 0) {
-                p.drawPile = shuffle([...p.discardPile]);
-                p.discardPile = [];
-            }
+            // A draw effect may use only the cards currently in the draw pile.
+            // The discard pile is rebuilt at the start of the next turn; it is
+            // not an implicit source for in-turn draws.
             const drawn = p.drawPile.pop();
-            if (!drawn) return;
-            if (p.hand.length < 10) p.hand.push(drawn);
-            else p.discardPile.push(drawn);
+            if (drawn) p.hand.push(drawn);
         };
 
         expansionEffects.forEach((expansion) => {
@@ -175,10 +168,7 @@ export const applyAdditionalCardLogic = (
                 case 'WEAK_ALL': livingEnemies.forEach(enemy => applyDebuff(enemy, 'WEAK', 1)); break;
                 case 'RECOVER_DISCARD': {
                     const recovered = p.discardPile.pop();
-                    if (recovered) {
-                        if (p.hand.length < 10) p.hand.push(recovered);
-                        else p.drawPile.push(recovered);
-                    }
+                    if (recovered) p.hand.push(recovered);
                     break;
                 }
                 case 'UPGRADE_HAND': {
@@ -240,13 +230,9 @@ export const applyAdditionalCardLogic = (
                 p.hand.filter(c => c.id !== card.id).forEach(c => p.discardPile.push(c));
                 p.hand = p.hand.filter(c => c.id === card.id);
                 for (let i = 0; i < count; i++) {
-                    if (p.drawPile.length === 0) {
-                        if (p.discardPile.length === 0) break;
-                        p.drawPile = shuffle(p.discardPile);
-                        p.discardPile = [];
-                    }
                     const drawn = p.drawPile.pop();
-                    if (drawn) p.hand.push(drawn);
+                    if (!drawn) break;
+                    p.hand.push(drawn);
                 }
                 currentLogs.push(trans("単位変換：手札をすべて入れ替えた", languageMode));
                 nextActiveEffects.push({ id: `vfx-unit-${Date.now()}`, type: 'BUFF', targetId: 'player' });
@@ -268,13 +254,9 @@ export const applyAdditionalCardLogic = (
                 p.hand = p.hand.filter(c => c.id === card.id);
                 handToReplace.forEach(c => p.discardPile.push(c));
                 for (let i = 0; i < handToReplace.length; i++) {
-                    if (p.drawPile.length === 0) {
-                        if (p.discardPile.length === 0) break;
-                        p.drawPile = shuffle(p.discardPile);
-                        p.discardPile = [];
-                    }
                     const drawn = p.drawPile.pop();
-                    if (drawn) p.hand.push(drawn);
+                    if (!drawn) break;
+                    p.hand.push(drawn);
                 }
                 currentLogs.push(trans(`魅惑のカカオ：手札を${handToReplace.length}枚入れ替えた`, languageMode));
                 nextActiveEffects.push({ id: `vfx-cacao-${Date.now()}`, type: 'BUFF', targetId: 'player' });
@@ -336,10 +318,6 @@ export const applyAdditionalCardLogic = (
             case '産業革命': {
                 p.currentEnergy += 1;
                 p.nextTurnEnergy += 1;
-                if (p.drawPile.length === 0 && p.discardPile.length > 0) {
-                    p.drawPile = shuffle(p.discardPile);
-                    p.discardPile = [];
-                }
                 const drawn = p.drawPile.pop();
                 if (drawn) p.hand.push(drawn);
                 currentLogs.push(trans("産業革命：Eを今/次ターンに分割し、1枚引いた！", languageMode));
@@ -347,10 +325,6 @@ export const applyAdditionalCardLogic = (
                 break;
             }
             case '覚醒のコーヒー': {
-                if (p.drawPile.length === 0 && p.discardPile.length > 0) {
-                    p.drawPile = shuffle(p.discardPile);
-                    p.discardPile = [];
-                }
                 const drawn = p.drawPile.pop();
                 if (drawn) p.hand.push(drawn);
                 p.currentHp = Math.max(0, p.currentHp - 1);
@@ -407,10 +381,6 @@ export const applyAdditionalCardLogic = (
                 break;
             }
             case '邪智暴虐': {
-                if (p.drawPile.length === 0 && p.discardPile.length > 0) {
-                    p.drawPile = shuffle(p.discardPile);
-                    p.discardPile = [];
-                }
                 const drawn = p.drawPile.pop();
                 if (drawn) p.hand.push(drawn);
                 currentLogs.push(trans("邪智暴虐：1ドロー", languageMode));

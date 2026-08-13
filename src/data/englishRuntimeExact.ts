@@ -353,6 +353,7 @@ export const ENGLISH_RUNTIME_EXACT: Record<string, string> = {
   '入賞記念のご褒美カードを獲得しました！': 'You received a prize card for placing in the rankings!',
   '攻撃カードのダメージを増加させる。': 'Increases damage dealt by Attack cards.',
   '使用済みカード。山札が切れるとリシャッフルされる。': 'Used cards go here and are shuffled back when the draw pile is empty.',
+  '使用済みカード。次のターン開始時に山札へ戻る。': 'Used cards go here and return to the draw pile at the start of the next turn.',
   'これまでに獲得したカードから': 'From the cards you have collected',
   '選択できるカードがありません...': 'There are no cards available to choose...',
   '他のキャラクターで冒険してカードをアンロックしてください。': 'Complete adventures with other characters to unlock more cards.',
