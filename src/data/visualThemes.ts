@@ -130,6 +130,51 @@ const HIGH_SCHOOL_IDLE_SPRITE_SCALE_BY_INDEX: Record<number, number> = {
   8: 1.01,
 };
 
+// The dedicated idle sheets were authored with slightly different transparent
+// margins from the regular idle sheets. Keep the regular idle scale as the
+// reference, then apply this small per-character correction to special idle
+// sheets so the character's visible height stays consistent when the sheet
+// swaps in during battle.
+const HIGH_SCHOOL_SPECIAL_IDLE_SPRITE_SCALE_BY_INDEX: Record<number, number> = {
+  0: 1.053,
+  1: 0.938,
+  2: 1.121,
+  3: 0.948,
+  4: 0.972,
+  5: 1.005,
+  6: 1.053,
+  7: 1.008,
+  8: 1.023,
+};
+
+type MagicIdleSpriteScale = { before: number; after: number };
+
+// These values are calibrated against a layer comparison of each regular and
+// special idle sheet. The special sheet is scaled independently because magic
+// effects and transformed silhouettes change the sheet's occupied bounds.
+const MAGIC_FEMALE_SPECIAL_IDLE_SPRITE_SCALE_BY_INDEX: Record<number, MagicIdleSpriteScale> = {
+  1: { before: 1.044, after: 1.021 },
+  2: { before: 1.001, after: 0.966 },
+  3: { before: 0.921, after: 0.995 },
+  4: { before: 1.012, after: 1.013 },
+  5: { before: 1.020, after: 0.958 },
+  6: { before: 0.960, after: 1.035 },
+  7: { before: 1.044, after: 1.014 },
+  8: { before: 0.981, after: 0.981 },
+  9: { before: 1.035, after: 1.006 },
+};
+
+const MAGIC_MALE_SPECIAL_IDLE_SPRITE_SCALE_BY_ID: Record<string, MagicIdleSpriteScale> = {
+  ELLIOT: { before: 1.022, after: 1.012 },
+  LEON: { before: 0.988, after: 0.977 },
+  MINATO: { before: 0.977, after: 1.015 },
+  REN: { before: 0.999, after: 1.020 },
+  RIKU: { before: 0.979, after: 1.064 },
+  SAKUYA: { before: 0.965, after: 0.994 },
+  SOMA: { before: 0.965, after: 1.026 },
+  YAMATO: { before: 1, after: 1.068 },
+};
+
 const HIGH_SCHOOL_IDLE_SPRITE_EXTENSION_BY_INDEX: Record<number, 'png' | 'webp'> = {
   // The caretaker sheet is kept lossless so transparent pixels do not reveal
   // codec matte colors between the 2x2 frames.
@@ -358,10 +403,25 @@ export const getThemedCharacterIdleSpriteSheetPath = (
 export const getThemedCharacterIdleSpriteScale = (
   theme: VisualThemeId,
   characterId: string | undefined,
+  transformed = false,
+  magicProtagonistId?: string,
+  magicProtagonistGender?: 'female' | 'male',
+  specialIdle = false,
 ) => {
-  if (theme !== 'high-school') return 1;
-  const imageIndex = HIGH_SCHOOL_CHARACTER_INDEX_BY_ID[characterId ?? 'WARRIOR'] ?? 0;
-  return HIGH_SCHOOL_IDLE_SPRITE_SCALE_BY_INDEX[imageIndex] ?? 1;
+  if (theme === 'high-school') {
+    const imageIndex = HIGH_SCHOOL_CHARACTER_INDEX_BY_ID[characterId ?? 'WARRIOR'] ?? 0;
+    return specialIdle
+      ? HIGH_SCHOOL_SPECIAL_IDLE_SPRITE_SCALE_BY_INDEX[imageIndex] ?? HIGH_SCHOOL_IDLE_SPRITE_SCALE_BY_INDEX[imageIndex] ?? 1
+      : HIGH_SCHOOL_IDLE_SPRITE_SCALE_BY_INDEX[imageIndex] ?? 1;
+  }
+  if (theme !== 'magic' || !specialIdle) return 1;
+
+  const form = transformed ? 'after' : 'before';
+  if (magicProtagonistGender === 'male') {
+    return MAGIC_MALE_SPECIAL_IDLE_SPRITE_SCALE_BY_ID[magicProtagonistId ?? '']?.[form] ?? 1;
+  }
+  const imageIndex = (HIGH_SCHOOL_CHARACTER_INDEX_BY_ID[characterId ?? 'WARRIOR'] ?? 0) + 1;
+  return MAGIC_FEMALE_SPECIAL_IDLE_SPRITE_SCALE_BY_INDEX[imageIndex]?.[form] ?? 1;
 };
 
 export const getThemedCharacterAnimationSheetPath = (

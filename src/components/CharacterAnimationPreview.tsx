@@ -135,7 +135,21 @@ const CharacterAnimationPreview: React.FC<CharacterAnimationPreviewProps> = ({ l
         selectedCharacter.magicProtagonistId,
         selectedCharacter.magicProtagonistGender,
     );
-    const idleSheetScale = getThemedCharacterIdleSpriteScale(theme, selectedCharacter.id);
+    const idleSheetScale = getThemedCharacterIdleSpriteScale(
+        theme,
+        selectedCharacter.id,
+        transformed,
+        selectedCharacter.magicProtagonistId,
+        selectedCharacter.magicProtagonistGender,
+    );
+    const idleSpecialSheetScale = getThemedCharacterIdleSpriteScale(
+        theme,
+        selectedCharacter.id,
+        transformed,
+        selectedCharacter.magicProtagonistId,
+        selectedCharacter.magicProtagonistGender,
+        true,
+    );
     const requestedAnimationAction: BattleHeroAnimationAction | null = action === 'idle'
         ? null
         : action === 'power'
@@ -289,7 +303,9 @@ const CharacterAnimationPreview: React.FC<CharacterAnimationPreviewProps> = ({ l
                             className={`character-animation-preview-sprite relative z-10 h-[clamp(14rem,62vw,20rem)] w-[clamp(14rem,62vw,20rem)] max-w-full ${actionClassName}`}
                             style={{
                                 '--battle-hero-animation-sheet-duration': getAnimationSheetDuration(action),
-                                '--battle-hero-animation-sheet-scale': action === 'idle-special' ? idleSheetScale : 1,
+                                '--battle-hero-animation-sheet-scale': action === 'idle-special'
+                                    ? (isIdleFallback ? idleSheetScale : idleSpecialSheetScale)
+                                    : 1,
                             } as React.CSSProperties}
                         >
                             {sheetSource ? (

@@ -807,7 +807,21 @@ const BattleScene: React.FC<BattleSceneProps> = ({
         player.magicProtagonistId,
         player.magicProtagonistGender,
     );
-    const idleSpriteSheetScale = getThemedCharacterIdleSpriteScale(visualTheme, player.id);
+    const idleSpriteSheetScale = getThemedCharacterIdleSpriteScale(
+        visualTheme,
+        player.id,
+        !!player.magicTransformed,
+        player.magicProtagonistId,
+        player.magicProtagonistGender,
+    );
+    const specialIdleSpriteSheetScale = getThemedCharacterIdleSpriteScale(
+        visualTheme,
+        player.id,
+        !!player.magicTransformed,
+        player.magicProtagonistId,
+        player.magicProtagonistGender,
+        true,
+    );
     const isMagicMalePlayerSprite = visualTheme === 'magic'
         && player.magicProtagonistGender === 'male';
     const magicMalePlayerSpriteScale = isMagicMalePlayerSprite && highSchoolHeroAction !== 'idle'
@@ -2233,7 +2247,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                         className={`${heroAnimationSheetClassName} relative z-10 w-full h-full ${visualTheme === 'high-school' ? '-scale-x-100' : ''}`}
                                         style={{
                                             backgroundImage: `url(${heroAnimationSheetSource})`,
-                                            '--battle-hero-animation-sheet-scale': heroAnimationAction === 'idle-special' ? idleSpriteSheetScale : 1,
+                                            '--battle-hero-animation-sheet-scale': heroAnimationAction === 'idle-special' ? specialIdleSpriteSheetScale : 1,
                                             '--battle-hero-animation-sheet-duration': heroAnimationSheetDuration,
                                         } as React.CSSProperties}
                                     />
