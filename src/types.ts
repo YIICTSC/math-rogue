@@ -45,6 +45,8 @@ export interface Card {
   upgraded?: boolean;
   holographic?: boolean;
   holographicVariant?: 'red' | 'yellow' | 'blue' | 'purple';
+  /** Battle-only marker: this card crossed the turn boundary by Retain. */
+  retained?: boolean;
   rewardCard?: boolean;
   rewardSource?: 'ASSIGNMENT' | 'RANKING';
   rewardGeneration?: 'ASSIGNMENT_REWARD';

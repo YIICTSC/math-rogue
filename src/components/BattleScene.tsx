@@ -2832,6 +2832,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                             ml-0
                             md:group-hover/hand:-ml-2 md:group-active/hand:-ml-2
                             ${isSelectedActive ? 'battle-hand-card-selection-option cursor-pointer z-[800]' : isSelectedDual ? 'battle-hand-card-combo-selected cursor-pointer z-[650]' : 'hover:-translate-y-4 hover:z-[700]'}
+                            ${card.retained ? 'ring-2 ring-cyan-300 ring-offset-1 ring-offset-slate-900 rounded-lg' : ''}
                             ${tutorialStep === 4 ? 'ring-4 ring-blue-500 ring-offset-2 ring-offset-transparent animate-pulse rounded-lg' : ''}
                         `}
                                 style={{
@@ -2842,6 +2843,15 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                 {isDualMode && isSelectedDual && (
                                     <div className="absolute -top-6 left-1/2 -translate-x-1/2 bg-indigo-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full border border-white shadow-lg z-30 animate-bounce">
                                         {selectedCardIds.indexOf(card.id) === 0 ? "1" : "2"}
+                                    </div>
+                                )}
+                                {card.retained && (
+                                    <div
+                                        className="absolute -top-6 right-0 bg-cyan-500 text-slate-950 text-[10px] font-black px-2 py-0.5 rounded-full border border-cyan-100 shadow-lg z-30"
+                                        title={trans("保留：次のターンへ持ち越し、通常どおり使用できます。", languageMode)}
+                                        aria-label={trans("保留：次のターンへ持ち越し、通常どおり使用できます。", languageMode)}
+                                    >
+                                        {trans("保留", languageMode)}
                                     </div>
                                 )}
 

@@ -44,6 +44,17 @@ type HighSchoolBattleVoiceAction = 'attack' | 'summon' | 'block' | 'power' | 'da
 const NON_FINISH_BATTLE_VOICE_RATE = 0.3;
 const BATTLE_VOICE_REPLY_DELAY_MS = 420;
 
+// `retained` is transient battle UI/state metadata.  It must not leak into a
+// discard/draw cycle, otherwise a previously retained card could be shown as
+// retained again when it is drawn normally later in the battle.
+const clearRetainedCardMarker = (card: ICard): ICard => {
+    const nextCard = { ...card };
+    delete nextCard.retained;
+    return nextCard;
+};
+
+const markRetainedCard = (card: ICard): ICard => ({ ...card, retained: true });
+
 const shouldPlayNonFinishBattleVoice = () => Math.random() < NON_FINISH_BATTLE_VOICE_RATE;
 
 const playDelayedBattleVoice = (play: () => void, delayMs = 0): boolean => {
@@ -3006,9 +3017,10 @@ const App: React.FC = () => {
     const preparePlayerForBattle = useCallback((sourcePlayer: Player, nodeType: NodeType) => {
         const p: Player = {
             ...sourcePlayer,
+            deck: sourcePlayer.deck.map(clearRetainedCardMarker),
             hand: [],
             discardPile: [],
-            drawPile: shuffle(sourcePlayer.deck.map(c => ({ ...c }))),
+            drawPile: shuffle(sourcePlayer.deck.map(clearRetainedCardMarker)),
             currentEnergy: sourcePlayer.maxEnergy,
             block: 0,
             strength: 0,
@@ -3093,7 +3105,7 @@ const App: React.FC = () => {
 
         for (let i = 0; i < drawCount; i++) {
             const drawn = p.drawPile.pop();
-            if (drawn) p.hand.push(randomizeCardCostForRelics(p, drawn));
+            if (drawn) p.hand.push(randomizeCardCostForRelics(p, clearRetainedCardMarker(drawn)));
         }
 
         if (p.relics.find(r => r.id === 'ENCHIRIDION')) {
@@ -4736,13 +4748,12 @@ const App: React.FC = () => {
     const getPotionCapacity = (player: Player) => hasRelic(player, 'CAULDRON') ? 5 : 3;
 
     const drawOneCard = (player: Player): ICard | null => {
-        if (player.drawPile.length === 0) {
-            if (player.discardPile.length === 0) return null;
-            player.drawPile = shuffle(player.discardPile);
-            player.discardPile = [];
-        }
+        // Automatic discard reshuffling is intentionally limited to the
+        // start-of-turn draw phase. In-turn effects must stop when the draw
+        // pile is empty and leave the discard pile untouched.
+        if (player.drawPile.length === 0) return null;
         const card = player.drawPile.pop();
-        return card ? { ...card } : null;
+        return card ? clearRetainedCardMarker(card) : null;
     };
 
     const randomizeCardCostForRelics = (player: Player, card: ICard): ICard => {
@@ -4847,7 +4858,7 @@ const App: React.FC = () => {
         if (has('BAG_OF_PREPARATION')) {
             const retained = player.drawPile.pop();
             if (retained) {
-                player.hand.push(retained);
+                player.hand.push(markRetainedCard(retained));
                 counter(`RETAIN_CARD_${retained.id}`, 1);
             }
         }
@@ -4924,6 +4935,7 @@ const App: React.FC = () => {
         }
         if (has('RING_NOTE') && player.hand.length > 0) {
             const target = player.hand[Math.floor(Math.random() * player.hand.length)];
+            player.hand = player.hand.map(card => card.id === target.id ? markRetainedCard(card) : card);
             counter(`RETAIN_CARD_${target.id}`, 1);
         }
     };
@@ -5025,7 +5037,7 @@ const App: React.FC = () => {
         if (has('BROKEN_CLOCK')) player.currentHp = Math.max(1, player.currentHp - 3);
         if (has('TIME_CAPSULE') && player.relicCounters['TIME_CAPSULE_DISCARD'] === 1 && (player.relicCounters['RELIC_TURN_NUMBER'] || 0) === 1) {
             player.hand.forEach(card => {
-                player.discardPile.push(card);
+                player.discardPile.push(clearRetainedCardMarker(card));
                 applyRelicDiscardEffects(player, card, enemies);
             });
             player.hand = [];
@@ -7021,10 +7033,10 @@ const App: React.FC = () => {
         };
         bossEnemy.nextIntent = getNextEnemyIntent(bossEnemy, 1);
 
-        playerBase.drawPile = shuffle(playerBase.deck.map(c => ({ ...c })));
+        playerBase.drawPile = shuffle(playerBase.deck.map(clearRetainedCardMarker));
         for (let i = 0; i < HAND_SIZE; i++) {
             const drawn = playerBase.drawPile.pop();
-            if (drawn) playerBase.hand.push(drawn);
+            if (drawn) playerBase.hand.push(clearRetainedCardMarker(drawn));
         }
 
         const combatState: GameState = {
@@ -8132,7 +8144,7 @@ const App: React.FC = () => {
             if (mode.type === 'DISCARD' || mode.type === 'EXHAUST') {
                 p.hand = p.hand.filter(c => c.id !== selectedCard.id);
                 if (mode.type === 'DISCARD') {
-                    p.discardPile.push(selectedCard);
+                    p.discardPile.push(clearRetainedCardMarker(selectedCard));
                     applyRelicDiscardEffects(p, selectedCard, prev.enemies);
                     if (selectedCard.name === 'カンニングペーパー' || selectedCard.name === 'STRATEGIST') {
                         p.nextTurnEnergy += 2;
@@ -8530,13 +8542,9 @@ const App: React.FC = () => {
             const target = enemies.find(e => e.id === actorSelectedEnemyId) || enemies[0];
             const drawCards = (count: number) => {
                 for (let i = 0; i < count; i++) {
-                    if (p.drawPile.length === 0) {
-                        if (p.discardPile.length === 0) break;
-                        p.drawPile = shuffle(p.discardPile);
-                        p.discardPile = [];
-                    }
+                    if (p.drawPile.length === 0) break;
                     const c = p.drawPile.pop();
-                    if (c) p.hand.push(c);
+                    if (c) p.hand.push(clearRetainedCardMarker(c));
                 }
             };
 
@@ -8597,7 +8605,7 @@ const App: React.FC = () => {
                 const cardsToDiscard = [...p.hand];
                 const discardCount = cardsToDiscard.length;
                 cardsToDiscard.forEach(c => {
-                    p.discardPile.push(c);
+                    p.discardPile.push(clearRetainedCardMarker(c));
                     applyRelicDiscardEffects(p, c, enemies);
                     if (c.name === 'カンニングペーパー' || c.name === 'STRATEGIST') {
                         p.nextTurnEnergy += 2;
@@ -8606,13 +8614,9 @@ const App: React.FC = () => {
                 });
                 p.hand = [];
                 for (let i = 0; i < discardCount; i++) {
-                    if (p.drawPile.length === 0) {
-                        if (p.discardPile.length === 0) break;
-                        p.drawPile = shuffle(p.discardPile);
-                        p.discardPile = [];
-                    }
+                    if (p.drawPile.length === 0) break;
                     const c = p.drawPile.pop();
-                    if (c) p.hand.push(c);
+                    if (c) p.hand.push(clearRetainedCardMarker(c));
                 }
                 newLogs.push(trans("手札を交換", languageMode));
             } else if (potion.templateId === 'ENTROPIC_BREW') {
@@ -9186,7 +9190,7 @@ const App: React.FC = () => {
                 const cardsToDiscard = p.hand.filter(c => c.id !== card.id);
                 const count = cardsToDiscard.length;
                 cardsToDiscard.forEach(c => {
-                    p.discardPile.push(c);
+                    p.discardPile.push(clearRetainedCardMarker(c));
                     applyRelicDiscardEffects(p, c, enemies);
                     if (c.name === 'カンニングペーパー' || c.name === 'STRATEGIST') {
                         p.nextTurnEnergy += 2;
@@ -9196,14 +9200,10 @@ const App: React.FC = () => {
                 });
                 p.hand = [];
                 for (let i = 0; i < count; i++) {
-                    if (p.drawPile.length === 0) {
-                        if (p.discardPile.length === 0) break;
-                        p.drawPile = shuffle(p.discardPile);
-                        p.discardPile = [];
-                    }
+                    if (p.drawPile.length === 0) break;
                     const newCard = p.drawPile.pop();
                     if (newCard) {
-                        const card = { ...newCard };
+                        const card = clearRetainedCardMarker(newCard);
                         if (card.name === '虚無' || card.name === 'VOID' || card.originalNames?.includes('虚無') || card.originalNames?.includes('VOID')) {
                             p.currentEnergy = Math.max(0, p.currentEnergy - 1);
                             p.floatingText = { id: `void-turn-${Date.now()}-${i}`, text: '-1 Energy', color: 'text-red-500', iconType: 'zap' };
@@ -9752,11 +9752,7 @@ const App: React.FC = () => {
                     if (isWeatherForecastCard) {
                         const peekCards: ICard[] = [];
                         for (let j = 0; j < 3; j++) {
-                            if (p.drawPile.length === 0) {
-                                if (p.discardPile === undefined || p.discardPile.length === 0) break;
-                                p.drawPile = shuffle(p.discardPile);
-                                p.discardPile = [];
-                            }
+                            if (p.drawPile.length === 0) break;
                             const top = p.drawPile.pop();
                             if (top) peekCards.push(top);
                         }
@@ -9773,11 +9769,7 @@ const App: React.FC = () => {
                     if (isGalaxyExpressCard) {
                         const peekCards: ICard[] = [];
                         for (let j = 0; j < 5; j++) {
-                            if (p.drawPile.length === 0) {
-                                if (p.discardPile === undefined || p.discardPile.length === 0) break;
-                                p.drawPile = shuffle(p.discardPile);
-                                p.discardPile = [];
-                            }
+                            if (p.drawPile.length === 0) break;
                             const top = p.drawPile.pop();
                             if (top) peekCards.push(top);
                         }
@@ -10045,14 +10037,10 @@ const App: React.FC = () => {
                             currentLogs.push(trans(`召喚効果：次のターン開始時に${drawAmount}枚ドロー`, languageMode));
                         } else {
                             for (let j = 0; j < drawAmount; j++) {
-                                if (p.drawPile.length === 0) {
-                                    if (p.discardPile === undefined || p.discardPile.length === 0) break;
-                                    p.drawPile = shuffle(p.discardPile);
-                                    p.discardPile = [];
-                                }
+                                if (p.drawPile.length === 0) break;
                                 const newCard = p.drawPile.pop();
                                 if (newCard) {
-                                    const card = { ...newCard };
+                                    const card = clearRetainedCardMarker(newCard);
                                     if (card.name === '虚無' || card.name === 'VOID' || card.originalNames?.includes('虚無') || card.originalNames?.includes('VOID')) {
                                         p.currentEnergy = Math.max(0, p.currentEnergy - 1);
                                         p.floatingText = { id: `void-turn-${Date.now()}-${j}`, text: '-1 Energy', color: 'text-red-500', iconType: 'zap' };
@@ -10064,14 +10052,10 @@ const App: React.FC = () => {
                                     if (p.powers['EVOLVE'] && (card.type === CardType.STATUS || card.type === CardType.CURSE)) {
                                         const evolveDrawCount = Math.max(0, Math.floor(p.powers['EVOLVE']));
                                         for (let k = 0; k < evolveDrawCount; k++) {
-                                            if (p.drawPile.length === 0) {
-                                                if (p.discardPile === undefined || p.discardPile.length === 0) break;
-                                                p.drawPile = shuffle(p.discardPile);
-                                                p.discardPile = [];
-                                            }
+                                            if (p.drawPile.length === 0) break;
                                             const extraCardRaw = p.drawPile.pop();
                                             if (extraCardRaw) {
-                                                const extraCard = { ...extraCardRaw };
+                                                const extraCard = clearRetainedCardMarker(extraCardRaw);
                                                 if (extraCard.name === '虚無' || extraCard.name === 'VOID' || extraCard.originalNames?.includes('虚無') || extraCard.originalNames?.includes('VOID')) {
                                                     p.currentEnergy = Math.max(0, p.currentEnergy - 1);
                                                     p.floatingText = { id: `void-evolve-${Date.now()}-${k}`, text: '-1 Energy', color: 'text-red-500', iconType: 'zap' };
@@ -10170,17 +10154,13 @@ const App: React.FC = () => {
                     if (p.relics.find(r => r.id === 'KUNAI')) { p.powers['DEXTERITY'] = (p.powers['DEXTERITY'] || 0) + 1; p.floatingText = { id: `kunai-${Date.now()}`, text: `${trans("カチカチ", languageMode)}+1`, color: 'text-blue-400', iconType: 'shield' }; nextActiveEffects.push({ id: `vfx-kunai-${Date.now()}`, type: 'BLOCK', targetId: 'player' }); }
                     // Compass (Calipers) Effect: Draw 1 card every 3 attacks
                     if (p.relics.find(r => r.id === 'CALIPERS')) {
-                        if (p.drawPile.length === 0) {
-                            if (p.discardPile.length !== 0) {
-                                p.drawPile = shuffle(p.discardPile);
-                                p.discardPile = [];
+                        if (p.drawPile.length > 0) {
+                            const drawn = p.drawPile.pop();
+                            if (drawn) {
+                                p.hand.push(clearRetainedCardMarker(drawn));
+                                currentLogs.push(trans("コンパス：カードを1枚引いた", languageMode));
+                                nextActiveEffects.push({ id: `vfx-calip-${Date.now()}`, type: 'BUFF', targetId: 'player' });
                             }
-                        }
-                        const drawn = p.drawPile.pop();
-                        if (drawn) {
-                            p.hand.push(drawn);
-                            currentLogs.push(trans("コンパス：カードを1枚引いた", languageMode));
-                            nextActiveEffects.push({ id: `vfx-calip-${Date.now()}`, type: 'BUFF', targetId: 'player' });
                         }
                     }
                 }
@@ -10202,7 +10182,7 @@ const App: React.FC = () => {
                     }
 
                     if (!isConsumedOnUse && !shouldExhaust && !(c.type === CardType.POWER) && !(c.promptsExhaust === 99)) {
-                        p.discardPile.push(c);
+                        p.discardPile.push(clearRetainedCardMarker(c));
                         applyRelicDiscardEffects(p, c, enemies);
                     } else if (!isConsumedOnUse && (shouldExhaust || c.promptsExhaust === 99)) {
                         applyRelicDiscardEffects(p, c, enemies, true);
@@ -10224,7 +10204,7 @@ const App: React.FC = () => {
                     currentLogs.push(`${trans(card.name, languageMode)}は使い切った。`);
                 }
                 if (!isConsumedOnUse && !shouldExhaust && !(card.type === CardType.POWER) && !(card.promptsExhaust === 99)) {
-                    p.discardPile.push(card);
+                    p.discardPile.push(clearRetainedCardMarker(card));
                     applyRelicDiscardEffects(p, card, enemies);
                 } else if (!isConsumedOnUse && (shouldExhaust || card.promptsExhaust === 99)) {
                     applyRelicDiscardEffects(p, card, enemies, true);
@@ -10264,13 +10244,10 @@ const App: React.FC = () => {
             if ((card.battleBonusDrawOnPlay || 0) > 0) {
                 const battleBonusDrawCount = Math.max(0, Math.floor(card.battleBonusDrawOnPlay || 0));
                 for (let i = 0; i < battleBonusDrawCount; i++) {
-                    if (p.drawPile.length === 0 && p.discardPile.length > 0) {
-                        p.drawPile = shuffle(p.discardPile);
-                        p.discardPile = [];
-                    }
+                    if (p.drawPile.length === 0) break;
                     const drawn = p.drawPile.pop();
                     if (!drawn) break;
-                    p.hand.push(drawn);
+                    p.hand.push(clearRetainedCardMarker(drawn));
                 }
                 currentLogs.push('追加テキスト: カードを1枚引いた');
             }
@@ -10282,13 +10259,10 @@ const App: React.FC = () => {
                 if (remaining <= 0) {
                     p.currentEnergy += 1;
                     for (let i = 0; i < 2; i++) {
-                        if (p.drawPile.length === 0 && p.discardPile.length > 0) {
-                            p.drawPile = shuffle(p.discardPile);
-                            p.discardPile = [];
-                        }
+                        if (p.drawPile.length === 0) break;
                         const drawn = p.drawPile.pop();
                         if (!drawn) break;
-                        p.hand.push(drawn);
+                        p.hand.push(clearRetainedCardMarker(drawn));
                     }
                     currentLogs.push('クエスト達成: エナジー1、2ドロー');
                     delete p.relicCounters['OUT_STAMP_QUEST_REMAINING'];
@@ -10475,12 +10449,16 @@ const App: React.FC = () => {
             let newHand: ICard[] = [];
             const retainedIds = new Set<string>();
             if (p.relics.find(r => r.id === 'BOOKMARK') && p.hand[0]) retainedIds.add(p.hand[0].id);
+            p.hand.filter(card => card.retained).forEach(card => retainedIds.add(card.id));
             Object.keys(p.relicCounters)
                 .filter(key => key.startsWith('RETAIN_CARD_'))
                 .forEach(key => retainedIds.add(key.replace('RETAIN_CARD_', '')));
             if (p.relicCounters['THREE_COLOR_RIBBON_RETAIN'] === 1) p.hand.slice(0, 3).forEach(card => retainedIds.add(card.id));
-            newHand.push(...p.hand.filter(card => retainedIds.has(card.id)));
-            newDiscardPile = [...newDiscardPile, ...p.hand.filter(card => !retainedIds.has(card.id))];
+            newHand.push(...p.hand.filter(card => retainedIds.has(card.id)).map(markRetainedCard));
+            newDiscardPile = [
+                ...newDiscardPile.map(clearRetainedCardMarker),
+                ...p.hand.filter(card => !retainedIds.has(card.id)).map(clearRetainedCardMarker)
+            ];
             Object.keys(p.relicCounters)
                 .filter(key => key.startsWith('RETAIN_CARD_'))
                 .forEach(key => delete p.relicCounters[key]);
@@ -10501,7 +10479,7 @@ const App: React.FC = () => {
                 }
                 const drawnCard = newDrawPile.pop();
                 if (drawnCard) {
-                    const card = randomizeCardCostForRelics(p, drawnCard);
+                    const card = randomizeCardCostForRelics(p, clearRetainedCardMarker(drawnCard));
                     if (card.type === CardType.CURSE && p.relicCounters['CORRECTION_TAPE_READY'] === 1) {
                         p.relicCounters['CORRECTION_TAPE_READY'] = 0;
                         i -= 1;
@@ -10522,7 +10500,7 @@ const App: React.FC = () => {
                             }
                             const extraCardRaw = newDrawPile.pop();
                             if (extraCardRaw) {
-                                const extraCard = randomizeCardCostForRelics(p, extraCardRaw);
+                                const extraCard = randomizeCardCostForRelics(p, clearRetainedCardMarker(extraCardRaw));
                                 if (extraCard.name === '虚無' || extraCard.name === 'VOID') {
                                     p.currentEnergy = Math.max(0, p.currentEnergy - 1);
                                     p.floatingText = { id: `void-evolve-${Date.now()}-${k}`, text: '-1 Energy', color: 'text-red-500', iconType: 'zap' };
@@ -10571,6 +10549,12 @@ const App: React.FC = () => {
                     }
                     return c;
                 });
+            }
+            if (hasRelic(p, 'STAPLER')) {
+                const firstRetainedIndex = newHand.findIndex(card => card.retained);
+                if (firstRetainedIndex !== -1) {
+                    newHand[firstRetainedIndex] = { ...newHand[firstRetainedIndex], cost: 0, xCost: false };
+                }
             }
             if (!p.powers['BARRICADE']) {
                 p.block = 0;
@@ -10723,7 +10707,10 @@ const App: React.FC = () => {
                 p.hand.slice(0, 3).forEach(card => retainedIds.add(card.id));
                 delete p.relicCounters['THREE_COLOR_RIBBON_RETAIN'];
             }
-            const retainedCards = p.hand.filter(card => retainedIds.has(card.id));
+            p.hand = p.hand.map(card => retainedIds.has(card.id)
+                ? markRetainedCard(card)
+                : clearRetainedCardMarker(card));
+            const retainedCards = p.hand.filter(card => card.retained);
             if (hasRelic(p, 'STAPLER') && retainedCards[0]) {
                 retainedCards[0].cost = 0;
                 retainedCards[0].xCost = false;
@@ -14174,14 +14161,10 @@ const App: React.FC = () => {
             const drawCardsForPlayer = (player: Player, amount: number) => {
                 let remaining = amount;
                 while (remaining > 0) {
-                    if (player.drawPile.length === 0) {
-                        if (player.discardPile.length === 0) break;
-                        player.drawPile = shuffle([...player.discardPile]);
-                        player.discardPile = [];
-                    }
+                    if (player.drawPile.length === 0) break;
                     const drawn = player.drawPile.pop();
                     if (!drawn) break;
-                    player.hand.push(drawn);
+                    player.hand.push(clearRetainedCardMarker(drawn));
                     remaining--;
                 }
                 return amount - remaining;
@@ -14337,14 +14320,10 @@ const App: React.FC = () => {
             const drawCardsForPlayer = (player: Player, amount: number) => {
                 let remaining = amount;
                 while (remaining > 0) {
-                    if (player.drawPile.length === 0) {
-                        if (player.discardPile.length === 0) break;
-                        player.drawPile = shuffle([...player.discardPile]);
-                        player.discardPile = [];
-                    }
+                    if (player.drawPile.length === 0) break;
                     const drawn = player.drawPile.pop();
                     if (!drawn) break;
-                    player.hand.push(drawn);
+                    player.hand.push(clearRetainedCardMarker(drawn));
                     remaining--;
                 }
                 return amount - remaining;
