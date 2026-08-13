@@ -2242,7 +2242,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                         key={idleSpriteSheetSource}
                                         role="img"
                                         aria-label={trans('主人公', languageMode)}
-                                        className="battle-hero-idle-sprite-sheet relative z-10 w-full h-full -scale-x-100"
+                                        className={`battle-hero-idle-sprite-sheet relative z-10 w-full h-full ${visualTheme === 'high-school' ? '-scale-x-100' : ''}`}
                                         style={{
                                             backgroundImage: `url(${idleSpriteSheetSource})`,
                                             '--battle-hero-idle-sprite-scale': idleSpriteSheetScale,
