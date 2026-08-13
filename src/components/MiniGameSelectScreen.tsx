@@ -15,6 +15,79 @@ interface MiniGameSelectScreenProps {
   languageMode: LanguageMode;
 }
 
+type MiniGameSpriteDefinition = {
+  src: string;
+  columns: number;
+  rows: number;
+  index: number;
+  cell?: number;
+  gap?: number;
+  offsetX?: number;
+  offsetY?: number;
+};
+
+const MINI_GAME_SPRITE_ICONS: Record<string, MiniGameSpriteDefinition> = {
+  GO_HOME: { src: 'sprites/go-home-dash-8-loop-grid.webp', columns: 8, rows: 1, index: 2 },
+  SURVIVOR: { src: 'sprites/schoolyard-survivor-weapons.webp', columns: 8, rows: 5, index: 0 },
+  POKER: { src: 'sprites/after-school-poker-card-ornaments.webp', columns: 8, rows: 2, index: 0 },
+  DUNGEON: { src: 'sprites/furai-sfc-v2-hero-base-5x5.webp', columns: 5, rows: 5, index: 0, cell: 72, gap: 16 },
+  KOCHO: { src: 'sprites/kocho-hero-actions-01.webp', columns: 5, rows: 5, index: 0 },
+  PAPER_PLANE: { src: 'sprites/paper-plane/pilots-02.webp', columns: 5, rows: 5, index: 1, offsetX: -12, offsetY: 2 },
+  DUNGEON_2: { src: 'sprites/furai-shogakusei2-card-sheet.webp', columns: 6, rows: 5, index: 0, cell: 72, gap: 16 },
+};
+
+export const MiniGameSpriteIcon: React.FC<{
+  game: MiniGameConfig;
+  className?: string;
+}> = ({ game, className = 'h-7 w-7 md:h-9 md:w-9' }) => {
+  const sprite = MINI_GAME_SPRITE_ICONS[game.id];
+  const fallbackIcon = <game.icon size={24} className="text-white fill-current md:w-7 md:h-7" />;
+
+  if (!sprite) return fallbackIcon;
+
+  const col = sprite.index % sprite.columns;
+  const row = Math.floor(sprite.index / sprite.columns);
+  const src = assetUrl(sprite.src);
+
+  if (sprite.cell && sprite.gap) {
+    const sheetWidth = sprite.gap + sprite.columns * (sprite.cell + sprite.gap);
+    const sheetHeight = sprite.gap + sprite.rows * (sprite.cell + sprite.gap);
+    const sx = sprite.gap + col * (sprite.cell + sprite.gap);
+    const sy = sprite.gap + row * (sprite.cell + sprite.gap);
+
+    return (
+      <div className={`relative ${className} overflow-hidden`} style={{ imageRendering: 'pixelated' }}>
+        <div
+          className="absolute bg-no-repeat"
+          style={{
+            left: `-${(sx / sprite.cell) * 100}%`,
+            top: `-${(sy / sprite.cell) * 100}%`,
+            width: `${(sheetWidth / sprite.cell) * 100}%`,
+            height: `${(sheetHeight / sprite.cell) * 100}%`,
+            backgroundImage: `url("${src}")`,
+            backgroundSize: '100% 100%',
+            imageRendering: 'pixelated',
+            transform: `translate(${sprite.offsetX ?? 0}%, ${sprite.offsetY ?? 0}%)`,
+          }}
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className={`${className} bg-no-repeat`}
+      style={{
+        backgroundImage: `url("${src}")`,
+        backgroundSize: `${sprite.columns * 100}% ${sprite.rows * 100}%`,
+        backgroundPosition: `${sprite.columns === 1 ? 0 : (col / (sprite.columns - 1)) * 100}% ${sprite.rows === 1 ? 0 : (row / (sprite.rows - 1)) * 100}%`,
+        imageRendering: 'pixelated',
+        transform: `translate(${sprite.offsetX ?? 0}%, ${sprite.offsetY ?? 0}%)`,
+      }}
+    />
+  );
+};
+
 const MiniGameSelectScreen: React.FC<MiniGameSelectScreenProps> = ({ onSelect, onBack, totalMathCorrect, isDebug, languageMode }) => {
   const [deleteTarget, setDeleteTarget] = useState<MiniGameConfig | null>(null);
   const longPressTimer = useRef<any>(null);
@@ -95,64 +168,6 @@ const MiniGameSelectScreen: React.FC<MiniGameSelectScreenProps> = ({ onSelect, o
       audioService.playSound('wrong');
     }
   });
-
-  const MiniGameSpriteIcon: React.FC<{ game: MiniGameConfig }> = ({ game }) => {
-    const spriteIcons: Record<string, { src: string; columns: number; rows: number; index: number; offsetX?: number; offsetY?: number } | { src: string; columns: number; rows: number; index: number; cell: number; gap: number; offsetX?: number; offsetY?: number }> = {
-      GO_HOME: { src: 'sprites/go-home-dash-8-loop-grid.webp', columns: 8, rows: 1, index: 2 },
-      SURVIVOR: { src: 'sprites/schoolyard-survivor-weapons.webp', columns: 8, rows: 5, index: 0 },
-      POKER: { src: 'sprites/after-school-poker-card-ornaments.webp', columns: 8, rows: 2, index: 0 },
-      DUNGEON: { src: 'sprites/furai-sfc-v2-hero-base-5x5.webp', columns: 5, rows: 5, index: 0, cell: 72, gap: 16 },
-      KOCHO: { src: 'sprites/kocho-hero-actions-01.webp', columns: 5, rows: 5, index: 0 },
-      PAPER_PLANE: { src: 'sprites/paper-plane/pilots-02.webp', columns: 5, rows: 5, index: 1, offsetX: -12, offsetY: 2 },
-      DUNGEON_2: { src: 'sprites/furai-shogakusei2-card-sheet.webp', columns: 6, rows: 5, index: 0, cell: 72, gap: 16 },
-    };
-    const sprite = spriteIcons[game.id];
-    const fallbackIcon = <game.icon size={24} className="text-white fill-current md:w-7 md:h-7" />;
-
-    if (!sprite) return fallbackIcon;
-
-    const col = sprite.index % sprite.columns;
-    const row = Math.floor(sprite.index / sprite.columns);
-    const src = assetUrl(sprite.src);
-
-    if ('cell' in sprite) {
-      const sheetWidth = sprite.gap + sprite.columns * (sprite.cell + sprite.gap);
-      const sheetHeight = sprite.gap + sprite.rows * (sprite.cell + sprite.gap);
-      const sx = sprite.gap + col * (sprite.cell + sprite.gap);
-      const sy = sprite.gap + row * (sprite.cell + sprite.gap);
-
-      return (
-        <div className="relative h-7 w-7 overflow-hidden md:h-9 md:w-9" style={{ imageRendering: 'pixelated' }}>
-          <div
-            className="absolute bg-no-repeat"
-            style={{
-              left: `-${(sx / sprite.cell) * 100}%`,
-              top: `-${(sy / sprite.cell) * 100}%`,
-              width: `${(sheetWidth / sprite.cell) * 100}%`,
-              height: `${(sheetHeight / sprite.cell) * 100}%`,
-              backgroundImage: `url("${src}")`,
-              backgroundSize: '100% 100%',
-              imageRendering: 'pixelated',
-              transform: `translate(${sprite.offsetX ?? 0}%, ${sprite.offsetY ?? 0}%)`,
-            }}
-          />
-        </div>
-      );
-    }
-
-    return (
-      <div
-        className="h-7 w-7 bg-no-repeat md:h-9 md:w-9"
-        style={{
-          backgroundImage: `url("${src}")`,
-          backgroundSize: `${sprite.columns * 100}% ${sprite.rows * 100}%`,
-          backgroundPosition: `${sprite.columns === 1 ? 0 : (col / (sprite.columns - 1)) * 100}% ${sprite.rows === 1 ? 0 : (row / (sprite.rows - 1)) * 100}%`,
-          imageRendering: 'pixelated',
-          transform: `translate(${sprite.offsetX ?? 0}%, ${sprite.offsetY ?? 0}%)`,
-        }}
-      />
-    );
-  };
 
   const LockedOverlay: React.FC<{ threshold: number }> = ({ threshold }) => {
     const remaining = Math.max(0, threshold - totalMathCorrect);

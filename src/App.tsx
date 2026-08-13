@@ -87,7 +87,7 @@ const getHumanoidEnemyVoiceActionForIntent = (intent: EnemyIntent): HumanoidEnem
     if (intent.type === EnemyIntentType.DEFEND) return 'defense';
     return 'skill';
 };
-import MiniGameSelectScreen from './components/MiniGameSelectScreen';
+import MiniGameSelectScreen, { MiniGameSpriteIcon } from './components/MiniGameSelectScreen';
 import MiniGameRouter from './components/MiniGameRouter'; // Added
 import { MINI_GAMES } from './miniGameConfig'; // Added
 import DodgeballShooting from './components/DodgeballShooting';
@@ -18721,7 +18721,7 @@ const App: React.FC = () => {
                                             {newlyUnlockedMiniGames.map((game) => (
                                                 <div key={game.id} className="flex w-full max-w-[16rem] flex-col rounded-xl border border-cyan-300/40 bg-slate-800/80 p-4">
                                                     <div className="mx-auto mb-3 flex h-16 w-16 items-center justify-center rounded-full border border-white/10 bg-black/20">
-                                                        <game.icon size={28} className="text-cyan-200" />
+                                                        <MiniGameSpriteIcon game={game} className="h-10 w-10" />
                                                     </div>
                                                     <div className="text-xl font-black text-cyan-100">{trans(game.name, languageMode)}</div>
                                                     <div className="mt-2 text-sm text-slate-300 leading-relaxed">{trans(game.description, languageMode)}</div>
