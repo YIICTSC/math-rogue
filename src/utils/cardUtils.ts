@@ -28,6 +28,37 @@ const uniqueStrings = (values: string[]): string[] => {
     return result;
 };
 
+/**
+ * Returns the current numeric energy value carried by a card.
+ *
+ * Boomerang used to grant Energy +1. It is intentionally excluded here,
+ * including from synthesized cards saved by older builds. When synthesis
+ * history is available, rebuild the value from the current canonical source
+ * cards so an old Boomerang contribution is removed without removing other
+ * energy sources such as 静電気.
+ */
+export const getCardEnergyValue = (
+    card: Pick<Card, 'energy' | 'name' | 'originalNames'>
+): number | undefined => {
+    const sourceNames = [card.name, ...(card.originalNames || [])];
+    const hasBoomerangSource = sourceNames.includes('ブーメラン');
+    const hasSynthesisHistory = (card.originalNames?.length ?? 0) > 0;
+
+    if (!hasBoomerangSource && !hasSynthesisHistory) {
+        return typeof card.energy === 'number' && Number.isFinite(card.energy) ? card.energy : undefined;
+    }
+
+    if (hasBoomerangSource && !hasSynthesisHistory) return undefined;
+
+    const canonicalEnergy = sourceNames.reduce((total, sourceName) => {
+        if (sourceName === 'ブーメラン') return total;
+        const canonicalCard = Object.values(CARDS_LIBRARY).find(candidate => candidate.name === sourceName);
+        return total + (typeof canonicalCard?.energy === 'number' && Number.isFinite(canonicalCard.energy) ? canonicalCard.energy : 0);
+    }, 0);
+
+    return canonicalEnergy > 0 ? canonicalEnergy : undefined;
+};
+
 const safeDecodeURIComponent = (value: string) => {
     try {
         return decodeURIComponent(value);
@@ -569,7 +600,7 @@ export const synthesizeCards = (c1: Card, c2: Card, c3?: Card): Card => {
     const newDamage = sum('damage');
     const newBlock = sum('block');
     const newDraw = sum('draw');
-    const newEnergy = sum('energy');
+    const newEnergy = sourceCards.reduce((total, card) => total + (getCardEnergyValue(card) || 0), 0);
     const newHeal = sum('heal');
     const newPoison = sum('poison');
     const newWeak = sum('weak');
@@ -889,7 +920,6 @@ export const synthesizeCards = (c1: Card, c2: Card, c3?: Card): Card => {
         '一寸法師': '連撃後ブロック3',
         '縄跳び': '自分に1ダメージ',
         '飴玉の嵐': '敵全体へろへろ1',
-        'ブーメラン': 'エナジー+1',
         'かいけつゾロリ': 'ブロック3',
         '側転': 'ブロック2',
         '電脳世界へのダイブ': '手札1枚を0コスト',

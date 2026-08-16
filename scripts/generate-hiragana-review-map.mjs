@@ -15,6 +15,19 @@ const READING_OVERRIDES = new Map([
   ['購買部の圧', 'こうばいぶのあつ'],
 ]);
 
+const normalizeHiragana = (value) => value
+  .replaceAll('しゅさつ', 'てふだ')
+  .replaceAll('すてさつ', 'すてふだ')
+  .replaceAll('やまさつ', 'やまふだ')
+  .replace(/おはら(?=[がをのにへも、。…\s])/g, 'おなか')
+  .replaceAll('たいしゅつかーど', 'かしだしカード')
+  .replaceAll('いんくかめ', 'インクびん')
+  .replaceAll('あとかたづけけ', 'あとかたづけ')
+  .replaceAll('いっって', 'いって')
+  .replaceAll('おきんがたりない', 'おかねがたりない')
+  .replaceAll('じゅほのお', 'じゅえん')
+  .replaceAll('あるま、', 'あるあいだ、');
+
 if (!fs.existsSync(REPORT)) {
   throw new Error('Run `pnpm run audit:language:report` before generating the review map.');
 }
@@ -50,7 +63,7 @@ await kuroshiro.init(new KuromojiAnalyzer());
 const entries = [];
 const uniqueRows = new Map(reviewRows.map((entry) => [entry.source, entry]));
 for (const { source, partiallyConverted } of [...uniqueRows.values()].sort((a, b) => a.source.localeCompare(b.source, 'ja'))) {
-  const converted = READING_OVERRIDES.get(source) || await kuroshiro.convert(partiallyConverted, { to: 'hiragana', mode: 'normal' });
+  const converted = normalizeHiragana(READING_OVERRIDES.get(source) || await kuroshiro.convert(partiallyConverted, { to: 'hiragana', mode: 'normal' }));
   if (converted !== source && !KANJI.test(converted)) entries.push([source, converted]);
 }
 

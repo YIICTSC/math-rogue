@@ -11068,6 +11068,27 @@ const stripGenericEnglishScaffolding = (value: string): string => {
     return value;
 };
 
+// Kuroshiro is useful for the long tail of runtime copy, but a few compound
+// words are tokenized with an uncommon reading (for example 手札 -> しゅさつ).
+// Keep these corrections at the final hiragana boundary so exact dictionaries,
+// generated relic copy, and dynamic battle logs all use the same vocabulary.
+const normalizeHiraganaDisplayText = (value: string): string => value
+    .replace(/しゅさつ/g, 'てふだ')
+    .replace(/すてさつ/g, 'すてふだ')
+    .replace(/やまさつ/g, 'やまふだ')
+    .replace(/おはら(?=[がをのにへも、。…\s])/g, 'おなか')
+    .replace(/たいしゅつかーど/g, 'かしだしカード')
+    .replace(/いんくかめ/g, 'インクびん')
+    .replace(/あとかたづけけ/g, 'あとかたづけ')
+    .replace(/いっって/g, 'いって')
+    .replace(/おきんがたりない/g, 'おかねがたりない')
+    .replace(/じゅほのお/g, 'じゅえん')
+    .replace(/\.\.\.\./g, '……')
+    .replace(/。。/g, '\n')
+    .replace(/<br\s*\/?>(?=\s*)/gi, '\n')
+    .replace(/〈br〉/g, '\n')
+    .replace(/＜br＞/g, '\n');
+
 export const trans = (text: string, mode: LanguageMode): string => {
     if (mode === 'ENGLISH') {
         const expansionTranslation = translateExpansionCardEnglish(text);
@@ -11078,7 +11099,11 @@ export const trans = (text: string, mode: LanguageMode): string => {
         if (expansionTranslation) return expansionTranslation;
     }
     const rawOutput = transCore(text, mode);
-    const output = mode === 'ENGLISH' ? stripGenericEnglishScaffolding(rawOutput) : rawOutput;
+    const output = mode === 'ENGLISH'
+        ? stripGenericEnglishScaffolding(rawOutput)
+        : mode === 'HIRAGANA'
+            ? normalizeHiraganaDisplayText(rawOutput)
+            : rawOutput;
     if (mode === 'ENGLISH') auditEnglishTranslationResult(text, output, 'trans');
     return output;
 };
@@ -11250,7 +11275,11 @@ const transEventTextCore = (text: string, mode: LanguageMode): string => {
 
 export const transEventText = (text: string, mode: LanguageMode): string => {
     const rawOutput = transEventTextCore(text, mode);
-    const output = mode === 'ENGLISH' ? stripGenericEnglishScaffolding(rawOutput) : rawOutput;
+    const output = mode === 'ENGLISH'
+        ? stripGenericEnglishScaffolding(rawOutput)
+        : mode === 'HIRAGANA'
+            ? normalizeHiraganaDisplayText(rawOutput)
+            : rawOutput;
     if (mode === 'ENGLISH') auditEnglishTranslationResult(text, output, 'transEventText');
     return output;
 };

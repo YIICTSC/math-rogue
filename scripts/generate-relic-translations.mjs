@@ -155,6 +155,20 @@ const humanizeId = (id) => id
   .map(word => word.charAt(0).toUpperCase() + word.slice(1))
   .join(' ');
 
+const normalizeHiragana = (value) => value
+  .replaceAll('しゅさつ', 'てふだ')
+  .replaceAll('すてさつ', 'すてふだ')
+  .replaceAll('やまさつ', 'やまふだ')
+  .replace(/おはら(?=[がをのにへも、。…\s])/g, 'おなか')
+  .replaceAll('たいしゅつかーど', 'かしだしカード')
+  .replaceAll('いんくかめ', 'インクびん')
+  .replaceAll('あとかたづけけ', 'あとかたづけ')
+  .replaceAll('いっって', 'いって')
+  .replaceAll('おきんがたりない', 'おかねがたりない')
+  .replaceAll('じゅほのお', 'じゅえん')
+  .replaceAll('あるま、', 'あるあいだ、')
+  .replaceAll('いちばんじょう', 'いちばんうえ');
+
 const parseRelics = (source) => {
   const block = source.match(/export const RELIC_LIBRARY:[^=]+= \{([\s\S]*?)\n\};/);
   if (!block) throw new Error('RELIC_LIBRARY was not found.');
@@ -183,8 +197,8 @@ for (const relic of relics) {
     ...relic,
     englishName: english.name,
     englishDescription: english.description,
-    hiraganaName: await kuroshiro.convert(relic.name, { to: 'hiragana', mode: 'normal' }),
-    hiraganaDescription: await kuroshiro.convert(relic.description, { to: 'hiragana', mode: 'normal' }),
+    hiraganaName: normalizeHiragana(await kuroshiro.convert(relic.name, { to: 'hiragana', mode: 'normal' })),
+    hiraganaDescription: normalizeHiragana(await kuroshiro.convert(relic.description, { to: 'hiragana', mode: 'normal' })),
   });
 }
 

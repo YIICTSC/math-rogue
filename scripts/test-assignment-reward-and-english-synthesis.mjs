@@ -38,6 +38,7 @@ const server = await createServer({
 
 try {
   const { getUpgradedCard, normalizeIllustrationRefToken, synthesizeCards } = await server.ssrLoadModule('/src/utils/cardUtils.ts');
+  const { CARDS_LIBRARY } = await server.ssrLoadModule('/src/constants.ts');
   const { getCardDamage } = await server.ssrLoadModule('/src/utils/cardDamage.ts');
   const { EXPANSION_CARDS } = await server.ssrLoadModule('/src/data/expansionCards.ts');
   const { buildEnglishCardName, transEventText } = await server.ssrLoadModule('/src/utils/textUtils.ts');
@@ -114,7 +115,10 @@ try {
     { ...skill, id: 'ENERGY_ONE', name: '充電', energy: 1, description: 'エナジー+1。' },
     { ...attack, id: 'SWORD_BOOMERANG', name: 'ブーメラン', playCopies: 1 },
   );
-  assert(repeatedEnergy.description.includes('エナジー+2'), `numeric energy effects were not consolidated: ${repeatedEnergy.description}`);
+  assert(CARDS_LIBRARY.SWORD_BOOMERANG.energy === undefined, 'Boomerang still carries a numeric Energy effect');
+  assert(!CARDS_LIBRARY.SWORD_BOOMERANG.description.includes('エナジー'), 'Boomerang still advertises an Energy effect');
+  assert(repeatedEnergy.description.includes('エナジー+1'), `non-Boomerang energy was lost during synthesis: ${repeatedEnergy.description}`);
+  assert(!repeatedEnergy.description.includes('エナジー+2'), `Boomerang Energy was not removed: ${repeatedEnergy.description}`);
   assert(!repeatedEnergy.description.includes('エナジー+1。エナジー+1'), `energy effect is still duplicated: ${repeatedEnergy.description}`);
   assert(repeatedEnergy.description.endsWith('×2。'), `whole-card repeat count is not at the end: ${repeatedEnergy.description}`);
   assert(!/\d+ダメージx2/.test(repeatedEnergy.description), `repeat count is still attached only to damage: ${repeatedEnergy.description}`);

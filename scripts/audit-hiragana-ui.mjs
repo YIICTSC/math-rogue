@@ -37,6 +37,9 @@ const CONTEXTUAL_MISTRANSLATIONS = [
   'あぶねえじ',
   'ほうもつ',
   'ついかときキラ',
+  'しゅさつ',
+  'すてさつ',
+  'やまさつ',
 ];
 
 const collectSourceFiles = (directory) => fs.readdirSync(directory, { withFileTypes: true }).flatMap((entry) => {
@@ -142,7 +145,9 @@ try {
     'src/data/hiraganaUiExact.ts',
     'src/data/hiraganaCompendiumExact.ts',
     'src/data/displayCopyExact.ts',
-    'src/utils/textUtils.ts',
+    'src/data/hiraganaReviewExact.ts',
+    'src/data/relicTranslations.generated.ts',
+    'src/utils/textUtils2.ts',
   ]) {
     const source = fs.readFileSync(file, 'utf8');
     for (const mistranslation of CONTEXTUAL_MISTRANSLATIONS) {
@@ -171,6 +176,7 @@ try {
     const auditTranslatedLiteral = (node, category, value) => {
       const output = trans(value, 'HIRAGANA');
       if (KANJI.test(output)) report(node, `${category} kanji remains`, value, output);
+      if (/(?:<br\s*\/?>|〈br〉|＜br＞)/i.test(output)) report(node, `${category} literal break tag`, value, output);
       for (const mistranslation of CONTEXTUAL_MISTRANSLATIONS) {
         if (output.includes(mistranslation)) report(node, `${category} contextual mistranslation`, value, output);
       }

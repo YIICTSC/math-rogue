@@ -1,7 +1,7 @@
 {
   "name": "learning-rogue",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.0.3",
   "description": "学習問題とカードバトルを組み合わせた学習ローグライクゲーム",
   "author": "YIICTSC",
   "type": "module",
@@ -23,7 +23,7 @@
     "prebuild:android": "pnpm run generate:relic-translations && pnpm run generate:illustration-manifests",
     "build": "pnpm run audit:english:gate && vite build",
     "build:steam": "pnpm run audit:english:gate && node scripts/build-steam.mjs",
-    "build:ios": "pnpm run audit:english:gate && node scripts/generate-icons.mjs && VITE_APP_PLATFORM=ios VITE_PAID_EDITION=true vite build",
+    "build:ios": "pnpm run audit:english:gate && node scripts/generate-icons.mjs && VITE_APP_PLATFORM=ios VITE_PAID_EDITION=true vite build && node scripts/cleanup-ios-web-assets.mjs",
     "build:android": "pnpm run audit:english:gate && node scripts/generate-icons.mjs && node scripts/generate-android-icons.mjs && node scripts/generate-android-asset-manifest.mjs && node scripts/verify-android-asset-manifest.mjs && VITE_APP_PLATFORM=android VITE_PAID_EDITION=true VITE_LARGE_ASSET_BASE_URL=https://yiictsc.github.io/math-rogue/ vite build && node scripts/prepare-android-dist.mjs",
     "ios:add": "pnpm run build:ios && cap add ios --packagemanager SPM",
     "ios:sync": "pnpm run build:ios && cap sync ios",

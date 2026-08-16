@@ -29,7 +29,11 @@ const JAPANESE = /[ぁ-んァ-ヶ一-龠々〆ヵヶ]/;
 const KANJI = /[一-龠]/;
 const GENERIC_FALLBACK = /^(Choose Option|Event Details|School Foe|Choose a fitting event action|You handled the (?:event|situation|moment).*|You turned the event into a useful tool for the road ahead\.|You handled the situation carefully and turned the experience into progress\.|The exchange with others changed the mood and opened a way forward\.|Facing the feeling directly helped your mind settle\.)$/;
 const BROKEN_PLACEHOLDER = /ZXQNAME|QZQ\d+QZQ|\bToshi\b/;
-const CONTEXTUAL_HIRAGANA = ['そらにもどる', '主にん公', '好感たびに', 'いちばんじょう', 'あぶねえじ', 'ほうもつ', 'すんで読', '閉か', '癒やし', 'ついかときキラ'];
+const CONTEXTUAL_HIRAGANA = [
+  'そらにもどる', '主にん公', '好感たびに', 'いちばんじょう', 'あぶねえじ',
+  'ほうもつ', 'すんで読', '閉か', '癒やし', 'ついかときキラ', 'しゅさつ',
+  'すてさつ', 'やまさつ', '<br>', '〈br〉',
+];
 
 const entries = [];
 for (const file of DISPLAY_DATA_FILES) {

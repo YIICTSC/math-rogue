@@ -122,7 +122,7 @@ import { getNextLaunchLockedManagedAssignment, getNextRequiredManagedAssignment,
 import { ASSIGNMENT_NOTIFICATION_OPEN_EVENT } from './services/assignmentNotificationService';
 import { childSafetyService } from './services/childSafetyService';
 import { generateEvent, generateLegacyEvent } from './services/eventService';
-import { createAssignmentRewardCard, createHolographicCard, getUpgradedCard, synthesizeCards } from './utils/cardUtils';
+import { createAssignmentRewardCard, createHolographicCard, getCardEnergyValue, getUpgradedCard, synthesizeCards } from './utils/cardUtils';
 import { getCardDamage, getCardPlayCost } from './utils/cardDamage';
 import { getCardIllustrationPaths } from './utils/cardIllustration';
 import { getMagicCardArtUrl } from './utils/cardArtPaths';
@@ -558,7 +558,12 @@ type RaceEffectState = {
     hideEnemyIntentsOnce: boolean;
 };
 
-const PORTRAIT_PLAYER_SCALE_BASELINE = 1.4;
+const IS_IOS_BUILD = String(import.meta.env.VITE_APP_PLATFORM || '').trim().toLowerCase() === 'ios';
+const PORTRAIT_PLAYER_SCALE_BASELINE = 1;
+const LEGACY_PORTRAIT_PLAYER_SCALE_BASELINE = 1.4;
+const IOS_PORTRAIT_PLAYER_SCALE_BASELINE = 0.75;
+const IOS_LANDSCAPE_PLAYER_SCALE_BASELINE = 1.2;
+const BATTLE_UI_SCALE_SETTINGS_VERSION = 2;
 
 const EMPTY_RACE_EFFECTS: RaceEffectState = {
     paperStormUntil: 0,
@@ -615,6 +620,7 @@ const DEFAULT_APP_SETTINGS: AppSettings = {
         statsScale: 1
     },
     portraitPlayerScaleBase: PORTRAIT_PLAYER_SCALE_BASELINE,
+    battleUiScaleSettingsVersion: BATTLE_UI_SCALE_SETTINGS_VERSION,
     lowDataMode: false
 };
 
@@ -641,7 +647,8 @@ const normalizeBattleUiSettings = (
 });
 
 const normalizePortraitBattleUiSettings = (
-    saved?: (Partial<BattleUiSettings> & { controlBarHeightRem?: number }) | null
+    saved?: (Partial<BattleUiSettings> & { controlBarHeightRem?: number }) | null,
+    migrateLegacyIosDefault = false
 ): BattleUiSettings => {
     const normalized = normalizeBattleUiSettings(saved);
     if (!saved?.playerScale || !Number.isFinite(saved.playerScale)) {
@@ -649,15 +656,40 @@ const normalizePortraitBattleUiSettings = (
     }
 
     // The portrait UI used 1.4 as the practical default before the scale
-    // baseline was made explicit. Expose that legacy default as 1.0 while
-    // leaving other user-selected values unchanged.
-    const playerScale = Math.abs(saved.playerScale - PORTRAIT_PLAYER_SCALE_BASELINE) < 0.001
-        ? 1
+    // baseline was made explicit. The previous iOS build also stored its
+    // baseline (0.75) as the user-facing value. Expose both legacy defaults
+    // as 1.0 while leaving other user-selected values unchanged.
+    const isLegacyPortraitDefault = Math.abs(saved.playerScale - LEGACY_PORTRAIT_PLAYER_SCALE_BASELINE) < 0.001;
+    const isLegacyIosDefault = migrateLegacyIosDefault
+        && IS_IOS_BUILD
+        && Math.abs(saved.playerScale - IOS_PORTRAIT_PLAYER_SCALE_BASELINE) < 0.001;
+    const playerScale = isLegacyPortraitDefault || isLegacyIosDefault
+        ? DEFAULT_APP_SETTINGS.battleUiPortrait.playerScale
         : saved.playerScale;
     return {
         ...normalized,
         playerScale
     };
+};
+
+const normalizeLandscapeBattleUiSettings = (
+    saved?: (Partial<BattleUiSettings> & { controlBarHeightRem?: number }) | null,
+    migrateLegacyIosDefault = false
+): BattleUiSettings => {
+    const normalized = normalizeBattleUiSettings(saved);
+    if (!saved?.playerScale || !Number.isFinite(saved.playerScale)) {
+        return normalized;
+    }
+
+    // The previous iOS build stored the landscape baseline (1.2) as the
+    // user-facing value. Keep the rendered size unchanged while presenting
+    // the normalized initial value as 1.0.
+    const isLegacyIosDefault = migrateLegacyIosDefault
+        && IS_IOS_BUILD
+        && Math.abs(saved.playerScale - IOS_LANDSCAPE_PLAYER_SCALE_BASELINE) < 0.001;
+    return isLegacyIosDefault
+        ? { ...normalized, playerScale: DEFAULT_APP_SETTINGS.battleUiLandscape.playerScale }
+        : normalized;
 };
 
 const getViewportBattleUiOrientation = (): 'portrait' | 'landscape' => {
@@ -1603,11 +1635,15 @@ const App: React.FC = () => {
         const savedBattleUi = saved?.battleUi as (Partial<AppSettings['battleUi']> & { controlBarHeightRem?: number }) | undefined;
         const baseBattleUi = normalizeBattleUiSettings(savedBattleUi);
         const savedPortraitBattleUi = saved?.battleUiPortrait as (Partial<AppSettings['battleUiPortrait']> & { controlBarHeightRem?: number }) | undefined;
+        const shouldMigrateLegacyIosScales = IS_IOS_BUILD
+            && saved?.battleUiScaleSettingsVersion !== BATTLE_UI_SCALE_SETTINGS_VERSION;
         const portraitBattleUi = !saved
             ? normalizeBattleUiSettings(DEFAULT_APP_SETTINGS.battleUiPortrait)
-            : saved.portraitPlayerScaleBase === PORTRAIT_PLAYER_SCALE_BASELINE
-                ? normalizeBattleUiSettings(savedPortraitBattleUi || baseBattleUi)
-                : normalizePortraitBattleUiSettings(savedPortraitBattleUi || baseBattleUi);
+            : normalizePortraitBattleUiSettings(savedPortraitBattleUi || baseBattleUi, shouldMigrateLegacyIosScales);
+        const savedLandscapeBattleUi = saved?.battleUiLandscape as (Partial<AppSettings['battleUiLandscape']> & { controlBarHeightRem?: number }) | undefined;
+        const landscapeBattleUi = !saved
+            ? normalizeBattleUiSettings(DEFAULT_APP_SETTINGS.battleUiLandscape)
+            : normalizeLandscapeBattleUiSettings(savedLandscapeBattleUi || baseBattleUi, shouldMigrateLegacyIosScales);
         const merged = {
             ...DEFAULT_APP_SETTINGS,
             ...(saved || {}),
@@ -1615,8 +1651,9 @@ const App: React.FC = () => {
             ...migrateSavedAudioVolumeDefaults(saved),
             battleUi: baseBattleUi,
             battleUiPortrait: portraitBattleUi,
-            battleUiLandscape: normalizeBattleUiSettings(saved?.battleUiLandscape || baseBattleUi),
-            portraitPlayerScaleBase: PORTRAIT_PLAYER_SCALE_BASELINE
+            battleUiLandscape: landscapeBattleUi,
+            portraitPlayerScaleBase: PORTRAIT_PLAYER_SCALE_BASELINE,
+            battleUiScaleSettingsVersion: BATTLE_UI_SCALE_SETTINGS_VERSION
         };
         return storageService.getBgmMode() ? merged : { ...merged, bgmMode: 'NEW' };
     });
@@ -4915,10 +4952,21 @@ const App: React.FC = () => {
             player.currentEnergy += 2;
             delete player.relicCounters['PERFECT_SCORE_ENERGY'];
         }
-        if (has('EXTRA_HOMEWORK') && player.relicCounters['EXTRA_HOMEWORK_SHAME'] === 1 && player.hand.length > 0) {
-            const index = Math.floor(Math.random() * player.hand.length);
-            player.hand[index] = { ...CURSE_CARDS.SHAME, id: `extra-homework-shame-${Date.now()}` };
-            delete player.relicCounters['EXTRA_HOMEWORK_SHAME'];
+        if (has('EXTRA_HOMEWORK') && player.relicCounters['EXTRA_HOMEWORK_COST_PENALTY'] === 1) {
+            const candidates = player.hand.filter(card => !card.unplayable && !card.xCost);
+            const target = candidates[Math.floor(Math.random() * candidates.length)];
+            if (target) {
+                player.hand = player.hand.map(card => card.id === target.id
+                    ? {
+                        ...card,
+                        battleRestore: card.battleRestore ?? { cost: card.cost, xCost: card.xCost },
+                        battleBaseCost: card.battleBaseCost ?? card.cost,
+                        battleBaseXCost: card.battleBaseXCost ?? card.xCost,
+                        cost: card.cost + 1,
+                    }
+                    : card);
+            }
+            delete player.relicCounters['EXTRA_HOMEWORK_COST_PENALTY'];
         }
         if (has('PENCIL_CASE')) {
             const types = new Set(player.hand.map(card => card.type));
@@ -5528,7 +5576,7 @@ const App: React.FC = () => {
             if (hasRelic(player, 'RECESS_TOKEN')) nextPlayer.relicCounters['RECESS_TOKEN_ENERGY'] = 1;
             if (hasRelic(player, 'EXTRA_HOMEWORK')) {
                 nextPlayer.gold += 30;
-                nextPlayer.relicCounters['EXTRA_HOMEWORK_SHAME'] = 1;
+                nextPlayer.relicCounters['EXTRA_HOMEWORK_COST_PENALTY'] = 1;
             }
             if (hasRelic(player, 'ENVELOPE')) {
                 const wins = (nextPlayer.relicCounters['ENVELOPE_WINS'] || 0) + 1;
@@ -8740,6 +8788,14 @@ const App: React.FC = () => {
             return;
         }
         const adjustedCard: ICard = { ...card };
+        if (adjustedCard.name === 'ブーメラン' || (adjustedCard.originalNames?.length ?? 0) > 0) {
+            const inheritedEnergy = getCardEnergyValue(adjustedCard);
+            if (inheritedEnergy !== undefined) adjustedCard.energy = inheritedEnergy;
+            else delete adjustedCard.energy;
+        } else if (adjustedCard.energy === undefined) {
+            const inheritedEnergy = getCardEnergyValue(adjustedCard);
+            if (inheritedEnergy !== undefined) adjustedCard.energy = inheritedEnergy;
+        }
         if (adjustedCard.lowHpCostZero && actionPlayer.currentHp * 2 <= actionPlayer.maxHp) {
             adjustedCard.cost = 0;
             adjustedCard.xCost = false;
@@ -17134,8 +17190,8 @@ const App: React.FC = () => {
                                     </button>
                                 </div>
 
-                                    <button onClick={() => setShowDebugLog(true)} className="start-menu-version text-gray-600 text-[10px] hover:text-gray-400 flex items-center justify-center gap-1 opacity-50 hover:opacity-100 transition-opacity">
-                                        <Terminal size={10} /> v1.0.0 YUSUKE ISHIGE
+                                    <button onClick={() => setShowDebugLog(true)} className="start-menu-version text-white text-[10px] hover:text-white flex items-center justify-center gap-1 transition-opacity">
+                                        <Terminal size={10} /> v1.0.3 YUSUKE ISHIGE
                                     </button>
                                 </div>
                             </div>
@@ -17566,14 +17622,29 @@ const App: React.FC = () => {
                                     className="mb-4 w-full select-none border-b border-green-800 bg-transparent pb-2 text-left font-mono text-xl font-bold text-green-400 active:text-green-200"
                                     onClick={handleLogClick}
                                 >
-                                    System Release Notes v1.0.0
+                                    System Release Notes v1.0.3
                                 </button>
                             ) : (
                                 <h2 className="mb-4 select-none border-b border-green-800 pb-2 font-mono text-xl font-bold text-green-400">
-                                    System Release Notes v1.0.0
+                                    System Release Notes v1.0.3
                                 </h2>
                             )}
                             <div className="space-y-4 text-sm font-mono text-gray-300 max-h-[60vh] overflow-y-auto custom-scrollbar">
+                                <section>
+                                    <h3 className="text-white font-bold mb-1">■ {trans('v1.0.3 ひらがな表示の修正', languageMode)}</h3>
+                                    <ul className="list-disc pl-5 space-y-1">
+                                        <li>{trans('ひらがなモードの手札・山札・捨て札などの読みを修正', languageMode)}</li>
+                                        <li>{trans('動的な戦闘ログとカード説明のひらがな表示を修正', languageMode)}</li>
+                                    </ul>
+                                </section>
+                                <section>
+                                    <h3 className="text-white font-bold mb-1">■ {trans('v1.0.2 軽微な修正', languageMode)}</h3>
+                                    <ul className="list-disc pl-5 space-y-1">
+                                        <li>{trans('合成カードの回数効果でエナジーも回数分反映', languageMode)}</li>
+                                        <li>{trans('iOS戦闘画面の縦横で味方キャラサイズの基準値を調整', languageMode)}</li>
+                                        <li>{trans('細かなバグ修正と安定性向上', languageMode)}</li>
+                                    </ul>
+                                </section>
                                 <section>
                                     <h3 className="text-white font-bold mb-1">■ {trans('v1.0.0 製品版リリース', languageMode)}</h3>
                                     <ul className="list-disc pl-5 space-y-1">

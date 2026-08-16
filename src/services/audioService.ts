@@ -1464,6 +1464,8 @@ class AudioService {
           'status-effects/weak',
           'status-effects/vulnerable',
           'status-effects/poison',
+          'correct',
+          'wrong',
           'finisher-slash',
           'finisher-explosion',
           'jump',
@@ -1635,6 +1637,38 @@ class AudioService {
           return;
       }
       startPlayback();
+  }
+
+  /**
+   * iOS WKWebView can keep AudioContext suspended when an answer callback is
+   * reached after an async state update. Answer feedback must still be audible
+   * in that case, so use the native media path first and retain the oscillator
+   * sound as a fallback for browsers/builds where the packaged file is absent.
+   */
+  private playIosAnswerSfx(effect: 'correct' | 'wrong') {
+      if (!this.appIsActive || (typeof document !== 'undefined' && document.hidden)) return;
+      const name = `answer-${effect}`;
+      const maxDurationMs = effect === 'correct' ? 700 : 400;
+      const generation = (this.sfxPlaybackGenerations.get(name) ?? 0) + 1;
+      this.sfxPlaybackGenerations.set(name, generation);
+      void this.playHtmlSfx(
+          name,
+          [
+              assetUrl(`sfx/${effect}.mp3`),
+              `/sfx/${effect}.mp3`,
+              `sfx/${effect}.mp3`,
+          ],
+          maxDurationMs,
+          true,
+          generation,
+      ).then(played => {
+          if (played) return;
+          void this.resumeAudioContext(IS_IOS_BUILD ? 4 : 1).then(ready => {
+              if (ready && this.appIsActive && (typeof document === 'undefined' || !document.hidden)) {
+                  this.playSynthSound(effect);
+              }
+          });
+      });
   }
 
   private playAttackSlashSfx() {
@@ -1935,9 +1969,44 @@ class AudioService {
       }
   }
 
+  /**
+   * A foreground event and a gameplay tap can arrive in the same run loop on
+   * iOS. Queue synthesized UI sounds behind the recovery promise so the
+   * context cannot be reported as running while the background suspend is
+   * still winning the race.
+   */
+  private deferSynthSoundUntilForegroundRecovery(effect: CommonSoundEffect): boolean {
+      const recovery = this.foregroundRecoveryPromise;
+      if (!recovery) return false;
+      void recovery.then(() => {
+          if (!this.appIsActive || (typeof document !== 'undefined' && document.hidden)) return;
+          if (this.ctx?.state === 'running') {
+              this.playSynthSound(effect);
+              return;
+          }
+          void this.resumeAudioContext(IS_IOS_BUILD ? 2 : 1).then(ready => {
+              if (ready && this.appIsActive && (typeof document === 'undefined' || !document.hidden)) {
+                  this.playSynthSound(effect);
+              }
+          });
+      });
+      return true;
+  }
+
   public playSound(effect: CommonSoundEffect) {
       this.init();
-      if (!this.ctx || !this.sfxGain || this.isMuted) return;
+      if (this.isMuted) return;
+      if (IS_IOS_BUILD && (effect === 'correct' || effect === 'wrong')) {
+          const recovery = this.foregroundRecoveryPromise;
+          if (recovery) {
+              void recovery.then(() => this.playIosAnswerSfx(effect));
+          } else {
+              this.playIosAnswerSfx(effect);
+          }
+          return;
+      }
+      if (!this.ctx || !this.sfxGain) return;
+      if (this.deferSynthSoundUntilForegroundRecovery(effect)) return;
       if (this.ctx.state !== 'running') {
           void this.resumeAudioContext().then(ready => {
               if (ready) this.playSound(effect);

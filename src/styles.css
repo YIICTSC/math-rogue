@@ -10176,6 +10176,13 @@ textarea {
     --battle-ui-player-offset-baseline: 10px;
   }
 
+  /* Portrait uses a direct 1.0 × 1.0 scale so the reset value and the
+     internal visual baseline stay aligned. */
+  html.app-platform-ios .battle-scene-root.battle-ui-custom {
+    --battle-ui-player-scale-baseline: 1;
+    --battle-ui-player-offset-baseline: 0px;
+  }
+
   .battle-scene-root.battle-ui-custom .battle-hand-area {
     flex-basis: clamp(10rem, calc(25.5dvh - var(--battle-ui-control-bar-offset-y, 0px)), 14rem) !important;
     min-height: 0 !important;
@@ -10203,6 +10210,15 @@ textarea {
   .battle-scene-root.battle-ui-custom .battle-hand-scroll {
     align-items: flex-start !important;
     padding: 0.3rem 0.5rem 0.45rem !important;
+  }
+}
+
+@media (orientation: landscape) {
+  /* iOS keeps the established 1.2 landscape visual size while normalizing
+     the user-facing reset value to 1.0. */
+  html.app-platform-ios .battle-scene-root.battle-ui-custom {
+    --battle-ui-player-scale-baseline: 1.2;
+    --battle-ui-player-offset-baseline: 0px;
   }
 }
 

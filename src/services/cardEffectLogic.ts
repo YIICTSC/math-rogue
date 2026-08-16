@@ -401,11 +401,6 @@ export const applyAdditionalCardLogic = (
                 currentLogs.push(trans("飴玉の嵐：敵全体へろへろ1", languageMode));
                 break;
             }
-            case 'ブーメラン': {
-                p.currentEnergy += 1;
-                currentLogs.push(trans("ブーメラン：エナジー+1", languageMode));
-                break;
-            }
             case 'かいけつゾロリ': {
                 p.block += 3;
                 currentLogs.push(trans("かいけつゾロリ：ブロック3", languageMode));
