@@ -196,16 +196,18 @@ const stoneCanPay = (card: StoneCard, stones: Record<StoneColor, number>, owned:
   for (const color of STONE_COLORS) wildNeeded += Math.max(0, (card.cost[color.id] || 0) - stoneDiscount(owned, color.id) - stones[color.id]);
   return wildNeeded <= wild;
 };
-const stonePay = (card: StoneCard, stones: Record<StoneColor, number>, owned: StoneCard[], wild: number) => {
+const stonePay = (card: StoneCard, stones: Record<StoneColor, number>, owned: StoneCard[], wild: number, supply: Record<StoneColor, number>) => {
   const next = { ...stones };
+  const nextSupply = { ...supply };
   let wildLeft = wild;
   for (const color of STONE_COLORS) {
     const amount = Math.max(0, (card.cost[color.id] || 0) - stoneDiscount(owned, color.id));
     const paid = Math.min(next[color.id], amount);
     next[color.id] -= paid;
+    nextSupply[color.id] += paid;
     wildLeft -= amount - paid;
   }
-  return { stones: next, wild: wildLeft };
+  return { stones: next, supply: nextSupply, wild: wildLeft };
 };
 const refillStoneMarket = (market: StoneCard[], deck: StoneCard[]) => {
   const nextMarket = [...market];
@@ -218,8 +220,9 @@ const advanceStoneCpu = (state: StoneGlowState): StoneGlowState => {
   const affordable = next.market.filter(card => stoneCanPay(card, next.cpuStones, next.cpuOwned, 0));
   const chosen = affordable.sort((a, b) => b.points - a.points || b.tier - a.tier)[0];
   if (chosen) {
-    const payment = stonePay(chosen, next.cpuStones, next.cpuOwned, 0);
+    const payment = stonePay(chosen, next.cpuStones, next.cpuOwned, 0, next.supply);
     next.cpuStones = payment.stones;
+    next.supply = payment.supply;
     next.cpuOwned = [...next.cpuOwned, chosen];
     next.cpuScore += chosen.points;
     next.market = next.market.filter(card => card.id !== chosen.id);
@@ -276,10 +279,11 @@ const StoneGlowGame: React.FC<TriviaMiniGameProps> = ({ onBack, languageMode = '
     setGame(previous => {
       const card = previous.market[index];
       if (!card || !stoneCanPay(card, previous.stones, previous.owned, previous.wild)) return previous;
-      const payment = stonePay(card, previous.stones, previous.owned, previous.wild);
+      const payment = stonePay(card, previous.stones, previous.owned, previous.wild, previous.supply);
       const next: StoneGlowState = {
         ...previous,
         stones: payment.stones,
+        supply: payment.supply,
         wild: payment.wild,
         owned: [...previous.owned, card],
         score: previous.score + card.points,
@@ -316,10 +320,11 @@ const StoneGlowGame: React.FC<TriviaMiniGameProps> = ({ onBack, languageMode = '
     setGame(previous => {
       const card = previous.reserved[index];
       if (!card || !stoneCanPay(card, previous.stones, previous.owned, previous.wild)) return previous;
-      const payment = stonePay(card, previous.stones, previous.owned, previous.wild);
+      const payment = stonePay(card, previous.stones, previous.owned, previous.wild, previous.supply);
       const next: StoneGlowState = {
         ...previous,
         stones: payment.stones,
+        supply: payment.supply,
         wild: payment.wild,
         owned: [...previous.owned, card],
         reserved: previous.reserved.filter((_, cardIndex) => cardIndex !== index),
