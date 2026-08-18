@@ -1,7 +1,7 @@
 
 import { GameScreen } from './types';
 import { storageService } from './services/storageService';
-import { Club, Skull, Compass, Mountain, Crown, Send, LucideIcon, Rocket } from 'lucide-react';
+import { Club, Skull, Compass, Mountain, Crown, Send, LucideIcon, Rocket, Gem, Dice5, Sparkles, CircleDot, Grid3X3, Layers3 } from 'lucide-react';
 
 export interface MiniGameConfig {
   id: string;
@@ -15,6 +15,8 @@ export interface MiniGameConfig {
   glowColor: string;
   icon: LucideIcon;
   clearAction: () => void;
+  /** 雑学カテゴリから直接開くゲーム。全体のミニゲーム一覧には出さない。 */
+  categoryOnly?: boolean;
 }
 
 export const MINI_GAMES: MiniGameConfig[] = [
@@ -111,5 +113,103 @@ export const MINI_GAMES: MiniGameConfig[] = [
     glowColor: 'rgba(34,211,238,0.4)',
     icon: Mountain,
     clearAction: () => storageService.clearDungeonState2()
+  },
+  {
+    id: 'STONE_GLOW',
+    name: '石ころの煌めき',
+    titleLines: ['石ころの', '煌めき'],
+    description: '石ころを集め、鉱山カードを買って煌めき点を競おう。',
+    screen: GameScreen.MINI_GAME_STONE_GLOW,
+    threshold: 0,
+    typeLabel: 'BOARD',
+    typeColor: 'bg-emerald-600',
+    glowColor: 'rgba(16,185,129,0.4)',
+    icon: Gem,
+    categoryOnly: true,
+    clearAction: () => {}
+  },
+  {
+    id: 'SCHOOL_TRPG',
+    name: '放課後スクールTRPG',
+    titleLines: ['放課後', 'スクールTRPG'],
+    description: 'サイコロを振って学校生活の物語を進めよう。',
+    screen: GameScreen.MINI_GAME_SCHOOL_TRPG,
+    threshold: 0,
+    typeLabel: 'TRPG',
+    typeColor: 'bg-amber-600',
+    glowColor: 'rgba(245,158,11,0.4)',
+    icon: Dice5,
+    categoryOnly: true,
+    clearAction: () => {}
+  },
+  {
+    id: 'LEARNING_TCG',
+    name: '学習ローグTCG',
+    titleLines: ['学習ローグ', 'TCG'],
+    description: 'おなじみのカードイラストで、エナジーを使って対戦。',
+    screen: GameScreen.MINI_GAME_LEARNING_TCG,
+    threshold: 0,
+    typeLabel: 'CARD',
+    typeColor: 'bg-violet-600',
+    glowColor: 'rgba(139,92,246,0.4)',
+    icon: Sparkles,
+    categoryOnly: true,
+    clearAction: () => {}
+  },
+  {
+    id: 'SHOGI',
+    name: 'ミニ将棋',
+    titleLines: ['ミニ', '将棋'],
+    description: '5×5の盤で駒を動かし、相手の王を詰めよう。',
+    screen: GameScreen.MINI_GAME_SHOGI,
+    threshold: 0,
+    typeLabel: 'SHOGI',
+    typeColor: 'bg-red-700',
+    glowColor: 'rgba(185,28,28,0.4)',
+    icon: Grid3X3,
+    categoryOnly: true,
+    clearAction: () => {}
+  },
+  {
+    id: 'GO',
+    name: '九路盤 囲碁',
+    titleLines: ['九路盤', '囲碁'],
+    description: '石を置き、相手の石を囲んで取ろう。',
+    screen: GameScreen.MINI_GAME_GO,
+    threshold: 0,
+    typeLabel: 'GO',
+    typeColor: 'bg-stone-600',
+    glowColor: 'rgba(120,113,108,0.4)',
+    icon: CircleDot,
+    categoryOnly: true,
+    clearAction: () => {}
+  },
+  {
+    id: 'CHESS',
+    name: 'スクールチェス',
+    titleLines: ['スクール', 'チェス'],
+    description: '駒の動きを覚えながら、相手のキングを狙おう。',
+    screen: GameScreen.MINI_GAME_CHESS,
+    threshold: 0,
+    typeLabel: 'CHESS',
+    typeColor: 'bg-sky-700',
+    glowColor: 'rgba(14,116,144,0.4)',
+    icon: Crown,
+    categoryOnly: true,
+    clearAction: () => {}
+  },
+  {
+    id: 'MAHJONG',
+    name: 'まなび麻雀',
+    titleLines: ['まなび', '麻雀'],
+    description: '牌を入れ替えて、同じ牌の組をそろえよう。',
+    screen: GameScreen.MINI_GAME_MAHJONG,
+    threshold: 0,
+    typeLabel: 'MAHJONG',
+    typeColor: 'bg-teal-700',
+    glowColor: 'rgba(13,148,136,0.4)',
+    icon: Layers3,
+    categoryOnly: true,
+    clearAction: () => {}
   }
 ];

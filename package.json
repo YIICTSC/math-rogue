@@ -1,7 +1,7 @@
 {
   "name": "learning-rogue",
   "private": true,
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "学習問題とカードバトルを組み合わせた学習ローグライクゲーム",
   "author": "YIICTSC",
   "type": "module",

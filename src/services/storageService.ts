@@ -58,6 +58,7 @@ const STORAGE_KEY_GO_HOME_RANKING = 'pixel_spire_go_home_ranking_v1';
 const STORAGE_KEY_SEEN_BATTLE_TUTORIAL = 'pixel_spire_seen_battle_tutorial_v1';
 const STORAGE_KEY_SEEN_PARRY_TUTORIAL = 'pixel_spire_seen_parry_tutorial_v1';
 const STORAGE_KEY_SEEN_EXHAUST_CARD_HINT = 'pixel_spire_seen_exhaust_card_hint_v1';
+const STORAGE_KEY_SEEN_RETAIN_CARD_HINT = 'pixel_spire_seen_retain_card_hint_v1';
 const STORAGE_KEY_SEEN_FRIENDSHIP_COMBO_TUTORIAL = 'pixel_spire_seen_friendship_combo_tutorial_v1';
 const STORAGE_KEY_SEEN_MAGIC_TRANSFORMATION_TUTORIAL = 'pixel_spire_seen_magic_transformation_tutorial_v1';
 const STORAGE_KEY_SEEN_POKER_TUTORIAL = 'pixel_spire_seen_poker_tutorial_v1';
@@ -73,6 +74,8 @@ const STORAGE_KEY_SEEN_BGM_SWITCH_HINT = 'pixel_spire_seen_bgm_switch_hint_v1';
 const STORAGE_KEY_LANGUAGE_MODE = 'pixel_spire_language_mode_v1';
 const STORAGE_KEY_PROBLEM_SET_VIEW = 'pixel_spire_problem_set_view_v1';
 const STORAGE_KEY_APP_SETTINGS = 'pixel_spire_app_settings_v1';
+const STORAGE_KEY_KANJI_STROKE_ORDER = 'pixel_spire_kanji_stroke_order_v1';
+const STORAGE_KEY_KANJI_TRACE_GUIDE = 'pixel_spire_kanji_trace_guide_v1';
 
 // --- PLAY TIME ---
 const STORAGE_KEY_TOTAL_PLAY_TIME = 'pixel_spire_total_play_time_v1';
@@ -1187,6 +1190,14 @@ export const storageService = {
       localStorage.setItem(STORAGE_KEY_SEEN_EXHAUST_CARD_HINT, 'true');
   },
 
+  getSeenRetainCardHint: (): boolean => {
+      return localStorage.getItem(STORAGE_KEY_SEEN_RETAIN_CARD_HINT) === 'true';
+  },
+
+  saveSeenRetainCardHint: () => {
+      localStorage.setItem(STORAGE_KEY_SEEN_RETAIN_CARD_HINT, 'true');
+  },
+
   getSeenFriendshipComboTutorial: (): boolean => {
       return localStorage.getItem(STORAGE_KEY_SEEN_FRIENDSHIP_COMBO_TUTORIAL) === 'true';
   },
@@ -1272,6 +1283,24 @@ export const storageService = {
     } catch (e) {
       console.warn('Failed to save app settings', e);
     }
+  },
+
+  getKanjiStrokeOrderPreference: (): boolean | null => {
+    const stored = localStorage.getItem(STORAGE_KEY_KANJI_STROKE_ORDER);
+    return stored === null ? null : stored === 'true';
+  },
+
+  saveKanjiStrokeOrderPreference: (enabled: boolean) => {
+    localStorage.setItem(STORAGE_KEY_KANJI_STROKE_ORDER, enabled.toString());
+  },
+
+  getKanjiTraceGuidePreference: (): boolean | null => {
+    const stored = localStorage.getItem(STORAGE_KEY_KANJI_TRACE_GUIDE);
+    return stored === null ? null : stored === 'true';
+  },
+
+  saveKanjiTraceGuidePreference: (enabled: boolean) => {
+    localStorage.setItem(STORAGE_KEY_KANJI_TRACE_GUIDE, enabled.toString());
   },
 
   // --- Play Time Management ---
@@ -1615,6 +1644,7 @@ export const storageService = {
       localStorage.removeItem(STORAGE_KEY_SEEN_BATTLE_TUTORIAL);
       localStorage.removeItem(STORAGE_KEY_SEEN_PARRY_TUTORIAL);
       localStorage.removeItem(STORAGE_KEY_SEEN_EXHAUST_CARD_HINT);
+      localStorage.removeItem(STORAGE_KEY_SEEN_RETAIN_CARD_HINT);
       localStorage.removeItem(STORAGE_KEY_CHALLENGE_RECORDS);
       localStorage.removeItem(STORAGE_KEY_MAX_UNLOCKED_DIFFICULTY);
       localStorage.removeItem(STORAGE_KEY_FIRST_STARTER_RELIC_SKIPPED);

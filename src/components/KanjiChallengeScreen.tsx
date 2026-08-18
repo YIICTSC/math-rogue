@@ -235,7 +235,7 @@ const KanjiChallengeScreen: React.FC<KanjiChallengeScreenProps> = ({ onComplete,
     && (currentProblemIndex < 2 || writingWrongStreak >= 1);
 
   return (
-    <div data-gamepad-navigation-root data-gamepad-question-screen data-gamepad-initial-scope={`kanji-challenge-${currentProblemIndex}`} className="main-challenge-screen kanji-challenge-screen flex flex-col h-full w-full bg-cyan-950 text-white relative items-center justify-center p-8 font-mono">
+    <div data-gamepad-navigation-root data-gamepad-question-screen data-gamepad-initial-scope={`kanji-challenge-${currentProblemIndex}`} className={`main-challenge-screen kanji-challenge-screen ${resolvedAnswerMode === 'WRITING' ? 'kanji-challenge-writing-mode' : 'kanji-challenge-non-writing-mode'} ${isChallenge ? 'kanji-challenge-in-problem-challenge' : ''} flex flex-col h-full w-full bg-cyan-950 text-white relative items-center justify-center p-8 font-mono`}>
         <div className="absolute inset-0 texture-dark-matter opacity-20 pointer-events-none"></div>
         <RewardHintBanner text={rewardHint} languageMode={languageMode} />
         

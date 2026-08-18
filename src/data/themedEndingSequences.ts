@@ -1,4 +1,6 @@
 import type { VisualThemeId } from './visualThemes';
+import { ENDING_PAGE_COPY } from './endingSceneCopy';
+import { ENDING_PAGE_LOCALIZED_COPY } from './endingSceneLocalizedCopy';
 
 export type NonMagicEndingTheme = Exclude<VisualThemeId, 'magic'>;
 
@@ -236,6 +238,21 @@ export const getThemedEndingVariants = (
       ?? CHARACTER_FINALE_VOICE.WARRIOR[theme];
     const toneResolution = FINALE_TONE_RESOLUTION[theme][ending.id]
       ?? FINALE_TONE_RESOLUTION[theme].serious;
+    const pageCopy = ENDING_PAGE_COPY[theme]?.[safeCharacterId]?.[ending.id];
+    const localizedPageCopy = ENDING_PAGE_LOCALIZED_COPY[theme]?.[safeCharacterId]?.[ending.id];
+    const japanesePageCopy = (pageIndex: number, fallback: string): string =>
+      (pageCopy?.[pageIndex] ?? fallback)
+        .replaceAll('主人公名', name || characterName)
+        .replaceAll('主人公', name || characterName);
+    const localizedPageText = (
+      pageIndex: number,
+      language: 'HIRAGANA' | 'ENGLISH',
+      fallback: string,
+    ): string => {
+      const pages = language === 'HIRAGANA' ? localizedPageCopy?.[0] : localizedPageCopy?.[1];
+      const localizedName = language === 'HIRAGANA' ? nameHiragana : nameEnglish;
+      return (pages?.[pageIndex] ?? fallback).replaceAll('__NAME__', localizedName);
+    };
     return {
       id: ending.id,
       tone: ending.tone,
@@ -244,27 +261,27 @@ export const getThemedEndingVariants = (
         title: ending.title,
         titleHiragana: ending.titleHiragana,
         titleEnglish: ending.titleEnglish,
-        text: `${name || characterName}は校長との最後の戦いを終えた。${characterScene.ja}`,
-        textHiragana: `${nameHiragana}は こうちょうとの さいごの たたかいを おえた。${characterScene.hira}`,
-        textEnglish: `${nameEnglish} finished the final battle with the headmaster. ${characterScene.en}`,
+        text: japanesePageCopy(0, `${name || characterName}は校長との最後の戦いを終えた。${characterScene.ja}`),
+        textHiragana: localizedPageText(0, 'HIRAGANA', `${nameHiragana}は こうちょうとの さいごの たたかいを おえた。${characterScene.hira}`),
+        textEnglish: localizedPageText(0, 'ENGLISH', `${nameEnglish} finished the final battle with the headmaster. ${characterScene.en}`),
         imagePath: `sprites/endings/${folder}/${safeCharacterId.toLowerCase()}/ending-${variantIndex + 1}-1.webp`,
       },
       {
         title: `${characterName}の答え`,
         titleHiragana: `${nameHiragana}の こたえ`,
         titleEnglish: `${nameEnglish}'s Answer`,
-        text: `${role}は、これまで集めた学びと仲間の言葉を自分の力に変えた。${profile.motif}が、新しい日々の記憶として残る。`,
-        textHiragana: `${roleHiragana}は、これまで あつめた まなびと なかまの ことばを じぶんの ちからに かえた。${profile.motifHiragana}が、あたらしい まいにちの きおくとして のこる。`,
-        textEnglish: `${roleEnglish} turned every lesson and every friend's words into personal strength. ${profile.motifEnglish} remained as a memory of the new days ahead.`,
+        text: japanesePageCopy(1, `${role}は、これまで集めた学びと仲間の言葉を自分の力に変えた。${profile.motif}が、新しい日々の記憶として残る。`),
+        textHiragana: localizedPageText(1, 'HIRAGANA', `${roleHiragana}は、これまで あつめた まなびと なかまの ことばを じぶんの ちからに かえた。${profile.motifHiragana}が、あたらしい まいにちの きおくとして のこる。`),
+        textEnglish: localizedPageText(1, 'ENGLISH', `${roleEnglish} turned every lesson and every friend's words into personal strength. ${profile.motifEnglish} remained as a memory of the new days ahead.`),
         imagePath: `sprites/endings/${folder}/${safeCharacterId.toLowerCase()}/ending-${variantIndex + 1}-2.webp`,
       },
       {
         title: 'そして、次の朝へ',
         titleHiragana: 'そして、つぎの あさへ',
         titleEnglish: 'And Then, Into a New Morning',
-        text: `「${characterVoice.ja} ${toneResolution.ja}」——${name || characterName}は自分らしい一歩で、校門の向こうへ進んだ。`,
-        textHiragana: `「${characterVoice.hira} ${toneResolution.hira}」——${nameHiragana}は じぶんらしい いっぽで、こうもんの むこうへ すすんだ。`,
-        textEnglish: `"${characterVoice.en} ${toneResolution.en}" ${nameEnglish} stepped beyond the school gate in a way only they could.`,
+        text: japanesePageCopy(2, `「${characterVoice.ja} ${toneResolution.ja}」——${name || characterName}は自分らしい一歩で、校門の向こうへ進んだ。`),
+        textHiragana: localizedPageText(2, 'HIRAGANA', `「${characterVoice.hira} ${toneResolution.hira}」——${nameHiragana}は じぶんらしい いっぽで、こうもんの むこうへ すすんだ。`),
+        textEnglish: localizedPageText(2, 'ENGLISH', `"${characterVoice.en} ${toneResolution.en}" ${nameEnglish} stepped beyond the school gate in a way only they could.`),
         imagePath: `sprites/endings/${folder}/${safeCharacterId.toLowerCase()}/ending-${variantIndex + 1}-3.webp`,
       },
       ],

@@ -1,8 +1,8 @@
 
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
-import { BookOpen, CheckCircle, XCircle, Volume2, Mic, Maximize2, X } from 'lucide-react';
+import { BookOpen, CheckCircle, XCircle, Volume2, Mic, Maximize2, X, Gamepad2 } from 'lucide-react';
 import { audioService } from '../services/audioService';
-import { AnswerMode, AssignmentAnswerResult, AssignmentCustomProblem, AssignmentReviewProblem, AssignmentUnit, GameMode, LanguageMode } from '../types';
+import { AnswerMode, AssignmentAnswerResult, AssignmentCustomProblem, AssignmentReviewProblem, AssignmentUnit, GameMode, GameScreen, LanguageMode } from '../types';
 import { storageService } from '../services/storageService';
 import { SUBJECT_DATA, GeneralProblem } from '../data/subjectData';
 import { getUnitBoardSummary } from '../data/unitBoardSummaries';
@@ -14,6 +14,7 @@ import { trans } from '../utils/textUtils';
 import { formatProblemUnitName } from '../utils/problemUnitName';
 import MathText from './MathText';
 import { assignmentFilterForMode, matchesAssignmentRangeFilter } from '../utils/assignmentRangeFilters';
+import { getCategoryMiniGameScreen } from '../miniGameCategoryConfig';
 
 interface GeneralChallengeScreenProps {
   onComplete: (correctCount: number) => void;
@@ -31,6 +32,7 @@ interface GeneralChallengeScreenProps {
   problemOffset?: number;
   reviewProblem?: AssignmentReviewProblem | null;
   assignmentUnits?: AssignmentUnit[];
+  onOpenCategoryMiniGame?: (screen: GameScreen) => void;
 }
 
 const EMPTY_CUSTOM_PROBLEMS: AssignmentCustomProblem[] = [];
@@ -127,7 +129,7 @@ const isEnglishSpeakingReviewMode = (mode: string) =>
   /^ENGLISH_G8_U(11|12|13)$/.test(mode) ||
   /^ENGLISH_G9_U(12|13|14)$/.test(mode);
 
-const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onComplete, mode, modePool, onModeCorrect, answerMode = 'CHOICE', debugSkip, isChallenge, streak = 0, rewardHint, languageMode = 'JAPANESE', onAnswerResult, customProblems = EMPTY_CUSTOM_PROBLEMS, problemOffset = 0, reviewProblem = null, assignmentUnits }) => {
+const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onComplete, mode, modePool, onModeCorrect, answerMode = 'CHOICE', debugSkip, isChallenge, streak = 0, rewardHint, languageMode = 'JAPANESE', onAnswerResult, customProblems = EMPTY_CUSTOM_PROBLEMS, problemOffset = 0, reviewProblem = null, assignmentUnits, onOpenCategoryMiniGame }) => {
   const [problems, setProblems] = useState<ExtendedGeneralProblem[]>([]);
   const [currentProblemIndex, setCurrentProblemIndex] = useState(0);
   const [correctCount, setCorrectCount] = useState(0);
@@ -1765,6 +1767,7 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
   if (debugSkip) return <div className="w-full h-full bg-black"></div>;
 
   const bgClass = getBackgroundClass(mode);
+  const categoryMiniGameScreen = getCategoryMiniGameScreen(mode);
 
   if (problems.length === 0) return (
       <div className={`flex flex-col h-full w-full ${bgClass} text-white items-center justify-center p-8 font-mono`}>
@@ -1801,6 +1804,19 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
                 title={trans('単元板書', languageMode)}
             >
                 <BookOpen size={22} />
+            </button>
+        )}
+        {categoryMiniGameScreen && onOpenCategoryMiniGame && (
+            <button
+                type="button"
+                onClick={() => onOpenCategoryMiniGame(categoryMiniGameScreen)}
+                data-gamepad-zone="challenge-tools"
+                data-gamepad-order={1}
+                className="absolute left-3 top-[4.25rem] z-20 inline-flex h-11 w-11 items-center justify-center rounded-full border border-cyan-100/45 bg-black/35 text-cyan-100 shadow-lg transition hover:bg-black/55"
+                aria-label={trans('ミニゲームを開く', languageMode)}
+                title={trans('ミニゲーム', languageMode)}
+            >
+                <Gamepad2 size={22} />
             </button>
         )}
         <UnitBoardModal summary={unitBoardSummary} open={isUnitBoardOpen} onClose={handleUnitBoardClose} languageMode={languageMode} />

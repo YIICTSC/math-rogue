@@ -8,6 +8,7 @@ import SchoolDungeonRPG2 from './SchoolDungeonRPG2';
 import KochoShowdown from './KochoShowdown';
 import PaperPlaneBattle from './PaperPlaneBattle';
 import GoHomeDash from './GoHomeDash';
+import TriviaMiniGameScreen from './TriviaMiniGameScreen';
 
 interface MiniGameRouterProps {
     screen: GameScreen;
@@ -34,6 +35,7 @@ export interface MiniGameComponentProps {
     languageMode?: LanguageMode;
     debugPreview?: MiniGameDebugPreview;
     isUiPreview?: boolean;
+    gameScreen?: GameScreen;
 }
 
 /**
@@ -48,6 +50,13 @@ const MINI_GAME_MAP: Partial<Record<GameScreen, React.ComponentType<MiniGameComp
     [GameScreen.MINI_GAME_KOCHO]: KochoShowdown,
     [GameScreen.MINI_GAME_PAPER_PLANE]: PaperPlaneBattle,
     [GameScreen.MINI_GAME_GO_HOME]: GoHomeDash,
+    [GameScreen.MINI_GAME_STONE_GLOW]: TriviaMiniGameScreen,
+    [GameScreen.MINI_GAME_SCHOOL_TRPG]: TriviaMiniGameScreen,
+    [GameScreen.MINI_GAME_LEARNING_TCG]: TriviaMiniGameScreen,
+    [GameScreen.MINI_GAME_SHOGI]: TriviaMiniGameScreen,
+    [GameScreen.MINI_GAME_GO]: TriviaMiniGameScreen,
+    [GameScreen.MINI_GAME_CHESS]: TriviaMiniGameScreen,
+    [GameScreen.MINI_GAME_MAHJONG]: TriviaMiniGameScreen,
 };
 
 const MiniGameRouter: React.FC<MiniGameRouterProps> = ({ screen, onBack, onFinish, problemMode, problemModePool, answerMode, assignment, onAnswerResult, languageMode, debugPreview, isUiPreview }) => {
@@ -75,6 +84,7 @@ const MiniGameRouter: React.FC<MiniGameRouterProps> = ({ screen, onBack, onFinis
             languageMode={languageMode}
             debugPreview={debugPreview}
             isUiPreview={isUiPreview}
+            gameScreen={screen}
         />
     );
 };

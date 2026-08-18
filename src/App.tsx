@@ -1386,6 +1386,7 @@ const App: React.FC = () => {
         actStats: { enemiesDefeated: 0, goldGained: 0, mathCorrect: 0 }
     });
     const [pendingMiniGameScreen, setPendingMiniGameScreen] = useState<GameScreen | null>(null);
+    const [miniGameReturnScreen, setMiniGameReturnScreen] = useState<GameScreen | null>(null);
     const [pendingAssignmentStartScreen, setPendingAssignmentStartScreen] = useState<GameScreen | null>(null);
     const [pendingResumeProblemSelection, setPendingResumeProblemSelection] = useState(false);
     const [miniGameProblemMode, setMiniGameProblemMode] = useState<GameMode>(GameMode.MIXED);
@@ -4749,6 +4750,7 @@ const App: React.FC = () => {
         setCoopBattleKey(null);
         setCoopEnemyTurnCursor(0);
         setCompletedAssignmentProblemSource(null);
+        setMiniGameReturnScreen(null);
         p2pService.close();
         setGameState(prev => ({ ...prev, screen: GameScreen.START_MENU, challengeMode: undefined, typingLessonId: undefined }));
         setHasSave(storageService.hasSaveFile());
@@ -6188,6 +6190,7 @@ const App: React.FC = () => {
             return;
         }
         audioService.playSound('select');
+        setMiniGameReturnScreen(null);
         if (screen === GameScreen.MINI_GAME_PAPER_PLANE) {
             setPendingMiniGameScreen(null);
             setGameState(prev => ({ ...prev, screen }));
@@ -6204,6 +6207,28 @@ const App: React.FC = () => {
         setGameState(prev => ({ ...prev, screen: GameScreen.MINI_GAME_MODE_SELECTION }));
     };
 
+    const handleProblemCategoryMiniGameOpen = (screen: GameScreen) => {
+        if (redirectToAssignmentChallengeIfLocked()) return;
+        if (isDailyLimitReached) {
+            audioService.playSound('wrong');
+            setShowTimeLimitModal(true);
+            return;
+        }
+        audioService.playSound('select');
+        startGameAssetPreload();
+        setMiniGameProblemMode(GameMode.MIXED);
+        setMiniGameProblemModePool(undefined);
+        setMiniGameAnswerMode('CHOICE');
+        setPendingMiniGameScreen(null);
+        setMiniGameReturnScreen(GameScreen.PROBLEM_CHALLENGE);
+        setGameState(prev => ({ ...prev, screen }));
+    };
+
+    const handleCategoryMiniGameBack = () => {
+        setMiniGameReturnScreen(null);
+        setGameState(prev => ({ ...prev, screen: GameScreen.PROBLEM_CHALLENGE }));
+    };
+
     const handleMiniGameModeSelect = async (mode: GameMode, modePool?: string[]) => {
         if (redirectToAssignmentChallengeIfLocked()) return;
         if (isDailyLimitReached) {
@@ -6212,6 +6237,7 @@ const App: React.FC = () => {
             return;
         }
         setCompletedAssignmentProblemSource(null);
+        setMiniGameReturnScreen(null);
         audioService.playSound('select');
         startGameAssetPreload();
         const nextScreen = pendingMiniGameScreen || GameScreen.MINI_GAME_SELECT;
@@ -17191,7 +17217,7 @@ const App: React.FC = () => {
                                 </div>
 
                                     <button onClick={() => setShowDebugLog(true)} className="start-menu-version text-white text-[10px] hover:text-white flex items-center justify-center gap-1 transition-opacity">
-                                        <Terminal size={10} /> v1.0.3 YUSUKE ISHIGE
+                                        <Terminal size={10} /> v1.0.4 YUSUKE ISHIGE
                                     </button>
                                 </div>
                             </div>
@@ -17622,14 +17648,22 @@ const App: React.FC = () => {
                                     className="mb-4 w-full select-none border-b border-green-800 bg-transparent pb-2 text-left font-mono text-xl font-bold text-green-400 active:text-green-200"
                                     onClick={handleLogClick}
                                 >
-                                    System Release Notes v1.0.3
+                                    System Release Notes v1.0.4
                                 </button>
                             ) : (
                                 <h2 className="mb-4 select-none border-b border-green-800 pb-2 font-mono text-xl font-bold text-green-400">
-                                    System Release Notes v1.0.3
+                                    System Release Notes v1.0.4
                                 </h2>
                             )}
                             <div className="space-y-4 text-sm font-mono text-gray-300 max-h-[60vh] overflow-y-auto custom-scrollbar">
+                                <section>
+                                    <h3 className="text-white font-bold mb-1">■ {trans('v1.0.4 雑学ミニゲームとBGMの改善', languageMode)}</h3>
+                                    <ul className="list-disc pl-5 space-y-1">
+                                        <li>{trans('7つの雑学内ミニゲームを遊べるように改善', languageMode)}</li>
+                                        <li>{trans('ミニゲームで放課後ポーカーのBGMを再生', languageMode)}</li>
+                                        <li>{trans('石ころの煌めきの割引表示と予約カード操作を改善', languageMode)}</li>
+                                    </ul>
+                                </section>
                                 <section>
                                     <h3 className="text-white font-bold mb-1">■ {trans('v1.0.3 ひらがな表示の修正', languageMode)}</h3>
                                     <ul className="list-disc pl-5 space-y-1">
@@ -17774,6 +17808,7 @@ const App: React.FC = () => {
                             problemSourceAssignment={completedAssignmentProblemSource}
                             onAnswerResult={handleAssignmentAnswerResult}
                             visualTheme={visualTheme}
+                            onOpenCategoryMiniGame={handleProblemCategoryMiniGameOpen}
                         />
                     </div>
                 )}
@@ -18110,7 +18145,7 @@ const App: React.FC = () => {
                         <MiniGameRouter
                             key={`${gameState.screen}:${uiPreviewMiniGameOutcome ?? 'DEFAULT'}`}
                             screen={gameState.screen}
-                            onBack={returnToTitle}
+                            onBack={miniGameReturnScreen ? handleCategoryMiniGameBack : returnToTitle}
                             problemMode={miniGameProblemMode}
                             problemModePool={miniGameProblemModePool}
                             answerMode={miniGameAnswerMode}

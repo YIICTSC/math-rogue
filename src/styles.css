@@ -2606,6 +2606,108 @@ html.app-platform-ios {
   }
 }
 
+/* Mini-games remain scrollable in landscape, while the header and rule modal
+   use the shorter viewport efficiently on phones. */
+.mini-game-shell {
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.mini-game-foreground-art {
+  mix-blend-mode: screen;
+}
+
+.mini-game-scope-stone-glow .stone-glow-market-card {
+  min-width: 0;
+}
+
+.mini-game-scope-stone-glow .stone-glow-log {
+  max-height: 8.5rem;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+@media (orientation: landscape) and (max-height: 600px) {
+  .mini-game-shell .mini-game-header {
+    margin-bottom: 0.45rem;
+    min-height: 3.25rem;
+    padding: 0.45rem 0.65rem;
+  }
+
+  .mini-game-shell .mini-game-header button {
+    height: 2.5rem;
+    width: 2.5rem;
+  }
+
+  .mini-game-shell .mini-game-header h1 {
+    font-size: 1rem;
+    line-height: 1.2;
+  }
+
+  .mini-game-shell .mini-game-header p {
+    font-size: 0.68rem;
+    line-height: 1.2;
+  }
+
+  .mini-game-shell .mini-game-foreground-art {
+    display: block;
+    height: 3rem;
+    width: 3rem;
+  }
+
+  .mini-game-shell .mini-game-main {
+    min-height: 0;
+  }
+
+  .mini-game-rules-modal {
+    max-height: 86dvh;
+    padding: 0.85rem;
+  }
+
+  .mini-game-scope-stone-glow .stone-glow-scoreboard {
+    margin-bottom: 0.35rem;
+  }
+
+  .mini-game-scope-stone-glow .stone-glow-main-grid {
+    grid-template-columns: minmax(0, 1fr) 220px;
+    margin-bottom: 0.35rem;
+  }
+
+  .mini-game-scope-stone-glow .stone-glow-main-grid > section,
+  .mini-game-scope-stone-glow .stone-glow-main-grid > aside,
+  .mini-game-scope-stone-glow .stone-glow-reserved {
+    padding: 0.45rem;
+  }
+
+  .mini-game-scope-stone-glow .stone-glow-market-card {
+    padding: 0.4rem;
+  }
+
+  .mini-game-scope-stone-glow .stone-glow-log {
+    max-height: 4.25rem;
+  }
+}
+
+@media (orientation: portrait) and (max-width: 640px) {
+  .mini-game-scope-stone-glow .stone-glow-market {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .mini-game-scope-stone-glow .stone-glow-market-card {
+    padding: 0.4rem;
+    font-size: 0.75rem;
+  }
+
+  .mini-game-scope-stone-glow .stone-glow-market-card button {
+    min-height: 2rem;
+    padding: 0.3rem 0.4rem;
+  }
+
+  .mini-game-scope-stone-glow .stone-glow-log {
+    max-height: 5.5rem;
+  }
+}
+
 /* Phone portrait pack opening: large packs use a centered 3 + 2 layout so
    every candidate and its select button stays above the home indicator. */
 @media (orientation: portrait) and (max-width: 640px) {
@@ -10816,4 +10918,75 @@ textarea {
   line-height: 1;
   opacity: 0.28;
   user-select: none;
+}
+
+/* Reading and input questions are short enough to sit in the visual center
+   on portrait phones. Handwriting keeps its own top-to-bottom layout because
+   the writing board needs the available height. */
+@media (orientation: portrait) {
+  .kanji-challenge-screen.kanji-challenge-non-writing-mode {
+    justify-content: center !important;
+  }
+
+  .kanji-challenge-screen.kanji-challenge-non-writing-mode > .kanji-challenge-layout {
+    align-self: center !important;
+  }
+}
+
+/* In the problem challenge, the mini battle is hidden only for handwriting.
+   Give that mode a fixed-height two-row layout so the writing board remains
+   fully visible instead of being clipped below the challenge viewport. */
+@media (orientation: portrait) {
+  .main-problem-challenge-active-screen .kanji-challenge-screen.kanji-challenge-writing-mode {
+    justify-content: flex-start !important;
+    overflow: hidden !important;
+    padding: 0.25rem 0.5rem !important;
+  }
+
+  .main-problem-challenge-active-screen .kanji-challenge-screen.kanji-challenge-writing-mode > .kanji-challenge-layout {
+    grid-template-rows: minmax(0, 0.86fr) minmax(0, 1.14fr) !important;
+    height: 100% !important;
+    max-height: 100% !important;
+    gap: 0.35rem !important;
+  }
+
+  .main-problem-challenge-active-screen .kanji-challenge-screen.kanji-challenge-writing-mode .kanji-challenge-question {
+    min-height: 0 !important;
+    height: 100% !important;
+    padding: 0.4rem !important;
+  }
+
+  .main-problem-challenge-active-screen .kanji-challenge-screen.kanji-challenge-writing-mode .kanji-challenge-question h3 {
+    font-size: clamp(2rem, 13vw, 4rem) !important;
+    line-height: 1 !important;
+  }
+
+  .main-problem-challenge-active-screen .kanji-challenge-screen.kanji-challenge-writing-mode .kanji-handwriting-input {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 0.25rem !important;
+    height: 100% !important;
+    max-height: 100% !important;
+    overflow: hidden !important;
+    padding: 0.4rem !important;
+  }
+
+  .main-problem-challenge-active-screen .kanji-challenge-screen.kanji-challenge-writing-mode .kanji-handwriting-input > :not([hidden]) ~ :not([hidden]) {
+    margin-top: 0 !important;
+  }
+
+  .main-problem-challenge-active-screen .kanji-challenge-screen.kanji-challenge-writing-mode .kanji-writing-canvas-frame {
+    flex: 1 1 auto !important;
+    min-height: 0 !important;
+    max-height: none !important;
+    padding: 0.15rem !important;
+  }
+
+  .main-problem-challenge-active-screen .kanji-challenge-screen.kanji-challenge-writing-mode .kanji-writing-canvas-frame > canvas {
+    width: auto !important;
+    height: 100% !important;
+    max-width: 100% !important;
+    max-height: 100% !important;
+    aspect-ratio: 1 / 1;
+  }
 }

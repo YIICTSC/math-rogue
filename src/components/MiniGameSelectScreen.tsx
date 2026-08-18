@@ -97,7 +97,8 @@ const MiniGameSelectScreen: React.FC<MiniGameSelectScreenProps> = ({ onSelect, o
     if (isDebug) return true;
     return totalMathCorrect >= game.threshold;
   };
-  const firstUnlockedGameId = MINI_GAMES.find(isUnlocked)?.id;
+  const visibleGames = MINI_GAMES.filter(game => !game.categoryOnly);
+  const firstUnlockedGameId = visibleGames.find(isUnlocked)?.id;
 
   const handlePressStart = (game: MiniGameConfig) => {
     if (!isUnlocked(game)) return;
@@ -232,7 +233,7 @@ const MiniGameSelectScreen: React.FC<MiniGameSelectScreenProps> = ({ onSelect, o
           </p>
           
           <div className="grid grid-cols-2 md:grid-cols-3 gap-3 w-full mb-8 shrink-0 px-1 md:px-2">
-            {MINI_GAMES.map((game) => (
+            {visibleGames.map((game) => (
               <button
                 key={game.id}
                 data-gamepad-initial-choice={game.id === firstUnlockedGameId ? true : undefined}

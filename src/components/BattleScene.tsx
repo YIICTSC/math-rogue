@@ -2,7 +2,7 @@
 import { Enemy, Player, Card as ICard, CardType, SelectionState, Potion, FloatingText, EnemyIntentType, LanguageMode, ParryState, VisualEffectInstance, CoopSupportCard, RaceTrickCard, AttackEffectKey, ActiveFamiliar } from '../types';
 import Card from './Card';
 import CardInspectionModal from './CardInspectionModal';
-import { Heart, Shield, Zap, Skull, Layers, X, Sword, AlertCircle, TrendingDown, Droplets, Hexagon, Gem, FlaskConical, Info, FileText, MoreHorizontal, Users, Sparkles, MessageCircle, Mic, ArrowRight, MousePointer2, ChevronsRight, ChevronDown, Flame, RotateCcw, Triangle, Settings } from 'lucide-react';
+import { Heart, Shield, Zap, Skull, Layers, X, Sword, AlertCircle, TrendingDown, Droplets, Hexagon, Gem, FlaskConical, Info, FileText, MoreHorizontal, Users, Sparkles, Bookmark, MessageCircle, Mic, ArrowRight, MousePointer2, ChevronsRight, ChevronDown, Flame, RotateCcw, Triangle, Settings } from 'lucide-react';
 import PixelSprite from './PixelSprite';
 import EnemyIllustration from './EnemyIllustration';
 import AttackEffectSprite from './AttackEffectSprite';
@@ -507,6 +507,8 @@ const BattleScene: React.FC<BattleSceneProps> = ({
     const [drawEntryAnimations, setDrawEntryAnimations] = useState<DrawEntryAnimation[]>([]);
     const [pendingExhaustCardHint, setPendingExhaustCardHint] = useState(false);
     const [showExhaustCardHint, setShowExhaustCardHint] = useState(false);
+    const [pendingRetainCardHint, setPendingRetainCardHint] = useState(false);
+    const [showRetainCardHint, setShowRetainCardHint] = useState(false);
     const isTrueBossPhase2SpecialLayout = false;
     const battleViewRef = useRef<HTMLDivElement>(null);
     const playerAreaRef = useRef<HTMLDivElement>(null);
@@ -514,6 +516,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
     const playerSpriteRef = useRef<HTMLDivElement>(null);
     const logContainerRef = useRef<HTMLDivElement>(null);
     const prevHandIdsRef = useRef<string[]>([]);
+    const prevRetainedCardIdsRef = useRef<Set<string>>(new Set());
     const drawEntryTimeoutsRef = useRef<number[]>([]);
     const previousPlayerHpRef = useRef<number | null>(null);
 
@@ -547,9 +550,9 @@ const BattleScene: React.FC<BattleSceneProps> = ({
     }, []);
 
     useEffect(() => {
-        if (!shouldShowMagicTransformationTutorial || tutorialStep !== null || showExhaustCardHint || showFriendshipComboTutorial) return;
+        if (!shouldShowMagicTransformationTutorial || tutorialStep !== null || showExhaustCardHint || showFriendshipComboTutorial || pendingRetainCardHint || showRetainCardHint) return;
         setShowMagicTransformationTutorial(true);
-    }, [shouldShowMagicTransformationTutorial, showExhaustCardHint, showFriendshipComboTutorial, tutorialStep]);
+    }, [shouldShowMagicTransformationTutorial, showExhaustCardHint, showFriendshipComboTutorial, pendingRetainCardHint, showRetainCardHint, tutorialStep]);
 
     useEffect(() => {
         if (
@@ -558,12 +561,14 @@ const BattleScene: React.FC<BattleSceneProps> = ({
             showMagicTransformationTutorial ||
             showExhaustCardHint ||
             pendingExhaustCardHint ||
+            pendingRetainCardHint ||
+            showRetainCardHint ||
             shouldShowMagicTransformationTutorial ||
             storageService.getSeenFriendshipComboTutorial()
         ) return;
         setShowFriendshipComboTutorial(true);
         storageService.saveSeenFriendshipComboTutorial();
-    }, [isDualMode, pendingExhaustCardHint, shouldShowMagicTransformationTutorial, showExhaustCardHint, showMagicTransformationTutorial, tutorialStep]);
+    }, [isDualMode, pendingExhaustCardHint, pendingRetainCardHint, shouldShowMagicTransformationTutorial, showExhaustCardHint, showFriendshipComboTutorial, showMagicTransformationTutorial, showRetainCardHint, tutorialStep]);
 
     useEffect(() => {
         if (!friendshipComboEnabled) {
@@ -581,6 +586,11 @@ const BattleScene: React.FC<BattleSceneProps> = ({
     const closeMagicTransformationTutorial = () => {
         setShowMagicTransformationTutorial(false);
         storageService.saveSeenMagicTransformationTutorial();
+        audioService.playBattleSound('select');
+    };
+
+    const closeRetainCardHint = () => {
+        setShowRetainCardHint(false);
         audioService.playBattleSound('select');
     };
 
@@ -724,8 +734,14 @@ const BattleScene: React.FC<BattleSceneProps> = ({
         const currentHandIds = player.hand.map(card => card.id);
         const previousHandIds = prevHandIdsRef.current;
         const newlyAddedIds = currentHandIds.filter(id => !previousHandIds.includes(id));
+        const currentRetainedCardIds = new Set(player.hand.filter(card => card.retained).map(card => card.id));
+        const newlyRetainedCards = player.hand.filter(card => card.retained && !prevRetainedCardIdsRef.current.has(card.id));
         const DRAW_ENTRY_STAGGER_MS = 130;
         const DRAW_ENTRY_DURATION_MS = 720;
+
+        if (newlyRetainedCards.length > 0 && !storageService.getSeenRetainCardHint()) {
+            setPendingRetainCardHint(true);
+        }
 
         if (newlyAddedIds.length > 0) {
             const newlyAddedCards = player.hand.filter(card => newlyAddedIds.includes(card.id));
@@ -757,6 +773,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
         }
 
         prevHandIdsRef.current = currentHandIds;
+        prevRetainedCardIdsRef.current = currentRetainedCardIds;
     }, [player.hand]);
 
     useEffect(() => {
@@ -765,12 +782,30 @@ const BattleScene: React.FC<BattleSceneProps> = ({
             tutorialStep !== null ||
             showMagicTransformationTutorial ||
             shouldShowMagicTransformationTutorial ||
+            pendingRetainCardHint ||
+            showRetainCardHint ||
             storageService.getSeenExhaustCardHint()
         ) return;
         setShowExhaustCardHint(true);
         setPendingExhaustCardHint(false);
         storageService.saveSeenExhaustCardHint();
-    }, [pendingExhaustCardHint, shouldShowMagicTransformationTutorial, showMagicTransformationTutorial, tutorialStep]);
+    }, [pendingExhaustCardHint, pendingRetainCardHint, shouldShowMagicTransformationTutorial, showExhaustCardHint, showMagicTransformationTutorial, showRetainCardHint, tutorialStep]);
+
+    useEffect(() => {
+        if (
+            !pendingRetainCardHint ||
+            tutorialStep !== null ||
+            showMagicTransformationTutorial ||
+            shouldShowMagicTransformationTutorial ||
+            showExhaustCardHint ||
+            pendingExhaustCardHint ||
+            showFriendshipComboTutorial ||
+            storageService.getSeenRetainCardHint()
+        ) return;
+        setShowRetainCardHint(true);
+        setPendingRetainCardHint(false);
+        storageService.saveSeenRetainCardHint();
+    }, [pendingRetainCardHint, pendingExhaustCardHint, shouldShowMagicTransformationTutorial, showExhaustCardHint, showFriendshipComboTutorial, showMagicTransformationTutorial, tutorialStep]);
 
     useEffect(() => {
         return () => {
@@ -1530,6 +1565,40 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                 {trans("わかった", languageMode)}
                             </button>
                         </div>
+                    </div>
+                </div>
+            )}
+
+            {showRetainCardHint && (
+                <div
+                    data-gamepad-modal
+                    data-gamepad-navigation-root
+                    data-gamepad-initial-scope="retain-card-tutorial"
+                    className="app-modal-overlay fixed inset-0 z-[210] flex items-center justify-center bg-black/75 p-4 animate-in fade-in duration-200"
+                    role="dialog"
+                    aria-modal="true"
+                    aria-labelledby="retain-card-tutorial-title"
+                >
+                    <div className="app-modal-panel app-battle-info-modal w-full max-w-md rounded-xl border-2 border-cyan-300 bg-slate-950 p-4 text-white shadow-[0_0_28px_rgba(34,211,238,0.45)]">
+                        <div className="mb-3 flex items-center gap-2 text-cyan-100">
+                            <Bookmark size={20} className="text-cyan-300" />
+                            <h3 id="retain-card-tutorial-title" className="text-lg font-black">{trans("保留効果", languageMode)}</h3>
+                        </div>
+                        <p className="mb-3 text-sm leading-relaxed text-slate-100">
+                            {trans("「保留」されたカードは、ターン終了時に捨て札へ送られず、次のターンへ持ち越されます。", languageMode)}
+                        </p>
+                        <div className="mb-4 rounded border border-cyan-400/40 bg-cyan-950/45 p-3 text-xs leading-relaxed text-cyan-50">
+                            {trans("保留中も、通常どおり使用できます。カード上部の「保留」表示が目印です。", languageMode)}
+                        </div>
+                        <button
+                            type="button"
+                            data-gamepad-back
+                            data-gamepad-initial-choice
+                            onClick={closeRetainCardHint}
+                            className="w-full rounded border-2 border-cyan-100 bg-cyan-600 px-4 py-2 text-sm font-black text-white shadow-[2px_2px_0_rgba(0,0,0,1)] transition hover:bg-cyan-500 active:translate-x-[2px] active:translate-y-[2px] active:shadow-none"
+                        >
+                            {trans("わかった", languageMode)}
+                        </button>
                     </div>
                 </div>
             )}

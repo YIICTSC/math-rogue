@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Eraser, Eye, EyeOff, PenLine } from 'lucide-react';
 import { LanguageMode } from '../types';
+import { storageService } from '../services/storageService';
 import { trans } from '../utils/textUtils';
 
 declare global {
@@ -68,9 +69,13 @@ const KanjiHandwritingInput: React.FC<KanjiHandwritingInputProps> = ({
   const [exactCandidates, setExactCandidates] = useState<string[]>([]);
   const [wrongOrderCandidates, setWrongOrderCandidates] = useState<string[]>([]);
   const [writtenCharacters, setWrittenCharacters] = useState<string[]>([]);
-  const [traceModeEnabled, setTraceModeEnabled] = useState(showTraceGuide);
+  const [traceModeEnabled, setTraceModeEnabled] = useState(() => (
+    storageService.getKanjiTraceGuidePreference() ?? showTraceGuide
+  ));
   const [hasStartedWriting, setHasStartedWriting] = useState(false);
-  const [strokeOrderCheckEnabled, setStrokeOrderCheckEnabled] = useState(true);
+  const [strokeOrderCheckEnabled, setStrokeOrderCheckEnabled] = useState(() => (
+    storageService.getKanjiStrokeOrderPreference() ?? true
+  ));
   const [strokeOrderFeedback, setStrokeOrderFeedback] = useState(false);
   const autoAdvanceTimerRef = useRef<number | null>(null);
   const inactivityTimerRef = useRef<number | null>(null);
@@ -206,7 +211,9 @@ const KanjiHandwritingInput: React.FC<KanjiHandwritingInputProps> = ({
   }, [disabled]);
 
   useEffect(() => {
-    setTraceModeEnabled(showTraceGuide);
+    if (storageService.getKanjiTraceGuidePreference() === null) {
+      setTraceModeEnabled(showTraceGuide);
+    }
   }, [showTraceGuide]);
 
   const clearInactivityTimer = useCallback(() => {
@@ -349,13 +356,17 @@ const KanjiHandwritingInput: React.FC<KanjiHandwritingInputProps> = ({
           <button
             type="button"
             onClick={() => {
-              setStrokeOrderCheckEnabled((current) => !current);
+              setStrokeOrderCheckEnabled((current) => {
+                const next = !current;
+                storageService.saveKanjiStrokeOrderPreference(next);
+                return next;
+              });
               setStrokeOrderFeedback(false);
             }}
             disabled={disabled || !engineReady}
             aria-pressed={strokeOrderCheckEnabled}
-            aria-label={trans('書き順判定', languageMode)}
-            title={trans('書き順判定', languageMode)}
+            aria-label={trans('書き順', languageMode)}
+            title={trans('書き順', languageMode)}
             className={`flex shrink-0 items-center rounded border px-1.5 py-1 text-[11px] font-bold whitespace-nowrap transition-colors disabled:opacity-40 ${strokeOrderCheckEnabled
               ? 'border-amber-300/70 bg-amber-950/60 text-amber-100 hover:bg-amber-900/70'
               : 'border-slate-500 bg-slate-800 text-slate-300 hover:bg-slate-700'}`}
@@ -364,22 +375,11 @@ const KanjiHandwritingInput: React.FC<KanjiHandwritingInputProps> = ({
           </button>
           <button
             type="button"
-            onClick={() => {
-              setStrokeOrderCheckEnabled((current) => !current);
-              setStrokeOrderFeedback(false);
-            }}
-            disabled={disabled || !engineReady}
-            aria-pressed={strokeOrderCheckEnabled}
-            aria-label={trans('書き順判定', languageMode)}
-            className={`flex shrink-0 items-center gap-1 rounded border px-2 py-1 text-xs font-bold transition-colors disabled:opacity-40 ${strokeOrderCheckEnabled
-              ? 'border-amber-300/70 bg-amber-950/60 text-amber-100 hover:bg-amber-900/70'
-              : 'border-slate-500 bg-slate-800 text-slate-300 hover:bg-slate-700'}`}
-          >
-            {trans('書き順判定', languageMode)} {strokeOrderCheckEnabled ? 'ON' : 'OFF'}
-          </button>
-          <button
-            type="button"
-            onClick={() => setTraceModeEnabled((current) => !current)}
+            onClick={() => setTraceModeEnabled((current) => {
+              const next = !current;
+              storageService.saveKanjiTraceGuidePreference(next);
+              return next;
+            })}
             disabled={disabled || !engineReady}
             aria-pressed={traceModeEnabled}
             aria-label={trans('模写', languageMode)}

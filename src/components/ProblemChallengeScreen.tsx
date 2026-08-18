@@ -31,6 +31,7 @@ interface ProblemChallengeScreenProps {
   problemSourceAssignment?: AssignmentPayload | null;
   onAnswerResult?: (result: AssignmentAnswerResult) => void;
   visualTheme?: VisualThemeId;
+  onOpenCategoryMiniGame?: (screen: GameScreen) => void;
 }
 
 type ProblemChallengeBgmOption = {
@@ -701,6 +702,7 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
   problemSourceAssignment,
   onAnswerResult,
   visualTheme = 'elementary',
+  onOpenCategoryMiniGame,
 }) => {
   const [phase, setPhase] = useState<'SELECT' | 'CHALLENGE'>('SELECT');
   const [selectedCategory, setSelectedCategory] = useState<SubjectCategoryConfig>(SUBJECT_CATEGORIES[0]);
@@ -1105,9 +1107,11 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
           </button>
         </div>
 
-        <div className="problem-challenge-mini-battle ios-safe-ui-x relative z-10">
-          <MiniBattleBanner key={challengeSubMode.id} streak={streak} />
-        </div>
+        {!(ChallengeScreen === GameScreen.KANJI_CHALLENGE && challengeAnswerMode === 'WRITING') && (
+          <div className="problem-challenge-mini-battle ios-safe-ui-x relative z-10">
+            <MiniBattleBanner key={challengeSubMode.id} streak={streak} />
+          </div>
+        )}
 
         <div className="problem-challenge-question-stage relative z-10 flex-1 min-h-0">
           {ChallengeScreen === GameScreen.MATH_CHALLENGE && (
@@ -1166,6 +1170,7 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
               streak={streak}
               languageMode={languageMode}
               assignmentUnits={activeChallenge?.assignmentUnits}
+              onOpenCategoryMiniGame={onOpenCategoryMiniGame}
             />
           )}
         </div>
