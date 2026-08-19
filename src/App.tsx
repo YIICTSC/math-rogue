@@ -5539,6 +5539,8 @@ const App: React.FC = () => {
         familiars: [],
         familiarActionQueue: [],
         floatingText: null,
+        magicTransformed: false,
+        magicTransformedThisBattle: false,
         relicCounters: Object.fromEntries(
             Object.entries(player.relicCounters).filter(([key]) =>
                 key !== 'OUT_SUPER_HERO_POSE_ACTIVE' && key !== 'OUT_STAMP_QUEST_REMAINING'
@@ -10746,13 +10748,47 @@ const App: React.FC = () => {
                     if (target.powers['CONFUSED'] === 0 && label) newLogs.push(`${label}の${trans("こんらん", languageMode)}が回復した`);
                 }
             };
-            if (prev.visualTheme === 'magic' && p.magicTransformed && prev.enemies.some(enemy => enemy.currentHp > 0)) {
+            const activeCoopTurnSlot = prev.coopBattleState?.turnQueue[prev.coopBattleState.turnCursor];
+            const magicDrainPeerIds = new Set<string>();
+            if (prev.challengeMode === 'COOP' && coopSession?.isHost && prev.coopBattleState) {
+                if (activeCoopTurnSlot?.type === 'ENEMY') {
+                    prev.coopBattleState.players
+                        .filter(entry => entry.player.currentHp > 0)
+                        .forEach(entry => magicDrainPeerIds.add(entry.peerId));
+                } else if (activeCoopTurnSlot?.peerId) {
+                    magicDrainPeerIds.add(activeCoopTurnSlot.peerId);
+                }
+            }
+            const shouldDrainMagicForLocalPlayer = prev.challengeMode !== 'COOP'
+                ? true
+                : magicDrainPeerIds.has(coopSelfPeerId);
+            const applyMagicTransformationDamage = (target: Player, label?: string, ownerPeerId?: string) => {
+                if (
+                    prev.visualTheme !== 'magic' ||
+                    !target.magicTransformed ||
+                    target.currentHp <= 0 ||
+                    !prev.enemies.some(enemy => enemy.currentHp > 0)
+                ) {
+                    return;
+                }
                 const hpLoss = 20;
-                p.currentHp = Math.max(0, p.currentHp - hpLoss);
-                p.hpLostThisTurn = (p.hpLostThisTurn || 0) + hpLoss;
-                p.floatingText = { id: `magic-drain-${Date.now()}`, text: `-${hpLoss}`, color: 'text-fuchsia-300', iconType: 'heart' };
-                newLogs.push(`変身の反動でHP-${hpLoss}`);
-                nextActiveEffects.push({ id: `vfx-magic-drain-${Date.now()}`, type: 'SLASH', targetId: 'player' });
+                target.currentHp = Math.max(0, target.currentHp - hpLoss);
+                target.hpLostThisTurn = (target.hpLostThisTurn || 0) + hpLoss;
+                target.floatingText = {
+                    id: `magic-drain-${Date.now()}${ownerPeerId ? `-${ownerPeerId}` : ''}`,
+                    text: `-${hpLoss}`,
+                    color: 'text-fuchsia-300',
+                    iconType: 'heart'
+                };
+                newLogs.push(label ? `${label}の変身の反動でHP-${hpLoss}` : `変身の反動でHP-${hpLoss}`);
+                nextActiveEffects.push(...attachCoopEffectOwner([{
+                    id: `vfx-magic-drain-${Date.now()}${ownerPeerId ? `-${ownerPeerId}` : ''}`,
+                    type: 'SLASH',
+                    targetId: 'player'
+                }], ownerPeerId));
+            };
+            if (shouldDrainMagicForLocalPlayer) {
+                applyMagicTransformationDamage(p);
             }
             applyRelicEndTurnEffects(p, prev.enemies, newLogs);
             if (hasRelic(p, 'POCKETWATCH')) {
@@ -10812,6 +10848,9 @@ const App: React.FC = () => {
                             };
                         }
                         const nextPlayer = clonePlayerForEndTurn(entry.player);
+                        if (magicDrainPeerIds.has(entry.peerId)) {
+                            applyMagicTransformationDamage(nextPlayer, entry.name, entry.peerId);
+                        }
                         tickPlayerDebuffs(nextPlayer, entry.name);
                         if ((nextPlayer.familiars || []).length > 0) {
                             const familiarEffects: VisualEffectInstance[] = [];
