@@ -10793,6 +10793,7 @@ textarea {
 
 .kanji-challenge-screen .kanji-challenge-question {
   box-sizing: border-box;
+  container-type: inline-size;
   grid-column: 1 !important;
   grid-row: 1 !important;
   width: 100% !important;
@@ -10810,6 +10811,42 @@ textarea {
   max-width: 100%;
   overflow-wrap: anywhere;
   word-break: break-word;
+}
+
+/* Four-or-more-kanji reading/input prompts must remain a single visual line.
+   Scale to the question card's content width so the complete prompt stays
+   visible in both portrait and landscape layouts. */
+.kanji-challenge-screen .kanji-question-text {
+  display: block;
+  width: 100%;
+  max-width: 100%;
+  min-width: 0;
+  overflow: hidden;
+  overflow-wrap: normal !important;
+  text-overflow: clip;
+  white-space: nowrap !important;
+  word-break: normal !important;
+  letter-spacing: 0.04em !important;
+  line-height: 1.05 !important;
+  font-size: clamp(1.6rem, 9vw, 4.5rem) !important;
+}
+
+.kanji-challenge-screen .kanji-question-4 {
+  font-size: clamp(2rem, 12vw, 4.5rem) !important;
+}
+
+.kanji-challenge-screen .kanji-question-5 {
+  font-size: clamp(1.7rem, 10vw, 3.5rem) !important;
+}
+
+.kanji-challenge-screen .kanji-question-6-plus {
+  font-size: clamp(1.45rem, 8vw, 3rem) !important;
+}
+
+@supports (width: 1cqw) {
+  .kanji-challenge-screen .kanji-question-text {
+    font-size: min(4.5rem, calc((100cqw - 0.5rem) / var(--kanji-question-length) / 1.08)) !important;
+  }
 }
 
 .kanji-challenge-screen .kanji-handwriting-input {

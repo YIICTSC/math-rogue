@@ -231,6 +231,15 @@ const KanjiChallengeScreen: React.FC<KanjiChallengeScreenProps> = ({ onComplete,
       : writingPromptLength === 4
         ? 'kanji-writing-answer-4'
         : '';
+  const questionLength = [...String(currentProblem.question)].filter((character) => !/[\s　]/.test(character)).length;
+  const questionLengthClass = questionLength >= 6
+    ? 'kanji-question-6-plus'
+    : questionLength === 5
+      ? 'kanji-question-5'
+      : 'kanji-question-4';
+  const questionTextClass = resolvedAnswerMode !== 'WRITING' && questionLength >= 4
+    ? `kanji-question-text ${questionLengthClass}`
+    : '';
   const showTraceGuide = resolvedAnswerMode === 'WRITING'
     && (currentProblemIndex < 2 || writingWrongStreak >= 1);
 
@@ -248,7 +257,12 @@ const KanjiChallengeScreen: React.FC<KanjiChallengeScreenProps> = ({ onComplete,
                     </div>
                 )}
                 <div className="text-xs text-gray-400 mb-2">{trans(resolvedAnswerMode === 'WRITING' ? 'この読みを漢字で書こう' : 'この漢字の読み方は？', languageMode)}</div>
-                <h3 className={`max-w-full min-w-0 break-words text-7xl font-bold text-white tracking-widest font-serif ${resolvedAnswerMode === 'WRITING' ? `kanji-writing-answer-text ${writingPromptLengthClass}` : ''}`}>{resolvedAnswerMode === 'WRITING' ? currentProblem.answer : currentProblem.question}</h3>
+                <h3
+                  className={`max-w-full min-w-0 break-words text-7xl font-bold text-white tracking-widest font-serif ${resolvedAnswerMode === 'WRITING' ? `kanji-writing-answer-text ${writingPromptLengthClass}` : questionTextClass}`}
+                  style={questionTextClass ? { '--kanji-question-length': questionLength } as React.CSSProperties : undefined}
+                >
+                  {resolvedAnswerMode === 'WRITING' ? currentProblem.answer : currentProblem.question}
+                </h3>
                 {resolvedAnswerMode === 'WRITING' && (
                   <div className="mt-3 text-xs text-cyan-200">{trans('漢字と送り仮名を手書きしてください', languageMode)}</div>
                 )}
