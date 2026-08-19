@@ -171,6 +171,8 @@ const MAX_CARD_DETAIL_VFX = 80;
 const CROWDFUNDING_BANNER_URL = 'https://camp-fire.jp/projects/954165/view?utm_campaign=cp_po_share_c_msg_mypage_projects_open';
 const CROWDFUNDING_BANNER_IMAGE = assetUrl('banners/campfire-crowdfunding.webp');
 const ASSIGNMENT_INTRO_BANNER_IMAGE = assetUrl('banners/daily-assignment-reward-intro.webp');
+const IOS_APP_STORE_URL = 'https://apps.apple.com/jp/app/%E5%AD%A6%E7%BF%92%E3%83%AD%E3%83%BC%E3%82%B0/id6793312973';
+const IOS_LAUNCH_BANNER_IMAGE = assetUrl('banners/learning-rogue-ios-launch-banner.png');
 const CROWDFUNDING_BANNER_END_AT = new Date('2026-06-20T23:59:59+09:00').getTime();
 const HOLOGRAPHIC_REWARD_CARD_CHANCE = 0.05;
 const VISUAL_THEMES: VisualThemeId[] = ['elementary', 'high-school', 'magic'];
@@ -17259,6 +17261,23 @@ const App: React.FC = () => {
                                         <Terminal size={10} /> v1.0.4 YUSUKE ISHIGE
                                     </button>
                                 </div>
+
+                                {DISTRIBUTION_PLATFORM === 'web' && (
+                                    <a
+                                        href={IOS_APP_STORE_URL}
+                                        target="_blank"
+                                        rel="noopener noreferrer"
+                                        aria-label={trans('学習ローグ iOS版のApp Storeページを開く', languageMode)}
+                                        className="start-menu-ios-launch-banner mt-2 block w-full overflow-hidden rounded border-2 border-cyan-200/80 bg-slate-950/80 p-1 shadow-[0_0_20px_rgba(34,211,238,0.3)] transition-transform hover:scale-[1.015] hover:border-amber-200 focus:outline-none focus:ring-2 focus:ring-amber-300"
+                                    >
+                                        <img
+                                            src={IOS_LAUNCH_BANNER_IMAGE}
+                                            alt={trans('学習ローグ iOS版アプリ 8月25日リリースのお知らせ', languageMode)}
+                                            className="block h-auto w-full object-cover"
+                                            draggable={false}
+                                        />
+                                    </a>
+                                )}
                             </div>
 
                             {shouldShowCrowdfundingBanner && (

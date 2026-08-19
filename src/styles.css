@@ -4034,6 +4034,16 @@ textarea {
   flex-shrink: 0;
 }
 
+.start-menu-ios-launch-banner {
+  line-height: 0;
+}
+
+.start-menu-ios-launch-banner img {
+  aspect-ratio: 2164 / 727;
+  max-height: 9rem;
+  object-fit: cover;
+}
+
 .start-menu-actions button:not(.start-menu-version) svg.mb-1 {
   margin-bottom: 0;
   margin-right: 0.375rem;
@@ -10375,6 +10385,14 @@ textarea {
     width: 100%;
     max-width: 30rem;
   }
+
+  .start-menu-root .start-menu-ios-launch-banner {
+    width: min(100%, 34rem);
+  }
+
+  .start-menu-root .start-menu-ios-launch-banner img {
+    max-height: clamp(5.5rem, 24vw, 8rem);
+  }
 }
 
 @media (orientation: landscape) and (max-height: 560px) {
@@ -10438,6 +10456,10 @@ textarea {
   .start-menu-root .start-menu-actions {
     width: 100%;
     max-width: none;
+  }
+
+  .start-menu-root .start-menu-ios-launch-banner img {
+    max-height: clamp(5rem, 15vh, 8rem);
   }
 
   .start-menu-root .start-menu-credit-button {
