@@ -2240,7 +2240,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
 
                     {/* Player Area */}
                     <div ref={playerAreaRef} className={isTrueBossPhase2SpecialLayout ? "battle-player-area relative z-20 flex items-end pl-2 pb-2 shrink-0" : "battle-player-area flex items-end pl-2 pb-2 shrink-0 mt-auto"}>
-                        <div ref={playerGroupRef} className={isTrueBossPhase2SpecialLayout ? "flex flex-col items-start md:flex-row md:items-end relative max-w-[48vw] md:max-w-none" : "flex items-end relative"}>
+          <div ref={playerGroupRef} className={isTrueBossPhase2SpecialLayout ? "battle-player-group flex flex-col items-start md:flex-row md:items-end relative max-w-[48vw] md:max-w-none" : "battle-player-group flex items-end relative"}>
 
                             <div ref={playerSpriteRef} className={`battle-player-sprite order-1 ${visualTheme !== 'elementary' ? 'w-40 h-40 md:w-48 md:h-48' : 'w-20 h-20 md:w-24 md:h-24'} relative transition-all duration-150 ease-out ${isTrueBossPhase2SpecialLayout ? 'mr-0 md:mr-2 mb-1 md:mb-0' : 'mr-2'} ${heroActionClass} ${selectedSupportCard ? 'ring-2 ring-emerald-300 rounded-lg cursor-pointer' : ''}`} onClick={() => {
                                 if (selectedSupportCard && onUseCoopSupport) {
@@ -2350,75 +2350,79 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                 )}
                             </div>
 
-                            {player.partner && player.partner.currentHp > 0 && (
-                                <div className={`order-3 w-16 h-16 md:w-20 md:h-20 relative transition-all duration-150 ease-out ${isTrueBossPhase2SpecialLayout ? 'mr-0 md:mr-2 -ml-3 md:-ml-6 mb-1 md:mb-0' : 'mr-2 -ml-6'} z-0`} onClick={() => showInfo(trans(player.partner!.name, languageMode), trans("パートナー。\n倒れるとデッキが1枚しか使えなくなります。", languageMode))}>
-                                    <img
-                                        src={player.partner.imageData}
-                                        alt="Partner"
-                                        className="w-full h-full pixel-art grayscale-[0.2]"
-                                        style={{ imageRendering: 'pixelated' }}
-                                    />
-                                    <FloatingTextOverlay data={player.partner.floatingText} languageMode={languageMode} offset="-top-2 -right-2" />
+                            <div className={isTrueBossPhase2SpecialLayout ? "contents" : "battle-player-support-column order-2 flex min-w-0 flex-col items-start mb-2 md:contents"}>
+                                {(player.partner && player.partner.currentHp > 0) || companions.length > 0 ? (
+                                    <div className="battle-player-support-row flex max-w-[min(16rem,calc(100vw-11rem))] flex-wrap items-end gap-1 md:order-3 md:max-w-none md:flex-nowrap md:gap-2 mb-1 md:mb-2">
+                                        {player.partner && player.partner.currentHp > 0 && (
+                                            <div className={`battle-player-partner w-16 h-16 md:w-20 md:h-20 relative transition-all duration-150 ease-out ${isTrueBossPhase2SpecialLayout ? 'mr-0 md:mr-2 -ml-3 md:-ml-6 mb-1 md:mb-0' : 'mr-2 -ml-6'} z-0`} onClick={() => showInfo(trans(player.partner!.name, languageMode), trans("パートナー。\n倒れるとデッキが1枚しか使えなくなります。", languageMode))}>
+                                                <img
+                                                    src={player.partner.imageData}
+                                                    alt="Partner"
+                                                    className="w-full h-full pixel-art grayscale-[0.2]"
+                                                    style={{ imageRendering: 'pixelated' }}
+                                                />
+                                                <FloatingTextOverlay data={player.partner.floatingText} languageMode={languageMode} offset="-top-2 -right-2" />
 
-                                    <div className="absolute -bottom-2 left-0 w-full h-1 bg-gray-700 rounded-full border border-gray-500 overflow-hidden">
-                                        <div className="h-full bg-green-500 transition-all duration-500" style={{ width: `${(player.partner.currentHp / player.partner.maxHp) * 100}%` }}></div>
-                                    </div>
-                                </div>
-                            )}
-
-                            <div className={isTrueBossPhase2SpecialLayout ? "contents" : "order-2 flex min-w-0 flex-col items-start mb-2 md:contents"}>
-                            {companions.length > 0 && (
-                                <div className={`order-1 md:order-3 flex max-w-[min(16rem,calc(100vw-11rem))] flex-wrap items-end gap-1 md:max-w-none md:flex-nowrap md:gap-2 ${player.partner && player.partner.currentHp > 0 ? 'ml-0' : 'ml-1'} mb-1 md:mb-2`}>
-                                    {companions.map((companion) => {
-                                        const hpPercent = Math.max(0, Math.min(100, (companion.currentHp / Math.max(1, companion.maxHp)) * 100));
-                                        const isDown = companion.currentHp <= 0;
-                                        const activeFamiliarDisplay = getActiveFamiliarDisplay(companion.familiarActionQueue);
-                                        const transformedMagicImageSrc = visualTheme === 'magic' && companion.magicTransformed
-                                            ? getThemedCharacterSpritePath(
-                                                'magic',
-                                                companion.characterId,
-                                                'idle',
-                                                companion.imageData,
-                                                true,
-                                                companion.magicProtagonistId,
-                                                companion.magicProtagonistGender,
-                                            )
-                                            : null;
-                                        const companionImageSrc = activeFamiliarDisplay?.src || transformedMagicImageSrc || companion.imageData;
-                                        const isMagicTransformedCompanion = Boolean(transformedMagicImageSrc && !activeFamiliarDisplay);
-                                        return (
-                                            <div
-                                                key={companion.id}
-                                                className={`w-14 md:w-16 shrink-0 ${selectedSupportCard ? 'cursor-pointer' : ''}`}
-                                                onClick={() => {
-                                                    if (selectedSupportCard && onUseCoopSupport) {
-                                                        onUseCoopSupport(selectedSupportCard, companion.id);
-                                                        setSelectedSupportCard(null);
-                                                        setCoopSupportHudOpen(false);
-                                                        return;
-                                                    }
-                                                    showInfo(companion.name, trans("協力モードの同行プレイヤー。HPのみを表示します。", languageMode));
-                                                }}
-                                            >
-                                                <div className={`w-14 h-14 md:w-16 md:h-16 relative rounded-lg border border-white/10 bg-black/35 overflow-hidden ${isDown ? 'grayscale opacity-55' : ''} ${selectedSupportCard ? 'ring-2 ring-emerald-300/80' : ''}`}>
-                                                    <img
-                                                        key={activeFamiliarDisplay ? `${activeFamiliarDisplay.familiar.instanceId}-${activeFamiliarDisplay.familiar.actionPulse}` : companion.id}
-                                                        src={companionImageSrc}
-                                                        alt={activeFamiliarDisplay?.familiar.name || companion.name}
-                                                        className={`w-full h-full transition-all duration-300 ease-out animate-in fade-in zoom-in-95 ${activeFamiliarDisplay ? 'object-contain drop-shadow-[0_0_12px_rgba(217,70,239,0.95)] animate-pulse' : isMagicTransformedCompanion ? 'object-contain -scale-x-100 drop-shadow-[0_0_12px_rgba(217,70,239,0.75)]' : `pixel-art ${visualTheme !== 'elementary' ? '-scale-x-100' : ''}`}`}
-                                                        style={activeFamiliarDisplay || isMagicTransformedCompanion ? undefined : { imageRendering: 'pixelated' }}
-                                                    />
-                                                    <FloatingTextOverlay data={companion.floatingText} languageMode={languageMode} offset="-top-2 -right-1" />
-                                                    <VFXOverlay effects={getPlayerScopedEffectsForPeer(companion.id)} targetId={companion.id} />
-                                                </div>
-                                                <div className="mt-1 h-1.5 bg-gray-700 rounded-full border border-gray-500 overflow-hidden">
-                                                    <div className={`h-full transition-all duration-500 ${isDown ? 'bg-gray-500' : 'bg-green-500'}`} style={{ width: `${hpPercent}%` }}></div>
+                                                <div className="absolute -bottom-2 left-0 w-full h-1 bg-gray-700 rounded-full border border-gray-500 overflow-hidden">
+                                                    <div className="h-full bg-green-500 transition-all duration-500" style={{ width: `${(player.partner.currentHp / player.partner.maxHp) * 100}%` }}></div>
                                                 </div>
                                             </div>
-                                        );
-                                    })}
-                                </div>
-                            )}
+                                        )}
+
+                                        {companions.length > 0 && (
+                                            <div className={`battle-coop-companions flex max-w-[min(16rem,calc(100vw-11rem))] flex-wrap items-end gap-1 md:max-w-none md:flex-nowrap md:gap-2 ${player.partner && player.partner.currentHp > 0 ? 'ml-0' : 'ml-1'}`}>
+                                                {companions.map((companion) => {
+                                                    const hpPercent = Math.max(0, Math.min(100, (companion.currentHp / Math.max(1, companion.maxHp)) * 100));
+                                                    const isDown = companion.currentHp <= 0;
+                                                    const activeFamiliarDisplay = getActiveFamiliarDisplay(companion.familiarActionQueue);
+                                                    const transformedMagicImageSrc = visualTheme === 'magic' && companion.magicTransformed
+                                                        ? getThemedCharacterSpritePath(
+                                                            'magic',
+                                                            companion.characterId,
+                                                            'idle',
+                                                            companion.imageData,
+                                                            true,
+                                                            companion.magicProtagonistId,
+                                                            companion.magicProtagonistGender,
+                                                        )
+                                                        : null;
+                                                    const companionImageSrc = activeFamiliarDisplay?.src || transformedMagicImageSrc || companion.imageData;
+                                                    const isMagicTransformedCompanion = Boolean(transformedMagicImageSrc && !activeFamiliarDisplay);
+                                                    return (
+                                                        <div
+                                                            key={companion.id}
+                                                            className={`w-14 md:w-16 shrink-0 ${selectedSupportCard ? 'cursor-pointer' : ''}`}
+                                                            onClick={() => {
+                                                                if (selectedSupportCard && onUseCoopSupport) {
+                                                                    onUseCoopSupport(selectedSupportCard, companion.id);
+                                                                    setSelectedSupportCard(null);
+                                                                    setCoopSupportHudOpen(false);
+                                                                    return;
+                                                                }
+                                                                showInfo(companion.name, trans("協力モードの同行プレイヤー。HPのみを表示します。", languageMode));
+                                                            }}
+                                                        >
+                                                            <div className={`w-14 h-14 md:w-16 md:h-16 relative rounded-lg border border-white/10 bg-black/35 overflow-hidden ${isDown ? 'grayscale opacity-55' : ''} ${selectedSupportCard ? 'ring-2 ring-emerald-300/80' : ''}`}>
+                                                                <img
+                                                                    key={activeFamiliarDisplay ? `${activeFamiliarDisplay.familiar.instanceId}-${activeFamiliarDisplay.familiar.actionPulse}` : companion.id}
+                                                                    src={companionImageSrc}
+                                                                    alt={activeFamiliarDisplay?.familiar.name || companion.name}
+                                                                    className={`w-full h-full transition-all duration-300 ease-out animate-in fade-in zoom-in-95 ${activeFamiliarDisplay ? 'object-contain drop-shadow-[0_0_12px_rgba(217,70,239,0.95)] animate-pulse' : isMagicTransformedCompanion ? 'object-contain -scale-x-100 drop-shadow-[0_0_12px_rgba(217,70,239,0.75)]' : `pixel-art ${visualTheme !== 'elementary' ? '-scale-x-100' : ''}`}`}
+                                                                    style={activeFamiliarDisplay || isMagicTransformedCompanion ? undefined : { imageRendering: 'pixelated' }}
+                                                                />
+                                                                <FloatingTextOverlay data={companion.floatingText} languageMode={languageMode} offset="-top-2 -right-1" />
+                                                                <VFXOverlay effects={getPlayerScopedEffectsForPeer(companion.id)} targetId={companion.id} />
+                                                            </div>
+                                                            <div className="mt-1 h-1.5 bg-gray-700 rounded-full border border-gray-500 overflow-hidden">
+                                                                <div className={`h-full transition-all duration-500 ${isDown ? 'bg-gray-500' : 'bg-green-500'}`} style={{ width: `${hpPercent}%` }}></div>
+                                                            </div>
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        )}
+                                    </div>
+                                ) : null}
 
                             <div className={`battle-player-stats order-2 bg-black/80 border-2 border-white p-1 text-white text-xs ${isTrueBossPhase2SpecialLayout ? 'w-28 md:w-40' : 'w-36 md:w-40'} mb-0 md:mb-2 shadow-lg rounded z-20 ${tutorialStep === 1 ? 'ring-4 ring-green-500 ring-offset-4 ring-offset-transparent animate-pulse' : ''}`}>
                                 <div className="flex items-center justify-between mb-1">

@@ -7979,7 +7979,7 @@ textarea {
   .app-battle-special-modal-overlay,
   .app-potion-replace-modal-overlay {
     align-items: center !important;
-    justify-content: center !important;
+    justify-content: flex-start !important;
     padding-top: max(0.5rem, env(safe-area-inset-top)) !important;
     padding-right: max(0.5rem, env(safe-area-inset-right)) !important;
     padding-bottom: max(0.5rem, env(safe-area-inset-bottom)) !important;
@@ -11047,5 +11047,48 @@ textarea {
     max-width: 100% !important;
     max-height: 100% !important;
     aspect-ratio: 1 / 1;
+  }
+}
+
+/* Phone landscape keeps the portrait relationship between the hero HUD and
+   the people fighting alongside them. The md:contents utility otherwise
+   flattens this column into the horizontal player row at 768px and above. */
+@media (orientation: landscape) and (max-height: 600px) and (max-width: 1100px) {
+  .battle-scene-root.battle-force-split .battle-player-area {
+    justify-content: flex-start !important;
+  }
+
+  html body .battle-scene-root.battle-force-split .battle-player-area > div.battle-player-group,
+  html body .battle-scene-root .battle-player-group {
+        align-items: flex-end !important;
+        flex-wrap: nowrap !important;
+        justify-content: flex-start !important;
+    max-width: none !important;
+    width: max-content !important;
+  }
+
+  .battle-scene-root .battle-player-sprite {
+    flex: 0 0 auto !important;
+  }
+
+  .battle-scene-root .battle-player-support-column {
+    display: flex !important;
+    flex-direction: column !important;
+    align-items: flex-start !important;
+    flex: 0 0 auto !important;
+    order: 2 !important;
+    min-width: 0 !important;
+    margin-bottom: 0 !important;
+  }
+
+  .battle-scene-root .battle-player-support-row {
+    order: 1 !important;
+    max-width: min(16rem, calc(100vw - 7rem)) !important;
+    margin-bottom: 0.2rem !important;
+  }
+
+  .battle-scene-root .battle-player-stats {
+    order: 2 !important;
+    margin-bottom: 0 !important;
   }
 }
