@@ -859,6 +859,8 @@ export const ENGLISH_RUNTIME_EXACT: Record<string, string> = {
   'v1.0.2 軽微な修正': 'v1.0.2 Minor Fixes',
   'v1.0.3 ひらがな表示の修正': 'v1.0.3 Hiragana Display Fixes',
   'v1.0.4 雑学ミニゲームとBGMの改善': 'v1.0.4 Trivia Minigames and BGM Improvements',
+  'v1.0.5 漢字問題の表示を改善': 'v1.0.5 Long Kanji Prompt Display Improvements',
+  '4文字以上の漢字問題を縦横画面ともに1行表示': 'Kanji prompts with four or more characters now stay on one line in portrait and landscape.',
   '7つの雑学内ミニゲームを遊べるように改善': 'Added seven trivia minigames',
   'ミニゲームで放課後ポーカーのBGMを再生': 'Minigames now play the After-School Poker BGM',
   '石ころの煌めきの割引表示と予約カード操作を改善': 'Improved discount displays and reserved-card actions in Stone Glow',

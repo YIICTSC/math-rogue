@@ -17258,7 +17258,7 @@ const App: React.FC = () => {
                                 </div>
 
                                     <button onClick={() => setShowDebugLog(true)} className="start-menu-version text-white text-[10px] hover:text-white flex items-center justify-center gap-1 transition-opacity">
-                                        <Terminal size={10} /> v1.0.4 YUSUKE ISHIGE
+                                        <Terminal size={10} /> v1.0.5 YUSUKE ISHIGE
                                     </button>
                                 </div>
 
@@ -17706,14 +17706,20 @@ const App: React.FC = () => {
                                     className="mb-4 w-full select-none border-b border-green-800 bg-transparent pb-2 text-left font-mono text-xl font-bold text-green-400 active:text-green-200"
                                     onClick={handleLogClick}
                                 >
-                                    System Release Notes v1.0.4
+                                    System Release Notes v1.0.5
                                 </button>
                             ) : (
                                 <h2 className="mb-4 select-none border-b border-green-800 pb-2 font-mono text-xl font-bold text-green-400">
-                                    System Release Notes v1.0.4
+                                    System Release Notes v1.0.5
                                 </h2>
                             )}
                             <div className="space-y-4 text-sm font-mono text-gray-300 max-h-[60vh] overflow-y-auto custom-scrollbar">
+                                <section>
+                                    <h3 className="text-white font-bold mb-1">■ {trans('v1.0.5 漢字問題の表示を改善', languageMode)}</h3>
+                                    <ul className="list-disc pl-5 space-y-1">
+                                        <li>{trans('4文字以上の漢字問題を縦横画面ともに1行表示', languageMode)}</li>
+                                    </ul>
+                                </section>
                                 <section>
                                     <h3 className="text-white font-bold mb-1">■ {trans('v1.0.4 雑学ミニゲームとBGMの改善', languageMode)}</h3>
                                     <ul className="list-disc pl-5 space-y-1">
