@@ -409,6 +409,8 @@ const ShogiMiniGame: React.FC<ShogiMiniGameProps> = ({ onBack, onFinish, languag
 
   const targetAt = (row: number, col: number) => selectedTarget.find(target => target.row === row && target.col === col);
   const playerHand = Object.entries(game.hands.P).filter(([, count]) => Number(count) > 0) as Array<[ShogiPieceKind, number]>;
+  const cpuHand = Object.entries(game.hands.C).filter(([, count]) => Number(count) > 0) as Array<[ShogiPieceKind, number]>;
+  const cpuHandCount = cpuHand.reduce((sum, [, count]) => sum + count, 0);
   const statusText = game.result
     ? game.result === 'WIN' ? copy(languageMode, '勝利！', 'VICTORY!') : game.result === 'LOSE' ? copy(languageMode, '敗北', 'DEFEAT') : copy(languageMode, '引き分け', 'DRAW')
     : game.message;
@@ -437,6 +439,24 @@ const ShogiMiniGame: React.FC<ShogiMiniGameProps> = ({ onBack, onFinish, languag
           </div>
         </aside>
         <section className="shogi-mini-board-wrap">
+          <div className="shogi-opponent-hand" aria-label={copy(languageMode, '相手の持ち駒', 'OPPONENT HAND', 'あいてのもちごま')}>
+            <div className="shogi-opponent-hand-heading">
+              <span>{copy(languageMode, '相手の持ち駒', 'OPPONENT HAND', 'あいてのもちごま')}</span>
+              <b>{cpuHandCount}</b>
+            </div>
+            <div className="shogi-opponent-hand-list">
+              {cpuHand.length ? cpuHand.map(([kind, count]) => {
+                const definition = getPieceDefinition(kind);
+                return (
+                  <span key={kind} title={pieceLabelFor(definition)}>
+                    <ShogiPieceIcon glyph={definition.glyph} cpu compact />
+                    <b>{pieceLabelFor(definition)}</b>
+                    <em>× {count}</em>
+                  </span>
+                );
+              }) : <small>{copy(languageMode, 'まだありません', 'NONE', 'まだありません')}</small>}
+            </div>
+          </div>
           <div className="shogi-mini-status">
             <span>{copy(languageMode, '手番', 'TURN', 'てばん')} {game.turn}</span>
             <b className={game.side === 'P' ? 'player' : 'cpu'}>{game.side === 'P' ? 'PLAYER PHASE' : 'CPU PHASE'}</b>
