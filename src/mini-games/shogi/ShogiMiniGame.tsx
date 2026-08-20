@@ -116,6 +116,8 @@ const localizeShogiMessage = (value: string, languageMode?: LanguageMode) => {
     'この駒は現在動かせません。': ['This piece has no legal moves right now.', 'このこまはげんざいうごかせません。'],
     'そのマスには移動できません。表示された候補を選んでください。': ['That square is not legal. Choose a highlighted destination.', 'そのマスにはいどうできません。ひょうじされたこうほをえらんでください。'],
     'CPUが指しました。あなたの手番です。': ['CPU moved. Your turn.', 'CPUがさしました。あなたのばんです。'],
+    '相手の王を取りました。勝利！': ['You captured the enemy king. Victory!', 'あいてのおうをとりました。しょうり！'],
+    '王を取られました。敗北。': ['Your king was captured. Defeat.', 'おうをとられました。はいぼく。'],
     '詰みです。勝利！': ['Checkmate. Victory!', 'つみです。しょうり！'],
     '合法手がありません。引き分けです。': ['There are no legal moves. Draw.', 'ごうほうてがありません。ひきわけです。'],
     'CPUに合法手がありません。引き分けです。': ['CPU has no legal moves. Draw.', 'CPUにごうほうてがありません。ひきわけです。'],

@@ -15,7 +15,7 @@ export const SHOGI_PIECE_ENGLISH: Record<ShogiPieceKind, ShogiPieceEnglishCopy> 
   K: {
     description: 'Move one square in any direction.',
     promotion: 'Does not promote.',
-    restriction: 'The king cannot be captured or dropped as a held piece.',
+    restriction: 'The king is not a held piece; capture it to win.',
   },
   R: {
     description: 'Move any number of squares orthogonally.',

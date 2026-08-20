@@ -308,8 +308,6 @@ export const getShogiTargets = (
   const piece = board[selection.row]?.[selection.col];
   if (!piece || piece.side !== side) return [];
   return candidateMoves(board, selection.row, selection.col)
-    // 王は捕獲せず、王手を回避できる合法手が尽きた時点で詰みと判定する。
-    .filter(target => board[target.row][target.col]?.kind !== 'K')
     .filter(target =>
       moveLeavesKingSafe(board, side, [selection.row, selection.col], [target.row, target.col]),
     );
@@ -479,6 +477,13 @@ export const playShogiMove = (state: ShogiGameState, target: [number, number]): 
   };
   const applied = applyMove(state.board, state.hands, move);
   const interim: ShogiGameState = { ...state, board: applied.board, hands: applied.hands, selected: null, legalTargets: [], lastMove: move, history: [...state.history, move], turn: state.turn + 1, signature: boardSignature(applied.board) };
+  if (applied.captured?.kind === 'K') {
+    return {
+      ...interim,
+      result: 'WIN',
+      message: '相手の王を取りました。勝利！',
+    };
+  }
   const cpuMoves = allMovesForSide(interim.board, interim.hands, 'C');
   if (cpuMoves.length === 0) {
     const cpuInCheck = isShogiInCheck(interim.board, 'C');
@@ -501,6 +506,13 @@ export const playShogiMove = (state: ShogiGameState, target: [number, number]): 
     message: 'CPUが指しました。あなたの手番です。',
     signature: boardSignature(cpuApplied.board),
   };
+  if (cpuApplied.captured?.kind === 'K') {
+    return {
+      ...afterCpu,
+      result: 'LOSE',
+      message: '王を取られました。敗北。',
+    };
+  }
   const playerMoves = allMovesForSide(afterCpu.board, afterCpu.hands, 'P');
   if (playerMoves.length === 0) {
     const playerInCheck = isShogiInCheck(afterCpu.board, 'P');
