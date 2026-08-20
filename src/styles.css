@@ -12568,8 +12568,9 @@ textarea {
 }
 
 /* Phone landscape: keep the duel field and hand visible in one viewport. */
-@media (max-width: 980px) and (orientation: landscape) {
+@media (max-width: 980px) and (orientation: landscape), (orientation: landscape) and (max-height: 600px) {
   .placement-tcg-shell {
+    --tcg-landscape-hand-height: clamp(126px, 38dvh, 180px);
     overflow: hidden;
   }
 
@@ -12612,9 +12613,9 @@ textarea {
   }
 
   .placement-tcg-layout {
-    height: calc(100dvh - 46px - 104px);
+    height: calc(100dvh - 46px - var(--tcg-landscape-hand-height));
     min-height: 0;
-    grid-template-columns: 96px minmax(0, 1fr);
+    grid-template-columns: clamp(96px, 13vw, 160px) minmax(0, 1fr);
     gap: 6px;
     padding: 5px 8px 4px;
     overflow: hidden;
@@ -12758,7 +12759,7 @@ textarea {
   }
 
   .placement-tcg-hand-zone {
-    height: 104px;
+    height: var(--tcg-landscape-hand-height);
     grid-template-columns: 28px minmax(0, 1fr);
     gap: 5px;
     padding: 4px 8px 6px;
@@ -12779,9 +12780,9 @@ textarea {
   }
 
   .placement-tcg-card {
-    flex-basis: 86px;
-    height: 92px;
-    grid-template-rows: 16px 30px 14px 1fr 14px;
+    flex-basis: clamp(102px, 17vw, 148px);
+    height: clamp(108px, 34dvh, 158px);
+    grid-template-rows: 20px 44px 18px 1fr 18px;
   }
 
   .placement-tcg-card-topline {
@@ -12789,12 +12790,12 @@ textarea {
   }
 
   .placement-tcg-card-cost {
-    font-size: 10px;
+    font-size: 12px;
   }
 
   .placement-tcg-card-kind {
     padding-left: 4px;
-    font-size: 5px;
+    font-size: 6px;
   }
 
   .placement-tcg-inspect-button {
@@ -12804,23 +12805,115 @@ textarea {
   }
 
   .placement-tcg-card-art {
-    height: 30px;
+    height: 44px;
   }
 
   .placement-tcg-card-name {
     padding: 2px 4px 1px;
-    font-size: 6px;
+    font-size: 7px;
   }
 
   .placement-tcg-card-rules {
     padding: 1px 4px;
-    font-size: 5px;
+    font-size: 6px;
     line-height: 1.2;
   }
 
   .placement-tcg-card-stats {
     padding-inline: 4px;
-    font-size: 5px;
+    font-size: 6px;
+  }
+
+  /* The title screen has no gameplay header, so give its copy and controls
+     explicit columns instead of letting the action row fall below the fold. */
+  .placement-tcg-shell.is-start {
+    overflow: hidden;
+  }
+
+  .placement-tcg-start-overlay {
+    width: min(900px, 92vw);
+    height: 100dvh;
+    display: grid;
+    grid-template-columns: minmax(0, 1.15fr) minmax(230px, .85fr);
+    grid-template-rows: auto auto minmax(0, 1fr) auto auto;
+    grid-template-areas:
+      "mark mark"
+      "eyebrow eyebrow"
+      "title lead"
+      "title specs"
+      "title actions";
+    align-content: center;
+    column-gap: clamp(18px, 4vw, 48px);
+    row-gap: 4px;
+    padding: 18px 0;
+    text-align: left;
+  }
+
+  .placement-tcg-start-mark {
+    grid-area: mark;
+    width: 54px;
+    height: 54px;
+    margin: 0 0 4px;
+    justify-self: center;
+    font-size: 8px;
+  }
+
+  .placement-tcg-start-overlay > .placement-tcg-eyebrow {
+    grid-area: eyebrow;
+    margin: 0;
+    justify-self: center;
+    font-size: 7px;
+  }
+
+  .placement-tcg-start-overlay h1 {
+    grid-area: title;
+    align-self: center;
+    margin: 0;
+    font-size: clamp(34px, 6.4vw, 66px);
+    line-height: .88;
+    text-align: left;
+  }
+
+  .placement-tcg-start-lead {
+    grid-area: lead;
+    align-self: end;
+    max-width: none;
+    margin: 0;
+    font-size: 10px;
+    line-height: 1.55;
+  }
+
+  .placement-tcg-start-specs {
+    grid-area: specs;
+    justify-content: flex-start;
+    width: 100%;
+    margin: 4px 0 0;
+  }
+
+  .placement-tcg-start-specs span {
+    min-width: 0;
+    flex: 1 1 0;
+    padding: 6px 7px;
+    font-size: 6px;
+  }
+
+  .placement-tcg-start-specs b {
+    margin-right: 3px;
+    font-size: 13px;
+  }
+
+  .placement-tcg-start-actions {
+    grid-area: actions;
+    justify-content: flex-start;
+    gap: 4px;
+  }
+
+  .placement-tcg-start-actions button {
+    min-width: 0;
+    margin: 4px 0 0;
+    padding: 8px 9px;
+    font-size: 7px;
+    letter-spacing: .07em;
   }
 }
 
@@ -13725,7 +13818,148 @@ textarea {
   .shogi-mini-start-stats b { font-size: 15px; }
 }
 
-@media (max-width: 980px) and (orientation: landscape) {
+@media (max-width: 980px) and (orientation: landscape), (orientation: landscape) and (max-height: 600px) {
+  .shogi-mini-shell:not(.is-playing) {
+    overflow: hidden;
+  }
+
+  /* Start controls stay beside the title in landscape, keeping the CTA
+     visible on phone screens without changing the portrait composition. */
+  .shogi-mini-start {
+    width: min(920px, 92vw);
+    height: 100dvh;
+    min-height: 0;
+    display: grid;
+    grid-template-columns: minmax(0, 1.08fr) minmax(250px, .92fr);
+    grid-template-rows: auto auto auto minmax(0, 1fr) auto;
+    align-content: center;
+    column-gap: clamp(18px, 4vw, 48px);
+    row-gap: 4px;
+    padding: 16px 0;
+    text-align: left;
+  }
+
+  .shogi-mini-emblem,
+  .shogi-mini-eyebrow,
+  .shogi-mini-start h1,
+  .shogi-mini-lead {
+    grid-column: 1;
+  }
+
+  .shogi-mini-emblem { grid-row: 1; }
+  .shogi-mini-eyebrow { grid-row: 2; }
+  .shogi-mini-start h1 { grid-row: 3; }
+  .shogi-mini-lead { grid-row: 4; }
+
+  .shogi-mini-emblem {
+    width: 54px;
+    height: 54px;
+    margin: 0 0 3px;
+    font-size: 8px;
+  }
+
+  .shogi-mini-eyebrow {
+    font-size: 7px;
+  }
+
+  .shogi-mini-start h1 {
+    align-self: center;
+    margin: 3px 0 8px;
+    font-size: clamp(36px, 6.6vw, 68px);
+    line-height: .9;
+  }
+
+  .shogi-mini-lead {
+    align-self: start;
+    max-width: 420px;
+    font-size: 10px;
+    line-height: 1.55;
+  }
+
+  .shogi-mini-mode-tabs,
+  .shogi-stage-picker,
+  .shogi-mini-start-stats,
+  .shogi-mini-start-actions {
+    grid-column: 2;
+  }
+
+  .shogi-mini-mode-tabs {
+    grid-row: 1 / span 2;
+    align-self: end;
+    margin-top: 0;
+    gap: 5px;
+  }
+
+  .shogi-mini-mode-tabs button {
+    gap: 3px;
+    padding: 8px;
+  }
+
+  .shogi-mini-mode-tabs b {
+    font-size: 10px;
+  }
+
+  .shogi-mini-mode-tabs span {
+    font-size: 8px;
+  }
+
+  .shogi-stage-picker {
+    grid-row: 3;
+    max-height: 112px;
+    margin-top: 2px;
+    padding: 7px;
+    overflow: hidden;
+  }
+
+  .shogi-stage-picker-head,
+  .shogi-stage-picker > p {
+    font-size: 8px;
+  }
+
+  .shogi-stage-grid {
+    max-height: 60px;
+    gap: 2px;
+    margin-top: 5px;
+  }
+
+  .shogi-stage-grid button {
+    padding: 3px 0;
+    font-size: 7px;
+  }
+
+  .shogi-mini-start-stats {
+    grid-row: 4;
+    justify-content: flex-start;
+    gap: 1px;
+    margin-top: 4px;
+  }
+
+  .shogi-mini-start-stats span {
+    min-width: 0;
+    flex: 1 1 0;
+    padding: 6px 5px;
+    font-size: 6px;
+  }
+
+  .shogi-mini-start-stats b {
+    font-size: 13px;
+  }
+
+  .shogi-mini-start-actions {
+    grid-row: 5;
+    justify-content: flex-start;
+    gap: 4px;
+    margin-top: 4px;
+  }
+
+  .shogi-mini-start-actions button {
+    min-width: 0;
+    margin: 0;
+    padding: 8px 9px;
+    font-size: 7px;
+    letter-spacing: .07em;
+  }
+
   .shogi-mini-shell.is-playing {
     overflow: hidden;
   }
@@ -13764,19 +13998,68 @@ textarea {
     height: calc(100dvh - 46px);
     min-height: 0;
     display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: minmax(0, 1fr) auto;
-    gap: 4px;
-    padding: 4px 7px 5px;
+    grid-template-columns: clamp(124px, 18vw, 210px) minmax(0, 1fr) clamp(124px, 18vw, 210px);
+    grid-template-rows: minmax(0, 1fr);
+    align-items: stretch;
+    gap: 8px;
+    padding: 6px 10px 7px;
+    overflow: hidden;
+  }
+
+  .shogi-mini-side-panel,
+  .shogi-mini-hand-panel {
+    grid-row: 1;
+    min-height: 0;
+    margin: 0;
+    padding: 8px;
     overflow: hidden;
   }
 
   .shogi-mini-side-panel {
-    display: none;
+    grid-column: 1;
+    display: flex;
+    flex-direction: column;
+  }
+
+  .shogi-mini-side-panel h2,
+  .shogi-mini-hand-panel h2 {
+    margin: 4px 0 8px;
+    font-size: 15px;
+  }
+
+  .shogi-mini-side-panel .shogi-mini-eyebrow,
+  .shogi-mini-hand-panel .shogi-mini-eyebrow {
+    font-size: 7px;
+    letter-spacing: .12em;
+  }
+
+  .shogi-mini-side-list {
+    flex: 1 1 auto;
+    min-height: 0;
+    max-height: none;
+    gap: 3px;
+    overflow-y: auto;
+  }
+
+  .shogi-mini-side-list > span {
+    gap: 4px;
+    padding-bottom: 3px;
+    font-size: 8px;
+  }
+
+  .shogi-mini-help {
+    flex: 0 0 auto;
+    margin-top: 7px;
+    padding: 6px;
+    font-size: 7px;
+    line-height: 1.4;
   }
 
   .shogi-mini-board-wrap {
-    width: min(100%, calc(100dvh - 150px));
+    grid-column: 2;
+    grid-row: 1;
+    align-self: center;
+    width: min(100%, calc(100dvh - 73px));
     min-height: 0;
     margin: 0 auto;
     padding: 4px;
@@ -13819,44 +14102,32 @@ textarea {
   }
 
   .shogi-mini-hand-panel {
-    grid-column: 1 / -1;
-    min-width: 0;
-    min-height: 54px;
-    margin: 0;
-    padding: 5px 8px;
-    overflow: hidden;
+    grid-column: 3;
     display: flex;
-    align-items: center;
-    gap: 8px;
-  }
-
-  .shogi-mini-hand-panel .shogi-mini-eyebrow {
-    flex: 0 0 auto;
-    font-size: 7px;
-    letter-spacing: .12em;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 5px;
+    overflow: hidden;
   }
 
   .shogi-mini-hand-panel h2 {
     flex: 0 0 auto;
-    margin: 0;
-    font-size: 16px;
   }
 
   .shogi-hand-list {
-    flex: 1 1 auto;
     min-width: 0;
+    flex: 1 1 auto;
     display: flex;
-    flex-direction: row;
-    gap: 7px;
+    flex-direction: column;
+    gap: 5px;
     max-height: none;
-    overflow-x: auto;
-    overflow-y: hidden;
-    padding-bottom: 4px;
+    overflow-x: hidden;
+    overflow-y: auto;
   }
 
   .shogi-hand-list button {
-    flex: 0 0 124px;
-    min-width: 124px;
+    flex: 0 0 auto;
+    min-width: 0;
     min-height: 40px;
     grid-template-columns: 24px minmax(0, 1fr) auto;
     gap: 4px;
@@ -13870,12 +14141,21 @@ textarea {
 
   .shogi-hand-list > p {
     margin: 0;
-    white-space: nowrap;
     font-size: 8px;
+    line-height: 1.45;
   }
 
-  .shogi-drop-hint,
+  .shogi-drop-hint {
+    margin-top: 2px;
+    padding: 6px;
+    font-size: 7px;
+    line-height: 1.4;
+  }
+
   .shogi-replay-button {
-    display: none;
+    flex: 0 0 auto;
+    margin-top: auto;
+    padding: 7px 5px;
+    font-size: 7px;
   }
 }
