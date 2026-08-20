@@ -156,7 +156,8 @@ const saveProgress = (progress: ShogiProgress) => {
 const glyphFor = (piece: ShogiPiece): string => {
   if (piece.kind.startsWith('ADV_')) return getPieceDefinition(piece.kind).glyph;
   if (!piece.promoted) return getPieceDefinition(piece.kind).glyph;
-  if (piece.kind === 'R') return '竜';
+  // 標準将棋の成り飛車は説明文・駒字とも「龍」で統一する。
+  if (piece.kind === 'R') return '龍';
   if (piece.kind === 'B') return '馬';
   if (piece.kind === 'S') return '全';
   if (piece.kind === 'N') return '圭';
@@ -492,7 +493,7 @@ const ShogiMiniGame: React.FC<ShogiMiniGameProps> = ({ onBack, onFinish, languag
             <p className="shogi-mini-eyebrow">MOVE REFERENCE // STANDARD</p>
             <h2>{copy(languageMode, '標準駒の動き', 'Standard piece movement')}</h2>
             <div className="shogi-standard-grid">{STANDARD_PIECES.map(piece => <button key={piece.kind} type="button" onClick={() => setInspect({ piece: { kind: piece.kind, side: 'P', promoted: false, hasMoved: false }, targetCount: 0 })}><b>{piece.glyph}</b><span>{pieceLabelFor(piece)}</span></button>)}</div>
-            <p className="shogi-guide-note">{copy(languageMode, '竜は飛車＋斜め1マス、馬は角＋縦横1マスです。移動中の駒を長押しすると、現在の盤面での合法手数も確認できます。', '竜 = rook plus one diagonal step. 馬 = bishop plus one orthogonal step. Hold any piece to see its current legal move count.', 'りゅうはひしゃ＋ななめ1マス、うまはかく＋たてよこ1マスです。こまをながおしすると、げんざいのばんめんでのごうほうてすうもかくにんできます。')}</p>
+            <p className="shogi-guide-note">{copy(languageMode, '龍は飛車＋斜め1マス、馬は角＋縦横1マスです。移動中の駒を長押しすると、現在の盤面での合法手数も確認できます。', '龍 = rook plus one diagonal step. 馬 = bishop plus one orthogonal step. Hold any piece to see its current legal move count.', 'りゅうはひしゃ＋ななめ1マス、うまはかく＋たてよこ1マスです。こまをながおしすると、げんざいのばんめんでのごうほうてすうもかくにんできます。')}</p>
           </section>
         </div>
       )}

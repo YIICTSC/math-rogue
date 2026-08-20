@@ -19,7 +19,7 @@ export const SHOGI_PIECE_ENGLISH: Record<ShogiPieceKind, ShogiPieceEnglishCopy> 
   },
   R: {
     description: 'Move any number of squares orthogonally.',
-    promotion: 'Promotes to 竜 in the enemy camp.',
+    promotion: 'Promotes to 龍 in the enemy camp.',
     restriction: 'Cannot jump over friendly pieces.',
   },
   B: {
