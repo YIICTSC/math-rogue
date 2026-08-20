@@ -193,8 +193,9 @@ const ModeStart: React.FC<{
   const [mode, setMode] = useState<ShogiMode>('STANDARD');
   const [stage, setStage] = useState(1);
   const unlocked = Math.min(100, progress.highestStage);
+  // 駒名・駒字は日本語の固有表記。英語の遅延DOM翻訳から保護する。
   return (
-    <main className="shogi-mini-shell">
+    <main className="shogi-mini-shell" data-allow-japanese="true">
       <div className="shogi-mini-backdrop" style={{ backgroundImage: 'url("' + assetUrl('sprites/backgrounds/mini-games/shogi.png') + '")' }} />
       <section className="shogi-mini-start">
         <div className="shogi-mini-emblem">{copy(languageMode, '将 // 5×5', 'SHO // 5x5', 'しょう // 5×5')}</div>
@@ -382,8 +383,9 @@ const ShogiMiniGame: React.FC<ShogiMiniGameProps> = ({ onBack, onFinish, languag
   const statusText = game.result
     ? game.result === 'WIN' ? copy(languageMode, '勝利！', 'VICTORY!') : game.result === 'LOSE' ? copy(languageMode, '敗北', 'DEFEAT') : copy(languageMode, '引き分け', 'DRAW')
     : game.message;
+  // 駒名・駒字は日本語の固有表記。英語の遅延DOM翻訳から保護する。
   return (
-    <main className="shogi-mini-shell is-playing">
+    <main className="shogi-mini-shell is-playing" data-allow-japanese="true">
       <div className="shogi-mini-backdrop" style={{ backgroundImage: 'url("' + assetUrl('sprites/backgrounds/mini-games/shogi.png') + '")' }} />
       <header className="shogi-mini-header">
         <button type="button" onClick={onBack}>← EXIT</button>
