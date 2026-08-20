@@ -1,7 +1,8 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import type { LanguageMode } from '../../types';
-import type { AttackEffectKey } from '../../types';
+import type { AnswerMode, AssignmentAnswerResult, AssignmentPayload, AttackEffectKey, GameMode } from '../../types';
 import ResilientAssetImage from '../../components/ResilientAssetImage';
+import MiniGameProblemChallenge from '../../components/MiniGameProblemChallenge';
 import { assetUrl } from '../../utils/assetPaths';
 import { getCardIllustrationPaths } from '../../utils/cardIllustration';
 import { trans } from '../../utils/textUtils';
@@ -40,6 +41,11 @@ interface PlacementTcgGameProps {
   onBack: () => void;
   onFinish?: (result: 'WIN' | 'LOSE') => void;
   languageMode?: LanguageMode;
+  problemMode?: GameMode;
+  problemModePool?: string[];
+  answerMode?: AnswerMode;
+  assignment?: AssignmentPayload | null;
+  onAnswerResult?: (result: AssignmentAnswerResult) => void;
 }
 
 const KIND_LABEL: Record<PlacementCardDefinition['kind'], string> = {
@@ -490,7 +496,7 @@ const CompletionOverlay: React.FC<{
   </div>
 );
 
-const PlacementTcgGame: React.FC<PlacementTcgGameProps> = ({ onBack, onFinish, languageMode }) => {
+const PlacementTcgGame: React.FC<PlacementTcgGameProps> = ({ onBack, onFinish, languageMode, problemMode = 'MIXED' as GameMode, problemModePool, answerMode = 'CHOICE', assignment, onAnswerResult }) => {
   const [savedRunAtOpen] = useState<PlacementRun | null>(() => loadPlacementRun());
   const [run, setRun] = useState<PlacementRun | null>(null);
   const [battle, setBattle] = useState<PlacementBattle | null>(null);
@@ -500,6 +506,7 @@ const PlacementTcgGame: React.FC<PlacementTcgGameProps> = ({ onBack, onFinish, l
   const [notice, setNotice] = useState('');
   const [rewardChoices, setRewardChoices] = useState<string[]>([]);
   const [complete, setComplete] = useState(false);
+  const [showMissionQuiz, setShowMissionQuiz] = useState(false);
   const [activeCue, setActiveCue] = useState<PlacementActionCue | null>(null);
   const cueTimerRef = useRef<number | null>(null);
   const seenCueRef = useRef<number | null>(null);
@@ -591,7 +598,9 @@ const PlacementTcgGame: React.FC<PlacementTcgGameProps> = ({ onBack, onFinish, l
   useEffect(() => {
     if (!battle?.winner || !run) return;
     setSelectedHandIndex(null);
+    setShowMissionQuiz(false);
     if (battle.winner === 'player') {
+      setShowMissionQuiz(true);
       if (run.battleIndex >= 9) {
         clearPlacementRun();
         setComplete(true);
@@ -785,6 +794,20 @@ const PlacementTcgGame: React.FC<PlacementTcgGameProps> = ({ onBack, onFinish, l
       )}
       {rewardChoices.length > 0 && (
         <RewardOverlay choices={rewardChoices} languageMode={languageMode} onChoose={takeReward} />
+      )}
+      {showMissionQuiz && (
+        <div className="fixed inset-0 z-[120] overflow-y-auto bg-slate-950/95 p-2 sm:p-4" data-gamepad-modal="true">
+          <MiniGameProblemChallenge
+            mode={problemMode}
+            modePool={problemModePool}
+            answerMode={answerMode}
+            assignment={assignment}
+            onAnswerResult={onAnswerResult}
+            onComplete={() => setShowMissionQuiz(false)}
+            languageMode={languageMode}
+            rewardHint={languageMode === 'ENGLISH' ? 'Mission clear quiz complete' : 'ミッションクリア問題を完了しました'}
+          />
+        </div>
       )}
       {complete && (
           <CompletionOverlay

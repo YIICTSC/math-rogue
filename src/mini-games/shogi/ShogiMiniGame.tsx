@@ -1,8 +1,9 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import type { LanguageMode } from '../../types';
+import type { AnswerMode, AssignmentAnswerResult, AssignmentPayload, GameMode, LanguageMode } from '../../types';
 import { audioService } from '../../services/audioService';
 import { assetUrl } from '../../utils/assetPaths';
 import { trans } from '../../utils/textUtils';
+import MiniGameProblemChallenge from '../../components/MiniGameProblemChallenge';
 import {
   createShogiGame,
   getAdvancedStageUniqueCount,
@@ -26,6 +27,11 @@ interface ShogiMiniGameProps {
   onBack: () => void;
   onFinish?: (result: 'WIN' | 'LOSE') => void;
   languageMode?: LanguageMode;
+  problemMode?: GameMode;
+  problemModePool?: string[];
+  answerMode?: AnswerMode;
+  assignment?: AssignmentPayload | null;
+  onAnswerResult?: (result: AssignmentAnswerResult) => void;
 }
 
 interface ShogiProgress {
@@ -322,11 +328,12 @@ const GuideLegend: React.FC<{ languageMode?: LanguageMode }> = ({ languageMode }
   </div>
 );
 
-const ShogiMiniGame: React.FC<ShogiMiniGameProps> = ({ onBack, onFinish, languageMode }) => {
+const ShogiMiniGame: React.FC<ShogiMiniGameProps> = ({ onBack, onFinish, languageMode, problemMode = 'MIXED' as GameMode, problemModePool, answerMode = 'CHOICE', assignment, onAnswerResult }) => {
   const [progress, setProgress] = useState<ShogiProgress>(() => loadProgress());
   const [game, setGame] = useState<ShogiGameState | null>(null);
   const [inspect, setInspect] = useState<{ piece: ShogiPiece; targetCount: number } | null>(null);
   const [showGuide, setShowGuide] = useState(false);
+  const [showMissionQuiz, setShowMissionQuiz] = useState(false);
   const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const longPressTriggered = useRef(false);
 
@@ -347,6 +354,7 @@ const ShogiMiniGame: React.FC<ShogiMiniGameProps> = ({ onBack, onFinish, languag
   useEffect(() => {
     if (!game?.result) return;
     if (game.result === 'WIN') {
+      setShowMissionQuiz(true);
       setProgress(previous => {
         const nextProgress: ShogiProgress = game.mode === 'ADVANCE'
           ? {
@@ -534,6 +542,20 @@ const ShogiMiniGame: React.FC<ShogiMiniGameProps> = ({ onBack, onFinish, languag
         </aside>
       </div>
       {inspect && <PieceInspector piece={inspect.piece} targetCount={inspect.targetCount} languageMode={languageMode} onClose={() => setInspect(null)} />}
+      {showMissionQuiz && (
+        <div className="fixed inset-0 z-[120] overflow-y-auto bg-slate-950/95 p-2 sm:p-4" data-gamepad-modal="true">
+          <MiniGameProblemChallenge
+            mode={problemMode}
+            modePool={problemModePool}
+            answerMode={answerMode}
+            assignment={assignment}
+            onAnswerResult={onAnswerResult}
+            onComplete={() => setShowMissionQuiz(false)}
+            languageMode={languageMode}
+            rewardHint={languageMode === 'ENGLISH' ? 'Mission clear quiz complete' : 'ミッションクリア問題を完了しました'}
+          />
+        </div>
+      )}
       {showGuide && (
         <div className="shogi-modal-backdrop" role="dialog" aria-modal="true" onClick={() => setShowGuide(false)}>
           <section className="shogi-piece-modal shogi-move-guide" onClick={event => event.stopPropagation()}>

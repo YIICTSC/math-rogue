@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { ArrowLeft, CircleHelp, Trophy } from 'lucide-react';
 import { CARDS_LIBRARY } from '../constants';
-import { Card as CardType, GameScreen, LanguageMode } from '../types';
+import { AnswerMode, AssignmentAnswerResult, AssignmentPayload, Card as CardType, GameMode, GameScreen, LanguageMode } from '../types';
 import Card from './Card';
+import MiniGameProblemChallenge from './MiniGameProblemChallenge';
 import { audioService } from '../services/audioService';
 import { trans } from '../utils/textUtils';
 import { assetUrl } from '../utils/assetPaths';
@@ -12,6 +13,12 @@ interface TriviaMiniGameProps {
   onFinish?: (result: 'WIN' | 'LOSE') => void;
   languageMode?: LanguageMode;
   gameScreen?: GameScreen;
+  problemMode?: GameMode;
+  problemModePool?: string[];
+  answerMode?: AnswerMode;
+  assignment?: AssignmentPayload | null;
+  onAnswerResult?: (result: AssignmentAnswerResult) => void;
+  onMissionClear?: () => void;
 }
 
 const text = (languageMode: LanguageMode, japanese: string, english: string) =>
@@ -94,7 +101,13 @@ const GameShell: React.FC<{
   );
 };
 
-const ResultBanner: React.FC<{ result: 'WIN' | 'LOSE' | null; onRestart: () => void; languageMode: LanguageMode }> = ({ result, onRestart, languageMode }) => {
+const MiniGameMissionClearContext = React.createContext<(() => void) | null>(null);
+
+const ResultBanner: React.FC<{ result: 'WIN' | 'LOSE' | null; onRestart: () => void; languageMode: LanguageMode; onWin?: () => void }> = ({ result, onRestart, languageMode, onWin }) => {
+  const missionClear = React.useContext(MiniGameMissionClearContext);
+  useEffect(() => {
+    if (result === 'WIN') (onWin || missionClear)?.();
+  }, [missionClear, onWin, result]);
   if (!result) return null;
   return (
     <div className="mb-3 rounded-2xl border border-yellow-300/50 bg-yellow-950/70 p-4 text-center shadow-lg">
@@ -244,7 +257,7 @@ const advanceStoneCpu = (state: StoneGlowState): StoneGlowState => {
   return next;
 };
 
-const StoneGlowGame: React.FC<TriviaMiniGameProps> = ({ onBack, languageMode = 'JAPANESE' }) => {
+const StoneGlowGame: React.FC<TriviaMiniGameProps> = ({ onBack, languageMode = 'JAPANESE', onMissionClear }) => {
   const [game, setGame] = useState<StoneGlowState>(createStoneGlowState);
   const restart = () => setGame(createStoneGlowState());
   const canBuy = (card: StoneCard) => stoneCanPay(card, game.stones, game.owned, game.wild);
@@ -337,7 +350,7 @@ const StoneGlowGame: React.FC<TriviaMiniGameProps> = ({ onBack, languageMode = '
   };
   return (
     <GameShell scope="stone-glow" title={text(languageMode, '石ころの煌めき', 'Stone Glow')} subtitle={text(languageMode, '共通の鉱山から石を取り、割引を育てて先に8点。予約とワイルド石が逆転の鍵。', 'Take stones from a shared mine, build discounts, and reach 8 points first. Reserve cards and wild stones can turn the game around.')} languageMode={languageMode} backgroundAsset="sprites/backgrounds/mini-games/stone-glow.png" badgeAsset="sprites/backgrounds/mini-games/badges/stone-glow.png" onBack={onBack}>
-      <ResultBanner result={game.result} onRestart={restart} languageMode={languageMode} />
+      <ResultBanner result={game.result} onRestart={restart} languageMode={languageMode} onWin={onMissionClear} />
       <div className="stone-glow-scoreboard mb-2 grid grid-cols-2 gap-2 sm:grid-cols-4">
         <div className="rounded-xl border border-emerald-300/30 bg-emerald-950/70 p-2"><div className="text-xs text-emerald-200">{text(languageMode, 'あなた', 'You')}</div><div className="text-2xl font-black">{game.score}<span className="ml-1 text-xs">{text(languageMode, '点', 'pts')}</span></div></div>
         <div className="rounded-xl border border-rose-300/30 bg-rose-950/70 p-2"><div className="text-xs text-rose-200">{text(languageMode, '相手', 'CPU')}</div><div className="text-2xl font-black">{game.cpuScore}<span className="ml-1 text-xs">{text(languageMode, '点', 'pts')}</span></div></div>
@@ -437,7 +450,7 @@ type TrpgLog = { stat: TrpgStat; statValue: number; fateBonus: number; roll: num
 type TrpgState = { sceneIndex: number; stats: Record<TrpgStat, number>; clues: number; stress: number; fate: number; lastRoll: number | null; logs: TrpgLog[]; result: 'WIN' | 'LOSE' | null; ending: LocalCopy | null };
 const createTrpgState = (): TrpgState => ({ sceneIndex: 0, stats: { study: 2, energy: 2, friendship: 2, courage: 2 }, clues: 0, stress: 0, fate: 2, lastRoll: null, logs: [], result: null, ending: null });
 
-const SchoolTrpgGame: React.FC<TriviaMiniGameProps> = ({ onBack, languageMode = 'JAPANESE' }) => {
+const SchoolTrpgGame: React.FC<TriviaMiniGameProps> = ({ onBack, languageMode = 'JAPANESE', onMissionClear }) => {
   const [game, setGame] = useState<TrpgState>(createTrpgState);
   const [useFate, setUseFate] = useState(false);
   const restart = () => { setGame(createTrpgState()); setUseFate(false); };
@@ -461,7 +474,7 @@ const SchoolTrpgGame: React.FC<TriviaMiniGameProps> = ({ onBack, languageMode = 
   const scene = TRPG_SCENES[game.sceneIndex];
   return (
     <GameShell scope="school-trpg" title={text(languageMode, '放課後スクールTRPG', 'After-School School TRPG')} subtitle={text(languageMode, 'd6判定、成長、運命ポイント、分岐する結末で学校の謎を解こう。', 'Solve a school mystery with d6 checks, growth, fate points, and branching outcomes.')} languageMode={languageMode} backgroundAsset="sprites/backgrounds/mini-games/school-trpg.png" badgeAsset="sprites/backgrounds/mini-games/badges/school-trpg.png" onBack={onBack}>
-      <ResultBanner result={game.result} onRestart={restart} languageMode={languageMode} />
+      <ResultBanner result={game.result} onRestart={restart} languageMode={languageMode} onWin={onMissionClear} />
       <div className="mb-3 grid grid-cols-2 gap-2 sm:grid-cols-4">{TRPG_STATS.map(stat => <div key={stat.id} className="rounded-xl border border-amber-300/20 bg-amber-950/55 p-2 text-center"><div className={`text-[11px] ${stat.className}`}>{copyText(languageMode, stat.label)}</div><div className="text-xl font-black">{game.stats[stat.id]}</div></div>)}</div>
       <div className="mb-3 grid grid-cols-3 gap-2 text-center text-xs"><div className="rounded-lg border border-cyan-300/20 bg-cyan-950/50 p-2">{text(languageMode, '手がかり', 'Clues')}<strong className="ml-1 text-cyan-100">{game.clues} / 3</strong></div><div className="rounded-lg border border-rose-300/20 bg-rose-950/50 p-2">{text(languageMode, '疲労', 'Stress')}<strong className="ml-1 text-rose-100">{game.stress} / 6</strong></div><div className="rounded-lg border border-violet-300/20 bg-violet-950/50 p-2">{text(languageMode, '運命', 'Fate')}<strong className="ml-1 text-violet-100">{game.fate}</strong></div></div>
       <section className="flex flex-1 flex-col rounded-2xl border border-amber-300/25 bg-slate-900/85 p-4 shadow-xl"><div className="mb-2 flex items-center justify-between"><h2 className="text-xl font-black text-amber-100">{copyText(languageMode, scene.title)}</h2><span className="text-xs text-slate-400">{text(languageMode, '場面', 'Scene')} {game.sceneIndex + 1} / {TRPG_SCENES.length}</span></div><p className="mb-4 rounded-xl bg-black/25 p-4 leading-7 text-slate-100">{copyText(languageMode, scene.text)}</p><div className="mb-3 flex items-center justify-between rounded-xl border border-violet-300/20 bg-violet-950/35 p-3 text-xs text-violet-100"><span>{text(languageMode, '判定前に運命を使うと+2。失敗すると運命が1戻る。', 'Spend Fate before a check for +2. Failed checks restore one Fate.')}</span><button type="button" onClick={() => setUseFate(previous => !previous)} disabled={game.fate <= 0 || !!game.result} data-gamepad-zone="trpg-tools" data-gamepad-order={0} className={`ml-2 shrink-0 rounded-lg px-3 py-2 font-black ${useFate ? 'bg-violet-400 text-slate-950' : 'border border-violet-300/40 bg-violet-900/50'} disabled:opacity-35`}>{useFate ? text(languageMode, '使用中', 'Ready') : text(languageMode, '運命+2', 'Use Fate')}</button></div><div className="grid gap-2 sm:grid-cols-2">{scene.choices.map((choice, index) => <button key={choice.label.jp} type="button" onClick={() => choose(choice)} disabled={!!game.result} data-gamepad-zone="trpg-choices" data-gamepad-order={index} className="rounded-xl border border-amber-300/30 bg-amber-900/30 p-3 text-left font-bold transition hover:bg-amber-800/50 disabled:opacity-40"><span className="mr-2 text-amber-300">{index + 1}.</span>{copyText(languageMode, choice.label)}<span className="mt-1 block text-xs font-normal text-slate-300">{text(languageMode, '使う力：', 'Check: ')}{copyText(languageMode, TRPG_STATS.find(stat => stat.id === choice.stat)!.label)} / {text(languageMode, '目標', 'Target')} {choice.difficulty}</span></button>)}</div>{game.lastRoll !== null && <div className="mt-4 text-sm text-amber-200">{text(languageMode, '直前のダイス：', 'Last roll: ')}{game.lastRoll}</div>}{game.ending && <div className={`mt-4 rounded-xl border p-3 font-black ${game.result === 'WIN' ? 'border-emerald-300/40 bg-emerald-950/45 text-emerald-100' : 'border-rose-300/40 bg-rose-950/45 text-rose-100'}`}>{copyText(languageMode, game.ending)}</div>}<div className="mt-4 space-y-1 text-xs text-slate-300">{game.logs.map((log, index) => <div key={`${log.roll}-${index}`}>🎲 {copyText(languageMode, TRPG_STATS.find(stat => stat.id === log.stat)!.label)} {log.roll} + {log.statValue}{log.fateBonus ? ` + ${log.fateBonus}` : ''} = {log.total} ／ {copyText(languageMode, log.copy)}</div>)}</div></section>
@@ -506,7 +519,7 @@ const createLearningTcgState = (): LearningTcgState => {
   return { deck: drawn.deck, hand: drawn.hand, discard: [], energy: 3, playerHp: 45, cpuHp: 45, block: 0, cpuBlock: 0, enemyIntent: 7, enemyVulnerable: 0, enemyWeak: 0, playerWeak: 0, nextEnergy: 0, turn: 1, logs: [copy('戦闘開始。手札からカードを何枚でも使い、最後にターン終了を押そう。', 'Battle start. Play as many cards as you can, then press End Turn.')], result: null };
 };
 
-const LearningTcgGame: React.FC<TriviaMiniGameProps> = ({ onBack, languageMode = 'JAPANESE' }) => {
+const LearningTcgGame: React.FC<TriviaMiniGameProps> = ({ onBack, languageMode = 'JAPANESE', onMissionClear }) => {
   const [game, setGame] = useState<LearningTcgState>(createLearningTcgState);
   const restart = () => setGame(createLearningTcgState());
   const playCard = (card: CardType) => {
@@ -549,7 +562,7 @@ const LearningTcgGame: React.FC<TriviaMiniGameProps> = ({ onBack, languageMode =
   };
   return (
     <GameShell scope="learning-tcg" title={text(languageMode, '学習ローグTCG', 'Learning Rogue TCG')} subtitle={text(languageMode, '毎ターン5枚を引き、エナジーを配分して攻撃と防御を組み立てる。', 'Draw five cards each turn and spend energy to balance offense and defense.')} languageMode={languageMode} backgroundAsset="sprites/backgrounds/mini-games/learning-tcg.png" badgeAsset="sprites/backgrounds/mini-games/badges/learning-tcg.png" onBack={onBack}>
-      <ResultBanner result={game.result} onRestart={restart} languageMode={languageMode} />
+      <ResultBanner result={game.result} onRestart={restart} languageMode={languageMode} onWin={onMissionClear} />
       <div className="mb-3 grid grid-cols-2 gap-2 sm:grid-cols-4"><div className="rounded-xl border border-cyan-300/30 bg-cyan-950/70 p-3"><div className="text-xs text-cyan-200">{text(languageMode, 'あなた HP', 'Your HP')}</div><div className="text-2xl font-black">{game.playerHp} <span className="text-xs">/ 45</span></div><div className="text-xs text-slate-300">{text(languageMode, 'ブロック', 'Block')} {game.block}</div></div><div className="rounded-xl border border-rose-300/30 bg-rose-950/70 p-3"><div className="text-xs text-rose-200">{text(languageMode, '相手 HP', 'CPU HP')}</div><div className="text-2xl font-black">{game.cpuHp} <span className="text-xs">/ 45</span></div><div className="text-xs text-slate-300">{text(languageMode, '相手ブロック', 'Enemy block')} {game.cpuBlock}</div></div><div className="rounded-xl border border-violet-300/30 bg-violet-950/60 p-3"><div className="text-xs text-violet-200">{text(languageMode, 'エナジー', 'Energy')}</div><div className="text-2xl font-black">{game.energy} / 3</div><div className="text-xs text-slate-300">{text(languageMode, 'ターン', 'Turn')} {game.turn}</div></div><div className="rounded-xl border border-amber-300/30 bg-amber-950/60 p-3"><div className="text-xs text-amber-200">{text(languageMode, '次の攻撃', 'Next attack')}</div><div className="text-2xl font-black">{game.enemyIntent}</div><div className="text-xs text-slate-300">{text(languageMode, '弱体化', 'Weak')} {game.enemyWeak}</div></div></div>
       <section className="flex flex-1 flex-col rounded-2xl border border-violet-300/25 bg-slate-900/85 p-3"><div className="mb-2 flex items-center justify-between gap-2"><h2 className="font-black text-violet-100">{text(languageMode, 'あなたの手札', 'Your hand')} <span className="text-xs font-normal text-slate-400">{game.hand.length} / 10</span></h2><button type="button" onClick={endTurn} disabled={!!game.result} data-gamepad-zone="tcg-actions" data-gamepad-order={0} className="rounded-lg bg-violet-600 px-3 py-2 text-xs font-black hover:bg-violet-500 disabled:opacity-35">{text(languageMode, 'ターン終了', 'End turn')}</button></div><p className="mb-3 text-xs text-slate-300">{text(languageMode, 'カードは何枚でも使用可能。ブロックは相手の攻撃を防ぎ、弱体・びくびくは次の数ターンに効く。', 'Play multiple cards. Block stops the next attack; Weak and Vulnerable affect upcoming turns.')}</p><div className="flex flex-wrap justify-center gap-2 pb-2">{game.hand.map((card, index) => <Card key={card.id} card={card} onClick={() => playCard(card)} disabled={!!game.result || card.cost > game.energy} languageMode={languageMode} gamepadZone="tcg-hand" gamepadOrder={index + 1} />)}</div><div className="mt-2 space-y-1 rounded-xl border border-white/10 bg-black/20 p-3 text-xs text-slate-300">{game.logs.map((log, index) => <div key={`${log.jp}-${index}`}>{copyText(languageMode, log)}</div>)}</div></section>
     </GameShell>
@@ -613,7 +626,7 @@ const shogiDropAllowed = (board: ShogiBoard, hands: ShogiHands, side: 'P' | 'C',
   return true;
 };
 
-const ShogiGame: React.FC<TriviaMiniGameProps> = ({ onBack, languageMode = 'JAPANESE' }) => {
+const ShogiGame: React.FC<TriviaMiniGameProps> = ({ onBack, languageMode = 'JAPANESE', onMissionClear }) => {
   const [board, setBoard] = useState<ShogiBoard>(createShogiBoard);
   const [hands, setHands] = useState<ShogiHands>(createShogiHands);
   const [selected, setSelected] = useState<ShogiSelection>(null);
@@ -894,21 +907,53 @@ const MahjongGame: React.FC<TriviaMiniGameProps> = ({ onBack, languageMode = 'JA
   );
 };
 
-const TriviaMiniGameScreen: React.FC<TriviaMiniGameProps> = ({ gameScreen = GameScreen.MINI_GAME_STONE_GLOW, ...props }) => {
+const TriviaMiniGameScreen: React.FC<TriviaMiniGameProps> = ({
+  gameScreen = GameScreen.MINI_GAME_STONE_GLOW,
+  problemMode = GameMode.MIXED,
+  problemModePool,
+  answerMode = 'CHOICE',
+  assignment,
+  onAnswerResult,
+  ...props
+}) => {
+  const [showMissionQuiz, setShowMissionQuiz] = useState(false);
+  const handleMissionClear = React.useCallback(() => setShowMissionQuiz(true), []);
   useEffect(() => {
     void audioService.playBGM(gameScreen === GameScreen.MINI_GAME_LEARNING_TCG ? 'battle' : 'poker_play');
   }, [gameScreen]);
 
-  switch (gameScreen) {
-    case GameScreen.MINI_GAME_SCHOOL_TRPG: return <SchoolTrpgGame {...props} />;
-    case GameScreen.MINI_GAME_LEARNING_TCG: return <LearningTcgGame {...props} />;
-    case GameScreen.MINI_GAME_SHOGI: return <ShogiGame {...props} />;
-    case GameScreen.MINI_GAME_GO: return <GoGame {...props} />;
-    case GameScreen.MINI_GAME_CHESS: return <ChessGame {...props} />;
-    case GameScreen.MINI_GAME_MAHJONG: return <MahjongGame {...props} />;
-    case GameScreen.MINI_GAME_STONE_GLOW:
-    default: return <StoneGlowGame {...props} />;
-  }
+  const game = (() => {
+    switch (gameScreen) {
+      case GameScreen.MINI_GAME_SCHOOL_TRPG: return <SchoolTrpgGame {...props} />;
+      case GameScreen.MINI_GAME_LEARNING_TCG: return <LearningTcgGame {...props} />;
+      case GameScreen.MINI_GAME_SHOGI: return <ShogiGame {...props} />;
+      case GameScreen.MINI_GAME_GO: return <GoGame {...props} />;
+      case GameScreen.MINI_GAME_CHESS: return <ChessGame {...props} />;
+      case GameScreen.MINI_GAME_MAHJONG: return <MahjongGame {...props} />;
+      case GameScreen.MINI_GAME_STONE_GLOW:
+      default: return <StoneGlowGame {...props} />;
+    }
+  })();
+
+  return (
+    <MiniGameMissionClearContext.Provider value={handleMissionClear}>
+      {game}
+      {showMissionQuiz && (
+        <div className="fixed inset-0 z-[120] overflow-y-auto bg-slate-950/95 p-2 sm:p-4" data-gamepad-modal="true">
+          <MiniGameProblemChallenge
+            mode={problemMode}
+            modePool={problemModePool}
+            answerMode={answerMode}
+            assignment={assignment}
+            onAnswerResult={onAnswerResult}
+            onComplete={() => setShowMissionQuiz(false)}
+            languageMode={props.languageMode}
+            rewardHint={props.languageMode === 'ENGLISH' ? 'Mission clear quiz complete' : 'ミッションクリア問題を完了しました'}
+          />
+        </div>
+      )}
+    </MiniGameMissionClearContext.Provider>
+  );
 };
 
 export default TriviaMiniGameScreen;

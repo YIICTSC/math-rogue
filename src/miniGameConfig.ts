@@ -15,7 +15,7 @@ export interface MiniGameConfig {
   glowColor: string;
   icon: LucideIcon;
   clearAction: () => void;
-  /** 雑学カテゴリから直接開くゲーム。全体のミニゲーム一覧には出さない。 */
+  /** 雑学カテゴリから直接開くゲーム。後方互換のため残している表示制御フラグ。 */
   categoryOnly?: boolean;
 }
 
@@ -125,7 +125,6 @@ export const MINI_GAMES: MiniGameConfig[] = [
     typeColor: 'bg-emerald-600',
     glowColor: 'rgba(16,185,129,0.4)',
     icon: Gem,
-    categoryOnly: true,
     clearAction: () => {}
   },
   {
@@ -139,7 +138,6 @@ export const MINI_GAMES: MiniGameConfig[] = [
     typeColor: 'bg-amber-600',
     glowColor: 'rgba(245,158,11,0.4)',
     icon: Dice5,
-    categoryOnly: true,
     clearAction: () => {}
   },
   {
@@ -153,7 +151,6 @@ export const MINI_GAMES: MiniGameConfig[] = [
     typeColor: 'bg-violet-600',
     glowColor: 'rgba(139,92,246,0.4)',
     icon: Sparkles,
-    categoryOnly: true,
     clearAction: () => {}
   },
   {
@@ -167,7 +164,6 @@ export const MINI_GAMES: MiniGameConfig[] = [
     typeColor: 'bg-red-700',
     glowColor: 'rgba(185,28,28,0.4)',
     icon: Grid3X3,
-    categoryOnly: true,
     clearAction: () => {}
   },
   {
@@ -181,7 +177,6 @@ export const MINI_GAMES: MiniGameConfig[] = [
     typeColor: 'bg-stone-600',
     glowColor: 'rgba(120,113,108,0.4)',
     icon: CircleDot,
-    categoryOnly: true,
     clearAction: () => {}
   },
   {
@@ -195,7 +190,6 @@ export const MINI_GAMES: MiniGameConfig[] = [
     typeColor: 'bg-sky-700',
     glowColor: 'rgba(14,116,144,0.4)',
     icon: Crown,
-    categoryOnly: true,
     clearAction: () => {}
   },
   {
@@ -209,7 +203,6 @@ export const MINI_GAMES: MiniGameConfig[] = [
     typeColor: 'bg-teal-700',
     glowColor: 'rgba(13,148,136,0.4)',
     icon: Layers3,
-    categoryOnly: true,
     clearAction: () => {}
   }
 ];

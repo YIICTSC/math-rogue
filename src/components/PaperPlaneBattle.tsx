@@ -4,8 +4,9 @@ import { ArrowLeft, Send, Wind, Trophy, Zap, Shield, Move, RefreshCw, Layers, Cr
 import { audioService } from '../services/audioService';
 import { storageService, PaperPlaneProgress } from '../services/storageService';
 import { assetUrl } from '../utils/assetPaths';
-import { LanguageMode, MiniGameDebugPreview } from '../types';
+import { AnswerMode, AssignmentAnswerResult, AssignmentPayload, GameMode, LanguageMode, MiniGameDebugPreview } from '../types';
 import { trans } from '../utils/textUtils';
+import MiniGameProblemChallenge from './MiniGameProblemChallenge';
 
 // --- TYPES & CONSTANTS ---
 
@@ -1762,7 +1763,7 @@ const loadProgress = () => {
     return storageService.loadPaperPlaneProgress();
 };
 
-const PaperPlaneBattle: React.FC<{ onBack: () => void; languageMode?: LanguageMode; debugPreview?: MiniGameDebugPreview }> = ({ onBack, languageMode = 'JAPANESE', debugPreview }) => {
+const PaperPlaneBattle: React.FC<{ onBack: () => void; languageMode?: LanguageMode; debugPreview?: MiniGameDebugPreview; problemMode?: GameMode; problemModePool?: string[]; answerMode?: AnswerMode; assignment?: AssignmentPayload | null; onAnswerResult?: (result: AssignmentAnswerResult) => void }> = ({ onBack, languageMode = 'JAPANESE', debugPreview, problemMode = 'MIXED' as GameMode, problemModePool, answerMode = 'CHOICE', assignment, onAnswerResult }) => {
     const t = (text: string) => trans(text, languageMode);
     const isGenericEnglish = (text: string) => /^(?:Choose Option|Event Details|Item|Details(?:None)?)$/i.test(text.trim());
     const paperPartTypeLabel = (type: ShipPart['type']) => ({
@@ -1811,6 +1812,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; languageMode?: LanguageMo
     const [selectedPilotIndex, setSelectedPilotIndex] = useState<number>(-1);
     const [pinnedPilotIndex, setPinnedPilotIndex] = useState<number | null>(null);
     const [selectedMissionLevel, setSelectedMissionLevel] = useState<number>(savedData?.selectedMissionLevel || 0);
+    const [showMissionQuiz, setShowMissionQuiz] = useState(false);
 
     const [pool, setPool] = useState<PoolState>(savedData?.pool || {
         genNumbers: [1,2,3,4,5,6,3,4,5], 
@@ -2045,6 +2047,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; languageMode?: LanguageMo
     };
     
     const returnToSetup = () => {
+        setShowMissionQuiz(false);
         setPhase('SETUP');
         setSetupStep('SHIP');
         setStage(1);
@@ -2782,6 +2785,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; languageMode?: LanguageMo
         } else if (tempEnemyHp <= 0) {
             audioService.playSound('win');
             if (stage === FINAL_STAGE_NORMAL && !isEndless) {
+                setShowMissionQuiz(true);
                 setPhase('VICTORY');
                 handlePhaseComplete(true); 
             } else {
@@ -2833,6 +2837,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; languageMode?: LanguageMo
         setHand([]);
 
         setRewardOptions(rollRewardParts(getAvailablePartTemplates(progress), 2, 'rew_p'));
+        setShowMissionQuiz(true);
         setPhase('REWARD_SELECT');
         audioService.playBGM('paper_plane_vacation'); // Switch to vacation theme for reward
         audioService.playSound('win');
@@ -3665,6 +3670,21 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; languageMode?: LanguageMo
         );
     };
 
+    const missionQuizOverlay = showMissionQuiz ? (
+        <div className="fixed inset-0 z-[120] overflow-y-auto bg-slate-950/95 p-2 sm:p-4" data-gamepad-modal="true">
+            <MiniGameProblemChallenge
+                mode={problemMode}
+                modePool={problemModePool}
+                answerMode={answerMode}
+                assignment={assignment}
+                onAnswerResult={onAnswerResult}
+                onComplete={() => setShowMissionQuiz(false)}
+                languageMode={languageMode}
+                rewardHint={languageMode === 'ENGLISH' ? 'Mission clear quiz complete' : 'ミッションクリア問題を完了しました'}
+            />
+        </div>
+    ) : null;
+
     // --- MAIN RENDER ---
     
     if (phase === 'SETUP') {
@@ -3908,6 +3928,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; languageMode?: LanguageMo
          const rerollCost = Math.max(0, 50 - player.talents.filter(t => t.effectType === 'DISCOUNT_REROLL_REWARD').reduce((a,b)=>a+b.value, 0));
          return (
              <div data-gamepad-initial-scope="paper-reward" className="paper-plane-reward-screen w-full h-full bg-black/90 text-white p-4 flex flex-col items-center justify-start md:justify-center font-mono z-50 relative overflow-y-auto py-8">
+                 {missionQuizOverlay}
                  <PaperPlaneSceneBackdrop sprite={PAPER_PLANE_SCENE_BACKGROUNDS.reward} alpha={0.2} />
                  <RenderTooltip />
                  <Trophy size={64} className="paper-plane-reward-trophy text-yellow-400 mb-4 animate-bounce"/>
@@ -4251,6 +4272,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; languageMode?: LanguageMo
     return (
         <div data-gamepad-navigation-root data-gamepad-initial-scope="paper-battle" className="mini-game-paper-plane-screen w-full h-full bg-[#101018] text-white flex flex-col font-mono relative overflow-hidden">
             <PaperPlaneSceneBackdrop sprite={PAPER_PLANE_SCENE_BACKGROUNDS.battle} alpha={0.16} />
+            {missionQuizOverlay}
             <RenderTooltip />
             {/* Pool Overlay */}
             {showPool && <PoolView pool={pool} onClose={() => setShowPool(false)} languageMode={languageMode} />}

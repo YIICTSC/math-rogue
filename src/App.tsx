@@ -6195,11 +6195,6 @@ const App: React.FC = () => {
         }
         audioService.playSound('select');
         setMiniGameReturnScreen(null);
-        if (screen === GameScreen.MINI_GAME_PAPER_PLANE) {
-            setPendingMiniGameScreen(null);
-            setGameState(prev => ({ ...prev, screen }));
-            return;
-        }
         setPendingMiniGameScreen(screen);
         if (showDailyAssignmentNoticeForProblemSelection()) {
             return;

@@ -34,6 +34,13 @@ const MINI_GAME_SPRITE_ICONS: Record<string, MiniGameSpriteDefinition> = {
   KOCHO: { src: 'sprites/kocho-hero-actions-01.webp', columns: 5, rows: 5, index: 0 },
   PAPER_PLANE: { src: 'sprites/paper-plane/pilots-02.webp', columns: 5, rows: 5, index: 1, offsetX: -12, offsetY: 2 },
   DUNGEON_2: { src: 'sprites/furai-shogakusei2-card-sheet.webp', columns: 6, rows: 5, index: 0, cell: 72, gap: 16 },
+  STONE_GLOW: { src: 'sprites/backgrounds/mini-games/badges/stone-glow.png', columns: 1, rows: 1, index: 0 },
+  SCHOOL_TRPG: { src: 'sprites/backgrounds/mini-games/badges/school-trpg.png', columns: 1, rows: 1, index: 0 },
+  LEARNING_TCG: { src: 'sprites/backgrounds/mini-games/badges/learning-tcg.png', columns: 1, rows: 1, index: 0 },
+  SHOGI: { src: 'sprites/backgrounds/mini-games/badges/shogi.png', columns: 1, rows: 1, index: 0 },
+  GO: { src: 'sprites/backgrounds/mini-games/badges/go.png', columns: 1, rows: 1, index: 0 },
+  CHESS: { src: 'sprites/backgrounds/mini-games/badges/chess.png', columns: 1, rows: 1, index: 0 },
+  MAHJONG: { src: 'sprites/backgrounds/mini-games/badges/mahjong.png', columns: 1, rows: 1, index: 0 },
 };
 
 export const MiniGameSpriteIcon: React.FC<{
