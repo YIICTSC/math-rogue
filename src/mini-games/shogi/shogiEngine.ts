@@ -118,7 +118,9 @@ const advancedVectors = (piece: ShogiPiece): Vector[] => {
     one(f, -1), one(f, 0), one(f, 1), one(0, -1), one(0, 1), one(-f, -1), one(-f, 0), one(-f, 1),
   ];
   switch (definitionOf(piece.kind).pattern) {
-    case 'DOUBLE_PAWN': return [one(f, 0), one(f * 2, 0, { jump: !piece.hasMoved, special: true })];
+    case 'DOUBLE_PAWN': return piece.hasMoved
+      ? [one(f, 0)]
+      : [one(f, 0), one(f * 2, 0, { jump: true, special: true })];
     case 'SIDE_PAWN': return [one(f, 0), one(0, -1), one(0, 1)];
     case 'RETURN_PAWN': return [one(f, 0), one(-f, 0)];
     case 'DIAGONAL_PAWN': return [one(f, -1), one(f, 1)];
@@ -129,21 +131,37 @@ const advancedVectors = (piece: ShogiPiece): Vector[] => {
     ];
     case 'PINWHEEL': return orthogonal(2);
     case 'STAR_BISHOP': return [...diagonal(2), one(-1, 0), one(1, 0), one(0, -1), one(0, 1)];
-    case 'CROSS': return [...orthogonal(1), ...orthogonal(2).map(vector => ({ ...vector, slide: false, jump: true }))];
+    case 'CROSS': return [
+      ...orthogonal(1),
+      one(-2, 0, { jump: true, special: true }), one(2, 0, { jump: true, special: true }),
+      one(0, -2, { jump: true, special: true }), one(0, 2, { jump: true, special: true }),
+    ];
     case 'HOURGLASS': return [one(f, -1), one(f, 1), one(-f, -1), one(-f, 0), one(-f, 1)];
     case 'HOOK_SPEAR': return [one(f, -1), one(f, 1), one(0, -1), one(0, 1), one(f, 0, { max: SIZE, slide: true })];
     case 'TWIN_SPEAR': return [{ dr: f, dc: 0, max: SIZE, slide: true }, { dr: -f, dc: 0, max: SIZE, slide: true }];
-    case 'LIGHTNING': return [...orthogonal(2).map(vector => ({ ...vector, slide: false, jump: true })), one(-1, -1), one(-1, 1), one(1, -1), one(1, 1)];
+    case 'LIGHTNING': return [
+      one(-2, 0, { jump: true, special: true }), one(2, 0, { jump: true, special: true }),
+      one(0, -2, { jump: true, special: true }), one(0, 2, { jump: true, special: true }),
+      one(-1, -1), one(-1, 1), one(1, -1), one(1, 1),
+    ];
     case 'RAINBOW': return [...diagonal(2), one(f, 0)];
     case 'COMET': return [...kingVectors().map(vector => ({ ...vector, dr: vector.dr * 2, dc: vector.dc * 2, jump: true }))];
     case 'SWALLOW': return [one(f, 0, { max: 2, slide: true }), one(-f, -1), one(-f, 1)];
-    case 'CAT': return [...diagonal(1), ...orthogonal(2).map(vector => ({ ...vector, slide: false, jump: true }))];
+    case 'CAT': return [
+      ...diagonal(1),
+      one(-2, 0, { jump: true, special: true }), one(2, 0, { jump: true, special: true }),
+      one(0, -2, { jump: true, special: true }), one(0, 2, { jump: true, special: true }),
+    ];
     case 'DOG': return [one(-1, 0), one(1, 0), one(0, -1), one(0, 1), one(f, -1), one(f, 1)];
     case 'CRANE': return [one(f, 0, { max: SIZE, slide: true }), one(-f, -1), one(-f, 1)];
     case 'TURTLE': return [one(-1, 0), one(1, 0), one(0, -1), one(0, 1)];
     case 'FROG': return [one(-2, 0, { jump: true }), one(2, 0, { jump: true }), one(0, -2, { jump: true }), one(0, 2, { jump: true })];
     case 'SPIDER': return [...diagonal(1), { dr: 0, dc: -1, max: 2, slide: true }, { dr: 0, dc: 1, max: 2, slide: true }];
-    case 'BUTTERFLY': return diagonal(2).map(vector => ({ ...vector, jump: true, slide: false, special: true }));
+    case 'BUTTERFLY': return [
+      ...diagonal(1),
+      one(-2, -2, { jump: true, special: true }), one(-2, 2, { jump: true, special: true }),
+      one(2, -2, { jump: true, special: true }), one(2, 2, { jump: true, special: true }),
+    ];
     case 'BEE': return [{ dr: f, dc: -1, max: 2, slide: true }, { dr: f, dc: 1, max: 2, slide: true }, one(-f, 0)];
     case 'WOLF': return kingVectors();
     case 'LION': return kingVectors();
@@ -169,8 +187,16 @@ const advancedVectors = (piece: ShogiPiece): Vector[] => {
     case 'PHOENIX': return [one(f, 0, { max: 2, slide: true }), one(f, -1), one(f, 1), one(-f, -1), one(-f, 1)];
     case 'DRAGON': return [...orthogonal(2), ...diagonal(1)];
     case 'UNICORN': return [...diagonal(2), ...orthogonal(1)];
-    case 'GRIFFIN': return [...orthogonal(1), ...diagonal(2).map(vector => ({ ...vector, jump: true }))];
-    case 'CHRONOS': return [...kingVectors(), ...orthogonal(2).map(vector => ({ ...vector, slide: false, jump: true, special: true }))];
+    case 'GRIFFIN': return [
+      ...orthogonal(1),
+      one(-2, -2, { jump: true, special: true }), one(-2, 2, { jump: true, special: true }),
+      one(2, -2, { jump: true, special: true }), one(2, 2, { jump: true, special: true }),
+    ];
+    case 'CHRONOS': return [
+      ...kingVectors(),
+      one(-2, 0, { jump: true, special: true }), one(2, 0, { jump: true, special: true }),
+      one(0, -2, { jump: true, special: true }), one(0, 2, { jump: true, special: true }),
+    ];
     default: return side;
   }
 };
@@ -228,7 +254,7 @@ const moveLeavesKingSafe = (
   const next = cloneBoard(board);
   const piece = next[from[0]][from[1]];
   if (!piece) return false;
-  next[to[0]][to[1]] = piece;
+  next[to[0]][to[1]] = promotedOnArrival(piece, to[0]);
   next[from[0]][from[1]] = null;
   const king = locateKing(next, side);
   return Boolean(king && !isAttacked(next, king[0], king[1], side === 'P' ? 'C' : 'P'));
