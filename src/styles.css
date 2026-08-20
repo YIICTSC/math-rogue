@@ -16,6 +16,584 @@
   src: url('https://fonts.gstatic.com/s/kleeone/v13/LDIxapCLNRc6A8oT4q4A.ttf') format('truetype');
 }
 
+/* Trivia mini-games: phone landscape composition. Keep the same compact,
+   information-first treatment as the shogi and placement TCG screens while
+   preserving the full game controls in a single viewport. */
+@media (max-width: 980px) and (orientation: landscape), (orientation: landscape) and (max-height: 600px) {
+  .mini-game-scope-stone-glow,
+  .mini-game-scope-school-trpg,
+  .mini-game-scope-go,
+  .mini-game-scope-chess,
+  .mini-game-scope-mahjong {
+    overflow: hidden;
+  }
+
+  .mini-game-scope-stone-glow > .relative.mx-auto,
+  .mini-game-scope-school-trpg > .relative.mx-auto,
+  .mini-game-scope-go > .relative.mx-auto,
+  .mini-game-scope-chess > .relative.mx-auto,
+  .mini-game-scope-mahjong > .relative.mx-auto {
+    height: 100dvh;
+    min-height: 0;
+    padding: max(6px, env(safe-area-inset-top)) max(8px, env(safe-area-inset-right)) max(6px, env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left));
+  }
+
+  .mini-game-scope-stone-glow .mini-game-main,
+  .mini-game-scope-school-trpg .mini-game-main,
+  .mini-game-scope-go .mini-game-main,
+  .mini-game-scope-chess .mini-game-main,
+  .mini-game-scope-mahjong .mini-game-main {
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .mini-game-scope-stone-glow .mini-game-header,
+  .mini-game-scope-school-trpg .mini-game-header,
+  .mini-game-scope-go .mini-game-header,
+  .mini-game-scope-chess .mini-game-header,
+  .mini-game-scope-mahjong .mini-game-header {
+    height: 50px;
+    min-height: 0;
+    margin-bottom: 4px;
+    padding: 4px 7px;
+  }
+
+  .mini-game-scope-stone-glow .mini-game-header button,
+  .mini-game-scope-school-trpg .mini-game-header button,
+  .mini-game-scope-go .mini-game-header button,
+  .mini-game-scope-chess .mini-game-header button,
+  .mini-game-scope-mahjong .mini-game-header button {
+    width: 40px;
+    height: 38px;
+  }
+
+  .mini-game-scope-stone-glow .mini-game-header img,
+  .mini-game-scope-school-trpg .mini-game-header img,
+  .mini-game-scope-go .mini-game-header img,
+  .mini-game-scope-chess .mini-game-header img,
+  .mini-game-scope-mahjong .mini-game-header img {
+    width: 38px;
+    height: 38px;
+  }
+
+  .mini-game-scope-stone-glow .mini-game-result-banner,
+  .mini-game-scope-school-trpg .mini-game-result-banner,
+  .mini-game-scope-go .mini-game-result-banner,
+  .mini-game-scope-chess .mini-game-result-banner,
+  .mini-game-scope-mahjong .mini-game-result-banner {
+    margin: 0 0 4px;
+    padding: 5px 8px;
+  }
+
+  .mini-game-scope-stone-glow .mini-game-result-banner svg,
+  .mini-game-scope-school-trpg .mini-game-result-banner svg,
+  .mini-game-scope-go .mini-game-result-banner svg,
+  .mini-game-scope-chess .mini-game-result-banner svg,
+  .mini-game-scope-mahjong .mini-game-result-banner svg {
+    width: 18px;
+    height: 18px;
+    margin-bottom: 0;
+  }
+
+  .mini-game-scope-stone-glow .mini-game-result-banner button,
+  .mini-game-scope-school-trpg .mini-game-result-banner button,
+  .mini-game-scope-go .mini-game-result-banner button,
+  .mini-game-scope-chess .mini-game-result-banner button,
+  .mini-game-scope-mahjong .mini-game-result-banner button {
+    margin-top: 2px;
+    padding: 3px 8px;
+    font-size: 9px;
+  }
+
+  /* Stone Glow: market and turn controls share the main row; reserved cards
+     and the small inventory strip stay visible below it. */
+  .mini-game-scope-stone-glow .stone-glow-scoreboard {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    margin-bottom: 4px;
+  }
+
+  .mini-game-scope-stone-glow .stone-glow-scoreboard > div {
+    min-width: 0;
+    padding: 5px;
+    font-size: 9px;
+  }
+
+  .mini-game-scope-stone-glow .stone-glow-scoreboard > div:nth-child(3) {
+    grid-column: span 2;
+  }
+
+  .mini-game-scope-stone-glow .stone-glow-scoreboard > div:nth-child(3) > div:first-child {
+    margin-bottom: 1px;
+    font-size: 8px;
+  }
+
+  .mini-game-scope-stone-glow .stone-glow-scoreboard > div:nth-child(3) > div:last-child {
+    gap: 5px;
+    font-size: 10px;
+  }
+
+  .mini-game-scope-stone-glow .stone-glow-main-grid {
+    grid-template-columns: minmax(0, 1fr) clamp(172px, 25vw, 220px);
+    flex: 1 1 0;
+    min-height: 0;
+    margin-bottom: 4px;
+    overflow: hidden;
+  }
+
+  .mini-game-scope-stone-glow .stone-glow-main-grid > section,
+  .mini-game-scope-stone-glow .stone-glow-main-grid > aside {
+    min-height: 0;
+    overflow: hidden;
+    padding: 6px;
+  }
+
+  .mini-game-scope-stone-glow .stone-glow-main-grid h2 {
+    font-size: 11px;
+  }
+
+  .mini-game-scope-stone-glow .stone-glow-market {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    min-height: 0;
+    gap: 4px;
+  }
+
+  .mini-game-scope-stone-glow .stone-glow-market-card {
+    min-height: 0;
+    padding: 5px;
+    font-size: 8px;
+  }
+
+  .mini-game-scope-stone-glow .stone-glow-market-card > div:nth-child(2) {
+    margin-block: 2px;
+    gap: 4px;
+  }
+
+  .mini-game-scope-stone-glow .stone-glow-market-card > div:nth-child(3) {
+    margin-bottom: 3px;
+    font-size: 8px;
+  }
+
+  .mini-game-scope-stone-glow .stone-glow-market-card button {
+    padding: 3px 4px;
+    font-size: 7px;
+  }
+
+  .mini-game-scope-stone-glow .stone-glow-main-grid > aside {
+    gap: 4px;
+  }
+
+  .mini-game-scope-stone-glow .stone-glow-main-grid > aside {
+    padding: 4px;
+  }
+
+  .mini-game-scope-stone-glow .stone-glow-main-grid > aside > div,
+  .mini-game-scope-stone-glow .stone-glow-main-grid > aside > section {
+    padding: 5px;
+  }
+
+  .mini-game-scope-stone-glow .stone-glow-main-grid > aside > div:first-child {
+    font-size: 10px;
+  }
+
+  .mini-game-scope-stone-glow .stone-glow-main-grid > aside > div:nth-child(2),
+  .mini-game-scope-stone-glow .stone-glow-main-grid > aside > div:last-child {
+    display: none;
+  }
+
+  .mini-game-scope-stone-glow .stone-glow-main-grid > aside > div:nth-child(3) {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 2px;
+  }
+
+  .mini-game-scope-stone-glow .stone-glow-main-grid > aside > div:nth-child(3) button {
+    min-width: 0;
+    padding: 4px 2px;
+    font-size: 7px;
+  }
+
+  .mini-game-scope-stone-glow .stone-glow-main-grid > aside > div:nth-child(4) {
+    padding: 3px;
+    font-size: 7px;
+  }
+
+  .mini-game-scope-stone-glow .stone-glow-main-grid > aside > div:nth-child(5) {
+    gap: 2px;
+  }
+
+  .mini-game-scope-stone-glow .stone-glow-main-grid > aside > div:nth-child(5) button {
+    min-width: 0;
+    padding: 4px 2px;
+    font-size: 7px;
+  }
+
+  .mini-game-scope-stone-glow .stone-glow-log {
+    max-height: 26px;
+    overflow-y: auto;
+  }
+
+  .mini-game-scope-stone-glow .stone-glow-log > div:first-child {
+    font-size: 8px;
+  }
+
+  .mini-game-scope-stone-glow .stone-glow-log > div:last-child {
+    font-size: 8px;
+    line-height: 1.25;
+  }
+
+  .mini-game-scope-stone-glow .stone-glow-reserved {
+    min-height: 0;
+    margin-bottom: 4px;
+    padding: 5px;
+  }
+
+  .mini-game-scope-stone-glow .stone-glow-reserved > div:first-child {
+    margin-bottom: 3px;
+    font-size: 10px;
+  }
+
+  .mini-game-scope-stone-glow .stone-glow-reserved > div:last-child {
+    gap: 4px;
+    max-height: 22px;
+    overflow: hidden;
+    padding: 3px;
+    white-space: nowrap;
+  }
+
+  .mini-game-scope-stone-glow .stone-glow-reserved article {
+    min-width: 0;
+    padding: 4px;
+    font-size: 8px;
+  }
+
+  .mini-game-scope-stone-glow .stone-glow-reserved article button {
+    padding: 3px 4px;
+    font-size: 7px;
+  }
+
+  .mini-game-scope-stone-glow .stone-glow-summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 4px;
+  }
+
+  .mini-game-scope-stone-glow .stone-glow-summary > div {
+    min-width: 0;
+    overflow: hidden;
+    padding: 3px 4px;
+    font-size: 8px;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  /* School TRPG: story copy sits beside the decision stack, leaving the
+     scene title, clues and all four action buttons visible at once. */
+  .mini-game-scope-school-trpg .school-trpg-stats,
+  .mini-game-scope-school-trpg .school-trpg-objectives {
+    margin-bottom: 4px;
+  }
+
+  .mini-game-scope-school-trpg .school-trpg-stats > div {
+    min-width: 0;
+    padding: 4px;
+  }
+
+  .mini-game-scope-school-trpg .school-trpg-stats > div > div:first-child {
+    font-size: 8px;
+  }
+
+  .mini-game-scope-school-trpg .school-trpg-stats > div > div:last-child {
+    font-size: 15px;
+  }
+
+  .mini-game-scope-school-trpg .school-trpg-objectives > div {
+    min-width: 0;
+    padding: 4px;
+    font-size: 8px;
+  }
+
+  .mini-game-scope-school-trpg .school-trpg-panel {
+    display: grid;
+    grid-template-columns: minmax(0, 1.08fr) minmax(205px, .92fr);
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    gap: 5px;
+    min-height: 0;
+    overflow: hidden;
+    padding: 7px;
+  }
+
+  .mini-game-scope-school-trpg .school-trpg-panel-heading {
+    grid-column: 1 / -1;
+    margin-bottom: 0;
+  }
+
+  .mini-game-scope-school-trpg .school-trpg-panel-heading h2 {
+    font-size: 13px;
+  }
+
+  .mini-game-scope-school-trpg .school-trpg-scene {
+    grid-column: 1;
+    grid-row: 2 / span 2;
+    min-height: 0;
+    margin: 0;
+    overflow-y: auto;
+    padding: 7px;
+    font-size: 10px;
+    line-height: 1.45;
+  }
+
+  .mini-game-scope-school-trpg .school-trpg-fate {
+    grid-column: 2;
+    grid-row: 2;
+    min-width: 0;
+    margin: 0;
+    padding: 5px;
+    font-size: 8px;
+  }
+
+  .mini-game-scope-school-trpg .school-trpg-fate button {
+    padding: 4px 6px;
+    font-size: 8px;
+  }
+
+  .mini-game-scope-school-trpg .school-trpg-choices {
+    grid-column: 2;
+    grid-row: 3;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    min-height: 0;
+    overflow-y: auto;
+  }
+
+  .mini-game-scope-school-trpg .school-trpg-choices button {
+    min-width: 0;
+    padding: 5px;
+    font-size: 9px;
+    line-height: 1.25;
+  }
+
+  .mini-game-scope-school-trpg .school-trpg-choices button span:last-child {
+    margin-top: 2px;
+    font-size: 7px;
+  }
+
+  .mini-game-scope-school-trpg .school-trpg-last-roll,
+  .mini-game-scope-school-trpg .school-trpg-ending {
+    display: none;
+  }
+
+  .mini-game-scope-school-trpg .school-trpg-log {
+    grid-column: 1;
+    grid-row: 3;
+    min-height: 0;
+    max-height: 42px;
+    margin: 0;
+    overflow-y: auto;
+    font-size: 8px;
+    line-height: 1.2;
+  }
+
+  /* Go and chess: the square board owns the left column; compact score and
+     instructions live in a right rail instead of pushing the board below it. */
+  .mini-game-scope-go .mini-game-main,
+  .mini-game-scope-chess .mini-game-main {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) clamp(190px, 29vw, 250px);
+    grid-template-rows: auto minmax(0, 1fr);
+    column-gap: 8px;
+  }
+
+  .mini-game-scope-go .mini-game-result-banner,
+  .mini-game-scope-chess .mini-game-result-banner {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .mini-game-scope-go .go-scoreboard,
+  .mini-game-scope-chess .chess-scoreboard {
+    grid-column: 2;
+    grid-row: 2;
+    align-self: start;
+    margin: 0 0 5px;
+  }
+
+  .mini-game-scope-go .go-scoreboard {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .mini-game-scope-go .go-scoreboard > div,
+  .mini-game-scope-chess .chess-scoreboard > div {
+    min-width: 0;
+    padding: 5px;
+    font-size: 8px;
+  }
+
+  .mini-game-scope-go .go-board-area,
+  .mini-game-scope-chess .chess-board-area {
+    grid-column: 1;
+    grid-row: 1 / span 2;
+    min-width: 0;
+    min-height: 0;
+    justify-content: center;
+    overflow: hidden;
+  }
+
+  .mini-game-scope-go .go-board,
+  .mini-game-scope-chess .chess-board {
+    width: min(100%, min(62dvh, 340px));
+    max-width: none;
+    flex: 0 0 auto;
+    margin: 0 auto 5px;
+    padding: 4px;
+    border-width: 3px;
+  }
+
+  .mini-game-scope-go .go-board button,
+  .mini-game-scope-chess .chess-board button {
+    font-size: clamp(0.78rem, 2.1dvh, 1.35rem);
+  }
+
+  .mini-game-scope-go .go-actions,
+  .mini-game-scope-go .go-final-score,
+  .mini-game-scope-go .go-guide,
+  .mini-game-scope-chess .chess-guide {
+    width: 100%;
+    max-width: none;
+    margin: 0 0 5px;
+    padding: 5px;
+    font-size: 8px;
+    line-height: 1.35;
+  }
+
+  .mini-game-scope-go .go-actions {
+    justify-content: stretch;
+  }
+
+  .mini-game-scope-go .go-actions button {
+    width: 100%;
+    padding: 5px 8px;
+    font-size: 9px;
+  }
+
+  .mini-game-scope-chess .chess-guide {
+    margin-top: 4px;
+  }
+
+  /* Mahjong: keep the eight-tile hand broad on the left and move the yaku
+     helper stack to the right rail. */
+  .mini-game-scope-mahjong .mini-game-main {
+    display: grid;
+    grid-template-columns: minmax(0, 1.25fr) clamp(200px, 31vw, 260px);
+    grid-template-rows: auto minmax(0, 1fr);
+    column-gap: 8px;
+  }
+
+  .mini-game-scope-mahjong .mini-game-result-banner {
+    grid-column: 2;
+    grid-row: 1;
+  }
+
+  .mini-game-scope-mahjong .mahjong-scoreboard {
+    grid-column: 2;
+    grid-row: 2;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-self: start;
+    margin: 0 0 5px;
+  }
+
+  .mini-game-scope-mahjong .mahjong-scoreboard > div {
+    min-width: 0;
+    padding: 5px;
+    font-size: 8px;
+  }
+
+  .mini-game-scope-mahjong .mahjong-play-area {
+    grid-column: 1;
+    grid-row: 1 / span 2;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 178px;
+    grid-template-rows: auto auto auto minmax(0, 1fr);
+    gap: 5px;
+    min-width: 0;
+    min-height: 0;
+    overflow: hidden;
+    padding: 7px;
+  }
+
+  .mini-game-scope-mahjong .mahjong-instruction {
+    grid-column: 1 / -1;
+    margin: 0;
+    font-size: 8px;
+  }
+
+  .mini-game-scope-mahjong .mahjong-hand {
+    grid-column: 1 / -1;
+    min-width: 0;
+    margin: 0;
+    gap: 3px;
+    flex-wrap: nowrap;
+    justify-content: center;
+  }
+
+  .mini-game-scope-mahjong .mahjong-hand button {
+    flex: 1 1 0;
+    width: auto;
+    min-width: 0;
+    height: clamp(48px, 13dvh, 66px);
+    max-width: 48px;
+    padding: 2px;
+    font-size: 12px;
+  }
+
+  .mini-game-scope-mahjong .mahjong-actions {
+    grid-column: 2;
+    grid-row: 3;
+    min-width: 0;
+    margin: 0;
+    justify-content: stretch;
+    gap: 3px;
+  }
+
+  .mini-game-scope-mahjong .mahjong-actions button {
+    flex: 1 1 auto;
+    min-width: 0;
+    padding: 4px 5px;
+    font-size: 7px;
+  }
+
+  .mini-game-scope-mahjong .mahjong-drawn {
+    grid-column: 1;
+    grid-row: 3;
+    align-self: center;
+    margin: 0;
+    font-size: 8px;
+  }
+
+  .mini-game-scope-mahjong .mahjong-recommendation {
+    grid-column: 2;
+    grid-row: 4;
+    min-width: 0;
+    margin: 0;
+    overflow-y: auto;
+    padding: 5px;
+  }
+
+  .mini-game-scope-mahjong .mahjong-recommendation p {
+    margin-top: 3px;
+    font-size: 8px;
+    line-height: 1.3;
+  }
+
+  .mini-game-scope-mahjong .mahjong-info {
+    grid-column: 1;
+    grid-row: 4;
+    align-self: stretch;
+    max-width: none;
+    margin: 0;
+    overflow-y: auto;
+    padding: 6px;
+    font-size: 8px;
+    line-height: 1.35;
+  }
+}
+
 .credits-roll-track {
   animation: credits-roll 28s linear infinite;
   padding-bottom: 72%;
