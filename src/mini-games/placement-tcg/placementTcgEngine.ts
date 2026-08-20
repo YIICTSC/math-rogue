@@ -4,6 +4,7 @@ import {
   PLACEMENT_TCG_REWARD_POOL,
   PLACEMENT_TCG_STARTER_DECK,
   type PlacementCardDefinition,
+  type PlacementEffectKey,
 } from './placementTcgCards';
 import {
   createPlacementTcgOpponents,
@@ -48,6 +49,17 @@ export interface PlacementSide {
   lanes: PlacementLane[];
 }
 
+export type PlacementActionCue = {
+  id: number;
+  type: 'DEPLOY' | 'ATTACK';
+  side: PlacementSideKey;
+  laneIndex: number;
+  cardId: string;
+  effect: PlacementEffectKey;
+  amount: number;
+  direct?: boolean;
+};
+
 export interface PlacementBattle {
   turn: PlacementTurn;
   turnNumber: number;
@@ -56,6 +68,7 @@ export interface PlacementBattle {
   winner: PlacementSideKey | null;
   log: string[];
   serial: number;
+  lastAction: PlacementActionCue | null;
 }
 
 export interface PlacementRun {
@@ -243,6 +256,7 @@ export const createPlacementBattle = (
     winner: null,
     log: ['デュエル開始。カードを選び、配置先のレーンを選択。'],
     serial: 1,
+    lastAction: null,
   };
   drawCards(battle, 'player', 5);
   drawCards(battle, 'cpu', 5);
@@ -374,6 +388,15 @@ export const playPlacementCard = (
     side.discard.push(card.id);
   }
   appendLog(battle, (sideKey === 'player' ? 'あなた' : 'CPU') + '：' + card.name + 'を使用');
+  battle.lastAction = {
+    id: battle.serial++,
+    type: 'DEPLOY',
+    side: sideKey,
+    laneIndex,
+    cardId: card.id,
+    effect: card.effect,
+    amount: card.amount,
+  };
   checkWinner(battle);
   return { battle, ok: true };
 };
@@ -393,6 +416,7 @@ export const attackPlacementLane = (
   const enemyLane = battle[enemyKey].lanes[laneIndex];
   const attackerCard = unitCard(ownLane.unit);
   const attack = getUnitAttack(ownLane, laneIndex);
+  const hadDefender = Boolean(enemyLane.unit);
   ownLane.unit.ready = false;
   if (enemyLane.unit) {
     const defenderAttack = getUnitAttack(enemyLane, laneIndex);
@@ -409,6 +433,16 @@ export const attackPlacementLane = (
     }
   }
   appendLog(battle, (attackerCard?.name || 'ユニット') + 'がレーン' + (laneIndex + 1) + 'を攻撃');
+  battle.lastAction = {
+    id: battle.serial++,
+    type: 'ATTACK',
+    side: sideKey,
+    laneIndex,
+    cardId: attackerCard?.id || '',
+    effect: attackerCard?.effect || 'PIERCE',
+    amount: attack,
+    direct: !hadDefender,
+  };
   checkWinner(battle);
   return { battle, ok: true };
 };

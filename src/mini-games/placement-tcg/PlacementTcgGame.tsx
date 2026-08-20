@@ -1,9 +1,11 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import type { LanguageMode } from '../../types';
+import type { AttackEffectKey } from '../../types';
 import ResilientAssetImage from '../../components/ResilientAssetImage';
 import { assetUrl } from '../../utils/assetPaths';
 import { getCardIllustrationPaths } from '../../utils/cardIllustration';
 import { trans } from '../../utils/textUtils';
+import { audioService } from '../../services/audioService';
 import {
   PLACEMENT_TCG_CARD_MAP,
   type PlacementCardDefinition,
@@ -24,6 +26,7 @@ import {
   runCpuTurn,
   savePlacementRun,
   type PlacementBattle,
+  type PlacementActionCue,
   type PlacementLane,
   type PlacementRun,
   type PlacementSideKey,
@@ -97,6 +100,48 @@ const localizedCardName = (card: PlacementCardDefinition, languageMode?: Languag
 
 const getCard = (cardId: string): PlacementCardDefinition | null =>
   PLACEMENT_TCG_CARD_MAP.get(cardId) || null;
+
+const attackSoundForCard = (card: PlacementCardDefinition | null): AttackEffectKey => {
+  switch (card?.effect) {
+    case 'PIERCE': return 'projectile';
+    case 'THORNS': return 'shockwave';
+    case 'RUSH': return 'slash';
+    default: return 'impact';
+  }
+};
+
+const playPlacementEffectSound = (card: PlacementCardDefinition | null) => {
+  if (!card) {
+    audioService.playBattleSound('select');
+    return;
+  }
+  switch (card.effect) {
+    case 'DEPLOY_DAMAGE':
+    case 'EVENT_DAMAGE':
+      audioService.playAttackEffectSound('fire');
+      break;
+    case 'EVENT_STUN':
+    case 'EVENT_BREAK':
+    case 'EVENT_BOUNCE':
+      audioService.playBattleSound('debuff');
+      break;
+    case 'EVENT_MOVE':
+      audioService.playAttackEffectSound('wind');
+      break;
+    case 'EVENT_HEAL':
+    case 'EVENT_BUFF':
+    case 'EVENT_ENERGY':
+    case 'EVENT_SHIELD':
+    case 'DEPLOY_HEAL':
+      audioService.playBattleSound('buff');
+      break;
+    case 'EVENT_DRAW':
+      audioService.playBattleSound('select');
+      break;
+    default:
+      audioService.playBattleSound('select');
+  }
+};
 
 const CardArt: React.FC<{ card: PlacementCardDefinition; compact?: boolean; languageMode?: LanguageMode }> = ({ card, compact, languageMode }) => (
   <div className={'placement-tcg-card-art ' + (compact ? 'is-compact' : '')}>
@@ -281,14 +326,45 @@ const InspectPanel: React.FC<{
   </div>
 );
 
+const LaneFxOverlay: React.FC<{
+  cue: PlacementActionCue | null;
+  owner: PlacementSideKey;
+  laneIndex: number;
+  languageMode?: LanguageMode;
+}> = ({ cue, owner, laneIndex, languageMode }) => {
+  if (!cue || cue.laneIndex !== laneIndex) return null;
+  const card = getCard(cue.cardId);
+  const isActor = cue.side === owner;
+  const isAttack = cue.type === 'ATTACK';
+  const tone = isAttack ? (isActor ? 'attack' : 'impact') : 'deploy';
+  const label = isAttack
+    ? isActor
+      ? copy(languageMode, '攻撃', 'こうげき', 'ATTACK')
+      : cue.direct
+        ? copy(languageMode, '直撃', 'ちょくげき', 'DIRECT HIT')
+        : copy(languageMode, '被ダメージ', 'ひダメージ', 'IMPACT')
+    : copy(languageMode, '効果発動', 'こうかはつどう', 'EFFECT');
+  const amount = isAttack
+    ? (isActor ? String(cue.amount) : `−${cue.amount}`)
+    : (card ? localizedCardName(card, languageMode) : '');
+  return (
+    <div className={'placement-tcg-lane-fx ' + tone} aria-hidden="true">
+      <i />
+      <b>{label}</b>
+      <span>{amount}</span>
+    </div>
+  );
+};
+
 const DuelBoard: React.FC<{
   battle: PlacementBattle;
   languageMode?: LanguageMode;
   selectedCard: PlacementCardDefinition | null;
+  activeCue: PlacementActionCue | null;
   onLane: (laneIndex: number) => void;
   onAttack: (laneIndex: number) => void;
   onInspect: (card: PlacementCardDefinition) => void;
-}> = ({ battle, languageMode, selectedCard, onLane, onAttack, onInspect }) => (
+}> = ({ battle, languageMode, selectedCard, activeCue, onLane, onAttack, onInspect }) => (
   <div className="placement-tcg-board">
     <div className="placement-tcg-lane-labels">
       {LANE_NAMES.map((name, index) => <span key={name}>0{index + 1} // {name}</span>)}
@@ -298,6 +374,7 @@ const DuelBoard: React.FC<{
         <div className="placement-tcg-lane" key={'enemy-' + laneIndex}>
           <SupportChip lane={lane} languageMode={languageMode} onInspect={onInspect} />
           <UnitChip lane={lane} laneIndex={laneIndex} owner="cpu" languageMode={languageMode} onInspect={onInspect} />
+          <LaneFxOverlay cue={activeCue} owner="cpu" laneIndex={laneIndex} languageMode={languageMode} />
         </div>
       ))}
     </div>
@@ -328,6 +405,7 @@ const DuelBoard: React.FC<{
             />
             <SupportChip lane={lane} languageMode={languageMode} onInspect={onInspect} />
             {selectedCard && <div className="placement-tcg-target-overlay">DEPLOY 0{laneIndex + 1}</div>}
+            <LaneFxOverlay cue={activeCue} owner="player" laneIndex={laneIndex} languageMode={languageMode} />
           </div>
         );
       })}
@@ -422,6 +500,10 @@ const PlacementTcgGame: React.FC<PlacementTcgGameProps> = ({ onBack, onFinish, l
   const [notice, setNotice] = useState('');
   const [rewardChoices, setRewardChoices] = useState<string[]>([]);
   const [complete, setComplete] = useState(false);
+  const [activeCue, setActiveCue] = useState<PlacementActionCue | null>(null);
+  const cueTimerRef = useRef<number | null>(null);
+  const seenCueRef = useRef<number | null>(null);
+  const seenWinnerRef = useRef<PlacementSideKey | null>(null);
 
   const opponent: PlacementTcgOpponent | null = useMemo(
     () => run && run.battleIndex < 10 ? getCurrentOpponent(run) : null,
@@ -432,9 +514,48 @@ const PlacementTcgGame: React.FC<PlacementTcgGameProps> = ({ onBack, onFinish, l
     ? getCard(battle.player.hand[selectedHandIndex])
     : null;
 
+  const showCue = (cue: PlacementActionCue) => {
+    if (cueTimerRef.current !== null) window.clearTimeout(cueTimerRef.current);
+    setActiveCue(cue);
+    cueTimerRef.current = window.setTimeout(() => {
+      setActiveCue(current => current?.id === cue.id ? null : current);
+      cueTimerRef.current = null;
+    }, cue.type === 'ATTACK' ? 900 : 760);
+  };
+
+  useEffect(() => () => {
+    if (cueTimerRef.current !== null) window.clearTimeout(cueTimerRef.current);
+  }, []);
+
+  useEffect(() => {
+    const cue = battle?.lastAction;
+    if (!cue || seenCueRef.current === cue.id) return;
+    seenCueRef.current = cue.id;
+    const card = getCard(cue.cardId);
+    if (cue.type === 'ATTACK') {
+      audioService.playAttackEffectSound(attackSoundForCard(card), cue.direct ? 1 : 2);
+    } else {
+      playPlacementEffectSound(card);
+    }
+    showCue(cue);
+  }, [battle?.lastAction]);
+
+  useEffect(() => {
+    if (!battle?.winner) {
+      seenWinnerRef.current = null;
+      return;
+    }
+    if (seenWinnerRef.current === battle.winner) return;
+    seenWinnerRef.current = battle.winner;
+    audioService.playBattleSound(battle.winner === 'player' ? 'win' : 'lose');
+  }, [battle?.winner]);
+
   const beginBattle = (nextRun: PlacementRun) => {
     setRun(nextRun);
     setBattle(createPlacementBattle(nextRun.deck, nextRun.battleIndex, nextRun.seed + nextRun.battleIndex * 313));
+    setActiveCue(null);
+    seenCueRef.current = null;
+    seenWinnerRef.current = null;
     setSelectedHandIndex(null);
     setRewardChoices([]);
     setComplete(false);
@@ -557,6 +678,7 @@ const PlacementTcgGame: React.FC<PlacementTcgGameProps> = ({ onBack, onFinish, l
             battle={battle}
             languageMode={languageMode}
             selectedCard={selectedCard}
+            activeCue={activeCue}
             onLane={deploySelected}
             onAttack={attack}
             onInspect={setInspectCard}
@@ -625,6 +747,7 @@ const PlacementTcgGame: React.FC<PlacementTcgGameProps> = ({ onBack, onFinish, l
                 disabled={battle.turn !== 'PLAYER' || card.spCost > battle.player.sp}
                 onSelect={() => {
                   if (battle.turn !== 'PLAYER') return;
+                  audioService.playBattleSound('select');
                   setSelectedHandIndex(current => current === index ? null : index);
                   setNotice('');
                 }}

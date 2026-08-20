@@ -11443,6 +11443,86 @@ textarea {
     rgba(7, 24, 39, .38);
 }
 
+.placement-tcg-lane-fx {
+  position: absolute;
+  z-index: 8;
+  inset: 8px;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  text-align: center;
+  text-shadow: 0 2px 12px rgba(0, 0, 0, .9);
+  animation: placement-tcg-lane-fx 820ms cubic-bezier(.18, .72, .25, 1) both;
+}
+
+.placement-tcg-lane-fx::before,
+.placement-tcg-lane-fx::after,
+.placement-tcg-lane-fx i {
+  position: absolute;
+  content: "";
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.placement-tcg-lane-fx::before {
+  width: 84%;
+  height: 84%;
+  border: 2px solid currentColor;
+  opacity: .8;
+  animation: placement-tcg-ring 760ms ease-out both;
+}
+
+.placement-tcg-lane-fx::after {
+  width: 38%;
+  height: 38%;
+  background: currentColor;
+  filter: blur(18px);
+  opacity: .45;
+  animation: placement-tcg-glow 760ms ease-out both;
+}
+
+.placement-tcg-lane-fx i {
+  width: 115%;
+  height: 3px;
+  background: currentColor;
+  box-shadow: 0 0 14px currentColor;
+  transform: rotate(-23deg) scaleX(0);
+  animation: placement-tcg-slash 620ms cubic-bezier(.16, .8, .25, 1) 70ms both;
+}
+
+.placement-tcg-lane-fx b,
+.placement-tcg-lane-fx span {
+  position: relative;
+  z-index: 2;
+  display: block;
+}
+
+.placement-tcg-lane-fx b {
+  font-size: 12px;
+  font-weight: 950;
+  letter-spacing: .16em;
+}
+
+.placement-tcg-lane-fx span {
+  margin-top: 3px;
+  font-size: 22px;
+  font-weight: 950;
+}
+
+.placement-tcg-lane-fx.attack {
+  color: #ffe17c;
+}
+
+.placement-tcg-lane-fx.impact {
+  color: #ff5f80;
+  animation-name: placement-tcg-impact-fx;
+}
+
+.placement-tcg-lane-fx.deploy {
+  color: #6ff7ff;
+  animation-name: placement-tcg-deploy-fx;
+}
+
 .placement-tcg-board-half.player .placement-tcg-lane {
   grid-template-rows: minmax(56px, 1fr) 25px;
 }
@@ -11514,6 +11594,7 @@ textarea {
   cursor: pointer;
   border-color: var(--tcg-cyan);
   box-shadow: inset 0 0 13px rgba(94, 246, 255, .1), 0 0 8px rgba(94, 246, 255, .1);
+  animation: placement-tcg-ready-pulse 1.1s ease-in-out infinite;
 }
 
 .placement-tcg-unit-chip.can-attack:hover {
@@ -12211,6 +12292,45 @@ textarea {
   to { box-shadow: inset 0 0 28px rgba(94, 246, 255, .18); }
 }
 
+@keyframes placement-tcg-ready-pulse {
+  50% { box-shadow: inset 0 0 20px rgba(94, 246, 255, .24), 0 0 16px rgba(94, 246, 255, .24); }
+}
+
+@keyframes placement-tcg-lane-fx {
+  0% { opacity: 0; transform: scale(.55); }
+  18% { opacity: 1; transform: scale(1.08); }
+  100% { opacity: 0; transform: scale(1.02); }
+}
+
+@keyframes placement-tcg-impact-fx {
+  0% { opacity: 0; transform: translateX(20px) scale(.5); }
+  18% { opacity: 1; transform: translateX(-3px) scale(1.12); }
+  42% { transform: translateX(3px) scale(1); }
+  100% { opacity: 0; transform: translateX(0) scale(.96); }
+}
+
+@keyframes placement-tcg-deploy-fx {
+  0% { opacity: 0; transform: translateY(18px) scale(.62); }
+  24% { opacity: 1; transform: translateY(0) scale(1.08); }
+  100% { opacity: 0; transform: translateY(-8px) scale(1); }
+}
+
+@keyframes placement-tcg-ring {
+  0% { opacity: .9; transform: scale(.55); }
+  100% { opacity: 0; transform: scale(1.35); }
+}
+
+@keyframes placement-tcg-glow {
+  0% { opacity: .55; transform: scale(.5); }
+  100% { opacity: 0; transform: scale(1.8); }
+}
+
+@keyframes placement-tcg-slash {
+  0% { opacity: 0; transform: rotate(-23deg) scaleX(0); }
+  45% { opacity: 1; transform: rotate(-23deg) scaleX(1); }
+  100% { opacity: 0; transform: rotate(-23deg) scaleX(.45); }
+}
+
 @media (max-width: 960px) {
   .placement-tcg-layout {
     grid-template-columns: 150px minmax(480px, 1fr);
@@ -12792,14 +12912,17 @@ textarea {
   overflow-y: auto;
 }
 
-.shogi-mini-side-list span {
+.shogi-mini-side-list > span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
   padding-bottom: 4px;
   border-bottom: 1px solid rgba(255, 255, 255, .06);
   color: #9ab0ae;
   font-size: 10px;
 }
 
-.shogi-mini-side-list span.unique {
+.shogi-mini-side-list > span.unique {
   color: #f4ce70;
 }
 
@@ -12918,23 +13041,62 @@ textarea {
   box-shadow: inset 0 0 0 3px rgba(249, 208, 83, .94);
 }
 
-.shogi-piece {
+.shogi-piece-icon {
+  position: relative;
+  width: 29px;
+  aspect-ratio: 1145 / 1374;
+  flex: 0 0 auto;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+}
+
+.shogi-piece-icon img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  filter: drop-shadow(0 2px 2px rgba(31, 13, 2, .48));
+  user-select: none;
+}
+
+.shogi-piece-icon .shogi-piece-glyph {
   position: relative;
   z-index: 2;
-  color: #1e1308;
+  color: #211307;
   font-family: "Hiragino Mincho ProN", "Yu Mincho", serif;
-  font-size: clamp(22px, 5vw, 42px);
+  font-size: 17px;
   font-weight: 950;
   line-height: 1;
   text-shadow: 0 1px 0 rgba(255, 255, 255, .35);
 }
 
-.shogi-piece.cpu {
+.shogi-piece-icon.compact {
+  width: 22px;
+}
+
+.shogi-piece-icon.compact .shogi-piece-glyph {
+  font-size: 12px;
+}
+
+.shogi-piece-icon.shogi-piece {
+  width: clamp(28px, 5.5vw, 48px);
+}
+
+.shogi-piece-icon.shogi-piece .shogi-piece-glyph {
+  font-size: clamp(18px, 3.8vw, 34px);
+}
+
+.shogi-piece-icon.cpu {
   transform: rotate(180deg);
+}
+
+.shogi-piece-icon.cpu .shogi-piece-glyph {
   color: #3b1a20;
 }
 
-.shogi-piece.promoted {
+.shogi-piece-icon.promoted .shogi-piece-glyph {
   color: #a31935;
 }
 
@@ -13050,10 +13212,8 @@ textarea {
   box-shadow: 0 0 12px rgba(101, 241, 251, .25);
 }
 
-.shogi-hand-list button > span {
+.shogi-hand-list button > .shogi-piece-icon {
   color: #f7ce67;
-  font-family: serif;
-  font-size: 24px;
   text-align: center;
 }
 
@@ -13128,21 +13288,16 @@ textarea {
   padding-right: 24px;
 }
 
-.shogi-piece-big {
+.shogi-piece-icon.shogi-piece-big {
   width: 70px;
   height: 78px;
-  display: grid;
-  place-items: center;
   border: 1px solid #f7ce67;
-  color: #221504;
   background: linear-gradient(145deg, #f5df9e, #b98736);
-  font-family: serif;
-  font-size: 45px;
-  font-weight: 950;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, .28);
 }
 
-.shogi-piece-big.cpu {
-  transform: rotate(180deg);
+.shogi-piece-icon.shogi-piece-big .shogi-piece-glyph {
+  font-size: 45px;
 }
 
 .shogi-piece-modal-heading h2 {
@@ -13152,7 +13307,7 @@ textarea {
   font-weight: 950;
 }
 
-.shogi-piece-modal-heading span {
+.shogi-piece-modal-heading > div > span {
   color: #9db0a8;
   font-size: 10px;
 }
@@ -13233,13 +13388,11 @@ textarea {
   background: rgba(247, 206, 103, .16);
 }
 
-.shogi-standard-grid b {
-  color: #f7ce67;
-  font-family: serif;
-  font-size: 26px;
+.shogi-standard-grid .shogi-piece-icon {
+  width: 30px;
 }
 
-.shogi-standard-grid span {
+.shogi-standard-grid button > span:not(.shogi-piece-icon) {
   font-size: 9px;
 }
 
