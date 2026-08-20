@@ -1468,7 +1468,7 @@ const App: React.FC = () => {
         const shouldSkipAttribute = (element: Element | null) => {
             if (!element) return true;
             const tagName = element.tagName.toLowerCase();
-            return tagName === 'script' || tagName === 'style';
+            return tagName === 'script' || tagName === 'style' || Boolean(element.closest('[data-allow-japanese]'));
         };
         const translatableAttributes = ['title', 'aria-label', 'placeholder'];
 
