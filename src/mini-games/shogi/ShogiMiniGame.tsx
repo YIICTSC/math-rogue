@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import type { LanguageMode } from '../../types';
+import { audioService } from '../../services/audioService';
 import { assetUrl } from '../../utils/assetPaths';
 import { trans } from '../../utils/textUtils';
 import {
@@ -328,6 +329,10 @@ const ShogiMiniGame: React.FC<ShogiMiniGameProps> = ({ onBack, onFinish, languag
   const [showGuide, setShowGuide] = useState(false);
   const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const longPressTriggered = useRef(false);
+
+  useEffect(() => {
+    void audioService.playBGM('poker_play');
+  }, []);
 
   const startGame = (mode: ShogiMode, stage: number) => {
     setGame(createShogiGame(mode, stage, Date.now() + stage * 97));

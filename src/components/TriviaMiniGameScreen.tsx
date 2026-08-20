@@ -896,7 +896,7 @@ const MahjongGame: React.FC<TriviaMiniGameProps> = ({ onBack, languageMode = 'JA
 
 const TriviaMiniGameScreen: React.FC<TriviaMiniGameProps> = ({ gameScreen = GameScreen.MINI_GAME_STONE_GLOW, ...props }) => {
   useEffect(() => {
-    void audioService.playBGM('poker_play');
+    void audioService.playBGM(gameScreen === GameScreen.MINI_GAME_LEARNING_TCG ? 'battle' : 'poker_play');
   }, [gameScreen]);
 
   switch (gameScreen) {

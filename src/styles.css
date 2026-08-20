@@ -12418,20 +12418,25 @@ textarea {
   }
 
   .placement-tcg-layout {
-    height: 510px;
-    min-height: 510px;
+    height: clamp(330px, calc(100dvh - 259px), 620px);
+    min-height: 330px;
     grid-template-columns: 1fr;
+    grid-template-rows: 58px minmax(0, 1fr);
     padding: 7px;
-    overflow: visible;
+    overflow: hidden;
   }
 
   .placement-tcg-opponent-panel {
-    position: absolute;
-    z-index: 6;
-    top: 10px;
-    left: 12px;
-    width: 100px;
-    padding: 6px;
+    position: static;
+    z-index: 1;
+    grid-row: 1;
+    width: 100%;
+    height: 58px;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    padding: 4px 8px;
+    overflow: hidden;
     background: rgba(3, 12, 24, .94);
   }
 
@@ -12442,17 +12447,26 @@ textarea {
   }
 
   .placement-tcg-portrait-frame {
-    width: 48px;
-    margin: 0 auto 3px;
+    flex: 0 0 42px;
+    width: 42px;
+    margin: 0;
   }
 
   .placement-tcg-opponent-panel h2 {
-    margin: 2px 0;
+    min-width: 0;
+    flex: 1 1 auto;
+    margin: 0;
+    overflow: hidden;
     font-size: 9px;
+    text-align: left;
+    text-overflow: ellipsis;
+    white-space: nowrap;
   }
 
   .placement-tcg-opponent-panel .placement-tcg-life {
-    margin: 3px 0;
+    flex: 0 0 clamp(118px, 36vw, 160px);
+    width: clamp(118px, 36vw, 160px);
+    margin: 0;
   }
 
   .placement-tcg-opponent-panel .placement-tcg-life > div:first-child {
@@ -12464,7 +12478,9 @@ textarea {
   }
 
   .placement-tcg-field-status {
-    padding-left: 105px;
+    padding-left: 0;
+    height: 24px;
+    min-height: 24px;
     grid-template-columns: 1fr;
   }
 
@@ -12482,7 +12498,42 @@ textarea {
   }
 
   .placement-tcg-board {
+    min-height: 0;
+    height: auto;
     padding-inline: 3px;
+  }
+
+  .placement-tcg-field {
+    grid-row: 2;
+    min-height: 0;
+    display: grid;
+    grid-template-rows: 24px minmax(0, 1fr) 40px;
+  }
+
+  .placement-tcg-field-status {
+    grid-row: 1;
+  }
+
+  .placement-tcg-field > .placement-tcg-board {
+    grid-row: 2;
+    height: auto;
+  }
+
+  .placement-tcg-mobile-actions {
+    position: static;
+    grid-row: 3;
+    width: 100%;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: 8px;
+    padding: 3px 5px;
+    border: 0;
+    border-top: 1px solid rgba(94, 246, 255, .18);
+    background: rgba(3, 15, 27, .94);
+    box-shadow: none;
+    box-sizing: border-box;
   }
 
   .placement-tcg-board-half,

@@ -505,6 +505,20 @@ const PlacementTcgGame: React.FC<PlacementTcgGameProps> = ({ onBack, onFinish, l
   const seenCueRef = useRef<number | null>(null);
   const seenWinnerRef = useRef<PlacementSideKey | null>(null);
 
+  const placementBgmType = !run || !battle
+    ? 'menu'
+    : complete
+      ? 'victory'
+      : rewardChoices.length > 0
+        ? 'reward'
+        : run.battleIndex === 9
+          ? 'boss'
+          : 'battle';
+
+  useEffect(() => {
+    void audioService.playBGM(placementBgmType);
+  }, [placementBgmType]);
+
   const opponent: PlacementTcgOpponent | null = useMemo(
     () => run && run.battleIndex < 10 ? getCurrentOpponent(run) : null,
     [run],
