@@ -247,7 +247,7 @@ const PieceInspector: React.FC<{
 }> = ({ piece, targetCount, languageMode, onClose }) => {
   const definition = getPieceDefinition(piece.kind);
   // 駒名はルール上の固有表記として全言語モードで日本語を維持する。
-  const pieceName = definition.name;
+  const pieceName = piece.promoted ? glyphFor(piece) : definition.name;
   return (
     <div className="shogi-modal-backdrop" role="dialog" aria-modal="true" onClick={onClose}>
       <section className="shogi-piece-modal" onClick={event => event.stopPropagation()}>
@@ -408,7 +408,7 @@ const ShogiMiniGame: React.FC<ShogiMiniGameProps> = ({ onBack, onFinish, languag
                   key={row + '-' + col}
                   type="button"
                   role="gridcell"
-                  aria-label={piece ? piece.kind + ' ' + getPieceDefinition(piece.kind).name : copy(languageMode, 'empty square', 'empty square', 'からのマス')}
+                  aria-label={piece ? piece.kind + ' ' + (piece.promoted ? glyphFor(piece) : getPieceDefinition(piece.kind).name) : copy(languageMode, 'empty square', 'empty square', 'からのマス')}
                   className={'shogi-square ' + (selectedHere ? 'selected ' : '') + (target ? 'target-' + target.status.toLowerCase() : '') + (row < 2 ? ' cpu-zone' : row > 2 ? ' player-zone' : ' neutral-zone')}
                   onClick={() => onSquare(row, col)}
                   onPointerDown={() => piece && beginLongPress(piece, row, col)}
