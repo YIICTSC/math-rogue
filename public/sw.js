@@ -1,7 +1,9 @@
-const SHELL_CACHE = 'learning-rogue-shell-v3';
-const RUNTIME_CACHE = 'learning-rogue-runtime-v3';
+// Bump the shell/runtime generation when the deployed app contains UI fixes.
+// This prevents an older Pages service worker from re-serving the pre-fix bundle.
+const SHELL_CACHE = 'learning-rogue-shell-v4';
+const RUNTIME_CACHE = 'learning-rogue-runtime-v4';
 const THEME_CACHE_PREFIX = 'learning-rogue-theme-';
-const THEME_CACHE_VERSION = 'v3';
+const THEME_CACHE_VERSION = 'v4';
 
 const isSameOrigin = (url) => url.origin === self.location.origin;
 const isNavigationRequest = (request) => request.mode === 'navigate';

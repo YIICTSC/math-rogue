@@ -165,6 +165,18 @@ const glyphFor = (piece: ShogiPiece): string => {
   return getPieceDefinition(piece.kind).glyph;
 };
 
+// 駒名は固有表記として日本語を維持する。古い翻訳キャッシュや汎用辞書が
+// 混入しても「Choose Option」などを画面へ出さず、駒字へ安全にフォールバックする。
+const GENERIC_PIECE_LABELS = new Set([
+  'Choose Option',
+  'Event Details',
+  'School Foe',
+  'Item',
+  'Choose a fitting event action',
+]);
+const pieceLabelFor = (definition: ReturnType<typeof getPieceDefinition>) =>
+  GENERIC_PIECE_LABELS.has(definition.name.trim()) ? definition.glyph : definition.name;
+
 const targetLabel = (target: ShogiTarget, languageMode?: LanguageMode) => {
   if (target.status === 'CAPTURE') return copy(languageMode, '捕獲できるマス', 'Capture square');
   if (target.status === 'DROP') return copy(languageMode, '持ち駒を打てるマス', 'Drop square');
@@ -247,7 +259,7 @@ const PieceInspector: React.FC<{
 }> = ({ piece, targetCount, languageMode, onClose }) => {
   const definition = getPieceDefinition(piece.kind);
   // 駒名はルール上の固有表記として全言語モードで日本語を維持する。
-  const pieceName = piece.promoted ? glyphFor(piece) : definition.name;
+  const pieceName = piece.promoted ? glyphFor(piece) : pieceLabelFor(definition);
   return (
     <div className="shogi-modal-backdrop" role="dialog" aria-modal="true" onClick={onClose}>
       <section className="shogi-piece-modal" onClick={event => event.stopPropagation()}>
@@ -384,8 +396,8 @@ const ShogiMiniGame: React.FC<ShogiMiniGameProps> = ({ onBack, onFinish, languag
           <p className="shogi-mini-eyebrow">{game.mode === 'ADVANCE' ? 'UNIQUE PIECES' : 'STANDARD PIECES'}</p>
           <h2>{game.mode === 'ADVANCE' ? getAdvancedStageUniqueCount(game.stage) + ' TYPES ACTIVE' : '8 TYPES ACTIVE'}</h2>
           <div className="shogi-mini-side-list">
-            {STANDARD_PIECES.map(piece => <span key={piece.kind}>{piece.glyph} {piece.name}</span>)}
-            {game.mode === 'ADVANCE' && ADVANCED_PIECES.slice(0, Math.min(50, game.stage)).slice(-getAdvancedStageUniqueCount(game.stage)).map(piece => <span key={piece.kind} className="unique">{piece.glyph} {piece.name}</span>)}
+            {STANDARD_PIECES.map(piece => <span key={piece.kind}>{piece.glyph} {pieceLabelFor(piece)}</span>)}
+            {game.mode === 'ADVANCE' && ADVANCED_PIECES.slice(0, Math.min(50, game.stage)).slice(-getAdvancedStageUniqueCount(game.stage)).map(piece => <span key={piece.kind} className="unique">{piece.glyph} {pieceLabelFor(piece)}</span>)}
           </div>
           <div className="shogi-mini-help">
             <b>{copy(languageMode, '操作', 'CONTROLS')}</b>
@@ -408,7 +420,7 @@ const ShogiMiniGame: React.FC<ShogiMiniGameProps> = ({ onBack, onFinish, languag
                   key={row + '-' + col}
                   type="button"
                   role="gridcell"
-                  aria-label={piece ? piece.kind + ' ' + (piece.promoted ? glyphFor(piece) : getPieceDefinition(piece.kind).name) : copy(languageMode, 'empty square', 'empty square', 'からのマス')}
+                  aria-label={piece ? piece.kind + ' ' + (piece.promoted ? glyphFor(piece) : pieceLabelFor(getPieceDefinition(piece.kind))) : copy(languageMode, 'empty square', 'empty square', 'からのマス')}
                   className={'shogi-square ' + (selectedHere ? 'selected ' : '') + (target ? 'target-' + target.status.toLowerCase() : '') + (row < 2 ? ' cpu-zone' : row > 2 ? ' player-zone' : ' neutral-zone')}
                   onClick={() => onSquare(row, col)}
                   onPointerDown={() => piece && beginLongPress(piece, row, col)}
@@ -461,7 +473,7 @@ const ShogiMiniGame: React.FC<ShogiMiniGameProps> = ({ onBack, onFinish, languag
                     if (event.key.toLowerCase() === 'i' || event.key === '?') setInspect({ piece: { kind, side: 'P', promoted: false, hasMoved: false }, targetCount: game ? getShogiTargets(game.board, game.hands, { hand: kind }, 'P').length : 0 });
                   }}
                 >
-              <span>{definition.glyph}</span><b>{definition.name}</b><em>× {count}</em>
+              <span>{definition.glyph}</span><b>{pieceLabelFor(definition)}</b><em>× {count}</em>
                 </button>
               );
             }) : <p>{copy(languageMode, 'まだありません。相手駒を取るとここへ入ります。', 'None yet. Captured pieces appear here.', 'まだありません。あいてこまをとるとここへはいります。')}</p>}
@@ -477,7 +489,7 @@ const ShogiMiniGame: React.FC<ShogiMiniGameProps> = ({ onBack, onFinish, languag
             <button type="button" className="shogi-modal-close" onClick={() => setShowGuide(false)}>×</button>
             <p className="shogi-mini-eyebrow">MOVE REFERENCE // STANDARD</p>
             <h2>{copy(languageMode, '標準駒の動き', 'Standard piece movement')}</h2>
-            <div className="shogi-standard-grid">{STANDARD_PIECES.map(piece => <button key={piece.kind} type="button" onClick={() => setInspect({ piece: { kind: piece.kind, side: 'P', promoted: false, hasMoved: false }, targetCount: 0 })}><b>{piece.glyph}</b><span>{piece.name}</span></button>)}</div>
+            <div className="shogi-standard-grid">{STANDARD_PIECES.map(piece => <button key={piece.kind} type="button" onClick={() => setInspect({ piece: { kind: piece.kind, side: 'P', promoted: false, hasMoved: false }, targetCount: 0 })}><b>{piece.glyph}</b><span>{pieceLabelFor(piece)}</span></button>)}</div>
             <p className="shogi-guide-note">{copy(languageMode, '竜は飛車＋斜め1マス、馬は角＋縦横1マスです。移動中の駒を長押しすると、現在の盤面での合法手数も確認できます。', '竜 = rook plus one diagonal step. 馬 = bishop plus one orthogonal step. Hold any piece to see its current legal move count.', 'りゅうはひしゃ＋ななめ1マス、うまはかく＋たてよこ1マスです。こまをながおしすると、げんざいのばんめんでのごうほうてすうもかくにんできます。')}</p>
           </section>
         </div>
