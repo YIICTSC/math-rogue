@@ -9,6 +9,8 @@ import KochoShowdown from './KochoShowdown';
 import PaperPlaneBattle from './PaperPlaneBattle';
 import GoHomeDash from './GoHomeDash';
 import TriviaMiniGameScreen from './TriviaMiniGameScreen';
+import PlacementTcgGame from '../mini-games/placement-tcg/PlacementTcgGame';
+import ShogiMiniGame from '../mini-games/shogi/ShogiMiniGame';
 
 interface MiniGameRouterProps {
     screen: GameScreen;
@@ -52,8 +54,8 @@ const MINI_GAME_MAP: Partial<Record<GameScreen, React.ComponentType<MiniGameComp
     [GameScreen.MINI_GAME_GO_HOME]: GoHomeDash,
     [GameScreen.MINI_GAME_STONE_GLOW]: TriviaMiniGameScreen,
     [GameScreen.MINI_GAME_SCHOOL_TRPG]: TriviaMiniGameScreen,
-    [GameScreen.MINI_GAME_LEARNING_TCG]: TriviaMiniGameScreen,
-    [GameScreen.MINI_GAME_SHOGI]: TriviaMiniGameScreen,
+    [GameScreen.MINI_GAME_LEARNING_TCG]: PlacementTcgGame,
+    [GameScreen.MINI_GAME_SHOGI]: ShogiMiniGame,
     [GameScreen.MINI_GAME_GO]: TriviaMiniGameScreen,
     [GameScreen.MINI_GAME_CHESS]: TriviaMiniGameScreen,
     [GameScreen.MINI_GAME_MAHJONG]: TriviaMiniGameScreen,
