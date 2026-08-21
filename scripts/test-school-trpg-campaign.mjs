@@ -1,0 +1,101 @@
+import assert from 'node:assert/strict';
+import { createServer } from 'vite';
+
+const server = await createServer({
+  server: { middlewareMode: true },
+  appType: 'custom',
+  logLevel: 'error',
+});
+
+try {
+  const data = await server.ssrLoadModule('/src/mini-games/school-trpg/schoolTrpgData.ts');
+  const engine = await server.ssrLoadModule('/src/mini-games/school-trpg/schoolTrpgEngine.ts');
+  const localStorageData = new Map();
+  globalThis.window = {
+    localStorage: {
+      getItem: key => localStorageData.get(key) ?? null,
+      setItem: (key, value) => localStorageData.set(key, String(value)),
+      removeItem: key => localStorageData.delete(key),
+    },
+  };
+  const save = await server.ssrLoadModule('/src/mini-games/school-trpg/schoolTrpgSave.ts');
+
+  assert.deepEqual(data.validateSchoolTrpgData(), [], 'TRPG content data must be internally consistent');
+  assert.deepEqual(engine.getSchoolTrpgDataErrors(), [], 'TRPG engine references must resolve');
+
+  const resolveLocation = (state, locationId, choiceIndex = 0) => {
+    const eventState = engine.beginSchoolTrpgEvent(state, locationId);
+    assert.equal(eventState.phase, 'EVENT', `${locationId} should open an event`);
+    const event = data.getTrpgEvent(eventState.currentEventId);
+    const resolved = engine.resolveSchoolTrpgChoice(eventState, event.choices[choiceIndex].id, false);
+    assert.equal(resolved.phase, 'RESULT', `${event.id} should produce a visible check result`);
+    return engine.continueSchoolTrpgResult(resolved);
+  };
+
+  const reachCombat = seed => {
+    let state = engine.createSchoolTrpgCampaign(seed);
+    state = resolveLocation(state, 'classroom');
+    state = resolveLocation(state, 'hallway');
+    state = resolveLocation(state, 'courtyard');
+    state = resolveLocation(state, 'library');
+    assert.equal(state.phase, 'QUESTION', 'the library must open the research quiz gate');
+    state = engine.completeSchoolTrpgQuestion(state, 3);
+    assert.ok(state.completedQuestionGates.includes('LIBRARY'));
+    assert.ok(state.unlockedLocationIds.includes('tcg-club'));
+    state = resolveLocation(state, 'tcg-club');
+    assert.ok(state.unlockedLocationIds.includes('old-school'));
+    state = resolveLocation(state, 'old-school');
+    assert.equal(state.phase, 'COMBAT', 'the old wing must open the guardian encounter');
+    return state;
+  };
+
+  const deterministicA = resolveLocation(engine.createSchoolTrpgCampaign(7419), 'classroom');
+  const deterministicB = resolveLocation(engine.createSchoolTrpgCampaign(7419), 'classroom');
+  assert.deepEqual(deterministicA, deterministicB, 'same seed and choice must be deterministic');
+  assert.equal(save.saveSchoolTrpgCampaign(deterministicA), true, 'campaign save should commit');
+  assert.deepEqual(save.loadSchoolTrpgCampaign(), deterministicA, 'campaign save should round-trip');
+  localStorageData.set(save.SCHOOL_TRPG_SAVE_KEY, '{"broken":true}');
+  assert.equal(save.loadSchoolTrpgCampaign(), null, 'invalid save data must fail closed');
+  assert.equal(save.saveSchoolTrpgCampaign(deterministicA), true, 'campaign should recover after invalid save data');
+  save.clearSchoolTrpgCampaign();
+  assert.equal(save.loadSchoolTrpgCampaign(), null, 'campaign clear should remove stable and pending data');
+
+  let persuasion = reachCombat(20260821);
+  persuasion = {
+    ...persuasion,
+    stress: 0,
+    stats: { ...persuasion.stats, energy: 6, friendship: 6, study: 6 },
+    flags: { ...persuasion.flags, knowsPassphrase: true },
+    combat: { ...persuasion.combat, insight: 3, resolve: 0, enemyIntent: 2 },
+  };
+  for (let guard = 0; guard < 4 && persuasion.phase === 'COMBAT'; guard += 1) {
+    persuasion = engine.performSchoolTrpgCombatAction(persuasion, 'PERSUADE');
+  }
+  assert.equal(persuasion.phase, 'QUESTION');
+  assert.equal(persuasion.combat.resolution, 'PERSUADE');
+  assert.equal(persuasion.pendingQuestionGate, 'MISSION_CLEAR');
+  persuasion = engine.completeSchoolTrpgQuestion(persuasion, 2);
+  assert.equal(persuasion.phase, 'REWARD');
+  persuasion = engine.chooseSchoolTrpgReward(persuasion, 'emblem-shard');
+  assert.equal(persuasion.phase, 'ENDING');
+  assert.equal(persuasion.endingId, 'memory-returned');
+  assert.ok(engine.isSchoolTrpgCampaignComplete(persuasion));
+
+  let escape = reachCombat(8501);
+  escape = { ...escape, combat: { ...escape.combat, turn: 3 }, stress: 0 };
+  escape = engine.performSchoolTrpgCombatAction(escape, 'ESCAPE');
+  assert.equal(escape.combat.resolution, 'ESCAPE');
+  escape = engine.completeSchoolTrpgQuestion(escape, 3);
+  escape = engine.chooseSchoolTrpgReward(escape, 'handmade-map');
+  assert.equal(escape.endingId, 'quiet-return');
+
+  let sealed = reachCombat(1287);
+  sealed = { ...sealed, combat: { ...sealed.combat, enemyHp: 1 }, stress: 0 };
+  sealed = engine.performSchoolTrpgCombatAction(sealed, 'STRIKE');
+  assert.equal(sealed.combat.resolution, 'DEFEAT');
+  assert.equal(sealed.pendingQuestionGate, 'MISSION_CLEAR');
+
+  console.log('School TRPG campaign tests passed: data, deterministic checks, quiz gates, combat routes, rewards, and endings.');
+} finally {
+  await server.close();
+}

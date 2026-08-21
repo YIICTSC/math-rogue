@@ -2,6 +2,7 @@
 import { GameScreen } from './types';
 import { storageService } from './services/storageService';
 import { Club, Skull, Compass, Mountain, Crown, Send, LucideIcon, Rocket, Gem, Dice5, Sparkles, CircleDot, Grid3X3, Layers3 } from 'lucide-react';
+import { clearSchoolTrpgCampaign } from './mini-games/school-trpg/schoolTrpgSave';
 
 export interface MiniGameConfig {
   id: string;
@@ -138,7 +139,7 @@ export const MINI_GAMES: MiniGameConfig[] = [
     typeColor: 'bg-amber-600',
     glowColor: 'rgba(245,158,11,0.4)',
     icon: Dice5,
-    clearAction: () => {}
+    clearAction: () => clearSchoolTrpgCampaign()
   },
   {
     id: 'LEARNING_TCG',
