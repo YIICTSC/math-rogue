@@ -16,6 +16,186 @@
   src: url('https://fonts.gstatic.com/s/kleeone/v13/LDIxapCLNRc6A8oT4q4A.ttf') format('truetype');
 }
 
+/* Mini-game hub: the landscape canvas is a fixed viewport, so keep the hub
+   header, every game tile, and the return action inside that canvas.  The
+   earlier centered min-height layout could center an over-tall grid at a
+   negative top offset, which made the title and first row appear clipped. */
+@media (orientation: landscape) and (max-height: 600px) {
+  .main-mini-game-select-screen {
+    height: 100dvh !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+  }
+
+  .main-mini-game-select-screen .mini-game-select-scroll {
+    box-sizing: border-box;
+    height: 100% !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+    padding: max(4px, env(safe-area-inset-top)) max(8px, env(safe-area-inset-right)) max(4px, env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left)) !important;
+  }
+
+  .main-mini-game-select-screen .mini-game-select-panel {
+    box-sizing: border-box;
+    width: 100% !important;
+    height: 100% !important;
+    min-height: 0 !important;
+    max-width: none !important;
+    justify-content: flex-start !important;
+    overflow: hidden !important;
+    padding: 4px 0 !important;
+  }
+
+  .main-mini-game-select-screen .mini-game-select-title {
+    flex: 0 0 auto;
+    margin: 0 0 2px !important;
+    font-size: clamp(1rem, 3.1vw, 1.45rem) !important;
+    line-height: 1.05;
+  }
+
+  .main-mini-game-select-screen .mini-game-select-title svg {
+    width: 1.15rem;
+    height: 1.15rem;
+    margin-right: 0.35rem;
+  }
+
+  .main-mini-game-select-screen .mini-game-select-hint {
+    flex: 0 0 auto;
+    max-width: 100%;
+    margin: 0 0 4px !important;
+    font-size: clamp(0.45rem, 1.05vw, 0.62rem) !important;
+    line-height: 1.15;
+    white-space: nowrap;
+  }
+
+  .main-mini-game-select-screen .mini-game-select-grid {
+    flex: 1 1 0;
+    width: 100% !important;
+    min-height: 0 !important;
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    grid-template-rows: repeat(4, minmax(0, 1fr));
+    gap: 4px !important;
+    margin: 0 0 3px !important;
+    padding: 0 !important;
+    overflow: hidden;
+  }
+
+  .main-mini-game-select-screen .mini-game-select-card {
+    min-width: 0;
+    min-height: 0 !important;
+    height: auto !important;
+    padding: 4px 6px !important;
+    border-width: 2px !important;
+    border-radius: 0.65rem;
+    flex-direction: row !important;
+    justify-content: flex-start !important;
+    gap: 4px;
+  }
+
+  .main-mini-game-select-screen .mini-game-select-card > .absolute {
+    right: 0;
+    font-size: 0.42rem;
+    line-height: 1.1;
+    padding: 1px 4px;
+  }
+
+  .main-mini-game-select-screen .mini-game-select-card-icon {
+    box-sizing: border-box;
+    width: clamp(2rem, 6.5vh, 3rem) !important;
+    height: clamp(2rem, 6.5vh, 3rem) !important;
+    margin: 0 3px 0 0 !important;
+    padding: 4px !important;
+    border-width: 1px;
+  }
+
+  .main-mini-game-select-screen .mini-game-select-card-icon > div {
+    width: 100% !important;
+    height: 100% !important;
+  }
+
+  .main-mini-game-select-screen .mini-game-select-card-copy {
+    min-width: 0;
+    align-items: flex-start !important;
+    text-align: left !important;
+  }
+
+  .main-mini-game-select-screen .mini-game-select-card-copy .mini-game-title {
+    min-width: 0;
+    margin-bottom: 1px !important;
+    font-size: clamp(0.58rem, 1.7vw, 0.85rem) !important;
+    line-height: 1.05;
+  }
+
+  .main-mini-game-select-screen .mini-game-select-card-copy .mini-game-title-line {
+    display: block;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .main-mini-game-select-screen .mini-game-select-card-copy > span:last-child {
+    display: -webkit-box;
+    max-width: 100%;
+    overflow: hidden;
+    color: rgb(203 213 225 / 0.82);
+    font-size: clamp(0.38rem, 0.9vw, 0.52rem) !important;
+    line-height: 1.15;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2;
+  }
+
+  .main-mini-game-select-screen .mini-game-select-card [data-gamepad-delete-target] {
+    min-width: 0;
+  }
+
+  .main-mini-game-select-screen .mini-game-select-back {
+    flex: 0 0 auto;
+    margin: 0 !important;
+    padding: 2px 4px !important;
+    font-size: clamp(0.55rem, 1.3vw, 0.75rem) !important;
+    line-height: 1.1;
+  }
+
+  .main-mini-game-select-screen .mini-game-select-back svg {
+    width: 0.8rem;
+    height: 0.8rem;
+    margin-right: 0.2rem;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 430px) {
+  .main-mini-game-select-screen .mini-game-select-panel {
+    padding-block: 2px !important;
+  }
+
+  .main-mini-game-select-screen .mini-game-select-title {
+    font-size: 0.95rem !important;
+  }
+
+  .main-mini-game-select-screen .mini-game-select-hint {
+    display: none;
+  }
+
+  .main-mini-game-select-screen .mini-game-select-grid {
+    gap: 3px !important;
+  }
+
+  .main-mini-game-select-screen .mini-game-select-card {
+    padding: 2px 4px !important;
+  }
+
+  .main-mini-game-select-screen .mini-game-select-card-icon {
+    width: 2rem !important;
+    height: 2rem !important;
+    padding: 3px !important;
+  }
+
+  .main-mini-game-select-screen .mini-game-select-card-copy > span:last-child {
+    display: none;
+  }
+}
+
 /* Trivia mini-games: phone landscape composition. Keep the same compact,
    information-first treatment as the shogi and placement TCG screens while
    preserving the full game controls in a single viewport. */

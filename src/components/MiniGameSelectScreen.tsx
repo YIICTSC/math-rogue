@@ -228,18 +228,18 @@ const MiniGameSelectScreen: React.FC<MiniGameSelectScreenProps> = ({ onSelect, o
         </div>
       )}
 
-      <div className="ios-safe-ui-x z-10 w-full h-full flex flex-col items-center p-4 overflow-y-auto custom-scrollbar">
-        <div className="w-full max-w-5xl flex flex-col items-center min-h-full justify-start md:justify-center py-8 md:py-4">
-          <h2 className="text-2xl md:text-3xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-500 animate-pulse flex items-center shrink-0">
+      <div className="mini-game-select-scroll ios-safe-ui-x z-10 w-full h-full flex flex-col items-center p-4 overflow-y-auto custom-scrollbar">
+        <div className="mini-game-select-panel w-full max-w-5xl flex flex-col items-center min-h-full justify-start md:justify-center py-8 md:py-4">
+          <h2 className="mini-game-select-title text-2xl md:text-3xl font-bold mb-4 text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-500 animate-pulse flex items-center shrink-0">
             <Gamepad2 className="mr-2 md:mr-3 text-yellow-400" size={28} /> {trans('ミニゲーム選択', languageMode)}
           </h2>
-          <p className="text-xs text-gray-500 mb-6 animate-pulse text-center">
+          <p className="mini-game-select-hint text-xs text-gray-500 mb-6 animate-pulse text-center">
             {languageMode === 'ENGLISH'
               ? 'Hold the button, or focus a game and press Y, to delete its save data.'
               : '※ボタン長押し、またはゲームに合わせてYボタンでセーブデータを削除できます'}
           </p>
           
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-3 w-full mb-8 shrink-0 px-1 md:px-2">
+          <div className="mini-game-select-grid grid grid-cols-2 md:grid-cols-3 gap-3 w-full mb-8 shrink-0 px-1 md:px-2">
             {visibleGames.map((game) => (
               <button
                 key={game.id}
@@ -247,7 +247,7 @@ const MiniGameSelectScreen: React.FC<MiniGameSelectScreenProps> = ({ onSelect, o
                 data-gamepad-delete-target={isUnlocked(game) ? true : undefined}
                 aria-keyshortcuts={isUnlocked(game) ? 'Y' : undefined}
                 {...bindPress(game)}
-                className={`group relative bg-slate-800 border-4 border-slate-600 hover:border-white p-2 md:p-4 rounded-xl flex flex-col md:flex-row items-center justify-center md:justify-start text-center md:text-left transition-all shadow-xl overflow-hidden h-36 md:h-32 ${!isUnlocked(game) ? 'grayscale opacity-60' : 'hover:bg-slate-700'}`}
+                className={`mini-game-select-card group relative bg-slate-800 border-4 border-slate-600 hover:border-white p-2 md:p-4 rounded-xl flex flex-col md:flex-row items-center justify-center md:justify-start text-center md:text-left transition-all shadow-xl overflow-hidden h-36 md:h-32 ${!isUnlocked(game) ? 'grayscale opacity-60' : 'hover:bg-slate-700'}`}
                 style={{ 
                   borderColor: isUnlocked(game) ? undefined : '#475569',
                   boxShadow: isUnlocked(game) ? `0 0 20px ${game.glowColor}` : undefined
@@ -258,11 +258,11 @@ const MiniGameSelectScreen: React.FC<MiniGameSelectScreenProps> = ({ onSelect, o
                   {trans(game.typeLabel, languageMode)}
                 </div>
                 
-                <div className={`p-2 md:p-3 rounded-full mb-2 md:mb-0 md:mr-3 group-hover:scale-110 transition-transform duration-300 border-2 border-white/10 shrink-0 bg-black/20`}>
+                <div className={`mini-game-select-card-icon p-2 md:p-3 rounded-full mb-2 md:mb-0 md:mr-3 group-hover:scale-110 transition-transform duration-300 border-2 border-white/10 shrink-0 bg-black/20`}>
                   <MiniGameSpriteIcon game={game} />
                 </div>
 
-                <div className="flex flex-col items-center md:items-start w-full">
+                <div className="mini-game-select-card-copy flex flex-col items-center md:items-start w-full">
                   <span
                     className={`mini-game-title text-sm md:text-lg font-bold mb-1 text-white transition-colors ${languageMode === 'ENGLISH' ? 'mini-game-title-english' : ''}`}
                     aria-label={trans(game.name, languageMode)}
@@ -283,7 +283,7 @@ const MiniGameSelectScreen: React.FC<MiniGameSelectScreenProps> = ({ onSelect, o
 
           <button 
             onClick={onBack} 
-            className="text-gray-400 hover:text-white flex items-center border-b border-transparent hover:border-white transition-colors text-base py-2 mt-auto shrink-0"
+            className="mini-game-select-back text-gray-400 hover:text-white flex items-center border-b border-transparent hover:border-white transition-colors text-base py-2 mt-auto shrink-0"
           >
             <ArrowLeft className="mr-2" size={20} /> {trans('タイトルへ戻る', languageMode)}
           </button>
