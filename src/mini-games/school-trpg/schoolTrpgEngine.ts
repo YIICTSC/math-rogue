@@ -96,6 +96,29 @@ export const beginSchoolTrpgEvent = (state: TrpgCampaignState, locationId: strin
   };
 };
 
+/**
+ * Rest on the route map to keep fatigue from becoming a dead end. A rest
+ * costs one in-game hour and recovers up to two stress points; it is only
+ * available while planning the next location.
+ */
+export const recoverSchoolTrpgStress = (state: TrpgCampaignState): TrpgCampaignState => {
+  if (state.phase !== 'MAP' || state.stress <= 0) return state;
+  const recovered = Math.min(2, state.stress);
+  return {
+    ...state,
+    time: state.time + 1,
+    stress: state.stress - recovered,
+    discoveryLog: [
+      ...state.discoveryLog,
+      trpgCopy(
+        `静かな休憩で疲労が${recovered}回復した。次の航路へ進める。`,
+        `しずかなきゅうけいでひろうが${recovered}かいふくした。つぎのこうろへすすめる。`,
+        `A quiet rest recovers ${recovered} stress. You are ready for the next route.`,
+      ),
+    ].slice(-18),
+  };
+};
+
 const createGuardianCombat = (state: TrpgCampaignState): TrpgCombatState => {
   const observed = Boolean(state.flags.observedGuardian);
   const knowsWeakness = Boolean(state.flags.knowsWeakness);

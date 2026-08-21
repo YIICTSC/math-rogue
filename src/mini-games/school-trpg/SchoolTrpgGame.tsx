@@ -50,6 +50,7 @@ import {
   getSchoolTrpgProgress,
   isHiddenSchoolTrpgChapterUnlocked,
   performSchoolTrpgCombatAction,
+  recoverSchoolTrpgStress,
   resolveSchoolTrpgChoice,
   startNextSchoolTrpgChapter,
 } from './schoolTrpgEngine';
@@ -81,6 +82,8 @@ const UI_COPY = {
   location: trpgCopy('現在地', 'げんざいち', 'LOCATION'),
   clues: trpgCopy('手がかり', 'てがかり', 'CLUES'),
   stress: trpgCopy('疲労', 'ひろう', 'STRESS'),
+  rest: trpgCopy('休憩して疲労を回復', 'きゅうけいしてひろうをかいふく', 'REST / RECOVER STRESS'),
+  restHint: trpgCopy('時間を1進め、疲労を最大2回復します。', 'じかんを1すすめ、ひろうをさいだい2かいふくします。', 'Advance time by 1 and recover up to 2 stress.'),
   fate: trpgCopy('運命', 'うんめい', 'FATE'),
   stats: trpgCopy('能力', 'のうりょく', 'STATS'),
   log: trpgCopy('発見ログ', 'はっけんログ', 'DISCOVERY LOG'),
@@ -187,7 +190,8 @@ const MapScreen: React.FC<{
   languageMode?: LanguageMode;
   onSelect: (locationId: string) => void;
   onTravel: (locationId: string) => void;
-}> = ({ state, selected, languageMode, onSelect, onTravel }) => {
+  onRest: () => void;
+}> = ({ state, selected, languageMode, onSelect, onTravel, onRest }) => {
   const chapterLocations = getTrpgChapterLocations(state.chapter);
   const chapter = getTrpgChapterMeta(state.chapter);
   const selectedLocation = chapterLocations.find(location => location.id === selected) || chapterLocations[0] || SCHOOL_TRPG_LOCATIONS[0];
@@ -250,17 +254,30 @@ const MapScreen: React.FC<{
         <div className="school-trpg-location-state">
           {completed ? text(SCHOOL_TRPG_COPY.revisit, languageMode) : unlocked ? text(UI_COPY.available, languageMode) : text(SCHOOL_TRPG_COPY.locked, languageMode)}
         </div>
-        <button
-          type="button"
-          className="school-trpg-primary-button"
-          disabled={!unlocked || completed}
-          onClick={() => onTravel(selectedLocation.id)}
-        >
-          <Compass size={18} />
-          {completed ? text(SCHOOL_TRPG_COPY.revisit, languageMode) : text(SCHOOL_TRPG_COPY.travel, languageMode)}
-          <ChevronRight size={18} />
-        </button>
+        <div className="school-trpg-location-actions">
+          <button
+            type="button"
+            className="school-trpg-primary-button"
+            disabled={!unlocked || completed}
+            onClick={() => onTravel(selectedLocation.id)}
+          >
+            <Compass size={18} />
+            {completed ? text(SCHOOL_TRPG_COPY.revisit, languageMode) : text(SCHOOL_TRPG_COPY.travel, languageMode)}
+            <ChevronRight size={18} />
+          </button>
+          <button
+            type="button"
+            className="school-trpg-secondary-button"
+            disabled={state.stress <= 0}
+            onClick={onRest}
+            title={text(UI_COPY.restHint, languageMode)}
+          >
+            <RotateCcw size={17} />
+            {text(UI_COPY.rest, languageMode)}
+          </button>
+        </div>
         <div className="school-trpg-command-hint">{text(SCHOOL_TRPG_COPY.selectLocation, languageMode)}</div>
+        <div className="school-trpg-rest-hint">{text(UI_COPY.restHint, languageMode)}</div>
         <StatStrip state={state} languageMode={languageMode} />
       </aside>
     </div>
@@ -504,7 +521,6 @@ const StartScreen: React.FC<{
         <h1>{text(SCHOOL_TRPG_COPY.campaign, languageMode)}</h1>
         <p>{text(SCHOOL_TRPG_COPY.intro, languageMode)}</p>
         <div className="school-trpg-start-specs"><span>{text(SCHOOL_TRPG_COPY.specChapters, languageMode)}</span><span>{text(SCHOOL_TRPG_COPY.specLocations, languageMode)}</span><span>{text(SCHOOL_TRPG_COPY.specEndings, languageMode)}</span></div>
-        <p className="school-trpg-start-secret-hint">{text(SCHOOL_TRPG_COPY.hiddenRouteHint, languageMode)}</p>
         {dataErrors.length > 0 && <div className="school-trpg-data-error"><b>{text(UI_COPY.dataError, languageMode)}</b>{dataErrors.map(error => <span key={error}>{error}</span>)}</div>}
         <div className="school-trpg-start-actions">
           {saved && <button type="button" className="school-trpg-primary-button" disabled={dataErrors.length > 0} onClick={onContinue}><MapPinned size={18} />{text(SCHOOL_TRPG_COPY.continueCampaign, languageMode)}<ChevronRight size={18} /></button>}
@@ -636,6 +652,10 @@ const SchoolTrpgGame = ({
               setState(beginSchoolTrpgEvent(state, locationId));
               setUseFate(false);
               audioService.playSound('select');
+            }}
+            onRest={() => {
+              setState(recoverSchoolTrpgStress(state));
+              audioService.playSound('buff');
             }}
           />
         )}

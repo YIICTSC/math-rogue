@@ -343,6 +343,11 @@
 .school-trpg-primary-button:disabled { cursor: not-allowed; opacity: 0.3; }
 .school-trpg-secondary-button { border-color: rgba(101, 236, 244, 0.36); color: #cae6ea; background: rgba(7, 31, 45, 0.78); }
 .school-trpg-danger-button { border-color: var(--trpg-rose); color: white; background: rgba(143, 26, 59, 0.82); }
+.school-trpg-secondary-button:hover:not(:disabled) { border-color: var(--trpg-gold); color: #fff2bd; background: rgba(65, 49, 20, 0.8); box-shadow: 0 0 24px rgba(243, 202, 104, 0.16); }
+.school-trpg-secondary-button:disabled { cursor: not-allowed; opacity: 0.3; }
+.school-trpg-location-actions { display: grid; grid-template-columns: minmax(0, 1.2fr) minmax(0, .8fr); gap: 8px; }
+.school-trpg-location-actions > button { min-width: 0; }
+.school-trpg-rest-hint { margin: -8px 0 12px; color: #a98c4d; font-size: 9px; line-height: 1.4; }
 .school-trpg-command-hint { margin: 12px 0 18px; color: #6d8e96; font-size: 10px; line-height: 1.55; }
 
 .school-trpg-campaign-stats { display: grid; grid-template-columns: repeat(4, 1fr); margin-top: auto; border-top: 1px solid rgba(101, 236, 244, 0.16); border-left: 1px solid rgba(101, 236, 244, 0.16); }
@@ -465,7 +470,6 @@
 .school-trpg-start-copy > p { color: #acc3c8; font-size: clamp(11px, 1.3vw, 16px); line-height: 1.85; }
 .school-trpg-start-specs { display: flex; flex-wrap: wrap; margin: 24px 0 16px; gap: 7px; }
 .school-trpg-start-specs span { padding: 6px 8px; border: 1px solid rgba(101,236,244,.24); color: var(--trpg-cyan); font-size: 8px; font-weight: 900; letter-spacing: .1em; }
-.school-trpg-start-secret-hint { margin: 0 0 18px; padding: 8px 10px; border-left: 2px solid var(--trpg-gold); color: #d5c58e !important; background: rgba(243,202,104,.07); font-size: 10px !important; line-height: 1.55 !important; }
 .school-trpg-start-actions { display: flex; flex-direction: column; gap: 8px; }
 .school-trpg-start-copy > small { margin-top: 10px; color: #708f97; font-size: 9px; }
 .school-trpg-data-error { display: flex; flex-direction: column; margin-bottom: 10px; padding: 10px; border: 1px solid var(--trpg-rose); color: #ffc0d1; background: rgba(100,10,34,.5); font-size: 9px; }
@@ -558,7 +562,6 @@
   .school-trpg-start-copy > p { font-size: 8px; line-height: 1.45; }
   .school-trpg-start-specs { margin: 8px 0 6px; }
   .school-trpg-start-specs span { padding: 3px 5px; font-size: 5px; }
-  .school-trpg-start-secret-hint { margin: 0 0 7px; padding: 4px 6px; font-size: 6px !important; }
   .school-trpg-reward-heading { margin-bottom: 7px; }
   .school-trpg-reward-heading h2 { font-size: 21px; }
   .school-trpg-reward-cards { grid-template-columns: repeat(3,minmax(140px,220px)); gap: 8px; padding: 0 10px; }
@@ -15720,4 +15723,91 @@ textarea {
     padding: 7px 5px;
     font-size: 7px;
   }
+}
+
+/* TRPG question gates ----------------------------------------------------
+   Keep the nested TRPG quiz inside its modal column. The shared challenge
+   screen has wider desktop rules for the main problem flow, so these scoped
+   rules prevent that layout from overflowing the TRPG viewport. */
+@media (orientation: landscape) and (min-width: 721px) {
+  .school-trpg-question-overlay {
+    box-sizing: border-box;
+    grid-template-columns: minmax(170px, .3fr) minmax(0, 1.7fr);
+    gap: 0;
+    padding: max(8px, env(safe-area-inset-top)) max(8px, env(safe-area-inset-right)) max(8px, env(safe-area-inset-bottom)) max(8px, env(safe-area-inset-left));
+  }
+
+  .school-trpg-question-content {
+    width: 100%;
+    height: 100%;
+    max-height: none;
+    overflow: hidden;
+  }
+
+  .school-trpg-question-content > .main-challenge-screen {
+    box-sizing: border-box;
+    width: 100%;
+    height: 100%;
+    min-width: 0;
+    min-height: 0;
+    padding: clamp(8px, 1.5vw, 20px) !important;
+    overflow: hidden !important;
+  }
+
+  .school-trpg-question-content > .main-challenge-screen > .z-10 {
+    box-sizing: border-box;
+    width: 100% !important;
+    max-width: none !important;
+    height: 100% !important;
+    min-height: 0 !important;
+    padding: 0 !important;
+  }
+
+  .school-trpg-question-content > .main-challenge-screen > .z-10.general-challenge-layout,
+  .school-trpg-question-content > .main-challenge-screen > .z-10.basic-challenge-layout {
+    display: grid !important;
+    grid-template-columns: minmax(0, 1.18fr) minmax(11rem, .82fr) !important;
+    grid-template-rows: minmax(0, 1fr) !important;
+    align-items: stretch !important;
+    gap: clamp(6px, 1vw, 14px) !important;
+  }
+
+  .school-trpg-question-content > .main-challenge-screen > .z-10 :is(.general-challenge-question, .basic-challenge-question) {
+    grid-column: 1 !important;
+    grid-row: 1 !important;
+    width: auto !important;
+    height: 100% !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    overflow-y: auto !important;
+  }
+
+  .school-trpg-question-content > .main-challenge-screen > .z-10 :is(.general-challenge-options, .general-challenge-input, .basic-challenge-options) {
+    grid-column: 2 !important;
+    grid-row: 1 !important;
+    width: auto !important;
+    height: 100% !important;
+    min-height: 0 !important;
+    align-self: stretch !important;
+  }
+
+  .school-trpg-question-content > .main-challenge-screen > .z-10 .general-challenge-options,
+  .school-trpg-question-content > .main-challenge-screen > .z-10 div.basic-challenge-options {
+    display: grid !important;
+    grid-template-columns: 1fr !important;
+    align-content: center !important;
+    gap: clamp(5px, .8vh, 10px) !important;
+  }
+
+  .school-trpg-question-content > .main-challenge-screen > .z-10 :is(.general-challenge-options, .basic-challenge-options) button {
+    min-height: clamp(36px, 9vh, 68px) !important;
+    padding: 6px 8px !important;
+    font-size: clamp(.68rem, 1.1vw, 1rem) !important;
+    line-height: 1.15 !important;
+  }
+}
+
+@media (orientation: portrait), (max-width: 720px) {
+  .school-trpg-location-actions { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 5px; }
+  .school-trpg-rest-hint { margin: -3px 0 5px; font-size: 6px; }
 }

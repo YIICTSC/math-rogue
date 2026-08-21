@@ -84,6 +84,14 @@ try {
   const deterministicA = resolveLocation(engine.createSchoolTrpgCampaign(7419), 'classroom');
   const deterministicB = resolveLocation(engine.createSchoolTrpgCampaign(7419), 'classroom');
   assert.deepEqual(deterministicA, deterministicB, 'same seed and choice must be deterministic');
+  const fatigued = { ...engine.createSchoolTrpgCampaign(7419), stress: 5 };
+  const rested = engine.recoverSchoolTrpgStress(fatigued);
+  assert.equal(rested.phase, 'MAP', 'TRPG rest should only resolve on the route map');
+  assert.equal(rested.stress, 3, 'TRPG rest should recover up to two stress');
+  assert.equal(rested.time, fatigued.time + 1, 'TRPG rest should advance the expedition clock');
+  assert.notDeepEqual(rested.discoveryLog, fatigued.discoveryLog, 'TRPG rest should leave a localized discovery log entry');
+  const eventState = { ...rested, phase: 'EVENT' };
+  assert.deepEqual(engine.recoverSchoolTrpgStress(eventState), eventState, 'TRPG rest must not interrupt an event');
   assert.equal(save.saveSchoolTrpgCampaign(deterministicA), true, 'campaign save should commit');
   assert.deepEqual(save.loadSchoolTrpgCampaign(), deterministicA, 'campaign save should round-trip');
   localStorageData.set(save.SCHOOL_TRPG_SAVE_KEY, '{"broken":true}');
