@@ -218,11 +218,13 @@ const targetLabel = (target: ShogiTarget, languageMode?: LanguageMode) => {
 const ModeStart: React.FC<{
   languageMode?: LanguageMode;
   progress: ShogiProgress;
+  initialMode?: ShogiMode;
+  initialStage?: number;
   onStart: (mode: ShogiMode, stage: number) => void;
   onBack: () => void;
-}> = ({ languageMode, progress, onStart, onBack }) => {
-  const [mode, setMode] = useState<ShogiMode>('STANDARD');
-  const [stage, setStage] = useState(1);
+}> = ({ languageMode, progress, initialMode = 'STANDARD', initialStage = 1, onStart, onBack }) => {
+  const [mode, setMode] = useState<ShogiMode>(initialMode);
+  const [stage, setStage] = useState(initialStage);
   const unlocked = Math.min(100, progress.highestStage);
   // 駒名・駒字は日本語の固有表記。英語の遅延DOM翻訳から保護する。
   return (
@@ -331,6 +333,8 @@ const GuideLegend: React.FC<{ languageMode?: LanguageMode }> = ({ languageMode }
 const ShogiMiniGame: React.FC<ShogiMiniGameProps> = ({ onBack, onFinish, languageMode, problemMode = 'MIXED' as GameMode, problemModePool, answerMode = 'CHOICE', assignment, onAnswerResult }) => {
   const [progress, setProgress] = useState<ShogiProgress>(() => loadProgress());
   const [game, setGame] = useState<ShogiGameState | null>(null);
+  const [startMode, setStartMode] = useState<ShogiMode>('STANDARD');
+  const [startStage, setStartStage] = useState(1);
   const [inspect, setInspect] = useState<{ piece: ShogiPiece; targetCount: number } | null>(null);
   const [showGuide, setShowGuide] = useState(false);
   const [showMissionQuiz, setShowMissionQuiz] = useState(false);
@@ -342,6 +346,7 @@ const ShogiMiniGame: React.FC<ShogiMiniGameProps> = ({ onBack, onFinish, languag
   }, []);
 
   const startGame = (mode: ShogiMode, stage: number) => {
+    setShowMissionQuiz(false);
     setGame(createShogiGame(mode, stage, Date.now() + stage * 97));
     setInspect(null);
   };
@@ -349,6 +354,13 @@ const ShogiMiniGame: React.FC<ShogiMiniGameProps> = ({ onBack, onFinish, languag
   const restart = () => {
     if (!game) return;
     startGame(game.mode, game.stage);
+  };
+
+  const openStagePicker = () => {
+    if (!game) return;
+    setStartMode(game.mode);
+    setStartStage(game.mode === 'ADVANCE' ? Math.min(100, game.stage + 1) : 1);
+    setGame(null);
   };
 
   useEffect(() => {
@@ -370,8 +382,8 @@ const ShogiMiniGame: React.FC<ShogiMiniGameProps> = ({ onBack, onFinish, languag
   }, [game?.result, game?.mode, game?.stage]);
 
   const selectedTarget = useMemo(
-    () => (game?.selected ? game.legalTargets : []),
-    [game?.selected, game?.legalTargets],
+    () => game?.selected ? getShogiTargets(game.board, game.hands, game.selected, 'P') : [],
+    [game?.board, game?.hands, game?.selected],
   );
 
   const beginLongPress = (piece: ShogiPiece, row?: number, col?: number) => {
@@ -398,7 +410,7 @@ const ShogiMiniGame: React.FC<ShogiMiniGameProps> = ({ onBack, onFinish, languag
       return;
     }
     if (game.selected) {
-      const isTarget = game.legalTargets.some(target => target.row === row && target.col === col);
+      const isTarget = selectedTarget.some(target => target.row === row && target.col === col);
       if (isTarget) {
         setGame(previous => previous ? playShogiMove(previous, [row, col]) : previous);
         return;
@@ -413,7 +425,7 @@ const ShogiMiniGame: React.FC<ShogiMiniGameProps> = ({ onBack, onFinish, languag
     if (game.board[row][col]?.side === 'P') setGame(previous => previous ? selectShogiPiece(previous, { row, col }) : previous);
   };
 
-  if (!game) return <ModeStart languageMode={languageMode} progress={progress} onStart={startGame} onBack={onBack} />;
+  if (!game) return <ModeStart languageMode={languageMode} progress={progress} initialMode={startMode} initialStage={startStage} onStart={startGame} onBack={onBack} />;
 
   const targetAt = (row: number, col: number) => selectedTarget.find(target => target.row === row && target.col === col);
   const playerHand = Object.entries(game.hands.P).filter(([, count]) => Number(count) > 0) as Array<[ShogiPieceKind, number]>;
@@ -507,6 +519,8 @@ const ShogiMiniGame: React.FC<ShogiMiniGameProps> = ({ onBack, onFinish, languag
               <span>{game.mode === 'ADVANCE' && game.result === 'WIN' ? 'STAGE ' + game.stage + ' CLEAR' : 'SEED ' + game.seed}</span>
               <div>
                 <button type="button" className="primary" onClick={restart}>{copy(languageMode, '新しい盤面で再戦', 'Replay with new board')}</button>
+                {game.mode === 'ADVANCE' && game.result === 'WIN' && game.stage < 100 && <button type="button" className="primary" onClick={() => startGame('ADVANCE', game.stage + 1)}>{copy(languageMode, '次のステージへ', 'Next stage')}</button>}
+                {game.mode === 'ADVANCE' && <button type="button" className="secondary" onClick={openStagePicker}>{copy(languageMode, 'ステージを選ぶ', 'Choose a stage')}</button>}
                 {game.result === 'WIN' && onFinish && <button type="button" className="secondary" onClick={() => onFinish('WIN')}>{copy(languageMode, '結果へ', 'Continue')}</button>}
               </div>
             </div>

@@ -790,7 +790,30 @@ const ChessGame: React.FC<TriviaMiniGameProps> = ({ onBack, languageMode = 'JAPA
     if (cpuCaptured?.kind === 'K' || allChessMoves(next, 'P').length === 0 && isChessInCheck(next, 'P')) setResult('LOSE');
   };
   const playerInCheck = isChessInCheck(board, 'P');
-  return <GameShell scope="chess" title={text(languageMode, 'スクールチェス', 'School Chess')} subtitle={text(languageMode, '合法手・チェック・チェックメイト・昇格を含む、学習向けの簡易チェス。', 'A learning-focused chess duel with legal moves, check, checkmate, and promotion.')} languageMode={languageMode} backgroundAsset="sprites/backgrounds/mini-games/chess.png" badgeAsset="sprites/backgrounds/mini-games/badges/chess.png" onBack={onBack}><ResultBanner result={result} onRestart={restart} languageMode={languageMode} /><div className="chess-scoreboard mb-3 grid grid-cols-3 gap-2 text-center text-sm"><div className="rounded-xl border border-cyan-300/25 bg-cyan-950/60 p-2">{text(languageMode, '手番', 'Turn')} {turn}</div><div className={`rounded-xl border p-2 ${playerInCheck ? 'border-rose-300/60 bg-rose-950/70 text-rose-100' : 'border-emerald-300/25 bg-emerald-950/55'}`}>{playerInCheck ? text(languageMode, 'チェックされています', 'You are in check') : text(languageMode, '自分のキングは安全', 'King is safe')}</div><div className="rounded-xl border border-amber-300/25 bg-amber-950/55 p-2">{text(languageMode, '最後の捕獲', 'Last capture')} {lastCapture || '-'}</div></div><div className="chess-board-area flex flex-1 flex-col items-center"><div className="chess-board grid w-full max-w-[min(90vw,560px)] grid-cols-8 gap-0.5 rounded-xl border-4 border-sky-900 bg-sky-950 p-2">{board.flatMap((line, boardRow) => line.map((piece, boardCol) => <button key={`${boardRow}-${boardCol}`} type="button" onClick={() => move(boardRow, boardCol)} data-gamepad-zone="chess-board" data-gamepad-order={boardRow * 8 + boardCol} className={`aspect-square text-2xl font-black sm:text-4xl ${selected?.[0] === boardRow && selected?.[1] === boardCol ? 'bg-cyan-400 text-slate-950' : (boardRow + boardCol) % 2 === 0 ? 'bg-sky-100 text-slate-900' : 'bg-sky-700 text-white'}`}>{piece && <span className={piece.side === 'P' ? 'text-white drop-shadow-[0_2px_0_rgba(0,0,0,0.8)]' : 'text-slate-950'}>{chessGlyph(piece)}</span>}</button>))}</div><div className="chess-guide mt-3 max-w-md rounded-xl border border-white/10 bg-white/5 p-3 text-xs leading-5 text-slate-300">{text(languageMode, '駒を選んで合法なマスへ移動。相手のキングを詰ませると勝利です。ポーンは最奥段でクイーンに昇格します。', 'Select a piece and move it to a legal square. Checkmate wins; pawns promote to queens on the last rank.')}</div></div></GameShell>;
+  const legalTargets = selected ? legalChessMoves(board, selected[0], selected[1]) : [];
+  const isLegalTarget = (row: number, col: number) => legalTargets.some(([targetRow, targetCol]) => targetRow === row && targetCol === col);
+  return <GameShell scope="chess" title={text(languageMode, 'スクールチェス', 'School Chess')} subtitle={text(languageMode, '合法手・チェック・チェックメイト・昇格を含む、学習向けの簡易チェス。', 'A learning-focused chess duel with legal moves, check, checkmate, and promotion.')} languageMode={languageMode} backgroundAsset="sprites/backgrounds/mini-games/chess.png" badgeAsset="sprites/backgrounds/mini-games/badges/chess.png" onBack={onBack}>
+    <ResultBanner result={result} onRestart={restart} languageMode={languageMode} />
+    <div className="chess-scoreboard mb-3 grid grid-cols-3 gap-2 text-center text-sm">
+      <div className="rounded-xl border border-cyan-300/25 bg-cyan-950/60 p-2">{text(languageMode, '手番', 'Turn')} {turn}</div>
+      <div className={`rounded-xl border p-2 ${playerInCheck ? 'border-rose-300/60 bg-rose-950/70 text-rose-100' : 'border-emerald-300/25 bg-emerald-950/55'}`}>{playerInCheck ? text(languageMode, 'チェックされています', 'You are in check') : text(languageMode, '自分のキングは安全', 'King is safe')}</div>
+      <div className="rounded-xl border border-amber-300/25 bg-amber-950/55 p-2">{text(languageMode, '最後の捕獲', 'Last capture')} {lastCapture || '-'}</div>
+    </div>
+    <div className="chess-board-area flex flex-1 flex-col items-center">
+      <div className="chess-board grid w-full max-w-[min(90vw,560px)] grid-cols-8 gap-0.5 rounded-xl border-4 border-sky-900 bg-sky-950 p-2">
+        {board.flatMap((line, boardRow) => line.map((piece, boardCol) => {
+          const selectedHere = selected?.[0] === boardRow && selected?.[1] === boardCol;
+          const legalTarget = isLegalTarget(boardRow, boardCol);
+          const captureTarget = legalTarget && Boolean(piece);
+          return <button key={`${boardRow}-${boardCol}`} type="button" onClick={() => move(boardRow, boardCol)} data-gamepad-zone="chess-board" data-gamepad-order={boardRow * 8 + boardCol} aria-label={legalTarget ? text(languageMode, captureTarget ? '駒を取れるマス' : '移動できるマス', captureTarget ? 'Capture square' : 'Legal move') : undefined} className={`relative aspect-square text-2xl font-black sm:text-4xl ${selectedHere ? 'bg-cyan-400 text-slate-950' : (boardRow + boardCol) % 2 === 0 ? 'bg-sky-100 text-slate-900' : 'bg-sky-700 text-white'} ${legalTarget ? captureTarget ? 'ring-4 ring-inset ring-rose-400/90' : 'ring-4 ring-inset ring-cyan-400/90' : ''}`}>
+            {piece && <span className={`relative z-10 ${piece.side === 'P' ? 'text-white drop-shadow-[0_2px_0_rgba(0,0,0,0.8)]' : 'text-slate-950'}`}>{chessGlyph(piece)}</span>}
+            {legalTarget && <span aria-hidden="true" className={captureTarget ? 'pointer-events-none absolute inset-0 z-20 flex items-center justify-center text-2xl font-black text-rose-500/90' : 'pointer-events-none absolute inset-0 z-20 flex items-center justify-center text-3xl font-black text-cyan-900/75'}>{captureTarget ? '×' : '•'}</span>}
+          </button>;
+        }))}
+      </div>
+      <div className="chess-guide mt-3 max-w-md rounded-xl border border-white/10 bg-white/5 p-3 text-xs leading-5 text-slate-300">{text(languageMode, '駒を選ぶと青い点で合法手、赤い×で捕獲先を表示します。自分のキングが攻撃される手は選べません。', 'Select a piece to show legal moves with blue dots and captures with red × marks. Moves that expose your king are not allowed.')}</div>
+    </div>
+  </GameShell>;
 };
 
 type MahjongTile = { key: string; id: string; suit: 'm' | 'p' | 's' | 'z'; value: number; label: string };

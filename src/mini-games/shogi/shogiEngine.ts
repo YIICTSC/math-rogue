@@ -383,12 +383,19 @@ const shuffled = <T,>(values: T[], random: () => number): T[] => {
 const stageUniqueCount = (stage: number) =>
   stage <= 50 ? 1 : stage <= 60 ? 2 : stage <= 70 ? 3 : stage <= 80 ? 4 : stage <= 90 ? 5 : stage <= 99 ? 6 : 8;
 
-export const createShogiPosition = (
+const isSafeInitialPosition = (board: ShogiBoard) => {
+  const playerKing = locateKing(board, 'P');
+  const cpuKing = locateKing(board, 'C');
+  if (!playerKing || !cpuKing) return false;
+  return !isAttacked(board, playerKing[0], playerKing[1], 'C')
+    && !isAttacked(board, cpuKing[0], cpuKing[1], 'P');
+};
+
+const buildShogiPosition = (
   mode: ShogiMode,
   stage: number,
-  seed: number,
+  random: () => number,
 ): { board: ShogiBoard; hands: ShogiHands; uniqueKinds: ShogiPieceKind[] } => {
-  const random = seededRandom(seed);
   const board = emptyBoard();
   const hands = emptyHands();
   const uniqueKinds: ShogiPieceKind[] = [];
@@ -416,6 +423,21 @@ export const createShogiPosition = (
   playerPieces.slice(0, playerCells.length).forEach((piece, index) => { board[playerCells[index][0]][playerCells[index][1]] = piece; });
   cpuPieces.slice(0, cpuCells.length).forEach((piece, index) => { board[cpuCells[index][0]][cpuCells[index][1]] = piece; });
   return { board, hands, uniqueKinds };
+};
+
+export const createShogiPosition = (
+  mode: ShogiMode,
+  stage: number,
+  seed: number,
+): { board: ShogiBoard; hands: ShogiHands; uniqueKinds: ShogiPieceKind[] } => {
+  // A fully random placement could put a rook/lance/bishop in line with a
+  // king before the first turn. That made otherwise movable pieces appear to
+  // have no destinations because every move left the king in check.
+  let position = buildShogiPosition(mode, stage, seededRandom(seed));
+  for (let attempt = 1; attempt < 64 && !isSafeInitialPosition(position.board); attempt += 1) {
+    position = buildShogiPosition(mode, stage, seededRandom(seed + attempt * 7919));
+  }
+  return position;
 };
 
 export const createShogiGame = (mode: ShogiMode, stage = 1, seed = Date.now()): ShogiGameState => {
@@ -463,7 +485,10 @@ export const selectShogiPiece = (
 
 export const playShogiMove = (state: ShogiGameState, target: [number, number]): ShogiGameState => {
   if (state.result || !state.selected) return state;
-  const allowed = state.legalTargets.find(item => item.row === target[0] && item.col === target[1]);
+  // The board and hands are the source of truth. Recalculate targets here so
+  // a target from a previous render/game can never affect the current move.
+  const currentTargets = getShogiTargets(state.board, state.hands, state.selected, 'P');
+  const allowed = currentTargets.find(item => item.row === target[0] && item.col === target[1]);
   if (!allowed) return { ...state, message: 'そのマスには移動できません。表示された候補を選んでください。' };
   const selection = state.selected;
   const piece = 'hand' in selection ? null : state.board[selection.row][selection.col];
