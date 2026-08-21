@@ -577,6 +577,7 @@
 
 @media (orientation: portrait), (max-width: 720px) {
   .school-trpg-campaign-shell { height: 100dvh; min-height: 0; overflow: hidden; grid-template-rows: 54px 34px minmax(0, 1fr) 28px; }
+  .school-trpg-campaign-shell.is-start { grid-template-rows: 54px minmax(0, 1fr); }
   .school-trpg-campaign-header { grid-template-columns: auto minmax(0,1fr) auto; min-height: 54px; padding: max(6px,env(safe-area-inset-top)) 10px 6px; gap: 8px; }
   .school-trpg-campaign-header > span { display: none; }
   .school-trpg-campaign-header > button { min-height: 36px; padding: 0 10px; font-size: 8px; }
@@ -599,7 +600,9 @@
   .school-trpg-map-node small { font-size: 5px; }
   .school-trpg-campaign-footer { min-height: 28px; }
   .school-trpg-start-layout { grid-template-columns: 1fr; width: calc(100% - 16px); height: calc(100% - 16px); min-height: 0; margin: 8px; overflow: hidden; }
-  .school-trpg-start-art { min-height: 0; height: 42%; }
+  .school-trpg-start-art { display: grid; place-items: center; align-self: stretch; min-height: 0; height: auto; }
+  .school-trpg-start-art > img { width: 88%; height: 100%; object-position: center; transform: none; }
+  .school-trpg-start-art > div { bottom: 42%; }
   .school-trpg-start-copy { min-height: 0; padding: 14px 20px; overflow: hidden; border-top: 1px solid rgba(101,236,244,.2); border-left: 0; }
   .school-trpg-start-copy h1 { margin: 4px 0 7px; font-size: 27px; }
   .school-trpg-start-copy > p { font-size: 9px; line-height: 1.45; }

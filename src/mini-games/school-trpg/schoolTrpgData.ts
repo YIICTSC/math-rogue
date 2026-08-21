@@ -57,6 +57,60 @@ export const SCHOOL_TRPG_LOCATIONS: TrpgLocation[] = [
   },
 ];
 
+// Chapter 1 expands the same campus into a night-time route. Keeping these
+// records in the same data table lets the map, save migration, and QA checks
+// treat future chapters as content additions instead of new UI branches.
+SCHOOL_TRPG_LOCATIONS.push(
+  {
+    id: 'music-room', eventId: 'P1-01', chapter: 1, x: 0.16, y: 0.66, danger: 1, travelCost: 1,
+    name: trpgCopy('放課後の音楽室', 'ほうかごのおんがくしつ', 'After-School Music Room'),
+    shortName: trpgCopy('音楽室', 'おんがくしつ', 'MUSIC ROOM'),
+    description: trpgCopy('消えた校章の音階をたどり、時計塔へ続く最初の旋律を探す。', 'きえたこうしょうのおんかいをたどり、とけいとうへつづくさいしょのせんりつをさがす。', 'Follow the emblem’s melody and find the first refrain leading to the clock tower.'),
+    backgroundAsset: 'sprites/backgrounds/learning-rogue/battle-classroom.webp',
+    iconAsset: 'sprites/backgrounds/mini-games/badges/school-trpg.png',
+  },
+  {
+    id: 'rooftop', eventId: 'P1-02', chapter: 1, x: 0.36, y: 0.42, danger: 1, travelCost: 1,
+    name: trpgCopy('星見の屋上', 'ほしみのおくじょう', 'Rooftop Observatory'),
+    shortName: trpgCopy('屋上', 'おくじょう', 'ROOFTOP'),
+    description: trpgCopy('夜空の星図に、旧校舎ではないもう一つの入口が浮かび上がる。', 'よぞらのせいずに、きゅうこうしゃではないもうひとつのいりぐちがうかびあがる。', 'A second entrance appears on the night sky chart, beyond the old wing.'),
+    backgroundAsset: 'sprites/backgrounds/learning-rogue/reward-rooftop.webp',
+    iconAsset: 'sprites/backgrounds/mini-games/badges/stone-glow.png',
+  },
+  {
+    id: 'science-lab', eventId: 'P1-03', chapter: 1, x: 0.54, y: 0.72, danger: 1, travelCost: 1,
+    name: trpgCopy('夜の理科室', 'よるのりかしつ', 'Night Science Lab'),
+    shortName: trpgCopy('理科室', 'りかしつ', 'SCIENCE LAB'),
+    description: trpgCopy('校章の欠片を照らすレンズを組み立て、見えない航路を可視化する。', 'こうしょうのかけらをてらすレンズをくみたて、みえないこうろをかしかする。', 'Build a lens that reveals the hidden route inside the emblem fragment.'),
+    backgroundAsset: 'sprites/backgrounds/learning-rogue/battle-library.webp',
+    iconAsset: 'sprites/backgrounds/mini-games/badges/chess.png',
+  },
+  {
+    id: 'archive', eventId: 'P1-04', chapter: 1, x: 0.58, y: 0.24, danger: 2, travelCost: 1,
+    name: trpgCopy('記録保管庫', 'きろくほかんこ', 'Archive Vault'),
+    shortName: trpgCopy('保管庫', 'ほかんこ', 'ARCHIVE'),
+    description: trpgCopy('卒業生の記録を照合し、時計塔の夜間通路を問題で復元する。', 'そつぎょうせいのきろくをしょうごうし、とけいとうのやかんつうろをもんだいでふくげんする。', 'Cross-check alumni records and restore the clock tower’s night passage through a quiz.'),
+    backgroundAsset: 'sprites/backgrounds/learning-rogue/battle-library.webp',
+    iconAsset: 'sprites/backgrounds/mini-games/badges/learning-tcg.png',
+  },
+  {
+    id: 'night-bridge', eventId: 'P1-05', chapter: 1, x: 0.76, y: 0.52, danger: 2, travelCost: 1,
+    name: trpgCopy('夜渡りの連絡橋', 'よわたりのれんらくきょう', 'Night Crossing'),
+    shortName: trpgCopy('連絡橋', 'れんらくきょう', 'NIGHT BRIDGE'),
+    description: trpgCopy('校舎と時計塔の間に浮かぶ連絡橋。足元の記憶が道の形を変える。', 'こうしゃととけいとうのあいだにうかぶれんらくきょう。あしもとのきおくがみちのかたちをかえる。', 'A bridge floats between the school and tower. Memories underfoot reshape its path.'),
+    backgroundAsset: 'sprites/backgrounds/learning-rogue/battle-hallway.webp',
+    iconAsset: 'sprites/backgrounds/mini-games/badges/shogi.png',
+  },
+  {
+    id: 'clock-tower', eventId: 'P1-06', chapter: 1, x: 0.88, y: 0.18, danger: 3, travelCost: 2,
+    name: trpgCopy('時計塔の最上階', 'とけいとうのさいじょうかい', 'Clock Tower Apex'),
+    shortName: trpgCopy('時計塔', 'とけいとう', 'CLOCK TOWER'),
+    description: trpgCopy('校章を返すか、記憶の番人と新しい契約を結ぶか。夜の探索が結末を選ぶ。', 'こうしょうをかえすか、きおくのばんにんとあたらしいけいやくをむすぶか。よるのたんさくがけつまつをえらぶ。', 'Return the emblem or make a new pact with the memory guardian. The night expedition decides the ending.'),
+    backgroundAsset: 'sprites/backgrounds/learning-rogue/battle-hallway.webp',
+    iconAsset: 'sprites/backgrounds/mini-games/badges/school-trpg.png',
+  },
+);
+
 export const SCHOOL_TRPG_EVENTS: TrpgEvent[] = [
   {
     id: 'P0-01', locationId: 'classroom', nextPhase: 'MAP',
@@ -213,6 +267,160 @@ export const SCHOOL_TRPG_EVENTS: TrpgEvent[] = [
   },
 ];
 
+SCHOOL_TRPG_EVENTS.push(
+  {
+    id: 'P1-01', locationId: 'music-room', chapter: 1, nextPhase: 'MAP',
+    title: trpgCopy('夜の音階', 'よるのおんかい', 'The Night Melody'),
+    eyebrow: trpgCopy('第2章 01 // 消えた旋律', 'だいにしょう 01 // きえたせんりつ', 'CHAPTER 2 // THE LOST MELODY'),
+    body: trpgCopy('放課後の音楽室で、誰も触れていないピアノが校歌の続きを奏でる。楽譜の空欄には、時計塔へ向かう時刻が隠されていた。', 'ほうかごのおんがくしつで、だれもふれていないピアノがこうかのつづきをかなでる。がくふのくうらんには、とけいとうへむかうじこくがかくされていた。', 'In the after-school music room, an untouched piano plays the next verse of the school song. A blank in the score hides the hour to visit the clock tower.'),
+    backgroundAsset: 'sprites/backgrounds/learning-rogue/battle-classroom.webp',
+    foregroundAsset: 'sprites/backgrounds/mini-games/foreground/school-trpg.png',
+    choices: [
+      {
+        id: 'tune', stat: 'study', difficulty: 6, clueOnSuccess: 1, stressOnFailure: 1,
+        label: trpgCopy('旋律の規則を読む', 'せんりつのきそくをよむ', 'Read the melody pattern'),
+        detail: trpgCopy('学力判定。屋上へ向かう星の時刻を見つける。', 'がくりょくはんてい。おくじょうへむかうほしのじこくをみつける。', 'Study check. Find the star-hour that points to the rooftop.'),
+        success: trpgCopy('音階は星の位置を示していた。次の鐘が鳴る前に屋上へ向かえる。', 'おんかいはほしのいちをしめしていた。つぎのかねがなるまえにおくじょうへむかえる。', 'The melody marks the stars. You can reach the rooftop before the next bell.'),
+        failure: trpgCopy('正確な時刻は分からないが、最後の和音が屋上の鍵を響かせた。', 'せいかくなじこくはわからないが、さいごのわおんがおくじょうのかぎをひびかせた。', 'The exact hour is unclear, but the final chord resonates with the rooftop key.'),
+        flags: { heardClockSong: true },
+      },
+      {
+        id: 'partner', stat: 'friendship', difficulty: 5, clueOnSuccess: 1, stressOnFailure: 0,
+        label: trpgCopy('仲間と合奏する', 'なかまとがっそうする', 'Play the score together'),
+        detail: trpgCopy('友情判定。仲間の記憶から欠けた音を補う。', 'ゆうじょうはんてい。なかまのきおくからかけたおとをおぎなう。', 'Friendship check. Reconstruct the missing note from an ally’s memory.'),
+        success: trpgCopy('二人の記憶が重なり、屋上へ続く夜間通路が開いた。', 'ふたりのきおくがかさなり、おくじょうへつづくやかんつうろがひらいた。', 'Your memories overlap and open a night passage to the rooftop.'),
+        failure: trpgCopy('音は外れたが、ピアノの裏から星図の切れ端を見つけた。', 'おとははずれたが、ピアノのうらからせいずのきれはしをみつけた。', 'The notes clash, but a star-chart fragment appears behind the piano.'),
+        flags: { metArchivist: true },
+      },
+    ],
+  },
+  {
+    id: 'P1-02', locationId: 'rooftop', chapter: 1, nextPhase: 'MAP',
+    title: trpgCopy('星見の合図', 'ほしみのあいず', 'Signal Among the Stars'),
+    eyebrow: trpgCopy('第2章 02 // 夜空の地図', 'だいにしょう 02 // よぞらのちず', 'CHAPTER 2 // NIGHT MAP'),
+    body: trpgCopy('屋上の望遠鏡から、時計塔の窓にだけ現れる光を見る。光は三回点滅し、校章の欠片を持つ者へ返事を求めていた。', 'おくじょうのぼうえんきょうから、とけいとうのまどにだけあらわれるひかりをみる。ひかりはさんかいてんめつし、こうしょうのかけらをもつものへへんじをもとめていた。', 'Through the rooftop telescope, a light appears only in the tower window. It flashes three times, asking the emblem holder for a reply.'),
+    backgroundAsset: 'sprites/backgrounds/learning-rogue/reward-rooftop.webp',
+    choices: [
+      {
+        id: 'chart', stat: 'study', difficulty: 6, clueOnSuccess: 1, stressOnFailure: 0,
+        label: trpgCopy('星図を写し取る', 'せいずをうつしとる', 'Copy the star chart'),
+        detail: trpgCopy('学力判定。理科室で使える座標を得る。', 'がくりょくはんてい。りかしつでつかえるざひょうをえる。', 'Study check. Gain coordinates useful in the science lab.'),
+        success: trpgCopy('光の座標がレンズの組み立て図になった。', 'ひかりのざひょうがレンズのくみたてずになった。', 'The light coordinates become a lens assembly diagram.'),
+        failure: trpgCopy('写し間違いはあるが、三つの光源だけは正しく残った。', 'うつしまちがいはあるが、みっつのこうげんだけはただしくのこった。', 'The copy has mistakes, but the three light sources remain correct.'),
+        flags: { foundStarChart: true },
+      },
+      {
+        id: 'storm', stat: 'courage', difficulty: 6, clueOnSuccess: 1, stressOnFailure: 1,
+        label: trpgCopy('風の中で合図を返す', 'かぜのなかであいずをかえす', 'Answer through the wind'),
+        detail: trpgCopy('勇気判定。危険な屋上から直接手がかりをつかむ。', 'ゆうきはんてい。きけんなおくじょうからちょくせつてがかりをつかむ。', 'Courage check. Take the clue directly from the dangerous rooftop.'),
+        success: trpgCopy('光は「理科室」と返した。次に必要なのは透明なレンズだ。', 'ひかりは「りかしつ」とかえした。つぎにひつようなのはとうめいなレンズだ。', 'The light answers “science lab.” The next need is a clear lens.'),
+        failure: trpgCopy('風に押し戻されたが、落ちた金属片を拾い上げた。', 'かぜにおしもどされたが、おちたきんぞくへんをひろいあげた。', 'The wind pushes you back, but you recover a fallen metal piece.'),
+        flags: { bravedStorm: true },
+      },
+    ],
+  },
+  {
+    id: 'P1-03', locationId: 'science-lab', chapter: 1, nextPhase: 'MAP',
+    title: trpgCopy('見えない航路', 'みえないこうろ', 'The Invisible Route'),
+    eyebrow: trpgCopy('第2章 03 // レンズ作り', 'だいにしょう 03 // レンズづくり', 'CHAPTER 2 // LENSWORK'),
+    body: trpgCopy('理科室の机には、望遠鏡のレンズ、校章の欠片、そして誰かが残した空の設計図がある。正しい順番で組めば、空中の道が見えるはずだ。', 'りかしつのつくえには、ぼうえんきょうのレンズ、こうしょうのかけら、そしてだれかがのこしたからのせっけいずがある。ただしいじゅんばんでくめば、くうちゅうのみちがみえるはずだ。', 'A telescope lens, the emblem fragment, and an empty blueprint wait on the lab desk. In the right order, they should reveal a path in the air.'),
+    backgroundAsset: 'sprites/backgrounds/learning-rogue/battle-library.webp',
+    choices: [
+      {
+        id: 'rebuild', stat: 'study', difficulty: 6, clueOnSuccess: 1, stressOnFailure: 1,
+        label: trpgCopy('設計図を再構成する', 'せっけいずをさいこうせいする', 'Rebuild the blueprint'),
+        detail: trpgCopy('学力判定。保管庫の記録を安全に照らす。', 'がくりょくはんてい。ほかんこのきろくをあんぜんにてらす。', 'Study check. Safely illuminate the archive records.'),
+        success: trpgCopy('レンズは夜間通路の輪郭を映し出した。', 'レンズはやかんつうろのりんかくをうつしだした。', 'The lens projects the outline of the night passage.'),
+        failure: trpgCopy('光が散り、短い時間だけ保管庫の番号が浮かんだ。', 'ひかりがちり、みじかいじかんだけほかんこのばんごうがうかんだ。', 'The light scatters, briefly revealing the archive number.'),
+        flags: { repairedCompass: true },
+      },
+      {
+        id: 'borrow-lens', stat: 'friendship', difficulty: 5, clueOnSuccess: 1, stressOnFailure: 0,
+        label: trpgCopy('理科部の記録を借りる', 'りかぶのきろくをかりる', 'Borrow the science club log'),
+        detail: trpgCopy('友情判定。前の探索者が残した注意書きを読む。', 'ゆうじょうはんてい。まえのたんさくしゃがのこしたちゅういがきをよむ。', 'Friendship check. Read a warning left by a former explorer.'),
+        success: trpgCopy('注意書きから、レンズを校章に直接当ててはいけないと分かった。', 'ちゅういがきから、レンズをこうしょうにちょくせつあててはいけないとわかった。', 'The warning says never point the lens directly at the emblem.'),
+        failure: trpgCopy('注意書きは破れていたが、保管庫の鍵番号だけは読めた。', 'ちゅういがきはやぶれていたが、ほかんこのかぎばんごうだけはよめた。', 'The warning is torn, but the archive key number is legible.'),
+        flags: { borrowedLens: true },
+      },
+    ],
+  },
+  {
+    id: 'P1-04', locationId: 'archive', chapter: 1, nextPhase: 'QUESTION', questionGate: 'CHAPTER1_RESEARCH',
+    title: trpgCopy('卒業生の記録', 'そつぎょうせいのきろく', 'Alumni Records'),
+    eyebrow: trpgCopy('第2章 04 // 研究ミッション', 'だいにしょう 04 // けんきゅうミッション', 'CHAPTER 2 // RESEARCH MISSION'),
+    body: trpgCopy('保管庫には、時計塔へ向かった卒業生たちの記録が残っている。資料の順番を問題で確かめれば、夜渡りの連絡橋が開く。', 'ほかんこには、とけいとうへむかったそつぎょうせいたちのきろくがのこっている。しりょうのじゅんばんをもんだいでたしかめれば、よわたりのれんらくきょうがひらく。', 'The vault holds records of alumni who visited the tower. Verify their order through a quiz to open the night crossing.'),
+    backgroundAsset: 'sprites/backgrounds/learning-rogue/battle-library.webp',
+    choices: [
+      {
+        id: 'timeline', stat: 'study', difficulty: 6, clueOnSuccess: 1, stressOnFailure: 0,
+        label: trpgCopy('記録を年代順に並べる', 'きろくをねんだいじゅんにならべる', 'Order the records by year'),
+        detail: trpgCopy('学力判定後、3問の研究チャレンジへ進む。', 'がくりょくはんていご、さんもんのけんきゅうチャレンジへすすむ。', 'Make a Study check, then begin a three-question research challenge.'),
+        success: trpgCopy('記録の空白が、連絡橋の座標を示している。', 'きろくのくうはんが、れんらくきょうのざひょうをしめしている。', 'The gaps in the records reveal the crossing coordinates.'),
+        failure: trpgCopy('年代は曖昧だが、最後のページに橋の名前が残っていた。', 'ねんだいはあいまいだが、さいごのページにはしのなまえがのこっていた。', 'The years are unclear, but the final page names the bridge.'),
+        flags: { archiveTimeline: true },
+      },
+      {
+        id: 'voice', stat: 'friendship', difficulty: 6, clueOnSuccess: 1, stressOnFailure: 1,
+        label: trpgCopy('記録者の声を探す', 'きろくしゃのこえをさがす', 'Find the recorder’s voice'),
+        detail: trpgCopy('友情判定後、記録の読み解き問題へ進む。', 'ゆうじょうはんていご、きろくのよみときもんだいへすすむ。', 'Make a Friendship check, then decode the records.'),
+        success: trpgCopy('仲間の記憶が、読めない欄の意味を補ってくれた。', 'なかまのきおくが、よめないらんのいみをおぎなってくれた。', 'An ally’s memory fills in the meaning of the unreadable fields.'),
+        failure: trpgCopy('声は遠かったが、橋を渡るための合言葉だけ聞き取れた。', 'こえはとおかったが、はしをわたるためのあいことばだけききとれた。', 'The voice is distant, but you catch the phrase needed to cross.'),
+        flags: { archiveVoice: true },
+      },
+    ],
+  },
+  {
+    id: 'P1-05', locationId: 'night-bridge', chapter: 1, nextPhase: 'MAP',
+    title: trpgCopy('夜渡りの連絡橋', 'よわたりのれんらくきょう', 'Crossing at Midnight'),
+    eyebrow: trpgCopy('第2章 05 // 境界線', 'だいにしょう 05 // きょうかいせん', 'CHAPTER 2 // THE BORDER'),
+    body: trpgCopy('連絡橋の床には、これまで集めた記憶が星のように流れている。一歩進むたび、誰かの忘れ物が道を変えていく。', 'れんらくきょうのゆかには、これまであつめたきおくがほしのようにながれている。いっぽすすむたび、だれかのわすれものがみちをかえていく。', 'Memories flow like stars beneath the crossing. Each step changes the path with someone’s forgotten keepsake.'),
+    backgroundAsset: 'sprites/backgrounds/learning-rogue/battle-hallway.webp',
+    choices: [
+      {
+        id: 'follow-stars', stat: 'courage', difficulty: 7, clueOnSuccess: 1, stressOnFailure: 1,
+        label: trpgCopy('星の流れに足を合わせる', 'ほしのながれにあしをあわせる', 'Step with the stars'),
+        detail: trpgCopy('勇気判定。時計塔への最短路を選ぶ。', 'ゆうきはんてい。とけいとうへのさいたんろをえらぶ。', 'Courage check. Choose the shortest route to the tower.'),
+        success: trpgCopy('星の流れが階段を作り、時計塔の扉まで一気に進めた。', 'ほしのながれがかいだんをつくり、とけいとうのとびらまでいっきにすすめた。', 'The stars form stairs, carrying you straight to the tower door.'),
+        failure: trpgCopy('橋が揺れたが、仲間の手を頼りに向こう岸へたどり着いた。', 'はしがゆれたが、なかまのてをたよりにむこうぎしへたどりついた。', 'The bridge sways, but an ally’s hand gets you to the far side.'),
+        flags: { crossedBridge: true },
+      },
+      {
+        id: 'anchor', stat: 'energy', difficulty: 6, clueOnSuccess: 1, stressOnFailure: 0,
+        label: trpgCopy('橋の記憶を固定する', 'はしのきおくをこていする', 'Anchor the bridge memory'),
+        detail: trpgCopy('体力判定。次の戦闘で番人の初手を弱める。', 'たいりょくはんてい。つぎのせんとうでばんにんのしょてをよわめる。', 'Energy check. Weaken the guardian’s opening move.'),
+        success: trpgCopy('校章の欠片を橋の中央へ置き、安全な足場を固定した。', 'こうしょうのかけらをはしのちゅうおうへおき、あんぜんなあしばをこていした。', 'You place the fragment at the center and stabilize the crossing.'),
+        failure: trpgCopy('足場は不安定なままだが、番人の気配だけは先に感じ取れた。', 'あしばはふあんていなままだが、ばんにんのけはいだけはさきにかんじとれた。', 'The footing remains unstable, but you sense the guardian ahead of time.'),
+        flags: { anchoredBridge: true, observedGuardian: true },
+      },
+    ],
+  },
+  {
+    id: 'P1-06', locationId: 'clock-tower', chapter: 1, nextPhase: 'COMBAT',
+    title: trpgCopy('時計塔の残響', 'とけいとうのざんきょう', 'Echoes in the Clock Tower'),
+    eyebrow: trpgCopy('第2章 06 // 最終対決', 'だいにしょう 06 // さいしゅうたいけつ', 'CHAPTER 2 // FINAL ENCOUNTER'),
+    body: trpgCopy('最上階で、思い出の残滓は鐘の音に姿を変えた。校章を返して過去を解放するか、番人と新しい契約を結ぶか。', 'さいじょうかいで、おもいでのざんしはかねのおとにすがたをかえた。こうしょうをかえしてかこをかいほうするか、ばんにんとあたらしいけいやくをむすぶか。', 'At the apex, the Remnant of Memory becomes the sound of a bell. Return the emblem to release the past, or make a new pact with the guardian.'),
+    backgroundAsset: 'sprites/backgrounds/learning-rogue/battle-hallway.webp',
+    choices: [
+      {
+        id: 'ring-bell', stat: 'courage', difficulty: 7, clueOnSuccess: 1, stressOnFailure: 1,
+        label: trpgCopy('鐘を鳴らして向き合う', 'かねをならしてむきあう', 'Ring the bell and face it'),
+        detail: trpgCopy('勇気判定後、番人との複数解決戦闘へ進む。', 'ゆうきはんていご、ばんにんとのふくすうかいけつせんとうへすすむ。', 'Make a Courage check, then enter a multi-solution guardian encounter.'),
+        success: trpgCopy('鐘の音が番人の輪郭を定めた。選択の責任を引き受ける時だ。', 'かねのおとがばんにんのりんかくをさだめた。せんたくのせきにんをひきうけるときだ。', 'The bell defines the guardian’s shape. It is time to own your choice.'),
+        failure: trpgCopy('鐘は割れた音を返した。それでも、番人の声は聞こえ始めた。', 'かねはわれたおとをかえした。それでも、ばんにんのこえはきこえはじめた。', 'The bell answers with a cracked tone, but the guardian’s voice begins to emerge.'),
+        flags: { facedGuardian: true, chapterOneBoss: true },
+      },
+      {
+        id: 'hold-fragment', stat: 'friendship', difficulty: 7, clueOnSuccess: 1, stressOnFailure: 0,
+        label: trpgCopy('仲間と欠片を掲げる', 'なかまとかけらをかかげる', 'Raise the fragment together'),
+        detail: trpgCopy('友情判定後、記憶を返す方法を探す戦闘へ進む。', 'ゆうじょうはんていご、きおくをかえすほうほうをさがすせんとうへすすむ。', 'Make a Friendship check, then seek a way to return the memory.'),
+        success: trpgCopy('欠片が二人の間で光り、番人は攻撃を止めて話を聞いた。', 'かけらがふたりのあいだでひかり、ばんにんはこうげきをとめてはなしをきいた。', 'The fragment glows between you, and the guardian pauses to listen.'),
+        failure: trpgCopy('光は弱いが、仲間の声が番人の記憶へ届いた。', 'ひかりはよわいが、なかまのこえがばんにんのきおくへとどいた。', 'The light is faint, but your ally’s voice reaches the guardian’s memory.'),
+        flags: { companionTrusted: true, knowsPassphrase: true, chapterOneBoss: true },
+      },
+    ],
+  },
+);
+
 export const SCHOOL_TRPG_REWARDS: TrpgReward[] = [
   {
     id: 'emblem-shard', artName: '校章ブレイク', flag: 'rewardEmblemShard',
@@ -230,6 +438,24 @@ export const SCHOOL_TRPG_REWARDS: TrpgReward[] = [
     description: trpgCopy('仲間と見つけた地点を記録し、次周の近道を解禁する。', 'なかまとみつけたちてんをきろくし、じしゅうのちかみちをかいきんする。', 'Records shared discoveries and unlocks a shortcut on the next run.'),
   },
 ];
+
+SCHOOL_TRPG_REWARDS.push(
+  {
+    id: 'clockwork-chime', chapter: 1, artName: '時計塔のチャイム', flag: 'rewardClockworkChime',
+    name: trpgCopy('時計塔のチャイム', 'とけいとうのチャイム', 'Clock-Tower Chime'),
+    description: trpgCopy('次の章で、イベント開始時に時間を1だけ戻せる。', 'つぎのしょうで、イベントかいしじにじかんをいちだけもどせる。', 'In the next chapter, rewind one time unit when an event begins.'),
+  },
+  {
+    id: 'star-chart', chapter: 1, artName: '夜空の星図', flag: 'rewardStarChart',
+    name: trpgCopy('夜空の星図', 'よぞらのせいず', 'Night-Sky Chart'),
+    description: trpgCopy('未解禁地点の危険度を、マップ上で先に確認できる。', 'みかいきんちてんのきけんどを、マップじょうでさきにかくにんできる。', 'Preview the danger of locked locations on the map.'),
+  },
+  {
+    id: 'memory-contract', chapter: 1, artName: '記憶の契約書', flag: 'rewardMemoryContract',
+    name: trpgCopy('記憶の契約書', 'きおくのけいやくしょ', 'Memory Pact'),
+    description: trpgCopy('説得ルートの次周で、番人との対話を最初から有利にする。', 'せっとくルートのじしゅうで、ばんにんとのたいわをさいしょからゆうりにする。', 'Starts the next persuasion route with an advantage in dialogue.'),
+  },
+);
 
 export const SCHOOL_TRPG_ENDINGS: TrpgEnding[] = [
   {
@@ -258,9 +484,37 @@ export const SCHOOL_TRPG_ENDINGS: TrpgEnding[] = [
   },
 ];
 
+SCHOOL_TRPG_ENDINGS.push(
+  {
+    id: 'clockwork-dawn', chapter: 1, tone: 'CYAN',
+    title: trpgCopy('鐘の音で迎える朝', 'かねのおとでむかえるあさ', 'Morning After the Bell'),
+    subtitle: trpgCopy('封印ルート // 夜の記録を守った', 'ふういんルート // よるのきろくをまもった', 'SEAL ROUTE // NIGHT RECORDS PRESERVED'),
+    body: trpgCopy('時計塔の鐘が朝を告げ、夜の航路は静かに閉じた。残された星図は、まだ見ぬ校外の物語を指している。', 'とけいとうのかねがあさをつげ、よるのこうろはしずかにとじた。のこされたせいずは、まだみぬこうがいのものがたりをさしている。', 'The tower bell announces morning and the night route closes. The remaining chart points toward stories beyond campus.'),
+  },
+  {
+    id: 'constellation-pact', chapter: 1, tone: 'VIOLET',
+    title: trpgCopy('星座の契約', 'せいざのけいやく', 'The Constellation Pact'),
+    subtitle: trpgCopy('説得ルート // 番人と共に歩く', 'せっとくルート // ばんにんとともにあるく', 'PERSUASION ROUTE // WALKING WITH THE GUARDIAN'),
+    body: trpgCopy('番人は鐘の音を道しるべに変え、仲間たちと新しい契約を結んだ。夜の学園には、まだ名前のない地点が残っている。', 'ばんにんはかねのおとをみちしるべにかえ、なかまたちとあたらしいけいやくをむすんだ。よるのがくえんには、まだなまえのないちてんがのこっている。', 'The guardian turns the bell into a guide and makes a new pact with your team. Unnamed places remain across the night campus.'),
+  },
+  {
+    id: 'bridge-before-dawn', chapter: 1, tone: 'GOLD',
+    title: trpgCopy('夜明け前の帰路', 'よあけまえのきろ', 'Return Before Dawn'),
+    subtitle: trpgCopy('退避ルート // 地図を次へ持ち越した', 'たいひルート // ちずをつぎへもちこした', 'ESCAPE ROUTE // MAP CARRIED FORWARD'),
+    body: trpgCopy('連絡橋が消える前に、記録と仲間を連れて戻った。時計塔の答えは、次の夜にもう一度探せる。', 'れんらくきょうがきえるまえに、きろくとなかまをつれてもどった。とけいとうのこたえは、つぎのよるにもういちどさがせる。', 'You return with your notes and ally before the crossing disappears. The tower’s answer can be sought on another night.'),
+  },
+  {
+    id: 'silent-clock', chapter: 1, tone: 'ROSE',
+    title: trpgCopy('止まった時計', 'とまったとけい', 'The Silent Clock'),
+    subtitle: trpgCopy('疲労ルート // 失敗を次の地図へ', 'ひろうルート // しっぱいをつぎのちずへ', 'FATIGUE ROUTE // FAILURE BECOMES A MAP'),
+    body: trpgCopy('鐘は鳴らなかったが、集めた記録は残った。止まった時計の針が、次の探索で向き合うべき時間を示している。', 'かねはならなかったが、あつめたきろくはのこった。とまったとけいのはりが、つぎのたんさくでむきあうべきじかんをしめしている。', 'The bell stays silent, but your records survive. The stopped hands mark the hour your next expedition must face.'),
+  },
+);
+
 export const SCHOOL_TRPG_COPY = {
   title: trpgCopy('放課後スクールTRPG', 'ほうかごスクールTRPG', 'AFTER-SCHOOL TRPG'),
   campaign: trpgCopy('失われた校章', 'うしなわれたこうしょう', 'THE MISSING EMBLEM'),
+  chapterTwo: trpgCopy('第2章・時計塔の余白', 'だいにしょう・とけいとうのよはく', 'CHAPTER 2 // THE CLOCK TOWER MARGIN'),
   intro: trpgCopy('地図を選び、仲間と調査し、戦い方まで決める探索キャンペーン。導入章の選択は4種類の結末へつながる。', 'ちずをえらび、なかまとちょうさし、たたかいかたまできめるたんさくキャンペーン。どうにゅうしょうのせんたくはよんしゅるいのけつまつへつながる。', 'Choose routes, investigate with allies, and decide how conflicts end. Your prologue choices lead to four outcomes.'),
   newCampaign: trpgCopy('新しい探索を始める', 'あたらしいたんさくをはじめる', 'START NEW EXPEDITION'),
   continueCampaign: trpgCopy('続きから再開', 'つづきからさいかい', 'CONTINUE EXPEDITION'),
@@ -276,8 +530,12 @@ export const SCHOOL_TRPG_COPY = {
   continue: trpgCopy('結果を確認して進む', 'けっかをかくにんしてすすむ', 'CONTINUE'),
   questionLibrary: trpgCopy('調査チャレンジ', 'ちょうさチャレンジ', 'RESEARCH CHALLENGE'),
   questionMission: trpgCopy('ミッションクリア問題', 'ミッションクリアもんだい', 'MISSION CLEAR QUIZ'),
+  questionChapterResearch: trpgCopy('夜間記録チャレンジ', 'やかんきろくチャレンジ', 'NIGHT RECORD CHALLENGE'),
+  questionChapterMission: trpgCopy('時計塔ミッションクリア問題', 'とけいとうミッションクリアもんだい', 'CLOCK TOWER MISSION QUIZ'),
   questionHint: trpgCopy('3問の結果が手がかりと報酬に反映されます。', 'さんもんのけっかがてがかりとほうしゅうにはんえいされます。', 'The three answers affect clues and rewards.'),
   battle: trpgCopy('記憶の番人との対決', 'きおくのばんにんとのたいけつ', 'ENCOUNTER: MEMORY GUARDIAN'),
+  chapterBattle: trpgCopy('時計塔の番人との対決', 'とけいとうのばんにんとのたいけつ', 'ENCOUNTER: CLOCK TOWER GUARDIAN'),
+  nextChapter: trpgCopy('第2章へ進む', 'だいにしょうへすすむ', 'CONTINUE TO CHAPTER 2'),
   reward: trpgCopy('発見物を1つ選ぶ', 'はっけんぶつをひとつえらぶ', 'CHOOSE ONE DISCOVERY'),
   finish: trpgCopy('探索結果へ進む', 'たんさくけっかへすすむ', 'COMPLETE EXPEDITION'),
   replay: trpgCopy('別の選択で再探索', 'べつのせんたくでさいたんさく', 'START ANOTHER EXPEDITION'),
@@ -290,6 +548,9 @@ export const SCHOOL_TRPG_COPY = {
 export const getTrpgLocation = (id: string) => SCHOOL_TRPG_LOCATIONS.find(location => location.id === id);
 export const getTrpgEvent = (id: string) => SCHOOL_TRPG_EVENTS.find(event => event.id === id);
 export const getTrpgEnding = (id: string | null) => SCHOOL_TRPG_ENDINGS.find(ending => ending.id === id);
+export const getTrpgChapterLocations = (chapter: number) => SCHOOL_TRPG_LOCATIONS.filter(location => (location.chapter || 0) === chapter);
+export const getTrpgChapterEvents = (chapter: number) => SCHOOL_TRPG_EVENTS.filter(event => (event.chapter || 0) === chapter);
+export const getTrpgChapterRewards = (chapter: number) => SCHOOL_TRPG_REWARDS.filter(reward => (reward.chapter || 0) === chapter);
 
 export const validateSchoolTrpgData = (): string[] => {
   const errors: string[] = [];
@@ -298,11 +559,13 @@ export const validateSchoolTrpgData = (): string[] => {
   for (const location of SCHOOL_TRPG_LOCATIONS) {
     if (locationIds.has(location.id)) errors.push(`Duplicate location: ${location.id}`);
     locationIds.add(location.id);
+    if (!Number.isInteger(location.chapter || 0) || (location.chapter || 0) < 0) errors.push(`Invalid chapter: ${location.id}`);
     if (location.x < 0 || location.x > 1 || location.y < 0 || location.y > 1) errors.push(`Invalid coordinates: ${location.id}`);
   }
   for (const event of SCHOOL_TRPG_EVENTS) {
     if (eventIds.has(event.id)) errors.push(`Duplicate event: ${event.id}`);
     eventIds.add(event.id);
+    if (!Number.isInteger(event.chapter || 0) || (event.chapter || 0) < 0) errors.push(`Invalid event chapter: ${event.id}`);
     if (!locationIds.has(event.locationId)) errors.push(`Missing event location: ${event.id}`);
     if (event.choices.length === 0) errors.push(`Event has no choices: ${event.id}`);
     if (event.nextPhase === 'QUESTION' && !event.questionGate) errors.push(`Missing question gate: ${event.id}`);
@@ -312,5 +575,8 @@ export const validateSchoolTrpgData = (): string[] => {
   }
   if (new Set(SCHOOL_TRPG_REWARDS.map(reward => reward.id)).size !== SCHOOL_TRPG_REWARDS.length) errors.push('Duplicate rewards');
   if (new Set(SCHOOL_TRPG_ENDINGS.map(ending => ending.id)).size !== SCHOOL_TRPG_ENDINGS.length) errors.push('Duplicate endings');
+  for (const chapter of new Set(SCHOOL_TRPG_LOCATIONS.map(location => location.chapter || 0))) {
+    if (!getTrpgChapterEvents(chapter).length) errors.push(`Chapter has no events: ${chapter}`);
+  }
   return errors;
 };

@@ -36,10 +36,16 @@ const parseEnvelope = (raw: string | null): SaveEnvelope | null => {
   try {
     const parsed = JSON.parse(raw) as Partial<SaveEnvelope>;
     if (parsed.schema !== 'school-trpg-campaign' || parsed.version !== 1 || !parsed.campaign) return null;
-    const campaign = parsed.campaign as TrpgCampaignState;
+    const rawCampaign = parsed.campaign as TrpgCampaignState;
+    if (checksum(JSON.stringify(rawCampaign)) !== parsed.checksum) return null;
+    const campaign = {
+      ...rawCampaign,
+      // Chapter 1 is additive; saves created before the expansion had no
+      // chapter field and continue from the prologue by default.
+      chapter: Number.isInteger(rawCampaign.chapter) && rawCampaign.chapter >= 0 ? rawCampaign.chapter : 0,
+    } as TrpgCampaignState;
     if (campaign.version !== 1 || typeof campaign.seed !== 'number' || !Array.isArray(campaign.unlockedLocationIds)) return null;
-    if (checksum(JSON.stringify(campaign)) !== parsed.checksum) return null;
-    return parsed as SaveEnvelope;
+    return { ...parsed, campaign } as SaveEnvelope;
   } catch {
     return null;
   }

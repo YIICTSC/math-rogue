@@ -57,6 +57,22 @@ try {
   localStorageData.set(save.SCHOOL_TRPG_SAVE_KEY, '{"broken":true}');
   assert.equal(save.loadSchoolTrpgCampaign(), null, 'invalid save data must fail closed');
   assert.equal(save.saveSchoolTrpgCampaign(deterministicA), true, 'campaign should recover after invalid save data');
+  const legacyCampaign = { ...deterministicA };
+  delete legacyCampaign.chapter;
+  const legacySerialized = JSON.stringify(legacyCampaign);
+  let legacyHash = 2166136261;
+  for (const character of legacySerialized) {
+    legacyHash ^= character.charCodeAt(0);
+    legacyHash = Math.imul(legacyHash, 16777619);
+  }
+  localStorageData.set(save.SCHOOL_TRPG_SAVE_KEY, JSON.stringify({
+    schema: 'school-trpg-campaign',
+    version: 1,
+    updatedAt: new Date().toISOString(),
+    checksum: (legacyHash >>> 0).toString(16).padStart(8, '0'),
+    campaign: legacyCampaign,
+  }));
+  assert.equal(save.loadSchoolTrpgCampaign().chapter, 0, 'legacy saves without a chapter should migrate to the prologue');
   save.clearSchoolTrpgCampaign();
   assert.equal(save.loadSchoolTrpgCampaign(), null, 'campaign clear should remove stable and pending data');
 
@@ -80,6 +96,33 @@ try {
   assert.equal(persuasion.phase, 'ENDING');
   assert.equal(persuasion.endingId, 'memory-returned');
   assert.ok(engine.isSchoolTrpgCampaignComplete(persuasion));
+
+  let chapterOne = engine.startNextSchoolTrpgChapter(persuasion);
+  assert.equal(chapterOne.chapter, 1, 'ending the prologue should unlock chapter 1');
+  assert.equal(chapterOne.phase, 'MAP');
+  assert.equal(chapterOne.currentLocationId, 'music-room');
+  chapterOne = resolveLocation(chapterOne, 'music-room');
+  assert.ok(chapterOne.unlockedLocationIds.includes('rooftop'));
+  assert.ok(chapterOne.unlockedLocationIds.includes('science-lab'));
+  chapterOne = resolveLocation(chapterOne, 'rooftop');
+  chapterOne = resolveLocation(chapterOne, 'science-lab');
+  assert.ok(chapterOne.unlockedLocationIds.includes('archive'));
+  chapterOne = resolveLocation(chapterOne, 'archive');
+  assert.equal(chapterOne.phase, 'QUESTION', 'the archive must open the chapter 1 research quiz gate');
+  chapterOne = engine.completeSchoolTrpgQuestion(chapterOne, 3);
+  assert.ok(chapterOne.completedQuestionGates.includes('CHAPTER1_RESEARCH'));
+  assert.ok(chapterOne.unlockedLocationIds.includes('night-bridge'));
+  chapterOne = resolveLocation(chapterOne, 'night-bridge');
+  assert.ok(chapterOne.unlockedLocationIds.includes('clock-tower'));
+  chapterOne = resolveLocation(chapterOne, 'clock-tower');
+  assert.equal(chapterOne.phase, 'COMBAT', 'the clock tower must open the chapter 1 encounter');
+  chapterOne = { ...chapterOne, combat: { ...chapterOne.combat, enemyHp: 1 }, stress: 0 };
+  chapterOne = engine.performSchoolTrpgCombatAction(chapterOne, 'STRIKE');
+  assert.equal(chapterOne.pendingQuestionGate, 'CHAPTER1_CLEAR');
+  chapterOne = engine.completeSchoolTrpgQuestion(chapterOne, 2);
+  chapterOne = engine.chooseSchoolTrpgReward(chapterOne, 'clockwork-chime');
+  assert.equal(chapterOne.phase, 'ENDING');
+  assert.equal(chapterOne.endingId, 'clockwork-dawn');
 
   let escape = reachCombat(8501);
   escape = { ...escape, combat: { ...escape.combat, turn: 3 }, stress: 0 };

@@ -13,12 +13,13 @@ export const localizeTrpgCopy = (copy: TrpgCopy, languageMode: LanguageMode = 'J
 
 export type TrpgStat = 'study' | 'energy' | 'friendship' | 'courage';
 export type TrpgPhase = 'MAP' | 'EVENT' | 'RESULT' | 'QUESTION' | 'COMBAT' | 'REWARD' | 'ENDING';
-export type TrpgQuestionGateId = 'LIBRARY' | 'MISSION_CLEAR';
+export type TrpgQuestionGateId = 'LIBRARY' | 'MISSION_CLEAR' | 'CHAPTER1_RESEARCH' | 'CHAPTER1_CLEAR';
 export type TrpgCombatResolution = 'DEFEAT' | 'PERSUADE' | 'ESCAPE' | 'OVERWHELMED';
 
 export type TrpgLocation = {
   id: string;
   eventId: string;
+  chapter?: number;
   name: TrpgCopy;
   shortName: TrpgCopy;
   description: TrpgCopy;
@@ -46,6 +47,7 @@ export type TrpgChoice = {
 export type TrpgEvent = {
   id: string;
   locationId: string;
+  chapter?: number;
   title: TrpgCopy;
   eyebrow: TrpgCopy;
   body: TrpgCopy;
@@ -58,6 +60,7 @@ export type TrpgEvent = {
 
 export type TrpgReward = {
   id: string;
+  chapter?: number;
   name: TrpgCopy;
   description: TrpgCopy;
   artName: string;
@@ -66,6 +69,7 @@ export type TrpgReward = {
 
 export type TrpgEnding = {
   id: string;
+  chapter?: number;
   title: TrpgCopy;
   subtitle: TrpgCopy;
   body: TrpgCopy;
@@ -107,7 +111,7 @@ export type TrpgCampaignState = {
   seed: number;
   rngStep: number;
   phase: TrpgPhase;
-  chapter: 0;
+  chapter: number;
   time: number;
   stress: number;
   fate: number;
