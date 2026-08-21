@@ -6,6 +6,50 @@ export const TRPG_STAT_COPY: Record<TrpgStat, ReturnType<typeof trpgCopy>> = {
   friendship: trpgCopy('友情', 'ゆうじょう', 'FRIENDSHIP'),
   courage: trpgCopy('勇気', 'ゆうき', 'COURAGE'),
 };
+
+/**
+ * Scene art is deliberately kept in the existing Learning Rogue library.  A
+ * location keeps its wide battle/map background for the scene backdrop, while
+ * this compact illustration is used for the map node and event focal point.
+ * The background-based fallback also covers the generated chapter locations.
+ */
+const SCHOOL_TRPG_SCENE_ART_BY_LOCATION: Record<string, string> = {
+  classroom: 'event-illustrations/校章の輝き.webp',
+  hallway: 'event-illustrations/踊り場の鏡.webp',
+  courtyard: 'event-illustrations/伝説の木の下.webp',
+  library: 'event-illustrations/図書室の静寂.webp',
+  'tcg-club': 'event-illustrations/放課後の決闘.webp',
+  'old-school': 'event-illustrations/呪われた書物.webp',
+  'music-room': 'event-illustrations/音楽室の肖像画.webp',
+  rooftop: 'event-illustrations/屋上の貯水槽.webp',
+  'science-lab': 'event-illustrations/理科室のアルコールランプ.webp',
+  archive: 'event-illustrations/秘密の連絡帳.webp',
+  'night-bridge': 'event-illustrations/階段の13段目.webp',
+  'clock-tower': 'event-illustrations/終わらない朝礼.webp',
+};
+
+const SCHOOL_TRPG_SCENE_ART_BY_BACKGROUND: Array<[string, string]> = [
+  ['map-festival.webp', 'event-illustrations/文化祭のポスター.webp'],
+  ['battle-courtyard.webp', 'event-illustrations/伝説の木の下.webp'],
+  ['battle-gym.webp', 'event-illustrations/体育館の跳び箱.webp'],
+  ['battle-music-room.webp', 'event-illustrations/音楽室の肖像画.webp'],
+  ['battle-science-lab.webp', 'event-illustrations/理科室のアルコールランプ.webp'],
+  ['battle-rooftop.webp', 'event-illustrations/屋上の貯水槽.webp'],
+  ['battle-library.webp', 'event-illustrations/図書室の静寂.webp'],
+  ['compendium-library.webp', 'event-illustrations/図書室の貸出カード.webp'],
+  ['event-hallway.webp', 'event-illustrations/踊り場の鏡.webp'],
+  ['battle-hallway.webp', 'event-illustrations/放課後の決闘.webp'],
+  ['magic-battle-library.webp', 'event-illustrations/秘密の連絡帳.webp'],
+  ['magic-battle-classroom.webp', 'event-illustrations/校章の輝き.webp'],
+];
+
+export const getSchoolTrpgSceneArt = (locationId: string, backgroundAsset: string): string => {
+  const locationArt = SCHOOL_TRPG_SCENE_ART_BY_LOCATION[locationId];
+  if (locationArt) return locationArt;
+  const backgroundArt = SCHOOL_TRPG_SCENE_ART_BY_BACKGROUND.find(([asset]) => backgroundAsset.endsWith(asset));
+  return backgroundArt?.[1] || 'event-illustrations/default.webp';
+};
+
 export const SCHOOL_TRPG_LOCATIONS: TrpgLocation[] = [
   {
     id: 'classroom', eventId: 'P0-01', x: 0.16, y: 0.66, danger: 0, travelCost: 0,

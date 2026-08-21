@@ -35,6 +35,7 @@ import {
   getTrpgEnding,
   getTrpgEvent,
   getTrpgLocation,
+  getSchoolTrpgSceneArt,
   validateSchoolTrpgData,
 } from './schoolTrpgData';
 import {
@@ -234,7 +235,11 @@ const MapScreen: React.FC<{
             >
               <span className="school-trpg-map-node-icon">
                 {isUnlocked
-                  ? <img src={assetUrl(location.iconAsset)} alt="" aria-hidden="true" />
+                  ? <ResilientAssetImage
+                    sources={[assetUrl(getSchoolTrpgSceneArt(location.id, location.backgroundAsset)), assetUrl(location.iconAsset)]}
+                    alt=""
+                    aria-hidden="true"
+                  />
                   : <LockKeyhole size={18} />}
               </span>
               <b>{text(location.shortName, languageMode)}</b>
@@ -292,10 +297,17 @@ const EventScreen: React.FC<{
   onChoice: (choiceId: string) => void;
 }> = ({ state, languageMode, useFate, onUseFate, onChoice }) => {
   const event = getTrpgEvent(state.currentEventId || '') || SCHOOL_TRPG_EVENTS[0];
+  const sceneArt = getSchoolTrpgSceneArt(event.locationId, event.backgroundAsset);
   return (
     <div className="school-trpg-campaign-layout event-mode">
       <section className="school-trpg-scene-panel">
         <SchoolTrpgBackdrop asset={event.backgroundAsset} />
+        <ResilientAssetImage
+          sources={[assetUrl(sceneArt), assetUrl(event.backgroundAsset)]}
+          alt=""
+          aria-hidden="true"
+          className="school-trpg-scene-illustration"
+        />
         <div className="school-trpg-scene-vignette" />
         {event.foregroundAsset && (
           <img className="school-trpg-scene-foreground" src={assetUrl(event.foregroundAsset)} alt="" aria-hidden="true" />

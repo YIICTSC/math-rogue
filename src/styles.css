@@ -357,6 +357,7 @@
 
 .school-trpg-scene-panel > .school-trpg-campaign-backdrop { opacity: 0.94; filter: saturate(0.92) brightness(0.72); }
 .school-trpg-scene-vignette { position: absolute; inset: 0; background: linear-gradient(90deg, rgba(2, 8, 17, 0.05), rgba(2, 8, 17, 0.3)), linear-gradient(0deg, rgba(2, 8, 17, 0.82), transparent 55%); }
+.school-trpg-scene-illustration { position: absolute; z-index: 1; top: 8%; right: 8%; width: min(42%, 360px); height: 58%; object-fit: contain; object-position: center; filter: drop-shadow(0 12px 24px rgba(0, 0, 0, 0.72)); }
 .school-trpg-scene-foreground { position: absolute; right: 3%; bottom: 0; width: min(54%, 540px); max-height: 88%; object-fit: contain; object-position: bottom; filter: drop-shadow(0 10px 24px rgba(0, 0, 0, 0.7)); }
 .school-trpg-scene-caption { position: absolute; left: 28px; right: 28px; bottom: 25px; display: flex; flex-direction: column; padding: 13px 16px; border-left: 3px solid var(--trpg-gold); background: rgba(2, 10, 18, 0.73); backdrop-filter: blur(7px); }
 .school-trpg-scene-caption span { color: var(--trpg-gold); font-size: 9px; font-weight: 900; letter-spacing: 0.18em; }
@@ -15810,4 +15811,244 @@ textarea {
 @media (orientation: portrait), (max-width: 720px) {
   .school-trpg-location-actions { grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 5px; }
   .school-trpg-rest-hint { margin: -3px 0 5px; font-size: 6px; }
+}
+
+/* Dedicated mini-games run as edge-to-edge layers on iPhone.  Keep their
+   internal grids inside the safe viewport and give every column an explicit
+   min-width:0 so Japanese labels cannot push the title or action buttons out
+   of the screen. */
+@media (orientation: portrait) and (max-width: 700px) {
+  .placement-tcg-shell,
+  .school-trpg-campaign-shell {
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .placement-tcg-shell {
+    height: 100dvh;
+    min-height: 0;
+    padding-top: max(env(safe-area-inset-top), var(--ios-ui-safe-top, 0px));
+    padding-right: max(env(safe-area-inset-right), var(--ios-ui-safe-right, 0px));
+    padding-bottom: max(env(safe-area-inset-bottom), var(--ios-ui-safe-bottom, 0px));
+    padding-left: max(env(safe-area-inset-left), var(--ios-ui-safe-left, 0px));
+  }
+
+  .placement-tcg-header {
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+    grid-template-columns: minmax(0, 72px) minmax(0, 1fr) minmax(0, 72px);
+    gap: 6px;
+    padding-inline: 6px;
+  }
+
+  .placement-tcg-header > *,
+  .placement-tcg-title,
+  .placement-tcg-progress,
+  .placement-tcg-back,
+  .placement-tcg-rules-button {
+    min-width: 0;
+  }
+
+  .placement-tcg-title {
+    overflow: hidden;
+  }
+
+  .placement-tcg-title b {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .placement-tcg-back,
+  .placement-tcg-rules-button {
+    width: 100%;
+    max-width: 72px;
+    overflow: hidden;
+    padding-inline: 2px;
+    text-overflow: ellipsis;
+  }
+
+  .placement-tcg-layout {
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+    height: clamp(330px, calc(100% - 259px), 620px);
+    padding-inline: 6px;
+  }
+
+  .placement-tcg-opponent-panel,
+  .placement-tcg-field,
+  .placement-tcg-board,
+  .placement-tcg-hand-zone,
+  .placement-tcg-hand {
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .placement-tcg-opponent-panel {
+    padding-inline: 6px;
+  }
+
+  .placement-tcg-opponent-panel .placement-tcg-life {
+    flex-basis: clamp(104px, 34vw, 150px);
+    width: clamp(104px, 34vw, 150px);
+    min-width: 0;
+  }
+
+  .placement-tcg-hand-zone {
+    overflow: hidden;
+  }
+
+  .placement-tcg-hand {
+    overflow-x: auto;
+    overflow-y: hidden;
+    padding-right: 2px;
+  }
+
+  .placement-tcg-start-overlay {
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 100%;
+    height: 100%;
+    padding-inline: 12px;
+  }
+
+  .school-trpg-campaign-shell {
+    height: 100%;
+    min-height: 0;
+    max-height: 100%;
+  }
+
+  .school-trpg-campaign-header {
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+    grid-template-columns: minmax(0, 84px) minmax(0, 1fr) minmax(0, 40px);
+    padding-inline: 8px;
+    gap: 6px;
+    overflow: hidden;
+  }
+
+  .school-trpg-campaign-header > *,
+  .school-trpg-campaign-header > div,
+  .school-trpg-campaign-header > button {
+    min-width: 0;
+  }
+
+  .school-trpg-campaign-header > button {
+    width: 100%;
+    max-width: 84px;
+    overflow: hidden;
+    padding-inline: 6px;
+    white-space: nowrap;
+  }
+
+  .school-trpg-campaign-header > button.is-reset {
+    max-width: 40px;
+  }
+
+  .school-trpg-campaign-header b {
+    display: block;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .school-trpg-campaign-statusbar {
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+  }
+
+  .school-trpg-campaign-statusbar > div {
+    min-width: 0;
+    overflow: hidden;
+    white-space: nowrap;
+  }
+
+  .school-trpg-campaign-statusbar > div > span,
+  .school-trpg-campaign-statusbar > div > b {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .school-trpg-campaign-main,
+  .school-trpg-campaign-layout,
+  .school-trpg-map-panel,
+  .school-trpg-scene-panel,
+  .school-trpg-command-panel {
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+    max-width: 100%;
+  }
+
+  .school-trpg-command-panel.event-copy {
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+
+  .school-trpg-location-actions {
+    width: 100%;
+    min-width: 0;
+  }
+
+  .school-trpg-location-actions > button {
+    min-width: 0;
+    overflow: hidden;
+    white-space: normal;
+    overflow-wrap: anywhere;
+  }
+
+  .school-trpg-location-actions > button svg {
+    flex: 0 0 auto;
+  }
+
+  .school-trpg-start-layout {
+    box-sizing: border-box;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr) minmax(176px, 42%);
+    width: calc(100% - 16px);
+    max-width: calc(100% - 16px);
+    height: calc(100% - 16px);
+    margin: 8px;
+  }
+
+  .school-trpg-start-art {
+    min-width: 0;
+    min-height: 0;
+  }
+
+  .school-trpg-start-art > img {
+    width: min(88%, 360px);
+    max-width: 100%;
+    height: 100%;
+    min-height: 0;
+    object-fit: contain;
+  }
+
+  .school-trpg-start-copy {
+    min-width: 0;
+    max-height: none;
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+
+  .school-trpg-scene-illustration {
+    position: absolute;
+    z-index: 1;
+    top: 7%;
+    right: 7%;
+    width: min(42%, 360px);
+    height: 58%;
+    object-fit: contain;
+    object-position: center;
+    filter: drop-shadow(0 12px 24px rgba(0, 0, 0, .72));
+  }
 }
