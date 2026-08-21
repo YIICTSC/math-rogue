@@ -22,6 +22,11 @@ try {
 
   assert.deepEqual(data.validateSchoolTrpgData(), [], 'TRPG content data must be internally consistent');
   assert.deepEqual(engine.getSchoolTrpgDataErrors(), [], 'TRPG engine references must resolve');
+  for (const chapter of data.SCHOOL_TRPG_CHAPTERS) {
+    const endings = data.getTrpgChapterEndings(chapter.chapter);
+    assert.ok(endings.length >= 4, `${chapter.chapter} should expose at least four endings`);
+    assert.ok(endings.every(ending => ending.artAsset), `${chapter.chapter} endings should all have artwork`);
+  }
 
   const resolveLocation = (state, locationId, choiceIndex = 0) => {
     const eventState = engine.beginSchoolTrpgEvent(state, locationId);
@@ -30,6 +35,33 @@ try {
     const resolved = engine.resolveSchoolTrpgChoice(eventState, event.choices[choiceIndex].id, false);
     assert.equal(resolved.phase, 'RESULT', `${event.id} should produce a visible check result`);
     return engine.continueSchoolTrpgResult(resolved);
+  };
+
+  const completeExpansionChapter = (initialState, chapter) => {
+    let state = initialState;
+    const locations = data.getTrpgChapterLocations(chapter);
+    const meta = data.getTrpgChapterMeta(chapter);
+    assert.equal(locations.length, 6, `chapter ${chapter} should expose six locations`);
+    state = resolveLocation(state, locations[0].id);
+    state = resolveLocation(state, locations[1].id);
+    state = resolveLocation(state, locations[2].id);
+    state = resolveLocation(state, locations[3].id);
+    assert.equal(state.phase, 'QUESTION', `chapter ${chapter} should open its research quiz gate`);
+    state = engine.completeSchoolTrpgQuestion(state, 3);
+    assert.ok(state.completedQuestionGates.includes(meta.researchGate));
+    state = resolveLocation(state, locations[4].id);
+    state = resolveLocation(state, locations[5].id);
+    assert.equal(state.phase, 'COMBAT', `chapter ${chapter} should open its guardian encounter`);
+    state = { ...state, combat: { ...state.combat, enemyHp: 1 }, stress: 0 };
+    state = engine.performSchoolTrpgCombatAction(state, 'STRIKE');
+    assert.equal(state.pendingQuestionGate, meta.clearGate, `chapter ${chapter} should open its clear quiz gate`);
+    state = engine.completeSchoolTrpgQuestion(state, 2);
+    assert.equal(state.phase, 'REWARD');
+    const reward = data.getTrpgChapterRewards(chapter)[0];
+    state = engine.chooseSchoolTrpgReward(state, reward.id);
+    assert.equal(state.phase, 'ENDING', `chapter ${chapter} should resolve to an ending`);
+    assert.ok(data.getTrpgChapterEndings(chapter).some(ending => ending.id === state.endingId));
+    return state;
   };
 
   const reachCombat = seed => {
@@ -123,6 +155,20 @@ try {
   chapterOne = engine.chooseSchoolTrpgReward(chapterOne, 'clockwork-chime');
   assert.equal(chapterOne.phase, 'ENDING');
   assert.equal(chapterOne.endingId, 'clockwork-dawn');
+
+  let chapterTwo = engine.startNextSchoolTrpgChapter(chapterOne);
+  chapterTwo = completeExpansionChapter(chapterTwo, 2);
+  let chapterThree = engine.startNextSchoolTrpgChapter(chapterTwo);
+  chapterThree = completeExpansionChapter(chapterThree, 3);
+  let chapterFour = engine.startNextSchoolTrpgChapter(chapterThree);
+  chapterFour = completeExpansionChapter(chapterFour, 4);
+  assert.ok(engine.isHiddenSchoolTrpgChapterUnlocked(chapterFour), 'chapter 4 research should reveal the hidden route');
+  let hiddenChapter = engine.startNextSchoolTrpgChapter(chapterFour);
+  assert.equal(hiddenChapter.chapter, 5, 'chapter 5 should unlock only after the origin research gate');
+  hiddenChapter = completeExpansionChapter(hiddenChapter, 5);
+  assert.equal(hiddenChapter.endingId?.startsWith('chapter5-'), true, 'hidden chapter should use its dedicated endings');
+  assert.equal(data.getTrpgChapterEndings(5).length, 5, 'hidden chapter should expose its timeline ending');
+  assert.ok(data.getTrpgChapterEndings(5).every(ending => ending.artAsset), 'every hidden ending should have artwork');
 
   let escape = reachCombat(8501);
   escape = { ...escape, combat: { ...escape.combat, turn: 3 }, stress: 0 };

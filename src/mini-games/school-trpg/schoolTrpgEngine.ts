@@ -5,6 +5,9 @@ import {
   getTrpgEvent,
   getTrpgLocation,
   getTrpgChapterEvents,
+  getTrpgChapterEndings,
+  getTrpgChapterLocations,
+  getTrpgChapterMeta,
   getTrpgChapterRewards,
 } from './schoolTrpgData';
 import {
@@ -37,19 +40,20 @@ export const reconcileSchoolTrpgUnlocks = (state: TrpgCampaignState): TrpgCampai
   const completed = new Set(state.completedEventIds);
   const questions = new Set(state.completedQuestionGates);
   const chapter = Number.isInteger(state.chapter) ? state.chapter : 0;
-  const unlocked = chapter === 1 ? ['music-room'] : ['classroom'];
-  if (chapter === 0) {
-    if (completed.has('P0-01')) unlocked.push('hallway');
-    if (completed.has('P0-02')) unlocked.push('courtyard', 'library');
-    if (completed.has('P0-03') && completed.has('P0-04') && questions.has('LIBRARY')) unlocked.push('tcg-club');
-    if (completed.has('P0-05')) unlocked.push('old-school');
-  } else if (chapter === 1) {
-    if (completed.has('P1-01')) unlocked.push('rooftop', 'science-lab');
-    if (completed.has('P1-02') && completed.has('P1-03')) unlocked.push('archive');
-    if (completed.has('P1-04') && questions.has('CHAPTER1_RESEARCH')) unlocked.push('night-bridge');
-    if (completed.has('P1-05')) unlocked.push('clock-tower');
+  const chapterLocations = getTrpgChapterLocations(chapter);
+  const chapterEvents = getTrpgChapterEvents(chapter);
+  const unlocked = chapterLocations[0] ? [chapterLocations[0].id] : [];
+  const completedEvent = (index: number) => Boolean(chapterEvents[index] && completed.has(chapterEvents[index].id));
+  if (completedEvent(0)) unlocked.push(...chapterLocations.slice(1, 3).map(location => location.id));
+  if (completedEvent(1) && completedEvent(2)) unlocked.push(chapterLocations[3]?.id);
+  const gateEvent = chapterEvents[3];
+  if (completedEvent(3) && (!gateEvent.questionGate || questions.has(gateEvent.questionGate))) unlocked.push(chapterLocations[4]?.id);
+  if (completedEvent(4)) unlocked.push(chapterLocations[5]?.id);
+  const safeUnlocked = unlocked.filter((locationId): locationId is string => Boolean(locationId));
+  if (chapter === 5 && state.flags.hiddenKey) {
+    safeUnlocked.push(...chapterLocations.map(location => location.id));
   }
-  return { ...state, chapter, unlockedLocationIds: unique([...state.unlockedLocationIds, ...unlocked]) };
+  return { ...state, chapter, unlockedLocationIds: unique([...state.unlockedLocationIds, ...safeUnlocked]) };
 };
 
 export const createSchoolTrpgCampaign = (seed = Date.now()): TrpgCampaignState => ({
@@ -171,21 +175,33 @@ export const continueSchoolTrpgResult = (state: TrpgCampaignState): TrpgCampaign
   return { ...state, phase: 'MAP', currentEventId: null, result: null };
 };
 
+export const isHiddenSchoolTrpgChapterUnlocked = (state: TrpgCampaignState) =>
+  state.chapter >= 4
+  && Boolean(state.flags.hiddenKey)
+  && state.completedQuestionGates.includes('CHAPTER4_RESEARCH');
+
 export const startNextSchoolTrpgChapter = (state: TrpgCampaignState): TrpgCampaignState => {
-  if (state.phase !== 'ENDING' || state.chapter !== 0) return state;
+  if (state.phase !== 'ENDING') return state;
+  const nextChapter = state.chapter < 4
+    ? state.chapter + 1
+    : state.chapter === 4 && isHiddenSchoolTrpgChapterUnlocked(state) ? 5 : null;
+  if (nextChapter === null) return state;
+  const nextLocation = getTrpgChapterLocations(nextChapter)[0];
+  if (!nextLocation) return state;
+  const nextMeta = getTrpgChapterMeta(nextChapter);
   const next: TrpgCampaignState = {
     ...state,
-    chapter: 1,
+    chapter: nextChapter,
     phase: 'MAP',
-    currentLocationId: 'music-room',
+    currentLocationId: nextLocation.id,
     currentEventId: null,
     pendingQuestionGate: null,
     result: null,
     combat: null,
     selectedRewardId: null,
     endingId: null,
-    unlockedLocationIds: ['music-room'],
-    discoveryLog: [...state.discoveryLog, trpgCopy('第2章。時計塔へ続く夜の航路を開いた。', 'だいにしょう。とけいとうへつづくよるのこうろをひらいた。', 'Chapter 2 begins. A night route to the clock tower opens.')].slice(-18),
+    unlockedLocationIds: [nextLocation.id],
+    discoveryLog: [...state.discoveryLog, trpgCopy(`${nextMeta.label.ja}の航路を開いた。`, `${nextMeta.label.hira}のこうろをひらいた。`, `The route for ${nextMeta.label.en} is now open.`)].slice(-18),
   };
   return reconcileSchoolTrpgUnlocks(next);
 };
@@ -197,6 +213,7 @@ export const completeSchoolTrpgQuestion = (
   const gate = state.pendingQuestionGate;
   if (state.phase !== 'QUESTION' || !gate) return state;
   const passed = correctCount >= 2;
+  const isResearchGate = gate === 'LIBRARY' || gate.endsWith('_RESEARCH');
   const completedQuestionGates = unique([...state.completedQuestionGates, gate]);
   const feedback = gate === 'LIBRARY'
     ? passed
@@ -207,13 +224,13 @@ export const completeSchoolTrpgQuestion = (
       : trpgCopy('補足記録を加え、失敗も次の探索に残せる知識へ変えた。', 'ほそくきろくをくわえ、しっぱいもつぎのたんさくにのこせるちしきへかえた。', 'You add a correction note, turning mistakes into knowledge for the next expedition.');
   const updated: TrpgCampaignState = {
     ...state,
-    phase: gate === 'LIBRARY' || gate === 'CHAPTER1_RESEARCH' ? 'MAP' : 'REWARD',
+    phase: isResearchGate ? 'MAP' : 'REWARD',
     pendingQuestionGate: null,
     completedQuestionGates,
     clues: clamp(state.clues + (passed ? 1 : 0), 0, 8),
     stress: clamp(state.stress + (passed ? 0 : 1), 0, 6),
     flags: { ...state.flags, [`question.${gate}`]: correctCount },
-    currentEventId: gate === 'LIBRARY' || gate === 'CHAPTER1_RESEARCH' ? null : state.currentEventId,
+    currentEventId: isResearchGate ? null : state.currentEventId,
     discoveryLog: [...state.discoveryLog, feedback].slice(-18),
   };
   return reconcileSchoolTrpgUnlocks(updated);
@@ -246,7 +263,7 @@ const finishCombat = (
     ...state,
     phase: 'QUESTION',
     combat: { ...combat, result: 'WIN', resolution },
-    pendingQuestionGate: state.chapter === 1 ? 'CHAPTER1_CLEAR' : 'MISSION_CLEAR',
+    pendingQuestionGate: getTrpgChapterMeta(state.chapter).clearGate,
     flags: { ...state.flags, combatResolution: resolution },
     discoveryLog: [...state.discoveryLog, trpgCopy('旧校舎の対決を乗り越えた。最後に調査記録を整理する。', 'きゅうこうしゃのたいけつをのりこえた。さいごにちょうさきろくをせいりする。', 'You overcome the old-wing encounter. One final review remains.')].slice(-18),
   };
@@ -311,18 +328,13 @@ export const performSchoolTrpgCombatAction = (
 };
 
 const evaluateEndingId = (state: TrpgCampaignState): string => {
-  const resolution = state.flags.combatResolution;
-  if (state.chapter === 1) {
-    if (resolution === 'PERSUADE') return 'constellation-pact';
-    if (resolution === 'ESCAPE') return 'bridge-before-dawn';
-    if (resolution === 'OVERWHELMED') return 'silent-clock';
-    return 'clockwork-dawn';
+  const resolution = state.flags.combatResolution as TrpgCombatResolution | undefined;
+  const endings = getTrpgChapterEndings(state.chapter);
+  if (state.chapter === 5 && resolution === 'PERSUADE' && state.flags.companionTrusted) {
+    return endings[4]?.id || endings[1]?.id || endings[0]?.id || 'unfinished-map';
   }
-  if (resolution === 'PERSUADE') return 'memory-returned';
-  if (resolution === 'ESCAPE') return 'quiet-return';
-  if (resolution === 'OVERWHELMED') return 'unfinished-map';
-  if (state.clues >= 4 && (state.flags.reportedKey || state.flags.companionTrusted)) return 'detective-club';
-  return 'quiet-return';
+  const index = resolution === 'PERSUADE' ? 1 : resolution === 'ESCAPE' ? 2 : resolution === 'OVERWHELMED' ? 3 : 0;
+  return endings[index]?.id || endings[0]?.id || 'unfinished-map';
 };
 
 export const chooseSchoolTrpgReward = (state: TrpgCampaignState, rewardId: string): TrpgCampaignState => {
@@ -368,20 +380,21 @@ export const getSchoolTrpgCombatResolutionCopy = (resolution: TrpgCombatResoluti
   return trpgCopy('未決着', 'みけっちゃく', 'UNRESOLVED');
 };
 
-export const getQuestionGateCopy = (gate: TrpgQuestionGateId | null): TrpgCopy =>
-  gate === 'MISSION_CLEAR'
-    ? trpgCopy('ミッションクリア問題', 'ミッションクリアもんだい', 'MISSION CLEAR QUIZ')
-    : gate === 'CHAPTER1_RESEARCH'
-      ? trpgCopy('夜間記録チャレンジ', 'やかんきろくチャレンジ', 'NIGHT RECORD CHALLENGE')
-      : gate === 'CHAPTER1_CLEAR'
-        ? trpgCopy('時計塔ミッションクリア問題', 'とけいとうミッションクリアもんだい', 'CLOCK TOWER MISSION QUIZ')
-        : trpgCopy('資料調査問題', 'しりょうちょうさもんだい', 'RESEARCH QUIZ');
+const QUESTION_GATE_COPY: Partial<Record<TrpgQuestionGateId, TrpgCopy>> = {
+  MISSION_CLEAR: trpgCopy('ミッションクリア問題', 'ミッションクリアもんだい', 'MISSION CLEAR QUIZ'),
+  CHAPTER1_RESEARCH: trpgCopy('夜間記録チャレンジ', 'やかんきろくチャレンジ', 'NIGHT RECORD CHALLENGE'),
+  CHAPTER1_CLEAR: trpgCopy('時計塔ミッションクリア問題', 'とけいとうミッションクリアもんだい', 'CLOCK TOWER MISSION QUIZ'),
+  CHAPTER2_RESEARCH: trpgCopy('祭りの残響チャレンジ', 'まつりのざんきょうチャレンジ', 'FESTIVAL ECHO CHALLENGE'),
+  CHAPTER2_CLEAR: trpgCopy('祭りの最終問題', 'まつりのさいしゅうもんだい', 'FESTIVAL FINALE QUIZ'),
+  CHAPTER3_RESEARCH: trpgCopy('校外航路チャレンジ', 'こうがいこうろチャレンジ', 'BEYOND-CAMPUS CHALLENGE'),
+  CHAPTER3_CLEAR: trpgCopy('校外航路の最終問題', 'こうがいこうろのさいしゅうもんだい', 'OUTBOUND FINALE QUIZ'),
+  CHAPTER4_RESEARCH: trpgCopy('原室記録チャレンジ', 'げんしつきろくチャレンジ', 'ORIGIN RECORD CHALLENGE'),
+  CHAPTER4_CLEAR: trpgCopy('第5章ミッションクリア問題', 'だいごしょうミッションクリアもんだい', 'CHAPTER 5 MISSION QUIZ'),
+  CHAPTER5_RESEARCH: trpgCopy('0時間目チャレンジ', 'れいじかんめチャレンジ', 'ZERO-HOUR CHALLENGE'),
+  HIDDEN_RESEARCH: trpgCopy('隠し航路チャレンジ', 'かくしこうろチャレンジ', 'SECRET ROUTE CHALLENGE'),
+  HIDDEN_CLEAR: trpgCopy('最初の鐘ミッションクリア問題', 'さいしょのかねミッションクリアもんだい', 'FIRST BELL MISSION QUIZ'),
+};
 
-export const getQuestionGateTitleCopy = (gate: TrpgQuestionGateId | null): TrpgCopy =>
-  gate === 'CHAPTER1_RESEARCH'
-    ? trpgCopy('夜間記録チャレンジ', 'やかんきろくチャレンジ', 'NIGHT RECORD CHALLENGE')
-    : gate === 'CHAPTER1_CLEAR'
-      ? trpgCopy('時計塔ミッションクリア問題', 'とけいとうミッションクリアもんだい', 'CLOCK TOWER MISSION QUIZ')
-      : gate === 'MISSION_CLEAR'
-        ? trpgCopy('ミッションクリア問題', 'ミッションクリアもんだい', 'MISSION CLEAR QUIZ')
-        : trpgCopy('資料調査問題', 'しりょうちょうさもんだい', 'RESEARCH QUIZ');
+export const getQuestionGateCopy = (gate: TrpgQuestionGateId | null): TrpgCopy => QUESTION_GATE_COPY[gate || 'LIBRARY'] || trpgCopy('資料調査問題', 'しりょうちょうさもんだい', 'RESEARCH QUIZ');
+
+export const getQuestionGateTitleCopy = (gate: TrpgQuestionGateId | null): TrpgCopy => getQuestionGateCopy(gate);

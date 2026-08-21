@@ -13,7 +13,21 @@ export const localizeTrpgCopy = (copy: TrpgCopy, languageMode: LanguageMode = 'J
 
 export type TrpgStat = 'study' | 'energy' | 'friendship' | 'courage';
 export type TrpgPhase = 'MAP' | 'EVENT' | 'RESULT' | 'QUESTION' | 'COMBAT' | 'REWARD' | 'ENDING';
-export type TrpgQuestionGateId = 'LIBRARY' | 'MISSION_CLEAR' | 'CHAPTER1_RESEARCH' | 'CHAPTER1_CLEAR';
+export type TrpgQuestionGateId =
+  | 'LIBRARY'
+  | 'MISSION_CLEAR'
+  | 'CHAPTER1_RESEARCH'
+  | 'CHAPTER1_CLEAR'
+  | 'CHAPTER2_RESEARCH'
+  | 'CHAPTER2_CLEAR'
+  | 'CHAPTER3_RESEARCH'
+  | 'CHAPTER3_CLEAR'
+  | 'CHAPTER4_RESEARCH'
+  | 'CHAPTER4_CLEAR'
+  | 'CHAPTER5_RESEARCH'
+  | 'CHAPTER5_CLEAR'
+  | 'HIDDEN_RESEARCH'
+  | 'HIDDEN_CLEAR';
 export type TrpgCombatResolution = 'DEFEAT' | 'PERSUADE' | 'ESCAPE' | 'OVERWHELMED';
 
 export type TrpgLocation = {
@@ -74,6 +88,7 @@ export type TrpgEnding = {
   subtitle: TrpgCopy;
   body: TrpgCopy;
   tone: 'CYAN' | 'GOLD' | 'VIOLET' | 'ROSE';
+  artAsset?: string;
 };
 
 export type TrpgCheckResult = {

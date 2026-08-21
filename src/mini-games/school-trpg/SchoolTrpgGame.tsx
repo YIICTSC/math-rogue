@@ -29,6 +29,7 @@ import {
   SCHOOL_TRPG_LOCATIONS,
   SCHOOL_TRPG_REWARDS,
   TRPG_STAT_COPY,
+  getTrpgChapterMeta,
   getTrpgChapterLocations,
   getTrpgChapterRewards,
   getTrpgEnding,
@@ -47,6 +48,7 @@ import {
   getSchoolTrpgCombatResolutionCopy,
   getSchoolTrpgDataErrors,
   getSchoolTrpgProgress,
+  isHiddenSchoolTrpgChapterUnlocked,
   performSchoolTrpgCombatAction,
   resolveSchoolTrpgChoice,
   startNextSchoolTrpgChapter,
@@ -71,9 +73,6 @@ interface SchoolTrpgGameProps {
   onAnswerResult?: (result: AssignmentAnswerResult) => void;
   languageMode?: LanguageMode;
 }
-
-const GUARDIAN_NAME = trpgCopy('思い出の残滓', 'おもいでのざんし', 'MEMORY REMNANT');
-const CLOCK_GUARDIAN_NAME = trpgCopy('時計塔の番人', 'とけいとうのばんにん', 'CLOCK TOWER GUARDIAN');
 
 const UI_COPY = {
   prologue: trpgCopy('導入章', 'どうにゅうしょう', 'PROLOGUE'),
@@ -168,9 +167,10 @@ const StatStrip: React.FC<{ state: TrpgCampaignState; languageMode?: LanguageMod
 const StatusBar: React.FC<{ state: TrpgCampaignState; languageMode?: LanguageMode }> = ({ state, languageMode }) => {
   const location = getTrpgLocation(state.currentLocationId);
   const progress = getSchoolTrpgProgress(state);
+  const chapter = getTrpgChapterMeta(state.chapter);
   return (
     <div className="school-trpg-campaign-statusbar">
-      <div><span>{text(state.chapter === 1 ? UI_COPY.chapterTwoLabel : UI_COPY.prologue, languageMode)}</span><b>{progress.completed} / {progress.total}</b></div>
+      <div><span>{text(chapter.shortLabel, languageMode)}</span><b>{progress.completed} / {progress.total}</b></div>
       <div><Clock3 size={15} /><span>{text(UI_COPY.hour, languageMode)}</span><b>{state.time}</b></div>
       <div><Brain size={15} /><span>{text(UI_COPY.clues, languageMode)}</span><b>{state.clues}</b></div>
       <div className={state.stress >= 5 ? 'is-danger' : ''}><span>{text(UI_COPY.stress, languageMode)}</span><b>{state.stress} / 6</b></div>
@@ -189,6 +189,7 @@ const MapScreen: React.FC<{
   onTravel: (locationId: string) => void;
 }> = ({ state, selected, languageMode, onSelect, onTravel }) => {
   const chapterLocations = getTrpgChapterLocations(state.chapter);
+  const chapter = getTrpgChapterMeta(state.chapter);
   const selectedLocation = chapterLocations.find(location => location.id === selected) || chapterLocations[0] || SCHOOL_TRPG_LOCATIONS[0];
   const unlocked = state.unlockedLocationIds.includes(selectedLocation.id);
   const completed = state.completedEventIds.includes(selectedLocation.eventId);
@@ -206,7 +207,7 @@ const MapScreen: React.FC<{
           <line x1="76" y1="52" x2="88" y2="18" />
         </svg>
         <div className="school-trpg-map-heading">
-          <span>ROUTE // {String(state.chapter).padStart(2, '0')}</span>
+          <span>{text(chapter.routeLabel, languageMode)}</span>
           <b>{text(SCHOOL_TRPG_COPY.map, languageMode)}</b>
         </div>
         {chapterLocations.map(location => {
@@ -358,7 +359,7 @@ const CombatScreen: React.FC<{
 }> = ({ state, languageMode, cue, onAction }) => {
   const combat = state.combat!;
   const canPersuade = combat.insight >= 3 || Boolean(state.flags.knowsPassphrase);
-  const guardianName = state.chapter === 1 ? CLOCK_GUARDIAN_NAME : GUARDIAN_NAME;
+  const chapter = getTrpgChapterMeta(state.chapter);
   return (
     <div className="school-trpg-campaign-layout combat-mode">
       <section className={`school-trpg-combat-panel ${cue ? `cue-${cue.toLowerCase()}` : ''}`}>
@@ -369,13 +370,13 @@ const CombatScreen: React.FC<{
           <b>{combat.enemyIntent}</b>
         </div>
         <EnemyIllustration
-          name={text(guardianName, languageMode)}
+          name={text(chapter.guardianName, languageMode)}
           seed={`school-trpg-${state.seed}`}
-          altText={text(guardianName, languageMode)}
+          altText={text(chapter.guardianName, languageMode)}
           className="school-trpg-guardian"
           size={18}
         />
-        <div className="school-trpg-enemy-name"><span>{state.chapter === 1 ? 'CLOCKWORK ENTITY' : 'MEMORY ENTITY'}</span><b>{text(guardianName, languageMode)}</b></div>
+        <div className="school-trpg-enemy-name"><span>{text(chapter.shortLabel, languageMode)}</span><b>{text(chapter.guardianName, languageMode)}</b></div>
         <div className="school-trpg-combat-meters">
           <div><span>{text(UI_COPY.enemyHp, languageMode)}</span><i><em style={{ width: `${(combat.enemyHp / combat.enemyMaxHp) * 100}%` }} /></i><b>{combat.enemyHp}/{combat.enemyMaxHp}</b></div>
           <div><span>{text(UI_COPY.insight, languageMode)}</span><i><em className="insight" style={{ width: `${(combat.insight / 6) * 100}%` }} /></i><b>{combat.insight}/6</b></div>
@@ -385,7 +386,7 @@ const CombatScreen: React.FC<{
       </section>
       <aside className="school-trpg-command-panel combat-copy">
         <div className="school-trpg-panel-eyebrow">{text(UI_COPY.turn, languageMode)} {String(combat.turn).padStart(2, '0')}</div>
-        <h2>{text(state.chapter === 1 ? SCHOOL_TRPG_COPY.chapterBattle : SCHOOL_TRPG_COPY.battle, languageMode)}</h2>
+        <h2>{text(chapter.battleLabel, languageMode)}</h2>
         <p>{text(UI_COPY.battleHint, languageMode)}</p>
         <div className="school-trpg-combat-actions">
           {COMBAT_ACTIONS.map(action => {
@@ -446,21 +447,30 @@ const EndingScreen: React.FC<{
   onReplay: () => void;
 }> = ({ state, languageMode, onFinish, onNextChapter, onReplay }) => {
   const ending = getTrpgEnding(state.endingId) || getTrpgEnding('unfinished-map')!;
+  const chapter = getTrpgChapterMeta(state.chapter);
   const reward = getTrpgChapterRewards(state.chapter).find(candidate => candidate.id === state.selectedRewardId)
     || SCHOOL_TRPG_REWARDS.find(candidate => candidate.id === state.selectedRewardId);
   const chapterProgress = getSchoolTrpgProgress(state);
+  const canAdvance = state.chapter < 4 || (state.chapter === 4 && isHiddenSchoolTrpgChapterUnlocked(state));
+  const nextChapter = state.chapter < 4 ? state.chapter + 1 : 5;
+  const nextMeta = getTrpgChapterMeta(nextChapter);
+  const nextChapterCopy = trpgCopy(
+    `${nextMeta.shortLabel.ja}へ進む`,
+    `${nextMeta.shortLabel.hira}へすすむ`,
+    `CONTINUE TO ${nextMeta.shortLabel.en}`,
+  );
   return (
     <div className={`school-trpg-ending-screen tone-${ending.tone.toLowerCase()}`}>
-      <SchoolTrpgBackdrop asset="sprites/backgrounds/learning-rogue/reward-rooftop.webp" />
+      <SchoolTrpgBackdrop asset={ending.artAsset || 'sprites/backgrounds/learning-rogue/reward-rooftop.webp'} />
       <div className="school-trpg-ending-seal"><span>ENDING</span><b>{String(Math.max(1, chapterProgress.total)).padStart(2, '0')}</b></div>
       <section>
-        <div className="school-trpg-panel-eyebrow">{state.chapter === 1 ? 'CHAPTER 2 RESULT' : 'PROLOGUE RESULT'} // {text(getSchoolTrpgCombatResolutionCopy(state.combat?.resolution || null), languageMode)}</div>
+        <div className="school-trpg-panel-eyebrow">{text(chapter.shortLabel, languageMode)} // {text(getSchoolTrpgCombatResolutionCopy(state.combat?.resolution || null), languageMode)}</div>
         <h2>{text(ending.title, languageMode)}</h2>
         <h3>{text(ending.subtitle, languageMode)}</h3>
         <p>{text(ending.body, languageMode)}</p>
         {reward && <div className="school-trpg-ending-reward"><Sparkles size={18} /><span>{text(reward.name, languageMode)}</span></div>}
         <div className="school-trpg-ending-actions">
-          {state.chapter === 0 && <button type="button" className="school-trpg-primary-button" onClick={onNextChapter}>{text(SCHOOL_TRPG_COPY.nextChapter, languageMode)}<ChevronRight size={18} /></button>}
+          {canAdvance && <button type="button" className="school-trpg-primary-button" onClick={onNextChapter}>{text(nextChapterCopy, languageMode)}<ChevronRight size={18} /></button>}
           <button type="button" className="school-trpg-primary-button" onClick={onFinish}>{text(SCHOOL_TRPG_COPY.finish, languageMode)}<ChevronRight size={18} /></button>
           <button type="button" className="school-trpg-secondary-button" onClick={onReplay}><RotateCcw size={17} />{text(SCHOOL_TRPG_COPY.replay, languageMode)}</button>
         </div>
@@ -610,7 +620,7 @@ const SchoolTrpgGame = ({
       <header className="school-trpg-campaign-header">
         <button type="button" onClick={onBack} aria-label={text(SCHOOL_TRPG_COPY.exit, languageMode)}><ArrowLeft size={20} /><span>{text(SCHOOL_TRPG_COPY.exit, languageMode)}</span></button>
         <div><small>LEARNING ROGUE // STORY EXPEDITION</small><b>{text(SCHOOL_TRPG_COPY.title, languageMode)}</b></div>
-        <span>{text(state.chapter === 1 ? SCHOOL_TRPG_COPY.chapterTwo : UI_COPY.prologue, languageMode)} // {String(state.chapter).padStart(2, '0')}</span>
+        <span>{text(getTrpgChapterMeta(state.chapter).shortLabel, languageMode)} // {String(state.chapter).padStart(2, '0')}</span>
         <button type="button" className="is-reset" onClick={() => setShowReset(true)} aria-label={text(SCHOOL_TRPG_COPY.abandon, languageMode)}><RotateCcw size={18} /></button>
       </header>
       <StatusBar state={state} languageMode={languageMode} />
