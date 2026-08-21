@@ -492,18 +492,19 @@ const StartScreen: React.FC<{
     <header className="school-trpg-campaign-header">
       <button type="button" onClick={onBack} aria-label={text(SCHOOL_TRPG_COPY.exit, languageMode)}><ArrowLeft size={20} /><span>{text(SCHOOL_TRPG_COPY.exit, languageMode)}</span></button>
       <div><small>LEARNING ROGUE // STORY EXPEDITION</small><b>{text(SCHOOL_TRPG_COPY.title, languageMode)}</b></div>
-      <span>CAMPAIGN 00</span>
+      <span>{text(SCHOOL_TRPG_COPY.campaignHeader, languageMode)}</span>
     </header>
     <div className="school-trpg-start-layout">
       <section className="school-trpg-start-art">
         <img src={assetUrl('sprites/backgrounds/mini-games/foreground/school-trpg.png')} alt="" aria-hidden="true" />
-        <div><span>OPEN CAMPUS ADVENTURE</span><b>{text(SCHOOL_TRPG_COPY.campaign, languageMode)}</b></div>
+        <div><span>{text(SCHOOL_TRPG_COPY.campaignTagline, languageMode)}</span><b>{text(SCHOOL_TRPG_COPY.campaign, languageMode)}</b></div>
       </section>
       <section className="school-trpg-start-copy">
         <div className="school-trpg-panel-eyebrow">CAMPAIGN BRIEFING</div>
         <h1>{text(SCHOOL_TRPG_COPY.campaign, languageMode)}</h1>
         <p>{text(SCHOOL_TRPG_COPY.intro, languageMode)}</p>
-        <div className="school-trpg-start-specs"><span>6 LOCATIONS</span><span>2 QUIZ GATES</span><span>4 ENDINGS</span></div>
+        <div className="school-trpg-start-specs"><span>{text(SCHOOL_TRPG_COPY.specChapters, languageMode)}</span><span>{text(SCHOOL_TRPG_COPY.specLocations, languageMode)}</span><span>{text(SCHOOL_TRPG_COPY.specEndings, languageMode)}</span></div>
+        <p className="school-trpg-start-secret-hint">{text(SCHOOL_TRPG_COPY.hiddenRouteHint, languageMode)}</p>
         {dataErrors.length > 0 && <div className="school-trpg-data-error"><b>{text(UI_COPY.dataError, languageMode)}</b>{dataErrors.map(error => <span key={error}>{error}</span>)}</div>}
         <div className="school-trpg-start-actions">
           {saved && <button type="button" className="school-trpg-primary-button" disabled={dataErrors.length > 0} onClick={onContinue}><MapPinned size={18} />{text(SCHOOL_TRPG_COPY.continueCampaign, languageMode)}<ChevronRight size={18} /></button>}
