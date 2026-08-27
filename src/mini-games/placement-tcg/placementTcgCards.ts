@@ -1,7 +1,27 @@
-import { CARDS_LIBRARY } from '../../constants';
+import { CARDS_LIBRARY, CHARACTERS } from '../../constants';
+import {
+  HIGH_SCHOOL_ENEMY_VARIANTS,
+  HIGH_SCHOOL_HUMANOID_ENEMY_VARIANTS,
+  MAGIC_ENEMY_VARIANTS,
+  MAGIC_HUMANOID_ENEMY_VARIANTS,
+} from '../../data/visualThemes';
+import { ENEMY_LIBRARY_BY_THEME } from '../../data/enemyCatalogs';
+import { MAGIC_HEROES, MAGIC_MALE_PROTAGONISTS } from '../../data/magicHeroes';
+import { getEnemyIllustrationPaths } from '../../utils/enemyIllustration';
+import { assetUrl } from '../../utils/assetPaths';
+import {
+  buildPlacementEffectProgram,
+  renderPlacementEffectProgram,
+  type PlacementEffectProgram,
+} from './placementTcgEffectDsl';
 
 export type PlacementCardKind = 'UNIT' | 'SUPPORT' | 'EVENT';
 export type PlacementCardTier = 'STARTER' | 'COMMON' | 'UNCOMMON' | 'RARE';
+export type PlacementTcgEdition = 'ELEMENTARY' | 'HIGH_SCHOOL' | 'MAGIC';
+export type PlacementCardVoiceProfile =
+  | { type: 'HIGH_SCHOOL_HERO'; id: string }
+  | { type: 'MAGIC_HERO'; id: string; transformed: boolean }
+  | { type: 'HUMANOID_ENEMY'; theme: 'high-school' | 'magic'; name: string };
 export type PlacementEffectKey =
   | 'DEPLOY_DAMAGE'
   | 'RUSH'
@@ -32,6 +52,8 @@ export type PlacementEffectKey =
 export interface PlacementCardDefinition {
   id: string;
   sourceCardId: string;
+  /** Internal artwork lookup key. The UI deliberately presents the current TCG art source instead of this legacy card ID. */
+  artSourceType: 'CHARACTER_ART' | 'CARD_ART';
   name: string;
   textureRef: string;
   kind: PlacementCardKind;
@@ -42,8 +64,155 @@ export interface PlacementCardDefinition {
   durability?: number;
   effect: PlacementEffectKey;
   amount: number;
+  /** Stable per-card effect identity used by the catalog/audit. The engine effect key is a runtime family. */
+  effectId: string;
+  effectProgram: PlacementEffectProgram;
   rulesText: { jp: string; en: string };
+  edition: PlacementTcgEdition;
+  artAsset?: string;
+  attackArtAsset?: string;
+  /** Per-source crop alignment so transparent portrait margins do not push a bust-up below the card frame. */
+  artObjectPosition?: string;
+  voiceProfile?: PlacementCardVoiceProfile;
+  signatureCode: number;
 }
+
+type CharacterCardBlueprint = {
+  id: string;
+  name: string;
+  edition: PlacementTcgEdition;
+  artAsset: string;
+  attackArtAsset?: string;
+  artObjectPosition?: string;
+  voiceProfile?: PlacementCardVoiceProfile;
+};
+
+type EnemyTheme = 'ELEMENTARY' | 'HIGH_SCHOOL' | 'MAGIC';
+
+const themeToEdition: Record<EnemyTheme, PlacementTcgEdition> = {
+  ELEMENTARY: 'ELEMENTARY',
+  HIGH_SCHOOL: 'HIGH_SCHOOL',
+  MAGIC: 'MAGIC',
+};
+
+const getThemedEnemyAsset = (theme: EnemyTheme, name: string): { artAsset: string; attackArtAsset: string } => {
+  if (theme === 'ELEMENTARY') {
+    const artAsset = getEnemyIllustrationPaths(name)[0];
+    return { artAsset, attackArtAsset: artAsset };
+  }
+  const isHighSchool = theme === 'HIGH_SCHOOL';
+  const humanoidVariants = isHighSchool ? HIGH_SCHOOL_HUMANOID_ENEMY_VARIANTS : MAGIC_HUMANOID_ENEMY_VARIANTS;
+  const monsterVariants = isHighSchool ? HIGH_SCHOOL_ENEMY_VARIANTS : MAGIC_ENEMY_VARIANTS;
+  const humanoid = humanoidVariants.find(variant => variant.name === name);
+  const monster = monsterVariants.find(variant => variant.name === name);
+  if (humanoid) {
+    const root = isHighSchool ? 'high-school' : 'magic';
+    return {
+      artAsset: assetUrl(`sprites/${root}/humanoid-enemies/${humanoid.imageIndex}.webp`),
+      attackArtAsset: assetUrl(`sprites/${root}/humanoid-enemies-attack/${humanoid.imageIndex}.webp`),
+    };
+  }
+  if (monster) {
+    const root = isHighSchool ? 'high-school' : 'magic';
+    const artAsset = assetUrl(`sprites/${root}/enemies/${monster.imageIndex}.webp`);
+    return { artAsset, attackArtAsset: artAsset };
+  }
+  throw new Error(`Missing named enemy artwork mapping: ${theme}:${name}`);
+};
+
+const createEnemyBlueprints = (theme: EnemyTheme, expectedCount: number): CharacterCardBlueprint[] => {
+  const entries = Object.entries(ENEMY_LIBRARY_BY_THEME[theme === 'ELEMENTARY' ? 'elementary' : theme === 'HIGH_SCHOOL' ? 'high-school' : 'magic']);
+  if (entries.length !== expectedCount) {
+    throw new Error(`Expected ${expectedCount} ${theme} enemy cards, found ${entries.length}`);
+  }
+  const humanoidNames = new Set(
+    (theme === 'HIGH_SCHOOL' ? HIGH_SCHOOL_HUMANOID_ENEMY_VARIANTS : theme === 'MAGIC' ? MAGIC_HUMANOID_ENEMY_VARIANTS : [])
+      .map(variant => variant.name),
+  );
+  return entries.map(([catalogKey, entry], index) => {
+    const elementaryPath = theme === 'ELEMENTARY'
+      ? getEnemyIllustrationPaths(entry.name, [catalogKey])[0]
+      : null;
+    if (theme === 'ELEMENTARY' && !elementaryPath) {
+      throw new Error(`Missing named enemy artwork mapping: ${theme}:${catalogKey}`);
+    }
+    const assets = elementaryPath
+      ? { artAsset: elementaryPath, attackArtAsset: elementaryPath }
+      : getThemedEnemyAsset(theme, entry.name);
+    const isHumanoid = humanoidNames.has(entry.name);
+    return {
+      id: `${theme}_ENEMY_${String(index + 1).padStart(3, '0')}`,
+      name: entry.name,
+      edition: themeToEdition[theme],
+      artAsset: assets.artAsset,
+      attackArtAsset: assets.attackArtAsset,
+      voiceProfile: isHumanoid
+        ? { type: 'HUMANOID_ENEMY' as const, theme: theme === 'HIGH_SCHOOL' ? 'high-school' as const : 'magic' as const, name: entry.name }
+        : undefined,
+    };
+  });
+};
+
+const HIGH_SCHOOL_HERO_NAMES = [
+  '反逆の高校生', '生物部の先輩', '謎めく転入生', 'バスケ部エース', '放送部ディレクター',
+  '文芸部書記', '学食の料理長', '園芸部部長', '化学研究会長',
+] as const;
+
+// The artwork sheet follows the character roster, while the display names are
+// intentionally written in story order. Keep the mapping explicit so a card
+// name can never silently drift onto another character's portrait when either
+// list is edited.
+const HIGH_SCHOOL_HERO_ART_INDEX: Record<string, number> = {
+  WARRIOR: 0,
+  CARETAKER: 1,
+  ASSASSIN: 2,
+  MAGE: 3,
+  DODGEBALL: 4,
+  BARD: 5,
+  LIBRARIAN: 6,
+  CHEF: 7,
+  GARDENER: 8,
+};
+
+const CHARACTER_CARD_BLUEPRINTS: CharacterCardBlueprint[] = [
+  ...CHARACTERS.map(character => ({
+    id: `ELEMENTARY_HERO_${character.id}`,
+    name: character.name,
+    edition: 'ELEMENTARY' as const,
+    artAsset: character.imageData,
+  })),
+  ...CHARACTERS.map((character, index) => {
+    const artIndex = HIGH_SCHOOL_HERO_ART_INDEX[character.id] ?? index;
+    return {
+      id: `HIGH_SCHOOL_HERO_${character.id}`,
+      name: HIGH_SCHOOL_HERO_NAMES[index] || character.name,
+      edition: 'HIGH_SCHOOL' as const,
+      artAsset: `sprites/high-school/characters/${artIndex}.webp`,
+      attackArtAsset: `sprites/high-school/characters-attack/${artIndex}.webp`,
+      voiceProfile: { type: 'HIGH_SCHOOL_HERO' as const, id: character.id },
+    };
+  }),
+  ...MAGIC_HEROES.flatMap(hero => ([false, true] as const).map(transformed => ({
+    id: `MAGIC_HERO_${hero.id}_${transformed ? 'AFTER' : 'BEFORE'}`,
+    name: transformed ? `${hero.name}／${hero.transformedTitle}` : hero.name,
+    edition: 'MAGIC' as const,
+    artAsset: `sprites/magic/characters/heroine-${String(hero.index).padStart(2, '0')}-${transformed ? 'after' : 'before'}.webp`,
+    attackArtAsset: `sprites/magic/characters-attack/heroine-${String(hero.index).padStart(2, '0')}-${transformed ? 'after' : 'before'}.webp`,
+    voiceProfile: { type: 'MAGIC_HERO' as const, id: hero.id, transformed },
+  }))),
+  ...MAGIC_MALE_PROTAGONISTS.flatMap(hero => ([false, true] as const).map(transformed => ({
+    id: `MAGIC_HERO_${hero.id}_${transformed ? 'AFTER' : 'BEFORE'}`,
+    name: transformed ? `${hero.name}／${hero.transformedTitle}` : hero.name,
+    edition: 'MAGIC' as const,
+    artAsset: `sprites/magic/male-characters/${hero.assetId}-${transformed ? 'after' : 'before'}.webp`,
+    attackArtAsset: `sprites/magic/male-characters-attack/${hero.assetId}-${transformed ? 'after' : 'before'}.webp`,
+    artObjectPosition: '50% 60%',
+    voiceProfile: { type: 'MAGIC_HERO' as const, id: hero.id, transformed },
+  }))),
+  ...createEnemyBlueprints('ELEMENTARY', 119),
+  ...createEnemyBlueprints('HIGH_SCHOOL', 103),
+  ...createEnemyBlueprints('MAGIC', 67),
+];
 
 export const PLACEMENT_TCG_SOURCE_CARD_IDS = [
   'GON_GITSUNE',
@@ -323,11 +492,16 @@ const rulesTextFor = (effect: PlacementEffectKey, amount: number): PlacementCard
   return copy[effect];
 };
 
-const createDefinition = (sourceCardId: string, index: number): PlacementCardDefinition => {
+const createDefinition = (
+  sourceCardId: string,
+  index: number,
+  blueprint?: CharacterCardBlueprint,
+  forcedKind?: PlacementCardKind,
+): PlacementCardDefinition => {
   const source = CARDS_LIBRARY[sourceCardId];
   if (!source) throw new Error(`Missing placement TCG source card: ${sourceCardId}`);
 
-  const kind = cardKindFor(index);
+  const kind: PlacementCardKind = forcedKind || (blueprint ? 'UNIT' : cardKindFor(index));
   const spCost = kind === 'UNIT'
     ? 1 + ((index * 3) % 5)
     : kind === 'SUPPORT'
@@ -340,10 +514,24 @@ const createDefinition = (sourceCardId: string, index: number): PlacementCardDef
       ? SUPPORT_EFFECTS[index % SUPPORT_EFFECTS.length]
       : EVENT_EFFECTS[index % EVENT_EFFECTS.length];
 
+  const edition: PlacementTcgEdition = blueprint?.edition
+    || (index % 3 === 0 ? 'ELEMENTARY' : index % 3 === 1 ? 'HIGH_SCHOOL' : 'MAGIC');
+  const baseRules = rulesTextFor(effect, amount);
+  const effectProgram = buildPlacementEffectProgram({
+    id: blueprint?.id || `${kind}_${sourceCardId}`,
+    name: blueprint?.name || source.name,
+    index,
+    kind,
+    edition,
+    amount,
+    legacyEffect: effect,
+  });
+  const effectId = `EFFECT_${String(index + 1).padStart(3, '0')}_${kind}`;
   return {
-    id: `MTCG_${sourceCardId}`,
+    id: blueprint ? `MTCG_${blueprint.id}` : `MTCG_${kind}_${sourceCardId}`,
     sourceCardId,
-    name: source.name,
+    artSourceType: blueprint ? 'CHARACTER_ART' : 'CARD_ART',
+    name: blueprint?.name || source.name,
     textureRef: source.textureRef || 'NOTEBOOK|青|SKILL',
     kind,
     tier: cardTierFor(index),
@@ -353,21 +541,73 @@ const createDefinition = (sourceCardId: string, index: number): PlacementCardDef
     durability: kind === 'SUPPORT' ? 2 + ((index * 3) % 4) : undefined,
     effect,
     amount,
-    rulesText: rulesTextFor(effect, amount),
+    effectId,
+    effectProgram,
+    rulesText: renderPlacementEffectProgram(effectProgram, baseRules),
+    edition,
+    artAsset: blueprint?.artAsset,
+    attackArtAsset: blueprint?.attackArtAsset,
+    artObjectPosition: blueprint?.artObjectPosition,
+    voiceProfile: blueprint?.voiceProfile,
+    signatureCode: index,
   };
 };
 
-export const PLACEMENT_TCG_CARDS: PlacementCardDefinition[] =
-  PLACEMENT_TCG_SOURCE_CARD_IDS.map(createDefinition);
+const SUPPORT_EVENT_SOURCES = PLACEMENT_TCG_SOURCE_CARD_IDS;
+
+export const PLACEMENT_TCG_CARDS: PlacementCardDefinition[] = [
+  ...CHARACTER_CARD_BLUEPRINTS.map((blueprint, index) => createDefinition(
+    PLACEMENT_TCG_SOURCE_CARD_IDS[index % PLACEMENT_TCG_SOURCE_CARD_IDS.length],
+    index,
+    blueprint,
+  )),
+  ...SUPPORT_EVENT_SOURCES.map((sourceCardId, offset) => createDefinition(
+    sourceCardId,
+    CHARACTER_CARD_BLUEPRINTS.length + offset,
+    undefined,
+    offset < SUPPORT_EVENT_SOURCES.length / 2 ? 'SUPPORT' : 'EVENT',
+  )),
+];
 
 export const PLACEMENT_TCG_CARD_MAP = new Map(
   PLACEMENT_TCG_CARDS.map(card => [card.id, card]),
 );
 
-export const PLACEMENT_TCG_STARTER_DECK = PLACEMENT_TCG_CARDS
-  .filter(card => card.tier === 'STARTER')
-  .map(card => card.id);
+/**
+ * v1 used MTCG_<source id> for the 200-card pool. Those IDs are retained as
+ * migration aliases only; the new catalog has separate SUPPORT/EVENT cards.
+ */
+export const PLACEMENT_TCG_LEGACY_CARD_ID_MAP = new Map(
+  PLACEMENT_TCG_SOURCE_CARD_IDS.map((sourceCardId, index) => [
+    `MTCG_${sourceCardId}`,
+    PLACEMENT_TCG_CARD_MAP.get(`MTCG_${index < PLACEMENT_TCG_SOURCE_CARD_IDS.length / 2 ? 'SUPPORT' : 'EVENT'}_${sourceCardId}`)?.id || '',
+  ]),
+);
+
+export const normalizePlacementTcgCardId = (cardId: string): string => (
+  PLACEMENT_TCG_CARD_MAP.has(cardId)
+    ? cardId
+    : PLACEMENT_TCG_LEGACY_CARD_ID_MAP.get(cardId) || cardId
+);
+
+const starterDeckFor = (edition: PlacementTcgEdition) => {
+  const editionCards = PLACEMENT_TCG_CARDS.filter(card => card.edition === edition);
+  const units = editionCards.filter(card => card.kind === 'UNIT').slice(0, 10);
+  const support = editionCards.filter(card => card.kind === 'SUPPORT').slice(0, 5);
+  const events = editionCards.filter(card => card.kind === 'EVENT').slice(0, 5);
+  const deck = [...units, ...support, ...events].map(card => card.id);
+  const fallback = editionCards.map(card => card.id);
+  for (let index = 0; deck.length < 20 && fallback.length > 0; index += 1) deck.push(fallback[index % fallback.length]);
+  return deck.slice(0, 20);
+};
+
+export const PLACEMENT_TCG_EDITION_DECKS: Record<PlacementTcgEdition, string[]> = {
+  ELEMENTARY: starterDeckFor('ELEMENTARY'),
+  HIGH_SCHOOL: starterDeckFor('HIGH_SCHOOL'),
+  MAGIC: starterDeckFor('MAGIC'),
+};
+
+export const PLACEMENT_TCG_STARTER_DECK = PLACEMENT_TCG_EDITION_DECKS.ELEMENTARY;
 
 export const PLACEMENT_TCG_REWARD_POOL = PLACEMENT_TCG_CARDS
-  .filter(card => card.tier !== 'STARTER')
   .map(card => card.id);

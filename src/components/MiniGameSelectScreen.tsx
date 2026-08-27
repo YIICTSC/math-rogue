@@ -2,7 +2,7 @@
 import React, { useState, useRef } from 'react';
 import { ArrowLeft, Gamepad2, AlertTriangle, Trash2, Lock } from 'lucide-react';
 import { audioService } from '../services/audioService';
-import { MINI_GAMES, MiniGameConfig } from '../miniGameConfig';
+import { isMiniGameUnlocked, MINI_GAMES, MiniGameConfig } from '../miniGameConfig';
 import { GameScreen, LanguageMode } from '../types';
 import { assetUrl } from '../utils/assetPaths';
 import { trans } from '../utils/textUtils';
@@ -11,6 +11,7 @@ interface MiniGameSelectScreenProps {
   onSelect: (screen: GameScreen) => void;
   onBack: () => void;
   totalMathCorrect: number;
+  mainClearCount: number;
   isDebug: boolean;
   languageMode: LanguageMode;
 }
@@ -95,14 +96,17 @@ export const MiniGameSpriteIcon: React.FC<{
   );
 };
 
-const MiniGameSelectScreen: React.FC<MiniGameSelectScreenProps> = ({ onSelect, onBack, totalMathCorrect, isDebug, languageMode }) => {
+const MiniGameSelectScreen: React.FC<MiniGameSelectScreenProps> = ({ onSelect, onBack, totalMathCorrect, mainClearCount, isDebug, languageMode }) => {
   const [deleteTarget, setDeleteTarget] = useState<MiniGameConfig | null>(null);
   const longPressTimer = useRef<any>(null);
   const isLongPress = useRef(false);
+  const touchStartPoint = useRef<{ x: number; y: number } | null>(null);
+  const isTouchScroll = useRef(false);
+  const TOUCH_SCROLL_THRESHOLD = 10;
 
   const isUnlocked = (game: MiniGameConfig) => {
     if (isDebug) return true;
-    return totalMathCorrect >= game.threshold;
+    return isMiniGameUnlocked(game, { totalMathCorrect, mainClearCount });
   };
   const visibleGames = MINI_GAMES.filter(game => !game.categoryOnly);
   const firstUnlockedGameId = visibleGames.find(isUnlocked)?.id;
@@ -145,6 +149,37 @@ const MiniGameSelectScreen: React.FC<MiniGameSelectScreenProps> = ({ onSelect, o
     }
   };
 
+  const handleTouchStart = (event: React.TouchEvent, game: MiniGameConfig) => {
+    const touch = event.touches[0];
+    touchStartPoint.current = touch ? { x: touch.clientX, y: touch.clientY } : null;
+    isTouchScroll.current = false;
+    handlePressStart(game);
+  };
+
+  const handleTouchMove = (event: React.TouchEvent) => {
+    const touch = event.touches[0];
+    const start = touchStartPoint.current;
+    if (!touch || !start) return;
+    const movedX = Math.abs(touch.clientX - start.x);
+    const movedY = Math.abs(touch.clientY - start.y);
+    if (movedX < TOUCH_SCROLL_THRESHOLD && movedY < TOUCH_SCROLL_THRESHOLD) return;
+    // A swipe belongs to the scroll container, never to a game card.  Keep
+    // the scroll native and only cancel the card's long-press timer here.
+    isTouchScroll.current = true;
+    handleCancelPress();
+  };
+
+  const handleTouchEnd = (event: React.TouchEvent, game: MiniGameConfig) => {
+    const wasScroll = isTouchScroll.current;
+    touchStartPoint.current = null;
+    isTouchScroll.current = false;
+    if (wasScroll) {
+      handleCancelPress();
+      return;
+    }
+    handlePressEnd(event, game);
+  };
+
   const confirmDelete = () => {
     if (!deleteTarget) return;
     
@@ -163,9 +198,9 @@ const MiniGameSelectScreen: React.FC<MiniGameSelectScreenProps> = ({ onSelect, o
     onMouseDown: () => handlePressStart(game),
     onMouseUp: (e: React.MouseEvent) => handlePressEnd(e, game),
     onMouseLeave: handleCancelPress,
-    onTouchStart: () => handlePressStart(game),
-    onTouchEnd: (e: React.TouchEvent) => handlePressEnd(e, game),
-    onTouchMove: handleCancelPress,
+    onTouchStart: (event: React.TouchEvent) => handleTouchStart(event, game),
+    onTouchEnd: (event: React.TouchEvent) => handleTouchEnd(event, game),
+    onTouchMove: handleTouchMove,
     onContextMenu: (event: React.MouseEvent) => {
       event.preventDefault();
       if (!isUnlocked(game)) {
@@ -177,13 +212,21 @@ const MiniGameSelectScreen: React.FC<MiniGameSelectScreenProps> = ({ onSelect, o
     }
   });
 
-  const LockedOverlay: React.FC<{ threshold: number }> = ({ threshold }) => {
-    const remaining = Math.max(0, threshold - totalMathCorrect);
+  const LockedOverlay: React.FC<{ game: MiniGameConfig }> = ({ game }) => {
+    const remainingClears = Math.max(0, (game.mainClearRequired ?? 0) - mainClearCount);
+    const remainingAnswers = Math.max(0, game.threshold - totalMathCorrect);
+    const needsMainClear = remainingClears > 0;
     return (
       <div className="absolute inset-0 bg-black/80 flex flex-col items-center justify-center rounded-xl z-20 pointer-events-none">
         <Lock className="text-gray-500 mb-2" size={32} />
         <div className="text-gray-400 font-bold text-xs">{trans('LOCKED', languageMode)}</div>
-        <div className="text-yellow-500 font-bold text-[10px] mt-1">{trans('あと', languageMode)} {remaining} {trans('問', languageMode)}</div>
+        {needsMainClear ? (
+          <div className="text-yellow-500 font-bold text-[10px] mt-1 text-center">
+            {languageMode === 'ENGLISH' ? 'Main clears remaining' : languageMode === 'HIRAGANA' ? 'ほんぺんくりあまであと' : '本編クリアまであと'} {remainingClears} {languageMode === 'ENGLISH' ? 'clears' : languageMode === 'HIRAGANA' ? 'かい' : '回'}
+          </div>
+        ) : (
+          <div className="text-yellow-500 font-bold text-[10px] mt-1">{trans('あと', languageMode)} {remainingAnswers} {trans('問', languageMode)}</div>
+        )}
       </div>
     );
   };
@@ -253,7 +296,7 @@ const MiniGameSelectScreen: React.FC<MiniGameSelectScreenProps> = ({ onSelect, o
                   boxShadow: isUnlocked(game) ? `0 0 20px ${game.glowColor}` : undefined
                 }}
               >
-                {!isUnlocked(game) && <LockedOverlay threshold={game.threshold} />}
+                {!isUnlocked(game) && <LockedOverlay game={game} />}
                 <div className={`absolute top-0 right-0 ${game.typeColor} text-white text-[9px] md:text-[10px] font-bold px-2 py-0.5 rounded-bl-lg shadow-md z-10`}>
                   {trans(game.typeLabel, languageMode)}
                 </div>

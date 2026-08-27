@@ -89,7 +89,7 @@ const getHumanoidEnemyVoiceActionForIntent = (intent: EnemyIntent): HumanoidEnem
 };
 import MiniGameSelectScreen, { MiniGameSpriteIcon } from './components/MiniGameSelectScreen';
 import MiniGameRouter from './components/MiniGameRouter'; // Added
-import { MINI_GAMES } from './miniGameConfig'; // Added
+import { isMiniGameUnlocked, MINI_GAMES } from './miniGameConfig'; // Added
 import DodgeballShooting from './components/DodgeballShooting';
 import BasketballLayupShooting from './components/BasketballLayupShooting';
 import FinalBridgeScreen from './components/FinalBridgeScreen';
@@ -1388,7 +1388,6 @@ const App: React.FC = () => {
         actStats: { enemiesDefeated: 0, goldGained: 0, mathCorrect: 0 }
     });
     const [pendingMiniGameScreen, setPendingMiniGameScreen] = useState<GameScreen | null>(null);
-    const [miniGameReturnScreen, setMiniGameReturnScreen] = useState<GameScreen | null>(null);
     const [pendingAssignmentStartScreen, setPendingAssignmentStartScreen] = useState<GameScreen | null>(null);
     const [pendingResumeProblemSelection, setPendingResumeProblemSelection] = useState(false);
     const [miniGameProblemMode, setMiniGameProblemMode] = useState<GameMode>(GameMode.MIXED);
@@ -1572,6 +1571,7 @@ const App: React.FC = () => {
     }, [coopSyncedVisualTheme]);
     const [unlockCheckStartMathCorrect, setUnlockCheckStartMathCorrect] = useState<number>(0);
     const [debugMenuStartClearCount, setDebugMenuStartClearCount] = useState<number>(0);
+    const [debugMenuStartMainClearCount, setDebugMenuStartMainClearCount] = useState<number>(0);
     const [debugMenuStartMathCorrect, setDebugMenuStartMathCorrect] = useState<number>(0);
     const [showDebugLog, setShowDebugLog] = useState<boolean>(false);
     const [showDataTransferModal, setShowDataTransferModal] = useState<boolean>(false);
@@ -2136,6 +2136,9 @@ const App: React.FC = () => {
     const [treasureOpened, setTreasureOpened] = useState(false);
     const [treasurePools, setTreasurePools] = useState<CoopTreasurePool[]>([]);
     const [clearCount, setClearCount] = useState<number>(() => storageService.getThemeClearCount(visualTheme));
+    // Global main-adventure clears drive the seven trivia mini-game unlocks.
+    // Keep this separate from the per-theme clear count used for characters.
+    const [mainClearCount, setMainClearCount] = useState<number>(() => storageService.getClearCount());
     const [maxUnlockedDifficulty, setMaxUnlockedDifficulty] = useState<number>(() => storageService.getMaxUnlockedDifficulty());
     const [raceSession, setRaceSession] = useState<RaceSession | null>(null);
     const [coopSession, setCoopSession] = useState<CoopSession | null>(null);
@@ -3755,35 +3758,10 @@ const App: React.FC = () => {
         if (gameState.challengeMode === 'RACE' || gameState.challengeMode === 'COOP') {
             return;
         }
-        const isAssignmentUtilityScreen = gameState.screen === GameScreen.ASSIGNMENT_CREATE || gameState.screen === GameScreen.SUBMISSION || gameState.screen === GameScreen.REWARD_CARD_ALBUM;
-        if (gameState.screen !== GameScreen.MAGIC_EVENT_SIMULATION && (
-            !isAssignmentUtilityScreen &&
-            gameState.screen !== GameScreen.START_MENU &&
-            gameState.screen !== GameScreen.GAME_OVER &&
-            gameState.screen !== GameScreen.MAGIC_ROMANCE_ENDING &&
-            gameState.screen !== GameScreen.ENDING &&
-            gameState.screen !== GameScreen.VICTORY &&
-            gameState.screen !== GameScreen.COMPENDIUM &&
-            gameState.screen !== GameScreen.HELP &&
-            gameState.screen !== GameScreen.CHARACTER_SELECTION &&
-            gameState.screen !== GameScreen.RELIC_SELECTION &&
-            gameState.screen !== GameScreen.MODE_SELECTION &&
-            gameState.screen !== GameScreen.DEBUG_MENU &&
-            gameState.screen !== GameScreen.MAGIC_EVENT_SIMULATION &&
-            gameState.screen !== GameScreen.MINI_GAME_SELECT &&
-            gameState.screen === GameScreen.MINI_GAME_POKER ||
-            gameState.screen === GameScreen.MINI_GAME_SURVIVOR ||
-            gameState.screen === GameScreen.MINI_GAME_DUNGEON ||
-            gameState.screen === GameScreen.MINI_GAME_DUNGEON_2 ||
-            gameState.screen === GameScreen.MINI_GAME_KOCHO ||
-            gameState.screen === GameScreen.MINI_GAME_PAPER_PLANE ||
-            gameState.screen === GameScreen.MINI_GAME_GO_HOME ||
-            gameState.screen !== GameScreen.PROBLEM_CHALLENGE &&
-            gameState.screen !== GameScreen.RACE_SETUP &&
-            gameState.screen !== GameScreen.FLOOR_RESULT
-        )) {
-            storageService.saveGame(gameState);
-        }
+        // storageService is the single source of truth for resumable screens.
+        // Mini-game state is deliberately kept in its own keys and can never
+        // overwrite or enable the title screen's main-adventure Continue slot.
+        storageService.saveGame(gameState);
 
         if (gameState.screen === GameScreen.START_MENU) {
             setHasSave(storageService.hasSaveFile());
@@ -4631,9 +4609,7 @@ const App: React.FC = () => {
 
     const toggleLanguage = () => {
         const nextMode: LanguageMode =
-            languageMode === 'JAPANESE' ? 'HIRAGANA' :
-            languageMode === 'HIRAGANA' ? 'ENGLISH' :
-            'JAPANESE';
+            languageMode === 'ENGLISH' ? 'JAPANESE' : 'ENGLISH';
         setLanguageMode(nextMode);
         storageService.saveLanguageMode(nextMode);
         audioService.playSound('select');
@@ -4697,6 +4673,8 @@ const App: React.FC = () => {
             stateRef.current.screen === GameScreen.VICTORY ||
             stateRef.current.screen === GameScreen.PROBLEM_CHALLENGE ||
             stateRef.current.screen === GameScreen.DEBUG_MENU;
+        let previousMainClearCount = mainClearCount;
+        let currentMainClearCount = mainClearCount;
 
         if (isEndingReturn || isGameOverReturn || isVictoryReturn) {
             storageService.clearSave();
@@ -4707,12 +4685,18 @@ const App: React.FC = () => {
             const completedThemeCharacters = getThemedCharacters(CHARACTERS, completedTheme);
             const previousClearCount = storageService.getThemeClearCount(completedTheme);
             const nextClearCount = storageService.incrementThemeClearCount(completedTheme);
+            previousMainClearCount = storageService.getClearCount();
             storageService.incrementClearCount();
+            currentMainClearCount = storageService.getClearCount();
+            setMainClearCount(currentMainClearCount);
             const previousUnlockedCount = Math.min(completedThemeCharacters.length, previousClearCount + 2);
             const nextUnlockedCount = Math.min(completedThemeCharacters.length, nextClearCount + 2);
             setClearCount(storageService.getThemeClearCount(visualTheme));
             setNewlyUnlockedCharacters(completedThemeCharacters.slice(previousUnlockedCount, nextUnlockedCount));
         } else if (isDebugReturn) {
+            previousMainClearCount = debugMenuStartMainClearCount;
+            currentMainClearCount = storageService.getClearCount();
+            setMainClearCount(currentMainClearCount);
             const nextClearCount = storageService.getThemeClearCount(visualTheme);
             const previousUnlockedCount = Math.min(themedCharacters.length, debugMenuStartClearCount + 2);
             const nextUnlockedCount = Math.min(themedCharacters.length, nextClearCount + 2);
@@ -4725,8 +4709,14 @@ const App: React.FC = () => {
         if (shouldCheckMiniGameUnlocks) {
             const currentMathCorrect = isDebugReturn ? storageService.getMathCorrectCount() : totalMathCorrect;
             const previousMathCorrect = isDebugReturn ? debugMenuStartMathCorrect : unlockCheckStartMathCorrect;
-            const previousUnlockedMiniGames = MINI_GAMES.filter(game => previousMathCorrect >= game.threshold);
-            const nextUnlockedMiniGames = MINI_GAMES.filter(game => currentMathCorrect >= game.threshold);
+            const previousUnlockedMiniGames = MINI_GAMES.filter(game => isMiniGameUnlocked(game, {
+                totalMathCorrect: previousMathCorrect,
+                mainClearCount: previousMainClearCount,
+            }));
+            const nextUnlockedMiniGames = MINI_GAMES.filter(game => isMiniGameUnlocked(game, {
+                totalMathCorrect: currentMathCorrect,
+                mainClearCount: currentMainClearCount,
+            }));
             if (isDebugReturn) {
                 setTotalMathCorrect(currentMathCorrect);
             }
@@ -4752,7 +4742,6 @@ const App: React.FC = () => {
         setCoopBattleKey(null);
         setCoopEnemyTurnCursor(0);
         setCompletedAssignmentProblemSource(null);
-        setMiniGameReturnScreen(null);
         p2pService.close();
         setGameState(prev => ({ ...prev, screen: GameScreen.START_MENU, challengeMode: undefined, typingLessonId: undefined }));
         setHasSave(storageService.hasSaveFile());
@@ -4762,6 +4751,7 @@ const App: React.FC = () => {
     const openDebugMenu = useCallback(() => {
         if (!isDebugModeActive) return;
         setDebugMenuStartClearCount(storageService.getThemeClearCount(visualTheme));
+        setDebugMenuStartMainClearCount(storageService.getClearCount());
         setDebugMenuStartMathCorrect(storageService.getMathCorrectCount());
         setGameState(prev => ({ ...prev, screen: GameScreen.DEBUG_MENU }));
     }, [isDebugModeActive, visualTheme]);
@@ -4770,6 +4760,7 @@ const App: React.FC = () => {
         storageService.incrementThemeClearCount(visualTheme);
         storageService.incrementClearCount();
         setClearCount(storageService.getThemeClearCount(visualTheme));
+        setMainClearCount(storageService.getClearCount());
     }, [visualTheme]);
 
     const handleDebugBoostMathCorrect = useCallback(() => {
@@ -6194,7 +6185,6 @@ const App: React.FC = () => {
             return;
         }
         audioService.playSound('select');
-        setMiniGameReturnScreen(null);
         setPendingMiniGameScreen(screen);
         if (showDailyAssignmentNoticeForProblemSelection()) {
             return;
@@ -6206,28 +6196,6 @@ const App: React.FC = () => {
         setGameState(prev => ({ ...prev, screen: GameScreen.MINI_GAME_MODE_SELECTION }));
     };
 
-    const handleProblemCategoryMiniGameOpen = (screen: GameScreen) => {
-        if (redirectToAssignmentChallengeIfLocked()) return;
-        if (isDailyLimitReached) {
-            audioService.playSound('wrong');
-            setShowTimeLimitModal(true);
-            return;
-        }
-        audioService.playSound('select');
-        startGameAssetPreload();
-        setMiniGameProblemMode(GameMode.MIXED);
-        setMiniGameProblemModePool(undefined);
-        setMiniGameAnswerMode('CHOICE');
-        setPendingMiniGameScreen(null);
-        setMiniGameReturnScreen(GameScreen.PROBLEM_CHALLENGE);
-        setGameState(prev => ({ ...prev, screen }));
-    };
-
-    const handleCategoryMiniGameBack = () => {
-        setMiniGameReturnScreen(null);
-        setGameState(prev => ({ ...prev, screen: GameScreen.PROBLEM_CHALLENGE }));
-    };
-
     const handleMiniGameModeSelect = async (mode: GameMode, modePool?: string[]) => {
         if (redirectToAssignmentChallengeIfLocked()) return;
         if (isDailyLimitReached) {
@@ -6236,7 +6204,6 @@ const App: React.FC = () => {
             return;
         }
         setCompletedAssignmentProblemSource(null);
-        setMiniGameReturnScreen(null);
         audioService.playSound('select');
         startGameAssetPreload();
         const nextScreen = pendingMiniGameScreen || GameScreen.MINI_GAME_SELECT;
@@ -16370,6 +16337,14 @@ const App: React.FC = () => {
         GameScreen.PROBLEM_CHALLENGE,
         GameScreen.FLOOR_RESULT,
         GameScreen.MINI_GAME_KOCHO,
+        // The mini-game hub owns its portrait safe-area padding and fixed
+        // title-return action. Keep the parent stage edge-to-edge so iOS does
+        // not inset the hub once more and clip its lower controls.
+        GameScreen.MINI_GAME_SELECT,
+        // The TRPG shell reserves the iOS safe area for its own header. Keep
+        // the parent stage edge-to-edge so that the inset is not applied twice
+        // and the portrait back/reset controls remain inside the viewport.
+        GameScreen.MINI_GAME_SCHOOL_TRPG,
     ].includes(gameState.screen);
 
     return (
@@ -16881,7 +16856,7 @@ const App: React.FC = () => {
                                 title={trans("言語切替", languageMode)}
                             >
                                 <Languages size={13} className="mr-1 shrink-0" />
-                                {languageMode === 'JAPANESE' ? '日本語' : languageMode === 'HIRAGANA' ? 'ひらがな' : 'English'}
+                                {languageMode === 'ENGLISH' ? 'English' : '日本語'}
                             </button>
                             <button
                                 onClick={() => setShowSettingsModal(true)}
@@ -17867,7 +17842,6 @@ const App: React.FC = () => {
                             problemSourceAssignment={completedAssignmentProblemSource}
                             onAnswerResult={handleAssignmentAnswerResult}
                             visualTheme={visualTheme}
-                            onOpenCategoryMiniGame={handleProblemCategoryMiniGameOpen}
                         />
                     </div>
                 )}
@@ -18176,6 +18150,7 @@ const App: React.FC = () => {
                             onSelect={handleMiniGameSelect}
                             onBack={returnToTitle}
                             totalMathCorrect={totalMathCorrect}
+                            mainClearCount={mainClearCount}
                             isDebug={isDebugHpOne || isMiniGameDebugUnlocked}
                             languageMode={languageMode}
                         />
@@ -18204,7 +18179,7 @@ const App: React.FC = () => {
                         <MiniGameRouter
                             key={`${gameState.screen}:${uiPreviewMiniGameOutcome ?? 'DEFAULT'}`}
                             screen={gameState.screen}
-                            onBack={miniGameReturnScreen ? handleCategoryMiniGameBack : returnToTitle}
+                            onBack={returnToTitle}
                             problemMode={miniGameProblemMode}
                             problemModePool={miniGameProblemModePool}
                             answerMode={miniGameAnswerMode}

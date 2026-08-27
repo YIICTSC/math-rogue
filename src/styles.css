@@ -16,6 +16,168 @@
   src: url('https://fonts.gstatic.com/s/kleeone/v13/LDIxapCLNRc6A8oT4q4A.ttf') format('truetype');
 }
 
+/* Mahjong tile readability: the suit is always visible as a colored label,
+   while the large center value keeps the tile legible on phones. */
+.mahjong-suit-legend {
+  width: min(100%, 560px);
+}
+
+.mahjong-suit-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  border: 1px solid rgba(255, 255, 255, .18);
+  border-radius: 999px;
+  padding: 3px 8px;
+  color: #dbeafe;
+  background: rgba(15, 23, 42, .78);
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: .02em;
+}
+
+.mahjong-suit-chip b {
+  border-radius: 4px;
+  padding: 1px 4px;
+  color: #03151c;
+  font-size: 9px;
+}
+
+.mahjong-suit-chip-m b { background: #fbbf24; }
+.mahjong-suit-chip-p b { background: #fb7185; }
+.mahjong-suit-chip-s b { background: #4ade80; }
+.mahjong-suit-chip-z b { background: #c4b5fd; }
+
+.mahjong-tile-button {
+  padding: 3px;
+}
+
+.mahjong-tile-face {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  border-radius: 5px;
+  padding: 4px 2px 3px;
+  line-height: 1;
+}
+
+.mahjong-tile-suit-label {
+  position: absolute;
+  top: 4px;
+  left: 2px;
+  right: 2px;
+  width: auto;
+  border-radius: 3px;
+  padding: 2px 1px;
+  font-size: 8px;
+  font-weight: 900;
+  letter-spacing: .02em;
+  text-align: center;
+}
+
+.mahjong-tile-value {
+  position: absolute;
+  top: 67%;
+  left: 0;
+  right: 0;
+  display: flex;
+  width: 100%;
+  min-height: 1.35em;
+  align-items: center;
+  justify-content: center;
+  font-size: clamp(1.05rem, 3vw, 1.65rem);
+  font-weight: 950;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+  transform: translateY(-50%);
+}
+
+.mahjong-tile-suit-mark {
+  position: absolute;
+  right: 0;
+  bottom: 4px;
+  left: 0;
+  font-size: 10px;
+  font-weight: 900;
+  opacity: .8;
+  text-align: center;
+}
+
+.mahjong-tile-suit-mark-empty {
+  visibility: hidden;
+}
+
+.mahjong-tile-suit-m { color: #92400e; background: linear-gradient(160deg, #fffbeb, #fef3c7); }
+.mahjong-tile-suit-m .mahjong-tile-suit-label { color: #78350f; background: #fbbf24; }
+.mahjong-tile-suit-p { color: #9f1239; background: linear-gradient(160deg, #fff1f2, #ffe4e6); }
+.mahjong-tile-suit-p .mahjong-tile-suit-label { color: #881337; background: #fb7185; }
+.mahjong-tile-suit-s { color: #166534; background: linear-gradient(160deg, #f0fdf4, #dcfce7); }
+.mahjong-tile-suit-s .mahjong-tile-suit-label { color: #14532d; background: #4ade80; }
+.mahjong-tile-suit-z { color: #5b21b6; background: linear-gradient(160deg, #f5f3ff, #ede9fe); }
+.mahjong-tile-suit-z .mahjong-tile-suit-label { color: #4c1d95; background: #c4b5fd; }
+
+@media (max-width: 600px) {
+  .mahjong-suit-chip {
+    padding: 2px 6px;
+    font-size: 8px;
+  }
+
+  .mahjong-tile-suit-label {
+    font-size: 7px;
+  }
+
+  .mahjong-tile-value {
+    font-size: 1.05rem;
+  }
+
+  /* Keep both the eight-tile practice hand and the 13/14-tile Standard hand
+     on one row on a phone. The count-specific grids avoid wrapping while
+     allowing Standard's authentic hand to remain readable. */
+  .mini-game-scope-mahjong .mahjong-hand {
+    display: grid;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
+    grid-template-columns: repeat(8, minmax(0, 1fr));
+    gap: clamp(2px, 0.9vw, 4px);
+    flex-wrap: nowrap;
+    justify-content: stretch;
+  }
+
+  .mini-game-scope-mahjong .mahjong-hand.mahjong-hand-count-13 {
+    grid-template-columns: repeat(13, minmax(0, 1fr));
+  }
+
+  .mini-game-scope-mahjong .mahjong-hand.mahjong-hand-count-14 {
+    grid-template-columns: repeat(14, minmax(0, 1fr));
+  }
+
+  .mini-game-scope-mahjong .mahjong-hand button {
+    width: 100%;
+    min-width: 0;
+    max-width: none;
+    height: clamp(62px, 18vw, 84px);
+    padding: 2px;
+  }
+
+  .mini-game-scope-mahjong .mahjong-tile-suit-label {
+    overflow: hidden;
+    font-size: clamp(5px, 1.65vw, 8px);
+    white-space: nowrap;
+  }
+
+  .mini-game-scope-mahjong .mahjong-tile-value {
+    font-size: clamp(0.78rem, 4vw, 1.15rem);
+    white-space: nowrap;
+  }
+
+  .mini-game-scope-mahjong .mahjong-tile-suit-mark {
+    font-size: clamp(6px, 1.8vw, 9px);
+  }
+}
+
 /* School TRPG campaign ---------------------------------------------------- */
 .school-trpg-campaign-shell {
   --trpg-cyan: #65ecf4;
@@ -355,9 +517,27 @@
 .school-trpg-campaign-stats span { color: #7999a0; font-size: 8px; font-weight: 800; }
 .school-trpg-campaign-stats b { color: var(--trpg-gold); font-size: 18px; }
 
+.school-trpg-discovery-shelf { margin-top: 14px; padding-top: 11px; border-top: 1px solid rgba(243, 202, 104, 0.22); }
+.school-trpg-discovery-shelf-heading { display: flex; align-items: center; justify-content: space-between; margin-bottom: 7px; color: var(--trpg-gold); font-size: 8px; font-weight: 900; letter-spacing: .16em; text-transform: uppercase; }
+.school-trpg-discovery-shelf-heading b { min-width: 18px; padding: 2px 5px; border: 1px solid rgba(243, 202, 104, 0.45); color: #fff0b0; font-size: 9px; text-align: center; }
+.school-trpg-discovery-shelf-list { display: grid; grid-template-columns: repeat(auto-fit, minmax(145px, 1fr)); gap: 6px; }
+.school-trpg-discovery-shelf-item { display: flex; align-items: center; min-width: 0; padding: 5px; gap: 7px; border: 1px solid rgba(101, 236, 244, 0.18); background: rgba(8, 31, 44, 0.56); }
+.school-trpg-discovery-shelf-item.is-used { opacity: .52; }
+.school-trpg-discovery-shelf-art { display: grid; place-items: center; flex: 0 0 28px; width: 28px; height: 28px; overflow: hidden; border: 1px solid rgba(243, 202, 104, 0.32); color: var(--trpg-gold); }
+.school-trpg-discovery-shelf-art img { width: 100%; height: 100%; object-fit: cover; }
+.school-trpg-discovery-shelf-item > div:last-child { display: flex; min-width: 0; flex-direction: column; }
+.school-trpg-discovery-shelf-item b { overflow: hidden; color: #d7edf0; font-size: 8px; text-overflow: ellipsis; white-space: nowrap; }
+.school-trpg-discovery-shelf-item small, .school-trpg-discovery-empty { color: #7898a0; font-size: 7px; line-height: 1.35; }
+.school-trpg-discovery-shelf.is-compact { margin-top: 9px; padding-top: 8px; }
+.school-trpg-discovery-shelf.is-compact .school-trpg-discovery-shelf-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+.school-trpg-discovery-shelf.is-compact .school-trpg-discovery-shelf-item { padding: 3px; }
+.school-trpg-choice-list > button:disabled { cursor: not-allowed; opacity: .36; }
+.school-trpg-choice-list > button:disabled:hover { border-color: rgba(101, 236, 244, 0.25); background: rgba(8, 31, 44, 0.75); transform: none; }
+
 .school-trpg-scene-panel > .school-trpg-campaign-backdrop { opacity: 0.94; filter: saturate(0.92) brightness(0.72); }
 .school-trpg-scene-vignette { position: absolute; inset: 0; background: linear-gradient(90deg, rgba(2, 8, 17, 0.05), rgba(2, 8, 17, 0.3)), linear-gradient(0deg, rgba(2, 8, 17, 0.82), transparent 55%); }
 .school-trpg-scene-illustration { position: absolute; z-index: 1; top: 8%; right: 8%; width: min(42%, 360px); height: 58%; object-fit: contain; object-position: center; filter: drop-shadow(0 12px 24px rgba(0, 0, 0, 0.72)); }
+.school-trpg-scene-illustration.is-event-original { inset: 0; width: 100%; height: 100%; object-fit: cover; object-position: center; filter: none; }
 .school-trpg-scene-foreground { position: absolute; right: 3%; bottom: 0; width: min(54%, 540px); max-height: 88%; object-fit: contain; object-position: bottom; filter: drop-shadow(0 10px 24px rgba(0, 0, 0, 0.7)); }
 .school-trpg-scene-caption { position: absolute; left: 28px; right: 28px; bottom: 25px; display: flex; flex-direction: column; padding: 13px 16px; border-left: 3px solid var(--trpg-gold); background: rgba(2, 10, 18, 0.73); backdrop-filter: blur(7px); }
 .school-trpg-scene-caption span { color: var(--trpg-gold); font-size: 9px; font-weight: 900; letter-spacing: 0.18em; }
@@ -385,6 +565,7 @@
 .school-trpg-roll-formula strong { padding: 9px; border: 1px solid rgba(101, 236, 244, 0.18); color: #8aa6ac; font-size: 9px; }
 .school-trpg-roll-formula b,
 .school-trpg-roll-formula strong { color: var(--trpg-gold); }
+.school-trpg-check-grade { margin: -9px 0 16px; padding: 8px 10px; border: 1px solid rgba(243, 202, 104, 0.45); color: var(--trpg-gold); background: rgba(65, 49, 20, 0.35); font-size: 9px; font-weight: 900; letter-spacing: .12em; }
 
 .school-trpg-combat-panel > .school-trpg-campaign-backdrop { opacity: 0.58; filter: saturate(0.66) brightness(0.47); }
 .school-trpg-enemy-intent { position: absolute; top: 20px; right: 20px; display: flex; align-items: center; padding: 8px 11px; gap: 9px; border: 1px solid rgba(255, 93, 136, 0.5); background: rgba(41, 8, 20, 0.85); }
@@ -420,6 +601,7 @@
 .school-trpg-combat-panel.cue-guard .school-trpg-combat-cue i { top: 22%; left: 50%; display: block; width: 34%; aspect-ratio: 1; border: 4px solid var(--trpg-cyan); border-radius: 50%; box-shadow: inset 0 0 42px rgba(101,236,244,.4), 0 0 36px rgba(101,236,244,.5); transform: translateX(-50%); animation: trpg-shield .6s ease-out both; }
 .school-trpg-combat-panel.cue-persuade .school-trpg-combat-cue b,
 .school-trpg-combat-panel.cue-investigate .school-trpg-combat-cue b { top: 36%; left: 50%; display: block; width: 28%; aspect-ratio: 1; border: 3px solid #ca91ff; transform: translateX(-50%) rotate(45deg); animation: trpg-pulse .6s ease-out both; }
+.school-trpg-combat-panel.cue-interact .school-trpg-combat-cue b { top: 32%; left: 50%; display: block; width: 22%; aspect-ratio: 1; border: 3px solid var(--trpg-gold); box-shadow: 0 0 30px rgba(243,202,104,.45); transform: translateX(-50%) rotate(45deg); animation: trpg-pulse .65s ease-out both; }
 
 .school-trpg-campaign-footer { z-index: 4; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; min-height: 43px; padding: 5px max(18px, env(safe-area-inset-right)) max(5px, env(safe-area-inset-bottom)) max(18px, env(safe-area-inset-left)); border-top: 1px solid rgba(101, 236, 244, 0.2); background: rgba(2, 10, 19, 0.94); }
 .school-trpg-campaign-footer > div:first-child { display: grid; grid-template-columns: auto auto minmax(0, 1fr); align-items: center; gap: 8px; min-width: 0; }
@@ -428,8 +610,7 @@
 .school-trpg-footer-route { display: flex; align-items: center; padding-left: 14px; gap: 8px; }
 .school-trpg-footer-route b { color: var(--trpg-gold); font-size: 12px; }
 
-.school-trpg-reward-screen,
-.school-trpg-ending-screen { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; width: min(1460px, 100%); height: 100%; min-height: 0; margin: 0 auto; overflow: hidden; border: 1px solid rgba(243, 202, 104, 0.36); background: rgba(2, 10, 18, 0.83); }
+.school-trpg-reward-screen { position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; width: min(1460px, 100%); height: 100%; min-height: 0; margin: 0 auto; overflow: hidden; border: 1px solid rgba(243, 202, 104, 0.36); background: rgba(2, 10, 18, 0.83); }
 .school-trpg-reward-screen > .school-trpg-campaign-backdrop,
 .school-trpg-ending-screen > .school-trpg-campaign-backdrop { opacity: .38; }
 .school-trpg-reward-heading { z-index: 1; margin-bottom: 18px; text-align: center; }
@@ -445,10 +626,14 @@
 .school-trpg-reward-art span { position: absolute; top: 8px; left: 8px; padding: 5px 7px; color: #07111d; background: var(--trpg-gold); font-size: 9px; font-weight: 900; }
 .school-trpg-reward-cards > button > b { margin: 13px 5px 5px; font-size: 15px; }
 .school-trpg-reward-cards > button > p { flex: 1; margin: 0 5px; color: #90aab0; font-size: 10px; line-height: 1.55; }
+.school-trpg-reward-use { display: block; margin: 6px 5px 0; color: #68dce8; font-size: 8px; line-height: 1.4; }
 .school-trpg-reward-cards > button > em { margin: 9px 5px 2px; color: var(--trpg-gold); font-size: 8px; font-style: normal; font-weight: 900; letter-spacing: .13em; }
 
-.school-trpg-ending-screen { align-items: stretch; padding: clamp(28px, 7vw, 90px); }
-.school-trpg-ending-screen > section { position: relative; z-index: 1; width: min(670px, 72%); padding: clamp(24px, 4vw, 52px); border-left: 3px solid var(--trpg-cyan); background: rgba(3, 14, 25, .88); backdrop-filter: blur(10px); }
+.school-trpg-ending-screen { position: relative; display: grid; grid-template-columns: minmax(0, 1.08fr) minmax(330px, .92fr); width: min(1460px, 100%); height: 100%; min-height: 0; margin: 0 auto; padding: clamp(14px, 2vw, 30px); gap: clamp(10px, 1.5vw, 22px); overflow: hidden; border: 1px solid rgba(243, 202, 104, 0.36); background: rgba(2, 10, 18, .93); }
+.school-trpg-ending-screen > section { position: relative; z-index: 1; width: 100%; min-width: 0; min-height: 0; padding: clamp(24px, 4vw, 52px); overflow: auto; border-left: 3px solid var(--trpg-cyan); background: rgba(3, 14, 25, .92); }
+.school-trpg-ending-art-panel { position: relative; min-width: 0; min-height: 0; overflow: hidden; border: 1px solid rgba(243, 202, 104, .42); background: #020812; box-shadow: inset 0 0 48px rgba(101, 236, 244, .08); }
+.school-trpg-ending-art { display: block; width: 100%; height: 100%; object-fit: contain; object-position: center; }
+.school-trpg-ending-art-shade { position: absolute; inset: 0; pointer-events: none; background: linear-gradient(180deg, transparent 62%, rgba(2, 10, 18, .66)); }
 .school-trpg-ending-screen h2 { margin: 8px 0 4px; font-size: clamp(28px, 5vw, 62px); line-height: 1.08; }
 .school-trpg-ending-screen h3 { margin: 0 0 18px; color: var(--trpg-gold); font-size: 11px; letter-spacing: .08em; }
 .school-trpg-ending-screen p { color: #b3c8cd; font-size: clamp(11px, 1.3vw, 16px); line-height: 1.8; }
@@ -456,6 +641,11 @@
 .school-trpg-ending-seal span { font-size: 9px; letter-spacing: .18em; }
 .school-trpg-ending-seal b { font-size: clamp(34px, 6vw, 72px); line-height: 1; }
 .school-trpg-ending-reward { display: inline-flex; align-items: center; margin-top: 8px; padding: 8px 11px; gap: 8px; border: 1px solid rgba(243,202,104,.35); color: var(--trpg-gold); font-size: 10px; }
+.school-trpg-ending-reward > span { display: flex; flex-direction: column; gap: 2px; }
+.school-trpg-ending-reward small { color: #9eb8be; font-size: 8px; font-weight: 500; line-height: 1.35; }
+.school-trpg-ending-cause { margin-top: 12px; padding: 9px 11px; border: 1px solid rgba(101, 236, 244, .32); border-left: 3px solid var(--trpg-cyan); background: rgba(5, 30, 43, .58); }
+.school-trpg-ending-cause > span { display: block; margin-bottom: 4px; color: var(--trpg-cyan); font-size: 8px; font-weight: 900; letter-spacing: .16em; }
+.school-trpg-ending-cause p { margin: 0; color: #c3d9dc; font-size: 10px; line-height: 1.55; }
 .school-trpg-ending-actions { display: flex; margin-top: 22px; gap: 8px; }
 
 .school-trpg-start-layout { position: relative; z-index: 1; display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(330px, .85fr); width: min(1400px, calc(100% - 48px)); min-height: 0; margin: auto; border: 1px solid rgba(101,236,244,.35); background: rgba(3, 13, 25, .84); box-shadow: 0 30px 100px rgba(0,0,0,.5); }
@@ -815,6 +1005,25 @@
   .main-mini-game-select-screen .mini-game-select-card-copy > span:last-child {
     display: none;
   }
+}
+
+.mini-game-local-mode button {
+  min-width: 0;
+  padding: 9px 12px;
+  border: 1px solid rgba(103, 232, 249, .28);
+  border-radius: 12px;
+  color: #9fb9c2;
+  background: rgba(8, 30, 43, .78);
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: .05em;
+}
+
+.mini-game-local-mode button.active {
+  border-color: #67e8f9;
+  color: #03151c;
+  background: #67e8f9;
+  box-shadow: 0 0 16px rgba(103, 232, 249, .18);
 }
 
 /* Trivia mini-games: phone landscape composition. Keep the same compact,
@@ -1197,7 +1406,7 @@
   .mini-game-scope-chess .mini-game-main {
     display: grid;
     grid-template-columns: minmax(0, 1fr) clamp(190px, 29vw, 250px);
-    grid-template-rows: auto minmax(0, 1fr);
+    grid-template-rows: auto auto minmax(0, 1fr);
     column-gap: 8px;
   }
 
@@ -1207,10 +1416,24 @@
     grid-row: 1;
   }
 
+  .mini-game-scope-go .mini-game-local-mode,
+  .mini-game-scope-chess .mini-game-local-mode {
+    grid-column: 2;
+    grid-row: 2;
+    margin: 0 0 5px;
+    gap: 4px;
+  }
+
+  .mini-game-scope-go .mini-game-local-mode button,
+  .mini-game-scope-chess .mini-game-local-mode button {
+    padding: 5px 4px;
+    font-size: 8px;
+  }
+
   .mini-game-scope-go .go-scoreboard,
   .mini-game-scope-chess .chess-scoreboard {
     grid-column: 2;
-    grid-row: 2;
+    grid-row: 3;
     align-self: start;
     margin: 0 0 5px;
   }
@@ -1229,7 +1452,7 @@
   .mini-game-scope-go .go-board-area,
   .mini-game-scope-chess .chess-board-area {
     grid-column: 1;
-    grid-row: 1 / span 2;
+    grid-row: 1 / span 3;
     min-width: 0;
     min-height: 0;
     justify-content: center;
@@ -1262,6 +1485,8 @@
     font-size: 8px;
     line-height: 1.35;
   }
+
+  .mini-game-scope-chess .chess-lesson { display: none; }
 
   .mini-game-scope-go .go-actions {
     justify-content: stretch;
@@ -1325,12 +1550,22 @@
   }
 
   .mini-game-scope-mahjong .mahjong-hand {
+    display: grid;
     grid-column: 1 / -1;
     min-width: 0;
     margin: 0;
     gap: 3px;
+    grid-template-columns: repeat(8, minmax(0, 1fr));
     flex-wrap: nowrap;
     justify-content: center;
+  }
+
+  .mini-game-scope-mahjong .mahjong-hand.mahjong-hand-count-13 {
+    grid-template-columns: repeat(13, minmax(0, 1fr));
+  }
+
+  .mini-game-scope-mahjong .mahjong-hand.mahjong-hand-count-14 {
+    grid-template-columns: repeat(14, minmax(0, 1fr));
   }
 
   .mini-game-scope-mahjong .mahjong-hand button {
@@ -1338,7 +1573,7 @@
     width: auto;
     min-width: 0;
     height: clamp(48px, 13dvh, 66px);
-    max-width: 48px;
+    max-width: none;
     padding: 2px;
     font-size: 12px;
   }
@@ -1392,6 +1627,70 @@
     padding: 6px;
     font-size: 8px;
     line-height: 1.35;
+  }
+
+  /* The mode picker and run status are part of the play area so the
+     landscape layout keeps a single viewport instead of pushing controls
+     below the fold. */
+  .mini-game-scope-mahjong .mahjong-play-area {
+    grid-template-rows: auto auto auto auto auto auto auto minmax(0, 1fr);
+  }
+
+  .mini-game-scope-mahjong .mahjong-mode-switch {
+    grid-column: 1 / -1;
+    grid-row: 1;
+    margin: 0;
+    padding: 4px;
+  }
+
+  .mini-game-scope-mahjong .mahjong-advance-status {
+    grid-column: 1 / -1;
+    grid-row: 2;
+    margin: 0;
+    padding: 4px 6px;
+  }
+
+  .mini-game-scope-mahjong .mahjong-instruction {
+    grid-row: 3;
+  }
+
+  .mini-game-scope-mahjong .mahjong-suit-legend {
+    grid-column: 1 / -1;
+    grid-row: 4;
+    margin: 0;
+    gap: 3px;
+  }
+
+  .mini-game-scope-mahjong .mahjong-hand {
+    grid-row: 5;
+  }
+
+  .mini-game-scope-mahjong .mahjong-actions,
+  .mini-game-scope-mahjong .mahjong-drawn {
+    grid-row: 6;
+  }
+
+  .mini-game-scope-mahjong .mahjong-recommendation,
+  .mini-game-scope-mahjong .mahjong-info {
+    grid-row: 7;
+  }
+
+  .mini-game-scope-mahjong .mahjong-reward-panel,
+  .mini-game-scope-mahjong .mahjong-run-complete,
+  .mini-game-scope-mahjong .mahjong-run-failed {
+    grid-column: 1 / -1;
+    grid-row: 8;
+    min-width: 0;
+    max-height: 22dvh;
+    overflow-y: auto;
+    margin: 0;
+    padding: 5px;
+  }
+
+  .mini-game-scope-mahjong .mahjong-reward-panel button {
+    padding: 5px;
+    font-size: 8px;
+    line-height: 1.25;
   }
 }
 
@@ -13476,6 +13775,89 @@ textarea {
   line-height: 1.75;
 }
 
+.placement-tcg-effect-terms {
+  margin: 18px 0 4px;
+  padding: 12px;
+  border: 1px solid rgba(94, 246, 255, .2);
+  background: rgba(3, 20, 31, .56);
+}
+
+.placement-tcg-effect-terms-title {
+  margin: 0 0 9px;
+  color: var(--tcg-cyan);
+  font-size: 10px;
+  font-weight: 950;
+  letter-spacing: .12em;
+}
+
+.placement-tcg-term-chip {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 3px;
+  min-width: 88px;
+  margin: 0 6px 6px 0;
+  padding: 7px 9px;
+  border: 1px solid rgba(94, 246, 255, .35);
+  color: #e4fbff;
+  background: rgba(94, 246, 255, .08);
+  text-align: left;
+  transition: border-color .15s ease, background .15s ease, transform .15s ease;
+}
+
+.placement-tcg-term-chip:hover,
+.placement-tcg-term-chip:focus-visible {
+  border-color: var(--tcg-cyan);
+  background: rgba(94, 246, 255, .18);
+  transform: translateY(-1px);
+}
+
+.placement-tcg-term-chip span {
+  font-size: 11px;
+  font-weight: 800;
+}
+
+.placement-tcg-term-chip small {
+  color: #76a7b1;
+  font-size: 7px;
+  font-weight: 900;
+  letter-spacing: .09em;
+}
+
+.placement-tcg-term-modal-backdrop {
+  position: fixed;
+  z-index: 120;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  background: rgba(0, 4, 12, .72);
+  backdrop-filter: blur(5px);
+}
+
+.placement-tcg-term-modal {
+  position: relative;
+  width: min(420px, 92vw);
+  padding: 26px 26px 22px;
+  border: 1px solid var(--tcg-cyan);
+  color: #ecfbff;
+  background: linear-gradient(145deg, rgba(12, 35, 51, .99), rgba(2, 9, 20, .99));
+  box-shadow: 0 0 50px rgba(28, 158, 188, .28), 0 24px 70px rgba(0, 0, 0, .72);
+}
+
+.placement-tcg-term-modal h3 {
+  margin: 8px 0 12px;
+  color: #f5fdff;
+  font-size: clamp(22px, 4vw, 30px);
+}
+
+.placement-tcg-term-modal > p:not(.placement-tcg-eyebrow) {
+  margin: 0;
+  color: #b7d0d5;
+  font-size: 13px;
+  line-height: 1.8;
+}
+
 .placement-tcg-inspect-copy dl {
   margin-top: 20px;
 }
@@ -13664,6 +14046,284 @@ textarea {
   display: flex;
   flex-wrap: wrap;
   justify-content: center;
+}
+
+.placement-tcg-edition-tabs {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+
+.placement-tcg-edition-tabs.is-title {
+  max-width: 620px;
+  margin: 12px auto 2px;
+}
+
+.placement-tcg-edition-tabs button {
+  padding: 10px 8px;
+  border: 1px solid rgba(94, 246, 255, .25);
+  color: #729aa5;
+  background: rgba(3, 18, 31, .86);
+  font-size: 9px;
+  font-weight: 950;
+  letter-spacing: .08em;
+}
+
+.placement-tcg-edition-tabs button.active {
+  border-color: var(--tcg-cyan);
+  color: #021016;
+  background: var(--tcg-cyan);
+  box-shadow: 0 0 22px rgba(94, 246, 255, .22);
+}
+
+/* Keep every title action inside the browser viewport. The previous flex row
+   kept each button's 190px minimum, so the collection action wrapped below
+   the visible title screen on narrower desktop windows. */
+.placement-tcg-shell.is-start .placement-tcg-start-overlay {
+  box-sizing: border-box;
+  width: min(760px, calc(100vw - 32px));
+  max-width: 100%;
+  min-width: 0;
+}
+
+.placement-tcg-shell.is-start .placement-tcg-start-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  width: min(100%, 620px);
+  min-width: 0;
+  margin-inline: auto;
+  gap: 8px;
+}
+
+.placement-tcg-shell.is-start .placement-tcg-start-actions button {
+  box-sizing: border-box;
+  width: 100%;
+  min-width: 0;
+  margin: 0;
+  padding: 11px 10px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.placement-tcg-shell.is-start .placement-tcg-start-actions .placement-tcg-text-button {
+  grid-column: 1 / -1;
+}
+
+.placement-tcg-edition-tabs button small {
+  display: block;
+  margin-top: 3px;
+  font-size: 6px;
+  letter-spacing: .12em;
+}
+
+.placement-tcg-manager {
+  position: relative;
+  z-index: 4;
+  width: min(1180px, calc(100vw - 20px));
+  height: calc(100dvh - 20px);
+  margin: 10px auto;
+  display: grid;
+  grid-template-rows: auto auto auto auto minmax(0, 1fr);
+  overflow: hidden;
+  border: 1px solid rgba(94, 246, 255, .45);
+  color: #e8fbff;
+  background: rgba(2, 11, 23, .96);
+  box-shadow: 0 25px 80px rgba(0, 0, 0, .68);
+}
+
+.placement-tcg-manager > header {
+  min-height: 60px;
+  display: grid;
+  grid-template-columns: 130px 1fr 130px;
+  align-items: center;
+  padding: 8px 14px;
+  border-bottom: 1px solid rgba(94, 246, 255, .2);
+}
+
+.placement-tcg-manager > header button,
+.placement-tcg-deck-summary button {
+  padding: 9px 12px;
+  border: 1px solid rgba(94, 246, 255, .5);
+  color: var(--tcg-cyan);
+  background: rgba(6, 35, 50, .85);
+  font-size: 9px;
+  font-weight: 950;
+}
+
+.placement-tcg-manager > header div span,
+.placement-tcg-manager > header div b {
+  display: block;
+  text-align: center;
+}
+
+.placement-tcg-manager > header div span {
+  color: #5a929e;
+  font-size: 7px;
+  letter-spacing: .16em;
+}
+
+.placement-tcg-manager > header div b {
+  margin-top: 3px;
+  font-size: 18px;
+  letter-spacing: .08em;
+}
+
+.placement-tcg-manager > header > strong {
+  color: var(--tcg-gold);
+  text-align: right;
+  font-size: 13px;
+}
+
+.placement-tcg-manager > .placement-tcg-edition-tabs {
+  padding: 8px 12px 2px;
+}
+
+.placement-tcg-deck-summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 12px;
+  color: #8db2ba;
+  font-size: 9px;
+}
+
+.placement-tcg-deck-summary > span { margin-right: auto; }
+.placement-tcg-deck-summary > b { color: var(--tcg-gold); }
+
+.placement-tcg-deck-strip {
+  min-height: 94px;
+  display: flex;
+  gap: 6px;
+  padding: 8px 12px;
+  overflow-x: auto;
+  border-block: 1px solid rgba(255, 255, 255, .07);
+  background: rgba(0, 0, 0, .22);
+}
+
+.placement-tcg-deck-strip > button,
+.placement-tcg-collection-grid > button {
+  position: relative;
+  padding: 0;
+  border: 1px solid rgba(94, 246, 255, .18);
+  color: #d8faff;
+  background: rgba(8, 28, 41, .92);
+  text-align: left;
+}
+
+.placement-tcg-deck-strip > button {
+  flex: 0 0 88px;
+  display: grid;
+  grid-template-rows: 60px 1fr;
+}
+
+.placement-tcg-deck-strip > button > span,
+.placement-tcg-collection-grid > button > span {
+  overflow: hidden;
+  padding: 4px 5px;
+  font-size: 7px;
+  font-weight: 900;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.placement-tcg-collection-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(105px, 1fr));
+  gap: 8px;
+  padding: 10px 12px 18px;
+  overflow-y: auto;
+}
+
+.placement-tcg-collection-grid > button {
+  min-height: 132px;
+  display: grid;
+  grid-template-rows: 88px auto auto;
+}
+
+.placement-tcg-collection-grid > button .placement-tcg-card-art,
+.placement-tcg-deck-strip > button .placement-tcg-card-art {
+  width: 100%;
+  height: 100%;
+}
+
+.placement-tcg-collection-grid > button small {
+  padding: 0 5px 5px;
+  color: #5f8992;
+  font-size: 6px;
+  letter-spacing: .07em;
+}
+
+.placement-tcg-collection-grid > button.locked .placement-tcg-card-art {
+  filter: grayscale(1) brightness(.18);
+}
+
+.placement-tcg-collection-grid > button:disabled { opacity: .58; }
+
+.placement-tcg-finisher {
+  position: fixed;
+  z-index: 150;
+  inset: 0;
+  display: grid;
+  grid-template-columns: minmax(220px, 38vw) minmax(260px, 1fr);
+  align-items: center;
+  gap: 4vw;
+  padding: 8vh 9vw;
+  overflow: hidden;
+  pointer-events: none;
+  color: white;
+  background: radial-gradient(circle at 28% 50%, rgba(94, 246, 255, .26), transparent 42%), rgba(0, 3, 12, .9);
+  animation: placement-tcg-finisher-in 1.65s both;
+}
+
+.placement-tcg-finisher .placement-tcg-card-art {
+  width: 100%;
+  height: min(70vh, 620px);
+  border: 2px solid var(--tcg-gold);
+  box-shadow: 0 0 70px rgba(246, 208, 111, .3);
+}
+
+.placement-tcg-finisher > div:last-child span,
+.placement-tcg-finisher > div:last-child b,
+.placement-tcg-finisher > div:last-child em { display: block; }
+.placement-tcg-finisher > div:last-child span { color: var(--tcg-cyan); font-size: clamp(12px, 2vw, 22px); letter-spacing: .25em; }
+.placement-tcg-finisher > div:last-child b { margin-top: 12px; font-size: clamp(28px, 5vw, 72px); line-height: .95; }
+.placement-tcg-finisher > div:last-child em { color: var(--tcg-red); font-size: clamp(48px, 11vw, 150px); font-style: normal; font-weight: 950; letter-spacing: -.04em; }
+
+@keyframes placement-tcg-finisher-in {
+  0% { opacity: 0; transform: scale(1.08); }
+  14%, 72% { opacity: 1; transform: scale(1); }
+  100% { opacity: 0; transform: scale(.98); }
+}
+
+@media (max-width: 700px) {
+  .placement-tcg-manager {
+    width: 100vw;
+    height: 100dvh;
+    margin: 0;
+    border-inline: 0;
+  }
+
+  .placement-tcg-manager > header {
+    min-height: 50px;
+    grid-template-columns: 82px 1fr 82px;
+    padding: 5px 7px;
+  }
+
+  .placement-tcg-manager > header div b { font-size: 13px; }
+  .placement-tcg-manager > header > strong { font-size: 10px; }
+  .placement-tcg-deck-summary { flex-wrap: wrap; }
+  .placement-tcg-deck-summary > span { width: 100%; }
+  .placement-tcg-deck-strip { min-height: 82px; }
+  .placement-tcg-collection-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 5px; padding: 7px; }
+  .placement-tcg-collection-grid > button { min-height: 118px; grid-template-rows: 76px auto auto; }
+  .placement-tcg-finisher { grid-template-columns: 1fr; grid-template-rows: minmax(0, 62vh) auto; gap: 10px; padding: 8vh 9vw 6vh; text-align: center; }
+  .placement-tcg-finisher .placement-tcg-card-art { height: 100%; }
+  .placement-tcg-start-overlay { padding-top: max(5vh, 32px); }
+  .placement-tcg-start-mark { width: 68px; height: 68px; margin-bottom: 10px; }
+  .placement-tcg-start-overlay h1 { margin-block: 4px 9px; }
+  .placement-tcg-start-specs { margin-top: 12px; }
+  .placement-tcg-edition-tabs.is-title { margin-top: 7px; }
 }
 
 @keyframes placement-tcg-pulse {
@@ -14449,6 +15109,36 @@ textarea {
   margin-top: 24px;
 }
 
+.shogi-play-mode-tabs {
+  width: 100%;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 6px;
+  margin-top: 8px;
+}
+
+.shogi-play-mode-tabs button {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 3px;
+  padding: 10px 12px;
+  border: 1px solid rgba(121, 191, 203, .28);
+  color: #8da9ad;
+  background: rgba(9, 29, 34, .72);
+  text-align: left;
+}
+
+.shogi-play-mode-tabs button.active {
+  border-color: #79bfcb;
+  color: #e8fdff;
+  background: rgba(23, 82, 94, .55);
+  box-shadow: 0 0 18px rgba(121, 191, 203, .12);
+}
+
+.shogi-play-mode-tabs b { font-size: 10px; letter-spacing: .11em; }
+.shogi-play-mode-tabs span { font-size: 8px; line-height: 1.35; }
+
 .shogi-mini-mode-tabs button {
   display: flex;
   flex-direction: column;
@@ -14778,7 +15468,8 @@ textarea {
   scrollbar-width: thin;
 }
 
-.shogi-opponent-hand-list > span {
+.shogi-opponent-hand-list > span,
+.shogi-opponent-hand-list > button {
   display: inline-flex;
   align-items: center;
   flex: 0 0 auto;
@@ -14791,21 +15482,32 @@ textarea {
   font-size: 8px;
 }
 
-.shogi-opponent-hand-list > span .shogi-piece-icon {
+.shogi-opponent-hand-list > button:disabled { opacity: 1; }
+.shogi-opponent-hand-list > button:not(:disabled) { cursor: pointer; }
+.shogi-opponent-hand-list > button.selected {
+  border-color: #79bfcb;
+  box-shadow: inset 0 0 0 1px #79bfcb;
+}
+
+.shogi-opponent-hand-list > span .shogi-piece-icon,
+.shogi-opponent-hand-list > button .shogi-piece-icon {
   width: 19px;
 }
 
-.shogi-opponent-hand-list > span .shogi-piece-icon .shogi-piece-glyph {
+.shogi-opponent-hand-list > span .shogi-piece-icon .shogi-piece-glyph,
+.shogi-opponent-hand-list > button .shogi-piece-icon .shogi-piece-glyph {
   font-size: 10px;
 }
 
-.shogi-opponent-hand-list > span b {
+.shogi-opponent-hand-list > span b,
+.shogi-opponent-hand-list > button b {
   font-size: 8px;
   font-weight: 800;
   white-space: nowrap;
 }
 
-.shogi-opponent-hand-list > span em {
+.shogi-opponent-hand-list > span em,
+.shogi-opponent-hand-list > button em {
   color: #a98f91;
   font-size: 8px;
   font-style: normal;
@@ -15321,16 +16023,21 @@ textarea {
   }
   .shogi-opponent-hand-heading b { font-size: 12px; }
   .shogi-opponent-hand-list { gap: 4px; }
-  .shogi-opponent-hand-list > span {
+  .shogi-opponent-hand-list > span,
+  .shogi-opponent-hand-list > button {
     min-height: 22px;
     gap: 3px;
     padding: 1px 4px 1px 2px;
     font-size: 7px;
   }
-  .shogi-opponent-hand-list > span .shogi-piece-icon { width: 17px; }
-  .shogi-opponent-hand-list > span .shogi-piece-icon .shogi-piece-glyph { font-size: 9px; }
+  .shogi-opponent-hand-list > span .shogi-piece-icon,
+  .shogi-opponent-hand-list > button .shogi-piece-icon { width: 17px; }
+  .shogi-opponent-hand-list > span .shogi-piece-icon .shogi-piece-glyph,
+  .shogi-opponent-hand-list > button .shogi-piece-icon .shogi-piece-glyph { font-size: 9px; }
   .shogi-opponent-hand-list > span b,
+  .shogi-opponent-hand-list > button b,
   .shogi-opponent-hand-list > span em,
+  .shogi-opponent-hand-list > button em,
   .shogi-opponent-hand-list > small { font-size: 7px; }
   .shogi-mini-hand-panel {
     width: 100%;
@@ -15349,7 +16056,8 @@ textarea {
   .shogi-piece-modal-grid { grid-template-columns: 1fr; }
   .shogi-standard-grid { grid-template-columns: repeat(4, 1fr); }
   .shogi-mini-start { padding-top: 40px; }
-  .shogi-mini-mode-tabs { grid-template-columns: 1fr; }
+  .shogi-mini-mode-tabs,
+  .shogi-play-mode-tabs { grid-template-columns: 1fr; }
   .shogi-mini-start-stats span { min-width: 94px; padding-inline: 6px; font-size: 7px; }
   .shogi-mini-start-stats b { font-size: 15px; }
 }
@@ -15413,6 +16121,7 @@ textarea {
   }
 
   .shogi-mini-mode-tabs,
+  .shogi-play-mode-tabs,
   .shogi-stage-picker,
   .shogi-mini-start-stats,
   .shogi-mini-start-actions {
@@ -15420,11 +16129,21 @@ textarea {
   }
 
   .shogi-mini-mode-tabs {
-    grid-row: 1 / span 2;
+    grid-row: 1;
     align-self: end;
     margin-top: 0;
     gap: 5px;
   }
+
+  .shogi-play-mode-tabs {
+    grid-row: 2;
+    margin-top: 0;
+    gap: 4px;
+  }
+
+  .shogi-play-mode-tabs button { padding: 6px 8px; }
+  .shogi-play-mode-tabs b { font-size: 8px; }
+  .shogi-play-mode-tabs span { font-size: 7px; }
 
   .shogi-mini-mode-tabs button {
     gap: 3px;
@@ -15618,17 +16337,22 @@ textarea {
 
   .shogi-opponent-hand-list { gap: 3px; }
 
-  .shogi-opponent-hand-list > span {
+  .shogi-opponent-hand-list > span,
+  .shogi-opponent-hand-list > button {
     min-height: 19px;
     gap: 2px;
     padding: 1px 3px 1px 2px;
     font-size: 6px;
   }
 
-  .shogi-opponent-hand-list > span .shogi-piece-icon { width: 15px; }
-  .shogi-opponent-hand-list > span .shogi-piece-icon .shogi-piece-glyph { font-size: 8px; }
+  .shogi-opponent-hand-list > span .shogi-piece-icon,
+  .shogi-opponent-hand-list > button .shogi-piece-icon { width: 15px; }
+  .shogi-opponent-hand-list > span .shogi-piece-icon .shogi-piece-glyph,
+  .shogi-opponent-hand-list > button .shogi-piece-icon .shogi-piece-glyph { font-size: 8px; }
   .shogi-opponent-hand-list > span b,
+  .shogi-opponent-hand-list > button b,
   .shogi-opponent-hand-list > span em,
+  .shogi-opponent-hand-list > button em,
   .shogi-opponent-hand-list > small { font-size: 6px; }
 
   .shogi-mini-status {
@@ -16050,5 +16774,726 @@ textarea {
     object-fit: contain;
     object-position: center;
     filter: drop-shadow(0 12px 24px rgba(0, 0, 0, .72));
+  }
+}
+
+/* Mini-game hub viewport flex layout.
+   Keep the title and return action as fixed flex rows while the game grid
+   absorbs the remaining viewport height.  This prevents the centered
+   min-height panel from pushing the header above the browser viewport on
+   desktop fullscreen and keeps the same layout usable on short devices. */
+.main-mini-game-select-screen {
+  box-sizing: border-box;
+  height: 100dvh !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+}
+
+.main-mini-game-select-screen .mini-game-select-scroll {
+  box-sizing: border-box;
+  display: flex;
+  flex: 1 1 auto;
+  height: 100% !important;
+  min-height: 0 !important;
+  overflow: hidden !important;
+  padding: clamp(6px, 1.5dvh, 20px) clamp(8px, 2vw, 32px) !important;
+}
+
+.main-mini-game-select-screen .mini-game-select-panel {
+  box-sizing: border-box;
+  display: flex;
+  flex: 1 1 auto;
+  align-items: stretch !important;
+  justify-content: flex-start !important;
+  width: min(100%, 72rem) !important;
+  height: 100% !important;
+  min-height: 0 !important;
+  max-width: none !important;
+  overflow: hidden !important;
+  padding: clamp(2px, 1dvh, 14px) 0 !important;
+}
+
+.main-mini-game-select-screen .mini-game-select-title {
+  flex: 0 0 auto;
+  align-self: center;
+  margin: 0 0 clamp(4px, 1dvh, 12px) !important;
+  font-size: clamp(1rem, 2.2vw, 2rem) !important;
+  line-height: 1.1;
+}
+
+.main-mini-game-select-screen .mini-game-select-title svg {
+  width: clamp(1rem, 2.2vw, 1.75rem);
+  height: clamp(1rem, 2.2vw, 1.75rem);
+  margin-right: clamp(0.3rem, 0.6vw, 0.75rem);
+}
+
+.main-mini-game-select-screen .mini-game-select-hint {
+  flex: 0 0 auto;
+  max-width: 100%;
+  margin: 0 0 clamp(5px, 1dvh, 14px) !important;
+  line-height: 1.2;
+  text-align: center;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.main-mini-game-select-screen .mini-game-select-grid {
+  display: grid;
+  flex: 1 1 auto !important;
+  width: 100% !important;
+  min-height: 0 !important;
+  grid-template-columns: repeat(3, minmax(0, 1fr)) !important;
+  grid-template-rows: repeat(5, minmax(0, 1fr));
+  grid-auto-rows: minmax(0, 1fr);
+  gap: clamp(4px, 0.7vw, 12px) !important;
+  margin: 0 0 clamp(5px, 1dvh, 12px) !important;
+  padding: 0 !important;
+  overflow: hidden;
+}
+
+.main-mini-game-select-screen .mini-game-select-card {
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: row !important;
+  align-items: center;
+  justify-content: flex-start !important;
+  min-width: 0;
+  min-height: 0 !important;
+  height: auto !important;
+  padding: clamp(4px, 0.8dvh, 12px) clamp(5px, 0.65vw, 12px) !important;
+  border-width: clamp(1px, 0.12vw, 3px) !important;
+  border-radius: clamp(0.45rem, 0.7vw, 0.85rem);
+  gap: clamp(4px, 0.55vw, 10px);
+}
+
+.main-mini-game-select-screen .mini-game-select-card-icon {
+  box-sizing: border-box;
+  flex: 0 0 auto;
+  width: clamp(2rem, 6dvh, 5rem) !important;
+  height: clamp(2rem, 6dvh, 5rem) !important;
+  margin: 0 !important;
+  padding: clamp(3px, 0.45vw, 9px) !important;
+}
+
+.main-mini-game-select-screen .mini-game-select-card-icon > div {
+  width: 100% !important;
+  height: 100% !important;
+}
+
+.main-mini-game-select-screen .mini-game-select-card-copy {
+  flex: 1 1 auto;
+  min-width: 0;
+  align-items: flex-start !important;
+  text-align: left !important;
+}
+
+.main-mini-game-select-screen .mini-game-select-card-copy .mini-game-title {
+  min-width: 0;
+  margin-bottom: clamp(1px, 0.25dvh, 4px) !important;
+  font-size: clamp(0.62rem, 1.25vw, 1.05rem) !important;
+  line-height: 1.08;
+}
+
+.main-mini-game-select-screen .mini-game-select-card-copy .mini-game-title-line {
+  display: block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.main-mini-game-select-screen .mini-game-select-card-copy > span:last-child {
+  display: -webkit-box;
+  max-width: 100%;
+  overflow: hidden;
+  font-size: clamp(0.4rem, 0.75vw, 0.68rem) !important;
+  line-height: 1.18;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.main-mini-game-select-screen .mini-game-select-card > .absolute {
+  right: 0;
+  font-size: clamp(0.38rem, 0.55vw, 0.62rem) !important;
+  line-height: 1.1;
+  padding: 1px clamp(3px, 0.35vw, 7px);
+}
+
+.main-mini-game-select-screen .mini-game-select-back {
+  flex: 0 0 auto;
+  align-self: center;
+  margin: 0 !important;
+  padding: clamp(3px, 0.55dvh, 9px) 4px !important;
+  font-size: clamp(0.62rem, 1vw, 0.95rem) !important;
+  line-height: 1.1;
+}
+
+.main-mini-game-select-screen .mini-game-select-back svg {
+  width: clamp(0.75rem, 1.5vw, 1.2rem);
+  height: clamp(0.75rem, 1.5vw, 1.2rem);
+  margin-right: clamp(0.2rem, 0.35vw, 0.5rem);
+}
+
+@media (max-width: 720px) {
+  .main-mini-game-select-screen .mini-game-select-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    grid-template-rows: repeat(7, minmax(0, 1fr));
+  }
+
+  .main-mini-game-select-screen .mini-game-select-card {
+    flex-direction: column !important;
+    justify-content: center !important;
+    gap: 2px;
+    padding: 4px !important;
+  }
+
+  .main-mini-game-select-screen .mini-game-select-card-icon {
+    width: clamp(1.75rem, 8dvh, 3.5rem) !important;
+    height: clamp(1.75rem, 8dvh, 3.5rem) !important;
+  }
+
+  .main-mini-game-select-screen .mini-game-select-card-copy {
+    align-items: center !important;
+    text-align: center !important;
+  }
+}
+
+@media (max-height: 620px) {
+  .main-mini-game-select-screen .mini-game-select-scroll {
+    padding-block: 4px !important;
+  }
+
+  .main-mini-game-select-screen .mini-game-select-panel {
+    padding-block: 2px !important;
+  }
+
+  .main-mini-game-select-screen .mini-game-select-hint {
+    display: none;
+  }
+
+  .main-mini-game-select-screen .mini-game-select-grid {
+    gap: 3px !important;
+    margin-bottom: 3px !important;
+  }
+
+  .main-mini-game-select-screen .mini-game-select-card-copy > span:last-child {
+    -webkit-line-clamp: 1;
+  }
+}
+
+@media (max-height: 430px) {
+  .main-mini-game-select-screen .mini-game-select-title {
+    font-size: 0.92rem !important;
+  }
+
+  .main-mini-game-select-screen .mini-game-select-card {
+    padding: 2px 3px !important;
+  }
+
+  .main-mini-game-select-screen .mini-game-select-card-icon {
+    width: 1.8rem !important;
+    height: 1.8rem !important;
+    padding: 2px !important;
+  }
+
+  .main-mini-game-select-screen .mini-game-select-card-copy > span:last-child {
+    display: none;
+  }
+}
+
+/* Final iOS portrait overrides. These are intentionally last so the compact
+   safe-area and four-column headers win over older generic phone rules. */
+@media (orientation: portrait) and (max-width: 700px) {
+  .school-trpg-campaign-shell {
+    box-sizing: border-box;
+    height: 100dvh;
+    min-height: 0;
+    padding-top: max(env(safe-area-inset-top), var(--ios-ui-safe-top, 0px));
+    padding-right: max(env(safe-area-inset-right), var(--ios-ui-safe-right, 0px));
+    padding-bottom: max(env(safe-area-inset-bottom), var(--ios-ui-safe-bottom, 0px));
+    padding-left: max(env(safe-area-inset-left), var(--ios-ui-safe-left, 0px));
+  }
+  .school-trpg-campaign-shell.is-playing .school-trpg-campaign-header { grid-template-columns: minmax(0, 84px) minmax(0, 1fr) minmax(0, 74px) minmax(0, 40px); }
+  .school-trpg-campaign-shell.is-playing .school-trpg-campaign-header > span { display: block; overflow: hidden; color: var(--trpg-cyan); font-size: 6px; font-weight: 900; letter-spacing: .08em; text-align: right; text-overflow: ellipsis; white-space: nowrap; }
+  .school-trpg-campaign-main { padding: 5px 7px; }
+  .school-trpg-campaign-layout { grid-template-rows: minmax(0, 44%) minmax(0, 56%); gap: 0; }
+  .school-trpg-command-panel { min-height: 0; padding: 8px 10px; overflow-x: hidden; overflow-y: auto; }
+  .school-trpg-command-panel h2 { margin: 3px 0 5px; font-size: 17px; line-height: 1.18; }
+  .school-trpg-command-panel > p { margin: 0; font-size: 8px; line-height: 1.45; }
+  .school-trpg-map-heading { top: 11px; left: 14px; }
+  .school-trpg-map-heading b { font-size: 15px; }
+  .school-trpg-map-node { grid-template-columns: 24px minmax(0, auto); min-width: 80px; min-height: 34px; padding: 3px 5px; }
+  .school-trpg-map-node-icon { width: 21px; height: 21px; }
+  .school-trpg-map-node b { font-size: 8px; }
+  .school-trpg-map-node small { font-size: 5px; }
+  .school-trpg-location-metrics { margin: 7px 0 4px; }
+  .school-trpg-location-metrics span { padding: 6px; font-size: 7px; }
+  .school-trpg-location-state { margin-bottom: 4px; font-size: 7px; }
+  .school-trpg-location-actions { gap: 5px; }
+  .school-trpg-location-actions > button { min-height: 40px; padding: 5px 6px; font-size: 7px; }
+  .school-trpg-command-hint, .school-trpg-rest-hint { margin: 4px 0; font-size: 6px; line-height: 1.35; }
+  .school-trpg-campaign-stats { margin-top: 4px; }
+  .school-trpg-campaign-stats > div { padding: 4px 2px; }
+  .school-trpg-campaign-stats span { font-size: 5px; }
+  .school-trpg-campaign-stats b { font-size: 11px; }
+  .school-trpg-discovery-shelf { margin-top: 5px; padding-top: 5px; }
+  .school-trpg-discovery-shelf-heading { margin-bottom: 4px; font-size: 5px; }
+  .school-trpg-discovery-shelf-heading b { min-width: 13px; padding: 1px 3px; font-size: 6px; }
+  .school-trpg-discovery-shelf-list { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 3px; }
+  .school-trpg-discovery-shelf-item { padding: 2px; gap: 4px; }
+  .school-trpg-discovery-shelf-art { flex-basis: 20px; width: 20px; height: 20px; }
+  .school-trpg-discovery-shelf-item b { font-size: 6px; }
+  .school-trpg-discovery-shelf-item small, .school-trpg-discovery-empty { font-size: 5px; }
+  .school-trpg-discovery-shelf.is-compact { margin-top: 5px; padding-top: 4px; }
+  .school-trpg-scene-illustration { top: 5%; right: 5%; width: min(44%, 220px); height: 54%; }
+  .school-trpg-scene-caption { right: 10px; bottom: 9px; left: 10px; padding: 6px 8px; }
+  .school-trpg-scene-caption b { font-size: 16px; }
+  .school-trpg-choice-list { gap: 5px; margin-top: 6px; }
+  .school-trpg-choice-list > button { min-height: 43px; padding: 4px 6px; gap: 5px; }
+  .school-trpg-choice-list > button b { font-size: 8px; }
+  .school-trpg-choice-list > button small, .school-trpg-choice-list > button em { font-size: 5px; }
+  .school-trpg-roll-formula { margin: 7px 0; gap: 4px; }
+  .school-trpg-roll-formula span, .school-trpg-roll-formula strong { padding: 5px; font-size: 6px; }
+  .school-trpg-combat-actions { margin-top: 5px; gap: 4px; }
+  .school-trpg-combat-actions button { min-height: 39px; padding: 4px; }
+  .school-trpg-combat-actions button b { font-size: 7px; }
+  .school-trpg-combat-actions button small, .school-trpg-combat-log p { font-size: 5px; }
+  .school-trpg-reward-heading { margin-bottom: 8px; }
+  .school-trpg-reward-heading h2 { font-size: 21px; }
+  .school-trpg-reward-cards { gap: 6px; padding: 0 7px; }
+  .school-trpg-reward-cards > button { min-height: 0; height: 250px; padding: 6px; }
+  .school-trpg-reward-art { height: 96px; }
+  .school-trpg-reward-cards > button > b { margin: 6px 2px 2px; font-size: 9px; }
+  .school-trpg-reward-cards > button > p { margin-inline: 2px; font-size: 6px; }
+  .school-trpg-ending-screen { padding: 12px 14px; }
+  .school-trpg-ending-screen > section { width: 100%; padding: 14px 16px; }
+  .school-trpg-ending-screen h2 { font-size: 28px; }
+  .school-trpg-ending-screen p { font-size: 9px; line-height: 1.5; }
+  .school-trpg-ending-seal { top: 6%; right: 7%; width: 68px; }
+  .school-trpg-campaign-footer { min-height: 28px; padding: 2px 8px max(2px, env(safe-area-inset-bottom)); }
+}
+
+@media (orientation: portrait) and (max-width: 700px) {
+  .shogi-mini-shell { box-sizing: border-box; height: 100dvh; padding-top: max(env(safe-area-inset-top), var(--ios-ui-safe-top, 0px)); padding-right: max(env(safe-area-inset-right), var(--ios-ui-safe-right, 0px)); padding-bottom: max(env(safe-area-inset-bottom), var(--ios-ui-safe-bottom, 0px)); padding-left: max(env(safe-area-inset-left), var(--ios-ui-safe-left, 0px)); }
+  .shogi-mini-shell.is-playing { overflow: hidden; }
+  .shogi-mini-header { position: relative; top: auto; height: 50px; min-height: 50px; grid-template-columns: 62px minmax(0, 1fr) 62px; gap: 6px; padding: 0 7px; }
+  .shogi-mini-header button { width: 62px; height: 32px; font-size: 8px; }
+  .shogi-mini-layout { box-sizing: border-box; height: calc(100% - 50px); min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) auto; gap: 5px; padding: 5px 7px 6px; overflow: hidden; }
+  .shogi-mini-side-panel { display: none; }
+  .shogi-mini-board-wrap { grid-column: 1; grid-row: 1; align-self: center; width: min(100%, 48vh); max-height: 100%; margin: 0 auto; padding: 4px; overflow: hidden; }
+  .shogi-opponent-hand { min-height: 25px; margin-bottom: 3px; padding: 2px 4px; }
+  .shogi-mini-status { min-height: 23px; height: 23px; grid-template-columns: 60px 92px minmax(0, 1fr); margin-bottom: 3px; font-size: 7px; }
+  .shogi-mini-board { width: 100%; max-width: none; gap: 2px; padding: 4px; border-width: 3px; }
+  .shogi-piece-icon.shogi-piece { width: clamp(25px, 8.8vw, 42px); }
+  .shogi-piece-icon.shogi-piece .shogi-piece-glyph { font-size: clamp(16px, 6vw, 30px); }
+  .shogi-guide-legend { gap: 6px; margin: 2px 0; font-size: 7px; }
+  .shogi-guide-legend i { width: 7px; height: 7px; border-width: 1px; }
+  .shogi-mini-message { min-height: 22px; font-size: 7px; }
+  .shogi-mini-hand-panel { grid-column: 1; grid-row: 2; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 6px; width: 100%; min-height: 0; max-height: 82px; margin: 0; padding: 5px 6px; overflow: hidden; }
+  .shogi-mini-hand-panel h2 { margin: 0; font-size: 15px; }
+  .shogi-mini-hand-panel > .shogi-mini-eyebrow { font-size: 7px; white-space: nowrap; }
+  .shogi-hand-list { min-width: 0; display: flex; flex-direction: row; gap: 4px; max-height: none; overflow-x: auto; overflow-y: hidden; }
+  .shogi-hand-list button { flex: 0 0 auto; min-width: 64px; min-height: 35px; grid-template-columns: 20px minmax(0, 1fr); gap: 3px; padding: 3px; }
+  .shogi-hand-list button em { grid-column: 2; font-size: 7px; }
+  .shogi-hand-list > p { margin: 0; font-size: 7px; line-height: 1.35; white-space: nowrap; }
+  .shogi-drop-hint { display: none; }
+  .shogi-replay-button { width: auto; min-width: 72px; margin: 0; padding: 6px 5px; font-size: 7px; white-space: nowrap; }
+}
+
+/* Ending art must sit above the opaque panel background. The old negative
+   z-index backdrop was hidden by the ending screen's own stacking context on
+   iOS WebKit, which made every prepared ending look like the fallback art. */
+.school-trpg-reward-screen {
+  isolation: isolate;
+}
+
+.school-trpg-reward-screen > .school-trpg-campaign-backdrop {
+  z-index: 0;
+}
+
+.school-trpg-reward-screen::after {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background: linear-gradient(90deg, rgba(2, 10, 18, .94) 0%, rgba(2, 10, 18, .68) 46%, rgba(2, 10, 18, .34) 100%);
+  content: "";
+}
+
+.school-trpg-reward-screen::after {
+  background: linear-gradient(180deg, rgba(2, 10, 18, .48), rgba(2, 10, 18, .8));
+}
+
+/* TRPG finale presentation: the prepared ending illustration is a dedicated
+   column, not a dimmed background. This keeps the artwork legible and gives
+   the route result an independent, scroll-safe reading column. */
+.school-trpg-ending-screen {
+  isolation: isolate;
+}
+
+.school-trpg-ending-screen::after {
+  content: none;
+}
+
+.school-trpg-ending-result-panel {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.school-trpg-ending-art-panel { position: relative; min-width: 0; min-height: 0; overflow: hidden; border: 1px solid rgba(243, 202, 104, .45); background: #06131e; }
+.school-trpg-ending-art { width: 100%; height: 100%; object-fit: cover; }
+.school-trpg-art-fallback { display: grid; place-items: center; width: 100%; height: 100%; min-height: 120px; padding: 18px; color: var(--trpg-gold); text-align: center; background: repeating-linear-gradient(135deg, rgba(243, 202, 104, .12) 0 8px, rgba(3, 14, 25, .78) 8px 16px); }
+.school-trpg-art-fallback span { max-width: 26em; font-size: 11px; line-height: 1.5; }
+.school-trpg-art-fallback-badge { position: absolute; z-index: 4; top: 7px; right: 7px; padding: 3px 5px; color: #081018; background: var(--trpg-gold); font-size: 7px; font-weight: 900; letter-spacing: .08em; }
+.school-trpg-ending-gallery { position: fixed; inset: 0; z-index: 30; display: grid; place-items: center; padding: 18px; background: rgba(0, 5, 10, .84); backdrop-filter: blur(8px); }
+.school-trpg-ending-gallery-inner { display: flex; flex-direction: column; width: min(1120px, 100%); max-height: min(90vh, 760px); padding: 18px; overflow: auto; border: 1px solid var(--trpg-cyan); background: #06131e; box-shadow: 0 24px 80px rgba(0,0,0,.5); }
+.school-trpg-ending-gallery-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 12px; }
+.school-trpg-ending-gallery-head h3 { margin: 0; color: var(--trpg-cyan); font-size: 16px; letter-spacing: .12em; }
+.school-trpg-ending-gallery-head button { width: 34px; height: 34px; color: #d9f8fb; border: 1px solid rgba(217,248,251,.4); background: transparent; font-size: 24px; line-height: 1; }
+.school-trpg-ending-gallery-grid { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 9px; margin-bottom: 14px; }
+.school-trpg-ending-gallery-grid article { min-width: 0; padding: 6px; border: 1px solid rgba(217,248,251,.24); background: rgba(2, 10, 18, .8); }
+.school-trpg-ending-gallery-grid article.is-discovered { border-color: rgba(243,202,104,.65); }
+.school-trpg-ending-gallery-art, .school-trpg-ending-gallery-lock { display: block; width: 100%; aspect-ratio: 1.35; object-fit: cover; }
+.school-trpg-ending-gallery-lock { display: grid; place-items: center; color: #6d858b; font-size: 8px; text-align: center; background: repeating-linear-gradient(135deg, rgba(109,133,139,.1) 0 7px, rgba(2,10,18,.4) 7px 14px); }
+.school-trpg-ending-gallery-grid article b { display: block; margin-top: 6px; overflow: hidden; color: #e9f6f7; font-size: 10px; text-overflow: ellipsis; white-space: nowrap; }
+.school-trpg-ending-gallery-grid article small { display: block; margin-top: 3px; color: #85a8ad; font-size: 8px; line-height: 1.35; }
+.school-trpg-combat-context { display: flex; flex-wrap: wrap; gap: 5px; margin: 8px 0; }
+.school-trpg-combat-context span { padding: 4px 6px; color: #82a6ad; border: 1px solid rgba(130,166,173,.25); font-size: 8px; letter-spacing: .05em; }
+.school-trpg-combat-context b { color: var(--trpg-gold); }
+
+.school-trpg-ending-art-panel .school-trpg-ending-seal {
+  top: 18px;
+  right: 18px;
+}
+
+.school-trpg-guardian {
+  object-fit: contain;
+  object-position: center bottom;
+}
+
+.school-trpg-campaign-layout.event-mode.archetype-dialogue .school-trpg-scene-caption,
+.school-trpg-campaign-layout.event-mode.archetype-puzzle .school-trpg-scene-caption,
+.school-trpg-campaign-layout.event-mode.archetype-chase .school-trpg-scene-caption,
+.school-trpg-campaign-layout.event-mode.archetype-defense .school-trpg-scene-caption {
+  border-left-color: #c487ff;
+}
+
+.school-trpg-campaign-layout.event-mode.archetype-chase .school-trpg-scene-caption {
+  border-left-color: var(--trpg-rose);
+}
+
+.school-trpg-campaign-layout.event-mode.archetype-defense .school-trpg-scene-caption {
+  border-left-color: var(--trpg-gold);
+}
+
+@media (orientation: portrait) and (max-width: 700px) {
+  /* The shell already owns the iOS top inset. Applying the inset again as
+     header padding pushed both controls outside the fixed 54px header row. */
+  .school-trpg-campaign-header {
+    box-sizing: border-box;
+    height: 54px;
+    min-height: 54px;
+    padding-top: 6px !important;
+    padding-bottom: 6px !important;
+  }
+
+  .school-trpg-ending-screen {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, 46%) minmax(0, 54%);
+    padding: 6px;
+    gap: 6px;
+  }
+
+  .school-trpg-ending-art-panel {
+    min-height: 0;
+  }
+
+  .school-trpg-ending-screen > .school-trpg-ending-result-panel {
+    width: 100%;
+    padding: 10px;
+    border-top: 2px solid var(--trpg-cyan);
+    border-left-width: 0;
+  }
+
+  .school-trpg-ending-screen h2 {
+    margin: 4px 0 3px;
+    font-size: 18px;
+  }
+
+  .school-trpg-ending-screen h3 {
+    margin-bottom: 6px;
+    font-size: 6px;
+    line-height: 1.35;
+  }
+
+  .school-trpg-ending-screen p {
+    margin: 0;
+    font-size: 7px;
+    line-height: 1.45;
+  }
+
+  .school-trpg-ending-cause {
+    margin-top: 5px;
+    padding: 5px 6px;
+  }
+
+  .school-trpg-ending-cause > span {
+    margin-bottom: 2px;
+    font-size: 5px;
+  }
+
+  .school-trpg-ending-cause p {
+    font-size: 6px;
+    line-height: 1.4;
+  }
+
+  .school-trpg-ending-screen .school-trpg-panel-eyebrow {
+    font-size: 5px;
+    line-height: 1.35;
+  }
+
+  .school-trpg-ending-reward {
+    margin-top: 5px;
+    padding: 5px;
+    gap: 4px;
+    font-size: 6px;
+  }
+
+  .school-trpg-ending-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+    margin-top: 7px;
+    gap: 4px;
+  }
+
+  .school-trpg-ending-actions > button {
+    min-height: 34px;
+    padding: 5px 6px;
+    gap: 4px;
+    font-size: 6px;
+  }
+
+  .school-trpg-ending-art-panel .school-trpg-ending-seal {
+    top: 8px;
+    right: 8px;
+    display: flex;
+    width: 46px;
+  }
+
+  .school-trpg-ending-seal span {
+    font-size: 5px;
+  }
+
+  .school-trpg-ending-seal b {
+    font-size: 20px;
+  }
+
+  .school-trpg-ending-gallery { padding: 7px; }
+  .school-trpg-ending-gallery-inner { max-height: 92dvh; padding: 10px; }
+  .school-trpg-ending-gallery-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 5px; }
+  .school-trpg-ending-gallery-grid article b { font-size: 7px; }
+  .school-trpg-ending-gallery-grid article small, .school-trpg-ending-gallery-lock { font-size: 6px; }
+  .school-trpg-art-fallback span { font-size: 8px; }
+  .school-trpg-combat-context { gap: 3px; margin: 5px 0; }
+  .school-trpg-combat-context span { padding: 3px 4px; font-size: 6px; }
+}
+
+/* Portrait mini-game hub: the fullscreen flex layout must not clip the lower
+   rows on phones. Keep the hub itself fixed to the viewport, but let its
+   inner column grow naturally and scroll when the card list is taller than
+   the available safe-area height. */
+@media (orientation: portrait) and (max-width: 720px) {
+  .main-mini-game-select-screen {
+    box-sizing: border-box;
+    height: 100dvh !important;
+    min-height: 100dvh !important;
+    overflow: hidden !important;
+  }
+
+  .main-mini-game-select-screen .mini-game-select-scroll {
+    box-sizing: border-box;
+    display: flex;
+    flex: 1 1 auto;
+    align-items: stretch !important;
+    width: 100%;
+    height: 100% !important;
+    min-height: 0 !important;
+    overflow-x: hidden !important;
+    overflow-y: auto !important;
+    overscroll-behavior-y: contain;
+    -webkit-overflow-scrolling: touch;
+    padding: max(8px, env(safe-area-inset-top)) max(10px, env(safe-area-inset-right)) max(10px, env(safe-area-inset-bottom)) max(10px, env(safe-area-inset-left)) !important;
+  }
+
+  .main-mini-game-select-screen .mini-game-select-panel {
+    box-sizing: border-box;
+    display: flex;
+    flex: 0 0 auto !important;
+    align-items: stretch !important;
+    justify-content: flex-start !important;
+    width: 100% !important;
+    height: auto !important;
+    min-height: 100% !important;
+    max-width: none !important;
+    overflow: visible !important;
+    padding: 8px 0 12px !important;
+  }
+
+  .main-mini-game-select-screen .mini-game-select-title {
+    align-self: center;
+    flex: 0 0 auto;
+    max-width: 100%;
+    margin: 0 0 8px !important;
+    font-size: clamp(1.1rem, 5.5vw, 1.6rem) !important;
+    line-height: 1.1;
+    white-space: nowrap;
+  }
+
+  .main-mini-game-select-screen .mini-game-select-title svg {
+    width: clamp(1.15rem, 6vw, 1.6rem);
+    height: clamp(1.15rem, 6vw, 1.6rem);
+    margin-right: 0.35rem;
+  }
+
+  .main-mini-game-select-screen .mini-game-select-hint {
+    flex: 0 0 auto;
+    max-width: 100%;
+    margin: 0 0 10px !important;
+    overflow: visible !important;
+    font-size: clamp(0.52rem, 2.5vw, 0.72rem) !important;
+    line-height: 1.35;
+    white-space: normal !important;
+  }
+
+  .main-mini-game-select-screen .mini-game-select-grid {
+    display: grid !important;
+    flex: 0 0 auto !important;
+    width: 100% !important;
+    min-height: 0 !important;
+    grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+    grid-template-rows: none !important;
+    grid-auto-rows: minmax(96px, auto) !important;
+    gap: 8px !important;
+    margin: 0 0 12px !important;
+    padding: 0 !important;
+    overflow: visible !important;
+  }
+
+  .main-mini-game-select-screen .mini-game-select-card {
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: row !important;
+    align-items: center;
+    justify-content: flex-start !important;
+    min-width: 0;
+    min-height: 96px !important;
+    height: auto !important;
+    gap: 6px;
+    padding: 7px !important;
+    border-width: 2px !important;
+  }
+
+  .main-mini-game-select-screen .mini-game-select-card-icon {
+    box-sizing: border-box;
+    flex: 0 0 auto;
+    width: clamp(2.25rem, 13vw, 3.5rem) !important;
+    height: clamp(2.25rem, 13vw, 3.5rem) !important;
+    margin: 0 !important;
+    padding: 4px !important;
+  }
+
+  .main-mini-game-select-screen .mini-game-select-card-copy {
+    min-width: 0;
+    align-items: flex-start !important;
+    text-align: left !important;
+  }
+
+  .main-mini-game-select-screen .mini-game-select-card-copy .mini-game-title {
+    min-width: 0;
+    margin-bottom: 2px !important;
+    font-size: clamp(0.58rem, 3.2vw, 0.9rem) !important;
+    line-height: 1.12;
+  }
+
+  .main-mini-game-select-screen .mini-game-select-card-copy .mini-game-title-line {
+    display: block;
+    max-width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .main-mini-game-select-screen .mini-game-select-card-copy > span:last-child {
+    display: -webkit-box;
+    max-width: 100%;
+    overflow: hidden;
+    font-size: clamp(0.4rem, 2.1vw, 0.6rem) !important;
+    line-height: 1.25;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 3;
+  }
+
+  .main-mini-game-select-screen .mini-game-select-card > .absolute {
+    right: 0;
+    font-size: 0.42rem !important;
+    line-height: 1.1;
+    padding: 1px 4px;
+  }
+
+  .main-mini-game-select-screen .mini-game-select-back {
+    align-self: center;
+    flex: 0 0 auto;
+    margin: 0 !important;
+    padding: 5px 4px !important;
+    font-size: clamp(0.65rem, 3vw, 0.9rem) !important;
+    line-height: 1.1;
+  }
+}
+
+/* Capacitor's portrait hub is edge-to-edge. The app shell intentionally does
+   not reserve the Dynamic Island/home-indicator space for this screen, so the
+   hub must consume the shared iOS UI insets itself. Keep the title action
+   fixed above the home indicator; the card list remains independently
+   scrollable behind it and reserves enough trailing space to avoid overlap. */
+@media (orientation: portrait) and (max-width: 720px) {
+  html.app-platform-ios .main-mini-game-select-screen {
+    height: 100dvh !important;
+    min-height: 0 !important;
+    overflow: hidden !important;
+  }
+
+  html.app-platform-ios .main-mini-game-select-screen .mini-game-select-scroll {
+    height: 100% !important;
+    min-height: 0 !important;
+    padding-top: max(8px, var(--ios-ui-safe-top, env(safe-area-inset-top))) !important;
+    padding-bottom: calc(max(10px, var(--ios-ui-safe-bottom, env(safe-area-inset-bottom))) + 3.5rem) !important;
+  }
+
+  html.app-platform-ios .main-mini-game-select-screen .mini-game-select-panel {
+    padding-bottom: calc(3.5rem + max(10px, var(--ios-ui-safe-bottom, env(safe-area-inset-bottom)))) !important;
+  }
+
+  html.app-platform-ios .main-mini-game-select-screen .mini-game-select-back {
+    position: fixed !important;
+    z-index: 40;
+    left: 50%;
+    bottom: max(8px, var(--ios-ui-safe-bottom, env(safe-area-inset-bottom)));
+    display: inline-flex;
+    width: min(75vw, 18rem);
+    min-height: 2.75rem;
+    align-items: center;
+    justify-content: center;
+    margin: 0 !important;
+    padding: 0.65rem 0.9rem !important;
+    border: 1px solid rgba(103, 232, 249, 0.55);
+    border-radius: 0.65rem;
+    background: rgba(3, 20, 34, 0.94);
+    box-shadow: 0 0.35rem 1.1rem rgba(0, 0, 0, 0.45), 0 0 1rem rgba(34, 211, 238, 0.18);
+    color: #d9fbff;
+    transform: translateX(-50%);
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
   }
 }

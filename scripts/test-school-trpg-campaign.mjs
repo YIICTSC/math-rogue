@@ -1,4 +1,6 @@
 import assert from 'node:assert/strict';
+import { existsSync } from 'node:fs';
+import { resolve } from 'node:path';
 import { createServer } from 'vite';
 
 const server = await createServer({
@@ -22,11 +24,35 @@ try {
 
   assert.deepEqual(data.validateSchoolTrpgData(), [], 'TRPG content data must be internally consistent');
   assert.deepEqual(engine.getSchoolTrpgDataErrors(), [], 'TRPG engine references must resolve');
+  const guardianFamilies = new Set();
   for (const chapter of data.SCHOOL_TRPG_CHAPTERS) {
     const endings = data.getTrpgChapterEndings(chapter.chapter);
     assert.ok(endings.length >= 4, `${chapter.chapter} should expose at least four endings`);
     assert.ok(endings.every(ending => ending.artAsset), `${chapter.chapter} endings should all have artwork`);
+    const locations = data.getTrpgChapterLocations(chapter.chapter);
+    const events = data.getTrpgChapterEvents(chapter.chapter);
+    const rewards = data.getTrpgChapterRewards(chapter.chapter);
+    assert.match(chapter.guardianAsset, /^sprites\/(high-school|magic)\/enemies\/\d+\.webp$/, `${chapter.chapter} should use a Learning Rogue enemy illustration`);
+    assert.match(chapter.battleBackgroundAsset, /^sprites\/backgrounds\/learning-rogue\/.+\.webp$/, `${chapter.chapter} should use a Learning Rogue battle background`);
+    guardianFamilies.add(chapter.guardianAsset.split('/')[1]);
+    assert.ok(events.every(event => event.archetype), `${chapter.chapter} events should expose an archetype`);
+    assert.ok(events.every(event => event.revisit && event.revisit.choices.length >= 2), `${chapter.chapter} events should expose a revisit beat`);
+    assert.ok(events.every(event => event.illustrationAsset), `${chapter.chapter} events should own original artwork`);
+    assert.equal(new Set(events.map(event => event.illustrationAsset)).size, events.length, `${chapter.chapter} event artwork should not repeat`);
+    assert.ok(events.every(event => existsSync(resolve('public', event.illustrationAsset))), `${chapter.chapter} event WebPs should exist`);
+    assert.equal(new Set(rewards.map(reward => reward.artAsset)).size, rewards.length, `${chapter.chapter} discovery artwork should not repeat`);
+    assert.ok(rewards.every(reward => reward.artAsset && existsSync(resolve('public', reward.artAsset))), `${chapter.chapter} discovery WebPs should exist`);
+    assert.ok(rewards.every(reward => reward.useCopy.ja && reward.useCopy.hira && reward.useCopy.en && reward.effect.amount > 0), `${chapter.chapter} discoveries should explain and implement their use`);
+    assert.ok(new Set(events.map(event => event.archetype)).size >= 4, `${chapter.chapter} should mix at least four event archetypes`);
+    const missingSceneArt = locations.filter(location => data.getSchoolTrpgSceneArt(location.id, location.backgroundAsset) === 'event-illustrations/default.webp').map(location => location.id);
+    assert.deepEqual(missingSceneArt, [], `${chapter.chapter} locations should resolve scene art: ${missingSceneArt.join(', ')}`);
   }
+  assert.deepEqual([...guardianFamilies].sort(), ['high-school', 'magic'], 'guardians should draw from the high-school and magic chapters');
+  assert.equal(Object.keys(data.SCHOOL_TRPG_ENDING_ART).length, data.SCHOOL_TRPG_ENDINGS.length, 'every ending should have one art registry entry');
+  assert.ok(data.SCHOOL_TRPG_ENDINGS.every(ending => {
+    const art = data.getTrpgEndingArt(ending.id);
+    return art && art.asset === ending.artAsset && art.focalPoint.x >= 0 && art.focalPoint.x <= 100 && art.focalPoint.y >= 0 && art.focalPoint.y <= 100;
+  }), 'ending art registry should include focal points for every ending');
 
   const resolveLocation = (state, locationId, choiceIndex = 0) => {
     const eventState = engine.beginSchoolTrpgEvent(state, locationId);
@@ -90,6 +116,14 @@ try {
   assert.equal(rested.stress, 3, 'TRPG rest should recover up to two stress');
   assert.equal(rested.time, fatigued.time + 1, 'TRPG rest should advance the expedition clock');
   assert.notDeepEqual(rested.discoveryLog, fatigued.discoveryLog, 'TRPG rest should leave a localized discovery log entry');
+  const revisitBase = engine.continueSchoolTrpgResult(deterministicA);
+  const revisitState = engine.beginSchoolTrpgEvent(revisitBase, 'classroom');
+  assert.equal(revisitState.currentEventVariant, 'REVISIT', 'completed locations should open a stateful revisit scene');
+  assert.equal(revisitState.locationStates.classroom, 'ALTERED', 'revisit should persist an altered location state');
+  assert.ok(data.getTrpgEvent(revisitState.currentEventId).revisit, 'revisit scene should be authored');
+  const revisitResolved = engine.resolveSchoolTrpgChoice(revisitState, data.getTrpgEvent(revisitState.currentEventId).revisit.choices[0].id, false);
+  assert.equal(revisitResolved.locationStates.classroom, 'COMPANION_REACTION', 'revisit outcome should persist a companion reaction state');
+  assert.equal(engine.continueSchoolTrpgResult(revisitResolved).phase, 'MAP', 'revisit scene should return to the map');
   const eventState = { ...rested, phase: 'EVENT' };
   assert.deepEqual(engine.recoverSchoolTrpgStress(eventState), eventState, 'TRPG rest must not interrupt an event');
   assert.equal(save.saveSchoolTrpgCampaign(deterministicA), true, 'campaign save should commit');
@@ -137,15 +171,42 @@ try {
   assert.equal(persuasion.endingId, 'memory-returned');
   assert.ok(engine.isSchoolTrpgCampaignComplete(persuasion));
 
+  assert.ok(persuasion.combat.actionHistory?.length, 'combat should retain an action history');
+  assert.ok(persuasion.combat.encounterId && persuasion.combat.enemyId, 'combat should retain encounter and enemy metadata');
+  const extendedBase = reachCombat(20260822);
+  const extendedCombat = {
+    ...extendedBase,
+    inventory: ['emblem-shard'],
+    combat: {
+      ...extendedBase.combat,
+      allyStates: [
+        { id: 'scribe', label: { ja: '記録係', hira: 'きろくがかり', en: 'SCRIBE' }, integrity: 2, status: 'THREATENED' },
+      ],
+      hazard: { id: 'memory-gate', label: { ja: '記憶の門', hira: 'きおくのもん', en: 'MEMORY GATE' }, progress: 0, target: 2 },
+    },
+  };
+  const itemTurn = engine.performSchoolTrpgCombatAction(extendedCombat, 'USE_ITEM');
+  assert.ok(itemTurn.combat.actionHistory.includes('USE_ITEM'), 'USE_ITEM should be recorded');
+  const allyTurn = engine.performSchoolTrpgCombatAction(itemTurn, 'ALLY_SKILL');
+  assert.ok(allyTurn.combat.actionHistory.includes('ALLY_SKILL'), 'ALLY_SKILL should be recorded');
+  const protectTurn = engine.performSchoolTrpgCombatAction(allyTurn, 'PROTECT');
+  assert.ok(protectTurn.combat.actionHistory.includes('PROTECT'), 'PROTECT should be recorded');
+
   let chapterOne = engine.startNextSchoolTrpgChapter(persuasion);
   assert.equal(chapterOne.chapter, 1, 'ending the prologue should unlock chapter 1');
   assert.equal(chapterOne.phase, 'MAP');
   assert.equal(chapterOne.currentLocationId, 'music-room');
   chapterOne = resolveLocation(chapterOne, 'music-room');
   assert.ok(chapterOne.unlockedLocationIds.includes('rooftop'));
-  assert.ok(chapterOne.unlockedLocationIds.includes('science-lab'));
   chapterOne = resolveLocation(chapterOne, 'rooftop');
-  chapterOne = resolveLocation(chapterOne, 'science-lab');
+  // Chapter 1 intentionally forks: a clean signal shortcuts the alternate
+  // lab route, while a setback opens it for recovery. Both routes must lead
+  // to the archive without exposing two identical map buttons at once.
+  if (chapterOne.unlockedLocationIds.includes('science-lab')) {
+    chapterOne = resolveLocation(chapterOne, 'science-lab');
+  } else {
+    assert.equal(chapterOne.flags.chapter1SkippedEvent, 'P1-03');
+  }
   assert.ok(chapterOne.unlockedLocationIds.includes('archive'));
   chapterOne = resolveLocation(chapterOne, 'archive');
   assert.equal(chapterOne.phase, 'QUESTION', 'the archive must open the chapter 1 research quiz gate');
@@ -177,6 +238,19 @@ try {
   assert.equal(hiddenChapter.endingId?.startsWith('chapter5-'), true, 'hidden chapter should use its dedicated endings');
   assert.equal(data.getTrpgChapterEndings(5).length, 5, 'hidden chapter should expose its timeline ending');
   assert.ok(data.getTrpgChapterEndings(5).every(ending => ending.artAsset), 'every hidden ending should have artwork');
+
+  const hiddenTimelineReward = data.getTrpgChapterRewards(5).find(reward => reward.effect.kind === 'ENDING_KEY' && reward.effect.amount === 2);
+  assert.ok(hiddenTimelineReward, 'hidden chapter should have the timeline key discovery');
+  const hiddenTimelineBase = {
+    ...engine.createSchoolTrpgCampaign(4805),
+    chapter: 5,
+    phase: 'REWARD',
+    flags: { combatResolution: 'PERSUADE', companionTrusted: true, 'question.HIDDEN_CLEAR': 3 },
+  };
+  const hiddenTimeline = engine.chooseSchoolTrpgReward(hiddenTimelineBase, hiddenTimelineReward.id);
+  assert.equal(data.getTrpgEnding(hiddenTimeline.endingId).route, 'TIMELINE', 'perfect answers, trust, persuasion, and the constellation thread should reach the timeline ending');
+  const hiddenNonPerfect = engine.chooseSchoolTrpgReward({ ...hiddenTimelineBase, flags: { ...hiddenTimelineBase.flags, 'question.HIDDEN_CLEAR': 2 } }, hiddenTimelineReward.id);
+  assert.equal(data.getTrpgEnding(hiddenNonPerfect.endingId).route, 'PERSUADE', 'missing a hidden answer should keep the normal persuasion ending');
 
   let escape = reachCombat(8501);
   escape = { ...escape, combat: { ...escape.combat, turn: 3 }, stress: 0 };

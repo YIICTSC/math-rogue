@@ -25,6 +25,7 @@ import { assetUrl } from '../../utils/assetPaths';
 import { getCardIllustrationPaths } from '../../utils/cardIllustration';
 import {
   SCHOOL_TRPG_COPY,
+  SCHOOL_TRPG_ENDINGS,
   SCHOOL_TRPG_EVENTS,
   SCHOOL_TRPG_LOCATIONS,
   SCHOOL_TRPG_REWARDS,
@@ -33,6 +34,7 @@ import {
   getTrpgChapterLocations,
   getTrpgChapterRewards,
   getTrpgEnding,
+  getTrpgEndingArt,
   getTrpgEvent,
   getTrpgLocation,
   getSchoolTrpgSceneArt,
@@ -46,8 +48,10 @@ import {
   createSchoolTrpgCampaign,
   getQuestionGateCopy,
   getQuestionGateTitleCopy,
+  getSchoolTrpgChoiceTarget,
   getSchoolTrpgCombatResolutionCopy,
   getSchoolTrpgDataErrors,
+  getSchoolTrpgEventForState,
   getSchoolTrpgProgress,
   isHiddenSchoolTrpgChapterUnlocked,
   performSchoolTrpgCombatAction,
@@ -61,8 +65,11 @@ import {
   trpgCopy,
   type TrpgCampaignState,
   type TrpgCombatActionId,
+  type TrpgCombatState,
   type TrpgCopy,
+  type TrpgEventArchetype,
   type TrpgLocation,
+  type TrpgReward,
 } from './schoolTrpgTypes';
 
 interface SchoolTrpgGameProps {
@@ -98,15 +105,47 @@ const UI_COPY = {
   target: trpgCopy('目標', 'もくひょう', 'TARGET'),
   roll: trpgCopy('出目', 'でめ', 'ROLL'),
   success: trpgCopy('成功', 'せいこう', 'SUCCESS'),
+  great: trpgCopy('大成功', 'だいせいこう', 'GREAT SUCCESS'),
   failure: trpgCopy('別ルートへ移行', 'べつルートへいこう', 'ALTERNATE ROUTE'),
+  routeLocked: trpgCopy('前の選択が必要', 'まえのせんたくがひつよう', 'REQUIRES PRIOR CHOICE'),
+  discoveryLoadout: trpgCopy('発見物ロードアウト', 'はっけんぶつロードアウト', 'DISCOVERY LOADOUT'),
+  discoveryReady: trpgCopy('未使用・次の判定に反映', 'みしよう・つぎのはんていにはんえい', 'READY · AFFECTS NEXT CHECK'),
+  discoveryUsed: trpgCopy('使用済み・記録に残る', 'しようずみ・きろくにのこる', 'USED · KEPT IN LOG'),
+  noDiscoveries: trpgCopy('まだ発見物はありません。', 'まだはっけんぶつはありません。', 'No discoveries yet.'),
+  causeTrace: trpgCopy('選択の連鎖', 'せんたくのれんさ', 'CAUSE TRACE'),
   enemyIntent: trpgCopy('次の脅威', 'つぎのきょうい', 'NEXT THREAT'),
   enemyHp: trpgCopy('脅威', 'きょうい', 'THREAT'),
   insight: trpgCopy('調査', 'ちょうさ', 'INSIGHT'),
   resolve: trpgCopy('対話', 'たいわ', 'DIALOGUE'),
+  phase: trpgCopy('局面', 'きょくめん', 'PHASE'),
+  hazard: trpgCopy('環境危険', 'かんきょうきけん', 'HAZARD'),
+  allies: trpgCopy('同行者', 'どうこうしゃ', 'ALLIES'),
   turn: trpgCopy('ターン', 'ターン', 'TURN'),
   battleHint: trpgCopy('調査3以上で説得が安定します。3ターン目以降は安全に退避できます。', 'ちょうさ3いじょうでせっとくがあんていします。3ターンめいこうはあんぜんにたいひできます。', 'At 3 Insight, persuasion becomes reliable. Safe escape opens from turn 3.'),
   noSave: trpgCopy('続きの記録はありません。', 'つづきのきろくはありません。', 'No expedition save found.'),
   dataError: trpgCopy('TRPGデータの検証に失敗しました。', 'TRPGデータのけんしょうにしっぱいしました。', 'TRPG data validation failed.'),
+  artFallback: trpgCopy('イラストを読み込めません。記録カードを表示しています。', 'いらすとをよみこめません。きろくカードをひょうじしています。', 'Artwork unavailable. Showing the record card instead.'),
+  gallery: trpgCopy('エンディングギャラリー', 'えんでぃんぐぎゃらりー', 'ENDING GALLERY'),
+  galleryClose: trpgCopy('ギャラリーを閉じる', 'ぎゃらりーをとじる', 'CLOSE GALLERY'),
+  galleryLocked: trpgCopy('未到達の結末', 'みとうたつのけつまつ', 'ENDING NOT DISCOVERED'),
+};
+
+const EVENT_ARCHETYPE_COPY: Record<TrpgEventArchetype, TrpgCopy> = {
+  INVESTIGATION: trpgCopy('調査', 'ちょうさ', 'INVESTIGATION'),
+  DIALOGUE: trpgCopy('対話', 'たいわ', 'DIALOGUE'),
+  PUZZLE: trpgCopy('パズル', 'ぱずる', 'PUZZLE'),
+  CHASE: trpgCopy('追跡', 'ついせき', 'CHASE'),
+  DEFENSE: trpgCopy('防衛', 'ぼうえい', 'DEFENSE'),
+  COMBAT: trpgCopy('戦闘', 'せんとう', 'COMBAT'),
+};
+
+const COMBAT_MODE_COPY: Record<NonNullable<TrpgCombatState['mode']>, TrpgCopy> = {
+  DUEL: trpgCopy('決闘', 'けっとう', 'DUEL'),
+  RITUAL: trpgCopy('儀式', 'ぎしき', 'RITUAL'),
+  CHASE: trpgCopy('追走', 'ついそう', 'CHASE'),
+  DEFENSE: trpgCopy('防衛', 'ぼうえい', 'DEFENSE'),
+  PARADOX: trpgCopy('逆説', 'ぎゃくせつ', 'PARADOX'),
+  ECHO: trpgCopy('残響', 'ざんきょう', 'ECHO'),
 };
 
 const COMBAT_ACTIONS: Array<{
@@ -136,6 +175,26 @@ const COMBAT_ACTIONS: Array<{
     detail: trpgCopy('体力に応じて次の脅威を防ぐ。', 'たいりょくにおうじてつぎのきょういをふせぐ。', 'Block the next threat using Energy.'),
   },
   {
+    id: 'INTERACT', icon: Compass,
+    label: trpgCopy('環境を操作する', 'かんきょうをそうさする', 'INTERACT'),
+    detail: trpgCopy('章の仕掛けを使い、攻撃以外の勝ち筋を進める。', 'しょうのしかけをつかい、こうげきいがいのかちすじをすすめる。', 'Use the chapter mechanism to advance a non-attack victory path.'),
+  },
+  {
+    id: 'USE_ITEM', icon: Sparkles,
+    label: trpgCopy('発見物を使う', 'はっけんぶつをつかう', 'USE DISCOVERY'),
+    detail: trpgCopy('発見物を1つ消費し、調査と対話を同時に進める。', 'はっけんぶつをひとつしょうひし、ちょうさとたいわをどうじにすすめる。', 'Spend one discovery to advance Insight and Dialogue.'),
+  },
+  {
+    id: 'ALLY_SKILL', icon: HeartHandshake,
+    label: trpgCopy('同行者の技能', 'どうこうしゃのぎのう', 'ALLY SKILL'),
+    detail: trpgCopy('仲間の状態を立て直し、連携を強める。', 'なかまのじょうたいをたてなおし、れんけいをつよめる。', 'Stabilize an ally and strengthen coordination.'),
+  },
+  {
+    id: 'PROTECT', icon: Shield,
+    label: trpgCopy('記録を守る', 'きろくをまもる', 'PROTECT RECORD'),
+    detail: trpgCopy('危険にさらされた仲間を守り、逃走／防衛の進行を高める。', 'きけんにさらされたなかまをまもり、とうそう／ぼうえいのしんこうをたかめる。', 'Protect a threatened ally to advance escape or defense.'),
+  },
+  {
     id: 'ESCAPE', icon: Footprints,
     label: trpgCopy('記録を持って退避', 'きろくをもってたいひ', 'ESCAPE WITH NOTES'),
     detail: trpgCopy('3ターン目、調査4、手がかり5のいずれかで成功。', '3ターンめ、ちょうさ4、てがかり5のいずれかでせいこう。', 'Succeeds on turn 3, at 4 Insight, or with 5 Clues.'),
@@ -144,18 +203,23 @@ const COMBAT_ACTIONS: Array<{
 
 const text = (copy: TrpgCopy, languageMode?: LanguageMode) => localizeTrpgCopy(copy, languageMode);
 
-const SchoolTrpgBackdrop: React.FC<{ asset: string; className?: string }> = ({ asset, className = '' }) => (
-  <ResilientAssetImage
-    sources={[
-      assetUrl(asset),
-      assetUrl('sprites/backgrounds/learning-rogue/map-campus.webp'),
-      assetUrl('sprites/backgrounds/mini-games/school-trpg.png'),
-    ]}
-    alt=""
-    aria-hidden="true"
-    className={`school-trpg-campaign-backdrop ${className}`}
-  />
-);
+const SchoolTrpgBackdrop: React.FC<{ asset: string; className?: string }> = ({ asset, className = '' }) => {
+  const [usedFallback, setUsedFallback] = useState(false);
+  return <>
+    <ResilientAssetImage
+      sources={[
+        assetUrl(asset),
+        assetUrl('sprites/backgrounds/learning-rogue/map-campus.webp'),
+        assetUrl('sprites/backgrounds/mini-games/school-trpg.png'),
+      ]}
+      alt=""
+      aria-hidden="true"
+      className={`school-trpg-campaign-backdrop ${className}`}
+      onError={() => setUsedFallback(true)}
+    />
+    {usedFallback && <span className="school-trpg-art-fallback-badge">ART FALLBACK</span>}
+  </>;
+};
 
 const StatStrip: React.FC<{ state: TrpgCampaignState; languageMode?: LanguageMode }> = ({ state, languageMode }) => (
   <div className="school-trpg-campaign-stats" aria-label={text(UI_COPY.stats, languageMode)}>
@@ -167,6 +231,49 @@ const StatStrip: React.FC<{ state: TrpgCampaignState; languageMode?: LanguageMod
     ))}
   </div>
 );
+
+const DiscoveryShelf: React.FC<{
+  state: TrpgCampaignState;
+  languageMode?: LanguageMode;
+  compact?: boolean;
+}> = ({ state, languageMode, compact = false }) => {
+  const rewards = state.inventory
+    .map(rewardId => SCHOOL_TRPG_REWARDS.find(candidate => candidate.id === rewardId))
+    .filter((reward): reward is TrpgReward => Boolean(reward));
+  return (
+    <section className={`school-trpg-discovery-shelf${compact ? ' is-compact' : ''}`} aria-label={text(UI_COPY.discoveryLoadout, languageMode)}>
+      <div className="school-trpg-discovery-shelf-heading">
+        <span>{text(UI_COPY.discoveryLoadout, languageMode)}</span>
+        <b>{rewards.length}</b>
+      </div>
+      {rewards.length === 0 ? (
+        <small className="school-trpg-discovery-empty">{text(UI_COPY.noDiscoveries, languageMode)}</small>
+      ) : (
+        <div className="school-trpg-discovery-shelf-list">
+          {rewards.map(reward => {
+            const used = Boolean(state.flags[`usedReward.${reward.id}`]);
+            return (
+              <div key={reward.id} className={`school-trpg-discovery-shelf-item${used ? ' is-used' : ''}`}>
+                <div className="school-trpg-discovery-shelf-art">
+                  <ResilientAssetImage
+                    sources={reward.artAsset ? [assetUrl(reward.artAsset)] : []}
+                    alt=""
+                    aria-hidden="true"
+                    fallback={<Sparkles size={13} />}
+                  />
+                </div>
+                <div title={text(reward.useCopy, languageMode)}>
+                  <b>{text(reward.name, languageMode)}</b>
+                  <small>{used ? text(UI_COPY.discoveryUsed, languageMode) : text(reward.useCopy, languageMode)}</small>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </section>
+  );
+};
 
 const StatusBar: React.FC<{ state: TrpgCampaignState; languageMode?: LanguageMode }> = ({ state, languageMode }) => {
   const location = getTrpgLocation(state.currentLocationId);
@@ -198,6 +305,8 @@ const MapScreen: React.FC<{
   const selectedLocation = chapterLocations.find(location => location.id === selected) || chapterLocations[0] || SCHOOL_TRPG_LOCATIONS[0];
   const unlocked = state.unlockedLocationIds.includes(selectedLocation.id);
   const completed = state.completedEventIds.includes(selectedLocation.eventId);
+  const revisitAvailable = completed && Boolean(getTrpgEvent(selectedLocation.eventId)?.revisit);
+  const canTravel = unlocked && (!completed || revisitAvailable);
   return (
     <div className="school-trpg-campaign-layout map-mode">
       <section className="school-trpg-map-panel">
@@ -263,7 +372,7 @@ const MapScreen: React.FC<{
           <button
             type="button"
             className="school-trpg-primary-button"
-            disabled={!unlocked || completed}
+            disabled={!canTravel}
             onClick={() => onTravel(selectedLocation.id)}
           >
             <Compass size={18} />
@@ -284,6 +393,7 @@ const MapScreen: React.FC<{
         <div className="school-trpg-command-hint">{text(SCHOOL_TRPG_COPY.selectLocation, languageMode)}</div>
         <div className="school-trpg-rest-hint">{text(UI_COPY.restHint, languageMode)}</div>
         <StatStrip state={state} languageMode={languageMode} />
+        <DiscoveryShelf state={state} languageMode={languageMode} />
       </aside>
     </div>
   );
@@ -296,29 +406,26 @@ const EventScreen: React.FC<{
   onUseFate: () => void;
   onChoice: (choiceId: string) => void;
 }> = ({ state, languageMode, useFate, onUseFate, onChoice }) => {
-  const event = getTrpgEvent(state.currentEventId || '') || SCHOOL_TRPG_EVENTS[0];
-  const sceneArt = getSchoolTrpgSceneArt(event.locationId, event.backgroundAsset);
+  const event = getSchoolTrpgEventForState(state) || SCHOOL_TRPG_EVENTS[0];
+  const sceneArt = event.illustrationAsset || getSchoolTrpgSceneArt(event.locationId, event.backgroundAsset);
+  const archetypeCopy = event.archetype ? EVENT_ARCHETYPE_COPY[event.archetype] : null;
   return (
-    <div className="school-trpg-campaign-layout event-mode">
+    <div className={`school-trpg-campaign-layout event-mode ${event.archetype ? `archetype-${event.archetype.toLowerCase()}` : ''}`}>
       <section className="school-trpg-scene-panel">
-        <SchoolTrpgBackdrop asset={event.backgroundAsset} />
         <ResilientAssetImage
           sources={[assetUrl(sceneArt), assetUrl(event.backgroundAsset)]}
           alt=""
           aria-hidden="true"
-          className="school-trpg-scene-illustration"
+          className="school-trpg-scene-illustration is-event-original"
         />
         <div className="school-trpg-scene-vignette" />
-        {event.foregroundAsset && (
-          <img className="school-trpg-scene-foreground" src={assetUrl(event.foregroundAsset)} alt="" aria-hidden="true" />
-        )}
         <div className="school-trpg-scene-caption">
           <span>{text(event.eyebrow, languageMode)}</span>
           <b>{text(event.title, languageMode)}</b>
         </div>
       </section>
       <aside className="school-trpg-command-panel event-copy">
-        <div className="school-trpg-panel-eyebrow">STORY EVENT // {event.id}</div>
+        <div className="school-trpg-panel-eyebrow">STORY EVENT // {event.id}{archetypeCopy ? ` · ${text(archetypeCopy, languageMode)}` : ''}</div>
         <h2>{text(event.title, languageMode)}</h2>
         <p>{text(event.body, languageMode)}</p>
         <button
@@ -332,13 +439,16 @@ const EventScreen: React.FC<{
           <b>{state.fate}</b>
         </button>
         <div className="school-trpg-choice-list">
-          {event.choices.map((choice, index) => (
-            <button key={choice.id} type="button" onClick={() => onChoice(choice.id)}>
+          {event.choices.map((choice, index) => {
+            const locked = Boolean(choice.requiresFlag && !state.flags[choice.requiresFlag]);
+            return (
+            <button key={choice.id} type="button" disabled={locked} onClick={() => onChoice(choice.id)}>
               <span>{String(index + 1).padStart(2, '0')}</span>
               <div><b>{text(choice.label, languageMode)}</b><small>{text(choice.detail, languageMode)}</small></div>
-              <em>{text(TRPG_STAT_COPY[choice.stat], languageMode)} {choice.difficulty}</em>
+              <em>{locked ? text(UI_COPY.routeLocked, languageMode) : `${text(TRPG_STAT_COPY[choice.stat], languageMode)} ${getSchoolTrpgChoiceTarget(state, choice)}`}</em>
             </button>
-          ))}
+            );
+          })}
         </div>
       </aside>
     </div>
@@ -350,28 +460,43 @@ const ResultScreen: React.FC<{
   languageMode?: LanguageMode;
   onContinue: () => void;
 }> = ({ state, languageMode, onContinue }) => {
-  const event = getTrpgEvent(state.currentEventId || '') || SCHOOL_TRPG_EVENTS[0];
+  const event = getSchoolTrpgEventForState(state) || SCHOOL_TRPG_EVENTS[0];
   const result = state.result!;
+  const isGreat = result.grade === 'GREAT';
   return (
     <div className="school-trpg-campaign-layout result-mode">
       <section className="school-trpg-scene-panel">
-        <SchoolTrpgBackdrop asset={event.backgroundAsset} />
+        <ResilientAssetImage
+          sources={[assetUrl(event.illustrationAsset || event.backgroundAsset), assetUrl(event.backgroundAsset)]}
+          alt=""
+          aria-hidden="true"
+          className="school-trpg-scene-illustration is-event-original"
+        />
+        <div className="school-trpg-scene-vignette" />
         <div className={`school-trpg-result-signal ${result.success ? 'is-success' : 'is-alternate'}`}>
-          <span>{text(result.success ? UI_COPY.success : UI_COPY.failure, languageMode)}</span>
+          <span>{text(isGreat ? UI_COPY.great : result.success ? UI_COPY.success : UI_COPY.failure, languageMode)}</span>
           <b>{result.total}</b>
           <small>{text(UI_COPY.target, languageMode)} {result.difficulty}</small>
         </div>
       </section>
       <aside className="school-trpg-command-panel result-copy">
         <div className="school-trpg-panel-eyebrow">CHECK RESOLUTION</div>
-        <h2>{text(result.success ? UI_COPY.success : UI_COPY.failure, languageMode)}</h2>
+        <h2>{text(isGreat ? UI_COPY.great : result.success ? UI_COPY.success : UI_COPY.failure, languageMode)}</h2>
         <p>{text(result.copy, languageMode)}</p>
         <div className="school-trpg-roll-formula">
           <span>{text(UI_COPY.roll, languageMode)} <b>{result.roll}</b></span>
           <span>{text(TRPG_STAT_COPY[result.stat], languageMode)} <b>+{result.statValue}</b></span>
           {result.fateBonus > 0 && <span>{text(UI_COPY.fate, languageMode)} <b>+{result.fateBonus}</b></span>}
+          {(result.itemBonus || 0) > 0 && <span>{result.itemName ? text(result.itemName, languageMode) : 'DISCOVERY'} <b>+{result.itemBonus}</b></span>}
           <strong>= {result.total}</strong>
         </div>
+        {(result.statGain || isGreat) && <div className="school-trpg-check-grade">
+          {text(result.statGain
+            ? isGreat
+              ? trpgCopy('手がかり+1・能力値+1', 'てがかり+1・のうりょくち+1', 'EXTRA CLUE · EXTRA STAT')
+              : trpgCopy('能力値+1（基礎成長）', 'のうりょくち+1（きそこうせい）', 'STAT +1 · FOUNDATION GROWTH')
+            : trpgCopy('手がかり+1・能力値は安定域', 'てがかり+1・のうりょくちはあんていいき', 'EXTRA CLUE · MASTERY STABLE'), languageMode)}
+        </div>}
         <button type="button" className="school-trpg-primary-button" onClick={onContinue}>
           {text(SCHOOL_TRPG_COPY.continue, languageMode)} <ChevronRight size={18} />
         </button>
@@ -388,22 +513,33 @@ const CombatScreen: React.FC<{
 }> = ({ state, languageMode, cue, onAction }) => {
   const combat = state.combat!;
   const canPersuade = combat.insight >= 3 || Boolean(state.flags.knowsPassphrase);
+  const canInteract = Boolean(combat.mode && combat.mode !== 'DUEL');
+  const canUseItem = state.inventory.some(itemId => !state.flags[`usedCombatItem.${itemId}`]);
+  const canAllySkill = Boolean(combat.allyStates?.some(ally => ally.status !== 'SAFE'));
+  const canProtect = Boolean(combat.allyStates?.some(ally => ally.status === 'THREATENED'));
   const chapter = getTrpgChapterMeta(state.chapter);
   return (
     <div className="school-trpg-campaign-layout combat-mode">
       <section className={`school-trpg-combat-panel ${cue ? `cue-${cue.toLowerCase()}` : ''}`}>
-        <SchoolTrpgBackdrop asset="sprites/backgrounds/learning-rogue/battle-hallway.webp" />
+        <SchoolTrpgBackdrop asset={chapter.battleBackgroundAsset} />
         <div className="school-trpg-combat-grid" />
         <div className="school-trpg-enemy-intent">
           <span>{text(UI_COPY.enemyIntent, languageMode)}</span>
           <b>{combat.enemyIntent}</b>
         </div>
-        <EnemyIllustration
-          name={text(chapter.guardianName, languageMode)}
-          seed={`school-trpg-${state.seed}`}
-          altText={text(chapter.guardianName, languageMode)}
+        <ResilientAssetImage
+          sources={[assetUrl(chapter.guardianAsset)]}
+          alt={text(chapter.guardianName, languageMode)}
           className="school-trpg-guardian"
-          size={18}
+          fallback={(
+            <EnemyIllustration
+              name={text(chapter.guardianName, languageMode)}
+              seed={`school-trpg-${state.seed}`}
+              altText={text(chapter.guardianName, languageMode)}
+              className="school-trpg-guardian"
+              size={18}
+            />
+          )}
         />
         <div className="school-trpg-enemy-name"><span>{text(chapter.shortLabel, languageMode)}</span><b>{text(chapter.guardianName, languageMode)}</b></div>
         <div className="school-trpg-combat-meters">
@@ -414,13 +550,22 @@ const CombatScreen: React.FC<{
         <div className="school-trpg-combat-cue" aria-hidden="true"><span /><i /><b /></div>
       </section>
       <aside className="school-trpg-command-panel combat-copy">
-        <div className="school-trpg-panel-eyebrow">{text(UI_COPY.turn, languageMode)} {String(combat.turn).padStart(2, '0')}</div>
+        <div className="school-trpg-panel-eyebrow">{text(UI_COPY.turn, languageMode)} {String(combat.turn).padStart(2, '0')} · {text(COMBAT_MODE_COPY[combat.mode || 'DUEL'], languageMode)}</div>
         <h2>{text(chapter.battleLabel, languageMode)}</h2>
-        <p>{text(UI_COPY.battleHint, languageMode)}</p>
+        <p>{combat.objective ? text(combat.objective, languageMode) : text(UI_COPY.battleHint, languageMode)}</p>
+        <div className="school-trpg-combat-context">
+          <span>{text(UI_COPY.phase, languageMode)} <b>{combat.phase || 1}/3</b></span>
+          {combat.hazard && <span>{text(UI_COPY.hazard, languageMode)} <b>{text(combat.hazard.label, languageMode)} {combat.hazard.progress}/{combat.hazard.target}</b></span>}
+          {combat.allyStates && <span>{text(UI_COPY.allies, languageMode)} <b>{combat.allyStates.filter(ally => ally.status === 'SAFE').length}/{combat.allyStates.length}</b></span>}
+        </div>
         <div className="school-trpg-combat-actions">
           {COMBAT_ACTIONS.map(action => {
             const Icon = action.icon;
-            const disabled = action.id === 'PERSUADE' && !canPersuade;
+            const disabled = (action.id === 'PERSUADE' && !canPersuade)
+              || (action.id === 'INTERACT' && !canInteract)
+              || (action.id === 'USE_ITEM' && !canUseItem)
+              || (action.id === 'ALLY_SKILL' && !canAllySkill)
+              || (action.id === 'PROTECT' && !canProtect);
             return (
               <button key={action.id} type="button" disabled={disabled} onClick={() => onAction(action.id)}>
                 <Icon size={18} />
@@ -432,6 +577,7 @@ const CombatScreen: React.FC<{
         <div className="school-trpg-combat-log">
           {combat.logs.slice(-3).reverse().map((entry, index) => <p key={`${entry.turn}-${index}`}><b>{String(entry.turn).padStart(2, '0')}</b>{text(entry.copy, languageMode)}</p>)}
         </div>
+        <DiscoveryShelf state={state} languageMode={languageMode} compact />
       </aside>
     </div>
   );
@@ -453,7 +599,10 @@ const RewardScreen: React.FC<{
         <button key={reward.id} type="button" onClick={() => onReward(reward.id)}>
           <div className="school-trpg-reward-art">
             <ResilientAssetImage
-              sources={getCardIllustrationPaths(reward.id, reward.artName, [reward.artName])}
+              sources={[
+                ...(reward.artAsset ? [assetUrl(reward.artAsset)] : []),
+                ...getCardIllustrationPaths(reward.id, reward.artName, [reward.artName]),
+              ]}
               alt={text(reward.name, languageMode)}
               fallback={<img src={assetUrl('sprites/backgrounds/mini-games/badges/school-trpg.png')} alt="" />}
             />
@@ -461,6 +610,7 @@ const RewardScreen: React.FC<{
           </div>
           <b>{text(reward.name, languageMode)}</b>
           <p>{text(reward.description, languageMode)}</p>
+          <small className="school-trpg-reward-use">{text(reward.useCopy, languageMode)}</small>
           <em>SELECT DISCOVERY</em>
         </button>
       ))}
@@ -471,15 +621,15 @@ const RewardScreen: React.FC<{
 const EndingScreen: React.FC<{
   state: TrpgCampaignState;
   languageMode?: LanguageMode;
-  onFinish: () => void;
   onNextChapter: () => void;
   onReplay: () => void;
-}> = ({ state, languageMode, onFinish, onNextChapter, onReplay }) => {
+}> = ({ state, languageMode, onNextChapter, onReplay }) => {
+  const [showGallery, setShowGallery] = useState(false);
   const ending = getTrpgEnding(state.endingId) || getTrpgEnding('unfinished-map')!;
+  const endingArt = getTrpgEndingArt(ending.id);
   const chapter = getTrpgChapterMeta(state.chapter);
   const reward = getTrpgChapterRewards(state.chapter).find(candidate => candidate.id === state.selectedRewardId)
     || SCHOOL_TRPG_REWARDS.find(candidate => candidate.id === state.selectedRewardId);
-  const chapterProgress = getSchoolTrpgProgress(state);
   const canAdvance = state.chapter < 4 || (state.chapter === 4 && isHiddenSchoolTrpgChapterUnlocked(state));
   const nextChapter = state.chapter < 4 ? state.chapter + 1 : 5;
   const nextMeta = getTrpgChapterMeta(nextChapter);
@@ -490,20 +640,53 @@ const EndingScreen: React.FC<{
   );
   return (
     <div className={`school-trpg-ending-screen tone-${ending.tone.toLowerCase()}`}>
-      <SchoolTrpgBackdrop asset={ending.artAsset || 'sprites/backgrounds/learning-rogue/reward-rooftop.webp'} />
-      <div className="school-trpg-ending-seal"><span>ENDING</span><b>{String(Math.max(1, chapterProgress.total)).padStart(2, '0')}</b></div>
-      <section>
+      <div className="school-trpg-ending-art-panel">
+        <ResilientAssetImage
+          sources={[endingArt?.asset ? assetUrl(endingArt.asset) : null]}
+          alt={text(ending.title, languageMode)}
+          className="school-trpg-ending-art"
+          style={endingArt ? { objectPosition: `${endingArt.focalPoint.x}% ${endingArt.focalPoint.y}%` } : undefined}
+          fallback={<div className="school-trpg-art-fallback"><span>{text(UI_COPY.artFallback, languageMode)}</span></div>}
+        />
+        <div className="school-trpg-ending-art-shade" aria-hidden="true" />
+      </div>
+      <section className="school-trpg-ending-result-panel">
         <div className="school-trpg-panel-eyebrow">{text(chapter.shortLabel, languageMode)} // {text(getSchoolTrpgCombatResolutionCopy(state.combat?.resolution || null), languageMode)}</div>
         <h2>{text(ending.title, languageMode)}</h2>
         <h3>{text(ending.subtitle, languageMode)}</h3>
         <p>{text(ending.body, languageMode)}</p>
-        {reward && <div className="school-trpg-ending-reward"><Sparkles size={18} /><span>{text(reward.name, languageMode)}</span></div>}
+        {state.endingSummary && (
+          <div className="school-trpg-ending-cause">
+            <span>{text(UI_COPY.causeTrace, languageMode)}</span>
+            <p>{text(state.endingSummary, languageMode)}</p>
+          </div>
+        )}
+        {reward && <div className="school-trpg-ending-reward"><Sparkles size={18} /><span><b>{text(reward.name, languageMode)}</b><small>{text(reward.useCopy, languageMode)}</small></span></div>}
         <div className="school-trpg-ending-actions">
           {canAdvance && <button type="button" className="school-trpg-primary-button" onClick={onNextChapter}>{text(nextChapterCopy, languageMode)}<ChevronRight size={18} /></button>}
-          <button type="button" className="school-trpg-primary-button" onClick={onFinish}>{text(SCHOOL_TRPG_COPY.finish, languageMode)}<ChevronRight size={18} /></button>
+          <button type="button" className="school-trpg-secondary-button" onClick={() => setShowGallery(true)}><BookOpen size={17} />{text(UI_COPY.gallery, languageMode)}</button>
           <button type="button" className="school-trpg-secondary-button" onClick={onReplay}><RotateCcw size={17} />{text(SCHOOL_TRPG_COPY.replay, languageMode)}</button>
         </div>
       </section>
+      {showGallery && <div className="school-trpg-ending-gallery" role="dialog" aria-modal="true" aria-label={text(UI_COPY.gallery, languageMode)}>
+        <div className="school-trpg-ending-gallery-inner">
+          <div className="school-trpg-ending-gallery-head"><h3>{text(UI_COPY.gallery, languageMode)}</h3><button type="button" onClick={() => setShowGallery(false)} aria-label={text(UI_COPY.galleryClose, languageMode)}>×</button></div>
+          <div className="school-trpg-ending-gallery-grid">
+            {SCHOOL_TRPG_ENDINGS.map(galleryEnding => {
+              const discovered = (state.endingHistory || []).includes(galleryEnding.id) || galleryEnding.id === ending.id;
+              const galleryArt = getTrpgEndingArt(galleryEnding.id);
+              return <article key={galleryEnding.id} className={discovered ? 'is-discovered' : 'is-locked'}>
+                {discovered && galleryArt
+                  ? <ResilientAssetImage sources={[assetUrl(galleryArt.asset)]} alt={text(galleryArt.alt, languageMode)} className="school-trpg-ending-gallery-art" fallback={<div className="school-trpg-art-fallback"><span>{text(UI_COPY.artFallback, languageMode)}</span></div>} />
+                  : <div className="school-trpg-ending-gallery-lock">{text(UI_COPY.galleryLocked, languageMode)}</div>}
+                <b>{discovered ? text(galleryEnding.title, languageMode) : '???'}</b>
+                <small>{discovered ? text(galleryEnding.subtitle, languageMode) : text(UI_COPY.galleryLocked, languageMode)}</small>
+              </article>;
+            })}
+          </div>
+          <button type="button" className="school-trpg-secondary-button" onClick={() => setShowGallery(false)}>{text(UI_COPY.galleryClose, languageMode)}</button>
+        </div>
+      </div>}
     </div>
   );
 };
@@ -622,6 +805,7 @@ const SchoolTrpgGame = ({
     if (action === 'STRIKE') audioService.playAttackEffectSound('impact', 1);
     else if (action === 'GUARD') audioService.playBattleSound('block');
     else if (action === 'PERSUADE') audioService.playBattleSound('buff');
+    else if (action === 'INTERACT') audioService.playBattleSound('buff');
     else audioService.playBattleSound('select');
     showCombatCue(action);
     setState(performSchoolTrpgCombatAction(state, action));
@@ -636,12 +820,6 @@ const SchoolTrpgGame = ({
   };
 
   if (!state) return <StartScreen saved={savedAtOpen} languageMode={languageMode} onBack={onBack} onNew={startNew} onContinue={continueSaved} dataErrors={dataErrors} />;
-
-  const finishResult = state.combat?.result === 'LOSE' ? 'LOSE' : 'WIN';
-  const finishCampaign = () => {
-    if (onFinish) onFinish(finishResult);
-    else onBack();
-  };
 
   return (
     <main className="school-trpg-campaign-shell is-playing" data-gamepad-navigation-root data-gamepad-initial-scope="school-trpg-campaign">
@@ -686,7 +864,6 @@ const SchoolTrpgGame = ({
         {state.phase === 'ENDING' && <EndingScreen
           state={state}
           languageMode={languageMode}
-          onFinish={finishCampaign}
           onNextChapter={() => {
             const nextState = startNextSchoolTrpgChapter(state);
             setSelectedLocationId(nextState.currentLocationId);

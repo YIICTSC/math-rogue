@@ -9,6 +9,7 @@ import {
 } from './shogiPieces';
 
 export type ShogiMode = 'STANDARD' | 'ADVANCE';
+export type ShogiPlayMode = 'CPU' | 'LOCAL';
 export type ShogiBoard = Array<Array<ShogiPiece | null>>;
 export type ShogiHands = Record<ShogiSide, Partial<Record<ShogiPieceKind, number>>>;
 export type ShogiTargetStatus = 'MOVE' | 'CAPTURE' | 'DROP' | 'SPECIAL';
@@ -28,6 +29,7 @@ export interface ShogiMove {
 }
 export interface ShogiGameState {
   mode: ShogiMode;
+  playMode: ShogiPlayMode;
   stage: number;
   seed: number;
   board: ShogiBoard;
@@ -291,7 +293,7 @@ const pieceValue = (kind: ShogiPieceKind): number => {
 const boardSignature = (board: ShogiBoard): string =>
   board.map(row => row.map(piece => piece ? piece.side + ':' + piece.kind + (piece.promoted ? '+' : '') : '..').join('|')).join('/');
 
-export const getShogiTargets = (
+export const getShogiMovementTargets = (
   board: ShogiBoard,
   hands: ShogiHands,
   selection: { row: number; col: number } | { hand: ShogiPieceKind } | null,
@@ -307,10 +309,19 @@ export const getShogiTargets = (
   }
   const piece = board[selection.row]?.[selection.col];
   if (!piece || piece.side !== side) return [];
-  return candidateMoves(board, selection.row, selection.col)
-    .filter(target =>
-      moveLeavesKingSafe(board, side, [selection.row, selection.col], [target.row, target.col]),
-    );
+  return candidateMoves(board, selection.row, selection.col);
+};
+
+/** The learning duel deliberately uses piece-movement rules rather than
+ * king-safe legality. A careless move stays on the board so the CPU can
+ * capture the king and teach the consequence through an actual defeat. */
+export const getShogiTargets = (
+  board: ShogiBoard,
+  hands: ShogiHands,
+  selection: { row: number; col: number } | { hand: ShogiPieceKind } | null,
+  side: ShogiSide,
+): ShogiTarget[] => {
+  return getShogiMovementTargets(board, hands, selection, side);
 };
 
 const applyMove = (
@@ -341,7 +352,7 @@ const allMovesForSide = (board: ShogiBoard, hands: ShogiHands, side: ShogiSide):
   for (let row = 0; row < SIZE; row += 1) for (let col = 0; col < SIZE; col += 1) {
     const piece = board[row][col];
     if (!piece || piece.side !== side) continue;
-    getShogiTargets(board, hands, { row, col }, side).forEach(target => moves.push({
+    getShogiMovementTargets(board, hands, { row, col }, side).forEach(target => moves.push({
       from: [row, col],
       to: [target.row, target.col],
       kind: piece.kind,
@@ -352,7 +363,7 @@ const allMovesForSide = (board: ShogiBoard, hands: ShogiHands, side: ShogiSide):
   }
   Object.keys(hands[side]).forEach(kindValue => {
     const kind = kindValue as ShogiPieceKind;
-    getShogiTargets(board, hands, { hand: kind }, side).forEach(target => moves.push({
+    getShogiMovementTargets(board, hands, { hand: kind }, side).forEach(target => moves.push({
       from: null,
       to: [target.row, target.col],
       kind,
@@ -408,14 +419,17 @@ const buildShogiPosition = (
       if (!uniqueKinds.includes(pick)) uniqueKinds.push(pick);
     }
   }
-  const playerKinds = shuffled(baseKinds, random).slice(0, mode === 'ADVANCE' ? 4 : 5);
-  const cpuKinds = shuffled(baseKinds, random).slice(0, mode === 'ADVANCE' ? 4 : 5);
+  const standardPieceSlots = mode === 'ADVANCE' ? Math.max(1, 9 - uniqueKinds.length) : 5;
+  const playerKinds = shuffled(baseKinds, random).slice(0, standardPieceSlots);
+  const cpuKinds = shuffled(baseKinds, random).slice(0, standardPieceSlots);
   const playerPieces = [makeShogiPiece('K', 'P'), ...playerKinds.map(kind => makeShogiPiece(kind, 'P'))];
   const cpuPieces = [makeShogiPiece('K', 'C'), ...cpuKinds.map(kind => makeShogiPiece(kind, 'C'))];
   if (mode === 'ADVANCE') {
-    uniqueKinds.forEach((kind, index) => {
-      if (index % 2 === 0) playerPieces.push(makeShogiPiece(kind, 'P'));
-      else cpuPieces.push(makeShogiPiece(kind, 'C'));
+    uniqueKinds.forEach(kind => {
+      // Advance is a symmetric duel: both sides receive the same randomly
+      // selected special-piece set, so setup luck never decides the match.
+      playerPieces.push(makeShogiPiece(kind, 'P'));
+      cpuPieces.push(makeShogiPiece(kind, 'C'));
     });
   }
   const playerCells = shuffled([[3, 0], [3, 1], [3, 2], [3, 3], [3, 4], [4, 0], [4, 1], [4, 2], [4, 3], [4, 4]] as Array<[number, number]>, random);
@@ -440,10 +454,11 @@ export const createShogiPosition = (
   return position;
 };
 
-export const createShogiGame = (mode: ShogiMode, stage = 1, seed = Date.now()): ShogiGameState => {
+export const createShogiGame = (mode: ShogiMode, stage = 1, seed = Date.now(), playMode: ShogiPlayMode = 'CPU'): ShogiGameState => {
   const position = createShogiPosition(mode, stage, seed);
   return {
     mode,
+    playMode,
     stage,
     seed,
     board: position.board,
@@ -453,7 +468,9 @@ export const createShogiGame = (mode: ShogiMode, stage = 1, seed = Date.now()): 
     result: null,
     selected: null,
     legalTargets: [],
-    message: mode === 'ADVANCE' ? 'ステージ' + stage + '：駒を選んで移動範囲を確認。' : '新しい盤面を生成しました。駒を選んで移動範囲を確認。',
+    message: playMode === 'LOCAL'
+      ? (mode === 'ADVANCE' ? '対面アドバンス局。先手が駒を選んでください。' : '対面局。先手が駒を選んでください。')
+      : mode === 'ADVANCE' ? 'ステージ' + stage + '：駒を選んで移動範囲を確認。' : '新しい盤面を生成しました。駒を選んで移動範囲を確認。',
     history: [],
     lastMove: null,
     signature: boardSignature(position.board),
@@ -474,12 +491,12 @@ export const selectShogiPiece = (
   state: ShogiGameState,
   selection: { row: number; col: number } | { hand: ShogiPieceKind },
 ): ShogiGameState => {
-  const nextTargets = getShogiTargets(state.board, state.hands, selection, 'P');
+  const nextTargets = getShogiMovementTargets(state.board, state.hands, selection, state.side);
   return {
     ...state,
     selected: selection,
     legalTargets: nextTargets,
-    message: nextTargets.length ? '青いマスが移動先です。赤いマスは捕獲できます。' : 'この駒は現在動かせません。',
+    message: nextTargets.length ? '駒本来の移動先を表示しています。王が危険になる手も指せます。失敗から守り方を学びましょう。' : 'この駒は駒の動きとして移動先がありません。',
   };
 };
 
@@ -487,7 +504,8 @@ export const playShogiMove = (state: ShogiGameState, target: [number, number]): 
   if (state.result || !state.selected) return state;
   // The board and hands are the source of truth. Recalculate targets here so
   // a target from a previous render/game can never affect the current move.
-  const currentTargets = getShogiTargets(state.board, state.hands, state.selected, 'P');
+  const movingSide = state.side;
+  const currentTargets = getShogiMovementTargets(state.board, state.hands, state.selected, movingSide);
   const allowed = currentTargets.find(item => item.row === target[0] && item.col === target[1]);
   if (!allowed) return { ...state, message: 'そのマスには移動できません。表示された候補を選んでください。' };
   const selection = state.selected;
@@ -496,7 +514,7 @@ export const playShogiMove = (state: ShogiGameState, target: [number, number]): 
     from: 'hand' in selection ? null : [selection.row, selection.col],
     to: target,
     kind: 'hand' in selection ? selection.hand : piece!.kind,
-    side: 'P',
+    side: movingSide,
     capture: state.board[target[0]][target[1]]?.kind || null,
     special: allowed.status === 'SPECIAL',
   };
@@ -505,21 +523,26 @@ export const playShogiMove = (state: ShogiGameState, target: [number, number]): 
   if (applied.captured?.kind === 'K') {
     return {
       ...interim,
-      result: 'WIN',
-      message: '相手の王を取りました。勝利！',
+      result: movingSide === 'P' ? 'WIN' : 'LOSE',
+      message: state.playMode === 'LOCAL'
+        ? (movingSide === 'P' ? '先手が王を取りました。先手の勝利！' : '後手が王を取りました。後手の勝利！')
+        : '相手の王を取りました。勝利！',
+    };
+  }
+  if (state.playMode === 'LOCAL') {
+    const nextSide: ShogiSide = movingSide === 'P' ? 'C' : 'P';
+    const nextMoves = allMovesForSide(interim.board, interim.hands, nextSide);
+    if (!nextMoves.length) return { ...interim, side: nextSide, result: 'DRAW', message: '動かせる駒がありません。引き分けです。' };
+    return {
+      ...interim,
+      side: nextSide,
+      message: nextSide === 'P' ? '先手の手番です。' : '後手の手番です。端末を相手へ渡してください。',
     };
   }
   const cpuMoves = allMovesForSide(interim.board, interim.hands, 'C');
-  if (cpuMoves.length === 0) {
-    const cpuInCheck = isShogiInCheck(interim.board, 'C');
-    return {
-      ...interim,
-      result: cpuInCheck ? 'WIN' : 'DRAW',
-      message: cpuInCheck ? '詰みです。勝利！' : '合法手がありません。引き分けです。',
-    };
-  }
+  if (cpuMoves.length === 0) return { ...interim, result: 'DRAW', message: 'CPUに動かせる駒がありません。引き分けです。' };
   const cpuMove = chooseCpuMove(interim);
-  if (!cpuMove) return { ...interim, result: 'DRAW', message: 'CPUに合法手がありません。引き分けです。' };
+  if (!cpuMove) return { ...interim, result: 'DRAW', message: 'CPUに動かせる駒がありません。引き分けです。' };
   const cpuApplied = applyMove(interim.board, interim.hands, cpuMove);
   const afterCpu: ShogiGameState = {
     ...interim,
@@ -539,14 +562,7 @@ export const playShogiMove = (state: ShogiGameState, target: [number, number]): 
     };
   }
   const playerMoves = allMovesForSide(afterCpu.board, afterCpu.hands, 'P');
-  if (playerMoves.length === 0) {
-    const playerInCheck = isShogiInCheck(afterCpu.board, 'P');
-    return {
-      ...afterCpu,
-      result: playerInCheck ? 'LOSE' : 'DRAW',
-      message: playerInCheck ? '詰みです。敗北。' : '合法手がありません。引き分けです。',
-    };
-  }
+  if (playerMoves.length === 0) return { ...afterCpu, result: 'DRAW', message: '動かせる駒がありません。引き分けです。' };
   return afterCpu;
 };
 

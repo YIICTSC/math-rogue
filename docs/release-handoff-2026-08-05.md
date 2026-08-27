@@ -170,6 +170,18 @@ Xcodeの`-exportArchive` / Organizerで `No provider associated with App Store C
 
 IPA内に`Payload` directoryがないと `The IPA is invalid. It does not include a Payload directory.` で拒否される。
 
+### Transporter GUIでのアップロード成功手順（2026-08-15 / Build 36）
+
+CLIの通常パスワード認証やXcodeの直接アップロードでは完了できなかったため、App Store Connectにログイン済みのTransporter GUIからデリバリした。次回も次の流れを基準にする。
+
+1. `/Applications/Transporter.app`を起動し、App Store Connectの対象プロバイダとアカウントが表示されていることを確認。
+2. `パッケージを追加`からIPAを追加する。今回のIPAは `build/ios/ipa-36/LearningRogue-1.0.2-36.ipa`。
+3. 同じバージョン・ビルドが既に一覧にある場合は、置き換え確認で`置き換える`を選択。
+4. 対象行の`デリバリ`を押し、パッケージ分析、App Store Connectの分析応答待ち、アップロード完了まで待つ。
+5. 行が緑色の`デリバリ済み`になったことを確認し、App Store ConnectのTestFlightで`1.0.2 (36)`が表示されることを確認する。処理中の間はテストグループに追加できない場合があるため、処理完了後に内部テストグループへ割り当てる。
+
+確認コード・パスワード・APIキーなどの認証情報は引き継ぎ資料に記録しない。
+
 ### iOS再ビルドの基本コマンド
 
 ```bash

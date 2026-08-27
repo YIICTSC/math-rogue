@@ -31,7 +31,6 @@ interface ProblemChallengeScreenProps {
   problemSourceAssignment?: AssignmentPayload | null;
   onAnswerResult?: (result: AssignmentAnswerResult) => void;
   visualTheme?: VisualThemeId;
-  onOpenCategoryMiniGame?: (screen: GameScreen) => void;
 }
 
 type ProblemChallengeBgmOption = {
@@ -702,7 +701,6 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
   problemSourceAssignment,
   onAnswerResult,
   visualTheme = 'elementary',
-  onOpenCategoryMiniGame,
 }) => {
   const [phase, setPhase] = useState<'SELECT' | 'CHALLENGE'>('SELECT');
   const [selectedCategory, setSelectedCategory] = useState<SubjectCategoryConfig>(SUBJECT_CATEGORIES[0]);
@@ -1170,7 +1168,6 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
               streak={streak}
               languageMode={languageMode}
               assignmentUnits={activeChallenge?.assignmentUnits}
-              onOpenCategoryMiniGame={onOpenCategoryMiniGame}
             />
           )}
         </div>

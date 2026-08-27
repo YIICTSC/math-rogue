@@ -15,6 +15,53 @@ const STORAGE_KEY_MAGIC_ENDING_GALLERY = 'pixel_spire_magic_ending_gallery_v1';
 const STORAGE_KEY_THEMED_ENDING_GALLERY = 'pixel_spire_themed_ending_gallery_v1';
 
 const STORAGE_KEY_GAME_STATE = 'pixel_spire_save_state_v1';
+// The title screen's "Continue" entry belongs only to the main roguelike.
+// Every mini-game owns its own progress/state key and must never create or
+// validate the main-adventure resume slot.
+const NON_RESUMABLE_GAME_SCREENS = new Set<GameScreen>([
+  GameScreen.START_MENU,
+  GameScreen.GAME_OVER,
+  GameScreen.ENDING,
+  GameScreen.MAGIC_ROMANCE_ENDING,
+  GameScreen.VICTORY,
+  GameScreen.COMPENDIUM,
+  GameScreen.HELP,
+  GameScreen.CHARACTER_SELECTION,
+  GameScreen.DIFFICULTY_SELECTION,
+  GameScreen.RANKING,
+  GameScreen.PROBLEM_CHALLENGE,
+  GameScreen.ASSIGNMENT_CREATE,
+  GameScreen.SUBMISSION,
+  GameScreen.REWARD_CARD_ALBUM,
+  GameScreen.DEBUG_MENU,
+  GameScreen.MAGIC_EVENT_SIMULATION,
+  GameScreen.MINI_GAME_SELECT,
+  GameScreen.MINI_GAME_MODE_SELECTION,
+  GameScreen.MINI_GAME_POKER,
+  GameScreen.MINI_GAME_SURVIVOR,
+  GameScreen.MINI_GAME_DUNGEON,
+  GameScreen.MINI_GAME_DUNGEON_2,
+  GameScreen.MINI_GAME_KOCHO,
+  GameScreen.MINI_GAME_PAPER_PLANE,
+  GameScreen.MINI_GAME_GO_HOME,
+  GameScreen.MINI_GAME_STONE_GLOW,
+  GameScreen.MINI_GAME_SCHOOL_TRPG,
+  GameScreen.MINI_GAME_LEARNING_TCG,
+  GameScreen.MINI_GAME_SHOGI,
+  GameScreen.MINI_GAME_GO,
+  GameScreen.MINI_GAME_CHESS,
+  GameScreen.MINI_GAME_MAHJONG,
+]);
+
+const isMainAdventureResumeState = (value: unknown): value is GameState => {
+  if (!value || typeof value !== 'object') return false;
+  const candidate = value as Partial<GameState>;
+  return typeof candidate.screen === 'string'
+    && !NON_RESUMABLE_GAME_SCREENS.has(candidate.screen as GameScreen)
+    && candidate.challengeMode !== 'COOP'
+    && Boolean(candidate.player)
+    && Array.isArray(candidate.map);
+};
 const STORAGE_KEY_CLEAR_COUNT = 'pixel_spire_clear_count_v1';
 const STORAGE_KEY_THEME_CLEAR_COUNTS = 'pixel_spire_theme_clear_counts_v1';
 const STORAGE_KEY_RANKING = 'pixel_spire_ranking_v1';
@@ -1425,18 +1472,7 @@ export const storageService = {
       }
       // Don't save if we are on transient screens OR mini-games
       // Title screen resume should only work for the main game
-      const transientOrMini = [
-          GameScreen.START_MENU, GameScreen.GAME_OVER, GameScreen.ENDING, GameScreen.MAGIC_ROMANCE_ENDING,
-          GameScreen.VICTORY, GameScreen.COMPENDIUM, GameScreen.HELP,
-          GameScreen.CHARACTER_SELECTION, GameScreen.DIFFICULTY_SELECTION, GameScreen.RANKING, GameScreen.PROBLEM_CHALLENGE,
-          GameScreen.ASSIGNMENT_CREATE, GameScreen.SUBMISSION, GameScreen.REWARD_CARD_ALBUM,
-          GameScreen.DEBUG_MENU, GameScreen.MAGIC_EVENT_SIMULATION,
-          GameScreen.MINI_GAME_SELECT, GameScreen.MINI_GAME_MODE_SELECTION,
-          GameScreen.MINI_GAME_POKER, GameScreen.MINI_GAME_SURVIVOR,
-          GameScreen.MINI_GAME_DUNGEON, GameScreen.MINI_GAME_DUNGEON_2, GameScreen.MINI_GAME_KOCHO,
-          GameScreen.MINI_GAME_PAPER_PLANE, GameScreen.MINI_GAME_GO_HOME
-      ];
-      if (transientOrMini.includes(state.screen)) { 
+      if (!isMainAdventureResumeState(state)) {
           return;
       }
       localStorage.setItem(STORAGE_KEY_GAME_STATE, JSON.stringify(state));
@@ -1450,13 +1486,7 @@ export const storageService = {
       const stored = localStorage.getItem(STORAGE_KEY_GAME_STATE);
       if (!stored) return null;
       const parsed = JSON.parse(stored);
-      if (
-        parsed?.screen === GameScreen.ASSIGNMENT_CREATE ||
-        parsed?.screen === GameScreen.SUBMISSION ||
-        parsed?.screen === GameScreen.REWARD_CARD_ALBUM ||
-        parsed?.screen === GameScreen.DEBUG_MENU ||
-        parsed?.screen === GameScreen.MAGIC_EVENT_SIMULATION
-      ) {
+      if (!isMainAdventureResumeState(parsed)) {
         localStorage.removeItem(STORAGE_KEY_GAME_STATE);
         return null;
       }
@@ -1472,13 +1502,7 @@ export const storageService = {
         const stored = localStorage.getItem(STORAGE_KEY_GAME_STATE);
         if (!stored) return false;
         const parsed = JSON.parse(stored);
-        if (
-          parsed?.screen === GameScreen.ASSIGNMENT_CREATE ||
-          parsed?.screen === GameScreen.SUBMISSION ||
-          parsed?.screen === GameScreen.REWARD_CARD_ALBUM ||
-          parsed?.screen === GameScreen.DEBUG_MENU ||
-          parsed?.screen === GameScreen.MAGIC_EVENT_SIMULATION
-        ) {
+        if (!isMainAdventureResumeState(parsed)) {
           localStorage.removeItem(STORAGE_KEY_GAME_STATE);
           return false;
         }

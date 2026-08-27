@@ -179,9 +179,13 @@ try {
     audioService.handleAppBackground();
     audioService.handleAppBackground();
     const pauseCountAfterBackground = window.__iosBgmPauseCount;
-    await audioService.handleAppForeground();
+    // Reproduce the iOS race where a correct-answer/UI tone is requested in
+    // the same run loop as foreground recovery. The sound must wait for the
+    // recovery promise even if AudioContext briefly reports itself as running.
+    const foregroundRecovery = audioService.handleAppForeground();
     const oscillatorCountBeforeSe = window.__iosOscillatorStartCount;
     audioService.playSound('select');
+    await foregroundRecovery;
     await new Promise(resolve => window.setTimeout(resolve, 30));
     void audioService.playHighSchoolVoiceFile('HS_MALE', 'attack-1', 500);
     await new Promise(resolve => window.setTimeout(resolve, 50));
@@ -193,6 +197,11 @@ try {
     audioService.playSound('jump');
     await new Promise(resolve => window.setTimeout(resolve, 50));
     const normalPackagedAttemptCount = window.__iosBgmPlayAttempts.length - beforeNormalSoundCount;
+    const beforeAnswerSoundCount = window.__iosBgmPlayAttempts.length;
+    audioService.playSound('correct');
+    audioService.playSound('wrong');
+    await new Promise(resolve => window.setTimeout(resolve, 50));
+    const answerSoundAttempts = window.__iosBgmPlayAttempts.slice(beforeAnswerSoundCount);
     audioService.playBattleSound('attack');
     audioService.playBattleSound('finisher_slash');
     audioService.playBattleSound('finisher_explosion');
@@ -202,6 +211,7 @@ try {
       mediaSourceCount: window.__iosBgmMediaSourceCount,
       pauseCountAfterBackground,
       normalPackagedAttemptCount,
+      answerSoundAttempts,
       attemptsBeforeCarPlayTouch,
       attemptsAfterCarPlayTouch,
       attemptsBeforeBackgroundRace,
@@ -215,7 +225,9 @@ try {
       && window.__iosBgmPlayAttempts.some(path => path.includes('/sfx/high-school-voices/HS_MALE/attack-1'))
       && window.__iosBgmPlayAttempts.some(path => path.includes('/sfx/attack-effects/impact.mp3'))
       && window.__iosBgmPlayAttempts.some(path => path.includes('/sfx/finisher-slash.mp3'))
-      && window.__iosBgmPlayAttempts.some(path => path.includes('/sfx/finisher-explosion.mp3')),
+      && window.__iosBgmPlayAttempts.some(path => path.includes('/sfx/finisher-explosion.mp3'))
+      && window.__iosBgmPlayAttempts.some(path => path.includes('/sfx/correct.mp3'))
+      && window.__iosBgmPlayAttempts.some(path => path.includes('/sfx/wrong.mp3')),
     beforeResumeCount,
   );
   if (runtimeState.bgmVolume !== 0.25) throw new Error('BGM volume setting was not retained');
@@ -224,6 +236,12 @@ try {
   if (runtimeState.contextState !== 'running') throw new Error(`AudioContext remained ${runtimeState.contextState} after foreground restore`);
   if (!runtimeState.oscillatorSeStarted) throw new Error('Synthesized SE did not resume after foreground restore');
   if (runtimeState.normalPackagedAttemptCount !== 0) throw new Error('Non-battle sound unexpectedly started a packaged SE');
+  if (!runtimeState.answerSoundAttempts.some(path => path.includes('/sfx/correct.mp3'))) {
+    throw new Error('iOS correct-answer sound did not use the native packaged audio path');
+  }
+  if (!runtimeState.answerSoundAttempts.some(path => path.includes('/sfx/wrong.mp3'))) {
+    throw new Error('iOS wrong-answer sound did not use the native packaged audio path');
+  }
   if (runtimeState.attemptsAfterCarPlayTouch !== runtimeState.attemptsBeforeCarPlayTouch) {
     throw new Error('Suspended CarPlay Web Audio caused the active HTML BGM to restart');
   }

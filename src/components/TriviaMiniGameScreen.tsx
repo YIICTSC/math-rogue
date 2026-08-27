@@ -7,6 +7,7 @@ import MiniGameProblemChallenge from './MiniGameProblemChallenge';
 import { audioService } from '../services/audioService';
 import { trans } from '../utils/textUtils';
 import { assetUrl } from '../utils/assetPaths';
+import { resolveStoneGlowRound, type StoneGlowOutcome } from '../mini-games/stone-glow/stoneGlowRules';
 
 interface TriviaMiniGameProps {
   onBack: () => void;
@@ -103,7 +104,7 @@ const GameShell: React.FC<{
 
 const MiniGameMissionClearContext = React.createContext<(() => void) | null>(null);
 
-const ResultBanner: React.FC<{ result: 'WIN' | 'LOSE' | null; onRestart: () => void; languageMode: LanguageMode; onWin?: () => void }> = ({ result, onRestart, languageMode, onWin }) => {
+const ResultBanner: React.FC<{ result: 'WIN' | 'LOSE' | 'DRAW' | null; onRestart: () => void; languageMode: LanguageMode; onWin?: () => void }> = ({ result, onRestart, languageMode, onWin }) => {
   const missionClear = React.useContext(MiniGameMissionClearContext);
   useEffect(() => {
     if (result === 'WIN') (onWin || missionClear)?.();
@@ -112,7 +113,7 @@ const ResultBanner: React.FC<{ result: 'WIN' | 'LOSE' | null; onRestart: () => v
   return (
     <div className="mini-game-result-banner mb-3 rounded-2xl border border-yellow-300/50 bg-yellow-950/70 p-4 text-center shadow-lg">
       <Trophy className="mx-auto mb-1 text-yellow-300" size={28} />
-      <div className="text-lg font-black text-yellow-100">{result === 'WIN' ? text(languageMode, '勝利！', 'Victory!') : text(languageMode, 'ゲーム終了', 'Game over')}</div>
+      <div className="text-lg font-black text-yellow-100">{result === 'WIN' ? text(languageMode, '勝利！', 'Victory!') : result === 'DRAW' ? text(languageMode, '引き分け', 'Draw') : text(languageMode, 'ゲーム終了', 'Game over')}</div>
       <button type="button" onClick={onRestart} data-gamepad-zone="result" data-gamepad-order={0} className="mt-3 rounded-lg bg-yellow-400 px-4 py-2 font-black text-slate-950 hover:bg-yellow-300">
         {text(languageMode, 'もう一度遊ぶ', 'Play again')}
       </button>
@@ -193,7 +194,7 @@ type StoneGlowState = {
   round: number;
   selectedTake: StoneColor[];
   actionLog: LocalCopy[];
-  result: 'WIN' | 'LOSE' | null;
+  result: StoneGlowOutcome | null;
 };
 const createStoneGlowState = (): StoneGlowState => {
   const shuffled = [...STONE_MARKET_DECK].sort(() => Math.random() - 0.5);
@@ -250,8 +251,19 @@ const advanceStoneCpu = (state: StoneGlowState): StoneGlowState => {
     next.actionLog.push({ jp: `CPUは${labels || '石'}の石を取りました。`, en: `CPU took ${englishLabels || 'stones'}.` });
   }
   next.round += 1;
-  if (next.score >= 8) next.result = 'WIN';
-  else if (next.cpuScore >= 8 || next.round > 18) next.result = next.score > next.cpuScore ? 'WIN' : 'LOSE';
+  next.result = resolveStoneGlowRound({
+    playerScore: next.score,
+    cpuScore: next.cpuScore,
+    playerCardCount: next.owned.length,
+    cpuCardCount: next.cpuOwned.length,
+    round: next.round,
+  });
+  if (next.result) {
+    next.actionLog.push({
+      jp: `後手番まで完了。最終得点はあなた${next.score}点、CPU${next.cpuScore}点です。`,
+      en: `The second turn is complete. Final score: You ${next.score}, CPU ${next.cpuScore}.`,
+    });
+  }
   if (!next.result) next.actionLog.push({ jp: `ラウンド${next.round}。あなたの手番です。`, en: `Round ${next.round}. Your turn.` });
   next.actionLog = next.actionLog.slice(-20);
   return next;
@@ -349,7 +361,7 @@ const StoneGlowGame: React.FC<TriviaMiniGameProps> = ({ onBack, languageMode = '
     audioService.playSound('select');
   };
   return (
-    <GameShell scope="stone-glow" title={text(languageMode, '石ころの煌めき', 'Stone Glow')} subtitle={text(languageMode, '共通の鉱山から石を取り、割引を育てて先に8点。予約とワイルド石が逆転の鍵。', 'Take stones from a shared mine, build discounts, and reach 8 points first. Reserve cards and wild stones can turn the game around.')} languageMode={languageMode} backgroundAsset="sprites/backgrounds/mini-games/stone-glow.png" badgeAsset="sprites/backgrounds/mini-games/badges/stone-glow.png" onBack={onBack}>
+    <GameShell scope="stone-glow" title={text(languageMode, '石ころの煌めき', 'Stone Glow')} subtitle={text(languageMode, '8点に達したラウンドは後手番まで進行。同じ手番数で得点を競います。', 'When either side reaches 8, finish the round so both sides receive the same number of turns.')} languageMode={languageMode} backgroundAsset="sprites/backgrounds/mini-games/stone-glow.png" badgeAsset="sprites/backgrounds/mini-games/badges/stone-glow.png" onBack={onBack}>
       <ResultBanner result={game.result} onRestart={restart} languageMode={languageMode} onWin={onMissionClear} />
       <div className="stone-glow-scoreboard mb-2 grid grid-cols-2 gap-2 sm:grid-cols-4">
         <div className="rounded-xl border border-emerald-300/30 bg-emerald-950/70 p-2"><div className="text-xs text-emerald-200">{text(languageMode, 'あなた', 'You')}</div><div className="text-2xl font-black">{game.score}<span className="ml-1 text-xs">{text(languageMode, '点', 'pts')}</span></div></div>
@@ -389,7 +401,7 @@ const copyText = (languageMode: LanguageMode, value: LocalCopy) => text(language
 const MINI_GAME_RULES: Record<string, MiniGameRules> = {
   'stone-glow': {
     summary: copy('石ころを集めて鉱山カードを購入し、割引を育てる対戦ゲームです。', 'Collect stones, buy mine cards, and grow permanent discounts.'),
-    goal: copy('先に8点を取る。18ラウンドで決着しない時は、点数の高い方が勝ち。', 'Reach 8 points first. If 18 rounds pass, the higher score wins.'),
+    goal: copy('どちらかが8点に達したラウンドを後手番まで行い、点数の高い方が勝ち。同点は獲得カードが少ない方、それも同じなら引き分け。', 'After either side reaches 8, finish the round and compare scores. A tie goes to the side with fewer cards; an exact tie is a draw.'),
     steps: [copy('公開カードのコストを確認する。色ごとの丸は必要な石の数です。', 'Check the open cards. Each colored gem shows a cost.'), copy('異なる色を2個、または供給が4個以上残る色を同じ2個取る。', 'Take two different colors, or two of one color when at least four remain.'), copy('購入カードは次から割引として働く。取れないカードは予約でき、ワイルド石を1個得る。', 'Purchased cards become discounts. Reserve an unreachable card to gain one wild stone.'), copy('「購入」または「石を確定して取る」で手番を終える。', 'End your turn with Buy or Confirm take.')],
     tip: copy('まず同じ色の割引がつながるカードを選ぶと、後半に高得点カードを買いやすくなります。', 'Build one color of discounts early so expensive cards become easier later.'),
   },
@@ -406,9 +418,9 @@ const MINI_GAME_RULES: Record<string, MiniGameRules> = {
     tip: copy('敵の攻撃予定が大きい時は防御を先に。弱体・脆弱を重ねると少ないエナジーでも伸びます。', 'Block first when the enemy intent is high. Weak and Vulnerable make small energy budgets go further.'),
   },
   shogi: {
-    summary: copy('5×5の盤で駒を動かし、取った駒を持ち駒として打てるミニ将棋です。', 'Move pieces on a 5x5 board and drop captured pieces back into play.'),
+    summary: copy('5×5の盤で駒本来の動きを自由に試し、悪手による敗北から王の守り方を学ぶミニ将棋です。', 'Try every piece-movement destination on a 5x5 board and learn king safety from losing after a mistake.'),
     goal: copy('相手の玉を取る。相手陣の2段に入った駒は一部が自動で成る。', 'Capture the enemy king. Some pieces auto-promote in the enemy camp.'),
-    steps: [copy('自分の駒を選び、動けるマスを選ぶ。相手の駒を取ると持ち駒になる。', 'Select a piece and a legal destination. Captured pieces go to your hand.'), copy('持ち駒を選ぶと、空いたマスへ打てる。', 'Select a held piece to drop it on an empty square.'), copy('歩は同じ筋に2枚置けず、歩・銀・角・飛は敵陣で成る。', 'Two unpromoted pawns cannot share a file; pawn, silver, bishop, and rook promote in the camp.'), copy('玉を詰める前に、相手の次の攻め筋も確認する。', 'Watch the opponent’s next attack before committing to a capture.')],
+    steps: [copy('自分の駒を選び、駒本来の動きで進めるマスを選ぶ。相手の駒を取ると持ち駒になる。', 'Select a piece and any destination allowed by its movement. Captured pieces go to your hand.'), copy('王を危険にする手も実行できる。CPUに王を取られると敗北し、その局面から守り方を学ぶ。', 'Moves exposing your king are allowed. If the CPU captures it, use the defeat to learn how it should have been defended.'), copy('持ち駒を選ぶと、空いたマスへ打てる。', 'Select a held piece to drop it on an empty square.'), copy('歩は同じ筋に2枚置けず、歩・銀・角・飛は敵陣で成る。', 'Two unpromoted pawns cannot share a file; pawn, silver, bishop, and rook promote in the camp.')],
     tip: copy('持ち駒は盤上の駒よりも自由度が高いので、取った駒をすぐに打たず攻めの形を考えます。', 'Held pieces are flexible; consider the attacking shape before dropping them immediately.'),
   },
   go: {
@@ -418,16 +430,16 @@ const MINI_GAME_RULES: Record<string, MiniGameRules> = {
     tip: copy('最初は中央を広げ、相手の石を囲むより自分の石の呼吸点を増やすことを意識します。', 'Start by expanding toward the center and keep your own groups connected with liberties.'),
   },
   chess: {
-    summary: copy('駒の動きと王の安全を学びながら、合法手で相手のキングを詰ませるチェスです。', 'Learn piece movement and king safety while checkmating the enemy king with legal moves.'),
-    goal: copy('相手のキングをチェックメイトする。ポーンは最奥段でクイーンに昇格する。', 'Checkmate the enemy king. Pawns promote to a queen on the last rank.'),
-    steps: [copy('自分の駒を選び、移動先を選ぶ。自分のキングが攻撃される手は選べない。', 'Select a piece and destination. A move leaving your king attacked is illegal.'), copy('ナイトは飛び越え、ビショップは斜め、ルークは縦横、クイーンは両方に動く。', 'Knights jump; bishops move diagonally; rooks move straight; queens do both.'), copy('相手のキングに攻撃が届くとチェック。逃げ道がなければ勝利。', 'An attacked king is in check; no legal escape means victory.'), copy('相手の攻撃予定を見て、駒をただ取るだけでなく王の安全を優先する。', 'Read the opponent’s threats and prioritize king safety over casual captures.')],
+    summary: copy('駒本来の動きを自由に試し、キングを取られる敗北から安全な指し方を学ぶチェスです。', 'Try every piece-movement destination and learn safe play from defeats where your king is captured.'),
+    goal: copy('相手のキングを取る。ポーンは最奥段でクイーンに昇格する。', 'Capture the enemy king. Pawns promote to a queen on the last rank.'),
+    steps: [copy('自分の駒を選び、駒本来の動きで進めるマスを選ぶ。キングを危険にする手も実行できる。', 'Select a piece and any destination allowed by its movement, including moves that expose your king.'), copy('ナイトは飛び越え、ビショップは斜め、ルークは縦横、クイーンは両方に動く。', 'Knights jump; bishops move diagonally; rooks move straight; queens do both.'), copy('CPUにキングを取られると敗北。取られた局面を見て、どの駒で守るべきだったか学ぶ。', 'If the CPU captures your king, study the losing position and identify the defense you missed.'), copy('相手の攻撃予定を見て、駒をただ取るだけでなく王の安全を優先する。', 'Read the opponent’s threats and prioritize king safety over casual captures.')],
     tip: copy('序盤は中央のポーンとナイトを動かし、キングの周りに逃げ道を残します。', 'Develop central pawns and knights early, and keep escape squares around your king.'),
   },
   mahjong: {
-    summary: copy('牌を入れ替えながら、順子・刻子の面子と対子をそろえる学習向け麻雀です。', 'Swap tiles to build sequences, triplets, and a pair in this learning mahjong game.'),
-    goal: copy('8枚の手牌で面子2つ＋対子1つを完成させる。役の知識は次の一手を選ぶヒントになる。', 'Complete two melds plus one pair with eight tiles. Yaku knowledge guides your next discard.'),
-    steps: [copy('捨てたい牌を選ぶと、1枚引いて手牌が入れ替わる。', 'Select a tile to discard, then draw one replacement.'), copy('順子は同じ種類の連番3枚、刻子は同じ牌3枚、対子は同じ牌2枚。', 'A sequence is three consecutive tiles; a triplet is three identical tiles; a pair is two identical tiles.'), copy('「牌を整理」で種類・数字順に並べ替え、「役を見る」で役の意味を確認する。', 'Use Sort tiles to order the hand and View yaku to learn yaku meanings.'), copy('おすすめ役のヒントを見て、不要な字牌や端牌から整理する。', 'Follow the recommended-yaku hint and trim isolated honors or terminals first.')],
-    tip: copy('まずはタンヤオ風に2〜8の数牌を集めると、順子が作りやすくなります。', 'Start with a Tanyao-style plan: keep number tiles 2–8 to make sequences more easily.'),
+    summary: copy('プラクティスは8枚で形を学び、スタンダードは13枚の手牌でツモ・捨て牌・鳴きを体験する2人対戦麻雀です。', 'Practice teaches hand shapes with eight tiles; Standard is a two-player game with 13-tile hands, draws, discards, and calls.'),
+    goal: copy('スタンダードは14枚から1枚を捨て、面子4つ＋対子1つを先に完成させる。プラクティスとアドバンスは短縮手牌で練習する。', 'In Standard, discard from 14 tiles and complete four melds plus a pair first. Practice and Advance use shorter learning hands.'),
+    steps: [copy('スタンダードでは13枚からツモって14枚にし、1枚を捨てる。相手の捨て牌にはチー・ポン・ロンで関われる。', 'In Standard, draw from 13 to 14 tiles, then discard one. You can respond to an opponent discard with Chi, Pon, or Ron.'), copy('順子は同じ種類の連番3枚、刻子は同じ牌3枚、対子は同じ牌2枚。', 'A sequence is three consecutive tiles; a triplet is three identical tiles; a pair is two identical tiles.'), copy('「役を見る」と「用語を見る」で、役・鳴き・捨て牌のルールをいつでも確認する。', 'Use View yaku and Glossary to check yaku, calls, and discard rules at any time.'), copy('アドバンスでは短縮局を重ねて報酬を選び、5局目を勝ち抜く。', 'In Advance, clear short rounds, choose rewards, and finish after five rounds.')],
+    tip: copy('スタンダードでは孤立した字牌を先に捨てるか、相手の捨て牌からチー・ポンできる形を残すかを考えます。', 'In Standard, decide whether to discard an isolated honor or keep shapes that can call Chi or Pon from an opponent discard.'),
   },
 };
 type TrpgStat = 'study' | 'energy' | 'friendship' | 'courage';
@@ -700,12 +712,25 @@ const scoreGo = (board: GoBoard) => {
   return { black, white };
 };
 
+const GO_TERMS: Array<{ term: LocalCopy; description: LocalCopy }> = [
+  { term: copy('呼吸点', 'Liberty'), description: copy('石またはつながった石の上下左右にある空き交点。すべて塞がれると取られます。', 'An empty adjacent intersection. A connected group is captured when all liberties are filled.') },
+  { term: copy('連', 'Chain'), description: copy('上下左右でつながった同じ色の石の集まり。呼吸点を共有します。', 'A group of same-color stones joined vertically or horizontally. The group shares its liberties.') },
+  { term: copy('アタリ', 'Atari'), description: copy('あと1つ呼吸点を塞がれると取られる状態。チェスのチェックに近い警告です。', 'A group with only one liberty left, meaning it can be captured on the next move.') },
+  { term: copy('地', 'Territory'), description: copy('自分の石だけで囲んだ空き交点。終局時の得点になります。', 'Empty intersections surrounded only by your stones. They score at the end of the game.') },
+  { term: copy('コウ', 'Ko'), description: copy('直前と同じ盤面をすぐに作り直す取り返し。無限反復を防ぐため禁止です。', 'An immediate recapture that would recreate the previous board. It is forbidden to prevent an endless loop.') },
+  { term: copy('自殺手', 'Suicide'), description: copy('相手を取らず、置いた石の呼吸点が0になる手。このミニゲームでは置けません。', 'A move leaving the played stone with no liberty without capturing. This mini-game disallows it.') },
+  { term: copy('パス', 'Pass'), description: copy('石を置かずに手番を渡すこと。2人が連続でパスすると終局です。', 'Yield the turn without playing a stone. Two consecutive passes end the game.') },
+];
+
 const GoGame: React.FC<TriviaMiniGameProps> = ({ onBack, languageMode = 'JAPANESE' }) => {
   const [board, setBoard] = useState<GoBoard>(emptyGoBoard);
-  const [captures, setCaptures] = useState(0); const [cpuCaptures, setCpuCaptures] = useState(0); const [passes, setPasses] = useState(0); const [moves, setMoves] = useState(0); const [koKey, setKoKey] = useState(''); const [finalScore, setFinalScore] = useState<{ black: number; white: number } | null>(null); const [result, setResult] = useState<'WIN' | 'LOSE' | null>(null);
-  const restart = () => { setBoard(emptyGoBoard()); setCaptures(0); setCpuCaptures(0); setPasses(0); setMoves(0); setKoKey(''); setFinalScore(null); setResult(null); };
+  const [playMode, setPlayMode] = useState<'CPU' | 'LOCAL'>('CPU');
+  const [side, setSide] = useState<'B' | 'W'>('B');
+  const [showTerms, setShowTerms] = useState(false);
+  const [captures, setCaptures] = useState(0); const [cpuCaptures, setCpuCaptures] = useState(0); const [passes, setPasses] = useState(0); const [moves, setMoves] = useState(0); const [koKey, setKoKey] = useState(''); const [finalScore, setFinalScore] = useState<{ black: number; white: number } | null>(null); const [result, setResult] = useState<'WIN' | 'LOSE' | 'DRAW' | null>(null);
+  const restart = (nextMode = playMode) => { setPlayMode(nextMode); setBoard(emptyGoBoard()); setSide('B'); setCaptures(0); setCpuCaptures(0); setPasses(0); setMoves(0); setKoKey(''); setFinalScore(null); setResult(null); };
   const finish = (finalBoard: GoBoard) => {
-    const score = scoreGo(finalBoard); setFinalScore(score); setResult(score.black >= score.white ? 'WIN' : 'LOSE');
+    const score = scoreGo(finalBoard); setFinalScore(score); setResult(score.black === score.white ? 'DRAW' : score.black > score.white ? 'WIN' : 'LOSE');
   };
   const cpuTurn = (current: GoBoard, forbiddenKey: string) => {
     const candidates: Array<{ row: number; col: number; captured: number; distance: number; board: GoBoard }> = [];
@@ -717,7 +742,18 @@ const GoGame: React.FC<TriviaMiniGameProps> = ({ onBack, languageMode = 'JAPANES
   };
   const place = (row: number, col: number) => {
     if (result) return;
-    const placed = putGoStone(board, row, col, 'B'); if (!placed || goBoardKey(placed.board) === koKey) return;
+    const placed = putGoStone(board, row, col, playMode === 'LOCAL' ? side : 'B'); if (!placed || goBoardKey(placed.board) === koKey) return;
+    if (playMode === 'LOCAL') {
+      const nextMoves = moves + 1;
+      setBoard(placed.board);
+      if (side === 'B') setCaptures(value => value + placed.captured); else setCpuCaptures(value => value + placed.captured);
+      setKoKey(goBoardKey(board));
+      setPasses(0);
+      setMoves(nextMoves);
+      setSide(side === 'B' ? 'W' : 'B');
+      if (nextMoves >= 90) finish(placed.board);
+      return;
+    }
     const cpu = cpuTurn(placed.board, goBoardKey(board)); const nextMoves = moves + 1;
     if (!cpu) { setBoard(placed.board); setCaptures(captures + placed.captured); setPasses(previous => previous + 1); setMoves(nextMoves); if (passes + 1 >= 2 || nextMoves >= 45) finish(placed.board); return; }
     const nextPasses = 0; setBoard(cpu.board); setCaptures(captures + placed.captured); setCpuCaptures(cpuCaptures + cpu.captured); setPasses(nextPasses); setMoves(nextMoves); setKoKey(goBoardKey(placed.board)); if (nextMoves >= 45) finish(cpu.board);
@@ -726,11 +762,23 @@ const GoGame: React.FC<TriviaMiniGameProps> = ({ onBack, languageMode = 'JAPANES
     if (result) return;
     const nextPasses = passes + 1;
     if (nextPasses >= 2) { finish(board); setPasses(nextPasses); return; }
+    if (playMode === 'LOCAL') {
+      setPasses(nextPasses);
+      setSide(side === 'B' ? 'W' : 'B');
+      setMoves(value => value + 1);
+      return;
+    }
     const cpu = cpuTurn(board, koKey);
     if (!cpu) { finish(board); setPasses(2); return; }
     setBoard(cpu.board); setCpuCaptures(cpuCaptures + cpu.captured); setPasses(0); setKoKey(goBoardKey(board)); setMoves(value => value + 1);
   };
-  return <GameShell scope="go" title={text(languageMode, '九路盤 囲碁', 'Nine-Ring Go')} subtitle={text(languageMode, 'コウ・自殺手・パス・陣地計算を使う9路盤。2回連続パスで終局します。', 'A 9x9 Go board with ko, suicide, passing, and territory scoring. Two consecutive passes end the game.')} languageMode={languageMode} backgroundAsset="sprites/backgrounds/mini-games/go.png" badgeAsset="sprites/backgrounds/mini-games/badges/go.png" onBack={onBack}><ResultBanner result={result} onRestart={restart} languageMode={languageMode} /><div className="go-scoreboard mb-3 grid grid-cols-2 gap-2 text-center sm:grid-cols-4"><div className="rounded-xl border border-slate-400/30 bg-slate-950/65 p-2 text-sm">{text(languageMode, '黒の捕獲', 'Black captures')}<strong className="ml-1">{captures}</strong></div><div className="rounded-xl border border-white/20 bg-white/15 p-2 text-sm">{text(languageMode, '白の捕獲', 'White captures')}<strong className="ml-1">{cpuCaptures}</strong></div><div className="rounded-xl border border-amber-300/25 bg-amber-950/55 p-2 text-sm">{text(languageMode, '手数', 'Moves')}<strong className="ml-1">{moves} / 45</strong></div><div className="rounded-xl border border-cyan-300/25 bg-cyan-950/55 p-2 text-sm">{text(languageMode, '連続パス', 'Passes')}<strong className="ml-1">{passes} / 2</strong></div></div><div className="go-board-area flex flex-1 flex-col items-center"><div className="go-board mb-3 grid aspect-square w-full max-w-[min(90vw,540px)] grid-cols-9 rounded-xl border-4 border-amber-700 bg-amber-200/90 p-2">{board.flatMap((line, row) => line.map((cell, col) => <button key={`${row}-${col}`} type="button" onClick={() => place(row, col)} data-gamepad-zone="go-board" data-gamepad-order={row * 9 + col} className="relative flex aspect-square items-center justify-center border border-amber-900/35 text-xl sm:text-2xl">{(row === 2 || row === 4 || row === 6) && (col === 2 || col === 4 || col === 6) && <span className="absolute h-1.5 w-1.5 rounded-full bg-amber-900" />}{cell && <span className={`relative z-10 h-[80%] w-[80%] rounded-full shadow-lg ${cell === 'B' ? 'bg-slate-950' : 'bg-white'}`} />}</button>))}</div><div className="go-actions mb-3 flex gap-2"><button type="button" onClick={pass} disabled={!!result} data-gamepad-zone="go-actions" data-gamepad-order={0} className="rounded-xl border border-cyan-300/40 bg-cyan-700/80 px-5 py-3 font-black hover:bg-cyan-600 disabled:opacity-35">{text(languageMode, 'パス', 'Pass')}</button></div>{finalScore && <div className="go-final-score mb-3 rounded-xl border border-amber-300/30 bg-amber-950/55 p-3 text-center text-sm text-amber-100">{text(languageMode, '終局スコア 黒：', 'Final score Black: ')}{finalScore.black} ／ {text(languageMode, '白：', 'White: ')}{finalScore.white}</div>}<div className="go-guide max-w-md rounded-xl border border-white/10 bg-white/5 p-3 text-xs leading-5 text-slate-300">{text(languageMode, '相手の石を取るだけでなく、空点を囲むと陣地になります。自殺手と直前の盤面への再現（コウ）は置けません。', 'Surrounding empty points scores territory. Suicide moves and immediate repetition of the previous board (ko) are illegal.')}</div></div></GameShell>;
+  return <GameShell scope="go" title={text(languageMode, '九路盤 囲碁', 'Nine-Ring Go')} subtitle={text(languageMode, 'コウ・自殺手・パス・陣地計算を使う9路盤。2回連続パスで終局します。', 'A 9x9 Go board with ko, suicide, passing, and territory scoring. Two consecutive passes end the game.')} languageMode={languageMode} backgroundAsset="sprites/backgrounds/mini-games/go.png" badgeAsset="sprites/backgrounds/mini-games/badges/go.png" onBack={onBack}>
+    {playMode === 'CPU' ? <ResultBanner result={result} onRestart={() => restart()} languageMode={languageMode} /> : result && <div className="mini-game-result-banner mb-3 rounded-2xl border border-yellow-300/50 bg-yellow-950/70 p-3 text-center font-black text-yellow-100">{result === 'DRAW' ? text(languageMode, '引き分け', 'Draw') : result === 'WIN' ? text(languageMode, '黒の勝利！', 'Black wins!') : text(languageMode, '白の勝利！', 'White wins!')}<button type="button" onClick={() => restart()} className="ml-3 rounded-lg bg-yellow-400 px-3 py-2 text-slate-950">{text(languageMode, 'もう一局', 'Play again')}</button></div>}
+    <div className="mini-game-local-mode mb-3 grid grid-cols-2 gap-2"><button type="button" className={playMode === 'CPU' ? 'active' : ''} onClick={() => restart('CPU')}>{text(languageMode, 'CPU対戦', 'VS CPU')}</button><button type="button" className={playMode === 'LOCAL' ? 'active' : ''} onClick={() => restart('LOCAL')}>{text(languageMode, '対面対戦', 'Face-to-face')}</button></div>
+    <div className="go-scoreboard mb-3 grid grid-cols-2 gap-2 text-center sm:grid-cols-4"><div className="rounded-xl border border-slate-400/30 bg-slate-950/65 p-2 text-sm">{text(languageMode, '黒の捕獲', 'Black captures')}<strong className="ml-1">{captures}</strong></div><div className="rounded-xl border border-white/20 bg-white/15 p-2 text-sm">{text(languageMode, '白の捕獲', 'White captures')}<strong className="ml-1">{cpuCaptures}</strong></div><div className="rounded-xl border border-amber-300/25 bg-amber-950/55 p-2 text-sm">{playMode === 'LOCAL' ? text(languageMode, side === 'B' ? '黒の手番' : '白の手番', side === 'B' ? 'Black turn' : 'White turn') : text(languageMode, '手数', 'Moves')}<strong className="ml-1">{moves} / {playMode === 'LOCAL' ? 90 : 45}</strong></div><div className="rounded-xl border border-cyan-300/25 bg-cyan-950/55 p-2 text-sm">{text(languageMode, '連続パス', 'Passes')}<strong className="ml-1">{passes} / 2</strong></div></div>
+    <div className="go-board-area flex flex-1 flex-col items-center"><div className="go-board mb-3 grid aspect-square w-full max-w-[min(90vw,540px)] grid-cols-9 rounded-xl border-4 border-amber-700 bg-amber-200/90 p-2">{board.flatMap((line, row) => line.map((cell, col) => <button key={`${row}-${col}`} type="button" onClick={() => place(row, col)} data-gamepad-zone="go-board" data-gamepad-order={row * 9 + col} className="relative flex aspect-square items-center justify-center border border-amber-900/35 text-xl sm:text-2xl">{(row === 2 || row === 4 || row === 6) && (col === 2 || col === 4 || col === 6) && <span className="absolute h-1.5 w-1.5 rounded-full bg-amber-900" />}{cell && <span className={`relative z-10 h-[80%] w-[80%] rounded-full shadow-lg ${cell === 'B' ? 'bg-slate-950' : 'bg-white'}`} />}</button>))}</div><div className="go-actions mb-3 flex flex-wrap justify-center gap-2"><button type="button" onClick={pass} disabled={!!result} data-gamepad-zone="go-actions" data-gamepad-order={0} className="rounded-xl border border-cyan-300/40 bg-cyan-700/80 px-5 py-3 font-black hover:bg-cyan-600 disabled:opacity-35">{text(languageMode, 'パス', 'Pass')}</button><button type="button" onClick={() => setShowTerms(true)} className="rounded-xl border border-amber-300/40 bg-amber-900/70 px-5 py-3 font-black text-amber-100">{text(languageMode, '用語・初心者ガイド', 'Terms & beginner guide')}</button></div>{finalScore && <div className="go-final-score mb-3 rounded-xl border border-amber-300/30 bg-amber-950/55 p-3 text-center text-sm text-amber-100">{text(languageMode, '終局スコア 黒：', 'Final score Black: ')}{finalScore.black} ／ {text(languageMode, '白：', 'White: ')}{finalScore.white}</div>}<div className="go-guide max-w-md rounded-xl border border-white/10 bg-white/5 p-3 text-xs leading-5 text-slate-300">{text(languageMode, '相手の石を取るだけでなく、空点を囲むと地になります。まず呼吸点を残し、石を上下左右につなげましょう。', 'Surrounded empty points become territory. Start by preserving liberties and connecting stones vertically or horizontally.')}</div></div>
+    {showTerms && <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/85 p-3" data-gamepad-modal="true"><section role="dialog" aria-modal="true" className="mini-game-rules-modal max-h-[90dvh] w-full max-w-lg overflow-y-auto rounded-3xl border border-amber-200/40 bg-slate-900 p-5"><div className="mb-4 flex items-center justify-between"><div><h2 className="text-xl font-black text-amber-100">{text(languageMode, '囲碁の用語と初心者ルール', 'Go terms and beginner rules')}</h2><p className="mt-1 text-xs text-slate-300">{text(languageMode, '黒が先手。空いた交点に1手ずつ置き、地と盤上の石の合計を競います。', 'Black moves first. Place one stone per turn and compete by stones plus surrounded territory.')}</p></div><button type="button" onClick={() => setShowTerms(false)} className="rounded-lg border border-white/20 px-3 py-2">{text(languageMode, '閉じる', 'Close')}</button></div><div className="space-y-2">{GO_TERMS.map(entry => <article key={entry.term.jp} className="rounded-xl border border-white/10 bg-white/5 p-3"><h3 className="font-black text-cyan-100">{copyText(languageMode, entry.term)}</h3><p className="mt-1 text-sm leading-6 text-slate-300">{copyText(languageMode, entry.description)}</p></article>)}</div></section></div>}
+  </GameShell>;
 };
 
 type ChessPiece = { kind: 'K' | 'Q' | 'R' | 'B' | 'N' | 'P'; side: 'P' | 'C' };
@@ -769,50 +817,75 @@ const isChessSquareAttacked = (board: ChessBoard, row: number, col: number, bySi
   return false;
 };
 const isChessInCheck = (board: ChessBoard, side: 'P' | 'C') => { const king = chessKingPosition(board, side); return !king || isChessSquareAttacked(board, king[0], king[1], side === 'P' ? 'C' : 'P'); };
-const legalChessMoves = (board: ChessBoard, row: number, col: number) => chessMoves(board, row, col).filter(to => !isChessInCheck(chessApplyMove(board, [row, col], to), board[row][col]!.side));
-const allChessMoves = (board: ChessBoard, side: 'P' | 'C') => board.flatMap((line, row) => line.flatMap((piece, col) => piece?.side === side ? legalChessMoves(board, row, col).map(to => ({ from: [row, col] as [number, number], to, capture: !!board[to[0]][to[1]] })) : []));
+const allChessMoves = (board: ChessBoard, side: 'P' | 'C') => board.flatMap((line, row) => line.flatMap((piece, col) => piece?.side === side ? chessMoves(board, row, col).map(to => ({ from: [row, col] as [number, number], to, captured: board[to[0]][to[1]] })) : []));
+
+const CHESS_PIECE_GUIDE: Array<{ kind: ChessPiece['kind']; name: LocalCopy; move: LocalCopy }> = [
+  { kind: 'K', name: copy('キング', 'King'), move: copy('縦・横・斜めの隣のマスへ1マス。本作では危険なマスへも動かせ、取られた失敗から学びます。', 'One square vertically, horizontally, or diagonally. This learning mode allows risky moves so a captured king teaches the consequence.') },
+  { kind: 'Q', name: copy('クイーン', 'Queen'), move: copy('縦・横・斜めへ、他の駒にぶつかるまで何マスでも。', 'Any number of squares vertically, horizontally, or diagonally until blocked.') },
+  { kind: 'R', name: copy('ルーク', 'Rook'), move: copy('縦・横へ、他の駒にぶつかるまで何マスでも。', 'Any number of squares vertically or horizontally until blocked.') },
+  { kind: 'B', name: copy('ビショップ', 'Bishop'), move: copy('斜めへ、他の駒にぶつかるまで何マスでも。', 'Any number of squares diagonally until blocked.') },
+  { kind: 'N', name: copy('ナイト', 'Knight'), move: copy('縦2マス＋横1マス、または縦1マス＋横2マス。間の駒を跳び越えます。', 'Two squares in one direction plus one perpendicular square. It jumps over pieces.') },
+  { kind: 'P', name: copy('ポーン', 'Pawn'), move: copy('前へ1マス。相手の駒は斜め前の1マスで取り、最奥段でクイーンに成ります。', 'One square forward; captures one square diagonally forward and promotes to a queen on the last rank.') },
+];
 
 const ChessGame: React.FC<TriviaMiniGameProps> = ({ onBack, languageMode = 'JAPANESE' }) => {
   const [board, setBoard] = useState<ChessBoard>(createChessBoard); const [selected, setSelected] = useState<[number, number] | null>(null); const [turn, setTurn] = useState(1); const [lastCapture, setLastCapture] = useState<ChessPiece['kind'] | null>(null); const [result, setResult] = useState<'WIN' | 'LOSE' | null>(null);
-  const restart = () => { setBoard(createChessBoard()); setSelected(null); setTurn(1); setLastCapture(null); setResult(null); };
+  const [playMode, setPlayMode] = useState<'CPU' | 'LOCAL'>('CPU');
+  const [side, setSide] = useState<'P' | 'C'>('P');
+  const [showMoves, setShowMoves] = useState(false);
+  const [lesson, setLesson] = useState(text(languageMode, '駒を選ぶと、駒本来の移動先を表示します。', 'Select a piece to show every destination allowed by its movement.'));
+  const restart = (nextMode = playMode) => { setPlayMode(nextMode); setBoard(createChessBoard()); setSelected(null); setSide('P'); setTurn(1); setLastCapture(null); setResult(null); setLesson(text(languageMode, '駒を選ぶと、駒本来の移動先を表示します。', 'Select a piece to show every destination allowed by its movement.')); };
   const move = (row: number, col: number) => {
     if (result) return;
-    if (!selected) { if (board[row][col]?.side === 'P') setSelected([row, col]); return; }
+    const movingSide = playMode === 'LOCAL' ? side : 'P';
+    if (!selected) { if (board[row][col]?.side === movingSide) { setSelected([row, col]); setLesson(text(languageMode, '駒本来の移動先です。キングが危険になる手も実行できます。', 'These are the piece-movement destinations. Moves exposing your king are playable.')); } return; }
     const [fromRow, fromCol] = selected;
-    if (board[row][col]?.side === 'P') { setSelected([row, col]); return; }
-    if (!legalChessMoves(board, fromRow, fromCol).some(([toRow, toCol]) => toRow === row && toCol === col)) { setSelected(null); return; }
+    if (board[row][col]?.side === movingSide) { setSelected([row, col]); setLesson(text(languageMode, '別の駒の移動先を表示しました。', 'Showing the newly selected piece movement.')); return; }
+    const movementAllowed = chessMoves(board, fromRow, fromCol).some(([toRow, toCol]) => toRow === row && toCol === col);
+    if (!movementAllowed) { setSelected(null); setLesson(text(languageMode, 'そのマスは、この駒の動きでは移動できません。駒の進み方を確認しましょう。', 'That square is outside this piece movement. Review how the piece travels.')); return; }
     const captured = board[row][col]; let next = chessApplyMove(board, selected, [row, col]);
-    if (captured?.kind === 'K') { setBoard(next); setLastCapture(captured.kind); setSelected(null); setResult('WIN'); return; }
+    if (captured?.kind === 'K') { setBoard(next); setLastCapture(captured.kind); setSelected(null); setResult(movingSide === 'P' ? 'WIN' : 'LOSE'); return; }
+    if (playMode === 'LOCAL') {
+      const nextSide = movingSide === 'P' ? 'C' : 'P';
+      setBoard(next); setSelected(null); setTurn(value => value + 1); setLastCapture(captured?.kind || null); setSide(nextSide);
+      setLesson(text(languageMode, nextSide === 'P' ? '白の手番です。' : '黒の手番です。端末を相手へ渡してください。', nextSide === 'P' ? 'White to move.' : 'Black to move. Pass the device to the other player.'));
+      return;
+    }
     const cpuMoves = allChessMoves(next, 'C');
     if (cpuMoves.length === 0) { setBoard(next); setSelected(null); setResult('WIN'); return; }
-    cpuMoves.sort((a, b) => Number(b.capture) - Number(a.capture)); const cpuMove = cpuMoves[0]; const cpuCaptured = next[cpuMove.to[0]][cpuMove.to[1]]; next = chessApplyMove(next, cpuMove.from, cpuMove.to);
-    setBoard(next); setSelected(null); setTurn(value => value + 1); setLastCapture(cpuCaptured?.kind || captured?.kind || null);
-    if (cpuCaptured?.kind === 'K' || allChessMoves(next, 'P').length === 0 && isChessInCheck(next, 'P')) setResult('LOSE');
+    const values: Record<ChessPiece['kind'], number> = { K: 100, Q: 9, R: 5, B: 3, N: 3, P: 1 };
+    cpuMoves.sort((a, b) => (b.captured ? values[b.captured.kind] : 0) - (a.captured ? values[a.captured.kind] : 0)); const cpuMove = cpuMoves[0]; const cpuCaptured = next[cpuMove.to[0]][cpuMove.to[1]]; next = chessApplyMove(next, cpuMove.from, cpuMove.to);
+    setBoard(next); setSelected(null); setTurn(value => value + 1); setLastCapture(cpuCaptured?.kind || captured?.kind || null); setLesson(cpuCaptured?.kind === 'K' ? text(languageMode, 'CPUにキングを取られました。この敗北局面から、直前の守り方を確認しましょう。', 'The CPU captured your king. Study this position and find the defense you missed.') : text(languageMode, 'CPUが指しました。キングへの攻撃筋を確認しましょう。', 'The CPU replied. Check every attack line toward your king.'));
+    if (cpuCaptured?.kind === 'K') setResult('LOSE');
   };
-  const playerInCheck = isChessInCheck(board, 'P');
-  const legalTargets = selected ? legalChessMoves(board, selected[0], selected[1]) : [];
-  const isLegalTarget = (row: number, col: number) => legalTargets.some(([targetRow, targetCol]) => targetRow === row && targetCol === col);
-  return <GameShell scope="chess" title={text(languageMode, 'スクールチェス', 'School Chess')} subtitle={text(languageMode, '合法手・チェック・チェックメイト・昇格を含む、学習向けの簡易チェス。', 'A learning-focused chess duel with legal moves, check, checkmate, and promotion.')} languageMode={languageMode} backgroundAsset="sprites/backgrounds/mini-games/chess.png" badgeAsset="sprites/backgrounds/mini-games/badges/chess.png" onBack={onBack}>
-    <ResultBanner result={result} onRestart={restart} languageMode={languageMode} />
+  const checkedSide = playMode === 'LOCAL' ? side : 'P';
+  const playerInCheck = isChessInCheck(board, checkedSide);
+  const movementTargets = selected ? chessMoves(board, selected[0], selected[1]) : [];
+  const isMovementTarget = (row: number, col: number) => movementTargets.some(([targetRow, targetCol]) => targetRow === row && targetCol === col);
+  return <GameShell scope="chess" title={text(languageMode, 'スクールチェス', 'School Chess')} subtitle={text(languageMode, '悪手も実行し、キングを取られる敗北から安全を学ぶ簡易チェス。', 'A learning chess duel where losing your king teaches safe play.')} languageMode={languageMode} backgroundAsset="sprites/backgrounds/mini-games/chess.png" badgeAsset="sprites/backgrounds/mini-games/badges/chess.png" onBack={onBack}>
+    {playMode === 'CPU' ? <ResultBanner result={result} onRestart={() => restart()} languageMode={languageMode} /> : result && <div className="mini-game-result-banner mb-3 rounded-2xl border border-yellow-300/50 bg-yellow-950/70 p-3 text-center font-black text-yellow-100">{result === 'WIN' ? text(languageMode, '白の勝利！', 'White wins!') : text(languageMode, '黒の勝利！', 'Black wins!')}<button type="button" onClick={() => restart()} className="ml-3 rounded-lg bg-yellow-400 px-3 py-2 text-slate-950">{text(languageMode, 'もう一局', 'Play again')}</button></div>}
+    <div className="mini-game-local-mode mb-3 grid grid-cols-2 gap-2"><button type="button" className={playMode === 'CPU' ? 'active' : ''} onClick={() => restart('CPU')}>{text(languageMode, 'CPU対戦', 'VS CPU')}</button><button type="button" className={playMode === 'LOCAL' ? 'active' : ''} onClick={() => restart('LOCAL')}>{text(languageMode, '対面対戦', 'Face-to-face')}</button></div>
     <div className="chess-scoreboard mb-3 grid grid-cols-3 gap-2 text-center text-sm">
       <div className="rounded-xl border border-cyan-300/25 bg-cyan-950/60 p-2">{text(languageMode, '手番', 'Turn')} {turn}</div>
-      <div className={`rounded-xl border p-2 ${playerInCheck ? 'border-rose-300/60 bg-rose-950/70 text-rose-100' : 'border-emerald-300/25 bg-emerald-950/55'}`}>{playerInCheck ? text(languageMode, 'チェックされています', 'You are in check') : text(languageMode, '自分のキングは安全', 'King is safe')}</div>
+      <div className={`rounded-xl border p-2 ${playerInCheck ? 'border-rose-300/60 bg-rose-950/70 text-rose-100' : 'border-emerald-300/25 bg-emerald-950/55'}`}>{playMode === 'LOCAL' ? text(languageMode, side === 'P' ? '白の手番' : '黒の手番', side === 'P' ? 'White turn' : 'Black turn') : playerInCheck ? text(languageMode, 'チェックされています', 'You are in check') : text(languageMode, '自分のキングは安全', 'King is safe')}</div>
       <div className="rounded-xl border border-amber-300/25 bg-amber-950/55 p-2">{text(languageMode, '最後の捕獲', 'Last capture')} {lastCapture || '-'}</div>
     </div>
+    <div className="chess-lesson mb-2 w-full rounded-lg border border-cyan-300/25 bg-slate-950/80 px-3 py-2 text-center text-xs text-cyan-100">{lesson}</div>
     <div className="chess-board-area flex flex-1 flex-col items-center">
       <div className="chess-board grid w-full max-w-[min(90vw,560px)] grid-cols-8 gap-0.5 rounded-xl border-4 border-sky-900 bg-sky-950 p-2">
         {board.flatMap((line, boardRow) => line.map((piece, boardCol) => {
           const selectedHere = selected?.[0] === boardRow && selected?.[1] === boardCol;
-          const legalTarget = isLegalTarget(boardRow, boardCol);
-          const captureTarget = legalTarget && Boolean(piece);
-          return <button key={`${boardRow}-${boardCol}`} type="button" onClick={() => move(boardRow, boardCol)} data-gamepad-zone="chess-board" data-gamepad-order={boardRow * 8 + boardCol} aria-label={legalTarget ? text(languageMode, captureTarget ? '駒を取れるマス' : '移動できるマス', captureTarget ? 'Capture square' : 'Legal move') : undefined} className={`relative aspect-square text-2xl font-black sm:text-4xl ${selectedHere ? 'bg-cyan-400 text-slate-950' : (boardRow + boardCol) % 2 === 0 ? 'bg-sky-100 text-slate-900' : 'bg-sky-700 text-white'} ${legalTarget ? captureTarget ? 'ring-4 ring-inset ring-rose-400/90' : 'ring-4 ring-inset ring-cyan-400/90' : ''}`}>
+          const movementTarget = isMovementTarget(boardRow, boardCol);
+          const captureTarget = movementTarget && Boolean(piece);
+          return <button key={`${boardRow}-${boardCol}`} type="button" onClick={() => move(boardRow, boardCol)} data-gamepad-zone="chess-board" data-gamepad-order={boardRow * 8 + boardCol} aria-label={movementTarget ? text(languageMode, captureTarget ? '駒の動きで取れるマス' : '駒の動きで移動できるマス', captureTarget ? 'Capture by piece movement' : 'Piece-movement destination') : undefined} className={`relative aspect-square text-2xl font-black sm:text-4xl ${selectedHere ? 'bg-cyan-400 text-slate-950' : (boardRow + boardCol) % 2 === 0 ? 'bg-sky-100 text-slate-900' : 'bg-sky-700 text-white'} ${movementTarget ? captureTarget ? 'ring-4 ring-inset ring-rose-400/90' : 'ring-4 ring-inset ring-cyan-400/90' : ''}`}>
             {piece && <span className={`relative z-10 ${piece.side === 'P' ? 'text-white drop-shadow-[0_2px_0_rgba(0,0,0,0.8)]' : 'text-slate-950'}`}>{chessGlyph(piece)}</span>}
-            {legalTarget && <span aria-hidden="true" className={captureTarget ? 'pointer-events-none absolute inset-0 z-20 flex items-center justify-center text-2xl font-black text-rose-500/90' : 'pointer-events-none absolute inset-0 z-20 flex items-center justify-center text-3xl font-black text-cyan-900/75'}>{captureTarget ? '×' : '•'}</span>}
+            {movementTarget && <span aria-hidden="true" className={captureTarget ? 'pointer-events-none absolute inset-0 z-20 flex items-center justify-center text-2xl font-black text-rose-500/90' : 'pointer-events-none absolute inset-0 z-20 flex items-center justify-center text-3xl font-black text-cyan-900/75'}>{captureTarget ? '×' : '•'}</span>}
           </button>;
         }))}
       </div>
-      <div className="chess-guide mt-3 max-w-md rounded-xl border border-white/10 bg-white/5 p-3 text-xs leading-5 text-slate-300">{text(languageMode, '駒を選ぶと青い点で合法手、赤い×で捕獲先を表示します。自分のキングが攻撃される手は選べません。', 'Select a piece to show legal moves with blue dots and captures with red × marks. Moves that expose your king are not allowed.')}</div>
+      <div className="chess-guide mt-3 flex max-w-md flex-wrap items-center justify-center gap-2 rounded-xl border border-white/10 bg-white/5 p-3 text-xs leading-5 text-slate-300"><span>{text(languageMode, '青い点は駒本来の移動先、赤い×は捕獲先です。キングが取られる手も実行できます。', 'Blue dots show movement destinations; red × marks captures. Moves that expose the king remain playable.')}</span><button type="button" onClick={() => setShowMoves(true)} className="rounded-lg border border-cyan-300/40 bg-cyan-900/70 px-3 py-2 font-black text-cyan-100">{text(languageMode, '駒の動きを確認', 'Piece movement')}</button></div>
     </div>
+    {showMoves && <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/85 p-3" data-gamepad-modal="true"><section role="dialog" aria-modal="true" className="mini-game-rules-modal max-h-[90dvh] w-full max-w-lg overflow-y-auto rounded-3xl border border-cyan-200/40 bg-slate-900 p-5"><div className="mb-4 flex items-center justify-between"><h2 className="text-xl font-black text-cyan-100">{text(languageMode, 'チェス駒の動き', 'Chess piece movement')}</h2><button type="button" onClick={() => setShowMoves(false)} className="rounded-lg border border-white/20 px-3 py-2">{text(languageMode, '閉じる', 'Close')}</button></div><div className="space-y-2">{CHESS_PIECE_GUIDE.map(entry => <article key={entry.kind} className="grid grid-cols-[52px_1fr] gap-3 rounded-xl border border-white/10 bg-white/5 p-3"><span className="flex h-12 w-12 items-center justify-center rounded-lg bg-sky-100 text-4xl text-slate-950">{chessGlyph({ kind: entry.kind, side: 'P' })}</span><div><h3 className="font-black text-cyan-100">{copyText(languageMode, entry.name)}</h3><p className="mt-1 text-sm leading-6 text-slate-300">{copyText(languageMode, entry.move)}</p></div></article>)}</div></section></div>}
   </GameShell>;
 };
 
@@ -824,8 +897,42 @@ const createMahjongTiles = () => {
   return tiles;
 };
 const MAHJONG_TILE_POOL = createMahjongTiles();
-const shuffleMahjong = (tiles: MahjongTile[]) => [...tiles].sort(() => Math.random() - 0.5);
-const mahjongTileText = (languageMode: LanguageMode, tile: MahjongTile) => languageMode === 'ENGLISH' ? (tile.suit === 'z' ? ['East', 'South', 'West', 'North', 'White', 'Green', 'Red'][tile.value - 1] : `${tile.value}${tile.suit === 'm' ? 'M' : tile.suit === 'p' ? 'P' : 'S'}`) : trans(tile.label, languageMode);
+const shuffleMahjong = (tiles: MahjongTile[]) => {
+  const shuffled = [...tiles];
+  for (let index = shuffled.length - 1; index > 0; index -= 1) {
+    const swapIndex = Math.floor(Math.random() * (index + 1));
+    [shuffled[index], shuffled[swapIndex]] = [shuffled[swapIndex], shuffled[index]];
+  }
+  return shuffled;
+};
+const MAHJONG_SUIT_ORDER: MahjongTile['suit'][] = ['m', 'p', 's', 'z'];
+const MAHJONG_SUIT_META: Record<MahjongTile['suit'], { jp: string; en: string; shortJp: string; shortEn: string }> = {
+  m: { jp: '萬子', en: 'Characters', shortJp: '萬', shortEn: 'M' },
+  p: { jp: '筒子', en: 'Dots', shortJp: '筒', shortEn: 'P' },
+  s: { jp: '索子', en: 'Bamboo', shortJp: '索', shortEn: 'S' },
+  z: { jp: '字牌', en: 'Honors', shortJp: '字', shortEn: 'Z' },
+};
+const mahjongTileText = (languageMode: LanguageMode, tile: MahjongTile) => languageMode === 'ENGLISH'
+  ? (tile.suit === 'z' ? ['East', 'South', 'West', 'North', 'White', 'Green', 'Red'][tile.value - 1] : `${tile.value}${MAHJONG_SUIT_META[tile.suit].shortEn}`)
+  : trans(tile.label, languageMode);
+const mahjongTileSuitLabel = (languageMode: LanguageMode, tile: MahjongTile) => {
+  if (tile.suit === 'z') return text(languageMode, tile.value <= 4 ? '風牌' : '三元牌', tile.value <= 4 ? 'Winds' : 'Dragons');
+  return text(languageMode, MAHJONG_SUIT_META[tile.suit].jp, MAHJONG_SUIT_META[tile.suit].en);
+};
+const mahjongTileAria = (languageMode: LanguageMode, tile: MahjongTile) => languageMode === 'ENGLISH'
+  ? `${mahjongTileText(languageMode, tile)} tile, ${mahjongTileSuitLabel(languageMode, tile)}`
+  : `${mahjongTileText(languageMode, tile)}・${mahjongTileSuitLabel(languageMode, tile)}`;
+const MahjongTileFace: React.FC<{ tile: MahjongTile; languageMode: LanguageMode }> = ({ tile, languageMode }) => {
+  const meta = MAHJONG_SUIT_META[tile.suit];
+  const isHonor = tile.suit === 'z';
+  return (
+    <span className={`mahjong-tile-face mahjong-tile-suit-${tile.suit}`}>
+      <span className="mahjong-tile-suit-label">{mahjongTileSuitLabel(languageMode, tile)}</span>
+      <span className="mahjong-tile-value">{isHonor ? mahjongTileText(languageMode, tile) : tile.value}</span>
+      <span className={`mahjong-tile-suit-mark ${isHonor ? 'mahjong-tile-suit-mark-empty' : ''}`} aria-hidden={isHonor}>{isHonor ? '\u00a0' : text(languageMode, meta.shortJp, meta.shortEn)}</span>
+    </span>
+  );
+};
 type MahjongYaku = { name: LocalCopy; description: LocalCopy; recommended?: boolean };
 const MAHJONG_YAKU: MahjongYaku[] = [
   { name: copy('タンヤオ', 'Tanyao'), description: copy('2〜8の数牌だけでそろえる役。字牌と1・9を使わないので、順子を作りやすい。', 'A hand made only of number tiles 2–8. Avoiding honors and 1/9 makes sequences easier.'), recommended: true },
@@ -834,6 +941,135 @@ const MAHJONG_YAKU: MahjongYaku[] = [
   { name: copy('一盃口', 'Pure double sequence'), description: copy('同じ順子を2組そろえる役。似た形が2つ見えた時に狙える。', 'Two identical sequences. Consider it when two matching sequence shapes appear.') },
   { name: copy('七対子', 'Seven pairs'), description: copy('7組の対子で作る役。本作の8枚ルールでは練習用の知識として紹介。', 'Seven pairs. In this eight-tile mini-game it is shown as a learning reference.') },
 ];
+type MahjongGlossaryEntry = { term: LocalCopy; description: LocalCopy; example: LocalCopy };
+const MAHJONG_GLOSSARY: MahjongGlossaryEntry[] = [
+  { term: copy('数牌', 'Number tiles'), description: copy('萬子・筒子・索子の1〜9。数字の連続を作る材料です。', 'The 1–9 tiles in Characters, Dots, and Bamboo. They form number sequences.'), example: copy('萬子の2・3・4は順子の候補。', 'Characters 2-3-4 can form a sequence.') },
+  { term: copy('字牌', 'Honor tiles'), description: copy('東南西北の風牌と、白發中の三元牌。数字の順子は作れません。', 'Wind tiles East, South, West, North and dragon tiles White, Green, Red. They cannot form sequences.'), example: copy('字牌は同じ3枚で刻子を作る。', 'Three identical honors form a triplet.') },
+  { term: copy('面子', 'Meld'), description: copy('順子または刻子の3枚組。完成形を作る基本単位です。', 'A three-tile group that is either a sequence or a triplet.'), example: copy('本作では面子2つを目指す。', 'This game asks you to build two melds.') },
+  { term: copy('順子', 'Sequence'), description: copy('同じスートの連続した数字3枚。字牌では作れません。', 'Three consecutive numbers in the same suit. Honors cannot make sequences.'), example: copy('筒子の4・5・6が順子。', 'Dots 4-5-6 is a sequence.') },
+  { term: copy('刻子', 'Triplet'), description: copy('まったく同じ牌を3枚そろえた面子です。', 'A meld of three identical tiles.'), example: copy('中・中・中は刻子。', 'Red dragon x3 is a triplet.') },
+  { term: copy('対子', 'Pair'), description: copy('同じ牌2枚の組。完成形の最後の土台になります。', 'Two identical tiles. It is the pair that completes the hand shape.'), example: copy('索子の7・7が対子。', 'Bamboo 7-7 is a pair.') },
+  { term: copy('待ち', 'Wait'), description: copy('あと1枚で面子や完成形になる、欲しい牌の候補です。', 'The tile or tiles that would complete a meld or hand shape.'), example: copy('2・3を持っていれば4や1が待ちになることがある。', 'With 2-3, a 1 or 4 may complete the sequence.') },
+  { term: copy('ツモ', 'Tsumo'), description: copy('山から牌を1枚引くこと。スタンダードでは13枚の手牌を14枚にしてから捨て牌を選びます。', 'Drawing one tile from the wall. In Standard, draw from 13 to 14 tiles before choosing a discard.'), example: copy('山牌から1枚ツモって、手牌の形を見直す。', 'Draw one tile from the wall and reassess the hand.') },
+  { term: copy('捨て牌', 'Discard'), description: copy('手牌から場に出す牌。自分の捨て牌は相手のチー・ポン・ロンの対象にもなります。', 'A tile placed from your hand into the discard area. Your discard can also become an opponent’s Chi, Pon, or Ron target.'), example: copy('相手の待ちを助けない牌を選んで捨てる。', 'Choose a tile that is less likely to help the opponent.') },
+  { term: copy('鳴き', 'Call'), description: copy('相手の捨て牌を使って面子を作ること。チーとポンがあり、鳴いた後は手牌の自由度が下がります。', 'Using an opponent discard to make an open meld. Chi and Pon are calls that reduce the flexibility of the concealed hand.'), example: copy('急いで鳴く前に、完成形と残りの待ちを確認する。', 'Check the target hand and remaining waits before calling.') },
+  { term: copy('チー', 'Chi'), description: copy('相手の捨て牌を使い、同じ種類の連番3枚を作ること。本作は2人用のため、相手の捨て牌を対象にします。', 'Calling a sequence with an opponent discard. This two-player version uses the opponent discard as the call target.'), example: copy('萬子の2・3を持っている時、相手の萬子4でチー。', 'With Characters 2-3, call Chi on an opponent’s Characters 4.') },
+  { term: copy('ポン', 'Pon'), description: copy('相手の捨て牌と同じ牌を手牌から2枚出して、刻子を作ること。', 'Calling a triplet by combining an opponent discard with two identical tiles from your hand.'), example: copy('發を2枚持っている時、相手の發でポン。', 'With two Green dragons, call Pon on an opponent’s Green dragon.') },
+  { term: copy('ロン', 'Ron'), description: copy('相手の捨て牌で完成形になる時に宣言する和了。自分のツモより早く決着できます。', 'Declaring a win when an opponent discard completes your hand. It can end the hand before your next draw.'), example: copy('最後の待ち牌が相手から捨てられたらロン。', 'Call Ron when the opponent discards your final waiting tile.') },
+  { term: copy('副露', 'Open meld'), description: copy('チー・ポンなどで公開した面子。公開した面子は手牌とは別に表示されます。', 'A revealed meld made through Chi or Pon. Revealed melds are displayed separately from the concealed hand.'), example: copy('ポンした刻子は副露として場に残る。', 'A Pon triplet stays visible as an open meld.') },
+  { term: copy('2人麻雀', 'Two-player mahjong'), description: copy('本作のスタンダードはCPUとの2人対戦。山を共有し、先に完成した側が勝ちます。', 'Standard is a two-player match against the CPU. Both players share the wall, and the first completed hand wins.'), example: copy('相手の捨て牌と自分の待ちを同時に観察する。', 'Watch both the opponent’s discards and your own waits.') },
+  { term: copy('役', 'Yaku'), description: copy('手牌の形や条件によるボーナス。まず完成形を作り、次に役を意識します。', 'A bonus pattern or condition. Build the hand shape first, then pursue yaku.'), example: copy('タンヤオは2〜8の数牌だけを使う役。', 'Tanyao uses only number tiles 2–8.') },
+];
+type MahjongRelic = { id: 'tile-compass' | 'long-notes' | 'score-seal' | 'honor-guard'; name: LocalCopy; description: LocalCopy };
+const MAHJONG_RELICS: MahjongRelic[] = [
+  { id: 'tile-compass', name: copy('牌効率の羅針盤', 'Tile Efficiency Compass'), description: copy('アドバンス中、捨て牌の後に山の上位2枚から手牌の形が良い方を引く。', 'In Advance mode, compare the top two wall tiles after a discard and draw the better hand shape.') },
+  { id: 'long-notes', name: copy('長考ノート', 'Deep Thought Notes'), description: copy('各局の制限巡目が2増える。焦らず待ちを探せる。', 'Each round gains two extra turns, giving you more time to find a wait.') },
+  { id: 'score-seal', name: copy('得点の封印', 'Score Seal'), description: copy('完成しなかった最終巡目でも、比較点に+1。僅差の勝負を支える。', 'Adds +1 to the tiebreak score when the final turn decides an unfinished hand.') },
+  { id: 'honor-guard', name: copy('字牌の守り札', 'Honor Guard Talisman'), description: copy('CPUの完成を1局につき1度だけ1巡遅らせる。', 'Once per round, delay a CPU completion by one turn.') },
+];
+type MahjongCpuProfile = 'COLLECTOR' | 'SEQUENCE' | 'DEFENDER' | 'GAMBLER';
+type MahjongEventEffect = 'OBSERVE' | 'SCORE_BOOST' | 'HONOR_FOCUS' | 'SHAPE_HINT' | 'WAIT_PEEK' | 'SAFE_ROUTE' | 'BOLD_ROUTE' | 'RELIC_LINK';
+type MahjongDiscardRisk = 'SAFE' | 'CAUTION' | 'DANGER';
+type MahjongAdvanceEventChoice = { id: MahjongEventEffect; label: LocalCopy; description: LocalCopy };
+type MahjongAdvanceEvent = { title: LocalCopy; description: LocalCopy; choices: MahjongAdvanceEventChoice[] };
+type MahjongAdvanceStage = {
+  stage: number;
+  title: LocalCopy;
+  objective: LocalCopy;
+  rule: LocalCopy;
+  eventTurn: number;
+  cpuProfile: MahjongCpuProfile;
+  event: MahjongAdvanceEvent;
+};
+const MAHJONG_CPU_PROFILE_META: Record<MahjongCpuProfile, { name: LocalCopy; description: LocalCopy }> = {
+  COLLECTOR: { name: copy('収集家', 'Collector'), description: copy('対子と字牌を残し、刻子を狙います。', 'Keeps pairs and honors, aiming for triplets.') },
+  SEQUENCE: { name: copy('連番職人', 'Sequence Crafter'), description: copy('同じスートの連番を優先します。', 'Prioritizes connected tiles in one suit.') },
+  DEFENDER: { name: copy('守備型', 'Defender'), description: copy('安全な形を残し、終盤の比較に強い相手です。', 'Keeps safe shapes and performs well in late comparisons.') },
+  GAMBLER: { name: copy('勝負師', 'Risk Taker'), description: copy('高得点を狙う代わりに、完成が不安定です。', 'Chases high scores at the cost of consistency.') },
+};
+const MAHJONG_ADVANCE_STAGES: MahjongAdvanceStage[] = [
+  {
+    stage: 1,
+    title: copy('第1局：手ならし', 'Round 1: Warm-up'),
+    objective: copy('面子2つ＋対子1つを作り、牌のつながりを見つける。', 'Build two melds and a pair while learning tile connections.'),
+    rule: copy('最初の3巡は、補充候補の形評価が表示されます。', 'For the first three turns, the replacement choice shows a shape hint.'),
+    eventTurn: 3,
+    cpuProfile: 'COLLECTOR',
+    event: {
+      title: copy('山の気配', 'Read the wall'),
+      description: copy('次の補充を読みます。形の安定を取るか、得点を伸ばすか選びましょう。', 'Read the next draw. Choose stability or a small score boost.'),
+      choices: [
+        { id: 'OBSERVE', label: copy('山を読む', 'Read the wall'), description: copy('次の補充候補を2枚比較し、形が良い方を選びます。', 'Compare two replacement candidates and keep the better shape.') },
+        { id: 'SCORE_BOOST', label: copy('形を磨く', 'Polish the shape'), description: copy('この局の比較点に+1。完成を急がず形を整えます。', '+1 comparison point this round. Refine the shape instead of rushing.') },
+      ],
+    },
+  },
+  {
+    stage: 2,
+    title: copy('第2局：字牌の使い道', 'Round 2: Honor tiles'),
+    objective: copy('字牌の刻子または対子を1組含めて完成を目指す。', 'Aim to finish with one honor pair or triplet.'),
+    rule: copy('字牌を含む完成形には、比較点ボーナスが入ります。', 'A completed shape containing honors receives a comparison bonus.'),
+    eventTurn: 3,
+    cpuProfile: 'SEQUENCE',
+    event: {
+      title: copy('字牌の分岐', 'Honor fork'),
+      description: copy('字牌を守るか、数牌の連番を伸ばすかを選びます。', 'Choose whether to protect honors or extend a number sequence.'),
+      choices: [
+        { id: 'HONOR_FOCUS', label: copy('字牌を守る', 'Protect honors'), description: copy('字牌の対子・刻子を比較点に加点します。', 'Add a bonus for an honor pair or triplet.') },
+        { id: 'SHAPE_HINT', label: copy('連番を伸ばす', 'Extend a sequence'), description: copy('次の補充で形が良くなる候補を優先します。', 'Prefer a replacement that improves the shape.') },
+      ],
+    },
+  },
+  {
+    stage: 3,
+    title: copy('第3局：待ちの読み合い', 'Round 3: Read the wait'),
+    objective: copy('2種類以上の待ち候補を残し、相手の捨て牌も観察する。', 'Keep at least two wait candidates and read the opponent discard.'),
+    rule: copy('相手の捨て牌から、危険度の目安を確認できます。', 'A danger hint appears for the opponent discard.'),
+    eventTurn: 4,
+    cpuProfile: 'DEFENDER',
+    event: {
+      title: copy('静かな一打', 'A quiet discard'),
+      description: copy('次の一手で情報を取るか、安全に巡目を延ばすかを選びます。', 'Choose information for the next draw or a safer extra turn.'),
+      choices: [
+        { id: 'WAIT_PEEK', label: copy('待ちを覗く', 'Peek at the wait'), description: copy('山の先頭牌を確認し、待ちの候補として表示します。', 'Reveal the top wall tile as a wait clue.') },
+        { id: 'SAFE_ROUTE', label: copy('安全に進む', 'Take the safe route'), description: copy('制限巡目を1つ延長し、焦らず判断します。', 'Gain one extra turn and make a calmer decision.') },
+      ],
+    },
+  },
+  {
+    stage: 4,
+    title: copy('第4局：決断の分岐', 'Round 4: The decision'),
+    objective: copy('安全重視か高得点重視かを選び、制限巡目までに勝負を決める。', 'Choose safety or high score and settle the match before the limit.'),
+    rule: copy('途中イベントの選択が、終盤の勝ち筋を変えます。', 'The event choice changes your endgame route.'),
+    eventTurn: 4,
+    cpuProfile: 'GAMBLER',
+    event: {
+      title: copy('勝負の分岐', 'Fork in the road'),
+      description: copy('安定して1巡増やすか、得点を伸ばして一気に決めるかを選びます。', 'Choose one safe extra turn or a burst of comparison points.'),
+      choices: [
+        { id: 'SAFE_ROUTE', label: copy('安全重視', 'Play safe'), description: copy('制限巡目を1つ延長します。', 'Gain one extra turn.') },
+        { id: 'BOLD_ROUTE', label: copy('高得点重視', 'Play bold'), description: copy('未完成時の比較点に+2。ただし巡目は増えません。', '+2 comparison points if unfinished, with no extra turns.') },
+      ],
+    },
+  },
+  {
+    stage: 5,
+    title: copy('第5局：最終局', 'Round 5: Final round'),
+    objective: copy('これまでのレリックを組み合わせ、最終局を制覇する。', 'Combine your relics and clear the final round.'),
+    rule: copy('レリックを2つ以上持つと、組み合わせボーナスが発生します。', 'Owning two or more relics unlocks a combination bonus.'),
+    eventTurn: 5,
+    cpuProfile: 'GAMBLER',
+    event: {
+      title: copy('最後の作戦会議', 'Final strategy meeting'),
+      description: copy('レリックの連携を信じるか、形を整えて確実に進むかを選びます。', 'Trust your relic synergy or take a steady route.'),
+      choices: [
+        { id: 'RELIC_LINK', label: copy('連携を発動', 'Link the relics'), description: copy('レリックの組み合わせ点を上げます。', 'Increase the relic combination bonus.') },
+        { id: 'SCORE_BOOST', label: copy('形を整える', 'Stabilize the shape'), description: copy('未完成時の比較点に+1。', '+1 comparison point if unfinished.') },
+      ],
+    },
+  },
+];
+const getMahjongAdvanceStage = (stage: number) => MAHJONG_ADVANCE_STAGES[Math.max(0, Math.min(MAHJONG_ADVANCE_STAGES.length - 1, stage - 1))];
 type MahjongQuality = { groups: number; pairs: number; complete: boolean };
 const mahjongCounts = (hand: MahjongTile[]) => hand.reduce<Record<string, number>>((counts, tile) => ({ ...counts, [tile.key]: (counts[tile.key] || 0) + 1 }), {});
 const canMahjongMelds = (counts: Record<string, number>, groups: number): boolean => {
@@ -848,22 +1084,163 @@ const canMahjongMelds = (counts: Record<string, number>, groups: number): boolea
   }
   return false;
 };
-const analyzeMahjongHand = (hand: MahjongTile[]): MahjongQuality => {
+const analyzeMahjongHand = (hand: MahjongTile[], openGroups = 0, targetGroups = 2): MahjongQuality => {
   const counts = mahjongCounts(hand); let bestGroups = 0; let bestPairs = 0;
-  Object.keys(counts).forEach(pairKey => { if (counts[pairKey] < 2) return; const remaining = { ...counts, [pairKey]: counts[pairKey] - 2 }; for (let groups = 2; groups >= 0; groups -= 1) if (canMahjongMelds(remaining, groups)) { bestGroups = Math.max(bestGroups, groups); bestPairs = Math.max(bestPairs, 1); break; } });
-  if (bestPairs === 0) bestGroups = Math.max(bestGroups, canMahjongMelds(counts, 2) ? 2 : canMahjongMelds(counts, 1) ? 1 : 0);
-  return { groups: bestGroups, pairs: bestPairs, complete: bestGroups >= 2 && bestPairs >= 1 };
+  const groupsNeeded = Math.max(0, targetGroups - openGroups);
+  Object.keys(counts).forEach(pairKey => { if (counts[pairKey] < 2) return; const remaining = { ...counts, [pairKey]: counts[pairKey] - 2 }; for (let groups = groupsNeeded; groups >= 0; groups -= 1) if (canMahjongMelds(remaining, groups)) { bestGroups = Math.max(bestGroups, groups); bestPairs = Math.max(bestPairs, 1); break; } });
+  if (bestPairs === 0) bestGroups = Math.max(bestGroups, canMahjongMelds(counts, groupsNeeded) ? groupsNeeded : groupsNeeded > 0 && canMahjongMelds(counts, groupsNeeded - 1) ? groupsNeeded - 1 : 0);
+  return { groups: bestGroups + openGroups, pairs: bestPairs, complete: bestGroups + openGroups >= targetGroups && bestPairs >= 1 };
 };
-type MahjongState = { hand: MahjongTile[]; deck: MahjongTile[]; cpuHand: MahjongTile[]; cpuDeck: MahjongTile[]; turn: number; quality: MahjongQuality; cpuQuality: MahjongQuality; lastDraw: MahjongTile | null; result: 'WIN' | 'LOSE' | null };
-const takeMahjongKeys = (pool: MahjongTile[], keys: string[]) => {
-  const remaining = [...pool]; const taken: MahjongTile[] = [];
-  keys.forEach(key => { const index = remaining.findIndex(tile => tile.key === key); if (index >= 0) taken.push(remaining.splice(index, 1)[0]); });
-  return { taken, remaining };
+const mahjongHasHonorSet = (hand: MahjongTile[]) => Object.entries(mahjongCounts(hand)).some(([key, count]) => key.startsWith('z') && count >= 2);
+const mahjongConnectedPairs = (hand: MahjongTile[]) => {
+  const counts = mahjongCounts(hand);
+  return Object.entries(counts).reduce((total, [key, count]) => {
+    if (key.startsWith('z') || count < 1) return total;
+    const suit = key[0]; const value = Number(key.substring(1));
+    return total + (counts[suit + String(value + 1)] ? 1 : 0);
+  }, 0);
 };
-const createMahjongState = (): MahjongState => {
-  const startPool = shuffleMahjong(MAHJONG_TILE_POOL); const player = takeMahjongKeys(startPool, ['m1', 'm2', 'm3', 'p4', 'p5', 's7', 's7', 'z1']); const cpu = takeMahjongKeys(player.remaining, ['p1', 'p2', 'p3', 's4', 's5', 'm9', 'm9', 'z2']);
-  const quality = analyzeMahjongHand(player.taken); const cpuQuality = analyzeMahjongHand(cpu.taken);
-  return { hand: player.taken, deck: cpu.remaining, cpuHand: cpu.taken, cpuDeck: [], turn: 1, quality, cpuQuality, lastDraw: null, result: null };
+const mahjongUsefulTileCount = (hand: MahjongTile[]) => {
+  const current = analyzeMahjongHand(hand);
+  return new Set(MAHJONG_TILE_POOL.filter(tile => {
+    const next = analyzeMahjongHand([...hand, tile]);
+    return next.groups > current.groups || next.pairs > current.pairs;
+  }).map(tile => tile.key)).size;
+};
+const mahjongDiscardRisk = (hand: MahjongTile[], tile: MahjongTile): MahjongDiscardRisk => {
+  const current = analyzeMahjongHand(hand);
+  const afterDiscard = analyzeMahjongHand([...hand, tile]);
+  if (afterDiscard.groups > current.groups || afterDiscard.pairs > current.pairs) return 'DANGER';
+  if (tile.suit !== 'z' && hand.some(other => other.suit === tile.suit && Math.abs(other.value - tile.value) <= 2)) return 'CAUTION';
+  return 'SAFE';
+};
+const mahjongRelicSynergyCount = (relics: MahjongRelic[]) => {
+  const ids = new Set(relics.map(relic => relic.id));
+  return Number(ids.has('tile-compass') && ids.has('long-notes'))
+    + Number(ids.has('tile-compass') && ids.has('score-seal'))
+    + Number(ids.has('honor-guard') && ids.has('score-seal'));
+};
+const mahjongAdvanceScore = (quality: MahjongQuality, hand: MahjongTile[], stage: number, relics: MahjongRelic[], eventEffect: MahjongEventEffect | null, includeTieBonus = false) => {
+  let score = mahjongShapeScore(quality, relics, includeTieBonus);
+  if (stage === 2 && mahjongHasHonorSet(hand)) score += 2;
+  if (stage === 3 && mahjongUsefulTileCount(hand) >= 2) score += 1;
+  if (stage === 5) score += Math.min(2, mahjongRelicSynergyCount(relics));
+  if (eventEffect === 'HONOR_FOCUS' && mahjongHasHonorSet(hand)) score += 2;
+  if (eventEffect === 'BOLD_ROUTE') score += 2;
+  if (eventEffect === 'SCORE_BOOST') score += 1;
+  if (eventEffect === 'RELIC_LINK') score += relics.length >= 2 ? 2 : 0;
+  return score;
+};
+const mahjongAdvanceAdvice = (hand: MahjongTile[], quality: MahjongQuality, stage: number): LocalCopy => {
+  if (quality.complete) return copy('完成形です。次局は、完成を急ぐか報酬の組み合わせを育てるかを選べます。', 'You completed the shape. Next round, choose between a quick finish and building relic synergy.');
+  if (stage === 2 && !mahjongHasHonorSet(hand)) return copy('字牌の対子・刻子がありません。孤立した端牌から整理し、字牌を1組残す作戦を試しましょう。', 'There is no honor pair or triplet. Trim isolated terminals and try keeping one honor set.');
+  if (stage === 3 && mahjongUsefulTileCount(hand) < 2) return copy('待ちの候補が少ない形です。隣り合う数牌を残し、複数の補充牌につながる形を探しましょう。', 'This shape has few waits. Keep connected numbers and look for multiple useful draws.');
+  if (quality.pairs === 0) return copy('対子が不足しています。同じ牌を2枚残せるかを確認してから、順子候補を整理しましょう。', 'You are missing a pair. Check whether two identical tiles can be kept before trimming sequence candidates.');
+  return copy('面子候補はあります。次の巡目は、孤立した牌を捨てて待ちを広げることを試しましょう。', 'You have meld candidates. On the next turn, trim an isolated tile to widen your waits.');
+};
+const mahjongCpuCandidateScore = (hand: MahjongTile[], quality: MahjongQuality, profile: MahjongCpuProfile) => {
+  let score = quality.groups * 3 + quality.pairs;
+  const counts = mahjongCounts(hand);
+  if (profile === 'COLLECTOR') score += Object.values(counts).filter(count => count >= 2).length * 1.5 + Number(mahjongHasHonorSet(hand));
+  if (profile === 'SEQUENCE') score += mahjongConnectedPairs(hand) * 1.5;
+  if (profile === 'DEFENDER') score += quality.groups * 1.5 + Object.values(counts).filter(count => count === 2).length;
+  if (profile === 'GAMBLER') score += mahjongConnectedPairs(hand) * 2 + Math.random() * 0.4;
+  return score;
+};
+const chooseMahjongCpuCandidate = (candidates: Array<{ index: number; quality: MahjongQuality; hand: MahjongTile[] }>, profile: MahjongCpuProfile, stage: number) => {
+  const ranked = [...candidates].sort((a, b) => mahjongCpuCandidateScore(b.hand, b.quality, profile) - mahjongCpuCandidateScore(a.hand, a.quality, profile));
+  if (stage <= 2) return ranked[Math.floor(Math.random() * Math.min(2, ranked.length))] || ranked[0];
+  if (profile === 'GAMBLER') return ranked[Math.floor(Math.random() * Math.min(3, ranked.length))] || ranked[0];
+  return ranked[0];
+};
+type MahjongMode = 'PRACTICE' | 'STANDARD' | 'ADVANCE';
+type MahjongMeld = { kind: 'CHI' | 'PON'; tiles: MahjongTile[] };
+type MahjongCallOption = 'CHI' | 'PON' | 'RON';
+const MAHJONG_ADVANCE_ROUNDS = 5;
+const mahjongHandSize = (mode: MahjongMode) => mode === 'STANDARD' ? 13 : 8;
+const mahjongTargetGroups = (mode: MahjongMode) => mode === 'STANDARD' ? 4 : 2;
+const hasMahjongRelic = (relics: MahjongRelic[], id: MahjongRelic['id']) => relics.some(relic => relic.id === id);
+const mahjongShapeScore = (quality: MahjongQuality, relics: MahjongRelic[], includeTieBonus = false) => (
+  quality.groups * 3
+  + quality.pairs
+  + (includeTieBonus && hasMahjongRelic(relics, 'score-seal') ? 1 : 0)
+);
+const chooseMahjongRewards = (owned: MahjongRelic[]) => {
+  const available = MAHJONG_RELICS.filter(relic => !owned.some(current => current.id === relic.id));
+  const pool = available.length >= 3 ? available : MAHJONG_RELICS;
+  return shuffleMahjong(pool).slice(0, 3);
+};
+const dealMahjongTiles = (pool: MahjongTile[], count: number) => {
+  const taken = pool.slice(0, count);
+  return { taken, remaining: pool.slice(count) };
+};
+const fallbackMahjongTile = (turn: number, offset: number) => MAHJONG_TILE_POOL[(turn * 7 + offset) % MAHJONG_TILE_POOL.length];
+const findMahjongChi = (hand: MahjongTile[], discarded: MahjongTile) => {
+  if (discarded.suit === 'z') return null;
+  for (let start = Math.max(1, discarded.value - 2); start <= Math.min(discarded.value, 7); start += 1) {
+    const neededValues = [start, start + 1, start + 2].filter(value => value !== discarded.value);
+    const indexes = neededValues.map(value => hand.findIndex(tile => tile.suit === discarded.suit && tile.value === value));
+    if (indexes.every(index => index >= 0) && new Set(indexes).size === indexes.length) return indexes;
+  }
+  return null;
+};
+const mahjongCallOptions = (hand: MahjongTile[], discarded: MahjongTile, openGroups: number, targetGroups: number): MahjongCallOption[] => {
+  const options: MahjongCallOption[] = [];
+  if (hand.filter(tile => tile.key === discarded.key).length >= 2) options.push('PON');
+  if (findMahjongChi(hand, discarded)) options.push('CHI');
+  if (analyzeMahjongHand([...hand, discarded], openGroups, targetGroups).complete) options.push('RON');
+  return options;
+};
+const selectMahjongDraw = (hand: MahjongTile[], discardIndex: number, deck: MahjongTile[], relics: MahjongRelic[], turn: number, offset: number, eventEffect: MahjongEventEffect | null = null) => {
+  const candidateCount = hasMahjongRelic(relics, 'tile-compass') || eventEffect === 'OBSERVE' || eventEffect === 'SHAPE_HINT' ? 2 : 1;
+  const candidates = deck.slice(0, candidateCount);
+  if (candidates.length === 0) return fallbackMahjongTile(turn, offset);
+  return candidates.map(tile => ({ tile, quality: analyzeMahjongHand(hand.filter((_, index) => index !== discardIndex).concat(tile)) }))
+    .sort((a, b) => mahjongAdvanceScore(a.quality, hand.filter((_, index) => index !== discardIndex).concat(a.tile), 1, relics, eventEffect) - mahjongAdvanceScore(b.quality, hand.filter((_, index) => index !== discardIndex).concat(b.tile), 1, relics, eventEffect))[candidates.length - 1].tile;
+};
+type MahjongState = {
+  hand: MahjongTile[];
+  deck: MahjongTile[];
+  cpuHand: MahjongTile[];
+  cpuDeck: MahjongTile[];
+  discardPile: MahjongTile[];
+  cpuDiscardPile: MahjongTile[];
+  turn: number;
+  turnLimit: number;
+  quality: MahjongQuality;
+  cpuQuality: MahjongQuality;
+  lastDraw: MahjongTile | null;
+  lastDiscard: MahjongTile | null;
+  lastCpuDiscard: MahjongTile | null;
+  pendingCall: { tile: MahjongTile; options: MahjongCallOption[] } | null;
+  drawnForDiscard: boolean;
+  mustDiscard: boolean;
+  melds: MahjongMeld[];
+  cpuMelds: MahjongMeld[];
+  result: 'WIN' | 'LOSE' | null;
+  mode: MahjongMode;
+  stage: number;
+  runScore: number;
+  relics: MahjongRelic[];
+  rewardOptions: MahjongRelic[] | null;
+  guardUsed: boolean;
+  cpuProfile: MahjongCpuProfile | null;
+  pendingEvent: MahjongAdvanceEvent | null;
+  eventUsed: boolean;
+  eventEffect: MahjongEventEffect | null;
+  eventPreview: MahjongTile | null;
+  lastCpuRisk: MahjongDiscardRisk | null;
+  drawHint: LocalCopy | null;
+  lastAdvice: LocalCopy | null;
+};
+const createMahjongState = (mode: MahjongMode = 'PRACTICE', stage = 1, relics: MahjongRelic[] = [], runScore = 0): MahjongState => {
+  const startPool = shuffleMahjong(MAHJONG_TILE_POOL);
+  const startingTiles = mahjongHandSize(mode);
+  const player = dealMahjongTiles(startPool, startingTiles);
+  const cpu = dealMahjongTiles(player.remaining, startingTiles);
+  const quality = analyzeMahjongHand(player.taken, 0, mahjongTargetGroups(mode)); const cpuQuality = analyzeMahjongHand(cpu.taken, 0, mahjongTargetGroups(mode));
+  const turnLimit = mode === 'STANDARD' ? 36 : mode === 'ADVANCE' ? 12 + (hasMahjongRelic(relics, 'long-notes') ? 2 : 0) : 12;
+  return { hand: player.taken, deck: player.remaining, cpuHand: cpu.taken, cpuDeck: cpu.remaining, discardPile: [], cpuDiscardPile: [], turn: 1, turnLimit, quality, cpuQuality, lastDraw: null, lastDiscard: null, lastCpuDiscard: null, pendingCall: null, drawnForDiscard: mode !== 'STANDARD', mustDiscard: false, melds: [], cpuMelds: [], result: null, mode, stage, runScore, relics, rewardOptions: null, guardUsed: false, cpuProfile: mode === 'ADVANCE' ? getMahjongAdvanceStage(stage).cpuProfile : null, pendingEvent: null, eventUsed: false, eventEffect: null, eventPreview: null, lastCpuRisk: null, drawHint: null, lastAdvice: null };
 };
 const mahjongSortTiles = (hand: MahjongTile[]) => [...hand].sort((a, b) => {
   const suitOrder: Record<MahjongTile['suit'], number> = { m: 0, p: 1, s: 2, z: 3 };
@@ -875,55 +1252,204 @@ const mahjongRecommendation = (hand: MahjongTile[]) => {
 };
 
 const MahjongGame: React.FC<TriviaMiniGameProps> = ({ onBack, languageMode = 'JAPANESE' }) => {
-  const [game, setGame] = useState<MahjongState>(createMahjongState);
+  const [game, setGame] = useState<MahjongState>(() => createMahjongState('PRACTICE'));
   const [selected, setSelected] = useState<number | null>(null);
   const [showYaku, setShowYaku] = useState(false);
-  const restart = () => { setGame(createMahjongState()); setSelected(null); };
-  const organizeTiles = () => { setGame(previous => ({ ...previous, hand: mahjongSortTiles(previous.hand) })); setSelected(null); audioService.playSound('select'); };
-  const recommendedYaku = mahjongRecommendation(game.hand);
-  const discard = () => {
-    if (game.result || selected === null) return;
+  const [showGlossary, setShowGlossary] = useState(false);
+  const restart = () => { setGame(createMahjongState(game.mode)); setSelected(null); };
+  const chooseMode = (mode: MahjongMode) => { setGame(createMahjongState(mode)); setSelected(null); setShowGlossary(false); setShowYaku(false); audioService.playSound('select'); };
+  const chooseReward = (relic: MahjongRelic) => {
+    if (game.mode !== 'ADVANCE' || !game.rewardOptions || game.stage >= MAHJONG_ADVANCE_ROUNDS) return;
+    setGame(createMahjongState('ADVANCE', game.stage + 1, [...game.relics, relic], game.runScore));
+    setSelected(null); audioService.playSound('buff');
+  };
+  const resolveAdvanceEvent = (choice: MahjongAdvanceEventChoice) => {
+    if (game.mode !== 'ADVANCE' || !game.pendingEvent || game.result) return;
     setGame(previous => {
-      const drawn = previous.deck[0] || MAHJONG_TILE_POOL[(previous.turn * 7) % MAHJONG_TILE_POOL.length];
-      const nextHand = previous.hand.filter((_, index) => index !== selected).concat(drawn); const quality = analyzeMahjongHand(nextHand);
-      const cpuDraw = previous.cpuDeck[0] || MAHJONG_TILE_POOL[(previous.turn * 11 + 13) % MAHJONG_TILE_POOL.length]; const cpuWithDraw = [...previous.cpuHand, cpuDraw];
-      const cpuChoice = cpuWithDraw.map((_, index) => ({ index, quality: analyzeMahjongHand(cpuWithDraw.filter((__, tileIndex) => tileIndex !== index)) })).sort((a, b) => b.quality.groups * 3 + b.quality.pairs - (a.quality.groups * 3 + a.quality.pairs))[0];
-      const nextCpuHand = cpuWithDraw.filter((_, index) => index !== cpuChoice.index); const cpuQuality = analyzeMahjongHand(nextCpuHand); const nextTurn = previous.turn + 1;
-      const result = quality.complete ? 'WIN' : cpuQuality.complete ? 'LOSE' : nextTurn > 12 ? (quality.groups * 3 + quality.pairs >= cpuQuality.groups * 3 + cpuQuality.pairs ? 'WIN' : 'LOSE') : null;
-      return { ...previous, hand: nextHand, deck: previous.deck.slice(1), cpuHand: nextCpuHand, cpuDeck: previous.cpuDeck.slice(1), turn: nextTurn, quality, cpuQuality, lastDraw: drawn, result };
+      if (!previous.pendingEvent) return previous;
+      const preview = choice.id === 'WAIT_PEEK' || choice.id === 'OBSERVE' ? previous.deck[0] || null : null;
+      return { ...previous, pendingEvent: null, eventUsed: true, eventEffect: choice.id, eventPreview: preview, turnLimit: previous.turnLimit + (choice.id === 'SAFE_ROUTE' ? 1 : 0) };
+    });
+    setSelected(null);
+    audioService.playSound('buff');
+  };
+  const organizeTiles = () => { if (game.pendingEvent) return; setGame(previous => ({ ...previous, hand: mahjongSortTiles(previous.hand) })); setSelected(null); audioService.playSound('select'); };
+  const recommendedYaku = mahjongRecommendation(game.hand);
+  const advanceStage = game.mode === 'ADVANCE' ? getMahjongAdvanceStage(game.stage) : null;
+  const cpuProfileMeta = game.cpuProfile ? MAHJONG_CPU_PROFILE_META[game.cpuProfile] : null;
+  const drawStandard = () => {
+    if (game.mode !== 'STANDARD' || game.result || game.pendingCall || game.drawnForDiscard || game.mustDiscard) return;
+    setGame(previous => {
+      const drawn = previous.deck[0] || fallbackMahjongTile(previous.turn, 31);
+      const nextHand = [...previous.hand, drawn];
+      return { ...previous, hand: nextHand, deck: previous.deck.length > 0 ? previous.deck.slice(1) : previous.deck, lastDraw: drawn, drawnForDiscard: true, quality: analyzeMahjongHand(nextHand, previous.melds.length, 4) };
+    });
+    audioService.playSound('select');
+  };
+  const passCall = () => {
+    if (game.mode !== 'STANDARD' || !game.pendingCall || game.result) return;
+    setGame(previous => ({ ...previous, pendingCall: null, drawnForDiscard: false, mustDiscard: false }));
+    setSelected(null); audioService.playSound('select');
+  };
+  const callDiscard = (option: MahjongCallOption) => {
+    if (game.mode !== 'STANDARD' || !game.pendingCall || game.result) return;
+    setGame(previous => {
+      const pending = previous.pendingCall;
+      if (!pending || !pending.options.includes(option)) return previous;
+      if (option === 'RON') {
+        return { ...previous, quality: analyzeMahjongHand([...previous.hand, pending.tile], previous.melds.length, 4), pendingCall: null, result: 'WIN', drawnForDiscard: false, mustDiscard: false };
+      }
+      if (option === 'PON') {
+        const matchingIndexes = previous.hand.map((tile, index) => tile.key === pending.tile.key ? index : -1).filter(index => index >= 0).slice(0, 2);
+        if (matchingIndexes.length < 2) return previous;
+        const nextHand = previous.hand.filter((_, index) => !matchingIndexes.includes(index));
+        const melds = [...previous.melds, { kind: 'PON' as const, tiles: [pending.tile, ...matchingIndexes.map(index => previous.hand[index])] }];
+        return { ...previous, hand: nextHand, melds, quality: analyzeMahjongHand(nextHand, melds.length, 4), pendingCall: null, drawnForDiscard: true, mustDiscard: true, lastDraw: null };
+      }
+      const chiIndexes = findMahjongChi(previous.hand, pending.tile);
+      if (!chiIndexes) return previous;
+      const nextHand = previous.hand.filter((_, index) => !chiIndexes.includes(index));
+      const melds = [...previous.melds, { kind: 'CHI' as const, tiles: [pending.tile, ...chiIndexes.map(index => previous.hand[index])] }];
+      return { ...previous, hand: nextHand, melds, quality: analyzeMahjongHand(nextHand, melds.length, 4), pendingCall: null, drawnForDiscard: true, mustDiscard: true, lastDraw: null };
+    });
+    setSelected(null); audioService.playSound(option === 'RON' ? 'success' : 'buff');
+  };
+  const discard = () => {
+    if (game.result || selected === null || game.pendingEvent) return;
+    setGame(previous => {
+      if (previous.mode === 'STANDARD') {
+        if (!previous.drawnForDiscard || previous.pendingCall || selected >= previous.hand.length) return previous;
+        const discarded = previous.hand[selected];
+        const nextHand = previous.hand.filter((_, index) => index !== selected);
+        const quality = analyzeMahjongHand(nextHand, previous.melds.length, 4);
+        const cpuDraw = previous.cpuDeck[0] || fallbackMahjongTile(previous.turn, 47);
+        const cpuWithDraw = [...previous.cpuHand, cpuDraw];
+        const cpuCandidates = cpuWithDraw.map((_, index) => ({ index, quality: analyzeMahjongHand(cpuWithDraw.filter((__, tileIndex) => tileIndex !== index), previous.cpuMelds.length, 4) })).sort((a, b) => mahjongShapeScore(b.quality, []) - mahjongShapeScore(a.quality, []));
+        const cpuChoice = cpuCandidates[0] || { index: 0, quality: analyzeMahjongHand(cpuWithDraw, previous.cpuMelds.length, 4) };
+        const cpuDiscard = cpuWithDraw[cpuChoice.index];
+        const nextCpuHand = cpuWithDraw.filter((_, index) => index !== cpuChoice.index);
+        const cpuQuality = analyzeMahjongHand(nextCpuHand, previous.cpuMelds.length, 4);
+        const nextTurn = previous.turn + 1;
+        const callOptions = quality.complete ? [] : mahjongCallOptions(nextHand, cpuDiscard, previous.melds.length, 4);
+        const limitReached = nextTurn > previous.turnLimit;
+        const finalPlayerScore = mahjongShapeScore(quality, previous.relics, true);
+        const finalCpuScore = mahjongShapeScore(cpuQuality, []);
+        const result = quality.complete ? 'WIN' : (cpuQuality.complete && !callOptions.includes('RON')) ? 'LOSE' : (!callOptions.length && limitReached ? (finalPlayerScore >= finalCpuScore ? 'WIN' : 'LOSE') : null);
+        return { ...previous, hand: nextHand, cpuHand: nextCpuHand, deck: previous.deck, cpuDeck: previous.cpuDeck.length > 0 ? previous.cpuDeck.slice(1) : previous.cpuDeck, discardPile: [...previous.discardPile, discarded], cpuDiscardPile: [...previous.cpuDiscardPile, cpuDiscard], turn: nextTurn, quality, cpuQuality, lastDraw: previous.lastDraw, lastDiscard: discarded, lastCpuDiscard: cpuDiscard, pendingCall: result ? null : callOptions.length > 0 ? { tile: cpuDiscard, options: callOptions } : null, drawnForDiscard: false, mustDiscard: false, result };
+      }
+      const stageDefinition = previous.mode === 'ADVANCE' ? getMahjongAdvanceStage(previous.stage) : null;
+      const drawn = selectMahjongDraw(previous.hand, selected, previous.deck, previous.mode === 'ADVANCE' ? previous.relics : [], previous.turn, 0, previous.mode === 'ADVANCE' ? previous.eventEffect : null);
+      const discarded = previous.hand[selected];
+      const nextHand = previous.hand.filter((_, index) => index !== selected).concat(drawn); const quality = analyzeMahjongHand(nextHand, 0, mahjongTargetGroups(previous.mode));
+      const cpuDraw = previous.cpuDeck[0] || fallbackMahjongTile(previous.turn, 13); const cpuWithDraw = [...previous.cpuHand, cpuDraw];
+      const cpuCandidates = cpuWithDraw.map((_, index) => {
+        const hand = cpuWithDraw.filter((__, tileIndex) => tileIndex !== index);
+        return { index, hand, quality: analyzeMahjongHand(hand, 0, mahjongTargetGroups(previous.mode)) };
+      });
+      const cpuChoice = previous.mode === 'ADVANCE'
+        ? chooseMahjongCpuCandidate(cpuCandidates, previous.cpuProfile || stageDefinition?.cpuProfile || 'COLLECTOR', previous.stage)
+        : cpuCandidates.sort((a, b) => mahjongShapeScore(b.quality, []) - mahjongShapeScore(a.quality, []))[0];
+      const nextCpuHand = cpuWithDraw.filter((_, index) => index !== cpuChoice.index); const cpuQuality = analyzeMahjongHand(nextCpuHand, 0, mahjongTargetGroups(previous.mode)); const nextTurn = previous.turn + 1;
+      const lastCpuRisk = previous.mode === 'ADVANCE' ? mahjongDiscardRisk(nextHand, cpuDiscard) : previous.lastCpuRisk;
+      const drawHint = previous.mode === 'ADVANCE' && (previous.stage === 1 && nextTurn <= 4 || previous.eventEffect === 'OBSERVE' || previous.eventEffect === 'SHAPE_HINT')
+        ? copy('補充牌は、面子と対子が伸びる形を優先して選びました。', 'The replacement prioritizes a shape that improves melds or the pair.')
+        : previous.drawHint;
+      const guardTriggered = previous.mode === 'ADVANCE' && hasMahjongRelic(previous.relics, 'honor-guard') && cpuQuality.complete && !previous.guardUsed && !quality.complete;
+      const cpuFinishes = cpuQuality.complete && !guardTriggered;
+      const limitReached = nextTurn > previous.turnLimit;
+      const finalPlayerScore = previous.mode === 'ADVANCE' ? mahjongAdvanceScore(quality, nextHand, previous.stage, previous.relics, previous.eventEffect, true) : mahjongShapeScore(quality, previous.relics, true);
+      const finalCpuScore = mahjongShapeScore(cpuQuality, []) + (previous.mode === 'ADVANCE' ? Math.max(0, previous.stage - 2) : 0);
+      const result = quality.complete ? 'WIN' : cpuFinishes ? 'LOSE' : limitReached ? (finalPlayerScore >= finalCpuScore ? 'WIN' : 'LOSE') : null;
+      const rewardOptions = result === 'WIN' && previous.mode === 'ADVANCE' && previous.stage < MAHJONG_ADVANCE_ROUNDS ? chooseMahjongRewards(previous.relics) : null;
+      const eventDue = previous.mode === 'ADVANCE' && !!stageDefinition && !previous.eventUsed && !result && nextTurn === stageDefinition.eventTurn;
+      const lastAdvice = previous.mode === 'ADVANCE' && result ? mahjongAdvanceAdvice(nextHand, quality, previous.stage) : previous.lastAdvice;
+      return { ...previous, hand: nextHand, deck: previous.deck.slice(previous.mode === 'ADVANCE' && (hasMahjongRelic(previous.relics, 'tile-compass') || previous.eventEffect === 'OBSERVE' || previous.eventEffect === 'SHAPE_HINT') ? 2 : 1), cpuHand: nextCpuHand, cpuDeck: previous.cpuDeck.slice(1), discardPile: [...previous.discardPile, discarded], cpuDiscardPile: previous.cpuDiscardPile, turn: nextTurn, quality, cpuQuality, lastDraw: drawn, lastDiscard: discarded, result, runScore: previous.runScore + (result === 'WIN' ? 1 : 0), rewardOptions, guardUsed: previous.guardUsed || guardTriggered, pendingEvent: eventDue ? stageDefinition?.event || null : previous.pendingEvent, lastCpuRisk, drawHint, lastAdvice };
     });
     setSelected(null); audioService.playSound('select');
   };
   return (
-    <GameShell scope="mahjong" title={text(languageMode, 'まなび麻雀', 'Learning Mahjong')} subtitle={text(languageMode, '1枚捨てて1枚引き、順子・刻子と対子をそろえる8枚の学習麻雀。', 'Discard and draw to build sequences, triplets, and a pair in this eight-tile learning mahjong game.')} languageMode={languageMode} backgroundAsset="sprites/backgrounds/mini-games/mahjong.png" badgeAsset="sprites/backgrounds/mini-games/badges/mahjong.png" onBack={onBack}>
+    <GameShell scope="mahjong" title={text(languageMode, 'まなび麻雀', 'Learning Mahjong')} subtitle={text(languageMode, game.mode === 'STANDARD' ? '13枚の手牌でツモ・捨て牌・チー・ポン・ロンを学ぶ2人対戦。' : game.mode === 'ADVANCE' ? '短縮手牌で局を重ね、報酬を選ぶアドバンス麻雀。' : '8枚の手牌で順子・刻子と対子を学ぶプラクティス。', game.mode === 'STANDARD' ? 'A two-player match with 13-tile hands, draws, discards, Chi, Pon, and Ron.' : game.mode === 'ADVANCE' ? 'A short-hand advance run with round rewards.' : 'Practice sequences, triplets, and pairs with an eight-tile hand.')} languageMode={languageMode} backgroundAsset="sprites/backgrounds/mini-games/mahjong.png" badgeAsset="sprites/backgrounds/mini-games/badges/mahjong.png" onBack={onBack}>
       <ResultBanner result={game.result} onRestart={restart} languageMode={languageMode} />
       <div className="mahjong-scoreboard mb-3 grid grid-cols-2 gap-2 sm:grid-cols-4">
-        <div className="rounded-xl border border-teal-300/25 bg-teal-950/60 p-3 text-center"><div className="text-xs text-teal-200">{text(languageMode, 'あなた', 'You')}</div><div className="text-xl font-black">{game.quality.groups} {text(languageMode, '面子', 'melds')}</div><div className="text-xs text-slate-300">{text(languageMode, '対子', 'Pair')} {game.quality.pairs}</div></div>
-        <div className="rounded-xl border border-rose-300/25 bg-rose-950/60 p-3 text-center"><div className="text-xs text-rose-200">{text(languageMode, '相手', 'CPU')}</div><div className="text-xl font-black">{game.cpuQuality.groups} {text(languageMode, '面子', 'melds')}</div><div className="text-xs text-slate-300">{text(languageMode, '対子', 'Pair')} {game.cpuQuality.pairs}</div></div>
-        <div className="rounded-xl border border-white/10 bg-white/5 p-3 text-center"><div className="text-xs text-slate-300">{text(languageMode, '巡目', 'Turn')}</div><div className="text-xl font-black">{game.turn} / 12</div></div>
+        <div className="rounded-xl border border-teal-300/25 bg-teal-950/60 p-3 text-center"><div className="text-xs text-teal-200">{text(languageMode, 'あなた', 'You')} {game.mode === 'ADVANCE' && <span className="text-amber-200">// ADVANCE</span>}</div><div className="text-xl font-black">{game.quality.groups} {text(languageMode, '面子', 'melds')}</div><div className="text-xs text-slate-300">{text(languageMode, '対子', 'Pair')} {game.quality.pairs} ・ {text(languageMode, '副露', 'open')} {game.melds.length}</div></div>
+        <div className="rounded-xl border border-rose-300/25 bg-rose-950/60 p-3 text-center"><div className="text-xs text-rose-200">{text(languageMode, '相手', 'CPU')}</div><div className="text-xl font-black">{game.cpuQuality.groups} {text(languageMode, '面子', 'melds')}</div><div className="text-xs text-slate-300">{text(languageMode, '対子', 'Pair')} {game.cpuQuality.pairs} ・ {text(languageMode, '副露', 'open')} {game.cpuMelds.length}</div></div>
+        <div className="rounded-xl border border-white/10 bg-white/5 p-3 text-center"><div className="text-xs text-slate-300">{text(languageMode, '巡目', 'Turn')}</div><div className="text-xl font-black">{game.turn} / {game.turnLimit}</div></div>
         <div className="rounded-xl border border-amber-300/20 bg-amber-950/50 p-3 text-center"><div className="text-xs text-amber-200">{text(languageMode, '山牌', 'Tiles left')}</div><div className="text-xl font-black">{game.deck.length}</div></div>
       </div>
       <section className="mahjong-play-area flex flex-1 flex-col items-center justify-center rounded-2xl border border-teal-300/25 bg-slate-900/85 p-4">
-        <div className="mahjong-instruction mb-2 text-sm text-slate-300">{text(languageMode, '捨てる牌を選び、捨てるボタンで手番を進めます。', 'Select a tile, then press Discard to advance.')}</div>
-        <div className="mahjong-hand mb-3 flex max-w-full flex-wrap justify-center gap-2">{game.hand.map((tile, index) => <button key={tile.id} type="button" onClick={() => setSelected(index)} data-gamepad-zone="mahjong-hand" data-gamepad-order={index} disabled={!!game.result} className={`flex h-20 w-14 items-center justify-center rounded-lg border-2 bg-slate-50 text-lg font-black text-slate-900 shadow-lg transition hover:-translate-y-2 hover:border-teal-400 disabled:opacity-40 sm:h-24 sm:w-16 ${selected === index ? 'border-cyan-400 ring-2 ring-cyan-300' : 'border-slate-300'}`}>{mahjongTileText(languageMode, tile)}</button>)}</div>
-        <div className="mahjong-actions mb-3 flex flex-wrap justify-center gap-2">
-          <button type="button" onClick={discard} disabled={!!game.result || selected === null} data-gamepad-zone="mahjong-actions" data-gamepad-order={0} className="rounded-xl border border-teal-300/40 bg-teal-700/80 px-4 py-3 font-black hover:bg-teal-600 disabled:opacity-35">{text(languageMode, 'この牌を捨てる', 'Discard selected')}</button>
-          <button type="button" onClick={organizeTiles} disabled={!!game.result} data-gamepad-zone="mahjong-actions" data-gamepad-order={1} className="rounded-xl border border-cyan-300/40 bg-cyan-700/70 px-4 py-3 font-black hover:bg-cyan-600 disabled:opacity-35">{text(languageMode, '牌を整理', 'Sort tiles')}</button>
-          <button type="button" onClick={() => setShowYaku(true)} data-gamepad-zone="mahjong-actions" data-gamepad-order={2} className="rounded-xl border border-amber-300/40 bg-amber-700/70 px-4 py-3 font-black hover:bg-amber-600">{text(languageMode, '役を見る', 'View yaku')}</button>
+        <div className="mahjong-mode-switch mb-3 flex w-full max-w-xl flex-wrap items-center justify-between gap-2 rounded-xl border border-cyan-300/20 bg-slate-950/70 p-2">
+          <div className="text-xs font-black uppercase tracking-wider text-cyan-200">{text(languageMode, '対局モード', 'Game mode')}</div>
+          <div className="flex gap-2">
+            <button type="button" onClick={() => chooseMode('PRACTICE')} data-gamepad-zone="mahjong-mode" data-gamepad-order={0} className={`rounded-lg px-3 py-2 text-xs font-black transition ${game.mode === 'PRACTICE' ? 'bg-teal-300 text-slate-950' : 'border border-white/15 bg-white/5 text-slate-300'}`}>{text(languageMode, 'プラクティス', 'Practice')}</button>
+            <button type="button" onClick={() => chooseMode('STANDARD')} data-gamepad-zone="mahjong-mode" data-gamepad-order={1} className={`rounded-lg px-3 py-2 text-xs font-black transition ${game.mode === 'STANDARD' ? 'bg-cyan-300 text-slate-950' : 'border border-cyan-300/30 bg-cyan-950/30 text-cyan-100'}`}>{text(languageMode, 'スタンダード', 'Standard')}</button>
+            <button type="button" onClick={() => chooseMode('ADVANCE')} data-gamepad-zone="mahjong-mode" data-gamepad-order={2} className={`rounded-lg px-3 py-2 text-xs font-black transition ${game.mode === 'ADVANCE' ? 'bg-amber-300 text-slate-950' : 'border border-amber-300/30 bg-amber-950/30 text-amber-100'}`}>{text(languageMode, 'アドバンス', 'Advance')}</button>
+          </div>
         </div>
+        {game.mode === 'ADVANCE' && <div className="mahjong-advance-status mb-3 w-full max-w-xl rounded-xl border border-amber-300/30 bg-amber-950/25 p-3">
+          <div className="flex flex-wrap items-center justify-between gap-2 text-xs"><span className="font-black uppercase tracking-wider text-amber-200">{text(languageMode, `アドバンス局 ${game.stage} / ${MAHJONG_ADVANCE_ROUNDS}`, `ADVANCE ROUND ${game.stage} / ${MAHJONG_ADVANCE_ROUNDS}`)}</span><span className="text-amber-100">{text(languageMode, `制覇ポイント ${game.runScore}`, `Run points ${game.runScore}`)}</span></div>
+          <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-slate-800"><div className="h-full rounded-full bg-amber-300 transition-all" style={{ width: `${Math.min(100, ((game.stage - 1) / MAHJONG_ADVANCE_ROUNDS) * 100)}%` }} /></div>
+          {game.relics.length > 0 && <div className="mt-2 flex flex-wrap gap-1.5">{game.relics.map(relic => <span key={relic.id} title={copyText(languageMode, relic.description)} className="mahjong-relic-chip rounded-full border border-cyan-300/30 bg-cyan-950/50 px-2 py-1 text-[10px] font-black text-cyan-100">{copyText(languageMode, relic.name)}</span>)}</div>}
+          {mahjongRelicSynergyCount(game.relics) > 0 && <div className="mt-2 text-[11px] font-black text-emerald-200">{text(languageMode, 'レリック連携', 'Relic links')} × {mahjongRelicSynergyCount(game.relics)}</div>}
+        </div>}
+        {game.mode === 'ADVANCE' && advanceStage && <div className="mahjong-advance-objective mb-3 w-full max-w-xl rounded-2xl border border-cyan-300/30 bg-cyan-950/35 p-3">
+          <div className="flex flex-wrap items-start justify-between gap-2">
+            <div><div className="text-xs font-black uppercase tracking-wider text-cyan-200">{copyText(languageMode, advanceStage.title)}</div><p className="mt-1 text-sm font-black text-cyan-50">{copyText(languageMode, advanceStage.objective)}</p></div>
+            {cpuProfileMeta && <div className="rounded-lg border border-rose-200/25 bg-rose-950/40 px-2 py-1 text-right"><div className="text-[10px] uppercase tracking-wider text-rose-200">{text(languageMode, 'CPU方針', 'CPU style')}</div><div className="text-xs font-black text-rose-50">{copyText(languageMode, cpuProfileMeta.name)}</div></div>}
+          </div>
+          <p className="mt-2 text-xs leading-5 text-slate-300">{copyText(languageMode, advanceStage.rule)}</p>
+          {cpuProfileMeta && <p className="mt-1 text-[11px] leading-5 text-rose-100/75">{copyText(languageMode, cpuProfileMeta.description)}</p>}
+        </div>}
+        {game.mode === 'ADVANCE' && game.pendingEvent && <section className="mahjong-advance-event mb-3 w-full max-w-xl rounded-2xl border border-violet-300/50 bg-violet-950/55 p-3" aria-live="polite">
+          <div className="text-xs font-black uppercase tracking-wider text-violet-200">{text(languageMode, '途中イベント', 'MID-ROUND EVENT')}</div>
+          <h3 className="mt-1 text-base font-black text-violet-50">{copyText(languageMode, game.pendingEvent.title)}</h3>
+          <p className="mt-1 text-sm leading-5 text-slate-200">{copyText(languageMode, game.pendingEvent.description)}</p>
+          <div className="mt-3 grid gap-2 sm:grid-cols-2">{game.pendingEvent.choices.map((choice, index) => <button key={choice.id} type="button" onClick={() => resolveAdvanceEvent(choice)} data-gamepad-zone="mahjong-advance-event" data-gamepad-order={index} className="rounded-xl border border-violet-200/30 bg-slate-950/60 p-3 text-left transition hover:-translate-y-0.5 hover:border-violet-200 hover:bg-violet-900/45"><div className="text-sm font-black text-violet-50">{copyText(languageMode, choice.label)}</div><p className="mt-1 text-xs leading-5 text-slate-300">{copyText(languageMode, choice.description)}</p></button>)}</div>
+        </section>}
+        {game.mode === 'ADVANCE' && game.eventPreview && <div className="mahjong-advance-preview mb-3 w-full max-w-xl rounded-xl border border-emerald-300/30 bg-emerald-950/35 p-2 text-center text-xs text-emerald-100" aria-live="polite">{text(languageMode, 'イベントで見えた山の先頭：', 'Event preview — top of the wall: ')}<strong>{mahjongTileText(languageMode, game.eventPreview)}</strong></div>}
+        {game.mode === 'ADVANCE' && game.drawHint && <div className="mahjong-advance-draw-hint mb-3 w-full max-w-xl rounded-xl border border-cyan-300/25 bg-cyan-950/30 p-2 text-center text-xs text-cyan-100" aria-live="polite">{copyText(languageMode, game.drawHint)}</div>}
+        {game.mode === 'ADVANCE' && game.stage >= 3 && game.lastCpuRisk && <div className="mahjong-advance-risk mb-3 w-full max-w-xl rounded-xl border border-rose-300/25 bg-rose-950/30 p-2 text-center text-xs" aria-live="polite"><span className="mr-1 font-black text-rose-200">{text(languageMode, '相手の捨て牌の危険度：', 'Opponent discard risk:')}</span><strong className={game.lastCpuRisk === 'DANGER' ? 'text-rose-200' : game.lastCpuRisk === 'CAUTION' ? 'text-amber-200' : 'text-emerald-200'}>{text(languageMode, game.lastCpuRisk === 'DANGER' ? '危険' : game.lastCpuRisk === 'CAUTION' ? '注意' : '比較的安全', game.lastCpuRisk === 'DANGER' ? 'Danger' : game.lastCpuRisk === 'CAUTION' ? 'Caution' : 'Relatively safe')}</strong></div>}
+        {game.mode === 'ADVANCE' && game.lastAdvice && game.result && <div className="mahjong-advance-advice mb-3 w-full max-w-xl rounded-xl border border-amber-300/30 bg-amber-950/35 p-3 text-sm leading-5 text-amber-50" aria-live="polite"><span className="mr-1 font-black text-amber-200">{text(languageMode, '振り返り：', 'Review:')}</span>{copyText(languageMode, game.lastAdvice)}</div>}
+        <div className="mahjong-instruction mb-2 text-sm text-slate-300">{text(languageMode, game.mode === 'STANDARD' ? 'ツモるボタンで14枚にし、捨てる牌を選びます。相手の捨て牌にはチー・ポン・ロンで応じられます。' : '捨てる牌を選び、捨てるボタンで手番を進めます。', game.mode === 'STANDARD' ? 'Draw to 14 tiles, then choose a discard. Respond to an opponent discard with Chi, Pon, or Ron.' : 'Select a tile, then press Discard to advance.')}</div>
+        <div className="mahjong-suit-legend mb-2 flex flex-wrap justify-center gap-2" aria-label={text(languageMode, '牌の種類', 'Tile suits')}>
+          {MAHJONG_SUIT_ORDER.map(suit => <span key={suit} className={`mahjong-suit-chip mahjong-suit-chip-${suit}`}><b>{text(languageMode, MAHJONG_SUIT_META[suit].shortJp, MAHJONG_SUIT_META[suit].shortEn)}</b>{text(languageMode, MAHJONG_SUIT_META[suit].jp, MAHJONG_SUIT_META[suit].en)}</span>)}
+        </div>
+        <div className={`mahjong-hand mahjong-hand-count-${game.hand.length} mb-3 flex max-w-full flex-wrap justify-center gap-2`}>{game.hand.map((tile, index) => <button key={tile.id} type="button" onClick={() => setSelected(index)} data-gamepad-zone="mahjong-hand" data-gamepad-order={index} disabled={!!game.result || (game.mode === 'STANDARD' && !game.drawnForDiscard)} aria-label={mahjongTileAria(languageMode, tile)} className={`mahjong-tile-button mahjong-tile-button-${tile.suit} flex h-20 w-14 items-center justify-center rounded-lg border-2 bg-slate-50 text-lg font-black text-slate-900 shadow-lg transition hover:-translate-y-2 hover:border-teal-400 disabled:opacity-40 sm:h-24 sm:w-16 ${selected === index ? 'border-cyan-400 ring-2 ring-cyan-300' : 'border-slate-300'}`}><MahjongTileFace tile={tile} languageMode={languageMode} /></button>)}</div>
+        <div className="mahjong-actions mb-3 flex flex-wrap justify-center gap-2">
+          {game.mode === 'STANDARD' && <button type="button" onClick={drawStandard} disabled={!!game.result || game.drawnForDiscard || !!game.pendingCall || game.mustDiscard} data-gamepad-zone="mahjong-actions" data-gamepad-order={0} className="rounded-xl border border-cyan-300/40 bg-cyan-700/80 px-4 py-3 font-black hover:bg-cyan-600 disabled:opacity-35">{text(languageMode, 'ツモる', 'Draw')}</button>}
+          <button type="button" onClick={discard} disabled={!!game.result || selected === null || (game.mode === 'STANDARD' && !game.drawnForDiscard)} data-gamepad-zone="mahjong-actions" data-gamepad-order={1} className="rounded-xl border border-teal-300/40 bg-teal-700/80 px-4 py-3 font-black hover:bg-teal-600 disabled:opacity-35">{text(languageMode, game.mode === 'STANDARD' ? 'この牌を捨てる' : 'この牌を捨てる', 'Discard selected')}</button>
+          <button type="button" onClick={organizeTiles} disabled={!!game.result} data-gamepad-zone="mahjong-actions" data-gamepad-order={2} className="rounded-xl border border-cyan-300/40 bg-cyan-700/70 px-4 py-3 font-black hover:bg-cyan-600 disabled:opacity-35">{text(languageMode, '牌を整理', 'Sort tiles')}</button>
+          <button type="button" onClick={() => setShowYaku(true)} data-gamepad-zone="mahjong-actions" data-gamepad-order={3} className="rounded-xl border border-amber-300/40 bg-amber-700/70 px-4 py-3 font-black hover:bg-amber-600">{text(languageMode, '役を見る', 'View yaku')}</button>
+          <button type="button" onClick={() => setShowGlossary(true)} data-gamepad-zone="mahjong-actions" data-gamepad-order={4} className="rounded-xl border border-violet-300/40 bg-violet-700/70 px-4 py-3 font-black hover:bg-violet-600">{text(languageMode, '用語を見る', 'Glossary')}</button>
+        </div>
+        {game.mode === 'STANDARD' && game.pendingCall && <div className="mahjong-call-panel mb-3 w-full max-w-xl rounded-2xl border border-cyan-300/50 bg-cyan-950/55 p-3"><div className="flex flex-wrap items-center justify-between gap-2"><span className="text-sm font-black text-cyan-100">{text(languageMode, '相手の捨て牌', 'Opponent discard')}: {mahjongTileText(languageMode, game.pendingCall.tile)}</span><span className="text-xs text-cyan-200">{text(languageMode, 'この牌に応じる', 'Respond to this discard')}</span></div><div className="mt-2 flex flex-wrap gap-2">{game.pendingCall.options.map(option => <button key={option} type="button" onClick={() => callDiscard(option)} data-gamepad-zone="mahjong-calls" data-gamepad-order={option === 'CHI' ? 0 : option === 'PON' ? 1 : 2} className={`rounded-lg px-3 py-2 text-xs font-black ${option === 'RON' ? 'bg-rose-400 text-slate-950' : 'border border-cyan-200/40 bg-cyan-800/80 text-cyan-50'}`}>{text(languageMode, option === 'CHI' ? 'チー' : option === 'PON' ? 'ポン' : 'ロン', option)}</button>)}<button type="button" onClick={passCall} data-gamepad-zone="mahjong-calls" data-gamepad-order={3} className="rounded-lg border border-white/20 bg-white/5 px-3 py-2 text-xs font-black text-slate-200">{text(languageMode, '見送る', 'Pass')}</button></div></div>}
         {game.lastDraw && <div className="mahjong-drawn mb-3 text-xs text-teal-200">{text(languageMode, '引いた牌：', 'Drawn tile: ')}{mahjongTileText(languageMode, game.lastDraw)}</div>}
+        {game.mode === 'STANDARD' && <div className="mahjong-discard-area mb-3 grid w-full max-w-xl gap-2 sm:grid-cols-2"><div className="rounded-xl border border-teal-300/20 bg-teal-950/30 p-2"><div className="text-[10px] font-black uppercase tracking-wider text-teal-200">{text(languageMode, 'あなたの捨て牌', 'Your discards')}</div><div className="mt-1 flex min-h-7 flex-wrap gap-1">{game.discardPile.slice(-12).map(tile => <span key={tile.id} className="rounded border border-teal-200/20 bg-slate-950/60 px-1.5 py-1 text-[10px] text-teal-50">{mahjongTileText(languageMode, tile)}</span>)}</div></div><div className="rounded-xl border border-rose-300/20 bg-rose-950/30 p-2"><div className="text-[10px] font-black uppercase tracking-wider text-rose-200">{text(languageMode, '相手の捨て牌', 'Opponent discards')}</div><div className="mt-1 flex min-h-7 flex-wrap gap-1">{game.cpuDiscardPile.slice(-12).map(tile => <span key={tile.id} className={`rounded border px-1.5 py-1 text-[10px] ${tile.id === game.lastCpuDiscard?.id ? 'border-cyan-300 bg-cyan-900/70 text-cyan-50' : 'border-rose-200/20 bg-slate-950/60 text-rose-50'}`}>{mahjongTileText(languageMode, tile)}</span>)}</div></div></div>}
+        {game.mode === 'STANDARD' && game.melds.length > 0 && <div className="mahjong-open-melds mb-3 w-full max-w-xl rounded-xl border border-violet-300/25 bg-violet-950/25 p-2"><div className="text-[10px] font-black uppercase tracking-wider text-violet-200">{text(languageMode, 'あなたの副露', 'Your open melds')}</div><div className="mt-1 flex flex-wrap gap-2">{game.melds.map((meld, index) => <span key={`${meld.kind}-${index}`} className="rounded-lg border border-violet-200/25 bg-slate-950/60 px-2 py-1 text-[10px] text-violet-50">{meld.kind === 'CHI' ? text(languageMode, 'チー', 'CHI') : text(languageMode, 'ポン', 'PON')}：{meld.tiles.map(tile => mahjongTileText(languageMode, tile)).join('・')}</span>)}</div></div>}
         <div className="mahjong-recommendation mb-3 w-full max-w-xl rounded-2xl border border-amber-300/30 bg-amber-950/35 p-3">
           <div className="flex flex-wrap items-center justify-between gap-2"><div className="text-xs font-black uppercase tracking-wider text-amber-200">{text(languageMode, 'おすすめ役', 'Recommended yaku')}</div><span className="rounded-full bg-amber-300/20 px-2 py-1 text-xs font-black text-amber-100">{copyText(languageMode, recommendedYaku.name)}</span></div>
           <p className="mt-2 text-sm leading-6 text-amber-50">{copyText(languageMode, recommendedYaku.description)}</p>
           <p className="mt-2 text-xs leading-5 text-amber-100/70">{text(languageMode, 'まずは面子2つ＋対子1つの完成を優先し、役は次の捨て牌を選ぶヒントとして使います。', 'Prioritize two melds plus a pair first; use yaku as a guide for your next discard.')}</p>
         </div>
-        <div className="mahjong-info max-w-md rounded-xl border border-white/10 bg-white/5 p-3 text-xs leading-5 text-slate-300">{text(languageMode, '順子は同じ種類の連番3枚、刻子は同じ牌3枚、対子は同じ牌2枚です。面子2つ＋対子1つで完成。', 'A sequence is three consecutive tiles of one suit; a triplet is three identical tiles; a pair is two identical tiles. Complete two melds plus one pair.')}</div>
+        <div className="mahjong-info max-w-md rounded-xl border border-white/10 bg-white/5 p-3 text-xs leading-5 text-slate-300">{text(languageMode, game.mode === 'STANDARD' ? 'スタンダードは2人対戦です。双方13枚から開始し、ツモで14枚、1枚捨てて13枚に戻します。相手の捨て牌はチー（連番）・ポン（同牌3枚）・ロン（完成形）で使えます。先に面子4つ＋対子1つを完成させた側が勝ちです。' : '順子は同じ種類の連番3枚、刻子は同じ牌3枚、対子は同じ牌2枚です。プラクティス／アドバンスは面子2つ＋対子1つで完成。', game.mode === 'STANDARD' ? 'Standard is a two-player match. Both start with 13 tiles, draw to 14, then discard back to 13. An opponent discard can be used for Chi (sequence), Pon (triplet), or Ron (complete hand). The first player to complete four melds plus a pair wins.' : 'A sequence is three consecutive tiles of one suit; a triplet is three identical tiles; a pair is two identical tiles. Practice and Advance complete with two melds plus one pair.')}</div>
+        {game.mode === 'ADVANCE' && game.result === 'WIN' && game.stage < MAHJONG_ADVANCE_ROUNDS && game.rewardOptions && <div className="mahjong-reward-panel mt-3 w-full max-w-xl rounded-2xl border border-amber-300/50 bg-amber-950/60 p-3">
+          <div className="text-center"><div className="text-xs font-black uppercase tracking-wider text-amber-200">{text(languageMode, '局クリア報酬', 'ROUND CLEAR REWARD')}</div><p className="mt-1 text-sm font-black text-amber-50">{text(languageMode, '次の局へ持ち込む道具を1つ選んでください。', 'Choose one tool to carry into the next round.')}</p></div>
+          <div className="mt-3 grid gap-2 sm:grid-cols-3">{game.rewardOptions.map(relic => <button type="button" key={relic.id} onClick={() => chooseReward(relic)} data-gamepad-zone="mahjong-rewards" data-gamepad-order={game.rewardOptions?.indexOf(relic) ?? 0} className="rounded-xl border border-amber-200/30 bg-slate-950/70 p-3 text-left transition hover:-translate-y-1 hover:border-amber-200 hover:bg-amber-900/40"><div className="text-sm font-black text-amber-100">{copyText(languageMode, relic.name)}</div><p className="mt-1 text-xs leading-5 text-slate-300">{copyText(languageMode, relic.description)}</p></button>)}</div>
+        </div>}
+        {game.mode === 'ADVANCE' && game.result === 'WIN' && game.stage >= MAHJONG_ADVANCE_ROUNDS && <div className="mahjong-run-complete mt-3 w-full max-w-xl rounded-2xl border border-emerald-300/50 bg-emerald-950/55 p-3 text-center"><div className="text-xs font-black uppercase tracking-wider text-emerald-200">{text(languageMode, 'アドバンス制覇', 'ADVANCE RUN COMPLETE')}</div><p className="mt-1 text-sm font-black text-emerald-50">{text(languageMode, '5局を勝ち抜きました。もう一度遊ぶと新しい配牌でランを始められます。', 'You cleared all five rounds. Play again to start a new run with a fresh random deal.')}</p></div>}
+        {game.mode === 'ADVANCE' && game.result === 'LOSE' && <div className="mahjong-run-failed mt-3 w-full max-w-xl rounded-2xl border border-rose-300/40 bg-rose-950/50 p-3 text-center"><div className="text-xs font-black uppercase tracking-wider text-rose-200">{text(languageMode, 'ラン終了', 'RUN ENDED')}</div><p className="mt-1 text-sm text-rose-50">{text(languageMode, 'このランはここで終了です。もう一度遊ぶと配牌と報酬が変わります。', 'This run is over. Play again to reroll the deal and rewards.')}</p></div>}
       </section>
       {showYaku && <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 p-3 backdrop-blur-sm" data-gamepad-modal="true" data-gamepad-navigation-root="true">
         <section role="dialog" aria-modal="true" aria-labelledby="mahjong-yaku-title" className="mini-game-rules-modal max-h-[90dvh] w-full max-w-lg overflow-y-auto rounded-3xl border border-amber-200/40 bg-slate-900 p-5 shadow-2xl">
           <div className="mb-4 flex items-center justify-between gap-3"><div><h2 id="mahjong-yaku-title" className="text-xl font-black text-amber-100">{text(languageMode, '麻雀の役を知る', 'Learn mahjong yaku')}</h2><p className="mt-1 text-xs text-slate-400">{text(languageMode, '役は手牌の特徴を表すボーナス条件です。', 'Yaku are bonus conditions that describe a hand’s pattern.')}</p></div><button type="button" onClick={() => setShowYaku(false)} data-gamepad-zone="mahjong-yaku" data-gamepad-order={0} className="rounded-lg border border-white/15 px-3 py-2 text-xs font-black">{text(languageMode, '閉じる', 'Close')}</button></div>
           <div className="space-y-2">{MAHJONG_YAKU.map(yaku => <article key={yaku.name.jp} className={`rounded-xl border p-3 ${yaku.name.jp === recommendedYaku.name.jp ? 'border-amber-300/60 bg-amber-950/40' : 'border-white/10 bg-white/5'}`}><div className="flex items-center gap-2"><span className="text-sm font-black text-amber-100">{copyText(languageMode, yaku.name)}</span>{yaku.name.jp === recommendedYaku.name.jp && <span className="rounded-full bg-emerald-400/20 px-2 py-0.5 text-[10px] font-black text-emerald-200">{text(languageMode, 'おすすめ', 'Recommended')}</span>}</div><p className="mt-1 text-xs leading-5 text-slate-300">{copyText(languageMode, yaku.description)}</p></article>)}</div>
           <button type="button" onClick={() => setShowYaku(false)} data-gamepad-zone="mahjong-yaku" data-gamepad-order={1} className="mt-4 w-full rounded-xl bg-amber-400 px-4 py-3 font-black text-slate-950">{text(languageMode, '役を確認した', 'Got it')}</button>
+        </section>
+      </div>}
+      {showGlossary && <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-950/80 p-3 backdrop-blur-sm" data-gamepad-modal="true" data-gamepad-navigation-root="true">
+        <section role="dialog" aria-modal="true" aria-labelledby="mahjong-glossary-title" className="mini-game-rules-modal max-h-[90dvh] w-full max-w-2xl overflow-y-auto rounded-3xl border border-violet-200/40 bg-slate-900 p-5 shadow-2xl">
+          <div className="mb-4 flex items-center justify-between gap-3"><div><h2 id="mahjong-glossary-title" className="text-xl font-black text-violet-100">{text(languageMode, '麻雀用語ミニ辞典', 'Mahjong glossary')}</h2><p className="mt-1 text-xs text-slate-400">{text(languageMode, '牌を選ぶ前に、意味と具体例を確認できます。', 'Check the meaning and example before choosing a tile.')}</p></div><button type="button" onClick={() => setShowGlossary(false)} data-gamepad-zone="mahjong-glossary" data-gamepad-order={0} className="rounded-lg border border-white/15 px-3 py-2 text-xs font-black">{text(languageMode, '閉じる', 'Close')}</button></div>
+          <div className="grid gap-2 sm:grid-cols-2">{MAHJONG_GLOSSARY.map((entry, index) => <article key={entry.term.jp} className="rounded-xl border border-violet-200/15 bg-white/5 p-3"><div className="flex items-center gap-2"><span className="flex h-6 w-6 items-center justify-center rounded-full bg-violet-300 font-black text-slate-950">{index + 1}</span><h3 className="font-black text-violet-100">{copyText(languageMode, entry.term)}</h3></div><p className="mt-2 text-xs leading-5 text-slate-300">{copyText(languageMode, entry.description)}</p><p className="mt-2 rounded-lg border border-white/10 bg-slate-950/50 p-2 text-xs leading-5 text-violet-50">{copyText(languageMode, entry.example)}</p></article>)}</div>
+          <button type="button" onClick={() => setShowGlossary(false)} data-gamepad-zone="mahjong-glossary" data-gamepad-order={1} className="mt-4 w-full rounded-xl bg-violet-300 px-4 py-3 font-black text-slate-950">{text(languageMode, '用語を確認した', 'Got it')}</button>
         </section>
       </div>}
     </GameShell>

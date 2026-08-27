@@ -113,6 +113,14 @@ export const createPlacementTcgOpponents = (seed: number): PlacementTcgOpponent[
   PLACEMENT_TCG_PRINCIPAL,
 ];
 
+export const getPlacementTcgEndlessOpponent = (seed: number, floor: number): PlacementTcgOpponent => {
+  const pool = seededShuffle(
+    ENDLESS_RIVALS.filter(rival => rival.id !== PLACEMENT_TCG_PRINCIPAL.id),
+    seed + Math.floor(Math.max(1, floor) / Math.max(1, ENDLESS_RIVALS.length - 1)) * 104729,
+  );
+  return pool[(Math.max(1, floor) - 1) % pool.length] || ENDLESS_RIVALS[1];
+};
+
 export const getPlacementOpponentPortraitStyle = (
   opponent: PlacementTcgOpponent,
   expression: 0 | 1 | 2,

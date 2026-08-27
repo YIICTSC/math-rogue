@@ -8,9 +8,17 @@ import { getCardIllustrationPaths } from '../../utils/cardIllustration';
 import { trans } from '../../utils/textUtils';
 import { audioService } from '../../services/audioService';
 import {
+  PLACEMENT_TCG_CARDS,
   PLACEMENT_TCG_CARD_MAP,
+  PLACEMENT_TCG_EDITION_DECKS,
   type PlacementCardDefinition,
+  type PlacementCardVoiceProfile,
+  type PlacementTcgEdition,
 } from './placementTcgCards';
+import {
+  getPlacementEffectTerms,
+  type PlacementEffectTermDefinition,
+} from './placementTcgEffectDsl';
 import {
   addRewardAndAdvance,
   attackPlacementLane,
@@ -18,18 +26,22 @@ import {
   createNewPlacementRun,
   createPlacementBattle,
   createRewardChoices,
+  enterPlacementTcgEndless,
   endPlayerTurn,
   getCurrentOpponent,
   getUnitAttack,
   getUnitMaxHealth,
   loadPlacementRun,
+  loadPlacementTcgCollection,
   playPlacementCard,
   runCpuTurn,
   savePlacementRun,
+  savePlacementTcgDeck,
   type PlacementBattle,
   type PlacementActionCue,
   type PlacementLane,
   type PlacementRun,
+  type PlacementTcgCollection,
   type PlacementSideKey,
 } from './placementTcgEngine';
 import {
@@ -149,12 +161,37 @@ const playPlacementEffectSound = (card: PlacementCardDefinition | null) => {
   }
 };
 
-const CardArt: React.FC<{ card: PlacementCardDefinition; compact?: boolean; languageMode?: LanguageMode }> = ({ card, compact, languageMode }) => (
+type PlacementVoiceAction = 'DEPLOY' | 'ATTACK' | 'DEFEAT' | 'FINISH';
+
+const playPlacementCardVoice = (profile: PlacementCardVoiceProfile | undefined, action: PlacementVoiceAction) => {
+  if (!profile) return;
+  if (profile.type === 'HIGH_SCHOOL_HERO') {
+    const mapped = action === 'DEPLOY' ? 'summon' : action === 'ATTACK' ? 'attack' : action === 'FINISH' ? 'finish' : 'defeat';
+    audioService.playHighSchoolVoice(profile.id, mapped, 3);
+    return;
+  }
+  if (profile.type === 'MAGIC_HERO') {
+    const mapped = action === 'DEPLOY' ? 'spell' : action === 'ATTACK' || action === 'FINISH' ? 'attack' : 'damage';
+    audioService.playMagicVoice(profile.id, mapped, 3, 1, profile.transformed);
+    return;
+  }
+  const mapped = action === 'DEPLOY' ? 'spawn' : action === 'ATTACK' || action === 'FINISH' ? 'attack' : 'defeat';
+  void audioService.playHumanoidEnemyVoice(profile.theme, profile.name, mapped);
+};
+
+const cardAssetSource = (asset: string) => asset.startsWith('data:') || asset.startsWith('http') ? asset : assetUrl(asset);
+
+const CardArt: React.FC<{ card: PlacementCardDefinition; compact?: boolean; combat?: boolean; languageMode?: LanguageMode }> = ({ card, compact, combat, languageMode }) => (
   <div className={'placement-tcg-card-art ' + (compact ? 'is-compact' : '')}>
     <ResilientAssetImage
-      sources={getCardIllustrationPaths(card.sourceCardId, card.name, [card.name])}
+      sources={[
+        combat && card.attackArtAsset ? cardAssetSource(card.attackArtAsset) : null,
+        card.artAsset ? cardAssetSource(card.artAsset) : null,
+        ...getCardIllustrationPaths(card.sourceCardId, card.name, [card.name]),
+      ]}
       alt={localizedCardName(card, languageMode)}
       className="placement-tcg-card-sprite"
+      style={{ objectPosition: card.artObjectPosition || '50% 50%' }}
       fallback={<div className="placement-tcg-card-art-fallback">{localizedCardName(card, languageMode).slice(0, 1)}</div>}
     />
     <div className="placement-tcg-art-scan" />
@@ -250,7 +287,7 @@ const UnitChip: React.FC<{
       }}
       aria-label={localizedCardName(card, languageMode) + (canAttack ? copy(languageMode, 'で攻撃', 'でこうげき', ' attack') : '')}
     >
-      <CardArt card={card} compact languageMode={languageMode} />
+      <CardArt card={card} compact combat languageMode={languageMode} />
       <div className="placement-tcg-unit-copy">
         <strong>{localizedCardName(card, languageMode)}</strong>
         <span>{lane.unit.stunned ? 'STUN' : lane.unit.ready ? 'READY' : 'REST'}</span>
@@ -313,24 +350,75 @@ const InspectPanel: React.FC<{
   card: PlacementCardDefinition;
   languageMode?: LanguageMode;
   onClose: () => void;
-}> = ({ card, languageMode, onClose }) => (
-  <div className="placement-tcg-modal-backdrop" role="dialog" aria-modal="true" onClick={onClose}>
-    <section className="placement-tcg-modal placement-tcg-inspect-modal" onClick={event => event.stopPropagation()}>
-      <button type="button" className="placement-tcg-modal-close" onClick={onClose}>×</button>
-      <CardFace card={card} languageMode={languageMode} />
-      <div className="placement-tcg-inspect-copy">
-        <p className="placement-tcg-eyebrow">{card.tier} // {card.kind}</p>
-        <h2>{card.name}</h2>
-        <p>{languageMode === 'ENGLISH' ? card.rulesText.en : languageMode === 'HIRAGANA' ? trans(card.rulesText.jp, 'HIRAGANA') : card.rulesText.jp}</p>
-        <dl>
-          <div><dt>COST</dt><dd>{card.spCost} SP</dd></div>
-          <div><dt>SOURCE</dt><dd>{card.sourceCardId}</dd></div>
-          <div><dt>CARD ID</dt><dd>{card.id}</dd></div>
-        </dl>
+}> = ({ card, languageMode, onClose }) => {
+  const [activeTerm, setActiveTerm] = useState<PlacementEffectTermDefinition | null>(null);
+  const terms = useMemo(() => getPlacementEffectTerms(card.effectProgram), [card.effectProgram]);
+  const termText = (term: PlacementEffectTermDefinition, field: 'label' | 'description') => {
+    const value = term[field];
+    if (languageMode === 'ENGLISH') return value.en;
+    if (languageMode === 'HIRAGANA') return trans(value.jp, 'HIRAGANA');
+    return value.jp;
+  };
+  const categoryLabel = (category: PlacementEffectTermDefinition['category']) => {
+    const labels = {
+      TRIGGER: { jp: '発動タイミング', hira: 'はつどうタイミング', en: 'TRIGGER' },
+      ACTION: { jp: '処理', hira: 'しょり', en: 'ACTION' },
+      TARGET: { jp: '対象', hira: 'たいしょう', en: 'TARGET' },
+      CONDITION: { jp: '条件', hira: 'じょうけん', en: 'CONDITION' },
+      RESET: { jp: '発動回数', hira: 'はつどうかいすう', en: 'LIMIT' },
+    }[category];
+    return languageMode === 'ENGLISH' ? labels.en : languageMode === 'HIRAGANA' ? labels.hira : labels.jp;
+  };
+  return (
+    <>
+      <div className="placement-tcg-modal-backdrop" role="dialog" aria-modal="true" onClick={onClose}>
+        <section className="placement-tcg-modal placement-tcg-inspect-modal" onClick={event => event.stopPropagation()}>
+          <button type="button" className="placement-tcg-modal-close" onClick={onClose}>×</button>
+          <CardFace card={card} languageMode={languageMode} />
+          <div className="placement-tcg-inspect-copy">
+            <p className="placement-tcg-eyebrow">{card.tier} // {card.kind}</p>
+            <h2>{card.name}</h2>
+            <p>{languageMode === 'ENGLISH' ? card.rulesText.en : languageMode === 'HIRAGANA' ? trans(card.rulesText.jp, 'HIRAGANA') : card.rulesText.jp}</p>
+            <div className="placement-tcg-effect-terms">
+              <p className="placement-tcg-effect-terms-title">{copy(languageMode, '効果用語', 'こうかようご', 'EFFECT TERMS')}</p>
+              {terms.map(term => (
+                <button
+                  type="button"
+                  key={term.key}
+                  className="placement-tcg-term-chip"
+                  onClick={() => setActiveTerm(term)}
+                >
+                  <span>{termText(term, 'label')}</span>
+                  <small>{categoryLabel(term.category)}</small>
+                </button>
+              ))}
+            </div>
+            <dl>
+              <div><dt>COST</dt><dd>{card.spCost} SP</dd></div>
+              <div><dt>ART SOURCE</dt><dd>{card.artSourceType === 'CHARACTER_ART'
+                ? copy(languageMode, '本編キャラクター立ち絵', 'ほんぺんキャラクターたちえ', 'MAIN GAME CHARACTER ART')
+                : copy(languageMode, '本編カードイラスト', 'ほんぺんカードイラスト', 'MAIN GAME CARD ART')}</dd></div>
+              <div><dt>CARD ID</dt><dd>{card.id}</dd></div>
+            </dl>
+          </div>
+        </section>
       </div>
-    </section>
-  </div>
-);
+      {activeTerm && (
+        <div className="placement-tcg-term-modal-backdrop" role="dialog" aria-modal="true" onClick={() => setActiveTerm(null)}>
+          <section className="placement-tcg-term-modal" onClick={event => event.stopPropagation()}>
+            <button type="button" className="placement-tcg-modal-close" onClick={() => setActiveTerm(null)}>×</button>
+            <p className="placement-tcg-eyebrow">{categoryLabel(activeTerm.category)}</p>
+            <h3>{termText(activeTerm, 'label')}</h3>
+            <p>{termText(activeTerm, 'description')}</p>
+            <button type="button" className="placement-tcg-secondary-button" onClick={() => setActiveTerm(null)}>
+              {copy(languageMode, '詳細へ戻る', 'しょうさいへもどる', 'BACK TO CARD')}
+            </button>
+          </section>
+        </div>
+      )}
+    </>
+  );
+};
 
 const LaneFxOverlay: React.FC<{
   cue: PlacementActionCue | null;
@@ -422,10 +510,143 @@ const DuelBoard: React.FC<{
 const StartOverlay: React.FC<{
   savedRun: PlacementRun | null;
   languageMode?: LanguageMode;
-  onStart: (continueSaved: boolean) => void;
+  onStart: (continueSaved: boolean, edition?: PlacementTcgEdition) => void;
   onBack: () => void;
-}> = ({ savedRun, languageMode, onStart, onBack }) => (
-  <div className="placement-tcg-start-overlay">
+}> = ({ savedRun, languageMode, onStart, onBack }) => {
+  const [edition, setEdition] = useState<PlacementTcgEdition>('ELEMENTARY');
+  const [manager, setManager] = useState<'DECK' | 'COLLECTION' | null>(null);
+  const [collection, setCollection] = useState<PlacementTcgCollection>(() => loadPlacementTcgCollection());
+  const [workingDeck, setWorkingDeck] = useState<string[]>(() => [...collection.decks.ELEMENTARY]);
+  const [deckNotice, setDeckNotice] = useState('');
+  const [inspectCard, setInspectCard] = useState<PlacementCardDefinition | null>(null);
+  const cardPressTimer = useRef<number | null>(null);
+  const longPressTriggered = useRef(false);
+  const editionLabel: Record<PlacementTcgEdition, string> = {
+    ELEMENTARY: copy(languageMode, '小学生編', 'しょうがくせいへん', 'ELEMENTARY'),
+    HIGH_SCHOOL: copy(languageMode, '高校編', 'こうこうへん', 'HIGH SCHOOL'),
+    MAGIC: copy(languageMode, 'マジック編', 'マジックへん', 'MAGIC'),
+  };
+  const switchEdition = (next: PlacementTcgEdition) => {
+    setEdition(next);
+    setWorkingDeck([...(collection.decks[next] || PLACEMENT_TCG_EDITION_DECKS[next])]);
+    setDeckNotice('');
+  };
+  const unlocked = new Set(collection.unlockedCardIds);
+  const deckCounts = workingDeck.reduce<Record<string, number>>((counts, cardId) => {
+    counts[cardId] = (counts[cardId] || 0) + 1;
+    return counts;
+  }, {});
+  // Starter decks remain edition-specific, but every card earned from any run is a
+  // shared collection card and can be added to any edition deck.
+  const managerCards = PLACEMENT_TCG_CARDS;
+  const beginCardPress = (card: PlacementCardDefinition) => {
+    longPressTriggered.current = false;
+    if (cardPressTimer.current !== null) window.clearTimeout(cardPressTimer.current);
+    cardPressTimer.current = window.setTimeout(() => {
+      longPressTriggered.current = true;
+      setInspectCard(card);
+    }, 520);
+  };
+  const endCardPress = () => {
+    if (cardPressTimer.current !== null) {
+      window.clearTimeout(cardPressTimer.current);
+      cardPressTimer.current = null;
+    }
+  };
+  const runCardTap = (action: () => void) => {
+    if (longPressTriggered.current) {
+      longPressTriggered.current = false;
+      return;
+    }
+    action();
+  };
+  const inspectFromContextMenu = (event: React.MouseEvent, card: PlacementCardDefinition) => {
+    event.preventDefault();
+    if (!unlocked.has(card.id)) return;
+    endCardPress();
+    longPressTriggered.current = true;
+    setInspectCard(card);
+  };
+  const saveDeck = () => {
+    if (!savePlacementTcgDeck(edition, workingDeck)) {
+      setDeckNotice(copy(languageMode, '20〜30枚・同名3枚までで編成してください。', '20〜30まい・おなじカード3まいまででへんせいしてください。', 'Use 20–30 cards, up to 3 copies each.'));
+      return;
+    }
+    const next = loadPlacementTcgCollection();
+    setCollection(next);
+    setDeckNotice(copy(languageMode, 'デッキを保存しました。', 'デッキをほぞんしました。', 'DECK SAVED'));
+  };
+
+  if (manager) return (
+    <div className="placement-tcg-manager">
+      <header>
+        <button type="button" onClick={() => setManager(null)}>← TITLE</button>
+        <div><span>TACTICAL DATABASE</span><b>{manager === 'DECK' ? 'DECK EDITOR' : 'CARD COLLECTION'}</b></div>
+        <strong>{manager === 'DECK' ? `${workingDeck.length} / 30` : `${collection.unlockedCardIds.length} / ${PLACEMENT_TCG_CARDS.length}`}</strong>
+      </header>
+      <nav className="placement-tcg-edition-tabs">
+        {(Object.keys(editionLabel) as PlacementTcgEdition[]).map(key => (
+          <button type="button" key={key} className={edition === key ? 'active' : ''} onClick={() => switchEdition(key)}>{editionLabel[key]}</button>
+        ))}
+      </nav>
+      {manager === 'DECK' && (
+        <div className="placement-tcg-deck-summary">
+          <span>{copy(languageMode, 'デッキ内カードを押すと1枚外し、下の所持カードを押すと追加します。', 'デッキのカードをおすとはずし、したのカードをおすとついかします。', 'Tap deck cards to remove; tap owned cards below to add.')}</span>
+          <button type="button" onClick={() => setWorkingDeck([...PLACEMENT_TCG_EDITION_DECKS[edition]])}>RESET</button>
+          <button type="button" onClick={saveDeck}>SAVE DECK</button>
+          {deckNotice && <b>{deckNotice}</b>}
+        </div>
+      )}
+      {manager === 'DECK' && (
+        <section className="placement-tcg-deck-strip">
+          {workingDeck.map((cardId, index) => {
+            const card = getCard(cardId);
+            return card ? <button
+              type="button"
+              key={`${cardId}-${index}`}
+              onClick={() => runCardTap(() => setWorkingDeck(cards => cards.filter((_, cardIndex) => cardIndex !== index)))}
+              onPointerDown={() => unlocked.has(card.id) && beginCardPress(card)}
+              onPointerUp={endCardPress}
+              onPointerLeave={endCardPress}
+              onPointerCancel={endCardPress}
+              onContextMenu={event => inspectFromContextMenu(event, card)}
+              aria-label={localizedCardName(card, languageMode)}
+            ><CardArt card={card} compact languageMode={languageMode} /><span>{localizedCardName(card, languageMode)}</span></button> : null;
+          })}
+        </section>
+      )}
+      <section className="placement-tcg-collection-grid">
+        {managerCards.map(card => {
+          const isUnlocked = unlocked.has(card.id);
+          const count = deckCounts[card.id] || 0;
+          const atDeckLimit = workingDeck.length >= 30 || count >= 3;
+          return (
+            <button
+              type="button"
+              key={card.id}
+              className={`${isUnlocked ? '' : 'locked'} ${manager === 'DECK' && atDeckLimit ? 'at-limit' : ''}`}
+              aria-disabled={!isUnlocked || (manager === 'DECK' && atDeckLimit)}
+              onClick={() => runCardTap(() => {
+                if (manager === 'DECK' && isUnlocked && !atDeckLimit) setWorkingDeck(cards => [...cards, card.id]);
+              })}
+              onPointerDown={() => isUnlocked && beginCardPress(card)}
+              onPointerUp={endCardPress}
+              onPointerLeave={endCardPress}
+              onPointerCancel={endCardPress}
+              onContextMenu={event => inspectFromContextMenu(event, card)}
+            >
+              <CardArt card={card} compact languageMode={languageMode} />
+              <span>{isUnlocked ? localizedCardName(card, languageMode) : 'LOCKED'}</span>
+              <small>{card.kind} // {manager === 'DECK' ? `IN DECK ×${count}` : card.tier}</small>
+            </button>
+          );
+        })}
+      </section>
+      {inspectCard && <InspectPanel card={inspectCard} languageMode={languageMode} onClose={() => setInspectCard(null)} />}
+    </div>
+  );
+
+  return <div className="placement-tcg-start-overlay">
     <div className="placement-tcg-start-mark">LR // TCG</div>
     <p className="placement-tcg-eyebrow">AFTER SCHOOL CARD PROTOCOL</p>
     <h1>TACTICAL<br /><em>CLASSROOM</em></h1>
@@ -433,23 +654,30 @@ const StartOverlay: React.FC<{
       {copy(languageMode, '3つのレーンを制圧し、9人のライバルと最後に待つ校長を撃破せよ。\n      学習ローグのカードイラストを使った、独立ルールの配置型TCG。', '3つのレーンをせいあつし、9にんのライバルとさいごにまつこうちょうをげきはせよ。\n      がくしゅうローグのカードイラストをつかった、どくりつルールのはいちがたTCG。', 'Control three lanes, defeat nine rivals, and take down the principal waiting at the end.\n      A standalone placement TCG using Learning Rogue card art.')}
     </p>
     <div className="placement-tcg-start-specs">
-      <span><b>200</b> CARDS</span>
+      <span><b>{PLACEMENT_TCG_CARDS.length}</b> CARDS</span>
       <span><b>10</b> BATTLES</span>
-      <span><b>3</b> LANES</span>
+      <span><b>∞</b> ENDLESS</span>
+    </div>
+    <div className="placement-tcg-edition-tabs is-title">
+      {(Object.keys(editionLabel) as PlacementTcgEdition[]).map(key => (
+        <button type="button" key={key} className={edition === key ? 'active' : ''} onClick={() => switchEdition(key)}>{editionLabel[key]}<small>{collection.decks[key].length} CARDS</small></button>
+      ))}
     </div>
     <div className="placement-tcg-start-actions">
-      {savedRun && savedRun.battleIndex < 10 && (
-        <button type="button" className="placement-tcg-primary-button" onClick={() => onStart(true)}>
-          {copy(languageMode, `CONTINUE // 第${savedRun.battleIndex + 1}戦`, `つづける // ${savedRun.battleIndex + 1}せんめ`, `CONTINUE // BATTLE ${savedRun.battleIndex + 1}`)}
+      {savedRun && (
+        <button type="button" className="placement-tcg-primary-button" onClick={() => onStart(true, savedRun.edition)}>
+          {savedRun.mode === 'ENDLESS' ? `CONTINUE // ENDLESS ${savedRun.endlessFloor}` : copy(languageMode, `CONTINUE // 第${savedRun.battleIndex + 1}戦`, `つづける // ${savedRun.battleIndex + 1}せんめ`, `CONTINUE // BATTLE ${savedRun.battleIndex + 1}`)}
         </button>
       )}
-      <button type="button" className="placement-tcg-secondary-button" onClick={() => onStart(false)}>
-        NEW RUN
+      <button type="button" className="placement-tcg-secondary-button" onClick={() => onStart(false, edition)}>
+        NEW RUN // {editionLabel[edition]}
       </button>
+      <button type="button" className="placement-tcg-secondary-button" onClick={() => setManager('DECK')}>DECK EDITOR</button>
+      <button type="button" className="placement-tcg-secondary-button" onClick={() => setManager('COLLECTION')}>CARD COLLECTION</button>
       <button type="button" className="placement-tcg-text-button" onClick={onBack}>{copy(languageMode, 'ミニゲーム選択へ戻る', 'ミニゲームせんたくへもどる', 'BACK TO MINI-GAMES')}</button>
     </div>
-  </div>
-);
+  </div>;
+};
 
 const RewardOverlay: React.FC<{
   choices: string[];
@@ -483,13 +711,15 @@ const CompletionOverlay: React.FC<{
   languageMode?: LanguageMode;
   onFinish: () => void;
   onNewRun: () => void;
-}> = ({ languageMode, onFinish, onNewRun }) => (
+  onEndless: () => void;
+}> = ({ languageMode, onFinish, onNewRun, onEndless }) => (
   <div className="placement-tcg-modal-backdrop reward" role="dialog" aria-modal="true">
     <section className="placement-tcg-completion-panel">
       <div className="placement-tcg-completion-seal">10 / 10</div>
       <p className="placement-tcg-eyebrow">ALL RIVALS DEFEATED</p>
       <h2>{copy(languageMode, '校長撃破', 'こうちょうげきは', 'PRINCIPAL DEFEATED')}<br /><em>TACTICAL MASTER</em></h2>
       <p>{copy(languageMode, '全10戦を制覇しました。新しいRUNでは、別の9人が対戦相手として選ばれます。', 'ぜん10せんをせいはしました。あたらしいRUNでは、べつの9にんがたいせんあいてとしてえらばれます。', 'You cleared all ten battles. A new run selects nine different rivals.')}</p>
+      <button type="button" className="placement-tcg-primary-button" onClick={onEndless}>ENDLESS MODE →</button>
       <button type="button" className="placement-tcg-primary-button" onClick={onFinish}>{copy(languageMode, '結果へ進む', 'けっかへすすむ', 'CONTINUE TO RESULTS')}</button>
       <button type="button" className="placement-tcg-secondary-button" onClick={onNewRun}>{copy(languageMode, '別のライバルで再挑戦', 'べつのライバルでさいちょうせん', 'RETRY WITH NEW RIVALS')}</button>
     </section>
@@ -508,6 +738,7 @@ const PlacementTcgGame: React.FC<PlacementTcgGameProps> = ({ onBack, onFinish, l
   const [complete, setComplete] = useState(false);
   const [showMissionQuiz, setShowMissionQuiz] = useState(false);
   const [activeCue, setActiveCue] = useState<PlacementActionCue | null>(null);
+  const [finisherCard, setFinisherCard] = useState<PlacementCardDefinition | null>(null);
   const cueTimerRef = useRef<number | null>(null);
   const seenCueRef = useRef<number | null>(null);
   const seenWinnerRef = useRef<PlacementSideKey | null>(null);
@@ -518,7 +749,7 @@ const PlacementTcgGame: React.FC<PlacementTcgGameProps> = ({ onBack, onFinish, l
       ? 'victory'
       : rewardChoices.length > 0
         ? 'reward'
-        : run.battleIndex === 9
+        : run.mode === 'GAUNTLET' && run.battleIndex === 9
           ? 'boss'
           : 'battle';
 
@@ -527,7 +758,7 @@ const PlacementTcgGame: React.FC<PlacementTcgGameProps> = ({ onBack, onFinish, l
   }, [placementBgmType]);
 
   const opponent: PlacementTcgOpponent | null = useMemo(
-    () => run && run.battleIndex < 10 ? getCurrentOpponent(run) : null,
+    () => run ? getCurrentOpponent(run) : null,
     [run],
   );
 
@@ -555,9 +786,12 @@ const PlacementTcgGame: React.FC<PlacementTcgGameProps> = ({ onBack, onFinish, l
     const card = getCard(cue.cardId);
     if (cue.type === 'ATTACK') {
       audioService.playAttackEffectSound(attackSoundForCard(card), cue.direct ? 1 : 2);
+      playPlacementCardVoice(card?.voiceProfile, 'ATTACK');
     } else {
       playPlacementEffectSound(card);
+      playPlacementCardVoice(card?.voiceProfile, 'DEPLOY');
     }
+    cue.defeatedCardIds?.forEach(cardId => playPlacementCardVoice(getCard(cardId)?.voiceProfile, 'DEFEAT'));
     showCue(cue);
   }, [battle?.lastAction]);
 
@@ -569,6 +803,12 @@ const PlacementTcgGame: React.FC<PlacementTcgGameProps> = ({ onBack, onFinish, l
     if (seenWinnerRef.current === battle.winner) return;
     seenWinnerRef.current = battle.winner;
     audioService.playBattleSound(battle.winner === 'player' ? 'win' : 'lose');
+    if (battle.winner === 'player' && battle.lastAction?.side === 'player') {
+      const card = getCard(battle.lastAction.cardId);
+      setFinisherCard(card);
+      playPlacementCardVoice(card?.voiceProfile, 'FINISH');
+      window.setTimeout(() => setFinisherCard(current => current?.id === card?.id ? null : current), 1650);
+    }
   }, [battle?.winner]);
 
   const beginBattle = (nextRun: PlacementRun) => {
@@ -580,11 +820,12 @@ const PlacementTcgGame: React.FC<PlacementTcgGameProps> = ({ onBack, onFinish, l
     setSelectedHandIndex(null);
     setRewardChoices([]);
     setComplete(false);
+    setFinisherCard(null);
     savePlacementRun(nextRun);
   };
 
-  const startRun = (continueSaved: boolean) => {
-    const nextRun = continueSaved && savedRunAtOpen ? savedRunAtOpen : createNewPlacementRun();
+  const startRun = (continueSaved: boolean, edition: PlacementTcgEdition = 'ELEMENTARY') => {
+    const nextRun = continueSaved && savedRunAtOpen ? savedRunAtOpen : createNewPlacementRun(edition);
     if (!continueSaved) clearPlacementRun();
     beginBattle(nextRun);
   };
@@ -601,8 +842,7 @@ const PlacementTcgGame: React.FC<PlacementTcgGameProps> = ({ onBack, onFinish, l
     setShowMissionQuiz(false);
     if (battle.winner === 'player') {
       setShowMissionQuiz(true);
-      if (run.battleIndex >= 9) {
-        clearPlacementRun();
+      if (run.mode === 'GAUNTLET' && run.battleIndex >= 9) {
         setComplete(true);
       } else {
         setRewardChoices(createRewardChoices(run));
@@ -664,15 +904,15 @@ const PlacementTcgGame: React.FC<PlacementTcgGameProps> = ({ onBack, onFinish, l
           <b>TACTICAL CLASSROOM</b>
         </div>
         <div className="placement-tcg-progress">
-          <span>BATTLE</span>
-          <b>{String(run.battleIndex + 1).padStart(2, '0')} / 10</b>
+          <span>{run.mode === 'ENDLESS' ? 'ENDLESS' : 'BATTLE'}</span>
+          <b>{run.mode === 'ENDLESS' ? `FLOOR ${String(run.endlessFloor).padStart(2, '0')}` : `${String(run.battleIndex + 1).padStart(2, '0')} / 10`}</b>
         </div>
         <button type="button" className="placement-tcg-rules-button" onClick={() => setShowRules(true)}>RULES</button>
       </header>
 
       <div className="placement-tcg-layout">
         <aside className="placement-tcg-opponent-panel">
-          <p className="placement-tcg-eyebrow">{run.battleIndex === 9 ? 'FINAL BOSS' : 'RIVAL ' + String(run.battleIndex + 1).padStart(2, '0')}</p>
+          <p className="placement-tcg-eyebrow">{run.mode === 'ENDLESS' ? `ENDLESS FLOOR ${String(run.endlessFloor).padStart(2, '0')}` : run.battleIndex === 9 ? 'FINAL BOSS' : 'RIVAL ' + String(run.battleIndex + 1).padStart(2, '0')}</p>
           <div className="placement-tcg-portrait-frame">
             <div className="placement-tcg-portrait" style={getPlacementOpponentPortraitStyle(opponent, expression)} />
             <div className="placement-tcg-portrait-scan" />
@@ -813,8 +1053,15 @@ const PlacementTcgGame: React.FC<PlacementTcgGameProps> = ({ onBack, onFinish, l
           <CompletionOverlay
             languageMode={languageMode}
           onFinish={() => onFinish ? onFinish('WIN') : onBack()}
-          onNewRun={() => beginBattle(createNewPlacementRun())}
+          onNewRun={() => beginBattle(createNewPlacementRun(run.edition))}
+          onEndless={() => beginBattle(enterPlacementTcgEndless(run))}
         />
+      )}
+      {finisherCard && (
+        <div className="placement-tcg-finisher" aria-hidden="true">
+          <CardArt card={finisherCard} combat languageMode={languageMode} />
+          <div><span>FINAL ATTACK</span><b>{localizedCardName(finisherCard, languageMode)}</b><em>FINISH</em></div>
+        </div>
       )}
       {showRules && <RulesPanel languageMode={languageMode} onClose={() => setShowRules(false)} />}
       {inspectCard && <InspectPanel card={inspectCard} languageMode={languageMode} onClose={() => setInspectCard(null)} />}

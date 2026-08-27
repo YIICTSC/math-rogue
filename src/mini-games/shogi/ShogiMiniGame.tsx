@@ -8,11 +8,12 @@ import {
   createShogiGame,
   getAdvancedStageUniqueCount,
   getPieceDefinition,
-  getShogiTargets,
+  getShogiMovementTargets,
   playShogiMove,
   selectShogiPiece,
   type ShogiGameState,
   type ShogiMode,
+  type ShogiPlayMode,
   type ShogiTarget,
 } from './shogiEngine';
 import {
@@ -118,21 +119,21 @@ const localizeShogiPieceField = (
 
 const localizeShogiMessage = (value: string, languageMode?: LanguageMode) => {
   const messages: Record<string, [string, string]> = {
-    '新しい盤面を生成しました。駒を選んで移動範囲を確認。': ['New board generated. Select a piece to see its legal moves.', 'あたらしいばんめんをせいせいしました。こまをえらんでいどうはんいをかくにん。'],
-    '青いマスが移動先です。赤いマスは捕獲できます。': ['Blue squares are legal moves. Red squares capture an enemy.', 'あおいマスがいどうさきです。あかいマスはてきこまをとれます。'],
-    'この駒は現在動かせません。': ['This piece has no legal moves right now.', 'このこまはげんざいうごかせません。'],
-    'そのマスには移動できません。表示された候補を選んでください。': ['That square is not legal. Choose a highlighted destination.', 'そのマスにはいどうできません。ひょうじされたこうほをえらんでください。'],
+    '新しい盤面を生成しました。駒を選んで移動範囲を確認。': ['New board generated. Select a piece to see every movement destination.', 'あたらしいばんめんをせいせいしました。こまをえらんでいどうはんいをかくにん。'],
+    '駒本来の移動先を表示しています。王が危険になる手も指せます。失敗から守り方を学びましょう。': ['Showing every destination allowed by the piece movement. Risky moves are allowed; learn king safety from the resulting defeat.', 'こまほんらいのいどうさきをひょうじしています。おうがきけんになるてもさせます。しっぱいからまもりかたをまなびましょう。'],
+    'この駒は駒の動きとして移動先がありません。': ['This piece has no destination under its movement rule.', 'このこまはこまのうごきとしていどうさきがありません。'],
+    'そのマスには移動できません。表示された候補を選んでください。': ['That square is outside this piece\'s movement. Choose a highlighted destination.', 'そのマスにはいどうできません。ひょうじされたこうほをえらんでください。'],
     'CPUが指しました。あなたの手番です。': ['CPU moved. Your turn.', 'CPUがさしました。あなたのばんです。'],
     '相手の王を取りました。勝利！': ['You captured the enemy king. Victory!', 'あいてのおうをとりました。しょうり！'],
     '王を取られました。敗北。': ['Your king was captured. Defeat.', 'おうをとられました。はいぼく。'],
     '詰みです。勝利！': ['Checkmate. Victory!', 'つみです。しょうり！'],
-    '合法手がありません。引き分けです。': ['There are no legal moves. Draw.', 'ごうほうてがありません。ひきわけです。'],
-    'CPUに合法手がありません。引き分けです。': ['CPU has no legal moves. Draw.', 'CPUにごうほうてがありません。ひきわけです。'],
+    '動かせる駒がありません。引き分けです。': ['There are no movable pieces. Draw.', 'うごかせるこまがありません。ひきわけです。'],
+    'CPUに動かせる駒がありません。引き分けです。': ['CPU has no movable pieces. Draw.', 'CPUにうごかせるこまがありません。ひきわけです。'],
     '詰みです。敗北。': ['Checkmate. Defeat.', 'つみです。はいぼく。'],
   };
   if (value.startsWith('ステージ') && value.includes('駒を選んで移動範囲を確認。')) {
     const stage = value.match(/^ステージ(\d+)/)?.[1] || '';
-    return copy(languageMode, value, `Stage ${stage}: select a piece to see its legal moves.`, `ステージ${stage}：こまをえらんでいどうはんいをかくにん。`);
+    return copy(languageMode, value, `Stage ${stage}: select a piece to see every movement destination.`, `ステージ${stage}：こまをえらんでいどうはんいをかくにん。`);
   }
   const translated = messages[value];
   return translated ? copy(languageMode, value, translated[0], translated[1]) : localizeShogiText(value, languageMode);
@@ -212,18 +213,20 @@ const targetLabel = (target: ShogiTarget, languageMode?: LanguageMode) => {
   if (target.status === 'CAPTURE') return copy(languageMode, '捕獲できるマス', 'Capture square');
   if (target.status === 'DROP') return copy(languageMode, '持ち駒を打てるマス', 'Drop square');
   if (target.status === 'SPECIAL') return copy(languageMode, '特殊移動の候補', 'Special move');
-  return copy(languageMode, '移動できるマス', 'Legal move');
+  return copy(languageMode, '移動できるマス', 'Movement destination');
 };
 
 const ModeStart: React.FC<{
   languageMode?: LanguageMode;
   progress: ShogiProgress;
   initialMode?: ShogiMode;
+  initialPlayMode?: ShogiPlayMode;
   initialStage?: number;
-  onStart: (mode: ShogiMode, stage: number) => void;
+  onStart: (mode: ShogiMode, stage: number, playMode: ShogiPlayMode) => void;
   onBack: () => void;
-}> = ({ languageMode, progress, initialMode = 'STANDARD', initialStage = 1, onStart, onBack }) => {
+}> = ({ languageMode, progress, initialMode = 'STANDARD', initialPlayMode = 'CPU', initialStage = 1, onStart, onBack }) => {
   const [mode, setMode] = useState<ShogiMode>(initialMode);
+  const [playMode, setPlayMode] = useState<ShogiPlayMode>(initialPlayMode);
   const [stage, setStage] = useState(initialStage);
   const unlocked = Math.min(100, progress.highestStage);
   // 駒名・駒字は日本語の固有表記。英語の遅延DOM翻訳から保護する。
@@ -235,7 +238,7 @@ const ModeStart: React.FC<{
         <p className="shogi-mini-eyebrow">LEARNING ROGUE // TRIVIA LAB</p>
         <h1>{copy(languageMode, 'ミニ将棋', 'MINI SHOGI')}</h1>
         <p className="shogi-mini-lead">
-          {copy(languageMode, '駒の動きを見て、王を守りながら相手の玉を詰ませよう。毎回異なる盤面で遊べます。', 'Read each piece, protect your king, and checkmate the enemy. Every replay generates a new board.')}
+          {copy(languageMode, '駒本来の動きを試し、悪手なら王を取られる実戦型。負けた局面から守り方を学べます。', 'Try every destination allowed by each piece. Risky moves can lose your king, so each defeat teaches better defense.')}
         </p>
         <div className="shogi-mini-mode-tabs">
           <button type="button" className={mode === 'STANDARD' ? 'active' : ''} onClick={() => setMode('STANDARD')}>
@@ -245,7 +248,15 @@ const ModeStart: React.FC<{
             <b>ADVANCE</b><span>{copy(languageMode, 'ユニーク駒50種 // 100ステージ', '50 unique pieces // 100 stages')}</span>
           </button>
         </div>
-        {mode === 'ADVANCE' && (
+        <div className="shogi-play-mode-tabs" aria-label={copy(languageMode, '対戦方式', 'Play mode')}>
+          <button type="button" className={playMode === 'CPU' ? 'active' : ''} onClick={() => setPlayMode('CPU')}>
+            <b>{copy(languageMode, 'CPU対戦', 'VS CPU')}</b><span>{copy(languageMode, '一人で学習CPUと対戦', 'Solo learning duel')}</span>
+          </button>
+          <button type="button" className={playMode === 'LOCAL' ? 'active' : ''} onClick={() => setPlayMode('LOCAL')}>
+            <b>{copy(languageMode, '対面対戦', 'FACE-TO-FACE')}</b><span>{copy(languageMode, '同じ画面で先手・後手を交代', 'Two players on one screen')}</span>
+          </button>
+        </div>
+        {mode === 'ADVANCE' && playMode === 'CPU' && (
           <div className="shogi-stage-picker">
             <div className="shogi-stage-picker-head">
               <span>{copy(languageMode, 'ステージを選択', 'Select stage')}</span>
@@ -275,8 +286,10 @@ const ModeStart: React.FC<{
           <span><b>8</b> STANDARD</span><span><b>50</b> UNIQUE</span><span><b>100</b> STAGES</span>
         </div>
         <div className="shogi-mini-start-actions">
-          <button type="button" className="primary" onClick={() => onStart(mode, mode === 'ADVANCE' ? stage : 1)}>
-            {mode === 'ADVANCE' ? 'START STAGE ' + String(stage).padStart(2, '0') : 'START RANDOM DUEL'}
+          <button type="button" className="primary" onClick={() => onStart(mode, mode === 'ADVANCE' ? (playMode === 'LOCAL' ? 100 : stage) : 1, playMode)}>
+            {playMode === 'LOCAL'
+              ? mode === 'ADVANCE' ? copy(languageMode, '対面アドバンス・ランダム局を開始', 'START LOCAL ADVANCE RANDOM') : copy(languageMode, '対面スタンダード局を開始', 'START LOCAL STANDARD')
+              : mode === 'ADVANCE' ? 'START STAGE ' + String(stage).padStart(2, '0') : 'START RANDOM DUEL'}
           </button>
           <button type="button" className="secondary" onClick={onBack}>{copy(languageMode, '戻る', 'Back')}</button>
         </div>
@@ -313,7 +326,7 @@ const PieceInspector: React.FC<{
           {definition.special && <article><b>{copy(languageMode, '特殊能力', 'SPECIAL')}</b><p>{localizeShogiPieceField(piece.kind, 'special', definition.special, languageMode)}</p></article>}
         </div>
         <div className="shogi-piece-modal-footer">
-          <span>{copy(languageMode, '現在の合法手', 'Legal moves now')}</span><b>{targetCount}</b>
+          <span>{copy(languageMode, '現在の移動先', 'Movement destinations')}</span><b>{targetCount}</b>
           <button type="button" onClick={onClose}>{copy(languageMode, '盤面へ戻る', 'Return to board')}</button>
         </div>
       </section>
@@ -334,6 +347,7 @@ const ShogiMiniGame: React.FC<ShogiMiniGameProps> = ({ onBack, onFinish, languag
   const [progress, setProgress] = useState<ShogiProgress>(() => loadProgress());
   const [game, setGame] = useState<ShogiGameState | null>(null);
   const [startMode, setStartMode] = useState<ShogiMode>('STANDARD');
+  const [startPlayMode, setStartPlayMode] = useState<ShogiPlayMode>('CPU');
   const [startStage, setStartStage] = useState(1);
   const [inspect, setInspect] = useState<{ piece: ShogiPiece; targetCount: number } | null>(null);
   const [showGuide, setShowGuide] = useState(false);
@@ -345,27 +359,31 @@ const ShogiMiniGame: React.FC<ShogiMiniGameProps> = ({ onBack, onFinish, languag
     void audioService.playBGM('poker_play');
   }, []);
 
-  const startGame = (mode: ShogiMode, stage: number) => {
+  const startGame = (mode: ShogiMode, stage: number, playMode: ShogiPlayMode = 'CPU') => {
     setShowMissionQuiz(false);
-    setGame(createShogiGame(mode, stage, Date.now() + stage * 97));
+    // Quiz/result screens may change the BGM. Every new board, including the
+    // Advance "next stage" action, explicitly restores the poker track.
+    void audioService.playBGM('poker_play');
+    setGame(createShogiGame(mode, stage, Date.now() + stage * 97, playMode));
     setInspect(null);
   };
 
   const restart = () => {
     if (!game) return;
-    startGame(game.mode, game.stage);
+    startGame(game.mode, game.stage, game.playMode);
   };
 
   const openStagePicker = () => {
     if (!game) return;
     setStartMode(game.mode);
+    setStartPlayMode(game.playMode);
     setStartStage(game.mode === 'ADVANCE' ? Math.min(100, game.stage + 1) : 1);
     setGame(null);
   };
 
   useEffect(() => {
     if (!game?.result) return;
-    if (game.result === 'WIN') {
+    if (game.result === 'WIN' && game.playMode === 'CPU') {
       setShowMissionQuiz(true);
       setProgress(previous => {
         const nextProgress: ShogiProgress = game.mode === 'ADVANCE'
@@ -379,11 +397,11 @@ const ShogiMiniGame: React.FC<ShogiMiniGameProps> = ({ onBack, onFinish, languag
         return nextProgress;
       });
     }
-  }, [game?.result, game?.mode, game?.stage]);
+  }, [game?.result, game?.mode, game?.stage, game?.playMode]);
 
   const selectedTarget = useMemo(
-    () => game?.selected ? getShogiTargets(game.board, game.hands, game.selected, 'P') : [],
-    [game?.board, game?.hands, game?.selected],
+    () => game?.selected ? getShogiMovementTargets(game.board, game.hands, game.selected, game.side) : [],
+    [game?.board, game?.hands, game?.selected, game?.side],
   );
 
   const beginLongPress = (piece: ShogiPiece, row?: number, col?: number) => {
@@ -392,7 +410,7 @@ const ShogiMiniGame: React.FC<ShogiMiniGameProps> = ({ onBack, onFinish, languag
     longPressTimer.current = setTimeout(() => {
       longPressTriggered.current = true;
       const selection = row !== undefined && col !== undefined ? { row, col } : { hand: piece.kind };
-      setInspect({ piece, targetCount: game ? getShogiTargets(game.board, game.hands, selection, piece.side).length : 0 });
+      setInspect({ piece, targetCount: game ? getShogiMovementTargets(game.board, game.hands, selection, piece.side).length : 0 });
     }, 450);
   };
   const cancelLongPress = () => {
@@ -401,7 +419,7 @@ const ShogiMiniGame: React.FC<ShogiMiniGameProps> = ({ onBack, onFinish, languag
   };
 
   const inspectBoardPiece = (piece: ShogiPiece, row: number, col: number) => {
-    setInspect({ piece, targetCount: game ? getShogiTargets(game.board, game.hands, { row, col }, piece.side).length : 0 });
+    setInspect({ piece, targetCount: game ? getShogiMovementTargets(game.board, game.hands, { row, col }, piece.side).length : 0 });
   };
   const onSquare = (row: number, col: number) => {
     if (!game || game.result) return;
@@ -415,24 +433,26 @@ const ShogiMiniGame: React.FC<ShogiMiniGameProps> = ({ onBack, onFinish, languag
         setGame(previous => previous ? playShogiMove(previous, [row, col]) : previous);
         return;
       }
-      if (game.board[row][col]?.side === 'P') {
+      if (game.board[row][col]?.side === game.side) {
         setGame(previous => previous ? selectShogiPiece(previous, { row, col }) : previous);
         return;
       }
       setGame(previous => previous ? { ...previous, message: copy(languageMode, '表示された候補を選んでください。', 'Choose a highlighted destination.') } : previous);
       return;
     }
-    if (game.board[row][col]?.side === 'P') setGame(previous => previous ? selectShogiPiece(previous, { row, col }) : previous);
+    if (game.board[row][col]?.side === game.side) setGame(previous => previous ? selectShogiPiece(previous, { row, col }) : previous);
   };
 
-  if (!game) return <ModeStart languageMode={languageMode} progress={progress} initialMode={startMode} initialStage={startStage} onStart={startGame} onBack={onBack} />;
+  if (!game) return <ModeStart languageMode={languageMode} progress={progress} initialMode={startMode} initialPlayMode={startPlayMode} initialStage={startStage} onStart={startGame} onBack={onBack} />;
 
   const targetAt = (row: number, col: number) => selectedTarget.find(target => target.row === row && target.col === col);
   const playerHand = Object.entries(game.hands.P).filter(([, count]) => Number(count) > 0) as Array<[ShogiPieceKind, number]>;
   const cpuHand = Object.entries(game.hands.C).filter(([, count]) => Number(count) > 0) as Array<[ShogiPieceKind, number]>;
   const cpuHandCount = cpuHand.reduce((sum, [, count]) => sum + count, 0);
   const statusText = game.result
-    ? game.result === 'WIN' ? copy(languageMode, '勝利！', 'VICTORY!') : game.result === 'LOSE' ? copy(languageMode, '敗北', 'DEFEAT') : copy(languageMode, '引き分け', 'DRAW')
+    ? game.playMode === 'LOCAL'
+      ? game.result === 'WIN' ? copy(languageMode, '先手の勝利！', 'FIRST PLAYER WINS!') : game.result === 'LOSE' ? copy(languageMode, '後手の勝利！', 'SECOND PLAYER WINS!') : copy(languageMode, '引き分け', 'DRAW')
+      : game.result === 'WIN' ? copy(languageMode, '勝利！', 'VICTORY!') : game.result === 'LOSE' ? copy(languageMode, '敗北', 'DEFEAT') : copy(languageMode, '引き分け', 'DRAW')
     : game.message;
   // 駒名・駒字は日本語の固有表記。英語の遅延DOM翻訳から保護する。
   return (
@@ -441,7 +461,7 @@ const ShogiMiniGame: React.FC<ShogiMiniGameProps> = ({ onBack, onFinish, languag
       <header className="shogi-mini-header">
         <button type="button" onClick={onBack}>← EXIT</button>
         <div><span>LEARNING ROGUE // TRIVIA LAB</span><b>{game.mode === 'ADVANCE' ? 'ADVANCE SHOGI' : 'MINI SHOGI'}</b></div>
-        <strong>{game.mode === 'ADVANCE' ? 'STAGE ' + String(game.stage).padStart(2, '0') + ' / 100' : 'RANDOM DUEL'}</strong>
+        <strong>{game.playMode === 'LOCAL' ? 'LOCAL // ' + (game.mode === 'ADVANCE' ? 'ADV RANDOM' : 'STANDARD') : game.mode === 'ADVANCE' ? 'STAGE ' + String(game.stage).padStart(2, '0') + ' / 100' : 'RANDOM DUEL'}</strong>
         <button type="button" onClick={() => setShowGuide(true)}>MOVES</button>
       </header>
       <div className="shogi-mini-layout">
@@ -454,32 +474,42 @@ const ShogiMiniGame: React.FC<ShogiMiniGameProps> = ({ onBack, onFinish, languag
           </div>
           <div className="shogi-mini-help">
             <b>{copy(languageMode, '操作', 'CONTROLS')}</b>
-            <p>{copy(languageMode, '駒を選択：合法手を表示', 'Select: show legal moves')}</p>
+            <p>{copy(languageMode, '駒を選択：駒本来の移動先を表示', 'Select: show piece movement')}</p>
             <p>{copy(languageMode, '長押し／I：駒の詳細', 'Hold / I: inspect piece')}</p>
           </div>
         </aside>
         <section className="shogi-mini-board-wrap">
-          <div className="shogi-opponent-hand" aria-label={copy(languageMode, '相手の持ち駒', 'OPPONENT HAND', 'あいてのもちごま')}>
+          <div className="shogi-opponent-hand" aria-label={copy(languageMode, game.playMode === 'LOCAL' ? '後手の持ち駒' : '相手の持ち駒', game.playMode === 'LOCAL' ? 'SECOND PLAYER HAND' : 'OPPONENT HAND')}>
             <div className="shogi-opponent-hand-heading">
-              <span>{copy(languageMode, '相手の持ち駒', 'OPPONENT HAND', 'あいてのもちごま')}</span>
+              <span>{copy(languageMode, game.playMode === 'LOCAL' ? '後手の持ち駒' : '相手の持ち駒', game.playMode === 'LOCAL' ? 'SECOND PLAYER HAND' : 'OPPONENT HAND')}</span>
               <b>{cpuHandCount}</b>
             </div>
             <div className="shogi-opponent-hand-list">
               {cpuHand.length ? cpuHand.map(([kind, count]) => {
                 const definition = getPieceDefinition(kind);
                 return (
-                  <span key={kind} title={pieceLabelFor(definition)}>
+                  <button
+                    key={kind}
+                    type="button"
+                    title={pieceLabelFor(definition)}
+                    disabled={game.playMode !== 'LOCAL' || game.side !== 'C'}
+                    className={game.side === 'C' && game.selected && 'hand' in game.selected && game.selected.hand === kind ? 'selected' : ''}
+                    onClick={() => setGame(previous => previous ? selectShogiPiece(previous, { hand: kind }) : previous)}
+                    onPointerDown={() => beginLongPress({ kind, side: 'C', promoted: false, hasMoved: false })}
+                    onPointerUp={cancelLongPress}
+                    onPointerLeave={cancelLongPress}
+                  >
                     <ShogiPieceIcon glyph={definition.glyph} cpu compact />
                     <b>{pieceLabelFor(definition)}</b>
                     <em>× {count}</em>
-                  </span>
+                  </button>
                 );
               }) : <small>{copy(languageMode, 'まだありません', 'NONE', 'まだありません')}</small>}
             </div>
           </div>
           <div className="shogi-mini-status">
             <span>{copy(languageMode, '手番', 'TURN', 'てばん')} {game.turn}</span>
-            <b className={game.side === 'P' ? 'player' : 'cpu'}>{game.side === 'P' ? 'PLAYER PHASE' : 'CPU PHASE'}</b>
+            <b className={game.side === 'P' ? 'player' : 'cpu'}>{game.playMode === 'LOCAL' ? (game.side === 'P' ? copy(languageMode, '先手', 'FIRST PLAYER') : copy(languageMode, '後手', 'SECOND PLAYER')) : game.side === 'P' ? 'PLAYER PHASE' : 'CPU PHASE'}</b>
             <span>{game.result ? statusText : localizeShogiMessage(statusText, languageMode)}</span>
           </div>
           <div className="shogi-mini-board" role="grid" aria-label={copy(languageMode, '5×5将棋盤', '5x5 shogi board', '5×5しょうぎばん')}>
@@ -519,15 +549,15 @@ const ShogiMiniGame: React.FC<ShogiMiniGameProps> = ({ onBack, onFinish, languag
               <span>{game.mode === 'ADVANCE' && game.result === 'WIN' ? 'STAGE ' + game.stage + ' CLEAR' : 'SEED ' + game.seed}</span>
               <div>
                 <button type="button" className="primary" onClick={restart}>{copy(languageMode, '新しい盤面で再戦', 'Replay with new board')}</button>
-                {game.mode === 'ADVANCE' && game.result === 'WIN' && game.stage < 100 && <button type="button" className="primary" onClick={() => startGame('ADVANCE', game.stage + 1)}>{copy(languageMode, '次のステージへ', 'Next stage')}</button>}
-                {game.mode === 'ADVANCE' && <button type="button" className="secondary" onClick={openStagePicker}>{copy(languageMode, 'ステージを選ぶ', 'Choose a stage')}</button>}
-                {game.result === 'WIN' && onFinish && <button type="button" className="secondary" onClick={() => onFinish('WIN')}>{copy(languageMode, '結果へ', 'Continue')}</button>}
+                {game.playMode === 'CPU' && game.mode === 'ADVANCE' && game.result === 'WIN' && game.stage < 100 && <button type="button" className="primary" onClick={() => startGame('ADVANCE', game.stage + 1, 'CPU')}>{copy(languageMode, '次のステージへ', 'Next stage')}</button>}
+                <button type="button" className="secondary" onClick={openStagePicker}>{game.playMode === 'LOCAL' ? copy(languageMode, '対戦設定へ', 'Match settings') : copy(languageMode, 'ステージを選ぶ', 'Choose a stage')}</button>
+                {game.playMode === 'CPU' && game.result === 'WIN' && onFinish && <button type="button" className="secondary" onClick={() => onFinish('WIN')}>{copy(languageMode, '結果へ', 'Continue')}</button>}
               </div>
             </div>
           )}
         </section>
         <aside className="shogi-mini-hand-panel">
-          <p className="shogi-mini-eyebrow">{copy(languageMode, '持ち駒', 'CAPTURED PIECES')}</p>
+          <p className="shogi-mini-eyebrow">{copy(languageMode, game.playMode === 'LOCAL' ? '先手の持ち駒' : '持ち駒', game.playMode === 'LOCAL' ? 'FIRST PLAYER HAND' : 'CAPTURED PIECES')}</p>
           <h2>{playerHand.length ? playerHand.reduce((sum, [, count]) => sum + count, 0) : 0}</h2>
           <div className="shogi-hand-list">
             {playerHand.length ? playerHand.map(([kind, count]) => {
@@ -537,13 +567,14 @@ const ShogiMiniGame: React.FC<ShogiMiniGameProps> = ({ onBack, onFinish, languag
                 <button
                   key={kind}
                   type="button"
+                  disabled={game.side !== 'P'}
                   className={selectedHand ? 'selected' : ''}
                   onClick={() => setGame(previous => previous ? selectShogiPiece(previous, { hand: kind }) : previous)}
                   onPointerDown={() => beginLongPress({ kind, side: 'P', promoted: false, hasMoved: false })}
                   onPointerUp={cancelLongPress}
                   onPointerLeave={cancelLongPress}
                   onKeyDown={event => {
-                    if (event.key.toLowerCase() === 'i' || event.key === '?') setInspect({ piece: { kind, side: 'P', promoted: false, hasMoved: false }, targetCount: game ? getShogiTargets(game.board, game.hands, { hand: kind }, 'P').length : 0 });
+                    if (event.key.toLowerCase() === 'i' || event.key === '?') setInspect({ piece: { kind, side: 'P', promoted: false, hasMoved: false }, targetCount: game ? getShogiMovementTargets(game.board, game.hands, { hand: kind }, 'P').length : 0 });
                   }}
                 >
               <ShogiPieceIcon glyph={definition.glyph} compact /><b>{pieceLabelFor(definition)}</b><em>× {count}</em>
@@ -577,7 +608,7 @@ const ShogiMiniGame: React.FC<ShogiMiniGameProps> = ({ onBack, onFinish, languag
             <p className="shogi-mini-eyebrow">MOVE REFERENCE // STANDARD</p>
             <h2>{copy(languageMode, '標準駒の動き', 'Standard piece movement')}</h2>
             <div className="shogi-standard-grid">{STANDARD_PIECES.map(piece => <button key={piece.kind} type="button" onClick={() => setInspect({ piece: { kind: piece.kind, side: 'P', promoted: false, hasMoved: false }, targetCount: 0 })}><ShogiPieceIcon glyph={piece.glyph} compact /><span>{pieceLabelFor(piece)}</span></button>)}</div>
-            <p className="shogi-guide-note">{copy(languageMode, '龍は飛車＋斜め1マス、馬は角＋縦横1マスです。移動中の駒を長押しすると、現在の盤面での合法手数も確認できます。', '龍 = rook plus one diagonal step. 馬 = bishop plus one orthogonal step. Hold any piece to see its current legal move count.', 'りゅうはひしゃ＋ななめ1マス、うまはかく＋たてよこ1マスです。こまをながおしすると、げんざいのばんめんでのごうほうてすうもかくにんできます。')}</p>
+            <p className="shogi-guide-note">{copy(languageMode, '龍は飛車＋斜め1マス、馬は角＋縦横1マスです。駒を長押しすると、現在の盤面での移動先数も確認できます。王が取られる手も指せるため、敗北から守り方を学べます。', '龍 = rook plus one diagonal step. 馬 = bishop plus one orthogonal step. Hold a piece to see its movement count. Risky moves remain playable so defeat can teach king safety.', 'りゅうはひしゃ＋ななめ1マス、うまはかく＋たてよこ1マスです。こまをながおしすると、げんざいのばんめんでのいどうさきすうもかくにんできます。おうがとられるてもさせるため、はいぼくからまもりかたをまなべます。')}</p>
           </section>
         </div>
       )}

@@ -11,6 +11,13 @@ export interface MiniGameConfig {
   description: string;
   screen: GameScreen;
   threshold: number;
+  /**
+   * Main-adventure clears required before this game appears.  The original
+   * seven games continue to use `threshold` (correct answers); the seven
+   * trivia mini-games use this progression so they are earned by actually
+   * finishing the main adventure.
+   */
+  mainClearRequired?: number;
   typeLabel: string;
   typeColor: string;
   glowColor: string;
@@ -19,6 +26,19 @@ export interface MiniGameConfig {
   /** 雑学カテゴリから直接開くゲーム。後方互換のため残している表示制御フラグ。 */
   categoryOnly?: boolean;
 }
+
+export interface MiniGameUnlockProgress {
+  totalMathCorrect: number;
+  mainClearCount: number;
+}
+
+export const isMiniGameUnlocked = (
+  game: MiniGameConfig,
+  progress: MiniGameUnlockProgress,
+): boolean => (
+  progress.totalMathCorrect >= game.threshold
+  && progress.mainClearCount >= (game.mainClearRequired ?? 0)
+);
 
 export const MINI_GAMES: MiniGameConfig[] = [
   {
@@ -116,51 +136,13 @@ export const MINI_GAMES: MiniGameConfig[] = [
     clearAction: () => storageService.clearDungeonState2()
   },
   {
-    id: 'STONE_GLOW',
-    name: '石ころの煌めき',
-    titleLines: ['石ころの', '煌めき'],
-    description: '石ころを集め、鉱山カードを買って煌めき点を競おう。',
-    screen: GameScreen.MINI_GAME_STONE_GLOW,
-    threshold: 0,
-    typeLabel: 'BOARD',
-    typeColor: 'bg-emerald-600',
-    glowColor: 'rgba(16,185,129,0.4)',
-    icon: Gem,
-    clearAction: () => {}
-  },
-  {
-    id: 'SCHOOL_TRPG',
-    name: '放課後スクールTRPG',
-    titleLines: ['放課後', 'スクールTRPG'],
-    description: 'サイコロを振って学校生活の物語を進めよう。',
-    screen: GameScreen.MINI_GAME_SCHOOL_TRPG,
-    threshold: 0,
-    typeLabel: 'TRPG',
-    typeColor: 'bg-amber-600',
-    glowColor: 'rgba(245,158,11,0.4)',
-    icon: Dice5,
-    clearAction: () => clearSchoolTrpgCampaign()
-  },
-  {
-    id: 'LEARNING_TCG',
-    name: '学習ローグTCG',
-    titleLines: ['学習ローグ', 'TCG'],
-    description: '本編のカードイラストで3レーンを制圧する配置型TCG。',
-    screen: GameScreen.MINI_GAME_LEARNING_TCG,
-    threshold: 0,
-    typeLabel: 'CARD',
-    typeColor: 'bg-violet-600',
-    glowColor: 'rgba(139,92,246,0.4)',
-    icon: Sparkles,
-    clearAction: () => {}
-  },
-  {
     id: 'SHOGI',
     name: 'ミニ将棋',
     titleLines: ['ミニ', '将棋'],
-    description: '5×5のランダム盤で駒を動かし、標準8種と50種のユニーク駒で相手の王を詰めよう。',
+    description: '駒本来の移動先を自由に試し、王を取られる敗北から守り方を学ぶ5×5将棋。',
     screen: GameScreen.MINI_GAME_SHOGI,
     threshold: 0,
+    mainClearRequired: 1,
     typeLabel: 'SHOGI',
     typeColor: 'bg-red-700',
     glowColor: 'rgba(185,28,28,0.4)',
@@ -174,6 +156,7 @@ export const MINI_GAMES: MiniGameConfig[] = [
     description: '石を置き、相手の石を囲んで取ろう。',
     screen: GameScreen.MINI_GAME_GO,
     threshold: 0,
+    mainClearRequired: 2,
     typeLabel: 'GO',
     typeColor: 'bg-stone-600',
     glowColor: 'rgba(120,113,108,0.4)',
@@ -184,9 +167,10 @@ export const MINI_GAMES: MiniGameConfig[] = [
     id: 'CHESS',
     name: 'スクールチェス',
     titleLines: ['スクール', 'チェス'],
-    description: '駒の動きを覚えながら、相手のキングを狙おう。',
+    description: '悪手も実行できる実戦型。キングを取られる敗北から守り方を学ぼう。',
     screen: GameScreen.MINI_GAME_CHESS,
     threshold: 0,
+    mainClearRequired: 3,
     typeLabel: 'CHESS',
     typeColor: 'bg-sky-700',
     glowColor: 'rgba(14,116,144,0.4)',
@@ -200,10 +184,53 @@ export const MINI_GAMES: MiniGameConfig[] = [
     description: '牌を入れ替えて、同じ牌の組をそろえよう。',
     screen: GameScreen.MINI_GAME_MAHJONG,
     threshold: 0,
+    mainClearRequired: 4,
     typeLabel: 'MAHJONG',
     typeColor: 'bg-teal-700',
     glowColor: 'rgba(13,148,136,0.4)',
     icon: Layers3,
+    clearAction: () => {}
+  },
+  {
+    id: 'STONE_GLOW',
+    name: '石ころの煌めき',
+    titleLines: ['石ころの', '煌めき'],
+    description: '石ころを集め、鉱山カードを買って煌めき点を競おう。',
+    screen: GameScreen.MINI_GAME_STONE_GLOW,
+    threshold: 0,
+    mainClearRequired: 5,
+    typeLabel: 'BOARD',
+    typeColor: 'bg-emerald-600',
+    glowColor: 'rgba(16,185,129,0.4)',
+    icon: Gem,
+    clearAction: () => {}
+  },
+  {
+    id: 'SCHOOL_TRPG',
+    name: '放課後スクールTRPG',
+    titleLines: ['放課後', 'スクールTRPG'],
+    description: 'サイコロを振って学校生活の物語を進めよう。',
+    screen: GameScreen.MINI_GAME_SCHOOL_TRPG,
+    threshold: 0,
+    mainClearRequired: 6,
+    typeLabel: 'TRPG',
+    typeColor: 'bg-amber-600',
+    glowColor: 'rgba(245,158,11,0.4)',
+    icon: Dice5,
+    clearAction: () => clearSchoolTrpgCampaign()
+  },
+  {
+    id: 'LEARNING_TCG',
+    name: '学習ローグTCG',
+    titleLines: ['学習ローグ', 'TCG'],
+    description: '本編のカードイラストで3レーンを制圧する配置型TCG。',
+    screen: GameScreen.MINI_GAME_LEARNING_TCG,
+    threshold: 0,
+    mainClearRequired: 7,
+    typeLabel: 'CARD',
+    typeColor: 'bg-violet-600',
+    glowColor: 'rgba(139,92,246,0.4)',
+    icon: Sparkles,
     clearAction: () => {}
   }
 ];

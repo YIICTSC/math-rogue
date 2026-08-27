@@ -33,7 +33,9 @@ export const isJapaneseDeviceLocale = () =>
   getDeviceLocales().some((locale) => locale === 'ja' || locale.startsWith('ja-'));
 
 export const getInitialLanguageMode = (storedMode: LanguageMode | null): LanguageMode =>
-  storedMode || (isJapaneseDeviceLocale() ? 'JAPANESE' : isEnglishDeviceLocale() ? 'ENGLISH' : 'JAPANESE');
+  storedMode === 'HIRAGANA'
+    ? 'JAPANESE'
+    : storedMode || (isJapaneseDeviceLocale() ? 'JAPANESE' : isEnglishDeviceLocale() ? 'ENGLISH' : 'JAPANESE');
 
 export const getInitialProblemSetView = (storedView: ProblemSetView | null): ProblemSetView =>
   storedView || (isJapaneseDeviceLocale() ? 'standard' : isEnglishDeviceLocale() ? 'nativeEnglish' : 'standard');
