@@ -18320,7 +18320,7 @@ const App: React.FC = () => {
 
                 {gameState.screen === GameScreen.HELP && (
                     <div className="absolute inset-0">
-                        <HelpScreen onBack={returnToTitle} languageMode={languageMode} visualTheme={gameState.visualTheme || visualTheme} />
+                        <HelpScreen onBack={returnToTitle} languageMode={languageMode} visualTheme={visualTheme} />
                     </div>
                 )}
 
