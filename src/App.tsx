@@ -1874,7 +1874,19 @@ const App: React.FC = () => {
                 }
                 if (cancelled) return;
                 setShowOnlineNameSetup(false);
-                openManagedAssignment(payload);
+                if (nextLaunchLocked) {
+                    storageService.saveCurrentAssignment(payload);
+                    setCurrentAssignment(payload);
+                    setCompletedAssignmentProblemSource(null);
+                    setPendingManagedAssignmentLetter(null);
+                    setShowAssignmentInbox(false);
+                    setShowAssignmentLetter(false);
+                    setPendingMiniGameScreen(null);
+                    setPendingAssignmentStartScreen(null);
+                    setGameState(prev => ({ ...prev, screen: GameScreen.PROBLEM_CHALLENGE }));
+                } else {
+                    openManagedAssignment(payload);
+                }
             } catch {
                 // Temporary network errors must not block locally playable content.
             } finally {
