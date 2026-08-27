@@ -15,6 +15,7 @@ import { ENGLISH_ENDING_EXACT } from '../data/englishEndingExact';
 import { ENGLISH_DEBUG_UI_EXACT, HIRAGANA_DEBUG_UI_EXACT } from '../data/debugUiExact';
 import { ENGLISH_DISPLAY_COPY_EXACT, HIRAGANA_DISPLAY_COPY_EXACT } from '../data/displayCopyExact';
 import { ENGLISH_MAGIC_CARD_RULE_EXACT } from '../data/englishMagicCardRuleExact';
+import { ENGLISH_CARD_DESCRIPTION_EXACT } from '../data/englishCardDescriptionExact';
 import { ENGLISH_IDENTIFIER_EXACT } from '../data/englishIdentifierExact';
 import { ENGLISH_MINIGAME_EXACT } from '../data/englishMinigameExact';
 import { ENGLISH_REVIEW_EXACT } from '../data/englishReviewExact';
@@ -9330,6 +9331,8 @@ const getPowerEffectEnglish = (id: string | undefined, amount: number): string |
             return `Your next Skill is played ${amount + 1} times`;
         case 'HEAL_ON_PLAY':
             return `Heal ${amount} HP whenever you play a card`;
+        case 'REGEN':
+            return `Heal ${amount} HP at the end of each turn`;
         case 'SKILL_BLOCK':
             return `Gain ${amount} Block whenever you play a Skill`;
         case 'LIZARD_TAIL':
@@ -9367,13 +9370,16 @@ const getPowerEffectEnglish = (id: string | undefined, amount: number): string |
         case 'GOLD':
             return `Gain ${amount} Gold`;
         case 'CHAOS_SURGE':
-            return `Draw ${plural(amount, "card")} at the start of next turn, gain ${amount} Strength, and gain Energy next turn`;
+            return `Draw ${plural(amount, "card")} at the start of next turn, gain ${amount} Strength, and gain ${Math.max(1, amount - 1)} Energy next turn`;
         default:
             return null;
     }
 };
 
 export const buildEnglishCardDescription = (card: Card): string => {
+    const exactDescription = ENGLISH_CARD_DESCRIPTION_EXACT[card.name];
+    if (exactDescription) return exactDescription;
+
     const parts: string[] = [];
     const allEnemies = card.target === 'ALL_ENEMIES';
     const randomEnemy = card.target === 'RANDOM_ENEMY';
@@ -9384,9 +9390,12 @@ export const buildEnglishCardDescription = (card: Card): string => {
     if (card.damage !== undefined && card.damage > 0) {
         const hits = (card.playCopies ?? 0) + 1;
         const hitText = hits > 1 ? ` ${hits} times` : "";
-        parts.push(card.xCost
+        const damageText = card.damagePerStrike
+            ? `Deal ${card.damage} damage, plus ${card.damagePerStrike} for each Pencil Attack in your deck`
+            : card.xCost
             ? `Deal ${card.damage} damage per Energy spent${targetText}${hitText}`
-            : `Deal ${card.damage} damage${targetText}${hitText}`);
+            : `Deal ${card.damage} damage${targetText}${hitText}`;
+        parts.push(damageText);
     }
     if (card.damagePerAttackPlayed) parts.push(`Deal ${card.damagePerAttackPlayed} extra damage for each Attack played this turn`);
     if (card.damagePerCardPlayed) parts.push(`Deal ${card.damagePerCardPlayed} extra damage for each card played this turn`);
@@ -9394,7 +9403,7 @@ export const buildEnglishCardDescription = (card: Card): string => {
     if (card.damagePerAttackInHand) parts.push(`Deal ${card.damagePerAttackInHand} extra damage for each Attack in your hand`);
     if (card.hitsPerAttackPlayed) parts.push(`Hit once for each Attack played this turn`);
     if (card.hitsPerSkillInHand) parts.push(`Hit once for each Skill in your hand`);
-    if (card.damagePerCardInHand) parts.push(`Deal damage for each card in your hand`);
+    if (card.damagePerCardInHand) parts.push(`Deal ${card.damagePerCardInHand} damage for each card in your hand`);
     if (card.damagePerCardInDeck) parts.push(`Deal ${card.damagePerCardInDeck} damage for each card in your deck`);
     if (card.damagePerCardInDraw) parts.push(`Deal damage for each card in your draw pile`);
     if (card.damageBasedOnHpLostThisTurn) parts.push(`Deal ${card.damageBasedOnHpLostThisTurn} times the HP you lost this turn as damage`);
@@ -9447,7 +9456,11 @@ export const buildEnglishCardDescription = (card: Card): string => {
 
     if (card.playCondition === 'DRAW_PILE_EMPTY') parts.push("Can only be played when your draw pile is empty");
     if (card.playCondition === 'HAND_ONLY_ATTACKS') parts.push("Can only be played when your hand contains only Attacks");
-    if (card.isSeed && card.growthRequired) parts.push(`Seed. Grows after ${plural(card.growthRequired, "turn")}`);
+    if (card.isSeed && card.growthRequired) {
+        const grownName = card.description.match(/「(.+?)」に成長/)?.[1];
+        const grownNameEnglish = grownName ? trans(grownName, 'ENGLISH') : 'its grown form';
+        parts.push(`Seed. Plant it in the garden to grow into ${grownNameEnglish} after ${plural(card.growthRequired, "turn")}`);
+    }
     if (card.familiarSummon) {
         const effect = card.familiarSummon.effect;
         const triggerMap: Record<string, string> = {
@@ -9465,6 +9478,7 @@ export const buildEnglishCardDescription = (card: Card): string => {
 
     if (card.exhaust) parts.push("Exhaust");
     if (card.innate) parts.push("Innate");
+    if (card.consumedOnUse) parts.push("Single use");
     if (card.eraserOnly) parts.push("Can only be used at rest sites to remove one unwanted card effect");
     const expansionEffects = card.expansionEffects?.length
         ? card.expansionEffects

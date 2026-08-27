@@ -1,7 +1,7 @@
 {
   "name": "learning-rogue",
   "private": true,
-  "version": "1.0.5",
+  "version": "1.0.6",
   "description": "学習問題とカードバトルを組み合わせた学習ローグライクゲーム",
   "author": "YIICTSC",
   "type": "module",
@@ -16,6 +16,7 @@
     "generate:enemy-art-manifest": "node scripts/generate-enemy-illustration-manifest.mjs",
     "generate:relic-translations": "node scripts/generate-relic-translations.mjs",
     "generate:web-asset-manifest": "node scripts/generate-web-asset-manifest.mjs",
+    "generate:card-effect-audit": "node scripts/generate-card-effect-japanese-english-audit.mjs",
     "generate:illustration-manifests": "pnpm run generate:card-art-manifest && pnpm run generate:enemy-art-manifest",
     "prebuild": "pnpm run generate:relic-translations && pnpm run generate:illustration-manifests && pnpm run generate:web-asset-manifest",
     "prebuild:steam": "pnpm run generate:relic-translations && pnpm run generate:illustration-manifests",
