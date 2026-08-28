@@ -519,6 +519,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
     const prevRetainedCardIdsRef = useRef<Set<string>>(new Set());
     const drawEntryTimeoutsRef = useRef<number[]>([]);
     const previousPlayerHpRef = useRef<number | null>(null);
+    const seenShakeEffectIdsRef = useRef<Set<string>>(new Set());
 
     // --- BATTLE TUTORIAL STATE ---
     const [tutorialStep, setTutorialStep] = useState<number | null>(null);
@@ -610,18 +611,29 @@ const BattleScene: React.FC<BattleSceneProps> = ({
             setIsShaking(false);
             return;
         }
-        if (activeEffects.length > 0) {
-            const impactTypes = activeEffects.map(e => e.type);
-            const hasImpact = impactTypes.some(type => ['SLASH', 'FIRE', 'EXPLOSION', 'LIGHTNING', 'CRITICAL', 'ATTACK_SPRITE'].includes(type));
-            if (hasImpact) {
-                const isHeavyImpact = impactTypes.some(type => type === 'CRITICAL' || type === 'EXPLOSION');
-                const isMediumImpact = !isHeavyImpact && impactTypes.some(type => type === 'LIGHTNING' || type === 'FIRE');
-                const shakeMs = isHeavyImpact ? 520 : (isMediumImpact ? 420 : 320);
-                setIsShaking(true);
-                const timer = setTimeout(() => setIsShaking(false), shakeMs);
-                return () => clearTimeout(timer);
-            }
+        if (activeEffects.length === 0) {
+            seenShakeEffectIdsRef.current.clear();
+            setIsShaking(false);
+            return;
         }
+
+        const shakeEffects = activeEffects.filter(effect =>
+            effect.screenShake !== false &&
+            ['SLASH', 'FIRE', 'EXPLOSION', 'LIGHTNING', 'CRITICAL', 'ATTACK_SPRITE'].includes(effect.type)
+        );
+        const newShakeEffects = shakeEffects.filter(effect => !seenShakeEffectIdsRef.current.has(effect.id));
+        shakeEffects.forEach(effect => seenShakeEffectIdsRef.current.add(effect.id));
+        if (newShakeEffects.length === 0) return;
+
+        const isHeavyImpact = newShakeEffects.some(effect => effect.type === 'CRITICAL' || effect.type === 'EXPLOSION');
+        const isMediumImpact = !isHeavyImpact && newShakeEffects.some(effect => effect.type === 'LIGHTNING' || effect.type === 'FIRE');
+        const shakeMs = isHeavyImpact ? 520 : (isMediumImpact ? 420 : 320);
+        setIsShaking(true);
+        const timer = setTimeout(() => setIsShaking(false), shakeMs);
+        return () => {
+            clearTimeout(timer);
+            setIsShaking(false);
+        };
     }, [activeEffects, selectionState.active]);
 
     useEffect(() => {

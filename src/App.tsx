@@ -5330,7 +5330,7 @@ const App: React.FC = () => {
                     case 'ENERGY_NEXT':
                         player.nextTurnEnergy += amount;
                         player.floatingText = { id: `fam-energy-${Date.now()}`, text: `次+${amount}`, color: 'text-yellow-200', iconType: 'zap' };
-                        effects.push({ id: `vfx-fam-energy-${Date.now()}`, type: 'LIGHTNING', targetId: 'player' });
+                        effects.push({ id: `vfx-fam-energy-${Date.now()}`, type: 'LIGHTNING', targetId: 'player', screenShake: false });
                         break;
                     case 'POISON':
                         livingEnemies().forEach(enemy => {
@@ -8733,7 +8733,7 @@ const App: React.FC = () => {
                 } else {
                     newLogs.push('No upgradable card in hand');
                 }
-                nextActiveEffects.push({ id: `vfx-pot-lab-${Date.now()}`, type: 'LIGHTNING', targetId: 'player' });
+                nextActiveEffects.push({ id: `vfx-pot-lab-${Date.now()}`, type: 'LIGHTNING', targetId: 'player', screenShake: false });
             } else if (potion.templateId === 'COPY_PAPER_FLUID') {
                 if (p.hand.length === 0) {
                     newLogs.push('No card to copy');
@@ -9118,7 +9118,7 @@ const App: React.FC = () => {
                 p.currentHp -= dmg;
                 currentLogs.push(`腹痛ダメージ: -${dmg}`);
                 p.floatingText = { id: `pain-${Date.now()}`, text: `-${dmg}`, color: 'text-purple-500', iconType: 'skull' };
-                nextActiveEffects.push({ id: `vfx-pain-${Date.now()}`, type: 'SLASH', targetId: 'player' });
+                nextActiveEffects.push({ id: `vfx-pain-${Date.now()}`, type: 'SLASH', targetId: 'player', screenShake: true });
             }
 
             p.currentEnergy -= effectiveCost;
@@ -9465,6 +9465,7 @@ const App: React.FC = () => {
                                     id: `vfx-${Date.now()}-${Math.random()}`,
                                     type: finalVfx,
                                     targetId: e.id,
+                                    screenShake: damage > 0,
                                     delay: Math.min(hitDelay, MAX_CARD_DETAIL_VFX * 80),
                                     rotation: Math.random() * 360,
                                     attackEffectKey,
@@ -9726,7 +9727,7 @@ const App: React.FC = () => {
                             p.strength += p.powers['RUPTURE'];
                             nextActiveEffects.push({ id: `vfx-rup-${Date.now()}`, type: 'BUFF', targetId: 'player', delay: hitDelay });
                         }
-                        nextActiveEffects.push({ id: `vfx-sd-${Date.now()}`, type: 'SLASH', targetId: 'player', delay: hitDelay });
+                        nextActiveEffects.push({ id: `vfx-sd-${Date.now()}`, type: 'SLASH', targetId: 'player', screenShake: selfDamage > 0, delay: hitDelay });
                     }
 
                     // --- FIX: fatalMaxHp as instant boost for non-attack Skills (target: SELF) ---
@@ -10183,7 +10184,7 @@ const App: React.FC = () => {
                                 e.currentHp = 0;
                                 currentLogs.push(`${trans(e.name, languageMode)}は${trans("早退", languageMode)}になった！`);
                                 e.floatingText = { id: `kill-${Date.now()}`, text: '早退!', color: 'text-red-600', iconType: 'skull' };
-                                nextActiveEffects.push({ id: `vfx-exp-${Date.now()}`, type: 'SLASH', targetId: e.id, delay: hitDelay });
+                                nextActiveEffects.push({ id: `vfx-exp-${Date.now()}`, type: 'SLASH', targetId: e.id, screenShake: false, delay: hitDelay });
                             } else {
                                 currentLogs.push(`${trans(e.name, languageMode)}は${trans("早退", languageMode)}を免れた`);
                             }
@@ -10246,7 +10247,7 @@ const App: React.FC = () => {
                 if (card.name === 'むしゃくしゃ' || card.name === 'YATSUATARI' || card.originalNames?.includes('むしゃくしゃ') || card.originalNames?.includes('YATSUATARI')) {
                     card.damage = (card.damage || 0) + 5;
                     currentLogs.push("むしゃくしゃの怒りが増した！");
-                    nextActiveEffects.push({ id: `vfx-metric-${Date.now()}`, type: 'FIRE', targetId: 'player' });
+                    nextActiveEffects.push({ id: `vfx-metric-${Date.now()}`, type: 'FIRE', targetId: 'player', screenShake: false });
                 }
                 const isConsumedOnUse = !!card.consumedOnUse;
                 if (isConsumedOnUse) {
@@ -10884,7 +10885,7 @@ const App: React.FC = () => {
                         enemy.poison--;
                         enemy.floatingText = { id: `psn-${Date.now()}-${enemy.id}`, text: `${poisonDmg}`, color: 'text-green-500', iconType: 'poison' };
                         nextLogs.push(`${trans(enemy.name, languageMode)}に毒ダメージ${poisonDmg}`);
-                        nextActiveEffects.push({ id: `vfx-psn-${Date.now()}-${enemy.id}`, type: 'FIRE', targetId: enemy.id });
+                        nextActiveEffects.push({ id: `vfx-psn-${Date.now()}-${enemy.id}`, type: 'FIRE', targetId: enemy.id, screenShake: false });
                         if (enemy.currentHp <= 0 && enemy.enemyType === 'THE_HEART' && enemy.phase === 1) {
                             enemy.currentHp = isDebugHpOne ? 1 : enemy.maxHp;
                             enemy.phase = 2;
@@ -11467,12 +11468,12 @@ const App: React.FC = () => {
                 nextActiveEffects.push({ id: `vfx-lose-str-${Date.now()}`, type: 'DEBUFF', targetId: 'player' });
             }
             p.hand.forEach(c => {
-                if (c.name === 'やけど' || c.name === 'やほど' || c.name === 'BURN') { p.currentHp -= 2; newLogs.push("やけどダメージ"); nextActiveEffects.push({ id: `vfx-burn-${Date.now()}`, type: 'FIRE', targetId: 'player' }); }
+                if (c.name === 'やけど' || c.name === 'やほど' || c.name === 'BURN') { p.currentHp -= 2; newLogs.push("やけどダメージ"); nextActiveEffects.push({ id: `vfx-burn-${Date.now()}`, type: 'FIRE', targetId: 'player', screenShake: false }); }
                 if (c.name === '虫歯' || c.name === 'DECAY') { p.currentHp -= 2; newLogs.push("虫歯ダメージ"); nextActiveEffects.push({ id: `vfx-decay-${Date.now()}`, type: 'DEBUFF', targetId: 'player' }); }
                 if (c.name === '人間失格' || c.name === 'OSAMU_NIGHT') { p.currentHp -= 3; newLogs.push("人間失格ダメージ"); nextActiveEffects.push({ id: `vfx-osamu-night-${Date.now()}`, type: 'DEBUFF', targetId: 'player' }); }
                 if (c.name === '不安' || c.name === 'DOUBT') p.powers['WEAK'] = (p.powers['WEAK'] || 0) + 1;
                 if (c.name === '恥' || c.name === 'SHAME') p.powers['VULNERABLE'] = (p.powers['VULNERABLE'] || 0) + 1;
-                if (c.name === '後悔' || c.name === 'REGRET') { p.currentHp -= p.hand.length; newLogs.push("後悔ダメージ"); nextActiveEffects.push({ id: `vfx-reg-${Date.now()}`, type: 'SLASH', targetId: 'player' }); }
+                if (c.name === '後悔' || c.name === 'REGRET') { p.currentHp -= p.hand.length; newLogs.push("後悔ダメージ"); nextActiveEffects.push({ id: `vfx-reg-${Date.now()}`, type: 'SLASH', targetId: 'player', screenShake: p.hand.length > 0 }); }
             });
             syncRedSkullState(p);
             return { ...prev, player: p, combatLog: [...prev.combatLog, ...newLogs].slice(-100), activeEffects: [...prev.activeEffects, ...nextActiveEffects] };

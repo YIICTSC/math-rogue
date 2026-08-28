@@ -754,7 +754,7 @@ export const applyAdditionalCardLogic = (
             case '僕だけのヒーロー': {
                 currentLogs.push(trans(`自分を信じる心が、ヒーローを呼び寄せた！`, languageMode));
                 nextActiveEffects.push({ id: `vfx-hero-flash`, type: 'FLASH', targetId: 'player' });
-                nextActiveEffects.push({ id: `vfx-hero-impact`, type: 'CRITICAL', targetId: 'player' });
+                nextActiveEffects.push({ id: `vfx-hero-impact`, type: 'CRITICAL', targetId: 'player', screenShake: false });
                 break;
             }
 
@@ -775,7 +775,7 @@ export const applyAdditionalCardLogic = (
                 e_list.forEach(enemy => {
                     if (enemy.currentHp > 0) {
                         enemy.block = 0;
-                        nextActiveEffects.push({ id: `vfx-rainbow-atk-${enemy.id}`, type: 'LIGHTNING', targetId: enemy.id });
+                        nextActiveEffects.push({ id: `vfx-rainbow-atk-${enemy.id}`, type: 'LIGHTNING', targetId: enemy.id, screenShake: false });
                     }
                 });
                 currentLogs.push(trans("カラフル・レインボー：敵全員のブロックを解除！", languageMode));

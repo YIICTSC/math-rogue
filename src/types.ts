@@ -1209,6 +1209,8 @@ export interface VisualEffectInstance {
   type: VFXType;
   targetId: string;
   ownerPeerId?: string;
+  /** 画面全体の揺れを発生させるか。未指定は従来どおり発生させる。 */
+  screenShake?: boolean;
   x?: number;
   y?: number;
   delay?: number;

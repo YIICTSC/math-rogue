@@ -728,6 +728,7 @@ const TypingBattleScene: React.FC<TypingBattleSceneProps> = ({
     const prevActingRef = useRef<string | null>(null);
     const mistypeFlashTimerRef = useRef<number | null>(null);
     const mistypeShakeTimerRef = useRef<number | null>(null);
+    const seenShakeEffectIdsRef = useRef<Set<string>>(new Set());
 
     const [input, setInput] = useState('');
     const [prompt, setPrompt] = useState<TypingPrompt | null>(null);
@@ -851,14 +852,26 @@ const TypingBattleScene: React.FC<TypingBattleSceneProps> = ({
     }, [rtbRatio, rtbDeadline, actingEnemyId, selectionState.active, onEndTurn]);
 
     useEffect(() => {
-        if (activeEffects.length > 0) {
-            const hasImpact = activeEffects.some(effect => ['SLASH', 'FIRE', 'EXPLOSION', 'LIGHTNING', 'CRITICAL'].includes(effect.type));
-            if (hasImpact) {
-                setIsShaking(true);
-                const timer = window.setTimeout(() => setIsShaking(false), 400);
-                return () => window.clearTimeout(timer);
-            }
+        if (activeEffects.length === 0) {
+            seenShakeEffectIdsRef.current.clear();
+            setIsShaking(false);
+            return;
         }
+
+        const shakeEffects = activeEffects.filter(effect =>
+            effect.screenShake !== false &&
+            ['SLASH', 'FIRE', 'EXPLOSION', 'LIGHTNING', 'CRITICAL'].includes(effect.type)
+        );
+        const newShakeEffects = shakeEffects.filter(effect => !seenShakeEffectIdsRef.current.has(effect.id));
+        shakeEffects.forEach(effect => seenShakeEffectIdsRef.current.add(effect.id));
+        if (newShakeEffects.length === 0) return;
+
+        setIsShaking(true);
+        const timer = window.setTimeout(() => setIsShaking(false), 400);
+        return () => {
+            window.clearTimeout(timer);
+            setIsShaking(false);
+        };
     }, [activeEffects]);
 
     useEffect(() => {
