@@ -184,6 +184,8 @@ const DEFAULT_DAILY_ASSIGNMENT_PROFILE: StudentProfile = {
     schoolYear: getCurrentSchoolYear(),
 };
 
+const HIRAGANA_LANGUAGE_ENABLED = DISTRIBUTION_PLATFORM === 'web';
+
 const getDefaultDailyAssignmentProfile = (languageMode: LanguageMode): StudentProfile => ({
     ...DEFAULT_DAILY_ASSIGNMENT_PROFILE,
     grade: languageMode === 'ENGLISH' ? 'Grade 1' : DEFAULT_DAILY_ASSIGNMENT_PROFILE.grade,
@@ -1451,7 +1453,10 @@ const App: React.FC = () => {
         ));
     }, []);
 
-    const [languageMode, setLanguageMode] = useState<LanguageMode>(() => getInitialLanguageMode(storageService.getLanguageMode()));
+    const [languageMode, setLanguageMode] = useState<LanguageMode>(() => getInitialLanguageMode(
+        storageService.getLanguageMode(),
+        HIRAGANA_LANGUAGE_ENABLED,
+    ));
     useEffect(() => {
         if (typeof document === 'undefined') return;
         document.documentElement.dataset.translationAuditScreen = String(gameState.screen);
@@ -4620,8 +4625,15 @@ const App: React.FC = () => {
     };
 
     const toggleLanguage = () => {
-        const nextMode: LanguageMode =
-            languageMode === 'ENGLISH' ? 'JAPANESE' : 'ENGLISH';
+        const nextMode: LanguageMode = HIRAGANA_LANGUAGE_ENABLED
+            ? languageMode === 'JAPANESE'
+                ? 'HIRAGANA'
+                : languageMode === 'HIRAGANA'
+                    ? 'ENGLISH'
+                    : 'JAPANESE'
+            : languageMode === 'ENGLISH'
+                ? 'JAPANESE'
+                : 'ENGLISH';
         setLanguageMode(nextMode);
         storageService.saveLanguageMode(nextMode);
         audioService.playSound('select');
@@ -16868,7 +16880,7 @@ const App: React.FC = () => {
                                 title={trans("言語切替", languageMode)}
                             >
                                 <Languages size={13} className="mr-1 shrink-0" />
-                                {languageMode === 'ENGLISH' ? 'English' : '日本語'}
+                                {languageMode === 'ENGLISH' ? 'English' : languageMode === 'HIRAGANA' ? 'ひらがな' : '日本語'}
                             </button>
                             <button
                                 onClick={() => setShowSettingsModal(true)}
