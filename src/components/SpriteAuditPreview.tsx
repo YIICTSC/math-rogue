@@ -142,7 +142,7 @@ const Checkerboard = ({ children }: { children: React.ReactNode }) => (
   </div>
 );
 
-const SpriteAuditCard: React.FC<{ asset: AuditAsset }> = ({ asset }) => {
+const SpriteAuditCard: React.FC<{ asset: AuditAsset; languageMode: LanguageMode }> = ({ asset, languageMode }) => {
   const [status, setStatus] = useState<'loading' | 'loaded' | 'error'>('loading');
   const [dimensions, setDimensions] = useState<string>('');
   const source = asset.src ?? assetUrl(asset.path);
@@ -164,7 +164,7 @@ const SpriteAuditCard: React.FC<{ asset: AuditAsset }> = ({ asset }) => {
         />
         {status === 'error' && (
           <div className="absolute inset-0 flex items-center justify-center bg-red-950/85 px-2 text-center text-xs font-bold text-red-200">
-            <AlertCircle size={14} className="mr-1 shrink-0" /> 読み込み失敗
+            <AlertCircle size={14} className="mr-1 shrink-0" /> {trans('読み込み失敗', languageMode)}
           </div>
         )}
       </Checkerboard>
@@ -177,21 +177,21 @@ const SpriteAuditCard: React.FC<{ asset: AuditAsset }> = ({ asset }) => {
       <code className="mt-1 block break-all text-[9px] leading-tight text-slate-500">{asset.path}</code>
       <div className="mt-1 flex min-h-4 items-center gap-1 text-[9px] text-slate-400">
         {status === 'loaded' ? <Check size={11} className="text-emerald-400" /> : status === 'error' ? <AlertCircle size={11} className="text-red-400" /> : <span className="text-yellow-400">…</span>}
-        {status === 'loaded' ? dimensions : status === 'error' ? 'ファイルを確認' : '読み込み中'}
+        {status === 'loaded' ? dimensions : status === 'error' ? trans('ファイルを確認', languageMode) : trans('読み込み中', languageMode)}
       </div>
-      {asset.note && <div className="mt-1 text-[9px] leading-tight text-amber-300">{asset.note}</div>}
+      {asset.note && <div className="mt-1 text-[9px] leading-tight text-amber-300">{trans(asset.note, languageMode)}</div>}
     </article>
   );
 };
 
-const ProtagonistCard: React.FC<{ entry: ProtagonistEntry }> = ({ entry }) => (
+const ProtagonistCard: React.FC<{ entry: ProtagonistEntry; languageMode: LanguageMode }> = ({ entry, languageMode }) => (
   <article className="rounded-xl border border-slate-700 bg-black/25 p-3">
     <div className="mb-3 flex items-center justify-between gap-2 border-b border-slate-700 pb-2">
       <h4 className="truncate text-sm font-black text-white">{entry.name}</h4>
       <span className="shrink-0 text-[9px] font-mono text-slate-500">{entry.assets.length} assets</span>
     </div>
     <div className="grid grid-cols-2 gap-2 xl:grid-cols-3">
-      {entry.assets.map((asset, index) => <SpriteAuditCard key={`${asset.path}-${index}`} asset={asset} />)}
+      {entry.assets.map((asset, index) => <SpriteAuditCard key={`${asset.path}-${index}`} asset={asset} languageMode={languageMode} />)}
     </div>
   </article>
 );
@@ -246,16 +246,16 @@ const SpriteAuditPreview: React.FC<{ languageMode: LanguageMode }> = ({ language
         <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
           <div>
             <h3 className="flex items-center gap-2 text-base font-black text-cyan-200">
-              <Layers size={18} /> スプライト見切れ確認
+              <Layers size={18} /> {trans('スプライト見切れ確認', languageMode)}
             </h3>
             <p className="mt-1 text-[10px] leading-relaxed text-slate-400">
-              画像をシート全体で表示します。隣のコマの写り込み、透明端の欠落、読み込み失敗をここで確認してください。
+              {trans('画像をシート全体で表示します。隣のコマの写り込み、透明端の欠落、読み込み失敗をここで確認してください。', languageMode)}
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2 text-[10px] font-bold text-slate-300">
-            <span className="rounded bg-slate-800 px-2 py-1">主人公 {protagonistCount}体</span>
-            <span className="rounded bg-slate-800 px-2 py-1">ミニゲーム {MINI_GAMES.length}種</span>
-            <span className="rounded bg-slate-800 px-2 py-1">素材 {miniGameAssetCount}件</span>
+            <span className="rounded bg-slate-800 px-2 py-1">{trans('主人公', languageMode)} {protagonistCount}{trans('体', languageMode)}</span>
+            <span className="rounded bg-slate-800 px-2 py-1">{trans('ミニゲーム', languageMode)} {MINI_GAMES.length}{trans('種', languageMode)}</span>
+            <span className="rounded bg-slate-800 px-2 py-1">{trans('素材', languageMode)} {miniGameAssetCount}{trans('件', languageMode)}</span>
           </div>
         </div>
         <div className="mt-3 flex flex-col gap-2 md:flex-row">
@@ -280,7 +280,7 @@ const SpriteAuditPreview: React.FC<{ languageMode: LanguageMode }> = ({ language
                 onClick={() => setScope(id)}
                 className={`rounded px-2 py-1 text-[10px] font-black transition-colors ${scope === id ? 'bg-cyan-500 text-slate-950' : 'text-slate-400 hover:bg-slate-800 hover:text-white'}`}
               >
-                {label}
+                {trans(label, languageMode)}
               </button>
             ))}
           </div>
@@ -291,20 +291,20 @@ const SpriteAuditPreview: React.FC<{ languageMode: LanguageMode }> = ({ language
         <section className="space-y-3">
           <div className="flex items-center gap-2 border-b border-cyan-800/70 pb-2">
             <Users size={17} className="text-cyan-300" />
-            <h3 className="text-sm font-black text-cyan-200">学習ローグ 主人公</h3>
-            <span className="text-[10px] text-slate-500">立ち絵・戦闘シート</span>
+            <h3 className="text-sm font-black text-cyan-200">{trans('学習ローグ 主人公', languageMode)}</h3>
+            <span className="text-[10px] text-slate-500">{trans('立ち絵・戦闘シート', languageMode)}</span>
           </div>
           {visibleProtagonistGroups.length > 0 ? visibleProtagonistGroups.map(group => (
             <div key={group.id} className="space-y-2">
               <div className="flex flex-wrap items-baseline justify-between gap-2">
-                <h4 className="text-xs font-black text-yellow-200">{group.title}</h4>
-                <span className="text-[10px] text-slate-500">{group.description}</span>
+                <h4 className="text-xs font-black text-yellow-200">{trans(group.title, languageMode)}</h4>
+                <span className="text-[10px] text-slate-500">{trans(group.description, languageMode)}</span>
               </div>
               <div className="grid grid-cols-1 gap-3 2xl:grid-cols-2">
-                {group.entries.map(entry => <ProtagonistCard key={entry.id} entry={entry} />)}
+                {group.entries.map(entry => <ProtagonistCard key={entry.id} entry={entry} languageMode={languageMode} />)}
               </div>
             </div>
-          )) : <div className="rounded border border-slate-800 bg-black/20 p-4 text-center text-xs text-slate-500">一致する主人公がありません。</div>}
+          )) : <div className="rounded border border-slate-800 bg-black/20 p-4 text-center text-xs text-slate-500">{trans('一致する主人公がありません。', languageMode)}</div>}
         </section>
       )}
 
@@ -312,8 +312,8 @@ const SpriteAuditPreview: React.FC<{ languageMode: LanguageMode }> = ({ language
         <section className="space-y-3">
           <div className="flex items-center gap-2 border-b border-orange-800/70 pb-2">
             <Gamepad2 size={17} className="text-orange-300" />
-            <h3 className="text-sm font-black text-orange-200">ミニゲーム素材</h3>
-            <span className="text-[10px] text-slate-500">全 {MINI_GAMES.length} 種</span>
+            <h3 className="text-sm font-black text-orange-200">{trans('ミニゲーム素材', languageMode)}</h3>
+            <span className="text-[10px] text-slate-500">{trans('全', languageMode)} {MINI_GAMES.length} {trans('種', languageMode)}</span>
           </div>
           {visibleMiniGames.map(game => {
             const definition = MINI_GAME_SPRITE_AUDIT_MANIFEST[game.id];
@@ -324,20 +324,20 @@ const SpriteAuditPreview: React.FC<{ languageMode: LanguageMode }> = ({ language
                     <h4 className="text-sm font-black text-white">{trans(game.name, languageMode)}</h4>
                     <code className="text-[9px] text-orange-300">{game.id}</code>
                   </div>
-                  <span className="text-[10px] text-slate-400">{definition?.assets.length ?? 0}素材</span>
+                  <span className="text-[10px] text-slate-400">{definition?.assets.length ?? 0}{trans('素材', languageMode)}</span>
                 </div>
-                <p className="mb-3 text-[10px] leading-relaxed text-slate-400">{definition?.note ?? '素材マニフェスト未登録'}</p>
+                <p className="mb-3 text-[10px] leading-relaxed text-slate-400">{definition?.note ? trans(definition.note, languageMode) : trans('素材マニフェスト未登録', languageMode)}</p>
                 {definition?.assets.length ? (
                   <div className="grid grid-cols-2 gap-2 lg:grid-cols-4 2xl:grid-cols-6">
-                    {definition.assets.map((asset, index) => <SpriteAuditCard key={`${asset.path}-${index}`} asset={asset} />)}
+                    {definition.assets.map((asset, index) => <SpriteAuditCard key={`${asset.path}-${index}`} asset={asset} languageMode={languageMode} />)}
                   </div>
                 ) : (
-                  <div className="rounded border border-yellow-800/70 bg-yellow-950/30 p-3 text-xs text-yellow-200">素材マニフェスト未登録</div>
+                  <div className="rounded border border-yellow-800/70 bg-yellow-950/30 p-3 text-xs text-yellow-200">{trans('素材マニフェスト未登録', languageMode)}</div>
                 )}
               </article>
             );
           })}
-          {visibleMiniGames.length === 0 && <div className="rounded border border-slate-800 bg-black/20 p-4 text-center text-xs text-slate-500">一致するミニゲームがありません。</div>}
+          {visibleMiniGames.length === 0 && <div className="rounded border border-slate-800 bg-black/20 p-4 text-center text-xs text-slate-500">{trans('一致するミニゲームがありません。', languageMode)}</div>}
         </section>
       )}
     </div>
