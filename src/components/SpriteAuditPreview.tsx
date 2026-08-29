@@ -1,5 +1,5 @@
-import React, { useMemo, useState } from 'react';
-import { AlertCircle, Check, Gamepad2, Layers, Search, Users } from 'lucide-react';
+import React, { useEffect, useMemo, useState } from 'react';
+import { AlertCircle, Check, ChevronLeft, ChevronRight, Gamepad2, Layers, Pause, Play, Search, Users } from 'lucide-react';
 import { CHARACTERS } from '../constants';
 import { MAGIC_HEROES, MAGIC_MALE_PROTAGONISTS } from '../data/magicHeroes';
 import { MINI_GAME_SPRITE_AUDIT_MANIFEST, type SpriteAuditAssetDefinition, type SpriteAuditAssetKind } from '../data/spriteAuditManifest';
@@ -123,9 +123,83 @@ const magicMaleProtagonists = (): ProtagonistEntry[] => MAGIC_MALE_PROTAGONISTS.
 });
 
 const assetKindLabel: Record<SpriteAuditAssetKind, string> = {
-  sprite: 'SPRITE',
-  sheet: 'SHEET',
-  ui: 'UI / 背景',
+  sprite: 'IN-GAME SPRITE',
+  sheet: 'IN-GAME FRAME',
+  ui: 'IN-GAME UI',
+};
+
+type SpritePreviewLayout = {
+  columns: number;
+  rows: number;
+  cellSize?: number;
+  gap?: number;
+  aspectRatio?: number;
+  frameDurationMs?: number;
+};
+
+const getSpritePreviewLayout = (path: string): SpritePreviewLayout | null => {
+  const normalizedPath = path.toLowerCase();
+  if (normalizedPath.includes('go-home-dash-8-loop-grid')) return { columns: 8, rows: 1, aspectRatio: 290 / 249, frameDurationMs: 120 };
+  if (normalizedPath.includes('go-home-dash-jump-3')) return { columns: 3, rows: 1, aspectRatio: 840 / 724, frameDurationMs: 180 };
+  if (normalizedPath.includes('go-home-dash-enemies')) return { columns: 4, rows: 4, frameDurationMs: 220 };
+  if (normalizedPath.includes('go-home-dash-projectiles')) return { columns: 5, rows: 2, frameDurationMs: 220 };
+  if (normalizedPath.includes('schoolyard-survivor-enemies')) return { columns: 8, rows: 2, frameDurationMs: 220 };
+  if (normalizedPath.includes('schoolyard-survivor-weapons')) return { columns: 8, rows: 5, frameDurationMs: 220 };
+  if (normalizedPath.includes('schoolyard-survivor-effects')) return { columns: 8, rows: 2, frameDurationMs: 220 };
+  if (normalizedPath.includes('after-school-poker-items')) return { columns: 8, rows: 5, frameDurationMs: 220 };
+  if (normalizedPath.includes('after-school-poker-card-ornaments')) return { columns: 8, rows: 2, frameDurationMs: 220 };
+  if (normalizedPath.includes('after-school-poker-rivals-') || normalizedPath.includes('after-school-poker-endless-rivals-')) return { columns: 3, rows: 3, frameDurationMs: 220 };
+  if (normalizedPath.includes('after-school-poker-overrides') || normalizedPath.includes('after-school-poker-consumable-overrides') || normalizedPath.includes('after-school-poker-stationery-overrides')) return { columns: 5, rows: 4, frameDurationMs: 220 };
+  if (normalizedPath.includes('after-school-poker-supporter-fixes')) return { columns: 2, rows: 1, frameDurationMs: 220 };
+  if (normalizedPath.includes('furai-shogakusei2-card-sheet')) return { columns: 6, rows: 5, cellSize: 72, gap: 16, frameDurationMs: 220 };
+  if (normalizedPath.includes('furai-shogakusei2-card-effects')) return { columns: 6, rows: 3, aspectRatio: 1.2, frameDurationMs: 220 };
+  if (normalizedPath.includes('furai-sfc-v2-') && normalizedPath.includes('5x5')) return { columns: 5, rows: 5, cellSize: 72, gap: 16, frameDurationMs: 220 };
+  if (normalizedPath.includes('principal-final-boss-3x2')) return { columns: 3, rows: 2, frameDurationMs: 220 };
+  if (normalizedPath.includes('characters-idle-sheets') || normalizedPath.includes('characters-idle-special') || normalizedPath.includes('characters-attack-sheets') || normalizedPath.includes('characters-skill-sheets') || normalizedPath.includes('characters-hit-sheets') || normalizedPath.includes('characters-low-hp-sheets')) return { columns: 2, rows: 2, frameDurationMs: 155 };
+  if (normalizedPath.includes('kocho-hero-actions-') || normalizedPath.includes('kocho-effects-') || normalizedPath.includes('kocho-enemies-') || normalizedPath.includes('kocho-backgrounds-5x5')) return { columns: 5, rows: 5, frameDurationMs: 220 };
+  if (normalizedPath.includes('high-school/sheets/')) return { columns: 5, rows: 5, frameDurationMs: 220 };
+  if (normalizedPath.includes('paper-plane/parts-') || normalizedPath.includes('paper-plane/pilots-02') || normalizedPath.includes('paper-plane/scene-backgrounds-5x5') || normalizedPath.includes('paper-plane/stage-backgrounds-5x5')) return { columns: 5, rows: 5, frameDurationMs: 220 };
+  return null;
+};
+
+const getBattlePreviewActionClass = (path: string): string => {
+  const normalizedPath = path.toLowerCase();
+  if (normalizedPath.includes('characters-attack-sheets')) return 'battle-hero-attack';
+  if (normalizedPath.includes('characters-skill-sheets')) return 'battle-hero-skill';
+  if (normalizedPath.includes('characters-hit-sheets')) return 'battle-hero-hit';
+  if (normalizedPath.includes('characters-low-hp-sheets')) return 'battle-hero-low-hp';
+  return '';
+};
+
+const getFrameImageStyle = (layout: SpritePreviewLayout, frame: number): React.CSSProperties => {
+  const column = frame % layout.columns;
+  const row = Math.floor(frame / layout.columns);
+  if (layout.gap !== undefined && layout.cellSize !== undefined) {
+    const sheetWidth = layout.gap + layout.columns * (layout.cellSize + layout.gap);
+    const sheetHeight = layout.gap + layout.rows * (layout.cellSize + layout.gap);
+    const sourceX = layout.gap + column * (layout.cellSize + layout.gap);
+    const sourceY = layout.gap + row * (layout.cellSize + layout.gap);
+    return {
+      position: 'absolute',
+      maxWidth: 'none',
+      maxHeight: 'none',
+      width: `${(sheetWidth / layout.cellSize) * 100}%`,
+      height: `${(sheetHeight / layout.cellSize) * 100}%`,
+      left: `-${(sourceX / layout.cellSize) * 100}%`,
+      top: `-${(sourceY / layout.cellSize) * 100}%`,
+      imageRendering: 'pixelated',
+    };
+  }
+  return {
+    position: 'absolute',
+    maxWidth: 'none',
+    maxHeight: 'none',
+    width: `${layout.columns * 100}%`,
+    height: `${layout.rows * 100}%`,
+    left: `-${column * 100}%`,
+    top: `-${row * 100}%`,
+    imageRendering: 'pixelated',
+  };
 };
 
 const Checkerboard = ({ children }: { children: React.ReactNode }) => (
@@ -145,29 +219,104 @@ const Checkerboard = ({ children }: { children: React.ReactNode }) => (
 const SpriteAuditCard: React.FC<{ asset: AuditAsset; languageMode: LanguageMode }> = ({ asset, languageMode }) => {
   const [status, setStatus] = useState<'loading' | 'loaded' | 'error'>('loading');
   const [dimensions, setDimensions] = useState<string>('');
+  const layout = useMemo(() => getSpritePreviewLayout(asset.path), [asset.path]);
+  const frameCount = layout ? layout.columns * layout.rows : 1;
+  const [frame, setFrame] = useState(0);
+  const [isPlaying, setIsPlaying] = useState(false);
   const source = asset.src ?? assetUrl(asset.path);
+
+  useEffect(() => {
+    setFrame(0);
+    setIsPlaying(false);
+  }, [asset.path]);
+
+  useEffect(() => {
+    if (!layout || frameCount <= 1 || !isPlaying) return undefined;
+    const timer = window.setInterval(() => {
+      setFrame(previous => (previous + 1) % frameCount);
+    }, layout.frameDurationMs ?? 220);
+    return () => window.clearInterval(timer);
+  }, [frameCount, isPlaying, layout]);
+
+  const battleActionClass = getBattlePreviewActionClass(asset.path);
+  const isHighSchoolAsset = asset.path.toLowerCase().includes('high-school');
+  const previewImage = layout ? (
+    <div
+      className={`relative w-full overflow-hidden ${battleActionClass ? `battle-scene-root ${isHighSchoolAsset ? 'battle-high-school' : ''}` : ''}`}
+      style={{ aspectRatio: layout.aspectRatio ?? 1 }}
+    >
+      <div className={`relative h-full w-full ${battleActionClass}`}>
+        <div className={`relative h-full w-full ${isHighSchoolAsset ? '-scale-x-100' : ''}`}>
+          <img
+            src={source}
+            alt={asset.label}
+            className="absolute"
+            style={getFrameImageStyle(layout, frame)}
+            draggable={false}
+            loading="lazy"
+            onLoad={(event) => {
+              setStatus('loaded');
+              setDimensions(`${event.currentTarget.naturalWidth} × ${event.currentTarget.naturalHeight}px`);
+            }}
+            onError={() => setStatus('error')}
+          />
+        </div>
+      </div>
+    </div>
+  ) : (
+    <img
+      src={source}
+      alt={asset.label}
+      className="max-h-48 max-w-full object-contain [image-rendering:auto]"
+      draggable={false}
+      loading="lazy"
+      onLoad={(event) => {
+        setStatus('loaded');
+        setDimensions(`${event.currentTarget.naturalWidth} × ${event.currentTarget.naturalHeight}px`);
+      }}
+      onError={() => setStatus('error')}
+    />
+  );
 
   return (
     <article className="min-w-0 rounded-lg border border-slate-700 bg-slate-950/70 p-2 shadow-inner">
       <Checkerboard>
-        <img
-          src={source}
-          alt={asset.label}
-          className="max-h-48 max-w-full object-contain [image-rendering:auto]"
-          draggable={false}
-          loading="lazy"
-          onLoad={(event) => {
-            setStatus('loaded');
-            setDimensions(`${event.currentTarget.naturalWidth} × ${event.currentTarget.naturalHeight}px`);
-          }}
-          onError={() => setStatus('error')}
-        />
+        {previewImage}
         {status === 'error' && (
           <div className="absolute inset-0 flex items-center justify-center bg-red-950/85 px-2 text-center text-xs font-bold text-red-200">
             <AlertCircle size={14} className="mr-1 shrink-0" /> {trans('読み込み失敗', languageMode)}
           </div>
         )}
       </Checkerboard>
+      {layout && frameCount > 1 && (
+        <div className="mt-2 flex items-center justify-between gap-1 rounded border border-slate-700 bg-slate-900/80 px-1.5 py-1 text-[9px] text-slate-300">
+          <button
+            type="button"
+            className="rounded p-0.5 text-slate-400 hover:bg-slate-700 hover:text-white"
+            aria-label={trans('前のフレーム', languageMode)}
+            onClick={() => setFrame(previous => (previous - 1 + frameCount) % frameCount)}
+          >
+            <ChevronLeft size={13} />
+          </button>
+          <span className="min-w-0 truncate text-center">{trans('ゲーム内フレーム', languageMode)} {frame + 1}/{frameCount}</span>
+          <button
+            type="button"
+            className="rounded p-0.5 text-slate-400 hover:bg-slate-700 hover:text-white"
+            aria-label={trans('次のフレーム', languageMode)}
+            onClick={() => setFrame(previous => (previous + 1) % frameCount)}
+          >
+            <ChevronRight size={13} />
+          </button>
+          <button
+            type="button"
+            className="rounded p-0.5 text-cyan-300 hover:bg-cyan-950 hover:text-cyan-100"
+            aria-label={trans(isPlaying ? '停止' : '再生', languageMode)}
+            onClick={() => setIsPlaying(previous => !previous)}
+          >
+            {isPlaying ? <Pause size={12} /> : <Play size={12} />}
+          </button>
+        </div>
+      )}
       <div className="mt-2 flex items-center justify-between gap-2">
         <div className="min-w-0 truncate text-xs font-black text-white" title={asset.label}>{asset.label}</div>
         <span className={`shrink-0 rounded px-1.5 py-0.5 text-[9px] font-black ${asset.kind === 'ui' ? 'bg-slate-700 text-slate-200' : asset.kind === 'sprite' ? 'bg-emerald-900 text-emerald-200' : 'bg-cyan-900 text-cyan-200'}`}>
@@ -246,10 +395,10 @@ const SpriteAuditPreview: React.FC<{ languageMode: LanguageMode }> = ({ language
         <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
           <div>
             <h3 className="flex items-center gap-2 text-base font-black text-cyan-200">
-              <Layers size={18} /> {trans('スプライト見切れ確認', languageMode)}
+              <Layers size={18} /> {trans('ゲーム内スプライト確認', languageMode)}
             </h3>
             <p className="mt-1 text-[10px] leading-relaxed text-slate-400">
-              {trans('画像をシート全体で表示します。隣のコマの写り込み、透明端の欠落、読み込み失敗をここで確認してください。', languageMode)}
+              {trans('シート全体ではなく、ゲーム内と同じように1フレームずつ切り出して表示します。前後のコマの写り込み、透明端の欠落、読み込み失敗をここで確認してください。', languageMode)}
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-2 text-[10px] font-bold text-slate-300">
