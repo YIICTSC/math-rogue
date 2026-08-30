@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import type { AnswerMode, AssignmentAnswerResult, AssignmentPayload, GameMode, LanguageMode } from '../../types';
 import { audioService } from '../../services/audioService';
+import { storageService } from '../../services/storageService';
 import { assetUrl } from '../../utils/assetPaths';
 import { trans } from '../../utils/textUtils';
 import MiniGameProblemChallenge from '../../components/MiniGameProblemChallenge';
@@ -354,6 +355,29 @@ const ShogiMiniGame: React.FC<ShogiMiniGameProps> = ({ onBack, onFinish, languag
   const [showMissionQuiz, setShowMissionQuiz] = useState(false);
   const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const longPressTriggered = useRef(false);
+  const discoveredShogiPiecesRef = useRef(new Set<string>());
+
+  useEffect(() => {
+    if (!game) return;
+    const visibleKinds = new Set<ShogiPieceKind>([
+      ...STANDARD_PIECES.map(piece => piece.kind),
+      ...game.board.flatMap(row => row.filter((piece): piece is ShogiPiece => Boolean(piece)).map(piece => piece.kind)),
+      ...(Object.keys(game.hands.P).filter(kind => game.hands.P[kind as ShogiPieceKind] > 0) as ShogiPieceKind[]),
+      ...(Object.keys(game.hands.C).filter(kind => game.hands.C[kind as ShogiPieceKind] > 0) as ShogiPieceKind[]),
+    ]);
+    if (game.mode === 'ADVANCE') {
+      ADVANCED_PIECES.slice(0, Math.min(50, game.stage))
+        .slice(-getAdvancedStageUniqueCount(game.stage))
+        .forEach(piece => visibleKinds.add(piece.kind));
+    }
+    visibleKinds.forEach(kind => {
+      const scopeKey = ADVANCED_PIECES.some(piece => piece.kind === kind) ? 'shogi-advanced' : 'shogi-standard';
+      const discoveryKey = `${scopeKey}-${kind}`;
+      if (discoveredShogiPiecesRef.current.has(discoveryKey)) return;
+      discoveredShogiPiecesRef.current.add(discoveryKey);
+      storageService.markMiniGameDiscovered('SHOGI', discoveryKey);
+    });
+  }, [game]);
 
   useEffect(() => {
     void audioService.playBGM('poker_play');

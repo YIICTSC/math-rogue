@@ -762,6 +762,12 @@ const KochoShowdown: React.FC<{
     // Ref to hold current state for async loops (avoiding stale closures)
     const stateRef = useRef(gameState);
     const pendingHandFocusIndexRef = useRef<number | null>(null);
+    const discoveredKochoCardsRef = useRef(new Set<string>());
+    const markKochoCardDiscovered = (cardName?: string) => {
+        if (debugPreview || isUiPreview || !cardName || discoveredKochoCardsRef.current.has(cardName)) return;
+        discoveredKochoCardsRef.current.add(cardName);
+        storageService.markMiniGameDiscovered('KOCHO', `kocho-${cardName}`);
+    };
     useEffect(() => {
         stateRef.current = gameState;
     }, [gameState]);
@@ -792,6 +798,11 @@ const KochoShowdown: React.FC<{
     const [maxUnlockedDifficulty, setMaxUnlockedDifficulty] = useState(() =>
         debugPreview ? KOCHO_DIFFICULTIES.length : storageService.getMaxUnlockedKochoDifficulty()
     );
+
+    useEffect(() => {
+        [...gameState.hand, ...gameState.queue, ...gameState.rewardCards, ...rewardCards].forEach(card => markKochoCardDiscovered(card.name));
+        markKochoCardDiscovered(newlyUnlockedCard?.name);
+    }, [gameState.hand, gameState.queue, gameState.rewardCards, rewardCards, newlyUnlockedCard, debugPreview, isUiPreview]);
     
     // UI State
     const [showRelicModal, setShowRelicModal] = useState(false);

@@ -323,6 +323,14 @@ const ITEM_DB: Record<string, Omit<Item, 'id'>> = {
 /** The complete item pool is also consumed by the in-game compendium. */
 export const SCHOOL_DUNGEON_ITEM_CATALOG = Object.entries(ITEM_DB).map(([id, item]) => ({ id, ...item }));
 
+export const getSchoolDungeonItemDiscoveryKey = (item: Pick<Item, 'category' | 'type' | 'name'>) => {
+    const baseName = item.name.replace(/\+\d+$/, '');
+    const namedMatch = Object.entries(ITEM_DB).find(([, template]) => template.category === item.category && template.name === baseName);
+    if (namedMatch) return namedMatch[0];
+    const typedMatch = Object.entries(ITEM_DB).find(([, template]) => template.category === item.category && template.type === item.type);
+    return typedMatch?.[0] || item.type;
+};
+
 // --- DIJKSTRA PATHFINDING HELPER ---
 const computeDijkstraMap = (map: TileType[][], targetX: number, targetY: number): number[][] => {
     const dMap = Array(MAP_H).fill(0).map(() => Array(MAP_W).fill(9999));
@@ -384,6 +392,14 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
   const roomsRef = useRef<RoomRect[]>([]); // Keep track of rooms for logic
   const spriteCache = useRef<Record<string, HTMLCanvasElement>>({});
   const spriteSheetImages = useRef<Partial<Record<FuraiSheetKey, HTMLImageElement>>>({});
+  const discoveredItemTypesRef = useRef(new Set<string>());
+  const markDungeonItemDiscovered = (item?: Pick<Item, 'category' | 'type' | 'name'>) => {
+      if (debugPreview || !item) return;
+      const discoveryKey = `dungeon-${getSchoolDungeonItemDiscoveryKey(item)}`;
+      if (discoveredItemTypesRef.current.has(discoveryKey)) return;
+      discoveredItemTypesRef.current.add(discoveryKey);
+      storageService.markMiniGameDiscovered('DUNGEON', discoveryKey);
+  };
   const [spriteSheetRevision, setSpriteSheetRevision] = useState(0);
   
   const [player, setPlayer] = useState<Entity>({
@@ -399,7 +415,12 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
   const [traps, setTraps] = useState<Entity[]>([]);
   const [inventory, setInventory] = useState<Item[]>([]);
   const [logs, setLogs] = useState<Log[]>([]);
-  
+
+  useEffect(() => {
+      if (debugPreview) return;
+      inventory.forEach(item => markDungeonItemDiscovered(item));
+  }, [inventory, debugPreview]);
+
   // Game Status
   const [floor, setFloor] = useState(1);
   const [level, setLevel] = useState(1);
@@ -752,6 +773,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
 
   const drawFloorItemFromSheets = (ctx: CanvasRenderingContext2D, item: Entity, sx: number, sy: number, ts: number) => {
       const data = item.itemData;
+      markDungeonItemDiscovered(data);
       if (data?.category === 'WEAPON') {
           const slot = getPagedSheet('weapons', getWeaponSpriteIndex(data.type));
           return drawSheetSprite(ctx, slot.sheet, slot.cell, sx, sy, ts, ts);
@@ -992,6 +1014,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
 
     initInventory.push({ ...ITEM_DB['FOOD_ONIGIRI'], id: `start-${Date.now()}` });
     initInventory.push({ ...ITEM_DB['PENCIL_SWORD'], id: `start-w-${Date.now()}` });
+    initInventory.forEach(item => markDungeonItemDiscovered(item));
     setInventory(initInventory);
     
     setPlayer({
@@ -1711,6 +1734,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
               audioService.playSound('select');
           } else if (itemEntity.itemData) {
               const item = itemEntity.itemData;
+              markDungeonItemDiscovered(item);
               if (inventory.length < MAX_INVENTORY) {
                   setInventory(prev => [...prev, item]);
                   addLog(`${getItemName(item)}を拾った！`);
@@ -1921,6 +1945,7 @@ const SchoolDungeonRPG: React.FC<SchoolDungeonRPGProps> = ({ onBack, problemMode
           
           if ((player.gold || 0) >= (item.price || 0)) {
               if (inventory.length < MAX_INVENTORY) {
+                  markDungeonItemDiscovered(item);
                   setPlayer(p => ({ ...p, gold: (p.gold || 0) - (item.price || 0) }));
                   setInventory(prev => [...prev, item]);
                   

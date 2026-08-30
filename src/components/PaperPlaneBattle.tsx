@@ -1873,6 +1873,29 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; languageMode?: LanguageMo
     const [earnedCoins, setEarnedCoins] = useState(debugPreview === 'PAPER_REWARD' ? 80 : savedData?.earnedCoins || 0);
     const [battleStats, setBattleStats] = useState<BattleStats>(savedData?.battleStats || createBattleStats());
 
+    const discoveredPaperPlaneRef = useRef(new Set<string>());
+    const markPaperPlanePartDiscovered = (name?: string) => {
+        const normalizedName = name?.replace(/\+$/, '');
+        if (debugPreview || !normalizedName || normalizedName === '空き' || discoveredPaperPlaneRef.current.has(`part-${normalizedName}`)) return;
+        discoveredPaperPlaneRef.current.add(`part-${normalizedName}`);
+        storageService.markMiniGameDiscovered('PAPER_PLANE', `paper-part-${normalizedName}`);
+    };
+    const markPaperPlanePilotDiscovered = (id?: string) => {
+        if (debugPreview || !id || discoveredPaperPlaneRef.current.has(`pilot-${id}`)) return;
+        discoveredPaperPlaneRef.current.add(`pilot-${id}`);
+        storageService.markMiniGameDiscovered('PAPER_PLANE', `paper-pilot-${id}`);
+    };
+
+    useEffect(() => {
+        rewardOptions.forEach(part => markPaperPlanePartDiscovered(part.name));
+        if (pendingPart) markPaperPlanePartDiscovered(pendingPart.name);
+        if (newlyUnlockedPart) markPaperPlanePartDiscovered(newlyUnlockedPart.name);
+        player.parts.forEach(part => markPaperPlanePartDiscovered(part.name));
+        player.partInventory.forEach(part => markPaperPlanePartDiscovered(part.name));
+        enemy.parts.forEach(part => markPaperPlanePartDiscovered(part.name));
+        pilotOptions.forEach(pilot => markPaperPlanePilotDiscovered(pilot.id));
+    }, [rewardOptions, pendingPart, newlyUnlockedPart, player.parts, player.partInventory, enemy.parts, pilotOptions, debugPreview]);
+
     // --- AUTO SAVE ---
     const saveDebounceRef = useRef<any>(null);
     const saveStateNow = useCallback(() => {
@@ -1968,6 +1991,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; languageMode?: LanguageMo
              slots.push(p);
         }
         setPilotOptions(slots);
+        slots.forEach(pilot => markPaperPlanePilotDiscovered(pilot.id));
         setSelectedPilotIndex(-1); // Reset selection
     };
 
@@ -2000,6 +2024,7 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; languageMode?: LanguageMo
             newOpts[i] = p;
         }
         setPilotOptions(newOpts);
+        newOpts.forEach(pilot => markPaperPlanePilotDiscovered(pilot?.id));
         setSelectedPilotIndex(-1); // Reset on reroll too? Maybe keep if pinned? No reset is safer.
 
         audioService.playSound('select');
@@ -2016,6 +2041,10 @@ const PaperPlaneBattle: React.FC<{ onBack: () => void; languageMode?: LanguageMo
         // Init Game Data
         const shipTemplate = SHIPS.find(s => s.id === selectedShipId)!;
         const pilot = pilotOptions[selectedPilotIndex];
+        if (!debugPreview) {
+            storageService.markMiniGameDiscovered('PAPER_PLANE', `paper-ship-${shipTemplate.id}`);
+            markPaperPlanePilotDiscovered(pilot.id);
+        }
         
         // Apply Modifiers
         let pMaxHp = shipTemplate.baseHp;

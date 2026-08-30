@@ -86,6 +86,7 @@ const STORAGE_KEY_POKER_EXPANDED_SUPPORTERS_UNLOCKED = 'pixel_spire_poker_expand
 // For School Dungeon 2
 const STORAGE_KEY_DUNGEON_STATE_2 = 'pixel_spire_dungeon_state_2_v1';
 const STORAGE_KEY_DUNGEON_RANKING_2 = 'pixel_spire_dungeon_ranking_2_v1';
+const STORAGE_KEY_MINI_GAME_DISCOVERIES = 'pixel_spire_mini_game_discoveries_v1';
 
 // For Kocho Showdown
 const STORAGE_KEY_KOCHO_STATE = 'pixel_spire_kocho_state_v1';
@@ -334,6 +335,32 @@ const createEmptyStudentProfile = (): StudentProfile => ({
   dailyAssignmentLanguageMode: undefined,
 });
 
+const readMiniGameDiscoveries = (scope: string): string[] => {
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY_MINI_GAME_DISCOVERIES);
+    if (!stored) return [];
+    const parsed = JSON.parse(stored) as Record<string, unknown>;
+    const values = parsed?.[scope];
+    return Array.isArray(values) ? values.filter((value): value is string => typeof value === 'string' && value.length > 0) : [];
+  } catch {
+    return [];
+  }
+};
+
+const saveMiniGameDiscoveries = (scope: string, ids: string | string[]) => {
+  const nextIds = (Array.isArray(ids) ? ids : [ids]).filter(id => typeof id === 'string' && id.length > 0);
+  if (nextIds.length === 0) return;
+  try {
+    const stored = localStorage.getItem(STORAGE_KEY_MINI_GAME_DISCOVERIES);
+    const parsed = stored ? JSON.parse(stored) as Record<string, unknown> : {};
+    const current = Array.isArray(parsed?.[scope]) ? parsed[scope].filter((value): value is string => typeof value === 'string') : [];
+    parsed[scope] = Array.from(new Set([...current, ...nextIds]));
+    localStorage.setItem(STORAGE_KEY_MINI_GAME_DISCOVERIES, JSON.stringify(parsed));
+  } catch (e) {
+    console.warn('Failed to save mini-game discovery', e);
+  }
+};
+
 const getStudentGradeLanguageKey = (grade?: string): 'JAPANESE' | 'ENGLISH' | undefined => {
   if (!grade) return undefined;
   if (/^Grade\s*[1-8]$/i.test(grade) || grade === 'Adult') return 'ENGLISH';
@@ -399,6 +426,10 @@ const normalizeBurnGameState = (state: GameState): GameState => ({
 });
 
 export const storageService = {
+  getMiniGameDiscoveries: (scope: string): string[] => readMiniGameDiscoveries(scope),
+
+  markMiniGameDiscovered: (scope: string, ids: string | string[]) => saveMiniGameDiscoveries(scope, ids),
+
   getCurrentAssignment: (): AssignmentPayload | null => {
     try {
       const stored = localStorage.getItem(STORAGE_KEY_CURRENT_ASSIGNMENT);
@@ -1659,6 +1690,7 @@ export const storageService = {
       localStorage.removeItem(STORAGE_KEY_PAPER_PLANE_PROGRESS);
       localStorage.removeItem(STORAGE_KEY_PAPER_PLANE_RANKING);
       localStorage.removeItem(STORAGE_KEY_GO_HOME_RANKING);
+      localStorage.removeItem(STORAGE_KEY_MINI_GAME_DISCOVERIES);
       // NOTE: STORAGE_KEY_LEGACY_CARD はリセット対象から除外（ユーザー要望）
       localStorage.removeItem(STORAGE_KEY_DEBUG_MATH_SKIP);
       localStorage.removeItem(STORAGE_KEY_DEBUG_HP_ONE);

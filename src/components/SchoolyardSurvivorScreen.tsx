@@ -581,6 +581,10 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
         MAGNET: 0, TEXTBOOK: 0, ABACUS: 0, CONSOLE: 0, MILK: 0, ORIGAMI: 0
     });
 
+    useEffect(() => {
+        if (!debugPreview) storageService.markMiniGameDiscovered('SURVIVOR', 'survivor-weapon-PENCIL');
+    }, [debugPreview]);
+
     const [upgradeOptions, setUpgradeOptions] = useState<any[]>([]);
     const [uiState, setUiState] = useState({ hp: 100, maxHp: 100, level: 1, time: 0, score: 0, xpPercent: 0, gameOver: false });
 
@@ -1629,10 +1633,18 @@ const SchoolyardSurvivorScreen: React.FC<SchoolyardSurvivorScreenProps> = ({ onB
         }
 
         if (picks.length < 3) picks.push({ type: 'HEAL', id: 'HEAL' });
+        if (!debugPreview) {
+            picks.forEach(option => {
+                if (option.type === 'WEAPON') storageService.markMiniGameDiscovered('SURVIVOR', `survivor-weapon-${option.id}`);
+                if (option.type === 'PASSIVE') storageService.markMiniGameDiscovered('SURVIVOR', `survivor-passive-${option.id}`);
+            });
+        }
         setUpgradeOptions(picks);
     };
 
     const selectUpgrade = (opt: any) => {
+        if (!debugPreview && opt.type === 'WEAPON') storageService.markMiniGameDiscovered('SURVIVOR', `survivor-weapon-${opt.id}`);
+        if (!debugPreview && opt.type === 'PASSIVE') storageService.markMiniGameDiscovered('SURVIVOR', `survivor-passive-${opt.id}`);
         if (opt.type === 'WEAPON') { const key = opt.id as WeaponType; const current = weapons[key]; setWeapons(prev => ({ ...prev, [key]: current ? { ...current, level: current.level + 1 } : { level: 1, cooldownTimer: 0 } })); }
         else if (opt.type === 'PASSIVE') { const key = opt.id as PassiveType; setPassives(prev => ({ ...prev, [key]: prev[key] + 1 })); }
         else if (opt.type === 'HEAL') { player.current.hp = Math.min(player.current.maxHp, player.current.hp + 50); }

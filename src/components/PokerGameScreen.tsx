@@ -801,6 +801,30 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
           ? Array.from({ length: Math.max(1, previewPack.size) }, () => generateRandomPlayingCard(0.4))
           : []
   );
+  const discoveredPokerItemsRef = useRef(new Set<string>());
+  const markPokerDiscovery = (kind: 'supporter' | 'consumable' | 'pack' | 'voucher', id?: string) => {
+      if (debugPreview || !id) return;
+      const key = `poker-${kind}-${id}`;
+      if (discoveredPokerItemsRef.current.has(key)) return;
+      discoveredPokerItemsRef.current.add(key);
+      storageService.markMiniGameDiscovered('POKER', key);
+  };
+
+  useEffect(() => {
+      runState.shopInventory.forEach(item => {
+          if ('rarity' in item) markPokerDiscovery('supporter', item.id);
+          else if ('size' in item) markPokerDiscovery('pack', item.id);
+          else markPokerDiscovery('consumable', item.id);
+      });
+      if (runState.shopVoucher) markPokerDiscovery('voucher', runState.shopVoucher.id);
+      runState.supporters.forEach(item => markPokerDiscovery('supporter', item.id));
+      runState.consumables.forEach(item => markPokerDiscovery('consumable', item.id));
+      if (currentPack) markPokerDiscovery('pack', currentPack.id);
+      packContent.forEach(item => {
+          if ('rarity' in item) markPokerDiscovery('supporter', item.id);
+          else if ('type' in item && !('suit' in item)) markPokerDiscovery('consumable', item.id);
+      });
+  }, [runState.shopInventory, runState.shopVoucher, runState.supporters, runState.consumables, currentPack, packContent, debugPreview]);
 
   // Play Animation State
   const [lastHandScore, setLastHandScore] = useState<{chips: number, mult: number, total: number, name: string} | null>(null);
@@ -1562,7 +1586,14 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
           restockedAnte = runState.ante;
       }
 
-      setRunState(prev => ({ 
+      items.forEach(item => {
+          if ('rarity' in item) markPokerDiscovery('supporter', item.id);
+          else if ('size' in item) markPokerDiscovery('pack', item.id);
+          else markPokerDiscovery('consumable', item.id);
+      });
+      if (voucher) markPokerDiscovery('voucher', voucher.id);
+
+      setRunState(prev => ({
           ...prev, 
           shopInventory: items, 
           shopVoucher: voucher,
@@ -1602,6 +1633,7 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
   };
 
   const createPackPreview = (pack: PokerPack) => {
+      markPokerDiscovery('pack', pack.id);
       const content: (PokerCard | PokerSupporter | PokerConsumable)[] = [];
 
       if (pack.type === 'STANDARD') {
@@ -1627,6 +1659,9 @@ const PokerGameScreen: React.FC<PokerGameScreenProps> = ({ onBack, problemMode =
           pool = pool.sort(() => Math.random() - 0.5);
           for (let i = 0; i < Math.min(pack.size, pool.length); i++) {
               content.push(pool[i]);
+              const item = pool[i];
+              if ('rarity' in item) markPokerDiscovery('supporter', item.id);
+              else markPokerDiscovery('consumable', item.id);
           }
       }
       return content;

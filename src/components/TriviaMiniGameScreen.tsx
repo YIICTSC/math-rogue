@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { ArrowLeft, CircleHelp, Trophy } from 'lucide-react';
 import { CARDS_LIBRARY } from '../constants';
 import { AnswerMode, AssignmentAnswerResult, AssignmentPayload, Card as CardType, GameMode, GameScreen, LanguageMode } from '../types';
 import Card from './Card';
 import MiniGameProblemChallenge from './MiniGameProblemChallenge';
 import { audioService } from '../services/audioService';
+import { storageService } from '../services/storageService';
 import { trans } from '../utils/textUtils';
 import { assetUrl } from '../utils/assetPaths';
 import { resolveStoneGlowRound, type StoneGlowOutcome } from '../mini-games/stone-glow/stoneGlowRules';
@@ -274,6 +275,14 @@ const advanceStoneCpu = (state: StoneGlowState): StoneGlowState => {
 
 const StoneGlowGame: React.FC<TriviaMiniGameProps> = ({ onBack, languageMode = 'JAPANESE', onMissionClear }) => {
   const [game, setGame] = useState<StoneGlowState>(createStoneGlowState);
+  const discoveredStoneCardsRef = useRef(new Set<string>());
+  useEffect(() => {
+    [...game.market, ...game.owned, ...game.reserved].forEach(card => {
+      if (discoveredStoneCardsRef.current.has(card.id)) return;
+      discoveredStoneCardsRef.current.add(card.id);
+      storageService.markMiniGameDiscovered('STONE_GLOW', `stone-glow-${card.id}`);
+    });
+  }, [game.market, game.owned, game.reserved]);
   const restart = () => setGame(createStoneGlowState());
   const canBuy = (card: StoneCard) => stoneCanPay(card, game.stones, game.owned, game.wild);
   const canBuyReserved = (card: StoneCard) => stoneCanPay(card, game.stones, game.owned, game.wild);

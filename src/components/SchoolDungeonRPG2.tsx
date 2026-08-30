@@ -380,6 +380,14 @@ const ITEM_DB: Record<string, Omit<Item, 'id'>> = {
 /** The complete item pool is also consumed by the in-game compendium. */
 export const SCHOOL_DUNGEON_2_ITEM_CATALOG = Object.entries(ITEM_DB).map(([id, item]) => ({ id, ...item }));
 
+export const getSchoolDungeon2ItemDiscoveryKey = (item: Pick<Item, 'category' | 'type' | 'name'>) => {
+    const baseName = item.name.replace(/\+\d+$/, '');
+    const namedMatch = Object.entries(ITEM_DB).find(([, template]) => template.category === item.category && template.name === baseName);
+    if (namedMatch) return namedMatch[0];
+    const typedMatch = Object.entries(ITEM_DB).find(([, template]) => template.category === item.category && template.type === item.type);
+    return typedMatch?.[0] || item.type;
+};
+
 // --- DUNGEON CARD DATABASE ---
 const DUNGEON_CARD_DB: Omit<DungeonCard, 'id'>[] = [
     { templateId: 'THRUST', name: 'えんぴつ突き', type: 'ATTACK', power: 3, description: '前方2マスの敵を貫通攻撃', icon: <Sword size={16}/> },
@@ -466,6 +474,18 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
   const roomsRef = useRef<RoomRect[]>([]);
   const spriteCache = useRef<Record<string, HTMLCanvasElement>>({});
   const spriteSheetImages = useRef<Partial<Record<FuraiSheetKey, HTMLImageElement>>>({});
+  const discoveredItemTypesRef = useRef(new Set<string>());
+  const markDungeonItemDiscovered = (item?: Pick<Item, 'category' | 'type' | 'name'>) => {
+      if (debugPreview || !item) return;
+      const discoveryKey = `dungeon-2-${getSchoolDungeon2ItemDiscoveryKey(item)}`;
+      if (discoveredItemTypesRef.current.has(discoveryKey)) return;
+      discoveredItemTypesRef.current.add(discoveryKey);
+      storageService.markMiniGameDiscovered('DUNGEON_2', discoveryKey);
+  };
+  const markDungeonCardDiscovered = (templateId?: string) => {
+      if (debugPreview || !templateId) return;
+      storageService.markMiniGameDiscovered('DUNGEON_2', `dungeon-2-card-${templateId}`);
+  };
   const [player, setPlayer] = useState<Entity>({
     id: 0, type: 'PLAYER', x: 1, y: 1, char: '@', name: 'わんぱく小学生', 
     hp: 50, maxHp: 50, baseAttack: 3, baseDefense: 0, attack: 3, defense: 0, xp: 0, gold: 0, dir: {x:0, y:1},
@@ -481,6 +501,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
   const [traps, setTraps] = useState<Entity[]>([]);
   const [inventory, setInventory] = useState<Item[]>([]);
   const [logs, setLogs] = useState<Log[]>([]);
+
   const [floor, setFloor] = useState(1);
   const [level, setLevel] = useState(1);
   const [belly, setBelly] = useState(100);
@@ -491,7 +512,18 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
   const [showMap, setShowMap] = useState(false); 
   const [showHelp, setShowHelp] = useState(false);
   const [showStatus, setShowStatus] = useState(false);
-  const [showDeck, setShowDeck] = useState(false); 
+  const [showDeck, setShowDeck] = useState(false);
+
+  useEffect(() => {
+      if (debugPreview) return;
+      inventory.forEach(item => markDungeonItemDiscovered(item));
+      dungeonHand.forEach(card => markDungeonCardDiscovered(card.templateId));
+      if (showDeck) {
+          dungeonDeck.forEach(card => markDungeonCardDiscovered(card.templateId));
+          dungeonDiscard.forEach(card => markDungeonCardDiscovered(card.templateId));
+      }
+  }, [inventory, dungeonHand, dungeonDeck, dungeonDiscard, showDeck, debugPreview]);
+
   const turnCounter = useRef(0);
   const [isEndless, setIsEndless] = useState(false);
   const saveDebounceRef = useRef<any>(null);
@@ -742,6 +774,8 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
 
   const drawFloorItemFromSheets = (ctx: CanvasRenderingContext2D, item: Entity, sx: number, sy: number, ts: number) => {
       const data = item.itemData;
+      if (data?.category === 'DECK_CARD') markDungeonCardDiscovered(data.type);
+      else markDungeonItemDiscovered(data);
       if (data?.category === 'DECK_CARD') {
           return drawCardEffectSpriteInRect(ctx, 'dropCard', sx, sy, ts, ts);
       }
@@ -917,6 +951,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
       newDeck.push({ ...guardTemplate, id: `card-init-guard-${Date.now()}-${Math.random()}` });
       newDeck.sort(() => Math.random() - 0.5);
       const hand = newDeck.splice(0, 3);
+      hand.forEach(card => markDungeonCardDiscovered(card.templateId));
       setDungeonHand(hand); setDungeonDeck(newDeck); setDungeonDiscard([]);
   };
 
@@ -924,6 +959,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
       if (gameOver || gameClear || menuOpen || shopState.active) return;
       if (index >= dungeonHand.length) return;
       const card = dungeonHand[index];
+      markDungeonCardDiscovered(card.templateId);
       let msg = ""; let used = false;
       const baseDmg = player.attack + card.power;
       if (card.templateId === 'JUMP') {
@@ -1172,6 +1208,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
     }
     initInventory.push({ ...ITEM_DB['FOOD_ONIGIRI'], id: `start-${Date.now()}` });
     initInventory.push({ ...ITEM_DB['PENCIL_SWORD'], id: `start-w-${Date.now()}` });
+    initInventory.forEach(item => markDungeonItemDiscovered(item));
     setInventory(initInventory);
 
     setPlayer({ id: 0, type: 'PLAYER', x: 1, y: 1, char: '@', name: 'わんぱく小学生', hp: 50, maxHp: 50, baseAttack: 3, baseDefense: 0, attack: 3, defense: 0, xp: 0, gold: debugPreview === 'DUNGEON_SHOP' ? 500 : 0, dir: {x:0, y:1}, equipment: { weapon: null, armor: null, ranged: null, accessory: null }, status: { sleep: 0, confused: 0, frozen: 0, blind: 0, speed: 0, poison: 0, trapSight: 0 }, offset: { x: 0, y: 0 } });
@@ -1476,7 +1513,9 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
           if (itemEntity.type === 'GOLD') { const amount = itemEntity.gold || 0; setPlayer(p => ({ ...p, gold: (p.gold || 0) + amount })); addLog(`${amount}円を拾った！`, "yellow"); setFloorItems(prev => prev.filter((_, i) => i !== itemIdx)); audioService.playSound('select'); } 
           else if (itemEntity.itemData) {
               const item = itemEntity.itemData;
-              if (item.category === 'DECK_CARD') { const template = DUNGEON_CARD_DB.find(t => t.templateId === item.type); if (template) { const newCard: DungeonCard = { ...template, id: `card-loot-${Date.now()}` }; setDungeonDeck(prev => [...prev, newCard]); addLog(`${item.name}のカードを拾った！`, "yellow"); setFloorItems(prev => prev.filter((_, i) => i !== itemIdx)); audioService.playSound('buff'); } } 
+              if (item.category === 'DECK_CARD') markDungeonCardDiscovered(item.type);
+              else markDungeonItemDiscovered(item);
+              if (item.category === 'DECK_CARD') { const template = DUNGEON_CARD_DB.find(t => t.templateId === item.type); if (template) { const newCard: DungeonCard = { ...template, id: `card-loot-${Date.now()}` }; setDungeonDeck(prev => [...prev, newCard]); addLog(`${item.name}のカードを拾った！`, "yellow"); setFloorItems(prev => prev.filter((_, i) => i !== itemIdx)); audioService.playSound('buff'); } }
               else { if (inventory.length < MAX_INVENTORY) { setInventory(prev => [...prev, item]); addLog(`${getItemName(item)}を拾った！`); setFloorItems(prev => prev.filter((_, i) => i !== itemIdx)); audioService.playSound('select'); } else addLog("持ち物がいっぱいで拾えない！", "red"); }
           }
       }
@@ -1561,7 +1600,7 @@ const SchoolDungeonRPG2: React.FC<SchoolDungeonRPG2Props> = ({ onBack, problemMo
       if (shopState.mode === 'BUY') {
           if (!shopkeeper.shopItems || shopkeeper.shopItems.length === 0) return; const item = shopkeeper.shopItems[idx]; if (!item) return;
           if ((player.gold || 0) >= (item.price || 0)) {
-              if (inventory.length < MAX_INVENTORY) { setPlayer(p => ({ ...p, gold: (p.gold || 0) - (item.price || 0) })); setInventory(prev => [...prev, item]); const newShopItems = shopkeeper.shopItems.filter((_, i) => i !== idx); setEnemies(prev => prev.map(e => e.id === shopkeeper.id ? { ...e, shopItems: newShopItems } : e)); addLog(`${getItemName(item)}を買った！`, currentTheme.colors.C2); audioService.playSound('buff'); if (newShopItems.length === 0) setShopState(prev => ({ ...prev, active: false })); else setSelectedItemIndex(prev => Math.min(prev, newShopItems.length - 1)); } 
+              if (inventory.length < MAX_INVENTORY) { markDungeonItemDiscovered(item); setPlayer(p => ({ ...p, gold: (p.gold || 0) - (item.price || 0) })); setInventory(prev => [...prev, item]); const newShopItems = shopkeeper.shopItems.filter((_, i) => i !== idx); setEnemies(prev => prev.map(e => e.id === shopkeeper.id ? { ...e, shopItems: newShopItems } : e)); addLog(`${getItemName(item)}を買った！`, currentTheme.colors.C2); audioService.playSound('buff'); if (newShopItems.length === 0) setShopState(prev => ({ ...prev, active: false })); else setSelectedItemIndex(prev => Math.min(prev, newShopItems.length - 1)); }
               else { addLog("持ち物がいっぱいで拾えない！", "red"); audioService.playSound('wrong'); }
           } else { addLog("お金が足りない！", "red"); audioService.playSound('wrong'); }
       } else {

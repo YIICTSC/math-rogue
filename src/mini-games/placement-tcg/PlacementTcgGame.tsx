@@ -7,6 +7,7 @@ import { assetUrl } from '../../utils/assetPaths';
 import { getCardIllustrationPaths } from '../../utils/cardIllustration';
 import { trans } from '../../utils/textUtils';
 import { audioService } from '../../services/audioService';
+import { storageService } from '../../services/storageService';
 import {
   PLACEMENT_TCG_CARDS,
   PLACEMENT_TCG_CARD_MAP,
@@ -742,6 +743,25 @@ const PlacementTcgGame: React.FC<PlacementTcgGameProps> = ({ onBack, onFinish, l
   const cueTimerRef = useRef<number | null>(null);
   const seenCueRef = useRef<number | null>(null);
   const seenWinnerRef = useRef<PlacementSideKey | null>(null);
+  const discoveredPlacementCardsRef = useRef(new Set<string>());
+  const markPlacementCardsDiscovered = (cardIds: string[]) => {
+    cardIds.forEach(cardId => {
+      if (!cardId || discoveredPlacementCardsRef.current.has(cardId)) return;
+      discoveredPlacementCardsRef.current.add(cardId);
+      storageService.markMiniGameDiscovered('LEARNING_TCG', `learning-tcg-${cardId}`);
+    });
+  };
+
+  useEffect(() => {
+    const visibleIds = [
+      ...(battle?.player.hand || []),
+      ...(battle?.player.lanes || []).flatMap(lane => [lane.unit?.cardId, lane.support?.cardId].filter((id): id is string => Boolean(id))),
+      ...(battle?.cpu.lanes || []).flatMap(lane => [lane.unit?.cardId, lane.support?.cardId].filter((id): id is string => Boolean(id))),
+      ...(battle?.lastAction ? [battle.lastAction.cardId, ...(battle.lastAction.defeatedCardIds || [])] : []),
+      ...rewardChoices,
+    ];
+    markPlacementCardsDiscovered(visibleIds);
+  }, [battle?.player.hand, battle?.player.lanes, battle?.cpu.lanes, battle?.lastAction, rewardChoices]);
 
   const placementBgmType = !run || !battle
     ? 'menu'

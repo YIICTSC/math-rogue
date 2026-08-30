@@ -29,7 +29,6 @@ import { localizeTrpgCopy } from '../mini-games/school-trpg/schoolTrpgTypes';
 import { loadSchoolTrpgCampaign } from '../mini-games/school-trpg/schoolTrpgSave';
 import { ShogiPieceIcon } from '../mini-games/shogi/ShogiMiniGame';
 import { ADVANCED_PIECES, STANDARD_PIECES } from '../mini-games/shogi/shogiPieces';
-import { loadPlacementTcgCollection } from '../mini-games/placement-tcg/placementTcgEngine';
 import { PLACEMENT_TCG_CARDS, type PlacementCardDefinition } from '../mini-games/placement-tcg/placementTcgCards';
 import { CardArt } from '../mini-games/placement-tcg/PlacementTcgGame';
 import { PokerCompendiumSprite } from './PokerGameScreen';
@@ -69,6 +68,8 @@ type MiniGameEntry = {
     unlocked: boolean;
     tracked: boolean;
     visual: MiniGameVisual;
+    /** Stable key written when this item is actually shown by its mini-game. */
+    discoveryKey?: string;
     /** False means the catalog entry has no representation ever used by the game UI. */
     visibleInGame?: boolean;
     metadata?: string[];
@@ -85,8 +86,6 @@ type MiniGameCompendiumProps = {
     languageMode: LanguageMode;
     isDebug: boolean;
 };
-
-const SHOGI_PROGRESS_KEY = 'learning_rogue_shogi_progress_v2';
 
 const FURAI_SHEET_CELL = 72;
 const FURAI_SHEET_GAP = 16;
@@ -194,21 +193,12 @@ const entryFromDungeonItem = (game: string, item: { id: string; category: string
     name: item.name,
     description: item.desc,
     category: item.category,
-    unlocked: true,
-    tracked: false,
+    unlocked: false,
+    tracked: true,
     visual: getDungeonItemVisual(item, game === 'dungeon-2' ? SCHOOL_DUNGEON_2_SPRITE_TYPES : SCHOOL_DUNGEON_SPRITE_TYPES),
+    discoveryKey: `${game}-${item.id}`,
     visibleInGame: true,
 });
-
-const readShogiHighestStage = () => {
-    if (typeof window === 'undefined') return 1;
-    try {
-        const value = JSON.parse(window.localStorage.getItem(SHOGI_PROGRESS_KEY) || '');
-        return typeof value?.highestStage === 'number' ? Math.max(1, Math.min(100, value.highestStage)) : 1;
-    } catch {
-        return 1;
-    }
-};
 
 const renderVisual = (entry: MiniGameEntry, size = 'h-14 w-14') => {
     if (entry.visual.type === 'image') {
@@ -257,29 +247,65 @@ const MiniGameCompendium: React.FC<MiniGameCompendiumProps> = ({ languageMode, i
 
     const sections = useMemo<MiniGameSection[]>(() => {
         const paperProgress = storageService.loadPaperPlaneProgress();
+        const discoveries = (scope: MiniGameSectionId) => new Set(storageService.getMiniGameDiscoveries(scope));
+        const discoveredDungeon = discoveries('DUNGEON');
+        const discoveredDungeon2 = discoveries('DUNGEON_2');
+        const discoveredSurvivor = discoveries('SURVIVOR');
+        const discoveredPoker = discoveries('POKER');
+        const discoveredKocho = new Set([
+            ...storageService.getMiniGameDiscoveries('KOCHO'),
+            ...storageService.getUnlockedKochoCards().map(cardName => `kocho-${cardName}`),
+        ]);
+        const discoveredPaperPlane = new Set([
+            ...storageService.getMiniGameDiscoveries('PAPER_PLANE'),
+            ...paperProgress.unlockedPartNames.map(partName => `paper-part-${partName.replace(/\+$/, '')}`),
+        ]);
+        const discoveredStoneGlow = discoveries('STONE_GLOW');
+        const discoveredTrpg = discoveries('SCHOOL_TRPG');
+        const discoveredTcg = discoveries('LEARNING_TCG');
+        const discoveredShogi = discoveries('SHOGI');
         const unlockedPokerCount = Math.min(storageService.getPokerExpandedSupporterUnlockCount(), EXPANDED_SUPPORTER_IDS.length);
-        const unlockedPokerIds = new Set(EXPANDED_SUPPORTER_IDS.slice(0, unlockedPokerCount));
-        const unlockedKochoCards = new Set(storageService.getUnlockedKochoCards());
+        const unlockedPokerIds = new Set(EXPANDED_SUPPORTER_IDS.slice(0, unlockedPokerCount).map(id => `poker-supporter-${id}`));
         const trpgCampaign = loadSchoolTrpgCampaign();
         const unlockedTrpgRewards = new Set(trpgCampaign?.inventory || []);
         const unlockedTrpgEndings = new Set([
             ...(trpgCampaign?.endingHistory || []),
             ...(trpgCampaign?.endingId ? [trpgCampaign.endingId] : []),
         ]);
-        const placementCollection = loadPlacementTcgCollection();
-        const unlockedPlacementCards = new Set(placementCollection.unlockedCardIds);
-        const shogiHighestStage = readShogiHighestStage();
 
-        const dungeonItems = SCHOOL_DUNGEON_ITEM_CATALOG.map(item => entryFromDungeonItem('dungeon', item));
-        const dungeon2Items = SCHOOL_DUNGEON_2_ITEM_CATALOG.map(item => entryFromDungeonItem('dungeon-2', item));
+        const isDiscovered = (scope: MiniGameSectionId, key: string, visibleInGame = true) => {
+            if (!visibleInGame) return false;
+            if (isDebug) return true;
+            const set = scope === 'DUNGEON' ? discoveredDungeon
+                : scope === 'DUNGEON_2' ? discoveredDungeon2
+                    : scope === 'SURVIVOR' ? discoveredSurvivor
+                        : scope === 'POKER' ? discoveredPoker
+                            : scope === 'KOCHO' ? discoveredKocho
+                                : scope === 'PAPER_PLANE' ? discoveredPaperPlane
+                                    : scope === 'STONE_GLOW' ? discoveredStoneGlow
+                                        : scope === 'SCHOOL_TRPG' ? discoveredTrpg
+                                            : scope === 'LEARNING_TCG' ? discoveredTcg
+                                                : discoveredShogi;
+            return set.has(key);
+        };
+
+        const dungeonItems = SCHOOL_DUNGEON_ITEM_CATALOG.map(item => {
+            const entry = entryFromDungeonItem('dungeon', item);
+            return { ...entry, unlocked: isDiscovered('DUNGEON', entry.discoveryKey || entry.id, entry.visibleInGame !== false) };
+        });
+        const dungeon2Items = SCHOOL_DUNGEON_2_ITEM_CATALOG.map(item => {
+            const entry = entryFromDungeonItem('dungeon-2', item);
+            return { ...entry, unlocked: isDiscovered('DUNGEON_2', entry.discoveryKey || entry.id, entry.visibleInGame !== false) };
+        });
         const dungeon2Cards = SCHOOL_DUNGEON_2_CARD_CATALOG.map(card => ({
             id: `dungeon-2-card-${card.templateId}`,
             name: card.name,
             description: card.description,
             category: 'デッキカード',
-            unlocked: true,
-            tracked: false,
+            unlocked: isDiscovered('DUNGEON_2', `dungeon-2-card-${card.templateId}`),
+            tracked: true,
             visual: { type: 'furai-card' as const, templateId: card.templateId },
+            discoveryKey: `dungeon-2-card-${card.templateId}`,
             visibleInGame: true,
             metadata: [`POWER ${card.power}`],
         }));
@@ -289,9 +315,10 @@ const MiniGameCompendium: React.FC<MiniGameCompendiumProps> = ({ languageMode, i
             name: weapon.name,
             description: `${weapon.desc} / ${weapon.evolvedName}: ${weapon.evolvedDesc}`,
             category: '武器',
-            unlocked: true,
-            tracked: false,
+            unlocked: isDiscovered('SURVIVOR', `survivor-weapon-${weapon.id}`),
+            tracked: true,
             visual: { type: 'sprite' as const, value: `${weapon.sprite.template}|${weapon.sprite.color}` },
+            discoveryKey: `survivor-weapon-${weapon.id}`,
             metadata: [`進化: ${weapon.evolvedName}`, `連携: ${weapon.synergy}`],
         }));
         const survivorPassives = SCHOOLYARD_PASSIVE_CATALOG.map(passive => ({
@@ -299,9 +326,10 @@ const MiniGameCompendium: React.FC<MiniGameCompendiumProps> = ({ languageMode, i
             name: passive.name,
             description: passive.desc,
             category: 'パッシブ',
-            unlocked: true,
-            tracked: false,
+            unlocked: isDiscovered('SURVIVOR', `survivor-passive-${passive.id}`),
+            tracked: true,
             visual: { type: 'sprite' as const, value: `${passive.sprite.template}|${passive.sprite.color}` },
+            discoveryKey: `survivor-passive-${passive.id}`,
         }));
 
         const pokerSupporters = SUPPORTERS_LIBRARY.map(supporter => {
@@ -311,9 +339,10 @@ const MiniGameCompendium: React.FC<MiniGameCompendiumProps> = ({ languageMode, i
                 name: supporter.name,
                 description: supporter.description,
                 category: 'サポーター',
-                unlocked: isDebug || !tracked || unlockedPokerIds.has(supporter.id),
-                tracked,
+                unlocked: isDiscovered('POKER', `poker-supporter-${supporter.id}`) || (tracked && unlockedPokerIds.has(`poker-supporter-${supporter.id}`)),
+                tracked: true,
                 visual: { type: 'poker' as const, itemId: supporter.id, icon: supporter.icon },
+                discoveryKey: `poker-supporter-${supporter.id}`,
                 visibleInGame: true,
                 metadata: [supporter.rarity, `価格 ${supporter.price}`],
             };
@@ -323,9 +352,10 @@ const MiniGameCompendium: React.FC<MiniGameCompendiumProps> = ({ languageMode, i
             name: item.name,
             description: item.description,
             category: '消費アイテム',
-            unlocked: true,
-            tracked: false,
+            unlocked: isDiscovered('POKER', `poker-consumable-${item.id}`),
+            tracked: true,
             visual: { type: 'poker' as const, itemId: item.id, icon: item.icon },
+            discoveryKey: `poker-consumable-${item.id}`,
             visibleInGame: true,
             metadata: [item.type, `価格 ${item.price}`],
         }));
@@ -334,9 +364,10 @@ const MiniGameCompendium: React.FC<MiniGameCompendiumProps> = ({ languageMode, i
             name: item.name,
             description: item.description,
             category: 'パック',
-            unlocked: true,
-            tracked: false,
+            unlocked: isDiscovered('POKER', `poker-pack-${item.id}`),
+            tracked: true,
             visual: { type: 'poker' as const, itemId: item.id, icon: item.icon },
+            discoveryKey: `poker-pack-${item.id}`,
             visibleInGame: true,
             metadata: [`${item.size}枚から${item.choose}枚`, `価格 ${item.price}`],
         }));
@@ -345,9 +376,10 @@ const MiniGameCompendium: React.FC<MiniGameCompendiumProps> = ({ languageMode, i
             name: item.name,
             description: item.description,
             category: 'バウチャー',
-            unlocked: true,
-            tracked: false,
+            unlocked: isDiscovered('POKER', `poker-voucher-${item.id}`),
+            tracked: true,
             visual: { type: 'poker' as const, itemId: item.id, icon: item.icon },
+            discoveryKey: `poker-voucher-${item.id}`,
             visibleInGame: true,
             metadata: [`価格 ${item.price}`],
         }));
@@ -359,9 +391,10 @@ const MiniGameCompendium: React.FC<MiniGameCompendiumProps> = ({ languageMode, i
                 name: card.name,
                 description: card.description,
                 category: card.type === 'ATTACK' ? '攻撃カード' : card.type === 'MOVE' ? '移動カード' : 'ユーティリティ',
-                unlocked: isDebug || !tracked || unlockedKochoCards.has(card.name),
-                tracked,
+                unlocked: isDiscovered('KOCHO', `kocho-${card.name}`) || (tracked && discoveredKocho.has(`kocho-${card.name}`)),
+                tracked: true,
                 visual: { type: 'kocho-card' as const, cardName: card.name },
+                discoveryKey: `kocho-${card.name}`,
                 visibleInGame: hasKochoCardActionArt(card.name),
                 metadata: [`ダメージ ${card.damage}`, `CD ${card.cooldown}`, `EN ${card.energyCost}`],
             };
@@ -372,9 +405,10 @@ const MiniGameCompendium: React.FC<MiniGameCompendiumProps> = ({ languageMode, i
             name: part.name,
             description: part.description || '説明なし',
             category: 'パーツ',
-            unlocked: isDebug || part.unlockedByDefault || paperProgress.unlockedPartNames.includes(part.name),
-            tracked: !part.unlockedByDefault,
+            unlocked: isDiscovered('PAPER_PLANE', `paper-part-${part.name.replace(/\+$/, '')}`),
+            tracked: true,
             visual: { type: 'paper-part' as const, name: part.name },
+            discoveryKey: `paper-part-${part.name.replace(/\+$/, '')}`,
             visibleInGame: Boolean(getPaperPlanePartSprite(part.name)),
             metadata: [`${part.type}`, `出力 ${part.basePower}`, `HP ${part.hp}`],
         }));
@@ -383,9 +417,10 @@ const MiniGameCompendium: React.FC<MiniGameCompendiumProps> = ({ languageMode, i
             name: pilot.name,
             description: `${pilot.intrinsicTalent.name}: ${pilot.intrinsicTalent.description}`,
             category: 'パイロット',
-            unlocked: true,
-            tracked: false,
+            unlocked: isDiscovered('PAPER_PLANE', `paper-pilot-${pilot.id}`),
+            tracked: true,
             visual: { type: 'image' as const, value: `sprites/paper-plane/pilots/${pilot.id}.webp` },
+            discoveryKey: `paper-pilot-${pilot.id}`,
             visibleInGame: true,
         }));
         const paperShips = PAPER_PLANE_SHIP_CATALOG.map(ship => ({
@@ -393,9 +428,10 @@ const MiniGameCompendium: React.FC<MiniGameCompendiumProps> = ({ languageMode, i
             name: ship.name,
             description: ship.description,
             category: '機体',
-            unlocked: isDebug || paperProgress.rank >= ship.unlockRank,
-            tracked: ship.unlockRank > 0,
+            unlocked: isDiscovered('PAPER_PLANE', `paper-ship-${ship.id}`),
+            tracked: true,
             visual: { type: 'paper-ship' as const, id: ship.id },
+            discoveryKey: `paper-ship-${ship.id}`,
             visibleInGame: Boolean(getPaperPlaneShipSprite(ship.id)),
             metadata: [`解禁ランク ${ship.unlockRank}`, `HP ${ship.baseHp}`],
         }));
@@ -405,9 +441,10 @@ const MiniGameCompendium: React.FC<MiniGameCompendiumProps> = ({ languageMode, i
             name: card.name,
             description: `ボーナス: ${card.bonus} / ${card.points}点`,
             category: `採掘カード Tier ${card.tier}`,
-            unlocked: true,
-            tracked: false,
+            unlocked: isDiscovered('STONE_GLOW', `stone-glow-${card.id}`),
+            tracked: true,
             visual: { type: 'stone-card' as const, bonus: card.bonus, points: card.points, tier: card.tier },
+            discoveryKey: `stone-glow-${card.id}`,
             visibleInGame: true,
             metadata: [`コスト ${Object.entries(card.cost).map(([color, amount]) => `${color}:${amount}`).join(' ')}`],
         }));
@@ -417,9 +454,10 @@ const MiniGameCompendium: React.FC<MiniGameCompendiumProps> = ({ languageMode, i
             name: localizeTrpgCopy(reward.name, languageMode),
             description: `${localizeTrpgCopy(reward.description, languageMode)}\n${localizeTrpgCopy(reward.useCopy, languageMode)}`,
             category: '発見物',
-            unlocked: isDebug || unlockedTrpgRewards.has(reward.id),
+            unlocked: isDebug || unlockedTrpgRewards.has(reward.id) || isDiscovered('SCHOOL_TRPG', `school-trpg-reward-${reward.id}`),
             tracked: true,
             visual: reward.artAsset ? { type: 'image' as const, value: reward.artAsset } : { type: 'none' as const },
+            discoveryKey: `school-trpg-reward-${reward.id}`,
             visibleInGame: Boolean(reward.artAsset),
             metadata: [`効果 ${reward.effect.kind} +${reward.effect.amount}`],
         }));
@@ -428,9 +466,10 @@ const MiniGameCompendium: React.FC<MiniGameCompendiumProps> = ({ languageMode, i
             name: localizeTrpgCopy(ending.title, languageMode),
             description: localizeTrpgCopy(ending.body, languageMode),
             category: 'エンディング',
-            unlocked: isDebug || unlockedTrpgEndings.has(ending.id),
+            unlocked: isDebug || unlockedTrpgEndings.has(ending.id) || isDiscovered('SCHOOL_TRPG', `school-trpg-ending-${ending.id}`),
             tracked: true,
             visual: ending.artAsset ? { type: 'image' as const, value: ending.artAsset } : { type: 'none' as const },
+            discoveryKey: `school-trpg-ending-${ending.id}`,
             visibleInGame: Boolean(ending.artAsset),
             metadata: [localizeTrpgCopy(ending.subtitle, languageMode)],
         }));
@@ -440,9 +479,10 @@ const MiniGameCompendium: React.FC<MiniGameCompendiumProps> = ({ languageMode, i
             name: card.name,
             description: languageMode === 'ENGLISH' ? card.rulesText.en : card.rulesText.jp,
             category: `${card.edition} / ${card.kind}`,
-            unlocked: isDebug || unlockedPlacementCards.has(card.id),
+            unlocked: isDiscovered('LEARNING_TCG', `learning-tcg-${card.id}`),
             tracked: true,
             visual: { type: 'placement-card' as const, card },
+            discoveryKey: `learning-tcg-${card.id}`,
             visibleInGame: true,
             metadata: [`TIER ${card.tier}`, `SP ${card.spCost}`],
         }));
@@ -453,9 +493,10 @@ const MiniGameCompendium: React.FC<MiniGameCompendiumProps> = ({ languageMode, i
                 name: piece.name,
                 description: piece.description,
                 category: '標準駒',
-                unlocked: true,
-                tracked: false,
+                unlocked: isDiscovered('SHOGI', `shogi-standard-${piece.kind}`),
+                tracked: true,
                 visual: { type: 'shogi-piece' as const, glyph: piece.glyph },
+                discoveryKey: `shogi-standard-${piece.kind}`,
                 visibleInGame: true,
                 metadata: [piece.promotion, piece.restriction],
             })),
@@ -464,17 +505,18 @@ const MiniGameCompendium: React.FC<MiniGameCompendiumProps> = ({ languageMode, i
                 name: piece.name,
                 description: piece.description,
                 category: `追加駒 STAGE ${piece.stage}`,
-                unlocked: isDebug || piece.stage <= shogiHighestStage,
+                unlocked: isDiscovered('SHOGI', `shogi-advanced-${piece.kind}`),
                 tracked: true,
                 visual: { type: 'shogi-piece' as const, glyph: piece.glyph },
+                discoveryKey: `shogi-advanced-${piece.kind}`,
                 visibleInGame: true,
                 metadata: [piece.promotion, piece.restriction, ...(piece.special ? [piece.special] : [])],
             })),
         ];
 
         return [
-            { id: 'DUNGEON', title: '学校ダンジョンRPG', caption: '小学生編の全アイテム', entries: dungeonItems },
-            { id: 'DUNGEON_2', title: '学校ダンジョンRPG 2', caption: '高校編の全アイテム・カード', entries: [...dungeon2Items, ...dungeon2Cards] },
+            { id: 'DUNGEON', title: '風来の小学生シリーズ', caption: '小学生編の全アイテム', entries: dungeonItems },
+            { id: 'DUNGEON_2', title: '風来の小学生シリーズ 2', caption: '高校編の全アイテム・カード', entries: [...dungeon2Items, ...dungeon2Cards] },
             { id: 'SURVIVOR', title: '校庭サバイバー', caption: '武器とパッシブ', entries: [...survivorWeapons, ...survivorPassives] },
             { id: 'POKER', title: '放課後ポーカー', caption: 'サポーター・アイテム・パック・バウチャー', entries: [...pokerSupporters, ...pokerConsumables, ...pokerPacks, ...pokerVouchers] },
             { id: 'KOCHO', title: '校長対決', caption: '全アクションカード', entries: kochoCards },
@@ -498,7 +540,7 @@ const MiniGameCompendium: React.FC<MiniGameCompendiumProps> = ({ languageMode, i
                     <div>
                         <h3 className="text-lg font-black text-cyan-100">{trans('ミニゲーム収集要素', languageMode)}</h3>
                         <p className="text-xs leading-relaxed text-slate-300">
-                            {trans('収集要素を持つミニゲームのマスター定義を一覧表示しています。解禁情報が保存される要素は現在の進捗も反映されます。', languageMode)}
+                            {trans('収集要素を持つミニゲームのマスター定義を一覧表示しています。ゲーム内で発見した情報は現在の進捗に反映されます。', languageMode)}
                         </p>
                     </div>
                     <div className="ml-auto text-right text-xs text-slate-300">
@@ -537,31 +579,32 @@ const MiniGameCompendium: React.FC<MiniGameCompendiumProps> = ({ languageMode, i
             <div className="grid grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-6">
                 {currentSection.entries.map(entry => {
                     const visibleInGame = entry.visibleInGame !== false;
-                    const canOpenDetails = visibleInGame;
+                    const discovered = visibleInGame && entry.unlocked;
+                    const canOpenDetails = discovered;
                     return (
                     <button
                         type="button"
                         key={entry.id}
                         disabled={!canOpenDetails}
                         onClick={canOpenDetails ? () => setSelectedEntry(entry) : undefined}
-                        aria-label={visibleInGame ? trans(entry.name, languageMode) : `${trans(entry.name, languageMode)} / ${trans('未表示', languageMode)}`}
-                        className={`group relative flex min-h-[142px] flex-col items-center rounded-lg border p-3 text-center transition-all ${!visibleInGame ? 'cursor-not-allowed border-slate-800 bg-black/65 opacity-55' : entry.unlocked ? 'border-slate-600 bg-black/60 hover:-translate-y-0.5 hover:border-cyan-300' : 'border-slate-700 bg-black/45 opacity-70 hover:-translate-y-0.5 hover:border-amber-400'}`}
+                        aria-label={discovered ? trans(entry.name, languageMode) : '???'}
+                        className={`group relative flex min-h-[142px] flex-col items-center rounded-lg border p-3 text-center transition-all ${!discovered ? 'cursor-not-allowed border-slate-800 bg-black/65 opacity-55' : 'border-slate-600 bg-black/60 hover:-translate-y-0.5 hover:border-cyan-300'}`}
                     >
                         <div className="mb-2 flex h-14 w-14 items-center justify-center rounded-lg border border-amber-400/60 bg-slate-900/90 p-1.5">
-                            {renderVisual(entry)}
-                            {(!visibleInGame || !entry.unlocked) && <Lock size={15} className="absolute right-2 top-2 text-slate-300" />}
+                            {discovered ? renderVisual(entry) : <span className="text-2xl font-black text-slate-300">?</span>}
+                            {!discovered && <Lock size={15} className="absolute right-2 top-2 text-slate-300" />}
                         </div>
-                        <span className={`line-clamp-2 w-full text-xs font-bold ${visibleInGame && entry.unlocked ? 'text-amber-100' : 'text-slate-400'}`}>{trans(entry.name, languageMode)}</span>
-                        <span className="mt-1 line-clamp-1 w-full text-[9px] text-slate-500">{trans(entry.category, languageMode)}</span>
-                        <span className={`mt-2 rounded px-1.5 py-0.5 text-[9px] font-bold ${!visibleInGame ? 'bg-slate-800 text-slate-400' : entry.tracked ? entry.unlocked ? 'bg-emerald-900/70 text-emerald-200' : 'bg-slate-800 text-slate-400' : 'bg-cyan-950/70 text-cyan-200'}`}>
-                            {!visibleInGame ? trans('未表示', languageMode) : entry.tracked ? entry.unlocked ? trans('解禁済み', languageMode) : trans('未解禁', languageMode) : trans('収録', languageMode)}
+                        <span className={`line-clamp-2 w-full text-xs font-bold ${discovered ? 'text-amber-100' : 'text-slate-400'}`}>{discovered ? trans(entry.name, languageMode) : '???'}</span>
+                        <span className="mt-1 line-clamp-1 w-full text-[9px] text-slate-500">{discovered ? trans(entry.category, languageMode) : '???'}</span>
+                        <span className={`mt-2 rounded px-1.5 py-0.5 text-[9px] font-bold ${!visibleInGame ? 'bg-slate-800 text-slate-400' : discovered ? 'bg-emerald-900/70 text-emerald-200' : 'bg-slate-800 text-slate-400'}`}>
+                            {!visibleInGame ? trans('未表示', languageMode) : discovered ? trans('解禁済み', languageMode) : trans('未発見', languageMode)}
                         </span>
                     </button>
                     );
                 })}
             </div>
 
-            {selectedEntry && selectedEntry.visibleInGame !== false && (
+            {selectedEntry && selectedEntry.visibleInGame !== false && selectedEntry.unlocked && (
                 <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm" onClick={() => setSelectedEntry(null)}>
                     <div className="relative w-full max-w-md rounded-xl border-2 border-cyan-400 bg-slate-900 p-5 shadow-[0_0_36px_rgba(34,211,238,0.25)]" onClick={event => event.stopPropagation()}>
                         <button type="button" onClick={() => setSelectedEntry(null)} className="absolute right-2 top-2 rounded p-2 text-slate-400 hover:text-white"><X size={20} /></button>
