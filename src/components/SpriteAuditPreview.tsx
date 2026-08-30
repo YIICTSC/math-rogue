@@ -424,7 +424,7 @@ const SpriteAuditPreview: React.FC<{ languageMode: LanguageMode }> = ({ language
 
   return (
     <div className="flex h-full min-h-0 flex-col gap-3 overflow-y-auto bg-slate-950/40 p-3 custom-scrollbar md:p-4">
-      <div className="sticky top-0 z-10 rounded-xl border border-cyan-700/70 bg-slate-900/95 p-3 shadow-lg backdrop-blur-md">
+      <div className="shrink-0 rounded-xl border border-cyan-700/70 bg-slate-900/95 p-3 shadow-lg">
         <div className="flex flex-col gap-3 xl:flex-row xl:items-center xl:justify-between">
           <div>
             <h3 className="flex items-center gap-2 text-base font-black text-cyan-200">
