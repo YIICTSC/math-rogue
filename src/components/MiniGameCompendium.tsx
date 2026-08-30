@@ -6,11 +6,19 @@ import { storageService } from '../services/storageService';
 import { trans } from '../utils/textUtils';
 import { assetUrl } from '../utils/assetPaths';
 import PixelSprite from './PixelSprite';
-import { SCHOOL_DUNGEON_ITEM_CATALOG } from './SchoolDungeonRPG';
-import { SCHOOL_DUNGEON_2_CARD_CATALOG, SCHOOL_DUNGEON_2_ITEM_CATALOG } from './SchoolDungeonRPG2';
-import { SCHOOLYARD_PASSIVE_CATALOG, SCHOOLYARD_WEAPON_CATALOG } from './SchoolyardSurvivorScreen';
-import { KOCHO_CARD_CATALOG } from './KochoShowdown';
+import { SCHOOL_DUNGEON_ITEM_CATALOG, SCHOOL_DUNGEON_SPRITE_TYPES } from './SchoolDungeonRPG';
 import {
+    SCHOOL_DUNGEON_2_CARD_CATALOG,
+    SCHOOL_DUNGEON_2_CARD_SPRITE_INDEX,
+    SCHOOL_DUNGEON_2_ITEM_CATALOG,
+    SCHOOL_DUNGEON_2_SPRITE_TYPES,
+} from './SchoolDungeonRPG2';
+import { SCHOOLYARD_PASSIVE_CATALOG, SCHOOLYARD_WEAPON_CATALOG } from './SchoolyardSurvivorScreen';
+import { hasKochoCardActionArt, KOCHO_CARD_CATALOG, KochoCardActionArt } from './KochoShowdown';
+import {
+    getPaperPlanePartSprite,
+    getPaperPlaneShipSprite,
+    PaperPlaneSheetImage,
     PAPER_PLANE_PART_CATALOG,
     PAPER_PLANE_PILOT_CATALOG,
     PAPER_PLANE_SHIP_CATALOG,
@@ -19,9 +27,12 @@ import { STONE_GLOW_CARD_CATALOG } from './TriviaMiniGameScreen';
 import { SCHOOL_TRPG_ENDINGS, SCHOOL_TRPG_REWARDS } from '../mini-games/school-trpg/schoolTrpgData';
 import { localizeTrpgCopy } from '../mini-games/school-trpg/schoolTrpgTypes';
 import { loadSchoolTrpgCampaign } from '../mini-games/school-trpg/schoolTrpgSave';
+import { ShogiPieceIcon } from '../mini-games/shogi/ShogiMiniGame';
 import { ADVANCED_PIECES, STANDARD_PIECES } from '../mini-games/shogi/shogiPieces';
 import { loadPlacementTcgCollection } from '../mini-games/placement-tcg/placementTcgEngine';
-import { PLACEMENT_TCG_CARDS } from '../mini-games/placement-tcg/placementTcgCards';
+import { PLACEMENT_TCG_CARDS, type PlacementCardDefinition } from '../mini-games/placement-tcg/placementTcgCards';
+import { CardArt } from '../mini-games/placement-tcg/PlacementTcgGame';
+import { PokerCompendiumSprite } from './PokerGameScreen';
 
 type MiniGameSectionId =
     | 'DUNGEON'
@@ -38,7 +49,17 @@ type MiniGameSectionId =
 type MiniGameVisual =
     | { type: 'sprite'; value: string }
     | { type: 'image'; value: string }
-    | { type: 'glyph'; value: string };
+    | { type: 'glyph'; value: string }
+    | { type: 'furai-sheet'; group: 'weapons' | 'armor' | 'items'; index: number }
+    | { type: 'furai-card'; templateId: string }
+    | { type: 'poker'; itemId: string; icon: string }
+    | { type: 'kocho-card'; cardName: string }
+    | { type: 'paper-part'; name: string }
+    | { type: 'paper-ship'; id: string }
+    | { type: 'stone-card'; bonus: string; points: number; tier: number }
+    | { type: 'placement-card'; card: PlacementCardDefinition }
+    | { type: 'shogi-piece'; glyph: string }
+    | { type: 'none' };
 
 type MiniGameEntry = {
     id: string;
@@ -48,6 +69,8 @@ type MiniGameEntry = {
     unlocked: boolean;
     tracked: boolean;
     visual: MiniGameVisual;
+    /** False means the catalog entry has no representation ever used by the game UI. */
+    visibleInGame?: boolean;
     metadata?: string[];
 };
 
@@ -65,13 +88,105 @@ type MiniGameCompendiumProps = {
 
 const SHOGI_PROGRESS_KEY = 'learning_rogue_shogi_progress_v2';
 
-const spriteForCategory = (category: string) => {
-    if (category.includes('武器') || category.includes('カード') || category === 'WEAPON') return 'SWORD|#38bdf8';
-    if (category.includes('防具') || category.includes('パッシブ') || category === 'ARMOR') return 'SHIELD|#a78bfa';
-    if (category.includes('パーツ')) return 'SWORD|#f59e0b';
-    if (category.includes('発見')) return 'GEM|#fbbf24';
-    if (category.includes('機体')) return 'FLIER|#22d3ee';
-    return 'GEM|#fbbf24';
+const FURAI_SHEET_CELL = 72;
+const FURAI_SHEET_GAP = 16;
+const FURAI_SHEET_COLUMNS = 5;
+const FURAI_SHEET_PAGE_SIZE = 25;
+const FURAI_SHEET_ASSETS = {
+    weapons: 'sprites/furai-sfc-v2-weapons-5x5',
+    armor: 'sprites/furai-sfc-v2-armor-5x5',
+    items: 'sprites/furai-sfc-v2-items-5x5',
+    cards: 'sprites/furai-shogakusei2-card-sheet.webp?v=sg2-cards4',
+} as const;
+
+const stableSpriteIndex = (value: string, modulo: number) => {
+    let hash = 0;
+    for (let index = 0; index < value.length; index += 1) hash = ((hash << 5) - hash) + value.charCodeAt(index);
+    return Math.abs(hash) % modulo;
+};
+
+const getFuraiSheetPath = (group: 'weapons' | 'armor' | 'items', index: number) => {
+    const page = Math.floor(Math.max(0, index) / FURAI_SHEET_PAGE_SIZE) + 1;
+    const actualPage = page <= 2 ? page : 1;
+    return `${FURAI_SHEET_ASSETS[group]}-${actualPage}.webp?v=sfcv2`;
+};
+
+const getFuraiSheetVisual = (group: 'weapons' | 'armor' | 'items', index: number): MiniGameVisual => ({
+    type: 'furai-sheet',
+    group,
+    index,
+});
+
+const getDungeonItemVisual = (
+    item: { category: string; type: string },
+    spriteTypes: typeof SCHOOL_DUNGEON_SPRITE_TYPES | typeof SCHOOL_DUNGEON_2_SPRITE_TYPES,
+): MiniGameVisual => {
+    if (item.category === 'WEAPON') {
+        const index = spriteTypes.weapons.indexOf(item.type);
+        return getFuraiSheetVisual('weapons', index >= 0 ? index : stableSpriteIndex(item.type, 64));
+    }
+    if (item.category === 'ARMOR') {
+        const index = spriteTypes.armor.indexOf(item.type);
+        return getFuraiSheetVisual('armor', index >= 0 ? index : stableSpriteIndex(item.type, 64));
+    }
+    const generalType = item.category === 'STAFF'
+        ? 'GENERIC_UMBRELLA'
+        : item.category === 'ACCESSORY'
+            ? 'GENERIC_BRACELET'
+            : item.type;
+    const index = spriteTypes.items.indexOf(generalType);
+    return getFuraiSheetVisual('items', index >= 0 ? index : stableSpriteIndex(generalType, 64));
+};
+
+const renderFuraiSheet = (
+    path: string,
+    index: number,
+    columns: number,
+    pageSize: number,
+    size: string,
+) => {
+    const normalizedIndex = ((index % pageSize) + pageSize) % pageSize;
+    const col = normalizedIndex % columns;
+    const row = Math.floor(normalizedIndex / columns);
+    const rows = Math.ceil(pageSize / columns);
+    const sx = FURAI_SHEET_GAP + col * (FURAI_SHEET_CELL + FURAI_SHEET_GAP);
+    const sy = FURAI_SHEET_GAP + row * (FURAI_SHEET_CELL + FURAI_SHEET_GAP);
+    const sheetWidth = FURAI_SHEET_GAP + columns * (FURAI_SHEET_CELL + FURAI_SHEET_GAP);
+    const sheetHeight = FURAI_SHEET_GAP + rows * (FURAI_SHEET_CELL + FURAI_SHEET_GAP);
+    return (
+        <div className={`shrink-0 overflow-hidden relative ${size}`} style={{ imageRendering: 'pixelated' }}>
+            <div
+                className="absolute bg-no-repeat pointer-events-none"
+                style={{
+                    left: `-${(sx / FURAI_SHEET_CELL) * 100}%`,
+                    top: `-${(sy / FURAI_SHEET_CELL) * 100}%`,
+                    width: `${(sheetWidth / FURAI_SHEET_CELL) * 100}%`,
+                    height: `${(sheetHeight / FURAI_SHEET_CELL) * 100}%`,
+                    backgroundImage: `url(${assetUrl(path)})`,
+                    backgroundSize: '100% 100%',
+                    imageRendering: 'pixelated',
+                }}
+            />
+        </div>
+    );
+};
+
+const renderStoneCardVisual = (bonus: string, points: number, tier: number, size: string) => {
+    const colorClass = bonus === 'ruby'
+        ? 'border-rose-300/70 bg-rose-950/60'
+        : bonus === 'sapphire'
+            ? 'border-sky-300/70 bg-sky-950/60'
+            : bonus === 'emerald'
+                ? 'border-emerald-300/70 bg-emerald-950/60'
+                : 'border-amber-300/70 bg-amber-950/60';
+    const dotClass = bonus === 'ruby' ? 'bg-rose-500' : bonus === 'sapphire' ? 'bg-sky-500' : bonus === 'emerald' ? 'bg-emerald-500' : 'bg-amber-400';
+    return (
+        <div className={`${size} flex flex-col items-center justify-center rounded-lg border ${colorClass} text-[10px] font-black`}>
+            <span className="text-yellow-300">★{points}</span>
+            <span className={`my-0.5 h-2.5 w-2.5 rounded-full ${dotClass}`} />
+            <span className="text-[8px] text-slate-300">T{tier}</span>
+        </div>
+    );
 };
 
 const entryFromDungeonItem = (game: string, item: { id: string; category: string; type: string; name: string; desc: string }): MiniGameEntry => ({
@@ -81,7 +196,8 @@ const entryFromDungeonItem = (game: string, item: { id: string; category: string
     category: item.category,
     unlocked: true,
     tracked: false,
-    visual: { type: 'sprite', value: `${spriteForCategory(item.category).split('|')[0]}|${item.category === 'ARMOR' ? '#a78bfa' : '#fbbf24'}` },
+    visual: getDungeonItemVisual(item, game === 'dungeon-2' ? SCHOOL_DUNGEON_2_SPRITE_TYPES : SCHOOL_DUNGEON_SPRITE_TYPES),
+    visibleInGame: true,
 });
 
 const readShogiHighestStage = () => {
@@ -100,6 +216,37 @@ const renderVisual = (entry: MiniGameEntry, size = 'h-14 w-14') => {
     }
     if (entry.visual.type === 'glyph') {
         return <span className={`${size} flex items-center justify-center text-4xl font-black text-amber-200`}>{entry.visual.value}</span>;
+    }
+    if (entry.visual.type === 'furai-sheet') {
+        return renderFuraiSheet(getFuraiSheetPath(entry.visual.group, entry.visual.index), entry.visual.index, FURAI_SHEET_COLUMNS, FURAI_SHEET_PAGE_SIZE, size);
+    }
+    if (entry.visual.type === 'furai-card') {
+        const index = SCHOOL_DUNGEON_2_CARD_SPRITE_INDEX[entry.visual.templateId] ?? stableSpriteIndex(entry.visual.templateId, 30);
+        return renderFuraiSheet(FURAI_SHEET_ASSETS.cards, index, 6, 30, size);
+    }
+    if (entry.visual.type === 'poker') {
+        return <PokerCompendiumSprite itemId={entry.visual.itemId} icon={entry.visual.icon} name={entry.name} className={`${size} image-rendering-pixelated`} />;
+    }
+    if (entry.visual.type === 'kocho-card') {
+        return <KochoCardActionArt card={{ name: entry.visual.cardName }} className={`${size} rounded bg-black/40`} />;
+    }
+    if (entry.visual.type === 'paper-part') {
+        return <PaperPlaneSheetImage sprite={getPaperPlanePartSprite(entry.visual.name)} title={entry.name} className={`${size} bg-no-repeat`} />;
+    }
+    if (entry.visual.type === 'paper-ship') {
+        return <PaperPlaneSheetImage sprite={getPaperPlaneShipSprite(entry.visual.id)} title={entry.name} className={`${size} bg-no-repeat`} />;
+    }
+    if (entry.visual.type === 'stone-card') {
+        return renderStoneCardVisual(entry.visual.bonus, entry.visual.points, entry.visual.tier, size);
+    }
+    if (entry.visual.type === 'placement-card') {
+        return <CardArt card={entry.visual.card} compact />;
+    }
+    if (entry.visual.type === 'shogi-piece') {
+        return <ShogiPieceIcon glyph={entry.visual.glyph} className="scale-[1.7]" />;
+    }
+    if (entry.visual.type === 'none') {
+        return <Lock size={22} className="text-slate-500" aria-hidden="true" />;
     }
     return <PixelSprite seed={entry.id} name={entry.visual.value} className={`${size} image-rendering-pixelated`} />;
 };
@@ -132,7 +279,8 @@ const MiniGameCompendium: React.FC<MiniGameCompendiumProps> = ({ languageMode, i
             category: 'デッキカード',
             unlocked: true,
             tracked: false,
-            visual: { type: 'sprite' as const, value: `${card.type === 'DEFENSE' ? 'SHIELD' : card.type === 'BUFF' ? 'POTION' : 'SWORD'}|#38bdf8` },
+            visual: { type: 'furai-card' as const, templateId: card.templateId },
+            visibleInGame: true,
             metadata: [`POWER ${card.power}`],
         }));
 
@@ -165,7 +313,8 @@ const MiniGameCompendium: React.FC<MiniGameCompendiumProps> = ({ languageMode, i
                 category: 'サポーター',
                 unlocked: isDebug || !tracked || unlockedPokerIds.has(supporter.id),
                 tracked,
-                visual: { type: 'sprite' as const, value: supporter.icon },
+                visual: { type: 'poker' as const, itemId: supporter.id, icon: supporter.icon },
+                visibleInGame: true,
                 metadata: [supporter.rarity, `価格 ${supporter.price}`],
             };
         });
@@ -176,7 +325,8 @@ const MiniGameCompendium: React.FC<MiniGameCompendiumProps> = ({ languageMode, i
             category: '消費アイテム',
             unlocked: true,
             tracked: false,
-            visual: { type: 'sprite' as const, value: item.icon },
+            visual: { type: 'poker' as const, itemId: item.id, icon: item.icon },
+            visibleInGame: true,
             metadata: [item.type, `価格 ${item.price}`],
         }));
         const pokerPacks = PACK_LIBRARY.map(item => ({
@@ -186,7 +336,8 @@ const MiniGameCompendium: React.FC<MiniGameCompendiumProps> = ({ languageMode, i
             category: 'パック',
             unlocked: true,
             tracked: false,
-            visual: { type: 'sprite' as const, value: item.icon },
+            visual: { type: 'poker' as const, itemId: item.id, icon: item.icon },
+            visibleInGame: true,
             metadata: [`${item.size}枚から${item.choose}枚`, `価格 ${item.price}`],
         }));
         const pokerVouchers = VOUCHERS_LIBRARY.map(item => ({
@@ -196,7 +347,8 @@ const MiniGameCompendium: React.FC<MiniGameCompendiumProps> = ({ languageMode, i
             category: 'バウチャー',
             unlocked: true,
             tracked: false,
-            visual: { type: 'sprite' as const, value: item.icon },
+            visual: { type: 'poker' as const, itemId: item.id, icon: item.icon },
+            visibleInGame: true,
             metadata: [`価格 ${item.price}`],
         }));
 
@@ -209,7 +361,8 @@ const MiniGameCompendium: React.FC<MiniGameCompendiumProps> = ({ languageMode, i
                 category: card.type === 'ATTACK' ? '攻撃カード' : card.type === 'MOVE' ? '移動カード' : 'ユーティリティ',
                 unlocked: isDebug || !tracked || unlockedKochoCards.has(card.name),
                 tracked,
-                visual: { type: 'sprite' as const, value: `${card.type === 'ATTACK' ? 'SWORD' : card.type === 'MOVE' ? 'SHOE' : 'SHIELD'}|#38bdf8` },
+                visual: { type: 'kocho-card' as const, cardName: card.name },
+                visibleInGame: hasKochoCardActionArt(card.name),
                 metadata: [`ダメージ ${card.damage}`, `CD ${card.cooldown}`, `EN ${card.energyCost}`],
             };
         });
@@ -221,7 +374,8 @@ const MiniGameCompendium: React.FC<MiniGameCompendiumProps> = ({ languageMode, i
             category: 'パーツ',
             unlocked: isDebug || part.unlockedByDefault || paperProgress.unlockedPartNames.includes(part.name),
             tracked: !part.unlockedByDefault,
-            visual: { type: 'sprite' as const, value: `${part.type === 'SHIELD' ? 'SHIELD' : part.type === 'ENGINE' ? 'FLIER' : 'SWORD'}|#f59e0b` },
+            visual: { type: 'paper-part' as const, name: part.name },
+            visibleInGame: Boolean(getPaperPlanePartSprite(part.name)),
             metadata: [`${part.type}`, `出力 ${part.basePower}`, `HP ${part.hp}`],
         }));
         const paperPilots = PAPER_PLANE_PILOT_CATALOG.map(pilot => ({
@@ -232,6 +386,7 @@ const MiniGameCompendium: React.FC<MiniGameCompendiumProps> = ({ languageMode, i
             unlocked: true,
             tracked: false,
             visual: { type: 'image' as const, value: `sprites/paper-plane/pilots/${pilot.id}.webp` },
+            visibleInGame: true,
         }));
         const paperShips = PAPER_PLANE_SHIP_CATALOG.map(ship => ({
             id: `paper-ship-${ship.id}`,
@@ -240,7 +395,8 @@ const MiniGameCompendium: React.FC<MiniGameCompendiumProps> = ({ languageMode, i
             category: '機体',
             unlocked: isDebug || paperProgress.rank >= ship.unlockRank,
             tracked: ship.unlockRank > 0,
-            visual: { type: 'sprite' as const, value: `SHIP|${ship.color.includes('blue') ? '#38bdf8' : ship.color.includes('orange') ? '#fb923c' : '#34d399'}` },
+            visual: { type: 'paper-ship' as const, id: ship.id },
+            visibleInGame: Boolean(getPaperPlaneShipSprite(ship.id)),
             metadata: [`解禁ランク ${ship.unlockRank}`, `HP ${ship.baseHp}`],
         }));
 
@@ -251,7 +407,8 @@ const MiniGameCompendium: React.FC<MiniGameCompendiumProps> = ({ languageMode, i
             category: `採掘カード Tier ${card.tier}`,
             unlocked: true,
             tracked: false,
-            visual: { type: 'sprite' as const, value: 'GEM|#60a5fa' },
+            visual: { type: 'stone-card' as const, bonus: card.bonus, points: card.points, tier: card.tier },
+            visibleInGame: true,
             metadata: [`コスト ${Object.entries(card.cost).map(([color, amount]) => `${color}:${amount}`).join(' ')}`],
         }));
 
@@ -262,7 +419,8 @@ const MiniGameCompendium: React.FC<MiniGameCompendiumProps> = ({ languageMode, i
             category: '発見物',
             unlocked: isDebug || unlockedTrpgRewards.has(reward.id),
             tracked: true,
-            visual: reward.artAsset ? { type: 'image' as const, value: reward.artAsset } : { type: 'sprite' as const, value: 'GEM|#fbbf24' },
+            visual: reward.artAsset ? { type: 'image' as const, value: reward.artAsset } : { type: 'none' as const },
+            visibleInGame: Boolean(reward.artAsset),
             metadata: [`効果 ${reward.effect.kind} +${reward.effect.amount}`],
         }));
         const trpgEndings = SCHOOL_TRPG_ENDINGS.map(ending => ({
@@ -272,7 +430,8 @@ const MiniGameCompendium: React.FC<MiniGameCompendiumProps> = ({ languageMode, i
             category: 'エンディング',
             unlocked: isDebug || unlockedTrpgEndings.has(ending.id),
             tracked: true,
-            visual: ending.artAsset ? { type: 'image' as const, value: ending.artAsset } : { type: 'sprite' as const, value: 'TROPHY|#fbbf24' },
+            visual: ending.artAsset ? { type: 'image' as const, value: ending.artAsset } : { type: 'none' as const },
+            visibleInGame: Boolean(ending.artAsset),
             metadata: [localizeTrpgCopy(ending.subtitle, languageMode)],
         }));
 
@@ -283,9 +442,8 @@ const MiniGameCompendium: React.FC<MiniGameCompendiumProps> = ({ languageMode, i
             category: `${card.edition} / ${card.kind}`,
             unlocked: isDebug || unlockedPlacementCards.has(card.id),
             tracked: true,
-            visual: card.artAsset
-                ? { type: 'image' as const, value: card.artAsset }
-                : { type: 'sprite' as const, value: `${card.kind === 'UNIT' ? 'HUMANOID' : 'CARD'}|#38bdf8` },
+            visual: { type: 'placement-card' as const, card },
+            visibleInGame: true,
             metadata: [`TIER ${card.tier}`, `SP ${card.spCost}`],
         }));
 
@@ -297,7 +455,8 @@ const MiniGameCompendium: React.FC<MiniGameCompendiumProps> = ({ languageMode, i
                 category: '標準駒',
                 unlocked: true,
                 tracked: false,
-                visual: { type: 'glyph' as const, value: piece.glyph },
+                visual: { type: 'shogi-piece' as const, glyph: piece.glyph },
+                visibleInGame: true,
                 metadata: [piece.promotion, piece.restriction],
             })),
             ...ADVANCED_PIECES.map(piece => ({
@@ -307,7 +466,8 @@ const MiniGameCompendium: React.FC<MiniGameCompendiumProps> = ({ languageMode, i
                 category: `追加駒 STAGE ${piece.stage}`,
                 unlocked: isDebug || piece.stage <= shogiHighestStage,
                 tracked: true,
-                visual: { type: 'glyph' as const, value: piece.glyph },
+                visual: { type: 'shogi-piece' as const, glyph: piece.glyph },
+                visibleInGame: true,
                 metadata: [piece.promotion, piece.restriction, ...(piece.special ? [piece.special] : [])],
             })),
         ];
@@ -375,27 +535,33 @@ const MiniGameCompendium: React.FC<MiniGameCompendiumProps> = ({ languageMode, i
             </div>
 
             <div className="grid grid-cols-2 gap-3 md:grid-cols-4 lg:grid-cols-6">
-                {currentSection.entries.map(entry => (
+                {currentSection.entries.map(entry => {
+                    const visibleInGame = entry.visibleInGame !== false;
+                    const canOpenDetails = visibleInGame;
+                    return (
                     <button
                         type="button"
                         key={entry.id}
-                        onClick={() => setSelectedEntry(entry)}
-                        className={`group relative flex min-h-[142px] flex-col items-center rounded-lg border p-3 text-center transition-all hover:-translate-y-0.5 ${entry.unlocked ? 'border-slate-600 bg-black/60 hover:border-cyan-300' : 'border-slate-700 bg-black/45 opacity-70 hover:border-amber-400'}`}
+                        disabled={!canOpenDetails}
+                        onClick={canOpenDetails ? () => setSelectedEntry(entry) : undefined}
+                        aria-label={visibleInGame ? trans(entry.name, languageMode) : `${trans(entry.name, languageMode)} / ${trans('未表示', languageMode)}`}
+                        className={`group relative flex min-h-[142px] flex-col items-center rounded-lg border p-3 text-center transition-all ${!visibleInGame ? 'cursor-not-allowed border-slate-800 bg-black/65 opacity-55' : entry.unlocked ? 'border-slate-600 bg-black/60 hover:-translate-y-0.5 hover:border-cyan-300' : 'border-slate-700 bg-black/45 opacity-70 hover:-translate-y-0.5 hover:border-amber-400'}`}
                     >
                         <div className="mb-2 flex h-14 w-14 items-center justify-center rounded-lg border border-amber-400/60 bg-slate-900/90 p-1.5">
                             {renderVisual(entry)}
-                            {!entry.unlocked && <Lock size={15} className="absolute right-2 top-2 text-slate-300" />}
+                            {(!visibleInGame || !entry.unlocked) && <Lock size={15} className="absolute right-2 top-2 text-slate-300" />}
                         </div>
-                        <span className={`line-clamp-2 w-full text-xs font-bold ${entry.unlocked ? 'text-amber-100' : 'text-slate-400'}`}>{trans(entry.name, languageMode)}</span>
+                        <span className={`line-clamp-2 w-full text-xs font-bold ${visibleInGame && entry.unlocked ? 'text-amber-100' : 'text-slate-400'}`}>{trans(entry.name, languageMode)}</span>
                         <span className="mt-1 line-clamp-1 w-full text-[9px] text-slate-500">{trans(entry.category, languageMode)}</span>
-                        <span className={`mt-2 rounded px-1.5 py-0.5 text-[9px] font-bold ${entry.tracked ? entry.unlocked ? 'bg-emerald-900/70 text-emerald-200' : 'bg-slate-800 text-slate-400' : 'bg-cyan-950/70 text-cyan-200'}`}>
-                            {entry.tracked ? entry.unlocked ? trans('解禁済み', languageMode) : trans('未解禁', languageMode) : trans('収録', languageMode)}
+                        <span className={`mt-2 rounded px-1.5 py-0.5 text-[9px] font-bold ${!visibleInGame ? 'bg-slate-800 text-slate-400' : entry.tracked ? entry.unlocked ? 'bg-emerald-900/70 text-emerald-200' : 'bg-slate-800 text-slate-400' : 'bg-cyan-950/70 text-cyan-200'}`}>
+                            {!visibleInGame ? trans('未表示', languageMode) : entry.tracked ? entry.unlocked ? trans('解禁済み', languageMode) : trans('未解禁', languageMode) : trans('収録', languageMode)}
                         </span>
                     </button>
-                ))}
+                    );
+                })}
             </div>
 
-            {selectedEntry && (
+            {selectedEntry && selectedEntry.visibleInGame !== false && (
                 <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/80 p-4 backdrop-blur-sm" onClick={() => setSelectedEntry(null)}>
                     <div className="relative w-full max-w-md rounded-xl border-2 border-cyan-400 bg-slate-900 p-5 shadow-[0_0_36px_rgba(34,211,238,0.25)]" onClick={event => event.stopPropagation()}>
                         <button type="button" onClick={() => setSelectedEntry(null)} className="absolute right-2 top-2 rounded p-2 text-slate-400 hover:text-white"><X size={20} /></button>

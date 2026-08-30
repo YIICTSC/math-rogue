@@ -127,6 +127,12 @@ const GENERAL_ITEM_SPRITE_TYPES = [
     'POT_GLUE', 'POT_CHANGE', 'BOMB', 'TRAP',
 ];
 
+/** The compendium reuses the same sheet order as the in-game canvas renderer. */
+export const SCHOOL_DUNGEON_2_SPRITE_TYPES = {
+    weapons: WEAPON_SPRITE_TYPES,
+    armor: ARMOR_SPRITE_TYPES,
+    items: GENERAL_ITEM_SPRITE_TYPES,
+} as const;
 const DUNGEON_CARD_SPRITE_INDEX: Record<string, number> = {
     THRUST: 0,
     SPIN: 1,
@@ -159,6 +165,9 @@ const DUNGEON_CARD_SPRITE_INDEX: Record<string, number> = {
     INVINCIBLE: 28,
     EXPLOSION: 29,
 };
+
+/** Card art order shared by the in-game card renderer and the compendium. */
+export const SCHOOL_DUNGEON_2_CARD_SPRITE_INDEX = DUNGEON_CARD_SPRITE_INDEX;
 
 const HUNGER_INTERVAL = 10;
 const REGEN_INTERVAL = 5;

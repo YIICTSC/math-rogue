@@ -741,7 +741,7 @@ export const PAPER_PLANE_PART_CATALOG = [
 ];
 
 const PAPER_PLANE_UNLOCK_TARGET = 50;
-type PaperPlaneSheetSprite = { sheet: string; row: number; col: number };
+export type PaperPlaneSheetSprite = { sheet: string; row: number; col: number };
 
 const getBaseAssetPath = (path: string): string => {
     return assetUrl(path);
@@ -761,15 +761,15 @@ const createSheetSprite = (sheetPrefix: string, index: number): PaperPlaneSheetS
     col: index % PAPER_PLANE_GRID_SIZE,
 });
 
-const getPaperPlanePartSprite = (name: string): PaperPlaneSheetSprite | null => {
+export const getPaperPlanePartSprite = (name: string): PaperPlaneSheetSprite | null => {
     const baseName = name.replace(/\+$/, '');
     const index = PAPER_PLANE_PART_NAMES.indexOf(baseName);
     return index >= 0 ? createSheetSprite('parts', index) : null;
 };
 
-const getPaperPlanePilotImage = (pilotId: string): string => `${PAPER_PLANE_ASSET_BASE}/pilots/${pilotId}.webp`;
+export const getPaperPlanePilotImage = (pilotId: string): string => `${PAPER_PLANE_ASSET_BASE}/pilots/${pilotId}.webp`;
 
-const getPaperPlaneShipSprite = (shipId: string): PaperPlaneSheetSprite | null => {
+export const getPaperPlaneShipSprite = (shipId: string): PaperPlaneSheetSprite | null => {
     const index = SHIPS.findIndex(ship => ship.id === shipId);
     return index >= 0 ? {
         sheet: `${PAPER_PLANE_ASSET_BASE}/pilots-02.webp`,
@@ -798,7 +798,7 @@ const PAPER_PLANE_SCENE_BACKGROUNDS: Record<string, PaperPlaneSheetSprite> = {
     victory: { sheet: `${PAPER_PLANE_ASSET_BASE}/scene-backgrounds-5x5.webp`, row: 2, col: 2 },
 };
 
-const getSheetSpriteStyle = (sprite: PaperPlaneSheetSprite, zoom = 1): React.CSSProperties => ({
+export const getSheetSpriteStyle = (sprite: PaperPlaneSheetSprite, zoom = 1): React.CSSProperties => ({
     backgroundImage: `url("${sprite.sheet}")`,
     backgroundSize: `${PAPER_PLANE_GRID_SIZE * 100 * zoom}% ${PAPER_PLANE_GRID_SIZE * 100 * zoom}%`,
     backgroundPosition: `${(sprite.col / (PAPER_PLANE_GRID_SIZE - 1)) * 100}% ${(sprite.row / (PAPER_PLANE_GRID_SIZE - 1)) * 100}%`,
@@ -1453,7 +1453,7 @@ const EnergyCardView: React.FC<{ card: EnergyCard, onClick?: () => void, selecte
     );
 };
 
-const PaperPlaneSheetImage: React.FC<{ sprite: PaperPlaneSheetSprite | null; className?: string; title?: string; zoom?: number }> = ({ sprite, className = '', title, zoom = 1 }) => {
+export const PaperPlaneSheetImage: React.FC<{ sprite: PaperPlaneSheetSprite | null; className?: string; title?: string; zoom?: number }> = ({ sprite, className = '', title, zoom = 1 }) => {
     if (!sprite) return null;
     return (
         <div

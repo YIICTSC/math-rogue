@@ -107,6 +107,13 @@ const GENERAL_ITEM_SPRITE_TYPES = [
     'POT_GLUE', 'POT_CHANGE', 'BOMB', 'TRAP',
 ];
 
+/** The compendium reuses the same sheet order as the in-game canvas renderer. */
+export const SCHOOL_DUNGEON_SPRITE_TYPES = {
+    weapons: WEAPON_SPRITE_TYPES,
+    armor: ARMOR_SPRITE_TYPES,
+    items: GENERAL_ITEM_SPRITE_TYPES,
+} as const;
+
 const HUNGER_INTERVAL = 10;
 const REGEN_INTERVAL = 5;
 const ENEMY_SPAWN_RATE = 25;

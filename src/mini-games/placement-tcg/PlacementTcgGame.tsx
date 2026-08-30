@@ -181,7 +181,7 @@ const playPlacementCardVoice = (profile: PlacementCardVoiceProfile | undefined, 
 
 const cardAssetSource = (asset: string) => asset.startsWith('data:') || asset.startsWith('http') ? asset : assetUrl(asset);
 
-const CardArt: React.FC<{ card: PlacementCardDefinition; compact?: boolean; combat?: boolean; languageMode?: LanguageMode }> = ({ card, compact, combat, languageMode }) => (
+export const CardArt: React.FC<{ card: PlacementCardDefinition; compact?: boolean; combat?: boolean; languageMode?: LanguageMode }> = ({ card, compact, combat, languageMode }) => (
   <div className={'placement-tcg-card-art ' + (compact ? 'is-compact' : '')}>
     <ResilientAssetImage
       sources={[

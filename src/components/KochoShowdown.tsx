@@ -294,6 +294,8 @@ const getKochoHeroActionAsset = (cardName?: string | null) => {
     return { src: KOCHO_HERO_ACTION_SHEETS[3], cell: index - 74 };
 };
 
+export const hasKochoCardActionArt = (cardName: string): boolean => KOCHO_ACTION_CARD_NAMES.includes(cardName);
+
 const shouldFlipKochoHeroAction = (cardName?: string | null) => cardName === '定規スラッシュ';
 
 const getKochoHeroDamageAsset = (kind: 'light' | 'heavy' | 'break' | 'stun' | 'low' | 'down') => {
@@ -313,7 +315,7 @@ const getKochoEffectAssetForCard = (cardName?: string) => {
     return { src: KOCHO_EFFECT_SHEETS[2], cell: 24 };
 };
 
-const KochoCardActionArt: React.FC<{
+export const KochoCardActionArt: React.FC<{
     card: Pick<KCard, 'name'>;
     className?: string;
 }> = ({ card, className = '' }) => {

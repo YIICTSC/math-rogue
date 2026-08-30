@@ -178,7 +178,7 @@ const glyphFor = (piece: ShogiPiece): string => {
 
 const SHOGI_PIECE_ICON = assetUrl('sprites/shogi/shogi-piece-realistic.png');
 
-const ShogiPieceIcon: React.FC<{
+export const ShogiPieceIcon: React.FC<{
   glyph: string;
   cpu?: boolean;
   promoted?: boolean;

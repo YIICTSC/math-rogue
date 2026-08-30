@@ -7683,6 +7683,7 @@ Object.assign(ENGLISH_DICTIONARY, {
     "解禁済み": "Unlocked",
     "収録": "Included",
     "ゲーム内に収録": "Included in game",
+    "未表示": "Not shown in game",
     "収集要素を持つミニゲームのマスター定義を一覧表示しています。解禁情報が保存される要素は現在の進捗も反映されます。": "This catalog lists the master data for minigames with collectible elements. Saved unlock progress is reflected where available.",
     "魔物": "Enemies",
     "エンディング": "Endings",

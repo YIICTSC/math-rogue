@@ -257,6 +257,16 @@ const renderPokerItemIcon = (icon: string, name: string, className: string, item
     return renderPokerSprite(className, name, getPokerItemStyle(icon));
 };
 
+/** The compendium must use the same master/override precedence as the game UI. */
+export const PokerCompendiumSprite: React.FC<{
+    itemId: string;
+    icon: string;
+    name: string;
+    className?: string;
+}> = ({ itemId, icon, name, className = '' }) => (
+    <>{renderPokerItemIcon(icon, name, className, itemId)}</>
+);
+
 const getPokerCardFaceStyle = (card: PokerCard): React.CSSProperties => {
     const accent = card.enhancement === 'GOLD' ? '#f6d66d'
         : card.enhancement === 'STEEL' ? '#b8c1d1'
