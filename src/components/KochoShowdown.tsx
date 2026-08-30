@@ -479,6 +479,20 @@ const KOCHO_UNLOCKABLE_CARD_DB: Omit<KCard, 'id' | 'currentCooldown' | 'usedSlot
 const ALL_KOCHO_CARD_DB = [...BASE_CARD_DB, ...KOCHO_UNLOCKABLE_CARD_DB];
 const KOCHO_UNLOCKABLE_CARD_TOTAL = KOCHO_UNLOCKABLE_CARD_DB.length;
 
+/** Plain card metadata for the in-game compendium; runtime cooldown fields stay private. */
+export const KOCHO_CARD_CATALOG = [
+    ...BASE_CARD_DB.map(({ icon: _icon, ...card }, index) => ({
+        id: `kocho-base-card-${index}`,
+        ...card,
+        unlockable: false,
+    })),
+    ...KOCHO_UNLOCKABLE_CARD_DB.map(({ icon: _icon, ...card }, index) => ({
+        id: `kocho-unlockable-card-${index}`,
+        ...card,
+        unlockable: true,
+    })),
+];
+
 const getUnlockedKochoCardTemplates = () => {
     const unlocked = new Set(storageService.getUnlockedKochoCards());
     return [...BASE_CARD_DB, ...KOCHO_UNLOCKABLE_CARD_DB.filter(card => unlocked.has(card.name))];

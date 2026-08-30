@@ -177,6 +177,9 @@ const STONE_MARKET_DECK: StoneCard[] = [
   { id: 'four-color', name: '四色の大鉱脈', cost: { ruby: 3, sapphire: 2, emerald: 2, amber: 1 }, bonus: 'sapphire', points: 5, tier: 3 },
   { id: 'ancient', name: '古代王の採掘場', cost: { ruby: 2, sapphire: 2, emerald: 2, amber: 2 }, bonus: 'emerald', points: 5, tier: 3 },
 ];
+
+/** The full market deck is the collectible card pool for 石ころの煌めき. */
+export const STONE_GLOW_CARD_CATALOG = STONE_MARKET_DECK;
 const emptyStones = (): Record<StoneColor, number> => ({ ruby: 0, sapphire: 0, emerald: 0, amber: 0 });
 const fullStoneSupply = (): Record<StoneColor, number> => ({ ruby: 5, sapphire: 5, emerald: 5, amber: 5 });
 type StoneGlowState = {

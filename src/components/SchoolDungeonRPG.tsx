@@ -313,6 +313,9 @@ const ITEM_DB: Record<string, Omit<Item, 'id'>> = {
     ...EXTRA_SCHOOL_DUNGEON_ITEMS,
 };
 
+/** The complete item pool is also consumed by the in-game compendium. */
+export const SCHOOL_DUNGEON_ITEM_CATALOG = Object.entries(ITEM_DB).map(([id, item]) => ({ id, ...item }));
+
 // --- DIJKSTRA PATHFINDING HELPER ---
 const computeDijkstraMap = (map: TileType[][], targetX: number, targetY: number): number[][] => {
     const dMap = Array(MAP_H).fill(0).map(() => Array(MAP_W).fill(9999));

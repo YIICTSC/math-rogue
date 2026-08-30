@@ -3,7 +3,7 @@ import React, { useMemo, useState, useEffect, useRef } from 'react';
 import { CARDS_LIBRARY, RELIC_LIBRARY, POTION_LIBRARY } from '../constants';
 import { Card as ICard, LanguageMode } from '../types';
 import Card from './Card';
-import { BookOpen, Lock, ArrowLeft, Swords, Gem, FlaskConical, Skull, X, Music, StepBack, StepForward, Pause, Play, Square, Repeat, Heart, Users, Volume2, ChevronRight } from 'lucide-react';
+import { BookOpen, Lock, ArrowLeft, Swords, Gem, FlaskConical, Skull, X, Music, StepBack, StepForward, Pause, Play, Square, Repeat, Heart, Users, Volume2, ChevronRight, Layers } from 'lucide-react';
 import EnemyIllustration from './EnemyIllustration';
 import PixelSprite from './PixelSprite';
 import { storageService } from '../services/storageService';
@@ -21,6 +21,7 @@ import { getMagicCardArtUrl } from '../utils/cardArtPaths';
 import { getDebugMagicEndingGalleryEntries, type MagicEndingGalleryEntry } from '../services/magicEndingService';
 import { getThemedEndingCharacterName, getThemedEndingToneLabel, type ThemedEndingGalleryEntry } from '../data/themedEndingSequences';
 import ThemedEndingSequenceScreen from './ThemedEndingSequenceScreen';
+import MiniGameCompendium from './MiniGameCompendium';
 
 interface CompendiumScreenProps {
     unlockedCardNames: string[];
@@ -201,7 +202,7 @@ const COMPENDIUM_MINIGAME_BGM_TRACKS = new Set([
 ]);
 
 const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, onBack, languageMode, isDebug = false, visualTheme = 'elementary' }) => {
-    const [activeTab, setActiveTab] = useState<'CARDS' | 'RELICS' | 'POTIONS' | 'ENEMIES' | 'ENDINGS'>('CARDS');
+    const [activeTab, setActiveTab] = useState<'CARDS' | 'RELICS' | 'POTIONS' | 'ENEMIES' | 'ENDINGS' | 'MINIGAMES'>('CARDS');
     const [unlockedRelics, setUnlockedRelics] = useState<string[]>([]);
     const [unlockedPotions, setUnlockedPotions] = useState<string[]>([]);
     const [defeatedEnemies, setDefeatedEnemies] = useState<string[]>([]);
@@ -387,11 +388,12 @@ const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, 
                         {activeTab === 'POTIONS' && <p className="text-xs text-gray-400">{trans("収集率", languageMode)}: {unlockedPotionsCount}/{totalPotions} ({potionsPercentage}%) {isDebug && "(DEBUG ON)"}</p>}
                         {activeTab === 'ENEMIES' && <p className="text-xs text-gray-400">{trans("収集率", languageMode)}: {defeatedEnemiesCount}/{totalEnemies} ({enemiesPercentage}%) {isDebug && "(DEBUG ON)"}</p>}
                         {activeTab === 'ENDINGS' && <p className="text-xs text-gray-400">{trans("到達済み", languageMode)}: {sortedMagicEndings.length + sortedThemedEndings.length} {trans("件", languageMode)} {isDebug && "(DEBUG ON)"}</p>}
+                        {activeTab === 'MINIGAMES' && <p className="text-xs text-gray-400">{trans("収集要素を持つミニゲーム", languageMode)}</p>}
                     </div>
                 </div>
 
                 {/* Tabs */}
-                <div className="compendium-tabs flex gap-2">
+                <div className="compendium-tabs flex flex-wrap justify-center gap-2">
                     <button data-gamepad-initial-choice onClick={() => setActiveTab('CARDS')} className={`px-3 py-1 rounded text-sm font-bold flex items-center ${activeTab === 'CARDS' ? 'bg-amber-600 text-white' : 'bg-gray-700 text-gray-300'}`}>
                         <Swords size={14} className="mr-1" /> {trans("カード", languageMode)}
                     </button>
@@ -406,6 +408,9 @@ const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, 
                     </button>
                     <button onClick={() => setActiveTab('ENDINGS')} className={`px-3 py-1 rounded text-sm font-bold flex items-center ${activeTab === 'ENDINGS' ? 'bg-amber-600 text-white' : 'bg-gray-700 text-gray-300'}`}>
                         <Heart size={14} className="mr-1" /> {trans("エンディング", languageMode)}
+                    </button>
+                    <button onClick={() => setActiveTab('MINIGAMES')} className={`px-3 py-1 rounded text-sm font-bold flex items-center ${activeTab === 'MINIGAMES' ? 'bg-cyan-700 text-white' : 'bg-gray-700 text-gray-300'}`}>
+                        <Layers size={14} className="mr-1" /> {trans("ミニゲーム", languageMode)}
                     </button>
                     <button
                         onClick={openBgmMode}
@@ -638,6 +643,8 @@ const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, 
                         </div>
                     )
                 )}
+
+                {activeTab === 'MINIGAMES' && <MiniGameCompendium languageMode={languageMode} isDebug={isDebug} />}
             </div>
 
             {/* Detail Modal */}

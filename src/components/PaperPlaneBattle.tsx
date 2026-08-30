@@ -249,6 +249,10 @@ const SHIPS: ShipTemplate[] = [
     }
 ];
 
+/** Core paper-plane collections are shared with the in-game compendium. */
+export const PAPER_PLANE_PILOT_CATALOG = PILOTS;
+export const PAPER_PLANE_SHIP_CATALOG = SHIPS.map(({ layout: _layout, ...ship }) => ship);
+
 // Enhanced Enemy Data (3x3 Grid + AI params) - ENGINE Removed, replaced with weapons or empty
 const ENEMY_DATA: EnemyDataTemplate[] = [
     { 
@@ -729,6 +733,11 @@ const UNLOCKABLE_PART_TEMPLATES: Omit<ShipPart, 'id'>[] = [
     { type: 'AMPLIFIER', name: '文化祭カウントダウン', description: '終盤になるほど会場の熱気で増幅が強まる。', slots: [{req:'ANY', value:null}], multiplier: 0, basePower: 3, hp: 8, specialEffect: 'TURN_SCALE' },
     { type: 'ENGINE', name: '進路相談コア', description: '中央に据えてフル装填すると安定して燃料が戻る。', slots: [{req:'ANY', value:null}, {req:'WHITE', value:null}], multiplier: 1.1, basePower: 2, hp: 10, specialEffect: 'CENTER_FULL_BONUS' },
     { type: 'CANNON', name: '卒業アルバム砲', description: '見てきた数字の多様さと3色の思い出を火力に変える。', slots: [{req:'WHITE', value:null}, {req:'BLUE', value:null}, {req:'ORANGE', value:null}], multiplier: 1.0, basePower: 5, hp: 11, specialEffect: 'UNIQUE_RAINBOW_BONUS' },
+];
+
+export const PAPER_PLANE_PART_CATALOG = [
+    ...PART_TEMPLATES.map((part, index) => ({ id: `paper-base-part-${index}`, ...part, unlockedByDefault: true })),
+    ...UNLOCKABLE_PART_TEMPLATES.map((part, index) => ({ id: `paper-unlockable-part-${index}`, ...part, unlockedByDefault: false })),
 ];
 
 const PAPER_PLANE_UNLOCK_TARGET = 50;

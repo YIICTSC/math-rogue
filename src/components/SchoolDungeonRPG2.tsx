@@ -368,6 +368,9 @@ const ITEM_DB: Record<string, Omit<Item, 'id'>> = {
     ...EXTRA_SCHOOL_DUNGEON_ITEMS,
 };
 
+/** The complete item pool is also consumed by the in-game compendium. */
+export const SCHOOL_DUNGEON_2_ITEM_CATALOG = Object.entries(ITEM_DB).map(([id, item]) => ({ id, ...item }));
+
 // --- DUNGEON CARD DATABASE ---
 const DUNGEON_CARD_DB: Omit<DungeonCard, 'id'>[] = [
     { templateId: 'THRUST', name: 'えんぴつ突き', type: 'ATTACK', power: 3, description: '前方2マスの敵を貫通攻撃', icon: <Sword size={16}/> },
@@ -401,6 +404,9 @@ const DUNGEON_CARD_DB: Omit<DungeonCard, 'id'>[] = [
     { templateId: 'EARTHQUAKE', name: '貧乏ゆすり', type: 'ATTACK', power: 5, description: '部屋全体の敵にダメージ', icon: <Activity size={16}/> },
     { templateId: 'GAMBLE', name: '運試し', type: 'SPECIAL', power: 0, description: '所持金増加か、ダメージか', icon: <Dice5 size={16}/> },
 ];
+
+/** The full deck-card pool is also consumed by the in-game compendium. */
+export const SCHOOL_DUNGEON_2_CARD_CATALOG = DUNGEON_CARD_DB.map(({ icon: _icon, ...card }) => card);
 
 // --- DIJKSTRA PATHFINDING HELPER ---
 const computeDijkstraMap = (map: TileType[][], targetX: number, targetY: number): number[][] => {

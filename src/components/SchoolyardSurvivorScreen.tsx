@@ -314,6 +314,10 @@ const PASSIVES: Record<PassiveType, PassiveDef> = {
     ORIGAMI: { id: 'ORIGAMI', name: '金ピカ折り紙', desc: '獲得ゴールド+20%', sprite: { template: 'FLIER', color: '#eab308', highlight: '#fef08a' } },
 };
 
+/** These pools are rendered by both the game and the in-game compendium. */
+export const SCHOOLYARD_WEAPON_CATALOG = Object.values(WEAPONS);
+export const SCHOOLYARD_PASSIVE_CATALOG = Object.values(PASSIVES);
+
 const SPRITE_ASSET_VERSION = 'schoolyard-survivor-v3';
 const SPRITE_SHEET_CELL_SIZE = 32;
 const SPRITE_SHEET_COLUMNS = 8;
