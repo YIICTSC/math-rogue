@@ -16,7 +16,8 @@ import {
     PAPER_PLANE_SHIP_CATALOG,
 } from './PaperPlaneBattle';
 import { STONE_GLOW_CARD_CATALOG } from './TriviaMiniGameScreen';
-import { localizeTrpgCopy, SCHOOL_TRPG_ENDINGS, SCHOOL_TRPG_REWARDS } from '../mini-games/school-trpg/schoolTrpgData';
+import { SCHOOL_TRPG_ENDINGS, SCHOOL_TRPG_REWARDS } from '../mini-games/school-trpg/schoolTrpgData';
+import { localizeTrpgCopy } from '../mini-games/school-trpg/schoolTrpgTypes';
 import { loadSchoolTrpgCampaign } from '../mini-games/school-trpg/schoolTrpgSave';
 import { ADVANCED_PIECES, STANDARD_PIECES } from '../mini-games/shogi/shogiPieces';
 import { loadPlacementTcgCollection } from '../mini-games/placement-tcg/placementTcgEngine';
