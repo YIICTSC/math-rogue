@@ -9,8 +9,6 @@ import type { LanguageMode } from '../types';
 import { assetUrl } from '../utils/assetPaths';
 import { trans } from '../utils/textUtils';
 
-type AuditScope = 'ALL' | 'PROTAGONISTS' | 'MINI_GAMES';
-
 type AuditAsset = SpriteAuditAssetDefinition & {
   src?: string;
 };
@@ -26,6 +24,16 @@ type ProtagonistGroup = {
   title: string;
   description: string;
   entries: ProtagonistEntry[];
+};
+
+type SpriteAuditCategory = {
+  id: string;
+  title: string;
+  description: string;
+  kind: 'protagonist' | 'mini-game';
+  entries?: ProtagonistEntry[];
+  assets?: AuditAsset[];
+  miniGameId?: string;
 };
 
 const HIGH_SCHOOL_SPRITE_INDEX_BY_ID: Record<string, number> = {
@@ -346,7 +354,7 @@ const ProtagonistCard: React.FC<{ entry: ProtagonistEntry; languageMode: Languag
 );
 
 const SpriteAuditPreview: React.FC<{ languageMode: LanguageMode }> = ({ languageMode }) => {
-  const [scope, setScope] = useState<AuditScope>('ALL');
+  const [activeCategoryId, setActiveCategoryId] = useState('protagonist-elementary');
   const [query, setQuery] = useState('');
   const protagonistGroups = useMemo<ProtagonistGroup[]>(() => [
     {
@@ -375,17 +383,42 @@ const SpriteAuditPreview: React.FC<{ languageMode: LanguageMode }> = ({ language
     },
   ], []);
 
+  const categories = useMemo<SpriteAuditCategory[]>(() => [
+    ...protagonistGroups.map(group => ({
+      id: `protagonist-${group.id}`,
+      title: group.title,
+      description: group.description,
+      kind: 'protagonist' as const,
+      entries: group.entries,
+    })),
+    ...MINI_GAMES.map(game => {
+      const definition = MINI_GAME_SPRITE_AUDIT_MANIFEST[game.id];
+      return {
+        id: `mini-game-${game.id}`,
+        title: game.name,
+        description: definition?.note ?? '',
+        kind: 'mini-game' as const,
+        assets: definition?.assets ?? [],
+        miniGameId: game.id,
+      };
+    }),
+  ], [protagonistGroups]);
+
   const normalizedQuery = query.trim().toLocaleLowerCase();
-  const visibleProtagonistGroups = protagonistGroups
-    .map(group => ({
-      ...group,
-      entries: group.entries.filter(entry => !normalizedQuery || `${group.title} ${entry.name}`.toLocaleLowerCase().includes(normalizedQuery)),
-    }))
-    .filter(group => group.entries.length > 0);
-  const visibleMiniGames = MINI_GAMES.filter(game => {
+  const visibleCategories = categories.filter(category => {
     if (!normalizedQuery) return true;
-    return `${game.name} ${game.id}`.toLocaleLowerCase().includes(normalizedQuery);
+    const searchText = category.kind === 'protagonist'
+      ? [category.title, category.id, ...(category.entries ?? []).flatMap(entry => [entry.name, ...entry.assets.map(asset => asset.label), ...entry.assets.map(asset => asset.path)])]
+      : [category.title, category.id, ...(category.assets ?? []).flatMap(asset => [asset.label, asset.path])];
+    return searchText.join(' ').toLocaleLowerCase().includes(normalizedQuery);
   });
+  const activeCategory = visibleCategories.find(category => category.id === activeCategoryId) ?? visibleCategories[0] ?? null;
+  const visibleProtagonistEntries = activeCategory?.kind === 'protagonist'
+    ? (activeCategory.entries ?? []).filter(entry => !normalizedQuery || `${activeCategory.title} ${entry.name} ${entry.assets.map(asset => `${asset.label} ${asset.path}`).join(' ')}`.toLocaleLowerCase().includes(normalizedQuery))
+    : [];
+  const visibleMiniGameAssets = activeCategory?.kind === 'mini-game'
+    ? (activeCategory.assets ?? []).filter(asset => !normalizedQuery || `${activeCategory.title} ${activeCategory.miniGameId ?? ''} ${asset.label} ${asset.path}`.toLocaleLowerCase().includes(normalizedQuery))
+    : [];
   const protagonistCount = protagonistGroups.reduce((total, group) => total + group.entries.length, 0);
   const miniGameAssetCount = MINI_GAMES.reduce((total, game) => total + (MINI_GAME_SPRITE_AUDIT_MANIFEST[game.id]?.assets.length ?? 0), 0);
 
@@ -417,78 +450,78 @@ const SpriteAuditPreview: React.FC<{ languageMode: LanguageMode }> = ({ language
               className="w-full rounded border border-slate-700 bg-slate-950 px-8 py-1.5 text-xs text-white outline-none focus:border-cyan-400"
             />
           </div>
-          <div className="flex shrink-0 gap-1 rounded border border-slate-700 bg-slate-950 p-1">
-            {([
-              ['ALL', 'すべて'],
-              ['PROTAGONISTS', '主人公'],
-              ['MINI_GAMES', 'ミニゲーム'],
-            ] as const).map(([id, label]) => (
-              <button
-                key={id}
-                type="button"
-                onClick={() => setScope(id)}
-                className={`rounded px-2 py-1 text-[10px] font-black transition-colors ${scope === id ? 'bg-cyan-500 text-slate-950' : 'text-slate-400 hover:bg-slate-800 hover:text-white'}`}
-              >
-                {trans(label, languageMode)}
-              </button>
-            ))}
+        </div>
+        <div className="mt-3 rounded border border-slate-700 bg-slate-950/80 p-2">
+          <div className="mb-2 flex items-center gap-2 text-[10px] font-black text-slate-300">
+            <Layers size={14} className="text-cyan-300" />
+            <span>{trans('カテゴリ', languageMode)}</span>
+            <span className="text-slate-500">{visibleCategories.length}/{categories.length}</span>
           </div>
+          {visibleCategories.length > 0 ? (
+            <div className="grid grid-cols-2 gap-1.5 sm:grid-cols-3 xl:grid-cols-4">
+              {visibleCategories.map(category => {
+                const count = category.kind === 'protagonist'
+                  ? category.entries?.length ?? 0
+                  : category.assets?.length ?? 0;
+                const isActive = activeCategory?.id === category.id;
+                return (
+                  <button
+                    key={category.id}
+                    type="button"
+                    onClick={() => setActiveCategoryId(category.id)}
+                    className={`flex min-w-0 items-center gap-2 rounded border px-2 py-2 text-left transition-colors ${isActive ? 'border-cyan-400 bg-cyan-950/80 text-cyan-100' : 'border-slate-700 bg-slate-900/80 text-slate-300 hover:border-cyan-700 hover:bg-slate-800'}`}
+                  >
+                    {category.kind === 'protagonist' ? <Users size={14} className="shrink-0" /> : <Gamepad2 size={14} className="shrink-0 text-orange-300" />}
+                    <span className="min-w-0 flex-1 truncate text-[10px] font-black">{trans(category.title, languageMode)}</span>
+                    <span className="shrink-0 text-[9px] text-slate-500">{count}</span>
+                  </button>
+                );
+              })}
+            </div>
+          ) : (
+            <div className="rounded border border-slate-800 bg-black/20 p-3 text-center text-xs text-slate-500">{trans('一致するカテゴリがありません。', languageMode)}</div>
+          )}
         </div>
       </div>
 
-      {(scope === 'ALL' || scope === 'PROTAGONISTS') && (
+      {activeCategory?.kind === 'protagonist' && (
         <section className="space-y-3">
-          <div className="flex items-center gap-2 border-b border-cyan-800/70 pb-2">
+          <div className="flex flex-wrap items-center gap-2 border-b border-cyan-800/70 pb-2">
             <Users size={17} className="text-cyan-300" />
-            <h3 className="text-sm font-black text-cyan-200">{trans('学習ローグ 主人公', languageMode)}</h3>
-            <span className="text-[10px] text-slate-500">{trans('立ち絵・戦闘シート', languageMode)}</span>
+            <h3 className="text-sm font-black text-cyan-200">{trans(activeCategory.title, languageMode)}</h3>
+            <span className="text-[10px] text-slate-500">{trans('学習ローグ 主人公', languageMode)} / {trans('立ち絵・戦闘シート', languageMode)}</span>
           </div>
-          {visibleProtagonistGroups.length > 0 ? visibleProtagonistGroups.map(group => (
-            <div key={group.id} className="space-y-2">
-              <div className="flex flex-wrap items-baseline justify-between gap-2">
-                <h4 className="text-xs font-black text-yellow-200">{trans(group.title, languageMode)}</h4>
-                <span className="text-[10px] text-slate-500">{trans(group.description, languageMode)}</span>
-              </div>
-              <div className="grid grid-cols-1 gap-3 2xl:grid-cols-2">
-                {group.entries.map(entry => <ProtagonistCard key={entry.id} entry={entry} languageMode={languageMode} />)}
-              </div>
+          <p className="text-[10px] leading-relaxed text-slate-400">{trans(activeCategory.description, languageMode)}</p>
+          {visibleProtagonistEntries.length > 0 ? (
+            <div className="grid grid-cols-1 gap-3 2xl:grid-cols-2">
+              {visibleProtagonistEntries.map(entry => <ProtagonistCard key={entry.id} entry={entry} languageMode={languageMode} />)}
             </div>
-          )) : <div className="rounded border border-slate-800 bg-black/20 p-4 text-center text-xs text-slate-500">{trans('一致する主人公がありません。', languageMode)}</div>}
+          ) : (
+            <div className="rounded border border-slate-800 bg-black/20 p-4 text-center text-xs text-slate-500">{trans('一致するカテゴリがありません。', languageMode)}</div>
+          )}
         </section>
       )}
 
-      {(scope === 'ALL' || scope === 'MINI_GAMES') && (
+      {activeCategory?.kind === 'mini-game' && (
         <section className="space-y-3">
-          <div className="flex items-center gap-2 border-b border-orange-800/70 pb-2">
+          <div className="flex flex-wrap items-center gap-2 border-b border-orange-800/70 pb-2">
             <Gamepad2 size={17} className="text-orange-300" />
-            <h3 className="text-sm font-black text-orange-200">{trans('ミニゲーム素材', languageMode)}</h3>
-            <span className="text-[10px] text-slate-500">{trans('全', languageMode)} {MINI_GAMES.length} {trans('種', languageMode)}</span>
+            <h3 className="text-sm font-black text-orange-200">{trans(activeCategory.title, languageMode)}</h3>
+            <code className="text-[9px] text-orange-300">{activeCategory.miniGameId}</code>
+            <span className="text-[10px] text-slate-400">{visibleMiniGameAssets.length}{trans('素材', languageMode)}</span>
           </div>
-          {visibleMiniGames.map(game => {
-            const definition = MINI_GAME_SPRITE_AUDIT_MANIFEST[game.id];
-            return (
-              <article key={game.id} className="rounded-xl border border-slate-700 bg-black/25 p-3">
-                <div className="mb-3 flex flex-col gap-1 border-b border-slate-700 pb-2 md:flex-row md:items-center md:justify-between">
-                  <div className="flex items-center gap-2">
-                    <h4 className="text-sm font-black text-white">{trans(game.name, languageMode)}</h4>
-                    <code className="text-[9px] text-orange-300">{game.id}</code>
-                  </div>
-                  <span className="text-[10px] text-slate-400">{definition?.assets.length ?? 0}{trans('素材', languageMode)}</span>
-                </div>
-                <p className="mb-3 text-[10px] leading-relaxed text-slate-400">{definition?.note ? trans(definition.note, languageMode) : trans('素材マニフェスト未登録', languageMode)}</p>
-                {definition?.assets.length ? (
-                  <div className="grid grid-cols-2 gap-2 lg:grid-cols-4 2xl:grid-cols-6">
-                    {definition.assets.map((asset, index) => <SpriteAuditCard key={`${asset.path}-${index}`} asset={asset} languageMode={languageMode} />)}
-                  </div>
-                ) : (
-                  <div className="rounded border border-yellow-800/70 bg-yellow-950/30 p-3 text-xs text-yellow-200">{trans('素材マニフェスト未登録', languageMode)}</div>
-                )}
-              </article>
-            );
-          })}
-          {visibleMiniGames.length === 0 && <div className="rounded border border-slate-800 bg-black/20 p-4 text-center text-xs text-slate-500">{trans('一致するミニゲームがありません。', languageMode)}</div>}
+          {activeCategory.description && <p className="text-[10px] leading-relaxed text-slate-400">{trans(activeCategory.description, languageMode)}</p>}
+          {visibleMiniGameAssets.length > 0 ? (
+            <div className="grid grid-cols-2 gap-2 lg:grid-cols-4 2xl:grid-cols-6">
+              {visibleMiniGameAssets.map((asset, index) => <SpriteAuditCard key={`${asset.path}-${index}`} asset={asset} languageMode={languageMode} />)}
+            </div>
+          ) : (
+            <div className="rounded border border-yellow-800/70 bg-yellow-950/30 p-3 text-xs text-yellow-200">{trans('素材マニフェスト未登録', languageMode)}</div>
+          )}
         </section>
       )}
+
+      {!activeCategory && <div className="rounded border border-slate-800 bg-black/20 p-4 text-center text-xs text-slate-500">{trans('一致するカテゴリがありません。', languageMode)}</div>}
     </div>
   );
 };

@@ -74,6 +74,8 @@ export const ENGLISH_DEBUG_UI_EXACT: Record<string, string> = {
   '読み込み失敗': 'Load failed',
   'ファイルを確認': 'Check file',
   '読み込み中': 'Loading',
+  'カテゴリ': 'Categories',
+  '一致するカテゴリがありません。': 'No matching categories.',
   'スプライト見切れ確認': 'Sprite Bleed Review',
   'シート全体ではなく、ゲーム内と同じように1フレームずつ切り出して表示します。前後のコマの写り込み、透明端の欠落、読み込み失敗をここで確認してください。': 'Instead of showing full sheets, display one frame at a time as it appears in-game to check for neighboring-frame bleed, clipped transparent edges, and failed loads.',
   '前のフレーム': 'Previous frame',
@@ -96,7 +98,7 @@ export const ENGLISH_DEBUG_UI_EXACT: Record<string, string> = {
   '立ち絵と、idle・特殊idle・攻撃・スキル・被弾・瀕死の各シートを確認します。': 'Review the portrait plus idle, special idle, attack, skill, hit, and low-HP sheets.',
   '変身前後の立ち絵と全戦闘アニメーションシートを確認します。': 'Review before-and-after transformation portraits and every battle animation sheet.',
   'CHARACTERS.imageData の内蔵SVG': 'Built-in SVG from CHARACTERS.imageData.',
-  '走行・ジャンプ・障害物・飛翔物のシート。1枚全体を表示してコマ境界を確認します。': 'Run, jump, obstacle, and projectile sheets. Display each full sheet to check frame boundaries.',
+  '走行・ジャンプ・障害物・飛翔物のシート。ゲーム内と同じ1フレーム表示でコマの写り込みを確認します。': 'Run, jump, obstacle, and projectile sheets. Display one frame at a time as it appears in-game to check for neighboring-frame bleed.',
   '敵・武器・演出はシート素材。プレイヤー本体はゲーム内のPixelSprite生成です。': 'Enemies, weapons, and effects use sheets. The player character is generated in-game with PixelSprite.',
   'アイテム、ライバル、装飾、差し替え素材を全件確認できます。': 'Review every item, rival, ornament, and replacement asset.',
   '風来の小学生で使う主人公・敵・装備・アイテム・演出のシートです。': 'Sheets for the protagonist, enemies, equipment, items, and effects used by Furai Elementary.',
@@ -110,6 +112,15 @@ export const ENGLISH_DEBUG_UI_EXACT: Record<string, string> = {
 };
 
 export const HIRAGANA_DEBUG_UI_EXACT: Record<string, string> = {
+  'ゲーム内スプライト確認': 'ゲームないスプライトかくにん',
+  'シート全体ではなく、ゲーム内と同じように1フレームずつ切り出して表示します。前後のコマの写り込み、透明端の欠落、読み込み失敗をここで確認してください。': 'シートぜんたいではなく、ゲームないと おなじように1フレームずつ きりだして ひょうじします。まえうしろの コマの うつりこみ、とうめいはしの けつらく、よみこみしっぱいを ここで かくにんしてください。',
+  '前のフレーム': 'まえのフレーム',
+  '次のフレーム': 'つぎのフレーム',
+  'ゲーム内フレーム': 'ゲームないフレーム',
+  '停止': 'ていし',
+  'カテゴリ': 'カテゴリ',
+  '一致するカテゴリがありません。': 'いっちするカテゴリがありません。',
+  '走行・ジャンプ・障害物・飛翔物のシート。ゲーム内と同じ1フレーム表示でコマの写り込みを確認します。': 'そうこう・ジャンプ・しょうがいぶつ・ひしょうぶつのシート。ゲームないと おなじ1フレームひょうじで コマの うつりこみを かくにんします。',
   '追加時キラ': 'ついかじキラ',
   'サンゴ礁': 'サンゴしょう',
   '火星・宇宙港・隕石': 'かせい・うちゅうこう・いんせき',

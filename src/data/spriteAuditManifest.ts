@@ -115,12 +115,12 @@ const triviaUiAssets = (id: string): SpriteAuditAssetDefinition[] => [
 ];
 
 /**
- * ミニゲーム本体が実際に参照する素材を、デバッグ用に全体表示するための一覧。
+ * ミニゲーム本体が実際に参照する素材を、デバッグ用にカテゴリ別で確認するための一覧。
  * 背景・UIしか持たないゲームも、専用スプライトなしと判定できるよう掲載する。
  */
 export const MINI_GAME_SPRITE_AUDIT_MANIFEST: Record<string, MiniGameSpriteAuditDefinition> = {
   GO_HOME: {
-    note: '走行・ジャンプ・障害物・飛翔物のシート。1枚全体を表示してコマ境界を確認します。',
+    note: '走行・ジャンプ・障害物・飛翔物のシート。ゲーム内と同じ1フレーム表示でコマの写り込みを確認します。',
     assets: [
       asset('sprites/go-home-dash-8-loop-grid.webp', 'プレイヤー走行 8コマ'),
       asset('sprites/go-home-dash-jump-3.webp', 'プレイヤージャンプ 3コマ'),
