@@ -154,6 +154,7 @@ const getSpritePreviewLayout = (path: string): SpritePreviewLayout | null => {
   if (normalizedPath.includes('schoolyard-survivor-enemies')) return { columns: 8, rows: 2, frameDurationMs: 220 };
   if (normalizedPath.includes('schoolyard-survivor-weapons')) return { columns: 8, rows: 5, frameDurationMs: 220 };
   if (normalizedPath.includes('schoolyard-survivor-effects')) return { columns: 8, rows: 2, frameDurationMs: 220 };
+  if (normalizedPath.includes('after-school-poker-item-sheet-')) return { columns: 5, rows: 5, frameDurationMs: 220 };
   if (normalizedPath.includes('after-school-poker-items')) return { columns: 8, rows: 5, frameDurationMs: 220 };
   if (normalizedPath.includes('after-school-poker-card-ornaments')) return { columns: 8, rows: 2, frameDurationMs: 220 };
   if (normalizedPath.includes('after-school-poker-rivals-') || normalizedPath.includes('after-school-poker-endless-rivals-')) return { columns: 3, rows: 3, frameDurationMs: 220 };

@@ -11,8 +11,7 @@ import { storageService } from '../services/storageService';
 import MiniGameProblemChallenge from './MiniGameProblemChallenge';
 import {
     POKER_ALL_ITEM_SPRITE_COLUMNS,
-    POKER_ALL_ITEM_SPRITE_ENTRIES,
-    POKER_ALL_ITEM_SPRITE_KEYS
+    POKER_ALL_ITEM_SPRITE_ENTRIES
 } from '../data/pokerItemSpriteManifest';
 import { assetUrl } from '../utils/assetPaths';
 import { trans } from '../utils/textUtils';
@@ -230,27 +229,32 @@ const getPokerAllItemStyle = (itemId: string): React.CSSProperties => {
     };
 };
 
+const renderPokerSprite = (className: string, name: string, style: React.CSSProperties) => (
+    <div className={`${className} bg-no-repeat bg-contain`} style={style} title={name} />
+);
+
 const renderPokerItemIcon = (icon: string, name: string, className: string, itemId?: string) => {
-    if (itemId && POKER_ALL_ITEM_SPRITE_KEYS.includes(itemId as any)) {
-        return <div className={`${className} bg-no-repeat bg-contain`} style={getPokerAllItemStyle(itemId)} title={name} />;
-    }
+    // アイテム補正素材は、全アイテムのマスターシートより優先する。
     if (itemId && POKER_SUPPORTER_FIX_KEYS.includes(itemId)) {
-        return <div className={`${className} bg-no-repeat bg-contain`} style={getPokerSupporterFixStyle(itemId)} title={name} />;
+        return renderPokerSprite(className, name, getPokerSupporterFixStyle(itemId));
     }
     if (itemId && POKER_STATIONERY_OVERRIDE_KEYS.includes(itemId)) {
-        return <div className={`${className} bg-no-repeat bg-contain`} style={getPokerStationeryOverrideStyle(itemId)} title={name} />;
+        return renderPokerSprite(className, name, getPokerStationeryOverrideStyle(itemId));
     }
     if (itemId && POKER_CONSUMABLE_OVERRIDE_KEYS.includes(itemId)) {
-        return <div className={`${className} bg-no-repeat bg-contain`} style={getPokerConsumableOverrideStyle(itemId)} title={name} />;
+        return renderPokerSprite(className, name, getPokerConsumableOverrideStyle(itemId));
     }
     if (itemId && POKER_OVERRIDE_KEYS.includes(itemId)) {
-        return <div className={`${className} bg-no-repeat bg-contain`} style={getPokerOverrideStyle(itemId)} title={name} />;
+        return renderPokerSprite(className, name, getPokerOverrideStyle(itemId));
+    }
+    if (itemId && POKER_ALL_ITEM_SPRITE_ENTRIES[itemId as keyof typeof POKER_ALL_ITEM_SPRITE_ENTRIES]) {
+        return renderPokerSprite(className, name, getPokerAllItemStyle(itemId));
     }
     const key = icon.split('|')[0] || 'NOTEBOOK';
     if (!POKER_ITEM_KEYS.includes(key)) {
         return <PixelSprite seed={icon} name={name} className={className} />;
     }
-    return <div className={`${className} bg-no-repeat bg-contain`} style={getPokerItemStyle(icon)} title={name} />;
+    return renderPokerSprite(className, name, getPokerItemStyle(icon));
 };
 
 const getPokerCardFaceStyle = (card: PokerCard): React.CSSProperties => {
