@@ -1,8 +1,11 @@
 {
   "image": "crane-game-sprites-4x4-v1.png",
   "productionImage": "crane-game-sprites-4x4-alpha-v1.png",
-  "cabinetImage": "crane-game-cabinet-v1.png",
-  "chuteFenceImage": "crane-game-chute-fence-v1.png",
+  "cabinetImage": "crane-game-cabinet-v2.png",
+  "heldPrizeImage": "crane-game-held-prizes-3x2-v1.png",
+  "heldPrizeProductionImage": "crane-game-held-prizes-3x2-alpha-v1.png",
+  "heldPrizeColumns": 3,
+  "heldPrizeRows": 2,
   "columns": 4,
   "rows": 4,
   "chromaKey": "#00FF00",

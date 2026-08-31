@@ -44,11 +44,10 @@ const copy = (mode: LanguageMode | string, ja: string, hira: string, en: string)
 );
 
 const SPRITE_SHEET = 'sprites/mini-games/crane-game/crane-game-sprites-4x4-alpha-v1.png';
-const CABINET_BACKGROUND = 'sprites/mini-games/crane-game/crane-game-cabinet-v1.png';
-const CHUTE_FENCE_OVERLAY = 'sprites/mini-games/crane-game/crane-game-chute-fence-v1.png';
+const HELD_PRIZE_SHEET = 'sprites/mini-games/crane-game/crane-game-held-prizes-3x2-alpha-v1.png';
+const CABINET_BACKGROUND = 'sprites/mini-games/crane-game/crane-game-cabinet-v2.png';
 const CLAW_TOP_Y = 7;
 const CLAW_DROP_Y = 63;
-const CHUTE_DROP_Y = 68;
 const FALLING_START_Y = CLAW_TOP_Y + 24;
 const FALLING_END_Y = 96;
 
@@ -62,6 +61,22 @@ const Sprite: React.FC<{ index: number; className?: string; style?: React.CSSPro
       style={{
         backgroundImage: `url("${assetUrl(SPRITE_SHEET)}")`,
         backgroundPosition: `${(column / 3) * 100}% ${(row / 3) * 100}%`,
+        ...style,
+      }}
+    />
+  );
+};
+
+const HeldPrizeSprite: React.FC<{ index: number; className?: string; style?: React.CSSProperties }> = ({ index, className = '', style }) => {
+  const column = index % 3;
+  const row = Math.floor(index / 3);
+  return (
+    <span
+      aria-hidden="true"
+      className={`crane-game-held-sprite ${className}`}
+      style={{
+        backgroundImage: `url("${assetUrl(HELD_PRIZE_SHEET)}")`,
+        backgroundPosition: `${(column / 2) * 100}% ${row * 100}%`,
         ...style,
       }}
     />
@@ -223,16 +238,19 @@ const CraneGame: React.FC<CraneGameProps> = ({
         }
         if (phase === 'DROPPING_INTO_CHUTE') {
           const chuteProgress = clampProgress((elapsed - chuteDropStartedAt.current) / CRANE_CHUTE_DROP_DURATION_MS);
-          const nextY = CLAW_TOP_Y + (CHUTE_DROP_Y - CLAW_TOP_Y) * easeInOut(chuteProgress);
           if (chuteProgress >= 1) {
-            setChuteDelivered(Boolean(caught));
-            setPhase('RESULT');
+            fallStartedAt.current = elapsed;
+            fallStartX.current = CRANE_CHUTE_X;
+            setPhase('FALLING');
           }
-          return { ...current, x: CRANE_CHUTE_X, y: nextY };
+          return { ...current, x: CRANE_CHUTE_X, y: CLAW_TOP_Y };
         }
         if (phase === 'FALLING') {
           const fallProgress = clampProgress((elapsed - fallStartedAt.current) / CRANE_FALL_DURATION_MS);
-          if (fallProgress >= 1) setPhase('RESULT');
+          if (fallProgress >= 1) {
+            setChuteDelivered(dropReason === 'DELIVERED');
+            setPhase('RESULT');
+          }
           return {
             ...current,
             x: interpolateCraneX(fallStartX.current, CRANE_CHUTE_X, Math.min(1, fallProgress * 0.8)),
@@ -268,7 +286,10 @@ const CraneGame: React.FC<CraneGameProps> = ({
       phase === 'FALLING' || (phase === 'RESULT' && dropReason === 'SLIPPED')
     );
     const isHeld = isPrizeCaught && !isFalling && phase !== 'RESULT';
-    const pose = getPrizePose(prize, isPrizeCaught ? catchStartedAt : elapsedMs);
+    // Once caught, the floor sprite is replaced by one ImageGen-held sprite so
+    // the arm and the prize share one transform during the full lift/carry route.
+    if (isHeld) return null;
+    const pose = isPrizeCaught && caught ? caught.pose : getPrizePose(prize, elapsedMs);
 
     if (isFalling) {
       const fallProgress = phase === 'FALLING'
@@ -289,18 +310,12 @@ const CraneGame: React.FC<CraneGameProps> = ({
       );
     }
 
-    const x = isHeld ? claw.x : pose.x;
-    const y = isHeld ? Math.min(93, claw.y + 24) : pose.y;
-    const rotation = isHeld
-      ? getHangingPrizeRotation(pose.rotation, Math.max(0, elapsedMs - catchStartedAt), lastDirection.current)
-      : pose.rotation;
     return (
       <Sprite
         key={prize.id}
         index={prize.spriteIndex}
-        className={`crane-game-prize ${isHeld ? 'is-caught' : ''}`}
-        // The same prize element moves from the floor into the claw. No precomposed grab sprite is used.
-        style={{ left: `${x}%`, top: `${y}%`, transform: `translate(-50%, -50%) rotate(${rotation}deg)` }}
+        className="crane-game-prize"
+        style={{ left: `${pose.x}%`, top: `${pose.y}%`, transform: `translate(-50%, -50%) rotate(${pose.rotation}deg)` }}
       />
     );
   };
@@ -309,6 +324,13 @@ const CraneGame: React.FC<CraneGameProps> = ({
     if (onCraneComplete) onCraneComplete(result);
     else onBack();
   };
+
+  const isHoldingPrize = Boolean(caught && (
+    phase === 'CLOSING'
+    || phase === 'LIFTING'
+    || phase === 'CARRYING'
+    || phase === 'DROPPING_INTO_CHUTE'
+  ));
 
   return (
     <main className="crane-game-screen" data-gamepad-initial-scope="crane-game">
@@ -325,24 +347,25 @@ const CraneGame: React.FC<CraneGameProps> = ({
         <section className="crane-game-chamber" aria-label={copy(languageMode, 'クレーンゲームの景品台', 'クレーンゲームの けいひんだい', 'Crane game prize bay')}>
           <div className="crane-game-cable" style={{ left: `${claw.x}%`, height: `${claw.y + 7}%` }} />
           {CRANE_PRIZES.map(renderPrize)}
-          <Sprite
-            index={phase === 'AIM' || phase === 'DROPPING' ? 1 : 2}
-            className="crane-game-claw"
-            style={{ left: `${claw.x}%`, top: `${claw.y}%` }}
-          />
+          {isHoldingPrize && caught ? (
+            <HeldPrizeSprite
+              index={caught.prize.heldSpriteIndex}
+              className="crane-game-held-prize"
+              style={{
+                left: `${claw.x}%`,
+                top: `${claw.y}%`,
+                transform: `translate(-50%, -25%) rotate(${getHangingPrizeRotation(0, Math.max(0, elapsedMs - catchStartedAt), lastDirection.current)}deg)`,
+              }}
+            />
+          ) : (
+            <Sprite
+              index={phase === 'AIM' || phase === 'DROPPING' ? 1 : 2}
+              className="crane-game-claw"
+              style={{ left: `${claw.x}%`, top: `${claw.y}%` }}
+            />
+          )}
           {phase === 'AIM' && <div className="crane-game-aim-line" style={{ left: `${claw.x}%` }} />}
         </section>
-
-        <div
-          className="crane-game-chute-overlay"
-          aria-hidden="true"
-          style={{ backgroundImage: `url("${assetUrl(CHUTE_FENCE_OVERLAY)}")` }}
-        />
-        <div
-          className="crane-game-chute-overlay crane-game-chute-overlay-front"
-          aria-hidden="true"
-          style={{ backgroundImage: `url("${assetUrl(CHUTE_FENCE_OVERLAY)}")` }}
-        />
 
         <div className="crane-game-status">
           {phase === 'AIM' && copy(languageMode, '左右で狙って、ボタンでアームを下ろそう！', 'さゆうで ねらって、ボタンで アームを おろそう！', 'Aim with Left/Right, then drop the claw!')}
@@ -351,7 +374,9 @@ const CraneGame: React.FC<CraneGameProps> = ({
           {phase === 'LIFTING' && copy(languageMode, '持ち上げ中…', 'もちあげちゅう…', 'Lifting…')}
           {phase === 'CARRYING' && copy(languageMode, '獲得口へ運搬中…', 'かくとくぐちへ うんぱんちゅう…', 'Carrying to the chute…')}
           {phase === 'DROPPING_INTO_CHUTE' && copy(languageMode, '獲得口でリリース！', 'かくとくぐちで リリース！', 'Releasing over the chute!')}
-          {phase === 'FALLING' && copy(languageMode, '景品が落下！', 'けいひんが らっか！', 'The prize slipped!')}
+          {phase === 'FALLING' && (dropReason === 'DELIVERED'
+            ? copy(languageMode, '獲得口へ落下！', 'かくとくぐちへ らっか！', 'Dropping into the chute!')
+            : copy(languageMode, '景品が落下！', 'けいひんが らっか！', 'The prize slipped!'))}
         </div>
 
         <div className="crane-game-controls" aria-label={copy(languageMode, '操作ボタン', 'そうさ ボタン', 'Controls')}>

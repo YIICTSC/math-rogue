@@ -17545,25 +17545,6 @@ textarea {
   pointer-events: none;
 }
 
-.crane-game-chute-overlay {
-  position: absolute;
-  z-index: 9;
-  top: 62%;
-  left: 12%;
-  width: 38%;
-  height: 38%;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-size: 100% 100%;
-  pointer-events: none;
-  filter: drop-shadow(0 -2px 4px rgba(15, 23, 42, 0.35));
-}
-
-.crane-game-chute-overlay-front {
-  z-index: 10;
-  clip-path: inset(66% 0 0 0);
-}
-
 .crane-game-cable {
   position: absolute;
   z-index: 2;
@@ -17574,6 +17555,20 @@ textarea {
   background: linear-gradient(90deg, #0f172a, #64748b, #111827);
   transform: translateX(-50%);
   transition: left 70ms linear;
+}
+
+.crane-game-held-sprite {
+  position: absolute;
+  z-index: 12;
+  width: 22%;
+  aspect-ratio: 1;
+  background-repeat: no-repeat;
+  background-size: 300% 200%;
+  image-rendering: pixelated;
+  transform: translate(-50%, -25%);
+  pointer-events: none;
+  filter: drop-shadow(0 5px 4px rgba(0, 0, 0, 0.5));
+  transition: left 65ms linear, top 65ms linear;
 }
 
 .crane-game-claw {
