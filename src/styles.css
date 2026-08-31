@@ -17532,6 +17532,7 @@ textarea {
   height: 48.4%;
   overflow: hidden;
   border-radius: 0.3rem;
+  isolation: isolate;
 }
 
 .crane-game-sprite {
@@ -17542,6 +17543,22 @@ textarea {
   background-size: 400% 400%;
   image-rendering: pixelated;
   pointer-events: none;
+}
+
+.crane-game-chute-overlay {
+  position: absolute;
+  z-index: 3;
+  inset: 0;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  pointer-events: none;
+  filter: drop-shadow(0 -2px 4px rgba(15, 23, 42, 0.35));
+}
+
+.crane-game-chute-overlay-front {
+  z-index: 7;
+  clip-path: inset(76% 0 0 0);
 }
 
 .crane-game-cable {
@@ -17558,7 +17575,7 @@ textarea {
 
 .crane-game-claw {
   position: absolute;
-  z-index: 8;
+  z-index: 12;
   width: 22%;
   transform: translate(-50%, -25%);
   transition: left 70ms linear;
@@ -17567,7 +17584,7 @@ textarea {
 
 .crane-game-prize {
   position: absolute;
-  z-index: 4;
+  z-index: 8;
   width: 18%;
   transform-origin: 50% 66%;
   transition: left 65ms linear, top 65ms linear, transform 65ms linear;
@@ -17575,10 +17592,17 @@ textarea {
 }
 
 .crane-game-prize.is-caught {
-  z-index: 7;
+  z-index: 9;
   width: 19%;
   transform-origin: 50% 15%;
   filter: drop-shadow(0 8px 5px rgba(15, 23, 42, 0.55));
+}
+
+.crane-game-prize.is-falling {
+  z-index: 10;
+  width: 18.5%;
+  transform-origin: 50% 66%;
+  filter: drop-shadow(0 10px 5px rgba(15, 23, 42, 0.58));
 }
 
 .crane-game-aim-line {

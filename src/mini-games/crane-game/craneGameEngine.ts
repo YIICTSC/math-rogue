@@ -17,6 +17,7 @@ export interface CranePrizeDefinition {
   periodMs: number;
   phase: number;
   catchRadius: number;
+  carryDropChance: number;
   goldReward: number;
   label: {
     ja: string;
@@ -38,41 +39,70 @@ export interface CraneCatch {
 }
 
 export const CRANE_EVENT_CHANCE = 0.25;
+export const CRANE_CHUTE_X = 50;
+export const CRANE_CARRY_DURATION_MS = 1250;
+export const CRANE_CHUTE_DROP_DURATION_MS = 720;
+export const CRANE_FALL_DURATION_MS = 640;
 
 export const CRANE_PRIZES: CranePrizeDefinition[] = [
   {
     id: 'cat', spriteIndex: 7, baseX: 18, baseY: 82, baseRotation: -31,
-    drift: 1.4, rollDegrees: 7, periodMs: 2900, phase: 0.4, catchRadius: 8.5, goldReward: 40,
+    drift: 1.4, rollDegrees: 7, periodMs: 2900, phase: 0.4, catchRadius: 8.5, carryDropChance: 0.3, goldReward: 40,
     label: { ja: '白ねこのぬいぐるみ', hira: 'しろねこの ぬいぐるみ', en: 'White Cat Plush' },
   },
   {
     id: 'raccoon', spriteIndex: 4, baseX: 35, baseY: 81, baseRotation: 24,
-    drift: 2.4, rollDegrees: 13, periodMs: 2200, phase: 1.7, catchRadius: 10.5, goldReward: 50,
+    drift: 2.4, rollDegrees: 13, periodMs: 2200, phase: 1.7, catchRadius: 10.5, carryDropChance: 0.42, goldReward: 50,
     label: { ja: 'アライグマのぬいぐるみ', hira: 'あらいぐまの ぬいぐるみ', en: 'Raccoon Plush' },
   },
   {
     id: 'red-capsule', spriteIndex: 8, baseX: 47, baseY: 88, baseRotation: -18,
-    drift: 3.2, rollDegrees: 19, periodMs: 1800, phase: 2.1, catchRadius: 7.5, goldReward: 25,
+    drift: 3.2, rollDegrees: 19, periodMs: 1800, phase: 2.1, catchRadius: 7.5, carryDropChance: 0.18, goldReward: 25,
     label: { ja: '赤いカプセル', hira: 'あかい カプセル', en: 'Red Capsule' },
   },
   {
     id: 'dragon', spriteIndex: 5, baseX: 60, baseY: 80, baseRotation: -20,
-    drift: 1.6, rollDegrees: 8, periodMs: 3400, phase: 3.2, catchRadius: 9.5, goldReward: 55,
+    drift: 1.6, rollDegrees: 8, periodMs: 3400, phase: 3.2, catchRadius: 9.5, carryDropChance: 0.35, goldReward: 55,
     label: { ja: '青いドラゴンのぬいぐるみ', hira: 'あおい ドラゴンの ぬいぐるみ', en: 'Blue Dragon Plush' },
   },
   {
     id: 'blue-capsule', spriteIndex: 9, baseX: 71, baseY: 88, baseRotation: 22,
-    drift: 2.8, rollDegrees: 17, periodMs: 2000, phase: 4.4, catchRadius: 7.5, goldReward: 25,
+    drift: 2.8, rollDegrees: 17, periodMs: 2000, phase: 4.4, catchRadius: 7.5, carryDropChance: 0.22, goldReward: 25,
     label: { ja: '青いカプセル', hira: 'あおい カプセル', en: 'Blue Capsule' },
   },
   {
     id: 'chick', spriteIndex: 6, baseX: 83, baseY: 82, baseRotation: 28,
-    drift: 1.8, rollDegrees: 10, periodMs: 2600, phase: 5.3, catchRadius: 9, goldReward: 35,
+    drift: 1.8, rollDegrees: 10, periodMs: 2600, phase: 5.3, catchRadius: 9, carryDropChance: 0.28, goldReward: 35,
     label: { ja: 'ひよこのぬいぐるみ', hira: 'ひよこの ぬいぐるみ', en: 'Chick Plush' },
   },
 ];
 
 export const clampCraneX = (x: number): number => Math.max(8, Math.min(92, x));
+
+export const clampProgress = (progress: number): number => Math.max(0, Math.min(1, progress));
+
+export const easeInOut = (progress: number): number => {
+  const t = clampProgress(progress);
+  return t * t * (3 - 2 * t);
+};
+
+export const interpolateCraneX = (startX: number, endX: number, progress: number): number => (
+  startX + (endX - startX) * easeInOut(progress)
+);
+
+/**
+ * Decide whether the held prize slips while the carriage travels to the chute.
+ * A slip happens between 32% and 80% of the route, keeping the drop visible
+ * instead of making it look like a random disappearance at the edge of the bay.
+ */
+export const getCarryDropPoint = (
+  randomValue: number,
+  prize: CranePrizeDefinition,
+): number | null => {
+  if (!Number.isFinite(randomValue) || randomValue < 0 || randomValue >= prize.carryDropChance) return null;
+  const normalized = randomValue / Math.max(0.0001, prize.carryDropChance);
+  return 0.32 + normalized * 0.48;
+};
 
 export const getPrizePose = (prize: CranePrizeDefinition, elapsedMs: number): CranePrizePose => {
   const wave = (elapsedMs / prize.periodMs) * Math.PI * 2 + prize.phase;

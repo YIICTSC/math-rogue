@@ -5807,10 +5807,14 @@ const App: React.FC = () => {
                 languageMode === 'ENGLISH'
                     ? result.outcome === 'WIN'
                         ? `The crane caught ${result.prizeLabel ?? 'a prize'}. You gained ${result.goldReward}G.`
-                        : `The claw slipped, but you received an ${result.goldReward}G consolation prize.`
+                        : result.reason === 'SLIPPED'
+                            ? `${result.prizeLabel ?? 'The prize'} slipped on the way to the chute, but you received an ${result.goldReward}G consolation prize.`
+                            : `The claw missed, but you received an ${result.goldReward}G consolation prize.`
                     : result.outcome === 'WIN'
                         ? `クレーンゲームで「${result.prizeLabel ?? '景品'}」を獲得。${result.goldReward}Gを得た。`
-                        : `アームは空振りしたが、参加賞として${result.goldReward}Gを得た。`,
+                        : result.reason === 'SLIPPED'
+                            ? `「${result.prizeLabel ?? '景品'}」は獲得口までに落ちたが、参加賞として${result.goldReward}Gを得た。`
+                            : `アームは空振りしたが、参加賞として${result.goldReward}Gを得た。`,
             ],
             craneGameContext: undefined,
         }));
@@ -5819,7 +5823,7 @@ const App: React.FC = () => {
 
     const handleCraneGameBack = useCallback(() => {
         if (stateRef.current.craneGameContext === 'EVENT') {
-            handleCraneGameComplete({ outcome: 'LOSE', prizeId: null, prizeLabel: null, goldReward: 8 });
+            handleCraneGameComplete({ outcome: 'LOSE', reason: 'MISSED', prizeId: null, prizeLabel: null, goldReward: 8 });
             return;
         }
         setGameState(prev => ({

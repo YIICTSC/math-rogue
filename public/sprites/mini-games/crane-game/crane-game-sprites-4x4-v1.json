@@ -2,6 +2,7 @@
   "image": "crane-game-sprites-4x4-v1.png",
   "productionImage": "crane-game-sprites-4x4-alpha-v1.png",
   "cabinetImage": "crane-game-cabinet-v1.png",
+  "chuteFenceImage": "crane-game-chute-fence-v1.png",
   "columns": 4,
   "rows": 4,
   "chromaKey": "#00FF00",
