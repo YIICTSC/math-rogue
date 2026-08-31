@@ -34,7 +34,7 @@ const MINI_GAME_SPRITE_ICONS: Record<string, MiniGameSpriteDefinition> = {
   POKER: { src: 'sprites/after-school-poker-card-ornaments.webp', columns: 8, rows: 2, index: 0 },
   DUNGEON: { src: 'sprites/furai-sfc-v2-hero-base-5x5.webp', columns: 5, rows: 5, index: 0, cell: 72, gap: 16 },
   KOCHO: { src: 'sprites/kocho-hero-actions-01.webp', columns: 5, rows: 5, index: 0 },
-  PAPER_PLANE: { src: 'sprites/paper-plane/pilots-02.webp', columns: 5, rows: 5, index: 1, offsetX: -12, offsetY: 2, assetVersion: '20260831-centered-v1' },
+  PAPER_PLANE: { src: 'sprites/paper-plane/pilots-02.webp', columns: 5, rows: 5, index: 1, offsetX: -12, offsetY: 2, assetVersion: '20260831-bleedfix-v2' },
   DUNGEON_2: { src: 'sprites/furai-shogakusei2-card-sheet.webp', columns: 6, rows: 5, index: 0, cell: 72, gap: 16 },
   STONE_GLOW: { src: 'sprites/backgrounds/mini-games/badges/stone-glow.png', columns: 1, rows: 1, index: 0 },
   SCHOOL_TRPG: { src: 'sprites/backgrounds/mini-games/badges/school-trpg.png', columns: 1, rows: 1, index: 0 },

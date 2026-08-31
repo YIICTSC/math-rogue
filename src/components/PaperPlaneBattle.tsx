@@ -748,7 +748,7 @@ const getBaseAssetPath = (path: string): string => {
 };
 
 const PAPER_PLANE_ASSET_BASE = getBaseAssetPath('sprites/paper-plane');
-const PAPER_PLANE_SHEET_VERSION = '20260831-centered-v1';
+const PAPER_PLANE_SHEET_VERSION = '20260831-bleedfix-v2';
 const paperPlaneSheetAsset = (path: string): string => `${assetUrl(path)}?v=${PAPER_PLANE_SHEET_VERSION}`;
 const PAPER_PLANE_GRID_SIZE = 5;
 const PAPER_PLANE_PART_NAMES = Array.from(new Set([
