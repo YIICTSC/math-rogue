@@ -1,0 +1,26 @@
+{
+  "image": "crane-game-sprites-4x4-v1.png",
+  "productionImage": "crane-game-sprites-4x4-alpha-v1.png",
+  "cabinetImage": "crane-game-cabinet-v1.png",
+  "columns": 4,
+  "rows": 4,
+  "chromaKey": "#00FF00",
+  "cells": [
+    { "id": "crane-carriage", "column": 0, "row": 0 },
+    { "id": "claw-open", "column": 1, "row": 0 },
+    { "id": "claw-half-closed", "column": 2, "row": 0 },
+    { "id": "claw-gripping", "column": 3, "row": 0 },
+    { "id": "plush-red-panda", "column": 0, "row": 1 },
+    { "id": "plush-blue-dragon", "column": 1, "row": 1 },
+    { "id": "plush-yellow-chick", "column": 2, "row": 1 },
+    { "id": "plush-white-cat", "column": 3, "row": 1 },
+    { "id": "capsule-red", "column": 0, "row": 2 },
+    { "id": "capsule-blue", "column": 1, "row": 2 },
+    { "id": "mystery-gift", "column": 2, "row": 2 },
+    { "id": "prize-tickets", "column": 3, "row": 2 },
+    { "id": "rare-trophy", "column": 0, "row": 3 },
+    { "id": "coins", "column": 1, "row": 3 },
+    { "id": "effect-success", "column": 2, "row": 3 },
+    { "id": "effect-miss", "column": 3, "row": 3 }
+  ]
+}

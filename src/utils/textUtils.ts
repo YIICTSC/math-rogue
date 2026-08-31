@@ -1113,6 +1113,9 @@ const BASE_DICTIONARY: Record<string, string> = {
     // --- Mini Game Selection ---
     "ミニゲーム選択": "ミニゲーム せんたく",
     "※ボタン長押しでセーブデータを削除できます": "※ボタン ながおしで データを けせます",
+    "放課後クレーンゲーム": "ほうかご クレーンゲーム",
+    "クレーンゲーム": "クレーンゲーム",
+    "アームを動かして景品をキャッチ！本編イベントを先行体験。": "アームを うごかして けいひんを キャッチ！ ほんぺんイベントを さきに たいけん。",
     "放課後ポーカー": "ほうかご ポーカー",
     "ポーカー役でスコアを伸ばせ！": "ポーカーやくで スコアを のばせ！",
     "アイテムを駆使するローグライク。": "アイテムを つかう ローグライク。",
@@ -9890,6 +9893,8 @@ const PROBLEM_SUBJECT_ENGLISH_MAP: Record<string, string> = {
 
 Object.assign(ENGLISH_DICTIONARY, {
     // Mini-game selection
+    "放課後クレーンゲーム": "After-School Crane Game",
+    "アームを動かして景品をキャッチ！本編イベントを先行体験。": "Move the claw, catch a prize, and preview the new main-adventure event.",
     "帰宅ダッシュ": "Home Dash",
     "帰宅ダッシュ！": "Home Dash!",
     "障害物をよけて帰宅せよ！レベルアップで教科を強化。": "Dodge obstacles and race home. Level up to strengthen your school skills.",

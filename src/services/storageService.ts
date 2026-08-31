@@ -51,6 +51,7 @@ const NON_RESUMABLE_GAME_SCREENS = new Set<GameScreen>([
   GameScreen.MINI_GAME_GO,
   GameScreen.MINI_GAME_CHESS,
   GameScreen.MINI_GAME_MAHJONG,
+  GameScreen.MINI_GAME_CRANE,
 ]);
 
 const isMainAdventureResumeState = (value: unknown): value is GameState => {

@@ -17452,6 +17452,333 @@ textarea {
   }
 }
 
+/* Crane game: the ImageGen cabinet is the fixed 3:2 coordinate space. Live
+   claw/prize sprites are overlaid only inside the glass bay. */
+.crane-game-screen {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  overflow: hidden;
+  background:
+    radial-gradient(circle at 50% 40%, rgba(34, 211, 238, 0.16), transparent 42%),
+    #05030b;
+  color: #fff;
+  user-select: none;
+  touch-action: none;
+}
+
+.crane-game-machine {
+  position: relative;
+  width: min(100vw, 150dvh);
+  height: min(100dvh, 66.6667vw);
+  max-width: 1536px;
+  max-height: 1024px;
+  overflow: hidden;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: 100% 100%;
+  filter: drop-shadow(0 0 28px rgba(239, 68, 68, 0.26));
+}
+
+.crane-game-marquee {
+  position: absolute;
+  z-index: 15;
+  top: 2.8%;
+  left: 28%;
+  width: 45%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  color: #fff7d6;
+  font-family: "Press Start 2P", "Noto Sans JP", sans-serif;
+  font-size: clamp(0.58rem, 1.6vw, 1.35rem);
+  font-weight: 900;
+  letter-spacing: 0.08em;
+  line-height: 1.25;
+  text-shadow: 0 2px 0 #991b1b, 0 0 12px rgba(251, 191, 36, 0.85);
+}
+
+.crane-game-marquee small {
+  margin-top: 0.35em;
+  color: #67e8f9;
+  font-size: 0.48em;
+  letter-spacing: 0.16em;
+  text-shadow: 0 0 8px rgba(34, 211, 238, 0.95);
+}
+
+.crane-game-back {
+  position: absolute;
+  z-index: 30;
+  top: 2.5%;
+  left: 2.5%;
+  display: grid;
+  width: clamp(2rem, 4vw, 3rem);
+  aspect-ratio: 1;
+  place-items: center;
+  border: 2px solid rgba(255, 255, 255, 0.72);
+  border-radius: 999px;
+  background: rgba(8, 15, 32, 0.82);
+  color: #fff;
+  box-shadow: 0 0 14px rgba(34, 211, 238, 0.42);
+}
+
+.crane-game-chamber {
+  position: absolute;
+  z-index: 5;
+  top: 18.2%;
+  left: 23.2%;
+  width: 53.8%;
+  height: 48.4%;
+  overflow: hidden;
+  border-radius: 0.3rem;
+}
+
+.crane-game-sprite {
+  display: block;
+  width: 18%;
+  aspect-ratio: 1;
+  background-repeat: no-repeat;
+  background-size: 400% 400%;
+  image-rendering: pixelated;
+  pointer-events: none;
+}
+
+.crane-game-cable {
+  position: absolute;
+  z-index: 2;
+  top: -5%;
+  width: clamp(2px, 0.45vw, 6px);
+  border-left: 2px solid #182033;
+  border-right: 1px solid rgba(255, 255, 255, 0.45);
+  background: linear-gradient(90deg, #0f172a, #64748b, #111827);
+  transform: translateX(-50%);
+  transition: left 70ms linear;
+}
+
+.crane-game-claw {
+  position: absolute;
+  z-index: 8;
+  width: 22%;
+  transform: translate(-50%, -25%);
+  transition: left 70ms linear;
+  filter: drop-shadow(0 5px 4px rgba(0, 0, 0, 0.5));
+}
+
+.crane-game-prize {
+  position: absolute;
+  z-index: 4;
+  width: 18%;
+  transform-origin: 50% 66%;
+  transition: left 65ms linear, top 65ms linear, transform 65ms linear;
+  filter: drop-shadow(0 7px 4px rgba(15, 23, 42, 0.42));
+}
+
+.crane-game-prize.is-caught {
+  z-index: 7;
+  width: 19%;
+  transform-origin: 50% 15%;
+  filter: drop-shadow(0 8px 5px rgba(15, 23, 42, 0.55));
+}
+
+.crane-game-aim-line {
+  position: absolute;
+  z-index: 1;
+  top: 18%;
+  bottom: 7%;
+  width: 1px;
+  border-left: 2px dashed rgba(103, 232, 249, 0.62);
+  transform: translateX(-50%);
+  animation: crane-aim-pulse 0.8s ease-in-out infinite alternate;
+}
+
+@keyframes crane-aim-pulse {
+  from { opacity: 0.3; }
+  to { opacity: 0.95; }
+}
+
+.crane-game-status {
+  position: absolute;
+  z-index: 12;
+  top: 60.7%;
+  left: 28%;
+  width: 44%;
+  min-height: 1.7em;
+  padding: 0.28em 0.7em;
+  border: 1px solid rgba(103, 232, 249, 0.45);
+  border-radius: 999px;
+  background: rgba(2, 6, 23, 0.76);
+  color: #e0f2fe;
+  font-size: clamp(0.48rem, 1.12vw, 0.95rem);
+  font-weight: 800;
+  text-align: center;
+  text-shadow: 0 1px 2px #000;
+  backdrop-filter: blur(4px);
+}
+
+.crane-game-controls {
+  position: absolute;
+  z-index: 18;
+  top: 69.6%;
+  left: 35.5%;
+  display: grid;
+  width: 29%;
+  grid-template-columns: 1fr 1.35fr 1fr;
+  gap: clamp(0.2rem, 0.8vw, 0.75rem);
+  align-items: center;
+}
+
+.crane-game-controls button {
+  display: inline-flex;
+  min-width: 0;
+  min-height: clamp(2rem, 5vw, 4.3rem);
+  align-items: center;
+  justify-content: center;
+  border: clamp(1px, 0.25vw, 3px) solid rgba(255, 255, 255, 0.86);
+  border-radius: 999px;
+  background: linear-gradient(#1e3a5f, #0f172a);
+  color: #e0f2fe;
+  box-shadow: inset 0 -5px 0 rgba(0, 0, 0, 0.28), 0 5px 12px rgba(0, 0, 0, 0.35);
+}
+
+.crane-game-controls button:active:not(:disabled) {
+  transform: translateY(3px);
+  box-shadow: inset 0 -2px 0 rgba(0, 0, 0, 0.28), 0 2px 5px rgba(0, 0, 0, 0.35);
+}
+
+.crane-game-controls button:disabled {
+  opacity: 0.42;
+}
+
+.crane-game-controls .crane-game-drop {
+  flex-direction: column;
+  border-color: #fff7d6;
+  background: linear-gradient(#fef3c7, #f59e0b 64%, #b45309);
+  color: #7c2d12;
+  font-size: clamp(0.38rem, 0.78vw, 0.68rem);
+  font-weight: 1000;
+  line-height: 1;
+  text-shadow: 0 1px rgba(255, 255, 255, 0.55);
+}
+
+.crane-game-controls svg {
+  width: clamp(1rem, 2.5vw, 2rem);
+  height: clamp(1rem, 2.5vw, 2rem);
+}
+
+.crane-game-result {
+  position: absolute;
+  z-index: 40;
+  top: 20%;
+  left: 29%;
+  display: grid;
+  width: 42%;
+  min-height: 42%;
+  grid-template-columns: 35% 1fr;
+  grid-template-rows: 1fr auto;
+  align-items: center;
+  gap: 0.6rem;
+  padding: clamp(0.65rem, 2vw, 1.5rem);
+  border: clamp(2px, 0.35vw, 5px) solid #fde68a;
+  border-radius: clamp(0.6rem, 1.6vw, 1.25rem);
+  background: linear-gradient(145deg, rgba(30, 41, 59, 0.97), rgba(76, 29, 149, 0.96));
+  box-shadow: 0 0 0 4px rgba(124, 45, 18, 0.85), 0 0 35px rgba(251, 191, 36, 0.72);
+  text-align: center;
+  animation: crane-result-pop 300ms cubic-bezier(.2, 1.6, .5, 1) both;
+}
+
+@keyframes crane-result-pop {
+  from { opacity: 0; transform: scale(0.72) rotate(-2deg); }
+  to { opacity: 1; transform: scale(1) rotate(0); }
+}
+
+.crane-game-result-prize {
+  width: 100%;
+  filter: drop-shadow(0 8px 5px rgba(0, 0, 0, 0.45));
+}
+
+.crane-game-result-copy svg {
+  display: inline-block;
+  color: #fde047;
+}
+
+.crane-game-result-copy h2 {
+  margin: 0.15em 0;
+  color: #fef3c7;
+  font-size: clamp(0.75rem, 2.2vw, 1.8rem);
+  font-weight: 1000;
+  text-shadow: 0 3px #9a3412, 0 0 15px rgba(250, 204, 21, 0.8);
+}
+
+.crane-game-result-copy p {
+  margin: 0;
+  color: #e0f2fe;
+  font-size: clamp(0.52rem, 1.15vw, 0.95rem);
+  font-weight: 800;
+}
+
+.crane-game-result-copy strong {
+  display: block;
+  margin-top: 0.25em;
+  color: #fde047;
+  font-size: clamp(0.75rem, 2vw, 1.5rem);
+}
+
+.crane-game-result-actions {
+  grid-column: 1 / -1;
+  display: flex;
+  gap: 0.55rem;
+  justify-content: center;
+}
+
+.crane-game-result-actions button {
+  display: inline-flex;
+  min-height: clamp(1.9rem, 4vw, 3rem);
+  align-items: center;
+  justify-content: center;
+  gap: 0.35rem;
+  padding: 0.45em 0.9em;
+  border: 2px solid rgba(255, 255, 255, 0.78);
+  border-radius: 0.55rem;
+  background: linear-gradient(#0891b2, #155e75);
+  color: #fff;
+  font-size: clamp(0.48rem, 1vw, 0.82rem);
+  font-weight: 900;
+  box-shadow: 0 4px 0 #164e63;
+}
+
+@media (orientation: portrait) and (max-width: 720px) {
+  .crane-game-screen {
+    align-items: center;
+  }
+
+  .crane-game-machine {
+    width: 100vw;
+    height: 66.6667vw;
+    max-height: none;
+  }
+
+  .crane-game-controls {
+    top: 68.8%;
+    left: 32%;
+    width: 36%;
+  }
+
+  .crane-game-result {
+    top: 17%;
+    left: 22%;
+    width: 56%;
+    min-height: 48%;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .crane-game-aim-line,
+  .crane-game-result {
+    animation: none;
+  }
+}
+
 /* Capacitor's portrait hub is edge-to-edge. The app shell intentionally does
    not reserve the Dynamic Island/home-indicator space for this screen, so the
    hub must consume the shared iOS UI insets itself. Keep the title action

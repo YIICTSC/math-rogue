@@ -460,6 +460,7 @@ export enum GameScreen {
   MINI_GAME_GO = 'MINI_GAME_GO',
   MINI_GAME_CHESS = 'MINI_GAME_CHESS',
   MINI_GAME_MAHJONG = 'MINI_GAME_MAHJONG',
+  MINI_GAME_CRANE = 'MINI_GAME_CRANE',
   PROBLEM_CHALLENGE = 'PROBLEM_CHALLENGE',
   ASSIGNMENT_CREATE = 'ASSIGNMENT_CREATE',
   SUBMISSION = 'SUBMISSION',
@@ -1250,6 +1251,7 @@ export interface GameState {
   currentStoryIndex?: number;
   actStats?: ActStats;
   currentEventTitle?: string;
+  craneGameContext?: 'TITLE' | 'EVENT';
   newlyUnlockedCardName?: string; // 追加: このアクトで解放されたカード
   coopBattleState?: CoopBattleState | null;
 }

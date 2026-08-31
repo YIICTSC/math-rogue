@@ -90,6 +90,8 @@ const getHumanoidEnemyVoiceActionForIntent = (intent: EnemyIntent): HumanoidEnem
 import MiniGameSelectScreen, { MiniGameSpriteIcon } from './components/MiniGameSelectScreen';
 import MiniGameRouter from './components/MiniGameRouter'; // Added
 import { isMiniGameUnlocked, MINI_GAMES } from './miniGameConfig'; // Added
+import type { CraneGameResult } from './mini-games/crane-game/CraneGame';
+import { shouldTriggerCraneEvent } from './mini-games/crane-game/craneGameEngine';
 import DodgeballShooting from './components/DodgeballShooting';
 import BasketballLayupShooting from './components/BasketballLayupShooting';
 import FinalBridgeScreen from './components/FinalBridgeScreen';
@@ -5784,6 +5786,51 @@ const App: React.FC = () => {
         audioService.playBGM('map');
     }, [gameState.challengeMode]);
 
+    const handleCraneGameComplete = useCallback((result: CraneGameResult) => {
+        const isMainEvent = stateRef.current.craneGameContext === 'EVENT';
+        if (!isMainEvent) {
+            setGameState(prev => ({
+                ...prev,
+                screen: GameScreen.MINI_GAME_SELECT,
+                craneGameContext: undefined,
+                currentEventTitle: undefined
+            }));
+            audioService.playBGM('menu');
+            return;
+        }
+
+        setGameState(prev => ({
+            ...prev,
+            player: { ...prev.player, gold: prev.player.gold + result.goldReward },
+            narrativeLog: [
+                ...prev.narrativeLog,
+                languageMode === 'ENGLISH'
+                    ? result.outcome === 'WIN'
+                        ? `The crane caught ${result.prizeLabel ?? 'a prize'}. You gained ${result.goldReward}G.`
+                        : `The claw slipped, but you received an ${result.goldReward}G consolation prize.`
+                    : result.outcome === 'WIN'
+                        ? `クレーンゲームで「${result.prizeLabel ?? '景品'}」を獲得。${result.goldReward}Gを得た。`
+                        : `アームは空振りしたが、参加賞として${result.goldReward}Gを得た。`,
+            ],
+            craneGameContext: undefined,
+        }));
+        handleNodeComplete();
+    }, [handleNodeComplete, languageMode]);
+
+    const handleCraneGameBack = useCallback(() => {
+        if (stateRef.current.craneGameContext === 'EVENT') {
+            handleCraneGameComplete({ outcome: 'LOSE', prizeId: null, prizeLabel: null, goldReward: 8 });
+            return;
+        }
+        setGameState(prev => ({
+            ...prev,
+            screen: GameScreen.MINI_GAME_SELECT,
+            craneGameContext: undefined,
+            currentEventTitle: undefined
+        }));
+        audioService.playBGM('menu');
+    }, [handleCraneGameComplete]);
+
     useEffect(() => {
         if (gameState.screen !== GameScreen.EVENT || eventData) return;
         const timeout = window.setTimeout(() => {
@@ -6209,6 +6256,17 @@ const App: React.FC = () => {
             return;
         }
         audioService.playSound('select');
+        if (screen === GameScreen.MINI_GAME_CRANE) {
+            setPendingMiniGameScreen(null);
+            setGameState(prev => ({
+                ...prev,
+                screen,
+                craneGameContext: 'TITLE',
+                currentEventTitle: undefined,
+                challengeMode: undefined,
+            }));
+            return;
+        }
         setPendingMiniGameScreen(screen);
         if (showDailyAssignmentNoticeForProblemSelection()) {
             return;
@@ -8035,6 +8093,30 @@ const App: React.FC = () => {
                         return;
                     }
                     p.relicCounters['TINY_CHEST_PROGRESS'] = tinyChestProgress;
+                }
+                const lastCraneAct = Number(p.relicCounters['CRANE_GAME_LAST_ACT'] || 0) || undefined;
+                if (
+                    gameState.challengeMode !== 'COOP'
+                    && shouldTriggerCraneEvent(Math.random(), nextState.act, lastCraneAct)
+                ) {
+                    const cranePlayer = {
+                        ...p,
+                        relicCounters: {
+                            ...p.relicCounters,
+                            CRANE_GAME_LAST_ACT: nextState.act,
+                        },
+                    };
+                    setEventData(null);
+                    setEventResultLog(null);
+                    setGameState({
+                        ...nextState,
+                        player: cranePlayer,
+                        screen: GameScreen.MINI_GAME_CRANE,
+                        craneGameContext: 'EVENT',
+                        currentEventTitle: '放課後ゲームセンター',
+                    });
+                    audioService.playBGM('event');
+                    return;
                 }
                 const unlockedCards = storageService.getUnlockedCards();
                 const activeVisualTheme = nextState.visualTheme || visualTheme;
@@ -16370,6 +16452,7 @@ const App: React.FC = () => {
         // the parent stage edge-to-edge so that the inset is not applied twice
         // and the portrait back/reset controls remain inside the viewport.
         GameScreen.MINI_GAME_SCHOOL_TRPG,
+        GameScreen.MINI_GAME_CRANE,
     ].includes(gameState.screen);
 
     return (
@@ -18212,7 +18295,7 @@ const App: React.FC = () => {
                         <MiniGameRouter
                             key={`${gameState.screen}:${uiPreviewMiniGameOutcome ?? 'DEFAULT'}`}
                             screen={gameState.screen}
-                            onBack={returnToTitle}
+                            onBack={gameState.screen === GameScreen.MINI_GAME_CRANE ? handleCraneGameBack : returnToTitle}
                             problemMode={miniGameProblemMode}
                             problemModePool={miniGameProblemModePool}
                             answerMode={miniGameAnswerMode}
@@ -18221,6 +18304,8 @@ const App: React.FC = () => {
                             languageMode={languageMode}
                             debugPreview={isUiPreviewMode ? uiPreviewMiniGameOutcome : undefined}
                             isUiPreview={isUiPreviewMode}
+                            onCraneComplete={handleCraneGameComplete}
+                            craneEventMode={gameState.craneGameContext === 'EVENT'}
                         />
                     </div>
                 )}

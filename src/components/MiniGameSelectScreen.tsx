@@ -29,6 +29,7 @@ type MiniGameSpriteDefinition = {
 };
 
 const MINI_GAME_SPRITE_ICONS: Record<string, MiniGameSpriteDefinition> = {
+  CRANE: { src: 'sprites/mini-games/crane-game/crane-game-sprites-4x4-alpha-v1.png', columns: 4, rows: 4, index: 4, assetVersion: '20260831-v1' },
   GO_HOME: { src: 'sprites/go-home-dash-8-loop-grid.webp', columns: 8, rows: 1, index: 2 },
   SURVIVOR: { src: 'sprites/schoolyard-survivor-weapons.webp', columns: 8, rows: 5, index: 0 },
   POKER: { src: 'sprites/after-school-poker-card-ornaments.webp', columns: 8, rows: 2, index: 0 },
