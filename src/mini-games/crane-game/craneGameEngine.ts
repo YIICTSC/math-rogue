@@ -39,7 +39,8 @@ export interface CraneCatch {
 }
 
 export const CRANE_EVENT_CHANCE = 0.25;
-export const CRANE_CHUTE_X = 50;
+// The physical prize outlet is on the left side of the cabinet sheet.
+export const CRANE_CHUTE_X = 14;
 export const CRANE_CARRY_DURATION_MS = 1250;
 export const CRANE_CHUTE_DROP_DURATION_MS = 720;
 export const CRANE_FALL_DURATION_MS = 640;

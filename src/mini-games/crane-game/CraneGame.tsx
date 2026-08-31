@@ -325,16 +325,6 @@ const CraneGame: React.FC<CraneGameProps> = ({
         <section className="crane-game-chamber" aria-label={copy(languageMode, 'クレーンゲームの景品台', 'クレーンゲームの けいひんだい', 'Crane game prize bay')}>
           <div className="crane-game-cable" style={{ left: `${claw.x}%`, height: `${claw.y + 7}%` }} />
           {CRANE_PRIZES.map(renderPrize)}
-          <div
-            className="crane-game-chute-overlay"
-            aria-hidden="true"
-            style={{ backgroundImage: `url("${assetUrl(CHUTE_FENCE_OVERLAY)}")` }}
-          />
-          <div
-            className="crane-game-chute-overlay crane-game-chute-overlay-front"
-            aria-hidden="true"
-            style={{ backgroundImage: `url("${assetUrl(CHUTE_FENCE_OVERLAY)}")` }}
-          />
           <Sprite
             index={phase === 'AIM' || phase === 'DROPPING' ? 1 : 2}
             className="crane-game-claw"
@@ -342,6 +332,17 @@ const CraneGame: React.FC<CraneGameProps> = ({
           />
           {phase === 'AIM' && <div className="crane-game-aim-line" style={{ left: `${claw.x}%` }} />}
         </section>
+
+        <div
+          className="crane-game-chute-overlay"
+          aria-hidden="true"
+          style={{ backgroundImage: `url("${assetUrl(CHUTE_FENCE_OVERLAY)}")` }}
+        />
+        <div
+          className="crane-game-chute-overlay crane-game-chute-overlay-front"
+          aria-hidden="true"
+          style={{ backgroundImage: `url("${assetUrl(CHUTE_FENCE_OVERLAY)}")` }}
+        />
 
         <div className="crane-game-status">
           {phase === 'AIM' && copy(languageMode, '左右で狙って、ボタンでアームを下ろそう！', 'さゆうで ねらって、ボタンで アームを おろそう！', 'Aim with Left/Right, then drop the claw!')}

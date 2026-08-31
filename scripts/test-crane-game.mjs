@@ -22,7 +22,7 @@ try {
   } = engine;
 
   assert.equal(CRANE_EVENT_CHANCE, 0.25, 'event chance should remain 25%');
-  assert.equal(CRANE_CHUTE_X, 50, 'the chute should be centered in the cabinet overlay');
+  assert.equal(CRANE_CHUTE_X, 14, 'the carriage target should sit over the left-side cabinet outlet');
   assert(CRANE_CARRY_DURATION_MS >= 1000, 'carriage travel should be visible, not instantaneous');
   assert(CRANE_CHUTE_DROP_DURATION_MS >= 600, 'the release over the chute should be visible');
   assert(CRANE_FALL_DURATION_MS >= 500, 'a slipped prize should have a visible fall');

@@ -17547,8 +17547,11 @@ textarea {
 
 .crane-game-chute-overlay {
   position: absolute;
-  z-index: 3;
-  inset: 0;
+  z-index: 9;
+  top: 62%;
+  left: 12%;
+  width: 38%;
+  height: 38%;
   background-position: center;
   background-repeat: no-repeat;
   background-size: 100% 100%;
@@ -17557,8 +17560,8 @@ textarea {
 }
 
 .crane-game-chute-overlay-front {
-  z-index: 7;
-  clip-path: inset(76% 0 0 0);
+  z-index: 10;
+  clip-path: inset(66% 0 0 0);
 }
 
 .crane-game-cable {
