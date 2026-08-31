@@ -19,7 +19,7 @@ import { trans } from '../utils/textUtils';
 // --- Constants & Helpers ---
 const SUITS: PokerSuit[] = ['SPADE', 'HEART', 'DIAMOND', 'CLUB'];
 const RANKS: PokerRank[] = [2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14];
-const POKER_ASSET_VERSION = 'after-school-poker-gptimage2-v13';
+const POKER_ASSET_VERSION = 'after-school-poker-gptimage2-v14';
 const pokerAsset = (fileName: string) => `${assetUrl(`sprites/${fileName}`)}?v=${POKER_ASSET_VERSION}`;
 const POKER_ITEM_SHEET = pokerAsset('after-school-poker-items.webp');
 const POKER_ORNAMENT_SHEET = pokerAsset('after-school-poker-card-ornaments.webp');

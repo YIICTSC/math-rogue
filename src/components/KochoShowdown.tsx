@@ -177,17 +177,20 @@ const getKochoAttackSound = (card: KCard, hitCount: number): { effect: AttackEff
 
 type KochoSheetKey = 'characters' | 'effects' | 'backgrounds';
 
+const KOCHO_HERO_ACTION_VERSION = '20260831-centered-v1';
+const kochoHeroActionAsset = (fileName: string) => `${assetUrl(`sprites/${fileName}`)}?v=${KOCHO_HERO_ACTION_VERSION}`;
+
 const KOCHO_SPRITE_SHEETS: Record<KochoSheetKey, string> = {
-    characters: assetUrl('sprites/kocho-hero-actions-01.webp'),
+    characters: kochoHeroActionAsset('kocho-hero-actions-01.webp'),
     effects: assetUrl('sprites/kocho-effects-01.webp'),
     backgrounds: assetUrl('sprites/kocho-backgrounds-5x5.webp'),
 };
 
 const KOCHO_HERO_ACTION_SHEETS = [
-    assetUrl('sprites/kocho-hero-actions-01.webp'),
-    assetUrl('sprites/kocho-hero-actions-02.webp'),
-    assetUrl('sprites/kocho-hero-actions-03.webp'),
-    assetUrl('sprites/kocho-hero-actions-04.webp'),
+    kochoHeroActionAsset('kocho-hero-actions-01.webp'),
+    kochoHeroActionAsset('kocho-hero-actions-02.webp'),
+    kochoHeroActionAsset('kocho-hero-actions-03.webp'),
+    kochoHeroActionAsset('kocho-hero-actions-04.webp'),
 ];
 
 const KOCHO_ENEMY_SHEETS = [

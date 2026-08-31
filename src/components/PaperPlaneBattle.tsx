@@ -748,6 +748,8 @@ const getBaseAssetPath = (path: string): string => {
 };
 
 const PAPER_PLANE_ASSET_BASE = getBaseAssetPath('sprites/paper-plane');
+const PAPER_PLANE_SHEET_VERSION = '20260831-centered-v1';
+const paperPlaneSheetAsset = (path: string): string => `${assetUrl(path)}?v=${PAPER_PLANE_SHEET_VERSION}`;
 const PAPER_PLANE_GRID_SIZE = 5;
 const PAPER_PLANE_PART_NAMES = Array.from(new Set([
     ...SHIPS.flatMap(ship => ship.layout.map(part => part.name)),
@@ -756,7 +758,7 @@ const PAPER_PLANE_PART_NAMES = Array.from(new Set([
 ].filter(name => name !== '空き')));
 
 const createSheetSprite = (sheetPrefix: string, index: number): PaperPlaneSheetSprite => ({
-    sheet: `${PAPER_PLANE_ASSET_BASE}/${sheetPrefix}-${String(Math.floor(index / 25) + 1).padStart(2, '0')}.webp`,
+    sheet: paperPlaneSheetAsset(`sprites/paper-plane/${sheetPrefix}-${String(Math.floor(index / 25) + 1).padStart(2, '0')}.webp`),
     row: Math.floor((index % 25) / PAPER_PLANE_GRID_SIZE),
     col: index % PAPER_PLANE_GRID_SIZE,
 });
@@ -772,7 +774,7 @@ export const getPaperPlanePilotImage = (pilotId: string): string => `${PAPER_PLA
 export const getPaperPlaneShipSprite = (shipId: string): PaperPlaneSheetSprite | null => {
     const index = SHIPS.findIndex(ship => ship.id === shipId);
     return index >= 0 ? {
-        sheet: `${PAPER_PLANE_ASSET_BASE}/pilots-02.webp`,
+        sheet: paperPlaneSheetAsset('sprites/paper-plane/pilots-02.webp'),
         row: 0,
         col: index + 1,
     } : null;
