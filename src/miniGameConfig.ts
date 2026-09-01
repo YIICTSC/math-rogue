@@ -1,7 +1,7 @@
 
 import { GameScreen } from './types';
 import { storageService } from './services/storageService';
-import { Club, Skull, Compass, Mountain, Crown, Send, LucideIcon, Rocket, Gem, Dice5, Sparkles, CircleDot, Grid3X3, Layers3, Joystick } from 'lucide-react';
+import { Club, Skull, Compass, Mountain, Crown, Send, LucideIcon, Rocket, Gem, Dice5, Sparkles, CircleDot, Grid3X3, Layers3 } from 'lucide-react';
 import { clearSchoolTrpgCampaign } from './mini-games/school-trpg/schoolTrpgSave';
 
 export interface MiniGameConfig {
@@ -41,19 +41,6 @@ export const isMiniGameUnlocked = (
 );
 
 export const MINI_GAMES: MiniGameConfig[] = [
-  {
-    id: 'CRANE',
-    name: '放課後クレーンゲーム',
-    titleLines: ['放課後', 'クレーンゲーム'],
-    description: 'アームを動かして景品をキャッチ！本編イベントを先行体験。',
-    screen: GameScreen.MINI_GAME_CRANE,
-    threshold: 0,
-    typeLabel: 'PRIZE',
-    typeColor: 'bg-rose-600',
-    glowColor: 'rgba(251,113,133,0.55)',
-    icon: Joystick,
-    clearAction: () => {}
-  },
   {
     id: 'GO_HOME',
     name: '帰宅ダッシュ',

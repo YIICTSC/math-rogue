@@ -44,6 +44,34 @@ type HighSchoolBattleVoiceAction = 'attack' | 'summon' | 'block' | 'power' | 'da
 const NON_FINISH_BATTLE_VOICE_RATE = 0.3;
 const BATTLE_VOICE_REPLY_DELAY_MS = 420;
 
+const CRANE_BATTLE_STRENGTH_COUNTER = 'CRANE_PRIZE_BATTLE_STRENGTH';
+const CRANE_BATTLE_BLOCK_COUNTER = 'CRANE_PRIZE_BATTLE_BLOCK';
+const CRANE_BATTLE_DRAW_COUNTER = 'CRANE_PRIZE_BATTLE_DRAW';
+
+const applyCranePermanentEffect = (player: Player, kind: CranePermanentEffectKind, amount: number): void => {
+    if (!Number.isFinite(amount) || amount <= 0) return;
+    switch (kind) {
+        case 'MAX_HP':
+            player.maxHp += amount;
+            player.currentHp = Math.min(player.maxHp, player.currentHp + amount);
+            break;
+        case 'MAX_ENERGY':
+            player.maxEnergy += amount;
+            break;
+        case 'BATTLE_STRENGTH':
+            player.relicCounters[CRANE_BATTLE_STRENGTH_COUNTER] = (player.relicCounters[CRANE_BATTLE_STRENGTH_COUNTER] || 0) + amount;
+            break;
+        case 'BATTLE_BLOCK':
+            player.relicCounters[CRANE_BATTLE_BLOCK_COUNTER] = (player.relicCounters[CRANE_BATTLE_BLOCK_COUNTER] || 0) + amount;
+            break;
+        case 'BATTLE_DRAW':
+            player.relicCounters[CRANE_BATTLE_DRAW_COUNTER] = (player.relicCounters[CRANE_BATTLE_DRAW_COUNTER] || 0) + amount;
+            break;
+        default:
+            break;
+    }
+};
+
 // `retained` is transient battle UI/state metadata.  It must not leak into a
 // discard/draw cycle, otherwise a previously retained card could be shown as
 // retained again when it is drawn normally later in the battle.
@@ -91,7 +119,13 @@ import MiniGameSelectScreen, { MiniGameSpriteIcon } from './components/MiniGameS
 import MiniGameRouter from './components/MiniGameRouter'; // Added
 import { isMiniGameUnlocked, MINI_GAMES } from './miniGameConfig'; // Added
 import type { CraneGameResult } from './mini-games/crane-game/CraneGame';
-import { shouldTriggerCraneEvent } from './mini-games/crane-game/craneGameEngine';
+import {
+    CRANE_PRIZES,
+    CRANE_REPLAY_COST,
+    getCranePrizeClaimedCounterKey,
+    shouldTriggerCraneEvent,
+} from './mini-games/crane-game/craneGameEngine';
+import type { CranePermanentEffectKind, CranePrizeId } from './mini-games/crane-game/craneGameEngine';
 import DodgeballShooting from './components/DodgeballShooting';
 import BasketballLayupShooting from './components/BasketballLayupShooting';
 import FinalBridgeScreen from './components/FinalBridgeScreen';
@@ -3107,6 +3141,10 @@ const App: React.FC = () => {
 
         const eventStrengthBonus = p.relicCounters['EVENT_STRENGTH_BONUS'] || 0;
         if (eventStrengthBonus > 0) p.strength += eventStrengthBonus;
+        const craneBattleStrength = p.relicCounters[CRANE_BATTLE_STRENGTH_COUNTER] || 0;
+        if (craneBattleStrength > 0) p.strength += craneBattleStrength;
+        const craneBattleBlock = p.relicCounters[CRANE_BATTLE_BLOCK_COUNTER] || 0;
+        if (craneBattleBlock > 0) p.block += craneBattleBlock;
         if (p.relics.find(r => r.id === 'HAPPY_FLOWER')) p.relicCounters['HAPPY_FLOWER'] = 0;
         if (p.relics.find(r => r.id === 'VAJRA')) p.strength += 1;
         if (p.relics.find(r => r.id === 'HACHIMAKI')) p.powers['DEXTERITY'] = (p.powers['DEXTERITY'] || 0) + 1;
@@ -3164,6 +3202,7 @@ const App: React.FC = () => {
         let drawCount = HAND_SIZE;
         if (p.relics.find(r => r.id === 'SNAKE_RING')) drawCount += 2;
         if (p.relics.find(r => r.id === 'SNECKO_EYE')) drawCount += 2;
+        drawCount += p.relicCounters[CRANE_BATTLE_DRAW_COUNTER] || 0;
 
         for (let i = 0; i < drawCount; i++) {
             const drawn = p.drawPile.pop();
@@ -5799,31 +5838,65 @@ const App: React.FC = () => {
             return;
         }
 
-        setGameState(prev => ({
-            ...prev,
-            player: { ...prev.player, gold: prev.player.gold + result.goldReward },
-            narrativeLog: [
-                ...prev.narrativeLog,
-                languageMode === 'ENGLISH'
-                    ? result.outcome === 'WIN'
-                        ? `The crane caught ${result.prizeLabel ?? 'a prize'}. You gained ${result.goldReward}G.`
-                        : result.reason === 'SLIPPED'
-                            ? `${result.prizeLabel ?? 'The prize'} slipped on the way to the chute, but you received an ${result.goldReward}G consolation prize.`
-                            : `The claw missed, but you received an ${result.goldReward}G consolation prize.`
-                    : result.outcome === 'WIN'
-                        ? `クレーンゲームで「${result.prizeLabel ?? '景品'}」を獲得。${result.goldReward}Gを得た。`
-                        : result.reason === 'SLIPPED'
-                            ? `「${result.prizeLabel ?? '景品'}」は獲得口までに落ちたが、参加賞として${result.goldReward}Gを得た。`
-                            : `アームは空振りしたが、参加賞として${result.goldReward}Gを得た。`,
-            ],
-            craneGameContext: undefined,
-        }));
+        const deliveredPrizeIds = result.outcome === 'WIN'
+            ? Array.from(new Set(result.prizeIds ?? (result.prizeId ? [result.prizeId as CranePrizeId] : [])))
+            : [];
+        setGameState(prev => {
+            const nextPlayer: Player = {
+                ...prev.player,
+                gold: prev.player.gold + result.goldReward,
+                relicCounters: { ...prev.player.relicCounters },
+            };
+            const newlyAppliedEffects = deliveredPrizeIds.flatMap((prizeId) => {
+                const prize = CRANE_PRIZES.find(candidate => candidate.id === prizeId);
+                if (!prize) return [];
+                const claimedKey = getCranePrizeClaimedCounterKey(prize.id);
+                if ((nextPlayer.relicCounters[claimedKey] || 0) > 0) return [];
+                nextPlayer.relicCounters[claimedKey] = 1;
+                applyCranePermanentEffect(nextPlayer, prize.permanentEffect.kind, prize.permanentEffect.amount);
+                return [prize.permanentEffect];
+            });
+            const effectTextJa = newlyAppliedEffects.map(effect => effect.label.ja).join('、');
+            const effectTextHira = newlyAppliedEffects.map(effect => effect.label.hira).join('、');
+            const effectTextEn = newlyAppliedEffects.map(effect => effect.label.en).join(', ');
+            const winLog = languageMode === 'ENGLISH'
+                ? `The crane caught ${result.prizeLabel ?? 'a prize'}. You gained ${result.goldReward}G.${effectTextEn ? ` Permanent bonus: ${effectTextEn}.` : ''}`
+                : languageMode === 'HIRAGANA'
+                    ? `くれーんげーむで「${result.prizeLabel ?? 'けいひん'}」を かくとく。${result.goldReward}Gを えた。${effectTextHira ? `ほんぺんの えいぞく こうか：${effectTextHira}。` : ''}`
+                    : `クレーンゲームで「${result.prizeLabel ?? '景品'}」を獲得。${result.goldReward}Gを得た。${effectTextJa ? `本編の永続効果：${effectTextJa}。` : ''}`;
+            const loseLog = languageMode === 'ENGLISH'
+                ? result.reason === 'SLIPPED'
+                    ? `${result.prizeLabel ?? 'The prize'} slipped on the way to the chute, but you received an ${result.goldReward}G consolation prize.`
+                    : `The claw missed, but you received an ${result.goldReward}G consolation prize.`
+                : languageMode === 'HIRAGANA'
+                    ? result.reason === 'SLIPPED'
+                        ? `「${result.prizeLabel ?? 'けいひん'}」は かくとくぐちまでに おちたが、さんかしょうとして${result.goldReward}Gを えた。`
+                        : `あーむは からぶりしたが、さんかしょうとして${result.goldReward}Gを えた。`
+                    : result.reason === 'SLIPPED'
+                        ? `「${result.prizeLabel ?? '景品'}」は獲得口までに落ちたが、参加賞として${result.goldReward}Gを得た。`
+                        : `アームは空振りしたが、参加賞として${result.goldReward}Gを得た。`;
+            return {
+                ...prev,
+                player: nextPlayer,
+                narrativeLog: [...prev.narrativeLog, result.outcome === 'WIN' ? winLog : loseLog],
+                craneGameContext: undefined,
+            };
+        });
         handleNodeComplete();
     }, [handleNodeComplete, languageMode]);
 
+    const handleCraneGameReplay = useCallback((): boolean => {
+        if (stateRef.current.craneGameContext !== 'EVENT' || stateRef.current.player.gold < CRANE_REPLAY_COST) return false;
+        setGameState(prev => ({
+            ...prev,
+            player: { ...prev.player, gold: prev.player.gold - CRANE_REPLAY_COST },
+        }));
+        return true;
+    }, []);
+
     const handleCraneGameBack = useCallback(() => {
         if (stateRef.current.craneGameContext === 'EVENT') {
-            handleCraneGameComplete({ outcome: 'LOSE', reason: 'MISSED', prizeId: null, prizeLabel: null, goldReward: 8 });
+            handleCraneGameComplete({ outcome: 'LOSE', reason: 'MISSED', prizeId: null, prizeIds: [], prizeLabel: null, goldReward: 8, permanentEffects: [] });
             return;
         }
         setGameState(prev => ({
@@ -16336,6 +16409,10 @@ const App: React.FC = () => {
     };
 
     const miniGame = MINI_GAMES.find(g => g.screen === gameState.screen);
+    // The crane is event-only now, so it is intentionally absent from the
+    // title-screen mini-game list. Keep its route renderable when the main
+    // adventure opens the event directly.
+    const isCraneGameScreen = gameState.screen === GameScreen.MINI_GAME_CRANE;
     const showGlobalSettingsGear = false;
 
     const updateSetting = useCallback(<K extends keyof AppSettings>(key: K, value: AppSettings[K]) => {
@@ -18294,7 +18371,7 @@ const App: React.FC = () => {
                 )}
 
                 {/* Generic Mini-Game Router */}
-                {miniGame && (
+                {(miniGame || isCraneGameScreen) && (
                     <div className="absolute inset-0">
                         <MiniGameRouter
                             key={`${gameState.screen}:${uiPreviewMiniGameOutcome ?? 'DEFAULT'}`}
@@ -18309,6 +18386,11 @@ const App: React.FC = () => {
                             debugPreview={isUiPreviewMode ? uiPreviewMiniGameOutcome : undefined}
                             isUiPreview={isUiPreviewMode}
                             onCraneComplete={handleCraneGameComplete}
+                            onCraneReplay={handleCraneGameReplay}
+                            claimedCranePrizeIds={CRANE_PRIZES
+                                .filter(prize => (gameState.player.relicCounters[getCranePrizeClaimedCounterKey(prize.id)] || 0) > 0)
+                                .map(prize => prize.id)}
+                            craneGold={gameState.player.gold}
                             craneEventMode={gameState.craneGameContext === 'EVENT'}
                         />
                     </div>

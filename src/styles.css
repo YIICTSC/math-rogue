@@ -17545,6 +17545,13 @@ textarea {
   pointer-events: none;
 }
 
+/* The red capsule cell contains a tiny disconnected sparkle at its lower
+   edge from the source sheet's neighbouring artwork. Keep the capsule's own
+   glow while cropping only that isolated bleed at render time. */
+.crane-game-sprite.crane-game-red-capsule {
+  clip-path: inset(0 0 4% 0);
+}
+
 .crane-game-cable {
   position: absolute;
   z-index: 2;
@@ -17554,7 +17561,8 @@ textarea {
   border-right: 1px solid rgba(255, 255, 255, 0.45);
   background: linear-gradient(90deg, #0f172a, #64748b, #111827);
   transform: translateX(-50%);
-  transition: left 70ms linear;
+  /* The cable follows the same per-frame coordinate as the held composite. */
+  transition: none;
 }
 
 .crane-game-held-sprite {
@@ -17568,7 +17576,9 @@ textarea {
   transform: translate(-50%, -25%);
   pointer-events: none;
   filter: drop-shadow(0 5px 4px rgba(0, 0, 0, 0.5));
-  transition: left 65ms linear, top 65ms linear;
+  /* Do not interpolate independently from the claw; both must share one path. */
+  transition: none;
+  will-change: left, top;
 }
 
 .crane-game-claw {
@@ -17601,6 +17611,13 @@ textarea {
   width: 18.5%;
   transform-origin: 50% 66%;
   filter: drop-shadow(0 10px 5px rgba(15, 23, 42, 0.58));
+  transition: none;
+}
+
+.crane-game-prize.is-rolling {
+  z-index: 11;
+  transition: none;
+  transform-origin: 50% 66%;
 }
 
 .crane-game-aim-line {
@@ -17622,7 +17639,8 @@ textarea {
 .crane-game-status {
   position: absolute;
   z-index: 12;
-  top: 60.7%;
+  /* Landscape layout: keep the guidance below the controller row. */
+  top: 82%;
   left: 28%;
   width: 44%;
   min-height: 1.7em;
@@ -17645,7 +17663,7 @@ textarea {
   left: 35.5%;
   display: grid;
   width: 29%;
-  grid-template-columns: 1fr 1.35fr 1fr;
+  grid-template-columns: 1fr 1fr 1.35fr;
   gap: clamp(0.2rem, 0.8vw, 0.75rem);
   align-items: center;
 }
@@ -17709,6 +17727,10 @@ textarea {
   animation: crane-result-pop 300ms cubic-bezier(.2, 1.6, .5, 1) both;
 }
 
+.crane-game-result.is-single-prize {
+  grid-template-columns: 45% 1fr;
+}
+
 @keyframes crane-result-pop {
   from { opacity: 0; transform: scale(0.72) rotate(-2deg); }
   to { opacity: 1; transform: scale(1) rotate(0); }
@@ -17717,6 +17739,27 @@ textarea {
 .crane-game-result-prize {
   width: 100%;
   filter: drop-shadow(0 8px 5px rgba(0, 0, 0, 0.45));
+}
+
+.crane-game-result-prizes {
+  display: grid;
+  width: 100%;
+  min-height: 100%;
+  grid-column: 1;
+  grid-row: 1;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: center;
+  justify-items: center;
+  gap: 0.3rem;
+}
+
+.crane-game-result-prizes .crane-game-result-prize {
+  width: 100%;
+  max-width: 100%;
+}
+
+.crane-game-result-prizes.is-single {
+  grid-template-columns: 1fr;
 }
 
 .crane-game-result-copy svg {
@@ -17739,11 +17782,86 @@ textarea {
   font-weight: 800;
 }
 
+.crane-game-result-effects {
+  display: grid;
+  gap: 0.12rem;
+  margin-top: 0.38rem;
+  color: #bbf7d0;
+  font-size: clamp(0.42rem, 0.88vw, 0.72rem);
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.crane-game-result-effects span {
+  color: #fde68a;
+  font-size: 0.9em;
+  letter-spacing: 0.04em;
+}
+
+.crane-game-result-effects strong {
+  margin-top: 0;
+  color: #bbf7d0;
+  font-size: inherit;
+}
+
+.crane-game-result-effects small {
+  color: rgba(224, 242, 254, 0.78);
+  font-size: 0.85em;
+}
+
+.crane-game-replay-denied {
+  grid-column: 1 / -1;
+  color: #fecaca;
+  font-size: clamp(0.48rem, 0.95vw, 0.78rem);
+  font-weight: 900;
+}
+
 .crane-game-result-copy strong {
   display: block;
   margin-top: 0.25em;
   color: #fde047;
   font-size: clamp(0.75rem, 2vw, 1.5rem);
+}
+
+.crane-game-result-effects strong {
+  display: flex;
+  align-items: baseline;
+  justify-content: center;
+  gap: 0.35em;
+  margin-top: 0;
+  color: #bbf7d0;
+  font-size: inherit;
+}
+
+.crane-game-result-effects strong.is-owned {
+  color: rgba(224, 242, 254, 0.68);
+}
+
+.crane-game-result-effects strong.is-new {
+  color: #bbf7d0;
+  text-shadow: 0 0 8px rgba(74, 222, 128, 0.48);
+}
+
+.crane-game-result-effects strong em {
+  flex: 0 0 auto;
+  font-style: normal;
+  font-size: 0.8em;
+  letter-spacing: 0.03em;
+  color: #fde68a;
+}
+
+.crane-game-result-effects strong.is-owned em {
+  color: rgba(186, 230, 253, 0.72);
+}
+
+.crane-game-result-wallet {
+  display: block;
+  margin-top: 0.35em;
+  color: #fef3c7;
+  font-size: clamp(0.56rem, 1.12vw, 0.9rem);
+  font-weight: 900;
+  letter-spacing: 0.03em;
+  text-shadow: 0 0 8px rgba(250, 204, 21, 0.58);
 }
 
 .crane-game-result-actions {
@@ -17772,18 +17890,65 @@ textarea {
 @media (orientation: portrait) and (max-width: 720px) {
   .crane-game-screen {
     align-items: center;
+    justify-items: center;
+    background: #030712;
   }
 
   .crane-game-machine {
+    /* Keep the layout box at the viewport width and zoom only the source
+       artwork. This makes the glass bay the centered crop even on browsers
+       that start oversized grid items at the inline-start edge. */
     width: 100vw;
-    height: 66.6667vw;
+    height: 120vw;
     max-height: none;
+    max-width: none;
+    justify-self: center;
+    margin-inline: auto;
+    left: auto;
+    background-size: 180vw 120vw;
+    background-position: center top;
+    filter: none;
+  }
+
+  .crane-game-chamber {
+    /* Source cabinet glass: x=23.2%, width=53.8%. With the source image
+       rendered at 180vw, its visible crop starts at -40vw. */
+    left: 1.76%;
+    width: 96.84%;
+    top: 18.2%;
+    height: 48.4%;
+  }
+
+  .crane-game-status {
+    position: fixed;
+    top: calc(50% + 60vw - 2.6rem);
+    left: 50%;
+    width: min(88vw, 24rem);
+    transform: translateX(-50%);
   }
 
   .crane-game-controls {
-    top: 68.8%;
-    left: 32%;
-    width: 36%;
+    position: fixed;
+    /* The cabinet is 120vw tall and vertically centered, so place the
+       controls immediately below its lower edge instead of pinning them to
+       the phone's bottom bezel. */
+    top: calc(50% + 60vw + 0.75rem);
+    left: 50%;
+    bottom: auto;
+    width: min(90vw, 24rem);
+    grid-template-columns: 1fr 1fr 1.35fr;
+    margin-inline: auto;
+    transform: translateX(-50%);
+  }
+
+  .crane-game-controls button {
+    min-height: clamp(3.2rem, 14vw, 4.6rem);
+  }
+
+  .crane-game-back {
+    position: fixed;
+    top: max(10px, env(safe-area-inset-top));
+    left: max(10px, env(safe-area-inset-left));
   }
 
   .crane-game-result {
