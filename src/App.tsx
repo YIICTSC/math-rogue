@@ -395,7 +395,7 @@ import { getThemedCharacters, getThemedEnemyDisplayName, getThemedHumanoidEnemyS
 import { getTrueBossByTheme } from './data/enemyCatalogs';
 import { getHumanoidEnemyVoiceProfile, type HumanoidEnemyVoiceAction } from './data/humanoidEnemyVoiceLines';
 import { boostMagicCardForTransformation, getMagicCardsForHero } from './data/magicCards';
-import { MAGIC_HEROES } from './data/magicHeroes';
+import { MAGIC_HEROES, MAGIC_MALE_PROTAGONISTS } from './data/magicHeroes';
 import { createMagicRuleState, createMagicStartingDeck, getMagicRuleConfig } from './data/magicLoadouts';
 import { generateMagicRomanceSelectionEvent } from './services/magicRomanceEventService';
 import { applyMagicRuleOnCardPlay } from './services/magicRuleService';
@@ -18401,8 +18401,12 @@ const App: React.FC = () => {
                     <div className="absolute inset-0">
                         <EndlessEndingSequenceScreen
                             kind="OPENING"
+                            theme={coopSyncedVisualTheme}
                             characterId={gameState.player.id}
-                            characterName={themedCharacters.find(character => character.id === gameState.player.id)?.name ?? selectedCharName}
+                            magicProtagonistId={coopSyncedVisualTheme === 'magic' && gameState.player.magicProtagonistGender === 'male' ? gameState.player.magicProtagonistId : undefined}
+                            characterName={coopSyncedVisualTheme === 'magic' && gameState.player.magicProtagonistGender === 'male'
+                                ? MAGIC_MALE_PROTAGONISTS.find(hero => hero.id === gameState.player.magicProtagonistId)?.name ?? selectedCharName
+                                : themedCharacters.find(character => character.id === gameState.player.id)?.name ?? selectedCharName}
                             languageMode={languageMode}
                             onComplete={() => {
                                 audioService.playBGM('map');
@@ -18420,8 +18424,12 @@ const App: React.FC = () => {
                     <div className="absolute inset-0">
                         <EndlessEndingSequenceScreen
                             kind="TRUE"
+                            theme={coopSyncedVisualTheme}
                             characterId={gameState.player.id}
-                            characterName={themedCharacters.find(character => character.id === gameState.player.id)?.name ?? selectedCharName}
+                            magicProtagonistId={coopSyncedVisualTheme === 'magic' && gameState.player.magicProtagonistGender === 'male' ? gameState.player.magicProtagonistId : undefined}
+                            characterName={coopSyncedVisualTheme === 'magic' && gameState.player.magicProtagonistGender === 'male'
+                                ? MAGIC_MALE_PROTAGONISTS.find(hero => hero.id === gameState.player.magicProtagonistId)?.name ?? selectedCharName
+                                : themedCharacters.find(character => character.id === gameState.player.id)?.name ?? selectedCharName}
                             languageMode={languageMode}
                             onComplete={() => {
                                 setGameState(prev => ({

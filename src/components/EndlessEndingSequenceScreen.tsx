@@ -1,6 +1,7 @@
 import React, { useMemo, useState } from 'react';
 import { ChevronRight, Sparkles } from 'lucide-react';
 import type { LanguageMode } from '../types';
+import type { VisualThemeId } from '../data/visualThemes';
 import {
   getEndlessEndingLocalizedText,
   getEndlessEndingLocalizedTitle,
@@ -14,11 +15,13 @@ interface Props {
   characterId: string;
   characterName: string;
   languageMode: LanguageMode;
+  theme?: VisualThemeId;
+  magicProtagonistId?: string;
   onComplete: () => void;
 }
 
-const EndlessEndingSequenceScreen: React.FC<Props> = ({ kind, characterId, characterName, languageMode, onComplete }) => {
-  const sequence = useMemo(() => getEndlessEndingSequence(kind, characterId, characterName), [characterId, characterName, kind]);
+const EndlessEndingSequenceScreen: React.FC<Props> = ({ kind, characterId, characterName, languageMode, theme = 'elementary', magicProtagonistId, onComplete }) => {
+  const sequence = useMemo(() => getEndlessEndingSequence(kind, characterId, characterName, theme, magicProtagonistId), [characterId, characterName, kind, magicProtagonistId, theme]);
   const [pageIndex, setPageIndex] = useState(0);
   const page = sequence.pages[pageIndex];
   const isLast = pageIndex >= sequence.pages.length - 1;

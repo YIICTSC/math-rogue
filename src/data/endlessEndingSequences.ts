@@ -1,4 +1,5 @@
 import type { LanguageMode } from '../types';
+import type { VisualThemeId } from './visualThemes';
 
 export type EndlessEndingKind = 'OPENING' | 'TRUE';
 
@@ -255,6 +256,8 @@ export const getEndlessEndingSequence = (
   kind: EndlessEndingKind,
   characterId: string,
   characterName: string,
+  theme: VisualThemeId = 'elementary',
+  magicProtagonistId?: string,
 ): EndlessEndingSequence => {
   const safeId = HERO_ENDING_COPY[characterId] ? characterId : 'WARRIOR';
   const titles = HERO_ENDING_COPY[safeId] ?? fallbackCopy;
@@ -269,7 +272,9 @@ export const getEndlessEndingSequence = (
       text: line.ja,
       textHiragana: line.hira,
       textEnglish: line.en,
-      imagePath: `sprites/endless-endings/${safeId.toLowerCase()}/${scene}-${index + 1}.webp`,
+      imagePath: theme === 'magic' && magicProtagonistId
+        ? `sprites/endless-endings/magic/male/${magicProtagonistId.toLowerCase()}/${scene}-${index + 1}.webp`
+        : `sprites/endless-endings/${theme === 'elementary' ? '' : `${theme}/`}${safeId.toLowerCase()}/${scene}-${index + 1}.webp`,
     };
   }) as [EndlessEndingPage, EndlessEndingPage, EndlessEndingPage];
   return {
