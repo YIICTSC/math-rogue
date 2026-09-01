@@ -207,6 +207,7 @@ const MathChallengeScreen: React.FC<MathChallengeScreenProps> = ({ onComplete, m
     const isCorrect = option === problems[currentProblemIndex].answer;
     const answerResult = {
       mode,
+      subjectId: mode,
       correct: isCorrect,
       elapsedMs: Date.now() - questionStartedAtRef.current,
       problemKey: problems[currentProblemIndex].problemKey || `${mode}:${problems[currentProblemIndex].question}`,

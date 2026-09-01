@@ -551,6 +551,7 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
     }
     const answerResult = {
       mode: problems[currentProblemIndex].sourceMode,
+      subjectId: problems[currentProblemIndex].sourceMode,
       correct: isCorrect,
       elapsedMs: Date.now() - questionStartedAtRef.current,
       problemId: problems[currentProblemIndex].assignmentProblemId,

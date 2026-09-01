@@ -35,8 +35,44 @@ export interface EndlessBossDefinition {
   theme: string;
   mechanicKey: string;
   mechanicSummary: string;
+  /** Short, non-colour-coded preparation hints shown on the map preview. */
+  weakness: string;
+  recommendedPrep: string;
   rewards: EndlessRewardChoice[];
 }
+
+const bossGuidance: Record<string, Pick<EndlessBossDefinition, 'weakness' | 'recommendedPrep'>> = {
+  UNPROCESSED: { weakness: '弱体を受けた直後の学習判定', recommendedPrep: '最初の弱体を無効化できるカードを温存' },
+  STREAK_CHECK: { weakness: '同じ分野の連続学習判定', recommendedPrep: '短い手札で3回連続成功を狙う' },
+  GATE_SEQUENCE: { weakness: '順序入力の学習判定', recommendedPrep: 'ブロックを確保して入力ターンを作る' },
+  SUBJECT_TRIAD: { weakness: '異なるsubjectIdの学習判定', recommendedPrep: '複数分野を選べる問題設定にする' },
+  UNREAD_PAGE: { weakness: '封印対象と同じ分野の学習判定', recommendedPrep: '山札の枚数を保ち、回収先を確保' },
+  PROTOCOL_TRIAD: { weakness: '指定カードタイプの解決', recommendedPrep: 'ATTACK・SKILL・POWERを各1枚残す' },
+  TIME_SLICE: { weakness: '早いターンの高火力', recommendedPrep: '初手の攻撃と防御を両方準備' },
+  REPEAT_RECORD: { weakness: '3回連続の学習判定成功', recommendedPrep: '同一分野の問題へ集中できる手札にする' },
+  UNDEFINED: { weakness: '未定義タグを持つカードの復元判定', recommendedPrep: '一時効果を受けても使えるカードを残す' },
+  NOX_ROOT: { weakness: '4フェーズすべての学習判定', recommendedPrep: '回復・ドロー・防御を終盤まで温存' },
+  RESUBMIT: { weakness: '再提出の学習判定', recommendedPrep: '失敗後の再試行用に1ターン余裕を作る' },
+  TEST_TRIAD: { weakness: 'カードタイプと分野の組み合わせ', recommendedPrep: '3タイプと複数subjectIdをそろえる' },
+  NOISE: { weakness: '通知消去の学習判定', recommendedPrep: '山札のノイズを処理するドローを確保' },
+  CONTRACT: { weakness: '規約解除の学習判定', recommendedPrep: '追加ルールを無視できる効果を温存' },
+  CATALYST: { weakness: '攻撃カードの連続解決', recommendedPrep: '攻撃の間に防御カードを挟める構成' },
+  ROOFTOP_COMBO: { weakness: '異なるカードタイプの連携', recommendedPrep: 'タイプを偏らせず手札を整える' },
+  BALANCE_SCORE: { weakness: '攻撃・ブロック・学習判定の均衡', recommendedPrep: '1ターンに3要素を無理なく進める' },
+  BLANK_VERDICT: { weakness: '白紙ルール解除の学習判定', recommendedPrep: '状態異常解除を1つ温存' },
+  WAVEFORM: { weakness: '遮断波形の順序判定', recommendedPrep: '敵の次行動表示を有効にする' },
+  NOX_PRIME: { weakness: '通知・規約・評定・遮断の順次判定', recommendedPrep: 'ドローとブロックを終盤用に温存' },
+  TIME_PHASE: { weakness: '時間板の切替直後', recommendedPrep: '直前カードを再演されても耐えるブロック' },
+  ATTRIBUTE_SEAL: { weakness: '異なる属性IDの連続解決', recommendedPrep: '2属性以上の魔法カードを山札に残す' },
+  REFLECTION: { weakness: '弱く反射されたSKILL', recommendedPrep: '反射されても損しないSKILLを先に選ぶ' },
+  PRISM_TRIAD: { weakness: '属性IDごとの順次判定', recommendedPrep: '属性を3つ以上切り替えられる構成' },
+  STAR_KEY: { weakness: '星鍵順序の学習判定', recommendedPrep: '敵の順序表示と入力時間を確保' },
+  LUNAR_PHASE: { weakness: '明光・暗相の切替直後', recommendedPrep: '状態異常解除と防御を両方残す' },
+  SEALED_PAGE: { weakness: '封印解除の学習判定', recommendedPrep: '封印されても戦える最低限の手札を保つ' },
+  ORBITAL_ORDER: { weakness: '観測点の順序判定', recommendedPrep: '単発の高火力を温存して防壁を割る' },
+  MORPH_AFTERIMAGE: { weakness: '異なる属性IDを2種類以上解決', recommendedPrep: '属性の違う魔法を2枚以上用意' },
+  NOX_ORIGIN: { weakness: '5種ギミックの切替タイミング', recommendedPrep: '回復・防御・属性・ドローを均等に準備' },
+};
 
 const bossRows: Array<[EndlessArc, number, EndlessBossTier, string, string, string, string]> = [
   ['elementary', 5, 'BOSS', '墨核端末ピポ', '未処理データを積み上げる端末', 'UNPROCESSED', '最初の弱体を無効化するか、学習判定成功で端末の装甲を下げる。'],
@@ -121,9 +157,13 @@ export const ENDLESS_BOSSES: EndlessBossDefinition[] = bossRows.map(([arc, floor
     scope,
     effectKey,
     oncePerRun: true,
-    oncePerProfile: scope === 'PERMANENT',
+    oncePerProfile: scope === 'PERMANENT' || scope === 'RECORD',
   }));
-  return { id: bossId, arc, floor: floor as EndlessBossDefinition['floor'], tier, name, theme, mechanicKey, mechanicSummary, rewards: choices };
+  const guidance = bossGuidance[mechanicKey] || {
+    weakness: '学習判定成功のタイミング',
+    recommendedPrep: '手札とHPを余裕のある状態に整える',
+  };
+  return { id: bossId, arc, floor: floor as EndlessBossDefinition['floor'], tier, name, theme, mechanicKey, mechanicSummary, ...guidance, rewards: choices };
 });
 
 export const getEndlessBoss = (arc: EndlessArc | undefined, floor: number) =>
@@ -140,9 +180,40 @@ export const getEndlessBossSpritePath = (boss: EndlessBossDefinition, action: 'i
 
 export const createEndlessRewardItems = (boss: EndlessBossDefinition, claimedIds: string[], prefix: string): RewardItem[] => {
   const available = boss.rewards.filter((reward) => !claimedIds.includes(reward.id));
-  const slots: EndlessRewardSlot[] = boss.tier === 'MAJOR_BOSS' ? ['CORE', 'GROWTH', 'CONTRACT'] : ['SAFE', 'LEARNING', 'RISK'];
-  const selected = slots.map((slot) => available.find((reward) => reward.slot === slot)).filter(Boolean) as EndlessRewardChoice[];
-  if (selected.length <= 1) return selected.map((reward) => ({ type: 'ENDLESS_REWARD', value: reward, id: `${prefix}-${reward.id}` }));
+  // The final floor is a special permanent/record pool rather than a normal
+  // major-boss CORE/GROWTH/CONTRACT pool.  Keep the two permanent choices
+  // distinct when selecting the three visible cards.
+  const slots: EndlessRewardSlot[] = boss.floor === 50
+    ? ['PERMANENT', 'PERMANENT', 'RECORD']
+    : boss.tier === 'MAJOR_BOSS' ? ['CORE', 'GROWTH', 'CONTRACT'] : ['SAFE', 'LEARNING', 'RISK'];
+  const fallbackNames: Record<EndlessRewardSlot, [string, string, string]> = {
+    SAFE: ['深層の回復箱', 'HPを10回復', 'FALLBACK_HEAL'],
+    LEARNING: ['深層の補給箱', 'Gを75獲得', 'FALLBACK_GOLD'],
+    RISK: ['深層の改良箱', '未強化カードを1枚強化', 'FALLBACK_CARD_UPGRADE'],
+    CORE: ['深層の回復箱', 'HPを10回復', 'FALLBACK_HEAL'],
+    GROWTH: ['深層の補給箱', 'Gを75獲得', 'FALLBACK_GOLD'],
+    CONTRACT: ['深層の改良箱', '未強化カードを1枚強化', 'FALLBACK_CARD_UPGRADE'],
+    PERMANENT: ['深層の回復箱', 'HPを10回復', 'FALLBACK_HEAL'],
+    RECORD: ['深層の補給箱', 'Gを75獲得', 'FALLBACK_GOLD'],
+  };
+  const selectedRewardIds = new Set<string>();
+  const selected = slots.map((slot, slotIndex) => {
+    const reward = available.find((candidate) => candidate.slot === slot && !selectedRewardIds.has(candidate.id));
+    if (reward) selectedRewardIds.add(reward.id);
+    if (reward) return reward;
+    const [name, description, effectKey] = fallbackNames[slot];
+    return {
+      id: `${boss.id}-FALLBACK-${slot}-${slotIndex}`,
+      bossId: boss.id,
+      slot,
+      name,
+      description,
+      scope: 'RUN' as const,
+      effectKey,
+      oncePerRun: false,
+      oncePerProfile: false,
+    };
+  });
   const seed = Array.from(prefix).reduce((hash, char) => (hash * 31 + char.charCodeAt(0)) >>> 0, 7);
   const offset = seed % selected.length;
   const ordered = selected.map((_, index) => selected[(index + offset) % selected.length]);

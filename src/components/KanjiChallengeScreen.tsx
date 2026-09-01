@@ -155,6 +155,7 @@ const KanjiChallengeScreen: React.FC<KanjiChallengeScreenProps> = ({ onComplete,
     }
     const answerResult = {
       mode,
+      subjectId: mode,
       correct: isCorrect,
       elapsedMs: Date.now() - questionStartedAtRef.current,
       problemKey: problems[currentProblemIndex].problemKey || `${mode}:${problems[currentProblemIndex].question}`,

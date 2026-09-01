@@ -103,6 +103,18 @@ const applyEndlessRewardChoice = (player: Player, choice: EndlessRewardChoice): 
         case 'HIGH_SCHOOL_START_REWARD_PLUS':
             counters.ENDLESS_START_REWARD_SLOTS = Math.max(counters.ENDLESS_START_REWARD_SLOTS || 0, 1);
             break;
+        case 'FALLBACK_HEAL':
+            player.currentHp = Math.min(player.maxHp, player.currentHp + 10);
+            break;
+        case 'FALLBACK_GOLD':
+            player.gold += 75;
+            break;
+        case 'FALLBACK_CARD_UPGRADE':
+            {
+                const index = player.deck.findIndex(card => !card.upgraded && !card.unplayable);
+                if (index >= 0) player.deck[index] = getUpgradedCard(player.deck[index]);
+            }
+            break;
         default:
             break;
     }
@@ -151,6 +163,124 @@ const clearRetainedCardMarker = (card: ICard): ICard => {
     const nextCard = { ...card };
     delete nextCard.retained;
     return nextCard;
+};
+
+// Endless learning rewards are resolved at the moment a learning judgment is
+// submitted, rather than when a multi-question challenge finishes.  This
+// keeps "first success", subject streaks, and per-battle scope deterministic
+// even when a challenge is interrupted or contains several questions.
+const ENDLESS_LEARNING_SCREENS = new Set<GameScreen>([
+    GameScreen.MATH_CHALLENGE,
+    GameScreen.KANJI_CHALLENGE,
+    GameScreen.ENGLISH_CHALLENGE,
+    GameScreen.GENERAL_CHALLENGE,
+]);
+
+const endlessSubjectKey = (value: string | undefined): string =>
+    (value || 'UNKNOWN').replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 80) || 'UNKNOWN';
+
+const drawEndlessLearningCard = (player: Player): boolean => {
+    const drawn = player.drawPile.pop();
+    if (!drawn) return false;
+    player.hand.push(clearRetainedCardMarker(drawn));
+    return true;
+};
+
+const applyEndlessLearningAnswer = (player: Player, result: AssignmentAnswerResult): boolean => {
+    const counters = { ...player.relicCounters };
+    const subject = endlessSubjectKey(result.subjectId || result.mode);
+    const subjectEnergyStreakKey = `ENDLESS_SUBJECT_ENERGY_STREAK_${subject}`;
+    const subjectGoldStreakKey = `ENDLESS_SUBJECT_GOLD_STREAK_${subject}`;
+    const subjectSeenKey = `ENDLESS_SUBJECT_SEEN_${subject}`;
+    const subjectBattleKey = `ENDLESS_BATTLE_SUBJECT_${subject}`;
+    let changed = false;
+
+    // A failed or timed-out judgment always breaks a same-subject streak. A
+    // retry is intentionally not counted as a new success, but a failed retry
+    // still breaks the streak so the UI and rewards match the written rules.
+    if (!result.correct) {
+        if (counters[subjectEnergyStreakKey]) {
+            counters[subjectEnergyStreakKey] = 0;
+            changed = true;
+        }
+        if (counters[subjectGoldStreakKey]) {
+            counters[subjectGoldStreakKey] = 0;
+            changed = true;
+        }
+        player.relicCounters = counters;
+        return changed;
+    }
+    if (result.isRetry) {
+        player.relicCounters = counters;
+        return false;
+    }
+
+    if (counters['ENDLESS_REWARD_DRAW_FIRST_LEARNING'] > 0
+        && counters['ENDLESS_LEARNING_DRAW_USED'] !== 1
+        && drawEndlessLearningCard(player)) {
+        counters['ENDLESS_LEARNING_DRAW_USED'] = 1;
+        changed = true;
+    }
+
+    // High-school's subject-tag reward is once per subject for the whole run,
+    // not once per battle.  Subject IDs are supplied by every challenge screen
+    // and fall back to the challenge mode for legacy saved answers.
+    if (counters['ENDLESS_REWARD_DRAW_FIRST_SUBJECT'] > 0 && counters[`ENDLESS_SUBJECT_DRAW_${subject}`] !== 1) {
+        if (drawEndlessLearningCard(player)) {
+            counters[`ENDLESS_SUBJECT_DRAW_${subject}`] = 1;
+            changed = true;
+        }
+    }
+
+    if (counters['ENDLESS_REWARD_LOW_HP_LEARNING_GOLD'] > 0
+        && player.currentHp / Math.max(1, player.maxHp) <= 0.3
+        && counters['ENDLESS_LOW_HP_GOLD_USED'] !== 1) {
+        player.gold += 20;
+        player.currentHp = Math.max(1, player.currentHp - 5);
+        counters['ENDLESS_LOW_HP_GOLD_USED'] = 1;
+        changed = true;
+    }
+
+    if (counters['ENDLESS_REWARD_SUBJECT_STREAK_ENERGY'] > 0) {
+        const streak = (counters[subjectEnergyStreakKey] || 0) + 1;
+        if (streak >= 3) {
+            player.nextTurnEnergy += 1;
+            counters[subjectEnergyStreakKey] = 0;
+        } else {
+            counters[subjectEnergyStreakKey] = streak;
+        }
+        changed = true;
+    }
+
+    if (counters['ENDLESS_REWARD_SUBJECT_STREAK_GOLD'] > 0) {
+        const streak = (counters[subjectGoldStreakKey] || 0) + 1;
+        if (streak >= 2) {
+            player.gold += 20;
+            counters[subjectGoldStreakKey] = 0;
+        } else {
+            counters[subjectGoldStreakKey] = streak;
+        }
+        changed = true;
+    }
+
+    if (counters['ENDLESS_REWARD_NEW_SUBJECT_BLOCK'] > 0 && counters[subjectSeenKey] !== 1) {
+        player.block += 4;
+        counters[subjectSeenKey] = 1;
+        changed = true;
+    }
+
+    if (counters['ENDLESS_REWARD_SUBJECT_TRIPLE_CARD'] > 0 && counters[subjectBattleKey] !== 1) {
+        counters[subjectBattleKey] = 1;
+        const subjectsInBattle = Object.keys(counters).filter(key => key.startsWith('ENDLESS_BATTLE_SUBJECT_') && counters[key] === 1).length;
+        if (subjectsInBattle >= 3 && counters['ENDLESS_BATTLE_TRIPLE_CARD_USED'] !== 1) {
+            counters['ENDLESS_NEXT_CARD_BOOST'] = Math.max(counters['ENDLESS_NEXT_CARD_BOOST'] || 0, 25);
+            counters['ENDLESS_BATTLE_TRIPLE_CARD_USED'] = 1;
+        }
+        changed = true;
+    }
+
+    player.relicCounters = counters;
+    return changed;
 };
 
 const markRetainedCard = (card: ICard): ICard => ({ ...card, retained: true });
@@ -3243,7 +3373,15 @@ const App: React.FC = () => {
             floatingText: null
         };
 
-        if (p.relicCounters['ENDLESS_REWARD_DRAW_FIRST_LEARNING'] || p.relicCounters['ENDLESS_REWARD_DRAW_FIRST_SUBJECT']) {
+        // Battle-scoped learning reward state must never leak into the next
+        // battle.  Per-run subject markers (DRAW_FIRST_SUBJECT/NEW_SUBJECT)
+        // intentionally remain intact.
+        Object.keys(p.relicCounters)
+            .filter(key => key.startsWith('ENDLESS_BATTLE_')
+                || key.startsWith('ENDLESS_SUBJECT_ENERGY_STREAK_')
+                || key.startsWith('ENDLESS_SUBJECT_GOLD_STREAK_'))
+            .forEach(key => delete p.relicCounters[key]);
+        if (p.relicCounters['ENDLESS_REWARD_DRAW_FIRST_LEARNING']) {
             p.relicCounters['ENDLESS_LEARNING_DRAW_USED'] = 0;
         }
         if (p.relicCounters['ENDLESS_REWARD_LOW_HP_LEARNING_GOLD']) {
@@ -6505,6 +6643,7 @@ const App: React.FC = () => {
             endlessRewardIds: [],
             endlessRunRewards: [],
             endlessRewardPending: false,
+            endlessRewardRerollUsed: false,
             player: (() => {
                 const profile = readEndlessProfileRewards();
                 const nextPlayer = { ...prev.player, relicCounters: { ...prev.player.relicCounters }, currentHp: prev.player.maxHp };
@@ -8164,6 +8303,7 @@ const App: React.FC = () => {
                     endlessFloor: nextState.isEndless ? nextFloor : nextState.endlessFloor,
                     endlessBossId: endlessBoss?.id,
                     endlessRewardPending: Boolean(endlessBoss),
+                    endlessRewardRerollUsed: false,
                     player: p,
                     enemies: enemies,
                     selectedEnemyId: enemies[0].id,
@@ -13631,6 +13771,7 @@ const App: React.FC = () => {
                             screen: GameScreen.FLOOR_RESULT,
                             endlessBossId: undefined,
                             endlessRewardPending: false,
+                            endlessRewardRerollUsed: false,
                             narrativeLog: [...prev.narrativeLog, '50階層を制覇！黒帳機関の深層記録が解放された。'],
                         };
                     }
@@ -13643,6 +13784,7 @@ const App: React.FC = () => {
                         screen: isMajorBoss ? GameScreen.REST : (isGardener ? GameScreen.GARDEN : GameScreen.MAP),
                         endlessBossId: undefined,
                         endlessRewardPending: false,
+                        endlessRewardRerollUsed: false,
                         narrativeLog: [...prev.narrativeLog, isMajorBoss
                             ? `${bossDefinition?.name || '大ボス'}撃破！体力が全回復。休息・強化を選べます。`
                             : `${bossDefinition?.name || 'ボス'}撃破！次の階層へ進もう。`],
@@ -13718,13 +13860,19 @@ const App: React.FC = () => {
         if (endlessBoss && gameState.challengeMode !== 'COOP') {
             const rewardPrefix = `endless-${endlessBoss.id}-${Date.now()}`;
             const tierGold = endlessBoss.floor === 50 ? 500 : endlessBoss.tier === 'MAJOR_BOSS' ? 200 : 100;
-            const rewards = createEndlessRewardItems(endlessBoss, gameState.endlessRewardIds || [], rewardPrefix);
+            const profileRewardIds = Object.keys(readEndlessProfileRewards()).filter(key => !key.startsWith('effect:'));
+            const rewards = createEndlessRewardItems(
+                endlessBoss,
+                [...(gameState.endlessRewardIds || []), ...profileRewardIds],
+                rewardPrefix,
+            );
             setGameState(prev => ({
                 ...prev,
                 screen: GameScreen.REWARD,
                 rewards,
                 endlessBossId: endlessBoss.id,
                 endlessRewardPending: true,
+                endlessRewardRerollUsed: false,
                 player: { ...prev.player, gold: prev.player.gold + tierGold },
                 actStats: prev.actStats ? { ...prev.actStats, goldGained: prev.actStats.goldGained + tierGold } : prev.actStats,
                 narrativeLog: [...prev.narrativeLog, `${endlessBoss.name}撃破！${tierGold}Gを獲得。3択から1つを選んでください。`],
@@ -13856,22 +14004,6 @@ const App: React.FC = () => {
                     p.relicCounters['PROBLEM_CORRECT_STREAK'] = 0;
                 }
                 if (hasRelic(p, 'MAKEUP_TEST')) p.relicCounters['MAKEUP_TEST_BLOCK'] = 1;
-                const hasFirstLearningReward = (p.relicCounters['ENDLESS_REWARD_DRAW_FIRST_LEARNING'] || 0) > 0;
-                const hasFirstSubjectReward = (p.relicCounters['ENDLESS_REWARD_DRAW_FIRST_SUBJECT'] || 0) > 0;
-                if ((hasFirstLearningReward || hasFirstSubjectReward) && p.relicCounters['ENDLESS_LEARNING_DRAW_USED'] !== 1) {
-                    const drawn = p.drawPile.pop();
-                    if (drawn) {
-                        p.hand.push(clearRetainedCardMarker(drawn));
-                        p.relicCounters['ENDLESS_LEARNING_DRAW_USED'] = 1;
-                    }
-                }
-                if ((p.relicCounters['ENDLESS_REWARD_LOW_HP_LEARNING_GOLD'] || 0) > 0
-                    && p.currentHp / Math.max(1, p.maxHp) <= 0.3
-                    && p.relicCounters['ENDLESS_LOW_HP_GOLD_USED'] !== 1) {
-                    p.gold += 20;
-                    p.currentHp = Math.max(1, p.currentHp - 5);
-                    p.relicCounters['ENDLESS_LOW_HP_GOLD_USED'] = 1;
-                }
             } else {
                 p.relicCounters['PROBLEM_CORRECT_STREAK'] = 0;
                 p.relicCounters['ZERO_POINT_NEXT_BATTLE'] = hasRelic(p, 'ZERO_POINT_TEST') ? 1 : 0;
@@ -14283,6 +14415,28 @@ const App: React.FC = () => {
     }, []);
 
     const handleAssignmentAnswerResult = useCallback((result: AssignmentAnswerResult) => {
+        // Endless rewards listen to the same answer stream as assignments, but
+        // are deliberately resolved before the assignment bookkeeping below.
+        // This path is also used for ordinary in-run questions where no daily
+        // assignment is active.
+        const endlessState = stateRef.current;
+        if (endlessState.isEndless && ENDLESS_LEARNING_SCREENS.has(endlessState.screen)) {
+            setGameState(prev => {
+                if (!prev.isEndless || !ENDLESS_LEARNING_SCREENS.has(prev.screen)) return prev;
+                const p: Player = {
+                    ...prev.player,
+                    hand: [...prev.player.hand],
+                    drawPile: [...prev.player.drawPile],
+                    discardPile: [...prev.player.discardPile],
+                    relicCounters: { ...prev.player.relicCounters },
+                    turnFlags: { ...prev.player.turnFlags },
+                };
+                if (!applyEndlessLearningAnswer(p, result)) return prev;
+                const next = { ...prev, player: p };
+                stateRef.current = next;
+                return next;
+            });
+        }
         const assignment = activeAssignment ? effectiveAssignment : null;
         const assignmentModePool = getAssignmentModePool(assignment);
         const assignmentUnit = assignment?.units.find((unit) => unit.modes.includes(result.mode));
@@ -14291,6 +14445,7 @@ const App: React.FC = () => {
         storageService.saveAssignmentAnswer({
             assignmentId: isAssignmentAnswer ? assignment?.id : undefined,
             mode: result.mode,
+            subjectId: result.subjectId,
             unitName: isCustomAssignmentAnswer ? trans('オリジナル問題', languageMode) : assignmentUnit?.name,
             problemId: result.problemId,
             problemKey: result.problemKey,
@@ -14662,6 +14817,31 @@ const App: React.FC = () => {
             }));
         }
         applyRewardToLocalPlayer(item, replacePotionId);
+    };
+
+    const handleEndlessRewardReroll = () => {
+        const sourceState = stateRef.current;
+        if (!sourceState.isEndless || !sourceState.endlessRewardPending || sourceState.endlessRewardRerollUsed) return;
+        if (!sourceState.rewards.some(reward => reward.type === 'ENDLESS_REWARD')) return;
+        const currentNode = sourceState.map.find(node => node.id === sourceState.currentMapNodeId);
+        const boss = sourceState.endlessBossId
+            ? getEndlessBossById(sourceState.endlessBossId)
+            : currentNode?.type === NodeType.BOSS
+                ? getEndlessBoss(getEndlessArc(sourceState.visualTheme || visualTheme), sourceState.endlessFloor ?? sourceState.floor)
+                : undefined;
+        if (!boss) return;
+        const profileRewardIds = Object.keys(readEndlessProfileRewards()).filter(key => !key.startsWith('effect:'));
+        const rerolledRewards = createEndlessRewardItems(
+            boss,
+            [...(sourceState.endlessRewardIds || []), ...profileRewardIds],
+            `endless-reroll-${boss.id}-${Date.now()}`,
+        );
+        setGameState(prev => ({
+            ...prev,
+            rewards: rerolledRewards,
+            endlessRewardRerollUsed: true,
+            narrativeLog: [...prev.narrativeLog, `${boss.name}の報酬候補を再抽選した。`],
+        }));
     };
 
     const applyCoopSupportEffect = useCallback((card: CoopSupportCard, targetPeerId?: string, sourcePeerId?: string) => {
@@ -15119,6 +15299,53 @@ const App: React.FC = () => {
             return;
         }
         handleNodeComplete();
+    };
+
+    // Major endless bosses open a short intermission.  Reuse the regular shop
+    // inventory rules, but keep the boss node as the completion target so
+    // leaving the shop returns to the same map position.
+    const handleEndlessIntermissionShop = () => {
+        const sourceState = stateRef.current;
+        const player = sourceState.player;
+        const isGardener = sourceState.visualTheme !== 'magic' && player.id === 'GARDENER';
+        const isHighSchoolShop = sourceState.visualTheme === 'high-school';
+        const allPossibleCards = getFilteredCardPool(player.id);
+        const nonFamiliarShopCards = allPossibleCards.filter(card => !card.familiarSummon);
+        const familiarShopCards = allPossibleCards.filter(card => !!card.familiarSummon);
+        const baseShopCards = isHighSchoolShop ? allPossibleCards : nonFamiliarShopCards;
+        const familiarShopSlot = isHighSchoolShop && familiarShopCards.length > 0 ? Math.floor(Math.random() * 5) : -1;
+        const cards: ICard[] = [];
+        for (let i = 0; i < 5; i++) {
+            if (baseShopCards.length === 0 && !(isGardener && i < 2)) break;
+            let candidatePool = baseShopCards;
+            if (isGardener && i < 2) {
+                candidatePool = Object.values(GARDEN_SEEDS).map(seed => ({ ...seed, id: `endless-shop-seed-${i}-${Date.now()}` }) as ICard);
+            } else if (isHighSchoolShop && i === familiarShopSlot) {
+                candidatePool = familiarShopCards;
+            } else if (isHighSchoolShop && nonFamiliarShopCards.length > 0) {
+                candidatePool = nonFamiliarShopCards;
+            }
+            const template = candidatePool[Math.floor(Math.random() * candidatePool.length)];
+            if (!template) continue;
+            let price = 40 + Math.floor(Math.random() * 60);
+            if (template.rarity === 'UNCOMMON') price += 25;
+            if (template.rarity === 'RARE') price += 50;
+            if (template.rarity === 'LEGENDARY') price += 100;
+            if (template.rarity === 'SPECIAL') price += 30;
+            cards.push({ ...template, id: `endless-shop-${i}-${Date.now()}`, price });
+        }
+        setShopCards(cards);
+        setShopRelics(shuffle(getAvailableRelicPool(player, ['SHOP', 'COMMON', 'UNCOMMON', 'RARE'])).slice(0, 2));
+        setShopPotions(shuffle(Object.values(POTION_LIBRARY)).slice(0, 3).map(potion => ({ ...potion, id: `endless-shop-pot-${Date.now()}-${Math.random()}` })));
+        setGameState(prev => ({ ...prev, screen: GameScreen.SHOP, narrativeLog: [...prev.narrativeLog, '大ボス後の特別ショップが開いた。'] }));
+        audioService.playBGM('shop');
+    };
+
+    const handleEndlessOrganizeDeck = (deck: ICard[]) => {
+        setGameState(prev => ({
+            ...prev,
+            player: { ...prev.player, deck: deck.map(card => ({ ...card })) },
+        }));
     };
 
     const handleNextActFromStory = () => {
@@ -19143,7 +19370,7 @@ const App: React.FC = () => {
 
                 {gameState.screen === GameScreen.REWARD && (
                     <div className="absolute inset-0">
-                        <RewardScreen rewards={gameState.rewards} onSelectReward={handleRewardSelection} onSkip={finishRewardPhase} isLoading={isLoading || coopAwaitingRewardSync} currentPotions={gameState.player.potions} potionCapacity={getPotionCapacity(gameState.player)} languageMode={languageMode} typingMode={gameState.challengeMode === 'TYPING'} dummyRewards={raceRewardDummyDisplay} autoSkipWhenEmpty={gameState.challengeMode !== 'COOP'} skipDisabled={coopRewardSkipDisabled || hasRelic(gameState.player, 'PREPAID_CARD') || hasRelic(gameState.player, 'SCHOOL_ARCHIVE') || (gameState.endlessRewardPending && gameState.rewards.some(reward => reward.type === 'ENDLESS_REWARD'))} skipDisabledMessage={gameState.endlessRewardPending && gameState.rewards.some(reward => reward.type === 'ENDLESS_REWARD') ? 'ボス報酬を1つ選んでください' : (coopAwaitingRewardSync ? 'ホストが報酬を確定するまで待っています' : ((hasRelic(gameState.player, 'PREPAID_CARD') || hasRelic(gameState.player, 'SCHOOL_ARCHIVE')) ? 'このレリックの効果でカード報酬をスキップできません' : (coopRewardSkipDisabled ? '他のプレイヤーの報酬完了を待っています' : undefined)))} interactionDisabled={coopLocalProgressInteractionDisabled} interactionDisabledMessage={coopInteractionDisabledMessage} visualTheme={gameState.visualTheme || visualTheme} endlessFloor={gameState.endlessFloor ?? gameState.floor} endlessBossName={gameState.endlessBossId ? getEndlessBoss(getEndlessArc(gameState.visualTheme || visualTheme), gameState.endlessFloor ?? gameState.floor)?.name : undefined} endlessBonusGold={gameState.endlessBossId ? (gameState.endlessFloor === 50 ? 500 : (gameState.endlessFloor && gameState.endlessFloor % 10 === 0 ? 200 : 100)) : undefined} />
+                        <RewardScreen rewards={gameState.rewards} onSelectReward={handleRewardSelection} onSkip={finishRewardPhase} isLoading={isLoading || coopAwaitingRewardSync} currentPotions={gameState.player.potions} potionCapacity={getPotionCapacity(gameState.player)} languageMode={languageMode} typingMode={gameState.challengeMode === 'TYPING'} dummyRewards={raceRewardDummyDisplay} autoSkipWhenEmpty={gameState.challengeMode !== 'COOP'} skipDisabled={coopRewardSkipDisabled || hasRelic(gameState.player, 'PREPAID_CARD') || hasRelic(gameState.player, 'SCHOOL_ARCHIVE') || (gameState.endlessRewardPending && gameState.rewards.some(reward => reward.type === 'ENDLESS_REWARD'))} skipDisabledMessage={gameState.endlessRewardPending && gameState.rewards.some(reward => reward.type === 'ENDLESS_REWARD') ? 'ボス報酬を1つ選んでください' : (coopAwaitingRewardSync ? 'ホストが報酬を確定するまで待っています' : ((hasRelic(gameState.player, 'PREPAID_CARD') || hasRelic(gameState.player, 'SCHOOL_ARCHIVE')) ? 'このレリックの効果でカード報酬をスキップできません' : (coopRewardSkipDisabled ? '他のプレイヤーの報酬完了を待っています' : undefined)))} interactionDisabled={coopLocalProgressInteractionDisabled} interactionDisabledMessage={coopInteractionDisabledMessage} visualTheme={gameState.visualTheme || visualTheme} endlessFloor={gameState.endlessFloor ?? gameState.floor} endlessBossName={gameState.endlessBossId ? getEndlessBoss(getEndlessArc(gameState.visualTheme || visualTheme), gameState.endlessFloor ?? gameState.floor)?.name : undefined} endlessBonusGold={gameState.endlessBossId ? (gameState.endlessFloor === 50 ? 500 : (gameState.endlessFloor && gameState.endlessFloor % 10 === 0 ? 200 : 100)) : undefined} onRerollEndlessReward={gameState.isEndless ? handleEndlessRewardReroll : undefined} endlessRerollAvailable={Boolean(gameState.isEndless && gameState.endlessRewardPending && !gameState.endlessRewardRerollUsed)} />
                     </div>
                 )}
 
@@ -19162,6 +19389,9 @@ const App: React.FC = () => {
                             interactionDisabled={coopLocalProgressInteractionDisabled}
                             interactionDisabledMessage={coopInteractionDisabledMessage}
                             visualTheme={gameState.visualTheme || visualTheme}
+                            endlessMajorBoss={Boolean(gameState.isEndless && gameState.endlessFloor && gameState.endlessFloor % 10 === 0)}
+                            onOpenShop={gameState.isEndless ? handleEndlessIntermissionShop : undefined}
+                            onOrganizeDeck={gameState.isEndless ? handleEndlessOrganizeDeck : undefined}
                         />
                     </div>
                 )}

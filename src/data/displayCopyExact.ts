@@ -1650,7 +1650,15 @@ export const ENGLISH_DISPLAY_COPY_EXACT: Record<string, string> = {
   "夢が大きすぎる時は？": "What happens when your dreams are too big?",
   "孤立": "isolation",
   "何も選ばない": "choose nothing",
-  "記録を消す": "erase records"
+  "記録を消す": "erase records",
+  "ギミック": "Mechanic",
+  "備え": "Preparation",
+  "整理を完了": "Finish organizing",
+  "もう1枚選ぶと順番が入れ替わります。": "Choose one more card to swap their order.",
+  "再抽選（残り1回）": "Reroll (1 left)",
+  "再抽選済み": "Rerolled",
+  "大ボス後の特別営業": "Special shop after the major boss",
+  "カード順を入れ替える": "Swap card order"
 };
 
 export const HIRAGANA_DISPLAY_COPY_EXACT: Record<string, string> = {
@@ -3003,5 +3011,13 @@ export const HIRAGANA_DISPLAY_COPY_EXACT: Record<string, string> = {
   "完璧以外は意味がない": "かんぺきいがいはいみがない",
   "一人で全部背負おう": "いちにんでぜんぶせおおう",
   "失敗したら終わり": "しっぱいしたらおわり",
-  "優しく現実的な助言として「無理せず、でも一歩は進もう」が適切。": "やさしくげんじつてきなじょげんとして「むりせず、でもいちほはすすもう」がてきせつ。"
+  "優しく現実的な助言として「無理せず、でも一歩は進もう」が適切。": "やさしくげんじつてきなじょげんとして「むりせず、でもいちほはすすもう」がてきせつ。",
+  "ギミック": "ぎみっく",
+  "備え": "そなえ",
+  "整理を完了": "せいりを かんりょう",
+  "もう1枚選ぶと順番が入れ替わります。": "もう1まい えらぶと じゅんばんが いれかわります。",
+  "再抽選（残り1回）": "さいちょうせん（のこり1かい）",
+  "再抽選済み": "さいちょうせんずみ",
+  "大ボス後の特別営業": "だいぼすごの とくべつえいぎょう",
+  "カード順を入れ替える": "かーどじゅんを いれかえる"
 };

@@ -904,6 +904,7 @@ export interface AssignmentPayload {
 export interface AssignmentAnswerRecord {
   assignmentId?: string;
   mode: string;
+  subjectId?: string;
   unitName?: string;
   problemId?: string;
   problemKey?: string;
@@ -929,6 +930,8 @@ export interface AssignmentReviewProblem {
 
 export interface AssignmentAnswerResult {
   mode: string;
+  /** Stable learning subject identifier used by scoped endless rewards. */
+  subjectId?: string;
   correct: boolean;
   elapsedMs: number;
   problemId?: string;
@@ -1256,6 +1259,8 @@ export interface GameState {
   endlessRewardIds?: string[];
   endlessRunRewards?: Array<{ id: string; name: string; floor: number; scope: 'RUN' | 'PERMANENT' | 'RECORD' }>;
   endlessRewardPending?: boolean;
+  /** One reroll is available while a boss reward choice is still pending. */
+  endlessRewardRerollUsed?: boolean;
   pokerState?: PokerRunState;
   codexOptions?: Card[];
   parryState?: ParryState;
@@ -1296,6 +1301,7 @@ export interface CoopSharedState {
   endlessRewardIds?: string[];
   endlessRunRewards?: Array<{ id: string; name: string; floor: number; scope: 'RUN' | 'PERMANENT' | 'RECORD' }>;
   endlessRewardPending?: boolean;
+  endlessRewardRerollUsed?: boolean;
   parryState?: ParryState;
   activeEffects: VisualEffectInstance[];
   currentStoryIndex?: number;

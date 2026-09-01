@@ -2,7 +2,7 @@
 import React, { useEffect, useState } from 'react';
 import { Player, Card as ICard, LanguageMode } from '../types';
 import Card from './Card';
-import { BedDouble, Hammer, ArrowRight, FlaskConical, Plus, Shuffle, Check, DoorOpen, Eraser } from 'lucide-react';
+import { BedDouble, Hammer, ArrowRight, FlaskConical, Plus, Shuffle, Check, DoorOpen, Eraser, ShoppingBag, Layers } from 'lucide-react';
 import { getUpgradedCard } from '../utils/cardUtils';
 import { trans } from '../utils/textUtils';
 import { assetUrl } from '../utils/assetPaths';
@@ -24,16 +24,23 @@ interface RestScreenProps {
   interactionDisabled?: boolean;
   interactionDisabledMessage?: string;
   visualTheme?: VisualThemeId;
+  /** Enabled after an endless major boss so the intermission always offers
+   * the documented rest/shop/deck-organization choices. */
+  endlessMajorBoss?: boolean;
+  onOpenShop?: () => void;
+  onOrganizeDeck?: (deck: ICard[]) => void;
 }
 
-const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSynthesize, onSelfStudy, onLeave, languageMode, typingMode = false, scienceRoomChance = 0.5, interactionDisabled = false, interactionDisabledMessage, visualTheme = 'elementary' }) => {
+const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSynthesize, onSelfStudy, onLeave, languageMode, typingMode = false, scienceRoomChance = 0.5, interactionDisabled = false, interactionDisabledMessage, visualTheme = 'elementary', endlessMajorBoss = false, onOpenShop, onOrganizeDeck }) => {
   const isMagic = visualTheme === 'magic';
   const restHubMessage = isMagic ? "特別結界室だ。魔力を整えて、次の出撃に備えよう。" : "放課後の校舎だ。どこへ行こう？";
-  const [mode, setMode] = useState<'CHOICE' | 'UPGRADE' | 'SYNTHESIS' | 'SELF_STUDY' | 'ERASER_EFFECT' | 'PREVIEW_UPGRADE' | 'PREVIEW_SYNTHESIS' | 'RESULT' | 'DONE'>('CHOICE');
+  const [mode, setMode] = useState<'CHOICE' | 'UPGRADE' | 'SYNTHESIS' | 'SELF_STUDY' | 'DECK' | 'ERASER_EFFECT' | 'PREVIEW_UPGRADE' | 'PREVIEW_SYNTHESIS' | 'RESULT' | 'DONE'>('CHOICE');
   const [message, setMessage] = useState(restHubMessage);
   const [selectedCard, setSelectedCard] = useState<ICard | null>(null);
   const [synthCards, setSynthCards] = useState<ICard[]>([]);
   const [resultCard, setResultCard] = useState<ICard | null>(null);
+  const [deckOrder, setDeckOrder] = useState<ICard[]>(() => [...player.deck]);
+  const [deckSelection, setDeckSelection] = useState<number[]>([]);
   
   // 50% chance for Science Room to be open normally
   const [isScienceRoomOpen] = useState(() => Math.random() < scienceRoomChance);
@@ -86,6 +93,18 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
               }
               return;
           }
+          if (mode === 'DECK') {
+              const shortcutIndex = REST_SHORTCUT_KEYS.indexOf(e.key.toLowerCase());
+              if (shortcutIndex >= 0 && deckOrder[shortcutIndex]) {
+                  e.preventDefault();
+                  handleDeckCardClick(shortcutIndex);
+              } else if (e.key === 'Enter' || e.key === '0' || e.key === 'Escape') {
+                  e.preventDefault();
+                  if (e.key === 'Enter') finishDeckOrganization();
+                  else cancelDeckOrganization();
+              }
+              return;
+          }
           if (mode === 'ERASER_EFFECT') {
               const index = Number(e.key) - 1;
               if (index >= 0 && selectedCard && selectedEraserOptions[index]) {
@@ -122,7 +141,7 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
       };
       window.addEventListener('keydown', handleKeyDown);
       return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [typingMode, mode, selectableCards, synthCards, selectedCard, requiredCards, interactionDisabled, hasCardEraser, selectedEraserOptions]);
+  }, [typingMode, mode, selectableCards, synthCards, selectedCard, requiredCards, interactionDisabled, hasCardEraser, selectedEraserOptions, deckOrder, deckSelection]);
 
   const handleRest = () => {
       if (interactionDisabled) return;
@@ -158,6 +177,45 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
       setMode('SELF_STUDY');
       setSelectedCard(null);
       setMessage(isMagic ? "静かな祈りの間だ。どのカードから乱れた魔力をほどく？" : "自習だ。カード消しゴムで、どのカードの不要な効果を消す？");
+  };
+
+  const handleDeckChoice = () => {
+      if (interactionDisabled || !endlessMajorBoss || !onOrganizeDeck) return;
+      setDeckOrder([...player.deck]);
+      setDeckSelection([]);
+      setMode('DECK');
+      setMessage(trans('カードを2枚選ぶと順番を入れ替えられます。整理を終えたら確定してください。', languageMode));
+  };
+
+  const handleDeckCardClick = (index: number) => {
+      if (interactionDisabled) return;
+      setDeckSelection(previous => {
+          if (previous.includes(index)) return previous.filter(value => value !== index);
+          const next = [...previous, index];
+          if (next.length !== 2) return next;
+          setDeckOrder(order => {
+              const swapped = [...order];
+              [swapped[next[0]], swapped[next[1]]] = [swapped[next[1]], swapped[next[0]]];
+              return swapped;
+          });
+          return [];
+      });
+  };
+
+  const finishDeckOrganization = () => {
+      if (interactionDisabled) return;
+      onOrganizeDeck?.(deckOrder);
+      setMode('DONE');
+      setMessage(trans('デッキを整理した。次の階層へ進もう。', languageMode));
+      setDeckSelection([]);
+  };
+
+  const cancelDeckOrganization = () => {
+      if (interactionDisabled) return;
+      setDeckOrder([...player.deck]);
+      setDeckSelection([]);
+      setMode('CHOICE');
+      setMessage(restHubMessage);
   };
 
   const handleCardClick = (card: ICard) => {
@@ -331,6 +389,59 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
                             <span className="text-xs text-gray-400">{trans("不要効果を削除", languageMode)}</span>
                         </button>
                     )}
+                    {endlessMajorBoss && onOpenShop && (
+                        <button
+                            data-gamepad-initial-choice
+                            onClick={() => { if (!interactionDisabled) onOpenShop(); }}
+                            className="group relative flex flex-col items-center gap-2 rounded-lg border-2 border-gray-600 p-4 transition-all hover:border-amber-400 hover:bg-gray-800 w-32 md:w-40"
+                        >
+                            {typingMode && <div className="absolute right-2 top-2 rounded-full border border-cyan-300 bg-cyan-950/95 px-1.5 py-0.5 text-[10px] font-black text-cyan-200">5</div>}
+                            <ShoppingBag size={40} className="text-amber-400 transition-transform group-hover:scale-110" />
+                            <span className="font-bold text-lg">{trans('ショップ', languageMode)}</span>
+                            <span className="text-xs text-gray-400">{trans('大ボス後の特別営業', languageMode)}</span>
+                        </button>
+                    )}
+                    {endlessMajorBoss && onOrganizeDeck && (
+                        <button
+                            data-gamepad-initial-choice
+                            onClick={handleDeckChoice}
+                            className="group relative flex flex-col items-center gap-2 rounded-lg border-2 border-gray-600 p-4 transition-all hover:border-cyan-400 hover:bg-gray-800 w-32 md:w-40"
+                        >
+                            {typingMode && <div className="absolute right-2 top-2 rounded-full border border-cyan-300 bg-cyan-950/95 px-1.5 py-0.5 text-[10px] font-black text-cyan-200">6</div>}
+                            <Layers size={40} className="text-cyan-300 transition-transform group-hover:scale-110" />
+                            <span className="font-bold text-lg">{trans('デッキ整理', languageMode)}</span>
+                            <span className="text-xs text-gray-400">{trans('カード順を入れ替える', languageMode)}</span>
+                        </button>
+                    )}
+                </div>
+            )}
+
+            {mode === 'DECK' && (
+                <div className="flex min-h-0 flex-1 flex-col items-center overflow-hidden">
+                    <div className="grid w-full max-w-3xl grid-cols-2 gap-2 overflow-y-auto rounded border border-cyan-500/40 bg-gray-900/70 p-3 sm:grid-cols-3 md:grid-cols-4 custom-scrollbar">
+                        {deckOrder.map((card, index) => {
+                            const selected = deckSelection.includes(index);
+                            const shortcut = REST_SHORTCUT_KEYS[index];
+                            return (
+                                <button
+                                    key={`${card.id}-${index}`}
+                                    type="button"
+                                    data-gamepad-initial-choice
+                                    onClick={() => handleDeckCardClick(index)}
+                                    className={`relative rounded border p-2 text-left text-xs transition-all ${selected ? 'border-cyan-300 bg-cyan-900/70 ring-2 ring-cyan-300' : 'border-gray-700 bg-gray-800/80 hover:border-cyan-500'}`}
+                                >
+                                    {typingMode && shortcut && <span className="absolute right-1 top-1 rounded border border-cyan-300 px-1 text-[9px] font-black text-cyan-100">{shortcut}</span>}
+                                    <span className="block text-[10px] text-cyan-300">#{index + 1}</span>
+                                    <span className="line-clamp-2 font-bold">{trans(card.name, languageMode)}</span>
+                                </button>
+                            );
+                        })}
+                    </div>
+                    <div className="mt-3 flex gap-3">
+                        <button data-gamepad-initial-choice onClick={finishDeckOrganization} className="rounded bg-cyan-600 px-6 py-2 font-bold hover:bg-cyan-500">{trans('整理を完了', languageMode)}{typingMode && ' [Enter]'}</button>
+                        <button onClick={cancelDeckOrganization} className="rounded bg-gray-600 px-6 py-2 hover:bg-gray-500">{trans('戻る', languageMode)}{typingMode && ' [0]'}</button>
+                    </div>
+                    {deckSelection.length === 1 && <div className="mt-2 text-xs text-cyan-200">{trans('もう1枚選ぶと順番が入れ替わります。', languageMode)}</div>}
                 </div>
             )}
 

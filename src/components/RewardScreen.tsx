@@ -29,9 +29,11 @@ interface RewardScreenProps {
   endlessFloor?: number;
   endlessBossName?: string;
   endlessBonusGold?: number;
+  onRerollEndlessReward?: () => void;
+  endlessRerollAvailable?: boolean;
 }
 
-const RewardScreen: React.FC<RewardScreenProps> = ({ rewards, onSelectReward, onSkip, isLoading, currentPotions = [], potionCapacity = 3, languageMode, typingMode = false, dummyRewards = 0, autoSkipWhenEmpty = true, skipDisabled = false, skipDisabledMessage, interactionDisabled = false, interactionDisabledMessage, visualTheme = 'elementary', endlessFloor, endlessBossName, endlessBonusGold }) => {
+const RewardScreen: React.FC<RewardScreenProps> = ({ rewards, onSelectReward, onSkip, isLoading, currentPotions = [], potionCapacity = 3, languageMode, typingMode = false, dummyRewards = 0, autoSkipWhenEmpty = true, skipDisabled = false, skipDisabledMessage, interactionDisabled = false, interactionDisabledMessage, visualTheme = 'elementary', endlessFloor, endlessBossName, endlessBonusGold, onRerollEndlessReward, endlessRerollAvailable = false }) => {
   const [replaceReward, setReplaceReward] = useState<RewardItem | null>(null);
   const [inspectedItem, setInspectedItem] = useState<{ type: 'CARD' | 'RELIC' | 'POTION', data: any } | null>(null);
   const longPressTimer = useRef<any>(null);
@@ -93,7 +95,10 @@ const RewardScreen: React.FC<RewardScreenProps> = ({ rewards, onSelectReward, on
         }
         return;
       }
-      if (e.key >= '1' && e.key <= '9') {
+      if (e.key.toLowerCase() === 'r' && endlessRerollAvailable && onRerollEndlessReward && rewards.some(reward => reward.type === 'ENDLESS_REWARD')) {
+        e.preventDefault();
+        onRerollEndlessReward();
+      } else if (e.key >= '1' && e.key <= '9') {
         const index = Number(e.key) - 1;
         const reward = rewards[index];
         if (!reward) return;
@@ -110,7 +115,7 @@ const RewardScreen: React.FC<RewardScreenProps> = ({ rewards, onSelectReward, on
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [typingMode, isLoading, inspectedItem, replaceReward, currentPotions, rewards, onSkip, interactionDisabled, skipDisabled]);
+  }, [typingMode, isLoading, inspectedItem, replaceReward, currentPotions, rewards, onSkip, interactionDisabled, skipDisabled, endlessRerollAvailable, onRerollEndlessReward]);
 
   const handlePotionClick = (reward: RewardItem) => {
       if (interactionDisabled) return;
@@ -235,6 +240,18 @@ const RewardScreen: React.FC<RewardScreenProps> = ({ rewards, onSelectReward, on
           </div>
         )}
         <p className="text-white text-sm font-bold drop-shadow-[0_2px_3px_rgba(0,0,0,0.95)] [text-shadow:0_0_8px_rgba(15,23,42,0.9)]">{trans(visualTheme === 'magic' ? "結界に残った魔力から、次に持ち込む力を選んでください" : "欲しい報酬を選択してください", languageMode)}</p>
+        {rewards.some(reward => reward.type === 'ENDLESS_REWARD') && onRerollEndlessReward && (
+          <button
+            type="button"
+            data-gamepad-initial-choice
+            data-gamepad-zone="endless-reward-reroll"
+            disabled={!endlessRerollAvailable || interactionDisabled || isLoading}
+            onClick={onRerollEndlessReward}
+            className="mt-2 rounded border border-fuchsia-300/70 bg-fuchsia-900/70 px-4 py-1.5 text-xs font-black text-fuchsia-100 transition hover:bg-fuchsia-800 disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            {trans(endlessRerollAvailable ? '再抽選（残り1回）' : '再抽選済み', languageMode)}{typingMode && endlessRerollAvailable && ' [R]'}
+          </button>
+        )}
       </div>
 
       <div className={`z-10 flex flex-row items-center gap-8 w-full overflow-x-auto md:justify-center landscape:justify-center custom-scrollbar px-4 pt-20 pb-8 min-h-[420px] snap-x ${isLoading ? 'opacity-50 pointer-events-none' : ''}`}>

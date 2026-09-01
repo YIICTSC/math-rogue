@@ -169,6 +169,7 @@ const EnglishChallengeScreen: React.FC<EnglishChallengeScreenProps> = ({ onCompl
     const isCorrect = normalize(option) === normalize(problems[currentProblemIndex].actualCorrectAnswer);
     const answerResult = {
       mode,
+      subjectId: mode,
       correct: isCorrect,
       elapsedMs: Date.now() - questionStartedAtRef.current,
       problemKey: problems[currentProblemIndex].problemKey || `${mode}:${problems[currentProblemIndex].question}`,

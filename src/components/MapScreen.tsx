@@ -284,8 +284,19 @@ const MapScreen: React.FC<MapScreenProps> = ({ nodes, currentNodeId, onNodeSelec
                 </div>
             )}
             {isEndless && nextBossDefinition && (
-                <div className="z-20 flex items-center justify-center border-b border-purple-400/30 bg-purple-950/70 px-3 py-2 text-center text-[11px] font-black text-purple-100">
-                    {trans(`次の節目 ${nextBossDefinition.floor}F：${nextBossDefinition.name}`, languageMode)}
+                <div
+                    className="z-20 border-b border-purple-400/30 bg-purple-950/80 px-3 py-2 text-center text-[11px] text-purple-100"
+                    aria-label={trans(`次の節目 ${nextBossDefinition.floor}F`, languageMode)}
+                >
+                    <div className="font-black">
+                        {trans(`次の節目 ${nextBossDefinition.floor}F：${nextBossDefinition.name}`, languageMode)}
+                        <span className="ml-2 text-purple-300">({trans(`あと${Math.max(1, nextBossDefinition.floor - floor)}階層`, languageMode)})</span>
+                    </div>
+                    <div className="mx-auto mt-1 grid max-w-2xl gap-0.5 text-[10px] font-semibold text-purple-200/90 sm:grid-cols-3">
+                        <span><span className="font-black text-fuchsia-300">{trans('弱点', languageMode)}：</span>{trans(nextBossDefinition.weakness, languageMode)}</span>
+                        <span><span className="font-black text-fuchsia-300">{trans('ギミック', languageMode)}：</span>{trans(nextBossDefinition.mechanicSummary, languageMode)}</span>
+                        <span><span className="font-black text-fuchsia-300">{trans('備え', languageMode)}：</span>{trans(nextBossDefinition.recommendedPrep, languageMode)}</span>
+                    </div>
                 </div>
             )}
 
