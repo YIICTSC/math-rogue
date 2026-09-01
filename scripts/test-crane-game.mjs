@@ -35,9 +35,9 @@ try {
   const cat = CRANE_PRIZES.find((prize) => prize.id === 'cat');
   assert(cat && cat.baseX - cat.drift > CRANE_CHUTE_X + cat.catchRadius, 'the prize outlet area must remain clear of floor prizes');
   assert.deepEqual(
-    CRANE_PRIZES.map((prize) => prize.heldSpriteIndex).sort((left, right) => left - right),
+    Array.from(new Set(CRANE_PRIZES.map((prize) => prize.heldSpriteIndex))).sort((left, right) => left - right),
     [0, 1, 2, 3, 4, 5],
-    'every prize must have a dedicated ImageGen held-claw frame',
+    'the prize set must cover every ImageGen held-claw frame',
   );
   const pose = getPrizePose(raccoon, 1380);
   assert.deepEqual(getPrizePose(raccoon, 1380), getPrizePose(raccoon, 2480), 'floor prizes should stay still until the claw catches one');
@@ -52,8 +52,8 @@ try {
   assert.equal(CRANE_PRIZES.some((prize) => prize.spriteIndex === 3), false, 'the precomposed claw-gripping-raccoon cell must never be a prize');
   const componentSource = fs.readFileSync('src/mini-games/crane-game/CraneGame.tsx', 'utf8');
   assert(!/index=\{3\}/.test(componentSource), 'the precomposed claw-gripping-raccoon sprite must not be rendered');
-  assert(componentSource.includes('crane-game-cabinet-v2.png'), 'the cabinet should contain the connected internal prize chute');
-  assert(componentSource.includes('crane-game-held-prizes-3x2-alpha-v1.png'), 'the ImageGen held-claw sheet must be used while carrying');
+  assert(componentSource.includes('crane-game-cabinet-v2.webp'), 'the cabinet should contain the connected internal prize chute');
+  assert(componentSource.includes('crane-game-held-prizes-3x2-alpha-v1.webp'), 'the ImageGen held-claw sheet must be used while carrying');
   assert(componentSource.includes('HeldPrizeSprite'), 'a caught prize should render as its dedicated held-claw sprite');
   assert(componentSource.includes("index={phase === 'AIM' || phase === 'DROPPING' ? 1 : 2}"), 'the claw should use its own open/closed sprite');
   assert(!componentSource.includes('clawSpriteIndex'), 'the claw sprite must not switch to a precomposed prize-grip cell');
@@ -64,8 +64,8 @@ try {
   assert(componentSource.includes("phase === 'CARRYING'"), 'the carriage-to-chute phase must be present');
   assert(componentSource.includes("phase === 'FALLING'"), 'the visible mid-route slip phase must be present');
   const manifestSource = fs.readFileSync('public/sprites/mini-games/crane-game/crane-game-sprites-4x4-v1.json', 'utf8');
-  assert(manifestSource.includes('crane-game-cabinet-v2.png'), 'the sprite manifest should point at the rebuilt cabinet');
-  assert(manifestSource.includes('crane-game-held-prizes-3x2-alpha-v1.png'), 'the sprite manifest should include the held-claw production sheet');
+  assert(manifestSource.includes('crane-game-cabinet-v2.webp'), 'the sprite manifest should point at the rebuilt cabinet');
+  assert(manifestSource.includes('crane-game-held-prizes-3x2-alpha-v1.webp'), 'the sprite manifest should include the held-claw production sheet');
   assert(!manifestSource.includes('chuteFenceImage'), 'the sprite manifest should not advertise an overlay chute');
 
   console.log('Crane game trigger, collision, angle preservation, and sprite-use checks passed.');

@@ -26,11 +26,6 @@ export interface CranePermanentEffect {
   };
 }
 
-export const CRANE_PRIZE_CLAIMED_COUNTER_PREFIX = 'CRANE_PRIZE_CLAIMED_';
-export const getCranePrizeClaimedCounterKey = (prizeId: CranePrizeId): string => (
-  `${CRANE_PRIZE_CLAIMED_COUNTER_PREFIX}${prizeId.toUpperCase().replace(/-/g, '_')}`
-);
-
 export interface CranePrizeDefinition {
   id: CranePrizeId;
   spriteIndex: number;
@@ -82,7 +77,7 @@ export const CRANE_CARRY_DURATION_MS = 1250;
 export const CRANE_CHUTE_DROP_DURATION_MS = 720;
 export const CRANE_FALL_DURATION_MS = 640;
 
-const PROTAGONIST_PRIZE_SHEET = 'sprites/mini-games/crane-game/crane-game-protagonist-prizes-3x2-alpha-v1.png';
+const PROTAGONIST_PRIZE_SHEET = 'sprites/mini-games/crane-game/crane-game-protagonist-prizes-3x2-alpha-v1.webp';
 const PROTAGONIST_SHEET_COLUMNS = 3;
 const PROTAGONIST_SHEET_ROWS = 2;
 const PROTAGONIST_CELL_ASPECT = 2 / 3;

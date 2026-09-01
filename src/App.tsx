@@ -122,7 +122,6 @@ import type { CraneGameResult } from './mini-games/crane-game/CraneGame';
 import {
     CRANE_PRIZES,
     CRANE_REPLAY_COST,
-    getCranePrizeClaimedCounterKey,
     shouldTriggerCraneEvent,
 } from './mini-games/crane-game/craneGameEngine';
 import type { CranePermanentEffectKind, CranePrizeId } from './mini-games/crane-game/craneGameEngine';
@@ -5847,12 +5846,12 @@ const App: React.FC = () => {
                 gold: prev.player.gold + result.goldReward,
                 relicCounters: { ...prev.player.relicCounters },
             };
+            // The crane event can occur once per floor (act). Apply every
+            // delivered prize in this event once; the same prize may grant its
+            // permanent effect again on a later floor.
             const newlyAppliedEffects = deliveredPrizeIds.flatMap((prizeId) => {
                 const prize = CRANE_PRIZES.find(candidate => candidate.id === prizeId);
                 if (!prize) return [];
-                const claimedKey = getCranePrizeClaimedCounterKey(prize.id);
-                if ((nextPlayer.relicCounters[claimedKey] || 0) > 0) return [];
-                nextPlayer.relicCounters[claimedKey] = 1;
                 applyCranePermanentEffect(nextPlayer, prize.permanentEffect.kind, prize.permanentEffect.amount);
                 return [prize.permanentEffect];
             });
@@ -5860,10 +5859,10 @@ const App: React.FC = () => {
             const effectTextHira = newlyAppliedEffects.map(effect => effect.label.hira).join('、');
             const effectTextEn = newlyAppliedEffects.map(effect => effect.label.en).join(', ');
             const winLog = languageMode === 'ENGLISH'
-                ? `The crane caught ${result.prizeLabel ?? 'a prize'}. You gained ${result.goldReward}G.${effectTextEn ? ` Permanent bonus: ${effectTextEn}.` : ''}`
+                ? `Prize get! You got ${result.prizeLabel ?? 'a prize'} and ${result.goldReward}G.${effectTextEn ? ` Permanent bonus: ${effectTextEn}.` : ''}`
                 : languageMode === 'HIRAGANA'
-                    ? `くれーんげーむで「${result.prizeLabel ?? 'けいひん'}」を かくとく。${result.goldReward}Gを えた。${effectTextHira ? `ほんぺんの えいぞく こうか：${effectTextHira}。` : ''}`
-                    : `クレーンゲームで「${result.prizeLabel ?? '景品'}」を獲得。${result.goldReward}Gを得た。${effectTextJa ? `本編の永続効果：${effectTextJa}。` : ''}`;
+                    ? `けいひん ゲット！「${result.prizeLabel ?? 'けいひん'}」と${result.goldReward}Gを てにいれた。${effectTextHira ? `ほんぺんの えいぞく こうか：${effectTextHira}。` : ''}`
+                    : `景品ゲット！「${result.prizeLabel ?? '景品'}」と${result.goldReward}Gを手に入れた。${effectTextJa ? `本編の永続効果：${effectTextJa}。` : ''}`;
             const loseLog = languageMode === 'ENGLISH'
                 ? result.reason === 'SLIPPED'
                     ? `${result.prizeLabel ?? 'The prize'} slipped on the way to the chute, but you received an ${result.goldReward}G consolation prize.`
@@ -18387,9 +18386,6 @@ const App: React.FC = () => {
                             isUiPreview={isUiPreviewMode}
                             onCraneComplete={handleCraneGameComplete}
                             onCraneReplay={handleCraneGameReplay}
-                            claimedCranePrizeIds={CRANE_PRIZES
-                                .filter(prize => (gameState.player.relicCounters[getCranePrizeClaimedCounterKey(prize.id)] || 0) > 0)
-                                .map(prize => prize.id)}
                             craneGold={gameState.player.gold}
                             craneEventMode={gameState.craneGameContext === 'EVENT'}
                         />

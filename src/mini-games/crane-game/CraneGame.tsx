@@ -39,8 +39,6 @@ interface CraneGameProps {
   onBack: () => void;
   onCraneComplete?: (result: CraneGameResult) => void;
   onCraneReplay?: () => boolean;
-  /** Prize ids whose one-time main-game bonuses have already been claimed. */
-  claimedCranePrizeIds?: CranePrizeId[];
   /** Current main-game wallet balance, shown when replay is available. */
   craneGold?: number;
   languageMode?: LanguageMode;
@@ -51,9 +49,9 @@ const copy = (mode: LanguageMode | string, ja: string, hira: string, en: string)
   mode === 'ENGLISH' ? en : mode === 'HIRAGANA' ? hira : ja
 );
 
-const SPRITE_SHEET = 'sprites/mini-games/crane-game/crane-game-sprites-4x4-alpha-v1.png';
-const HELD_PRIZE_SHEET = 'sprites/mini-games/crane-game/crane-game-held-prizes-3x2-alpha-v1.png';
-const CABINET_BACKGROUND = 'sprites/mini-games/crane-game/crane-game-cabinet-v2.png';
+const SPRITE_SHEET = 'sprites/mini-games/crane-game/crane-game-sprites-4x4-alpha-v1.webp';
+const HELD_PRIZE_SHEET = 'sprites/mini-games/crane-game/crane-game-held-prizes-3x2-alpha-v1.webp';
+const CABINET_BACKGROUND = 'sprites/mini-games/crane-game/crane-game-cabinet-v2.webp';
 const CLAW_TOP_Y = 7;
 const CLAW_DROP_Y = 63;
 const FALLING_START_Y = CLAW_TOP_Y + 24;
@@ -204,7 +202,6 @@ const CraneGame: React.FC<CraneGameProps> = ({
   onBack,
   onCraneComplete,
   onCraneReplay,
-  claimedCranePrizeIds = [],
   craneGold,
   languageMode = 'JAPANESE',
   eventMode = false,
@@ -346,8 +343,6 @@ const CraneGame: React.FC<CraneGameProps> = ({
       .filter((prize): prize is CranePrizeDefinition => Boolean(prize));
     return prizes.length > 0 ? prizes : caught ? [caught.prize] : [];
   }, [activePrizes, attemptResult.prizeIds, caught]);
-
-  const claimedPrizeIdSet = useMemo(() => new Set(claimedCranePrizeIds), [claimedCranePrizeIds]);
 
   const resetGame = useCallback(() => {
     finishSubmittedRef.current = false;
@@ -986,7 +981,7 @@ const CraneGame: React.FC<CraneGameProps> = ({
               <Sparkles aria-hidden="true" />
               <h2>
                 {attemptResult.outcome === 'WIN'
-                  ? copy(languageMode, '獲得口に落下！', 'かくとくぐちに らっか！', 'DROPPED IN!')
+                  ? copy(languageMode, '景品ゲット！', 'けいひん ゲット！', 'PRIZE GET!')
                   : caught && dropReason === 'SLIPPED'
                     ? copy(languageMode, '途中でポロリ…', 'とちゅうで ポロリ…', 'SLIPPED ON THE WAY…')
                     : copy(languageMode, 'おしい！', 'おしい！', 'SO CLOSE!')}
@@ -999,20 +994,13 @@ const CraneGame: React.FC<CraneGameProps> = ({
                   : copy(languageMode, '参加賞をもらった', 'さんかしょうを もらった', 'You received a consolation prize')}
               </p>
               {eventMode && attemptResult.outcome === 'WIN' && currentResultPrizes.length > 0 && (
-                <div className="crane-game-result-effects" aria-label={copy(languageMode, '本編の永続効果と取得状況', 'ほんぺんの えいぞく こうかと しゅとく じょうきょう', 'Permanent bonuses and claim status')}>
-                  <span>{copy(languageMode, '本編効果・取得状況', 'ほんぺん こうか・しゅとく じょうきょう', 'MAIN-GAME BONUS · CLAIM STATUS')}</span>
-                  {currentResultPrizes.map((prize) => {
-                    const isClaimed = claimedPrizeIdSet.has(prize.id);
-                    const status = isClaimed
-                      ? copy(languageMode, '獲得済み', 'かくとくずみ', 'OWNED')
-                      : copy(languageMode, '新規効果', 'しんき こうか', 'NEW BONUS');
-                    return (
-                      <strong key={`effect-${prize.id}`} className={isClaimed ? 'is-owned' : 'is-new'}>
-                        <em>{status}</em> {copy(languageMode, prize.permanentEffect.label.ja, prize.permanentEffect.label.hira, prize.permanentEffect.label.en)}
-                      </strong>
-                    );
-                  })}
-                  <small>{copy(languageMode, '同じ景品の効果は重複しません', 'おなじ けいひんの こうかは ちょうふくしません', 'Duplicate prizes do not stack')}</small>
+                <div className="crane-game-result-effects" aria-label={copy(languageMode, '本編の永続効果', 'ほんぺんの えいぞく こうか', 'Permanent bonuses')}>
+                  <span>{copy(languageMode, '本編の永続効果', 'ほんぺんの えいぞく こうか', 'PERMANENT BONUS')}</span>
+                  {currentResultPrizes.map((prize) => (
+                    <strong key={`effect-${prize.id}`}>
+                      {copy(languageMode, prize.permanentEffect.label.ja, prize.permanentEffect.label.hira, prize.permanentEffect.label.en)}
+                    </strong>
+                  ))}
                 </div>
               )}
               {eventMode && replayDenied && (

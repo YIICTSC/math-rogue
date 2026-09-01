@@ -17804,11 +17804,6 @@ textarea {
   font-size: inherit;
 }
 
-.crane-game-result-effects small {
-  color: rgba(224, 242, 254, 0.78);
-  font-size: 0.85em;
-}
-
 .crane-game-replay-denied {
   grid-column: 1 / -1;
   color: #fecaca;
@@ -17831,27 +17826,6 @@ textarea {
   margin-top: 0;
   color: #bbf7d0;
   font-size: inherit;
-}
-
-.crane-game-result-effects strong.is-owned {
-  color: rgba(224, 242, 254, 0.68);
-}
-
-.crane-game-result-effects strong.is-new {
-  color: #bbf7d0;
-  text-shadow: 0 0 8px rgba(74, 222, 128, 0.48);
-}
-
-.crane-game-result-effects strong em {
-  flex: 0 0 auto;
-  font-style: normal;
-  font-size: 0.8em;
-  letter-spacing: 0.03em;
-  color: #fde68a;
-}
-
-.crane-game-result-effects strong.is-owned em {
-  color: rgba(186, 230, 253, 0.72);
 }
 
 .crane-game-result-wallet {

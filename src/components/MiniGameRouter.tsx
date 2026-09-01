@@ -13,7 +13,6 @@ import PlacementTcgGame from '../mini-games/placement-tcg/PlacementTcgGame';
 import ShogiMiniGame from '../mini-games/shogi/ShogiMiniGame';
 import SchoolTrpgGame from '../mini-games/school-trpg/SchoolTrpgGame';
 import CraneGame, { type CraneGameResult } from '../mini-games/crane-game/CraneGame';
-import type { CranePrizeId } from '../mini-games/crane-game/craneGameEngine';
 
 interface MiniGameRouterProps {
     screen: GameScreen;
@@ -29,7 +28,6 @@ interface MiniGameRouterProps {
     isUiPreview?: boolean;
     onCraneComplete?: (result: CraneGameResult) => void;
     onCraneReplay?: () => boolean;
-    claimedCranePrizeIds?: CranePrizeId[];
     craneGold?: number;
     craneEventMode?: boolean;
 }
@@ -48,7 +46,6 @@ export interface MiniGameComponentProps {
     gameScreen?: GameScreen;
     onCraneComplete?: (result: CraneGameResult) => void;
     onCraneReplay?: () => boolean;
-    claimedCranePrizeIds?: CranePrizeId[];
     craneGold?: number;
     eventMode?: boolean;
 }
@@ -75,7 +72,7 @@ const MINI_GAME_MAP: Partial<Record<GameScreen, React.ComponentType<MiniGameComp
     [GameScreen.MINI_GAME_CRANE]: CraneGame,
 };
 
-const MiniGameRouter: React.FC<MiniGameRouterProps> = ({ screen, onBack, onFinish, problemMode, problemModePool, answerMode, assignment, onAnswerResult, languageMode, debugPreview, isUiPreview, onCraneComplete, onCraneReplay, claimedCranePrizeIds, craneGold, craneEventMode }) => {
+const MiniGameRouter: React.FC<MiniGameRouterProps> = ({ screen, onBack, onFinish, problemMode, problemModePool, answerMode, assignment, onAnswerResult, languageMode, debugPreview, isUiPreview, onCraneComplete, onCraneReplay, craneGold, craneEventMode }) => {
     const Component = MINI_GAME_MAP[screen];
 
     if (!Component) {
@@ -103,7 +100,6 @@ const MiniGameRouter: React.FC<MiniGameRouterProps> = ({ screen, onBack, onFinis
             gameScreen={screen}
             onCraneComplete={onCraneComplete}
             onCraneReplay={onCraneReplay}
-            claimedCranePrizeIds={claimedCranePrizeIds}
             craneGold={craneGold}
             eventMode={craneEventMode}
         />
