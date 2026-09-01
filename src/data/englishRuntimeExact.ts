@@ -1,4 +1,6 @@
 export const ENGLISH_RUNTIME_EXACT: Record<string, string> = {
+  'エンドレスの最初の階層へ進んだ。': 'You stepped into the first floor of Endless Mode.',
+  '真エンディングを解放した。': 'The true ending has been unlocked.',
   '大声': 'Loud Voice',
   '夕暮れの共闘宣言': 'Alliance at Sunset',
   '放課後の勧誘': 'An After-School Invitation',

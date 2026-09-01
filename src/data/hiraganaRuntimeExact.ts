@@ -1,5 +1,7 @@
 // Generated from runtime game data; keep proper-noun readings in the overrides used by the generator.
 export const HIRAGANA_RUNTIME_EXACT: Record<string, string> = {
+  "エンドレスの最初の階層へ進んだ。": "えんどれすの さいしょの かいそうへ すすんだ。",
+  "真エンディングを解放した。": "しんえんでぃんぐを かいほうした。",
   "石ころの煌めき": "いしころのきらめき",
   "石ころを集め、鉱山カードを買って煌めき点を競おう。": "いしころをあつめ、こうざんカードをかってきらめきてんをきそおう。",
   "放課後スクールTRPG": "ほうかごスクールTRPG",

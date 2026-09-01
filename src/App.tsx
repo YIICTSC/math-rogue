@@ -337,6 +337,7 @@ import FinalBridgeScreen from './components/FinalBridgeScreen';
 import MagicRomanceEndingScreen from './components/MagicRomanceEndingScreen';
 import ThemedEndingSequenceScreen from './components/ThemedEndingSequenceScreen';
 import { buildThemedEndingGalleryEntry } from './data/themedEndingSequences';
+import EndlessEndingSequenceScreen from './components/EndlessEndingSequenceScreen';
 import { getMagicEndingGalleryEntries, hasMagicEnding } from './services/magicEndingService';
 import ProblemChallengeScreen from './components/ProblemChallengeScreen';
 import AssignmentCreateScreen from './components/AssignmentCreateScreen';
@@ -1011,7 +1012,7 @@ const shouldPreserveLocalCoopScreen = (localScreen: GameScreen, incomingScreen: 
         return true;
     }
     if (
-        (localScreen === GameScreen.GAME_OVER || localScreen === GameScreen.ENDING) &&
+        (localScreen === GameScreen.GAME_OVER || localScreen === GameScreen.ENDING || localScreen === GameScreen.ENDLESS_OPENING || localScreen === GameScreen.ENDLESS_TRUE_ENDING) &&
         COOP_LOCAL_SETUP_SCREEN_SET.has(incomingScreen)
     ) {
         return true;
@@ -3341,6 +3342,8 @@ const App: React.FC = () => {
             case GameScreen.FLOOR_RESULT:
             case GameScreen.MAGIC_ROMANCE_ENDING:
             case GameScreen.ENDING:
+            case GameScreen.ENDLESS_OPENING:
+            case GameScreen.ENDLESS_TRUE_ENDING:
                 return 'victory' as const;
             case GameScreen.GAME_OVER:
                 return 'game_over' as const;
@@ -4431,7 +4434,9 @@ const App: React.FC = () => {
             GameScreen.EVENT,
             GameScreen.GAME_OVER,
             GameScreen.MAGIC_ROMANCE_ENDING,
-            GameScreen.ENDING
+            GameScreen.ENDING,
+            GameScreen.ENDLESS_OPENING,
+            GameScreen.ENDLESS_TRUE_ENDING
         ]);
 
         if (!syncableScreens.has(gameState.screen)) return;
@@ -6640,7 +6645,7 @@ const App: React.FC = () => {
             floor: 0,
             map: generateDungeonMap(prev.difficultyLevel || 1, { endless: true, visualTheme: prev.visualTheme || visualTheme }),
             currentMapNodeId: null,
-            screen: GameScreen.MAP,
+            screen: GameScreen.ENDLESS_OPENING,
             isEndless: true,
             endlessFloor: 0,
             endlessBossId: undefined,
@@ -13767,12 +13772,12 @@ const App: React.FC = () => {
                         block: 0,
                     };
                     if (isFinalFloor) {
-                        audioService.playBGM('map');
+                        audioService.playBGM('victory');
                         return {
                             ...prev,
                             map: completedMap,
                             player: healedPlayer,
-                            screen: GameScreen.FLOOR_RESULT,
+                            screen: GameScreen.ENDLESS_TRUE_ENDING,
                             endlessBossId: undefined,
                             endlessRewardPending: false,
                             endlessRewardRerollUsed: false,
@@ -18388,6 +18393,43 @@ const App: React.FC = () => {
                             magicRomance={gameState.player.magicRomance}
                             endlessRunRewards={gameState.endlessRunRewards}
                             isEndless={gameState.isEndless}
+                        />
+                    </div>
+                )}
+
+                {gameState.screen === GameScreen.ENDLESS_OPENING && (
+                    <div className="absolute inset-0">
+                        <EndlessEndingSequenceScreen
+                            kind="OPENING"
+                            characterId={gameState.player.id}
+                            characterName={themedCharacters.find(character => character.id === gameState.player.id)?.name ?? selectedCharName}
+                            languageMode={languageMode}
+                            onComplete={() => {
+                                audioService.playBGM('map');
+                                setGameState(prev => ({
+                                    ...prev,
+                                    screen: GameScreen.MAP,
+                                    narrativeLog: [...prev.narrativeLog, trans('エンドレスの最初の階層へ進んだ。', languageMode)],
+                                }));
+                            }}
+                        />
+                    </div>
+                )}
+
+                {gameState.screen === GameScreen.ENDLESS_TRUE_ENDING && (
+                    <div className="absolute inset-0">
+                        <EndlessEndingSequenceScreen
+                            kind="TRUE"
+                            characterId={gameState.player.id}
+                            characterName={themedCharacters.find(character => character.id === gameState.player.id)?.name ?? selectedCharName}
+                            languageMode={languageMode}
+                            onComplete={() => {
+                                setGameState(prev => ({
+                                    ...prev,
+                                    screen: GameScreen.FLOOR_RESULT,
+                                    narrativeLog: [...prev.narrativeLog, trans('真エンディングを解放した。', languageMode)],
+                                }));
+                            }}
                         />
                     </div>
                 )}
