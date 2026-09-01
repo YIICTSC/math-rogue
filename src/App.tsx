@@ -179,6 +179,8 @@ const ENDLESS_LEARNING_SCREENS = new Set<GameScreen>([
 const endlessSubjectKey = (value: string | undefined): string =>
     (value || 'UNKNOWN').replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 80) || 'UNKNOWN';
 
+const hasEndlessSubject = (value: string | undefined): boolean => Boolean(value && value.trim());
+
 const drawEndlessLearningCard = (player: Player): boolean => {
     const drawn = player.drawPile.pop();
     if (!drawn) return false;
@@ -188,7 +190,9 @@ const drawEndlessLearningCard = (player: Player): boolean => {
 
 const applyEndlessLearningAnswer = (player: Player, result: AssignmentAnswerResult): boolean => {
     const counters = { ...player.relicCounters };
-    const subject = endlessSubjectKey(result.subjectId || result.mode);
+    const rawSubject = result.subjectId;
+    const subject = endlessSubjectKey(rawSubject);
+    const subjectEligible = hasEndlessSubject(rawSubject);
     const subjectEnergyStreakKey = `ENDLESS_SUBJECT_ENERGY_STREAK_${subject}`;
     const subjectGoldStreakKey = `ENDLESS_SUBJECT_GOLD_STREAK_${subject}`;
     const subjectSeenKey = `ENDLESS_SUBJECT_SEEN_${subject}`;
@@ -223,9 +227,9 @@ const applyEndlessLearningAnswer = (player: Player, result: AssignmentAnswerResu
     }
 
     // High-school's subject-tag reward is once per subject for the whole run,
-    // not once per battle.  Subject IDs are supplied by every challenge screen
-    // and fall back to the challenge mode for legacy saved answers.
-    if (counters['ENDLESS_REWARD_DRAW_FIRST_SUBJECT'] > 0 && counters[`ENDLESS_SUBJECT_DRAW_${subject}`] !== 1) {
+    // not once per battle.  Subject IDs are supplied by every challenge screen;
+    // an answer without one is deliberately excluded from subject-scoped hooks.
+    if (subjectEligible && counters['ENDLESS_REWARD_DRAW_FIRST_SUBJECT'] > 0 && counters[`ENDLESS_SUBJECT_DRAW_${subject}`] !== 1) {
         if (drawEndlessLearningCard(player)) {
             counters[`ENDLESS_SUBJECT_DRAW_${subject}`] = 1;
             changed = true;
@@ -241,7 +245,7 @@ const applyEndlessLearningAnswer = (player: Player, result: AssignmentAnswerResu
         changed = true;
     }
 
-    if (counters['ENDLESS_REWARD_SUBJECT_STREAK_ENERGY'] > 0) {
+    if (subjectEligible && counters['ENDLESS_REWARD_SUBJECT_STREAK_ENERGY'] > 0) {
         const streak = (counters[subjectEnergyStreakKey] || 0) + 1;
         if (streak >= 3) {
             player.nextTurnEnergy += 1;
@@ -252,7 +256,7 @@ const applyEndlessLearningAnswer = (player: Player, result: AssignmentAnswerResu
         changed = true;
     }
 
-    if (counters['ENDLESS_REWARD_SUBJECT_STREAK_GOLD'] > 0) {
+    if (subjectEligible && counters['ENDLESS_REWARD_SUBJECT_STREAK_GOLD'] > 0) {
         const streak = (counters[subjectGoldStreakKey] || 0) + 1;
         if (streak >= 2) {
             player.gold += 20;
@@ -263,13 +267,13 @@ const applyEndlessLearningAnswer = (player: Player, result: AssignmentAnswerResu
         changed = true;
     }
 
-    if (counters['ENDLESS_REWARD_NEW_SUBJECT_BLOCK'] > 0 && counters[subjectSeenKey] !== 1) {
+    if (subjectEligible && counters['ENDLESS_REWARD_NEW_SUBJECT_BLOCK'] > 0 && counters[subjectSeenKey] !== 1) {
         player.block += 4;
         counters[subjectSeenKey] = 1;
         changed = true;
     }
 
-    if (counters['ENDLESS_REWARD_SUBJECT_TRIPLE_CARD'] > 0 && counters[subjectBattleKey] !== 1) {
+    if (subjectEligible && counters['ENDLESS_REWARD_SUBJECT_TRIPLE_CARD'] > 0 && counters[subjectBattleKey] !== 1) {
         counters[subjectBattleKey] = 1;
         const subjectsInBattle = Object.keys(counters).filter(key => key.startsWith('ENDLESS_BATTLE_SUBJECT_') && counters[key] === 1).length;
         if (subjectsInBattle >= 3 && counters['ENDLESS_BATTLE_TRIPLE_CARD_USED'] !== 1) {
@@ -14446,6 +14450,8 @@ const App: React.FC = () => {
             assignmentId: isAssignmentAnswer ? assignment?.id : undefined,
             mode: result.mode,
             subjectId: result.subjectId,
+            attributeId: result.attributeId,
+            cardType: result.cardType,
             unitName: isCustomAssignmentAnswer ? trans('オリジナル問題', languageMode) : assignmentUnit?.name,
             problemId: result.problemId,
             problemKey: result.problemKey,

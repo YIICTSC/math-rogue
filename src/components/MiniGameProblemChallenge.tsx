@@ -81,6 +81,8 @@ const MiniGameProblemChallenge: React.FC<MiniGameProblemChallengeProps> = ({
       assignmentId: isAssignmentAnswer ? assignment?.id : undefined,
       mode: result.mode,
       subjectId: result.subjectId,
+      attributeId: result.attributeId,
+      cardType: result.cardType,
       unitName: isCustomAssignmentAnswer ? (languageMode === 'ENGLISH' ? 'Original Problem' : 'オリジナル問題') : assignmentUnit?.name,
       problemId: result.problemId,
       problemKey: result.problemKey,

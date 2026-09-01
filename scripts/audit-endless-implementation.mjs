@@ -46,7 +46,7 @@ for (const [label, source, patterns] of [
   ['map generation', map, [/mapHeight\s*=\s*options\.endless\s*\?\s*50/, /endlessBossId/]],
   ['reward persistence', app, [/endlessRewardPending/, /endlessRunRewards/, /createEndlessRewardItems/, /handleEndlessRewardReroll/]],
   ['reward choice safety', data, [/boss\.floor === 50/, /selectedRewardIds/, /FALLBACK_CARD_UPGRADE/]],
-  ['learning judgment hook', app, [/ENDLESS_LEARNING_SCREENS/, /applyEndlessLearningAnswer/, /subjectId/]],
+  ['learning judgment hook', app, [/ENDLESS_LEARNING_SCREENS/, /applyEndlessLearningAnswer/, /subjectId/, /subjectEligible/]],
   ['boss preview', mapScreen, [/nextBossDefinition\.weakness/, /recommendedPrep/]],
   ['major boss intermission', rest, [/endlessMajorBoss/, /onOpenShop/, /onOrganizeDeck/]],
 ]) {

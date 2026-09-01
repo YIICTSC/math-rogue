@@ -905,6 +905,8 @@ export interface AssignmentAnswerRecord {
   assignmentId?: string;
   mode: string;
   subjectId?: string;
+  attributeId?: string;
+  cardType?: CardType;
   unitName?: string;
   problemId?: string;
   problemKey?: string;
@@ -932,6 +934,9 @@ export interface AssignmentAnswerResult {
   mode: string;
   /** Stable learning subject identifier used by scoped endless rewards. */
   subjectId?: string;
+  /** Optional magic/card metadata; absent values never satisfy attribute/type triggers. */
+  attributeId?: string;
+  cardType?: CardType;
   correct: boolean;
   elapsedMs: number;
   problemId?: string;
