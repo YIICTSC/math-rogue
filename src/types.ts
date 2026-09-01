@@ -1249,6 +1249,13 @@ export interface GameState {
   rewards: RewardItem[];
   selectionState: SelectionState;
   isEndless?: boolean;
+  /** The current floor in the 50-floor endless run (0 before the first node). */
+  endlessFloor?: number;
+  /** Boss/reward state is kept in the save payload so a reload cannot double-claim. */
+  endlessBossId?: string;
+  endlessRewardIds?: string[];
+  endlessRunRewards?: Array<{ id: string; name: string; floor: number; scope: 'RUN' | 'PERMANENT' | 'RECORD' }>;
+  endlessRewardPending?: boolean;
   pokerState?: PokerRunState;
   codexOptions?: Card[];
   parryState?: ParryState;

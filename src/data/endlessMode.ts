@@ -3,7 +3,15 @@ import { assetUrl } from '../utils/assetPaths';
 
 export type EndlessArc = 'elementary' | 'high-school' | 'magic';
 export type EndlessBossTier = 'BOSS' | 'MAJOR_BOSS';
-export type EndlessRewardSlot = 'SAFE' | 'LEARNING' | 'RISK' | 'CORE' | 'GROWTH' | 'CONTRACT';
+export type EndlessRewardSlot =
+  | 'SAFE'
+  | 'LEARNING'
+  | 'RISK'
+  | 'CORE'
+  | 'GROWTH'
+  | 'CONTRACT'
+  | 'PERMANENT'
+  | 'RECORD';
 export type EndlessRewardScope = 'RUN' | 'PERMANENT' | 'RECORD';
 
 export interface EndlessRewardChoice {
