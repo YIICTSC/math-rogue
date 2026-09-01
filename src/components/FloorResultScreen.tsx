@@ -24,9 +24,11 @@ interface FloorResultScreenProps {
   visualTheme?: 'elementary' | 'high-school' | 'magic';
   magicHeroId?: string;
   magicRomance?: MagicRomanceProgress;
+  endlessRunRewards?: Array<{ id: string; name: string; floor: number; scope: 'RUN' | 'PERMANENT' | 'RECORD' }>;
+  isEndless?: boolean;
 }
 
-const FloorResultScreen: React.FC<FloorResultScreenProps> = ({ act, stats, storyIndex, onNext, languageMode, newlyUnlockedCardName, typingMode = false, visualTheme = 'elementary', magicHeroId = 'AKARI', magicRomance }) => {
+const FloorResultScreen: React.FC<FloorResultScreenProps> = ({ act, stats, storyIndex, onNext, languageMode, newlyUnlockedCardName, typingMode = false, visualTheme = 'elementary', magicHeroId = 'AKARI', magicRomance, endlessRunRewards = [], isEndless = false }) => {
   const [displayedText, setDisplayedText] = useState("");
   const [isTyping, setIsTyping] = useState(true);
   
@@ -121,7 +123,9 @@ const FloorResultScreen: React.FC<FloorResultScreenProps> = ({ act, stats, story
       <div className="floor-result-panel z-10 w-full max-w-2xl md:max-w-5xl bg-black/90 border-2 sm:border-4 border-gray-700 p-4 sm:p-8 md:p-6 rounded-xl shadow-2xl animate-in fade-in zoom-in duration-500 max-h-[95vh] flex flex-col overflow-y-auto md:overflow-hidden custom-scrollbar">
         <div className="floor-result-header text-center mb-4 sm:mb-6 md:mb-4 shrink-0">
           <h2 className="floor-result-heading text-3xl sm:text-4xl md:text-5xl font-black text-gray-100 mb-2 tracking-tighter italic">
-            {languageMode === 'ENGLISH' ? `ACT ${act} CLEARED` : languageMode === 'HIRAGANA' ? `だい${act}しょう くりあ` : `第${act}章クリア`}
+            {isEndless
+              ? (languageMode === 'ENGLISH' ? 'ENDLESS FLOOR 50 CLEARED' : 'エンドレス 50F 制覇')
+              : languageMode === 'ENGLISH' ? `ACT ${act} CLEARED` : languageMode === 'HIRAGANA' ? `だい${act}しょう くりあ` : `第${act}章クリア`}
           </h2>
           <div className="h-1 w-24 sm:w-32 bg-gray-500 mx-auto rounded-full"></div>
         </div>
@@ -174,6 +178,20 @@ const FloorResultScreen: React.FC<FloorResultScreenProps> = ({ act, stats, story
                 </div>
 
                 {/* Story Section */}
+                {isEndless && endlessRunRewards.length > 0 && (
+                  <div className="mb-4 rounded-lg border-2 border-cyan-500/50 bg-cyan-950/30 p-3 text-left">
+                    <div className="mb-2 text-center text-xs font-black tracking-[0.2em] text-cyan-200">{trans('今回の深層報酬', languageMode)}</div>
+                    <div className="space-y-1.5">
+                      {endlessRunRewards.map((reward) => (
+                        <div key={`${reward.floor}-${reward.id}`} className="flex items-center gap-2 rounded border border-white/10 bg-black/25 px-2 py-1.5 text-xs">
+                          <span className="font-black text-amber-200">{reward.floor}F</span>
+                          <span className="flex-1 font-bold text-white">{reward.name}</span>
+                          <span className="text-[9px] font-black text-cyan-200">{reward.scope}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
                 <div className="floor-result-story-panel bg-gray-800/30 border-2 border-gray-700 p-4 sm:p-6 md:p-4 rounded-lg mb-4 min-h-[8rem] md:min-h-0 relative flex-grow flex flex-col justify-center">
                     <div className="floor-result-story-title absolute -top-3 left-4 sm:left-6 bg-gray-700 px-2 sm:px-3 py-0.5 rounded text-[8px] sm:text-[9px] font-bold text-gray-300 uppercase tracking-widest z-10">
                         {languageMode === 'ENGLISH' && visualTheme === 'magic'

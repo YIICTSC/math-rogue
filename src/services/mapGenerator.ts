@@ -2,6 +2,7 @@
 
 import { MapNode, NodeType } from '../types';
 import { getDifficultyConfig } from '../config/difficulty';
+import { getEndlessArc, getEndlessBoss } from '../data/endlessMode';
 
 // Keep the normal Learning Rogue route length in every distributable build.
 // Debug access must never change the stage structure before the player opts in.
@@ -10,20 +11,27 @@ export const MAP_WIDTH = 7;   // Max width of the grid
 
 const getRandomInt = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min;
 
-export const generateDungeonMap = (difficultyLevel: number = 1): MapNode[] => {
+export const generateDungeonMap = (difficultyLevel: number = 1, options: { endless?: boolean; visualTheme?: string } = {}): MapNode[] => {
   const nodes: MapNode[] = [];
   const floors: MapNode[][] = [];
   const difficulty = getDifficultyConfig(difficultyLevel);
+  const mapHeight = options.endless ? 50 : MAP_HEIGHT;
+  const endlessArc = options.endless ? getEndlessArc(options.visualTheme) : undefined;
 
   // Helper to create node
   const createNode = (x: number, y: number, type: NodeType): MapNode => {
+    const floor = y + 1;
+    const endlessBossId = options.endless && type === NodeType.BOSS
+      ? getEndlessBoss(endlessArc, floor)?.id
+      : undefined;
     return {
       id: `node-${y}-${x}`,
       x,
       y,
       type,
       nextNodes: [],
-      completed: false
+      completed: false,
+      ...(endlessBossId ? { endlessBossId } : {})
     };
   };
 
@@ -40,8 +48,15 @@ export const generateDungeonMap = (difficultyLevel: number = 1): MapNode[] => {
   floors.push(startNodes);
   nodes.push(...startNodes);
 
-  // Middle Floors (1 to MAP_HEIGHT - 2)
-  for (let y = 1; y < MAP_HEIGHT - 1; y++) {
+  // Middle Floors (1 to MAP_HEIGHT - 2). Endless maps keep the same readable
+  // branching, but every fifth floor is a deterministic dedicated boss.
+  for (let y = 1; y < mapHeight - 1; y++) {
+    if (options.endless && (y + 1) % 5 === 0) {
+      const bossNode = createNode(Math.floor(MAP_WIDTH / 2), y, NodeType.BOSS);
+      floors.push([bossNode]);
+      nodes.push(bossNode);
+      continue;
+    }
     const floorNodes: MapNode[] = [];
     const nodeCount = getRandomInt(3, 4);
     
@@ -63,7 +78,7 @@ export const generateDungeonMap = (difficultyLevel: number = 1): MapNode[] => {
             type = NodeType.TREASURE; // Guaranteed treasure mid-way
         } else if (y === 9) {
             type = NodeType.ELITE; // Guaranteed elite
-        } else if (y === MAP_HEIGHT - 2) {
+        } else if (!options.endless && y === MAP_HEIGHT - 2) {
              type = NodeType.REST; // Rest before boss
         } else {
             const restChance = 0.13;
@@ -95,12 +110,12 @@ export const generateDungeonMap = (difficultyLevel: number = 1): MapNode[] => {
   }
 
   // Final Floor: Boss
-  const bossNode = createNode(Math.floor(MAP_WIDTH / 2), MAP_HEIGHT - 1, NodeType.BOSS);
+  const bossNode = createNode(Math.floor(MAP_WIDTH / 2), mapHeight - 1, NodeType.BOSS);
   floors.push([bossNode]);
   nodes.push(bossNode);
 
   // Connect Nodes (Create Paths)
-  for (let y = 0; y < MAP_HEIGHT - 1; y++) {
+  for (let y = 0; y < mapHeight - 1; y++) {
       const currentFloor = floors[y];
       const nextFloor = floors[y + 1];
 

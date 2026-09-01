@@ -274,6 +274,9 @@ export interface Enemy {
   familiars?: ActiveFamiliar[];
   sleepTurns?: number;
   phase?: number;
+  /** Dedicated 50-floor endless boss metadata. */
+  endlessBossId?: string;
+  endlessMechanicKey?: string;
 }
 
 export interface Relic {
@@ -830,6 +833,8 @@ export interface MapNode {
   type: NodeType;
   nextNodes: string[];
   completed: boolean;
+  /** Populated only by the 50-floor endless map. */
+  endlessBossId?: string;
 }
 
 export interface SelectionState {
@@ -995,7 +1000,7 @@ export interface CoopSupportCard {
 }
 
 export interface RewardItem {
-  type: 'CARD' | 'RELIC' | 'GOLD' | 'POTION' | 'RACE_TRICK' | 'COOP_SUPPORT';
+  type: 'CARD' | 'RELIC' | 'GOLD' | 'POTION' | 'RACE_TRICK' | 'COOP_SUPPORT' | 'ENDLESS_REWARD';
   value?: any;
   id: string;
 }
@@ -1277,6 +1282,13 @@ export interface CoopSharedState {
   combatLog: string[];
   selectionState: SelectionState;
   isEndless?: boolean;
+  /** The current floor in the 50-floor endless run (0 before the first node). */
+  endlessFloor?: number;
+  /** Boss/reward state is kept in the save payload so a reload cannot double-claim. */
+  endlessBossId?: string;
+  endlessRewardIds?: string[];
+  endlessRunRewards?: Array<{ id: string; name: string; floor: number; scope: 'RUN' | 'PERMANENT' | 'RECORD' }>;
+  endlessRewardPending?: boolean;
   parryState?: ParryState;
   activeEffects: VisualEffectInstance[];
   currentStoryIndex?: number;

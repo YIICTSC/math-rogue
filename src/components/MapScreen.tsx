@@ -7,6 +7,7 @@ import Card from './Card';
 import { trans } from '../utils/textUtils';
 import { assetUrl } from '../utils/assetPaths';
 import type { VisualThemeId } from '../data/visualThemes';
+import { getEndlessArc, getEndlessBoss } from '../data/endlessMode';
 
 interface MapScreenProps {
     nodes: MapNode[];
@@ -25,18 +26,26 @@ interface MapScreenProps {
     selectionDisabledMessage?: string;
     visualTheme?: VisualThemeId;
     highSchoolStoryId?: string;
+    isEndless?: boolean;
 }
 
-const MapScreen: React.FC<MapScreenProps> = ({ nodes, currentNodeId, onNodeSelect, onReturnToTitle, onOpenSettings, player, languageMode, narrative, act, floor, typingMode = false, selectionHoldMs = 0, selectionDisabled = false, selectionDisabledMessage, visualTheme = 'elementary', highSchoolStoryId }) => {
+const MapScreen: React.FC<MapScreenProps> = ({ nodes, currentNodeId, onNodeSelect, onReturnToTitle, onOpenSettings, player, languageMode, narrative, act, floor, typingMode = false, selectionHoldMs = 0, selectionDisabled = false, selectionDisabledMessage, visualTheme = 'elementary', highSchoolStoryId, isEndless = false }) => {
     const scrollRef = useRef<HTMLDivElement>(null);
     const [showDeck, setShowDeck] = useState(false);
     const holdTimerRef = useRef<number | null>(null);
+    const mapHeight = Math.max(MAP_HEIGHT, nodes.reduce((max, node) => Math.max(max, node.y + 1), 0));
+    const nextBoss = isEndless
+        ? nodes
+            .filter(node => node.type === NodeType.BOSS && !node.completed && node.y + 1 > floor)
+            .sort((a, b) => a.y - b.y)[0]
+        : undefined;
+    const nextBossDefinition = nextBoss ? getEndlessBoss(getEndlessArc(visualTheme), nextBoss.y + 1) : undefined;
 
     // 現在地へのオートスクロール
     useEffect(() => {
         if (scrollRef.current) {
             const currentNode = nodes.find(n => n.id === currentNodeId);
-            const totalHeight = MAP_HEIGHT * 100 + 200;
+            const totalHeight = mapHeight * 100 + 200;
             let targetScroll = totalHeight;
 
             if (currentNode) {
@@ -51,7 +60,7 @@ const MapScreen: React.FC<MapScreenProps> = ({ nodes, currentNodeId, onNodeSelec
                 behavior: 'smooth'
             });
         }
-    }, [currentNodeId, nodes]);
+    }, [currentNodeId, nodes, mapHeight]);
 
     const getNodeIcon = (type: NodeType) => {
         switch (type) {
@@ -200,7 +209,9 @@ const MapScreen: React.FC<MapScreenProps> = ({ nodes, currentNodeId, onNodeSelec
     const highSchoolMapAct = highSchoolStoryId === 'HS_CHERRY_BLOSSOM_LOOP'
         ? 1
         : Math.min(4, Math.max(1, act));
-    const mapBackground = visualTheme === 'high-school'
+    const mapBackground = isEndless
+        ? assetUrl(`sprites/backgrounds/learning-rogue/endless-${visualTheme}.webp`)
+        : visualTheme === 'high-school'
         ? assetUrl(`sprites/backgrounds/learning-rogue/high-school-map-act${highSchoolMapAct}.webp`)
         : visualTheme === 'magic'
             ? assetUrl(`sprites/backgrounds/learning-rogue/magic-map-act${Math.min(4, Math.max(1, act))}.webp`)
@@ -272,10 +283,15 @@ const MapScreen: React.FC<MapScreenProps> = ({ nodes, currentNodeId, onNodeSelec
                     </div>
                 </div>
             )}
+            {isEndless && nextBossDefinition && (
+                <div className="z-20 flex items-center justify-center border-b border-purple-400/30 bg-purple-950/70 px-3 py-2 text-center text-[11px] font-black text-purple-100">
+                    {trans(`次の節目 ${nextBossDefinition.floor}F：${nextBossDefinition.name}`, languageMode)}
+                </div>
+            )}
 
             {/* メインマップエリア */}
             <div ref={scrollRef} className="ios-edge-to-edge-visual flex-grow overflow-y-auto relative custom-scrollbar z-10" style={{ scrollBehavior: 'smooth' }}>
-                <div className="relative w-full" style={{ height: `${MAP_HEIGHT * 100 + 300}px` }}>
+                <div className="relative w-full" style={{ height: `${mapHeight * 100 + 300}px` }}>
                     <div
                         className="pointer-events-none absolute inset-0 z-0 bg-cover bg-top opacity-100"
                         style={{ backgroundImage: `url(${mapBackground})` }}
@@ -302,7 +318,7 @@ const MapScreen: React.FC<MapScreenProps> = ({ nodes, currentNodeId, onNodeSelec
                             const x2 = ((conn.to.x + 0.5) / MAP_WIDTH) * 100;
                             const y2 = (conn.to.y * 100 + 80);
 
-                            const totalH = MAP_HEIGHT * 100 + 300;
+                            const totalH = mapHeight * 100 + 300;
                             const svgY1 = totalH - y1;
                             const svgY2 = totalH - y2;
 

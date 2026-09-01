@@ -4,6 +4,7 @@ import { getEnemyIllustrationPaths } from '../utils/enemyIllustration';
 import { isLegacySpriteModeEnabled } from '../utils/legacySpriteMode';
 import { getThemedHumanoidEnemySpritePath, getThemedMonsterEnemySpritePath, type HighSchoolEnemyAction, type VisualThemeId } from '../data/visualThemes';
 import { assetUrl } from '../utils/assetPaths';
+import { ENDLESS_BOSSES, getEndlessBossSpritePath } from '../data/endlessMode';
 
 interface EnemyIllustrationProps {
   name: string;
@@ -38,6 +39,8 @@ const EnemyIllustration: React.FC<EnemyIllustrationProps> = ({ name, seed, alias
   }
 
   const enemyRef = { name, enemyType, phase };
+  const endlessBoss = enemyType === 'ENDLESS_BOSS' ? ENDLESS_BOSSES.find((boss) => boss.name === name) : undefined;
+  const endlessSpritePath = endlessBoss ? getEndlessBossSpritePath(endlessBoss, action) : null;
   const azukiSpritePath = visualTheme === 'high-school' && enemyType === 'AZUKI'
     ? assetUrl(`sprites/high-school/azuki/${action === 'attack' ? 'pounce' : action === 'skill' ? 'howl' : 'idle'}.webp`)
     : null;
@@ -51,7 +54,9 @@ const EnemyIllustration: React.FC<EnemyIllustrationProps> = ({ name, seed, alias
     ? getThemedHumanoidEnemySpritePath(enemyRef, visualTheme, 'idle')
     : null;
   const monsterPath = getThemedMonsterEnemySpritePath(enemyRef, visualTheme);
-  const imagePaths = crowdfundingBossPath
+  const imagePaths = endlessSpritePath
+    ? [endlessSpritePath, getEndlessBossSpritePath(endlessBoss!, 'idle')]
+    : crowdfundingBossPath
     ? [crowdfundingBossPath]
     : azukiSpritePath
     ? [azukiSpritePath]

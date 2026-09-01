@@ -39,6 +39,7 @@ import EnglishChallengeScreen from './components/EnglishChallengeScreen';
 import GeneralChallengeScreen from './components/GeneralChallengeScreen';
 import DebugMenuScreen from './components/DebugMenuScreen';
 import MagicEventSimulationScreen from './components/MagicEventSimulationScreen';
+import { createEndlessRewardItems, getEndlessArc, getEndlessBoss, getEndlessBossById, getEndlessBossSpritePath, type EndlessRewardChoice } from './data/endlessMode';
 
 type HighSchoolBattleVoiceAction = 'attack' | 'summon' | 'block' | 'power' | 'damage' | 'item' | 'finish' | 'defeat';
 const NON_FINISH_BATTLE_VOICE_RATE = 0.3;
@@ -47,6 +48,77 @@ const BATTLE_VOICE_REPLY_DELAY_MS = 420;
 const CRANE_BATTLE_STRENGTH_COUNTER = 'CRANE_PRIZE_BATTLE_STRENGTH';
 const CRANE_BATTLE_BLOCK_COUNTER = 'CRANE_PRIZE_BATTLE_BLOCK';
 const CRANE_BATTLE_DRAW_COUNTER = 'CRANE_PRIZE_BATTLE_DRAW';
+const ENDLESS_REWARD_PROFILE_KEY = 'learning-rogue-endless-rewards-v1';
+
+const readEndlessProfileRewards = (): Record<string, number> => {
+    if (typeof window === 'undefined') return {};
+    try {
+        return JSON.parse(window.localStorage.getItem(ENDLESS_REWARD_PROFILE_KEY) || '{}') as Record<string, number>;
+    } catch {
+        return {};
+    }
+};
+
+const applyEndlessRewardChoice = (player: Player, choice: EndlessRewardChoice): void => {
+    const counters = { ...player.relicCounters };
+    const flags = { ...player.turnFlags };
+    const counterKey = `ENDLESS_REWARD_${choice.effectKey}`;
+    counters[counterKey] = (counters[counterKey] || 0) + 1;
+    // Store every selected choice as a counter, so every MD-defined reward has
+    // a deterministic, save-safe representation even when its trigger is a
+    // specialised future battle hook.
+    switch (choice.effectKey) {
+        case 'REMOVE_CURSE':
+        case 'REMOVE_CURSE_HP5':
+            {
+                const index = player.deck.findIndex(card => card.type === CardType.CURSE || card.rarity === 'SPECIAL' && card.unplayable);
+                if (index >= 0) player.deck = player.deck.filter((_, cardIndex) => cardIndex !== index);
+                if (choice.effectKey === 'REMOVE_CURSE_HP5') {
+                    player.maxHp = Math.max(1, player.maxHp - 5);
+                    player.currentHp = Math.min(player.currentHp, player.maxHp);
+                }
+            }
+            break;
+        case 'CHEAT_DEATH':
+        case 'CHEAT_DEATH_NO_HEAL':
+            flags.ENDLESS_CHEAT_DEATH = true;
+            break;
+        case 'LOW_HP_DOUBLE_ATTACK':
+        case 'THREE_ATTRIBUTE_ATTACK':
+            counters.ENDLESS_NEXT_ATTACK_MULTIPLIER = Math.max(counters.ENDLESS_NEXT_ATTACK_MULTIPLIER || 1, choice.effectKey === 'LOW_HP_DOUBLE_ATTACK' ? 2 : 1.5);
+            break;
+        case 'EXTRA_TURN_HP8':
+        case 'EXTRA_TURN_CORRUPTION':
+            counters.ENDLESS_EXTRA_TURN = (counters.ENDLESS_EXTRA_TURN || 0) + 1;
+            if (choice.effectKey === 'EXTRA_TURN_HP8') player.currentHp = Math.max(1, player.currentHp - 8);
+            break;
+        case 'BOOST_CARD_HP10':
+            player.currentHp = Math.max(1, player.currentHp - 10);
+            counters.ENDLESS_NEXT_CARD_BOOST = Math.max(counters.ENDLESS_NEXT_CARD_BOOST || 0, 25);
+            break;
+        case 'MAGIC_START_GAUGE':
+            counters.ENDLESS_START_TRANSFORM_GAUGE = 10;
+            break;
+        case 'ELEMENTARY_START_REWARD_PLUS':
+        case 'HIGH_SCHOOL_START_REWARD_PLUS':
+            counters.ENDLESS_START_REWARD_SLOTS = Math.max(counters.ENDLESS_START_REWARD_SLOTS || 0, 1);
+            break;
+        default:
+            break;
+    }
+    player.relicCounters = counters;
+    player.turnFlags = flags;
+    if (choice.scope === 'PERMANENT' || choice.scope === 'RECORD') {
+        try {
+            const current = JSON.parse(window.localStorage.getItem(ENDLESS_REWARD_PROFILE_KEY) || '{}') as Record<string, number>;
+            current[choice.id] = (current[choice.id] || 0) + 1;
+            current[`effect:${choice.effectKey}`] = (current[`effect:${choice.effectKey}`] || 0) + 1;
+            window.localStorage.setItem(ENDLESS_REWARD_PROFILE_KEY, JSON.stringify(current));
+        } catch {
+            // localStorage is unavailable in some embedded preview contexts.
+        }
+    }
+};
 
 const applyCranePermanentEffect = (player: Player, kind: CranePermanentEffectKind, amount: number): void => {
     if (!Number.isFinite(amount) || amount <= 0) return;
@@ -318,9 +390,13 @@ const getBgmThemeForPlayer = (
 };
 
 const getBattleEnemyTransitionAssetPaths = (
-    enemy: Pick<Enemy, 'name' | 'enemyType' | 'phase'>,
+    enemy: Pick<Enemy, 'name' | 'enemyType' | 'phase' | 'endlessBossId'>,
     visualTheme: VisualThemeId,
 ): string[] => {
+    if (enemy.enemyType === 'ENDLESS_BOSS') {
+        const endlessBoss = getEndlessBossById(enemy.endlessBossId);
+        if (endlessBoss) return [getEndlessBossSpritePath(endlessBoss, 'idle')];
+    }
     if (visualTheme === 'high-school' && enemy.enemyType === 'AZUKI') {
         return [assetUrl('sprites/high-school/azuki/idle.webp')];
     }
@@ -1231,6 +1307,35 @@ const getNextEnemyIntent = (enemy: Enemy, turn: number): EnemyIntent => {
                 if (heartTurn === 4) return { type: EnemyIntentType.BUFF, value: 0, secondaryValue: 5 };
                 return { type: EnemyIntentType.ATTACK_DEBUFF, value: 10, secondaryValue: 3, debuffType: 'WEAK' };
             }
+
+        case 'ENDLESS_BOSS': {
+            // Endless bosses share the existing intent primitives, but their
+            // mechanic key changes the cadence so each dedicated encounter
+            // feels distinct without introducing a parallel battle engine.
+            const mechanic = enemy.endlessMechanicKey || '';
+            const phase = Math.max(1, enemy.phase || 1);
+            if (mechanic.includes('NOISE') || mechanic.includes('WAVEFORM') || mechanic.includes('CONTRACT')) {
+                if (turn % 4 === 1) return { type: EnemyIntentType.DEBUFF, value: 0, secondaryValue: phase, debuffType: 'CONFUSED' };
+                if (turn % 4 === 2) return { type: EnemyIntentType.ATTACK_DEFEND, value: 10 + phase * 3, secondaryValue: 8 + phase * 4 };
+                if (turn % 4 === 3) return { type: EnemyIntentType.ATTACK_DEBUFF, value: 8 + phase * 2, secondaryValue: 1, debuffType: 'WEAK' };
+                return { type: EnemyIntentType.DEFEND, value: 10 + phase * 4 };
+            }
+            if (mechanic.includes('TIME') || mechanic.includes('REPEAT') || mechanic.includes('REFLECTION')) {
+                if (turn % 3 === 1) return { type: EnemyIntentType.BUFF, value: 0, secondaryValue: phase + 1 };
+                if (turn % 3 === 2) return { type: EnemyIntentType.ATTACK, value: 12 + phase * 5 };
+                return { type: EnemyIntentType.PIERCE_ATTACK, value: 9 + phase * 4 };
+            }
+            if (mechanic.includes('ATTRIBUTE') || mechanic.includes('PRISM') || mechanic.includes('ORBIT') || mechanic.includes('MORPH')) {
+                if (turn % 4 === 1) return { type: EnemyIntentType.ATTACK_DEBUFF, value: 9 + phase * 3, secondaryValue: 2, debuffType: 'VULNERABLE' };
+                if (turn % 4 === 2) return { type: EnemyIntentType.BUFF, value: 0, secondaryValue: phase + 2 };
+                if (turn % 4 === 3) return { type: EnemyIntentType.PIERCE_ATTACK, value: 11 + phase * 4 };
+                return { type: EnemyIntentType.DEFEND, value: 8 + phase * 5 };
+            }
+            if (turn % 4 === 1) return { type: EnemyIntentType.ATTACK, value: 11 + phase * 4 };
+            if (turn % 4 === 2) return { type: EnemyIntentType.ATTACK_DEFEND, value: 8 + phase * 3, secondaryValue: 10 + phase * 3 };
+            if (turn % 4 === 3) return { type: EnemyIntentType.DEBUFF, value: 0, secondaryValue: phase, debuffType: 'WEAK' };
+            return { type: EnemyIntentType.BUFF, value: 0, secondaryValue: phase + 1 };
+        }
 
 
         default:
@@ -3137,6 +3242,13 @@ const App: React.FC = () => {
                 : undefined,
             floatingText: null
         };
+
+        if (p.relicCounters['ENDLESS_REWARD_DRAW_FIRST_LEARNING'] || p.relicCounters['ENDLESS_REWARD_DRAW_FIRST_SUBJECT']) {
+            p.relicCounters['ENDLESS_LEARNING_DRAW_USED'] = 0;
+        }
+        if (p.relicCounters['ENDLESS_REWARD_LOW_HP_LEARNING_GOLD']) {
+            p.relicCounters['ENDLESS_LOW_HP_GOLD_USED'] = 0;
+        }
 
         const eventStrengthBonus = p.relicCounters['EVENT_STRENGTH_BONUS'] || 0;
         if (eventStrengthBonus > 0) p.strength += eventStrengthBonus;
@@ -6384,14 +6496,33 @@ const App: React.FC = () => {
             ...prev,
             act: prev.act + 1,
             floor: 0,
-            map: generateDungeonMap(prev.difficultyLevel || 1),
+            map: generateDungeonMap(prev.difficultyLevel || 1, { endless: true, visualTheme: prev.visualTheme || visualTheme }),
             currentMapNodeId: null,
             screen: GameScreen.MAP,
             isEndless: true,
-            player: {
-                ...prev.player,
-                currentHp: prev.player.maxHp
-            },
+            endlessFloor: 0,
+            endlessBossId: undefined,
+            endlessRewardIds: [],
+            endlessRunRewards: [],
+            endlessRewardPending: false,
+            player: (() => {
+                const profile = readEndlessProfileRewards();
+                const nextPlayer = { ...prev.player, relicCounters: { ...prev.player.relicCounters }, currentHp: prev.player.maxHp };
+                Object.keys(nextPlayer.relicCounters)
+                    .filter(key => key.startsWith('ENDLESS_'))
+                    .forEach(key => delete nextPlayer.relicCounters[key]);
+                const turnFlags = { ...nextPlayer.turnFlags };
+                delete turnFlags.ENDLESS_CHEAT_DEATH;
+                nextPlayer.turnFlags = turnFlags;
+                const arc = getEndlessArc(prev.visualTheme || visualTheme);
+                if (arc !== 'magic' && (profile[`effect:${arc === 'elementary' ? 'ELEMENTARY_START_REWARD_PLUS' : 'HIGH_SCHOOL_START_REWARD_PLUS'}`] || 0) > 0) {
+                    nextPlayer.relicCounters.ENDLESS_START_REWARD_SLOTS = 1;
+                }
+                if (arc === 'magic' && (profile['effect:MAGIC_START_GAUGE'] || 0) > 0) {
+                    nextPlayer.relicCounters.ENDLESS_START_TRANSFORM_GAUGE = 10;
+                }
+                return nextPlayer;
+            })(),
             narrativeLog: [...prev.narrativeLog, trans("終わらない冒険が始まる...", languageMode)],
             actStats: { enemiesDefeated: 0, goldGained: 0, mathCorrect: 0 }
         }));
@@ -7827,6 +7958,9 @@ const App: React.FC = () => {
                 const difficulty = getDifficultyConfig(gameState.difficultyLevel);
                 const enemyHpMultiplier = coopEnemyHpMultiplier * difficulty.enemyHpMultiplier;
                 const activeBattleVisualTheme = nextState.visualTheme || visualTheme;
+                const endlessBoss = nextState.isEndless && node.type === NodeType.BOSS
+                    ? getEndlessBoss(getEndlessArc(activeBattleVisualTheme), nextFloor)
+                    : undefined;
                 const isDodomedesuBoss = node.type === NodeType.BOSS
                     && nextState.isEndless
                     && activeBattleVisualTheme === 'high-school'
@@ -7836,7 +7970,32 @@ const App: React.FC = () => {
                     && activeBattleVisualTheme === 'high-school'
                     && Boolean(nextState.player.turnFlags[AZUKI_ENCOUNTER_FLAG]);
 
-                if (isDodomedesuBoss) {
+                if (endlessBoss) {
+                    const tierMultiplier = endlessBoss.tier === 'MAJOR_BOSS' ? 2.35 : 1.65;
+                    const baseBossHp = Math.ceil((120 + nextFloor * 9) * tierMultiplier * enemyHpMultiplier);
+                    const bossHp = isDebugHpOne ? 1 : baseBossHp;
+                    const bossEnemy: Enemy = {
+                        id: `endless-boss-${endlessBoss.id}-${Date.now()}`,
+                        enemyType: 'ENDLESS_BOSS',
+                        name: endlessBoss.name,
+                        maxHp: baseBossHp,
+                        currentHp: bossHp,
+                        block: 0,
+                        strength: Math.max(0, difficulty.enemyStrengthBonus + Math.floor(nextFloor / 10)),
+                        nextIntent: { type: EnemyIntentType.UNKNOWN, value: 0 },
+                        vulnerable: 0,
+                        weak: 0,
+                        poison: 0,
+                        artifact: endlessBoss.tier === 'MAJOR_BOSS' ? 2 : 1,
+                        corpseExplosion: false,
+                        floatingText: null,
+                        phase: endlessBoss.tier === 'MAJOR_BOSS' ? 1 : 0,
+                        endlessBossId: endlessBoss.id,
+                        endlessMechanicKey: endlessBoss.mechanicKey,
+                    };
+                    enemies.push({ ...bossEnemy, nextIntent: getNextEnemyIntent(bossEnemy, 1) });
+                    bgmType = nextFloor === 50 ? 'final_boss' : endlessBoss.tier === 'MAJOR_BOSS' ? 'boss' : 'mid_boss';
+                } else if (isDodomedesuBoss) {
                     const baseBossHp = Math.ceil((170 * gameState.act + floorDifficulty * 2) * enemyHpMultiplier);
                     const genzoHp = Math.ceil(baseBossHp * 0.45);
                     enemies.push({ id: `dodomedesu-${Date.now()}`, enemyType: 'DODOMEDESU', name: DODOMEDESU_NAME, maxHp: baseBossHp, currentHp: isDebugHpOne ? 1 : baseBossHp, block: 0, strength: difficulty.enemyStrengthBonus, nextIntent: { type: EnemyIntentType.UNKNOWN, value: 0 }, vulnerable: 0, weak: 0, poison: 0, artifact: 1, corpseExplosion: false, floatingText: null });
@@ -8002,6 +8161,9 @@ const App: React.FC = () => {
 
                 const nextGameState = {
                     ...nextState,
+                    endlessFloor: nextState.isEndless ? nextFloor : nextState.endlessFloor,
+                    endlessBossId: endlessBoss?.id,
+                    endlessRewardPending: Boolean(endlessBoss),
                     player: p,
                     enemies: enemies,
                     selectedEnemyId: enemies[0].id,
@@ -9564,6 +9726,16 @@ const App: React.FC = () => {
                                 logParts.push(`${bonus >= 0 ? '+' : ''}${bonus}(${trans("ムキムキ", languageMode)})`);
                             }
                             let multiplier = 1;
+                            if (card.type === CardType.ATTACK && p.relicCounters['ENDLESS_NEXT_ATTACK_MULTIPLIER'] > 1) {
+                                multiplier *= p.relicCounters['ENDLESS_NEXT_ATTACK_MULTIPLIER'];
+                                delete p.relicCounters['ENDLESS_NEXT_ATTACK_MULTIPLIER'];
+                                logParts.push(`x${multiplier}(深層報酬)`);
+                            }
+                            if (p.relicCounters['ENDLESS_NEXT_CARD_BOOST'] > 0) {
+                                multiplier *= 1 + p.relicCounters['ENDLESS_NEXT_CARD_BOOST'] / 100;
+                                delete p.relicCounters['ENDLESS_NEXT_CARD_BOOST'];
+                                logParts.push(`x1.25(深層報酬)`);
+                            }
                             if (act === 0 && h === 0 && card.type === CardType.ATTACK && p.relics.find(r => r.id === 'PEN_NIB')) {
                                 p.relicCounters['ATTACK_COUNT_NIB'] = (p.relicCounters['ATTACK_COUNT_NIB'] || 0) + 1;
                                 if (p.relicCounters['ATTACK_COUNT_NIB'] === 10) {
@@ -9596,6 +9768,18 @@ const App: React.FC = () => {
                             } else if (e.block >= damage) { e.block -= damage; damage = 0; }
                             else { damage -= e.block; e.block = 0; }
                             e.currentHp -= damage;
+                            if (e.enemyType === 'ENDLESS_BOSS' && e.currentHp > 0) {
+                                const hpRatio = e.currentHp / Math.max(1, e.maxHp);
+                                const nextPhase = hpRatio <= 0.3 ? 3 : hpRatio <= 0.6 ? 2 : 1;
+                                if (nextPhase > (e.phase || 1)) {
+                                    e.phase = nextPhase;
+                                    e.strength += 1;
+                                    e.block += Math.ceil(e.maxHp * 0.04);
+                                    e.floatingText = { id: `endless-phase-${Date.now()}-${e.id}`, text: `フェーズ${nextPhase}`, color: 'text-fuchsia-300' };
+                                    currentLogs.push(`${trans(e.name, languageMode)}のフェーズ${nextPhase}が起動した！`);
+                                    nextActiveEffects.push({ id: `endless-phase-vfx-${Date.now()}-${e.id}`, type: 'BUFF', targetId: e.id, delay: hitDelay + 120 });
+                                }
+                            }
                             if (e.currentHp <= 0 && e.poison > 0 && hasRelic(p, 'ANIMAL_CARE_BADGE') && p.relicCounters['ANIMAL_CARE_BADGE_HEALS'] < 3) {
                                 p.currentHp = Math.min(p.maxHp, p.currentHp + 4);
                                 p.relicCounters['ANIMAL_CARE_BADGE_HEALS'] += 1;
@@ -12063,6 +12247,23 @@ const App: React.FC = () => {
             return;
         }
 
+        if (gameState.challengeMode !== 'COOP' && (gameState.player.relicCounters['ENDLESS_EXTRA_TURN'] || 0) > 0) {
+            setGameState(prev => ({
+                ...prev,
+                player: {
+                    ...prev.player,
+                    relicCounters: {
+                        ...prev.player.relicCounters,
+                        ENDLESS_EXTRA_TURN: Math.max(0, (prev.player.relicCounters['ENDLESS_EXTRA_TURN'] || 0) - 1),
+                    },
+                },
+                combatLog: [...prev.combatLog, '深層報酬の追加ターン！敵の行動を挟まず、もう一度行動できます。'].slice(-100),
+            }));
+            audioService.playBattleSound('buff');
+            startPlayerTurn();
+            return;
+        }
+
         if (gameState.player.relics.find(r => r.id === 'NILRYS_CODEX')) {
             const pool = getFilteredCardPool(gameState.player.id);
             const options = [];
@@ -13016,14 +13217,26 @@ const App: React.FC = () => {
     }, [visualTheme]);
 
     const resolveBattleDefeat = useCallback(() => {
+        const currentState = stateRef.current;
+        if (currentState.isEndless && currentState.player.turnFlags.ENDLESS_CHEAT_DEATH && currentState.player.currentHp <= 0) {
+            const turnFlags = { ...currentState.player.turnFlags };
+            delete turnFlags.ENDLESS_CHEAT_DEATH;
+            audioService.playSound('buff');
+            setGameState(prev => ({
+                ...prev,
+                player: { ...prev.player, currentHp: 1, turnFlags },
+                screen: GameScreen.BATTLE,
+                combatLog: [...prev.combatLog, '再計測免除証が発動！HP1で戦闘を続行します。'],
+            }));
+            return;
+        }
         storageService.clearSave();
         setNewlyUnlockedCard(null);
         setLegacyCardSelected(false);
         audioService.playSound('lose');
-        if (stateRef.current.visualTheme === 'high-school') {
-            audioService.playHighSchoolVoice(stateRef.current.player.id, 'defeat');
+        if (currentState.visualTheme === 'high-school') {
+            audioService.playHighSchoolVoice(currentState.player.id, 'defeat');
         }
-        const currentState = stateRef.current;
         void audioService.switchThemeAndPlayBGM(
             getBgmThemeForPlayer(currentState.visualTheme || visualTheme, currentState.player),
             'game_over'
@@ -13332,6 +13545,11 @@ const App: React.FC = () => {
             closeUiPreview();
             return;
         }
+        if (gameState.endlessRewardPending && gameState.rewards.some(reward => reward.type === 'ENDLESS_REWARD')) {
+            // Endless boss rewards are a deliberate three-choice decision;
+            // never allow the generic skip button or a restored save to bypass it.
+            return;
+        }
         if (gameState.challengeMode === 'COOP' && coopSession && !coopSession.isHost) {
             if (coopSelfPeerId) {
                 setCoopSession(prev => prev ? {
@@ -13395,27 +13613,39 @@ const App: React.FC = () => {
                         delete turnFlags[DODOMEDESU_EVENT_STAGE_FLAG];
                         nextPlayer = { ...nextPlayer, turnFlags };
                     }
-                    const nextAct = prev.act + 1;
-                    const newMap = generateDungeonMap(prev.difficultyLevel || 1);
-                    audioService.playBGM('map');
-                    const isGardener = prev.visualTheme !== 'magic' && nextPlayer.id === 'GARDENER';
-                    if (prev.challengeMode === 'COOP') {
-                        healCoopPartyToFull({ ...nextPlayer, currentHp: nextPlayer.maxHp, block: 0 });
+                    const bossDefinition = getEndlessBoss(getEndlessArc(prev.visualTheme || visualTheme), prev.floor);
+                    const completedMap = prev.map.map(node => node.id === prev.currentMapNodeId ? { ...node, completed: true } : node);
+                    const isFinalFloor = prev.floor >= 50;
+                    const isMajorBoss = bossDefinition?.tier === 'MAJOR_BOSS';
+                    const healedPlayer = {
+                        ...nextPlayer,
+                        currentHp: isMajorBoss ? nextPlayer.maxHp : nextPlayer.currentHp,
+                        block: 0,
+                    };
+                    if (isFinalFloor) {
+                        audioService.playBGM('map');
+                        return {
+                            ...prev,
+                            map: completedMap,
+                            player: healedPlayer,
+                            screen: GameScreen.FLOOR_RESULT,
+                            endlessBossId: undefined,
+                            endlessRewardPending: false,
+                            narrativeLog: [...prev.narrativeLog, '50階層を制覇！黒帳機関の深層記録が解放された。'],
+                        };
                     }
-
+                    audioService.playBGM(isMajorBoss ? 'rest' : 'map');
+                    const isGardener = prev.visualTheme !== 'magic' && healedPlayer.id === 'GARDENER';
                     return {
                         ...prev,
-                        act: nextAct,
-                        floor: 0,
-                        map: newMap,
-                        currentMapNodeId: null,
-                        screen: isGardener ? GameScreen.GARDEN : GameScreen.MAP,
-                        player: {
-                            ...nextPlayer,
-                            currentHp: nextPlayer.maxHp
-                        },
-                        narrativeLog: [...prev.narrativeLog, trans(`第${nextAct}章へ進んだ。体力が全回復した！`, languageMode)],
-                        actStats: { enemiesDefeated: 0, goldGained: 0, mathCorrect: 0 }
+                        map: completedMap,
+                        player: healedPlayer,
+                        screen: isMajorBoss ? GameScreen.REST : (isGardener ? GameScreen.GARDEN : GameScreen.MAP),
+                        endlessBossId: undefined,
+                        endlessRewardPending: false,
+                        narrativeLog: [...prev.narrativeLog, isMajorBoss
+                            ? `${bossDefinition?.name || '大ボス'}撃破！体力が全回復。休息・強化を選べます。`
+                            : `${bossDefinition?.name || 'ボス'}撃破！次の階層へ進もう。`],
                     };
                 }
 
@@ -13482,6 +13712,26 @@ const App: React.FC = () => {
             return;
         }
         const currentNode = gameState.map.find(n => n.id === gameState.currentMapNodeId);
+        const endlessBoss = gameState.isEndless && currentNode?.type === NodeType.BOSS
+            ? getEndlessBoss(getEndlessArc(gameState.visualTheme || visualTheme), gameState.floor)
+            : undefined;
+        if (endlessBoss && gameState.challengeMode !== 'COOP') {
+            const rewardPrefix = `endless-${endlessBoss.id}-${Date.now()}`;
+            const tierGold = endlessBoss.floor === 50 ? 500 : endlessBoss.tier === 'MAJOR_BOSS' ? 200 : 100;
+            const rewards = createEndlessRewardItems(endlessBoss, gameState.endlessRewardIds || [], rewardPrefix);
+            setGameState(prev => ({
+                ...prev,
+                screen: GameScreen.REWARD,
+                rewards,
+                endlessBossId: endlessBoss.id,
+                endlessRewardPending: true,
+                player: { ...prev.player, gold: prev.player.gold + tierGold },
+                actStats: prev.actStats ? { ...prev.actStats, goldGained: prev.actStats.goldGained + tierGold } : prev.actStats,
+                narrativeLog: [...prev.narrativeLog, `${endlessBoss.name}撃破！${tierGold}Gを獲得。3択から1つを選んでください。`],
+            }));
+            audioService.playBGM('reward');
+            return;
+        }
         const debugBoss = crowdfundingBossDebugRef.current;
         const nodeType = debugBoss ? NodeType.BOSS : currentNode?.type;
         const rewardPlayer = debugBoss === 'AZUKI'
@@ -13586,7 +13836,14 @@ const App: React.FC = () => {
         else if (correctCount === 2) bonusGold = 30;
         else if (correctCount === 3) bonusGold = 50;
         setGameState(prev => {
-            const p = { ...prev.player, relicCounters: { ...prev.player.relicCounters }, deck: [...prev.player.deck] };
+            const p = {
+                ...prev.player,
+                relicCounters: { ...prev.player.relicCounters },
+                deck: [...prev.player.deck],
+                hand: [...prev.player.hand],
+                drawPile: [...prev.player.drawPile],
+                discardPile: [...prev.player.discardPile],
+            };
             if (correctCount > 0) {
                 const streak = (p.relicCounters['PROBLEM_CORRECT_STREAK'] || 0) + correctCount;
                 p.relicCounters['PROBLEM_CORRECT_STREAK'] = streak;
@@ -13599,6 +13856,22 @@ const App: React.FC = () => {
                     p.relicCounters['PROBLEM_CORRECT_STREAK'] = 0;
                 }
                 if (hasRelic(p, 'MAKEUP_TEST')) p.relicCounters['MAKEUP_TEST_BLOCK'] = 1;
+                const hasFirstLearningReward = (p.relicCounters['ENDLESS_REWARD_DRAW_FIRST_LEARNING'] || 0) > 0;
+                const hasFirstSubjectReward = (p.relicCounters['ENDLESS_REWARD_DRAW_FIRST_SUBJECT'] || 0) > 0;
+                if ((hasFirstLearningReward || hasFirstSubjectReward) && p.relicCounters['ENDLESS_LEARNING_DRAW_USED'] !== 1) {
+                    const drawn = p.drawPile.pop();
+                    if (drawn) {
+                        p.hand.push(clearRetainedCardMarker(drawn));
+                        p.relicCounters['ENDLESS_LEARNING_DRAW_USED'] = 1;
+                    }
+                }
+                if ((p.relicCounters['ENDLESS_REWARD_LOW_HP_LEARNING_GOLD'] || 0) > 0
+                    && p.currentHp / Math.max(1, p.maxHp) <= 0.3
+                    && p.relicCounters['ENDLESS_LOW_HP_GOLD_USED'] !== 1) {
+                    p.gold += 20;
+                    p.currentHp = Math.max(1, p.currentHp - 5);
+                    p.relicCounters['ENDLESS_LOW_HP_GOLD_USED'] = 1;
+                }
             } else {
                 p.relicCounters['PROBLEM_CORRECT_STREAK'] = 0;
                 p.relicCounters['ZERO_POINT_NEXT_BATTLE'] = hasRelic(p, 'ZERO_POINT_TEST') ? 1 : 0;
@@ -14146,8 +14419,28 @@ const App: React.FC = () => {
         }
         setGameState(prev => {
             let p = { ...prev.player };
-            const nextRewards = nextRewardsOverride ?? removeRewardFromList(prev.rewards, item);
-            if (item.type === 'CARD') {
+            const nextRewards = nextRewardsOverride ?? (item.type === 'ENDLESS_REWARD' ? [] : removeRewardFromList(prev.rewards, item));
+            if (item.type === 'ENDLESS_REWARD') {
+                const choice = item.value as EndlessRewardChoice;
+                if (prev.endlessRewardIds?.includes(choice.id)) {
+                    return { ...prev, rewards: [] };
+                }
+                applyEndlessRewardChoice(p, choice);
+                const rewardIds = [...(prev.endlessRewardIds || []), choice.id].filter((id, index, all) => all.indexOf(id) === index);
+                const runRewards = [
+                    ...(prev.endlessRunRewards || []),
+                    { id: choice.id, name: choice.name, floor: prev.floor, scope: choice.scope },
+                ];
+                return {
+                    ...prev,
+                    player: p,
+                    rewards: [],
+                    endlessRewardIds: rewardIds,
+                    endlessRunRewards: runRewards,
+                    endlessRewardPending: false,
+                    narrativeLog: [...prev.narrativeLog, `獲得！${choice.name}`],
+                };
+            } else if (item.type === 'CARD') {
                 const rewardCard = p.relicCounters['REPORT_CARD_UPGRADE'] === 1 ? getUpgradedCard(item.value) : item.value;
                 addCardToDeckWithRelics(p, rewardCard);
                 delete p.relicCounters['REPORT_CARD_UPGRADE'];
@@ -14830,6 +15123,16 @@ const App: React.FC = () => {
 
     const handleNextActFromStory = () => {
         setGameState(prev => {
+            if (prev.isEndless && prev.floor >= 50) {
+                return {
+                    ...prev,
+                    isEndless: false,
+                    screen: GameScreen.START_MENU,
+                    currentMapNodeId: null,
+                    rewards: [],
+                    endlessRewardPending: false,
+                };
+            }
             if (prev.act === 3 && !prev.isEndless) {
                 return { ...prev, screen: GameScreen.FINAL_BRIDGE };
             }
@@ -17850,6 +18153,8 @@ const App: React.FC = () => {
                             visualTheme={gameState.visualTheme || visualTheme}
                             magicHeroId={getMagicProtagonistId(gameState.player)}
                             magicRomance={gameState.player.magicRomance}
+                            endlessRunRewards={gameState.endlessRunRewards}
+                            isEndless={gameState.isEndless}
                         />
                     </div>
                 )}
@@ -18551,6 +18856,7 @@ const App: React.FC = () => {
                                 : undefined}
                             visualTheme={coopSyncedVisualTheme}
                             highSchoolStoryId={coopSyncedVisualTheme === 'high-school' ? HIGH_SCHOOL_STORIES[gameState.currentStoryIndex || 0]?.id : undefined}
+                            isEndless={gameState.isEndless}
                         />
                         {gameState.challengeMode === 'COOP' && coopSession?.isHost && coopNeedsInitialMapSync && (
                             <div className="absolute left-1/2 -translate-x-1/2 top-[72px] z-30">
@@ -18837,7 +19143,7 @@ const App: React.FC = () => {
 
                 {gameState.screen === GameScreen.REWARD && (
                     <div className="absolute inset-0">
-                        <RewardScreen rewards={gameState.rewards} onSelectReward={handleRewardSelection} onSkip={finishRewardPhase} isLoading={isLoading || coopAwaitingRewardSync} currentPotions={gameState.player.potions} potionCapacity={getPotionCapacity(gameState.player)} languageMode={languageMode} typingMode={gameState.challengeMode === 'TYPING'} dummyRewards={raceRewardDummyDisplay} autoSkipWhenEmpty={gameState.challengeMode !== 'COOP'} skipDisabled={coopRewardSkipDisabled || hasRelic(gameState.player, 'PREPAID_CARD') || hasRelic(gameState.player, 'SCHOOL_ARCHIVE')} skipDisabledMessage={coopAwaitingRewardSync ? 'ホストが報酬を確定するまで待っています' : ((hasRelic(gameState.player, 'PREPAID_CARD') || hasRelic(gameState.player, 'SCHOOL_ARCHIVE')) ? 'このレリックの効果でカード報酬をスキップできません' : (coopRewardSkipDisabled ? '他のプレイヤーの報酬完了を待っています' : undefined))} interactionDisabled={coopLocalProgressInteractionDisabled} interactionDisabledMessage={coopInteractionDisabledMessage} visualTheme={gameState.visualTheme || visualTheme} />
+                        <RewardScreen rewards={gameState.rewards} onSelectReward={handleRewardSelection} onSkip={finishRewardPhase} isLoading={isLoading || coopAwaitingRewardSync} currentPotions={gameState.player.potions} potionCapacity={getPotionCapacity(gameState.player)} languageMode={languageMode} typingMode={gameState.challengeMode === 'TYPING'} dummyRewards={raceRewardDummyDisplay} autoSkipWhenEmpty={gameState.challengeMode !== 'COOP'} skipDisabled={coopRewardSkipDisabled || hasRelic(gameState.player, 'PREPAID_CARD') || hasRelic(gameState.player, 'SCHOOL_ARCHIVE') || (gameState.endlessRewardPending && gameState.rewards.some(reward => reward.type === 'ENDLESS_REWARD'))} skipDisabledMessage={gameState.endlessRewardPending && gameState.rewards.some(reward => reward.type === 'ENDLESS_REWARD') ? 'ボス報酬を1つ選んでください' : (coopAwaitingRewardSync ? 'ホストが報酬を確定するまで待っています' : ((hasRelic(gameState.player, 'PREPAID_CARD') || hasRelic(gameState.player, 'SCHOOL_ARCHIVE')) ? 'このレリックの効果でカード報酬をスキップできません' : (coopRewardSkipDisabled ? '他のプレイヤーの報酬完了を待っています' : undefined)))} interactionDisabled={coopLocalProgressInteractionDisabled} interactionDisabledMessage={coopInteractionDisabledMessage} visualTheme={gameState.visualTheme || visualTheme} endlessFloor={gameState.endlessFloor ?? gameState.floor} endlessBossName={gameState.endlessBossId ? getEndlessBoss(getEndlessArc(gameState.visualTheme || visualTheme), gameState.endlessFloor ?? gameState.floor)?.name : undefined} endlessBonusGold={gameState.endlessBossId ? (gameState.endlessFloor === 50 ? 500 : (gameState.endlessFloor && gameState.endlessFloor % 10 === 0 ? 200 : 100)) : undefined} />
                     </div>
                 )}
 
@@ -19508,6 +19814,21 @@ const App: React.FC = () => {
                                 <h1 className="game-over-title text-6xl mb-4 font-bold">{trans("しゅくだいがふえた…", languageMode)}</h1>
                                 <p className="game-over-subtitle mb-8 text-2xl">Act {gameState.act} - Floor {gameState.floor}</p>
                             </div>
+
+                            {gameState.isEndless && (gameState.endlessRunRewards?.length || 0) > 0 && (
+                                <div className="mb-8 rounded-2xl border-2 border-cyan-300/70 bg-slate-950/80 p-5 text-left shadow-[0_0_24px_rgba(34,211,238,0.2)]">
+                                    <div className="mb-3 text-center text-sm font-black uppercase tracking-[0.25em] text-cyan-200">{trans('今回の深層報酬', languageMode)}</div>
+                                    <div className="space-y-2">
+                                        {gameState.endlessRunRewards?.map((reward) => (
+                                            <div key={`${reward.floor}-${reward.id}`} className="flex items-center justify-between gap-3 rounded-lg border border-white/10 bg-black/30 px-3 py-2">
+                                                <span className="text-xs font-bold text-slate-300">{reward.floor}F</span>
+                                                <span className="flex-1 text-sm font-black text-white">{reward.name}</span>
+                                                <span className="text-[10px] font-black text-amber-200">{reward.scope}</span>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
 
                             {/* Newly Unlocked Card Section */}
                             {newlyUnlockedCard && (

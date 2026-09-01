@@ -8,6 +8,7 @@ import { trans } from '../utils/textUtils';
 import { assetUrl } from '../utils/assetPaths';
 import { PotionIcon, RelicIcon } from './ItemIcon';
 import type { VisualThemeId } from '../data/visualThemes';
+import type { EndlessRewardChoice } from '../data/endlessMode';
 
 interface RewardScreenProps {
   rewards: RewardItem[];
@@ -25,9 +26,12 @@ interface RewardScreenProps {
   interactionDisabled?: boolean;
   interactionDisabledMessage?: string;
   visualTheme?: VisualThemeId;
+  endlessFloor?: number;
+  endlessBossName?: string;
+  endlessBonusGold?: number;
 }
 
-const RewardScreen: React.FC<RewardScreenProps> = ({ rewards, onSelectReward, onSkip, isLoading, currentPotions = [], potionCapacity = 3, languageMode, typingMode = false, dummyRewards = 0, autoSkipWhenEmpty = true, skipDisabled = false, skipDisabledMessage, interactionDisabled = false, interactionDisabledMessage, visualTheme = 'elementary' }) => {
+const RewardScreen: React.FC<RewardScreenProps> = ({ rewards, onSelectReward, onSkip, isLoading, currentPotions = [], potionCapacity = 3, languageMode, typingMode = false, dummyRewards = 0, autoSkipWhenEmpty = true, skipDisabled = false, skipDisabledMessage, interactionDisabled = false, interactionDisabledMessage, visualTheme = 'elementary', endlessFloor, endlessBossName, endlessBonusGold }) => {
   const [replaceReward, setReplaceReward] = useState<RewardItem | null>(null);
   const [inspectedItem, setInspectedItem] = useState<{ type: 'CARD' | 'RELIC' | 'POTION', data: any } | null>(null);
   const longPressTimer = useRef<any>(null);
@@ -223,6 +227,13 @@ const RewardScreen: React.FC<RewardScreenProps> = ({ rewards, onSelectReward, on
         <h2 className="text-3xl md:text-4xl text-amber-100 font-bold mb-2 flex items-center justify-center animate-pulse drop-shadow-[0_2px_4px_rgba(0,0,0,0.95)] [text-shadow:0_0_10px_rgba(120,53,15,0.95)]">
           <Gift className="mr-3" size={32} /> {trans(visualTheme === 'magic' ? "魔力回収" : "勝利", languageMode)}
         </h2>
+        {rewards.some(reward => reward.type === 'ENDLESS_REWARD') && (
+          <div className="mx-auto mb-2 max-w-2xl rounded-lg border border-fuchsia-400/50 bg-fuchsia-950/40 px-3 py-2 text-xs font-black text-fuchsia-100">
+            FLOOR {String(endlessFloor ?? 0).padStart(2, '0')} BOSS REWARD
+            {endlessBossName && <span className="ml-2 text-white">{endlessBossName}</span>}
+            {typeof endlessBonusGold === 'number' && <span className="ml-2 text-amber-200">+{endlessBonusGold}G</span>}
+          </div>
+        )}
         <p className="text-white text-sm font-bold drop-shadow-[0_2px_3px_rgba(0,0,0,0.95)] [text-shadow:0_0_8px_rgba(15,23,42,0.9)]">{trans(visualTheme === 'magic' ? "結界に残った魔力から、次に持ち込む力を選んでください" : "欲しい報酬を選択してください", languageMode)}</p>
       </div>
 
@@ -299,6 +310,25 @@ const RewardScreen: React.FC<RewardScreenProps> = ({ rewards, onSelectReward, on
                         <div className="text-xs text-gray-400 leading-tight h-16 overflow-hidden">{trans(reward.value.description, languageMode)}</div>
                     </div>
                     <button data-gamepad-initial-choice data-gamepad-zone="reward-options" data-gamepad-order={rewardIndex} disabled={interactionDisabled} className="bg-gray-600 px-6 py-2 text-sm font-bold rounded border hover:bg-gray-500 w-full mt-2 disabled:cursor-not-allowed disabled:opacity-50">{trans("獲得", languageMode)}</button>
+                </div>
+            )}
+
+            {reward.type === 'ENDLESS_REWARD' && (
+                <div
+                    className="relative w-56 bg-gradient-to-b from-slate-950/95 to-indigo-950/90 border-2 border-cyan-400 rounded-xl flex flex-col items-center justify-between p-5 cursor-pointer hover:bg-indigo-900/90 shadow-[0_0_24px_rgba(34,211,238,0.22)] h-80"
+                    onClick={() => !interactionDisabled && onSelectReward(reward)}
+                >
+                    {typingMode && <div className="absolute right-2 top-2 z-20 rounded-full border border-cyan-300 bg-cyan-950/95 px-2 py-0.5 text-[10px] font-black text-cyan-200">{rewards.findIndex(r => r.id === reward.id) + 1}</div>}
+                    <div className="rounded-full border-2 border-cyan-300 bg-slate-900 p-4 text-cyan-200 shadow-[0_0_18px_rgba(34,211,238,0.38)]">
+                        <Gem size={36} />
+                    </div>
+                    <div className="mt-3 w-full text-center">
+                        <div className="mb-1 text-[10px] font-black uppercase tracking-[0.2em] text-cyan-200">{(reward.value as EndlessRewardChoice).slot}</div>
+                        <div className="mb-2 text-lg font-black text-white">{trans((reward.value as EndlessRewardChoice).name, languageMode)}</div>
+                        <div className="mb-2 text-xs font-bold leading-relaxed text-slate-200">{trans((reward.value as EndlessRewardChoice).description, languageMode)}</div>
+                        <span className="inline-flex rounded-full border border-white/30 bg-black/30 px-2 py-0.5 text-[10px] font-black text-amber-200">{(reward.value as EndlessRewardChoice).scope}</span>
+                    </div>
+                    <button data-gamepad-initial-choice data-gamepad-zone="reward-options" data-gamepad-order={rewardIndex} disabled={interactionDisabled} onClick={(event) => { event.stopPropagation(); onSelectReward(reward); }} className="bg-cyan-600 px-6 py-2 text-sm font-bold rounded border border-cyan-200 hover:bg-cyan-500 w-full mt-2 disabled:cursor-not-allowed disabled:opacity-50">{trans("この報酬を選ぶ", languageMode)}</button>
                 </div>
             )}
 
