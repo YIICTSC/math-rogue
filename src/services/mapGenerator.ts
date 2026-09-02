@@ -11,26 +11,32 @@ export const MAP_WIDTH = 7;   // Max width of the grid
 
 const getRandomInt = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1)) + min;
 
-export const generateDungeonMap = (difficultyLevel: number = 1, options: { endless?: boolean; visualTheme?: string } = {}): MapNode[] => {
+export const generateDungeonMap = (difficultyLevel: number = 1, options: { endless?: boolean; visualTheme?: string; endlessChapter?: number } = {}): MapNode[] => {
   const nodes: MapNode[] = [];
   const floors: MapNode[][] = [];
   const difficulty = getDifficultyConfig(difficultyLevel);
-  const mapHeight = options.endless ? 50 : MAP_HEIGHT;
+  // Endless mode is a sequence of normal-sized chapter maps.  Keeping each
+  // generated map at 15 floors preserves the route density and scroll rhythm
+  // of the regular mode; the chapter counter lives in GameState instead.
+  const mapHeight = MAP_HEIGHT;
+  const endlessChapter = Math.max(1, options.endlessChapter ?? 1);
+  const endlessBossChapter = options.endless && endlessChapter % 5 === 0;
   const endlessArc = options.endless ? getEndlessArc(options.visualTheme) : undefined;
 
   // Helper to create node
   const createNode = (x: number, y: number, type: NodeType): MapNode => {
-    const floor = y + 1;
     const endlessBossId = options.endless && type === NodeType.BOSS
-      ? getEndlessBoss(endlessArc, floor)?.id
+      ? getEndlessBoss(endlessArc, endlessChapter)?.id
       : undefined;
+    const idPrefix = options.endless ? `endless-${endlessChapter}-` : '';
     return {
-      id: `node-${y}-${x}`,
+      id: `${idPrefix}node-${y}-${x}`,
       x,
       y,
       type,
       nextNodes: [],
       completed: false,
+      ...(options.endless ? { endlessChapter } : {}),
       ...(endlessBossId ? { endlessBossId } : {})
     };
   };
@@ -48,15 +54,10 @@ export const generateDungeonMap = (difficultyLevel: number = 1, options: { endle
   floors.push(startNodes);
   nodes.push(...startNodes);
 
-  // Middle Floors (1 to MAP_HEIGHT - 2). Endless maps keep the same readable
-  // branching, but every fifth floor is a deterministic dedicated boss.
+  // Middle floors (1 to MAP_HEIGHT - 2) use the same readable branching as a
+  // normal chapter.  Bosses are chapter-end content, never an interruption in
+  // the middle of a 15-floor route.
   for (let y = 1; y < mapHeight - 1; y++) {
-    if (options.endless && (y + 1) % 5 === 0) {
-      const bossNode = createNode(Math.floor(MAP_WIDTH / 2), y, NodeType.BOSS);
-      floors.push([bossNode]);
-      nodes.push(bossNode);
-      continue;
-    }
     const floorNodes: MapNode[] = [];
     const nodeCount = getRandomInt(3, 4);
     
@@ -78,7 +79,7 @@ export const generateDungeonMap = (difficultyLevel: number = 1, options: { endle
             type = NodeType.TREASURE; // Guaranteed treasure mid-way
         } else if (y === 9) {
             type = NodeType.ELITE; // Guaranteed elite
-        } else if (!options.endless && y === MAP_HEIGHT - 2) {
+        } else if (y === MAP_HEIGHT - 2) {
              type = NodeType.REST; // Rest before boss
         } else {
             const restChance = 0.13;
@@ -109,10 +110,13 @@ export const generateDungeonMap = (difficultyLevel: number = 1, options: { endle
     nodes.push(...floorNodes);
   }
 
-  // Final Floor: Boss
-  const bossNode = createNode(Math.floor(MAP_WIDTH / 2), mapHeight - 1, NodeType.BOSS);
-  floors.push([bossNode]);
-  nodes.push(bossNode);
+  // Final floor: every fifth endless chapter has a boss.  Other endless
+  // chapters finish with one combat node that acts as the chapter transition
+  // after its reward is resolved.
+  const finalNodeType = !options.endless || endlessBossChapter ? NodeType.BOSS : NodeType.COMBAT;
+  const finalNode = createNode(Math.floor(MAP_WIDTH / 2), mapHeight - 1, finalNodeType);
+  floors.push([finalNode]);
+  nodes.push(finalNode);
 
   // Connect Nodes (Create Paths)
   for (let y = 0; y < mapHeight - 1; y++) {

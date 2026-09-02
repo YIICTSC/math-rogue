@@ -1,13 +1,13 @@
 
 import React, { useEffect, useRef, useState } from 'react';
-import { MapNode, NodeType, Player, LanguageMode } from '../types';
+import { MapNode, NodeType, Player, LanguageMode, type EndlessGimmickProgress } from '../types';
 import { Swords, Skull, BedDouble, ShoppingBag, HelpCircle, AlertTriangle, PlayCircle, Coins, Heart, Layers, X, Home, MessageSquare, Settings } from 'lucide-react';
 import { MAP_WIDTH, MAP_HEIGHT } from '../services/mapGenerator';
 import Card from './Card';
 import { trans } from '../utils/textUtils';
 import { assetUrl } from '../utils/assetPaths';
 import type { VisualThemeId } from '../data/visualThemes';
-import { getEndlessArc, getEndlessBoss } from '../data/endlessMode';
+import { getEndlessArc, getEndlessBoss, getEndlessBossById } from '../data/endlessMode';
 
 interface MapScreenProps {
     nodes: MapNode[];
@@ -27,19 +27,37 @@ interface MapScreenProps {
     visualTheme?: VisualThemeId;
     highSchoolStoryId?: string;
     isEndless?: boolean;
+    endlessGimmickProgress?: Record<string, EndlessGimmickProgress>;
 }
 
-const MapScreen: React.FC<MapScreenProps> = ({ nodes, currentNodeId, onNodeSelect, onReturnToTitle, onOpenSettings, player, languageMode, narrative, act, floor, typingMode = false, selectionHoldMs = 0, selectionDisabled = false, selectionDisabledMessage, visualTheme = 'elementary', highSchoolStoryId, isEndless = false }) => {
+const MapScreen: React.FC<MapScreenProps> = ({ nodes, currentNodeId, onNodeSelect, onReturnToTitle, onOpenSettings, player, languageMode, narrative, act, floor, typingMode = false, selectionHoldMs = 0, selectionDisabled = false, selectionDisabledMessage, visualTheme = 'elementary', highSchoolStoryId, isEndless = false, endlessGimmickProgress = {} }) => {
     const scrollRef = useRef<HTMLDivElement>(null);
     const [showDeck, setShowDeck] = useState(false);
     const holdTimerRef = useRef<number | null>(null);
     const mapHeight = Math.max(MAP_HEIGHT, nodes.reduce((max, node) => Math.max(max, node.y + 1), 0));
+    const endlessChapter = Math.max(1, act);
+    const nextBossChapter = Math.min(50, Math.ceil(endlessChapter / 5) * 5);
     const nextBoss = isEndless
-        ? nodes
-            .filter(node => node.type === NodeType.BOSS && !node.completed && node.y + 1 > floor)
-            .sort((a, b) => a.y - b.y)[0]
+        ? nodes.find(node => node.type === NodeType.BOSS && !node.completed)
         : undefined;
-    const nextBossDefinition = nextBoss ? getEndlessBoss(getEndlessArc(visualTheme), nextBoss.y + 1) : undefined;
+    // Non-boss chapters intentionally have no boss node.  Keep the next
+    // milestone banner visible across chapter map regeneration instead of
+    // making it disappear for C01-C04, C06-C09, and so on.
+    const nextBossDefinition = isEndless
+        ? (nextBoss?.endlessBossId
+            ? getEndlessBossById(nextBoss.endlessBossId)
+            : getEndlessBoss(getEndlessArc(visualTheme), nextBossChapter))
+        : undefined;
+    const nextBossGimmickProgress = nextBossDefinition ? endlessGimmickProgress[nextBossDefinition.id] : undefined;
+    const latestAchievedGimmick = isEndless
+        ? Object.entries(endlessGimmickProgress)
+            .map(([bossId, progress]) => {
+                const definition = getEndlessBossById(bossId);
+                return definition ? { definition, progress } : undefined;
+            })
+            .filter((entry): entry is { definition: NonNullable<typeof nextBossDefinition>; progress: EndlessGimmickProgress } => Boolean(entry?.progress?.achieved))
+            .sort((a, b) => b.definition.floor - a.definition.floor)[0]
+        : undefined;
 
     // 現在地へのオートスクロール
     useEffect(() => {
@@ -209,8 +227,9 @@ const MapScreen: React.FC<MapScreenProps> = ({ nodes, currentNodeId, onNodeSelec
     const highSchoolMapAct = highSchoolStoryId === 'HS_CHERRY_BLOSSOM_LOOP'
         ? 1
         : Math.min(4, Math.max(1, act));
+    const endlessDepthBand = `${String(Math.floor((endlessChapter - 1) / 10) * 10 + 1).padStart(2, '0')}-${String(Math.min(50, Math.floor((endlessChapter - 1) / 10) * 10 + 10)).padStart(2, '0')}`;
     const mapBackground = isEndless
-        ? assetUrl(`sprites/backgrounds/learning-rogue/endless-${visualTheme}.webp`)
+        ? assetUrl(`sprites/backgrounds/learning-rogue/endless-${visualTheme}-${endlessDepthBand}.webp`)
         : visualTheme === 'high-school'
         ? assetUrl(`sprites/backgrounds/learning-rogue/high-school-map-act${highSchoolMapAct}.webp`)
         : visualTheme === 'magic'
@@ -246,7 +265,9 @@ const MapScreen: React.FC<MapScreenProps> = ({ nodes, currentNodeId, onNodeSelec
 
                 <div className="flex flex-col items-center">
                     <h2 className="text-xs md:text-sm font-black text-slate-400 uppercase tracking-tighter mb-0.5">
-                        {languageMode === 'ENGLISH' ? `Act ${act}` : `${trans("第", languageMode)}${act}${trans("章", languageMode)}`} - {floor}F
+                        {isEndless
+                            ? (languageMode === 'ENGLISH' ? `Endless Chapter ${act}` : `エンドレス ${trans("第", languageMode)}${act}${trans("章", languageMode)}`)
+                            : (languageMode === 'ENGLISH' ? `Act ${act}` : `${trans("第", languageMode)}${act}${trans("章", languageMode)}`)} - {floor}F
                     </h2>
                     <div className="h-1 w-16 md:w-24 bg-gradient-to-r from-transparent via-yellow-500 to-transparent"></div>
                 </div>
@@ -286,17 +307,28 @@ const MapScreen: React.FC<MapScreenProps> = ({ nodes, currentNodeId, onNodeSelec
             {isEndless && nextBossDefinition && (
                 <div
                     className="z-20 border-b border-purple-400/30 bg-purple-950/80 px-3 py-2 text-center text-[11px] text-purple-100"
-                    aria-label={trans(`次の節目 ${nextBossDefinition.floor}F`, languageMode)}
+                    aria-label={trans(`次の節目 第${nextBossDefinition.floor}章`, languageMode)}
                 >
                     <div className="font-black">
-                        {trans(`次の節目 ${nextBossDefinition.floor}F：${nextBossDefinition.name}`, languageMode)}
-                        <span className="ml-2 text-purple-300">({trans(`あと${Math.max(1, nextBossDefinition.floor - floor)}階層`, languageMode)})</span>
+                        {trans(`次の節目 エンドレス第${nextBossDefinition.floor}章：${nextBossDefinition.name}`, languageMode)}
+                        <span className="ml-2 text-purple-300">({trans(`あと${Math.max(1, nextBossDefinition.floor - endlessChapter)}章`, languageMode)})</span>
                     </div>
                     <div className="mx-auto mt-1 grid max-w-2xl gap-0.5 text-[10px] font-semibold text-purple-200/90 sm:grid-cols-3">
                         <span><span className="font-black text-fuchsia-300">{trans('弱点', languageMode)}：</span>{trans(nextBossDefinition.weakness, languageMode)}</span>
-                        <span><span className="font-black text-fuchsia-300">{trans('ギミック', languageMode)}：</span>{trans(nextBossDefinition.mechanicSummary, languageMode)}</span>
+                        <span>
+                            <span className="font-black text-fuchsia-300">{trans('ギミック', languageMode)}：</span>
+                            {trans(nextBossDefinition.mechanicSummary, languageMode)}
+                            {nextBossGimmickProgress?.achieved && (
+                                <span className="ml-1 font-black text-emerald-300">（{trans('達成済み', languageMode)}）</span>
+                            )}
+                        </span>
                         <span><span className="font-black text-fuchsia-300">{trans('備え', languageMode)}：</span>{trans(nextBossDefinition.recommendedPrep, languageMode)}</span>
                     </div>
+                    {latestAchievedGimmick && (
+                        <div className="mx-auto mt-1 max-w-2xl text-[10px] font-black text-emerald-300">
+                            {trans('ギミック達成記録', languageMode)}：{trans(`エンドレス第${latestAchievedGimmick.definition.floor}章 ${latestAchievedGimmick.definition.name}`, languageMode)} — {trans(latestAchievedGimmick.definition.mechanicSummary, languageMode)}（{trans('達成済み', languageMode)}）
+                        </div>
+                    )}
                 </div>
             )}
 

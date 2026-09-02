@@ -40,14 +40,22 @@ for (const row of bossRows) {
 for (const arc of ['elementary', 'high-school', 'magic']) {
   const asset = path.join(root, `public/sprites/backgrounds/learning-rogue/endless-${arc}.webp`);
   if (!fs.existsSync(asset)) failures.push(`missing endless map background: ${path.relative(root, asset)}`);
+  for (const band of ['01-10', '11-20', '21-30', '31-40', '41-50']) {
+    const depthAsset = path.join(root, `public/sprites/backgrounds/learning-rogue/endless-${arc}-${band}.webp`);
+    if (!fs.existsSync(depthAsset)) failures.push(`missing endless depth background: ${path.relative(root, depthAsset)}`);
+  }
 }
 
 for (const [label, source, patterns] of [
-  ['map generation', map, [/mapHeight\s*=\s*options\.endless\s*\?\s*50/, /endlessBossId/]],
+  ['map generation', map, [/mapHeight\s*=\s*MAP_HEIGHT/, /endlessChapter/, /endlessBossChapter/, /endlessBossId/]],
+  ['chapter transitions', app, [/endlessChapter: 1/, /currentNode\?\.y === MAP_HEIGHT - 1/, /const nextChapter = endlessChapter \+ 1/]],
+  ['map depth backgrounds', mapScreen, [/endlessDepthBand/, /endless-\$\{visualTheme\}-\$\{endlessDepthBand\}/]],
   ['reward persistence', app, [/endlessRewardPending/, /endlessRunRewards/, /createEndlessRewardItems/, /handleEndlessRewardReroll/]],
   ['reward choice safety', data, [/boss\.floor === 50/, /selectedRewardIds/, /FALLBACK_CARD_UPGRADE/]],
   ['learning judgment hook', app, [/ENDLESS_LEARNING_SCREENS/, /applyEndlessLearningAnswer/, /subjectId/, /subjectEligible/]],
-  ['boss preview', mapScreen, [/nextBossDefinition\.weakness/, /recommendedPrep/]],
+  ['boss gimmick progress', app, [/updateActiveEndlessGimmick/, /updateEndlessGimmickProgress/, /endlessGimmickProgress/, /bossPhaseCount/]],
+  ['boss phase definitions', data, [/phaseCountByMechanic/, /phaseCount:/]],
+  ['boss preview', mapScreen, [/nextBossDefinition\.weakness/, /recommendedPrep/, /latestAchievedGimmick/, /達成済み/]],
   ['major boss intermission', rest, [/endlessMajorBoss/, /onOpenShop/, /onOrganizeDeck/]],
 ]) {
   for (const pattern of patterns) if (!pattern.test(source)) failures.push(`${label} is missing ${pattern}`);

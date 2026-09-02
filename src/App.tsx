@@ -39,7 +39,7 @@ import EnglishChallengeScreen from './components/EnglishChallengeScreen';
 import GeneralChallengeScreen from './components/GeneralChallengeScreen';
 import DebugMenuScreen from './components/DebugMenuScreen';
 import MagicEventSimulationScreen from './components/MagicEventSimulationScreen';
-import { createEndlessRewardItems, getEndlessArc, getEndlessBoss, getEndlessBossById, getEndlessBossSpritePath, type EndlessRewardChoice } from './data/endlessMode';
+import { createEndlessRewardItems, getEndlessArc, getEndlessBoss, getEndlessBossById, getEndlessBossSpritePath, updateEndlessGimmickProgress, type EndlessGimmickEvent, type EndlessRewardChoice } from './data/endlessMode';
 
 type HighSchoolBattleVoiceAction = 'attack' | 'summon' | 'block' | 'power' | 'damage' | 'item' | 'finish' | 'defeat';
 const NON_FINISH_BATTLE_VOICE_RATE = 0.3;
@@ -179,6 +179,36 @@ const ENDLESS_LEARNING_SCREENS = new Set<GameScreen>([
 const endlessSubjectKey = (value: string | undefined): string =>
     (value || 'UNKNOWN').replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 80) || 'UNKNOWN';
 
+const updateActiveEndlessGimmick = (state: GameState, event: EndlessGimmickEvent): GameState => {
+    if (!state.isEndless) return state;
+    const activeBossEnemy = state.enemies.find(enemy => enemy.enemyType === 'ENDLESS_BOSS' && enemy.currentHp > 0);
+    const currentNode = state.map.find(node => node.id === state.currentMapNodeId);
+    const isBossBattle = Boolean(activeBossEnemy || (state.endlessBossId && currentNode?.type === NodeType.BOSS));
+    const currentFloor = state.endlessFloor ?? state.floor;
+    const nextBossFloor = Math.min(50, Math.max(5, Math.ceil((Math.max(0, currentFloor) + 1) / 5) * 5));
+    const boss = getEndlessBossById(activeBossEnemy?.endlessBossId || state.endlessBossId)
+        || getEndlessBoss(getEndlessArc(state.visualTheme), nextBossFloor);
+    if (!boss) return state;
+    const current = state.endlessGimmickProgress?.[boss.id];
+    const next = updateEndlessGimmickProgress(current, boss.mechanicKey, {
+        ...event,
+        segment: Math.ceil(boss.floor / 5),
+        bossBattle: isBossBattle,
+        battleId: state.currentMapNodeId || undefined,
+        ...(event.type === 'LEARNING_ANSWER'
+            ? { phase: event.phase ?? (activeBossEnemy?.phase ?? state.endlessBossPhase) }
+            : {}),
+    }, boss.phaseCount);
+    if (!next || next === current) return state;
+    return {
+        ...state,
+        endlessGimmickProgress: {
+            ...(state.endlessGimmickProgress || {}),
+            [boss.id]: next,
+        },
+    };
+};
+
 const hasEndlessSubject = (value: string | undefined): boolean => Boolean(value && value.trim());
 
 const drawEndlessLearningCard = (player: Player): boolean => {
@@ -196,7 +226,6 @@ const applyEndlessLearningAnswer = (player: Player, result: AssignmentAnswerResu
     const subjectEnergyStreakKey = `ENDLESS_SUBJECT_ENERGY_STREAK_${subject}`;
     const subjectGoldStreakKey = `ENDLESS_SUBJECT_GOLD_STREAK_${subject}`;
     const subjectSeenKey = `ENDLESS_SUBJECT_SEEN_${subject}`;
-    const subjectBattleKey = `ENDLESS_BATTLE_SUBJECT_${subject}`;
     let changed = false;
 
     // A failed or timed-out judgment always breaks a same-subject streak. A
@@ -267,20 +296,29 @@ const applyEndlessLearningAnswer = (player: Player, result: AssignmentAnswerResu
         changed = true;
     }
 
+    const learningCountInBattle = (counters['ENDLESS_BATTLE_LEARNING_COUNT'] || 0) + 1;
+    counters['ENDLESS_BATTLE_LEARNING_COUNT'] = learningCountInBattle;
+    changed = true;
+
+    if (counters['ENDLESS_REWARD_SUBJECT_BLOCK'] > 0) {
+        const blockCount = counters['ENDLESS_BATTLE_SUBJECT_BLOCK_COUNT'] || 0;
+        if (blockCount < 3) {
+            player.block += 2;
+            counters['ENDLESS_BATTLE_SUBJECT_BLOCK_COUNT'] = blockCount + 1;
+        }
+    }
+
     if (subjectEligible && counters['ENDLESS_REWARD_NEW_SUBJECT_BLOCK'] > 0 && counters[subjectSeenKey] !== 1) {
         player.block += 4;
         counters[subjectSeenKey] = 1;
         changed = true;
     }
 
-    if (subjectEligible && counters['ENDLESS_REWARD_SUBJECT_TRIPLE_CARD'] > 0 && counters[subjectBattleKey] !== 1) {
-        counters[subjectBattleKey] = 1;
-        const subjectsInBattle = Object.keys(counters).filter(key => key.startsWith('ENDLESS_BATTLE_SUBJECT_') && counters[key] === 1).length;
-        if (subjectsInBattle >= 3 && counters['ENDLESS_BATTLE_TRIPLE_CARD_USED'] !== 1) {
-            counters['ENDLESS_NEXT_CARD_BOOST'] = Math.max(counters['ENDLESS_NEXT_CARD_BOOST'] || 0, 25);
-            counters['ENDLESS_BATTLE_TRIPLE_CARD_USED'] = 1;
-        }
-        changed = true;
+    if (counters['ENDLESS_REWARD_SUBJECT_TRIPLE_CARD'] > 0
+        && learningCountInBattle >= 3
+        && counters['ENDLESS_BATTLE_TRIPLE_CARD_USED'] !== 1) {
+        counters['ENDLESS_NEXT_CARD_BOOST'] = Math.max(counters['ENDLESS_NEXT_CARD_BOOST'] || 0, 25);
+        counters['ENDLESS_BATTLE_TRIPLE_CARD_USED'] = 1;
     }
 
     player.relicCounters = counters;
@@ -357,7 +395,7 @@ import { assetPreloadService } from './services/assetPreloadService';
 import { androidAssetPackService } from './services/androidAssetPackService';
 import { setLegacySpriteModeEnabled } from './utils/legacySpriteMode';
 import { generateEnemyName } from './services/geminiService';
-import { generateDungeonMap } from './services/mapGenerator';
+import { generateDungeonMap, MAP_HEIGHT } from './services/mapGenerator';
 import { parseTransferData, serializeTransferData, storageService } from './services/storageService';
 import { onlineRankingService, type OnlineRankingProfile, type OnlineReward } from './services/onlineRankingService';
 import { getNextLaunchLockedManagedAssignment, getNextRequiredManagedAssignment, isManagedAssignmentActive, managementPortalService, toAssignmentPayload, type ManagementProfile } from './services/managementPortalService';
@@ -3304,12 +3342,17 @@ const App: React.FC = () => {
         combatLog: state.combatLog,
         selectionState: state.selectionState,
         isEndless: state.isEndless,
+        endlessGimmickProgress: state.endlessGimmickProgress,
         parryState: state.parryState,
         activeEffects: state.activeEffects,
         currentStoryIndex: state.currentStoryIndex,
         actStats: state.actStats,
         currentEventTitle: state.currentEventTitle,
         newlyUnlockedCardName: state.newlyUnlockedCardName,
+        endlessFloor: state.endlessFloor,
+        endlessBossId: state.endlessBossId,
+        endlessBossPhase: state.endlessBossPhase,
+        endlessRewardPending: state.endlessRewardPending,
         coopBattleState: state.coopBattleState ?? null
     }), []);
     const getBgmForScreen = useCallback((state: Pick<GameState, 'screen' | 'map' | 'currentMapNodeId' | 'enemies'>) => {
@@ -3520,12 +3563,17 @@ const App: React.FC = () => {
         combatLog: sharedState.combatLog,
         selectionState: sharedState.selectionState,
         isEndless: sharedState.isEndless,
+        endlessGimmickProgress: sharedState.endlessGimmickProgress,
         parryState: sharedState.parryState,
         activeEffects: sharedState.activeEffects,
         currentStoryIndex: sharedState.currentStoryIndex,
         actStats: sharedState.actStats,
         currentEventTitle: sharedState.currentEventTitle,
         newlyUnlockedCardName: sharedState.newlyUnlockedCardName,
+        endlessFloor: sharedState.endlessFloor,
+        endlessBossId: sharedState.endlessBossId,
+        endlessBossPhase: sharedState.endlessBossPhase,
+        endlessRewardPending: sharedState.endlessRewardPending,
         coopBattleState: sharedState.coopBattleState ?? null
     }), []);
     const broadcastCoopBattleState = useCallback((battleState: CoopBattleState | null, syncOverrides?: {
@@ -6059,6 +6107,39 @@ const App: React.FC = () => {
                 if (hasRelic(p, 'SECRET_BASE_MAP')) p.currentHp = Math.min(p.maxHp, p.currentHp + 3);
                 if (hasRelic(p, 'PTA_HANDOUT')) p.relicCounters['PTA_HANDOUT_ENERGY'] = 1;
             }
+            const endlessChapter = Math.max(1, prev.endlessFloor ?? prev.act);
+            const endlessBoss = prev.isEndless && completedNode?.type === NodeType.BOSS
+                ? getEndlessBoss(getEndlessArc(prev.visualTheme || visualTheme), endlessChapter)
+                : undefined;
+            // Major-boss rest is the final screen of the completed chapter.
+            // Generate the next 15F map only after the player leaves that
+            // intermission so its controls and chapter label stay accurate.
+            if (prev.isEndless && endlessBoss?.tier === 'MAJOR_BOSS' && endlessChapter < 50) {
+                const nextChapter = endlessChapter + 1;
+                const isGardener = prev.visualTheme !== 'magic' && p.id === 'GARDENER';
+                audioService.playBGM('map');
+                return {
+                    ...prev,
+                    act: nextChapter,
+                    floor: 0,
+                    endlessFloor: nextChapter,
+                    map: generateDungeonMap(prev.difficultyLevel || 1, {
+                        endless: true,
+                        endlessChapter: nextChapter,
+                        visualTheme: prev.visualTheme || visualTheme
+                    }),
+                    currentMapNodeId: null,
+                    player: p,
+                    screen: isGardener ? GameScreen.GARDEN : GameScreen.MAP,
+                    currentEventTitle: undefined,
+                    endlessBossId: undefined,
+                    endlessBossPhase: undefined,
+                    endlessRewardPending: false,
+                    endlessRewardRerollUsed: false,
+                    actStats: { enemiesDefeated: 0, goldGained: 0, mathCorrect: 0 },
+                    narrativeLog: [...prev.narrativeLog, `エンドレス第${nextChapter}章へ進もう。`]
+                };
+            }
             return {
                 ...prev,
                 player: p,
@@ -6641,18 +6722,23 @@ const App: React.FC = () => {
         }
         setGameState(prev => ({
             ...prev,
-            act: prev.act + 1,
+            // Endless has its own chapter numbering.  Do not continue the
+            // normal-mode Act counter (which would make the run start at 5
+            // after clearing the four normal Acts).
+            act: 1,
             floor: 0,
-            map: generateDungeonMap(prev.difficultyLevel || 1, { endless: true, visualTheme: prev.visualTheme || visualTheme }),
+            map: generateDungeonMap(prev.difficultyLevel || 1, { endless: true, endlessChapter: 1, visualTheme: prev.visualTheme || visualTheme }),
             currentMapNodeId: null,
             screen: GameScreen.ENDLESS_OPENING,
             isEndless: true,
-            endlessFloor: 0,
+            endlessFloor: 1,
             endlessBossId: undefined,
+            endlessBossPhase: undefined,
             endlessRewardIds: [],
             endlessRunRewards: [],
             endlessRewardPending: false,
             endlessRewardRerollUsed: false,
+            endlessGimmickProgress: {},
             player: (() => {
                 const profile = readEndlessProfileRewards();
                 const nextPlayer = { ...prev.player, relicCounters: { ...prev.player.relicCounters }, currentHp: prev.player.maxHp };
@@ -8084,12 +8170,18 @@ const App: React.FC = () => {
         audioService.playSound('select');
 
         const nextFloor = node.y + 1;
-        const nextState = { ...gameState, currentMapNodeId: node.id, floor: nextFloor };
+        const nextState = { ...gameState, currentMapNodeId: node.id, floor: nextFloor, endlessBossPhase: undefined };
+        const endlessChapter = nextState.isEndless
+            ? Math.max(1, nextState.endlessFloor ?? nextState.act)
+            : undefined;
 
         try {
             if (node.type === NodeType.COMBAT || node.type === NodeType.ELITE || node.type === NodeType.BOSS || node.type === NodeType.START) {
 
-                const actMultiplier = gameState.act;
+                // `act` is the mode-local chapter number shown in the UI.
+                // Endless starts at Chapter 1, but its combat scaling should
+                // not fall back to normal Act 1 difficulty.
+                const actMultiplier = gameState.isEndless ? Math.max(5, gameState.act) : gameState.act;
                 const floorDifficulty = node.y * (1 + (actMultiplier * 0.5));
 
                 let enemies: Enemy[] = [];
@@ -8107,7 +8199,7 @@ const App: React.FC = () => {
                 const enemyHpMultiplier = coopEnemyHpMultiplier * difficulty.enemyHpMultiplier;
                 const activeBattleVisualTheme = nextState.visualTheme || visualTheme;
                 const endlessBoss = nextState.isEndless && node.type === NodeType.BOSS
-                    ? getEndlessBoss(getEndlessArc(activeBattleVisualTheme), nextFloor)
+                    ? getEndlessBoss(getEndlessArc(activeBattleVisualTheme), endlessChapter || 1)
                     : undefined;
                 const isDodomedesuBoss = node.type === NodeType.BOSS
                     && nextState.isEndless
@@ -8120,7 +8212,7 @@ const App: React.FC = () => {
 
                 if (endlessBoss) {
                     const tierMultiplier = endlessBoss.tier === 'MAJOR_BOSS' ? 2.35 : 1.65;
-                    const baseBossHp = Math.ceil((120 + nextFloor * 9) * tierMultiplier * enemyHpMultiplier);
+                    const baseBossHp = Math.ceil((120 + (endlessChapter || 1) * 9) * tierMultiplier * enemyHpMultiplier);
                     const bossHp = isDebugHpOne ? 1 : baseBossHp;
                     const bossEnemy: Enemy = {
                         id: `endless-boss-${endlessBoss.id}-${Date.now()}`,
@@ -8129,7 +8221,7 @@ const App: React.FC = () => {
                         maxHp: baseBossHp,
                         currentHp: bossHp,
                         block: 0,
-                        strength: Math.max(0, difficulty.enemyStrengthBonus + Math.floor(nextFloor / 10)),
+                        strength: Math.max(0, difficulty.enemyStrengthBonus + Math.floor((endlessChapter || 1) / 10)),
                         nextIntent: { type: EnemyIntentType.UNKNOWN, value: 0 },
                         vulnerable: 0,
                         weak: 0,
@@ -8142,9 +8234,9 @@ const App: React.FC = () => {
                         endlessMechanicKey: endlessBoss.mechanicKey,
                     };
                     enemies.push({ ...bossEnemy, nextIntent: getNextEnemyIntent(bossEnemy, 1) });
-                    bgmType = nextFloor === 50 ? 'final_boss' : endlessBoss.tier === 'MAJOR_BOSS' ? 'boss' : 'mid_boss';
+                    bgmType = endlessChapter === 50 ? 'final_boss' : endlessBoss.tier === 'MAJOR_BOSS' ? 'boss' : 'mid_boss';
                 } else if (isDodomedesuBoss) {
-                    const baseBossHp = Math.ceil((170 * gameState.act + floorDifficulty * 2) * enemyHpMultiplier);
+                    const baseBossHp = Math.ceil((170 * actMultiplier + floorDifficulty * 2) * enemyHpMultiplier);
                     const genzoHp = Math.ceil(baseBossHp * 0.45);
                     enemies.push({ id: `dodomedesu-${Date.now()}`, enemyType: 'DODOMEDESU', name: DODOMEDESU_NAME, maxHp: baseBossHp, currentHp: isDebugHpOne ? 1 : baseBossHp, block: 0, strength: difficulty.enemyStrengthBonus, nextIntent: { type: EnemyIntentType.UNKNOWN, value: 0 }, vulnerable: 0, weak: 0, poison: 0, artifact: 1, corpseExplosion: false, floatingText: null });
                     enemies.push({ id: `genzo-${Date.now()}`, enemyType: 'GENZO', name: GENZO_NAME, maxHp: genzoHp, currentHp: isDebugHpOne ? 1 : genzoHp, block: 0, strength: difficulty.enemyStrengthBonus, nextIntent: { type: EnemyIntentType.UNKNOWN, value: 0 }, vulnerable: 0, weak: 0, poison: 0, artifact: 0, corpseExplosion: false, floatingText: null });
@@ -8207,7 +8299,7 @@ const App: React.FC = () => {
                         let baseHp = (node.type === NodeType.BOSS ? 150 : 20) * actMultiplier + floorDifficulty * 2 + (node.type === NodeType.ELITE ? 40 : 0);
 
                         if (node.type === NodeType.BOSS && maxAtkDmg > baseHp) {
-                            const multiplier = 2 + gameState.act;
+                            const multiplier = 2 + actMultiplier;
                             baseHp = Math.ceil(maxAtkDmg * multiplier);
                         }
                         baseHp *= enemyHpMultiplier;
@@ -8215,7 +8307,7 @@ const App: React.FC = () => {
                         const hpStep = Math.max(2, Math.floor(baseHp * 0.08));
                         const hpAdjusted = Math.max(1, Math.floor(baseHp + hpOffsets[i] * hpStep));
 
-                        const name = await generateEnemyName(node.y, gameState.act, nextState.visualTheme || visualTheme);
+                        const name = await generateEnemyName(node.y, actMultiplier, nextState.visualTheme || visualTheme);
                         const isBoss = node.type === NodeType.BOSS;
 
                         enemies.push({
@@ -8240,8 +8332,8 @@ const App: React.FC = () => {
                     });
                 }
 
-                const battleBackgroundScene = chooseBattleBackgroundScene(node.type, nextState.act, nextState.floor, activeBattleVisualTheme);
-                const flavor = getBattleBackgroundFlavor(battleBackgroundScene, nextState.act * 100 + nextState.floor);
+                const battleBackgroundScene = chooseBattleBackgroundScene(node.type, actMultiplier, nextState.floor, activeBattleVisualTheme);
+                const flavor = getBattleBackgroundFlavor(battleBackgroundScene, actMultiplier * 100 + nextState.floor);
 
                 const p = preparePlayerForBattle(nextState.player, node.type);
                 if (isAzukiBoss) {
@@ -8309,8 +8401,11 @@ const App: React.FC = () => {
 
                 const nextGameState = {
                     ...nextState,
-                    endlessFloor: nextState.isEndless ? nextFloor : nextState.endlessFloor,
+                    endlessFloor: nextState.isEndless ? endlessChapter : nextState.endlessFloor,
                     endlessBossId: endlessBoss?.id,
+                    endlessBossPhase: endlessBoss
+                        ? (endlessBoss.tier === 'MAJOR_BOSS' ? 1 : 0)
+                        : undefined,
                     endlessRewardPending: Boolean(endlessBoss),
                     endlessRewardRerollUsed: false,
                     player: p,
@@ -9459,6 +9554,13 @@ const App: React.FC = () => {
                 ? { ...(prev.coopBattleState?.selectionStateByPeerId?.[selectionPeerId] || INACTIVE_SELECTION_STATE) }
                 : { ...prev.selectionState };
             const nextActStats = prev.actStats ? { ...prev.actStats } : { enemiesDefeated: 0, goldGained: 0, mathCorrect: 0 };
+            const nextGimmickState = updateActiveEndlessGimmick(prev, {
+                type: 'CARD_PLAY',
+                cardType: card.type,
+                turn: prev.turn,
+                damage: card.damage,
+                block: card.block,
+            });
 
             // --- カード固有の拡張ロジック ---
             // ここに外部サービスからの呼び出しを追加
@@ -9919,7 +10021,11 @@ const App: React.FC = () => {
                             e.currentHp -= damage;
                             if (e.enemyType === 'ENDLESS_BOSS' && e.currentHp > 0) {
                                 const hpRatio = e.currentHp / Math.max(1, e.maxHp);
-                                const nextPhase = hpRatio <= 0.3 ? 3 : hpRatio <= 0.6 ? 2 : 1;
+                                const bossPhaseCount = getEndlessBossById(e.endlessBossId)?.phaseCount || 3;
+                                const nextPhase = Math.min(
+                                    bossPhaseCount,
+                                    Math.floor((1 - hpRatio) * bossPhaseCount) + 1,
+                                );
                                 if (nextPhase > (e.phase || 1)) {
                                     e.phase = nextPhase;
                                     e.strength += 1;
@@ -10816,6 +10922,7 @@ const App: React.FC = () => {
 
             let nextSelectedId = actorSelectedEnemyId;
             const aliveEnemies = enemies.filter(e => e.currentHp > 0);
+            const endlessBossInBattle = enemies.find(e => e.enemyType === 'ENDLESS_BOSS');
             const defeatedCount = enemies.length - aliveEnemies.length;
             if (defeatedCount > 0 && hasRelic(p, 'BIRD_FACED_URN')) {
                 const healAmount = defeatedCount * 2;
@@ -10835,6 +10942,10 @@ const App: React.FC = () => {
 
             return {
                 ...prev,
+                endlessGimmickProgress: nextGimmickState.endlessGimmickProgress,
+                endlessBossPhase: prev.isEndless
+                    ? (endlessBossInBattle?.phase ?? prev.endlessBossPhase)
+                    : undefined,
                 player: coopActorPeerId ? prev.player : p,
                 enemies: aliveEnemies,
                 selectedEnemyId: coopActorPeerId ? prev.selectedEnemyId : nextSelectedId,
@@ -13762,9 +13873,10 @@ const App: React.FC = () => {
                         delete turnFlags[DODOMEDESU_EVENT_STAGE_FLAG];
                         nextPlayer = { ...nextPlayer, turnFlags };
                     }
-                    const bossDefinition = getEndlessBoss(getEndlessArc(prev.visualTheme || visualTheme), prev.floor);
+                    const endlessChapter = Math.max(1, prev.endlessFloor ?? prev.act);
+                    const bossDefinition = getEndlessBoss(getEndlessArc(prev.visualTheme || visualTheme), endlessChapter);
                     const completedMap = prev.map.map(node => node.id === prev.currentMapNodeId ? { ...node, completed: true } : node);
-                    const isFinalFloor = prev.floor >= 50;
+                    const isFinalFloor = endlessChapter >= 50;
                     const isMajorBoss = bossDefinition?.tier === 'MAJOR_BOSS';
                     const healedPlayer = {
                         ...nextPlayer,
@@ -13775,28 +13887,51 @@ const App: React.FC = () => {
                         audioService.playBGM('victory');
                         return {
                             ...prev,
-                            map: completedMap,
                             player: healedPlayer,
                             screen: GameScreen.ENDLESS_TRUE_ENDING,
                             endlessBossId: undefined,
+                            endlessBossPhase: undefined,
                             endlessRewardPending: false,
                             endlessRewardRerollUsed: false,
-                            narrativeLog: [...prev.narrativeLog, '50階層を制覇！黒帳機関の深層記録が解放された。'],
+                            narrativeLog: [...prev.narrativeLog, 'エンドレス第50章（累計750F相当）を制覇！黒帳機関の深層記録が解放された。'],
                         };
                     }
-                    audioService.playBGM(isMajorBoss ? 'rest' : 'map');
+                    if (isMajorBoss) {
+                        audioService.playBGM('rest');
+                        return {
+                            ...prev,
+                            map: completedMap,
+                            player: healedPlayer,
+                            screen: GameScreen.REST,
+                            endlessBossId: undefined,
+                            endlessBossPhase: undefined,
+                            endlessRewardPending: false,
+                            endlessRewardRerollUsed: false,
+                            narrativeLog: [...prev.narrativeLog, `${bossDefinition?.name || '大ボス'}撃破！体力が全回復。休息・強化を選べます。`],
+                        };
+                    }
+                    const nextChapter = endlessChapter + 1;
+                    const nextMap = generateDungeonMap(prev.difficultyLevel || 1, {
+                        endless: true,
+                        endlessChapter: nextChapter,
+                        visualTheme: prev.visualTheme || visualTheme
+                    });
+                    audioService.playBGM('map');
                     const isGardener = prev.visualTheme !== 'magic' && healedPlayer.id === 'GARDENER';
                     return {
                         ...prev,
-                        map: completedMap,
+                        act: nextChapter,
+                        floor: 0,
+                        endlessFloor: nextChapter,
+                        map: nextMap,
+                        currentMapNodeId: null,
                         player: healedPlayer,
-                        screen: isMajorBoss ? GameScreen.REST : (isGardener ? GameScreen.GARDEN : GameScreen.MAP),
+                        screen: isGardener ? GameScreen.GARDEN : GameScreen.MAP,
                         endlessBossId: undefined,
+                        endlessBossPhase: undefined,
                         endlessRewardPending: false,
                         endlessRewardRerollUsed: false,
-                        narrativeLog: [...prev.narrativeLog, isMajorBoss
-                            ? `${bossDefinition?.name || '大ボス'}撃破！体力が全回復。休息・強化を選べます。`
-                            : `${bossDefinition?.name || 'ボス'}撃破！次の階層へ進もう。`],
+                        narrativeLog: [...prev.narrativeLog, `${bossDefinition?.name || 'ボス'}撃破！エンドレス第${nextChapter}章へ進もう。`],
                     };
                 }
 
@@ -13816,6 +13951,30 @@ const App: React.FC = () => {
                 });
                 audioService.playBGM('map');
                 const isGardener = prev.visualTheme !== 'magic' && nextPlayer.id === 'GARDENER';
+                const endlessChapter = Math.max(1, prev.endlessFloor ?? prev.act);
+                if (prev.isEndless && currentNode?.y === MAP_HEIGHT - 1 && endlessChapter < 50) {
+                    const nextChapter = endlessChapter + 1;
+                    return {
+                        ...prev,
+                        act: nextChapter,
+                        floor: 0,
+                        endlessFloor: nextChapter,
+                        map: generateDungeonMap(prev.difficultyLevel || 1, {
+                            endless: true,
+                            endlessChapter: nextChapter,
+                            visualTheme: prev.visualTheme || visualTheme
+                        }),
+                        currentMapNodeId: null,
+                        player: nextPlayer,
+                        screen: isGardener ? GameScreen.GARDEN : GameScreen.MAP,
+                        endlessBossId: undefined,
+                        endlessBossPhase: undefined,
+                        endlessRewardPending: false,
+                        endlessRewardRerollUsed: false,
+                        actStats: { enemiesDefeated: 0, goldGained: 0, mathCorrect: 0 },
+                        narrativeLog: [...prev.narrativeLog, `エンドレス第${nextChapter}章へ進もう。`]
+                    };
+                }
                 return {
                     ...prev,
                     player: nextPlayer,
@@ -13863,8 +14022,9 @@ const App: React.FC = () => {
             return;
         }
         const currentNode = gameState.map.find(n => n.id === gameState.currentMapNodeId);
+        const endlessChapter = Math.max(1, gameState.endlessFloor ?? gameState.act);
         const endlessBoss = gameState.isEndless && currentNode?.type === NodeType.BOSS
-            ? getEndlessBoss(getEndlessArc(gameState.visualTheme || visualTheme), gameState.floor)
+            ? getEndlessBoss(getEndlessArc(gameState.visualTheme || visualTheme), endlessChapter)
             : undefined;
         if (endlessBoss && gameState.challengeMode !== 'COOP') {
             const rewardPrefix = `endless-${endlessBoss.id}-${Date.now()}`;
@@ -14440,8 +14600,17 @@ const App: React.FC = () => {
                     relicCounters: { ...prev.player.relicCounters },
                     turnFlags: { ...prev.player.turnFlags },
                 };
-                if (!applyEndlessLearningAnswer(p, result)) return prev;
-                const next = { ...prev, player: p };
+                const rewardChanged = applyEndlessLearningAnswer(p, result);
+                const nextWithGimmick = updateActiveEndlessGimmick(prev, {
+                    type: 'LEARNING_ANSWER',
+                    correct: result.correct,
+                    isRetry: result.isRetry,
+                    subjectId: result.subjectId,
+                    mode: result.mode,
+                    phase: prev.enemies.find(enemy => enemy.enemyType === 'ENDLESS_BOSS' && enemy.currentHp > 0)?.phase,
+                });
+                if (!rewardChanged && nextWithGimmick === prev) return prev;
+                const next = { ...nextWithGimmick, player: p };
                 stateRef.current = next;
                 return next;
             });
@@ -15361,7 +15530,7 @@ const App: React.FC = () => {
 
     const handleNextActFromStory = () => {
         setGameState(prev => {
-            if (prev.isEndless && prev.floor >= 50) {
+            if (prev.isEndless && (prev.endlessFloor ?? prev.act) >= 50) {
                 return {
                     ...prev,
                     isEndless: false,
@@ -18403,7 +18572,7 @@ const App: React.FC = () => {
                             kind="OPENING"
                             theme={coopSyncedVisualTheme}
                             characterId={gameState.player.id}
-                            magicProtagonistId={coopSyncedVisualTheme === 'magic' && gameState.player.magicProtagonistGender === 'male' ? gameState.player.magicProtagonistId : undefined}
+                            magicProtagonistId={coopSyncedVisualTheme === 'magic' ? getMagicProtagonistId(gameState.player) : undefined}
                             characterName={coopSyncedVisualTheme === 'magic' && gameState.player.magicProtagonistGender === 'male'
                                 ? MAGIC_MALE_PROTAGONISTS.find(hero => hero.id === gameState.player.magicProtagonistId)?.name ?? selectedCharName
                                 : themedCharacters.find(character => character.id === gameState.player.id)?.name ?? selectedCharName}
@@ -18413,7 +18582,7 @@ const App: React.FC = () => {
                                 setGameState(prev => ({
                                     ...prev,
                                     screen: GameScreen.MAP,
-                                    narrativeLog: [...prev.narrativeLog, trans('エンドレスの最初の階層へ進んだ。', languageMode)],
+                                    narrativeLog: [...prev.narrativeLog, trans('エンドレス第1章へ進んだ。', languageMode)],
                                 }));
                             }}
                         />
@@ -18426,7 +18595,7 @@ const App: React.FC = () => {
                             kind="TRUE"
                             theme={coopSyncedVisualTheme}
                             characterId={gameState.player.id}
-                            magicProtagonistId={coopSyncedVisualTheme === 'magic' && gameState.player.magicProtagonistGender === 'male' ? gameState.player.magicProtagonistId : undefined}
+                            magicProtagonistId={coopSyncedVisualTheme === 'magic' ? getMagicProtagonistId(gameState.player) : undefined}
                             characterName={coopSyncedVisualTheme === 'magic' && gameState.player.magicProtagonistGender === 'male'
                                 ? MAGIC_MALE_PROTAGONISTS.find(hero => hero.id === gameState.player.magicProtagonistId)?.name ?? selectedCharName
                                 : themedCharacters.find(character => character.id === gameState.player.id)?.name ?? selectedCharName}
@@ -19140,6 +19309,7 @@ const App: React.FC = () => {
                             visualTheme={coopSyncedVisualTheme}
                             highSchoolStoryId={coopSyncedVisualTheme === 'high-school' ? HIGH_SCHOOL_STORIES[gameState.currentStoryIndex || 0]?.id : undefined}
                             isEndless={gameState.isEndless}
+                            endlessGimmickProgress={gameState.endlessGimmickProgress}
                         />
                         {gameState.challengeMode === 'COOP' && coopSession?.isHost && coopNeedsInitialMapSync && (
                             <div className="absolute left-1/2 -translate-x-1/2 top-[72px] z-30">

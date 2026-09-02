@@ -279,6 +279,25 @@ export interface Enemy {
   endlessMechanicKey?: string;
 }
 
+/** Progress recorded for the active boss's endless-mode gimmick. */
+export interface EndlessGimmickProgress {
+  /** 5-chapter segment that owns this boss gimmick. */
+  segment?: number;
+  progress: number;
+  target: number;
+  achieved: boolean;
+  streak?: number;
+  lastSubjectId?: string;
+  lastCardType?: string;
+  /** Map node id used to keep card-consecutive conditions inside one battle. */
+  lastBattleId?: string;
+  cardTypes?: string[];
+  phases?: number[];
+  attackCount?: number;
+  blockCount?: number;
+  learningCount?: number;
+}
+
 export interface Relic {
   id: string;
   name: string;
@@ -835,7 +854,8 @@ export interface MapNode {
   type: NodeType;
   nextNodes: string[];
   completed: boolean;
-  /** Populated only by the 50-floor endless map. */
+  /** Populated only by an endless chapter map; identifies the C01-C50 segment. */
+  endlessChapter?: number;
   endlessBossId?: string;
 }
 
@@ -1259,7 +1279,7 @@ export interface GameState {
   rewards: RewardItem[];
   selectionState: SelectionState;
   isEndless?: boolean;
-  /** The current floor in the 50-floor endless run (0 before the first node). */
+  /** The current endless chapter (0 before the first node, 1-50 during a run). */
   endlessFloor?: number;
   /** Boss/reward state is kept in the save payload so a reload cannot double-claim. */
   endlessBossId?: string;
@@ -1268,6 +1288,10 @@ export interface GameState {
   endlessRewardPending?: boolean;
   /** One reroll is available while a boss reward choice is still pending. */
   endlessRewardRerollUsed?: boolean;
+  /** Per-boss gimmick records, retained after returning to the map. */
+  endlessGimmickProgress?: Record<string, EndlessGimmickProgress>;
+  /** Phase reached by the active endless boss, retained while its post-battle learning screen is open. */
+  endlessBossPhase?: number;
   pokerState?: PokerRunState;
   codexOptions?: Card[];
   parryState?: ParryState;
@@ -1301,7 +1325,7 @@ export interface CoopSharedState {
   combatLog: string[];
   selectionState: SelectionState;
   isEndless?: boolean;
-  /** The current floor in the 50-floor endless run (0 before the first node). */
+  /** The current endless chapter (0 before the first node, 1-50 during a run). */
   endlessFloor?: number;
   /** Boss/reward state is kept in the save payload so a reload cannot double-claim. */
   endlessBossId?: string;
@@ -1309,6 +1333,9 @@ export interface CoopSharedState {
   endlessRunRewards?: Array<{ id: string; name: string; floor: number; scope: 'RUN' | 'PERMANENT' | 'RECORD' }>;
   endlessRewardPending?: boolean;
   endlessRewardRerollUsed?: boolean;
+  endlessGimmickProgress?: Record<string, EndlessGimmickProgress>;
+  /** Phase reached by the active endless boss, retained while its post-battle learning screen is open. */
+  endlessBossPhase?: number;
   parryState?: ParryState;
   activeEffects: VisualEffectInstance[];
   currentStoryIndex?: number;

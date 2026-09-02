@@ -234,7 +234,7 @@ const RewardScreen: React.FC<RewardScreenProps> = ({ rewards, onSelectReward, on
         </h2>
         {rewards.some(reward => reward.type === 'ENDLESS_REWARD') && (
           <div className="mx-auto mb-2 max-w-2xl rounded-lg border border-fuchsia-400/50 bg-fuchsia-950/40 px-3 py-2 text-xs font-black text-fuchsia-100">
-            FLOOR {String(endlessFloor ?? 0).padStart(2, '0')} BOSS REWARD
+            CHAPTER {String(endlessFloor ?? 0).padStart(2, '0')} BOSS REWARD
             {endlessBossName && <span className="ml-2 text-white">{endlessBossName}</span>}
             {typeof endlessBonusGold === 'number' && <span className="ml-2 text-amber-200">+{endlessBonusGold}G</span>}
           </div>

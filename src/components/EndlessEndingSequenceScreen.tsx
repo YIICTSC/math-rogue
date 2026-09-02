@@ -3,6 +3,7 @@ import { ChevronRight, Sparkles } from 'lucide-react';
 import type { LanguageMode } from '../types';
 import type { VisualThemeId } from '../data/visualThemes';
 import {
+  getEndlessEndingLocalizedDialogue,
   getEndlessEndingLocalizedText,
   getEndlessEndingLocalizedTitle,
   getEndlessEndingSequence,
@@ -21,7 +22,7 @@ interface Props {
 }
 
 const EndlessEndingSequenceScreen: React.FC<Props> = ({ kind, characterId, characterName, languageMode, theme = 'elementary', magicProtagonistId, onComplete }) => {
-  const sequence = useMemo(() => getEndlessEndingSequence(kind, characterId, characterName, theme, magicProtagonistId), [characterId, characterName, kind, magicProtagonistId, theme]);
+  const sequence = useMemo(() => getEndlessEndingSequence(kind, characterId, characterName, theme as VisualThemeId, magicProtagonistId), [characterId, characterName, kind, magicProtagonistId, theme]);
   const [pageIndex, setPageIndex] = useState(0);
   const page = sequence.pages[pageIndex];
   const isLast = pageIndex >= sequence.pages.length - 1;
@@ -29,6 +30,7 @@ const EndlessEndingSequenceScreen: React.FC<Props> = ({ kind, characterId, chara
 
   const localizedTitle = getEndlessEndingLocalizedTitle(page, languageMode);
   const localizedText = getEndlessEndingLocalizedText(page, languageMode);
+  const localizedDialogue = getEndlessEndingLocalizedDialogue(page, languageMode);
   const isTrueEnding = kind === 'TRUE';
   const fallback = isTrueEnding
     ? 'sprites/backgrounds/learning-rogue/high-school-act-clear.webp'
@@ -59,6 +61,10 @@ const EndlessEndingSequenceScreen: React.FC<Props> = ({ kind, characterId, chara
         </div>
         <h1 className="text-xl font-black text-white sm:text-3xl">{localizedTitle}</h1>
         <p className="mt-3 max-h-[30dvh] overflow-y-auto whitespace-pre-wrap text-sm leading-relaxed text-slate-100 sm:text-lg">{localizedText}</p>
+        <p className="mt-3 rounded-lg border border-amber-200/30 bg-amber-100/10 px-3 py-2 text-sm font-bold leading-relaxed text-amber-100 sm:text-base">
+          <span className="mr-2 text-xs tracking-wide text-amber-200/75">{characterName}</span>
+          {localizedDialogue}
+        </p>
         <button
           type="button"
           data-gamepad-initial-choice
