@@ -6136,6 +6136,7 @@ const App: React.FC = () => {
                     endlessBossPhase: undefined,
                     endlessRewardPending: false,
                     endlessRewardRerollUsed: false,
+                    newlyUnlockedCardName: undefined,
                     actStats: { enemiesDefeated: 0, goldGained: 0, mathCorrect: 0 },
                     narrativeLog: [...prev.narrativeLog, `エンドレス第${nextChapter}章へ進もう。`]
                 };
@@ -13858,6 +13859,13 @@ const App: React.FC = () => {
                     slot.plantedCard ? { ...slot, growth: Math.min(slot.maxGrowth, slot.growth + 1) } : slot
                 );
             }
+            const endlessChapter = Math.max(1, prev.endlessFloor ?? prev.act);
+            const isEndlessChapterEnd = Boolean(
+                prev.isEndless &&
+                currentNode &&
+                (currentNode.type === NodeType.BOSS || currentNode.y === MAP_HEIGHT - 1)
+            );
+            const unlockedEndlessChapterCard = isEndlessChapterEnd ? unlockRandomAdditionalCard() : undefined;
 
             if (currentNode && currentNode.type === NodeType.BOSS) {
                 if (prev.isEndless) {
@@ -13873,7 +13881,6 @@ const App: React.FC = () => {
                         delete turnFlags[DODOMEDESU_EVENT_STAGE_FLAG];
                         nextPlayer = { ...nextPlayer, turnFlags };
                     }
-                    const endlessChapter = Math.max(1, prev.endlessFloor ?? prev.act);
                     const bossDefinition = getEndlessBoss(getEndlessArc(prev.visualTheme || visualTheme), endlessChapter);
                     const completedMap = prev.map.map(node => node.id === prev.currentMapNodeId ? { ...node, completed: true } : node);
                     const isFinalFloor = endlessChapter >= 50;
@@ -13893,45 +13900,35 @@ const App: React.FC = () => {
                             endlessBossPhase: undefined,
                             endlessRewardPending: false,
                             endlessRewardRerollUsed: false,
+                            newlyUnlockedCardName: unlockedEndlessChapterCard?.name,
                             narrativeLog: [...prev.narrativeLog, 'エンドレス第50章（累計750F相当）を制覇！黒帳機関の深層記録が解放された。'],
                         };
                     }
                     if (isMajorBoss) {
-                        audioService.playBGM('rest');
                         return {
                             ...prev,
                             map: completedMap,
                             player: healedPlayer,
-                            screen: GameScreen.REST,
-                            endlessBossId: undefined,
+                            screen: GameScreen.FLOOR_RESULT,
+                            endlessBossId: bossDefinition?.id,
                             endlessBossPhase: undefined,
                             endlessRewardPending: false,
                             endlessRewardRerollUsed: false,
+                            newlyUnlockedCardName: unlockedEndlessChapterCard?.name,
                             narrativeLog: [...prev.narrativeLog, `${bossDefinition?.name || '大ボス'}撃破！体力が全回復。休息・強化を選べます。`],
                         };
                     }
-                    const nextChapter = endlessChapter + 1;
-                    const nextMap = generateDungeonMap(prev.difficultyLevel || 1, {
-                        endless: true,
-                        endlessChapter: nextChapter,
-                        visualTheme: prev.visualTheme || visualTheme
-                    });
-                    audioService.playBGM('map');
-                    const isGardener = prev.visualTheme !== 'magic' && healedPlayer.id === 'GARDENER';
                     return {
                         ...prev,
-                        act: nextChapter,
-                        floor: 0,
-                        endlessFloor: nextChapter,
-                        map: nextMap,
-                        currentMapNodeId: null,
+                        map: completedMap,
                         player: healedPlayer,
-                        screen: isGardener ? GameScreen.GARDEN : GameScreen.MAP,
-                        endlessBossId: undefined,
+                        screen: GameScreen.FLOOR_RESULT,
+                        endlessBossId: bossDefinition?.id,
                         endlessBossPhase: undefined,
                         endlessRewardPending: false,
                         endlessRewardRerollUsed: false,
-                        narrativeLog: [...prev.narrativeLog, `${bossDefinition?.name || 'ボス'}撃破！エンドレス第${nextChapter}章へ進もう。`],
+                        newlyUnlockedCardName: unlockedEndlessChapterCard?.name,
+                        narrativeLog: [...prev.narrativeLog, `${bossDefinition?.name || 'ボス'}撃破！章クリア記録を確認しよう。`],
                     };
                 }
 
@@ -13951,28 +13948,18 @@ const App: React.FC = () => {
                 });
                 audioService.playBGM('map');
                 const isGardener = prev.visualTheme !== 'magic' && nextPlayer.id === 'GARDENER';
-                const endlessChapter = Math.max(1, prev.endlessFloor ?? prev.act);
                 if (prev.isEndless && currentNode?.y === MAP_HEIGHT - 1 && endlessChapter < 50) {
-                    const nextChapter = endlessChapter + 1;
                     return {
                         ...prev,
-                        act: nextChapter,
-                        floor: 0,
-                        endlessFloor: nextChapter,
-                        map: generateDungeonMap(prev.difficultyLevel || 1, {
-                            endless: true,
-                            endlessChapter: nextChapter,
-                            visualTheme: prev.visualTheme || visualTheme
-                        }),
-                        currentMapNodeId: null,
+                        map: newMap,
                         player: nextPlayer,
-                        screen: isGardener ? GameScreen.GARDEN : GameScreen.MAP,
+                        screen: GameScreen.FLOOR_RESULT,
                         endlessBossId: undefined,
                         endlessBossPhase: undefined,
                         endlessRewardPending: false,
                         endlessRewardRerollUsed: false,
-                        actStats: { enemiesDefeated: 0, goldGained: 0, mathCorrect: 0 },
-                        narrativeLog: [...prev.narrativeLog, `エンドレス第${nextChapter}章へ進もう。`]
+                        newlyUnlockedCardName: unlockedEndlessChapterCard?.name,
+                        narrativeLog: [...prev.narrativeLog, `エンドレス第${endlessChapter}章クリア！章クリア記録を確認しよう。`]
                     };
                 }
                 return {
@@ -15538,6 +15525,54 @@ const App: React.FC = () => {
                     currentMapNodeId: null,
                     rewards: [],
                     endlessRewardPending: false,
+                    newlyUnlockedCardName: undefined,
+                };
+            }
+            if (prev.isEndless) {
+                const endlessChapter = Math.max(1, prev.endlessFloor ?? prev.act);
+                const currentNode = prev.map.find(node => node.id === prev.currentMapNodeId);
+                const bossDefinition = currentNode?.type === NodeType.BOSS
+                    ? getEndlessBoss(getEndlessArc(prev.visualTheme || visualTheme), endlessChapter)
+                    : undefined;
+                if (bossDefinition?.tier === 'MAJOR_BOSS') {
+                    audioService.playBGM('rest');
+                    return {
+                        ...prev,
+                        screen: GameScreen.REST,
+                        narrativeLog: [...prev.narrativeLog, `${bossDefinition.name}後の休息・強化を選べます。`],
+                    };
+                }
+                const nextChapter = endlessChapter + 1;
+                const newMap = generateDungeonMap(prev.difficultyLevel || 1, {
+                    endless: true,
+                    endlessChapter: nextChapter,
+                    visualTheme: prev.visualTheme || visualTheme
+                });
+                audioService.playBGM('map');
+                const isGardener = prev.visualTheme !== 'magic' && prev.player.id === 'GARDENER';
+                if (prev.challengeMode === 'COOP') {
+                    healCoopPartyToFull({ ...prev.player, currentHp: prev.player.maxHp, block: 0 });
+                }
+                return {
+                    ...prev,
+                    act: nextChapter,
+                    floor: 0,
+                    endlessFloor: nextChapter,
+                    map: newMap,
+                    currentMapNodeId: null,
+                    screen: isGardener ? GameScreen.GARDEN : GameScreen.MAP,
+                    player: {
+                        ...prev.player,
+                        currentHp: prev.player.maxHp,
+                        block: 0,
+                    },
+                    endlessBossId: undefined,
+                    endlessBossPhase: undefined,
+                    endlessRewardPending: false,
+                    endlessRewardRerollUsed: false,
+                    newlyUnlockedCardName: undefined,
+                    narrativeLog: [...prev.narrativeLog, trans(`エンドレス第${nextChapter}章へ進んだ。体力が全回復した！`, languageMode)],
+                    actStats: { enemiesDefeated: 0, goldGained: 0, mathCorrect: 0 },
                 };
             }
             if (prev.act === 3 && !prev.isEndless) {

@@ -7,11 +7,15 @@ const appPath = path.join(root, 'src/App.tsx');
 const mapPath = path.join(root, 'src/services/mapGenerator.ts');
 const mapScreenPath = path.join(root, 'src/components/MapScreen.tsx');
 const restPath = path.join(root, 'src/components/RestScreen.tsx');
+const floorResultPath = path.join(root, 'src/components/FloorResultScreen.tsx');
+const chapterResultsPath = path.join(root, 'src/data/endlessChapterResults.ts');
 const data = fs.readFileSync(dataPath, 'utf8');
 const app = fs.readFileSync(appPath, 'utf8');
 const map = fs.readFileSync(mapPath, 'utf8');
 const mapScreen = fs.readFileSync(mapScreenPath, 'utf8');
 const rest = fs.readFileSync(restPath, 'utf8');
+const floorResult = fs.readFileSync(floorResultPath, 'utf8');
+const chapterResults = fs.readFileSync(chapterResultsPath, 'utf8');
 const failures = [];
 
 const bossRows = [...data.matchAll(/^\s*\['(elementary|high-school|magic)',\s*(\d+),\s*'(BOSS|MAJOR_BOSS)'/gm)]
@@ -21,6 +25,12 @@ for (const arc of ['elementary', 'high-school', 'magic']) {
   const floors = bossRows.filter(row => row.arc === arc).map(row => row.floor);
   const expected = [5, 10, 15, 20, 25, 30, 35, 40, 45, 50];
   if (expected.some(floor => !floors.includes(floor))) failures.push(`${arc} is missing a milestone floor`);
+}
+
+const chapterResultRows = [...chapterResults.matchAll(/^\s*chapter:\s*(\d+),/gm)].map(match => Number(match[1]));
+if (chapterResultRows.length !== 50) failures.push(`expected 50 endless chapter results, found ${chapterResultRows.length}`);
+if (new Set(chapterResultRows).size !== 50 || chapterResultRows.some((chapter, index) => chapter !== index + 1)) {
+  failures.push('endless chapter results must cover chapters 1 through 50 exactly once');
 }
 
 const assetRoot = path.join(root, 'public/sprites/endless-bosses');
@@ -57,6 +67,9 @@ for (const [label, source, patterns] of [
   ['boss phase definitions', data, [/phaseCountByMechanic/, /phaseCount:/]],
   ['boss preview', mapScreen, [/nextBossDefinition\.weakness/, /recommendedPrep/, /latestAchievedGimmick/, /達成済み/]],
   ['major boss intermission', rest, [/endlessMajorBoss/, /onOpenShop/, /onOrganizeDeck/]],
+  ['chapter result data', chapterResults, [/ENDLESS_CHAPTER_RESULTS/, /chapter:\s*50/, /getEndlessChapterResult/]],
+  ['chapter result screen', floorResult, [/getEndlessChapterResult/, /isEndless/, /ENDLESS CHAPTER/]],
+  ['chapter result transition', app, [/unlockedEndlessChapterCard/, /screen: GameScreen\.FLOOR_RESULT/, /体力が全回復した/]],
 ]) {
   for (const pattern of patterns) if (!pattern.test(source)) failures.push(`${label} is missing ${pattern}`);
 }

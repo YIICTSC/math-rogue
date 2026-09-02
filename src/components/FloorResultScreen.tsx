@@ -12,6 +12,7 @@ import { Skull, Coins, Brain, ArrowRight, BookOpen, Sparkles } from 'lucide-reac
 import { audioService } from '../services/audioService';
 import Card from './Card';
 import { assetUrl } from '../utils/assetPaths';
+import { getEndlessChapterResult } from '../data/endlessChapterResults';
 
 interface FloorResultScreenProps {
   act: number;
@@ -53,6 +54,20 @@ const FloorResultScreen: React.FC<FloorResultScreenProps> = ({ act, stats, story
       ? getMagicActStoryPart(magicHeroId, act, closestTargetEntry?.target?.name, closestTargetEntry?.affection, storySet)
       : storySet.parts[(act - 1) % 3];
   }, [visualTheme, magicHeroId, act, closestTargetEntry, storySet]);
+  const displayedPart = useMemo(() => {
+    if (!isEndless) return currentPart;
+    const endlessPart = getEndlessChapterResult(act);
+    if (languageMode === 'ENGLISH') {
+      return { title: endlessPart.englishTitle, content: endlessPart.englishContent };
+    }
+    if (languageMode === 'HIRAGANA') {
+      return {
+        title: transEventText(endlessPart.title, languageMode),
+        content: transEventText(endlessPart.content, languageMode),
+      };
+    }
+    return { title: endlessPart.title, content: endlessPart.content };
+  }, [act, currentPart, isEndless, languageMode]);
 
   // 解放されたカード情報の取得
   const unlockedCard = useMemo(() => {
@@ -65,8 +80,8 @@ const FloorResultScreen: React.FC<FloorResultScreenProps> = ({ act, stats, story
 
   useEffect(() => {
     let index = 0;
-    const rawContent = currentPart.content;
-    const translatedContent = transEventText(rawContent, languageMode);
+    const rawContent = displayedPart.content;
+    const translatedContent = isEndless ? rawContent : transEventText(rawContent, languageMode);
     
     setDisplayedText("");
     setIsTyping(true);
@@ -84,11 +99,11 @@ const FloorResultScreen: React.FC<FloorResultScreenProps> = ({ act, stats, story
     return () => {
       clearInterval(interval);
     };
-  }, [currentPart.content, languageMode]);
+  }, [displayedPart.content, isEndless, languageMode]);
 
   const handleNext = () => {
     if (isTyping) {
-      setDisplayedText(transEventText(currentPart.content, languageMode));
+      setDisplayedText(isEndless ? displayedPart.content : transEventText(displayedPart.content, languageMode));
       setIsTyping(false);
     } else {
       onNext();
@@ -106,7 +121,7 @@ const FloorResultScreen: React.FC<FloorResultScreenProps> = ({ act, stats, story
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [typingMode, isTyping, currentPart, languageMode]);
+  }, [typingMode, isTyping, displayedPart, isEndless, languageMode]);
 
   return (
     <div
@@ -124,7 +139,7 @@ const FloorResultScreen: React.FC<FloorResultScreenProps> = ({ act, stats, story
         <div className="floor-result-header text-center mb-4 sm:mb-6 md:mb-4 shrink-0">
           <h2 className="floor-result-heading text-3xl sm:text-4xl md:text-5xl font-black text-gray-100 mb-2 tracking-tighter italic">
             {isEndless
-              ? (languageMode === 'ENGLISH' ? 'ENDLESS FLOOR 50 CLEARED' : 'エンドレス 50F 制覇')
+              ? (languageMode === 'ENGLISH' ? `ENDLESS CHAPTER ${act} CLEARED` : languageMode === 'HIRAGANA' ? `えんどれす だい${act}しょう くりあ` : `エンドレス 第${act}章クリア`)
               : languageMode === 'ENGLISH' ? `ACT ${act} CLEARED` : languageMode === 'HIRAGANA' ? `だい${act}しょう くりあ` : `第${act}章クリア`}
           </h2>
           <div className="h-1 w-24 sm:w-32 bg-gray-500 mx-auto rounded-full"></div>
@@ -194,9 +209,9 @@ const FloorResultScreen: React.FC<FloorResultScreenProps> = ({ act, stats, story
                 )}
                 <div className="floor-result-story-panel bg-gray-800/30 border-2 border-gray-700 p-4 sm:p-6 md:p-4 rounded-lg mb-4 min-h-[8rem] md:min-h-0 relative flex-grow flex flex-col justify-center">
                     <div className="floor-result-story-title absolute -top-3 left-4 sm:left-6 bg-gray-700 px-2 sm:px-3 py-0.5 rounded text-[8px] sm:text-[9px] font-bold text-gray-300 uppercase tracking-widest z-10">
-                        {languageMode === 'ENGLISH' && visualTheme === 'magic'
+                        {languageMode === 'ENGLISH' && visualTheme === 'magic' && !isEndless
                           ? trans('章クリア記録', languageMode)
-                          : transEventText(currentPart.title, languageMode)}
+                          : isEndless ? displayedPart.title : transEventText(displayedPart.title, languageMode)}
                     </div>
                     <div className="overflow-y-auto custom-scrollbar h-full max-h-[150px] md:max-h-none pr-1">
                         <p className="text-base sm:text-lg md:text-xl leading-relaxed text-gray-200">
