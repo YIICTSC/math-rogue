@@ -8,6 +8,8 @@ const mapPath = path.join(root, 'src/services/mapGenerator.ts');
 const mapScreenPath = path.join(root, 'src/components/MapScreen.tsx');
 const restPath = path.join(root, 'src/components/RestScreen.tsx');
 const floorResultPath = path.join(root, 'src/components/FloorResultScreen.tsx');
+const clearPath = path.join(root, 'src/components/EndlessClearScreen.tsx');
+const eventPath = path.join(root, 'src/services/eventService.ts');
 const chapterResultsPath = path.join(root, 'src/data/endlessChapterResults.ts');
 const data = fs.readFileSync(dataPath, 'utf8');
 const app = fs.readFileSync(appPath, 'utf8');
@@ -15,6 +17,8 @@ const map = fs.readFileSync(mapPath, 'utf8');
 const mapScreen = fs.readFileSync(mapScreenPath, 'utf8');
 const rest = fs.readFileSync(restPath, 'utf8');
 const floorResult = fs.readFileSync(floorResultPath, 'utf8');
+const clear = fs.readFileSync(clearPath, 'utf8');
+const event = fs.readFileSync(eventPath, 'utf8');
 const chapterResults = fs.readFileSync(chapterResultsPath, 'utf8');
 const failures = [];
 
@@ -69,6 +73,10 @@ for (const [label, source, patterns] of [
   ['major boss intermission', rest, [/endlessMajorBoss/, /onOpenShop/, /onOrganizeDeck/]],
   ['chapter result data', chapterResults, [/ENDLESS_CHAPTER_RESULTS/, /chapter:\s*50/, /getEndlessChapterResult/]],
   ['chapter result screen', floorResult, [/getEndlessChapterResult/, /isEndless/, /ENDLESS CHAPTER/]],
+  ['endless clear screen', clear, [/ENDLESS MODE CLEARED/, /onReturnToTitle/, /onEnterTrueEndless/, /getEndlessChapterResult/]],
+  ['true endless transition', app, [/ENDLESS_CLEAR/, /endlessTrueMode/, /nextChapter = 51/]],
+  ['shared endless special events', event, [/const shouldShowDodomedesuEvent = isEndless/, /if \(\s*isEndless/, /HIGH_SCHOOL_SUPPORTER_NPC_EVENTS/]],
+  ['magic endless event routing', app, [/activeVisualTheme === 'magic' && !nextState\.isEndless/, /savedVisualTheme === 'magic' && !saved\.isEndless/]],
   ['chapter result transition', app, [/unlockedEndlessChapterCard/, /screen: GameScreen\.FLOOR_RESULT/, /体力が全回復した/]],
 ]) {
   for (const pattern of patterns) if (!pattern.test(source)) failures.push(`${label} is missing ${pattern}`);

@@ -912,8 +912,9 @@ export const generateEvent = (
     const dodomedesuStage = preferredDodomedesuStage >= 0
         ? preferredDodomedesuStage
         : Number(player.turnFlags[DODOMEDESU_EVENT_STAGE_FLAG] || 0);
-    const shouldShowDodomedesuEvent = visualTheme === 'high-school'
-        && isEndless
+    // These crossover events are part of the shared Endless Mode event pool.
+    // Each arc can add its own generic events later without losing this pool.
+    const shouldShowDodomedesuEvent = isEndless
         && (preferredDodomedesuStage >= 0 || !player.turnFlags[DODOMEDESU_BOSS_READY_FLAG])
         && dodomedesuStage < DODOMEDESU_EVENT_STAGES.length
         && (preferredDodomedesuStage >= 0 || Math.random() < (dodomedesuStage > 0 ? 0.35 : 0.12));
@@ -959,8 +960,7 @@ export const generateEvent = (
     }
 
     if (
-        visualTheme === 'high-school'
-        && isEndless
+        isEndless
         && (preferredEventTitle === 'あずきとの出会い' || (!player.turnFlags[AZUKI_ENCOUNTER_FLAG] && Math.random() < 0.12))
     ) {
         return finalizeEvent({
@@ -992,7 +992,7 @@ export const generateEvent = (
         });
     }
 
-    if (visualTheme === 'high-school' && isEndless && HIGH_SCHOOL_SUPPORTER_NPC_EVENTS.length > 0 && Math.random() < 0.55) {
+    if (isEndless && HIGH_SCHOOL_SUPPORTER_NPC_EVENTS.length > 0 && Math.random() < 0.55) {
         const profile = HIGH_SCHOOL_SUPPORTER_NPC_EVENTS[Math.floor(Math.random() * HIGH_SCHOOL_SUPPORTER_NPC_EVENTS.length)];
         return buildSupporterNpcEvent(profile);
     }

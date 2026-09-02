@@ -376,6 +376,7 @@ import MagicRomanceEndingScreen from './components/MagicRomanceEndingScreen';
 import ThemedEndingSequenceScreen from './components/ThemedEndingSequenceScreen';
 import { buildThemedEndingGalleryEntry } from './data/themedEndingSequences';
 import EndlessEndingSequenceScreen from './components/EndlessEndingSequenceScreen';
+import EndlessClearScreen from './components/EndlessClearScreen';
 import { getMagicEndingGalleryEntries, hasMagicEnding } from './services/magicEndingService';
 import ProblemChallengeScreen from './components/ProblemChallengeScreen';
 import AssignmentCreateScreen from './components/AssignmentCreateScreen';
@@ -1050,7 +1051,7 @@ const shouldPreserveLocalCoopScreen = (localScreen: GameScreen, incomingScreen: 
         return true;
     }
     if (
-        (localScreen === GameScreen.GAME_OVER || localScreen === GameScreen.ENDING || localScreen === GameScreen.ENDLESS_OPENING || localScreen === GameScreen.ENDLESS_TRUE_ENDING) &&
+        (localScreen === GameScreen.GAME_OVER || localScreen === GameScreen.ENDING || localScreen === GameScreen.ENDLESS_OPENING || localScreen === GameScreen.ENDLESS_TRUE_ENDING || localScreen === GameScreen.ENDLESS_CLEAR) &&
         COOP_LOCAL_SETUP_SCREEN_SET.has(incomingScreen)
     ) {
         return true;
@@ -3342,6 +3343,7 @@ const App: React.FC = () => {
         combatLog: state.combatLog,
         selectionState: state.selectionState,
         isEndless: state.isEndless,
+        endlessTrueMode: state.endlessTrueMode,
         endlessGimmickProgress: state.endlessGimmickProgress,
         parryState: state.parryState,
         activeEffects: state.activeEffects,
@@ -3387,6 +3389,7 @@ const App: React.FC = () => {
             case GameScreen.ENDING:
             case GameScreen.ENDLESS_OPENING:
             case GameScreen.ENDLESS_TRUE_ENDING:
+            case GameScreen.ENDLESS_CLEAR:
                 return 'victory' as const;
             case GameScreen.GAME_OVER:
                 return 'game_over' as const;
@@ -3563,6 +3566,7 @@ const App: React.FC = () => {
         combatLog: sharedState.combatLog,
         selectionState: sharedState.selectionState,
         isEndless: sharedState.isEndless,
+        endlessTrueMode: sharedState.endlessTrueMode,
         endlessGimmickProgress: sharedState.endlessGimmickProgress,
         parryState: sharedState.parryState,
         activeEffects: sharedState.activeEffects,
@@ -4484,7 +4488,8 @@ const App: React.FC = () => {
             GameScreen.MAGIC_ROMANCE_ENDING,
             GameScreen.ENDING,
             GameScreen.ENDLESS_OPENING,
-            GameScreen.ENDLESS_TRUE_ENDING
+            GameScreen.ENDLESS_TRUE_ENDING,
+            GameScreen.ENDLESS_CLEAR
         ]);
 
         if (!syncableScreens.has(gameState.screen)) return;
@@ -5037,6 +5042,7 @@ const App: React.FC = () => {
         const isEndingReturn = stateRef.current.screen === GameScreen.ENDING;
         const isGameOverReturn = stateRef.current.screen === GameScreen.GAME_OVER;
         const isVictoryReturn = stateRef.current.screen === GameScreen.VICTORY;
+        const isEndlessClearReturn = stateRef.current.screen === GameScreen.ENDLESS_CLEAR;
         const isDebugReturn = stateRef.current.screen === GameScreen.DEBUG_MENU;
         const shouldCheckMiniGameUnlocks =
             stateRef.current.screen === GameScreen.ENDING ||
@@ -5047,7 +5053,7 @@ const App: React.FC = () => {
         let previousMainClearCount = mainClearCount;
         let currentMainClearCount = mainClearCount;
 
-        if (isEndingReturn || isGameOverReturn || isVictoryReturn) {
+        if (isEndingReturn || isGameOverReturn || isVictoryReturn || isEndlessClearReturn) {
             storageService.clearSave();
         }
 
@@ -5114,7 +5120,19 @@ const App: React.FC = () => {
         setCoopEnemyTurnCursor(0);
         setCompletedAssignmentProblemSource(null);
         p2pService.close();
-        setGameState(prev => ({ ...prev, screen: GameScreen.START_MENU, challengeMode: undefined, typingLessonId: undefined }));
+        setGameState(prev => ({
+            ...prev,
+            screen: GameScreen.START_MENU,
+            challengeMode: undefined,
+            typingLessonId: undefined,
+            isEndless: isEndlessClearReturn ? false : prev.isEndless,
+            endlessTrueMode: isEndlessClearReturn ? false : prev.endlessTrueMode,
+            currentMapNodeId: isEndlessClearReturn ? null : prev.currentMapNodeId,
+            map: isEndlessClearReturn ? [] : prev.map,
+            rewards: isEndlessClearReturn ? [] : prev.rewards,
+            endlessRewardPending: isEndlessClearReturn ? false : prev.endlessRewardPending,
+            newlyUnlockedCardName: isEndlessClearReturn ? undefined : prev.newlyUnlockedCardName,
+        }));
         setHasSave(storageService.hasSaveFile());
         audioService.playBGM('menu');
     };
@@ -6338,7 +6356,7 @@ const App: React.FC = () => {
 
                 if (canRestoreEvent) {
                     const unlockedCards = storageService.getUnlockedCards();
-                    const restoredEvent = savedVisualTheme === 'magic'
+                    const restoredEvent = savedVisualTheme === 'magic' && !saved.isEndless
                         ? generateMagicRomanceSelectionEvent(
                             saved.player,
                             getMagicProtagonistId(saved.player),
@@ -6733,6 +6751,7 @@ const App: React.FC = () => {
             screen: GameScreen.ENDLESS_OPENING,
             isEndless: true,
             endlessFloor: 1,
+            endlessTrueMode: false,
             endlessBossId: undefined,
             endlessBossPhase: undefined,
             endlessRewardIds: [],
@@ -8204,11 +8223,9 @@ const App: React.FC = () => {
                     : undefined;
                 const isDodomedesuBoss = node.type === NodeType.BOSS
                     && nextState.isEndless
-                    && activeBattleVisualTheme === 'high-school'
                     && Boolean(nextState.player.turnFlags[DODOMEDESU_BOSS_READY_FLAG]);
                 const isAzukiBoss = node.type === NodeType.BOSS
                     && nextState.isEndless
-                    && activeBattleVisualTheme === 'high-school'
                     && Boolean(nextState.player.turnFlags[AZUKI_ENCOUNTER_FLAG]);
 
                 if (endlessBoss) {
@@ -8603,7 +8620,7 @@ const App: React.FC = () => {
                 }
                 const unlockedCards = storageService.getUnlockedCards();
                 const activeVisualTheme = nextState.visualTheme || visualTheme;
-                const ev = activeVisualTheme === 'magic'
+                const ev = activeVisualTheme === 'magic' && !nextState.isEndless
                     ? generateMagicRomanceSelectionEvent(
                         nextState.player,
                         getMagicProtagonistId(nextState.player),
@@ -13883,14 +13900,14 @@ const App: React.FC = () => {
                     }
                     const bossDefinition = getEndlessBoss(getEndlessArc(prev.visualTheme || visualTheme), endlessChapter);
                     const completedMap = prev.map.map(node => node.id === prev.currentMapNodeId ? { ...node, completed: true } : node);
-                    const isFinalFloor = endlessChapter >= 50;
+                    const isFinalChapter = !prev.endlessTrueMode && endlessChapter === 50;
                     const isMajorBoss = bossDefinition?.tier === 'MAJOR_BOSS';
                     const healedPlayer = {
                         ...nextPlayer,
                         currentHp: isMajorBoss ? nextPlayer.maxHp : nextPlayer.currentHp,
                         block: 0,
                     };
-                    if (isFinalFloor) {
+                    if (isFinalChapter) {
                         audioService.playBGM('victory');
                         return {
                             ...prev,
@@ -13948,7 +13965,7 @@ const App: React.FC = () => {
                 });
                 audioService.playBGM('map');
                 const isGardener = prev.visualTheme !== 'magic' && nextPlayer.id === 'GARDENER';
-                if (prev.isEndless && currentNode?.y === MAP_HEIGHT - 1 && endlessChapter < 50) {
+                if (prev.isEndless && currentNode?.y === MAP_HEIGHT - 1 && (prev.endlessTrueMode || endlessChapter < 50)) {
                     return {
                         ...prev,
                         map: newMap,
@@ -15515,12 +15532,55 @@ const App: React.FC = () => {
         }));
     };
 
+    const handleEnterTrueEndless = () => {
+        setGameState(prev => {
+            const nextChapter = 51;
+            const newMap = generateDungeonMap(prev.difficultyLevel || 1, {
+                endless: true,
+                endlessChapter: nextChapter,
+                visualTheme: prev.visualTheme || visualTheme,
+            });
+            const isGardener = prev.visualTheme !== 'magic' && prev.player.id === 'GARDENER';
+            if (prev.challengeMode === 'COOP') {
+                healCoopPartyToFull({ ...prev.player, currentHp: prev.player.maxHp, block: 0 });
+            }
+            audioService.playBGM('map');
+            return {
+                ...prev,
+                isEndless: true,
+                endlessTrueMode: true,
+                act: nextChapter,
+                floor: 0,
+                endlessFloor: nextChapter,
+                map: newMap,
+                currentMapNodeId: null,
+                screen: isGardener ? GameScreen.GARDEN : GameScreen.MAP,
+                player: {
+                    ...prev.player,
+                    currentHp: prev.player.maxHp,
+                    block: 0,
+                },
+                enemies: [],
+                selectedEnemyId: null,
+                rewards: [],
+                endlessBossId: undefined,
+                endlessBossPhase: undefined,
+                endlessRewardPending: false,
+                endlessRewardRerollUsed: false,
+                newlyUnlockedCardName: undefined,
+                actStats: { enemiesDefeated: 0, goldGained: 0, mathCorrect: 0 },
+                narrativeLog: [...prev.narrativeLog, trans('真のエンドレスモード第51章へ進んだ。', languageMode)],
+            };
+        });
+    };
+
     const handleNextActFromStory = () => {
         setGameState(prev => {
-            if (prev.isEndless && (prev.endlessFloor ?? prev.act) >= 50) {
+            if (prev.isEndless && !prev.endlessTrueMode && (prev.endlessFloor ?? prev.act) >= 50) {
                 return {
                     ...prev,
                     isEndless: false,
+                    endlessTrueMode: false,
                     screen: GameScreen.START_MENU,
                     currentMapNodeId: null,
                     rewards: [],
@@ -16198,6 +16258,7 @@ const App: React.FC = () => {
                     if (
                         data.state.screen === GameScreen.EVENT &&
                         (data.state.visualTheme || visualTheme) === 'magic' &&
+                        !data.state.isEndless &&
                         (gameState.screen !== GameScreen.EVENT || !eventData)
                     ) {
                         setEventData(generateMagicRomanceSelectionEvent(
@@ -16211,6 +16272,7 @@ const App: React.FC = () => {
                     } else if (
                         data.state.screen === GameScreen.EVENT &&
                         (data.state.visualTheme || visualTheme) === 'magic' &&
+                        !data.state.isEndless &&
                         gameState.screen === GameScreen.EVENT &&
                         eventData
                     ) {
@@ -17268,6 +17330,7 @@ const App: React.FC = () => {
     const usesIosEdgeToEdgeLayout = [
         GameScreen.PROBLEM_CHALLENGE,
         GameScreen.FLOOR_RESULT,
+        GameScreen.ENDLESS_CLEAR,
         GameScreen.MINI_GAME_KOCHO,
         // The mini-game hub owns its portrait safe-area padding and fixed
         // title-return action. Keep the parent stage edge-to-edge so iOS does
@@ -18597,6 +18660,7 @@ const App: React.FC = () => {
                             magicRomance={gameState.player.magicRomance}
                             endlessRunRewards={gameState.endlessRunRewards}
                             isEndless={gameState.isEndless}
+                            isTrueEndless={gameState.endlessTrueMode}
                         />
                     </div>
                 )}
@@ -18638,10 +18702,22 @@ const App: React.FC = () => {
                             onComplete={() => {
                                 setGameState(prev => ({
                                     ...prev,
-                                    screen: GameScreen.FLOOR_RESULT,
+                                    screen: GameScreen.ENDLESS_CLEAR,
                                     narrativeLog: [...prev.narrativeLog, trans('真エンディングを解放した。', languageMode)],
                                 }));
                             }}
+                        />
+                    </div>
+                )}
+
+                {gameState.screen === GameScreen.ENDLESS_CLEAR && (
+                    <div className="absolute inset-0">
+                        <EndlessClearScreen
+                            languageMode={languageMode}
+                            visualTheme={gameState.visualTheme || visualTheme}
+                            newlyUnlockedCardName={gameState.newlyUnlockedCardName}
+                            onReturnToTitle={returnToTitle}
+                            onEnterTrueEndless={handleEnterTrueEndless}
                         />
                     </div>
                 )}

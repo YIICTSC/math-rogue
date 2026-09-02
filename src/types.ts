@@ -465,6 +465,7 @@ export enum GameScreen {
   ENDING = 'ENDING',
   ENDLESS_OPENING = 'ENDLESS_OPENING',
   ENDLESS_TRUE_ENDING = 'ENDLESS_TRUE_ENDING',
+  ENDLESS_CLEAR = 'ENDLESS_CLEAR',
   HELP = 'HELP',
   TREASURE = 'TREASURE',
   RANKING = 'RANKING',
@@ -1279,8 +1280,10 @@ export interface GameState {
   rewards: RewardItem[];
   selectionState: SelectionState;
   isEndless?: boolean;
-  /** The current endless chapter (0 before the first node, 1-50 during a run). */
+  /** The current endless chapter (0 before the first node, 1+ after true endless begins). */
   endlessFloor?: number;
+  /** True after the 50-chapter clear screen when the player chooses to continue. */
+  endlessTrueMode?: boolean;
   /** Boss/reward state is kept in the save payload so a reload cannot double-claim. */
   endlessBossId?: string;
   endlessRewardIds?: string[];
@@ -1325,8 +1328,10 @@ export interface CoopSharedState {
   combatLog: string[];
   selectionState: SelectionState;
   isEndless?: boolean;
-  /** The current endless chapter (0 before the first node, 1-50 during a run). */
+  /** The current endless chapter (0 before the first node, 1+ after true endless begins). */
   endlessFloor?: number;
+  /** True after the 50-chapter clear screen when the player chooses to continue. */
+  endlessTrueMode?: boolean;
   /** Boss/reward state is kept in the save payload so a reload cannot double-claim. */
   endlessBossId?: string;
   endlessRewardIds?: string[];

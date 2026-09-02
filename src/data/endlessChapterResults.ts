@@ -7,9 +7,10 @@ export interface EndlessChapterResult {
 }
 
 /**
- * Chapter-clear records for Endless Mode.  The clues begin as anonymous
- * tampering in the school and gradually expose the Black Ledger Bureau by
- * Chapter 50, without replacing the character-specific ending sequence.
+ * Chapter-clear records for Endless Mode. The first 49 records appear on
+ * chapter result screens. Record 50 is reserved for the final clear screen,
+ * where it follows the true-ending sequence without creating a Chapter 50
+ * result-screen stop.
  */
 export const ENDLESS_CHAPTER_RESULTS: EndlessChapterResult[] = [
   {

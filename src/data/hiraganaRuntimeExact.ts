@@ -1,6 +1,7 @@
 // Generated from runtime game data; keep proper-noun readings in the overrides used by the generator.
 export const HIRAGANA_RUNTIME_EXACT: Record<string, string> = {
   "エンドレス第1章へ進んだ。": "えんどれす だい1しょうへ すすんだ。",
+  "真のエンドレスモード第51章へ進んだ。": "しんの えんどれすもーど だい51しょうへ すすんだ。",
   "エンドレスの最初の階層へ進んだ。": "えんどれすの さいしょの かいそうへ すすんだ。",
   "真エンディングを解放した。": "しんえんでぃんぐを かいほうした。",
   "石ころの煌めき": "いしころのきらめき",

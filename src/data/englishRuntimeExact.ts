@@ -1,5 +1,6 @@
 export const ENGLISH_RUNTIME_EXACT: Record<string, string> = {
   'エンドレス第1章へ進んだ。': 'You entered Endless Chapter 1.',
+  '真のエンドレスモード第51章へ進んだ。': 'You entered True Endless Mode, Chapter 51.',
   'エンドレスの最初の階層へ進んだ。': 'You stepped into the first floor of Endless Mode.',
   '真エンディングを解放した。': 'The true ending has been unlocked.',
   '大声': 'Loud Voice',

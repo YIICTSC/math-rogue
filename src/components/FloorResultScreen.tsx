@@ -27,9 +27,10 @@ interface FloorResultScreenProps {
   magicRomance?: MagicRomanceProgress;
   endlessRunRewards?: Array<{ id: string; name: string; floor: number; scope: 'RUN' | 'PERMANENT' | 'RECORD' }>;
   isEndless?: boolean;
+  isTrueEndless?: boolean;
 }
 
-const FloorResultScreen: React.FC<FloorResultScreenProps> = ({ act, stats, storyIndex, onNext, languageMode, newlyUnlockedCardName, typingMode = false, visualTheme = 'elementary', magicHeroId = 'AKARI', magicRomance, endlessRunRewards = [], isEndless = false }) => {
+const FloorResultScreen: React.FC<FloorResultScreenProps> = ({ act, stats, storyIndex, onNext, languageMode, newlyUnlockedCardName, typingMode = false, visualTheme = 'elementary', magicHeroId = 'AKARI', magicRomance, endlessRunRewards = [], isEndless = false, isTrueEndless = false }) => {
   const [displayedText, setDisplayedText] = useState("");
   const [isTyping, setIsTyping] = useState(true);
   
@@ -56,6 +57,17 @@ const FloorResultScreen: React.FC<FloorResultScreenProps> = ({ act, stats, story
   }, [visualTheme, magicHeroId, act, closestTargetEntry, storySet]);
   const displayedPart = useMemo(() => {
     if (!isEndless) return currentPart;
+    if (isTrueEndless) {
+      const title = `真の深層記録 ${act}：境界の外`;
+      const content = `真のエンドレス第${act}章。50章の記録を越えた先で、黒帳機関の観測網はまだ終わっていない。`;
+      if (languageMode === 'ENGLISH') {
+        return { title: `TRUE ENDLESS RECORD ${act}: Beyond the Boundary`, content: `True Endless Chapter ${act}. Beyond the 50-chapter record, the Black Ledger Bureau's observation network still has no end.` };
+      }
+      if (languageMode === 'HIRAGANA') {
+        return { title: transEventText(title, languageMode), content: transEventText(content, languageMode) };
+      }
+      return { title, content };
+    }
     const endlessPart = getEndlessChapterResult(act);
     if (languageMode === 'ENGLISH') {
       return { title: endlessPart.englishTitle, content: endlessPart.englishContent };
@@ -67,7 +79,7 @@ const FloorResultScreen: React.FC<FloorResultScreenProps> = ({ act, stats, story
       };
     }
     return { title: endlessPart.title, content: endlessPart.content };
-  }, [act, currentPart, isEndless, languageMode]);
+  }, [act, currentPart, isEndless, isTrueEndless, languageMode]);
 
   // 解放されたカード情報の取得
   const unlockedCard = useMemo(() => {
@@ -139,7 +151,9 @@ const FloorResultScreen: React.FC<FloorResultScreenProps> = ({ act, stats, story
         <div className="floor-result-header text-center mb-4 sm:mb-6 md:mb-4 shrink-0">
           <h2 className="floor-result-heading text-3xl sm:text-4xl md:text-5xl font-black text-gray-100 mb-2 tracking-tighter italic">
             {isEndless
-              ? (languageMode === 'ENGLISH' ? `ENDLESS CHAPTER ${act} CLEARED` : languageMode === 'HIRAGANA' ? `えんどれす だい${act}しょう くりあ` : `エンドレス 第${act}章クリア`)
+              ? (isTrueEndless
+                ? (languageMode === 'ENGLISH' ? `TRUE ENDLESS CHAPTER ${act}` : languageMode === 'HIRAGANA' ? `しんの えんどれす だい${act}しょう` : `真のエンドレス 第${act}章`)
+                : (languageMode === 'ENGLISH' ? `ENDLESS CHAPTER ${act} CLEARED` : languageMode === 'HIRAGANA' ? `えんどれす だい${act}しょう くりあ` : `エンドレス 第${act}章クリア`))
               : languageMode === 'ENGLISH' ? `ACT ${act} CLEARED` : languageMode === 'HIRAGANA' ? `だい${act}しょう くりあ` : `第${act}章クリア`}
           </h2>
           <div className="h-1 w-24 sm:w-32 bg-gray-500 mx-auto rounded-full"></div>
