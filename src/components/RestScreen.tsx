@@ -333,17 +333,22 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
 
             {mode === 'CHOICE' && (
                 <div className="flex flex-wrap justify-center gap-4 md:gap-8">
-                    {/* Health Room (Rest) */}
-                    <button
-                        data-gamepad-initial-choice
-                        onClick={handleRest}
-                        className="group relative flex flex-col items-center gap-2 p-4 border-2 border-gray-600 hover:border-green-500 rounded-lg hover:bg-gray-800 transition-all w-32 md:w-40"
-                    >
-                        {typingMode && <div className="absolute right-2 top-2 rounded-full border border-cyan-300 bg-cyan-950/95 px-1.5 py-0.5 text-[10px] font-black text-cyan-200">1</div>}
-                        <BedDouble size={40} className="text-green-500 group-hover:scale-110 transition-transform" />
-                        <span className="font-bold text-lg">{trans("保健室", languageMode)}</span>
-                        <span className="text-xs text-gray-400">HP {healAmount} {trans("回復", languageMode)}</span>
-                    </button>
+                    {/* The major-boss intermission already starts at full HP. */}
+                    {!endlessMajorBoss && (
+                        <>
+                            {/* Health Room (Rest) */}
+                            <button
+                                data-gamepad-initial-choice
+                                onClick={handleRest}
+                                className="group relative flex flex-col items-center gap-2 p-4 border-2 border-gray-600 hover:border-green-500 rounded-lg hover:bg-gray-800 transition-all w-32 md:w-40"
+                            >
+                                {typingMode && <div className="absolute right-2 top-2 rounded-full border border-cyan-300 bg-cyan-950/95 px-1.5 py-0.5 text-[10px] font-black text-cyan-200">1</div>}
+                                <BedDouble size={40} className="text-green-500 group-hover:scale-110 transition-transform" />
+                                <span className="font-bold text-lg">{trans("保健室", languageMode)}</span>
+                                <span className="text-xs text-gray-400">HP {healAmount} {trans("回復", languageMode)}</span>
+                            </button>
+                        </>
+                    )}
 
                     {/* Art Room (Upgrade) */}
                     <button
@@ -399,18 +404,6 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
                             <ShoppingBag size={40} className="text-amber-400 transition-transform group-hover:scale-110" />
                             <span className="font-bold text-lg">{trans('ショップ', languageMode)}</span>
                             <span className="text-xs text-gray-400">{trans('大ボス後の特別営業', languageMode)}</span>
-                        </button>
-                    )}
-                    {endlessMajorBoss && onOrganizeDeck && (
-                        <button
-                            data-gamepad-initial-choice
-                            onClick={handleDeckChoice}
-                            className="group relative flex flex-col items-center gap-2 rounded-lg border-2 border-gray-600 p-4 transition-all hover:border-cyan-400 hover:bg-gray-800 w-32 md:w-40"
-                        >
-                            {typingMode && <div className="absolute right-2 top-2 rounded-full border border-cyan-300 bg-cyan-950/95 px-1.5 py-0.5 text-[10px] font-black text-cyan-200">6</div>}
-                            <Layers size={40} className="text-cyan-300 transition-transform group-hover:scale-110" />
-                            <span className="font-bold text-lg">{trans('デッキ整理', languageMode)}</span>
-                            <span className="text-xs text-gray-400">{trans('カード順を入れ替える', languageMode)}</span>
                         </button>
                     )}
                 </div>
