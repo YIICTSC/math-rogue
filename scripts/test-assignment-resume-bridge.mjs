@@ -23,7 +23,7 @@ assert.match(
   '送信課題の続き状態を課題レター表示中に保持していない'
 );
 
-const assignmentStartHandlers = [...source.matchAll(/const assignmentResumeState = pendingAssignmentResumeState;/g)];
+const assignmentStartHandlers = [...source.matchAll(/const assignmentResumeState = pendingAssignmentResumeState\s*\|\|/g)];
 assert.equal(assignmentStartHandlers.length, 2, '課題レター両方の開始ハンドラに復帰状態を渡す必要がある');
 assert.equal(
   (source.match(/\.\.\.\(assignmentResumeState \|\| prev\)/g) || []).length,

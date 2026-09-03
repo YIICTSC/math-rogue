@@ -2080,6 +2080,7 @@ const App: React.FC = () => {
         storageService.saveCurrentAssignment(assignment);
         setCurrentAssignment(assignment);
         setCompletedAssignmentProblemSource(null);
+        setPendingAssignmentResumeState(storageService.loadGame());
         setAssignmentLetterSource('title');
         setShowAssignmentLetter(true);
         setGameState(prev => ({ ...prev, screen: GameScreen.START_MENU }));
@@ -2159,7 +2160,7 @@ const App: React.FC = () => {
         setCurrentAssignment(assignment);
         setCompletedAssignmentProblemSource(null);
         setPendingManagedAssignmentLetter(assignment);
-        setPendingAssignmentResumeState(null);
+        setPendingAssignmentResumeState(storageService.loadGame());
         setAssignmentLetterSource('title');
         setShowAssignmentInbox(false);
         setShowAssignmentLetter(true);
@@ -17840,7 +17841,8 @@ const App: React.FC = () => {
                                                  }
                                                  const resumeMiniGameScreen = pendingMiniGameScreen;
                                                  const resumeAssignmentScreen = pendingAssignmentStartScreen;
-                                                 const assignmentResumeState = pendingAssignmentResumeState;
+                                                 const assignmentResumeState = pendingAssignmentResumeState
+                                                     || (isTeacherAssignmentActive ? storageService.loadGame() : null);
                                                  if (assignmentLetter.gameMode === 'FREE' && resumeMiniGameScreen) {
                                                      const assignmentConfig = getAssignmentProblemConfig(assignmentLetter);
                                                      setMiniGameProblemMode(assignmentConfig.mode || GameMode.UPPER_TRIVIA);
@@ -18435,7 +18437,8 @@ const App: React.FC = () => {
                                         }
                                         const resumeMiniGameScreen = pendingMiniGameScreen;
                                         const resumeAssignmentScreen = pendingAssignmentStartScreen;
-                                        const assignmentResumeState = pendingAssignmentResumeState;
+                                         const assignmentResumeState = pendingAssignmentResumeState
+                                             || (isTeacherAssignmentActive ? storageService.loadGame() : null);
                                         if (assignmentLetter.gameMode === 'FREE' && resumeMiniGameScreen) {
                                             const assignmentConfig = getAssignmentProblemConfig(assignmentLetter);
                                             setMiniGameProblemMode(assignmentConfig.mode || GameMode.UPPER_TRIVIA);

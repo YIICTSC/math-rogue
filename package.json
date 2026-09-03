@@ -67,6 +67,7 @@
     "test:placement-tcg": "node scripts/test-placement-tcg-complete.mjs",
     "test:title-resume-isolation": "node scripts/test-title-resume-isolation.mjs",
     "test:assignment-resume": "node scripts/test-assignment-resume-bridge.mjs",
+    "test:assignment-resume-browser": "node scripts/test-assignment-resume-browser.mjs",
     "test:crane-game": "node scripts/test-crane-game.mjs",
     "test:assignment-reward-runtime": "node scripts/test-assignment-reward-runtime.mjs",
     "build:offline": "pnpm run audit:english:gate && node scripts/build-offline.mjs",
