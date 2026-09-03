@@ -322,7 +322,12 @@ export const managementPortalService = {
       organizationType: 'family' | 'school';
     }>(`/api/group-invitations/${encodeURIComponent(token)}/learner`, {
       method: 'POST',
-      body: JSON.stringify(childSafetyService.isChild() ? { displayName: '', attendanceNumber: '', ageBand: '9_12' } : input),
+      // 氏名・出席番号は年齢に関係なく任意入力として送信する。
+      // 年齢区分は学習集計の許可判定にだけ使い、名簿情報を匿名化する理由にはしない。
+      body: JSON.stringify({
+        displayName: input.displayName || '',
+        attendanceNumber: input.attendanceNumber || '',
+      }),
     }, currentProfile?.token);
     if (result.alreadyLinked && currentProfile) {
       const profile = { ...currentProfile, displayName: result.displayName || currentProfile.displayName };

@@ -7,7 +7,6 @@ import {
 } from '../services/managementPortalService';
 import { LanguageMode } from '../types';
 import { trans } from '../utils/textUtils';
-import { childSafetyService } from '../services/childSafetyService';
 
 type Props = {
   token: string;
@@ -97,15 +96,15 @@ export default function LearnerGroupInviteModal({ token, open, languageMode, onL
           <span className="mt-1 block text-sm text-slate-300">{invitation.organizationName}</span>
         </div>
         <form onSubmit={submit} className="space-y-4">
-          <p className="rounded-lg bg-slate-800 px-3 py-2 text-xs font-bold leading-5 text-slate-300">{t('9〜12歳では氏名と出席番号を送信しません。保護者または学校が発行した招待だけを使用してください。')}</p>
-          {!childSafetyService.isChild() && <label className="block text-sm font-black text-slate-200">
+          <p className="rounded-lg bg-slate-800 px-3 py-2 text-xs font-bold leading-5 text-slate-300">{t('氏名と出席番号を入力すると、管理ポータルの名簿や学習状況で確認しやすくなります。どちらも空欄のまま参加できます。')}</p>
+          <label className="block text-sm font-black text-slate-200">
             {t('出席番号（任意）')}
             <input name="attendanceNumber" maxLength={32} inputMode="numeric" autoComplete="off" className="mt-2 w-full rounded-xl border-2 border-slate-600 bg-slate-950 px-4 py-3 text-base font-bold outline-none focus:border-cyan-300" />
-          </label>}
-          {!childSafetyService.isChild() && <label className="block text-sm font-black text-slate-200">
+          </label>
+          <label className="block text-sm font-black text-slate-200">
             {t('氏名（任意）')}
             <input name="displayName" maxLength={32} autoComplete="name" className="mt-2 w-full rounded-xl border-2 border-slate-600 bg-slate-950 px-4 py-3 text-base font-bold outline-none focus:border-cyan-300" />
-          </label>}
+          </label>
           <button data-gamepad-initial-choice disabled={joining} className="flex w-full items-center justify-center gap-2 rounded-xl bg-cyan-300 px-4 py-3 font-black text-slate-950 disabled:opacity-50">
             {joining ? <LoaderCircle className="animate-spin" size={20} /> : <UserRoundCheck size={20} />}
             {t(joining ? '参加と連携をしています…' : '参加してこの端末を連携')}

@@ -1065,6 +1065,7 @@ export const ENGLISH_RUNTIME_EXACT: Record<string, string> = {
   '招待情報を確認中…': 'Checking invitation…',
   '招待情報を確認できませんでした。': 'Could not verify the invitation.',
   'グループに参加できませんでした。': 'Could not join the group.',
+  '氏名と出席番号を入力すると、管理ポータルの名簿や学習状況で確認しやすくなります。どちらも空欄のまま参加できます。': 'Entering your name and attendance number helps guardians and teachers identify you in the roster and learning progress. You can also join with both fields blank.',
   '入力が難しいときは、どちらも空欄のまま参加できます。': 'If typing is difficult, you can leave both fields blank.',
   '出席番号（任意）': 'Attendance Number (Optional)',
   '氏名（任意）': 'Name (Optional)',
