@@ -6400,8 +6400,22 @@ const App: React.FC = () => {
                 ? activeAssignment
                 : null;
             if (assignmentForContinue) {
-                setAssignmentLetterSource('selection');
-                setShowAssignmentLetter(true);
+                // A managed assignment has already been explicitly selected before
+                // the learner presses Continue. Re-opening its letter here caused
+                // the generic teacher-assignment fallback to send the restored run
+                // back to START_MENU, so the saved main adventure never actually
+                // resumed with the assignment settings applied. Continue directly
+                // for sent assignments; daily assignments keep their notice flow.
+                const isSentAssignment = Boolean(assignmentForContinue.managementPortal);
+                if (isSentAssignment) {
+                    setPendingManagedAssignmentLetter(null);
+                    setPendingMiniGameScreen(null);
+                    setPendingAssignmentStartScreen(null);
+                    setShowAssignmentLetter(false);
+                } else {
+                    setAssignmentLetterSource('selection');
+                    setShowAssignmentLetter(true);
+                }
                 if (assignmentForContinue.gameMode === 'CHALLENGE_ONLY') {
                     saved.screen = GameScreen.PROBLEM_CHALLENGE;
                     saved.challengeMode = undefined;
@@ -8221,11 +8235,12 @@ const App: React.FC = () => {
                 const endlessBoss = nextState.isEndless && node.type === NodeType.BOSS
                     ? getEndlessBoss(getEndlessArc(activeBattleVisualTheme), endlessChapter || 1)
                     : undefined;
-                const isDodomedesuBoss = node.type === NodeType.BOSS
-                    && nextState.isEndless
+                const isSpecialBossChapter = nextState.isEndless
+                    && node.y === MAP_HEIGHT - 1
+                    && (endlessChapter || 1) % 5 !== 0;
+                const isDodomedesuBoss = isSpecialBossChapter
                     && Boolean(nextState.player.turnFlags[DODOMEDESU_BOSS_READY_FLAG]);
-                const isAzukiBoss = node.type === NodeType.BOSS
-                    && nextState.isEndless
+                const isAzukiBoss = isSpecialBossChapter
                     && Boolean(nextState.player.turnFlags[AZUKI_ENCOUNTER_FLAG]);
 
                 if (endlessBoss) {
@@ -13886,9 +13901,10 @@ const App: React.FC = () => {
 
             if (currentNode && currentNode.type === NodeType.BOSS) {
                 if (prev.isEndless) {
-                    if (nextPlayer.turnFlags[AZUKI_BOSS_FLAG]) {
+                    if (nextPlayer.turnFlags[AZUKI_BOSS_FLAG] || nextPlayer.turnFlags[AZUKI_ENCOUNTER_FLAG]) {
                         const turnFlags = { ...nextPlayer.turnFlags };
                         delete turnFlags[AZUKI_BOSS_FLAG];
+                        delete turnFlags[AZUKI_ENCOUNTER_FLAG];
                         nextPlayer = { ...nextPlayer, turnFlags };
                     }
                     if (nextPlayer.turnFlags[DODOMEDESU_BOSS_ACTIVE_FLAG]) {
@@ -13896,6 +13912,10 @@ const App: React.FC = () => {
                         delete turnFlags[DODOMEDESU_BOSS_ACTIVE_FLAG];
                         delete turnFlags[DODOMEDESU_BOSS_READY_FLAG];
                         delete turnFlags[DODOMEDESU_EVENT_STAGE_FLAG];
+                        nextPlayer = { ...nextPlayer, turnFlags };
+                    } else if (nextPlayer.turnFlags[DODOMEDESU_BOSS_READY_FLAG]) {
+                        const turnFlags = { ...nextPlayer.turnFlags };
+                        delete turnFlags[DODOMEDESU_BOSS_READY_FLAG];
                         nextPlayer = { ...nextPlayer, turnFlags };
                     }
                     const bossDefinition = getEndlessBoss(getEndlessArc(prev.visualTheme || visualTheme), endlessChapter);
@@ -13959,6 +13979,22 @@ const App: React.FC = () => {
                     newlyUnlockedCardName: unlockedCard?.name // Passing unlocked card name to display in result screen
                 };
             } else {
+                const isSpecialBossBattle = Boolean(
+                    prev.isEndless
+                    && currentNode
+                    && currentNode.y === MAP_HEIGHT - 1
+                    && endlessChapter % 5 !== 0
+                    && (nextPlayer.turnFlags[AZUKI_BOSS_FLAG] || nextPlayer.turnFlags[DODOMEDESU_BOSS_ACTIVE_FLAG])
+                );
+                if (isSpecialBossBattle) {
+                    const turnFlags = { ...nextPlayer.turnFlags };
+                    delete turnFlags[AZUKI_BOSS_FLAG];
+                    delete turnFlags[AZUKI_ENCOUNTER_FLAG];
+                    delete turnFlags[DODOMEDESU_BOSS_ACTIVE_FLAG];
+                    delete turnFlags[DODOMEDESU_BOSS_READY_FLAG];
+                    delete turnFlags[DODOMEDESU_EVENT_STAGE_FLAG];
+                    nextPlayer = { ...nextPlayer, turnFlags };
+                }
                 const newMap = prev.map.map(n => {
                     if (n.id === prev.currentMapNodeId) return { ...n, completed: true };
                     return n;
@@ -14383,8 +14419,17 @@ const App: React.FC = () => {
             1,
             3 + (hasRelic(player, 'SCHOOL_ARCHIVE') ? 2 : 0) - (hasRelic(player, 'PRINCIPAL_SEAL') ? 1 : 0)
         );
-        const isAzukiBossReward = nodeType === NodeType.BOSS && Boolean(player.turnFlags[AZUKI_BOSS_FLAG]);
-        const isDodomedesuBossReward = nodeType === NodeType.BOSS && Boolean(player.turnFlags[DODOMEDESU_BOSS_ACTIVE_FLAG]);
+        const rewardNode = stateRef.current.map.find(node => node.id === stateRef.current.currentMapNodeId);
+        const rewardChapter = Math.max(1, stateRef.current.endlessFloor ?? stateRef.current.act);
+        const isEndlessChapterEndNode = Boolean(
+            stateRef.current.isEndless
+            && rewardNode
+            && rewardNode.y === MAP_HEIGHT - 1
+            && rewardChapter % 5 !== 0
+        );
+        const isSpecialBossReward = isEndlessChapterEndNode;
+        const isAzukiBossReward = isSpecialBossReward && Boolean(player.turnFlags[AZUKI_BOSS_FLAG]);
+        const isDodomedesuBossReward = isSpecialBossReward && Boolean(player.turnFlags[DODOMEDESU_BOSS_ACTIVE_FLAG]);
 
         if (bonusGold > 0) {
             let goldReward = bonusGold;

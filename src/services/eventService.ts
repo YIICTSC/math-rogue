@@ -1,6 +1,6 @@
 ﻿
 import React from 'react';
-import { Player, GameState, GameScreen, CardType, Card, TargetType } from '../types';
+import { Player, GameState, GameScreen, CardType, Card, TargetType, NodeType, MapNode } from '../types';
 import { CARDS_LIBRARY, RELIC_LIBRARY, POTION_LIBRARY, CURSE_CARDS, EVENT_CARDS, STATUS_CARDS } from '../constants';
 import { transEventText as trans } from '../utils/textUtils';
 import { LanguageMode } from '../types';
@@ -10,6 +10,7 @@ import { getVisualThemeEventTheme, getVisualThemeEventThemeByTitle, type ThemedE
 import { getSupporterNpcEventByTitle, HIGH_SCHOOL_SUPPORTER_NPC_EVENTS, type SupporterNpcEventProfile, type SupporterNpcQuestion, type SupporterNpcReward } from '../data/supporterNpcEvents';
 import { AZUKI_ENCOUNTER_FLAG } from '../data/azukiBoss';
 import { DODOMEDESU_BOSS_READY_FLAG, DODOMEDESU_EVENT_STAGE_FLAG, DODOMEDESU_EVENT_STAGES } from '../data/dodomedesuBoss';
+import { MAP_HEIGHT } from './mapGenerator';
 
 interface EventAnswerMeta {
     quickQuizProgress?: number;
@@ -270,6 +271,16 @@ export const generateEvent = (
     supporterQuestionIndex?: number
 ): GameEvent => {
     let activeEventTitle: string | null = null;
+    const endlessChapter = Math.max(1, currentAct || 1);
+    const canSpawnSpecialBossEvent = isEndless && endlessChapter % 5 !== 0;
+    const promoteSpecialBossNode = (prev: GameState): MapNode[] => {
+        if (!canSpawnSpecialBossEvent) return prev.map;
+        return prev.map.map(node =>
+            node.y === MAP_HEIGHT - 1
+                ? { ...node, type: NodeType.BOSS }
+                : node
+        );
+    };
     const finalizeEvent = (event: GameEvent): GameEvent => {
         const isCrowdfundingEvent = event.title === 'あずきとの出会い'
             || DODOMEDESU_EVENT_STAGES.some(stage => stage.title === event.title);
@@ -914,7 +925,7 @@ export const generateEvent = (
         : Number(player.turnFlags[DODOMEDESU_EVENT_STAGE_FLAG] || 0);
     // These crossover events are part of the shared Endless Mode event pool.
     // Each arc can add its own generic events later without losing this pool.
-    const shouldShowDodomedesuEvent = isEndless
+    const shouldShowDodomedesuEvent = canSpawnSpecialBossEvent
         && (preferredDodomedesuStage >= 0 || !player.turnFlags[DODOMEDESU_BOSS_READY_FLAG])
         && dodomedesuStage < DODOMEDESU_EVENT_STAGES.length
         && (preferredDodomedesuStage >= 0 || Math.random() < (dodomedesuStage > 0 ? 0.35 : 0.12));
@@ -940,7 +951,18 @@ export const generateEvent = (
                     label: '最後のゲームを受けて立つ',
                     text: 'この階層のボスがドドメデスとゲンゾーになる',
                     action: () => {
-                        setGameState(prev => ({ ...prev, player: { ...prev.player, turnFlags: { ...prev.player.turnFlags, [DODOMEDESU_EVENT_STAGE_FLAG]: 5, [DODOMEDESU_BOSS_READY_FLAG]: true } } }));
+                        setGameState(prev => ({
+                            ...prev,
+                            map: promoteSpecialBossNode(prev),
+                            player: {
+                                ...prev.player,
+                                turnFlags: {
+                                    ...prev.player.turnFlags,
+                                    [DODOMEDESU_EVENT_STAGE_FLAG]: 5,
+                                    [DODOMEDESU_BOSS_READY_FLAG]: true
+                                }
+                            }
+                        }));
                         setEventResultLog('ゲンゾーが高らかに宣言し、ドドメデスが巨大な姿へ覚醒した。階層の最奥で決着をつける。');
                     }
                 },
@@ -960,7 +982,7 @@ export const generateEvent = (
     }
 
     if (
-        isEndless
+        canSpawnSpecialBossEvent
         && (preferredEventTitle === 'あずきとの出会い' || (!player.turnFlags[AZUKI_ENCOUNTER_FLAG] && Math.random() < 0.12))
     ) {
         return finalizeEvent({
@@ -974,7 +996,17 @@ export const generateEvent = (
                     label: languageMode === 'ENGLISH' ? 'Walk together' : '一緒に歩く',
                     text: languageMode === 'ENGLISH' ? 'Azuki will appear as this act\'s boss' : 'この階層のボスがあずきになる',
                     action: () => {
-                        setGameState(prev => ({ ...prev, player: { ...prev.player, turnFlags: { ...prev.player.turnFlags, [AZUKI_ENCOUNTER_FLAG]: true } } }));
+                        setGameState(prev => ({
+                            ...prev,
+                            map: promoteSpecialBossNode(prev),
+                            player: {
+                                ...prev.player,
+                                turnFlags: {
+                                    ...prev.player.turnFlags,
+                                    [AZUKI_ENCOUNTER_FLAG]: true
+                                }
+                            }
+                        }));
                         setEventResultLog(languageMode === 'ENGLISH'
                             ? 'Azuki happily joins your walk. You sense a big reunion waiting at the end of this act.'
                             : 'あずきは嬉しそうに並んで歩き出した。この階層の終わりで、もう一度会える気がする。');
