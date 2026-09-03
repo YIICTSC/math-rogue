@@ -11,6 +11,8 @@ import { getSupporterNpcEventByTitle, HIGH_SCHOOL_SUPPORTER_NPC_EVENTS, type Sup
 import { AZUKI_ENCOUNTER_FLAG } from '../data/azukiBoss';
 import { DODOMEDESU_BOSS_READY_FLAG, DODOMEDESU_EVENT_STAGE_FLAG, DODOMEDESU_EVENT_STAGES } from '../data/dodomedesuBoss';
 import { MAP_HEIGHT } from './mapGenerator';
+import { MAGIC_ENDLESS_EVENTS, MAGIC_ENDLESS_MALE_EVENTS, type MagicEndlessEventDefinition } from '../data/magicEndlessEvents';
+import { applyMagicEndlessEventEffects } from '../utils/magicEndlessEventEffects';
 
 interface EventAnswerMeta {
     quickQuizProgress?: number;
@@ -29,6 +31,60 @@ interface GameEvent {
     options: EventOption[];
     imageKey?: string;
 }
+
+const getMagicEndlessEventPool = (player: Player, chapter: number): MagicEndlessEventDefinition[] => {
+    const source = player.magicProtagonistGender === 'male' ? MAGIC_ENDLESS_MALE_EVENTS : MAGIC_ENDLESS_EVENTS;
+    const available = source.filter(event => event.availableFrom <= chapter);
+    return available.length > 0 ? available : source.slice(0, 1);
+};
+
+/** Generate one of the authored 90-event pools for Magic Endless Mode. */
+export const generateMagicEndlessEvent = (
+    player: Player,
+    setGameState: React.Dispatch<React.SetStateAction<GameState>>,
+    setEventResultLog: (log: string | null) => void,
+    languageMode: LanguageMode,
+    currentChapter: number,
+    preferredEventTitle?: string,
+): GameEvent => {
+    const chapter = Math.max(1, Math.floor(currentChapter));
+    const pool = getMagicEndlessEventPool(player, chapter);
+    const selected = pool.find(event => event.title === preferredEventTitle)
+        || pool[Math.floor(Math.random() * pool.length)];
+    const protagonistLine = selected.center ? `\n\n${selected.center}の視点で、魔法学園の日常が少しだけ深層の色に変わる。` : '';
+    return {
+        title: selected.title,
+        description: `${selected.description}${protagonistLine}`,
+        imageKey: selected.id,
+        options: selected.options.map(option => ({
+            label: option.label,
+            text: option.text,
+            action: () => {
+                if (option.learning) {
+                    setEventResultLog(null);
+                    setGameState(prev => ({
+                        ...prev,
+                        screen: GameScreen.GENERAL_CHALLENGE,
+                        eventLearningPending: {
+                            eventId: selected.id,
+                            eventTitle: selected.title,
+                            successEffects: option.learning?.successEffects || [],
+                            failureEffects: option.learning?.failureEffects || [],
+                        },
+                    }));
+                    return;
+                }
+                setGameState(prev => {
+                    const result = applyMagicEndlessEventEffects(prev.player, option.effects);
+                    return { ...prev, player: result.player };
+                });
+                const preview = applyMagicEndlessEventEffects(player, option.effects);
+                const resultText = preview.messages.length > 0 ? preview.messages.join('。') : '変化はなかった。';
+                setEventResultLog(`${selected.title}：${resultText}。`);
+            },
+        })),
+    };
+};
 
 export const ELEMENTARY_EVENT_TITLES = [
     '忘れ物', '怪しい薬売り', '踊り場の鏡', '呪われた書物', '伝説の給食', '校庭の野良犬', '謎の転校生', '席替え',
@@ -1022,6 +1078,17 @@ export const generateEvent = (
                 }
             ]
         });
+    }
+
+    if (visualTheme === 'magic' && isEndless) {
+        return generateMagicEndlessEvent(
+            player,
+            setGameState,
+            setEventResultLog,
+            languageMode,
+            endlessChapter,
+            preferredEventTitle,
+        );
     }
 
     if (isEndless && HIGH_SCHOOL_SUPPORTER_NPC_EVENTS.length > 0 && Math.random() < 0.55) {

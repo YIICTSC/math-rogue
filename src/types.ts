@@ -434,6 +434,14 @@ export interface ActStats {
   mathCorrect: number;
 }
 
+/** State retained while a magic endless event temporarily opens one quiz. */
+export interface MagicEndlessEventLearningPending {
+  eventId: string;
+  eventTitle: string;
+  successEffects: string[];
+  failureEffects: string[];
+}
+
 export enum GameScreen {
   START_MENU = 'START_MENU',
   DEBUG_MENU = 'DEBUG_MENU',
@@ -855,7 +863,7 @@ export interface MapNode {
   type: NodeType;
   nextNodes: string[];
   completed: boolean;
-  /** Populated only by an endless chapter map; identifies the C01-C50 segment. */
+  /** Populated only by an endless chapter map; identifies the current chapter. */
   endlessChapter?: number;
   endlessBossId?: string;
 }
@@ -1302,6 +1310,7 @@ export interface GameState {
   currentStoryIndex?: number;
   actStats?: ActStats;
   currentEventTitle?: string;
+  eventLearningPending?: MagicEndlessEventLearningPending;
   craneGameContext?: 'TITLE' | 'EVENT';
   newlyUnlockedCardName?: string; // 追加: このアクトで解放されたカード
   coopBattleState?: CoopBattleState | null;
@@ -1346,6 +1355,7 @@ export interface CoopSharedState {
   currentStoryIndex?: number;
   actStats?: ActStats;
   currentEventTitle?: string;
+  eventLearningPending?: MagicEndlessEventLearningPending;
   newlyUnlockedCardName?: string;
   coopBattleState?: CoopBattleState | null;
 }

@@ -52,7 +52,8 @@ export type EndlessGimmickEvent =
 export interface EndlessBossDefinition {
   id: string;
   arc: EndlessArc;
-  floor: 5 | 10 | 15 | 20 | 25 | 30 | 35 | 40 | 45 | 50;
+  /** Boss chapter. Chapters after 50 are generated deterministically. */
+  floor: number;
   tier: EndlessBossTier;
   name: string;
   theme: string;
@@ -378,11 +379,87 @@ export const ENDLESS_BOSSES: EndlessBossDefinition[] = bossRows.map(([arc, floor
   };
 });
 
-export const getEndlessBoss = (arc: EndlessArc | undefined, floor: number) =>
-  arc ? ENDLESS_BOSSES.find((boss) => boss.arc === arc && boss.floor === floor) : undefined;
+const TRUE_ENDLESS_MECHANICS = [
+  'REPEAT_RECORD', 'WAVEFORM', 'ATTRIBUTE_SEAL', 'MORPH_AFTERIMAGE',
+  'ORBITAL_ORDER', 'NOISE', 'TIME_PHASE', 'CATALYST', 'STAR_KEY', 'CONTRACT',
+] as const;
 
-export const getEndlessBossById = (id: string | undefined) =>
-  id ? ENDLESS_BOSSES.find((boss) => boss.id === id) : undefined;
+const TRUE_ENDLESS_BOSS_NAMES: Record<EndlessArc, string[]> = {
+  elementary: ['反復深度体リピタ', '空白深度体ブランクス', '演算深度体オルビス', '門式深度体オクト'],
+  'high-school': ['周波深度体オルト', '規約深度体ヴェルデック', '評定深度体モノメル', '屋上深度体バルグリフ'],
+  magic: ['深層星獣ノクティス', '反照深度体ヴェイル', '軌道深度体オルビタ', '原典深度体アーカイヴ'],
+};
+
+/**
+ * True endless chapters have no finite boss table. Generate their boss from
+ * the chapter number so saves, replays, and coop clients resolve the same
+ * name, gimmick, reward IDs, and phase count without another content table.
+ */
+const createTrueEndlessBoss = (arc: EndlessArc, floor: number): EndlessBossDefinition => {
+  const index = Math.max(0, Math.floor((floor - 55) / 5));
+  const tier: EndlessBossTier = floor % 10 === 0 ? 'MAJOR_BOSS' : 'BOSS';
+  const mechanicKey = TRUE_ENDLESS_MECHANICS[index % TRUE_ENDLESS_MECHANICS.length];
+  const bossId = `ENDLESS-${arc.toUpperCase().replace('-', '_')}-${String(floor).padStart(2, '0')}`;
+  const slots: EndlessRewardSlot[] = tier === 'MAJOR_BOSS' ? ['CORE', 'GROWTH', 'CONTRACT'] : ['SAFE', 'LEARNING', 'RISK'];
+  const rewardNames: Record<EndlessRewardSlot, [string, string, string]> = {
+    SAFE: ['深層安定核', 'HPを10回復する', 'FALLBACK_HEAL'],
+    LEARNING: ['深層記録金', '75Gを得る', 'FALLBACK_GOLD'],
+    RISK: ['深層改良片', '未強化カードを1枚強化する', 'FALLBACK_CARD_UPGRADE'],
+    CORE: ['深層コア', 'HPを10回復する', 'FALLBACK_HEAL'],
+    GROWTH: ['深層成長記録', '75Gを得る', 'FALLBACK_GOLD'],
+    CONTRACT: ['深層契約片', '未強化カードを1枚強化する', 'FALLBACK_CARD_UPGRADE'],
+    PERMANENT: ['深層記章', 'HPを10回復する', 'FALLBACK_HEAL'],
+    RECORD: ['深層記録片', '75Gを得る', 'FALLBACK_GOLD'],
+  };
+  const guidance = bossGuidance[mechanicKey] || {
+    weakness: '区間内の学習判定成功とカード解決を積み重ねる',
+    recommendedPrep: '学習機会と3種類のカードを確保する',
+  };
+  return {
+    id: bossId,
+    arc,
+    floor,
+    tier,
+    name: TRUE_ENDLESS_BOSS_NAMES[arc][index % TRUE_ENDLESS_BOSS_NAMES[arc].length],
+    theme: `第${floor}章の深層を巡回する${arc}監査体`,
+    mechanicKey,
+    mechanicSummary: `真エンドレス第${floor}章の深層ギミック。${guidance.weakness}。`,
+    phaseCount: tier === 'MAJOR_BOSS' ? 3 : 1,
+    ...guidance,
+    rewards: slots.map((slot, slotIndex) => {
+      const [name, description, effectKey] = rewardNames[slot];
+      return {
+        id: `${bossId}-${slot}`,
+        bossId,
+        slot,
+        name: `${name} ${slotIndex + 1}`,
+        description,
+        scope: 'RUN' as const,
+        effectKey,
+        oncePerRun: true,
+        oncePerProfile: false,
+      };
+    }),
+  };
+};
+
+export const getEndlessBoss = (arc: EndlessArc | undefined, floor: number) => {
+  if (!arc) return undefined;
+  const fixedBoss = ENDLESS_BOSSES.find((boss) => boss.arc === arc && boss.floor === floor);
+  if (fixedBoss) return fixedBoss;
+  return floor > 50 && floor % 5 === 0 ? createTrueEndlessBoss(arc, floor) : undefined;
+};
+
+export const getEndlessBossById = (id: string | undefined) => {
+  if (!id) return undefined;
+  const fixedBoss = ENDLESS_BOSSES.find((boss) => boss.id === id);
+  if (fixedBoss) return fixedBoss;
+  const match = id.match(/^ENDLESS-(ELEMENTARY|HIGH_SCHOOL|MAGIC)-(\d+)$/);
+  if (!match) return undefined;
+  const arc = match[1] === 'HIGH_SCHOOL' ? 'high-school' : match[1].toLowerCase() as EndlessArc;
+  const floor = Number(match[2]);
+  return floor > 50 && floor % 5 === 0 ? createTrueEndlessBoss(arc, floor) : undefined;
+};
 
 export const getEndlessArc = (theme: string | undefined): EndlessArc =>
   theme === 'high-school' || theme === 'magic' ? theme : 'elementary';

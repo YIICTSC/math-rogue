@@ -185,7 +185,7 @@ const updateActiveEndlessGimmick = (state: GameState, event: EndlessGimmickEvent
     const currentNode = state.map.find(node => node.id === state.currentMapNodeId);
     const isBossBattle = Boolean(activeBossEnemy || (state.endlessBossId && currentNode?.type === NodeType.BOSS));
     const currentFloor = state.endlessFloor ?? state.floor;
-    const nextBossFloor = Math.min(50, Math.max(5, Math.ceil((Math.max(0, currentFloor) + 1) / 5) * 5));
+    const nextBossFloor = Math.max(5, Math.ceil((Math.max(0, currentFloor) + 1) / 5) * 5);
     const boss = getEndlessBossById(activeBossEnemy?.endlessBossId || state.endlessBossId)
         || getEndlessBoss(getEndlessArc(state.visualTheme), nextBossFloor);
     if (!boss) return state;
@@ -438,6 +438,7 @@ import { MAGIC_HEROES, MAGIC_MALE_PROTAGONISTS } from './data/magicHeroes';
 import { createMagicRuleState, createMagicStartingDeck, getMagicRuleConfig } from './data/magicLoadouts';
 import { generateMagicRomanceSelectionEvent } from './services/magicRomanceEventService';
 import { applyMagicRuleOnCardPlay } from './services/magicRuleService';
+import { applyMagicEndlessEventEffects } from './utils/magicEndlessEventEffects';
 import { BATTLE_MODAL_PREVIEWS, UI_PREVIEW_GROUPS, UI_PREVIEW_SCREENS, type BattleModalPreviewId } from './data/uiPreviewScreens';
 import { useXboxControllerNavigation } from './hooks/useXboxControllerNavigation';
 import { GamepadVirtualKeyboard } from './components/GamepadVirtualKeyboard';
@@ -569,7 +570,9 @@ const getBattleEnemyTransitionAssetPaths = (
 ): string[] => {
     if (enemy.enemyType === 'ENDLESS_BOSS') {
         const endlessBoss = getEndlessBossById(enemy.endlessBossId);
-        if (endlessBoss) return [getEndlessBossSpritePath(endlessBoss, 'idle')];
+        // Named artwork currently covers the authored C01-C50 bosses. True
+        // endless uses the themed monster fallback until its next art pack.
+        if (endlessBoss && endlessBoss.floor <= 50) return [getEndlessBossSpritePath(endlessBoss, 'idle')];
     }
     if (visualTheme === 'high-school' && enemy.enemyType === 'AZUKI') {
         return [assetUrl('sprites/high-school/azuki/idle.webp')];
@@ -1705,6 +1708,10 @@ const App: React.FC = () => {
     });
     const [pendingMiniGameScreen, setPendingMiniGameScreen] = useState<GameScreen | null>(null);
     const [pendingAssignmentStartScreen, setPendingAssignmentStartScreen] = useState<GameScreen | null>(null);
+    // 「続きから」で読み込んだ本編の状態を、課題レターを確認してから
+    // 適用するための一時保持。課題レターの既定値 START_MENU が本編の
+    // 復帰先を上書きして、タイトル画面へ戻るループになるのを防ぐ。
+    const [pendingAssignmentResumeState, setPendingAssignmentResumeState] = useState<GameState | null>(null);
     const [pendingResumeProblemSelection, setPendingResumeProblemSelection] = useState(false);
     const [miniGameProblemMode, setMiniGameProblemMode] = useState<GameMode>(GameMode.MIXED);
     const [miniGameProblemModePool, setMiniGameProblemModePool] = useState<string[] | undefined>(undefined);
@@ -2152,6 +2159,7 @@ const App: React.FC = () => {
         setCurrentAssignment(assignment);
         setCompletedAssignmentProblemSource(null);
         setPendingManagedAssignmentLetter(assignment);
+        setPendingAssignmentResumeState(null);
         setAssignmentLetterSource('title');
         setShowAssignmentInbox(false);
         setShowAssignmentLetter(true);
@@ -3362,6 +3370,7 @@ const App: React.FC = () => {
         currentStoryIndex: state.currentStoryIndex,
         actStats: state.actStats,
         currentEventTitle: state.currentEventTitle,
+        eventLearningPending: state.eventLearningPending,
         newlyUnlockedCardName: state.newlyUnlockedCardName,
         endlessFloor: state.endlessFloor,
         endlessBossId: state.endlessBossId,
@@ -3585,6 +3594,7 @@ const App: React.FC = () => {
         currentStoryIndex: sharedState.currentStoryIndex,
         actStats: sharedState.actStats,
         currentEventTitle: sharedState.currentEventTitle,
+        eventLearningPending: sharedState.eventLearningPending,
         newlyUnlockedCardName: sharedState.newlyUnlockedCardName,
         endlessFloor: sharedState.endlessFloor,
         endlessBossId: sharedState.endlessBossId,
@@ -6147,7 +6157,7 @@ const App: React.FC = () => {
             // Major-boss rest is the final screen of the completed chapter.
             // Generate the next 15F map only after the player leaves that
             // intermission so its controls and chapter label stay accurate.
-            if (prev.isEndless && endlessBoss?.tier === 'MAJOR_BOSS' && endlessChapter < 50) {
+            if (prev.isEndless && endlessBoss?.tier === 'MAJOR_BOSS' && endlessChapter !== 50) {
                 const nextChapter = endlessChapter + 1;
                 const isGardener = prev.visualTheme !== 'magic' && p.id === 'GARDENER';
                 audioService.playBGM('map');
@@ -6416,17 +6426,22 @@ const App: React.FC = () => {
                 : null;
             if (assignmentForContinue) {
                 // A managed assignment has already been explicitly selected before
-                // the learner presses Continue. Re-opening its letter here caused
-                // the generic teacher-assignment fallback to send the restored run
-                // back to START_MENU, so the saved main adventure never actually
-                // resumed with the assignment settings applied. Continue directly
-                // for sent assignments; daily assignments keep their notice flow.
+                // the learner presses Continue.  The letter is shown once so the
+                // learner can confirm the task, while the restored main-run state
+                // waits in pendingAssignmentResumeState instead of being replaced
+                // by the letter's generic START_MENU fallback.
                 const isSentAssignment = Boolean(assignmentForContinue.managementPortal);
                 if (isSentAssignment) {
                     setPendingManagedAssignmentLetter(null);
                     setPendingMiniGameScreen(null);
                     setPendingAssignmentStartScreen(null);
-                    setShowAssignmentLetter(false);
+                    // Continue is intentionally paused at the assignment letter so the
+                    // learner can see which sent task will be applied.  Keep the fully
+                    // restored main-run state separate from gameState while the title
+                    // screen is still visible; otherwise the assignment letter's
+                    // START_MENU fallback can overwrite the saved resume point.
+                    setAssignmentLetterSource('title');
+                    setShowAssignmentLetter(true);
                 } else {
                     setAssignmentLetterSource('selection');
                     setShowAssignmentLetter(true);
@@ -6456,6 +6471,13 @@ const App: React.FC = () => {
                 saved.enemies = saved.enemies.map(enemy => (
                     enemy.currentHp > 0 ? { ...enemy, currentHp: 1 } : enemy
                 ));
+            }
+            if (assignmentForContinue?.managementPortal) {
+                // The assignment letter owns the final transition for a sent
+                // assignment.  Do not commit START_MENU to the resumable save while
+                // waiting for the learner to press 「課題を始める」.
+                setPendingAssignmentResumeState({ ...saved });
+                return;
             }
             setGameState(saved);
             const bgmType = getBgmForScreen(saved) || 'map';
@@ -8286,13 +8308,14 @@ const App: React.FC = () => {
                 } else if (isDodomedesuBoss) {
                     const baseBossHp = Math.ceil((170 * actMultiplier + floorDifficulty * 2) * enemyHpMultiplier);
                     const genzoHp = Math.ceil(baseBossHp * 0.45);
-                    enemies.push({ id: `dodomedesu-${Date.now()}`, enemyType: 'DODOMEDESU', name: DODOMEDESU_NAME, maxHp: baseBossHp, currentHp: isDebugHpOne ? 1 : baseBossHp, block: 0, strength: difficulty.enemyStrengthBonus, nextIntent: { type: EnemyIntentType.UNKNOWN, value: 0 }, vulnerable: 0, weak: 0, poison: 0, artifact: 1, corpseExplosion: false, floatingText: null });
-                    enemies.push({ id: `genzo-${Date.now()}`, enemyType: 'GENZO', name: GENZO_NAME, maxHp: genzoHp, currentHp: isDebugHpOne ? 1 : genzoHp, block: 0, strength: difficulty.enemyStrengthBonus, nextIntent: { type: EnemyIntentType.UNKNOWN, value: 0 }, vulnerable: 0, weak: 0, poison: 0, artifact: 0, corpseExplosion: false, floatingText: null });
+                    const deepBossStrength = difficulty.enemyStrengthBonus + Math.floor((endlessChapter || 1) / 10);
+                    enemies.push({ id: `dodomedesu-${Date.now()}`, enemyType: 'DODOMEDESU', name: DODOMEDESU_NAME, maxHp: baseBossHp, currentHp: isDebugHpOne ? 1 : baseBossHp, block: 0, strength: deepBossStrength, nextIntent: { type: EnemyIntentType.UNKNOWN, value: 0 }, vulnerable: 0, weak: 0, poison: 0, artifact: 1, corpseExplosion: false, floatingText: null });
+                    enemies.push({ id: `genzo-${Date.now()}`, enemyType: 'GENZO', name: GENZO_NAME, maxHp: genzoHp, currentHp: isDebugHpOne ? 1 : genzoHp, block: 0, strength: deepBossStrength, nextIntent: { type: EnemyIntentType.UNKNOWN, value: 0 }, vulnerable: 0, weak: 0, poison: 0, artifact: 0, corpseExplosion: false, floatingText: null });
                     enemies = enemies.map(enemy => ({ ...enemy, nextIntent: getNextEnemyIntent(enemy, 1) }));
                     bgmType = 'boss';
                 } else if (isAzukiBoss) {
                     const maxDeckBlock = Math.max(1, ...nextState.player.deck.map(card => Math.max(0, card.block || 0)));
-                    const azukiHp = maxDeckBlock * 10;
+                    const azukiHp = Math.ceil(Math.max(maxDeckBlock * 10, 50 + (endlessChapter || 1) * 4) * enemyHpMultiplier);
                     enemies.push({
                         id: `azuki-boss-${Date.now()}`,
                         enemyType: 'AZUKI',
@@ -8300,7 +8323,7 @@ const App: React.FC = () => {
                         maxHp: azukiHp,
                         currentHp: isDebugHpOne ? 1 : azukiHp,
                         block: 0,
-                        strength: difficulty.enemyStrengthBonus,
+                        strength: difficulty.enemyStrengthBonus + Math.floor((endlessChapter || 1) / 10),
                         nextIntent: { type: EnemyIntentType.UNKNOWN, value: 0 },
                         vulnerable: 0, weak: 0, poison: 0, artifact: 0, corpseExplosion: false,
                         floatingText: null
@@ -14203,6 +14226,25 @@ const App: React.FC = () => {
                 p2pService.send({ type: 'COOP_QUIZ_RESULT', correctCount });
             }
         }
+        if (gameState.eventLearningPending) {
+            const pending = gameState.eventLearningPending;
+            const success = correctCount > 0;
+            const effects = success ? pending.successEffects : pending.failureEffects;
+            const resultPreview = applyMagicEndlessEventEffects(gameState.player, effects);
+            setGameState(prev => {
+                const result = applyMagicEndlessEventEffects(prev.player, effects);
+                return {
+                    ...prev,
+                    player: result.player,
+                    screen: GameScreen.EVENT,
+                    eventLearningPending: undefined,
+                };
+            });
+            const effectSummary = resultPreview.messages.length > 0 ? resultPreview.messages.join('。') : '変化はなかった';
+            setEventResultLog(`学習判定：${success ? '成功' : '失敗'}。${effectSummary}。`);
+            audioService.playBGM('event');
+            return;
+        }
         let bonusGold = 0;
         if (correctCount === 1) bonusGold = 15;
         else if (correctCount === 2) bonusGold = 30;
@@ -17795,34 +17837,38 @@ const App: React.FC = () => {
                                                 if (!isTeacherAssignmentActive && assignmentLetter) {
                                                     setDismissedDailyAssignmentId(null);
                                                     setStartedDailyAssignmentId(assignmentLetter.id);
-                                                }
-                                                const resumeMiniGameScreen = pendingMiniGameScreen;
-                                                const resumeAssignmentScreen = pendingAssignmentStartScreen;
-                                                if (assignmentLetter.gameMode === 'FREE' && resumeMiniGameScreen) {
-                                                    const assignmentConfig = getAssignmentProblemConfig(assignmentLetter);
-                                                    setMiniGameProblemMode(assignmentConfig.mode || GameMode.UPPER_TRIVIA);
-                                                    setMiniGameProblemModePool(assignmentConfig.modePool);
-                                                    setMiniGameAnswerMode(assignmentConfig.answerMode || 'CHOICE');
-                                                }
-                                                setPendingMiniGameScreen(null);
-                                                setPendingAssignmentStartScreen(null);
-                                                setGameState(prev => ({
-                                                    ...prev,
-                                                    ...(assignmentLetter.gameMode === 'FREE'
-                                                        ? (() => {
-                                                            const assignmentConfig = getAssignmentProblemConfig(assignmentLetter);
-                                                            return {
+                                                 }
+                                                 const resumeMiniGameScreen = pendingMiniGameScreen;
+                                                 const resumeAssignmentScreen = pendingAssignmentStartScreen;
+                                                 const assignmentResumeState = pendingAssignmentResumeState;
+                                                 if (assignmentLetter.gameMode === 'FREE' && resumeMiniGameScreen) {
+                                                     const assignmentConfig = getAssignmentProblemConfig(assignmentLetter);
+                                                     setMiniGameProblemMode(assignmentConfig.mode || GameMode.UPPER_TRIVIA);
+                                                     setMiniGameProblemModePool(assignmentConfig.modePool);
+                                                     setMiniGameAnswerMode(assignmentConfig.answerMode || 'CHOICE');
+                                                 }
+                                                 setPendingMiniGameScreen(null);
+                                                 setPendingAssignmentStartScreen(null);
+                                                 setPendingAssignmentResumeState(null);
+                                                 setGameState(prev => ({
+                                                     ...(assignmentResumeState || prev),
+                                                     ...(assignmentLetter.gameMode === 'FREE'
+                                                         ? (() => {
+                                                             const assignmentConfig = getAssignmentProblemConfig(assignmentLetter);
+                                                             return {
                                                                 mode: assignmentConfig.mode || prev.mode,
                                                                 modePool: assignmentConfig.modePool,
                                                                 answerMode: assignmentConfig.answerMode || prev.answerMode || 'CHOICE',
                                                             };
-                                                        })()
-                                                        : {}),
-                                                    screen: assignmentLetter.gameMode === 'CHALLENGE_ONLY'
-                                                        ? GameScreen.PROBLEM_CHALLENGE
-                                                        : resumeMiniGameScreen
-                                                            ? resumeMiniGameScreen
-                                                            : resumeAssignmentScreen
+                                                         })()
+                                                         : {}),
+                                                     screen: assignmentLetter.gameMode === 'CHALLENGE_ONLY'
+                                                         ? GameScreen.PROBLEM_CHALLENGE
+                                                         : assignmentResumeState
+                                                             ? assignmentResumeState.screen
+                                                         : resumeMiniGameScreen
+                                                             ? resumeMiniGameScreen
+                                                             : resumeAssignmentScreen
                                                                 ? resumeAssignmentScreen
                                                         : isTeacherAssignmentActive
                                                             ? GameScreen.START_MENU
@@ -17846,9 +17892,10 @@ const App: React.FC = () => {
                                                     }
                                                     setStartedDailyAssignmentId(null);
                                                 }
-                                                setPendingMiniGameScreen(null);
-                                                setPendingAssignmentStartScreen(null);
-                                                setShowAssignmentLetter(false);
+                                                 setPendingMiniGameScreen(null);
+                                                 setPendingAssignmentStartScreen(null);
+                                                 setPendingAssignmentResumeState(null);
+                                                 setShowAssignmentLetter(false);
                                             }}
                                             className="rounded-xl border border-slate-500 bg-white px-4 py-3 text-sm font-black text-slate-800 hover:bg-slate-100"
                                         >
@@ -18388,6 +18435,7 @@ const App: React.FC = () => {
                                         }
                                         const resumeMiniGameScreen = pendingMiniGameScreen;
                                         const resumeAssignmentScreen = pendingAssignmentStartScreen;
+                                        const assignmentResumeState = pendingAssignmentResumeState;
                                         if (assignmentLetter.gameMode === 'FREE' && resumeMiniGameScreen) {
                                             const assignmentConfig = getAssignmentProblemConfig(assignmentLetter);
                                             setMiniGameProblemMode(assignmentConfig.mode || GameMode.UPPER_TRIVIA);
@@ -18396,8 +18444,9 @@ const App: React.FC = () => {
                                         }
                                         setPendingMiniGameScreen(null);
                                         setPendingAssignmentStartScreen(null);
+                                        setPendingAssignmentResumeState(null);
                                         setGameState(prev => ({
-                                            ...prev,
+                                            ...(assignmentResumeState || prev),
                                             ...(assignmentLetter.gameMode === 'FREE'
                                                 ? (() => {
                                                     const assignmentConfig = getAssignmentProblemConfig(assignmentLetter);
@@ -18410,6 +18459,8 @@ const App: React.FC = () => {
                                                 : {}),
                                             screen: assignmentLetter.gameMode === 'CHALLENGE_ONLY'
                                                 ? GameScreen.PROBLEM_CHALLENGE
+                                                : assignmentResumeState
+                                                    ? assignmentResumeState.screen
                                                 : resumeMiniGameScreen
                                                     ? resumeMiniGameScreen
                                                     : resumeAssignmentScreen
@@ -18438,6 +18489,7 @@ const App: React.FC = () => {
                                         }
                                         setPendingMiniGameScreen(null);
                                         setPendingAssignmentStartScreen(null);
+                                        setPendingAssignmentResumeState(null);
                                         setShowAssignmentLetter(false);
                                     }}
                                     className="rounded-xl border border-slate-500 bg-white px-4 py-3 text-sm font-black text-slate-800 hover:bg-slate-100"
@@ -19594,7 +19646,7 @@ const App: React.FC = () => {
                             onComplete={handleMathChallengeComplete}
                             onAnswerResult={handleAssignmentAnswerResult}
                             debugSkip={isMathDebugSkipped}
-                            isChallenge={false}
+                            isChallenge={Boolean(gameState.eventLearningPending)}
                             rewardHint={trans("正解するとゴールド獲得", languageMode)}
                             languageMode={languageMode}
                             assignmentUnits={assignmentProblemSource?.units}
@@ -19611,7 +19663,7 @@ const App: React.FC = () => {
                             onComplete={handleMathChallengeComplete}
                             onAnswerResult={handleAssignmentAnswerResult}
                             debugSkip={isMathDebugSkipped}
-                            isChallenge={false}
+                            isChallenge={Boolean(gameState.eventLearningPending)}
                             rewardHint={trans("正解するとゴールド獲得", languageMode)}
                             languageMode={languageMode}
                             assignmentUnits={assignmentProblemSource?.units}
@@ -19626,7 +19678,7 @@ const App: React.FC = () => {
                             onComplete={handleMathChallengeComplete}
                             onAnswerResult={handleAssignmentAnswerResult}
                             debugSkip={isMathDebugSkipped}
-                            isChallenge={false}
+                            isChallenge={Boolean(gameState.eventLearningPending)}
                             rewardHint={trans("正解するとゴールド獲得", languageMode)}
                             languageMode={languageMode}
                             assignmentUnits={assignmentProblemSource?.units}
@@ -19645,7 +19697,7 @@ const App: React.FC = () => {
                             onAnswerResult={handleAssignmentAnswerResult}
                             customProblems={localAssignmentProblemConfig?.mode && assignmentProblemSource?.gameMode === 'FREE' ? assignmentProblemSource.customProblems : undefined}
                             debugSkip={isMathDebugSkipped}
-                            isChallenge={false}
+                            isChallenge={Boolean(gameState.eventLearningPending)}
                             rewardHint={trans("正解するとゴールド獲得", languageMode)}
                             languageMode={languageMode}
                             assignmentUnits={assignmentProblemSource?.units}

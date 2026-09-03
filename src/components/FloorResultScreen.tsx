@@ -12,7 +12,7 @@ import { Skull, Coins, Brain, ArrowRight, BookOpen, Sparkles } from 'lucide-reac
 import { audioService } from '../services/audioService';
 import Card from './Card';
 import { assetUrl } from '../utils/assetPaths';
-import { getEndlessChapterResult } from '../data/endlessChapterResults';
+import { getEndlessChapterResult, getTrueEndlessChapterResult } from '../data/endlessChapterResults';
 
 interface FloorResultScreenProps {
   act: number;
@@ -58,15 +58,14 @@ const FloorResultScreen: React.FC<FloorResultScreenProps> = ({ act, stats, story
   const displayedPart = useMemo(() => {
     if (!isEndless) return currentPart;
     if (isTrueEndless) {
-      const title = `真の深層記録 ${act}：境界の外`;
-      const content = `真のエンドレス第${act}章。50章の記録を越えた先で、黒帳機関の観測網はまだ終わっていない。`;
+      const trueEndlessPart = getTrueEndlessChapterResult(act);
       if (languageMode === 'ENGLISH') {
-        return { title: `TRUE ENDLESS RECORD ${act}: Beyond the Boundary`, content: `True Endless Chapter ${act}. Beyond the 50-chapter record, the Black Ledger Bureau's observation network still has no end.` };
+        return { title: trueEndlessPart.englishTitle, content: trueEndlessPart.englishContent };
       }
       if (languageMode === 'HIRAGANA') {
-        return { title: transEventText(title, languageMode), content: transEventText(content, languageMode) };
+        return { title: transEventText(trueEndlessPart.title, languageMode), content: transEventText(trueEndlessPart.content, languageMode) };
       }
-      return { title, content };
+      return { title: trueEndlessPart.title, content: trueEndlessPart.content };
     }
     const endlessPart = getEndlessChapterResult(act);
     if (languageMode === 'ENGLISH') {
@@ -213,9 +212,9 @@ const FloorResultScreen: React.FC<FloorResultScreenProps> = ({ act, stats, story
                     <div className="space-y-1.5">
                       {endlessRunRewards.map((reward) => (
                         <div key={`${reward.floor}-${reward.id}`} className="flex items-center gap-2 rounded border border-white/10 bg-black/25 px-2 py-1.5 text-xs">
-                          <span className="font-black text-amber-200">{reward.floor}F</span>
+                          <span className="font-black text-amber-200">{languageMode === 'ENGLISH' ? `Chapter ${reward.floor}` : `第${reward.floor}章`}</span>
                           <span className="flex-1 font-bold text-white">{reward.name}</span>
-                          <span className="text-[9px] font-black text-cyan-200">{reward.scope}</span>
+                          <span className="text-[9px] font-black text-cyan-200">{reward.scope === 'RUN' ? '今回の周回' : reward.scope === 'PERMANENT' ? '恒久解放' : '記録解放'}</span>
                         </div>
                       ))}
                     </div>

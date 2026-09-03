@@ -96,6 +96,20 @@ const EventScreen: React.FC<EventScreenProps> = ({ title, description, options, 
     const match = imageKey?.match(/^magic-event-(\d+)$/);
     return match ? Number(match[1]) : null;
   }, [imageKey]);
+  const magicEndlessEventSheet = useMemo(() => {
+    const match = imageKey?.match(/^MGE(M)?-(\d+)$/);
+    if (!match) return null;
+    const eventNumber = Number(match[2]);
+    if (!Number.isFinite(eventNumber) || eventNumber < 1 || eventNumber > 90) return null;
+    const sheetStart = Math.floor((eventNumber - 1) / 9) * 9 + 1;
+    const sheetEnd = sheetStart + 8;
+    const column = (eventNumber - 1) % 3;
+    const row = Math.floor((eventNumber - 1) / 3) % 3;
+    return {
+      path: assetUrl(`sprites/magic/events/endless/character-sheets/${match[1] ? 'MGEM' : 'MGE'}-${String(sheetStart).padStart(3, '0')}-${String(sheetEnd).padStart(3, '0')}.png`),
+      backgroundPosition: `${column * 50}% ${row * 50}%`,
+    };
+  }, [imageKey]);
   const magicRomanceImage = useMemo(() => {
     const match = imageKey?.match(/^magic-romance:([^:]+):([^:]+):(r[1-6])$/);
     return match
@@ -307,13 +321,26 @@ const EventScreen: React.FC<EventScreenProps> = ({ title, description, options, 
                     }
                 } : undefined}
             >
-                <img
-                    src={imageCandidates[imageIndex]}
-                    alt={`${title} thumbnail`}
-                    className={`absolute inset-0 h-full w-full object-cover ${highSchoolEventIndex !== null && highSchoolEventIndex < 18 ? 'scale-[1.18]' : ''}`}
-                    style={highSchoolEventObjectPosition ? { objectPosition: highSchoolEventObjectPosition } : undefined}
-                    onError={() => setImageIndex(prev => Math.min(prev + 1, imageCandidates.length - 1))}
-                />
+                {magicEndlessEventSheet ? (
+                    <div
+                        role="img"
+                        aria-label={`${title} thumbnail`}
+                        className="absolute inset-0 h-full w-full bg-cover bg-no-repeat"
+                        style={{
+                            backgroundImage: `url(${magicEndlessEventSheet.path})`,
+                            backgroundPosition: magicEndlessEventSheet.backgroundPosition,
+                            backgroundSize: '300% 300%',
+                        }}
+                    />
+                ) : (
+                    <img
+                        src={imageCandidates[imageIndex]}
+                        alt={`${title} thumbnail`}
+                        className={`absolute inset-0 h-full w-full object-cover ${highSchoolEventIndex !== null && highSchoolEventIndex < 18 ? 'scale-[1.18]' : ''}`}
+                        style={highSchoolEventObjectPosition ? { objectPosition: highSchoolEventObjectPosition } : undefined}
+                        onError={() => setImageIndex(prev => Math.min(prev + 1, imageCandidates.length - 1))}
+                    />
+                )}
                 {image && (
                     <img
                         src={image}
@@ -456,13 +483,27 @@ const EventScreen: React.FC<EventScreenProps> = ({ title, description, options, 
                 >
                     {trans("閉じる", languageMode)}
                 </button>
-                <img
-                    src={imageCandidates[imageIndex]}
-                    alt={`${title} enlarged`}
-                    className="max-h-[92dvh] max-w-[96vw] rounded-xl border border-fuchsia-200/50 object-contain shadow-2xl"
-                    onClick={(event) => event.stopPropagation()}
-                    onError={() => setImageIndex(prev => Math.min(prev + 1, imageCandidates.length - 1))}
-                />
+                {magicEndlessEventSheet ? (
+                    <div
+                        role="img"
+                        aria-label={`${title} enlarged`}
+                        className="aspect-square w-[min(92dvh,96vw)] rounded-xl border border-fuchsia-200/50 bg-cover bg-no-repeat shadow-2xl"
+                        style={{
+                            backgroundImage: `url(${magicEndlessEventSheet.path})`,
+                            backgroundPosition: magicEndlessEventSheet.backgroundPosition,
+                            backgroundSize: '300% 300%',
+                        }}
+                        onClick={(event) => event.stopPropagation()}
+                    />
+                ) : (
+                    <img
+                        src={imageCandidates[imageIndex]}
+                        alt={`${title} enlarged`}
+                        className="max-h-[92dvh] max-w-[96vw] rounded-xl border border-fuchsia-200/50 object-contain shadow-2xl"
+                        onClick={(event) => event.stopPropagation()}
+                        onError={() => setImageIndex(prev => Math.min(prev + 1, imageCandidates.length - 1))}
+                    />
+                )}
             </div>
         )}
     </div>

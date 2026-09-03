@@ -365,6 +365,29 @@ export const ENDLESS_CHAPTER_RESULTS: EndlessChapterResult[] = [
   },
 ];
 
-export const getEndlessChapterResult = (chapter: number): EndlessChapterResult => (
-  ENDLESS_CHAPTER_RESULTS[Math.min(50, Math.max(1, Math.floor(chapter))) - 1] || ENDLESS_CHAPTER_RESULTS[0]
-);
+export const getEndlessChapterResult = (chapter: number): EndlessChapterResult => {
+  const normalizedChapter = Math.max(1, Math.floor(chapter));
+  if (normalizedChapter > 50) return getTrueEndlessChapterResult(normalizedChapter);
+  return ENDLESS_CHAPTER_RESULTS[normalizedChapter - 1] || ENDLESS_CHAPTER_RESULTS[0];
+};
+
+/** Deterministic chapter records for the unbounded true-endless continuation. */
+export const getTrueEndlessChapterResult = (chapter: number): EndlessChapterResult => {
+  const normalizedChapter = Math.max(51, Math.floor(chapter));
+  const depth = normalizedChapter - 50;
+  const motifs = [
+    ['反転した校門', 'The Inverted Gate'],
+    ['眠らない採点室', 'The Sleepless Grading Room'],
+    ['星図の裏面', 'The Back of the Star Map'],
+    ['名前のない観測者', 'The Nameless Observer'],
+    ['深層の余白', 'The Margin of the Deep'],
+  ];
+  const [motif, englishMotif] = motifs[(depth - 1) % motifs.length];
+  return {
+    chapter: normalizedChapter,
+    title: `真の深層記録 ${String(normalizedChapter).padStart(2, '0')}：${motif}`,
+    content: `50章の記録を越えて${depth}章目。黒帳機関の観測網は形を変えながら続いている。次の扉にも、主人公たちが学び続けた証だけが残されていた。`,
+    englishTitle: `TRUE ENDLESS RECORD ${normalizedChapter}: ${englishMotif}`,
+    englishContent: `Chapter ${depth} beyond the 50-chapter record. The Black Ledger Bureau's observation network changes shape but continues. Beyond the next door, only proof that the protagonists kept learning remains.`,
+  };
+};

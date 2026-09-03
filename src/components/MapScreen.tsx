@@ -36,7 +36,7 @@ const MapScreen: React.FC<MapScreenProps> = ({ nodes, currentNodeId, onNodeSelec
     const holdTimerRef = useRef<number | null>(null);
     const mapHeight = Math.max(MAP_HEIGHT, nodes.reduce((max, node) => Math.max(max, node.y + 1), 0));
     const endlessChapter = Math.max(1, act);
-    const nextBossChapter = Math.min(50, Math.ceil(endlessChapter / 5) * 5);
+    const nextBossChapter = Math.max(5, Math.ceil(Math.max(1, endlessChapter) / 5) * 5);
     const nextBoss = isEndless
         ? nodes.find(node => node.type === NodeType.BOSS && !node.completed)
         : undefined;
@@ -227,7 +227,11 @@ const MapScreen: React.FC<MapScreenProps> = ({ nodes, currentNodeId, onNodeSelec
     const highSchoolMapAct = highSchoolStoryId === 'HS_CHERRY_BLOSSOM_LOOP'
         ? 1
         : Math.min(4, Math.max(1, act));
-    const endlessDepthBand = `${String(Math.floor((endlessChapter - 1) / 10) * 10 + 1).padStart(2, '0')}-${String(Math.min(50, Math.floor((endlessChapter - 1) / 10) * 10 + 10)).padStart(2, '0')}`;
+    // True endless chapters reuse the deepest authored map atmosphere until
+    // a later art pack is added. The chapter progression itself remains
+    // unbounded; only the background asset band is capped at 41-50.
+    const endlessDepthBandStart = Math.min(41, Math.floor((Math.max(1, endlessChapter) - 1) / 10) * 10 + 1);
+    const endlessDepthBand = `${String(endlessDepthBandStart).padStart(2, '0')}-${String(endlessDepthBandStart + 9).padStart(2, '0')}`;
     const mapBackground = isEndless
         ? assetUrl(`sprites/backgrounds/learning-rogue/endless-${visualTheme}-${endlessDepthBand}.webp`)
         : visualTheme === 'high-school'
