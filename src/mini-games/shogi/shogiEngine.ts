@@ -18,6 +18,8 @@ export interface ShogiTarget {
   col: number;
   status: ShogiTargetStatus;
   note?: string;
+  /** Intermediate squares used by a two-step unique-piece move. */
+  path?: Array<[number, number]>;
 }
 export interface ShogiMove {
   from: [number, number] | null;
@@ -26,6 +28,7 @@ export interface ShogiMove {
   side: ShogiSide;
   capture: ShogiPieceKind | null;
   special?: boolean;
+  path?: Array<[number, number]>;
 }
 export interface ShogiGameState {
   mode: ShogiMode;
@@ -139,7 +142,7 @@ const advancedVectors = (piece: ShogiPiece): Vector[] => {
       one(0, -2, { jump: true, special: true }), one(0, 2, { jump: true, special: true }),
     ];
     case 'HOURGLASS': return [one(f, -1), one(f, 1), one(-f, -1), one(-f, 0), one(-f, 1)];
-    case 'HOOK_SPEAR': return [one(f, -1), one(f, 1), one(0, -1), one(0, 1), one(f, 0, { max: SIZE, slide: true })];
+    case 'HOOK_SPEAR': return [one(0, -1), one(0, 1), one(f, 0, { max: SIZE, slide: true })];
     case 'TWIN_SPEAR': return [{ dr: f, dc: 0, max: SIZE, slide: true }, { dr: -f, dc: 0, max: SIZE, slide: true }];
     case 'LIGHTNING': return [
       one(-2, 0, { jump: true, special: true }), one(2, 0, { jump: true, special: true }),
@@ -178,7 +181,7 @@ const advancedVectors = (piece: ShogiPiece): Vector[] => {
     case 'SPRING': return diagonal(1);
     case 'ANCHOR': return [one(-1, 0), one(1, 0), one(0, -1), one(0, 1)];
     case 'CLOCK': return kingVectors();
-    case 'KEY': return goldVectors(piece.side);
+    case 'KEY': return [one(f, -1), one(f, 0), one(f, 1), one(0, -1), one(0, 1)];
     case 'BRIDGE': return [{ dr: 0, dc: -1, max: SIZE, slide: true, special: true }, { dr: 0, dc: 1, max: SIZE, slide: true, special: true }];
     case 'WALL': return [one(f, 0), one(-f, 0)];
     case 'PORTAL': return [one(-1, 0), one(1, 0), one(0, -1), one(0, 1)];
@@ -186,7 +189,7 @@ const advancedVectors = (piece: ShogiPiece): Vector[] => {
     case 'NINJA': return diagonal(2).map(vector => ({ ...vector, special: true }));
     case 'DRILL': return [{ dr: f, dc: 0, max: SIZE, slide: true, special: true }];
     case 'CANNON': return orthogonal().map(vector => ({ ...vector, special: true }));
-    case 'PHOENIX': return [one(f, 0, { max: 2, slide: true }), one(f, -1), one(f, 1), one(-f, -1), one(-f, 1)];
+    case 'PHOENIX': return [one(f, 0, { max: 2, slide: true }), one(f, -1), one(f, 1)];
     case 'DRAGON': return [...orthogonal(2), ...diagonal(1)];
     case 'UNICORN': return [...diagonal(2), ...orthogonal(1)];
     case 'GRIFFIN': return [
@@ -203,12 +206,275 @@ const advancedVectors = (piece: ShogiPiece): Vector[] => {
   }
 };
 
-const candidateMoves = (board: ShogiBoard, row: number, col: number): ShogiTarget[] => {
-  const piece = board[row]?.[col];
+const isStandardKind = (kind: ShogiPieceKind): boolean =>
+  ['K', 'R', 'B', 'G', 'S', 'N', 'L', 'P'].includes(kind);
+
+const canLandOn = (piece: ShogiPiece, target: ShogiPiece | null, jumping = false, allowFriendly = false): boolean => {
+  if (target?.side === piece.side && !allowFriendly) return false;
+  if (!target || target.side === piece.side) return true;
+  if (piece.kind === 'ADV_WALL') return false;
+  if (jumping && definitionOf(target.kind).immuneJumpCapture) return false;
+  return true;
+};
+
+const uniqueTargets = (targets: ShogiTarget[]): ShogiTarget[] =>
+  Array.from(new Map(targets.map(target => [target.row + ':' + target.col, target])).values());
+
+const slidingTargets = (
+  board: ShogiBoard,
+  row: number,
+  col: number,
+  piece: ShogiPiece,
+  directions: Vector[],
+): ShogiTarget[] => {
+  const result: ShogiTarget[] = [];
+  directions.forEach(vector => {
+    const max = vector.max || SIZE;
+    let occupiedBeforeTarget = 0;
+    for (let step = 1; step <= max; step += 1) {
+      const targetRow = row + vector.dr * step;
+      const targetCol = col + vector.dc * step;
+      if (!inside(targetRow, targetCol)) break;
+      const target = board[targetRow][targetCol];
+      if (target) {
+        occupiedBeforeTarget += 1;
+        if (occupiedBeforeTarget > 1 || !canLandOn(piece, target)) break;
+        result.push({ row: targetRow, col: targetCol, status: 'CAPTURE' });
+        break;
+      }
+      result.push({ row: targetRow, col: targetCol, status: 'MOVE' });
+    }
+  });
+  return result;
+};
+
+const lionTargets = (board: ShogiBoard, row: number, col: number, piece: ShogiPiece): ShogiTarget[] => {
+  type SearchState = { row: number; col: number; depth: number; captures: number; path: Array<[number, number]> };
+  const queue: SearchState[] = [{ row, col, depth: 0, captures: 0, path: [] }];
+  const result: ShogiTarget[] = [];
+  while (queue.length) {
+    const current = queue.shift()!;
+    if (current.depth >= 2) continue;
+    for (const vector of kingVectors()) {
+      const targetRow = current.row + vector.dr;
+      const targetCol = current.col + vector.dc;
+      if (!inside(targetRow, targetCol)) continue;
+      const target = board[targetRow][targetCol];
+      if (target?.side === piece.side) continue;
+      const captures = current.captures + (target ? 1 : 0);
+      if (captures > 1 || (target && definitionOf(target.kind).immuneJumpCapture && current.depth > 0)) continue;
+      const path = [...current.path, [targetRow, targetCol] as [number, number]];
+      result.push({
+        row: targetRow,
+        col: targetCol,
+        status: target ? 'CAPTURE' : current.depth === 0 ? 'MOVE' : 'SPECIAL',
+        note: current.depth === 0 ? undefined : '獅子の二段移動',
+        path: current.depth === 0 ? undefined : path,
+      });
+      if (!target || captures < 1) queue.push({ row: targetRow, col: targetCol, depth: current.depth + 1, captures, path });
+    }
+  }
+  return uniqueTargets(result);
+};
+
+const customAdvancedTargets = (
+  board: ShogiBoard,
+  row: number,
+  col: number,
+  piece: ShogiPiece,
+  lastMove?: ShogiMove,
+): ShogiTarget[] | undefined => {
+  const pattern = definitionOf(piece.kind).pattern;
+  const f = forwardFor(piece.side);
+  const one = (dr: number, dc: number): Vector => ({ dr, dc });
+
+  if (pattern === 'LION') return lionTargets(board, row, col, piece);
+
+  if (pattern === 'MIRROR') {
+    if (!lastMove?.from) return undefined;
+    const dr = lastMove.to[0] - lastMove.from[0];
+    const dc = lastMove.to[1] - lastMove.from[1];
+    if (!dr && !dc) return undefined;
+    const targetRow = row + dr;
+    const targetCol = col + dc;
+    if (!inside(targetRow, targetCol) || !canLandOn(piece, board[targetRow][targetCol], true)) return [];
+    return [{ row: targetRow, col: targetCol, status: board[targetRow][targetCol] ? 'CAPTURE' : 'SPECIAL', note: '直前の相手着手を反映' }];
+  }
+
+  if (pattern === 'CHAMELEON') {
+    const vectors: Vector[] = [];
+    for (let neighborRow = row - 1; neighborRow <= row + 1; neighborRow += 1) {
+      for (let neighborCol = col - 1; neighborCol <= col + 1; neighborCol += 1) {
+        const neighbor = board[neighborRow]?.[neighborCol];
+        if (!neighbor || neighbor.side !== piece.side || !isStandardKind(neighbor.kind)) continue;
+        vectors.push(...standardVectors(neighbor));
+      }
+    }
+    return candidateMoves(board, row, col, piece, vectors.length ? vectors : [one(f, 0)]);
+  }
+
+  if (pattern === 'BUTTERFLY') {
+    const result: ShogiTarget[] = [];
+    for (const vector of diagonal(2)) {
+      const first = board[row + vector.dr]?.[col + vector.dc];
+      if (inside(row + vector.dr, col + vector.dc) && canLandOn(piece, first)) {
+        result.push({ row: row + vector.dr, col: col + vector.dc, status: first ? 'CAPTURE' : 'MOVE' });
+      }
+      const targetRow = row + vector.dr * 2;
+      const targetCol = col + vector.dc * 2;
+      if (!inside(targetRow, targetCol)) continue;
+      const target = board[targetRow][targetCol];
+      // A two-square capture is a normal slide and therefore needs an empty
+      // middle square.  Only a non-capturing move may jump the middle piece.
+      if (target ? !first && canLandOn(piece, target) : canLandOn(piece, target, true)) {
+        result.push({ row: targetRow, col: targetCol, status: target ? 'CAPTURE' : 'SPECIAL', note: target ? undefined : '中間の駒を跳越' });
+      }
+    }
+    return result;
+  }
+
+  if (pattern === 'SWITCH') {
+    const result = candidateMoves(board, row, col, piece, kingVectors());
+    for (const vector of kingVectors()) {
+      const targetRow = row + vector.dr;
+      const targetCol = col + vector.dc;
+      const target = board[targetRow]?.[targetCol];
+      if (inside(targetRow, targetCol) && target?.side === piece.side) {
+        result.push({ row: targetRow, col: targetCol, status: 'SPECIAL', note: '味方駒と入替' });
+      }
+    }
+    return result;
+  }
+
+  if (pattern === 'PORTAL') {
+    const result = candidateMoves(board, row, col, piece, advancedVectors(piece));
+    for (let portalRow = 0; portalRow < SIZE; portalRow += 1) {
+      for (let portalCol = 0; portalCol < SIZE; portalCol += 1) {
+        const portal = board[portalRow][portalCol];
+        if (!portal || portal.kind !== 'ADV_PORTAL' || portal.side !== piece.side || (portalRow === row && portalCol === col)) continue;
+        for (const vector of kingVectors()) {
+          const targetRow = portalRow + vector.dr;
+          const targetCol = portalCol + vector.dc;
+          if (inside(targetRow, targetCol) && !board[targetRow][targetCol]) {
+            result.push({ row: targetRow, col: targetCol, status: 'SPECIAL', note: 'もう一つの穴の隣へ移動' });
+          }
+        }
+      }
+    }
+    return result;
+  }
+
+  if (pattern === 'SHADOW') {
+    return candidateMoves(board, row, col, piece, advancedVectors(piece)).filter(target => !board[target.row][target.col]);
+  }
+
+  if (pattern === 'BRIDGE') {
+    return slidingTargets(board, row, col, piece, [
+      { dr: 0, dc: -1, max: SIZE, slide: true },
+      { dr: 0, dc: 1, max: SIZE, slide: true },
+    ]).concat(([-1, 1] as const).flatMap(dc => {
+      const result: ShogiTarget[] = [];
+      let seen = 0;
+      for (let step = 1; step <= SIZE; step += 1) {
+        const targetRow = row;
+        const targetCol = col + dc * step;
+        if (!inside(targetRow, targetCol)) break;
+        const target = board[targetRow][targetCol];
+        if (target) {
+          seen += 1;
+          if (seen > 1) break;
+          // The jumped piece is not captured; the destination may still be
+          // an enemy piece, just like an ordinary bridge crossing.
+          continue;
+        }
+        if (seen === 1) result.push({ row: targetRow, col: targetCol, status: 'SPECIAL', note: '1枚を跳越' });
+      }
+      return result;
+    }));
+  }
+
+  if (pattern === 'NINJA') {
+    const result: ShogiTarget[] = [];
+    for (const vector of diagonal(2)) {
+      const first = board[row + vector.dr]?.[col + vector.dc];
+      const firstRow = row + vector.dr;
+      const firstCol = col + vector.dc;
+      if (inside(firstRow, firstCol) && canLandOn(piece, first)) result.push({ row: firstRow, col: firstCol, status: first ? 'CAPTURE' : 'MOVE' });
+      const targetRow = row + vector.dr * 2;
+      const targetCol = col + vector.dc * 2;
+      if (!inside(targetRow, targetCol) || !canLandOn(piece, board[targetRow][targetCol], Boolean(first))) continue;
+      result.push({ row: targetRow, col: targetCol, status: board[targetRow][targetCol] ? 'CAPTURE' : first ? 'SPECIAL' : 'MOVE', note: first ? '中間の1枚を跳越' : undefined });
+    }
+    return result;
+  }
+
+  if (pattern === 'DRILL') {
+    const result = slidingTargets(board, row, col, piece, [{ dr: f, dc: 0, max: SIZE, slide: true }]);
+    for (let step = 1; step < SIZE; step += 1) {
+      const obstacleRow = row + f * step;
+      const landingRow = row + f * (step + 1);
+      if (!inside(obstacleRow, col) || !inside(landingRow, col)) break;
+      const obstacle = board[obstacleRow][col];
+      if (!obstacle) continue;
+      if (obstacle.side === piece.side || board[landingRow][col]) break;
+      result.push({ row: landingRow, col, status: 'SPECIAL', note: '敵駒を1枚跳越' });
+      break;
+    }
+    return result;
+  }
+
+  if (pattern === 'CANNON') {
+    const result: ShogiTarget[] = [];
+    // Empty destinations are ordinary rook-like slides. A capture is only
+    // legal after exactly one intervening piece has been jumped.
+    for (const vector of orthogonal()) {
+      for (let step = 1; step <= SIZE; step += 1) {
+        const targetRow = row + vector.dr * step;
+        const targetCol = col + vector.dc * step;
+        if (!inside(targetRow, targetCol)) break;
+        const target = board[targetRow][targetCol];
+        if (target) break;
+        result.push({ row: targetRow, col: targetCol, status: 'MOVE' });
+      }
+    }
+    for (const vector of orthogonal()) {
+      let seen = 0;
+      for (let step = 1; step <= SIZE; step += 1) {
+        const targetRow = row + vector.dr * step;
+        const targetCol = col + vector.dc * step;
+        if (!inside(targetRow, targetCol)) break;
+        const target = board[targetRow][targetCol];
+        if (!target) continue;
+        if (seen === 0) {
+          seen = 1;
+          continue;
+        }
+        if (canLandOn(piece, target, true)) result.push({ row: targetRow, col: targetCol, status: 'CAPTURE', note: '1枚を跳越して捕獲' });
+        break;
+      }
+    }
+    return result;
+  }
+
+  return undefined;
+};
+
+const candidateMoves = (
+  board: ShogiBoard,
+  row: number,
+  col: number,
+  pieceOverride?: ShogiPiece,
+  vectorOverride?: Vector[],
+  mirrorJump = false,
+  lastMove?: ShogiMove,
+): ShogiTarget[] => {
+  const piece = pieceOverride || board[row]?.[col];
   if (!piece) return [];
-  const vectors = definitionOf(piece.kind).advanced
-    ? advancedVectors(piece)
-    : standardVectors(piece);
+  const custom = !vectorOverride && definitionOf(piece.kind).advanced
+    ? customAdvancedTargets(board, row, col, piece, lastMove)
+    : undefined;
+  if (custom) return uniqueTargets(custom);
+  const vectors = vectorOverride || (definitionOf(piece.kind).advanced ? advancedVectors(piece) : standardVectors(piece));
   const result: ShogiTarget[] = [];
   vectors.forEach(vector => {
     const max = vector.slide ? (vector.max || SIZE) : 1;
@@ -217,18 +483,19 @@ const candidateMoves = (board: ShogiBoard, row: number, col: number): ShogiTarge
       const targetCol = col + vector.dc * step;
       if (!inside(targetRow, targetCol)) break;
       const target = board[targetRow][targetCol];
-      if (target?.side === piece.side) break;
-      if (!vector.jump && step > 1 && board[row + vector.dr * (step - 1)][col + vector.dc * (step - 1)]) break;
+      const jumping = Boolean(vector.jump || mirrorJump);
+      if (!canLandOn(piece, target, jumping)) break;
+      if (!jumping && step > 1 && board[row + vector.dr * (step - 1)][col + vector.dc * (step - 1)]) break;
       result.push({
         row: targetRow,
         col: targetCol,
-        status: target ? 'CAPTURE' : vector.special ? 'SPECIAL' : 'MOVE',
-        note: vector.special ? '特殊移動' : undefined,
+        status: target ? 'CAPTURE' : vector.special || mirrorJump ? 'SPECIAL' : 'MOVE',
+        note: vector.special || mirrorJump ? '特殊移動' : undefined,
       });
-      if (target || vector.jump || !vector.slide) break;
+      if (target || jumping || !vector.slide) break;
     }
   });
-  return Array.from(new Map(result.map(target => [target.row + ':' + target.col, target])).values());
+  return uniqueTargets(result);
 };
 
 const locateKing = (board: ShogiBoard, side: ShogiSide): [number, number] | null => {
@@ -268,7 +535,10 @@ const forcedPromotion = (piece: ShogiPiece, toRow: number) =>
     piece.kind === 'N' && (piece.side === 'P' ? toRow <= 1 : toRow >= 3));
 const promotedOnArrival = (piece: ShogiPiece, toRow: number): ShogiPiece => ({
   ...piece,
-  promoted: piece.promoted || (piece.kind !== 'K' && piece.kind !== 'G' && isPromotionZone(piece.side, toRow)),
+  // Advance pieces explicitly never promote.  The previous generic rule
+  // promoted every non-king/non-gold kind, which made unique pieces violate
+  // their own inspector text as soon as they entered the promotion zone.
+  promoted: piece.promoted || (!definitionOf(piece.kind).advanced && piece.kind !== 'K' && piece.kind !== 'G' && isPromotionZone(piece.side, toRow)),
   hasMoved: true,
 });
 
@@ -298,6 +568,7 @@ export const getShogiMovementTargets = (
   hands: ShogiHands,
   selection: { row: number; col: number } | { hand: ShogiPieceKind } | null,
   side: ShogiSide,
+  history: ShogiMove[] = [],
 ): ShogiTarget[] => {
   if (!selection) return [];
   if ('hand' in selection) {
@@ -309,7 +580,8 @@ export const getShogiMovementTargets = (
   }
   const piece = board[selection.row]?.[selection.col];
   if (!piece || piece.side !== side) return [];
-  return candidateMoves(board, selection.row, selection.col);
+  const lastOpponentMove = [...history].reverse().find(move => move.side !== side);
+  return candidateMoves(board, selection.row, selection.col, undefined, undefined, false, lastOpponentMove);
 };
 
 /** The learning duel deliberately uses piece-movement rules rather than
@@ -320,50 +592,66 @@ export const getShogiTargets = (
   hands: ShogiHands,
   selection: { row: number; col: number } | { hand: ShogiPieceKind } | null,
   side: ShogiSide,
+  history: ShogiMove[] = [],
 ): ShogiTarget[] => {
-  return getShogiMovementTargets(board, hands, selection, side);
+  return getShogiMovementTargets(board, hands, selection, side, history);
 };
 
 const applyMove = (
   board: ShogiBoard,
   hands: ShogiHands,
   move: ShogiMove,
-): { board: ShogiBoard; hands: ShogiHands; captured: ShogiPiece | null } => {
+): { board: ShogiBoard; hands: ShogiHands; captured: ShogiPiece | null; capturedKing: boolean } => {
   const nextBoard = cloneBoard(board);
   const nextHands = cloneHands(hands);
-  const captured = nextBoard[move.to[0]][move.to[1]];
+  let captured: ShogiPiece | null = null;
+  let capturedKing = false;
   if (move.from) {
-    const moving = nextBoard[move.from[0]][move.from[1]];
-    if (!moving) return { board: nextBoard, hands: nextHands, captured: null };
-    nextBoard[move.to[0]][move.to[1]] = promotedOnArrival(moving, move.to[0]);
-    nextBoard[move.from[0]][move.from[1]] = null;
+    let moving = nextBoard[move.from[0]][move.from[1]];
+    if (!moving) return { board: nextBoard, hands: nextHands, captured: null, capturedKing: false };
+    const path = move.path?.length ? move.path : [move.to];
+    let current = move.from;
+    path.forEach(([targetRow, targetCol], index) => {
+      const landed = nextBoard[targetRow][targetCol];
+      if (landed) {
+        captured = landed;
+        if (landed.kind === 'K') capturedKing = true;
+        if (landed.kind !== 'K') {
+          nextHands[move.side][landed.kind] = (nextHands[move.side][landed.kind] || 0) + 1;
+        }
+      }
+      nextBoard[current[0]][current[1]] = null;
+      nextBoard[targetRow][targetCol] = index === path.length - 1 ? promotedOnArrival(moving!, targetRow) : moving;
+      current = [targetRow, targetCol];
+    });
   } else {
     nextBoard[move.to[0]][move.to[1]] = makeShogiPiece(move.kind, move.side);
     nextHands[move.side][move.kind] = Math.max(0, (nextHands[move.side][move.kind] || 0) - 1);
   }
-  if (captured && captured.kind !== 'K') {
+  if (!move.from && captured && captured.kind !== 'K') {
     nextHands[move.side][captured.kind] = (nextHands[move.side][captured.kind] || 0) + 1;
   }
-  return { board: nextBoard, hands: nextHands, captured };
+  return { board: nextBoard, hands: nextHands, captured, capturedKing };
 };
 
-const allMovesForSide = (board: ShogiBoard, hands: ShogiHands, side: ShogiSide): ShogiMove[] => {
+const allMovesForSide = (board: ShogiBoard, hands: ShogiHands, side: ShogiSide, history: ShogiMove[] = []): ShogiMove[] => {
   const moves: ShogiMove[] = [];
   for (let row = 0; row < SIZE; row += 1) for (let col = 0; col < SIZE; col += 1) {
     const piece = board[row][col];
     if (!piece || piece.side !== side) continue;
-    getShogiMovementTargets(board, hands, { row, col }, side).forEach(target => moves.push({
+    getShogiMovementTargets(board, hands, { row, col }, side, history).forEach(target => moves.push({
       from: [row, col],
       to: [target.row, target.col],
       kind: piece.kind,
       side,
       capture: board[target.row][target.col]?.kind || null,
       special: target.status === 'SPECIAL',
+      path: target.path,
     }));
   }
   Object.keys(hands[side]).forEach(kindValue => {
     const kind = kindValue as ShogiPieceKind;
-    getShogiMovementTargets(board, hands, { hand: kind }, side).forEach(target => moves.push({
+    getShogiMovementTargets(board, hands, { hand: kind }, side, history).forEach(target => moves.push({
       from: null,
       to: [target.row, target.col],
       kind,
@@ -478,7 +766,7 @@ export const createShogiGame = (mode: ShogiMode, stage = 1, seed = Date.now(), p
 };
 
 const chooseCpuMove = (state: ShogiGameState): ShogiMove | null => {
-  const moves = allMovesForSide(state.board, state.hands, 'C');
+  const moves = allMovesForSide(state.board, state.hands, 'C', state.history);
   if (!moves.length) return null;
   return [...moves].sort((left, right) => {
     const rightScore = (right.capture ? pieceValue(right.capture) : 0) * 100 + (right.special ? 4 : 0);
@@ -491,7 +779,7 @@ export const selectShogiPiece = (
   state: ShogiGameState,
   selection: { row: number; col: number } | { hand: ShogiPieceKind },
 ): ShogiGameState => {
-  const nextTargets = getShogiMovementTargets(state.board, state.hands, selection, state.side);
+  const nextTargets = getShogiMovementTargets(state.board, state.hands, selection, state.side, state.history);
   return {
     ...state,
     selected: selection,
@@ -505,7 +793,7 @@ export const playShogiMove = (state: ShogiGameState, target: [number, number]): 
   // The board and hands are the source of truth. Recalculate targets here so
   // a target from a previous render/game can never affect the current move.
   const movingSide = state.side;
-  const currentTargets = getShogiMovementTargets(state.board, state.hands, state.selected, movingSide);
+  const currentTargets = getShogiMovementTargets(state.board, state.hands, state.selected, movingSide, state.history);
   const allowed = currentTargets.find(item => item.row === target[0] && item.col === target[1]);
   if (!allowed) return { ...state, message: 'そのマスには移動できません。表示された候補を選んでください。' };
   const selection = state.selected;
@@ -517,10 +805,11 @@ export const playShogiMove = (state: ShogiGameState, target: [number, number]): 
     side: movingSide,
     capture: state.board[target[0]][target[1]]?.kind || null,
     special: allowed.status === 'SPECIAL',
+    path: allowed.path,
   };
   const applied = applyMove(state.board, state.hands, move);
   const interim: ShogiGameState = { ...state, board: applied.board, hands: applied.hands, selected: null, legalTargets: [], lastMove: move, history: [...state.history, move], turn: state.turn + 1, signature: boardSignature(applied.board) };
-  if (applied.captured?.kind === 'K') {
+  if (applied.capturedKing) {
     return {
       ...interim,
       result: movingSide === 'P' ? 'WIN' : 'LOSE',
@@ -531,7 +820,7 @@ export const playShogiMove = (state: ShogiGameState, target: [number, number]): 
   }
   if (state.playMode === 'LOCAL') {
     const nextSide: ShogiSide = movingSide === 'P' ? 'C' : 'P';
-    const nextMoves = allMovesForSide(interim.board, interim.hands, nextSide);
+    const nextMoves = allMovesForSide(interim.board, interim.hands, nextSide, interim.history);
     if (!nextMoves.length) return { ...interim, side: nextSide, result: 'DRAW', message: '動かせる駒がありません。引き分けです。' };
     return {
       ...interim,
@@ -539,7 +828,7 @@ export const playShogiMove = (state: ShogiGameState, target: [number, number]): 
       message: nextSide === 'P' ? '先手の手番です。' : '後手の手番です。端末を相手へ渡してください。',
     };
   }
-  const cpuMoves = allMovesForSide(interim.board, interim.hands, 'C');
+  const cpuMoves = allMovesForSide(interim.board, interim.hands, 'C', interim.history);
   if (cpuMoves.length === 0) return { ...interim, result: 'DRAW', message: 'CPUに動かせる駒がありません。引き分けです。' };
   const cpuMove = chooseCpuMove(interim);
   if (!cpuMove) return { ...interim, result: 'DRAW', message: 'CPUに動かせる駒がありません。引き分けです。' };
@@ -554,14 +843,14 @@ export const playShogiMove = (state: ShogiGameState, target: [number, number]): 
     message: 'CPUが指しました。あなたの手番です。',
     signature: boardSignature(cpuApplied.board),
   };
-  if (cpuApplied.captured?.kind === 'K') {
+  if (cpuApplied.capturedKing) {
     return {
       ...afterCpu,
       result: 'LOSE',
       message: '王を取られました。敗北。',
     };
   }
-  const playerMoves = allMovesForSide(afterCpu.board, afterCpu.hands, 'P');
+  const playerMoves = allMovesForSide(afterCpu.board, afterCpu.hands, 'P', afterCpu.history);
   if (playerMoves.length === 0) return { ...afterCpu, result: 'DRAW', message: '動かせる駒がありません。引き分けです。' };
   return afterCpu;
 };

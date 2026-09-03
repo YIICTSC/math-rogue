@@ -28,6 +28,7 @@ import { isCardEligibleForCopySelection } from '../utils/cardCopySelection';
 import type { BattleUiSettings } from './SettingsModal';
 import MagicRulePanel from './MagicRulePanel';
 import ResilientAssetImage from './ResilientAssetImage';
+import EndlessGimmickGlossaryText, { getEndlessGimmickDefinition, getEndlessGimmickTermLabel } from './EndlessGimmickGlossary';
 
 const MAGIC_MALE_ACTION_SCALE: Record<string, {
     before: { attack: number; skill: number };
@@ -2219,18 +2220,29 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                             </div>
 
                                             {endlessBoss && (
-                                                <button
-                                                    type="button"
+                                                <div
+                                                    role="button"
+                                                    tabIndex={0}
                                                     className="mb-1 w-full rounded border border-fuchsia-400/60 bg-fuchsia-950/80 px-1 py-0.5 text-left text-[8px] leading-tight text-fuchsia-100"
                                                     title={endlessBoss.mechanicSummary}
                                                     onClick={(event) => {
                                                         event.stopPropagation();
                                                         showInfo(`${endlessBoss.name}：特殊ルール`, endlessBoss.mechanicSummary);
                                                     }}
+                                                    onKeyDown={(event) => {
+                                                        if (event.key !== 'Enter' && event.key !== ' ') return;
+                                                        event.preventDefault();
+                                                        event.stopPropagation();
+                                                        showInfo(`${endlessBoss.name}：特殊ルール`, endlessBoss.mechanicSummary);
+                                                    }}
                                                 >
                                                     <span className="mr-1 font-black text-fuchsia-300">{languageMode === 'ENGLISH' ? 'MECHANIC' : languageMode === 'HIRAGANA' ? 'ぎみっく' : 'ギミック'}</span>
-                                                    {endlessBoss.mechanicSummary}
-                                                </button>
+                                                    <EndlessGimmickGlossaryText
+                                                        text={endlessBoss.mechanicSummary}
+                                                        languageMode={languageMode}
+                                                        onTermClick={(entry) => showInfo(getEndlessGimmickTermLabel(entry, languageMode), getEndlessGimmickDefinition(entry, languageMode))}
+                                                    />
+                                                </div>
                                             )}
 
                                             <div className="relative w-full h-3 bg-gray-800 rounded-full overflow-hidden border border-gray-600 mb-0.5" onClick={(e) => { e.stopPropagation(); showInfo("HP", `現在: ${enemy.currentHp} / 最大: ${enemy.maxHp}`); }}>

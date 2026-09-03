@@ -1860,6 +1860,12 @@ const App: React.FC = () => {
         ? (gameState.visualTheme || visualTheme)
         : visualTheme;
     const themedCharacters = useMemo(() => getThemedCharacters(CHARACTERS, coopSyncedVisualTheme), [coopSyncedVisualTheme]);
+    // A saved run can outlive the menu theme setting (for example after a
+    // theme switch or a restored save).  Ending/opening screens must resolve
+    // their copy and artwork from the run itself, otherwise a high-school
+    // image can be paired with the elementary protagonist's dialogue.
+    const activeRunVisualTheme: VisualThemeId = gameState.visualTheme || coopSyncedVisualTheme;
+    const activeRunThemedCharacters = useMemo(() => getThemedCharacters(CHARACTERS, activeRunVisualTheme), [activeRunVisualTheme]);
     const [currentNarrative, setCurrentNarrative] = useState<string>("...");
     const [currentBattleBackgroundId, setCurrentBattleBackgroundId] = useState<string>('classroom');
     const [turnLog, setTurnLog] = useState<string>("あなたのターン");
@@ -18804,12 +18810,12 @@ const App: React.FC = () => {
                     <div className="absolute inset-0">
                         <EndlessEndingSequenceScreen
                             kind="OPENING"
-                            theme={coopSyncedVisualTheme}
+                            theme={activeRunVisualTheme}
                             characterId={gameState.player.id}
-                            magicProtagonistId={coopSyncedVisualTheme === 'magic' ? getMagicProtagonistId(gameState.player) : undefined}
-                            characterName={coopSyncedVisualTheme === 'magic' && gameState.player.magicProtagonistGender === 'male'
+                            magicProtagonistId={activeRunVisualTheme === 'magic' ? getMagicProtagonistId(gameState.player) : undefined}
+                            characterName={activeRunVisualTheme === 'magic' && gameState.player.magicProtagonistGender === 'male'
                                 ? MAGIC_MALE_PROTAGONISTS.find(hero => hero.id === gameState.player.magicProtagonistId)?.name ?? selectedCharName
-                                : themedCharacters.find(character => character.id === gameState.player.id)?.name ?? selectedCharName}
+                                : activeRunThemedCharacters.find(character => character.id === gameState.player.id)?.name ?? selectedCharName}
                             languageMode={languageMode}
                             onComplete={() => {
                                 audioService.playBGM('map');
@@ -18827,12 +18833,12 @@ const App: React.FC = () => {
                     <div className="absolute inset-0">
                         <EndlessEndingSequenceScreen
                             kind="TRUE"
-                            theme={coopSyncedVisualTheme}
+                            theme={activeRunVisualTheme}
                             characterId={gameState.player.id}
-                            magicProtagonistId={coopSyncedVisualTheme === 'magic' ? getMagicProtagonistId(gameState.player) : undefined}
-                            characterName={coopSyncedVisualTheme === 'magic' && gameState.player.magicProtagonistGender === 'male'
+                            magicProtagonistId={activeRunVisualTheme === 'magic' ? getMagicProtagonistId(gameState.player) : undefined}
+                            characterName={activeRunVisualTheme === 'magic' && gameState.player.magicProtagonistGender === 'male'
                                 ? MAGIC_MALE_PROTAGONISTS.find(hero => hero.id === gameState.player.magicProtagonistId)?.name ?? selectedCharName
-                                : themedCharacters.find(character => character.id === gameState.player.id)?.name ?? selectedCharName}
+                                : activeRunThemedCharacters.find(character => character.id === gameState.player.id)?.name ?? selectedCharName}
                             languageMode={languageMode}
                             onComplete={() => {
                                 setGameState(prev => ({
