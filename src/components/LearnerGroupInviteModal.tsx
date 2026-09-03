@@ -31,7 +31,25 @@ export default function LearnerGroupInviteModal({ token, open, languageMode, onL
     setError('');
     void managementPortalService.fetchLearnerInvitation(token)
       .then((result) => {
-        if (active) setInvitation(result);
+        if (!active) return;
+        // 期限切れ・停止済みのURLは参加登録には使えないが、児童を
+        // タイトル画面で止めない。URLを消して通常起動へ戻す。
+        if (result.unavailableReason) {
+          managementPortalService.clearLearnerInvitationToken();
+          onCancel();
+          return;
+        }
+        // すでにこのグループへ所属している端末は入力を再表示しない。
+        // 既存プロフィールをそのまま親へ渡して、通常のタイトル画面へ進む。
+        if (result.alreadyJoined) {
+          const profile = managementPortalService.getProfile();
+          if (profile) {
+            managementPortalService.clearLearnerInvitationToken();
+            onLinked(profile);
+            return;
+          }
+        }
+        setInvitation(result);
       })
       .catch((reason) => {
         if (active) setError(reason instanceof Error && reason.message !== 'Failed to fetch'

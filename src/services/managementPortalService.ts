@@ -67,6 +67,10 @@ export type LearnerGroupInvitation = {
   organizationName: string;
   groupName: string;
   organizationType: 'family' | 'school';
+  /** 招待受付が終了していても、タイトル画面へ戻るために表示できる。 */
+  unavailableReason?: string;
+  /** 現在の端末プロフィールが対象グループに所属済みか。 */
+  alreadyJoined?: boolean;
 };
 
 type ProgressEvent = {
@@ -299,7 +303,13 @@ export const managementPortalService = {
   },
 
   async fetchLearnerInvitation(token: string) {
-    const result = await request<{ invitation: LearnerGroupInvitation }>(`/api/group-invitations/${encodeURIComponent(token)}/learner`);
+    const result = await request<{ invitation: LearnerGroupInvitation; unavailableReason?: string; alreadyJoined?: boolean }>(
+      `/api/group-invitations/${encodeURIComponent(token)}/learner`,
+      {},
+      this.getProfile()?.token,
+    );
+    result.invitation.unavailableReason = result.unavailableReason;
+    result.invitation.alreadyJoined = Boolean(result.alreadyJoined);
     return result.invitation;
   },
 
