@@ -17872,11 +17872,13 @@ const App: React.FC = () => {
                                                              ? resumeMiniGameScreen
                                                              : resumeAssignmentScreen
                                                                 ? resumeAssignmentScreen
-                                                        : isTeacherAssignmentActive
-                                                            ? GameScreen.START_MENU
-                                                            : prev.screen === GameScreen.MODE_SELECTION
-                                                                ? GameScreen.DIFFICULTY_SELECTION
-                                                                : prev.screen,
+                                                         : isTeacherAssignmentActive
+                                                             ? assignmentLetter.gameMode === 'FREE'
+                                                                 ? GameScreen.DIFFICULTY_SELECTION
+                                                                 : GameScreen.PROBLEM_CHALLENGE
+                                                             : prev.screen === GameScreen.MODE_SELECTION
+                                                                 ? GameScreen.DIFFICULTY_SELECTION
+                                                                 : prev.screen,
                                                 }));
                                             }}
                                             className={`rounded-xl px-4 py-3 text-sm font-black text-slate-950 ${isTeacherAssignmentActive ? 'bg-amber-400 hover:bg-amber-300' : 'bg-lime-400 hover:bg-lime-300'}`}
@@ -18469,10 +18471,12 @@ const App: React.FC = () => {
                                                     : resumeAssignmentScreen
                                                         ? resumeAssignmentScreen
                                                 : isTeacherAssignmentActive
-                                                    ? GameScreen.START_MENU
-                                                    : prev.screen === GameScreen.MODE_SELECTION
+                                                    ? assignmentLetter.gameMode === 'FREE'
                                                         ? GameScreen.DIFFICULTY_SELECTION
-                                                        : prev.screen,
+                                                        : GameScreen.PROBLEM_CHALLENGE
+                                                : prev.screen === GameScreen.MODE_SELECTION
+                                                    ? GameScreen.DIFFICULTY_SELECTION
+                                                    : prev.screen,
                                         }));
                                     }}
                                     className={`rounded-xl px-4 py-3 text-sm font-black text-slate-950 ${isTeacherAssignmentActive ? 'bg-amber-400 hover:bg-amber-300' : 'bg-lime-400 hover:bg-lime-300'}`}

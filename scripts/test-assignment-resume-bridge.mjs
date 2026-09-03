@@ -35,5 +35,10 @@ assert.equal(
   2,
   '課題開始時に保存済み本編の画面へ戻していない'
 );
+assert.equal(
+  (source.match(/isTeacherAssignmentActive\s+\? assignmentLetter\.gameMode === 'FREE'\s+\? GameScreen\.DIFFICULTY_SELECTION\s+\: GameScreen\.PROBLEM_CHALLENGE/g) || []).length,
+  2,
+  '保存状態がない送信課題をタイトル画面へ戻している'
+);
 
 console.log('Assignment resume bridge regression test passed.');
