@@ -137,13 +137,21 @@ try {
   await page.getByRole('button', { name: '課題レター' }).click();
   await page.waitForTimeout(500);
   await page.getByRole('button', { name: /課題を始める/ }).first().click();
+  await page.getByRole('button', { name: 'つづきから' }).waitFor({ state: 'visible' });
+  assert.equal(await page.locator('.assignment-letter-overlay:visible').count(), 0, '課題開始後もレターが表示されている');
+  assert.equal(JSON.parse(await page.evaluate((saveKey) => localStorage.getItem(saveKey), gameSaveKey)).screen, 'MAP');
+
+  await page.getByRole('button', { name: 'つづきから' }).click();
   await page.waitForFunction((saveKey) => JSON.parse(localStorage.getItem(saveKey) || '{}').screen === 'MAP', gameSaveKey);
+  assert.equal(await page.locator('.assignment-letter-overlay:visible').count(), 0, '課題開始後のつづきからでレターが再表示されている');
   assert.equal(JSON.parse(await page.evaluate((saveKey) => localStorage.getItem(saveKey), gameSaveKey)).screen, 'MAP');
 
   await page.reload({ waitUntil: 'domcontentloaded' });
   await page.getByRole('button', { name: 'つづきから' }).click();
   await page.getByRole('button', { name: /課題を始める/ }).first().click();
+  await page.getByRole('button', { name: 'つづきから' }).click();
   await page.waitForFunction((saveKey) => JSON.parse(localStorage.getItem(saveKey) || '{}').screen === 'MAP', gameSaveKey);
+  assert.equal(await page.locator('.assignment-letter-overlay:visible').count(), 0, '再開後の課題がレター再表示になっている');
   assert.equal(JSON.parse(await page.evaluate((saveKey) => localStorage.getItem(saveKey), gameSaveKey)).screen, 'MAP');
 
   await page.evaluate(({ saveKey, taskKey, profileKey, assignmentsKey, saved, managed }) => {
@@ -161,10 +169,14 @@ try {
   });
   await page.reload({ waitUntil: 'domcontentloaded' });
   await page.getByRole('button', { name: /課題を始める/ }).first().click();
-  await page.waitForFunction((saveKey) => JSON.parse(localStorage.getItem(saveKey) || '{}').screen === 'MAP', gameSaveKey);
+  await page.getByRole('button', { name: 'つづきから' }).waitFor({ state: 'visible' });
   await page.waitForTimeout(800);
   assert.equal(await page.locator('.assignment-letter-overlay:visible').count(), 0, '必須課題レターが開始後に再表示されている');
   assert.equal(JSON.parse(await page.evaluate((saveKey) => localStorage.getItem(saveKey), gameSaveKey)).screen, 'MAP');
+
+  await page.getByRole('button', { name: 'つづきから' }).click();
+  await page.waitForFunction((saveKey) => JSON.parse(localStorage.getItem(saveKey) || '{}').screen === 'MAP', gameSaveKey);
+  assert.equal(await page.locator('.assignment-letter-overlay:visible').count(), 0, '必須課題のつづきからでレターが再表示されている');
 
   console.log('Browser assignment resume flow passed for direct task start and Continue.');
 } finally {

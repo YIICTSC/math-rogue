@@ -1941,6 +1941,8 @@ const App: React.FC = () => {
     const [completedAssignmentProblemSource, setCompletedAssignmentProblemSource] = useState<AssignmentPayload | null>(null);
     const [showAssignmentLetter, setShowAssignmentLetter] = useState(false);
     const [pendingManagedAssignmentLetter, setPendingManagedAssignmentLetter] = useState<AssignmentPayload | null>(null);
+    const [assignmentStartConfirmedId, setAssignmentStartConfirmedId] = useState<string | null>(null);
+    const assignmentStartConfirmedIdRef = useRef<string | null>(null);
     const [assignmentLetterSource, setAssignmentLetterSource] = useState<'title' | 'selection'>('title');
     const [dismissedDailyAssignmentId, setDismissedDailyAssignmentId] = useState<string | null>(null);
     const [startedDailyAssignmentId, setStartedDailyAssignmentId] = useState<string | null>(null);
@@ -2080,6 +2082,8 @@ const App: React.FC = () => {
         storageService.saveCurrentAssignment(assignment);
         setCurrentAssignment(assignment);
         setCompletedAssignmentProblemSource(null);
+        assignmentStartConfirmedIdRef.current = null;
+        setAssignmentStartConfirmedId(null);
         setPendingAssignmentResumeState(storageService.loadGame());
         setAssignmentLetterSource('title');
         setShowAssignmentLetter(true);
@@ -2159,6 +2163,8 @@ const App: React.FC = () => {
         storageService.saveCurrentAssignment(assignment);
         setCurrentAssignment(assignment);
         setCompletedAssignmentProblemSource(null);
+        assignmentStartConfirmedIdRef.current = null;
+        setAssignmentStartConfirmedId(null);
         setPendingManagedAssignmentLetter(assignment);
         setPendingAssignmentResumeState(storageService.loadGame());
         setAssignmentLetterSource('title');
@@ -4147,6 +4153,11 @@ const App: React.FC = () => {
         if (gameState.challengeMode === 'RACE' || gameState.challengeMode === 'COOP') {
             return;
         }
+        // Keep the actual main-adventure save intact while a managed assignment
+        // letter is waiting for the learner to choose Continue or another mode.
+        if (gameState.screen === GameScreen.START_MENU && pendingAssignmentResumeState) {
+            return;
+        }
         // storageService is the single source of truth for resumable screens.
         // Mini-game state is deliberately kept in its own keys and can never
         // overwrite or enable the title screen's main-adventure Continue slot.
@@ -4155,7 +4166,7 @@ const App: React.FC = () => {
         if (gameState.screen === GameScreen.START_MENU) {
             setHasSave(storageService.hasSaveFile());
         }
-    }, [gameState, isUiPreviewMode]);
+    }, [gameState, isUiPreviewMode, pendingAssignmentResumeState]);
 
     useEffect(() => {
         if (!raceSession || gameState.challengeMode !== 'RACE' || gameState.screen === GameScreen.RACE_SETUP) return;
@@ -5145,6 +5156,7 @@ const App: React.FC = () => {
         setCoopBattleKey(null);
         setCoopEnemyTurnCursor(0);
         setCompletedAssignmentProblemSource(null);
+        setPendingAssignmentResumeState(null);
         p2pService.close();
         setGameState(prev => ({
             ...prev,
@@ -6350,7 +6362,7 @@ const App: React.FC = () => {
         }
         setShowStartOverConfirm(false);
         setPendingResumeProblemSelection(false);
-        const saved = storageService.loadGame();
+        const saved = pendingAssignmentResumeState || storageService.loadGame();
         if (saved) {
             const savedVisualTheme = VISUAL_THEMES.includes(saved.visualTheme as VisualThemeId)
                 ? saved.visualTheme as VisualThemeId
@@ -6425,6 +6437,7 @@ const App: React.FC = () => {
             const assignmentForContinue = activeAssignment && isAssignmentDeadlineActive(activeAssignment)
                 ? activeAssignment
                 : null;
+            let shouldHoldAssignmentResumeState = false;
             if (assignmentForContinue) {
                 // A managed assignment has already been explicitly selected before
                 // the learner presses Continue.  The letter is shown once so the
@@ -6432,7 +6445,10 @@ const App: React.FC = () => {
                 // waits in pendingAssignmentResumeState instead of being replaced
                 // by the letter's generic START_MENU fallback.
                 const isSentAssignment = Boolean(assignmentForContinue.managementPortal);
-                if (isSentAssignment) {
+                const isAssignmentAlreadyStarted = assignmentStartConfirmedId === assignmentForContinue.id
+                    || assignmentStartConfirmedIdRef.current === assignmentForContinue.id;
+                shouldHoldAssignmentResumeState = isSentAssignment && !isAssignmentAlreadyStarted;
+                if (shouldHoldAssignmentResumeState) {
                     setPendingManagedAssignmentLetter(null);
                     setPendingMiniGameScreen(null);
                     setPendingAssignmentStartScreen(null);
@@ -6443,7 +6459,7 @@ const App: React.FC = () => {
                     // START_MENU fallback can overwrite the saved resume point.
                     setAssignmentLetterSource('title');
                     setShowAssignmentLetter(true);
-                } else {
+                } else if (!isSentAssignment) {
                     setAssignmentLetterSource('selection');
                     setShowAssignmentLetter(true);
                 }
@@ -6473,7 +6489,7 @@ const App: React.FC = () => {
                     enemy.currentHp > 0 ? { ...enemy, currentHp: 1 } : enemy
                 ));
             }
-            if (assignmentForContinue?.managementPortal) {
+            if (shouldHoldAssignmentResumeState) {
                 // The assignment letter owns the final transition for a sent
                 // assignment.  Do not commit START_MENU to the resumable save while
                 // waiting for the learner to press 「課題を始める」.
@@ -6481,10 +6497,84 @@ const App: React.FC = () => {
                 return;
             }
             setGameState(saved);
+            setPendingAssignmentResumeState(null);
             const bgmType = getBgmForScreen(saved) || 'map';
             await audioService.switchThemeAndPlayBGM(getBgmThemeForPlayer(savedVisualTheme, saved.player), bgmType);
             addLog(trans("続きから再開しました。", languageMode), "blue");
         }
+    };
+
+    const startAssignmentFromLetter = (assignment: AssignmentPayload, isTeacherAssignment: boolean) => {
+        audioService.playSound('select');
+        setShowAssignmentLetter(false);
+
+        if (isTeacherAssignment) {
+            // Confirming a managed assignment only enables its question source.
+            // The learner can now choose Continue, Adventure, Problem, a mini-game,
+            // or another available mode from the title screen.
+            assignmentStartConfirmedIdRef.current = assignment.id;
+            setAssignmentStartConfirmedId(assignment.id);
+            setPendingMiniGameScreen(null);
+            setPendingAssignmentStartScreen(null);
+            const resumableMainState = pendingAssignmentResumeState || storageService.loadGame();
+            if (resumableMainState && resumableMainState.screen !== GameScreen.START_MENU) {
+                setPendingAssignmentResumeState({ ...resumableMainState });
+            }
+            if (assignment.gameMode === 'CHALLENGE_ONLY') {
+                // Problem-only and launch-locked assignments remain restricted by
+                // the sender's explicit policy.
+                setPendingAssignmentResumeState(null);
+                setGameState(prev => ({
+                    ...prev,
+                    screen: GameScreen.PROBLEM_CHALLENGE,
+                    challengeMode: undefined,
+                }));
+            } else {
+                setGameState(prev => ({ ...prev, screen: GameScreen.START_MENU }));
+            }
+            return;
+        }
+
+        // Daily assignment notices are contextual: preserve the mode the learner
+        // was already choosing when the notice appeared.
+        setDismissedDailyAssignmentId(null);
+        setStartedDailyAssignmentId(assignment.id);
+        const resumeMiniGameScreen = pendingMiniGameScreen;
+        const resumeAssignmentScreen = pendingAssignmentStartScreen;
+        const assignmentResumeState = pendingAssignmentResumeState;
+        if (assignment.gameMode === 'FREE' && resumeMiniGameScreen) {
+            const assignmentConfig = getAssignmentProblemConfig(assignment);
+            setMiniGameProblemMode(assignmentConfig.mode || GameMode.UPPER_TRIVIA);
+            setMiniGameProblemModePool(assignmentConfig.modePool);
+            setMiniGameAnswerMode(assignmentConfig.answerMode || 'CHOICE');
+        }
+        setPendingMiniGameScreen(null);
+        setPendingAssignmentStartScreen(null);
+        setPendingAssignmentResumeState(null);
+        setGameState(prev => ({
+            ...(assignmentResumeState || prev),
+            ...(assignment.gameMode === 'FREE'
+                ? (() => {
+                    const assignmentConfig = getAssignmentProblemConfig(assignment);
+                    return {
+                        mode: assignmentConfig.mode || prev.mode,
+                        modePool: assignmentConfig.modePool,
+                        answerMode: assignmentConfig.answerMode || prev.answerMode || 'CHOICE',
+                    };
+                })()
+                : {}),
+            screen: assignment.gameMode === 'CHALLENGE_ONLY'
+                ? GameScreen.PROBLEM_CHALLENGE
+                : assignmentResumeState
+                    ? assignmentResumeState.screen
+                    : resumeMiniGameScreen
+                        ? resumeMiniGameScreen
+                        : resumeAssignmentScreen
+                            ? resumeAssignmentScreen
+                            : prev.screen === GameScreen.MODE_SELECTION
+                                ? GameScreen.DIFFICULTY_SELECTION
+                                : prev.screen,
+        }));
     };
 
     const launchNewAdventure = (themeOverride: VisualThemeId = visualTheme) => {
@@ -6505,7 +6595,10 @@ const App: React.FC = () => {
         setIsLoading(false); // Ensure loading is reset
         showDailyAssignmentNoticeForProblemSelection();
         setGameState({
-            screen: activeAssignment?.gameMode === 'FREE' ? GameScreen.DIFFICULTY_SELECTION : GameScreen.MODE_SELECTION,
+            // Assignment activation should not choose a problem mode on the
+            // learner's behalf. Let the normal mode selector open; the active
+            // assignment still supplies the questions after the selection.
+            screen: GameScreen.MODE_SELECTION,
             mode: initialMode,
             modePool: assignmentHasCustomProblems ? (assignmentModePool || []) : assignmentModePool,
             visualTheme: adventureTheme,
@@ -6649,6 +6742,7 @@ const App: React.FC = () => {
         storageService.clearSave();
         setHasSave(false);
         setShowStartOverConfirm(false);
+        setPendingAssignmentResumeState(null);
         launchNewAdventure();
     };
 
@@ -17833,54 +17927,7 @@ const App: React.FC = () => {
                                     </div>
                                     <div className={`assignment-letter-actions grid gap-2 ${isBlockingTeacherAssignment ? 'sm:grid-cols-1' : 'sm:grid-cols-3'}`}>
                                         <button
-                                            onClick={() => {
-                                                setShowAssignmentLetter(false);
-                                                if (!isTeacherAssignmentActive && assignmentLetter) {
-                                                    setDismissedDailyAssignmentId(null);
-                                                    setStartedDailyAssignmentId(assignmentLetter.id);
-                                                 }
-                                                 const resumeMiniGameScreen = pendingMiniGameScreen;
-                                                 const resumeAssignmentScreen = pendingAssignmentStartScreen;
-                                                 const assignmentResumeState = pendingAssignmentResumeState
-                                                     || (isTeacherAssignmentActive ? storageService.loadGame() : null);
-                                                 if (assignmentLetter.gameMode === 'FREE' && resumeMiniGameScreen) {
-                                                     const assignmentConfig = getAssignmentProblemConfig(assignmentLetter);
-                                                     setMiniGameProblemMode(assignmentConfig.mode || GameMode.UPPER_TRIVIA);
-                                                     setMiniGameProblemModePool(assignmentConfig.modePool);
-                                                     setMiniGameAnswerMode(assignmentConfig.answerMode || 'CHOICE');
-                                                 }
-                                                 setPendingMiniGameScreen(null);
-                                                 setPendingAssignmentStartScreen(null);
-                                                 setPendingAssignmentResumeState(null);
-                                                 setGameState(prev => ({
-                                                     ...(assignmentResumeState || prev),
-                                                     ...(assignmentLetter.gameMode === 'FREE'
-                                                         ? (() => {
-                                                             const assignmentConfig = getAssignmentProblemConfig(assignmentLetter);
-                                                             return {
-                                                                mode: assignmentConfig.mode || prev.mode,
-                                                                modePool: assignmentConfig.modePool,
-                                                                answerMode: assignmentConfig.answerMode || prev.answerMode || 'CHOICE',
-                                                            };
-                                                         })()
-                                                         : {}),
-                                                     screen: assignmentLetter.gameMode === 'CHALLENGE_ONLY'
-                                                         ? GameScreen.PROBLEM_CHALLENGE
-                                                         : assignmentResumeState
-                                                             ? assignmentResumeState.screen
-                                                         : resumeMiniGameScreen
-                                                             ? resumeMiniGameScreen
-                                                             : resumeAssignmentScreen
-                                                                ? resumeAssignmentScreen
-                                                         : isTeacherAssignmentActive
-                                                             ? assignmentLetter.gameMode === 'FREE'
-                                                                 ? GameScreen.DIFFICULTY_SELECTION
-                                                                 : GameScreen.PROBLEM_CHALLENGE
-                                                             : prev.screen === GameScreen.MODE_SELECTION
-                                                                 ? GameScreen.DIFFICULTY_SELECTION
-                                                                 : prev.screen,
-                                                }));
-                                            }}
+                                            onClick={() => startAssignmentFromLetter(assignmentLetter, isTeacherAssignmentActive)}
                                             className={`rounded-xl px-4 py-3 text-sm font-black text-slate-950 ${isTeacherAssignmentActive ? 'bg-amber-400 hover:bg-amber-300' : 'bg-lime-400 hover:bg-lime-300'}`}
                                         >
                                             {trans("課題を始める", languageMode)}
@@ -18431,54 +18478,7 @@ const App: React.FC = () => {
                             <div className={`assignment-letter-actions grid gap-2 ${isBlockingTeacherAssignment ? 'sm:grid-cols-1' : 'sm:grid-cols-3'}`}>
                                 <button
                                     data-gamepad-initial-choice
-                                    onClick={() => {
-                                        setShowAssignmentLetter(false);
-                                        if (!isTeacherAssignmentActive && assignmentLetter) {
-                                            setDismissedDailyAssignmentId(null);
-                                            setStartedDailyAssignmentId(assignmentLetter.id);
-                                        }
-                                        const resumeMiniGameScreen = pendingMiniGameScreen;
-                                        const resumeAssignmentScreen = pendingAssignmentStartScreen;
-                                         const assignmentResumeState = pendingAssignmentResumeState
-                                             || (isTeacherAssignmentActive ? storageService.loadGame() : null);
-                                        if (assignmentLetter.gameMode === 'FREE' && resumeMiniGameScreen) {
-                                            const assignmentConfig = getAssignmentProblemConfig(assignmentLetter);
-                                            setMiniGameProblemMode(assignmentConfig.mode || GameMode.UPPER_TRIVIA);
-                                            setMiniGameProblemModePool(assignmentConfig.modePool);
-                                            setMiniGameAnswerMode(assignmentConfig.answerMode || 'CHOICE');
-                                        }
-                                        setPendingMiniGameScreen(null);
-                                        setPendingAssignmentStartScreen(null);
-                                        setPendingAssignmentResumeState(null);
-                                        setGameState(prev => ({
-                                            ...(assignmentResumeState || prev),
-                                            ...(assignmentLetter.gameMode === 'FREE'
-                                                ? (() => {
-                                                    const assignmentConfig = getAssignmentProblemConfig(assignmentLetter);
-                                                    return {
-                                                        mode: assignmentConfig.mode || prev.mode,
-                                                        modePool: assignmentConfig.modePool,
-                                                        answerMode: assignmentConfig.answerMode || prev.answerMode || 'CHOICE',
-                                                    };
-                                                })()
-                                                : {}),
-                                            screen: assignmentLetter.gameMode === 'CHALLENGE_ONLY'
-                                                ? GameScreen.PROBLEM_CHALLENGE
-                                                : assignmentResumeState
-                                                    ? assignmentResumeState.screen
-                                                : resumeMiniGameScreen
-                                                    ? resumeMiniGameScreen
-                                                    : resumeAssignmentScreen
-                                                        ? resumeAssignmentScreen
-                                                : isTeacherAssignmentActive
-                                                    ? assignmentLetter.gameMode === 'FREE'
-                                                        ? GameScreen.DIFFICULTY_SELECTION
-                                                        : GameScreen.PROBLEM_CHALLENGE
-                                                : prev.screen === GameScreen.MODE_SELECTION
-                                                    ? GameScreen.DIFFICULTY_SELECTION
-                                                    : prev.screen,
-                                        }));
-                                    }}
+                                    onClick={() => startAssignmentFromLetter(assignmentLetter, isTeacherAssignmentActive)}
                                     className={`rounded-xl px-4 py-3 text-sm font-black text-slate-950 ${isTeacherAssignmentActive ? 'bg-amber-400 hover:bg-amber-300' : 'bg-lime-400 hover:bg-lime-300'}`}
                                 >
                                     {trans("課題を始める", languageMode)}
