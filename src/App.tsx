@@ -1919,6 +1919,7 @@ const App: React.FC = () => {
     const [managementProfile, setManagementProfile] = useState<ManagementProfile | null>(() => managementPortalService.getProfile());
     const [learnerInvitationToken, setLearnerInvitationToken] = useState(() => managementPortalService.getLearnerInvitationToken());
     const requiredAssignmentCheckRef = useRef(false);
+    const launchLockedAssignmentExitRef = useRef<string | null>(null);
     const [managedAssignmentsRevision, setManagedAssignmentsRevision] = useState(0);
     const [showAssignmentInbox, setShowAssignmentInbox] = useState(false);
     const [currentAssignment, setCurrentAssignment] = useState<AssignmentPayload | null>(() => storageService.getCurrentAssignment());
@@ -2146,6 +2147,7 @@ const App: React.FC = () => {
     }, []);
 
     const openManagedAssignment = useCallback((assignment: AssignmentPayload) => {
+        launchLockedAssignmentExitRef.current = null;
         storageService.saveCurrentAssignment(assignment);
         setCurrentAssignment(assignment);
         setCompletedAssignmentProblemSource(null);
@@ -2179,6 +2181,16 @@ const App: React.FC = () => {
                 }
                 const nextLaunchLocked = getNextLaunchLockedManagedAssignment(assignments);
                 const nextRequired = nextLaunchLocked || getNextRequiredManagedAssignment(assignments);
+                if (nextLaunchLocked && launchLockedAssignmentExitRef.current === nextLaunchLocked.id) {
+                    // Leaving a launch-locked challenge is an explicit user action.
+                    // Consume the one-shot escape here so the title screen does not
+                    // immediately reopen the same challenge in a redirect loop.
+                    launchLockedAssignmentExitRef.current = null;
+                    return;
+                }
+                if (!nextLaunchLocked) {
+                    launchLockedAssignmentExitRef.current = null;
+                }
                 if (!nextRequired || cancelled) return;
                 let payload = currentAssignment?.id === nextRequired.id ? currentAssignment : null;
                 if (!payload) {
@@ -5039,6 +5051,9 @@ const App: React.FC = () => {
     };
 
     const returnToTitle = () => {
+        if (stateRef.current.screen === GameScreen.PROBLEM_CHALLENGE && currentAssignment?.enforcementLevel === 'launch_lock') {
+            launchLockedAssignmentExitRef.current = currentAssignment.id;
+        }
         const isEndingReturn = stateRef.current.screen === GameScreen.ENDING;
         const isGameOverReturn = stateRef.current.screen === GameScreen.GAME_OVER;
         const isVictoryReturn = stateRef.current.screen === GameScreen.VICTORY;

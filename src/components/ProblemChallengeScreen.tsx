@@ -719,6 +719,7 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
   const [assignmentReviewQueue, setAssignmentReviewQueue] = useState<Array<{ problem: AssignmentReviewProblem; dueStep: number }>>([]);
   const [pendingAssignmentSource, setPendingAssignmentSource] = useState<AssignmentPayload | null>(null);
   const appliedAssignmentSignatureRef = useRef('');
+  const assignmentSessionRef = useRef(false);
   const assignmentSourceStepRef = useRef(0);
   const displayedCategories = useMemo<SubjectCategoryConfig[]>(() => {
     const kanjiCategory = SUBJECT_CATEGORIES.find((cat) => cat.id === 'KANJI');
@@ -773,6 +774,7 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
   }, []);
 
   const applyAssignmentChallenge = useCallback((assignmentSource: AssignmentPayload, resetProgress: boolean) => {
+    assignmentSessionRef.current = true;
     const customProblems = assignmentSource.customProblems || [];
     const modePool = Array.from(new Set(assignmentSource.units.flatMap((unit) => unit.modes)));
     if (modePool.length === 0 && customProblems.length === 0) return false;
@@ -1008,7 +1010,10 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
   }, [assignment, challengeStep, onAnswerResult]);
 
   const handleFinish = () => {
-    if (assignment) {
+    // Keep the parent navigation available after the final correct answer too.
+    // The parent removes a completed assignment from `assignment` immediately,
+    // so checking only the prop would leave the finished challenge on this screen.
+    if (assignment || assignmentSessionRef.current) {
       onBack();
       return;
     }
