@@ -111,14 +111,17 @@ const browser = await chromium.launch({ headless: true });
 try {
   const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
   page.on('pageerror', (error) => console.log('pageerror:', error.stack || error.message));
+  let routedAssignments = [managedRequiredAssignment];
   await page.route('https://learning-rogue-management.yishigeict.chatgpt.site/**', async (route) => {
     const pathname = new URL(route.request().url()).pathname;
     if (pathname.endsWith('/assignments')) {
-      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ assignments: [managedRequiredAssignment] }) });
+      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ assignments: routedAssignments }) });
       return;
     }
     if (pathname.includes('/assignments/')) {
-      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ assignment: managedRequiredAssignment }) });
+      const assignmentId = pathname.split('/').pop();
+      const assignment = routedAssignments.find((item) => item.id === assignmentId) || routedAssignments[0] || managedRequiredAssignment;
+      await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ assignment }) });
       return;
     }
     await route.continue();
@@ -140,6 +143,18 @@ try {
   await page.getByRole('button', { name: 'つづきから' }).waitFor({ state: 'visible' });
   assert.equal(await page.locator('.assignment-letter-overlay:visible').count(), 0, '課題開始後もレターが表示されている');
   assert.equal(JSON.parse(await page.evaluate((saveKey) => localStorage.getItem(saveKey), gameSaveKey)).screen, 'MAP');
+
+  await page.getByRole('button', { name: '冒険を始める' }).click();
+  await page.getByRole('button', { name: '最初から始める' }).click();
+  await page.getByRole('heading', { name: 'ゲーム難易度選択' }).waitFor({ state: 'visible' });
+  assert.equal(await page.getByRole('heading', { name: 'モード選択' }).count(), 0, '選択済み課題の冒険開始で問題選択が表示されている');
+
+  await page.evaluate(({ saveKey, saved }) => {
+    localStorage.setItem(saveKey, JSON.stringify(saved));
+  }, { saveKey: gameSaveKey, saved: savedMainState });
+  await page.reload({ waitUntil: 'domcontentloaded' });
+  await page.getByRole('button', { name: '課題レター' }).click();
+  await page.getByRole('button', { name: /課題を始める/ }).first().click();
 
   await page.getByRole('button', { name: 'つづきから' }).click();
   await page.waitForFunction((saveKey) => JSON.parse(localStorage.getItem(saveKey) || '{}').screen === 'MAP', gameSaveKey);
@@ -177,6 +192,44 @@ try {
   await page.getByRole('button', { name: 'つづきから' }).click();
   await page.waitForFunction((saveKey) => JSON.parse(localStorage.getItem(saveKey) || '{}').screen === 'MAP', gameSaveKey);
   assert.equal(await page.locator('.assignment-letter-overlay:visible').count(), 0, '必須課題のつづきからでレターが再表示されている');
+
+  const launchLockedManagedAssignment = {
+    ...managedRequiredAssignment,
+    id: 'browser-launch-locked-assignment-test',
+    title: '最優先課題のレター表示テスト',
+    playMode: 'problem_only',
+    gameMode: 'CHALLENGE_ONLY',
+    enforcementLevel: 'launch_lock',
+    requirementType: 'required',
+  };
+  const launchLockedAssignmentPayload = {
+    ...assignment,
+    id: launchLockedManagedAssignment.id,
+    title: launchLockedManagedAssignment.title,
+    gameMode: 'CHALLENGE_ONLY',
+    enforcementLevel: 'launch_lock',
+    requirementType: 'required',
+    managementPortal: { assignmentId: launchLockedManagedAssignment.id, sourceGroupName: '最優先課題テスト' },
+  };
+  routedAssignments = [launchLockedManagedAssignment];
+  await page.evaluate(({ saveKey, taskKey, assignmentsKey, saved, task, managed }) => {
+    localStorage.setItem(saveKey, JSON.stringify(saved));
+    localStorage.setItem(taskKey, JSON.stringify(task));
+    localStorage.setItem(assignmentsKey, JSON.stringify([managed]));
+  }, {
+    saveKey: gameSaveKey,
+    taskKey: assignmentKey,
+    assignmentsKey: managementAssignmentsKey,
+    saved: savedMainState,
+    task: launchLockedAssignmentPayload,
+    managed: launchLockedManagedAssignment,
+  });
+  await page.reload({ waitUntil: 'domcontentloaded' });
+  await page.locator('.assignment-letter-overlay:visible').waitFor({ state: 'visible' });
+  assert.equal(await page.locator('.assignment-letter-overlay:visible').count(), 1, '最優先課題の内容表示レターが開いていない');
+  await page.getByRole('button', { name: /課題を始める/ }).first().click();
+  await page.locator('.main-problem-challenge-active-screen').waitFor({ state: 'visible' });
+  assert.equal(await page.locator('.assignment-letter-overlay:visible').count(), 0, '最優先課題の開始後もレターが残っている');
 
   console.log('Browser assignment resume flow passed for direct task start and Continue.');
 } finally {

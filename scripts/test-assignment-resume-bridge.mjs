@@ -54,6 +54,14 @@ assert.match(source, /setGameState\(prev => \(\{ \.\.\.prev, screen: GameScreen\
   '通常の送信課題をタイトル画面へ戻していない');
 assert.match(source, /screen: GameScreen\.MODE_SELECTION,/,
   '課題開始後の冒険で通常のモード選択を開いていない');
+assert.match(source, /const shouldSkipAssignmentModeSelection = activeAssignment\?\.gameMode === 'FREE' && isAssignmentWithinDeadline;/,
+  '選択済みFREE課題の冒険で問題選択をスキップする判定がない');
+assert.match(source, /screen: shouldSkipAssignmentModeSelection\s*\? GameScreen\.DIFFICULTY_SELECTION\s*:\s*GameScreen\.MODE_SELECTION,/,
+  '選択済み課題の冒険開始が難易度選択へ進まない');
+assert.match(source, /nextLaunchLocked && pendingManagedAssignmentLetter\?\.id === nextLaunchLocked\.id && showAssignmentLetter/,
+  '最優先課題レター表示中の自動再処理を抑止していない');
+assert.match(source, /if \(nextLaunchLocked\) \{[\s\S]*?openManagedAssignment\(payload\);/,
+  '最優先課題をレター表示経由で開始していない');
 assert.match(source, /gameState\.screen === GameScreen\.START_MENU && pendingAssignmentResumeState/,
   '保持中の本編セーブをタイトル画面の保存処理で上書きする可能性がある');
 

@@ -2207,6 +2207,24 @@ const App: React.FC = () => {
                     launchLockedAssignmentExitRef.current = null;
                 }
                 if (!nextRequired || cancelled) return;
+                if (nextLaunchLocked && pendingManagedAssignmentLetter?.id === nextLaunchLocked.id && showAssignmentLetter) {
+                    // The launch-locked assignment is waiting for the learner to
+                    // read its letter and press 「課題を始める」. Do not reopen or
+                    // bypass that letter while the title screen is rendering.
+                    return;
+                }
+                if (nextLaunchLocked && assignmentStartConfirmedIdRef.current === nextLaunchLocked.id && !showAssignmentLetter) {
+                    // The learner has just confirmed the launch-locked letter.
+                    // Avoid racing the screen transition and reopening the letter
+                    // before ProblemChallengeScreen can mount.
+                    return;
+                }
+                if (!nextLaunchLocked && assignmentStartConfirmedIdRef.current === nextRequired.id && !showAssignmentLetter) {
+                    // A required FREE assignment has already been confirmed from
+                    // its letter. Keep the learner on the title screen so they can
+                    // choose a mode instead of reopening the letter immediately.
+                    return;
+                }
                 let payload = currentAssignment?.id === nextRequired.id ? currentAssignment : null;
                 if (!payload) {
                     try {
@@ -2221,15 +2239,10 @@ const App: React.FC = () => {
                 if (cancelled) return;
                 setShowOnlineNameSetup(false);
                 if (nextLaunchLocked) {
-                    storageService.saveCurrentAssignment(payload);
-                    setCurrentAssignment(payload);
-                    setCompletedAssignmentProblemSource(null);
-                    setPendingManagedAssignmentLetter(null);
-                    setShowAssignmentInbox(false);
-                    setShowAssignmentLetter(false);
-                    setPendingMiniGameScreen(null);
-                    setPendingAssignmentStartScreen(null);
-                    setGameState(prev => ({ ...prev, screen: GameScreen.PROBLEM_CHALLENGE }));
+                    // Launch-locked tasks still start automatically, but first show
+                    // the same assignment letter as other managed tasks so the
+                    // learner can review the title, scope, deadline, and answer mode.
+                    openManagedAssignment(payload);
                 } else {
                     openManagedAssignment(payload);
                 }
@@ -2246,7 +2259,7 @@ const App: React.FC = () => {
             // immediately instead of being deferred until the next app launch.
             requiredAssignmentCheckRef.current = false;
         };
-    }, [currentAssignment, gameState.screen, managedAssignmentsRevision, managementProfile, openManagedAssignment, showAgePrivacySetup, showStudentGradeSurvey]);
+    }, [currentAssignment, gameState.screen, managedAssignmentsRevision, managementProfile, openManagedAssignment, pendingManagedAssignmentLetter, showAgePrivacySetup, showAssignmentLetter, showStudentGradeSurvey]);
 
     const markDailyAssignmentCompleted = useCallback((assignmentId: string | undefined) => {
         if (!assignmentId || !assignmentId.startsWith('daily-')) return;
@@ -2381,6 +2394,7 @@ const App: React.FC = () => {
         setGameState(prev => ({ ...prev, screen }));
     }, [getAssignmentProblemConfig]);
     const isAssignmentChallengeOnlyLocked = activeAssignment?.gameMode === 'CHALLENGE_ONLY' && isAssignmentWithinDeadline;
+    const shouldSkipAssignmentModeSelection = activeAssignment?.gameMode === 'FREE' && isAssignmentWithinDeadline;
     const rewardCardAlbum = useMemo(() => storageService.getRewardCardAlbum(), [rewardCardAlbumVersion]);
 
     const showDailyAssignmentNoticeForProblemSelection = useCallback(() => {
@@ -6595,10 +6609,12 @@ const App: React.FC = () => {
         setIsLoading(false); // Ensure loading is reset
         showDailyAssignmentNoticeForProblemSelection();
         setGameState({
-            // Assignment activation should not choose a problem mode on the
-            // learner's behalf. Let the normal mode selector open; the active
-            // assignment still supplies the questions after the selection.
-            screen: GameScreen.MODE_SELECTION,
+            // A selected FREE assignment already supplies the problem source.
+            // Skip the separate problem/mode selector and continue with the
+            // adventure-specific difficulty selection instead.
+            screen: shouldSkipAssignmentModeSelection
+                ? GameScreen.DIFFICULTY_SELECTION
+                : GameScreen.MODE_SELECTION,
             mode: initialMode,
             modePool: assignmentHasCustomProblems ? (assignmentModePool || []) : assignmentModePool,
             visualTheme: adventureTheme,
@@ -19454,7 +19470,14 @@ const App: React.FC = () => {
                             <DifficultySelectionScreen
                                 maxUnlockedDifficulty={isDebugHpOne ? 10 : maxUnlockedDifficulty}
                                 onSelectDifficulty={handleDifficultySelect}
-                                onBack={() => setGameState(prev => ({ ...prev, screen: prev.challengeMode === 'TYPING' ? GameScreen.TYPING_MODE_SELECTION : GameScreen.MODE_SELECTION }))}
+                                onBack={() => setGameState(prev => ({
+                                    ...prev,
+                                    screen: shouldSkipAssignmentModeSelection
+                                        ? GameScreen.START_MENU
+                                        : prev.challengeMode === 'TYPING'
+                                            ? GameScreen.TYPING_MODE_SELECTION
+                                            : GameScreen.MODE_SELECTION,
+                                }))}
                                 languageMode={languageMode}
                                 visualTheme={visualTheme}
                             />
