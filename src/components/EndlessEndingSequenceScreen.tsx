@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { ChevronRight, Sparkles } from 'lucide-react';
 import type { LanguageMode } from '../types';
 import type { VisualThemeId } from '../data/visualThemes';
@@ -30,14 +30,15 @@ const EndlessEndingSequenceScreen: React.FC<Props> = ({ kind, characterId, chara
   const isLast = pageIndex >= sequence.pages.length - 1;
   const voiceName = `endless-${kind.toLowerCase()}-${pageIndex + 1}`;
   const voiceHeroId = getEndlessEndingVoiceHeroId(characterId, theme as VisualThemeId, magicProtagonistId);
+  const completionStartedRef = useRef(false);
 
   useEffect(() => {
     audioService.stopHighSchoolVoices();
     audioService.stopMagicEventVoices();
     if (theme === 'high-school') {
-      void audioService.playHighSchoolVoiceFile(voiceHeroId, voiceName, 12000);
+      void audioService.playHighSchoolVoiceFile(voiceHeroId, voiceName, 12000).catch(() => undefined);
     } else if (theme === 'magic') {
-      void audioService.playMagicEventVoice(voiceHeroId, voiceName);
+      void audioService.playMagicEventVoice(voiceHeroId, voiceName).catch(() => undefined);
     }
     return () => {
       audioService.stopHighSchoolVoices();
@@ -61,6 +62,15 @@ const EndlessEndingSequenceScreen: React.FC<Props> = ({ kind, characterId, chara
   const eventBackground = theme === 'magic'
     ? 'sprites/backgrounds/learning-rogue/magic-event-hallway.webp'
     : 'sprites/backgrounds/learning-rogue/event-hallway.webp';
+  const handleContinue = () => {
+    if (!isLast) {
+      setPageIndex(index => Math.min(index + 1, sequence.pages.length - 1));
+      return;
+    }
+    if (completionStartedRef.current) return;
+    completionStartedRef.current = true;
+    onComplete();
+  };
 
   return (
     <div
@@ -128,7 +138,7 @@ const EndlessEndingSequenceScreen: React.FC<Props> = ({ kind, characterId, chara
           <div className="event-screen-description min-h-0 max-h-[36dvh] overflow-y-auto text-sm leading-relaxed text-slate-100 sm:text-base">
             <p className="whitespace-pre-wrap">{localizedText}</p>
             <p className="mt-3 rounded-lg border border-amber-200/30 bg-amber-100/10 px-3 py-2 text-sm font-bold leading-relaxed text-amber-100 sm:text-base">
-              <span className="mr-2 text-xs tracking-wide text-amber-200/75">{characterName}</span>
+              <span className="mr-2 text-xs tracking-wide text-amber-200/75">{sequence.characterName}</span>
               {localizedDialogue}
             </p>
           </div>
@@ -137,7 +147,7 @@ const EndlessEndingSequenceScreen: React.FC<Props> = ({ kind, characterId, chara
             <h1 className="text-xl font-black text-white sm:text-3xl">{localizedTitle}</h1>
             <p className="mt-3 max-h-[30dvh] overflow-y-auto whitespace-pre-wrap text-sm leading-relaxed text-slate-100 sm:text-lg">{localizedText}</p>
             <p className="mt-3 rounded-lg border border-amber-200/30 bg-amber-100/10 px-3 py-2 text-sm font-bold leading-relaxed text-amber-100 sm:text-base">
-              <span className="mr-2 text-xs tracking-wide text-amber-200/75">{characterName}</span>
+              <span className="mr-2 text-xs tracking-wide text-amber-200/75">{sequence.characterName}</span>
               {localizedDialogue}
             </p>
           </>
@@ -147,7 +157,7 @@ const EndlessEndingSequenceScreen: React.FC<Props> = ({ kind, characterId, chara
           <button
             type="button"
             data-gamepad-initial-choice
-            onClick={() => isLast ? onComplete() : setPageIndex(index => index + 1)}
+            onClick={handleContinue}
             className="flex w-full items-center justify-center gap-2 rounded-lg bg-amber-300 px-5 py-3 font-black text-slate-950 hover:bg-amber-200"
           >
             {languageMode === 'ENGLISH'

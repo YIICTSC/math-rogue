@@ -39,7 +39,7 @@ const getRevisionEntry = (
   theme: VisualThemeId,
   magicProtagonistId?: string,
 ): EndlessRevisionEntry => {
-  const normalizedCharacterId = characterId.trim().toUpperCase();
+  const normalizedCharacterId = (characterId ?? '').trim().toUpperCase();
   if (theme === 'magic') {
     const requestedMagicId = magicProtagonistId?.toUpperCase();
     const femaleMagicId = MAGIC_HERO_ID_BY_CHARACTER_ID[normalizedCharacterId] ?? 'AKARI';
@@ -90,6 +90,7 @@ export const getEndlessEndingSequence = (
 ): EndlessEndingSequence => {
   const resolvedTheme: VisualThemeId = theme === 'high-school' || theme === 'magic' ? theme : 'elementary';
   const entry = getRevisionEntry(characterId, resolvedTheme, magicProtagonistId);
+  const resolvedCharacterName = (characterName ?? '').trim() || '主人公';
   const copies = kind === 'OPENING' ? entry.opening : entry.true;
   const pages = copies.map((copy) => ({
     title: copy.title,
@@ -108,7 +109,7 @@ export const getEndlessEndingSequence = (
   return {
     id: `${kind.toLowerCase()}-${entry.protagonistId.toLowerCase()}`,
     characterId: entry.baseCharacterId,
-    characterName,
+    characterName: resolvedCharacterName,
     kind,
     pages,
   };

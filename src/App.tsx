@@ -7028,10 +7028,10 @@ const App: React.FC = () => {
         }
         setGameState(prev => ({
             ...prev,
+            // The normal clear screen and the endless sequence must use the
+            // same run theme even if the menu setting was changed earlier.
+            visualTheme: prev.visualTheme || visualTheme,
             // Keep the map, copy, speaker label and voice asset on one theme.
-            // In single-player the menu selection is authoritative; COOP keeps
-            // the synchronized run theme from the shared state.
-            visualTheme: prev.challengeMode === 'COOP' ? (prev.visualTheme || visualTheme) : visualTheme,
             // Endless has its own chapter numbering.  Do not continue the
             // normal-mode Act counter (which would make the run start at 5
             // after clearing the four normal Acts).
@@ -7040,7 +7040,7 @@ const App: React.FC = () => {
             map: generateDungeonMap(prev.difficultyLevel || 1, {
                 endless: true,
                 endlessChapter: 1,
-                visualTheme: prev.challengeMode === 'COOP' ? (prev.visualTheme || visualTheme) : visualTheme,
+                visualTheme: prev.visualTheme || visualTheme,
             }),
             currentMapNodeId: null,
             screen: GameScreen.ENDLESS_OPENING,
@@ -7063,7 +7063,7 @@ const App: React.FC = () => {
                 const turnFlags = { ...nextPlayer.turnFlags };
                 delete turnFlags.ENDLESS_CHEAT_DEATH;
                 nextPlayer.turnFlags = turnFlags;
-                const endlessTheme = prev.challengeMode === 'COOP' ? (prev.visualTheme || visualTheme) : visualTheme;
+                const endlessTheme = prev.visualTheme || visualTheme;
                 const arc = getEndlessArc(endlessTheme);
                 if (arc !== 'magic' && (profile[`effect:${arc === 'elementary' ? 'ELEMENTARY_START_REWARD_PLUS' : 'HIGH_SCHOOL_START_REWARD_PLUS'}`] || 0) > 0) {
                     nextPlayer.relicCounters.ENDLESS_START_REWARD_SLOTS = 1;
