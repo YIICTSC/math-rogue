@@ -6142,6 +6142,16 @@ textarea {
     margin: 0;
   }
 
+  /* Keep the App Store promotion in the left column, directly above the
+     playtime readout, when the desktop menu switches to its split layout. */
+  .start-menu-ios-launch-banner {
+    position: absolute;
+    left: 0.5rem;
+    bottom: 3.85rem;
+    width: min(44vw, 500px);
+    margin: 0;
+  }
+
   .start-menu-crowdfunding + .start-menu-playtime,
   .start-menu-playtime {
     bottom: 1.25rem;
@@ -6589,6 +6599,13 @@ textarea {
   .start-menu-crowdfunding {
     position: absolute;
     left: 0.75rem;
+    bottom: 2.75rem;
+    width: min(44vw, 21rem);
+    margin: 0;
+  }
+
+  .start-menu-ios-launch-banner {
+    left: 0.5rem;
     bottom: 2.75rem;
     width: min(44vw, 21rem);
     margin: 0;
@@ -15138,6 +15155,18 @@ textarea {
 
 .shogi-play-mode-tabs b { font-size: 10px; letter-spacing: .11em; }
 .shogi-play-mode-tabs span { font-size: 8px; line-height: 1.35; }
+
+.shogi-local-advance-note {
+  width: 100%;
+  margin: 10px 0 0;
+  padding: 9px 12px;
+  border: 1px solid rgba(121, 191, 203, .2);
+  color: #9eb9bd;
+  background: rgba(9, 29, 34, .48);
+  font-size: 10px;
+  line-height: 1.55;
+  text-align: left;
+}
 
 .shogi-mini-mode-tabs button {
   display: flex;

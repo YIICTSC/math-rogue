@@ -245,18 +245,23 @@ const ModeStart: React.FC<{
           <button type="button" className={mode === 'STANDARD' ? 'active' : ''} onClick={() => setMode('STANDARD')}>
             <b>STANDARD</b><span>{copy(languageMode, '標準8種 // ランダム配置', 'Eight standard pieces // random setup')}</span>
           </button>
-          <button type="button" className={mode === 'ADVANCE' ? 'active' : ''} onClick={() => setMode('ADVANCE')}>
+          <button type="button" className={mode === 'ADVANCE' ? 'active' : ''} onClick={() => { setMode('ADVANCE'); setStage(current => Math.min(current, unlocked)); }}>
             <b>ADVANCE</b><span>{copy(languageMode, 'ユニーク駒50種 // 100ステージ', '50 unique pieces // 100 stages')}</span>
           </button>
         </div>
         <div className="shogi-play-mode-tabs" aria-label={copy(languageMode, '対戦方式', 'Play mode')}>
-          <button type="button" className={playMode === 'CPU' ? 'active' : ''} onClick={() => setPlayMode('CPU')}>
+          <button type="button" className={playMode === 'CPU' ? 'active' : ''} onClick={() => { setPlayMode('CPU'); if (mode === 'ADVANCE') setStage(current => Math.min(current, unlocked)); }}>
             <b>{copy(languageMode, 'CPU対戦', 'VS CPU')}</b><span>{copy(languageMode, '一人で学習CPUと対戦', 'Solo learning duel')}</span>
           </button>
           <button type="button" className={playMode === 'LOCAL' ? 'active' : ''} onClick={() => setPlayMode('LOCAL')}>
             <b>{copy(languageMode, '対面対戦', 'FACE-TO-FACE')}</b><span>{copy(languageMode, '同じ画面で先手・後手を交代', 'Two players on one screen')}</span>
           </button>
         </div>
+        {mode === 'ADVANCE' && playMode === 'LOCAL' && (
+          <p className="shogi-local-advance-note">
+            {copy(languageMode, `端末でステージ${unlocked}まで解禁されたユニーク駒から毎局ランダムに最大4種を選び、標準駒と組み合わせます。`, `Each local Advance game randomly selects up to four unique pieces unlocked through Stage ${unlocked} on this device and combines them with standard pieces.`)}
+          </p>
+        )}
         {mode === 'ADVANCE' && playMode === 'CPU' && (
           <div className="shogi-stage-picker">
             <div className="shogi-stage-picker-head">
@@ -365,11 +370,7 @@ const ShogiMiniGame: React.FC<ShogiMiniGameProps> = ({ onBack, onFinish, languag
       ...(Object.keys(game.hands.P).filter(kind => game.hands.P[kind as ShogiPieceKind] > 0) as ShogiPieceKind[]),
       ...(Object.keys(game.hands.C).filter(kind => game.hands.C[kind as ShogiPieceKind] > 0) as ShogiPieceKind[]),
     ]);
-    if (game.mode === 'ADVANCE') {
-      ADVANCED_PIECES.slice(0, Math.min(50, game.stage))
-        .slice(-getAdvancedStageUniqueCount(game.stage))
-        .forEach(piece => visibleKinds.add(piece.kind));
-    }
+    if (game.mode === 'ADVANCE') game.activeAdvancedKinds.forEach(kind => visibleKinds.add(kind));
     visibleKinds.forEach(kind => {
       const scopeKey = ADVANCED_PIECES.some(piece => piece.kind === kind) ? 'shogi-advanced' : 'shogi-standard';
       const discoveryKey = `${scopeKey}-${kind}`;
@@ -388,7 +389,13 @@ const ShogiMiniGame: React.FC<ShogiMiniGameProps> = ({ onBack, onFinish, languag
     // Quiz/result screens may change the BGM. Every new board, including the
     // Advance "next stage" action, explicitly restores the poker track.
     void audioService.playBGM('poker_play');
-    setGame(createShogiGame(mode, stage, Date.now() + stage * 97, playMode));
+    setGame(createShogiGame(
+      mode,
+      stage,
+      Date.now() + stage * 97,
+      playMode,
+      mode === 'ADVANCE' ? progress.highestStage : 0,
+    ));
     setInspect(null);
   };
 
@@ -424,8 +431,8 @@ const ShogiMiniGame: React.FC<ShogiMiniGameProps> = ({ onBack, onFinish, languag
   }, [game?.result, game?.mode, game?.stage, game?.playMode]);
 
   const selectedTarget = useMemo(
-    () => game?.selected ? getShogiMovementTargets(game.board, game.hands, game.selected, game.side) : [],
-    [game?.board, game?.hands, game?.selected, game?.side],
+    () => game?.selected ? getShogiMovementTargets(game.board, game.hands, game.selected, game.side, game.history) : [],
+    [game?.board, game?.hands, game?.selected, game?.side, game?.history],
   );
 
   const beginLongPress = (piece: ShogiPiece, row?: number, col?: number) => {
@@ -434,7 +441,7 @@ const ShogiMiniGame: React.FC<ShogiMiniGameProps> = ({ onBack, onFinish, languag
     longPressTimer.current = setTimeout(() => {
       longPressTriggered.current = true;
       const selection = row !== undefined && col !== undefined ? { row, col } : { hand: piece.kind };
-      setInspect({ piece, targetCount: game ? getShogiMovementTargets(game.board, game.hands, selection, piece.side).length : 0 });
+      setInspect({ piece, targetCount: game ? getShogiMovementTargets(game.board, game.hands, selection, piece.side, game.history).length : 0 });
     }, 450);
   };
   const cancelLongPress = () => {
@@ -443,7 +450,7 @@ const ShogiMiniGame: React.FC<ShogiMiniGameProps> = ({ onBack, onFinish, languag
   };
 
   const inspectBoardPiece = (piece: ShogiPiece, row: number, col: number) => {
-    setInspect({ piece, targetCount: game ? getShogiMovementTargets(game.board, game.hands, { row, col }, piece.side).length : 0 });
+    setInspect({ piece, targetCount: game ? getShogiMovementTargets(game.board, game.hands, { row, col }, piece.side, game.history).length : 0 });
   };
   const onSquare = (row: number, col: number) => {
     if (!game || game.result) return;
@@ -491,10 +498,13 @@ const ShogiMiniGame: React.FC<ShogiMiniGameProps> = ({ onBack, onFinish, languag
       <div className="shogi-mini-layout">
         <aside className="shogi-mini-side-panel">
           <p className="shogi-mini-eyebrow">{game.mode === 'ADVANCE' ? 'UNIQUE PIECES' : 'STANDARD PIECES'}</p>
-          <h2>{game.mode === 'ADVANCE' ? getAdvancedStageUniqueCount(game.stage) + ' TYPES ACTIVE' : '8 TYPES ACTIVE'}</h2>
+          <h2>{game.mode === 'ADVANCE' ? game.activeAdvancedKinds.length + ' TYPES ACTIVE' : '8 TYPES ACTIVE'}</h2>
           <div className="shogi-mini-side-list">
             {STANDARD_PIECES.map(piece => <span key={piece.kind}><ShogiPieceIcon glyph={piece.glyph} compact />{pieceLabelFor(piece)}</span>)}
-            {game.mode === 'ADVANCE' && ADVANCED_PIECES.slice(0, Math.min(50, game.stage)).slice(-getAdvancedStageUniqueCount(game.stage)).map(piece => <span key={piece.kind} className="unique"><ShogiPieceIcon glyph={piece.glyph} compact />{pieceLabelFor(piece)}</span>)}
+            {game.mode === 'ADVANCE' && game.activeAdvancedKinds.map(kind => {
+              const piece = getPieceDefinition(kind);
+              return <span key={piece.kind} className="unique"><ShogiPieceIcon glyph={piece.glyph} compact />{pieceLabelFor(piece)}</span>;
+            })}
           </div>
           <div className="shogi-mini-help">
             <b>{copy(languageMode, '操作', 'CONTROLS')}</b>
@@ -598,7 +608,7 @@ const ShogiMiniGame: React.FC<ShogiMiniGameProps> = ({ onBack, onFinish, languag
                   onPointerUp={cancelLongPress}
                   onPointerLeave={cancelLongPress}
                   onKeyDown={event => {
-                    if (event.key.toLowerCase() === 'i' || event.key === '?') setInspect({ piece: { kind, side: 'P', promoted: false, hasMoved: false }, targetCount: game ? getShogiMovementTargets(game.board, game.hands, { hand: kind }, 'P').length : 0 });
+                    if (event.key.toLowerCase() === 'i' || event.key === '?') setInspect({ piece: { kind, side: 'P', promoted: false, hasMoved: false }, targetCount: game ? getShogiMovementTargets(game.board, game.hands, { hand: kind }, 'P', game.history).length : 0 });
                   }}
                 >
               <ShogiPieceIcon glyph={definition.glyph} compact /><b>{pieceLabelFor(definition)}</b><em>× {count}</em>

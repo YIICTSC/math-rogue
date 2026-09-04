@@ -34,6 +34,10 @@ export interface ShogiGameState {
   mode: ShogiMode;
   playMode: ShogiPlayMode;
   stage: number;
+  /** The advanced pieces actually included in this board. */
+  activeAdvancedKinds: ShogiPieceKind[];
+  /** Number of advanced pieces unlocked on this device when the board was created. */
+  unlockedAdvancedCount: number;
   seed: number;
   board: ShogiBoard;
   hands: ShogiHands;
@@ -277,6 +281,59 @@ const lionTargets = (board: ShogiBoard, row: number, col: number, piece: ShogiPi
   return uniqueTargets(result);
 };
 
+const wolfTargets = (board: ShogiBoard, row: number, col: number, piece: ShogiPiece): ShogiTarget[] => {
+  const result = candidateMoves(board, row, col, piece, kingVectors());
+  for (const firstVector of kingVectors()) {
+    const firstRow = row + firstVector.dr;
+    const firstCol = col + firstVector.dc;
+    const first = board[firstRow]?.[firstCol];
+    if (!inside(firstRow, firstCol) || !first || first.side === piece.side || !canLandOn(piece, first)) continue;
+    // The first step must capture. The optional second step is deliberately
+    // empty-only, so a Wolf can never capture twice in one turn.
+    for (const secondVector of kingVectors()) {
+      const secondRow = firstRow + secondVector.dr;
+      const secondCol = firstCol + secondVector.dc;
+      if (!inside(secondRow, secondCol) || board[secondRow][secondCol]) continue;
+      result.push({
+        row: secondRow,
+        col: secondCol,
+        status: 'SPECIAL',
+        note: '捕獲後の追加移動',
+        path: [[firstRow, firstCol], [secondRow, secondCol]],
+      });
+    }
+  }
+  return uniqueTargets(result);
+};
+
+const chronosTargets = (board: ShogiBoard, row: number, col: number, piece: ShogiPiece): ShogiTarget[] => {
+  const result = candidateMoves(board, row, col, piece, advancedVectors(piece));
+  if (piece.extraMoveUsed) return uniqueTargets(result);
+
+  // Chronos can spend its one extra action by chaining two king steps. The
+  // final destination is selected in one tap, just like the Lion's two-step
+  // move, while applyMove still resolves each intermediate square in order.
+  for (const firstVector of kingVectors()) {
+    const firstRow = row + firstVector.dr;
+    const firstCol = col + firstVector.dc;
+    if (!inside(firstRow, firstCol) || !canLandOn(piece, board[firstRow][firstCol])) continue;
+    if (board[firstRow][firstCol]?.kind === 'K') continue;
+    for (const secondVector of kingVectors()) {
+      const secondRow = firstRow + secondVector.dr;
+      const secondCol = firstCol + secondVector.dc;
+      if (!inside(secondRow, secondCol) || !canLandOn(piece, board[secondRow][secondCol])) continue;
+      result.push({
+        row: secondRow,
+        col: secondCol,
+        status: 'SPECIAL',
+        note: '宿の追加手',
+        path: [[firstRow, firstCol], [secondRow, secondCol]],
+      });
+    }
+  }
+  return uniqueTargets(result);
+};
+
 const customAdvancedTargets = (
   board: ShogiBoard,
   row: number,
@@ -289,6 +346,8 @@ const customAdvancedTargets = (
   const one = (dr: number, dc: number): Vector => ({ dr, dc });
 
   if (pattern === 'LION') return lionTargets(board, row, col, piece);
+  if (pattern === 'WOLF') return wolfTargets(board, row, col, piece);
+  if (pattern === 'CHRONOS') return chronosTargets(board, row, col, piece);
 
   if (pattern === 'MIRROR') {
     if (!lastMove?.from) return undefined;
@@ -621,7 +680,12 @@ const applyMove = (
         }
       }
       nextBoard[current[0]][current[1]] = null;
-      nextBoard[targetRow][targetCol] = index === path.length - 1 ? promotedOnArrival(moving!, targetRow) : moving;
+      const arrived = promotedOnArrival(moving!, targetRow);
+      nextBoard[targetRow][targetCol] = index === path.length - 1
+        ? move.kind === 'ADV_CHRONOS' && path.length > 1
+          ? { ...arrived, extraMoveUsed: true }
+          : arrived
+        : moving;
       current = [targetRow, targetCol];
     });
   } else {
@@ -694,20 +758,31 @@ const buildShogiPosition = (
   mode: ShogiMode,
   stage: number,
   random: () => number,
+  playMode: ShogiPlayMode,
+  advancedUnlockCount = stage,
 ): { board: ShogiBoard; hands: ShogiHands; uniqueKinds: ShogiPieceKind[] } => {
   const board = emptyBoard();
   const hands = emptyHands();
   const uniqueKinds: ShogiPieceKind[] = [];
   const baseKinds: ShogiPieceKind[] = ['R', 'B', 'G', 'S', 'N', 'L', 'P'];
   if (mode === 'ADVANCE') {
-    if (stage <= 50) uniqueKinds.push(ADVANCED_PIECES[stage - 1].kind);
-    const unlocked = ADVANCED_PIECES.slice(0, Math.max(1, Math.min(50, stage)));
-    while (uniqueKinds.length < stageUniqueCount(stage)) {
+    const unlockedCount = Math.max(1, Math.min(50, Math.floor(advancedUnlockCount)));
+    const unlocked = ADVANCED_PIECES.slice(0, unlockedCount);
+    const uniqueCount = playMode === 'LOCAL'
+      ? Math.min(4, unlocked.length)
+      : Math.min(stageUniqueCount(stage), unlocked.length);
+    if (playMode !== 'LOCAL' && stage <= 50) uniqueKinds.push(ADVANCED_PIECES[stage - 1].kind);
+    while (uniqueKinds.length < uniqueCount) {
       const pick = unlocked[Math.floor(random() * unlocked.length)].kind;
       if (!uniqueKinds.includes(pick)) uniqueKinds.push(pick);
     }
   }
-  const standardPieceSlots = mode === 'ADVANCE' ? Math.max(1, 9 - uniqueKinds.length) : 5;
+  // Face-to-face Advance is a free duel: keep the same five standard-piece
+  // slots as STANDARD and add up to four unlocked unique pieces alongside
+  // them. CPU stages retain their teaching-oriented stage composition.
+  const standardPieceSlots = mode === 'ADVANCE' && playMode !== 'LOCAL'
+    ? Math.max(1, 9 - uniqueKinds.length)
+    : 5;
   const playerKinds = shuffled(baseKinds, random).slice(0, standardPieceSlots);
   const cpuKinds = shuffled(baseKinds, random).slice(0, standardPieceSlots);
   const playerPieces = [makeShogiPiece('K', 'P'), ...playerKinds.map(kind => makeShogiPiece(kind, 'P'))];
@@ -731,23 +806,38 @@ export const createShogiPosition = (
   mode: ShogiMode,
   stage: number,
   seed: number,
-): { board: ShogiBoard; hands: ShogiHands; uniqueKinds: ShogiPieceKind[] } => {
+  playMode: ShogiPlayMode = 'CPU',
+  advancedUnlockCount = mode === 'ADVANCE' ? stage : 0,
+): { board: ShogiBoard; hands: ShogiHands; uniqueKinds: ShogiPieceKind[]; unlockedAdvancedCount: number } => {
   // A fully random placement could put a rook/lance/bishop in line with a
   // king before the first turn. That made otherwise movable pieces appear to
   // have no destinations because every move left the king in check.
-  let position = buildShogiPosition(mode, stage, seededRandom(seed));
+  let position = buildShogiPosition(mode, stage, seededRandom(seed), playMode, advancedUnlockCount);
   for (let attempt = 1; attempt < 64 && !isSafeInitialPosition(position.board); attempt += 1) {
-    position = buildShogiPosition(mode, stage, seededRandom(seed + attempt * 7919));
+    position = buildShogiPosition(mode, stage, seededRandom(seed + attempt * 7919), playMode, advancedUnlockCount);
   }
-  return position;
+  return {
+    ...position,
+    unlockedAdvancedCount: mode === 'ADVANCE'
+      ? Math.max(1, Math.min(50, Math.floor(advancedUnlockCount)))
+      : 0,
+  };
 };
 
-export const createShogiGame = (mode: ShogiMode, stage = 1, seed = Date.now(), playMode: ShogiPlayMode = 'CPU'): ShogiGameState => {
-  const position = createShogiPosition(mode, stage, seed);
+export const createShogiGame = (
+  mode: ShogiMode,
+  stage = 1,
+  seed = Date.now(),
+  playMode: ShogiPlayMode = 'CPU',
+  advancedUnlockCount = mode === 'ADVANCE' ? stage : 0,
+): ShogiGameState => {
+  const position = createShogiPosition(mode, stage, seed, playMode, advancedUnlockCount);
   return {
     mode,
     playMode,
     stage,
+    activeAdvancedKinds: position.uniqueKinds,
+    unlockedAdvancedCount: position.unlockedAdvancedCount,
     seed,
     board: position.board,
     hands: position.hands,

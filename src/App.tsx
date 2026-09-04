@@ -399,7 +399,7 @@ import { generateEnemyName } from './services/geminiService';
 import { generateDungeonMap, MAP_HEIGHT } from './services/mapGenerator';
 import { parseTransferData, serializeTransferData, storageService } from './services/storageService';
 import { onlineRankingService, type OnlineRankingProfile, type OnlineReward } from './services/onlineRankingService';
-import { getNextLaunchLockedManagedAssignment, getNextRequiredManagedAssignment, isManagedAssignmentActive, managementPortalService, toAssignmentPayload, type ManagementProfile } from './services/managementPortalService';
+import { getNextLaunchLockedManagedAssignment, getNextRequiredManagedAssignment, managementPortalService, toAssignmentPayload, type ManagementProfile } from './services/managementPortalService';
 import { ASSIGNMENT_NOTIFICATION_OPEN_EVENT } from './services/assignmentNotificationService';
 import { childSafetyService } from './services/childSafetyService';
 import { generateEvent, generateLegacyEvent } from './services/eventService';
@@ -472,6 +472,13 @@ const getDefaultDailyAssignmentProfile = (languageMode: LanguageMode): StudentPr
     ...DEFAULT_DAILY_ASSIGNMENT_PROFILE,
     grade: languageMode === 'ENGLISH' ? 'Grade 1' : DEFAULT_DAILY_ASSIGNMENT_PROFILE.grade,
 });
+
+const isAssignmentDeadlineActive = (assignment: AssignmentPayload | null | undefined) => {
+    if (!assignment) return false;
+    if (!assignment.dueAt) return true;
+    const dueTime = new Date(assignment.dueAt).getTime();
+    return Number.isNaN(dueTime) ? true : Date.now() <= dueTime;
+};
 
 const getInitialStudentGradeMode = (languageMode: LanguageMode): LanguageMode => {
     // 初回モーダルも、タイトル画面で選ばれている表示言語に揃える。
@@ -2165,9 +2172,8 @@ const App: React.FC = () => {
     }, []);
 
     const openManagedAssignment = useCallback((assignment: AssignmentPayload) => {
+        if (!isAssignmentDeadlineActive(assignment)) return;
         launchLockedAssignmentExitRef.current = null;
-        storageService.saveCurrentAssignment(assignment);
-        setCurrentAssignment(assignment);
         setCompletedAssignmentProblemSource(null);
         assignmentStartConfirmedIdRef.current = null;
         setAssignmentStartConfirmedId(null);
@@ -2186,6 +2192,12 @@ const App: React.FC = () => {
     }, [showAssignmentLetter]);
 
     useEffect(() => {
+        if (gameState.screen !== GameScreen.START_MENU || !currentAssignment || isAssignmentDeadlineActive(currentAssignment)) return;
+        storageService.clearCurrentAssignment();
+        setCurrentAssignment(null);
+    }, [currentAssignment, gameState.screen]);
+
+    useEffect(() => {
         if (gameState.screen !== GameScreen.START_MENU) return;
         if (!managementProfile || showAgePrivacySetup || showStudentGradeSurvey || requiredAssignmentCheckRef.current) return;
         requiredAssignmentCheckRef.current = true;
@@ -2193,13 +2205,6 @@ const App: React.FC = () => {
         void (async () => {
             try {
                 const assignments = managementPortalService.getCachedAssignments();
-                if (currentAssignment?.enforcementLevel === 'launch_lock') {
-                    const currentManagedAssignment = assignments.find((assignment) => assignment.id === currentAssignment.id);
-                    if (!currentManagedAssignment || !isManagedAssignmentActive(currentManagedAssignment)) {
-                        storageService.clearCurrentAssignment();
-                        setCurrentAssignment(null);
-                    }
-                }
                 const nextLaunchLocked = getNextLaunchLockedManagedAssignment(assignments);
                 const nextRequired = nextLaunchLocked || getNextRequiredManagedAssignment(assignments);
                 if (nextLaunchLocked && launchLockedAssignmentExitRef.current === nextLaunchLocked.id) {
@@ -2297,7 +2302,9 @@ const App: React.FC = () => {
             || correctCustomProblemIds.size >= getAssignmentCustomTargetCorrect(currentAssignment);
         return completedUnits && completedCustomProblems;
     }, [currentAssignment, currentUrlAssignmentAnswers]);
-    const shouldPrioritizeCurrentAssignment = !!currentAssignment && !isCurrentUrlAssignmentComplete;
+    const shouldPrioritizeCurrentAssignment = !!currentAssignment
+        && !isCurrentUrlAssignmentComplete
+        && isAssignmentDeadlineActive(currentAssignment);
     const generatedDailyAssignment = useMemo(
         () => shouldPrioritizeCurrentAssignment ? null : createDailyAssignment(dailyAssignmentProfile, modeCorrectCounts),
         [shouldPrioritizeCurrentAssignment, dailyAssignmentProfile.grade, dailyAssignmentProfile.schoolYear, modeCorrectCounts]
@@ -2315,27 +2322,22 @@ const App: React.FC = () => {
     // that initiated the async selection can briefly replace a required task.
     const assignmentLetter = pendingManagedAssignmentLetter
         || (shouldPrioritizeCurrentAssignment ? currentAssignment : dailyAssignment);
-    const effectiveAssignment = pendingManagedAssignmentLetter
-        || (shouldPrioritizeCurrentAssignment ? currentAssignment : (isDailyAssignmentStarted ? dailyAssignment : null));
+    const effectiveAssignment = pendingManagedAssignmentLetter && isAssignmentDeadlineActive(pendingManagedAssignmentLetter)
+        ? pendingManagedAssignmentLetter
+        : (shouldPrioritizeCurrentAssignment ? currentAssignment : (isDailyAssignmentStarted ? dailyAssignment : null));
     const isTeacherAssignmentActive = !!pendingManagedAssignmentLetter || shouldPrioritizeCurrentAssignment;
-    const isRequiredTeacherAssignment = isTeacherAssignmentActive && assignmentLetter?.requirementType === 'required';
+    const isRequiredTeacherAssignment = isTeacherAssignmentActive
+        && (assignmentLetter?.enforcementLevel === 'required' || assignmentLetter?.requirementType === 'required');
     const isLaunchLockedTeacherAssignment = isTeacherAssignmentActive && assignmentLetter?.enforcementLevel === 'launch_lock';
     const isBlockingTeacherAssignment = isRequiredTeacherAssignment || isLaunchLockedTeacherAssignment;
     const teacherAssignmentConditionLabel = isLaunchLockedTeacherAssignment ? '最優先課題（起動時開始）' : isRequiredTeacherAssignment ? '必須課題' : '任意課題';
 
-    const isAssignmentDeadlineActive = useCallback((assignment: AssignmentPayload | null | undefined) => {
-        if (!assignment) return false;
-        if (!assignment.dueAt) return true;
-        const dueTime = new Date(assignment.dueAt).getTime();
-        return Number.isNaN(dueTime) ? true : Date.now() <= dueTime;
-    }, []);
-
     const isAssignmentWithinDeadline = useMemo(() => {
         return isAssignmentDeadlineActive(effectiveAssignment);
-    }, [effectiveAssignment, isAssignmentDeadlineActive]);
+    }, [effectiveAssignment]);
     const isAssignmentLetterWithinDeadline = useMemo(() => (
         isAssignmentDeadlineActive(assignmentLetter)
-    ), [assignmentLetter, isAssignmentDeadlineActive]);
+    ), [assignmentLetter]);
     const currentAssignmentAnswers = useMemo(() => {
         if (!effectiveAssignment) return [];
         return storageService.getAssignmentAnswers().filter(answer => answer.assignmentId === effectiveAssignment.id);
@@ -2373,7 +2375,11 @@ const App: React.FC = () => {
     // rebuilds both activeAssignment and the daily assignment after every saved answer.
     const assignmentProblemSourceRef = useRef<AssignmentPayload | null>(null);
     const currentProblemSource = effectiveAssignment || completedAssignmentProblemSource;
-    if (currentProblemSource && assignmentProblemSourceRef.current?.id !== currentProblemSource.id) {
+    const currentProblemSourceVersion = currentProblemSource?.managementPortal?.version ?? currentProblemSource?.createdAt;
+    if (currentProblemSource && (
+        assignmentProblemSourceRef.current?.id !== currentProblemSource.id
+        || (assignmentProblemSourceRef.current?.managementPortal?.version ?? assignmentProblemSourceRef.current?.createdAt) !== currentProblemSourceVersion
+    )) {
         assignmentProblemSourceRef.current = currentProblemSource;
     }
     const assignmentProblemSource = currentProblemSource ? assignmentProblemSourceRef.current : null;
@@ -6526,12 +6532,23 @@ const App: React.FC = () => {
 
     const startAssignmentFromLetter = (assignment: AssignmentPayload, isTeacherAssignment: boolean) => {
         audioService.playSound('select');
+        if (!isAssignmentDeadlineActive(assignment)) {
+            setPendingManagedAssignmentLetter(null);
+            setPendingMiniGameScreen(null);
+            setPendingAssignmentStartScreen(null);
+            setPendingAssignmentResumeState(null);
+            setShowAssignmentLetter(false);
+            return;
+        }
         setShowAssignmentLetter(false);
 
         if (isTeacherAssignment) {
             // Confirming a managed assignment only enables its question source.
             // The learner can now choose Continue, Adventure, Problem, a mini-game,
             // or another available mode from the title screen.
+            storageService.saveCurrentAssignment(assignment);
+            setCurrentAssignment(assignment);
+            setCompletedAssignmentProblemSource(null);
             assignmentStartConfirmedIdRef.current = assignment.id;
             setAssignmentStartConfirmedId(assignment.id);
             setPendingMiniGameScreen(null);
@@ -6562,6 +6579,7 @@ const App: React.FC = () => {
         const resumeMiniGameScreen = pendingMiniGameScreen;
         const resumeAssignmentScreen = pendingAssignmentStartScreen;
         const assignmentResumeState = pendingAssignmentResumeState;
+        const resumeToCraneGame = !assignmentResumeState && resumeMiniGameScreen === GameScreen.MINI_GAME_CRANE;
         if (assignment.gameMode === 'FREE' && resumeMiniGameScreen) {
             const assignmentConfig = getAssignmentProblemConfig(assignment);
             setMiniGameProblemMode(assignmentConfig.mode || GameMode.UPPER_TRIVIA);
@@ -6592,8 +6610,15 @@ const App: React.FC = () => {
                         : resumeAssignmentScreen
                             ? resumeAssignmentScreen
                             : prev.screen === GameScreen.MODE_SELECTION
-                                ? GameScreen.DIFFICULTY_SELECTION
+                            ? GameScreen.DIFFICULTY_SELECTION
                                 : prev.screen,
+            ...(resumeToCraneGame
+                ? {
+                    craneGameContext: 'TITLE' as const,
+                    currentEventTitle: undefined,
+                    challengeMode: undefined,
+                }
+                : {}),
         }));
     };
 
@@ -6859,7 +6884,11 @@ const App: React.FC = () => {
             return;
         }
         audioService.playSound('select');
+        setPendingMiniGameScreen(screen);
         if (screen === GameScreen.MINI_GAME_CRANE) {
+            if (showDailyAssignmentNoticeForProblemSelection()) {
+                return;
+            }
             setPendingMiniGameScreen(null);
             setGameState(prev => ({
                 ...prev,
@@ -6870,7 +6899,6 @@ const App: React.FC = () => {
             }));
             return;
         }
-        setPendingMiniGameScreen(screen);
         if (showDailyAssignmentNoticeForProblemSelection()) {
             return;
         }
@@ -17958,11 +17986,7 @@ const App: React.FC = () => {
                                             data-gamepad-back
                                             onClick={() => {
                                                 if (!isTeacherAssignmentActive && assignmentLetter) {
-                                                    if (assignmentLetterSource === 'selection') {
-                                                        setDismissedDailyAssignmentId(assignmentLetter.id);
-                                                    } else {
-                                                        setDismissedDailyAssignmentId(null);
-                                                    }
+                                                    setDismissedDailyAssignmentId(assignmentLetter.id);
                                                     setStartedDailyAssignmentId(null);
                                                 }
                                                  setPendingMiniGameScreen(null);
@@ -17977,8 +18001,12 @@ const App: React.FC = () => {
                                         {!isBlockingTeacherAssignment && (isTeacherAssignmentActive ? (
                                             <button
                                                 onClick={() => {
-                                                    storageService.clearCurrentAssignment();
-                                                    setCurrentAssignment(null);
+                                                    if (currentAssignment?.id === assignmentLetter?.id) {
+                                                        storageService.clearCurrentAssignment();
+                                                        setCurrentAssignment(null);
+                                                    }
+                                                    setPendingManagedAssignmentLetter(null);
+                                                    setPendingAssignmentResumeState(null);
                                                     setShowAssignmentLetter(false);
                                                 }}
                                                 className="rounded-xl border border-red-400 bg-red-50 px-4 py-3 text-sm font-black text-red-700 hover:bg-red-100"
@@ -18408,23 +18436,24 @@ const App: React.FC = () => {
                                     </button>
                                 </div>
 
-                                {DISTRIBUTION_PLATFORM === 'web' && (
-                                    <a
-                                        href={IOS_APP_STORE_URL}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        aria-label={trans('学習ローグ iOS版のApp Storeページを開く', languageMode)}
-                                        className="start-menu-ios-launch-banner mt-2 block w-full overflow-hidden rounded border-2 border-cyan-200/80 bg-slate-950/80 p-1 shadow-[0_0_20px_rgba(34,211,238,0.3)] transition-transform hover:scale-[1.015] hover:border-amber-200 focus:outline-none focus:ring-2 focus:ring-amber-300"
-                                    >
-                                        <img
-                                            src={IOS_LAUNCH_BANNER_IMAGE}
-                                            alt={trans('学習ローグ iOS版アプリ 8月25日リリースのお知らせ', languageMode)}
-                                            className="block h-auto w-full object-cover"
-                                            draggable={false}
-                                        />
-                                    </a>
-                                )}
                             </div>
+
+                            {DISTRIBUTION_PLATFORM === 'web' && (
+                                <a
+                                    href={IOS_APP_STORE_URL}
+                                    target="_blank"
+                                    rel="noopener noreferrer"
+                                    aria-label={trans('学習ローグ iOS版のApp Storeページを開く', languageMode)}
+                                    className="start-menu-ios-launch-banner mt-2 block w-full overflow-hidden rounded border-2 border-cyan-200/80 bg-slate-950/80 p-1 shadow-[0_0_20px_rgba(34,211,238,0.3)] transition-transform hover:scale-[1.015] hover:border-amber-200 focus:outline-none focus:ring-2 focus:ring-amber-300"
+                                >
+                                    <img
+                                        src={IOS_LAUNCH_BANNER_IMAGE}
+                                        alt={trans('学習ローグ iOS版アプリ 8月25日リリースのお知らせ', languageMode)}
+                                        className="block h-auto w-full object-cover"
+                                        draggable={false}
+                                    />
+                                </a>
+                            )}
 
                             {shouldShowCrowdfundingBanner && (
                                 <a
@@ -18509,11 +18538,7 @@ const App: React.FC = () => {
                                     data-gamepad-back
                                     onClick={() => {
                                         if (!isTeacherAssignmentActive && assignmentLetter) {
-                                            if (assignmentLetterSource === 'selection') {
-                                                setDismissedDailyAssignmentId(assignmentLetter.id);
-                                            } else {
-                                                setDismissedDailyAssignmentId(null);
-                                            }
+                                            setDismissedDailyAssignmentId(assignmentLetter.id);
                                             setStartedDailyAssignmentId(null);
                                         }
                                         setPendingMiniGameScreen(null);
@@ -18529,8 +18554,12 @@ const App: React.FC = () => {
                                     <button
                                         data-gamepad-initial-choice
                                         onClick={() => {
-                                            storageService.clearCurrentAssignment();
-                                            setCurrentAssignment(null);
+                                            if (currentAssignment?.id === assignmentLetter?.id) {
+                                                storageService.clearCurrentAssignment();
+                                                setCurrentAssignment(null);
+                                            }
+                                            setPendingManagedAssignmentLetter(null);
+                                            setPendingAssignmentResumeState(null);
                                             setShowAssignmentLetter(false);
                                         }}
                                         className="rounded-xl border border-red-400 bg-red-50 px-4 py-3 text-sm font-black text-red-700 hover:bg-red-100"

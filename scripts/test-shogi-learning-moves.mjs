@@ -11,7 +11,7 @@ try {
   const engine = await server.ssrLoadModule('/src/mini-games/shogi/shogiEngine.ts');
   const pieces = await server.ssrLoadModule('/src/mini-games/shogi/shogiPieces.ts');
   const { ADVANCED_PIECES, makeShogiPiece } = pieces;
-  const { getShogiMovementTargets } = engine;
+  const { createShogiGame, createShogiPosition, getShogiMovementTargets } = engine;
 
   assert.equal(ADVANCED_PIECES.length, 50, 'Advance must expose all 50 unique pieces');
 
@@ -36,6 +36,25 @@ try {
   const lion = targets('ADV_LION', boardWith('ADV_LION'));
   assert.equal(lion.length, 24, 'Lion should reach every square within two king steps from the centre');
   assert(lion.find(target => target.row === 0 && target.col === 0)?.path?.length === 2, 'Lion two-step destinations need a two-square path');
+  const lionTwoCaptures = targets('ADV_LION', boardWith('ADV_LION', 2, 2, [['P', 1, 2, 'C'], ['P', 0, 2, 'C'], ['P', 1, 1, 'P'], ['P', 1, 3, 'P']]));
+  assert(!has(lionTwoCaptures, 0, 2), 'Lion must not capture two pieces in one turn');
+
+  const wolf = targets('ADV_WOLF', boardWith('ADV_WOLF', 2, 2, [['P', 1, 2, 'C']]));
+  assert(wolf.find(target => target.row === 0 && target.col === 2)?.path?.length === 2, 'Wolf may move once more after a capture');
+
+  const chronos = targets('ADV_CHRONOS', boardWith('ADV_CHRONOS'));
+  assert(chronos.some(target => target.status === 'SPECIAL' && target.path?.length === 2), 'Chronos should expose its one-time extra move');
+
+  const localPosition = createShogiPosition('ADVANCE', 100, 20260904, 'LOCAL', 3);
+  assert.equal(localPosition.uniqueKinds.length, 3, 'Local Advance should include three unlocked unique pieces when only three are unlocked');
+  assert(localPosition.uniqueKinds.every(kind => ADVANCED_PIECES.slice(0, 3).some(piece => piece.kind === kind)), 'Local Advance must draw only from unlocked pieces');
+  for (const side of ['P', 'C']) {
+    const pieces = localPosition.board.flat().filter(piece => piece?.side === side);
+    assert.equal(pieces.filter(piece => piece && !piece.kind.startsWith('ADV_') && piece.kind !== 'K').length, 5, 'Local Advance keeps five standard piece slots');
+    assert.equal(pieces.filter(piece => piece?.kind.startsWith('ADV_')).length, 3, 'Local Advance adds the selected unique pieces');
+  }
+  const localGame = createShogiGame('ADVANCE', 100, 20260904, 'LOCAL', 3);
+  assert.deepEqual(localGame.activeAdvancedKinds, localPosition.uniqueKinds, 'Game state should expose the actually selected local unique pieces');
 
   const butterfly = targets('ADV_BUTTERFLY', boardWith('ADV_BUTTERFLY', 2, 2, [['P', 1, 1, 'P']]));
   assert(has(butterfly, 0, 0, 'SPECIAL'), 'Butterfly may jump the middle piece when not capturing');

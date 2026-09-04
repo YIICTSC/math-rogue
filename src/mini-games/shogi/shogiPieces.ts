@@ -47,6 +47,8 @@ export interface ShogiPiece {
   side: ShogiSide;
   promoted: boolean;
   hasMoved: boolean;
+  /** One-time abilities are stored on the piece so they survive movement. */
+  extraMoveUsed?: boolean;
 }
 
 export const STANDARD_PIECES: ShogiPieceDefinition[] = [
