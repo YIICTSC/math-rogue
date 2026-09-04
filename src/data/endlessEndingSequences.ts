@@ -39,17 +39,32 @@ const getRevisionEntry = (
   theme: VisualThemeId,
   magicProtagonistId?: string,
 ): EndlessRevisionEntry => {
+  const normalizedCharacterId = characterId.trim().toUpperCase();
   if (theme === 'magic') {
     const requestedMagicId = magicProtagonistId?.toUpperCase();
-    const femaleMagicId = MAGIC_HERO_ID_BY_CHARACTER_ID[characterId] ?? 'AKARI';
+    const femaleMagicId = MAGIC_HERO_ID_BY_CHARACTER_ID[normalizedCharacterId] ?? 'AKARI';
     return (
       (requestedMagicId ? ENDLESS_REVISION_COPY.magic[requestedMagicId] : undefined) ??
       ENDLESS_REVISION_COPY.magic[femaleMagicId] ??
-      ENDLESS_REVISION_COPY.elementary.WARRIOR
+      // Never cross the theme boundary on a malformed/legacy protagonist ID.
+      // The old elementary fallback paired elementary copy with high-school
+      // artwork when a high-school save contained an unknown ID.
+      ENDLESS_REVISION_COPY.magic.AKARI
     );
   }
-  return ENDLESS_REVISION_COPY[theme][characterId] ?? ENDLESS_REVISION_COPY.elementary.WARRIOR;
+  if (theme === 'high-school') {
+    return ENDLESS_REVISION_COPY['high-school'][normalizedCharacterId]
+      ?? ENDLESS_REVISION_COPY['high-school'].WARRIOR;
+  }
+  return ENDLESS_REVISION_COPY.elementary[normalizedCharacterId]
+    ?? ENDLESS_REVISION_COPY.elementary.WARRIOR;
 };
+
+export const getEndlessEndingVoiceHeroId = (
+  characterId: string,
+  theme: VisualThemeId,
+  magicProtagonistId?: string,
+): string => getRevisionEntry(characterId, theme, magicProtagonistId).protagonistId;
 
 const getRevisionImagePath = (
   theme: VisualThemeId,
@@ -73,7 +88,8 @@ export const getEndlessEndingSequence = (
   theme: VisualThemeId = 'elementary',
   magicProtagonistId?: string,
 ): EndlessEndingSequence => {
-  const entry = getRevisionEntry(characterId, theme, magicProtagonistId);
+  const resolvedTheme: VisualThemeId = theme === 'high-school' || theme === 'magic' ? theme : 'elementary';
+  const entry = getRevisionEntry(characterId, resolvedTheme, magicProtagonistId);
   const copies = kind === 'OPENING' ? entry.opening : entry.true;
   const pages = copies.map((copy) => ({
     title: copy.title,
@@ -86,7 +102,7 @@ export const getEndlessEndingSequence = (
     dialogue: copy.dialogue,
     dialogueHiragana: localizeRevisionText(copy.dialogue, 'HIRAGANA'),
     dialogueEnglish: localizeRevisionText(copy.dialogue, 'ENGLISH'),
-    imagePath: getRevisionImagePath(theme, entry, copy),
+    imagePath: getRevisionImagePath(resolvedTheme, entry, copy),
   })) as [EndlessEndingPage, EndlessEndingPage, EndlessEndingPage];
 
   return {

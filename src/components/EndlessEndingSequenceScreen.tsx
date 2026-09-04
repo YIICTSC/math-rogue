@@ -7,9 +7,9 @@ import {
   getEndlessEndingLocalizedText,
   getEndlessEndingLocalizedTitle,
   getEndlessEndingSequence,
+  getEndlessEndingVoiceHeroId,
   type EndlessEndingKind,
 } from '../data/endlessEndingSequences';
-import { MAGIC_HERO_ID_BY_CHARACTER_ID } from '../data/visualThemes';
 import { assetUrl } from '../utils/assetPaths';
 import { audioService } from '../services/audioService';
 
@@ -29,21 +29,21 @@ const EndlessEndingSequenceScreen: React.FC<Props> = ({ kind, characterId, chara
   const page = sequence.pages[pageIndex];
   const isLast = pageIndex >= sequence.pages.length - 1;
   const voiceName = `endless-${kind.toLowerCase()}-${pageIndex + 1}`;
+  const voiceHeroId = getEndlessEndingVoiceHeroId(characterId, theme as VisualThemeId, magicProtagonistId);
 
   useEffect(() => {
     audioService.stopHighSchoolVoices();
     audioService.stopMagicEventVoices();
     if (theme === 'high-school') {
-      void audioService.playHighSchoolVoiceFile(characterId, voiceName, 12000);
+      void audioService.playHighSchoolVoiceFile(voiceHeroId, voiceName, 12000);
     } else if (theme === 'magic') {
-      const heroId = magicProtagonistId ?? MAGIC_HERO_ID_BY_CHARACTER_ID[characterId];
-      void audioService.playMagicEventVoice(heroId, voiceName);
+      void audioService.playMagicEventVoice(voiceHeroId, voiceName);
     }
     return () => {
       audioService.stopHighSchoolVoices();
       audioService.stopMagicEventVoices();
     };
-  }, [characterId, kind, magicProtagonistId, pageIndex, theme, voiceName]);
+  }, [characterId, kind, magicProtagonistId, pageIndex, theme, voiceHeroId, voiceName]);
 
   if (!page) return null;
 

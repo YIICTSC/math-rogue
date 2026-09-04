@@ -7028,12 +7028,20 @@ const App: React.FC = () => {
         }
         setGameState(prev => ({
             ...prev,
+            // Keep the map, copy, speaker label and voice asset on one theme.
+            // In single-player the menu selection is authoritative; COOP keeps
+            // the synchronized run theme from the shared state.
+            visualTheme: prev.challengeMode === 'COOP' ? (prev.visualTheme || visualTheme) : visualTheme,
             // Endless has its own chapter numbering.  Do not continue the
             // normal-mode Act counter (which would make the run start at 5
             // after clearing the four normal Acts).
             act: 1,
             floor: 0,
-            map: generateDungeonMap(prev.difficultyLevel || 1, { endless: true, endlessChapter: 1, visualTheme: prev.visualTheme || visualTheme }),
+            map: generateDungeonMap(prev.difficultyLevel || 1, {
+                endless: true,
+                endlessChapter: 1,
+                visualTheme: prev.challengeMode === 'COOP' ? (prev.visualTheme || visualTheme) : visualTheme,
+            }),
             currentMapNodeId: null,
             screen: GameScreen.ENDLESS_OPENING,
             isEndless: true,
@@ -7055,7 +7063,8 @@ const App: React.FC = () => {
                 const turnFlags = { ...nextPlayer.turnFlags };
                 delete turnFlags.ENDLESS_CHEAT_DEATH;
                 nextPlayer.turnFlags = turnFlags;
-                const arc = getEndlessArc(prev.visualTheme || visualTheme);
+                const endlessTheme = prev.challengeMode === 'COOP' ? (prev.visualTheme || visualTheme) : visualTheme;
+                const arc = getEndlessArc(endlessTheme);
                 if (arc !== 'magic' && (profile[`effect:${arc === 'elementary' ? 'ELEMENTARY_START_REWARD_PLUS' : 'HIGH_SCHOOL_START_REWARD_PLUS'}`] || 0) > 0) {
                     nextPlayer.relicCounters.ENDLESS_START_REWARD_SLOTS = 1;
                 }
@@ -18944,7 +18953,9 @@ const App: React.FC = () => {
                             magicProtagonistId={activeRunVisualTheme === 'magic' ? getMagicProtagonistId(gameState.player) : undefined}
                             characterName={activeRunVisualTheme === 'magic' && gameState.player.magicProtagonistGender === 'male'
                                 ? MAGIC_MALE_PROTAGONISTS.find(hero => hero.id === gameState.player.magicProtagonistId)?.name ?? selectedCharName
-                                : activeRunThemedCharacters.find(character => character.id === gameState.player.id)?.name ?? selectedCharName}
+                                : activeRunThemedCharacters.find(character => character.id === gameState.player.id)?.name
+                                    ?? activeRunThemedCharacters[0]?.name
+                                    ?? selectedCharName}
                             languageMode={languageMode}
                             onComplete={() => {
                                 audioService.playBGM('map');
@@ -18967,7 +18978,9 @@ const App: React.FC = () => {
                             magicProtagonistId={activeRunVisualTheme === 'magic' ? getMagicProtagonistId(gameState.player) : undefined}
                             characterName={activeRunVisualTheme === 'magic' && gameState.player.magicProtagonistGender === 'male'
                                 ? MAGIC_MALE_PROTAGONISTS.find(hero => hero.id === gameState.player.magicProtagonistId)?.name ?? selectedCharName
-                                : activeRunThemedCharacters.find(character => character.id === gameState.player.id)?.name ?? selectedCharName}
+                                : activeRunThemedCharacters.find(character => character.id === gameState.player.id)?.name
+                                    ?? activeRunThemedCharacters[0]?.name
+                                    ?? selectedCharName}
                             languageMode={languageMode}
                             onComplete={() => {
                                 setGameState(prev => ({
@@ -20727,10 +20740,14 @@ const App: React.FC = () => {
                     <ThemedEndingSequenceScreen
                         theme={coopSyncedVisualTheme}
                         characterId={gameState.player.id}
-                        characterName={themedCharacters.find(character => character.id === gameState.player.id)?.name ?? selectedCharName}
+                        characterName={themedCharacters.find(character => character.id === gameState.player.id)?.name
+                            ?? themedCharacters[0]?.name
+                            ?? selectedCharName}
                         languageMode={languageMode}
                         onComplete={(variant) => {
-                            const characterName = themedCharacters.find(character => character.id === gameState.player.id)?.name ?? selectedCharName;
+                            const characterName = themedCharacters.find(character => character.id === gameState.player.id)?.name
+                                ?? themedCharacters[0]?.name
+                                ?? selectedCharName;
                             storageService.saveThemedEndingGalleryEntry(buildThemedEndingGalleryEntry(
                                 coopSyncedVisualTheme,
                                 gameState.player.id,

@@ -54,7 +54,8 @@ export const getThemedEndingCharacterName = (
   characterId: string,
   languageMode: 'JAPANESE' | 'HIRAGANA' | 'ENGLISH',
 ): string => {
-  const profile = CHARACTER_PROFILE[characterId] ?? CHARACTER_PROFILE.WARRIOR;
+  const normalizedCharacterId = characterId.trim().toUpperCase();
+  const profile = CHARACTER_PROFILE[normalizedCharacterId] ?? CHARACTER_PROFILE.WARRIOR;
   if (theme === 'high-school') {
     if (languageMode === 'ENGLISH') return profile.highSchoolNameEnglish;
     if (languageMode === 'HIRAGANA') return profile.highSchoolNameHiragana;
@@ -63,6 +64,11 @@ export const getThemedEndingCharacterName = (
   if (languageMode === 'ENGLISH') return profile.elementaryNameEnglish;
   if (languageMode === 'HIRAGANA') return profile.elementaryNameHiragana;
   return profile.elementaryName;
+};
+
+export const getThemedEndingVoiceHeroId = (characterId: string): string => {
+  const normalizedCharacterId = characterId.trim().toUpperCase();
+  return CHARACTER_PROFILE[normalizedCharacterId] ? normalizedCharacterId : 'WARRIOR';
 };
 
 export const getThemedEndingToneLabel = (
@@ -218,7 +224,8 @@ export const getThemedEndingVariants = (
   characterId: string,
   characterName: string,
 ): ThemedEndingVariant[] => {
-  const safeCharacterId = CHARACTER_PROFILE[characterId] ? characterId : 'WARRIOR';
+  const normalizedCharacterId = characterId.trim().toUpperCase();
+  const safeCharacterId = CHARACTER_PROFILE[normalizedCharacterId] ? normalizedCharacterId : 'WARRIOR';
   const profile = CHARACTER_PROFILE[safeCharacterId];
   const role = theme === 'high-school' ? profile.highSchool : profile.elementary;
   const roleHiragana = theme === 'high-school' ? profile.highSchoolHiragana : profile.elementaryHiragana;

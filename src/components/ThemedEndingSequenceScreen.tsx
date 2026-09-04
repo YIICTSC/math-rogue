@@ -2,7 +2,7 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { ChevronRight, Sparkles } from 'lucide-react';
 import type { LanguageMode } from '../types';
 import type { NonMagicEndingTheme } from '../data/themedEndingSequences';
-import { getThemedEndingToneLabel, getThemedEndingVariants, type ThemedEndingVariant } from '../data/themedEndingSequences';
+import { getThemedEndingToneLabel, getThemedEndingVariants, getThemedEndingVoiceHeroId, type ThemedEndingVariant } from '../data/themedEndingSequences';
 import { assetUrl } from '../utils/assetPaths';
 import { audioService } from '../services/audioService';
 
@@ -25,12 +25,13 @@ const ThemedEndingSequenceScreen: React.FC<Props> = ({ theme, characterId, chara
   const variant = variants[variantIndex] ?? variants[0];
   const page = variant?.pages[pageIndex];
   const endingVoiceName = variant ? `ending-${variant.id}` : undefined;
+  const voiceHeroId = getThemedEndingVoiceHeroId(characterId);
 
   useEffect(() => {
     if (theme !== 'high-school' || pageIndex !== 2 || !endingVoiceName) return undefined;
-    void audioService.playHighSchoolVoiceFile(characterId, endingVoiceName, 12000);
+    void audioService.playHighSchoolVoiceFile(voiceHeroId, endingVoiceName, 12000);
     return () => audioService.stopHighSchoolVoices();
-  }, [characterId, endingVoiceName, pageIndex, theme]);
+  }, [endingVoiceName, pageIndex, theme, voiceHeroId]);
 
   if (!variant || !page) return null;
 
