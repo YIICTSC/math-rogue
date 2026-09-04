@@ -1016,6 +1016,39 @@ const CHALLENGE_SCREEN_SET = new Set<GameScreen>([
     GameScreen.GENERAL_CHALLENGE
 ]);
 
+// A launch-locked assignment has the highest priority, but it must not tear
+// down an in-flight battle or mini-game.  These screens are therefore treated
+// as safe checkpoints: the assignment letter opens as soon as the player
+// reaches one of them.  Real-time COOP/RACE sessions are additionally gated by
+// challengeMode below so that both peers can finish the current exchange.
+const LAUNCH_LOCK_DEFERRED_SCREEN_SET = new Set<GameScreen>([
+    GameScreen.BATTLE,
+    GameScreen.PROBLEM_CHALLENGE,
+    GameScreen.MATH_CHALLENGE,
+    GameScreen.KANJI_CHALLENGE,
+    GameScreen.ENGLISH_CHALLENGE,
+    GameScreen.GENERAL_CHALLENGE,
+    GameScreen.DODGEBALL_SHOOTING,
+    GameScreen.BASKETBALL_LAYUP,
+    GameScreen.MINI_GAME_POKER,
+    GameScreen.MINI_GAME_SURVIVOR,
+    GameScreen.MINI_GAME_DUNGEON,
+    GameScreen.MINI_GAME_DUNGEON_2,
+    GameScreen.MINI_GAME_KOCHO,
+    GameScreen.MINI_GAME_PAPER_PLANE,
+    GameScreen.MINI_GAME_GO_HOME,
+    GameScreen.MINI_GAME_STONE_GLOW,
+    GameScreen.MINI_GAME_SCHOOL_TRPG,
+    GameScreen.MINI_GAME_LEARNING_TCG,
+    GameScreen.MINI_GAME_SHOGI,
+    GameScreen.MINI_GAME_GO,
+    GameScreen.MINI_GAME_CHESS,
+    GameScreen.MINI_GAME_MAHJONG,
+    GameScreen.MINI_GAME_CRANE,
+    GameScreen.COOP_SETUP,
+    GameScreen.RACE_SETUP,
+]);
+
 const COOP_DECISION_HUD_SCREEN_SET = new Set<GameScreen>([
     GameScreen.MAP
 ]);
@@ -1940,6 +1973,11 @@ const App: React.FC = () => {
     const [learnerInvitationToken, setLearnerInvitationToken] = useState(() => managementPortalService.getLearnerInvitationToken());
     const requiredAssignmentCheckRef = useRef(false);
     const launchLockedAssignmentExitRef = useRef<string | null>(null);
+    // Keep the id only while a launch-locked assignment is waiting for a safe
+    // checkpoint.  The cached assignment list remains the source of truth for
+    // the title shown in the non-blocking notice.
+    const [deferredLaunchLockedAssignmentId, setDeferredLaunchLockedAssignmentId] = useState<string | null>(null);
+    const [deferredAssignmentInboxOpen, setDeferredAssignmentInboxOpen] = useState(false);
     const [managedAssignmentsRevision, setManagedAssignmentsRevision] = useState(0);
     const [showAssignmentInbox, setShowAssignmentInbox] = useState(false);
     const [currentAssignment, setCurrentAssignment] = useState<AssignmentPayload | null>(() => storageService.getCurrentAssignment());
@@ -2164,12 +2202,32 @@ const App: React.FC = () => {
     useEffect(() => {
         const openInboxFromNotification = () => {
             if (!managementPortalService.getProfile()) return;
+            const liveState = stateRef.current;
+            const realtimeSessionActive = liveState.screen !== GameScreen.START_MENU
+                && (liveState.challengeMode === 'COOP' || liveState.challengeMode === 'RACE');
+            if (realtimeSessionActive || LAUNCH_LOCK_DEFERRED_SCREEN_SET.has(liveState.screen)) {
+                // A notification click must not throw a learner out of an
+                // in-flight battle.  The inbox is opened at the next safe
+                // checkpoint, alongside launch-locked enforcement.
+                setDeferredAssignmentInboxOpen(true);
+                return;
+            }
             setShowAssignmentInbox(true);
             setGameState(prev => ({ ...prev, screen: GameScreen.START_MENU }));
         };
         window.addEventListener(ASSIGNMENT_NOTIFICATION_OPEN_EVENT, openInboxFromNotification);
         return () => window.removeEventListener(ASSIGNMENT_NOTIFICATION_OPEN_EVENT, openInboxFromNotification);
     }, []);
+
+    useEffect(() => {
+        if (!deferredAssignmentInboxOpen || showAssignmentLetter || showStudentGradeSurvey) return;
+        const realtimeSessionActive = gameState.screen !== GameScreen.START_MENU
+            && (gameState.challengeMode === 'COOP' || gameState.challengeMode === 'RACE');
+        if (realtimeSessionActive || LAUNCH_LOCK_DEFERRED_SCREEN_SET.has(gameState.screen)) return;
+        setDeferredAssignmentInboxOpen(false);
+        setShowAssignmentInbox(true);
+        setGameState(prev => ({ ...prev, screen: GameScreen.START_MENU }));
+    }, [deferredAssignmentInboxOpen, gameState.challengeMode, gameState.screen, showAssignmentLetter, showStudentGradeSurvey]);
 
     const openManagedAssignment = useCallback((assignment: AssignmentPayload) => {
         if (!isAssignmentDeadlineActive(assignment)) return;
@@ -2198,7 +2256,6 @@ const App: React.FC = () => {
     }, [currentAssignment, gameState.screen]);
 
     useEffect(() => {
-        if (gameState.screen !== GameScreen.START_MENU) return;
         if (!managementProfile || showAgePrivacySetup || showStudentGradeSurvey || requiredAssignmentCheckRef.current) return;
         requiredAssignmentCheckRef.current = true;
         let cancelled = false;
@@ -2216,8 +2273,32 @@ const App: React.FC = () => {
                 }
                 if (!nextLaunchLocked) {
                     launchLockedAssignmentExitRef.current = null;
+                    if (deferredLaunchLockedAssignmentId !== null) {
+                        setDeferredLaunchLockedAssignmentId(null);
+                    }
                 }
+                // Regular required assignments keep their existing title-screen
+                // behavior. Only the launch-locked level is allowed to interrupt
+                // a safe in-game checkpoint.
+                if (!nextLaunchLocked && gameState.screen !== GameScreen.START_MENU) return;
                 if (!nextRequired || cancelled) return;
+
+                const realtimeSessionActive = gameState.screen !== GameScreen.START_MENU
+                    && (gameState.challengeMode === 'COOP' || gameState.challengeMode === 'RACE');
+                const shouldDeferLaunchLockedAssignment = Boolean(nextLaunchLocked)
+                    && (realtimeSessionActive || LAUNCH_LOCK_DEFERRED_SCREEN_SET.has(gameState.screen));
+                if (shouldDeferLaunchLockedAssignment && nextLaunchLocked) {
+                    if (deferredLaunchLockedAssignmentId !== nextLaunchLocked.id) {
+                        setDeferredLaunchLockedAssignmentId(nextLaunchLocked.id);
+                    }
+                    // Keep the current run intact while the learner is in a
+                    // battle/mini-game. The effect runs again when the screen
+                    // reaches a safe checkpoint (or the real-time session ends).
+                    return;
+                }
+                if (deferredLaunchLockedAssignmentId !== null) {
+                    setDeferredLaunchLockedAssignmentId(null);
+                }
                 if (nextLaunchLocked && pendingManagedAssignmentLetter?.id === nextLaunchLocked.id && showAssignmentLetter) {
                     // The launch-locked assignment is waiting for the learner to
                     // read its letter and press 「課題を始める」. Do not reopen or
@@ -2249,10 +2330,20 @@ const App: React.FC = () => {
                 }
                 if (cancelled) return;
                 setShowOnlineNameSetup(false);
+                if (gameState.screen !== GameScreen.START_MENU
+                    && !isUiPreviewMode
+                    && gameState.challengeMode !== 'COOP'
+                    && gameState.challengeMode !== 'RACE') {
+                    // Persist the exact single-player checkpoint before the
+                    // assignment letter moves the shell to the title screen.
+                    // The regular save effect intentionally skips START_MENU
+                    // while this resume snapshot is pending.
+                    storageService.saveGame(gameState);
+                }
+                // Launch-locked tasks still start automatically, but first show
+                // the same assignment letter as other managed tasks so the
+                // learner can review the title, scope, deadline, and answer mode.
                 if (nextLaunchLocked) {
-                    // Launch-locked tasks still start automatically, but first show
-                    // the same assignment letter as other managed tasks so the
-                    // learner can review the title, scope, deadline, and answer mode.
                     openManagedAssignment(payload);
                 } else {
                     openManagedAssignment(payload);
@@ -2270,7 +2361,7 @@ const App: React.FC = () => {
             // immediately instead of being deferred until the next app launch.
             requiredAssignmentCheckRef.current = false;
         };
-    }, [currentAssignment, gameState.screen, managedAssignmentsRevision, managementProfile, openManagedAssignment, pendingManagedAssignmentLetter, showAgePrivacySetup, showAssignmentLetter, showStudentGradeSurvey]);
+    }, [currentAssignment, deferredLaunchLockedAssignmentId, gameState.challengeMode, gameState.screen, isUiPreviewMode, managedAssignmentsRevision, managementProfile, openManagedAssignment, pendingManagedAssignmentLetter, showAgePrivacySetup, showAssignmentLetter, showStudentGradeSurvey]);
 
     const markDailyAssignmentCompleted = useCallback((assignmentId: string | undefined) => {
         if (!assignmentId || !assignmentId.startsWith('daily-')) return;
@@ -17611,6 +17702,15 @@ const App: React.FC = () => {
                         100% { transform: translate(0, 0); }
                     }
                 `}</style>
+
+                {deferredLaunchLockedAssignmentId && !showAssignmentLetter && (
+                    <div className="pointer-events-none fixed inset-x-0 top-3 z-[10020] flex justify-center px-3">
+                        <div className="max-w-lg rounded-xl border-2 border-fuchsia-300/80 bg-slate-950/95 px-4 py-2 text-center text-xs font-black text-fuchsia-100 shadow-[0_0_24px_rgba(217,70,239,0.35)] sm:text-sm">
+                            <div className="text-fuchsia-300">{trans("最優先課題を受信しました", languageMode)}</div>
+                            <div className="mt-0.5 text-slate-200">{trans("現在のプレイが安全に区切られると自動で開始します。", languageMode)}</div>
+                        </div>
+                    </div>
+                )}
 
                 {isUiPreviewMode && (
                     <div className="fixed right-2 top-2 z-[10060] flex items-start gap-2 text-white">

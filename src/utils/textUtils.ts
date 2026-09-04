@@ -3423,6 +3423,8 @@ const ENGLISH_DICTIONARY: Record<string, string> = {
     "「確認用デッキをセット」後、上部の「出発する」からマップへ進み、戦闘でこのカードを使用してください。": "After setting the test deck, choose Start at the top, enter a map, and play this card in battle.",
     "付与候補カードがありません。": "No eligible effect cards found.",
     "学習ローグ": "Learning Rogue",
+    "最優先課題を受信しました": "A top-priority assignment has arrived.",
+    "現在のプレイが安全に区切られると自動で開始します。": "It will start automatically at the next safe checkpoint.",
     "書き": "Writing",
     "手書き": "Handwriting",
     "送り仮名": "Okurigana",
@@ -6359,6 +6361,8 @@ Object.assign(ENGLISH_DICTIONARY, {
 });
 Object.assign(DICTIONARY, RELIC_HIRAGANA_TRANSLATIONS);
 Object.assign(DICTIONARY, {
+    "最優先課題を受信しました": "さいゆうせん かだいを じゅしんしました",
+    "現在のプレイが安全に区切られると自動で開始します。": "いまの プレイが あんぜんに くぎられると じどうで はじまります。",
     "戦闘開始後、最初にカードを使った時、カードを1枚引く。": "バトルの あと、さいしょに カードを つかったとき、カードを 1まい ひく。",
     "1ターンに異なる敵を2体以上攻撃した時、ムキムキ1を得る。": "1ターンに ちがう てきを 2たい いじょう こうげきしたとき、ムキムキ1を ゲット。",
     "ターン終了時にブロックが残っていれば、その20%を次のターンへ持ち越す。": "ターンの おわりに ブロックが のこっていれば、その20%を つぎの ターンへ もちこす。",

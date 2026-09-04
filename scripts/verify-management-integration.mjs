@@ -75,6 +75,11 @@ assert.match(modal, /const latestProfile = managementPortalService\.getProfile\(
 assert.match(app, /getNextRequiredManagedAssignment/);
 assert.match(app, /getNextLaunchLockedManagedAssignment/);
 assert.match(app, /managedAssignmentsRevision/);
+assert.match(app, /LAUNCH_LOCK_DEFERRED_SCREEN_SET/);
+assert.match(app, /deferredLaunchLockedAssignmentId/);
+assert.match(app, /setDeferredAssignmentInboxOpen/);
+assert.match(app, /Regular required assignments keep their existing title-screen/);
+assert.match(app, /storageService\.saveGame\(gameState\)/);
 assert.match(app, /setManagedAssignmentsRevision\(version => version \+ 1\)/);
 assert.match(app, /CapacitorApp\.addListener\('appStateChange'/);
 assert.match(app, /const nextLaunchLocked = getNextLaunchLockedManagedAssignment\(assignments\)/);
