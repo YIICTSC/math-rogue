@@ -79,6 +79,23 @@ const phaseCountByMechanic: Record<string, number> = {
   NOX_ORIGIN: 4,
 };
 
+/**
+ * Converts internal segment codes into the chapter deadline shown to players.
+ * The save data still uses the numeric segment, but the map should explain
+ * the scope as a concrete milestone such as "5章までに".
+ */
+const formatEndlessSegmentText = (text: string, bossChapter: number): string => {
+  const deadline = `${bossChapter}章まで`;
+  return text
+    .replace(/S\d{2}区間内の/g, `${deadline}の`)
+    .replace(/S\d{2}区間内に/g, `${deadline}に`)
+    .replace(/S\d{2}区間内/g, deadline)
+    .replace(/区間内の/g, `${deadline}の`)
+    .replace(/区間内に/g, `${deadline}に`)
+    .replace(/区間内/g, deadline)
+    .replace(/C\d{2}ボス戦の/g, `${bossChapter}章ボス戦の`);
+};
+
 export const getEndlessGimmickTarget = (mechanicKey: string, phaseCount = 3): number => {
   // The final boss has four HP phases, but the game presents the learning
   // challenge once after the battle.  Requiring one answer per HP phase would
@@ -364,6 +381,7 @@ export const ENDLESS_BOSSES: EndlessBossDefinition[] = bossRows.map(([arc, floor
     weakness: '学習判定成功のタイミング',
     recommendedPrep: '手札とHPを余裕のある状態に整える',
   };
+  const formattedWeakness = formatEndlessSegmentText(guidance.weakness, floor);
   return {
     id: bossId,
     arc,
@@ -372,9 +390,11 @@ export const ENDLESS_BOSSES: EndlessBossDefinition[] = bossRows.map(([arc, floor
     name,
     theme,
     mechanicKey,
-    mechanicSummary,
+    mechanicSummary: formatEndlessSegmentText(mechanicSummary, floor),
     phaseCount: phaseCountByMechanic[mechanicKey] || (tier === 'MAJOR_BOSS' ? 3 : 1),
     ...guidance,
+    weakness: formattedWeakness,
+    recommendedPrep: formatEndlessSegmentText(guidance.recommendedPrep, floor),
     rewards: choices,
   };
 });
@@ -415,6 +435,7 @@ const createTrueEndlessBoss = (arc: EndlessArc, floor: number): EndlessBossDefin
     weakness: '区間内の学習判定成功とカード解決を積み重ねる',
     recommendedPrep: '学習機会と3種類のカードを確保する',
   };
+  const formattedWeakness = formatEndlessSegmentText(guidance.weakness, floor);
   return {
     id: bossId,
     arc,
@@ -423,9 +444,11 @@ const createTrueEndlessBoss = (arc: EndlessArc, floor: number): EndlessBossDefin
     name: TRUE_ENDLESS_BOSS_NAMES[arc][index % TRUE_ENDLESS_BOSS_NAMES[arc].length],
     theme: `第${floor}章の深層を巡回する${arc}監査体`,
     mechanicKey,
-    mechanicSummary: `真エンドレス第${floor}章の深層ギミック。${guidance.weakness}。`,
+    mechanicSummary: `真エンドレス第${floor}章の深層ギミック。${formattedWeakness}。`,
     phaseCount: tier === 'MAJOR_BOSS' ? 3 : 1,
     ...guidance,
+    weakness: formattedWeakness,
+    recommendedPrep: formatEndlessSegmentText(guidance.recommendedPrep, floor),
     rewards: slots.map((slot, slotIndex) => {
       const [name, description, effectKey] = rewardNames[slot];
       return {

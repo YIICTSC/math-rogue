@@ -2017,7 +2017,8 @@
 
   .themed-ending-sequence-panel > div { grid-area: meta; margin-bottom: 0.1rem !important; font-size: 0.62rem !important; }
   .themed-ending-sequence-panel > h1 { grid-area: title; font-size: clamp(0.9rem, 2.4vw, 1.2rem) !important; line-height: 1.1 !important; }
-  .themed-ending-sequence-panel > p { grid-area: text; margin-top: 0.2rem !important; max-height: none !important; font-size: clamp(0.65rem, 1.7vw, 0.82rem) !important; line-height: 1.35 !important; }
+  .themed-ending-sequence-panel > .themed-ending-sequence-copy { grid-area: text; min-height: 0; margin-top: 0.2rem; overflow-y: auto; }
+  .themed-ending-sequence-copy > p { max-height: none !important; font-size: clamp(0.65rem, 1.7vw, 0.82rem) !important; line-height: 1.35 !important; }
   .themed-ending-sequence-panel > button {
     grid-area: action;
     width: 100%;
