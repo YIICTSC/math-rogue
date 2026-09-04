@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { ChevronRight, Sparkles } from 'lucide-react';
 import type { LanguageMode } from '../types';
 import type { NonMagicEndingTheme } from '../data/themedEndingSequences';
@@ -26,10 +26,11 @@ const ThemedEndingSequenceScreen: React.FC<Props> = ({ theme, characterId, chara
   const page = variant?.pages[pageIndex];
   const endingVoiceName = variant ? `ending-${variant.id}` : undefined;
   const voiceHeroId = getThemedEndingVoiceHeroId(characterId);
+  const completionStartedRef = useRef(false);
 
   useEffect(() => {
     if (theme !== 'high-school' || pageIndex !== 2 || !endingVoiceName) return undefined;
-    void audioService.playHighSchoolVoiceFile(voiceHeroId, endingVoiceName, 12000);
+    void audioService.playHighSchoolVoiceFile(voiceHeroId, endingVoiceName, 12000).catch(() => undefined);
     return () => audioService.stopHighSchoolVoices();
   }, [endingVoiceName, pageIndex, theme, voiceHeroId]);
 
@@ -42,6 +43,15 @@ const ThemedEndingSequenceScreen: React.FC<Props> = ({ theme, characterId, chara
     : 'sprites/backgrounds/learning-rogue/reward-rooftop.webp';
   const localizedTitle = languageMode === 'ENGLISH' ? page.titleEnglish : languageMode === 'HIRAGANA' ? page.titleHiragana : page.title;
   const localizedText = languageMode === 'ENGLISH' ? page.textEnglish : languageMode === 'HIRAGANA' ? page.textHiragana : page.text;
+  const handleContinue = () => {
+    if (!isLast) {
+      setPageIndex(index => Math.min(index + 1, variant.pages.length - 1));
+      return;
+    }
+    if (completionStartedRef.current) return;
+    completionStartedRef.current = true;
+    onComplete(variant);
+  };
 
   return (
     <div data-gamepad-initial-scope={`themed-ending-${variant.id}-${pageIndex}`} className="themed-ending-sequence relative flex h-full w-full flex-col overflow-hidden bg-slate-950 text-white">
@@ -72,7 +82,7 @@ const ThemedEndingSequenceScreen: React.FC<Props> = ({ theme, characterId, chara
         <button
           type="button"
           data-gamepad-initial-choice
-          onClick={() => isLast ? onComplete(variant) : setPageIndex(index => index + 1)}
+          onClick={handleContinue}
           className="mt-4 flex w-full items-center justify-center gap-2 rounded-lg bg-amber-300 px-5 py-3 font-black text-slate-950 hover:bg-amber-200"
         >
           {languageMode === 'ENGLISH' ? (isLast ? 'Continue to results' : 'Next') : languageMode === 'HIRAGANA' ? (isLast ? 'けっかへ' : 'つぎへ') : (isLast ? 'クリア結果へ' : '次へ')}

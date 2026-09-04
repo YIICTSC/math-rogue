@@ -54,7 +54,7 @@ export const getThemedEndingCharacterName = (
   characterId: string,
   languageMode: 'JAPANESE' | 'HIRAGANA' | 'ENGLISH',
 ): string => {
-  const normalizedCharacterId = characterId.trim().toUpperCase();
+  const normalizedCharacterId = (characterId ?? '').trim().toUpperCase();
   const profile = CHARACTER_PROFILE[normalizedCharacterId] ?? CHARACTER_PROFILE.WARRIOR;
   if (theme === 'high-school') {
     if (languageMode === 'ENGLISH') return profile.highSchoolNameEnglish;
@@ -67,7 +67,7 @@ export const getThemedEndingCharacterName = (
 };
 
 export const getThemedEndingVoiceHeroId = (characterId: string): string => {
-  const normalizedCharacterId = characterId.trim().toUpperCase();
+  const normalizedCharacterId = (characterId ?? '').trim().toUpperCase();
   return CHARACTER_PROFILE[normalizedCharacterId] ? normalizedCharacterId : 'WARRIOR';
 };
 
@@ -224,7 +224,7 @@ export const getThemedEndingVariants = (
   characterId: string,
   characterName: string,
 ): ThemedEndingVariant[] => {
-  const normalizedCharacterId = characterId.trim().toUpperCase();
+  const normalizedCharacterId = (characterId ?? '').trim().toUpperCase();
   const safeCharacterId = CHARACTER_PROFILE[normalizedCharacterId] ? normalizedCharacterId : 'WARRIOR';
   const profile = CHARACTER_PROFILE[safeCharacterId];
   const role = theme === 'high-school' ? profile.highSchool : profile.elementary;
@@ -233,6 +233,7 @@ export const getThemedEndingVariants = (
   const name = theme === 'high-school' ? profile.highSchoolName : profile.elementaryName;
   const nameHiragana = theme === 'high-school' ? profile.highSchoolNameHiragana : profile.elementaryNameHiragana;
   const nameEnglish = theme === 'high-school' ? profile.highSchoolNameEnglish : profile.elementaryNameEnglish;
+  const fallbackCharacterName = (characterName ?? '').trim() || name;
   const folder = theme === 'high-school' ? 'high-school' : 'elementary';
 
   return ENDING_TONES.map((ending, variantIndex) => {
@@ -274,7 +275,7 @@ export const getThemedEndingVariants = (
         imagePath: `sprites/endings/${folder}/${safeCharacterId.toLowerCase()}/ending-${variantIndex + 1}-1.webp`,
       },
       {
-        title: `${characterName}の答え`,
+        title: `${fallbackCharacterName}の答え`,
         titleHiragana: `${nameHiragana}の こたえ`,
         titleEnglish: `${nameEnglish}'s Answer`,
         text: japanesePageCopy(1, `${role}は、これまで集めた学びと仲間の言葉を自分の力に変えた。${profile.motif}が、新しい日々の記憶として残る。`),
@@ -286,7 +287,7 @@ export const getThemedEndingVariants = (
         title: 'そして、次の朝へ',
         titleHiragana: 'そして、つぎの あさへ',
         titleEnglish: 'And Then, Into a New Morning',
-        text: japanesePageCopy(2, `「${characterVoice.ja} ${toneResolution.ja}」——${name || characterName}は自分らしい一歩で、校門の向こうへ進んだ。`),
+        text: japanesePageCopy(2, `「${characterVoice.ja} ${toneResolution.ja}」——${fallbackCharacterName}は自分らしい一歩で、校門の向こうへ進んだ。`),
         textHiragana: localizedPageText(2, 'HIRAGANA', `「${characterVoice.hira} ${toneResolution.hira}」——${nameHiragana}は じぶんらしい いっぽで、こうもんの むこうへ すすんだ。`),
         textEnglish: localizedPageText(2, 'ENGLISH', `"${characterVoice.en} ${toneResolution.en}" ${nameEnglish} stepped beyond the school gate in a way only they could.`),
         imagePath: `sprites/endings/${folder}/${safeCharacterId.toLowerCase()}/ending-${variantIndex + 1}-3.webp`,

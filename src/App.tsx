@@ -20736,20 +20736,20 @@ const App: React.FC = () => {
                     </div>
                 )}
 
-                {gameState.screen === GameScreen.ENDING && coopSyncedVisualTheme !== 'magic' && !themedEndingSequenceComplete && (
+                {gameState.screen === GameScreen.ENDING && activeRunVisualTheme !== 'magic' && !themedEndingSequenceComplete && (
                     <ThemedEndingSequenceScreen
-                        theme={coopSyncedVisualTheme}
+                        theme={activeRunVisualTheme}
                         characterId={gameState.player.id}
-                        characterName={themedCharacters.find(character => character.id === gameState.player.id)?.name
-                            ?? themedCharacters[0]?.name
+                        characterName={activeRunThemedCharacters.find(character => character.id === gameState.player.id)?.name
+                            ?? activeRunThemedCharacters[0]?.name
                             ?? selectedCharName}
                         languageMode={languageMode}
                         onComplete={(variant) => {
-                            const characterName = themedCharacters.find(character => character.id === gameState.player.id)?.name
-                                ?? themedCharacters[0]?.name
+                            const characterName = activeRunThemedCharacters.find(character => character.id === gameState.player.id)?.name
+                                ?? activeRunThemedCharacters[0]?.name
                                 ?? selectedCharName;
                             storageService.saveThemedEndingGalleryEntry(buildThemedEndingGalleryEntry(
-                                coopSyncedVisualTheme,
+                                activeRunVisualTheme,
                                 gameState.player.id,
                                 characterName,
                                 variant,
@@ -20759,13 +20759,13 @@ const App: React.FC = () => {
                     />
                 )}
 
-                {gameState.screen === GameScreen.ENDING && (coopSyncedVisualTheme === 'magic' || themedEndingSequenceComplete) && (
+                {gameState.screen === GameScreen.ENDING && (activeRunVisualTheme === 'magic' || themedEndingSequenceComplete) && (
                     <div
                         data-gamepad-initial-scope="main-ending"
                         className="ending-screen w-full h-full bg-yellow-900 bg-cover bg-center flex flex-col items-center justify-start text-center text-white p-4 overflow-y-auto custom-scrollbar relative"
                         style={{
                             backgroundImage: `url(${assetUrl(
-                                coopSyncedVisualTheme === 'magic'
+                                activeRunVisualTheme === 'magic'
                                     ? 'sprites/backgrounds/learning-rogue/magic-act-clear.webp'
                                     : 'sprites/backgrounds/learning-rogue/reward-rooftop.webp'
                             )})`
@@ -20787,7 +20787,7 @@ const App: React.FC = () => {
                                         </div>
                                         <p className="text-sm text-yellow-100 font-bold">
                                             {trans(
-                                                coopSyncedVisualTheme === 'high-school'
+                                                activeRunVisualTheme === 'high-school'
                                                     ? "新しい学園での成果が、次回の挑戦から現れるようになります！"
                                                     : "新しい学習の成果が、次回の冒険から現れるようになります！",
                                                 languageMode
@@ -20800,9 +20800,9 @@ const App: React.FC = () => {
                             <div className="ending-main">
                                 <h1 className="ending-title text-4xl md:text-6xl mb-4 font-bold text-yellow-200 shrink-0">
                                     {trans(
-                                        coopSyncedVisualTheme === 'high-school'
+                                        activeRunVisualTheme === 'high-school'
                                             ? "卒業おめでとう！"
-                                            : coopSyncedVisualTheme === 'magic'
+                                            : activeRunVisualTheme === 'magic'
                                                 ? "願いの夜明け"
                                                 : "ゲームクリア！",
                                         languageMode
@@ -20810,9 +20810,9 @@ const App: React.FC = () => {
                                 </h1>
                                 <p className="ending-message mb-8 text-lg md:text-xl shrink-0 whitespace-pre-line">
                                     {trans(
-                                        coopSyncedVisualTheme === 'high-school'
+                                        activeRunVisualTheme === 'high-school'
                                             ? "あなたは真・校長の支配を打ち破り、\nこの学園に自分たちの明日を取り戻しました。\n反逆の卒業生として、その名は校内伝説に刻まれるでしょう。"
-                                            : coopSyncedVisualTheme === 'magic'
+                                            : activeRunVisualTheme === 'magic'
                                                 ? "あなたは大魔女校長が作り出した「願いの檻」を打ち破り、\n学園に自由な未来と朝の光を取り戻しました。\n学び、迷い、誰かを大切にした日々は、これからもあなたの魔法を強くしていくでしょう。"
                                                 : "あなたは校長先生をせっとくし、\nでんせつの しょうがくせいとして かたりつがれることでしょう。",
                                         languageMode
@@ -20823,7 +20823,7 @@ const App: React.FC = () => {
                                 <div className="ending-legacy mb-8 shrink-0">
                                     <p className="mb-4 text-sm text-yellow-100 font-bold">
                                         {trans(
-                                            coopSyncedVisualTheme === 'high-school'
+                                            activeRunVisualTheme === 'high-school'
                                                 ? "次回の学園攻略に持っていくカードを1枚選んでください"
                                                 : "次回の冒険に持っていくカードを1枚選んでください",
                                             languageMode
@@ -20854,7 +20854,7 @@ const App: React.FC = () => {
                                     <p className="text-green-400 font-bold text-xl">{trans("カードを継承しました！", languageMode)}</p>
                                     <p className="text-sm text-green-200 mt-1">
                                         {trans(
-                                            coopSyncedVisualTheme === 'high-school'
+                                            activeRunVisualTheme === 'high-school'
                                                 ? "次の学園攻略の初期デッキに追加されます。"
                                                 : "次の冒険の初期デッキに追加されます。",
                                             languageMode
