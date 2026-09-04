@@ -39,6 +39,8 @@ import SpriteAuditPreview from './SpriteAuditPreview';
 interface DebugMenuScreenProps {
     onStart: (deck: ICard[], relics: Relic[], potions: Potion[]) => void;
     onStartAct3Boss: (deck: ICard[], relics: Relic[], potions: Potion[]) => void;
+    onStartEndlessOpeningPreview: () => void;
+    onStartEndlessTrueEndingPreview: () => void;
     onStartMagicEventSimulation: () => void;
     onStartUiPreview: (screen: GameScreen, miniGameOutcome?: MiniGameDebugPreview) => void;
     onStartProblemUiPreview: (mode: GameMode, modePool?: string[]) => void;
@@ -262,6 +264,8 @@ const TranslationRow = React.memo(({ original, context, debugLanguageMode, isInl
 const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
     onStart,
     onStartAct3Boss,
+    onStartEndlessOpeningPreview,
+    onStartEndlessTrueEndingPreview,
     onStartMagicEventSimulation,
     onStartUiPreview,
     onStartProblemUiPreview,
@@ -944,6 +948,18 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
                         className="bg-purple-700 hover:bg-purple-600 text-white px-3 py-1 md:px-4 md:py-2 rounded font-bold flex items-center shadow-lg border border-purple-400 text-xs"
                     >
                         ACT3 BOSS <Skull size={14} className="ml-1" />
+                    </button>
+                    <button
+                        onClick={onStartEndlessOpeningPreview}
+                        className="bg-cyan-800 hover:bg-cyan-700 text-white px-3 py-1 md:px-4 md:py-2 rounded font-bold flex items-center shadow-lg border border-cyan-300 text-xs"
+                    >
+                        エンドレス導入 <ArrowRight size={14} className="ml-1" />
+                    </button>
+                    <button
+                        onClick={onStartEndlessTrueEndingPreview}
+                        className="bg-amber-700 hover:bg-amber-600 text-white px-3 py-1 md:px-4 md:py-2 rounded font-bold flex items-center shadow-lg border border-amber-300 text-xs"
+                    >
+                        真エンディング <Sparkles size={14} className="ml-1" />
                     </button>
                     <button
                         onClick={() => onStart(selectedDeck, selectedRelics, selectedPotions)}

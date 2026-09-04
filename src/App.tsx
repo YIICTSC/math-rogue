@@ -7549,6 +7549,45 @@ const App: React.FC = () => {
         });
     }, [applyUiPreviewBattle, coopBattleKey, coopBattleQueue, coopEnemyTurnCursor, coopPlayerSnapshots, coopSession, coopSupportCards, createUiPreviewEnemies, themedCharacters, uiPreviewBattleConfig]);
 
+    const handleStartEndlessSequencePreview = useCallback((kind: 'OPENING' | 'TRUE') => {
+        const screen = kind === 'OPENING' ? GameScreen.ENDLESS_OPENING : GameScreen.ENDLESS_TRUE_ENDING;
+        const previewTheme = visualTheme;
+        const previewCharacter = getThemedCharacters(CHARACTERS, previewTheme).find(character => character.id === 'WARRIOR')
+            ?? CHARACTERS[0];
+
+        // Reuse the normal UI preview shell so the debug toolbar can restore
+        // the state that was active before opening this sequence.
+        handleStartUiPreview(screen);
+        setGameState(prev => ({
+            ...prev,
+            screen,
+            visualTheme: previewTheme,
+            challengeMode: undefined,
+            isEndless: true,
+            endlessTrueMode: kind === 'TRUE',
+            endlessFloor: kind === 'TRUE' ? 750 : 1,
+            act: kind === 'TRUE' ? 50 : 1,
+            floor: kind === 'TRUE' ? 750 : 0,
+            currentMapNodeId: null,
+            enemies: [],
+            selectedEnemyId: null,
+            rewards: [],
+            selectionState: { active: false, type: 'DISCARD', amount: 0 },
+            player: {
+                ...prev.player,
+                id: previewCharacter?.id ?? 'WARRIOR',
+                imageData: previewCharacter?.imageData ?? prev.player.imageData,
+                magicProtagonistId: previewTheme === 'magic'
+                    ? previewCharacter?.magicProtagonistId ?? 'AKARI'
+                    : undefined,
+                magicProtagonistGender: previewTheme === 'magic' ? 'female' : undefined,
+                currentHp: Math.max(1, prev.player.currentHp),
+            },
+            coopBattleState: null,
+        }));
+        audioService.playBGM(kind === 'TRUE' ? 'victory' : 'map');
+    }, [handleStartUiPreview, visualTheme]);
+
     const handleStartBattleModalPreview = useCallback((modalId: BattleModalPreviewId) => {
         const previewCards = Object.values(CARDS_LIBRARY)
             .filter(card => card.type !== CardType.STATUS && card.type !== CardType.CURSE)
@@ -19085,6 +19124,8 @@ const App: React.FC = () => {
                         <DebugMenuScreen
                             onStart={handleDebugStart}
                             onStartAct3Boss={handleDebugStartAct3Boss}
+                            onStartEndlessOpeningPreview={() => handleStartEndlessSequencePreview('OPENING')}
+                            onStartEndlessTrueEndingPreview={() => handleStartEndlessSequencePreview('TRUE')}
                             onStartMagicEventSimulation={() => setGameState(prev => ({ ...prev, screen: GameScreen.MAGIC_EVENT_SIMULATION }))}
                             onStartUiPreview={handleStartUiPreview}
                             onStartProblemUiPreview={handleStartProblemUiPreview}
