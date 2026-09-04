@@ -1,4 +1,6 @@
 export const ENGLISH_DEBUG_UI_EXACT: Record<string, string> = {
+  'エンドレス導入': 'Endless Opening',
+  '真エンディング': 'True Ending',
   '恋愛イベントSIM': 'Romance Event Simulator',
   'UI実寸': 'UI Preview',
   '問題デバッグ': 'Question Debug',
@@ -112,6 +114,8 @@ export const ENGLISH_DEBUG_UI_EXACT: Record<string, string> = {
 };
 
 export const HIRAGANA_DEBUG_UI_EXACT: Record<string, string> = {
+  'エンドレス導入': 'エンドレスどうにゅう',
+  '真エンディング': 'しんエンディング',
   'ゲーム内スプライト確認': 'ゲームないスプライトかくにん',
   'シート全体ではなく、ゲーム内と同じように1フレームずつ切り出して表示します。前後のコマの写り込み、透明端の欠落、読み込み失敗をここで確認してください。': 'シートぜんたいではなく、ゲームないと おなじように1フレームずつ きりだして ひょうじします。まえうしろの コマの うつりこみ、とうめいはしの けつらく、よみこみしっぱいを ここで かくにんしてください。',
   '前のフレーム': 'まえのフレーム',

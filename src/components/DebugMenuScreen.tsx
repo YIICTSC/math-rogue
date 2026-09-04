@@ -953,13 +953,13 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
                         onClick={onStartEndlessOpeningPreview}
                         className="bg-cyan-800 hover:bg-cyan-700 text-white px-3 py-1 md:px-4 md:py-2 rounded font-bold flex items-center shadow-lg border border-cyan-300 text-xs"
                     >
-                        エンドレス導入 <ArrowRight size={14} className="ml-1" />
+                        {trans('エンドレス導入', initialLanguageMode)} <ArrowRight size={14} className="ml-1" />
                     </button>
                     <button
                         onClick={onStartEndlessTrueEndingPreview}
                         className="bg-amber-700 hover:bg-amber-600 text-white px-3 py-1 md:px-4 md:py-2 rounded font-bold flex items-center shadow-lg border border-amber-300 text-xs"
                     >
-                        真エンディング <Sparkles size={14} className="ml-1" />
+                        {trans('真エンディング', initialLanguageMode)} <Sparkles size={14} className="ml-1" />
                     </button>
                     <button
                         onClick={() => onStart(selectedDeck, selectedRelics, selectedPotions)}
