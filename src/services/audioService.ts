@@ -1888,6 +1888,14 @@ class AudioService {
       }
   }
 
+  public stopHighSchoolVoices() {
+      for (const name of Array.from(this.activeHtmlSfx.keys())) {
+          if (name.startsWith('high-school-voice-')) {
+              this.stopActiveSfx(name);
+          }
+      }
+  }
+
   private playSynthSound(effect: CommonSoundEffect) {
       if (!this.ctx || !this.sfxGain || this.isMuted) return;
       const t = this.ctx.currentTime;

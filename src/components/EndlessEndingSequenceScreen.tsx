@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { ChevronRight, Sparkles } from 'lucide-react';
 import type { LanguageMode } from '../types';
 import type { VisualThemeId } from '../data/visualThemes';
@@ -9,7 +9,9 @@ import {
   getEndlessEndingSequence,
   type EndlessEndingKind,
 } from '../data/endlessEndingSequences';
+import { MAGIC_HERO_ID_BY_CHARACTER_ID } from '../data/visualThemes';
 import { assetUrl } from '../utils/assetPaths';
+import { audioService } from '../services/audioService';
 
 interface Props {
   kind: EndlessEndingKind;
@@ -26,6 +28,23 @@ const EndlessEndingSequenceScreen: React.FC<Props> = ({ kind, characterId, chara
   const [pageIndex, setPageIndex] = useState(0);
   const page = sequence.pages[pageIndex];
   const isLast = pageIndex >= sequence.pages.length - 1;
+  const voiceName = `endless-${kind.toLowerCase()}-${pageIndex + 1}`;
+
+  useEffect(() => {
+    audioService.stopHighSchoolVoices();
+    audioService.stopMagicEventVoices();
+    if (theme === 'high-school') {
+      void audioService.playHighSchoolVoiceFile(characterId, voiceName, 12000);
+    } else if (theme === 'magic') {
+      const heroId = magicProtagonistId ?? MAGIC_HERO_ID_BY_CHARACTER_ID[characterId];
+      void audioService.playMagicEventVoice(heroId, voiceName);
+    }
+    return () => {
+      audioService.stopHighSchoolVoices();
+      audioService.stopMagicEventVoices();
+    };
+  }, [characterId, kind, magicProtagonistId, pageIndex, theme, voiceName]);
+
   if (!page) return null;
 
   const localizedTitle = getEndlessEndingLocalizedTitle(page, languageMode);

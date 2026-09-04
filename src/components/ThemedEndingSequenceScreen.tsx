@@ -1,9 +1,10 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { ChevronRight, Sparkles } from 'lucide-react';
 import type { LanguageMode } from '../types';
 import type { NonMagicEndingTheme } from '../data/themedEndingSequences';
 import { getThemedEndingToneLabel, getThemedEndingVariants, type ThemedEndingVariant } from '../data/themedEndingSequences';
 import { assetUrl } from '../utils/assetPaths';
+import { audioService } from '../services/audioService';
 
 interface Props {
   theme: NonMagicEndingTheme;
@@ -23,6 +24,14 @@ const ThemedEndingSequenceScreen: React.FC<Props> = ({ theme, characterId, chara
   const [pageIndex, setPageIndex] = useState(0);
   const variant = variants[variantIndex] ?? variants[0];
   const page = variant?.pages[pageIndex];
+  const endingVoiceName = variant ? `ending-${variant.id}` : undefined;
+
+  useEffect(() => {
+    if (theme !== 'high-school' || pageIndex !== 2 || !endingVoiceName) return undefined;
+    void audioService.playHighSchoolVoiceFile(characterId, endingVoiceName, 12000);
+    return () => audioService.stopHighSchoolVoices();
+  }, [characterId, endingVoiceName, pageIndex, theme]);
+
   if (!variant || !page) return null;
 
   const isLast = pageIndex >= variant.pages.length - 1;

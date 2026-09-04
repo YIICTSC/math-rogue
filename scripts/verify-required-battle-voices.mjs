@@ -12,14 +12,23 @@ const requiredSourceFragments = [
   'didPlayCardVoice = playDelayedBattleVoice(playHighSchoolCardVoice);',
   'didPlayCardVoice = playDelayedBattleVoice(playMagicAttackVoice);',
   "audioService.playHighSchoolVoice(stateRef.current.player.id, 'finish');",
-  "audioService.playHighSchoolVoice(stateRef.current.player.id, 'defeat');",
+  {
+    anyOf: [
+      "audioService.playHighSchoolVoice(stateRef.current.player.id, 'defeat');",
+      "audioService.playHighSchoolVoice(currentState.player.id, 'defeat');",
+    ],
+  },
   "stateRef.current.visualTheme === 'magic'",
   '&& !finisherVoiceAlreadyPlayed',
 ];
 
 for (const fragment of requiredSourceFragments) {
-  if (!appSource.includes(fragment)) {
-    throw new Error(`Battle voice frequency/finisher branch is missing: ${fragment}`);
+  const found = typeof fragment === 'string'
+    ? appSource.includes(fragment)
+    : fragment.anyOf.some(candidate => appSource.includes(candidate));
+  if (!found) {
+    const expected = typeof fragment === 'string' ? fragment : fragment.anyOf.join(' OR ');
+    throw new Error(`Battle voice frequency/finisher branch is missing: ${expected}`);
   }
 }
 
