@@ -162,8 +162,9 @@ npm run preview
 | `npm run build:ios` | 時間制限なしのiOS有料版Web資産を生成 |
 | `npm run ios:sync` | iOS向けWeb資産とネイティブ依存を同期 |
 | `npm run ios:open` | XcodeでiOSプロジェクトを開く |
+| `npm run ios:prepare-submit` | iOS提出用にWeb資産を同期し、Xcodeを開く |
 | `npm run ios:prepare-simulator` | Simulatorの初回共有キャッシュを生成 |
-| `npm run ios:run` | iPhone Simulatorへビルド・インストール・起動 |
+| `npm run ios:run` | 実機なしでiPhone Simulatorへビルド・インストール・起動 |
 
 ## 公開構成
 

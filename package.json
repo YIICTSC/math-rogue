@@ -1,7 +1,7 @@
 {
   "name": "learning-rogue",
   "private": true,
-  "version": "1.0.6",
+  "version": "1.0.7",
   "description": "学習問題とカードバトルを組み合わせた学習ローグライクゲーム",
   "author": "YIICTSC",
   "type": "module",
@@ -29,6 +29,7 @@
     "ios:add": "pnpm run build:ios && cap add ios --packagemanager SPM",
     "ios:sync": "pnpm run build:ios && cap sync ios",
     "ios:open": "cap open ios",
+    "ios:prepare-submit": "pnpm run ios:sync && open -a Xcode ios/App/App.xcodeproj",
     "ios:prepare-simulator": "xcrun simctl runtime dyld_shared_cache update --all",
     "ios:run": "bash scripts/ios-build-launch.sh",
     "android:add": "pnpm run build:android && cap add android",

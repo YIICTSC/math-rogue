@@ -6,7 +6,7 @@
 
 - 既存のReact/Vite版をCapacitorでiPhone/iPadアプリとして包む。
 - Capacitorは8.4.2で固定し、iOS依存管理にはSwift Package Managerを使う。
-- Xcode操作はCLIを基本とし、`xcodebuild`で再現可能なSimulatorビルドを行う。
+- Simulator検証は`xcodebuild`で再現可能にし、App Store提出はXcode Organizerから直接行う。
 - ネイティブ専用機能は、まずCapacitorプラグインまたは小さなSwiftブリッジとして段階的に追加する。
 
 全面的なSwiftUI書き直しは、現在のゲーム規模とWeb版との機能差を考えると初期リリースの対象外とする。
@@ -17,7 +17,7 @@
 | --- | --- |
 | macOS | 15.7.7 |
 | Xcode | 26.3 (17C529) |
-| iOS SDK / Simulator | SDK 26.2 / iOS 26.3 runtime |
+| iOS SDK / Simulator | SDK 26.2 / Simulator RuntimeはXcodeのComponentsで追加 |
 | App Store提出SDK要件 | iOS 26 SDK要件を満たす |
 | Capacitor | 8.4.2 |
 | Node.js | 24.14.0（Codex同梱ランタイム） |
@@ -25,14 +25,13 @@
 | Deployment Target | iOS 15.0、iPhone / iPad |
 | 署名 | Automatic（Teamは正式Bundle ID確定後に設定） |
 
-旧Xcode 16.2は `/Applications/Xcode-16.2.app` に退避している。
-
-`App` schemeはiPhone Simulator向けに署名なしでビルド済み。Xcodeの結果は
+`App` schemeはiPhone Simulator向けに署名なしでビルド済み。実機を接続しなくても
+`npm run ios:run`が利用可能なSimulatorを選択または作成して起動する。Xcodeの結果は
 `BUILD SUCCEEDED`、生成されたDebugアプリは約976MBだった。
 
-iOS 26.3の`iPhone 17 Pro` Simulatorへインストールし、アプリプロセスの起動、
-学年選択画面の表示、終了後の再起動まで確認済み。初回は資産展開を含めて表示まで
-約40秒、再起動時は15秒以内に同じ画面を表示できた。確認画像は
+Simulatorへインストールし、アプリプロセスの起動、学年選択画面の表示、終了後の
+再起動まで確認する。初回は資産展開を含めて表示まで時間がかかる場合がある。
+確認画像は
 [`ios-simulator-relaunch.png`](./ios-simulator-relaunch.png) に保存している。
 
 2026-07-22にWeb版を再ビルドしてCapacitorへ同期し、同期後のXcodeビルドと
@@ -52,7 +51,7 @@ Simulator再起動も成功した。`dist`とiOS側のHTML／メインJavaScript
 [`ios-simulator-paid-debug-locked.png`](./ios-simulator-paid-debug-locked.png)に保存している。
 確認画像は[`ios-simulator-paid-edition.png`](./ios-simulator-paid-edition.png)に保存している。
 
-このIntel MacではiOS 26.3 Simulatorの初回起動時にdyld共有キャッシュ生成が走る。
+Simulator Runtimeの初回起動時にはdyld共有キャッシュ生成が走る場合がある。
 生成中はSimulatorへのインストールが待機状態になるため、完了を待ってから再度
 `npm run ios:run` を実行する。Appleが案内する事前生成コマンドは次のとおり。
 
@@ -106,6 +105,33 @@ iOS有料版では、1日のプレイ時間制限なしで遊べます。広告�
 オンライン機能は任意です。ゲーム本体は、管理ポータルやランキングと連携せずに通常の学習・冒険を楽しめます。公開ランキングでは、実名や個人を特定できる名前を使用しないでください。
 
 Bundle IDはApp Store Connectでアプリレコードを作る前に最終確定する。変更後に既存アプリ扱いへ戻すことはできないため、組織用の正式な逆ドメイン名がある場合は先に差し替える。
+
+## XcodeからApp Store Connectへ提出する標準フロー
+
+今後のiOS提出は、IPAをTransporterへ渡す方式ではなく、XcodeのOrganizerから
+App Store Connectへ直接アップロードする。リポジトリを取得した直後、またはWeb側を
+変更した提出前には、プロジェクトを開く前に次を実行する。
+
+```bash
+pnpm run ios:prepare-submit
+```
+
+このコマンドは、iOS有料版のWeb資産を生成し、CapacitorをiOSへ同期してから
+`ios/App/App.xcodeproj`をXcodeで開く。Xcodeでは次を選択する。
+
+1. Schemeが`App`、実行先が`Any iOS Device (arm64)`であることを確認する。Archiveに実機の接続は不要。
+2. `Product > Archive`を実行する。
+3. Organizerで生成されたArchiveを選び、`Distribute App > App Store Connect > Upload`を進める。
+4. Bundle ID `jp.yusukeishige.learningrogue`、バージョン、Build番号が対象リリースと一致することを確認してアップロードする。
+
+プロジェクトはAutomatic Signing、Team `STVR67YH4M`、ReleaseのApple Distribution署名、
+iPhone／iPad向け設定を共有している。初回だけXcodeの`Signing & Capabilities`で
+Apple Developerアカウントにログインし、Teamが設定されていることを確認する。
+認証や2段階認証を求められた場合は、Xcodeの画面で本人が入力する。
+
+XcodeのArchiveから直接アップロードするため、提出時にIPAを書き出したり、Transporterを
+起動したりする必要はない。アップロード後のビルド処理、TestFlight、App Reviewの状態は
+App Store Connectで確認する。
 
 ## Releaseアーカイブと署名状態
 
@@ -245,10 +271,10 @@ npm run ios:prepare-simulator
 npm run ios:run
 ```
 
-`npm run ios:run` は次を連続実行する。
+`npm run ios:run` は実機を必要とせず、次を連続実行する。
 
 1. iOS向けWebビルドとCapacitor同期
-2. `iPhone 17 Pro` Simulatorの起動
+2. 利用可能なRuntimeのSimulatorを選択し、なければ作成して起動
 3. `App` schemeのDebugビルド
 4. Simulatorへのインストールと起動
 
@@ -256,6 +282,19 @@ npm run ios:run
 
 ```bash
 IOS_SIMULATOR="iPad Pro 11-inch (M4)" npm run ios:run
+```
+
+指定した機種が現在のRuntimeに対応しない場合は、既定で`iPhone 16 Pro`へ
+フォールバックする。Runtimeを固定する場合は`IOS_SIMULATOR_RUNTIME`へ
+`com.apple.CoreSimulator.SimRuntime.iOS-18-3`のようなRuntime IDを指定する。
+
+Xcodeが選択中のRuntimeをSimulatorのビルド先として利用できない場合は、実機へ
+フォールバックせず停止する。Xcodeの`Settings > Components`で、使用中のXcodeに
+対応するiOS Simulator Runtimeを追加してから再実行する。複数のXcodeを使う場合は、
+次のようにSimulator実行時だけDeveloper Directoryを指定できる。
+
+```bash
+IOS_DEVELOPER_DIR="/Applications/Xcode.app/Contents/Developer" npm run ios:run
 ```
 
 ## iOS互換性で実施した変更

@@ -18580,7 +18580,7 @@ const App: React.FC = () => {
                                 </div>
 
                                     <button onClick={() => setShowDebugLog(true)} className="start-menu-version text-white text-[10px] hover:text-white flex items-center justify-center gap-1 transition-opacity">
-                                        <Terminal size={10} /> v1.0.6 YUSUKE ISHIGE
+                                        <Terminal size={10} /> v1.0.7 YUSUKE ISHIGE
                                     </button>
                                 </div>
 
@@ -19054,14 +19054,26 @@ const App: React.FC = () => {
                                     className="mb-4 w-full select-none border-b border-green-800 bg-transparent pb-2 text-left font-mono text-xl font-bold text-green-400 active:text-green-200"
                                     onClick={handleLogClick}
                                 >
-                                    System Release Notes v1.0.6
+                                    System Release Notes v1.0.7
                                 </button>
                             ) : (
                                 <h2 className="mb-4 select-none border-b border-green-800 pb-2 font-mono text-xl font-bold text-green-400">
-                                    System Release Notes v1.0.6
+                                    System Release Notes v1.0.7
                                 </h2>
                             )}
                             <div className="space-y-4 text-sm font-mono text-gray-300 max-h-[60vh] overflow-y-auto custom-scrollbar">
+                                <section>
+                                    <h3 className="text-white font-bold mb-1">■ {trans('v1.0.7 エンドレスモードと学習連携の強化', languageMode)}</h3>
+                                    <ul className="list-disc pl-5 space-y-1">
+                                        <li>{trans('エンドレスモードを全50章・1章15Fで進行できるように改善', languageMode)}</li>
+                                        <li>{trans('章クリア結果、特殊イベント、5章ごとのボスと固有ギミックを追加', languageMode)}</li>
+                                        <li>{trans('エンドレスの導入・真エンディングの進行、表示文、画像レイアウト、翻訳を修正', languageMode)}</li>
+                                        <li>{trans('マジック編の男女主人公向けエンドレスイベント、演出画像、ボイスを追加', languageMode)}</li>
+                                        <li>{trans('課題・招待からの冒険再開と保存データ分離を安定化', languageMode)}</li>
+                                        <li>{trans('将棋Advanceの固有駒と移動ロジックを拡張', languageMode)}</li>
+                                        <li>{trans('エンディングのデバッグプレビュー、監査、回帰テストを追加', languageMode)}</li>
+                                    </ul>
+                                </section>
                                 <section>
                                     <h3 className="text-white font-bold mb-1">■ {trans('v1.0.6 軽微な表示・翻訳修正', languageMode)}</h3>
                                     <ul className="list-disc pl-5 space-y-1">

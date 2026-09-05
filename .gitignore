@@ -31,7 +31,8 @@ public/sfx/magic-voices/**/*.wav
 public/sfx/magic-event-voices/**/*.wav
 public/sfx/high-school-voices/**/*.wav
 
-# Local iOS app work. Keep the GitHub repo focused on the web game.
+# Local iOS app work. Keep generated web files and build output out of Git while
+# retaining the native project inputs needed to open and archive in Xcode.
 ios/
 *.xcodeproj/
 *.xcworkspace/
@@ -44,6 +45,45 @@ Pods/
 *.ipa
 *.xcarchive
 *.dSYM/
+
+# Checked-in Xcode project inputs.
+!ios/
+!ios/App/
+!ios/debug.xcconfig
+!ios/App/App.xcodeproj/
+!ios/App/App.xcodeproj/project.pbxproj
+!ios/App/App.xcodeproj/xcshareddata/
+!ios/App/App.xcodeproj/xcshareddata/xcschemes/
+!ios/App/App.xcodeproj/xcshareddata/xcschemes/App.xcscheme
+!ios/App/App/
+!ios/App/App/AppDelegate.swift
+!ios/App/App/Info.plist
+!ios/App/App/App.entitlements
+!ios/App/App/Assets.xcassets/
+!ios/App/App/Assets.xcassets/**
+!ios/App/App/Base.lproj/
+!ios/App/App/Base.lproj/**
+!ios/App/App/en.lproj/
+!ios/App/App/en.lproj/**
+!ios/App/App/ja.lproj/
+!ios/App/App/ja.lproj/**
+!ios/App/CapApp-SPM/
+!ios/App/CapApp-SPM/Package.swift
+!ios/App/CapApp-SPM/Package.resolved
+!ios/App/CapApp-SPM/README.md
+!ios/App/CapApp-SPM/Sources/
+!ios/App/CapApp-SPM/Sources/**
+
+# Xcode-generated workspace/user data and Capacitor output.
+ios/ExportOptions-*.plist
+ios/App/App.xcodeproj/project.xcworkspace/
+ios/App/App.xcodeproj/xcuserdata/
+ios/App/App/public/
+ios/App/build/
+ios/App/CapApp-SPM/.build/
+ios/App/CapApp-SPM/build/
+ios/App/CapApp-SPM/.swiftpm/
+ios/capacitor-cordova-ios-plugins/
 
 # Generated Android build outputs and local signing material.
 android/.gradle/

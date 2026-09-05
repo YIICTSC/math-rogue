@@ -1,0 +1,5 @@
+/* English app bundle localization. Japanese is the primary app language. */
+"CFBundleDisplayName" = "Learning Rogue";
+"NSCameraUsageDescription" = "Camera access is used to create a protagonist icon for the Elementary School arc.";
+"NSMicrophoneUsageDescription" = "Microphone access is used to evaluate pronunciation in English questions.";
+"NSSpeechRecognitionUsageDescription" = "Speech recognition is used to evaluate spoken answers in English questions.";
