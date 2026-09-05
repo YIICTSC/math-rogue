@@ -1,14 +1,12 @@
 
 import React, { useEffect, useRef, useState } from 'react';
-import { MapNode, NodeType, Player, LanguageMode, type EndlessGimmickProgress } from '../types';
+import { MapNode, NodeType, Player, LanguageMode } from '../types';
 import { Swords, Skull, BedDouble, ShoppingBag, HelpCircle, AlertTriangle, PlayCircle, Coins, Heart, Layers, X, Home, MessageSquare, Settings } from 'lucide-react';
 import { MAP_WIDTH, MAP_HEIGHT } from '../services/mapGenerator';
 import Card from './Card';
 import { trans } from '../utils/textUtils';
 import { assetUrl } from '../utils/assetPaths';
 import type { VisualThemeId } from '../data/visualThemes';
-import { getEndlessArc, getEndlessBoss, getEndlessBossById } from '../data/endlessMode';
-import EndlessGimmickGlossaryText, { getEndlessGimmickDefinition, getEndlessGimmickTermLabel, type EndlessGimmickGlossaryEntry } from './EndlessGimmickGlossary';
 
 interface MapScreenProps {
     nodes: MapNode[];
@@ -28,38 +26,14 @@ interface MapScreenProps {
     visualTheme?: VisualThemeId;
     highSchoolStoryId?: string;
     isEndless?: boolean;
-    endlessGimmickProgress?: Record<string, EndlessGimmickProgress>;
 }
 
-const MapScreen: React.FC<MapScreenProps> = ({ nodes, currentNodeId, onNodeSelect, onReturnToTitle, onOpenSettings, player, languageMode, narrative, act, floor, typingMode = false, selectionHoldMs = 0, selectionDisabled = false, selectionDisabledMessage, visualTheme = 'elementary', highSchoolStoryId, isEndless = false, endlessGimmickProgress = {} }) => {
+const MapScreen: React.FC<MapScreenProps> = ({ nodes, currentNodeId, onNodeSelect, onReturnToTitle, onOpenSettings, player, languageMode, narrative, act, floor, typingMode = false, selectionHoldMs = 0, selectionDisabled = false, selectionDisabledMessage, visualTheme = 'elementary', highSchoolStoryId, isEndless = false }) => {
     const scrollRef = useRef<HTMLDivElement>(null);
     const [showDeck, setShowDeck] = useState(false);
-    const [selectedGimmickTerm, setSelectedGimmickTerm] = useState<EndlessGimmickGlossaryEntry | null>(null);
     const holdTimerRef = useRef<number | null>(null);
     const mapHeight = Math.max(MAP_HEIGHT, nodes.reduce((max, node) => Math.max(max, node.y + 1), 0));
     const endlessChapter = Math.max(1, act);
-    const nextBossChapter = Math.max(5, Math.ceil(Math.max(1, endlessChapter) / 5) * 5);
-    const nextBoss = isEndless
-        ? nodes.find(node => node.type === NodeType.BOSS && !node.completed)
-        : undefined;
-    // Non-boss chapters intentionally have no boss node.  Keep the next
-    // milestone banner visible across chapter map regeneration instead of
-    // making it disappear for C01-C04, C06-C09, and so on.
-    const nextBossDefinition = isEndless
-        ? (nextBoss?.endlessBossId
-            ? getEndlessBossById(nextBoss.endlessBossId)
-            : getEndlessBoss(getEndlessArc(visualTheme), nextBossChapter))
-        : undefined;
-    const nextBossGimmickProgress = nextBossDefinition ? endlessGimmickProgress[nextBossDefinition.id] : undefined;
-    const latestAchievedGimmick = isEndless
-        ? Object.entries(endlessGimmickProgress)
-            .map(([bossId, progress]) => {
-                const definition = getEndlessBossById(bossId);
-                return definition ? { definition, progress } : undefined;
-            })
-            .filter((entry): entry is { definition: NonNullable<typeof nextBossDefinition>; progress: EndlessGimmickProgress } => Boolean(entry?.progress?.achieved))
-            .sort((a, b) => b.definition.floor - a.definition.floor)[0]
-        : undefined;
 
     // 現在地へのオートスクロール
     useEffect(() => {
@@ -310,42 +284,6 @@ const MapScreen: React.FC<MapScreenProps> = ({ nodes, currentNodeId, onNodeSelec
                     </div>
                 </div>
             )}
-            {isEndless && nextBossDefinition && (
-                <div
-                    className="z-20 border-b border-purple-400/30 bg-purple-950/80 px-3 py-2 text-center text-[11px] text-purple-100"
-                    aria-label={trans(`次の節目 第${nextBossDefinition.floor}章`, languageMode)}
-                >
-                    <div className="font-black">
-                        {trans(`次の節目 エンドレス第${nextBossDefinition.floor}章：${nextBossDefinition.name}`, languageMode)}
-                        <span className="ml-2 text-purple-300">({trans(`あと${Math.max(1, nextBossDefinition.floor - endlessChapter)}章`, languageMode)})</span>
-                    </div>
-                    <div className="mx-auto mt-1 grid max-w-2xl gap-0.5 text-[10px] font-semibold text-purple-200/90 sm:grid-cols-3">
-                        <span><span className="font-black text-fuchsia-300">{trans('弱点', languageMode)}：</span>{trans(nextBossDefinition.weakness, languageMode)}</span>
-                        <span>
-                            <span className="font-black text-fuchsia-300">{trans('ギミック', languageMode)}：</span>
-                            <EndlessGimmickGlossaryText
-                                text={nextBossDefinition.mechanicSummary}
-                                languageMode={languageMode}
-                                onTermClick={setSelectedGimmickTerm}
-                            />
-                            {nextBossGimmickProgress?.achieved && (
-                                <span className="ml-1 font-black text-emerald-300">（{trans('達成済み', languageMode)}）</span>
-                            )}
-                        </span>
-                        <span><span className="font-black text-fuchsia-300">{trans('備え', languageMode)}：</span>{trans(nextBossDefinition.recommendedPrep, languageMode)}</span>
-                    </div>
-                    {latestAchievedGimmick && (
-                        <div className="mx-auto mt-1 max-w-2xl text-[10px] font-black text-emerald-300">
-                            {trans('ギミック達成記録', languageMode)}：{trans(`エンドレス第${latestAchievedGimmick.definition.floor}章 ${latestAchievedGimmick.definition.name}`, languageMode)} — <EndlessGimmickGlossaryText
-                                text={latestAchievedGimmick.definition.mechanicSummary}
-                                languageMode={languageMode}
-                                onTermClick={setSelectedGimmickTerm}
-                            />（{trans('達成済み', languageMode)}）
-                        </div>
-                    )}
-                </div>
-            )}
-
             {/* メインマップエリア */}
             <div ref={scrollRef} className="ios-edge-to-edge-visual flex-grow overflow-y-auto relative custom-scrollbar z-10" style={{ scrollBehavior: 'smooth' }}>
                 <div className="relative w-full" style={{ height: `${mapHeight * 100 + 300}px` }}>
@@ -577,32 +515,6 @@ const MapScreen: React.FC<MapScreenProps> = ({ nodes, currentNodeId, onNodeSelec
                 </div>
             )}
 
-            {selectedGimmickTerm && (
-                <div
-                    className="app-modal-overlay fixed inset-0 z-[80] flex items-center justify-center bg-black/75 p-4 backdrop-blur-sm"
-                    role="presentation"
-                    onClick={() => setSelectedGimmickTerm(null)}
-                >
-                    <section
-                        className="app-modal-panel w-full max-w-md rounded-xl border-2 border-yellow-300 bg-slate-950 p-5 text-white shadow-[0_0_30px_rgba(250,204,21,0.35)]"
-                        role="dialog"
-                        aria-modal="true"
-                        aria-labelledby="endless-gimmick-term-title"
-                        onClick={event => event.stopPropagation()}
-                    >
-                        <div className="mb-2 text-xs font-black tracking-widest text-yellow-300">{trans('ギミック用語', languageMode)}</div>
-                        <h2 id="endless-gimmick-term-title" className="text-xl font-black text-yellow-100">{getEndlessGimmickTermLabel(selectedGimmickTerm, languageMode)}</h2>
-                        <p className="mt-3 text-sm leading-relaxed text-slate-100">{getEndlessGimmickDefinition(selectedGimmickTerm, languageMode)}</p>
-                        <button
-                            type="button"
-                            className="mt-5 w-full rounded-lg bg-yellow-300 px-4 py-2 font-black text-slate-950 hover:bg-yellow-200"
-                            onClick={() => setSelectedGimmickTerm(null)}
-                        >
-                            {trans('閉じる', languageMode)}
-                        </button>
-                    </section>
-                </div>
-            )}
         </div>
     );
 };

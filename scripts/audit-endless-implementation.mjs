@@ -66,11 +66,9 @@ for (const [label, source, patterns] of [
   ['map depth backgrounds', mapScreen, [/endlessDepthBand/, /endless-\$\{visualTheme\}-\$\{endlessDepthBand\}/]],
   ['reward persistence', app, [/endlessRewardPending/, /endlessRunRewards/, /createEndlessRewardItems/, /handleEndlessRewardReroll/]],
   ['reward choice safety', data, [/boss\.floor === 50/, /selectedRewardIds/, /FALLBACK_CARD_UPGRADE/]],
-  ['learning judgment hook', app, [/ENDLESS_LEARNING_SCREENS/, /applyEndlessLearningAnswer/, /subjectId/, /subjectEligible/]],
-  ['boss gimmick progress', app, [/updateActiveEndlessGimmick/, /updateEndlessGimmickProgress/, /endlessGimmickProgress/, /bossPhaseCount/]],
   ['boss phase definitions', data, [/phaseCountByMechanic/, /phaseCount:/]],
   ['true endless boss generation', data, [/createTrueEndlessBoss/, /floor > 50 && floor % 5 === 0/]],
-  ['boss preview', mapScreen, [/nextBossDefinition\.weakness/, /recommendedPrep/, /latestAchievedGimmick/, /達成済み/]],
+  ['boss reward flow', app, [/createEndlessRewardItems/, /endlessRewardPending/, /handleEndlessRewardReroll/]],
   ['major boss intermission', rest, [/endlessMajorBoss/, /onOpenShop/, /onOrganizeDeck/]],
   ['chapter result data', chapterResults, [/ENDLESS_CHAPTER_RESULTS/, /chapter:\s*50/, /getEndlessChapterResult/, /getTrueEndlessChapterResult/]],
   ['chapter result screen', floorResult, [/getEndlessChapterResult/, /getTrueEndlessChapterResult/, /isEndless/, /ENDLESS CHAPTER/]],
@@ -88,4 +86,4 @@ if (failures.length) {
   console.error(failures.map(failure => `- ${failure}`).join('\n'));
   process.exit(1);
 }
-console.log(`Endless implementation audit passed: ${bossRows.length} bosses, WebP assets, persistence, learning hooks, previews, and intermission choices verified.`);
+console.log(`Endless implementation audit passed: ${bossRows.length} bosses, WebP assets, reward persistence, and intermission choices verified.`);

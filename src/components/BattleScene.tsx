@@ -20,7 +20,6 @@ import { storageService } from '../services/storageService';
 import { PotionIcon, RelicIcon } from './ItemIcon';
 import { getBattleBackgroundSceneById } from '../data/battleBackgrounds';
 import { getStatusEffectKeyForVfx } from '../data/statusEffects';
-import { getEndlessBossById } from '../data/endlessMode';
 import { BATTLE_SPECIAL_IDLE_DURATION_MS, BATTLE_SPECIAL_IDLE_TRIGGER_DELAY_MS, getThemedCharacterAnimationSheetPath, getThemedCharacterIdleSpriteScale, getThemedCharacterIdleSpriteSheetPath, getThemedCharacterSpritePath, getThemedEnemyDisplayName, getThemedEnemyVariant, getThemedHumanoidEnemyVariant, type BattleHeroAnimationAction, type HighSchoolEnemyAction, type HighSchoolHeroAction, type VisualThemeId } from '../data/visualThemes';
 import { boostMagicCardForTransformation } from '../data/magicCards';
 import { assetUrl } from '../utils/assetPaths';
@@ -28,7 +27,6 @@ import { isCardEligibleForCopySelection } from '../utils/cardCopySelection';
 import type { BattleUiSettings } from './SettingsModal';
 import MagicRulePanel from './MagicRulePanel';
 import ResilientAssetImage from './ResilientAssetImage';
-import EndlessGimmickGlossaryText, { getEndlessGimmickDefinition, getEndlessGimmickTermLabel } from './EndlessGimmickGlossary';
 
 const MAGIC_MALE_ACTION_SCALE: Record<string, {
     before: { attack: number; skill: number };
@@ -2003,9 +2001,6 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                 languageMode
                             );
                             const enemyNameNeedsScroll = enemyName.length > 8;
-                            const endlessBoss = enemy.enemyType === 'ENDLESS_BOSS'
-                                ? getEndlessBossById(enemy.endlessBossId)
-                                : undefined;
                             const isTrueBossPhase2 = enemy.enemyType === 'THE_HEART' && enemy.phase === 2;
                             const isFinalBoss = enemy.enemyType === 'THE_HEART';
                             const humanoidEnemy = getThemedHumanoidEnemyVariant(enemy, visualTheme);
@@ -2218,32 +2213,6 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                                 </div>
                                                 {enemy.block > 0 && <span className="text-blue-300 flex items-center bg-blue-900/80 px-1 rounded text-[8px] font-bold ml-1 shrink-0" onClick={(e) => { e.stopPropagation(); showInfo(trans("ブロック", languageMode), trans("次のターン開始時までダメージを防ぐ。", languageMode)); }}><Shield size={8} className="mr-0.5" /> {enemy.block}</span>}
                                             </div>
-
-                                            {endlessBoss && (
-                                                <div
-                                                    role="button"
-                                                    tabIndex={0}
-                                                    className="mb-1 w-full rounded border border-fuchsia-400/60 bg-fuchsia-950/80 px-1 py-0.5 text-left text-[8px] leading-tight text-fuchsia-100"
-                                                    title={endlessBoss.mechanicSummary}
-                                                    onClick={(event) => {
-                                                        event.stopPropagation();
-                                                        showInfo(`${endlessBoss.name}：特殊ルール`, endlessBoss.mechanicSummary);
-                                                    }}
-                                                    onKeyDown={(event) => {
-                                                        if (event.key !== 'Enter' && event.key !== ' ') return;
-                                                        event.preventDefault();
-                                                        event.stopPropagation();
-                                                        showInfo(`${endlessBoss.name}：特殊ルール`, endlessBoss.mechanicSummary);
-                                                    }}
-                                                >
-                                                    <span className="mr-1 font-black text-fuchsia-300">{languageMode === 'ENGLISH' ? 'MECHANIC' : languageMode === 'HIRAGANA' ? 'ぎみっく' : 'ギミック'}</span>
-                                                    <EndlessGimmickGlossaryText
-                                                        text={endlessBoss.mechanicSummary}
-                                                        languageMode={languageMode}
-                                                        onTermClick={(entry) => showInfo(getEndlessGimmickTermLabel(entry, languageMode), getEndlessGimmickDefinition(entry, languageMode))}
-                                                    />
-                                                </div>
-                                            )}
 
                                             <div className="relative w-full h-3 bg-gray-800 rounded-full overflow-hidden border border-gray-600 mb-0.5" onClick={(e) => { e.stopPropagation(); showInfo("HP", `現在: ${enemy.currentHp} / 最大: ${enemy.maxHp}`); }}>
                                                 <div className={`h-full ${isTrueBossPhase2 ? 'bg-gradient-to-r from-purple-800 to-red-600' : 'bg-gradient-to-r from-red-600 to-red-500'} transition-all duration-500`} style={{ width: `${enemyHpPercent}%` }}></div>
