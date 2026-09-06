@@ -13,6 +13,36 @@ export type EndlessRewardSlot =
   | 'PERMANENT'
   | 'RECORD';
 export type EndlessRewardScope = 'RUN' | 'PERMANENT' | 'RECORD';
+export type EndlessBossSpecialActionKey = 'DISCARD_HAND' | 'CARD_TAX' | 'TYPE_LOCK';
+
+const ENDLESS_BOSS_SPECIAL_ACTION_SEQUENCE: EndlessBossSpecialActionKey[] = [
+  'DISCARD_HAND',
+  'CARD_TAX',
+  'TYPE_LOCK',
+];
+
+const ENDLESS_BOSS_ARC_OFFSETS: Record<EndlessArc, number> = {
+  elementary: 0,
+  'high-school': 1,
+  magic: 2,
+};
+
+export const ENDLESS_BOSS_SPECIAL_ACTION_SUMMARIES: Record<EndlessBossSpecialActionKey, string> = {
+  DISCARD_HAND: '予告後、手札からランダムに1枚を戦闘中の捨て札へ送る。カード自体はデッキから削除しない。',
+  CARD_TAX: '予告後、次に使うXコスト以外のカードのコストが1増える。ターン終了時に解除される。',
+  TYPE_LOCK: '予告後、ATTACK・SKILL・POWERのいずれか1種類を次の自分ターンだけ使用不可にする。',
+};
+
+/**
+ * Returns the special battle action for a milestone boss.  The sequence
+ * rotates by arc so the same chapter number does not always demand the same
+ * counterplay.  The formula also covers true-endless chapters after 50.
+ */
+export const getEndlessBossSpecialActionKey = (arc: EndlessArc, floor: number): EndlessBossSpecialActionKey => {
+  const chapterIndex = Math.max(0, Math.floor((floor - 5) / 5));
+  const actionIndex = (chapterIndex + ENDLESS_BOSS_ARC_OFFSETS[arc]) % ENDLESS_BOSS_SPECIAL_ACTION_SEQUENCE.length;
+  return ENDLESS_BOSS_SPECIAL_ACTION_SEQUENCE[actionIndex];
+};
 
 export interface EndlessRewardChoice {
   id: string;
@@ -61,6 +91,9 @@ export interface EndlessBossDefinition {
   mechanicSummary: string;
   /** Number of HP phases used by the boss. Normal bosses use one phase. */
   phaseCount: number;
+  /** Battle-only action shown as an intent before the boss executes it. */
+  specialActionKey: EndlessBossSpecialActionKey;
+  specialActionSummary: string;
   /** Short, non-colour-coded preparation hints shown on the map preview. */
   weakness: string;
   recommendedPrep: string;
@@ -366,6 +399,7 @@ const rewardRows: Record<EndlessArc, Record<number, Array<[EndlessRewardSlot, st
 
 export const ENDLESS_BOSSES: EndlessBossDefinition[] = bossRows.map(([arc, floor, tier, name, theme, mechanicKey, mechanicSummary]) => {
   const bossId = `ENDLESS-${arc.toUpperCase().replace('-', '_')}-${String(floor).padStart(2, '0')}`;
+  const specialActionKey = getEndlessBossSpecialActionKey(arc, floor);
   const choices = (rewardRows[arc][floor] || []).map(([slot, rewardName, description, scope, effectKey]) => ({
     id: `${bossId}-${slot}`,
     bossId,
@@ -390,8 +424,10 @@ export const ENDLESS_BOSSES: EndlessBossDefinition[] = bossRows.map(([arc, floor
     name,
     theme,
     mechanicKey,
-    mechanicSummary: formatEndlessSegmentText(mechanicSummary, floor),
+    mechanicSummary: `${formatEndlessSegmentText(mechanicSummary, floor)} 特殊行動：${ENDLESS_BOSS_SPECIAL_ACTION_SUMMARIES[specialActionKey]}`,
     phaseCount: phaseCountByMechanic[mechanicKey] || (tier === 'MAJOR_BOSS' ? 3 : 1),
+    specialActionKey,
+    specialActionSummary: ENDLESS_BOSS_SPECIAL_ACTION_SUMMARIES[specialActionKey],
     ...guidance,
     weakness: formattedWeakness,
     recommendedPrep: formatEndlessSegmentText(guidance.recommendedPrep, floor),
@@ -419,6 +455,7 @@ const createTrueEndlessBoss = (arc: EndlessArc, floor: number): EndlessBossDefin
   const index = Math.max(0, Math.floor((floor - 55) / 5));
   const tier: EndlessBossTier = floor % 10 === 0 ? 'MAJOR_BOSS' : 'BOSS';
   const mechanicKey = TRUE_ENDLESS_MECHANICS[index % TRUE_ENDLESS_MECHANICS.length];
+  const specialActionKey = getEndlessBossSpecialActionKey(arc, floor);
   const bossId = `ENDLESS-${arc.toUpperCase().replace('-', '_')}-${String(floor).padStart(2, '0')}`;
   const slots: EndlessRewardSlot[] = tier === 'MAJOR_BOSS' ? ['CORE', 'GROWTH', 'CONTRACT'] : ['SAFE', 'LEARNING', 'RISK'];
   const rewardNames: Record<EndlessRewardSlot, [string, string, string]> = {
@@ -444,8 +481,10 @@ const createTrueEndlessBoss = (arc: EndlessArc, floor: number): EndlessBossDefin
     name: TRUE_ENDLESS_BOSS_NAMES[arc][index % TRUE_ENDLESS_BOSS_NAMES[arc].length],
     theme: `第${floor}章の深層を巡回する${arc}監査体`,
     mechanicKey,
-    mechanicSummary: `真エンドレス第${floor}章の深層ギミック。${formattedWeakness}。`,
+    mechanicSummary: `真エンドレス第${floor}章の深層ギミック。${formattedWeakness}。特殊行動：${ENDLESS_BOSS_SPECIAL_ACTION_SUMMARIES[specialActionKey]}`,
     phaseCount: tier === 'MAJOR_BOSS' ? 3 : 1,
+    specialActionKey,
+    specialActionSummary: ENDLESS_BOSS_SPECIAL_ACTION_SUMMARIES[specialActionKey],
     ...guidance,
     weakness: formattedWeakness,
     recommendedPrep: formatEndlessSegmentText(guidance.recommendedPrep, floor),

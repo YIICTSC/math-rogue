@@ -981,6 +981,21 @@ const remapCoopBattleStatePeerId = (
 };
 
 const INACTIVE_SELECTION_STATE: SelectionState = { active: false, type: 'DISCARD', amount: 0 };
+const ENDLESS_BOSS_CARD_TAX_COUNTER = 'ENDLESS_BOSS_CARD_TAX';
+const ENDLESS_BOSS_LOCK_COUNTERS = {
+    [CardType.ATTACK]: 'ENDLESS_BOSS_LOCK_ATTACK',
+    [CardType.SKILL]: 'ENDLESS_BOSS_LOCK_SKILL',
+    [CardType.POWER]: 'ENDLESS_BOSS_LOCK_POWER',
+} as const;
+const ENDLESS_BOSS_TEMPORARY_COUNTERS = [
+    ENDLESS_BOSS_CARD_TAX_COUNTER,
+    ENDLESS_BOSS_LOCK_COUNTERS[CardType.ATTACK],
+    ENDLESS_BOSS_LOCK_COUNTERS[CardType.SKILL],
+    ENDLESS_BOSS_LOCK_COUNTERS[CardType.POWER],
+] as const;
+
+const getEndlessBossLockCounterKey = (cardType: CardType): string | undefined =>
+    ENDLESS_BOSS_LOCK_COUNTERS[cardType as CardType.ATTACK | CardType.SKILL | CardType.POWER];
 
 const withCoopSelectionStateForPeer = (
     battleState: CoopBattleState | null | undefined,
@@ -1280,7 +1295,9 @@ const getNextEnemyIntent = (enemy: Enemy, turn: number): EnemyIntent => {
     const type = enemy.enemyType;
     const localTurn = turn % 3;
     const isAct2Plus = (enemy.maxHp > 60);
-    const namedIntent = getNamedEnemyIntent(enemy, turn, isAct2Plus);
+    // Authored endless bosses have their own deterministic action cycle.  Do
+    // not let a name-based generic pattern overwrite the authored telegraph.
+    const namedIntent = type === 'ENDLESS_BOSS' ? null : getNamedEnemyIntent(enemy, turn, isAct2Plus);
     if (namedIntent) return namedIntent;
 
     switch (type) {
@@ -1366,10 +1383,24 @@ const getNextEnemyIntent = (enemy: Enemy, turn: number): EnemyIntent => {
             }
 
         case 'ENDLESS_BOSS': {
-            // Endless bosses use one transparent, phase-scaled pattern.  The
-            // encounter is differentiated by its strength and phase, not by
-            // hidden gimmick conditions.
+            // Endless bosses use one transparent, phase-scaled pattern plus a
+            // deterministic special action.  The special action is always
+            // telegraphed and repeats on the second enemy action of each
+            // five-turn cycle.
             const phase = Math.max(1, enemy.phase || 1);
+            const boss = getEndlessBossById(enemy.endlessBossId);
+            if (boss && turn % 5 === 2) {
+                if (boss.specialActionKey === 'DISCARD_HAND') {
+                    return { type: EnemyIntentType.DISCARD_HAND, value: 1 };
+                }
+                if (boss.specialActionKey === 'CARD_TAX') {
+                    return { type: EnemyIntentType.CARD_TAX, value: 1 };
+                }
+                const cardTypes = [CardType.ATTACK, CardType.SKILL, CardType.POWER];
+                const chapterIndex = Math.max(0, Math.floor((boss.floor - 5) / 5));
+                const targetCardType = cardTypes[(chapterIndex + phase) % cardTypes.length];
+                return { type: EnemyIntentType.TYPE_LOCK, value: 1, targetCardType };
+            }
             if (turn % 4 === 1) return { type: EnemyIntentType.ATTACK, value: 11 + phase * 4 };
             if (turn % 4 === 2) return { type: EnemyIntentType.ATTACK_DEFEND, value: 8 + phase * 3, secondaryValue: 10 + phase * 3 };
             if (turn % 4 === 3) return { type: EnemyIntentType.DEBUFF, value: 0, secondaryValue: phase, debuffType: 'WEAK' };
@@ -9541,7 +9572,7 @@ const App: React.FC = () => {
         });
     };
 
-    const handlePlayCard = (card: ICard, coopActorPeerId?: string) => {
+    const handlePlayCard = (card: ICard, coopActorPeerId?: string, options?: { endlessBossTaxAlreadyIncluded?: boolean }) => {
         if (weatherScryModal || galaxyExpressModal || goldFishModal || dreamCatcherModal) return;
         const isCoopHostRemoteAction = !!coopActorPeerId && gameState.challengeMode === 'COOP' && !!coopSession?.isHost;
         const coopActorEntry = coopActorPeerId
@@ -9621,6 +9652,11 @@ const App: React.FC = () => {
         if (adjustedCard.type === CardType.SKILL && actionPlayer.relicCounters['DUAL_PENCIL_SKILL_READY'] === 1) {
             adjustedCard.block = (adjustedCard.block || 0) + 2;
         }
+        const endlessBossLockCounter = getEndlessBossLockCounterKey(adjustedCard.type);
+        if (endlessBossLockCounter && actionPlayer.relicCounters[endlessBossLockCounter] > 0) {
+            if (!isCoopHostRemoteAction) audioService.playSound('wrong');
+            return;
+        }
         let effectiveCost = getCardPlayCost(adjustedCard, actionPlayer.currentEnergy);
         if (actionPlayer.powers['CORRUPTION'] && adjustedCard.type === CardType.SKILL) {
             effectiveCost = 0;
@@ -9628,6 +9664,9 @@ const App: React.FC = () => {
         if (adjustedCard.type === CardType.ATTACK && actionPlayer.turnFlags['NEXT_ATTACK_COST_DOWN']) {
             effectiveCost = Math.max(0, effectiveCost - 1);
         }
+        const endlessBossCardTaxPending = !adjustedCard.xCost && actionPlayer.relicCounters[ENDLESS_BOSS_CARD_TAX_COUNTER] > 0;
+        const endlessBossCardTaxApplied = endlessBossCardTaxPending && !options?.endlessBossTaxAlreadyIncluded;
+        if (endlessBossCardTaxApplied) effectiveCost += 1;
 
         card = adjustedCard;
 
@@ -9727,7 +9766,7 @@ const App: React.FC = () => {
                 : null;
             const actorPlayer = actorEntry?.player ?? prev.player;
             const actorSelectedEnemyId = actorEntry?.selectedEnemyId ?? actionSelectedEnemyId;
-            let p = { ...actorPlayer, hand: [...actorPlayer.hand], drawPile: [...actorPlayer.drawPile], discardPile: [...actorPlayer.discardPile], deck: [...actorPlayer.deck], powers: { ...actorPlayer.powers } };
+            let p = { ...actorPlayer, hand: [...actorPlayer.hand], drawPile: [...actorPlayer.drawPile], discardPile: [...actorPlayer.discardPile], deck: [...actorPlayer.deck], powers: { ...actorPlayer.powers }, relicCounters: { ...actorPlayer.relicCounters } };
             const hpLostAtCardPlay = p.hpLostThisTurn || 0;
             const magicEffectMultiplier = p.magicTransformed ? 2 : 1;
             let enemies = prev.enemies.map(e => ({ ...e }));
@@ -9747,6 +9786,9 @@ const App: React.FC = () => {
             const additionalResult = applyAdditionalCardLogic(card, p, enemies, languageMode, currentLogs, nextActiveEffects, effectiveCost);
             Object.assign(p, additionalResult.player);
             enemies = additionalResult.enemies;
+            if (endlessBossCardTaxPending && p.relicCounters[ENDLESS_BOSS_CARD_TAX_COUNTER] > 0) {
+                delete p.relicCounters[ENDLESS_BOSS_CARD_TAX_COUNTER];
+            }
             const protagonistId = getMagicProtagonistId(p);
             if (p.relics.some((relic) => relic.magicRelicHeroId === protagonistId)) {
                 const magicRuleResult = applyMagicRuleOnCardPlay(
@@ -11488,7 +11530,7 @@ const App: React.FC = () => {
         setTurnLog(trans("敵のターン", languageMode));
         setLastActionType(null);
         setGameState(prev => {
-            const p = { ...prev.player };
+            const p = { ...prev.player, relicCounters: { ...prev.player.relicCounters } };
             const newLogs: string[] = [];
             const nextActiveEffects: VisualEffectInstance[] = [];
             const clonePlayerForEndTurn = (player: Player): Player => ({
@@ -11504,6 +11546,10 @@ const App: React.FC = () => {
                 familiars: [...(player.familiars || [])],
                 familiarActionQueue: [...(player.familiarActionQueue || [])]
             });
+            const clearEndlessBossTemporaryCounters = (target: Player) => {
+                ENDLESS_BOSS_TEMPORARY_COUNTERS.forEach(counterKey => delete target.relicCounters[counterKey]);
+            };
+            clearEndlessBossTemporaryCounters(p);
             const tickPlayerDebuffs = (target: Player, label?: string) => {
                 if (target.powers['WEAK'] > 0) {
                     target.powers['WEAK']--;
@@ -11618,6 +11664,7 @@ const App: React.FC = () => {
                             };
                         }
                         const nextPlayer = clonePlayerForEndTurn(entry.player);
+                        clearEndlessBossTemporaryCounters(nextPlayer);
                         if (magicDrainPeerIds.has(entry.peerId)) {
                             applyMagicTransformationDamage(nextPlayer, entry.name, entry.peerId);
                         }
@@ -11778,13 +11825,23 @@ const App: React.FC = () => {
             if (isAttackIntent) audioService.playBattleSound('attack');
             else if (enemy.nextIntent.type === EnemyIntentType.DEFEND) audioService.playBattleSound('block');
             else if (enemy.nextIntent.type === EnemyIntentType.BUFF) audioService.playBattleSound('buff');
-            else if (enemy.nextIntent.type === EnemyIntentType.DEBUFF) audioService.playBattleSound('debuff');
+            else if (enemy.nextIntent.type === EnemyIntentType.DEBUFF
+                || enemy.nextIntent.type === EnemyIntentType.DISCARD_HAND
+                || enemy.nextIntent.type === EnemyIntentType.CARD_TAX
+                || enemy.nextIntent.type === EnemyIntentType.TYPE_LOCK) audioService.playBattleSound('debuff');
             else audioService.playSound('select');
             await new Promise<void>(resolve => {
                 setGameState(prev => {
                     const currentEnemyIndex = prev.enemies.findIndex(e => e.id === enemy.id);
                     if (currentEnemyIndex === -1) return prev;
-                    const p = { ...prev.player };
+                    const p = {
+                        ...prev.player,
+                        hand: [...prev.player.hand],
+                        discardPile: [...prev.player.discardPile],
+                        powers: { ...prev.player.powers },
+                        relicCounters: { ...prev.player.relicCounters },
+                        turnFlags: { ...prev.player.turnFlags },
+                    };
                     const newEnemies = [...prev.enemies];
                     const e = { ...newEnemies[currentEnemyIndex] };
                     newEnemies[currentEnemyIndex] = e;
@@ -11804,8 +11861,11 @@ const App: React.FC = () => {
                                 ...entry,
                                 player: {
                                     ...entry.player,
+                                    hand: [...entry.player.hand],
                                     powers: { ...entry.player.powers },
-                                    discardPile: [...entry.player.discardPile]
+                                    discardPile: [...entry.player.discardPile],
+                                    relicCounters: { ...entry.player.relicCounters },
+                                    turnFlags: { ...entry.player.turnFlags },
                                 }
                             }))
                         }
@@ -11826,6 +11886,64 @@ const App: React.FC = () => {
                             combatLog: [...prev.combatLog, ...newLogs].slice(-100),
                             activeEffects: [...prev.activeEffects, ...nextActiveEffects]
                         };
+                    }
+                    const isEndlessBossSpecialIntent = e.enemyType === 'ENDLESS_BOSS'
+                        && (intent.type === EnemyIntentType.DISCARD_HAND
+                            || intent.type === EnemyIntentType.CARD_TAX
+                            || intent.type === EnemyIntentType.TYPE_LOCK);
+                    if (isEndlessBossSpecialIntent) {
+                        const applyEndlessBossSpecialAction = (target: Player, targetName: string) => {
+                            if (intent.type === EnemyIntentType.DISCARD_HAND) {
+                                if (target.hand.length === 0) {
+                                    newLogs.push(`${targetName}の手札は空だった。`);
+                                    return;
+                                }
+                                const discarded = target.hand.splice(Math.floor(Math.random() * target.hand.length), 1)[0];
+                                if (discarded) {
+                                    const normalized = clearRetainedCardMarker(discarded);
+                                    target.discardPile.push(normalized);
+                                    applyRelicDiscardEffects(target, normalized, newEnemies);
+                                    newLogs.push(`${targetName}は${trans(normalized.name, languageMode)}を捨てさせられた！`);
+                                }
+                                nextActiveEffects.push({ id: `vfx-endless-discard-${Date.now()}-${e.id}`, type: 'DEBUFF', targetId: 'player' });
+                                return;
+                            }
+                            if (intent.type === EnemyIntentType.CARD_TAX) {
+                                target.relicCounters[ENDLESS_BOSS_CARD_TAX_COUNTER] = 1;
+                                newLogs.push(`${targetName}は次に使うカードのコストが1増える。`);
+                                nextActiveEffects.push({ id: `vfx-endless-tax-${Date.now()}-${e.id}`, type: 'DEBUFF', targetId: 'player' });
+                                return;
+                            }
+                            const lockCounter = intent.targetCardType
+                                ? getEndlessBossLockCounterKey(intent.targetCardType)
+                                : undefined;
+                            if (lockCounter && intent.targetCardType) {
+                                target.relicCounters[lockCounter] = 1;
+                                newLogs.push(`${targetName}は${intent.targetCardType}カードを次のターン使えない。`);
+                                nextActiveEffects.push({ id: `vfx-endless-lock-${Date.now()}-${e.id}`, type: 'DEBUFF', targetId: 'player' });
+                            }
+                        };
+                        if (prev.challengeMode === 'COOP' && coopSession?.isHost && nextCoopBattleState) {
+                            nextCoopBattleState.players
+                                .filter(entry => entry.player.currentHp > 0)
+                                .forEach(entry => {
+                                    const target = entry.peerId === coopSelfPeerId ? p : entry.player;
+                                    const targetName = entry.name || coopSelfDisplayName;
+                                    applyEndlessBossSpecialAction(target, targetName);
+                                    entry.player = target;
+                                    entry.isDown = target.currentHp <= 0;
+                                    updateCoopParticipantState(entry.peerId, current => ({
+                                        ...current,
+                                        currentHp: target.currentHp,
+                                        block: target.block,
+                                        nextTurnEnergy: target.nextTurnEnergy,
+                                        strength: target.strength,
+                                        buffer: target.powers['BUFFER'] || 0
+                                    }));
+                                });
+                        } else {
+                            applyEndlessBossSpecialAction(p, trans('あなた', languageMode));
+                        }
                     }
                     if (intent.type === EnemyIntentType.ATTACK || intent.type === EnemyIntentType.ATTACK_DEBUFF || intent.type === EnemyIntentType.ATTACK_DEFEND || intent.type === EnemyIntentType.PIERCE_ATTACK) {
                         let baseDamage = intent.value;
@@ -13050,7 +13168,10 @@ const App: React.FC = () => {
     };
 
     const handlePlaySynthesizedCard = async (card: ICard) => {
-        handlePlayCard(card);
+        // BattleScene has already included the pending tax in the combo cost
+        // (the tax applies once to the combo), so only consume the counter in
+        // the shared card resolver and do not add another energy here.
+        handlePlayCard(card, undefined, { endlessBossTaxAlreadyIncluded: true });
     };
 
     const handleTypingAutoPlayCard = (card: ICard) => {
@@ -16080,12 +16201,19 @@ const App: React.FC = () => {
         if (payload.cardId) {
             const requestedCard = previousRemotePlayer.hand.find(card => card.id === payload.cardId);
             if (!requestedCard) return;
+            const remoteLockCounter = getEndlessBossLockCounterKey(requestedCard.type);
+            if (remoteLockCounter && previousRemotePlayer.relicCounters[remoteLockCounter] > 0) {
+                return;
+            }
             let effectiveCost = requestedCard.cost;
             if (previousRemotePlayer.powers['CORRUPTION'] && requestedCard.type === CardType.SKILL) {
                 effectiveCost = 0;
             }
             if (requestedCard.type === CardType.ATTACK && previousRemotePlayer.turnFlags['NEXT_ATTACK_COST_DOWN']) {
                 effectiveCost = Math.max(0, effectiveCost - 1);
+            }
+            if (!requestedCard.xCost && previousRemotePlayer.relicCounters[ENDLESS_BOSS_CARD_TAX_COUNTER] > 0) {
+                effectiveCost += 1;
             }
             if (previousRemotePlayer.currentEnergy < effectiveCost && !previousRemotePlayer.partner) {
                 return;

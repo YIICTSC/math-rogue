@@ -4,6 +4,7 @@ import path from 'node:path';
 const root = process.cwd();
 const dataPath = path.join(root, 'src/data/endlessMode.ts');
 const appPath = path.join(root, 'src/App.tsx');
+const battleScenePath = path.join(root, 'src/components/BattleScene.tsx');
 const mapPath = path.join(root, 'src/services/mapGenerator.ts');
 const mapScreenPath = path.join(root, 'src/components/MapScreen.tsx');
 const restPath = path.join(root, 'src/components/RestScreen.tsx');
@@ -13,6 +14,7 @@ const eventPath = path.join(root, 'src/services/eventService.ts');
 const chapterResultsPath = path.join(root, 'src/data/endlessChapterResults.ts');
 const data = fs.readFileSync(dataPath, 'utf8');
 const app = fs.readFileSync(appPath, 'utf8');
+const battleScene = fs.readFileSync(battleScenePath, 'utf8');
 const map = fs.readFileSync(mapPath, 'utf8');
 const mapScreen = fs.readFileSync(mapScreenPath, 'utf8');
 const rest = fs.readFileSync(restPath, 'utf8');
@@ -67,6 +69,9 @@ for (const [label, source, patterns] of [
   ['reward persistence', app, [/endlessRewardPending/, /endlessRunRewards/, /createEndlessRewardItems/, /handleEndlessRewardReroll/]],
   ['reward choice safety', data, [/boss\.floor === 50/, /selectedRewardIds/, /FALLBACK_CARD_UPGRADE/]],
   ['boss phase definitions', data, [/phaseCountByMechanic/, /phaseCount:/]],
+  ['boss special action definitions', data, [/EndlessBossSpecialActionKey/, /getEndlessBossSpecialActionKey/, /specialActionSummary:/, /DISCARD_HAND.*CARD_TAX.*TYPE_LOCK/s]],
+  ['boss special action resolver', app, [/turn % 5 === 2/, /isEndlessBossSpecialIntent/, /ENDLESS_BOSS_CARD_TAX/, /ENDLESS_BOSS_LOCK_ATTACK/]],
+  ['boss special action presentation', battleScene, [/EnemyIntentType\.DISCARD_HAND/, /EnemyIntentType\.CARD_TAX/, /EnemyIntentType\.TYPE_LOCK/, /ENDLESS_BOSS_CARD_TAX/]],
   ['true endless boss generation', data, [/createTrueEndlessBoss/, /floor > 50 && floor % 5 === 0/]],
   ['boss reward flow', app, [/createEndlessRewardItems/, /endlessRewardPending/, /handleEndlessRewardReroll/]],
   ['major boss intermission', rest, [/endlessMajorBoss/, /onOpenShop/, /onOrganizeDeck/]],

@@ -42,6 +42,13 @@ const MAGIC_MALE_ACTION_SCALE: Record<string, {
     SAKUYA: { before: { attack: 1.097, skill: 1.055 }, after: { attack: 1.128, skill: 0.996 } },
 };
 
+const getEndlessBossLockCounterKey = (cardType: CardType): string | undefined => {
+    if (cardType === CardType.ATTACK) return 'ENDLESS_BOSS_LOCK_ATTACK';
+    if (cardType === CardType.SKILL) return 'ENDLESS_BOSS_LOCK_SKILL';
+    if (cardType === CardType.POWER) return 'ENDLESS_BOSS_LOCK_POWER';
+    return undefined;
+};
+
 const POWER_DEFINITIONS: Record<string, { name: string, desc: string }> = {
     WEAK: { name: "へろへろ", desc: "攻撃で与えるダメージが25%減っちゃう。" },
     VULNERABLE: { name: "びくびく", desc: "攻撃から受けるダメージが50%増えちゃう。" },
@@ -1137,6 +1144,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
         const debuffLabel = intent.debuffType
             ? (debuffLabels[intent.debuffType]?.[languageMode] ?? trans(intent.debuffType, languageMode))
             : trans('デバフ', languageMode);
+        const lockedCardTypeLabel = intent.targetCardType || 'カードタイプ';
         if (languageMode === 'ENGLISH') {
             switch (intent.type) {
                 case EnemyIntentType.ATTACK: return `Attack: ${intent.value} damage`;
@@ -1147,6 +1155,9 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                 case EnemyIntentType.BUFF: return `Buff: Strength +${intent.secondaryValue || 2}`;
                 case EnemyIntentType.DEBUFF: return `Debuff: ${debuffLabel}${intent.secondaryValue ? ` ${intent.secondaryValue}` : ''}`;
                 case EnemyIntentType.SLEEP: return 'Asleep: Does nothing';
+                case EnemyIntentType.DISCARD_HAND: return 'Disruption: Discard 1 random card from your hand';
+                case EnemyIntentType.CARD_TAX: return 'Disruption: Your next non-X card costs +1 Energy';
+                case EnemyIntentType.TYPE_LOCK: return `Seal: ${lockedCardTypeLabel} cards cannot be played on your next turn`;
                 default: return 'Next action unknown';
             }
         }
@@ -1168,6 +1179,12 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                 return `妨害行動: ${debuffLabel}${intent.secondaryValue ? ` ${intent.secondaryValue}` : ''}`;
             case EnemyIntentType.SLEEP:
                 return '睡眠中: 何もしない';
+            case EnemyIntentType.DISCARD_HAND:
+                return '妨害: 手札からランダムに1枚を捨て札へ送る';
+            case EnemyIntentType.CARD_TAX:
+                return '妨害: 次に使うXコスト以外のカードのコスト+1';
+            case EnemyIntentType.TYPE_LOCK:
+                return `封印: ${lockedCardTypeLabel}を次の自分ターンだけ使用不可`;
             default:
                 return '次の行動は不明';
         }
@@ -1208,6 +1225,9 @@ const BattleScene: React.FC<BattleSceneProps> = ({
         }
         if (player.powers['CORRUPTION'] && card.type === CardType.SKILL) {
             effectiveCard.cost = 0;
+        }
+        if (!card.xCost && player.relicCounters['ENDLESS_BOSS_CARD_TAX'] > 0) {
+            effectiveCard.cost += 1;
         }
         return effectiveCard;
     };
@@ -2003,6 +2023,8 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                             const enemyNameNeedsScroll = enemyName.length > 8;
                             const isTrueBossPhase2 = enemy.enemyType === 'THE_HEART' && enemy.phase === 2;
                             const isFinalBoss = enemy.enemyType === 'THE_HEART';
+                            const hasExplicitIntentDetails = hasObservationNotes
+                                || [EnemyIntentType.DISCARD_HAND, EnemyIntentType.CARD_TAX, EnemyIntentType.TYPE_LOCK].includes(enemy.nextIntent.type);
                             const humanoidEnemy = getThemedHumanoidEnemyVariant(enemy, visualTheme);
                             const useFinalBossLayout = isFinalBoss && !humanoidEnemy;
                             const enemySpriteSizeClass = humanoidEnemy
@@ -2062,14 +2084,14 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                             role={!hideEnemyIntents ? 'button' : undefined}
                                             tabIndex={!hideEnemyIntents ? 0 : -1}
                                             aria-label={!hideEnemyIntents
-                                                ? trans(hasObservationNotes ? `観察メモ：${getIntentHoverText(enemy)}` : '敵の次の行動です。', languageMode)
+                                                ? trans(hasExplicitIntentDetails ? `行動予告：${getIntentHoverText(enemy)}` : '敵の次の行動です。', languageMode)
                                                 : undefined}
                                             className={`battle-enemy-intent absolute ${isTrueBossPhase2 ? '-top-1 md:-top-6' : '-top-6'} ${dodomedesuIntentPosition} left-1/2 -translate-x-1/2 z-30 transition-all duration-300 text-xs font-extrabold px-1.5 py-0.5 rounded border-2 animate-bounce whitespace-nowrap shadow-xl flex items-center justify-center min-w-[40px] ${hideEnemyIntents ? 'bg-slate-900 text-slate-100 border-slate-500' : enemy.nextIntent.type === 'PIERCE_ATTACK' ? 'bg-red-800 text-white border-yellow-400 scale-125 ring-2 ring-red-400 shadow-red-900/50' : 'bg-white text-black border-red-600'}`}
                                             onClick={(e) => {
                                                 e.stopPropagation();
                                                 showInfo(
-                                                    hasObservationNotes && !hideEnemyIntents ? '観察メモ：行動予告' : '敵',
-                                                    hasObservationNotes && !hideEnemyIntents ? getIntentHoverText(enemy) : '敵の次の行動です。'
+                                                    hasExplicitIntentDetails && !hideEnemyIntents ? '行動予告' : '敵',
+                                                    hasExplicitIntentDetails && !hideEnemyIntents ? getIntentHoverText(enemy) : '敵の次の行動です。'
                                                 );
                                             }}
                                             onKeyDown={(event) => {
@@ -2077,8 +2099,8 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                                 event.preventDefault();
                                                 event.stopPropagation();
                                                 showInfo(
-                                                    hasObservationNotes ? '観察メモ：行動予告' : '敵',
-                                                    hasObservationNotes ? getIntentHoverText(enemy) : '敵の次の行動です。'
+                                                    hasExplicitIntentDetails ? '行動予告' : '敵',
+                                                    hasExplicitIntentDetails ? getIntentHoverText(enemy) : '敵の次の行動です。'
                                                 );
                                             }}
                                             title={hideEnemyIntents ? "???" : trans(getIntentHoverText(enemy), languageMode)}
@@ -2111,7 +2133,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                                     {enemy.nextIntent.type === 'DEFEND' && (
                                                         <><Shield size={12} className="mr-1 text-blue-600" /> {enemy.nextIntent.value}</>
                                                     )}
-                                                    {(enemy.nextIntent.type === 'BUFF' || enemy.nextIntent.type === 'DEBUFF' || enemy.nextIntent.type === 'SLEEP') && (
+                                                    {(enemy.nextIntent.type === 'BUFF' || enemy.nextIntent.type === 'DEBUFF' || enemy.nextIntent.type === 'SLEEP' || enemy.nextIntent.type === 'DISCARD_HAND' || enemy.nextIntent.type === 'CARD_TAX' || enemy.nextIntent.type === 'TYPE_LOCK') && (
                                                         <><Zap size={12} className="mr-1 text-yellow-500 fill-yellow-500" /> !</>
                                                     )}
                                                     {enemy.nextIntent.type === 'UNKNOWN' && <span className="text-gray-600">?</span>}
@@ -2897,6 +2919,8 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                         const incomingDrawCount = (card.draw || 0) * (player.magicTransformed ? 2 : 1);
                         const discardableHandCount = player.hand.filter(c => c.id !== card.id).length + incomingDrawCount;
                         const isDiscardCostDisabled = requiredDiscardCount > 0 && discardableHandCount < requiredDiscardCount;
+                        const endlessBossLockCounter = getEndlessBossLockCounterKey(card.type);
+                        const isEndlessBossLockDisabled = !!endlessBossLockCounter && player.relicCounters[endlessBossLockCounter] > 0;
 
                         const isFriendshipComboSelectionMode = isDualMode && friendshipComboEnabled;
                         const isSelectedDual = isFriendshipComboSelectionMode && selectedCardIds.includes(card.id);
@@ -2905,7 +2929,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                             && !isCardEligibleForCopySelection(card, selectionState, player.hand);
                         const isSelectedActive = selectionState.active && !isCopySelectionTargetDisabled;
 
-                        const specialDisabled = isClashDisabled || isGrandFinaleDisabled || isChokerDisabled || isNormalityDisabled || isDiscardCostDisabled;
+                        const specialDisabled = isClashDisabled || isGrandFinaleDisabled || isChokerDisabled || isNormalityDisabled || isDiscardCostDisabled || isEndlessBossLockDisabled;
 
                         const displayCard = getEffectiveBattleCard(card);
                         const isEnergyDisabled = player.currentEnergy < displayCard.cost;

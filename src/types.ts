@@ -238,7 +238,10 @@ export enum EnemyIntentType {
   ATTACK_DEBUFF = 'ATTACK_DEBUFF',
   ATTACK_DEFEND = 'ATTACK_DEFEND',
   SLEEP = 'SLEEP',
-  PIERCE_ATTACK = 'PIERCE_ATTACK'
+  PIERCE_ATTACK = 'PIERCE_ATTACK',
+  DISCARD_HAND = 'DISCARD_HAND',
+  CARD_TAX = 'CARD_TAX',
+  TYPE_LOCK = 'TYPE_LOCK'
 }
 
 
@@ -247,6 +250,7 @@ export interface EnemyIntent {
   value: number;
   secondaryValue?: number;
   debuffType?: 'WEAK' | 'VULNERABLE' | 'POISON' | 'CONFUSED';
+  targetCardType?: CardType;
 }
 
 export interface FloatingText {
