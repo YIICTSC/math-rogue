@@ -2433,9 +2433,6 @@ const App: React.FC = () => {
     // what activates the rest of the debug surface for the current session.
     const [isDebugMode, setIsDebugMode] = useState(false);
     const isDebugModeActive = DEBUG_FEATURES_ENABLED && isDebugMode;
-    const vacationModeUnlockedForTheme = isDebugModeActive
-        || (visualTheme === 'high-school' && vacationModeUnlocks['high-school'])
-        || (visualTheme === 'magic' && vacationModeUnlocks.magic);
     const [isMathDebugSkipped, setIsMathDebugSkipped] = useState(false);
     const [isDebugHpOne, setIsDebugHpOne] = useState(false);
     const [isMiniGameDebugUnlocked, setIsMiniGameDebugUnlocked] = useState(false);
@@ -2478,6 +2475,9 @@ const App: React.FC = () => {
     const [treasurePools, setTreasurePools] = useState<CoopTreasurePool[]>([]);
     const [clearCount, setClearCount] = useState<number>(() => storageService.getThemeClearCount(visualTheme));
     const [vacationModeUnlocks, setVacationModeUnlocks] = useState(() => storageService.getVacationModeUnlocks());
+    const vacationModeUnlockedForTheme = isDebugModeActive
+        || (visualTheme === 'high-school' && vacationModeUnlocks['high-school'])
+        || (visualTheme === 'magic' && vacationModeUnlocks.magic);
     // Global main-adventure clears drive the seven trivia mini-game unlocks.
     // Keep this separate from the per-theme clear count used for characters.
     const [mainClearCount, setMainClearCount] = useState<number>(() => storageService.getClearCount());
