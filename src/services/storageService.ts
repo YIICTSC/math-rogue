@@ -1326,8 +1326,12 @@ export const storageService = {
 
   // --- English Voice Flag ---
   getEnglishVoiceEnabled: (): boolean => {
-    const stored = localStorage.getItem(STORAGE_KEY_ENGLISH_VOICE);
-    return stored === null ? true : stored === 'true';
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY_ENGLISH_VOICE);
+      return stored === null ? true : stored === 'true';
+    } catch {
+      return true;
+    }
   },
 
   saveEnglishVoiceEnabled: (enabled: boolean) => {
@@ -1336,7 +1340,11 @@ export const storageService = {
 
   // --- BGM Mode ---
   getBgmMode: (): string | null => {
-    return localStorage.getItem(STORAGE_KEY_BGM_MODE);
+    try {
+      return localStorage.getItem(STORAGE_KEY_BGM_MODE);
+    } catch {
+      return null;
+    }
   },
 
   saveBgmMode: (mode: string) => {
@@ -1344,7 +1352,11 @@ export const storageService = {
   },
 
   getSeenBgmSwitchHint: (): boolean => {
-    return localStorage.getItem(STORAGE_KEY_SEEN_BGM_SWITCH_HINT) === 'true';
+    try {
+      return localStorage.getItem(STORAGE_KEY_SEEN_BGM_SWITCH_HINT) === 'true';
+    } catch {
+      return false;
+    }
   },
 
   saveSeenBgmSwitchHint: () => {
@@ -1353,7 +1365,11 @@ export const storageService = {
 
   // --- Language Mode ---
   getLanguageMode: (): LanguageMode | null => {
-    return localStorage.getItem(STORAGE_KEY_LANGUAGE_MODE) as LanguageMode | null;
+    try {
+      return localStorage.getItem(STORAGE_KEY_LANGUAGE_MODE) as LanguageMode | null;
+    } catch {
+      return null;
+    }
   },
 
   saveLanguageMode: (mode: LanguageMode) => {
@@ -1361,8 +1377,12 @@ export const storageService = {
   },
 
   getProblemSetView: (): ProblemSetView | null => {
-    const stored = localStorage.getItem(STORAGE_KEY_PROBLEM_SET_VIEW);
-    return isProblemSetView(stored) ? stored : null;
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY_PROBLEM_SET_VIEW);
+      return isProblemSetView(stored) ? stored : null;
+    } catch {
+      return null;
+    }
   },
 
   saveProblemSetView: (view: ProblemSetView) => {
@@ -1388,8 +1408,12 @@ export const storageService = {
   },
 
   getKanjiStrokeOrderPreference: (): boolean | null => {
-    const stored = localStorage.getItem(STORAGE_KEY_KANJI_STROKE_ORDER);
-    return stored === null ? null : stored === 'true';
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY_KANJI_STROKE_ORDER);
+      return stored === null ? null : stored === 'true';
+    } catch {
+      return null;
+    }
   },
 
   saveKanjiStrokeOrderPreference: (enabled: boolean) => {
@@ -1397,8 +1421,12 @@ export const storageService = {
   },
 
   getKanjiTraceGuidePreference: (): boolean | null => {
-    const stored = localStorage.getItem(STORAGE_KEY_KANJI_TRACE_GUIDE);
-    return stored === null ? null : stored === 'true';
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY_KANJI_TRACE_GUIDE);
+      return stored === null ? null : stored === 'true';
+    } catch {
+      return null;
+    }
   },
 
   saveKanjiTraceGuidePreference: (enabled: boolean) => {
@@ -1414,7 +1442,11 @@ export const storageService = {
   },
 
   saveTotalPlayTime: (seconds: number) => {
-    localStorage.setItem(STORAGE_KEY_TOTAL_PLAY_TIME, seconds.toString());
+    try {
+      localStorage.setItem(STORAGE_KEY_TOTAL_PLAY_TIME, seconds.toString());
+    } catch {
+      // Play-time persistence is optional and must not break the running app.
+    }
   },
 
   getDailyPlayTime: (): number => {
@@ -1429,8 +1461,12 @@ export const storageService = {
   },
 
   saveDailyPlayTime: (seconds: number) => {
-    const today = getLocalDateString();
-    localStorage.setItem(STORAGE_KEY_DAILY_PLAY_TIME, JSON.stringify({ date: today, seconds }));
+    try {
+      const today = getLocalDateString();
+      localStorage.setItem(STORAGE_KEY_DAILY_PLAY_TIME, JSON.stringify({ date: today, seconds }));
+    } catch {
+      // Play-time persistence is optional and must not break the running app.
+    }
   },
 
   getHintStreaks: (): Record<string, number> => {
@@ -1641,9 +1677,13 @@ export const storageService = {
   },
 
   clearDebugSettings: () => {
-      localStorage.removeItem(STORAGE_KEY_DEBUG_MATH_SKIP);
-      localStorage.removeItem(STORAGE_KEY_DEBUG_HP_ONE);
-      localStorage.removeItem(STORAGE_KEY_DEBUG_MINI_GAME_UNLOCK);
+      try {
+          localStorage.removeItem(STORAGE_KEY_DEBUG_MATH_SKIP);
+          localStorage.removeItem(STORAGE_KEY_DEBUG_HP_ONE);
+          localStorage.removeItem(STORAGE_KEY_DEBUG_MINI_GAME_UNLOCK);
+      } catch {
+          // Debug cleanup is optional and must never block the title screen.
+      }
   },
 
   saveUiPreviewChecklist: (checklist: UiPreviewChecklist) => {

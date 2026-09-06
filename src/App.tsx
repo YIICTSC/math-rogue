@@ -561,8 +561,14 @@ const MAGIC_TRANSFORMATION_QUOTES: Record<string, string> = {
 };
 const readStoredVisualTheme = (): VisualThemeId => {
     if (typeof window === 'undefined') return 'elementary';
-    const stored = window.localStorage.getItem('learning-rogue-visual-theme');
-    return VISUAL_THEMES.includes(stored as VisualThemeId) ? stored as VisualThemeId : 'elementary';
+    try {
+        const stored = window.localStorage.getItem('learning-rogue-visual-theme');
+        return VISUAL_THEMES.includes(stored as VisualThemeId) ? stored as VisualThemeId : 'elementary';
+    } catch {
+        // Some embedded browsers and privacy modes can temporarily deny
+        // storage access.  The title screen must still be able to render.
+        return 'elementary';
+    }
 };
 
 const calculateScore = (state: GameState, victory: boolean): number => {
@@ -1781,7 +1787,11 @@ const App: React.FC = () => {
     }, [gameState.screen]);
 
     useEffect(() => {
-        window.localStorage.setItem('learning-rogue-visual-theme', visualTheme);
+        try {
+            window.localStorage.setItem('learning-rogue-visual-theme', visualTheme);
+        } catch {
+            // Local persistence is optional; it must not block the web boot.
+        }
         void audioService.setBgmTheme(getBgmThemeForPlayer(visualTheme, gameState.player));
     }, [visualTheme, gameState.player.magicProtagonistGender]);
     const handleVisualThemeSelect = useCallback((nextTheme: VisualThemeId) => {
@@ -2509,7 +2519,12 @@ const App: React.FC = () => {
     const isCoopVfxDebugEnabled = useMemo(() => {
         if (typeof window === 'undefined') return false;
         const queryEnabled = new URLSearchParams(window.location.search).get('coopVfxDebug') === '1';
-        const storageEnabled = window.localStorage.getItem(COOP_VFX_DEBUG_STORAGE_KEY) === '1';
+        let storageEnabled = false;
+        try {
+            storageEnabled = window.localStorage.getItem(COOP_VFX_DEBUG_STORAGE_KEY) === '1';
+        } catch {
+            // Optional debug persistence must not prevent the title screen.
+        }
         return queryEnabled || storageEnabled;
     }, []);
     const prevScreenRef = useRef<GameScreen>(GameScreen.START_MENU);

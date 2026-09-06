@@ -432,7 +432,14 @@ const getSnapshot = (periodType: OnlinePeriodType, registeredAt: string) => {
 
 export const onlineRankingService = {
   isAvailable: () => Boolean(getApiBase()) && childSafetyService.canContactRemoteServices(),
-  hasDeclinedInitialPrompt: () => typeof window !== 'undefined' && window.localStorage.getItem(INITIAL_PROMPT_DECLINED_KEY) === '1',
+  hasDeclinedInitialPrompt: () => {
+    if (typeof window === 'undefined') return false;
+    try {
+      return window.localStorage.getItem(INITIAL_PROMPT_DECLINED_KEY) === '1';
+    } catch {
+      return false;
+    }
+  },
   declineInitialPrompt: () => {
     if (typeof window !== 'undefined') window.localStorage.setItem(INITIAL_PROMPT_DECLINED_KEY, '1');
   },

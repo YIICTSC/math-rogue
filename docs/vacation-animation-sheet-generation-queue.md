@@ -14,11 +14,11 @@
 
 ## 保存先
 
-高校編：`public/sprites/high-school/vacation-characters-{action}-sheets/{index}.png`
+高校編：`public/sprites/high-school/vacation-characters-{action}-sheets/{index}.webp`
 
-マジック編女性：`public/sprites/magic/vacation-characters-{action}-sheets/heroine-{nn}-{before|after}.png`
+マジック編女性：`public/sprites/magic/vacation-characters-{action}-sheets/heroine-{nn}-{before|after}.webp`
 
-マジック編男性：`public/sprites/magic/vacation-male-characters-{action}-sheets/{assetId}-{before|after}.png`
+マジック編男性：`public/sprites/magic/vacation-male-characters-{action}-sheets/{assetId}-{before|after}.webp`
 
 ## 進捗（2026-09-06）
 

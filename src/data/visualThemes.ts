@@ -358,7 +358,7 @@ export const getMagicCharacterSpritePath = (
 
 const getHighSchoolVacationSpritePath = (characterId: string | undefined) => {
   const imageIndex = HIGH_SCHOOL_CHARACTER_INDEX_BY_ID[characterId ?? 'WARRIOR'] ?? 0;
-  return assetUrl(`sprites/high-school/vacation-characters/${imageIndex}.png`);
+  return assetUrl(`sprites/high-school/vacation-characters/${imageIndex}.webp`);
 };
 
 const getHighSchoolVacationAnimationSheetPath = (
@@ -366,7 +366,7 @@ const getHighSchoolVacationAnimationSheetPath = (
   action: BattleHeroAnimationAction,
 ) => {
   const imageIndex = HIGH_SCHOOL_CHARACTER_INDEX_BY_ID[characterId ?? 'WARRIOR'] ?? 0;
-  return assetUrl(`sprites/high-school/vacation-characters-${action}-sheets/${imageIndex}.png`);
+  return assetUrl(`sprites/high-school/vacation-characters-${action}-sheets/${imageIndex}.webp`);
 };
 
 const getMagicVacationSpritePath = (
@@ -378,10 +378,10 @@ const getMagicVacationSpritePath = (
   const form = transformed ? 'after' : 'before';
   if (magicProtagonistGender === 'male') {
     const protagonist = MAGIC_MALE_PROTAGONISTS.find(entry => entry.id === magicProtagonistId) ?? MAGIC_MALE_PROTAGONISTS[0];
-    return assetUrl(`sprites/magic/vacation-male-characters/${protagonist.assetId}-${form}.png`);
+    return assetUrl(`sprites/magic/vacation-male-characters/${protagonist.assetId}-${form}.webp`);
   }
   const imageIndex = (HIGH_SCHOOL_CHARACTER_INDEX_BY_ID[characterId ?? 'WARRIOR'] ?? 0) + 1;
-  return assetUrl(`sprites/magic/vacation-characters/heroine-${String(imageIndex).padStart(2, '0')}-${form}.png`);
+  return assetUrl(`sprites/magic/vacation-characters/heroine-${String(imageIndex).padStart(2, '0')}-${form}.webp`);
 };
 
 const getMagicVacationAnimationSheetPath = (
@@ -395,17 +395,17 @@ const getMagicVacationAnimationSheetPath = (
   const folderAction = action === 'idle-special' ? 'idle-special' : action;
   if (magicProtagonistGender === 'male') {
     const protagonist = MAGIC_MALE_PROTAGONISTS.find(entry => entry.id === magicProtagonistId) ?? MAGIC_MALE_PROTAGONISTS[0];
-    return assetUrl(`sprites/magic/vacation-male-characters-${folderAction}-sheets/${protagonist.assetId}-${form}.png`);
+    return assetUrl(`sprites/magic/vacation-male-characters-${folderAction}-sheets/${protagonist.assetId}-${form}.webp`);
   }
   const imageIndex = (HIGH_SCHOOL_CHARACTER_INDEX_BY_ID[characterId ?? 'WARRIOR'] ?? 0) + 1;
-  return assetUrl(`sprites/magic/vacation-characters-${folderAction}-sheets/heroine-${String(imageIndex).padStart(2, '0')}-${form}.png`);
+  return assetUrl(`sprites/magic/vacation-characters-${folderAction}-sheets/heroine-${String(imageIndex).padStart(2, '0')}-${form}.webp`);
 };
 
 const VACATION_ANIMATION_ACTIONS: BattleHeroAnimationAction[] = ['idle-special', 'attack', 'skill', 'hit', 'low-hp'];
 
 export const HIGH_SCHOOL_VACATION_ANIMATION_ASSET_PATHS = Array.from({ length: 9 }, (_, index) => (
   VACATION_ANIMATION_ACTIONS.map(action =>
-    `sprites/high-school/vacation-characters-${action}-sheets/${index}.png`
+    `sprites/high-school/vacation-characters-${action}-sheets/${index}.webp`
   )
 )).flat();
 
@@ -413,13 +413,13 @@ export const MAGIC_VACATION_ANIMATION_ASSET_PATHS = [
   Array.from({ length: 9 }, (_, index) => {
     const heroine = String(index + 1).padStart(2, '0');
     return VACATION_ANIMATION_ACTIONS.flatMap(action => [
-      `sprites/magic/vacation-characters-${action}-sheets/heroine-${heroine}-before.png`,
-      `sprites/magic/vacation-characters-${action}-sheets/heroine-${heroine}-after.png`,
+      `sprites/magic/vacation-characters-${action}-sheets/heroine-${heroine}-before.webp`,
+      `sprites/magic/vacation-characters-${action}-sheets/heroine-${heroine}-after.webp`,
     ]);
   }).flat(),
   MAGIC_MALE_PROTAGONISTS.flatMap(protagonist => VACATION_ANIMATION_ACTIONS.flatMap(action => [
-    `sprites/magic/vacation-male-characters-${action}-sheets/${protagonist.assetId}-before.png`,
-    `sprites/magic/vacation-male-characters-${action}-sheets/${protagonist.assetId}-after.png`,
+    `sprites/magic/vacation-male-characters-${action}-sheets/${protagonist.assetId}-before.webp`,
+    `sprites/magic/vacation-male-characters-${action}-sheets/${protagonist.assetId}-after.webp`,
   ])),
 ].flat();
 

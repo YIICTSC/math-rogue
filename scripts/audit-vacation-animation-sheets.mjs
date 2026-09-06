@@ -13,7 +13,7 @@ for (let index = 0; index < 9; index += 1) {
       spritesRoot,
       'high-school',
       `vacation-characters-${action}-sheets`,
-      `${index}.png`,
+      `${index}.webp`,
     ));
   }
 }
@@ -26,7 +26,7 @@ for (let index = 1; index <= 9; index += 1) {
         spritesRoot,
         'magic',
         `vacation-characters-${action}-sheets`,
-        `${subject}-${form}.png`,
+        `${subject}-${form}.webp`,
       ));
     }
   }
@@ -39,7 +39,7 @@ for (const subject of ['ren', 'soma', 'minato', 'riku', 'yamato', 'leon', 'ellio
         spritesRoot,
         'magic',
         `vacation-male-characters-${action}-sheets`,
-        `${subject}-${form}.png`,
+        `${subject}-${form}.webp`,
       ));
     }
   }
