@@ -1,4 +1,4 @@
-import type { Character, Enemy } from '../types';
+import type { Character, CharacterAppearanceMode, Enemy } from '../types';
 import { assetUrl } from '../utils/assetPaths';
 import { HIGH_SCHOOL_STARTER_REPLACEMENTS } from './highSchoolCards';
 import { MAGIC_HEROES, MAGIC_MALE_PROTAGONISTS } from './magicHeroes';
@@ -356,6 +356,114 @@ export const getMagicCharacterSpritePath = (
   return assetUrl(`sprites/magic/${folder}/heroine-${String(imageIndex).padStart(2, '0')}-${form}.webp`);
 };
 
+const getHighSchoolVacationSpritePath = (characterId: string | undefined) => {
+  const imageIndex = HIGH_SCHOOL_CHARACTER_INDEX_BY_ID[characterId ?? 'WARRIOR'] ?? 0;
+  return assetUrl(`sprites/high-school/vacation-characters/${imageIndex}.png`);
+};
+
+const getHighSchoolVacationAnimationSheetPath = (
+  characterId: string | undefined,
+  action: BattleHeroAnimationAction,
+) => {
+  const imageIndex = HIGH_SCHOOL_CHARACTER_INDEX_BY_ID[characterId ?? 'WARRIOR'] ?? 0;
+  return assetUrl(`sprites/high-school/vacation-characters-${action}-sheets/${imageIndex}.png`);
+};
+
+const getMagicVacationSpritePath = (
+  characterId: string | undefined,
+  transformed: boolean,
+  magicProtagonistId?: string,
+  magicProtagonistGender?: 'female' | 'male',
+) => {
+  const form = transformed ? 'after' : 'before';
+  if (magicProtagonistGender === 'male') {
+    const protagonist = MAGIC_MALE_PROTAGONISTS.find(entry => entry.id === magicProtagonistId) ?? MAGIC_MALE_PROTAGONISTS[0];
+    return assetUrl(`sprites/magic/vacation-male-characters/${protagonist.assetId}-${form}.png`);
+  }
+  const imageIndex = (HIGH_SCHOOL_CHARACTER_INDEX_BY_ID[characterId ?? 'WARRIOR'] ?? 0) + 1;
+  return assetUrl(`sprites/magic/vacation-characters/heroine-${String(imageIndex).padStart(2, '0')}-${form}.png`);
+};
+
+const getMagicVacationAnimationSheetPath = (
+  characterId: string | undefined,
+  action: BattleHeroAnimationAction,
+  transformed = false,
+  magicProtagonistId?: string,
+  magicProtagonistGender?: 'female' | 'male',
+) => {
+  const form = transformed ? 'after' : 'before';
+  const folderAction = action === 'idle-special' ? 'idle-special' : action;
+  if (magicProtagonistGender === 'male') {
+    const protagonist = MAGIC_MALE_PROTAGONISTS.find(entry => entry.id === magicProtagonistId) ?? MAGIC_MALE_PROTAGONISTS[0];
+    return assetUrl(`sprites/magic/vacation-male-characters-${folderAction}-sheets/${protagonist.assetId}-${form}.png`);
+  }
+  const imageIndex = (HIGH_SCHOOL_CHARACTER_INDEX_BY_ID[characterId ?? 'WARRIOR'] ?? 0) + 1;
+  return assetUrl(`sprites/magic/vacation-characters-${folderAction}-sheets/heroine-${String(imageIndex).padStart(2, '0')}-${form}.png`);
+};
+
+const VACATION_ANIMATION_ACTIONS: BattleHeroAnimationAction[] = ['idle-special', 'attack', 'skill', 'hit', 'low-hp'];
+
+export const HIGH_SCHOOL_VACATION_ANIMATION_ASSET_PATHS = Array.from({ length: 9 }, (_, index) => (
+  VACATION_ANIMATION_ACTIONS.map(action =>
+    `sprites/high-school/vacation-characters-${action}-sheets/${index}.png`
+  )
+)).flat();
+
+export const MAGIC_VACATION_ANIMATION_ASSET_PATHS = [
+  Array.from({ length: 9 }, (_, index) => {
+    const heroine = String(index + 1).padStart(2, '0');
+    return VACATION_ANIMATION_ACTIONS.flatMap(action => [
+      `sprites/magic/vacation-characters-${action}-sheets/heroine-${heroine}-before.png`,
+      `sprites/magic/vacation-characters-${action}-sheets/heroine-${heroine}-after.png`,
+    ]);
+  }).flat(),
+  MAGIC_MALE_PROTAGONISTS.flatMap(protagonist => VACATION_ANIMATION_ACTIONS.flatMap(action => [
+    `sprites/magic/vacation-male-characters-${action}-sheets/${protagonist.assetId}-before.png`,
+    `sprites/magic/vacation-male-characters-${action}-sheets/${protagonist.assetId}-after.png`,
+  ])),
+].flat();
+
+// All 215 sheets have passed the RGBA/2×2 audit. Keep the availability keys
+// separate from the URL lists so an incomplete future batch can fall back to
+// the standard battle sheet without breaking the animation lookup.
+const HIGH_SCHOOL_VACATION_ANIMATION_AVAILABLE = new Set(
+  Array.from({ length: 9 }, (_, imageIndex) => VACATION_ANIMATION_ACTIONS.map(action => `${imageIndex}:${action}`)).flat(),
+);
+
+export const HIGH_SCHOOL_VACATION_GENERATED_ANIMATION_ASSET_PATHS = HIGH_SCHOOL_VACATION_ANIMATION_ASSET_PATHS;
+
+const MAGIC_VACATION_ANIMATION_AVAILABLE = new Set([
+  ...Array.from({ length: 9 }, (_, index) => {
+    const subject = `heroine-${String(index + 1).padStart(2, '0')}`;
+    return ['before', 'after'].flatMap(form => VACATION_ANIMATION_ACTIONS.map(action => `${subject}:${form}:${action}`));
+  }).flat(),
+  ...MAGIC_MALE_PROTAGONISTS.flatMap(protagonist => (
+    ['before', 'after'].flatMap(form => VACATION_ANIMATION_ACTIONS.map(action => `${protagonist.assetId}:${form}:${action}`))
+  )),
+]);
+
+export const MAGIC_VACATION_GENERATED_ANIMATION_ASSET_PATHS = MAGIC_VACATION_ANIMATION_ASSET_PATHS;
+
+const hasVacationAnimationSheet = (
+  theme: VisualThemeId,
+  characterId: string | undefined,
+  action: BattleHeroAnimationAction,
+  transformed = false,
+  magicProtagonistId?: string,
+  magicProtagonistGender?: 'female' | 'male',
+) => {
+  if (theme === 'high-school') {
+    const imageIndex = HIGH_SCHOOL_CHARACTER_INDEX_BY_ID[characterId ?? 'WARRIOR'] ?? 0;
+    return HIGH_SCHOOL_VACATION_ANIMATION_AVAILABLE.has(`${imageIndex}:${action}`);
+  }
+  if (theme !== 'magic') return false;
+  const form = transformed ? 'after' : 'before';
+  const subject = magicProtagonistGender === 'male'
+    ? (MAGIC_MALE_PROTAGONISTS.find(entry => entry.id === magicProtagonistId)?.assetId ?? '')
+    : `heroine-${String((HIGH_SCHOOL_CHARACTER_INDEX_BY_ID[characterId ?? 'WARRIOR'] ?? 0) + 1).padStart(2, '0')}`;
+  return MAGIC_VACATION_ANIMATION_AVAILABLE.has(`${subject}:${form}:${action}`);
+};
+
 export const getThemedCharacterSpritePath = (
   theme: VisualThemeId,
   characterId: string | undefined,
@@ -364,7 +472,12 @@ export const getThemedCharacterSpritePath = (
   transformed = false,
   magicProtagonistId?: string,
   magicProtagonistGender?: 'female' | 'male',
+  appearanceMode: CharacterAppearanceMode = 'STANDARD',
 ) => {
+  if (appearanceMode === 'VACATION') {
+    if (theme === 'high-school') return getHighSchoolVacationSpritePath(characterId);
+    if (theme === 'magic') return getMagicVacationSpritePath(characterId, transformed, magicProtagonistId, magicProtagonistGender);
+  }
   if (theme === 'high-school') return getHighSchoolCharacterSpritePath(characterId, action);
   if (theme === 'magic') return getMagicCharacterSpritePath(
     characterId,
@@ -382,7 +495,20 @@ export const getThemedCharacterIdleSpriteSheetPath = (
   transformed = false,
   magicProtagonistId?: string,
   magicProtagonistGender?: 'female' | 'male',
+  appearanceMode: CharacterAppearanceMode = 'STANDARD',
 ) => {
+  if (appearanceMode === 'VACATION') {
+    if (hasVacationAnimationSheet(theme, characterId, 'idle-special', transformed, magicProtagonistId, magicProtagonistGender)) {
+      if (theme === 'high-school') return getHighSchoolVacationAnimationSheetPath(characterId, 'idle-special');
+      if (theme === 'magic') return getMagicVacationAnimationSheetPath(
+        characterId,
+        'idle-special',
+        transformed,
+        magicProtagonistId,
+        magicProtagonistGender,
+      );
+    }
+  }
   if (theme === 'magic') {
     const form = transformed ? 'after' : 'before';
     if (magicProtagonistGender === 'male') {
@@ -407,7 +533,9 @@ export const getThemedCharacterIdleSpriteScale = (
   magicProtagonistId?: string,
   magicProtagonistGender?: 'female' | 'male',
   specialIdle = false,
+  appearanceMode: CharacterAppearanceMode = 'STANDARD',
 ) => {
+  if (appearanceMode === 'VACATION') return 1;
   if (theme === 'high-school') {
     const imageIndex = HIGH_SCHOOL_CHARACTER_INDEX_BY_ID[characterId ?? 'WARRIOR'] ?? 0;
     return specialIdle
@@ -431,7 +559,20 @@ export const getThemedCharacterAnimationSheetPath = (
   transformed = false,
   magicProtagonistId?: string,
   magicProtagonistGender?: 'female' | 'male',
+  appearanceMode: CharacterAppearanceMode = 'STANDARD',
 ) => {
+  if (appearanceMode === 'VACATION') {
+    if (hasVacationAnimationSheet(theme, characterId, action, transformed, magicProtagonistId, magicProtagonistGender)) {
+      if (theme === 'high-school') return getHighSchoolVacationAnimationSheetPath(characterId, action);
+      if (theme === 'magic') return getMagicVacationAnimationSheetPath(
+        characterId,
+        action,
+        transformed,
+        magicProtagonistId,
+        magicProtagonistGender,
+      );
+    }
+  }
   if (theme === 'high-school') {
     const path = HIGH_SCHOOL_CHARACTER_ANIMATION_PROFILES[characterId ?? '']?.[action];
     return path ? assetUrl(path) : null;

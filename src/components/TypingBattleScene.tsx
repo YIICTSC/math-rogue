@@ -762,6 +762,7 @@ const TypingBattleScene: React.FC<TypingBattleSceneProps> = ({
         !!player.magicTransformed,
         player.magicProtagonistId,
         player.magicProtagonistGender,
+        player.appearanceMode,
     );
     const isMagicMalePlayerSprite = visualTheme === 'magic'
         && player.magicProtagonistGender === 'male';

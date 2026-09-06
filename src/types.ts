@@ -336,6 +336,9 @@ export interface Character {
   magicProtagonistGender?: 'female' | 'male';
 }
 
+/** 主人公選択時に固定する表示衣装。戦闘中も同じモードを引き継ぐ。 */
+export type CharacterAppearanceMode = 'STANDARD' | 'VACATION';
+
 export interface Partner {
   id: string;
   name: string;
@@ -368,6 +371,7 @@ export interface MagicRuleState {
 
 export interface Player {
   id?: string;
+  appearanceMode?: CharacterAppearanceMode;
   magicProtagonistId?: string;
   magicProtagonistGender?: 'female' | 'male';
   maxHp: number;

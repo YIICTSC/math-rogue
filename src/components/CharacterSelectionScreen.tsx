@@ -1,6 +1,6 @@
 
 import React, { useState, useRef, useEffect, useMemo } from 'react';
-import { Character, LanguageMode } from '../types';
+import { Character, CharacterAppearanceMode, LanguageMode } from '../types';
 import { Lock, Heart, Coins, Gem, ArrowRight, Swords, Shield, Zap, Sparkles, Brain, GraduationCap, Camera, X, RefreshCw, AlertCircle, Keyboard } from 'lucide-react';
 import { RELIC_LIBRARY, CARDS_LIBRARY, CHARACTER_ACCESSORIES } from '../constants';
 import { trans } from '../utils/textUtils';
@@ -8,7 +8,7 @@ import { assetUrl } from '../utils/assetPaths';
 import { audioService } from '../services/audioService';
 import { storageService } from '../services/storageService';
 import { RelicIcon } from './ItemIcon';
-import { MAGIC_HERO_ID_BY_CHARACTER_ID, type VisualThemeId } from '../data/visualThemes';
+import { getThemedCharacterSpritePath, MAGIC_HERO_ID_BY_CHARACTER_ID, type VisualThemeId } from '../data/visualThemes';
 import { MAGIC_HEROES, MAGIC_MALE_PROTAGONISTS } from '../data/magicHeroes';
 import { getMagicRuleConfig } from '../data/magicLoadouts';
 
@@ -26,7 +26,7 @@ const MAGIC_MALE_CHARACTER_IDS = [
 interface CharacterSelectionScreenProps {
   characters: Character[];
   unlockedCount: number;
-  onSelect: (character: Character) => void;
+  onSelect: (character: Character, appearanceMode?: CharacterAppearanceMode) => void;
   challengeMode?: string;
   languageMode: LanguageMode;
   coopParticipants?: Array<{
@@ -40,14 +40,16 @@ interface CharacterSelectionScreenProps {
   coopSelfPeerId?: string;
   coopDecisionOwnerPeerId?: string;
   visualTheme?: VisualThemeId;
+  vacationModeUnlocked?: boolean;
 }
 
-const CharacterSelectionScreen: React.FC<CharacterSelectionScreenProps> = ({ characters, unlockedCount, onSelect, challengeMode, languageMode, coopParticipants = [], coopSelfPeerId, coopDecisionOwnerPeerId, visualTheme = 'elementary' }) => {
+const CharacterSelectionScreen: React.FC<CharacterSelectionScreenProps> = ({ characters, unlockedCount, onSelect, challengeMode, languageMode, coopParticipants = [], coopSelfPeerId, coopDecisionOwnerPeerId, visualTheme = 'elementary', vacationModeUnlocked = false }) => {
   const [customImages, setCustomImages] = useState<Record<string, string>>({});
   const [showCamera, setShowCamera] = useState(false);
   const [activeCharId, setActiveCharId] = useState<string | null>(null);
   const [cameraError, setCameraError] = useState<string | null>(null);
   const [magicGender, setMagicGender] = useState<'female' | 'male'>('female');
+  const [appearanceMode, setAppearanceMode] = useState<CharacterAppearanceMode>('STANDARD');
   
   const videoRef = useRef<HTMLVideoElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -94,6 +96,12 @@ const CharacterSelectionScreen: React.FC<CharacterSelectionScreenProps> = ({ cha
     const savedImages = storageService.getCustomImages();
     setCustomImages(savedImages);
   }, [visualTheme]);
+
+  useEffect(() => {
+    if (visualTheme === 'elementary' || !vacationModeUnlocked) {
+      setAppearanceMode('STANDARD');
+    }
+  }, [vacationModeUnlocked, visualTheme]);
 
   useEffect(() => {
     if (challengeMode !== 'TYPING' || showCamera) return;
@@ -210,9 +218,20 @@ const CharacterSelectionScreen: React.FC<CharacterSelectionScreenProps> = ({ cha
       ...char,
       imageData: visualTheme === 'elementary'
         ? customImages[char.id] || char.imageData
+      : appearanceMode === 'VACATION'
+        ? getThemedCharacterSpritePath(
+            visualTheme,
+            char.id,
+            'idle',
+            char.imageData,
+            false,
+            char.magicProtagonistId,
+            char.magicProtagonistGender,
+            appearanceMode,
+          )
         : char.imageData
     };
-    onSelect(finalChar);
+    onSelect(finalChar, appearanceMode);
   };
 
   const handleResetImage = (e: React.MouseEvent, charId: string) => {
@@ -357,6 +376,27 @@ const CharacterSelectionScreen: React.FC<CharacterSelectionScreenProps> = ({ cha
                 ))}
               </div>
             )}
+            {visualTheme !== 'elementary' && vacationModeUnlocked && (
+              <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-amber-300/70 bg-slate-950/85 p-1 pl-3 shadow-lg">
+                <span className="text-xs font-black text-amber-100">{trans('見た目', languageMode)}</span>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setAppearanceMode(previous => previous === 'STANDARD' ? 'VACATION' : 'STANDARD');
+                    audioService.playSound('select');
+                  }}
+                  className={`rounded-full px-4 py-2 text-xs font-black transition-colors ${appearanceMode === 'VACATION' ? 'bg-amber-400 text-slate-950' : 'bg-slate-800 text-slate-200 hover:bg-slate-700'}`}
+                  aria-pressed={appearanceMode === 'VACATION'}
+                >
+                  {appearanceMode === 'VACATION' ? trans('バカンス ON', languageMode) : trans('通常', languageMode)}
+                </button>
+              </div>
+            )}
+            {visualTheme !== 'elementary' && !vacationModeUnlocked && (
+              <p className="mt-4 text-xs font-bold text-amber-200/80">
+                {trans('バカンスモードはエンドレス第50章クリア後に解禁されます。', languageMode)}
+              </p>
+            )}
         </div>
 
         {challengeMode === 'COOP' && coopParticipants.length > 0 && (
@@ -414,7 +454,18 @@ const CharacterSelectionScreen: React.FC<CharacterSelectionScreenProps> = ({ cha
                     ? getMagicRuleConfig(char.magicProtagonistId)
                     : null;
                 const customImage = visualTheme === 'elementary' ? customImages[char.id] : undefined;
-                const charImage = customImage || char.imageData;
+                const charImage = appearanceMode === 'VACATION'
+                  ? getThemedCharacterSpritePath(
+                      visualTheme,
+                      char.id,
+                      'idle',
+                      char.imageData,
+                      false,
+                      char.magicProtagonistId,
+                      char.magicProtagonistGender,
+                      appearanceMode,
+                    )
+                  : customImage || char.imageData;
                 const isCustom = !!customImage;
                 const isMagicPortrait = visualTheme === 'magic' && !isCustom;
                 const isMagicMalePortrait = visualTheme === 'magic'
@@ -574,7 +625,18 @@ const CharacterSelectionScreen: React.FC<CharacterSelectionScreenProps> = ({ cha
         <div className="character-selection-thumbnail-row" aria-label={trans("主人公一覧", languageMode)}>
           {displayedCharacters.map((char, index) => {
             const isUnlocked = index < unlockedCount;
-            const charImage = customImages[char.id] || char.imageData;
+            const charImage = appearanceMode === 'VACATION'
+              ? getThemedCharacterSpritePath(
+                  visualTheme,
+                  char.id,
+                  'idle',
+                  char.imageData,
+                  false,
+                  char.magicProtagonistId,
+                  char.magicProtagonistGender,
+                  appearanceMode,
+                )
+              : customImages[char.id] || char.imageData;
             const isCustom = !!customImages[char.id];
             const isMagicPortrait = visualTheme === 'magic' && !isCustom;
 

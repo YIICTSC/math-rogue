@@ -1,6 +1,6 @@
 import { BATTLE_BACKGROUND_SCENES } from '../data/battleBackgrounds';
 import { MAGIC_ASSET_PATHS } from '../data/magicAssetManifest';
-import { HIGH_SCHOOL_CHARACTER_ANIMATION_ASSET_PATHS, HIGH_SCHOOL_IDLE_SPRITE_ASSET_PATHS, type VisualThemeId } from '../data/visualThemes';
+import { HIGH_SCHOOL_CHARACTER_ANIMATION_ASSET_PATHS, HIGH_SCHOOL_IDLE_SPRITE_ASSET_PATHS, HIGH_SCHOOL_VACATION_GENERATED_ANIMATION_ASSET_PATHS, MAGIC_VACATION_GENERATED_ANIMATION_ASSET_PATHS, type VisualThemeId } from '../data/visualThemes';
 import { assetUrl } from '../utils/assetPaths';
 import { WEB_PERFORMANCE_MODE, WEB_PRELOAD_ENABLED } from '../config/runtime';
 
@@ -85,6 +85,7 @@ const buildCriticalAssetPaths = (visualTheme: VisualThemeId): string[] => {
                 'sprites/backgrounds/learning-rogue/high-school-map.webp',
                 ...HIGH_SCHOOL_IDLE_SPRITE_ASSET_PATHS,
                 ...HIGH_SCHOOL_CHARACTER_ANIMATION_ASSET_PATHS,
+                ...HIGH_SCHOOL_VACATION_GENERATED_ANIMATION_ASSET_PATHS,
             );
         }
 
@@ -96,6 +97,7 @@ const buildCriticalAssetPaths = (visualTheme: VisualThemeId): string[] => {
                 'sprites/backgrounds/learning-rogue/magic-battle-classroom.webp',
                 'sprites/backgrounds/learning-rogue/magic-battle-hallway.webp',
                 'sprites/backgrounds/learning-rogue/magic-battle-gym.webp',
+                ...MAGIC_VACATION_GENERATED_ANIMATION_ASSET_PATHS,
             );
         }
 
@@ -108,6 +110,7 @@ const buildCriticalAssetPaths = (visualTheme: VisualThemeId): string[] => {
             ...range(9).map(index => `sprites/high-school/characters/${index}.webp`),
             ...HIGH_SCHOOL_IDLE_SPRITE_ASSET_PATHS,
             ...HIGH_SCHOOL_CHARACTER_ANIMATION_ASSET_PATHS,
+            ...HIGH_SCHOOL_VACATION_GENERATED_ANIMATION_ASSET_PATHS,
             ...range(12).map(index => `sprites/high-school/enemies/${index}.webp`),
             ...range(12).map(index => `sprites/high-school/humanoid-enemies/${index}.webp`),
         );
@@ -126,6 +129,7 @@ const buildCriticalAssetPaths = (visualTheme: VisualThemeId): string[] => {
             'sprites/backgrounds/learning-rogue/magic-compendium-library.webp',
             ...range(9).map(index => `sprites/magic/characters/heroine-${String(index + 1).padStart(2, '0')}-before.webp`),
             ...range(8).map(index => `sprites/magic/male-characters/${['ren', 'soma', 'minato', 'riku', 'yamato', 'leon', 'elliot', 'sakuya'][index]}-before.webp`),
+            ...MAGIC_VACATION_GENERATED_ANIMATION_ASSET_PATHS,
             ...range(12).map(index => `sprites/magic/enemies/${index}.webp`),
             ...range(10).map(index => `sprites/magic/humanoid-enemies/${index}.webp`),
         );

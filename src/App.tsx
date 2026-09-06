@@ -3,7 +3,7 @@ import { App as CapacitorApp } from '@capacitor/app';
 import type { PluginListenerHandle } from '@capacitor/core';
 import {
     GameState, GameScreen, Enemy, Card as ICard, ActiveFamiliar,
-    CardType, TargetType, EnemyIntentType, NodeType, MapNode, RewardItem, Relic, Potion, Player, EnemyIntent, Character, FloatingText, RankingEntry, GameMode, LanguageMode, AnswerMode, SelectionState, VisualEffectInstance, GardenSlot, VFXType, ActStats, RaceTrickCard, RaceTrickEffectId, CoopSupportCard, CoopBattleState, CoopBattleTurnSlot, CoopBattlePlayerState, CoopSharedState, CoopTreasurePool, AssignmentPayload, AssignmentAnswerResult, StudentProfile, MiniGameDebugPreview
+    CardType, TargetType, EnemyIntentType, NodeType, MapNode, RewardItem, Relic, Potion, Player, EnemyIntent, Character, CharacterAppearanceMode, FloatingText, RankingEntry, GameMode, LanguageMode, AnswerMode, SelectionState, VisualEffectInstance, GardenSlot, VFXType, ActStats, RaceTrickCard, RaceTrickEffectId, CoopSupportCard, CoopBattleState, CoopBattleTurnSlot, CoopBattlePlayerState, CoopSharedState, CoopTreasurePool, AssignmentPayload, AssignmentAnswerResult, StudentProfile, MiniGameDebugPreview
 } from './types';
 import {
     INITIAL_HP, INITIAL_ENERGY, HAND_SIZE,
@@ -2423,6 +2423,9 @@ const App: React.FC = () => {
     // what activates the rest of the debug surface for the current session.
     const [isDebugMode, setIsDebugMode] = useState(false);
     const isDebugModeActive = DEBUG_FEATURES_ENABLED && isDebugMode;
+    const vacationModeUnlockedForTheme = isDebugModeActive
+        || (visualTheme === 'high-school' && vacationModeUnlocks['high-school'])
+        || (visualTheme === 'magic' && vacationModeUnlocks.magic);
     const [isMathDebugSkipped, setIsMathDebugSkipped] = useState(false);
     const [isDebugHpOne, setIsDebugHpOne] = useState(false);
     const [isMiniGameDebugUnlocked, setIsMiniGameDebugUnlocked] = useState(false);
@@ -2464,6 +2467,7 @@ const App: React.FC = () => {
     const [treasureOpened, setTreasureOpened] = useState(false);
     const [treasurePools, setTreasurePools] = useState<CoopTreasurePool[]>([]);
     const [clearCount, setClearCount] = useState<number>(() => storageService.getThemeClearCount(visualTheme));
+    const [vacationModeUnlocks, setVacationModeUnlocks] = useState(() => storageService.getVacationModeUnlocks());
     // Global main-adventure clears drive the seven trivia mini-game unlocks.
     // Keep this separate from the per-theme clear count used for characters.
     const [mainClearCount, setMainClearCount] = useState<number>(() => storageService.getClearCount());
@@ -2778,6 +2782,7 @@ const App: React.FC = () => {
                     characterId: battleEntry?.player.id || participant.selectedCharacterId,
                     magicProtagonistId: battleEntry?.player.magicProtagonistId || participant.magicProtagonistId,
                     magicProtagonistGender: battleEntry?.player.magicProtagonistGender || participant.magicProtagonistGender,
+                    appearanceMode: battleEntry?.player.appearanceMode || participant.appearanceMode,
                     magicTransformed: Boolean(battleEntry?.player.magicTransformed),
                     floatingText: battleEntry?.player.floatingText || null,
                     familiarActionQueue: battleEntry?.player.familiarActionQueue || []
@@ -3630,6 +3635,7 @@ const App: React.FC = () => {
             ...participant,
             selectedCharacterId: player.id,
             imageData: player.imageData,
+            appearanceMode: player.appearanceMode,
             maxHp: player.maxHp,
             currentHp: player.currentHp
         }));
@@ -3672,6 +3678,7 @@ const App: React.FC = () => {
             selectedCharacterId: gameState.player.id,
             magicProtagonistId: gameState.player.magicProtagonistId,
             magicProtagonistGender: gameState.player.magicProtagonistGender,
+            appearanceMode: gameState.player.appearanceMode,
             maxHp: gameState.player.maxHp,
             currentHp: gameState.player.currentHp,
             block: gameState.player.block,
@@ -3708,6 +3715,7 @@ const App: React.FC = () => {
             selectedCharacterId: selfState.selectedCharacterId,
             magicProtagonistId: selfState.magicProtagonistId,
             magicProtagonistGender: selfState.magicProtagonistGender,
+            appearanceMode: selfState.appearanceMode,
             maxHp: selfState.maxHp,
             currentHp: selfState.currentHp,
             block: selfState.block,
@@ -4848,6 +4856,16 @@ const App: React.FC = () => {
         storageService.clearSave();
         setGameState(prev => ({ ...prev, screen: GameScreen.START_MENU, challengeMode: undefined }));
     }, [gameState.screen, isDebugModeActive]);
+
+    // C50の真エンディングへ到達した編だけ、対応するバカンス衣装を
+    // 永続解禁する。デバッグメニュー中は両編を表示可能にするため、
+    // この保存フラグとは別に isDebugModeActive を優先する。
+    useEffect(() => {
+        if (gameState.screen !== GameScreen.ENDLESS_TRUE_ENDING) return;
+        const theme = gameState.visualTheme;
+        if (theme !== 'high-school' && theme !== 'magic') return;
+        setVacationModeUnlocks(storageService.unlockVacationMode(theme));
+    }, [gameState.screen, gameState.visualTheme]);
 
     useEffect(() => {
         let appStateHandle: PluginListenerHandle | undefined;
@@ -7862,7 +7880,7 @@ const App: React.FC = () => {
         startGameAssetPreload();
     }, [coopSession, gameState.challengeMode, languageMode, startGameAssetPreload]);
 
-    const handleCharacterSelect = async (char: Character) => {
+    const handleCharacterSelect = async (char: Character, appearanceMode: CharacterAppearanceMode = 'STANDARD') => {
         audioService.playSound('select');
         setSelectedCharName(char.name);
         setUnlockCheckStartMathCorrect(totalMathCorrect);
@@ -7912,6 +7930,7 @@ const App: React.FC = () => {
         const initialPlayerState = {
             ...gameState.player,
             id: char.id,
+            appearanceMode: appearanceMode === 'VACATION' && vacationModeUnlockedForTheme ? 'VACATION' as const : 'STANDARD' as const,
             magicProtagonistId: char.magicProtagonistId,
             magicProtagonistGender: char.magicProtagonistGender,
             maxHp: char.maxHp,
@@ -7983,7 +8002,8 @@ const App: React.FC = () => {
                     currentHp: char.maxHp,
                     relicResolved: shouldSkipStarterRelic,
                     magicProtagonistId: char.magicProtagonistId,
-                    magicProtagonistGender: char.magicProtagonistGender
+                    magicProtagonistGender: char.magicProtagonistGender,
+                    appearanceMode: appearanceMode === 'VACATION' && vacationModeUnlockedForTheme ? 'VACATION' : 'STANDARD'
                 });
             }
             if (!coopSession.isHost || !areActiveCoopParticipantsResolved(nextParticipants, participant => !!participant.selectedCharacterId)) {
@@ -8060,7 +8080,18 @@ const App: React.FC = () => {
                                 name: warrior.name,
                                 maxHp: warrior.maxHp,
                                 currentHp: warrior.maxHp,
-                                imageData: warrior.imageData,
+                                imageData: appearanceMode === 'VACATION'
+                                    ? getThemedCharacterSpritePath(
+                                        visualTheme,
+                                        warrior.id,
+                                        'idle',
+                                        warrior.imageData,
+                                        false,
+                                        warrior.magicProtagonistId,
+                                        warrior.magicProtagonistGender,
+                                        appearanceMode,
+                                    )
+                                    : warrior.imageData,
                                 floatingText: null
                             } : undefined;
 
@@ -16769,6 +16800,7 @@ const App: React.FC = () => {
                             selectedCharacterId: data.characterId,
                             magicProtagonistId: data.magicProtagonistId,
                             magicProtagonistGender: data.magicProtagonistGender,
+                            appearanceMode: data.appearanceMode,
                             name: data.name,
                             imageData: data.imageData,
                             maxHp: data.maxHp,
@@ -16807,6 +16839,7 @@ const App: React.FC = () => {
                             selectedCharacterId: data.selectedCharacterId ?? participant.selectedCharacterId,
                             magicProtagonistId: data.magicProtagonistId ?? participant.magicProtagonistId,
                             magicProtagonistGender: data.magicProtagonistGender ?? participant.magicProtagonistGender,
+                            appearanceMode: data.appearanceMode ?? participant.appearanceMode,
                             maxHp: data.maxHp ?? participant.maxHp,
                             currentHp: data.currentHp ?? participant.currentHp,
                             block: data.block ?? participant.block,
@@ -19573,6 +19606,7 @@ const App: React.FC = () => {
                             coopSelfPeerId={gameState.challengeMode === 'COOP' ? coopSelfPeerId : undefined}
                             coopDecisionOwnerPeerId={gameState.challengeMode === 'COOP' ? coopDecisionOwner?.peerId : undefined}
                             visualTheme={visualTheme}
+                            vacationModeUnlocked={vacationModeUnlockedForTheme}
                         />
                     </div>
                 )}

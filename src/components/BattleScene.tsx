@@ -354,6 +354,7 @@ interface BattleSceneProps {
         characterId?: string;
         magicProtagonistId?: string;
         magicProtagonistGender?: 'female' | 'male';
+        appearanceMode?: 'STANDARD' | 'VACATION';
         magicTransformed?: boolean;
         floatingText: FloatingText | null;
         familiarActionQueue?: ActiveFamiliar[];
@@ -853,6 +854,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
         !!player.magicTransformed,
         player.magicProtagonistId,
         player.magicProtagonistGender,
+        player.appearanceMode,
     );
     const idleSpriteSheetSource = getThemedCharacterIdleSpriteSheetPath(
         visualTheme,
@@ -860,6 +862,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
         !!player.magicTransformed,
         player.magicProtagonistId,
         player.magicProtagonistGender,
+        player.appearanceMode,
     );
     const idleSpriteSheetScale = getThemedCharacterIdleSpriteScale(
         visualTheme,
@@ -867,6 +870,8 @@ const BattleScene: React.FC<BattleSceneProps> = ({
         !!player.magicTransformed,
         player.magicProtagonistId,
         player.magicProtagonistGender,
+        false,
+        player.appearanceMode,
     );
     const specialIdleSpriteSheetScale = getThemedCharacterIdleSpriteScale(
         visualTheme,
@@ -875,6 +880,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
         player.magicProtagonistId,
         player.magicProtagonistGender,
         true,
+        player.appearanceMode,
     );
     const isMagicMalePlayerSprite = visualTheme === 'magic'
         && player.magicProtagonistGender === 'male';
@@ -921,6 +927,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
         !!player.magicTransformed,
         player.magicProtagonistId,
         player.magicProtagonistGender,
+        player.appearanceMode,
     );
     const canUseSpecialIdle = !!specialIdleSheetSource
         && !mobileActiveFamiliar
@@ -964,9 +971,10 @@ const BattleScene: React.FC<BattleSceneProps> = ({
             visualTheme as VisualThemeId,
             player.id,
             heroAnimationAction,
-            !!player.magicTransformed,
-            player.magicProtagonistId,
-            player.magicProtagonistGender,
+        !!player.magicTransformed,
+        player.magicProtagonistId,
+        player.magicProtagonistGender,
+        player.appearanceMode,
         )
         : null;
     const heroActionClass = mobileActiveFamiliar
@@ -2418,6 +2426,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                                             true,
                                                             companion.magicProtagonistId,
                                                             companion.magicProtagonistGender,
+                                                            companion.appearanceMode,
                                                         )
                                                         : null;
                                                     const companionImageSrc = activeFamiliarDisplay?.src || transformedMagicImageSrc || companion.imageData;

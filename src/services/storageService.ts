@@ -140,6 +140,7 @@ const STORAGE_KEY_REWARD_CARD_ALBUM = 'pixel_spire_reward_card_album_v1';
 const STORAGE_KEY_REWARD_CARD_CLAIMED_ASSIGNMENTS = 'pixel_spire_reward_card_claimed_assignments_v1';
 const STORAGE_KEY_COMPLETED_DAILY_ASSIGNMENTS = 'pixel_spire_completed_daily_assignments_v1';
 const STORAGE_KEY_HIGHEST_CARD_DAMAGE = 'pixel_spire_highest_card_damage_v1';
+const STORAGE_KEY_VACATION_MODE_UNLOCKS = 'pixel_spire_vacation_mode_unlocks_v1';
 export const ONLINE_RANKING_DATA_CHANGED_EVENT = 'learning-rogue:online-ranking-data-changed';
 
 const notifyOnlineRankingDataChanged = (reason: string) => {
@@ -837,6 +838,28 @@ export const storageService = {
           console.warn("Failed to save theme clear count", e);
           return storageService.getThemeClearCount(theme);
       }
+  },
+
+  getVacationModeUnlocks: (): Pick<Record<VisualThemeId, boolean>, 'high-school' | 'magic'> => {
+    try {
+      const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY_VACATION_MODE_UNLOCKS) || '{}') as Record<string, unknown>;
+      return {
+        'high-school': parsed['high-school'] === true,
+        magic: parsed.magic === true,
+      };
+    } catch {
+      return { 'high-school': false, magic: false };
+    }
+  },
+
+  unlockVacationMode: (theme: Extract<VisualThemeId, 'high-school' | 'magic'>) => {
+    try {
+      const next = { ...storageService.getVacationModeUnlocks(), [theme]: true };
+      localStorage.setItem(STORAGE_KEY_VACATION_MODE_UNLOCKS, JSON.stringify(next));
+      return next;
+    } catch {
+      return storageService.getVacationModeUnlocks();
+    }
   },
 
   // --- Math Correct Count ---
@@ -1718,6 +1741,7 @@ export const storageService = {
       localStorage.removeItem(STORAGE_KEY_CUSTOM_IMAGES);
       localStorage.removeItem(STORAGE_KEY_HINT_STREAKS);
       localStorage.removeItem(STORAGE_KEY_HIGHEST_CARD_DAMAGE);
+      localStorage.removeItem(STORAGE_KEY_VACATION_MODE_UNLOCKS);
   },
 
   clearAllLocalData: () => {

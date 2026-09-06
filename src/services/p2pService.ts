@@ -16,6 +16,7 @@ type P2PCoopParticipant = {
     selectedCharacterId?: string,
     magicProtagonistId?: string,
     magicProtagonistGender?: P2PMagicProtagonistGender,
+    appearanceMode?: 'STANDARD' | 'VACATION',
     maxHp?: number,
     currentHp?: number,
     block?: number,
@@ -72,7 +73,7 @@ export type P2PEvent =
     | { type: 'COOP_START', roomCode?: string, battleMode?: 'TURN_BASED' | 'REALTIME', visualTheme?: 'elementary' | 'high-school' | 'magic', participants?: P2PCoopParticipant[] }
     | { type: 'COOP_MODE_SET', mode: any, modePool?: string[], answerMode?: any }
     | { type: 'COOP_DIFFICULTY_SET', difficultyLevel: number }
-    | { type: 'COOP_CHARACTER_SELECT', characterId: string, name: string, imageData: string, maxHp: number, currentHp: number, relicResolved?: boolean, magicProtagonistId?: string, magicProtagonistGender?: P2PMagicProtagonistGender }
+    | { type: 'COOP_CHARACTER_SELECT', characterId: string, name: string, imageData: string, maxHp: number, currentHp: number, relicResolved?: boolean, magicProtagonistId?: string, magicProtagonistGender?: P2PMagicProtagonistGender, appearanceMode?: 'STANDARD' | 'VACATION' }
     | { type: 'COOP_QUIZ_RESULT', correctCount: number }
     | { type: 'COOP_PLAYER_SNAPSHOT', player: any }
     | {
@@ -82,6 +83,7 @@ export type P2PEvent =
         selectedCharacterId?: string,
         magicProtagonistId?: string,
         magicProtagonistGender?: P2PMagicProtagonistGender,
+        appearanceMode?: 'STANDARD' | 'VACATION',
         maxHp?: number,
         currentHp?: number,
         block?: number,

@@ -52,6 +52,7 @@ export interface CoopParticipantPayload {
   selectedCharacterId?: string;
   magicProtagonistId?: string;
   magicProtagonistGender?: 'female' | 'male';
+  appearanceMode?: 'STANDARD' | 'VACATION';
   maxHp?: number;
   currentHp?: number;
   block?: number;
