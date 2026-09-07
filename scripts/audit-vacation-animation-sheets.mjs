@@ -4,7 +4,7 @@ import sharp from 'sharp';
 
 const projectRoot = process.cwd();
 const spritesRoot = path.join(projectRoot, 'public', 'sprites');
-const actions = ['idle-special', 'attack', 'skill', 'hit', 'low-hp'];
+const actions = ['idle', 'idle-special', 'attack', 'skill', 'hit', 'low-hp'];
 const expectedFiles = [];
 
 for (let index = 0; index < 9; index += 1) {
@@ -58,6 +58,7 @@ for (const filePath of expectedFiles) {
   const metadata = await sharp(filePath).metadata();
   const { data, info } = await sharp(filePath).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
   const quadrantOpaquePixels = [0, 0, 0, 0];
+  const frameDifferences = [0, 0, 0];
   let opaquePixels = 0;
 
   for (let y = 0; y < info.height; y += 1) {
@@ -67,6 +68,20 @@ for (const filePath of expectedFiles) {
       opaquePixels += 1;
       const quadrant = (y >= info.height / 2 ? 2 : 0) + (x >= info.width / 2 ? 1 : 0);
       quadrantOpaquePixels[quadrant] += 1;
+
+      if (x < info.width / 2 && y < info.height / 2) {
+        const frameOffset = (y * info.width + x) * 4;
+        for (let frame = 1; frame < 4; frame += 1) {
+          const frameX = x + (frame % 2) * (info.width / 2);
+          const frameY = y + Math.floor(frame / 2) * (info.height / 2);
+          const compareOffset = (frameY * info.width + frameX) * 4;
+          const difference = Math.abs(data[frameOffset] - data[compareOffset])
+            + Math.abs(data[frameOffset + 1] - data[compareOffset + 1])
+            + Math.abs(data[frameOffset + 2] - data[compareOffset + 2])
+            + Math.abs(data[frameOffset + 3] - data[compareOffset + 3]);
+          if (difference > 24) frameDifferences[frame - 1] += 1;
+        }
+      }
     }
   }
 
@@ -83,6 +98,7 @@ for (const filePath of expectedFiles) {
     || metadata.channels !== 4
     || corners.some(alpha => alpha > 8)
     || quadrantOpaquePixels.some(count => count < 50)
+    || frameDifferences.some(count => count < 100)
     || opaquePixels < 200
   ) {
     failures.push({
@@ -92,6 +108,7 @@ for (const filePath of expectedFiles) {
         channels: metadata.channels,
         corners,
         quadrantOpaquePixels,
+        frameDifferences,
         opaquePixels,
       },
     });

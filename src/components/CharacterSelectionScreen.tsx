@@ -392,11 +392,6 @@ const CharacterSelectionScreen: React.FC<CharacterSelectionScreenProps> = ({ cha
                 </button>
               </div>
             )}
-            {visualTheme !== 'elementary' && !vacationModeUnlocked && (
-              <p className="mt-4 text-xs font-bold text-amber-200/80">
-                {trans('バカンスモードはエンドレス第50章クリア後に解禁されます。', languageMode)}
-              </p>
-            )}
         </div>
 
         {challengeMode === 'COOP' && coopParticipants.length > 0 && (
