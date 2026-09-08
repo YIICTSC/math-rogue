@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { Check, Dice5, Globe2, Link2, ShieldCheck, Smartphone, X } from 'lucide-react';
 import { LanguageMode } from '../types';
 import { onlineRankingService, OnlineRankingProfile } from '../services/onlineRankingService';
@@ -18,11 +18,13 @@ const OnlineNameSetupModal: React.FC<Props> = ({ open, languageMode, onClose, on
   const [suggestions, setSuggestions] = useState<string[]>([]);
   const [name, setName] = useState('');
   const [accepted, setAccepted] = useState(false);
+  const [acceptancePrompt, setAcceptancePrompt] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [mode, setMode] = useState<'register' | 'redeem' | 'rename'>('register');
   const [transferCode, setTransferCode] = useState('');
   const [issuedCode, setIssuedCode] = useState('');
+  const acceptanceCheckboxRef = useRef<HTMLInputElement>(null);
 
   const loadSuggestions = async (selectFirst = true) => {
     setError('');
@@ -39,6 +41,7 @@ const OnlineNameSetupModal: React.FC<Props> = ({ open, languageMode, onClose, on
     if (!open) return;
     setError('');
     setIssuedCode('');
+    setAcceptancePrompt(false);
     if (profile && initialMode === 'rename') {
       setName(profile.displayName);
       setMode('rename');
@@ -126,7 +129,12 @@ const OnlineNameSetupModal: React.FC<Props> = ({ open, languageMode, onClose, on
   </div>;
 
   const submit = async () => {
-    if (!accepted || !name.trim()) return;
+    if (!name.trim()) return;
+    if (!accepted) {
+      setAcceptancePrompt(true);
+      acceptanceCheckboxRef.current?.focus();
+      return;
+    }
     setLoading(true);
     setError('');
     try {
@@ -153,15 +161,16 @@ const OnlineNameSetupModal: React.FC<Props> = ({ open, languageMode, onClose, on
         <input value={name} onChange={(event) => setName(event.target.value)} maxLength={16} className="mt-1.5 w-full rounded-xl border-2 border-slate-600 bg-black px-3 py-2.5 text-base font-black text-white outline-none focus:border-lime-300 sm:mt-2 sm:px-4 sm:py-3 sm:text-lg" placeholder={trans('2～16文字', languageMode)} />
       </label>
 
-      <label className="mb-3 flex cursor-pointer items-start gap-2 rounded-xl border border-slate-700 bg-slate-900/80 p-2.5 text-[10px] font-bold leading-4 text-slate-300 sm:mb-4 sm:gap-3 sm:p-3 sm:text-xs sm:leading-5">
-        <input type="checkbox" checked={accepted} onChange={(event) => setAccepted(event.target.checked)} className="mt-1 h-4 w-4 accent-lime-400" />
+      <label className={`mb-2 flex cursor-pointer items-start gap-2 rounded-xl border p-2.5 text-[10px] font-bold leading-4 text-slate-300 transition sm:gap-3 sm:p-3 sm:text-xs sm:leading-5 ${acceptancePrompt ? 'border-amber-300 bg-amber-950/80 ring-4 ring-amber-300/40 motion-safe:animate-pulse' : 'border-slate-700 bg-slate-900/80'}`}>
+        <input ref={acceptanceCheckboxRef} type="checkbox" checked={accepted} onChange={(event) => { setAccepted(event.target.checked); if (event.target.checked) setAcceptancePrompt(false); }} aria-describedby={acceptancePrompt ? 'ranking-acceptance-prompt' : undefined} className={`mt-1 h-4 w-4 ${acceptancePrompt ? 'accent-amber-300' : 'accent-lime-400'}`} />
         <span><ShieldCheck size={16} className="mr-1 inline text-lime-300" />{trans('公開名と集計済みの記録をオンラインランキングに送信します。本名・学年・組・番号・問題文・回答内容は送信しません。', languageMode)}</span>
       </label>
+      {acceptancePrompt && <p id="ranking-acceptance-prompt" role="alert" className="mb-3 rounded-lg border-2 border-amber-300 bg-amber-950 px-3 py-2 text-center text-xs font-black leading-5 text-amber-100">{trans('ランキングに参加するには、まずここにチェックを入れてください。', languageMode)}</p>}
 
       {error && <div className="mb-4 rounded-lg border border-red-500 bg-red-950/60 p-3 text-center text-xs font-bold text-red-100">{error}</div>}
       <div className="grid grid-cols-1 gap-2 sm:grid-cols-[minmax(0,1fr)_minmax(0,1.4fr)]">
         <button onClick={onClose} className="min-w-0 rounded-xl border border-slate-600 bg-slate-800 px-2 py-2.5 text-sm font-black text-slate-200 sm:px-4 sm:py-3 sm:text-base">{trans('あとで決める', languageMode)}</button>
-        <button onClick={() => void submit()} disabled={!accepted || !name.trim() || loading} className="flex min-w-0 items-center justify-center gap-1.5 rounded-xl bg-lime-300 px-2 py-2.5 text-sm font-black text-slate-950 disabled:cursor-not-allowed disabled:opacity-40 sm:gap-2 sm:px-4 sm:py-3 sm:text-base"><Check size={17} />{loading ? trans('登録中…', languageMode) : trans('この名前で参加する', languageMode)}</button>
+        <button onClick={() => void submit()} disabled={!name.trim() || loading} className="flex min-w-0 items-center justify-center gap-1.5 rounded-xl bg-lime-300 px-2 py-2.5 text-sm font-black text-slate-950 disabled:cursor-not-allowed disabled:opacity-40 sm:gap-2 sm:px-4 sm:py-3 sm:text-base"><Check size={17} />{loading ? trans('登録中…', languageMode) : trans('この名前で参加する', languageMode)}</button>
       </div>
       {onDecline && <button onClick={onDecline} className="mt-2 w-full rounded-xl border border-slate-700 bg-black/40 px-3 py-2.5 text-xs font-black text-slate-400 hover:border-slate-500 hover:text-slate-200">{trans('ランキングに参加しない', languageMode)}</button>}
       <div className="mt-2 flex items-center justify-center gap-1.5 text-center text-[9px] font-bold leading-4 text-slate-500 sm:mt-4 sm:gap-2 sm:text-[10px]"><Globe2 className="shrink-0" size={12} />{trans('同じ名前のプレイヤーは識別コードで区別されます。', languageMode)}</div>

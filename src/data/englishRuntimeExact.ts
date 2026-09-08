@@ -626,6 +626,7 @@ export const ENGLISH_RUNTIME_EXACT: Record<string, string> = {
   '自由入力': 'Custom Name',
   '2～16文字': '2-16 characters',
   '公開名と集計済みの記録をオンラインランキングに送信します。本名・学年・組・番号・問題文・回答内容は送信しません。': 'Your public name and aggregated records will be sent to the online ranking. Your real name, grade, class, student number, questions, and answers will not be sent.',
+  'ランキングに参加するには、まずここにチェックを入れてください。': 'To join the ranking, please check this box first.',
   '同じ名前のプレイヤーは識別コードで区別されます。': 'Players with the same name are distinguished by an ID code.',
   'オンラインランキングを読み込めませんでした。': 'Could not load the online ranking.',
   '端末連携': 'Device Link',
