@@ -2267,19 +2267,7 @@ export interface VacationIdleFrameTranslation {
   y: number;
 }
 
-const getIdleBaseline = (anchors: VacationAnimationFrameAnchor[] | undefined): VacationAnimationFrameAnchor | null => {
-  if (!anchors?.length) return null;
-  const median = (values: number[]) => {
-    const sorted = [...values].sort((a, b) => a - b);
-    return sorted[Math.floor(sorted.length / 2)] ?? 0;
-  };
-  return {
-    centerX: median(anchors.map(anchor => anchor.centerX)),
-    bottomY: median(anchors.map(anchor => anchor.bottomY)),
-    cellWidth: anchors[0].cellWidth,
-    cellHeight: anchors[0].cellHeight,
-  };
-};
+const getIdleBaseline = (anchors: VacationAnimationFrameAnchor[] | undefined): VacationAnimationFrameAnchor | null => anchors?.[0] ?? null;
 
 export const getVacationIdleFrameTranslation = (source: string | null, frameIndex: number): VacationIdleFrameTranslation | null => {
   const assetPath = getAssetPath(source);

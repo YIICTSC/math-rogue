@@ -78,7 +78,10 @@ const AuditStage: React.FC<AuditStageProps> = ({
     centerLabel,
 }) => {
     const framePosition = FRAME_POSITIONS[frameIndex] ?? FRAME_POSITIONS[0];
-    const idleAnchor = getVacationIdleFrameAnchor(idleSource, frameIndex);
+    // Use the first normal-idle frame as the shared audit baseline. The
+    // displayed frame still changes so the original animation motion remains
+    // visible while placement drift is measured against one fixed origin.
+    const idleAnchor = getVacationIdleFrameAnchor(idleSource, 0);
     const centerGuideStyle = idleAnchor
         ? { left: `${(idleAnchor.centerX / idleAnchor.cellWidth) * 100}%` }
         : undefined;
