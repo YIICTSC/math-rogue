@@ -15,6 +15,7 @@
     "generate:expansion-cards": "node scripts/generate-expansion-cards.mjs",
     "generate:enemy-art-manifest": "node scripts/generate-enemy-illustration-manifest.mjs",
     "generate:vacation-animation-anchors": "node scripts/generate-vacation-animation-anchors.mjs",
+    "fix:vacation:transparency": "node scripts/fix-vacation-internal-transparency.mjs",
     "generate:relic-translations": "node scripts/generate-relic-translations.mjs",
     "generate:web-asset-manifest": "node scripts/generate-web-asset-manifest.mjs",
     "generate:card-effect-audit": "node scripts/generate-card-effect-japanese-english-audit.mjs",
