@@ -34,6 +34,7 @@ import React, { useMemo, useState, useCallback, useEffect, useRef } from 'react'
 import TranslatedUiTree from './TranslatedUiTree';
 import ResilientAssetImage from './ResilientAssetImage';
 import CharacterAnimationPreview from './CharacterAnimationPreview';
+import ActionPositionAuditPreview from './ActionPositionAuditPreview';
 import SpriteAuditPreview from './SpriteAuditPreview';
 
 interface DebugMenuScreenProps {
@@ -284,7 +285,7 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
     focusedUiPreviewScreenId,
     focusedSupporterNpcEventTitle
 }) => {
-    const [activeTab, setActiveTab] = useState<'CARDS' | 'RELICS' | 'POTIONS' | 'SYNTHESIS' | 'CAPTURE_SIM' | 'SYSTEM' | 'UI_PREVIEW' | 'PROBLEM_DEBUG' | 'EFFECTS' | 'MAGIC_VOICES' | 'ENEMY_VOICE_AUDIT' | 'MAGIC_ART_AUDIT' | 'EVENTS' | 'HUMANOID_SPRITES' | 'CHARACTER_ANIMATIONS' | 'SPRITE_AUDIT' | 'TRANSLATION'>(focusedSupporterNpcEventTitle ? 'EVENTS' : focusedUiPreviewScreenId ? 'UI_PREVIEW' : 'CARDS');
+    const [activeTab, setActiveTab] = useState<'CARDS' | 'RELICS' | 'POTIONS' | 'SYNTHESIS' | 'CAPTURE_SIM' | 'SYSTEM' | 'UI_PREVIEW' | 'PROBLEM_DEBUG' | 'EFFECTS' | 'MAGIC_VOICES' | 'ENEMY_VOICE_AUDIT' | 'MAGIC_ART_AUDIT' | 'EVENTS' | 'HUMANOID_SPRITES' | 'CHARACTER_ANIMATIONS' | 'ACTION_POSITION_AUDIT' | 'SPRITE_AUDIT' | 'TRANSLATION'>(focusedSupporterNpcEventTitle ? 'EVENTS' : focusedUiPreviewScreenId ? 'UI_PREVIEW' : 'CARDS');
     const showLoadoutPanel = activeTab === 'CARDS' || activeTab === 'RELICS' || activeTab === 'POTIONS' || activeTab === 'SYNTHESIS' || activeTab === 'CAPTURE_SIM';
     const focusedUiPreviewItemRef = useRef<HTMLDivElement | null>(null);
     const focusedSupporterNpcEventRef = useRef<HTMLDivElement | null>(null);
@@ -988,6 +989,7 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
                         <button onClick={() => setActiveTab('EVENTS')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'EVENTS' ? 'bg-cyan-900 text-white' : 'text-cyan-400 hover:bg-gray-750'}`}>高校編イベント</button>
                         <button onClick={() => setActiveTab('HUMANOID_SPRITES')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'HUMANOID_SPRITES' ? 'bg-rose-900 text-white' : 'text-rose-400 hover:bg-gray-750'}`}>高校人型敵</button>
                         <button onClick={() => setActiveTab('CHARACTER_ANIMATIONS')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'CHARACTER_ANIMATIONS' ? 'bg-cyan-900 text-white' : 'text-cyan-400 hover:bg-gray-750'}`}>{trans('キャラ動作', initialLanguageMode)}</button>
+                        <button onClick={() => setActiveTab('ACTION_POSITION_AUDIT')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'ACTION_POSITION_AUDIT' ? 'bg-rose-900 text-white' : 'text-rose-400 hover:bg-gray-750'}`}>{trans('配置監査', initialLanguageMode)}</button>
                         <button onClick={() => setActiveTab('SPRITE_AUDIT')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'SPRITE_AUDIT' ? 'bg-teal-900 text-white' : 'text-teal-400 hover:bg-gray-750'}`}>{trans('スプライト確認', initialLanguageMode)}</button>
                         <button onClick={() => setActiveTab('TRANSLATION')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'TRANSLATION' ? 'bg-emerald-900 text-white' : 'text-emerald-400 hover:bg-gray-750'}`}>翻訳確認</button>
                     </div>
@@ -1027,6 +1029,8 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
                         )}
 
                         {activeTab === 'CHARACTER_ANIMATIONS' && <CharacterAnimationPreview languageMode={initialLanguageMode} />}
+
+                        {activeTab === 'ACTION_POSITION_AUDIT' && <ActionPositionAuditPreview languageMode={initialLanguageMode} />}
 
                         {activeTab === 'SPRITE_AUDIT' && <SpriteAuditPreview languageMode={initialLanguageMode} />}
 
