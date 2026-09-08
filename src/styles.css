@@ -5412,12 +5412,17 @@ textarea {
   60%, 100% { background-position: 100% 100%; }
 }
 
-/* Vacation idle sheets keep their original four poses, but compensate each
-   frame at render time so the character's feet stay on one shared baseline.
-   The source sheets remain untouched; the different timing of normal and
-   special idle animations is preserved. */
+/* Vacation animation sheets keep their original four poses, but compensate
+   each frame at render time so the character's feet stay on one shared
+   baseline. The source sheets remain untouched; only the display axis moves. */
 .battle-scene-root .battle-hero-idle-sprite-sheet.battle-hero-vacation-anchored-sprite-sheet {
   animation-name: battle-hero-vacation-idle-frames;
+  translate: 0 0;
+}
+
+.battle-scene-root .battle-hero-action-sprite-sheet.battle-hero-vacation-anchored-sprite-sheet,
+.battle-scene-root .battle-hero-low-hp-sprite-sheet.battle-hero-vacation-anchored-sprite-sheet {
+  animation-name: battle-hero-vacation-action-frames;
   translate: 0 0;
 }
 
@@ -5464,9 +5469,32 @@ textarea {
   }
 }
 
+@keyframes battle-hero-vacation-action-frames {
+  0%, 19.99% {
+    background-position: 0 0;
+    translate: var(--vacation-frame-0-translate-x, 0%) var(--vacation-frame-0-translate-y, 0%);
+  }
+  20%, 44.99% {
+    background-position: 100% 0;
+    translate: var(--vacation-frame-1-translate-x, 0%) var(--vacation-frame-1-translate-y, 0%);
+  }
+  45%, 69.99% {
+    background-position: 0 100%;
+    translate: var(--vacation-frame-2-translate-x, 0%) var(--vacation-frame-2-translate-y, 0%);
+  }
+  70%, 100% {
+    background-position: 100% 100%;
+    translate: var(--vacation-frame-3-translate-x, 0%) var(--vacation-frame-3-translate-y, 0%);
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .battle-hero-idle-sprite-sheet {
     animation: none !important;
+  }
+
+  .battle-scene-root .battle-hero-vacation-anchored-sprite-sheet {
+    translate: none !important;
   }
 }
 

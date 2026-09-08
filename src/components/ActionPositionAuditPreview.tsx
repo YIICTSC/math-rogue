@@ -11,7 +11,7 @@ import {
 } from '../data/visualThemes';
 import type { LanguageMode } from '../types';
 import { trans } from '../utils/textUtils';
-import { getVacationIdleFrameAnchor } from '../data/vacationAnimationAnchors.generated';
+import { getVacationIdleFrameAnchor, getVacationAnimationFrameTranslation } from '../data/vacationAnimationAnchors.generated';
 
 type AuditAction = 'idle' | BattleHeroAnimationAction;
 
@@ -88,12 +88,17 @@ const AuditStage: React.FC<AuditStageProps> = ({
     const feetGuideStyle = idleAnchor
         ? { top: `${(idleAnchor.bottomY / idleAnchor.cellHeight) * 100}%` }
         : undefined;
-    const layerStyle = (source: string | null, opacity: number) => source ? ({
-        backgroundImage: `url("${source}")`,
-        backgroundSize: '200% 200%',
-        backgroundPosition: framePosition,
-        opacity,
-    }) : undefined;
+    const layerStyle = (source: string | null, opacity: number) => {
+        if (!source) return undefined;
+        const translation = getVacationAnimationFrameTranslation(source, frameIndex);
+        return {
+            backgroundImage: `url("${source}")`,
+            backgroundSize: '200% 200%',
+            backgroundPosition: framePosition,
+            opacity,
+            transform: translation ? `translate(${translation.x}%, ${translation.y}%)` : undefined,
+        };
+    };
 
     return (
         <div
@@ -204,7 +209,7 @@ const ActionPositionAuditPreview: React.FC<ActionPositionAuditPreviewProps> = ({
                         </p>
                     </div>
                     <div className="rounded-lg border border-amber-700/60 bg-amber-950/30 px-3 py-2 text-[11px] text-amber-100">
-                        {translate('赤ゴースト = アイドル基準 / 現在の画像 = 比較対象')}
+                        {translate('赤ゴースト = アイドル基準 / 全アクション軸補正済み表示で比較')}
                     </div>
                 </div>
 

@@ -7,6 +7,6717 @@ export interface VacationAnimationFrameAnchor {
   cellHeight: number;
 }
 
+export const VACATION_ANIMATION_FRAME_ANCHORS: Record<string, VacationAnimationFrameAnchor[]> = {
+  "sprites/high-school/vacation-characters-idle-sheets/0.webp": [
+    {
+      "centerX": 361,
+      "bottomY": 599,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 240,
+      "bottomY": 585,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 377,
+      "bottomY": 602,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 244,
+      "bottomY": 592,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/high-school/vacation-characters-idle-special-sheets/0.webp": [
+    {
+      "centerX": 368,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 248,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 333,
+      "bottomY": 607,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 285,
+      "bottomY": 591,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/high-school/vacation-characters-attack-sheets/0.webp": [
+    {
+      "centerX": 377,
+      "bottomY": 608,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 291,
+      "bottomY": 582,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 301,
+      "bottomY": 583,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 348,
+      "bottomY": 601,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/high-school/vacation-characters-skill-sheets/0.webp": [
+    {
+      "centerX": 358,
+      "bottomY": 615,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 334,
+      "bottomY": 601,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 338,
+      "bottomY": 584,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 282,
+      "bottomY": 600,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/high-school/vacation-characters-hit-sheets/0.webp": [
+    {
+      "centerX": 348,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 281,
+      "bottomY": 611,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 331,
+      "bottomY": 609,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 223,
+      "bottomY": 609,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/high-school/vacation-characters-low-hp-sheets/0.webp": [
+    {
+      "centerX": 368,
+      "bottomY": 597,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 257,
+      "bottomY": 598,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 365,
+      "bottomY": 601,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 255,
+      "bottomY": 597,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/high-school/vacation-characters-idle-sheets/1.webp": [
+    {
+      "centerX": 347,
+      "bottomY": 618,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 322,
+      "bottomY": 615,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 355,
+      "bottomY": 599,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 307,
+      "bottomY": 599,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/high-school/vacation-characters-idle-special-sheets/1.webp": [
+    {
+      "centerX": 418,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 229,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 402,
+      "bottomY": 621,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 182,
+      "bottomY": 611,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/high-school/vacation-characters-attack-sheets/1.webp": [
+    {
+      "centerX": 361,
+      "bottomY": 597,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 308,
+      "bottomY": 586,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 353,
+      "bottomY": 538,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 293,
+      "bottomY": 558,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/high-school/vacation-characters-skill-sheets/1.webp": [
+    {
+      "centerX": 363,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 293,
+      "bottomY": 595,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 339,
+      "bottomY": 570,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 271,
+      "bottomY": 569,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/high-school/vacation-characters-hit-sheets/1.webp": [
+    {
+      "centerX": 380,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 283,
+      "bottomY": 608,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 388,
+      "bottomY": 588,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 270,
+      "bottomY": 595,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/high-school/vacation-characters-low-hp-sheets/1.webp": [
+    {
+      "centerX": 357,
+      "bottomY": 595,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 266,
+      "bottomY": 603,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 336,
+      "bottomY": 589,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 271,
+      "bottomY": 601,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/high-school/vacation-characters-idle-sheets/2.webp": [
+    {
+      "centerX": 377,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 261,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 384,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 253,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/high-school/vacation-characters-idle-special-sheets/2.webp": [
+    {
+      "centerX": 368,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 273,
+      "bottomY": 594,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 375,
+      "bottomY": 618,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 253,
+      "bottomY": 587,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/high-school/vacation-characters-attack-sheets/2.webp": [
+    {
+      "centerX": 363,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 306,
+      "bottomY": 572,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 328,
+      "bottomY": 599,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 285,
+      "bottomY": 610,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/high-school/vacation-characters-skill-sheets/2.webp": [
+    {
+      "centerX": 387,
+      "bottomY": 595,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 288,
+      "bottomY": 573,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 340,
+      "bottomY": 537,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 227,
+      "bottomY": 574,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/high-school/vacation-characters-hit-sheets/2.webp": [
+    {
+      "centerX": 350,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 274,
+      "bottomY": 597,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 308,
+      "bottomY": 594,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 277,
+      "bottomY": 604,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/high-school/vacation-characters-low-hp-sheets/2.webp": [
+    {
+      "centerX": 370,
+      "bottomY": 613,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 226,
+      "bottomY": 606,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 341,
+      "bottomY": 592,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 206,
+      "bottomY": 593,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/high-school/vacation-characters-idle-sheets/3.webp": [
+    {
+      "centerX": 372,
+      "bottomY": 619,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 276,
+      "bottomY": 618,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 374,
+      "bottomY": 619,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 278,
+      "bottomY": 619,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/high-school/vacation-characters-idle-special-sheets/3.webp": [
+    {
+      "centerX": 360,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 252,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 372,
+      "bottomY": 621,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 237,
+      "bottomY": 619,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/high-school/vacation-characters-attack-sheets/3.webp": [
+    {
+      "centerX": 383,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 268,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 307,
+      "bottomY": 544,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 285,
+      "bottomY": 599,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/high-school/vacation-characters-skill-sheets/3.webp": [
+    {
+      "centerX": 417,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 250,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 354,
+      "bottomY": 547,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 260,
+      "bottomY": 547,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/high-school/vacation-characters-hit-sheets/3.webp": [
+    {
+      "centerX": 320,
+      "bottomY": 595,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 281,
+      "bottomY": 591,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 339,
+      "bottomY": 578,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 281,
+      "bottomY": 577,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/high-school/vacation-characters-low-hp-sheets/3.webp": [
+    {
+      "centerX": 354,
+      "bottomY": 616,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 281,
+      "bottomY": 614,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 344,
+      "bottomY": 596,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 268,
+      "bottomY": 602,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/high-school/vacation-characters-idle-sheets/4.webp": [
+    {
+      "centerX": 368,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 276,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 385,
+      "bottomY": 572,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 258,
+      "bottomY": 568,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/high-school/vacation-characters-idle-special-sheets/4.webp": [
+    {
+      "centerX": 386,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 250,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 413,
+      "bottomY": 578,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 208,
+      "bottomY": 568,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/high-school/vacation-characters-attack-sheets/4.webp": [
+    {
+      "centerX": 392,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 300,
+      "bottomY": 602,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 326,
+      "bottomY": 585,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 340,
+      "bottomY": 559,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/high-school/vacation-characters-skill-sheets/4.webp": [
+    {
+      "centerX": 361,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 302,
+      "bottomY": 585,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 338,
+      "bottomY": 576,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 275,
+      "bottomY": 550,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/high-school/vacation-characters-hit-sheets/4.webp": [
+    {
+      "centerX": 366,
+      "bottomY": 613,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 264,
+      "bottomY": 599,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 352,
+      "bottomY": 570,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 268,
+      "bottomY": 567,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/high-school/vacation-characters-low-hp-sheets/4.webp": [
+    {
+      "centerX": 400,
+      "bottomY": 602,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 292,
+      "bottomY": 603,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 373,
+      "bottomY": 582,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 305,
+      "bottomY": 587,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/high-school/vacation-characters-idle-sheets/5.webp": [
+    {
+      "centerX": 327,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 273,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 334,
+      "bottomY": 550,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 264,
+      "bottomY": 541,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/high-school/vacation-characters-idle-special-sheets/5.webp": [
+    {
+      "centerX": 359,
+      "bottomY": 606,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 264,
+      "bottomY": 612,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 331,
+      "bottomY": 580,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 269,
+      "bottomY": 578,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/high-school/vacation-characters-attack-sheets/5.webp": [
+    {
+      "centerX": 337,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 318,
+      "bottomY": 602,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 341,
+      "bottomY": 595,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 251,
+      "bottomY": 611,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/high-school/vacation-characters-skill-sheets/5.webp": [
+    {
+      "centerX": 354,
+      "bottomY": 596,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 312,
+      "bottomY": 594,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 333,
+      "bottomY": 577,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 247,
+      "bottomY": 574,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/high-school/vacation-characters-hit-sheets/5.webp": [
+    {
+      "centerX": 330,
+      "bottomY": 602,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 279,
+      "bottomY": 558,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 295,
+      "bottomY": 550,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 292,
+      "bottomY": 598,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/high-school/vacation-characters-low-hp-sheets/5.webp": [
+    {
+      "centerX": 336,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 254,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 290,
+      "bottomY": 531,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 288,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/high-school/vacation-characters-idle-sheets/6.webp": [
+    {
+      "centerX": 360,
+      "bottomY": 593,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 256,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 341,
+      "bottomY": 603,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 261,
+      "bottomY": 603,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/high-school/vacation-characters-idle-special-sheets/6.webp": [
+    {
+      "centerX": 371,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 265,
+      "bottomY": 610,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 377,
+      "bottomY": 607,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 226,
+      "bottomY": 606,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/high-school/vacation-characters-attack-sheets/6.webp": [
+    {
+      "centerX": 392,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 284,
+      "bottomY": 613,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 313,
+      "bottomY": 608,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 254,
+      "bottomY": 619,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/high-school/vacation-characters-skill-sheets/6.webp": [
+    {
+      "centerX": 372,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 253,
+      "bottomY": 607,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 345,
+      "bottomY": 594,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 201,
+      "bottomY": 593,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/high-school/vacation-characters-hit-sheets/6.webp": [
+    {
+      "centerX": 350,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 256,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 355,
+      "bottomY": 598,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 246,
+      "bottomY": 625,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/high-school/vacation-characters-low-hp-sheets/6.webp": [
+    {
+      "centerX": 381,
+      "bottomY": 614,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 265,
+      "bottomY": 617,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 372,
+      "bottomY": 599,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 252,
+      "bottomY": 601,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/high-school/vacation-characters-idle-sheets/7.webp": [
+    {
+      "centerX": 351,
+      "bottomY": 594,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 285,
+      "bottomY": 595,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 357,
+      "bottomY": 599,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 283,
+      "bottomY": 594,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/high-school/vacation-characters-idle-special-sheets/7.webp": [
+    {
+      "centerX": 364,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 262,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 375,
+      "bottomY": 612,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 264,
+      "bottomY": 614,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/high-school/vacation-characters-attack-sheets/7.webp": [
+    {
+      "centerX": 379,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 290,
+      "bottomY": 591,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 330,
+      "bottomY": 573,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 258,
+      "bottomY": 618,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/high-school/vacation-characters-skill-sheets/7.webp": [
+    {
+      "centerX": 335,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 269,
+      "bottomY": 614,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 355,
+      "bottomY": 594,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 288,
+      "bottomY": 596,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/high-school/vacation-characters-hit-sheets/7.webp": [
+    {
+      "centerX": 342,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 311,
+      "bottomY": 605,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 299,
+      "bottomY": 613,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 278,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/high-school/vacation-characters-low-hp-sheets/7.webp": [
+    {
+      "centerX": 350,
+      "bottomY": 624,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 289,
+      "bottomY": 604,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 334,
+      "bottomY": 586,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 283,
+      "bottomY": 604,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/high-school/vacation-characters-idle-sheets/8.webp": [
+    {
+      "centerX": 332,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 255,
+      "bottomY": 601,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 342,
+      "bottomY": 608,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 253,
+      "bottomY": 590,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/high-school/vacation-characters-idle-special-sheets/8.webp": [
+    {
+      "centerX": 362,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 275,
+      "bottomY": 620,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 370,
+      "bottomY": 606,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 271,
+      "bottomY": 611,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/high-school/vacation-characters-attack-sheets/8.webp": [
+    {
+      "centerX": 373,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 307,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 315,
+      "bottomY": 563,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 279,
+      "bottomY": 595,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/high-school/vacation-characters-skill-sheets/8.webp": [
+    {
+      "centerX": 341,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 274,
+      "bottomY": 599,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 361,
+      "bottomY": 578,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 286,
+      "bottomY": 586,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/high-school/vacation-characters-hit-sheets/8.webp": [
+    {
+      "centerX": 360,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 259,
+      "bottomY": 610,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 326,
+      "bottomY": 585,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 254,
+      "bottomY": 618,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/high-school/vacation-characters-low-hp-sheets/8.webp": [
+    {
+      "centerX": 327,
+      "bottomY": 624,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 268,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 320,
+      "bottomY": 578,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 247,
+      "bottomY": 594,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-idle-sheets/heroine-01-before.webp": [
+    {
+      "centerX": 338,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 271,
+      "bottomY": 588,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 341,
+      "bottomY": 586,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 272,
+      "bottomY": 591,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-idle-special-sheets/heroine-01-before.webp": [
+    {
+      "centerX": 315,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 311,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 291,
+      "bottomY": 624,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 314,
+      "bottomY": 620,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-attack-sheets/heroine-01-before.webp": [
+    {
+      "centerX": 343,
+      "bottomY": 589,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 320,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 310,
+      "bottomY": 550,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 281,
+      "bottomY": 575,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-skill-sheets/heroine-01-before.webp": [
+    {
+      "centerX": 309,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 285,
+      "bottomY": 593,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 320,
+      "bottomY": 571,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 264,
+      "bottomY": 553,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-hit-sheets/heroine-01-before.webp": [
+    {
+      "centerX": 356,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 300,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 308,
+      "bottomY": 577,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 270,
+      "bottomY": 603,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-low-hp-sheets/heroine-01-before.webp": [
+    {
+      "centerX": 314,
+      "bottomY": 586,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 300,
+      "bottomY": 586,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 321,
+      "bottomY": 574,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 243,
+      "bottomY": 574,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-idle-sheets/heroine-01-after.webp": [
+    {
+      "centerX": 346,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 282,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 353,
+      "bottomY": 608,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 278,
+      "bottomY": 612,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-idle-special-sheets/heroine-01-after.webp": [
+    {
+      "centerX": 350,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 285,
+      "bottomY": 610,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 351,
+      "bottomY": 614,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 268,
+      "bottomY": 605,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-attack-sheets/heroine-01-after.webp": [
+    {
+      "centerX": 360,
+      "bottomY": 623,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 294,
+      "bottomY": 620,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 320,
+      "bottomY": 602,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 305,
+      "bottomY": 601,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-skill-sheets/heroine-01-after.webp": [
+    {
+      "centerX": 338,
+      "bottomY": 602,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 290,
+      "bottomY": 597,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 332,
+      "bottomY": 618,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 284,
+      "bottomY": 592,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-hit-sheets/heroine-01-after.webp": [
+    {
+      "centerX": 323,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 308,
+      "bottomY": 611,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 315,
+      "bottomY": 600,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 307,
+      "bottomY": 611,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-low-hp-sheets/heroine-01-after.webp": [
+    {
+      "centerX": 285,
+      "bottomY": 587,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 270,
+      "bottomY": 595,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 320,
+      "bottomY": 562,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 232,
+      "bottomY": 556,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-idle-sheets/heroine-02-before.webp": [
+    {
+      "centerX": 361,
+      "bottomY": 593,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 286,
+      "bottomY": 597,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 357,
+      "bottomY": 595,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 284,
+      "bottomY": 583,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-idle-special-sheets/heroine-02-before.webp": [
+    {
+      "centerX": 381,
+      "bottomY": 594,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 201,
+      "bottomY": 580,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 382,
+      "bottomY": 574,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 270,
+      "bottomY": 591,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-attack-sheets/heroine-02-before.webp": [
+    {
+      "centerX": 360,
+      "bottomY": 582,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 302,
+      "bottomY": 565,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 315,
+      "bottomY": 587,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 292,
+      "bottomY": 562,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-skill-sheets/heroine-02-before.webp": [
+    {
+      "centerX": 344,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 251,
+      "bottomY": 574,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 342,
+      "bottomY": 574,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 279,
+      "bottomY": 574,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-hit-sheets/heroine-02-before.webp": [
+    {
+      "centerX": 392,
+      "bottomY": 612,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 281,
+      "bottomY": 597,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 370,
+      "bottomY": 568,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 264,
+      "bottomY": 590,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-low-hp-sheets/heroine-02-before.webp": [
+    {
+      "centerX": 366,
+      "bottomY": 602,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 247,
+      "bottomY": 599,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 357,
+      "bottomY": 564,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 243,
+      "bottomY": 589,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-idle-sheets/heroine-02-after.webp": [
+    {
+      "centerX": 339,
+      "bottomY": 600,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 281,
+      "bottomY": 617,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 351,
+      "bottomY": 596,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 277,
+      "bottomY": 574,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-idle-special-sheets/heroine-02-after.webp": [
+    {
+      "centerX": 357,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 296,
+      "bottomY": 605,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 349,
+      "bottomY": 591,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 288,
+      "bottomY": 593,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-attack-sheets/heroine-02-after.webp": [
+    {
+      "centerX": 338,
+      "bottomY": 604,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 297,
+      "bottomY": 599,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 331,
+      "bottomY": 565,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 255,
+      "bottomY": 579,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-skill-sheets/heroine-02-after.webp": [
+    {
+      "centerX": 323,
+      "bottomY": 624,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 284,
+      "bottomY": 586,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 330,
+      "bottomY": 593,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 251,
+      "bottomY": 592,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-hit-sheets/heroine-02-after.webp": [
+    {
+      "centerX": 354,
+      "bottomY": 611,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 317,
+      "bottomY": 589,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 335,
+      "bottomY": 593,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 281,
+      "bottomY": 604,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-low-hp-sheets/heroine-02-after.webp": [
+    {
+      "centerX": 364,
+      "bottomY": 609,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 275,
+      "bottomY": 610,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 365,
+      "bottomY": 598,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 276,
+      "bottomY": 600,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-idle-sheets/heroine-03-before.webp": [
+    {
+      "centerX": 370,
+      "bottomY": 591,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 256,
+      "bottomY": 592,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 373,
+      "bottomY": 594,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 249,
+      "bottomY": 581,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-idle-special-sheets/heroine-03-before.webp": [
+    {
+      "centerX": 310,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 247,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 368,
+      "bottomY": 603,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 242,
+      "bottomY": 610,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-attack-sheets/heroine-03-before.webp": [
+    {
+      "centerX": 358,
+      "bottomY": 620,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 252,
+      "bottomY": 604,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 345,
+      "bottomY": 593,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 287,
+      "bottomY": 597,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-skill-sheets/heroine-03-before.webp": [
+    {
+      "centerX": 360,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 237,
+      "bottomY": 589,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 386,
+      "bottomY": 580,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 259,
+      "bottomY": 550,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-hit-sheets/heroine-03-before.webp": [
+    {
+      "centerX": 352,
+      "bottomY": 618,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 261,
+      "bottomY": 595,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 347,
+      "bottomY": 586,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 274,
+      "bottomY": 598,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-low-hp-sheets/heroine-03-before.webp": [
+    {
+      "centerX": 331,
+      "bottomY": 617,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 284,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 325,
+      "bottomY": 568,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 289,
+      "bottomY": 602,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-idle-sheets/heroine-03-after.webp": [
+    {
+      "centerX": 341,
+      "bottomY": 613,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 263,
+      "bottomY": 609,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 347,
+      "bottomY": 605,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 263,
+      "bottomY": 610,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-idle-special-sheets/heroine-03-after.webp": [
+    {
+      "centerX": 397,
+      "bottomY": 618,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 272,
+      "bottomY": 610,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 373,
+      "bottomY": 604,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 279,
+      "bottomY": 599,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-attack-sheets/heroine-03-after.webp": [
+    {
+      "centerX": 317,
+      "bottomY": 616,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 277,
+      "bottomY": 597,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 328,
+      "bottomY": 580,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 288,
+      "bottomY": 593,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-skill-sheets/heroine-03-after.webp": [
+    {
+      "centerX": 302,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 233,
+      "bottomY": 598,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 316,
+      "bottomY": 588,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 259,
+      "bottomY": 591,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-hit-sheets/heroine-03-after.webp": [
+    {
+      "centerX": 338,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 278,
+      "bottomY": 613,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 343,
+      "bottomY": 610,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 272,
+      "bottomY": 610,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-low-hp-sheets/heroine-03-after.webp": [
+    {
+      "centerX": 323,
+      "bottomY": 598,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 275,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 330,
+      "bottomY": 600,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 253,
+      "bottomY": 605,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-idle-sheets/heroine-04-before.webp": [
+    {
+      "centerX": 320,
+      "bottomY": 600,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 301,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 319,
+      "bottomY": 605,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 293,
+      "bottomY": 606,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-idle-special-sheets/heroine-04-before.webp": [
+    {
+      "centerX": 370,
+      "bottomY": 587,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 299,
+      "bottomY": 585,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 332,
+      "bottomY": 577,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 307,
+      "bottomY": 591,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-attack-sheets/heroine-04-before.webp": [
+    {
+      "centerX": 321,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 317,
+      "bottomY": 609,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 306,
+      "bottomY": 591,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 284,
+      "bottomY": 604,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-skill-sheets/heroine-04-before.webp": [
+    {
+      "centerX": 347,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 277,
+      "bottomY": 591,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 330,
+      "bottomY": 600,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 281,
+      "bottomY": 590,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-hit-sheets/heroine-04-before.webp": [
+    {
+      "centerX": 360,
+      "bottomY": 579,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 270,
+      "bottomY": 566,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 340,
+      "bottomY": 540,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 263,
+      "bottomY": 531,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-low-hp-sheets/heroine-04-before.webp": [
+    {
+      "centerX": 347,
+      "bottomY": 577,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 295,
+      "bottomY": 589,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 321,
+      "bottomY": 578,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 259,
+      "bottomY": 585,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-idle-sheets/heroine-04-after.webp": [
+    {
+      "centerX": 323,
+      "bottomY": 616,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 271,
+      "bottomY": 600,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 345,
+      "bottomY": 602,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 284,
+      "bottomY": 599,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-idle-special-sheets/heroine-04-after.webp": [
+    {
+      "centerX": 372,
+      "bottomY": 600,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 273,
+      "bottomY": 584,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 347,
+      "bottomY": 602,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 319,
+      "bottomY": 601,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-attack-sheets/heroine-04-after.webp": [
+    {
+      "centerX": 349,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 313,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 297,
+      "bottomY": 542,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 298,
+      "bottomY": 583,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-skill-sheets/heroine-04-after.webp": [
+    {
+      "centerX": 329,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 298,
+      "bottomY": 585,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 333,
+      "bottomY": 578,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 293,
+      "bottomY": 571,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-hit-sheets/heroine-04-after.webp": [
+    {
+      "centerX": 332,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 302,
+      "bottomY": 591,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 307,
+      "bottomY": 564,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 323,
+      "bottomY": 582,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-low-hp-sheets/heroine-04-after.webp": [
+    {
+      "centerX": 346,
+      "bottomY": 599,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 290,
+      "bottomY": 602,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 340,
+      "bottomY": 552,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 271,
+      "bottomY": 585,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-idle-sheets/heroine-05-before.webp": [
+    {
+      "centerX": 346,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 277,
+      "bottomY": 607,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 353,
+      "bottomY": 608,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 272,
+      "bottomY": 588,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-idle-special-sheets/heroine-05-before.webp": [
+    {
+      "centerX": 335,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 263,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 325,
+      "bottomY": 583,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 244,
+      "bottomY": 557,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-attack-sheets/heroine-05-before.webp": [
+    {
+      "centerX": 344,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 313,
+      "bottomY": 550,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 359,
+      "bottomY": 569,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 259,
+      "bottomY": 593,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-skill-sheets/heroine-05-before.webp": [
+    {
+      "centerX": 336,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 304,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 334,
+      "bottomY": 599,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 297,
+      "bottomY": 582,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-hit-sheets/heroine-05-before.webp": [
+    {
+      "centerX": 363,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 242,
+      "bottomY": 596,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 354,
+      "bottomY": 567,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 238,
+      "bottomY": 605,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-low-hp-sheets/heroine-05-before.webp": [
+    {
+      "centerX": 338,
+      "bottomY": 605,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 271,
+      "bottomY": 566,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 337,
+      "bottomY": 562,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 247,
+      "bottomY": 570,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-idle-sheets/heroine-05-after.webp": [
+    {
+      "centerX": 338,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 262,
+      "bottomY": 586,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 355,
+      "bottomY": 585,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 263,
+      "bottomY": 563,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-idle-special-sheets/heroine-05-after.webp": [
+    {
+      "centerX": 354,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 295,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 346,
+      "bottomY": 608,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 274,
+      "bottomY": 578,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-attack-sheets/heroine-05-after.webp": [
+    {
+      "centerX": 326,
+      "bottomY": 615,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 324,
+      "bottomY": 573,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 316,
+      "bottomY": 579,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 308,
+      "bottomY": 582,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-skill-sheets/heroine-05-after.webp": [
+    {
+      "centerX": 358,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 294,
+      "bottomY": 578,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 329,
+      "bottomY": 565,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 271,
+      "bottomY": 578,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-hit-sheets/heroine-05-after.webp": [
+    {
+      "centerX": 321,
+      "bottomY": 572,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 272,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 348,
+      "bottomY": 576,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 257,
+      "bottomY": 574,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-low-hp-sheets/heroine-05-after.webp": [
+    {
+      "centerX": 348,
+      "bottomY": 612,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 255,
+      "bottomY": 588,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 379,
+      "bottomY": 534,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 269,
+      "bottomY": 608,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-idle-sheets/heroine-06-before.webp": [
+    {
+      "centerX": 356,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 282,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 343,
+      "bottomY": 566,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 269,
+      "bottomY": 566,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-idle-special-sheets/heroine-06-before.webp": [
+    {
+      "centerX": 330,
+      "bottomY": 597,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 327,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 352,
+      "bottomY": 591,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 293,
+      "bottomY": 582,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-attack-sheets/heroine-06-before.webp": [
+    {
+      "centerX": 355,
+      "bottomY": 589,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 271,
+      "bottomY": 565,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 338,
+      "bottomY": 550,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 286,
+      "bottomY": 555,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-skill-sheets/heroine-06-before.webp": [
+    {
+      "centerX": 291,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 299,
+      "bottomY": 593,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 304,
+      "bottomY": 583,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 288,
+      "bottomY": 579,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-hit-sheets/heroine-06-before.webp": [
+    {
+      "centerX": 327,
+      "bottomY": 622,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 303,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 305,
+      "bottomY": 598,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 291,
+      "bottomY": 600,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-low-hp-sheets/heroine-06-before.webp": [
+    {
+      "centerX": 373,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 245,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 365,
+      "bottomY": 547,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 240,
+      "bottomY": 585,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-idle-sheets/heroine-06-after.webp": [
+    {
+      "centerX": 359,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 293,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 340,
+      "bottomY": 591,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 290,
+      "bottomY": 561,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-idle-special-sheets/heroine-06-after.webp": [
+    {
+      "centerX": 383,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 283,
+      "bottomY": 594,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 342,
+      "bottomY": 578,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 274,
+      "bottomY": 585,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-attack-sheets/heroine-06-after.webp": [
+    {
+      "centerX": 354,
+      "bottomY": 595,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 318,
+      "bottomY": 583,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 320,
+      "bottomY": 569,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 290,
+      "bottomY": 589,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-skill-sheets/heroine-06-after.webp": [
+    {
+      "centerX": 359,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 282,
+      "bottomY": 614,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 326,
+      "bottomY": 603,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 277,
+      "bottomY": 589,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-hit-sheets/heroine-06-after.webp": [
+    {
+      "centerX": 356,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 278,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 320,
+      "bottomY": 577,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 268,
+      "bottomY": 574,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-low-hp-sheets/heroine-06-after.webp": [
+    {
+      "centerX": 346,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 288,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 332,
+      "bottomY": 592,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 248,
+      "bottomY": 593,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-idle-sheets/heroine-07-before.webp": [
+    {
+      "centerX": 345,
+      "bottomY": 609,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 289,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 326,
+      "bottomY": 573,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 284,
+      "bottomY": 585,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-idle-special-sheets/heroine-07-before.webp": [
+    {
+      "centerX": 308,
+      "bottomY": 608,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 300,
+      "bottomY": 611,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 307,
+      "bottomY": 605,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 304,
+      "bottomY": 600,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-attack-sheets/heroine-07-before.webp": [
+    {
+      "centerX": 312,
+      "bottomY": 601,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 326,
+      "bottomY": 581,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 317,
+      "bottomY": 566,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 274,
+      "bottomY": 563,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-skill-sheets/heroine-07-before.webp": [
+    {
+      "centerX": 348,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 253,
+      "bottomY": 574,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 346,
+      "bottomY": 586,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 250,
+      "bottomY": 558,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-hit-sheets/heroine-07-before.webp": [
+    {
+      "centerX": 321,
+      "bottomY": 614,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 317,
+      "bottomY": 585,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 312,
+      "bottomY": 581,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 303,
+      "bottomY": 592,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-low-hp-sheets/heroine-07-before.webp": [
+    {
+      "centerX": 330,
+      "bottomY": 613,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 271,
+      "bottomY": 615,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 338,
+      "bottomY": 580,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 260,
+      "bottomY": 580,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-idle-sheets/heroine-07-after.webp": [
+    {
+      "centerX": 328,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 310,
+      "bottomY": 585,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 329,
+      "bottomY": 580,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 315,
+      "bottomY": 585,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-idle-special-sheets/heroine-07-after.webp": [
+    {
+      "centerX": 324,
+      "bottomY": 587,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 309,
+      "bottomY": 610,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 329,
+      "bottomY": 588,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 304,
+      "bottomY": 585,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-attack-sheets/heroine-07-after.webp": [
+    {
+      "centerX": 328,
+      "bottomY": 595,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 313,
+      "bottomY": 569,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 345,
+      "bottomY": 560,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 258,
+      "bottomY": 521,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-skill-sheets/heroine-07-after.webp": [
+    {
+      "centerX": 333,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 270,
+      "bottomY": 609,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 350,
+      "bottomY": 573,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 278,
+      "bottomY": 565,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-hit-sheets/heroine-07-after.webp": [
+    {
+      "centerX": 309,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 311,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 309,
+      "bottomY": 572,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 284,
+      "bottomY": 601,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-low-hp-sheets/heroine-07-after.webp": [
+    {
+      "centerX": 359,
+      "bottomY": 596,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 284,
+      "bottomY": 605,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 340,
+      "bottomY": 560,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 287,
+      "bottomY": 569,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-idle-sheets/heroine-08-before.webp": [
+    {
+      "centerX": 355,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 280,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 334,
+      "bottomY": 594,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 266,
+      "bottomY": 585,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-idle-special-sheets/heroine-08-before.webp": [
+    {
+      "centerX": 359,
+      "bottomY": 618,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 260,
+      "bottomY": 619,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 309,
+      "bottomY": 588,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 244,
+      "bottomY": 567,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-attack-sheets/heroine-08-before.webp": [
+    {
+      "centerX": 360,
+      "bottomY": 625,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 296,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 306,
+      "bottomY": 568,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 294,
+      "bottomY": 568,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-skill-sheets/heroine-08-before.webp": [
+    {
+      "centerX": 310,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 288,
+      "bottomY": 570,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 335,
+      "bottomY": 542,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 308,
+      "bottomY": 541,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-hit-sheets/heroine-08-before.webp": [
+    {
+      "centerX": 343,
+      "bottomY": 582,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 310,
+      "bottomY": 583,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 320,
+      "bottomY": 553,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 274,
+      "bottomY": 574,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-low-hp-sheets/heroine-08-before.webp": [
+    {
+      "centerX": 277,
+      "bottomY": 583,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 258,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 361,
+      "bottomY": 577,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 236,
+      "bottomY": 590,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-idle-sheets/heroine-08-after.webp": [
+    {
+      "centerX": 331,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 266,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 336,
+      "bottomY": 616,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 276,
+      "bottomY": 621,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-idle-special-sheets/heroine-08-after.webp": [
+    {
+      "centerX": 326,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 309,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 326,
+      "bottomY": 558,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 299,
+      "bottomY": 573,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-attack-sheets/heroine-08-after.webp": [
+    {
+      "centerX": 306,
+      "bottomY": 615,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 333,
+      "bottomY": 596,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 323,
+      "bottomY": 553,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 309,
+      "bottomY": 563,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-skill-sheets/heroine-08-after.webp": [
+    {
+      "centerX": 319,
+      "bottomY": 611,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 310,
+      "bottomY": 589,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 311,
+      "bottomY": 593,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 286,
+      "bottomY": 595,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-hit-sheets/heroine-08-after.webp": [
+    {
+      "centerX": 364,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 290,
+      "bottomY": 578,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 341,
+      "bottomY": 584,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 262,
+      "bottomY": 603,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-low-hp-sheets/heroine-08-after.webp": [
+    {
+      "centerX": 297,
+      "bottomY": 614,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 282,
+      "bottomY": 602,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 341,
+      "bottomY": 562,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 241,
+      "bottomY": 579,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-idle-sheets/heroine-09-before.webp": [
+    {
+      "centerX": 333,
+      "bottomY": 598,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 285,
+      "bottomY": 598,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 328,
+      "bottomY": 585,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 293,
+      "bottomY": 583,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-idle-special-sheets/heroine-09-before.webp": [
+    {
+      "centerX": 384,
+      "bottomY": 598,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 256,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 326,
+      "bottomY": 602,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 263,
+      "bottomY": 601,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-attack-sheets/heroine-09-before.webp": [
+    {
+      "centerX": 313,
+      "bottomY": 617,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 286,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 290,
+      "bottomY": 569,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 280,
+      "bottomY": 601,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-skill-sheets/heroine-09-before.webp": [
+    {
+      "centerX": 300,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 269,
+      "bottomY": 600,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 330,
+      "bottomY": 573,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 265,
+      "bottomY": 581,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-hit-sheets/heroine-09-before.webp": [
+    {
+      "centerX": 371,
+      "bottomY": 603,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 292,
+      "bottomY": 625,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 349,
+      "bottomY": 576,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 273,
+      "bottomY": 582,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-low-hp-sheets/heroine-09-before.webp": [
+    {
+      "centerX": 344,
+      "bottomY": 610,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 266,
+      "bottomY": 609,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 337,
+      "bottomY": 596,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 271,
+      "bottomY": 605,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-idle-sheets/heroine-09-after.webp": [
+    {
+      "centerX": 343,
+      "bottomY": 616,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 302,
+      "bottomY": 608,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 335,
+      "bottomY": 590,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 305,
+      "bottomY": 591,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-idle-special-sheets/heroine-09-after.webp": [
+    {
+      "centerX": 357,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 270,
+      "bottomY": 574,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 352,
+      "bottomY": 593,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 286,
+      "bottomY": 570,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-attack-sheets/heroine-09-after.webp": [
+    {
+      "centerX": 364,
+      "bottomY": 614,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 287,
+      "bottomY": 590,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 323,
+      "bottomY": 555,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 284,
+      "bottomY": 577,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-skill-sheets/heroine-09-after.webp": [
+    {
+      "centerX": 340,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 289,
+      "bottomY": 579,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 325,
+      "bottomY": 595,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 277,
+      "bottomY": 587,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-hit-sheets/heroine-09-after.webp": [
+    {
+      "centerX": 349,
+      "bottomY": 610,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 267,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 315,
+      "bottomY": 560,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 286,
+      "bottomY": 586,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-low-hp-sheets/heroine-09-after.webp": [
+    {
+      "centerX": 344,
+      "bottomY": 592,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 273,
+      "bottomY": 600,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 326,
+      "bottomY": 537,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 272,
+      "bottomY": 564,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-idle-sheets/ren-before.webp": [
+    {
+      "centerX": 365,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 302,
+      "bottomY": 619,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 363,
+      "bottomY": 609,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 340,
+      "bottomY": 615,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-idle-special-sheets/ren-before.webp": [
+    {
+      "centerX": 339,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 302,
+      "bottomY": 589,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 334,
+      "bottomY": 540,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 308,
+      "bottomY": 595,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-attack-sheets/ren-before.webp": [
+    {
+      "centerX": 328,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 312,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 329,
+      "bottomY": 602,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 279,
+      "bottomY": 611,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-skill-sheets/ren-before.webp": [
+    {
+      "centerX": 307,
+      "bottomY": 601,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 288,
+      "bottomY": 599,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 337,
+      "bottomY": 582,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 252,
+      "bottomY": 578,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-hit-sheets/ren-before.webp": [
+    {
+      "centerX": 327,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 306,
+      "bottomY": 599,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 318,
+      "bottomY": 598,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 298,
+      "bottomY": 601,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-low-hp-sheets/ren-before.webp": [
+    {
+      "centerX": 335,
+      "bottomY": 600,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 321,
+      "bottomY": 588,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 282,
+      "bottomY": 562,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 287,
+      "bottomY": 583,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-idle-sheets/ren-after.webp": [
+    {
+      "centerX": 306,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 284,
+      "bottomY": 619,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 349,
+      "bottomY": 614,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 290,
+      "bottomY": 614,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-idle-special-sheets/ren-after.webp": [
+    {
+      "centerX": 322,
+      "bottomY": 600,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 269,
+      "bottomY": 594,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 329,
+      "bottomY": 557,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 296,
+      "bottomY": 572,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-attack-sheets/ren-after.webp": [
+    {
+      "centerX": 330,
+      "bottomY": 596,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 315,
+      "bottomY": 562,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 328,
+      "bottomY": 536,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 250,
+      "bottomY": 553,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-skill-sheets/ren-after.webp": [
+    {
+      "centerX": 336,
+      "bottomY": 603,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 301,
+      "bottomY": 598,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 331,
+      "bottomY": 580,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 305,
+      "bottomY": 578,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-hit-sheets/ren-after.webp": [
+    {
+      "centerX": 356,
+      "bottomY": 585,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 269,
+      "bottomY": 577,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 319,
+      "bottomY": 564,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 293,
+      "bottomY": 572,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-low-hp-sheets/ren-after.webp": [
+    {
+      "centerX": 356,
+      "bottomY": 596,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 305,
+      "bottomY": 586,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 321,
+      "bottomY": 572,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 256,
+      "bottomY": 561,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-idle-sheets/soma-before.webp": [
+    {
+      "centerX": 328,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 292,
+      "bottomY": 621,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 344,
+      "bottomY": 606,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 287,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-idle-special-sheets/soma-before.webp": [
+    {
+      "centerX": 367,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 268,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 342,
+      "bottomY": 598,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 246,
+      "bottomY": 598,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-attack-sheets/soma-before.webp": [
+    {
+      "centerX": 332,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 266,
+      "bottomY": 592,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 319,
+      "bottomY": 548,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 269,
+      "bottomY": 583,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-skill-sheets/soma-before.webp": [
+    {
+      "centerX": 343,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 293,
+      "bottomY": 623,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 331,
+      "bottomY": 598,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 268,
+      "bottomY": 592,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-hit-sheets/soma-before.webp": [
+    {
+      "centerX": 364,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 282,
+      "bottomY": 610,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 338,
+      "bottomY": 585,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 300,
+      "bottomY": 605,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-low-hp-sheets/soma-before.webp": [
+    {
+      "centerX": 310,
+      "bottomY": 596,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 302,
+      "bottomY": 596,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 316,
+      "bottomY": 567,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 278,
+      "bottomY": 583,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-idle-sheets/soma-after.webp": [
+    {
+      "centerX": 357,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 259,
+      "bottomY": 603,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 340,
+      "bottomY": 617,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 274,
+      "bottomY": 610,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-idle-special-sheets/soma-after.webp": [
+    {
+      "centerX": 358,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 275,
+      "bottomY": 623,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 342,
+      "bottomY": 617,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 246,
+      "bottomY": 624,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-attack-sheets/soma-after.webp": [
+    {
+      "centerX": 364,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 305,
+      "bottomY": 554,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 356,
+      "bottomY": 540,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 246,
+      "bottomY": 564,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-skill-sheets/soma-after.webp": [
+    {
+      "centerX": 351,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 291,
+      "bottomY": 595,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 328,
+      "bottomY": 609,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 313,
+      "bottomY": 583,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-hit-sheets/soma-after.webp": [
+    {
+      "centerX": 355,
+      "bottomY": 612,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 268,
+      "bottomY": 581,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 320,
+      "bottomY": 564,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 294,
+      "bottomY": 571,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-low-hp-sheets/soma-after.webp": [
+    {
+      "centerX": 346,
+      "bottomY": 578,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 243,
+      "bottomY": 580,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 347,
+      "bottomY": 551,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 243,
+      "bottomY": 552,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-idle-sheets/minato-before.webp": [
+    {
+      "centerX": 368,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 300,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 364,
+      "bottomY": 605,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 288,
+      "bottomY": 612,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-idle-special-sheets/minato-before.webp": [
+    {
+      "centerX": 329,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 284,
+      "bottomY": 597,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 320,
+      "bottomY": 612,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 265,
+      "bottomY": 585,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-attack-sheets/minato-before.webp": [
+    {
+      "centerX": 365,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 300,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 329,
+      "bottomY": 589,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 277,
+      "bottomY": 592,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-skill-sheets/minato-before.webp": [
+    {
+      "centerX": 334,
+      "bottomY": 602,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 307,
+      "bottomY": 600,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 328,
+      "bottomY": 559,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 231,
+      "bottomY": 569,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-hit-sheets/minato-before.webp": [
+    {
+      "centerX": 389,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 286,
+      "bottomY": 562,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 324,
+      "bottomY": 580,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 274,
+      "bottomY": 602,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-low-hp-sheets/minato-before.webp": [
+    {
+      "centerX": 370,
+      "bottomY": 599,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 303,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 363,
+      "bottomY": 553,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 292,
+      "bottomY": 581,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-idle-sheets/minato-after.webp": [
+    {
+      "centerX": 346,
+      "bottomY": 610,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 295,
+      "bottomY": 577,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 351,
+      "bottomY": 599,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 291,
+      "bottomY": 602,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-idle-special-sheets/minato-after.webp": [
+    {
+      "centerX": 354,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 308,
+      "bottomY": 597,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 354,
+      "bottomY": 615,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 254,
+      "bottomY": 620,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-attack-sheets/minato-after.webp": [
+    {
+      "centerX": 359,
+      "bottomY": 600,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 277,
+      "bottomY": 585,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 333,
+      "bottomY": 500,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 290,
+      "bottomY": 581,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-skill-sheets/minato-after.webp": [
+    {
+      "centerX": 386,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 264,
+      "bottomY": 588,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 337,
+      "bottomY": 592,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 275,
+      "bottomY": 599,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-hit-sheets/minato-after.webp": [
+    {
+      "centerX": 354,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 311,
+      "bottomY": 568,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 323,
+      "bottomY": 606,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 291,
+      "bottomY": 609,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-low-hp-sheets/minato-after.webp": [
+    {
+      "centerX": 311,
+      "bottomY": 604,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 305,
+      "bottomY": 608,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 302,
+      "bottomY": 559,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 299,
+      "bottomY": 567,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-idle-sheets/riku-before.webp": [
+    {
+      "centerX": 388,
+      "bottomY": 596,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 276,
+      "bottomY": 596,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 367,
+      "bottomY": 595,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 250,
+      "bottomY": 592,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-idle-special-sheets/riku-before.webp": [
+    {
+      "centerX": 388,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 235,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 360,
+      "bottomY": 582,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 236,
+      "bottomY": 603,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-attack-sheets/riku-before.webp": [
+    {
+      "centerX": 357,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 279,
+      "bottomY": 570,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 315,
+      "bottomY": 568,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 285,
+      "bottomY": 581,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-skill-sheets/riku-before.webp": [
+    {
+      "centerX": 393,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 266,
+      "bottomY": 587,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 351,
+      "bottomY": 599,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 244,
+      "bottomY": 606,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-hit-sheets/riku-before.webp": [
+    {
+      "centerX": 357,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 238,
+      "bottomY": 623,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 358,
+      "bottomY": 574,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 235,
+      "bottomY": 601,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-low-hp-sheets/riku-before.webp": [
+    {
+      "centerX": 381,
+      "bottomY": 593,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 237,
+      "bottomY": 593,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 336,
+      "bottomY": 595,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 270,
+      "bottomY": 593,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-idle-sheets/riku-after.webp": [
+    {
+      "centerX": 352,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 290,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 347,
+      "bottomY": 625,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 285,
+      "bottomY": 620,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-idle-special-sheets/riku-after.webp": [
+    {
+      "centerX": 337,
+      "bottomY": 623,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 299,
+      "bottomY": 606,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 342,
+      "bottomY": 599,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 270,
+      "bottomY": 596,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-attack-sheets/riku-after.webp": [
+    {
+      "centerX": 339,
+      "bottomY": 575,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 305,
+      "bottomY": 557,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 309,
+      "bottomY": 547,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 278,
+      "bottomY": 598,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-skill-sheets/riku-after.webp": [
+    {
+      "centerX": 334,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 269,
+      "bottomY": 596,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 338,
+      "bottomY": 602,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 263,
+      "bottomY": 596,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-hit-sheets/riku-after.webp": [
+    {
+      "centerX": 391,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 235,
+      "bottomY": 590,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 374,
+      "bottomY": 584,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 241,
+      "bottomY": 611,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-low-hp-sheets/riku-after.webp": [
+    {
+      "centerX": 352,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 274,
+      "bottomY": 585,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 342,
+      "bottomY": 547,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 249,
+      "bottomY": 565,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-idle-sheets/yamato-before.webp": [
+    {
+      "centerX": 354,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 256,
+      "bottomY": 612,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 352,
+      "bottomY": 596,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 256,
+      "bottomY": 601,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-idle-special-sheets/yamato-before.webp": [
+    {
+      "centerX": 353,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 270,
+      "bottomY": 600,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 344,
+      "bottomY": 592,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 257,
+      "bottomY": 569,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-attack-sheets/yamato-before.webp": [
+    {
+      "centerX": 377,
+      "bottomY": 592,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 298,
+      "bottomY": 563,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 303,
+      "bottomY": 568,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 273,
+      "bottomY": 576,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-skill-sheets/yamato-before.webp": [
+    {
+      "centerX": 289,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 285,
+      "bottomY": 598,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 323,
+      "bottomY": 574,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 268,
+      "bottomY": 561,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-hit-sheets/yamato-before.webp": [
+    {
+      "centerX": 309,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 270,
+      "bottomY": 622,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 323,
+      "bottomY": 609,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 257,
+      "bottomY": 591,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-low-hp-sheets/yamato-before.webp": [
+    {
+      "centerX": 326,
+      "bottomY": 599,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 262,
+      "bottomY": 610,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 318,
+      "bottomY": 577,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 222,
+      "bottomY": 563,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-idle-sheets/yamato-after.webp": [
+    {
+      "centerX": 333,
+      "bottomY": 582,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 274,
+      "bottomY": 580,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 320,
+      "bottomY": 590,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 287,
+      "bottomY": 583,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-idle-special-sheets/yamato-after.webp": [
+    {
+      "centerX": 332,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 262,
+      "bottomY": 615,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 317,
+      "bottomY": 593,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 300,
+      "bottomY": 594,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-attack-sheets/yamato-after.webp": [
+    {
+      "centerX": 336,
+      "bottomY": 594,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 307,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 331,
+      "bottomY": 580,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 261,
+      "bottomY": 601,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-skill-sheets/yamato-after.webp": [
+    {
+      "centerX": 285,
+      "bottomY": 601,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 292,
+      "bottomY": 586,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 325,
+      "bottomY": 580,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 281,
+      "bottomY": 569,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-hit-sheets/yamato-after.webp": [
+    {
+      "centerX": 373,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 261,
+      "bottomY": 597,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 365,
+      "bottomY": 599,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 261,
+      "bottomY": 609,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-low-hp-sheets/yamato-after.webp": [
+    {
+      "centerX": 342,
+      "bottomY": 593,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 267,
+      "bottomY": 596,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 320,
+      "bottomY": 573,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 215,
+      "bottomY": 581,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-idle-sheets/leon-before.webp": [
+    {
+      "centerX": 373,
+      "bottomY": 606,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 274,
+      "bottomY": 610,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 345,
+      "bottomY": 603,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 275,
+      "bottomY": 598,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-idle-special-sheets/leon-before.webp": [
+    {
+      "centerX": 375,
+      "bottomY": 581,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 277,
+      "bottomY": 600,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 353,
+      "bottomY": 603,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 239,
+      "bottomY": 557,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-attack-sheets/leon-before.webp": [
+    {
+      "centerX": 364,
+      "bottomY": 622,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 288,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 326,
+      "bottomY": 562,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 294,
+      "bottomY": 577,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-skill-sheets/leon-before.webp": [
+    {
+      "centerX": 347,
+      "bottomY": 624,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 311,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 334,
+      "bottomY": 600,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 250,
+      "bottomY": 593,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-hit-sheets/leon-before.webp": [
+    {
+      "centerX": 370,
+      "bottomY": 585,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 282,
+      "bottomY": 579,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 365,
+      "bottomY": 581,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 299,
+      "bottomY": 583,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-low-hp-sheets/leon-before.webp": [
+    {
+      "centerX": 324,
+      "bottomY": 601,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 264,
+      "bottomY": 610,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 331,
+      "bottomY": 582,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 245,
+      "bottomY": 579,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-idle-sheets/leon-after.webp": [
+    {
+      "centerX": 356,
+      "bottomY": 591,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 277,
+      "bottomY": 585,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 327,
+      "bottomY": 580,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 270,
+      "bottomY": 583,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-idle-special-sheets/leon-after.webp": [
+    {
+      "centerX": 340,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 291,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 358,
+      "bottomY": 621,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 249,
+      "bottomY": 617,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-attack-sheets/leon-after.webp": [
+    {
+      "centerX": 362,
+      "bottomY": 597,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 273,
+      "bottomY": 576,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 334,
+      "bottomY": 545,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 315,
+      "bottomY": 549,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-skill-sheets/leon-after.webp": [
+    {
+      "centerX": 341,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 306,
+      "bottomY": 615,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 323,
+      "bottomY": 568,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 306,
+      "bottomY": 590,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-hit-sheets/leon-after.webp": [
+    {
+      "centerX": 350,
+      "bottomY": 617,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 278,
+      "bottomY": 583,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 326,
+      "bottomY": 602,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 281,
+      "bottomY": 597,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-low-hp-sheets/leon-after.webp": [
+    {
+      "centerX": 383,
+      "bottomY": 607,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 293,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 376,
+      "bottomY": 604,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 283,
+      "bottomY": 618,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-idle-sheets/elliot-before.webp": [
+    {
+      "centerX": 332,
+      "bottomY": 604,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 249,
+      "bottomY": 602,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 334,
+      "bottomY": 595,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 250,
+      "bottomY": 592,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-idle-special-sheets/elliot-before.webp": [
+    {
+      "centerX": 347,
+      "bottomY": 623,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 287,
+      "bottomY": 613,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 327,
+      "bottomY": 585,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 242,
+      "bottomY": 574,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-attack-sheets/elliot-before.webp": [
+    {
+      "centerX": 355,
+      "bottomY": 616,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 273,
+      "bottomY": 603,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 352,
+      "bottomY": 606,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 273,
+      "bottomY": 610,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-skill-sheets/elliot-before.webp": [
+    {
+      "centerX": 373,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 296,
+      "bottomY": 607,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 317,
+      "bottomY": 594,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 255,
+      "bottomY": 598,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-hit-sheets/elliot-before.webp": [
+    {
+      "centerX": 330,
+      "bottomY": 625,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 337,
+      "bottomY": 596,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 332,
+      "bottomY": 556,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 284,
+      "bottomY": 601,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-low-hp-sheets/elliot-before.webp": [
+    {
+      "centerX": 338,
+      "bottomY": 596,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 286,
+      "bottomY": 590,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 360,
+      "bottomY": 582,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 259,
+      "bottomY": 582,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-idle-sheets/elliot-after.webp": [
+    {
+      "centerX": 352,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 284,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 330,
+      "bottomY": 607,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 268,
+      "bottomY": 613,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-idle-special-sheets/elliot-after.webp": [
+    {
+      "centerX": 345,
+      "bottomY": 608,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 268,
+      "bottomY": 615,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 304,
+      "bottomY": 582,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 263,
+      "bottomY": 601,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-attack-sheets/elliot-after.webp": [
+    {
+      "centerX": 343,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 319,
+      "bottomY": 594,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 314,
+      "bottomY": 576,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 296,
+      "bottomY": 593,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-skill-sheets/elliot-after.webp": [
+    {
+      "centerX": 326,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 301,
+      "bottomY": 600,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 330,
+      "bottomY": 600,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 305,
+      "bottomY": 617,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-hit-sheets/elliot-after.webp": [
+    {
+      "centerX": 360,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 286,
+      "bottomY": 603,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 333,
+      "bottomY": 605,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 245,
+      "bottomY": 603,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-low-hp-sheets/elliot-after.webp": [
+    {
+      "centerX": 319,
+      "bottomY": 607,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 292,
+      "bottomY": 603,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 310,
+      "bottomY": 573,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 285,
+      "bottomY": 584,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-idle-sheets/sakuya-before.webp": [
+    {
+      "centerX": 346,
+      "bottomY": 611,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 268,
+      "bottomY": 614,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 340,
+      "bottomY": 616,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 248,
+      "bottomY": 607,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-idle-special-sheets/sakuya-before.webp": [
+    {
+      "centerX": 338,
+      "bottomY": 619,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 306,
+      "bottomY": 602,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 302,
+      "bottomY": 602,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 272,
+      "bottomY": 604,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-attack-sheets/sakuya-before.webp": [
+    {
+      "centerX": 343,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 306,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 324,
+      "bottomY": 509,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 254,
+      "bottomY": 602,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-skill-sheets/sakuya-before.webp": [
+    {
+      "centerX": 341,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 286,
+      "bottomY": 605,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 326,
+      "bottomY": 541,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 255,
+      "bottomY": 625,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-hit-sheets/sakuya-before.webp": [
+    {
+      "centerX": 343,
+      "bottomY": 615,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 300,
+      "bottomY": 596,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 336,
+      "bottomY": 603,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 289,
+      "bottomY": 598,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-low-hp-sheets/sakuya-before.webp": [
+    {
+      "centerX": 358,
+      "bottomY": 604,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 272,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 369,
+      "bottomY": 550,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 232,
+      "bottomY": 567,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-idle-sheets/sakuya-after.webp": [
+    {
+      "centerX": 360,
+      "bottomY": 614,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 283,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 352,
+      "bottomY": 605,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 280,
+      "bottomY": 611,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-idle-special-sheets/sakuya-after.webp": [
+    {
+      "centerX": 351,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 265,
+      "bottomY": 616,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 354,
+      "bottomY": 622,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 285,
+      "bottomY": 613,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-attack-sheets/sakuya-after.webp": [
+    {
+      "centerX": 351,
+      "bottomY": 622,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 293,
+      "bottomY": 568,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 319,
+      "bottomY": 519,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 266,
+      "bottomY": 562,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-skill-sheets/sakuya-after.webp": [
+    {
+      "centerX": 321,
+      "bottomY": 614,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 299,
+      "bottomY": 609,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 318,
+      "bottomY": 610,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 302,
+      "bottomY": 599,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-hit-sheets/sakuya-after.webp": [
+    {
+      "centerX": 379,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 265,
+      "bottomY": 602,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 341,
+      "bottomY": 598,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 264,
+      "bottomY": 605,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-low-hp-sheets/sakuya-after.webp": [
+    {
+      "centerX": 344,
+      "bottomY": 602,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 280,
+      "bottomY": 609,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 353,
+      "bottomY": 592,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 297,
+      "bottomY": 605,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ]
+};
+
 export const VACATION_IDLE_FRAME_ANCHORS: Record<string, VacationAnimationFrameAnchor[]> = {
   "sprites/high-school/vacation-characters-idle-sheets/0.webp": [
     {
@@ -2267,18 +8978,25 @@ export interface VacationIdleFrameTranslation {
   y: number;
 }
 
-const getIdleBaseline = (anchors: VacationAnimationFrameAnchor[] | undefined): VacationAnimationFrameAnchor | null => anchors?.[0] ?? null;
+const getIdleAssetPath = (assetPath: string): string => assetPath
+  .replace('/vacation-characters-idle-special-sheets/', '/vacation-characters-idle-sheets/')
+  .replace('/vacation-male-characters-idle-special-sheets/', '/vacation-male-characters-idle-sheets/')
+  .replace('/vacation-characters-attack-sheets/', '/vacation-characters-idle-sheets/')
+  .replace('/vacation-characters-skill-sheets/', '/vacation-characters-idle-sheets/')
+  .replace('/vacation-characters-hit-sheets/', '/vacation-characters-idle-sheets/')
+  .replace('/vacation-characters-low-hp-sheets/', '/vacation-characters-idle-sheets/')
+  .replace('/vacation-male-characters-attack-sheets/', '/vacation-male-characters-idle-sheets/')
+  .replace('/vacation-male-characters-skill-sheets/', '/vacation-male-characters-idle-sheets/')
+  .replace('/vacation-male-characters-hit-sheets/', '/vacation-male-characters-idle-sheets/')
+  .replace('/vacation-male-characters-low-hp-sheets/', '/vacation-male-characters-idle-sheets/');
 
-export const getVacationIdleFrameTranslation = (source: string | null, frameIndex: number): VacationIdleFrameTranslation | null => {
+export const getVacationAnimationFrameTranslation = (source: string | null, frameIndex: number): VacationIdleFrameTranslation | null => {
   const assetPath = getAssetPath(source);
   if (!assetPath) return null;
-  const isSpecial = assetPath.includes('/vacation-characters-idle-special-sheets/') || assetPath.includes('/vacation-male-characters-idle-special-sheets/');
-  const idleAssetPath = isSpecial
-    ? assetPath.replace('/vacation-characters-idle-special-sheets/', '/vacation-characters-idle-sheets/').replace('/vacation-male-characters-idle-special-sheets/', '/vacation-male-characters-idle-sheets/')
-    : assetPath;
+  const idleAssetPath = getIdleAssetPath(assetPath);
   const idleAnchors = VACATION_IDLE_FRAME_ANCHORS[idleAssetPath];
-  const currentAnchors = isSpecial ? VACATION_IDLE_SPECIAL_FRAME_ANCHORS[assetPath] : idleAnchors;
-  const baseline = getIdleBaseline(idleAnchors);
+  const currentAnchors = VACATION_ANIMATION_FRAME_ANCHORS[assetPath];
+  const baseline = idleAnchors?.[0];
   const current = currentAnchors?.[frameIndex];
   if (!baseline || !current) return null;
   return {
@@ -2286,3 +9004,5 @@ export const getVacationIdleFrameTranslation = (source: string | null, frameInde
     y: ((baseline.bottomY - current.bottomY) / current.cellHeight) * 100,
   };
 };
+
+export const getVacationIdleFrameTranslation = getVacationAnimationFrameTranslation;
