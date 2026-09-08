@@ -11,6 +11,7 @@ import {
 } from '../data/visualThemes';
 import type { LanguageMode } from '../types';
 import { trans } from '../utils/textUtils';
+import { getVacationIdleFrameAnchor } from '../data/vacationAnimationAnchors.generated';
 
 type AuditAction = 'idle' | BattleHeroAnimationAction;
 
@@ -77,6 +78,13 @@ const AuditStage: React.FC<AuditStageProps> = ({
     centerLabel,
 }) => {
     const framePosition = FRAME_POSITIONS[frameIndex] ?? FRAME_POSITIONS[0];
+    const idleAnchor = getVacationIdleFrameAnchor(idleSource, frameIndex);
+    const centerGuideStyle = idleAnchor
+        ? { left: `${(idleAnchor.centerX / idleAnchor.cellWidth) * 100}%` }
+        : undefined;
+    const feetGuideStyle = idleAnchor
+        ? { top: `${(idleAnchor.bottomY / idleAnchor.cellHeight) * 100}%` }
+        : undefined;
     const layerStyle = (source: string | null, opacity: number) => source ? ({
         backgroundImage: `url("${source}")`,
         backgroundSize: '200% 200%',
@@ -90,8 +98,14 @@ const AuditStage: React.FC<AuditStageProps> = ({
             aria-label="Idle reference and action frame overlay"
         >
             <div className="pointer-events-none absolute inset-0 opacity-30 [background-image:linear-gradient(rgba(148,163,184,0.16)_1px,transparent_1px),linear-gradient(90deg,rgba(148,163,184,0.16)_1px,transparent_1px)] [background-size:25%_25%]" />
-            <div className="pointer-events-none absolute inset-y-0 left-1/2 z-20 w-px bg-rose-300/70" />
-            <div className="pointer-events-none absolute inset-x-0 bottom-[13%] z-20 h-px bg-amber-300/70" />
+            <div
+                className={`pointer-events-none absolute inset-y-0 z-20 w-px bg-rose-300/70 ${idleAnchor ? '' : 'left-1/2'}`}
+                style={centerGuideStyle}
+            />
+            <div
+                className={`pointer-events-none absolute inset-x-0 z-20 h-px bg-amber-300/70 ${idleAnchor ? '' : 'bottom-[13%]'}`}
+                style={feetGuideStyle}
+            />
             {showIdle && idleSource && (
                 <div
                     className="pointer-events-none absolute inset-0 z-10 bg-contain bg-no-repeat grayscale sepia saturate-[8] hue-rotate-[300deg]"
