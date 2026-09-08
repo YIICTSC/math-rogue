@@ -10,25 +10,25 @@ export interface VacationAnimationFrameAnchor {
 export const VACATION_IDLE_FRAME_ANCHORS: Record<string, VacationAnimationFrameAnchor[]> = {
   "sprites/high-school/vacation-characters-idle-sheets/0.webp": [
     {
-      "centerX": 426,
+      "centerX": 361,
       "bottomY": 599,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 216,
+      "centerX": 240,
       "bottomY": 585,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 407,
+      "centerX": 377,
       "bottomY": 602,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 280,
+      "centerX": 244,
       "bottomY": 592,
       "cellWidth": 627,
       "cellHeight": 627
@@ -36,25 +36,25 @@ export const VACATION_IDLE_FRAME_ANCHORS: Record<string, VacationAnimationFrameA
   ],
   "sprites/high-school/vacation-characters-idle-sheets/1.webp": [
     {
-      "centerX": 317,
+      "centerX": 347,
       "bottomY": 618,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 265,
+      "centerX": 322,
       "bottomY": 615,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 318,
+      "centerX": 355,
       "bottomY": 599,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 278,
+      "centerX": 307,
       "bottomY": 599,
       "cellWidth": 627,
       "cellHeight": 627
@@ -62,25 +62,25 @@ export const VACATION_IDLE_FRAME_ANCHORS: Record<string, VacationAnimationFrameA
   ],
   "sprites/high-school/vacation-characters-idle-sheets/2.webp": [
     {
-      "centerX": 371,
+      "centerX": 377,
       "bottomY": 626,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 239,
+      "centerX": 261,
       "bottomY": 626,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 346,
+      "centerX": 384,
       "bottomY": 626,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 242,
+      "centerX": 253,
       "bottomY": 626,
       "cellWidth": 627,
       "cellHeight": 627
@@ -88,25 +88,25 @@ export const VACATION_IDLE_FRAME_ANCHORS: Record<string, VacationAnimationFrameA
   ],
   "sprites/high-school/vacation-characters-idle-sheets/3.webp": [
     {
-      "centerX": 339,
+      "centerX": 372,
       "bottomY": 619,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 277,
+      "centerX": 276,
       "bottomY": 618,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 340,
+      "centerX": 374,
       "bottomY": 619,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 241,
+      "centerX": 278,
       "bottomY": 619,
       "cellWidth": 627,
       "cellHeight": 627
@@ -114,25 +114,25 @@ export const VACATION_IDLE_FRAME_ANCHORS: Record<string, VacationAnimationFrameA
   ],
   "sprites/high-school/vacation-characters-idle-sheets/4.webp": [
     {
-      "centerX": 386,
+      "centerX": 368,
       "bottomY": 626,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 246,
+      "centerX": 276,
       "bottomY": 626,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 354,
+      "centerX": 385,
       "bottomY": 572,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 262,
+      "centerX": 258,
       "bottomY": 568,
       "cellWidth": 627,
       "cellHeight": 627
@@ -140,25 +140,25 @@ export const VACATION_IDLE_FRAME_ANCHORS: Record<string, VacationAnimationFrameA
   ],
   "sprites/high-school/vacation-characters-idle-sheets/5.webp": [
     {
-      "centerX": 401,
+      "centerX": 327,
       "bottomY": 626,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 266,
+      "centerX": 273,
       "bottomY": 626,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 394,
+      "centerX": 334,
       "bottomY": 550,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 183,
+      "centerX": 264,
       "bottomY": 541,
       "cellWidth": 627,
       "cellHeight": 627
@@ -166,25 +166,25 @@ export const VACATION_IDLE_FRAME_ANCHORS: Record<string, VacationAnimationFrameA
   ],
   "sprites/high-school/vacation-characters-idle-sheets/6.webp": [
     {
-      "centerX": 355,
+      "centerX": 360,
       "bottomY": 593,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 221,
+      "centerX": 256,
       "bottomY": 626,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 353,
+      "centerX": 341,
       "bottomY": 603,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 259,
+      "centerX": 261,
       "bottomY": 603,
       "cellWidth": 627,
       "cellHeight": 627
@@ -192,25 +192,25 @@ export const VACATION_IDLE_FRAME_ANCHORS: Record<string, VacationAnimationFrameA
   ],
   "sprites/high-school/vacation-characters-idle-sheets/7.webp": [
     {
-      "centerX": 432,
+      "centerX": 351,
       "bottomY": 594,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 304,
+      "centerX": 285,
       "bottomY": 595,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 442,
+      "centerX": 357,
       "bottomY": 599,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 368,
+      "centerX": 283,
       "bottomY": 594,
       "cellWidth": 627,
       "cellHeight": 627
@@ -218,25 +218,25 @@ export const VACATION_IDLE_FRAME_ANCHORS: Record<string, VacationAnimationFrameA
   ],
   "sprites/high-school/vacation-characters-idle-sheets/8.webp": [
     {
-      "centerX": 345,
+      "centerX": 332,
       "bottomY": 626,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 244,
+      "centerX": 255,
       "bottomY": 601,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 355,
+      "centerX": 342,
       "bottomY": 608,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 256,
+      "centerX": 253,
       "bottomY": 590,
       "cellWidth": 627,
       "cellHeight": 627
@@ -244,25 +244,25 @@ export const VACATION_IDLE_FRAME_ANCHORS: Record<string, VacationAnimationFrameA
   ],
   "sprites/magic/vacation-characters-idle-sheets/heroine-01-before.webp": [
     {
-      "centerX": 438,
+      "centerX": 338,
       "bottomY": 626,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 244,
+      "centerX": 271,
       "bottomY": 588,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 340,
+      "centerX": 341,
       "bottomY": 586,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 371,
+      "centerX": 272,
       "bottomY": 591,
       "cellWidth": 627,
       "cellHeight": 627
@@ -270,25 +270,25 @@ export const VACATION_IDLE_FRAME_ANCHORS: Record<string, VacationAnimationFrameA
   ],
   "sprites/magic/vacation-characters-idle-sheets/heroine-01-after.webp": [
     {
-      "centerX": 449,
+      "centerX": 346,
       "bottomY": 626,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 298,
+      "centerX": 282,
       "bottomY": 626,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 350,
+      "centerX": 353,
       "bottomY": 608,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 380,
+      "centerX": 278,
       "bottomY": 612,
       "cellWidth": 627,
       "cellHeight": 627
@@ -296,25 +296,25 @@ export const VACATION_IDLE_FRAME_ANCHORS: Record<string, VacationAnimationFrameA
   ],
   "sprites/magic/vacation-characters-idle-sheets/heroine-02-before.webp": [
     {
-      "centerX": 394,
+      "centerX": 361,
       "bottomY": 593,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 272,
+      "centerX": 286,
       "bottomY": 597,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 360,
+      "centerX": 357,
       "bottomY": 595,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 316,
+      "centerX": 284,
       "bottomY": 583,
       "cellWidth": 627,
       "cellHeight": 627
@@ -322,25 +322,25 @@ export const VACATION_IDLE_FRAME_ANCHORS: Record<string, VacationAnimationFrameA
   ],
   "sprites/magic/vacation-characters-idle-sheets/heroine-02-after.webp": [
     {
-      "centerX": 333,
+      "centerX": 339,
       "bottomY": 600,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 271,
+      "centerX": 281,
       "bottomY": 617,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 342,
+      "centerX": 351,
       "bottomY": 596,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 271,
+      "centerX": 277,
       "bottomY": 574,
       "cellWidth": 627,
       "cellHeight": 627
@@ -348,25 +348,25 @@ export const VACATION_IDLE_FRAME_ANCHORS: Record<string, VacationAnimationFrameA
   ],
   "sprites/magic/vacation-characters-idle-sheets/heroine-03-before.webp": [
     {
-      "centerX": 367,
+      "centerX": 370,
       "bottomY": 591,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 249,
+      "centerX": 256,
       "bottomY": 592,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 380,
+      "centerX": 373,
       "bottomY": 594,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 238,
+      "centerX": 249,
       "bottomY": 581,
       "cellWidth": 627,
       "cellHeight": 627
@@ -374,25 +374,25 @@ export const VACATION_IDLE_FRAME_ANCHORS: Record<string, VacationAnimationFrameA
   ],
   "sprites/magic/vacation-characters-idle-sheets/heroine-03-after.webp": [
     {
-      "centerX": 343,
+      "centerX": 341,
       "bottomY": 613,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 211,
+      "centerX": 263,
       "bottomY": 609,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 334,
+      "centerX": 347,
       "bottomY": 605,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 254,
+      "centerX": 263,
       "bottomY": 610,
       "cellWidth": 627,
       "cellHeight": 627
@@ -400,25 +400,25 @@ export const VACATION_IDLE_FRAME_ANCHORS: Record<string, VacationAnimationFrameA
   ],
   "sprites/magic/vacation-characters-idle-sheets/heroine-04-before.webp": [
     {
-      "centerX": 276,
+      "centerX": 320,
       "bottomY": 600,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 340,
+      "centerX": 301,
       "bottomY": 626,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 303,
+      "centerX": 319,
       "bottomY": 605,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 267,
+      "centerX": 293,
       "bottomY": 606,
       "cellWidth": 627,
       "cellHeight": 627
@@ -426,25 +426,25 @@ export const VACATION_IDLE_FRAME_ANCHORS: Record<string, VacationAnimationFrameA
   ],
   "sprites/magic/vacation-characters-idle-sheets/heroine-04-after.webp": [
     {
-      "centerX": 193,
+      "centerX": 323,
       "bottomY": 616,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 274,
+      "centerX": 271,
       "bottomY": 600,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 276,
+      "centerX": 345,
       "bottomY": 602,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 154,
+      "centerX": 284,
       "bottomY": 599,
       "cellWidth": 627,
       "cellHeight": 627
@@ -452,25 +452,25 @@ export const VACATION_IDLE_FRAME_ANCHORS: Record<string, VacationAnimationFrameA
   ],
   "sprites/magic/vacation-characters-idle-sheets/heroine-05-before.webp": [
     {
-      "centerX": 332,
+      "centerX": 346,
       "bottomY": 626,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 261,
+      "centerX": 277,
       "bottomY": 607,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 337,
+      "centerX": 353,
       "bottomY": 608,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 265,
+      "centerX": 272,
       "bottomY": 588,
       "cellWidth": 627,
       "cellHeight": 627
@@ -478,25 +478,25 @@ export const VACATION_IDLE_FRAME_ANCHORS: Record<string, VacationAnimationFrameA
   ],
   "sprites/magic/vacation-characters-idle-sheets/heroine-05-after.webp": [
     {
-      "centerX": 316,
+      "centerX": 338,
       "bottomY": 626,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 217,
+      "centerX": 262,
       "bottomY": 586,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 314,
+      "centerX": 355,
       "bottomY": 585,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 248,
+      "centerX": 263,
       "bottomY": 563,
       "cellWidth": 627,
       "cellHeight": 627
@@ -504,25 +504,25 @@ export const VACATION_IDLE_FRAME_ANCHORS: Record<string, VacationAnimationFrameA
   ],
   "sprites/magic/vacation-characters-idle-sheets/heroine-06-before.webp": [
     {
-      "centerX": 349,
+      "centerX": 356,
       "bottomY": 626,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 250,
+      "centerX": 282,
       "bottomY": 626,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 307,
+      "centerX": 343,
       "bottomY": 566,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 258,
+      "centerX": 269,
       "bottomY": 566,
       "cellWidth": 627,
       "cellHeight": 627
@@ -530,25 +530,25 @@ export const VACATION_IDLE_FRAME_ANCHORS: Record<string, VacationAnimationFrameA
   ],
   "sprites/magic/vacation-characters-idle-sheets/heroine-06-after.webp": [
     {
-      "centerX": 347,
+      "centerX": 359,
       "bottomY": 626,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 231,
+      "centerX": 293,
       "bottomY": 626,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 312,
+      "centerX": 340,
       "bottomY": 591,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 247,
+      "centerX": 290,
       "bottomY": 561,
       "cellWidth": 627,
       "cellHeight": 627
@@ -556,25 +556,25 @@ export const VACATION_IDLE_FRAME_ANCHORS: Record<string, VacationAnimationFrameA
   ],
   "sprites/magic/vacation-characters-idle-sheets/heroine-07-before.webp": [
     {
-      "centerX": 366,
+      "centerX": 345,
       "bottomY": 609,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 219,
+      "centerX": 289,
       "bottomY": 626,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 375,
+      "centerX": 326,
       "bottomY": 573,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 305,
+      "centerX": 284,
       "bottomY": 585,
       "cellWidth": 627,
       "cellHeight": 627
@@ -582,25 +582,25 @@ export const VACATION_IDLE_FRAME_ANCHORS: Record<string, VacationAnimationFrameA
   ],
   "sprites/magic/vacation-characters-idle-sheets/heroine-07-after.webp": [
     {
-      "centerX": 433,
+      "centerX": 328,
       "bottomY": 626,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 282,
+      "centerX": 310,
       "bottomY": 585,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 298,
+      "centerX": 329,
       "bottomY": 580,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 409,
+      "centerX": 315,
       "bottomY": 585,
       "cellWidth": 627,
       "cellHeight": 627
@@ -608,19 +608,19 @@ export const VACATION_IDLE_FRAME_ANCHORS: Record<string, VacationAnimationFrameA
   ],
   "sprites/magic/vacation-characters-idle-sheets/heroine-08-before.webp": [
     {
-      "centerX": 374,
+      "centerX": 355,
       "bottomY": 626,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 290,
+      "centerX": 280,
       "bottomY": 626,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 316,
+      "centerX": 334,
       "bottomY": 594,
       "cellWidth": 627,
       "cellHeight": 627
@@ -634,25 +634,25 @@ export const VACATION_IDLE_FRAME_ANCHORS: Record<string, VacationAnimationFrameA
   ],
   "sprites/magic/vacation-characters-idle-sheets/heroine-08-after.webp": [
     {
-      "centerX": 373,
+      "centerX": 331,
       "bottomY": 626,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 263,
+      "centerX": 266,
       "bottomY": 626,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 322,
+      "centerX": 336,
       "bottomY": 616,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 274,
+      "centerX": 276,
       "bottomY": 621,
       "cellWidth": 627,
       "cellHeight": 627
@@ -666,19 +666,19 @@ export const VACATION_IDLE_FRAME_ANCHORS: Record<string, VacationAnimationFrameA
       "cellHeight": 627
     },
     {
-      "centerX": 300,
+      "centerX": 285,
       "bottomY": 598,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 326,
+      "centerX": 328,
       "bottomY": 585,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 295,
+      "centerX": 293,
       "bottomY": 583,
       "cellWidth": 627,
       "cellHeight": 627
@@ -692,19 +692,19 @@ export const VACATION_IDLE_FRAME_ANCHORS: Record<string, VacationAnimationFrameA
       "cellHeight": 627
     },
     {
-      "centerX": 237,
+      "centerX": 302,
       "bottomY": 608,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 347,
+      "centerX": 335,
       "bottomY": 590,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 293,
+      "centerX": 305,
       "bottomY": 591,
       "cellWidth": 627,
       "cellHeight": 627
@@ -712,25 +712,25 @@ export const VACATION_IDLE_FRAME_ANCHORS: Record<string, VacationAnimationFrameA
   ],
   "sprites/magic/vacation-male-characters-idle-sheets/ren-before.webp": [
     {
-      "centerX": 260,
+      "centerX": 365,
       "bottomY": 626,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 189,
+      "centerX": 302,
       "bottomY": 619,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 272,
+      "centerX": 363,
       "bottomY": 609,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 228,
+      "centerX": 340,
       "bottomY": 615,
       "cellWidth": 627,
       "cellHeight": 627
@@ -738,25 +738,25 @@ export const VACATION_IDLE_FRAME_ANCHORS: Record<string, VacationAnimationFrameA
   ],
   "sprites/magic/vacation-male-characters-idle-sheets/ren-after.webp": [
     {
-      "centerX": 269,
+      "centerX": 306,
       "bottomY": 626,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 365,
+      "centerX": 284,
       "bottomY": 619,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 383,
+      "centerX": 349,
       "bottomY": 614,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 224,
+      "centerX": 290,
       "bottomY": 614,
       "cellWidth": 627,
       "cellHeight": 627
@@ -764,25 +764,25 @@ export const VACATION_IDLE_FRAME_ANCHORS: Record<string, VacationAnimationFrameA
   ],
   "sprites/magic/vacation-male-characters-idle-sheets/soma-before.webp": [
     {
-      "centerX": 327,
+      "centerX": 328,
       "bottomY": 626,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 307,
+      "centerX": 292,
       "bottomY": 621,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 362,
+      "centerX": 344,
       "bottomY": 606,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 270,
+      "centerX": 287,
       "bottomY": 626,
       "cellWidth": 627,
       "cellHeight": 627
@@ -790,25 +790,25 @@ export const VACATION_IDLE_FRAME_ANCHORS: Record<string, VacationAnimationFrameA
   ],
   "sprites/magic/vacation-male-characters-idle-sheets/soma-after.webp": [
     {
-      "centerX": 330,
+      "centerX": 357,
       "bottomY": 626,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 249,
+      "centerX": 259,
       "bottomY": 603,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 336,
+      "centerX": 340,
       "bottomY": 617,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 243,
+      "centerX": 274,
       "bottomY": 610,
       "cellWidth": 627,
       "cellHeight": 627
@@ -816,25 +816,25 @@ export const VACATION_IDLE_FRAME_ANCHORS: Record<string, VacationAnimationFrameA
   ],
   "sprites/magic/vacation-male-characters-idle-sheets/minato-before.webp": [
     {
-      "centerX": 400,
+      "centerX": 368,
       "bottomY": 626,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 229,
+      "centerX": 300,
       "bottomY": 626,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 408,
+      "centerX": 364,
       "bottomY": 605,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 320,
+      "centerX": 288,
       "bottomY": 612,
       "cellWidth": 627,
       "cellHeight": 627
@@ -842,25 +842,25 @@ export const VACATION_IDLE_FRAME_ANCHORS: Record<string, VacationAnimationFrameA
   ],
   "sprites/magic/vacation-male-characters-idle-sheets/minato-after.webp": [
     {
-      "centerX": 388,
+      "centerX": 346,
       "bottomY": 610,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 303,
+      "centerX": 295,
       "bottomY": 577,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 367,
+      "centerX": 351,
       "bottomY": 599,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 349,
+      "centerX": 291,
       "bottomY": 602,
       "cellWidth": 627,
       "cellHeight": 627
@@ -868,25 +868,25 @@ export const VACATION_IDLE_FRAME_ANCHORS: Record<string, VacationAnimationFrameA
   ],
   "sprites/magic/vacation-male-characters-idle-sheets/riku-before.webp": [
     {
-      "centerX": 379,
+      "centerX": 388,
       "bottomY": 596,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 242,
+      "centerX": 276,
       "bottomY": 596,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 337,
+      "centerX": 367,
       "bottomY": 595,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 236,
+      "centerX": 250,
       "bottomY": 592,
       "cellWidth": 627,
       "cellHeight": 627
@@ -894,25 +894,25 @@ export const VACATION_IDLE_FRAME_ANCHORS: Record<string, VacationAnimationFrameA
   ],
   "sprites/magic/vacation-male-characters-idle-sheets/riku-after.webp": [
     {
-      "centerX": 345,
+      "centerX": 352,
       "bottomY": 626,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 264,
+      "centerX": 290,
       "bottomY": 626,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 350,
+      "centerX": 347,
       "bottomY": 625,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 276,
+      "centerX": 285,
       "bottomY": 620,
       "cellWidth": 627,
       "cellHeight": 627
@@ -920,25 +920,25 @@ export const VACATION_IDLE_FRAME_ANCHORS: Record<string, VacationAnimationFrameA
   ],
   "sprites/magic/vacation-male-characters-idle-sheets/yamato-before.webp": [
     {
-      "centerX": 379,
+      "centerX": 354,
       "bottomY": 626,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 230,
+      "centerX": 256,
       "bottomY": 612,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 390,
+      "centerX": 352,
       "bottomY": 596,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 304,
+      "centerX": 256,
       "bottomY": 601,
       "cellWidth": 627,
       "cellHeight": 627
@@ -946,25 +946,25 @@ export const VACATION_IDLE_FRAME_ANCHORS: Record<string, VacationAnimationFrameA
   ],
   "sprites/magic/vacation-male-characters-idle-sheets/yamato-after.webp": [
     {
-      "centerX": 379,
+      "centerX": 333,
       "bottomY": 582,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 301,
+      "centerX": 274,
       "bottomY": 580,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 362,
+      "centerX": 320,
       "bottomY": 590,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 329,
+      "centerX": 287,
       "bottomY": 583,
       "cellWidth": 627,
       "cellHeight": 627
@@ -972,25 +972,25 @@ export const VACATION_IDLE_FRAME_ANCHORS: Record<string, VacationAnimationFrameA
   ],
   "sprites/magic/vacation-male-characters-idle-sheets/leon-before.webp": [
     {
-      "centerX": 360,
+      "centerX": 373,
       "bottomY": 606,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 252,
+      "centerX": 274,
       "bottomY": 610,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 341,
+      "centerX": 345,
       "bottomY": 603,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 266,
+      "centerX": 275,
       "bottomY": 598,
       "cellWidth": 627,
       "cellHeight": 627
@@ -998,25 +998,25 @@ export const VACATION_IDLE_FRAME_ANCHORS: Record<string, VacationAnimationFrameA
   ],
   "sprites/magic/vacation-male-characters-idle-sheets/leon-after.webp": [
     {
-      "centerX": 321,
+      "centerX": 356,
       "bottomY": 591,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 252,
+      "centerX": 277,
       "bottomY": 585,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 309,
+      "centerX": 327,
       "bottomY": 580,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 241,
+      "centerX": 270,
       "bottomY": 583,
       "cellWidth": 627,
       "cellHeight": 627
@@ -1024,25 +1024,25 @@ export const VACATION_IDLE_FRAME_ANCHORS: Record<string, VacationAnimationFrameA
   ],
   "sprites/magic/vacation-male-characters-idle-sheets/elliot-before.webp": [
     {
-      "centerX": 325,
+      "centerX": 332,
       "bottomY": 604,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 251,
+      "centerX": 249,
       "bottomY": 602,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 331,
+      "centerX": 334,
       "bottomY": 595,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 241,
+      "centerX": 250,
       "bottomY": 592,
       "cellWidth": 627,
       "cellHeight": 627
@@ -1056,19 +1056,19 @@ export const VACATION_IDLE_FRAME_ANCHORS: Record<string, VacationAnimationFrameA
       "cellHeight": 627
     },
     {
-      "centerX": 278,
+      "centerX": 284,
       "bottomY": 626,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 346,
+      "centerX": 330,
       "bottomY": 607,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 257,
+      "centerX": 268,
       "bottomY": 613,
       "cellWidth": 627,
       "cellHeight": 627
@@ -1076,25 +1076,25 @@ export const VACATION_IDLE_FRAME_ANCHORS: Record<string, VacationAnimationFrameA
   ],
   "sprites/magic/vacation-male-characters-idle-sheets/sakuya-before.webp": [
     {
-      "centerX": 318,
+      "centerX": 346,
       "bottomY": 611,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 224,
+      "centerX": 268,
       "bottomY": 614,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 316,
+      "centerX": 340,
       "bottomY": 616,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 220,
+      "centerX": 248,
       "bottomY": 607,
       "cellWidth": 627,
       "cellHeight": 627
@@ -1102,8 +1102,479 @@ export const VACATION_IDLE_FRAME_ANCHORS: Record<string, VacationAnimationFrameA
   ],
   "sprites/magic/vacation-male-characters-idle-sheets/sakuya-after.webp": [
     {
-      "centerX": 335,
+      "centerX": 360,
       "bottomY": 614,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 283,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 352,
+      "bottomY": 605,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 280,
+      "bottomY": 611,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ]
+};
+
+export const VACATION_IDLE_SPECIAL_FRAME_ANCHORS: Record<string, VacationAnimationFrameAnchor[]> = {
+  "sprites/high-school/vacation-characters-idle-special-sheets/0.webp": [
+    {
+      "centerX": 368,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 248,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 333,
+      "bottomY": 607,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 285,
+      "bottomY": 591,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/high-school/vacation-characters-idle-special-sheets/1.webp": [
+    {
+      "centerX": 418,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 229,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 402,
+      "bottomY": 621,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 182,
+      "bottomY": 611,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/high-school/vacation-characters-idle-special-sheets/2.webp": [
+    {
+      "centerX": 368,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 273,
+      "bottomY": 594,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 375,
+      "bottomY": 618,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 253,
+      "bottomY": 587,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/high-school/vacation-characters-idle-special-sheets/3.webp": [
+    {
+      "centerX": 360,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 252,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 372,
+      "bottomY": 621,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 237,
+      "bottomY": 619,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/high-school/vacation-characters-idle-special-sheets/4.webp": [
+    {
+      "centerX": 386,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 250,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 413,
+      "bottomY": 578,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 208,
+      "bottomY": 568,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/high-school/vacation-characters-idle-special-sheets/5.webp": [
+    {
+      "centerX": 359,
+      "bottomY": 606,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 264,
+      "bottomY": 612,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 331,
+      "bottomY": 580,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 269,
+      "bottomY": 578,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/high-school/vacation-characters-idle-special-sheets/6.webp": [
+    {
+      "centerX": 371,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 265,
+      "bottomY": 610,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 377,
+      "bottomY": 607,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 226,
+      "bottomY": 606,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/high-school/vacation-characters-idle-special-sheets/7.webp": [
+    {
+      "centerX": 364,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 262,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 375,
+      "bottomY": 612,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 264,
+      "bottomY": 614,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/high-school/vacation-characters-idle-special-sheets/8.webp": [
+    {
+      "centerX": 362,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 275,
+      "bottomY": 620,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 370,
+      "bottomY": 606,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 271,
+      "bottomY": 611,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-idle-special-sheets/heroine-01-before.webp": [
+    {
+      "centerX": 315,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 311,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 291,
+      "bottomY": 624,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 314,
+      "bottomY": 620,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-idle-special-sheets/heroine-01-after.webp": [
+    {
+      "centerX": 350,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 285,
+      "bottomY": 610,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 351,
+      "bottomY": 614,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 268,
+      "bottomY": 605,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-idle-special-sheets/heroine-02-before.webp": [
+    {
+      "centerX": 381,
+      "bottomY": 594,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 201,
+      "bottomY": 580,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 382,
+      "bottomY": 574,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 270,
+      "bottomY": 591,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-idle-special-sheets/heroine-02-after.webp": [
+    {
+      "centerX": 357,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 296,
+      "bottomY": 605,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 349,
+      "bottomY": 591,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 288,
+      "bottomY": 593,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-idle-special-sheets/heroine-03-before.webp": [
+    {
+      "centerX": 310,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 247,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 368,
+      "bottomY": 603,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 242,
+      "bottomY": 610,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-idle-special-sheets/heroine-03-after.webp": [
+    {
+      "centerX": 397,
+      "bottomY": 618,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 272,
+      "bottomY": 610,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 373,
+      "bottomY": 604,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 279,
+      "bottomY": 599,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-idle-special-sheets/heroine-04-before.webp": [
+    {
+      "centerX": 370,
+      "bottomY": 587,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 299,
+      "bottomY": 585,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 332,
+      "bottomY": 577,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 307,
+      "bottomY": 591,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-idle-special-sheets/heroine-04-after.webp": [
+    {
+      "centerX": 372,
+      "bottomY": 600,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 273,
+      "bottomY": 584,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 347,
+      "bottomY": 602,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 319,
+      "bottomY": 601,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-idle-special-sheets/heroine-05-before.webp": [
+    {
+      "centerX": 335,
+      "bottomY": 626,
       "cellWidth": 627,
       "cellHeight": 627
     },
@@ -1114,14 +1585,664 @@ export const VACATION_IDLE_FRAME_ANCHORS: Record<string, VacationAnimationFrameA
       "cellHeight": 627
     },
     {
-      "centerX": 357,
+      "centerX": 325,
+      "bottomY": 583,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 244,
+      "bottomY": 557,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-idle-special-sheets/heroine-05-after.webp": [
+    {
+      "centerX": 354,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 295,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 346,
+      "bottomY": 608,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 274,
+      "bottomY": 578,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-idle-special-sheets/heroine-06-before.webp": [
+    {
+      "centerX": 330,
+      "bottomY": 597,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 327,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 352,
+      "bottomY": 591,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 293,
+      "bottomY": 582,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-idle-special-sheets/heroine-06-after.webp": [
+    {
+      "centerX": 383,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 283,
+      "bottomY": 594,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 342,
+      "bottomY": 578,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 274,
+      "bottomY": 585,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-idle-special-sheets/heroine-07-before.webp": [
+    {
+      "centerX": 308,
+      "bottomY": 608,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 300,
+      "bottomY": 611,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 307,
       "bottomY": 605,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 251,
-      "bottomY": 611,
+      "centerX": 304,
+      "bottomY": 600,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-idle-special-sheets/heroine-07-after.webp": [
+    {
+      "centerX": 324,
+      "bottomY": 587,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 309,
+      "bottomY": 610,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 329,
+      "bottomY": 588,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 304,
+      "bottomY": 585,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-idle-special-sheets/heroine-08-before.webp": [
+    {
+      "centerX": 359,
+      "bottomY": 618,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 260,
+      "bottomY": 619,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 309,
+      "bottomY": 588,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 244,
+      "bottomY": 567,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-idle-special-sheets/heroine-08-after.webp": [
+    {
+      "centerX": 326,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 309,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 326,
+      "bottomY": 558,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 299,
+      "bottomY": 573,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-idle-special-sheets/heroine-09-before.webp": [
+    {
+      "centerX": 384,
+      "bottomY": 598,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 256,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 326,
+      "bottomY": 602,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 263,
+      "bottomY": 601,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-characters-idle-special-sheets/heroine-09-after.webp": [
+    {
+      "centerX": 357,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 270,
+      "bottomY": 574,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 352,
+      "bottomY": 593,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 286,
+      "bottomY": 570,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-idle-special-sheets/ren-before.webp": [
+    {
+      "centerX": 339,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 302,
+      "bottomY": 589,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 334,
+      "bottomY": 540,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 308,
+      "bottomY": 595,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-idle-special-sheets/ren-after.webp": [
+    {
+      "centerX": 322,
+      "bottomY": 600,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 269,
+      "bottomY": 594,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 329,
+      "bottomY": 557,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 296,
+      "bottomY": 572,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-idle-special-sheets/soma-before.webp": [
+    {
+      "centerX": 367,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 268,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 342,
+      "bottomY": 598,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 246,
+      "bottomY": 598,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-idle-special-sheets/soma-after.webp": [
+    {
+      "centerX": 358,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 275,
+      "bottomY": 623,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 342,
+      "bottomY": 617,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 246,
+      "bottomY": 624,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-idle-special-sheets/minato-before.webp": [
+    {
+      "centerX": 329,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 284,
+      "bottomY": 597,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 320,
+      "bottomY": 612,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 265,
+      "bottomY": 585,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-idle-special-sheets/minato-after.webp": [
+    {
+      "centerX": 354,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 308,
+      "bottomY": 597,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 354,
+      "bottomY": 615,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 254,
+      "bottomY": 620,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-idle-special-sheets/riku-before.webp": [
+    {
+      "centerX": 388,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 235,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 360,
+      "bottomY": 582,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 236,
+      "bottomY": 603,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-idle-special-sheets/riku-after.webp": [
+    {
+      "centerX": 337,
+      "bottomY": 623,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 299,
+      "bottomY": 606,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 342,
+      "bottomY": 599,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 270,
+      "bottomY": 596,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-idle-special-sheets/yamato-before.webp": [
+    {
+      "centerX": 353,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 270,
+      "bottomY": 600,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 344,
+      "bottomY": 592,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 257,
+      "bottomY": 569,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-idle-special-sheets/yamato-after.webp": [
+    {
+      "centerX": 332,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 262,
+      "bottomY": 615,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 317,
+      "bottomY": 593,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 300,
+      "bottomY": 594,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-idle-special-sheets/leon-before.webp": [
+    {
+      "centerX": 375,
+      "bottomY": 581,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 277,
+      "bottomY": 600,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 353,
+      "bottomY": 603,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 239,
+      "bottomY": 557,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-idle-special-sheets/leon-after.webp": [
+    {
+      "centerX": 340,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 291,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 358,
+      "bottomY": 621,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 249,
+      "bottomY": 617,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-idle-special-sheets/elliot-before.webp": [
+    {
+      "centerX": 347,
+      "bottomY": 623,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 287,
+      "bottomY": 613,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 327,
+      "bottomY": 585,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 242,
+      "bottomY": 574,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-idle-special-sheets/elliot-after.webp": [
+    {
+      "centerX": 345,
+      "bottomY": 608,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 268,
+      "bottomY": 615,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 304,
+      "bottomY": 582,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 263,
+      "bottomY": 601,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-idle-special-sheets/sakuya-before.webp": [
+    {
+      "centerX": 338,
+      "bottomY": 619,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 306,
+      "bottomY": 602,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 302,
+      "bottomY": 602,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 272,
+      "bottomY": 604,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-idle-special-sheets/sakuya-after.webp": [
+    {
+      "centerX": 351,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 265,
+      "bottomY": 616,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 354,
+      "bottomY": 622,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 285,
+      "bottomY": 613,
       "cellWidth": 627,
       "cellHeight": 627
     }
@@ -1139,4 +2260,41 @@ const getAssetPath = (source: string | null): string | null => {
 export const getVacationIdleFrameAnchor = (source: string | null, frameIndex: number): VacationAnimationFrameAnchor | null => {
   const anchors = getAssetPath(source) ? VACATION_IDLE_FRAME_ANCHORS[getAssetPath(source)!] : undefined;
   return anchors?.[frameIndex] ?? null;
+};
+
+export interface VacationIdleFrameTranslation {
+  x: number;
+  y: number;
+}
+
+const getIdleBaseline = (anchors: VacationAnimationFrameAnchor[] | undefined): VacationAnimationFrameAnchor | null => {
+  if (!anchors?.length) return null;
+  const median = (values: number[]) => {
+    const sorted = [...values].sort((a, b) => a - b);
+    return sorted[Math.floor(sorted.length / 2)] ?? 0;
+  };
+  return {
+    centerX: median(anchors.map(anchor => anchor.centerX)),
+    bottomY: median(anchors.map(anchor => anchor.bottomY)),
+    cellWidth: anchors[0].cellWidth,
+    cellHeight: anchors[0].cellHeight,
+  };
+};
+
+export const getVacationIdleFrameTranslation = (source: string | null, frameIndex: number): VacationIdleFrameTranslation | null => {
+  const assetPath = getAssetPath(source);
+  if (!assetPath) return null;
+  const isSpecial = assetPath.includes('/vacation-characters-idle-special-sheets/') || assetPath.includes('/vacation-male-characters-idle-special-sheets/');
+  const idleAssetPath = isSpecial
+    ? assetPath.replace('/vacation-characters-idle-special-sheets/', '/vacation-characters-idle-sheets/').replace('/vacation-male-characters-idle-special-sheets/', '/vacation-male-characters-idle-sheets/')
+    : assetPath;
+  const idleAnchors = VACATION_IDLE_FRAME_ANCHORS[idleAssetPath];
+  const currentAnchors = isSpecial ? VACATION_IDLE_SPECIAL_FRAME_ANCHORS[assetPath] : idleAnchors;
+  const baseline = getIdleBaseline(idleAnchors);
+  const current = currentAnchors?.[frameIndex];
+  if (!baseline || !current) return null;
+  return {
+    x: ((baseline.centerX - current.centerX) / current.cellWidth) * 100,
+    y: ((baseline.bottomY - current.bottomY) / current.cellHeight) * 100,
+  };
 };

@@ -7,29 +7,39 @@ const sprites = path.join(root, 'public', 'sprites');
 const outputPath = path.join(root, 'src', 'data', 'vacationAnimationAnchors.generated.ts');
 const subjects = [];
 
+const addSubject = (assetPath, filePath, specialAssetPath, specialFilePath) => {
+  subjects.push({ assetPath, filePath, specialAssetPath, specialFilePath });
+};
+
 for (let index = 0; index < 9; index += 1) {
-  subjects.push({
-    assetPath: `sprites/high-school/vacation-characters-idle-sheets/${index}.webp`,
-    filePath: path.join(sprites, 'high-school', 'vacation-characters-idle-sheets', `${index}.webp`),
-  });
+  addSubject(
+    `sprites/high-school/vacation-characters-idle-sheets/${index}.webp`,
+    path.join(sprites, 'high-school', 'vacation-characters-idle-sheets', `${index}.webp`),
+    `sprites/high-school/vacation-characters-idle-special-sheets/${index}.webp`,
+    path.join(sprites, 'high-school', 'vacation-characters-idle-special-sheets', `${index}.webp`),
+  );
 }
 
 for (let index = 1; index <= 9; index += 1) {
   const heroine = `heroine-${String(index).padStart(2, '0')}`;
   for (const form of ['before', 'after']) {
-    subjects.push({
-      assetPath: `sprites/magic/vacation-characters-idle-sheets/${heroine}-${form}.webp`,
-      filePath: path.join(sprites, 'magic', 'vacation-characters-idle-sheets', `${heroine}-${form}.webp`),
-    });
+    addSubject(
+      `sprites/magic/vacation-characters-idle-sheets/${heroine}-${form}.webp`,
+      path.join(sprites, 'magic', 'vacation-characters-idle-sheets', `${heroine}-${form}.webp`),
+      `sprites/magic/vacation-characters-idle-special-sheets/${heroine}-${form}.webp`,
+      path.join(sprites, 'magic', 'vacation-characters-idle-special-sheets', `${heroine}-${form}.webp`),
+    );
   }
 }
 
 for (const subject of ['ren', 'soma', 'minato', 'riku', 'yamato', 'leon', 'elliot', 'sakuya']) {
   for (const form of ['before', 'after']) {
-    subjects.push({
-      assetPath: `sprites/magic/vacation-male-characters-idle-sheets/${subject}-${form}.webp`,
-      filePath: path.join(sprites, 'magic', 'vacation-male-characters-idle-sheets', `${subject}-${form}.webp`),
-    });
+    addSubject(
+      `sprites/magic/vacation-male-characters-idle-sheets/${subject}-${form}.webp`,
+      path.join(sprites, 'magic', 'vacation-male-characters-idle-sheets', `${subject}-${form}.webp`),
+      `sprites/magic/vacation-male-characters-idle-special-sheets/${subject}-${form}.webp`,
+      path.join(sprites, 'magic', 'vacation-male-characters-idle-special-sheets', `${subject}-${form}.webp`),
+    );
   }
 }
 
@@ -42,11 +52,15 @@ const findAnchor = (data, info, frame) => {
   const yOffset = Math.floor(frame / 2) * cellHeight;
   const alphaAt = (x, y) => data[((yOffset + y) * info.width + xOffset + x) * 4 + 3];
   let maxY = 0;
+  let minX = cellWidth;
+  let maxX = -1;
   let opaquePixelCount = 0;
 
   for (let y = 0; y < cellHeight; y += 1) {
     for (let x = 0; x < cellWidth; x += 1) {
       if (alphaAt(x, y) <= 8) continue;
+      minX = Math.min(minX, x);
+      maxX = Math.max(maxX, x);
       maxY = Math.max(maxY, y);
       opaquePixelCount += 1;
     }
@@ -54,37 +68,26 @@ const findAnchor = (data, info, frame) => {
 
   if (opaquePixelCount === 0) return null;
 
-  const bandStart = Math.max(0, maxY - Math.max(32, Math.round(cellHeight * 0.1)));
-  const histogram = new Uint32Array(cellWidth);
-  let bandOpaquePixelCount = 0;
-  for (let y = bandStart; y <= maxY; y += 1) {
-    for (let x = 0; x < cellWidth; x += 1) {
-      if (alphaAt(x, y) <= 8) continue;
-      histogram[x] += 1;
-      bandOpaquePixelCount += 1;
-    }
-  }
-
-  const histogramTotal = bandOpaquePixelCount > 0 ? bandOpaquePixelCount : opaquePixelCount;
-  let cumulative = 0;
-  let centerX = Math.floor(cellWidth / 2);
-  for (let x = 0; x < cellWidth; x += 1) {
-    cumulative += histogram[x];
-    if (cumulative * 2 >= histogramTotal) {
-      centerX = x;
-      break;
-    }
-  }
-
-  return { centerX, bottomY: maxY, cellWidth, cellHeight };
+  return { centerX: Math.round((minX + maxX) / 2), bottomY: maxY, cellWidth, cellHeight };
 };
 
 const entries = {};
+const specialEntries = {};
 for (const subject of subjects) {
   const raw = await readRaw(subject.filePath);
   const anchors = Array.from({ length: 4 }, (_, frame) => findAnchor(raw.data, raw.info, frame));
   if (anchors.every(Boolean)) {
     entries[subject.assetPath] = anchors.map(anchor => ({
+      centerX: anchor.centerX,
+      bottomY: anchor.bottomY,
+      cellWidth: anchor.cellWidth,
+      cellHeight: anchor.cellHeight,
+    }));
+  }
+  const specialRaw = await readRaw(subject.specialFilePath);
+  const specialAnchors = Array.from({ length: 4 }, (_, frame) => findAnchor(specialRaw.data, specialRaw.info, frame));
+  if (specialAnchors.every(Boolean)) {
+    specialEntries[subject.specialAssetPath] = specialAnchors.map(anchor => ({
       centerX: anchor.centerX,
       bottomY: anchor.bottomY,
       cellWidth: anchor.cellWidth,
@@ -101,6 +104,7 @@ const output = `// Generated by scripts/generate-vacation-animation-anchors.mjs.
   `  cellHeight: number;\n` +
   `}\n\n` +
   `export const VACATION_IDLE_FRAME_ANCHORS: Record<string, VacationAnimationFrameAnchor[]> = ${JSON.stringify(entries, null, 2)};\n\n` +
+  `export const VACATION_IDLE_SPECIAL_FRAME_ANCHORS: Record<string, VacationAnimationFrameAnchor[]> = ${JSON.stringify(specialEntries, null, 2)};\n\n` +
   `const getAssetPath = (source: string | null): string | null => {\n` +
   `  if (!source) return null;\n` +
   `  const marker = 'sprites/';\n` +
@@ -111,7 +115,41 @@ const output = `// Generated by scripts/generate-vacation-animation-anchors.mjs.
   `export const getVacationIdleFrameAnchor = (source: string | null, frameIndex: number): VacationAnimationFrameAnchor | null => {\n` +
   `  const anchors = getAssetPath(source) ? VACATION_IDLE_FRAME_ANCHORS[getAssetPath(source)!] : undefined;\n` +
   `  return anchors?.[frameIndex] ?? null;\n` +
+  `};\n\n` +
+  `export interface VacationIdleFrameTranslation {\n` +
+  `  x: number;\n` +
+  `  y: number;\n` +
+  `}\n\n` +
+  `const getIdleBaseline = (anchors: VacationAnimationFrameAnchor[] | undefined): VacationAnimationFrameAnchor | null => {\n` +
+  `  if (!anchors?.length) return null;\n` +
+  `  const median = (values: number[]) => {\n` +
+  `    const sorted = [...values].sort((a, b) => a - b);\n` +
+  `    return sorted[Math.floor(sorted.length / 2)] ?? 0;\n` +
+  `  };\n` +
+  `  return {\n` +
+  `    centerX: median(anchors.map(anchor => anchor.centerX)),\n` +
+  `    bottomY: median(anchors.map(anchor => anchor.bottomY)),\n` +
+  `    cellWidth: anchors[0].cellWidth,\n` +
+  `    cellHeight: anchors[0].cellHeight,\n` +
+  `  };\n` +
+  `};\n\n` +
+  `export const getVacationIdleFrameTranslation = (source: string | null, frameIndex: number): VacationIdleFrameTranslation | null => {\n` +
+  `  const assetPath = getAssetPath(source);\n` +
+  `  if (!assetPath) return null;\n` +
+  `  const isSpecial = assetPath.includes('/vacation-characters-idle-special-sheets/') || assetPath.includes('/vacation-male-characters-idle-special-sheets/');\n` +
+  `  const idleAssetPath = isSpecial\n` +
+  `    ? assetPath.replace('/vacation-characters-idle-special-sheets/', '/vacation-characters-idle-sheets/').replace('/vacation-male-characters-idle-special-sheets/', '/vacation-male-characters-idle-sheets/')\n` +
+  `    : assetPath;\n` +
+  `  const idleAnchors = VACATION_IDLE_FRAME_ANCHORS[idleAssetPath];\n` +
+  `  const currentAnchors = isSpecial ? VACATION_IDLE_SPECIAL_FRAME_ANCHORS[assetPath] : idleAnchors;\n` +
+  `  const baseline = getIdleBaseline(idleAnchors);\n` +
+  `  const current = currentAnchors?.[frameIndex];\n` +
+  `  if (!baseline || !current) return null;\n` +
+  `  return {\n` +
+  `    x: ((baseline.centerX - current.centerX) / current.cellWidth) * 100,\n` +
+  `    y: ((baseline.bottomY - current.bottomY) / current.cellHeight) * 100,\n` +
+  `  };\n` +
   `};\n`;
 
 await fs.writeFile(outputPath, output, 'utf8');
-console.log(`Generated ${path.relative(root, outputPath)} (${Object.keys(entries).length} idle sheets).`);
+console.log(`Generated ${path.relative(root, outputPath)} (${Object.keys(entries).length} idle + ${Object.keys(specialEntries).length} idle-special sheets).`);

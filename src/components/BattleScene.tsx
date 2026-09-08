@@ -28,6 +28,7 @@ import { getDiscardableCardCountAfterPlay } from '../utils/cardPlayRequirements'
 import type { BattleUiSettings } from './SettingsModal';
 import MagicRulePanel from './MagicRulePanel';
 import ResilientAssetImage from './ResilientAssetImage';
+import { getVacationIdleFrameTranslation } from '../data/vacationAnimationAnchors.generated';
 
 const MAGIC_MALE_ACTION_SCALE: Record<string, {
     before: { attack: number; skill: number };
@@ -41,6 +42,17 @@ const MAGIC_MALE_ACTION_SCALE: Record<string, {
     LEON: { before: { attack: 1.093, skill: 0.999 }, after: { attack: 1.214, skill: 1.103 } },
     ELLIOT: { before: { attack: 1.078, skill: 0.975 }, after: { attack: 1.140, skill: 1.119 } },
     SAKUYA: { before: { attack: 1.097, skill: 1.055 }, after: { attack: 1.128, skill: 0.996 } },
+};
+
+const getVacationIdleAnchorStyle = (source: string | null, enabled: boolean, mirrored: boolean): React.CSSProperties => {
+    if (!enabled || !source) return {};
+    const style: Record<string, string> = {};
+    for (let frame = 0; frame < 4; frame += 1) {
+        const translation = getVacationIdleFrameTranslation(source, frame);
+        style[`--vacation-frame-${frame}-translate-x`] = `${mirrored ? -(translation?.x ?? 0) : (translation?.x ?? 0)}%`;
+        style[`--vacation-frame-${frame}-translate-y`] = `${translation?.y ?? 0}%`;
+    }
+    return style as React.CSSProperties;
 };
 
 const getEndlessBossLockCounterKey = (cardType: CardType): string | undefined => {
@@ -1004,6 +1016,14 @@ const BattleScene: React.FC<BattleSceneProps> = ({
         && !shouldRenderHeroAnimationSheet
         && !mobileActiveFamiliar
         && highSchoolHeroAction === 'idle';
+    const shouldAnchorVacationIdle = player.appearanceMode === 'VACATION'
+        && (!!idleSpriteSheetSource || heroAnimationAction === 'idle-special')
+        && (shouldRenderIdleSpriteSheet || (shouldRenderHeroAnimationSheet && heroAnimationAction === 'idle-special'));
+    const vacationIdleAnchorStyle = getVacationIdleAnchorStyle(
+        shouldRenderHeroAnimationSheet ? heroAnimationSheetSource : idleSpriteSheetSource,
+        shouldAnchorVacationIdle,
+        visualTheme === 'high-school',
+    );
     const heroAnimationSheetDuration = heroAnimationAction === 'hit'
         ? '380ms'
         : heroAnimationAction === 'low-hp'
@@ -2356,11 +2376,12 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                         key={`${displayedPlayerSpriteKey}-${heroAnimationSheetSource}`}
                                         role="img"
                                         aria-label={trans('主人公', languageMode)}
-                                        className={`${heroAnimationSheetClassName} relative z-10 w-full h-full ${visualTheme === 'high-school' ? '-scale-x-100' : ''}`}
+                                        className={`${heroAnimationSheetClassName} ${shouldAnchorVacationIdle ? 'battle-hero-vacation-anchored-sprite-sheet' : ''} relative z-10 w-full h-full ${visualTheme === 'high-school' ? '-scale-x-100' : ''}`}
                                         style={{
                                             backgroundImage: `url(${heroAnimationSheetSource})`,
                                             '--battle-hero-animation-sheet-scale': heroAnimationAction === 'idle-special' ? specialIdleSpriteSheetScale : 1,
                                             '--battle-hero-animation-sheet-duration': heroAnimationSheetDuration,
+                                            ...vacationIdleAnchorStyle,
                                         } as React.CSSProperties}
                                     />
                                 ) : shouldRenderIdleSpriteSheet ? (
@@ -2368,10 +2389,11 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                         key={idleSpriteSheetSource}
                                         role="img"
                                         aria-label={trans('主人公', languageMode)}
-                                        className={`battle-hero-idle-sprite-sheet relative z-10 w-full h-full ${visualTheme === 'high-school' ? '-scale-x-100' : ''}`}
+                                        className={`battle-hero-idle-sprite-sheet ${shouldAnchorVacationIdle ? 'battle-hero-vacation-anchored-sprite-sheet' : ''} relative z-10 w-full h-full ${visualTheme === 'high-school' ? '-scale-x-100' : ''}`}
                                         style={{
                                             backgroundImage: `url(${idleSpriteSheetSource})`,
                                             '--battle-hero-idle-sprite-scale': idleSpriteSheetScale,
+                                            ...vacationIdleAnchorStyle,
                                         } as React.CSSProperties}
                                     />
                                 ) : (
