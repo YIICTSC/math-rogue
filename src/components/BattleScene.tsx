@@ -24,6 +24,7 @@ import { BATTLE_SPECIAL_IDLE_DURATION_MS, BATTLE_SPECIAL_IDLE_TRIGGER_DELAY_MS, 
 import { boostMagicCardForTransformation } from '../data/magicCards';
 import { assetUrl } from '../utils/assetPaths';
 import { isCardEligibleForCopySelection } from '../utils/cardCopySelection';
+import { getDiscardableCardCountAfterPlay } from '../utils/cardPlayRequirements';
 import type { BattleUiSettings } from './SettingsModal';
 import MagicRulePanel from './MagicRulePanel';
 import ResilientAssetImage from './ResilientAssetImage';
@@ -2925,8 +2926,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                         const isChokerDisabled = player.relics.some(r => r.id === 'VELVET_CHOKER') && player.cardsPlayedThisTurn >= 6;
                         const isNormalityDisabled = player.hand.some(c => c.name === '退屈' || c.name === 'NORMALITY') && player.cardsPlayedThisTurn >= 3;
                         const requiredDiscardCount = card.promptsDiscard || 0;
-                        const incomingDrawCount = (card.draw || 0) * (player.magicTransformed ? 2 : 1);
-                        const discardableHandCount = player.hand.filter(c => c.id !== card.id).length + incomingDrawCount;
+                        const discardableHandCount = getDiscardableCardCountAfterPlay(player, card);
                         const isDiscardCostDisabled = requiredDiscardCount > 0 && discardableHandCount < requiredDiscardCount;
                         const endlessBossLockCounter = getEndlessBossLockCounterKey(card.type);
                         const isEndlessBossLockDisabled = !!endlessBossLockCounter && player.relicCounters[endlessBossLockCounter] > 0;

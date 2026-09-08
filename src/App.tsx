@@ -261,6 +261,7 @@ import { formatProblemUnitName } from './utils/problemUnitName';
 import { getDifficultyConfig } from './config/difficulty';
 import { CARD_ERASER_TEMPLATE_ID, CARD_ERASER_NAME, eraseCardEffect, getErasableEffectOptions } from './utils/cardEraser';
 import { createCardCopySelectionState, isCardEligibleForCopySelection } from './utils/cardCopySelection';
+import { getDiscardableCardCountAfterPlay } from './utils/cardPlayRequirements';
 import { RotateCcw, Home, BookOpen, Coins, Trophy, HelpCircle, Infinity, Play, ScrollText, Plus, Minus, X as MultiplyIcon, Divide, Shuffle, Send, Swords, Terminal, Club, Zap, Gamepad2, Brain, Languages, Music, Book, MessageSquare, GraduationCap, Clock, AlertTriangle, TimerOff, X, Check, FlaskConical, Globe, MapPin, ChevronDown, ArrowLeft, Sparkles, Flag, Keyboard, Users, Settings, ClipboardList, FileText, Monitor, ShieldCheck } from 'lucide-react';
 import { applyAdditionalCardLogic } from './services/cardEffectLogic';
 import { p2pService } from './services/p2pService';
@@ -9726,8 +9727,7 @@ const App: React.FC = () => {
         if (activeSelectionState.active) return;
         if (card.unplayable) return;
         const requiredDiscardCount = card.promptsDiscard || 0;
-        const incomingDrawCount = (card.draw || 0) * (actionPlayer.magicTransformed ? 2 : 1);
-        const discardableHandCount = actionPlayer.hand.filter(handCard => handCard.id !== card.id).length + incomingDrawCount;
+        const discardableHandCount = getDiscardableCardCountAfterPlay(actionPlayer, card);
         if (requiredDiscardCount > 0 && discardableHandCount < requiredDiscardCount) {
             if (!isCoopHostRemoteAction) audioService.playSound('wrong');
             return;
