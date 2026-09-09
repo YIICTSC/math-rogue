@@ -280,7 +280,7 @@ import { createMagicRuleState, createMagicStartingDeck, getMagicRuleConfig } fro
 import { generateMagicRomanceSelectionEvent } from './services/magicRomanceEventService';
 import { applyMagicRuleOnCardPlay } from './services/magicRuleService';
 import { applyMagicEndlessEventEffects } from './utils/magicEndlessEventEffects';
-import { BATTLE_MODAL_PREVIEWS, UI_PREVIEW_GROUPS, UI_PREVIEW_SCREENS, type BattleModalPreviewId } from './data/uiPreviewScreens';
+import { BATTLE_MODAL_PREVIEWS, UI_PREVIEW_GROUPS, UI_PREVIEW_SCREENS, type AppModalPreviewId, type BattleModalPreviewId } from './data/uiPreviewScreens';
 import { useXboxControllerNavigation } from './hooks/useXboxControllerNavigation';
 import { GamepadVirtualKeyboard } from './components/GamepadVirtualKeyboard';
 import { GamepadSystemMenu } from './components/GamepadSystemMenu';
@@ -1920,13 +1920,13 @@ const App: React.FC = () => {
     const [showParryTutorial, setShowParryTutorial] = useState(false);
 
     useEffect(() => {
-        if (isStudentGradeUnset) {
+        if (!isUiPreviewMode && isStudentGradeUnset) {
             setShowStudentGradeSurvey(true);
         }
-    }, [isStudentGradeUnset]);
+    }, [isStudentGradeUnset, isUiPreviewMode]);
 
     useEffect(() => {
-        if (gameState.screen !== GameScreen.START_MENU) return;
+        if (isUiPreviewMode || gameState.screen !== GameScreen.START_MENU) return;
         if (!showAgePrivacySetup
             && !showStudentGradeSurvey
             && !onlineRankingProfile
@@ -1935,7 +1935,7 @@ const App: React.FC = () => {
             && childSafetyService.canSubmitRanking()) {
             setShowOnlineNameSetup(true);
         }
-    }, [gameState.screen, onlineNamePromptDismissed, onlineRankingProfile, showAgePrivacySetup, showStudentGradeSurvey]);
+    }, [gameState.screen, isUiPreviewMode, onlineNamePromptDismissed, onlineRankingProfile, showAgePrivacySetup, showStudentGradeSurvey]);
 
     useEffect(() => {
         if (gameState.screen !== GameScreen.START_MENU) {
@@ -2122,7 +2122,7 @@ const App: React.FC = () => {
     }, [currentAssignment, gameState.screen]);
 
     useEffect(() => {
-        if (!managementProfile || showAgePrivacySetup || showStudentGradeSurvey || requiredAssignmentCheckRef.current) return;
+        if (isUiPreviewMode || !managementProfile || showAgePrivacySetup || showStudentGradeSurvey || requiredAssignmentCheckRef.current) return;
         requiredAssignmentCheckRef.current = true;
         let cancelled = false;
         void (async () => {
@@ -7262,8 +7262,39 @@ const App: React.FC = () => {
         });
     }, [createUiPreviewEnemies, createUiPreviewFamiliars, getSelfTurnLogLabel, preparePlayerForBattle, themedCharacters, visualTheme]);
 
+    const clearUiPreviewModalState = useCallback(() => {
+        setVacationUnlockNotice(null);
+        setNewlyUnlockedCharacters([]);
+        setNewlyUnlockedMiniGames([]);
+        setMasteryRewardModal(null);
+        setAssignmentProgressNotice(null);
+        setRankingRewardNotices([]);
+        setShowDataTransferModal(false);
+        setShowPrivacyControls(false);
+        setShowAssignmentInbox(false);
+        setShowOnlineNameSetup(false);
+        setShowSettingsModal(false);
+        setShowCreditsModal(false);
+        setShowStartOverConfirm(false);
+        setShowTimeLimitModal(false);
+        setShowStudentGradeSurvey(false);
+        setShowAssignmentLetter(false);
+        setPendingManagedAssignmentLetter(null);
+        setWeatherScryModal(null);
+        setGalaxyExpressModal(null);
+        setGoldFishModal(null);
+        setDreamCatcherModal(null);
+        setOrreryModal(null);
+        setPeacePipeModal(null);
+        setEventSynthesisModal(null);
+        setEventCardChoiceModal(null);
+        setCoopFanFavorite(null);
+        setAzukiBattleInfoOpen(false);
+    }, []);
+
     const handleStartUiPreview = useCallback((screen: GameScreen, miniGameOutcome?: MiniGameDebugPreview) => {
         const selectedPreviewItem = UI_PREVIEW_SCREENS.find(item => item.screen === screen && item.miniGameOutcome === miniGameOutcome);
+        clearUiPreviewModalState();
         if (!uiPreviewSnapshotRef.current) {
             uiPreviewSnapshotRef.current = stateRef.current;
             uiPreviewCoopSnapshotRef.current = {
@@ -7438,7 +7469,7 @@ const App: React.FC = () => {
                 coopBattleState: null,
             };
         });
-    }, [applyUiPreviewBattle, coopBattleKey, coopBattleQueue, coopEnemyTurnCursor, coopPlayerSnapshots, coopSession, coopSupportCards, createUiPreviewEnemies, themedCharacters, uiPreviewBattleConfig]);
+    }, [applyUiPreviewBattle, clearUiPreviewModalState, coopBattleKey, coopBattleQueue, coopEnemyTurnCursor, coopPlayerSnapshots, coopSession, coopSupportCards, createUiPreviewEnemies, themedCharacters, uiPreviewBattleConfig]);
 
     const handleStartEndlessSequencePreview = useCallback((kind: 'OPENING' | 'TRUE') => {
         const screen = kind === 'OPENING' ? GameScreen.ENDLESS_OPENING : GameScreen.ENDLESS_TRUE_ENDING;
@@ -7478,6 +7509,97 @@ const App: React.FC = () => {
         }));
         audioService.playBGM(kind === 'TRUE' ? 'victory' : 'map');
     }, [handleStartUiPreview, visualTheme]);
+
+    const handleStartAppModalPreview = useCallback((modalId: AppModalPreviewId) => {
+        clearUiPreviewModalState();
+        const isVacationPreview = modalId === 'VACATION_UNLOCK_HIGH_SCHOOL' || modalId === 'VACATION_UNLOCK_MAGIC';
+        const previewTheme: VisualThemeId = modalId === 'VACATION_UNLOCK_HIGH_SCHOOL'
+            ? 'high-school'
+            : modalId === 'VACATION_UNLOCK_MAGIC'
+                ? 'magic'
+                : visualTheme;
+        const previewScreen = modalId === 'CREDITS' || modalId === 'START_OVER_CONFIRM'
+            ? GameScreen.START_MENU
+            : isVacationPreview
+                ? GameScreen.ENDLESS_CLEAR
+                : GameScreen.DEBUG_MENU;
+
+        handleStartUiPreview(previewScreen);
+        setGameState(prev => ({
+            ...prev,
+            screen: previewScreen,
+            visualTheme: previewTheme,
+            challengeMode: undefined,
+            ...(isVacationPreview
+                ? { isEndless: true, endlessTrueMode: true, act: 50, floor: 750, endlessFloor: 750 }
+                : {}),
+        }));
+
+        switch (modalId) {
+            case 'VACATION_UNLOCK_HIGH_SCHOOL':
+            case 'VACATION_UNLOCK_MAGIC':
+                setVacationUnlockNotice(previewTheme === 'magic' ? 'magic' : 'high-school');
+                break;
+            case 'NEW_UNLOCKS':
+                setNewlyUnlockedCharacters(getThemedCharacters(CHARACTERS, previewTheme).slice(0, 2));
+                setNewlyUnlockedMiniGames(MINI_GAMES.slice(0, 2));
+                break;
+            case 'MASTERY_REWARD':
+                setMasteryRewardModal({ mode: 'UI_PREVIEW', rewardCard: { ...CARDS_LIBRARY.STRIKE, id: 'ui-preview-mastery-reward-card' } });
+                break;
+            case 'ASSIGNMENT_PROGRESS':
+                setAssignmentProgressNotice({
+                    type: 'ASSIGNMENT_COMPLETE',
+                    unitName: '算数 小6 1学期',
+                    remainingUnitNames: [],
+                    rewardCard: { ...CARDS_LIBRARY.STRIKE, id: 'ui-preview-assignment-reward-card' },
+                });
+                break;
+            case 'RANKING_REWARD': {
+                const template = Object.values(CARDS_LIBRARY)[0];
+                if (template) {
+                    setRankingRewardNotices([{
+                        id: 'ui-preview-ranking-reward',
+                        rankingId: 'math_correct_total',
+                        periodType: 'weekly',
+                        periodKey: 'QA PREVIEW',
+                        awardedRank: 1,
+                        card: { ...template, id: 'ui-preview-ranking-reward-card', rewardCard: true, rewardSource: 'RANKING' },
+                    }]);
+                }
+                break;
+            }
+            case 'ONLINE_NAME_SETUP':
+                setOnlineNameSetupIntent('manage');
+                setShowOnlineNameSetup(true);
+                break;
+            case 'PRIVACY_CONTROLS':
+                setShowPrivacyControls(true);
+                break;
+            case 'ASSIGNMENT_INBOX':
+                setShowAssignmentInbox(true);
+                break;
+            case 'DATA_TRANSFER':
+                openDataTransferModal();
+                break;
+            case 'SETTINGS':
+                setSettingsTab('AUDIO');
+                setShowSettingsModal(true);
+                break;
+            case 'CREDITS':
+                setShowCreditsModal(true);
+                break;
+            case 'START_OVER_CONFIRM':
+                setShowStartOverConfirm(true);
+                break;
+            case 'TIME_LIMIT':
+                setShowTimeLimitModal(true);
+                break;
+            case 'STUDENT_GRADE':
+                setShowStudentGradeSurvey(true);
+                break;
+        }
+    }, [clearUiPreviewModalState, handleStartUiPreview, openDataTransferModal, visualTheme]);
 
     const handleStartBattleModalPreview = useCallback((modalId: BattleModalPreviewId) => {
         const previewCards = Object.values(CARDS_LIBRARY)
@@ -7581,6 +7703,7 @@ const App: React.FC = () => {
 
     const closeUiPreview = useCallback(() => {
         crowdfundingBossDebugRef.current = null;
+        clearUiPreviewModalState();
         const snapshot = uiPreviewSnapshotRef.current;
         const coopSnapshot = uiPreviewCoopSnapshotRef.current;
         uiPreviewSnapshotRef.current = null;
@@ -7597,7 +7720,7 @@ const App: React.FC = () => {
             setCoopPlayerSnapshots(coopSnapshot.coopPlayerSnapshots);
         }
         setGameState(prev => snapshot ?? ({ ...prev, screen: GameScreen.DEBUG_MENU }));
-    }, []);
+    }, [clearUiPreviewModalState]);
 
     const handleStartProblemUiPreview = useCallback((mode: GameMode, modePool?: string[]) => {
         const screen = getChallengeScreenForMode(mode);
@@ -19211,6 +19334,7 @@ const App: React.FC = () => {
                             onStartProblemUiPreview={handleStartProblemUiPreview}
                             onStartEventUiPreview={handleStartEventUiPreview}
                             onStartBattleModalPreview={handleStartBattleModalPreview}
+                            onStartAppModalPreview={handleStartAppModalPreview}
                             onStartCrowdfundingBoss={handleStartCrowdfundingBoss}
                             onPreviewRankingReward={() => {
                                 const template = Object.values(CARDS_LIBRARY)[0];

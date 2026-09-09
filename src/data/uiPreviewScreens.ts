@@ -33,6 +33,41 @@ export const BATTLE_MODAL_PREVIEWS: Array<{ id: BattleModalPreviewId; label: str
     { id: 'EVENT_DUPLICATE', label: 'イベント：複製', description: '複製対象のカードを選ぶ' },
 ];
 
+export type AppModalPreviewId =
+    | 'VACATION_UNLOCK_HIGH_SCHOOL'
+    | 'VACATION_UNLOCK_MAGIC'
+    | 'NEW_UNLOCKS'
+    | 'MASTERY_REWARD'
+    | 'ASSIGNMENT_PROGRESS'
+    | 'RANKING_REWARD'
+    | 'ONLINE_NAME_SETUP'
+    | 'PRIVACY_CONTROLS'
+    | 'ASSIGNMENT_INBOX'
+    | 'DATA_TRANSFER'
+    | 'SETTINGS'
+    | 'CREDITS'
+    | 'START_OVER_CONFIRM'
+    | 'TIME_LIMIT'
+    | 'STUDENT_GRADE';
+
+export const APP_MODAL_PREVIEWS: Array<{ id: AppModalPreviewId; label: string; description: string }> = [
+    { id: 'VACATION_UNLOCK_HIGH_SCHOOL', label: 'バカンス解禁：高校編', description: '集合イラスト付きの解禁演出' },
+    { id: 'VACATION_UNLOCK_MAGIC', label: 'バカンス解禁：マジック編', description: 'マジック編の解禁演出' },
+    { id: 'NEW_UNLOCKS', label: '新しい解放要素', description: '主人公・ミニゲームの解禁一覧' },
+    { id: 'MASTERY_REWARD', label: 'マスター達成', description: 'マスター報酬カードの表示' },
+    { id: 'ASSIGNMENT_PROGRESS', label: '課題達成通知', description: '課題クリアとご褒美カード' },
+    { id: 'RANKING_REWARD', label: 'ランキング入賞', description: 'ランキング報酬カード' },
+    { id: 'ONLINE_NAME_SETUP', label: '公開名の設定', description: 'ランキング公開名の登録画面' },
+    { id: 'PRIVACY_CONTROLS', label: 'プライバシー設定', description: 'ランキング・学習データの管理' },
+    { id: 'ASSIGNMENT_INBOX', label: '課題ボックス', description: '受信した課題の一覧' },
+    { id: 'DATA_TRANSFER', label: 'データ移行', description: '保存データの書き出し・取り込み' },
+    { id: 'SETTINGS', label: 'セッティング', description: '音声・表示・戦闘設定' },
+    { id: 'CREDITS', label: 'クレジット', description: 'タイトル画面のクレジットロール' },
+    { id: 'START_OVER_CONFIRM', label: '続きデータ確認', description: 'タイトル画面の再開確認' },
+    { id: 'TIME_LIMIT', label: '時間切れ', description: '本日のプレイ時間終了' },
+    { id: 'STUDENT_GRADE', label: '学年設定', description: '初回プロフィール設定' },
+];
+
 export const UI_PREVIEW_SCREENS: UiPreviewScreenDefinition[] = [
     { id: GameScreen.START_MENU, screen: GameScreen.START_MENU, label: 'タイトル', group: 'メインモード' },
     { id: GameScreen.MODE_SELECTION, screen: GameScreen.MODE_SELECTION, label: '学習モード選択', group: 'メインモード' },

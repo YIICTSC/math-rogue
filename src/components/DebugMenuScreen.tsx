@@ -24,7 +24,7 @@ import { getMagicRomanceVoiceLines } from '../services/magicRomanceEventService'
 import { getMagicEndingVoiceLine } from '../services/magicEndingService';
 import { MAGIC_ART_CONSISTENCY_TARGETS } from '../data/magicArtConsistencyTargets';
 import { assetUrl, getWebpFirstAssetPaths } from '../utils/assetPaths';
-import { BATTLE_MODAL_PREVIEWS, UI_PREVIEW_GROUPS, UI_PREVIEW_SCREENS, type BattleModalPreviewId } from '../data/uiPreviewScreens';
+import { APP_MODAL_PREVIEWS, BATTLE_MODAL_PREVIEWS, UI_PREVIEW_GROUPS, UI_PREVIEW_SCREENS, type AppModalPreviewId, type BattleModalPreviewId } from '../data/uiPreviewScreens';
 import { getDebugProblemUnitGroups } from './ProblemChallengeScreen';
 import { SUBJECT_DATA, type GeneralProblem } from '../data/subjectData';
 import { ELEMENTARY_EVENT_TITLES } from '../services/eventService';
@@ -47,6 +47,7 @@ interface DebugMenuScreenProps {
     onStartProblemUiPreview: (mode: GameMode, modePool?: string[]) => void;
     onStartEventUiPreview: (theme: VisualThemeId, title: string) => void;
     onStartBattleModalPreview: (modalId: BattleModalPreviewId) => void;
+    onStartAppModalPreview: (modalId: AppModalPreviewId) => void;
     onStartCrowdfundingBoss: (boss: 'AZUKI' | 'DODOMEDESU') => void;
     onPreviewRankingReward: () => void;
     onBack: () => void;
@@ -272,6 +273,7 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
     onStartProblemUiPreview,
     onStartEventUiPreview,
     onStartBattleModalPreview,
+    onStartAppModalPreview,
     onStartCrowdfundingBoss,
     onPreviewRankingReward,
     onBack,
@@ -1582,7 +1584,30 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
                                         </span>
                                     </div>
                                 </div>
-                                <section className="rounded-xl border border-violet-600/70 bg-violet-950/25 p-4">
+                                <section className="rounded-xl border border-fuchsia-600/70 bg-fuchsia-950/25 p-4">
+                                    <h4 className="mb-2 flex items-center gap-2 text-sm font-black text-fuchsia-200">
+                                        <Sparkles size={18} /> 各種モーダル実寸確認
+                                    </h4>
+                                    <p className="mb-3 text-xs leading-relaxed text-slate-300">
+                                        解禁演出を含む各モーダルを、現在のウィンドウサイズ（100%）で開きます。表示領域、スクロール、ボタンの押しやすさ、閉じる動作を確認できます。
+                                    </p>
+                                    <div className="grid grid-cols-1 gap-2 sm:grid-cols-2 lg:grid-cols-3">
+                                        {APP_MODAL_PREVIEWS.map((modal) => (
+                                            <button
+                                                key={modal.id}
+                                                type="button"
+                                                onClick={() => onStartAppModalPreview(modal.id)}
+                                                className={`rounded-lg border px-3 py-3 text-left transition-colors ${modal.id.startsWith('VACATION_UNLOCK_')
+                                                    ? 'border-amber-400/70 bg-amber-950/70 hover:border-amber-200 hover:bg-amber-900/55'
+                                                    : 'border-fuchsia-400/50 bg-slate-950/80 hover:border-fuchsia-200 hover:bg-fuchsia-900/45'}`}
+                                            >
+                                                <span className="block text-sm font-black text-fuchsia-100">{modal.label}</span>
+                                                <span className="mt-1 block text-[10px] leading-relaxed text-slate-400">{modal.description}</span>
+                                            </button>
+                                        ))}
+                                    </div>
+                                </section>
+                            <section className="rounded-xl border border-violet-600/70 bg-violet-950/25 p-4">
                                     <h4 className="mb-2 flex items-center gap-2 text-sm font-black text-violet-200">
                                         <Layers size={18} /> 戦闘特殊モーダル確認
                                     </h4>
