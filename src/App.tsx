@@ -296,6 +296,7 @@ const CROWDFUNDING_BANNER_IMAGE = assetUrl('banners/campfire-crowdfunding.webp')
 const ASSIGNMENT_INTRO_BANNER_IMAGE = assetUrl('banners/daily-assignment-reward-intro.webp');
 const IOS_APP_STORE_URL = 'https://apps.apple.com/jp/app/%E5%AD%A6%E7%BF%92%E3%83%AD%E3%83%BC%E3%82%B0/id6793312973';
 const IOS_LAUNCH_BANNER_IMAGE = assetUrl('banners/learning-rogue-ios-launch-banner.png');
+const VACATION_UNLOCK_ILLUSTRATION = assetUrl('event-illustrations/vacation-mode-unlock.webp');
 const CROWDFUNDING_BANNER_END_AT = new Date('2026-06-20T23:59:59+09:00').getTime();
 const HOLOGRAPHIC_REWARD_CARD_CHANCE = 0.05;
 const VISUAL_THEMES: VisualThemeId[] = ['elementary', 'high-school', 'magic'];
@@ -1782,6 +1783,7 @@ const App: React.FC = () => {
     const [themedEndingSequenceComplete, setThemedEndingSequenceComplete] = useState(false);
     const [newlyUnlockedCharacters, setNewlyUnlockedCharacters] = useState<Character[]>([]);
     const [newlyUnlockedMiniGames, setNewlyUnlockedMiniGames] = useState<(typeof MINI_GAMES)[number][]>([]);
+    const [vacationUnlockNotice, setVacationUnlockNotice] = useState<'high-school' | 'magic' | null>(null);
 
     useEffect(() => {
         if (gameState.screen !== GameScreen.ENDING) setThemedEndingSequenceComplete(false);
@@ -4880,7 +4882,12 @@ const App: React.FC = () => {
         if (gameState.screen !== GameScreen.ENDLESS_TRUE_ENDING) return;
         const theme = gameState.visualTheme;
         if (theme !== 'high-school' && theme !== 'magic') return;
+        const previousUnlocks = storageService.getVacationModeUnlocks();
+        const wasAlreadyUnlocked = theme === 'high-school'
+            ? previousUnlocks['high-school']
+            : previousUnlocks.magic;
         setVacationModeUnlocks(storageService.unlockVacationMode(theme));
+        if (!wasAlreadyUnlocked) setVacationUnlockNotice(theme);
     }, [gameState.screen, gameState.visualTheme]);
 
     useEffect(() => {
@@ -19012,6 +19019,96 @@ const App: React.FC = () => {
                             onReturnToTitle={returnToTitle}
                             onEnterTrueEndless={handleEnterTrueEndless}
                         />
+                    </div>
+                )}
+
+                {vacationUnlockNotice && gameState.screen === GameScreen.ENDLESS_CLEAR && (
+                    <div
+                        data-gamepad-modal
+                        data-gamepad-initial-scope="vacation-unlock"
+                        className="app-modal-overlay vacation-unlock-modal-overlay fixed inset-0 z-[2147483647] flex items-center justify-center overflow-y-auto bg-slate-950/90 p-3 sm:p-6"
+                        onClick={() => setVacationUnlockNotice(null)}
+                    >
+                        <div
+                            data-gamepad-navigation-root
+                            role="dialog"
+                            aria-modal="true"
+                            aria-labelledby="vacation-unlock-title"
+                            className={`app-modal-panel vacation-unlock-modal-panel relative my-auto w-full max-w-5xl overflow-hidden rounded-[1.5rem] border-2 p-3 text-center shadow-2xl sm:p-5 ${vacationUnlockNotice === 'magic' ? 'vacation-unlock-modal-panel-magic' : 'vacation-unlock-modal-panel-high-school'}`}
+                            onClick={(event) => event.stopPropagation()}
+                        >
+                            <div className="vacation-unlock-modal-rays" aria-hidden="true" />
+                            <div className="vacation-unlock-modal-orb vacation-unlock-modal-orb-one" aria-hidden="true" />
+                            <div className="vacation-unlock-modal-orb vacation-unlock-modal-orb-two" aria-hidden="true" />
+                            <div className="vacation-unlock-modal-sparkle vacation-unlock-modal-sparkle-one" aria-hidden="true"><Sparkles size={22} /></div>
+                            <div className="vacation-unlock-modal-sparkle vacation-unlock-modal-sparkle-two" aria-hidden="true"><Sparkles size={16} /></div>
+                            <div className="vacation-unlock-modal-sparkle vacation-unlock-modal-sparkle-three" aria-hidden="true"><Sparkles size={26} /></div>
+
+                            <div className="relative z-10 mb-3 flex items-center justify-center gap-2 sm:mb-4">
+                                <Sparkles className="vacation-unlock-modal-title-sparkle text-yellow-200" size={22} />
+                                <span className="rounded-full border border-yellow-200/60 bg-yellow-100/10 px-3 py-1 text-xs font-black tracking-[0.18em] text-yellow-100 sm:text-sm">
+                                    {vacationUnlockNotice === 'magic'
+                                        ? (languageMode === 'ENGLISH' ? 'MAGIC CHAPTER' : languageMode === 'HIRAGANA' ? 'まじっくへん' : 'マジック編')
+                                        : (languageMode === 'ENGLISH' ? 'HIGH-SCHOOL CHAPTER' : languageMode === 'HIRAGANA' ? 'こうこうへん' : '高校編')}
+                                </span>
+                                <Sparkles className="vacation-unlock-modal-title-sparkle text-yellow-200" size={22} />
+                            </div>
+
+                            <div className="relative z-10 mb-4 sm:mb-5">
+                                <div id="vacation-unlock-title" className="mb-1 text-3xl font-black leading-none tracking-tight text-white drop-shadow-[0_3px_0_rgba(0,0,0,0.5)] sm:text-5xl">
+                                    {languageMode === 'ENGLISH' ? 'VACATION MODE UNLOCKED!' : languageMode === 'HIRAGANA' ? 'ばかんすモード かいきん！' : 'バカンスモード解禁！'}
+                                </div>
+                                <div className="text-xs font-black tracking-[0.3em] text-yellow-100/90 sm:text-sm">TRUE ENDING BONUS</div>
+                            </div>
+
+                            <div className="relative z-10 grid items-center gap-4 sm:grid-cols-[1.45fr_0.85fr] sm:gap-6">
+                                <div className="vacation-unlock-modal-hero group relative overflow-hidden rounded-2xl border border-white/50 bg-sky-950/70 shadow-[0_0_35px_rgba(125,211,252,0.35)]">
+                                    <img
+                                        src={VACATION_UNLOCK_ILLUSTRATION}
+                                        alt={languageMode === 'ENGLISH' ? 'The heroes enjoying a vacation together' : languageMode === 'HIRAGANA' ? 'しゅじんこうたちが いっしょに ばかんすを たのしんでいる え' : '主人公たちが一緒にバカンスを楽しんでいるイラスト'}
+                                        className="block aspect-video w-full object-cover transition-transform duration-700 group-hover:scale-[1.03]"
+                                        loading="eager"
+                                    />
+                                    <div className="vacation-unlock-modal-hero-glint" aria-hidden="true" />
+                                    <div className="absolute bottom-2 left-2 rounded-full border border-white/40 bg-slate-950/65 px-2 py-1 text-[10px] font-black tracking-wider text-white/90 sm:bottom-3 sm:left-3 sm:px-3 sm:text-xs">
+                                        {languageMode === 'ENGLISH' ? 'A SPECIAL SUMMER ADVENTURE' : languageMode === 'HIRAGANA' ? 'とくべつな なつの ぼうけん' : '特別な夏の冒険'}
+                                    </div>
+                                </div>
+
+                                <div className="rounded-2xl border border-white/20 bg-slate-950/55 p-4 text-left shadow-inner sm:p-5">
+                                    <div className="mb-3 flex items-center gap-2 text-lg font-black text-cyan-100 sm:text-xl">
+                                        <Zap className="text-yellow-300" size={22} />
+                                        {languageMode === 'ENGLISH' ? 'New adventure unlocked' : languageMode === 'HIRAGANA' ? 'あたらしい ぼうけんが かいきん' : '新しい冒険が解禁されました'}
+                                    </div>
+                                    <p className="mb-4 text-sm font-bold leading-relaxed text-slate-100 sm:text-base">
+                                        {languageMode === 'ENGLISH'
+                                            ? 'As a reward for reaching the true ending, vacation outfits and exclusive actions are now available.'
+                                            : languageMode === 'HIRAGANA'
+                                                ? 'しんエンディングに たどりついた あかしとして、ばかんす いしょうと とくべつな うごきが かいきんされました。'
+                                                : '真エンディング到達の証として、バカンス衣装と専用アクションが解禁されました。'}
+                                    </p>
+                                    <div className="mb-4 flex flex-wrap gap-2">
+                                        <span className="rounded-full border border-cyan-200/40 bg-cyan-300/15 px-2.5 py-1 text-xs font-black text-cyan-100">{languageMode === 'ENGLISH' ? 'Vacation outfits' : languageMode === 'HIRAGANA' ? 'ばかんす いしょう' : 'バカンス衣装'}</span>
+                                        <span className="rounded-full border border-fuchsia-200/40 bg-fuchsia-300/15 px-2.5 py-1 text-xs font-black text-fuchsia-100">{languageMode === 'ENGLISH' ? '2×2 actions' : languageMode === 'HIRAGANA' ? '2×2の うごき' : '2×2専用アクション'}</span>
+                                        <span className="rounded-full border border-amber-200/40 bg-amber-300/15 px-2.5 py-1 text-xs font-black text-amber-100">{languageMode === 'ENGLISH' ? 'Select characters' : languageMode === 'HIRAGANA' ? 'しゅじんこうを えらぶ' : '主人公選択で切替'}</span>
+                                    </div>
+                                    <button
+                                        type="button"
+                                        data-gamepad-initial-choice
+                                        data-gamepad-zone="vacation-unlock-actions"
+                                        data-gamepad-order={0}
+                                        onClick={() => setVacationUnlockNotice(null)}
+                                        className="w-full rounded-xl border-2 border-yellow-200 bg-gradient-to-r from-yellow-300 via-amber-300 to-orange-300 px-4 py-3 text-base font-black text-slate-950 shadow-[0_0_24px_rgba(253,224,71,0.35)] transition hover:brightness-110 active:scale-[0.98] sm:py-3.5 sm:text-lg"
+                                    >
+                                        {languageMode === 'ENGLISH' ? 'Let’s go on vacation!' : languageMode === 'HIRAGANA' ? 'ばかんすを みにいく！' : 'バカンスを見に行く！'}
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div className="relative z-10 mt-3 text-[10px] font-bold text-white/65 sm:mt-4 sm:text-xs">
+                                {languageMode === 'ENGLISH' ? 'You can view Vacation Mode from character selection.' : languageMode === 'HIRAGANA' ? 'しゅじんこう せんたくから ばかんすモードを みられます。' : '主人公選択からバカンスモードを楽しめます。'}
+                            </div>
+                        </div>
                     </div>
                 )}
 

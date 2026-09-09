@@ -17562,6 +17562,162 @@ textarea {
   }
 }
 
+/* Vacation mode unlock modal: keep the generated group illustration as the
+   focal point while giving the first-time unlock a celebratory, story-ending
+   treatment. The effects are decorative only and do not affect input. */
+@keyframes vacation-unlock-backdrop-in {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes vacation-unlock-panel-in {
+  0% { opacity: 0; transform: translateY(1.5rem) scale(0.9) rotateX(8deg); }
+  65% { opacity: 1; transform: translateY(-0.2rem) scale(1.015) rotateX(0); }
+  100% { opacity: 1; transform: translateY(0) scale(1) rotateX(0); }
+}
+
+@keyframes vacation-unlock-rays-spin {
+  from { transform: translate(-50%, -50%) rotate(0deg); }
+  to { transform: translate(-50%, -50%) rotate(360deg); }
+}
+
+@keyframes vacation-unlock-shimmer {
+  0% { transform: translateX(-120%) skewX(-18deg); opacity: 0; }
+  18% { opacity: 0.8; }
+  45%, 100% { transform: translateX(180%) skewX(-18deg); opacity: 0; }
+}
+
+@keyframes vacation-unlock-sparkle {
+  0%, 100% { opacity: 0.35; transform: scale(0.75) rotate(0deg); }
+  45% { opacity: 1; transform: scale(1.1) rotate(18deg); }
+  70% { opacity: 0.6; transform: scale(0.9) rotate(-12deg); }
+}
+
+@keyframes vacation-unlock-orb-float {
+  0%, 100% { transform: translate3d(0, 0, 0) scale(1); }
+  50% { transform: translate3d(0, -0.75rem, 0) scale(1.08); }
+}
+
+.vacation-unlock-modal-overlay {
+  animation: vacation-unlock-backdrop-in 320ms ease-out both;
+  -webkit-backdrop-filter: blur(0.25rem);
+  backdrop-filter: blur(0.25rem);
+}
+
+.vacation-unlock-modal-panel {
+  isolation: isolate;
+  transform-origin: center center;
+  animation: vacation-unlock-panel-in 720ms cubic-bezier(0.18, 0.88, 0.28, 1.08) both;
+  background:
+    radial-gradient(circle at 15% 0%, rgba(125, 211, 252, 0.2), transparent 35%),
+    radial-gradient(circle at 90% 100%, rgba(244, 114, 182, 0.2), transparent 38%),
+    linear-gradient(145deg, rgba(8, 47, 73, 0.98), rgba(30, 27, 75, 0.98) 52%, rgba(67, 20, 72, 0.98));
+}
+
+.vacation-unlock-modal-panel-high-school {
+  border-color: rgba(125, 211, 252, 0.9);
+  box-shadow: 0 0 2rem rgba(56, 189, 248, 0.35), 0 0 7rem rgba(14, 165, 233, 0.2), inset 0 0 2rem rgba(255, 255, 255, 0.06);
+}
+
+.vacation-unlock-modal-panel-magic {
+  border-color: rgba(251, 191, 36, 0.95);
+  box-shadow: 0 0 2rem rgba(251, 191, 36, 0.3), 0 0 7rem rgba(217, 70, 239, 0.22), inset 0 0 2rem rgba(255, 255, 255, 0.06);
+}
+
+.vacation-unlock-modal-rays {
+  position: absolute;
+  z-index: 0;
+  top: 48%;
+  left: 50%;
+  width: 125%;
+  aspect-ratio: 1;
+  pointer-events: none;
+  opacity: 0.27;
+  background: repeating-conic-gradient(from 0deg, rgba(253, 224, 71, 0.32) 0deg 7deg, transparent 7deg 18deg);
+  -webkit-mask-image: radial-gradient(circle, black 0 22%, transparent 70%);
+  mask-image: radial-gradient(circle, black 0 22%, transparent 70%);
+  animation: vacation-unlock-rays-spin 32s linear infinite;
+}
+
+.vacation-unlock-modal-orb {
+  position: absolute;
+  z-index: 0;
+  width: 9rem;
+  aspect-ratio: 1;
+  pointer-events: none;
+  border-radius: 9999px;
+  filter: blur(1.5rem);
+  opacity: 0.32;
+  animation: vacation-unlock-orb-float 5s ease-in-out infinite;
+}
+
+.vacation-unlock-modal-orb-one {
+  top: -4rem;
+  left: -2rem;
+  background: #38bdf8;
+}
+
+.vacation-unlock-modal-orb-two {
+  right: -2rem;
+  bottom: -4rem;
+  background: #f472b6;
+  animation-delay: -2.2s;
+}
+
+.vacation-unlock-modal-sparkle {
+  position: absolute;
+  z-index: 1;
+  pointer-events: none;
+  color: rgba(254, 249, 195, 0.9);
+  filter: drop-shadow(0 0 0.6rem rgba(253, 224, 71, 0.8));
+  animation: vacation-unlock-sparkle 2.8s ease-in-out infinite;
+}
+
+.vacation-unlock-modal-sparkle-one { top: 18%; left: 3%; }
+.vacation-unlock-modal-sparkle-two { top: 10%; right: 7%; animation-delay: -0.9s; }
+.vacation-unlock-modal-sparkle-three { right: 3%; bottom: 18%; animation-delay: -1.8s; }
+
+.vacation-unlock-modal-title-sparkle {
+  filter: drop-shadow(0 0 0.5rem rgba(253, 224, 71, 0.85));
+  animation: vacation-unlock-sparkle 2s ease-in-out infinite;
+}
+
+.vacation-unlock-modal-hero {
+  isolation: isolate;
+}
+
+.vacation-unlock-modal-hero::before {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  pointer-events: none;
+  content: '';
+  background: linear-gradient(115deg, transparent 25%, rgba(255, 255, 255, 0.38) 46%, transparent 56%);
+  transform: translateX(-120%) skewX(-18deg);
+  animation: vacation-unlock-shimmer 4.6s ease-in-out 1.1s infinite;
+}
+
+.vacation-unlock-modal-hero-glint {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(circle at 50% 45%, transparent 0 35%, rgba(125, 211, 252, 0.1) 60%, rgba(14, 116, 144, 0.28) 100%);
+  mix-blend-mode: screen;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .vacation-unlock-modal-overlay,
+  .vacation-unlock-modal-panel,
+  .vacation-unlock-modal-rays,
+  .vacation-unlock-modal-orb,
+  .vacation-unlock-modal-sparkle,
+  .vacation-unlock-modal-title-sparkle,
+  .vacation-unlock-modal-hero::before {
+    animation: none !important;
+  }
+}
+
 /* Crane game: the ImageGen cabinet is the fixed 3:2 coordinate space. Live
    claw/prize sprites are overlaid only inside the glass bay. */
 .crane-game-screen {
