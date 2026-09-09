@@ -296,7 +296,10 @@ const CROWDFUNDING_BANNER_IMAGE = assetUrl('banners/campfire-crowdfunding.webp')
 const ASSIGNMENT_INTRO_BANNER_IMAGE = assetUrl('banners/daily-assignment-reward-intro.webp');
 const IOS_APP_STORE_URL = 'https://apps.apple.com/jp/app/%E5%AD%A6%E7%BF%92%E3%83%AD%E3%83%BC%E3%82%B0/id6793312973';
 const IOS_LAUNCH_BANNER_IMAGE = assetUrl('banners/learning-rogue-ios-launch-banner.png');
-const VACATION_UNLOCK_ILLUSTRATION = assetUrl('event-illustrations/vacation-mode-unlock.webp');
+const VACATION_UNLOCK_ILLUSTRATIONS = {
+    'high-school': assetUrl('event-illustrations/vacation-mode-unlock-high-school.webp'),
+    magic: assetUrl('event-illustrations/vacation-mode-unlock-magic.webp'),
+} as const;
 const CROWDFUNDING_BANNER_END_AT = new Date('2026-06-20T23:59:59+09:00').getTime();
 const HOLOGRAPHIC_REWARD_CARD_CHANCE = 0.05;
 const VISUAL_THEMES: VisualThemeId[] = ['elementary', 'high-school', 'magic'];
@@ -7849,6 +7852,188 @@ const App: React.FC = () => {
         audioService.playBGM('boss');
         setTurnLog(getSelfTurnLogLabel());
     }, [debugLoadout, gameState.difficultyLevel, gameState.player, getSelfTurnLogLabel, handleStartUiPreview, isDebugHpOne, preparePlayerForBattle]);
+
+    const handleStartEndlessBossDebug = useCallback((
+        theme: 'high-school' | 'magic',
+        protagonistId: string,
+        magicProtagonistGender: 'female' | 'male' | undefined,
+        deck: ICard[],
+        relics: Relic[],
+        potions: Potion[],
+    ) => {
+        const themedCharacters = getThemedCharacters(CHARACTERS, theme);
+        let selectedCharacter: Character | undefined;
+
+        if (theme === 'magic' && magicProtagonistGender === 'male') {
+            const maleIndex = MAGIC_MALE_PROTAGONISTS.findIndex(protagonist => protagonist.id === protagonistId);
+            const maleProtagonist = MAGIC_MALE_PROTAGONISTS[maleIndex];
+            const baseCharacter = maleIndex >= 0 ? CHARACTERS[maleIndex] : undefined;
+            if (maleProtagonist && baseCharacter) {
+                selectedCharacter = {
+                    ...baseCharacter,
+                    name: maleProtagonist.name,
+                    imageData: assetUrl(`sprites/magic/male-characters/${maleProtagonist.assetId}-before.webp`),
+                    magicProtagonistId: maleProtagonist.id,
+                    magicProtagonistGender: 'male',
+                };
+            }
+        } else {
+            selectedCharacter = theme === 'magic'
+                ? themedCharacters.find(character => character.magicProtagonistId === protagonistId)
+                : themedCharacters.find(character => character.id === protagonistId);
+        }
+
+        const boss = getEndlessBoss(getEndlessArc(theme), 50);
+        if (!selectedCharacter || !boss) return;
+
+        const fallbackDeck = theme === 'magic'
+            ? createMagicStartingDeck(protagonistId).map((card, index) => ({
+                ...card,
+                id: `endless-boss-debug-${card.id}-${index}`,
+            }))
+            : createDeck(selectedCharacter.deckTemplate);
+        const sourceDeck = deck.length > 0 ? deck.map(clearRetainedCardMarker) : fallbackDeck;
+        const fallbackRelic = theme === 'magic'
+            ? getMagicRuleConfig(protagonistId).relic
+            : RELIC_LIBRARY[selectedCharacter.startingRelicId];
+        const sourceRelics = relics.length > 0 ? relics : (fallbackRelic ? [fallbackRelic] : []);
+        const sourcePlayer: Player = {
+            ...gameState.player,
+            id: selectedCharacter.id,
+            appearanceMode: 'STANDARD',
+            magicProtagonistId: theme === 'magic' ? protagonistId : undefined,
+            magicProtagonistGender: theme === 'magic' ? magicProtagonistGender : undefined,
+            maxHp: 999,
+            currentHp: isDebugHpOne ? 1 : 999,
+            maxEnergy: 9,
+            currentEnergy: 9,
+            gold: 9999,
+            deck: sourceDeck,
+            relics: sourceRelics,
+            potions,
+            imageData: selectedCharacter.imageData,
+            hand: [],
+            discardPile: [],
+            drawPile: [],
+            block: 0,
+            strength: 0,
+            powers: {},
+            echoes: 0,
+            cardsPlayedThisTurn: 0,
+            cardsPlayedThisBattle: 0,
+            attacksPlayedThisTurn: 0,
+            typesPlayedThisTurn: [],
+            nextTurnEnergy: 0,
+            nextTurnDraw: 0,
+            relicCounters: {},
+            turnFlags: {},
+            floatingText: null,
+            partner: undefined,
+            garden: theme !== 'magic' && selectedCharacter.id === 'GARDENER'
+                ? Array.from({ length: 9 }, () => ({ plantedCard: null, growth: 0, maxGrowth: 0 }))
+                : undefined,
+            codexBuffer: [],
+            familiarActionQueue: [],
+            magicTransformed: false,
+            magicTransformedThisBattle: false,
+            magicRuleState: theme === 'magic' ? createMagicRuleState(protagonistId) : undefined,
+        };
+        const player = preparePlayerForBattle(sourcePlayer, NodeType.BOSS);
+        const maxAtkDmg = Math.max(
+            estimateBossScalingSingleCardDamage(player.deck),
+            theme === 'magic'
+                ? estimateBossScalingSingleCardDamage(
+                    getMagicCardsForHero(protagonistId).map(card =>
+                        boostMagicCardForTransformation(card, player.gold, player.deck.length) as ICard
+                    ),
+                    2,
+                )
+                : 0,
+        );
+        const difficulty = getDifficultyConfig(gameState.difficultyLevel);
+        const enemyHpMultiplier = coopEnemyHpMultiplier * difficulty.enemyHpMultiplier;
+        const baseBossHp = Math.ceil(((120 + 50 * 9) * 2.35 + maxAtkDmg * 1.5) * enemyHpMultiplier);
+        const bossEnemy: Enemy = {
+            id: `endless-boss-debug-${boss.id}-${Date.now()}`,
+            enemyType: 'ENDLESS_BOSS',
+            name: boss.name,
+            maxHp: baseBossHp,
+            currentHp: isDebugHpOne ? 1 : baseBossHp,
+            block: 0,
+            strength: Math.max(0, difficulty.enemyStrengthBonus + 5),
+            nextIntent: { type: EnemyIntentType.UNKNOWN, value: 0 },
+            vulnerable: 0,
+            weak: 0,
+            poison: 0,
+            artifact: 2,
+            corpseExplosion: false,
+            floatingText: null,
+            phase: 1,
+            endlessBossId: boss.id,
+        };
+        bossEnemy.nextIntent = getNextEnemyIntent(bossEnemy, 1);
+
+        const map = generateDungeonMap(gameState.difficultyLevel || 1, {
+            endless: true,
+            endlessChapter: 50,
+            visualTheme: theme,
+        });
+        const bossNode = map.find(node => node.type === NodeType.BOSS);
+        if (!bossNode) return;
+
+        const floor = bossNode.y + 1;
+        const battleBackgroundScene = chooseBattleBackgroundScene(NodeType.BOSS, 50, floor, theme);
+        assetPreloadService.preloadTransitionAssets([
+            battleBackgroundScene.image,
+            ...getBattleEnemyTransitionAssetPaths(bossEnemy, theme),
+            ...player.hand.slice(0, 5).flatMap(getBattleCardTransitionAssetPaths),
+        ]);
+        setDebugLoadout({ deck: sourceDeck, relics: sourceRelics, potions });
+        setSelectedCharName(selectedCharacter.name);
+        setCurrentBattleBackgroundId(battleBackgroundScene.id);
+        setCurrentNarrative(`${theme === 'magic' ? 'マジック編' : '高校編'} / ${selectedCharacter.name} / エンドレス第50章ボス戦`);
+        setIsLoading(false);
+        setGameState(prev => ({
+            ...prev,
+            screen: GameScreen.BATTLE,
+            mode: prev.mode,
+            visualTheme: theme,
+            challengeMode: undefined,
+            act: 50,
+            floor,
+            turn: 1,
+            map,
+            currentMapNodeId: bossNode.id,
+            player,
+            enemies: [bossEnemy],
+            selectedEnemyId: bossEnemy.id,
+            narrativeLog: [`デバッグ: ${theme === 'magic' ? 'マジック編' : '高校編'} ${selectedCharacter.name} / エンドレス第50章ボス戦を開始`],
+            combatLog: [`> ${boss.name}との第50章ボス戦を開始！`],
+            rewards: [],
+            selectionState: { active: false, type: 'DISCARD', amount: 0 },
+            isEndless: true,
+            endlessTrueMode: false,
+            endlessFloor: 50,
+            endlessBossId: boss.id,
+            endlessBossPhase: 1,
+            endlessRewardPending: true,
+            endlessRewardIds: [],
+            endlessRunRewards: [],
+            endlessRewardRerollUsed: false,
+            currentStoryIndex: 0,
+            currentEventTitle: undefined,
+            eventLearningPending: undefined,
+            newlyUnlockedCardName: undefined,
+            parryState: { active: false, enemyId: null, success: false },
+            activeEffects: [],
+            coopBattleState: null,
+            actStats: { enemiesDefeated: 0, goldGained: 0, mathCorrect: 0 },
+        }));
+        audioService.prepareBGM('final_boss', getBgmThemeForPlayer(theme, player));
+        audioService.playBGM('final_boss');
+        setTurnLog(getSelfTurnLogLabel());
+        startGameAssetPreload();
+    }, [gameState.difficultyLevel, gameState.player, getSelfTurnLogLabel, isDebugHpOne, preparePlayerForBattle, startGameAssetPreload]);
 
     useEffect(() => {
         if (!isUiPreviewMode) return;
@@ -19187,7 +19372,7 @@ const App: React.FC = () => {
                             <div className="relative z-10 grid items-center gap-4 sm:grid-cols-[1.45fr_0.85fr] sm:gap-6">
                                 <div className="vacation-unlock-modal-hero group relative overflow-hidden rounded-2xl border border-white/50 bg-sky-950/70 shadow-[0_0_35px_rgba(125,211,252,0.35)]">
                                     <img
-                                        src={VACATION_UNLOCK_ILLUSTRATION}
+                                        src={VACATION_UNLOCK_ILLUSTRATIONS[vacationUnlockNotice]}
                                         alt={languageMode === 'ENGLISH' ? 'The heroes enjoying a vacation together' : languageMode === 'HIRAGANA' ? 'しゅじんこうたちが いっしょに ばかんすを たのしんでいる え' : '主人公たちが一緒にバカンスを楽しんでいるイラスト'}
                                         className="block aspect-video w-full object-cover transition-transform duration-700 group-hover:scale-[1.03]"
                                         loading="eager"
@@ -19335,6 +19520,7 @@ const App: React.FC = () => {
                             onStartEventUiPreview={handleStartEventUiPreview}
                             onStartBattleModalPreview={handleStartBattleModalPreview}
                             onStartAppModalPreview={handleStartAppModalPreview}
+                            onStartEndlessBossDebug={handleStartEndlessBossDebug}
                             onStartCrowdfundingBoss={handleStartCrowdfundingBoss}
                             onPreviewRankingReward={() => {
                                 const template = Object.values(CARDS_LIBRARY)[0];

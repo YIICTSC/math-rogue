@@ -1,5 +1,5 @@
 
-import { CARDS_LIBRARY, RELIC_LIBRARY, POTION_LIBRARY } from '../constants';
+import { CARDS_LIBRARY, RELIC_LIBRARY, POTION_LIBRARY, CHARACTERS } from '../constants';
 import { GAME_STORIES } from '../data/stories';
 import { FLAVOR_TEXTS, ENEMY_NAMES } from '../services/geminiService';
 import { AttackEffectKey, StatusEffectKey, Card as ICard, Relic, Potion, CardType, TargetType, LanguageMode, GameScreen, GameMode, MiniGameDebugPreview } from '../types';
@@ -15,7 +15,7 @@ import { audioService } from '../services/audioService';
 import { trans } from '../utils/textUtils';
 import { ATTACK_EFFECT_LIST } from '../data/attackEffects';
 import { STATUS_EFFECT_LIST } from '../data/statusEffects';
-import { HIGH_SCHOOL_EVENT_THEMES, MAGIC_EVENT_THEMES, HIGH_SCHOOL_HUMANOID_ENEMY_VARIANTS, MAGIC_HUMANOID_ENEMY_VARIANTS, type HighSchoolEnemyAction, type VisualThemeId } from '../data/visualThemes';
+import { getThemedCharacters, HIGH_SCHOOL_EVENT_THEMES, MAGIC_EVENT_THEMES, HIGH_SCHOOL_HUMANOID_ENEMY_VARIANTS, MAGIC_HUMANOID_ENEMY_VARIANTS, type HighSchoolEnemyAction, type VisualThemeId } from '../data/visualThemes';
 import { getEnemyLibraryByTheme } from '../data/enemyCatalogs';
 import { HUMANOID_ENEMY_VOICE_PROFILES, type HumanoidEnemyVoiceGender, type HumanoidEnemyVoiceProfile } from '../data/humanoidEnemyVoiceLines';
 import { MAGIC_HEROES, MAGIC_MALE_PROTAGONISTS } from '../data/magicHeroes';
@@ -48,6 +48,7 @@ interface DebugMenuScreenProps {
     onStartEventUiPreview: (theme: VisualThemeId, title: string) => void;
     onStartBattleModalPreview: (modalId: BattleModalPreviewId) => void;
     onStartAppModalPreview: (modalId: AppModalPreviewId) => void;
+    onStartEndlessBossDebug: (theme: 'high-school' | 'magic', protagonistId: string, magicProtagonistGender: 'female' | 'male' | undefined, deck: ICard[], relics: Relic[], potions: Potion[]) => void;
     onStartCrowdfundingBoss: (boss: 'AZUKI' | 'DODOMEDESU') => void;
     onPreviewRankingReward: () => void;
     onBack: () => void;
@@ -274,6 +275,7 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
     onStartEventUiPreview,
     onStartBattleModalPreview,
     onStartAppModalPreview,
+    onStartEndlessBossDebug,
     onStartCrowdfundingBoss,
     onPreviewRankingReward,
     onBack,
@@ -327,6 +329,46 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
     const [debugEventTheme, setDebugEventTheme] = useState<VisualThemeId>('elementary');
     const [debugEventTitle, setDebugEventTitle] = useState(DEBUG_EVENT_GROUPS[0]?.titles[0] ?? '');
     const [uiPreviewChecklist, setUiPreviewChecklist] = useState<UiPreviewChecklist>(() => storageService.getUiPreviewChecklist());
+    const [endlessBossDebugTheme, setEndlessBossDebugTheme] = useState<'high-school' | 'magic'>('high-school');
+    const [endlessBossDebugMagicGender, setEndlessBossDebugMagicGender] = useState<'female' | 'male'>('female');
+    const [endlessBossDebugProtagonistId, setEndlessBossDebugProtagonistId] = useState('WARRIOR');
+
+    const endlessBossDebugProtagonists = useMemo(() => {
+        if (endlessBossDebugTheme === 'high-school') {
+            return getThemedCharacters(CHARACTERS, 'high-school').map(character => ({
+                id: character.id,
+                name: character.name,
+                imageData: character.imageData,
+                detail: character.description,
+                color: character.color,
+                magicProtagonistGender: undefined as 'female' | 'male' | undefined,
+            }));
+        }
+        if (endlessBossDebugMagicGender === 'male') {
+            return MAGIC_MALE_PROTAGONISTS.map(protagonist => ({
+                id: protagonist.id,
+                name: protagonist.name,
+                imageData: assetUrl(`sprites/magic/male-characters/${protagonist.assetId}-before.webp`),
+                detail: `${protagonist.role} / ${protagonist.specialty}`,
+                color: protagonist.color,
+                magicProtagonistGender: 'male' as const,
+            }));
+        }
+        return MAGIC_HEROES.map(hero => ({
+            id: hero.id,
+            name: hero.name,
+            imageData: assetUrl(`sprites/magic/characters/heroine-${String(hero.index).padStart(2, '0')}-before.webp`),
+            detail: `${hero.attribute}属性 / ${hero.specialty}`,
+            color: hero.color,
+            magicProtagonistGender: 'female' as const,
+        }));
+    }, [endlessBossDebugMagicGender, endlessBossDebugTheme]);
+
+    useEffect(() => {
+        if (!endlessBossDebugProtagonists.some(protagonist => protagonist.id === endlessBossDebugProtagonistId)) {
+            setEndlessBossDebugProtagonistId(endlessBossDebugProtagonists[0]?.id ?? '');
+        }
+    }, [endlessBossDebugProtagonistId, endlessBossDebugProtagonists]);
 
     useEffect(() => {
         if (!focusedUiPreviewScreenId) return;
@@ -1175,6 +1217,99 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
                                     <p className="text-xs text-gray-400 mt-3">
                                         ここで増やした分は、デバッグメニューから戻った時に既存の解禁モーダルで確認できます。
                                     </p>
+                                </section>
+
+                                <section className="rounded-xl border border-cyan-500/60 bg-cyan-950/20 p-4">
+                                    <h3 className="mb-2 flex items-center gap-2 font-bold text-cyan-200">
+                                        <Skull size={18} /> エンドレスボスデバッグ
+                                    </h3>
+                                    <p className="mb-4 text-xs leading-relaxed text-gray-300">
+                                        各編の主人公を選び、第50章ボス戦から直接開始します。通常衣装で開始し、撃破後の真エンディングとバカンス解禁判定を確認できます。
+                                    </p>
+                                    <div className="mb-3 flex flex-wrap gap-2">
+                                        {([
+                                            ['high-school', '高校編'],
+                                            ['magic', 'マジック編'],
+                                        ] as const).map(([theme, label]) => (
+                                            <button
+                                                key={theme}
+                                                type="button"
+                                                onClick={() => {
+                                                    setEndlessBossDebugTheme(theme);
+                                                    setEndlessBossDebugProtagonistId(theme === 'high-school'
+                                                        ? 'WARRIOR'
+                                                        : endlessBossDebugMagicGender === 'male' ? 'REN' : 'AKARI');
+                                                }}
+                                                className={`rounded-full border px-4 py-2 text-xs font-black transition-colors ${endlessBossDebugTheme === theme
+                                                    ? 'border-cyan-200 bg-cyan-500 text-slate-950'
+                                                    : 'border-cyan-700 bg-slate-950 text-cyan-200 hover:bg-cyan-900/60'}`}
+                                            >
+                                                {label}
+                                            </button>
+                                        ))}
+                                    </div>
+                                    {endlessBossDebugTheme === 'magic' && (
+                                        <div className="mb-3 flex flex-wrap gap-2">
+                                            {([
+                                                ['female', '女子主人公'],
+                                                ['male', '男子主人公'],
+                                            ] as const).map(([gender, label]) => (
+                                                <button
+                                                    key={gender}
+                                                    type="button"
+                                                    onClick={() => {
+                                                        setEndlessBossDebugMagicGender(gender);
+                                                        setEndlessBossDebugProtagonistId(gender === 'male' ? 'REN' : 'AKARI');
+                                                    }}
+                                                    className={`rounded-lg border px-3 py-2 text-xs font-black transition-colors ${endlessBossDebugMagicGender === gender
+                                                        ? 'border-fuchsia-200 bg-fuchsia-600 text-white'
+                                                        : 'border-fuchsia-700 bg-slate-950 text-fuchsia-200 hover:bg-fuchsia-900/60'}`}
+                                                >
+                                                    {label}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    )}
+                                    <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-4">
+                                        {endlessBossDebugProtagonists.map(protagonist => {
+                                            const isSelected = protagonist.id === endlessBossDebugProtagonistId;
+                                            return (
+                                                <button
+                                                    key={`${endlessBossDebugTheme}-${protagonist.id}`}
+                                                    type="button"
+                                                    onClick={() => setEndlessBossDebugProtagonistId(protagonist.id)}
+                                                    className={`flex min-h-[92px] items-center gap-2 rounded-lg border p-2 text-left transition-colors ${isSelected
+                                                        ? 'border-cyan-200 bg-cyan-900/70 shadow-[0_0_16px_rgba(34,211,238,0.25)]'
+                                                        : 'border-slate-700 bg-slate-950/80 hover:border-cyan-700 hover:bg-cyan-950/40'}`}
+                                                >
+                                                    <img src={protagonist.imageData} alt="" className="h-16 w-12 shrink-0 object-contain" />
+                                                    <span className="min-w-0">
+                                                        <span className="block truncate text-xs font-black text-white">{protagonist.name}</span>
+                                                        <span className="mt-1 block truncate text-[10px] text-slate-400">{protagonist.detail}</span>
+                                                    </span>
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                    <button
+                                        type="button"
+                                        disabled={!endlessBossDebugProtagonistId}
+                                        onClick={() => {
+                                            const selected = endlessBossDebugProtagonists.find(protagonist => protagonist.id === endlessBossDebugProtagonistId);
+                                            if (!selected) return;
+                                            onStartEndlessBossDebug(
+                                                endlessBossDebugTheme,
+                                                selected.id,
+                                                selected.magicProtagonistGender,
+                                                selectedDeck,
+                                                selectedRelics,
+                                                selectedPotions,
+                                            );
+                                        }}
+                                        className="mt-4 flex w-full items-center justify-center gap-2 rounded-xl border-2 border-cyan-200 bg-cyan-700 px-4 py-3 text-sm font-black text-white shadow-lg transition-colors hover:bg-cyan-600 disabled:cursor-not-allowed disabled:opacity-40"
+                                    >
+                                        <Swords size={18} /> 第50章ボスから開始
+                                    </button>
                                 </section>
 
                                 <section>
