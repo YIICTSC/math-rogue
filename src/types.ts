@@ -48,7 +48,7 @@ export interface Card {
   /** Battle-only marker: this card crossed the turn boundary by Retain. */
   retained?: boolean;
   rewardCard?: boolean;
-  rewardSource?: 'ASSIGNMENT' | 'RANKING';
+  rewardSource?: 'ASSIGNMENT' | 'RANKING' | 'ORIGINAL_BUILDER';
   rewardGeneration?: 'ASSIGNMENT_REWARD';
   rankingId?: string;
   periodId?: string;
@@ -86,6 +86,14 @@ export interface Card {
   enemyIllustrationNames?: string[];
   enemyIllustrationEnemyType?: string;
   enemyIllustrationPhase?: number;
+  /** User-created card metadata. The image is a compressed data URL. */
+  customCard?: boolean;
+  customImageData?: string;
+  customEffectSlots?: Array<{
+    kind: 'GOOD' | 'BAD';
+    effectId: string;
+    label: string;
+  }>;
   visualTheme?: 'elementary' | 'high-school' | 'magic';
   highSchoolCardArtIndex?: number;
   magicCardArtIndex?: number;
@@ -482,6 +490,7 @@ export enum GameScreen {
   ENDLESS_OPENING = 'ENDLESS_OPENING',
   ENDLESS_TRUE_ENDING = 'ENDLESS_TRUE_ENDING',
   ENDLESS_CLEAR = 'ENDLESS_CLEAR',
+  ORIGINAL_CARD_BUILDER = 'ORIGINAL_CARD_BUILDER',
   HELP = 'HELP',
   TREASURE = 'TREASURE',
   RANKING = 'RANKING',

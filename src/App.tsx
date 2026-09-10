@@ -222,6 +222,7 @@ import ProblemChallengeScreen from './components/ProblemChallengeScreen';
 import AssignmentCreateScreen from './components/AssignmentCreateScreen';
 import SubmissionScreen from './components/SubmissionScreen';
 import RewardCardAlbumScreen from './components/RewardCardAlbumScreen';
+import OriginalCardBuilderScreen from './components/OriginalCardBuilderScreen';
 import ChefDeckSelectionScreen from './components/ChefDeckSelectionScreen';
 import GardenScreen from './components/GardenScreen';
 import P2PRaceSetup from './components/P2PRaceSetup';
@@ -2480,10 +2481,23 @@ const App: React.FC = () => {
     const [treasureOpened, setTreasureOpened] = useState(false);
     const [treasurePools, setTreasurePools] = useState<CoopTreasurePool[]>([]);
     const [clearCount, setClearCount] = useState<number>(() => storageService.getThemeClearCount(visualTheme));
+    const [originalCardBuilderUnlocked, setOriginalCardBuilderUnlocked] = useState(() => storageService.isOriginalCardBuilderUnlocked());
     const [vacationModeUnlocks, setVacationModeUnlocks] = useState(() => storageService.getVacationModeUnlocks());
     const vacationModeUnlockedForTheme = isDebugModeActive
         || (visualTheme === 'high-school' && vacationModeUnlocks['high-school'])
         || (visualTheme === 'magic' && vacationModeUnlocks.magic);
+    const originalCardBuilderAvailable = originalCardBuilderUnlocked || isDebugModeActive;
+
+    useEffect(() => {
+        const completedTheme = gameState.visualTheme || visualTheme;
+        if (
+            gameState.screen !== GameScreen.ENDLESS_CLEAR
+            || !gameState.isEndless
+            || completedTheme !== 'elementary'
+            || originalCardBuilderUnlocked
+        ) return;
+        if (storageService.unlockOriginalCardBuilder()) setOriginalCardBuilderUnlocked(true);
+    }, [gameState.isEndless, gameState.screen, gameState.visualTheme, originalCardBuilderUnlocked, visualTheme]);
     // Global main-adventure clears drive the seven trivia mini-game unlocks.
     // Keep this separate from the per-theme clear count used for characters.
     const [mainClearCount, setMainClearCount] = useState<number>(() => storageService.getClearCount());
@@ -18830,6 +18844,15 @@ const App: React.FC = () => {
                                             <ClipboardList className="mr-1" size={16} /> {trans("課題送信", languageMode)}
                                         </button>
                                     )}
+                                    {originalCardBuilderAvailable && (
+                                        <button
+                                            type="button"
+                                            onClick={() => setGameState(prev => ({ ...prev, screen: GameScreen.ORIGINAL_CARD_BUILDER }))}
+                                            className="original-card-builder-start-button flex-1 py-2 px-1 text-xs font-black border-b-4 border-r-4 rounded-none bg-violet-950/90 text-violet-100 border-violet-300 hover:bg-violet-900 cursor-pointer flex items-center justify-center shadow-md"
+                                        >
+                                            <Sparkles className="mr-1" size={16} /> {trans("カードづくり", languageMode)}
+                                        </button>
+                                    )}
                                     <button
                                         onClick={() => setGameState(prev => ({ ...prev, screen: GameScreen.REWARD_CARD_ALBUM }))}
                                         className="flex-1 py-2 px-1 text-xs font-bold border-b-4 border-r-4 rounded-none bg-cyan-950/80 text-cyan-100 border-cyan-300 hover:bg-cyan-900 cursor-pointer flex items-center justify-center shadow-md"
@@ -19583,6 +19606,20 @@ const App: React.FC = () => {
                                 setRewardCardAlbumVersion(prev => prev + 1);
                             }}
                             languageMode={languageMode}
+                        />
+                    </div>
+                )}
+
+                {gameState.screen === GameScreen.ORIGINAL_CARD_BUILDER && (
+                    <div className="absolute inset-0">
+                        <OriginalCardBuilderScreen
+                            languageMode={languageMode}
+                            onBack={returnToTitle}
+                            onSave={(card) => {
+                                storageService.saveRewardCardToAlbum(card);
+                                setRewardCardAlbumVersion(previous => previous + 1);
+                                returnToTitle();
+                            }}
                         />
                     </div>
                 )}

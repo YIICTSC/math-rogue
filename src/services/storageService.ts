@@ -33,6 +33,7 @@ const NON_RESUMABLE_GAME_SCREENS = new Set<GameScreen>([
   GameScreen.ASSIGNMENT_CREATE,
   GameScreen.SUBMISSION,
   GameScreen.REWARD_CARD_ALBUM,
+  GameScreen.ORIGINAL_CARD_BUILDER,
   GameScreen.DEBUG_MENU,
   GameScreen.MAGIC_EVENT_SIMULATION,
   GameScreen.MINI_GAME_SELECT,
@@ -141,6 +142,7 @@ const STORAGE_KEY_REWARD_CARD_CLAIMED_ASSIGNMENTS = 'pixel_spire_reward_card_cla
 const STORAGE_KEY_COMPLETED_DAILY_ASSIGNMENTS = 'pixel_spire_completed_daily_assignments_v1';
 const STORAGE_KEY_HIGHEST_CARD_DAMAGE = 'pixel_spire_highest_card_damage_v1';
 const STORAGE_KEY_VACATION_MODE_UNLOCKS = 'pixel_spire_vacation_mode_unlocks_v1';
+const STORAGE_KEY_ORIGINAL_CARD_BUILDER_UNLOCKED = 'pixel_spire_original_card_builder_unlocked_v1';
 export const ONLINE_RANKING_DATA_CHANGED_EVENT = 'learning-rogue:online-ranking-data-changed';
 
 const notifyOnlineRankingDataChanged = (reason: string) => {
@@ -859,6 +861,23 @@ export const storageService = {
       return next;
     } catch {
       return storageService.getVacationModeUnlocks();
+    }
+  },
+
+  isOriginalCardBuilderUnlocked: (): boolean => {
+    try {
+      return localStorage.getItem(STORAGE_KEY_ORIGINAL_CARD_BUILDER_UNLOCKED) === 'true';
+    } catch {
+      return false;
+    }
+  },
+
+  unlockOriginalCardBuilder: (): boolean => {
+    try {
+      localStorage.setItem(STORAGE_KEY_ORIGINAL_CARD_BUILDER_UNLOCKED, 'true');
+      return true;
+    } catch {
+      return false;
     }
   },
 
@@ -1782,6 +1801,7 @@ export const storageService = {
       localStorage.removeItem(STORAGE_KEY_HINT_STREAKS);
       localStorage.removeItem(STORAGE_KEY_HIGHEST_CARD_DAMAGE);
       localStorage.removeItem(STORAGE_KEY_VACATION_MODE_UNLOCKS);
+      localStorage.removeItem(STORAGE_KEY_ORIGINAL_CARD_BUILDER_UNLOCKED);
   },
 
   clearAllLocalData: () => {

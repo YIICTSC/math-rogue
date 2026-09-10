@@ -1659,7 +1659,8 @@ export const ENGLISH_DISPLAY_COPY_EXACT: Record<string, string> = {
   "再抽選（残り1回）": "Reroll (1 left)",
   "再抽選済み": "Rerolled",
   "大ボス後の特別営業": "Special shop after the major boss",
-  "カード順を入れ替える": "Swap card order"
+  "カード順を入れ替える": "Swap card order",
+  "カードづくり": "Card Builder"
 };
 
 export const HIRAGANA_DISPLAY_COPY_EXACT: Record<string, string> = {
@@ -3021,5 +3022,6 @@ export const HIRAGANA_DISPLAY_COPY_EXACT: Record<string, string> = {
   "再抽選（残り1回）": "さいちょうせん（のこり1かい）",
   "再抽選済み": "さいちょうせんずみ",
   "大ボス後の特別営業": "だいぼすごの とくべつえいぎょう",
-  "カード順を入れ替える": "かーどじゅんを いれかえる"
+  "カード順を入れ替える": "かーどじゅんを いれかえる",
+  "カードづくり": "かーどづくり"
 };

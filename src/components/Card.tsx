@@ -333,6 +333,18 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled, onInspect, languag
   const renderCardArt = () => {
     const resolvedCardVisualTheme = card.visualTheme ?? 'elementary';
 
+    if (card.customImageData) {
+      return (
+        <img
+          src={card.customImageData}
+          alt={displayCardName}
+          className="w-full h-full object-cover opacity-95 drop-shadow-md"
+          loading="eager"
+          decoding="async"
+        />
+      );
+    }
+
     const age9ReplacementArt = getAge9ReplacementArt(card);
     if (age9ReplacementArt) {
       return (
