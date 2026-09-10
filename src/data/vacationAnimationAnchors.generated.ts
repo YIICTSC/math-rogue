@@ -3910,13 +3910,13 @@ export const VACATION_ANIMATION_FRAME_ANCHORS: Record<string, VacationAnimationF
   ],
   "sprites/magic/vacation-characters-idle-sheets/heroine-09-before.webp": [
     {
-      "centerX": 333,
-      "bottomY": 598,
+      "centerX": 336,
+      "bottomY": 600,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 285,
+      "centerX": 287,
       "bottomY": 598,
       "cellWidth": 627,
       "cellHeight": 627
@@ -3929,33 +3929,33 @@ export const VACATION_ANIMATION_FRAME_ANCHORS: Record<string, VacationAnimationF
     },
     {
       "centerX": 293,
-      "bottomY": 583,
+      "bottomY": 586,
       "cellWidth": 627,
       "cellHeight": 627
     }
   ],
   "sprites/magic/vacation-characters-idle-special-sheets/heroine-09-before.webp": [
     {
-      "centerX": 384,
-      "bottomY": 598,
+      "centerX": 383,
+      "bottomY": 600,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 256,
-      "bottomY": 626,
+      "centerX": 258,
+      "bottomY": 590,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 326,
-      "bottomY": 602,
+      "centerX": 324,
+      "bottomY": 603,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 263,
-      "bottomY": 601,
+      "centerX": 262,
+      "bottomY": 603,
       "cellWidth": 627,
       "cellHeight": 627
     }
@@ -3968,14 +3968,14 @@ export const VACATION_ANIMATION_FRAME_ANCHORS: Record<string, VacationAnimationF
       "cellHeight": 627
     },
     {
-      "centerX": 286,
-      "bottomY": 626,
+      "centerX": 282,
+      "bottomY": 607,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 290,
-      "bottomY": 569,
+      "centerX": 288,
+      "bottomY": 570,
       "cellWidth": 627,
       "cellHeight": 627
     },
@@ -3988,51 +3988,51 @@ export const VACATION_ANIMATION_FRAME_ANCHORS: Record<string, VacationAnimationF
   ],
   "sprites/magic/vacation-characters-skill-sheets/heroine-09-before.webp": [
     {
-      "centerX": 300,
+      "centerX": 303,
       "bottomY": 626,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 269,
-      "bottomY": 600,
+      "centerX": 280,
+      "bottomY": 608,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 330,
-      "bottomY": 573,
+      "centerX": 328,
+      "bottomY": 578,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 265,
-      "bottomY": 581,
+      "centerX": 270,
+      "bottomY": 585,
       "cellWidth": 627,
       "cellHeight": 627
     }
   ],
   "sprites/magic/vacation-characters-hit-sheets/heroine-09-before.webp": [
     {
-      "centerX": 371,
-      "bottomY": 603,
+      "centerX": 373,
+      "bottomY": 606,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 292,
-      "bottomY": 625,
+      "centerX": 291,
+      "bottomY": 585,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 349,
+      "centerX": 352,
       "bottomY": 576,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 273,
+      "centerX": 272,
       "bottomY": 582,
       "cellWidth": 627,
       "cellHeight": 627
@@ -4040,130 +4040,130 @@ export const VACATION_ANIMATION_FRAME_ANCHORS: Record<string, VacationAnimationF
   ],
   "sprites/magic/vacation-characters-low-hp-sheets/heroine-09-before.webp": [
     {
-      "centerX": 344,
-      "bottomY": 610,
+      "centerX": 347,
+      "bottomY": 616,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 266,
-      "bottomY": 609,
+      "centerX": 272,
+      "bottomY": 614,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 337,
-      "bottomY": 596,
+      "centerX": 339,
+      "bottomY": 598,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 271,
-      "bottomY": 605,
+      "centerX": 278,
+      "bottomY": 608,
       "cellWidth": 627,
       "cellHeight": 627
     }
   ],
   "sprites/magic/vacation-characters-idle-sheets/heroine-09-after.webp": [
     {
-      "centerX": 343,
-      "bottomY": 616,
+      "centerX": 344,
+      "bottomY": 615,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
       "centerX": 302,
-      "bottomY": 608,
+      "bottomY": 606,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 335,
-      "bottomY": 590,
+      "centerX": 337,
+      "bottomY": 593,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 305,
-      "bottomY": 591,
+      "centerX": 306,
+      "bottomY": 592,
       "cellWidth": 627,
       "cellHeight": 627
     }
   ],
   "sprites/magic/vacation-characters-idle-special-sheets/heroine-09-after.webp": [
     {
-      "centerX": 357,
+      "centerX": 358,
       "bottomY": 626,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 270,
+      "centerX": 269,
       "bottomY": 574,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 352,
+      "centerX": 350,
       "bottomY": 593,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 286,
-      "bottomY": 570,
+      "centerX": 287,
+      "bottomY": 572,
       "cellWidth": 627,
       "cellHeight": 627
     }
   ],
   "sprites/magic/vacation-characters-attack-sheets/heroine-09-after.webp": [
     {
-      "centerX": 364,
-      "bottomY": 614,
+      "centerX": 353,
+      "bottomY": 624,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 287,
-      "bottomY": 590,
+      "centerX": 312,
+      "bottomY": 612,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 323,
-      "bottomY": 555,
+      "centerX": 324,
+      "bottomY": 576,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 284,
-      "bottomY": 577,
+      "centerX": 299,
+      "bottomY": 589,
       "cellWidth": 627,
       "cellHeight": 627
     }
   ],
   "sprites/magic/vacation-characters-skill-sheets/heroine-09-after.webp": [
     {
-      "centerX": 340,
+      "centerX": 331,
       "bottomY": 626,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 289,
-      "bottomY": 579,
+      "centerX": 296,
+      "bottomY": 585,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
       "centerX": 325,
-      "bottomY": 595,
+      "bottomY": 597,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
       "centerX": 277,
-      "bottomY": 587,
+      "bottomY": 589,
       "cellWidth": 627,
       "cellHeight": 627
     }
@@ -4171,51 +4171,51 @@ export const VACATION_ANIMATION_FRAME_ANCHORS: Record<string, VacationAnimationF
   "sprites/magic/vacation-characters-hit-sheets/heroine-09-after.webp": [
     {
       "centerX": 349,
-      "bottomY": 610,
+      "bottomY": 612,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 267,
+      "centerX": 270,
       "bottomY": 626,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 315,
-      "bottomY": 560,
+      "centerX": 307,
+      "bottomY": 558,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 286,
-      "bottomY": 586,
+      "centerX": 285,
+      "bottomY": 589,
       "cellWidth": 627,
       "cellHeight": 627
     }
   ],
   "sprites/magic/vacation-characters-low-hp-sheets/heroine-09-after.webp": [
     {
-      "centerX": 344,
-      "bottomY": 592,
+      "centerX": 338,
+      "bottomY": 612,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 273,
-      "bottomY": 600,
+      "centerX": 311,
+      "bottomY": 619,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 326,
-      "bottomY": 537,
+      "centerX": 317,
+      "bottomY": 548,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 272,
-      "bottomY": 564,
+      "centerX": 315,
+      "bottomY": 587,
       "cellWidth": 627,
       "cellHeight": 627
     }
@@ -4534,14 +4534,14 @@ export const VACATION_ANIMATION_FRAME_ANCHORS: Record<string, VacationAnimationF
   ],
   "sprites/magic/vacation-male-characters-idle-sheets/soma-before.webp": [
     {
-      "centerX": 328,
+      "centerX": 331,
       "bottomY": 626,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
       "centerX": 292,
-      "bottomY": 621,
+      "bottomY": 623,
       "cellWidth": 627,
       "cellHeight": 627
     },
@@ -4552,7 +4552,7 @@ export const VACATION_ANIMATION_FRAME_ANCHORS: Record<string, VacationAnimationF
       "cellHeight": 627
     },
     {
-      "centerX": 287,
+      "centerX": 288,
       "bottomY": 626,
       "cellWidth": 627,
       "cellHeight": 627
@@ -4560,72 +4560,34 @@ export const VACATION_ANIMATION_FRAME_ANCHORS: Record<string, VacationAnimationF
   ],
   "sprites/magic/vacation-male-characters-idle-special-sheets/soma-before.webp": [
     {
-      "centerX": 367,
+      "centerX": 368,
       "bottomY": 626,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 268,
+      "centerX": 269,
       "bottomY": 626,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 342,
-      "bottomY": 598,
+      "centerX": 344,
+      "bottomY": 600,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 246,
-      "bottomY": 598,
+      "centerX": 247,
+      "bottomY": 599,
       "cellWidth": 627,
       "cellHeight": 627
     }
   ],
   "sprites/magic/vacation-male-characters-attack-sheets/soma-before.webp": [
     {
-      "centerX": 332,
-      "bottomY": 626,
-      "cellWidth": 627,
-      "cellHeight": 627
-    },
-    {
-      "centerX": 266,
-      "bottomY": 592,
-      "cellWidth": 627,
-      "cellHeight": 627
-    },
-    {
-      "centerX": 319,
-      "bottomY": 548,
-      "cellWidth": 627,
-      "cellHeight": 627
-    },
-    {
-      "centerX": 269,
-      "bottomY": 583,
-      "cellWidth": 627,
-      "cellHeight": 627
-    }
-  ],
-  "sprites/magic/vacation-male-characters-skill-sheets/soma-before.webp": [
-    {
-      "centerX": 343,
-      "bottomY": 626,
-      "cellWidth": 627,
-      "cellHeight": 627
-    },
-    {
-      "centerX": 293,
-      "bottomY": 623,
-      "cellWidth": 627,
-      "cellHeight": 627
-    },
-    {
       "centerX": 331,
-      "bottomY": 598,
+      "bottomY": 626,
       "cellWidth": 627,
       "cellHeight": 627
     },
@@ -4634,64 +4596,232 @@ export const VACATION_ANIMATION_FRAME_ANCHORS: Record<string, VacationAnimationF
       "bottomY": 592,
       "cellWidth": 627,
       "cellHeight": 627
+    },
+    {
+      "centerX": 320,
+      "bottomY": 549,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 268,
+      "bottomY": 586,
+      "cellWidth": 627,
+      "cellHeight": 627
     }
   ],
-  "sprites/magic/vacation-male-characters-hit-sheets/soma-before.webp": [
+  "sprites/magic/vacation-male-characters-skill-sheets/soma-before.webp": [
     {
-      "centerX": 364,
+      "centerX": 355,
       "bottomY": 626,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 282,
+      "centerX": 300,
+      "bottomY": 624,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 332,
+      "bottomY": 599,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 273,
+      "bottomY": 593,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-hit-sheets/soma-before.webp": [
+    {
+      "centerX": 363,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 286,
       "bottomY": 610,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 338,
-      "bottomY": 585,
+      "centerX": 340,
+      "bottomY": 586,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
       "centerX": 300,
-      "bottomY": 605,
+      "bottomY": 606,
       "cellWidth": 627,
       "cellHeight": 627
     }
   ],
   "sprites/magic/vacation-male-characters-low-hp-sheets/soma-before.webp": [
     {
-      "centerX": 310,
-      "bottomY": 596,
+      "centerX": 311,
+      "bottomY": 597,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
       "centerX": 302,
-      "bottomY": 596,
+      "bottomY": 597,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 316,
+      "centerX": 317,
       "bottomY": 567,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 278,
-      "bottomY": 583,
+      "centerX": 279,
+      "bottomY": 582,
       "cellWidth": 627,
       "cellHeight": 627
     }
   ],
   "sprites/magic/vacation-male-characters-idle-sheets/soma-after.webp": [
     {
-      "centerX": 357,
+      "centerX": 358,
       "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 280,
+      "bottomY": 602,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 342,
+      "bottomY": 617,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 296,
+      "bottomY": 612,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-idle-special-sheets/soma-after.webp": [
+    {
+      "centerX": 376,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 276,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 339,
+      "bottomY": 617,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 248,
+      "bottomY": 624,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-attack-sheets/soma-after.webp": [
+    {
+      "centerX": 353,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 309,
+      "bottomY": 568,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 337,
+      "bottomY": 568,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 260,
+      "bottomY": 587,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-skill-sheets/soma-after.webp": [
+    {
+      "centerX": 352,
+      "bottomY": 626,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 303,
+      "bottomY": 598,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 327,
+      "bottomY": 614,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 317,
+      "bottomY": 598,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-hit-sheets/soma-after.webp": [
+    {
+      "centerX": 356,
+      "bottomY": 613,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 271,
+      "bottomY": 583,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 320,
+      "bottomY": 565,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 292,
+      "bottomY": 571,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-low-hp-sheets/soma-after.webp": [
+    {
+      "centerX": 351,
+      "bottomY": 601,
       "cellWidth": 627,
       "cellHeight": 627
     },
@@ -4702,144 +4832,14 @@ export const VACATION_ANIMATION_FRAME_ANCHORS: Record<string, VacationAnimationF
       "cellHeight": 627
     },
     {
-      "centerX": 340,
-      "bottomY": 617,
-      "cellWidth": 627,
-      "cellHeight": 627
-    },
-    {
-      "centerX": 274,
-      "bottomY": 610,
-      "cellWidth": 627,
-      "cellHeight": 627
-    }
-  ],
-  "sprites/magic/vacation-male-characters-idle-special-sheets/soma-after.webp": [
-    {
-      "centerX": 358,
-      "bottomY": 626,
-      "cellWidth": 627,
-      "cellHeight": 627
-    },
-    {
-      "centerX": 275,
-      "bottomY": 623,
-      "cellWidth": 627,
-      "cellHeight": 627
-    },
-    {
-      "centerX": 342,
-      "bottomY": 617,
-      "cellWidth": 627,
-      "cellHeight": 627
-    },
-    {
-      "centerX": 246,
-      "bottomY": 624,
-      "cellWidth": 627,
-      "cellHeight": 627
-    }
-  ],
-  "sprites/magic/vacation-male-characters-attack-sheets/soma-after.webp": [
-    {
-      "centerX": 364,
-      "bottomY": 626,
-      "cellWidth": 627,
-      "cellHeight": 627
-    },
-    {
-      "centerX": 305,
-      "bottomY": 554,
-      "cellWidth": 627,
-      "cellHeight": 627
-    },
-    {
-      "centerX": 356,
-      "bottomY": 540,
-      "cellWidth": 627,
-      "cellHeight": 627
-    },
-    {
-      "centerX": 246,
-      "bottomY": 564,
-      "cellWidth": 627,
-      "cellHeight": 627
-    }
-  ],
-  "sprites/magic/vacation-male-characters-skill-sheets/soma-after.webp": [
-    {
       "centerX": 351,
-      "bottomY": 626,
+      "bottomY": 563,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 291,
-      "bottomY": 595,
-      "cellWidth": 627,
-      "cellHeight": 627
-    },
-    {
-      "centerX": 328,
-      "bottomY": 609,
-      "cellWidth": 627,
-      "cellHeight": 627
-    },
-    {
-      "centerX": 313,
-      "bottomY": 583,
-      "cellWidth": 627,
-      "cellHeight": 627
-    }
-  ],
-  "sprites/magic/vacation-male-characters-hit-sheets/soma-after.webp": [
-    {
-      "centerX": 355,
-      "bottomY": 612,
-      "cellWidth": 627,
-      "cellHeight": 627
-    },
-    {
-      "centerX": 268,
-      "bottomY": 581,
-      "cellWidth": 627,
-      "cellHeight": 627
-    },
-    {
-      "centerX": 320,
+      "centerX": 262,
       "bottomY": 564,
-      "cellWidth": 627,
-      "cellHeight": 627
-    },
-    {
-      "centerX": 294,
-      "bottomY": 571,
-      "cellWidth": 627,
-      "cellHeight": 627
-    }
-  ],
-  "sprites/magic/vacation-male-characters-low-hp-sheets/soma-after.webp": [
-    {
-      "centerX": 346,
-      "bottomY": 578,
-      "cellWidth": 627,
-      "cellHeight": 627
-    },
-    {
-      "centerX": 243,
-      "bottomY": 580,
-      "cellWidth": 627,
-      "cellHeight": 627
-    },
-    {
-      "centerX": 347,
-      "bottomY": 551,
-      "cellWidth": 627,
-      "cellHeight": 627
-    },
-    {
-      "centerX": 243,
-      "bottomY": 552,
       "cellWidth": 627,
       "cellHeight": 627
     }
@@ -6101,18 +6101,18 @@ export const VACATION_ANIMATION_FRAME_ANCHORS: Record<string, VacationAnimationF
     },
     {
       "centerX": 249,
-      "bottomY": 602,
+      "bottomY": 601,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
       "centerX": 334,
-      "bottomY": 595,
+      "bottomY": 596,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 250,
+      "centerX": 248,
       "bottomY": 592,
       "cellWidth": 627,
       "cellHeight": 627
@@ -6120,26 +6120,26 @@ export const VACATION_ANIMATION_FRAME_ANCHORS: Record<string, VacationAnimationF
   ],
   "sprites/magic/vacation-male-characters-idle-special-sheets/elliot-before.webp": [
     {
-      "centerX": 347,
-      "bottomY": 623,
+      "centerX": 352,
+      "bottomY": 626,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 287,
-      "bottomY": 613,
+      "centerX": 288,
+      "bottomY": 619,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 327,
-      "bottomY": 585,
+      "centerX": 342,
+      "bottomY": 604,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 242,
-      "bottomY": 574,
+      "centerX": 280,
+      "bottomY": 597,
       "cellWidth": 627,
       "cellHeight": 627
     }
@@ -6152,57 +6152,77 @@ export const VACATION_ANIMATION_FRAME_ANCHORS: Record<string, VacationAnimationF
       "cellHeight": 627
     },
     {
-      "centerX": 273,
-      "bottomY": 603,
+      "centerX": 275,
+      "bottomY": 602,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 352,
-      "bottomY": 606,
+      "centerX": 348,
+      "bottomY": 607,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
       "centerX": 273,
-      "bottomY": 610,
+      "bottomY": 611,
       "cellWidth": 627,
       "cellHeight": 627
     }
   ],
   "sprites/magic/vacation-male-characters-skill-sheets/elliot-before.webp": [
     {
-      "centerX": 373,
+      "centerX": 364,
       "bottomY": 626,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 296,
+      "centerX": 301,
+      "bottomY": 614,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 330,
+      "bottomY": 600,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 269,
       "bottomY": 607,
-      "cellWidth": 627,
-      "cellHeight": 627
-    },
-    {
-      "centerX": 317,
-      "bottomY": 594,
-      "cellWidth": 627,
-      "cellHeight": 627
-    },
-    {
-      "centerX": 255,
-      "bottomY": 598,
       "cellWidth": 627,
       "cellHeight": 627
     }
   ],
   "sprites/magic/vacation-male-characters-hit-sheets/elliot-before.webp": [
     {
-      "centerX": 330,
-      "bottomY": 625,
+      "centerX": 331,
+      "bottomY": 626,
       "cellWidth": 627,
       "cellHeight": 627
     },
+    {
+      "centerX": 334,
+      "bottomY": 597,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 330,
+      "bottomY": 558,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 284,
+      "bottomY": 604,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/magic/vacation-male-characters-low-hp-sheets/elliot-before.webp": [
     {
       "centerX": 337,
       "bottomY": 596,
@@ -6210,65 +6230,45 @@ export const VACATION_ANIMATION_FRAME_ANCHORS: Record<string, VacationAnimationF
       "cellHeight": 627
     },
     {
-      "centerX": 332,
-      "bottomY": 556,
-      "cellWidth": 627,
-      "cellHeight": 627
-    },
-    {
       "centerX": 284,
-      "bottomY": 601,
-      "cellWidth": 627,
-      "cellHeight": 627
-    }
-  ],
-  "sprites/magic/vacation-male-characters-low-hp-sheets/elliot-before.webp": [
-    {
-      "centerX": 338,
-      "bottomY": 596,
-      "cellWidth": 627,
-      "cellHeight": 627
-    },
-    {
-      "centerX": 286,
       "bottomY": 590,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 360,
+      "centerX": 361,
       "bottomY": 582,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
       "centerX": 259,
-      "bottomY": 582,
+      "bottomY": 581,
       "cellWidth": 627,
       "cellHeight": 627
     }
   ],
   "sprites/magic/vacation-male-characters-idle-sheets/elliot-after.webp": [
     {
-      "centerX": 352,
+      "centerX": 353,
       "bottomY": 626,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 284,
+      "centerX": 285,
       "bottomY": 626,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 330,
-      "bottomY": 607,
+      "centerX": 329,
+      "bottomY": 608,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 268,
+      "centerX": 269,
       "bottomY": 613,
       "cellWidth": 627,
       "cellHeight": 627
@@ -6277,12 +6277,12 @@ export const VACATION_ANIMATION_FRAME_ANCHORS: Record<string, VacationAnimationF
   "sprites/magic/vacation-male-characters-idle-special-sheets/elliot-after.webp": [
     {
       "centerX": 345,
-      "bottomY": 608,
+      "bottomY": 609,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 268,
+      "centerX": 267,
       "bottomY": 615,
       "cellWidth": 627,
       "cellHeight": 627
@@ -6294,7 +6294,7 @@ export const VACATION_ANIMATION_FRAME_ANCHORS: Record<string, VacationAnimationF
       "cellHeight": 627
     },
     {
-      "centerX": 263,
+      "centerX": 264,
       "bottomY": 601,
       "cellWidth": 627,
       "cellHeight": 627
@@ -6308,46 +6308,46 @@ export const VACATION_ANIMATION_FRAME_ANCHORS: Record<string, VacationAnimationF
       "cellHeight": 627
     },
     {
-      "centerX": 319,
+      "centerX": 317,
       "bottomY": 594,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 314,
-      "bottomY": 576,
+      "centerX": 315,
+      "bottomY": 578,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 296,
-      "bottomY": 593,
+      "centerX": 295,
+      "bottomY": 595,
       "cellWidth": 627,
       "cellHeight": 627
     }
   ],
   "sprites/magic/vacation-male-characters-skill-sheets/elliot-after.webp": [
     {
-      "centerX": 326,
+      "centerX": 325,
       "bottomY": 626,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 301,
+      "centerX": 298,
+      "bottomY": 604,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 329,
       "bottomY": 600,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 330,
-      "bottomY": 600,
-      "cellWidth": 627,
-      "cellHeight": 627
-    },
-    {
-      "centerX": 305,
-      "bottomY": 617,
+      "centerX": 307,
+      "bottomY": 620,
       "cellWidth": 627,
       "cellHeight": 627
     }
@@ -6360,46 +6360,46 @@ export const VACATION_ANIMATION_FRAME_ANCHORS: Record<string, VacationAnimationF
       "cellHeight": 627
     },
     {
-      "centerX": 286,
-      "bottomY": 603,
+      "centerX": 284,
+      "bottomY": 604,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 333,
-      "bottomY": 605,
+      "centerX": 332,
+      "bottomY": 606,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 245,
-      "bottomY": 603,
+      "centerX": 246,
+      "bottomY": 604,
       "cellWidth": 627,
       "cellHeight": 627
     }
   ],
   "sprites/magic/vacation-male-characters-low-hp-sheets/elliot-after.webp": [
     {
-      "centerX": 319,
-      "bottomY": 607,
+      "centerX": 320,
+      "bottomY": 608,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 292,
-      "bottomY": 603,
+      "centerX": 294,
+      "bottomY": 605,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
       "centerX": 310,
-      "bottomY": 573,
+      "bottomY": 574,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 285,
-      "bottomY": 584,
+      "centerX": 284,
+      "bottomY": 587,
       "cellWidth": 627,
       "cellHeight": 627
     }
@@ -7371,13 +7371,13 @@ export const VACATION_IDLE_FRAME_ANCHORS: Record<string, VacationAnimationFrameA
   ],
   "sprites/magic/vacation-characters-idle-sheets/heroine-09-before.webp": [
     {
-      "centerX": 333,
-      "bottomY": 598,
+      "centerX": 336,
+      "bottomY": 600,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 285,
+      "centerX": 287,
       "bottomY": 598,
       "cellWidth": 627,
       "cellHeight": 627
@@ -7390,33 +7390,33 @@ export const VACATION_IDLE_FRAME_ANCHORS: Record<string, VacationAnimationFrameA
     },
     {
       "centerX": 293,
-      "bottomY": 583,
+      "bottomY": 586,
       "cellWidth": 627,
       "cellHeight": 627
     }
   ],
   "sprites/magic/vacation-characters-idle-sheets/heroine-09-after.webp": [
     {
-      "centerX": 343,
-      "bottomY": 616,
+      "centerX": 344,
+      "bottomY": 615,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
       "centerX": 302,
-      "bottomY": 608,
+      "bottomY": 606,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 335,
-      "bottomY": 590,
+      "centerX": 337,
+      "bottomY": 593,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 305,
-      "bottomY": 591,
+      "centerX": 306,
+      "bottomY": 592,
       "cellWidth": 627,
       "cellHeight": 627
     }
@@ -7475,14 +7475,14 @@ export const VACATION_IDLE_FRAME_ANCHORS: Record<string, VacationAnimationFrameA
   ],
   "sprites/magic/vacation-male-characters-idle-sheets/soma-before.webp": [
     {
-      "centerX": 328,
+      "centerX": 331,
       "bottomY": 626,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
       "centerX": 292,
-      "bottomY": 621,
+      "bottomY": 623,
       "cellWidth": 627,
       "cellHeight": 627
     },
@@ -7493,7 +7493,7 @@ export const VACATION_IDLE_FRAME_ANCHORS: Record<string, VacationAnimationFrameA
       "cellHeight": 627
     },
     {
-      "centerX": 287,
+      "centerX": 288,
       "bottomY": 626,
       "cellWidth": 627,
       "cellHeight": 627
@@ -7501,26 +7501,26 @@ export const VACATION_IDLE_FRAME_ANCHORS: Record<string, VacationAnimationFrameA
   ],
   "sprites/magic/vacation-male-characters-idle-sheets/soma-after.webp": [
     {
-      "centerX": 357,
+      "centerX": 358,
       "bottomY": 626,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 259,
-      "bottomY": 603,
+      "centerX": 280,
+      "bottomY": 602,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 340,
+      "centerX": 342,
       "bottomY": 617,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 274,
-      "bottomY": 610,
+      "centerX": 296,
+      "bottomY": 612,
       "cellWidth": 627,
       "cellHeight": 627
     }
@@ -7742,18 +7742,18 @@ export const VACATION_IDLE_FRAME_ANCHORS: Record<string, VacationAnimationFrameA
     },
     {
       "centerX": 249,
-      "bottomY": 602,
+      "bottomY": 601,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
       "centerX": 334,
-      "bottomY": 595,
+      "bottomY": 596,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 250,
+      "centerX": 248,
       "bottomY": 592,
       "cellWidth": 627,
       "cellHeight": 627
@@ -7761,25 +7761,25 @@ export const VACATION_IDLE_FRAME_ANCHORS: Record<string, VacationAnimationFrameA
   ],
   "sprites/magic/vacation-male-characters-idle-sheets/elliot-after.webp": [
     {
-      "centerX": 352,
+      "centerX": 353,
       "bottomY": 626,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 284,
+      "centerX": 285,
       "bottomY": 626,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 330,
-      "bottomY": 607,
+      "centerX": 329,
+      "bottomY": 608,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 268,
+      "centerX": 269,
       "bottomY": 613,
       "cellWidth": 627,
       "cellHeight": 627
@@ -8492,52 +8492,52 @@ export const VACATION_IDLE_SPECIAL_FRAME_ANCHORS: Record<string, VacationAnimati
   ],
   "sprites/magic/vacation-characters-idle-special-sheets/heroine-09-before.webp": [
     {
-      "centerX": 384,
-      "bottomY": 598,
+      "centerX": 383,
+      "bottomY": 600,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 256,
-      "bottomY": 626,
+      "centerX": 258,
+      "bottomY": 590,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 326,
-      "bottomY": 602,
+      "centerX": 324,
+      "bottomY": 603,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 263,
-      "bottomY": 601,
+      "centerX": 262,
+      "bottomY": 603,
       "cellWidth": 627,
       "cellHeight": 627
     }
   ],
   "sprites/magic/vacation-characters-idle-special-sheets/heroine-09-after.webp": [
     {
-      "centerX": 357,
+      "centerX": 358,
       "bottomY": 626,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 270,
+      "centerX": 269,
       "bottomY": 574,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 352,
+      "centerX": 350,
       "bottomY": 593,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 286,
-      "bottomY": 570,
+      "centerX": 287,
+      "bottomY": 572,
       "cellWidth": 627,
       "cellHeight": 627
     }
@@ -8596,51 +8596,51 @@ export const VACATION_IDLE_SPECIAL_FRAME_ANCHORS: Record<string, VacationAnimati
   ],
   "sprites/magic/vacation-male-characters-idle-special-sheets/soma-before.webp": [
     {
-      "centerX": 367,
+      "centerX": 368,
       "bottomY": 626,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 268,
+      "centerX": 269,
       "bottomY": 626,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 342,
-      "bottomY": 598,
+      "centerX": 344,
+      "bottomY": 600,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 246,
-      "bottomY": 598,
+      "centerX": 247,
+      "bottomY": 599,
       "cellWidth": 627,
       "cellHeight": 627
     }
   ],
   "sprites/magic/vacation-male-characters-idle-special-sheets/soma-after.webp": [
     {
-      "centerX": 358,
+      "centerX": 376,
       "bottomY": 626,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 275,
-      "bottomY": 623,
+      "centerX": 276,
+      "bottomY": 626,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 342,
+      "centerX": 339,
       "bottomY": 617,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 246,
+      "centerX": 248,
       "bottomY": 624,
       "cellWidth": 627,
       "cellHeight": 627
@@ -8856,26 +8856,26 @@ export const VACATION_IDLE_SPECIAL_FRAME_ANCHORS: Record<string, VacationAnimati
   ],
   "sprites/magic/vacation-male-characters-idle-special-sheets/elliot-before.webp": [
     {
-      "centerX": 347,
-      "bottomY": 623,
+      "centerX": 352,
+      "bottomY": 626,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 287,
-      "bottomY": 613,
+      "centerX": 288,
+      "bottomY": 619,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 327,
-      "bottomY": 585,
+      "centerX": 342,
+      "bottomY": 604,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 242,
-      "bottomY": 574,
+      "centerX": 280,
+      "bottomY": 597,
       "cellWidth": 627,
       "cellHeight": 627
     }
@@ -8883,12 +8883,12 @@ export const VACATION_IDLE_SPECIAL_FRAME_ANCHORS: Record<string, VacationAnimati
   "sprites/magic/vacation-male-characters-idle-special-sheets/elliot-after.webp": [
     {
       "centerX": 345,
-      "bottomY": 608,
+      "bottomY": 609,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 268,
+      "centerX": 267,
       "bottomY": 615,
       "cellWidth": 627,
       "cellHeight": 627
@@ -8900,7 +8900,7 @@ export const VACATION_IDLE_SPECIAL_FRAME_ANCHORS: Record<string, VacationAnimati
       "cellHeight": 627
     },
     {
-      "centerX": 263,
+      "centerX": 264,
       "bottomY": 601,
       "cellWidth": 627,
       "cellHeight": 627

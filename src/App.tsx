@@ -643,8 +643,25 @@ const PRIMARY_SITE_URL = 'https://yiictsc.github.io/math-rogue/';
 const COOP_VFX_DEBUG_STORAGE_KEY = 'mr.coopVfxDebug';
 const COOP_RESUME_STORAGE_KEY = 'learning-rogue.coopResume';
 const COOP_REALTIME_END_TURN_RESEND_MS = 1200;
+const COOP_BATTLE_ACTION_RESEND_MS = 1000;
+const COOP_BATTLE_ACTION_MAX_RESENDS = 3;
 const COOP_REALTIME_AUTO_ADVANCE_MS = 10000;
 const COOP_FINISHER_DISPLAY_MS = 1800;
+
+type CoopQueuedBattleEvent = {
+    type: 'COOP_BATTLE_PLAY_CARD' | 'COOP_BATTLE_USE_POTION' | 'COOP_BATTLE_TURN_START' | 'COOP_BATTLE_SELECTION_STATE' | 'COOP_BATTLE_MODAL_RESOLVE' | 'COOP_BATTLE_CODEX_SELECT';
+    actionId?: string;
+    battleKey?: string;
+    turnCursor?: number;
+    enemyTurnCursor?: number;
+    cardId?: string;
+    potionId?: string;
+    playedCard?: ICard;
+    selectedCardId?: string;
+    selectionCancelled?: boolean;
+    modalType?: 'WEATHER_SCRY' | 'GALAXY_EXPRESS' | 'GOLD_FISH' | 'DREAM_CATCHER';
+    keepMap?: Record<string, boolean>;
+};
 
 type LearningRogueElectronApi = {
     isElectron: boolean;
@@ -2576,9 +2593,16 @@ const App: React.FC = () => {
     const coopVfxDebugLogRef = useRef<CoopVfxDebugEntry[]>([]);
     const coopChainTrackerRef = useRef<{ lastActorPeerId: string | null; lastAt: number; chainCount: number }>({ lastActorPeerId: null, lastAt: 0, chainCount: 0 });
     const coopPendingHostActionRef = useRef<string | null>(null);
+    const coopPendingHostActionEventRef = useRef<CoopQueuedBattleEvent | null>(null);
+    const coopBattleActionRetryTimerRef = useRef<number | null>(null);
+    const coopBattleActionRetryCountRef = useRef(0);
     const coopProcessedHostActionIdsRef = useRef<Set<string>>(new Set());
     const coopHostBattleSyncTimerRef = useRef<number | null>(null);
-    const queuedCoopBattleEventRef = useRef<{ type: 'COOP_BATTLE_PLAY_CARD' | 'COOP_BATTLE_USE_POTION' | 'COOP_BATTLE_TURN_START' | 'COOP_BATTLE_SELECTION_STATE' | 'COOP_BATTLE_MODAL_RESOLVE' | 'COOP_BATTLE_CODEX_SELECT', actionId?: string, battleKey?: string, turnCursor?: number, enemyTurnCursor?: number, cardId?: string, potionId?: string, playedCard?: ICard, selectedCardId?: string, selectionCancelled?: boolean, modalType?: 'WEATHER_SCRY' | 'GALAXY_EXPRESS' | 'GOLD_FISH' | 'DREAM_CATCHER', keepMap?: Record<string, boolean> } | null>(null);
+    const coopLastBattleSyncSignatureRef = useRef<string | null>(null);
+    const coopHostBattleSyncRevisionRef = useRef(0);
+    const coopGuestBattleSyncRevisionRef = useRef(0);
+    const coopHealthResyncAtRef = useRef<Record<string, number>>({});
+    const queuedCoopBattleEventRef = useRef<CoopQueuedBattleEvent | null>(null);
     const [queuedCoopBattleEventTick, setQueuedCoopBattleEventTick] = useState(0);
     const coopMapPendingTimerRef = useRef<number | null>(null);
     const coopHostMigrationInProgressRef = useRef(false);
@@ -2613,6 +2637,10 @@ const App: React.FC = () => {
             if (coopEndTurnResendTimerRef.current) {
                 window.clearInterval(coopEndTurnResendTimerRef.current);
                 coopEndTurnResendTimerRef.current = null;
+            }
+            if (coopBattleActionRetryTimerRef.current) {
+                window.clearInterval(coopBattleActionRetryTimerRef.current);
+                coopBattleActionRetryTimerRef.current = null;
             }
             if (coopRealtimeAutoAdvanceTimerRef.current) {
                 window.clearTimeout(coopRealtimeAutoAdvanceTimerRef.current);
@@ -3623,6 +3651,8 @@ const App: React.FC = () => {
         coopBattleState: sharedState.coopBattleState ?? null
     }), []);
     const broadcastCoopBattleState = useCallback((battleState: CoopBattleState | null, syncOverrides?: {
+        force?: boolean,
+        targetPeerId?: string,
         activeEffects?: VisualEffectInstance[],
         enemies?: Enemy[],
         selectedEnemyId?: string | null,
@@ -3635,8 +3665,45 @@ const App: React.FC = () => {
         if (!coopSession?.isHost) return;
         const latestState = stateRef.current;
         const normalizedBattleState = mergeLocalPeerIntoCoopBattleState(battleState);
-        p2pService.send({
+        const signature = JSON.stringify({
+            battleKey: normalizedBattleState?.battleKey ?? null,
+            turnCursor: normalizedBattleState?.turnCursor ?? null,
+            enemyTurnCursor: normalizedBattleState?.enemyTurnCursor ?? null,
+            roundEndedPeerIds: normalizedBattleState?.roundEndedPeerIds ?? [],
+            players: normalizedBattleState?.players.map(entry => ({
+                peerId: entry.peerId,
+                hp: entry.player.currentHp,
+                energy: entry.player.currentEnergy,
+                block: entry.player.block,
+                hand: entry.player.hand.map(card => card.id),
+                draw: entry.player.drawPile.map(card => card.id),
+                discard: entry.player.discardPile.map(card => card.id),
+                potions: entry.player.potions.map(potion => potion.id),
+                selectedEnemyId: entry.selectedEnemyId,
+                selection: normalizedBattleState?.selectionStateByPeerId?.[entry.peerId] ?? null
+            })) ?? [],
+            enemies: (syncOverrides?.enemies ?? latestState.enemies).map(enemy => ({
+                id: enemy.id,
+                hp: enemy.currentHp,
+                block: enemy.block,
+                weak: enemy.weak,
+                vulnerable: enemy.vulnerable,
+                poison: enemy.poison,
+                phase: enemy.phase
+            })),
+            selectedEnemyId: syncOverrides?.selectedEnemyId ?? latestState.selectedEnemyId,
+            selectionState: syncOverrides?.selectionState ?? latestState.selectionState,
+            combatLogTail: (syncOverrides?.combatLog ?? latestState.combatLog).slice(-2),
+            turnLog: syncOverrides?.turnLog ?? turnLog,
+            actingEnemyId: syncOverrides?.actingEnemyId ?? actingEnemyId,
+            finisherCutinCardId: (syncOverrides?.finisherCutinCard ?? battleFinisherCutinCard)?.id ?? null
+        });
+        if (!syncOverrides?.force && signature === coopLastBattleSyncSignatureRef.current) return;
+        coopLastBattleSyncSignatureRef.current = signature;
+        coopHostBattleSyncRevisionRef.current += 1;
+        const payload = {
             type: 'COOP_BATTLE_SYNC',
+            revision: coopHostBattleSyncRevisionRef.current,
             battleState: normalizedBattleState,
             activeEffects: syncOverrides?.activeEffects ?? latestState.activeEffects,
             enemies: syncOverrides?.enemies ?? latestState.enemies,
@@ -3646,7 +3713,12 @@ const App: React.FC = () => {
             turnLog: syncOverrides?.turnLog ?? turnLog,
             actingEnemyId: syncOverrides?.actingEnemyId ?? actingEnemyId,
             finisherCutinCard: syncOverrides?.finisherCutinCard ?? battleFinisherCutinCard
-        });
+        } as const;
+        if (syncOverrides?.targetPeerId) {
+            p2pService.sendTo(syncOverrides.targetPeerId, payload);
+        } else {
+            p2pService.send(payload);
+        }
     }, [actingEnemyId, battleFinisherCutinCard, coopSession, mergeLocalPeerIntoCoopBattleState, turnLog]);
     const scheduleHostCoopBattleSync = useCallback((delayMs = 50) => {
         if (!coopSession?.isHost) return;
@@ -3683,7 +3755,23 @@ const App: React.FC = () => {
             setGameState(prev => ({ ...prev, player }));
         }
     }, [coopSelfPeerId, updateCoopParticipantState, upsertCoopPlayerSnapshot]);
-    const queueCoopBattleEvent = useCallback((event: { type: 'COOP_BATTLE_PLAY_CARD' | 'COOP_BATTLE_USE_POTION' | 'COOP_BATTLE_TURN_START' | 'COOP_BATTLE_SELECTION_STATE' | 'COOP_BATTLE_MODAL_RESOLVE' | 'COOP_BATTLE_CODEX_SELECT', actionId?: string, battleKey?: string, turnCursor?: number, enemyTurnCursor?: number, cardId?: string, potionId?: string, playedCard?: ICard, selectedCardId?: string, selectionCancelled?: boolean, modalType?: 'WEATHER_SCRY' | 'GALAXY_EXPRESS' | 'GOLD_FISH' | 'DREAM_CATCHER', keepMap?: Record<string, boolean> }) => {
+    const sendCoopBattleEvent = useCallback((event: CoopQueuedBattleEvent, selectedEnemyId?: string | null) => {
+        p2pService.send({
+            type: event.type,
+            actionId: event.actionId,
+            battleKey: event.battleKey,
+            turnCursor: event.turnCursor,
+            enemyTurnCursor: event.enemyTurnCursor,
+            ...(event.cardId ? { cardId: event.cardId } : {}),
+            ...(event.potionId ? { potionId: event.potionId } : {}),
+            ...(event.selectedCardId ? { selectedCardId: event.selectedCardId } : {}),
+            ...(event.selectionCancelled ? { selectionCancelled: true } : {}),
+            ...(event.modalType ? { modalType: event.modalType } : {}),
+            ...(event.keepMap ? { keepMap: event.keepMap } : {}),
+            ...(selectedEnemyId !== undefined ? { selectedEnemyId } : {})
+        } as any);
+    }, []);
+    const queueCoopBattleEvent = useCallback((event: CoopQueuedBattleEvent) => {
         const latestState = stateRef.current;
         const nextEvent = {
             ...event,
@@ -4594,8 +4682,8 @@ const App: React.FC = () => {
         ) {
             return;
         }
-        broadcastCoopBattleState(gameState.coopBattleState);
-    }, [battleFinisherCutinCard, broadcastCoopBattleState, coopSession, gameState.challengeMode, gameState.coopBattleState, gameState.screen]);
+        broadcastCoopBattleState(stateRef.current.coopBattleState);
+    }, [battleFinisherCutinCard, broadcastCoopBattleState, coopSession, gameState.challengeMode, gameState.screen]);
     useEffect(() => {
         if (
             queuedCoopBattleEventTick === 0 ||
@@ -4633,34 +4721,61 @@ const App: React.FC = () => {
         const timeout = window.setTimeout(() => {
             const latestState = stateRef.current;
             coopLastBattleActionSignatureRef.current = actionSignature;
-            p2pService.send({
-                type: queuedEvent.type,
-                actionId: queuedEvent.actionId,
-                battleKey: queuedEvent.battleKey,
-                turnCursor: queuedEvent.turnCursor,
-                enemyTurnCursor: queuedEvent.enemyTurnCursor,
-                ...(queuedEvent.cardId ? { cardId: queuedEvent.cardId } : {}),
-                ...(queuedEvent.potionId ? { potionId: queuedEvent.potionId } : {}),
-                ...(queuedEvent.selectedCardId ? { selectedCardId: queuedEvent.selectedCardId } : {}),
-                ...(queuedEvent.selectionCancelled ? { selectionCancelled: true } : {}),
-                ...(queuedEvent.modalType ? { modalType: queuedEvent.modalType } : {}),
-                ...(queuedEvent.keepMap ? { keepMap: queuedEvent.keepMap } : {}),
-                ...(queuedEvent.playedCard ? { playedCard: queuedEvent.playedCard } : {}),
-                selectedEnemyId: latestState.selectedEnemyId
-            } as any);
+            if (queuedEvent.type === 'COOP_BATTLE_PLAY_CARD' || queuedEvent.type === 'COOP_BATTLE_USE_POTION') {
+                if (coopBattleActionRetryTimerRef.current) {
+                    window.clearInterval(coopBattleActionRetryTimerRef.current);
+                }
+                coopPendingHostActionEventRef.current = queuedEvent;
+                coopBattleActionRetryCountRef.current = 0;
+                sendCoopBattleEvent(queuedEvent, latestState.selectedEnemyId);
+                coopBattleActionRetryTimerRef.current = window.setInterval(() => {
+                    const pendingEvent = coopPendingHostActionEventRef.current;
+                    if (!pendingEvent || stateRef.current.screen !== GameScreen.BATTLE) {
+                        if (coopBattleActionRetryTimerRef.current) {
+                            window.clearInterval(coopBattleActionRetryTimerRef.current);
+                            coopBattleActionRetryTimerRef.current = null;
+                        }
+                        return;
+                    }
+                    if (coopBattleActionRetryCountRef.current >= COOP_BATTLE_ACTION_MAX_RESENDS) {
+                        if (coopBattleActionRetryTimerRef.current) {
+                            window.clearInterval(coopBattleActionRetryTimerRef.current);
+                            coopBattleActionRetryTimerRef.current = null;
+                        }
+                        coopPendingHostActionEventRef.current = null;
+                        coopPendingHostActionRef.current = null;
+                        setTurnLog('通信を確認しています。戦闘状態を同期し直します。');
+                        p2pService.send({ type: 'COOP_STATE_SYNC_REQUEST' });
+                        return;
+                    }
+                    coopBattleActionRetryCountRef.current += 1;
+                    sendCoopBattleEvent(pendingEvent, stateRef.current.selectedEnemyId);
+                }, COOP_BATTLE_ACTION_RESEND_MS);
+            } else {
+                sendCoopBattleEvent(queuedEvent, latestState.selectedEnemyId);
+            }
             queuedCoopBattleEventRef.current = null;
         }, 40);
         return () => window.clearTimeout(timeout);
-    }, [actingEnemyId, coopSession, gameState.challengeMode, gameState.coopBattleState, gameState.combatLog, gameState.enemies, gameState.player, gameState.screen, gameState.selectedEnemyId, queuedCoopBattleEventTick, turnLog]);
+    }, [actingEnemyId, coopSession, gameState.challengeMode, gameState.coopBattleState, gameState.combatLog, gameState.enemies, gameState.player, gameState.screen, gameState.selectedEnemyId, queuedCoopBattleEventTick, sendCoopBattleEvent, turnLog]);
     useEffect(() => {
         if (gameState.screen !== GameScreen.BATTLE) {
             coopLastBattleActionSignatureRef.current = null;
             coopProcessedHostActionIdsRef.current.clear();
             coopProcessedEndTurnKeysRef.current.clear();
             coopPendingHostActionRef.current = null;
+            coopPendingHostActionEventRef.current = null;
+            coopBattleActionRetryCountRef.current = 0;
+            if (coopBattleActionRetryTimerRef.current) {
+                window.clearInterval(coopBattleActionRetryTimerRef.current);
+                coopBattleActionRetryTimerRef.current = null;
+            }
             coopPendingEndTurnKeyRef.current = null;
             coopHostStartedTurnKeysRef.current.clear();
             coopHostPreparedInitialTurnPeerIdsRef.current.clear();
+            coopLastBattleSyncSignatureRef.current = null;
+            coopHostBattleSyncRevisionRef.current = 0;
+            coopGuestBattleSyncRevisionRef.current = 0;
             coopRemoteFinisherCardIdRef.current = null;
         }
     }, [gameState.screen]);
@@ -9726,32 +9841,33 @@ const App: React.FC = () => {
         setPeacePipeModal(null);
     };
 
-    const handleUsePotion = (potion: Potion, coopActorPeerId?: string) => {
-        if (gameState.screen !== GameScreen.BATTLE) return;
-        if (weatherScryModal || galaxyExpressModal || goldFishModal || dreamCatcherModal) return;
-        const isCoopHostRemoteAction = !!coopActorPeerId && gameState.challengeMode === 'COOP' && !!coopSession?.isHost;
+    const handleUsePotion = (potion: Potion, coopActorPeerId?: string): boolean => {
+        const isCoopHostRemoteAction = !!coopActorPeerId && stateRef.current.challengeMode === 'COOP' && !!coopSession?.isHost;
+        const actionState = isCoopHostRemoteAction ? stateRef.current : gameState;
+        if (actionState.screen !== GameScreen.BATTLE) return false;
+        if (weatherScryModal || galaxyExpressModal || goldFishModal || dreamCatcherModal) return false;
         const potionOwner = coopActorPeerId
-            ? gameState.coopBattleState?.players.find(entry => entry.peerId === coopActorPeerId)?.player
-            : gameState.player;
+            ? actionState.coopBattleState?.players.find(entry => entry.peerId === coopActorPeerId)?.player
+            : actionState.player;
         if (potionOwner && hasRelic(potionOwner, 'SOZU')) {
             if (!isCoopHostRemoteAction) audioService.playSound('wrong');
-            return;
+            return false;
         }
-        if (!isCoopHostRemoteAction && gameState.challengeMode === 'COOP' && coopSession && !coopSession.isHost && coopPendingHostActionRef.current) {
+        if (!isCoopHostRemoteAction && actionState.challengeMode === 'COOP' && coopSession && !coopSession.isHost && coopPendingHostActionRef.current) {
             audioService.playSound('wrong');
-            return;
+            return false;
         }
         if (!isCoopHostRemoteAction) {
             audioService.playSound('select');
-            if (gameState.visualTheme === 'high-school') {
+            if (actionState.visualTheme === 'high-school') {
                 playDelayedBattleVoice(() => {
                     audioService.playHighSchoolVoice(gameState.player.id, 'item');
                 });
             }
         }
-        if (!isCoopHostRemoteAction && gameState.challengeMode === 'COOP' && coopSession && !coopSession.isHost) {
+        if (!isCoopHostRemoteAction && actionState.challengeMode === 'COOP' && coopSession && !coopSession.isHost) {
             queueCoopBattleEvent({ type: 'COOP_BATTLE_USE_POTION', potionId: potion.id });
-            return;
+            return true;
         }
 
         setGameState(prev => {
@@ -9956,20 +10072,22 @@ const App: React.FC = () => {
                 activeEffects: [...prev.activeEffects, ...attachCoopEffectOwner(nextActiveEffects, coopActorPeerId)]
             };
         });
+        return true;
     };
 
-    const handlePlayCard = (card: ICard, coopActorPeerId?: string, options?: { endlessBossTaxAlreadyIncluded?: boolean }) => {
-        if (weatherScryModal || galaxyExpressModal || goldFishModal || dreamCatcherModal) return;
-        const isCoopHostRemoteAction = !!coopActorPeerId && gameState.challengeMode === 'COOP' && !!coopSession?.isHost;
+    const handlePlayCard = (card: ICard, coopActorPeerId?: string, options?: { endlessBossTaxAlreadyIncluded?: boolean }): boolean => {
+        const isCoopHostRemoteAction = !!coopActorPeerId && stateRef.current.challengeMode === 'COOP' && !!coopSession?.isHost;
+        const actionState = isCoopHostRemoteAction ? stateRef.current : gameState;
+        if (weatherScryModal || galaxyExpressModal || goldFishModal || dreamCatcherModal) return false;
         const coopActorEntry = coopActorPeerId
-            ? gameState.coopBattleState?.players.find(entry => entry.peerId === coopActorPeerId)
+            ? actionState.coopBattleState?.players.find(entry => entry.peerId === coopActorPeerId)
             : null;
-        const actionPlayer = coopActorEntry?.player ?? gameState.player;
-        const actionSelectedEnemyId = coopActorEntry?.selectedEnemyId ?? gameState.selectedEnemyId;
-        if (gameState.challengeMode === 'COOP' && actionPlayer.currentHp <= 0) return;
-        if (!isCoopHostRemoteAction && gameState.challengeMode === 'COOP' && coopSession && !coopSession.isHost && coopPendingHostActionRef.current) {
+        const actionPlayer = coopActorEntry?.player ?? actionState.player;
+        const actionSelectedEnemyId = coopActorEntry?.selectedEnemyId ?? actionState.selectedEnemyId;
+        if (actionState.challengeMode === 'COOP' && actionPlayer.currentHp <= 0) return false;
+        if (!isCoopHostRemoteAction && actionState.challengeMode === 'COOP' && coopSession && !coopSession.isHost && coopPendingHostActionRef.current) {
             audioService.playSound('wrong');
-            return;
+            return false;
         }
         const adjustedCard: ICard = { ...card };
         if (adjustedCard.name === 'ブーメラン' || (adjustedCard.originalNames?.length ?? 0) > 0) {
@@ -10041,7 +10159,7 @@ const App: React.FC = () => {
         const endlessBossLockCounter = getEndlessBossLockCounterKey(adjustedCard.type);
         if (endlessBossLockCounter && actionPlayer.relicCounters[endlessBossLockCounter] > 0) {
             if (!isCoopHostRemoteAction) audioService.playSound('wrong');
-            return;
+            return false;
         }
         let effectiveCost = getCardPlayCost(adjustedCard, actionPlayer.currentEnergy);
         if (actionPlayer.powers['CORRUPTION'] && adjustedCard.type === CardType.SKILL) {
@@ -10056,32 +10174,32 @@ const App: React.FC = () => {
 
         card = adjustedCard;
 
-        if (actionPlayer.currentEnergy < effectiveCost && !actionPlayer.partner) return;
-        if (gameState.enemies.length === 0) return;
-        if (actingEnemyId) return;
-        const activeSelectionPeerId = gameState.challengeMode === 'COOP' ? (coopActorPeerId || coopSelfPeerId) : undefined;
+        if (actionPlayer.currentEnergy < effectiveCost && !actionPlayer.partner) return false;
+        if (actionState.enemies.length === 0) return false;
+        if (actingEnemyId) return false;
+        const activeSelectionPeerId = actionState.challengeMode === 'COOP' ? (coopActorPeerId || coopSelfPeerId) : undefined;
         const activeSelectionState = activeSelectionPeerId
-            ? (gameState.coopBattleState?.selectionStateByPeerId?.[activeSelectionPeerId] || INACTIVE_SELECTION_STATE)
-            : gameState.selectionState;
-        if (activeSelectionState.active) return;
-        if (card.unplayable) return;
+            ? (actionState.coopBattleState?.selectionStateByPeerId?.[activeSelectionPeerId] || INACTIVE_SELECTION_STATE)
+            : actionState.selectionState;
+        if (activeSelectionState.active) return false;
+        if (card.unplayable) return false;
         const requiredDiscardCount = card.promptsDiscard || 0;
         const discardableHandCount = getDiscardableCardCountAfterPlay(actionPlayer, card);
         if (requiredDiscardCount > 0 && discardableHandCount < requiredDiscardCount) {
             if (!isCoopHostRemoteAction) audioService.playSound('wrong');
-            return;
+            return false;
         }
 
         const hasChoker = !!actionPlayer.relics.find(r => r.id === 'VELVET_CHOKER');
         if (hasChoker && actionPlayer.cardsPlayedThisTurn >= 6) {
             audioService.playSound('wrong');
-            return;
+            return false;
         }
 
         const hasNormality = actionPlayer.hand.some(c => c.name === '退屈' || c.name === 'NORMALITY');
         if (hasNormality && actionPlayer.attacksPlayedThisTurn + (actionPlayer.cardsPlayedThisTurn - actionPlayer.attacksPlayedThisTurn) >= 3) {
             audioService.playSound('wrong');
-            return;
+            return false;
         }
 
         let cardAttackPreviewHitCount = 1;
@@ -10142,7 +10260,7 @@ const App: React.FC = () => {
         lastPlayedCardVoicePlayedRef.current = didPlayCardVoice;
         if (!isCoopHostRemoteAction && gameState.challengeMode === 'COOP' && coopSession && !coopSession.isHost) {
             queueCoopBattleEvent({ type: 'COOP_BATTLE_PLAY_CARD', cardId: card.id, playedCard: { ...card } });
-            return;
+            return true;
         }
 
         setGameState(prev => {
@@ -11567,6 +11685,7 @@ const App: React.FC = () => {
         setTimeout(() => {
             setGameState(prev => ({ ...prev, activeEffects: [] }));
         }, effectClearDelay);
+        return true;
     };
 
     const startPlayerTurn = (coopActorPeerId?: string) => {
@@ -13557,6 +13676,7 @@ const App: React.FC = () => {
         // (the tax applies once to the combo), so only consume the counter in
         // the shared card resolver and do not add another energy here.
         handlePlayCard(card, undefined, { endlessBossTaxAlreadyIncluded: true });
+        return true;
     };
 
     const handleTypingAutoPlayCard = (card: ICard) => {
@@ -16719,6 +16839,7 @@ const App: React.FC = () => {
 
         const previousOnData = p2pService.onData;
         const previousOnClose = p2pService.onClose;
+        const previousOnConnectionHealth = p2pService.onConnectionHealth;
         p2pService.onClose = (closedPeerId?: string) => {
             if (coopSession.isHost && closedPeerId) {
                 setCoopSession(prev => {
@@ -16761,7 +16882,47 @@ const App: React.FC = () => {
             }
             previousOnClose?.(closedPeerId);
         };
+        p2pService.onConnectionHealth = (health) => {
+            previousOnConnectionHealth?.(health);
+            if (
+                !health.degraded ||
+                gameState.screen !== GameScreen.BATTLE ||
+                !stateRef.current.coopBattleState
+            ) {
+                return;
+            }
+            const now = Date.now();
+            const lastResyncAt = coopHealthResyncAtRef.current[health.peerId] || 0;
+            if (now - lastResyncAt < 5000) return;
+            coopHealthResyncAtRef.current[health.peerId] = now;
+            appendCoopVfxDebugLog('LAG', `peer:${health.peerId} heartbeat timeout; automatic battle resync`);
+            if (coopSession.isHost) {
+                const latestBattleState = stateRef.current.coopBattleState;
+                if (latestBattleState) {
+                    sendCoopStateSync(health.peerId);
+                    broadcastCoopBattleState(latestBattleState, {
+                        force: true,
+                        targetPeerId: health.peerId
+                    });
+                }
+            } else {
+                p2pService.send({ type: 'COOP_STATE_SYNC_REQUEST' });
+            }
+        };
         p2pService.onData = (data, fromPeerId) => {
+            const sendBattleActionAck = (peerId: string, actionId: string | undefined, status: 'ACCEPTED' | 'REJECTED', reason?: string) => {
+                if (!actionId) return;
+                const latestBattleState = stateRef.current.coopBattleState;
+                p2pService.sendTo(peerId, {
+                    type: 'COOP_BATTLE_ACTION_ACK',
+                    actionId,
+                    status,
+                    reason,
+                    battleKey: latestBattleState?.battleKey,
+                    turnCursor: latestBattleState?.turnCursor,
+                    enemyTurnCursor: latestBattleState?.enemyTurnCursor
+                });
+            };
             if (data.type === 'COOP_JOIN' && coopSession.isHost && fromPeerId) {
                 setCoopSession(prev => {
                     if (!prev) return prev;
@@ -17324,9 +17485,38 @@ const App: React.FC = () => {
                 return;
             }
 
+            if (data.type === 'COOP_BATTLE_ACTION_ACK' && !coopSession.isHost) {
+                const pendingEvent = coopPendingHostActionEventRef.current;
+                if (pendingEvent?.actionId === data.actionId) {
+                    coopPendingHostActionEventRef.current = null;
+                    coopPendingHostActionRef.current = null;
+                    coopBattleActionRetryCountRef.current = 0;
+                    if (coopBattleActionRetryTimerRef.current) {
+                        window.clearInterval(coopBattleActionRetryTimerRef.current);
+                        coopBattleActionRetryTimerRef.current = null;
+                    }
+                    coopLastBattleActionSignatureRef.current = null;
+                    if (data.status === 'REJECTED') {
+                        setTurnLog(data.reason || 'この操作は現在の戦闘状態では受け付けられません。');
+                        p2pService.send({ type: 'COOP_STATE_SYNC_REQUEST' });
+                    }
+                }
+                return;
+            }
+
             if (data.type === 'COOP_BATTLE_SYNC') {
                 if (coopLateJoinCharacterSelect) {
                     return;
+                }
+                if (data.revision !== undefined && data.battleState) {
+                    const currentBattleKey = stateRef.current.coopBattleState?.battleKey;
+                    if (currentBattleKey === data.battleState.battleKey && data.revision <= coopGuestBattleSyncRevisionRef.current) {
+                        return;
+                    }
+                    if (currentBattleKey !== data.battleState.battleKey) {
+                        coopGuestBattleSyncRevisionRef.current = 0;
+                    }
+                    coopGuestBattleSyncRevisionRef.current = data.revision;
                 }
                 coopApplyingRemoteBattleSyncRef.current = true;
                 const pendingQueuedBattleEvent = queuedCoopBattleEventRef.current;
@@ -17386,7 +17576,6 @@ const App: React.FC = () => {
                     setBattleFinisherCutinCard(null);
                 }
                 if (data.battleState && coopSelfPeerId) {
-                    coopPendingHostActionRef.current = null;
                     const incomingTurnKey = `${data.battleState.battleKey}:${data.battleState.turnCursor}:${data.battleState.enemyTurnCursor}:${coopSelfPeerId}`;
                     if (coopPendingEndTurnKeyRef.current && coopPendingEndTurnKeyRef.current !== incomingTurnKey) {
                         coopPendingEndTurnKeyRef.current = null;
@@ -17477,60 +17666,98 @@ const App: React.FC = () => {
                 return;
             }
 
-            if (data.type === 'COOP_BATTLE_PLAY_CARD' && coopSession.isHost && fromPeerId && gameState.screen === GameScreen.BATTLE) {
-                const activeTurn = gameState.coopBattleState?.turnQueue[gameState.coopBattleState.turnCursor];
-                const isRealtimeTurn = gameState.coopBattleState?.battleMode === 'REALTIME' && activeTurn?.type !== 'ENEMY';
+            if (data.type === 'COOP_BATTLE_PLAY_CARD' && coopSession.isHost && fromPeerId && stateRef.current.screen === GameScreen.BATTLE) {
+                const latestState = stateRef.current;
+                const latestBattleState = latestState.coopBattleState;
+                const activeTurn = latestBattleState?.turnQueue[latestBattleState.turnCursor];
+                const isRealtimeTurn = latestBattleState?.battleMode === 'REALTIME' && activeTurn?.type !== 'ENEMY';
                 if (!activeTurn || activeTurn.type === 'ENEMY' || (!isRealtimeTurn && activeTurn.peerId !== fromPeerId)) {
+                    sendBattleActionAck(fromPeerId, data.actionId, 'REJECTED', '現在はこの参加者のターンではありません。');
                     return;
                 }
                 if (
-                    (data.battleKey && data.battleKey !== gameState.coopBattleState?.battleKey) ||
-                    (data.turnCursor !== undefined && data.turnCursor !== gameState.coopBattleState?.turnCursor) ||
-                    (data.enemyTurnCursor !== undefined && data.enemyTurnCursor !== gameState.coopBattleState?.enemyTurnCursor)
+                    (data.battleKey && data.battleKey !== latestBattleState?.battleKey) ||
+                    (data.turnCursor !== undefined && data.turnCursor !== latestBattleState?.turnCursor) ||
+                    (data.enemyTurnCursor !== undefined && data.enemyTurnCursor !== latestBattleState?.enemyTurnCursor)
                 ) {
+                    sendBattleActionAck(fromPeerId, data.actionId, 'REJECTED', '戦闘状態が更新されたため、もう一度お試しください。');
                     return;
                 }
                 if (data.actionId) {
                     const actionKey = `${fromPeerId}:${data.actionId}`;
                     if (coopProcessedHostActionIdsRef.current.has(actionKey)) {
+                        sendBattleActionAck(fromPeerId, data.actionId, 'ACCEPTED');
                         return;
                     }
-                    coopProcessedHostActionIdsRef.current.add(actionKey);
                 }
-                const remotePlayer = gameState.coopBattleState?.players.find(entry => entry.peerId === fromPeerId)?.player;
+                const remotePlayer = latestBattleState?.players.find(entry => entry.peerId === fromPeerId)?.player;
                 const requestedCard = remotePlayer?.hand.find(card => card.id === data.cardId);
-                if (!requestedCard) return;
+                if (!requestedCard) {
+                    sendBattleActionAck(fromPeerId, data.actionId, 'REJECTED', 'そのカードは現在の手札にありません。同期し直してください。');
+                    sendCoopStateSync(fromPeerId);
+                    return;
+                }
                 coopLastBattleCardEventAtRef.current = Date.now();
                 appendCoopVfxDebugLog('CARD', `remote:${requestedCard.name}`);
-                handlePlayCard(requestedCard, fromPeerId);
+                const accepted = handlePlayCard(requestedCard, fromPeerId);
+                if (!accepted) {
+                    sendBattleActionAck(fromPeerId, data.actionId, 'REJECTED', 'このカードは現在の戦闘状態では使用できません。');
+                    return;
+                }
+                if (data.actionId) {
+                    coopProcessedHostActionIdsRef.current.add(`${fromPeerId}:${data.actionId}`);
+                    if (coopProcessedHostActionIdsRef.current.size > 500) {
+                        coopProcessedHostActionIdsRef.current = new Set(Array.from(coopProcessedHostActionIdsRef.current).slice(-250));
+                    }
+                }
+                sendBattleActionAck(fromPeerId, data.actionId, 'ACCEPTED');
                 scheduleHostCoopBattleSync();
                 return;
             }
 
-            if (data.type === 'COOP_BATTLE_USE_POTION' && coopSession.isHost && fromPeerId && gameState.screen === GameScreen.BATTLE) {
-                const activeTurn = gameState.coopBattleState?.turnQueue[gameState.coopBattleState.turnCursor];
-                const isRealtimeTurn = gameState.coopBattleState?.battleMode === 'REALTIME' && activeTurn?.type !== 'ENEMY';
+            if (data.type === 'COOP_BATTLE_USE_POTION' && coopSession.isHost && fromPeerId && stateRef.current.screen === GameScreen.BATTLE) {
+                const latestState = stateRef.current;
+                const latestBattleState = latestState.coopBattleState;
+                const activeTurn = latestBattleState?.turnQueue[latestBattleState.turnCursor];
+                const isRealtimeTurn = latestBattleState?.battleMode === 'REALTIME' && activeTurn?.type !== 'ENEMY';
                 if (!activeTurn || activeTurn.type === 'ENEMY' || (!isRealtimeTurn && activeTurn.peerId !== fromPeerId)) {
+                    sendBattleActionAck(fromPeerId, data.actionId, 'REJECTED', '現在はこの参加者のターンではありません。');
                     return;
                 }
                 if (
-                    (data.battleKey && data.battleKey !== gameState.coopBattleState?.battleKey) ||
-                    (data.turnCursor !== undefined && data.turnCursor !== gameState.coopBattleState?.turnCursor) ||
-                    (data.enemyTurnCursor !== undefined && data.enemyTurnCursor !== gameState.coopBattleState?.enemyTurnCursor)
+                    (data.battleKey && data.battleKey !== latestBattleState?.battleKey) ||
+                    (data.turnCursor !== undefined && data.turnCursor !== latestBattleState?.turnCursor) ||
+                    (data.enemyTurnCursor !== undefined && data.enemyTurnCursor !== latestBattleState?.enemyTurnCursor)
                 ) {
+                    sendBattleActionAck(fromPeerId, data.actionId, 'REJECTED', '戦闘状態が更新されたため、もう一度お試しください。');
                     return;
                 }
                 if (data.actionId) {
                     const actionKey = `${fromPeerId}:${data.actionId}`;
                     if (coopProcessedHostActionIdsRef.current.has(actionKey)) {
+                        sendBattleActionAck(fromPeerId, data.actionId, 'ACCEPTED');
                         return;
                     }
-                    coopProcessedHostActionIdsRef.current.add(actionKey);
                 }
-                const remotePlayer = gameState.coopBattleState?.players.find(entry => entry.peerId === fromPeerId)?.player;
+                const remotePlayer = latestBattleState?.players.find(entry => entry.peerId === fromPeerId)?.player;
                 const requestedPotion = remotePlayer?.potions.find(potion => potion.id === data.potionId);
-                if (!requestedPotion) return;
-                handleUsePotion(requestedPotion, fromPeerId);
+                if (!requestedPotion) {
+                    sendBattleActionAck(fromPeerId, data.actionId, 'REJECTED', 'そのポーションは現在の所持品にありません。同期し直してください。');
+                    sendCoopStateSync(fromPeerId);
+                    return;
+                }
+                const accepted = handleUsePotion(requestedPotion, fromPeerId);
+                if (!accepted) {
+                    sendBattleActionAck(fromPeerId, data.actionId, 'REJECTED', 'このポーションは現在の戦闘状態では使用できません。');
+                    return;
+                }
+                if (data.actionId) {
+                    coopProcessedHostActionIdsRef.current.add(`${fromPeerId}:${data.actionId}`);
+                    if (coopProcessedHostActionIdsRef.current.size > 500) {
+                        coopProcessedHostActionIdsRef.current = new Set(Array.from(coopProcessedHostActionIdsRef.current).slice(-250));
+                    }
+                }
+                sendBattleActionAck(fromPeerId, data.actionId, 'ACCEPTED');
                 scheduleHostCoopBattleSync();
                 return;
             }
@@ -17886,8 +18113,9 @@ const App: React.FC = () => {
         return () => {
             p2pService.onData = previousOnData;
             p2pService.onClose = previousOnClose;
+            p2pService.onConnectionHealth = previousOnConnectionHealth;
         };
-    }, [advanceCoopAfterCharacterReady, applyCoopPlayerStateToPeer, applyCoopSharedState, applyCoopSupportEffect, applyHostCoopBattleSnapshot, applyRestAction, applyRewardToLocalPlayer, applySynthesizeCard, applyTreasureRewardsToPlayer, applyUpgradeCard, broadcastCoopBattleState, claimCoopTreasurePoolForPeer, coopPlayerSnapshots, coopRewardSets, coopSelfPeerId, coopSession, eventData, executeQueuedTurnTransition, gameState.challengeMode, gameState.coopBattleState, gameState.map, gameState.player, gameState.rewards, gameState.screen, handleCoopHostDisconnected, handleNodeComplete, handleNodeSelect, handleShopBuyCard, handleShopBuyPotion, handleShopBuyRelic, handleShopLeave, handleShopRemoveCard, handleTreasureOpen, localAssignmentProblemConfig, preserveLocalBattleCardZones, preserveLocalPlayerInCoopBattleState, removeRewardFromList, resolveBattleVictory, resolveCoopEventOptionForPlayer, scheduleHostCoopBattleSync, sendCoopRewardSyncToPeer, sendCoopStateSync, setCoopBattleState, shopCards, shopPotions, shopRelics, treasurePools, turnLog, upsertCoopPlayerSnapshot]);
+    }, [advanceCoopAfterCharacterReady, appendCoopVfxDebugLog, applyCoopPlayerStateToPeer, applyCoopSharedState, applyCoopSupportEffect, applyHostCoopBattleSnapshot, applyRestAction, applyRewardToLocalPlayer, applySynthesizeCard, applyTreasureRewardsToPlayer, applyUpgradeCard, broadcastCoopBattleState, claimCoopTreasurePoolForPeer, coopPlayerSnapshots, coopRewardSets, coopSelfPeerId, coopSession, eventData, executeQueuedTurnTransition, gameState.challengeMode, gameState.coopBattleState, gameState.map, gameState.player, gameState.rewards, gameState.screen, handleCoopHostDisconnected, handleNodeComplete, handleNodeSelect, handleShopBuyCard, handleShopBuyPotion, handleShopBuyRelic, handleShopLeave, handleShopRemoveCard, handleTreasureOpen, localAssignmentProblemConfig, preserveLocalBattleCardZones, preserveLocalPlayerInCoopBattleState, removeRewardFromList, resolveBattleVictory, resolveCoopEventOptionForPlayer, scheduleHostCoopBattleSync, sendCoopRewardSyncToPeer, sendCoopStateSync, setCoopBattleState, shopCards, shopPotions, shopRelics, treasurePools, turnLog, upsertCoopPlayerSnapshot]);
 
     const goToFloorResult = () => {
         // 未解放のカードがあれば1枚解放する

@@ -36,6 +36,8 @@ type P2PCoopParticipant = {
 };
 
 export type P2PEvent =
+    | { type: 'P2P_HEARTBEAT', nonce: string, sentAt: number }
+    | { type: 'P2P_HEARTBEAT_ACK', nonce: string, sentAt: number }
     | { type: 'HANDSHAKE', player: any }
     | { type: 'STATE_UPDATE', myState: any, yourState: any, lastAction?: string, receiverTurn?: boolean, turnCount?: number, senderName?: string }
     | { type: 'EMOTE', emoteId: string }
@@ -124,6 +126,7 @@ export type P2PEvent =
     | { type: 'COOP_REWARD_SYNC_REQUEST' }
     | {
         type: 'COOP_BATTLE_SYNC',
+        revision?: number,
         battleState: CoopBattleState | null,
         activeEffects?: any[],
         enemies?: any[],
@@ -133,6 +136,15 @@ export type P2PEvent =
         turnLog?: string,
         actingEnemyId?: string | null,
         finisherCutinCard?: any | null
+    }
+    | {
+        type: 'COOP_BATTLE_ACTION_ACK',
+        actionId: string,
+        status: 'ACCEPTED' | 'REJECTED',
+        reason?: string,
+        battleKey?: string,
+        turnCursor?: number,
+        enemyTurnCursor?: number
     }
     | {
         type: 'COOP_BATTLE_FINISH',
@@ -213,11 +225,21 @@ class P2PService {
     private peer: Peer | null = null;
     private connections: Map<string, DataConnection> = new Map();
     private myId: string | null = null;
+    private heartbeatTimer: ReturnType<typeof setInterval> | null = null;
+    private heartbeatPending: Map<string, { nonce: string, sentAt: number }> = new Map();
+    private readonly heartbeatIntervalMs = 2000;
+    private readonly heartbeatTimeoutMs = 6500;
 
     public onConnect: ((conn: DataConnection) => void) | null = null;
     public onData: ((data: P2PEvent, fromPeerId?: string) => void) | null = null;
     public onClose: ((peerId?: string) => void) | null = null;
     public onError: ((err: any) => void) | null = null;
+    public onConnectionHealth: ((health: {
+        peerId: string,
+        rttMs: number,
+        lastSeenAt: number,
+        degraded: boolean
+    }) => void) | null = null;
 
     constructor() { }
 
@@ -286,13 +308,44 @@ class P2PService {
     private handleConnection(conn: DataConnection) {
         this.connections.set(conn.peer, conn);
         console.log('Setting up connection handlers for:', conn.peer);
+        this.startHeartbeat();
 
         conn.on('data', (data: unknown) => {
+            const receivedAt = Date.now();
+            const message = data as { type?: string, nonce?: string, sentAt?: number } | null;
+            if (message?.type === 'P2P_HEARTBEAT') {
+                this.safeSend(conn, {
+                    type: 'P2P_HEARTBEAT_ACK',
+                    nonce: message.nonce || '',
+                    sentAt: message.sentAt || receivedAt
+                });
+                return;
+            }
+            if (message?.type === 'P2P_HEARTBEAT_ACK') {
+                const pending = message.nonce ? this.heartbeatPending.get(conn.peer) : undefined;
+                if (pending && pending.nonce === message.nonce) {
+                    this.heartbeatPending.delete(conn.peer);
+                    this.onConnectionHealth?.({
+                        peerId: conn.peer,
+                        rttMs: Math.max(0, receivedAt - pending.sentAt),
+                        lastSeenAt: receivedAt,
+                        degraded: false
+                    });
+                }
+                return;
+            }
             if (this.onData) this.onData(data as P2PEvent, conn.peer);
         });
 
         conn.on('close', () => {
             this.connections.delete(conn.peer);
+            this.heartbeatPending.delete(conn.peer);
+            this.onConnectionHealth?.({
+                peerId: conn.peer,
+                rttMs: Number.POSITIVE_INFINITY,
+                lastSeenAt: Date.now(),
+                degraded: true
+            });
             if (this.onClose) this.onClose(conn.peer);
         });
 
@@ -305,20 +358,68 @@ class P2PService {
         }
     }
 
-    public send(data: P2PEvent) {
-        const targets = Array.from(this.connections.values()).filter(c => c.open);
-        if (targets.length > 0) {
-            targets.forEach(conn => conn.send(data));
-        } else {
-            console.warn('Cannot send data, no open connections');
+    private safeSend(conn: DataConnection, data: P2PEvent): boolean {
+        if (!conn.open) return false;
+        try {
+            conn.send(data);
+            return true;
+        } catch (err) {
+            console.warn('P2P send failed:', conn.peer, err);
+            if (this.onError) this.onError(err);
+            return false;
         }
     }
 
-    public sendTo(peerId: string, data: P2PEvent) {
-        const conn = this.connections.get(peerId);
-        if (conn && conn.open) {
-            conn.send(data);
+    private startHeartbeat() {
+        if (this.heartbeatTimer !== null) return;
+        this.heartbeatTimer = setInterval(() => {
+            const now = Date.now();
+            for (const [peerId, conn] of this.connections.entries()) {
+                if (!conn.open) continue;
+                const pending = this.heartbeatPending.get(peerId);
+                if (pending) {
+                    if (now - pending.sentAt < this.heartbeatTimeoutMs) continue;
+                    this.heartbeatPending.delete(peerId);
+                    this.onConnectionHealth?.({
+                        peerId,
+                        rttMs: now - pending.sentAt,
+                        lastSeenAt: now,
+                        degraded: true
+                    });
+                }
+                const nonce = `${now}-${Math.random().toString(36).slice(2, 10)}`;
+                this.heartbeatPending.set(peerId, { nonce, sentAt: now });
+                if (!this.safeSend(conn, { type: 'P2P_HEARTBEAT', nonce, sentAt: now })) {
+                    this.heartbeatPending.delete(peerId);
+                }
+            }
+        }, this.heartbeatIntervalMs);
+    }
+
+    private stopHeartbeat() {
+        if (this.heartbeatTimer !== null) {
+            clearInterval(this.heartbeatTimer);
+            this.heartbeatTimer = null;
         }
+        this.heartbeatPending.clear();
+    }
+
+    public send(data: P2PEvent): boolean {
+        const targets = Array.from(this.connections.values()).filter(c => c.open);
+        if (targets.length === 0) {
+            console.warn('Cannot send data, no open connections');
+            return false;
+        }
+        let sent = false;
+        targets.forEach(conn => {
+            sent = this.safeSend(conn, data) || sent;
+        });
+        return sent;
+    }
+
+    public sendTo(peerId: string, data: P2PEvent): boolean {
+        const conn = this.connections.get(peerId);
+        return conn ? this.safeSend(conn, data) : false;
     }
 
     public getConnectedPeerIds(): string[] {
@@ -331,11 +432,14 @@ class P2PService {
 
     public close(options?: { silent?: boolean }) {
         const previousOnClose = this.onClose;
+        const previousOnConnectionHealth = this.onConnectionHealth;
         if (options?.silent) {
             this.onClose = null;
+            this.onConnectionHealth = null;
         }
         this.connections.forEach(conn => conn.close());
         this.connections.clear();
+        this.stopHeartbeat();
         if (this.peer) {
             this.peer.destroy();
             this.peer = null;
@@ -343,6 +447,7 @@ class P2PService {
         this.myId = null;
         if (options?.silent) {
             this.onClose = previousOnClose;
+            this.onConnectionHealth = previousOnConnectionHealth;
         }
     }
 
