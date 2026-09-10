@@ -223,6 +223,7 @@ import AssignmentCreateScreen from './components/AssignmentCreateScreen';
 import SubmissionScreen from './components/SubmissionScreen';
 import RewardCardAlbumScreen from './components/RewardCardAlbumScreen';
 import OriginalCardBuilderScreen from './components/OriginalCardBuilderScreen';
+import OriginalCardBuilderUnlockModal from './components/OriginalCardBuilderUnlockModal';
 import ChefDeckSelectionScreen from './components/ChefDeckSelectionScreen';
 import GardenScreen from './components/GardenScreen';
 import P2PRaceSetup from './components/P2PRaceSetup';
@@ -1788,6 +1789,7 @@ const App: React.FC = () => {
     const [newlyUnlockedCharacters, setNewlyUnlockedCharacters] = useState<Character[]>([]);
     const [newlyUnlockedMiniGames, setNewlyUnlockedMiniGames] = useState<(typeof MINI_GAMES)[number][]>([]);
     const [vacationUnlockNotice, setVacationUnlockNotice] = useState<'high-school' | 'magic' | null>(null);
+    const [originalCardBuilderUnlockNotice, setOriginalCardBuilderUnlockNotice] = useState(false);
 
     useEffect(() => {
         if (gameState.screen !== GameScreen.ENDING) setThemedEndingSequenceComplete(false);
@@ -2496,7 +2498,10 @@ const App: React.FC = () => {
             || completedTheme !== 'elementary'
             || originalCardBuilderUnlocked
         ) return;
-        if (storageService.unlockOriginalCardBuilder()) setOriginalCardBuilderUnlocked(true);
+        if (storageService.unlockOriginalCardBuilder()) {
+            setOriginalCardBuilderUnlocked(true);
+            setOriginalCardBuilderUnlockNotice(true);
+        }
     }, [gameState.isEndless, gameState.screen, gameState.visualTheme, originalCardBuilderUnlocked, visualTheme]);
     // Global main-adventure clears drive the seven trivia mini-game unlocks.
     // Keep this separate from the per-theme clear count used for characters.
@@ -7281,6 +7286,7 @@ const App: React.FC = () => {
 
     const clearUiPreviewModalState = useCallback(() => {
         setVacationUnlockNotice(null);
+        setOriginalCardBuilderUnlockNotice(false);
         setNewlyUnlockedCharacters([]);
         setNewlyUnlockedMiniGames([]);
         setMasteryRewardModal(null);
@@ -7530,6 +7536,7 @@ const App: React.FC = () => {
     const handleStartAppModalPreview = useCallback((modalId: AppModalPreviewId) => {
         clearUiPreviewModalState();
         const isVacationPreview = modalId === 'VACATION_UNLOCK_HIGH_SCHOOL' || modalId === 'VACATION_UNLOCK_MAGIC';
+        const isOriginalCardBuilderUnlockPreview = modalId === 'ORIGINAL_CARD_BUILDER_UNLOCK';
         const previewTheme: VisualThemeId = modalId === 'VACATION_UNLOCK_HIGH_SCHOOL'
             ? 'high-school'
             : modalId === 'VACATION_UNLOCK_MAGIC'
@@ -7537,7 +7544,7 @@ const App: React.FC = () => {
                 : visualTheme;
         const previewScreen = modalId === 'CREDITS' || modalId === 'START_OVER_CONFIRM'
             ? GameScreen.START_MENU
-            : isVacationPreview
+            : isVacationPreview || isOriginalCardBuilderUnlockPreview
                 ? GameScreen.ENDLESS_CLEAR
                 : GameScreen.DEBUG_MENU;
 
@@ -7547,7 +7554,7 @@ const App: React.FC = () => {
             screen: previewScreen,
             visualTheme: previewTheme,
             challengeMode: undefined,
-            ...(isVacationPreview
+            ...(isVacationPreview || isOriginalCardBuilderUnlockPreview
                 ? { isEndless: true, endlessTrueMode: true, act: 50, floor: 750, endlessFloor: 750 }
                 : {}),
         }));
@@ -7556,6 +7563,9 @@ const App: React.FC = () => {
             case 'VACATION_UNLOCK_HIGH_SCHOOL':
             case 'VACATION_UNLOCK_MAGIC':
                 setVacationUnlockNotice(previewTheme === 'magic' ? 'magic' : 'high-school');
+                break;
+            case 'ORIGINAL_CARD_BUILDER_UNLOCK':
+                setOriginalCardBuilderUnlockNotice(true);
                 break;
             case 'NEW_UNLOCKS':
                 setNewlyUnlockedCharacters(getThemedCharacters(CHARACTERS, previewTheme).slice(0, 2));
@@ -19353,6 +19363,13 @@ const App: React.FC = () => {
                     </div>
                 )}
 
+                {originalCardBuilderUnlockNotice && gameState.screen === GameScreen.ENDLESS_CLEAR && (
+                    <OriginalCardBuilderUnlockModal
+                        languageMode={languageMode}
+                        onClose={() => setOriginalCardBuilderUnlockNotice(false)}
+                    />
+                )}
+
                 {vacationUnlockNotice && gameState.screen === GameScreen.ENDLESS_CLEAR && (
                     <div
                         data-gamepad-modal
@@ -19375,7 +19392,7 @@ const App: React.FC = () => {
                             <div className="vacation-unlock-modal-sparkle vacation-unlock-modal-sparkle-two" aria-hidden="true"><Sparkles size={16} /></div>
                             <div className="vacation-unlock-modal-sparkle vacation-unlock-modal-sparkle-three" aria-hidden="true"><Sparkles size={26} /></div>
 
-                            <div className="relative z-10 mb-3 flex items-center justify-center gap-2 sm:mb-4">
+                            <div className="relative z-10 mb-3 flex items-center justify-center gap-2 sm:mb-4 vacation-unlock-modal-chapter">
                                 <Sparkles className="vacation-unlock-modal-title-sparkle text-yellow-200" size={22} />
                                 <span className="rounded-full border border-yellow-200/60 bg-yellow-100/10 px-3 py-1 text-xs font-black tracking-[0.18em] text-yellow-100 sm:text-sm">
                                     {vacationUnlockNotice === 'magic'
@@ -19385,14 +19402,14 @@ const App: React.FC = () => {
                                 <Sparkles className="vacation-unlock-modal-title-sparkle text-yellow-200" size={22} />
                             </div>
 
-                            <div className="relative z-10 mb-4 sm:mb-5">
+                            <div className="relative z-10 mb-4 sm:mb-5 vacation-unlock-modal-title">
                                 <div id="vacation-unlock-title" className="mb-1 text-3xl font-black leading-none tracking-tight text-white drop-shadow-[0_3px_0_rgba(0,0,0,0.5)] sm:text-5xl">
                                     {languageMode === 'ENGLISH' ? 'VACATION MODE UNLOCKED!' : languageMode === 'HIRAGANA' ? 'ばかんすモード かいきん！' : 'バカンスモード解禁！'}
                                 </div>
                                 <div className="text-xs font-black tracking-[0.3em] text-yellow-100/90 sm:text-sm">TRUE ENDING BONUS</div>
                             </div>
 
-                            <div className="relative z-10 grid items-center gap-4 sm:grid-cols-[1.45fr_0.85fr] sm:gap-6">
+                            <div className="relative z-10 grid items-center gap-4 sm:grid-cols-[1.45fr_0.85fr] sm:gap-6 vacation-unlock-modal-content">
                                 <div className="vacation-unlock-modal-hero group relative overflow-hidden rounded-2xl border border-white/50 bg-sky-950/70 shadow-[0_0_35px_rgba(125,211,252,0.35)]">
                                     <img
                                         src={VACATION_UNLOCK_ILLUSTRATIONS[vacationUnlockNotice]}
@@ -19406,19 +19423,19 @@ const App: React.FC = () => {
                                     </div>
                                 </div>
 
-                                <div className="rounded-2xl border border-white/20 bg-slate-950/55 p-4 text-left shadow-inner sm:p-5">
-                                    <div className="mb-3 flex items-center gap-2 text-lg font-black text-cyan-100 sm:text-xl">
+                                <div className="rounded-2xl border border-white/20 bg-slate-950/55 p-4 text-left shadow-inner sm:p-5 vacation-unlock-modal-details">
+                                    <div className="mb-3 flex items-center gap-2 text-lg font-black text-cyan-100 sm:text-xl vacation-unlock-modal-details-heading">
                                         <Zap className="text-yellow-300" size={22} />
                                         {languageMode === 'ENGLISH' ? 'New adventure unlocked' : languageMode === 'HIRAGANA' ? 'あたらしい ぼうけんが かいきん' : '新しい冒険が解禁されました'}
                                     </div>
-                                    <p className="mb-4 text-sm font-bold leading-relaxed text-slate-100 sm:text-base">
+                                    <p className="mb-4 text-sm font-bold leading-relaxed text-slate-100 sm:text-base vacation-unlock-modal-details-copy">
                                         {languageMode === 'ENGLISH'
                                             ? 'As a reward for reaching the true ending, vacation outfits and exclusive actions are now available.'
                                             : languageMode === 'HIRAGANA'
                                                 ? 'しんエンディングに たどりついた あかしとして、ばかんす いしょうと とくべつな うごきが かいきんされました。'
                                                 : '真エンディング到達の証として、バカンス衣装と専用アクションが解禁されました。'}
                                     </p>
-                                    <div className="mb-4 flex flex-wrap gap-2">
+                                    <div className="mb-4 flex flex-wrap gap-2 vacation-unlock-modal-tags">
                                         <span className="rounded-full border border-cyan-200/40 bg-cyan-300/15 px-2.5 py-1 text-xs font-black text-cyan-100">{languageMode === 'ENGLISH' ? 'Vacation outfits' : languageMode === 'HIRAGANA' ? 'ばかんす いしょう' : 'バカンス衣装'}</span>
                                         <span className="rounded-full border border-fuchsia-200/40 bg-fuchsia-300/15 px-2.5 py-1 text-xs font-black text-fuchsia-100">{languageMode === 'ENGLISH' ? '2×2 actions' : languageMode === 'HIRAGANA' ? '2×2の うごき' : '2×2専用アクション'}</span>
                                         <span className="rounded-full border border-amber-200/40 bg-amber-300/15 px-2.5 py-1 text-xs font-black text-amber-100">{languageMode === 'ENGLISH' ? 'Select characters' : languageMode === 'HIRAGANA' ? 'しゅじんこうを えらぶ' : '主人公選択で切替'}</span>
@@ -19429,14 +19446,14 @@ const App: React.FC = () => {
                                         data-gamepad-zone="vacation-unlock-actions"
                                         data-gamepad-order={0}
                                         onClick={() => setVacationUnlockNotice(null)}
-                                        className="w-full rounded-xl border-2 border-yellow-200 bg-gradient-to-r from-yellow-300 via-amber-300 to-orange-300 px-4 py-3 text-base font-black text-slate-950 shadow-[0_0_24px_rgba(253,224,71,0.35)] transition hover:brightness-110 active:scale-[0.98] sm:py-3.5 sm:text-lg"
+                                        className="w-full rounded-xl border-2 border-yellow-200 bg-gradient-to-r from-yellow-300 via-amber-300 to-orange-300 px-4 py-3 text-base font-black text-slate-950 shadow-[0_0_24px_rgba(253,224,71,0.35)] transition hover:brightness-110 active:scale-[0.98] sm:py-3.5 sm:text-lg vacation-unlock-modal-close"
                                     >
-                                        {languageMode === 'ENGLISH' ? 'Let’s go on vacation!' : languageMode === 'HIRAGANA' ? 'ばかんすを みにいく！' : 'バカンスを見に行く！'}
+                                        {languageMode === 'ENGLISH' ? 'Close this notice' : languageMode === 'HIRAGANA' ? 'このおしらせを とじる' : 'このお知らせをとじる'}
                                     </button>
                                 </div>
                             </div>
 
-                            <div className="relative z-10 mt-3 text-[10px] font-bold text-white/65 sm:mt-4 sm:text-xs">
+                            <div className="relative z-10 mt-3 text-[10px] font-bold text-white/65 sm:mt-4 sm:text-xs vacation-unlock-modal-footer">
                                 {languageMode === 'ENGLISH' ? 'You can view Vacation Mode from character selection.' : languageMode === 'HIRAGANA' ? 'しゅじんこう せんたくから ばかんすモードを みられます。' : '主人公選択からバカンスモードを楽しめます。'}
                             </div>
                         </div>

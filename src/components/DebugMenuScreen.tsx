@@ -1732,7 +1732,7 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
                                                 key={modal.id}
                                                 type="button"
                                                 onClick={() => onStartAppModalPreview(modal.id)}
-                                                className={`rounded-lg border px-3 py-3 text-left transition-colors ${modal.id.startsWith('VACATION_UNLOCK_')
+                                                className={`rounded-lg border px-3 py-3 text-left transition-colors ${modal.id.startsWith('VACATION_UNLOCK_') || modal.id === 'ORIGINAL_CARD_BUILDER_UNLOCK'
                                                     ? 'border-amber-400/70 bg-amber-950/70 hover:border-amber-200 hover:bg-amber-900/55'
                                                     : 'border-fuchsia-400/50 bg-slate-950/80 hover:border-fuchsia-200 hover:bg-fuchsia-900/45'}`}
                                             >

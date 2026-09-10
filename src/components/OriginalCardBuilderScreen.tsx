@@ -1,4 +1,4 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { ArrowLeft, Camera, CheckCircle2, ImagePlus, RefreshCw, Save, Sparkles, Upload } from 'lucide-react';
 import type { Card, CardType as CardTypeValue, LanguageMode, TargetType } from '../types';
 import { CardType } from '../types';
@@ -76,6 +76,11 @@ const rollEffectSlots = (type: CardTypeValue): EffectSlot[] => {
   return [...goodSlots, { kind: 'BAD', effectId: pickRandom(getBadEffects(type)).id }];
 };
 
+const compressCanvas = (canvas: HTMLCanvasElement): string => {
+  const webp = canvas.toDataURL('image/webp', 0.82);
+  return webp.startsWith('data:image/webp') ? webp : canvas.toDataURL('image/jpeg', 0.82);
+};
+
 const compressImageFile = (file: File): Promise<string> => new Promise((resolve, reject) => {
   if (!file.type.startsWith('image/')) {
     reject(new Error('画像ファイルを選んでください。'));
@@ -98,13 +103,25 @@ const compressImageFile = (file: File): Promise<string> => new Promise((resolve,
         return;
       }
       context.drawImage(image, 0, 0, canvas.width, canvas.height);
-      const webp = canvas.toDataURL('image/webp', 0.82);
-      resolve(webp.startsWith('data:image/webp') ? webp : canvas.toDataURL('image/jpeg', 0.82));
+      resolve(compressCanvas(canvas));
     };
     image.src = String(reader.result || '');
   };
   reader.readAsDataURL(file);
 });
+
+const captureVideoFrame = (video: HTMLVideoElement): string | null => {
+  if (!video.videoWidth || !video.videoHeight) return null;
+  const maxSide = 512;
+  const scale = Math.min(1, maxSide / Math.max(video.videoWidth, video.videoHeight));
+  const canvas = document.createElement('canvas');
+  canvas.width = Math.max(1, Math.round(video.videoWidth * scale));
+  canvas.height = Math.max(1, Math.round(video.videoHeight * scale));
+  const context = canvas.getContext('2d');
+  if (!context) return null;
+  context.drawImage(video, 0, 0, canvas.width, canvas.height);
+  return compressCanvas(canvas);
+};
 
 interface OriginalCardBuilderScreenProps {
   languageMode: LanguageMode;
@@ -120,6 +137,66 @@ const OriginalCardBuilderScreen: React.FC<OriginalCardBuilderScreenProps> = ({ l
   const [imageData, setImageData] = useState<string | undefined>();
   const [imageError, setImageError] = useState<string | null>(null);
   const [slots, setSlots] = useState<EffectSlot[]>(() => rollEffectSlots(CardType.ATTACK));
+  const [cameraOpen, setCameraOpen] = useState(false);
+  const [cameraStream, setCameraStream] = useState<MediaStream | null>(null);
+  const [cameraError, setCameraError] = useState<string | null>(null);
+  const cameraStreamRef = useRef<MediaStream | null>(null);
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+
+  const stopCamera = () => {
+    cameraStreamRef.current?.getTracks().forEach(track => track.stop());
+    cameraStreamRef.current = null;
+    setCameraStream(null);
+    setCameraOpen(false);
+  };
+
+  useEffect(() => {
+    if (!cameraOpen) return undefined;
+    let cancelled = false;
+    if (!navigator.mediaDevices?.getUserMedia) {
+      setCameraError(builderText(languageMode, 'この端末または接続ではカメラを利用できません。', 'Camera access is not available on this device or connection.', 'このたんまつまたはせつぞくではかめらをりようできません。'));
+      return () => undefined;
+    }
+
+    navigator.mediaDevices.getUserMedia({
+      video: {
+        facingMode: { ideal: 'environment' },
+        width: { ideal: 1280 },
+        height: { ideal: 720 },
+      },
+      audio: false,
+    }).then(stream => {
+      if (cancelled) {
+        stream.getTracks().forEach(track => track.stop());
+        return;
+      }
+      cameraStreamRef.current = stream;
+      setCameraError(null);
+      setCameraStream(stream);
+    }).catch(() => {
+      if (!cancelled) {
+        setCameraError(builderText(languageMode, 'カメラの起動を許可できませんでした。ファイル取り込みも利用できます。', 'Camera permission was not granted. You can still choose an image file.', 'かめらのきどうをきょかできませんでした。ふぁいるとりこみもりようできます。'));
+      }
+    });
+
+    return () => {
+      cancelled = true;
+      cameraStreamRef.current?.getTracks().forEach(track => track.stop());
+      cameraStreamRef.current = null;
+      setCameraStream(null);
+    };
+  }, [cameraOpen, languageMode]);
+
+  useEffect(() => {
+    const video = videoRef.current;
+    if (!video || !cameraStream) return undefined;
+    video.srcObject = cameraStream;
+    void video.play().catch(() => undefined);
+    return () => {
+      if (video.srcObject === cameraStream) video.srcObject = null;
+    };
+  }, [cameraStream]);
 
   const updateType = (nextType: CardTypeValue) => {
     setCardType(nextType);
@@ -176,6 +253,23 @@ const OriginalCardBuilderScreen: React.FC<OriginalCardBuilderScreenProps> = ({ l
     }
   };
 
+  const openCamera = () => {
+    setCameraError(null);
+    setImageError(null);
+    setCameraOpen(true);
+  };
+
+  const handleCameraCapture = () => {
+    const capturedImage = videoRef.current ? captureVideoFrame(videoRef.current) : null;
+    if (!capturedImage) {
+      setCameraError(builderText(languageMode, '撮影準備中です。少し待ってからもう一度押してください。', 'The camera is still starting. Wait a moment and try again.', 'さつえいじゅんびちゅうです。すこしまってからもういちどおしてください。'));
+      return;
+    }
+    setImageData(capturedImage);
+    setImageError(null);
+    stopCamera();
+  };
+
   const handleSave = () => {
     const safeName = cardName.trim();
     if (!safeName) {
@@ -204,6 +298,61 @@ const OriginalCardBuilderScreen: React.FC<OriginalCardBuilderScreenProps> = ({ l
 
   return (
     <div className="absolute inset-0 overflow-y-auto bg-[radial-gradient(circle_at_top,#312e81_0%,#111827_48%,#020617_100%)] px-3 py-4 text-white sm:px-6 sm:py-8">
+      {cameraOpen && (
+        <div
+          className="fixed inset-0 z-[2147483647] flex items-center justify-center bg-slate-950/95 p-3 sm:p-6"
+          role="presentation"
+          onClick={stopCamera}
+        >
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="original-card-camera-title"
+            className="w-full max-w-lg rounded-3xl border-2 border-cyan-300/50 bg-slate-900 p-4 shadow-2xl"
+            onClick={event => event.stopPropagation()}
+          >
+            <div className="mb-3 flex items-center justify-between gap-3">
+              <div className="flex items-center gap-2 text-lg font-black text-cyan-100" id="original-card-camera-title">
+                <Camera className="text-cyan-300" size={21} />
+                {builderText(languageMode, 'カメラで撮影', 'Take a photo', 'かめらでさつえい')}
+              </div>
+              <button type="button" onClick={stopCamera} className="rounded-xl border border-slate-500 px-3 py-2 text-xs font-black text-slate-200 hover:bg-slate-800">
+                {builderText(languageMode, '閉じる', 'Close', 'とじる')}
+              </button>
+            </div>
+            <div className="overflow-hidden rounded-2xl border border-cyan-200/30 bg-black">
+              {cameraError ? (
+                <div className="flex min-h-64 items-center justify-center p-6 text-center text-sm font-bold text-rose-200">
+                  {cameraError}
+                </div>
+              ) : (
+                <video
+                  ref={videoRef}
+                  autoPlay
+                  playsInline
+                  muted
+                  className="aspect-video w-full object-cover"
+                  aria-label={builderText(languageMode, '撮影中のカメラ映像', 'Camera preview', 'さつえいちゅうのかめらえいぞう')}
+                />
+              )}
+            </div>
+            <div className="mt-3 grid grid-cols-2 gap-2">
+              <button type="button" onClick={stopCamera} className="rounded-xl border-2 border-slate-500 bg-slate-800 px-3 py-3 text-sm font-black text-slate-100 hover:bg-slate-700">
+                {builderText(languageMode, 'キャンセル', 'Cancel', 'きゃんせる')}
+              </button>
+              <button type="button" onClick={handleCameraCapture} disabled={!cameraStream || !!cameraError} className="rounded-xl border-b-4 border-cyan-700 bg-cyan-300 px-3 py-3 text-sm font-black text-slate-950 hover:bg-cyan-200 disabled:cursor-not-allowed disabled:opacity-40">
+                {builderText(languageMode, 'この写真を使う', 'Use this photo', 'このしゃしんをつかう')}
+              </button>
+            </div>
+            {cameraError && (
+              <button type="button" onClick={() => { stopCamera(); fileInputRef.current?.click(); }} className="mt-2 flex w-full items-center justify-center gap-2 rounded-xl border border-violet-300/60 bg-violet-600/40 px-3 py-2 text-xs font-black text-violet-50 hover:bg-violet-500/50">
+                <ImagePlus size={15} />
+                {builderText(languageMode, 'ファイルから選ぶ', 'Choose a file instead', 'ふぁいるからえらぶ')}
+              </button>
+            )}
+          </div>
+        </div>
+      )}
       <main className="mx-auto w-full max-w-6xl">
         <div className="mb-4 flex items-center justify-between gap-3">
           <button
@@ -322,10 +471,14 @@ const OriginalCardBuilderScreen: React.FC<OriginalCardBuilderScreenProps> = ({ l
                 {builderText(languageMode, 'カード画像', 'Card image', 'かーどがぞう')}
               </div>
               <div className="flex flex-wrap items-center gap-2">
-                <label className="flex cursor-pointer items-center gap-2 rounded-xl border-2 border-violet-300/60 bg-violet-600/40 px-3 py-2 text-xs font-black text-violet-50 hover:bg-violet-500/50">
+                <button type="button" onClick={openCamera} className="flex items-center gap-2 rounded-xl border-2 border-cyan-300/60 bg-cyan-600/40 px-3 py-2 text-xs font-black text-cyan-50 hover:bg-cyan-500/50">
                   <Camera size={15} />
+                  {builderText(languageMode, 'カメラで撮影', 'Take a photo', 'かめらでさつえい')}
+                </button>
+                <label className="flex cursor-pointer items-center gap-2 rounded-xl border-2 border-violet-300/60 bg-violet-600/40 px-3 py-2 text-xs font-black text-violet-50 hover:bg-violet-500/50">
+                  <ImagePlus size={15} />
                   {builderText(languageMode, '写真・ファイルを取り込む', 'Choose photo or file', 'しゃしん・ふぁいるをとりこむ')}
-                  <input type="file" accept="image/*" capture="environment" onChange={handleFileChange} className="sr-only" />
+                  <input ref={fileInputRef} type="file" accept="image/*" capture="environment" onChange={handleFileChange} className="sr-only" />
                 </label>
                 {imageData && (
                   <button type="button" onClick={() => setImageData(undefined)} className="rounded-xl border border-slate-500 px-3 py-2 text-xs font-black text-slate-200 hover:bg-slate-800">

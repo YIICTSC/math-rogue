@@ -36,6 +36,7 @@ export const BATTLE_MODAL_PREVIEWS: Array<{ id: BattleModalPreviewId; label: str
 export type AppModalPreviewId =
     | 'VACATION_UNLOCK_HIGH_SCHOOL'
     | 'VACATION_UNLOCK_MAGIC'
+    | 'ORIGINAL_CARD_BUILDER_UNLOCK'
     | 'NEW_UNLOCKS'
     | 'MASTERY_REWARD'
     | 'ASSIGNMENT_PROGRESS'
@@ -53,6 +54,7 @@ export type AppModalPreviewId =
 export const APP_MODAL_PREVIEWS: Array<{ id: AppModalPreviewId; label: string; description: string }> = [
     { id: 'VACATION_UNLOCK_HIGH_SCHOOL', label: 'バカンス解禁：高校編', description: '集合イラスト付きの解禁演出' },
     { id: 'VACATION_UNLOCK_MAGIC', label: 'バカンス解禁：マジック編', description: 'マジック編の解禁演出' },
+    { id: 'ORIGINAL_CARD_BUILDER_UNLOCK', label: 'カードビルダー解禁', description: 'オリジナルカードビルダーの解禁演出' },
     { id: 'NEW_UNLOCKS', label: '新しい解放要素', description: '主人公・ミニゲームの解禁一覧' },
     { id: 'MASTERY_REWARD', label: 'マスター達成', description: 'マスター報酬カードの表示' },
     { id: 'ASSIGNMENT_PROGRESS', label: '課題達成通知', description: '課題クリアとご褒美カード' },
