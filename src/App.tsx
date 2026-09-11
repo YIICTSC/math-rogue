@@ -19715,7 +19715,12 @@ const App: React.FC = () => {
                                         <li>{trans('マジック編の男女主人公向けエンドレスイベント、演出画像、ボイスを追加', languageMode)}</li>
                                         <li>{trans('課題・招待からの冒険再開と保存データ分離を安定化', languageMode)}</li>
                                         <li>{trans('将棋Advanceの固有駒と移動ロジックを拡張', languageMode)}</li>
-                                        <li>{trans('エンディングのデバッグプレビュー、監査、回帰テストを追加', languageMode)}</li>
+                                        <li>{trans('エンドレスボスの特殊行動と報酬選択を改善', languageMode)}</li>
+                                        <li>{trans('バカンスモードの解禁演出、衣装、専用アニメーションを追加', languageMode)}</li>
+                                        <li>{trans('バカンスモードの戦闘演出とキャラクター表示を改善', languageMode)}</li>
+                                        <li>{trans('高校編バカンスキャラクターのアニメーション表示品質を改善', languageMode)}</li>
+                                        <li>{trans('オリジナルカードビルダーを解禁し、学習問題からカードを作成できるように改善', languageMode)}</li>
+                                        <li>{trans('ランキング参加の案内、協力プレイ、カード対象判定を改善', languageMode)}</li>
                                     </ul>
                                 </section>
                                 <section>
