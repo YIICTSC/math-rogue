@@ -10,294 +10,788 @@ export interface VacationAnimationFrameAnchor {
 export const VACATION_ANIMATION_FRAME_ANCHORS: Record<string, VacationAnimationFrameAnchor[]> = {
   "sprites/high-school/vacation-characters-idle-sheets/0.webp": [
     {
-      "centerX": 359,
-      "bottomY": 600,
+      "centerX": 356,
+      "bottomY": 586,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 237,
+      "centerX": 241,
+      "bottomY": 573,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 373,
       "bottomY": 587,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 376,
-      "bottomY": 601,
-      "cellWidth": 627,
-      "cellHeight": 627
-    },
-    {
-      "centerX": 242,
-      "bottomY": 594,
+      "centerX": 246,
+      "bottomY": 580,
       "cellWidth": 627,
       "cellHeight": 627
     }
   ],
   "sprites/high-school/vacation-characters-idle-special-sheets/0.webp": [
     {
-      "centerX": 371,
-      "bottomY": 626,
+      "centerX": 368,
+      "bottomY": 610,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 247,
-      "bottomY": 626,
+      "centerX": 251,
+      "bottomY": 610,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 339,
-      "bottomY": 607,
-      "cellWidth": 627,
-      "cellHeight": 627
-    },
-    {
-      "centerX": 282,
+      "centerX": 338,
       "bottomY": 592,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 283,
+      "bottomY": 578,
       "cellWidth": 627,
       "cellHeight": 627
     }
   ],
   "sprites/high-school/vacation-characters-attack-sheets/0.webp": [
     {
-      "centerX": 378,
-      "bottomY": 610,
+      "centerX": 375,
+      "bottomY": 595,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 289,
-      "bottomY": 581,
+      "centerX": 290,
+      "bottomY": 568,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 300,
-      "bottomY": 583,
+      "centerX": 301,
+      "bottomY": 569,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 345,
-      "bottomY": 602,
+      "centerX": 343,
+      "bottomY": 588,
       "cellWidth": 627,
       "cellHeight": 627
     }
   ],
   "sprites/high-school/vacation-characters-skill-sheets/0.webp": [
     {
-      "centerX": 354,
-      "bottomY": 616,
-      "cellWidth": 627,
-      "cellHeight": 627
-    },
-    {
-      "centerX": 332,
+      "centerX": 351,
       "bottomY": 601,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 336,
-      "bottomY": 586,
+      "centerX": 331,
+      "bottomY": 587,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 283,
-      "bottomY": 600,
+      "centerX": 335,
+      "bottomY": 572,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 284,
+      "bottomY": 586,
       "cellWidth": 627,
       "cellHeight": 627
     }
   ],
   "sprites/high-school/vacation-characters-hit-sheets/0.webp": [
     {
-      "centerX": 351,
-      "bottomY": 626,
+      "centerX": 349,
+      "bottomY": 610,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 281,
-      "bottomY": 612,
+      "centerX": 282,
+      "bottomY": 597,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
       "centerX": 330,
-      "bottomY": 610,
+      "bottomY": 595,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 220,
-      "bottomY": 610,
+      "centerX": 225,
+      "bottomY": 595,
       "cellWidth": 627,
       "cellHeight": 627
     }
   ],
   "sprites/high-school/vacation-characters-low-hp-sheets/0.webp": [
     {
-      "centerX": 368,
-      "bottomY": 599,
+      "centerX": 366,
+      "bottomY": 584,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 255,
-      "bottomY": 599,
+      "centerX": 258,
+      "bottomY": 585,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 367,
-      "bottomY": 600,
+      "centerX": 365,
+      "bottomY": 586,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 256,
-      "bottomY": 598,
+      "centerX": 259,
+      "bottomY": 584,
       "cellWidth": 627,
       "cellHeight": 627
     }
   ],
   "sprites/high-school/vacation-characters-idle-sheets/1.webp": [
     {
-      "centerX": 349,
-      "bottomY": 619,
+      "centerX": 347,
+      "bottomY": 604,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
       "centerX": 324,
-      "bottomY": 614,
+      "bottomY": 600,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 358,
-      "bottomY": 599,
+      "centerX": 356,
+      "bottomY": 585,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
       "centerX": 309,
-      "bottomY": 599,
+      "bottomY": 585,
       "cellWidth": 627,
       "cellHeight": 627
     }
   ],
   "sprites/high-school/vacation-characters-idle-special-sheets/1.webp": [
     {
-      "centerX": 419,
-      "bottomY": 626,
+      "centerX": 414,
+      "bottomY": 610,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 229,
-      "bottomY": 626,
+      "centerX": 234,
+      "bottomY": 610,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 402,
-      "bottomY": 620,
+      "centerX": 398,
+      "bottomY": 604,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 179,
-      "bottomY": 612,
+      "centerX": 186,
+      "bottomY": 597,
       "cellWidth": 627,
       "cellHeight": 627
     }
   ],
   "sprites/high-school/vacation-characters-attack-sheets/1.webp": [
     {
-      "centerX": 353,
-      "bottomY": 592,
+      "centerX": 350,
+      "bottomY": 578,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
       "centerX": 303,
-      "bottomY": 626,
+      "bottomY": 610,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 337,
-      "bottomY": 564,
+      "centerX": 336,
+      "bottomY": 552,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
       "centerX": 306,
-      "bottomY": 576,
+      "bottomY": 563,
       "cellWidth": 627,
       "cellHeight": 627
     }
   ],
   "sprites/high-school/vacation-characters-skill-sheets/1.webp": [
     {
-      "centerX": 363,
-      "bottomY": 626,
+      "centerX": 360,
+      "bottomY": 610,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 292,
-      "bottomY": 596,
+      "centerX": 293,
+      "bottomY": 582,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 338,
-      "bottomY": 570,
+      "centerX": 337,
+      "bottomY": 557,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 273,
-      "bottomY": 570,
+      "centerX": 275,
+      "bottomY": 557,
       "cellWidth": 627,
       "cellHeight": 627
     }
   ],
   "sprites/high-school/vacation-characters-hit-sheets/1.webp": [
     {
-      "centerX": 381,
-      "bottomY": 626,
+      "centerX": 377,
+      "bottomY": 610,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 283,
-      "bottomY": 609,
+      "centerX": 285,
+      "bottomY": 594,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 388,
-      "bottomY": 588,
+      "centerX": 384,
+      "bottomY": 574,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 269,
-      "bottomY": 596,
+      "centerX": 271,
+      "bottomY": 582,
       "cellWidth": 627,
       "cellHeight": 627
     }
   ],
   "sprites/high-school/vacation-characters-low-hp-sheets/1.webp": [
     {
+      "centerX": 354,
+      "bottomY": 581,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 288,
+      "bottomY": 589,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 348,
+      "bottomY": 575,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 275,
+      "bottomY": 587,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/high-school/vacation-characters-idle-sheets/2.webp": [
+    {
+      "centerX": 367,
+      "bottomY": 610,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 270,
+      "bottomY": 610,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 375,
+      "bottomY": 607,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 265,
+      "bottomY": 608,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/high-school/vacation-characters-idle-special-sheets/2.webp": [
+    {
+      "centerX": 365,
+      "bottomY": 610,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 274,
+      "bottomY": 582,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 370,
+      "bottomY": 606,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 256,
+      "bottomY": 576,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/high-school/vacation-characters-attack-sheets/2.webp": [
+    {
+      "centerX": 359,
+      "bottomY": 610,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 306,
+      "bottomY": 560,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 333,
+      "bottomY": 585,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 263,
+      "bottomY": 599,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/high-school/vacation-characters-skill-sheets/2.webp": [
+    {
+      "centerX": 383,
+      "bottomY": 583,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 296,
+      "bottomY": 610,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 336,
+      "bottomY": 533,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 233,
+      "bottomY": 566,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/high-school/vacation-characters-hit-sheets/2.webp": [
+    {
+      "centerX": 347,
+      "bottomY": 610,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 301,
+      "bottomY": 610,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 327,
+      "bottomY": 576,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 298,
+      "bottomY": 550,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/high-school/vacation-characters-low-hp-sheets/2.webp": [
+    {
+      "centerX": 363,
+      "bottomY": 600,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 236,
+      "bottomY": 594,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 341,
+      "bottomY": 581,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 213,
+      "bottomY": 583,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/high-school/vacation-characters-idle-sheets/3.webp": [
+    {
+      "centerX": 370,
+      "bottomY": 603,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 277,
+      "bottomY": 604,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 368,
+      "bottomY": 603,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 278,
+      "bottomY": 602,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/high-school/vacation-characters-idle-special-sheets/3.webp": [
+    {
       "centerX": 356,
+      "bottomY": 610,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 254,
+      "bottomY": 610,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 369,
+      "bottomY": 604,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 241,
+      "bottomY": 603,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/high-school/vacation-characters-attack-sheets/3.webp": [
+    {
+      "centerX": 381,
+      "bottomY": 607,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 278,
+      "bottomY": 610,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 314,
+      "bottomY": 534,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 310,
+      "bottomY": 582,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/high-school/vacation-characters-skill-sheets/3.webp": [
+    {
+      "centerX": 368,
+      "bottomY": 610,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 269,
+      "bottomY": 577,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 347,
+      "bottomY": 554,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 274,
+      "bottomY": 553,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/high-school/vacation-characters-hit-sheets/3.webp": [
+    {
+      "centerX": 322,
+      "bottomY": 580,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 285,
+      "bottomY": 576,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 341,
+      "bottomY": 564,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 285,
+      "bottomY": 565,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/high-school/vacation-characters-low-hp-sheets/3.webp": [
+    {
+      "centerX": 352,
+      "bottomY": 601,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 283,
+      "bottomY": 601,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 354,
+      "bottomY": 583,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 270,
+      "bottomY": 589,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/high-school/vacation-characters-idle-sheets/4.webp": [
+    {
+      "centerX": 366,
+      "bottomY": 610,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 282,
+      "bottomY": 610,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 380,
+      "bottomY": 558,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 259,
+      "bottomY": 556,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/high-school/vacation-characters-idle-special-sheets/4.webp": [
+    {
+      "centerX": 382,
+      "bottomY": 610,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 254,
+      "bottomY": 579,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 404,
+      "bottomY": 569,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 211,
+      "bottomY": 563,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/high-school/vacation-characters-attack-sheets/4.webp": [
+    {
+      "centerX": 389,
+      "bottomY": 610,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 304,
+      "bottomY": 590,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 323,
+      "bottomY": 570,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 331,
+      "bottomY": 554,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/high-school/vacation-characters-skill-sheets/4.webp": [
+    {
+      "centerX": 353,
+      "bottomY": 610,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 302,
+      "bottomY": 570,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 333,
+      "bottomY": 563,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 277,
+      "bottomY": 544,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/high-school/vacation-characters-hit-sheets/4.webp": [
+    {
+      "centerX": 342,
       "bottomY": 596,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 304,
+      "bottomY": 598,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 341,
+      "bottomY": 565,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 294,
+      "bottomY": 572,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/high-school/vacation-characters-low-hp-sheets/4.webp": [
+    {
+      "centerX": 393,
+      "bottomY": 589,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 294,
+      "bottomY": 590,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 375,
+      "bottomY": 572,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 310,
+      "bottomY": 574,
+      "cellWidth": 627,
+      "cellHeight": 627
+    }
+  ],
+  "sprites/high-school/vacation-characters-idle-sheets/5.webp": [
+    {
+      "centerX": 334,
+      "bottomY": 594,
       "cellWidth": 627,
       "cellHeight": 627
     },
@@ -308,586 +802,92 @@ export const VACATION_ANIMATION_FRAME_ANCHORS: Record<string, VacationAnimationF
       "cellHeight": 627
     },
     {
-      "centerX": 351,
-      "bottomY": 589,
-      "cellWidth": 627,
-      "cellHeight": 627
-    },
-    {
-      "centerX": 273,
-      "bottomY": 602,
-      "cellWidth": 627,
-      "cellHeight": 627
-    }
-  ],
-  "sprites/high-school/vacation-characters-idle-sheets/2.webp": [
-    {
-      "centerX": 369,
-      "bottomY": 626,
-      "cellWidth": 627,
-      "cellHeight": 627
-    },
-    {
-      "centerX": 268,
-      "bottomY": 626,
-      "cellWidth": 627,
-      "cellHeight": 627
-    },
-    {
-      "centerX": 378,
-      "bottomY": 622,
-      "cellWidth": 627,
-      "cellHeight": 627
-    },
-    {
-      "centerX": 263,
-      "bottomY": 623,
-      "cellWidth": 627,
-      "cellHeight": 627
-    }
-  ],
-  "sprites/high-school/vacation-characters-idle-special-sheets/2.webp": [
-    {
-      "centerX": 367,
-      "bottomY": 626,
-      "cellWidth": 627,
-      "cellHeight": 627
-    },
-    {
-      "centerX": 272,
-      "bottomY": 596,
-      "cellWidth": 627,
-      "cellHeight": 627
-    },
-    {
-      "centerX": 372,
-      "bottomY": 621,
-      "cellWidth": 627,
-      "cellHeight": 627
-    },
-    {
-      "centerX": 252,
-      "bottomY": 590,
-      "cellWidth": 627,
-      "cellHeight": 627
-    }
-  ],
-  "sprites/high-school/vacation-characters-attack-sheets/2.webp": [
-    {
-      "centerX": 361,
-      "bottomY": 626,
-      "cellWidth": 627,
-      "cellHeight": 627
-    },
-    {
-      "centerX": 305,
-      "bottomY": 573,
-      "cellWidth": 627,
-      "cellHeight": 627
-    },
-    {
       "centerX": 334,
-      "bottomY": 599,
-      "cellWidth": 627,
-      "cellHeight": 627
-    },
-    {
-      "centerX": 260,
-      "bottomY": 614,
-      "cellWidth": 627,
-      "cellHeight": 627
-    }
-  ],
-  "sprites/high-school/vacation-characters-skill-sheets/2.webp": [
-    {
-      "centerX": 386,
-      "bottomY": 597,
-      "cellWidth": 627,
-      "cellHeight": 627
-    },
-    {
-      "centerX": 295,
-      "bottomY": 626,
-      "cellWidth": 627,
-      "cellHeight": 627
-    },
-    {
-      "centerX": 337,
-      "bottomY": 544,
-      "cellWidth": 627,
-      "cellHeight": 627
-    },
-    {
-      "centerX": 228,
-      "bottomY": 579,
-      "cellWidth": 627,
-      "cellHeight": 627
-    }
-  ],
-  "sprites/high-school/vacation-characters-hit-sheets/2.webp": [
-    {
-      "centerX": 348,
-      "bottomY": 626,
-      "cellWidth": 627,
-      "cellHeight": 627
-    },
-    {
-      "centerX": 300,
-      "bottomY": 626,
-      "cellWidth": 627,
-      "cellHeight": 627
-    },
-    {
-      "centerX": 328,
-      "bottomY": 590,
-      "cellWidth": 627,
-      "cellHeight": 627
-    },
-    {
-      "centerX": 298,
-      "bottomY": 562,
-      "cellWidth": 627,
-      "cellHeight": 627
-    }
-  ],
-  "sprites/high-school/vacation-characters-low-hp-sheets/2.webp": [
-    {
-      "centerX": 365,
-      "bottomY": 615,
-      "cellWidth": 627,
-      "cellHeight": 627
-    },
-    {
-      "centerX": 232,
-      "bottomY": 609,
-      "cellWidth": 627,
-      "cellHeight": 627
-    },
-    {
-      "centerX": 343,
-      "bottomY": 596,
-      "cellWidth": 627,
-      "cellHeight": 627
-    },
-    {
-      "centerX": 208,
-      "bottomY": 597,
-      "cellWidth": 627,
-      "cellHeight": 627
-    }
-  ],
-  "sprites/high-school/vacation-characters-idle-sheets/3.webp": [
-    {
-      "centerX": 373,
-      "bottomY": 618,
-      "cellWidth": 627,
-      "cellHeight": 627
-    },
-    {
-      "centerX": 275,
-      "bottomY": 619,
-      "cellWidth": 627,
-      "cellHeight": 627
-    },
-    {
-      "centerX": 372,
-      "bottomY": 618,
-      "cellWidth": 627,
-      "cellHeight": 627
-    },
-    {
-      "centerX": 276,
-      "bottomY": 618,
-      "cellWidth": 627,
-      "cellHeight": 627
-    }
-  ],
-  "sprites/high-school/vacation-characters-idle-special-sheets/3.webp": [
-    {
-      "centerX": 359,
-      "bottomY": 626,
-      "cellWidth": 627,
-      "cellHeight": 627
-    },
-    {
-      "centerX": 251,
-      "bottomY": 626,
-      "cellWidth": 627,
-      "cellHeight": 627
-    },
-    {
-      "centerX": 372,
-      "bottomY": 619,
-      "cellWidth": 627,
-      "cellHeight": 627
-    },
-    {
-      "centerX": 237,
-      "bottomY": 619,
-      "cellWidth": 627,
-      "cellHeight": 627
-    }
-  ],
-  "sprites/high-school/vacation-characters-attack-sheets/3.webp": [
-    {
-      "centerX": 385,
-      "bottomY": 623,
-      "cellWidth": 627,
-      "cellHeight": 627
-    },
-    {
-      "centerX": 276,
-      "bottomY": 626,
-      "cellWidth": 627,
-      "cellHeight": 627
-    },
-    {
-      "centerX": 314,
-      "bottomY": 546,
-      "cellWidth": 627,
-      "cellHeight": 627
-    },
-    {
-      "centerX": 309,
-      "bottomY": 596,
-      "cellWidth": 627,
-      "cellHeight": 627
-    }
-  ],
-  "sprites/high-school/vacation-characters-skill-sheets/3.webp": [
-    {
-      "centerX": 371,
-      "bottomY": 626,
-      "cellWidth": 627,
-      "cellHeight": 627
-    },
-    {
-      "centerX": 266,
-      "bottomY": 591,
-      "cellWidth": 627,
-      "cellHeight": 627
-    },
-    {
-      "centerX": 349,
-      "bottomY": 567,
-      "cellWidth": 627,
-      "cellHeight": 627
-    },
-    {
-      "centerX": 272,
-      "bottomY": 566,
-      "cellWidth": 627,
-      "cellHeight": 627
-    }
-  ],
-  "sprites/high-school/vacation-characters-hit-sheets/3.webp": [
-    {
-      "centerX": 322,
-      "bottomY": 595,
-      "cellWidth": 627,
-      "cellHeight": 627
-    },
-    {
-      "centerX": 283,
-      "bottomY": 590,
-      "cellWidth": 627,
-      "cellHeight": 627
-    },
-    {
-      "centerX": 343,
-      "bottomY": 578,
-      "cellWidth": 627,
-      "cellHeight": 627
-    },
-    {
-      "centerX": 283,
-      "bottomY": 579,
-      "cellWidth": 627,
-      "cellHeight": 627
-    }
-  ],
-  "sprites/high-school/vacation-characters-low-hp-sheets/3.webp": [
-    {
-      "centerX": 354,
-      "bottomY": 616,
-      "cellWidth": 627,
-      "cellHeight": 627
-    },
-    {
-      "centerX": 281,
-      "bottomY": 616,
-      "cellWidth": 627,
-      "cellHeight": 627
-    },
-    {
-      "centerX": 356,
-      "bottomY": 598,
-      "cellWidth": 627,
-      "cellHeight": 627
-    },
-    {
-      "centerX": 268,
-      "bottomY": 604,
-      "cellWidth": 627,
-      "cellHeight": 627
-    }
-  ],
-  "sprites/high-school/vacation-characters-idle-sheets/4.webp": [
-    {
-      "centerX": 368,
-      "bottomY": 626,
-      "cellWidth": 627,
-      "cellHeight": 627
-    },
-    {
-      "centerX": 279,
-      "bottomY": 626,
-      "cellWidth": 627,
-      "cellHeight": 627
-    },
-    {
-      "centerX": 384,
-      "bottomY": 571,
-      "cellWidth": 627,
-      "cellHeight": 627
-    },
-    {
-      "centerX": 256,
-      "bottomY": 569,
-      "cellWidth": 627,
-      "cellHeight": 627
-    }
-  ],
-  "sprites/high-school/vacation-characters-idle-special-sheets/4.webp": [
-    {
-      "centerX": 386,
-      "bottomY": 626,
-      "cellWidth": 627,
-      "cellHeight": 627
-    },
-    {
-      "centerX": 251,
-      "bottomY": 593,
-      "cellWidth": 627,
-      "cellHeight": 627
-    },
-    {
-      "centerX": 408,
-      "bottomY": 583,
-      "cellWidth": 627,
-      "cellHeight": 627
-    },
-    {
-      "centerX": 205,
-      "bottomY": 576,
-      "cellWidth": 627,
-      "cellHeight": 627
-    }
-  ],
-  "sprites/high-school/vacation-characters-attack-sheets/4.webp": [
-    {
-      "centerX": 394,
-      "bottomY": 626,
-      "cellWidth": 627,
-      "cellHeight": 627
-    },
-    {
-      "centerX": 303,
-      "bottomY": 604,
-      "cellWidth": 627,
-      "cellHeight": 627
-    },
-    {
-      "centerX": 323,
-      "bottomY": 584,
-      "cellWidth": 627,
-      "cellHeight": 627
-    },
-    {
-      "centerX": 332,
-      "bottomY": 567,
-      "cellWidth": 627,
-      "cellHeight": 627
-    }
-  ],
-  "sprites/high-school/vacation-characters-skill-sheets/4.webp": [
-    {
-      "centerX": 355,
-      "bottomY": 626,
-      "cellWidth": 627,
-      "cellHeight": 627
-    },
-    {
-      "centerX": 302,
-      "bottomY": 583,
-      "cellWidth": 627,
-      "cellHeight": 627
-    },
-    {
-      "centerX": 334,
-      "bottomY": 575,
-      "cellWidth": 627,
-      "cellHeight": 627
-    },
-    {
-      "centerX": 275,
-      "bottomY": 556,
-      "cellWidth": 627,
-      "cellHeight": 627
-    }
-  ],
-  "sprites/high-school/vacation-characters-hit-sheets/4.webp": [
-    {
-      "centerX": 343,
-      "bottomY": 611,
-      "cellWidth": 627,
-      "cellHeight": 627
-    },
-    {
-      "centerX": 304,
-      "bottomY": 613,
-      "cellWidth": 627,
-      "cellHeight": 627
-    },
-    {
-      "centerX": 342,
-      "bottomY": 578,
-      "cellWidth": 627,
-      "cellHeight": 627
-    },
-    {
-      "centerX": 293,
-      "bottomY": 585,
-      "cellWidth": 627,
-      "cellHeight": 627
-    }
-  ],
-  "sprites/high-school/vacation-characters-low-hp-sheets/4.webp": [
-    {
-      "centerX": 397,
-      "bottomY": 603,
-      "cellWidth": 627,
-      "cellHeight": 627
-    },
-    {
-      "centerX": 293,
-      "bottomY": 605,
-      "cellWidth": 627,
-      "cellHeight": 627
-    },
-    {
-      "centerX": 378,
-      "bottomY": 585,
-      "cellWidth": 627,
-      "cellHeight": 627
-    },
-    {
-      "centerX": 310,
       "bottomY": 588,
       "cellWidth": 627,
       "cellHeight": 627
-    }
-  ],
-  "sprites/high-school/vacation-characters-idle-sheets/5.webp": [
-    {
-      "centerX": 336,
-      "bottomY": 609,
-      "cellWidth": 627,
-      "cellHeight": 627
     },
     {
-      "centerX": 284,
-      "bottomY": 618,
-      "cellWidth": 627,
-      "cellHeight": 627
-    },
-    {
-      "centerX": 336,
-      "bottomY": 602,
-      "cellWidth": 627,
-      "cellHeight": 627
-    },
-    {
-      "centerX": 287,
-      "bottomY": 602,
+      "centerX": 288,
+      "bottomY": 588,
       "cellWidth": 627,
       "cellHeight": 627
     }
   ],
   "sprites/high-school/vacation-characters-idle-special-sheets/5.webp": [
     {
-      "centerX": 358,
-      "bottomY": 609,
+      "centerX": 356,
+      "bottomY": 594,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 266,
-      "bottomY": 616,
+      "centerX": 269,
+      "bottomY": 601,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 336,
-      "bottomY": 583,
+      "centerX": 335,
+      "bottomY": 570,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 262,
-      "bottomY": 582,
+      "centerX": 265,
+      "bottomY": 569,
       "cellWidth": 627,
       "cellHeight": 627
     }
   ],
   "sprites/high-school/vacation-characters-attack-sheets/5.webp": [
     {
-      "centerX": 336,
-      "bottomY": 624,
+      "centerX": 335,
+      "bottomY": 609,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 312,
-      "bottomY": 613,
+      "centerX": 313,
+      "bottomY": 598,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 342,
-      "bottomY": 585,
+      "centerX": 340,
+      "bottomY": 572,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 262,
-      "bottomY": 607,
+      "centerX": 265,
+      "bottomY": 592,
       "cellWidth": 627,
       "cellHeight": 627
     }
   ],
   "sprites/high-school/vacation-characters-skill-sheets/5.webp": [
     {
-      "centerX": 350,
-      "bottomY": 588,
+      "centerX": 348,
+      "bottomY": 574,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
       "centerX": 310,
-      "bottomY": 588,
+      "bottomY": 574,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 330,
-      "bottomY": 581,
+      "centerX": 329,
+      "bottomY": 568,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 247,
-      "bottomY": 581,
+      "centerX": 250,
+      "bottomY": 568,
       "cellWidth": 627,
       "cellHeight": 627
     }
@@ -895,493 +895,493 @@ export const VACATION_ANIMATION_FRAME_ANCHORS: Record<string, VacationAnimationF
   "sprites/high-school/vacation-characters-hit-sheets/5.webp": [
     {
       "centerX": 328,
-      "bottomY": 603,
+      "bottomY": 589,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 291,
-      "bottomY": 574,
+      "centerX": 292,
+      "bottomY": 561,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
       "centerX": 310,
-      "bottomY": 554,
+      "bottomY": 542,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
       "centerX": 301,
-      "bottomY": 598,
+      "bottomY": 584,
       "cellWidth": 627,
       "cellHeight": 627
     }
   ],
   "sprites/high-school/vacation-characters-low-hp-sheets/5.webp": [
     {
-      "centerX": 336,
-      "bottomY": 626,
+      "centerX": 334,
+      "bottomY": 610,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 254,
-      "bottomY": 626,
+      "centerX": 257,
+      "bottomY": 610,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 288,
-      "bottomY": 534,
+      "centerX": 289,
+      "bottomY": 523,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 291,
-      "bottomY": 623,
+      "centerX": 292,
+      "bottomY": 608,
       "cellWidth": 627,
       "cellHeight": 627
     }
   ],
   "sprites/high-school/vacation-characters-idle-sheets/6.webp": [
     {
-      "centerX": 361,
-      "bottomY": 592,
+      "centerX": 359,
+      "bottomY": 578,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 256,
-      "bottomY": 583,
+      "centerX": 259,
+      "bottomY": 569,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 339,
-      "bottomY": 603,
+      "centerX": 337,
+      "bottomY": 588,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 263,
-      "bottomY": 603,
+      "centerX": 266,
+      "bottomY": 589,
       "cellWidth": 627,
       "cellHeight": 627
     }
   ],
   "sprites/high-school/vacation-characters-idle-special-sheets/6.webp": [
     {
-      "centerX": 373,
-      "bottomY": 626,
+      "centerX": 369,
+      "bottomY": 610,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 257,
-      "bottomY": 611,
+      "centerX": 260,
+      "bottomY": 596,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 375,
-      "bottomY": 605,
+      "centerX": 372,
+      "bottomY": 590,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 239,
-      "bottomY": 609,
+      "centerX": 243,
+      "bottomY": 594,
       "cellWidth": 627,
       "cellHeight": 627
     }
   ],
   "sprites/high-school/vacation-characters-attack-sheets/6.webp": [
     {
-      "centerX": 388,
-      "bottomY": 626,
-      "cellWidth": 627,
-      "cellHeight": 627
-    },
-    {
-      "centerX": 296,
+      "centerX": 384,
       "bottomY": 610,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 320,
-      "bottomY": 604,
+      "centerX": 297,
+      "bottomY": 594,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 272,
-      "bottomY": 603,
+      "centerX": 320,
+      "bottomY": 589,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 274,
+      "bottomY": 589,
       "cellWidth": 627,
       "cellHeight": 627
     }
   ],
   "sprites/high-school/vacation-characters-skill-sheets/6.webp": [
     {
-      "centerX": 386,
-      "bottomY": 626,
-      "cellWidth": 627,
-      "cellHeight": 627
-    },
-    {
-      "centerX": 256,
+      "centerX": 382,
       "bottomY": 610,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 349,
-      "bottomY": 596,
+      "centerX": 259,
+      "bottomY": 595,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 206,
-      "bottomY": 594,
+      "centerX": 347,
+      "bottomY": 582,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 211,
+      "bottomY": 580,
       "cellWidth": 627,
       "cellHeight": 627
     }
   ],
   "sprites/high-school/vacation-characters-hit-sheets/6.webp": [
     {
-      "centerX": 402,
-      "bottomY": 626,
+      "centerX": 398,
+      "bottomY": 610,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 240,
-      "bottomY": 621,
+      "centerX": 244,
+      "bottomY": 606,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 357,
-      "bottomY": 569,
+      "centerX": 354,
+      "bottomY": 556,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 239,
-      "bottomY": 613,
+      "centerX": 243,
+      "bottomY": 598,
       "cellWidth": 627,
       "cellHeight": 627
     }
   ],
   "sprites/high-school/vacation-characters-low-hp-sheets/6.webp": [
     {
-      "centerX": 377,
-      "bottomY": 616,
+      "centerX": 374,
+      "bottomY": 600,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 267,
-      "bottomY": 617,
+      "centerX": 269,
+      "bottomY": 602,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 369,
-      "bottomY": 601,
+      "centerX": 366,
+      "bottomY": 586,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 249,
-      "bottomY": 601,
+      "centerX": 253,
+      "bottomY": 587,
       "cellWidth": 627,
       "cellHeight": 627
     }
   ],
   "sprites/high-school/vacation-characters-idle-sheets/7.webp": [
     {
+      "centerX": 349,
+      "bottomY": 582,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 285,
+      "bottomY": 582,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
       "centerX": 351,
-      "bottomY": 596,
+      "bottomY": 581,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 284,
-      "bottomY": 596,
-      "cellWidth": 627,
-      "cellHeight": 627
-    },
-    {
-      "centerX": 353,
-      "bottomY": 595,
-      "cellWidth": 627,
-      "cellHeight": 627
-    },
-    {
-      "centerX": 281,
-      "bottomY": 594,
+      "centerX": 283,
+      "bottomY": 580,
       "cellWidth": 627,
       "cellHeight": 627
     }
   ],
   "sprites/high-school/vacation-characters-idle-special-sheets/7.webp": [
     {
-      "centerX": 362,
-      "bottomY": 626,
+      "centerX": 360,
+      "bottomY": 610,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 261,
-      "bottomY": 626,
+      "centerX": 263,
+      "bottomY": 610,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 371,
-      "bottomY": 612,
+      "centerX": 368,
+      "bottomY": 597,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 264,
-      "bottomY": 613,
+      "centerX": 266,
+      "bottomY": 598,
       "cellWidth": 627,
       "cellHeight": 627
     }
   ],
   "sprites/high-school/vacation-characters-attack-sheets/7.webp": [
     {
-      "centerX": 379,
-      "bottomY": 626,
+      "centerX": 375,
+      "bottomY": 610,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 289,
-      "bottomY": 592,
+      "centerX": 291,
+      "bottomY": 578,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 330,
-      "bottomY": 572,
+      "centerX": 329,
+      "bottomY": 559,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 259,
-      "bottomY": 619,
+      "centerX": 261,
+      "bottomY": 604,
       "cellWidth": 627,
       "cellHeight": 627
     }
   ],
   "sprites/high-school/vacation-characters-skill-sheets/7.webp": [
     {
-      "centerX": 343,
-      "bottomY": 626,
+      "centerX": 342,
+      "bottomY": 610,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 274,
-      "bottomY": 612,
+      "centerX": 276,
+      "bottomY": 597,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 349,
-      "bottomY": 594,
+      "centerX": 347,
+      "bottomY": 580,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 298,
-      "bottomY": 600,
+      "centerX": 299,
+      "bottomY": 585,
       "cellWidth": 627,
       "cellHeight": 627
     }
   ],
   "sprites/high-school/vacation-characters-hit-sheets/7.webp": [
     {
-      "centerX": 340,
-      "bottomY": 626,
+      "centerX": 339,
+      "bottomY": 610,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
       "centerX": 308,
-      "bottomY": 606,
+      "bottomY": 591,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 299,
-      "bottomY": 612,
+      "centerX": 300,
+      "bottomY": 597,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 277,
-      "bottomY": 626,
+      "centerX": 279,
+      "bottomY": 610,
       "cellWidth": 627,
       "cellHeight": 627
     }
   ],
   "sprites/high-school/vacation-characters-low-hp-sheets/7.webp": [
     {
-      "centerX": 349,
-      "bottomY": 624,
+      "centerX": 347,
+      "bottomY": 608,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 287,
-      "bottomY": 604,
+      "centerX": 289,
+      "bottomY": 590,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 336,
-      "bottomY": 586,
+      "centerX": 335,
+      "bottomY": 572,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 282,
-      "bottomY": 605,
+      "centerX": 283,
+      "bottomY": 591,
       "cellWidth": 627,
       "cellHeight": 627
     }
   ],
   "sprites/high-school/vacation-characters-idle-sheets/8.webp": [
     {
-      "centerX": 332,
-      "bottomY": 626,
+      "centerX": 331,
+      "bottomY": 610,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 254,
-      "bottomY": 604,
+      "centerX": 258,
+      "bottomY": 590,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 341,
-      "bottomY": 609,
+      "centerX": 340,
+      "bottomY": 594,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 252,
-      "bottomY": 593,
+      "centerX": 255,
+      "bottomY": 579,
       "cellWidth": 627,
       "cellHeight": 627
     }
   ],
   "sprites/high-school/vacation-characters-idle-special-sheets/8.webp": [
     {
-      "centerX": 359,
-      "bottomY": 626,
+      "centerX": 357,
+      "bottomY": 610,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 272,
-      "bottomY": 622,
-      "cellWidth": 627,
-      "cellHeight": 627
-    },
-    {
-      "centerX": 367,
-      "bottomY": 606,
-      "cellWidth": 627,
-      "cellHeight": 627
-    },
-    {
-      "centerX": 267,
+      "centerX": 274,
       "bottomY": 607,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 365,
+      "bottomY": 591,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 269,
+      "bottomY": 592,
       "cellWidth": 627,
       "cellHeight": 627
     }
   ],
   "sprites/high-school/vacation-characters-attack-sheets/8.webp": [
     {
-      "centerX": 369,
-      "bottomY": 626,
+      "centerX": 366,
+      "bottomY": 610,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 306,
-      "bottomY": 626,
+      "centerX": 307,
+      "bottomY": 610,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 320,
-      "bottomY": 569,
+      "centerX": 319,
+      "bottomY": 556,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 243,
-      "bottomY": 591,
+      "centerX": 247,
+      "bottomY": 577,
       "cellWidth": 627,
       "cellHeight": 627
     }
   ],
   "sprites/high-school/vacation-characters-skill-sheets/8.webp": [
     {
-      "centerX": 325,
-      "bottomY": 626,
+      "centerX": 324,
+      "bottomY": 610,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 274,
-      "bottomY": 611,
+      "centerX": 276,
+      "bottomY": 596,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 352,
-      "bottomY": 585,
+      "centerX": 350,
+      "bottomY": 572,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 275,
-      "bottomY": 590,
+      "centerX": 277,
+      "bottomY": 576,
       "cellWidth": 627,
       "cellHeight": 627
     }
   ],
   "sprites/high-school/vacation-characters-hit-sheets/8.webp": [
     {
-      "centerX": 343,
-      "bottomY": 626,
+      "centerX": 341,
+      "bottomY": 610,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 296,
-      "bottomY": 613,
+      "centerX": 297,
+      "bottomY": 598,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 337,
-      "bottomY": 582,
+      "centerX": 336,
+      "bottomY": 569,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 291,
-      "bottomY": 595,
+      "centerX": 292,
+      "bottomY": 581,
       "cellWidth": 627,
       "cellHeight": 627
     }
@@ -1389,25 +1389,25 @@ export const VACATION_ANIMATION_FRAME_ANCHORS: Record<string, VacationAnimationF
   "sprites/high-school/vacation-characters-low-hp-sheets/8.webp": [
     {
       "centerX": 324,
-      "bottomY": 624,
+      "bottomY": 609,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 263,
-      "bottomY": 626,
+      "centerX": 265,
+      "bottomY": 610,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
       "centerX": 307,
-      "bottomY": 578,
+      "bottomY": 564,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 254,
-      "bottomY": 597,
+      "centerX": 257,
+      "bottomY": 583,
       "cellWidth": 627,
       "cellHeight": 627
     }
@@ -6721,234 +6721,234 @@ export const VACATION_ANIMATION_FRAME_ANCHORS: Record<string, VacationAnimationF
 export const VACATION_IDLE_FRAME_ANCHORS: Record<string, VacationAnimationFrameAnchor[]> = {
   "sprites/high-school/vacation-characters-idle-sheets/0.webp": [
     {
-      "centerX": 359,
-      "bottomY": 600,
+      "centerX": 356,
+      "bottomY": 586,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 237,
+      "centerX": 241,
+      "bottomY": 573,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 373,
       "bottomY": 587,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 376,
-      "bottomY": 601,
-      "cellWidth": 627,
-      "cellHeight": 627
-    },
-    {
-      "centerX": 242,
-      "bottomY": 594,
+      "centerX": 246,
+      "bottomY": 580,
       "cellWidth": 627,
       "cellHeight": 627
     }
   ],
   "sprites/high-school/vacation-characters-idle-sheets/1.webp": [
     {
-      "centerX": 349,
-      "bottomY": 619,
+      "centerX": 347,
+      "bottomY": 604,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
       "centerX": 324,
-      "bottomY": 614,
+      "bottomY": 600,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 358,
-      "bottomY": 599,
+      "centerX": 356,
+      "bottomY": 585,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
       "centerX": 309,
-      "bottomY": 599,
+      "bottomY": 585,
       "cellWidth": 627,
       "cellHeight": 627
     }
   ],
   "sprites/high-school/vacation-characters-idle-sheets/2.webp": [
     {
-      "centerX": 369,
-      "bottomY": 626,
+      "centerX": 367,
+      "bottomY": 610,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 268,
-      "bottomY": 626,
+      "centerX": 270,
+      "bottomY": 610,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 378,
-      "bottomY": 622,
+      "centerX": 375,
+      "bottomY": 607,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 263,
-      "bottomY": 623,
+      "centerX": 265,
+      "bottomY": 608,
       "cellWidth": 627,
       "cellHeight": 627
     }
   ],
   "sprites/high-school/vacation-characters-idle-sheets/3.webp": [
     {
-      "centerX": 373,
-      "bottomY": 618,
+      "centerX": 370,
+      "bottomY": 603,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 275,
-      "bottomY": 619,
+      "centerX": 277,
+      "bottomY": 604,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 372,
-      "bottomY": 618,
+      "centerX": 368,
+      "bottomY": 603,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 276,
-      "bottomY": 618,
+      "centerX": 278,
+      "bottomY": 602,
       "cellWidth": 627,
       "cellHeight": 627
     }
   ],
   "sprites/high-school/vacation-characters-idle-sheets/4.webp": [
     {
-      "centerX": 368,
-      "bottomY": 626,
+      "centerX": 366,
+      "bottomY": 610,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 279,
-      "bottomY": 626,
+      "centerX": 282,
+      "bottomY": 610,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 384,
-      "bottomY": 571,
+      "centerX": 380,
+      "bottomY": 558,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 256,
-      "bottomY": 569,
+      "centerX": 259,
+      "bottomY": 556,
       "cellWidth": 627,
       "cellHeight": 627
     }
   ],
   "sprites/high-school/vacation-characters-idle-sheets/5.webp": [
     {
-      "centerX": 336,
-      "bottomY": 609,
+      "centerX": 334,
+      "bottomY": 594,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 284,
-      "bottomY": 618,
+      "centerX": 286,
+      "bottomY": 603,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 336,
-      "bottomY": 602,
+      "centerX": 334,
+      "bottomY": 588,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 287,
-      "bottomY": 602,
+      "centerX": 288,
+      "bottomY": 588,
       "cellWidth": 627,
       "cellHeight": 627
     }
   ],
   "sprites/high-school/vacation-characters-idle-sheets/6.webp": [
     {
-      "centerX": 361,
-      "bottomY": 592,
+      "centerX": 359,
+      "bottomY": 578,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 256,
-      "bottomY": 583,
+      "centerX": 259,
+      "bottomY": 569,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 339,
-      "bottomY": 603,
+      "centerX": 337,
+      "bottomY": 588,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 263,
-      "bottomY": 603,
+      "centerX": 266,
+      "bottomY": 589,
       "cellWidth": 627,
       "cellHeight": 627
     }
   ],
   "sprites/high-school/vacation-characters-idle-sheets/7.webp": [
     {
+      "centerX": 349,
+      "bottomY": 582,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 285,
+      "bottomY": 582,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
       "centerX": 351,
-      "bottomY": 596,
+      "bottomY": 581,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 284,
-      "bottomY": 596,
-      "cellWidth": 627,
-      "cellHeight": 627
-    },
-    {
-      "centerX": 353,
-      "bottomY": 595,
-      "cellWidth": 627,
-      "cellHeight": 627
-    },
-    {
-      "centerX": 281,
-      "bottomY": 594,
+      "centerX": 283,
+      "bottomY": 580,
       "cellWidth": 627,
       "cellHeight": 627
     }
   ],
   "sprites/high-school/vacation-characters-idle-sheets/8.webp": [
     {
-      "centerX": 332,
-      "bottomY": 626,
+      "centerX": 331,
+      "bottomY": 610,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 254,
-      "bottomY": 604,
+      "centerX": 258,
+      "bottomY": 590,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 341,
-      "bottomY": 609,
+      "centerX": 340,
+      "bottomY": 594,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 252,
-      "bottomY": 593,
+      "centerX": 255,
+      "bottomY": 579,
       "cellWidth": 627,
       "cellHeight": 627
     }
@@ -7842,234 +7842,234 @@ export const VACATION_IDLE_FRAME_ANCHORS: Record<string, VacationAnimationFrameA
 export const VACATION_IDLE_SPECIAL_FRAME_ANCHORS: Record<string, VacationAnimationFrameAnchor[]> = {
   "sprites/high-school/vacation-characters-idle-special-sheets/0.webp": [
     {
-      "centerX": 371,
-      "bottomY": 626,
+      "centerX": 368,
+      "bottomY": 610,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 247,
-      "bottomY": 626,
+      "centerX": 251,
+      "bottomY": 610,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 339,
-      "bottomY": 607,
-      "cellWidth": 627,
-      "cellHeight": 627
-    },
-    {
-      "centerX": 282,
+      "centerX": 338,
       "bottomY": 592,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 283,
+      "bottomY": 578,
       "cellWidth": 627,
       "cellHeight": 627
     }
   ],
   "sprites/high-school/vacation-characters-idle-special-sheets/1.webp": [
     {
-      "centerX": 419,
-      "bottomY": 626,
+      "centerX": 414,
+      "bottomY": 610,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 229,
-      "bottomY": 626,
+      "centerX": 234,
+      "bottomY": 610,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 402,
-      "bottomY": 620,
+      "centerX": 398,
+      "bottomY": 604,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 179,
-      "bottomY": 612,
+      "centerX": 186,
+      "bottomY": 597,
       "cellWidth": 627,
       "cellHeight": 627
     }
   ],
   "sprites/high-school/vacation-characters-idle-special-sheets/2.webp": [
     {
-      "centerX": 367,
-      "bottomY": 626,
+      "centerX": 365,
+      "bottomY": 610,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 272,
-      "bottomY": 596,
+      "centerX": 274,
+      "bottomY": 582,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 372,
-      "bottomY": 621,
+      "centerX": 370,
+      "bottomY": 606,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 252,
-      "bottomY": 590,
+      "centerX": 256,
+      "bottomY": 576,
       "cellWidth": 627,
       "cellHeight": 627
     }
   ],
   "sprites/high-school/vacation-characters-idle-special-sheets/3.webp": [
     {
-      "centerX": 359,
-      "bottomY": 626,
+      "centerX": 356,
+      "bottomY": 610,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 251,
-      "bottomY": 626,
+      "centerX": 254,
+      "bottomY": 610,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 372,
-      "bottomY": 619,
+      "centerX": 369,
+      "bottomY": 604,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 237,
-      "bottomY": 619,
+      "centerX": 241,
+      "bottomY": 603,
       "cellWidth": 627,
       "cellHeight": 627
     }
   ],
   "sprites/high-school/vacation-characters-idle-special-sheets/4.webp": [
     {
-      "centerX": 386,
-      "bottomY": 626,
+      "centerX": 382,
+      "bottomY": 610,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 251,
-      "bottomY": 593,
+      "centerX": 254,
+      "bottomY": 579,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 408,
-      "bottomY": 583,
+      "centerX": 404,
+      "bottomY": 569,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 205,
-      "bottomY": 576,
+      "centerX": 211,
+      "bottomY": 563,
       "cellWidth": 627,
       "cellHeight": 627
     }
   ],
   "sprites/high-school/vacation-characters-idle-special-sheets/5.webp": [
     {
-      "centerX": 358,
-      "bottomY": 609,
+      "centerX": 356,
+      "bottomY": 594,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 266,
-      "bottomY": 616,
+      "centerX": 269,
+      "bottomY": 601,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 336,
-      "bottomY": 583,
+      "centerX": 335,
+      "bottomY": 570,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 262,
-      "bottomY": 582,
+      "centerX": 265,
+      "bottomY": 569,
       "cellWidth": 627,
       "cellHeight": 627
     }
   ],
   "sprites/high-school/vacation-characters-idle-special-sheets/6.webp": [
     {
-      "centerX": 373,
-      "bottomY": 626,
+      "centerX": 369,
+      "bottomY": 610,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 257,
-      "bottomY": 611,
+      "centerX": 260,
+      "bottomY": 596,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 375,
-      "bottomY": 605,
+      "centerX": 372,
+      "bottomY": 590,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 239,
-      "bottomY": 609,
+      "centerX": 243,
+      "bottomY": 594,
       "cellWidth": 627,
       "cellHeight": 627
     }
   ],
   "sprites/high-school/vacation-characters-idle-special-sheets/7.webp": [
     {
-      "centerX": 362,
-      "bottomY": 626,
+      "centerX": 360,
+      "bottomY": 610,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 261,
-      "bottomY": 626,
+      "centerX": 263,
+      "bottomY": 610,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 371,
-      "bottomY": 612,
+      "centerX": 368,
+      "bottomY": 597,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 264,
-      "bottomY": 613,
+      "centerX": 266,
+      "bottomY": 598,
       "cellWidth": 627,
       "cellHeight": 627
     }
   ],
   "sprites/high-school/vacation-characters-idle-special-sheets/8.webp": [
     {
-      "centerX": 359,
-      "bottomY": 626,
+      "centerX": 357,
+      "bottomY": 610,
       "cellWidth": 627,
       "cellHeight": 627
     },
     {
-      "centerX": 272,
-      "bottomY": 622,
-      "cellWidth": 627,
-      "cellHeight": 627
-    },
-    {
-      "centerX": 367,
-      "bottomY": 606,
-      "cellWidth": 627,
-      "cellHeight": 627
-    },
-    {
-      "centerX": 267,
+      "centerX": 274,
       "bottomY": 607,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 365,
+      "bottomY": 591,
+      "cellWidth": 627,
+      "cellHeight": 627
+    },
+    {
+      "centerX": 269,
+      "bottomY": 592,
       "cellWidth": 627,
       "cellHeight": 627
     }
