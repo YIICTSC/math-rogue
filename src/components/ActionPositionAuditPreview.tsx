@@ -9,7 +9,7 @@ import {
     type BattleHeroAnimationAction,
     type VisualThemeId,
 } from '../data/visualThemes';
-import type { LanguageMode } from '../types';
+import type { CharacterAppearanceMode, LanguageMode } from '../types';
 import { trans } from '../utils/textUtils';
 import { getVacationIdleFrameAnchor, getVacationAnimationFrameTranslation } from '../data/vacationAnimationAnchors.generated';
 
@@ -33,7 +33,7 @@ const AUDIT_ACTIONS: Array<{ id: AuditAction; label: string; detail: string }> =
 
 const FRAME_POSITIONS = ['0% 0%', '100% 0%', '0% 100%', '100% 100%'];
 
-const getVacationCharacters = (theme: VisualThemeId): AuditCharacter[] => {
+const getAuditCharacters = (theme: VisualThemeId): AuditCharacter[] => {
     const femaleCharacters = getThemedCharacters(CHARACTERS, theme).map(character => ({
         id: character.id,
         name: character.name,
@@ -141,6 +141,7 @@ interface ActionPositionAuditPreviewProps {
 const ActionPositionAuditPreview: React.FC<ActionPositionAuditPreviewProps> = ({ languageMode }) => {
     const translate = (text: string) => trans(text, languageMode);
     const [theme, setTheme] = useState<VisualThemeId>('high-school');
+    const [appearanceMode, setAppearanceMode] = useState<CharacterAppearanceMode>('VACATION');
     const [characterId, setCharacterId] = useState('WARRIOR');
     const [transformed, setTransformed] = useState(false);
     const [frameIndex, setFrameIndex] = useState(0);
@@ -149,7 +150,7 @@ const ActionPositionAuditPreview: React.FC<ActionPositionAuditPreviewProps> = ({
     const [showIdle, setShowIdle] = useState(true);
     const [playing, setPlaying] = useState(false);
 
-    const characters = useMemo(() => getVacationCharacters(theme), [theme]);
+    const characters = useMemo(() => getAuditCharacters(theme), [theme]);
     const selectedCharacter = characters.find(character => character.id === characterId) ?? characters[0];
 
     useEffect(() => {
@@ -175,7 +176,7 @@ const ActionPositionAuditPreview: React.FC<ActionPositionAuditPreviewProps> = ({
         transformed,
         selectedCharacter.magicProtagonistId,
         selectedCharacter.magicProtagonistGender,
-        'VACATION',
+        appearanceMode,
     );
 
     const getActionSource = (action: AuditAction) => action === 'idle'
@@ -187,13 +188,19 @@ const ActionPositionAuditPreview: React.FC<ActionPositionAuditPreviewProps> = ({
             transformed,
             selectedCharacter.magicProtagonistId,
             selectedCharacter.magicProtagonistGender,
-            'VACATION',
+            appearanceMode,
         );
 
     const selectTheme = (nextTheme: VisualThemeId) => {
         setTheme(nextTheme);
-        setCharacterId(getVacationCharacters(nextTheme)[0]?.id ?? '');
+        setCharacterId(getAuditCharacters(nextTheme)[0]?.id ?? '');
         setTransformed(false);
+        setFrameIndex(0);
+        setPlaying(false);
+    };
+
+    const selectAppearanceMode = (nextMode: CharacterAppearanceMode) => {
+        setAppearanceMode(nextMode);
         setFrameIndex(0);
         setPlaying(false);
     };
@@ -203,7 +210,11 @@ const ActionPositionAuditPreview: React.FC<ActionPositionAuditPreviewProps> = ({
             <section className="rounded-xl border border-cyan-800/70 bg-slate-950/50 p-3 md:p-4">
                 <div className="flex flex-wrap items-start justify-between gap-3">
                     <div>
-                        <h2 className="text-base font-black text-cyan-100">{translate('バカンスアクション配置監査')}</h2>
+                        <h2 className="text-base font-black text-cyan-100">
+                            {appearanceMode === 'VACATION'
+                                ? translate('バカンスアクション配置監査')
+                                : `${translate('配置監査')} / ${translate('通常衣装')}`}
+                        </h2>
                         <p className="mt-1 max-w-3xl text-xs leading-relaxed text-slate-400">
                             {translate('シート一覧ではなく、アイドルを基準に各アクションの同じコマを重ねて、中央・足元・見切れのぶれを確認します。')}
                         </p>
@@ -215,6 +226,18 @@ const ActionPositionAuditPreview: React.FC<ActionPositionAuditPreviewProps> = ({
 
                 <div className="mt-4 grid gap-3 lg:grid-cols-[1fr_1.6fr]">
                     <div className="space-y-3 rounded-lg border border-slate-800 bg-black/20 p-3">
+                        <div className="flex flex-wrap gap-2">
+                            {(['STANDARD', 'VACATION'] as const).map(option => (
+                                <button
+                                    key={option}
+                                    type="button"
+                                    onClick={() => selectAppearanceMode(option)}
+                                    className={`rounded border px-3 py-1.5 text-xs font-bold ${appearanceMode === option ? 'border-amber-300 bg-amber-700 text-white' : 'border-slate-700 bg-slate-900 text-slate-400 hover:border-amber-700'}`}
+                                >
+                                    {option === 'STANDARD' ? translate('通常衣装') : translate('バカンス衣装')}
+                                </button>
+                            ))}
+                        </div>
                         <div className="flex flex-wrap gap-2">
                             {(['high-school', 'magic'] as const).map(option => (
                                 <button
