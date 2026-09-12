@@ -407,7 +407,7 @@ export const VACATION_ANIMATION_FRAME_ANCHORS: Record<string, VacationAnimationF
     },
     {
       "centerX": 296,
-      "bottomY": 610,
+      "bottomY": 564,
       "cellWidth": 627,
       "cellHeight": 627
     },
@@ -537,7 +537,7 @@ export const VACATION_ANIMATION_FRAME_ANCHORS: Record<string, VacationAnimationF
     },
     {
       "centerX": 278,
-      "bottomY": 610,
+      "bottomY": 602,
       "cellWidth": 627,
       "cellHeight": 627
     },
@@ -635,7 +635,7 @@ export const VACATION_ANIMATION_FRAME_ANCHORS: Record<string, VacationAnimationF
   "sprites/high-school/vacation-characters-idle-sheets/4.webp": [
     {
       "centerX": 366,
-      "bottomY": 610,
+      "bottomY": 573,
       "cellWidth": 627,
       "cellHeight": 627
     },
@@ -661,7 +661,7 @@ export const VACATION_ANIMATION_FRAME_ANCHORS: Record<string, VacationAnimationF
   "sprites/high-school/vacation-characters-idle-special-sheets/4.webp": [
     {
       "centerX": 382,
-      "bottomY": 610,
+      "bottomY": 587,
       "cellWidth": 627,
       "cellHeight": 627
     },
@@ -1025,7 +1025,7 @@ export const VACATION_ANIMATION_FRAME_ANCHORS: Record<string, VacationAnimationF
   "sprites/high-school/vacation-characters-skill-sheets/6.webp": [
     {
       "centerX": 382,
-      "bottomY": 610,
+      "bottomY": 603,
       "cellWidth": 627,
       "cellHeight": 627
     },
@@ -1135,7 +1135,7 @@ export const VACATION_ANIMATION_FRAME_ANCHORS: Record<string, VacationAnimationF
     },
     {
       "centerX": 263,
-      "bottomY": 610,
+      "bottomY": 597,
       "cellWidth": 627,
       "cellHeight": 627
     },
@@ -1317,7 +1317,7 @@ export const VACATION_ANIMATION_FRAME_ANCHORS: Record<string, VacationAnimationF
     },
     {
       "centerX": 307,
-      "bottomY": 610,
+      "bottomY": 563,
       "cellWidth": 627,
       "cellHeight": 627
     },
@@ -6826,7 +6826,7 @@ export const VACATION_IDLE_FRAME_ANCHORS: Record<string, VacationAnimationFrameA
   "sprites/high-school/vacation-characters-idle-sheets/4.webp": [
     {
       "centerX": 366,
-      "bottomY": 610,
+      "bottomY": 573,
       "cellWidth": 627,
       "cellHeight": 627
     },
@@ -7947,7 +7947,7 @@ export const VACATION_IDLE_SPECIAL_FRAME_ANCHORS: Record<string, VacationAnimati
   "sprites/high-school/vacation-characters-idle-special-sheets/4.webp": [
     {
       "centerX": 382,
-      "bottomY": 610,
+      "bottomY": 587,
       "cellWidth": 627,
       "cellHeight": 627
     },
@@ -8031,7 +8031,7 @@ export const VACATION_IDLE_SPECIAL_FRAME_ANCHORS: Record<string, VacationAnimati
     },
     {
       "centerX": 263,
-      "bottomY": 610,
+      "bottomY": 597,
       "cellWidth": 627,
       "cellHeight": 627
     },
