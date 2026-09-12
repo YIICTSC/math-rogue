@@ -225,7 +225,7 @@ export const VACATION_ANIMATION_FRAME_ANCHORS: Record<string, VacationAnimationF
     },
     {
       "centerX": 303,
-      "bottomY": 610,
+      "bottomY": 572,
       "cellWidth": 627,
       "cellHeight": 627
     },
@@ -236,8 +236,8 @@ export const VACATION_ANIMATION_FRAME_ANCHORS: Record<string, VacationAnimationF
       "cellHeight": 627
     },
     {
-      "centerX": 306,
-      "bottomY": 563,
+      "centerX": 338,
+      "bottomY": 596,
       "cellWidth": 627,
       "cellHeight": 627
     }
