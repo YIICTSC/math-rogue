@@ -29,6 +29,27 @@ const HIGH_SCHOOL_EVENT_IMAGE_POSITION: Partial<Record<number, string>> = {
   17: '50% 42%',
 };
 
+const EVENT_FRAME_ASSETS: Record<VisualThemeId, string> = {
+  elementary: 'ui/event-frames/elementary.webp',
+  'high-school': 'ui/event-frames/high-school.webp',
+  magic: 'ui/event-frames/magic.webp',
+};
+
+interface EventFrameOverlayProps {
+  visualTheme: VisualThemeId;
+  className?: string;
+}
+
+const EventFrameOverlay: React.FC<EventFrameOverlayProps> = ({ visualTheme, className = '' }) => (
+  <img
+    src={assetUrl(EVENT_FRAME_ASSETS[visualTheme])}
+    alt=""
+    aria-hidden="true"
+    draggable={false}
+    className={`event-screen-frame pointer-events-none absolute inset-0 h-full w-full object-fill ${className}`}
+  />
+);
+
 const getTsukaponAnswerLabel = (label: string) => {
   const value = label.replace(/^\d+\.\s*/, '');
   if (!value.startsWith('jp:')) return value;
@@ -349,6 +370,7 @@ const EventScreen: React.FC<EventScreenProps> = ({ title, description, options, 
                     />
                 )}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-transparent" />
+                <EventFrameOverlay visualTheme={visualTheme} />
                 {imageZoomEnabled && (
                     <div className="absolute bottom-2 right-2 rounded-full border border-white/30 bg-black/70 px-2 py-1 text-[10px] font-black text-white">
                         {trans("拡大", languageMode)}
@@ -485,24 +507,31 @@ const EventScreen: React.FC<EventScreenProps> = ({ title, description, options, 
                 </button>
                 {magicEndlessEventSheet ? (
                     <div
-                        role="img"
-                        aria-label={`${title} enlarged`}
-                        className="aspect-square w-[min(92dvh,96vw)] rounded-xl border border-fuchsia-200/50 bg-cover bg-no-repeat shadow-2xl"
-                        style={{
-                            backgroundImage: `url(${magicEndlessEventSheet.path})`,
-                            backgroundPosition: magicEndlessEventSheet.backgroundPosition,
-                            backgroundSize: '300% 300%',
-                        }}
+                        className="relative aspect-square w-[min(92dvh,96vw)] overflow-hidden rounded-xl border border-fuchsia-200/50 bg-slate-950 shadow-2xl"
                         onClick={(event) => event.stopPropagation()}
-                    />
+                    >
+                        <div
+                            role="img"
+                            aria-label={`${title} enlarged`}
+                            className="absolute inset-0 bg-cover bg-no-repeat"
+                            style={{
+                                backgroundImage: `url(${magicEndlessEventSheet.path})`,
+                                backgroundPosition: magicEndlessEventSheet.backgroundPosition,
+                                backgroundSize: '300% 300%',
+                            }}
+                        />
+                        <EventFrameOverlay visualTheme={visualTheme} />
+                    </div>
                 ) : (
-                    <img
-                        src={imageCandidates[imageIndex]}
-                        alt={`${title} enlarged`}
-                        className="max-h-[92dvh] max-w-[96vw] rounded-xl border border-fuchsia-200/50 object-contain shadow-2xl"
-                        onClick={(event) => event.stopPropagation()}
-                        onError={() => setImageIndex(prev => Math.min(prev + 1, imageCandidates.length - 1))}
-                    />
+                    <div className="relative inline-block max-h-[92dvh] max-w-[96vw]" onClick={(event) => event.stopPropagation()}>
+                        <img
+                            src={imageCandidates[imageIndex]}
+                            alt={`${title} enlarged`}
+                            className="block max-h-[92dvh] max-w-[96vw] rounded-xl border border-fuchsia-200/50 object-contain shadow-2xl"
+                            onError={() => setImageIndex(prev => Math.min(prev + 1, imageCandidates.length - 1))}
+                        />
+                        <EventFrameOverlay visualTheme={visualTheme} />
+                    </div>
                 )}
             </div>
         )}

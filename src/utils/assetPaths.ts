@@ -78,6 +78,7 @@ const shouldVersionAsset = (path: string): boolean =>
   path.startsWith('sprites/high-school/events/') ||
   path.startsWith('sprites/backgrounds/learning-rogue/magic') ||
   path.startsWith('event-illustrations/magic-') ||
+  path.startsWith('ui/event-frames/') ||
   path.startsWith('ui/magic/') ||
   path.startsWith('bgm/magic');
 

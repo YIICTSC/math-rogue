@@ -115,7 +115,6 @@ export const ENGLISH_DEBUG_UI_EXACT: Record<string, string> = {
   '次のフレーム': 'Next frame',
   'ゲーム内フレーム': 'In-game frame',
   '停止': 'Pause',
-  '再生': 'Play',
   '画像をシート全体で表示します。隣のコマの写り込み、透明端の欠落、読み込み失敗をここで確認してください。': 'Display each sheet in full to check for neighboring-frame bleed, clipped transparent edges, and failed loads.',
   '主人公・ミニゲームを検索': 'Search protagonists or mini-games',
   '学習ローグ 主人公': 'Learning Rogue protagonists',
