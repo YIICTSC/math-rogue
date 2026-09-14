@@ -1,10 +1,13 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { ArrowLeft, Coins, Heart, RefreshCcw, Shuffle, Sparkles } from 'lucide-react';
 import { CARDS_LIBRARY, HERO_IMAGE_DATA, STARTING_DECK_TEMPLATE } from '../constants';
+import { DODOMEDESU_BOSS_READY_FLAG, DODOMEDESU_EVENT_STAGES } from '../data/dodomedesuBoss';
+import { MAGIC_ENDLESS_EVENTS, MAGIC_ENDLESS_MALE_EVENTS } from '../data/magicEndlessEvents';
 import { HIGH_SCHOOL_SUPPORTER_NPC_EVENTS } from '../data/supporterNpcEvents';
 import { HIGH_SCHOOL_EVENT_THEMES, MAGIC_EVENT_THEMES, type VisualThemeId } from '../data/visualThemes';
-import { ELEMENTARY_EVENT_TITLES, generateEvent, generateLegacyEvent } from '../services/eventService';
+import { ELEMENTARY_EVENT_TITLES, generateEvent, generateLegacyEvent, generateMagicEndlessEvent } from '../services/eventService';
 import { GameMode, GameScreen, type GameState, type LanguageMode, type Player } from '../types';
+import { applyMagicEndlessEventEffects } from '../utils/magicEndlessEventEffects';
 import EventScreen from './EventScreen';
 import TranslatedUiTree from './TranslatedUiTree';
 
@@ -15,15 +18,42 @@ interface EventSimulationScreenProps {
 }
 
 type SimulationEvent = ReturnType<typeof generateEvent>;
+type SimulationMode = 'normal' | 'endless';
+type MagicEndlessGender = 'female' | 'male';
 
-const EVENT_TITLES: Record<VisualThemeId, string[]> = {
+const NORMAL_EVENT_TITLES: Record<VisualThemeId, string[]> = {
   elementary: [...ELEMENTARY_EVENT_TITLES],
-  'high-school': [
-    ...HIGH_SCHOOL_EVENT_THEMES.map(event => event.title),
-    ...HIGH_SCHOOL_SUPPORTER_NPC_EVENTS.map(event => event.title),
-  ],
+  'high-school': HIGH_SCHOOL_EVENT_THEMES.map(event => event.title),
   magic: MAGIC_EVENT_THEMES.map(event => event.title),
 };
+
+const ENDLESS_SHARED_EVENT_TITLES = [
+  'あずきとの出会い',
+  ...DODOMEDESU_EVENT_STAGES.map(stage => stage.title),
+];
+
+const getEndlessEventTitles = (
+  theme: VisualThemeId,
+  magicGender: MagicEndlessGender,
+  chapter: number,
+): string[] => {
+  if (theme === 'magic') {
+    const source = magicGender === 'male' ? MAGIC_ENDLESS_MALE_EVENTS : MAGIC_ENDLESS_EVENTS;
+    return [
+      ...source.filter(event => event.availableFrom <= chapter).map(event => event.title),
+      ...ENDLESS_SHARED_EVENT_TITLES,
+    ];
+  }
+  if (theme === 'high-school') {
+    return [
+      ...HIGH_SCHOOL_SUPPORTER_NPC_EVENTS.map(event => event.title),
+      ...ENDLESS_SHARED_EVENT_TITLES,
+    ];
+  }
+  return ENDLESS_SHARED_EVENT_TITLES;
+};
+
+const isSharedEndlessEvent = (title: string) => ENDLESS_SHARED_EVENT_TITLES.includes(title);
 
 const THEME_LABELS: Record<VisualThemeId, string> = {
   elementary: '小学生編',
@@ -49,8 +79,10 @@ const THEME_ACCENTS: Record<VisualThemeId, { border: string; text: string; butto
   },
 };
 
-const createSimulationPlayer = (): Player => ({
+const createSimulationPlayer = (magicGender: MagicEndlessGender = 'female'): Player => ({
   id: 'WARRIOR',
+  magicProtagonistId: magicGender === 'male' ? 'REN' : 'AKARI',
+  magicProtagonistGender: magicGender,
   maxHp: 100,
   currentHp: 100,
   maxEnergy: 3,
@@ -89,7 +121,7 @@ const createSimulationPlayer = (): Player => ({
   },
 });
 
-const createSimulationState = (theme: VisualThemeId): GameState => ({
+const createSimulationState = (theme: VisualThemeId, magicGender: MagicEndlessGender = 'female'): GameState => ({
   screen: GameScreen.EVENT_SIMULATION,
   mode: GameMode.MULTIPLICATION,
   visualTheme: theme,
@@ -101,7 +133,7 @@ const createSimulationState = (theme: VisualThemeId): GameState => ({
   turn: 0,
   map: [],
   currentMapNodeId: null,
-  player: createSimulationPlayer(),
+  player: createSimulationPlayer(magicGender),
   enemies: [],
   selectedEnemyId: null,
   narrativeLog: [],
@@ -116,10 +148,18 @@ const createSimulationState = (theme: VisualThemeId): GameState => ({
 });
 
 const EventSimulationScreen: React.FC<EventSimulationScreenProps> = ({ theme, languageMode, onBack }) => {
-  const titles = EVENT_TITLES[theme];
   const accent = THEME_ACCENTS[theme];
-  const [simulationState, setSimulationState] = useState<GameState>(() => createSimulationState(theme));
-  const [selectedTitle, setSelectedTitle] = useState(titles[0] ?? '');
+  const [simulationMode, setSimulationMode] = useState<SimulationMode>('normal');
+  const [magicGender, setMagicGender] = useState<MagicEndlessGender>('female');
+  const [endlessChapter, setEndlessChapter] = useState(51);
+  const titles = useMemo(
+    () => simulationMode === 'normal'
+      ? NORMAL_EVENT_TITLES[theme]
+      : getEndlessEventTitles(theme, magicGender, endlessChapter),
+    [endlessChapter, magicGender, simulationMode, theme],
+  );
+  const [simulationState, setSimulationState] = useState<GameState>(() => createSimulationState(theme, magicGender));
+  const [selectedTitle, setSelectedTitle] = useState(NORMAL_EVENT_TITLES[theme][0] ?? '');
   const [eventData, setEventData] = useState<SimulationEvent | null>(null);
   const [resultLog, setResultLog] = useState<string | null>(null);
   const [act, setAct] = useState(1);
@@ -135,7 +175,7 @@ const EventSimulationScreen: React.FC<EventSimulationScreenProps> = ({ theme, la
     targetFloor: number,
     serial: number,
   ): SimulationEvent => {
-    if (theme === 'elementary' && title === '忘れ物') {
+    if (simulationMode === 'normal' && theme === 'elementary' && title === '忘れ物') {
       return generateLegacyEvent(
         { ...CARDS_LIBRARY.STRIKE, id: `event-sim-legacy-${serial}` },
         setSimulationState,
@@ -144,8 +184,33 @@ const EventSimulationScreen: React.FC<EventSimulationScreenProps> = ({ theme, la
       );
     }
 
+    if (simulationMode === 'endless' && theme === 'magic' && !isSharedEndlessEvent(title)) {
+      return generateMagicEndlessEvent(
+        state.player,
+        setSimulationState,
+        setResultLog,
+        languageMode,
+        endlessChapter,
+        title,
+      );
+    }
+
+    const endlessAct = simulationMode === 'endless'
+      ? (isSharedEndlessEvent(title) && endlessChapter % 5 === 0 ? endlessChapter + 1 : endlessChapter)
+      : targetAct;
+
+    const eventPlayer = simulationMode === 'endless' && title === 'あずきとの出会い'
+      ? {
+          ...state.player,
+          turnFlags: {
+            ...state.player.turnFlags,
+            [DODOMEDESU_BOSS_READY_FLAG]: true,
+          },
+        }
+      : state.player;
+
     return generateEvent(
-      state.player,
+      eventPlayer,
       setSimulationState,
       () => undefined,
       setResultLog,
@@ -153,12 +218,12 @@ const EventSimulationScreen: React.FC<EventSimulationScreenProps> = ({ theme, la
       unlockedCardNames,
       title,
       theme,
-      targetAct,
+      endlessAct,
       targetFloor,
-      false,
+      simulationMode === 'endless',
       serial,
     );
-  }, [languageMode, theme, unlockedCardNames]);
+  }, [endlessChapter, languageMode, simulationMode, theme, unlockedCardNames]);
 
   const openEvent = useCallback((
     title: string,
@@ -175,8 +240,8 @@ const EventSimulationScreen: React.FC<EventSimulationScreenProps> = ({ theme, la
   }, [act, buildEvent, eventSerial, floor, simulationState]);
 
   useEffect(() => {
-    const initialState = createSimulationState(theme);
-    const initialTitle = EVENT_TITLES[theme][0] ?? '';
+    const initialState = createSimulationState(theme, magicGender);
+    const initialTitle = titles[0] ?? '';
     setSimulationState(initialState);
     setSelectedTitle(initialTitle);
     setAct(1);
@@ -184,16 +249,17 @@ const EventSimulationScreen: React.FC<EventSimulationScreenProps> = ({ theme, la
     setEventSerial(1);
     setResultLog(null);
     setEventData(initialTitle ? buildEvent(initialState, initialTitle, 1, 1, 1) : null);
-  }, [buildEvent, theme]);
+  }, [buildEvent, magicGender, theme, titles]);
 
   const handleReset = useCallback(() => {
-    const resetState = createSimulationState(theme);
+    const resetState = createSimulationState(theme, magicGender);
     setSimulationState(resetState);
     setResultLog(null);
     openEvent(selectedTitle || titles[0] || '', resetState);
-  }, [openEvent, selectedTitle, theme, titles]);
+  }, [magicGender, openEvent, selectedTitle, theme, titles]);
 
   const handleContinue = useCallback(() => {
+    if (titles.length === 0) return;
     const currentIndex = Math.max(0, titles.indexOf(selectedTitle));
     const nextTitle = titles[(currentIndex + 1) % titles.length];
     openEvent(nextTitle);
@@ -216,6 +282,24 @@ const EventSimulationScreen: React.FC<EventSimulationScreenProps> = ({ theme, la
     setFloor(normalizedFloor);
     openEvent(selectedTitle, simulationState, act, normalizedFloor);
   }, [act, openEvent, selectedTitle, simulationState]);
+
+  const handleLearningResult = useCallback((success: boolean) => {
+    const pending = simulationState.eventLearningPending;
+    if (!pending) return;
+    const effects = success ? pending.successEffects : pending.failureEffects;
+    const preview = applyMagicEndlessEventEffects(simulationState.player, effects);
+    setSimulationState(prev => {
+      const result = applyMagicEndlessEventEffects(prev.player, effects);
+      return {
+        ...prev,
+        player: result.player,
+        screen: GameScreen.EVENT_SIMULATION,
+        eventLearningPending: undefined,
+      };
+    });
+    const summary = preview.messages.length > 0 ? preview.messages.join('。') : '変化はなかった';
+    setResultLog(`学習判定：${success ? '成功' : '失敗'}。${summary}。`);
+  }, [simulationState.eventLearningPending, simulationState.player]);
 
   return (
     <TranslatedUiTree mode={languageMode}>
@@ -241,7 +325,9 @@ const EventSimulationScreen: React.FC<EventSimulationScreenProps> = ({ theme, la
             <div>
               <div className={`text-xs font-black ${accent.text}`}>EVENT SIMULATOR</div>
               <h1 className="text-lg font-black">{THEME_LABELS[theme]}</h1>
-              <div className="mt-1 text-[10px] text-slate-400">実イベント処理 / {titles.length}件</div>
+              <div className="mt-1 text-[10px] text-slate-400">
+                {simulationMode === 'normal' ? '通常イベント' : 'エンドレス専用イベント'} / {titles.length}件
+              </div>
             </div>
             <button onClick={onBack} className="rounded-lg border border-slate-600 bg-slate-800 p-2 text-slate-200 hover:bg-slate-700" title="デバッグへ戻る">
               <ArrowLeft size={18} />
@@ -249,6 +335,62 @@ const EventSimulationScreen: React.FC<EventSimulationScreenProps> = ({ theme, la
           </div>
 
           <div className="mb-4 space-y-2">
+            <div className="grid grid-cols-2 gap-2">
+              <button
+                type="button"
+                onClick={() => setSimulationMode('normal')}
+                className={`rounded-lg border px-3 py-2 text-xs font-black ${simulationMode === 'normal' ? accent.button : 'border-slate-600 bg-slate-900 text-slate-300 hover:bg-slate-800'}`}
+              >
+                通常
+              </button>
+              <button
+                type="button"
+                onClick={() => setSimulationMode('endless')}
+                className={`rounded-lg border px-3 py-2 text-xs font-black ${simulationMode === 'endless' ? 'border-violet-300 bg-violet-800 text-white hover:bg-violet-700' : 'border-slate-600 bg-slate-900 text-slate-300 hover:bg-slate-800'}`}
+              >
+                エンドレス
+              </button>
+            </div>
+
+            {simulationMode === 'endless' && theme === 'magic' && (
+              <div className="grid grid-cols-2 gap-2">
+                <label className="text-[10px] font-bold text-slate-400">
+                  主人公
+                  <select
+                    value={magicGender}
+                    onChange={(event) => setMagicGender(event.target.value as MagicEndlessGender)}
+                    className="mt-1 w-full rounded border border-slate-600 bg-slate-900 px-2 py-1.5 text-xs text-white"
+                  >
+                    <option value="female">女子主人公 90件</option>
+                    <option value="male">男子主人公 90件</option>
+                  </select>
+                </label>
+                <label className="text-[10px] font-bold text-slate-400">
+                  CHAPTER
+                  <input
+                    type="number"
+                    min={1}
+                    value={endlessChapter}
+                    onChange={(event) => setEndlessChapter(Math.max(1, Number(event.target.value) || 1))}
+                    className="mt-1 w-full rounded border border-slate-600 bg-slate-900 px-2 py-1.5 text-xs text-white"
+                  />
+                </label>
+              </div>
+            )}
+
+            {simulationMode === 'endless' && theme !== 'magic' && (
+              <label className="block text-[10px] font-bold text-slate-400">
+                ENDLESS CHAPTER
+                <input
+                  type="number"
+                  min={1}
+                  value={endlessChapter}
+                  onChange={(event) => setEndlessChapter(Math.max(1, Number(event.target.value) || 1))}
+                  className="mt-1 w-full rounded border border-slate-600 bg-slate-900 px-2 py-1.5 text-xs text-white"
+                />
+              </label>
+            )}
+
             <label className="block text-[10px] font-bold text-slate-400">
               イベント
               <select
@@ -267,6 +409,7 @@ const EventSimulationScreen: React.FC<EventSimulationScreenProps> = ({ theme, la
             </button>
           </div>
 
+          {simulationMode === 'normal' && (
           <div className="mb-4 grid grid-cols-2 gap-2">
             <label className="text-[10px] font-bold text-slate-400">
               ACT
@@ -286,6 +429,18 @@ const EventSimulationScreen: React.FC<EventSimulationScreenProps> = ({ theme, la
               />
             </label>
           </div>
+          )}
+
+          {simulationState.eventLearningPending && (
+            <div className="mb-4 rounded-xl border border-amber-400/70 bg-amber-950/30 p-3">
+              <div className="mb-2 text-xs font-black text-amber-200">学習判定イベント</div>
+              <div className="mb-2 text-[10px] text-slate-300">{simulationState.eventLearningPending.eventTitle}</div>
+              <div className="grid grid-cols-2 gap-2">
+                <button type="button" onClick={() => handleLearningResult(true)} className="rounded border border-emerald-300 bg-emerald-800 px-2 py-2 text-xs font-black hover:bg-emerald-700">成功を適用</button>
+                <button type="button" onClick={() => handleLearningResult(false)} className="rounded border border-rose-300 bg-rose-900 px-2 py-2 text-xs font-black hover:bg-rose-800">失敗を適用</button>
+              </div>
+            </div>
+          )}
 
           <div className={`mb-4 rounded-xl border bg-white/5 p-3 ${accent.border}`}>
             <div className="mb-2 flex items-center gap-2 text-xs font-black text-slate-200">

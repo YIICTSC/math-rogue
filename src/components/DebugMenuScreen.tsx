@@ -2504,7 +2504,7 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
                                         <h3 className="flex items-center gap-2 text-sm font-black text-cyan-200">
                                             <Sparkles size={18} /> 各編イベントシミュレータ
                                         </h3>
-                                        <p className="mt-1 text-xs text-gray-400">実際のイベント選択肢を操作し、HP・G・カード・レリックなどの変化を連続して確認できます。</p>
+                                        <p className="mt-1 text-xs text-gray-400">通常イベントに加え、エンドレス専用イベントも確認できます。マジック編は男女各90イベントと章ごとの解禁条件に対応します。</p>
                                     </div>
                                     <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
                                         {DEBUG_EVENT_GROUPS.map(group => (
@@ -2523,7 +2523,7 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
                                                 <span className="flex items-center gap-2 text-sm font-black text-white">
                                                     <Sparkles size={16} /> {group.name}
                                                 </span>
-                                                <span className="mt-2 block text-[10px] text-slate-300">{group.titles.length}件のイベントを確認</span>
+                                                <span className="mt-2 block text-[10px] text-slate-300">通常 / エンドレスを切り替えて確認</span>
                                             </button>
                                         ))}
                                     </div>
