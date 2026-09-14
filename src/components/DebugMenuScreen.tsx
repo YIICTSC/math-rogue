@@ -43,6 +43,7 @@ interface DebugMenuScreenProps {
     onStartEndlessOpeningPreview: () => void;
     onStartEndlessTrueEndingPreview: () => void;
     onStartMagicEventSimulation: () => void;
+    onStartEventSimulation: (theme: VisualThemeId) => void;
     onStartUiPreview: (screen: GameScreen, miniGameOutcome?: MiniGameDebugPreview) => void;
     onStartProblemUiPreview: (mode: GameMode, modePool?: string[]) => void;
     onStartEventUiPreview: (theme: VisualThemeId, title: string) => void;
@@ -270,6 +271,7 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
     onStartEndlessOpeningPreview,
     onStartEndlessTrueEndingPreview,
     onStartMagicEventSimulation,
+    onStartEventSimulation,
     onStartUiPreview,
     onStartProblemUiPreview,
     onStartEventUiPreview,
@@ -1030,7 +1032,7 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
                         <button onClick={() => setActiveTab('MAGIC_VOICES')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'MAGIC_VOICES' ? 'bg-fuchsia-900 text-white' : 'text-fuchsia-400 hover:bg-gray-750'}`}>マジック声</button>
                         <button onClick={() => setActiveTab('ENEMY_VOICE_AUDIT')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'ENEMY_VOICE_AUDIT' ? 'bg-violet-900 text-white' : 'text-violet-400 hover:bg-gray-750'}`}>敵声整合</button>
                         <button onClick={() => setActiveTab('MAGIC_ART_AUDIT')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'MAGIC_ART_AUDIT' ? 'bg-pink-900 text-white' : 'text-pink-400 hover:bg-gray-750'}`}>魔法絵不整合</button>
-                        <button onClick={() => setActiveTab('EVENTS')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'EVENTS' ? 'bg-cyan-900 text-white' : 'text-cyan-400 hover:bg-gray-750'}`}>高校編イベント</button>
+                        <button onClick={() => setActiveTab('EVENTS')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'EVENTS' ? 'bg-cyan-900 text-white' : 'text-cyan-400 hover:bg-gray-750'}`}>イベント</button>
                         <button onClick={() => setActiveTab('HUMANOID_SPRITES')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'HUMANOID_SPRITES' ? 'bg-rose-900 text-white' : 'text-rose-400 hover:bg-gray-750'}`}>高校人型敵</button>
                         <button onClick={() => setActiveTab('CHARACTER_ANIMATIONS')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'CHARACTER_ANIMATIONS' ? 'bg-cyan-900 text-white' : 'text-cyan-400 hover:bg-gray-750'}`}>{trans('キャラ動作', initialLanguageMode)}</button>
                         <button onClick={() => setActiveTab('ACTION_POSITION_AUDIT')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'ACTION_POSITION_AUDIT' ? 'bg-rose-900 text-white' : 'text-rose-400 hover:bg-gray-750'}`}>{trans('配置監査', initialLanguageMode)}</button>
@@ -2497,6 +2499,35 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
 
                         {activeTab === 'EVENTS' && (
                             <div className="space-y-4">
+                                <section className="rounded-xl border border-cyan-500/70 bg-cyan-950/20 p-4">
+                                    <div className="mb-3">
+                                        <h3 className="flex items-center gap-2 text-sm font-black text-cyan-200">
+                                            <Sparkles size={18} /> 各編イベントシミュレータ
+                                        </h3>
+                                        <p className="mt-1 text-xs text-gray-400">実際のイベント選択肢を操作し、HP・G・カード・レリックなどの変化を連続して確認できます。</p>
+                                    </div>
+                                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                                        {DEBUG_EVENT_GROUPS.map(group => (
+                                            <button
+                                                key={`event-simulator-${group.id}`}
+                                                type="button"
+                                                onClick={() => onStartEventSimulation(group.id)}
+                                                className={`rounded-lg border px-4 py-4 text-left transition-colors ${
+                                                    group.id === 'elementary'
+                                                        ? 'border-emerald-400 bg-emerald-900/70 hover:bg-emerald-800'
+                                                        : group.id === 'high-school'
+                                                            ? 'border-sky-400 bg-sky-900/70 hover:bg-sky-800'
+                                                            : 'border-fuchsia-400 bg-fuchsia-950/70 hover:bg-fuchsia-900'
+                                                }`}
+                                            >
+                                                <span className="flex items-center gap-2 text-sm font-black text-white">
+                                                    <Sparkles size={16} /> {group.name}
+                                                </span>
+                                                <span className="mt-2 block text-[10px] text-slate-300">{group.titles.length}件のイベントを確認</span>
+                                            </button>
+                                        ))}
+                                    </div>
+                                </section>
                                 <div className="flex items-center justify-between gap-3 border-b border-cyan-700/60 pb-3">
                                     <h3 className="text-cyan-300 font-bold flex items-center">
                                         <HelpCircle size={18} className="mr-2" /> 高校編イベント確認

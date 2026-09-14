@@ -39,6 +39,7 @@ import EnglishChallengeScreen from './components/EnglishChallengeScreen';
 import GeneralChallengeScreen from './components/GeneralChallengeScreen';
 import DebugMenuScreen from './components/DebugMenuScreen';
 import MagicEventSimulationScreen from './components/MagicEventSimulationScreen';
+import EventSimulationScreen from './components/EventSimulationScreen';
 import { createEndlessRewardItems, getEndlessArc, getEndlessBoss, getEndlessBossById, getEndlessBossSpritePath, type EndlessRewardChoice } from './data/endlessMode';
 
 type HighSchoolBattleVoiceAction = 'attack' | 'summon' | 'block' | 'power' | 'damage' | 'item' | 'finish' | 'defeat';
@@ -2459,6 +2460,7 @@ const App: React.FC = () => {
     // what activates the rest of the debug surface for the current session.
     const [isDebugMode, setIsDebugMode] = useState(false);
     const isDebugModeActive = DEBUG_FEATURES_ENABLED && isDebugMode;
+    const [debugEventSimulationTheme, setDebugEventSimulationTheme] = useState<VisualThemeId>('elementary');
     const [isMathDebugSkipped, setIsMathDebugSkipped] = useState(false);
     const [isDebugHpOne, setIsDebugHpOne] = useState(false);
     const [isMiniGameDebugUnlocked, setIsMiniGameDebugUnlocked] = useState(false);
@@ -4214,6 +4216,7 @@ const App: React.FC = () => {
                 gameState.screen !== GameScreen.START_MENU &&
                 gameState.screen !== GameScreen.PROBLEM_CHALLENGE &&
                 gameState.screen !== GameScreen.DEBUG_MENU &&
+                gameState.screen !== GameScreen.EVENT_SIMULATION &&
                 gameState.screen !== GameScreen.MAGIC_EVENT_SIMULATION
             ) {
                 const currentFromStorage = storageService.getDailyPlayTime();
@@ -5006,7 +5009,11 @@ const App: React.FC = () => {
 
     useEffect(() => {
         if (isDebugModeActive) return;
-        if (gameState.screen !== GameScreen.DEBUG_MENU && gameState.screen !== GameScreen.MAGIC_EVENT_SIMULATION) return;
+        if (
+            gameState.screen !== GameScreen.DEBUG_MENU
+            && gameState.screen !== GameScreen.EVENT_SIMULATION
+            && gameState.screen !== GameScreen.MAGIC_EVENT_SIMULATION
+        ) return;
         storageService.clearDebugSettings();
         storageService.clearSave();
         setGameState(prev => ({ ...prev, screen: GameScreen.START_MENU, challengeMode: undefined }));
@@ -19788,6 +19795,10 @@ const App: React.FC = () => {
                             onStartEndlessOpeningPreview={() => handleStartEndlessSequencePreview('OPENING')}
                             onStartEndlessTrueEndingPreview={() => handleStartEndlessSequencePreview('TRUE')}
                             onStartMagicEventSimulation={() => setGameState(prev => ({ ...prev, screen: GameScreen.MAGIC_EVENT_SIMULATION }))}
+                            onStartEventSimulation={(theme) => {
+                                setDebugEventSimulationTheme(theme);
+                                setGameState(prev => ({ ...prev, screen: GameScreen.EVENT_SIMULATION }));
+                            }}
                             onStartUiPreview={handleStartUiPreview}
                             onStartProblemUiPreview={handleStartProblemUiPreview}
                             onStartEventUiPreview={handleStartEventUiPreview}
@@ -19817,6 +19828,16 @@ const App: React.FC = () => {
                             languageMode={languageMode}
                             focusedUiPreviewScreenId={focusedUiPreviewScreenId}
                             focusedSupporterNpcEventTitle={focusedSupporterNpcEventTitle}
+                        />
+                    </div>
+                )}
+
+                {DEBUG_FEATURES_ENABLED && gameState.screen === GameScreen.EVENT_SIMULATION && (
+                    <div className="absolute inset-0">
+                        <EventSimulationScreen
+                            theme={debugEventSimulationTheme}
+                            languageMode={languageMode}
+                            onBack={() => setGameState(prev => ({ ...prev, screen: GameScreen.DEBUG_MENU }))}
                         />
                     </div>
                 )}
