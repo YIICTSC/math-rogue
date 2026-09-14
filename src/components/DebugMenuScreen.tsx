@@ -8,7 +8,7 @@ import CaptureCardSimulator from './CaptureCardSimulator';
 import AttackEffectSprite from './AttackEffectSprite';
 import StatusEffectSprite from './StatusEffectSprite';
 import EnemyIllustration from './EnemyIllustration';
-import { ArrowRight, Trash2, Plus, Gem, FlaskConical, Swords, Shield, Zap, Search, Beaker, RotateCcw, Skull, Clock, History, Languages, FileText, BookOpen, MessageSquare, HelpCircle, AlertCircle, Copy, Check, X, Volume2, Sparkles, Monitor, Layers } from 'lucide-react';
+import { ArrowRight, Trash2, Plus, Gem, FlaskConical, Swords, Shield, Zap, Search, Beaker, RotateCcw, Skull, Clock, History, Languages, FileText, BookOpen, MessageSquare, HelpCircle, AlertCircle, Copy, Check, X, Volume2, Sparkles, Monitor, Layers, Image as ImageIcon } from 'lucide-react';
 import { createHolographicCard, synthesizeCards } from '../utils/cardUtils';
 import { storageService, type UiPreviewCheckTarget, type UiPreviewChecklist } from '../services/storageService';
 import { audioService } from '../services/audioService';
@@ -27,6 +27,7 @@ import { assetUrl, getWebpFirstAssetPaths } from '../utils/assetPaths';
 import { APP_MODAL_PREVIEWS, BATTLE_MODAL_PREVIEWS, UI_PREVIEW_GROUPS, UI_PREVIEW_SCREENS, type AppModalPreviewId, type BattleModalPreviewId } from '../data/uiPreviewScreens';
 import { getDebugProblemUnitGroups } from './ProblemChallengeScreen';
 import { SUBJECT_DATA, type GeneralProblem } from '../data/subjectData';
+import { PROBLEM_ILLUSTRATION_ASSETS } from '../data/problemIllustrations';
 import { ELEMENTARY_EVENT_TITLES } from '../services/eventService';
 import { HIGH_SCHOOL_SUPPORTER_NPC_EVENTS, type SupporterNpcReward } from '../data/supporterNpcEvents';
 import { DODOMEDESU_EVENT_STAGES } from '../data/dodomedesuBoss';
@@ -46,6 +47,7 @@ interface DebugMenuScreenProps {
     onStartEventSimulation: (theme: VisualThemeId) => void;
     onStartUiPreview: (screen: GameScreen, miniGameOutcome?: MiniGameDebugPreview) => void;
     onStartProblemUiPreview: (mode: GameMode, modePool?: string[]) => void;
+    onStartIllustratedProblemPreview: (mode: string, problem: GeneralProblem) => void;
     onStartEventUiPreview: (theme: VisualThemeId, title: string) => void;
     onStartBattleModalPreview: (modalId: BattleModalPreviewId) => void;
     onStartAppModalPreview: (modalId: AppModalPreviewId) => void;
@@ -176,6 +178,32 @@ const getProblemDebugModeList = (unit: { mode: GameMode; modePool?: string[] }) 
 const getProblemsForDebugUnit = (unit: { mode: GameMode; modePool?: string[] }): GeneralProblem[] =>
     getProblemDebugModeList(unit).flatMap(mode => SUBJECT_DATA[mode] || []);
 
+type IllustratedProblemDebugEntry = {
+    key: string;
+    mode: string;
+    problem: GeneralProblem;
+};
+
+const ILLUSTRATED_PROBLEM_DEBUG_GROUPS = PROBLEM_ILLUSTRATION_ASSETS.map((assetMeta) => {
+    const uniqueProblems = new Map<string, IllustratedProblemDebugEntry>();
+    Object.entries(SUBJECT_DATA).forEach(([mode, problems]) => {
+        problems.forEach((problem) => {
+            if (!problem.imageUrl?.includes(assetMeta.asset)) return;
+            const key = `${problem.question}\u0000${problem.answer}`;
+            const candidate = { key, mode, problem };
+            const current = uniqueProblems.get(key);
+            const candidateIsUnitMode = /_U\d+$/i.test(mode);
+            const currentIsUnitMode = current ? /_U\d+$/i.test(current.mode) : false;
+            if (!current || (candidateIsUnitMode && !currentIsUnitMode)) uniqueProblems.set(key, candidate);
+        });
+    });
+    return {
+        ...assetMeta,
+        problems: Array.from(uniqueProblems.values()).sort((left, right) => left.problem.question.localeCompare(right.problem.question, 'ja')),
+    };
+}).filter(group => group.problems.length > 0);
+const ILLUSTRATED_PROBLEM_DEBUG_TOTAL = ILLUSTRATED_PROBLEM_DEBUG_GROUPS.reduce((sum, group) => sum + group.problems.length, 0);
+
 const formatProblemDebugCopyLine = (
     groupName: string,
     unit: DebugProblemUnit,
@@ -274,6 +302,7 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
     onStartEventSimulation,
     onStartUiPreview,
     onStartProblemUiPreview,
+    onStartIllustratedProblemPreview,
     onStartEventUiPreview,
     onStartBattleModalPreview,
     onStartAppModalPreview,
@@ -291,7 +320,7 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
     focusedUiPreviewScreenId,
     focusedSupporterNpcEventTitle
 }) => {
-    const [activeTab, setActiveTab] = useState<'CARDS' | 'RELICS' | 'POTIONS' | 'SYNTHESIS' | 'CAPTURE_SIM' | 'SYSTEM' | 'UI_PREVIEW' | 'PROBLEM_DEBUG' | 'EFFECTS' | 'MAGIC_VOICES' | 'ENEMY_VOICE_AUDIT' | 'MAGIC_ART_AUDIT' | 'EVENTS' | 'HUMANOID_SPRITES' | 'CHARACTER_ANIMATIONS' | 'ACTION_POSITION_AUDIT' | 'SPRITE_AUDIT' | 'TRANSLATION'>(focusedSupporterNpcEventTitle ? 'EVENTS' : focusedUiPreviewScreenId ? 'UI_PREVIEW' : 'CARDS');
+    const [activeTab, setActiveTab] = useState<'CARDS' | 'RELICS' | 'POTIONS' | 'SYNTHESIS' | 'CAPTURE_SIM' | 'SYSTEM' | 'UI_PREVIEW' | 'PROBLEM_DEBUG' | 'ILLUSTRATED_PROBLEMS' | 'EFFECTS' | 'MAGIC_VOICES' | 'ENEMY_VOICE_AUDIT' | 'MAGIC_ART_AUDIT' | 'EVENTS' | 'HUMANOID_SPRITES' | 'CHARACTER_ANIMATIONS' | 'ACTION_POSITION_AUDIT' | 'SPRITE_AUDIT' | 'TRANSLATION'>(focusedSupporterNpcEventTitle ? 'EVENTS' : focusedUiPreviewScreenId ? 'UI_PREVIEW' : 'CARDS');
     const showLoadoutPanel = activeTab === 'CARDS' || activeTab === 'RELICS' || activeTab === 'POTIONS' || activeTab === 'SYNTHESIS' || activeTab === 'CAPTURE_SIM';
     const focusedUiPreviewItemRef = useRef<HTMLDivElement | null>(null);
     const focusedSupporterNpcEventRef = useRef<HTMLDivElement | null>(null);
@@ -328,6 +357,7 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
     const [problemDebugDetailUnitId, setProblemDebugDetailUnitId] = useState<string | null>(null);
     const [problemDebugFixUnitIds, setProblemDebugFixUnitIds] = useState<string[]>([]);
     const [problemDebugFixCopied, setProblemDebugFixCopied] = useState(false);
+    const [illustratedProblemSelections, setIllustratedProblemSelections] = useState<Record<string, number>>({});
     const [debugEventTheme, setDebugEventTheme] = useState<VisualThemeId>('elementary');
     const [debugEventTitle, setDebugEventTitle] = useState(DEBUG_EVENT_GROUPS[0]?.titles[0] ?? '');
     const [uiPreviewChecklist, setUiPreviewChecklist] = useState<UiPreviewChecklist>(() => storageService.getUiPreviewChecklist());
@@ -1028,6 +1058,7 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
                         <button onClick={() => setActiveTab('SYSTEM')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'SYSTEM' ? 'bg-indigo-900 text-white' : 'text-indigo-400 hover:bg-gray-750'}`}>システム</button>
                         <button onClick={() => setActiveTab('UI_PREVIEW')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'UI_PREVIEW' ? 'bg-sky-900 text-white' : 'text-sky-400 hover:bg-gray-750'}`}>UI実寸</button>
                         <button onClick={() => setActiveTab('PROBLEM_DEBUG')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'PROBLEM_DEBUG' ? 'bg-lime-900 text-white' : 'text-lime-400 hover:bg-gray-750'}`}>問題デバッグ</button>
+                        <button onClick={() => setActiveTab('ILLUSTRATED_PROBLEMS')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'ILLUSTRATED_PROBLEMS' ? 'bg-teal-900 text-white' : 'text-teal-300 hover:bg-gray-750'}`}>イラスト問題</button>
                         <button onClick={() => setActiveTab('EFFECTS')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'EFFECTS' ? 'bg-orange-900 text-white' : 'text-orange-400 hover:bg-gray-750'}`}>エフェクト</button>
                         <button onClick={() => setActiveTab('MAGIC_VOICES')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'MAGIC_VOICES' ? 'bg-fuchsia-900 text-white' : 'text-fuchsia-400 hover:bg-gray-750'}`}>マジック声</button>
                         <button onClick={() => setActiveTab('ENEMY_VOICE_AUDIT')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'ENEMY_VOICE_AUDIT' ? 'bg-violet-900 text-white' : 'text-violet-400 hover:bg-gray-750'}`}>敵声整合</button>
@@ -1700,6 +1731,105 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
                                         </section>
                                     </div>
                                 )}
+                            </div>
+                        )}
+
+                        {activeTab === 'ILLUSTRATED_PROBLEMS' && (
+                            <div className="space-y-4">
+                                <div className="rounded-xl border border-teal-600/70 bg-teal-950/25 p-4">
+                                    <div className="flex flex-col gap-3 md:flex-row md:items-start md:justify-between">
+                                        <div>
+                                            <h3 className="flex items-center gap-2 text-sm font-black text-teal-200">
+                                                <ImageIcon size={18} /> イラストつき問題テスト
+                                            </h3>
+                                            <p className="mt-1 text-xs leading-relaxed text-gray-300">
+                                                教材イラストごとに対応問題を選び、本番と同じ問題画面で1問だけ試します。プレビュー中の正答数やヒント連続記録は保存されません。
+                                            </p>
+                                        </div>
+                                        <div className="flex flex-wrap gap-2 text-[10px] font-black">
+                                            <span className="rounded-full border border-teal-500/60 bg-black/40 px-3 py-1 text-teal-100">
+                                                イラスト {ILLUSTRATED_PROBLEM_DEBUG_GROUPS.length}種類
+                                            </span>
+                                            <span className="rounded-full border border-cyan-500/60 bg-black/40 px-3 py-1 text-cyan-100">
+                                                対応問題 {ILLUSTRATED_PROBLEM_DEBUG_TOTAL}問
+                                            </span>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
+                                    {ILLUSTRATED_PROBLEM_DEBUG_GROUPS.map((group) => {
+                                        const rawIndex = illustratedProblemSelections[group.asset] ?? 0;
+                                        const selectedIndex = Math.max(0, Math.min(rawIndex, group.problems.length - 1));
+                                        const selectedEntry = group.problems[selectedIndex] ?? group.problems[0];
+                                        return (
+                                            <section key={group.asset} className="rounded-xl border border-teal-800/70 bg-slate-950/65 p-4">
+                                                <div className="grid grid-cols-[112px_minmax(0,1fr)] gap-4">
+                                                    <div className="flex h-28 w-28 items-center justify-center overflow-hidden rounded-xl border border-white/15 bg-white p-2">
+                                                        <img
+                                                            src={selectedEntry.problem.imageUrl}
+                                                            alt={group.label}
+                                                            className="max-h-full max-w-full object-contain"
+                                                        />
+                                                    </div>
+                                                    <div className="min-w-0">
+                                                        <div className="text-sm font-black text-teal-100">{group.label}</div>
+                                                        <div className="mt-1 font-mono text-[10px] text-slate-500">{group.asset}</div>
+                                                        <div className="mt-2 text-xs font-bold text-slate-300">対応 {group.problems.length}問</div>
+                                                        <div className="mt-1 rounded bg-black/30 px-2 py-1 font-mono text-[10px] text-cyan-200">
+                                                            {selectedEntry.mode}
+                                                        </div>
+                                                    </div>
+                                                </div>
+
+                                                <label className="mt-4 flex flex-col gap-1 text-[10px] font-bold text-gray-400">
+                                                    試す問題
+                                                    <select
+                                                        value={selectedIndex}
+                                                        onChange={(event) => setIllustratedProblemSelections(prev => ({
+                                                            ...prev,
+                                                            [group.asset]: Number(event.target.value),
+                                                        }))}
+                                                        className="min-w-0 rounded-lg border border-teal-700 bg-slate-950 px-3 py-2 text-xs font-bold text-white"
+                                                    >
+                                                        {group.problems.map((entry, index) => (
+                                                            <option key={`${entry.key}-${entry.mode}`} value={index}>
+                                                                {index + 1}. {entry.problem.question}
+                                                            </option>
+                                                        ))}
+                                                    </select>
+                                                </label>
+
+                                                <div className="mt-3 rounded-lg border border-slate-800 bg-black/35 p-3">
+                                                    <div className="whitespace-pre-wrap text-xs font-bold leading-relaxed text-white">{selectedEntry.problem.question}</div>
+                                                    <div className="mt-2 text-[11px] font-black text-lime-300">答え: {selectedEntry.problem.answer}</div>
+                                                </div>
+
+                                                <div className="mt-3 grid grid-cols-2 gap-2">
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => onStartIllustratedProblemPreview(selectedEntry.mode, selectedEntry.problem)}
+                                                        className="rounded-lg border border-teal-300 bg-teal-600 px-3 py-2 text-xs font-black text-white hover:bg-teal-500"
+                                                    >
+                                                        この問題を試す
+                                                    </button>
+                                                    <button
+                                                        type="button"
+                                                        onClick={() => {
+                                                            const nextIndex = Math.floor(Math.random() * group.problems.length);
+                                                            const nextEntry = group.problems[nextIndex] ?? group.problems[0];
+                                                            setIllustratedProblemSelections(prev => ({ ...prev, [group.asset]: nextIndex }));
+                                                            onStartIllustratedProblemPreview(nextEntry.mode, nextEntry.problem);
+                                                        }}
+                                                        className="rounded-lg border border-cyan-400/70 bg-cyan-950 px-3 py-2 text-xs font-black text-cyan-100 hover:bg-cyan-900"
+                                                    >
+                                                        ランダムで試す
+                                                    </button>
+                                                </div>
+                                            </section>
+                                        );
+                                    })}
+                                </div>
                             </div>
                         )}
 

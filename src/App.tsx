@@ -40,6 +40,7 @@ import GeneralChallengeScreen from './components/GeneralChallengeScreen';
 import DebugMenuScreen from './components/DebugMenuScreen';
 import MagicEventSimulationScreen from './components/MagicEventSimulationScreen';
 import EventSimulationScreen from './components/EventSimulationScreen';
+import type { GeneralProblem } from './data/subjectData';
 import { createEndlessRewardItems, getEndlessArc, getEndlessBoss, getEndlessBossById, getEndlessBossSpritePath, type EndlessRewardChoice } from './data/endlessMode';
 
 type HighSchoolBattleVoiceAction = 'attack' | 'summon' | 'block' | 'power' | 'damage' | 'item' | 'finish' | 'defeat';
@@ -1646,6 +1647,7 @@ const App: React.FC = () => {
     const [uiPreviewMiniGameOutcome, setUiPreviewMiniGameOutcome] = useState<MiniGameDebugPreview | undefined>(undefined);
     const [focusedUiPreviewScreenId, setFocusedUiPreviewScreenId] = useState<string | undefined>(undefined);
     const [focusedSupporterNpcEventTitle, setFocusedSupporterNpcEventTitle] = useState<string | undefined>(undefined);
+    const [debugIllustratedProblemPreview, setDebugIllustratedProblemPreview] = useState<{ mode: GameMode; problem: GeneralProblem } | null>(null);
     const [uiPreviewViewport, setUiPreviewViewport] = useState(() => ({
         width: typeof window === 'undefined' ? 0 : window.innerWidth,
         height: typeof window === 'undefined' ? 0 : window.innerHeight,
@@ -7439,6 +7441,7 @@ const App: React.FC = () => {
 
     const handleStartUiPreview = useCallback((screen: GameScreen, miniGameOutcome?: MiniGameDebugPreview) => {
         const selectedPreviewItem = UI_PREVIEW_SCREENS.find(item => item.screen === screen && item.miniGameOutcome === miniGameOutcome);
+        setDebugIllustratedProblemPreview(null);
         clearUiPreviewModalState();
         if (!uiPreviewSnapshotRef.current) {
             uiPreviewSnapshotRef.current = stateRef.current;
@@ -7852,6 +7855,7 @@ const App: React.FC = () => {
 
     const closeUiPreview = useCallback(() => {
         crowdfundingBossDebugRef.current = null;
+        setDebugIllustratedProblemPreview(null);
         clearUiPreviewModalState();
         const snapshot = uiPreviewSnapshotRef.current;
         const coopSnapshot = uiPreviewCoopSnapshotRef.current;
@@ -7883,6 +7887,12 @@ const App: React.FC = () => {
             challengeMode: undefined,
         }));
     }, [handleStartUiPreview]);
+
+    const handleStartIllustratedProblemPreview = useCallback((mode: string, problem: GeneralProblem) => {
+        const resolvedMode = mode as GameMode;
+        handleStartProblemUiPreview(resolvedMode);
+        setDebugIllustratedProblemPreview({ mode: resolvedMode, problem });
+    }, [handleStartProblemUiPreview]);
 
     const handleStartEventUiPreview = useCallback((theme: VisualThemeId, title: string) => {
         setEventResultLog(null);
@@ -19801,6 +19811,7 @@ const App: React.FC = () => {
                             }}
                             onStartUiPreview={handleStartUiPreview}
                             onStartProblemUiPreview={handleStartProblemUiPreview}
+                            onStartIllustratedProblemPreview={handleStartIllustratedProblemPreview}
                             onStartEventUiPreview={handleStartEventUiPreview}
                             onStartBattleModalPreview={handleStartBattleModalPreview}
                             onStartAppModalPreview={handleStartAppModalPreview}
@@ -20606,18 +20617,20 @@ const App: React.FC = () => {
                 {gameState.screen === GameScreen.GENERAL_CHALLENGE && (
                     <div className="absolute inset-0" data-allow-japanese="true">
                         <GeneralChallengeScreen
-                            mode={localAssignmentProblemConfig?.mode || gameState.mode}
-                            modePool={localAssignmentProblemConfig?.mode ? localAssignmentProblemConfig.modePool : gameState.modePool}
+                            mode={debugIllustratedProblemPreview?.mode || localAssignmentProblemConfig?.mode || gameState.mode}
+                            modePool={debugIllustratedProblemPreview ? undefined : localAssignmentProblemConfig?.mode ? localAssignmentProblemConfig.modePool : gameState.modePool}
                             answerMode={localAssignmentProblemConfig?.answerMode || gameState.answerMode || 'CHOICE'}
-                            onModeCorrect={handleModeCorrectProgress}
-                            onComplete={handleMathChallengeComplete}
-                            onAnswerResult={handleAssignmentAnswerResult}
-                            customProblems={localAssignmentProblemConfig?.mode && assignmentProblemSource?.gameMode === 'FREE' ? assignmentProblemSource.customProblems : undefined}
-                            debugSkip={isMathDebugSkipped}
-                            isChallenge={Boolean(gameState.eventLearningPending)}
-                            rewardHint={trans("正解するとゴールド獲得", languageMode)}
+                            onModeCorrect={debugIllustratedProblemPreview ? undefined : handleModeCorrectProgress}
+                            onComplete={debugIllustratedProblemPreview ? (() => closeUiPreview()) : handleMathChallengeComplete}
+                            onAnswerResult={debugIllustratedProblemPreview ? undefined : handleAssignmentAnswerResult}
+                            customProblems={debugIllustratedProblemPreview ? undefined : localAssignmentProblemConfig?.mode && assignmentProblemSource?.gameMode === 'FREE' ? assignmentProblemSource.customProblems : undefined}
+                            debugProblems={debugIllustratedProblemPreview ? [debugIllustratedProblemPreview.problem] : undefined}
+                            previewOnly={Boolean(debugIllustratedProblemPreview)}
+                            debugSkip={debugIllustratedProblemPreview ? false : isMathDebugSkipped}
+                            isChallenge={debugIllustratedProblemPreview ? false : Boolean(gameState.eventLearningPending)}
+                            rewardHint={debugIllustratedProblemPreview ? undefined : trans("正解するとゴールド獲得", languageMode)}
                             languageMode={languageMode}
-                            assignmentUnits={assignmentProblemSource?.units}
+                            assignmentUnits={debugIllustratedProblemPreview ? undefined : assignmentProblemSource?.units}
                         />
                     </div>
                 )}

@@ -31,9 +31,12 @@ interface GeneralChallengeScreenProps {
   problemOffset?: number;
   reviewProblem?: AssignmentReviewProblem | null;
   assignmentUnits?: AssignmentUnit[];
+  debugProblems?: GeneralProblem[];
+  previewOnly?: boolean;
 }
 
 const EMPTY_CUSTOM_PROBLEMS: AssignmentCustomProblem[] = [];
+const EMPTY_DEBUG_PROBLEMS: GeneralProblem[] = [];
 
 const buildCustomProblemOptions = (answer: string, providedOptions: string[] = [], languageMode: LanguageMode = 'JAPANESE'): string[] => {
   const correct = answer.trim();
@@ -127,7 +130,7 @@ const isEnglishSpeakingReviewMode = (mode: string) =>
   /^ENGLISH_G8_U(11|12|13)$/.test(mode) ||
   /^ENGLISH_G9_U(12|13|14)$/.test(mode);
 
-const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onComplete, mode, modePool, onModeCorrect, answerMode = 'CHOICE', debugSkip, isChallenge, streak = 0, rewardHint, languageMode = 'JAPANESE', onAnswerResult, customProblems = EMPTY_CUSTOM_PROBLEMS, problemOffset = 0, reviewProblem = null, assignmentUnits }) => {
+const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onComplete, mode, modePool, onModeCorrect, answerMode = 'CHOICE', debugSkip, isChallenge, streak = 0, rewardHint, languageMode = 'JAPANESE', onAnswerResult, customProblems = EMPTY_CUSTOM_PROBLEMS, problemOffset = 0, reviewProblem = null, assignmentUnits, debugProblems = EMPTY_DEBUG_PROBLEMS, previewOnly = false }) => {
   const [problems, setProblems] = useState<ExtendedGeneralProblem[]>([]);
   const [currentProblemIndex, setCurrentProblemIndex] = useState(0);
   const [correctCount, setCorrectCount] = useState(0);
@@ -164,12 +167,12 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
   );
 
   useEffect(() => {
-    if (!unitBoardSummary || reviewProblem) return;
+    if (previewOnly || !unitBoardSummary || reviewProblem) return;
     if (unitBoardAutoShownRef.current === unitBoardSummary.id) return;
     unitBoardAutoShownRef.current = unitBoardSummary.id;
 
     if (claimUnitBoardFirstDisplay(unitBoardSummary.id)) setIsUnitBoardOpen(true);
-  }, [reviewProblem, unitBoardSummary]);
+  }, [previewOnly, reviewProblem, unitBoardSummary]);
 
   const handleUnitBoardClose = useCallback(() => {
     setIsUnitBoardOpen(false);
@@ -427,7 +430,9 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
     }
 
     let problemPool: Array<GeneralProblem & { sourceMode: string }> = [];
-    if (modePool && modePool.length > 0) {
+    if (debugProblems.length > 0) {
+      problemPool = debugProblems.map((problem) => ({ ...problem, sourceMode: mode }));
+    } else if (modePool && modePool.length > 0) {
       problemPool = modePool.flatMap((m) => {
         const source = SUBJECT_DATA[m] || [];
         const filter = assignmentFilterForMode(assignmentUnits, m);
@@ -440,7 +445,7 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
       const filtered = filter ? source.filter((problem) => matchesAssignmentRangeFilter(problem, filter)) : source;
       problemPool = (filtered.length > 0 ? filtered : source).map((p) => ({ ...p, sourceMode: mode }));
     }
-    if (customProblems.length > 0) {
+    if (debugProblems.length === 0 && customProblems.length > 0) {
       const customProblemPool = customProblems.map((problem) => ({
         question: problem.question,
         answer: problem.answer,
@@ -466,8 +471,8 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
       problemPool = SUBJECT_DATA.MAP_SYMBOLS.map((p) => ({ ...p, sourceMode: 'MAP_SYMBOLS' }));
     }
     
-    const count = isChallenge ? 1 : 3;
-    const orderedPool = customProblems.length > 0
+    const count = debugProblems.length > 0 ? debugProblems.length : isChallenge ? 1 : 3;
+    const orderedPool = debugProblems.length > 0 || customProblems.length > 0
       ? [...problemPool]
       : [...problemPool].sort(() => Math.random() - 0.5);
     const shuffled = orderedPool
@@ -484,7 +489,7 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
         });
         
     setProblems(shuffled);
-  }, [mode, modePool, debugSkip, isChallenge, customProblems, problemOffset, reviewProblem, languageMode, assignmentUnits]);
+  }, [mode, modePool, debugSkip, isChallenge, customProblems, problemOffset, reviewProblem, languageMode, assignmentUnits, debugProblems]);
 
   const attemptedCount = currentProblemIndex + (isAnswered ? 1 : 0);
   const accuracy = attemptedCount > 0 ? Math.round((correctCount / attemptedCount) * 100) : 0;
@@ -538,16 +543,17 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
       setCorrectCount(prev => prev + 1);
       setFeedback('CORRECT');
       audioService.playSound('correct');
-      onModeCorrect?.(problems[currentProblemIndex].sourceMode, 1);
-      const currentTotal = storageService.getMathCorrectCount();
-      storageService.saveMathCorrectCount(currentTotal + 1);
-      
-      const currentStreak = storageService.getHintStreaks()[problems[currentProblemIndex].sourceMode] || 0;
-      storageService.saveHintStreak(problems[currentProblemIndex].sourceMode, currentStreak + 1);
+      if (!previewOnly) {
+        onModeCorrect?.(problems[currentProblemIndex].sourceMode, 1);
+        const currentTotal = storageService.getMathCorrectCount();
+        storageService.saveMathCorrectCount(currentTotal + 1);
+        const currentStreak = storageService.getHintStreaks()[problems[currentProblemIndex].sourceMode] || 0;
+        storageService.saveHintStreak(problems[currentProblemIndex].sourceMode, currentStreak + 1);
+      }
     } else {
       setFeedback('WRONG');
       audioService.playSound('wrong');
-      storageService.saveHintStreak(problems[currentProblemIndex].sourceMode, 0);
+      if (!previewOnly) storageService.saveHintStreak(problems[currentProblemIndex].sourceMode, 0);
     }
     const answerResult = {
       mode: problems[currentProblemIndex].sourceMode,
@@ -577,7 +583,7 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
         onComplete(isCorrect ? correctCount + 1 : correctCount);
       }
     }, 1200);
-  }, [correctCount, currentProblemIndex, isAnswered, isChallenge, onAnswerResult, onComplete, onModeCorrect, problems]);
+  }, [correctCount, currentProblemIndex, isAnswered, isChallenge, onAnswerResult, onComplete, onModeCorrect, previewOnly, problems]);
 
   const handleAnswer = (option: string) => {
     const isCorrect = normalize(option) === normalize(problems[currentProblemIndex].actualCorrectAnswer);
