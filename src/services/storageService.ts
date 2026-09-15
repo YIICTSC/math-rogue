@@ -134,6 +134,7 @@ const STORAGE_KEY_MODE_CORRECT_COUNTS = 'pixel_spire_mode_correct_counts_v1';
 const STORAGE_KEY_MASTERED_MODES = 'pixel_spire_mastered_modes_v1';
 const STORAGE_KEY_TYPING_WEAK_KEYS = 'pixel_spire_typing_weak_keys_v1';
 const STORAGE_KEY_HINT_STREAKS = 'pixel_spire_hint_streaks_v1';
+const STORAGE_KEY_SOLVED_PROBLEM_CYCLES = 'pixel_spire_solved_problem_cycles_v1';
 const STORAGE_KEY_CURRENT_ASSIGNMENT = 'pixel_spire_current_assignment_v1';
 const STORAGE_KEY_ASSIGNMENT_ANSWERS = 'pixel_spire_assignment_answers_v1';
 const STORAGE_KEY_STUDENT_PROFILE = 'pixel_spire_student_profile_v1';
@@ -446,12 +447,11 @@ export const storageService = {
           targetCorrect: Math.max(1, Number(unit.targetCorrect || 10)),
         })),
         customProblems: (assignment.customProblems || []).map((problem) => ({
-          ...problem,
+          id: String(problem.id || ''),
           question: String(problem.question || ''),
           answer: String(problem.answer || ''),
           options: Array.isArray(problem.options) ? problem.options.map((option) => String(option || '')) : [],
-          imageUrl: problem.imageUrl ? String(problem.imageUrl) : undefined,
-          imageAlt: problem.imageAlt ? String(problem.imageAlt) : undefined,
+          timeLimitSeconds: [10, 20, 30, 60].includes(Number(problem.timeLimitSeconds)) ? Number(problem.timeLimitSeconds) : null,
         })),
         customTargetCorrect: Math.max(1, Number(assignment.customTargetCorrect || (assignment.customProblems || []).length || 10)),
       };
@@ -462,7 +462,17 @@ export const storageService = {
 
   saveCurrentAssignment: (assignment: AssignmentPayload) => {
     try {
-      localStorage.setItem(STORAGE_KEY_CURRENT_ASSIGNMENT, JSON.stringify(assignment));
+      const sanitizedAssignment: AssignmentPayload = {
+        ...assignment,
+        customProblems: (assignment.customProblems || []).map((problem) => ({
+          id: String(problem.id || ''),
+          question: String(problem.question || ''),
+          answer: String(problem.answer || ''),
+          options: Array.isArray(problem.options) ? problem.options.map((option) => String(option || '')) : [],
+          timeLimitSeconds: problem.timeLimitSeconds ?? null,
+        })),
+      };
+      localStorage.setItem(STORAGE_KEY_CURRENT_ASSIGNMENT, JSON.stringify(sanitizedAssignment));
     } catch (e) {
       console.warn("Failed to save current assignment", e);
     }
@@ -1504,6 +1514,48 @@ export const storageService = {
       localStorage.setItem(STORAGE_KEY_HINT_STREAKS, JSON.stringify(current));
     } catch (e) {
       console.warn("Failed to save hint streak", e);
+    }
+  },
+
+  // --- Solved problem cycles ---
+  // Correctly answered problems are kept out of the random pool until the
+  // current unit's available problem set has been completed once.
+  getSolvedProblemKeys: (unitKey: string): string[] => {
+    if (!unitKey) return [];
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY_SOLVED_PROBLEM_CYCLES);
+      const parsed = stored ? JSON.parse(stored) as Record<string, unknown> : {};
+      const keys = parsed[unitKey];
+      return Array.isArray(keys)
+        ? Array.from(new Set(keys.filter((key): key is string => typeof key === 'string' && key.length > 0)))
+        : [];
+    } catch {
+      return [];
+    }
+  },
+
+  markProblemCycleCorrect: (unitKey: string, problemKey: string) => {
+    if (!unitKey || !problemKey) return;
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY_SOLVED_PROBLEM_CYCLES);
+      const parsed = stored ? JSON.parse(stored) as Record<string, unknown> : {};
+      const current = storageService.getSolvedProblemKeys(unitKey);
+      parsed[unitKey] = Array.from(new Set([...current, problemKey]));
+      localStorage.setItem(STORAGE_KEY_SOLVED_PROBLEM_CYCLES, JSON.stringify(parsed));
+    } catch (e) {
+      console.warn('Failed to save solved problem cycle', e);
+    }
+  },
+
+  resetProblemCycle: (unitKey: string) => {
+    if (!unitKey) return;
+    try {
+      const stored = localStorage.getItem(STORAGE_KEY_SOLVED_PROBLEM_CYCLES);
+      const parsed = stored ? JSON.parse(stored) as Record<string, unknown> : {};
+      delete parsed[unitKey];
+      localStorage.setItem(STORAGE_KEY_SOLVED_PROBLEM_CYCLES, JSON.stringify(parsed));
+    } catch (e) {
+      console.warn('Failed to reset solved problem cycle', e);
     }
   },
 

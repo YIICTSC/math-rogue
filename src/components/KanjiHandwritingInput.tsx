@@ -13,8 +13,8 @@ declare global {
 
 const JHR_SCRIPT_ID = 'learning-rogue-jlect-jhr';
 const JHR_SCRIPT_URL = 'https://cdn.jsdelivr.net/gh/ZacharyRead/jlect-jhr@master/jlect-jhr.full.js';
-const INACTIVITY_TIMEOUT_MS = 6000;
-const RECOGNITION_SETTLE_TIMEOUT_MS = 600;
+const INACTIVITY_TIMEOUT_MS = 3000;
+const RECOGNITION_SETTLE_TIMEOUT_MS = 300;
 let jhrLoader: Promise<void> | null = null;
 
 type JhrCanvasPrototype = {
@@ -77,6 +77,7 @@ const KanjiHandwritingInput: React.FC<KanjiHandwritingInputProps> = ({
     storageService.getKanjiStrokeOrderPreference() ?? true
   ));
   const [strokeOrderFeedback, setStrokeOrderFeedback] = useState(false);
+  const [recognitionPrompt, setRecognitionPrompt] = useState<'candidates' | 'retry' | null>(null);
   const autoAdvanceTimerRef = useRef<number | null>(null);
   const inactivityTimerRef = useRef<number | null>(null);
   const candidateOptionsRef = useRef<string[]>([]);
@@ -211,9 +212,10 @@ const KanjiHandwritingInput: React.FC<KanjiHandwritingInputProps> = ({
   }, [disabled]);
 
   useEffect(() => {
-    if (storageService.getKanjiTraceGuidePreference() === null) {
-      setTraceModeEnabled(showTraceGuide);
-    }
+    // The challenge screen controls the automatic visibility: hide after
+    // three correct answers and show again after a wrong answer. The manual
+    // toggle still applies until that automatic state changes.
+    setTraceModeEnabled(showTraceGuide);
   }, [showTraceGuide]);
 
   const clearInactivityTimer = useCallback(() => {
@@ -233,6 +235,7 @@ const KanjiHandwritingInput: React.FC<KanjiHandwritingInputProps> = ({
     hasStartedWritingRef.current = false;
     setHasStartedWriting(false);
     setStrokeOrderFeedback(false);
+    setRecognitionPrompt(null);
     window.erase?.();
     setCandidates([]);
     setExactCandidates([]);
@@ -254,16 +257,18 @@ const KanjiHandwritingInput: React.FC<KanjiHandwritingInputProps> = ({
           return;
         }
 
-        // Candidates are intentionally not shown to the learner. If the
-        // expected character has not been recognized before the timeout,
-        // advance only the current character. Calling onSubmit here would
-        // submit a single first character as the answer for a multi-character
-        // problem before the remaining characters have been written.
-        const candidate = candidateOptionsRef.current[0] || '';
-        if (candidate) {
-          advanceWithCandidateRef.current(candidate);
+        // Keep normal recognition automatic, but never silently accept an
+        // unrelated top candidate. If the expected character is present in
+        // the recognizer's candidates, it is safe to use that character as
+        // the automatic fallback. Otherwise let the learner retry or choose
+        // a candidate; the selected character is still judged automatically
+        // by the challenge screen.
+        if (expectedCharacter && candidateOptionsRef.current.includes(expectedCharacter)) {
+          advanceWithCandidateRef.current(expectedCharacter);
+        } else if (candidateOptionsRef.current.length > 0) {
+          setRecognitionPrompt('candidates');
         } else {
-          onSubmit('');
+          setRecognitionPrompt('retry');
         }
         return;
       }
@@ -276,7 +281,13 @@ const KanjiHandwritingInput: React.FC<KanjiHandwritingInputProps> = ({
 
   const beginWriting = useCallback(() => {
     if (disabled || !engineReady) return;
+    // Starting a new stroke after an uncertain result means "rewrite".
+    // Clear the old stroke history so it cannot contaminate recognition.
+    if (recognitionPrompt !== null) {
+      clearCurrentCharacter();
+    }
     setStrokeOrderFeedback(false);
+    setRecognitionPrompt(null);
     isPointerDownRef.current = true;
     if (autoAdvanceTimerRef.current !== null) {
       window.clearTimeout(autoAdvanceTimerRef.current);
@@ -285,7 +296,7 @@ const KanjiHandwritingInput: React.FC<KanjiHandwritingInputProps> = ({
     hasStartedWritingRef.current = true;
     setHasStartedWriting(true);
     scheduleInactivityTimeout();
-  }, [disabled, engineReady, scheduleInactivityTimeout]);
+  }, [clearCurrentCharacter, disabled, engineReady, recognitionPrompt, scheduleInactivityTimeout]);
 
   const continueWriting = useCallback((event: React.PointerEvent<HTMLCanvasElement>) => {
     if (event.buttons > 0 && hasStartedWritingRef.current) {
@@ -312,6 +323,7 @@ const KanjiHandwritingInput: React.FC<KanjiHandwritingInputProps> = ({
 
   const advanceWithCandidate = useCallback((candidate: string) => {
     if (!engineReady || disabled || !candidate || characterIndex >= characters.length) return;
+    setRecognitionPrompt(null);
     const nextWrittenCharacters = [...writtenCharacters, candidate];
     if (characterIndex >= characters.length - 1) {
       clearCurrentCharacter();
@@ -406,6 +418,46 @@ const KanjiHandwritingInput: React.FC<KanjiHandwritingInputProps> = ({
           {trans('文字は合っていますが、書き順を見直してください', languageMode)}
         </div>
       )}
+      {recognitionPrompt === 'candidates' && (
+        <div role="alert" className="rounded border border-cyan-300/60 bg-cyan-950/50 px-2 py-2 text-center text-xs font-bold text-cyan-100">
+          <p>{trans('認識が安定しません。候補を選ぶか、書き直してください', languageMode)}</p>
+          <div className="mt-2 flex flex-wrap justify-center gap-1.5">
+            {candidateOptions.slice(0, 6).map((candidate) => (
+              <button
+                key={candidate}
+                type="button"
+                onClick={() => advanceWithCandidate(candidate)}
+                disabled={disabled || !engineReady}
+                aria-label={`${candidate}を選択`}
+                className="flex h-10 w-10 items-center justify-center rounded border border-cyan-200/70 bg-slate-900 text-xl font-serif text-white transition-colors hover:bg-cyan-900/70 disabled:opacity-40"
+              >
+                {candidate}
+              </button>
+            ))}
+          </div>
+          <button
+            type="button"
+            onClick={clearCurrentCharacter}
+            disabled={disabled || !engineReady}
+            className="mt-2 rounded border border-slate-400/70 bg-slate-800 px-2 py-1 text-[11px] text-slate-200 transition-colors hover:bg-slate-700 disabled:opacity-40"
+          >
+            {trans('書き直す', languageMode)}
+          </button>
+        </div>
+      )}
+      {recognitionPrompt === 'retry' && (
+        <div role="alert" className="rounded border border-amber-300/60 bg-amber-950/50 px-2 py-2 text-center text-xs font-bold text-amber-100">
+          <p>{trans('認識できませんでした。もう一度書いてください', languageMode)}</p>
+          <button
+            type="button"
+            onClick={clearCurrentCharacter}
+            disabled={disabled || !engineReady}
+            className="mt-2 rounded border border-amber-200/70 bg-slate-800 px-2 py-1 text-[11px] text-amber-100 transition-colors hover:bg-slate-700 disabled:opacity-40"
+          >
+            {trans('書き直す', languageMode)}
+          </button>
+        </div>
+      )}
       <div className="kanji-writing-canvas-frame relative mx-auto flex w-full max-w-[420px] min-w-0 justify-center rounded-lg border-2 border-cyan-300/60 bg-white p-2">
         {traceModeEnabled && !disabled && expectedCharacter && (
           <span aria-hidden="true" className="kanji-trace-guide pointer-events-none absolute inset-2 z-20 flex items-center justify-center font-serif">
@@ -431,6 +483,10 @@ const KanjiHandwritingInput: React.FC<KanjiHandwritingInputProps> = ({
             ? trans('手書き認識エンジンを読み込めませんでした。通信を確認してください。', languageMode)
             : !engineReady
               ? trans('手書き認識エンジンを準備中…', languageMode)
+              : recognitionPrompt === 'candidates'
+                ? trans('候補を選んでください', languageMode)
+                : recognitionPrompt === 'retry'
+                  ? trans('マスの中にもう一度文字を書いてください', languageMode)
               : hasStartedWriting
                 ? trans('認識中…', languageMode)
                 : trans('マスの中に文字を書いてください', languageMode)}

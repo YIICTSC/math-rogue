@@ -49,8 +49,6 @@ type ManagedAssignmentDetail = ManagedAssignment & {
     question: string;
     answer: string;
     options: string[];
-    imageUrl?: string;
-    imageAlt?: string;
     timeLimitSeconds?: number | null;
   }>;
 };
@@ -263,7 +261,13 @@ export const toAssignmentPayload = (assignment: ManagedAssignment): AssignmentPa
 const toDetailedAssignmentPayload = (assignment: ManagedAssignmentDetail): AssignmentPayload => ({
   ...toAssignmentPayload(assignment),
   units: assignment.customProblems?.length ? [] : toAssignmentPayload(assignment).units,
-  customProblems: assignment.customProblems || [],
+  customProblems: (assignment.customProblems || []).map(({ id, question, answer, options, timeLimitSeconds }) => ({
+    id,
+    question,
+    answer,
+    options,
+    timeLimitSeconds,
+  })),
   customTargetCorrect: assignment.customProblems?.length ? Math.max(1, Number(assignment.targetCorrect || assignment.customProblems.length)) : undefined,
   gameMode: toAssignmentPayload(assignment).gameMode,
 });
@@ -405,17 +409,9 @@ export const managementPortalService = {
     const profile = this.getProfile();
     if (!profile) throw new Error('管理ポータルとの端末連携が必要です。');
     const result = await request<{ assignment: ManagedAssignmentDetail }>(`/api/v1/learner/assignments/${encodeURIComponent(assignmentId)}`, {}, profile.token);
-    const customProblems = await Promise.all((result.assignment.customProblems || []).map(async (problem) => {
-      if (!problem.imageUrl) return problem;
-      try {
-        const response = await fetch(problem.imageUrl, { headers: { authorization: `Bearer ${profile.token}` } });
-        if (!response.ok) return { ...problem, imageUrl: undefined };
-        return { ...problem, imageUrl: URL.createObjectURL(await response.blob()) };
-      } catch {
-        return { ...problem, imageUrl: undefined };
-      }
-    }));
-    return toDetailedAssignmentPayload({ ...result.assignment, customProblems });
+    // Problem illustrations are intentionally not loaded here. The learner UI
+    // renders only the dynamic `visual` field for problem visuals.
+    return toDetailedAssignmentPayload(result.assignment);
   },
 
   async fetchRelationships() {

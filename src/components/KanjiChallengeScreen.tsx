@@ -9,6 +9,7 @@ import RewardHintBanner from './RewardHintBanner';
 import KanjiHandwritingInput from './KanjiHandwritingInput';
 import { trans } from '../utils/textUtils';
 import { assignmentFilterForMode, matchesKanjiAssignmentRangeFilter } from '../utils/assignmentRangeFilters';
+import { getProblemCycleScope, selectProblemsForCycle } from '../utils/problemCycle';
 
 interface KanjiChallengeScreenProps {
   onComplete: (correctCount: number) => void;
@@ -43,6 +44,7 @@ const KanjiChallengeScreen: React.FC<KanjiChallengeScreenProps> = ({ onComplete,
   const [isAnswered, setIsAnswered] = useState(false);
   const [feedback, setFeedback] = useState<'CORRECT' | 'WRONG' | null>(null);
   const [writingWrongStreak, setWritingWrongStreak] = useState(0);
+  const [writingCorrectStreak, setWritingCorrectStreak] = useState(0);
   const inputRef = React.useRef<HTMLInputElement>(null);
   const questionStartedAtRef = React.useRef(Date.now());
 
@@ -55,6 +57,11 @@ const KanjiChallengeScreen: React.FC<KanjiChallengeScreenProps> = ({ onComplete,
   useEffect(() => {
     questionStartedAtRef.current = Date.now();
   }, [currentProblemIndex]);
+
+  useEffect(() => {
+    setWritingCorrectStreak(0);
+    setWritingWrongStreak(0);
+  }, [isChallenge, mode, resolvedAnswerMode, reviewProblem]);
 
   // 表記のゆらぎ（スペース、括弧内の補足、全角半角など）を排除して比較する関数
   const normalize = (s: string) => {
@@ -116,9 +123,14 @@ const KanjiChallengeScreen: React.FC<KanjiChallengeScreenProps> = ({ onComplete,
     const filteredPool = filter ? problemPool.filter((problem) => matchesKanjiAssignmentRangeFilter(problem, filter)) : problemPool;
     if (filteredPool.length > 0) problemPool = filteredPool;
     const count = isChallenge ? 1 : 3;
-    const shuffled = [...problemPool]
-        .sort(() => Math.random() - 0.5)
-        .slice(0, count)
+    const cycleScope = getProblemCycleScope(String(mode), filter);
+    const cyclePool = selectProblemsForCycle(
+        problemPool,
+        count,
+        () => cycleScope,
+        (problem) => `${mode}:${problem.question}`,
+    );
+    const shuffled = cyclePool
         .map(p => {
             // 指示通り、options[0]を絶対的な正解として保持する
             const correctAnswer = p.options[0];
@@ -129,7 +141,7 @@ const KanjiChallengeScreen: React.FC<KanjiChallengeScreenProps> = ({ onComplete,
                 ...p,
                 problemKey: `${mode}:${p.question}`,
                 actualCorrectAnswer: correctAnswer,
-                actualWrittenAnswer: p.question,
+                actualWrittenAnswer: p.writingAnswer || p.question,
                 // 表示用にはシャッフルした選択肢を渡す
                 options: [...contextualOptions].sort(() => Math.random() - 0.5)
             };
@@ -151,7 +163,13 @@ const KanjiChallengeScreen: React.FC<KanjiChallengeScreenProps> = ({ onComplete,
       : currentProblem.actualCorrectAnswer;
     const isCorrect = normalize(option) === normalize(expectedAnswer);
     if (resolvedAnswerMode === 'WRITING') {
-      setWritingWrongStreak((previous) => isCorrect ? 0 : previous + 1);
+      if (isCorrect) {
+        setWritingWrongStreak(0);
+        setWritingCorrectStreak((previous) => previous + 1);
+      } else {
+        setWritingWrongStreak((previous) => previous + 1);
+        setWritingCorrectStreak(0);
+      }
     }
     const answerResult = {
       mode,
@@ -170,6 +188,10 @@ const KanjiChallengeScreen: React.FC<KanjiChallengeScreenProps> = ({ onComplete,
       setCorrectCount(prev => prev + 1);
       setFeedback('CORRECT');
       audioService.playSound('correct');
+      if (!problems[currentProblemIndex].isAssignmentRetry) {
+        const cycleScope = getProblemCycleScope(String(mode), assignmentFilterForMode(assignmentUnits, mode));
+        storageService.markProblemCycleCorrect(cycleScope, problems[currentProblemIndex].problemKey || `${mode}:${problems[currentProblemIndex].question}`);
+      }
       const currentTotal = storageService.getMathCorrectCount();
       storageService.saveMathCorrectCount(currentTotal + 1);
       
@@ -242,7 +264,7 @@ const KanjiChallengeScreen: React.FC<KanjiChallengeScreenProps> = ({ onComplete,
     ? `kanji-question-text ${questionLengthClass}`
     : '';
   const showTraceGuide = resolvedAnswerMode === 'WRITING'
-    && (currentProblemIndex < 2 || writingWrongStreak >= 1);
+    && (writingCorrectStreak < 3 || writingWrongStreak >= 1);
 
   return (
     <div data-gamepad-navigation-root data-gamepad-question-screen data-gamepad-initial-scope={`kanji-challenge-${currentProblemIndex}`} className={`main-challenge-screen kanji-challenge-screen ${resolvedAnswerMode === 'WRITING' ? 'kanji-challenge-writing-mode' : 'kanji-challenge-non-writing-mode'} ${isChallenge ? 'kanji-challenge-in-problem-challenge' : ''} flex flex-col h-full w-full bg-cyan-950 text-white relative items-center justify-center p-8 font-mono`}>

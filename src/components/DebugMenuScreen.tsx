@@ -27,7 +27,6 @@ import { assetUrl, getWebpFirstAssetPaths } from '../utils/assetPaths';
 import { APP_MODAL_PREVIEWS, BATTLE_MODAL_PREVIEWS, UI_PREVIEW_GROUPS, UI_PREVIEW_SCREENS, type AppModalPreviewId, type BattleModalPreviewId } from '../data/uiPreviewScreens';
 import { getDebugProblemUnitGroups } from './ProblemChallengeScreen';
 import { SUBJECT_DATA, type GeneralProblem } from '../data/subjectData';
-import { PROBLEM_ILLUSTRATION_ASSETS } from '../data/problemIllustrations';
 import { ELEMENTARY_EVENT_TITLES } from '../services/eventService';
 import { HIGH_SCHOOL_SUPPORTER_NPC_EVENTS, type SupporterNpcReward } from '../data/supporterNpcEvents';
 import { DODOMEDESU_EVENT_STAGES } from '../data/dodomedesuBoss';
@@ -184,25 +183,27 @@ type IllustratedProblemDebugEntry = {
     problem: GeneralProblem;
 };
 
-const ILLUSTRATED_PROBLEM_DEBUG_GROUPS = PROBLEM_ILLUSTRATION_ASSETS.map((assetMeta) => {
-    const uniqueProblems = new Map<string, IllustratedProblemDebugEntry>();
+const ILLUSTRATED_PROBLEM_DEBUG_ENTRIES: IllustratedProblemDebugEntry[] = (() => {
+    const entries = new Map<string, IllustratedProblemDebugEntry>();
     Object.entries(SUBJECT_DATA).forEach(([mode, problems]) => {
-        problems.forEach((problem) => {
-            if (!problem.imageUrl?.includes(assetMeta.asset)) return;
-            const key = `${problem.question}\u0000${problem.answer}`;
-            const candidate = { key, mode, problem };
-            const current = uniqueProblems.get(key);
-            const candidateIsUnitMode = /_U\d+$/i.test(mode);
-            const currentIsUnitMode = current ? /_U\d+$/i.test(current.mode) : false;
-            if (!current || (candidateIsUnitMode && !currentIsUnitMode)) uniqueProblems.set(key, candidate);
+        problems.forEach((problem, index) => {
+            if (!problem.visual) return;
+            const key = `${mode}\u0000${problem.question}\u0000${problem.answer}\u0000${index}`;
+            entries.set(key, {
+                key,
+                mode,
+                problem,
+            });
         });
     });
-    return {
-        ...assetMeta,
-        problems: Array.from(uniqueProblems.values()).sort((left, right) => left.problem.question.localeCompare(right.problem.question, 'ja')),
-    };
-}).filter(group => group.problems.length > 0);
-const ILLUSTRATED_PROBLEM_DEBUG_TOTAL = ILLUSTRATED_PROBLEM_DEBUG_GROUPS.reduce((sum, group) => sum + group.problems.length, 0);
+    return Array.from(entries.values()).sort((left, right) => (
+        left.mode.localeCompare(right.mode, 'ja')
+        || (left.problem.unitLabel || '').localeCompare(right.problem.unitLabel || '', 'ja')
+        || left.problem.question.localeCompare(right.problem.question, 'ja')
+    ));
+})();
+const ILLUSTRATED_PROBLEM_DEBUG_VISUAL_TOTAL = ILLUSTRATED_PROBLEM_DEBUG_ENTRIES.length;
+const ILLUSTRATED_PROBLEM_DEBUG_PAGE_SIZE = 24;
 
 const formatProblemDebugCopyLine = (
     groupName: string,
@@ -357,13 +358,34 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
     const [problemDebugDetailUnitId, setProblemDebugDetailUnitId] = useState<string | null>(null);
     const [problemDebugFixUnitIds, setProblemDebugFixUnitIds] = useState<string[]>([]);
     const [problemDebugFixCopied, setProblemDebugFixCopied] = useState(false);
-    const [illustratedProblemSelections, setIllustratedProblemSelections] = useState<Record<string, number>>({});
+    const [illustratedProblemSearch, setIllustratedProblemSearch] = useState('');
+    const [illustratedProblemPage, setIllustratedProblemPage] = useState(0);
     const [debugEventTheme, setDebugEventTheme] = useState<VisualThemeId>('elementary');
     const [debugEventTitle, setDebugEventTitle] = useState(DEBUG_EVENT_GROUPS[0]?.titles[0] ?? '');
     const [uiPreviewChecklist, setUiPreviewChecklist] = useState<UiPreviewChecklist>(() => storageService.getUiPreviewChecklist());
     const [endlessBossDebugTheme, setEndlessBossDebugTheme] = useState<'high-school' | 'magic'>('high-school');
     const [endlessBossDebugMagicGender, setEndlessBossDebugMagicGender] = useState<'female' | 'male'>('female');
     const [endlessBossDebugProtagonistId, setEndlessBossDebugProtagonistId] = useState('WARRIOR');
+
+    const filteredIllustratedProblemEntries = useMemo(() => {
+        const query = illustratedProblemSearch.trim().toLocaleLowerCase('ja');
+        return ILLUSTRATED_PROBLEM_DEBUG_ENTRIES.filter((entry) => {
+            if (!query) return true;
+            const searchText = [
+                entry.mode,
+                entry.problem.unitLabel,
+                entry.problem.question,
+                entry.problem.answer,
+            ].filter(Boolean).join(' ').toLocaleLowerCase('ja');
+            return searchText.includes(query);
+        });
+    }, [illustratedProblemSearch]);
+    const illustratedProblemPageCount = Math.max(1, Math.ceil(filteredIllustratedProblemEntries.length / ILLUSTRATED_PROBLEM_DEBUG_PAGE_SIZE));
+    const illustratedProblemPageIndex = Math.min(illustratedProblemPage, illustratedProblemPageCount - 1);
+    const visibleIllustratedProblemEntries = filteredIllustratedProblemEntries.slice(
+        illustratedProblemPageIndex * ILLUSTRATED_PROBLEM_DEBUG_PAGE_SIZE,
+        (illustratedProblemPageIndex + 1) * ILLUSTRATED_PROBLEM_DEBUG_PAGE_SIZE,
+    );
 
     const endlessBossDebugProtagonists = useMemo(() => {
         if (endlessBossDebugTheme === 'high-school') {
@@ -1743,93 +1765,114 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
                                                 <ImageIcon size={18} /> イラストつき問題テスト
                                             </h3>
                                             <p className="mt-1 text-xs leading-relaxed text-gray-300">
-                                                教材イラストごとに対応問題を選び、本番と同じ問題画面で1問だけ試します。プレビュー中の正答数やヒント連続記録は保存されません。
+                                                動的visualが設定された問題を選び、本番と同じ問題画面で1問だけ試します。プレビュー中の正答数やヒント連続記録は保存されません。
                                             </p>
                                         </div>
                                         <div className="flex flex-wrap gap-2 text-[10px] font-black">
-                                            <span className="rounded-full border border-teal-500/60 bg-black/40 px-3 py-1 text-teal-100">
-                                                イラスト {ILLUSTRATED_PROBLEM_DEBUG_GROUPS.length}種類
-                                            </span>
                                             <span className="rounded-full border border-cyan-500/60 bg-black/40 px-3 py-1 text-cyan-100">
-                                                対応問題 {ILLUSTRATED_PROBLEM_DEBUG_TOTAL}問
+                                                動的visual {ILLUSTRATED_PROBLEM_DEBUG_VISUAL_TOTAL}問
                                             </span>
                                         </div>
                                     </div>
                                 </div>
 
-                                <div className="grid grid-cols-1 gap-4 lg:grid-cols-2">
-                                    {ILLUSTRATED_PROBLEM_DEBUG_GROUPS.map((group) => {
-                                        const rawIndex = illustratedProblemSelections[group.asset] ?? 0;
-                                        const selectedIndex = Math.max(0, Math.min(rawIndex, group.problems.length - 1));
-                                        const selectedEntry = group.problems[selectedIndex] ?? group.problems[0];
-                                        return (
-                                            <section key={group.asset} className="rounded-xl border border-teal-800/70 bg-slate-950/65 p-4">
-                                                <div className="grid grid-cols-[112px_minmax(0,1fr)] gap-4">
-                                                    <div className="flex h-28 w-28 items-center justify-center overflow-hidden rounded-xl border border-white/15 bg-white p-2">
-                                                        <img
-                                                            src={selectedEntry.problem.imageUrl}
-                                                            alt={group.label}
-                                                            className="max-h-full max-w-full object-contain"
-                                                        />
-                                                    </div>
-                                                    <div className="min-w-0">
-                                                        <div className="text-sm font-black text-teal-100">{group.label}</div>
-                                                        <div className="mt-1 font-mono text-[10px] text-slate-500">{group.asset}</div>
-                                                        <div className="mt-2 text-xs font-bold text-slate-300">対応 {group.problems.length}問</div>
-                                                        <div className="mt-1 rounded bg-black/30 px-2 py-1 font-mono text-[10px] text-cyan-200">
-                                                            {selectedEntry.mode}
+                                <section className="rounded-xl border border-cyan-700/70 bg-cyan-950/20 p-4">
+                                    <div className="flex flex-col gap-3 xl:flex-row xl:items-start xl:justify-between">
+                                        <div>
+                                            <h4 className="flex items-center gap-2 text-sm font-black text-cyan-200">
+                                                <Search size={17} /> 現在イラストがある問題一覧
+                                            </h4>
+                                            <p className="mt-1 text-xs leading-relaxed text-slate-300">
+                                                時計・図形・グラフなど、現在の問題データに実際に設定されている動的visualを確認できます。
+                                            </p>
+                                        </div>
+                                        <div className="flex flex-wrap gap-2 text-[10px] font-black">
+                                            <span className="rounded-full border border-violet-500/60 bg-black/40 px-3 py-1 text-violet-100">動的visual {ILLUSTRATED_PROBLEM_DEBUG_VISUAL_TOTAL}問</span>
+                                        </div>
+                                    </div>
+
+                                    <div className="mt-4 grid grid-cols-1 gap-2">
+                                        <label className="flex items-center gap-2 rounded-lg border border-cyan-800 bg-slate-950/70 px-3 py-2 text-xs text-slate-400">
+                                            <Search size={14} className="shrink-0" />
+                                            <input
+                                                value={illustratedProblemSearch}
+                                                onChange={(event) => {
+                                                    setIllustratedProblemSearch(event.target.value);
+                                                    setIllustratedProblemPage(0);
+                                                }}
+                                                placeholder="問題文・単元名・モード・答えを検索"
+                                                className="min-w-0 flex-1 bg-transparent text-xs font-bold text-white outline-none placeholder:text-slate-600"
+                                            />
+                                        </label>
+                                    </div>
+
+                                    <div className="mt-3 grid grid-cols-1 gap-3 xl:grid-cols-2">
+                                        {visibleIllustratedProblemEntries.map((entry) => (
+                                            <article key={entry.key} className="rounded-xl border border-slate-700 bg-slate-950/70 p-3">
+                                                <div className="flex gap-3">
+                                                    <div className="flex h-20 w-20 shrink-0 items-center justify-center overflow-hidden rounded-lg border border-white/15 bg-white p-1">
+                                                        <div className="flex h-full w-full flex-col items-center justify-center gap-1 bg-violet-950 text-center text-[10px] font-black text-violet-200">
+                                                            <Sparkles size={16} />
+                                                            <span>{entry.problem.visual?.kind || 'visual'}</span>
                                                         </div>
                                                     </div>
+                                                    <div className="min-w-0 flex-1">
+                                                        <div className="flex flex-wrap items-center gap-1 text-[10px] font-black">
+                                                            <span className="rounded bg-violet-950 px-2 py-0.5 text-violet-200">動的visual</span>
+                                                            <span className="rounded bg-black/40 px-2 py-0.5 font-mono text-cyan-200">{entry.mode}</span>
+                                                        </div>
+                                                        {entry.problem.unitLabel && <div className="mt-1 truncate text-[10px] font-bold text-slate-400">{entry.problem.unitLabel}</div>}
+                                                        <div className="mt-1 whitespace-pre-wrap text-xs font-bold leading-relaxed text-white">{entry.problem.question}</div>
+                                                        <div className="mt-1 text-[10px] font-black text-lime-300">答え: {entry.problem.answer}</div>
+                                                    </div>
                                                 </div>
+                                                <button
+                                                    type="button"
+                                                    onClick={() => onStartIllustratedProblemPreview(entry.mode, entry.problem)}
+                                                    className="mt-3 w-full rounded-lg border border-cyan-400/70 bg-cyan-950 px-3 py-2 text-xs font-black text-cyan-100 hover:bg-cyan-900"
+                                                >
+                                                    この問題を試す
+                                                </button>
+                                            </article>
+                                        ))}
+                                    </div>
 
-                                                <label className="mt-4 flex flex-col gap-1 text-[10px] font-bold text-gray-400">
-                                                    試す問題
-                                                    <select
-                                                        value={selectedIndex}
-                                                        onChange={(event) => setIllustratedProblemSelections(prev => ({
-                                                            ...prev,
-                                                            [group.asset]: Number(event.target.value),
-                                                        }))}
-                                                        className="min-w-0 rounded-lg border border-teal-700 bg-slate-950 px-3 py-2 text-xs font-bold text-white"
-                                                    >
-                                                        {group.problems.map((entry, index) => (
-                                                            <option key={`${entry.key}-${entry.mode}`} value={index}>
-                                                                {index + 1}. {entry.problem.question}
-                                                            </option>
-                                                        ))}
-                                                    </select>
-                                                </label>
+                                    {visibleIllustratedProblemEntries.length === 0 && (
+                                        <div className="mt-3 rounded-lg border border-slate-700 bg-black/30 p-5 text-center text-xs font-bold text-slate-400">
+                                            条件に一致するイラスト問題はありません。
+                                        </div>
+                                    )}
 
-                                                <div className="mt-3 rounded-lg border border-slate-800 bg-black/35 p-3">
-                                                    <div className="whitespace-pre-wrap text-xs font-bold leading-relaxed text-white">{selectedEntry.problem.question}</div>
-                                                    <div className="mt-2 text-[11px] font-black text-lime-300">答え: {selectedEntry.problem.answer}</div>
-                                                </div>
+                                    <div className="mt-4 flex flex-wrap items-center justify-between gap-2 text-[10px] font-black text-slate-400">
+                                        <span>
+                                            {filteredIllustratedProblemEntries.length === 0
+                                                ? '0問'
+                                                : `${illustratedProblemPageIndex * ILLUSTRATED_PROBLEM_DEBUG_PAGE_SIZE + 1}–${Math.min((illustratedProblemPageIndex + 1) * ILLUSTRATED_PROBLEM_DEBUG_PAGE_SIZE, filteredIllustratedProblemEntries.length)} / ${filteredIllustratedProblemEntries.length}問`}
+                                        </span>
+                                        <div className="flex gap-2">
+                                            <button
+                                                type="button"
+                                                disabled={illustratedProblemPageIndex === 0}
+                                                onClick={() => setIllustratedProblemPage(current => Math.max(0, current - 1))}
+                                                className="rounded border border-slate-600 bg-slate-800 px-3 py-1.5 text-slate-100 enabled:hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-40"
+                                            >
+                                                ← 前へ
+                                            </button>
+                                            <span className="rounded border border-slate-700 bg-black/30 px-3 py-1.5 text-cyan-200">
+                                                {illustratedProblemPageIndex + 1} / {illustratedProblemPageCount}
+                                            </span>
+                                            <button
+                                                type="button"
+                                                disabled={illustratedProblemPageIndex >= illustratedProblemPageCount - 1}
+                                                onClick={() => setIllustratedProblemPage(current => Math.min(illustratedProblemPageCount - 1, current + 1))}
+                                                className="rounded border border-slate-600 bg-slate-800 px-3 py-1.5 text-slate-100 enabled:hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-40"
+                                            >
+                                                次へ →
+                                            </button>
+                                        </div>
+                                    </div>
+                                </section>
 
-                                                <div className="mt-3 grid grid-cols-2 gap-2">
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => onStartIllustratedProblemPreview(selectedEntry.mode, selectedEntry.problem)}
-                                                        className="rounded-lg border border-teal-300 bg-teal-600 px-3 py-2 text-xs font-black text-white hover:bg-teal-500"
-                                                    >
-                                                        この問題を試す
-                                                    </button>
-                                                    <button
-                                                        type="button"
-                                                        onClick={() => {
-                                                            const nextIndex = Math.floor(Math.random() * group.problems.length);
-                                                            const nextEntry = group.problems[nextIndex] ?? group.problems[0];
-                                                            setIllustratedProblemSelections(prev => ({ ...prev, [group.asset]: nextIndex }));
-                                                            onStartIllustratedProblemPreview(nextEntry.mode, nextEntry.problem);
-                                                        }}
-                                                        className="rounded-lg border border-cyan-400/70 bg-cyan-950 px-3 py-2 text-xs font-black text-cyan-100 hover:bg-cyan-900"
-                                                    >
-                                                        ランダムで試す
-                                                    </button>
-                                                </div>
-                                            </section>
-                                        );
-                                    })}
-                                </div>
                             </div>
                         )}
 

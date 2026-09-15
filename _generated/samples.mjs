@@ -1,0 +1,3 @@
+import { createServer } from 'vite';
+const server=await createServer({server:{middlewareMode:true},appType:'custom',logLevel:'error'});
+try{const {SUBJECT_DATA}=await server.ssrLoadModule('/src/data/subjectData.ts'); const modes=['LIFE_1_U01','SCIENCE_3_U01','SCIENCE_4_U01','SCIENCE_5_U01','SCIENCE_6_U01','SCIENCE_7_U01','SCIENCE_8_U01','SCIENCE_9_U01','SOCIAL_3_U01','SOCIAL_6_U01','ENGLISH_G3_U03','ENGLISH_G7_U01','KOKUGO_G4_U01','MATH_G3_U01','NATIVE_SCIENCE_G4']; for(const m of modes){const ps=SUBJECT_DATA[m]||[]; console.log('\n### '+m+' '+ps.length); for(const p of ps.slice(0,8)) console.log(JSON.stringify(p));}}finally{await server.close();}

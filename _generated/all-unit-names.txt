@@ -1,0 +1,657 @@
+
+## 算数・数学（単元） (116)
+小1 / かずとすうじ（10までの かず）	MATH_G1_U01
+小1 / いくつといくつ	MATH_G1_U02
+小1 / かたちあそび	MATH_G1_U03
+小1 / なんばんめ	MATH_G1_U04
+小1 / あわせていくつ（たしざん）	MATH_G1_U05
+小1 / ふえるといくつ（たしざん）	MATH_G1_U06
+小1 / のこりはいくつ（ひきざん）	MATH_G1_U07
+小1 / ちがいはいくつ（ひきざん）	MATH_G1_U08
+小1 / 20までのかず	MATH_G1_U09
+小1 / なんじ（とけい）	MATH_G1_U10
+小1 / ながさくらべ	MATH_G1_U11
+小1 / かさくらべ	MATH_G1_U12
+小1 / えぐらふ	MATH_G1_U13
+小1 / ひょう	MATH_G1_U14
+小1 / さんかくとしかく	MATH_G1_U15
+小1 / かたちづくり	MATH_G1_U16
+小1 / 3つのかずのけいさん	MATH_G1_U17
+小1 / ぶんしょうだい	MATH_G1_U18
+小2 / 表 と グラフ	MATH_G2_U01
+小2 / たし算（2けた＋2けた）	MATH_G2_U02
+小2 / ひき算（2けた−2けた）	MATH_G2_U03
+小2 / 長さ（ものさし）	MATH_G2_U04
+小2 / 100までの 数	MATH_G2_U05
+小2 / かさ（リットル・デシリットル）	MATH_G2_U06
+小2 / 時こく と 時かん	MATH_G2_U07
+小2 / 3けたの 数	MATH_G2_U08
+小2 / かけ算（かけ算のいみ）	MATH_G2_U09
+小2 / かけ算（九九）	MATH_G2_U10
+小2 / はこの 形	MATH_G2_U11
+小2 / ぶんしょうだい	MATH_G2_U12
+小3 / 表 と グラフ	MATH_G3_U01
+小3 / 大きい 数（1000より大きい数）	MATH_G3_U02
+小3 / たし算（3けた・4けた）	MATH_G3_U03
+小3 / ひき算（3けた・4けた）	MATH_G3_U04
+小3 / 時こく と 時かん	MATH_G3_U05
+小3 / 長さ（km と m）	MATH_G3_U06
+小3 / かけ算（2けた×1けた など）	MATH_G3_U07
+小3 / 円 と きゅう	MATH_G3_U08
+小3 / わり算（わり算のいみ）	MATH_G3_U09
+小3 / わり算（あまりのある計算）	MATH_G3_U10
+小3 / 重さ（g と kg）	MATH_G3_U11
+小3 / 小数	MATH_G3_U12
+小3 / 分数	MATH_G3_U13
+小3 / □をつかった 式	MATH_G3_U14
+小4 / 大きい 数（1おくまでの数）	MATH_G4_U01
+小4 / わり算（2けたでわる計算）	MATH_G4_U02
+小4 / 折れ線グラフ	MATH_G4_U03
+小4 / 角	MATH_G4_U04
+小4 / そろばん	MATH_G4_U05
+小4 / 小数	MATH_G4_U06
+小4 / 小数の たし算 と ひき算	MATH_G4_U07
+小4 / 面せき	MATH_G4_U08
+小4 / がい数	MATH_G4_U09
+小4 / 式 と 計算の じゅんじょ	MATH_G4_U10
+小4 / 分数	MATH_G4_U11
+小4 / 分数の たし算 と ひき算	MATH_G4_U12
+小4 / 直方体 と 立方体	MATH_G4_U13
+小4 / 変わり方	MATH_G4_U14
+小4 / 調べたことを 表 や グラフ にまとめる	MATH_G4_U15
+小5 / 整数 と 小数	MATH_G5_U01
+小5 / 体積	MATH_G5_U02
+小5 / 小数の かけ算	MATH_G5_U03
+小5 / 小数の わり算	MATH_G5_U04
+小5 / 合同な 図形	MATH_G5_U05
+小5 / 分数 と 小数・整数	MATH_G5_U06
+小5 / 分数の たし算 と ひき算	MATH_G5_U07
+小5 / 平均	MATH_G5_U08
+小5 / 単位量あたりの 大きさ	MATH_G5_U09
+小5 / 速さ	MATH_G5_U10
+小5 / 比例	MATH_G5_U11
+小5 / 円 と 正多角形	MATH_G5_U12
+小5 / 角柱 と 円柱	MATH_G5_U13
+小5 / 割合	MATH_G5_U14
+小5 / 帯グラフ と 円グラフ	MATH_G5_U15
+小6 / 対称な 図形	MATH_G6_U01
+小6 / 文字 と 式	MATH_G6_U02
+小6 / 分数の かけ算	MATH_G6_U03
+小6 / 分数の わり算	MATH_G6_U04
+小6 / 比 と その 利用	MATH_G6_U05
+小6 / 比例 と 反比例	MATH_G6_U06
+小6 / 拡大図 と 縮図	MATH_G6_U07
+小6 / 円の 面積	MATH_G6_U08
+小6 / 角柱 と 円柱の 体積	MATH_G6_U09
+小6 / およその 面積 と 体積	MATH_G6_U10
+小6 / 場合の 数	MATH_G6_U11
+小6 / 資料の 調べ方	MATH_G6_U12
+小6 / 算数の まとめ	MATH_G6_U13
+中1 / 正の数 と 負の数	MATH_G7_U01
+中1 / 正負の数の 加法 と 減法	MATH_G7_U02
+中1 / 正負の数の 乗法 と 除法	MATH_G7_U03
+中1 / 文字式	MATH_G7_U04
+中1 / 文字式の 計算	MATH_G7_U05
+中1 / 一次方程式	MATH_G7_U06
+中1 / 一次方程式の 利用	MATH_G7_U07
+中1 / 比例 と 反比例	MATH_G7_U08
+中1 / 平面図形	MATH_G7_U09
+中1 / 空間図形	MATH_G7_U10
+中1 / 資料の 整理 と 活用	MATH_G7_U11
+中2 / 式の計算	MATH_G8_U01
+中2 / 連立方程式	MATH_G8_U02
+中2 / 連立方程式の 利用	MATH_G8_U03
+中2 / 一次関数	MATH_G8_U04
+中2 / 図形の 性質	MATH_G8_U05
+中2 / 図形の 合同	MATH_G8_U06
+中2 / 三角形 と 四角形	MATH_G8_U07
+中2 / 確率	MATH_G8_U08
+中2 / データの 分析	MATH_G8_U09
+中3 / 式の 展開 と 因数分解	MATH_G9_U01
+中3 / 平方根	MATH_G9_U02
+中3 / 二次方程式	MATH_G9_U03
+中3 / 二次方程式の 利用	MATH_G9_U04
+中3 / 関数 y=ax²	MATH_G9_U05
+中3 / 相似な 図形	MATH_G9_U06
+中3 / 三平方の 定理	MATH_G9_U07
+中3 / 円の 性質	MATH_G9_U08
+中3 / 標本調査	MATH_G9_U09
+
+## 国語（単元） (99)
+小1 / ひらがな	KOKUGO_G1_U01
+小1 / ことばあつめ	KOKUGO_G1_U02
+小1 / のばすおん（ー）	KOKUGO_G1_U03
+小1 / ちいさい「っ」	KOKUGO_G1_U04
+小1 / 「は・を・へ」のつかいかた	KOKUGO_G1_U05
+小1 / かたかな	KOKUGO_G1_U06
+小1 / おはなしをよむ	KOKUGO_G1_U07
+小1 / せつめいぶんをよむ	KOKUGO_G1_U08
+小1 / ばめんをそうぞうしてよむ	KOKUGO_G1_U09
+小1 / たいせつなところをみつけてよむ	KOKUGO_G1_U10
+小1 / ぶんをかく	KOKUGO_G1_U11
+小1 / かんたんなにっき	KOKUGO_G1_U12
+小1 / おはなしをつくる	KOKUGO_G1_U13
+小1 / はなしをきく	KOKUGO_G1_U14
+小1 / じぶんのことをはなす	KOKUGO_G1_U15
+小1 / みんなのまえではなす	KOKUGO_G1_U16
+小2 / かたかなのことば	KOKUGO_G2_U01
+小2 / 主語 と 述語	KOKUGO_G2_U02
+小2 / 文のきまり	KOKUGO_G2_U03
+小2 / 日記を書く	KOKUGO_G2_U04
+小2 / せつめい文を読む	KOKUGO_G2_U05
+小2 / 物語を読む	KOKUGO_G2_U06
+小2 / 大事なことを見つける	KOKUGO_G2_U07
+小2 / 手紙を書く	KOKUGO_G2_U08
+小2 / 作文を書く	KOKUGO_G2_U09
+小2 / 話を聞く	KOKUGO_G2_U10
+小2 / 順序よく話す	KOKUGO_G2_U11
+小3 / 漢字の読み書き	KOKUGO_G3_U01
+小3 / 国語辞典の使い方	KOKUGO_G3_U02
+小3 / 段落	KOKUGO_G3_U03
+小3 / 物語文の読み取り	KOKUGO_G3_U04
+小3 / 説明文の読み取り	KOKUGO_G3_U05
+小3 / 要点をまとめる	KOKUGO_G3_U06
+小3 / 日記・作文	KOKUGO_G3_U07
+小3 / 手紙の書き方	KOKUGO_G3_U08
+小3 / 話し合い	KOKUGO_G3_U09
+小4 / 漢字の使い方	KOKUGO_G4_U01
+小4 / 熟語	KOKUGO_G4_U02
+小4 / 国語辞典・漢字辞典	KOKUGO_G4_U03
+小4 / 段落と要旨	KOKUGO_G4_U04
+小4 / 物語文の読み取り	KOKUGO_G4_U05
+小4 / 説明文の読み取り	KOKUGO_G4_U06
+小4 / 要約	KOKUGO_G4_U07
+小4 / 意見文を書く	KOKUGO_G4_U08
+小4 / 話し合いと発表	KOKUGO_G4_U09
+小5 / 漢字の意味と使い分け	KOKUGO_G5_U01
+小5 / 敬語	KOKUGO_G5_U02
+小5 / 物語文の読み取り	KOKUGO_G5_U03
+小5 / 説明文の読み取り	KOKUGO_G5_U04
+小5 / 要約と要旨	KOKUGO_G5_U05
+小5 / 意見文を書く	KOKUGO_G5_U06
+小5 / 報告文を書く	KOKUGO_G5_U07
+小5 / 討論	KOKUGO_G5_U08
+小5 / スピーチ	KOKUGO_G5_U09
+小6 / 漢字のまとめ	KOKUGO_G6_U01
+小6 / 熟語と語句	KOKUGO_G6_U02
+小6 / 物語文の読み取り	KOKUGO_G6_U03
+小6 / 説明文の読み取り	KOKUGO_G6_U04
+小6 / 要旨と要約	KOKUGO_G6_U05
+小6 / 意見文を書く	KOKUGO_G6_U06
+小6 / 提案文を書く	KOKUGO_G6_U07
+小6 / 討論	KOKUGO_G6_U08
+小6 / スピーチ	KOKUGO_G6_U09
+小6 / 卒業文集	KOKUGO_G6_U10
+中1 / 物語文の読み取り	KOKUGO_G7_U01
+中1 / 説明文の読み取り	KOKUGO_G7_U02
+中1 / 詩の読み取り	KOKUGO_G7_U03
+中1 / 古典（古文の基礎）	KOKUGO_G7_U04
+中1 / 漢文の基礎	KOKUGO_G7_U05
+中1 / 文の成分（主語・述語など）	KOKUGO_G7_U06
+中1 / 品詞	KOKUGO_G7_U07
+中1 / 漢字の読み書き	KOKUGO_G7_U08
+中1 / 要約	KOKUGO_G7_U09
+中1 / 意見文	KOKUGO_G7_U10
+中1 / スピーチ	KOKUGO_G7_U11
+中1 / 話し合い	KOKUGO_G7_U12
+中2 / 物語文の読み取り	KOKUGO_G8_U01
+中2 / 説明文の読み取り	KOKUGO_G8_U02
+中2 / 詩・短歌・俳句	KOKUGO_G8_U03
+中2 / 古文（物語・随筆）	KOKUGO_G8_U04
+中2 / 漢文（訓読・故事成語）	KOKUGO_G8_U05
+中2 / 文法（品詞・活用）	KOKUGO_G8_U06
+中2 / 漢字の読み書き	KOKUGO_G8_U07
+中2 / 要約	KOKUGO_G8_U08
+中2 / 意見文	KOKUGO_G8_U09
+中2 / 発表	KOKUGO_G8_U10
+中2 / 討論	KOKUGO_G8_U11
+中3 / 物語文の読み取り	KOKUGO_G9_U01
+中3 / 説明文の読み取り	KOKUGO_G9_U02
+中3 / 詩・短歌・俳句	KOKUGO_G9_U03
+中3 / 古文（古典文学）	KOKUGO_G9_U04
+中3 / 漢文（名文・思想）	KOKUGO_G9_U05
+中3 / 文法（文の構造）	KOKUGO_G9_U06
+中3 / 漢字の読み書き	KOKUGO_G9_U07
+中3 / 要約	KOKUGO_G9_U08
+中3 / 論説文を書く	KOKUGO_G9_U09
+中3 / スピーチ	KOKUGO_G9_U10
+中3 / 討論	KOKUGO_G9_U11
+中3 / 卒業論文・発表	KOKUGO_G9_U12
+
+## 英語（単元） (106)
+小3 / あいさつ	ENGLISH_G3_U01
+小3 / じこしょうかい	ENGLISH_G3_U02
+小3 / すきなもの	ENGLISH_G3_U03
+小3 / かぞく	ENGLISH_G3_U04
+小3 / いろ	ENGLISH_G3_U05
+小3 / かず（1〜20）	ENGLISH_G3_U06
+小3 / どうぶつ	ENGLISH_G3_U07
+小3 / くだもの・たべもの	ENGLISH_G3_U08
+小3 / きぶん	ENGLISH_G3_U09
+小3 / からだのぶぶん	ENGLISH_G3_U10
+小3 / リスニング総仕上げ	ENGLISH_G3_U11
+小3 / 発声総仕上げ	ENGLISH_G3_U12
+小3 / 復唱問題総仕上げ	ENGLISH_G3_U13
+小3 / 応答問題総仕上げ	ENGLISH_G3_U14
+小3 / 英単語総合	ENGLISH_G3_WORDS
+小4 / あいさつと会話	ENGLISH_G4_U01
+小4 / すきな教科	ENGLISH_G4_U02
+小4 / 一日の生活	ENGLISH_G4_U03
+小4 / 天気	ENGLISH_G4_U04
+小4 / 時こく	ENGLISH_G4_U05
+小4 / 文ぼうぐ	ENGLISH_G4_U06
+小4 / 場所	ENGLISH_G4_U07
+小4 / 学校の中	ENGLISH_G4_U08
+小4 / すきな食べ物	ENGLISH_G4_U09
+小4 / 日本の文化しょうかい	ENGLISH_G4_U10
+小4 / リスニング総仕上げ	ENGLISH_G4_U11
+小4 / 発声総仕上げ	ENGLISH_G4_U12
+小4 / 復唱問題総仕上げ	ENGLISH_G4_U13
+小4 / 応答問題総仕上げ	ENGLISH_G4_U14
+小4 / 英単語総合	ENGLISH_G4_WORDS
+小5 / アルファベット	ENGLISH_G5_U01
+小5 / 自己紹介	ENGLISH_G5_U02
+小5 / 家族	ENGLISH_G5_U03
+小5 / 誕生日	ENGLISH_G5_U04
+小5 / 好きなもの	ENGLISH_G5_U05
+小5 / 学校生活	ENGLISH_G5_U06
+小5 / 曜日	ENGLISH_G5_U07
+小5 / 時こく	ENGLISH_G5_U08
+小5 / できること（can）	ENGLISH_G5_U09
+小5 / 行きたい場所	ENGLISH_G5_U10
+小5 / リスニング総仕上げ	ENGLISH_G5_U11
+小5 / 発声総仕上げ	ENGLISH_G5_U12
+小5 / 復唱問題総仕上げ	ENGLISH_G5_U13
+小5 / 応答問題総仕上げ	ENGLISH_G5_U14
+小5 / 英単語総合	ENGLISH_G5_WORDS
+小6 / 自己紹介	ENGLISH_G6_U01
+小6 / 将来の夢	ENGLISH_G6_U02
+小6 / 日常生活	ENGLISH_G6_U03
+小6 / 日本文化紹介	ENGLISH_G6_U04
+小6 / 行きたい国	ENGLISH_G6_U05
+小6 / 思い出	ENGLISH_G6_U06
+小6 / 過去の出来事	ENGLISH_G6_U07
+小6 / 好きなもの	ENGLISH_G6_U08
+小6 / 世界の文化	ENGLISH_G6_U09
+小6 / 将来の計画	ENGLISH_G6_U10
+小6 / リスニング総仕上げ	ENGLISH_G6_U11
+小6 / 発声総仕上げ	ENGLISH_G6_U12
+小6 / 復唱問題総仕上げ	ENGLISH_G6_U13
+小6 / 応答問題総仕上げ	ENGLISH_G6_U14
+小6 / 英単語総合	ENGLISH_G6_WORDS
+中1 / アルファベット	ENGLISH_G7_U01
+中1 / be動詞	ENGLISH_G7_U02
+中1 / 一般動詞	ENGLISH_G7_U03
+中1 / 疑問文	ENGLISH_G7_U04
+中1 / 否定文	ENGLISH_G7_U05
+中1 / 命令文	ENGLISH_G7_U06
+中1 / can	ENGLISH_G7_U07
+中1 / 現在進行形	ENGLISH_G7_U08
+中1 / 三人称単数	ENGLISH_G7_U09
+中1 / 前置詞	ENGLISH_G7_U10
+中1 / 複数形	ENGLISH_G7_U11
+中1 / 代名詞	ENGLISH_G7_U12
+中1 / リスニング総仕上げ	ENGLISH_G7_U13
+中1 / 発声総仕上げ	ENGLISH_G7_U14
+中1 / 復唱問題総仕上げ	ENGLISH_G7_U15
+中1 / 応答問題総仕上げ	ENGLISH_G7_U16
+中1 / 英単語総合	ENGLISH_G7_WORDS
+中2 / 過去形	ENGLISH_G8_U01
+中2 / 過去進行形	ENGLISH_G8_U02
+中2 / 未来表現（will / be going to）	ENGLISH_G8_U03
+中2 / 助動詞（must / have to / may など）	ENGLISH_G8_U04
+中2 / 不定詞	ENGLISH_G8_U05
+中2 / 動名詞	ENGLISH_G8_U06
+中2 / 接続詞	ENGLISH_G8_U07
+中2 / 比較（比較級・最上級）	ENGLISH_G8_U08
+中2 / 受動態	ENGLISH_G8_U09
+中2 / リスニング総仕上げ	ENGLISH_G8_U10
+中2 / 発声総仕上げ	ENGLISH_G8_U11
+中2 / 復唱問題総仕上げ	ENGLISH_G8_U12
+中2 / 応答問題総仕上げ	ENGLISH_G8_U13
+中2 / 英単語総合	ENGLISH_G8_WORDS
+中3 / 現在完了	ENGLISH_G9_U01
+中3 / 現在完了進行形	ENGLISH_G9_U02
+中3 / 関係代名詞	ENGLISH_G9_U03
+中3 / 間接疑問文	ENGLISH_G9_U04
+中3 / 仮定法	ENGLISH_G9_U05
+中3 / 分詞	ENGLISH_G9_U06
+中3 / 比較の応用	ENGLISH_G9_U07
+中3 / 長文読解	ENGLISH_G9_U08
+中3 / 英作文	ENGLISH_G9_U09
+中3 / スピーチ	ENGLISH_G9_U10
+中3 / リスニング総仕上げ	ENGLISH_G9_U11
+中3 / 発声総仕上げ	ENGLISH_G9_U12
+中3 / 復唱問題総仕上げ	ENGLISH_G9_U13
+中3 / 応答問題総仕上げ	ENGLISH_G9_U14
+中3 / 英単語総合	ENGLISH_G9_WORDS
+
+## 生活（単元） (14)
+小1 / がっこうたんけん	LIFE_1_U01
+小1 / がっこうのひととなかよし	LIFE_1_U02
+小1 / きせつとなかよし	LIFE_1_U03
+小1 / いきものとなかよし	LIFE_1_U04
+小1 / はなややさいをそだてよう	LIFE_1_U05
+小1 / みぢかなものあそび	LIFE_1_U06
+小1 / じぶんのせいちょう	LIFE_1_U07
+小2 / まちたんけん	LIFE_2_U01
+小2 / まちのひととなかよし	LIFE_2_U02
+小2 / きせつのしぜん	LIFE_2_U03
+小2 / やさいをそだてよう	LIFE_2_U04
+小2 / いきもののかんさつ	LIFE_2_U05
+小2 / おもちゃづくり	LIFE_2_U06
+小2 / じぶんのせいちょう	LIFE_2_U07
+
+## 理科（単元） (72)
+小3 / しぜんのかんさつ	SCIENCE_3_U01
+小3 / こん虫のせい長	SCIENCE_3_U02
+小3 / しょくぶつのせい長	SCIENCE_3_U03
+小3 / 太陽と地面	SCIENCE_3_U04
+小3 / 光	SCIENCE_3_U05
+小3 / 音	SCIENCE_3_U06
+小3 / 風とゴムのはたらき	SCIENCE_3_U07
+小3 / 電気の通り道	SCIENCE_3_U08
+小3 / ものの重さ	SCIENCE_3_U09
+小3 / じしゃく	SCIENCE_3_U10
+小4 / 天気と気温	SCIENCE_4_U01
+小4 / 季節と生き物	SCIENCE_4_U02
+小4 / 星と空	SCIENCE_4_U03
+小4 / 月の動き	SCIENCE_4_U04
+小4 / 電気のはたらき	SCIENCE_4_U05
+小4 / 空気と水	SCIENCE_4_U06
+小4 / とじこめた空気	SCIENCE_4_U07
+小4 / 水のすがた	SCIENCE_4_U08
+小4 / もののあたたまり方	SCIENCE_4_U09
+小5 / 天気の変化	SCIENCE_5_U01
+小5 / 台風と天気	SCIENCE_5_U02
+小5 / 植物の発芽と成長	SCIENCE_5_U03
+小5 / 花から実へ	SCIENCE_5_U04
+小5 / メダカのたんじょう	SCIENCE_5_U05
+小5 / 人のたんじょう	SCIENCE_5_U06
+小5 / 流れる水のはたらき	SCIENCE_5_U07
+小5 / 物のとけ方	SCIENCE_5_U08
+小5 / 電磁石	SCIENCE_5_U09
+小6 / 物の燃え方	SCIENCE_6_U01
+小6 / 植物のつくりとはたらき	SCIENCE_6_U02
+小6 / 人の体のつくりとはたらき	SCIENCE_6_U03
+小6 / 月と太陽	SCIENCE_6_U04
+小6 / てこ	SCIENCE_6_U05
+小6 / 水よう液	SCIENCE_6_U06
+小6 / 電気の利用	SCIENCE_6_U07
+小6 / 土地のつくり	SCIENCE_6_U08
+小6 / 生き物と環境	SCIENCE_6_U09
+中1 / 生物の観察と分類	SCIENCE_7_U01
+中1 / 植物の体のつくりとはたらき	SCIENCE_7_U02
+中1 / 動物の体のつくりとはたらき	SCIENCE_7_U03
+中1 / 身のまわりの物質	SCIENCE_7_U04
+中1 / 気体の性質	SCIENCE_7_U05
+中1 / 水溶液の性質	SCIENCE_7_U06
+中1 / 光	SCIENCE_7_U07
+中1 / 音	SCIENCE_7_U08
+中1 / 力と圧力	SCIENCE_7_U09
+中1 / 大地の変化	SCIENCE_7_U10
+中1 / 火山	SCIENCE_7_U11
+中1 / 地震	SCIENCE_7_U12
+中1 / 地層	SCIENCE_7_U13
+中2 / 生物と細胞	SCIENCE_8_U01
+中2 / 植物の体のつくりとはたらき	SCIENCE_8_U02
+中2 / 動物の体のつくりとはたらき	SCIENCE_8_U03
+中2 / 化学変化	SCIENCE_8_U04
+中2 / 原子と分子	SCIENCE_8_U05
+中2 / 化学変化と質量	SCIENCE_8_U06
+中2 / 電流	SCIENCE_8_U07
+中2 / 電流と磁界	SCIENCE_8_U08
+中2 / 天気と気象	SCIENCE_8_U09
+中2 / 前線と天気	SCIENCE_8_U10
+中3 / 生物の成長と生殖	SCIENCE_9_U01
+中3 / 遺伝	SCIENCE_9_U02
+中3 / 生物のつながり	SCIENCE_9_U03
+中3 / 化学変化とイオン	SCIENCE_9_U04
+中3 / 酸とアルカリ	SCIENCE_9_U05
+中3 / 中和	SCIENCE_9_U06
+中3 / 力の合成と分解	SCIENCE_9_U07
+中3 / 運動	SCIENCE_9_U08
+中3 / 仕事とエネルギー	SCIENCE_9_U09
+中3 / 地球と宇宙	SCIENCE_9_U10
+中3 / 太陽系	SCIENCE_9_U11
+中3 / 星の動き	SCIENCE_9_U12
+
+## 社会（単元） (84)
+小3 / わたしたちの町	SOCIAL_3_U01
+小3 / 地図の見方	SOCIAL_3_U02
+小3 / 土地のようす	SOCIAL_3_U03
+小3 / 町ではたらく人	SOCIAL_3_U04
+小3 / 商店のしごと	SOCIAL_3_U05
+小3 / 農家のしごと	SOCIAL_3_U06
+小3 / 工場のしごと	SOCIAL_3_U07
+小3 / 交通のはたらき	SOCIAL_3_U08
+小3 / 市のようすのうつりかわり	SOCIAL_3_U09
+小4 / 都道府県	SOCIAL_4_U01
+小4 / 日本の地形	SOCIAL_4_U02
+小4 / 気候	SOCIAL_4_U03
+小4 / 水のしごと	SOCIAL_4_U04
+小4 / ごみのしょり	SOCIAL_4_U05
+小4 / 災害とくらし	SOCIAL_4_U06
+小4 / 地図帳の使い方	SOCIAL_4_U07
+小4 / 県のようす	SOCIAL_4_U08
+小4 / 伝統文化	SOCIAL_4_U09
+小5 / 日本の国土	SOCIAL_5_U01
+小5 / 日本の気候	SOCIAL_5_U02
+小5 / 農業	SOCIAL_5_U03
+小5 / 水産業	SOCIAL_5_U04
+小5 / 工業	SOCIAL_5_U05
+小5 / 貿易	SOCIAL_5_U06
+小5 / 情報産業	SOCIAL_5_U07
+小5 / 環境問題	SOCIAL_5_U08
+小5 / 食料問題	SOCIAL_5_U09
+小6 / 日本の歴史（縄文・弥生）	SOCIAL_6_U01
+小6 / 古墳時代	SOCIAL_6_U02
+小6 / 奈良時代	SOCIAL_6_U03
+小6 / 平安時代	SOCIAL_6_U04
+小6 / 鎌倉時代	SOCIAL_6_U05
+小6 / 室町時代	SOCIAL_6_U06
+小6 / 安土桃山時代	SOCIAL_6_U07
+小6 / 江戸時代	SOCIAL_6_U08
+小6 / 明治時代	SOCIAL_6_U09
+小6 / 大正時代	SOCIAL_6_U10
+小6 / 昭和時代	SOCIAL_6_U11
+小6 / 日本国憲法	SOCIAL_6_U12
+小6 / 国会	SOCIAL_6_U13
+小6 / 内閣	SOCIAL_6_U14
+小6 / 裁判所	SOCIAL_6_U15
+小6 / 地方自治	SOCIAL_6_U16
+小6 / 国際社会	SOCIAL_6_U17
+中1 / 世界の地域	SOCIAL_7_U01
+中1 / 世界の気候	SOCIAL_7_U02
+中1 / 世界の人口	SOCIAL_7_U03
+中1 / 世界の産業	SOCIAL_7_U04
+中1 / アジア	SOCIAL_7_U05
+中1 / ヨーロッパ	SOCIAL_7_U06
+中1 / アフリカ	SOCIAL_7_U07
+中1 / 北アメリカ	SOCIAL_7_U08
+中1 / 南アメリカ	SOCIAL_7_U09
+中1 / オセアニア	SOCIAL_7_U10
+中1 / 日本の地域	SOCIAL_7_U11
+中1 / 日本の自然	SOCIAL_7_U12
+中1 / 日本の人口	SOCIAL_7_U13
+中1 / 日本の産業	SOCIAL_7_U14
+中2 / 古代文明	SOCIAL_8_U01
+中2 / ギリシャ・ローマ	SOCIAL_8_U02
+中2 / 日本の古代	SOCIAL_8_U03
+中2 / 日本の中世	SOCIAL_8_U04
+中2 / 日本の近世	SOCIAL_8_U05
+中2 / 欧米の近代化	SOCIAL_8_U06
+中2 / 明治維新	SOCIAL_8_U07
+中2 / 日本の近代化	SOCIAL_8_U08
+中2 / 世界大戦	SOCIAL_8_U09
+中2 / 現代の日本	SOCIAL_8_U10
+中3 / 現代社会	SOCIAL_9_U01
+中3 / 人権	SOCIAL_9_U02
+中3 / 民主主義	SOCIAL_9_U03
+中3 / 日本国憲法	SOCIAL_9_U04
+中3 / 国会	SOCIAL_9_U05
+中3 / 内閣	SOCIAL_9_U06
+中3 / 裁判所	SOCIAL_9_U07
+中3 / 地方自治	SOCIAL_9_U08
+中3 / 選挙	SOCIAL_9_U09
+中3 / 税金	SOCIAL_9_U10
+中3 / 市場経済	SOCIAL_9_U11
+中3 / 金融	SOCIAL_9_U12
+中3 / 労働	SOCIAL_9_U13
+中3 / 社会保障	SOCIAL_9_U14
+中3 / 国際社会	SOCIAL_9_U15
+中3 / 国際協力	SOCIAL_9_U16
+
+## 英語圏 ELA（単元） (32)
+小1 / ELA G1: Phonics and Sight Words	NATIVE_ELA_G1
+小1 / ELA G1: Long Vowels	NATIVE_ELA_G1_LONG_VOWELS
+小1 / ELA G1: Sight Words in Sentences	NATIVE_ELA_G1_SIGHT_WORDS
+小1 / ELA G1: Sentences and Story Details	NATIVE_ELA_G1_SENTENCES
+小2 / ELA G2: Sentences and Main Idea	NATIVE_ELA_G2
+小2 / ELA G2: Prefixes and Suffixes	NATIVE_ELA_G2_PREFIX_SUFFIX
+小2 / ELA G2: Reading Details and Vocabulary	NATIVE_ELA_G2_READING
+小2 / ELA G2: Reading Fluency and Expression	NATIVE_ELA_G2_FLUENCY
+小3 / ELA G3: Reading and Grammar	NATIVE_ELA_G3
+小3 / ELA G3: Paragraphs and Word Study	NATIVE_ELA_G3_WRITING
+小3 / ELA G3: Inference and Theme	NATIVE_ELA_G3_INFERENCE
+小3 / ELA G3: Vocabulary and Context Clues	NATIVE_ELA_G3_VOCAB
+小4 / ELA G4: Inference and Theme	NATIVE_ELA_G4_INFERENCE
+小4 / ELA G4: Text Structure and Vocabulary	NATIVE_ELA_G4_STRUCTURE
+小4 / ELA G4: Point of View	NATIVE_ELA_G4_POINT_OF_VIEW
+小4 / ELA G4: Figurative Language	NATIVE_ELA_G4_FIGURATIVE
+小5 / ELA G5: Text Analysis	NATIVE_ELA_G5_ANALYSIS
+小5 / ELA G5: Opinion and Informative Writing	NATIVE_ELA_G5_WRITING
+小5 / ELA G5: Text Evidence	NATIVE_ELA_G5_TEXT_EVIDENCE
+小5 / ELA G5: Compare and Contrast	NATIVE_ELA_G5_COMPARE
+小6 / ELA G6: Argument and Evidence	NATIVE_ELA_G6_ARGUMENT
+小6 / ELA G6: Literature and Figurative Language	NATIVE_ELA_G6_LITERATURE
+小6 / ELA G6: Academic Vocabulary	NATIVE_ELA_G6_VOCAB
+小6 / ELA G6: Informational Text	NATIVE_ELA_G6_INFORMATIONAL
+中1 / ELA G7: Literary Analysis	NATIVE_ELA_G7_ANALYSIS
+中1 / ELA G7: Research and Media Literacy	NATIVE_ELA_G7_RESEARCH
+中1 / ELA G7: Argument and Claims	NATIVE_ELA_G7_ARGUMENT
+中1 / ELA G7: Word Study and Tone	NATIVE_ELA_G7_VOCAB
+中2 / ELA G8: Rhetoric and Author Craft	NATIVE_ELA_G8_RHETORIC
+中2 / ELA G8: Argument Writing and Source Use	NATIVE_ELA_G8_ARGUMENT
+中2 / ELA G8: Media Literacy	NATIVE_ELA_G8_MEDIA
+中2 / ELA G8: Literature and Theme	NATIVE_ELA_G8_LITERATURE
+
+## 英語圏 Math（単元） (32)
+小1 / Math G1: Number Sense	NATIVE_MATH_G1
+小1 / Math G1: Addition and Subtraction within 20	NATIVE_MATH_G1_ADD_SUB_20
+小1 / Math G1: Shapes, Time, and Money	NATIVE_MATH_G1_SHAPES
+小1 / Math G1: Compare Numbers and Data	NATIVE_MATH_G1_COMPARE
+小2 / Math G2: Word Problems	NATIVE_MATH_G2
+小2 / Math G2: Place Value	NATIVE_MATH_G2_PLACE_VALUE
+小2 / Math G2: Place Value and Measurement	NATIVE_MATH_G2_MEASURE
+小2 / Math G2: Addition and Subtraction within 100	NATIVE_MATH_G2_ADD_SUB_100
+小3 / Math G3: Multiplication and Fractions	NATIVE_MATH_G3
+小3 / Math G3: Fractions on Shapes and Number Lines	NATIVE_MATH_G3_FRACTIONS
+小3 / Math G3: Geometry and Data	NATIVE_MATH_G3_GEOMETRY
+小3 / Math G3: Division and Equal Groups	NATIVE_MATH_G3_DIVISION
+小4 / Math G4: Multi-Digit Operations	NATIVE_MATH_G4_OPERATIONS
+小4 / Math G4: Fractions and Decimals	NATIVE_MATH_G4_FRACTIONS
+小4 / Math G4: Decimals and Measurement	NATIVE_MATH_G4_DECIMALS
+小4 / Math G4: Geometry, Lines, and Angles	NATIVE_MATH_G4_GEOMETRY
+小5 / Math G5: Decimals and Volume	NATIVE_MATH_G5_DECIMALS
+小5 / Math G5: Fraction Operations	NATIVE_MATH_G5_FRACTIONS
+小5 / Math G5: Coordinate Plane	NATIVE_MATH_G5_COORDINATE
+小5 / Math G5: Numerical Expressions	NATIVE_MATH_G5_EXPRESSIONS
+小6 / Math G6: Ratios and Rates	NATIVE_MATH_G6_RATIOS
+小6 / Math G6: Expressions and Equations	NATIVE_MATH_G6_EXPRESSIONS
+小6 / Math G6: Integers and Rational Numbers	NATIVE_MATH_G6_INTEGERS
+小6 / Math G6: Statistics and Data	NATIVE_MATH_G6_STATS
+中1 / Math G7: Proportional Relationships	NATIVE_MATH_G7_PROPORTIONS
+中1 / Math G7: Statistics and Probability	NATIVE_MATH_G7_STATS
+中1 / Math G7: Integers and Rational Numbers	NATIVE_MATH_G7_INTEGERS
+中1 / Math G7: Expressions and Equations	NATIVE_MATH_G7_EXPRESSIONS
+中2 / Math G8: Linear Equations	NATIVE_MATH_G8_LINEAR
+中2 / Math G8: Geometry and Functions	NATIVE_MATH_G8_GEOMETRY
+中2 / Math G8: Pythagorean Theorem	NATIVE_MATH_G8_PYTHAGOREAN
+中2 / Math G8: Transformations and Congruence	NATIVE_MATH_G8_TRANSFORMATIONS
+
+## 英語圏 Science（単元） (24)
+小1 / Science G1: Weather and Living Things	NATIVE_SCIENCE_G1
+小1 / Science G1: Weather and Seasons	NATIVE_SCIENCE_G1_WEATHER
+小1 / Science G1: Light, Sound, and Materials	NATIVE_SCIENCE_G1_MATERIALS
+小2 / Science G2: Plants, Animals, and Matter	NATIVE_SCIENCE_G2
+小2 / Science G2: Solids, Liquids, and Changes	NATIVE_SCIENCE_G2_MATTER
+小2 / Science G2: Land, Water, and Weather	NATIVE_SCIENCE_G2_EARTH
+小3 / Science G3: Habitats and Forces	NATIVE_SCIENCE_G3
+小3 / Science G3: Life Cycles and Earth Systems	NATIVE_SCIENCE_G3_SYSTEMS
+小3 / Science G3: Weather and Climate	NATIVE_SCIENCE_G3_WEATHER_CLIMATE
+小4 / Science G4: Energy and Waves	NATIVE_SCIENCE_G4_ENERGY
+小4 / Science G4: Earth Changes	NATIVE_SCIENCE_G4_EARTH
+小4 / Science G4: Organisms and Environments	NATIVE_SCIENCE_G4_ORGANISMS
+小5 / Science G5: Matter and Mixtures	NATIVE_SCIENCE_G5_MATTER
+小5 / Science G5: Ecosystems and Space	NATIVE_SCIENCE_G5_ECOSYSTEMS
+小5 / Science G5: Engineering Design	NATIVE_SCIENCE_G5_ENGINEERING
+小6 / Science G6: Cells and Body Systems	NATIVE_SCIENCE_G6_CELLS
+小6 / Science G6: Earth Science	NATIVE_SCIENCE_G6_EARTH
+小6 / Science G6: Weather and Climate	NATIVE_SCIENCE_G6_WEATHER_CLIMATE
+中1 / Science G7: Genetics and Ecology	NATIVE_SCIENCE_G7_LIFE
+中1 / Science G7: Physical Science	NATIVE_SCIENCE_G7_PHYSICAL
+中1 / Science G7: Energy Transfer	NATIVE_SCIENCE_G7_ENERGY_TRANSFER
+中2 / Science G8: Chemistry Foundations	NATIVE_SCIENCE_G8_CHEMISTRY
+中2 / Science G8: Space and Earth History	NATIVE_SCIENCE_G8_SPACE
+中2 / Science G8: Forces and Motion	NATIVE_SCIENCE_G8_FORCES_MOTION
+
+## 英語圏 Social Studies（単元） (32)
+小1 / Social Studies G1: Community	NATIVE_SOCIAL_G1
+小1 / Social Studies G1: Needs, Wants, and Jobs	NATIVE_SOCIAL_G1_NEEDS_WANTS
+小1 / Social Studies G1: Rules and Citizenship	NATIVE_SOCIAL_G1_CITIZENSHIP
+小1 / Social Studies G1: Digital Kindness and Safety	NATIVE_SOCIAL_G1_DIGITAL_KINDNESS
+小2 / Social Studies G2: Maps and Citizenship	NATIVE_SOCIAL_G2
+小2 / Social Studies G2: Map Skills	NATIVE_SOCIAL_G2_MAP_SKILLS
+小2 / Social Studies G2: Culture and History Sources	NATIVE_SOCIAL_G2_HISTORY
+小2 / Social Studies G2: Healthy Routines and Choices	NATIVE_SOCIAL_G2_HEALTHY_ROUTINES
+小3 / Social Studies G3: Regions and History	NATIVE_SOCIAL_G3
+小3 / Social Studies G3: Government and Economy	NATIVE_SOCIAL_G3_GOVERNMENT
+小3 / Social Studies G3: Map Skills and Regions	NATIVE_SOCIAL_G3_MAP_SKILLS
+小3 / Social Studies G3: Digital Citizenship	NATIVE_SOCIAL_G3_DIGITAL_CITIZENSHIP
+小4 / Social Studies G4: Geography and Regions	NATIVE_SOCIAL_G4_GEOGRAPHY
+小4 / Social Studies G4: State and Local History	NATIVE_SOCIAL_G4_HISTORY
+小4 / Social Studies G4: Economics and Resources	NATIVE_SOCIAL_G4_ECONOMICS
+小4 / Social Studies G4: Study Skills and Goals	NATIVE_SOCIAL_G4_STUDY_SKILLS
+小5 / Social Studies G5: U.S. History Foundations	NATIVE_SOCIAL_G5_US_HISTORY
+小5 / Social Studies G5: Civics and Economics	NATIVE_SOCIAL_G5_CIVICS
+小5 / Social Studies G5: Geography of the Americas	NATIVE_SOCIAL_G5_GEOGRAPHY
+小5 / Social Studies G5: Financial Literacy Basics	NATIVE_SOCIAL_G5_FINANCIAL_LITERACY
+小6 / Social Studies G6: World Geography	NATIVE_SOCIAL_G6_WORLD_GEO
+小6 / Social Studies G6: Ancient Civilizations	NATIVE_SOCIAL_G6_ANCIENT
+小6 / Social Studies G6: World Cultures	NATIVE_SOCIAL_G6_WORLD_CULTURES
+小6 / Social Studies G6: Online Safety and Privacy	NATIVE_SOCIAL_G6_ONLINE_PRIVACY
+中1 / Social Studies G7: Medieval and Early Modern World	NATIVE_SOCIAL_G7_MEDIEVAL
+中1 / Social Studies G7: Civics and Global Issues	NATIVE_SOCIAL_G7_CIVICS
+中1 / Social Studies G7: Economics and Trade	NATIVE_SOCIAL_G7_ECONOMICS
+中1 / Social Studies G7: Media Balance and Well-Being	NATIVE_SOCIAL_G7_MEDIA_BALANCE
+中2 / Social Studies G8: U.S. History and Constitution	NATIVE_SOCIAL_G8_US_HISTORY
+中2 / Social Studies G8: Government, Rights, and Media	NATIVE_SOCIAL_G8_CIVICS
+中2 / Social Studies G8: Media Literacy and Public Issues	NATIVE_SOCIAL_G8_MEDIA_LITERACY
+中2 / Social Studies G8: Career Awareness and Problem Solving	NATIVE_SOCIAL_G8_CAREER_AWARENESS
+
+## 英語圏 Japanese（単元） (24)
+小1 / Japanese G1: Hiragana and First Words	NATIVE_JAPANESE_G1
+小1 / Japanese G1: Greetings and Classroom Phrases	NATIVE_JAPANESE_G1_GREETINGS
+小1 / Japanese G1: Numbers and Colors	NATIVE_JAPANESE_G1_NUMBERS
+小2 / Japanese G2: Katakana and Loanwords	NATIVE_JAPANESE_G2
+小2 / Japanese G2: Simple Sentences	NATIVE_JAPANESE_G2_SENTENCES
+小2 / Japanese G2: Family and Daily Words	NATIVE_JAPANESE_G2_FAMILY
+小3 / Japanese G3: Particles and Questions	NATIVE_JAPANESE_G3
+小3 / Japanese G3: First Kanji and Radicals	NATIVE_JAPANESE_G3_KANJI
+小3 / Japanese G3: Time and Schedules	NATIVE_JAPANESE_G3_TIME
+小4 / Japanese G4: Verbs and Polite Forms	NATIVE_JAPANESE_G4_VERBS
+小4 / Japanese G4: Short Reading Passages	NATIVE_JAPANESE_G4_READING
+小4 / Japanese G4: Shopping and Menus	NATIVE_JAPANESE_G4_SHOPPING
+小5 / Japanese G5: Adjectives and Descriptions	NATIVE_JAPANESE_G5_ADJECTIVES
+小5 / Japanese G5: Daily Life Communication	NATIVE_JAPANESE_G5_DAILY_LIFE
+小5 / Japanese G5: School Life	NATIVE_JAPANESE_G5_SCHOOL_LIFE
+小6 / Japanese G6: Connectors and Longer Sentences	NATIVE_JAPANESE_G6_CONNECTORS
+小6 / Japanese G6: Culture and Practical Reading	NATIVE_JAPANESE_G6_CULTURE
+小6 / Japanese G6: Travel and Directions	NATIVE_JAPANESE_G6_TRAVEL
+中1 / Japanese G7: Conversation and Opinions	NATIVE_JAPANESE_G7_CONVERSATION
+中1 / Japanese G7: Reading with Kanji	NATIVE_JAPANESE_G7_READING
+中1 / Japanese G7: Media and Messages	NATIVE_JAPANESE_G7_MEDIA
+中2 / Japanese G8: Grammar Review and Nuance	NATIVE_JAPANESE_G8_GRAMMAR
+中2 / Japanese G8: Media, Signs, and Everyday Texts	NATIVE_JAPANESE_G8_MEDIA
+中2 / Japanese G8: Culture Project and Presentation	NATIVE_JAPANESE_G8_CULTURE_PROJECT

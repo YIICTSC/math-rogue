@@ -11,6 +11,7 @@ import UnitBoardModal from './UnitBoardModal';
 import { claimUnitBoardFirstDisplay } from '../utils/unitBoardSeen';
 import { trans } from '../utils/textUtils';
 import { assignmentFilterForMode } from '../utils/assignmentRangeFilters';
+import { getProblemCycleScope, selectProblemsForCycle } from '../utils/problemCycle';
 
 interface MathProblem {
   question: string;
@@ -89,7 +90,10 @@ const MathChallengeScreen: React.FC<MathChallengeScreenProps> = ({ onComplete, m
     // チャレンジモードなら1問、通常なら3問生成
     const count = isChallenge ? 1 : 3;
 
-    for (let i = 0; i < count; i++) {
+    // Generate a larger candidate set first so the cycle can avoid already
+    // mastered expressions even though these arithmetic modes are generated.
+    const candidateCount = Math.max(96, count * 32);
+    for (let i = 0; i < candidateCount; i++) {
       let a, b, answer, operator;
       let type = safeMode;
       
@@ -185,7 +189,14 @@ const MathChallengeScreen: React.FC<MathChallengeScreenProps> = ({ onComplete, m
         problemKey: `${type}:${a}${operator}${b}`,
       });
     }
-    setProblems(generatedProblems);
+    const cycleScope = getProblemCycleScope(String(safeMode), rangeFilter);
+    const cycleProblems = selectProblemsForCycle(
+      generatedProblems,
+      count,
+      () => cycleScope,
+      (problem) => problem.problemKey || `${safeMode}:${problem.question}`,
+    );
+    setProblems(cycleProblems);
   }, [mode, debugSkip, isChallenge, reviewProblem, assignmentUnits]);
 
   useEffect(() => {
@@ -221,6 +232,10 @@ const MathChallengeScreen: React.FC<MathChallengeScreenProps> = ({ onComplete, m
       setCorrectCount(prev => prev + 1);
       setFeedback('CORRECT');
       audioService.playSound('correct');
+      if (!problems[currentProblemIndex].isAssignmentRetry) {
+        const cycleScope = getProblemCycleScope(String(mode), assignmentFilterForMode(assignmentUnits, mode));
+        storageService.markProblemCycleCorrect(cycleScope, answerResult.problemKey);
+      }
       const currentTotal = storageService.getMathCorrectCount();
       storageService.saveMathCorrectCount(currentTotal + 1);
     } else {

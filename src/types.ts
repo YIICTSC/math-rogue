@@ -920,8 +920,6 @@ export interface AssignmentCustomProblem {
   question: string;
   answer: string;
   options: string[];
-  imageUrl?: string;
-  imageAlt?: string;
   timeLimitSeconds?: number | null;
 }
 

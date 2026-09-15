@@ -62,7 +62,7 @@ export const KANJI_G4_DATA: KanjiProblem[] = [
     { question: "角度", answer: "かくど", options: ["かくど", "つのたび", "がくど", "かど"], hint: "角の開きの大きさ。" },
     { question: "観客", answer: "かんきゃく", options: ["かんきゃく", "みまね", "がんきゃく", "げんきゃく"], hint: "見に来ている人たちのこと。" },
     { question: "関係", answer: "かんけい", options: ["かんけい", "せきけい", "げんけい", "かんじ"], hint: "物事のつながりのこと。" },
-    { question: "学級", answer: "がっきゅう", options: ["がっきゅう", "まなびなみ", "加学きゅう", "加学きゅう"], hint: "クラスのこと。" },
+    { question: "学級", answer: "がっきゅう", options: ["がっきゅう", "まなびなみ", "がくきゅう", "がっきゅ"], hint: "クラスのこと。" },
     { question: "救急車", answer: "きゅうきゅうしゃ", options: ["きゅうきゅうしゃ", "すくいしゃ", "きゅきゅしゃ", "きゅうしゃ"], hint: "急病の人を運ぶ車。" },
     { question: "季節", answer: "きせつ", options: ["きせつ", "ときふし", "ぎせつ", "きせっつ"], hint: "春夏秋冬のこと。" },
     { question: "紀元前", answer: "きげんぜん", options: ["きげんぜん", "しるしもとまえ", "ぎげんぜん", "きげんまえ"], hint: "キリストが生まれる前の時代。" },

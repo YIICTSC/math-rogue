@@ -8,6 +8,7 @@ import { ENGLISH_DATA, EnglishProblem } from '../data/englishData';
 import RewardHintBanner from './RewardHintBanner';
 import { trans } from '../utils/textUtils';
 import { assignmentFilterForMode } from '../utils/assignmentRangeFilters';
+import { getProblemCycleScope, selectProblemsForCycle } from '../utils/problemCycle';
 
 interface EnglishChallengeScreenProps {
   onComplete: (correctCount: number) => void;
@@ -122,9 +123,14 @@ const EnglishChallengeScreen: React.FC<EnglishChallengeScreenProps> = ({ onCompl
     if (rangeFilter?.kind === 'english_words' && rangeFilter.values.includes('listening')) setVoiceEnabled(true);
     
     const count = isChallenge ? 1 : 3;
-    const shuffled = [...problemPool]
-        .sort(() => Math.random() - 0.5)
-        .slice(0, count)
+    const cycleScope = getProblemCycleScope(String(mode), rangeFilter);
+    const cyclePool = selectProblemsForCycle(
+        problemPool,
+        count,
+        () => cycleScope,
+        (problem) => `${mode}:${problem.question}`,
+    );
+    const shuffled = cyclePool
         .map(p => {
             // インデックス0を正解として保持
             const correctAnswer = p.options[0];
@@ -183,6 +189,10 @@ const EnglishChallengeScreen: React.FC<EnglishChallengeScreenProps> = ({ onCompl
       setCorrectCount(prev => prev + 1);
       setFeedback('CORRECT');
       audioService.playSound('correct');
+      if (!problems[currentProblemIndex].isAssignmentRetry) {
+        const cycleScope = getProblemCycleScope(String(mode), assignmentFilterForMode(assignmentUnits, mode));
+        storageService.markProblemCycleCorrect(cycleScope, answerResult.problemKey);
+      }
       const currentTotal = storageService.getMathCorrectCount();
       storageService.saveMathCorrectCount(currentTotal + 1);
 

@@ -1,0 +1,4925 @@
+[
+  {
+    "mode": "ENGLISH_G3_1",
+    "asset": "sprites/dog/dog_r1c1.webp",
+    "q": "「I like dogs.」の意味として正しいものを1つ選ぼう。",
+    "a": "わたしは いぬが すきです。",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G3_1",
+    "asset": "sprites/dog/dog_r1c1.webp",
+    "q": "「わたしは いぬが すきです。」を英語で表すとどれ？",
+    "a": "I like dogs.",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G3_1",
+    "asset": "sprites/dog/dog_r1c1.webp",
+    "q": "わたしは いぬが すきです。 に当てはまる英語は？",
+    "a": "I like dogs.",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G3_1",
+    "asset": "sprites/dog/dog_r1c1.webp",
+    "q": "わたしは いぬが すきです。 に当てはまる英語は？",
+    "a": "I like dogs.",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G3_1",
+    "asset": "sprites/dog/dog_r1c1.webp",
+    "q": "わたしは いぬが すきです。 に当てはまる英語は？",
+    "a": "I like dogs.",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G3_1",
+    "asset": "sprites/dog/dog_r1c1.webp",
+    "q": "わたしは いぬが すきです。 に当てはまる英語は？",
+    "a": "I like dogs.",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G3_1",
+    "asset": "sprites/dog/dog_r1c1.webp",
+    "q": "わたしは いぬが すきです。 に当てはまる英語は？",
+    "a": "I like dogs.",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G3_1",
+    "asset": "sprites/dog/dog_r1c1.webp",
+    "q": "「I like dogs.」は 日本語で なんという？",
+    "a": "わたしは いぬが すきです。",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G3_1",
+    "asset": "sprites/dog/dog_r1c1.webp",
+    "q": "「わたしは いぬが すきです。」は 英語で なんという？",
+    "a": "I like dogs.",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G3_1",
+    "asset": "sprites/dog/dog_r1c1.webp",
+    "q": "「I like dogs.」の意味として正しいものを1つ選ぼう。",
+    "a": "わたしは 犬が すきです。",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G3_1",
+    "asset": "sprites/dog/dog_r1c1.webp",
+    "q": "「わたしは 犬が すきです。」を英語で表すとどれ？",
+    "a": "I like dogs.",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G3_1",
+    "asset": "sprites/apple/apple_r1c1.webp",
+    "q": "「I like apples.」の意味として正しいものを1つ選ぼう。",
+    "a": "わたしは りんごが すきです。",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G3_1",
+    "asset": "sprites/apple/apple_r1c1.webp",
+    "q": "「わたしは りんごが すきです。」を英語で表すとどれ？",
+    "a": "I like apples.",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G3_1",
+    "asset": "sprites/dog/dog_r1c1.webp",
+    "q": "わたしは 犬が すきです。 に当てはまる英語は？",
+    "a": "I like dogs.",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G3_1",
+    "asset": "sprites/apple/apple_r1c1.webp",
+    "q": "わたしは りんごが すきです。 に当てはまる英語は？",
+    "a": "I like apples.",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G3_1",
+    "asset": "sprites/dog/dog_r1c1.webp",
+    "q": "わたしは 犬が すきです。 に当てはまる英語は？",
+    "a": "I like dogs.",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G3_1",
+    "asset": "sprites/apple/apple_r1c1.webp",
+    "q": "わたしは りんごが すきです。 に当てはまる英語は？",
+    "a": "I like apples.",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G3_1",
+    "asset": "sprites/dog/dog_r1c1.webp",
+    "q": "わたしは 犬が すきです。 に当てはまる英語は？",
+    "a": "I like dogs.",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G3_1",
+    "asset": "sprites/apple/apple_r1c1.webp",
+    "q": "わたしは りんごが すきです。 に当てはまる英語は？",
+    "a": "I like apples.",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G3_1",
+    "asset": "sprites/dog/dog_r1c1.webp",
+    "q": "わたしは 犬が すきです。 に当てはまる英語は？",
+    "a": "I like dogs.",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G3_1",
+    "asset": "sprites/apple/apple_r1c1.webp",
+    "q": "わたしは りんごが すきです。 に当てはまる英語は？",
+    "a": "I like apples.",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G3_1",
+    "asset": "sprites/dog/dog_r1c1.webp",
+    "q": "わたしは 犬が すきです。 に当てはまる英語は？",
+    "a": "I like dogs.",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G3_1",
+    "asset": "sprites/apple/apple_r1c1.webp",
+    "q": "わたしは りんごが すきです。 に当てはまる英語は？",
+    "a": "I like apples.",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G3_1",
+    "asset": "sprites/dog/dog_r1c1.webp",
+    "q": "「I like dogs.」は 日本語で なんという？",
+    "a": "わたしは 犬が すきです。",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G3_1",
+    "asset": "sprites/dog/dog_r1c1.webp",
+    "q": "「わたしは 犬が すきです。」は 英語で なんという？",
+    "a": "I like dogs.",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G3_1",
+    "asset": "sprites/apple/apple_r1c1.webp",
+    "q": "「I like apples.」は 日本語で なんという？",
+    "a": "わたしは りんごが すきです。",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G3_1",
+    "asset": "sprites/apple/apple_r1c1.webp",
+    "q": "「わたしは りんごが すきです。」は 英語で なんという？",
+    "a": "I like apples.",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G3_1",
+    "asset": "sprites/dog/dog_r1c1.webp",
+    "q": "「I like dogs.」は 日本語で なんという？",
+    "a": "わたしは 犬が すきです。",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G3_1",
+    "asset": "sprites/dog/dog_r1c1.webp",
+    "q": "「わたしは 犬が すきです。」は 英語で なんという？",
+    "a": "I like dogs.",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G3_1",
+    "asset": "sprites/dog/dog_r1c1.webp",
+    "q": "「dog」の意味として正しいものを1つ選ぼう。",
+    "a": "いぬ",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G3_1",
+    "asset": "sprites/dog/dog_r1c1.webp",
+    "q": "「いぬ」を英語で表すとどれ？",
+    "a": "dog",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G3_1",
+    "asset": "sprites/dog/dog_r1c1.webp",
+    "q": "いぬ に当てはまる英語は？",
+    "a": "dog",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G3_1",
+    "asset": "sprites/dog/dog_r1c1.webp",
+    "q": "いぬ に当てはまる英語は？",
+    "a": "dog",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G3_1",
+    "asset": "sprites/dog/dog_r1c1.webp",
+    "q": "いぬ に当てはまる英語は？",
+    "a": "dog",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G3_1",
+    "asset": "sprites/dog/dog_r1c1.webp",
+    "q": "「dog」は 日本語で なんという？",
+    "a": "いぬ",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G3_1",
+    "asset": "sprites/dog/dog_r1c1.webp",
+    "q": "「いぬ」は 英語で なんという？",
+    "a": "dog",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G3_1",
+    "asset": "sprites/apple/apple_r1c1.webp",
+    "q": "「apple」の意味として正しいものを1つ選ぼう。",
+    "a": "りんご",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G3_1",
+    "asset": "sprites/apple/apple_r1c1.webp",
+    "q": "「りんご」を英語で表すとどれ？",
+    "a": "apple",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G3_1",
+    "asset": "sprites/apple/apple_r1c1.webp",
+    "q": "りんご に当てはまる英語は？",
+    "a": "apple",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G3_1",
+    "asset": "sprites/apple/apple_r1c1.webp",
+    "q": "りんご に当てはまる英語は？",
+    "a": "apple",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G3_1",
+    "asset": "sprites/apple/apple_r1c1.webp",
+    "q": "「apple」は 日本語で なんという？",
+    "a": "りんご",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G3_1",
+    "asset": "sprites/apple/apple_r1c1.webp",
+    "q": "「りんご」は 英語で なんという？",
+    "a": "apple",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G3_U02",
+    "asset": "sprites/dog/dog_r1c1.webp",
+    "q": "「I like dogs.」の意味として正しいものを1つ選ぼう。",
+    "a": "わたしは いぬが すきです。",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G3_U02",
+    "asset": "sprites/dog/dog_r1c1.webp",
+    "q": "「わたしは いぬが すきです。」を英語で表すとどれ？",
+    "a": "I like dogs.",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G3_U02",
+    "asset": "sprites/dog/dog_r1c1.webp",
+    "q": "わたしは いぬが すきです。 に当てはまる英語は？",
+    "a": "I like dogs.",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G3_U02",
+    "asset": "sprites/dog/dog_r1c1.webp",
+    "q": "わたしは いぬが すきです。 に当てはまる英語は？",
+    "a": "I like dogs.",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G3_U02",
+    "asset": "sprites/dog/dog_r1c1.webp",
+    "q": "わたしは いぬが すきです。 に当てはまる英語は？",
+    "a": "I like dogs.",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G3_U02",
+    "asset": "sprites/dog/dog_r1c1.webp",
+    "q": "わたしは いぬが すきです。 に当てはまる英語は？",
+    "a": "I like dogs.",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G3_U02",
+    "asset": "sprites/dog/dog_r1c1.webp",
+    "q": "わたしは いぬが すきです。 に当てはまる英語は？",
+    "a": "I like dogs.",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G3_U02",
+    "asset": "sprites/dog/dog_r1c1.webp",
+    "q": "「I like dogs.」は 日本語で なんという？",
+    "a": "わたしは いぬが すきです。",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G3_U02",
+    "asset": "sprites/dog/dog_r1c1.webp",
+    "q": "「わたしは いぬが すきです。」は 英語で なんという？",
+    "a": "I like dogs.",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G3_U03",
+    "asset": "sprites/dog/dog_r1c1.webp",
+    "q": "「I like dogs.」の意味として正しいものを1つ選ぼう。",
+    "a": "わたしは 犬が すきです。",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G3_U03",
+    "asset": "sprites/dog/dog_r1c1.webp",
+    "q": "「わたしは 犬が すきです。」を英語で表すとどれ？",
+    "a": "I like dogs.",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G3_U03",
+    "asset": "sprites/apple/apple_r1c1.webp",
+    "q": "「I like apples.」の意味として正しいものを1つ選ぼう。",
+    "a": "わたしは りんごが すきです。",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G3_U03",
+    "asset": "sprites/apple/apple_r1c1.webp",
+    "q": "「わたしは りんごが すきです。」を英語で表すとどれ？",
+    "a": "I like apples.",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G3_U03",
+    "asset": "sprites/dog/dog_r1c1.webp",
+    "q": "わたしは 犬が すきです。 に当てはまる英語は？",
+    "a": "I like dogs.",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G3_U03",
+    "asset": "sprites/apple/apple_r1c1.webp",
+    "q": "わたしは りんごが すきです。 に当てはまる英語は？",
+    "a": "I like apples.",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G3_U03",
+    "asset": "sprites/dog/dog_r1c1.webp",
+    "q": "わたしは 犬が すきです。 に当てはまる英語は？",
+    "a": "I like dogs.",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G3_U03",
+    "asset": "sprites/apple/apple_r1c1.webp",
+    "q": "わたしは りんごが すきです。 に当てはまる英語は？",
+    "a": "I like apples.",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G3_U03",
+    "asset": "sprites/dog/dog_r1c1.webp",
+    "q": "わたしは 犬が すきです。 に当てはまる英語は？",
+    "a": "I like dogs.",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G3_U03",
+    "asset": "sprites/apple/apple_r1c1.webp",
+    "q": "わたしは りんごが すきです。 に当てはまる英語は？",
+    "a": "I like apples.",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G3_U03",
+    "asset": "sprites/dog/dog_r1c1.webp",
+    "q": "わたしは 犬が すきです。 に当てはまる英語は？",
+    "a": "I like dogs.",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G3_U03",
+    "asset": "sprites/apple/apple_r1c1.webp",
+    "q": "わたしは りんごが すきです。 に当てはまる英語は？",
+    "a": "I like apples.",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G3_U03",
+    "asset": "sprites/dog/dog_r1c1.webp",
+    "q": "わたしは 犬が すきです。 に当てはまる英語は？",
+    "a": "I like dogs.",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G3_U03",
+    "asset": "sprites/apple/apple_r1c1.webp",
+    "q": "わたしは りんごが すきです。 に当てはまる英語は？",
+    "a": "I like apples.",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G3_U03",
+    "asset": "sprites/dog/dog_r1c1.webp",
+    "q": "「I like dogs.」は 日本語で なんという？",
+    "a": "わたしは 犬が すきです。",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G3_U03",
+    "asset": "sprites/dog/dog_r1c1.webp",
+    "q": "「わたしは 犬が すきです。」は 英語で なんという？",
+    "a": "I like dogs.",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G3_U03",
+    "asset": "sprites/apple/apple_r1c1.webp",
+    "q": "「I like apples.」は 日本語で なんという？",
+    "a": "わたしは りんごが すきです。",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G3_U03",
+    "asset": "sprites/apple/apple_r1c1.webp",
+    "q": "「わたしは りんごが すきです。」は 英語で なんという？",
+    "a": "I like apples.",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G3_U03",
+    "asset": "sprites/dog/dog_r1c1.webp",
+    "q": "「I like dogs.」は 日本語で なんという？",
+    "a": "わたしは 犬が すきです。",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G3_U03",
+    "asset": "sprites/dog/dog_r1c1.webp",
+    "q": "「わたしは 犬が すきです。」は 英語で なんという？",
+    "a": "I like dogs.",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G3_U07",
+    "asset": "sprites/dog/dog_r1c1.webp",
+    "q": "「dog」の意味として正しいものを1つ選ぼう。",
+    "a": "いぬ",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G3_U07",
+    "asset": "sprites/dog/dog_r1c1.webp",
+    "q": "「いぬ」を英語で表すとどれ？",
+    "a": "dog",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G3_U07",
+    "asset": "sprites/dog/dog_r1c1.webp",
+    "q": "いぬ に当てはまる英語は？",
+    "a": "dog",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G3_U07",
+    "asset": "sprites/dog/dog_r1c1.webp",
+    "q": "いぬ に当てはまる英語は？",
+    "a": "dog",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G3_U07",
+    "asset": "sprites/dog/dog_r1c1.webp",
+    "q": "いぬ に当てはまる英語は？",
+    "a": "dog",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G3_U07",
+    "asset": "sprites/dog/dog_r1c1.webp",
+    "q": "「dog」は 日本語で なんという？",
+    "a": "いぬ",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G3_U07",
+    "asset": "sprites/dog/dog_r1c1.webp",
+    "q": "「いぬ」は 英語で なんという？",
+    "a": "dog",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G3_U08",
+    "asset": "sprites/apple/apple_r1c1.webp",
+    "q": "「apple」の意味として正しいものを1つ選ぼう。",
+    "a": "りんご",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G3_U08",
+    "asset": "sprites/apple/apple_r1c1.webp",
+    "q": "「りんご」を英語で表すとどれ？",
+    "a": "apple",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G3_U08",
+    "asset": "sprites/apple/apple_r1c1.webp",
+    "q": "りんご に当てはまる英語は？",
+    "a": "apple",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G3_U08",
+    "asset": "sprites/apple/apple_r1c1.webp",
+    "q": "りんご に当てはまる英語は？",
+    "a": "apple",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G3_U08",
+    "asset": "sprites/apple/apple_r1c1.webp",
+    "q": "「apple」は 日本語で なんという？",
+    "a": "りんご",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G3_U08",
+    "asset": "sprites/apple/apple_r1c1.webp",
+    "q": "「りんご」は 英語で なんという？",
+    "a": "apple",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G4_1",
+    "asset": "sprites/weather/weather_r1c1.webp",
+    "q": "「sunny」の意味として正しいものを1つ選ぼう。",
+    "a": "はれ",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G4_1",
+    "asset": "sprites/weather/weather_r1c1.webp",
+    "q": "「はれ」を英語で表すとどれ？",
+    "a": "sunny",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G4_1",
+    "asset": "sprites/weather/weather_r1c2.webp",
+    "q": "「cloudy」の意味として正しいものを1つ選ぼう。",
+    "a": "くもり",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G4_1",
+    "asset": "sprites/weather/weather_r1c2.webp",
+    "q": "「くもり」を英語で表すとどれ？",
+    "a": "cloudy",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G4_1",
+    "asset": "sprites/weather/weather_r1c3.webp",
+    "q": "「rainy」の意味として正しいものを1つ選ぼう。",
+    "a": "あめ",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G4_1",
+    "asset": "sprites/weather/weather_r1c3.webp",
+    "q": "「あめ」を英語で表すとどれ？",
+    "a": "rainy",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G4_1",
+    "asset": "sprites/weather/weather_r1c1.webp",
+    "q": "はれ に当てはまる英語は？",
+    "a": "sunny",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G4_1",
+    "asset": "sprites/weather/weather_r1c2.webp",
+    "q": "くもり に当てはまる英語は？",
+    "a": "cloudy",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G4_1",
+    "asset": "sprites/weather/weather_r1c3.webp",
+    "q": "あめ に当てはまる英語は？",
+    "a": "rainy",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G4_1",
+    "asset": "sprites/weather/weather_r1c1.webp",
+    "q": "はれ に当てはまる英語は？",
+    "a": "sunny",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G4_1",
+    "asset": "sprites/weather/weather_r1c2.webp",
+    "q": "くもり に当てはまる英語は？",
+    "a": "cloudy",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G4_1",
+    "asset": "sprites/weather/weather_r1c3.webp",
+    "q": "あめ に当てはまる英語は？",
+    "a": "rainy",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G4_1",
+    "asset": "sprites/weather/weather_r1c1.webp",
+    "q": "はれ に当てはまる英語は？",
+    "a": "sunny",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G4_1",
+    "asset": "sprites/weather/weather_r1c2.webp",
+    "q": "くもり に当てはまる英語は？",
+    "a": "cloudy",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G4_1",
+    "asset": "sprites/weather/weather_r1c3.webp",
+    "q": "あめ に当てはまる英語は？",
+    "a": "rainy",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G4_1",
+    "asset": "sprites/weather/weather_r1c1.webp",
+    "q": "はれ に当てはまる英語は？",
+    "a": "sunny",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G4_1",
+    "asset": "sprites/weather/weather_r1c2.webp",
+    "q": "くもり に当てはまる英語は？",
+    "a": "cloudy",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G4_1",
+    "asset": "sprites/weather/weather_r1c3.webp",
+    "q": "あめ に当てはまる英語は？",
+    "a": "rainy",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G4_1",
+    "asset": "sprites/weather/weather_r1c1.webp",
+    "q": "「sunny」は 日本語で なんという？",
+    "a": "はれ",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G4_1",
+    "asset": "sprites/weather/weather_r1c1.webp",
+    "q": "「はれ」は 英語で なんという？",
+    "a": "sunny",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G4_1",
+    "asset": "sprites/weather/weather_r1c2.webp",
+    "q": "「cloudy」は 日本語で なんという？",
+    "a": "くもり",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G4_1",
+    "asset": "sprites/weather/weather_r1c2.webp",
+    "q": "「くもり」は 英語で なんという？",
+    "a": "cloudy",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G4_1",
+    "asset": "sprites/weather/weather_r1c3.webp",
+    "q": "「rainy」は 日本語で なんという？",
+    "a": "あめ",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G4_1",
+    "asset": "sprites/weather/weather_r1c3.webp",
+    "q": "「あめ」は 英語で なんという？",
+    "a": "rainy",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G4_1",
+    "asset": "sprites/weather/weather_r1c1.webp",
+    "q": "「sunny」は 日本語で なんという？",
+    "a": "はれ",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G4_1",
+    "asset": "sprites/weather/weather_r1c1.webp",
+    "q": "「はれ」は 英語で なんという？",
+    "a": "sunny",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G4_1",
+    "asset": "sprites/classroom/classroom_r1c1.webp",
+    "q": "「classroom」の意味として正しいものを1つ選ぼう。",
+    "a": "教室",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G4_1",
+    "asset": "sprites/classroom/classroom_r1c1.webp",
+    "q": "「教室」を英語で表すとどれ？",
+    "a": "classroom",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G4_1",
+    "asset": "sprites/classroom/classroom_r1c1.webp",
+    "q": "教室 に当てはまる英語は？",
+    "a": "classroom",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G4_1",
+    "asset": "sprites/classroom/classroom_r1c1.webp",
+    "q": "教室 に当てはまる英語は？",
+    "a": "classroom",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G4_1",
+    "asset": "sprites/classroom/classroom_r1c1.webp",
+    "q": "教室 に当てはまる英語は？",
+    "a": "classroom",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G4_1",
+    "asset": "sprites/classroom/classroom_r1c1.webp",
+    "q": "教室 に当てはまる英語は？",
+    "a": "classroom",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G4_1",
+    "asset": "sprites/classroom/classroom_r1c1.webp",
+    "q": "教室 に当てはまる英語は？",
+    "a": "classroom",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G4_1",
+    "asset": "sprites/classroom/classroom_r1c1.webp",
+    "q": "「classroom」は 日本語で なんという？",
+    "a": "教室",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G4_1",
+    "asset": "sprites/classroom/classroom_r1c1.webp",
+    "q": "「教室」は 英語で なんという？",
+    "a": "classroom",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G4_1",
+    "asset": "sprites/classroom/classroom_r1c1.webp",
+    "q": "「classroom」は 日本語で なんという？",
+    "a": "教室",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G4_1",
+    "asset": "sprites/classroom/classroom_r1c1.webp",
+    "q": "「教室」は 英語で なんという？",
+    "a": "classroom",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G4_U04",
+    "asset": "sprites/weather/weather_r1c1.webp",
+    "q": "「sunny」の意味として正しいものを1つ選ぼう。",
+    "a": "はれ",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G4_U04",
+    "asset": "sprites/weather/weather_r1c1.webp",
+    "q": "「はれ」を英語で表すとどれ？",
+    "a": "sunny",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G4_U04",
+    "asset": "sprites/weather/weather_r1c2.webp",
+    "q": "「cloudy」の意味として正しいものを1つ選ぼう。",
+    "a": "くもり",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G4_U04",
+    "asset": "sprites/weather/weather_r1c2.webp",
+    "q": "「くもり」を英語で表すとどれ？",
+    "a": "cloudy",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G4_U04",
+    "asset": "sprites/weather/weather_r1c3.webp",
+    "q": "「rainy」の意味として正しいものを1つ選ぼう。",
+    "a": "あめ",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G4_U04",
+    "asset": "sprites/weather/weather_r1c3.webp",
+    "q": "「あめ」を英語で表すとどれ？",
+    "a": "rainy",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G4_U04",
+    "asset": "sprites/weather/weather_r1c1.webp",
+    "q": "はれ に当てはまる英語は？",
+    "a": "sunny",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G4_U04",
+    "asset": "sprites/weather/weather_r1c2.webp",
+    "q": "くもり に当てはまる英語は？",
+    "a": "cloudy",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G4_U04",
+    "asset": "sprites/weather/weather_r1c3.webp",
+    "q": "あめ に当てはまる英語は？",
+    "a": "rainy",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G4_U04",
+    "asset": "sprites/weather/weather_r1c1.webp",
+    "q": "はれ に当てはまる英語は？",
+    "a": "sunny",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G4_U04",
+    "asset": "sprites/weather/weather_r1c2.webp",
+    "q": "くもり に当てはまる英語は？",
+    "a": "cloudy",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G4_U04",
+    "asset": "sprites/weather/weather_r1c3.webp",
+    "q": "あめ に当てはまる英語は？",
+    "a": "rainy",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G4_U04",
+    "asset": "sprites/weather/weather_r1c1.webp",
+    "q": "はれ に当てはまる英語は？",
+    "a": "sunny",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G4_U04",
+    "asset": "sprites/weather/weather_r1c2.webp",
+    "q": "くもり に当てはまる英語は？",
+    "a": "cloudy",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G4_U04",
+    "asset": "sprites/weather/weather_r1c3.webp",
+    "q": "あめ に当てはまる英語は？",
+    "a": "rainy",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G4_U04",
+    "asset": "sprites/weather/weather_r1c1.webp",
+    "q": "はれ に当てはまる英語は？",
+    "a": "sunny",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G4_U04",
+    "asset": "sprites/weather/weather_r1c2.webp",
+    "q": "くもり に当てはまる英語は？",
+    "a": "cloudy",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G4_U04",
+    "asset": "sprites/weather/weather_r1c3.webp",
+    "q": "あめ に当てはまる英語は？",
+    "a": "rainy",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G4_U04",
+    "asset": "sprites/weather/weather_r1c1.webp",
+    "q": "「sunny」は 日本語で なんという？",
+    "a": "はれ",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G4_U04",
+    "asset": "sprites/weather/weather_r1c1.webp",
+    "q": "「はれ」は 英語で なんという？",
+    "a": "sunny",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G4_U04",
+    "asset": "sprites/weather/weather_r1c2.webp",
+    "q": "「cloudy」は 日本語で なんという？",
+    "a": "くもり",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G4_U04",
+    "asset": "sprites/weather/weather_r1c2.webp",
+    "q": "「くもり」は 英語で なんという？",
+    "a": "cloudy",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G4_U04",
+    "asset": "sprites/weather/weather_r1c3.webp",
+    "q": "「rainy」は 日本語で なんという？",
+    "a": "あめ",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G4_U04",
+    "asset": "sprites/weather/weather_r1c3.webp",
+    "q": "「あめ」は 英語で なんという？",
+    "a": "rainy",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G4_U04",
+    "asset": "sprites/weather/weather_r1c1.webp",
+    "q": "「sunny」は 日本語で なんという？",
+    "a": "はれ",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G4_U04",
+    "asset": "sprites/weather/weather_r1c1.webp",
+    "q": "「はれ」は 英語で なんという？",
+    "a": "sunny",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G4_U08",
+    "asset": "sprites/classroom/classroom_r1c1.webp",
+    "q": "「classroom」の意味として正しいものを1つ選ぼう。",
+    "a": "教室",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G4_U08",
+    "asset": "sprites/classroom/classroom_r1c1.webp",
+    "q": "「教室」を英語で表すとどれ？",
+    "a": "classroom",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G4_U08",
+    "asset": "sprites/classroom/classroom_r1c1.webp",
+    "q": "教室 に当てはまる英語は？",
+    "a": "classroom",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G4_U08",
+    "asset": "sprites/classroom/classroom_r1c1.webp",
+    "q": "教室 に当てはまる英語は？",
+    "a": "classroom",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G4_U08",
+    "asset": "sprites/classroom/classroom_r1c1.webp",
+    "q": "教室 に当てはまる英語は？",
+    "a": "classroom",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G4_U08",
+    "asset": "sprites/classroom/classroom_r1c1.webp",
+    "q": "教室 に当てはまる英語は？",
+    "a": "classroom",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G4_U08",
+    "asset": "sprites/classroom/classroom_r1c1.webp",
+    "q": "教室 に当てはまる英語は？",
+    "a": "classroom",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G4_U08",
+    "asset": "sprites/classroom/classroom_r1c1.webp",
+    "q": "「classroom」は 日本語で なんという？",
+    "a": "教室",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G4_U08",
+    "asset": "sprites/classroom/classroom_r1c1.webp",
+    "q": "「教室」は 英語で なんという？",
+    "a": "classroom",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G4_U08",
+    "asset": "sprites/classroom/classroom_r1c1.webp",
+    "q": "「classroom」は 日本語で なんという？",
+    "a": "教室",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G4_U08",
+    "asset": "sprites/classroom/classroom_r1c1.webp",
+    "q": "「教室」は 英語で なんという？",
+    "a": "classroom",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G3_WORDS",
+    "asset": "sprites/dog/dog_r1c1.webp",
+    "q": "「dog」は 日本語で なんという？",
+    "a": "犬",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G3_WORDS",
+    "asset": "sprites/dog/dog_r1c1.webp",
+    "q": "「犬」は 英語で なんという？",
+    "a": "dog",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G3_WORDS",
+    "asset": "sprites/apple/apple_r1c1.webp",
+    "q": "「apple」は 日本語で なんという？",
+    "a": "リンゴ",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G3_WORDS",
+    "asset": "sprites/apple/apple_r1c1.webp",
+    "q": "「リンゴ」は 英語で なんという？",
+    "a": "apple",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G4_WORDS",
+    "asset": "sprites/weather/weather_r1c1.webp",
+    "q": "「sunny」は 日本語で なんという？",
+    "a": "晴れ",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G4_WORDS",
+    "asset": "sprites/weather/weather_r1c1.webp",
+    "q": "「晴れ」は 英語で なんという？",
+    "a": "sunny",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G4_WORDS",
+    "asset": "sprites/weather/weather_r1c2.webp",
+    "q": "「cloudy」は 日本語で なんという？",
+    "a": "くもり",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G4_WORDS",
+    "asset": "sprites/weather/weather_r1c2.webp",
+    "q": "「くもり」は 英語で なんという？",
+    "a": "cloudy",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G4_WORDS",
+    "asset": "sprites/weather/weather_r1c3.webp",
+    "q": "「rainy」は 日本語で なんという？",
+    "a": "雨の",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G4_WORDS",
+    "asset": "sprites/weather/weather_r1c3.webp",
+    "q": "「雨の」は 英語で なんという？",
+    "a": "rainy",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G4_WORDS",
+    "asset": "sprites/classroom/classroom_r1c1.webp",
+    "q": "「classroom」は 日本語で なんという？",
+    "a": "教室",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "ENGLISH_G4_WORDS",
+    "asset": "sprites/classroom/classroom_r1c1.webp",
+    "q": "「教室」は 英語で なんという？",
+    "a": "classroom",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_1",
+    "asset": "sprites/plant/plant_r2c1.webp",
+    "q": "植物のからだのつくり、根、茎（くき）、あと一つは？",
+    "a": "葉",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_1",
+    "asset": "sprites/insect/insect_r1c2.webp",
+    "q": "チョウの育ち方、卵、幼虫、さなぎ、その次は？",
+    "a": "成虫",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_1",
+    "asset": "sprites/plant/plant_r5c2.webp",
+    "q": "植物が育つのに必要なものは、日光、水、あと一つは？",
+    "a": "肥料",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_1",
+    "asset": "sprites/plant/plant_r1c1.webp",
+    "q": "ホウセンカの種はどこにできる？",
+    "a": "実の中",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_1",
+    "asset": "sprites/plant/plant_r1c5.webp",
+    "q": "ひまわりの花は、どの方向を向くことが多い？",
+    "a": "太陽の方向",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_1",
+    "asset": "sprites/insect/insect_r1c2.webp",
+    "q": "モンシロチョウの幼虫が食べる葉っぱは？",
+    "a": "キャベツ",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_1",
+    "asset": "sprites/insect/insect_r1c2.webp",
+    "q": "アゲハチョウの幼虫は何の葉を食べる？",
+    "a": "ミカンやサンショウ",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_1",
+    "asset": "sprites/insect/insect_r1c1.webp",
+    "q": "カマキリのたまごはどこにある？",
+    "a": "あわのようなかたまりの中",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_1",
+    "asset": "sprites/insect/insect_r5c5.webp",
+    "q": "バッタの育ち方で「ない」のはどれ？",
+    "a": "さなぎ",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_1",
+    "asset": "sprites/insect/insect_r5c1.webp",
+    "q": "テントウムシの幼虫は何を食べる？",
+    "a": "アブラムシ",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_1",
+    "asset": "sprites/plant/plant_r1c5.webp",
+    "q": "ひまわりの種をまく時期はいつごろ？",
+    "a": "春",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_1",
+    "asset": "sprites/plant/plant_r1c2.webp",
+    "q": "ホウセンカの芽が出たときの最初の葉の名前は？",
+    "a": "子葉（しよう）",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_1",
+    "asset": "sprites/insect/insect_r1c1.webp",
+    "q": "モンシロチョウが卵を産み付ける場所は？",
+    "a": "葉の裏",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_1",
+    "asset": "sprites/plant/plant_r2c1.webp",
+    "q": "植物の根の主な役割は？",
+    "a": "水や養分を吸い上げる",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_1",
+    "asset": "sprites/insect/insect_r5c4.webp",
+    "q": "トンボの幼虫の名前は？",
+    "a": "ヤゴ",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_1",
+    "asset": "sprites/insect/insect_r1c4.webp",
+    "q": "セミが成虫になってから生きる期間はどれくらい？（地上で）",
+    "a": "1週間から1ヶ月程度",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_1",
+    "asset": "sprites/insect/insect_r1c1.webp",
+    "q": "アリの巣の中に必ず1ぴきいる、卵を産むアリは？",
+    "a": "女王アリ",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_1",
+    "asset": "sprites/plant/plant_r2c2.webp",
+    "q": "植物の茎（くき）の主な役割は？",
+    "a": "水や養分の通り道になる",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_1",
+    "asset": "sprites/plant/plant_r3c1.webp",
+    "q": "マリーゴールドの花は何色が多い？",
+    "a": "オレンジや黄色",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_1",
+    "asset": "sprites/insect/insect_r5c5.webp",
+    "q": "バッタの足で、ジャンプするために発達しているのは？",
+    "a": "後ろあし",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_1",
+    "asset": "sprites/plant/plant_r3c5.webp",
+    "q": "クワガタムシの「角（つの）」に見える部分は、実は何？",
+    "a": "あご",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_1",
+    "asset": "sprites/insect/insect_r1c1.webp",
+    "q": "モンシロチョウの卵の色は？",
+    "a": "黄色",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_1",
+    "asset": "sprites/insect/insect_r5c3.webp",
+    "q": "カブトムシが夜に集まる場所は？",
+    "a": "樹液（じゅえき）が出ている木",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_1",
+    "asset": "sprites/plant/plant_r2c3.webp",
+    "q": "植物の葉にある、筋（すじ）のような模様を何という？",
+    "a": "葉脈（ようみゃく）",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_1",
+    "asset": "sprites/plant/plant_r5c3.webp",
+    "q": "植物を観察するときに、一番ていねいに書くべきものは？",
+    "a": "スケッチ",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_1",
+    "asset": "sprites/plant/plant_r1c5.webp",
+    "q": "ひまわりの茎は、1年でどれくらい伸びる？",
+    "a": "2メートル以上",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_1",
+    "asset": "sprites/plant/plant_r3c5.webp",
+    "q": "ホウセンカの実は、熟（じゅく）すとどうなる？",
+    "a": "はじけて種を飛ばす",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_1",
+    "asset": "sprites/insect/insect_r1c2.webp",
+    "q": "カイコは何を食べて育つ？",
+    "a": "クワの葉",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_1",
+    "asset": "sprites/insect/insect_r1c4.webp",
+    "q": "昆虫の成虫の体のパーツは、いくつに分かれている？",
+    "a": "3つ",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_1",
+    "asset": "sprites/plant/plant_r2c1.webp",
+    "q": "植物の根が、ひげのようにたくさん出ているのを何という？",
+    "a": "ひげ根",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_1",
+    "asset": "sprites/plant/plant_r5c3.webp",
+    "q": "生き物を観察するとき、一番大切なことは？",
+    "a": "命を大切にすること",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_3",
+    "asset": "sprites/circuit/circuit_r1c5.webp",
+    "q": "磁石につくものはどれ？",
+    "a": "鉄の釘（くぎ）",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_3",
+    "asset": "sprites/circuit/circuit_r1c3.webp",
+    "q": "乾電池（かんでんち）に豆電球（まめでんきゅう）をつないで明かりをつけるには？",
+    "a": "輪（回路）にする",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_3",
+    "asset": "sprites/circuit/circuit_r1c2.webp",
+    "q": "導線（どうせん）のまわりを包んでいるビニールは電気を通す？",
+    "a": "通さない",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_3",
+    "asset": "sprites/circuit/circuit_r1c3.webp",
+    "q": "豆電球が光るのは、中に何が流れているから？",
+    "a": "電流（でんりゅう）",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_3",
+    "asset": "sprites/circuit/circuit_r1c3.webp",
+    "q": "乾電池の向きを逆にすると、豆電球はどうなる？",
+    "a": "変わらず光る",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_3",
+    "asset": "sprites/circuit/circuit_r2c2.webp",
+    "q": "スイッチの役割は何？",
+    "a": "回路をつないだり切ったりする",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_3",
+    "asset": "sprites/circuit/circuit_r1c3.webp",
+    "q": "豆電球の中にある、光る細い線は？",
+    "a": "フィラメント",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_3",
+    "asset": "sprites/circuit/circuit_r5c2.webp",
+    "q": "乾電池を2個、「直列（ちょくれつ）」につなぐと明るさは？",
+    "a": "とても明るくなる",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_3",
+    "asset": "sprites/circuit/circuit_r1c3.webp",
+    "q": "回路の途中で糸（いと）をつなぐと、豆電球は？",
+    "a": "消える",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_3",
+    "asset": "sprites/circuit/circuit_r2c1.webp",
+    "q": "電気回路で、電気が流れる向きは？",
+    "a": "プラスからマイナス",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_3",
+    "asset": "sprites/circuit/circuit_r2c1.webp",
+    "q": "乾電池の「＋（プラス）」と「＋」をつなぐと電気は流れる？",
+    "a": "流れない",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_3",
+    "asset": "sprites/circuit/circuit_r1c5.webp",
+    "q": "磁石が鉄を引きつけるとき、間に紙があってもつく？",
+    "a": "つく",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_3",
+    "asset": "sprites/circuit/circuit_r1c4.webp",
+    "q": "豆電球の「ソケット」の役割は？",
+    "a": "電球を固定して電気をつなぐ",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_4_1",
+    "asset": "sprites/human-body/human-body_r2c3.webp",
+    "q": "ひざやひじのように、骨と骨がつながっている部分を何という？",
+    "a": "関節（かんせつ）",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_4_1",
+    "asset": "sprites/human-body/human-body_r5c1.webp",
+    "q": "腕を曲げたとき、腕の「内側（上側）」の筋肉はどうなる？",
+    "a": "縮んで硬くなる",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_4_1",
+    "asset": "sprites/human-body/human-body_r5c1.webp",
+    "q": "腕を曲げたとき、腕の「外側（下側）」の筋肉はどうなる？",
+    "a": "伸びて柔らかくなる",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_4_1",
+    "asset": "sprites/human-body/human-body_r1c2.webp",
+    "q": "人の体の中で、脳（のう）を守っている骨は？",
+    "a": "頭の骨（頭蓋骨）",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_4_1",
+    "asset": "sprites/human-body/human-body_r1c2.webp",
+    "q": "人の体の中で、肺（はい）や心臓を守っている骨は？",
+    "a": "むねの骨（肋骨）",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_4_1",
+    "asset": "sprites/human-body/human-body_r2c3.webp",
+    "q": "関節（かんせつ）ではない場所はどこ？",
+    "a": "太ももの真ん中",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_4_1",
+    "asset": "sprites/human-body/human-body_r3c1.webp",
+    "q": "筋肉（きんにく）はどこについている？",
+    "a": "骨についている",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_4_1",
+    "asset": "sprites/human-body/human-body_r3c1.webp",
+    "q": "筋肉が骨を「押す」ことで体は動く？",
+    "a": "動かない（筋肉は引くことしかできない）",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_4_1",
+    "asset": "sprites/human-body/human-body_r1c2.webp",
+    "q": "人の背中（せなか）にある、一本につながった骨は？",
+    "a": "せぼね（脊椎）",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_4_1",
+    "asset": "sprites/human-body/human-body_r1c2.webp",
+    "q": "昆虫（こんちゅう）にも「骨」はある？",
+    "a": "ない（外側に硬い殻がある）",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_4_1",
+    "asset": "sprites/human-body/human-body_r5c1.webp",
+    "q": "腕を伸ばしたとき、内側の筋肉はどうなる？",
+    "a": "伸びてゆるむ",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_4_1",
+    "asset": "sprites/human-body/human-body_r3c1.webp",
+    "q": "人の体で、筋肉が1つだけで骨を曲げることはできる？",
+    "a": "できない（2つ以上の筋肉がペアで働く）",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_4_1",
+    "asset": "sprites/human-body/human-body_r1c2.webp",
+    "q": "骨（ほね）の主な役割は、体を支えることと、あと一つは？",
+    "a": "中にある大切な内臓を守ること",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_4_1",
+    "asset": "sprites/human-body/human-body_r2c3.webp",
+    "q": "人の関節で、一番ぐるぐる自由に回せるのはどこ？",
+    "a": "肩（かた）",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_4_1",
+    "asset": "sprites/human-body/human-body_r3c1.webp",
+    "q": "筋肉が骨を動かすとき、筋肉はどのように変化する？",
+    "a": "太く、短くなる（縮む）",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_4_1",
+    "asset": "sprites/human-body/human-body_r2c3.webp",
+    "q": "人の体で、骨と骨が関節でつながっていない場所は？",
+    "a": "耳（みみ）",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_4_1",
+    "asset": "sprites/human-body/human-body_r3c1.webp",
+    "q": "人の筋肉は、意識（いしき）しないで動くものもある？",
+    "a": "ある（心臓や胃など）",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_4_1",
+    "asset": "sprites/human-body/human-body_r1c2.webp",
+    "q": "体の中で、骨の数が一番多いのはどこ？",
+    "a": "手と足（指など）",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_4_1",
+    "asset": "sprites/human-body/human-body_r3c1.webp",
+    "q": "筋肉が骨についている端（はし）の部分を何という？",
+    "a": "腱（けん）",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_4_1",
+    "asset": "sprites/human-body/human-body_r3c1.webp",
+    "q": "人の体で、筋肉が一番大きいのはどこ？",
+    "a": "太もも",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_8_1",
+    "asset": "sprites/molecule/molecule_r1c1.webp",
+    "q": "いくつかの原子が結びついてできた、物質の性質を持つ最小の粒は？",
+    "a": "分子",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_8_1",
+    "asset": "sprites/molecule/molecule_r1c4.webp",
+    "q": "水素の元素記号は？",
+    "a": "H",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_8_1",
+    "asset": "sprites/molecule/molecule_r1c3.webp",
+    "q": "酸素の元素記号は？",
+    "a": "O",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_8_1",
+    "asset": "sprites/molecule/molecule_r4c5.webp",
+    "q": "炭素の元素記号は？",
+    "a": "C",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_8_1",
+    "asset": "sprites/molecule/molecule_r4c5.webp",
+    "q": "鉄の元素記号は？",
+    "a": "Fe",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_8_1",
+    "asset": "sprites/molecule/molecule_r1c1.webp",
+    "q": "1種類の元素（原子）だけでできている物質を何という？",
+    "a": "単体",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_8_1",
+    "asset": "sprites/molecule/molecule_r1c1.webp",
+    "q": "2種類以上の元素（原子）が結びついてできている物質を何という？",
+    "a": "化合物",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_8_1",
+    "asset": "sprites/molecule/molecule_r1c5.webp",
+    "q": "物質を表す記号。二酸化炭素は？",
+    "a": "CO₂",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_8_1",
+    "asset": "sprites/molecule/molecule_r1c3.webp",
+    "q": "物質が酸素と結びつく変化を何という？",
+    "a": "酸化",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_8_1",
+    "asset": "sprites/molecule/molecule_r1c3.webp",
+    "q": "酸化物から酸素を取り除く変化を何という？",
+    "a": "還元（かんげん）",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_8_1",
+    "asset": "sprites/molecule/molecule_r1c3.webp",
+    "q": "銅(Cu)が酸素(O)と結びついた物質の名前は？",
+    "a": "酸化銅",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_8_1",
+    "asset": "sprites/molecule/molecule_r4c5.webp",
+    "q": "化学変化の前後で、物質全体の質量は変わらないという法則は？",
+    "a": "質量保存の法則",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_8_1",
+    "asset": "sprites/molecule/molecule_r1c4.webp",
+    "q": "炭酸水素ナトリウムを加熱して分解する実験。残った白い粉は？",
+    "a": "炭酸ナトリウム",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_8_1",
+    "asset": "sprites/molecule/molecule_r1c3.webp",
+    "q": "化学反応式。 2H₂ + O₂ → （ ？ ）",
+    "a": "2H₂O",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_8_1",
+    "asset": "sprites/molecule/molecule_r4c5.webp",
+    "q": "銀の元素記号は？",
+    "a": "Ag",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_8_1",
+    "asset": "sprites/molecule/molecule_r4c5.webp",
+    "q": "塩素の元素記号は？",
+    "a": "Cl",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_8_1",
+    "asset": "sprites/molecule/molecule_r4c5.webp",
+    "q": "銅の元素記号は？",
+    "a": "Cu",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_8_1",
+    "asset": "sprites/molecule/molecule_r4c5.webp",
+    "q": "ナトリウムの元素記号は？",
+    "a": "Na",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_8_1",
+    "asset": "sprites/molecule/molecule_r1c1.webp",
+    "q": "周期表。縦の列が同じ元素は、どんな特徴がある？",
+    "a": "性質が似ている",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_8_1",
+    "asset": "sprites/molecule/molecule_r4c5.webp",
+    "q": "窒素の元素記号は？",
+    "a": "N",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_8_1",
+    "asset": "sprites/molecule/molecule_r4c5.webp",
+    "q": "化学反応式の矢印「→」の左側に書くのは？",
+    "a": "反応前の物質",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_8_1",
+    "asset": "sprites/molecule/molecule_r4c5.webp",
+    "q": "原子は化学変化によって、新しくできたり消えたりする？",
+    "a": "しない",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_8_1",
+    "asset": "sprites/molecule/molecule_r1c4.webp",
+    "q": "水素分子(H₂)の中に、水素原子は何個ある？",
+    "a": "2個",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_8_1",
+    "asset": "sprites/molecule/molecule_r1c3.webp",
+    "q": "二酸化マンガンは、酸素を出す実験でどう変化する？",
+    "a": "自身は変化しない（触媒）",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_8_1",
+    "asset": "sprites/molecule/molecule_r1c4.webp",
+    "q": "炭酸水素ナトリウムの分解。気体、液体、固体。何ができる？",
+    "a": "二酸化炭素、水、炭酸ナトリウム",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_8_1",
+    "asset": "sprites/molecule/molecule_r1c3.webp",
+    "q": "水の電気分解。水素と酸素、発生する体積の比は？",
+    "a": "水素 2 ： 酸素 1",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_8_1",
+    "asset": "sprites/molecule/molecule_r1c3.webp",
+    "q": "マグネシウムと酸素が化合するときの質量の比は？",
+    "a": "3 ： 2",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_8_1",
+    "asset": "sprites/molecule/molecule_r1c3.webp",
+    "q": "銅と酸素が化合するときの質量の比は？",
+    "a": "4 ： 1",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_8_1",
+    "asset": "sprites/molecule/molecule_r1c4.webp",
+    "q": "硫化水素の匂いは、どんな匂いに例えられる？",
+    "a": "腐った卵のような匂い",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_8_1",
+    "asset": "sprites/molecule/molecule_r4c5.webp",
+    "q": "化学変化で、熱を吸収する例はどれ？",
+    "a": "クエン酸と炭酸水素ナトリウムの反応",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_8_1",
+    "asset": "sprites/molecule/molecule_r1c1.webp",
+    "q": "原子の記号。金は？",
+    "a": "Au",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_8_1",
+    "asset": "sprites/molecule/molecule_r4c5.webp",
+    "q": "化学式の中で、原子の数を示す数字はどこに書く？",
+    "a": "右下に小さく",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_8_2",
+    "asset": "sprites/human-body/human-body_r3c1.webp",
+    "q": "中枢神経から筋肉などの運動器官へ信号を伝えるのは？",
+    "a": "運動神経",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_8_2",
+    "asset": "sprites/human-body/human-body_r1c2.webp",
+    "q": "バッタやカニのように、体の外側に硬い殻を持つ動物の骨格は？",
+    "a": "外骨格（がいこっかく）",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_8_2",
+    "asset": "sprites/human-body/human-body_r1c5.webp",
+    "q": "セキツイ動物以外の、背骨がない動物のグループを？",
+    "a": "無セキツイ動物",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_3",
+    "asset": "sprites/solar-system/solar-system_r1c1.webp",
+    "q": "太陽のように自ら光り輝く星を何という？",
+    "a": "恒星（こうせい）",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_3",
+    "asset": "sprites/solar-system/solar-system_r1c4.webp",
+    "q": "地球のまわりを回る月のような星を何という？",
+    "a": "衛星（えいせい）",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_3",
+    "asset": "sprites/solar-system/solar-system_r1c4.webp",
+    "q": "恒星のまわりを回る地球や火星のような星を何という？",
+    "a": "惑星（わくせい）",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_3",
+    "asset": "sprites/solar-system/solar-system_r1c1.webp",
+    "q": "太陽系で一番大きく、主にガスでできている惑星は？",
+    "a": "木星",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_3",
+    "asset": "sprites/solar-system/solar-system_r1c1.webp",
+    "q": "太陽系で2番目に大きく、美しい環（わ）を持つ惑星は？",
+    "a": "土星",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_3",
+    "asset": "sprites/solar-system/solar-system_r1c2.webp",
+    "q": "地球より内側を回る惑星、水星とあと一つは？",
+    "a": "金星",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_3",
+    "asset": "sprites/solar-system/solar-system_r1c4.webp",
+    "q": "地球が1日に1回、自らの軸を中心に回ることを何という？",
+    "a": "自転",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_3",
+    "asset": "sprites/solar-system/solar-system_r1c4.webp",
+    "q": "地球が1年に1回、太陽のまわりを回ることを何という？",
+    "a": "公転",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_3",
+    "asset": "sprites/solar-system/solar-system_r3c5.webp",
+    "q": "北極星（ほっきょくせい）がほとんど動かない理由は？",
+    "a": "地球の地軸の延長線上にあるから",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_3",
+    "asset": "sprites/solar-system/solar-system_r1c1.webp",
+    "q": "太陽の表面に見える、周りより温度が低い黒い点を何という？",
+    "a": "黒点（こくてん）",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_3",
+    "asset": "sprites/solar-system/solar-system_r1c1.webp",
+    "q": "太陽の表面から立ち上がる、巨大な炎のようなガスを何という？",
+    "a": "プロミネンス（紅炎）",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_3",
+    "asset": "sprites/solar-system/solar-system_r1c1.webp",
+    "q": "太陽の最も外側にある、真珠色の薄いガスの層を何という？",
+    "a": "コロナ",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_3",
+    "asset": "sprites/solar-system/solar-system_r3c4.webp",
+    "q": "季節によって見える星座が変わる原因は、地球の何の運動？",
+    "a": "公転",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_3",
+    "asset": "sprites/solar-system/solar-system_r3c5.webp",
+    "q": "真夜中に南の空に見える星座。3ヶ月後には何時に南にくる？",
+    "a": "午後6時（夕方）",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_3",
+    "asset": "sprites/solar-system/solar-system_r1c1.webp",
+    "q": "夏至（げし）の日の太陽、南中高度はどうなる？",
+    "a": "1年で最も高い",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_3",
+    "asset": "sprites/solar-system/solar-system_r1c1.webp",
+    "q": "冬至（とうじ）の日の太陽、昼の長さはどうなる？",
+    "a": "1年で最も短い",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_3",
+    "asset": "sprites/solar-system/solar-system_r1c4.webp",
+    "q": "月が太陽と地球の間にきて、太陽を隠す現象を？",
+    "a": "日食（にっしょく）",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_3",
+    "asset": "sprites/solar-system/solar-system_r1c4.webp",
+    "q": "地球が太陽と月の間にきて、月が地球の影に入る現象を？",
+    "a": "月食（げっしょく）",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_3",
+    "asset": "sprites/solar-system/solar-system_r1c4.webp",
+    "q": "温室効果ガスの増加によって地球の気温が上がる現象を？",
+    "a": "地球温暖化",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_3",
+    "asset": "sprites/solar-system/solar-system_r1c1.webp",
+    "q": "太陽系外縁にある、多くの氷の天体が存在する領域を？（発展）",
+    "a": "エッジワース・カイパーベルト",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_3",
+    "asset": "sprites/solar-system/solar-system_r4c2.webp",
+    "q": "銀河系（天の川銀河）にある恒星の数はだいたい何個？",
+    "a": "約2000億個",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_3",
+    "asset": "sprites/solar-system/solar-system_r1c1.webp",
+    "q": "太陽から一番近い惑星は？",
+    "a": "水星",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_3",
+    "asset": "sprites/solar-system/solar-system_r1c3.webp",
+    "q": "金星が真夜中に見えない理由は？",
+    "a": "地球より内側の軌道を回っているから",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_3",
+    "asset": "sprites/solar-system/solar-system_r3c2.webp",
+    "q": "月が満ち欠けして見える原因は？",
+    "a": "太陽・地球・月の位置関係が変わるから",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_3",
+    "asset": "sprites/solar-system/solar-system_r1c1.webp",
+    "q": "春分・秋分の日の太陽の動きは？",
+    "a": "真東から昇り、真西に沈む",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_3",
+    "asset": "sprites/solar-system/solar-system_r2c1.webp",
+    "q": "太陽系。火星と木星の間に多く存在する小さな岩石の集まりは？",
+    "a": "小惑星（アステロイド）ベルト",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_3",
+    "asset": "sprites/solar-system/solar-system_r1c3.webp",
+    "q": "金星の表面温度が400度以上もある理由は？（発展）",
+    "a": "濃い二酸化炭素の温室効果",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_3",
+    "asset": "sprites/solar-system/solar-system_r1c1.webp",
+    "q": "太陽系で一番重力が大きいのはどこ？",
+    "a": "太陽",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_U02",
+    "asset": "sprites/insect/insect_r1c4.webp",
+    "q": "モンシロチョウの そだちかたの じゅんばんで ただしいのは？",
+    "a": "たまご→よう虫→さなぎ→せい虫",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_U02",
+    "asset": "sprites/insect/insect_r1c1.webp",
+    "q": "モンシロチョウの たまごが 見つかりやすい ばしょは？",
+    "a": "キャベツの 葉",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_U02",
+    "asset": "sprites/insect/insect_r1c2.webp",
+    "q": "よう虫が いちばん よく することは？",
+    "a": "葉を 食べる",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_U02",
+    "asset": "sprites/insect/insect_r1c3.webp",
+    "q": "さなぎの あいだに おこる へんかは？",
+    "a": "体の つくりが かわる",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_U02",
+    "asset": "sprites/insect/insect_r5c5.webp",
+    "q": "バッタの あしで 長く はったつしているのは？",
+    "a": "後ろあし",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_U02",
+    "asset": "sprites/insect/insect_r1c4.webp",
+    "q": "チョウの せい虫が よく すうものは？",
+    "a": "花みつ",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_U02",
+    "asset": "sprites/insect/insect_r5c3.webp",
+    "q": "カブトムシは こん虫なので あしは？",
+    "a": "6本",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_U02",
+    "asset": "sprites/insect/insect_r1c4.webp",
+    "q": "チョウと ガに きょう通することは？",
+    "a": "どちらも こん虫",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_U02",
+    "asset": "sprites/insect/insect_r5c4.webp",
+    "q": "トンボの よう虫を 何という？",
+    "a": "ヤゴ",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_U02",
+    "asset": "sprites/insect/insect_r1c4.webp",
+    "q": "チョウの はねは 何まい？",
+    "a": "4まい",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_U02",
+    "asset": "sprites/insect/insect_r1c2.webp",
+    "q": "よう虫と せい虫で 大きく ちがうことが あるのは？",
+    "a": "食べもの",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_U02",
+    "asset": "sprites/insect/insect_r1c4.webp",
+    "q": "モンシロチョウの せい虫を 育てるときに ひつようなのは？",
+    "a": "花みつの かわりの さとう水",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_U02",
+    "asset": "sprites/insect/insect_r1c2.webp",
+    "q": "チョウの よう虫は どの 部分を よく 食べる？",
+    "a": "葉",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_U02",
+    "asset": "sprites/insect/insect_r1c2.webp",
+    "q": "よう虫が 大きくなる ときに 見られることが あるのは？",
+    "a": "皮を ぬぐ",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_U02",
+    "asset": "sprites/insect/insect_r1c3.webp",
+    "q": "さなぎは ふつう どんな ようす？",
+    "a": "あまり 動かない",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_U02",
+    "asset": "sprites/insect/insect_r1c4.webp",
+    "q": "チョウの せい虫に あるものは？",
+    "a": "はね",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_U02",
+    "asset": "sprites/insect/insect_r5c5.webp",
+    "q": "バッタの よう虫と せい虫で にているところは？",
+    "a": "体の 形",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_U02",
+    "asset": "sprites/insect/insect_r5c3.webp",
+    "q": "カブトムシの よう虫が よく いる ところは？",
+    "a": "くさった 木や 土の 中",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_U02",
+    "asset": "sprites/insect/insect_r5c4.webp",
+    "q": "トンボの ヤゴは どこで 育つ？",
+    "a": "水の 中",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_U02",
+    "asset": "sprites/insect/insect_r1c1.webp",
+    "q": "チョウの たまごを かんさつするときに よい 方法は？",
+    "a": "葉ごと そっと 見る",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_U02",
+    "asset": "sprites/insect/insect_r1c2.webp",
+    "q": "よう虫が 食べる 葉を かえるときに 気をつけることは？",
+    "a": "食べられる 葉を 用意する",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_U02",
+    "asset": "sprites/insect/insect_r1c4.webp",
+    "q": "せい虫に なった チョウを 外へ はなすときに よい ばしょは？",
+    "a": "花や 草が ある ばしょ",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_U02",
+    "asset": "sprites/insect/insect_r1c4.webp",
+    "q": "チョウの 口は 花みつを すうために どうなっている？",
+    "a": "細長く のびる",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_U02",
+    "asset": "sprites/insect/insect_r1c2.webp",
+    "q": "よう虫と せい虫で 食べものが へんわることを 調べるには？",
+    "a": "それぞれの えさを かんさつする",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_U02",
+    "asset": "sprites/insect/insect_r1c3.webp",
+    "q": "チョウの さなぎから せい虫が 出ることを 何という？",
+    "a": "羽化",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_U02",
+    "asset": "sprites/insect/insect_r1c1.webp",
+    "q": "チョウの たまごを 見つけた 葉を きろくするのは なぜ？",
+    "a": "何を 食べるか わかるから",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_U02",
+    "asset": "sprites/insect/insect_r1c4.webp",
+    "q": "こん虫の せい虫を かんさつするときに 見ると よい動きは？",
+    "a": "飛ぶ・歩く・食べる",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_U03",
+    "asset": "sprites/plant/plant_r1c1.webp",
+    "q": "たねまきの あとに まず 出てくることが 多いのは？",
+    "a": "めが 出る",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_U03",
+    "asset": "sprites/plant/plant_r2c2.webp",
+    "q": "しょくぶつの くきの はたらきの ひとつは？",
+    "a": "水を はこぶ",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_U03",
+    "asset": "sprites/plant/plant_r2c3.webp",
+    "q": "葉に 日光が あたると しょくぶつは どうしやすい？",
+    "a": "せい長する",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_U03",
+    "asset": "sprites/plant/plant_r2c1.webp",
+    "q": "根が 土の 中に のびる りゆうは？",
+    "a": "水や よう分を とるため",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_U03",
+    "asset": "sprites/plant/plant_r2c3.webp",
+    "q": "子葉の あとの 葉を 何ということが ある？",
+    "a": "本葉",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_U03",
+    "asset": "sprites/plant/plant_r5c3.webp",
+    "q": "しょくぶつの せい長を 調べるには 何を きろくすると よい？",
+    "a": "たけや 葉の 数",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_U03",
+    "asset": "sprites/plant/plant_r3c1.webp",
+    "q": "花が さく 前に よく できるものは？",
+    "a": "つぼみ",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_U03",
+    "asset": "sprites/plant/plant_r5c3.webp",
+    "q": "同じ たねでも せい長の はやさが ちがうことが あるのは？",
+    "a": "そだつ じょうけんが ちがうから",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_U03",
+    "asset": "sprites/plant/plant_r2c3.webp",
+    "q": "葉の 色が ふつう 緑なのは？",
+    "a": "日光と かんけいする はたらきが あるから",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_U03",
+    "asset": "sprites/plant/plant_r1c1.webp",
+    "q": "朝顔や ホウセンカの たねを まくときに することは？",
+    "a": "土に 入れて 水を やる",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_U03",
+    "asset": "sprites/plant/plant_r3c1.webp",
+    "q": "しょくぶつの 花を かんさつするときに 見ると よいのは？",
+    "a": "色や 形",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_U03",
+    "asset": "sprites/plant/plant_r1c1.webp",
+    "q": "たねから 育てた しょくぶつに 実が できるのは どんな あと？",
+    "a": "花が さいた あと",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_U03",
+    "asset": "sprites/plant/plant_r5c3.webp",
+    "q": "せい長した しょくぶつに できることが 多いものは？",
+    "a": "花や 実",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_U03",
+    "asset": "sprites/plant/plant_r1c1.webp",
+    "q": "たねを まいた 日を きろくするのは なぜ？",
+    "a": "何日で めが 出たか わかるから",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_U03",
+    "asset": "sprites/plant/plant_r2c1.webp",
+    "q": "発めした あと、根は ふつう どちらへ のびる？",
+    "a": "下の ほう",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_U03",
+    "asset": "sprites/plant/plant_r2c3.webp",
+    "q": "葉の 数を 数えると 何が わかる？",
+    "a": "せい長の ようす",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_U03",
+    "asset": "sprites/plant/plant_r5c3.webp",
+    "q": "しょくぶつの 高さを はかるときに 使うものは？",
+    "a": "ものさし",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_U03",
+    "asset": "sprites/plant/plant_r2c2.webp",
+    "q": "ホウセンカの くきが のびたら 支柱を 立てることが あるのは なぜ？",
+    "a": "たおれにくく するため",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_U03",
+    "asset": "sprites/plant/plant_r2c1.webp",
+    "q": "しょくぶつの 根を かんさつするときに 見るものは？",
+    "a": "長さや 分かれ方",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_U03",
+    "asset": "sprites/plant/plant_r2c2.webp",
+    "q": "くきの 太さを きろくすると 何が わかる？",
+    "a": "せい長の へん化",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_U03",
+    "asset": "sprites/plant/plant_r3c1.webp",
+    "q": "花が さいた 日を きろくするのは なぜ？",
+    "a": "せい長の じゅんばんが わかるから",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_U03",
+    "asset": "sprites/plant/plant_r1c1.webp",
+    "q": "たねから めが 出ることを 何という？",
+    "a": "発め",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_U03",
+    "asset": "sprites/plant/plant_r2c3.webp",
+    "q": "葉が 大きくなると しょくぶつは 何を 受けやすくなる？",
+    "a": "日光",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_U03",
+    "asset": "sprites/plant/plant_r2c2.webp",
+    "q": "くきの 先に つぼみが できたら 次に 起こりやすいことは？",
+    "a": "花が さく",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_U03",
+    "asset": "sprites/plant/plant_r3c1.webp",
+    "q": "かれた 花の あとを かんさつすると 何が 見つかることが ある？",
+    "a": "実",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_U03",
+    "asset": "sprites/plant/plant_r1c1.webp",
+    "q": "たねを とるときに よい じょうたいは？",
+    "a": "実が よく かわいた とき",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_U03",
+    "asset": "sprites/plant/plant_r5c3.webp",
+    "q": "しょくぶつの せい長を グラフに すると よいのは なぜ？",
+    "a": "へん化が 見やすいから",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_U03",
+    "asset": "sprites/plant/plant_r1c1.webp",
+    "q": "同じ たねを まいても めが 出ないことが あるのは なぜ？",
+    "a": "水や 温度などが 合わないことが あるから",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_U03",
+    "asset": "sprites/plant/plant_r2c3.webp",
+    "q": "葉が しおれている ときに 考えることは？",
+    "a": "水や 日光が 足りているか",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_U03",
+    "asset": "sprites/plant/plant_r3c1.webp",
+    "q": "花を むやみに とらないほうが よいのは なぜ？",
+    "a": "実や たねに つながるから",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_U03",
+    "asset": "sprites/plant/plant_r5c3.webp",
+    "q": "しょくぶつの せい長を 友だちと くらべるときに 大切なのは？",
+    "a": "同じ 見方で くらべる",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_U03",
+    "asset": "sprites/plant/plant_r2c1.webp",
+    "q": "根が 土を つかむように のびると しょくぶつは どうなりやすい？",
+    "a": "たおれにくい",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_U03",
+    "asset": "sprites/plant/plant_r1c1.webp",
+    "q": "たねを まく 深さが 深すぎると よくないことが あるのは なぜ？",
+    "a": "めが 出にくいことが あるから",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_U08",
+    "asset": "sprites/circuit/circuit_r1c3.webp",
+    "q": "かんでんちと まめでんきゅうを つないで つけるには？",
+    "a": "かいろを つくる",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_U08",
+    "asset": "sprites/circuit/circuit_r1c3.webp",
+    "q": "かいろが つながっていないと まめでんきゅうは？",
+    "a": "つかない",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_U08",
+    "asset": "sprites/circuit/circuit_r1c3.webp",
+    "q": "豆電球が つく つなぎ方で 正しいのは？",
+    "a": "かん電池の 両方につなぐ",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_U08",
+    "asset": "sprites/circuit/circuit_r2c2.webp",
+    "q": "スイッチの はたらきは？",
+    "a": "電気の 通り道を つないだり 切ったりする",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_U08",
+    "asset": "sprites/circuit/circuit_r2c1.webp",
+    "q": "まめ電球の 金ぞくぶぶんに つなぐのは なぜ？",
+    "a": "電気が 通る ところだから",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_U08",
+    "asset": "sprites/circuit/circuit_r2c1.webp",
+    "q": "木の ぼうで 回路を つなぐと つかないことが 多いのは なぜ？",
+    "a": "電気を 通しにくいから",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_U08",
+    "asset": "sprites/circuit/circuit_r2c1.webp",
+    "q": "かん電池を 入れかえても 回路が つながれば わかることは？",
+    "a": "向きが 大切",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_U08",
+    "asset": "sprites/circuit/circuit_r1c3.webp",
+    "q": "豆電球が つかない ときに まず たしかめることは？",
+    "a": "つなぎ方",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_U08",
+    "asset": "sprites/circuit/circuit_r2c1.webp",
+    "q": "回路の ずに よく かくものは？",
+    "a": "かん電池と まめ電球",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_U08",
+    "asset": "sprites/circuit/circuit_r1c3.webp",
+    "q": "豆電球が つく 回路は どのような つながり？",
+    "a": "切れ目なく つながっている",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_U08",
+    "asset": "sprites/circuit/circuit_r1c3.webp",
+    "q": "豆電球を つけるには 電気の 通り道を どうする？",
+    "a": "一つの わの ように つなぐ",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_U08",
+    "asset": "sprites/circuit/circuit_r1c3.webp",
+    "q": "電気の 通り道が 切れていると 豆電球は どうなる？",
+    "a": "つかない",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_U08",
+    "asset": "sprites/circuit/circuit_r1c3.webp",
+    "q": "豆電球が つく 回路では かん電池の どこを 使う？",
+    "a": "両方の きょく",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_U08",
+    "asset": "sprites/circuit/circuit_r2c1.webp",
+    "q": "どう線の 金ぞくの 部分を つなぐのは なぜ？",
+    "a": "電気が 通るから",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_U08",
+    "asset": "sprites/circuit/circuit_r1c3.webp",
+    "q": "アルミはくを 回路に 入れると 豆電球は どうなりやすい？",
+    "a": "つく",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_U08",
+    "asset": "sprites/circuit/circuit_r1c3.webp",
+    "q": "プラスチックを 回路に 入れると 豆電球は どうなりやすい？",
+    "a": "つかない",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_U08",
+    "asset": "sprites/circuit/circuit_r1c3.webp",
+    "q": "紙を 回路に 入れると 豆電球は どうなりやすい？",
+    "a": "つかない",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_U08",
+    "asset": "sprites/circuit/circuit_r1c3.webp",
+    "q": "金ぞくクリップを 回路に 入れると 豆電球は どうなりやすい？",
+    "a": "つく",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_U08",
+    "asset": "sprites/circuit/circuit_r1c3.webp",
+    "q": "木の ぼうを 回路に 入れると 豆電球は どうなりやすい？",
+    "a": "つかない",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_U08",
+    "asset": "sprites/circuit/circuit_r1c3.webp",
+    "q": "電気を 通すか 調べる じっけんで 豆電球が ついたら どういえる？",
+    "a": "電気を 通す",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_U08",
+    "asset": "sprites/circuit/circuit_r1c3.webp",
+    "q": "電気を 通すか 調べる じっけんで 豆電球が つかなかったら どういえる？",
+    "a": "電気を 通しにくい",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_U08",
+    "asset": "sprites/circuit/circuit_r2c2.webp",
+    "q": "スイッチを 入れると 豆電球が つくのは なぜ？",
+    "a": "回路が つながるから",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_U08",
+    "asset": "sprites/circuit/circuit_r2c2.webp",
+    "q": "スイッチを 切ると 豆電球が 消えるのは なぜ？",
+    "a": "回路が 切れるから",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_U08",
+    "asset": "sprites/circuit/circuit_r1c3.webp",
+    "q": "豆電球の 金ぞくの ところに どう線を つなぐのは なぜ？",
+    "a": "電気が 通る ところだから",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_U08",
+    "asset": "sprites/circuit/circuit_r2c1.webp",
+    "q": "かん電池の プラスきょくと マイナスきょくを つなぐとき 大切なのは？",
+    "a": "回路を とじること",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_U08",
+    "asset": "sprites/circuit/circuit_r1c3.webp",
+    "q": "豆電球が つかない とき、まず 見るところは？",
+    "a": "どう線が はずれていないか",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_U08",
+    "asset": "sprites/circuit/circuit_r2c1.webp",
+    "q": "回路を 図に かくときに かくものは？",
+    "a": "かん電池・豆電球・どう線",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_U08",
+    "asset": "sprites/circuit/circuit_r1c3.webp",
+    "q": "1円玉を 回路に 入れると 豆電球が つきやすいのは なぜ？",
+    "a": "金ぞくで できているから",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_U08",
+    "asset": "sprites/circuit/circuit_r1c3.webp",
+    "q": "消しゴムを 回路に 入れると 豆電球が つきにくいのは なぜ？",
+    "a": "電気を 通しにくいから",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_U08",
+    "asset": "sprites/circuit/circuit_r2c1.webp",
+    "q": "回路の とちゅうを 金ぞくで つなぐと 電気は どうなる？",
+    "a": "通りやすい",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_U08",
+    "asset": "sprites/circuit/circuit_r2c1.webp",
+    "q": "回路の とちゅうを 紙で つなぐと 電気は どうなる？",
+    "a": "通りにくい",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_U08",
+    "asset": "sprites/circuit/circuit_r2c1.webp",
+    "q": "電気の 通り道を 調べるとき、けっかとして きろくすることは？",
+    "a": "豆電球が ついたか",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_3_U08",
+    "asset": "sprites/circuit/circuit_r1c3.webp",
+    "q": "豆電球が ついた ざいりょうを なかま分けするとき 見ることは？",
+    "a": "電気を 通すか",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_8_U03",
+    "asset": "sprites/human-body/human-body_r3c1.webp",
+    "q": "筋肉と 骨を つなぐ ものとして 正しいものは？",
+    "a": "けん",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_8_U03",
+    "asset": "sprites/human-body/human-body_r1c2.webp",
+    "q": "骨格の はたらきとして 正しいものは？",
+    "a": "体を 支える",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_8_U03",
+    "asset": "sprites/human-body/human-body_r2c3.webp",
+    "q": "関節とは どんな 部分？",
+    "a": "骨と 骨が つながる 部分",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_8_U03",
+    "asset": "sprites/human-body/human-body_r3c1.webp",
+    "q": "筋肉が ちぢむ と 体は どうなる？",
+    "a": "骨が 引かれて 動く",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_8_U05",
+    "asset": "sprites/molecule/molecule_r4c5.webp",
+    "q": "水の 分子を あらわす 化学式は？",
+    "a": "H2O",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_8_U05",
+    "asset": "sprites/molecule/molecule_r1c5.webp",
+    "q": "二酸化炭素の 化学式は？",
+    "a": "CO2",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_8_U05",
+    "asset": "sprites/molecule/molecule_r1c3.webp",
+    "q": "酸素の 分子を 表す 化学式は？",
+    "a": "O2",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_8_U05",
+    "asset": "sprites/molecule/molecule_r1c4.webp",
+    "q": "水素の 分子を 表す 化学式は？",
+    "a": "H2",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_8_U05",
+    "asset": "sprites/molecule/molecule_r4c5.webp",
+    "q": "食塩の 化学式は？",
+    "a": "NaCl",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_8_U05",
+    "asset": "sprites/molecule/molecule_r1c1.webp",
+    "q": "原子記号で 炭素を 表す ものは？",
+    "a": "C",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_8_U05",
+    "asset": "sprites/molecule/molecule_r1c3.webp",
+    "q": "原子記号で 酸素を 表す ものは？",
+    "a": "O",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_8_U05",
+    "asset": "sprites/molecule/molecule_r1c4.webp",
+    "q": "原子記号で 水素を 表す ものは？",
+    "a": "H",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_8_U05",
+    "asset": "sprites/molecule/molecule_r4c5.webp",
+    "q": "単体として 正しいものは？",
+    "a": "酸素",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_8_U05",
+    "asset": "sprites/molecule/molecule_r4c5.webp",
+    "q": "化合物として 正しいものは？",
+    "a": "水",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_8_U05",
+    "asset": "sprites/molecule/molecule_r4c5.webp",
+    "q": "化学式が 表すものとして 正しいものは？",
+    "a": "原子の 種類と 数の 比",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_8_U05",
+    "asset": "sprites/molecule/molecule_r1c1.webp",
+    "q": "銅の 原子記号は？",
+    "a": "Cu",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_8_U05",
+    "asset": "sprites/molecule/molecule_r1c1.webp",
+    "q": "塩素の 原子記号は？",
+    "a": "Cl",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_8_U05",
+    "asset": "sprites/molecule/molecule_r1c1.webp",
+    "q": "原子と 分子を 学ぶ 理由として よいものは？",
+    "a": "物質の なりたちを 理解するため",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_8_U05",
+    "asset": "sprites/molecule/molecule_r1c1.webp",
+    "q": "元素とは 何の こと？",
+    "a": "物質を つくる 原子の 種類",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_8_U05",
+    "asset": "sprites/molecule/molecule_r1c1.webp",
+    "q": "原子の 特徴として 正しいものは？",
+    "a": "化学変化で なくなったり 新しくできたりしない",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_8_U05",
+    "asset": "sprites/molecule/molecule_r1c1.webp",
+    "q": "原子記号で ナトリウムを 表す ものは？",
+    "a": "Na",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_8_U05",
+    "asset": "sprites/molecule/molecule_r1c1.webp",
+    "q": "原子記号で 硫黄を 表す ものは？",
+    "a": "S",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_8_U05",
+    "asset": "sprites/molecule/molecule_r1c1.webp",
+    "q": "原子記号で 鉄を 表す ものは？",
+    "a": "Fe",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_8_U05",
+    "asset": "sprites/molecule/molecule_r1c1.webp",
+    "q": "原子記号で 銀を 表す ものは？",
+    "a": "Ag",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_8_U05",
+    "asset": "sprites/molecule/molecule_r1c1.webp",
+    "q": "原子記号で マグネシウムを 表す ものは？",
+    "a": "Mg",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_8_U05",
+    "asset": "sprites/molecule/molecule_r1c1.webp",
+    "q": "原子記号で カルシウムを 表す ものは？",
+    "a": "Ca",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_8_U05",
+    "asset": "sprites/molecule/molecule_r1c1.webp",
+    "q": "原子記号で 窒素を 表す ものは？",
+    "a": "N",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_8_U05",
+    "asset": "sprites/molecule/molecule_r1c1.webp",
+    "q": "原子記号で アルミニウムを 表す ものは？",
+    "a": "Al",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_8_U05",
+    "asset": "sprites/molecule/molecule_r1c1.webp",
+    "q": "1種類の 原子だけで できた 物質を 何という？",
+    "a": "単体",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_8_U05",
+    "asset": "sprites/molecule/molecule_r1c1.webp",
+    "q": "2種類以上の 原子が 結びついた 物質を 何という？",
+    "a": "化合物",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_8_U05",
+    "asset": "sprites/molecule/molecule_r4c5.webp",
+    "q": "混合物と 化合物の 違いとして 正しいものは？",
+    "a": "化合物は 原子が 決まった 比で 結びつく",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_8_U05",
+    "asset": "sprites/molecule/molecule_r1c3.webp",
+    "q": "酸素 O2 は 何個の 酸素原子から できる？",
+    "a": "2個",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_8_U05",
+    "asset": "sprites/molecule/molecule_r1c5.webp",
+    "q": "二酸化炭素 CO2 は 何種類の 原子から できる？",
+    "a": "2種類",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_8_U05",
+    "asset": "sprites/molecule/molecule_r1c5.webp",
+    "q": "二酸化炭素 CO2 の 酸素原子は 何個？",
+    "a": "2個",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_8_U05",
+    "asset": "sprites/molecule/molecule_r1c2.webp",
+    "q": "水 H2O の 水素原子は 何個？",
+    "a": "2個",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_8_U05",
+    "asset": "sprites/molecule/molecule_r1c2.webp",
+    "q": "水 H2O の 酸素原子は 何個？",
+    "a": "1個",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_8_U05",
+    "asset": "sprites/molecule/molecule_r1c1.webp",
+    "q": "アンモニア NH3 は 何種類の 原子から できる？",
+    "a": "2種類",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_8_U05",
+    "asset": "sprites/molecule/molecule_r1c4.webp",
+    "q": "アンモニア NH3 の 水素原子は 何個？",
+    "a": "3個",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_8_U05",
+    "asset": "sprites/molecule/molecule_r4c5.webp",
+    "q": "化学式で 数字を 小さく 右下に 書く 意味は？",
+    "a": "その 原子の 数を 表す",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_8_U05",
+    "asset": "sprites/molecule/molecule_r4c5.webp",
+    "q": "化学式の 前に つく 大きな 数字は 何を 表す？",
+    "a": "分子や 粒子の 個数の 比",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_8_U05",
+    "asset": "sprites/molecule/molecule_r4c5.webp",
+    "q": "金属単体の 例として 正しいものは？",
+    "a": "銅",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_8_U05",
+    "asset": "sprites/molecule/molecule_r4c5.webp",
+    "q": "非金属単体の 例として 正しいものは？",
+    "a": "酸素",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_8_U05",
+    "asset": "sprites/molecule/molecule_r4c5.webp",
+    "q": "酸化銅の 化学式は？",
+    "a": "CuO",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_8_U05",
+    "asset": "sprites/molecule/molecule_r4c5.webp",
+    "q": "酸化マグネシウムの 化学式は？",
+    "a": "MgO",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_8_U05",
+    "asset": "sprites/molecule/molecule_r4c5.webp",
+    "q": "硫化鉄の 化学式は？",
+    "a": "FeS",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_8_U05",
+    "asset": "sprites/molecule/molecule_r4c5.webp",
+    "q": "化学式で 物質を 表す 利点は？",
+    "a": "原子の 種類と 数が 分かる",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_8_U05",
+    "asset": "sprites/molecule/molecule_r1c1.webp",
+    "q": "モデルで 原子を 表す ときに 大切な ことは？",
+    "a": "種類と 数を 区別する",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_8_U05",
+    "asset": "sprites/molecule/molecule_r4c5.webp",
+    "q": "化学反応式で 原子の 数を そろえる 理由は？",
+    "a": "原子が 保存されるから",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_8_U05",
+    "asset": "sprites/molecule/molecule_r1c1.webp",
+    "q": "原子と 分子の 学習で 大切な 見方は？",
+    "a": "目に 見えない 粒子で 物質を 考える",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_8_U05",
+    "asset": "sprites/molecule/molecule_r1c1.webp",
+    "q": "同じ 元素から できていても 性質が 違う 例として 近いものは？",
+    "a": "炭素から できる ダイヤモンドと 黒鉛",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_U10",
+    "asset": "sprites/solar-system/solar-system_r1c4.webp",
+    "q": "地球の 周りには どんな 気体の 層が ある？",
+    "a": "大気",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_U10",
+    "asset": "sprites/solar-system/solar-system_r3c4.webp",
+    "q": "地球が 自転することで 起こることの 1つは？",
+    "a": "昼夜が できる",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_U10",
+    "asset": "sprites/solar-system/solar-system_r1c4.webp",
+    "q": "地球が 太陽の 周りを 回ることを？",
+    "a": "公転",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_U10",
+    "asset": "sprites/solar-system/solar-system_r3c4.webp",
+    "q": "季節が 変わる 主な 理由として 正しいものは？",
+    "a": "地軸が 傾いたまま 地球が 公転するから",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_U10",
+    "asset": "sprites/solar-system/solar-system_r1c4.webp",
+    "q": "地球を 北極と 南極を 結ぶ 軸の まわりに 回る運動を？",
+    "a": "自転",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_U10",
+    "asset": "sprites/solar-system/solar-system_r3c4.webp",
+    "q": "地球の 自転の 向きは 北極側から 見て どちらか？",
+    "a": "反時計回り",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_U10",
+    "asset": "sprites/solar-system/solar-system_r3c4.webp",
+    "q": "地球の 公転の 向きは 北極側から 見て どちらか？",
+    "a": "反時計回り",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_U10",
+    "asset": "sprites/solar-system/solar-system_r1c1.webp",
+    "q": "北半球で 夏に 太陽の 南中高度が 高く なると どうなりやすい？",
+    "a": "昼が 長く なり 気温が 上がりやすい",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_U10",
+    "asset": "sprites/solar-system/solar-system_r1c4.webp",
+    "q": "地球の 表面の 大部分を おおうものは？",
+    "a": "海水",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_U10",
+    "asset": "sprites/solar-system/solar-system_r1c4.webp",
+    "q": "地球の 表面付近で 天気の 変化が 起こる 層を？",
+    "a": "対流圏",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_U10",
+    "asset": "sprites/solar-system/solar-system_r1c4.webp",
+    "q": "地球の 内部で 一番 外側に ある 固い 部分を？",
+    "a": "地殻",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_U10",
+    "asset": "sprites/solar-system/solar-system_r1c5.webp",
+    "q": "月が 自ら 光って 見える わけでは ない 理由は？",
+    "a": "太陽の 光を 反射しているから",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_U10",
+    "asset": "sprites/solar-system/solar-system_r1c4.webp",
+    "q": "地球から 見た 太陽や 星の 動きの 多くは 何による 見かけか？",
+    "a": "地球の 自転",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_U10",
+    "asset": "sprites/solar-system/solar-system_r3c5.webp",
+    "q": "1年の うちで 同じ 時刻に 見える 星座が 変わる 主な 理由は？",
+    "a": "地球が 公転しているから",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_U10",
+    "asset": "sprites/solar-system/solar-system_r1c4.webp",
+    "q": "宇宙から 見た 地球の 形に 最も 近いものは？",
+    "a": "少し つぶれた 球",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_U10",
+    "asset": "sprites/solar-system/solar-system_r1c4.webp",
+    "q": "地球と 宇宙を 学ぶ 理由として よいものは？",
+    "a": "地球の 運動と 季節や 昼夜の 関係を 理解するため",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_U10",
+    "asset": "sprites/solar-system/solar-system_r1c4.webp",
+    "q": "人工衛星が 地球の 周りを 回れる 主な 理由として 近いものは？",
+    "a": "地球の 引力を 受けながら 前に 進みつづけるから",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_U10",
+    "asset": "sprites/solar-system/solar-system_r1c4.webp",
+    "q": "宇宙から 見た 地球に ふくまれる 水の 多くは どこに ある？",
+    "a": "海",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_U10",
+    "asset": "sprites/solar-system/solar-system_r3c4.webp",
+    "q": "地球の 自転の 向きは 北極側から 見ると どちら向き？",
+    "a": "反時計回り",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_U10",
+    "asset": "sprites/solar-system/solar-system_r3c4.webp",
+    "q": "地球が 西から 東へ 自転するため、太陽は どちらから 昇って 見える？",
+    "a": "東",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_U10",
+    "asset": "sprites/solar-system/solar-system_r3c4.webp",
+    "q": "地球の 自転周期は およそ どれくらい？",
+    "a": "1日",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_U10",
+    "asset": "sprites/solar-system/solar-system_r3c4.webp",
+    "q": "地球の 公転周期は およそ どれくらい？",
+    "a": "1年",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_U10",
+    "asset": "sprites/solar-system/solar-system_r3c4.webp",
+    "q": "季節が 生じる 主な 理由は？",
+    "a": "地軸が 傾いたまま 公転するから",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_U10",
+    "asset": "sprites/solar-system/solar-system_r1c1.webp",
+    "q": "太陽高度とは 何を 表す？",
+    "a": "太陽の 見える 高さの 角度",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_U10",
+    "asset": "sprites/solar-system/solar-system_r1c1.webp",
+    "q": "日本で 太陽が 南中するころ、影の 長さは どうなりやすい？",
+    "a": "最も 短くなる",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_U10",
+    "asset": "sprites/solar-system/solar-system_r3c4.webp",
+    "q": "緯度が 高い 地域ほど、季節による 昼の 長さの 変化は？",
+    "a": "大きくなりやすい",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_U10",
+    "asset": "sprites/solar-system/solar-system_r3c4.webp",
+    "q": "赤道付近で 季節による 昼の 長さの 変化は？",
+    "a": "比較的 小さい",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_U10",
+    "asset": "sprites/solar-system/solar-system_r3c2.webp",
+    "q": "月の 満ち欠けが 起こる 主な 理由は？",
+    "a": "太陽・地球・月の 位置関係が 変わるから",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_U10",
+    "asset": "sprites/solar-system/solar-system_r3c2.webp",
+    "q": "新月の とき、月は 地球から 見て どの 方向に ある？",
+    "a": "太陽の 方向",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_U10",
+    "asset": "sprites/solar-system/solar-system_r3c2.webp",
+    "q": "満月の とき、月は 太陽と どのような 位置関係に 近い？",
+    "a": "地球を はさんで 反対側",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_U10",
+    "asset": "sprites/solar-system/solar-system_r1c5.webp",
+    "q": "上弦の 月は 夕方ごろ どの 方向に 見えやすい？",
+    "a": "南の 空",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_U10",
+    "asset": "sprites/solar-system/solar-system_r3c3.webp",
+    "q": "日食が 起こる とき、間に 入る 天体は？",
+    "a": "月",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_U10",
+    "asset": "sprites/solar-system/solar-system_r3c2.webp",
+    "q": "月食が 起こる とき、間に 入る 天体は？",
+    "a": "地球",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_U10",
+    "asset": "sprites/solar-system/solar-system_r3c3.webp",
+    "q": "日食が 毎月 起こらない 理由として 近いものは？",
+    "a": "月の 軌道面が 地球の 公転面と 少し 傾いているから",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_U10",
+    "asset": "sprites/solar-system/solar-system_r1c4.webp",
+    "q": "地球が 球形である 証拠として 適切なものは？",
+    "a": "月食の とき 地球の 影が 丸い",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_U10",
+    "asset": "sprites/solar-system/solar-system_r1c4.webp",
+    "q": "地球の 表面で 海が 多いことから、地球は 何と 呼ばれることが ある？",
+    "a": "水の 惑星",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_U10",
+    "asset": "sprites/solar-system/solar-system_r1c4.webp",
+    "q": "大気が 地球に あることで 生命に 役立つことは？",
+    "a": "温度を 保ち 宇宙線などを やわらげる",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_U10",
+    "asset": "sprites/solar-system/solar-system_r1c4.webp",
+    "q": "地球の 重力が あるために 保たれているものは？",
+    "a": "大気や 海",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_U10",
+    "asset": "sprites/solar-system/solar-system_r1c4.webp",
+    "q": "人工衛星が 落ち続けながら 地球を 回ると 考えられる 理由は？",
+    "a": "前向きの 速さと 重力が あるから",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_U10",
+    "asset": "sprites/solar-system/solar-system_r1c4.webp",
+    "q": "宇宙から 地球を 観測する 利点は？",
+    "a": "広い 範囲の 雲や 海を 調べられる",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_U10",
+    "asset": "sprites/solar-system/solar-system_r1c1.webp",
+    "q": "太陽のように自ら光り輝く星を何という？",
+    "a": "恒星（こうせい）",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_U11",
+    "asset": "sprites/solar-system/solar-system_r1c1.webp",
+    "q": "太陽の まわりを 回る 天体の 集まりを？",
+    "a": "太陽系",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_U11",
+    "asset": "sprites/solar-system/solar-system_r1c4.webp",
+    "q": "地球に いちばん 近い 恒星は？",
+    "a": "太陽",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_U11",
+    "asset": "sprites/solar-system/solar-system_r3c4.webp",
+    "q": "太陽の まわりを 公転する 大きな 天体を？",
+    "a": "惑星",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_U11",
+    "asset": "sprites/solar-system/solar-system_r4c3.webp",
+    "q": "惑星の まわりを 回る 天体を？",
+    "a": "衛星",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_U11",
+    "asset": "sprites/solar-system/solar-system_r1c1.webp",
+    "q": "太陽系で 最も 大きい 惑星は？",
+    "a": "木星",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_U11",
+    "asset": "sprites/solar-system/solar-system_r1c1.webp",
+    "q": "太陽に 最も 近い 惑星は？",
+    "a": "水星",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_U11",
+    "asset": "sprites/solar-system/solar-system_r1c4.webp",
+    "q": "地球の 1つ 外側を 回る 惑星は？",
+    "a": "火星",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_U11",
+    "asset": "sprites/solar-system/solar-system_r1c4.webp",
+    "q": "地球の 1つ 内側を 回る 惑星は？",
+    "a": "金星",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_U11",
+    "asset": "sprites/solar-system/solar-system_r4c3.webp",
+    "q": "輪が 目立つ 惑星として 有名なのは？",
+    "a": "土星",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_U11",
+    "asset": "sprites/solar-system/solar-system_r1c1.webp",
+    "q": "太陽系の 惑星は 何個か？",
+    "a": "8個",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_U11",
+    "asset": "sprites/solar-system/solar-system_r4c4.webp",
+    "q": "小惑星が 多く 集まる 領域は どこに ある？",
+    "a": "火星と 木星の 間",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_U11",
+    "asset": "sprites/solar-system/solar-system_r1c1.webp",
+    "q": "細長い 軌道を えがき、太陽に 近づくと ほうき星の ように 見える 天体は？",
+    "a": "彗星",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_U11",
+    "asset": "sprites/solar-system/solar-system_r1c1.webp",
+    "q": "太陽の 表面に 黒く 見える 部分を？",
+    "a": "黒点",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_U11",
+    "asset": "sprites/solar-system/solar-system_r1c1.webp",
+    "q": "太陽の 表面温度は およそ 何度か？",
+    "a": "約6000度",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_U11",
+    "asset": "sprites/solar-system/solar-system_r1c4.webp",
+    "q": "地球型惑星に 共通しやすい 特ちょうは？",
+    "a": "岩石質で 比較的 小さい",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_U11",
+    "asset": "sprites/solar-system/solar-system_r2c2.webp",
+    "q": "木星型惑星に 共通しやすい 特ちょうは？",
+    "a": "大きくて 気体成分が 多い",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_U11",
+    "asset": "sprites/solar-system/solar-system_r1c1.webp",
+    "q": "太陽系を 学ぶ 理由として よいものは？",
+    "a": "地球が 太陽系の どこに あるかを 理解するため",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_U11",
+    "asset": "sprites/solar-system/solar-system_r4c3.webp",
+    "q": "惑星が 自ら 光って 見える わけでは ない 理由は？",
+    "a": "太陽の 光を 反射しているから",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_U11",
+    "asset": "sprites/solar-system/solar-system_r1c1.webp",
+    "q": "太陽は どのような 天体か？",
+    "a": "自ら 光を 出す 恒星",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_U11",
+    "asset": "sprites/solar-system/solar-system_r1c1.webp",
+    "q": "太陽の 表面に 見える 黒っぽい 部分を 何という？",
+    "a": "黒点",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_U11",
+    "asset": "sprites/solar-system/solar-system_r1c1.webp",
+    "q": "黒点が 移動して 見えることから わかる 太陽の 運動は？",
+    "a": "自転",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_U11",
+    "asset": "sprites/solar-system/solar-system_r1c1.webp",
+    "q": "太陽の 主成分として 多い 気体は？",
+    "a": "水素と ヘリウム",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_U11",
+    "asset": "sprites/solar-system/solar-system_r1c1.webp",
+    "q": "太陽の エネルギーは 主に どの 反応で 生じる？",
+    "a": "核融合",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_U11",
+    "asset": "sprites/solar-system/solar-system_r1c2.webp",
+    "q": "水星の 特ちょうとして 適切なものは？",
+    "a": "太陽に 最も 近い 惑星",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_U11",
+    "asset": "sprites/solar-system/solar-system_r1c3.webp",
+    "q": "金星が 明け方や 夕方に 見えやすい 理由は？",
+    "a": "地球より 内側を 公転するから",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_U11",
+    "asset": "sprites/solar-system/solar-system_r2c1.webp",
+    "q": "火星が 赤っぽく 見える 理由として 近いものは？",
+    "a": "表面の 酸化鉄が 関係するから",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_U11",
+    "asset": "sprites/solar-system/solar-system_r2c2.webp",
+    "q": "木星の 特ちょうとして 適切なものは？",
+    "a": "太陽系で 最も 大きい 惑星",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_U11",
+    "asset": "sprites/solar-system/solar-system_r2c3.webp",
+    "q": "土星の 特ちょうとして よく 知られるものは？",
+    "a": "大きな 環",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_U11",
+    "asset": "sprites/solar-system/solar-system_r2c4.webp",
+    "q": "天王星や 海王星は どの 分類に 入る？",
+    "a": "木星型惑星",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_U11",
+    "asset": "sprites/solar-system/solar-system_r1c4.webp",
+    "q": "地球型惑星に 共通する 特ちょうは？",
+    "a": "岩石質で 比較的 小さい",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_U11",
+    "asset": "sprites/solar-system/solar-system_r4c3.webp",
+    "q": "衛星とは どのような 天体か？",
+    "a": "惑星の 周りを 公転する 天体",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_U11",
+    "asset": "sprites/solar-system/solar-system_r4c4.webp",
+    "q": "小惑星が 多く 分布する 場所として 知られるのは？",
+    "a": "火星と 木星の 間",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_U11",
+    "asset": "sprites/solar-system/solar-system_r3c4.webp",
+    "q": "太陽系の 惑星が ほぼ 同じ 平面上を 公転する 理由として 近いものは？",
+    "a": "同じ 円盤状の 材料から できたと 考えられるから",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_U11",
+    "asset": "sprites/solar-system/solar-system_r3c4.webp",
+    "q": "惑星の 公転軌道は どのような 形に 近い？",
+    "a": "だ円",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_U11",
+    "asset": "sprites/solar-system/solar-system_r3c4.webp",
+    "q": "太陽から 遠い 惑星ほど 公転周期は どうなりやすい？",
+    "a": "長い",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_U11",
+    "asset": "sprites/solar-system/solar-system_r4c3.webp",
+    "q": "内惑星に あたる 惑星は？",
+    "a": "水星と 金星",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_U11",
+    "asset": "sprites/solar-system/solar-system_r4c3.webp",
+    "q": "外惑星に あたる 惑星は？",
+    "a": "火星・木星・土星・天王星・海王星",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_U11",
+    "asset": "sprites/solar-system/solar-system_r1c3.webp",
+    "q": "金星が 真夜中に 見えにくい 理由は？",
+    "a": "太陽から 大きく 離れて 見えないから",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_U11",
+    "asset": "sprites/solar-system/solar-system_r2c1.webp",
+    "q": "火星が 真夜中に 見えることが ある 理由は？",
+    "a": "地球より 外側を 公転する 外惑星だから",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_U11",
+    "asset": "sprites/solar-system/solar-system_r4c3.webp",
+    "q": "恒星と 惑星の ちがいとして 正しいものは？",
+    "a": "恒星は 自ら 光り、惑星は 主に 光を 反射する",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_U11",
+    "asset": "sprites/solar-system/solar-system_r4c2.webp",
+    "q": "太陽系が ある 銀河は？",
+    "a": "天の川銀河",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_U11",
+    "asset": "sprites/solar-system/solar-system_r4c2.webp",
+    "q": "銀河とは どのような 集まりか？",
+    "a": "多数の 恒星や ガスなどの 集まり",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_U11",
+    "asset": "sprites/solar-system/solar-system_r1c1.webp",
+    "q": "太陽系を 調べる 探査機の 利点は？",
+    "a": "近くから 天体の 表面や 環境を 観測できる",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_U12",
+    "asset": "sprites/solar-system/solar-system_r3c5.webp",
+    "q": "1年の うちで 見える 星座が 変わる 主な 理由は？",
+    "a": "地球が 公転しているから",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_U12",
+    "asset": "sprites/solar-system/solar-system_r3c5.webp",
+    "q": "北極星の 近くを 中心に 星が 円を えがくように 見える 動きを？",
+    "a": "日周運動",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_U12",
+    "asset": "sprites/solar-system/solar-system_r3c4.webp",
+    "q": "オリオン座が よく 見える 季節は？",
+    "a": "冬",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_U12",
+    "asset": "sprites/solar-system/solar-system_r3c4.webp",
+    "q": "さそり座が よく 見える 季節は？",
+    "a": "夏",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_U12",
+    "asset": "sprites/solar-system/solar-system_r3c5.webp",
+    "q": "北斗七星を ふくむ 星座は？",
+    "a": "おおぐま座",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_U12",
+    "asset": "sprites/solar-system/solar-system_r4c3.webp",
+    "q": "恒星の 色の ちがいから わかることとして 適切なものは？",
+    "a": "表面温度の ちがい",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_U12",
+    "asset": "sprites/solar-system/solar-system_r1c1.webp",
+    "q": "太陽が 動いて 見えるのも 星と 同じく 主に 何が 原因か？",
+    "a": "地球の 自転",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_U12",
+    "asset": "sprites/solar-system/solar-system_r3c4.webp",
+    "q": "季節によって 南中する 星座が 変わる 理由は？",
+    "a": "地球が 公転しているから",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_U12",
+    "asset": "sprites/solar-system/solar-system_r3c5.webp",
+    "q": "星座早見盤を 使う 目的として 適切なのは？",
+    "a": "日時に 応じて 見える 星座を 調べるため",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_U12",
+    "asset": "sprites/solar-system/solar-system_r3c5.webp",
+    "q": "北極星を 見つける 手がかりとして よく 使うものは？",
+    "a": "北斗七星",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_U12",
+    "asset": "sprites/solar-system/solar-system_r3c4.webp",
+    "q": "同じ 時刻に 見える 星座が 季節で 変わる 理由は？",
+    "a": "地球の 公転で 夜に 向く 方向が 変わるから",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_U12",
+    "asset": "sprites/solar-system/solar-system_r3c5.webp",
+    "q": "北極星が ほとんど 動かないように 見える 理由は？",
+    "a": "地軸の 延長方向に 近いから",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_U12",
+    "asset": "sprites/solar-system/solar-system_r3c5.webp",
+    "q": "星座早見を 使う ときに 合わせるものは？",
+    "a": "日付と 時刻",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_U12",
+    "asset": "sprites/solar-system/solar-system_r3c5.webp",
+    "q": "星座早見で 方位を 合わせる 理由は？",
+    "a": "実際の 空の 方角と 対応させるため",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_U12",
+    "asset": "sprites/solar-system/solar-system_r3c4.webp",
+    "q": "オリオン座が 見えやすい 季節は？",
+    "a": "冬",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_U12",
+    "asset": "sprites/solar-system/solar-system_r3c4.webp",
+    "q": "さそり座が 見えやすい 季節は？",
+    "a": "夏",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_U12",
+    "asset": "sprites/solar-system/solar-system_r3c5.webp",
+    "q": "春の 代表的な 星座として 適切なものは？",
+    "a": "しし座",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_U12",
+    "asset": "sprites/solar-system/solar-system_r3c5.webp",
+    "q": "秋の 代表的な 星座として 適切なものは？",
+    "a": "ペガスス座",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_U12",
+    "asset": "sprites/solar-system/solar-system_r3c5.webp",
+    "q": "星座を 作る 星どうしは 実際には どうなっている？",
+    "a": "距離が 大きく ちがうことが 多い",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_U12",
+    "asset": "sprites/solar-system/solar-system_r1c1.webp",
+    "q": "天体望遠鏡で 太陽を 直接 見てはいけない 理由は？",
+    "a": "目を 傷つける 危険が あるから",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_U12",
+    "asset": "sprites/solar-system/solar-system_r3c5.webp",
+    "q": "星座の 観察に 適した 場所として よいものは？",
+    "a": "街灯が 少なく 空が 開けた 場所",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_U12",
+    "asset": "sprites/solar-system/solar-system_r3c5.webp",
+    "q": "惑星が 星座の 間を 動いて 見える 理由は？",
+    "a": "惑星も 太陽の 周りを 公転しているから",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  },
+  {
+    "mode": "SCIENCE_9_U12",
+    "asset": "sprites/solar-system/solar-system_r4c3.webp",
+    "q": "恒星の 年周視差を 調べると 何が わかる？",
+    "a": "星までの 距離",
+    "audio": false,
+    "speech": false,
+    "visual": false
+  }
+]
