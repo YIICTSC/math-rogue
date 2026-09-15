@@ -307,7 +307,7 @@ export const MATH_G9_UNIT_DATA: Record<string, GeneralProblem[]> = {
         q("合同は相似比いくつの相似？", "1:1", "1:2", "2:1", "0:1", "大きさも同じ相似です。"),
         q("地図で1cmが実際の500mを表すとき、この考えは？", "縮図", "展開図", "投影図", "作図", "実物を小さくした図です。"),
         q("相似比1:2000で図上3cmなら実際は？", "6000cm", "2003cm", "2000cm", "3/2000cm", "3×2000です。"),
-        q("相似な三角形で小さい辺4cmに対応する大きい辺が10cm。相似比は？", "2:5", "4:10だけ", "5:2", "1:6", "簡単な整数比にします。"),
+        q("相似な三角形で小さい辺4cmに対応する大きい辺が10cm。相似比は？", "2:5", "4:9", "5:2", "1:6", "簡単な整数比にします。"),
         q("相似比2:5で小さい辺6cmなら対応する大きい辺は？", "15cm", "12cm", "30cm", "9cm", "6×5/2です。"),
         q("相似な図形の面積を比べるとき注意することは？", "相似比を2乗する", "相似比をそのまま使う", "相似比を3乗する", "角を足す", "面積は2次元です。"),
         q("相似な立体の体積を比べるとき注意することは？", "相似比を3乗する", "相似比を2乗する", "相似比をそのまま使う", "辺を足す", "体積は3次元です。"),
@@ -370,8 +370,8 @@ export const MATH_G9_UNIT_DATA: Record<string, GeneralProblem[]> = {
         q("国勢調査はどちらに近い？", "全数調査", "標本調査", "作図", "確率実験", "対象全体を調べる代表例です。"),
         q("テレビ視聴率調査はどちらに近い？", "標本調査", "全数調査", "合同証明", "平方根", "一部の世帯から推定します。"),
         q("池の魚の数を推定する方法として使われる考えは？", "標識再捕法", "三平方の定理", "因数分解", "円周角の定理", "印をつけて割合から推定します。"),
-        q("標本30人中12人が賛成。賛成の割合は？", "2/5", "12/30だけ", "3/5", "18/30", "12/30を約分します。"),
-        q("標本50個中8個が不良品。割合は？", "4/25", "8/50だけ", "42/50", "25/4", "8/50を約分します。"),
+        q("標本30人中12人が賛成。賛成の割合は？", "2/5", "12/25", "3/5", "18/30", "12/30を約分します。"),
+        q("標本50個中8個が不良品。割合は？", "4/25", "8/40", "42/50", "25/4", "8/50を約分します。"),
         q("母集団1000人で、標本の賛成割合が30%なら賛成者数の推定は？", "約300人", "約30人", "約700人", "約1000人", "1000×0.30です。"),
         q("母集団500個で、不良品割合が4%なら不良品数の推定は？", "約20個", "約4個", "約125個", "約480個", "500×0.04です。"),
         q("標本調査で結果を読むとき忘れてはいけないことは？", "誤差がありうる", "必ず完全に正しい", "全数調査と同じ", "計算不要", "一部から推測するためずれが出ます。"),
@@ -387,14 +387,17 @@ const makeUnitProblem = (unitId: string, n: number): GeneralProblem => {
         case 'MATH_G9_U01': {
             const a = (n % 6) + 1;
             const b = (n % 5) + 2;
+            const left = Math.min(a, b);
+            const right = Math.max(a, b);
             if (n % 2 === 0) {
                 return { question: `(x+${a})(x+${b}) を展開せよ。`, answer: `x² + ${(a + b)}x + ${a * b}`, options: d(`x² + ${(a + b)}x + ${a * b}`, `x² + ${(a - b)}x + ${a * b}`, `x² + ${a + b}`, `x² + ${(a + b)}x - ${a * b}`), hint: "分配法則で展開。" };
             }
-            return { question: `x² + ${(a + b)}x + ${a * b} を因数分解せよ。`, answer: `(x+${a})(x+${b})`, options: d(`(x+${a})(x+${b})`, `(x-${a})(x-${b})`, `(x+${a * b})(x+1)`, `(x+${a + b})(x+1)`), hint: "足して ${a + b}、かけて ${a * b}。" };
+            return { question: `x² + ${(a + b)}x + ${a * b} を因数分解せよ。`, answer: `(x+${left})(x+${right})`, options: d(`(x+${left})(x+${right})`, `(x-${left})(x-${right})`, `(x+${a * b})(x+1)`, `(x+${a + b})(x+1)`), hint: "足して ${a + b}、かけて ${a * b}。" };
         }
         case 'MATH_G9_U02': {
-            const k = (n % 8) + 2;
-            if (n % 2 === 0) {
+            const form = n % 2;
+            const k = (Math.floor(n / 2) % 8) + 2;
+            if (form === 0) {
                 return { question: `√${k * k * 2} を簡単にせよ。`, answer: `${k}√2`, options: d(`${k}√2`, `${k * 2}`, `√${k * 2}`, `${k}√${k}`), hint: "平方数を外に出す。" };
             }
             return { question: `${k}√2 を 1つの根号で表すと？`, answer: `√${k * k * 2}`, options: d(`√${k * k * 2}`, `√${k * 2}`, `${k * 2}`, `√${k * k}`), hint: "係数を2乗して中に入れる。" };
@@ -402,14 +405,17 @@ const makeUnitProblem = (unitId: string, n: number): GeneralProblem => {
         case 'MATH_G9_U03': {
             const p = (n % 6) + 2;
             const q = (n % 5) + 1;
+            const first = Math.min(p, q);
+            const second = Math.max(p, q);
             if (n % 2 === 0) {
-                return { question: `x² - ${(p + q)}x + ${p * q} = 0 の解は？`, answer: `x=${p}, ${q}`, options: d(`x=${p}, ${q}`, `x=-${p}, -${q}`, `x=${p + q}`, `x=${p * q}`), hint: "因数分解で解く。" };
+                return { question: `x² - ${(p + q)}x + ${p * q} = 0 の解は？`, answer: `x=${first}, ${second}`, options: d(`x=${first}, ${second}`, `x=-${first}, -${second}`, `x=${p + q}`, `x=${p * q}`), hint: "因数分解で解く。" };
             }
-            return { question: `x=${p}, ${q} を解にもつ二次方程式は？`, answer: `x² - ${(p + q)}x + ${p * q} = 0`, options: d(`x² - ${(p + q)}x + ${p * q} = 0`, `x² + ${(p + q)}x + ${p * q} = 0`, `x² - ${p * q}x + ${p + q} = 0`, `x² - ${(p + q)}x - ${p * q} = 0`), hint: "(x-p)(x-q)=0 の形。" };
+            return { question: `x=${first}, ${second} を解にもつ二次方程式は？`, answer: `x² - ${(p + q)}x + ${p * q} = 0`, options: d(`x² - ${(p + q)}x + ${p * q} = 0`, `x² + ${(p + q)}x + ${p * q} = 0`, `x² - ${p * q}x + ${p + q} = 0`, `x² - ${(p + q)}x - ${p * q} = 0`), hint: "(x-p)(x-q)=0 の形。" };
         }
         case 'MATH_G9_U04': {
-            const x = (n % 8) + 3;
-            if (n % 2 === 0) {
+            const form = n % 2;
+            const x = (Math.floor(n / 2) % 8) + 3;
+            if (form === 0) {
                 return { question: `連続する2整数の積が ${x * (x + 1)}。小さい方は？`, answer: `${x}`, options: d(`${x}`, `${x + 1}`, `${x - 1}`, `${x + 2}`), hint: "x(x+1) の形。" };
             }
             return { question: `連続する2整数の積が ${x * (x + 1)}。大きい方は？`, answer: `${x + 1}`, options: d(`${x + 1}`, `${x}`, `${x + 2}`, `${x - 1}`), hint: "小さい方が ${x} なら次は ${x + 1}。" };
@@ -423,12 +429,14 @@ const makeUnitProblem = (unitId: string, n: number): GeneralProblem => {
             return { question: `y=${a}x² のグラフで x が 1 から 2 へ増えるとき、y の増加量は？`, answer: `${a * 4 - a}`, options: d(`${a * 4 - a}`, `${a * 4}`, `${a}`, `${a * 2}`), hint: "y(2)-y(1) を求める。", visual: { kind: 'parabola', a, markX: 2 } };
         }
         case 'MATH_G9_U06': {
-            const p = (n % 4) + 1;
-            const q = p + 1;
-            if (n % 2 === 0) {
+            const form = n % 3;
+            const p = (Math.floor(n / 3) % 5) + 1;
+            const q = p + (Math.floor(n / 15) % 3) + 1;
+            if (form === 0) {
                 return { question: `相似比 ${p}:${q} のとき面積比は？`, answer: `${p * p}:${q * q}`, options: d(`${p * p}:${q * q}`, `${p}:${q}`, `${p * 2}:${q * 2}`, `${p * p * p}:${q * q * q}`), hint: "面積比は相似比の2乗。", visual: { kind: 'polygon', sides: 3, labels: ['A', 'B', 'C'] } };
             }
-            return { question: `相似比 ${p}:${q} のとき体積比は？`, answer: `${p * p * p}:${q * q * q}`, options: d(`${p * p * p}:${q * q * q}`, `${p * p}:${q * q}`, `${p}:${q}`, `${p + q}:${q}`), hint: "体積比は相似比の3乗。", visual: { kind: 'polygon', sides: 3, labels: ['P', 'Q', 'R'] } };
+            if (form === 1) return { question: `相似比 ${p}:${q} のとき体積比は？`, answer: `${p * p * p}:${q * q * q}`, options: d(`${p * p * p}:${q * q * q}`, `${p * p}:${q * q}`, `${p}:${q}`, `${p + q}:${q}`), hint: "体積比は相似比の3乗。", visual: { kind: 'polygon', sides: 3, labels: ['P', 'Q', 'R'] } };
+            return { question: `相似な図形で小さい方の対応辺が${p * 2}cm、大きい方が${q * 2}cm。相似比（小:大）は？`, answer: `${p}:${q}`, options: d(`${p}:${q}`, `${q}:${p}`, `${p * p}:${q * q}`, `${p + q}:${q}`), hint: "対応する辺の長さの比。", visual: { kind: 'polygon', sides: 3 } };
         }
         case 'MATH_G9_U07': {
             const a = (n % 5) + 3;
@@ -440,11 +448,13 @@ const makeUnitProblem = (unitId: string, n: number): GeneralProblem => {
             return { question: `直角三角形の斜辺の2乗が ${c2}、1辺が ${a}。もう1辺の2乗は？`, answer: `${b * b}`, options: d(`${b * b}`, `${c2}`, `${a * a}`, `${a + b}`), hint: "c²-a² を求める。", visual: { kind: 'angle', degrees: 90, rightAngleMark: true, labels: ['a', 'c'] } };
         }
         case 'MATH_G9_U08': {
-            const angle = ((n % 8) + 1) * 15;
-            if (n % 2 === 0) {
+            const form = n % 3;
+            const angle = ((Math.floor(n / 3) % 8) + 1) * 15;
+            if (form === 0) {
                 return { question: `同じ弧に対する中心角が ${angle * 2}度。円周角は？`, answer: `${angle}度`, options: d(`${angle}度`, `${angle * 2}度`, `${Math.floor(angle / 2)}度`, `90度`), hint: "円周角は中心角の半分。", visual: { kind: 'circle', showChord: true, centralAngle: angle * 2, inscribedAngle: angle, labels: ['A', 'B', 'P'] } };
             }
-            return { question: `同じ弧に対する円周角が ${angle}度。中心角は？`, answer: `${angle * 2}度`, options: d(`${angle * 2}度`, `${angle}度`, `${Math.floor(angle / 2)}度`, `180度`), hint: "中心角は円周角の2倍。", visual: { kind: 'circle', showChord: true, centralAngle: angle * 2, inscribedAngle: angle, labels: ['A', 'B', 'P'] } };
+            if (form === 1) return { question: `同じ弧に対する円周角が ${angle}度。中心角は？`, answer: `${angle * 2}度`, options: d(`${angle * 2}度`, `${angle}度`, `${Math.floor(angle / 2)}度`, `180度`), hint: "中心角は円周角の2倍。", visual: { kind: 'circle', showChord: true, centralAngle: angle * 2, inscribedAngle: angle, labels: ['A', 'B', 'P'] } };
+            return { question: `同じ弧ABを見る円周角∠APBが${angle}度。別の点Qから弧ABを見る円周角∠AQBは？`, answer: `${angle}度`, options: d(`${angle}度`, `${angle * 2}度`, `${Math.floor(angle / 2)}度`, `${180 - angle}度`), hint: "同じ弧に対する円周角は等しい。", visual: { kind: 'circle', showChord: true, inscribedAngle: angle, labels: ['A', 'B', 'P'] } };
         }
         case 'MATH_G9_U09': {
             const sample = (n % 5) + 10;
@@ -467,7 +477,7 @@ const makeUnitProblem = (unitId: string, n: number): GeneralProblem => {
     }
 };
 
-fillGeneratedUnitProblems(MATH_G9_UNIT_DATA, makeUnitProblem);
+fillGeneratedUnitProblems(MATH_G9_UNIT_DATA, makeUnitProblem, { stopAtMin: true });
 
 Object.assign(MATH_G9_DATA, MATH_G9_UNIT_DATA);
 

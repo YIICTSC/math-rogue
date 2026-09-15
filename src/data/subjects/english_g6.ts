@@ -63,13 +63,13 @@ const memories: EnglishWordItem[] = [
 ];
 const pastEvents: EnglishWordItem[] = [
   { en: 'played', jp: '遊んだ' },
-  { en: 'watched', jp: '見た' },
+  { en: 'watched', jp: '見た', promptJp: '見た（テレビ・試合などを）' },
   { en: 'visited', jp: 'おとずれた' },
   { en: 'studied', jp: '勉強した' },
   { en: 'helped', jp: '手伝った' },
   { en: 'cooked', jp: '料理した' },
   { en: 'went', jp: '行った' },
-  { en: 'saw', jp: '見た' },
+  { en: 'saw', jp: '見た', promptJp: '見た（目に入った・見かけた）' },
   { en: 'ate', jp: '食べた' },
   { en: 'made', jp: '作った' },
 ];

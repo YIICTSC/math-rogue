@@ -8,6 +8,39 @@ const q = (question: string, answer: string, wrong1: string, wrong2: string, wro
     hint,
 });
 
+const gcd = (x: number, y: number): number => {
+    let a = Math.abs(x);
+    let b = Math.abs(y);
+    while (b !== 0) {
+        [a, b] = [b, a % b];
+    }
+    return a || 1;
+};
+
+const reduceFraction = (numerator: number, denominator: number): { n: number; d: number } => {
+    const divisor = gcd(numerator, denominator);
+    return { n: numerator / divisor, d: denominator / divisor };
+};
+
+const formatFraction = (numerator: number, denominator: number): string => {
+    const reduced = reduceFraction(numerator, denominator);
+    return reduced.d === 1 ? `${reduced.n}` : `${reduced.n}/${reduced.d}`;
+};
+
+const fractionOptions = (numerator: number, denominator: number): string[] => {
+    const reduced = reduceFraction(numerator, denominator);
+    const answer = formatFraction(reduced.n, reduced.d);
+    if (reduced.d === 1) {
+        return d(answer, `${reduced.n + 1}`, `${Math.max(0, reduced.n - 1)}`, `${reduced.n}/${2}`);
+    }
+    return d(
+        answer,
+        `${reduced.n + 1}/${reduced.d}`,
+        `${reduced.n}/${reduced.d + 1}`,
+        `${reduced.n + 1}/${reduced.d + 1}`,
+    );
+};
+
 // --- 6年生 1学期: 対称・文字と式・分数の掛け算割り算 (50問) ---
 const MATH_G6_1: GeneralProblem[] = [
         { question: "1つの直線を折り目にして重ねた時、ぴったり重なる図形を？", answer: "線対称（せんたいしょう）な図形", options: d("線対称", "点対称", "非対称", "正多角形"), hint: "鏡（かがみ）あわせのような形だよ。" },
@@ -236,9 +269,9 @@ export const MATH_G6_UNIT_DATA: Record<string, GeneralProblem[]> = {
     ], // 文字 と 式
     MATH_G6_U03: [
         q("2/3×4/5=?", "8/15", "6/8", "2/15", "4/3", "分子どうし、分母どうしをかけます。"),
-        q("3/4×2/5=?", "3/10", "6/20だけ", "5/9", "6/9", "6/20を約分します。"),
-        q("5/6×3/10=?", "1/4", "15/60だけ", "8/16", "5/20", "15/60を約分します。"),
-        q("4/7×7/8=?", "1/2", "28/56だけ", "4/8", "7/14", "7と7、4と8を約分できます。"),
+        q("3/4×2/5=?", "3/10", "6/25", "5/9", "6/9", "分子どうし・分母どうしをかけて約分します。"),
+        q("5/6×3/10=?", "1/4", "15/50", "8/16", "5/18", "分子どうし・分母どうしをかけて約分します。"),
+        q("4/7×7/8=?", "1/2", "28/48", "4/7", "7/8", "7と7、4と8を約分できます。"),
         q("3/5×10=?", "6", "30/50", "3/50", "2", "10を10/1と見て約分します。"),
         q("2/9×6=?", "4/3", "12/54", "1/3", "8/9", "6と9を3で約分します。"),
         q("1と1/2×2/3を計算する前にすることは？", "仮分数に直す", "整数だけかける", "分母を足す", "小数点を動かす", "帯分数は3/2にします。"),
@@ -259,9 +292,9 @@ export const MATH_G6_UNIT_DATA: Record<string, GeneralProblem[]> = {
     MATH_G6_U04: [
         q("2/3÷4/5=?", "5/6", "8/15", "6/5", "2/15", "2/3×5/4にします。"),
         q("3/4÷2/5=?", "15/8", "6/20", "5/6", "1/2", "3/4×5/2です。"),
-        q("5/6÷10/3=?", "1/4", "50/18", "8/16", "5/20", "5/6×3/10です。"),
-        q("4/7÷2=?", "2/7", "4/14だけ", "8/7", "2", "2でわると半分です。"),
-        q("3/5÷6=?", "1/10", "18/5", "3/30だけ", "2/5", "3/5×1/6です。"),
+        q("5/6÷10/3=?", "1/4", "50/18", "8/16", "5/18", "5/6×3/10です。"),
+        q("4/7÷2=?", "2/7", "4/12", "8/7", "2", "2でわると半分です。"),
+        q("3/5÷6=?", "1/10", "18/5", "3/20", "2/5", "3/5×1/6です。"),
         q("5÷1/2=?", "10", "5/2", "2.5", "5", "半分でわると2倍です。"),
         q("3÷2/5=?", "15/2", "6/5", "5/6", "3/5", "3×5/2です。"),
         q("1と1/2÷3/4=?", "2", "9/8", "1", "3/2", "3/2×4/3です。"),
@@ -282,7 +315,7 @@ export const MATH_G6_UNIT_DATA: Record<string, GeneralProblem[]> = {
         q("2:3と同じ比は？", "4:6", "3:4", "2:6", "5:6", "両方を2倍しています。"),
         q("6:9を簡単にすると？", "2:3", "3:2", "6:3", "1:9", "両方を3で割ります。"),
         q("15:10を簡単にすると？", "3:2", "5:2", "15:1", "1:10", "両方を5で割ります。"),
-        q("0.4:0.6を整数の比にすると？", "2:3", "4:6だけ", "3:2", "1:6", "10倍して4:6、さらに簡単にします。"),
+        q("0.4:0.6を整数の比にすると？", "2:3", "4:5", "3:2", "1:6", "10倍して4:6、さらに簡単にします。"),
         q("1/2:1/3を整数の比にすると？", "3:2", "2:3", "1:6", "1:1", "両方に6をかけます。"),
         q("2:5の比の値は？", "2/5", "5/2", "7", "10", "前の数÷後ろの数です。"),
         q("3:4で、全体が140gなら1あたりは？", "20g", "35g", "140g", "7g", "3+4=7、140÷7です。"),
@@ -460,7 +493,7 @@ export const MATH_G6_UNIT_DATA: Record<string, GeneralProblem[]> = {
         q("(12+6)×3=?", "54", "30", "21", "36", "かっこの中が先です。"),
         q("1/2+1/3=?", "5/6", "2/5", "1/5", "2/6", "通分します。"),
         q("3/4-1/2=?", "1/4", "2/2", "1/2", "3/2", "1/2を2/4にします。"),
-        q("2/3×3/5=?", "2/5", "6/15だけ", "5/8", "1/5", "3を約分できます。"),
+        q("2/3×3/5=?", "2/5", "6/12", "5/8", "1/5", "3を約分できます。"),
         q("2/3÷4/5=?", "5/6", "8/15", "6/5", "2/15", "5/4をかけます。"),
         q("0.25を分数にすると？", "1/4", "1/2", "1/5", "2/5", "25/100を約分します。"),
         q("3/5を小数にすると？", "0.6", "0.3", "1.5", "0.5", "3÷5です。"),
@@ -480,10 +513,19 @@ export const MATH_G6_UNIT_DATA: Record<string, GeneralProblem[]> = {
 
 const makeUnitProblem = (unitId: string, n: number): GeneralProblem => {
     switch (unitId) {
-        case 'MATH_G6_U01':
-            return n % 2 === 0
-                ? { question: "このような図形で、折り目になる線は？", answer: "対称の軸", options: d("対称の軸", "対称の中心", "対角線", "底辺"), hint: "鏡写しになる線。", visual: { kind: 'polygon', sides: 4 } }
-                : { question: "点対称の図形は何度回すと重なる？", answer: "180度", options: d("180度", "90度", "360度", "45度"), hint: "半回転で重なる。", visual: { kind: 'polygon', sides: 4 } };
+        case 'MATH_G6_U01': {
+            const p = n % 10;
+            if (p === 0) return { question: "線対称な図形で、折り目になる線は？", answer: "対称の軸", options: d("対称の軸", "対称の中心", "対角線", "底辺"), hint: "折ると両側が重なる線。", visual: { kind: 'polygon', sides: 4 } };
+            if (p === 1) return { question: "点対称の図形は何度回すと重なる？", answer: "180度", options: d("180度", "90度", "360度", "45度"), hint: "半回転で重なる。", visual: { kind: 'polygon', sides: 4 } };
+            if (p === 2) return { question: "線対称な図形で、対応する2点を結ぶ線分と対称の軸の関係は？", answer: "垂直に交わる", options: d("垂直に交わる", "平行になる", "必ず重なる", "関係ない"), hint: "対応する点は軸から同じ距離。", visual: { kind: 'polygon', sides: 4 } };
+            if (p === 3) return { question: "線対称な図形で、対応する2点は対称の軸からの距離が？", answer: "等しい", options: d("等しい", "2倍", "半分", "決まらない"), hint: "軸をはさんで同じ距離。", visual: { kind: 'polygon', sides: 4 } };
+            if (p === 4) return { question: "点対称な図形で、対応する2点を結ぶ線分はどこを通る？", answer: "対称の中心", options: d("対称の中心", "対称の軸", "必ず頂点", "図形の外だけ"), hint: "中心をはさんで反対側に対応する。", visual: { kind: 'polygon', sides: 4 } };
+            if (p === 5) return { question: "正方形の対称の軸は何本？", answer: "4本", options: d("4本", "2本", "1本", "0本"), hint: "縦・横・2本の対角線。", visual: { kind: 'polygon', sides: 4 } };
+            if (p === 6) return { question: "長方形（正方形ではない）の対称の軸は何本？", answer: "2本", options: d("2本", "4本", "1本", "0本"), hint: "たてとよこの中心を通る2本。", visual: { kind: 'polygon', sides: 4 } };
+            if (p === 7) return { question: "正三角形の対称の軸は何本？", answer: "3本", options: d("3本", "1本", "2本", "0本"), hint: "各頂点から向かいの辺の中央へ。", visual: { kind: 'polygon', sides: 3 } };
+            if (p === 8) return { question: "平行四辺形は一般に点対称？", answer: "点対称", options: d("点対称", "必ず線対称", "対称ではない", "円対称"), hint: "対角線の交点を中心に180度回す。", visual: { kind: 'polygon', sides: 4 } };
+            return { question: "対称な図形を調べるとき、対応する辺の長さは？", answer: "等しい", options: d("等しい", "必ず2倍", "必ず半分", "比べられない"), hint: "重なる部分は同じ長さ。", visual: { kind: 'polygon', sides: 4 } };
+        }
         case 'MATH_G6_U02': {
             const x = (n % 8) + 2;
             const y = x + (n % 5) + 1;
@@ -495,15 +537,19 @@ const makeUnitProblem = (unitId: string, n: number): GeneralProblem => {
         case 'MATH_G6_U03': {
             const a = (n % 6) + 1;
             const b = (n % 7) + 2;
-            const c = (n % 5) + 1;
+            const rawC = (n % 5) + 1;
             const dnm = (n % 8) + 3;
+            const c = rawC === dnm ? rawC + 1 : rawC;
             const p = n % 4;
             if (p === 0) {
+                const numerator = a * c;
+                const denominator = b * dnm;
+                const answer = formatFraction(numerator, denominator);
                 return {
                     question: `${a}/${b} × ${c}/${dnm} = ?`,
-                    answer: `${a * c}/${b * dnm}`,
-                    options: d(`${a * c}/${b * dnm}`, `${a + c}/${b + dnm}`, `${a * dnm}/${b * c}`, `${a}/${b}`),
-                    hint: "分子どうし、分母どうし。",
+                    answer,
+                    options: fractionOptions(numerator, denominator),
+                    hint: "分子どうし、分母どうしをかけ、最後に約分する。",
                     visual: { kind: 'fraction_operation', left: { n: a, d: b }, right: { n: c, d: dnm }, op: '×' }
                 };
             }
@@ -525,26 +571,31 @@ const makeUnitProblem = (unitId: string, n: number): GeneralProblem => {
                     visual: { kind: 'fraction', numerator: a, denominator: b }
                 };
             }
+            const identityAnswer = formatFraction(a, b);
             return {
                 question: `${a}/${b} × 1 = ?`,
-                answer: `${a}/${b}`,
-                options: d(`${a}/${b}`, `${a}/${b + 1}`, `${a + 1}/${b}`, `1/${b}`),
-                hint: "1をかけても変わらない。",
+                answer: identityAnswer,
+                options: fractionOptions(a, b),
+                hint: "1をかけても大きさは変わらない。答えは簡単な分数にする。",
                 visual: { kind: 'fraction_operation', left: { n: a, d: b }, right: { n: 1, d: 1 }, op: '×' }
             };
         }
         case 'MATH_G6_U04': {
             const a = (n % 6) + 2;
             const b = (n % 7) + 3;
-            const c = (n % 5) + 1;
+            const rawC = (n % 5) + 1;
             const dnm = (n % 4) + 2;
+            const c = rawC === dnm ? rawC + 1 : rawC;
             const p = n % 4;
             if (p === 0) {
+                const numerator = a * dnm;
+                const denominator = b * c;
+                const answer = formatFraction(numerator, denominator);
                 return {
                     question: `${a}/${b} ÷ ${c}/${dnm} = ?`,
-                    answer: `${a * dnm}/${b * c}`,
-                    options: d(`${a * dnm}/${b * c}`, `${a * c}/${b * dnm}`, `${a + dnm}/${b + c}`, `${a}/${b}`),
-                    hint: "後ろをひっくり返してかける。",
+                    answer,
+                    options: fractionOptions(numerator, denominator),
+                    hint: "後ろをひっくり返してかけ、最後に約分する。",
                     visual: { kind: 'fraction_operation', left: { n: a, d: b }, right: { n: c, d: dnm }, op: '÷' }
                 };
             }
@@ -558,11 +609,12 @@ const makeUnitProblem = (unitId: string, n: number): GeneralProblem => {
                 };
             }
             if (p === 2) {
+                const identityAnswer = formatFraction(a, b);
                 return {
                     question: `${a}/${b} ÷ 1 = ?`,
-                    answer: `${a}/${b}`,
-                    options: d(`${a}/${b}`, `${b}/${a}`, `1/${b}`, `${a * b}/1`),
-                    hint: "1で割っても変わらない。",
+                    answer: identityAnswer,
+                    options: fractionOptions(a, b),
+                    hint: "1で割っても大きさは変わらない。答えは簡単な分数にする。",
                     visual: { kind: 'fraction_operation', left: { n: a, d: b }, right: { n: 1, d: 1 }, op: '÷' }
                 };
             }
@@ -578,17 +630,24 @@ const makeUnitProblem = (unitId: string, n: number): GeneralProblem => {
             const left = (n % 5) + 1;
             const right = (n % 4) + 2;
             const mul = (n % 4) + 2;
+            const divisor = gcd(left, right);
+            const simpleLeft = left / divisor;
+            const simpleRight = right / divisor;
             if (n % 2 === 0) {
-                return { question: `${left}:${right} と同じ比は？`, answer: `${left * mul}:${right * mul}`, options: d(`${left * mul}:${right * mul}`, `${left + mul}:${right + mul}`, `${left}:${right * mul}`, `${left * mul}:${right}`), hint: "両方に同じ数をかける。" };
+                return { question: `${left}:${right} と同じ比は？`, answer: `${left * mul}:${right * mul}`, options: d(`${left * mul}:${right * mul}`, `${left * mul}:${right * mul + 1}`, `${left * mul + 1}:${right * mul}`, `${left}:${right * mul}`), hint: "両方に同じ数をかける。" };
             }
-            return { question: `${left * mul}:${right * mul} を いちばん かんたんな比にすると？`, answer: `${left}:${right}`, options: d(`${left}:${right}`, `${left * mul}:${right * mul}`, `${left + right}:${right}`, `${left}:${right + mul}`), hint: "両方を 同じ数で わる。" };
+            return { question: `${left * mul}:${right * mul} を いちばん かんたんな比にすると？`, answer: `${simpleLeft}:${simpleRight}`, options: d(`${simpleLeft}:${simpleRight}`, `${simpleLeft + 1}:${simpleRight}`, `${simpleLeft}:${simpleRight + 1}`, `${simpleLeft + 2}:${simpleRight}`), hint: "両方を 最大公約数で わる。" };
         }
         case 'MATH_G6_U06': {
-            const x = (n % 6) + 1;
-            if (n % 2 === 0) {
-                return { question: `比例で y=4x。x=${x} のとき y=?`, answer: `${4 * x}`, options: d(`${4 * x}`, `${x + 4}`, `${x * x}`, `${x}`), hint: "比例は y=ax。" };
+            const form = n % 2;
+            const xValues = [1, 2, 3, 4, 6, 8];
+            const x = xValues[Math.floor(n / 2) % xValues.length];
+            const k = (Math.floor(n / (2 * xValues.length)) % 4) + 2;
+            if (form === 0) {
+                return { question: `比例で y=${k}x。x=${x} のとき y=?`, answer: `${k * x}`, options: d(`${k * x}`, `${x + k}`, `${x * x}`, `${x}`), hint: "比例は y=ax。" };
             }
-            return { question: `反比例で x×y=12。x=${x} のとき y=?`, answer: `${12 / x}`, options: d(`${12 / x}`, `${4 * x}`, `${x + 12}`, `${x}`), hint: "反比例は x×y が いつも同じ。" };
+            const constant = 24;
+            return { question: `反比例で x×y=${constant}。x=${x} のとき y=?`, answer: `${constant / x}`, options: d(`${constant / x}`, `${k * x}`, `${x + constant}`, `${x}`), hint: "反比例は x×y が いつも同じ。" };
         }
         case 'MATH_G6_U07': {
             const scale = (n % 4) + 2;
@@ -614,21 +673,34 @@ const makeUnitProblem = (unitId: string, n: number): GeneralProblem => {
             return { question: `体積が ${base * h}cm3、高さが ${h}cm の角柱/円柱。底面積は？`, answer: `${base}cm2`, options: d(`${base}cm2`, `${base * h}cm2`, `${h}cm2`, `${base + h}cm2`), hint: "体積÷高さ。", visual: { kind: 'cylinder', showRadius: true, showHeight: true } };
         }
         case 'MATH_G6_U10': {
-            const x = 100 + n * 13;
-            const rounded = Math.round(x / 10) * 10;
-            if (n % 2 === 0) {
-                return { question: `${x} を十の位までのおよその数にすると？`, answer: `${rounded}`, options: d(`${rounded}`, `${Math.floor(x / 10) * 10}`, `${Math.ceil(x / 10) * 10}`, `${x}`), hint: "一の位で四捨五入。" };
+            const length = (n % 8) + 12;
+            const width = (n % 6) + 8;
+            const height = (n % 5) + 3;
+            const p = n % 4;
+            if (p === 0) {
+                return { question: `池を たて約${length}m、よこ約${width}m の長方形に見立てる。およその面積は？`, answer: `${length * width}m2`, options: d(`${length * width}m2`, `${length + width}m2`, `${2 * (length + width)}m2`, `${length * width * 2}m2`), hint: "長方形に見立てて、たて×よこ。" };
             }
-            return { question: `${x} は およそ ${rounded} と いえる？`, answer: "はい", options: d("はい", "いいえ", "同じ", "わからない"), hint: "十の位までの がい数に した数を 見よう。" };
+            if (p === 1) {
+                return { question: `土地を 底辺約${length}m、高さ約${width}m の三角形に見立てる。およその面積は？`, answer: `${(length * width) / 2}m2`, options: d(`${(length * width) / 2}m2`, `${length * width}m2`, `${length + width}m2`, `${2 * (length + width)}m2`), hint: "三角形に見立てて、底辺×高さ÷2。" };
+            }
+            if (p === 2) {
+                return { question: `荷物を たて約${length}m、よこ約${width}m、高さ約${height}m の直方体に見立てる。およその体積は？`, answer: `${length * width * height}m3`, options: d(`${length * width * height}m3`, `${length * width}m3`, `${length + width + height}m3`, `${2 * (length * width + width * height + height * length)}m3`), hint: "直方体に見立てて、たて×よこ×高さ。" };
+            }
+            const baseArea = length * width;
+            return { question: `柱の底面積を約${baseArea}m2、高さを約${height}m と見積もる。およその体積は？`, answer: `${baseArea * height}m3`, options: d(`${baseArea * height}m3`, `${baseArea + height}m3`, `${baseArea}m3`, `${height}m3`), hint: "柱の体積は 底面積×高さ。" };
         }
         case 'MATH_G6_U11': {
-            const nItems = (n % 4) + 3;
+            const form = n % 3;
+            const nItems = (Math.floor(n / 3) % 4) + 3;
             let ways = 1;
             for (let k = 2; k <= nItems; k++) ways *= k;
-            if (n % 2 === 0) {
+            if (form === 0) {
                 return { question: `${nItems}人 を1列に並べると何通り？`, answer: `${ways}通り`, options: d(`${ways}通り`, `${nItems * nItems}通り`, `${nItems + 1}通り`, `${ways / 2}通り`), hint: "順列の基本 n×(n-1)×..." };
             }
-            return { question: `赤と青の2しゅるいのき を ${nItems}回 えらぶ。全部で何通り？`, answer: `${2 ** nItems}通り`, options: d(`${2 ** nItems}通り`, `${ways}通り`, `${nItems * 2}通り`, `${nItems}通り`), hint: "毎回 2通り ずつ。" };
+            if (form === 1) return { question: `赤と青の2色から、毎回どちらか1色を ${nItems}回 えらぶ。全部で何通り？`, answer: `${2 ** nItems}通り`, options: d(`${2 ** nItems}通り`, `${ways}通り`, `${nItems * 2}通り`, `${nItems}通り`), hint: "毎回 2通り ずつ。" };
+            const drinks = nItems;
+            const foods = nItems - 1;
+            return { question: `飲み物${drinks}種類と 食べ物${foods}種類から1つずつ選ぶ。組合せは何通り？`, answer: `${drinks * foods}通り`, options: d(`${drinks * foods}通り`, `${drinks + foods}通り`, `${drinks}通り`, `${foods}通り`), hint: "飲み物の選び方×食べ物の選び方。" };
         }
         case 'MATH_G6_U12': {
             const a = (n % 5) * 10 + 50;
@@ -658,7 +730,7 @@ const makeUnitProblem = (unitId: string, n: number): GeneralProblem => {
     }
 };
 
-fillGeneratedUnitProblems(MATH_G6_UNIT_DATA, makeUnitProblem);
+fillGeneratedUnitProblems(MATH_G6_UNIT_DATA, makeUnitProblem, { stopAtMin: true });
 
 export const MATH_G6_DATA: Record<string, GeneralProblem[]> = {
     MATH_G6_1,

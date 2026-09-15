@@ -397,13 +397,14 @@ const makeUnitProblem = (unitId: string, n: number): GeneralProblem => {
             return { question: `連立方程式。x+y=${x + y}, x-y=${x - y} のとき y は？`, answer: `${y}`, options: d(`${y}`, `${x}`, `${x + y}`, `${x - y}`), hint: "2式を引くと2y。" };
         }
         case 'MATH_G8_U03': {
-            const p = (n % 4) + 3;
-            const q = (n % 5) + 2;
-            const total = p * q;
+            const x = (n % 5) + 2;
+            const y = (n % 4) + 1;
+            const count = x + y;
+            const total = 120 * x + 80 * y;
             if (n % 2 === 0) {
-                return { question: `連立利用。1個${p}円の商品をx個で${total}円。xは？`, answer: `${q}`, options: d(`${q}`, `${p}`, `${total}`, `${q + 1}`), hint: "px=total。" };
+                return { question: `120円の品をx個、80円の品をy個買う。x+y=${count}、120x+80y=${total} のとき x は？`, answer: `${x}`, options: d(`${x}`, `${y}`, `${count}`, `${x + 1}`), hint: "個数と代金の2つの式を連立して解く。" };
             }
-            return { question: `商品を${q}個買って${total}円。1個あたりの値段は？`, answer: `${p}`, options: d(`${p}`, `${q}`, `${total}`, `${p + 1}`), hint: "合計 ÷ 個数。" };
+            return { question: `120円の品をx個、80円の品をy個買う。x+y=${count}、120x+80y=${total} のとき y は？`, answer: `${y}`, options: d(`${y}`, `${x}`, `${count}`, `${y + 1}`), hint: "2つの式を連立して解く。" };
         }
         case 'MATH_G8_U04': {
             const a = (n % 5) + 1;
@@ -414,26 +415,42 @@ const makeUnitProblem = (unitId: string, n: number): GeneralProblem => {
             }
             return { question: `一次関数 y=${a}x${b >= 0 ? `+${b}` : b} の切片は？`, answer: `${b}`, options: d(`${b}`, `${a}`, `${a * x + b}`, `${x}`), hint: "x=0 のときの y の値。" };
         }
-        case 'MATH_G8_U05':
-            return n % 2 === 0
-                ? { question: "平行線の同位角は？", answer: "等しい", options: d("等しい", "和が180度", "90度", "不定"), hint: "平行線の角の性質。", visual: { kind: 'angle', degrees: 45, parallelLines: true, labels: ['a', 'a'] } }
-                : { question: "対頂角は？", answer: "等しい", options: d("等しい", "和が180度", "90度", "不定"), hint: "向かい合う角。", visual: { kind: 'angle', degrees: 120, labels: ['x', 'x'] } };
-        case 'MATH_G8_U06':
-            return n % 2 === 0
-                ? { question: "合同な図形とは？", answer: "形と大きさが同じ", options: d("形と大きさが同じ", "形だけ同じ", "面積だけ同じ", "向きだけ同じ"), hint: "重ねて一致。", visual: { kind: 'polygon', sides: 4, labels: ['A', 'B', 'C', 'D'], showDiagonals: true } }
-                : { question: "三角形の合同条件の1つは？", answer: "3組の辺がそれぞれ等しい", options: d("3組の辺が等しい", "3組の角が等しい", "面積が等しい", "周が等しい"), hint: "SSS条件。", visual: { kind: 'polygon', sides: 3, labels: ['A', 'B', 'C'] } };
-        case 'MATH_G8_U07':
-            return n % 3 === 0
-                ? { question: "n角形の内角和の公式は？", answer: "180(n-2)", options: d("180(n-2)", "180n", "360n", "90n"), hint: "三角形分割。", visual: { kind: 'polygon', sides: 5, labels: ['A', 'B', 'C', 'D', 'E'], showDiagonals: true } }
-                : n % 3 === 1
-                ? { question: "四角形の内角和は？", answer: "360度", options: d("360度", "180度", "540度", "720度"), hint: "三角形2つ分。", visual: { kind: 'polygon', sides: 4, labels: ['A', 'B', 'C', 'D'], showDiagonals: true } }
-                : { question: "正六角形の1つの内角は？", answer: "120度", options: d("120度", "60度", "90度", "108度"), hint: "720÷6。", visual: { kind: 'polygon', sides: 6, labels: ['A', 'B', 'C', 'D', 'E', 'F'] } };
+        case 'MATH_G8_U05': {
+            const p = n % 4;
+            const angle = ((Math.floor(n / 4) % 7) + 2) * 10;
+            if (p === 0) return { question: `平行線の同位角の一方が${angle}度。対応する角は？`, answer: `${angle}度`, options: d(`${angle}度`, `${180 - angle}度`, "90度", `${angle + 10}度`), hint: "同位角は等しい。", visual: { kind: 'angle', degrees: angle, parallelLines: true, labels: ['a', 'a'] } };
+            if (p === 1) return { question: `平行線の錯角の一方が${angle}度。対応する角は？`, answer: `${angle}度`, options: d(`${angle}度`, `${180 - angle}度`, "90度", `${angle + 10}度`), hint: "錯角は等しい。", visual: { kind: 'angle', degrees: angle, parallelLines: true, labels: ['x', 'x'] } };
+            if (p === 2) return { question: `対頂角の一方が${angle}度。向かいの角は？`, answer: `${angle}度`, options: d(`${angle}度`, `${180 - angle}度`, "90度", `${angle + 10}度`), hint: "対頂角は等しい。", visual: { kind: 'angle', degrees: angle, labels: ['x', 'x'] } };
+            return { question: `一直線上のとなり合う角の一方が${angle}度。もう一方は？`, answer: `${180 - angle}度`, options: d(`${180 - angle}度`, `${angle}度`, "90度", `${180 + angle}度`), hint: "一直線の角の和は180度。", visual: { kind: 'angle', degrees: angle } };
+        }
+        case 'MATH_G8_U06': {
+            const p = n % 10;
+            if (p === 0) return { question: "合同な図形とは？", answer: "形と大きさが同じ", options: d("形と大きさが同じ", "形だけ同じ", "面積だけ同じ", "向きだけ同じ"), hint: "重ねて一致。", visual: { kind: 'polygon', sides: 4 } };
+            if (p === 1) return { question: "三角形の合同条件 SSS は？", answer: "3組の辺がそれぞれ等しい", options: d("3組の辺がそれぞれ等しい", "3組の角が等しい", "面積が等しい", "周が等しい"), hint: "SSS条件。", visual: { kind: 'polygon', sides: 3 } };
+            if (p === 2) return { question: "三角形の合同条件 SAS は？", answer: "2組の辺とその間の角がそれぞれ等しい", options: d("2組の辺とその間の角がそれぞれ等しい", "2組の角だけが等しい", "1辺だけ等しい", "面積だけ等しい"), hint: "辺・角・辺。", visual: { kind: 'polygon', sides: 3 } };
+            if (p === 3) return { question: "三角形の合同条件 ASA に近いものは？", answer: "1組の辺とその両端の角がそれぞれ等しい", options: d("1組の辺とその両端の角がそれぞれ等しい", "3組の角だけが等しい", "周の長さだけが等しい", "面積だけが等しい"), hint: "角・辺・角。", visual: { kind: 'polygon', sides: 3 } };
+            if (p === 4) return { question: "合同な三角形の対応する辺は？", answer: "等しい", options: d("等しい", "必ず2倍", "必ず半分", "関係ない"), hint: "合同なら対応する部分が等しい。", visual: { kind: 'polygon', sides: 3 } };
+            if (p === 5) return { question: "合同な三角形の対応する角は？", answer: "等しい", options: d("等しい", "和が180度", "必ず90度", "関係ない"), hint: "対応する角も等しい。", visual: { kind: 'polygon', sides: 3 } };
+            if (p === 6) return { question: "3組の角がそれぞれ等しいだけで、三角形は必ず合同？", answer: "必ずとはいえない", options: d("必ずとはいえない", "必ず合同", "必ず直角三角形", "必ず正三角形"), hint: "大きさが違う相似な三角形もある。", visual: { kind: 'polygon', sides: 3 } };
+            if (p === 7) return { question: "合同な図形を回転させると、合同でなくなる？", answer: "ならない", options: d("ならない", "必ずなる", "90度ならなる", "180度ならなる"), hint: "向きは合同かどうかに関係しない。", visual: { kind: 'polygon', sides: 4 } };
+            if (p === 8) return { question: "合同な図形を裏返しても、ぴったり重なれば？", answer: "合同", options: d("合同", "相似だけ", "別の図形", "判断不能"), hint: "裏返しも認める。", visual: { kind: 'polygon', sides: 4 } };
+            return { question: "合同な図形の面積の関係は？", answer: "等しい", options: d("等しい", "必ず2倍", "必ず半分", "関係ない"), hint: "形と大きさが同じ。", visual: { kind: 'polygon', sides: 4 } };
+        }
+        case 'MATH_G8_U07': {
+            const sides = [3, 4, 5, 6, 8, 10][Math.floor(n / 3) % 6];
+            const p = n % 3;
+            const sum = 180 * (sides - 2);
+            if (p === 0) return { question: `${sides}角形の内角の和は？`, answer: `${sum}度`, options: d(`${sum}度`, `${180 * sides}度`, `${360}度`, `${sum + 180}度`), hint: "180×(n-2)。", visual: { kind: 'polygon', sides } };
+            if (p === 1) return { question: `正${sides}角形の外角1つは？`, answer: `${360 / sides}度`, options: d(`${360 / sides}度`, `${180 / sides}度`, `${180 - 360 / sides}度`, "180度"), hint: "外角の和は360度。", visual: { kind: 'polygon', sides } };
+            return { question: `正${sides}角形の内角1つは？`, answer: `${180 - 360 / sides}度`, options: d(`${180 - 360 / sides}度`, `${360 / sides}度`, `${180 / sides}度`, "180度"), hint: "180度－外角。", visual: { kind: 'polygon', sides } };
+        }
         case 'MATH_G8_U08': {
-            const faces = (n % 6) + 1;
-            if (n % 2 === 0) {
-                return { question: `サイコロ1回。${faces}の目が出る確率は？`, answer: `1/6`, options: d(`1/6`, `1/3`, `1/2`, `1/12`), hint: "同様に確からしい6通り。" };
-            }
-            return { question: `サイコロ1回。${faces}以外の目が出る確率は？`, answer: `5/6`, options: d(`5/6`, `1/6`, `1/2`, `1`), hint: "余事象で考える。" };
+            const p = n % 4;
+            const faces = (Math.floor(n / 4) % 6) + 1;
+            if (p === 0) return { question: `サイコロ1回。${faces}の目が出る確率は？`, answer: `1/6`, options: d(`1/6`, `1/3`, `1/2`, `1/12`), hint: "同様に確からしい6通り。" };
+            if (p === 1) return { question: `サイコロ1回。${faces}以外の目が出る確率は？`, answer: `5/6`, options: d(`5/6`, `1/6`, `1/2`, `1`), hint: "余事象で考える。" };
+            if (p === 2) return { question: "サイコロ1回。偶数の目が出る確率は？", answer: "1/2", options: d("1/2", "1/3", "1/6", "2/3"), hint: "2,4,6 の3通り。" };
+            return { question: `サイコロ1回。${faces}以下の目が出る確率は？`, answer: `${faces}/6`, options: d(`${faces}/6`, `${6 - faces}/6`, `1/6`, `5/6`), hint: `1から${faces}までの${faces}通り。` };
         }
         case 'MATH_G8_U09': {
             const a = (n % 20) + 60;
@@ -446,19 +463,19 @@ const makeUnitProblem = (unitId: string, n: number): GeneralProblem => {
                 return { question: `データ分析。${a}, ${b}, ${c} の平均は？`, answer: `${avg}`, options: d(`${avg}`, `${a + b + c}`, `${Math.max(a, b, c)}`, `${Math.min(a, b, c)}`), hint: "合計÷個数。" };
             }
             if (p === 1) {
-                return { question: `データ分析。中央値は？`, answer: `${sorted[1]}`, options: d(`${sorted[1]}`, `${sorted[0]}`, `${sorted[2]}`, `${avg}`), hint: "小さい順で真ん中。" };
+                return { question: `データ分析。${a}, ${b}, ${c} の中央値は？`, answer: `${sorted[1]}`, options: d(`${sorted[1]}`, `${sorted[0]}`, `${sorted[2]}`, `${avg}`), hint: "小さい順で真ん中。" };
             }
             if (p === 2) {
-                return { question: `データ分析。範囲（最大-最小）は？`, answer: `${sorted[2] - sorted[0]}`, options: d(`${sorted[2] - sorted[0]}`, `${avg}`, `${a + b + c}`, `${sorted[2]}`), hint: "散らばりを見る。" };
+                return { question: `データ分析。${a}, ${b}, ${c} の範囲（最大-最小）は？`, answer: `${sorted[2] - sorted[0]}`, options: d(`${sorted[2] - sorted[0]}`, `${avg}`, `${a + b + c}`, `${sorted[2]}`), hint: "散らばりを見る。" };
             }
-            return { question: `データ分析。最小値は？`, answer: `${sorted[0]}`, options: d(`${sorted[0]}`, `${sorted[2]}`, `${sorted[1]}`, `${avg}`), hint: "最も小さい値。" };
+            return { question: `データ分析。${a}, ${b}, ${c} の最小値は？`, answer: `${sorted[0]}`, options: d(`${sorted[0]}`, `${sorted[2]}`, `${sorted[1]}`, `${avg}`), hint: "最も小さい値。" };
         }
         default:
             return { question: "2 + 3 = ?", answer: "5", options: d("5", "4", "6", "7"), hint: "基本。" };
     }
 };
 
-fillGeneratedUnitProblems(MATH_G8_UNIT_DATA, makeUnitProblem);
+fillGeneratedUnitProblems(MATH_G8_UNIT_DATA, makeUnitProblem, { stopAtMin: true });
 
 export const MATH_G8_DATA: Record<string, GeneralProblem[]> = {
     MATH_G8_1,

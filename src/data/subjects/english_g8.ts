@@ -1,5 +1,5 @@
 import { GeneralProblem } from './utils';
-import { buildListeningReviewUnit, buildRepeatReviewUnit, buildResponseReviewUnit, buildSpeakingReviewUnit, cycleProblems, EnglishResponseItem, EnglishWordItem, prompt, uniqueEnglishWordItems } from './english_utils';
+import { buildListeningReviewUnit, buildRepeatReviewUnit, buildResponseReviewUnit, buildSpeakingReviewUnit, cycleProblems, EnglishResponseItem, EnglishWordItem, fillEnglishGeneratedUnitProblems, prompt, uniqueEnglishWordItems } from './english_utils';
 
 const readingPassagesG8: GeneralProblem[] = [
   prompt(
@@ -41,6 +41,14 @@ const g8ReviewItems: EnglishWordItem[] = uniqueEnglishWordItems([
   { en: 'Ken is taller than Tom.', jp: 'けんは トムより背が高いです。', speech: 'Ken is taller than Tom' },
   { en: 'The window was broken.', jp: '窓は こわされました。', speech: 'The window was broken' },
   { en: 'The room was cleaned by the students.', jp: 'その部屋は 生徒たちによって そうじされました。', speech: 'The room was cleaned by the students' },
+  { en: 'She visited Kyoto last year.', jp: '彼女は 去年京都を訪れました。', speech: 'She visited Kyoto last year' },
+  { en: 'They were studying at seven.', jp: '彼らは 7時に勉強していました。', speech: 'They were studying at seven' },
+  { en: 'We are going to visit the museum.', jp: 'わたしたちは 博物館を訪れる予定です。', speech: 'We are going to visit the museum' },
+  { en: 'You must wear a helmet.', jp: 'あなたは ヘルメットをかぶらなければなりません。', speech: 'You must wear a helmet' },
+  { en: 'I went to the library to study.', jp: 'わたしは 勉強するために図書館へ行きました。', speech: 'I went to the library to study' },
+  { en: 'Reading books is interesting.', jp: '本を読むことは おもしろいです。', speech: 'Reading books is interesting' },
+  { en: 'It was cold, so I wore a coat.', jp: '寒かったので コートを着ました。', speech: 'It was cold so I wore a coat' },
+  { en: 'This river is longer than that one.', jp: 'この川は あの川より長いです。', speech: 'This river is longer than that one' },
 ]);
 const g8ResponseItems: EnglishResponseItem[] = [
   { promptEn: 'What did you do yesterday?', promptJp: 'きのう 何を しましたか。', answerEn: 'I went to the park yesterday.', answerJp: 'わたしは きのう公園へ行きました。', answerSpeech: 'I went to the park yesterday' },
@@ -49,7 +57,102 @@ const g8ResponseItems: EnglishResponseItem[] = [
   { promptEn: 'What do you have to do?', promptJp: '何を しなければなりませんか。', answerEn: 'I have to wash my hands.', answerJp: '手を洗わなければなりません。', answerSpeech: 'I have to wash my hands' },
   { promptEn: 'What do you want to be?', promptJp: '何に なりたいですか。', answerEn: 'I want to be a teacher.', answerJp: 'わたしは 先生になりたいです。', answerSpeech: 'I want to be a teacher' },
   { promptEn: 'Which is taller, Ken or Tom?', promptJp: 'けんとトムでは どちらが 背が高いですか。', answerEn: 'Ken is taller than Tom.', answerJp: 'けんは トムより背が高いです。', answerSpeech: 'Ken is taller than Tom' },
+  { promptEn: 'Where did she go last year?', promptJp: '彼女は 去年どこへ行きましたか。', answerEn: 'She visited Kyoto last year.', answerJp: '彼女は 去年京都を訪れました。', answerSpeech: 'She visited Kyoto last year' },
+  { promptEn: 'What are you going to do?', promptJp: '何をする予定ですか。', answerEn: 'We are going to visit the museum.', answerJp: 'わたしたちは 博物館を訪れる予定です。', answerSpeech: 'We are going to visit the museum' },
+  { promptEn: 'Why did you go to the library?', promptJp: 'なぜ図書館へ行きましたか。', answerEn: 'I went to the library to study.', answerJp: '勉強するために図書館へ行きました。', answerSpeech: 'I went to the library to study' },
+  { promptEn: 'Why did you wear a coat?', promptJp: 'なぜコートを着ましたか。', answerEn: 'It was cold, so I wore a coat.', answerJp: '寒かったので コートを着ました。', answerSpeech: 'It was cold so I wore a coat' },
 ];
+
+const makeG8GrammarProblem = (unitId: string, n: number): GeneralProblem | null => {
+  switch (unitId) {
+    case 'ENGLISH_G8_U01': {
+      const verbs = [
+        ['go', 'went', 'to the park'], ['play', 'played', 'tennis'], ['watch', 'watched', 'TV'], ['visit', 'visited', 'Kyoto'],
+        ['help', 'helped', 'my grandmother'], ['study', 'studied', 'English'], ['eat', 'ate', 'lunch'], ['see', 'saw', 'a movie'],
+        ['buy', 'bought', 'a book'], ['make', 'made', 'dinner'], ['take', 'took', 'a picture'], ['write', 'wrote', 'a letter'],
+      ] as const;
+      const form = n % 3;
+      const [base, past, object] = verbs[Math.floor(n / 3) % verbs.length];
+      const subject = ['I', 'She', 'He', 'We', 'They'][Math.floor(n / (verbs.length * 3)) % 5];
+      if (form === 0) return prompt(`${subject} ___ ${object} yesterday.`, past, [base, `${base}s`, `${base}ing`], 'yesterday に合う過去形。');
+      if (form === 1) return prompt(`${subject} did not ___ ${object} yesterday.`, base, [past, `${base}s`, `${base}ing`], 'did not の後は動詞の原形。');
+      return prompt(`Did ${subject === 'I' ? 'I' : subject.toLowerCase()} ___ ${object} yesterday?`, base, [past, `${base}s`, `${base}ing`], 'Did の後は動詞の原形。');
+    }
+    case 'ENGLISH_G8_U02': {
+      const subjects = [['I', 'was'], ['He', 'was'], ['She', 'was'], ['We', 'were'], ['They', 'were']] as const;
+      const actions = [['study', 'studying', 'English'], ['play', 'playing', 'soccer'], ['read', 'reading', 'a book'], ['eat', 'eating', 'lunch'], ['run', 'running', 'in the park'], ['write', 'writing', 'a letter'], ['cook', 'cooking', 'dinner'], ['watch', 'watching', 'TV']] as const;
+      const [subject, be] = subjects[n % subjects.length];
+      const [base, ing, object] = actions[Math.floor(n / subjects.length) % actions.length];
+      if (n % 2 === 0) return prompt(`${subject} ${be} ___ ${object} then.`, ing, [base, `${base}s`, `to ${base}`], '過去進行形は was/were + -ing。');
+      return prompt(`${subject} ___ ${ing} ${object} at seven yesterday.`, be, ['am', 'is', 'are'], '主語に合う was / were。');
+    }
+    case 'ENGLISH_G8_U03': {
+      const actions = [['visit', 'my grandmother'], ['play', 'tennis'], ['read', 'a book'], ['help', 'my friend'], ['study', 'English'], ['clean', 'my room'], ['cook', 'dinner'], ['go', 'to the museum']] as const;
+      const subjects = [['I', 'am'], ['You', 'are'], ['He', 'is'], ['She', 'is'], ['We', 'are'], ['They', 'are']] as const;
+      const [subject, be] = subjects[n % subjects.length];
+      const [verb, object] = actions[Math.floor(n / subjects.length) % actions.length];
+      if (n % 3 === 0) return prompt(`${subject} ___ ${verb} ${object} tomorrow.`, 'will', ['did', 'was', 'does'], 'will + 動詞の原形。');
+      if (n % 3 === 1) return prompt(`${subject} ${be} going to ___ ${object} tomorrow.`, verb, [`${verb}s`, `${verb}ing`, `${verb}ed`], 'be going to + 動詞の原形。');
+      return prompt(`___ ${subject === 'I' ? 'I' : subject.toLowerCase()} going to ${verb} ${object}?`, be[0].toUpperCase() + be.slice(1), [...['Am', 'Is', 'Are'].filter(x => x !== be[0].toUpperCase() + be.slice(1)), 'Do'], 'be going to の疑問文。');
+    }
+    case 'ENGLISH_G8_U04': {
+      const duties = [['do', 'your homework'], ['wash', 'your hands'], ['wear', 'a helmet'], ['follow', 'the rules'], ['study', 'for the test'], ['help', 'your family'], ['be', 'quiet'], ['finish', 'the report'], ['bring', 'your notebook'], ['clean', 'your desk']] as const;
+      const [verb, object] = duties[Math.floor(n / 3) % duties.length];
+      const form = n % 3;
+      if (form === 0) return prompt(`You ___ ${verb} ${object}.`, 'must', ['are', 'do', 'will'], 'must は義務を表す。');
+      if (form === 1) return prompt(`You have to ___ ${object}.`, verb, [`${verb}s`, `${verb}ing`, `to ${verb}`], 'have to の後は動詞の原形。');
+      return prompt(`___ I ${verb} ${object}?`, 'May', ['Must', 'Have', 'Am'], 'May I ...? は許可を求める表現。');
+    }
+    case 'ENGLISH_G8_U05': {
+      const actions = [['study', 'English'], ['read', 'this book'], ['help', 'people'], ['visit', 'Kyoto'], ['buy', 'milk'], ['finish', 'the report'], ['learn', 'Japanese'], ['see', 'my friend'], ['use', 'a computer'], ['play', 'soccer']] as const;
+      const [verb, object] = actions[Math.floor(n / 3) % actions.length];
+      const form = n % 3;
+      if (form === 0) return prompt(`I want ___ ${object}.`, `to ${verb}`, [verb, `${verb}ing`, `${verb}s`], 'want to + 動詞の原形。');
+      if (form === 1) return prompt(`I went there ___ ${object}.`, `to ${verb}`, [verb, `${verb}ing`, `${verb}s`], '目的を表す to + 動詞。');
+      return prompt(`It is important ___ ${object}.`, `to ${verb}`, [verb, `${verb}ing`, `${verb}s`], 'It is ... to ～ の形。');
+    }
+    case 'ENGLISH_G8_U06': {
+      const actions = [['listen to', 'listening to', 'music'], ['read', 'reading', 'books'], ['play', 'playing', 'soccer'], ['cook', 'cooking', 'dinner'], ['swim', 'swimming', 'in the pool'], ['talk', 'talking', 'with friends'], ['study', 'studying', 'English'], ['walk', 'walking', 'in the park'], ['take', 'taking', 'pictures'], ['travel', 'traveling', 'abroad']] as const;
+      const [base, ing, object] = actions[Math.floor(n / 3) % actions.length];
+      const form = n % 3;
+      if (form === 0) return prompt(`I enjoy ___ ${object}.`, ing, [base, `to ${base}`, `${base}s`], 'enjoy の後は動名詞。');
+      if (form === 1) return prompt(`She likes ___ ${object}.`, ing, [base, `${base}s`, `${base}ed`], '動名詞で「〜すること」。');
+      return prompt(`___ ${object} is fun.`, ing[0].toUpperCase() + ing.slice(1), [base[0].toUpperCase() + base.slice(1), `To ${base}`, `${base}s`], '動名詞を主語にできる。');
+    }
+    case 'ENGLISH_G8_U07': {
+      const sentences = [
+        ['I was tired, ___ I went to bed early.', 'so'], ['I stayed home ___ it was rainy.', 'because'], ['I like dogs, ___ my sister likes cats.', 'but'], ['I opened the window ___ the room was hot.', 'because'],
+        ['It was cold, ___ I wore a coat.', 'so'], ['Ken is young, ___ he is very good at tennis.', 'but'], ['I finished my homework ___ watched TV.', 'and'], ['She studied hard, ___ she passed the test.', 'so'],
+        ['We did not go out ___ it was snowing.', 'because'], ['Tom likes math, ___ he does not like science.', 'but'], ['I got up early ___ ate breakfast.', 'and'], ['The bus was late, ___ I walked to school.', 'so'],
+      ] as const;
+      const [sentence, answer] = sentences[Math.floor(n / 3) % sentences.length];
+      const form = n % 3;
+      if (form === 0) return prompt(sentence, answer, ['and', 'but', 'because', 'so'].filter(x => x !== answer).slice(0, 3), '前後の意味に合う接続詞を選ぶ。');
+      if (form === 1) return prompt(`文を完成させよう。 ${sentence}`, answer, ['and', 'but', 'because', 'so'].filter(x => x !== answer).reverse().slice(0, 3), '理由・結果・対比・並列を見分ける。');
+      return prompt(`接続詞として最も自然なのは？ ${sentence}`, answer, ['and', 'but', 'because', 'so'].filter(x => x !== answer).slice(0, 3), '文全体のつながりを考える。');
+    }
+    case 'ENGLISH_G8_U08': {
+      const adjectives = [['tall', 'taller', 'tallest'], ['big', 'bigger', 'biggest'], ['small', 'smaller', 'smallest'], ['fast', 'faster', 'fastest'], ['long', 'longer', 'longest'], ['young', 'younger', 'youngest'], ['easy', 'easier', 'easiest'], ['interesting', 'more interesting', 'most interesting'], ['useful', 'more useful', 'most useful'], ['beautiful', 'more beautiful', 'most beautiful']] as const;
+      const [base, comparative, superlative] = adjectives[Math.floor(n / 3) % adjectives.length];
+      const form = n % 3;
+      const forms = [base, comparative, superlative, `very ${base}`];
+      if (form === 0) return prompt(`A is ___ than B. (${base})`, comparative, forms.filter(x => x !== comparative).slice(0, 3), 'than があると比較級。');
+      if (form === 1) return prompt(`A is the ___ of the three. (${base})`, superlative, forms.filter(x => x !== superlative).slice(0, 3), 'the と3つ以上の比較は最上級。');
+      return prompt(`A is as ___ as B.`, base, forms.filter(x => x !== base).slice(0, 3), 'as ... as の間は原級。');
+    }
+    case 'ENGLISH_G8_U09': {
+      const passives = [['book', 'write', 'written'], ['room', 'clean', 'cleaned'], ['window', 'break', 'broken'], ['cookies', 'make', 'made'], ['song', 'love', 'loved'], ['picture', 'take', 'taken'], ['letter', 'send', 'sent'], ['bridge', 'build', 'built'], ['English', 'speak', 'spoken'], ['car', 'wash', 'washed']] as const;
+      const [thing, base, pp] = passives[Math.floor(n / 3) % passives.length];
+      const plural = thing === 'cookies';
+      const form = n % 3;
+      if (form === 0) return prompt(`The ${thing} ___ yesterday.`, `${plural ? 'were' : 'was'} ${pp}`, [base, pp, `${plural ? 'were' : 'was'} ${base}`], 'be動詞 + 過去分詞。');
+      if (form === 1) return prompt(`The ${thing} is ___ every day.`, pp, [base, `${base}ing`, `${base}s`], '現在の受動態。');
+      return prompt(`The ${thing} was ___ by the students.`, pp, [base, `${base}ing`, `${base}s`], 'by の前は受動態の過去分詞。');
+    }
+    default:
+      return null;
+  }
+};
 
 export const ENGLISH_G8_UNIT_DATA: Record<string, GeneralProblem[]> = {
   ENGLISH_G8_U01: cycleProblems([
@@ -129,6 +232,8 @@ export const ENGLISH_G8_UNIT_DATA: Record<string, GeneralProblem[]> = {
   ENGLISH_G8_U12: buildRepeatReviewUnit(g8ReviewItems, '中2の 重要表現を きいて、英語を くりかえそう。'),
   ENGLISH_G8_U13: buildResponseReviewUnit(g8ResponseItems, '中2の 会話に 英語で こたえよう。'),
 };
+
+fillEnglishGeneratedUnitProblems(ENGLISH_G8_UNIT_DATA, makeG8GrammarProblem, { min: 36 });
 
 export const ENGLISH_G8_DATA: Record<string, GeneralProblem[]> = {
   ENGLISH_G8_1: [...Object.values(ENGLISH_G8_UNIT_DATA).flat(), ...readingPassagesG8],

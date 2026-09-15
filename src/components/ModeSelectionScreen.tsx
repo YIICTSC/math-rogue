@@ -344,10 +344,10 @@ const KOKUGO_GRADE_UNITS: Record<number, MathUnitOption[]> = {
   1: [
     { id: 'J1_U01', name: 'ひらがな', mode: 'KOKUGO_G1_U01' },
     { id: 'J1_U02', name: 'ことばあつめ', mode: 'KOKUGO_G1_U02' },
+    { id: 'J1_U06', name: 'かたかな', mode: 'KOKUGO_G1_U06' },
     { id: 'J1_U03', name: 'のばすおん（ー）', mode: 'KOKUGO_G1_U03' },
     { id: 'J1_U04', name: 'ちいさい「っ」', mode: 'KOKUGO_G1_U04' },
     { id: 'J1_U05', name: '「は・を・へ」のつかいかた', mode: 'KOKUGO_G1_U05' },
-    { id: 'J1_U06', name: 'かたかな', mode: 'KOKUGO_G1_U06' },
     { id: 'J1_U07', name: 'おはなしをよむ', mode: 'KOKUGO_G1_U07' },
     { id: 'J1_U08', name: 'せつめいぶんをよむ', mode: 'KOKUGO_G1_U08' },
     { id: 'J1_U09', name: 'ばめんをそうぞうしてよむ', mode: 'KOKUGO_G1_U09' },

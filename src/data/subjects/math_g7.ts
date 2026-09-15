@@ -468,7 +468,7 @@ const makeUnitProblem = (unitId: string, n: number): GeneralProblem => {
             if (n % 2 === 0) {
                 return { question: `文字式。 x=${x} のとき 2x+3 の値は？`, answer: `${2 * x + 3}`, options: d(`${2 * x + 3}`, `${x + 3}`, `${2 * x}`, `${x * x}`), hint: "代入して計算。" };
             }
-            return { question: `文字式。 x を使って「${x}円のノートを2冊と3円」を表す式は？`, answer: `2x+3`, options: d(`2x+3`, `${x}+3`, `2+3x`, `x²+3`), hint: "個数はかけ算で表す。" };
+            return { question: `文字式。1冊x円のノートを2冊買い、さらに3円を加えた金額を表す式は？`, answer: `2x+3`, options: d(`2x+3`, `x+3`, `2+3x`, `x²+3`), hint: "2冊分は2x円。" };
         }
         case 'MATH_G7_U05': {
             const a = (n % 6) + 2;
@@ -476,7 +476,7 @@ const makeUnitProblem = (unitId: string, n: number): GeneralProblem => {
             if (n % 2 === 0) {
                 return { question: `${a}x + ${b}x = ?`, answer: `${a + b}x`, options: d(`${a + b}x`, `${a * b}x`, `${a + b}`, `${a - b}x`), hint: "同類項をまとめる。" };
             }
-            return { question: `${a + b}x を 2つの同類項の和で表すと？`, answer: `${a}x + ${b}x`, options: d(`${a}x + ${b}x`, `${a * b}x`, `${a + b}`, `${a} + ${b}x`), hint: "係数を分けて考える。" };
+            return { question: `次のうち、${a + b}x と等しい式は？`, answer: `${a}x + ${b}x`, options: d(`${a}x + ${b}x`, `${a * b}x`, `${a + b}`, `${a} + ${b}x`), hint: "同類項の係数を足して確かめる。" };
         }
         case 'MATH_G7_U06': {
             const x = (n % 7) + 2;
@@ -497,21 +497,22 @@ const makeUnitProblem = (unitId: string, n: number): GeneralProblem => {
             return { question: `x個で${total}円。1個${p}円のとき x を表す式は？`, answer: `${total}/${p}`, options: d(`${total}/${p}`, `${p}/${total}`, `${p}x=${total}`, `${total}-${p}`), hint: "合計 ÷ 単価。" };
         }
         case 'MATH_G7_U08': {
-            const x = (n % 6) + 1;
+            const x = [1, 2, 4, 5, 10][n % 5];
             if (n % 2 === 0) {
                 return { question: `比例 y=5x。x=${x} のとき y=?`, answer: `${5 * x}`, options: d(`${5 * x}`, `${x + 5}`, `${x * x}`, `${x}`), hint: "y=ax。" };
             }
             return { question: `反比例 y=20/x。x=${x} のとき y=?`, answer: `${20 / x}`, options: d(`${20 / x}`, `${5 * x}`, `${x + 20}`, `${x}`), hint: "xとyの積が一定。" };
         }
         case 'MATH_G7_U09': {
-            return n % 3 === 0
-                ? { question: "この三角形の内角の和は？", answer: "180度", options: d("180度", "360度", "90度", "270度"), hint: "基本。", visual: { kind: 'polygon', sides: 3, labels: ['A', 'B', 'C'] } }
-                : n % 3 === 1
-                ? { question: "平行線と同位角の関係は？", answer: "等しい", options: d("等しい", "和が180度", "直角", "不定"), hint: "平行線の角の性質。", visual: { kind: 'angle', degrees: 60, parallelLines: true, labels: ['a', 'a'] } }
-                : { question: "平行線と錯角の関係は？", answer: "等しい", options: d("等しい", "和が180度", "直角", "不定"), hint: "Zの形の角。", visual: { kind: 'angle', degrees: 60, parallelLines: true, labels: ['x', 'x'] } };
+            const p = n % 4;
+            const angle = ((Math.floor(n / 4) % 7) + 2) * 10;
+            if (p === 0) return { question: `三角形の2つの角が ${angle}度 と ${90 - angle / 2}度。残りの角は？`, answer: `${180 - angle - (90 - angle / 2)}度`, options: d(`${180 - angle - (90 - angle / 2)}度`, `${angle}度`, `${90 - angle / 2}度`, "180度"), hint: "三角形の内角の和は180度。", visual: { kind: 'polygon', sides: 3, labels: ['A', 'B', 'C'] } };
+            if (p === 1) return { question: `平行線の同位角の一方が ${angle}度。もう一方は？`, answer: `${angle}度`, options: d(`${angle}度`, `${180 - angle}度`, "90度", `${angle + 10}度`), hint: "平行線の同位角は等しい。", visual: { kind: 'angle', degrees: angle, parallelLines: true, labels: ['a', 'a'] } };
+            if (p === 2) return { question: `平行線の錯角の一方が ${angle}度。もう一方は？`, answer: `${angle}度`, options: d(`${angle}度`, `${180 - angle}度`, "90度", `${angle + 10}度`), hint: "平行線の錯角は等しい。", visual: { kind: 'angle', degrees: angle, parallelLines: true, labels: ['x', 'x'] } };
+            return { question: `一直線上で1つの角が ${angle}度。となりの角は？`, answer: `${180 - angle}度`, options: d(`${180 - angle}度`, `${angle}度`, "90度", `${180 + angle}度`), hint: "一直線の角の和は180度。", visual: { kind: 'angle', degrees: angle } };
         }
         case 'MATH_G7_U10': {
-            const p = n % 6;
+            const p = n % 10;
             if (p === 0) {
                 return { question: "この立体の頂点の数は？", answer: "8個", options: d("8個", "6個", "12個", "4個"), hint: "基本の立体。", visual: { kind: 'cube', showHiddenEdges: true, labels: ['A', 'B', 'C', 'D'] } };
             }
@@ -527,7 +528,12 @@ const makeUnitProblem = (unitId: string, n: number): GeneralProblem => {
             if (p === 4) {
                 return { question: "円柱の体積公式は？", answer: "底面積×高さ", options: d("底面積×高さ", "円周×高さ", "半径×高さ", "直径×高さ"), hint: "円柱も柱。", visual: { kind: 'circle' } };
             }
-            return { question: "円柱の展開図で、側面は何の形？", answer: "長方形", options: d("長方形", "円", "三角形", "台形"), hint: "まいた面を広げる。", visual: { kind: 'circle' } };
+            if (p === 5) return { question: "円柱の展開図で、側面は何の形？", answer: "長方形", options: d("長方形", "円", "三角形", "台形"), hint: "まいた面を広げる。", visual: { kind: 'circle' } };
+            const baseSides = p === 6 ? 3 : p === 7 ? 4 : 5;
+            if (p === 6) return { question: `${baseSides}角柱の頂点の数は？`, answer: `${baseSides * 2}個`, options: d(`${baseSides * 2}個`, `${baseSides}個`, `${baseSides * 3}個`, `${baseSides + 2}個`), hint: "上と下に同じ数の頂点。", visual: { kind: 'prism', baseSides } };
+            if (p === 7) return { question: `${baseSides}角柱の辺の数は？`, answer: `${baseSides * 3}本`, options: d(`${baseSides * 3}本`, `${baseSides * 2}本`, `${baseSides}本`, `${baseSides + 2}本`), hint: "底面2つと側面の辺を数える。", visual: { kind: 'prism', baseSides } };
+            if (p === 8) return { question: `${baseSides}角柱の面の数は？`, answer: `${baseSides + 2}個`, options: d(`${baseSides + 2}個`, `${baseSides}個`, `${baseSides * 2}個`, `${baseSides + 1}個`), hint: "側面に底面2つを足す。", visual: { kind: 'prism', baseSides } };
+            return { question: "円柱の底面は何個ある？", answer: "2個", options: d("2個", "1個", "3個", "0個"), hint: "上と下に同じ円がある。", visual: { kind: 'cylinder', showRadius: true, showHeight: true } };
         }
         case 'MATH_G7_U11': {
             const a = (n % 30) + 40;
@@ -539,19 +545,19 @@ const makeUnitProblem = (unitId: string, n: number): GeneralProblem => {
                 return { question: `資料の整理。${a}, ${b}, ${c} の平均は？`, answer: `${avg}`, options: d(`${avg}`, `${a + b + c}`, `${Math.max(a, b, c)}`, `${Math.min(a, b, c)}`), hint: "合計÷個数。" };
             }
             if (p === 1) {
-                return { question: `資料の整理。中央値（小さい順の真ん中）は？`, answer: `${[a, b, c].sort((x, y) => x - y)[1]}`, options: d(`${[a, b, c].sort((x, y) => x - y)[1]}`, `${Math.max(a, b, c)}`, `${Math.min(a, b, c)}`, `${avg}`), hint: "並べ替えて中央を見る。" };
+                return { question: `資料の整理。${a}, ${b}, ${c} の中央値（小さい順の真ん中）は？`, answer: `${[a, b, c].sort((x, y) => x - y)[1]}`, options: d(`${[a, b, c].sort((x, y) => x - y)[1]}`, `${Math.max(a, b, c)}`, `${Math.min(a, b, c)}`, `${avg}`), hint: "並べ替えて中央を見る。" };
             }
             if (p === 2) {
-                return { question: `資料の整理。範囲（最大-最小）は？`, answer: `${Math.max(a, b, c) - Math.min(a, b, c)}`, options: d(`${Math.max(a, b, c) - Math.min(a, b, c)}`, `${a + b + c}`, `${avg}`, `${Math.max(a, b, c)}`), hint: "散らばりの大きさ。" };
+                return { question: `資料の整理。${a}, ${b}, ${c} の範囲（最大-最小）は？`, answer: `${Math.max(a, b, c) - Math.min(a, b, c)}`, options: d(`${Math.max(a, b, c) - Math.min(a, b, c)}`, `${a + b + c}`, `${avg}`, `${Math.max(a, b, c)}`), hint: "散らばりの大きさ。" };
             }
-            return { question: `資料の整理。最大値は？`, answer: `${Math.max(a, b, c)}`, options: d(`${Math.max(a, b, c)}`, `${Math.min(a, b, c)}`, `${avg}`, `${a + b + c}`), hint: "最も大きいデータ。" };
+            return { question: `資料の整理。${a}, ${b}, ${c} の最大値は？`, answer: `${Math.max(a, b, c)}`, options: d(`${Math.max(a, b, c)}`, `${Math.min(a, b, c)}`, `${avg}`, `${a + b + c}`), hint: "最も大きいデータ。" };
         }
         default:
             return { question: "1 + 1 = ?", answer: "2", options: d("2", "1", "3", "0"), hint: "基本。" };
     }
 };
 
-fillGeneratedUnitProblems(MATH_G7_UNIT_DATA, makeUnitProblem);
+fillGeneratedUnitProblems(MATH_G7_UNIT_DATA, makeUnitProblem, { stopAtMin: true });
 
 export const MATH_G7_DATA: Record<string, GeneralProblem[]> = {
     MATH_G7_1,

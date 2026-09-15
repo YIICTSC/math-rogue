@@ -128,7 +128,7 @@ const EnglishChallengeScreen: React.FC<EnglishChallengeScreenProps> = ({ onCompl
         problemPool,
         count,
         () => cycleScope,
-        (problem) => `${mode}:${problem.question}`,
+        (problem) => `${mode}:${problem.question}:${problem.answer}`,
     );
     const shuffled = cyclePool
         .map(p => {
@@ -136,7 +136,7 @@ const EnglishChallengeScreen: React.FC<EnglishChallengeScreenProps> = ({ onCompl
             const correctAnswer = p.options[0];
             return {
                 ...p,
-                problemKey: `${mode}:${p.question}`,
+                problemKey: `${mode}:${p.question}:${p.answer}`,
                 actualCorrectAnswer: correctAnswer,
                 options: [...p.options].sort(() => Math.random() - 0.5)
             };

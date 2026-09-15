@@ -241,7 +241,7 @@ export const MATH_G3_UNIT_DATA: Record<string, GeneralProblem[]> = {
         { question: "569 + 431 = ?", answer: "1000", options: d("1000", "990", "900", "1100"), hint: "569+400+31。" },
         { question: "2704 + 809 = ?", answer: "3513", options: d("3513", "3413", "3503", "4513"), hint: "809を位にそろえる。" },
         { question: "答えが756になる式は？", answer: "428 + 328", options: d("428 + 328", "428 + 238", "418 + 328", "756 + 1"), hint: "たして756。" },
-        { question: "答えが5000になる式は？", answer: "3750 + 1250", options: d("3750 + 1250", "3750 + 1150", "3650 + 1250", "5000 + 0"), hint: "千・百の位を見る。" },
+        { question: "答えが5000になる式は？", answer: "3750 + 1250", options: d("3750 + 1250", "3750 + 1150", "3650 + 1250", "4900 + 0"), hint: "千・百の位を見る。" },
         { question: "一の位が 8+7 のたし算は、どうなる？", answer: "くり上がる", options: d("くり上がる", "くり上がらない", "答えは8", "答えは7"), hint: "8+7=15。" },
         { question: "十の位が 6+5+1 のとき、十の位に書く数字は？", answer: "2", options: d("2", "12", "1", "6"), hint: "12の2を書き、1くり上げる。" },
         { question: "307 + 58 で、58を書く位置は？", answer: "一の位をそろえる", options: d("一の位をそろえる", "左にそろえる", "百の位にそろえる", "どこでもよい"), hint: "位をそろえる。" },
@@ -263,7 +263,7 @@ export const MATH_G3_UNIT_DATA: Record<string, GeneralProblem[]> = {
         { question: "802 - 349 = ?", answer: "453", options: d("453", "553", "463", "1151"), hint: "0の位から借りる。" },
         { question: "6300 - 2750 = ?", answer: "3550", options: d("3550", "3650", "3450", "9050"), hint: "百の位に注意。" },
         { question: "答えが286になる式は？", answer: "734 - 448", options: d("734 - 448", "734 - 438", "724 - 448", "286 + 1"), hint: "差が286。" },
-        { question: "答えが4000になる式は？", answer: "7250 - 3250", options: d("7250 - 3250", "7250 - 3150", "7150 - 3250", "4000 - 0"), hint: "千と百の位を見る。" },
+        { question: "答えが4000になる式は？", answer: "7250 - 3250", options: d("7250 - 3250", "7250 - 3150", "7150 - 3250", "4100 - 0"), hint: "千と百の位を見る。" },
         { question: "上の一の位が0で、6をひくときは？", answer: "くり下がる", options: d("くり下がる", "そのまま0", "6を書く", "たす"), hint: "0から6はひけない。" },
         { question: "1004 - 7 で、くり下がりは？", answer: "ある", options: d("ある", "ない", "いつも0", "答えなし"), hint: "4から7はひけない。" },
         { question: "486 - 0 = ?", answer: "486", options: d("486", "0", "480", "487"), hint: "0をひいても同じ。" },
@@ -330,8 +330,8 @@ export const MATH_G3_UNIT_DATA: Record<string, GeneralProblem[]> = {
         { question: "56 × 4 = ?", answer: "224", options: d("224", "204", "226", "60"), hint: "50×4と6×4。" },
         { question: "68 × 5 = ?", answer: "340", options: d("340", "300", "330", "73"), hint: "60×5と8×5。" },
         { question: "84 × 2 = ?", answer: "168", options: d("168", "166", "148", "86"), hint: "2倍する。" },
-        { question: "答えが144になる式は？", answer: "36 × 4", options: d("36 × 4", "34 × 4", "36 × 3", "144 + 0"), hint: "30×4と6×4。" },
-        { question: "答えが270になる式は？", answer: "54 × 5", options: d("54 × 5", "45 × 5", "54 × 4", "270 × 1"), hint: "50×5と4×5。" },
+        { question: "答えが144になる式は？", answer: "36 × 4", options: d("36 × 4", "34 × 4", "36 × 3", "140 + 0"), hint: "30×4と6×4。" },
+        { question: "答えが270になる式は？", answer: "54 × 5", options: d("54 × 5", "45 × 5", "54 × 4", "27 × 1"), hint: "50×5と4×5。" },
         { question: "ひっ算で一の位が 7×6 のとき、一の位に書く数字は？", answer: "2", options: d("2", "42", "4", "6"), hint: "42の2を書く。" },
         { question: "ひっ算で 8×7=56 のとき、くり上がる数は？", answer: "5", options: d("5", "6", "56", "8"), hint: "6を書いて5くり上げ。" },
         { question: "40 × 6 = ?", answer: "240", options: d("240", "24", "46", "400"), hint: "4×6に0をつける。" },
@@ -670,7 +670,7 @@ const makeUnitProblem = (unitId: string, n: number): GeneralProblem => {
     }
 };
 
-fillGeneratedUnitProblems(MATH_G3_UNIT_DATA, makeUnitProblem);
+fillGeneratedUnitProblems(MATH_G3_UNIT_DATA, makeUnitProblem, { stopAtMin: true });
 
 export const MATH_G3_DATA: Record<string, GeneralProblem[]> = {
     MATH_G3_1,

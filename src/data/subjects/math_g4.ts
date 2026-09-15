@@ -299,7 +299,7 @@ export const MATH_G4_UNIT_DATA: Record<string, GeneralProblem[]> = {
         q("0.56と0.65ではどちらが大きい？", "0.65", "0.56", "同じ", "0.06", "小数第一位から比べます。"),
         q("1.08と1.8ではどちらが大きい？", "1.8", "1.08", "同じ", "0.8", "1.8は1.80です。"),
         q("0.4を分数で表すと？", "4/10", "4/100", "1/4", "40/10", "0.4は10分の4です。"),
-        q("0.03を分数で表すと？", "3/100", "3/10", "30/1000", "1/3", "0.03は100分の3です。"),
+        q("0.03を分数で表すと？", "3/100", "3/10", "3/1000", "1/3", "0.03は100分の3です。"),
         q("5/10を小数で表すと？", "0.5", "5.0", "0.05", "0.005", "10分のいくつかを小数第一位で表します。"),
         q("27/100を小数で表すと？", "0.27", "2.7", "0.027", "27.0", "100分のいくつかを小数第二位までで表します。"),
         q("小数を読むとき、小数点の右側はどう読む？", "数字を順に読む", "十、百をつけて読む", "必ず分数で読む", "読まない", "1.23は一点二三と読みます。"),
@@ -548,14 +548,17 @@ const makeUnitProblem = (unitId: string, n: number): GeneralProblem => {
             return { question: `3日間の 合計は？`, answer: `${a + b + c}人`, options: d(`${a + b + c}人`, `${a + b}人`, `${b + c}人`, `${a + c}人`), hint: "3本ともたす。", visual: { kind: 'bar_chart', values: [a, b, c], labels: ["1日目", "2日目", "3日目"] } };
         }
         case 'MATH_G4_U04': {
-            const a = (n % 9 + 1) * 10;
-            return {
-                question: `この角は 直角(90度)より 大きい？小さい？`,
-                answer: a > 90 ? "大きい" : (a < 90 ? "小さい" : "同じ"),
-                options: d(a > 90 ? "大きい" : (a < 90 ? "小さい" : "同じ"), "大きい", "小さい", "同じ"),
-                hint: "90度と比べよう。",
-                visual: { kind: 'angle', degrees: a }
-            };
+            const a = ((Math.floor(n / 2) % 17) + 1) * 10;
+            if (n % 2 === 0) {
+                return {
+                    question: `この角は 直角(90度)より 大きい？小さい？`,
+                    answer: a > 90 ? "大きい" : (a < 90 ? "小さい" : "同じ"),
+                    options: d(a > 90 ? "大きい" : (a < 90 ? "小さい" : "同じ"), "大きい", "小さい", "同じ"),
+                    hint: "90度と比べよう。",
+                    visual: { kind: 'angle', degrees: a }
+                };
+            }
+            return { question: "この角の 大きさは？", answer: `${a}度`, options: d(`${a}度`, `${Math.max(10, a - 10)}度`, `${Math.min(180, a + 10)}度`, "90度"), hint: "分度器の目盛りを読むように考えよう。", visual: { kind: 'angle', degrees: a } };
         }
         case 'MATH_G4_U05': {
             const a = (n % 6) + 2;
@@ -570,8 +573,8 @@ const makeUnitProblem = (unitId: string, n: number): GeneralProblem => {
             return { question: `1/10 が ${a}つ ある数を 小数で書くと？`, answer: `0.${a}`, options: d(`0.${a}`, `${a}.0`, `0.0${a}`, `${a}/10`), hint: "10分のいくつかを 小数で 表す。" };
         }
         case 'MATH_G4_U07': {
-            const a = (n % 8) + 1;
-            const b = (n % 8) + 1;
+            const a = (Math.floor(n / 2) % 8) + 1;
+            const b = (Math.floor(n / 16) % 8) + 1;
             const sum = (a + a / 10 + b + b / 10).toFixed(1);
             const diffBig = (Math.max(a, b) + Math.max(a, b) / 10 - (Math.min(a, b) + Math.min(a, b) / 10)).toFixed(1);
             if (n % 2 === 0) {
@@ -623,7 +626,9 @@ const makeUnitProblem = (unitId: string, n: number): GeneralProblem => {
         case 'MATH_G4_U12': {
             const denominator = (n % 7) + 3;
             const a = (n % (denominator - 1)) + 1;
-            const b = Math.min(denominator - 1, a + 1);
+            const b = a === denominator - 1 ? a - 1 : a + 1;
+            const big = Math.max(a, b);
+            const small = Math.min(a, b);
             const p = n % 4;
             if (p === 0) {
                 return {
@@ -635,8 +640,6 @@ const makeUnitProblem = (unitId: string, n: number): GeneralProblem => {
                 };
             }
             if (p === 1) {
-                const big = Math.max(a, b);
-                const small = Math.min(a, b);
                 return {
                     question: `${big}/${denominator} - ${small}/${denominator} = ?`,
                     answer: `${big - small}/${denominator}`,
@@ -648,22 +651,22 @@ const makeUnitProblem = (unitId: string, n: number): GeneralProblem => {
             if (p === 2) {
                 return {
                     question: `${a}/${denominator} と ${b}/${denominator}。 大きいのは？`,
-                    answer: `${b}/${denominator}`,
-                    options: d(`${b}/${denominator}`, `${a}/${denominator}`, "同じ", "くらべられない"),
+                    answer: `${big}/${denominator}`,
+                    options: d(`${big}/${denominator}`, `${small}/${denominator}`, "同じ", "くらべられない"),
                     hint: "分母が同じなら分子を比べる。",
                     visual: { kind: 'fraction_operation', left: { n: a, d: denominator }, right: { n: b, d: denominator }, op: '>' }
                 };
             }
             return {
                 question: `${a}/${denominator} と ${b}/${denominator}。 小さいのは？`,
-                answer: `${a}/${denominator}`,
-                options: d(`${a}/${denominator}`, `${b}/${denominator}`, "同じ", "くらべられない"),
+                answer: `${small}/${denominator}`,
+                options: d(`${small}/${denominator}`, `${big}/${denominator}`, "同じ", "くらべられない"),
                 hint: "分母が同じなら分子が小さいほう。",
                 visual: { kind: 'fraction_operation', left: { n: a, d: denominator }, right: { n: b, d: denominator }, op: '<' }
             };
         }
         case 'MATH_G4_U13': {
-            const p = n % 6;
+            const p = n % 10;
             if (p === 0) {
                 return { question: "この立体の面の数は？", answer: "6つ", options: d("6つ", "8つ", "12つ", "4つ"), hint: "サイコロと同じ。", visual: { kind: 'cube' } };
             }
@@ -679,11 +682,18 @@ const makeUnitProblem = (unitId: string, n: number): GeneralProblem => {
             if (p === 4) {
                 return { question: "直方体の向かい合う面どうしの関係は？", answer: "へいこう", options: d("へいこう", "すいちょく", "交わる", "重なる"), hint: "どこまでのばしても交わらない。", visual: { kind: 'cube' } };
             }
-            return { question: "直方体のとなりあう面どうしの関係は？", answer: "すいちょく", options: d("すいちょく", "へいこう", "重なる", "同じ面"), hint: "かどで直角に交わる。", visual: { kind: 'cube' } };
+            if (p === 5) return { question: "直方体のとなりあう面どうしの関係は？", answer: "すいちょく", options: d("すいちょく", "へいこう", "重なる", "同じ面"), hint: "かどで直角に交わる。", visual: { kind: 'cube' } };
+            if (p === 6) return { question: "立方体の6つの面の形は？", answer: "すべて正方形", options: d("すべて正方形", "すべて三角形", "円が2つ", "長方形が1つだけ"), hint: "サイコロの形を思い出そう。", visual: { kind: 'cube' } };
+            if (p === 7) return { question: "直方体で 同じ形・同じ大きさの面は どこにある？", answer: "向かい合うところ", options: d("向かい合うところ", "必ずとなり合うところ", "1つしかない", "頂点だけ"), hint: "向かい合う面を比べよう。", visual: { kind: 'cube' } };
+            if (p === 8) return { question: "直方体の1つの頂点に集まる辺は何本？", answer: "3本", options: d("3本", "2本", "4本", "6本"), hint: "たて・よこ・高さの3方向。", visual: { kind: 'cube' } };
+            return { question: "立方体の辺は、長さについてどんな関係？", answer: "すべて同じ長さ", options: d("すべて同じ長さ", "向かい合う2本だけ同じ", "全部ちがう", "長さは決まらない"), hint: "立方体はすべての辺が同じ。", visual: { kind: 'cube' } };
         }
         case 'MATH_G4_U14': {
-            const x = (n % 6) + 1;
-            return { question: `正方形の1辺が ${x}cm のとき、まわりの長さは？`, answer: `${x * 4}cm`, options: d(`${x * 4}cm`, `${x * x}cm2`, `${x + 4}cm`, `${x * 2}cm`), hint: "同じ長さが4本。" };
+            const x = (Math.floor(n / 3) % 8) + 1;
+            const p = n % 3;
+            if (p === 0) return { question: `正方形の1辺が ${x}cm のとき、まわりの長さは？`, answer: `${x * 4}cm`, options: d(`${x * 4}cm`, `${x * x}cm2`, `${x + 4}cm`, `${x * 2}cm`), hint: "同じ長さが4本。" };
+            if (p === 1) return { question: `正方形のまわりが ${x * 4}cm。1辺の長さは？`, answer: `${x}cm`, options: d(`${x}cm`, `${x * 4}cm`, `${x * 2}cm`, `${x + 4}cm`), hint: "まわりの長さを4でわる。" };
+            return { question: `正方形の1辺を ${x}cm から ${x + 1}cm にすると、まわりは何cmふえる？`, answer: "4cm", options: d("4cm", "1cm", "2cm", "8cm"), hint: "4本の辺が1cmずつ長くなる。" };
         }
         case 'MATH_G4_U15': {
             const a = (n % 8) + 2;
@@ -695,7 +705,7 @@ const makeUnitProblem = (unitId: string, n: number): GeneralProblem => {
     }
 };
 
-fillGeneratedUnitProblems(MATH_G4_UNIT_DATA, makeUnitProblem);
+fillGeneratedUnitProblems(MATH_G4_UNIT_DATA, makeUnitProblem, { stopAtMin: true });
 
 export const MATH_G4_DATA: Record<string, GeneralProblem[]> = {
     MATH_G4_1,

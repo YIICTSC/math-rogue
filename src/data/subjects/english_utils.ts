@@ -3,6 +3,9 @@ import { GeneralProblem, d } from './utils';
 export interface EnglishWordItem {
   en: string;
   jp: string;
+  /** 問題文だけで意味を区別したい場合の表示用ラベル。正解値や音声は en/jp を使う。 */
+  promptEn?: string;
+  promptJp?: string;
   hint?: string;
   choiceGroup?: string;
   speech?: string;
@@ -22,20 +25,53 @@ export interface EnglishResponseItem {
   answerSpeechAlternates?: string[];
 }
 
-const MIN_ENGLISH_UNIT_PROBLEMS = 50;
-
 export const cycleProblems = (problems: GeneralProblem[]) => {
-  if (problems.length === 0) return [];
-  const result = [...problems];
-  while (result.length < MIN_ENGLISH_UNIT_PROBLEMS) {
-    const base = problems[result.length % problems.length];
-    const round = Math.floor(result.length / problems.length) + 1;
-    result.push({
-      ...base,
-      question: base.question,
+  const seen = new Set<string>();
+  return problems.filter((problem) => {
+    const key = JSON.stringify({
+      question: problem.question,
+      answer: problem.answer,
+      options: problem.options,
+      audio: problem.audioPrompt?.text,
+      speech: problem.speechPrompt?.expected,
     });
-  }
-  return result;
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+};
+
+const englishProblemSignature = (problem: GeneralProblem) => JSON.stringify({
+  question: problem.question,
+  answer: problem.answer,
+  options: problem.options,
+  audio: problem.audioPrompt?.text,
+  speech: problem.speechPrompt?.expected,
+});
+
+/**
+ * 文法単元の問題数を、同一問題のコピーではなく生成問題で補う。
+ * makeProblem は n に応じて主語・語彙・文型を変え、同じ表示問題を返さないことを前提にする。
+ */
+export const fillEnglishGeneratedUnitProblems = (
+  unitData: Record<string, GeneralProblem[]>,
+  makeProblem: (unitId: string, n: number) => GeneralProblem | null,
+  options: { min?: number; maxAttempts?: number } = {},
+): void => {
+  const min = options.min ?? 36;
+  const maxAttempts = options.maxAttempts ?? 180;
+  Object.keys(unitData).forEach((unitId) => {
+    const problems = unitData[unitId];
+    const seen = new Set(problems.map(englishProblemSignature));
+    for (let n = 0; problems.length < min && n < maxAttempts; n += 1) {
+      const problem = makeProblem(unitId, n);
+      if (!problem) break;
+      const signature = englishProblemSignature(problem);
+      if (seen.has(signature)) continue;
+      seen.add(signature);
+      problems.push(problem);
+    }
+  });
 };
 
 export const uniqueEnglishWordItems = (items: EnglishWordItem[]) => {
@@ -137,16 +173,18 @@ export const buildWordUnit = (
 
   items.forEach((item, index) => {
     const itemPool = poolFor(item);
-    const jpPool = itemPool.map((candidate) => candidate.jp);
-    const enPool = itemPool.map((candidate) => candidate.en);
+    const jpPool = itemPool.filter((candidate) => candidate.en !== item.en).map((candidate) => candidate.jp);
+    const enPool = itemPool.filter((candidate) => candidate.jp !== item.jp).map((candidate) => candidate.en);
+    const displayEn = item.promptEn || item.en;
+    const displayJp = item.promptJp || item.jp;
     problems.push({
-        question: `「${item.en}」は 日本語で なんという？`,
+        question: `「${displayEn}」は 日本語で なんという？`,
         answer: item.jp,
         options: d(item.jp, ...pickDistinct(jpPool, item.jp, index + 1, 3)),
         hint: item.hint || '英語の意味を考えよう。',
       });
     problems.push({
-        question: `「${item.jp}」は 英語で なんという？`,
+        question: `「${displayJp}」は 英語で なんという？`,
         answer: item.en,
         options: d(item.en, ...pickDistinct(enPool, item.en, index + 2, 3)),
         hint: item.hint || '英語を選ぼう。',
@@ -169,7 +207,7 @@ export const buildWordUnit = (
     }
     if (enableSpeaking) {
       problems.push({
-        question: options.speakingPrompt || `「${item.jp}」を 英語で いってみよう。`,
+        question: options.speakingPrompt || `「${displayJp}」を 英語で いってみよう。`,
         answer: item.en,
         options: d(item.en, ...pickDistinct(enPool, item.en, index + 5, 3)),
         hint: 'マイク対応ブラウザなら発話判定もできる。',
@@ -181,7 +219,7 @@ export const buildWordUnit = (
       const example = buildExampleSentence(item);
       if (example) {
         problems.push({
-          question: `つぎの文の「${item.en}」は 日本語で なんという？\n${example.en}`,
+          question: `つぎの文の「${displayEn}」は 日本語で なんという？\n${example.en}`,
           answer: item.jp,
           options: d(item.jp, ...pickDistinct(jpPool, item.jp, index + 6, 3)),
           hint: '文の中の英語と日本語を結びつけよう。',
@@ -198,34 +236,38 @@ export const buildFixedChoiceUnit = (
   unitTitle: string,
 ): GeneralProblem[] => {
   if (items.length === 0) return [];
-  const enPool = items.map((item) => item.en);
-  const jpPool = items.map((item) => item.jp);
   const fixed: GeneralProblem[] = [];
 
   items.forEach((item, index) => {
+    const displayEn = item.promptEn || item.en;
+    const displayJp = item.promptJp || item.jp;
+    const safeJpPool = items.filter((candidate) => candidate.en !== item.en).map((candidate) => candidate.jp);
+    const safeEnPool = items.filter((candidate) => candidate.jp !== item.jp).map((candidate) => candidate.en);
     fixed.push({
-      question: `「${item.en}」の意味として正しいものを1つ選ぼう。`,
+      question: `「${displayEn}」の意味として正しいものを1つ選ぼう。`,
       answer: item.jp,
-      options: d(item.jp, ...pickDistinct(jpPool, item.jp, index + 1, 3)),
+      options: d(item.jp, ...pickDistinct(safeJpPool, item.jp, index + 1, 3)),
       hint: '単語の意味を確認しよう。',
     });
     fixed.push({
-      question: `「${item.jp}」を英語で表すとどれ？`,
+      question: `「${displayJp}」を英語で表すとどれ？`,
       answer: item.en,
-      options: d(item.en, ...pickDistinct(enPool, item.en, index + 2, 3)),
+      options: d(item.en, ...pickDistinct(safeEnPool, item.en, index + 2, 3)),
       hint: '英語表現を選ぼう。',
     });
   });
 
-  while (fixed.length < MIN_ENGLISH_UNIT_PROBLEMS) {
-    const item = items[fixed.length % items.length];
+  // 同じ設問を50問まで複製せず、各語につき別形式を1問だけ追加する。
+  items.forEach((item, index) => {
+    const displayJp = item.promptJp || item.jp;
+    const safeEnPool = items.filter((candidate) => candidate.jp !== item.jp).map((candidate) => candidate.en);
     fixed.push({
-      question: `${item.jp} に当てはまる英語は？`,
+      question: `${displayJp} に当てはまる英語は？`,
       answer: item.en,
-      options: d(item.en, ...pickDistinct(enPool, item.en, fixed.length + 1, 3)),
+      options: d(item.en, ...pickDistinct(safeEnPool, item.en, index + 3, 3)),
       hint: '4つの選択肢から選ぼう。',
     });
-  }
+  });
 
   return fixed;
 };
@@ -233,22 +275,28 @@ export const buildFixedChoiceUnit = (
 export const buildListeningReviewUnit = (items: EnglishWordItem[], promptText = '学年の ことばを きいて、あてはまる 英語を えらぼう。'): GeneralProblem[] => {
   const enPool = items.map((item) => item.en);
   const jpPool = items.map((item) => item.jp);
-  return cycleProblems(items.flatMap((item, index) => ([
-    {
+  return cycleProblems(items.flatMap((item, index) => {
+    const sameSoundMeanings = new Set(
+      items.filter((candidate) => candidate.en === item.en).map((candidate) => candidate.jp),
+    );
+    const problems: GeneralProblem[] = [{
       question: promptText,
       answer: item.en,
       options: d(item.en, ...pickDistinct(enPool, item.en, index + 1, 3)),
       hint: '学年でならった表現を聞き取ろう。',
       audioPrompt: { text: item.speech || item.en, lang: 'en-US', autoPlay: true },
-    },
-    {
+    }];
+    // 同じ音・表記に複数の日本語訳がある語（orange / library など）は、
+    // 音声だけでは意味を一意に決められないため日本語選択問題を作らない。
+    if (sameSoundMeanings.size === 1) problems.push({
       question: '学年の ことばを きいて、あてはまる 日本語を えらぼう。',
       answer: item.jp,
       options: d(item.jp, ...pickDistinct(jpPool, item.jp, index + 2, 3)),
       hint: '意味までセットで思い出そう。',
       audioPrompt: { text: item.speech || item.en, lang: 'en-US', autoPlay: true },
-    },
-  ])));
+    });
+    return problems;
+  }));
 };
 
 export const buildSpeakingReviewUnit = (items: EnglishWordItem[], promptText = '学年の ことばを 英語で いってみよう。'): GeneralProblem[] => {
@@ -264,19 +312,34 @@ export const buildSpeakingReviewUnit = (items: EnglishWordItem[], promptText = '
     ]));
   };
 
-  return cycleProblems(items.map((item, index) => ({
-    question: `${promptText}\n「${item.jp}」`,
-    answer: item.en,
-    options: d(item.en, ...pickDistinct(enPool, item.en, index + 3, 3)),
-    hint: 'マイクで発音して確認。',
-    speechPrompt: {
-      expected: item.speech || item.en,
-      alternates: makeSpeechAlternates(item),
-      lang: 'en-US',
-      buttonLabel: 'えいごで はなす',
+  return cycleProblems(items.flatMap((item, index) => ([
+    {
+      question: `${promptText}\n「${item.promptJp || item.jp}」`,
+      answer: item.en,
+      options: d(item.en, ...pickDistinct(enPool, item.en, index + 3, 3)),
+      hint: 'マイクで発音して確認。',
+      speechPrompt: {
+        expected: item.speech || item.en,
+        alternates: makeSpeechAlternates(item),
+        lang: 'en-US',
+        buttonLabel: 'えいごで はなす',
+      },
+      audioPrompt: { text: item.speech || item.en, lang: 'en-US', autoPlay: false },
     },
-    audioPrompt: { text: item.speech || item.en, lang: 'en-US', autoPlay: false },
-  })));
+    {
+      question: `おとを きいて、同じ 英語を いってみよう。\n「${item.promptJp || item.jp}」`,
+      answer: item.en,
+      options: d(item.en, ...pickDistinct(enPool, item.en, index + 5, 3)),
+      hint: '音を聞いてから、同じ表現を発音する。',
+      speechPrompt: {
+        expected: item.speech || item.en,
+        alternates: makeSpeechAlternates(item),
+        lang: 'en-US',
+        buttonLabel: 'きいて はなす',
+      },
+      audioPrompt: { text: item.speech || item.en, lang: 'en-US', autoPlay: true },
+    },
+  ])));
 };
 
 export const buildRepeatReviewUnit = (items: EnglishWordItem[], promptText = 'おとを きいて、そのまま 英語で くりかえそう。'): GeneralProblem[] => {
@@ -294,7 +357,7 @@ export const buildRepeatReviewUnit = (items: EnglishWordItem[], promptText = '�
 
   return cycleProblems(items.flatMap((item, index) => ([
     {
-      question: `${promptText}\n「${item.jp}」`,
+      question: `${promptText}\n「${item.promptJp || item.jp}」`,
       answer: item.en,
       options: d(item.en, ...pickDistinct(enPool, item.en, index + 1, 3)),
       hint: '聞いた 英語を そのまま くりかえす。',
@@ -314,7 +377,7 @@ export const buildRepeatReviewUnit = (items: EnglishWordItem[], promptText = '�
       audioPrompt: { text: item.speech || item.en, lang: 'en-US', autoPlay: true },
     },
     {
-      question: `つぎの 日本語を 英語で くりかえそう。\n「${item.jp}」`,
+      question: `つぎの 日本語を 英語で くりかえそう。\n「${item.promptJp || item.jp}」`,
       answer: item.en,
       options: d(item.en, ...pickDistinct(enPool, item.en, index + 3, 3)),
       hint: '例の音を まねして はっきり言う。',

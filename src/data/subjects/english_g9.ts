@@ -1,5 +1,5 @@
 import { GeneralProblem } from './utils';
-import { buildListeningReviewUnit, buildRepeatReviewUnit, buildResponseReviewUnit, buildSpeakingReviewUnit, cycleProblems, EnglishResponseItem, EnglishWordItem, prompt, uniqueEnglishWordItems } from './english_utils';
+import { buildListeningReviewUnit, buildRepeatReviewUnit, buildResponseReviewUnit, buildSpeakingReviewUnit, cycleProblems, EnglishResponseItem, EnglishWordItem, fillEnglishGeneratedUnitProblems, prompt, uniqueEnglishWordItems } from './english_utils';
 
 const readingPassages = [
   {
@@ -50,6 +50,30 @@ const readingPassages = [
     detail: '泳いだり走ったりできる',
     place: '駅の近く',
   },
+  {
+    text: 'Our class started a recycling project in April. We collect used paper every Friday and take it to a recycling center once a month.',
+    topic: 'クラスのリサイクル活動',
+    detail: '毎週金曜日に古紙を集める',
+    place: '学校の活動',
+  },
+  {
+    text: 'Mai joined the basketball team this spring. She practices three times a week and hopes to play in the next school tournament.',
+    topic: 'まいのバスケットボール部活動',
+    detail: '週に3回練習している',
+    place: '学校の部活動',
+  },
+  {
+    text: 'The city museum has a special exhibition about local history. Students can enter for free on Saturdays if they show their student cards.',
+    topic: '市立博物館の特別展示',
+    detail: '土曜日は学生証を見せると無料',
+    place: '市立博物館',
+  },
+  {
+    text: 'Takuya has used the same bicycle for five years. Last weekend, he repaired the brakes with his father instead of buying a new bicycle.',
+    topic: 'たくやの自転車修理',
+    detail: '父といっしょにブレーキを直した',
+    place: '自転車を大切に使う話',
+  },
 ];
 const g9ReviewItems: EnglishWordItem[] = uniqueEnglishWordItems([
   { en: 'I have seen that movie.', jp: 'わたしは その映画を見たことがあります。', speech: 'I have seen that movie' },
@@ -62,6 +86,14 @@ const g9ReviewItems: EnglishWordItem[] = uniqueEnglishWordItems([
   { en: 'I think it is important to study English.', jp: '英語を勉強することは大切だと思います。', speech: 'I think it is important to study English' },
   { en: 'Today, I want to talk about my hobby.', jp: '今日は わたしのしゅみについて話したいです。', speech: 'Today I want to talk about my hobby' },
   { en: 'Thank you for listening.', jp: '聞いてくれてありがとうございます。', speech: 'Thank you for listening', speechAlternates: ['Thanks for listening'] },
+  { en: 'She has already finished her homework.', jp: '彼女は すでに宿題を終えています。', speech: 'She has already finished her homework' },
+  { en: 'He has been practicing soccer since noon.', jp: '彼は 正午からずっとサッカーを練習しています。', speech: 'He has been practicing soccer since noon' },
+  { en: 'The student who won the contest is my friend.', jp: '大会で勝った生徒は わたしの友だちです。', speech: 'The student who won the contest is my friend' },
+  { en: 'Please tell me where the station is.', jp: '駅がどこにあるか教えてください。', speech: 'Please tell me where the station is' },
+  { en: 'If I had more time, I would read more books.', jp: 'もっと時間があれば もっと本を読むのに。', speech: 'If I had more time I would read more books' },
+  { en: 'The picture taken in Kyoto was beautiful.', jp: '京都で撮られた写真は美しかったです。', speech: 'The picture taken in Kyoto was beautiful' },
+  { en: 'This computer is more useful than that one.', jp: 'このコンピュータは あれより便利です。', speech: 'This computer is more useful than that one' },
+  { en: 'First, I will explain my main idea.', jp: 'まず わたしの主な考えを説明します。', speech: 'First I will explain my main idea' },
 ]);
 const g9ResponseItems: EnglishResponseItem[] = [
   { promptEn: 'Have you seen that movie?', promptJp: 'その映画を見たことがありますか。', answerEn: 'Yes, I have.', answerJp: 'はい、あります。', answerSpeech: 'Yes I have', answerSpeechAlternates: ['Yes, I have.'] },
@@ -70,7 +102,143 @@ const g9ResponseItems: EnglishResponseItem[] = [
   { promptEn: 'If you were me, what would you do?', promptJp: 'もし わたしだったら、どうしますか。', answerEn: 'I would study harder.', answerJp: 'もっと 勉強します。', answerSpeech: 'I would study harder' },
   { promptEn: 'What language is spoken here?', promptJp: 'ここで 話されている言語は 何ですか。', answerEn: 'English is spoken here.', answerJp: 'ここでは 英語が話されています。', answerSpeech: 'English is spoken here' },
   { promptEn: 'Please start your speech.', promptJp: 'スピーチを はじめてください。', answerEn: 'Today, I want to talk about my hobby.', answerJp: '今日は わたしのしゅみについて話したいです。', answerSpeech: 'Today I want to talk about my hobby' },
+  { promptEn: 'Has she finished her homework?', promptJp: '彼女は 宿題を終えましたか。', answerEn: 'She has already finished her homework.', answerJp: '彼女は すでに宿題を終えています。', answerSpeech: 'She has already finished her homework' },
+  { promptEn: 'Do you know where the station is?', promptJp: '駅がどこにあるか知っていますか。', answerEn: 'Please tell me where the station is.', answerJp: '駅がどこにあるか教えてください。', answerSpeech: 'Please tell me where the station is' },
+  { promptEn: 'What would you do with more time?', promptJp: 'もっと時間があれば 何をしますか。', answerEn: 'I would read more books.', answerJp: 'もっと本を読みます。', answerSpeech: 'I would read more books' },
+  { promptEn: 'Which computer is more useful?', promptJp: 'どちらのコンピュータが より便利ですか。', answerEn: 'This computer is more useful than that one.', answerJp: 'このコンピュータは あれより便利です。', answerSpeech: 'This computer is more useful than that one' },
 ];
+
+const makeG9GrammarProblem = (unitId: string, n: number): GeneralProblem | null => {
+  switch (unitId) {
+    case 'ENGLISH_G9_U01': {
+      const verbs = [
+        ['see', 'seen', 'that movie'], ['read', 'read', 'this book'], ['finish', 'finished', 'my homework'], ['visit', 'visited', 'Kyoto'], ['eat', 'eaten', 'lunch'],
+        ['write', 'written', 'the report'], ['do', 'done', 'the work'], ['clean', 'cleaned', 'the room'], ['make', 'made', 'dinner'], ['take', 'taken', 'many pictures'], ['buy', 'bought', 'a new bag'], ['be', 'been', 'to Osaka'],
+      ] as const;
+      const [base, pp, object] = verbs[Math.floor(n / 3) % verbs.length];
+      const form = n % 3;
+      if (form === 0) return prompt(`I have ___ ${object}.`, pp, [base, `${base}ing`, `${base}s`, `to ${base}`], 'have + 過去分詞。');
+      if (form === 1) return prompt(`She has ___ ${object}.`, pp, [base, `${base}ing`, `${base}s`, `to ${base}`], 'has + 過去分詞。');
+      return prompt(`Have you ___ ${object}?`, pp, [base, `${base}ing`, `${base}s`, `to ${base}`], 'Have you + 過去分詞。');
+    }
+    case 'ENGLISH_G9_U02': {
+      const actions = [
+        ['study', 'studying', 'English'], ['play', 'playing', 'soccer'], ['wait', 'waiting', 'here'], ['read', 'reading', 'this book'], ['practice', 'practicing', 'the piano'],
+        ['work', 'working', 'on the project'], ['run', 'running', 'in the park'], ['write', 'writing', 'letters'], ['learn', 'learning', 'Japanese'], ['use', 'using', 'this computer'],
+      ] as const;
+      const periods = ['for two hours', 'since noon', 'for three days', 'since Monday', 'for a long time'];
+      const [base, ing, object] = actions[Math.floor(n / 3) % actions.length];
+      const period = periods[Math.floor(n / (actions.length * 3)) % periods.length];
+      const form = n % 3;
+      if (form === 0) return prompt(`I have been ___ ${object} ${period}.`, ing, [base, `${base}s`, `${base}ed`], 'have been + -ing。');
+      if (form === 1) return prompt(`She has been ___ ${object} ${period}.`, ing, [base, `${base}s`, `${base}ed`], 'has been + -ing。');
+      return prompt(`Have they been ___ ${object} ${period}?`, ing, [base, `${base}s`, `${base}ed`], '現在完了進行形の疑問文。');
+    }
+    case 'ENGLISH_G9_U03': {
+      const people = [['girl', 'is singing'], ['boy', 'lives in Osaka'], ['student', 'won the contest'], ['teacher', 'teaches English'], ['man', 'helped me'], ['woman', 'works here'], ['player', 'scored the goal'], ['doctor', 'treated me'], ['friend', 'called me'], ['student', 'speaks French']] as const;
+      const things = [['book', 'I bought yesterday'], ['cake', 'my mother made'], ['picture', 'I took in Kyoto'], ['movie', 'we saw'], ['bag', 'Tom uses'], ['song', 'everyone likes'], ['computer', 'my father bought'], ['letter', 'she wrote'], ['museum', 'we visited'], ['bike', 'Ken repaired']] as const;
+      const form = n % 3;
+      if (form === 0) {
+        const [noun, clause] = people[Math.floor(n / 3) % people.length];
+        return prompt(`The ${noun} ___ ${clause} is my friend.`, 'who', ['which', 'where', 'when'], '人を説明するときは who。');
+      }
+      const [noun, clause] = things[Math.floor(n / 3) % things.length];
+      if (form === 1) return prompt(`This is the ${noun} ___ ${clause}.`, 'that', ['who', 'where', 'when'], '物を説明するときは that / which。');
+      return prompt(`The ${noun} ___ ${clause} was interesting.`, 'that', ['who', 'where', 'when'], '先行詞が物の関係代名詞。');
+    }
+    case 'ENGLISH_G9_U04': {
+      const clauses = [
+        ['where', 'he is'], ['what', 'she wants'], ['when', 'the train leaves'], ['why', 'the bus is late'], ['how', 'he made it'], ['who', 'that man is'],
+        ['where', 'she lives'], ['what', 'this word means'], ['when', 'the store opens'], ['why', 'they are here'], ['how', 'the machine works'], ['who', 'won the game'],
+      ] as const;
+      const [wh, clause] = clauses[Math.floor(n / 3) % clauses.length];
+      const form = n % 3;
+      const wrongs = ['where', 'what', 'when', 'why', 'how', 'who'].filter(x => x !== wh).slice((n % 2), (n % 2) + 3);
+      if (form === 0) return prompt(`Do you know ___ ${clause}?`, wh, wrongs, '間接疑問文では疑問詞の後は平叙文の語順。');
+      if (form === 1) return prompt(`Please tell me ___ ${clause}.`, wh, wrongs, '疑問詞 + 主語 + 動詞の語順。');
+      return prompt(`I wonder ___ ${clause}.`, wh, wrongs, 'wonder の後の間接疑問。');
+    }
+    case 'ENGLISH_G9_U05': {
+      const situations = [
+        ['rich', 'travel abroad'], ['free', 'join the club'], ['you', 'study harder'], ['a teacher', 'help every student'], ['at home', 'cook dinner'], ['younger', 'play outside more'],
+        ['good at English', 'talk with visitors'], ['in Kyoto', 'visit many temples'], ['the captain', 'practice every day'], ['a doctor', 'help sick people'],
+      ] as const;
+      const [condition, action] = situations[Math.floor(n / 3) % situations.length];
+      const form = n % 3;
+      if (form === 0) return prompt(`If I ___ ${condition}, I would ${action}.`, 'were', ['am', 'was', 'be'], '仮定法では If I were ... を使う。');
+      if (form === 1) return prompt(`If she were ${condition}, she ___ ${action}.`, 'would', ['will', 'did', 'is'], '仮定法の主節は would + 動詞。');
+      return prompt(`If he ___ ${condition}, he would ${action}.`, 'were', ['is', 'was', 'be'], '現実と異なる仮定を表す。');
+    }
+    case 'ENGLISH_G9_U06': {
+      const present = [['boy', 'standing', 'by the window'], ['girl', 'running', 'in the park'], ['student', 'reading', 'a book'], ['dog', 'sleeping', 'under the table'], ['man', 'waiting', 'at the station'], ['woman', 'singing', 'on the stage'], ['child', 'playing', 'outside'], ['teacher', 'talking', 'with Ken'], ['cat', 'sitting', 'on the chair'], ['player', 'wearing', 'number ten'], ['student', 'using', 'the computer'], ['bird', 'flying', 'over the park'], ['girl', 'carrying', 'a blue bag'], ['man', 'walking', 'near the station'], ['boy', 'cooking', 'in the kitchen']] as const;
+      const past = [['homework', 'give', 'given', 'by the teacher'], ['picture', 'take', 'taken', 'in Kyoto'], ['language', 'speak', 'spoken', 'here'], ['window', 'break', 'broken', 'yesterday'], ['cake', 'make', 'made', 'by my mother'], ['letter', 'write', 'written', 'in English'], ['bridge', 'build', 'built', 'last year'], ['song', 'sing', 'sung', 'by the students'], ['book', 'write', 'written', 'for children'], ['bike', 'repair', 'repaired', 'by Ken'], ['room', 'clean', 'cleaned', 'this morning'], ['meal', 'cook', 'cooked', 'by my father'], ['ball', 'use', 'used', 'in the game'], ['gift', 'send', 'sent', 'from Canada'], ['car', 'make', 'made', 'in Japan']] as const;
+      const form = n % 2;
+      if (form === 0) {
+        const [noun, ing, rest] = present[Math.floor(n / 2) % present.length];
+        return prompt(`The ${noun} ___ ${rest} is my friend.`, ing, [ing.replace(/ing$/, ''), `${ing}s`, `${ing}ed`], '現在分詞が名詞を説明する。');
+      }
+      const [noun, base, pp, rest] = past[Math.floor(n / 2) % past.length];
+      return prompt(`The ${noun} ___ ${rest} was important.`, pp, [base, `${base}ing`, `${base}s`], '過去分詞が名詞を説明する。');
+    }
+    case 'ENGLISH_G9_U07': {
+      const adjectives = [['difficult', 'more difficult', 'most difficult'], ['popular', 'more popular', 'most popular'], ['useful', 'more useful', 'most useful'], ['beautiful', 'more beautiful', 'most beautiful'], ['important', 'more important', 'most important'], ['interesting', 'more interesting', 'most interesting'], ['expensive', 'more expensive', 'most expensive'], ['famous', 'more famous', 'most famous']] as const;
+      const [base, comparative, superlative] = adjectives[Math.floor(n / 4) % adjectives.length];
+      const form = n % 4;
+      const forms = [base, comparative, superlative, `very ${base}`];
+      if (form === 0) return prompt(`This problem is ___ than that one.`, comparative, forms.filter(x => x !== comparative).slice(0, 3), '長い形容詞の比較級は more。');
+      if (form === 1) return prompt(`This is the ___ of the three.`, superlative, forms.filter(x => x !== superlative).slice(0, 3), '最上級は the most ...。');
+      if (form === 2) return prompt(`This book is as ___ as that one.`, base, forms.filter(x => x !== base).slice(0, 3), 'as ... as の間は原級。');
+      return prompt(`This is one of the ___ books in the library.`, superlative, forms.filter(x => x !== superlative).slice(0, 3), 'one of the + 最上級 + 複数名詞。');
+    }
+    case 'ENGLISH_G9_U09': {
+      const writing = [
+        ['わたしは 毎日英語を勉強します。', 'I study English every day.'],
+        ['彼は 昨日図書館へ行きました。', 'He went to the library yesterday.'],
+        ['わたしには 犬が2ひきいます。', 'I have two dogs.'],
+        ['わたしは 人を助けたいです。', 'I want to help people.'],
+        ['彼女は 今本を読んでいます。', 'She is reading a book now.'],
+        ['わたしたちは 来週京都を訪れる予定です。', 'We are going to visit Kyoto next week.'],
+        ['英語を勉強することは大切です。', 'It is important to study English.'],
+        ['この本は あの本よりおもしろいです。', 'This book is more interesting than that one.'],
+        ['これは 母が作ったケーキです。', 'This is the cake that my mother made.'],
+        ['わたしは その映画を見たことがあります。', 'I have seen that movie.'],
+        ['雨だったので 家にいました。', 'I stayed home because it was rainy.'],
+        ['もし時間があれば もっと本を読むのに。', 'If I had more time, I would read more books.'],
+        ['その窓は 昨日こわされました。', 'The window was broken yesterday.'],
+        ['わたしは 将来先生になりたいです。', 'I want to be a teacher in the future.'],
+      ] as const;
+      const [jp, en] = writing[Math.floor(n / 2) % writing.length];
+      const others = writing.filter(([, candidate]) => candidate !== en).map(([, candidate]) => candidate);
+      if (n % 2 === 0) return prompt(`「${jp}」に 合う英文は？`, en, [others[n % others.length], others[(n + 4) % others.length], others[(n + 8) % others.length]], '文法と語順を確認する。');
+      return prompt(`次の英文の内容に 合う日本語は？\n${en}`, jp, writing.filter(([candidateJp]) => candidateJp !== jp).slice((n % 4), (n % 4) + 3).map(([candidateJp]) => candidateJp), '英文全体の意味をとらえる。');
+    }
+    case 'ENGLISH_G9_U10': {
+      const speech = [
+        ['Today, I want to talk about my hobby.', '話題を示す導入'],
+        ['First, I will explain my main idea.', '最初の要点を示す'],
+        ['For example, I practice every day.', '具体例を出す'],
+        ['I have two reasons.', '理由の数を示す'],
+        ['My first reason is that it is useful.', '1つ目の理由を述べる'],
+        ['My second reason is that it is fun.', '2つ目の理由を述べる'],
+        ['I learned this from my experience.', '自分の経験につなげる'],
+        ['Please look at this picture.', '資料に注目してもらう'],
+        ['This is important because it helps everyone.', '理由を添えて主張する'],
+        ['In conclusion, I think we should try it.', '結論を述べる'],
+        ['That is why I like this activity.', '理由をまとめる'],
+        ['I hope you are interested in this topic.', '聞き手へ呼びかける'],
+        ['Do you have any questions?', '質問を受け付ける'],
+        ['Thank you for listening.', 'スピーチを終える'],
+      ] as const;
+      const [en, purpose] = speech[Math.floor(n / 2) % speech.length];
+      const otherEnglish = speech.filter(([candidate]) => candidate !== en).map(([candidate]) => candidate);
+      const otherPurposes = speech.filter(([, candidate]) => candidate !== purpose).map(([, candidate]) => candidate);
+      if (n % 2 === 0) return prompt(`「${purpose}」ときに使いやすい表現は？`, en, [otherEnglish[n % otherEnglish.length], otherEnglish[(n + 4) % otherEnglish.length], otherEnglish[(n + 8) % otherEnglish.length]], 'スピーチの役割に合う表現を選ぶ。');
+      return prompt(`${en}\nこの表現の役割として近いものは？`, purpose, [otherPurposes[n % otherPurposes.length], otherPurposes[(n + 3) % otherPurposes.length], otherPurposes[(n + 6) % otherPurposes.length]], '導入・理由・例・結論などを見分ける。');
+    }
+    default:
+      return null;
+  }
+};
 
 export const ENGLISH_G9_UNIT_DATA: Record<string, GeneralProblem[]> = {
   ENGLISH_G9_U01: cycleProblems([
@@ -209,6 +377,8 @@ export const ENGLISH_G9_UNIT_DATA: Record<string, GeneralProblem[]> = {
   ENGLISH_G9_U13: buildRepeatReviewUnit(g9ReviewItems, '中3の 重要表現を きいて、英語を くりかえそう。'),
   ENGLISH_G9_U14: buildResponseReviewUnit(g9ResponseItems, '中3の 会話に 英語で こたえよう。'),
 };
+
+fillEnglishGeneratedUnitProblems(ENGLISH_G9_UNIT_DATA, makeG9GrammarProblem, { min: 36 });
 
 export const ENGLISH_G9_DATA: Record<string, GeneralProblem[]> = {
   ENGLISH_G9_1: Object.values(ENGLISH_G9_UNIT_DATA).flat(),

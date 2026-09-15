@@ -1856,7 +1856,7 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
                                                 onClick={() => setIllustratedProblemPage(current => Math.max(0, current - 1))}
                                                 className="rounded border border-slate-600 bg-slate-800 px-3 py-1.5 text-slate-100 enabled:hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-40"
                                             >
-                                                ← 前へ
+                                                {languageMode === 'ENGLISH' ? '← Previous' : '← 前へ'}
                                             </button>
                                             <span className="rounded border border-slate-700 bg-black/30 px-3 py-1.5 text-cyan-200">
                                                 {illustratedProblemPageIndex + 1} / {illustratedProblemPageCount}
@@ -1867,7 +1867,7 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
                                                 onClick={() => setIllustratedProblemPage(current => Math.min(illustratedProblemPageCount - 1, current + 1))}
                                                 className="rounded border border-slate-600 bg-slate-800 px-3 py-1.5 text-slate-100 enabled:hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-40"
                                             >
-                                                次へ →
+                                                {languageMode === 'ENGLISH' ? 'Next →' : '次へ →'}
                                             </button>
                                         </div>
                                     </div>

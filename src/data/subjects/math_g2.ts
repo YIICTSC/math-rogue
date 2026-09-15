@@ -259,10 +259,10 @@ export const MATH_G2_UNIT_DATA: Record<string, GeneralProblem[]> = {
     MATH_G2_U09: [
         { question: "3こずつのさらが4まい。しきは？", answer: "3 × 4", options: d("3 × 4", "3 + 4", "4 - 3", "3 × 3"), hint: "3こが4つ。" },
         { question: "2人ずつのれつが5つ。しきは？", answer: "2 × 5", options: d("2 × 5", "2 + 5", "5 - 2", "2 × 4"), hint: "2人が5つ。" },
-        { question: "4 + 4 + 4 をかけ算にすると？", answer: "4 × 3", options: d("4 × 3", "3 × 4", "4 + 3", "4 × 4"), hint: "4が3つ。" },
-        { question: "6 + 6 をかけ算にすると？", answer: "6 × 2", options: d("6 × 2", "2 × 6", "6 + 2", "6 × 6"), hint: "6が2つ。" },
+        { question: "4 + 4 + 4 をかけ算にすると？", answer: "4 × 3", options: d("4 × 3", "4 × 2", "4 + 3", "4 × 4"), hint: "4が3つ。" },
+        { question: "6 + 6 をかけ算にすると？", answer: "6 × 2", options: d("6 × 2", "6 × 3", "6 + 2", "6 × 6"), hint: "6が2つ。" },
         { question: "5 × 3 は、どんな意味？", answer: "5が3つ", options: d("5が3つ", "3が5つだけ", "5+3だけ", "5-3"), hint: "前の数がいくつずつ。" },
-        { question: "7が4つあるしきは？", answer: "7 × 4", options: d("7 × 4", "4 × 7", "7 + 4", "7 - 4"), hint: "7が4つ。" },
+        { question: "7が4つあるしきは？", answer: "7 × 4", options: d("7 × 4", "7 × 3", "7 + 4", "7 - 4"), hint: "7が4つ。" },
         { question: "2 × 6 のこたえは？", answer: "12", options: d("12", "8", "10", "6"), hint: "2が6つ。" },
         { question: "3 × 5 のこたえは？", answer: "15", options: d("15", "8", "12", "10"), hint: "3が5つ。" },
         { question: "4こ入りのふくろが3つ。ぜんぶで？", answer: "12こ", options: d("12こ", "7こ", "9こ", "16こ"), hint: "4×3。" },
@@ -363,7 +363,8 @@ const makeUnitProblem = (unitId: string, n: number): GeneralProblem => {
             }
             if (p === 2) {
                 const min = Math.min(a, b, c);
-                const winners = [["あか", a], ["あお", b], ["みどり", c]].filter(([, v]) => v === min).map(([label]) => label);
+                const itemValues: Array<[string, number]> = [["あか", a], ["あお", b], ["みどり", c]];
+                const winners = itemValues.filter(([, v]) => v === min).map(([label]) => label);
                 const answer = winners.length === 1 ? winners[0] : "おなじ";
                 const wrongs = ["あか", "あお", "みどり", "おなじ"].filter((label) => label !== answer).slice(0, 3);
                 return { question: `みどりは ${c}こ。 いちばん すくない いろは？`, answer, options: d(answer, ...wrongs), hint: "ひくい ぼうを さがそう。", visual: { kind: 'bar_chart', values: [a, b, c], labels: ["あか", "あお", "みどり"] } };
@@ -426,20 +427,20 @@ const makeUnitProblem = (unitId: string, n: number): GeneralProblem => {
         case 'MATH_G2_U09': {
             const a = (n % 4) + 2;
             const b = (n % 5) + 2;
-            if (n % 2 === 0) return { question: `${a} が ${b}こ。 かけ算の 式は？`, answer: `${a} × ${b}`, options: d(`${a} × ${b}`, `${a} + ${b}`, `${b} - ${a}`, `${b} × ${a} + 1`), hint: "おなじ数の くりかえしは かけ算。" };
+            if (n % 2 === 0) return { question: `${a} が ${b}こ。 かけ算の 式は？`, answer: `${a} × ${b}`, options: d(`${a} × ${b}`, `${a + 1} × ${b}`, `${a} × ${b + 1}`, `${a} × ${b - 1}`), hint: "おなじ数の くりかえしは かけ算。" };
             const repeatedAdd = Array.from({ length: b }, () => `${a}`).join(' + ');
-            return { question: `${repeatedAdd} を かけ算の 式にすると？`, answer: `${a} × ${b}`, options: d(`${a} × ${b}`, `${b} × ${a}`, `${a} + ${b}`, `${a} × ${b - 1}`), hint: "たしざんを かけざんに。" };
+            return { question: `${repeatedAdd} を かけ算の 式にすると？`, answer: `${a} × ${b}`, options: d(`${a} × ${b}`, `${a + 1} × ${b}`, `${a} × ${b + 1}`, `${a} × ${b - 1}`), hint: "たしざんを かけざんに。" };
         }
         case 'MATH_G2_U10': {
             const a = (n % 9) + 1;
             const b = (Math.floor(n / 9) % 9) + 1;
             const p = a * b;
             if (n % 3 === 0) return { question: `九九。 ${a} × ${b} = ?`, answer: `${p}`, options: d(`${p}`, `${p + 1}`, `${p - 1}`, `${a + b}`), hint: "九九を おもいだそう。" };
-            if (n % 3 === 1) return { question: `${p} に なる かけ算は？`, answer: `${a} × ${b}`, options: d(`${a} × ${b}`, `${a} + ${b}`, `${p} × 1`, `${a} × ${b + 1}`), hint: "しきを えらぼう。" };
+            if (n % 3 === 1) return { question: `次の かけ算の うち、答えが ${p} に なるのは？`, answer: `${a} × ${b}`, options: d(`${a} × ${b}`, `${a} × ${b + 1}`, `${a + 1} × ${b}`, `${a} × ${b + 2}`), hint: "それぞれの かけ算を たしかめよう。" };
             return { question: `${a} × □ = ${p}。 □ は？`, answer: `${b}`, options: d(`${b}`, `${a}`, `${p}`, `${b + 1}`), hint: "九九を つかって さがそう。" };
         }
         case 'MATH_G2_U11': {
-            const p = n % 6;
+            const p = n % 10;
             if (p === 0) {
                 return { question: "この はこの 形で、たいらな 面は いくつ？", answer: "6つ", options: d("6つ", "4つ", "8つ", "12つ"), hint: "サイコロを おもいだそう。", visual: { kind: 'cube' } };
             }
@@ -455,7 +456,11 @@ const makeUnitProblem = (unitId: string, n: number): GeneralProblem => {
             if (p === 4) {
                 return { question: "この はこの 形を ひらくと 面は いくつ？", answer: "6つ", options: d("6つ", "5つ", "7つ", "8つ"), hint: "組み立てても 面の数は同じ。", visual: { kind: 'cube' } };
             }
-            return { question: "サイコロの 形と おなじ 立体は？", answer: "立方体", options: d("立方体", "球", "円柱", "三角柱"), hint: "ぜんぶ 正方形の面。", visual: { kind: 'cube' } };
+            if (p === 5) return { question: "サイコロの 形と おなじ 立体は？", answer: "立方体", options: d("立方体", "球", "円柱", "三角柱"), hint: "ぜんぶ 正方形の面。", visual: { kind: 'cube' } };
+            if (p === 6) return { question: "立方体の 面は どんな 形？", answer: "正方形", options: d("正方形", "三角形", "円", "長方形だけ"), hint: "サイコロの面を見よう。", visual: { kind: 'cube' } };
+            if (p === 7) return { question: "はこの 形で、むかい合う 面は 交わる？", answer: "交わらない", options: d("交わらない", "必ず交わる", "1点だけで交わる", "同じ面になる"), hint: "むかい合う面は はなれている。", visual: { kind: 'cube' } };
+            if (p === 8) return { question: "立方体には 同じ大きさの 面が いくつある？", answer: "6つ", options: d("6つ", "4つ", "8つ", "12つ"), hint: "6つの面は同じ正方形。", visual: { kind: 'cube' } };
+            return { question: "はこの 形を つくるとき、面と面は どこで つながる？", answer: "へん", options: d("へん", "面のまんなか", "頂点だけ", "空中"), hint: "面どうしの境目を見よう。", visual: { kind: 'cube' } };
         }
         case 'MATH_G2_U12': {
             const a = 20 + (n % 30);
@@ -469,7 +474,7 @@ const makeUnitProblem = (unitId: string, n: number): GeneralProblem => {
     }
 };
 
-fillGeneratedUnitProblems(MATH_G2_UNIT_DATA, makeUnitProblem);
+fillGeneratedUnitProblems(MATH_G2_UNIT_DATA, makeUnitProblem, { stopAtMin: true });
 
 export const MATH_G2_DATA: Record<string, GeneralProblem[]> = {
     MATH_G2_1,

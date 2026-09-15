@@ -67,7 +67,7 @@ const stationery: EnglishWordItem[] = [
 ];
 const places: EnglishWordItem[] = [
   { en: 'park', jp: '公園' },
-  { en: 'library', jp: '図書館' },
+  { en: 'library', jp: '図書館', promptEn: 'library（町の施設）' },
   { en: 'station', jp: '駅' },
   { en: 'store', jp: '店' },
   { en: 'hospital', jp: '病院' },
@@ -79,7 +79,7 @@ const places: EnglishWordItem[] = [
 const schoolPlaces: EnglishWordItem[] = [
   { en: 'classroom', jp: '教室' },
   { en: 'music room', jp: '音楽室', speech: 'music room' },
-  { en: 'library', jp: '図書室' },
+  { en: 'library', jp: '図書室', promptEn: 'library（学校の部屋）' },
   { en: 'gym', jp: '体育館' },
   { en: 'playground', jp: '校庭' },
   { en: 'nurse\'s room', jp: '保健室', speech: 'nurses room' },

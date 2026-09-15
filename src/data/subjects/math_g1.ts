@@ -214,7 +214,7 @@ export const MATH_G1_UNIT_DATA: Record<string, GeneralProblem[]> = {
     MATH_G1_U03: [
         { question: "ころころ ころがる かたちは どれ？", answer: "ぼーる", options: d("ぼーる", "のーと", "つみきの はこ", "さんかくじょうぎ"), hint: "まるい かたちは ころがるよ。" },
         { question: "かどが ある かたちは どれ？", answer: "しかくい はこ", options: d("しかくい はこ", "ぼーる", "みかん", "びーだま"), hint: "かどを さがそう。" },
-        { question: "さんかくに にている ものは？", answer: "さんかくじょうぎ", options: d("さんかくじょうぎ", "ぼーる", "こっぷ", "まるい さら"), hint: "3つの かどが あるよ。" },
+        { question: "さんかくに にている ものは？", answer: "さんかく じょうぎ", options: d("さんかく じょうぎ", "ボール", "コップ", "まるい さら"), hint: "3つの かどが あるよ。" },
         { question: "まるに にている ものは？", answer: "びーだま", options: d("びーだま", "のーと", "つくえ", "えんぴつの はこ"), hint: "まるくて ころがるよ。" },
         { question: "しかくに にている ものは？", answer: "のーと", options: d("のーと", "ぼーる", "みかん", "わっか"), hint: "かどが 4つ ある かたち。" },
         { question: "たいらな ところに すわりやすい かたちは？", answer: "はこ", options: d("はこ", "ぼーる", "びーだま", "たま"), hint: "ころがらない かたちを えらぼう。" },
@@ -569,22 +569,33 @@ const makeUnitProblem = (unitId: string, n: number): GeneralProblem => {
     switch (unitId) {
         case 'MATH_G1_U01': {
             const a = (n % 9) + 1;
-            return { question: `${a}の つぎの かずは？`, answer: `${a + 1}`, options: d(`${a + 1}`, `${a}`, `${a + 2}`, `${a - 1}`), hint: "1つ おおきい かずだよ。", visual: { kind: 'dots', counts: [a], labels: ["かず"] } };
+            if (Math.floor(n / 9) % 2 === 0) {
+                return { question: `${a}の つぎの かずは？`, answer: `${a + 1}`, options: d(`${a + 1}`, `${a}`, `${a + 2}`, `${Math.max(0, a - 1)}`), hint: "1つ おおきい かずだよ。", visual: { kind: 'dots', counts: [a], labels: ["かず"] } };
+            }
+            return { question: `${a + 1}の ひとつ まえの かずは？`, answer: `${a}`, options: d(`${a}`, `${a + 1}`, `${Math.max(0, a - 1)}`, `${a + 2}`), hint: "ひとつ まえに もどろう。", visual: { kind: 'number_sequence', values: [a, a + 1] } };
         }
         case 'MATH_G1_U02': {
-            const a = (n % 9) + 1;
-            const b = 10 - a;
-            return { question: `10は ${a} と なに？`, answer: `${b}`, options: d(`${b}`, `${b + 1}`, `${a}`, `${Math.max(0, b - 1)}`), hint: "10に なる くみあわせを かんがえよう。", visual: { kind: 'dots', counts: [a, b], labels: ["その1", "その2"] } };
+            const total = 5 + (Math.floor(n / 6) % 6);
+            const a = (n % Math.max(1, total - 1)) + 1;
+            const b = total - a;
+            return { question: `${total}は ${a} と なに？`, answer: `${b}`, options: d(`${b}`, `${b + 1}`, `${a}`, `${Math.max(0, b - 1)}`), hint: `${total}に なる くみあわせを かんがえよう。`, visual: { kind: 'dots', counts: [a, b], labels: ["その1", "その2"] } };
         }
         case 'MATH_G1_U03': {
+            const roundObjects = ["ボール", "みかん", "ビー玉", "まるい さら"];
+            const squareObjects = ["ノート", "おりがみ", "えほん", "しかくい はこ"];
+            const triangleObjects = ["さんかく じょうぎ", "おにぎり", "さんかくの はた", "やねの かたち"];
             const p = n % 3;
-            if (p === 0) return { question: "まるい かたちは どれ？", answer: "ボール", options: d("ボール", "ノート", "つくえ", "ほん"), hint: "ころころ ころがるよ。" };
-            if (p === 1) return { question: "しかくい かたちは どれ？", answer: "ノート", options: d("ノート", "ボール", "みかん", "ビー玉"), hint: "かどが 4つ あるよ。" };
-            return { question: "さんかくに にている ものは？", answer: "さんかく じょうぎ", options: d("さんかく じょうぎ", "ボール", "ノート", "コップ"), hint: "3つの かどが あるよ。" };
+            const index = Math.floor(n / 3) % 4;
+            if (p === 0) return { question: `まるに にている ものは？`, answer: roundObjects[index], options: d(roundObjects[index], squareObjects[index], triangleObjects[index], "つくえ"), hint: "まるい ところを さがそう。" };
+            if (p === 1) return { question: `しかくに にている ものは？`, answer: squareObjects[index], options: d(squareObjects[index], roundObjects[index], triangleObjects[index], "たま"), hint: "4つの かどを さがそう。" };
+            return { question: `さんかくに にている ものは？`, answer: triangleObjects[index], options: d(triangleObjects[index], roundObjects[index], squareObjects[index], "コップ"), hint: "3つの かどが ある かたち。" };
         }
         case 'MATH_G1_U04': {
+            const sequences = [[1, 2, 3, 4, 5], [5, 4, 3, 2, 1], [2, 4, 6, 8, 10]];
+            const seq = sequences[Math.floor(n / 5) % sequences.length];
             const pos = (n % 5) + 1;
-            return { question: `1、2、3、4、5。 ${pos}ばんめの かずは？`, answer: `${pos}`, options: d(`${pos}`, `${Math.max(1, pos - 1)}`, `${Math.min(5, pos + 1)}`, "5"), hint: "じゅんばんに よんでみよう。", visual: { kind: 'number_sequence', values: [1, 2, 3, 4, 5] } };
+            const answer = `${seq[pos - 1]}`;
+            return { question: `${seq.join('、')}。 ${pos}ばんめの かずは？`, answer, options: d(answer, `${seq[Math.max(0, pos - 2)]}`, `${seq[Math.min(4, pos)]}`, `${pos}`), hint: "さいしょから じゅんばんに かぞえよう。", visual: { kind: 'number_sequence', values: seq } };
         }
         case 'MATH_G1_U05': {
             const a = (n % 6) + 1;
@@ -606,10 +617,11 @@ const makeUnitProblem = (unitId: string, n: number): GeneralProblem => {
             return { question: `${a}こ から ${b}こ へると？`, answer: `${a - b}こ`, options: d(`${a - b}こ`, `${a}こ`, `${b}こ`, `${a + b}こ`), hint: "へる は ひく。" };
         }
         case 'MATH_G1_U08': {
-            const small = (n % 6) + 1;
-            const diff = (n % 3) + 1;
+            const form = n % 2;
+            const small = (Math.floor(n / 2) % 6) + 1;
+            const diff = (Math.floor(n / 12) % 4) + 1;
             const big = small + diff;
-            if (n % 2 === 0) return { question: `${big}こと ${small}こ。 ちがいは なんこ？`, answer: `${diff}こ`, options: d(`${diff}こ`, `${big}こ`, `${small}こ`, `${diff + 1}こ`), hint: "おおい ほう から すくない ほうを ひくよ。" };
+            if (form === 0) return { question: `${big}こと ${small}こ。 ちがいは なんこ？`, answer: `${diff}こ`, options: d(`${diff}こ`, `${big}こ`, `${small}こ`, `${diff + 1}こ`), hint: "おおい ほう から すくない ほうを ひくよ。" };
             return { question: `${small}こ より ${big}こ は なんこ おおい？`, answer: `${diff}こ`, options: d(`${diff}こ`, `${big}こ`, `${small}こ`, `${diff + 1}こ`), hint: "ちがいを しらべる。" };
         }
         case 'MATH_G1_U09': {
@@ -654,19 +666,31 @@ const makeUnitProblem = (unitId: string, n: number): GeneralProblem => {
             return { question: `えグラフ。 あか ${r}こ、あお ${b}こ。 おおいのは？`, answer, options: d(answer, ...wrongs), hint: "かずを くらべよう。", visual: { kind: 'bar_chart', values: [r, b], labels: ["あか", "あお"] } };
         }
         case 'MATH_G1_U14': {
-            const cat = (n % 4) + 1;
-            return { question: `ひょう。 ねこ:${cat} いぬ:${cat + 1} うさぎ:${cat - 1}。 いちばん おおいのは？`, answer: "いぬ", options: d("いぬ", "ねこ", "うさぎ", "おなじ"), hint: "ひょうの かずを くらべるよ。", visual: { kind: 'bar_chart', values: [cat, cat + 1, cat - 1], labels: ["ねこ", "いぬ", "うさぎ"] } };
+            const base = (Math.floor(n / 3) % 5) + 2;
+            const values = [base, base + 2, base - 1];
+            const p = n % 3;
+            if (p === 0) return { question: `ひょう。 ねこ:${values[0]} いぬ:${values[1]} うさぎ:${values[2]}。 いちばん おおいのは？`, answer: "いぬ", options: d("いぬ", "ねこ", "うさぎ", "おなじ"), hint: "いちばん 大きい かずを みよう。", visual: { kind: 'bar_chart', values, labels: ["ねこ", "いぬ", "うさぎ"] } };
+            if (p === 1) return { question: `ひょう。 ねこ:${values[0]} いぬ:${values[1]} うさぎ:${values[2]}。 いちばん すくないのは？`, answer: "うさぎ", options: d("うさぎ", "ねこ", "いぬ", "おなじ"), hint: "いちばん 小さい かずを みよう。", visual: { kind: 'bar_chart', values, labels: ["ねこ", "いぬ", "うさぎ"] } };
+            return { question: `ひょう。 ねこ:${values[0]} いぬ:${values[1]} うさぎ:${values[2]}。 ぜんぶで いくつ？`, answer: `${values.reduce((sum, value) => sum + value, 0)}`, options: d(`${values.reduce((sum, value) => sum + value, 0)}`, `${values[0] + values[1]}`, `${values[1]}`, `${values[0]}`), hint: "3つの かずを ぜんぶ たそう。", visual: { kind: 'bar_chart', values, labels: ["ねこ", "いぬ", "うさぎ"] } };
         }
         case 'MATH_G1_U15': {
-            if (n % 2 === 0) {
-                return { question: "この ずけいの かどは いくつ？", answer: "3つ", options: d("3つ", "4つ", "2つ", "0つ"), hint: "さんかくは 3つだよ。", visual: { kind: 'polygon', sides: 3 } };
-            }
-            return { question: "この ずけいの へんは いくつ？", answer: "4つ", options: d("4つ", "3つ", "5つ", "2つ"), hint: "しかくは 4つだよ。", visual: { kind: 'polygon', sides: 4 } };
+            const sides = 3 + (Math.floor(n / 5) % 2);
+            const name = sides === 3 ? "さんかく" : "しかく";
+            const p = n % 5;
+            if (p === 0) return { question: "この ずけいの かどは いくつ？", answer: `${sides}つ`, options: d(`${sides}つ`, `${sides + 1}つ`, `${sides - 1}つ`, "0つ"), hint: "かどを ひとつずつ かぞえよう。", visual: { kind: 'polygon', sides } };
+            if (p === 1) return { question: "この ずけいの へんは いくつ？", answer: `${sides}つ`, options: d(`${sides}つ`, `${sides + 1}つ`, `${sides - 1}つ`, "0つ"), hint: "まわりの せんを かぞえよう。", visual: { kind: 'polygon', sides } };
+            if (p === 2) return { question: "この ずけいの なまえは？", answer: name, options: d(name, sides === 3 ? "しかく" : "さんかく", "まる", "せん"), hint: "かどと へんの かずを みよう。", visual: { kind: 'polygon', sides } };
+            if (p === 3) return { question: `${name}の へんと かどの かずは？`, answer: `どちらも ${sides}つ`, options: d(`どちらも ${sides}つ`, `へんだけ ${sides}つ`, `かどだけ ${sides}つ`, `どちらも ${sides + 1}つ`), hint: "へんと かどは おなじ かず。", visual: { kind: 'polygon', sides } };
+            return { question: `ぼうを へんにして ${name}を 1つ つくる。ぼうは なん本 いる？`, answer: `${sides}本`, options: d(`${sides}本`, `${sides - 1}本`, `${sides + 1}本`, `${sides * 2}本`), hint: "1つのへんに ぼうを1本ずつ つかうよ。", visual: { kind: 'polygon', sides } };
         }
         case 'MATH_G1_U16': {
-            const sticks = (n % 3) + 3;
-            const ans = sticks === 3 ? "さんかく" : (sticks === 4 ? "しかく" : "ごかくけい");
-            return { question: "この ずけいの なまえは？", answer: ans, options: d(ans, "まる", "わからない", "かたちに ならない"), hint: "へんの かずと おなじだよ。", visual: { kind: 'polygon', sides: sticks } };
+            const sides = (Math.floor(n / 3) % 4) + 3;
+            const names = { 3: "さんかく", 4: "しかく", 5: "ごかくけい", 6: "ろっかくけい" } as Record<number, string>;
+            const ans = names[sides];
+            const p = n % 3;
+            if (p === 0) return { question: "この ずけいの なまえは？", answer: ans, options: d(ans, ...Object.values(names).filter(name => name !== ans).slice(0, 3)), hint: "へんの かずを かぞえよう。", visual: { kind: 'polygon', sides } };
+            if (p === 1) return { question: "この ずけいを つくる へんは いくつ？", answer: `${sides}つ`, options: d(`${sides}つ`, `${sides - 1}つ`, `${sides + 1}つ`, "0つ"), hint: "まわりの せんを かぞえよう。", visual: { kind: 'polygon', sides } };
+            return { question: "この ずけいの かどは いくつ？", answer: `${sides}つ`, options: d(`${sides}つ`, `${sides - 1}つ`, `${sides + 1}つ`, "0つ"), hint: "かどを ひとつずつ かぞえよう。", visual: { kind: 'polygon', sides } };
         }
         case 'MATH_G1_U17': {
             const a = (n % 4) + 1;
@@ -677,12 +701,13 @@ const makeUnitProblem = (unitId: string, n: number): GeneralProblem => {
             return { question: `${a}こと ${b}こと ${c}こ。 あわせて いくつ？`, answer: `${sum}`, options: d(`${sum}`, `${a + b}`, `${b + c}`, `${sum + 1}`), hint: "じゅんに たそう。" };
         }
         case 'MATH_G1_U18': {
-            const a = (n % 6) + 4;
-            const b = (n % 3) + 1;
-            if (n % 3 === 0) {
+            const form = n % 3;
+            const a = (Math.floor(n / 3) % 7) + 4;
+            const b = (Math.floor(n / 21) % 3) + 1;
+            if (form === 0) {
                 return { question: `りんごが ${a}こ。 ${b}こ もらいました。 ぜんぶで？`, answer: `${a + b}こ`, options: d(`${a + b}こ`, `${a - b}こ`, `${b}こ`, `${a}こ`), hint: "もらうは たしざん。" };
             }
-            if (n % 3 === 1) return { question: `あめが ${a}こ。 ${b}こ たべました。 のこりは？`, answer: `${a - b}こ`, options: d(`${a - b}こ`, `${a + b}こ`, `${a}こ`, `${b}こ`), hint: "たべると へるから ひきざん。" };
+            if (form === 1) return { question: `あめが ${a}こ。 ${b}こ たべました。 のこりは？`, answer: `${a - b}こ`, options: d(`${a - b}こ`, `${a + b}こ`, `${a}こ`, `${b}こ`), hint: "たべると へるから ひきざん。" };
             return { question: `えんぴつが ${a}ほん。 ${b}ほん ふえると なんぼん？`, answer: `${a + b}ほん`, options: d(`${a + b}ほん`, `${a - b}ほん`, `${a}ほん`, `${b}ほん`), hint: "ぶんしょうを しきにしよう。" };
         }
         default:
@@ -690,7 +715,7 @@ const makeUnitProblem = (unitId: string, n: number): GeneralProblem => {
     }
 };
 
-fillGeneratedUnitProblems(MATH_G1_UNIT_DATA, makeUnitProblem);
+fillGeneratedUnitProblems(MATH_G1_UNIT_DATA, makeUnitProblem, { stopAtMin: true });
 
 const buildReviewProblems = (unitIds: string[], perUnit: number): GeneralProblem[] =>
     unitIds.flatMap((unitId) => MATH_G1_UNIT_DATA[unitId].slice(0, perUnit));

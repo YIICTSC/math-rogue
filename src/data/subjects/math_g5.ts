@@ -538,16 +538,27 @@ const makeUnitProblem = (unitId: string, n: number): GeneralProblem => {
         case 'MATH_G5_U04': {
             const b = (n % 8) + 2;
             const q = (n % 6) + 1;
-            const a = b * q;
+            const decimalDigit = (n % 9) + 1;
+            const quotient = q + decimalDigit / 10;
+            const dividend = (quotient * b).toFixed(1);
+            const answer = quotient.toFixed(1);
             if (n % 2 === 0) {
-                return { question: `${a}.${a % 10} ÷ ${b} = ?`, answer: `${q}.${Math.floor((a % 10) / b)}`, options: d(`${q}.${Math.floor((a % 10) / b)}`, `${q}`, `${a / b}`, `${q + 1}`), hint: "整数部分と小数部分を順に考える。" };
+                return { question: `${dividend} ÷ ${b} = ?`, answer, options: d(answer, `${q}.0`, `${(quotient + 0.1).toFixed(1)}`, `${(quotient - 0.1).toFixed(1)}`), hint: "小数点の位置に気をつけて計算する。" };
             }
-            return { question: `${a}.${a % 10} を ${b} でわると、商は ${q} より 大きい？小さい？`, answer: "大きい", options: d("大きい", "小さい", "同じ", "わからない"), hint: "小数部分があるので ${q} より少し大きい。" };
+            return { question: `${dividend} ÷ ${b} の商は ${q} より 大きい？小さい？`, answer: "大きい", options: d("大きい", "小さい", "同じ", "わからない"), hint: `商は ${answer} になる。` };
         }
         case 'MATH_G5_U05': {
-            return n % 2 === 0
-                ? { question: "このような図形で合同とは？", answer: "形と大きさが同じ", options: d("形と大きさが同じ", "形だけ同じ", "面積だけ同じ", "色だけ同じ"), hint: "重ねてぴったり重なる。", visual: { kind: 'polygon', sides: 4 } }
-                : { question: "三角形の合同条件の1つは？", answer: "3辺がそれぞれ等しい", options: d("3辺がそれぞれ等しい", "3角が等しい", "面積が等しい", "周が等しい"), hint: "辺と角の条件を使う。", visual: { kind: 'polygon', sides: 3 } };
+            const p = n % 10;
+            if (p === 0) return { question: "合同な図形とは？", answer: "形と大きさが同じ", options: d("形と大きさが同じ", "形だけ同じ", "面積だけ同じ", "色だけ同じ"), hint: "重ねてぴったり重なる。", visual: { kind: 'polygon', sides: 4 } };
+            if (p === 1) return { question: "合同な三角形で、対応する辺の長さは？", answer: "等しい", options: d("等しい", "必ず2倍", "必ず半分", "関係ない"), hint: "対応する部分は等しい。", visual: { kind: 'polygon', sides: 3 } };
+            if (p === 2) return { question: "合同な三角形で、対応する角の大きさは？", answer: "等しい", options: d("等しい", "和が90度", "和が180度", "関係ない"), hint: "対応する角も等しい。", visual: { kind: 'polygon', sides: 3 } };
+            if (p === 3) return { question: "図形を回転して重なった。合同といえる？", answer: "いえる", options: d("いえる", "いえない", "色が同じならいえる", "向きが同じときだけ"), hint: "向きが変わっても形と大きさが同じなら合同。", visual: { kind: 'polygon', sides: 4 } };
+            if (p === 4) return { question: "図形を裏返してぴったり重なった。合同といえる？", answer: "いえる", options: d("いえる", "いえない", "面積だけで決める", "辺の数だけで決める"), hint: "裏返しても重なれば合同。", visual: { kind: 'polygon', sides: 3 } };
+            if (p === 5) return { question: "2つの正方形で1辺の長さが同じ。2つは合同？", answer: "合同", options: d("合同", "相似だけ", "必ず合同でない", "判断できない"), hint: "正方形は1辺が決まれば大きさが決まる。", visual: { kind: 'polygon', sides: 4 } };
+            if (p === 6) return { question: "2つの長方形の面積が同じなら、必ず合同？", answer: "必ずとはいえない", options: d("必ずとはいえない", "必ず合同", "必ず正方形", "必ず相似"), hint: "面積が同じでもたて・よこの組合せは違うことがある。", visual: { kind: 'polygon', sides: 4 } };
+            if (p === 7) return { question: "合同な図形の周の長さは？", answer: "等しい", options: d("等しい", "必ず2倍", "必ず半分", "比べられない"), hint: "対応する辺がすべて等しい。", visual: { kind: 'polygon', sides: 4 } };
+            if (p === 8) return { question: "合同な図形の面積は？", answer: "等しい", options: d("等しい", "必ず2倍", "必ず半分", "形で変わる"), hint: "形も大きさも同じ。", visual: { kind: 'polygon', sides: 3 } };
+            return { question: "合同な図形で対応する頂点を見つける手がかりは？", answer: "辺や角の並び", options: d("辺や角の並び", "色だけ", "置いてある向きだけ", "名前の長さ"), hint: "対応する辺・角の順番を追う。", visual: { kind: 'polygon', sides: 4 } };
         }
         case 'MATH_G5_U06': {
             const num = (n % 9) + 1;
@@ -566,7 +577,9 @@ const makeUnitProblem = (unitId: string, n: number): GeneralProblem => {
         case 'MATH_G5_U07': {
             const denominator = (n % 8) + 2;
             const a = (n % (denominator - 1)) + 1;
-            const b = Math.min(denominator - 1, a + 1);
+            const b = a === denominator - 1 ? a - 1 : a + 1;
+            const big = Math.max(a, b);
+            const small = Math.min(a, b);
             const p = n % 4;
             if (p === 0) {
                 return {
@@ -578,8 +591,6 @@ const makeUnitProblem = (unitId: string, n: number): GeneralProblem => {
                 };
             }
             if (p === 1) {
-                const big = Math.max(a, b);
-                const small = Math.min(a, b);
                 return {
                     question: `${big}/${denominator} - ${small}/${denominator} = ?`,
                     answer: `${big - small}/${denominator}`,
@@ -591,8 +602,8 @@ const makeUnitProblem = (unitId: string, n: number): GeneralProblem => {
             if (p === 2) {
                 return {
                     question: `${a}/${denominator} と ${b}/${denominator}。 大きいのは？`,
-                    answer: `${b}/${denominator}`,
-                    options: d(`${b}/${denominator}`, `${a}/${denominator}`, "同じ", "くらべられない"),
+                    answer: `${big}/${denominator}`,
+                    options: d(`${big}/${denominator}`, `${small}/${denominator}`, "同じ", "くらべられない"),
                     hint: "分母が同じなら分子が大きいほう。",
                     visual: { kind: 'fraction_operation', left: { n: a, d: denominator }, right: { n: b, d: denominator }, op: '>' }
                 };
@@ -616,9 +627,11 @@ const makeUnitProblem = (unitId: string, n: number): GeneralProblem => {
             return { question: `3この数の平均が ${avg}。 合計は？`, answer: `${avg * 3}`, options: d(`${avg * 3}`, `${avg}`, `${avg + 3}`, `${a + b + c}`), hint: "平均×個数。" };
         }
         case 'MATH_G5_U09': {
-            const people = (n % 8 + 2) * 3;
-            const area = (n % 4) + 2;
-            if (n % 2 === 0) {
+            const form = n % 2;
+            const area = (Math.floor(n / 2) % 6) + 2;
+            const density = (Math.floor(n / 12) % 5) + 2;
+            const people = area * density;
+            if (form === 0) {
                 return { question: `${area}m2 に ${people}人。1m2あたりは？`, answer: `${people / area}人`, options: d(`${people / area}人`, `${people * area}人`, `${people - area}人`, `${area / people}人`), hint: "人数÷面積。" };
             }
             return { question: `1m2あたり ${people / area}人 の部屋が ${area}m2。 全部で何人？`, answer: `${people}人`, options: d(`${people}人`, `${people / area}人`, `${area}人`, `${people + area}人`), hint: "単位量あたりの大きさ×広さ。" };
@@ -632,18 +645,23 @@ const makeUnitProblem = (unitId: string, n: number): GeneralProblem => {
             return { question: `${speed * h}km を ${h}時間で 進むと 時速は？`, answer: `${speed}km`, options: d(`${speed}km`, `${h}km`, `${speed * h}km`, `${speed / h}km`), hint: "道のり÷時間。" };
         }
         case 'MATH_G5_U11': {
-            const x = (n % 6) + 1;
-            if (n % 2 === 0) {
-                return { question: `比例で y=3x。 x=${x} のとき y=?`, answer: `${3 * x}`, options: d(`${3 * x}`, `${x + 3}`, `${x}`, `${x * x}`), hint: "一定の割合で増える。" };
+            const form = n % 2;
+            const x = (Math.floor(n / 2) % 8) + 1;
+            const k = (Math.floor(n / 16) % 5) + 2;
+            if (form === 0) {
+                return { question: `比例で y=${k}x。 x=${x} のとき y=?`, answer: `${k * x}`, options: d(`${k * x}`, `${x + k}`, `${x}`, `${x * x}`), hint: "一定の割合で増える。" };
             }
-            return { question: `比例で y=3x。 y=${3 * x} のとき x=?`, answer: `${x}`, options: d(`${x}`, `${3 * x}`, `${x + 3}`, `${x * x}`), hint: "比例定数 3 で わる。" };
+            return { question: `比例で y=${k}x。 y=${k * x} のとき x=?`, answer: `${x}`, options: d(`${x}`, `${k * x}`, `${x + k}`, `${x * x}`), hint: `比例定数 ${k} で わる。` };
         }
         case 'MATH_G5_U12': {
-            const nSides = (n % 5) + 3;
-            return { question: `この正${nSides}角形の中心角は？`, answer: `${360 / nSides}度`, options: d(`${360 / nSides}度`, `${180 / nSides}度`, `${nSides * 10}度`, "90度"), hint: "360÷辺の数。", visual: { kind: 'polygon', sides: nSides } };
+            const nSides = [3, 4, 5, 6, 8][n % 5];
+            const p = Math.floor(n / 5) % 3;
+            if (p === 0) return { question: `この正${nSides}角形の中心角は？`, answer: `${360 / nSides}度`, options: d(`${360 / nSides}度`, `${180 / nSides}度`, `${nSides * 10}度`, "90度"), hint: "360÷辺の数。", visual: { kind: 'polygon', sides: nSides } };
+            if (p === 1) return { question: `正${nSides}角形の外角1つの大きさは？`, answer: `${360 / nSides}度`, options: d(`${360 / nSides}度`, `${180 / nSides}度`, `${180 - 360 / nSides}度`, "180度"), hint: "外角の和は360度。", visual: { kind: 'polygon', sides: nSides } };
+            return { question: `正${nSides}角形の内角1つの大きさは？`, answer: `${180 - 360 / nSides}度`, options: d(`${180 - 360 / nSides}度`, `${360 / nSides}度`, `${180 / nSides}度`, "180度"), hint: "180度から外角をひく。", visual: { kind: 'polygon', sides: nSides } };
         }
         case 'MATH_G5_U13': {
-            const p = n % 6;
+            const p = n % 9;
             if (p === 0) {
                 return { question: "この立体（円柱）の底面の形は？", answer: "円", options: d("円", "三角形", "長方形", "正方形"), hint: "上下の面を考える。", visual: { kind: 'cylinder', showRadius: true, showHeight: true } };
             }
@@ -660,7 +678,11 @@ const makeUnitProblem = (unitId: string, n: number): GeneralProblem => {
             if (p === 4) {
                 return { question: "三角柱の頂点の数は？", answer: "6こ", options: d("6こ", "3こ", "8こ", "9こ"), hint: "上に3こ、下に3こ。", visual: { kind: 'prism', baseSides: 3 } };
             }
-            return { question: "三角柱の辺の数は？", answer: "9本", options: d("9本", "6本", "12本", "15本"), hint: "上3本、下3本、横3本。", visual: { kind: 'prism', baseSides: 3 } };
+            if (p === 5) return { question: "三角柱の辺の数は？", answer: "9本", options: d("9本", "6本", "12本", "15本"), hint: "上3本、下3本、横3本。", visual: { kind: 'prism', baseSides: 3 } };
+            const baseSides = p === 6 ? 4 : p === 7 ? 5 : 6;
+            if (p === 6) return { question: `${baseSides}角柱の頂点の数は？`, answer: `${baseSides * 2}こ`, options: d(`${baseSides * 2}こ`, `${baseSides}こ`, `${baseSides * 3}こ`, `${baseSides + 2}こ`), hint: "上と下に同じ数の頂点。", visual: { kind: 'prism', baseSides } };
+            if (p === 7) return { question: `${baseSides}角柱の辺の数は？`, answer: `${baseSides * 3}本`, options: d(`${baseSides * 3}本`, `${baseSides * 2}本`, `${baseSides}本`, `${baseSides + 2}本`), hint: "上・下・横で底面の辺数の3倍。", visual: { kind: 'prism', baseSides } };
+            return { question: `${baseSides}角柱の面の数は？`, answer: `${baseSides + 2}面`, options: d(`${baseSides + 2}面`, `${baseSides}面`, `${baseSides * 2}面`, `${baseSides + 1}面`), hint: "側面に上と下の2面を足す。", visual: { kind: 'prism', baseSides } };
         }
         case 'MATH_G5_U14': {
             const base = (n % 9 + 1) * 100;
@@ -697,7 +719,7 @@ const makeUnitProblem = (unitId: string, n: number): GeneralProblem => {
     }
 };
 
-fillGeneratedUnitProblems(MATH_G5_UNIT_DATA, makeUnitProblem);
+fillGeneratedUnitProblems(MATH_G5_UNIT_DATA, makeUnitProblem, { stopAtMin: true });
 
 export const MATH_G5_DATA: Record<string, GeneralProblem[]> = {
     MATH_G5_1,

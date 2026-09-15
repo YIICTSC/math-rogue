@@ -4403,6 +4403,41 @@ const SOCIAL_UNIT_SEED_DATA: Record<string, GeneralProblem[]> = {
   ],
 };
 
+// 元データ内で問題文が重複していた単元だけ、単元内容に沿った問題を補う。
+// 旧学年データのキーワード検索には戻さず、単元境界を明確に保つ。
+const SOCIAL_UNIT_SUPPLEMENT_DATA: Record<string, GeneralProblem[]> = {
+  SOCIAL_5_U04: [
+    q('魚や 貝などを 人の 手で 育てて 出荷する 水産業を 何という？', '養殖業', '沿岸漁業', '遠洋漁業', '林業', '育てて とる 漁業。'),
+    q('日本の 近海が よい 漁場に なりやすい 理由の ひとつは？', '暖流と 寒流が 出会う 海域が あるから', '海が すべて 浅いから', '川が まったく ないから', '一年中 海が 凍るから', '海流と 漁場の 関係。'),
+  ],
+  SOCIAL_6_U13: [
+    q('国会を つくる 二つの 議院は？', '衆議院と 参議院', '内閣と 裁判所', '都道府県と 市町村', '警察と 消防', '日本の 国会は 二院制。'),
+  ],
+  SOCIAL_6_U14: [
+    q('内閣は 内閣総理大臣と だれで つくられる？', '国務大臣', '裁判官', '都道府県知事', '国会議員全員', '行政を 担う 組織。'),
+  ],
+  SOCIAL_6_U16: [
+    q('地方自治で、住民が 地域の 代表を 選ぶ 方法は？', '選挙', '抽選', 'くじ引きだけ', '国が 全員を 指名する', '住民が 地域の 政治に 参加する。'),
+  ],
+  SOCIAL_8_U01: [
+    q('古代エジプト文明が 発達した 大河は？', 'ナイル川', 'ライン川', 'テムズ川', 'ミシシッピ川', '川の 恵みを 受けて 文明が 発達した。'),
+    q('古代メソポタミアで 使われた 文字として 知られるものは？', 'くさび形文字', 'かな文字', 'ハングル', 'ローマ字だけ', '粘土板などに 記された。'),
+    q('インダス文明の 都市遺跡として 有名なのは？', 'モヘンジョ・ダロ', 'ポンペイ', '平城京', 'ベルサイユ', '計画的な 都市が つくられた。'),
+  ],
+  SOCIAL_8_U04: [
+    q('鎌倉時代に 二度にわたって 元が 日本へ 攻めてきた 出来事を 何という？', '元寇', '応仁の乱', '大化の改新', '壬申の乱', '文永の役・弘安の役。'),
+  ],
+  SOCIAL_9_U06: [
+    q('内閣が 国会の 信任を 基礎として 成り立つ しくみを 何という？', '議院内閣制', '三審制', '二元代表制', '直接民主制', '内閣と 国会の 関係。'),
+  ],
+  SOCIAL_9_U13: [
+    q('労働者に 認められた 労働三権に ふくまれるものは？', '団結権', '納税権', '裁判権', '外交権', '労働者が 団結して 条件改善を 求める 権利。'),
+  ],
+  SOCIAL_9_U14: [
+    q('社会保障の 分野で、感染症予防や 健康づくりなどに 関わるものは？', '公衆衛生', '金融政策', '外交', '選挙制度', '人々の 健康を 守る 取り組み。'),
+  ],
+};
+
 const SOURCE_MODE_UNIT_GROUPS: Record<string, string[]> = {};
 for (const unit of Object.values(SOCIAL_GRADE_UNITS).flat()) {
   if (!SOURCE_MODE_UNIT_GROUPS[unit.sourceMode]) {
@@ -4523,23 +4558,12 @@ const getAssignedSourceSlice = (mode: string, sourceMode: string): GeneralProble
 
 const expandUnitProblems = (mode: string, sourceMode: string, unitName: string): GeneralProblem[] => {
   const seeds = SOCIAL_UNIT_SEED_DATA[mode] || [];
-  const gradeMatch = mode.match(/^SOCIAL_(\d+)_/);
-  const grade = gradeMatch ? Number(gradeMatch[1]) : 7;
-  if (grade <= 6) {
-    return dedupeByQuestion(seeds);
-  }
-  const source = SOURCE_MODE_DATA[sourceMode] || [];
-  const assignedSlice = getAssignedSourceSlice(mode, sourceMode);
-  const keywords = buildKeywords(unitName);
-  const assignedRelated = assignedSlice.filter((problem) => isRelated(problem, keywords));
-  const relatedOutsideSlice = source.filter(
-    (problem) => !assignedSlice.includes(problem) && isRelated(problem, keywords)
-  );
-  return dedupeByQuestion([
-    ...seeds,
-    ...assignedRelated,
-    ...relatedOutsideSlice,
-  ]);
+  // 各単元には専用の50問が用意されているため、旧学年データからの
+  // キーワード再検索は行わない。例えば「アジア」→「中国地方」、
+  // 「日本の地域」→歴史問題のような誤混入を防ぐ。
+  void sourceMode;
+  void unitName;
+  return dedupeByQuestion([...seeds, ...(SOCIAL_UNIT_SUPPLEMENT_DATA[mode] || [])]);
 };
 
 const replaceAll = (text: string, replacements: Array<[string, string]>): string =>

@@ -46,7 +46,49 @@ export interface GeneralProblem {
  * 正解の選択肢とその他の選択肢を並べる。
  * シャッフルはコンポーネント側で行うため、ここでは行わない。
  */
-export const d = (ans: string, ...others: string[]) => [ans, ...others];
+export const d = (ans: string, ...others: string[]) => {
+    const choices = Array.from(new Set([ans, ...others]));
+    const addChoice = (choice: string) => {
+        if (choices.length < 4 && choice !== ans && !choices.includes(choice)) choices.push(choice);
+    };
+
+    // 計算問題では、誤答候補が正解や互いに重なった場合も
+    // 「どれでもない」のような汎用選択肢へすぐ逃げず、答えの形式を保った
+    // 近い数値を補う。低学年の計算・単位問題ほど自然な4択になる。
+    const fraction = ans.match(/^(-?\d+)\/(\d+)(.*)$/);
+    if (fraction && choices.length < 4) {
+        const numerator = Number(fraction[1]);
+        const denominator = Number(fraction[2]);
+        const suffix = fraction[3];
+        addChoice(`${numerator + 1}/${denominator}${suffix}`);
+        if (numerator > 0) addChoice(`${numerator - 1}/${denominator}${suffix}`);
+        addChoice(`${numerator}/${denominator + 1}${suffix}`);
+        addChoice(`${numerator + 1}/${denominator + 1}${suffix}`);
+    }
+
+    const numeric = ans.match(/^(-?\d+(?:\.\d+)?)(.*)$/);
+    if (numeric && choices.length < 4) {
+        const value = Number(numeric[1]);
+        const suffix = numeric[2];
+        const decimals = numeric[1].includes('.') ? numeric[1].split('.')[1].length : 0;
+        const format = (candidate: number) => decimals > 0 ? candidate.toFixed(decimals) : String(candidate);
+        const step = decimals > 0 ? 10 ** -decimals : 1;
+        addChoice(`${format(value + step)}${suffix}`);
+        addChoice(`${format(value + step * 2)}${suffix}`);
+        if (value - step >= 0) addChoice(`${format(value - step)}${suffix}`);
+        addChoice(`${format(value + step * 3)}${suffix}`);
+    }
+
+    const allEnglish = [ans, ...others].every((choice) => /^[A-Za-z][A-Za-z .,'!?-]*$/.test(choice));
+    const fallbacks = allEnglish
+        ? ['none of these', 'another answer', 'not applicable']
+        : ['わからない', 'どちらでもない', 'あてはまらない'];
+    for (const fallback of fallbacks) {
+        if (choices.length >= 4) break;
+        addChoice(fallback);
+    }
+    return choices.slice(0, 4);
+};
 
 export const normalizeProblemQuestionText = (question: string): string =>
     question
@@ -104,19 +146,35 @@ const problemSignature = (problem: GeneralProblem): string =>
 export const fillGeneratedUnitProblems = (
     unitData: Record<string, GeneralProblem[]>,
     makeProblem: (unitId: string, n: number) => GeneralProblem,
-    options: { min?: number; maxAttempts?: number; duplicatePatience?: number } = {},
+    options: { min?: number; maxAttempts?: number; duplicatePatience?: number; stopAtMin?: boolean } = {},
 ): void => {
     const min = options.min ?? 50;
     const maxAttempts = options.maxAttempts ?? 240;
     const duplicatePatience = options.duplicatePatience ?? 80;
+    const stopAtMin = options.stopAtMin === true;
 
     Object.keys(unitData).forEach((unitId) => {
         const problems = unitData[unitId];
+        // もともとの単元データ側に完全一致の重複がある場合も、生成前に
+        // 1件へ整理する。生成ロジックだけを重複防止しても、種データの
+        // 重複は残り続けるため、ここで一元的に除外する。
+        const uniqueProblems = new Map<string, GeneralProblem>();
+        problems.forEach((problem) => {
+            const signature = problemSignature(problem);
+            if (!uniqueProblems.has(signature)) uniqueProblems.set(signature, problem);
+        });
+        if (uniqueProblems.size !== problems.length) {
+            problems.splice(0, problems.length, ...uniqueProblems.values());
+        }
+
         const seen = new Set(problems.map(problemSignature));
         let n = problems.length;
         let duplicateStreak = 0;
 
-        while (n < maxAttempts && (problems.length < min || duplicateStreak < duplicatePatience)) {
+        while (
+            n < maxAttempts
+            && (problems.length < min || (!stopAtMin && duplicateStreak < duplicatePatience))
+        ) {
             const problem = makeProblem(unitId, n);
             const signature = problemSignature(problem);
             if (!seen.has(signature)) {
@@ -129,8 +187,12 @@ export const fillGeneratedUnitProblems = (
             n += 1;
         }
 
-        while (problems.length < min) {
-            problems.push(makeProblem(unitId, problems.length));
+        // 品質優先モードでは、生成パターンを使い切った後に同一問題を
+        // 水増しして最低件数へ合わせない。実際に異なる問題だけを残す。
+        if (!stopAtMin) {
+            while (problems.length < min) {
+                problems.push(makeProblem(unitId, problems.length));
+            }
         }
     });
 };

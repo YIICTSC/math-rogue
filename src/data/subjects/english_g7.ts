@@ -1,5 +1,5 @@
 import { GeneralProblem } from './utils';
-import { buildListeningReviewUnit, buildRepeatReviewUnit, buildResponseReviewUnit, buildSpeakingReviewUnit, cycleProblems, EnglishResponseItem, EnglishWordItem, prompt, uniqueEnglishWordItems } from './english_utils';
+import { buildListeningReviewUnit, buildRepeatReviewUnit, buildResponseReviewUnit, buildSpeakingReviewUnit, cycleProblems, EnglishResponseItem, EnglishWordItem, fillEnglishGeneratedUnitProblems, prompt, uniqueEnglishWordItems } from './english_utils';
 
 const readingPassagesG7: GeneralProblem[] = [
   prompt(
@@ -43,6 +43,12 @@ const g7ReviewItems: EnglishWordItem[] = uniqueEnglishWordItems([
   { en: 'The cat is in the box.', jp: 'ねこは 箱の中にいます。', speech: 'The cat is in the box' },
   { en: 'These are books.', jp: 'これらは 本です。', speech: 'These are books' },
   { en: 'She is my friend.', jp: '彼女は わたしの友だちです。', speech: 'She is my friend' },
+  { en: 'We study English at school.', jp: 'わたしたちは 学校で英語を勉強します。', speech: 'We study English at school' },
+  { en: 'They are playing soccer now.', jp: '彼らは 今サッカーをしています。', speech: 'They are playing soccer now' },
+  { en: 'My father watches TV at night.', jp: '父は 夜テレビを見ます。', speech: 'My father watches TV at night' },
+  { en: 'The ball is under the table.', jp: 'ボールは 机の下にあります。', speech: 'The ball is under the table' },
+  { en: 'I have two brothers.', jp: 'わたしには 兄弟が2人います。', speech: 'I have two brothers' },
+  { en: 'Please open the window.', jp: '窓を開けてください。', speech: 'Please open the window' },
 ]);
 const g7ResponseItems: EnglishResponseItem[] = [
   { promptEn: 'Are you a student?', promptJp: 'あなたは 生徒ですか。', answerEn: 'Yes, I am.', answerJp: 'はい、そうです。', answerSpeech: 'Yes I am', answerSpeechAlternates: ['Yes, I am.'] },
@@ -51,7 +57,139 @@ const g7ResponseItems: EnglishResponseItem[] = [
   { promptEn: 'What is she doing?', promptJp: '彼女は 何を していますか。', answerEn: 'She is reading a book.', answerJp: '彼女は 本を 読んでいます。', answerSpeech: 'She is reading a book' },
   { promptEn: 'Where is the cat?', promptJp: 'ねこは どこですか。', answerEn: 'It is in the box.', answerJp: 'それは 箱の中にいます。', answerSpeech: 'It is in the box' },
   { promptEn: 'Who is she?', promptJp: '彼女は だれですか。', answerEn: 'She is my friend.', answerJp: '彼女は わたしの友だちです。', answerSpeech: 'She is my friend' },
+  { promptEn: 'What do you study at school?', promptJp: '学校で 何を勉強しますか。', answerEn: 'We study English at school.', answerJp: 'わたしたちは 学校で英語を勉強します。', answerSpeech: 'We study English at school' },
+  { promptEn: 'What are they doing now?', promptJp: '彼らは 今何をしていますか。', answerEn: 'They are playing soccer now.', answerJp: '彼らは 今サッカーをしています。', answerSpeech: 'They are playing soccer now' },
+  { promptEn: 'Where is the ball?', promptJp: 'ボールは どこですか。', answerEn: 'The ball is under the table.', answerJp: 'ボールは 机の下にあります。', answerSpeech: 'The ball is under the table' },
+  { promptEn: 'How many brothers do you have?', promptJp: '兄弟は 何人いますか。', answerEn: 'I have two brothers.', answerJp: 'わたしには 兄弟が2人います。', answerSpeech: 'I have two brothers' },
 ];
+
+const makeG7GrammarProblem = (unitId: string, n: number): GeneralProblem | null => {
+  const subjects = [
+    ['I', 'am'], ['You', 'are'], ['He', 'is'], ['She', 'is'], ['We', 'are'], ['They', 'are'], ['Tom', 'is'], ['My sister', 'is'],
+  ] as const;
+  const complements = ['happy', 'busy', 'at home', 'a student', 'in the library', 'ready'];
+  const actions = [
+    ['play', 'soccer'], ['study', 'English'], ['eat', 'lunch'], ['read', 'books'], ['use', 'a computer'], ['like', 'music'],
+    ['watch', 'TV'], ['visit', 'the park'], ['help', 'my family'], ['clean', 'the room'],
+  ] as const;
+  switch (unitId) {
+    case 'ENGLISH_G7_U01': {
+      const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+      const letter = letters[n % letters.length];
+      if (n % 3 === 0) return prompt(`「${letter}」の 小文字は？`, letter.toLowerCase(), [letters[(n + 1) % 26].toLowerCase(), letters[(n + 2) % 26].toLowerCase(), letters[(n + 3) % 26].toLowerCase()], '大文字と小文字を対応させよう。');
+      if (n % 3 === 1) return prompt(`「${letter.toLowerCase()}」の 大文字は？`, letter, [letters[(n + 4) % 26], letters[(n + 7) % 26], letters[(n + 11) % 26]], '大文字と小文字を対応させよう。');
+      const words = ['apple', 'book', 'cat', 'desk', 'English', 'friend', 'green', 'house', 'juice', 'music', 'school', 'tennis', 'window'];
+      const word = words[n % words.length];
+      return prompt(`「${word}」の はじめの文字は？`, word[0].toLowerCase(), [word.at(-1)!.toLowerCase(), letters[(n + 5) % 26].toLowerCase(), letters[(n + 9) % 26].toLowerCase()], '単語の最初の文字を見よう。');
+    }
+    case 'ENGLISH_G7_U02': {
+      const [subject, be] = subjects[n % subjects.length];
+      const rawComplement = complements[Math.floor(n / subjects.length) % complements.length];
+      const complement = rawComplement === 'a student' && /^(We|They)$/.test(subject) ? 'students' : rawComplement;
+      const questionSubject = subject === 'I' || subject === 'Tom' ? subject : subject.toLowerCase();
+      if (n % 3 === 0) return prompt(`${subject} ___ ${complement}.`, be, [...['am', 'is', 'are'].filter(x => x !== be), 'be'], '主語に合う be動詞を選ぶ。');
+      if (n % 3 === 1) return prompt(`${subject} ___ not ${complement}.`, be, [...['am', 'is', 'are'].filter(x => x !== be), 'be'], 'be動詞の否定文。');
+      const cap = be[0].toUpperCase() + be.slice(1);
+      return prompt(`___ ${questionSubject} ${complement}?`, cap, [...['Am', 'Is', 'Are'].filter(x => x !== cap), 'Do'], 'be動詞を文の先頭に置く。');
+    }
+    case 'ENGLISH_G7_U03': {
+      const simpleSubjects = ['I', 'You', 'We', 'They'];
+      const subject = simpleSubjects[n % simpleSubjects.length];
+      const [verb, object] = actions[Math.floor(n / simpleSubjects.length) % actions.length];
+      if (n % 3 === 0) return prompt(`${subject} ___ ${object} every day.`, verb, [`${verb}s`, `${verb}ing`, 'am'], '一般動詞の基本形。');
+      if (n % 3 === 1) return prompt(`${subject} do not ___ ${object}.`, verb, [`${verb}s`, `${verb}ing`, 'is'], 'do not の後は動詞の原形。');
+      return prompt(`___ ${subject.toLowerCase()} ${verb} ${object}?`, 'Do', ['Does', 'Is', 'Are'], 'I/you/we/they の一般動詞の疑問文。');
+    }
+    case 'ENGLISH_G7_U04': {
+      const [subject, be] = subjects[n % subjects.length];
+      const rawComplement = complements[(n * 2) % complements.length];
+      const complement = rawComplement === 'a student' && /^(We|They)$/.test(subject) ? 'students' : rawComplement;
+      const questionSubject = subject === 'I' || subject === 'Tom' ? subject : subject.toLowerCase();
+      if (n % 2 === 0) {
+        const cap = be[0].toUpperCase() + be.slice(1);
+        return prompt(`___ ${questionSubject} ${complement}?`, cap, ['Am', 'Is', 'Are', 'Do'].filter(x => x !== cap), 'be動詞の疑問文。');
+      }
+      const [verb, object] = actions[n % actions.length];
+      const third = /^(He|She|Tom|My sister)$/.test(subject);
+      return prompt(`___ ${questionSubject} ${verb} ${object}?`, third ? 'Does' : 'Do', third ? ['Do', 'Is', 'Are'] : ['Does', 'Is', 'Are'], '一般動詞の疑問文。');
+    }
+    case 'ENGLISH_G7_U05': {
+      const [subject, be] = subjects[Math.floor(n / 2) % subjects.length];
+      if (n % 2 === 0) {
+        const rawComplement = complements[Math.floor(n / (subjects.length * 2)) % complements.length];
+        const complement = rawComplement === 'a student' && /^(We|They)$/.test(subject) ? 'students' : rawComplement;
+        return prompt(`${subject} ___ ${complement}.`, `${be} not`, ['do not', 'does not', 'not'], 'be動詞の否定文。');
+      }
+      const [verb, object] = actions[Math.floor(n / (subjects.length * 2)) % actions.length];
+      const third = /^(He|She|Tom|My sister)$/.test(subject);
+      return prompt(`${subject} ___ ${verb} ${object}.`, third ? 'does not' : 'do not', third ? ['do not', 'is not', 'not'] : ['does not', 'are not', 'not'], '一般動詞の否定文。');
+    }
+    case 'ENGLISH_G7_U06': {
+      const commands = [
+        ['Sit down.', '座ってください。'], ['Stand up.', '立ってください。'], ['Open your book.', '本を開いてください。'], ['Close the door.', 'ドアを閉めてください。'],
+        ['Come here.', 'ここへ来てください。'], ['Listen to me.', 'わたしの話を聞いてください。'], ['Write your name.', '名前を書いてください。'], ['Read this page.', 'このページを読んでください。'],
+        ['Be quiet.', '静かにしてください。'], ['Look at the board.', '黒板を見てください。'], ['Turn left.', '左へ曲がってください。'], ['Take this pen.', 'このペンを取ってください。'],
+      ] as const;
+      const form = n % 3;
+      const commandIndex = Math.floor(n / 3) % commands.length;
+      const [en, jp] = commands[commandIndex];
+      const wrong = [commands[(commandIndex + 1) % commands.length][0], commands[(commandIndex + 4) % commands.length][0], commands[(commandIndex + 7) % commands.length][0]];
+      if (form === 0) return prompt(`「${jp}」に 合う 英語は？`, en, wrong, '命令文は動詞から始める。');
+      if (form === 1) return prompt(`${en} の いみは？`, jp, [commands[(commandIndex + 1) % commands.length][1], commands[(commandIndex + 4) % commands.length][1], commands[(commandIndex + 7) % commands.length][1]], '命令文の意味。');
+      return prompt(`教室で「${jp}」と伝える文は？`, en, wrong, '場面に合う命令文を選ぶ。', { audioPrompt: { text: en, lang: 'en-US', autoPlay: false } });
+    }
+    case 'ENGLISH_G7_U07': {
+      const abilities = [['swim', '泳ぐ'], ['cook', '料理する'], ['run fast', '速く走る'], ['play the piano', 'ピアノを弾く'], ['speak English', '英語を話す'], ['ride a bike', '自転車に乗る'], ['sing well', '上手に歌う'], ['use a computer', 'コンピュータを使う']] as const;
+      const [verb] = abilities[n % abilities.length];
+      const subject = ['I', 'You', 'He', 'She', 'We', 'They'][Math.floor(n / abilities.length) % 6];
+      const questionSubject = subject === 'I' ? 'I' : subject.toLowerCase();
+      if (n % 3 === 0) return prompt(`${subject} ___ ${verb}.`, 'can', ['am', 'do', 'is'], 'can + 動詞の原形。');
+      if (n % 3 === 1) return prompt(`${subject} cannot ___.`, verb, ['can', 'does', 'is'], 'cannot の後も動詞の原形。');
+      return prompt(`___ ${questionSubject} ${verb}?`, 'Can', ['Do', 'Is', 'Are'], 'Can を文の先頭に置く。');
+    }
+    case 'ENGLISH_G7_U08': {
+      const progress = [['study', 'studying', 'English'], ['play', 'playing', 'soccer'], ['read', 'reading', 'a book'], ['eat', 'eating', 'lunch'], ['run', 'running', 'in the park'], ['write', 'writing', 'a letter'], ['use', 'using', 'a computer'], ['cook', 'cooking', 'dinner']] as const;
+      const [subject, be] = subjects[n % subjects.length];
+      const [base, ing, object] = progress[Math.floor(n / subjects.length) % progress.length];
+      return prompt(`${subject} ${be} ___ ${object} now.`, ing, [base, `${base}s`, `to ${base}`], 'be動詞 + -ing。');
+    }
+    case 'ENGLISH_G7_U09': {
+      const thirdActions = [['play', 'plays', 'soccer'], ['study', 'studies', 'English'], ['eat', 'eats', 'breakfast'], ['watch', 'watches', 'TV'], ['read', 'reads', 'books'], ['like', 'likes', 'music'], ['teach', 'teaches', 'science'], ['go', 'goes', 'to school']] as const;
+      const subject = ['He', 'She', 'Tom', 'My brother', 'My sister'][n % 5];
+      const [base, third, object] = thirdActions[Math.floor(n / 5) % thirdActions.length];
+      return prompt(`${subject} ___ ${object} every day.`, third, [base, `${base}ing`, `${base}ed`], '三人称単数現在の形。');
+    }
+    case 'ENGLISH_G7_U10': {
+      const places = [['in', 'the box'], ['on', 'the desk'], ['under', 'the table'], ['by', 'the door'], ['near', 'the station'], ['behind', 'the chair'], ['in front of', 'the school']] as const;
+      const things = ['The cat', 'The book', 'The ball', 'My bag', 'The bicycle', 'The dog'];
+      const [prep, place] = places[n % places.length];
+      const thing = things[Math.floor(n / places.length) % things.length];
+      const otherPreps = places.filter(([p]) => p !== prep).map(([p]) => p);
+      return prompt(`${thing} is ___ ${place}.`, prep, [otherPreps[n % otherPreps.length], otherPreps[(n + 2) % otherPreps.length], otherPreps[(n + 4) % otherPreps.length]], '場所を表す前置詞。');
+    }
+    case 'ENGLISH_G7_U11': {
+      const nouns = [['book', 'books'], ['dog', 'dogs'], ['pen', 'pens'], ['box', 'boxes'], ['bus', 'buses'], ['watch', 'watches'], ['dish', 'dishes'], ['city', 'cities'], ['baby', 'babies'], ['child', 'children'], ['person', 'people'], ['man', 'men']] as const;
+      const [single, plural] = nouns[n % nouns.length];
+      const otherPlurals = nouns.filter(([, p]) => p !== plural).map(([, p]) => p);
+      if (n % 2 === 0) return prompt(`${single} の 複数形は？`, plural, [otherPlurals[n % otherPlurals.length], otherPlurals[(n + 3) % otherPlurals.length], single], '複数形のつづりを確認。');
+      return prompt(`two ___ に 入るのは？`, plural, [single, otherPlurals[(n + 2) % otherPlurals.length], otherPlurals[(n + 5) % otherPlurals.length]], 'two の後は複数形。');
+    }
+    case 'ENGLISH_G7_U12': {
+      const pronouns = [
+        ['I', 'my', 'me', 'mine', 'am'], ['you', 'your', 'you', 'yours', 'are'], ['he', 'his', 'him', 'his', 'is'], ['she', 'her', 'her', 'hers', 'is'], ['we', 'our', 'us', 'ours', 'are'], ['they', 'their', 'them', 'theirs', 'are'],
+      ] as const;
+      const [subject, possessive, object, possessivePronoun, be] = pronouns[Math.floor(n / 5) % pronouns.length];
+      const form = n % 5;
+      if (form === 0) return prompt(`「${subject}」の 所有格は？`, possessive, ['my', 'your', 'his', 'her', 'our', 'their'].filter(x => x !== possessive).slice(0, 3), '「〜の」を表す形。');
+      if (form === 1) return prompt(`This is ___ book. (${subject})`, possessive, ['my', 'your', 'his', 'her', 'our', 'their'].filter(x => x !== possessive).slice(0, 3), '名詞の前には所有格。');
+      if (form === 2) return prompt(`Please help ___. (${subject})`, object, ['me', 'you', 'him', 'her', 'us', 'them'].filter(x => x !== object).slice(0, 3), '動詞の後には目的格。');
+      if (form === 3) return prompt(`___ ${be} ready.`, subject, ['I', 'you', 'he', 'she', 'we', 'they'].filter(x => x !== subject).slice(0, 3), '文の主語になる代名詞。');
+      return prompt(`This book is ___. (${subject})`, possessivePronoun, ['mine', 'yours', 'his', 'hers', 'ours', 'theirs'].filter(x => x !== possessivePronoun).slice(0, 3), '名詞をくり返さずに「〜のもの」と表す。');
+    }
+    default:
+      return null;
+  }
+};
 
 export const ENGLISH_G7_UNIT_DATA: Record<string, GeneralProblem[]> = {
   ENGLISH_G7_U01: cycleProblems([
@@ -155,6 +293,8 @@ export const ENGLISH_G7_UNIT_DATA: Record<string, GeneralProblem[]> = {
   ENGLISH_G7_U15: buildRepeatReviewUnit(g7ReviewItems, '中1の 重要表現を きいて、英語を くりかえそう。'),
   ENGLISH_G7_U16: buildResponseReviewUnit(g7ResponseItems, '中1の 会話に 英語で こたえよう。'),
 };
+
+fillEnglishGeneratedUnitProblems(ENGLISH_G7_UNIT_DATA, makeG7GrammarProblem, { min: 36 });
 
 export const ENGLISH_G7_DATA: Record<string, GeneralProblem[]> = {
   ENGLISH_G7_1: [...Object.values(ENGLISH_G7_UNIT_DATA).flat(), ...readingPassagesG7],

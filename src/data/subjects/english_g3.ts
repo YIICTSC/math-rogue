@@ -2,13 +2,13 @@ import { GeneralProblem } from './utils';
 import { buildListeningReviewUnit, buildRepeatReviewUnit, buildResponseReviewUnit, buildSpeakingReviewUnit, buildWordUnit, buildFixedChoiceUnit, cycleProblems, EnglishResponseItem, EnglishWordItem, uniqueEnglishWordItems } from './english_utils';
 
 const greetings: EnglishWordItem[] = [
-  { en: 'Hello', jp: 'こんにちは', speechAlternates: ['hello there'] },
+  { en: 'Hello', jp: 'こんにちは', promptJp: 'こんにちは（ふだんの あいさつ）', speechAlternates: ['hello there'] },
   { en: 'Good morning', jp: 'おはよう' },
   { en: 'Goodbye', jp: 'さようなら', speechAlternates: ['bye', 'bye bye'] },
   { en: 'Thank you', jp: 'ありがとう', speechAlternates: ['thanks'] },
   { en: 'See you', jp: 'またね', speechAlternates: ['see you later'] },
   { en: 'Nice to meet you', jp: 'はじめまして' },
-  { en: 'Good afternoon', jp: 'こんにちは' },
+  { en: 'Good afternoon', jp: 'こんにちは', promptJp: 'こんにちは（ごごの あいさつ）' },
   { en: 'Good night', jp: 'おやすみ' },
   { en: 'See you tomorrow', jp: 'またあした' },
   { en: 'You are welcome', jp: 'どういたしまして' },
@@ -120,9 +120,9 @@ const body: EnglishWordItem[] = [
   { en: 'ear', jp: 'みみ' },
   { en: 'mouth', jp: 'くち' },
   { en: 'hand', jp: 'て' },
-  { en: 'foot', jp: 'あし' },
+  { en: 'foot', jp: 'あし', promptJp: 'あし（あしくび より さき）' },
   { en: 'arm', jp: 'うで' },
-  { en: 'leg', jp: 'あし' },
+  { en: 'leg', jp: 'あし', promptJp: 'あし（あしくび より うえ）' },
   { en: 'nose', jp: 'はな' },
   { en: 'face', jp: 'かお' },
 ];
