@@ -30,6 +30,8 @@ interface ExtendedEnglishProblem extends EnglishProblem {
   retryOfProblemKey?: string;
 }
 
+const ENGLISH_AUDIO_BGM_DUCK_MULTIPLIER = 0.05;
+
 const EnglishChallengeScreen: React.FC<EnglishChallengeScreenProps> = ({ onComplete, mode, debugSkip, isChallenge, streak = 0, rewardHint, languageMode = 'NORMAL', onAnswerResult, reviewProblem = null, assignmentUnits }) => {
   const [problems, setProblems] = useState<ExtendedEnglishProblem[]>([]);
   const [currentProblemIndex, setCurrentProblemIndex] = useState(0);
@@ -41,6 +43,7 @@ const EnglishChallengeScreen: React.FC<EnglishChallengeScreenProps> = ({ onCompl
   // Voice feature control
   const [voiceEnabled, setVoiceEnabled] = useState(() => storageService.getEnglishVoiceEnabled());
   const questionStartedAtRef = React.useRef(Date.now());
+  const speechGenerationRef = React.useRef(0);
 
   const normalize = (s: string) => {
     if (!s) return "";
@@ -53,11 +56,18 @@ const EnglishChallengeScreen: React.FC<EnglishChallengeScreenProps> = ({ onCompl
 
   const speakWord = useCallback((word: string) => {
     if (!('speechSynthesis' in window)) return;
+    const speechGeneration = ++speechGenerationRef.current;
     window.speechSynthesis.cancel();
+    audioService.setBgmDuckMultiplier(ENGLISH_AUDIO_BGM_DUCK_MULTIPLIER);
     const utterance = new SpeechSynthesisUtterance(word);
     utterance.lang = 'en-US';
     utterance.rate = 0.85; 
     utterance.volume = 0.78;
+    const restoreBgm = () => {
+      if (speechGenerationRef.current === speechGeneration) audioService.setBgmDuckMultiplier(1);
+    };
+    utterance.onend = restoreBgm;
+    utterance.onerror = restoreBgm;
     window.speechSynthesis.speak(utterance);
   }, []);
 
@@ -66,7 +76,9 @@ const EnglishChallengeScreen: React.FC<EnglishChallengeScreenProps> = ({ onCompl
     setVoiceEnabled(newVal);
     storageService.saveEnglishVoiceEnabled(newVal);
     if (!newVal) {
+      speechGenerationRef.current += 1;
       window.speechSynthesis.cancel();
+      audioService.setBgmDuckMultiplier(1);
     }
     audioService.playSound('select');
   };
@@ -160,9 +172,11 @@ const EnglishChallengeScreen: React.FC<EnglishChallengeScreenProps> = ({ onCompl
 
   useEffect(() => {
     return () => {
+      speechGenerationRef.current += 1;
       if ('speechSynthesis' in window) {
         window.speechSynthesis.cancel();
       }
+      audioService.setBgmDuckMultiplier(1);
     };
   }, []);
 

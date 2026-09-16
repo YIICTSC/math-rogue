@@ -1,7 +1,10 @@
 import React from 'react';
-import { BookOpen, X } from 'lucide-react';
+import { BookOpen, Lightbulb, PencilLine, Sigma, Target, TriangleAlert, X } from 'lucide-react';
 import { assetUrl } from '../utils/assetPaths';
 import type { UnitBoardSummary, UnitBoardSummaryPage } from '../data/unitBoardSummaries';
+import { buildUnitBoardTeachingContent } from '../data/unitBoardTeaching';
+import { limitUnitBoardKanjiByGrade } from '../data/unitBoardGradeKanji.generated';
+import { normalizeUnitBoardHiragana, repairUnitBoardHiraganaArtifacts } from '../data/unitBoardHiragana.generated';
 import type { LanguageMode } from '../types';
 import { trans } from '../utils/textUtils';
 
@@ -23,9 +26,19 @@ const UnitBoardModal: React.FC<UnitBoardModalProps> = ({ summary, open, onClose,
 
   const isNativeEnglishBoard = summary.id.startsWith('NATIVE_');
   const keepJapaneseBoard = languageMode === 'ENGLISH' && !isNativeEnglishBoard;
-  const translate = (text: string) => isNativeEnglishBoard || keepJapaneseBoard || languageMode === 'HIRAGANA'
-    ? text
-    : trans(text, languageMode);
+  const translate = (text: string) => {
+    if (isNativeEnglishBoard) return text;
+    const boardText = limitUnitBoardKanjiByGrade(
+      repairUnitBoardHiraganaArtifacts(text),
+      summary.grade,
+      summary.id,
+    );
+    if (keepJapaneseBoard) return boardText;
+    const translated = languageMode === 'HIRAGANA'
+      ? trans(normalizeUnitBoardHiragana(boardText), 'HIRAGANA')
+      : trans(boardText, languageMode);
+    return repairUnitBoardHiraganaArtifacts(translated);
+  };
   const pages: UnitBoardSummaryPage[] = [
     {
       id: 'main',
@@ -40,12 +53,29 @@ const UnitBoardModal: React.FC<UnitBoardModalProps> = ({ summary, open, onClose,
   const currentPageIndex = Math.min(pageIndex, pages.length - 1);
   const currentPage = pages[currentPageIndex];
   const hasMultiplePages = pages.length > 1;
+  const teaching = buildUnitBoardTeachingContent(summary, currentPage);
+  const boardSubject = teaching.subject;
+  const ruleLines = teaching.ruleLines;
+  const workedExampleLines = teaching.workedExampleSteps;
   const boardLabel = isNativeEnglishBoard ? 'Board' : translate(summary.grade && summary.grade <= 2 ? 'ばんしょ' : '板書');
   const pageLabel = translate(currentPage.label);
   const goalLabel = isNativeEnglishBoard ? 'Goal' : translate(currentPage.sectionLabels?.goal ?? 'めあて');
-  const ideaLabel = isNativeEnglishBoard ? 'Key Ideas' : translate(currentPage.sectionLabels?.points ?? (summary.grade && summary.grade <= 1 ? 'かんがえかた' : '考え方'));
-  const mistakesLabel = isNativeEnglishBoard ? 'Common Mistakes' : translate(currentPage.sectionLabels?.mistakes ?? 'よくあるまちがい');
-  const exampleLabel = isNativeEnglishBoard ? 'Example' : translate(currentPage.sectionLabels?.example ?? '例');
+  const ideaLabel = isNativeEnglishBoard ? 'How to Think' : translate(currentPage.sectionLabels?.points ?? (summary.grade && summary.grade <= 1 ? 'かんがえるじゅんばん' : '考える順番'));
+  const mistakesLabel = isNativeEnglishBoard ? 'Watch Out' : translate(currentPage.sectionLabels?.mistakes ?? (summary.grade && summary.grade <= 2 ? 'ここにちゅうい' : 'ここに注意'));
+  const exampleLabel = isNativeEnglishBoard ? 'Worked Example' : translate(currentPage.sectionLabels?.example ?? (summary.grade && summary.grade <= 2 ? 'れいだい・たしかめ' : '例題・たしかめ'));
+  const ruleLabel = (() => {
+    if (isNativeEnglishBoard) return 'Rule / Pattern';
+    if (summary.grade && summary.grade <= 1) return translate('たいせつなきまり');
+    switch (boardSubject) {
+      case 'math': return translate('公式・きまり');
+      case 'english': return translate('文の形・きまり');
+      case 'science': return translate('しくみ・きまり');
+      case 'social': return translate('大事なつながり');
+      case 'language': return translate('読み方・書き方のコツ');
+      case 'life': return translate('見つけるポイント');
+      default: return translate('大事なポイント');
+    }
+  })();
   const closeLabel = isNativeEnglishBoard ? 'Back to question' : translate(summary.grade && summary.grade <= 2 ? 'もんだいにもどる' : '問題にもどる');
   const closeAriaLabel = isNativeEnglishBoard ? 'Close board' : translate('板書を閉じる');
   const previousLabel = isNativeEnglishBoard ? 'Previous' : translate('前ページ');
@@ -107,42 +137,79 @@ const UnitBoardModal: React.FC<UnitBoardModalProps> = ({ summary, open, onClose,
             </div>
           </div>
 
-          <div className="unit-board-content grid grid-cols-1 gap-2 text-left text-xs leading-5 text-emerald-50 sm:grid-cols-2 sm:gap-x-4 sm:gap-y-2 md:text-sm md:leading-6 lg:text-base">
-            <section>
-              <h3 className="unit-board-section-title mb-0.5 text-sm font-black text-yellow-100 sm:mb-1 sm:text-base md:text-lg">{goalLabel}</h3>
-              <p>{translate(currentPage.goal)}</p>
+          <div className="unit-board-content space-y-3 text-left text-xs leading-5 text-emerald-50 md:text-sm md:leading-6 lg:text-base">
+            <section className="unit-board-goal border-b border-dashed border-yellow-100/35 pb-2">
+              <h3 className="unit-board-section-title mb-1 flex items-center gap-2 text-sm font-black text-yellow-100 sm:text-base md:text-lg">
+                <Target className="unit-board-section-icon" size={18} />
+                {goalLabel}
+              </h3>
+              <p className="pl-0.5 font-bold text-white">{translate(currentPage.goal)}</p>
             </section>
 
-            <section>
-              <h3 className="unit-board-section-title mb-0.5 text-sm font-black text-yellow-100 sm:mb-1 sm:text-base md:text-lg">{ideaLabel}</h3>
-              <ul className="space-y-0.5 sm:space-y-1">
-                {currentPage.points.map((point) => (
-                  <li key={point} className="flex gap-1.5 sm:gap-2">
-                    <span className="mt-0.5 text-yellow-100">・</span>
-                    <span>{translate(point)}</span>
-                  </li>
-                ))}
-              </ul>
-            </section>
+            <div className="unit-board-main-grid grid grid-cols-1 gap-3 sm:grid-cols-[minmax(0,1.2fr)_minmax(0,0.8fr)] sm:gap-4">
+              <section className="unit-board-thinking min-w-0">
+                <h3 className="unit-board-section-title mb-1.5 flex items-center gap-2 text-sm font-black text-yellow-100 sm:text-base md:text-lg">
+                  <Lightbulb className="unit-board-section-icon" size={18} />
+                  {ideaLabel}
+                </h3>
+                <ol className="unit-board-thinking-list space-y-1.5">
+                  {teaching.thinkingSteps.map((point, index) => (
+                    <li key={point} className="flex items-start gap-2">
+                      <span className="unit-board-step-number mt-0.5 inline-flex h-5 min-w-5 items-center justify-center rounded-full border border-yellow-100/60 px-1 text-[10px] font-black leading-none text-yellow-100 sm:h-6 sm:min-w-6 sm:text-xs">
+                        {index + 1}
+                      </span>
+                      <span className="min-w-0 flex-1">{translate(point)}</span>
+                    </li>
+                  ))}
+                </ol>
+              </section>
 
-            <section>
-              <h3 className="unit-board-section-title mb-0.5 text-sm font-black text-yellow-100 sm:mb-1 sm:text-base md:text-lg">{mistakesLabel}</h3>
+              <section className="unit-board-rule min-w-0 border-2 border-yellow-100/45 bg-black/20 px-3 py-2 shadow-inner sm:px-4 sm:py-3">
+                <h3 className="unit-board-section-title mb-1.5 flex items-center gap-2 text-sm font-black text-yellow-100 sm:text-base md:text-lg">
+                  <Sigma className="unit-board-section-icon" size={18} />
+                  {ruleLabel}
+                </h3>
+                <div className="space-y-1.5">
+                  {ruleLines.map((rule) => (
+                    <p key={rule} className="unit-board-rule-line font-black leading-snug text-white">
+                      {translate(rule)}
+                    </p>
+                  ))}
+                </div>
+              </section>
+            </div>
+
+            {workedExampleLines.length > 0 && (
+              <section className="unit-board-example border-l-4 border-cyan-100/55 bg-black/15 px-3 py-2 sm:px-4 sm:py-3">
+                <h3 className="unit-board-section-title mb-1 flex items-center gap-2 text-sm font-black text-cyan-50 sm:text-base md:text-lg">
+                  <PencilLine className="unit-board-section-icon" size={18} />
+                  {exampleLabel}
+                </h3>
+                <div className="unit-board-example-lines space-y-0.5 font-bold text-white">
+                  {workedExampleLines.map((line, index) => (
+                    <p key={line} className="flex items-start gap-2">
+                      <span className="text-cyan-100">{index === 0 ? '▶' : '→'}</span>
+                      <span>{translate(line)}</span>
+                    </p>
+                  ))}
+                </div>
+              </section>
+            )}
+
+            <section className="unit-board-mistakes border-t border-dashed border-rose-100/35 pt-2">
+              <h3 className="unit-board-section-title mb-1 flex items-center gap-2 text-sm font-black text-rose-100 sm:text-base md:text-lg">
+                <TriangleAlert className="unit-board-section-icon" size={18} />
+                {mistakesLabel}
+              </h3>
               <ul className="space-y-0.5 sm:space-y-1">
                 {currentPage.mistakes.map((mistake) => (
-                  <li key={mistake} className="flex gap-1.5 sm:gap-2">
-                    <span className="mt-0.5 text-rose-100">・</span>
+                  <li key={mistake} className="flex gap-2">
+                    <span className="text-rose-100">※</span>
                     <span>{translate(mistake)}</span>
                   </li>
                 ))}
               </ul>
             </section>
-
-            {currentPage.example && (
-              <section>
-                <h3 className="unit-board-section-title mb-0.5 text-sm font-black text-yellow-100 sm:mb-1 sm:text-base md:text-lg">{exampleLabel}</h3>
-                <p>{translate(currentPage.example)}</p>
-              </section>
-            )}
           </div>
         </div>
 

@@ -54,6 +54,7 @@ class AudioService {
   private bgmMode: 'OSCILLATOR' | 'NEW' | 'OLD' | 'STUDY' = 'NEW';
   private bgmTheme: BgmThemeId = 'elementary';
   private bgmVolume: number = 1;
+  private bgmDuckMultiplier: number = 1;
   private sfxVolume: number = 0.6;
   private voiceVolume: number = 0.8;
   private audioBuffers: Record<string, AudioBuffer> = {};
@@ -106,6 +107,25 @@ class AudioService {
   private unplayedBgmList: string[] = [...this.bgmList];
 
   constructor() {}
+
+  private getEffectiveBgmVolume() {
+      return this.bgmVolume * this.bgmDuckMultiplier;
+  }
+
+  private applyBgmVolume() {
+      const effectiveVolume = this.getEffectiveBgmVolume();
+      if (this.bgmGain && this.ctx) {
+          this.bgmGain.gain.setTargetAtTime(effectiveVolume, this.ctx.currentTime, 0.05);
+      }
+      if (this.currentHtmlAudio) {
+          this.currentHtmlAudio.volume = this.bgmMediaSources.has(this.currentHtmlAudio)
+              ? 1
+              : Math.min(1, effectiveVolume);
+      }
+      this.activeBgmHtmlAudios.forEach(audio => {
+          audio.volume = this.bgmMediaSources.has(audio) ? 1 : Math.min(1, effectiveVolume);
+      });
+  }
 
   private parseBgmSequenceEntry(entry: string): { theme?: BgmThemeId; type: string } {
       const separatorIndex = entry.indexOf('::');
@@ -166,7 +186,7 @@ class AudioService {
 
     // BGM Bus
     this.bgmGain = this.ctx.createGain();
-    this.bgmGain.gain.value = this.bgmVolume;
+    this.bgmGain.gain.value = this.getEffectiveBgmVolume();
     this.bgmGain.connect(this.masterGain);
 
     // SFX Bus
@@ -340,21 +360,20 @@ class AudioService {
 
   public setBgmVolume(volume: number) {
       this.bgmVolume = Math.max(0, Math.min(1.5, volume));
-      if (this.bgmGain && this.ctx) {
-          this.bgmGain.gain.setTargetAtTime(this.bgmVolume, this.ctx.currentTime, 0.05);
-      }
-      if (this.currentHtmlAudio) {
-          this.currentHtmlAudio.volume = this.bgmMediaSources.has(this.currentHtmlAudio)
-              ? 1
-              : Math.min(1, this.bgmVolume);
-      }
-      this.activeBgmHtmlAudios.forEach(audio => {
-          audio.volume = this.bgmMediaSources.has(audio) ? 1 : Math.min(1, this.bgmVolume);
-      });
+      this.applyBgmVolume();
   }
 
   public getBgmVolume() {
       return this.bgmVolume;
+  }
+
+  /**
+   * Temporarily lower only BGM playback without changing the user's saved
+   * BGM volume setting. A multiplier of 1 restores the normal level.
+   */
+  public setBgmDuckMultiplier(multiplier: number) {
+      this.bgmDuckMultiplier = Math.max(0, Math.min(1, multiplier));
+      this.applyBgmVolume();
   }
 
   /**
@@ -383,7 +402,7 @@ class AudioService {
       const audio = document.createElement('audio');
       audio.preload = 'auto';
       audio.loop = true;
-      audio.volume = Math.min(1, this.bgmVolume);
+      audio.volume = Math.min(1, this.getEffectiveBgmVolume());
       (audio as HTMLAudioElement & { fetchPriority?: 'high' | 'low' | 'auto' }).fetchPriority = 'high';
       audio.src = path;
       this.preparedBgmHtmlAudios.set(path, audio);
@@ -1209,7 +1228,7 @@ class AudioService {
                   } catch {}
               }
               audio.loop = loop;
-              audio.volume = Math.min(1, this.bgmVolume);
+              audio.volume = Math.min(1, this.getEffectiveBgmVolume());
               (audio as HTMLAudioElement & { fetchPriority?: 'high' | 'low' | 'auto' }).fetchPriority = 'high';
               // Keep iOS BGM on the media element's native playback path. Routing
               // it through WKWebView's AudioContext makes the stream repeatedly
@@ -1217,7 +1236,7 @@ class AudioService {
               // Bluetooth, AirPlay), which sounds like short chopped fragments.
               // SFX/voices can remain on Web Audio; BGM volume is applied directly.
               const routedThroughWebAudio = !IS_IOS_BUILD && this.connectHtmlBgmToGain(audio);
-              audio.volume = routedThroughWebAudio ? 1 : Math.min(1, this.bgmVolume);
+              audio.volume = routedThroughWebAudio ? 1 : Math.min(1, this.getEffectiveBgmVolume());
               audio.onended = () => {
                   if (this.isPlayingBGM && !loop) {
                       if (this.bgmAdvanceMode === 'sorted') {

@@ -131,6 +131,17 @@ const isEnglishSpeakingReviewMode = (mode: string) =>
   /^ENGLISH_G8_U(11|12|13)$/.test(mode) ||
   /^ENGLISH_G9_U(12|13|14)$/.test(mode);
 
+const ENGLISH_AUDIO_BGM_DUCK_MULTIPLIER = 0.05;
+
+const isEnglishAudioFocusProblem = (problem: ExtendedGeneralProblem | undefined, fallbackMode: string) => {
+  if (!problem?.audioPrompt && !problem?.speechPrompt) return false;
+  const sourceMode = problem.sourceMode || fallbackMode;
+  const isEnglishMode = /(?:^|_)ENGLISH(?:_|$)/.test(sourceMode);
+  const hasEnglishAudio = [problem.audioPrompt?.lang, problem.speechPrompt?.lang]
+    .some((lang) => typeof lang === 'string' && /^en(?:-|$)/i.test(lang));
+  return isEnglishMode || hasEnglishAudio;
+};
+
 const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onComplete, mode, modePool, onModeCorrect, answerMode = 'CHOICE', debugSkip, isChallenge, streak = 0, rewardHint, languageMode = 'JAPANESE', onAnswerResult, customProblems = EMPTY_CUSTOM_PROBLEMS, problemOffset = 0, reviewProblem = null, assignmentUnits, debugProblems = EMPTY_DEBUG_PROBLEMS, previewOnly = false }) => {
   const [problems, setProblems] = useState<ExtendedGeneralProblem[]>([]);
   const [currentProblemIndex, setCurrentProblemIndex] = useState(0);
@@ -153,6 +164,7 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
   const [mapSymbolImageFailed, setMapSymbolImageFailed] = useState(false);
   const [isUnitBoardOpen, setIsUnitBoardOpen] = useState(false);
   const currentProblem = problems[currentProblemIndex];
+  const shouldDuckBgmForEnglishAudio = isEnglishAudioFocusProblem(currentProblem, mode);
   const shouldUseEnglishAudioButton = languageMode === 'ENGLISH';
   const audioButtonLabel = shouldUseEnglishAudioButton ? 'Listen' : 'おとを きく';
   const audioButtonAriaLabel = shouldUseEnglishAudioButton ? 'Listen to audio' : 'おとを きく';
@@ -164,6 +176,13 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
     () => getUnitBoardSummary(currentProblem?.sourceMode || mode, currentProblem?.unitLabel),
     [currentProblem?.sourceMode, currentProblem?.unitLabel, mode]
   );
+
+  useEffect(() => {
+    audioService.setBgmDuckMultiplier(shouldDuckBgmForEnglishAudio ? ENGLISH_AUDIO_BGM_DUCK_MULTIPLIER : 1);
+    return () => {
+      if (shouldDuckBgmForEnglishAudio) audioService.setBgmDuckMultiplier(1);
+    };
+  }, [shouldDuckBgmForEnglishAudio]);
 
   useEffect(() => {
     if (previewOnly || !unitBoardSummary || reviewProblem) return;

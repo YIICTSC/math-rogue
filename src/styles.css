@@ -1779,6 +1779,27 @@
   }
 }
 
+.unit-board-rule-line:first-child {
+  font-size: 1.08em;
+  letter-spacing: 0.015em;
+}
+
+.unit-board-rule-line + .unit-board-rule-line {
+  border-top: 1px dashed rgba(254, 249, 195, 0.28);
+  margin-top: 0.4rem;
+  padding-top: 0.4rem;
+}
+
+.unit-board-example-lines p:last-child {
+  margin-top: 0.3rem;
+}
+
+.unit-board-thinking-list li span:last-child,
+.unit-board-rule-line,
+.unit-board-example-lines p span:last-child {
+  overflow-wrap: anywhere;
+}
+
 @media (orientation: landscape) and (max-height: 520px) {
   .credits-roll-track {
     padding-top: clamp(112px, 30vh, 168px);
@@ -1847,12 +1868,40 @@
   }
 
   .unit-board-content {
-    display: grid !important;
-    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) !important;
-    column-gap: 0.75rem !important;
+    display: block !important;
     font-size: clamp(0.58rem, 2.25dvh, 0.72rem) !important;
     line-height: 1.22 !important;
-    row-gap: 0.18rem !important;
+  }
+
+  .unit-board-content > * + * {
+    margin-top: 0.3rem !important;
+  }
+
+  .unit-board-main-grid {
+    column-gap: 0.65rem !important;
+    row-gap: 0.25rem !important;
+  }
+
+  .unit-board-rule,
+  .unit-board-example {
+    padding: 0.3rem 0.45rem !important;
+  }
+
+  .unit-board-thinking-list {
+    gap: 0.08rem !important;
+  }
+
+  .unit-board-step-number {
+    height: 1rem !important;
+    min-width: 1rem !important;
+    padding-left: 0.18rem !important;
+    padding-right: 0.18rem !important;
+    font-size: 0.48rem !important;
+  }
+
+  .unit-board-section-icon {
+    height: 0.78rem !important;
+    width: 0.78rem !important;
   }
 
   .unit-board-section-title {
