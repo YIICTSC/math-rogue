@@ -634,9 +634,39 @@ const makeUnitProblem = (unitId: string, n: number): GeneralProblem => {
             const simpleLeft = left / divisor;
             const simpleRight = right / divisor;
             if (n % 2 === 0) {
-                return { question: `${left}:${right} と同じ比は？`, answer: `${left * mul}:${right * mul}`, options: d(`${left * mul}:${right * mul}`, `${left * mul}:${right * mul + 1}`, `${left * mul + 1}:${right * mul}`, `${left}:${right * mul}`), hint: "両方に同じ数をかける。" };
+                return {
+                    question: `${left}:${right} と同じ比は？`,
+                    answer: `${left * mul}:${right * mul}`,
+                    options: d(`${left * mul}:${right * mul}`, `${left * mul}:${right * mul + 1}`, `${left * mul + 1}:${right * mul}`, `${left}:${right * mul}`),
+                    hint: "両方に同じ数をかける。",
+                    visual: {
+                        kind: 'double_number_line',
+                        topValues: [0, left, left * mul],
+                        bottomValues: [0, right, right * mul],
+                        topLabel: '左',
+                        bottomLabel: '右',
+                        highlightIndex: 2,
+                        topUnknownIndex: 2,
+                        bottomUnknownIndex: 2,
+                    },
+                };
             }
-            return { question: `${left * mul}:${right * mul} を いちばん かんたんな比にすると？`, answer: `${simpleLeft}:${simpleRight}`, options: d(`${simpleLeft}:${simpleRight}`, `${simpleLeft + 1}:${simpleRight}`, `${simpleLeft}:${simpleRight + 1}`, `${simpleLeft + 2}:${simpleRight}`), hint: "両方を 最大公約数で わる。" };
+            return {
+                question: `${left * mul}:${right * mul} を いちばん かんたんな比にすると？`,
+                answer: `${simpleLeft}:${simpleRight}`,
+                options: d(`${simpleLeft}:${simpleRight}`, `${simpleLeft + 1}:${simpleRight}`, `${simpleLeft}:${simpleRight + 1}`, `${simpleLeft + 2}:${simpleRight}`),
+                hint: "両方を 最大公約数で わる。",
+                visual: {
+                    kind: 'double_number_line',
+                    topValues: [0, simpleLeft, left * mul],
+                    bottomValues: [0, simpleRight, right * mul],
+                    topLabel: '左',
+                    bottomLabel: '右',
+                    highlightIndex: 1,
+                    topUnknownIndex: 1,
+                    bottomUnknownIndex: 1,
+                },
+            };
         }
         case 'MATH_G6_U06': {
             const form = n % 2;
@@ -644,10 +674,10 @@ const makeUnitProblem = (unitId: string, n: number): GeneralProblem => {
             const x = xValues[Math.floor(n / 2) % xValues.length];
             const k = (Math.floor(n / (2 * xValues.length)) % 4) + 2;
             if (form === 0) {
-                return { question: `比例で y=${k}x。x=${x} のとき y=?`, answer: `${k * x}`, options: d(`${k * x}`, `${x + k}`, `${x * x}`, `${x}`), hint: "比例は y=ax。" };
+                return { question: `比例で y=${k}x。x=${x} のとき y=?`, answer: `${k * x}`, options: d(`${k * x}`, `${x + k}`, `${x * x}`, `${x}`), hint: "比例は y=ax。", visual: { kind: 'coordinate_plane', xMin: 0, xMax: 8, yMin: 0, yMax: 40, relation: { type: 'linear', slope: k }, points: [{ x, y: k * x, emphasized: true }], xLabel: 'x', yLabel: 'y' } };
             }
             const constant = 24;
-            return { question: `反比例で x×y=${constant}。x=${x} のとき y=?`, answer: `${constant / x}`, options: d(`${constant / x}`, `${k * x}`, `${x + constant}`, `${x}`), hint: "反比例は x×y が いつも同じ。" };
+            return { question: `反比例で x×y=${constant}。x=${x} のとき y=?`, answer: `${constant / x}`, options: d(`${constant / x}`, `${k * x}`, `${x + constant}`, `${x}`), hint: "反比例は x×y が いつも同じ。", visual: { kind: 'coordinate_plane', xMin: 0, xMax: 8, yMin: 0, yMax: 24, relation: { type: 'inverse', constant }, points: [{ x, y: constant / x, emphasized: true }], xLabel: 'x', yLabel: 'y' } };
         }
         case 'MATH_G6_U07': {
             const scale = (n % 4) + 2;
@@ -678,16 +708,16 @@ const makeUnitProblem = (unitId: string, n: number): GeneralProblem => {
             const height = (n % 5) + 3;
             const p = n % 4;
             if (p === 0) {
-                return { question: `池を たて約${length}m、よこ約${width}m の長方形に見立てる。およその面積は？`, answer: `${length * width}m2`, options: d(`${length * width}m2`, `${length + width}m2`, `${2 * (length + width)}m2`, `${length * width * 2}m2`), hint: "長方形に見立てて、たて×よこ。" };
+                return { question: `池を たて約${length}m、よこ約${width}m の長方形に見立てる。およその面積は？`, answer: `${length * width}m2`, options: d(`${length * width}m2`, `${length + width}m2`, `${2 * (length + width)}m2`, `${length * width * 2}m2`), hint: "長方形に見立てて、たて×よこ。", visual: { kind: 'area_grid', widthUnits: length, heightUnits: width, widthLabel: `約${length}m`, heightLabel: `約${width}m` } };
             }
             if (p === 1) {
-                return { question: `土地を 底辺約${length}m、高さ約${width}m の三角形に見立てる。およその面積は？`, answer: `${(length * width) / 2}m2`, options: d(`${(length * width) / 2}m2`, `${length * width}m2`, `${length + width}m2`, `${2 * (length + width)}m2`), hint: "三角形に見立てて、底辺×高さ÷2。" };
+                return { question: `土地を 底辺約${length}m、高さ約${width}m の三角形に見立てる。およその面積は？`, answer: `${(length * width) / 2}m2`, options: d(`${(length * width) / 2}m2`, `${length * width}m2`, `${length + width}m2`, `${2 * (length + width)}m2`), hint: "三角形に見立てて、底辺×高さ÷2。", visual: { kind: 'area_grid', widthUnits: length, heightUnits: width, shape: 'triangle', widthLabel: `約${length}m`, heightLabel: `約${width}m` } };
             }
             if (p === 2) {
-                return { question: `荷物を たて約${length}m、よこ約${width}m、高さ約${height}m の直方体に見立てる。およその体積は？`, answer: `${length * width * height}m3`, options: d(`${length * width * height}m3`, `${length * width}m3`, `${length + width + height}m3`, `${2 * (length * width + width * height + height * length)}m3`), hint: "直方体に見立てて、たて×よこ×高さ。" };
+                return { question: `荷物を たて約${length}m、よこ約${width}m、高さ約${height}m の直方体に見立てる。およその体積は？`, answer: `${length * width * height}m3`, options: d(`${length * width * height}m3`, `${length * width}m3`, `${length + width + height}m3`, `${2 * (length * width + width * height + height * length)}m3`), hint: "直方体に見立てて、たて×よこ×高さ。", visual: { kind: 'unit_cubes', width: length, depth: width, height, widthLabel: `約${length}m`, depthLabel: `約${width}m`, heightLabel: `約${height}m` } };
             }
             const baseArea = length * width;
-            return { question: `柱の底面積を約${baseArea}m2、高さを約${height}m と見積もる。およその体積は？`, answer: `${baseArea * height}m3`, options: d(`${baseArea * height}m3`, `${baseArea + height}m3`, `${baseArea}m3`, `${height}m3`), hint: "柱の体積は 底面積×高さ。" };
+            return { question: `柱の底面積を約${baseArea}m2、高さを約${height}m と見積もる。およその体積は？`, answer: `${baseArea * height}m3`, options: d(`${baseArea * height}m3`, `${baseArea + height}m3`, `${baseArea}m3`, `${height}m3`), hint: "柱の体積は 底面積×高さ。", visual: { kind: 'bar_model', bars: [{ label: '底面', segments: [{ value: baseArea, label: `約${baseArea}m2` }] }, { label: '体積', segments: [{ value: baseArea * height, unknown: true }] }], compareLabel: `${height}m分` } };
         }
         case 'MATH_G6_U11': {
             const form = n % 3;
@@ -695,12 +725,12 @@ const makeUnitProblem = (unitId: string, n: number): GeneralProblem => {
             let ways = 1;
             for (let k = 2; k <= nItems; k++) ways *= k;
             if (form === 0) {
-                return { question: `${nItems}人 を1列に並べると何通り？`, answer: `${ways}通り`, options: d(`${ways}通り`, `${nItems * nItems}通り`, `${nItems + 1}通り`, `${ways / 2}通り`), hint: "順列の基本 n×(n-1)×..." };
+                return { question: `${nItems}人 を1列に並べると何通り？`, answer: `${ways}通り`, options: d(`${ways}通り`, `${nItems * nItems}通り`, `${nItems + 1}通り`, `${ways / 2}通り`), hint: "順列の基本 n×(n-1)×...", visual: { kind: 'probability_tree', stages: Array.from({ length: nItems }, (_, index) => ({ label: `${index + 1}番目`, choices: nItems - index })), resultLabel: '?通り' } };
             }
-            if (form === 1) return { question: `赤と青の2色から、毎回どちらか1色を ${nItems}回 えらぶ。全部で何通り？`, answer: `${2 ** nItems}通り`, options: d(`${2 ** nItems}通り`, `${ways}通り`, `${nItems * 2}通り`, `${nItems}通り`), hint: "毎回 2通り ずつ。" };
+            if (form === 1) return { question: `赤と青の2色から、毎回どちらか1色を ${nItems}回 えらぶ。全部で何通り？`, answer: `${2 ** nItems}通り`, options: d(`${2 ** nItems}通り`, `${ways}通り`, `${nItems * 2}通り`, `${nItems}通り`), hint: "毎回 2通り ずつ。", visual: { kind: 'probability_tree', stages: Array.from({ length: nItems }, (_, index) => ({ label: `${index + 1}回目`, choices: 2 })), resultLabel: '?通り' } };
             const drinks = nItems;
             const foods = nItems - 1;
-            return { question: `飲み物${drinks}種類と 食べ物${foods}種類から1つずつ選ぶ。組合せは何通り？`, answer: `${drinks * foods}通り`, options: d(`${drinks * foods}通り`, `${drinks + foods}通り`, `${drinks}通り`, `${foods}通り`), hint: "飲み物の選び方×食べ物の選び方。" };
+            return { question: `飲み物${drinks}種類と 食べ物${foods}種類から1つずつ選ぶ。組合せは何通り？`, answer: `${drinks * foods}通り`, options: d(`${drinks * foods}通り`, `${drinks + foods}通り`, `${drinks}通り`, `${foods}通り`), hint: "飲み物の選び方×食べ物の選び方。", visual: { kind: 'probability_tree', stages: [{ label: '飲み物', choices: drinks }, { label: '食べ物', choices: foods }], resultLabel: '?通り' } };
         }
         case 'MATH_G6_U12': {
             const a = (n % 5) * 10 + 50;
@@ -709,15 +739,15 @@ const makeUnitProblem = (unitId: string, n: number): GeneralProblem => {
             const avg = Math.floor((a + b + c) / 3);
             const p = n % 4;
             if (p === 0) {
-                return { question: `${a}, ${b}, ${c} の平均は？`, answer: `${avg}`, options: d(`${avg}`, `${a + b + c}`, `${Math.max(a, b, c)}`, `${Math.min(a, b, c)}`), hint: "合計÷個数。" };
+                return { question: `${a}, ${b}, ${c} の平均は？`, answer: `${avg}`, options: d(`${avg}`, `${a + b + c}`, `${Math.max(a, b, c)}`, `${Math.min(a, b, c)}`), hint: "合計÷個数。", visual: { kind: 'dot_plot', values: [a, b, c], summaryValue: avg, summaryLabel: '平均' } };
             }
             if (p === 1) {
-                return { question: `${a}, ${b}, ${c} の最大値は？`, answer: `${Math.max(a, b, c)}`, options: d(`${Math.max(a, b, c)}`, `${Math.min(a, b, c)}`, `${avg}`, `${a + b + c}`), hint: "いちばん大きい値。" };
+                return { question: `${a}, ${b}, ${c} の最大値は？`, answer: `${Math.max(a, b, c)}`, options: d(`${Math.max(a, b, c)}`, `${Math.min(a, b, c)}`, `${avg}`, `${a + b + c}`), hint: "いちばん大きい値。", visual: { kind: 'dot_plot', values: [a, b, c], highlightValues: [Math.max(a, b, c)] } };
             }
             if (p === 2) {
-                return { question: `${a}, ${b}, ${c} の最小値は？`, answer: `${Math.min(a, b, c)}`, options: d(`${Math.min(a, b, c)}`, `${Math.max(a, b, c)}`, `${avg}`, `${a + b + c}`), hint: "いちばん小さい値。" };
+                return { question: `${a}, ${b}, ${c} の最小値は？`, answer: `${Math.min(a, b, c)}`, options: d(`${Math.min(a, b, c)}`, `${Math.max(a, b, c)}`, `${avg}`, `${a + b + c}`), hint: "いちばん小さい値。", visual: { kind: 'dot_plot', values: [a, b, c], highlightValues: [Math.min(a, b, c)] } };
             }
-            return { question: `${a}, ${b}, ${c} の範囲（最大-最小）は？`, answer: `${Math.max(a, b, c) - Math.min(a, b, c)}`, options: d(`${Math.max(a, b, c) - Math.min(a, b, c)}`, `${a + b + c}`, `${avg}`, `${Math.max(a, b, c)}`), hint: "ばらつきをみる指標。" };
+            return { question: `${a}, ${b}, ${c} の範囲（最大-最小）は？`, answer: `${Math.max(a, b, c) - Math.min(a, b, c)}`, options: d(`${Math.max(a, b, c) - Math.min(a, b, c)}`, `${a + b + c}`, `${avg}`, `${Math.max(a, b, c)}`), hint: "ばらつきをみる指標。", visual: { kind: 'dot_plot', values: [a, b, c], highlightValues: [Math.min(a, b, c), Math.max(a, b, c)] } };
         }
         case 'MATH_G6_U13': {
             const a = (n % 8) + 2;

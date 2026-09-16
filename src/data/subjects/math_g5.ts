@@ -522,9 +522,9 @@ const makeUnitProblem = (unitId: string, n: number): GeneralProblem => {
             const b = (n % 5) + 3;
             const c = (n % 4) + 2;
             if (n % 2 === 0) {
-                return { question: `たて${a}cm よこ${b}cm 高さ${c}cm の体積は？`, answer: `${a * b * c}cm3`, options: d(`${a * b * c}cm3`, `${a + b + c}cm3`, `${a * b}cm2`, `${a * b * c * 2}cm3`), hint: "たて×よこ×高さ。" };
+                return { question: `たて${a}cm よこ${b}cm 高さ${c}cm の体積は？`, answer: `${a * b * c}cm3`, options: d(`${a * b * c}cm3`, `${a + b + c}cm3`, `${a * b}cm2`, `${a * b * c * 2}cm3`), hint: "たて×よこ×高さ。", visual: { kind: 'unit_cubes', width: a, depth: b, height: c, widthLabel: `${a}cm`, depthLabel: `${b}cm`, heightLabel: `${c}cm` } };
             }
-            return { question: `底面積が ${a * b}cm2、高さが ${c}cm の体積は？`, answer: `${a * b * c}cm3`, options: d(`${a * b * c}cm3`, `${a * b + c}cm3`, `${a * b}cm3`, `${c}cm3`), hint: "底面積×高さ。" };
+            return { question: `底面積が ${a * b}cm2、高さが ${c}cm の体積は？`, answer: `${a * b * c}cm3`, options: d(`${a * b * c}cm3`, `${a * b + c}cm3`, `${a * b}cm3`, `${c}cm3`), hint: "底面積×高さ。", visual: { kind: 'bar_model', bars: [{ label: '1段', segments: [{ value: a * b, label: `${a * b}cm2` }] }, { label: 'ぜんぶ', segments: [{ value: a * b * c, unknown: true }] }], compareLabel: `${c}段分` } };
         }
         case 'MATH_G5_U03': {
             const a = (n % 9) + 1;
@@ -533,7 +533,21 @@ const makeUnitProblem = (unitId: string, n: number): GeneralProblem => {
             if (n % 2 === 0) {
                 return { question: `0.${a} × 0.${b} = ?`, answer: `${product}`, options: d(`${product}`, `0.${a * b}`, `${a * b}`, `0.00${a * b}`), hint: "小数第1位×小数第1位。" };
             }
-            return { question: `0.${a} を ${b}倍すると？`, answer: `${(a * b) / 10}`, options: d(`${(a * b) / 10}`, `${product}`, `${a * b}`, `0.${a + b}`), hint: "小数×整数 でも考えられる。" };
+            const scaled = (a * b) / 10;
+            return {
+                question: `0.${a} を ${b}倍すると？`,
+                answer: `${scaled}`,
+                options: d(`${scaled}`, `${product}`, `${a * b}`, `0.${a + b}`),
+                hint: "小数×整数 でも考えられる。",
+                visual: {
+                    kind: 'bar_model',
+                    bars: [
+                        { label: '1つ分', segments: [{ value: a / 10, label: `0.${a}` }] },
+                        { label: `${b}倍`, segments: [{ value: scaled, unknown: true }] },
+                    ],
+                    compareLabel: `${b}倍の大きさ`,
+                },
+            };
         }
         case 'MATH_G5_U04': {
             const b = (n % 8) + 2;
@@ -542,10 +556,18 @@ const makeUnitProblem = (unitId: string, n: number): GeneralProblem => {
             const quotient = q + decimalDigit / 10;
             const dividend = (quotient * b).toFixed(1);
             const answer = quotient.toFixed(1);
+            const visual = {
+                kind: 'bar_model' as const,
+                bars: [{
+                    label: 'ぜんぶ',
+                    segments: Array.from({ length: b }, () => ({ value: quotient, unknown: true })),
+                }],
+                compareLabel: `${b}等分した 1つ分は？`,
+            };
             if (n % 2 === 0) {
-                return { question: `${dividend} ÷ ${b} = ?`, answer, options: d(answer, `${q}.0`, `${(quotient + 0.1).toFixed(1)}`, `${(quotient - 0.1).toFixed(1)}`), hint: "小数点の位置に気をつけて計算する。" };
+                return { question: `${dividend} ÷ ${b} = ?`, answer, options: d(answer, `${q}.0`, `${(quotient + 0.1).toFixed(1)}`, `${(quotient - 0.1).toFixed(1)}`), hint: "小数点の位置に気をつけて計算する。", visual };
             }
-            return { question: `${dividend} ÷ ${b} の商は ${q} より 大きい？小さい？`, answer: "大きい", options: d("大きい", "小さい", "同じ", "わからない"), hint: `商は ${answer} になる。` };
+            return { question: `${dividend} ÷ ${b} の商は ${q} より 大きい？小さい？`, answer: "大きい", options: d("大きい", "小さい", "同じ", "わからない"), hint: `商は ${answer} になる。`, visual };
         }
         case 'MATH_G5_U05': {
             const p = n % 10;
@@ -632,26 +654,38 @@ const makeUnitProblem = (unitId: string, n: number): GeneralProblem => {
             const density = (Math.floor(n / 12) % 5) + 2;
             const people = area * density;
             if (form === 0) {
-                return { question: `${area}m2 に ${people}人。1m2あたりは？`, answer: `${people / area}人`, options: d(`${people / area}人`, `${people * area}人`, `${people - area}人`, `${area / people}人`), hint: "人数÷面積。" };
+                return {
+                    question: `${area}m2 に ${people}人。1m2あたりは？`,
+                    answer: `${people / area}人`,
+                    options: d(`${people / area}人`, `${people * area}人`, `${people - area}人`, `${area / people}人`),
+                    hint: "人数÷面積。",
+                    visual: { kind: 'double_number_line', topValues: [0, 1, area], bottomValues: [0, density, people], topLabel: 'm²', bottomLabel: '人', highlightIndex: 1, bottomUnknownIndex: 1 },
+                };
             }
-            return { question: `1m2あたり ${people / area}人 の部屋が ${area}m2。 全部で何人？`, answer: `${people}人`, options: d(`${people}人`, `${people / area}人`, `${area}人`, `${people + area}人`), hint: "単位量あたりの大きさ×広さ。" };
+            return {
+                question: `1m2あたり ${people / area}人 の部屋が ${area}m2。 全部で何人？`,
+                answer: `${people}人`,
+                options: d(`${people}人`, `${people / area}人`, `${area}人`, `${people + area}人`),
+                hint: "単位量あたりの大きさ×広さ。",
+                visual: { kind: 'double_number_line', topValues: [0, 1, area], bottomValues: [0, density, people], topLabel: 'm²', bottomLabel: '人', highlightIndex: 2, bottomUnknownIndex: 2 },
+            };
         }
         case 'MATH_G5_U10': {
             const speed = (n % 6 + 3) * 10;
             const h = (n % 4) + 1;
             if (n % 2 === 0) {
-                return { question: `時速${speed}km で ${h}時間。道のりは？`, answer: `${speed * h}km`, options: d(`${speed * h}km`, `${speed / h}km`, `${speed + h}km`, `${h}km`), hint: "速さ×時間。" };
+                return { question: `時速${speed}km で ${h}時間。道のりは？`, answer: `${speed * h}km`, options: d(`${speed * h}km`, `${speed / h}km`, `${speed + h}km`, `${h}km`), hint: "速さ×時間。", visual: { kind: 'double_number_line', topValues: [0, 1, h], bottomValues: [0, speed, speed * h], topLabel: '時間', bottomLabel: 'km', highlightIndex: 2, bottomUnknownIndex: 2 } };
             }
-            return { question: `${speed * h}km を ${h}時間で 進むと 時速は？`, answer: `${speed}km`, options: d(`${speed}km`, `${h}km`, `${speed * h}km`, `${speed / h}km`), hint: "道のり÷時間。" };
+            return { question: `${speed * h}km を ${h}時間で 進むと 時速は？`, answer: `${speed}km`, options: d(`${speed}km`, `${h}km`, `${speed * h}km`, `${speed / h}km`), hint: "道のり÷時間。", visual: { kind: 'double_number_line', topValues: [0, 1, h], bottomValues: [0, speed, speed * h], topLabel: '時間', bottomLabel: 'km', highlightIndex: 1, bottomUnknownIndex: 1 } };
         }
         case 'MATH_G5_U11': {
             const form = n % 2;
             const x = (Math.floor(n / 2) % 8) + 1;
             const k = (Math.floor(n / 16) % 5) + 2;
             if (form === 0) {
-                return { question: `比例で y=${k}x。 x=${x} のとき y=?`, answer: `${k * x}`, options: d(`${k * x}`, `${x + k}`, `${x}`, `${x * x}`), hint: "一定の割合で増える。" };
+                return { question: `比例で y=${k}x。 x=${x} のとき y=?`, answer: `${k * x}`, options: d(`${k * x}`, `${x + k}`, `${x}`, `${x * x}`), hint: "一定の割合で増える。", visual: { kind: 'double_number_line', topValues: [0, 1, x], bottomValues: [0, k, k * x], topLabel: 'x', bottomLabel: 'y', highlightIndex: 2, bottomUnknownIndex: 2 } };
             }
-            return { question: `比例で y=${k}x。 y=${k * x} のとき x=?`, answer: `${x}`, options: d(`${x}`, `${k * x}`, `${x + k}`, `${x * x}`), hint: `比例定数 ${k} で わる。` };
+            return { question: `比例で y=${k}x。 y=${k * x} のとき x=?`, answer: `${x}`, options: d(`${x}`, `${k * x}`, `${x + k}`, `${x * x}`), hint: `比例定数 ${k} で わる。`, visual: { kind: 'double_number_line', topValues: [0, 1, x], bottomValues: [0, k, k * x], topLabel: 'x', bottomLabel: 'y', highlightIndex: 2, topUnknownIndex: 2 } };
         }
         case 'MATH_G5_U12': {
             const nSides = [3, 4, 5, 6, 8][n % 5];
@@ -687,10 +721,13 @@ const makeUnitProblem = (unitId: string, n: number): GeneralProblem => {
         case 'MATH_G5_U14': {
             const base = (n % 9 + 1) * 100;
             const pct = ((n % 5) + 1) * 10;
+            const portion = (base * pct) / 100;
             if (n % 2 === 0) {
-                return { question: `${base}円 の ${pct}% は？`, answer: `${(base * pct) / 100}円`, options: d(`${(base * pct) / 100}円`, `${base - (base * pct) / 100}円`, `${pct}円`, `${base * pct}円`), hint: "もとにする量×割合。" };
+                return { question: `${base}円 の ${pct}% は？`, answer: `${portion}円`, options: d(`${portion}円`, `${base - portion}円`, `${pct}円`, `${base * pct}円`), hint: "もとにする量×割合。", visual: { kind: 'double_number_line', topValues: [0, pct, 100], bottomValues: [0, portion, base], topLabel: '%', bottomLabel: '円', highlightIndex: 1, bottomUnknownIndex: 1 } };
             }
-            return { question: `${base}円 の ${pct}%引き の ねだんは？`, answer: `${base - (base * pct) / 100}円`, options: d(`${base - (base * pct) / 100}円`, `${(base * pct) / 100}円`, `${base}円`, `${base + (base * pct) / 100}円`), hint: "割引は 元のねだん から ひく。" };
+            const remainingPct = 100 - pct;
+            const salePrice = base - portion;
+            return { question: `${base}円 の ${pct}%引き の ねだんは？`, answer: `${salePrice}円`, options: d(`${salePrice}円`, `${portion}円`, `${base}円`, `${base + portion}円`), hint: "割引は 元のねだん から ひく。", visual: { kind: 'double_number_line', topValues: [0, remainingPct, 100], bottomValues: [0, salePrice, base], topLabel: '%', bottomLabel: '円', highlightIndex: 1, bottomUnknownIndex: 1 } };
         }
         case 'MATH_G5_U15': {
             const a = (n % 6) + 2;

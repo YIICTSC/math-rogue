@@ -519,10 +519,18 @@ const makeUnitProblem = (unitId: string, n: number): GeneralProblem => {
             const divisor = (n % 80) + 20;
             const q = (n % 7) + 2;
             const nmr = divisor * q;
+            const visual = {
+                kind: 'bar_model' as const,
+                bars: [
+                    { label: 'ぜんぶ', segments: [{ value: nmr, label: `${nmr}` }] },
+                    { label: '1こ分', segments: [{ value: divisor, label: `${divisor}` }] },
+                ],
+                compareLabel: '何こ分？',
+            };
             if (n % 2 === 0) {
-                return { question: `${nmr} ÷ ${divisor} = ?`, answer: `${q}`, options: d(`${q}`, `${q + 1}`, `${q - 1}`, `${divisor}`), hint: "2けたでわる計算。" };
+                return { question: `${nmr} ÷ ${divisor} = ?`, answer: `${q}`, options: d(`${q}`, `${q + 1}`, `${q - 1}`, `${divisor}`), hint: "2けたでわる計算。", visual };
             }
-            return { question: `□ × ${divisor} = ${nmr}。 □ は？`, answer: `${q}`, options: d(`${q}`, `${q + 1}`, `${Math.max(1, q - 1)}`, `${divisor}`), hint: "わり算を かけ算で たしかめる。" };
+            return { question: `□ × ${divisor} = ${nmr}。 □ は？`, answer: `${q}`, options: d(`${q}`, `${q + 1}`, `${Math.max(1, q - 1)}`, `${divisor}`), hint: "わり算を かけ算で たしかめる。", visual };
         }
         case 'MATH_G4_U03': {
             const a = (n % 7) + 2;
@@ -563,32 +571,79 @@ const makeUnitProblem = (unitId: string, n: number): GeneralProblem => {
         case 'MATH_G4_U05': {
             const a = (n % 6) + 2;
             const b = (n % 5) + 2;
-            return { question: `そろばんのように くらをそろえて計算。 ${a * 100} + ${b * 10} = ?`, answer: `${a * 100 + b * 10}`, options: d(`${a * 100 + b * 10}`, `${a * 10 + b * 100}`, `${a + b}`, `${a * 100 + b}`), hint: "百のくら、十のくらを分ける。" };
+            return { question: `そろばんのように くらをそろえて計算。 ${a * 100} + ${b * 10} = ?`, answer: `${a * 100 + b * 10}`, options: d(`${a * 100 + b * 10}`, `${a * 10 + b * 100}`, `${a + b}`, `${a * 100 + b}`), hint: "百のくら、十のくらを分ける。", visual: { kind: 'soroban', hundreds: a, tens: b, ones: 0 } };
         }
         case 'MATH_G4_U06': {
             const a = (n % 9) + 1;
+            const visual = {
+                kind: 'number_line' as const,
+                min: 0,
+                max: 1,
+                step: 0.1,
+                markers: [{ value: a / 10, label: `0.${a}`, emphasized: true }],
+            };
             if (n % 2 === 0) {
-                return { question: `0.${a} は 1/10 が いくつ分？`, answer: `${a}つ`, options: d(`${a}つ`, `${a * 10}つ`, "1つ", `${a + 1}つ`), hint: "小数第一位を見よう。" };
+                return { question: `0.${a} は 1/10 が いくつ分？`, answer: `${a}つ`, options: d(`${a}つ`, `${a * 10}つ`, "1つ", `${a + 1}つ`), hint: "小数第一位を見よう。", visual };
             }
-            return { question: `1/10 が ${a}つ ある数を 小数で書くと？`, answer: `0.${a}`, options: d(`0.${a}`, `${a}.0`, `0.0${a}`, `${a}/10`), hint: "10分のいくつかを 小数で 表す。" };
+            return { question: `1/10 が ${a}つ ある数を 小数で書くと？`, answer: `0.${a}`, options: d(`0.${a}`, `${a}.0`, `0.0${a}`, `${a}/10`), hint: "10分のいくつかを 小数で 表す。", visual };
         }
         case 'MATH_G4_U07': {
             const a = (Math.floor(n / 2) % 8) + 1;
             const b = (Math.floor(n / 16) % 8) + 1;
             const sum = (a + a / 10 + b + b / 10).toFixed(1);
             const diffBig = (Math.max(a, b) + Math.max(a, b) / 10 - (Math.min(a, b) + Math.min(a, b) / 10)).toFixed(1);
+            const leftValue = a + a / 10;
+            const rightValue = b + b / 10;
             if (n % 2 === 0) {
-                return { question: `${a}.${a} + ${b}.${b} = ?`, answer: sum, options: d(sum, `${a + b}`, `${a}.${b}`, `${b}.${a}`), hint: "同じ位どうしを足す。" };
+                const sumValue = Number(sum);
+                return {
+                    question: `${a}.${a} + ${b}.${b} = ?`,
+                    answer: sum,
+                    options: d(sum, `${a + b}`, `${a}.${b}`, `${b}.${a}`),
+                    hint: "同じ位どうしを足す。",
+                    visual: {
+                        kind: 'number_line',
+                        min: 0,
+                        max: Math.ceil(sumValue) + 1,
+                        step: 1,
+                        markers: [
+                            { value: leftValue, label: `${a}.${a}` },
+                            { value: sumValue, label: '?', emphasized: true },
+                        ],
+                        jump: { from: leftValue, to: sumValue, label: `+${b}.${b}` },
+                    },
+                };
             }
-            return { question: `${Math.max(a, b)}.${Math.max(a, b)} - ${Math.min(a, b)}.${Math.min(a, b)} = ?`, answer: diffBig, options: d(diffBig, `${Math.max(a, b) - Math.min(a, b)}`, `${sum}`, `${(Math.max(a, b) - Math.min(a, b)).toFixed(1)}`), hint: "同じ位どうしをひく。" };
+            const bigDigit = Math.max(a, b);
+            const smallDigit = Math.min(a, b);
+            const bigValue = Math.max(leftValue, rightValue);
+            const smallValue = Math.min(leftValue, rightValue);
+            const diffValue = Number(diffBig);
+            return {
+                question: `${bigDigit}.${bigDigit} - ${smallDigit}.${smallDigit} = ?`,
+                answer: diffBig,
+                options: d(diffBig, `${bigDigit - smallDigit}`, `${sum}`, `${(bigDigit - smallDigit).toFixed(1)}`),
+                hint: "同じ位どうしをひく。",
+                visual: {
+                    kind: 'number_line',
+                    min: 0,
+                    max: Math.ceil(bigValue) + 1,
+                    step: 1,
+                    markers: [
+                        { value: bigValue, label: `${bigDigit}.${bigDigit}` },
+                        { value: diffValue, label: '?', emphasized: true },
+                    ],
+                    jump: { from: bigValue, to: diffValue, label: `-${smallValue.toFixed(1)}` },
+                },
+            };
         }
         case 'MATH_G4_U08': {
             const h = (n % 8) + 2;
             const w = (n % 7) + 3;
             if (n % 2 === 0) {
-                return { question: `たて${h}cm よこ${w}cm の長方形の面せきは？`, answer: `${h * w}cm2`, options: d(`${h * w}cm2`, `${h + w}cm2`, `${h * 2 + w * 2}cm`, `${h * w * 2}cm2`), hint: "面せき = たて×よこ。" };
+                return { question: `たて${h}cm よこ${w}cm の長方形の面せきは？`, answer: `${h * w}cm2`, options: d(`${h * w}cm2`, `${h + w}cm2`, `${h * 2 + w * 2}cm`, `${h * w * 2}cm2`), hint: "面せき = たて×よこ。", visual: { kind: 'area_grid', widthUnits: w, heightUnits: h, widthLabel: `${w}cm`, heightLabel: `${h}cm` } };
             }
-            return { question: `面せきが ${h * w}cm2、たてが ${h}cm の長方形。 よこは？`, answer: `${w}cm`, options: d(`${w}cm`, `${h}cm`, `${h * w}cm`, `${h + w}cm`), hint: "面せき ÷ たて = よこ。" };
+            return { question: `面せきが ${h * w}cm2、たてが ${h}cm の長方形。 よこは？`, answer: `${w}cm`, options: d(`${w}cm`, `${h}cm`, `${h * w}cm`, `${h + w}cm`), hint: "面せき ÷ たて = よこ。", visual: { kind: 'area_grid', widthUnits: w, heightUnits: h, heightLabel: `${h}cm`, unknownWidth: true } };
         }
         case 'MATH_G4_U09': {
             const value = 1000 + n * 37;
@@ -691,14 +746,15 @@ const makeUnitProblem = (unitId: string, n: number): GeneralProblem => {
         case 'MATH_G4_U14': {
             const x = (Math.floor(n / 3) % 8) + 1;
             const p = n % 3;
-            if (p === 0) return { question: `正方形の1辺が ${x}cm のとき、まわりの長さは？`, answer: `${x * 4}cm`, options: d(`${x * 4}cm`, `${x * x}cm2`, `${x + 4}cm`, `${x * 2}cm`), hint: "同じ長さが4本。" };
-            if (p === 1) return { question: `正方形のまわりが ${x * 4}cm。1辺の長さは？`, answer: `${x}cm`, options: d(`${x}cm`, `${x * 4}cm`, `${x * 2}cm`, `${x + 4}cm`), hint: "まわりの長さを4でわる。" };
-            return { question: `正方形の1辺を ${x}cm から ${x + 1}cm にすると、まわりは何cmふえる？`, answer: "4cm", options: d("4cm", "1cm", "2cm", "8cm"), hint: "4本の辺が1cmずつ長くなる。" };
+            const visual = { kind: 'coordinate_plane' as const, xMin: 0, xMax: 10, yMin: 0, yMax: 40, relation: { type: 'linear' as const, slope: 4 }, points: [{ x, y: x * 4, emphasized: true }, { x: x + 1, y: (x + 1) * 4 }], xLabel: '1辺(cm)', yLabel: 'まわり(cm)' };
+            if (p === 0) return { question: `正方形の1辺が ${x}cm のとき、まわりの長さは？`, answer: `${x * 4}cm`, options: d(`${x * 4}cm`, `${x * x}cm2`, `${x + 4}cm`, `${x * 2}cm`), hint: "同じ長さが4本。", visual };
+            if (p === 1) return { question: `正方形のまわりが ${x * 4}cm。1辺の長さは？`, answer: `${x}cm`, options: d(`${x}cm`, `${x * 4}cm`, `${x * 2}cm`, `${x + 4}cm`), hint: "まわりの長さを4でわる。", visual };
+            return { question: `正方形の1辺を ${x}cm から ${x + 1}cm にすると、まわりは何cmふえる？`, answer: "4cm", options: d("4cm", "1cm", "2cm", "8cm"), hint: "4本の辺が1cmずつ長くなる。", visual };
         }
         case 'MATH_G4_U15': {
             const a = (n % 8) + 2;
             const b = (n % 5) + 1;
-            return { question: `調べ学習。Aは${a}人、Bは${b}人。 表やグラフで伝えるならまず何をそろえる？`, answer: "項目と人数", options: d("項目と人数", "色だけ", "線の太さだけ", "順番は不要"), hint: "比べるために同じ項目をそろえる。" };
+            return { question: `調べ学習。Aは${a}人、Bは${b}人。 表やグラフで伝えるならまず何をそろえる？`, answer: "項目と人数", options: d("項目と人数", "色だけ", "線の太さだけ", "順番は不要"), hint: "比べるために同じ項目をそろえる。", visual: { kind: 'bar_chart', values: [a, b], labels: ['A', 'B'] } };
         }
         default:
             return { question: "4 + 5 = ?", answer: "9", options: d("9", "8", "10", "7"), hint: "たし算。" };

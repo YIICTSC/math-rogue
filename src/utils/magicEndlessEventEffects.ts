@@ -59,17 +59,22 @@ export const applyMagicEndlessEventEffects = (player: Player, effects: string[])
   effects.forEach(effect => {
     const amount = parseAmount(effect);
     if (effect.startsWith('HEAL+')) {
+      const previousHp = next.currentHp;
       next.currentHp = Math.min(next.maxHp, next.currentHp + amount);
-      messages.push(`HPが${amount}回復した`);
+      const healedAmount = next.currentHp - previousHp;
+      messages.push(healedAmount > 0 ? `HPが${healedAmount}回復した` : 'HPはすでに最大だった');
     } else if (effect.startsWith('GOLD+')) {
       next.gold += amount;
       messages.push(`${amount}Gを得た`);
     } else if (effect.startsWith('CARD+')) {
       if (addEventCard(next)) messages.push('カードを1枚得た');
+      else messages.push('獲得できるカードがなかった');
     } else if (effect.startsWith('UPGRADE+')) {
       if (upgradeEventCard(next)) messages.push('カードを1枚強化した');
+      else messages.push('強化できるカードがなかった');
     } else if (effect.startsWith('REMOVE_CURSE+')) {
       if (removeEventCurse(next)) messages.push('呪いカードを1枚除去した');
+      else messages.push('除去できる呪いカードがなかった');
     } else if (effect.startsWith('DRAW+')) {
       next.nextTurnDraw += amount;
       messages.push(`次のターンのドローが${amount}枚増える`);
@@ -87,8 +92,10 @@ export const applyMagicEndlessEventEffects = (player: Player, effects: string[])
       next.turnFlags.MAGIC_ENDLESS_CORRUPTION = true;
       messages.push('腐蝕が1段階進んだ');
     } else if (effect.startsWith('RISK:HP-')) {
+      const previousHp = next.currentHp;
       next.currentHp = Math.max(1, next.currentHp - amount);
-      messages.push(`HPを${amount}失った`);
+      const lostAmount = previousHp - next.currentHp;
+      messages.push(lostAmount > 0 ? `HPを${lostAmount}失った` : 'HPはこれ以上減らなかった');
     }
   });
   return { player: next, messages };

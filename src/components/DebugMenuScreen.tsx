@@ -376,6 +376,7 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
                 entry.problem.unitLabel,
                 entry.problem.question,
                 entry.problem.answer,
+                entry.problem.visual?.kind,
             ].filter(Boolean).join(' ').toLocaleLowerCase('ja');
             return searchText.includes(query);
         });
@@ -1800,7 +1801,7 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
                                                     setIllustratedProblemSearch(event.target.value);
                                                     setIllustratedProblemPage(0);
                                                 }}
-                                                placeholder="問題文・単元名・モード・答えを検索"
+                                                placeholder="問題文・単元名・モード・答え・visual種別を検索"
                                                 className="min-w-0 flex-1 bg-transparent text-xs font-bold text-white outline-none placeholder:text-slate-600"
                                             />
                                         </label>
@@ -1856,7 +1857,7 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
                                                 onClick={() => setIllustratedProblemPage(current => Math.max(0, current - 1))}
                                                 className="rounded border border-slate-600 bg-slate-800 px-3 py-1.5 text-slate-100 enabled:hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-40"
                                             >
-                                                {languageMode === 'ENGLISH' ? '← Previous' : '← 前へ'}
+                                                {initialLanguageMode === 'ENGLISH' ? '← Previous' : '← 前へ'}
                                             </button>
                                             <span className="rounded border border-slate-700 bg-black/30 px-3 py-1.5 text-cyan-200">
                                                 {illustratedProblemPageIndex + 1} / {illustratedProblemPageCount}
@@ -1867,7 +1868,7 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
                                                 onClick={() => setIllustratedProblemPage(current => Math.min(illustratedProblemPageCount - 1, current + 1))}
                                                 className="rounded border border-slate-600 bg-slate-800 px-3 py-1.5 text-slate-100 enabled:hover:bg-slate-700 disabled:cursor-not-allowed disabled:opacity-40"
                                             >
-                                                {languageMode === 'ENGLISH' ? 'Next →' : '次へ →'}
+                                                {initialLanguageMode === 'ENGLISH' ? 'Next →' : '次へ →'}
                                             </button>
                                         </div>
                                     </div>

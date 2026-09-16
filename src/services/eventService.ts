@@ -1,4 +1,3 @@
-﻿
 import React from 'react';
 import { Player, GameState, GameScreen, CardType, Card, TargetType, NodeType, MapNode } from '../types';
 import { CARDS_LIBRARY, RELIC_LIBRARY, POTION_LIBRARY, CURSE_CARDS, EVENT_CARDS, STATUS_CARDS } from '../constants';
@@ -68,6 +67,7 @@ export const generateMagicEndlessEvent = (
                         eventLearningPending: {
                             eventId: selected.id,
                             eventTitle: selected.title,
+                            optionLabel: option.label,
                             successEffects: option.learning?.successEffects || [],
                             failureEffects: option.learning?.failureEffects || [],
                         },
@@ -79,8 +79,8 @@ export const generateMagicEndlessEvent = (
                     return { ...prev, player: result.player };
                 });
                 const preview = applyMagicEndlessEventEffects(player, option.effects);
-                const resultText = preview.messages.length > 0 ? preview.messages.join('。') : '変化はなかった。';
-                setEventResultLog(`${selected.title}：${resultText}。`);
+                const resultText = preview.messages.length > 0 ? preview.messages.join('。') : '変化はなかった';
+                setEventResultLog(`${selected.title}「${option.label}」：${resultText}。`);
             },
         })),
     };

@@ -391,29 +391,33 @@ const makeUnitProblem = (unitId: string, n: number): GeneralProblem => {
         case 'MATH_G8_U02': {
             const x = (n % 6) + 1;
             const y = (n % 5) + 2;
+            const sum = x + y;
+            const diff = x - y;
+            const visual = { kind: 'coordinate_plane' as const, xMin: 0, xMax: 8, yMin: 0, yMax: 8, relations: [{ type: 'linear' as const, slope: -1, intercept: sum }, { type: 'linear' as const, slope: 1, intercept: -diff }], points: [{ x, y, label: '交点', emphasized: true }], xLabel: 'x', yLabel: 'y' };
             if (n % 2 === 0) {
-                return { question: `連立方程式。x+y=${x + y}, x-y=${x - y} のとき x は？`, answer: `${x}`, options: d(`${x}`, `${y}`, `${x + y}`, `${x - y}`), hint: "2式を足すと2x。" };
+                return { question: `連立方程式。x+y=${sum}, x-y=${diff} のとき x は？`, answer: `${x}`, options: d(`${x}`, `${y}`, `${sum}`, `${diff}`), hint: "2式を足すと2x。", visual };
             }
-            return { question: `連立方程式。x+y=${x + y}, x-y=${x - y} のとき y は？`, answer: `${y}`, options: d(`${y}`, `${x}`, `${x + y}`, `${x - y}`), hint: "2式を引くと2y。" };
+            return { question: `連立方程式。x+y=${sum}, x-y=${diff} のとき y は？`, answer: `${y}`, options: d(`${y}`, `${x}`, `${sum}`, `${diff}`), hint: "2式を引くと2y。", visual };
         }
         case 'MATH_G8_U03': {
             const x = (n % 5) + 2;
             const y = (n % 4) + 1;
             const count = x + y;
             const total = 120 * x + 80 * y;
+            const visual = { kind: 'coordinate_plane' as const, xMin: 0, xMax: 8, yMin: 0, yMax: 14, relations: [{ type: 'linear' as const, slope: -1, intercept: count }, { type: 'linear' as const, slope: -1.5, intercept: total / 80 }], points: [{ x, y, label: '答え', emphasized: true }], xLabel: 'x', yLabel: 'y' };
             if (n % 2 === 0) {
-                return { question: `120円の品をx個、80円の品をy個買う。x+y=${count}、120x+80y=${total} のとき x は？`, answer: `${x}`, options: d(`${x}`, `${y}`, `${count}`, `${x + 1}`), hint: "個数と代金の2つの式を連立して解く。" };
+                return { question: `120円の品をx個、80円の品をy個買う。x+y=${count}、120x+80y=${total} のとき x は？`, answer: `${x}`, options: d(`${x}`, `${y}`, `${count}`, `${x + 1}`), hint: "個数と代金の2つの式を連立して解く。", visual };
             }
-            return { question: `120円の品をx個、80円の品をy個買う。x+y=${count}、120x+80y=${total} のとき y は？`, answer: `${y}`, options: d(`${y}`, `${x}`, `${count}`, `${y + 1}`), hint: "2つの式を連立して解く。" };
+            return { question: `120円の品をx個、80円の品をy個買う。x+y=${count}、120x+80y=${total} のとき y は？`, answer: `${y}`, options: d(`${y}`, `${x}`, `${count}`, `${y + 1}`), hint: "2つの式を連立して解く。", visual };
         }
         case 'MATH_G8_U04': {
             const a = (n % 5) + 1;
             const b = (n % 7) - 3;
             const x = (n % 4) + 1;
             if (n % 2 === 0) {
-                return { question: `一次関数 y=${a}x${b >= 0 ? `+${b}` : b}。x=${x} のとき y=?`, answer: `${a * x + b}`, options: d(`${a * x + b}`, `${a + x + b}`, `${a * x}`, `${x + b}`), hint: "代入計算。" };
+                return { question: `一次関数 y=${a}x${b >= 0 ? `+${b}` : b}。x=${x} のとき y=?`, answer: `${a * x + b}`, options: d(`${a * x + b}`, `${a + x + b}`, `${a * x}`, `${x + b}`), hint: "代入計算。", visual: { kind: 'coordinate_plane', xMin: 0, xMax: 5, yMin: -5, yMax: 25, relation: { type: 'linear', slope: a, intercept: b }, points: [{ x, y: a * x + b, emphasized: true }], xLabel: 'x', yLabel: 'y' } };
             }
-            return { question: `一次関数 y=${a}x${b >= 0 ? `+${b}` : b} の切片は？`, answer: `${b}`, options: d(`${b}`, `${a}`, `${a * x + b}`, `${x}`), hint: "x=0 のときの y の値。" };
+            return { question: `一次関数 y=${a}x${b >= 0 ? `+${b}` : b} の切片は？`, answer: `${b}`, options: d(`${b}`, `${a}`, `${a * x + b}`, `${x}`), hint: "x=0 のときの y の値。", visual: { kind: 'coordinate_plane', xMin: 0, xMax: 5, yMin: -5, yMax: 25, relation: { type: 'linear', slope: a, intercept: b }, points: [{ x: 0, y: b, label: '切片', emphasized: true }], xLabel: 'x', yLabel: 'y' } };
         }
         case 'MATH_G8_U05': {
             const p = n % 4;
@@ -447,10 +451,10 @@ const makeUnitProblem = (unitId: string, n: number): GeneralProblem => {
         case 'MATH_G8_U08': {
             const p = n % 4;
             const faces = (Math.floor(n / 4) % 6) + 1;
-            if (p === 0) return { question: `サイコロ1回。${faces}の目が出る確率は？`, answer: `1/6`, options: d(`1/6`, `1/3`, `1/2`, `1/12`), hint: "同様に確からしい6通り。" };
-            if (p === 1) return { question: `サイコロ1回。${faces}以外の目が出る確率は？`, answer: `5/6`, options: d(`5/6`, `1/6`, `1/2`, `1`), hint: "余事象で考える。" };
-            if (p === 2) return { question: "サイコロ1回。偶数の目が出る確率は？", answer: "1/2", options: d("1/2", "1/3", "1/6", "2/3"), hint: "2,4,6 の3通り。" };
-            return { question: `サイコロ1回。${faces}以下の目が出る確率は？`, answer: `${faces}/6`, options: d(`${faces}/6`, `${6 - faces}/6`, `1/6`, `5/6`), hint: `1から${faces}までの${faces}通り。` };
+            if (p === 0) return { question: `サイコロ1回。${faces}の目が出る確率は？`, answer: `1/6`, options: d(`1/6`, `1/3`, `1/2`, `1/12`), hint: "同様に確からしい6通り。", visual: { kind: 'dice_grid', highlightedFaces: [faces], label: '当たりの目' } };
+            if (p === 1) return { question: `サイコロ1回。${faces}以外の目が出る確率は？`, answer: `5/6`, options: d(`5/6`, `1/6`, `1/2`, `1`), hint: "余事象で考える。", visual: { kind: 'dice_grid', highlightedFaces: [1, 2, 3, 4, 5, 6].filter((face) => face !== faces), label: '当たりの目' } };
+            if (p === 2) return { question: "サイコロ1回。偶数の目が出る確率は？", answer: "1/2", options: d("1/2", "1/3", "1/6", "2/3"), hint: "2,4,6 の3通り。", visual: { kind: 'dice_grid', highlightedFaces: [2, 4, 6], label: '偶数' } };
+            return { question: `サイコロ1回。${faces}以下の目が出る確率は？`, answer: `${faces}/6`, options: d(`${faces}/6`, `${6 - faces}/6`, `1/6`, `5/6`), hint: `1から${faces}までの${faces}通り。`, visual: { kind: 'dice_grid', highlightedFaces: Array.from({ length: faces }, (_, index) => index + 1), label: `${faces}以下` } };
         }
         case 'MATH_G8_U09': {
             const a = (n % 20) + 60;
@@ -460,15 +464,15 @@ const makeUnitProblem = (unitId: string, n: number): GeneralProblem => {
             const sorted = [a, b, c].sort((x, y) => x - y);
             const p = n % 4;
             if (p === 0) {
-                return { question: `データ分析。${a}, ${b}, ${c} の平均は？`, answer: `${avg}`, options: d(`${avg}`, `${a + b + c}`, `${Math.max(a, b, c)}`, `${Math.min(a, b, c)}`), hint: "合計÷個数。" };
+                return { question: `データ分析。${a}, ${b}, ${c} の平均は？`, answer: `${avg}`, options: d(`${avg}`, `${a + b + c}`, `${Math.max(a, b, c)}`, `${Math.min(a, b, c)}`), hint: "合計÷個数。", visual: { kind: 'dot_plot', values: [a, b, c], summaryValue: avg, summaryLabel: '平均' } };
             }
             if (p === 1) {
-                return { question: `データ分析。${a}, ${b}, ${c} の中央値は？`, answer: `${sorted[1]}`, options: d(`${sorted[1]}`, `${sorted[0]}`, `${sorted[2]}`, `${avg}`), hint: "小さい順で真ん中。" };
+                return { question: `データ分析。${a}, ${b}, ${c} の中央値は？`, answer: `${sorted[1]}`, options: d(`${sorted[1]}`, `${sorted[0]}`, `${sorted[2]}`, `${avg}`), hint: "小さい順で真ん中。", visual: { kind: 'dot_plot', values: [a, b, c], highlightValues: [sorted[1]] } };
             }
             if (p === 2) {
-                return { question: `データ分析。${a}, ${b}, ${c} の範囲（最大-最小）は？`, answer: `${sorted[2] - sorted[0]}`, options: d(`${sorted[2] - sorted[0]}`, `${avg}`, `${a + b + c}`, `${sorted[2]}`), hint: "散らばりを見る。" };
+                return { question: `データ分析。${a}, ${b}, ${c} の範囲（最大-最小）は？`, answer: `${sorted[2] - sorted[0]}`, options: d(`${sorted[2] - sorted[0]}`, `${avg}`, `${a + b + c}`, `${sorted[2]}`), hint: "散らばりを見る。", visual: { kind: 'dot_plot', values: [a, b, c], highlightValues: [sorted[0], sorted[2]] } };
             }
-            return { question: `データ分析。${a}, ${b}, ${c} の最小値は？`, answer: `${sorted[0]}`, options: d(`${sorted[0]}`, `${sorted[2]}`, `${sorted[1]}`, `${avg}`), hint: "最も小さい値。" };
+            return { question: `データ分析。${a}, ${b}, ${c} の最小値は？`, answer: `${sorted[0]}`, options: d(`${sorted[0]}`, `${sorted[2]}`, `${sorted[1]}`, `${avg}`), hint: "最も小さい値。", visual: { kind: 'dot_plot', values: [a, b, c], highlightValues: [sorted[0]] } };
         }
         default:
             return { question: "2 + 3 = ?", answer: "5", options: d("5", "4", "6", "7"), hint: "基本。" };

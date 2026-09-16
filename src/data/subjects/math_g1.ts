@@ -586,9 +586,9 @@ const makeUnitProblem = (unitId: string, n: number): GeneralProblem => {
             const triangleObjects = ["さんかく じょうぎ", "おにぎり", "さんかくの はた", "やねの かたち"];
             const p = n % 3;
             const index = Math.floor(n / 3) % 4;
-            if (p === 0) return { question: `まるに にている ものは？`, answer: roundObjects[index], options: d(roundObjects[index], squareObjects[index], triangleObjects[index], "つくえ"), hint: "まるい ところを さがそう。" };
-            if (p === 1) return { question: `しかくに にている ものは？`, answer: squareObjects[index], options: d(squareObjects[index], roundObjects[index], triangleObjects[index], "たま"), hint: "4つの かどを さがそう。" };
-            return { question: `さんかくに にている ものは？`, answer: triangleObjects[index], options: d(triangleObjects[index], roundObjects[index], squareObjects[index], "コップ"), hint: "3つの かどが ある かたち。" };
+            if (p === 0) return { question: `まるに にている ものは？`, answer: roundObjects[index], options: d(roundObjects[index], squareObjects[index], triangleObjects[index], "つくえ"), hint: "まるい ところを さがそう。", visual: { kind: 'circle' } };
+            if (p === 1) return { question: `しかくに にている ものは？`, answer: squareObjects[index], options: d(squareObjects[index], roundObjects[index], triangleObjects[index], "たま"), hint: "4つの かどを さがそう。", visual: { kind: 'polygon', sides: 4 } };
+            return { question: `さんかくに にている ものは？`, answer: triangleObjects[index], options: d(triangleObjects[index], roundObjects[index], squareObjects[index], "コップ"), hint: "3つの かどが ある かたち。", visual: { kind: 'polygon', sides: 3 } };
         }
         case 'MATH_G1_U04': {
             const sequences = [[1, 2, 3, 4, 5], [5, 4, 3, 2, 1], [2, 4, 6, 8, 10]];
@@ -601,28 +601,34 @@ const makeUnitProblem = (unitId: string, n: number): GeneralProblem => {
             const a = (n % 6) + 1;
             const b = (n % (10 - a)) + 1;
             const sum = a + b;
-            if (n % 2 === 0) return { question: `${a} + ${b} = ?`, answer: `${sum}`, options: d(`${sum}`, `${sum + 1}`, `${sum - 1}`, `${a}`), hint: "あわせて いくつか かぞえよう。" };
-            return { question: `${a} と ${b} を あわせると？`, answer: `${sum}`, options: d(`${sum}`, `${sum + 1}`, `${sum - 1}`, `${b}`), hint: "たしざんの もんだい。" };
+            if (n % 2 === 0) return { question: `${a} + ${b} = ?`, answer: `${sum}`, options: d(`${sum}`, `${sum + 1}`, `${sum - 1}`, `${a}`), hint: "あわせて いくつか かぞえよう。", visual: { kind: 'ten_frame', value: sum, splitAt: a } };
+            return { question: `${a} と ${b} を あわせると？`, answer: `${sum}`, options: d(`${sum}`, `${sum + 1}`, `${sum - 1}`, `${b}`), hint: "たしざんの もんだい。", visual: { kind: 'ten_frame', value: sum, splitAt: a } };
         }
         case 'MATH_G1_U06': {
             const a = (n % 7) + 2;
             const b = (n % 3) + 1;
-            if (n % 2 === 0) return { question: `${a}こ ありました。 ${b}こ ふえると なんこ？`, answer: `${a + b}こ`, options: d(`${a + b}こ`, `${a}こ`, `${b}こ`, `${a + b + 1}こ`), hint: "ふえると たしざんだよ。" };
-            return { question: `${a}こ に ${b}こ たすと？`, answer: `${a + b}こ`, options: d(`${a + b}こ`, `${a - b}こ`, `${b}こ`, `${a}こ`), hint: "ふえる は たす。" };
+            const total = a + b;
+            const visual = { kind: 'ten_frame' as const, value: total, total: total > 10 ? 20 as const : 10 as const, splitAt: a };
+            if (n % 2 === 0) return { question: `${a}こ ありました。 ${b}こ ふえると なんこ？`, answer: `${total}こ`, options: d(`${total}こ`, `${a}こ`, `${b}こ`, `${total + 1}こ`), hint: "ふえると たしざんだよ。", visual };
+            return { question: `${a}こ に ${b}こ たすと？`, answer: `${total}こ`, options: d(`${total}こ`, `${a - b}こ`, `${b}こ`, `${a}こ`), hint: "ふえる は たす。", visual };
         }
         case 'MATH_G1_U07': {
             const a = (n % 7) + 4;
             const b = (n % 3) + 1;
-            if (n % 2 === 0) return { question: `${a}こ あります。 ${b}こ つかうと のこりは？`, answer: `${a - b}こ`, options: d(`${a - b}こ`, `${a + b}こ`, `${b}こ`, `${a}こ`), hint: "のこりは ひきざん。" };
-            return { question: `${a}こ から ${b}こ へると？`, answer: `${a - b}こ`, options: d(`${a - b}こ`, `${a}こ`, `${b}こ`, `${a + b}こ`), hint: "へる は ひく。" };
+            if (n % 2 === 0) return { question: `${a}こ あります。 ${b}こ つかうと のこりは？`, answer: `${a - b}こ`, options: d(`${a - b}こ`, `${a + b}こ`, `${b}こ`, `${a}こ`), hint: "のこりは ひきざん。", visual: { kind: 'ten_frame', value: a, removed: b } };
+            return { question: `${a}こ から ${b}こ へると？`, answer: `${a - b}こ`, options: d(`${a - b}こ`, `${a}こ`, `${b}こ`, `${a + b}こ`), hint: "へる は ひく。", visual: { kind: 'ten_frame', value: a, removed: b } };
         }
         case 'MATH_G1_U08': {
             const form = n % 2;
             const small = (Math.floor(n / 2) % 6) + 1;
             const diff = (Math.floor(n / 12) % 4) + 1;
             const big = small + diff;
-            if (form === 0) return { question: `${big}こと ${small}こ。 ちがいは なんこ？`, answer: `${diff}こ`, options: d(`${diff}こ`, `${big}こ`, `${small}こ`, `${diff + 1}こ`), hint: "おおい ほう から すくない ほうを ひくよ。" };
-            return { question: `${small}こ より ${big}こ は なんこ おおい？`, answer: `${diff}こ`, options: d(`${diff}こ`, `${big}こ`, `${small}こ`, `${diff + 1}こ`), hint: "ちがいを しらべる。" };
+            const visual = { kind: 'bar_model' as const, bars: [
+                { label: 'おおい', segments: [{ value: small }, { value: diff, unknown: true, emphasized: true }] },
+                { label: 'すくない', segments: [{ value: small }] },
+            ], compareLabel: 'ちがいは？' };
+            if (form === 0) return { question: `${big}こと ${small}こ。 ちがいは なんこ？`, answer: `${diff}こ`, options: d(`${diff}こ`, `${big}こ`, `${small}こ`, `${diff + 1}こ`), hint: "おおい ほう から すくない ほうを ひくよ。", visual };
+            return { question: `${small}こ より ${big}こ は なんこ おおい？`, answer: `${diff}こ`, options: d(`${diff}こ`, `${big}こ`, `${small}こ`, `${diff + 1}こ`), hint: "ちがいを しらべる。", visual };
         }
         case 'MATH_G1_U09': {
             const a = (n % 10) + 10;
@@ -705,10 +711,10 @@ const makeUnitProblem = (unitId: string, n: number): GeneralProblem => {
             const a = (Math.floor(n / 3) % 7) + 4;
             const b = (Math.floor(n / 21) % 3) + 1;
             if (form === 0) {
-                return { question: `りんごが ${a}こ。 ${b}こ もらいました。 ぜんぶで？`, answer: `${a + b}こ`, options: d(`${a + b}こ`, `${a - b}こ`, `${b}こ`, `${a}こ`), hint: "もらうは たしざん。" };
+                return { question: `りんごが ${a}こ。 ${b}こ もらいました。 ぜんぶで？`, answer: `${a + b}こ`, options: d(`${a + b}こ`, `${a - b}こ`, `${b}こ`, `${a}こ`), hint: "もらうは たしざん。", visual: { kind: 'bar_model', bars: [{ segments: [{ value: a, label: `${a}` }, { value: b, label: `${b}`, emphasized: true }] }], compareLabel: 'ぜんぶで？' } };
             }
-            if (form === 1) return { question: `あめが ${a}こ。 ${b}こ たべました。 のこりは？`, answer: `${a - b}こ`, options: d(`${a - b}こ`, `${a + b}こ`, `${a}こ`, `${b}こ`), hint: "たべると へるから ひきざん。" };
-            return { question: `えんぴつが ${a}ほん。 ${b}ほん ふえると なんぼん？`, answer: `${a + b}ほん`, options: d(`${a + b}ほん`, `${a - b}ほん`, `${a}ほん`, `${b}ほん`), hint: "ぶんしょうを しきにしよう。" };
+            if (form === 1) return { question: `あめが ${a}こ。 ${b}こ たべました。 のこりは？`, answer: `${a - b}こ`, options: d(`${a - b}こ`, `${a + b}こ`, `${a}こ`, `${b}こ`), hint: "たべると へるから ひきざん。", visual: { kind: 'bar_model', bars: [{ segments: [{ value: a - b, unknown: true }, { value: b, label: `${b}`, emphasized: true }] }], compareLabel: 'のこりは？' } };
+            return { question: `えんぴつが ${a}ほん。 ${b}ほん ふえると なんぼん？`, answer: `${a + b}ほん`, options: d(`${a + b}ほん`, `${a - b}ほん`, `${a}ほん`, `${b}ほん`), hint: "ぶんしょうを しきにしよう。", visual: { kind: 'bar_model', bars: [{ segments: [{ value: a, label: `${a}` }, { value: b, label: `${b}`, emphasized: true }] }], compareLabel: 'ぜんぶで？' } };
         }
         default:
             return { question: "1 + 1 = ?", answer: "2", options: d("2", "1", "3", "0"), hint: "たしざんだよ。" };

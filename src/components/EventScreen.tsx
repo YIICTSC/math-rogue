@@ -127,7 +127,7 @@ const EventScreen: React.FC<EventScreenProps> = ({ title, description, options, 
     const column = (eventNumber - 1) % 3;
     const row = Math.floor((eventNumber - 1) / 3) % 3;
     return {
-      path: assetUrl(`sprites/magic/events/endless/character-sheets/${match[1] ? 'MGEM' : 'MGE'}-${String(sheetStart).padStart(3, '0')}-${String(sheetEnd).padStart(3, '0')}.png`),
+      path: assetUrl(`sprites/magic/events/endless/character-sheets/${match[1] ? 'MGEM' : 'MGE'}-${String(sheetStart).padStart(3, '0')}-${String(sheetEnd).padStart(3, '0')}.webp`),
       backgroundPosition: `${column * 50}% ${row * 50}%`,
     };
   }, [imageKey]);

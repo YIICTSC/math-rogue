@@ -71,6 +71,7 @@ import { HIGH_SCHOOL_ULTRA_UNIT_DATA } from './subjects/high_school_ultra_units'
 import { HIGH_SCHOOL_GIGA_UNIT_DATA } from './subjects/high_school_giga_units';
 import { HIGH_SCHOOL_MATH_GENERATED_DATA } from './subjects/high_school_math_generated';
 import { HOBBY_KNOWLEDGE_DATA } from './subjects/hobby_knowledge';
+import { attachLanguageVisual } from './subjects/language_visuals';
 
 export type { GeneralProblem };
 
@@ -185,6 +186,6 @@ const AUGMENTED_SUBJECT_DATA: Record<string, GeneralProblem[]> = Object.fromEntr
 export const SUBJECT_DATA: Record<string, GeneralProblem[]> = Object.fromEntries(
     Object.entries(AUGMENTED_SUBJECT_DATA).map(([mode, problems]) => [
         mode,
-        problems.map((problem) => normalizeProblemQuestionLabels(problem)),
+        attachLanguageVisual(mode, problems).map((problem) => normalizeProblemQuestionLabels(problem)),
     ])
 );

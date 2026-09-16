@@ -204,15 +204,15 @@
 
 ```text
 eventId: MGE-001 ... MGE-090
-imageKey: magic-endless-generic/MGE-001 ... magic-endless-generic/MGE-090
+imageKey: MGE-001 ... MGE-090
 ```
 
-画像は後工程で作成する。1イベント1枚の16:9イベント画像を基本とし、同じ背景を使う場合も人物の配置と魔法エフェクトはイベントごとに差し替える。
+現在の実装では9イベントを1枚の3×3正方形シートへまとめ、`EventScreen` が `imageKey` の番号から該当セルを切り出して表示する。セル順は左上から右へ進む行優先で、各イベントの人物配置と魔法エフェクトは導入本文に対応させる。
 
 ```text
-public/sprites/magic/events/endless/MGE-001.webp
+public/sprites/magic/events/endless/character-sheets/MGE-001-009.webp
 ...
-public/sprites/magic/events/endless/MGE-090.webp
+public/sprites/magic/events/endless/character-sheets/MGE-082-090.webp
 ```
 
 ### 11.2 画像の共通要件

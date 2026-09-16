@@ -14965,7 +14965,8 @@ const App: React.FC = () => {
                 };
             });
             const effectSummary = resultPreview.messages.length > 0 ? resultPreview.messages.join('。') : '変化はなかった';
-            setEventResultLog(`学習判定：${success ? '成功' : '失敗'}。${effectSummary}。`);
+            const eventChoice = pending.optionLabel ? `${pending.eventTitle}「${pending.optionLabel}」：` : '';
+            setEventResultLog(`${eventChoice}学習判定：${success ? '成功' : '失敗'}。${effectSummary}。`);
             audioService.playBGM('event');
             return;
         }

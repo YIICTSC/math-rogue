@@ -1,0 +1,3 @@
+import { createServer } from 'vite';
+const server=await createServer({server:{middlewareMode:true},appType:'custom',logLevel:'error'});
+try { const {SUBJECT_DATA}=await server.ssrLoadModule('/src/data/subjectData.ts'); let short=[]; for(const [m,ps] of Object.entries(SUBJECT_DATA)){ if(!/^(?:MATH_G\d|KOKUGO_G\d|ENGLISH_G\d|LIFE_\d|SCIENCE_\d|SOCIAL_\d)_U\d+$/.test(m))continue; ps.forEach((p,i)=>{if((p.options||[]).length<4)short.push({m,i,n:(p.options||[]).length,q:p.question,a:p.answer,o:p.options})}); } console.log('SHORT_OPTIONS',short.length); console.log(JSON.stringify(short.slice(0,30),null,2)); } finally {await server.close();}

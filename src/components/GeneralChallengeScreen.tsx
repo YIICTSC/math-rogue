@@ -15,6 +15,18 @@ import { formatProblemUnitName } from '../utils/problemUnitName';
 import MathText from './MathText';
 import { assignmentFilterForMode, matchesAssignmentRangeFilter } from '../utils/assignmentRangeFilters';
 import { getProblemCycleScope, selectProblemsForCycle } from '../utils/problemCycle';
+import { drawQuantityProblemVisual } from '../utils/quantityVisualRenderer';
+import { drawMeasurementProblemVisual } from '../utils/measurementVisualRenderer';
+import { drawGraphProblemVisual } from '../utils/graphVisualRenderer';
+import { drawMathConceptProblemVisual } from '../utils/mathConceptVisualRenderer';
+import { drawScienceLifeProblemVisual } from '../utils/scienceLifeVisualRenderer';
+import { drawSciencePhysicsProblemVisual } from '../utils/sciencePhysicsVisualRenderer';
+import { drawScienceMatterProblemVisual } from '../utils/scienceMatterVisualRenderer';
+import { drawScienceEarthProblemVisual } from '../utils/scienceEarthVisualRenderer';
+import { drawScienceBiologyProblemVisual } from '../utils/scienceBiologyVisualRenderer';
+import { drawSocialProblemVisual } from '../utils/socialVisualRenderer';
+import { drawLanguageStructureProblemVisual } from '../utils/languageStructureVisualRenderer';
+import { drawEnglishSupportProblemVisual } from '../utils/englishSupportVisualRenderer';
 
 interface GeneralChallengeScreenProps {
   onComplete: (correctCount: number) => void;
@@ -176,6 +188,8 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
     () => getUnitBoardSummary(currentProblem?.sourceMode || mode, currentProblem?.unitLabel),
     [currentProblem?.sourceMode, currentProblem?.unitLabel, mode]
   );
+
+  const visualRenderKey = JSON.stringify(currentProblem?.visual ?? null);
 
   useEffect(() => {
     audioService.setBgmDuckMultiplier(shouldDuckBgmForEnglishAudio ? ENGLISH_AUDIO_BGM_DUCK_MULTIPLIER : 1);
@@ -732,13 +746,50 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
     try {
       const ctx = canvas.getContext('2d');
       if (!ctx) return;
-      const w = canvas.width;
-      const h = canvas.height;
-      ctx.clearRect(0, 0, w, h);
-      ctx.fillStyle = '#0f172a';
+      const logicalWidth = 260;
+      const logicalHeight = 180;
+      const renderScale = Math.max(1, Math.min(canvas.width / logicalWidth, canvas.height / logicalHeight));
+      ctx.setTransform(1, 0, 0, 1, 0, 0);
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.setTransform(renderScale, 0, 0, renderScale, 0, 0);
+      const w = logicalWidth;
+      const h = logicalHeight;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      const backdrop = ctx.createLinearGradient(0, 0, w, h);
+      backdrop.addColorStop(0, '#0b1220');
+      backdrop.addColorStop(1, '#172033');
+      ctx.fillStyle = backdrop;
       ctx.fillRect(0, 0, w, h);
+      ctx.strokeStyle = 'rgba(148, 163, 184, 0.08)';
+      ctx.lineWidth = 1;
+      for (let x = 10; x < w; x += 20) {
+        ctx.beginPath();
+        ctx.moveTo(x, 0);
+        ctx.lineTo(x, h);
+        ctx.stroke();
+      }
+      for (let y = 10; y < h; y += 20) {
+        ctx.beginPath();
+        ctx.moveTo(0, y);
+        ctx.lineTo(w, y);
+        ctx.stroke();
+      }
       ctx.strokeStyle = '#e2e8f0';
       ctx.lineWidth = 2;
+
+      if (drawQuantityProblemVisual(ctx, visual, w, h)) return;
+      if (drawMeasurementProblemVisual(ctx, visual, w, h)) return;
+      if (drawGraphProblemVisual(ctx, visual, w, h)) return;
+      if (drawMathConceptProblemVisual(ctx, visual, w, h)) return;
+      if (drawScienceLifeProblemVisual(ctx, visual, w, h)) return;
+      if (drawSciencePhysicsProblemVisual(ctx, visual, w, h)) return;
+      if (drawScienceMatterProblemVisual(ctx, visual, w, h)) return;
+      if (drawScienceEarthProblemVisual(ctx, visual, w, h)) return;
+      if (drawScienceBiologyProblemVisual(ctx, visual, w, h)) return;
+      if (drawSocialProblemVisual(ctx, visual, w, h)) return;
+      if (drawLanguageStructureProblemVisual(ctx, visual, w, h)) return;
+      if (drawEnglishSupportProblemVisual(ctx, visual, w, h)) return;
 
       if (visual.kind === 'map_symbol') {
         const cx = w / 2;
@@ -1778,24 +1829,7 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
     } catch (e) {
       console.warn('visual render failed', e);
     }
-  }, [
-    currentProblem?.visual?.kind,
-    currentProblem?.visual?.kind === 'clock' ? currentProblem.visual.hour : undefined,
-    currentProblem?.visual?.kind === 'clock' ? currentProblem.visual.minute : undefined,
-    currentProblem?.visual?.kind === 'polygon' ? currentProblem.visual.sides : undefined,
-    currentProblem?.visual?.kind === 'angle' ? currentProblem.visual.degrees : undefined,
-    currentProblem?.visual?.kind === 'circle' ? currentProblem.visual.showRadius : undefined,
-    currentProblem?.visual?.kind === 'circle' ? currentProblem.visual.showDiameter : undefined,
-    currentProblem?.visual?.kind === 'bar_chart' ? currentProblem.visual.values.join(',') : undefined,
-    currentProblem?.visual?.kind === 'bar_chart' ? (currentProblem.visual.labels || []).join(',') : undefined,
-    currentProblem?.visual?.kind === 'dots' ? currentProblem.visual.counts.join(',') : undefined,
-    currentProblem?.visual?.kind === 'dots' ? (currentProblem.visual.labels || []).join(',') : undefined,
-    currentProblem?.visual?.kind === 'number_sequence' ? currentProblem.visual.values.join(',') : undefined,
-    currentProblem?.visual?.kind === 'fraction' ? `${currentProblem.visual.whole || 0},${currentProblem.visual.numerator},${currentProblem.visual.denominator}` : undefined,
-    currentProblem?.visual?.kind === 'fraction_operation' ? `${currentProblem.visual.left.n}/${currentProblem.visual.left.d}${currentProblem.visual.op}${currentProblem.visual.right.n}/${currentProblem.visual.right.d}` : undefined,
-    currentProblem?.visual?.kind === 'map_symbol' ? currentProblem.visual.symbol : undefined,
-    mapSymbolImageFailed,
-  ]);
+  }, [visualRenderKey, mapSymbolImageFailed]);
 
   if (debugSkip) return <div className="w-full h-full bg-black"></div>;
 
@@ -1918,36 +1952,43 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
                 )}
 
                 {currentProblem.visual && currentProblem.visual.kind !== 'map_symbol' && (
-                    <div className="w-full mb-4 flex justify-center">
+                    <div
+                        className="dynamic-visual-stage"
+                        data-visual-kind={currentProblem.visual.kind}
+                        role="img"
+                        aria-label={languageMode === 'ENGLISH' ? 'Problem visual' : languageMode === 'HIRAGANA' ? 'もんだいのず' : '問題の図'}
+                    >
                         <canvas
                             ref={visualCanvasRef}
-                            width={260}
-                            height={180}
-                            className="w-full max-w-[260px] h-auto aspect-[13/9] rounded-lg border border-white/30 bg-slate-900"
+                            width={780}
+                            height={540}
+                            className="dynamic-visual-canvas"
                         />
                     </div>
                 )}
                 {currentProblem.visual?.kind === 'map_symbol' && (
-                    <div className="w-full mb-4 flex justify-center">
-                        <div className="flex w-full max-w-[240px] flex-col items-center gap-2">
-                            <div className="flex w-full min-h-[165px] items-center justify-center rounded-lg border border-white/30 bg-white p-3">
+                    <div
+                        className="dynamic-visual-stage dynamic-visual-stage--map"
+                        data-visual-kind="map_symbol"
+                        role="img"
+                        aria-label={languageMode === 'ENGLISH' ? 'Map symbol' : languageMode === 'HIRAGANA' ? 'ちずきごう' : '地図記号'}
+                    >
+                        <div className="dynamic-visual-map-card">
                                 {mapSymbolAsset && !mapSymbolImageFailed ? (
                                     <img
                                         src={mapSymbolAsset.src}
                                         alt={mapSymbolAsset.title}
-                                        className="block h-auto max-h-[140px] w-full object-contain"
+                                        className="dynamic-visual-map-image"
                                         onError={() => setMapSymbolImageFailed(true)}
                                     />
                                 ) : (
                                     <canvas
                                         ref={visualCanvasRef}
-                                        width={260}
-                                        height={180}
-                                        className="w-full max-w-[220px] h-auto aspect-[13/9] rounded bg-white"
+                                        width={780}
+                                        height={540}
+                                        className="dynamic-visual-canvas dynamic-visual-canvas--map"
                                     />
                                 )}
-                            </div>
-
                         </div>
                     </div>
                 )}

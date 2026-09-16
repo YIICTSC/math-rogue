@@ -6440,8 +6440,8 @@ export const MAGIC_ENDLESS_MALE_EVENTS: MagicEndlessEventDefinition[] = [
   {
     "id": "MGEM-089",
     "availableFrom": 51,
-    "center": "男子8人・ノクスの記録片",
-    "title": "男子8人・ノクスの記録片",
+    "center": "男子8人",
+    "title": "ノクスの記録片",
     "description": "ノクスの記録片に、男性主人公たちが勝った場面ではなく、互いの失敗を待った場面だけが残されている。理玖は記録の欠落を探し、朔夜は欠落したままの記憶を守ろうとする。",
     "options": [
       {

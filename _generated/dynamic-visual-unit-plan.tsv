@@ -1,0 +1,485 @@
+mode	grade	subject	title	priority	problemCount	visualProblemCount	currentKinds	recommendedKinds	rendererFamilies	needsNewVisual	needsDisplayUpgrade	reason
+ENGLISH_G3_U01	3	ENGLISH	あいさつ	C	90	0						会話・語彙・表現そのものを中心にし、必要なら静止イラストを使う。
+ENGLISH_G3_U02	3	ENGLISH	じこしょうかい	C	56	0						会話・語彙・表現そのものを中心にし、必要なら静止イラストを使う。
+ENGLISH_G3_U03	3	ENGLISH	すきなもの	C	56	0						会話・語彙・表現そのものを中心にし、必要なら静止イラストを使う。
+ENGLISH_G3_U04	3	ENGLISH	かぞく	B	64	0		picture_card,category_grid	english-support			語彙の意味確認に視覚支援は有効だが、動的生成は限定的でよい。
+ENGLISH_G3_U05	3	ENGLISH	いろ	B	80	0		picture_card,category_grid	english-support			語彙の意味確認に視覚支援は有効だが、動的生成は限定的でよい。
+ENGLISH_G3_U06	3	ENGLISH	かず	B	160	0		picture_card,category_grid	english-support			語彙の意味確認に視覚支援は有効だが、動的生成は限定的でよい。
+ENGLISH_G3_U07	3	ENGLISH	どうぶつ	B	96	0		picture_card,category_grid	english-support			語彙の意味確認に視覚支援は有効だが、動的生成は限定的でよい。
+ENGLISH_G3_U08	3	ENGLISH	くだもの・たべもの	B	104	0		picture_card,category_grid	english-support			語彙の意味確認に視覚支援は有効だが、動的生成は限定的でよい。
+ENGLISH_G3_U09	3	ENGLISH	きぶん	C	72	0						会話・語彙・表現そのものを中心にし、必要なら静止イラストを使う。
+ENGLISH_G3_U10	3	ENGLISH	からだのぶぶん	B	80	0		body_label	english-support			部位と英単語を対応させる問題で有効。
+ENGLISH_G3_U11	3	ENGLISH	リスニングまとめ	C	206	0						音声・発話・本文を主役にし、動的visualは原則使わない。
+ENGLISH_G3_U12	3	ENGLISH	声に出すまとめ	C	210	0						音声・発話・本文を主役にし、動的visualは原則使わない。
+ENGLISH_G3_U13	3	ENGLISH	まねして言う問題まとめ	C	315	0						音声・発話・本文を主役にし、動的visualは原則使わない。
+ENGLISH_G3_U14	3	ENGLISH	こたえる問題まとめ	C	18	0						音声・発話・本文を主役にし、動的visualは原則使わない。
+ENGLISH_G4_U01	4	ENGLISH	あいさつと会話	C	74	0						会話・語彙・表現そのものを中心にし、必要なら静止イラストを使う。
+ENGLISH_G4_U02	4	ENGLISH	すきな教科	B	63	0		picture_card,category_grid	english-support			語彙の意味確認に視覚支援は有効だが、動的生成は限定的でよい。
+ENGLISH_G4_U03	4	ENGLISH	一日の生活	B	72	0		clock,schedule_timeline,calendar	english-support,flow-diagram,specialized			時刻・曜日・日付を扱う設問に限定して有効。
+ENGLISH_G4_U04	4	ENGLISH	天気	B	72	0		picture_card,category_grid	english-support			語彙の意味確認に視覚支援は有効だが、動的生成は限定的でよい。
+ENGLISH_G4_U05	4	ENGLISH	時こく	B	81	0		clock,schedule_timeline,calendar	english-support,flow-diagram,specialized			時刻・曜日・日付を扱う設問に限定して有効。
+ENGLISH_G4_U06	4	ENGLISH	文ぼうぐ	B	72	0		picture_card,category_grid	english-support			語彙の意味確認に視覚支援は有効だが、動的生成は限定的でよい。
+ENGLISH_G4_U07	4	ENGLISH	場所	B	71	0		picture_card	english-support			実データは場所を表す語彙問題が中心。静止絵カードは有効だが、動的Canvasを標準化する必要性は低い。
+ENGLISH_G4_U08	4	ENGLISH	学校の中	B	60	0		picture_card	english-support			実データは場所を表す語彙問題が中心。静止絵カードは有効だが、動的Canvasを標準化する必要性は低い。
+ENGLISH_G4_U09	4	ENGLISH	すきな食べ物	C	86	0						会話・語彙・表現そのものを中心にし、必要なら静止イラストを使う。
+ENGLISH_G4_U10	4	ENGLISH	日本の文化しょうかい	C	60	0						会話・語彙・表現そのものを中心にし、必要なら静止イラストを使う。
+ENGLISH_G4_U11	4	ENGLISH	リスニング総仕上げ	C	170	0						音声・発話・本文を主役にし、動的visualは原則使わない。
+ENGLISH_G4_U12	4	ENGLISH	発声総仕上げ	C	172	0						音声・発話・本文を主役にし、動的visualは原則使わない。
+ENGLISH_G4_U13	4	ENGLISH	復唱問題総仕上げ	C	258	0						音声・発話・本文を主役にし、動的visualは原則使わない。
+ENGLISH_G4_U14	4	ENGLISH	応答問題総仕上げ	C	18	0						音声・発話・本文を主役にし、動的visualは原則使わない。
+ENGLISH_G5_U01	5	ENGLISH	アルファベット	B	208	0		letter_grid,letter_case_pair	english-support			大文字小文字・並び順を扱う問題に有効。
+ENGLISH_G5_U02	5	ENGLISH	自己紹介	C	48	0						会話・語彙・表現そのものを中心にし、必要なら静止イラストを使う。
+ENGLISH_G5_U03	5	ENGLISH	家族	B	48	0		picture_card,category_grid	english-support			語彙の意味確認に視覚支援は有効だが、動的生成は限定的でよい。
+ENGLISH_G5_U04	5	ENGLISH	誕生日	B	96	0		clock,schedule_timeline,calendar	english-support,flow-diagram,specialized			時刻・曜日・日付を扱う設問に限定して有効。
+ENGLISH_G5_U05	5	ENGLISH	好きなもの	C	64	0						会話・語彙・表現そのものを中心にし、必要なら静止イラストを使う。
+ENGLISH_G5_U06	5	ENGLISH	学校生活	C	72	0						会話・語彙・表現そのものを中心にし、必要なら静止イラストを使う。
+ENGLISH_G5_U07	5	ENGLISH	曜日	B	56	0		clock,schedule_timeline,calendar	english-support,flow-diagram,specialized			時刻・曜日・日付を扱う設問に限定して有効。
+ENGLISH_G5_U08	5	ENGLISH	時こく	B	63	0		clock,schedule_timeline,calendar	english-support,flow-diagram,specialized			時刻・曜日・日付を扱う設問に限定して有効。
+ENGLISH_G5_U09	5	ENGLISH	できること	C	64	0						会話・語彙・表現そのものを中心にし、必要なら静止イラストを使う。
+ENGLISH_G5_U10	5	ENGLISH	行きたい場所	B	64	0		picture_card,category_grid	english-support			語彙の意味確認に視覚支援は有効だが、動的生成は限定的でよい。
+ENGLISH_G5_U11	5	ENGLISH	リスニング総仕上げ	C	194	0						音声・発話・本文を主役にし、動的visualは原則使わない。
+ENGLISH_G5_U12	5	ENGLISH	発声総仕上げ	C	194	0						音声・発話・本文を主役にし、動的visualは原則使わない。
+ENGLISH_G5_U13	5	ENGLISH	復唱問題総仕上げ	C	291	0						音声・発話・本文を主役にし、動的visualは原則使わない。
+ENGLISH_G5_U14	5	ENGLISH	応答問題総仕上げ	C	18	0						音声・発話・本文を主役にし、動的visualは原則使わない。
+ENGLISH_G6_U01	6	ENGLISH	自己紹介	C	64	0						会話・語彙・表現そのものを中心にし、必要なら静止イラストを使う。
+ENGLISH_G6_U02	6	ENGLISH	将来の夢	C	64	0						会話・語彙・表現そのものを中心にし、必要なら静止イラストを使う。
+ENGLISH_G6_U03	6	ENGLISH	日常生活	C	64	0						会話・語彙・表現そのものを中心にし、必要なら静止イラストを使う。
+ENGLISH_G6_U04	6	ENGLISH	日本文化紹介	C	56	0						会話・語彙・表現そのものを中心にし、必要なら静止イラストを使う。
+ENGLISH_G6_U05	6	ENGLISH	行きたい国	C	72	0						会話・語彙・表現そのものを中心にし、必要なら静止イラストを使う。
+ENGLISH_G6_U06	6	ENGLISH	思い出	C	64	0						会話・語彙・表現そのものを中心にし、必要なら静止イラストを使う。
+ENGLISH_G6_U07	6	ENGLISH	過去の出来事	C	80	0						会話・語彙・表現そのものを中心にし、必要なら静止イラストを使う。
+ENGLISH_G6_U08	6	ENGLISH	好きなもの	C	56	0						会話・語彙・表現そのものを中心にし、必要なら静止イラストを使う。
+ENGLISH_G6_U09	6	ENGLISH	世界の文化	C	80	0						会話・語彙・表現そのものを中心にし、必要なら静止イラストを使う。
+ENGLISH_G6_U10	6	ENGLISH	将来の計画	C	64	0						会話・語彙・表現そのものを中心にし、必要なら静止イラストを使う。
+ENGLISH_G6_U11	6	ENGLISH	リスニング総仕上げ	C	166	0						音声・発話・本文を主役にし、動的visualは原則使わない。
+ENGLISH_G6_U12	6	ENGLISH	発声総仕上げ	C	166	0						音声・発話・本文を主役にし、動的visualは原則使わない。
+ENGLISH_G6_U13	6	ENGLISH	復唱問題総仕上げ	C	249	0						音声・発話・本文を主役にし、動的visualは原則使わない。
+ENGLISH_G6_U14	6	ENGLISH	応答問題総仕上げ	C	18	0						音声・発話・本文を主役にし、動的visualは原則使わない。
+ENGLISH_G7_U01	7	ENGLISH	アルファベット	B	36	0		letter_grid,letter_case_pair	english-support			大文字小文字・並び順を扱う問題に有効。
+ENGLISH_G7_U02	7	ENGLISH	be動詞	A	36	1	sentence_blocks	sentence_blocks	language-structure		YES	語順や文の役割をブロックで動かして示すと理解しやすい。
+ENGLISH_G7_U03	7	ENGLISH	一般動詞	A	36	1	sentence_blocks	sentence_blocks	language-structure		YES	語順や文の役割をブロックで動かして示すと理解しやすい。
+ENGLISH_G7_U04	7	ENGLISH	疑問文	A	36	1	sentence_blocks	sentence_blocks	language-structure		YES	語順や文の役割をブロックで動かして示すと理解しやすい。
+ENGLISH_G7_U05	7	ENGLISH	否定文	A	36	1	sentence_blocks	sentence_blocks	language-structure		YES	語順や文の役割をブロックで動かして示すと理解しやすい。
+ENGLISH_G7_U06	7	ENGLISH	命令文	A	36	1	sentence_blocks	sentence_blocks	language-structure		YES	語順や文の役割をブロックで動かして示すと理解しやすい。
+ENGLISH_G7_U07	7	ENGLISH	can	A	36	1	sentence_blocks	sentence_blocks	language-structure		YES	語順や文の役割をブロックで動かして示すと理解しやすい。
+ENGLISH_G7_U08	7	ENGLISH	現在進行形	A	36	1	tense_timeline	sentence_blocks,tense_timeline	flow-diagram,language-structure		YES	語順に加えて時間軸を示すことが文法理解に有効。
+ENGLISH_G7_U09	7	ENGLISH	三人称単数	A	36	1	sentence_blocks	sentence_blocks	language-structure		YES	語順や文の役割をブロックで動かして示すと理解しやすい。
+ENGLISH_G7_U10	7	ENGLISH	前置詞	A	36	1	spatial_preposition	spatial_preposition	english-support		YES	in/on/under等の位置関係は図を見る問題と相性がよい。
+ENGLISH_G7_U11	7	ENGLISH	複数形	A	36	1	sentence_blocks	sentence_blocks	language-structure		YES	語順や文の役割をブロックで動かして示すと理解しやすい。
+ENGLISH_G7_U12	7	ENGLISH	代名詞	A	36	1	sentence_blocks	sentence_blocks	language-structure		YES	語順や文の役割をブロックで動かして示すと理解しやすい。
+ENGLISH_G7_U13	7	ENGLISH	リスニング総仕上げ	C	36	0						音声・発話・本文を主役にし、動的visualは原則使わない。
+ENGLISH_G7_U14	7	ENGLISH	発声総仕上げ	C	36	0						音声・発話・本文を主役にし、動的visualは原則使わない。
+ENGLISH_G7_U15	7	ENGLISH	復唱問題総仕上げ	C	54	0						音声・発話・本文を主役にし、動的visualは原則使わない。
+ENGLISH_G7_U16	7	ENGLISH	応答問題総仕上げ	C	30	0						音声・発話・本文を主役にし、動的visualは原則使わない。
+ENGLISH_G8_U01	8	ENGLISH	過去形	A	36	1	tense_timeline	sentence_blocks,tense_timeline	flow-diagram,language-structure		YES	語順に加えて時間軸を示すことが文法理解に有効。
+ENGLISH_G8_U02	8	ENGLISH	過去進行形	A	36	1	tense_timeline	sentence_blocks,tense_timeline	flow-diagram,language-structure		YES	語順に加えて時間軸を示すことが文法理解に有効。
+ENGLISH_G8_U03	8	ENGLISH	未来表現	A	36	1	tense_timeline	sentence_blocks,tense_timeline	flow-diagram,language-structure		YES	語順に加えて時間軸を示すことが文法理解に有効。
+ENGLISH_G8_U04	8	ENGLISH	助動詞	A	36	1	sentence_blocks	sentence_blocks	language-structure		YES	語順や文の役割をブロックで動かして示すと理解しやすい。
+ENGLISH_G8_U05	8	ENGLISH	不定詞	A	36	1	sentence_blocks	sentence_blocks	language-structure		YES	語順や文の役割をブロックで動かして示すと理解しやすい。
+ENGLISH_G8_U06	8	ENGLISH	動名詞	A	36	1	sentence_blocks	sentence_blocks	language-structure		YES	語順や文の役割をブロックで動かして示すと理解しやすい。
+ENGLISH_G8_U07	8	ENGLISH	接続詞	A	36	1	sentence_blocks	sentence_blocks	language-structure		YES	語順や文の役割をブロックで動かして示すと理解しやすい。
+ENGLISH_G8_U08	8	ENGLISH	比較	A	36	1	comparison_scale	comparison_scale,sentence_blocks	english-support,language-structure		YES	2者・3者の比較関係を視覚的に整理できる。
+ENGLISH_G8_U09	8	ENGLISH	受動態	A	36	1	sentence_blocks	sentence_blocks	language-structure		YES	語順や文の役割をブロックで動かして示すと理解しやすい。
+ENGLISH_G8_U10	8	ENGLISH	リスニング総仕上げ	C	36	0						音声・発話・本文を主役にし、動的visualは原則使わない。
+ENGLISH_G8_U11	8	ENGLISH	発声総仕上げ	C	36	0						音声・発話・本文を主役にし、動的visualは原則使わない。
+ENGLISH_G8_U12	8	ENGLISH	復唱問題総仕上げ	C	54	0						音声・発話・本文を主役にし、動的visualは原則使わない。
+ENGLISH_G8_U13	8	ENGLISH	応答問題総仕上げ	C	30	0						音声・発話・本文を主役にし、動的visualは原則使わない。
+ENGLISH_G9_U01	9	ENGLISH	現在完了	A	36	1	tense_timeline	sentence_blocks,tense_timeline	flow-diagram,language-structure		YES	語順に加えて時間軸を示すことが文法理解に有効。
+ENGLISH_G9_U02	9	ENGLISH	現在完了進行形	A	36	1	tense_timeline	sentence_blocks,tense_timeline	flow-diagram,language-structure		YES	語順に加えて時間軸を示すことが文法理解に有効。
+ENGLISH_G9_U03	9	ENGLISH	関係代名詞	A	36	1	sentence_blocks	sentence_blocks	language-structure		YES	語順や文の役割をブロックで動かして示すと理解しやすい。
+ENGLISH_G9_U04	9	ENGLISH	間接疑問文	A	36	1	sentence_blocks	sentence_blocks	language-structure		YES	語順や文の役割をブロックで動かして示すと理解しやすい。
+ENGLISH_G9_U05	9	ENGLISH	仮定法	A	36	1	condition_branch	condition_branch,tense_timeline	english-support,flow-diagram		YES	現実と仮定の分岐を図で示すと理解しやすい。
+ENGLISH_G9_U06	9	ENGLISH	分詞	A	36	1	sentence_blocks	sentence_blocks	language-structure		YES	語順や文の役割をブロックで動かして示すと理解しやすい。
+ENGLISH_G9_U07	9	ENGLISH	比較の応用	A	36	1	comparison_scale	comparison_scale,sentence_blocks	english-support,language-structure		YES	2者・3者の比較関係を視覚的に整理できる。
+ENGLISH_G9_U08	9	ENGLISH	長文読解	C	40	0						音声・発話・本文を主役にし、動的visualは原則使わない。
+ENGLISH_G9_U09	9	ENGLISH	英作文	C	36	0						音声・発話・本文を主役にし、動的visualは原則使わない。
+ENGLISH_G9_U10	9	ENGLISH	スピーチ	C	36	0						音声・発話・本文を主役にし、動的visualは原則使わない。
+ENGLISH_G9_U11	9	ENGLISH	リスニング総仕上げ	C	36	0						音声・発話・本文を主役にし、動的visualは原則使わない。
+ENGLISH_G9_U12	9	ENGLISH	発声総仕上げ	C	36	0						音声・発話・本文を主役にし、動的visualは原則使わない。
+ENGLISH_G9_U13	9	ENGLISH	復唱問題総仕上げ	C	54	0						音声・発話・本文を主役にし、動的visualは原則使わない。
+ENGLISH_G9_U14	9	ENGLISH	応答問題総仕上げ	C	30	0						音声・発話・本文を主役にし、動的visualは原則使わない。
+KOKUGO_G1_U01	1	KOKUGO	ひらがな	C	83	0						文字・文章そのものを読むことを優先し、図が答えの手掛かりになり過ぎないようにする。
+KOKUGO_G1_U02	1	KOKUGO	ことばあつめ	C	50	0						文字・文章そのものを読むことを優先し、図が答えの手掛かりになり過ぎないようにする。
+KOKUGO_G1_U03	1	KOKUGO	のばすおん	B	50	0		sound_blocks,word_blocks	language-structure			音や助詞の位置をブロックで示す問題に有効。
+KOKUGO_G1_U04	1	KOKUGO	ちいさい「っ」	B	50	0		sound_blocks,word_blocks	language-structure			音や助詞の位置をブロックで示す問題に有効。
+KOKUGO_G1_U05	1	KOKUGO	は・を・へ	B	50	0		sound_blocks,word_blocks	language-structure			音や助詞の位置をブロックで示す問題に有効。
+KOKUGO_G1_U06	1	KOKUGO	かたかな	C	83	0						文字・文章そのものを読むことを優先し、図が答えの手掛かりになり過ぎないようにする。
+KOKUGO_G1_U07	1	KOKUGO	おはなしをよむ	B	50	0		story_timeline,character_relation	language-structure			場面の順序や人物関係を問う問題に限定して有効。
+KOKUGO_G1_U08	1	KOKUGO	せつめいぶんをよむ	C	50	0						文字・文章そのものを読むことを優先し、図が答えの手掛かりになり過ぎないようにする。
+KOKUGO_G1_U09	1	KOKUGO	ばめんをそうぞうしてよむ	B	50	0		story_timeline,character_relation	language-structure			場面の順序や人物関係を問う問題に限定して有効。
+KOKUGO_G1_U10	1	KOKUGO	たいせつなところをみつけてよむ	C	50	0						文字・文章そのものを読むことを優先し、図が答えの手掛かりになり過ぎないようにする。
+KOKUGO_G1_U11	1	KOKUGO	ぶんをかく	C	50	0						文字・文章そのものを読むことを優先し、図が答えの手掛かりになり過ぎないようにする。
+KOKUGO_G1_U12	1	KOKUGO	かんたんなにっき	C	50	0						文字・文章そのものを読むことを優先し、図が答えの手掛かりになり過ぎないようにする。
+KOKUGO_G1_U13	1	KOKUGO	おはなしをつくる	B	50	0		story_timeline,character_relation	language-structure			場面の順序や人物関係を問う問題に限定して有効。
+KOKUGO_G1_U14	1	KOKUGO	はなしをきく	C	50	0						文字・文章そのものを読むことを優先し、図が答えの手掛かりになり過ぎないようにする。
+KOKUGO_G1_U15	1	KOKUGO	じぶんのことをはなす	C	50	0						文字・文章そのものを読むことを優先し、図が答えの手掛かりになり過ぎないようにする。
+KOKUGO_G1_U16	1	KOKUGO	みんなのまえではなす	C	50	0						文字・文章そのものを読むことを優先し、図が答えの手掛かりになり過ぎないようにする。
+KOKUGO_G2_U01	2	KOKUGO	かたかなのことば	C	66	0						文字・文章そのものを読むことを優先し、図が答えの手掛かりになり過ぎないようにする。
+KOKUGO_G2_U02	2	KOKUGO	主語と述語	A	50	1	sentence_structure	sentence_structure	language-structure		YES	文の要素を色分け・ブロック化して関係を示す価値が高い。
+KOKUGO_G2_U03	2	KOKUGO	文のきまり	A	50	1	sentence_structure	sentence_structure	language-structure		YES	文の要素を色分け・ブロック化して関係を示す価値が高い。
+KOKUGO_G2_U04	2	KOKUGO	日記を書く	B	50	0		writing_structure	language-structure			文章の組み立てを作る問題で構成図が使える。
+KOKUGO_G2_U05	2	KOKUGO	せつめい文を読む	B	50	0		paragraph_structure,cause_effect_flow	flow-diagram,language-structure			文章構造や因果関係を問う問題で有効。
+KOKUGO_G2_U06	2	KOKUGO	物語を読む	C	50	0						文字・文章そのものを読むことを優先し、図が答えの手掛かりになり過ぎないようにする。
+KOKUGO_G2_U07	2	KOKUGO	大事なことを見つける	C	50	0						文字・文章そのものを読むことを優先し、図が答えの手掛かりになり過ぎないようにする。
+KOKUGO_G2_U08	2	KOKUGO	手紙を書く	B	50	0		writing_structure	language-structure			文章の組み立てを作る問題で構成図が使える。
+KOKUGO_G2_U09	2	KOKUGO	作文を書く	B	50	0		writing_structure	language-structure			文章の組み立てを作る問題で構成図が使える。
+KOKUGO_G2_U10	2	KOKUGO	話を聞く	C	50	0						文字・文章そのものを読むことを優先し、図が答えの手掛かりになり過ぎないようにする。
+KOKUGO_G2_U11	2	KOKUGO	順序よく話す	C	50	0						文字・文章そのものを読むことを優先し、図が答えの手掛かりになり過ぎないようにする。
+KOKUGO_G3_U01	3	KOKUGO	漢字の読み書き	C	50	0						文字・文章そのものを読むことを優先し、図が答えの手掛かりになり過ぎないようにする。
+KOKUGO_G3_U02	3	KOKUGO	国語じてんの使いかた	B	50	0		dictionary_order	language-structure			見出し語の順序や辞書の構成を扱う問題で有効。
+KOKUGO_G3_U03	3	KOKUGO	まとまり	A	50	1	paragraph_structure	paragraph_structure,idea_hierarchy	language-structure		YES	段落関係・中心文・要旨の構造を可視化できる。
+KOKUGO_G3_U04	3	KOKUGO	物語文の読みとり	B	50	0		story_timeline,character_relation	language-structure			場面の順序や人物関係を問う問題に限定して有効。
+KOKUGO_G3_U05	3	KOKUGO	せつめい文の読みとり	B	50	0		paragraph_structure,cause_effect_flow	flow-diagram,language-structure			文章構造や因果関係を問う問題で有効。
+KOKUGO_G3_U06	3	KOKUGO	大事なところをまとめる	C	50	0						文字・文章そのものを読むことを優先し、図が答えの手掛かりになり過ぎないようにする。
+KOKUGO_G3_U07	3	KOKUGO	日記・作文	B	50	0		writing_structure	language-structure			文章の組み立てを作る問題で構成図が使える。
+KOKUGO_G3_U08	3	KOKUGO	手紙の書きかた	B	50	0		writing_structure	language-structure			文章の組み立てを作る問題で構成図が使える。
+KOKUGO_G3_U09	3	KOKUGO	話し合い	B	50	0		argument_map,speech_structure	language-structure			意見と理由、発表構成を整理する問題に有効。
+KOKUGO_G4_U01	4	KOKUGO	漢字の使い方	C	50	0						文字・文章そのものを読むことを優先し、図が答えの手掛かりになり過ぎないようにする。
+KOKUGO_G4_U02	4	KOKUGO	熟語	C	50	0						文字・文章そのものを読むことを優先し、図が答えの手掛かりになり過ぎないようにする。
+KOKUGO_G4_U03	4	KOKUGO	国語辞典・漢字辞典	B	50	0		dictionary_order	language-structure			見出し語の順序や辞書の構成を扱う問題で有効。
+KOKUGO_G4_U04	4	KOKUGO	段落と要旨	A	50	1	paragraph_structure	paragraph_structure,idea_hierarchy	language-structure		YES	段落関係・中心文・要旨の構造を可視化できる。
+KOKUGO_G4_U05	4	KOKUGO	物語文の読み取り	B	50	0		story_timeline,character_relation	language-structure			場面の順序や人物関係を問う問題に限定して有効。
+KOKUGO_G4_U06	4	KOKUGO	説明文の読み取り	B	50	0		paragraph_structure,cause_effect_flow	flow-diagram,language-structure			文章構造や因果関係を問う問題で有効。
+KOKUGO_G4_U07	4	KOKUGO	要約	A	50	1	paragraph_structure	paragraph_structure,idea_hierarchy	language-structure		YES	段落関係・中心文・要旨の構造を可視化できる。
+KOKUGO_G4_U08	4	KOKUGO	意見文を書く	B	50	0		writing_structure	language-structure			文章の組み立てを作る問題で構成図が使える。
+KOKUGO_G4_U09	4	KOKUGO	話し合いと発表	B	50	0		argument_map,speech_structure	language-structure			意見と理由、発表構成を整理する問題に有効。
+KOKUGO_G5_U01	5	KOKUGO	漢字の意味と使い分け	C	50	0						文字・文章そのものを読むことを優先し、図が答えの手掛かりになり過ぎないようにする。
+KOKUGO_G5_U02	5	KOKUGO	敬語	C	50	0						文字・文章そのものを読むことを優先し、図が答えの手掛かりになり過ぎないようにする。
+KOKUGO_G5_U03	5	KOKUGO	物語文の読み取り	B	50	0		story_timeline,character_relation	language-structure			場面の順序や人物関係を問う問題に限定して有効。
+KOKUGO_G5_U04	5	KOKUGO	説明文の読み取り	B	50	0		paragraph_structure,cause_effect_flow	flow-diagram,language-structure			文章構造や因果関係を問う問題で有効。
+KOKUGO_G5_U05	5	KOKUGO	要約と要旨	A	50	1	paragraph_structure	paragraph_structure,idea_hierarchy	language-structure		YES	段落関係・中心文・要旨の構造を可視化できる。
+KOKUGO_G5_U06	5	KOKUGO	意見文を書く	B	50	0		writing_structure	language-structure			文章の組み立てを作る問題で構成図が使える。
+KOKUGO_G5_U07	5	KOKUGO	報告文を書く	B	50	0		writing_structure	language-structure			文章の組み立てを作る問題で構成図が使える。
+KOKUGO_G5_U08	5	KOKUGO	討論	B	50	0		argument_map,speech_structure	language-structure			意見と理由、発表構成を整理する問題に有効。
+KOKUGO_G5_U09	5	KOKUGO	スピーチ	B	50	0		argument_map,speech_structure	language-structure			意見と理由、発表構成を整理する問題に有効。
+KOKUGO_G6_U01	6	KOKUGO	漢字のまとめ	C	50	0						文字・文章そのものを読むことを優先し、図が答えの手掛かりになり過ぎないようにする。
+KOKUGO_G6_U02	6	KOKUGO	熟語と語句	C	50	0						文字・文章そのものを読むことを優先し、図が答えの手掛かりになり過ぎないようにする。
+KOKUGO_G6_U03	6	KOKUGO	物語文の読み取り	B	50	0		story_timeline,character_relation	language-structure			場面の順序や人物関係を問う問題に限定して有効。
+KOKUGO_G6_U04	6	KOKUGO	説明文の読み取り	B	50	0		paragraph_structure,cause_effect_flow	flow-diagram,language-structure			文章構造や因果関係を問う問題で有効。
+KOKUGO_G6_U05	6	KOKUGO	要旨と要約	A	50	1	paragraph_structure	paragraph_structure,idea_hierarchy	language-structure		YES	段落関係・中心文・要旨の構造を可視化できる。
+KOKUGO_G6_U06	6	KOKUGO	意見文を書く	B	50	0		writing_structure	language-structure			文章の組み立てを作る問題で構成図が使える。
+KOKUGO_G6_U07	6	KOKUGO	提案文を書く	B	50	0		writing_structure	language-structure			文章の組み立てを作る問題で構成図が使える。
+KOKUGO_G6_U08	6	KOKUGO	討論	B	50	0		argument_map,speech_structure	language-structure			意見と理由、発表構成を整理する問題に有効。
+KOKUGO_G6_U09	6	KOKUGO	スピーチ	B	50	0		argument_map,speech_structure	language-structure			意見と理由、発表構成を整理する問題に有効。
+KOKUGO_G6_U10	6	KOKUGO	卒業文集	C	50	0						文字・文章そのものを読むことを優先し、図が答えの手掛かりになり過ぎないようにする。
+KOKUGO_G7_U01	7	KOKUGO	物語文の読み取り	B	50	0		story_timeline,character_relation	language-structure			場面の順序や人物関係を問う問題に限定して有効。
+KOKUGO_G7_U02	7	KOKUGO	説明文の読み取り	B	50	0		paragraph_structure,cause_effect_flow	flow-diagram,language-structure			文章構造や因果関係を問う問題で有効。
+KOKUGO_G7_U03	7	KOKUGO	詩の読み取り	C	50	0						文字・文章そのものを読むことを優先し、図が答えの手掛かりになり過ぎないようにする。
+KOKUGO_G7_U04	7	KOKUGO	古典（古文の基礎）	B	50	0		reading_order,classical_sentence_map	language-structure			返り点・語順・現代語との対応を扱う問題で使える。
+KOKUGO_G7_U05	7	KOKUGO	漢文の基礎	B	50	0		reading_order,classical_sentence_map	language-structure			返り点・語順・現代語との対応を扱う問題で使える。
+KOKUGO_G7_U06	7	KOKUGO	文の成分	A	50	1	sentence_structure	sentence_structure	language-structure		YES	文の要素を色分け・ブロック化して関係を示す価値が高い。
+KOKUGO_G7_U07	7	KOKUGO	品詞	A	50	1	word_class_blocks	word_class_blocks,sentence_structure	language-structure		YES	語の役割を分類し、文中の位置と対応させられる。
+KOKUGO_G7_U08	7	KOKUGO	漢字の読み書き	C	50	0						文字・文章そのものを読むことを優先し、図が答えの手掛かりになり過ぎないようにする。
+KOKUGO_G7_U09	7	KOKUGO	要約	A	50	1	paragraph_structure	paragraph_structure,idea_hierarchy	language-structure		YES	段落関係・中心文・要旨の構造を可視化できる。
+KOKUGO_G7_U10	7	KOKUGO	意見文	B	50	0		writing_structure	language-structure			文章の組み立てを作る問題で構成図が使える。
+KOKUGO_G7_U11	7	KOKUGO	スピーチ	B	50	0		argument_map,speech_structure	language-structure			意見と理由、発表構成を整理する問題に有効。
+KOKUGO_G7_U12	7	KOKUGO	話し合い	B	50	0		argument_map,speech_structure	language-structure			意見と理由、発表構成を整理する問題に有効。
+KOKUGO_G8_U01	8	KOKUGO	物語文の読み取り	B	50	0		story_timeline,character_relation	language-structure			場面の順序や人物関係を問う問題に限定して有効。
+KOKUGO_G8_U02	8	KOKUGO	説明文の読み取り	B	50	0		paragraph_structure,cause_effect_flow	flow-diagram,language-structure			文章構造や因果関係を問う問題で有効。
+KOKUGO_G8_U03	8	KOKUGO	詩・短歌・俳句	C	50	0						文字・文章そのものを読むことを優先し、図が答えの手掛かりになり過ぎないようにする。
+KOKUGO_G8_U04	8	KOKUGO	古文	B	50	0		reading_order,classical_sentence_map	language-structure			返り点・語順・現代語との対応を扱う問題で使える。
+KOKUGO_G8_U05	8	KOKUGO	漢文	B	50	0		reading_order,classical_sentence_map	language-structure			返り点・語順・現代語との対応を扱う問題で使える。
+KOKUGO_G8_U06	8	KOKUGO	文法	A	50	1	word_class_blocks	sentence_structure	language-structure		YES	文の要素を色分け・ブロック化して関係を示す価値が高い。
+KOKUGO_G8_U07	8	KOKUGO	漢字の読み書き	C	50	0						文字・文章そのものを読むことを優先し、図が答えの手掛かりになり過ぎないようにする。
+KOKUGO_G8_U08	8	KOKUGO	要約	A	50	1	paragraph_structure	paragraph_structure,idea_hierarchy	language-structure		YES	段落関係・中心文・要旨の構造を可視化できる。
+KOKUGO_G8_U09	8	KOKUGO	意見文	B	50	0		writing_structure	language-structure			文章の組み立てを作る問題で構成図が使える。
+KOKUGO_G8_U10	8	KOKUGO	発表	B	50	0		argument_map,speech_structure	language-structure			意見と理由、発表構成を整理する問題に有効。
+KOKUGO_G8_U11	8	KOKUGO	討論	B	50	0		argument_map,speech_structure	language-structure			意見と理由、発表構成を整理する問題に有効。
+KOKUGO_G9_U01	9	KOKUGO	物語文の読み取り	B	50	0		story_timeline,character_relation	language-structure			場面の順序や人物関係を問う問題に限定して有効。
+KOKUGO_G9_U02	9	KOKUGO	説明文の読み取り	B	50	0		paragraph_structure,cause_effect_flow	flow-diagram,language-structure			文章構造や因果関係を問う問題で有効。
+KOKUGO_G9_U03	9	KOKUGO	詩・短歌・俳句	C	50	0						文字・文章そのものを読むことを優先し、図が答えの手掛かりになり過ぎないようにする。
+KOKUGO_G9_U04	9	KOKUGO	古文	B	50	0		reading_order,classical_sentence_map	language-structure			返り点・語順・現代語との対応を扱う問題で使える。
+KOKUGO_G9_U05	9	KOKUGO	漢文	B	50	0		reading_order,classical_sentence_map	language-structure			返り点・語順・現代語との対応を扱う問題で使える。
+KOKUGO_G9_U06	9	KOKUGO	文法	A	50	1	sentence_structure	sentence_structure	language-structure		YES	文の要素を色分け・ブロック化して関係を示す価値が高い。
+KOKUGO_G9_U07	9	KOKUGO	漢字の読み書き	C	50	0						文字・文章そのものを読むことを優先し、図が答えの手掛かりになり過ぎないようにする。
+KOKUGO_G9_U08	9	KOKUGO	要約	A	50	1	paragraph_structure	paragraph_structure,idea_hierarchy	language-structure		YES	段落関係・中心文・要旨の構造を可視化できる。
+KOKUGO_G9_U09	9	KOKUGO	論説文を書く	B	50	0		writing_structure	language-structure			文章の組み立てを作る問題で構成図が使える。
+KOKUGO_G9_U10	9	KOKUGO	スピーチ	B	50	0		argument_map,speech_structure	language-structure			意見と理由、発表構成を整理する問題に有効。
+KOKUGO_G9_U11	9	KOKUGO	討論	B	50	0		argument_map,speech_structure	language-structure			意見と理由、発表構成を整理する問題に有効。
+KOKUGO_G9_U12	9	KOKUGO	卒業論文・発表	B	50	0		argument_map,speech_structure	language-structure			意見と理由、発表構成を整理する問題に有効。
+LIFE_1_U01	1	LIFE	がっこうたんけん	B	30	0		simple_map,route_map	map			場所や順路を扱う問題に限定して地図表現が使える。
+LIFE_1_U02	1	LIFE	がっこうのひととなかよし	C	31	0						体験・対話を中心にし、動的visualは原則不要。
+LIFE_1_U03	1	LIFE	きせつとなかよし	B	50	0		season_cycle	specialized			季節ごとの自然や生き物の違いを比較する問題で有効。
+LIFE_1_U04	1	LIFE	いきものとなかよし	B	30	0		observation_compare,life_cycle	science-life			観察ポイントや変化を比べる問題で有効。
+LIFE_1_U05	1	LIFE	はなややさいをそだてよう	A	36	1	life_cycle	growth_sequence,plant_life_cycle	science-life		YES	成長の順序と変化を観察する単元なので連続図が有効。
+LIFE_1_U06	1	LIFE	みぢかなものあそび	B	30	0		process_sequence,mechanism_diagram	specialized			作り方や仕組みを順序立てる問題で有効。
+LIFE_1_U07	1	LIFE	じぶんのせいちょう	B	30	0		growth_timeline	flow-diagram			過去と現在の変化を時系列で示す問題に有効。
+LIFE_2_U01	2	LIFE	まちたんけん	B	42	0		simple_map,route_map	map			場所や順路を扱う問題に限定して地図表現が使える。
+LIFE_2_U02	2	LIFE	まちのひととなかよし	C	30	0						体験・対話を中心にし、動的visualは原則不要。
+LIFE_2_U03	2	LIFE	きせつのしぜん	B	48	0		season_cycle	specialized			季節ごとの自然や生き物の違いを比較する問題で有効。
+LIFE_2_U04	2	LIFE	やさいをそだてよう	A	44	1	life_cycle	growth_sequence,plant_life_cycle	science-life		YES	成長の順序と変化を観察する単元なので連続図が有効。
+LIFE_2_U05	2	LIFE	いきもののかんさつ	B	30	0		observation_compare,life_cycle	science-life			観察ポイントや変化を比べる問題で有効。
+LIFE_2_U06	2	LIFE	おもちゃづくり	B	46	0		process_sequence,mechanism_diagram	specialized			作り方や仕組みを順序立てる問題で有効。
+LIFE_2_U07	2	LIFE	じぶんのせいちょう	B	44	0		growth_timeline	flow-diagram			過去と現在の変化を時系列で示す問題に有効。
+MATH_G1_U01	1	MATH	かずとすうじ	B	38	27	dots,number_sequence	ten_frame,dots,number_line	quantity-model,specialized		YES	数のまとまり・順序を具体物と数直線で補助する。
+MATH_G1_U02	1	MATH	いくつといくつ	B	50	32	dots	ten_frame,dots,number_line	quantity-model,specialized		YES	数のまとまり・順序を具体物と数直線で補助する。
+MATH_G1_U03	1	MATH	かたちあそび	A	32	12	circle,polygon	geometry_diagram,polygon,angle,circle,transformation_overlay	geometry		YES	形・角・対応・補助線など図そのものを読んで考える単元。
+MATH_G1_U04	1	MATH	なんばんめ	B	35	16	number_sequence	ten_frame,dots,number_line	quantity-model,specialized		YES	数のまとまり・順序を具体物と数直線で補助する。
+MATH_G1_U05	1	MATH	あわせていくつ	A	42	24	dots,ten_frame	ten_frame,place_value_blocks,bar_model,number_line	quantity-model		YES	加減の意味、繰り上がり・繰り下がり、差を視覚化する価値が高い。
+MATH_G1_U06	1	MATH	ふえるといくつ	A	50	31	dots,ten_frame	ten_frame,place_value_blocks,bar_model,number_line	quantity-model		YES	加減の意味、繰り上がり・繰り下がり、差を視覚化する価値が高い。
+MATH_G1_U07	1	MATH	のこりはいくつ	A	50	30	ten_frame	ten_frame,place_value_blocks,bar_model,number_line	quantity-model		YES	加減の意味、繰り上がり・繰り下がり、差を視覚化する価値が高い。
+MATH_G1_U08	1	MATH	ちがいはいくつ	A	50	30	bar_model	ten_frame,place_value_blocks,bar_model,number_line	quantity-model		YES	加減の意味、繰り上がり・繰り下がり、差を視覚化する価値が高い。
+MATH_G1_U09	1	MATH	20までのかず	B	30	11	number_sequence	ten_frame,dots,number_line	quantity-model,specialized		YES	数のまとまり・順序を具体物と数直線で補助する。
+MATH_G1_U10	1	MATH	なんじ	A	32	14	clock	clock,time_line	specialized		YES	時計の読みと経過時間は視覚情報が中心。
+MATH_G1_U11	1	MATH	ながさくらべ	A	50	30	bar_chart	measurement_scale,comparison_strip	quantity-model		YES	目盛り・単位・量の比較は図を読む技能そのもの。
+MATH_G1_U12	1	MATH	かさくらべ	A	40	20	bar_chart	measurement_scale,comparison_strip	quantity-model		YES	目盛り・単位・量の比較は図を読む技能そのもの。
+MATH_G1_U13	1	MATH	えぐらふ	A	40	21	bar_chart	bar_chart,line_chart,pie_chart,dot_plot,histogram,box_plot,sample_population	data-chart		YES	資料を図から読み取ることが単元の中心。
+MATH_G1_U14	1	MATH	ひょう	A	35	15	bar_chart	bar_chart,line_chart,pie_chart,dot_plot,histogram,box_plot,sample_population	data-chart		YES	資料を図から読み取ることが単元の中心。
+MATH_G1_U15	1	MATH	さんかくとしかく	A	30	12	polygon	geometry_diagram,polygon,angle,circle,transformation_overlay	geometry		YES	形・角・対応・補助線など図そのものを読んで考える単元。
+MATH_G1_U16	1	MATH	かたちづくり	A	32	12	polygon	geometry_diagram,polygon,angle,circle,transformation_overlay	geometry		YES	形・角・対応・補助線など図そのものを読んで考える単元。
+MATH_G1_U17	1	MATH	3つのかずのけいさん	B	32	0		number_line,expression_flow	quantity-model			計算の順序を段階表示する問題で有効。
+MATH_G1_U18	1	MATH	ぶんしょうだい	A	50	30	bar_model	bar_model,relationship_diagram,coordinate_plane	coordinate-graph,quantity-model,specialized		YES	文章中の数量関係を図に置き換えること自体が学習目標になる。
+MATH_G2_U01	2	MATH	表とグラフ	A	50	31	bar_chart	bar_chart,line_chart,pie_chart,dot_plot,histogram,box_plot,sample_population	data-chart		YES	資料を図から読み取ることが単元の中心。
+MATH_G2_U02	2	MATH	たし算	A	50	30	place_value_blocks	ten_frame,place_value_blocks,bar_model,number_line	quantity-model		YES	加減の意味、繰り上がり・繰り下がり、差を視覚化する価値が高い。
+MATH_G2_U03	2	MATH	ひき算	A	50	30	place_value_blocks	ten_frame,place_value_blocks,bar_model,number_line	quantity-model		YES	加減の意味、繰り上がり・繰り下がり、差を視覚化する価値が高い。
+MATH_G2_U04	2	MATH	長さ	A	50	30	bar_model	measurement_scale,comparison_strip	quantity-model		YES	目盛り・単位・量の比較は図を読む技能そのもの。
+MATH_G2_U05	2	MATH	100までの数	B	50	30	number_line	place_value_blocks,place_value_chart,number_line	quantity-model		YES	位取りや数の大きさを見せる問題で有効。
+MATH_G2_U06	2	MATH	かさ	A	38	18	measurement_scale	measurement_scale,comparison_strip	quantity-model		YES	目盛り・単位・量の比較は図を読む技能そのもの。
+MATH_G2_U07	2	MATH	時こくと時かん	A	40	20	clock	clock,time_line	specialized		YES	時計の読みと経過時間は視覚情報が中心。
+MATH_G2_U08	2	MATH	3けたの数	B	50	30	place_value_blocks	place_value_blocks,place_value_chart,number_line	quantity-model		YES	位取りや数の大きさを見せる問題で有効。
+MATH_G2_U09	2	MATH	かけ算のいみ	A	40	20	array_model,groups_model	array_model,groups_model,number_line	quantity-model		YES	同じ数のまとまり・倍の意味を配列で理解させる。
+MATH_G2_U10	2	MATH	九九	A	50	30	array_model	array_model,groups_model,number_line	quantity-model		YES	同じ数のまとまり・倍の意味を配列で理解させる。
+MATH_G2_U11	2	MATH	はこの形	C	30	11	cube				YES	通常の式・文章表示で十分。
+MATH_G2_U12	2	MATH	ぶんしょうだい	A	50	30	bar_model	bar_model,relationship_diagram,coordinate_plane	coordinate-graph,quantity-model,specialized		YES	文章中の数量関係を図に置き換えること自体が学習目標になる。
+MATH_G3_U01	3	MATH	表とグラフ	A	50	30	bar_chart	bar_chart,line_chart,pie_chart,dot_plot,histogram,box_plot,sample_population	data-chart		YES	資料を図から読み取ることが単元の中心。
+MATH_G3_U02	3	MATH	大きい数	B	50	0		place_value_blocks,place_value_chart,number_line	quantity-model			位取りや数の大きさを見せる問題で有効。
+MATH_G3_U03	3	MATH	たし算	A	50	30	place_value_blocks	ten_frame,place_value_blocks,bar_model,number_line	quantity-model		YES	加減の意味、繰り上がり・繰り下がり、差を視覚化する価値が高い。
+MATH_G3_U04	3	MATH	ひき算	A	50	30	place_value_blocks	ten_frame,place_value_blocks,bar_model,number_line	quantity-model		YES	加減の意味、繰り上がり・繰り下がり、差を視覚化する価値が高い。
+MATH_G3_U05	3	MATH	時こくと時間	A	50	30	clock	clock,time_line	specialized		YES	時計の読みと経過時間は視覚情報が中心。
+MATH_G3_U06	3	MATH	長さ	A	50	30	measurement_scale	measurement_scale,comparison_strip	quantity-model		YES	目盛り・単位・量の比較は図を読む技能そのもの。
+MATH_G3_U07	3	MATH	かけ算	A	50	30	bar_model	array_model,groups_model,number_line	quantity-model		YES	同じ数のまとまり・倍の意味を配列で理解させる。
+MATH_G3_U08	3	MATH	円と球	A	30	11	circle	geometry_diagram,polygon,angle,circle,transformation_overlay	geometry		YES	形・角・対応・補助線など図そのものを読んで考える単元。
+MATH_G3_U09	3	MATH	わり算	A	44	24	groups_model	groups_model,array_model,bar_model	quantity-model		YES	等分除・包含除・あまりを具体的に示せる。
+MATH_G3_U10	3	MATH	あまりのあるわり算	A	50	30	groups_model	groups_model,array_model,bar_model	quantity-model		YES	等分除・包含除・あまりを具体的に示せる。
+MATH_G3_U11	3	MATH	重さ	A	50	30	measurement_scale	measurement_scale,comparison_strip	quantity-model		YES	目盛り・単位・量の比較は図を読む技能そのもの。
+MATH_G3_U12	3	MATH	小数	A	38	18	number_line	number_line,place_value_chart,area_model	quantity-model		YES	小数の位置・位取り・演算を数直線と面積で結び付ける。
+MATH_G3_U13	3	MATH	分数	A	50	30	fraction_operation	fraction_area,fraction_number_line,fraction_operation	quantity-model,specialized		YES	分数は面積モデルと数直線の両方で表す価値が高い。
+MATH_G3_U14	3	MATH	□をつかった式	B	50	0		balance_equation,algebra_tiles	quantity-model			未知数や文字の意味を数量関係として見せると理解しやすい。
+MATH_G4_U01	4	MATH	大きい数	B	50	0		place_value_blocks,place_value_chart,number_line	quantity-model			位取りや数の大きさを見せる問題で有効。
+MATH_G4_U02	4	MATH	わり算	A	50	30	bar_model	groups_model,array_model,bar_model	quantity-model		YES	等分除・包含除・あまりを具体的に示せる。
+MATH_G4_U03	4	MATH	折れ線グラフ	A	50	30	bar_chart	bar_chart,line_chart,pie_chart,dot_plot,histogram,box_plot,sample_population	data-chart		YES	資料を図から読み取ることが単元の中心。
+MATH_G4_U04	4	MATH	角	A	50	30	angle	geometry_diagram,polygon,angle,circle,transformation_overlay	geometry		YES	形・角・対応・補助線など図そのものを読んで考える単元。
+MATH_G4_U05	4	MATH	そろばん	A	50	30	soroban	soroban	quantity-model		YES	珠の位置そのものが学習対象。
+MATH_G4_U06	4	MATH	小数	A	38	18	number_line	number_line,place_value_chart,area_model	quantity-model		YES	小数の位置・位取り・演算を数直線と面積で結び付ける。
+MATH_G4_U07	4	MATH	小数のたし算とひき算	A	50	30	number_line	ten_frame,place_value_blocks,bar_model,number_line	quantity-model		YES	加減の意味、繰り上がり・繰り下がり、差を視覚化する価値が高い。
+MATH_G4_U08	4	MATH	面せき	A	50	30	area_grid	area_grid,shape_decomposition,circle_area	quantity-model		YES	分割・移動・方眼による面積理解が必要。
+MATH_G4_U09	4	MATH	がい数	B	50	0		number_line	quantity-model			四捨五入する境界を数直線で示す問題に有効。
+MATH_G4_U10	4	MATH	式と計算のじゅんじょ	B	50	0		number_line,expression_flow	quantity-model			計算の順序を段階表示する問題で有効。
+MATH_G4_U11	4	MATH	分数	A	50	30	fraction,fraction_operation	fraction_area,fraction_number_line,fraction_operation	quantity-model,specialized		YES	分数は面積モデルと数直線の両方で表す価値が高い。
+MATH_G4_U12	4	MATH	分数のたし算とひき算	A	50	30	fraction_operation	ten_frame,place_value_blocks,bar_model,number_line	quantity-model		YES	加減の意味、繰り上がり・繰り下がり、差を視覚化する価値が高い。
+MATH_G4_U13	4	MATH	直方体と立方体	C	30	10	cube				YES	通常の式・文章表示で十分。
+MATH_G4_U14	4	MATH	変わり方	A	44	24	coordinate_plane	coordinate_plane,table_graph_link	coordinate-graph		YES	表・式・グラフを対応させることが学習の中核。
+MATH_G4_U15	4	MATH	表やグラフにまとめる	A	50	30	bar_chart	bar_chart,line_chart,pie_chart,dot_plot,histogram,box_plot,sample_population	data-chart		YES	資料を図から読み取ることが単元の中心。
+MATH_G5_U01	5	MATH	整数と小数	B	50	0		place_value_blocks,place_value_chart,number_line	quantity-model			位取りや数の大きさを見せる問題で有効。
+MATH_G5_U02	5	MATH	体積	A	50	30	bar_model,unit_cubes	unit_cubes,prism,cylinder,solid_cross_section	geometry,quantity-model		YES	底面積×高さや立体構成を空間的に示す必要がある。
+MATH_G5_U03	5	MATH	小数のかけ算	A	50	15	bar_model	array_model,groups_model,number_line	quantity-model		YES	同じ数のまとまり・倍の意味を配列で理解させる。
+MATH_G5_U04	5	MATH	小数のわり算	A	50	30	bar_model	groups_model,array_model,bar_model	quantity-model		YES	等分除・包含除・あまりを具体的に示せる。
+MATH_G5_U05	5	MATH	合同な図形	A	30	10	polygon	geometry_diagram,polygon,angle,circle,transformation_overlay	geometry		YES	形・角・対応・補助線など図そのものを読んで考える単元。
+MATH_G5_U06	5	MATH	分数と小数・整数	A	50	30	fraction	number_line,place_value_chart,area_model	quantity-model		YES	小数の位置・位取り・演算を数直線と面積で結び付ける。
+MATH_G5_U07	5	MATH	分数のたし算とひき算	A	42	22	fraction_operation	ten_frame,place_value_blocks,bar_model,number_line	quantity-model		YES	加減の意味、繰り上がり・繰り下がり、差を視覚化する価値が高い。
+MATH_G5_U08	5	MATH	平均	B	50	0		redistribution_bar,bar_chart	data-chart,quantity-model			平均化を高さのならしとして示すと意味理解に有効。
+MATH_G5_U09	5	MATH	単位量あたりの大きさ	A	50	30	double_number_line	double_number_line,ratio_bar,motion_strip,percent_bar	quantity-model		YES	2量の対応関係を図にすると立式根拠が明確になる。
+MATH_G5_U10	5	MATH	速さ	A	32	12	double_number_line	double_number_line,ratio_bar,motion_strip,percent_bar	quantity-model		YES	2量の対応関係を図にすると立式根拠が明確になる。
+MATH_G5_U11	5	MATH	比例	A	50	30	double_number_line	coordinate_plane,table_graph_link	coordinate-graph		YES	表・式・グラフを対応させることが学習の中核。
+MATH_G5_U12	5	MATH	円と正多角形	A	35	15	polygon	geometry_diagram,polygon,angle,circle,transformation_overlay	geometry		YES	形・角・対応・補助線など図そのものを読んで考える単元。
+MATH_G5_U13	5	MATH	角柱と円柱	A	30	10	cylinder,prism	unit_cubes,prism,cylinder,solid_cross_section	geometry,quantity-model		YES	底面積×高さや立体構成を空間的に示す必要がある。
+MATH_G5_U14	5	MATH	割合	A	50	30	double_number_line	double_number_line,ratio_bar,motion_strip,percent_bar	quantity-model		YES	2量の対応関係を図にすると立式根拠が明確になる。
+MATH_G5_U15	5	MATH	帯グラフと円グラフ	A	50	30	bar_chart	bar_chart,line_chart,pie_chart,dot_plot,histogram,box_plot,sample_population	data-chart		YES	資料を図から読み取ることが単元の中心。
+MATH_G6_U01	6	MATH	対称な図形	A	30	10	polygon	geometry_diagram,polygon,angle,circle,transformation_overlay	geometry		YES	形・角・対応・補助線など図そのものを読んで考える単元。
+MATH_G6_U02	6	MATH	文字と式	B	50	0		balance_equation,algebra_tiles	quantity-model			未知数や文字の意味を数量関係として見せると理解しやすい。
+MATH_G6_U03	6	MATH	分数のかけ算	A	50	30	fraction,fraction_operation	array_model,groups_model,number_line	quantity-model		YES	同じ数のまとまり・倍の意味を配列で理解させる。
+MATH_G6_U04	6	MATH	分数のわり算	A	50	30	fraction,fraction_operation	groups_model,array_model,bar_model	quantity-model		YES	等分除・包含除・あまりを具体的に示せる。
+MATH_G6_U05	6	MATH	比とその利用	A	40	20	double_number_line	double_number_line,ratio_bar,motion_strip,percent_bar	quantity-model		YES	2量の対応関係を図にすると立式根拠が明確になる。
+MATH_G6_U06	6	MATH	比例と反比例	A	50	30	coordinate_plane	coordinate_plane,table_graph_link	coordinate-graph		YES	表・式・グラフを対応させることが学習の中核。
+MATH_G6_U07	6	MATH	拡大図と縮図	A	32	12	polygon	geometry_diagram,polygon,angle,circle,transformation_overlay	geometry		YES	形・角・対応・補助線など図そのものを読んで考える単元。
+MATH_G6_U08	6	MATH	円の面積	A	38	18	circle	area_grid,shape_decomposition,circle_area	quantity-model		YES	分割・移動・方眼による面積理解が必要。
+MATH_G6_U09	6	MATH	角柱と円柱の体積	A	44	24	cylinder,prism	unit_cubes,prism,cylinder,solid_cross_section	geometry,quantity-model		YES	底面積×高さや立体構成を空間的に示す必要がある。
+MATH_G6_U10	6	MATH	およその面積と体積	A	50	30	area_grid,bar_model,unit_cubes	area_grid,shape_decomposition,circle_area	quantity-model		YES	分割・移動・方眼による面積理解が必要。
+MATH_G6_U11	6	MATH	場合の数	A	32	12	probability_tree	probability_tree,spinner,dice_grid	probability		YES	起こりうる場合を漏れなく整理するため図が有効。
+MATH_G6_U12	6	MATH	資料の調べ方	A	50	30	dot_plot	bar_chart,line_chart,pie_chart,dot_plot,histogram,box_plot,sample_population	data-chart		YES	資料を図から読み取ることが単元の中心。
+MATH_G6_U13	6	MATH	算数のまとめ	C	50	0						総合復習は問題内容ごとに既存visualを再利用し、単元専用visualは増やさない。
+MATH_G7_U01	7	MATH	正の数と負の数	A	38	18	number_line	number_line	quantity-model		YES	正負の位置と移動を数直線で捉えることが重要。
+MATH_G7_U02	7	MATH	正負の数の加法と減法	A	50	30	number_line	number_line	quantity-model		YES	正負の位置と移動を数直線で捉えることが重要。
+MATH_G7_U03	7	MATH	正負の数の乗法と除法	B	50	0		number_line,sign_pattern	quantity-model			符号規則の確認に補助図が使える。
+MATH_G7_U04	7	MATH	文字式	B	30	0		balance_equation,algebra_tiles	quantity-model			未知数や文字の意味を数量関係として見せると理解しやすい。
+MATH_G7_U05	7	MATH	文字式の計算	B	50	0		algebra_tiles	quantity-model			式変形を面積・タイルで確認する問題に限定して有効。
+MATH_G7_U06	7	MATH	一次方程式	A	48	28	balance_equation	balance_equation,coordinate_plane	coordinate-graph,quantity-model		YES	等式の性質や2式の交点を視覚化できる。
+MATH_G7_U07	7	MATH	一次方程式の利用	A	50	30	bar_model	bar_model,relationship_diagram,coordinate_plane	coordinate-graph,quantity-model,specialized		YES	文章中の数量関係を図に置き換えること自体が学習目標になる。
+MATH_G7_U08	7	MATH	比例と反比例	A	30	10	coordinate_plane	coordinate_plane,table_graph_link	coordinate-graph		YES	表・式・グラフを対応させることが学習の中核。
+MATH_G7_U09	7	MATH	平面図形	A	48	28	angle,polygon	geometry_diagram,polygon,angle,circle,transformation_overlay	geometry		YES	形・角・対応・補助線など図そのものを読んで考える単元。
+MATH_G7_U10	7	MATH	空間図形	A	30	10	circle,cube,cylinder,prism	geometry_diagram,polygon,angle,circle,transformation_overlay	geometry		YES	形・角・対応・補助線など図そのものを読んで考える単元。
+MATH_G7_U11	7	MATH	資料の整理と活用	A	50	30	dot_plot	bar_chart,line_chart,pie_chart,dot_plot,histogram,box_plot,sample_population	data-chart		YES	資料を図から読み取ることが単元の中心。
+MATH_G8_U01	8	MATH	式の計算	B	40	0		algebra_tiles	quantity-model			式変形を面積・タイルで確認する問題に限定して有効。
+MATH_G8_U02	8	MATH	連立方程式	A	50	30	coordinate_plane	balance_equation,coordinate_plane	coordinate-graph,quantity-model		YES	等式の性質や2式の交点を視覚化できる。
+MATH_G8_U03	8	MATH	連立方程式の利用	A	40	20	coordinate_plane	bar_model,relationship_diagram,coordinate_plane	coordinate-graph,quantity-model,specialized		YES	文章中の数量関係を図に置き換えること自体が学習目標になる。
+MATH_G8_U04	8	MATH	一次関数	A	50	30	coordinate_plane	coordinate_plane,table_graph_link	coordinate-graph		YES	表・式・グラフを対応させることが学習の中核。
+MATH_G8_U05	8	MATH	図形の性質	A	48	28	angle	geometry_diagram,polygon,angle,circle,transformation_overlay	geometry		YES	形・角・対応・補助線など図そのものを読んで考える単元。
+MATH_G8_U06	8	MATH	図形の合同	A	30	10	polygon	geometry_diagram,polygon,angle,circle,transformation_overlay	geometry		YES	形・角・対応・補助線など図そのものを読んで考える単元。
+MATH_G8_U07	8	MATH	三角形と四角形	C	38	18	polygon				YES	通常の式・文章表示で十分。
+MATH_G8_U08	8	MATH	確率	A	39	19	dice_grid	probability_tree,spinner,dice_grid	probability		YES	起こりうる場合を漏れなく整理するため図が有効。
+MATH_G8_U09	8	MATH	データの分析	A	50	30	dot_plot	bar_chart,line_chart,pie_chart,dot_plot,histogram,box_plot,sample_population	data-chart		YES	資料を図から読み取ることが単元の中心。
+MATH_G9_U01	9	MATH	式の展開と因数分解	B	47	0		algebra_tiles	quantity-model			式変形を面積・タイルで確認する問題に限定して有効。
+MATH_G9_U02	9	MATH	平方根	B	36	0		number_line,square_area	quantity-model			数直線上の位置と正方形の面積モデルが概念理解を助ける。
+MATH_G9_U03	9	MATH	二次方程式	B	48	0		coordinate_plane,area_model	coordinate-graph,quantity-model			解とグラフ・面積モデルを結び付ける問題で有効。
+MATH_G9_U04	9	MATH	二次方程式の利用	B	36	0		coordinate_plane,area_model	coordinate-graph,quantity-model			解とグラフ・面積モデルを結び付ける問題で有効。
+MATH_G9_U05	9	MATH	関数 y=ax^2	A	35	15	parabola	coordinate_plane,table_graph_link	coordinate-graph		YES	表・式・グラフを対応させることが学習の中核。
+MATH_G9_U06	9	MATH	相似な図形	A	50	30	polygon	geometry_diagram,polygon,angle,circle,transformation_overlay	geometry		YES	形・角・対応・補助線など図そのものを読んで考える単元。
+MATH_G9_U07	9	MATH	三平方の定理	A	40	20	angle	geometry_diagram,polygon,angle,circle,transformation_overlay	geometry		YES	形・角・対応・補助線など図そのものを読んで考える単元。
+MATH_G9_U08	9	MATH	円の性質	A	44	24	circle	geometry_diagram,polygon,angle,circle,transformation_overlay	geometry		YES	形・角・対応・補助線など図そのものを読んで考える単元。
+MATH_G9_U09	9	MATH	標本調査	A	36	15	bar_chart	bar_chart,line_chart,pie_chart,dot_plot,histogram,box_plot,sample_population	data-chart		YES	資料を図から読み取ることが単元の中心。
+SCIENCE_3_U01	3	SCIENCE	しぜんのかんさつ	B	50	1	science_classification	observation_compare,classification_tree	science-life		YES	観察ポイントや分類条件を整理する問題で有効。
+SCIENCE_3_U02	3	SCIENCE	こん虫のせい長	A	50	1	life_cycle	life_cycle,growth_sequence	science-life		YES	時間順の変化や成長段階を並べて理解する単元。
+SCIENCE_3_U03	3	SCIENCE	しょくぶつのせい長	A	50	1	life_cycle	life_cycle,growth_sequence	science-life		YES	時間順の変化や成長段階を並べて理解する単元。
+SCIENCE_3_U04	3	SCIENCE	太陽と地面	A	50	1	sun_shadow	sun_shadow	specialized		YES	太陽の位置と影の向き・長さの関係が図で明確になる。
+SCIENCE_3_U05	3	SCIENCE	光	A	50	1	ray_diagram	ray_diagram	science-physics		YES	反射・屈折・像は光線図を読むことが重要。
+SCIENCE_3_U06	3	SCIENCE	音	A	50	1	wave_diagram	wave_diagram,vibration_model	science-physics		YES	振動・振幅・周波数を形として比較できる。
+SCIENCE_3_U07	3	SCIENCE	風とゴムのはたらき	B	50	1	force_diagram	force_arrow,distance_comparison	science-physics,specialized		YES	力の大きさと動きの変化を比較する問題で有効。
+SCIENCE_3_U08	3	SCIENCE	電気の通り道	A	50	1	electric_circuit	electric_circuit,magnetic_field,energy_flow	science-physics		YES	回路・電流の向き・磁界は模式図が学習の中心。
+SCIENCE_3_U09	3	SCIENCE	ものの重さ	A	50	1	force_diagram	force_diagram,pressure_area,vector_composition	science-physics		YES	力の向きと大きさを矢印で示す必要がある。
+SCIENCE_3_U10	3	SCIENCE	じしゃく	A	50	1	magnetic_field	magnetic_field,magnet_force	science-physics,specialized		YES	極と力の向き・磁力線を図示できる。
+SCIENCE_4_U01	4	SCIENCE	天気と気温	A	50	1	weather_map	weather_map,line_chart,front_cross_section	data-chart,science-earth		YES	気象データ・雲・前線の配置を読み取ることが重要。
+SCIENCE_4_U02	4	SCIENCE	季節と生き物	B	50	1	life_cycle	season_cycle,life_cycle	science-life,specialized		YES	季節変化との対応を示す問題で有効。
+SCIENCE_4_U03	4	SCIENCE	星と空	A	50	1	orbit_diagram	orbit_diagram,sky_path,moon_phase	science-earth		YES	天体の位置関係と見かけの動きは図なしでは理解しにくい。
+SCIENCE_4_U04	4	SCIENCE	月の動き	A	50	1	orbit_diagram	orbit_diagram,sky_path,moon_phase	science-earth		YES	天体の位置関係と見かけの動きは図なしでは理解しにくい。
+SCIENCE_4_U05	4	SCIENCE	電気のはたらき	A	50	1	electric_circuit	electric_circuit,magnetic_field,energy_flow	science-physics		YES	回路・電流の向き・磁界は模式図が学習の中心。
+SCIENCE_4_U06	4	SCIENCE	空気と水	A	50	1	particle_model	particle_model,compression_model	science-matter,science-physics		YES	圧縮と体積変化を粒子モデルで説明しやすい。
+SCIENCE_4_U07	4	SCIENCE	とじこめた空気	A	50	1	particle_model	particle_model,compression_model	science-matter,science-physics		YES	圧縮と体積変化を粒子モデルで説明しやすい。
+SCIENCE_4_U08	4	SCIENCE	水のすがた	A	50	1	phase_change	phase_change,heat_flow	science-matter		YES	状態変化や熱の移動を流れとして見せられる。
+SCIENCE_4_U09	4	SCIENCE	もののあたたまり方	A	50	1	heat_flow	phase_change,heat_flow	science-matter		YES	状態変化や熱の移動を流れとして見せられる。
+SCIENCE_5_U01	5	SCIENCE	天気の変化	A	50	1	weather_map	weather_map,line_chart,front_cross_section	data-chart,science-earth		YES	気象データ・雲・前線の配置を読み取ることが重要。
+SCIENCE_5_U02	5	SCIENCE	台風と天気	A	50	1	weather_map	weather_map,line_chart,front_cross_section	data-chart,science-earth		YES	気象データ・雲・前線の配置を読み取ることが重要。
+SCIENCE_5_U03	5	SCIENCE	植物の発芽と成長	A	50	1	life_cycle	life_cycle,growth_sequence	science-life		YES	時間順の変化や成長段階を並べて理解する単元。
+SCIENCE_5_U04	5	SCIENCE	花から実へ	A	50	1	life_cycle	life_cycle,growth_sequence	science-life		YES	時間順の変化や成長段階を並べて理解する単元。
+SCIENCE_5_U05	5	SCIENCE	メダカのたんじょう	A	50	1	life_cycle	life_cycle,growth_sequence	science-life		YES	時間順の変化や成長段階を並べて理解する単元。
+SCIENCE_5_U06	5	SCIENCE	人のたんじょう	A	50	1	life_cycle	life_cycle,growth_sequence	science-life		YES	時間順の変化や成長段階を並べて理解する単元。
+SCIENCE_5_U07	5	SCIENCE	流れる水のはたらき	A	50	1	river_cross_section	river_cross_section,erosion_flow	science-earth		YES	侵食・運搬・堆積の場所を地形と対応させる。
+SCIENCE_5_U08	5	SCIENCE	物のとけ方	A	50	1	particle_model	beaker_model,particle_model,ph_scale	science-matter		YES	溶解・濃度・酸アルカリを粒子や目盛りで示すと理解しやすい。
+SCIENCE_5_U09	5	SCIENCE	電磁石	A	50	1	magnetic_field	electric_circuit,magnetic_field,energy_flow	science-physics		YES	回路・電流の向き・磁界は模式図が学習の中心。
+SCIENCE_6_U01	6	SCIENCE	物の燃え方	A	50	1	combustion_model	combustion_model,gas_composition	science-matter		YES	燃焼前後の気体の変化と条件を模式化できる。
+SCIENCE_6_U02	6	SCIENCE	植物のつくりとはたらき	A	50	1	plant_anatomy	plant_anatomy,transport_flow	science-life		YES	根・茎・葉と水や養分の流れを図で関連付ける。
+SCIENCE_6_U03	6	SCIENCE	人の体のつくりとはたらき	A	50	1	body_system	body_system,circulation_flow	science-life		YES	器官の位置と働きのつながりを図で整理する。
+SCIENCE_6_U04	6	SCIENCE	月と太陽	A	48	1	orbit_diagram	orbit_diagram,sky_path,moon_phase	science-earth		YES	天体の位置関係と見かけの動きは図なしでは理解しにくい。
+SCIENCE_6_U05	6	SCIENCE	てこ	A	50	1	lever	lever	science-physics		YES	支点・力点・作用点と距離の関係が図そのもの。
+SCIENCE_6_U06	6	SCIENCE	水よう液	A	50	1	ph_scale	beaker_model,particle_model,ph_scale	science-matter		YES	溶解・濃度・酸アルカリを粒子や目盛りで示すと理解しやすい。
+SCIENCE_6_U07	6	SCIENCE	電気の利用	A	50	1	electric_circuit	electric_circuit,magnetic_field,energy_flow	science-physics		YES	回路・電流の向き・磁界は模式図が学習の中心。
+SCIENCE_6_U08	6	SCIENCE	土地のつくり	A	50	1	earth_cross_section	strata_cross_section,volcano_cross_section,seismic_wave,plate_motion	science-earth		YES	地下構造や時間変化を断面図で示す必要がある。
+SCIENCE_6_U09	6	SCIENCE	生き物と環境	A	50	1	food_web	food_web,ecosystem_flow	science-life		YES	食物連鎖・物質循環の関係をネットワークで表せる。
+SCIENCE_7_U01	7	SCIENCE	生物の観察と分類	B	50	1	science_classification	observation_compare,classification_tree	science-life		YES	観察ポイントや分類条件を整理する問題で有効。
+SCIENCE_7_U02	7	SCIENCE	植物の体のつくりとはたらき	B	50	1	plant_anatomy	concept_diagram	specialized		YES	理科は模式図が有効だが、この単元では問題内容を選んで限定的に使う。
+SCIENCE_7_U03	7	SCIENCE	動物の体のつくりとはたらき	A	50	1	body_system	body_system,circulation_flow	science-life		YES	器官の位置と働きのつながりを図で整理する。
+SCIENCE_7_U04	7	SCIENCE	身のまわりの物質	B	50	1	science_classification	particle_model,gas_collection	science-matter		YES	性質比較や気体の集め方を図で確認する問題に有効。
+SCIENCE_7_U05	7	SCIENCE	気体の性質	B	50	1	science_classification	particle_model,gas_collection	science-matter		YES	性質比較や気体の集め方を図で確認する問題に有効。
+SCIENCE_7_U06	7	SCIENCE	水溶液の性質	A	50	1	beaker_model	beaker_model,particle_model,ph_scale	science-matter		YES	溶解・濃度・酸アルカリを粒子や目盛りで示すと理解しやすい。
+SCIENCE_7_U07	7	SCIENCE	光	A	50	1	ray_diagram	ray_diagram	science-physics		YES	反射・屈折・像は光線図を読むことが重要。
+SCIENCE_7_U08	7	SCIENCE	音	A	50	1	wave_diagram	wave_diagram,vibration_model	science-physics		YES	振動・振幅・周波数を形として比較できる。
+SCIENCE_7_U09	7	SCIENCE	力と圧力	A	50	1	force_diagram	force_diagram,pressure_area,vector_composition	science-physics		YES	力の向きと大きさを矢印で示す必要がある。
+SCIENCE_7_U10	7	SCIENCE	大地の変化	A	50	1	earth_cross_section	strata_cross_section,volcano_cross_section,seismic_wave,plate_motion	science-earth		YES	地下構造や時間変化を断面図で示す必要がある。
+SCIENCE_7_U11	7	SCIENCE	火山	A	50	1	earth_cross_section	strata_cross_section,volcano_cross_section,seismic_wave,plate_motion	science-earth		YES	地下構造や時間変化を断面図で示す必要がある。
+SCIENCE_7_U12	7	SCIENCE	地震	A	50	1	earth_cross_section	strata_cross_section,volcano_cross_section,seismic_wave,plate_motion	science-earth		YES	地下構造や時間変化を断面図で示す必要がある。
+SCIENCE_7_U13	7	SCIENCE	地層	A	50	1	earth_cross_section	strata_cross_section,volcano_cross_section,seismic_wave,plate_motion	science-earth		YES	地下構造や時間変化を断面図で示す必要がある。
+SCIENCE_8_U01	8	SCIENCE	生物と細胞	A	50	1	cell_diagram	cell_diagram	science-life		YES	細胞の各部位と違いを図から判断する単元。
+SCIENCE_8_U02	8	SCIENCE	植物の体のつくりとはたらき	B	50	1	plant_anatomy	concept_diagram	specialized		YES	理科は模式図が有効だが、この単元では問題内容を選んで限定的に使う。
+SCIENCE_8_U03	8	SCIENCE	動物の体のつくりとはたらき	A	50	1	body_system	body_system,circulation_flow	science-life		YES	器官の位置と働きのつながりを図で整理する。
+SCIENCE_8_U04	8	SCIENCE	化学変化	A	50	1	particle_reaction	particle_reaction,atom_molecule,balance_model	science-matter		YES	反応前後の粒子数・結び付き・電荷を視覚化する。
+SCIENCE_8_U05	8	SCIENCE	原子と分子	A	50	1	particle_model	particle_reaction,atom_molecule,balance_model	science-matter		YES	反応前後の粒子数・結び付き・電荷を視覚化する。
+SCIENCE_8_U06	8	SCIENCE	化学変化と質量	A	50	1	particle_reaction	particle_reaction,atom_molecule,balance_model	science-matter		YES	反応前後の粒子数・結び付き・電荷を視覚化する。
+SCIENCE_8_U07	8	SCIENCE	電流	A	50	1	electric_circuit	electric_circuit,magnetic_field,energy_flow	science-physics		YES	回路・電流の向き・磁界は模式図が学習の中心。
+SCIENCE_8_U08	8	SCIENCE	電流と磁界	A	50	1	magnetic_field	electric_circuit,magnetic_field,energy_flow	science-physics		YES	回路・電流の向き・磁界は模式図が学習の中心。
+SCIENCE_8_U09	8	SCIENCE	天気と気象	A	50	1	weather_map	weather_map,line_chart,front_cross_section	data-chart,science-earth		YES	気象データ・雲・前線の配置を読み取ることが重要。
+SCIENCE_8_U10	8	SCIENCE	前線と天気	A	50	1	weather_map	weather_map,line_chart,front_cross_section	data-chart,science-earth		YES	気象データ・雲・前線の配置を読み取ることが重要。
+SCIENCE_9_U01	9	SCIENCE	生物の成長と生殖	A	50	1	life_cycle	life_cycle,growth_sequence	science-life		YES	時間順の変化や成長段階を並べて理解する単元。
+SCIENCE_9_U02	9	SCIENCE	遺伝	A	50	1	punnett_square	punnett_square,chromosome_model	science-life		YES	遺伝情報の組合せを表で追うことが有効。
+SCIENCE_9_U03	9	SCIENCE	生物のつながり	A	50	1	food_web	food_web,ecosystem_flow	science-life		YES	食物連鎖・物質循環の関係をネットワークで表せる。
+SCIENCE_9_U04	9	SCIENCE	化学変化とイオン	A	50	1	beaker_model	particle_reaction,atom_molecule,balance_model	science-matter		YES	反応前後の粒子数・結び付き・電荷を視覚化する。
+SCIENCE_9_U05	9	SCIENCE	酸とアルカリ	A	50	1	ph_scale	beaker_model,particle_model,ph_scale	science-matter		YES	溶解・濃度・酸アルカリを粒子や目盛りで示すと理解しやすい。
+SCIENCE_9_U06	9	SCIENCE	中和	A	50	1	particle_reaction	beaker_model,particle_model,ph_scale	science-matter		YES	溶解・濃度・酸アルカリを粒子や目盛りで示すと理解しやすい。
+SCIENCE_9_U07	9	SCIENCE	力の合成と分解	A	50	1	force_diagram	force_diagram,pressure_area,vector_composition	science-physics		YES	力の向きと大きさを矢印で示す必要がある。
+SCIENCE_9_U08	9	SCIENCE	運動	A	50	1	motion_graph	motion_graph,motion_strip	coordinate-graph,quantity-model		YES	位置・時間・速さをグラフと連続図で結び付ける。
+SCIENCE_9_U09	9	SCIENCE	仕事とエネルギー	A	50	1	energy_bar	energy_bar,force_distance	science-physics,specialized		YES	エネルギー変換や仕事を量の変化として表せる。
+SCIENCE_9_U10	9	SCIENCE	地球と宇宙	A	50	1	orbit_diagram	orbit_diagram,sky_path,moon_phase	science-earth		YES	天体の位置関係と見かけの動きは図なしでは理解しにくい。
+SCIENCE_9_U11	9	SCIENCE	太陽系	A	50	1	orbit_diagram	orbit_diagram,sky_path,moon_phase	science-earth		YES	天体の位置関係と見かけの動きは図なしでは理解しにくい。
+SCIENCE_9_U12	9	SCIENCE	星の動き	A	50	1	orbit_diagram	orbit_diagram,sky_path,moon_phase	science-earth		YES	天体の位置関係と見かけの動きは図なしでは理解しにくい。
+SOCIAL_3_U01	3	SOCIAL	わたしたちの町	B	50	0		town_map,timeline	flow-diagram,map			地域の位置関係や変化を扱う問題で有効。
+SOCIAL_3_U02	3	SOCIAL	地図の見かた	A	50	1	social_map	region_map,map_layer	map		YES	位置・分布・方位を地図から読み取ることが学習の中心。
+SOCIAL_3_U03	3	SOCIAL	土地のようす	A	50	1	social_landform	region_map,map_layer	map		YES	位置・分布・方位を地図から読み取ることが学習の中心。
+SOCIAL_3_U04	3	SOCIAL	町ではたらく人	B	50	0		work_flow,supply_chain	flow-diagram			仕事の工程や人のつながりを順序で示す問題に有効。
+SOCIAL_3_U05	3	SOCIAL	商店のしごと	B	50	0		work_flow,supply_chain	flow-diagram			仕事の工程や人のつながりを順序で示す問題に有効。
+SOCIAL_3_U06	3	SOCIAL	農家のしごと	B	50	0		work_flow,supply_chain	flow-diagram			仕事の工程や人のつながりを順序で示す問題に有効。
+SOCIAL_3_U07	3	SOCIAL	工場のしごと	B	50	0		work_flow,supply_chain	flow-diagram			仕事の工程や人のつながりを順序で示す問題に有効。
+SOCIAL_3_U08	3	SOCIAL	交通のはたらき	A	50	1	social_flow	route_map,transport_flow	map,science-life		YES	交通網と人・物の移動を図で考える単元。
+SOCIAL_3_U09	3	SOCIAL	市のようすのうつりかわり	B	50	0		town_map,timeline	flow-diagram,map			地域の位置関係や変化を扱う問題で有効。
+SOCIAL_4_U01	4	SOCIAL	都道府県	A	50	1	social_map	region_map,map_layer	map		YES	位置・分布・方位を地図から読み取ることが学習の中心。
+SOCIAL_4_U02	4	SOCIAL	日本の地形	A	50	1	social_landform	region_map,map_layer	map		YES	位置・分布・方位を地図から読み取ることが学習の中心。
+SOCIAL_4_U03	4	SOCIAL	気候	A	50	1	social_climograph	climate_map,climograph	data-chart,map		YES	地域分布と気温・降水量を対応させる必要がある。
+SOCIAL_4_U04	4	SOCIAL	水のしごと	A	50	1	social_flow	process_flow,infrastructure_flow	flow-diagram		YES	施設から家庭までの流れを順序立てて理解する単元。
+SOCIAL_4_U05	4	SOCIAL	ごみのしょり	A	50	1	social_flow	process_flow,infrastructure_flow	flow-diagram		YES	施設から家庭までの流れを順序立てて理解する単元。
+SOCIAL_4_U06	4	SOCIAL	災害とくらし	A	50	1	social_hazard	hazard_map,evacuation_flow	map,specialized		YES	危険箇所・避難経路・災害種別を地図で考えられる。
+SOCIAL_4_U07	4	SOCIAL	地図帳の使い方	A	50	1	social_map	region_map,map_layer	map		YES	位置・分布・方位を地図から読み取ることが学習の中心。
+SOCIAL_4_U08	4	SOCIAL	県のようす	A	50	1	social_region_profile	region_map,map_layer	map		YES	位置・分布・方位を地図から読み取ることが学習の中心。
+SOCIAL_4_U09	4	SOCIAL	伝統文化	B	50	0		region_map,timeline	flow-diagram,map			地域や時代との対応を示す問題で有効。
+SOCIAL_5_U01	5	SOCIAL	日本の国土	A	50	1	social_map	region_map,map_layer	map		YES	位置・分布・方位を地図から読み取ることが学習の中心。
+SOCIAL_5_U02	5	SOCIAL	日本の気候	A	50	1	social_flow	climate_map,climograph	data-chart,map		YES	地域分布と気温・降水量を対応させる必要がある。
+SOCIAL_5_U03	5	SOCIAL	農業	A	50	1	social_flow	production_map,supply_chain	flow-diagram,map		YES	生産地域と流通のつながりを地図・フローで示せる。
+SOCIAL_5_U04	5	SOCIAL	水産業	A	50	1	social_flow	production_map,supply_chain	flow-diagram,map		YES	生産地域と流通のつながりを地図・フローで示せる。
+SOCIAL_5_U05	5	SOCIAL	工業	A	50	1	social_flow	production_map,supply_chain	flow-diagram,map		YES	生産地域と流通のつながりを地図・フローで示せる。
+SOCIAL_5_U06	5	SOCIAL	貿易	A	50	1	social_flow	trade_flow_map,bar_chart	data-chart,map		YES	輸出入の方向・品目・相手国を流れとして示す価値が高い。
+SOCIAL_5_U07	5	SOCIAL	情報産業	B	50	0		network_flow,information_flow	flow-diagram			情報が届く経路を可視化する問題で有効。
+SOCIAL_5_U08	5	SOCIAL	環境問題	B	50	0		cause_effect_flow,supply_chain	flow-diagram			原因と影響のつながりを整理する問題で有効。
+SOCIAL_5_U09	5	SOCIAL	食料問題	B	50	0		cause_effect_flow,supply_chain	flow-diagram			原因と影響のつながりを整理する問題で有効。
+SOCIAL_6_U01	6	SOCIAL	日本の歴史（縄文・弥生）	B	50	1	social_timeline	timeline,cause_effect_flow,historical_map	flow-diagram,map		YES	年代・因果・勢力範囲を扱う問題に絞って有効。
+SOCIAL_6_U02	6	SOCIAL	古墳時代	B	50	1	social_timeline	timeline,cause_effect_flow,historical_map	flow-diagram,map		YES	年代・因果・勢力範囲を扱う問題に絞って有効。
+SOCIAL_6_U03	6	SOCIAL	奈良時代	B	50	1	social_timeline	timeline,cause_effect_flow,historical_map	flow-diagram,map		YES	年代・因果・勢力範囲を扱う問題に絞って有効。
+SOCIAL_6_U04	6	SOCIAL	平安時代	B	50	1	social_timeline	timeline,cause_effect_flow,historical_map	flow-diagram,map		YES	年代・因果・勢力範囲を扱う問題に絞って有効。
+SOCIAL_6_U05	6	SOCIAL	鎌倉時代	B	50	1	social_timeline	timeline,cause_effect_flow,historical_map	flow-diagram,map		YES	年代・因果・勢力範囲を扱う問題に絞って有効。
+SOCIAL_6_U06	6	SOCIAL	室町時代	B	50	1	social_timeline	timeline,cause_effect_flow,historical_map	flow-diagram,map		YES	年代・因果・勢力範囲を扱う問題に絞って有効。
+SOCIAL_6_U07	6	SOCIAL	安土桃山時代	B	50	1	social_timeline	timeline,cause_effect_flow,historical_map	flow-diagram,map		YES	年代・因果・勢力範囲を扱う問題に絞って有効。
+SOCIAL_6_U08	6	SOCIAL	江戸時代	B	50	1	social_timeline	timeline,cause_effect_flow,historical_map	flow-diagram,map		YES	年代・因果・勢力範囲を扱う問題に絞って有効。
+SOCIAL_6_U09	6	SOCIAL	明治時代	B	50	1	social_timeline	timeline,cause_effect_flow,historical_map	flow-diagram,map		YES	年代・因果・勢力範囲を扱う問題に絞って有効。
+SOCIAL_6_U10	6	SOCIAL	大正時代	B	50	1	social_timeline	timeline,cause_effect_flow,historical_map	flow-diagram,map		YES	年代・因果・勢力範囲を扱う問題に絞って有効。
+SOCIAL_6_U11	6	SOCIAL	昭和時代	B	50	1	social_timeline	timeline,cause_effect_flow,historical_map	flow-diagram,map		YES	年代・因果・勢力範囲を扱う問題に絞って有効。
+SOCIAL_6_U12	6	SOCIAL	日本国憲法	A	50	1	social_government	government_flow,institution_relationship	flow-diagram		YES	制度間の関係・手続き・三権のつながりを図で整理できる。
+SOCIAL_6_U13	6	SOCIAL	国会	A	50	1	social_government	government_flow,institution_relationship	flow-diagram		YES	制度間の関係・手続き・三権のつながりを図で整理できる。
+SOCIAL_6_U14	6	SOCIAL	内閣	A	50	1	social_government	government_flow,institution_relationship	flow-diagram		YES	制度間の関係・手続き・三権のつながりを図で整理できる。
+SOCIAL_6_U15	6	SOCIAL	裁判所	A	50	1	social_government	government_flow,institution_relationship	flow-diagram		YES	制度間の関係・手続き・三権のつながりを図で整理できる。
+SOCIAL_6_U16	6	SOCIAL	地方自治	A	50	1	social_government	government_flow,institution_relationship	flow-diagram		YES	制度間の関係・手続き・三権のつながりを図で整理できる。
+SOCIAL_6_U17	6	SOCIAL	国際社会	B	50	0		world_map,organization_flow	flow-diagram,map			国・地域・国際機関の関係を扱う問題で有効。
+SOCIAL_7_U01	7	SOCIAL	世界の地域	A	50	1	social_map	region_map,map_layer	map		YES	位置・分布・方位を地図から読み取ることが学習の中心。
+SOCIAL_7_U02	7	SOCIAL	世界の気候	A	50	1	social_region_profile	climate_map,climograph	data-chart,map		YES	地域分布と気温・降水量を対応させる必要がある。
+SOCIAL_7_U03	7	SOCIAL	世界の人口	A	50	1	social_population_pyramid	population_map,population_pyramid,bar_chart	data-chart,specialized		YES	人口分布や構成を資料から読み取る単元。
+SOCIAL_7_U04	7	SOCIAL	世界の産業	A	50	1	social_flow	production_map,supply_chain	flow-diagram,map		YES	生産地域と流通のつながりを地図・フローで示せる。
+SOCIAL_7_U05	7	SOCIAL	アジア	A	50	1	social_climograph	region_map,thematic_map	map		YES	地域ごとの位置・自然・産業の分布を地図で扱う。
+SOCIAL_7_U06	7	SOCIAL	ヨーロッパ	A	50	1	social_flow	region_map,thematic_map	map		YES	地域ごとの位置・自然・産業の分布を地図で扱う。
+SOCIAL_7_U07	7	SOCIAL	アフリカ	A	50	1	social_population_pyramid	region_map,thematic_map	map		YES	地域ごとの位置・自然・産業の分布を地図で扱う。
+SOCIAL_7_U08	7	SOCIAL	北アメリカ	A	50	1	social_flow	region_map,thematic_map	map		YES	地域ごとの位置・自然・産業の分布を地図で扱う。
+SOCIAL_7_U09	7	SOCIAL	南アメリカ	A	50	1	social_region_profile	region_map,thematic_map	map		YES	地域ごとの位置・自然・産業の分布を地図で扱う。
+SOCIAL_7_U10	7	SOCIAL	オセアニア	A	50	1	social_flow	region_map,thematic_map	map		YES	地域ごとの位置・自然・産業の分布を地図で扱う。
+SOCIAL_7_U11	7	SOCIAL	日本の地域	A	50	1	social_region_profile	region_map,map_layer	map		YES	位置・分布・方位を地図から読み取ることが学習の中心。
+SOCIAL_7_U12	7	SOCIAL	日本の自然	A	50	1	social_landform	region_map,map_layer	map		YES	位置・分布・方位を地図から読み取ることが学習の中心。
+SOCIAL_7_U13	7	SOCIAL	日本の人口	A	50	1	social_population_pyramid	population_map,population_pyramid,bar_chart	data-chart,specialized		YES	人口分布や構成を資料から読み取る単元。
+SOCIAL_7_U14	7	SOCIAL	日本の産業	A	50	1	social_flow	production_map,supply_chain	flow-diagram,map		YES	生産地域と流通のつながりを地図・フローで示せる。
+SOCIAL_8_U01	8	SOCIAL	古代文明	A	50	1	social_flow	historical_map,timeline	flow-diagram,map		YES	文明の位置と年代を同時に見る価値が高い。
+SOCIAL_8_U02	8	SOCIAL	ギリシャ・ローマ	A	50	1	social_timeline	historical_map,timeline	flow-diagram,map		YES	文明の位置と年代を同時に見る価値が高い。
+SOCIAL_8_U03	8	SOCIAL	日本の古代	B	50	1	social_timeline	timeline,cause_effect_flow,historical_map	flow-diagram,map		YES	年代・因果・勢力範囲を扱う問題に絞って有効。
+SOCIAL_8_U04	8	SOCIAL	日本の中世	B	50	1	social_timeline	timeline,cause_effect_flow,historical_map	flow-diagram,map		YES	年代・因果・勢力範囲を扱う問題に絞って有効。
+SOCIAL_8_U05	8	SOCIAL	日本の近世	B	50	1	social_timeline	timeline,cause_effect_flow,historical_map	flow-diagram,map		YES	年代・因果・勢力範囲を扱う問題に絞って有効。
+SOCIAL_8_U06	8	SOCIAL	欧米の近代化	B	50	1	social_flow	timeline,cause_effect_flow,historical_map	flow-diagram,map		YES	年代・因果・勢力範囲を扱う問題に絞って有効。
+SOCIAL_8_U07	8	SOCIAL	明治維新	B	50	1	social_timeline	timeline,cause_effect_flow,historical_map	flow-diagram,map		YES	年代・因果・勢力範囲を扱う問題に絞って有効。
+SOCIAL_8_U08	8	SOCIAL	日本の近代化	B	50	1	social_region_profile	timeline,cause_effect_flow,historical_map	flow-diagram,map		YES	年代・因果・勢力範囲を扱う問題に絞って有効。
+SOCIAL_8_U09	8	SOCIAL	世界大戦	B	50	1	social_flow	timeline,cause_effect_flow,historical_map	flow-diagram,map		YES	年代・因果・勢力範囲を扱う問題に絞って有効。
+SOCIAL_8_U10	8	SOCIAL	現代の日本	B	50	1	social_timeline	timeline,cause_effect_flow,historical_map	flow-diagram,map		YES	年代・因果・勢力範囲を扱う問題に絞って有効。
+SOCIAL_9_U01	9	SOCIAL	現代社会	B	50	0		cause_effect_flow,money_flow,institution_relationship	flow-diagram			制度やお金の流れを扱う設問で補助図が有効。
+SOCIAL_9_U02	9	SOCIAL	人権	B	50	0		cause_effect_flow,money_flow,institution_relationship	flow-diagram			制度やお金の流れを扱う設問で補助図が有効。
+SOCIAL_9_U03	9	SOCIAL	民主主義	A	50	1	social_government	government_flow,institution_relationship	flow-diagram		YES	制度間の関係・手続き・三権のつながりを図で整理できる。
+SOCIAL_9_U04	9	SOCIAL	日本国憲法	A	50	1	social_government	government_flow,institution_relationship	flow-diagram		YES	制度間の関係・手続き・三権のつながりを図で整理できる。
+SOCIAL_9_U05	9	SOCIAL	国会	A	50	1	social_government	government_flow,institution_relationship	flow-diagram		YES	制度間の関係・手続き・三権のつながりを図で整理できる。
+SOCIAL_9_U06	9	SOCIAL	内閣	A	50	1	social_government	government_flow,institution_relationship	flow-diagram		YES	制度間の関係・手続き・三権のつながりを図で整理できる。
+SOCIAL_9_U07	9	SOCIAL	裁判所	A	50	1	social_government	government_flow,institution_relationship	flow-diagram		YES	制度間の関係・手続き・三権のつながりを図で整理できる。
+SOCIAL_9_U08	9	SOCIAL	地方自治	A	50	1	social_government	government_flow,institution_relationship	flow-diagram		YES	制度間の関係・手続き・三権のつながりを図で整理できる。
+SOCIAL_9_U09	9	SOCIAL	選挙	A	50	1	social_government	government_flow,institution_relationship	flow-diagram		YES	制度間の関係・手続き・三権のつながりを図で整理できる。
+SOCIAL_9_U10	9	SOCIAL	税金	B	50	0		cause_effect_flow,money_flow,institution_relationship	flow-diagram			制度やお金の流れを扱う設問で補助図が有効。
+SOCIAL_9_U11	9	SOCIAL	市場経済	B	50	0		cause_effect_flow,money_flow,institution_relationship	flow-diagram			制度やお金の流れを扱う設問で補助図が有効。
+SOCIAL_9_U12	9	SOCIAL	金融	B	50	0		cause_effect_flow,money_flow,institution_relationship	flow-diagram			制度やお金の流れを扱う設問で補助図が有効。
+SOCIAL_9_U13	9	SOCIAL	労働	B	50	0		cause_effect_flow,money_flow,institution_relationship	flow-diagram			制度やお金の流れを扱う設問で補助図が有効。
+SOCIAL_9_U14	9	SOCIAL	社会保障	B	50	0		cause_effect_flow,money_flow,institution_relationship	flow-diagram			制度やお金の流れを扱う設問で補助図が有効。
+SOCIAL_9_U15	9	SOCIAL	国際社会	B	50	0		world_map,organization_flow	flow-diagram,map			国・地域・国際機関の関係を扱う問題で有効。
+SOCIAL_9_U16	9	SOCIAL	国際協力	B	50	0		world_map,organization_flow	flow-diagram,map			国・地域・国際機関の関係を扱う問題で有効。

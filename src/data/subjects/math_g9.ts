@@ -461,14 +461,14 @@ const makeUnitProblem = (unitId: string, n: number): GeneralProblem => {
             const hit = (n % 4) + 2;
             const p = n % 4;
             if (p === 0) {
-                return { question: `標本 ${sample}個中 ${hit}個が該当。割合は？`, answer: `${hit}/${sample}`, options: d(`${hit}/${sample}`, `${sample}/${hit}`, `${hit + sample}`, `${sample - hit}`), hint: "該当数/標本数。" };
+                return { question: `標本 ${sample}個中 ${hit}個が該当。割合は？`, answer: `${hit}/${sample}`, options: d(`${hit}/${sample}`, `${sample}/${hit}`, `${hit + sample}`, `${sample - hit}`), hint: "該当数/標本数。", visual: { kind: 'bar_chart', values: [hit, sample - hit], labels: ['該当', 'その他'] } };
             }
             if (p === 1) {
-                return { question: `標本 ${sample}個中 ${hit}個が該当。百分率は？`, answer: `${Math.round((hit / sample) * 100)}%`, options: d(`${Math.round((hit / sample) * 100)}%`, `${hit * sample}%`, `${sample - hit}%`, `${hit}%`), hint: "割合×100。" };
+                return { question: `標本 ${sample}個中 ${hit}個が該当。百分率は？`, answer: `${Math.round((hit / sample) * 100)}%`, options: d(`${Math.round((hit / sample) * 100)}%`, `${hit * sample}%`, `${sample - hit}%`, `${hit}%`), hint: "割合×100。", visual: { kind: 'bar_chart', values: [hit, sample - hit], labels: ['該当', 'その他'] } };
             }
             if (p === 2) {
                 const miss = sample - hit;
-                return { question: `標本 ${sample}個中 ${hit}個が該当。該当しない個数は？`, answer: `${miss}個`, options: d(`${miss}個`, `${sample + hit}個`, `${hit}個`, `${sample}個`), hint: "全体-該当数。" };
+                return { question: `標本 ${sample}個中 ${hit}個が該当。該当しない個数は？`, answer: `${miss}個`, options: d(`${miss}個`, `${sample + hit}個`, `${hit}個`, `${sample}個`), hint: "全体-該当数。", visual: { kind: 'bar_chart', values: [hit, miss], labels: ['該当', 'その他'] } };
             }
             return { question: `標本調査で 母集団を推定するとき大切なのは？`, answer: "かたよりのない標本", options: d("かたよりのない標本", "できるだけ少ない標本", "同じ人だけの標本", "結果が高い標本"), hint: "代表性が重要。" };
         }

@@ -1,5 +1,6 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import sharp from 'sharp';
 
 const root = process.cwd();
 const femaleDoc = fs.readFileSync(path.join(root, 'docs/magic-endless-generic-events-90-plan.md'), 'utf8');
@@ -12,6 +13,18 @@ const failures = [];
 const countRows = (source, prefix) => [...source.matchAll(new RegExp(`^\\|\\s*${prefix}-\\d+`, 'gm'))].length;
 if (countRows(femaleDoc, 'MGE') !== 90) failures.push('female design document must contain 90 MGE rows');
 if (countRows(maleDoc, 'MGEM') !== 90) failures.push('male design document must contain 90 MGEM rows');
+
+const verifyDesignRowColumns = (source, prefix) => {
+  const rows = source.split(/\r?\n/).filter(line => new RegExp(`^\\|\\s*${prefix}-\\d+`).test(line));
+  for (const row of rows) {
+    const cells = row.split('|').slice(1, -1).map(cell => cell.trim());
+    if (cells.length !== 6) {
+      failures.push(`${prefix} design row must contain 6 columns: ${cells[0] || 'unknown ID'}`);
+    }
+  }
+};
+verifyDesignRowColumns(femaleDoc, 'MGE');
+verifyDesignRowColumns(maleDoc, 'MGEM');
 
 for (const [prefix, expected] of [['MGE', 90], ['MGEM', 90]]) {
   const ids = runtime.match(new RegExp(`\\b${prefix}-\\d{3}\\b`, 'g')) || [];
@@ -27,15 +40,15 @@ for (const prefix of ['MGE', 'MGEM']) {
   const sheetRoot = path.join(root, 'public/sprites/magic/events/endless/character-sheets');
   for (let start = 1; start <= 90; start += 9) {
     const end = start + 8;
-    const file = path.join(sheetRoot, `${prefix}-${String(start).padStart(3, '0')}-${String(end).padStart(3, '0')}.png`);
+    const file = path.join(sheetRoot, `${prefix}-${String(start).padStart(3, '0')}-${String(end).padStart(3, '0')}.webp`);
     if (!fs.existsSync(file)) {
       failures.push(`missing ${prefix} image sheet: ${path.relative(root, file)}`);
       continue;
     }
-    const png = fs.readFileSync(file);
-    const width = png.readUInt32BE(16);
-    const height = png.readUInt32BE(20);
-    if (width !== height || width < 900) failures.push(`${prefix} sheet is not a square high-resolution PNG: ${path.relative(root, file)}`);
+    const metadata = await sharp(file).metadata();
+    if (metadata.format !== 'webp' || metadata.width !== metadata.height || (metadata.width ?? 0) < 900) {
+      failures.push(`${prefix} sheet is not a square high-resolution WebP: ${path.relative(root, file)}`);
+    }
   }
 }
 

@@ -443,17 +443,38 @@ const makeUnitProblem = (unitId: string, n: number): GeneralProblem => {
         case 'MATH_G7_U01': {
             const a = (n % 9) + 1;
             if (n % 2 === 0) {
-                return { question: `正の数と負の数。 ${a} の反対の数は？`, answer: `${-a}`, options: d(`${-a}`, `${a}`, "0", `${a + 1}`), hint: "符号を反転。" };
+                return {
+                    question: `正の数と負の数。 ${a} の反対の数は？`,
+                    answer: `${-a}`,
+                    options: d(`${-a}`, `${a}`, "0", `${a + 1}`),
+                    hint: "符号を反転。",
+                    visual: { kind: 'number_line', min: -10, max: 10, step: 1, markers: [{ value: a, label: `+${a}` }, { value: 0, label: '0' }, { value: -a, label: '?', emphasized: true }] },
+                };
             }
-            return { question: `数直線で 0 から ${a} はなれた負の数は？`, answer: `${-a}`, options: d(`${-a}`, `${a}`, "0", `${-(a + 1)}`), hint: "負の向きに ${a} 進む。" };
+            return {
+                question: `数直線で 0 から ${a} はなれた負の数は？`,
+                answer: `${-a}`,
+                options: d(`${-a}`, `${a}`, "0", `${-(a + 1)}`),
+                hint: "負の向きに ${a} 進む。",
+                visual: { kind: 'number_line', min: -10, max: 10, step: 1, markers: [{ value: 0, label: '0' }, { value: -a, label: '?', emphasized: true }] },
+            };
         }
         case 'MATH_G7_U02': {
             const a = (n % 7) + 2;
             const b = (n % 6) + 1;
+            const result = a - b;
+            const visual = {
+                kind: 'number_line' as const,
+                min: -6,
+                max: 10,
+                step: 1,
+                markers: [{ value: a, label: `${a}` }, { value: result, label: '?', emphasized: true }],
+                jump: { from: a, to: result, label: `-${b}` },
+            };
             if (n % 2 === 0) {
-                return { question: `${a} + (${ -b }) = ?`, answer: `${a - b}`, options: d(`${a - b}`, `${a + b}`, `${b - a}`, `${a}`), hint: "符号に注意して加減。" };
+                return { question: `${a} + (${ -b }) = ?`, answer: `${result}`, options: d(`${result}`, `${a + b}`, `${b - a}`, `${a}`), hint: "符号に注意して加減。", visual };
             }
-            return { question: `${a} - ${b} = ?`, answer: `${a - b}`, options: d(`${a - b}`, `${a + b}`, `${b - a}`, `${-a - b}`), hint: "減法を加法に直してもよい。" };
+            return { question: `${a} - ${b} = ?`, answer: `${result}`, options: d(`${result}`, `${a + b}`, `${b - a}`, `${-a - b}`), hint: "減法を加法に直してもよい。", visual };
         }
         case 'MATH_G7_U03': {
             const a = (n % 8) + 2;
@@ -483,25 +504,33 @@ const makeUnitProblem = (unitId: string, n: number): GeneralProblem => {
             const a = (n % 4) + 2;
             const b = a * x + 3;
             if (n % 2 === 0) {
-                return { question: `${a}x + 3 = ${b}。xは？`, answer: `${x}`, options: d(`${x}`, `${x + 1}`, `${x - 1}`, `${a}`), hint: "移項して解く。" };
+                return { question: `${a}x + 3 = ${b}。xは？`, answer: `${x}`, options: d(`${x}`, `${x + 1}`, `${x - 1}`, `${a}`), hint: "移項して解く。", visual: { kind: 'balance_equation', leftParts: [`${a}×x`, '+3'], rightParts: [`${b}`], focusLabel: '両辺から同じ量を動かす' } };
             }
-            return { question: `${a}x = ${a * x}。xは？`, answer: `${x}`, options: d(`${x}`, `${a}`, `${a * x}`, `${x + 1}`), hint: "両辺を ${a} で割る。" };
+            return { question: `${a}x = ${a * x}。xは？`, answer: `${x}`, options: d(`${x}`, `${a}`, `${a * x}`, `${x + 1}`), hint: "両辺を ${a} で割る。", visual: { kind: 'balance_equation', leftParts: [`${a}×x`], rightParts: [`${a * x}`], focusLabel: `両辺を ${a} で分ける` } };
         }
         case 'MATH_G7_U07': {
             const p = (n % 5) + 2;
             const q = (n % 6) + 4;
             const total = p * q;
+            const visual = {
+                kind: 'bar_model' as const,
+                bars: [
+                    { label: '合計', segments: [{ value: total, label: `${total}円` }] },
+                    { label: '1個', segments: [{ value: p, label: `${p}円` }] },
+                ],
+                compareLabel: '何個分？',
+            };
             if (n % 2 === 0) {
-                return { question: `一次方程式の利用。1個${p}円の品をx個買って${total}円。xは？`, answer: `${q}`, options: d(`${q}`, `${p}`, `${total}`, `${q + 1}`), hint: "px=total の形。" };
+                return { question: `一次方程式の利用。1個${p}円の品をx個買って${total}円。xは？`, answer: `${q}`, options: d(`${q}`, `${p}`, `${total}`, `${q + 1}`), hint: "px=total の形。", visual };
             }
-            return { question: `x個で${total}円。1個${p}円のとき x を表す式は？`, answer: `${total}/${p}`, options: d(`${total}/${p}`, `${p}/${total}`, `${p}x=${total}`, `${total}-${p}`), hint: "合計 ÷ 単価。" };
+            return { question: `x個で${total}円。1個${p}円のとき x を表す式は？`, answer: `${total}/${p}`, options: d(`${total}/${p}`, `${p}/${total}`, `${p}x=${total}`, `${total}-${p}`), hint: "合計 ÷ 単価。", visual };
         }
         case 'MATH_G7_U08': {
             const x = [1, 2, 4, 5, 10][n % 5];
             if (n % 2 === 0) {
-                return { question: `比例 y=5x。x=${x} のとき y=?`, answer: `${5 * x}`, options: d(`${5 * x}`, `${x + 5}`, `${x * x}`, `${x}`), hint: "y=ax。" };
+                return { question: `比例 y=5x。x=${x} のとき y=?`, answer: `${5 * x}`, options: d(`${5 * x}`, `${x + 5}`, `${x * x}`, `${x}`), hint: "y=ax。", visual: { kind: 'coordinate_plane', xMin: 0, xMax: 10, yMin: 0, yMax: 50, relation: { type: 'linear', slope: 5 }, points: [{ x, y: 5 * x, emphasized: true }], xLabel: 'x', yLabel: 'y' } };
             }
-            return { question: `反比例 y=20/x。x=${x} のとき y=?`, answer: `${20 / x}`, options: d(`${20 / x}`, `${5 * x}`, `${x + 20}`, `${x}`), hint: "xとyの積が一定。" };
+            return { question: `反比例 y=20/x。x=${x} のとき y=?`, answer: `${20 / x}`, options: d(`${20 / x}`, `${5 * x}`, `${x + 20}`, `${x}`), hint: "xとyの積が一定。", visual: { kind: 'coordinate_plane', xMin: 0, xMax: 10, yMin: 0, yMax: 20, relation: { type: 'inverse', constant: 20 }, points: [{ x, y: 20 / x, emphasized: true }], xLabel: 'x', yLabel: 'y' } };
         }
         case 'MATH_G7_U09': {
             const p = n % 4;
@@ -542,15 +571,16 @@ const makeUnitProblem = (unitId: string, n: number): GeneralProblem => {
             const avg = Math.floor((a + b + c) / 3);
             const p = n % 4;
             if (p === 0) {
-                return { question: `資料の整理。${a}, ${b}, ${c} の平均は？`, answer: `${avg}`, options: d(`${avg}`, `${a + b + c}`, `${Math.max(a, b, c)}`, `${Math.min(a, b, c)}`), hint: "合計÷個数。" };
+                return { question: `資料の整理。${a}, ${b}, ${c} の平均は？`, answer: `${avg}`, options: d(`${avg}`, `${a + b + c}`, `${Math.max(a, b, c)}`, `${Math.min(a, b, c)}`), hint: "合計÷個数。", visual: { kind: 'dot_plot', values: [a, b, c], summaryValue: avg, summaryLabel: '平均' } };
             }
             if (p === 1) {
-                return { question: `資料の整理。${a}, ${b}, ${c} の中央値（小さい順の真ん中）は？`, answer: `${[a, b, c].sort((x, y) => x - y)[1]}`, options: d(`${[a, b, c].sort((x, y) => x - y)[1]}`, `${Math.max(a, b, c)}`, `${Math.min(a, b, c)}`, `${avg}`), hint: "並べ替えて中央を見る。" };
+                const median = [a, b, c].sort((x, y) => x - y)[1];
+                return { question: `資料の整理。${a}, ${b}, ${c} の中央値（小さい順の真ん中）は？`, answer: `${median}`, options: d(`${median}`, `${Math.max(a, b, c)}`, `${Math.min(a, b, c)}`, `${avg}`), hint: "並べ替えて中央を見る。", visual: { kind: 'dot_plot', values: [a, b, c], highlightValues: [median] } };
             }
             if (p === 2) {
-                return { question: `資料の整理。${a}, ${b}, ${c} の範囲（最大-最小）は？`, answer: `${Math.max(a, b, c) - Math.min(a, b, c)}`, options: d(`${Math.max(a, b, c) - Math.min(a, b, c)}`, `${a + b + c}`, `${avg}`, `${Math.max(a, b, c)}`), hint: "散らばりの大きさ。" };
+                return { question: `資料の整理。${a}, ${b}, ${c} の範囲（最大-最小）は？`, answer: `${Math.max(a, b, c) - Math.min(a, b, c)}`, options: d(`${Math.max(a, b, c) - Math.min(a, b, c)}`, `${a + b + c}`, `${avg}`, `${Math.max(a, b, c)}`), hint: "散らばりの大きさ。", visual: { kind: 'dot_plot', values: [a, b, c], highlightValues: [Math.min(a, b, c), Math.max(a, b, c)] } };
             }
-            return { question: `資料の整理。${a}, ${b}, ${c} の最大値は？`, answer: `${Math.max(a, b, c)}`, options: d(`${Math.max(a, b, c)}`, `${Math.min(a, b, c)}`, `${avg}`, `${a + b + c}`), hint: "最も大きいデータ。" };
+            return { question: `資料の整理。${a}, ${b}, ${c} の最大値は？`, answer: `${Math.max(a, b, c)}`, options: d(`${Math.max(a, b, c)}`, `${Math.min(a, b, c)}`, `${avg}`, `${a + b + c}`), hint: "最も大きいデータ。", visual: { kind: 'dot_plot', values: [a, b, c], highlightValues: [Math.max(a, b, c)] } };
         }
         default:
             return { question: "1 + 1 = ?", answer: "2", options: d("2", "1", "3", "0"), hint: "基本。" };

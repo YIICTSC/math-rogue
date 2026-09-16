@@ -533,19 +533,21 @@ const makeUnitProblem = (unitId: string, n: number): GeneralProblem => {
             const a = 200 + (n % 700);
             const b = 100 + (n % 500);
             const s = a + b;
+            const visual = { kind: 'place_value_blocks' as const, values: [{ value: a, label: 'A' }, { value: b, label: 'B' }], operation: '+' as const };
             if (n % 2 === 0) {
-                return { question: `${a} + ${b} = ?`, answer: `${s}`, options: d(`${s}`, `${s + 10}`, `${s - 10}`, `${a}`), hint: "3けた・4けたの たし算。" };
+                return { question: `${a} + ${b} = ?`, answer: `${s}`, options: d(`${s}`, `${s + 10}`, `${s - 10}`, `${a}`), hint: "3けた・4けたの たし算。", visual };
             }
-            return { question: `${s} に なる 式は どれ？`, answer: `${a} + ${b}`, options: d(`${a} + ${b}`, `${a} + ${b + 10}`, `${a - 10} + ${b}`, `${s} + ${b}`), hint: "和が ${s} に なる式を えらぼう。" };
+            return { question: `${s} に なる 式は どれ？`, answer: `${a} + ${b}`, options: d(`${a} + ${b}`, `${a} + ${b + 10}`, `${a - 10} + ${b}`, `${s} + ${b}`), hint: "和が ${s} に なる式を えらぼう。", visual };
         }
         case 'MATH_G3_U04': {
             const b = 100 + (n % 500);
             const a = b + 200 + (n % 400);
             const dff = a - b;
+            const visual = { kind: 'place_value_blocks' as const, values: [{ value: a, label: 'A' }, { value: b, label: 'B' }], operation: '-' as const };
             if (n % 2 === 0) {
-                return { question: `${a} - ${b} = ?`, answer: `${dff}`, options: d(`${dff}`, `${dff + 10}`, `${dff - 10}`, `${a}`), hint: "3けた・4けたの ひき算。" };
+                return { question: `${a} - ${b} = ?`, answer: `${dff}`, options: d(`${dff}`, `${dff + 10}`, `${dff - 10}`, `${a}`), hint: "3けた・4けたの ひき算。", visual };
             }
-            return { question: `${dff} に なる 式は どれ？`, answer: `${a} - ${b}`, options: d(`${a} - ${b}`, `${a} - ${b - 10}`, `${a + 10} - ${b}`, `${dff} - ${b}`), hint: "差が ${dff} に なる式を えらぼう。" };
+            return { question: `${dff} に なる 式は どれ？`, answer: `${a} - ${b}`, options: d(`${a} - ${b}`, `${a} - ${b - 10}`, `${a + 10} - ${b}`, `${dff} - ${b}`), hint: "差が ${dff} に なる式を えらぼう。", visual };
         }
         case 'MATH_G3_U05': {
             const h = (n % 10) + 1;
@@ -563,19 +565,37 @@ const makeUnitProblem = (unitId: string, n: number): GeneralProblem => {
         case 'MATH_G3_U06': {
             const km = (n % 5) + 1;
             const m = (n % 9) * 100;
+            const totalM = km * 1000 + m;
+            const visual = {
+                kind: 'measurement_scale' as const,
+                sourceMinorValue: totalM,
+                majorUnit: 'km',
+                minorUnit: 'm',
+                minorPerMajor: 1000,
+                sourceLabel: n % 2 === 0 ? `${km}km${m}m` : `${totalM}m`,
+                targetLabel: n % 2 === 0 ? '? m' : '? km ? m',
+            };
             if (n % 2 === 0) {
-                return { question: `${km}km${m}m は 何m？`, answer: `${km * 1000 + m}m`, options: d(`${km * 1000 + m}m`, `${km * 100 + m}m`, `${km * 1000}m`, `${m}m`), hint: "1km=1000m。" };
+                return { question: `${km}km${m}m は 何m？`, answer: `${totalM}m`, options: d(`${totalM}m`, `${km * 100 + m}m`, `${km * 1000}m`, `${m}m`), hint: "1km=1000m。", visual };
             }
-            return { question: `${km * 1000 + m}m は 何km何m？`, answer: `${km}km${m}m`, options: d(`${km}km${m}m`, `${km}km`, `${m}m`, `${km + 1}km${m}m`), hint: "1000m ごとに km に なおす。" };
+            return { question: `${totalM}m は 何km何m？`, answer: `${km}km${m}m`, options: d(`${km}km${m}m`, `${km}km`, `${m}m`, `${km + 1}km${m}m`), hint: "1000m ごとに km に なおす。", visual };
         }
         case 'MATH_G3_U07': {
             const a = (n % 8) + 12;
             const b = (n % 7) + 2;
             const p = a * b;
+            const visual = {
+                kind: 'bar_model' as const,
+                bars: [
+                    { label: '1つ分', segments: [{ value: a, label: `${a}` }] },
+                    { label: 'ぜんぶ', segments: [{ value: p, unknown: true }] },
+                ],
+                compareLabel: n % 2 === 0 ? `${b}こ分` : '何こ分？',
+            };
             if (n % 2 === 0) {
-                return { question: `${a} × ${b} = ?`, answer: `${p}`, options: d(`${p}`, `${p + b}`, `${p - b}`, `${a + b}`), hint: "2けた×1けた の かけ算。" };
+                return { question: `${a} × ${b} = ?`, answer: `${p}`, options: d(`${p}`, `${p + b}`, `${p - b}`, `${a + b}`), hint: "2けた×1けた の かけ算。", visual };
             }
-            return { question: `${a} × □ = ${p}。 □ は？`, answer: `${b}`, options: d(`${b}`, `${a}`, `${b + 1}`, `${Math.max(1, b - 1)}`), hint: "かけ算を ぎゃくに見よう。" };
+            return { question: `${a} × □ = ${p}。 □ は？`, answer: `${b}`, options: d(`${b}`, `${a}`, `${b + 1}`, `${Math.max(1, b - 1)}`), hint: "かけ算を ぎゃくに見よう。", visual };
         }
         case 'MATH_G3_U08': {
             if (n % 2 === 0) {
@@ -589,33 +609,43 @@ const makeUnitProblem = (unitId: string, n: number): GeneralProblem => {
             const q = (n % 6) + 3;
             const nmr = divisor * q;
             if (n % 2 === 0) {
-                return { question: `${nmr} ÷ ${divisor} = ?`, answer: `${q}`, options: d(`${q}`, `${divisor}`, `${q + 1}`, `${q - 1}`), hint: "かけ算で たしかめよう。" };
+                return { question: `${nmr} ÷ ${divisor} = ?`, answer: `${q}`, options: d(`${q}`, `${divisor}`, `${q + 1}`, `${q - 1}`), hint: "かけ算で たしかめよう。", visual: { kind: 'groups_model', groups: divisor, perGroup: q, groupLabel: `${nmr}こを ${divisor}つに分ける` } };
             }
-            return { question: `□ × ${divisor} = ${nmr}。 □ は？`, answer: `${q}`, options: d(`${q}`, `${divisor}`, `${q + 1}`, `${Math.max(1, q - 1)}`), hint: "わり算を かけ算に なおそう。" };
+            return { question: `□ × ${divisor} = ${nmr}。 □ は？`, answer: `${q}`, options: d(`${q}`, `${divisor}`, `${q + 1}`, `${Math.max(1, q - 1)}`), hint: "わり算を かけ算に なおそう。", visual: { kind: 'groups_model', groups: divisor, perGroup: q } };
         }
         case 'MATH_G3_U10': {
             const divisor = (n % 7) + 3;
             const q = (n % 5) + 2;
             const r = (n % (divisor - 1)) + 1;
             const nmr = divisor * q + r;
-            return { question: `${nmr} ÷ ${divisor} = ?`, answer: `${q} あまり ${r}`, options: d(`${q} あまり ${r}`, `${q + 1} あまり ${r}`, `${q} あまり ${Math.max(0, r - 1)}`, `${q - 1} あまり ${r}`), hint: "あまりは わる数より 小さい。" };
+            return { question: `${nmr} ÷ ${divisor} = ?`, answer: `${q} あまり ${r}`, options: d(`${q} あまり ${r}`, `${q + 1} あまり ${r}`, `${q} あまり ${Math.max(0, r - 1)}`, `${q - 1} あまり ${r}`), hint: "あまりは わる数より 小さい。", visual: { kind: 'groups_model', groups: divisor, perGroup: q, remainder: r } };
         }
         case 'MATH_G3_U11': {
             const kg = (n % 4) + 1;
             const g = (n % 9) * 100;
+            const totalG = kg * 1000 + g;
+            const visual = {
+                kind: 'measurement_scale' as const,
+                sourceMinorValue: totalG,
+                majorUnit: 'kg',
+                minorUnit: 'g',
+                minorPerMajor: 1000,
+                sourceLabel: n % 2 === 0 ? `${kg}kg${g}g` : `${totalG}g`,
+                targetLabel: n % 2 === 0 ? '? g' : '? kg ? g',
+            };
             if (n % 2 === 0) {
-                return { question: `${kg}kg${g}g は 何g？`, answer: `${kg * 1000 + g}g`, options: d(`${kg * 1000 + g}g`, `${kg * 100 + g}g`, `${kg * 1000}g`, `${g}g`), hint: "1kg=1000g。" };
+                return { question: `${kg}kg${g}g は 何g？`, answer: `${totalG}g`, options: d(`${totalG}g`, `${kg * 100 + g}g`, `${kg * 1000}g`, `${g}g`), hint: "1kg=1000g。", visual };
             }
-            return { question: `${kg * 1000 + g}g は 何kg何g？`, answer: `${kg}kg${g}g`, options: d(`${kg}kg${g}g`, `${kg}kg`, `${g}g`, `${kg + 1}kg${g}g`), hint: "1000g ごとに kg に なおす。" };
+            return { question: `${totalG}g は 何kg何g？`, answer: `${kg}kg${g}g`, options: d(`${kg}kg${g}g`, `${kg}kg`, `${g}g`, `${kg + 1}kg${g}g`), hint: "1000g ごとに kg に なおす。", visual };
         }
         case 'MATH_G3_U12': {
             const a = (n % 9) + 1;
             const b = (n % 9) + 1;
             const sum = (a + b) / 10;
             if (n % 2 === 0) {
-                return { question: `0.${a} + 0.${b} = ?`, answer: `${sum}`, options: d(`${sum}`, `0.${a}`, `0.${b}`, `${a + b}`), hint: "小数第1位どうしを たそう。" };
+                return { question: `0.${a} + 0.${b} = ?`, answer: `${sum}`, options: d(`${sum}`, `0.${a}`, `0.${b}`, `${a + b}`), hint: "小数第1位どうしを たそう。", visual: { kind: 'number_line', min: 0, max: 2, step: 0.1, markers: [{ value: a / 10, label: `0.${a}`, emphasized: true }], jump: { from: a / 10, to: sum, label: `+0.${b}` } } };
             }
-            return { question: `0.1 が ${a}こ と 0.1 が ${b}こ。 あわせて いくつ？`, answer: `${sum}`, options: d(`${sum}`, `${a + b}`, `0.${a}`, `1.${Math.max(0, a + b - 10)}`), hint: "0.1 を 何こ 集めたかで 考える。" };
+            return { question: `0.1 が ${a}こ と 0.1 が ${b}こ。 あわせて いくつ？`, answer: `${sum}`, options: d(`${sum}`, `${a + b}`, `0.${a}`, `1.${Math.max(0, a + b - 10)}`), hint: "0.1 を 何こ 集めたかで 考える。", visual: { kind: 'number_line', min: 0, max: 2, step: 0.1, markers: [{ value: a / 10, label: `0.${a}`, emphasized: true }], jump: { from: a / 10, to: sum, label: `${b}こ分` } } };
         }
         case 'MATH_G3_U13': {
             const den = (n % 6) + 3;

@@ -198,7 +198,7 @@
 | MGEM-086 | 真C51～ | 理玖・エリオット | 記録者の名前の空欄 | 世界の記録に、記録者の名前だけが空欄になっている。理玖は空欄の前後に残る時刻を、エリオットは星界の表記を照合し、書くべき名前を急いで決めない。 | A「時刻と表記を照合する」→`LEARNING` 成功`MAGIC_TRACE+1`／失敗`RISK:CORRUPTION+1`。B「空欄を保存する」→`CARD+1`。C「仲間の名前を記録する」→`TEAM+1`。 |
 | MGEM-087 | 真C51～ | レオン・朔夜 | 真逆の詠唱 | レオンの幻術と朔夜の封印が、同じ呪文を逆向きに唱えている。二つを無理に合わせれば強いが、どちらかの記憶が消える可能性がある。 | A「詠唱の対応を解く」→`LEARNING` 成功`REMOVE_CURSE+1`／失敗`RISK:CORRUPTION+1`。B「別々のまま重ねる」→`MAGIC_TRACE+1`。C「詠唱を止める」→`HEAL+8`。 |
 | MGEM-088 | 真C51～ | 男子8人 | 男子8人の無音結界 | 男子寮の中央に、音も文字も通さない結界が張られる。蓮は風で気配を伝え、颯真は順番を決め、湊は水面で合図を作り、8人は声なしで役割を分ける。 | A「無音の合図を体系化する」→`LEARNING` 成功`TEAM+1`／失敗`RISK:HP-5`。B「8属性の魔法を同時に使う」→`CARD+1`。C「結界が消えるまで待つ」→`HEAL+12`。 |
-| MGEM-089 | 真C51～ | 男子8人・ノクスの記録片 | ノクスの記録片に、男性主人公たちが勝った場面ではなく、互いの失敗を待った場面だけが残されている。理玖は記録の欠落を探し、朔夜は欠落したままの記憶を守ろうとする。 | A「記録の欠落を調べる」→`LEARNING` 成功`MAGIC_TRACE+1`／失敗`RISK:CORRUPTION+1`。B「記録を上書きする」→`UPGRADE+1`。C「全員で記録を分ける」→`TEAM+1`。 |
+| MGEM-089 | 真C51～ | 男子8人 | ノクスの記録片 | ノクスの記録片に、男性主人公たちが勝った場面ではなく、互いの失敗を待った場面だけが残されている。理玖は記録の欠落を探し、朔夜は欠落したままの記憶を守ろうとする。 | A「記録の欠落を調べる」→`LEARNING` 成功`MAGIC_TRACE+1`／失敗`RISK:CORRUPTION+1`。B「記録を上書きする」→`UPGRADE+1`。C「全員で記録を分ける」→`TEAM+1`。 |
 | MGEM-090 | 真C51～ | 男子8人 | 男子寮の明日を選ぶ鐘 | 男子寮の鐘が、過去の始業ではなく、まだ選ばれていない明日を告げる。8人が別々に鳴らせば別の世界が開き、全員で一度だけ鳴らせば同じ朝へ続く道が現れる。 | A「8人で一緒に鳴らす」→`LEARNING` 成功`MAGIC_TRACE+1`＋`TEAM+1`／失敗`HEAL+12`。B「一人ずつ別の鐘を鳴らす」→`CARD+1`。C「鐘を鳴らさず朝を待つ」→`MAX_HP+3`。 |
 
 ## 11. 表示・画像・固有セリフ方針
@@ -207,23 +207,15 @@
 
 ```text
 eventId: MGEM-001 ... MGEM-090
-imageKey: magic-endless-generic-male/MGEM-001 ... magic-endless-generic-male/MGEM-090
+imageKey: MGEM-001 ... MGEM-090
 ```
 
-個別画像へ切り出す前の3×3シートは、女子用シートと混同しないよう男子用フォルダへ分ける。
+現在の実装では9イベントを1枚の3×3正方形シートへまとめ、`EventScreen` が `imageKey` の番号から該当セルを切り出して表示する。女子用と同じ `character-sheets` フォルダを使うが、ファイル名を `MGEM` 接頭辞で分離する。セル順は左上から右へ進む行優先とする。
 
 ```text
-public/sprites/magic/events/endless/male/MGEM-001-009.png
+public/sprites/magic/events/endless/character-sheets/MGEM-001-009.webp
 ...
-public/sprites/magic/events/endless/male/MGEM-082-090.png
-```
-
-実装時に個別WebPへ切り出す場合は、次のキーへ対応させる。
-
-```text
-public/sprites/magic/events/endless/male/MGEM-001.webp
-...
-public/sprites/magic/events/endless/male/MGEM-090.webp
+public/sprites/magic/events/endless/character-sheets/MGEM-082-090.webp
 ```
 
 ### 11.2 固有セリフの最低要件

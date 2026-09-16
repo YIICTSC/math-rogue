@@ -1,4 +1,4 @@
-import { GeneralProblem, d, stripReviewStepLabel } from './utils';
+import { GeneralProblem, ProblemVisual, d, stripReviewStepLabel } from './utils';
 import { SOCIAL_GRADE_UNITS } from '../../socialUnitConfig';
 import { SOCIAL_G3_DATA } from './social_g3';
 import { SOCIAL_G4_DATA } from './social_g4';
@@ -4566,6 +4566,629 @@ const expandUnitProblems = (mode: string, sourceMode: string, unitName: string):
   return dedupeByQuestion([...seeds, ...(SOCIAL_UNIT_SUPPLEMENT_DATA[mode] || [])]);
 };
 
+type SocialVisualAttachment = {
+  match: string;
+  visual: ProblemVisual;
+};
+
+const SOCIAL_VISUAL_ATTACHMENTS: Record<string, SocialVisualAttachment> = {
+  SOCIAL_3_U02: {
+    match: '上が 北の とき、右は',
+    visual: { kind: 'social_map', mode: 'compass', title: '地図の方位', highlightDirection: 'E' },
+  },
+  SOCIAL_3_U03: {
+    match: '山が 多い 土地では',
+    visual: { kind: 'social_landform', mode: 'terrain', title: '土地の高低' },
+  },
+  SOCIAL_3_U08: {
+    match: '交通の はたらきとして',
+    visual: {
+      kind: 'social_flow',
+      title: '交通で場所をつなぐ',
+      nodes: [
+        { label: '出発地', tone: 'good' },
+        { label: '道路・鉄道', tone: 'primary' },
+        { label: '駅・港', tone: 'secondary' },
+        { label: '目的地', tone: 'accent' },
+      ],
+    },
+  },
+  SOCIAL_4_U01: {
+    match: '都道府県を しらべる ときに 役立つ',
+    visual: { kind: 'social_map', mode: 'japan_overview', title: '日本列島と都道府県' },
+  },
+  SOCIAL_4_U02: {
+    match: '山が つらなっている 地形',
+    visual: { kind: 'social_landform', mode: 'terrain', title: '山地から平地へ' },
+  },
+  SOCIAL_4_U03: {
+    match: '気候を 調べる ときに くらべる',
+    visual: {
+      kind: 'social_climograph',
+      title: '気候の資料',
+      temperatures: [5, 6, 9, 14, 19, 23, 27, 28, 24, 18, 12, 7],
+      precipitation: [55, 65, 95, 105, 125, 175, 160, 145, 190, 135, 85, 60],
+    },
+  },
+  SOCIAL_4_U04: {
+    match: '使った 水を そのまま 川へ 流さない',
+    visual: {
+      kind: 'social_flow',
+      title: '水がめぐる道',
+      nodes: [
+        { label: '川・ダム', tone: 'primary' },
+        { label: '浄水場', tone: 'secondary' },
+        { label: '家・学校', tone: 'good' },
+        { label: '下水処理場', tone: 'accent' },
+        { label: '川・海', tone: 'primary' },
+      ],
+    },
+  },
+  SOCIAL_4_U05: {
+    match: 'ごみを 分ける 理由',
+    visual: {
+      kind: 'social_flow',
+      title: 'ごみを資源につなぐ',
+      nodes: [
+        { label: '家庭', tone: 'good' },
+        { label: '分別', tone: 'primary' },
+        { label: '収集', tone: 'secondary' },
+        { label: '資源化', tone: 'accent' },
+        { label: '再利用', tone: 'purple' },
+      ],
+    },
+  },
+  SOCIAL_4_U06: {
+    match: 'ハザードマップは',
+    visual: { kind: 'social_hazard', mode: 'flood', title: '危険な場所と避難先' },
+  },
+  SOCIAL_4_U07: {
+    match: '地図帳の 縮尺',
+    visual: { kind: 'social_map', mode: 'atlas', title: '地図帳の手がかり' },
+  },
+  SOCIAL_4_U08: {
+    match: '県の ようすを くらべる',
+    visual: {
+      kind: 'social_region_profile',
+      title: '県の特色を比べる',
+      items: [
+        { heading: '土地', value: '山地／平地', tone: 'good' },
+        { heading: '産業', value: '農業／工業', tone: 'accent' },
+        { heading: '交通', value: '道路／鉄道', tone: 'primary' },
+      ],
+    },
+  },
+  SOCIAL_5_U01: {
+    match: '国土が 南北に 長いことで',
+    visual: { kind: 'social_map', mode: 'japan_overview', title: '南北に長い日本' },
+  },
+  SOCIAL_5_U02: {
+    match: '日本海側で 冬に 雪が 多い',
+    visual: {
+      kind: 'social_flow',
+      title: '冬の日本海側のしくみ',
+      nodes: [
+        { label: '日本海', tone: 'primary' },
+        { label: '湿った風', tone: 'secondary' },
+        { label: '山地', tone: 'good' },
+        { label: '雪', tone: 'accent' },
+      ],
+    },
+  },
+  SOCIAL_5_U03: {
+    match: '農家が 出荷先を 考える',
+    visual: {
+      kind: 'social_flow',
+      title: '農産物が届くまで',
+      nodes: [
+        { label: '農家', tone: 'good' },
+        { label: '集荷', tone: 'secondary' },
+        { label: '輸送', tone: 'primary' },
+        { label: '店', tone: 'accent' },
+        { label: '食卓', tone: 'purple' },
+      ],
+    },
+  },
+  SOCIAL_5_U04: {
+    match: '日本の水産業を 学ぶ と どんな ことが わかる',
+    visual: {
+      kind: 'social_flow',
+      title: '水産物が届くまで',
+      nodes: [
+        { label: '漁港', tone: 'primary' },
+        { label: '市場', tone: 'secondary' },
+        { label: '輸送', tone: 'good' },
+        { label: '店', tone: 'accent' },
+        { label: '食卓', tone: 'purple' },
+      ],
+    },
+  },
+  SOCIAL_5_U05: {
+    match: '工業を 学ぶ 社会科の 見方',
+    visual: {
+      kind: 'social_flow',
+      title: '工業製品が届くまで',
+      nodes: [
+        { label: '原料', tone: 'secondary' },
+        { label: '工場', tone: 'accent' },
+        { label: '輸送', tone: 'primary' },
+        { label: '店', tone: 'good' },
+        { label: '消費者', tone: 'purple' },
+      ],
+    },
+  },
+  SOCIAL_5_U06: {
+    match: '港や 空港が 大切な 理由',
+    visual: {
+      kind: 'social_flow',
+      title: '外国と日本を結ぶ',
+      nodes: [
+        { label: '外国', tone: 'secondary' },
+        { label: '船・飛行機', tone: 'primary' },
+        { label: '港・空港', tone: 'accent' },
+        { label: '日本', tone: 'good' },
+      ],
+      direction: 'bidirectional',
+    },
+  },
+  SOCIAL_6_U01: {
+    match: '縄文・弥生を 学ぶ と わかる こととして',
+    visual: {
+      kind: 'social_timeline',
+      title: 'くらしの変化を時間で見る',
+      events: [
+        { label: '自然の利用' },
+        { label: '農耕の広がり', emphasized: true },
+        { label: 'むらの成長' },
+      ],
+    },
+  },
+  SOCIAL_6_U02: {
+    match: '古墳時代を 学ぶ 理由として',
+    visual: {
+      kind: 'social_timeline',
+      title: '国づくりへ向かう流れ',
+      events: [
+        { label: '大きなむら' },
+        { label: '王・豪族', emphasized: true },
+        { label: '支配の広がり' },
+      ],
+    },
+  },
+  SOCIAL_6_U03: {
+    match: '奈良時代を 学ぶ 理由として',
+    visual: {
+      kind: 'social_timeline',
+      title: '古代国家が整う流れ',
+      events: [
+        { label: '制度を学ぶ' },
+        { label: '都と政治', emphasized: true },
+        { label: '地方へ広がる' },
+      ],
+    },
+  },
+  SOCIAL_6_U04: {
+    match: '平安時代の 学習で 大切な 社会科の 見方',
+    visual: {
+      kind: 'social_timeline',
+      title: '平安時代を流れで見る',
+      events: [
+        { label: '都と貴族' },
+        { label: '文化の発達' },
+        { label: '地方の変化' },
+        { label: '武士の台頭', emphasized: true },
+      ],
+    },
+  },
+  SOCIAL_6_U05: {
+    match: '鎌倉時代を 学ぶ と わかる こととして',
+    visual: {
+      kind: 'social_timeline',
+      title: '鎌倉時代の大きな流れ',
+      events: [
+        { label: '武家政権' },
+        { label: '主従関係' },
+        { label: '元寇', emphasized: true },
+        { label: '幕府の動揺' },
+      ],
+    },
+  },
+  SOCIAL_6_U06: {
+    match: '室町時代の 学習で 政治と 文化を つなげて 見る 理由',
+    visual: {
+      kind: 'social_timeline',
+      title: '室町時代の政治と文化',
+      events: [
+        { label: '幕府と貿易' },
+        { label: '北山・東山文化' },
+        { label: '応仁の乱', emphasized: true },
+        { label: '地方勢力' },
+      ],
+    },
+  },
+  SOCIAL_6_U07: {
+    match: '安土桃山時代の 政策を 学ぶ ときに 大切な 見方',
+    visual: {
+      kind: 'social_timeline',
+      title: '戦国から統一へ',
+      events: [
+        { label: '戦国の争い' },
+        { label: '統一の進行', emphasized: true },
+        { label: '支配の整備' },
+        { label: '次の政権へ' },
+      ],
+    },
+  },
+  SOCIAL_6_U08: {
+    match: '江戸時代を 学ぶ と わかる こととして',
+    visual: {
+      kind: 'social_timeline',
+      title: '江戸時代の長い流れ',
+      events: [
+        { label: '幕府成立' },
+        { label: '社会の安定' },
+        { label: '都市・文化' },
+        { label: '開国へ', emphasized: true },
+      ],
+    },
+  },
+  SOCIAL_6_U09: {
+    match: '明治時代を 学ぶ 理由として',
+    visual: {
+      kind: 'social_timeline',
+      title: '近代国家へ向かう流れ',
+      events: [
+        { label: '幕末' },
+        { label: '新政府' },
+        { label: '制度改革', emphasized: true },
+        { label: '産業・政治' },
+      ],
+    },
+  },
+  SOCIAL_6_U10: {
+    match: '大正時代を 学ぶ と わかる こととして',
+    visual: {
+      kind: 'social_timeline',
+      title: '大正時代の社会の動き',
+      events: [
+        { label: '政治参加' },
+        { label: '社会運動', emphasized: true },
+        { label: '大衆文化' },
+      ],
+    },
+  },
+  SOCIAL_6_U11: {
+    match: '昭和時代の 学習で 大切な 見方',
+    visual: {
+      kind: 'social_timeline',
+      title: '昭和を前後でつなぐ',
+      events: [
+        { label: '戦前' },
+        { label: '戦時期' },
+        { label: '終戦', emphasized: true },
+        { label: '再建' },
+        { label: '成長' },
+      ],
+    },
+  },
+  SOCIAL_6_U12: {
+    match: '日本国憲法を 学ぶ 理由',
+    visual: { kind: 'social_government', mode: 'constitution', title: '日本国憲法の三原則' },
+  },
+  SOCIAL_6_U13: {
+    match: '国会を 学ぶ 理由として',
+    visual: { kind: 'social_government', mode: 'legislature', title: '二院制の国会' },
+  },
+  SOCIAL_6_U14: {
+    match: '内閣を 学ぶ 理由として',
+    visual: { kind: 'social_government', mode: 'cabinet', title: '行政を進めるしくみ' },
+  },
+  SOCIAL_6_U15: {
+    match: '裁判所を 学ぶ 理由',
+    visual: { kind: 'social_government', mode: 'judiciary', title: '裁判所のしくみ' },
+  },
+  SOCIAL_6_U16: {
+    match: '地方自治が 大切な 理由',
+    visual: { kind: 'social_government', mode: 'local', title: '住民と地方自治' },
+  },
+  SOCIAL_7_U01: {
+    match: '国の 位置を 調べる ときに 使う 線',
+    visual: { kind: 'social_map', mode: 'latlon', title: '地球上の位置を読む' },
+  },
+  SOCIAL_7_U02: {
+    match: '高い 山の 上で 見られる',
+    visual: {
+      kind: 'social_region_profile',
+      title: '気候を決める要素',
+      items: [
+        { heading: '緯度', value: '低い／高い', tone: 'primary' },
+        { heading: '標高', value: '低地／高地', tone: 'good' },
+        { heading: '海と風', value: '海流／季節風', tone: 'secondary' },
+      ],
+    },
+  },
+  SOCIAL_7_U03: {
+    match: '若い 人の 割合が 高い',
+    visual: { kind: 'social_population_pyramid', shape: 'expanding', title: '若い世代が多い人口構成' },
+  },
+  SOCIAL_7_U04: {
+    match: '世界の 産業は 大きく',
+    visual: {
+      kind: 'social_flow',
+      title: '産業のつながり',
+      nodes: [
+        { label: '自然から得る', sublabel: '農・林・漁', tone: 'good' },
+        { label: '加工して作る', sublabel: '工業', tone: 'accent' },
+        { label: '届ける・支える', sublabel: '商業・運輸など', tone: 'primary' },
+      ],
+    },
+  },
+  SOCIAL_7_U05: {
+    match: '東南アジアで 多く 見られる 自然条件',
+    visual: {
+      kind: 'social_climograph',
+      title: '高温・多雨の気候資料',
+      temperatures: [26, 27, 28, 29, 29, 28, 28, 28, 28, 28, 27, 26],
+      precipitation: [160, 120, 150, 190, 230, 260, 240, 250, 280, 250, 210, 180],
+    },
+  },
+  SOCIAL_7_U06: {
+    match: '国境を こえた 協力が 大切な 理由',
+    visual: {
+      kind: 'social_flow',
+      title: '国境をこえた結びつき',
+      nodes: [
+        { label: '国A', tone: 'secondary' },
+        { label: 'EU', sublabel: '協力の枠組み', tone: 'accent' },
+        { label: '国B', tone: 'primary' },
+      ],
+      direction: 'bidirectional',
+    },
+  },
+  SOCIAL_7_U07: {
+    match: '人口増加が 急な 地域',
+    visual: { kind: 'social_population_pyramid', shape: 'expanding', title: '人口増加が大きい地域の例' },
+  },
+  SOCIAL_7_U08: {
+    match: '企業的な 農業が さかんな 理由',
+    visual: {
+      kind: 'social_flow',
+      title: '大規模農業のしくみ',
+      nodes: [
+        { label: '広い農地', tone: 'good' },
+        { label: '大型機械', tone: 'accent' },
+        { label: '大量生産', tone: 'primary' },
+        { label: '広域輸送', tone: 'secondary' },
+      ],
+    },
+  },
+  SOCIAL_7_U09: {
+    match: '南アメリカに 広がる 大きな 熱帯林',
+    visual: {
+      kind: 'social_region_profile',
+      title: '南アメリカの自然',
+      items: [
+        { heading: '北・中央', value: '広い熱帯林', tone: 'good' },
+        { heading: '西側', value: '高い山地', tone: 'secondary' },
+        { heading: '各地', value: '鉱産資源', tone: 'accent' },
+      ],
+    },
+  },
+  SOCIAL_7_U10: {
+    match: '小麦や 畜産物の 輸出が 多い 理由',
+    visual: {
+      kind: 'social_flow',
+      title: '生産から輸出へ',
+      nodes: [
+        { label: '広い農地', tone: 'good' },
+        { label: '大規模生産', tone: 'accent' },
+        { label: '港', tone: 'primary' },
+        { label: '海外', tone: 'secondary' },
+      ],
+    },
+  },
+  SOCIAL_7_U11: {
+    match: '日本の 地域を 学ぶ ときに よく 使う 見方',
+    visual: {
+      kind: 'social_region_profile',
+      title: '日本の地域を見る視点',
+      items: [
+        { heading: '自然', value: '地形／気候', tone: 'good' },
+        { heading: '人口', value: '都市／人口', tone: 'primary' },
+        { heading: '産業', value: '農業／工業', tone: 'accent' },
+      ],
+    },
+  },
+  SOCIAL_7_U12: {
+    match: '日本の 川の 特ちょう',
+    visual: { kind: 'social_landform', mode: 'japan_nature', title: '日本の地形と川' },
+  },
+  SOCIAL_7_U13: {
+    match: '少子高齢化が 進む と',
+    visual: { kind: 'social_population_pyramid', shape: 'constrictive', title: '少子高齢化の人口構成' },
+  },
+  SOCIAL_7_U14: {
+    match: '日本の 産業を 学ぶ 目的',
+    visual: {
+      kind: 'social_flow',
+      title: '産業をつなげて見る',
+      nodes: [
+        { label: '自然条件', sublabel: '土地・資源', tone: 'good' },
+        { label: '生産', sublabel: '農業・工業', tone: 'accent' },
+        { label: '交通', sublabel: '物流', tone: 'primary' },
+        { label: '市場', sublabel: '消費地', tone: 'secondary' },
+      ],
+    },
+  },
+  SOCIAL_8_U03: {
+    match: '古代日本を 学ぶ ときに 大切な 見方として',
+    visual: {
+      kind: 'social_timeline',
+      title: '日本の古代を長く見る',
+      events: [
+        { label: '縄文・弥生' },
+        { label: '古墳' },
+        { label: '飛鳥・奈良', emphasized: true },
+        { label: '平安' },
+      ],
+    },
+  },
+  SOCIAL_8_U04: {
+    match: '日本の 中世を 学ぶ 目的として',
+    visual: {
+      kind: 'social_timeline',
+      title: '武家社会の移り変わり',
+      events: [
+        { label: '鎌倉' },
+        { label: '室町', emphasized: true },
+        { label: '戦国' },
+      ],
+    },
+  },
+  SOCIAL_8_U05: {
+    match: '江戸時代を 学ぶ ときに 大切な 見方として',
+    visual: {
+      kind: 'social_timeline',
+      title: '近世を多面的に見る',
+      events: [
+        { label: '幕府成立' },
+        { label: '社会の安定' },
+        { label: '都市・文化', emphasized: true },
+        { label: '開国' },
+      ],
+    },
+  },
+  SOCIAL_8_U06: {
+    match: '欧米の 近代化を 学ぶ ときに 大切な 見方として',
+    visual: {
+      kind: 'social_flow',
+      title: '近代社会が形づくられる流れ',
+      nodes: [
+        { label: '政治の変化', tone: 'secondary' },
+        { label: '技術・機械化', tone: 'accent' },
+        { label: '都市・産業', tone: 'primary' },
+        { label: '社会の変化', tone: 'good' },
+      ],
+    },
+  },
+  SOCIAL_8_U07: {
+    match: '明治維新を 学ぶ ときに 大切な 見方として',
+    visual: {
+      kind: 'social_timeline',
+      title: '明治維新の変化を追う',
+      events: [
+        { label: '幕府の終わり' },
+        { label: '新政府', emphasized: true },
+        { label: '制度改革' },
+        { label: '近代化' },
+      ],
+    },
+  },
+  SOCIAL_8_U08: {
+    match: '日本の 近代化を 学ぶ ときに 大切な 見方として',
+    visual: {
+      kind: 'social_region_profile',
+      title: '近代化を三つの面から見る',
+      items: [
+        { heading: '制度', value: '憲法／議会', tone: 'secondary' },
+        { heading: '生産', value: '工場／交通', tone: 'accent' },
+        { heading: '世界', value: '条約／国際関係', tone: 'primary' },
+      ],
+      schematicLabel: '同じ時代の変化を関連づける模式図',
+    },
+  },
+  SOCIAL_8_U09: {
+    match: '世界大戦を 学ぶ ときに 大切な 見方として',
+    visual: {
+      kind: 'social_flow',
+      title: '大戦を原因と結果で見る',
+      nodes: [
+        { label: '国際的な緊張', tone: 'danger' },
+        { label: '大きな戦争', tone: 'accent' },
+        { label: '社会への被害', tone: 'secondary' },
+        { label: '国際協力', tone: 'good' },
+      ],
+    },
+  },
+  SOCIAL_8_U10: {
+    match: '戦後日本を 学ぶ ときに 大切な 見方として',
+    visual: {
+      kind: 'social_timeline',
+      title: '戦後から現代への流れ',
+      events: [
+        { label: '戦後改革' },
+        { label: '再建' },
+        { label: '生活の変化', emphasized: true },
+        { label: '現在へ' },
+      ],
+    },
+  },
+  SOCIAL_8_U01: {
+    match: '四大文明に 共通する',
+    visual: {
+      kind: 'social_flow',
+      title: '大河と文明の発達',
+      nodes: [
+        { label: '水を得やすい環境', tone: 'primary' },
+        { label: '農耕', tone: 'good' },
+        { label: '都市', tone: 'accent' },
+        { label: '文明', tone: 'purple' },
+      ],
+    },
+  },
+  SOCIAL_8_U02: {
+    match: '古代ローマが 後の 社会に 与えた',
+    visual: {
+      kind: 'social_timeline',
+      title: 'ギリシャ・ローマの流れ',
+      events: [
+        { label: 'ポリス' },
+        { label: '共和政' },
+        { label: '帝政', emphasized: true },
+      ],
+    },
+  },
+  SOCIAL_9_U03: {
+    match: '間接民主制の 説明',
+    visual: { kind: 'social_government', mode: 'democracy', title: '民主主義の意思決定' },
+  },
+  SOCIAL_9_U04: {
+    match: '憲法が 必要な 理由',
+    visual: { kind: 'social_government', mode: 'constitution', title: '憲法が支える政治' },
+  },
+  SOCIAL_9_U05: {
+    match: '国会を 学ぶ 理由として',
+    visual: { kind: 'social_government', mode: 'legislature', title: '国会と二院制' },
+  },
+  SOCIAL_9_U06: {
+    match: '内閣を 学ぶ 理由として',
+    visual: { kind: 'social_government', mode: 'cabinet', title: '内閣と行政' },
+  },
+  SOCIAL_9_U07: {
+    match: '裁判所が ある と どんな よい',
+    visual: { kind: 'social_government', mode: 'judiciary', title: '裁判所と三審制' },
+  },
+  SOCIAL_9_U08: {
+    match: '地方自治が 大切な 理由',
+    visual: { kind: 'social_government', mode: 'local', title: '地方自治のしくみ' },
+  },
+  SOCIAL_9_U09: {
+    match: '選挙に 参加する 意味',
+    visual: { kind: 'social_government', mode: 'election', title: '投票から政治へ' },
+  },
+};
+
+const attachSocialVisual = (mode: string, problems: GeneralProblem[]): GeneralProblem[] => {
+  const attachment = SOCIAL_VISUAL_ATTACHMENTS[mode];
+  if (!attachment) return problems;
+  let attached = false;
+  return problems.map((problem) => {
+    if (attached || problem.visual || !problem.question.includes(attachment.match)) return problem;
+    attached = true;
+    return { ...problem, visual: attachment.visual };
+  });
+};
+
 const replaceAll = (text: string, replacements: Array<[string, string]>): string =>
   replacements.reduce((result, [from, to]) => result.split(from).join(to), text);
 
@@ -4981,7 +5604,7 @@ export const SOCIAL_UNIT_DATA: Record<string, GeneralProblem[]> = Object.fromEnt
     .flat()
     .map((unit) => [
       unit.mode,
-      expandUnitProblems(unit.mode, unit.sourceMode, unit.name).map((problem) =>
+      attachSocialVisual(unit.mode, expandUnitProblems(unit.mode, unit.sourceMode, unit.name)).map((problem) =>
         normalizeProblemForMode(unit.mode, problem)
       ),
     ])

@@ -454,6 +454,8 @@ export interface ActStats {
 export interface MagicEndlessEventLearningPending {
   eventId: string;
   eventTitle: string;
+  /** Choice that opened the learning check; optional for saves made before this field existed. */
+  optionLabel?: string;
   successEffects: string[];
   failureEffects: string[];
 }

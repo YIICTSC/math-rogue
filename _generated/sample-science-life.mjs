@@ -1,0 +1,3 @@
+import { createServer } from 'vite';
+const server=await createServer({server:{middlewareMode:true},appType:'custom',logLevel:'error'});
+try{const {SUBJECT_DATA}=await server.ssrLoadModule('/src/data/subjectData.ts');for(const [mode,ps] of Object.entries(SUBJECT_DATA).filter(([k])=>/^(?:LIFE_\d|SCIENCE_\d)_U\d+$/.test(k))){const qs=[];const seen=new Set();for(const p of ps){const q=p.question.replace(/\d+(?:\.\d+)?/g,'#').replace(/\s+/g,' ');if(!seen.has(q)){seen.add(q);qs.push(`${p.question.replaceAll('\n',' ')} => ${p.options?.[0]}`);}if(qs.length>=6)break;}console.log(`${mode}\t${ps.length}\t${qs.join(' || ')}`)}}finally{await server.close()}

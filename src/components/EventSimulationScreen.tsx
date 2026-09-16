@@ -298,7 +298,8 @@ const EventSimulationScreen: React.FC<EventSimulationScreenProps> = ({ theme, la
       };
     });
     const summary = preview.messages.length > 0 ? preview.messages.join('。') : '変化はなかった';
-    setResultLog(`学習判定：${success ? '成功' : '失敗'}。${summary}。`);
+    const eventChoice = pending.optionLabel ? `${pending.eventTitle}「${pending.optionLabel}」：` : '';
+    setResultLog(`${eventChoice}学習判定：${success ? '成功' : '失敗'}。${summary}。`);
   }, [simulationState.eventLearningPending, simulationState.player]);
 
   return (

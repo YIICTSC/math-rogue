@@ -375,33 +375,44 @@ const makeUnitProblem = (unitId: string, n: number): GeneralProblem => {
             const a = 20 + (n % 60);
             const b = 10 + (n % 30);
             const s = a + b;
-            if (n % 3 === 0) return { question: `${a} + ${b} = ?`, answer: `${s}`, options: d(`${s}`, `${s + 1}`, `${s - 1}`, `${a}`), hint: "2けたどうしの たし算だよ。" };
-            if (n % 3 === 1) return { question: `${a} に ${b} を たすと？`, answer: `${s}`, options: d(`${s}`, `${s + 10}`, `${s - 10}`, `${b}`), hint: "くりあがりにも 気をつけよう。" };
-            return { question: `こたえが ${s} に なる しきは？`, answer: `${a} + ${b}`, options: d(`${a} + ${b}`, `${a} + ${b + 1}`, `${a - 1} + ${b}`, `${a} - ${b}`), hint: "しきを えらぼう。" };
+            const visual = { kind: 'place_value_blocks' as const, values: [{ value: a, label: 'A' }, { value: b, label: 'B', emphasized: true }], operation: '+' as const };
+            if (n % 3 === 0) return { question: `${a} + ${b} = ?`, answer: `${s}`, options: d(`${s}`, `${s + 1}`, `${s - 1}`, `${a}`), hint: "2けたどうしの たし算だよ。", visual };
+            if (n % 3 === 1) return { question: `${a} に ${b} を たすと？`, answer: `${s}`, options: d(`${s}`, `${s + 10}`, `${s - 10}`, `${b}`), hint: "くりあがりにも 気をつけよう。", visual };
+            return { question: `こたえが ${s} に なる しきは？`, answer: `${a} + ${b}`, options: d(`${a} + ${b}`, `${a} + ${b + 1}`, `${a - 1} + ${b}`, `${a} - ${b}`), hint: "しきを えらぼう。", visual };
         }
         case 'MATH_G2_U03': {
             const b = 10 + (n % 30);
             const a = b + 20 + (n % 20);
             const dff = a - b;
-            if (n % 3 === 0) return { question: `${a} - ${b} = ?`, answer: `${dff}`, options: d(`${dff}`, `${dff + 1}`, `${dff - 1}`, `${a}`), hint: "2けたどうしの ひき算だよ。" };
-            if (n % 3 === 1) return { question: `${a} から ${b} を ひくと？`, answer: `${dff}`, options: d(`${dff}`, `${a + b}`, `${b}`, `${dff + 10}`), hint: "くりさがりにも 気をつけよう。" };
-            return { question: `こたえが ${dff} に なる しきは？`, answer: `${a} - ${b}`, options: d(`${a} - ${b}`, `${a} + ${b}`, `${b} - ${a}`, `${a} - ${b + 1}`), hint: "しきを えらぼう。" };
+            const visual = { kind: 'place_value_blocks' as const, values: [{ value: a, label: 'もと' }, { value: b, label: 'ひく', emphasized: true }], operation: '-' as const };
+            if (n % 3 === 0) return { question: `${a} - ${b} = ?`, answer: `${dff}`, options: d(`${dff}`, `${dff + 1}`, `${dff - 1}`, `${a}`), hint: "2けたどうしの ひき算だよ。", visual };
+            if (n % 3 === 1) return { question: `${a} から ${b} を ひくと？`, answer: `${dff}`, options: d(`${dff}`, `${a + b}`, `${b}`, `${dff + 10}`), hint: "くりさがりにも 気をつけよう。", visual };
+            return { question: `こたえが ${dff} に なる しきは？`, answer: `${a} - ${b}`, options: d(`${a} - ${b}`, `${a} + ${b}`, `${b} - ${a}`, `${a} - ${b + 1}`), hint: "しきを えらぼう。", visual };
         }
         case 'MATH_G2_U04': {
             const a = (n % 9) + 1;
             const b = (n % 8) + 2;
             const answer = a === b ? "おなじ" : `${Math.max(a, b)}cm`;
-            return { question: `${a}cm と ${b}cm。 ながいのは？`, answer, options: d(answer, a === b ? `${a + 1}cm` : `${Math.min(a, b)}cm`, a === b ? `${Math.max(1, a - 1)}cm` : "おなじ", "わからない"), hint: "ものさしで くらべる イメージ。" };
+            return { question: `${a}cm と ${b}cm。 ながいのは？`, answer, options: d(answer, a === b ? `${a + 1}cm` : `${Math.min(a, b)}cm`, a === b ? `${Math.max(1, a - 1)}cm` : "おなじ", "わからない"), hint: "ものさしで くらべる イメージ。", visual: { kind: 'bar_model', bars: [{ label: 'A', segments: [{ value: a, label: `${a}cm` }] }, { label: 'B', segments: [{ value: b, label: `${b}cm` }] }] } };
         }
         case 'MATH_G2_U05': {
             const a = 10 + (n % 90);
-            if (n % 2 === 0) return { question: `${a}の つぎの かずは？`, answer: `${a + 1}`, options: d(`${a + 1}`, `${a}`, `${a - 1}`, `${a + 2}`), hint: "100までの かずを ならべよう。" };
-            return { question: `${a}の まえの かずは？`, answer: `${a - 1}`, options: d(`${a - 1}`, `${a}`, `${a + 1}`, `${a - 2}`), hint: "ひとつ まえを かんがえよう。" };
+            if (n % 2 === 0) return { question: `${a}の つぎの かずは？`, answer: `${a + 1}`, options: d(`${a + 1}`, `${a}`, `${a - 1}`, `${a + 2}`), hint: "100までの かずを ならべよう。", visual: { kind: 'number_line', min: Math.max(0, a - 3), max: Math.min(100, a + 3), step: 1, markers: [{ value: a, emphasized: true }], jump: { from: a, to: a + 1, label: '+1' } } };
+            return { question: `${a}の まえの かずは？`, answer: `${a - 1}`, options: d(`${a - 1}`, `${a}`, `${a + 1}`, `${a - 2}`), hint: "ひとつ まえを かんがえよう。", visual: { kind: 'number_line', min: Math.max(0, a - 3), max: Math.min(100, a + 3), step: 1, markers: [{ value: a, emphasized: true }], jump: { from: a, to: a - 1, label: '-1' } } };
         }
         case 'MATH_G2_U06': {
             const dl = (n % 9) + 1;
-            if (n % 2 === 0) return { question: `${dl}dL は なんmL？`, answer: `${dl * 100}mL`, options: d(`${dl * 100}mL`, `${dl * 10}mL`, `${dl}mL`, `${dl * 1000}mL`), hint: "1dL = 100mL。" };
-            return { question: `${dl * 100}mL は なんdL？`, answer: `${dl}dL`, options: d(`${dl}dL`, `${dl * 10}dL`, `1dL`, `${dl + 1}dL`), hint: "100mLで 1dL。" };
+            const visual = {
+                kind: 'measurement_scale' as const,
+                sourceMinorValue: dl * 100,
+                majorUnit: 'dL',
+                minorUnit: 'mL',
+                minorPerMajor: 100,
+                sourceLabel: n % 2 === 0 ? `${dl}dL` : `${dl * 100}mL`,
+                targetLabel: n % 2 === 0 ? '? mL' : '? dL',
+            };
+            if (n % 2 === 0) return { question: `${dl}dL は なんmL？`, answer: `${dl * 100}mL`, options: d(`${dl * 100}mL`, `${dl * 10}mL`, `${dl}mL`, `${dl * 1000}mL`), hint: "1dL = 100mL。", visual };
+            return { question: `${dl * 100}mL は なんdL？`, answer: `${dl}dL`, options: d(`${dl}dL`, `${dl * 10}dL`, `1dL`, `${dl + 1}dL`), hint: "100mLで 1dL。", visual };
         }
         case 'MATH_G2_U07': {
             const h = (n % 10) + 1;
@@ -421,23 +432,25 @@ const makeUnitProblem = (unitId: string, n: number): GeneralProblem => {
             const t = n % 10;
             const o = (n * 3) % 10;
             const value = `${h}${t}${o}`;
-            if (n % 2 === 0) return { question: `${h}ひゃく ${t}じゅう ${o} を 数字で かくと？`, answer: value, options: d(value, `${h}${o}${t}`, `${t}${h}${o}`, `${h}${t}`), hint: "100の くらいから ならべよう。" };
-            return { question: `${value} を ことばで いうと？`, answer: `${h}ひゃく ${t}じゅう ${o}`, options: d(`${h}ひゃく ${t}じゅう ${o}`, `${h}ひゃく ${o}じゅう ${t}`, `${t}ひゃく ${h}じゅう ${o}`, `${h}じゅう ${t}`), hint: "百、十、一のくらい。" };
+            const visual = { kind: 'place_value_blocks' as const, values: [{ value: Number(value) }] };
+            if (n % 2 === 0) return { question: `${h}ひゃく ${t}じゅう ${o} を 数字で かくと？`, answer: value, options: d(value, `${h}${o}${t}`, `${t}${h}${o}`, `${h}${t}`), hint: "100の くらいから ならべよう。", visual };
+            return { question: `${value} を ことばで いうと？`, answer: `${h}ひゃく ${t}じゅう ${o}`, options: d(`${h}ひゃく ${t}じゅう ${o}`, `${h}ひゃく ${o}じゅう ${t}`, `${t}ひゃく ${h}じゅう ${o}`, `${h}じゅう ${t}`), hint: "百、十、一のくらい。", visual };
         }
         case 'MATH_G2_U09': {
             const a = (n % 4) + 2;
             const b = (n % 5) + 2;
-            if (n % 2 === 0) return { question: `${a} が ${b}こ。 かけ算の 式は？`, answer: `${a} × ${b}`, options: d(`${a} × ${b}`, `${a + 1} × ${b}`, `${a} × ${b + 1}`, `${a} × ${b - 1}`), hint: "おなじ数の くりかえしは かけ算。" };
+            if (n % 2 === 0) return { question: `${a} が ${b}こ。 かけ算の 式は？`, answer: `${a} × ${b}`, options: d(`${a} × ${b}`, `${a + 1} × ${b}`, `${a} × ${b + 1}`, `${a} × ${b - 1}`), hint: "おなじ数の くりかえしは かけ算。", visual: { kind: 'groups_model', groups: b, perGroup: a, groupLabel: `${a}こずつ` } };
             const repeatedAdd = Array.from({ length: b }, () => `${a}`).join(' + ');
-            return { question: `${repeatedAdd} を かけ算の 式にすると？`, answer: `${a} × ${b}`, options: d(`${a} × ${b}`, `${a + 1} × ${b}`, `${a} × ${b + 1}`, `${a} × ${b - 1}`), hint: "たしざんを かけざんに。" };
+            return { question: `${repeatedAdd} を かけ算の 式にすると？`, answer: `${a} × ${b}`, options: d(`${a} × ${b}`, `${a + 1} × ${b}`, `${a} × ${b + 1}`, `${a} × ${b - 1}`), hint: "たしざんを かけざんに。", visual: { kind: 'array_model', rows: b, columns: a, rowLabel: `${b}だん`, columnLabel: `${a}こずつ` } };
         }
         case 'MATH_G2_U10': {
             const a = (n % 9) + 1;
             const b = (Math.floor(n / 9) % 9) + 1;
             const p = a * b;
-            if (n % 3 === 0) return { question: `九九。 ${a} × ${b} = ?`, answer: `${p}`, options: d(`${p}`, `${p + 1}`, `${p - 1}`, `${a + b}`), hint: "九九を おもいだそう。" };
-            if (n % 3 === 1) return { question: `次の かけ算の うち、答えが ${p} に なるのは？`, answer: `${a} × ${b}`, options: d(`${a} × ${b}`, `${a} × ${b + 1}`, `${a + 1} × ${b}`, `${a} × ${b + 2}`), hint: "それぞれの かけ算を たしかめよう。" };
-            return { question: `${a} × □ = ${p}。 □ は？`, answer: `${b}`, options: d(`${b}`, `${a}`, `${p}`, `${b + 1}`), hint: "九九を つかって さがそう。" };
+            const visual = { kind: 'array_model' as const, rows: b, columns: a };
+            if (n % 3 === 0) return { question: `九九。 ${a} × ${b} = ?`, answer: `${p}`, options: d(`${p}`, `${p + 1}`, `${p - 1}`, `${a + b}`), hint: "九九を おもいだそう。", visual };
+            if (n % 3 === 1) return { question: `次の かけ算の うち、答えが ${p} に なるのは？`, answer: `${a} × ${b}`, options: d(`${a} × ${b}`, `${a} × ${b + 1}`, `${a + 1} × ${b}`, `${a} × ${b + 2}`), hint: "それぞれの かけ算を たしかめよう。", visual };
+            return { question: `${a} × □ = ${p}。 □ は？`, answer: `${b}`, options: d(`${b}`, `${a}`, `${p}`, `${b + 1}`), hint: "九九を つかって さがそう。", visual };
         }
         case 'MATH_G2_U11': {
             const p = n % 10;
@@ -465,9 +478,9 @@ const makeUnitProblem = (unitId: string, n: number): GeneralProblem => {
         case 'MATH_G2_U12': {
             const a = 20 + (n % 30);
             const b = (n % 9) + 1;
-            if (n % 3 === 0) return { question: `えんぴつが ${a}本。 ${b}本 もらうと なん本？`, answer: `${a + b}本`, options: d(`${a + b}本`, `${a - b}本`, `${a}本`, `${b}本`), hint: "もらうは たし算。" };
-            if (n % 3 === 1) return { question: `クッキーが ${a}こ。 ${b}こ たべると のこりは？`, answer: `${a - b}こ`, options: d(`${a - b}こ`, `${a + b}こ`, `${a}こ`, `${b}こ`), hint: "たべると ひき算。" };
-            return { question: `はこに ${a}こ あります。 ${b}こ ふやすと ぜんぶで？`, answer: `${a + b}こ`, options: d(`${a + b}こ`, `${a - b}こ`, `${b}こ`, `${a}こ`), hint: "ぶんしょうを しきにしよう。" };
+            if (n % 3 === 0) return { question: `えんぴつが ${a}本。 ${b}本 もらうと なん本？`, answer: `${a + b}本`, options: d(`${a + b}本`, `${a - b}本`, `${a}本`, `${b}本`), hint: "もらうは たし算。", visual: { kind: 'bar_model', bars: [{ segments: [{ value: a, label: `${a}` }, { value: b, label: `${b}`, emphasized: true }] }], compareLabel: 'ぜんぶで？' } };
+            if (n % 3 === 1) return { question: `クッキーが ${a}こ。 ${b}こ たべると のこりは？`, answer: `${a - b}こ`, options: d(`${a - b}こ`, `${a + b}こ`, `${a}こ`, `${b}こ`), hint: "たべると ひき算。", visual: { kind: 'bar_model', bars: [{ segments: [{ value: a - b, unknown: true }, { value: b, label: `${b}`, emphasized: true }] }], compareLabel: 'のこりは？' } };
+            return { question: `はこに ${a}こ あります。 ${b}こ ふやすと ぜんぶで？`, answer: `${a + b}こ`, options: d(`${a + b}こ`, `${a - b}こ`, `${b}こ`, `${a}こ`), hint: "ぶんしょうを しきにしよう。", visual: { kind: 'bar_model', bars: [{ segments: [{ value: a, label: `${a}` }, { value: b, label: `${b}`, emphasized: true }] }], compareLabel: 'ぜんぶで？' } };
         }
         default:
             return { question: "2 + 2 = ?", answer: "4", options: d("4", "3", "5", "2"), hint: "たし算だよ。" };

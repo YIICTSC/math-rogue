@@ -1,0 +1,3 @@
+import { createServer } from 'vite'; import { SOCIAL_GRADE_UNITS } from '../src/socialUnitConfig.ts';
+const server=await createServer({server:{middlewareMode:true},appType:'custom',logLevel:'error'});
+try{const {SUBJECT_DATA}=await server.ssrLoadModule('/src/data/subjectData.ts');const names={};for(const u of SOCIAL_GRADE_UNITS[8])names[u.mode]=u.name;for(const [mode,ps] of Object.entries(SUBJECT_DATA).filter(([k])=>/^SOCIAL_8_U\d+$/.test(k))){console.log(`\n## ${mode} ${names[mode]} (${ps.length})`);for(const p of ps.slice(-20))console.log(`- ${p.question} => ${p.options?.[0]}`)}}finally{await server.close()}
