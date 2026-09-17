@@ -4,6 +4,7 @@ import { chromium } from 'playwright';
 const baseUrl = process.env.LEARNING_ROGUE_URL || 'http://127.0.0.1:5173/';
 const gameSaveKey = 'pixel_spire_save_state_v1';
 const assignmentKey = 'pixel_spire_current_assignment_v1';
+const assignmentAnswersKey = 'pixel_spire_assignment_answers_v1';
 const managementProfileKey = 'learning_rogue_management_profile_v1';
 const managementAssignmentsKey = 'learning_rogue_management_assignments_v1';
 
@@ -112,8 +113,16 @@ try {
   const page = await browser.newPage({ viewport: { width: 1280, height: 900 } });
   page.on('pageerror', (error) => console.log('pageerror:', error.stack || error.message));
   let routedAssignments = [managedRequiredAssignment];
+  const completedAssignmentRequests = [];
   await page.route('https://learning-rogue-management.yishigeict.chatgpt.site/**', async (route) => {
     const pathname = new URL(route.request().url()).pathname;
+    if (pathname.endsWith('/complete')) {
+      const assignmentId = pathname.split('/').at(-2);
+      completedAssignmentRequests.push(assignmentId);
+      routedAssignments = routedAssignments.map((item) => item.id === assignmentId ? { ...item, status: 'completed' } : item);
+      await route.fulfill({ status: 200, contentType: 'application/json', body: '{}' });
+      return;
+    }
     if (pathname.endsWith('/assignments')) {
       await route.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ assignments: routedAssignments }) });
       return;
@@ -140,6 +149,9 @@ try {
   await page.getByRole('button', { name: '課題レター' }).click();
   await page.waitForTimeout(500);
   await page.getByRole('button', { name: /課題を始める/ }).first().click();
+  await page.getByRole('heading', { name: 'フリー課題について' }).waitFor({ state: 'visible' });
+  assert.equal(await page.getByRole('button', { name: 'すぐに問題をはじめる' }).count(), 1, 'FREE課題の問題チャレンジ直行ボタンがない');
+  await page.getByRole('button', { name: 'わかった', exact: true }).click();
   await page.getByRole('button', { name: 'つづきから' }).waitFor({ state: 'visible' });
   assert.equal(await page.locator('.assignment-letter-overlay:visible').count(), 0, '課題開始後もレターが表示されている');
   assert.equal(JSON.parse(await page.evaluate((saveKey) => localStorage.getItem(saveKey), gameSaveKey)).screen, 'MAP');
@@ -155,6 +167,7 @@ try {
   await page.reload({ waitUntil: 'domcontentloaded' });
   await page.getByRole('button', { name: '課題レター' }).click();
   await page.getByRole('button', { name: /課題を始める/ }).first().click();
+  await page.getByRole('button', { name: 'わかった', exact: true }).click();
 
   await page.getByRole('button', { name: 'つづきから' }).click();
   await page.waitForFunction((saveKey) => JSON.parse(localStorage.getItem(saveKey) || '{}').screen === 'MAP', gameSaveKey);
@@ -164,6 +177,7 @@ try {
   await page.reload({ waitUntil: 'domcontentloaded' });
   await page.getByRole('button', { name: 'つづきから' }).click();
   await page.getByRole('button', { name: /課題を始める/ }).first().click();
+  await page.getByRole('button', { name: 'わかった', exact: true }).click();
   await page.getByRole('button', { name: 'つづきから' }).click();
   await page.waitForFunction((saveKey) => JSON.parse(localStorage.getItem(saveKey) || '{}').screen === 'MAP', gameSaveKey);
   assert.equal(await page.locator('.assignment-letter-overlay:visible').count(), 0, '再開後の課題がレター再表示になっている');
@@ -184,6 +198,7 @@ try {
   });
   await page.reload({ waitUntil: 'domcontentloaded' });
   await page.getByRole('button', { name: /課題を始める/ }).first().click();
+  await page.getByRole('button', { name: 'わかった', exact: true }).click();
   await page.getByRole('button', { name: 'つづきから' }).waitFor({ state: 'visible' });
   await page.waitForTimeout(800);
   assert.equal(await page.locator('.assignment-letter-overlay:visible').count(), 0, '必須課題レターが開始後に再表示されている');
@@ -230,6 +245,33 @@ try {
   await page.getByRole('button', { name: /課題を始める/ }).first().click();
   await page.locator('.main-problem-challenge-active-screen').waitFor({ state: 'visible' });
   assert.equal(await page.locator('.assignment-letter-overlay:visible').count(), 0, '最優先課題の開始後もレターが残っている');
+
+  routedAssignments = [{ ...launchLockedManagedAssignment, status: 'in_progress', correctCount: 0 }];
+  await page.evaluate(({ taskKey, answersKey, assignmentsKey, task, managed }) => {
+    localStorage.setItem(taskKey, JSON.stringify(task));
+    localStorage.setItem(answersKey, JSON.stringify([{
+      assignmentId: task.id,
+      mode: 'MULTIPLICATION',
+      correct: true,
+      answeredAt: new Date().toISOString(),
+      elapsedMs: 1000,
+    }]));
+    localStorage.setItem(assignmentsKey, JSON.stringify([managed]));
+  }, {
+    taskKey: assignmentKey,
+    answersKey: assignmentAnswersKey,
+    assignmentsKey: managementAssignmentsKey,
+    task: launchLockedAssignmentPayload,
+    managed: routedAssignments[0],
+  });
+  await page.reload({ waitUntil: 'domcontentloaded' });
+  await page.waitForFunction(({ assignmentsKey, assignmentId }) => {
+    const assignments = JSON.parse(localStorage.getItem(assignmentsKey) || '[]');
+    return assignments.some((item) => item.id === assignmentId && item.status === 'completed');
+  }, { assignmentsKey: managementAssignmentsKey, assignmentId: launchLockedManagedAssignment.id });
+  await page.waitForTimeout(300);
+  assert.ok(completedAssignmentRequests.includes(launchLockedManagedAssignment.id), '再開時に達成済み最優先課題の完了同期が行われていない');
+  assert.equal(await page.locator('.assignment-letter-overlay:visible').count(), 0, '達成済み最優先課題が再び開始レターで拘束している');
 
   console.log('Browser assignment resume flow passed for direct task start and Continue.');
 } finally {

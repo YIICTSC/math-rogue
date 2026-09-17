@@ -1884,8 +1884,10 @@ const App: React.FC = () => {
     const [completedAssignmentProblemSource, setCompletedAssignmentProblemSource] = useState<AssignmentPayload | null>(null);
     const [showAssignmentLetter, setShowAssignmentLetter] = useState(false);
     const [pendingManagedAssignmentLetter, setPendingManagedAssignmentLetter] = useState<AssignmentPayload | null>(null);
+    const [freeAssignmentStartGuide, setFreeAssignmentStartGuide] = useState<AssignmentPayload | null>(null);
     const [assignmentStartConfirmedId, setAssignmentStartConfirmedId] = useState<string | null>(null);
     const assignmentStartConfirmedIdRef = useRef<string | null>(null);
+    const managedAssignmentCompletionSyncedRef = useRef<Set<string>>(new Set());
     const [assignmentLetterSource, setAssignmentLetterSource] = useState<'title' | 'selection'>('title');
     const [dismissedDailyAssignmentId, setDismissedDailyAssignmentId] = useState<string | null>(null);
     const [startedDailyAssignmentId, setStartedDailyAssignmentId] = useState<string | null>(null);
@@ -2264,6 +2266,17 @@ const App: React.FC = () => {
         setShowAssignmentLetter(false);
     }, [dismissedDailyAssignmentId, startedDailyAssignmentId]);
 
+    const syncManagedAssignmentCompletion = useCallback((assignment: AssignmentPayload | null | undefined) => {
+        if (!assignment?.managementPortal) return;
+        if (managedAssignmentCompletionSyncedRef.current.has(assignment.id)) return;
+        managedAssignmentCompletionSyncedRef.current.add(assignment.id);
+        void managementPortalService.completeAssignment(assignment.id)
+            .then(() => setManagedAssignmentsRevision(version => version + 1))
+            .catch(() => {
+                managedAssignmentCompletionSyncedRef.current.delete(assignment.id);
+            });
+    }, []);
+
     const currentUrlAssignmentAnswers = useMemo(() => {
         if (!currentAssignment) return [];
         return storageService.getAssignmentAnswers().filter(answer => answer.assignmentId === currentAssignment.id);
@@ -2285,6 +2298,18 @@ const App: React.FC = () => {
             || correctCustomProblemIds.size >= getAssignmentCustomTargetCorrect(currentAssignment);
         return completedUnits && completedCustomProblems;
     }, [currentAssignment, currentUrlAssignmentAnswers]);
+
+    useEffect(() => {
+        if (!currentAssignment || !isCurrentUrlAssignmentComplete) return;
+        if (pendingManagedAssignmentLetter?.id === currentAssignment.id) {
+            setPendingManagedAssignmentLetter(null);
+            setShowAssignmentLetter(false);
+        }
+        if (freeAssignmentStartGuide?.id === currentAssignment.id) {
+            setFreeAssignmentStartGuide(null);
+        }
+        syncManagedAssignmentCompletion(currentAssignment);
+    }, [currentAssignment, freeAssignmentStartGuide, isCurrentUrlAssignmentComplete, pendingManagedAssignmentLetter, syncManagedAssignmentCompletion]);
     const shouldPrioritizeCurrentAssignment = !!currentAssignment
         && !isCurrentUrlAssignmentComplete
         && isAssignmentDeadlineActive(currentAssignment);
@@ -6697,6 +6722,9 @@ const App: React.FC = () => {
                 }));
             } else {
                 setGameState(prev => ({ ...prev, screen: GameScreen.START_MENU }));
+                if (assignment.enforcementLevel !== 'launch_lock') {
+                    setFreeAssignmentStartGuide(assignment);
+                }
             }
             return;
         }
@@ -6748,6 +6776,21 @@ const App: React.FC = () => {
                     challengeMode: undefined,
                 }
                 : {}),
+        }));
+    };
+
+    const startFreeAssignmentInProblemChallenge = (assignment: AssignmentPayload) => {
+        audioService.playSound('select');
+        const assignmentConfig = getAssignmentProblemConfig(assignment);
+        setFreeAssignmentStartGuide(null);
+        setUnlockCheckStartMathCorrect(totalMathCorrect);
+        setGameState(prev => ({
+            ...prev,
+            screen: GameScreen.PROBLEM_CHALLENGE,
+            mode: assignmentConfig.mode || prev.mode,
+            modePool: assignmentConfig.modePool,
+            answerMode: assignmentConfig.answerMode || prev.answerMode || 'CHOICE',
+            challengeMode: undefined,
         }));
     };
 
@@ -15506,10 +15549,7 @@ const App: React.FC = () => {
                 if (isAssignmentComplete && !currentAssignment) {
                     markDailyAssignmentCompleted(assignment.id);
                 }
-                if (isAssignmentComplete && assignment.managementPortal) {
-                    void managementPortalService.completeAssignment(assignment.id)
-                        .catch(() => undefined);
-                }
+                if (isAssignmentComplete) syncManagedAssignmentCompletion(assignment);
                 setAssignmentProgressNotice({
                     type: isAssignmentComplete ? 'ASSIGNMENT_COMPLETE' : 'UNIT_COMPLETE',
                     unitName: trans('オリジナル問題', languageMode),
@@ -15549,10 +15589,7 @@ const App: React.FC = () => {
             if (isAssignmentComplete && !currentAssignment) {
                 markDailyAssignmentCompleted(assignment.id);
             }
-            if (isAssignmentComplete && assignment.managementPortal) {
-                void managementPortalService.completeAssignment(assignment.id)
-                    .catch(() => undefined);
-            }
+            if (isAssignmentComplete) syncManagedAssignmentCompletion(assignment);
             setAssignmentProgressNotice({
                 type: isAssignmentComplete ? 'ASSIGNMENT_COMPLETE' : 'UNIT_COMPLETE',
                 unitName: assignmentUnit.name,
@@ -15564,7 +15601,7 @@ const App: React.FC = () => {
                 assignment: isAssignmentComplete ? assignment : undefined,
             });
         }
-    }, [activeAssignment, addMiniGameUnlockCorrectCount, correctCustomAssignmentProblemIds, createRewardCardForAssignment, currentAssignment, currentAssignmentAnswers, effectiveAssignment, languageMode, markDailyAssignmentCompleted]);
+    }, [activeAssignment, addMiniGameUnlockCorrectCount, correctCustomAssignmentProblemIds, createRewardCardForAssignment, currentAssignment, currentAssignmentAnswers, effectiveAssignment, languageMode, markDailyAssignmentCompleted, syncManagedAssignmentCompletion]);
 
     const removeRewardFromList = useCallback((rewards: RewardItem[], item: RewardItem) => {
         const cannotSkipCards = hasRelic(gameState.player, 'PREPAID_CARD') || hasRelic(gameState.player, 'SCHOOL_ARCHIVE');
@@ -19294,6 +19331,46 @@ const App: React.FC = () => {
                                         {trans("進捗を見る", languageMode)}
                                     </button>
                                 ))}
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                {freeAssignmentStartGuide && (
+                    <div
+                        className="fixed inset-0 z-[10035] flex items-center justify-center bg-black/80 p-4"
+                        data-gamepad-modal
+                        data-gamepad-initial-scope={`free-assignment-start-guide-${freeAssignmentStartGuide.id}`}
+                    >
+                        <div
+                            className="w-full max-w-lg rounded-2xl border-4 border-cyan-300 bg-slate-950 p-5 text-white shadow-[0_0_40px_rgba(34,211,238,0.35)]"
+                            data-gamepad-navigation-root
+                        >
+                            <div className="mb-2 text-center text-[10px] font-black tracking-[0.3em] text-cyan-300">FREE ASSIGNMENT</div>
+                            <h2 className="mb-3 text-center text-xl font-black text-white sm:text-2xl">
+                                {trans('フリー課題について', languageMode)}
+                            </h2>
+                            <div className="mb-4 rounded-xl border border-cyan-400/50 bg-cyan-950/35 p-4 text-sm font-bold leading-7 text-cyan-50">
+                                {trans('フリー課題は、どのモードではじめても課題が開始されます。', languageMode)}
+                            </div>
+                            <div className="grid gap-2 sm:grid-cols-2">
+                                <button
+                                    data-gamepad-initial-choice
+                                    data-gamepad-back
+                                    onClick={() => {
+                                        audioService.playSound('select');
+                                        setFreeAssignmentStartGuide(null);
+                                    }}
+                                    className="rounded-xl border border-slate-500 bg-slate-800 px-4 py-3 text-sm font-black text-white hover:bg-slate-700"
+                                >
+                                    {trans('わかった', languageMode)}
+                                </button>
+                                <button
+                                    onClick={() => startFreeAssignmentInProblemChallenge(freeAssignmentStartGuide)}
+                                    className="rounded-xl bg-cyan-400 px-4 py-3 text-sm font-black text-slate-950 hover:bg-cyan-300"
+                                >
+                                    {trans('すぐに問題をはじめる', languageMode)}
+                                </button>
                             </div>
                         </div>
                     </div>

@@ -50,6 +50,18 @@ assert.equal(
   1,
   '課題を始める確定時に課題実施を有効化していない'
 );
+assert.match(source, /const \[freeAssignmentStartGuide, setFreeAssignmentStartGuide\] = useState<AssignmentPayload \| null>\(null\);/,
+  'FREE課題の開始案内モーダル状態がない');
+assert.match(source, /フリー課題は、どのモードではじめても課題が開始されます。/,
+  'FREE課題のどのモードでも開始される案内がない');
+assert.match(source, /すぐに問題をはじめる/,
+  'FREE課題から問題チャレンジへ直行する操作がない');
+assert.match(source, /startFreeAssignmentInProblemChallenge[\s\S]*?screen: GameScreen\.PROBLEM_CHALLENGE/,
+  'FREE課題の直行操作が問題チャレンジを開始していない');
+assert.match(source, /syncManagedAssignmentCompletion\(currentAssignment\)/,
+  '再開後にローカル達成済み課題を管理側へ完了同期する処理がない');
+assert.match(source, /managedAssignmentCompletionSyncedRef/,
+  '課題完了同期の多重送信防止がない');
 assert.match(source, /setGameState\(prev => \(\{ \.\.\.prev, screen: GameScreen\.START_MENU \}\)\);/,
   '通常の送信課題をタイトル画面へ戻していない');
 assert.match(source, /screen: GameScreen\.MODE_SELECTION,/,
