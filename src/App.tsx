@@ -6513,27 +6513,8 @@ const App: React.FC = () => {
         return () => window.clearTimeout(timeout);
     }, [addLog, eventData, gameState.screen, languageMode]);
 
-    const requestGameFullscreen = () => {
+    const unlockGameAudio = () => {
         void audioService.unlockAudio().catch(() => undefined);
-        if (typeof document === 'undefined' || document.fullscreenElement) return;
-        const capacitorWindow = window as Window & {
-            Capacitor?: { isNativePlatform?: () => boolean };
-        };
-        const isNativeCapacitor = import.meta.env.VITE_APP_PLATFORM === 'ios'
-            || window.location.protocol === 'capacitor:'
-            || capacitorWindow.Capacitor?.isNativePlatform?.() === true;
-        if (isNativeCapacitor) return;
-        const root = document.documentElement as HTMLElement & {
-            webkitRequestFullscreen?: () => Promise<void> | void;
-        };
-        const request = root.requestFullscreen?.bind(root) || root.webkitRequestFullscreen?.bind(root);
-        if (!request) return;
-        try {
-            const result = request();
-            if (result && typeof result.catch === 'function') void result.catch(() => undefined);
-        } catch {
-            // 全画面表示が許可されない環境では、通常表示のままゲームを続行する。
-        }
     };
 
     const continueGame = async () => {
@@ -6568,7 +6549,7 @@ const App: React.FC = () => {
                 return;
             }
 
-            requestGameFullscreen();
+            unlockGameAudio();
 
             if (saved.screen === GameScreen.EVENT) {
                 const currentNode = saved.map.find(n => n.id === saved.currentMapNodeId);
@@ -6806,7 +6787,7 @@ const App: React.FC = () => {
             setShowTimeLimitModal(true);
             return;
         }
-        requestGameFullscreen();
+        unlockGameAudio();
         const assignmentModePool = activeAssignment?.gameMode === 'FREE' ? getAssignmentModePool(activeAssignment) : undefined;
         const assignmentHasCustomProblems = activeAssignment?.gameMode === 'FREE' && activeAssignment.customProblems.length > 0;
         const initialMode = assignmentHasCustomProblems ? GameMode.UPPER_TRIVIA : assignmentModePool ? getAssignmentRepresentativeMode(activeAssignment) : GameMode.MULTIPLICATION;
@@ -6879,7 +6860,7 @@ const App: React.FC = () => {
             setShowTimeLimitModal(true);
             return;
         }
-        requestGameFullscreen();
+        unlockGameAudio();
         audioService.playSound('select');
         setIsLoading(false);
         showDailyAssignmentNoticeForProblemSelection();
@@ -6969,7 +6950,7 @@ const App: React.FC = () => {
 
     const startTypingGame = () => {
         if (redirectToAssignmentChallengeIfLocked()) return;
-        requestGameFullscreen();
+        unlockGameAudio();
         audioService.playSound('select');
         setIsLoading(false);
         showDailyAssignmentNoticeForProblemSelection();
