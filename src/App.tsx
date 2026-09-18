@@ -4462,6 +4462,7 @@ const App: React.FC = () => {
                     image: eventData.image,
                     imageKey: eventData.imageKey,
                     voiceLines: eventData.voiceLines,
+                    highSchoolVoiceName: eventData.highSchoolVoiceName,
                     options: (eventData.options || []).map((option: any) => ({
                         label: option.label,
                         text: option.text
@@ -4477,13 +4478,25 @@ const App: React.FC = () => {
         }
     }, [buildCoopSharedState, eventData, eventResultLog, isCoopHost, shopCards, shopPotions, shopRelics, treasureOpened, treasurePools, treasureRewards]);
     useEffect(() => {
-        if (gameState.screen !== GameScreen.EVENT || eventResultLog || !eventData?.voiceLines?.length) {
+        if (gameState.screen !== GameScreen.EVENT || eventResultLog) {
             audioService.stopMagicEventVoices();
+            audioService.stopHighSchoolVoices();
             return;
         }
+        if (eventData?.highSchoolVoiceName) {
+            audioService.stopMagicEventVoices();
+            void audioService.playHighSchoolVoiceFile(gameState.player.id, eventData.highSchoolVoiceName, 6000);
+            return () => audioService.stopHighSchoolVoices();
+        }
+        if (!eventData?.voiceLines?.length) {
+            audioService.stopMagicEventVoices();
+            audioService.stopHighSchoolVoices();
+            return;
+        }
+        audioService.stopHighSchoolVoices();
         void audioService.playMagicEventVoiceSequence(eventData.voiceLines);
         return () => audioService.stopMagicEventVoices();
-    }, [eventData?.imageKey, eventData?.title, eventData?.voiceLines, eventResultLog, gameState.screen]);
+    }, [eventData?.highSchoolVoiceName, eventData?.imageKey, eventData?.title, eventData?.voiceLines, eventResultLog, gameState.player.id, gameState.screen]);
     const sendCoopRewardSyncToPeer = useCallback((peerId: string) => {
         if (!coopSession?.isHost || gameState.challengeMode !== 'COOP' || gameState.screen !== GameScreen.REWARD) return;
         const participant = coopSession.participants.find(entry => entry.peerId === peerId);
@@ -8164,7 +8177,7 @@ const App: React.FC = () => {
         if (!bossNode) return;
 
         const floor = bossNode.y + 1;
-        const battleBackgroundScene = chooseBattleBackgroundScene(NodeType.BOSS, 50, floor, theme);
+        const battleBackgroundScene = chooseBattleBackgroundScene(NodeType.BOSS, 50, floor, theme, player.appearanceMode);
         assetPreloadService.preloadTransitionAssets([
             battleBackgroundScene.image,
             ...getBattleEnemyTransitionAssetPaths(bossEnemy, theme),
@@ -9094,7 +9107,7 @@ const App: React.FC = () => {
                     });
                 }
 
-                const battleBackgroundScene = chooseBattleBackgroundScene(node.type, actMultiplier, nextState.floor, activeBattleVisualTheme);
+                const battleBackgroundScene = chooseBattleBackgroundScene(node.type, actMultiplier, nextState.floor, activeBattleVisualTheme, nextState.player.appearanceMode);
                 const flavor = getBattleBackgroundFlavor(battleBackgroundScene, actMultiplier * 100 + nextState.floor);
 
                 const p = preparePlayerForBattle(nextState.player, node.type);
@@ -19748,14 +19761,14 @@ const App: React.FC = () => {
                                     </div>
                                     <p className="mb-4 text-sm font-bold leading-relaxed text-slate-100 sm:text-base vacation-unlock-modal-details-copy">
                                         {languageMode === 'ENGLISH'
-                                            ? 'As a reward for reaching the true ending, vacation outfits and exclusive actions are now available.'
+                                            ? 'As a reward for reaching the true ending, Vacation Mode now changes outfits, maps, battle scenery, events, and exclusive story scenes.'
                                             : languageMode === 'HIRAGANA'
-                                                ? 'しんエンディングに たどりついた あかしとして、ばかんす いしょうと とくべつな うごきが かいきんされました。'
-                                                : '真エンディング到達の証として、バカンス衣装と専用アクションが解禁されました。'}
+                                                ? 'しんエンディングに たどりついた あかしとして、ばかんす いしょう、マップ、せんとう はいけい、イベント、せんようストーリーが かいきんされました。'
+                                                : '真エンディング到達の証として、バカンス衣装・専用マップ・戦闘背景・イベント・専用ストーリーが解禁されました。'}
                                     </p>
                                     <div className="mb-4 flex flex-wrap gap-2 vacation-unlock-modal-tags">
                                         <span className="rounded-full border border-cyan-200/40 bg-cyan-300/15 px-2.5 py-1 text-xs font-black text-cyan-100">{languageMode === 'ENGLISH' ? 'Vacation outfits' : languageMode === 'HIRAGANA' ? 'ばかんす いしょう' : 'バカンス衣装'}</span>
-                                        <span className="rounded-full border border-fuchsia-200/40 bg-fuchsia-300/15 px-2.5 py-1 text-xs font-black text-fuchsia-100">{languageMode === 'ENGLISH' ? '2×2 actions' : languageMode === 'HIRAGANA' ? '2×2の うごき' : '2×2専用アクション'}</span>
+                                        <span className="rounded-full border border-fuchsia-200/40 bg-fuchsia-300/15 px-2.5 py-1 text-xs font-black text-fuchsia-100">{languageMode === 'ENGLISH' ? 'Vacation maps & events' : languageMode === 'HIRAGANA' ? 'ばかんす マップ・イベント' : '専用マップ・イベント'}</span>
                                         <span className="rounded-full border border-amber-200/40 bg-amber-300/15 px-2.5 py-1 text-xs font-black text-amber-100">{languageMode === 'ENGLISH' ? 'Select characters' : languageMode === 'HIRAGANA' ? 'しゅじんこうを えらぶ' : '主人公選択で切替'}</span>
                                     </div>
                                     <button

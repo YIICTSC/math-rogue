@@ -208,7 +208,16 @@ const MapScreen: React.FC<MapScreenProps> = ({ nodes, currentNodeId, onNodeSelec
     // unbounded; only the background asset band is capped at 41-50.
     const endlessDepthBandStart = Math.min(41, Math.floor((Math.max(1, endlessChapter) - 1) / 10) * 10 + 1);
     const endlessDepthBand = `${String(endlessDepthBandStart).padStart(2, '0')}-${String(endlessDepthBandStart + 9).padStart(2, '0')}`;
-    const mapBackground = isEndless
+    const vacationMapAct = isEndless
+        ? Math.min(4, Math.floor((Math.max(1, endlessChapter) - 1) / 10) + 1)
+        : Math.min(4, Math.max(1, act));
+    const vacationTheme = player.appearanceMode === 'VACATION'
+        && (visualTheme === 'high-school' || visualTheme === 'magic')
+        ? visualTheme
+        : null;
+    const mapBackground = vacationTheme
+        ? assetUrl('sprites/backgrounds/learning-rogue/' + vacationTheme + '-vacation-map-act' + vacationMapAct + '.webp')
+        : isEndless
         ? assetUrl(`sprites/backgrounds/learning-rogue/endless-${visualTheme}-${endlessDepthBand}.webp`)
         : visualTheme === 'high-school'
         ? assetUrl(`sprites/backgrounds/learning-rogue/high-school-map-act${highSchoolMapAct}.webp`)

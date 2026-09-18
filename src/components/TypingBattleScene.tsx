@@ -964,7 +964,11 @@ const TypingBattleScene: React.FC<TypingBattleSceneProps> = ({
     };
 
     const focusInput = () => inputRef.current?.focus();
-    const battleBackgroundScene = getBattleBackgroundSceneById(battleBackgroundId, visualTheme);
+    const battleBackgroundScene = getBattleBackgroundSceneById(
+        battleBackgroundId,
+        visualTheme as 'elementary' | 'high-school' | 'magic',
+        player.appearanceMode,
+    );
 
     return (
         <div className={`flex h-full w-full flex-col overflow-hidden bg-gray-950 text-white ${isShaking ? 'animate-screen-shake' : ''}`} style={battleUiStyle} onClick={focusInput}>

@@ -428,7 +428,11 @@ const BattleScene: React.FC<BattleSceneProps> = ({
     const isCoopBattleView = !!coopSelfPeerId || companions.length > 0;
     const [controllerItemsOpen, setControllerItemsOpen] = useState(false);
     const pendingCardFocusRef = useRef<{ playedCardId: string; nextCardId?: string; fallbackIndex: number } | null>(null);
-    const battleBackgroundScene = getBattleBackgroundSceneById(battleBackgroundId, visualTheme);
+    const battleBackgroundScene = getBattleBackgroundSceneById(
+        battleBackgroundId,
+        visualTheme as 'elementary' | 'high-school' | 'magic',
+        player.appearanceMode,
+    );
     const battleUiStyle = battleUiSettings ? {
         '--battle-ui-control-bar-offset-y': `${battleUiSettings.controlBarOffsetY}px`,
         '--battle-ui-hand-card-scale': battleUiSettings.handCardScale,

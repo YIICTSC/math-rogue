@@ -1,4 +1,4 @@
-import { MAGIC_BATTLE_BACKGROUND_SCENES } from './battleBackgrounds';
+import { MAGIC_BATTLE_BACKGROUND_SCENES, MAGIC_VACATION_BATTLE_BACKGROUND_SCENES } from './battleBackgrounds';
 import { MAGIC_HEROES, MAGIC_MALE_PROTAGONISTS } from './magicHeroes';
 import { MAGIC_FRIENDSHIP_ROUTES } from './magicFriendshipRoutes';
 import { MAGIC_EVENT_IMAGE_MANIFEST } from './romanceEvents';
@@ -23,6 +23,7 @@ const doubleRomanceEventPaths = [
 export const MAGIC_ASSET_PATHS = Array.from(new Set([
   'sprites/magic/title-background.webp',
   ...range(4).map(index => `sprites/backgrounds/learning-rogue/magic-map-act${index + 1}.webp`),
+  ...range(4).map(index => `sprites/backgrounds/learning-rogue/magic-vacation-map-act${index + 1}.webp`),
   'sprites/backgrounds/learning-rogue/magic-selection-entrance.webp',
   'sprites/backgrounds/learning-rogue/magic-event-hallway.webp',
   'sprites/backgrounds/learning-rogue/magic-reward-sanctuary.webp',
@@ -33,6 +34,7 @@ export const MAGIC_ASSET_PATHS = Array.from(new Set([
   'sprites/backgrounds/learning-rogue/magic-final-bridge.webp',
   'sprites/backgrounds/learning-rogue/magic-act-clear.webp',
   ...MAGIC_BATTLE_BACKGROUND_SCENES.map(scene => scene.image),
+  ...MAGIC_VACATION_BATTLE_BACKGROUND_SCENES.map(scene => scene.image),
   'sprites/magic/effects/transformation-sheet.webp',
   'sprites/magic/events/forgotten-card.webp',
   'ui/magic/transformation-guide.png',

@@ -378,7 +378,9 @@ const CharacterSelectionScreen: React.FC<CharacterSelectionScreenProps> = ({ cha
             )}
             {visualTheme !== 'elementary' && vacationModeUnlocked && (
               <div className="mt-4 inline-flex items-center gap-2 rounded-full border border-amber-300/70 bg-slate-950/85 p-1 pl-3 shadow-lg">
-                <span className="text-xs font-black text-amber-100">{trans('見た目', languageMode)}</span>
+                <span className="text-xs font-black text-amber-100">
+                  {languageMode === 'ENGLISH' ? 'Adventure style' : languageMode === 'HIRAGANA' ? 'ぼうけんスタイル' : '冒険スタイル'}
+                </span>
                 <button
                   type="button"
                   onClick={() => {

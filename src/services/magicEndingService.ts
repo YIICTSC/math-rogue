@@ -1,5 +1,6 @@
-import type { Player } from '../types';
+import type { CharacterAppearanceMode, Player } from '../types';
 import { getMagicRomanceEndingText, type MagicRomanceEndingRank } from '../data/magicRomanceDialogue';
+import { getMagicVacationRomanceEnding } from '../data/magicVacationRomanceDialogue';
 import { getMagicFriendshipRoutesForHero } from '../data/magicFriendshipRoutes';
 import { getMagicFriendshipEndingDialogue } from '../data/magicFriendshipEndingDialogue';
 import { MAGIC_HEROES, MAGIC_MALE_PROTAGONISTS, isMagicMaleProtagonist } from '../data/magicHeroes';
@@ -117,6 +118,25 @@ const getPairImagePath = (heroId: string, firstTargetId: string, secondTargetId:
   return `sprites/magic/events/double-romance/${folder}/${pair.join('-')}.webp`;
 };
 
+const getRomanceEndingForAppearance = (
+  heroId: string,
+  targetId: string,
+  affection: number,
+  appearanceMode: CharacterAppearanceMode = 'STANDARD',
+) => {
+  const standard = getMagicRomanceEndingText(heroId, targetId, affection);
+  if (appearanceMode !== 'VACATION') return standard;
+  const vacation = getMagicVacationRomanceEnding(heroId, targetId, affection);
+  return {
+    ...standard,
+    description: vacation.description,
+    lines: vacation.lines,
+    imagePath: vacation.imagePath,
+    fallbackImagePath: standard.imagePath,
+    rank: vacation.rank,
+  };
+};
+
 const DOUBLE_ROMANCE_HERO_REPLY_LINES: Record<string, string> = {
   AKARI: 'わ、わかったから二人とも一歩だけ下がって！星より先に私の心臓が爆発しちゃうよ！',
   SHIZUKU: 'ま、待ってください。情報量と距離が同時に限界です……一人ずつ、順番に聞かせてください。',
@@ -141,26 +161,37 @@ const buildDoubleRomancePage = (
   heroId: string,
   firstTargetId: string,
   secondTargetId: string,
+  appearanceMode: CharacterAppearanceMode = 'STANDARD',
 ): MagicEndingPage => {
   const heroName = getCharacterName(heroId);
   const firstName = getCharacterName(firstTargetId);
   const secondName = getCharacterName(secondTargetId);
-  const firstEnding = getMagicRomanceEndingText(heroId, firstTargetId, 100);
-  const secondEnding = getMagicRomanceEndingText(heroId, secondTargetId, 100);
-  const lines = [
-    firstEnding.lines[1],
-    secondEnding.lines[1],
-    firstEnding.lines[0],
-    `${heroName}「${DOUBLE_ROMANCE_HERO_REPLY_LINES[heroId] ?? DOUBLE_ROMANCE_HERO_REPLY_LINES.AKARI}」`,
-  ];
+  const firstEnding = getRomanceEndingForAppearance(heroId, firstTargetId, 100, appearanceMode);
+  const secondEnding = getRomanceEndingForAppearance(heroId, secondTargetId, 100, appearanceMode);
+  const lines = appearanceMode === 'VACATION'
+    ? [
+        firstEnding.lines[1],
+        secondEnding.lines[1],
+        firstEnding.lines[0],
+        firstEnding.lines[2],
+      ]
+    : [
+        firstEnding.lines[1],
+        secondEnding.lines[1],
+        firstEnding.lines[0],
+        `${heroName}「${DOUBLE_ROMANCE_HERO_REPLY_LINES[heroId] ?? DOUBLE_ROMANCE_HERO_REPLY_LINES.AKARI}」`,
+      ];
 
   return {
     kind: 'double-romance',
     title: `${firstName}と${secondName}、譲れない告白`,
-    description: `決戦後、${heroName}を呼び止めた二人は、互いの想いが同じ強さだと知る。好意を曖昧にしないため、二人は正面から答えを求めた。`,
+    description: appearanceMode === 'VACATION'
+      ? `夏の決戦後、海辺で${heroName}を呼び止めた二人は、互いの想いが同じ強さだと知る。潮騒の中、二人は正面から答えを求めた。`
+      : `決戦後、${heroName}を呼び止めた二人は、互いの想いが同じ強さだと知る。好意を曖昧にしないため、二人は正面から答えを求めた。`,
     lines,
     voiceLines: getMagicEndingVoiceLines(lines, heroId),
-    imagePath: getPairImagePath(heroId, firstTargetId, secondTargetId),
+    imagePath: appearanceMode === 'VACATION' ? firstEnding.imagePath : getPairImagePath(heroId, firstTargetId, secondTargetId),
+    fallbackImagePath: appearanceMode === 'VACATION' ? getPairImagePath(heroId, firstTargetId, secondTargetId) : undefined,
     rankLabel: '修羅場エンド',
     metricLabel: '好感度 100 / 100 × 2',
   };
@@ -206,12 +237,13 @@ export const getMagicEndingPages = (player: Player, heroId: string): MagicEnding
       heroId,
       completedRomanceTargetIds[0],
       completedRomanceTargetIds[1],
+      player.appearanceMode,
     ));
   } else {
     const targetId = completedRomanceTargetIds[0] ?? getBestRomanceTargetId(player, heroId);
     if (targetId) {
       const affection = player.magicRomance?.affection[targetId] ?? 0;
-      const ending = getMagicRomanceEndingText(heroId, targetId, affection);
+      const ending = getRomanceEndingForAppearance(heroId, targetId, affection, player.appearanceMode);
       pages.push({
         kind: 'romance',
         title: ending.title,

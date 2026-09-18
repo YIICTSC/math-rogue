@@ -109,6 +109,10 @@ const EventScreen: React.FC<EventScreenProps> = ({ title, description, options, 
     const match = imageKey?.match(/^high-school-event-(\d+)$/);
     return match ? Number(match[1]) : null;
   }, [imageKey]);
+  const highSchoolVacationEventIndex = useMemo(() => {
+    const match = imageKey?.match(/^high-school-vacation-event-(\d+)$/);
+    return match ? Number(match[1]) : null;
+  }, [imageKey]);
   const highSchoolSupporterNpcImages = useMemo(() => {
     const match = imageKey?.match(/^high-school-supporter-npc\/([^/]+)$/);
     return match ? getWebpFirstAssetPaths(`sprites/high-school/supporter-npcs/${match[1]}`) : [];
@@ -137,6 +141,14 @@ const EventScreen: React.FC<EventScreenProps> = ({ title, description, options, 
       ? assetUrl(`sprites/magic/events/romance/${match[1]}/${match[2]}/${match[3]}.webp`)
       : null;
   }, [imageKey]);
+  const magicVacationRomanceImages = useMemo(() => {
+    const match = imageKey?.match(/^magic-romance-vacation:([^:]+):([^:]+):(r[1-5])$/);
+    if (!match) return [];
+    return [
+      assetUrl('sprites/magic/events/romance/vacation/' + match[1] + '/' + match[2] + '/' + match[3] + '.webp'),
+      assetUrl('sprites/magic/events/romance/' + match[1] + '/' + match[2] + '/' + match[3] + '.webp'),
+    ];
+  }, [imageKey]);
   const magicFriendshipImages = useMemo(() => {
     const match = imageKey?.match(/^magic-friendship:([^:]+):([^:]+)$/);
     if (!match) return [];
@@ -164,6 +176,12 @@ const EventScreen: React.FC<EventScreenProps> = ({ title, description, options, 
         assetUrl('event-illustrations/default.webp'),
       ];
     }
+    if (magicVacationRomanceImages.length > 0) {
+      return [
+        ...magicVacationRomanceImages,
+        assetUrl('event-illustrations/default.webp'),
+      ];
+    }
     if (magicRomanceImage) {
       return [
         magicRomanceImage,
@@ -179,6 +197,13 @@ const EventScreen: React.FC<EventScreenProps> = ({ title, description, options, 
     if (highSchoolEventIndex !== null) {
       return [
         assetUrl(`sprites/high-school/events/${highSchoolEventIndex}.webp`),
+        assetUrl('event-illustrations/default.webp'),
+      ];
+    }
+    if (highSchoolVacationEventIndex !== null) {
+      const paddedIndex = String(highSchoolVacationEventIndex).padStart(3, '0');
+      return [
+        assetUrl('sprites/high-school/events/vacation/' + paddedIndex + '.webp'),
         assetUrl('event-illustrations/default.webp'),
       ];
     }
@@ -198,7 +223,7 @@ const EventScreen: React.FC<EventScreenProps> = ({ title, description, options, 
       assetUrl(`event-illustrations/${encodedTitle}.svg`),
       assetUrl('event-illustrations/default.webp')
     ];
-  }, [highSchoolEventIndex, highSchoolSupporterNpcImages, magicEventIndex, magicFriendshipImages, magicRomanceImage, imageKey, title, visualTheme]);
+  }, [highSchoolEventIndex, highSchoolVacationEventIndex, highSchoolSupporterNpcImages, magicEventIndex, magicFriendshipImages, magicRomanceImage, magicVacationRomanceImages, imageKey, title, visualTheme]);
   const [imageIndex, setImageIndex] = useState(0);
   const [choiceLocked, setChoiceLocked] = useState(false);
   const [continueLocked, setContinueLocked] = useState(false);

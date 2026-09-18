@@ -12,6 +12,12 @@ import { DODOMEDESU_BOSS_READY_FLAG, DODOMEDESU_EVENT_STAGE_FLAG, DODOMEDESU_EVE
 import { MAP_HEIGHT } from './mapGenerator';
 import { MAGIC_ENDLESS_EVENTS, MAGIC_ENDLESS_MALE_EVENTS, type MagicEndlessEventDefinition } from '../data/magicEndlessEvents';
 import { applyMagicEndlessEventEffects } from '../utils/magicEndlessEventEffects';
+import {
+    HIGH_SCHOOL_VACATION_EVENTS,
+    getHighSchoolVacationEventByIndex,
+    getHighSchoolVacationEventByTitle,
+    type HighSchoolVacationEventDefinition,
+} from '../data/highSchoolVacationEvents';
 
 interface EventAnswerMeta {
     quickQuizProgress?: number;
@@ -29,6 +35,7 @@ interface GameEvent {
     description: string;
     options: EventOption[];
     imageKey?: string;
+    highSchoolVoiceName?: string;
 }
 
 const getMagicEndlessEventPool = (player: Player, chapter: number): MagicEndlessEventDefinition[] => {
@@ -385,6 +392,78 @@ export const generateEvent = (
         | { kind: 'potion'; potionId: keyof typeof POTION_LIBRARY }
         | { kind: 'momentum' };
 
+    const getVacationEffect = (intent: string, eventIndex: number, choiceIndex: number): HighSchoolEffect => {
+        const normalized = intent.toLowerCase();
+        const amountSeed = eventIndex + choiceIndex;
+        if (
+            normalized.includes('heal')
+            || normalized.includes('mood')
+            || normalized.includes('safety')
+            || normalized.includes('hp')
+            || normalized.includes('rest')
+            || normalized.includes('view')
+            || normalized.includes('time save')
+        ) {
+            return { kind: 'heal', amount: 10 + (amountSeed % 3) * 2 };
+        }
+        if (
+            normalized.includes('focus')
+            || normalized.includes('knowledge')
+            || normalized.includes('insight')
+            || normalized.includes('creativity')
+        ) {
+            return { kind: 'upgrade' };
+        }
+        if (normalized.includes('skill')) {
+            return { kind: 'skillCard' };
+        }
+        if (
+            normalized.includes('trust')
+            || normalized.includes('reward')
+            || normalized.includes('gold')
+            || normalized.includes('work')
+            || normalized.includes('social')
+        ) {
+            return { kind: 'gold', amount: 25 + (amountSeed % 3) * 5 };
+        }
+        if (
+            normalized.includes('challenge')
+            || normalized.includes('high risk')
+            || normalized.includes('strength')
+        ) {
+            return { kind: 'strength', amount: 1 };
+        }
+        if (normalized.includes('item') || normalized.includes('collection')) {
+            const potionIds: Array<keyof typeof POTION_LIBRARY> = ['ENERGY_POTION', 'BLOCK_POTION', 'STRENGTH_POTION'];
+            return { kind: 'potion', potionId: potionIds[amountSeed % potionIds.length] };
+        }
+        if (normalized.includes('memory')) {
+            return { kind: 'maxHp', amount: 2 };
+        }
+        return { kind: 'momentum' };
+    };
+
+    const getVacationEffectText = (effect: HighSchoolEffect): string => {
+        switch (effect.kind) {
+            case 'gold':
+                return effect.amount + 'Gを得る';
+            case 'heal':
+                return 'HPを' + effect.amount + '回復する';
+            case 'maxHp':
+                return '最大HP+' + effect.amount;
+            case 'strength':
+                return '恒久ムキムキ+' + effect.amount;
+            case 'upgrade':
+                return 'カードを1枚強化する';
+            case 'skillCard':
+                return 'スキルカードを1枚得る';
+            case 'potion':
+                return 'ポーションを得る';
+            case 'momentum':
+                return '小さな成果を得る';
+        }
+    };
+
     const highSchoolChoices: Record<number, Array<{ label: string; text: string; result: string; effect: HighSchoolEffect }>> = {
         0: [
             { label: '残って勉強する', text: 'カードを1枚強化する', result: '静かな机で復習が進んだ。', effect: { kind: 'upgrade' } },
@@ -703,29 +782,30 @@ export const generateEvent = (
     };
 
     const applyHighSchoolEffect = (themeTitle: string, choice: { result: string; effect: HighSchoolEffect }) => {
-        switch (choice.effect.kind) {
+        const effect = choice.effect;
+        switch (effect.kind) {
             case 'gold':
-                setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold + choice.effect.amount } }));
-                setEventResultLog(trans(`${choice.result}\n${choice.effect.amount}Gを得た。`, languageMode));
+                setGameState(prev => ({ ...prev, player: { ...prev.player, gold: prev.player.gold + effect.amount } }));
+                setEventResultLog(trans(`${choice.result}\n${effect.amount}Gを得た。`, languageMode));
                 return;
             case 'heal':
-                setGameState(prev => ({ ...prev, player: healPlayer(prev.player, choice.effect.amount) }));
-                setEventResultLog(trans(`${choice.result}\nHPが${choice.effect.amount}回復した。`, languageMode));
+                setGameState(prev => ({ ...prev, player: healPlayer(prev.player, effect.amount) }));
+                setEventResultLog(trans(`${choice.result}\nHPが${effect.amount}回復した。`, languageMode));
                 return;
             case 'maxHp':
                 setGameState(prev => ({
                     ...prev,
                     player: {
                         ...prev.player,
-                        maxHp: prev.player.maxHp + choice.effect.amount,
-                        currentHp: prev.player.currentHp + choice.effect.amount,
+                        maxHp: prev.player.maxHp + effect.amount,
+                        currentHp: prev.player.currentHp + effect.amount,
                     }
                 }));
-                setEventResultLog(trans(`${choice.result}\n最大HP+${choice.effect.amount}。`, languageMode));
+                setEventResultLog(trans(`${choice.result}\n最大HP+${effect.amount}。`, languageMode));
                 return;
             case 'strength':
-                setGameState(prev => ({ ...prev, player: addPermanentStrengthBonus(prev.player, choice.effect.amount) }));
-                setEventResultLog(trans(`${choice.result}\n恒久ムキムキ+${choice.effect.amount}。`, languageMode));
+                setGameState(prev => ({ ...prev, player: addPermanentStrengthBonus(prev.player, effect.amount) }));
+                setEventResultLog(trans(`${choice.result}\n恒久ムキムキ+${effect.amount}。`, languageMode));
                 return;
             case 'upgrade': {
                 let upgradedName = '';
@@ -759,7 +839,7 @@ export const generateEvent = (
                 return;
             }
             case 'potion': {
-                const potion = { ...POTION_LIBRARY[choice.effect.potionId], id: `hs-pot-${Date.now()}` };
+                const potion = { ...POTION_LIBRARY[effect.potionId], id: `hs-pot-${Date.now()}` };
                 setGameState(prev => ({
                     ...prev,
                     player: {
@@ -785,6 +865,29 @@ export const generateEvent = (
                 label: choice.label,
                 text: choice.text,
                 action: () => applyHighSchoolEffect(theme.title, choice),
+            })),
+        };
+    };
+
+    const buildHighSchoolVacationEvent = (event: HighSchoolVacationEventDefinition): GameEvent => {
+        const choices = event.choices.map((choice, choiceIndex) => {
+            const effect = getVacationEffect(choice.intent, event.imageIndex, choiceIndex);
+            return {
+                label: choice.label,
+                text: getVacationEffectText(effect),
+                result: event.resultLog,
+                effect,
+            };
+        });
+        return {
+            title: event.title,
+            description: event.description,
+            imageKey: 'high-school-vacation-event-' + event.imageIndex,
+            highSchoolVoiceName: 'vacation-' + event.voiceCue,
+            options: choices.map(choice => ({
+                label: choice.label,
+                text: choice.text,
+                action: () => applyHighSchoolEffect(event.title, choice),
             })),
         };
     };
@@ -6802,6 +6905,10 @@ export const generateEvent = (
     );
 
     if (preferredEventTitle) {
+        if (visualTheme === 'high-school' && player.appearanceMode === 'VACATION') {
+            const matchedVacationEvent = getHighSchoolVacationEventByTitle(preferredEventTitle);
+            if (matchedVacationEvent) return buildHighSchoolVacationEvent(matchedVacationEvent);
+        }
         if (visualTheme !== 'elementary') {
             const matchedTheme = getVisualThemeEventThemeByTitle(visualTheme, preferredEventTitle);
             if (matchedTheme) return buildThemedEvent(matchedTheme, visualTheme);
@@ -6810,6 +6917,11 @@ export const generateEvent = (
             e.title === preferredEventTitle
         );
         if (matched) return finalizeEvent(matched);
+    }
+
+    if (visualTheme === 'high-school' && player.appearanceMode === 'VACATION') {
+        const randomIndex = Math.floor(Math.random() * HIGH_SCHOOL_VACATION_EVENTS.length);
+        return buildHighSchoolVacationEvent(getHighSchoolVacationEventByIndex(randomIndex));
     }
 
     // Pick random event from the massive pool

@@ -3,6 +3,10 @@ import type { GameState, MagicRomanceProgress, Player } from '../types';
 import { getUpgradedCard } from '../utils/cardUtils';
 import { ROMANCE_TARGETS } from '../data/romanceTargets';
 import { getMagicRomanceDialogue, type MagicRomanceRewardKind } from '../data/magicRomanceDialogue';
+import {
+  getMagicVacationRomanceDialogue,
+  getMagicVacationRomanceImageKey,
+} from '../data/magicVacationRomanceDialogue';
 import { MAGIC_HEROES, MAGIC_MALE_PROTAGONISTS, isMagicMaleProtagonist } from '../data/magicHeroes';
 import { getMagicFriendshipRoutesForHero, type MagicFriendshipRoute } from '../data/magicFriendshipRoutes';
 
@@ -66,6 +70,14 @@ const getRomanceImageKey = (heroId: string, targetId: string, stage: number) =>
   isMagicMaleProtagonist(heroId)
     ? `magic-romance:${targetId}:${heroId}:r${stage}`
     : `magic-romance:${heroId}:${targetId}:r${stage}`;
+
+const getVacationVoiceLines = (heroId: string, targetId: string, stageIndex: number): MagicEventVoiceLine[] => {
+  const lineId = `vacation-romance-r${Math.max(1, Math.min(5, stageIndex + 1))}`;
+  return [
+    { heroId, lineId },
+    { heroId: targetId, lineId },
+  ];
+};
 
 const SPEAKER_NAME_TO_MAGIC_ID: Record<string, string> = {
   あかり: 'AKARI',
@@ -258,15 +270,22 @@ const buildDialogueEvent = (
   stageIndex: number,
   setGameState: React.Dispatch<React.SetStateAction<GameState>>,
   setEventResultLog: (log: string | null) => void,
+  vacation = false,
 ): MagicRomanceGameEvent => {
-  const dialogue = getMagicRomanceDialogue(heroId, targetId, stageIndex);
+  const dialogue = vacation
+    ? getMagicVacationRomanceDialogue(heroId, targetId, stageIndex)
+    : getMagicRomanceDialogue(heroId, targetId, stageIndex);
   const target = getRomanceCandidate(heroId, targetId);
 
   return {
     title: dialogue.title,
     description: dialogue.description,
-    imageKey: getRomanceImageKey(heroId, targetId, stageIndex + 1),
-    voiceLines: getMagicRomanceVoiceLines(heroId, targetId, stageIndex, dialogue.description),
+    imageKey: vacation
+      ? getMagicVacationRomanceImageKey(heroId, targetId, stageIndex + 1)
+      : getRomanceImageKey(heroId, targetId, stageIndex + 1),
+    voiceLines: vacation
+      ? getVacationVoiceLines(heroId, targetId, stageIndex)
+      : getMagicRomanceVoiceLines(heroId, targetId, stageIndex, dialogue.description),
     options: dialogue.choices.map((choice, choiceIndex) => ({
       label: choice.label,
       text: `好感度+${choice.affectionGain}`,
@@ -315,8 +334,11 @@ const buildCompletedRouteEvent = (
   targetId: string,
   setGameState: React.Dispatch<React.SetStateAction<GameState>>,
   setEventResultLog: (log: string | null) => void,
+  vacation = false,
 ): MagicRomanceGameEvent => {
-  const dialogue = getMagicRomanceDialogue(heroId, targetId, 4);
+  const dialogue = vacation
+    ? getMagicVacationRomanceDialogue(heroId, targetId, 4)
+    : getMagicRomanceDialogue(heroId, targetId, 4);
   const target = getRomanceCandidate(heroId, targetId);
   const choices = [
     { label: '一緒に帰る', rewardKind: 'heal' as const, rewardAmount: 10, text: 'HPを10回復' },
@@ -325,10 +347,16 @@ const buildCompletedRouteEvent = (
   ];
 
   return {
-    title: `${target.name}・約束の続き`,
-    description: `${dialogue.description}\n\n五つの大切な時間を重ねた二人には、もう言葉に迷う距離はなかった。`,
-    imageKey: getRomanceImageKey(heroId, targetId, 5),
-    voiceLines: getMagicRomanceVoiceLines(heroId, targetId, 4, dialogue.description),
+    title: vacation ? `${target.name}・夏の約束の続き` : `${target.name}・約束の続き`,
+    description: vacation
+      ? `${dialogue.description}\n\n五つの夏の時間を重ねた二人は、潮風の中でもう言葉に迷う距離ではなかった。`
+      : `${dialogue.description}\n\n五つの大切な時間を重ねた二人には、もう言葉に迷う距離はなかった。`,
+    imageKey: vacation
+      ? getMagicVacationRomanceImageKey(heroId, targetId, 5)
+      : getRomanceImageKey(heroId, targetId, 5),
+    voiceLines: vacation
+      ? getVacationVoiceLines(heroId, targetId, 4)
+      : getMagicRomanceVoiceLines(heroId, targetId, 4, dialogue.description),
     options: choices.map((choice, choiceIndex) => ({
       label: choice.label,
       text: `5段階完了 / ${choice.text}`,
@@ -344,7 +372,9 @@ const buildCompletedRouteEvent = (
           rewardMessage = reward.message;
           return { ...prev, player: reward.player };
         });
-        setEventResultLog(`${target.name}との五つの物語を越え、穏やかな時間を過ごした。\n好感度は変化しない。\n${rewardMessage}`);
+        setEventResultLog(vacation
+          ? `${target.name}との五つの夏の物語を越え、海辺で穏やかな時間を過ごした。\n好感度は変化しない。\n${rewardMessage}`
+          : `${target.name}との五つの物語を越え、穏やかな時間を過ごした。\n好感度は変化しない。\n${rewardMessage}`);
       },
     })),
   };
@@ -452,10 +482,13 @@ const buildChapterWaitEvent = (
   requiredAct: number,
   setGameState: React.Dispatch<React.SetStateAction<GameState>>,
   setEventResultLog: (log: string | null) => void,
+  vacation = false,
 ): MagicRomanceGameEvent => {
   const target = getRomanceCandidate(heroId, targetId);
   const previousStage = Math.max(0, stageIndex - 1);
-  const dialogue = getMagicRomanceDialogue(heroId, targetId, previousStage);
+  const dialogue = vacation
+    ? getMagicVacationRomanceDialogue(heroId, targetId, previousStage)
+    : getMagicRomanceDialogue(heroId, targetId, previousStage);
   const choices = [
     { label: '一緒に復習する', rewardKind: 'upgrade' as const, rewardAmount: 1, text: 'カードを1枚強化' },
     { label: '魔力を整える', rewardKind: 'heal' as const, rewardAmount: 10, text: 'HPを10回復' },
@@ -463,10 +496,16 @@ const buildChapterWaitEvent = (
   ];
 
   return {
-    title: `${target.name}・次の季節を待ちながら`,
-    description: `${dialogue.description}\n\n二人の関係は確かに進んでいる。けれど、次の出来事が動き出すのは第${requiredAct}章からだ。今日は焦らず、いつもの学園生活を一緒に過ごすことにした。`,
-    imageKey: getRomanceImageKey(heroId, targetId, previousStage + 1),
-    voiceLines: getMagicRomanceVoiceLines(heroId, targetId, previousStage, dialogue.description),
+    title: vacation ? `${target.name}・次の夏の時間を待ちながら` : `${target.name}・次の季節を待ちながら`,
+    description: vacation
+      ? `${dialogue.description}\n\n二人の関係は確かに進んでいる。次の出来事が動き出す第${requiredAct}章までは、海辺の寄り道をもう少し楽しむことにした。`
+      : `${dialogue.description}\n\n二人の関係は確かに進んでいる。けれど、次の出来事が動き出すのは第${requiredAct}章からだ。今日は焦らず、いつもの学園生活を一緒に過ごすことにした。`,
+    imageKey: vacation
+      ? getMagicVacationRomanceImageKey(heroId, targetId, previousStage + 1)
+      : getRomanceImageKey(heroId, targetId, previousStage + 1),
+    voiceLines: vacation
+      ? getVacationVoiceLines(heroId, targetId, previousStage)
+      : getMagicRomanceVoiceLines(heroId, targetId, previousStage, dialogue.description),
     options: choices.map((choice, choiceIndex) => ({
       label: choice.label,
       text: `段階維持 / ${choice.text}`,
@@ -482,7 +521,9 @@ const buildChapterWaitEvent = (
           rewardMessage = reward.message;
           return { ...prev, player: reward.player };
         });
-        setEventResultLog(`${target.name}と穏やかな放課後を過ごした。\n次の恋愛イベントは第${requiredAct}章で解放される。\n${rewardMessage}`);
+        setEventResultLog(vacation
+          ? `${target.name}と潮風の中で穏やかな時間を過ごした。\n次の恋愛イベントは第${requiredAct}章で解放される。\n${rewardMessage}`
+          : `${target.name}と穏やかな放課後を過ごした。\n次の恋愛イベントは第${requiredAct}章で解放される。\n${rewardMessage}`);
       },
     })),
   };
@@ -500,6 +541,7 @@ export const generateMagicRomanceSelectionEvent = (
     showAllFriendshipCandidates?: boolean;
   },
 ): MagicRomanceGameEvent => {
+  const vacation = player.appearanceMode === 'VACATION';
   const targets = debugOptions?.showAllRomanceCandidates
     ? getRomanceCandidates(heroId)
     : weightedTargetSelection(player, heroId, 2);
@@ -507,8 +549,10 @@ export const generateMagicRomanceSelectionEvent = (
     ? getMagicFriendshipRoutesForHero(heroId)
     : weightedFriendshipRouteSelection(player, heroId, 1);
   return {
-    title: '放課後、誰と過ごす？',
-    description: '授業と魔法訓練の合間に、少しだけ自由な時間ができた。\n恋の相手、あるいは親友として絆を深める相手を選ぼう。以前選んだ相手は、次から候補に現れやすくなる。',
+    title: vacation ? 'バカンス、誰と過ごす？' : '放課後、誰と過ごす？',
+    description: vacation
+      ? '海辺で少しだけ自由な時間ができた。\n恋の相手、あるいは親友として絆を深める相手を選ぼう。以前選んだ相手は、次から候補に現れやすくなる。'
+      : '授業と魔法訓練の合間に、少しだけ自由な時間ができた。\n恋の相手、あるいは親友として絆を深める相手を選ぼう。以前選んだ相手は、次から候補に現れやすくなる。',
     imageKey: 'magic-romance-select',
     options: [
       ...targets.map((target) => ({
@@ -530,7 +574,7 @@ export const generateMagicRomanceSelectionEvent = (
           const progress = getProgress(prev.player);
           return {
             ...prev,
-            currentEventTitle: `${target.name}との放課後`,
+            currentEventTitle: vacation ? `${target.name}とのバカンス` : `${target.name}との放課後`,
             player: {
               ...prev.player,
               magicRomance: {
@@ -547,7 +591,7 @@ export const generateMagicRomanceSelectionEvent = (
         const requiredAct = REQUIRED_ACT_BY_STAGE[Math.min(4, stage)];
         setEventData(
           stage >= 5
-            ? buildCompletedRouteEvent(heroId, target.id, setGameState, setEventResultLog)
+            ? buildCompletedRouteEvent(heroId, target.id, setGameState, setEventResultLog, vacation)
             : currentAct < requiredAct
               ? buildChapterWaitEvent(
                   heroId,
@@ -556,8 +600,9 @@ export const generateMagicRomanceSelectionEvent = (
                   requiredAct,
                   setGameState,
                   setEventResultLog,
+                  vacation,
                 )
-              : buildDialogueEvent(heroId, target.id, stage, setGameState, setEventResultLog),
+              : buildDialogueEvent(heroId, target.id, stage, setGameState, setEventResultLog, vacation),
         );
       },
     })),

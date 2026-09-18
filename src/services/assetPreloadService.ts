@@ -1,4 +1,8 @@
-import { BATTLE_BACKGROUND_SCENES } from '../data/battleBackgrounds';
+import {
+    BATTLE_BACKGROUND_SCENES,
+    HIGH_SCHOOL_VACATION_BATTLE_BACKGROUND_SCENES,
+    MAGIC_VACATION_BATTLE_BACKGROUND_SCENES,
+} from '../data/battleBackgrounds';
 import { MAGIC_ASSET_PATHS } from '../data/magicAssetManifest';
 import { HIGH_SCHOOL_CHARACTER_ANIMATION_ASSET_PATHS, HIGH_SCHOOL_IDLE_SPRITE_ASSET_PATHS, HIGH_SCHOOL_VACATION_GENERATED_ANIMATION_ASSET_PATHS, MAGIC_VACATION_GENERATED_ANIMATION_ASSET_PATHS, type VisualThemeId } from '../data/visualThemes';
 import { assetUrl } from '../utils/assetPaths';
@@ -56,6 +60,11 @@ const HIGH_SCHOOL_BACKGROUND_PATHS = [
     'sprites/backgrounds/learning-rogue/high-school-map-act2.webp',
     'sprites/backgrounds/learning-rogue/high-school-map-act3.webp',
     'sprites/backgrounds/learning-rogue/high-school-map-act4.webp',
+    'sprites/backgrounds/learning-rogue/high-school-vacation-map-act1.webp',
+    'sprites/backgrounds/learning-rogue/high-school-vacation-map-act2.webp',
+    'sprites/backgrounds/learning-rogue/high-school-vacation-map-act3.webp',
+    'sprites/backgrounds/learning-rogue/high-school-vacation-map-act4.webp',
+    ...HIGH_SCHOOL_VACATION_BATTLE_BACKGROUND_SCENES.map(scene => scene.image),
 ];
 
 const range = (count: number) => Array.from({ length: count }, (_, index) => index);
@@ -83,6 +92,8 @@ const buildCriticalAssetPaths = (visualTheme: VisualThemeId): string[] => {
             paths.push(
                 'sprites/high-school/title-background.webp',
                 'sprites/backgrounds/learning-rogue/high-school-map.webp',
+                'sprites/backgrounds/learning-rogue/high-school-vacation-map-act1.webp',
+                ...HIGH_SCHOOL_VACATION_BATTLE_BACKGROUND_SCENES.map(scene => scene.image),
                 ...HIGH_SCHOOL_IDLE_SPRITE_ASSET_PATHS,
                 ...HIGH_SCHOOL_CHARACTER_ANIMATION_ASSET_PATHS,
                 ...HIGH_SCHOOL_VACATION_GENERATED_ANIMATION_ASSET_PATHS,
@@ -93,10 +104,12 @@ const buildCriticalAssetPaths = (visualTheme: VisualThemeId): string[] => {
             paths.push(
                 'sprites/magic/title-background.webp',
                 'sprites/backgrounds/learning-rogue/magic-map-act1.webp',
+                'sprites/backgrounds/learning-rogue/magic-vacation-map-act1.webp',
                 'sprites/backgrounds/learning-rogue/magic-selection-entrance.webp',
                 'sprites/backgrounds/learning-rogue/magic-battle-classroom.webp',
                 'sprites/backgrounds/learning-rogue/magic-battle-hallway.webp',
                 'sprites/backgrounds/learning-rogue/magic-battle-gym.webp',
+                ...MAGIC_VACATION_BATTLE_BACKGROUND_SCENES.map(scene => scene.image),
                 ...MAGIC_VACATION_GENERATED_ANIMATION_ASSET_PATHS,
             );
         }
@@ -120,6 +133,7 @@ const buildCriticalAssetPaths = (visualTheme: VisualThemeId): string[] => {
         paths.push(
             'sprites/magic/title-background.webp',
             ...range(4).map(index => `sprites/backgrounds/learning-rogue/magic-map-act${index + 1}.webp`),
+            ...range(4).map(index => `sprites/backgrounds/learning-rogue/magic-vacation-map-act${index + 1}.webp`),
             'sprites/backgrounds/learning-rogue/magic-selection-entrance.webp',
             'sprites/backgrounds/learning-rogue/magic-event-hallway.webp',
             'sprites/backgrounds/learning-rogue/magic-reward-sanctuary.webp',
@@ -127,6 +141,7 @@ const buildCriticalAssetPaths = (visualTheme: VisualThemeId): string[] => {
             'sprites/backgrounds/learning-rogue/magic-shop-store.webp',
             'sprites/backgrounds/learning-rogue/magic-treasure-vault.webp',
             'sprites/backgrounds/learning-rogue/magic-compendium-library.webp',
+            ...MAGIC_VACATION_BATTLE_BACKGROUND_SCENES.map(scene => scene.image),
             ...range(9).map(index => `sprites/magic/characters/heroine-${String(index + 1).padStart(2, '0')}-before.webp`),
             ...range(8).map(index => `sprites/magic/male-characters/${['ren', 'soma', 'minato', 'riku', 'yamato', 'leon', 'elliot', 'sakuya'][index]}-before.webp`),
             ...MAGIC_VACATION_GENERATED_ANIMATION_ASSET_PATHS,
