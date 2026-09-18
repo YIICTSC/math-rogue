@@ -191,18 +191,30 @@ export const ShogiPieceIcon: React.FC<{
   promoted?: boolean;
   compact?: boolean;
   className?: string;
-}> = ({ glyph, cpu = false, promoted = false, compact = false, className = '' }) => (
-  <span className={[
-    'shogi-piece-icon',
-    cpu ? 'cpu' : '',
-    promoted ? 'promoted' : '',
-    compact ? 'compact' : '',
-    className,
-  ].filter(Boolean).join(' ')} aria-hidden="true">
-    <img src={SHOGI_PIECE_ICON} alt="" draggable={false} />
-    <span className="shogi-piece-glyph">{glyph}</span>
-  </span>
-);
+}> = ({ glyph, cpu = false, promoted = false, compact = false, className = '' }) => {
+  const glyphCharacters = Array.from(glyph);
+  const verticalGlyph = glyphCharacters.length === 2;
+  return (
+    <span className={[
+      'shogi-piece-icon',
+      cpu ? 'cpu' : '',
+      promoted ? 'promoted' : '',
+      compact ? 'compact' : '',
+      verticalGlyph ? 'two-chars' : '',
+      className,
+    ].filter(Boolean).join(' ')} aria-hidden="true">
+      <img src={SHOGI_PIECE_ICON} alt="" draggable={false} />
+      {verticalGlyph ? (
+        <span className="shogi-piece-glyph shogi-piece-glyph-vertical">
+          <span>{glyphCharacters[0]}</span>
+          <span>{glyphCharacters[1]}</span>
+        </span>
+      ) : (
+        <span className="shogi-piece-glyph">{glyph}</span>
+      )}
+    </span>
+  );
+};
 
 // 駒名は固有表記として日本語を維持する。古い翻訳キャッシュや汎用辞書が
 // 混入しても「Choose Option」などを画面へ出さず、駒字へ安全にフォールバックする。

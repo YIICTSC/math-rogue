@@ -16023,6 +16023,21 @@ textarea {
   text-shadow: 0 1px 0 rgba(255, 255, 255, .35);
 }
 
+.shogi-piece-icon .shogi-piece-glyph-vertical {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0;
+  line-height: .82;
+  white-space: nowrap;
+  transform: translateY(1px);
+}
+
+.shogi-piece-icon .shogi-piece-glyph-vertical > span {
+  display: block;
+}
+
 .shogi-piece-icon.compact {
   width: 22px;
 }
@@ -16031,12 +16046,22 @@ textarea {
   font-size: 12px;
 }
 
+.shogi-piece-icon.compact.two-chars .shogi-piece-glyph-vertical {
+  font-size: 9px;
+  line-height: .8;
+}
+
 .shogi-piece-icon.shogi-piece {
   width: clamp(28px, 5.5vw, 48px);
 }
 
 .shogi-piece-icon.shogi-piece .shogi-piece-glyph {
   font-size: clamp(18px, 3.8vw, 34px);
+}
+
+.shogi-piece-icon.shogi-piece.two-chars .shogi-piece-glyph-vertical {
+  font-size: clamp(12px, 2.55vw, 22px);
+  line-height: .8;
 }
 
 .shogi-piece-icon.cpu {
@@ -16289,6 +16314,11 @@ textarea {
 
 .shogi-piece-icon.shogi-piece-big .shogi-piece-glyph {
   font-size: 45px;
+}
+
+.shogi-piece-icon.shogi-piece-big.two-chars .shogi-piece-glyph-vertical {
+  font-size: 27px;
+  line-height: .82;
 }
 
 .shogi-piece-modal-heading h2 {
@@ -17514,6 +17544,7 @@ textarea {
   .shogi-mini-board { width: 100%; max-width: none; gap: 2px; padding: 4px; border-width: 3px; }
   .shogi-piece-icon.shogi-piece { width: clamp(25px, 8.8vw, 42px); }
   .shogi-piece-icon.shogi-piece .shogi-piece-glyph { font-size: clamp(16px, 6vw, 30px); }
+  .shogi-piece-icon.shogi-piece.two-chars .shogi-piece-glyph-vertical { font-size: clamp(11px, 4vw, 19px); }
   .shogi-guide-legend { gap: 6px; margin: 2px 0; font-size: 7px; }
   .shogi-guide-legend i { width: 7px; height: 7px; border-width: 1px; }
   .shogi-mini-message { min-height: 22px; font-size: 7px; }
