@@ -7,6 +7,7 @@ import { PLACEMENT_TCG_HIGH_SCHOOL_REST_PROGRAMS } from './placementTcgUniqueEff
 import { PLACEMENT_TCG_MAGIC_UNIT_PROGRAMS } from './placementTcgUniqueEffectsMagic';
 import { PLACEMENT_TCG_SUPPORT_PROGRAMS } from './placementTcgUniqueEffectsSupport';
 import { PLACEMENT_TCG_EVENT_PROGRAMS } from './placementTcgUniqueEffectsEvent';
+import { PLACEMENT_TCG_VACATION_UNIT_PROGRAMS } from './placementTcgUniqueEffectsVacation';
 
 const elementaryUnitPrograms: Record<string, PlacementEffectProgram> = {
   MTCG_ELEMENTARY_HERO_WARRIOR: defineElementaryUnitProgram('MTCG_ELEMENTARY_HERO_WARRIOR', {
@@ -2090,6 +2091,7 @@ export const PLACEMENT_TCG_UNIQUE_EFFECT_PROGRAMS: Readonly<Record<string, Place
     ...PLACEMENT_TCG_MAGIC_UNIT_PROGRAMS,
     ...PLACEMENT_TCG_SUPPORT_PROGRAMS,
     ...PLACEMENT_TCG_EVENT_PROGRAMS,
+    ...PLACEMENT_TCG_VACATION_UNIT_PROGRAMS,
   };
 
 export const getPlacementTcgUniqueEffectProgram = (cardId: string): PlacementEffectProgram | undefined =>

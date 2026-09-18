@@ -2,6 +2,7 @@ import { createServer } from 'vite';
 
 const strict = process.argv.includes('--strict');
 const failures = [];
+const EXPECTED_CARD_COUNT = 584;
 
 const server = await createServer({
   configFile: './vite.config.ts',
@@ -24,8 +25,8 @@ try {
   const { PLACEMENT_TCG_UNIQUE_EFFECT_PROGRAMS } = uniqueModule;
   const explicitEntries = Object.entries(PLACEMENT_TCG_UNIQUE_EFFECT_PROGRAMS);
 
-  if (PLACEMENT_TCG_CARDS.length !== 541) failures.push(`catalog size: expected 541, got ${PLACEMENT_TCG_CARDS.length}`);
-  if (PLACEMENT_TCG_CARD_MAP.size !== 541) failures.push(`card map size: expected 541, got ${PLACEMENT_TCG_CARD_MAP.size}`);
+  if (PLACEMENT_TCG_CARDS.length !== EXPECTED_CARD_COUNT) failures.push(`catalog size: expected ${EXPECTED_CARD_COUNT}, got ${PLACEMENT_TCG_CARDS.length}`);
+  if (PLACEMENT_TCG_CARD_MAP.size !== EXPECTED_CARD_COUNT) failures.push(`card map size: expected ${EXPECTED_CARD_COUNT}, got ${PLACEMENT_TCG_CARD_MAP.size}`);
 
   const cardIds = PLACEMENT_TCG_CARDS.map(card => card.id);
   if (new Set(cardIds).size !== cardIds.length) failures.push('duplicate Card ID exists');
@@ -111,8 +112,8 @@ try {
     console.error(`Placement TCG unique-effect audit failed: ${failures.length} issue(s).`);
     process.exitCode = 1;
   } else {
-    console.log(`Placement TCG unique-effect audit passed: ${explicitEntries.length}/541 explicit unique effects, ${fallbackCount} fallback card(s).`);
-    if (!strict && fallbackCount > 0) console.log('Run with --strict after all 541 cards have explicit unique effects.');
+    console.log(`Placement TCG unique-effect audit passed: ${explicitEntries.length}/${EXPECTED_CARD_COUNT} explicit unique effects, ${fallbackCount} fallback card(s).`);
+    if (!strict && fallbackCount > 0) console.log(`Run with --strict after all ${EXPECTED_CARD_COUNT} cards have explicit unique effects.`);
   }
 } finally {
   await server.close();

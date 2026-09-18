@@ -48,15 +48,15 @@ try {
     runCpuTurn,
   } = engine;
 
-  assert.equal(PLACEMENT_TCG_CARDS.length, 541, 'TCG catalog must contain 541 cards');
-  assert.equal(new Set(PLACEMENT_TCG_CARDS.map(card => card.id)).size, 541, 'TCG card IDs must be unique');
-  assert.equal(new Set(PLACEMENT_TCG_CARDS.map(card => card.effectProgram.normalizedSignature)).size, 541, 'Current effect-program signatures must stay unique during migration');
-  assert.equal(PLACEMENT_TCG_REWARD_POOL.length, 541, 'Reward pool must expose the whole catalog');
+  assert.equal(PLACEMENT_TCG_CARDS.length, 584, 'TCG catalog must contain 584 cards');
+  assert.equal(new Set(PLACEMENT_TCG_CARDS.map(card => card.id)).size, 584, 'TCG card IDs must be unique');
+  assert.equal(new Set(PLACEMENT_TCG_CARDS.map(card => card.effectProgram.normalizedSignature)).size, 584, 'Current effect-program signatures must stay unique during migration');
+  assert.equal(PLACEMENT_TCG_REWARD_POOL.length, 584, 'Reward pool must expose the whole catalog');
 
   const expectedCounts = {
     ELEMENTARY: { UNIT: 128, SUPPORT: 33, EVENT: 34 },
-    HIGH_SCHOOL: { UNIT: 112, SUPPORT: 33, EVENT: 33 },
-    MAGIC: { UNIT: 101, SUPPORT: 34, EVENT: 33 },
+    HIGH_SCHOOL: { UNIT: 121, SUPPORT: 33, EVENT: 33 },
+    MAGIC: { UNIT: 135, SUPPORT: 34, EVENT: 33 },
   };
   for (const [edition, kinds] of Object.entries(expectedCounts)) {
     for (const [kind, count] of Object.entries(kinds)) {
@@ -68,6 +68,16 @@ try {
     }
     assert.equal(PLACEMENT_TCG_EDITION_DECKS[edition].length, 20, `${edition} starter deck must contain 20 cards`);
   }
+
+  const vacationCards = PLACEMENT_TCG_CARDS.filter(card =>
+    card.id.endsWith('_VACATION') || card.id.endsWith('_VACATION_AFTER'),
+  );
+  assert.equal(vacationCards.length, 43, 'Vacation protagonist set must contain 43 cards');
+  assert.equal(vacationCards.filter(card => card.edition === 'HIGH_SCHOOL').length, 9, 'High School vacation set must contain 9 protagonists');
+  assert.equal(vacationCards.filter(card => card.edition === 'MAGIC').length, 34, 'Magic vacation set must contain 34 protagonists');
+  assert(vacationCards.every(card => card.kind === 'UNIT'), 'Vacation protagonist cards must all be Units');
+  assert(vacationCards.every(card => card.artSourceType === 'CHARACTER_ART' && card.artAsset?.includes('/vacation-')), 'Vacation protagonist cards must use vacation character artwork');
+  assert(vacationCards.every(card => card.effectProgram.id.startsWith('DSL_') && card.effectProgram.identityNote.includes('バカンス')), 'Vacation protagonist cards must all use explicit themed effect programs');
   assert.equal(
     PLACEMENT_TCG_CARDS.filter(card => card.kind === 'SUPPORT' && card.effectProgram.trigger === 'DEFEAT').length,
     0,
@@ -487,7 +497,7 @@ try {
     remoteEvent.effectProgram = originalRemoteEvent.effectProgram;
   }
 
-  assert.equal(PLACEMENT_TCG_CARD_MAP.size, 541);
+  assert.equal(PLACEMENT_TCG_CARD_MAP.size, 584);
   console.log('Placement TCG regression suite passed: catalog, decks, and Phase 0 effect semantics.');
 } finally {
   await server.close();

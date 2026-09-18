@@ -215,6 +215,49 @@ const CHARACTER_CARD_BLUEPRINTS: CharacterCardBlueprint[] = [
   ...createEnemyBlueprints('MAGIC', 67),
 ];
 
+const VACATION_CHARACTER_CARD_BLUEPRINTS: CharacterCardBlueprint[] = [
+  ...CHARACTERS.map((character, index) => {
+    const artIndex = HIGH_SCHOOL_HERO_ART_INDEX[character.id] ?? index;
+    return {
+      id: `HIGH_SCHOOL_HERO_${character.id}_VACATION`,
+      name: `${HIGH_SCHOOL_HERO_NAMES[index] || character.name}／バカンス`,
+      edition: 'HIGH_SCHOOL' as const,
+      artAsset: `sprites/high-school/vacation-characters/${artIndex}.webp`,
+      voiceProfile: { type: 'HIGH_SCHOOL_HERO' as const, id: character.id },
+    };
+  }),
+  ...MAGIC_HEROES.map(hero => ({
+    id: `MAGIC_HERO_${hero.id}_VACATION`,
+    name: `${hero.name}／バカンス`,
+    edition: 'MAGIC' as const,
+    artAsset: `sprites/magic/vacation-characters/heroine-${String(hero.index).padStart(2, '0')}-before.webp`,
+    voiceProfile: { type: 'MAGIC_HERO' as const, id: hero.id, transformed: false },
+  })),
+  ...MAGIC_MALE_PROTAGONISTS.map(hero => ({
+    id: `MAGIC_HERO_${hero.id}_VACATION`,
+    name: `${hero.name}／バカンス`,
+    edition: 'MAGIC' as const,
+    artAsset: `sprites/magic/vacation-male-characters/${hero.assetId}-before.webp`,
+    artObjectPosition: '50% 60%',
+    voiceProfile: { type: 'MAGIC_HERO' as const, id: hero.id, transformed: false },
+  })),
+  ...MAGIC_HEROES.map(hero => ({
+    id: `MAGIC_HERO_${hero.id}_VACATION_AFTER`,
+    name: `${hero.name}／${hero.transformedTitle}／バカンス`,
+    edition: 'MAGIC' as const,
+    artAsset: `sprites/magic/vacation-characters/heroine-${String(hero.index).padStart(2, '0')}-after.webp`,
+    voiceProfile: { type: 'MAGIC_HERO' as const, id: hero.id, transformed: true },
+  })),
+  ...MAGIC_MALE_PROTAGONISTS.map(hero => ({
+    id: `MAGIC_HERO_${hero.id}_VACATION_AFTER`,
+    name: `${hero.name}／${hero.transformedTitle}／バカンス`,
+    edition: 'MAGIC' as const,
+    artAsset: `sprites/magic/vacation-male-characters/${hero.assetId}-after.webp`,
+    artObjectPosition: '50% 60%',
+    voiceProfile: { type: 'MAGIC_HERO' as const, id: hero.id, transformed: true },
+  })),
+];
+
 export const PLACEMENT_TCG_SOURCE_CARD_IDS = [
   'GON_GITSUNE',
   'GON_KURU',
@@ -570,6 +613,14 @@ export const PLACEMENT_TCG_CARDS: PlacementCardDefinition[] = [
     undefined,
     offset < SUPPORT_EVENT_SOURCES.length / 2 ? 'SUPPORT' : 'EVENT',
   )),
+  ...VACATION_CHARACTER_CARD_BLUEPRINTS.map((blueprint, offset) => {
+    const index = CHARACTER_CARD_BLUEPRINTS.length + SUPPORT_EVENT_SOURCES.length + offset;
+    return createDefinition(
+      PLACEMENT_TCG_SOURCE_CARD_IDS[index % PLACEMENT_TCG_SOURCE_CARD_IDS.length],
+      index,
+      blueprint,
+    );
+  }),
 ];
 
 export const PLACEMENT_TCG_CARD_MAP = new Map(
