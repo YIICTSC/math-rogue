@@ -21,12 +21,12 @@ import {
   type PlacementEffectTermDefinition,
 } from './placementTcgEffectDsl';
 import {
-  addRewardAndAdvance,
+  addRewardsAndAdvance,
   attackPlacementLane,
   clearPlacementRun,
   createNewPlacementRun,
   createPlacementBattle,
-  createRewardChoices,
+  createRewardPack,
   enterPlacementTcgEndless,
   endPlayerTurn,
   getCurrentOpponent,
@@ -38,6 +38,7 @@ import {
   runCpuTurn,
   savePlacementRun,
   savePlacementTcgDeck,
+  stagePlacementRewardPack,
   type PlacementBattle,
   type PlacementActionCue,
   type PlacementLane,
@@ -66,6 +67,16 @@ const KIND_LABEL: Record<PlacementCardDefinition['kind'], string> = {
   SUPPORT: 'SUPPORT',
   EVENT: 'EVENT',
 };
+
+const REWARD_TIER_RANK: Record<PlacementCardDefinition['tier'], number> = {
+  STARTER: 0,
+  COMMON: 1,
+  UNCOMMON: 2,
+  RARE: 3,
+};
+
+const isRareReward = (card: PlacementCardDefinition | null) =>
+  Boolean(card && REWARD_TIER_RANK[card.tier] >= REWARD_TIER_RANK.RARE);
 
 const LANE_NAMES = ['LEFT', 'CENTER', 'RIGHT'];
 
@@ -667,7 +678,15 @@ const StartOverlay: React.FC<{
     <div className="placement-tcg-start-actions">
       {savedRun && (
         <button type="button" className="placement-tcg-primary-button" onClick={() => onStart(true, savedRun.edition)}>
-          {savedRun.mode === 'ENDLESS' ? `CONTINUE // ENDLESS ${savedRun.endlessFloor}` : copy(languageMode, `CONTINUE // 第${savedRun.battleIndex + 1}戦`, `つづける // ${savedRun.battleIndex + 1}せんめ`, `CONTINUE // BATTLE ${savedRun.battleIndex + 1}`)}
+          {savedRun.pendingRewardCardIds?.length
+            ? savedRun.pendingRewardStage === 'QUIZ'
+              ? copy(languageMode, 'CONTINUE // クリア問題', 'つづける // クリアもんだい', 'CONTINUE // CLEAR QUIZ')
+              : savedRun.pendingRewardStage === 'PACK'
+              ? copy(languageMode, 'CONTINUE // パック開封', 'つづける // パックかいふう', 'CONTINUE // OPEN PACK')
+              : copy(languageMode, 'CONTINUE // デッキ構築', 'つづける // デッキこうちく', 'CONTINUE // DECK BUILD')
+            : savedRun.mode === 'ENDLESS'
+              ? `CONTINUE // ENDLESS ${savedRun.endlessFloor}`
+              : copy(languageMode, `CONTINUE // 第${savedRun.battleIndex + 1}戦`, `つづける // ${savedRun.battleIndex + 1}せんめ`, `CONTINUE // BATTLE ${savedRun.battleIndex + 1}`)}
         </button>
       )}
       <button type="button" className="placement-tcg-secondary-button" onClick={() => onStart(false, edition)}>
@@ -680,33 +699,233 @@ const StartOverlay: React.FC<{
   </div>;
 };
 
+const playRewardRevealSound = (card: PlacementCardDefinition | null) => {
+  if (!card) return;
+  if (isRareReward(card)) {
+    audioService.playBattleSound('explosion');
+    window.setTimeout(() => audioService.playBattleSound('win'), 180);
+    return;
+  }
+  audioService.playBattleSound(card.tier === 'UNCOMMON' ? 'buff' : 'select');
+};
+
+type RewardPackPhase = 'SEALED' | 'OPENING' | 'REVEAL' | 'DECK';
+
 const RewardOverlay: React.FC<{
   choices: string[];
+  runDeck: string[];
   languageMode?: LanguageMode;
-  onChoose: (cardId: string) => void;
-}> = ({ choices, languageMode, onChoose }) => (
-  <div className="placement-tcg-modal-backdrop reward" role="dialog" aria-modal="true">
-    <section className="placement-tcg-reward-panel">
-      <p className="placement-tcg-eyebrow">BATTLE CLEAR // DECK UPGRADE</p>
-      <h2>{copy(languageMode, '新しいカードを1枚選択', 'あたらしいカードを1まいせんたく', 'Choose one new card')}</h2>
-      <p>{copy(languageMode, '選んだカードはデッキに追加され、次の対戦から使用できます。', 'えらんだカードはデッキについかされ、つぎのたいせんからつかえます。', 'The selected card joins your deck for the next battle.')}</p>
-      <div className="placement-tcg-reward-cards">
-        {choices.map(cardId => {
-          const card = getCard(cardId);
-          return card ? (
-            <CardFace
-              key={cardId}
-              card={card}
-              languageMode={languageMode}
-              reward
-              onSelect={() => onChoose(cardId)}
-            />
-          ) : null;
-        })}
-      </div>
-    </section>
-  </div>
-);
+  onClaim: () => void;
+  onContinue: (deck: string[]) => boolean;
+  resumeDeckBuilder?: boolean;
+}> = ({ choices, runDeck, languageMode, onClaim, onContinue, resumeDeckBuilder }) => {
+  const [phase, setPhase] = useState<RewardPackPhase>(resumeDeckBuilder ? 'DECK' : 'SEALED');
+  const [revealedCount, setRevealedCount] = useState(0);
+  const [workingDeck, setWorkingDeck] = useState<string[]>(() => [...runDeck]);
+  const [deckNotice, setDeckNotice] = useState('');
+  const claimedRef = useRef(false);
+  const cards = choices.map(getCard).filter((card): card is PlacementCardDefinition => Boolean(card));
+  const latestCard = revealedCount > 0 ? cards[Math.min(revealedCount, cards.length) - 1] || null : null;
+  const revealComplete = phase === 'REVEAL' && cards.length > 0 && revealedCount >= cards.length;
+  const hasRareReveal = isRareReward(latestCard);
+  const collection = loadPlacementTcgCollection();
+  const availableIds = new Set([...collection.unlockedCardIds, ...choices]);
+  const availableCards = PLACEMENT_TCG_CARDS.filter(card => availableIds.has(card.id));
+  const deckCounts = workingDeck.reduce<Record<string, number>>((counts, cardId) => {
+    counts[cardId] = (counts[cardId] || 0) + 1;
+    return counts;
+  }, {});
+
+  useEffect(() => {
+    if (phase !== 'OPENING') return;
+    const burstTimer = window.setTimeout(() => audioService.playBattleSound('explosion'), 360);
+    const revealTimer = window.setTimeout(() => {
+      setPhase('REVEAL');
+      setRevealedCount(cards.length > 0 ? 1 : 0);
+    }, 760);
+    return () => {
+      window.clearTimeout(burstTimer);
+      window.clearTimeout(revealTimer);
+    };
+  }, [phase, cards.length]);
+
+  useEffect(() => {
+    if (phase !== 'REVEAL' || revealedCount <= 0) return;
+    playRewardRevealSound(latestCard);
+    if (revealedCount >= cards.length) {
+      if (!claimedRef.current) {
+        claimedRef.current = true;
+        onClaim();
+      }
+      return;
+    }
+    const timer = window.setTimeout(() => setRevealedCount(count => Math.min(cards.length, count + 1)), 560);
+    return () => window.clearTimeout(timer);
+  }, [phase, revealedCount, cards.length, latestCard?.id, onClaim]);
+
+  const openPack = () => {
+    if (phase !== 'SEALED') return;
+    audioService.playBattleSound('select');
+    setPhase('OPENING');
+  };
+
+  const addCardToDeck = (cardId: string) => {
+    const count = deckCounts[cardId] || 0;
+    if (workingDeck.length >= 30 || count >= 3) return;
+    setWorkingDeck(deck => [...deck, cardId]);
+    setDeckNotice('');
+  };
+
+  const removeCardFromDeck = (index: number) => {
+    setWorkingDeck(deck => deck.filter((_, cardIndex) => cardIndex !== index));
+    setDeckNotice('');
+  };
+
+  const addRewardCards = () => {
+    let next = [...workingDeck];
+    for (const cardId of choices) {
+      if (next.length >= 30) break;
+      const count = next.filter(id => id === cardId).length;
+      if (count < 3) next.push(cardId);
+    }
+    setWorkingDeck(next);
+    setDeckNotice('');
+  };
+
+  const continueWithDeck = () => {
+    if (workingDeck.length < 20 || workingDeck.length > 30) {
+      setDeckNotice(copy(languageMode, 'デッキは20〜30枚で編成してください。', 'デッキは20〜30まいでへんせいしてください。', 'Build a deck with 20–30 cards.'));
+      return;
+    }
+    if (!onContinue(workingDeck)) {
+      setDeckNotice(copy(languageMode, '同名カードは3枚までです。', 'おなじカードは3まいまでです。', 'Use no more than 3 copies of the same card.'));
+    }
+  };
+
+  const rareParticles = hasRareReveal
+    ? Array.from({ length: 16 }, (_, index) => (
+      <i
+        key={index}
+        className="placement-tcg-reward-particle"
+        style={{ '--reward-particle': index } as React.CSSProperties}
+      />
+    ))
+    : null;
+
+  return (
+    <div className={`placement-tcg-modal-backdrop reward pack-${phase.toLowerCase()} ${hasRareReveal ? 'has-rare-reveal' : ''}`} role="dialog" aria-modal="true">
+      <section className={`placement-tcg-reward-panel placement-tcg-pack-panel ${hasRareReveal ? 'rare-impact' : ''}`}>
+        {phase !== 'DECK' && <div className="placement-tcg-pack-radiance" aria-hidden="true" />}
+        {rareParticles}
+        {phase === 'SEALED' || phase === 'OPENING' ? (
+          <div className="placement-tcg-pack-opening-stage">
+            <p className="placement-tcg-eyebrow">BATTLE CLEAR // CARD PACK ACQUIRED</p>
+            <h2>{copy(languageMode, 'クリアパックを開封', 'クリアパックをかいふう', 'OPEN CLEAR PACK')}</h2>
+            <p>{copy(languageMode, '報酬カードは5枚すべて獲得できます。パックを開けてカードを確認しよう。', 'ほうしゅうカードは5まいすべてもらえます。パックをあけてカードをかくにんしよう。', 'All five reward cards are yours. Open the pack and reveal them.')}</p>
+            <button
+              type="button"
+              className={`placement-tcg-booster-pack ${phase === 'OPENING' ? 'is-opening' : ''}`}
+              onClick={openPack}
+              disabled={phase === 'OPENING'}
+            >
+              <span className="placement-tcg-pack-foil" />
+              <small>LEARNING ROGUE</small>
+              <b>TACTICAL<br />CARD PACK</b>
+              <em>5 CARDS</em>
+              <strong>{phase === 'OPENING' ? 'OPENING...' : copy(languageMode, 'タップして開封', 'タップしてかいふう', 'TAP TO OPEN')}</strong>
+            </button>
+            <div className={`placement-tcg-pack-flash ${phase === 'OPENING' ? 'is-active' : ''}`} aria-hidden="true" />
+          </div>
+        ) : phase === 'REVEAL' ? (
+          <div className="placement-tcg-pack-reveal-stage">
+            <p className="placement-tcg-eyebrow">PACK OPEN // {revealedCount} / {cards.length}</p>
+            <h2>{hasRareReveal ? 'RARE CARD!!' : copy(languageMode, 'カード獲得', 'カードかくとく', 'CARD ACQUIRED')}</h2>
+            <p>{revealComplete
+              ? copy(languageMode, '5枚すべて獲得しました。続けてデッキを組み替えられます。', '5まいすべてもらいました。つづけてデッキをくみかえられます。', 'All five cards acquired. You can rebuild your deck before the next duel.')
+              : copy(languageMode, 'カードがパックから飛び出しています…', 'カードがパックからとびだしています…', 'Cards are bursting out of the pack...')}
+            </p>
+            <div className="placement-tcg-reward-cards is-pack-reveal">
+              {cards.map((card, index) => (
+                <div
+                  key={card.id}
+                  className={`placement-tcg-reward-card-slot tier-${card.tier.toLowerCase()} ${index < revealedCount ? 'is-revealed' : ''} ${index === revealedCount - 1 ? 'is-latest' : ''}`}
+                  aria-hidden={index >= revealedCount}
+                >
+                  <span className="placement-tcg-reward-tier">{card.tier === 'RARE' ? '★ RARE ★' : card.tier}</span>
+                  <CardFace card={card} languageMode={languageMode} reward />
+                </div>
+              ))}
+            </div>
+            {revealComplete && (
+              <button type="button" className="placement-tcg-primary-button placement-tcg-pack-next" onClick={() => setPhase('DECK')}>
+                {copy(languageMode, '5枚を受け取り デッキ構築へ →', '5まいをうけとり デッキこうちくへ →', 'BUILD DECK WITH REWARDS →')}
+              </button>
+            )}
+          </div>
+        ) : (
+          <div className="placement-tcg-pack-deck-builder">
+            <header className="placement-tcg-pack-deck-header">
+              <div>
+                <p className="placement-tcg-eyebrow">5 CARDS ACQUIRED // RUN DECK EDIT</p>
+                <h2>{copy(languageMode, '次の対戦に向けてデッキ構築', 'つぎのたいせんにむけてデッキこうちく', 'BUILD YOUR NEXT DECK')}</h2>
+              </div>
+              <strong>{workingDeck.length} / 30</strong>
+            </header>
+            <div className="placement-tcg-pack-deck-toolbar">
+              <span>{copy(languageMode, 'デッキ内カードを押すと外し、所持カードを押すと追加します。20〜30枚・同名3枚まで。', 'デッキのカードをおすとはずし、もっているカードをおすとついかします。20〜30まい・おなじカード3まいまで。', 'Tap deck cards to remove and owned cards to add. Use 20–30 cards, up to 3 copies each.')}</span>
+              <button type="button" onClick={() => setWorkingDeck([...runDeck])}>RESET</button>
+              <button type="button" onClick={addRewardCards}>+ 5 REWARDS</button>
+              <button type="button" className="placement-tcg-primary-button" onClick={continueWithDeck}>{copy(languageMode, '保存して次の対戦へ', 'ほぞんしてつぎのたいせんへ', 'SAVE & NEXT DUEL')}</button>
+            </div>
+            {deckNotice && <b className="placement-tcg-pack-deck-notice">{deckNotice}</b>}
+            <section className="placement-tcg-pack-current-deck">
+              <div className="placement-tcg-pack-section-title">
+                <b>RUN DECK</b><span>{copy(languageMode, '押すと1枚外す', 'おすと1まいはずす', 'Tap to remove')}</span>
+              </div>
+              <div className="placement-tcg-deck-strip">
+                {workingDeck.map((cardId, index) => {
+                  const card = getCard(cardId);
+                  return card ? (
+                    <button type="button" key={`${cardId}-${index}`} onClick={() => removeCardFromDeck(index)} title={localizedCardName(card, languageMode)}>
+                      <CardArt card={card} compact languageMode={languageMode} />
+                      <span>{localizedCardName(card, languageMode)}</span>
+                    </button>
+                  ) : null;
+                })}
+              </div>
+            </section>
+            <section className="placement-tcg-pack-owned-cards">
+              <div className="placement-tcg-pack-section-title">
+                <b>OWNED CARDS</b><span>{copy(languageMode, '今回の5枚にはNEW表示', 'こんかいの5まいにはNEWひょうじ', 'New pack cards are marked NEW')}</span>
+              </div>
+              <div className="placement-tcg-collection-grid">
+                {availableCards.map(card => {
+                  const count = deckCounts[card.id] || 0;
+                  const atLimit = workingDeck.length >= 30 || count >= 3;
+                  const isNew = choices.includes(card.id);
+                  return (
+                    <button
+                      type="button"
+                      key={card.id}
+                      className={`${atLimit ? 'at-limit' : ''} ${isNew ? 'is-pack-new' : ''}`}
+                      disabled={atLimit}
+                      onClick={() => addCardToDeck(card.id)}
+                    >
+                      {isNew && <em className="placement-tcg-pack-new-badge">NEW</em>}
+                      <CardArt card={card} compact languageMode={languageMode} />
+                      <span>{localizedCardName(card, languageMode)}</span>
+                      <small>{card.tier} // IN DECK ×{count}</small>
+                    </button>
+                  );
+                })}
+              </div>
+            </section>
+          </div>
+        )}
+      </section>
+    </div>
+  );
+};
 
 const CompletionOverlay: React.FC<{
   languageMode?: LanguageMode;
@@ -736,6 +955,7 @@ const PlacementTcgGame: React.FC<PlacementTcgGameProps> = ({ onBack, onFinish, l
   const [showRules, setShowRules] = useState(false);
   const [notice, setNotice] = useState('');
   const [rewardChoices, setRewardChoices] = useState<string[]>([]);
+  const [rewardAdvanceRun, setRewardAdvanceRun] = useState<PlacementRun | null>(null);
   const [complete, setComplete] = useState(false);
   const [showMissionQuiz, setShowMissionQuiz] = useState(false);
   const [activeCue, setActiveCue] = useState<PlacementActionCue | null>(null);
@@ -839,6 +1059,7 @@ const PlacementTcgGame: React.FC<PlacementTcgGameProps> = ({ onBack, onFinish, l
     seenWinnerRef.current = null;
     setSelectedHandIndex(null);
     setRewardChoices([]);
+    setRewardAdvanceRun(null);
     setComplete(false);
     setFinisherCard(null);
     savePlacementRun(nextRun);
@@ -848,6 +1069,11 @@ const PlacementTcgGame: React.FC<PlacementTcgGameProps> = ({ onBack, onFinish, l
     const nextRun = continueSaved && savedRunAtOpen ? savedRunAtOpen : createNewPlacementRun(edition);
     if (!continueSaved) clearPlacementRun();
     beginBattle(nextRun);
+    if (continueSaved && nextRun.pendingRewardCardIds?.length) {
+      setRewardChoices([...nextRun.pendingRewardCardIds]);
+      setRewardAdvanceRun(nextRun.pendingRewardStage === 'DECK' ? nextRun : null);
+      setShowMissionQuiz(nextRun.pendingRewardStage === 'QUIZ');
+    }
   };
 
   useEffect(() => {
@@ -865,10 +1091,18 @@ const PlacementTcgGame: React.FC<PlacementTcgGameProps> = ({ onBack, onFinish, l
       if (run.mode === 'GAUNTLET' && run.battleIndex >= 9) {
         setComplete(true);
       } else {
-        setRewardChoices(createRewardChoices(run));
+        const rewardPack = createRewardPack(run);
+        setRewardChoices(rewardPack);
+        savePlacementRun(stagePlacementRewardPack(run, rewardPack, 'QUIZ'));
       }
     }
   }, [battle?.winner, run]);
+
+  const completeMissionQuiz = () => {
+    setShowMissionQuiz(false);
+    if (!run || rewardChoices.length === 0 || rewardAdvanceRun) return;
+    savePlacementRun(stagePlacementRewardPack(run, rewardChoices, 'PACK'));
+  };
 
   const deploySelected = (laneIndex: number) => {
     if (!battle || selectedHandIndex === null) return;
@@ -893,10 +1127,23 @@ const PlacementTcgGame: React.FC<PlacementTcgGameProps> = ({ onBack, onFinish, l
     setNotice('');
   };
 
-  const takeReward = (cardId: string) => {
-    if (!run) return;
-    const nextRun = addRewardAndAdvance(run, cardId);
-    beginBattle(nextRun);
+  const claimRewardPack = () => {
+    if (!run || rewardAdvanceRun || rewardChoices.length === 0) return;
+    const nextRun = addRewardsAndAdvance(run, rewardChoices);
+    setRewardAdvanceRun(nextRun);
+    savePlacementRun(nextRun);
+  };
+
+  const continueWithRewardDeck = (deck: string[]): boolean => {
+    if (!rewardAdvanceRun) return false;
+    if (!savePlacementTcgDeck(rewardAdvanceRun.edition, deck)) return false;
+    beginBattle({
+      ...rewardAdvanceRun,
+      deck: [...deck],
+      pendingRewardCardIds: undefined,
+      pendingRewardStage: undefined,
+    });
+    return true;
   };
 
   const retry = () => {
@@ -1053,7 +1300,14 @@ const PlacementTcgGame: React.FC<PlacementTcgGameProps> = ({ onBack, onFinish, l
         </div>
       )}
       {rewardChoices.length > 0 && (
-        <RewardOverlay choices={rewardChoices} languageMode={languageMode} onChoose={takeReward} />
+        <RewardOverlay
+          choices={rewardChoices}
+          runDeck={rewardAdvanceRun?.deck || run.deck}
+          languageMode={languageMode}
+          onClaim={claimRewardPack}
+          onContinue={continueWithRewardDeck}
+          resumeDeckBuilder={rewardAdvanceRun?.pendingRewardStage === 'DECK'}
+        />
       )}
       {showMissionQuiz && (
         <div className="fixed inset-0 z-[120] overflow-y-auto bg-slate-950/95 p-2 sm:p-4" data-gamepad-modal="true">
@@ -1063,7 +1317,7 @@ const PlacementTcgGame: React.FC<PlacementTcgGameProps> = ({ onBack, onFinish, l
             answerMode={answerMode}
             assignment={assignment}
             onAnswerResult={onAnswerResult}
-            onComplete={() => setShowMissionQuiz(false)}
+            onComplete={completeMissionQuiz}
             languageMode={languageMode}
             rewardHint={languageMode === 'ENGLISH' ? 'Mission clear quiz complete' : 'ミッションクリア問題を完了しました'}
           />

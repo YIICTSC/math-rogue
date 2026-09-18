@@ -104,6 +104,9 @@ export interface PlacementRun {
   edition: PlacementTcgEdition;
   mode: 'GAUNTLET' | 'ENDLESS';
   endlessFloor: number;
+  /** Clear-pack cards waiting to be opened or committed through deck editing. */
+  pendingRewardCardIds?: string[];
+  pendingRewardStage?: 'QUIZ' | 'PACK' | 'DECK';
 }
 
 export interface PlacementTcgCollection {
@@ -1190,29 +1193,70 @@ export const getCurrentOpponent = (run: PlacementRun): PlacementTcgOpponent =>
     : getPlacementTcgOpponent(run.opponentIds[run.battleIndex]) ||
       createPlacementTcgOpponents(run.seed)[Math.min(9, run.battleIndex)];
 
-export const createRewardChoices = (run: PlacementRun): string[] => {
-  // Rewards are cards the player does not already own in the shared
-  // collection, not merely cards absent from the current run deck. This
-  // keeps the three-card offer meaningful when switching between editions.
+export const createRewardPack = (run: PlacementRun): string[] => {
+  // A clear reward is now a five-card pack. Prefer cards that are not yet in
+  // the shared collection, then fill the pack with unique catalog cards once
+  // the player is close to completing the collection.
   const owned = new Set([...run.deck, ...loadPlacementTcgCollection().unlockedCardIds]);
-  const pool = PLACEMENT_TCG_REWARD_POOL.filter(cardId => !owned.has(cardId));
-  const fallback = pool.length >= 3 ? pool : PLACEMENT_TCG_REWARD_POOL;
-  return seededShuffle(fallback, run.seed + run.wins * 7919).slice(0, 3);
+  const unseen = seededShuffle(
+    PLACEMENT_TCG_REWARD_POOL.filter(cardId => !owned.has(cardId)),
+    run.seed + run.wins * 7919,
+  );
+  const picked = unseen.slice(0, 5);
+  if (picked.length < 5) {
+    const alreadyPicked = new Set(picked);
+    const refill = seededShuffle(
+      PLACEMENT_TCG_REWARD_POOL.filter(cardId => !alreadyPicked.has(cardId)),
+      run.seed + run.wins * 104729 + 17,
+    );
+    picked.push(...refill.slice(0, 5 - picked.length));
+  }
+  return picked.slice(0, 5);
 };
 
-export const addRewardAndAdvance = (run: PlacementRun, cardId: string): PlacementRun => {
-  unlockPlacementTcgCard(cardId);
+// Keep the old export for callers outside the mini-game while making the new
+// five-card pack semantics the single source of truth.
+export const createRewardChoices = createRewardPack;
+
+const normalizeRewardCardIds = (cardIds: string[]): string[] => Array.from(new Set(
+  cardIds
+    .map(normalizePlacementTcgCardId)
+    .filter(cardId => PLACEMENT_TCG_CARD_MAP.has(cardId)),
+)).slice(0, 5);
+
+export const stagePlacementRewardPack = (
+  run: PlacementRun,
+  cardIds: string[],
+  stage: 'QUIZ' | 'PACK' = 'PACK',
+): PlacementRun => ({
+  ...run,
+  pendingRewardCardIds: normalizeRewardCardIds(cardIds),
+  pendingRewardStage: stage,
+});
+
+export const addRewardsAndAdvance = (
+  run: PlacementRun,
+  cardIds: string[],
+  nextDeck: string[] = run.deck,
+): PlacementRun => {
+  const rewards = normalizeRewardCardIds(cardIds);
+  rewards.forEach(unlockPlacementTcgCard);
   const next = {
     ...run,
     battleIndex: run.battleIndex + 1,
     wins: run.wins + 1,
-    deck: [...run.deck, cardId],
-    rewardHistory: [...run.rewardHistory, cardId],
+    deck: [...nextDeck],
+    rewardHistory: [...run.rewardHistory, ...rewards],
     endlessFloor: run.mode === 'ENDLESS' ? run.endlessFloor + 1 : run.endlessFloor,
+    pendingRewardCardIds: rewards,
+    pendingRewardStage: 'DECK' as const,
   };
   if (next.mode === 'ENDLESS') recordEndlessFloor(next.endlessFloor);
   return next;
 };
+
+export const addRewardAndAdvance = (run: PlacementRun, cardId: string): PlacementRun =>
+  addRewardsAndAdvance(run, [cardId], [...run.deck, cardId]);
 
 export const enterPlacementTcgEndless = (run: PlacementRun): PlacementRun => {
   const next: PlacementRun = {
@@ -1308,12 +1352,22 @@ export const loadPlacementRun = (): PlacementRun | null => {
     if (value.version === 2) {
       const edition = value.edition || 'ELEMENTARY';
       const validDeck = value.deck.map(normalizePlacementTcgCardId).filter(cardId => PLACEMENT_TCG_CARD_MAP.has(cardId));
+      const pendingRewardCardIds = Array.isArray(value.pendingRewardCardIds)
+        ? normalizeRewardCardIds(value.pendingRewardCardIds)
+        : [];
+      const pendingRewardStage = pendingRewardCardIds.length > 0
+        ? value.pendingRewardStage === 'QUIZ' || value.pendingRewardStage === 'PACK' || value.pendingRewardStage === 'DECK'
+          ? value.pendingRewardStage
+          : 'DECK'
+        : undefined;
       return {
         ...value,
         edition,
         deck: validDeck.length >= 20 ? validDeck : [...PLACEMENT_TCG_EDITION_DECKS[edition]],
         mode: value.mode || 'GAUNTLET',
         endlessFloor: Math.max(0, value.endlessFloor || 0),
+        pendingRewardCardIds: pendingRewardCardIds.length > 0 ? pendingRewardCardIds : undefined,
+        pendingRewardStage,
       };
     }
     const migratedDeck = value.deck.map(normalizePlacementTcgCardId).filter(cardId => PLACEMENT_TCG_CARD_MAP.has(cardId));

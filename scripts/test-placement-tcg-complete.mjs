@@ -40,12 +40,16 @@ try {
   } = cardsModule;
   const {
     PLACEMENT_TCG_LIFE,
+    addRewardsAndAdvance,
     attackPlacementLane,
+    createNewPlacementRun,
     createPlacementBattle,
+    createRewardPack,
     endPlayerTurn,
     getUnitAttack,
     playPlacementCard,
     runCpuTurn,
+    stagePlacementRewardPack,
   } = engine;
 
   assert.equal(PLACEMENT_TCG_CARDS.length, 584, 'TCG catalog must contain 584 cards');
@@ -94,6 +98,25 @@ try {
   assert.equal(initial.cpu.life, PLACEMENT_TCG_LIFE);
   assert.equal(initial.player.hand.length, 5);
   assert.equal(initial.cpu.hand.length, 5);
+
+  // Every clear now grants a complete five-card pack. Claiming the pack must
+  // advance the run exactly once and leave deck composition to the reward
+  // deck-builder instead of silently appending all five cards.
+  const rewardRun = createNewPlacementRun('ELEMENTARY', 2026091801);
+  const rewardPack = createRewardPack(rewardRun);
+  assert.equal(rewardPack.length, 5, 'Clear reward pack must always contain five cards');
+  assert.equal(new Set(rewardPack).size, 5, 'A clear reward pack must not repeat a card ID');
+  const stagedQuizReward = stagePlacementRewardPack(rewardRun, rewardPack, 'QUIZ');
+  assert.equal(stagedQuizReward.pendingRewardStage, 'QUIZ', 'Clear reward must persist the mission-quiz gate before pack opening');
+  assert.deepEqual(stagedQuizReward.pendingRewardCardIds, rewardPack, 'Pending clear reward must preserve the exact five-card pack');
+  assert.equal(stagedQuizReward.battleIndex, rewardRun.battleIndex, 'Staging a reward pack must not advance the battle before cards are claimed');
+  const rewardAdvanced = addRewardsAndAdvance(rewardRun, rewardPack);
+  assert.equal(rewardAdvanced.wins, rewardRun.wins + 1, 'Five-card claim must count as one battle win');
+  assert.equal(rewardAdvanced.battleIndex, rewardRun.battleIndex + 1, 'Five-card claim must advance exactly one battle');
+  assert.deepEqual(rewardAdvanced.rewardHistory.slice(-5), rewardPack, 'All five reward cards must be recorded');
+  assert.deepEqual(rewardAdvanced.deck, rewardRun.deck, 'Reward claim must leave deck composition to the deck builder');
+  assert.deepEqual(rewardAdvanced.pendingRewardCardIds, rewardPack, 'Claimed pack must persist until the between-battle deck edit is completed');
+  assert.equal(rewardAdvanced.pendingRewardStage, 'DECK', 'Claimed pack must resume at deck editing until the deck is saved');
 
   // KILL_DRAW says once per turn. Two kills by the same unit in one turn may only draw once.
   const killer = PLACEMENT_TCG_CARDS.find(card =>
