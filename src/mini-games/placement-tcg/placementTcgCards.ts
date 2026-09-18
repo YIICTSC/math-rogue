@@ -14,6 +14,7 @@ import {
   renderPlacementEffectProgram,
   type PlacementEffectProgram,
 } from './placementTcgEffectDsl';
+import { getPlacementTcgUniqueEffectProgram } from './placementTcgUniqueEffects';
 
 export type PlacementCardKind = 'UNIT' | 'SUPPORT' | 'EVENT';
 export type PlacementCardTier = 'STARTER' | 'COMMON' | 'UNCOMMON' | 'RARE';
@@ -517,18 +518,20 @@ const createDefinition = (
   const edition: PlacementTcgEdition = blueprint?.edition
     || (index % 3 === 0 ? 'ELEMENTARY' : index % 3 === 1 ? 'HIGH_SCHOOL' : 'MAGIC');
   const baseRules = rulesTextFor(effect, amount);
-  const effectProgram = buildPlacementEffectProgram({
-    id: blueprint?.id || `${kind}_${sourceCardId}`,
-    name: blueprint?.name || source.name,
-    index,
-    kind,
-    edition,
-    amount,
-    legacyEffect: effect,
-  });
+  const cardId = blueprint ? `MTCG_${blueprint.id}` : `MTCG_${kind}_${sourceCardId}`;
+  const effectProgram = getPlacementTcgUniqueEffectProgram(cardId)
+    || buildPlacementEffectProgram({
+      id: blueprint?.id || `${kind}_${sourceCardId}`,
+      name: blueprint?.name || source.name,
+      index,
+      kind,
+      edition,
+      amount,
+      legacyEffect: effect,
+    });
   const effectId = `EFFECT_${String(index + 1).padStart(3, '0')}_${kind}`;
   return {
-    id: blueprint ? `MTCG_${blueprint.id}` : `MTCG_${kind}_${sourceCardId}`,
+    id: cardId,
     sourceCardId,
     artSourceType: blueprint ? 'CHARACTER_ART' : 'CARD_ART',
     name: blueprint?.name || source.name,

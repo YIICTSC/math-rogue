@@ -54,6 +54,7 @@ const BASE_DICTIONARY: Record<string, string> = {
     "記録": "きろく",
     "遊び方": "あそびかた",
     "戻る": "もどる",
+    "インストール": "インストール",
     "進む": "すすむ",
     "選択": "えらぶ",
     "選択解除": "せんたく かいじょ",
@@ -11261,6 +11262,7 @@ export const buildEnglishCardName = (
 };
 
 Object.assign(ENGLISH_DICTIONARY, {
+    "インストール": "Install",
     "共通素材": "Shared assets",
     "共通の画像・UI・BGM・SEを保存します。": "Save shared images, UI, BGM, and sound effects.",
     "小学生編の画像を保存します。共通BGM・SEは共通素材に含まれます。": "Save elementary-school images. Shared BGM and sound effects are in Shared assets.",

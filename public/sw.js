@@ -1,7 +1,7 @@
 // Bump the shell/runtime generation when the deployed app contains UI fixes.
 // This prevents an older Pages service worker from re-serving the pre-fix bundle.
-const SHELL_CACHE = 'learning-rogue-shell-v4';
-const RUNTIME_CACHE = 'learning-rogue-runtime-v4';
+const SHELL_CACHE = 'learning-rogue-shell-v5';
+const RUNTIME_CACHE = 'learning-rogue-runtime-v5';
 const THEME_CACHE_PREFIX = 'learning-rogue-theme-';
 const THEME_CACHE_VERSION = 'v4';
 
@@ -22,6 +22,9 @@ self.addEventListener('install', (event) => {
     const shellUrls = [
       new URL('./', scopeUrl).href,
       new URL('index.html', scopeUrl).href,
+      new URL('manifest.webmanifest', scopeUrl).href,
+      new URL('pwa-icon-192.png', scopeUrl).href,
+      new URL('pwa-icon-512.png', scopeUrl).href,
     ];
     await Promise.all(shellUrls.map((url) => cache.add(url).catch(() => undefined)));
     await self.skipWaiting();

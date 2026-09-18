@@ -266,7 +266,7 @@ import { getDifficultyConfig } from './config/difficulty';
 import { CARD_ERASER_TEMPLATE_ID, CARD_ERASER_NAME, eraseCardEffect, getErasableEffectOptions } from './utils/cardEraser';
 import { createCardCopySelectionState, isCardEligibleForCopySelection } from './utils/cardCopySelection';
 import { getDiscardableCardCountAfterPlay } from './utils/cardPlayRequirements';
-import { RotateCcw, Home, BookOpen, Coins, Trophy, HelpCircle, Infinity, Play, ScrollText, Plus, Minus, X as MultiplyIcon, Divide, Shuffle, Send, Swords, Terminal, Club, Zap, Gamepad2, Brain, Languages, Music, Book, MessageSquare, GraduationCap, Clock, AlertTriangle, TimerOff, X, Check, FlaskConical, Globe, MapPin, ChevronDown, ArrowLeft, Sparkles, Flag, Keyboard, Users, Settings, ClipboardList, FileText, Monitor, ShieldCheck } from 'lucide-react';
+import { RotateCcw, Home, BookOpen, Coins, Trophy, HelpCircle, Infinity, Play, ScrollText, Plus, Minus, X as MultiplyIcon, Divide, Shuffle, Send, Swords, Terminal, Club, Zap, Gamepad2, Brain, Languages, Music, Book, MessageSquare, GraduationCap, Clock, AlertTriangle, TimerOff, X, Check, FlaskConical, Globe, MapPin, ChevronDown, ArrowLeft, Sparkles, Flag, Keyboard, Users, Settings, ClipboardList, FileText, Monitor, ShieldCheck, Download } from 'lucide-react';
 import { applyAdditionalCardLogic } from './services/cardEffectLogic';
 import { p2pService } from './services/p2pService';
 import { TypingLessonId } from './data/typingLessonConfig';
@@ -290,6 +290,7 @@ import { GamepadVirtualKeyboard } from './components/GamepadVirtualKeyboard';
 import { GamepadSystemMenu } from './components/GamepadSystemMenu';
 import { CREDIT_SECTIONS } from './data/credits';
 import { getSupporterNpcEventByTitle } from './data/supporterNpcEvents';
+import { usePwaInstall } from './hooks/usePwaInstall';
 
 const PARRY_WINDOW_MS = 650;
 const PARRY_PERFECT_MS = 220;
@@ -1451,6 +1452,7 @@ const getNextEnemyIntent = (enemy: Enemy, turn: number): EnemyIntent => {
 
 const App: React.FC = () => {
     useXboxControllerNavigation();
+    const { canInstall: canInstallPwa, install: installPwa } = usePwaInstall();
     const electronApi = typeof window !== 'undefined'
         ? ((window as Window & { learningRogue?: LearningRogueElectronApi }).learningRogue)
         : undefined;
@@ -18775,6 +18777,18 @@ const App: React.FC = () => {
                         )}
 
                         <div className="start-menu-toolbar absolute top-2 right-2 z-[10010] flex items-center gap-1.5 sm:gap-2">
+                            {canInstallPwa && (
+                                <button
+                                    type="button"
+                                    onClick={() => { void installPwa(); }}
+                                    className="flex h-9 items-center border-t-2 border-l-2 border-r-4 border-b-4 border-t-cyan-200 border-l-cyan-200 border-r-cyan-800 border-b-cyan-800 bg-cyan-950/95 px-2 text-[10px] font-black uppercase tracking-[0.08em] text-cyan-100 shadow-[0_0_0_1px_rgba(0,0,0,0.45)] transition-all hover:bg-cyan-900 active:translate-x-[2px] active:translate-y-[2px] active:border-r-2 active:border-b-2 sm:text-xs"
+                                    title={trans("インストール", languageMode)}
+                                    aria-label={trans("インストール", languageMode)}
+                                >
+                                    <Download size={13} className="mr-1 shrink-0" />
+                                    {trans("インストール", languageMode)}
+                                </button>
+                            )}
                             <div className="relative">
                                 <button
                                     onClick={toggleBgmMode}

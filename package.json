@@ -48,6 +48,8 @@
     "audit:magic-endless-events": "node scripts/audit-magic-endless-events.mjs",
     "audit:unit-board": "node scripts/audit-unit-board-summaries.mjs",
     "audit:dynamic-visual": "node scripts/audit-dynamic-visual-plan.mjs",
+    "audit:placement-tcg:unique": "node scripts/audit-placement-tcg-unique-effects.mjs",
+    "audit:placement-tcg:unique:strict": "node scripts/audit-placement-tcg-unique-effects.mjs --strict",
     "audit:translations": "pnpm run audit:english:gate && pnpm run audit:hiragana",
     "audit:language:report": "node scripts/generate-language-check-report.mjs",
     "audit:language:split": "node scripts/split-language-check-report.mjs",

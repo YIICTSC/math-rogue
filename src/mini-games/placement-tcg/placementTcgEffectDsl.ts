@@ -11,6 +11,7 @@ export type PlacementEffectTrigger =
   | 'DIRECT_ATTACK'
   | 'DAMAGED'
   | 'DEFEAT'
+  | 'ALLY_DEFEATED'
   | 'TURN_START'
   | 'TURN_END'
   | 'EVENT_PLAY'
@@ -91,12 +92,15 @@ export interface PlacementEffectBuildContext {
 }
 
 const UNIT_TRIGGERS: PlacementEffectTrigger[] = [
-  'DEPLOY', 'ATTACK', 'DIRECT_ATTACK', 'DAMAGED', 'DEFEAT', 'TURN_START', 'TURN_END', 'FINISH',
+  'DEPLOY', 'ATTACK', 'DIRECT_ATTACK', 'DAMAGED', 'DEFEAT', 'TURN_START', 'TURN_END',
 ];
-const SUPPORT_TRIGGERS: PlacementEffectTrigger[] = ['DEPLOY', 'TURN_START', 'TURN_END', 'DEFEAT'];
+const SUPPORT_TRIGGERS: PlacementEffectTrigger[] = ['DEPLOY', 'TURN_START', 'TURN_END', 'ALLY_DEFEATED'];
 const ACTIONS: PlacementEffectAction[] = [
   'DAMAGE', 'HEAL', 'DRAW', 'GAIN_SP', 'BUFF_ATTACK', 'BUFF_HEALTH', 'SHIELD',
   'STUN', 'MOVE', 'BREAK_SUPPORT', 'LIFE_DRAIN', 'MARK', 'REORDER_HAND', 'DISCARD',
+];
+const ALLY_DEFEATED_ACTIONS: PlacementEffectAction[] = [
+  'DAMAGE', 'DRAW', 'GAIN_SP', 'STUN', 'BREAK_SUPPORT', 'LIFE_DRAIN', 'MARK', 'REORDER_HAND', 'DISCARD',
 ];
 const TARGETS: PlacementEffectTarget[] = [
   'SELF', 'OWN_SAME_LANE', 'OWN_ANY', 'OWN_ALL', 'ENEMY_SAME_LANE', 'ENEMY_ANY',
@@ -131,6 +135,7 @@ const triggerLabel: Record<PlacementEffectTrigger, { jp: string; en: string }> =
   DIRECT_ATTACK: { jp: '直接攻撃時', en: 'after a direct attack' },
   DAMAGED: { jp: '被ダメージ時', en: 'when damaged' },
   DEFEAT: { jp: '撃退時', en: 'after a defeat' },
+  ALLY_DEFEATED: { jp: '同レーン味方退場時', en: 'when the allied unit here falls' },
   TURN_START: { jp: 'ターン開始時', en: 'at turn start' },
   TURN_END: { jp: 'ターン終了時', en: 'at turn end' },
   EVENT_PLAY: { jp: 'イベント解決時', en: 'when the event resolves' },
@@ -188,6 +193,7 @@ export const PLACEMENT_EFFECT_TERM_DEFINITIONS: Record<string, PlacementEffectTe
         DIRECT_ATTACK: '相手レーンが空いていて、ライフへ直接攻撃が通ったときに確認します。',
         DAMAGED: 'このユニットがダメージを受けた直後に確認します。',
         DEFEAT: 'このカードが相手ユニットを撃退した直後に確認します。',
+        ALLY_DEFEATED: 'このサポートと同じレーンの味方ユニットが退場した直後に確認します。',
         TURN_START: '自分のターンが始まったときに確認します。',
         TURN_END: '自分のターンを終えるときに確認します。',
         EVENT_PLAY: 'イベントカードの効果を解決するときに確認します。',
@@ -199,6 +205,7 @@ export const PLACEMENT_EFFECT_TERM_DEFINITIONS: Record<string, PlacementEffectTe
         DIRECT_ATTACK: 'Checks after a direct attack reaches the opponent Life.',
         DAMAGED: 'Checks immediately after this unit takes damage.',
         DEFEAT: 'Checks immediately after this card defeats an enemy unit.',
+        ALLY_DEFEATED: 'Checks immediately after the allied unit in this Support lane is defeated.',
         TURN_START: 'Checks when your turn begins.',
         TURN_END: 'Checks as your turn ends.',
         EVENT_PLAY: 'Checks while an Event card is resolving.',
@@ -247,10 +254,10 @@ export const PLACEMENT_EFFECT_TERM_DEFINITIONS: Record<string, PlacementEffectTe
       jp: {
         SELF: '効果を発動したこのカード自身が対象です。',
         OWN_SAME_LANE: 'このカードと同じレーンにいる味方が対象です。',
-        OWN_ANY: '自分が選んだ味方1体が対象です。',
+        OWN_ANY: '条件に合う味方1体を左のレーンから自動で選びます。',
         OWN_ALL: '自分の場にいるすべての味方が対象です。',
         ENEMY_SAME_LANE: 'このカードと同じレーンにいる敵が対象です。',
-        ENEMY_ANY: '自分が選んだ敵1体が対象です。',
+        ENEMY_ANY: '条件に合う敵1体を左のレーンから自動で選びます。',
         ENEMY_ALL: '相手の場にいるすべての敵が対象です。',
         ENEMY_LIFE: '相手プレイヤーのライフが対象です。',
         ADJACENT_EMPTY: '現在のレーンに隣接する空きレーンが対象です。',
@@ -259,10 +266,10 @@ export const PLACEMENT_EFFECT_TERM_DEFINITIONS: Record<string, PlacementEffectTe
       en: {
         SELF: 'The card that triggered this effect.',
         OWN_SAME_LANE: 'Your ally in this card lane.',
-        OWN_ANY: 'One allied unit you choose.',
+        OWN_ANY: 'Automatically targets the first valid allied unit from the left.',
         OWN_ALL: 'All allied units on your field.',
         ENEMY_SAME_LANE: 'The enemy in this card lane.',
-        ENEMY_ANY: 'One enemy unit you choose.',
+        ENEMY_ANY: 'Automatically targets the first valid enemy unit from the left.',
         ENEMY_ALL: 'All enemy units on the opposing field.',
         ENEMY_LIFE: 'The opposing player Life total.',
         ADJACENT_EMPTY: 'An empty lane next to the current lane.',
@@ -342,11 +349,40 @@ const targetPoolFor = (action: PlacementEffectAction): PlacementEffectTarget[] =
   }
 };
 
+const nextNonMarkAction = (seed: number, pool: readonly PlacementEffectAction[] = ACTIONS): PlacementEffectAction => {
+  for (let offset = 0; offset < pool.length; offset += 1) {
+    const candidate = pool[(seed + offset) % pool.length];
+    if (candidate !== 'MARK') return candidate;
+  }
+  return 'DRAW';
+};
+
+const normalizeTargetForContext = (
+  kind: PlacementCardKind,
+  action: PlacementEffectAction,
+  target: PlacementEffectTarget,
+): PlacementEffectTarget => {
+  if (
+    kind === 'SUPPORT'
+    && target === 'SELF'
+    && ['HEAL', 'BUFF_ATTACK', 'BUFF_HEALTH', 'SHIELD', 'MOVE'].includes(action)
+  ) {
+    // A Support is not a Unit. For unit-mutating actions, the historical
+    // runtime meaning of SELF was the allied Unit sharing this lane. Encode
+    // that meaning explicitly so UI text and future engine cleanup stay safe.
+    return 'OWN_SAME_LANE';
+  }
+  return target;
+};
+
 // Labels are presentation metadata, not effect identity. Amount and duration
 // are included so two cards that happen to use the same verb still audit as
 // different only when their actual state mutation differs.
+const effectiveDuration = (step: Pick<PlacementEffectStep, 'action' | 'duration'>): number =>
+  step.action === 'BUFF_ATTACK' || step.action === 'BUFF_HEALTH' ? step.duration : 0;
+
 const stepSignature = (step: PlacementEffectStep): string => [
-  step.action, step.target, step.condition, step.amount, step.duration,
+  step.action, step.target, step.condition, step.amount, effectiveDuration(step),
 ].join(':');
 
 const renderStep = (step: PlacementEffectStep): { jp: string; en: string } => {
@@ -358,15 +394,35 @@ const renderStep = (step: PlacementEffectStep): { jp: string; en: string } => {
     : String(step.amount);
   const jpAmount = amount ? ` ${amount}` : '';
   const enAmount = amount ? ` ${amount}` : '';
-  const targetText = ['DRAW', 'GAIN_SP', 'MARK', 'REORDER_HAND', 'DISCARD'].includes(step.action)
+  const duration = effectiveDuration(step);
+  const durationJp = duration > 0 ? `（${duration}ターン）` : '';
+  const durationEn = duration > 0 ? ` for ${duration} turn${duration === 1 ? '' : 's'}` : '';
+  const isTargetless = ['DRAW', 'GAIN_SP', 'MARK', 'REORDER_HAND', 'DISCARD'].includes(step.action);
+  const breakSupportTargetJp: Partial<Record<PlacementEffectTarget, string>> = {
+    SUPPORT_SAME_LANE: '同じレーンのサポートへ',
+    ENEMY_SAME_LANE: '同じレーンの敵サポートへ',
+    ENEMY_ANY: '敵サポート1枚へ',
+    ENEMY_ALL: '敵サポートすべてへ',
+  };
+  const breakSupportTargetEn: Partial<Record<PlacementEffectTarget, string>> = {
+    SUPPORT_SAME_LANE: ' to the Support in this lane',
+    ENEMY_SAME_LANE: ' to the enemy Support in this lane',
+    ENEMY_ANY: ' to one enemy Support',
+    ENEMY_ALL: ' to all enemy Supports',
+  };
+  const targetText = isTargetless
     ? ''
-    : `${target.jp}へ`;
-  const targetTextEn = ['DRAW', 'GAIN_SP', 'MARK', 'REORDER_HAND', 'DISCARD'].includes(step.action)
+    : step.action === 'BREAK_SUPPORT' && breakSupportTargetJp[step.target]
+      ? breakSupportTargetJp[step.target]!
+      : `${target.jp}へ`;
+  const targetTextEn = isTargetless
     ? ''
-    : ` to ${target.en}`;
+    : step.action === 'BREAK_SUPPORT' && breakSupportTargetEn[step.target]
+      ? breakSupportTargetEn[step.target]!
+      : ` to ${target.en}`;
   return {
-    jp: `${condition.jp}、${targetText}${action.jp}${jpAmount}。`,
-    en: `${action.en}${enAmount}${targetTextEn} ${condition.en}.`,
+    jp: `${condition.jp}、${targetText}${action.jp}${jpAmount}${durationJp}。`,
+    en: `${action.en}${enAmount}${targetTextEn}${durationEn} ${condition.en}.`,
   };
 };
 
@@ -376,20 +432,35 @@ export const buildPlacementEffectProgram = (context: PlacementEffectBuildContext
     ? ['EVENT_PLAY'] as PlacementEffectTrigger[]
     : context.kind === 'SUPPORT' ? SUPPORT_TRIGGERS : UNIT_TRIGGERS;
   const trigger = triggers[context.index % triggers.length];
-  const action = ACTIONS[(context.index * 3 + context.amount) % ACTIONS.length];
-  const target = targetPoolFor(action)[(context.index * 5 + context.amount) % targetPoolFor(action).length];
+  const actionPool = trigger === 'ALLY_DEFEATED' ? ALLY_DEFEATED_ACTIONS : ACTIONS;
+  const action = actionPool[(context.index * 3 + context.amount) % actionPool.length];
+  const rawTarget = targetPoolFor(action)[(context.index * 5 + context.amount) % targetPoolFor(action).length];
+  const target = normalizeTargetForContext(context.kind, action, rawTarget);
   const condition = CONDITIONS[(context.index * 7 + context.amount) % CONDITIONS.length];
-  const secondAction = ACTIONS[(context.index * 11 + 2) % ACTIONS.length];
+  const secondActionSeed = context.index * 11 + 2;
+  const rawSecondAction = actionPool[secondActionSeed % actionPool.length];
+  const secondAction = rawSecondAction === 'MARK'
+    ? nextNonMarkAction(secondActionSeed + 1, actionPool)
+    : rawSecondAction;
   const secondTargetPool = targetPoolFor(secondAction);
-  const secondTarget = secondTargetPool[(context.index * 13 + 1) % secondTargetPool.length];
-  const secondCondition = CONDITIONS[(context.index * 17 + 3) % CONDITIONS.length];
+  const rawSecondTarget = secondTargetPool[(context.index * 13 + 1) % secondTargetPool.length];
+  const secondTarget = normalizeTargetForContext(context.kind, secondAction, rawSecondTarget);
+  const secondCondition = action === 'MARK'
+    ? 'AFTER_MARK'
+    : CONDITIONS[(context.index * 17 + 3) % CONDITIONS.length];
+  const firstDuration = action === 'BUFF_ATTACK' || action === 'BUFF_HEALTH'
+    ? (context.index % 4) as 0 | 1 | 2 | 3
+    : 0;
+  const secondDuration = secondAction === 'BUFF_ATTACK' || secondAction === 'BUFF_HEALTH'
+    ? ((context.index + 1) % 4) as 0 | 1 | 2 | 3
+    : 0;
   const steps: PlacementEffectStep[] = [
     {
       action,
       target,
       condition,
       amount: 1 + ((context.index + context.amount) % 5),
-      duration: (context.index % 4) as 0 | 1 | 2 | 3,
+      duration: firstDuration,
       label: `step-${context.index + 1}-a`,
     },
     {
@@ -397,7 +468,7 @@ export const buildPlacementEffectProgram = (context: PlacementEffectBuildContext
       target: secondTarget,
       condition: secondCondition,
       amount: 1 + ((context.index * 2 + context.amount) % 5),
-      duration: ((context.index + 1) % 4) as 0 | 1 | 2 | 3,
+      duration: secondDuration,
       label: `step-${context.index + 1}-b`,
     },
   ];

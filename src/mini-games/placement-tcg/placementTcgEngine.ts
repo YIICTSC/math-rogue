@@ -34,9 +34,16 @@ export interface PlacementUnit {
   health: number;
   attackBonus: number;
   healthBonus: number;
+  timedAttackBonuses?: PlacementTimedBonus[];
+  timedHealthBonuses?: PlacementTimedBonus[];
   shield: number;
   ready: boolean;
   stunned: boolean;
+}
+
+export interface PlacementTimedBonus {
+  amount: number;
+  expiresAtTurn: number;
 }
 
 export interface PlacementSupport {
@@ -150,6 +157,28 @@ const hasOwnUnit = (battle: PlacementBattle, sideKey: PlacementSideKey, laneInde
     : Boolean(battle[sideKey].lanes[laneIndex]?.unit)
 );
 
+const turnStamp = (battle: PlacementBattle): number =>
+  battle.turnNumber * 2 + (battle.turn === 'CPU' ? 1 : 0);
+
+const timedBonusExpiryTurn = (
+  battle: PlacementBattle,
+  targetSide: PlacementSideKey,
+  duration: number,
+  trigger: PlacementEffectTrigger,
+): number => {
+  const activeTurnMatchesTarget = (battle.turn === 'PLAYER' && targetSide === 'player')
+    || (battle.turn === 'CPU' && targetSide === 'cpu');
+  const targetTurnNumber = targetSide === 'player'
+    ? battle.turnNumber + (battle.turn === 'CPU' ? 1 : 0)
+    : battle.turnNumber;
+  // duration=N means the bonus survives for N owner-turn action windows after
+  // it is created. A TURN_END bonus has already missed the current action
+  // window, so its first usable window is the next owner turn. When a bonus is
+  // created during the opponent turn, targetTurnNumber already points at the
+  // next owner turn and must not receive another +1.
+  return targetTurnNumber + duration + (activeTurnMatchesTarget && trigger === 'TURN_END' ? 1 : 0);
+};
+
 const conditionPasses = (
   battle: PlacementBattle,
   sideKey: PlacementSideKey,
@@ -231,7 +260,8 @@ export const getUnitAttack = (lane: PlacementLane, laneIndex: number): number =>
   if (!lane.unit) return 0;
   const card = unitCard(lane.unit);
   if (!card) return 0;
-  let attack = (card.attack || 0) + lane.unit.attackBonus;
+  const timedAttack = (lane.unit.timedAttackBonuses || []).reduce((sum, bonus) => sum + bonus.amount, 0);
+  let attack = (card.attack || 0) + lane.unit.attackBonus + timedAttack;
   const support = supportCard(lane.support);
   if (support?.effect === 'ATTACK_AURA') attack += support.amount;
   if (card.effect === 'SUPPORT_BOND' && lane.support) attack += card.amount;
@@ -243,7 +273,8 @@ export const getUnitMaxHealth = (lane: PlacementLane, laneIndex: number): number
   if (!lane.unit) return 0;
   const card = unitCard(lane.unit);
   if (!card) return 0;
-  let health = (card.health || 1) + lane.unit.healthBonus;
+  const timedHealth = (lane.unit.timedHealthBonuses || []).reduce((sum, bonus) => sum + bonus.amount, 0);
+  let health = (card.health || 1) + lane.unit.healthBonus + timedHealth;
   const support = supportCard(lane.support);
   if (support?.effect === 'HEALTH_AURA') health += support.amount;
   if (card.effect === 'CENTER_POWER' && laneIndex === 1) health += card.amount;
@@ -255,11 +286,18 @@ const healUnit = (lane: PlacementLane, laneIndex: number, amount: number) => {
   lane.unit.health = Math.min(getUnitMaxHealth(lane, laneIndex), lane.unit.health + amount);
 };
 
+type PlacementDamageSource = {
+  sideKey: PlacementSideKey;
+  laneIndex: number;
+  cardId?: string;
+  unitUid?: string;
+};
+
 const clearDefeated = (
   battle: PlacementBattle,
   sideKey: PlacementSideKey,
   laneIndex: number,
-  defeatedBy: PlacementSideKey | null,
+  defeatedBy: PlacementDamageSource | null,
 ) => {
   const side = battle[sideKey];
   const lane = side.lanes[laneIndex];
@@ -269,18 +307,25 @@ const clearDefeated = (
   lane.unit = null;
   appendLog(battle, (defeated?.name || 'ユニット') + 'が退場');
   const support = supportCard(lane.support);
-  if (support) runEffectProgram(battle, sideKey, laneIndex, support, 'DEFEAT');
+  if (support) runEffectProgram(battle, sideKey, laneIndex, support, 'ALLY_DEFEATED');
   if (support?.effect === 'DRAW_ON_DEFEAT' && lane.support) {
     drawOne(battle, sideKey);
     lane.support.durability -= 1;
   }
-  if (defeatedBy) {
-    const enemyKey: PlacementSideKey = sideKey === 'player' ? 'cpu' : 'player';
-    const attacker = battle[enemyKey].lanes[laneIndex].unit;
-    if (attacker) {
+  if (defeatedBy?.unitUid) {
+    const attackerLane = battle[defeatedBy.sideKey].lanes[defeatedBy.laneIndex];
+    const attacker = attackerLane?.unit;
+    if (attacker?.uid === defeatedBy.unitUid) {
       const attackerCard = unitCard(attacker);
-      if (attackerCard?.effect === 'KILL_DRAW') drawOne(battle, defeatedBy);
-      if (attackerCard) runEffectProgram(battle, enemyKey, laneIndex, attackerCard, 'DEFEAT');
+      if (attackerCard?.effect === 'KILL_DRAW') {
+        const killDrawKey = `legacy:kill-draw:${attacker.uid}:turn`;
+        const stamp = turnStamp(battle);
+        if (battle.effectMemory[killDrawKey] !== stamp) {
+          drawOne(battle, defeatedBy.sideKey);
+          battle.effectMemory[killDrawKey] = stamp;
+        }
+      }
+      if (attackerCard) runEffectProgram(battle, defeatedBy.sideKey, defeatedBy.laneIndex, attackerCard, 'DEFEAT');
     }
   }
   if (lane.support && lane.support.durability <= 0) {
@@ -294,7 +339,7 @@ const damageUnit = (
   sideKey: PlacementSideKey,
   laneIndex: number,
   amount: number,
-  sourceSide: PlacementSideKey | null,
+  source: PlacementDamageSource | null,
   combat = false,
 ): number => {
   const lane = battle[sideKey].lanes[laneIndex];
@@ -306,20 +351,43 @@ const damageUnit = (
     damage -= absorbed;
   }
   const support = supportCard(lane.support);
-  if (support?.effect === 'DAMAGE_WARD' && lane.support && lane.support.durability > 0) {
-    damage = Math.max(0, damage - support.amount);
-    lane.support.durability -= 1;
+  if (
+    support?.effect === 'DAMAGE_WARD'
+    && lane.support
+    && lane.support.durability > 0
+    && source
+    && source.sideKey !== sideKey
+    && ((battle.turn === 'PLAYER' && source.sideKey === 'player')
+      || (battle.turn === 'CPU' && source.sideKey === 'cpu'))
+  ) {
+    const wardKey = `legacy:damage-ward:${lane.support.uid}:turn`;
+    const stamp = turnStamp(battle);
+    if (battle.effectMemory[wardKey] !== stamp) {
+      damage = Math.max(0, damage - support.amount);
+      battle.effectMemory[wardKey] = stamp;
+      lane.support.durability -= 1;
+      if (lane.support.durability <= 0) {
+        battle[sideKey].discard.push(lane.support.cardId);
+        lane.support = null;
+      }
+    }
   }
   lane.unit.health -= damage;
   const damagedCard = unitCard(lane.unit);
-  if (combat && sourceSide && damagedCard?.effect === 'THORNS') {
-    const sourceLane = battle[sourceSide].lanes[laneIndex];
-    if (sourceLane.unit) {
+  const damagedUnitUid = lane.unit.uid;
+  if (combat && source && damage > 0 && damagedCard?.effect === 'THORNS') {
+    const sourceLane = battle[source.sideKey].lanes[source.laneIndex];
+    if (sourceLane.unit && (!source.unitUid || sourceLane.unit.uid === source.unitUid)) {
       sourceLane.unit.health -= damagedCard.amount;
-      clearDefeated(battle, sourceSide, laneIndex, sideKey);
+      clearDefeated(battle, source.sideKey, source.laneIndex, {
+        sideKey,
+        laneIndex,
+        cardId: damagedCard.id,
+        unitUid: damagedUnitUid,
+      });
     }
   }
-  clearDefeated(battle, sideKey, laneIndex, sourceSide);
+  clearDefeated(battle, sideKey, laneIndex, source);
   if (damagedCard && battle[sideKey].lanes[laneIndex]?.unit) {
     runEffectProgram(battle, sideKey, laneIndex, damagedCard, 'DAMAGED');
   }
@@ -337,10 +405,13 @@ const applyEffectStep = (
   sideKey: PlacementSideKey,
   laneIndex: number,
   runtimeMemoryKey: string,
+  sourceCard: PlacementCardDefinition,
+  trigger: PlacementEffectTrigger,
   step: {
     action: PlacementEffectAction;
     target: PlacementEffectTarget;
     amount: number;
+    duration: number;
   },
 ): boolean => {
   const amount = Math.max(1, step.amount);
@@ -357,7 +428,13 @@ const applyEffectStep = (
       }
       let changed = false;
       unitTargets.forEach(index => {
-        changed = damageUnit(battle, targetSide, index, amount, sideKey) > 0 || changed;
+        const sourceUnit = battle[sideKey].lanes[laneIndex]?.unit;
+        changed = damageUnit(battle, targetSide, index, amount, {
+          sideKey,
+          laneIndex,
+          cardId: sourceCard.id,
+          unitUid: sourceCard.kind === 'UNIT' && sourceUnit?.cardId === sourceCard.id ? sourceUnit.uid : undefined,
+        }) > 0 || changed;
       });
       return changed;
     }
@@ -395,7 +472,15 @@ const applyEffectStep = (
       unitTargets.forEach(index => {
         const unit = battle[targetSide].lanes[index].unit;
         if (!unit) return;
-        unit.attackBonus += amount;
+        if (step.duration > 0) {
+          unit.timedAttackBonuses = unit.timedAttackBonuses || [];
+          unit.timedAttackBonuses.push({
+            amount,
+            expiresAtTurn: timedBonusExpiryTurn(battle, targetSide, step.duration, trigger),
+          });
+        } else {
+          unit.attackBonus += amount;
+        }
         changed = true;
       });
       return changed;
@@ -405,7 +490,15 @@ const applyEffectStep = (
       unitTargets.forEach(index => {
         const unit = battle[targetSide].lanes[index].unit;
         if (!unit) return;
-        unit.healthBonus += amount;
+        if (step.duration > 0) {
+          unit.timedHealthBonuses = unit.timedHealthBonuses || [];
+          unit.timedHealthBonuses.push({
+            amount,
+            expiresAtTurn: timedBonusExpiryTurn(battle, targetSide, step.duration, trigger),
+          });
+        } else {
+          unit.healthBonus += amount;
+        }
         unit.health += amount;
         changed = true;
       });
@@ -450,18 +543,27 @@ const applyEffectStep = (
     }
     case 'BREAK_SUPPORT': {
       const supportSide = step.target.startsWith('ENEMY') ? enemyKey : sideKey;
-      const indices = step.target === 'SUPPORT_SAME_LANE' ? [laneIndex] : targetLanes;
+      const supportLanes = battle[supportSide].lanes;
+      const indices = step.target === 'SUPPORT_SAME_LANE' || step.target === 'ENEMY_SAME_LANE'
+        ? [laneIndex]
+        : step.target === 'ENEMY_ANY'
+          ? [supportLanes.findIndex(lane => Boolean(lane.support))].filter(index => index >= 0)
+          : step.target === 'ENEMY_ALL'
+            ? supportLanes.map((lane, index) => lane.support ? index : -1).filter(index => index >= 0)
+            : targetLanes;
+      let changed = false;
       for (const index of indices) {
         const lane = battle[supportSide].lanes[index];
         if (!lane.support) continue;
         lane.support.durability -= amount;
+        changed = true;
         if (lane.support.durability <= 0) {
           battle[supportSide].discard.push(lane.support.cardId);
           lane.support = null;
         }
-        return true;
+        if (step.target !== 'ENEMY_ALL') break;
       }
-      return false;
+      return changed;
     }
     case 'LIFE_DRAIN': {
       const beforeLife = battle[enemyKey].life;
@@ -470,7 +572,13 @@ const applyEffectStep = (
         battle[enemyKey].life = Math.max(0, battle[enemyKey].life - amount);
       } else {
         unitTargets.forEach(index => {
-          changed = damageUnit(battle, enemyKey, index, amount, sideKey) > 0 || changed;
+          const sourceUnit = battle[sideKey].lanes[laneIndex]?.unit;
+          changed = damageUnit(battle, enemyKey, index, amount, {
+            sideKey,
+            laneIndex,
+            cardId: sourceCard.id,
+            unitUid: sourceCard.kind === 'UNIT' && sourceUnit?.cardId === sourceCard.id ? sourceUnit.uid : undefined,
+          }) > 0 || changed;
         });
       }
       if (battle[enemyKey].life < beforeLife) {
@@ -489,9 +597,15 @@ const applyEffectStep = (
     }
     case 'REORDER_HAND': {
       const hand = battle[sideKey].hand;
-      if (hand.length < 2) return false;
-      const shift = amount % hand.length;
-      battle[sideKey].hand = [...hand.slice(shift), ...hand.slice(0, shift)];
+      if (!hand.length) return false;
+      const count = hand.length;
+      const returned = [...hand];
+      battle[sideKey].hand = [];
+      battle[sideKey].deck = shuffleWithSeed(
+        [...battle[sideKey].deck, ...returned],
+        battle.serial * 131 + battle.turnNumber * 19 + (sideKey === 'cpu' ? 1 : 0),
+      );
+      drawCards(battle, sideKey, count);
       return true;
     }
     case 'DISCARD': {
@@ -520,32 +634,41 @@ const runEffectProgram = (
   // card's two-step program and nested defeat reactions to resolve.
   if (!program || program.trigger !== trigger || battle.effectDepth >= 32) return false;
   const lane = battle[sideKey].lanes[laneIndex];
-  const instanceId = lane?.unit?.cardId === card.id
-    ? lane.unit.uid
-    : lane?.support?.cardId === card.id
-      ? lane.support.uid
-      : `play-${battle.serial}`;
+  const instanceId = card.kind === 'EVENT'
+    ? `event:${card.id}`
+    : lane?.unit?.cardId === card.id
+      ? lane.unit.uid
+      : lane?.support?.cardId === card.id
+        ? lane.support.uid
+        : `play-${battle.serial}`;
   // A copied card gets an independent once-per-turn/battle slot. The program
   // key remains card-unique for audits, while this runtime suffix identifies
   // the physical card instance in the current battle.
   const runtimeMemoryKey = `${program.memoryKey}:${sideKey}:${instanceId}`;
   const usedKey = `${runtimeMemoryKey}:used`;
   const turnKey = `${runtimeMemoryKey}:turn`;
+  const resolvingKey = `${runtimeMemoryKey}:resolving`;
+  const currentTurnStamp = turnStamp(battle);
   if (program.resetRule === 'ONCE_PER_BATTLE' && battle.effectMemory[usedKey]) return false;
-  if (program.resetRule === 'ONCE_PER_TURN' && battle.effectMemory[turnKey] === battle.turnNumber) return false;
-  if (program.resetRule === 'ONCE_PER_BATTLE') battle.effectMemory[usedKey] = 1;
-  if (program.resetRule === 'ONCE_PER_TURN') battle.effectMemory[turnKey] = battle.turnNumber;
+  if (program.resetRule === 'ONCE_PER_TURN' && battle.effectMemory[turnKey] === currentTurnStamp) return false;
+  if (program.resetRule !== 'EVERY_TRIGGER' && battle.effectMemory[resolvingKey]) return false;
+  if (program.resetRule !== 'EVERY_TRIGGER') battle.effectMemory[resolvingKey] = 1;
   battle.effectDepth += 1;
   let changed = false;
   try {
     for (const step of program.steps) {
       if (!conditionPasses(battle, sideKey, laneIndex, step.condition, runtimeMemoryKey)) continue;
-      changed = applyEffectStep(battle, sideKey, laneIndex, runtimeMemoryKey, step) || changed;
+      changed = applyEffectStep(battle, sideKey, laneIndex, runtimeMemoryKey, card, trigger, step) || changed;
+    }
+    if (changed) {
+      if (program.resetRule === 'ONCE_PER_BATTLE') battle.effectMemory[usedKey] = 1;
+      if (program.resetRule === 'ONCE_PER_TURN') battle.effectMemory[turnKey] = currentTurnStamp;
     }
     if (changed) appendLog(battle, `${card.name}：固有効果`);
     checkWinner(battle);
     return changed;
   } finally {
+    if (program.resetRule !== 'EVERY_TRIGGER') delete battle.effectMemory[resolvingKey];
     battle.effectDepth = Math.max(0, battle.effectDepth - 1);
   }
 };
@@ -696,6 +819,8 @@ const makeUnit = (battle: PlacementBattle, card: PlacementCardDefinition): Place
   health: card.health || 1,
   attackBonus: 0,
   healthBonus: 0,
+  timedAttackBonuses: [],
+  timedHealthBonuses: [],
   shield: 0,
   ready: card.effect === 'RUSH',
   stunned: false,
@@ -714,7 +839,14 @@ const resolveDeploy = (
   card: PlacementCardDefinition,
 ) => {
   const enemyKey: PlacementSideKey = sideKey === 'player' ? 'cpu' : 'player';
-  if (card.effect === 'DEPLOY_DAMAGE') damageUnit(battle, enemyKey, laneIndex, card.amount, sideKey);
+  const sourceUnit = battle[sideKey].lanes[laneIndex].unit;
+  const source: PlacementDamageSource = {
+    sideKey,
+    laneIndex,
+    cardId: card.id,
+    unitUid: sourceUnit?.cardId === card.id ? sourceUnit.uid : undefined,
+  };
+  if (card.effect === 'DEPLOY_DAMAGE') damageUnit(battle, enemyKey, laneIndex, card.amount, source);
   if (card.effect === 'DEPLOY_HEAL') {
     const side = battle[sideKey];
     const targetIndex = side.lanes.findIndex(lane => lane.unit && lane !== side.lanes[laneIndex]);
@@ -735,7 +867,7 @@ const resolveEvent = (
   const enemyLane = enemy.lanes[laneIndex];
   if (card.effect === 'EVENT_DAMAGE') {
     if (!enemyLane.unit) return false;
-    damageUnit(battle, enemyKey, laneIndex, card.amount + 1, sideKey);
+    damageUnit(battle, enemyKey, laneIndex, card.amount + 1, { sideKey, laneIndex, cardId: card.id });
   } else if (card.effect === 'EVENT_DRAW') {
     drawCards(battle, sideKey, Math.min(2, card.amount));
   } else if (card.effect === 'EVENT_HEAL') {
@@ -862,8 +994,20 @@ export const attackPlacementLane = (
   if (enemyLane.unit) {
     const defenderAttack = getUnitAttack(enemyLane, laneIndex);
     const defenderHealthBefore = enemyLane.unit.health + enemyLane.unit.shield;
-    damageUnit(battle, enemyKey, laneIndex, attack, sideKey, true);
-    if (ownLane.unit) damageUnit(battle, sideKey, laneIndex, defenderAttack, enemyKey, true);
+    const attackerSource: PlacementDamageSource = {
+      sideKey,
+      laneIndex,
+      cardId: attackerCard?.id,
+      unitUid: ownLane.unit.uid,
+    };
+    const defenderSource: PlacementDamageSource = {
+      sideKey: enemyKey,
+      laneIndex,
+      cardId: defenderCardId,
+      unitUid: enemyLane.unit.uid,
+    };
+    damageUnit(battle, enemyKey, laneIndex, attack, attackerSource, true);
+    if (ownLane.unit) damageUnit(battle, sideKey, laneIndex, defenderAttack, defenderSource, true);
     if (attackerCard?.effect === 'PIERCE' && attack > defenderHealthBefore) {
       battle[enemyKey].life -= Math.min(attackerCard.amount, attack - defenderHealthBefore);
     }
@@ -902,6 +1046,11 @@ const prepareTurn = (battle: PlacementBattle, sideKey: PlacementSideKey) => {
   side.sp = side.maxSp;
   side.lanes.forEach((lane, laneIndex) => {
     if (lane.unit) {
+      lane.unit.timedAttackBonuses = (lane.unit.timedAttackBonuses || [])
+        .filter(bonus => bonus.expiresAtTurn > battle.turnNumber);
+      lane.unit.timedHealthBonuses = (lane.unit.timedHealthBonuses || [])
+        .filter(bonus => bonus.expiresAtTurn > battle.turnNumber);
+      lane.unit.health = Math.min(lane.unit.health, getUnitMaxHealth(lane, laneIndex));
       if (lane.unit.stunned) {
         lane.unit.stunned = false;
         lane.unit.ready = false;
