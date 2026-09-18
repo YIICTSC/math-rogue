@@ -35,6 +35,40 @@ type CommonSoundEffect =
   | 'finisher_explosion'
   | 'jump';
 
+type ShogiGimmickSoundProfile = {
+  baseSound: CommonSoundEffect;
+  notes: readonly [number, number, number, number, number];
+  wave: OscillatorType;
+  spacing: number;
+  duration: number;
+  volume: number;
+};
+
+const SHOGI_GIMMICK_SOUND_PROFILES: Readonly<Record<string, ShogiGimmickSoundProfile>> = {
+  EXPLOSION: { baseSound: 'explosion', notes: [180, 130, 95, 72, 52], wave: 'sawtooth', spacing: 0.035, duration: 0.24, volume: 0.16 },
+  WARP: { baseSound: 'jump', notes: [420, 630, 945, 1260, 1680], wave: 'sine', spacing: 0.045, duration: 0.18, volume: 0.13 },
+  LASER: { baseSound: 'attack', notes: [1760, 1480, 1180, 900, 660], wave: 'sawtooth', spacing: 0.025, duration: 0.13, volume: 0.11 },
+  CLONE: { baseSound: 'buff', notes: [523, 659, 523, 784, 659], wave: 'triangle', spacing: 0.055, duration: 0.2, volume: 0.11 },
+  TIME: { baseSound: 'select', notes: [880, 660, 440, 660, 880], wave: 'square', spacing: 0.07, duration: 0.11, volume: 0.09 },
+  GRAVITY: { baseSound: 'debuff', notes: [220, 165, 124, 93, 62], wave: 'sine', spacing: 0.05, duration: 0.28, volume: 0.15 },
+  PULL: { baseSound: 'debuff', notes: [720, 560, 420, 300, 210], wave: 'sawtooth', spacing: 0.04, duration: 0.18, volume: 0.11 },
+  PUSH: { baseSound: 'attack', notes: [210, 300, 440, 620, 860], wave: 'square', spacing: 0.035, duration: 0.16, volume: 0.1 },
+  REFLECT: { baseSound: 'block', notes: [760, 1080, 1520, 1080, 760], wave: 'triangle', spacing: 0.04, duration: 0.16, volume: 0.11 },
+  TERRAIN: { baseSound: 'buff', notes: [260, 330, 392, 494, 587], wave: 'triangle', spacing: 0.06, duration: 0.22, volume: 0.1 },
+  CHAIN: { baseSound: 'attack', notes: [330, 495, 660, 990, 1320], wave: 'square', spacing: 0.045, duration: 0.15, volume: 0.1 },
+  REVIVE: { baseSound: 'correct', notes: [294, 392, 523, 659, 988], wave: 'sine', spacing: 0.065, duration: 0.24, volume: 0.13 },
+  FORECAST: { baseSound: 'select', notes: [740, 880, 1047, 1319, 1568], wave: 'triangle', spacing: 0.06, duration: 0.18, volume: 0.1 },
+  SWAP: { baseSound: 'jump', notes: [520, 780, 1040, 780, 520], wave: 'square', spacing: 0.035, duration: 0.14, volume: 0.09 },
+  SILENCE: { baseSound: 'debuff', notes: [360, 270, 180, 135, 90], wave: 'sine', spacing: 0.075, duration: 0.12, volume: 0.07 },
+  PHASE: { baseSound: 'jump', notes: [610, 915, 1220, 1830, 1220], wave: 'sine', spacing: 0.03, duration: 0.2, volume: 0.09 },
+  ROTATE: { baseSound: 'jump', notes: [392, 523, 659, 523, 392], wave: 'triangle', spacing: 0.04, duration: 0.15, volume: 0.1 },
+  BLACK_HOLE: { baseSound: 'debuff', notes: [147, 110, 82, 62, 41], wave: 'sawtooth', spacing: 0.055, duration: 0.32, volume: 0.14 },
+  TELEPORT: { baseSound: 'jump', notes: [660, 880, 1320, 1760, 2349], wave: 'sine', spacing: 0.028, duration: 0.16, volume: 0.1 },
+  FREEZE: { baseSound: 'block', notes: [1320, 1760, 1480, 1980, 2350], wave: 'triangle', spacing: 0.035, duration: 0.18, volume: 0.09 },
+  BARRIER: { baseSound: 'block', notes: [440, 554, 659, 880, 1109], wave: 'square', spacing: 0.025, duration: 0.24, volume: 0.08 },
+  TRANSFORM: { baseSound: 'buff', notes: [330, 440, 587, 784, 1175], wave: 'sawtooth', spacing: 0.055, duration: 0.24, volume: 0.1 },
+};
+
 class AudioService {
   private ctx: AudioContext | null = null;
   private masterGain: GainNode | null = null;
@@ -2041,6 +2075,92 @@ class AudioService {
           return;
       }
       this.playSynthSound(effect);
+  }
+
+  public playShogiGimmickSound(family: string, tier: number = 1) {
+      this.init();
+      if (this.isMuted) return;
+
+      const normalizedFamily = String(family || '').trim().toUpperCase();
+      const profile = SHOGI_GIMMICK_SOUND_PROFILES[normalizedFamily];
+      if (!profile) {
+          this.playSound('select');
+          return;
+      }
+
+      const rawTier = Number.isFinite(tier) ? Math.floor(tier) : 1;
+      const resolvedTier = Math.max(1, Math.min(4, rawTier));
+      if (!this.ctx || !this.sfxGain) return;
+
+      const recovery = this.foregroundRecoveryPromise;
+      if (recovery) {
+          void recovery.then(() => {
+              if (!this.appIsActive || (typeof document !== 'undefined' && document.hidden)) return;
+              this.playShogiGimmickSound(normalizedFamily, resolvedTier);
+          });
+          return;
+      }
+
+      if (this.ctx.state !== 'running') {
+          void this.resumeAudioContext().then(ready => {
+              if (ready) this.playShogiGimmickSound(normalizedFamily, resolvedTier);
+          });
+          return;
+      }
+
+      const t = this.ctx.currentTime;
+      const noteCount = resolvedTier + 1;
+      this.playSound(profile.baseSound);
+      profile.notes.slice(0, noteCount).forEach((freq, index) => {
+          this.playOsc(
+              freq,
+              t + index * profile.spacing,
+              profile.duration,
+              profile.wave,
+              profile.volume,
+              this.sfxGain!,
+          );
+      });
+
+      if (resolvedTier >= 2) {
+          this.playOsc(
+              Math.max(48, profile.notes[0] / 2),
+              t,
+              profile.duration + 0.12,
+              'triangle',
+              0.11,
+              this.sfxGain,
+          );
+      }
+      if (resolvedTier >= 3) {
+          this.playOsc(
+              Math.min(3200, profile.notes[2] * 2),
+              t + profile.spacing * 1.5,
+              profile.duration + 0.06,
+              'sine',
+              0.08,
+              this.sfxGain,
+          );
+      }
+      if (resolvedTier >= 4) {
+          const motifEnd = t + profile.spacing * 4;
+          this.playOsc(
+              Math.max(36, profile.notes[0] / 4),
+              t,
+              profile.duration + 0.24,
+              'sawtooth',
+              0.08,
+              this.sfxGain,
+          );
+          this.playOsc(
+              Math.min(3600, profile.notes[4] * 1.5),
+              motifEnd,
+              profile.duration + 0.08,
+              'sine',
+              0.065,
+              this.sfxGain,
+          );
+      }
   }
 
   public playBattleSound(effect: CommonSoundEffect) {

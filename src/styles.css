@@ -15705,6 +15705,9 @@ textarea {
 }
 
 .shogi-mini-board {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
   width: min(100%, 560px);
   aspect-ratio: 1;
   display: grid;
@@ -15716,6 +15719,231 @@ textarea {
   border: 4px solid #bd8b38;
   background: #3c2813;
   box-shadow: 0 10px 22px rgba(0, 0, 0, .42);
+}
+
+/* Shogi Advance supernatural gimmick VFX.
+   --gx / --gy are zero-based 5x5 board coordinates, --tier is 1..4. */
+.shogi-gimmick-vfx {
+  --gx: 2;
+  --gy: 2;
+  --tier: 1;
+  --g1: #fff8bf;
+  --g2: #ffb93f;
+  --g3: #ff5e45;
+  --g-duration: calc(680ms + (var(--tier) * 70ms));
+  --g-scale: calc(.82 + (var(--tier) * .1));
+  position: absolute;
+  z-index: 12;
+  left: calc((var(--gx) + .5) * 20%);
+  top: calc((var(--gy) + .5) * 20%);
+  width: min(22%, 118px);
+  aspect-ratio: 1;
+  border: max(2px, calc(var(--tier) * .7px)) solid var(--g1);
+  border-radius: 50%;
+  pointer-events: none;
+  transform: translate(-50%, -50%) scale(.18);
+  opacity: 0;
+  mix-blend-mode: screen;
+  filter: drop-shadow(0 0 calc(4px + var(--tier) * 2px) var(--g2));
+  box-shadow:
+    0 0 0 2px color-mix(in srgb, var(--g2) 52%, transparent),
+    0 0 calc(14px + var(--tier) * 7px) var(--g2),
+    inset 0 0 calc(9px + var(--tier) * 4px) var(--g3);
+  background:
+    radial-gradient(circle, color-mix(in srgb, var(--g1) 82%, transparent) 0 5%, transparent 7% 30%, color-mix(in srgb, var(--g2) 38%, transparent) 31% 42%, transparent 44%),
+    conic-gradient(from 0deg, transparent 0 7%, color-mix(in srgb, var(--g1) 70%, transparent) 8% 10%, transparent 11% 24%, color-mix(in srgb, var(--g3) 60%, transparent) 25% 27%, transparent 28% 100%);
+  animation: shogi-gimmick-burst var(--g-duration) cubic-bezier(.16, .8, .22, 1) both;
+}
+
+.shogi-gimmick-vfx::before,
+.shogi-gimmick-vfx::after {
+  content: '';
+  position: absolute;
+  inset: 50%;
+  width: 12%;
+  height: 12%;
+  border-radius: 50%;
+  background: var(--g1);
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.shogi-gimmick-vfx::before {
+  box-shadow:
+    0 -2.2em 0 -.05em var(--g1),
+    1.55em -1.55em 0 -.08em var(--g2),
+    2.2em 0 0 -.04em var(--g1),
+    1.55em 1.55em 0 -.08em var(--g3),
+    0 2.2em 0 -.05em var(--g2),
+    -1.55em 1.55em 0 -.08em var(--g1),
+    -2.2em 0 0 -.04em var(--g3),
+    -1.55em -1.55em 0 -.08em var(--g2);
+  animation: shogi-gimmick-particles var(--g-duration) ease-out both;
+}
+
+.shogi-gimmick-vfx::after {
+  width: 150%;
+  height: max(3px, calc(var(--tier) * 2px));
+  border-radius: 999px;
+  background: linear-gradient(90deg, transparent, var(--g2) 18%, #fff 50%, var(--g1) 82%, transparent);
+  filter: drop-shadow(0 0 5px var(--g2));
+  animation: shogi-gimmick-flash var(--g-duration) ease-out both;
+}
+
+.shogi-gimmick-vfx.explosion { --g1: #fff1a8; --g2: #ff9d22; --g3: #ff3f24; }
+.shogi-gimmick-vfx.warp { --g1: #e7d1ff; --g2: #a35cff; --g3: #4ce8ff; border-style: dashed; }
+.shogi-gimmick-vfx.laser { --g1: #fff; --g2: #52f7ff; --g3: #2582ff; border-radius: 18%; }
+.shogi-gimmick-vfx.clone { --g1: #d9ffff; --g2: #62d7ff; --g3: #ca7dff; border-style: double; }
+.shogi-gimmick-vfx.time { --g1: #fff3ad; --g2: #6bdcff; --g3: #9c67ff; border-style: dashed; }
+.shogi-gimmick-vfx.gravity { --g1: #c9b5ff; --g2: #7c4dff; --g3: #211342; }
+.shogi-gimmick-vfx.pull { --g1: #b9faff; --g2: #32c7e8; --g3: #2564d7; }
+.shogi-gimmick-vfx.push { --g1: #fff0b0; --g2: #ff9d3d; --g3: #ef4b35; }
+.shogi-gimmick-vfx.reflect { --g1: #fff; --g2: #8eeeff; --g3: #f18cff; border-radius: 16%; transform: translate(-50%, -50%) rotate(45deg) scale(.18); }
+.shogi-gimmick-vfx.terrain { --g1: #d4ff9c; --g2: #6edc71; --g3: #30a6a5; border-style: dotted; }
+.shogi-gimmick-vfx.chain { --g1: #fff4a6; --g2: #ffd23e; --g3: #ff6b35; border-style: dashed; }
+.shogi-gimmick-vfx.revive { --g1: #fff; --g2: #83ffd1; --g3: #58a8ff; }
+.shogi-gimmick-vfx.forecast { --g1: #e6fbff; --g2: #7cb9ff; --g3: #865eff; border-style: double; }
+.shogi-gimmick-vfx.swap { --g1: #fff0ff; --g2: #ec72ff; --g3: #57d8ff; border-style: dashed; }
+.shogi-gimmick-vfx.silence { --g1: #d8dce8; --g2: #85899a; --g3: #353747; filter: none; }
+.shogi-gimmick-vfx.phase { --g1: #dcffff; --g2: #63f4e8; --g3: #8a75ff; border-style: dotted; }
+.shogi-gimmick-vfx.rotate { --g1: #fff8b8; --g2: #ffb34f; --g3: #ff6ca8; border-style: dashed; }
+.shogi-gimmick-vfx.black-hole { --g1: #dfccff; --g2: #844cff; --g3: #090412; border-width: calc(3px + var(--tier) * .7px); }
+.shogi-gimmick-vfx.teleport { --g1: #eaffff; --g2: #58e8ff; --g3: #7568ff; border-style: double; }
+.shogi-gimmick-vfx.freeze { --g1: #fff; --g2: #a6edff; --g3: #4b9dff; border-radius: 22%; }
+.shogi-gimmick-vfx.barrier { --g1: #fffbd1; --g2: #71e7ff; --g3: #4384ff; border-width: calc(3px + var(--tier) * .8px); }
+.shogi-gimmick-vfx.transform { --g1: #fff; --g2: #ff79d8; --g3: #ffd54a; border-style: double; }
+
+.shogi-gimmick-vfx.explosion::after,
+.shogi-gimmick-vfx.gravity::after,
+.shogi-gimmick-vfx.black-hole::after,
+.shogi-gimmick-vfx.barrier::after {
+  width: 82%;
+  height: 82%;
+  border: 2px solid var(--g1);
+  border-radius: 50%;
+  background: radial-gradient(circle, color-mix(in srgb, var(--g2) 58%, transparent), transparent 64%);
+}
+
+.shogi-gimmick-vfx.laser::after {
+  width: min(420%, 420px);
+  height: calc(3px + var(--tier) * 2px);
+  border: 0;
+  border-radius: 999px;
+}
+
+.shogi-gimmick-vfx.pull::after,
+.shogi-gimmick-vfx.push::after {
+  width: 185%;
+  height: calc(4px + var(--tier) * 2px);
+  transform-origin: center;
+}
+
+.shogi-gimmick-vfx.pull::after { transform: translate(-50%, -50%) scaleX(.15); }
+.shogi-gimmick-vfx.push::after { transform: translate(-50%, -50%) scaleX(1.3); }
+
+.shogi-gimmick-vfx.time,
+.shogi-gimmick-vfx.rotate,
+.shogi-gimmick-vfx.warp,
+.shogi-gimmick-vfx.teleport {
+  animation-name: shogi-gimmick-spin-burst;
+}
+
+.shogi-gimmick-vfx.clone::before,
+.shogi-gimmick-vfx.phase::before {
+  box-shadow:
+    -1.15em 0 0 .42em color-mix(in srgb, var(--g2) 70%, transparent),
+    1.15em 0 0 .42em color-mix(in srgb, var(--g3) 70%, transparent),
+    0 -1.5em 0 .15em var(--g1),
+    0 1.5em 0 .15em var(--g1);
+}
+
+.shogi-gimmick-vfx.silence::before {
+  width: 120%;
+  height: 2px;
+  border-radius: 0;
+  background: var(--g1);
+  box-shadow: 0 .7em 0 var(--g2), 0 -.7em 0 var(--g2);
+}
+
+.shogi-gimmick-vfx.freeze::before {
+  width: 8%;
+  height: 105%;
+  border-radius: 0;
+  background: linear-gradient(var(--g1), var(--g2));
+  box-shadow: 0 0 8px var(--g2);
+}
+
+.shogi-gimmick-vfx.freeze::after {
+  width: 105%;
+  height: 8%;
+  border-radius: 0;
+  transform: translate(-50%, -50%) rotate(60deg);
+}
+
+.shogi-gimmick-vfx.transform::after,
+.shogi-gimmick-vfx.revive::after,
+.shogi-gimmick-vfx.forecast::after {
+  transform: translate(-50%, -50%) rotate(-45deg);
+}
+
+@keyframes shogi-gimmick-burst {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(.16); }
+  12% { opacity: 1; }
+  42% { opacity: .96; transform: translate(-50%, -50%) scale(var(--g-scale)); }
+  72% { opacity: .62; }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(calc(var(--g-scale) * 1.42)); }
+}
+
+@keyframes shogi-gimmick-spin-burst {
+  0% { opacity: 0; transform: translate(-50%, -50%) rotate(-115deg) scale(.16); }
+  14% { opacity: 1; }
+  55% { opacity: .95; transform: translate(-50%, -50%) rotate(150deg) scale(var(--g-scale)); }
+  100% { opacity: 0; transform: translate(-50%, -50%) rotate(330deg) scale(calc(var(--g-scale) * 1.36)); }
+}
+
+@keyframes shogi-gimmick-particles {
+  0% { opacity: 0; transform: translate(-50%, -50%) scale(.16) rotate(0deg); }
+  18% { opacity: .95; }
+  70% { opacity: .8; transform: translate(-50%, -50%) scale(calc(.8 + var(--tier) * .14)) rotate(42deg); }
+  100% { opacity: 0; transform: translate(-50%, -50%) scale(calc(1.2 + var(--tier) * .18)) rotate(82deg); }
+}
+
+@keyframes shogi-gimmick-flash {
+  0% { opacity: 0; }
+  10% { opacity: .96; }
+  34% { opacity: .78; }
+  100% { opacity: 0; }
+}
+
+@media (max-width: 680px) {
+  .shogi-gimmick-vfx {
+    width: min(21%, 84px);
+    filter: drop-shadow(0 0 calc(3px + var(--tier) * 1.5px) var(--g2));
+  }
+
+  .shogi-gimmick-vfx.laser::after {
+    width: min(360%, 280px);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shogi-gimmick-vfx,
+  .shogi-gimmick-vfx::before,
+  .shogi-gimmick-vfx::after {
+    animation: none !important;
+  }
+
+  .shogi-gimmick-vfx {
+    opacity: .82;
+    transform: translate(-50%, -50%) scale(.92);
+    transition: opacity 120ms linear;
+  }
+
+  .shogi-gimmick-vfx::before,
+  .shogi-gimmick-vfx::after {
+    opacity: .5;
+  }
 }
 
 .shogi-square {
@@ -15837,6 +16065,46 @@ textarea {
 .target-capture .shogi-target-marker { color: #b7253c; }
 .target-drop .shogi-target-marker { color: #a16b08; }
 .target-special .shogi-target-marker { color: #7d4eb2; }
+
+.shogi-terrain-marker {
+  position: absolute;
+  z-index: 1;
+  inset: 3px;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+  font-size: clamp(18px, 4vw, 34px);
+  font-weight: 950;
+  opacity: .72;
+  text-shadow: 0 0 9px currentColor;
+}
+
+.shogi-square.terrain-crater { box-shadow: inset 0 0 0 4px rgba(64, 38, 32, .72), inset 0 0 28px rgba(20, 8, 4, .66); }
+.shogi-square.terrain-crater .shogi-terrain-marker { color: #5a3029; }
+.shogi-square.terrain-barrier { box-shadow: inset 0 0 0 4px rgba(89, 225, 255, .75), inset 0 0 28px rgba(89, 225, 255, .34); }
+.shogi-square.terrain-barrier .shogi-terrain-marker { color: #46e5ff; }
+.shogi-square.terrain-trap { box-shadow: inset 0 0 0 4px rgba(255, 88, 75, .72), inset 0 0 30px rgba(255, 67, 46, .38); }
+.shogi-square.terrain-trap .shogi-terrain-marker { color: #ff4a3a; animation: shogiTerrainPulse .68s ease-in-out infinite alternate; }
+.shogi-square.terrain-portal { box-shadow: inset 0 0 0 4px rgba(175, 93, 255, .78), inset 0 0 30px rgba(136, 55, 255, .45); }
+.shogi-square.terrain-portal .shogi-terrain-marker { color: #a85bff; animation: shogiTerrainSpin 1.25s linear infinite; }
+.shogi-square.terrain-laser-floor { box-shadow: inset 0 0 0 4px rgba(255, 42, 150, .72), inset 0 0 34px rgba(255, 42, 150, .4); }
+.shogi-square.terrain-laser-floor .shogi-terrain-marker { color: #ff2a96; animation: shogiTerrainPulse .48s ease-in-out infinite alternate; }
+.shogi-square.terrain-gravity-field { box-shadow: inset 0 0 0 4px rgba(78, 44, 130, .82), inset 0 0 35px rgba(21, 7, 45, .68); }
+.shogi-square.terrain-gravity-field .shogi-terrain-marker { color: #6b36b8; animation: shogiTerrainGravity .9s ease-in-out infinite alternate; }
+
+@keyframes shogiTerrainPulse {
+  from { transform: scale(.78); opacity: .45; }
+  to { transform: scale(1.08); opacity: .92; }
+}
+
+@keyframes shogiTerrainSpin {
+  to { transform: rotate(360deg); }
+}
+
+@keyframes shogiTerrainGravity {
+  from { transform: scale(.65); filter: blur(.5px); }
+  to { transform: scale(1.05); filter: blur(0); }
+}
 
 .shogi-guide-legend {
   display: flex;

@@ -7,17 +7,25 @@ import {
   type ShogiPieceKind,
   type ShogiSide,
 } from './shogiPieces';
+import {
+  deriveShogiGimmickProfile,
+  getCatalogMovementVectors,
+  isOncePerBattleCatalogEffect,
+  type ShogiRuntimeVector,
+} from './shogiAdvanceRuntime';
 
 export type ShogiMode = 'STANDARD' | 'ADVANCE';
 export type ShogiPlayMode = 'CPU' | 'LOCAL';
 export type ShogiBoard = Array<Array<ShogiPiece | null>>;
 export type ShogiHands = Record<ShogiSide, Partial<Record<ShogiPieceKind, number>>>;
 export type ShogiTargetStatus = 'MOVE' | 'CAPTURE' | 'DROP' | 'SPECIAL';
+export type ShogiSpecialAction = 'MOVE' | 'WARP' | 'RANGED_CAPTURE' | 'SWAP' | 'ACTIVATE';
 export interface ShogiTarget {
   row: number;
   col: number;
   status: ShogiTargetStatus;
   note?: string;
+  action?: ShogiSpecialAction;
   /** Intermediate squares used by a two-step unique-piece move. */
   path?: Array<[number, number]>;
 }
@@ -29,6 +37,25 @@ export interface ShogiMove {
   capture: ShogiPieceKind | null;
   special?: boolean;
   path?: Array<[number, number]>;
+  action?: ShogiSpecialAction;
+}
+export type ShogiTerrainType = 'CRATER' | 'BARRIER' | 'TRAP' | 'PORTAL' | 'LASER_FLOOR' | 'GRAVITY_FIELD';
+export interface ShogiTerrain {
+  id: string;
+  row: number;
+  col: number;
+  type: ShogiTerrainType;
+  side: ShogiSide;
+  turnsLeft: number;
+  group?: string;
+}
+export interface ShogiGimmickEvent {
+  nonce: number;
+  family: string;
+  tier: number;
+  row: number;
+  col: number;
+  label: string;
 }
 export interface ShogiGameState {
   mode: ShogiMode;
@@ -50,16 +77,11 @@ export interface ShogiGameState {
   history: ShogiMove[];
   lastMove: ShogiMove | null;
   signature: string;
+  terrain: ShogiTerrain[];
+  gimmickEvent: ShogiGimmickEvent | null;
 }
 
-interface Vector {
-  dr: number;
-  dc: number;
-  max?: number;
-  slide?: boolean;
-  jump?: boolean;
-  special?: boolean;
-}
+type Vector = ShogiRuntimeVector;
 
 const SIZE = 5;
 const inside = (row: number, col: number) => row >= 0 && row < SIZE && col >= 0 && col < SIZE;
@@ -126,7 +148,9 @@ const advancedVectors = (piece: ShogiPiece): Vector[] => {
   const side = [
     one(f, -1), one(f, 0), one(f, 1), one(0, -1), one(0, 1), one(-f, -1), one(-f, 0), one(-f, 1),
   ];
-  switch (definitionOf(piece.kind).pattern) {
+  const definition = definitionOf(piece.kind);
+  switch (definition.pattern) {
+    case 'CATALOG': return getCatalogMovementVectors(definition.catalogNo || definition.stage, definition.description, piece.side);
     case 'DOUBLE_PAWN': return piece.hasMoved
       ? [one(f, 0)]
       : [one(f, 0), one(f * 2, 0, { jump: true, special: true })];
@@ -212,6 +236,23 @@ const advancedVectors = (piece: ShogiPiece): Vector[] => {
 
 const isStandardKind = (kind: ShogiPieceKind): boolean =>
   ['K', 'R', 'B', 'G', 'S', 'N', 'L', 'P'].includes(kind);
+
+const gimmickProfileOf = (kind: ShogiPieceKind) => {
+  const definition = definitionOf(kind);
+  return deriveShogiGimmickProfile(
+    definition.catalogNo || definition.stage,
+    definition.family || '',
+    definition.description,
+    definition.restriction,
+  );
+};
+
+const isCatalogPiece = (kind: ShogiPieceKind) => definitionOf(kind).pattern === 'CATALOG';
+
+const terrainBlocksSquare = (terrain: ShogiTerrain[], row: number, col: number, side: ShogiSide): boolean =>
+  terrain.some(item => item.row === row && item.col === col && (
+    item.type === 'CRATER' || (item.type === 'BARRIER' && item.side !== side)
+  ));
 
 const canLandOn = (piece: ShogiPiece, target: ShogiPiece | null, jumping = false, allowFriendly = false): boolean => {
   if (target?.side === piece.side && !allowFriendly) return false;
@@ -518,6 +559,93 @@ const customAdvancedTargets = (
   return undefined;
 };
 
+const firstEnemyOnRay = (
+  board: ShogiBoard,
+  row: number,
+  col: number,
+  side: ShogiSide,
+  dr: number,
+  dc: number,
+): [number, number] | null => {
+  for (let step = 1; step < SIZE; step += 1) {
+    const targetRow = row + dr * step;
+    const targetCol = col + dc * step;
+    if (!inside(targetRow, targetCol)) break;
+    const target = board[targetRow][targetCol];
+    if (!target) continue;
+    if (target.side !== side && target.kind !== 'K') return [targetRow, targetCol];
+    break;
+  }
+  return null;
+};
+
+const catalogSpecialTargets = (
+  board: ShogiBoard,
+  terrain: ShogiTerrain[],
+  row: number,
+  col: number,
+  piece: ShogiPiece,
+): ShogiTarget[] => {
+  if (!isCatalogPiece(piece.kind) || piece.silencedTurns) return [];
+  const definition = definitionOf(piece.kind);
+  const profile = gimmickProfileOf(piece.kind);
+  if (isOncePerBattleCatalogEffect(definition.restriction, definition.description) && piece.gimmickUsed) return [];
+  const result: ShogiTarget[] = [];
+  const text = `${definition.description} ${definition.restriction}`;
+
+  if (profile.families.some(family => family === 'WARP' || family === 'TELEPORT' || family === 'PHASE')) {
+    const addWarp = (targetRow: number, targetCol: number) => {
+      if (!inside(targetRow, targetCol) || board[targetRow][targetCol] || terrainBlocksSquare(terrain, targetRow, targetCol, piece.side)) return;
+      if (targetRow === row && targetCol === col) return;
+      result.push({ row: targetRow, col: targetCol, status: 'SPECIAL', action: 'WARP', note: '空間移動' });
+    };
+    if (/盤端|端升|端の/.test(text)) {
+      for (let index = 0; index < SIZE; index += 1) {
+        addWarp(0, index); addWarp(SIZE - 1, index); addWarp(index, 0); addWarp(index, SIZE - 1);
+      }
+    } else if (/四隅|対角の隅/.test(text)) {
+      addWarp(0, 0); addWarp(0, SIZE - 1); addWarp(SIZE - 1, 0); addWarp(SIZE - 1, SIZE - 1);
+    } else if (/同じ行|同じ段|同じ列|同じ筋/.test(text)) {
+      for (let index = 0; index < SIZE; index += 1) { addWarp(row, index); addWarp(index, col); }
+    } else if (/任意|どこでも|全空き/.test(text) || profile.tier >= 4) {
+      for (let targetRow = 0; targetRow < SIZE; targetRow += 1) for (let targetCol = 0; targetCol < SIZE; targetCol += 1) addWarp(targetRow, targetCol);
+    } else {
+      for (const vector of kingVectors()) addWarp(row + vector.dr * 2, col + vector.dc * 2);
+    }
+  }
+
+  if (profile.families.includes('LASER')) {
+    const rayDirections = /斜め|月光|角/.test(text) && !/縦横|同じ列|同じ段|前方同列/.test(text)
+      ? diagonal(1)
+      : /縦横|同じ列|同じ段|直線|前方|上下左右/.test(text)
+        ? orthogonal(1)
+        : [...orthogonal(1), ...diagonal(1)];
+    rayDirections.forEach(vector => {
+      const enemy = firstEnemyOnRay(board, row, col, piece.side, vector.dr, vector.dc);
+      if (!enemy) return;
+      result.push({ row: enemy[0], col: enemy[1], status: 'SPECIAL', action: 'RANGED_CAPTURE', note: '遠隔射撃' });
+    });
+  }
+
+  if (profile.families.includes('SWAP')) {
+    const radius = profile.tier >= 3 || /任意|盤上/.test(text) ? SIZE : /距離2|2以内/.test(text) ? 2 : 1;
+    const allowEnemySwap = /敵|敵味方|相手|循環交換|捕獲済み/.test(text);
+    for (let targetRow = 0; targetRow < SIZE; targetRow += 1) for (let targetCol = 0; targetCol < SIZE; targetCol += 1) {
+      const target = board[targetRow][targetCol];
+      if (!target || target.kind === 'K') continue;
+      if (target.side !== piece.side && !allowEnemySwap) continue;
+      if (Math.max(Math.abs(targetRow - row), Math.abs(targetCol - col)) > radius) continue;
+      result.push({ row: targetRow, col: targetCol, status: 'SPECIAL', action: 'SWAP', note: '味方と位置交換' });
+    }
+  }
+
+  if (profile.tier > 0 && /移動せず|手番を使って|1局1回、(?:盤上|空き|中央|敵|自軍|相手|指定)/.test(text)) {
+    result.push({ row, col, status: 'SPECIAL', action: 'ACTIVATE', note: '固有能力を発動' });
+  }
+
+  return uniqueTargets(result);
+};
+
 const candidateMoves = (
   board: ShogiBoard,
   row: number,
@@ -526,14 +654,18 @@ const candidateMoves = (
   vectorOverride?: Vector[],
   mirrorJump = false,
   lastMove?: ShogiMove,
+  terrain: ShogiTerrain[] = [],
 ): ShogiTarget[] => {
   const piece = pieceOverride || board[row]?.[col];
-  if (!piece) return [];
+  if (!piece || piece.frozenTurns) return [];
   const custom = !vectorOverride && definitionOf(piece.kind).advanced
     ? customAdvancedTargets(board, row, col, piece, lastMove)
     : undefined;
   if (custom) return uniqueTargets(custom);
-  const vectors = vectorOverride || (definitionOf(piece.kind).advanced ? advancedVectors(piece) : standardVectors(piece));
+  const baseVectors = vectorOverride || (definitionOf(piece.kind).advanced ? advancedVectors(piece) : standardVectors(piece));
+  const vectors = piece.reverseMovementTurns
+    ? baseVectors.map(vector => ({ ...vector, dr: -vector.dr, dc: -vector.dc }))
+    : baseVectors;
   const result: ShogiTarget[] = [];
   vectors.forEach(vector => {
     const max = vector.slide ? (vector.max || SIZE) : 1;
@@ -541,10 +673,23 @@ const candidateMoves = (
       const targetRow = row + vector.dr * step;
       const targetCol = col + vector.dc * step;
       if (!inside(targetRow, targetCol)) break;
+      if (terrainBlocksSquare(terrain, targetRow, targetCol, piece.side)) break;
       const target = board[targetRow][targetCol];
       const jumping = Boolean(vector.jump || mirrorJump);
       if (!canLandOn(piece, target, jumping)) break;
+      if (target && piece.captureLockedTurns) {
+        if (!jumping && vector.slide) break;
+        continue;
+      }
       if (!jumping && step > 1 && board[row + vector.dr * (step - 1)][col + vector.dc * (step - 1)]) break;
+      if (target && vector.moveOnly) {
+        if (!jumping && vector.slide) break;
+        continue;
+      }
+      if (!target && vector.captureOnly) {
+        if (!jumping && vector.slide) continue;
+        continue;
+      }
       result.push({
         row: targetRow,
         col: targetCol,
@@ -554,6 +699,7 @@ const candidateMoves = (
       if (target || jumping || !vector.slide) break;
     }
   });
+  if (!vectorOverride && isCatalogPiece(piece.kind)) result.push(...catalogSpecialTargets(board, terrain, row, col, piece));
   return uniqueTargets(result);
 };
 
@@ -628,6 +774,7 @@ export const getShogiMovementTargets = (
   selection: { row: number; col: number } | { hand: ShogiPieceKind } | null,
   side: ShogiSide,
   history: ShogiMove[] = [],
+  terrain: ShogiTerrain[] = [],
 ): ShogiTarget[] => {
   if (!selection) return [];
   if ('hand' in selection) {
@@ -640,7 +787,7 @@ export const getShogiMovementTargets = (
   const piece = board[selection.row]?.[selection.col];
   if (!piece || piece.side !== side) return [];
   const lastOpponentMove = [...history].reverse().find(move => move.side !== side);
-  return candidateMoves(board, selection.row, selection.col, undefined, undefined, false, lastOpponentMove);
+  return candidateMoves(board, selection.row, selection.col, undefined, undefined, false, lastOpponentMove, terrain);
 };
 
 /** The learning duel deliberately uses piece-movement rules rather than
@@ -652,22 +799,64 @@ export const getShogiTargets = (
   selection: { row: number; col: number } | { hand: ShogiPieceKind } | null,
   side: ShogiSide,
   history: ShogiMove[] = [],
+  terrain: ShogiTerrain[] = [],
 ): ShogiTarget[] => {
-  return getShogiMovementTargets(board, hands, selection, side, history);
+  return getShogiMovementTargets(board, hands, selection, side, history, terrain);
 };
 
 const applyMove = (
   board: ShogiBoard,
   hands: ShogiHands,
   move: ShogiMove,
-): { board: ShogiBoard; hands: ShogiHands; captured: ShogiPiece | null; capturedKing: boolean } => {
+): { board: ShogiBoard; hands: ShogiHands; captured: ShogiPiece | null; capturedKing: boolean; movedTo: [number, number] | null } => {
   const nextBoard = cloneBoard(board);
   const nextHands = cloneHands(hands);
   let captured: ShogiPiece | null = null;
   let capturedKing = false;
   if (move.from) {
     let moving = nextBoard[move.from[0]][move.from[1]];
-    if (!moving) return { board: nextBoard, hands: nextHands, captured: null, capturedKing: false };
+    if (!moving) return { board: nextBoard, hands: nextHands, captured: null, capturedKing: false, movedTo: null };
+
+    if (move.action === 'ACTIVATE') {
+      return { board: nextBoard, hands: nextHands, captured: null, capturedKing: false, movedTo: move.from };
+    }
+
+    if (move.action === 'RANGED_CAPTURE') {
+      const landed = nextBoard[move.to[0]][move.to[1]];
+      if (landed && landed.side !== move.side && landed.kind !== 'K') {
+        if (landed.reflectCharges && landed.reflectCharges > 0) {
+          landed.reflectCharges -= 1;
+          if (moving.kind !== 'K') {
+            nextBoard[move.from[0]][move.from[1]] = null;
+            addCapturedPieceToHand(nextHands, landed.side, moving, true);
+          }
+        } else {
+          captured = landed;
+          nextBoard[move.to[0]][move.to[1]] = null;
+          if (!landed.ephemeral) nextHands[move.side][landed.kind] = (nextHands[move.side][landed.kind] || 0) + 1;
+          applyCapturedPieceTrigger(landed, moving, true);
+          const landedDefinition = definitionOf(landed.kind);
+          if (
+            moving.kind !== 'K'
+            && gimmickProfileOf(landed.kind).families.includes('REFLECT')
+            && /発生源の敵も同時に捕獲/.test(`${landedDefinition.description} ${landedDefinition.restriction}`)
+          ) {
+            nextBoard[move.from[0]][move.from[1]] = null;
+            addCapturedPieceToHand(nextHands, landed.side, moving, true);
+          }
+        }
+      }
+      return { board: nextBoard, hands: nextHands, captured, capturedKing: false, movedTo: move.from };
+    }
+
+    if (move.action === 'SWAP') {
+      const other = nextBoard[move.to[0]][move.to[1]];
+      if (!other || other.kind === 'K') return { board: nextBoard, hands: nextHands, captured: null, capturedKing: false, movedTo: move.from };
+      nextBoard[move.from[0]][move.from[1]] = { ...other, hasMoved: true };
+      nextBoard[move.to[0]][move.to[1]] = { ...moving, hasMoved: true };
+      return { board: nextBoard, hands: nextHands, captured: null, capturedKing: false, movedTo: move.to };
+    }
+
     const path = move.path?.length ? move.path : [move.to];
     let current = move.from;
     path.forEach(([targetRow, targetCol], index) => {
@@ -676,7 +865,25 @@ const applyMove = (
         captured = landed;
         if (landed.kind === 'K') capturedKing = true;
         if (landed.kind !== 'K') {
-          nextHands[move.side][landed.kind] = (nextHands[move.side][landed.kind] || 0) + 1;
+          applyCapturedPieceTrigger(landed, moving!, false);
+          const reviveProfile = gimmickProfileOf(landed.kind);
+          const canRevive = isCatalogPiece(landed.kind)
+            && reviveProfile.families.includes('REVIVE')
+            && !landed.gimmickUsed;
+          if (canRevive) {
+            const homeRow = landed.side === 'P' ? SIZE - 1 : 0;
+            const fallbackRow = landed.side === 'P' ? SIZE - 2 : 1;
+            const reviveCell = [homeRow, fallbackRow].flatMap(candidateRow =>
+              Array.from({ length: SIZE }, (_, candidateCol) => [candidateRow, candidateCol] as [number, number]),
+            ).find(([candidateRow, candidateCol]) => !nextBoard[candidateRow][candidateCol]);
+            if (reviveCell) {
+              nextBoard[reviveCell[0]][reviveCell[1]] = { ...landed, promoted: false, gimmickUsed: true, hasMoved: true };
+            } else if (!landed.ephemeral) {
+              nextHands[move.side][landed.kind] = (nextHands[move.side][landed.kind] || 0) + 1;
+            }
+          } else if (!landed.ephemeral) {
+            nextHands[move.side][landed.kind] = (nextHands[move.side][landed.kind] || 0) + 1;
+          }
         }
       }
       nextBoard[current[0]][current[1]] = null;
@@ -695,15 +902,447 @@ const applyMove = (
   if (!move.from && captured && captured.kind !== 'K') {
     nextHands[move.side][captured.kind] = (nextHands[move.side][captured.kind] || 0) + 1;
   }
-  return { board: nextBoard, hands: nextHands, captured, capturedKing };
+  return { board: nextBoard, hands: nextHands, captured, capturedKing, movedTo: move.to };
 };
 
-const allMovesForSide = (board: ShogiBoard, hands: ShogiHands, side: ShogiSide, history: ShogiMove[] = []): ShogiMove[] => {
+const addCapturedPieceToHand = (hands: ShogiHands, side: ShogiSide, piece: ShogiPiece, allow = true) => {
+  if (!allow || piece.kind === 'K' || piece.ephemeral) return;
+  hands[side][piece.kind] = (hands[side][piece.kind] || 0) + 1;
+};
+
+const removeAutomaticTarget = (
+  board: ShogiBoard,
+  hands: ShogiHands,
+  side: ShogiSide,
+  row: number,
+  col: number,
+  addToHand: boolean,
+): boolean => {
+  const target = board[row]?.[col];
+  if (!target || target.side === side || target.kind === 'K') return false;
+  if (target.reflectCharges && target.reflectCharges > 0) {
+    target.reflectCharges -= 1;
+    return false;
+  }
+  board[row][col] = null;
+  addCapturedPieceToHand(hands, side, target, addToHand);
+  return true;
+};
+
+const moveOneSquareToward = (
+  board: ShogiBoard,
+  fromRow: number,
+  fromCol: number,
+  targetRow: number,
+  targetCol: number,
+): boolean => {
+  const piece = board[fromRow]?.[fromCol];
+  if (!piece || piece.kind === 'K') return false;
+  const dr = Math.sign(targetRow - fromRow);
+  const dc = Math.sign(targetCol - fromCol);
+  const nextRow = fromRow + dr;
+  const nextCol = fromCol + dc;
+  if (!inside(nextRow, nextCol) || board[nextRow][nextCol]) return false;
+  board[nextRow][nextCol] = piece;
+  board[fromRow][fromCol] = null;
+  return true;
+};
+
+const moveOneSquareAway = (
+  board: ShogiBoard,
+  fromRow: number,
+  fromCol: number,
+  centerRow: number,
+  centerCol: number,
+): boolean => {
+  const piece = board[fromRow]?.[fromCol];
+  if (!piece || piece.kind === 'K') return false;
+  let dr = Math.sign(fromRow - centerRow);
+  let dc = Math.sign(fromCol - centerCol);
+  if (!dr && !dc) return false;
+  const nextRow = fromRow + dr;
+  const nextCol = fromCol + dc;
+  if (!inside(nextRow, nextCol) || board[nextRow][nextCol]) return false;
+  board[nextRow][nextCol] = piece;
+  board[fromRow][fromCol] = null;
+  return true;
+};
+
+const tickStatusesForSide = (board: ShogiBoard, side: ShogiSide): ShogiBoard => {
+  const next = cloneBoard(board);
+  for (let row = 0; row < SIZE; row += 1) for (let col = 0; col < SIZE; col += 1) {
+    const piece = next[row][col];
+    if (!piece || piece.side !== side) continue;
+    if (piece.frozenTurns) piece.frozenTurns = Math.max(0, piece.frozenTurns - 1);
+    if (piece.silencedTurns) piece.silencedTurns = Math.max(0, piece.silencedTurns - 1);
+    if (piece.captureLockedTurns) piece.captureLockedTurns = Math.max(0, piece.captureLockedTurns - 1);
+    if (piece.reverseMovementTurns) piece.reverseMovementTurns = Math.max(0, piece.reverseMovementTurns - 1);
+    if (piece.ephemeralTurns) {
+      piece.ephemeralTurns -= 1;
+      if (piece.ephemeralTurns <= 0) next[row][col] = null;
+    }
+    if (piece.transformTurns) {
+      piece.transformTurns -= 1;
+      if (piece.transformTurns <= 0 && piece.originalKind) {
+        piece.kind = piece.originalKind;
+        piece.originalKind = undefined;
+        piece.transformTurns = undefined;
+      }
+    }
+  }
+  return next;
+};
+
+const tickTerrain = (terrain: ShogiTerrain[]): ShogiTerrain[] =>
+  terrain.map(item => ({ ...item, turnsLeft: item.turnsLeft - 1 })).filter(item => item.turnsLeft > 0);
+
+const applyTerrainPulse = (board: ShogiBoard, terrain: ShogiTerrain[]): ShogiBoard => {
+  const next = cloneBoard(board);
+  terrain.filter(item => item.type === 'GRAVITY_FIELD').forEach(field => {
+    const candidates: Array<{ row: number; col: number; distance: number }> = [];
+    for (let row = 0; row < SIZE; row += 1) for (let col = 0; col < SIZE; col += 1) {
+      const piece = next[row][col];
+      if (!piece || piece.kind === 'K') continue;
+      const distance = Math.max(Math.abs(row - field.row), Math.abs(col - field.col));
+      if (distance > 0 && distance <= 2) candidates.push({ row, col, distance });
+    }
+    candidates.sort((left, right) => left.distance - right.distance);
+    // Move the closest pieces first so the field feels like a real pull rather
+    // than a visual-only tile. Kings are deliberately immune.
+    candidates.slice(0, 3).forEach(candidate => {
+      moveOneSquareToward(next, candidate.row, candidate.col, field.row, field.col);
+    });
+  });
+  return next;
+};
+
+const terrainTypeForText = (text: string): ShogiTerrainType => {
+  if (/穴|クレーター|隕/.test(text)) return 'CRATER';
+  if (/ポータル|門|裂け目/.test(text)) return 'PORTAL';
+  if (/レーザー|光床|光線/.test(text)) return 'LASER_FLOOR';
+  if (/重力|事象|引力/.test(text)) return 'GRAVITY_FIELD';
+  if (/罠|地雷|爆弾/.test(text)) return 'TRAP';
+  return 'BARRIER';
+};
+
+const applyCapturedPieceTrigger = (
+  captured: ShogiPiece,
+  capturer: ShogiPiece,
+  captureWasRemote: boolean,
+) => {
+  if (capturer.kind === 'K') return;
+  const definition = definitionOf(captured.kind);
+  const text = `${definition.description} ${definition.restriction}`;
+  if (!/捕獲された時|取られた時|取られると|捕獲されると|捕獲された場合|この駒を捕獲した/.test(text)) return;
+  const profile = gimmickProfileOf(captured.kind);
+  // These statuses are applied to the piece that just moved. The engine ticks
+  // the moving side once at end-of-turn, so use two counts to preserve one
+  // full future owning-side turn after that immediate tick.
+  if (profile.families.includes('FREEZE')) capturer.frozenTurns = Math.max(capturer.frozenTurns || 0, 2);
+  if (profile.families.includes('SILENCE') || /捕獲を伴う移動ができない/.test(text)) {
+    capturer.captureLockedTurns = Math.max(capturer.captureLockedTurns || 0, 2);
+  }
+  if (profile.families.includes('REFLECT') && /移動方向を反転/.test(text)) {
+    capturer.reverseMovementTurns = Math.max(capturer.reverseMovementTurns || 0, 2);
+  }
+  if (captureWasRemote && profile.families.includes('REFLECT') && /発生源の敵も同時に捕獲/.test(text)) {
+    capturer.captureLockedTurns = Math.max(capturer.captureLockedTurns || 0, 2);
+  }
+};
+
+const applyTerrainEntry = (
+  board: ShogiBoard,
+  hands: ShogiHands,
+  terrain: ShogiTerrain[],
+  move: ShogiMove,
+  movedTo: [number, number] | null,
+): { board: ShogiBoard; hands: ShogiHands } => {
+  if (!movedTo || move.action === 'RANGED_CAPTURE') return { board, hands };
+  const nextBoard = cloneBoard(board);
+  const nextHands = cloneHands(hands);
+  const entered = terrain.filter(item => item.row === movedTo[0] && item.col === movedTo[1] && item.side !== move.side);
+  const moving = nextBoard[movedTo[0]]?.[movedTo[1]];
+  if (!moving) return { board: nextBoard, hands: nextHands };
+  const harmful = entered.find(item => item.type === 'TRAP' || item.type === 'LASER_FLOOR');
+  if (harmful && moving.kind !== 'K') {
+    nextBoard[movedTo[0]][movedTo[1]] = null;
+    addCapturedPieceToHand(nextHands, harmful.side, moving, true);
+    return { board: nextBoard, hands: nextHands };
+  }
+  const portal = entered.find(item => item.type === 'PORTAL' && item.group);
+  if (portal && moving.kind !== 'K') {
+    const exit = terrain.find(item => item.type === 'PORTAL' && item.group === portal.group && item.id !== portal.id && !nextBoard[item.row][item.col]);
+    if (exit) {
+      nextBoard[exit.row][exit.col] = moving;
+      nextBoard[movedTo[0]][movedTo[1]] = null;
+    }
+  }
+  return { board: nextBoard, hands: nextHands };
+};
+
+const applyCatalogGimmicks = (
+  board: ShogiBoard,
+  hands: ShogiHands,
+  terrain: ShogiTerrain[],
+  move: ShogiMove,
+  captured: ShogiPiece | null,
+  movedTo: [number, number] | null,
+  eventNonce: number,
+): { board: ShogiBoard; hands: ShogiHands; terrain: ShogiTerrain[]; event: ShogiGimmickEvent | null } => {
+  if (!move.from || !movedTo || !isCatalogPiece(move.kind)) return { board, hands, terrain, event: null };
+  const definition = definitionOf(move.kind);
+  const profile = gimmickProfileOf(move.kind);
+  if (profile.families.length === 1 && profile.families[0] === 'NONE') return { board, hands, terrain, event: null };
+  const text = `${definition.description} ${definition.restriction}`;
+  const nextBoard = cloneBoard(board);
+  const nextHands = cloneHands(hands);
+  let nextTerrain = terrain.map(item => ({ ...item }));
+  const moving = nextBoard[movedTo[0]]?.[movedTo[1]] || nextBoard[move.from[0]]?.[move.from[1]];
+  if (!moving || moving.silencedTurns) return { board: nextBoard, hands: nextHands, terrain: nextTerrain, event: null };
+  const once = isOncePerBattleCatalogEffect(definition.restriction, definition.description);
+  if (once && moving.gimmickUsed) return { board: nextBoard, hands: nextHands, terrain: nextTerrain, event: null };
+  const captureRequired = /捕獲時|捕獲すると|捕獲した時|敵を捕獲した|取った時/.test(text);
+  const activeTrigger = !captureRequired || Boolean(captured) || move.action === 'RANGED_CAPTURE';
+  if (!activeTrigger && !profile.families.some(family => ['REFLECT', 'BARRIER', 'FORECAST', 'GRAVITY'].includes(family))) {
+    return { board: nextBoard, hands: nextHands, terrain: nextTerrain, event: null };
+  }
+  const addRemovedToHand = !/除去|除外|消滅|持ち駒になら/.test(text);
+  const tier = profile.tier;
+  let triggered = move.action === 'WARP' || move.action === 'RANGED_CAPTURE' || move.action === 'SWAP' || move.action === 'ACTIVATE';
+
+  if (profile.families.includes('EXPLOSION') && activeTrigger) {
+    const radius = tier >= 4 ? 2 : 1;
+    let removed = 0;
+    const limit = tier >= 3 ? Number.POSITIVE_INFINITY : 1 + tier;
+    explosionLoop:
+    for (let targetRow = 0; targetRow < SIZE; targetRow += 1) for (let targetCol = 0; targetCol < SIZE; targetCol += 1) {
+      const distance = Math.max(Math.abs(targetRow - movedTo[0]), Math.abs(targetCol - movedTo[1]));
+      if (!distance || distance > radius) continue;
+      if (removeAutomaticTarget(nextBoard, nextHands, move.side, targetRow, targetCol, addRemovedToHand)) {
+        removed += 1;
+        if (removed >= limit) break explosionLoop;
+      }
+    }
+    triggered ||= removed > 0;
+  }
+
+  if (profile.families.includes('CHAIN') && activeTrigger && captured) {
+    let frontier: Array<[number, number]> = [movedTo];
+    let removed = 0;
+    const limit = Math.min(5, 1 + tier);
+    while (frontier.length && removed < limit) {
+      const [centerRow, centerCol] = frontier.shift()!;
+      let found: [number, number] | null = null;
+      for (const vector of kingVectors()) {
+        const targetRow = centerRow + vector.dr;
+        const targetCol = centerCol + vector.dc;
+        const target = nextBoard[targetRow]?.[targetCol];
+        if (target && target.side !== move.side && target.kind !== 'K') { found = [targetRow, targetCol]; break; }
+      }
+      if (found && removeAutomaticTarget(nextBoard, nextHands, move.side, found[0], found[1], addRemovedToHand)) {
+        removed += 1;
+        frontier.push(found);
+      }
+    }
+    triggered ||= removed > 0;
+  }
+
+  if (profile.families.some(family => family === 'PULL' || family === 'GRAVITY' || family === 'BLACK_HOLE')) {
+    const candidates: Array<{ row: number; col: number; distance: number }> = [];
+    for (let targetRow = 0; targetRow < SIZE; targetRow += 1) for (let targetCol = 0; targetCol < SIZE; targetCol += 1) {
+      const target = nextBoard[targetRow][targetCol];
+      if (!target || target.side === move.side || target.kind === 'K') continue;
+      candidates.push({ row: targetRow, col: targetCol, distance: Math.max(Math.abs(targetRow - movedTo[0]), Math.abs(targetCol - movedTo[1])) });
+    }
+    candidates.sort((left, right) => left.distance - right.distance);
+    const limit = profile.families.includes('BLACK_HOLE') ? Math.min(8, 2 + tier) : tier >= 3 ? 2 : 1;
+    let moved = 0;
+    for (const candidate of candidates) {
+      if (moveOneSquareToward(nextBoard, candidate.row, candidate.col, movedTo[0], movedTo[1])) moved += 1;
+      if (moved >= limit) break;
+    }
+    triggered ||= moved > 0;
+  }
+
+  if (profile.families.includes('PUSH')) {
+    let pushed = 0;
+    for (const vector of kingVectors()) {
+      const targetRow = movedTo[0] + vector.dr;
+      const targetCol = movedTo[1] + vector.dc;
+      if (nextBoard[targetRow]?.[targetCol]?.side === move.side) continue;
+      if (moveOneSquareAway(nextBoard, targetRow, targetCol, movedTo[0], movedTo[1])) pushed += 1;
+    }
+    triggered ||= pushed > 0;
+  }
+
+  if (profile.families.some(family => family === 'TIME' || family === 'FREEZE')) {
+    if (tier >= 4 && move.action === 'ACTIVATE' && move.side === 'P') {
+      let frozen = 0;
+      for (let targetRow = 0; targetRow < SIZE; targetRow += 1) for (let targetCol = 0; targetCol < SIZE; targetCol += 1) {
+        const target = nextBoard[targetRow][targetCol];
+        if (!target || target.side === move.side || target.kind === 'K') continue;
+        target.frozenTurns = Math.max(target.frozenTurns || 0, 1);
+        frozen += 1;
+      }
+      triggered ||= frozen > 0;
+    } else {
+    const limit = tier >= 4 ? 2 : 1;
+    let frozen = 0;
+    for (const vector of kingVectors()) {
+      const target = nextBoard[movedTo[0] + vector.dr]?.[movedTo[1] + vector.dc];
+      if (!target || target.side === move.side || target.kind === 'K') continue;
+      target.frozenTurns = Math.max(target.frozenTurns || 0, tier >= 3 ? 2 : 1);
+      frozen += 1;
+      if (frozen >= limit) break;
+    }
+    triggered ||= frozen > 0;
+    }
+  }
+
+  if (profile.families.includes('SILENCE')) {
+    let silenced = 0;
+    for (const vector of kingVectors()) {
+      const target = nextBoard[movedTo[0] + vector.dr]?.[movedTo[1] + vector.dc];
+      if (!target || target.side === move.side || target.kind === 'K' || !definitionOf(target.kind).advanced) continue;
+      target.silencedTurns = Math.max(target.silencedTurns || 0, 1 + (tier >= 4 ? 1 : 0));
+      silenced += 1;
+      if (silenced >= 1 + Math.floor(tier / 2)) break;
+    }
+    triggered ||= silenced > 0;
+  }
+
+  if (profile.families.some(family => family === 'REFLECT' || family === 'BARRIER')) {
+    moving.reflectCharges = Math.max(moving.reflectCharges || 0, 1 + (tier >= 4 ? 1 : 0));
+    triggered = true;
+  }
+
+  if (profile.families.includes('CLONE')) {
+    const emptyCandidates: Array<[number, number]> = [];
+    if (!nextBoard[move.from[0]][move.from[1]]) emptyCandidates.push(move.from);
+    for (const vector of kingVectors()) {
+      const targetRow = movedTo[0] + vector.dr;
+      const targetCol = movedTo[1] + vector.dc;
+      if (inside(targetRow, targetCol) && !nextBoard[targetRow][targetCol]) emptyCandidates.push([targetRow, targetCol]);
+    }
+    const count = Math.min(emptyCandidates.length, tier >= 4 ? 4 : tier >= 3 ? 2 : 1);
+    for (let index = 0; index < count; index += 1) {
+      const [cloneRow, cloneCol] = emptyCandidates[index];
+      nextBoard[cloneRow][cloneCol] = { ...moving, ephemeral: true, ephemeralTurns: 2, gimmickUsed: true };
+    }
+    triggered ||= count > 0;
+  }
+
+  const explicitlyCreatesBarrierTerrain = profile.families.includes('BARRIER')
+    && /障壁|バリア|結界|光壁|防護膜|力場|壁を|壁へ|壁・/.test(text)
+    && /生成|設置|置|張る|変える|地形/.test(text);
+  if (profile.families.includes('TERRAIN') || explicitlyCreatesBarrierTerrain) {
+    const type = terrainTypeForText(text);
+    const candidates: Array<[number, number]> = [];
+    if (!nextBoard[move.from[0]][move.from[1]]) candidates.push(move.from);
+    for (const vector of kingVectors()) {
+      const targetRow = movedTo[0] + vector.dr;
+      const targetCol = movedTo[1] + vector.dc;
+      if (inside(targetRow, targetCol) && !nextBoard[targetRow][targetCol]) candidates.push([targetRow, targetCol]);
+    }
+    const terrainCount = Math.min(candidates.length, tier >= 4 ? 3 : 1);
+    const group = `g-${eventNonce}-${move.kind}`;
+    for (let index = 0; index < terrainCount; index += 1) {
+      const [terrainRow, terrainCol] = candidates[index];
+      // Terrain is ticked after every half-turn, including the turn where it is
+      // created.  Four plies guarantees that a newly-created one-turn portal or
+      // hazard is still present for the creator's next turn; higher-tier terrain
+      // lasts proportionally longer.
+      const turnsLeft = tier >= 4 ? 8 : tier >= 3 ? 6 : 4;
+      nextTerrain.push({ id: `${group}-${index}`, row: terrainRow, col: terrainCol, type, side: move.side, turnsLeft, group: type === 'PORTAL' ? group : undefined });
+    }
+    triggered ||= terrainCount > 0;
+  }
+
+  if (profile.families.includes('ROTATE') && tier >= 2) {
+    const ring = kingVectors().map(vector => [movedTo[0] + vector.dr, movedTo[1] + vector.dc] as [number, number]).filter(([targetRow, targetCol]) => inside(targetRow, targetCol));
+    const movable = ring.filter(([targetRow, targetCol]) => nextBoard[targetRow][targetCol] && nextBoard[targetRow][targetCol]!.kind !== 'K');
+    if (movable.length >= 2) {
+      const snapshots = movable.map(([targetRow, targetCol]) => nextBoard[targetRow][targetCol]);
+      movable.forEach(([targetRow, targetCol], index) => { nextBoard[targetRow][targetCol] = snapshots[(index + snapshots.length - 1) % snapshots.length]; });
+      triggered = true;
+    }
+  }
+
+  if (profile.families.includes('PHASE')) {
+    moving.reflectCharges = Math.max(moving.reflectCharges || 0, 1);
+    triggered = true;
+  }
+
+  if (profile.families.includes('REVIVE') && activeTrigger) {
+    const heldKind = Object.entries(nextHands[move.side]).find(([kind, count]) => kind !== 'K' && Number(count) > 0)?.[0] as ShogiPieceKind | undefined;
+    if (heldKind) {
+      const homeRows = move.side === 'P' ? [SIZE - 1, SIZE - 2] : [0, 1];
+      const reviveCell = homeRows.flatMap(targetRow => Array.from({ length: SIZE }, (_, targetCol) => [targetRow, targetCol] as [number, number]))
+        .find(([targetRow, targetCol]) => !nextBoard[targetRow][targetCol] && !terrainBlocksSquare(nextTerrain, targetRow, targetCol, move.side));
+      if (reviveCell) {
+        nextHands[move.side][heldKind] = Math.max(0, (nextHands[move.side][heldKind] || 0) - 1);
+        nextBoard[reviveCell[0]][reviveCell[1]] = { ...makeShogiPiece(heldKind, move.side), frozenTurns: 1 };
+        triggered = true;
+      }
+    }
+  }
+
+  if (profile.families.includes('FORECAST')) {
+    const enemies: Array<ShogiPiece> = [];
+    for (let targetRow = 0; targetRow < SIZE; targetRow += 1) for (let targetCol = 0; targetCol < SIZE; targetCol += 1) {
+      const target = nextBoard[targetRow][targetCol];
+      if (target && target.side !== move.side && target.kind !== 'K') enemies.push(target);
+    }
+    const forecastTarget = enemies[0];
+    if (forecastTarget) {
+      forecastTarget.silencedTurns = Math.max(forecastTarget.silencedTurns || 0, 1);
+      if (tier >= 4) forecastTarget.frozenTurns = Math.max(forecastTarget.frozenTurns || 0, 1);
+    }
+    // Forecast is primarily information, so it still fires when there is no
+    // eligible target to suppress.
+    triggered = true;
+  }
+
+  if (profile.families.includes('TRANSFORM')) {
+    let copied: ShogiPiece | null = null;
+    for (const vector of kingVectors()) {
+      const target = nextBoard[movedTo[0] + vector.dr]?.[movedTo[1] + vector.dc];
+      if (target && target.side === move.side && target.kind !== 'K' && target.kind !== moving.kind) {
+        copied = target;
+        break;
+      }
+    }
+    if (copied) {
+      moving.originalKind = moving.originalKind || moving.kind;
+      moving.kind = copied.kind;
+      moving.transformTurns = 2;
+      triggered = true;
+    }
+  }
+
+  if (once && triggered) moving.gimmickUsed = true;
+  const eventFamily = profile.families.find(family => family !== 'NONE') || 'NONE';
+  return {
+    board: nextBoard,
+    hands: nextHands,
+    terrain: nextTerrain,
+    event: triggered ? {
+      nonce: eventNonce,
+      family: eventFamily,
+      tier,
+      row: movedTo[0],
+      col: movedTo[1],
+      label: definition.name,
+    } : null,
+  };
+};
+
+const allMovesForSide = (board: ShogiBoard, hands: ShogiHands, side: ShogiSide, history: ShogiMove[] = [], terrain: ShogiTerrain[] = []): ShogiMove[] => {
   const moves: ShogiMove[] = [];
   for (let row = 0; row < SIZE; row += 1) for (let col = 0; col < SIZE; col += 1) {
     const piece = board[row][col];
     if (!piece || piece.side !== side) continue;
-    getShogiMovementTargets(board, hands, { row, col }, side, history).forEach(target => moves.push({
+    getShogiMovementTargets(board, hands, { row, col }, side, history, terrain).forEach(target => moves.push({
       from: [row, col],
       to: [target.row, target.col],
       kind: piece.kind,
@@ -711,20 +1350,25 @@ const allMovesForSide = (board: ShogiBoard, hands: ShogiHands, side: ShogiSide, 
       capture: board[target.row][target.col]?.kind || null,
       special: target.status === 'SPECIAL',
       path: target.path,
+      action: target.action,
     }));
   }
   Object.keys(hands[side]).forEach(kindValue => {
     const kind = kindValue as ShogiPieceKind;
-    getShogiMovementTargets(board, hands, { hand: kind }, side, history).forEach(target => moves.push({
+    getShogiMovementTargets(board, hands, { hand: kind }, side, history, terrain).forEach(target => moves.push({
       from: null,
       to: [target.row, target.col],
       kind,
       side,
       capture: null,
+      action: target.action,
     }));
   });
   return moves;
 };
+
+const sideHasFrozenPiece = (board: ShogiBoard, side: ShogiSide): boolean =>
+  board.some(row => row.some(piece => Boolean(piece && piece.side === side && piece.frozenTurns && piece.frozenTurns > 0)));
 
 const seededRandom = (initial: number) => {
   let state = initial >>> 0;
@@ -744,7 +1388,13 @@ const shuffled = <T,>(values: T[], random: () => number): T[] => {
 };
 
 const stageUniqueCount = (stage: number) =>
-  stage <= 50 ? 1 : stage <= 60 ? 2 : stage <= 70 ? 3 : stage <= 80 ? 4 : stage <= 90 ? 5 : stage <= 99 ? 6 : 8;
+  stage <= 100 ? 1
+    : stage <= 200 ? 2
+      : stage <= 300 ? 3
+        : stage <= 400 ? 4
+          : stage <= 450 ? 5
+            : stage < ADVANCED_PIECES.length ? 6
+              : 8;
 
 const isSafeInitialPosition = (board: ShogiBoard) => {
   const playerKing = locateKing(board, 'P');
@@ -766,12 +1416,12 @@ const buildShogiPosition = (
   const uniqueKinds: ShogiPieceKind[] = [];
   const baseKinds: ShogiPieceKind[] = ['R', 'B', 'G', 'S', 'N', 'L', 'P'];
   if (mode === 'ADVANCE') {
-    const unlockedCount = Math.max(1, Math.min(50, Math.floor(advancedUnlockCount)));
+    const unlockedCount = Math.max(1, Math.min(ADVANCED_PIECES.length, Math.floor(advancedUnlockCount)));
     const unlocked = ADVANCED_PIECES.slice(0, unlockedCount);
     const uniqueCount = playMode === 'LOCAL'
       ? Math.min(4, unlocked.length)
       : Math.min(stageUniqueCount(stage), unlocked.length);
-    if (playMode !== 'LOCAL' && stage <= 50) uniqueKinds.push(ADVANCED_PIECES[stage - 1].kind);
+    if (playMode !== 'LOCAL' && stage <= ADVANCED_PIECES.length) uniqueKinds.push(ADVANCED_PIECES[stage - 1].kind);
     while (uniqueKinds.length < uniqueCount) {
       const pick = unlocked[Math.floor(random() * unlocked.length)].kind;
       if (!uniqueKinds.includes(pick)) uniqueKinds.push(pick);
@@ -819,7 +1469,7 @@ export const createShogiPosition = (
   return {
     ...position,
     unlockedAdvancedCount: mode === 'ADVANCE'
-      ? Math.max(1, Math.min(50, Math.floor(advancedUnlockCount)))
+      ? Math.max(1, Math.min(ADVANCED_PIECES.length, Math.floor(advancedUnlockCount)))
       : 0,
   };
 };
@@ -852,11 +1502,13 @@ export const createShogiGame = (
     history: [],
     lastMove: null,
     signature: boardSignature(position.board),
+    terrain: [],
+    gimmickEvent: null,
   };
 };
 
 const chooseCpuMove = (state: ShogiGameState): ShogiMove | null => {
-  const moves = allMovesForSide(state.board, state.hands, 'C', state.history);
+  const moves = allMovesForSide(state.board, state.hands, 'C', state.history, state.terrain);
   if (!moves.length) return null;
   return [...moves].sort((left, right) => {
     const rightScore = (right.capture ? pieceValue(right.capture) : 0) * 100 + (right.special ? 4 : 0);
@@ -869,7 +1521,7 @@ export const selectShogiPiece = (
   state: ShogiGameState,
   selection: { row: number; col: number } | { hand: ShogiPieceKind },
 ): ShogiGameState => {
-  const nextTargets = getShogiMovementTargets(state.board, state.hands, selection, state.side, state.history);
+  const nextTargets = getShogiMovementTargets(state.board, state.hands, selection, state.side, state.history, state.terrain);
   return {
     ...state,
     selected: selection,
@@ -883,7 +1535,7 @@ export const playShogiMove = (state: ShogiGameState, target: [number, number]): 
   // The board and hands are the source of truth. Recalculate targets here so
   // a target from a previous render/game can never affect the current move.
   const movingSide = state.side;
-  const currentTargets = getShogiMovementTargets(state.board, state.hands, state.selected, movingSide, state.history);
+  const currentTargets = getShogiMovementTargets(state.board, state.hands, state.selected, movingSide, state.history, state.terrain);
   const allowed = currentTargets.find(item => item.row === target[0] && item.col === target[1]);
   if (!allowed) return { ...state, message: 'そのマスには移動できません。表示された候補を選んでください。' };
   const selection = state.selected;
@@ -896,9 +1548,34 @@ export const playShogiMove = (state: ShogiGameState, target: [number, number]): 
     capture: state.board[target[0]][target[1]]?.kind || null,
     special: allowed.status === 'SPECIAL',
     path: allowed.path,
+    action: allowed.action,
   };
   const applied = applyMove(state.board, state.hands, move);
-  const interim: ShogiGameState = { ...state, board: applied.board, hands: applied.hands, selected: null, legalTargets: [], lastMove: move, history: [...state.history, move], turn: state.turn + 1, signature: boardSignature(applied.board) };
+  const terrainApplied = applyTerrainEntry(applied.board, applied.hands, state.terrain, move, applied.movedTo);
+  const playerGimmick = applyCatalogGimmicks(
+    terrainApplied.board,
+    terrainApplied.hands,
+    state.terrain,
+    move,
+    applied.captured,
+    applied.movedTo,
+    state.history.length + 1,
+  );
+  const playerBoard = tickStatusesForSide(applyTerrainPulse(playerGimmick.board, playerGimmick.terrain), movingSide);
+  const playerTerrain = tickTerrain(playerGimmick.terrain);
+  const interim: ShogiGameState = {
+    ...state,
+    board: playerBoard,
+    hands: playerGimmick.hands,
+    terrain: playerTerrain,
+    gimmickEvent: playerGimmick.event,
+    selected: null,
+    legalTargets: [],
+    lastMove: move,
+    history: [...state.history, move],
+    turn: state.turn + 1,
+    signature: boardSignature(playerBoard),
+  };
   if (applied.capturedKing) {
     return {
       ...interim,
@@ -910,7 +1587,18 @@ export const playShogiMove = (state: ShogiGameState, target: [number, number]): 
   }
   if (state.playMode === 'LOCAL') {
     const nextSide: ShogiSide = movingSide === 'P' ? 'C' : 'P';
-    const nextMoves = allMovesForSide(interim.board, interim.hands, nextSide, interim.history);
+    const nextMoves = allMovesForSide(interim.board, interim.hands, nextSide, interim.history, interim.terrain);
+    if (!nextMoves.length && sideHasFrozenPiece(interim.board, nextSide)) {
+      const recoveredBoard = tickStatusesForSide(interim.board, nextSide);
+      return {
+        ...interim,
+        board: recoveredBoard,
+        terrain: tickTerrain(interim.terrain),
+        side: movingSide,
+        signature: boardSignature(recoveredBoard),
+        message: '時間停止で相手の手番をスキップしました。もう一度指せます。',
+      };
+    }
     if (!nextMoves.length) return { ...interim, side: nextSide, result: 'DRAW', message: '動かせる駒がありません。引き分けです。' };
     return {
       ...interim,
@@ -918,20 +1606,45 @@ export const playShogiMove = (state: ShogiGameState, target: [number, number]): 
       message: nextSide === 'P' ? '先手の手番です。' : '後手の手番です。端末を相手へ渡してください。',
     };
   }
-  const cpuMoves = allMovesForSide(interim.board, interim.hands, 'C', interim.history);
+  const cpuMoves = allMovesForSide(interim.board, interim.hands, 'C', interim.history, interim.terrain);
+  if (cpuMoves.length === 0 && sideHasFrozenPiece(interim.board, 'C')) {
+    const recoveredBoard = tickStatusesForSide(interim.board, 'C');
+    return {
+      ...interim,
+      board: recoveredBoard,
+      terrain: tickTerrain(interim.terrain),
+      side: 'P',
+      signature: boardSignature(recoveredBoard),
+      message: '時間停止！ CPUの手番をスキップしました。あなたの手番です。',
+    };
+  }
   if (cpuMoves.length === 0) return { ...interim, result: 'DRAW', message: 'CPUに動かせる駒がありません。引き分けです。' };
   const cpuMove = chooseCpuMove(interim);
   if (!cpuMove) return { ...interim, result: 'DRAW', message: 'CPUに動かせる駒がありません。引き分けです。' };
   const cpuApplied = applyMove(interim.board, interim.hands, cpuMove);
+  const cpuTerrainApplied = applyTerrainEntry(cpuApplied.board, cpuApplied.hands, interim.terrain, cpuMove, cpuApplied.movedTo);
+  const cpuGimmick = applyCatalogGimmicks(
+    cpuTerrainApplied.board,
+    cpuTerrainApplied.hands,
+    interim.terrain,
+    cpuMove,
+    cpuApplied.captured,
+    cpuApplied.movedTo,
+    interim.history.length + 1,
+  );
+  const cpuBoard = tickStatusesForSide(applyTerrainPulse(cpuGimmick.board, cpuGimmick.terrain), 'C');
+  const cpuTerrain = tickTerrain(cpuGimmick.terrain);
   const afterCpu: ShogiGameState = {
     ...interim,
-    board: cpuApplied.board,
-    hands: cpuApplied.hands,
+    board: cpuBoard,
+    hands: cpuGimmick.hands,
+    terrain: cpuTerrain,
     side: 'P',
     lastMove: cpuMove,
     history: [...interim.history, cpuMove],
     message: 'CPUが指しました。あなたの手番です。',
-    signature: boardSignature(cpuApplied.board),
+    signature: boardSignature(cpuBoard),
+    gimmickEvent: cpuGimmick.event || playerGimmick.event,
   };
   if (cpuApplied.capturedKing) {
     return {
@@ -940,7 +1653,16 @@ export const playShogiMove = (state: ShogiGameState, target: [number, number]): 
       message: '王を取られました。敗北。',
     };
   }
-  const playerMoves = allMovesForSide(afterCpu.board, afterCpu.hands, 'P', afterCpu.history);
+  const playerMoves = allMovesForSide(afterCpu.board, afterCpu.hands, 'P', afterCpu.history, afterCpu.terrain);
+  if (playerMoves.length === 0 && sideHasFrozenPiece(afterCpu.board, 'P')) {
+    const recoveredBoard = tickStatusesForSide(afterCpu.board, 'P');
+    return {
+      ...afterCpu,
+      board: recoveredBoard,
+      signature: boardSignature(recoveredBoard),
+      message: '時間停止の効果が切れました。あなたの手番です。',
+    };
+  }
   if (playerMoves.length === 0) return { ...afterCpu, result: 'DRAW', message: '動かせる駒がありません。引き分けです。' };
   return afterCpu;
 };

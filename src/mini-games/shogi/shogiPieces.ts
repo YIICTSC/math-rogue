@@ -1,15 +1,10 @@
+import { SHOGI_ADVANCE_CATALOG } from './shogiAdvanceCatalog';
+
 export type ShogiStandardKind = 'K' | 'R' | 'B' | 'G' | 'S' | 'N' | 'L' | 'P';
-export type ShogiAdvancedKind =
-  | 'ADV_DOUBLE_PAWN' | 'ADV_SIDE_PAWN' | 'ADV_RETURN_PAWN' | 'ADV_DIAGONAL_PAWN' | 'ADV_RABBIT'
-  | 'ADV_MOON_RABBIT' | 'ADV_PINWHEEL' | 'ADV_STAR_BISHOP' | 'ADV_CROSS' | 'ADV_HOURGLASS'
-  | 'ADV_HOOK_SPEAR' | 'ADV_TWIN_SPEAR' | 'ADV_LIGHTNING' | 'ADV_RAINBOW' | 'ADV_COMET'
-  | 'ADV_SWALLOW' | 'ADV_CAT' | 'ADV_DOG' | 'ADV_CRANE' | 'ADV_TURTLE'
-  | 'ADV_FROG' | 'ADV_SPIDER' | 'ADV_BUTTERFLY' | 'ADV_BEE' | 'ADV_WOLF'
-  | 'ADV_LION' | 'ADV_MIRROR' | 'ADV_CHAMELEON' | 'ADV_SWITCH' | 'ADV_GATE'
-  | 'ADV_SHIELD' | 'ADV_LANTERN' | 'ADV_BELL' | 'ADV_MAGNET' | 'ADV_SPRING'
-  | 'ADV_ANCHOR' | 'ADV_CLOCK' | 'ADV_KEY' | 'ADV_BRIDGE' | 'ADV_WALL'
-  | 'ADV_PORTAL' | 'ADV_SHADOW' | 'ADV_NINJA' | 'ADV_DRILL' | 'ADV_CANNON'
-  | 'ADV_PHOENIX' | 'ADV_DRAGON' | 'ADV_UNICORN' | 'ADV_GRIFFIN' | 'ADV_CHRONOS';
+// The Advance catalog is intentionally data-driven.  `string` here keeps the
+// engine open to hundreds of stable catalog IDs without maintaining a second
+// 500-member union by hand.
+export type ShogiAdvancedKind = string;
 export type ShogiPieceKind = ShogiStandardKind | ShogiAdvancedKind;
 export type ShogiSide = 'P' | 'C';
 
@@ -25,7 +20,8 @@ export type ShogiPattern =
   | 'SHIELD' | 'LANTERN' | 'BELL' | 'MAGNET' | 'SPRING'
   | 'ANCHOR' | 'CLOCK' | 'KEY' | 'BRIDGE' | 'WALL'
   | 'PORTAL' | 'SHADOW' | 'NINJA' | 'DRILL' | 'CANNON'
-  | 'PHOENIX' | 'DRAGON' | 'UNICORN' | 'GRIFFIN' | 'CHRONOS';
+  | 'PHOENIX' | 'DRAGON' | 'UNICORN' | 'GRIFFIN' | 'CHRONOS'
+  | 'CATALOG';
 
 export interface ShogiPieceDefinition {
   kind: ShogiPieceKind;
@@ -40,6 +36,8 @@ export interface ShogiPieceDefinition {
   special?: string;
   immuneJumpCapture?: boolean;
   extraMoveAfterCapture?: boolean;
+  catalogNo?: number;
+  family?: string;
 }
 
 export interface ShogiPiece {
@@ -49,6 +47,26 @@ export interface ShogiPiece {
   hasMoved: boolean;
   /** One-time abilities are stored on the piece so they survive movement. */
   extraMoveUsed?: boolean;
+  /** Generic one-use flag for catalog gimmicks marked as once per battle. */
+  gimmickUsed?: boolean;
+  /** Number of this side's turns for which the piece cannot move. */
+  frozenTurns?: number;
+  /** Number of this side's turns for which catalog special effects are disabled. */
+  silencedTurns?: number;
+  /** Temporary protection against automatic/ranged gimmick capture. */
+  reflectCharges?: number;
+  /** Owning-side turns during which this piece may move but may not capture. */
+  captureLockedTurns?: number;
+  /** Owning-side turns during which all movement vectors are reversed. */
+  reverseMovementTurns?: number;
+  /** Ephemeral clones disappear instead of becoming held pieces. */
+  ephemeral?: boolean;
+  /** Remaining owning-side turns before an ephemeral piece disappears. */
+  ephemeralTurns?: number;
+  /** Original catalog ID while a temporary transformation is active. */
+  originalKind?: ShogiPieceKind;
+  /** Owning-side turns remaining for a temporary transformation. */
+  transformTurns?: number;
 }
 
 export const STANDARD_PIECES: ShogiPieceDefinition[] = [
@@ -115,7 +133,7 @@ const ADVANCED_ROWS: Array<[ShogiAdvancedKind, string, string, ShogiPattern, str
   ['ADV_CHRONOS', '宿', '王と同じ＋縦横の2マス先へ跳ぶ。', 'CHRONOS', '成らない。', '対局中1回だけ追加手。', ''],
 ];
 
-export const ADVANCED_PIECES: ShogiPieceDefinition[] = ADVANCED_ROWS.map(
+const LEGACY_ADVANCED_PIECES: ShogiPieceDefinition[] = ADVANCED_ROWS.map(
   ([kind, glyph, description, pattern, promotion, restriction, special], index) => ({
     kind,
     name: ADVANCED_ROWS[index][1],
@@ -131,6 +149,26 @@ export const ADVANCED_PIECES: ShogiPieceDefinition[] = ADVANCED_ROWS.map(
     extraMoveAfterCapture: kind === 'ADV_WOLF' || kind === 'ADV_LION' || kind === 'ADV_CHRONOS',
   }),
 );
+
+const CATALOG_ADVANCED_PIECES: ShogiPieceDefinition[] = SHOGI_ADVANCE_CATALOG.map(entry => ({
+  kind: entry.kind,
+  name: entry.name,
+  glyph: entry.glyph,
+  pattern: 'CATALOG',
+  stage: entry.no,
+  advanced: true,
+  description: entry.description,
+  promotion: '成らない。',
+  restriction: entry.restriction,
+  special: entry.family,
+  catalogNo: entry.no,
+  family: entry.family,
+}));
+
+export const ADVANCED_PIECES: ShogiPieceDefinition[] = [
+  ...LEGACY_ADVANCED_PIECES,
+  ...CATALOG_ADVANCED_PIECES,
+];
 
 export const SHOGI_PIECES = [...STANDARD_PIECES, ...ADVANCED_PIECES];
 export const SHOGI_PIECE_MAP = new Map<ShogiPieceKind, ShogiPieceDefinition>(

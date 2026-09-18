@@ -13,6 +13,7 @@ import {
   playShogiMove,
   selectShogiPiece,
   type ShogiGameState,
+  type ShogiGimmickEvent,
   type ShogiMode,
   type ShogiPlayMode,
   type ShogiTarget,
@@ -23,6 +24,11 @@ import {
   type ShogiPiece,
   type ShogiPieceKind,
 } from './shogiPieces';
+import {
+  SHOGI_ADVANCED_PIECE_COUNT,
+  SHOGI_ADVANCE_STAGE_COUNT,
+  SHOGI_ADVANCE_STAGE_PAGE_SIZE,
+} from './shogiAdvanceConfig';
 import { getShogiPieceEnglish, type ShogiPieceEnglishCopy } from './shogiTranslations';
 
 interface ShogiMiniGameProps {
@@ -145,7 +151,7 @@ const loadProgress = (): ShogiProgress => {
     const value = JSON.parse(localStorage.getItem(SAVE_KEY) || '');
     if (value && typeof value.highestStage === 'number') {
       return {
-        highestStage: Math.max(1, Math.min(100, value.highestStage)),
+        highestStage: Math.max(1, Math.min(SHOGI_ADVANCE_STAGE_COUNT, value.highestStage)),
         completedStages: Array.isArray(value.completedStages) ? value.completedStages : [],
         standardWins: typeof value.standardWins === 'number' ? value.standardWins : 0,
       };
@@ -229,7 +235,12 @@ const ModeStart: React.FC<{
   const [mode, setMode] = useState<ShogiMode>(initialMode);
   const [playMode, setPlayMode] = useState<ShogiPlayMode>(initialPlayMode);
   const [stage, setStage] = useState(initialStage);
-  const unlocked = Math.min(100, progress.highestStage);
+  const [stagePage, setStagePage] = useState(() => Math.floor((Math.max(1, Math.min(SHOGI_ADVANCE_STAGE_COUNT, initialStage)) - 1) / SHOGI_ADVANCE_STAGE_PAGE_SIZE));
+  const unlocked = Math.min(SHOGI_ADVANCE_STAGE_COUNT, progress.highestStage);
+  const stagePageCount = Math.ceil(SHOGI_ADVANCE_STAGE_COUNT / SHOGI_ADVANCE_STAGE_PAGE_SIZE);
+  const pageStart = stagePage * SHOGI_ADVANCE_STAGE_PAGE_SIZE + 1;
+  const pageEnd = Math.min(SHOGI_ADVANCE_STAGE_COUNT, pageStart + SHOGI_ADVANCE_STAGE_PAGE_SIZE - 1);
+  const pageStages = Array.from({ length: pageEnd - pageStart + 1 }, (_, index) => pageStart + index);
   // 駒名・駒字は日本語の固有表記。英語の遅延DOM翻訳から保護する。
   return (
     <main className="shogi-mini-shell" data-allow-japanese="true">
@@ -246,7 +257,7 @@ const ModeStart: React.FC<{
             <b>STANDARD</b><span>{copy(languageMode, '標準8種 // ランダム配置', 'Eight standard pieces // random setup')}</span>
           </button>
           <button type="button" className={mode === 'ADVANCE' ? 'active' : ''} onClick={() => { setMode('ADVANCE'); setStage(current => Math.min(current, unlocked)); }}>
-            <b>ADVANCE</b><span>{copy(languageMode, 'ユニーク駒50種 // 100ステージ', '50 unique pieces // 100 stages')}</span>
+            <b>ADVANCE</b><span>{copy(languageMode, `ユニーク駒${SHOGI_ADVANCED_PIECE_COUNT}種 // ${SHOGI_ADVANCE_STAGE_COUNT}ステージ`, `${SHOGI_ADVANCED_PIECE_COUNT} unique pieces // ${SHOGI_ADVANCE_STAGE_COUNT} stages`)}</span>
           </button>
         </div>
         <div className="shogi-play-mode-tabs" aria-label={copy(languageMode, '対戦方式', 'Play mode')}>
@@ -265,11 +276,28 @@ const ModeStart: React.FC<{
         {mode === 'ADVANCE' && playMode === 'CPU' && (
           <div className="shogi-stage-picker">
             <div className="shogi-stage-picker-head">
-              <span>{copy(languageMode, 'ステージを選択', 'Select stage')}</span>
-              <b>{unlocked} / 100 {copy(languageMode, '解禁', 'unlocked')}</b>
+              <span>{copy(languageMode, `ステージを選択 // ${pageStart}〜${pageEnd}`, `Select stage // ${pageStart}-${pageEnd}`)}</span>
+              <b>{unlocked} / {SHOGI_ADVANCE_STAGE_COUNT} {copy(languageMode, '解禁', 'unlocked')}</b>
             </div>
             <div className="shogi-stage-grid">
-              {Array.from({ length: 100 }, (_, index) => index + 1).map(value => {
+              {Array.from({ length: stagePageCount }, (_, index) => index).map(page => {
+                const first = page * SHOGI_ADVANCE_STAGE_PAGE_SIZE + 1;
+                const last = Math.min(SHOGI_ADVANCE_STAGE_COUNT, first + SHOGI_ADVANCE_STAGE_PAGE_SIZE - 1);
+                return (
+                  <button
+                    key={'chapter-' + page}
+                    type="button"
+                    className={stagePage === page ? 'selected' : ''}
+                    onClick={() => setStagePage(page)}
+                    aria-label={`Stages ${first}-${last}`}
+                  >
+                    {page + 1}
+                  </button>
+                );
+              })}
+            </div>
+            <div className="shogi-stage-grid">
+              {pageStages.map(value => {
                 const isUnlocked = value <= unlocked;
                 return (
                   <button
@@ -280,7 +308,7 @@ const ModeStart: React.FC<{
                     onClick={() => setStage(value)}
                     aria-label={'Stage ' + value + (isUnlocked ? '' : ' locked')}
                   >
-                    {String(value).padStart(2, '0')}
+                    {String(value).padStart(3, '0')}
                   </button>
                 );
               })}
@@ -289,13 +317,13 @@ const ModeStart: React.FC<{
           </div>
         )}
         <div className="shogi-mini-start-stats">
-          <span><b>8</b> STANDARD</span><span><b>50</b> UNIQUE</span><span><b>100</b> STAGES</span>
+          <span><b>8</b> STANDARD</span><span><b>{SHOGI_ADVANCED_PIECE_COUNT}</b> UNIQUE</span><span><b>{SHOGI_ADVANCE_STAGE_COUNT}</b> STAGES</span>
         </div>
         <div className="shogi-mini-start-actions">
-          <button type="button" className="primary" onClick={() => onStart(mode, mode === 'ADVANCE' ? (playMode === 'LOCAL' ? 100 : stage) : 1, playMode)}>
+          <button type="button" className="primary" onClick={() => onStart(mode, mode === 'ADVANCE' ? (playMode === 'LOCAL' ? unlocked : stage) : 1, playMode)}>
             {playMode === 'LOCAL'
               ? mode === 'ADVANCE' ? copy(languageMode, '対面アドバンス・ランダム局を開始', 'START LOCAL ADVANCE RANDOM') : copy(languageMode, '対面スタンダード局を開始', 'START LOCAL STANDARD')
-              : mode === 'ADVANCE' ? 'START STAGE ' + String(stage).padStart(2, '0') : 'START RANDOM DUEL'}
+              : mode === 'ADVANCE' ? 'START STAGE ' + String(stage).padStart(3, '0') : 'START RANDOM DUEL'}
           </button>
           <button type="button" className="secondary" onClick={onBack}>{copy(languageMode, '戻る', 'Back')}</button>
         </div>
@@ -358,7 +386,10 @@ const ShogiMiniGame: React.FC<ShogiMiniGameProps> = ({ onBack, onFinish, languag
   const [inspect, setInspect] = useState<{ piece: ShogiPiece; targetCount: number } | null>(null);
   const [showGuide, setShowGuide] = useState(false);
   const [showMissionQuiz, setShowMissionQuiz] = useState(false);
+  const [gimmickVfx, setGimmickVfx] = useState<ShogiGimmickEvent | null>(null);
   const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const gimmickVfxTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const lastGimmickNonce = useRef<number | null>(null);
   const longPressTriggered = useRef(false);
   const discoveredShogiPiecesRef = useRef(new Set<string>());
 
@@ -384,6 +415,31 @@ const ShogiMiniGame: React.FC<ShogiMiniGameProps> = ({ onBack, onFinish, languag
     void audioService.playBGM('poker_play');
   }, []);
 
+  useEffect(() => {
+    const event = game?.gimmickEvent || null;
+    if (!event) {
+      if (gimmickVfxTimer.current) clearTimeout(gimmickVfxTimer.current);
+      gimmickVfxTimer.current = null;
+      lastGimmickNonce.current = null;
+      setGimmickVfx(null);
+      return;
+    }
+    if (lastGimmickNonce.current === event.nonce) return;
+    lastGimmickNonce.current = event.nonce;
+    if (gimmickVfxTimer.current) clearTimeout(gimmickVfxTimer.current);
+    const tier = Math.max(1, Math.min(4, Math.floor(event.tier || 1)));
+    setGimmickVfx({ ...event, tier });
+    audioService.playShogiGimmickSound(event.family, tier);
+    gimmickVfxTimer.current = setTimeout(() => {
+      setGimmickVfx(current => current?.nonce === event.nonce ? null : current);
+      gimmickVfxTimer.current = null;
+    }, 680 + tier * 70);
+    return () => {
+      if (gimmickVfxTimer.current) clearTimeout(gimmickVfxTimer.current);
+      gimmickVfxTimer.current = null;
+    };
+  }, [game?.gimmickEvent?.nonce]);
+
   const startGame = (mode: ShogiMode, stage: number, playMode: ShogiPlayMode = 'CPU') => {
     setShowMissionQuiz(false);
     // Quiz/result screens may change the BGM. Every new board, including the
@@ -394,7 +450,7 @@ const ShogiMiniGame: React.FC<ShogiMiniGameProps> = ({ onBack, onFinish, languag
       stage,
       Date.now() + stage * 97,
       playMode,
-      mode === 'ADVANCE' ? progress.highestStage : 0,
+      mode === 'ADVANCE' ? Math.min(SHOGI_ADVANCED_PIECE_COUNT, progress.highestStage) : 0,
     ));
     setInspect(null);
   };
@@ -408,7 +464,7 @@ const ShogiMiniGame: React.FC<ShogiMiniGameProps> = ({ onBack, onFinish, languag
     if (!game) return;
     setStartMode(game.mode);
     setStartPlayMode(game.playMode);
-    setStartStage(game.mode === 'ADVANCE' ? Math.min(100, game.stage + 1) : 1);
+    setStartStage(game.mode === 'ADVANCE' ? Math.min(SHOGI_ADVANCE_STAGE_COUNT, game.stage + 1) : 1);
     setGame(null);
   };
 
@@ -420,7 +476,7 @@ const ShogiMiniGame: React.FC<ShogiMiniGameProps> = ({ onBack, onFinish, languag
         const nextProgress: ShogiProgress = game.mode === 'ADVANCE'
           ? {
             ...previous,
-            highestStage: Math.max(previous.highestStage, Math.min(100, game.stage + 1)),
+            highestStage: Math.max(previous.highestStage, Math.min(SHOGI_ADVANCE_STAGE_COUNT, game.stage + 1)),
             completedStages: Array.from(new Set([...previous.completedStages, game.stage])).sort((a, b) => a - b),
           }
           : { ...previous, standardWins: previous.standardWins + 1 };
@@ -431,8 +487,8 @@ const ShogiMiniGame: React.FC<ShogiMiniGameProps> = ({ onBack, onFinish, languag
   }, [game?.result, game?.mode, game?.stage, game?.playMode]);
 
   const selectedTarget = useMemo(
-    () => game?.selected ? getShogiMovementTargets(game.board, game.hands, game.selected, game.side, game.history) : [],
-    [game?.board, game?.hands, game?.selected, game?.side, game?.history],
+    () => game?.selected ? getShogiMovementTargets(game.board, game.hands, game.selected, game.side, game.history, game.terrain) : [],
+    [game?.board, game?.hands, game?.selected, game?.side, game?.history, game?.terrain],
   );
 
   const beginLongPress = (piece: ShogiPiece, row?: number, col?: number) => {
@@ -441,7 +497,7 @@ const ShogiMiniGame: React.FC<ShogiMiniGameProps> = ({ onBack, onFinish, languag
     longPressTimer.current = setTimeout(() => {
       longPressTriggered.current = true;
       const selection = row !== undefined && col !== undefined ? { row, col } : { hand: piece.kind };
-      setInspect({ piece, targetCount: game ? getShogiMovementTargets(game.board, game.hands, selection, piece.side, game.history).length : 0 });
+      setInspect({ piece, targetCount: game ? getShogiMovementTargets(game.board, game.hands, selection, piece.side, game.history, game.terrain).length : 0 });
     }, 450);
   };
   const cancelLongPress = () => {
@@ -450,7 +506,7 @@ const ShogiMiniGame: React.FC<ShogiMiniGameProps> = ({ onBack, onFinish, languag
   };
 
   const inspectBoardPiece = (piece: ShogiPiece, row: number, col: number) => {
-    setInspect({ piece, targetCount: game ? getShogiMovementTargets(game.board, game.hands, { row, col }, piece.side, game.history).length : 0 });
+    setInspect({ piece, targetCount: game ? getShogiMovementTargets(game.board, game.hands, { row, col }, piece.side, game.history, game.terrain).length : 0 });
   };
   const onSquare = (row: number, col: number) => {
     if (!game || game.result) return;
@@ -492,7 +548,7 @@ const ShogiMiniGame: React.FC<ShogiMiniGameProps> = ({ onBack, onFinish, languag
       <header className="shogi-mini-header">
         <button type="button" onClick={onBack}>← EXIT</button>
         <div><span>LEARNING ROGUE // TRIVIA LAB</span><b>{game.mode === 'ADVANCE' ? 'ADVANCE SHOGI' : 'MINI SHOGI'}</b></div>
-        <strong>{game.playMode === 'LOCAL' ? 'LOCAL // ' + (game.mode === 'ADVANCE' ? 'ADV RANDOM' : 'STANDARD') : game.mode === 'ADVANCE' ? 'STAGE ' + String(game.stage).padStart(2, '0') + ' / 100' : 'RANDOM DUEL'}</strong>
+        <strong>{game.playMode === 'LOCAL' ? 'LOCAL // ' + (game.mode === 'ADVANCE' ? 'ADV RANDOM' : 'STANDARD') : game.mode === 'ADVANCE' ? 'STAGE ' + String(game.stage).padStart(3, '0') + ' / ' + SHOGI_ADVANCE_STAGE_COUNT : 'RANDOM DUEL'}</strong>
         <button type="button" onClick={() => setShowGuide(true)}>MOVES</button>
       </header>
       <div className="shogi-mini-layout">
@@ -549,6 +605,8 @@ const ShogiMiniGame: React.FC<ShogiMiniGameProps> = ({ onBack, onFinish, languag
           <div className="shogi-mini-board" role="grid" aria-label={copy(languageMode, '5×5将棋盤', '5x5 shogi board', '5×5しょうぎばん')}>
             {game.board.map((line, row) => line.map((piece, col) => {
               const target = targetAt(row, col);
+              const terrainHere = game.terrain.filter(item => item.row === row && item.col === col);
+              const terrainClass = terrainHere[0]?.type.toLowerCase().replace(/_/g, '-');
               const selectedHere = game.selected && 'row' in game.selected && game.selected.row === row && game.selected.col === col;
               return (
                 <button
@@ -556,7 +614,7 @@ const ShogiMiniGame: React.FC<ShogiMiniGameProps> = ({ onBack, onFinish, languag
                   type="button"
                   role="gridcell"
                   aria-label={piece ? piece.kind + ' ' + (piece.promoted ? glyphFor(piece) : pieceLabelFor(getPieceDefinition(piece.kind))) : copy(languageMode, 'empty square', 'empty square', 'からのマス')}
-                  className={'shogi-square ' + (selectedHere ? 'selected ' : '') + (target ? 'target-' + target.status.toLowerCase() : '') + (row < 2 ? ' cpu-zone' : row > 2 ? ' player-zone' : ' neutral-zone')}
+                  className={'shogi-square ' + (selectedHere ? 'selected ' : '') + (target ? 'target-' + target.status.toLowerCase() + ' ' : '') + (terrainClass ? 'terrain-' + terrainClass + ' ' : '') + (row < 2 ? 'cpu-zone' : row > 2 ? 'player-zone' : 'neutral-zone')}
                   onClick={() => onSquare(row, col)}
                   onPointerDown={() => piece && beginLongPress(piece, row, col)}
                   onPointerUp={cancelLongPress}
@@ -570,10 +628,30 @@ const ShogiMiniGame: React.FC<ShogiMiniGameProps> = ({ onBack, onFinish, languag
                   }}
                 >
                   {piece && <ShogiPieceIcon glyph={glyphFor(piece)} cpu={piece.side === 'C'} promoted={piece.promoted} className="shogi-piece" />}
+                  {terrainHere.length > 0 && <span className="shogi-terrain-marker" aria-hidden="true">{
+                    terrainHere[0].type === 'CRATER' ? '◉'
+                      : terrainHere[0].type === 'BARRIER' ? '▣'
+                        : terrainHere[0].type === 'TRAP' ? '✹'
+                          : terrainHere[0].type === 'PORTAL' ? '◎'
+                            : terrainHere[0].type === 'LASER_FLOOR' ? '━'
+                              : '●'
+                  }</span>}
                   {target && <span className="shogi-target-marker" aria-label={targetLabel(target, languageMode)}>{target.status === 'CAPTURE' ? '×' : target.status === 'DROP' ? '↓' : target.status === 'SPECIAL' ? '◇' : '•'}</span>}
                 </button>
               );
             }))}
+            {gimmickVfx && (
+              <span
+                key={gimmickVfx.nonce}
+                className={'shogi-gimmick-vfx ' + gimmickVfx.family.toLowerCase().replace(/_/g, '-')}
+                style={{
+                  '--gx': gimmickVfx.col,
+                  '--gy': gimmickVfx.row,
+                  '--tier': gimmickVfx.tier,
+                } as React.CSSProperties & Record<'--gx' | '--gy' | '--tier', number>}
+                aria-hidden="true"
+              />
+            )}
           </div>
           <GuideLegend languageMode={languageMode} />
           <div className="shogi-mini-message">{game.result ? statusText : localizeShogiMessage(statusText, languageMode)}</div>
@@ -583,7 +661,7 @@ const ShogiMiniGame: React.FC<ShogiMiniGameProps> = ({ onBack, onFinish, languag
               <span>{game.mode === 'ADVANCE' && game.result === 'WIN' ? 'STAGE ' + game.stage + ' CLEAR' : 'SEED ' + game.seed}</span>
               <div>
                 <button type="button" className="primary" onClick={restart}>{copy(languageMode, '新しい盤面で再戦', 'Replay with new board')}</button>
-                {game.playMode === 'CPU' && game.mode === 'ADVANCE' && game.result === 'WIN' && game.stage < 100 && <button type="button" className="primary" onClick={() => startGame('ADVANCE', game.stage + 1, 'CPU')}>{copy(languageMode, '次のステージへ', 'Next stage')}</button>}
+                {game.playMode === 'CPU' && game.mode === 'ADVANCE' && game.result === 'WIN' && game.stage < SHOGI_ADVANCE_STAGE_COUNT && <button type="button" className="primary" onClick={() => startGame('ADVANCE', game.stage + 1, 'CPU')}>{copy(languageMode, '次のステージへ', 'Next stage')}</button>}
                 <button type="button" className="secondary" onClick={openStagePicker}>{game.playMode === 'LOCAL' ? copy(languageMode, '対戦設定へ', 'Match settings') : copy(languageMode, 'ステージを選ぶ', 'Choose a stage')}</button>
                 {game.playMode === 'CPU' && game.result === 'WIN' && onFinish && <button type="button" className="secondary" onClick={() => onFinish('WIN')}>{copy(languageMode, '結果へ', 'Continue')}</button>}
               </div>
@@ -608,7 +686,7 @@ const ShogiMiniGame: React.FC<ShogiMiniGameProps> = ({ onBack, onFinish, languag
                   onPointerUp={cancelLongPress}
                   onPointerLeave={cancelLongPress}
                   onKeyDown={event => {
-                    if (event.key.toLowerCase() === 'i' || event.key === '?') setInspect({ piece: { kind, side: 'P', promoted: false, hasMoved: false }, targetCount: game ? getShogiMovementTargets(game.board, game.hands, { hand: kind }, 'P', game.history).length : 0 });
+                    if (event.key.toLowerCase() === 'i' || event.key === '?') setInspect({ piece: { kind, side: 'P', promoted: false, hasMoved: false }, targetCount: game ? getShogiMovementTargets(game.board, game.hands, { hand: kind }, 'P', game.history, game.terrain).length : 0 });
                   }}
                 >
               <ShogiPieceIcon glyph={definition.glyph} compact /><b>{pieceLabelFor(definition)}</b><em>× {count}</em>

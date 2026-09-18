@@ -11,7 +11,7 @@ export interface ShogiPieceEnglishCopy {
  * 駒名・ glyph は日本語の固有表記として維持し、説明だけをこの辞書で翻訳する。
  * `trans()` の汎用フォールバック（Choose Option）を将棋のルール文に使わないための専用辞書。
  */
-export const SHOGI_PIECE_ENGLISH: Record<ShogiPieceKind, ShogiPieceEnglishCopy> = {
+export const SHOGI_PIECE_ENGLISH: Partial<Record<ShogiPieceKind, ShogiPieceEnglishCopy>> = {
   K: {
     description: 'Move one square in any direction.',
     promotion: 'Does not promote.',
