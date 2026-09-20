@@ -28,6 +28,7 @@ const server = await createServer({
 try {
   const hs = await server.ssrLoadModule('/src/data/highSchoolVacationEvents.ts');
   const battle = await server.ssrLoadModule('/src/data/battleBackgrounds.ts');
+  const visualThemes = await server.ssrLoadModule('/src/data/visualThemes.ts');
   const vacationRomance = await server.ssrLoadModule('/src/data/magicVacationRomanceDialogue.ts');
   const vacationEndingCopy = await server.ssrLoadModule('/src/data/vacationEndingCopy.ts');
   const themedEndingSequences = await server.ssrLoadModule('/src/data/themedEndingSequences.ts');
@@ -59,6 +60,21 @@ try {
     for (let act = 1; act <= 4; act += 1) {
       assert(exists(`sprites/backgrounds/learning-rogue/${theme}-vacation-map-act${act}.webp`), `Missing ${theme} Vacation map act ${act}`);
     }
+  }
+
+  const toRelativeSpritePath = (value) => String(value).replace(/^.*sprites\//, 'sprites/').split('?')[0];
+  for (const theme of ['high-school', 'magic']) {
+    const monsterEnemy = { name: `${theme}-vacation-monster-route-check`, enemyType: 'GENERIC', phase: 1 };
+    const humanoidEnemy = { name: `${theme}-vacation-humanoid-route-check`, enemyType: 'GUARDIAN', phase: 1 };
+    const vacationMonsterPath = toRelativeSpritePath(visualThemes.getThemedMonsterEnemySpritePath(monsterEnemy, theme, 'VACATION'));
+    const vacationHumanoidIdlePath = toRelativeSpritePath(visualThemes.getThemedHumanoidEnemySpritePath(humanoidEnemy, theme, 'idle', 'VACATION'));
+    const vacationHumanoidAttackPath = toRelativeSpritePath(visualThemes.getThemedHumanoidEnemySpritePath(humanoidEnemy, theme, 'attack', 'VACATION'));
+    assert(vacationMonsterPath.startsWith(`sprites/${theme}/vacation-enemies/`), `Vacation ${theme} monster path did not use vacation assets: ${vacationMonsterPath}`);
+    assert(vacationHumanoidIdlePath.startsWith(`sprites/${theme}/vacation-humanoid-enemies/`), `Vacation ${theme} humanoid idle path did not use vacation assets: ${vacationHumanoidIdlePath}`);
+    assert(vacationHumanoidAttackPath.startsWith(`sprites/${theme}/vacation-humanoid-enemies-attack/`), `Vacation ${theme} humanoid attack path did not use vacation assets: ${vacationHumanoidAttackPath}`);
+    assert(exists(vacationMonsterPath), `Missing Vacation ${theme} monster route asset: ${vacationMonsterPath}`);
+    assert(exists(vacationHumanoidIdlePath), `Missing Vacation ${theme} humanoid idle route asset: ${vacationHumanoidIdlePath}`);
+    assert(exists(vacationHumanoidAttackPath), `Missing Vacation ${theme} humanoid attack route asset: ${vacationHumanoidAttackPath}`);
   }
 
   const hsHeroIds = ['WARRIOR', 'CARETAKER', 'ASSASSIN', 'DODGEBALL', 'BARD', 'LIBRARIAN', 'CHEF', 'GARDENER', 'MAGE'];
@@ -244,6 +260,7 @@ try {
   console.log('Vacation Mode runtime audit passed.');
   console.log('High-school Vacation events: 90 / CGs: 90 / voices: 54');
   console.log('Vacation maps: 8 / battle backgrounds: 16');
+  console.log('Vacation enemy routes: high-school + magic monster/humanoid idle/attack paths');
   console.log('Magic Vacation romance CGs: 648 / R1-R5 voices: 85 / R6 voices: 136');
   console.log('High-school Vacation ending pages: 135 / Magic common Vacation ending pages: 3');
 } finally {

@@ -786,11 +786,13 @@ export const getHighSchoolHumanoidEnemyVariant = (enemy: Pick<Enemy, 'name' | 'e
 export const getHighSchoolHumanoidEnemySpritePath = (
   enemy: Pick<Enemy, 'name' | 'enemyType' | 'phase'>,
   action: HighSchoolEnemyAction,
+  appearanceMode: CharacterAppearanceMode = 'STANDARD',
 ) => {
   const variant = getHighSchoolHumanoidEnemyVariant(enemy);
   if (!variant) return null;
   const folder = action === 'idle' ? 'humanoid-enemies' : `humanoid-enemies-${action}`;
-  return assetUrl(`sprites/high-school/${folder}/${variant.imageIndex}.webp`);
+  const vacationPrefix = appearanceMode === 'VACATION' ? 'vacation-' : '';
+  return assetUrl(`sprites/high-school/${vacationPrefix}${folder}/${variant.imageIndex}.webp`);
 };
 
 export const MAGIC_ENEMY_VARIANTS = [
@@ -894,11 +896,13 @@ export const getMagicEnemyVariant = (enemy: Pick<Enemy, 'name' | 'enemyType' | '
 export const getMagicHumanoidEnemySpritePath = (
   enemy: Pick<Enemy, 'name' | 'enemyType' | 'phase'>,
   action: HighSchoolEnemyAction,
+  appearanceMode: CharacterAppearanceMode = 'STANDARD',
 ) => {
   const variant = getMagicHumanoidEnemyVariant(enemy);
   if (!variant) return null;
   const folder = action === 'idle' ? 'humanoid-enemies' : `humanoid-enemies-${action}`;
-  return assetUrl(`sprites/magic/${folder}/${variant.imageIndex}.webp`);
+  const vacationPrefix = appearanceMode === 'VACATION' ? 'vacation-' : '';
+  return assetUrl(`sprites/magic/${vacationPrefix}${folder}/${variant.imageIndex}.webp`);
 };
 
 export const getThemedEnemyVariant = (
@@ -923,18 +927,21 @@ export const getThemedHumanoidEnemySpritePath = (
   enemy: Pick<Enemy, 'name' | 'enemyType' | 'phase'>,
   theme: VisualThemeId,
   action: HighSchoolEnemyAction,
+  appearanceMode: CharacterAppearanceMode = 'STANDARD',
 ) => {
-  if (theme === 'high-school') return getHighSchoolHumanoidEnemySpritePath(enemy, action);
-  if (theme === 'magic') return getMagicHumanoidEnemySpritePath(enemy, action);
+  if (theme === 'high-school') return getHighSchoolHumanoidEnemySpritePath(enemy, action, appearanceMode);
+  if (theme === 'magic') return getMagicHumanoidEnemySpritePath(enemy, action, appearanceMode);
   return null;
 };
 
 export const getThemedMonsterEnemySpritePath = (
   enemy: Pick<Enemy, 'name' | 'enemyType' | 'phase'>,
   theme: VisualThemeId,
+  appearanceMode: CharacterAppearanceMode = 'STANDARD',
 ) => {
-  if (theme === 'high-school') return assetUrl(`sprites/high-school/enemies/${getHighSchoolEnemyVariant(enemy).imageIndex}.webp`);
-  if (theme === 'magic') return assetUrl(`sprites/magic/enemies/${getMagicEnemyVariant(enemy).imageIndex}.webp`);
+  const vacationPrefix = appearanceMode === 'VACATION' ? 'vacation-' : '';
+  if (theme === 'high-school') return assetUrl(`sprites/high-school/${vacationPrefix}enemies/${getHighSchoolEnemyVariant(enemy).imageIndex}.webp`);
+  if (theme === 'magic') return assetUrl(`sprites/magic/${vacationPrefix}enemies/${getMagicEnemyVariant(enemy).imageIndex}.webp`);
   return null;
 };
 

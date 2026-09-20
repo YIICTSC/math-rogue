@@ -425,6 +425,7 @@ const getBgmThemeForPlayer = (
 const getBattleEnemyTransitionAssetPaths = (
     enemy: Pick<Enemy, 'name' | 'enemyType' | 'phase' | 'endlessBossId'>,
     visualTheme: VisualThemeId,
+    appearanceMode: CharacterAppearanceMode = 'STANDARD',
 ): string[] => {
     if (enemy.enemyType === 'ENDLESS_BOSS') {
         const endlessBoss = getEndlessBossById(enemy.endlessBossId);
@@ -433,18 +434,18 @@ const getBattleEnemyTransitionAssetPaths = (
         if (endlessBoss && endlessBoss.floor <= 50) return [getEndlessBossSpritePath(endlessBoss, 'idle')];
     }
     if (visualTheme === 'high-school' && enemy.enemyType === 'AZUKI') {
-        return [assetUrl('sprites/high-school/azuki/idle.webp')];
+        return [assetUrl(appearanceMode === 'VACATION' ? 'sprites/high-school/vacation-bosses/azuki-idle.webp' : 'sprites/high-school/azuki/idle.webp')];
     }
     if (visualTheme === 'high-school' && enemy.enemyType === 'DODOMEDESU') {
-        return [assetUrl('enemy-illustrations/ドドメデス.webp')];
+        return [assetUrl(appearanceMode === 'VACATION' ? 'sprites/high-school/vacation-bosses/dodomedesu.webp' : 'enemy-illustrations/ドドメデス.webp')];
     }
     if (visualTheme === 'high-school' && enemy.enemyType === 'GENZO') {
-        return [assetUrl('enemy-illustrations/ゲンゾー.webp')];
+        return [assetUrl(appearanceMode === 'VACATION' ? 'sprites/high-school/vacation-bosses/genzo.webp' : 'enemy-illustrations/ゲンゾー.webp')];
     }
 
-    const humanoidPath = getThemedHumanoidEnemySpritePath(enemy, visualTheme, 'idle');
+    const humanoidPath = getThemedHumanoidEnemySpritePath(enemy, visualTheme, 'idle', appearanceMode);
     if (humanoidPath) return [humanoidPath];
-    const monsterPath = getThemedMonsterEnemySpritePath(enemy, visualTheme);
+    const monsterPath = getThemedMonsterEnemySpritePath(enemy, visualTheme, appearanceMode);
     if (monsterPath) return [monsterPath];
     return getEnemyIllustrationPaths(enemy.name);
 };
@@ -8193,7 +8194,7 @@ const App: React.FC = () => {
         const battleBackgroundScene = chooseBattleBackgroundScene(NodeType.BOSS, 50, floor, theme, player.appearanceMode);
         assetPreloadService.preloadTransitionAssets([
             battleBackgroundScene.image,
-            ...getBattleEnemyTransitionAssetPaths(bossEnemy, theme),
+            ...getBattleEnemyTransitionAssetPaths(bossEnemy, theme, player.appearanceMode),
             ...player.hand.slice(0, 5).flatMap(getBattleCardTransitionAssetPaths),
         ]);
         setDebugLoadout({ deck: sourceDeck, relics: sourceRelics, potions });
@@ -9177,7 +9178,7 @@ const App: React.FC = () => {
                 // browser cache is shared with the mounted scene components.
                 assetPreloadService.preloadTransitionAssets([
                     battleBackgroundScene.image,
-                    ...enemies.flatMap(enemy => getBattleEnemyTransitionAssetPaths(enemy, activeBattleVisualTheme)),
+                    ...enemies.flatMap(enemy => getBattleEnemyTransitionAssetPaths(enemy, activeBattleVisualTheme, p.appearanceMode)),
                     ...p.hand.slice(0, 5).flatMap(getBattleCardTransitionAssetPaths),
                 ]);
                 audioService.prepareBGM(
@@ -14312,6 +14313,7 @@ const App: React.FC = () => {
             VISUAL_THEMES.includes(stateRef.current.visualTheme as VisualThemeId)
                 ? stateRef.current.visualTheme as VisualThemeId
                 : visualTheme || storedTheme;
+        const appearanceMode = stateRef.current.player.appearanceMode ?? 'STANDARD';
         const isCrowdfundingBoss = enemy.enemyType === 'AZUKI'
             || enemy.enemyType === 'DODOMEDESU'
             || enemy.enemyType === 'GENZO';
@@ -14322,13 +14324,13 @@ const App: React.FC = () => {
         const isDodomedesuAlive = remainingEnemies.some(entry => entry.enemyType === 'DODOMEDESU' && entry.currentHp > 0);
         const isGenzoAlive = remainingEnemies.some(entry => entry.enemyType === 'GENZO' && entry.currentHp > 0);
         const specialFinisherIllustration = enemy.enemyType === 'AZUKI'
-            ? 'asset:sprites/high-school/azuki/pounce.webp'
+            ? `asset:${appearanceMode === 'VACATION' ? 'sprites/high-school/vacation-bosses/azuki-pounce.webp' : 'sprites/high-school/azuki/pounce.webp'}`
             : enemy.enemyType === 'DODOMEDESU' || enemy.enemyType === 'GENZO'
                 ? isDodomedesuAlive && isGenzoAlive
-                    ? 'asset:enemy-illustrations/ドドメデス.webp'
+                    ? `asset:${appearanceMode === 'VACATION' ? 'sprites/high-school/vacation-bosses/dodomedesu.webp' : 'enemy-illustrations/ドドメデス.webp'}`
                     : isDodomedesuAlive
-                        ? 'asset:enemy-illustrations/ドドメデス-困惑.webp'
-                        : 'asset:enemy-illustrations/ゲンゾー-孤立.webp'
+                        ? `asset:${appearanceMode === 'VACATION' ? 'sprites/high-school/vacation-bosses/dodomedesu.webp' : 'enemy-illustrations/ドドメデス-困惑.webp'}`
+                        : `asset:${appearanceMode === 'VACATION' ? 'sprites/high-school/vacation-bosses/genzo.webp' : 'enemy-illustrations/ゲンゾー-孤立.webp'}`
                 : undefined;
 
         return {
@@ -21501,7 +21503,7 @@ const App: React.FC = () => {
 
                 {battleFinisherCutinCard && gameState.screen !== GameScreen.BATTLE && (
                     <div className="fixed inset-0 z-[300] pointer-events-none overflow-hidden">
-                        <BattleFinisherCutinOverlay card={battleFinisherCutinCard} languageMode={languageMode} />
+                        <BattleFinisherCutinOverlay card={battleFinisherCutinCard} languageMode={languageMode} appearanceMode={gameState.player.appearanceMode} />
                     </div>
                 )}
 

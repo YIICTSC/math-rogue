@@ -1050,6 +1050,7 @@ const TypingBattleScene: React.FC<TypingBattleSceneProps> = ({
                                         seed={enemy.id}
                                         aliases={enemySvgAliases}
                                         visualTheme={visualTheme}
+                                        appearanceMode={player.appearanceMode}
                                         enemyType={enemy.enemyType}
                                         phase={enemy.phase}
                                         action={highSchoolEnemyAction}
@@ -1326,7 +1327,7 @@ const TypingBattleScene: React.FC<TypingBattleSceneProps> = ({
                 </div>
             </div>
 
-            {finisherCutinCard && <StandardBattleFinisherCutinOverlay card={finisherCutinCard} languageMode={languageMode} />}
+            {finisherCutinCard && <StandardBattleFinisherCutinOverlay card={finisherCutinCard} languageMode={languageMode} appearanceMode={player.appearanceMode} />}
             <style>{`
                 @keyframes typing-fill-pop {
                     0% { transform: scale(0.85); filter: brightness(1.6); }
