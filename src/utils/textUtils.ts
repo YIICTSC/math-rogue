@@ -11284,6 +11284,27 @@ Object.assign(ENGLISH_DICTIONARY, {
     "確認中": "Checking",
 });
 
+Object.assign(ENGLISH_DICTIONARY, {
+    "エンドレス第1章へ、星海の航路が開いた。": "The Starsea route opened toward Endless Chapter 1.",
+    "星海バカンスの真エンディングを解放した。": "The Starsea Vacation true ending has been unlocked.",
+    "星海の波が荒れている…": "The Starsea waves are growing rough...",
+    "旅で得た成果が、次の挑戦から現れるようになります！": "The gains from this journey will appear from your next challenge onward!",
+    "次の旅人が続きを歩く。": "The next traveler will carry the journey onward.",
+    "夏の旅での成果が、次回の挑戦から現れるようになります！": "The gains from your summer journey will appear from your next challenge onward!",
+    "星海バカンスの夜明け": "Dawn Over the Starsea Vacation",
+    "あなたは夏の旅を閉じ込めようとした支配を打ち破り、\n仲間と過ごした海辺の一日を守りました。\n帰る朝に残った思い出は、次の旅へ持っていける宝物です。": "You broke the rule that tried to imprison your summer journey and protected the seaside day you shared with your friends. The memories left on the morning home are treasures you can carry into the next journey.",
+    "あなたは星海リゾートを永遠の夏に封じる「願いの檻」を打ち破り、\n海を夜明けの景色へ戻しました。\n臨海研修で学び、迷い、誰かを大切にした時間は、これからもあなたの魔法を強くします。": "You broke the Wish Cage that tried to seal the Starsea Resort in eternal summer and returned the sea to its dawn colors. The time you spent learning, wavering, and caring for someone during the seaside trip will keep strengthening your magic.",
+    "次の旅へ持っていくカードを1枚選んでください": "Choose one card to carry into your next journey.",
+    "次の旅の初期デッキに追加されます。": "It will be added to your next journey's starting deck.",
+    "魔法リゾート休息所": "Magic Resort Rest Stop",
+    "星砂の休息結界": "Starsea Rest Barrier",
+    "海辺のベンチ": "Seaside Bench",
+    "星砂の工房": "Starsea Workshop",
+    "夏の工房": "Summer Workshop",
+    "潮汐錬金台": "Tidal Alchemy Table",
+    "海辺の実験テラス": "Seaside Experiment Terrace",
+});
+
 const transEventTextCore = (text: string, mode: LanguageMode): string => {
     if (mode === 'ENGLISH' && ENGLISH_DISPLAY_COPY_EXACT[text]) return ENGLISH_DISPLAY_COPY_EXACT[text];
     if (mode === 'HIRAGANA' && HIRAGANA_DISPLAY_COPY_EXACT[text]) return HIRAGANA_DISPLAY_COPY_EXACT[text];

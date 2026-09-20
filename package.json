@@ -46,6 +46,7 @@
     "audit:endless-terminology": "node scripts/audit-endless-terminology.mjs",
     "audit:endless-implementation": "node scripts/audit-endless-implementation.mjs",
     "audit:magic-endless-events": "node scripts/audit-magic-endless-events.mjs",
+    "audit:vacation:world": "node scripts/audit-vacation-world-conversion.mjs",
     "audit:unit-board": "node scripts/audit-unit-board-summaries.mjs",
     "audit:dynamic-visual": "node scripts/audit-dynamic-visual-plan.mjs",
     "audit:placement-tcg:unique": "node scripts/audit-placement-tcg-unique-effects.mjs",

@@ -1,11 +1,11 @@
 
 import React, { useState, useEffect } from 'react';
 import { Archive, Key, Check } from 'lucide-react';
-import { RewardItem, LanguageMode, CoopTreasurePool } from '../types';
+import { CharacterAppearanceMode, RewardItem, LanguageMode, CoopTreasurePool } from '../types';
 import { audioService } from '../services/audioService';
 import { trans } from '../utils/textUtils';
-import { assetUrl } from '../utils/assetPaths';
 import type { VisualThemeId } from '../data/visualThemes';
+import { getEnvironmentBackgroundCss, getVacationEnvironmentCopy } from '../data/vacationEnvironmentAssets';
 
 interface TreasureScreenProps {
   onOpen?: () => void;
@@ -20,6 +20,7 @@ interface TreasureScreenProps {
   resolved?: boolean;
   waitingForOthers?: boolean;
   visualTheme?: VisualThemeId;
+  appearanceMode?: CharacterAppearanceMode;
 }
 
 const TreasureScreen: React.FC<TreasureScreenProps> = ({
@@ -34,12 +35,14 @@ const TreasureScreen: React.FC<TreasureScreenProps> = ({
   onClaimPool,
   resolved = false,
   waitingForOthers = false,
-  visualTheme = 'elementary'
+  visualTheme = 'elementary',
+  appearanceMode = 'STANDARD'
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const currencyLabel = visualTheme === 'magic' ? '魔晶' : 'ゴールド';
   const isPoolMode = pools.length > 0;
   const displayOpen = opened ?? isOpen;
+  const vacationCopy = getVacationEnvironmentCopy(visualTheme, appearanceMode);
 
   useEffect(() => {
     // Play suspenseful "event" music when chest is discovered
@@ -97,9 +100,7 @@ const TreasureScreen: React.FC<TreasureScreenProps> = ({
       data-gamepad-initial-scope={`treasure-${isPoolMode ? 'pool' : displayOpen ? 'opened' : 'closed'}`}
       className="main-treasure-screen flex h-full w-full flex-col items-center justify-center overflow-y-auto bg-gray-900 bg-cover bg-center p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] text-white relative sm:p-8"
       style={{
-        backgroundImage: `url(${assetUrl(visualTheme === 'magic'
-          ? 'sprites/backgrounds/learning-rogue/magic-treasure-vault.webp'
-          : 'sprites/backgrounds/learning-rogue/treasure-storage.webp')})`
+        backgroundImage: getEnvironmentBackgroundCss(visualTheme, 'treasure', appearanceMode)
       }}
     >
       <div className="absolute inset-0 bg-slate-950/60 pointer-events-none" />
@@ -107,8 +108,8 @@ const TreasureScreen: React.FC<TreasureScreenProps> = ({
 
           {isPoolMode ? (
               <>
-                <h2 className="text-4xl text-yellow-400 font-bold mb-6">{trans(visualTheme === 'magic' ? "封印宝珠を発見！" : "宝を発見！", languageMode)}</h2>
-                <p className="text-gray-300 mb-6">{trans(visualTheme === 'magic' ? "人数分の宝珠があります。先に触れた宝珠の魔力を獲得できます。" : "人数分の宝があります。誰でも先に取った宝を獲得できます。", languageMode)}</p>
+                <h2 className="text-4xl text-yellow-400 font-bold mb-6">{trans(vacationCopy?.treasureClosedTitle ?? (visualTheme === 'magic' ? "封印宝珠を発見！" : "宝を発見！"), languageMode)}</h2>
+                <p className="text-gray-300 mb-6">{trans(vacationCopy?.treasureDescription ?? (visualTheme === 'magic' ? "人数分の宝珠があります。先に触れた宝珠の魔力を獲得できます。" : "人数分の宝があります。誰でも先に取った宝を獲得できます。"), languageMode)}</p>
                 {hasCursedKey && (
                   <div className="mb-4 rounded-full border border-purple-500 bg-purple-950/70 px-4 py-2 text-sm text-purple-200">
                     <Key className="inline-block mr-2" size={16} />
@@ -170,7 +171,7 @@ const TreasureScreen: React.FC<TreasureScreenProps> = ({
               </>
           ) : !displayOpen ? (
               <>
-                <h2 className="text-4xl text-yellow-400 font-bold mb-8 animate-pulse">{trans(visualTheme === 'magic' ? "封印宝珠を発見！" : "宝箱を発見！", languageMode)}</h2>
+                <h2 className="text-4xl text-yellow-400 font-bold mb-8 animate-pulse">{trans(vacationCopy?.treasureClosedTitle ?? (visualTheme === 'magic' ? "封印宝珠を発見！" : "宝箱を発見！"), languageMode)}</h2>
                 <div 
                     onClick={handleOpen}
                     className="cursor-pointer transition-transform hover:scale-110 mb-8 relative"
@@ -182,7 +183,7 @@ const TreasureScreen: React.FC<TreasureScreenProps> = ({
                         </div>
                     )}
                 </div>
-                <p className="text-gray-400 mb-8">{trans(visualTheme === 'magic' ? "結界の奥で、まだ名前のない魔力が脈打っている。" : "中には何が入っているだろうか？", languageMode)}</p>
+                <p className="text-gray-400 mb-8">{trans(vacationCopy?.treasureDescription ?? (visualTheme === 'magic' ? "結界の奥で、まだ名前のない魔力が脈打っている。" : "中には何が入っているだろうか？"), languageMode)}</p>
                 <button
                     data-gamepad-initial-choice
                     onClick={handleOpen}
@@ -200,7 +201,7 @@ const TreasureScreen: React.FC<TreasureScreenProps> = ({
               </>
           ) : (
               <>
-                <h2 className="text-4xl text-yellow-400 font-bold mb-8">{trans(visualTheme === 'magic' ? "魔力獲得！" : "獲得！", languageMode)}</h2>
+                <h2 className="text-4xl text-yellow-400 font-bold mb-8">{trans(vacationCopy?.treasureOpenedTitle ?? (visualTheme === 'magic' ? "魔力獲得！" : "獲得！"), languageMode)}</h2>
                 <div className="mb-12 flex flex-col gap-4 animate-in fade-in zoom-in duration-500">
                     <Archive size={128} className="text-yellow-400 mb-4 mx-auto opacity-50" />
                     

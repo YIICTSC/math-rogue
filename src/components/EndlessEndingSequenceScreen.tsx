@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { ChevronRight, Sparkles } from 'lucide-react';
-import type { LanguageMode } from '../types';
+import type { CharacterAppearanceMode, LanguageMode } from '../types';
 import type { VisualThemeId } from '../data/visualThemes';
 import {
   getEndlessEndingLocalizedDialogue,
@@ -12,6 +12,7 @@ import {
 } from '../data/endlessEndingSequences';
 import { assetUrl } from '../utils/assetPaths';
 import { audioService } from '../services/audioService';
+import { getEnvironmentBackgroundCss, getEnvironmentBackgroundPath } from '../data/vacationEnvironmentAssets';
 
 interface Props {
   kind: EndlessEndingKind;
@@ -19,12 +20,13 @@ interface Props {
   characterName: string;
   languageMode: LanguageMode;
   theme?: VisualThemeId;
+  appearanceMode?: CharacterAppearanceMode;
   magicProtagonistId?: string;
   onComplete: () => void;
 }
 
-const EndlessEndingSequenceScreen: React.FC<Props> = ({ kind, characterId, characterName, languageMode, theme = 'elementary', magicProtagonistId, onComplete }) => {
-  const sequence = useMemo(() => getEndlessEndingSequence(kind, characterId, characterName, theme as VisualThemeId, magicProtagonistId), [characterId, characterName, kind, magicProtagonistId, theme]);
+const EndlessEndingSequenceScreen: React.FC<Props> = ({ kind, characterId, characterName, languageMode, theme = 'elementary', appearanceMode = 'STANDARD', magicProtagonistId, onComplete }) => {
+  const sequence = useMemo(() => getEndlessEndingSequence(kind, characterId, characterName, theme as VisualThemeId, magicProtagonistId, appearanceMode), [appearanceMode, characterId, characterName, kind, magicProtagonistId, theme]);
   const [pageIndex, setPageIndex] = useState(0);
   const page = sequence.pages[pageIndex];
   const isLast = pageIndex >= sequence.pages.length - 1;
@@ -52,16 +54,18 @@ const EndlessEndingSequenceScreen: React.FC<Props> = ({ kind, characterId, chara
   const localizedText = getEndlessEndingLocalizedText(page, languageMode);
   const localizedDialogue = getEndlessEndingLocalizedDialogue(page, languageMode);
   const isTrueEnding = kind === 'TRUE';
-  const fallback = isTrueEnding
-    ? 'sprites/backgrounds/learning-rogue/high-school-act-clear.webp'
-    : 'sprites/backgrounds/learning-rogue/reward-rooftop.webp';
+  const fallback = appearanceMode === 'VACATION'
+    ? (isTrueEnding
+      ? getEnvironmentBackgroundPath(theme, 'actClear', appearanceMode)
+      : getEnvironmentBackgroundPath(theme, 'reward', appearanceMode))
+    : (isTrueEnding
+      ? 'sprites/backgrounds/learning-rogue/high-school-act-clear.webp'
+      : 'sprites/backgrounds/learning-rogue/reward-rooftop.webp');
   const useEventLayout = theme === 'high-school' || theme === 'magic';
   const sequenceLabel = isTrueEnding
     ? (languageMode === 'ENGLISH' ? 'TRUE ENDING' : languageMode === 'HIRAGANA' ? 'しんえんでぃんぐ' : '真エンディング')
     : (languageMode === 'ENGLISH' ? 'ENDLESS PROLOGUE' : languageMode === 'HIRAGANA' ? 'おわらない たびの じょしょう' : 'エンドレス序章');
-  const eventBackground = theme === 'magic'
-    ? 'sprites/backgrounds/learning-rogue/magic-event-hallway.webp'
-    : 'sprites/backgrounds/learning-rogue/event-hallway.webp';
+  const eventBackgroundCss = getEnvironmentBackgroundCss(theme, 'event', appearanceMode);
   const handleContinue = () => {
     if (!isLast) {
       setPageIndex(index => Math.min(index + 1, sequence.pages.length - 1));
@@ -134,7 +138,7 @@ const EndlessEndingSequenceScreen: React.FC<Props> = ({ kind, characterId, chara
   }
 
   return (
-    <div className="main-event-screen flex h-full w-full flex-col items-center justify-start overflow-y-auto bg-gray-900 bg-cover bg-center p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] text-white relative custom-scrollbar sm:justify-center sm:p-8" style={{ backgroundImage: `url(${assetUrl(eventBackground)})` }}>
+    <div className="main-event-screen flex h-full w-full flex-col items-center justify-start overflow-y-auto bg-gray-900 bg-cover bg-center p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] text-white relative custom-scrollbar sm:justify-center sm:p-8" style={{ backgroundImage: eventBackgroundCss }}>
       <div className="absolute inset-0 bg-slate-950/60 pointer-events-none" />
       <div data-gamepad-navigation-root className="event-screen-panel z-10 my-auto w-full max-w-2xl rounded-lg border-2 border-gray-600 bg-gray-800 p-4 shadow-2xl sm:p-8">
         <div className="event-screen-title mb-4 flex items-center border-b border-gray-700 pb-3 sm:mb-6 sm:pb-4">

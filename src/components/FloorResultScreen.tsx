@@ -1,9 +1,11 @@
 
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
-import { ActStats, LanguageMode, Card as ICard, MagicRomanceProgress } from '../types';
+import { ActStats, CharacterAppearanceMode, LanguageMode, Card as ICard, MagicRomanceProgress } from '../types';
 import { GAME_STORIES } from '../data/stories';
 import { HIGH_SCHOOL_STORIES } from '../data/highSchoolStories';
+import { HIGH_SCHOOL_VACATION_STORIES } from '../data/highSchoolVacationStories';
 import { getMagicActStoryPart, MAGIC_STORIES } from '../data/magicStories';
+import { MAGIC_VACATION_STORIES } from '../data/magicVacationStories';
 import { ROMANCE_TARGETS } from '../data/romanceTargets';
 import { MAGIC_HEROES, isMagicMaleProtagonist } from '../data/magicHeroes';
 import { ADDITIONAL_CARDS } from '../constants1';
@@ -11,8 +13,9 @@ import { buildEnglishCardDescription, trans, transEventText } from '../utils/tex
 import { Skull, Coins, Brain, ArrowRight, BookOpen, Sparkles } from 'lucide-react';
 import { audioService } from '../services/audioService';
 import Card from './Card';
-import { assetUrl } from '../utils/assetPaths';
 import { getEndlessChapterResult, getTrueEndlessChapterResult } from '../data/endlessChapterResults';
+import { getVacationEndlessChapterResult } from '../data/endlessVacationChapterResults';
+import { getEnvironmentBackgroundCss, isVacationRun } from '../data/vacationEnvironmentAssets';
 
 interface FloorResultScreenProps {
   act: number;
@@ -23,6 +26,7 @@ interface FloorResultScreenProps {
   newlyUnlockedCardName?: string; // 追加
   typingMode?: boolean;
   visualTheme?: 'elementary' | 'high-school' | 'magic';
+  appearanceMode?: CharacterAppearanceMode;
   magicHeroId?: string;
   magicRomance?: MagicRomanceProgress;
   endlessRunRewards?: Array<{ id: string; name: string; floor: number; scope: 'RUN' | 'PERMANENT' | 'RECORD' }>;
@@ -30,14 +34,14 @@ interface FloorResultScreenProps {
   isTrueEndless?: boolean;
 }
 
-const FloorResultScreen: React.FC<FloorResultScreenProps> = ({ act, stats, storyIndex, onNext, languageMode, newlyUnlockedCardName, typingMode = false, visualTheme = 'elementary', magicHeroId = 'AKARI', magicRomance, endlessRunRewards = [], isEndless = false, isTrueEndless = false }) => {
+const FloorResultScreen: React.FC<FloorResultScreenProps> = ({ act, stats, storyIndex, onNext, languageMode, newlyUnlockedCardName, typingMode = false, visualTheme = 'elementary', appearanceMode = 'STANDARD', magicHeroId = 'AKARI', magicRomance, endlessRunRewards = [], isEndless = false, isTrueEndless = false }) => {
   const [displayedText, setDisplayedText] = useState("");
   const [isTyping, setIsTyping] = useState(true);
-  
+  const vacation = isVacationRun(visualTheme, appearanceMode);
   const storyPool = visualTheme === 'high-school'
-    ? HIGH_SCHOOL_STORIES
+    ? (vacation ? HIGH_SCHOOL_VACATION_STORIES : HIGH_SCHOOL_STORIES)
     : visualTheme === 'magic'
-      ? MAGIC_STORIES
+      ? (vacation ? MAGIC_VACATION_STORIES : MAGIC_STORIES)
       : GAME_STORIES;
   const storySet = storyPool[storyIndex % storyPool.length] || storyPool[0];
   const closestTargetEntry = useMemo(() => {
@@ -51,14 +55,16 @@ const FloorResultScreen: React.FC<FloorResultScreenProps> = ({ act, stats, story
     };
   }, [magicHeroId, magicRomance]);
   const currentPart = useMemo(() => {
-    return visualTheme === 'magic'
+    return visualTheme === 'magic' && !vacation
       ? getMagicActStoryPart(magicHeroId, act, closestTargetEntry?.target?.name, closestTargetEntry?.affection, storySet)
       : storySet.parts[(act - 1) % 3];
-  }, [visualTheme, magicHeroId, act, closestTargetEntry, storySet]);
+  }, [visualTheme, vacation, magicHeroId, act, closestTargetEntry, storySet]);
   const displayedPart = useMemo(() => {
     if (!isEndless) return currentPart;
     if (isTrueEndless) {
-      const trueEndlessPart = getTrueEndlessChapterResult(act);
+      const trueEndlessPart = vacation
+        ? getVacationEndlessChapterResult(act, true)
+        : getTrueEndlessChapterResult(act);
       if (languageMode === 'ENGLISH') {
         return { title: trueEndlessPart.englishTitle, content: trueEndlessPart.englishContent };
       }
@@ -67,7 +73,9 @@ const FloorResultScreen: React.FC<FloorResultScreenProps> = ({ act, stats, story
       }
       return { title: trueEndlessPart.title, content: trueEndlessPart.content };
     }
-    const endlessPart = getEndlessChapterResult(act);
+    const endlessPart = vacation
+      ? getVacationEndlessChapterResult(act)
+      : getEndlessChapterResult(act);
     if (languageMode === 'ENGLISH') {
       return { title: endlessPart.englishTitle, content: endlessPart.englishContent };
     }
@@ -78,7 +86,7 @@ const FloorResultScreen: React.FC<FloorResultScreenProps> = ({ act, stats, story
       };
     }
     return { title: endlessPart.title, content: endlessPart.content };
-  }, [act, currentPart, isEndless, isTrueEndless, languageMode]);
+  }, [act, currentPart, isEndless, isTrueEndless, languageMode, vacation]);
 
   // 解放されたカード情報の取得
   const unlockedCard = useMemo(() => {
@@ -138,11 +146,13 @@ const FloorResultScreen: React.FC<FloorResultScreenProps> = ({ act, stats, story
     <div
       data-gamepad-initial-scope={`floor-result-${storyIndex}-${isTyping ? 'typing' : 'story'}`}
       className="ios-edge-to-edge main-floor-result-screen w-full h-full bg-[#0a0a0a] bg-cover bg-center flex flex-col items-center justify-center p-3 sm:p-6 md:p-8 lg:p-10 relative overflow-hidden font-mono"
-      style={visualTheme === 'magic' ? { backgroundImage: `url(${assetUrl('sprites/backgrounds/learning-rogue/magic-act-clear.webp')})` } : undefined}
+      style={visualTheme === 'magic' || vacation
+        ? { backgroundImage: getEnvironmentBackgroundCss(visualTheme, 'actClear', appearanceMode) }
+        : undefined}
     >
-      {visualTheme === 'magic' && <div className="absolute inset-0 bg-slate-950/62 pointer-events-none" />}
+      {(visualTheme === 'magic' || vacation) && <div className="absolute inset-0 bg-slate-950/62 pointer-events-none" />}
       {/* Background decoration */}
-      <div className={`absolute inset-0 pointer-events-none flex items-center justify-center ${visualTheme === 'magic' ? 'opacity-5' : 'opacity-10'}`}>
+      <div className={`absolute inset-0 pointer-events-none flex items-center justify-center ${visualTheme === 'magic' || vacation ? 'opacity-5' : 'opacity-10'}`}>
         <BookOpen className="text-gray-500 w-[200px] h-[200px] sm:w-[400px] sm:h-[400px]" />
       </div>
 

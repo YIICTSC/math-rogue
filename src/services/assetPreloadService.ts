@@ -7,6 +7,7 @@ import { MAGIC_ASSET_PATHS } from '../data/magicAssetManifest';
 import { HIGH_SCHOOL_CHARACTER_ANIMATION_ASSET_PATHS, HIGH_SCHOOL_IDLE_SPRITE_ASSET_PATHS, HIGH_SCHOOL_VACATION_GENERATED_ANIMATION_ASSET_PATHS, MAGIC_VACATION_GENERATED_ANIMATION_ASSET_PATHS, type VisualThemeId } from '../data/visualThemes';
 import { assetUrl } from '../utils/assetPaths';
 import { WEB_PERFORMANCE_MODE, WEB_PRELOAD_ENABLED } from '../config/runtime';
+import { VACATION_ENVIRONMENT_ASSET_PATHS } from '../data/vacationEnvironmentAssets';
 
 const ATTACK_EFFECT_KEYS = [
     'slash',
@@ -53,6 +54,8 @@ const SCREEN_BACKGROUND_PATHS = [
     'sprites/backgrounds/learning-rogue/compendium-library.webp',
 ];
 
+const range = (count: number) => Array.from({ length: count }, (_, index) => index);
+
 const HIGH_SCHOOL_BACKGROUND_PATHS = [
     'sprites/high-school/title-background.webp',
     'sprites/backgrounds/learning-rogue/high-school-map.webp',
@@ -65,9 +68,64 @@ const HIGH_SCHOOL_BACKGROUND_PATHS = [
     'sprites/backgrounds/learning-rogue/high-school-vacation-map-act3.webp',
     'sprites/backgrounds/learning-rogue/high-school-vacation-map-act4.webp',
     ...HIGH_SCHOOL_VACATION_BATTLE_BACKGROUND_SCENES.map(scene => scene.image),
+    ...VACATION_ENVIRONMENT_ASSET_PATHS.filter(path => path.includes('/high-school-vacation-')),
 ];
 
-const range = (count: number) => Array.from({ length: count }, (_, index) => index);
+const HIGH_SCHOOL_VACATION_ENEMY_ASSET_PATHS = [
+    ...range(50).map(index => `sprites/high-school/vacation-enemies/${index}.webp`),
+    ...range(53).flatMap(index => [
+        `sprites/high-school/vacation-humanoid-enemies/${index}.webp`,
+        `sprites/high-school/vacation-humanoid-enemies-attack/${index}.webp`,
+        `sprites/high-school/vacation-humanoid-enemies-skill/${index}.webp`,
+    ]),
+];
+
+const MAGIC_VACATION_ENEMY_ASSET_PATHS = [
+    ...range(45).map(index => `sprites/magic/vacation-enemies/${index}.webp`),
+    ...range(22).flatMap(index => [
+        `sprites/magic/vacation-humanoid-enemies/${index}.webp`,
+        `sprites/magic/vacation-humanoid-enemies-attack/${index}.webp`,
+        `sprites/magic/vacation-humanoid-enemies-skill/${index}.webp`,
+    ]),
+];
+
+const VACATION_ENDING_ASSET_PATHS = [
+    ...['assassin', 'bard', 'caretaker', 'chef', 'dodgeball', 'gardener', 'librarian', 'mage', 'warrior'].flatMap(character => (
+        range(15).map(index => `sprites/endings/high-school-vacation/${character}/ending-${Math.floor(index / 3) + 1}-${(index % 3) + 1}.webp`)
+    )),
+    ...range(3).map(index => `sprites/endings/magic-vacation/common/ending-${index + 1}.webp`),
+];
+
+const VACATION_SPECIAL_ENEMY_ASSET_PATHS = [
+    'sprites/high-school/vacation-bosses/azuki-idle.webp',
+    'sprites/high-school/vacation-bosses/azuki-pounce.webp',
+    'sprites/high-school/vacation-bosses/azuki-howl.webp',
+    'sprites/high-school/vacation-bosses/dodomedesu.webp',
+    'sprites/high-school/vacation-bosses/genzo.webp',
+    'sprites/high-school/vacation-bosses/kocho.webp',
+    'sprites/high-school/vacation-bosses/true-kocho.webp',
+    'sprites/magic/vacation-bosses/grand-witch.webp',
+    'sprites/magic/vacation-bosses/star-calamity.webp',
+];
+
+const VACATION_ENDLESS_BOSS_ASSET_PATHS = ['high-school', 'magic'].flatMap(arc => (
+    range(10).flatMap(index => {
+        const floor = String((index + 1) * 5).padStart(2, '0');
+        return ['idle', 'attack', 'skill'].map(action => `sprites/endless-bosses-vacation/${arc}/${floor}-${action}.webp`);
+    })
+));
+
+const VACATION_ENDLESS_ENDING_ASSET_PATHS = [
+    ...['assassin', 'bard', 'caretaker', 'chef', 'dodgeball', 'gardener', 'librarian', 'mage', 'warrior'].flatMap(character => (
+        ['opening', 'true'].flatMap(kind => range(3).map(index => `sprites/endless-endings/high-school-vacation/${character}/${kind}-${index + 1}.webp`))
+    )),
+    ...['assassin', 'bard', 'caretaker', 'chef', 'dodgeball', 'gardener', 'librarian', 'mage', 'warrior'].flatMap(character => (
+        ['opening', 'true'].flatMap(kind => range(3).map(index => `sprites/endless-endings/magic-vacation/${character}/${kind}-${index + 1}.webp`))
+    )),
+    ...['ren', 'soma', 'minato', 'riku', 'yamato', 'leon', 'elliot', 'sakuya'].flatMap(character => (
+        ['opening', 'true'].flatMap(kind => range(3).map(index => `sprites/endless-endings/magic-vacation/male/${character}/${kind}-${index + 1}.webp`))
+    )),
+];
 
 const isResolvedAssetUrl = (path: string): boolean =>
     /^(data:|blob:|https?:|\/)/.test(path);
@@ -97,6 +155,7 @@ const buildCriticalAssetPaths = (visualTheme: VisualThemeId): string[] => {
                 ...HIGH_SCHOOL_IDLE_SPRITE_ASSET_PATHS,
                 ...HIGH_SCHOOL_CHARACTER_ANIMATION_ASSET_PATHS,
                 ...HIGH_SCHOOL_VACATION_GENERATED_ANIMATION_ASSET_PATHS,
+                ...VACATION_ENVIRONMENT_ASSET_PATHS.filter(path => path.includes('/high-school-vacation-')),
             );
         }
 
@@ -111,6 +170,7 @@ const buildCriticalAssetPaths = (visualTheme: VisualThemeId): string[] => {
                 'sprites/backgrounds/learning-rogue/magic-battle-gym.webp',
                 ...MAGIC_VACATION_BATTLE_BACKGROUND_SCENES.map(scene => scene.image),
                 ...MAGIC_VACATION_GENERATED_ANIMATION_ASSET_PATHS,
+                ...VACATION_ENVIRONMENT_ASSET_PATHS.filter(path => path.includes('/magic-vacation-')),
             );
         }
 
@@ -126,6 +186,11 @@ const buildCriticalAssetPaths = (visualTheme: VisualThemeId): string[] => {
             ...HIGH_SCHOOL_VACATION_GENERATED_ANIMATION_ASSET_PATHS,
             ...range(12).map(index => `sprites/high-school/enemies/${index}.webp`),
             ...range(12).map(index => `sprites/high-school/humanoid-enemies/${index}.webp`),
+            ...HIGH_SCHOOL_VACATION_ENEMY_ASSET_PATHS,
+            ...VACATION_SPECIAL_ENEMY_ASSET_PATHS,
+            ...VACATION_ENDLESS_BOSS_ASSET_PATHS,
+            ...VACATION_ENDLESS_ENDING_ASSET_PATHS,
+            ...VACATION_ENDING_ASSET_PATHS,
         );
     }
 
@@ -142,11 +207,17 @@ const buildCriticalAssetPaths = (visualTheme: VisualThemeId): string[] => {
             'sprites/backgrounds/learning-rogue/magic-treasure-vault.webp',
             'sprites/backgrounds/learning-rogue/magic-compendium-library.webp',
             ...MAGIC_VACATION_BATTLE_BACKGROUND_SCENES.map(scene => scene.image),
+            ...VACATION_ENVIRONMENT_ASSET_PATHS.filter(path => path.includes('/magic-vacation-')),
             ...range(9).map(index => `sprites/magic/characters/heroine-${String(index + 1).padStart(2, '0')}-before.webp`),
             ...range(8).map(index => `sprites/magic/male-characters/${['ren', 'soma', 'minato', 'riku', 'yamato', 'leon', 'elliot', 'sakuya'][index]}-before.webp`),
             ...MAGIC_VACATION_GENERATED_ANIMATION_ASSET_PATHS,
             ...range(12).map(index => `sprites/magic/enemies/${index}.webp`),
             ...range(10).map(index => `sprites/magic/humanoid-enemies/${index}.webp`),
+            ...MAGIC_VACATION_ENEMY_ASSET_PATHS,
+            ...VACATION_SPECIAL_ENEMY_ASSET_PATHS,
+            ...VACATION_ENDLESS_BOSS_ASSET_PATHS,
+            ...VACATION_ENDLESS_ENDING_ASSET_PATHS,
+            ...VACATION_ENDING_ASSET_PATHS,
         );
     }
 
@@ -168,12 +239,24 @@ const buildDeferredAssetPaths = (visualTheme: VisualThemeId): string[] => {
                 `sprites/high-school/humanoid-enemies-attack/${index}.webp`,
                 `sprites/high-school/humanoid-enemies-skill/${index}.webp`,
             ]),
+            ...HIGH_SCHOOL_VACATION_ENEMY_ASSET_PATHS,
+            ...VACATION_SPECIAL_ENEMY_ASSET_PATHS,
+            ...VACATION_ENDLESS_BOSS_ASSET_PATHS,
+            ...VACATION_ENDLESS_ENDING_ASSET_PATHS,
+            ...VACATION_ENDING_ASSET_PATHS,
             ...range(25).map(index => `sprites/high-school/cards/${index}.webp`),
         ];
     }
 
     if (visualTheme === 'magic') {
-        return MAGIC_ASSET_PATHS;
+        return [
+            ...MAGIC_ASSET_PATHS,
+            ...MAGIC_VACATION_ENEMY_ASSET_PATHS,
+            ...VACATION_SPECIAL_ENEMY_ASSET_PATHS,
+            ...VACATION_ENDLESS_BOSS_ASSET_PATHS,
+            ...VACATION_ENDLESS_ENDING_ASSET_PATHS,
+            ...VACATION_ENDING_ASSET_PATHS,
+        ];
     }
 
     return [];

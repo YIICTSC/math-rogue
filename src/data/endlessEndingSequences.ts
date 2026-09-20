@@ -1,7 +1,8 @@
-import type { LanguageMode } from '../types';
+import type { CharacterAppearanceMode, LanguageMode } from '../types';
 import { transEventText } from '../utils/textUtils';
 import { MAGIC_HERO_ID_BY_CHARACTER_ID, type VisualThemeId } from './visualThemes';
 import {
+  ENDLESS_VACATION_COPY,
   ENDLESS_REVISION_COPY,
   type EndlessRevisionEntry,
   type EndlessRevisionPageCopy,
@@ -81,17 +82,35 @@ const getRevisionImagePath = (
   return `sprites/endless-endings/${themeFolder}${entry.baseCharacterId.toLowerCase()}/${page.imageKey}.webp`;
 };
 
+const getVacationRevisionImagePath = (
+  theme: 'high-school' | 'magic',
+  entry: EndlessRevisionEntry,
+  page: EndlessRevisionPageCopy,
+): string => {
+  if (theme === 'magic') {
+    const protagonistFolder = entry.magicGender === 'male'
+      ? `male/${entry.protagonistId.toLowerCase()}`
+      : entry.baseCharacterId.toLowerCase();
+    return `sprites/endless-endings/magic-vacation/${protagonistFolder}/${page.imageKey}.webp`;
+  }
+  return `sprites/endless-endings/high-school-vacation/${entry.baseCharacterId.toLowerCase()}/${page.imageKey}.webp`;
+};
+
 export const getEndlessEndingSequence = (
   kind: EndlessEndingKind,
   characterId: string,
   characterName: string,
   theme: VisualThemeId = 'elementary',
   magicProtagonistId?: string,
+  appearanceMode: CharacterAppearanceMode = 'STANDARD',
 ): EndlessEndingSequence => {
   const resolvedTheme: VisualThemeId = theme === 'high-school' || theme === 'magic' ? theme : 'elementary';
   const entry = getRevisionEntry(characterId, resolvedTheme, magicProtagonistId);
   const resolvedCharacterName = (characterName ?? '').trim() || '主人公';
-  const copies = kind === 'OPENING' ? entry.opening : entry.true;
+  const vacation = appearanceMode === 'VACATION' && (resolvedTheme === 'high-school' || resolvedTheme === 'magic');
+  const copies = vacation
+    ? (kind === 'OPENING' ? ENDLESS_VACATION_COPY[resolvedTheme].opening : ENDLESS_VACATION_COPY[resolvedTheme].true)
+    : (kind === 'OPENING' ? entry.opening : entry.true);
   const pages = copies.map((copy) => ({
     title: copy.title,
     titleHiragana: localizeRevisionText(copy.title, 'HIRAGANA'),
@@ -103,7 +122,9 @@ export const getEndlessEndingSequence = (
     dialogue: copy.dialogue,
     dialogueHiragana: localizeRevisionText(copy.dialogue, 'HIRAGANA'),
     dialogueEnglish: localizeRevisionText(copy.dialogue, 'ENGLISH'),
-    imagePath: getRevisionImagePath(resolvedTheme, entry, copy),
+    imagePath: vacation
+      ? getVacationRevisionImagePath(resolvedTheme, entry, copy)
+      : getRevisionImagePath(resolvedTheme, entry, copy),
   })) as [EndlessEndingPage, EndlessEndingPage, EndlessEndingPage];
 
   return {

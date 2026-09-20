@@ -1,5 +1,6 @@
 import type { EndlessGimmickProgress, RewardItem } from '../types';
 import { assetUrl } from '../utils/assetPaths';
+import type { CharacterAppearanceMode } from '../types';
 
 export type EndlessArc = 'elementary' | 'high-school' | 'magic';
 export type EndlessBossTier = 'BOSS' | 'MAJOR_BOSS';
@@ -526,8 +527,11 @@ export const getEndlessBossById = (id: string | undefined) => {
 export const getEndlessArc = (theme: string | undefined): EndlessArc =>
   theme === 'high-school' || theme === 'magic' ? theme : 'elementary';
 
-export const getEndlessBossSpritePath = (boss: EndlessBossDefinition, action: 'idle' | 'attack' | 'skill' = 'idle') =>
-  assetUrl(`sprites/endless-bosses/${boss.arc}/${String(boss.floor).padStart(2, '0')}-${action}.webp`);
+export const getEndlessBossSpritePath = (
+  boss: EndlessBossDefinition,
+  action: 'idle' | 'attack' | 'skill' = 'idle',
+  appearanceMode: CharacterAppearanceMode = 'STANDARD',
+) => assetUrl(`${appearanceMode === 'VACATION' && (boss.arc === 'high-school' || boss.arc === 'magic') ? 'sprites/endless-bosses-vacation' : 'sprites/endless-bosses'}/${boss.arc}/${String(boss.floor).padStart(2, '0')}-${action}.webp`);
 
 export const createEndlessRewardItems = (boss: EndlessBossDefinition, claimedIds: string[], prefix: string): RewardItem[] => {
   const available = boss.rewards.filter((reward) => !claimedIds.includes(reward.id));

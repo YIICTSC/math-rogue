@@ -2,9 +2,10 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { HelpCircle, ArrowRight } from 'lucide-react';
 import { assetUrl, getWebpFirstAssetPaths } from '../utils/assetPaths';
-import { LanguageMode } from '../types';
+import { CharacterAppearanceMode, LanguageMode } from '../types';
 import { trans } from '../utils/textUtils';
 import type { VisualThemeId } from '../data/visualThemes';
+import { getEnvironmentBackgroundCss } from '../data/vacationEnvironmentAssets';
 import { HIGH_SCHOOL_SUPPORTER_NPC_EVENTS } from '../data/supporterNpcEvents';
 
 
@@ -84,10 +85,11 @@ interface EventScreenProps {
     interactionDisabledMessage?: string;
     languageMode: LanguageMode;
     visualTheme?: VisualThemeId;
+    appearanceMode?: CharacterAppearanceMode;
     imageZoomEnabled?: boolean;
 }
 
-const EventScreen: React.FC<EventScreenProps> = ({ title, description, options, imageKey, image, resultLog, onContinue, typingMode = false, interactionDisabled = false, interactionDisabledMessage, languageMode, visualTheme = 'elementary', imageZoomEnabled = false }) => {
+const EventScreen: React.FC<EventScreenProps> = ({ title, description, options, imageKey, image, resultLog, onContinue, typingMode = false, interactionDisabled = false, interactionDisabledMessage, languageMode, visualTheme = 'elementary', appearanceMode = 'STANDARD', imageZoomEnabled = false }) => {
   const supporterNpcProfile = useMemo(() => {
     const fileName = imageKey?.match(/^high-school-supporter-npc\/([^/]+)$/)?.[1];
     return HIGH_SCHOOL_SUPPORTER_NPC_EVENTS.find(profile => profile.imageFile === fileName);
@@ -334,9 +336,7 @@ const EventScreen: React.FC<EventScreenProps> = ({ title, description, options, 
       data-gamepad-initial-scope="event-screen"
       className="main-event-screen flex h-full w-full flex-col items-center justify-start overflow-y-auto bg-gray-900 bg-cover bg-center p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] text-white relative custom-scrollbar sm:justify-center sm:p-8"
       style={{
-        backgroundImage: `url(${assetUrl(visualTheme === 'magic'
-          ? 'sprites/backgrounds/learning-rogue/magic-event-hallway.webp'
-          : 'sprites/backgrounds/learning-rogue/event-hallway.webp')})`
+        backgroundImage: getEnvironmentBackgroundCss(visualTheme, 'event', appearanceMode)
       }}
     >
         <div className="absolute inset-0 bg-slate-950/60 pointer-events-none" />
