@@ -1,7 +1,7 @@
 
 import React, { useMemo, useState, useEffect, useRef } from 'react';
 import { CARDS_LIBRARY, RELIC_LIBRARY, POTION_LIBRARY } from '../constants';
-import { Card as ICard, CharacterAppearanceMode, LanguageMode } from '../types';
+import { Card as ICard, LanguageMode } from '../types';
 import Card from './Card';
 import { BookOpen, Lock, ArrowLeft, Swords, Gem, FlaskConical, Skull, X, Music, StepBack, StepForward, Pause, Play, Square, Repeat, Heart, Users, Volume2, ChevronRight, Layers } from 'lucide-react';
 import EnemyIllustration from './EnemyIllustration';
@@ -29,7 +29,6 @@ interface CompendiumScreenProps {
     languageMode: LanguageMode;
     isDebug?: boolean;
     visualTheme?: VisualThemeId;
-    appearanceMode?: CharacterAppearanceMode;
 }
 
 type CompendiumEnemy = {
@@ -202,7 +201,7 @@ const COMPENDIUM_MINIGAME_BGM_TRACKS = new Set([
     'paper_plane_vacation',
 ]);
 
-const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, onBack, languageMode, isDebug = false, visualTheme = 'elementary', appearanceMode = 'STANDARD' }) => {
+const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, onBack, languageMode, isDebug = false, visualTheme = 'elementary' }) => {
     const [activeTab, setActiveTab] = useState<'CARDS' | 'RELICS' | 'POTIONS' | 'ENEMIES' | 'ENDINGS' | 'MINIGAMES'>('CARDS');
     const [unlockedRelics, setUnlockedRelics] = useState<string[]>([]);
     const [unlockedPotions, setUnlockedPotions] = useState<string[]>([]);
@@ -553,7 +552,6 @@ const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, 
                                             visualTheme={enemyCompendiumTheme}
                                             enemyType={enemy.enemyType}
                                             phase={enemy.phase}
-                                            appearanceMode={appearanceMode}
                                             altText={trans(enemyDisplayName, languageMode)}
                                         />
                                     </div>
@@ -701,7 +699,6 @@ const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, 
                                             visualTheme={enemyCompendiumTheme}
                                             enemyType={selectedItem.data.enemyType}
                                             phase={selectedItem.data.phase}
-                                            appearanceMode={appearanceMode}
                                             altText={trans(getEnemyDisplayName(selectedItem.data), languageMode)}
                                         />
                                     ) : <div className="w-full h-full flex items-center justify-center text-gray-700 text-4xl">?</div>}
@@ -748,7 +745,6 @@ const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, 
                         characterName={selectedThemedEnding.characterName}
                         languageMode={languageMode}
                         variantId={selectedThemedEnding.variant.id}
-                        appearanceMode={selectedThemedEnding.appearanceMode ?? (selectedThemedEnding.variant.pages.some(page => page.imagePath.includes('high-school-vacation')) ? 'VACATION' : 'STANDARD')}
                         onComplete={() => setSelectedThemedEnding(null)}
                     />
                     <button data-gamepad-back onClick={() => setSelectedThemedEnding(null)} className="absolute right-3 top-3 z-20 rounded-full border border-white/20 bg-black/70 p-2.5 text-white/90 hover:text-white"><X size={24} /></button>

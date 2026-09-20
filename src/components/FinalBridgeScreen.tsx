@@ -1,23 +1,21 @@
 
 import React, { useState, useEffect } from 'react';
-import { CharacterAppearanceMode, Player, LanguageMode } from '../types';
+import { Player, LanguageMode } from '../types';
 import { trans } from '../utils/textUtils';
 import { audioService } from '../services/audioService';
 import { ChevronRight, Sparkles, BookOpen, Heart } from 'lucide-react';
-import { getEnvironmentBackgroundCss, isVacationRun } from '../data/vacationEnvironmentAssets';
+import { assetUrl } from '../utils/assetPaths';
 
 interface FinalBridgeScreenProps {
   player: Player;
   onComplete: (upgradeType: 'HEAL' | 'APOTHEOSIS' | 'STRENGTH') => void;
   languageMode: LanguageMode;
   visualTheme?: 'elementary' | 'high-school' | 'magic';
-  appearanceMode?: CharacterAppearanceMode;
 }
 
-const FinalBridgeScreen: React.FC<FinalBridgeScreenProps> = ({ player, onComplete, languageMode, visualTheme = 'elementary', appearanceMode = 'STANDARD' }) => {
+const FinalBridgeScreen: React.FC<FinalBridgeScreenProps> = ({ player, onComplete, languageMode, visualTheme = 'elementary' }) => {
   const [step, setStep] = useState(0);
   const [showChoices, setShowChoices] = useState(false);
-  const vacation = isVacationRun(visualTheme, appearanceMode);
 
   const elementaryStoryTexts = [
     "ついに、校舎の最上階へと続く『最後の渡り廊下』にたどり着いた...",
@@ -40,24 +38,10 @@ const FinalBridgeScreen: React.FC<FinalBridgeScreenProps> = ({ player, onComplet
     "「あなたの願いも恋も、すべて私の秩序の中に封じましょう」",
     "答えはカードと学びの中にある。最後の準備を整えよう。"
   ];
-  const vacationHighSchoolStoryTexts = [
-    "花火の終わった夜の浜辺に、最終会場へ続く灯りが伸びている。",
-    "背後には、海辺の売店、夏祭り、仲間と越えてきた旅の記憶が残っている。",
-    "前方の防波堤の向こうには、夏の一日を永遠に閉じ込めようとする支配人が待っている。",
-    "「終わりを選ばなければ、楽しい旅はずっと続く」",
-    "けれど、帰る朝があるから思い出は輝く。最後の準備を整えよう。"
-  ];
-  const vacationMagicStoryTexts = [
-    "星界化した海の上に、光の道が伸びて巨大な月の結界へ続いている。",
-    "背後には、臨海研修、港町、夜祭、そして大切な人と交わした夏の記憶が残っている。",
-    "前方の星海リゾートには、永遠の夏を封じる大魔女校長が待っている。",
-    "「別れも迷いも消せば、このバカンスは完璧になる」",
-    "答えは、終わりを受け入れて次の朝へ進むこと。最後の準備を整えよう。"
-  ];
   const storyTexts = visualTheme === 'high-school'
-    ? (vacation ? vacationHighSchoolStoryTexts : highSchoolStoryTexts)
+    ? highSchoolStoryTexts
     : visualTheme === 'magic'
-      ? (vacation ? vacationMagicStoryTexts : magicStoryTexts)
+      ? magicStoryTexts
       : elementaryStoryTexts;
 
   useEffect(() => {
@@ -78,11 +62,9 @@ const FinalBridgeScreen: React.FC<FinalBridgeScreenProps> = ({ player, onComplet
     <div
       data-gamepad-initial-scope={`final-bridge-${showChoices ? 'choice' : `story-${step}`}`}
       className="main-final-bridge-screen w-full h-full bg-black bg-cover bg-center flex flex-col items-center justify-center p-8 relative overflow-hidden font-mono"
-      style={visualTheme === 'magic' || vacation
-        ? { backgroundImage: getEnvironmentBackgroundCss(visualTheme, 'finalBridge', appearanceMode) }
-        : undefined}
+      style={visualTheme === 'magic' ? { backgroundImage: `url(${assetUrl('sprites/backgrounds/learning-rogue/magic-final-bridge.webp')})` } : undefined}
     >
-      {(visualTheme === 'magic' || vacation) && <div className="absolute inset-0 bg-slate-950/45 pointer-events-none" />}
+      {visualTheme === 'magic' && <div className="absolute inset-0 bg-slate-950/45 pointer-events-none" />}
       {/* Background Parallax Stars Effect */}
       <div className="absolute inset-0 opacity-30 pointer-events-none">
         {[...Array(50)].map((_, i) => (

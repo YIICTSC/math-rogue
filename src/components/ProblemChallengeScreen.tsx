@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
-import { AnswerMode, AssignmentAnswerResult, AssignmentPayload, AssignmentReviewProblem, CharacterAppearanceMode, GameMode, LanguageMode, GameScreen } from '../types';
+import { AnswerMode, AssignmentAnswerResult, AssignmentPayload, AssignmentReviewProblem, GameMode, LanguageMode, GameScreen } from '../types';
 import { storageService } from '../services/storageService';
 import { audioService, type BgmThemeId } from '../services/audioService';
 import MathChallengeScreen from './MathChallengeScreen';
@@ -15,12 +15,12 @@ import { NATIVE_ENGLISH_GRADE_UNITS, NativeEnglishSubjectId } from '../nativeEng
 import { SCIENCE_GRADE_UNITS, getScienceGradeMode } from '../scienceUnitConfig';
 import { SOCIAL_GRADE_UNITS, getSocialGradeMode } from '../socialUnitConfig';
 import { trans, transProblemSubjectName } from '../utils/textUtils';
+import { assetUrl } from '../utils/assetPaths';
 import { saveAnswerModePreference } from '../utils/answerMode';
 import { getInitialProblemSetView, type ProblemSetView } from '../utils/localePreferences';
 import { formatProblemSelectionUnitName } from '../utils/problemUnitName';
 import { UPPER_KANJI_SUB_MODE_IDS, UPPER_PROBLEM_CATEGORIES } from './ModeSelectionScreen';
 import type { VisualThemeId } from '../data/visualThemes';
-import { getEnvironmentBackgroundCss } from '../data/vacationEnvironmentAssets';
 
 interface ProblemChallengeScreenProps {
   onBack: () => void;
@@ -31,7 +31,6 @@ interface ProblemChallengeScreenProps {
   problemSourceAssignment?: AssignmentPayload | null;
   onAnswerResult?: (result: AssignmentAnswerResult) => void;
   visualTheme?: VisualThemeId;
-  appearanceMode?: CharacterAppearanceMode;
 }
 
 type ProblemChallengeBgmOption = {
@@ -702,7 +701,6 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
   problemSourceAssignment,
   onAnswerResult,
   visualTheme = 'elementary',
-  appearanceMode = 'STANDARD',
 }) => {
   const [phase, setPhase] = useState<'SELECT' | 'CHALLENGE'>('SELECT');
   const [selectedCategory, setSelectedCategory] = useState<SubjectCategoryConfig>(SUBJECT_CATEGORIES[0]);
@@ -1089,7 +1087,9 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
         data-allow-japanese="true"
         className="ios-edge-to-edge main-problem-challenge-active-screen w-full h-full relative bg-black bg-cover bg-center flex flex-col"
         style={{
-          backgroundImage: getEnvironmentBackgroundCss(visualTheme, 'challenge', appearanceMode)
+          backgroundImage: `url(${assetUrl(visualTheme === 'magic'
+            ? 'sprites/backgrounds/learning-rogue/magic-compendium-library.webp'
+            : 'sprites/backgrounds/learning-rogue/compendium-library.webp')})`
         }}
       >
         <div className="absolute inset-0 bg-slate-950/62 pointer-events-none" />
@@ -1204,7 +1204,9 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
       data-gamepad-initial-scope={`problem-challenge-${problemSetView}-${selectedCategory.id}`}
       className="main-problem-challenge-screen w-full h-full bg-slate-950 bg-cover bg-center flex flex-col relative overflow-hidden"
       style={{
-        backgroundImage: getEnvironmentBackgroundCss(visualTheme, 'challengeSelect', appearanceMode)
+        backgroundImage: `url(${assetUrl(visualTheme === 'magic'
+          ? 'sprites/backgrounds/learning-rogue/magic-selection-entrance.webp'
+          : 'sprites/backgrounds/learning-rogue/selection-entrance.webp')})`
       }}
     >
       <div className="absolute inset-0 bg-slate-950/65 pointer-events-none"></div>

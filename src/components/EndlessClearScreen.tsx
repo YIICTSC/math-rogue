@@ -1,17 +1,14 @@
 import React, { useMemo } from 'react';
 import { ChevronRight, Home, Infinity as InfinityIcon, Sparkles } from 'lucide-react';
 import { ADDITIONAL_CARDS } from '../constants1';
-import { CharacterAppearanceMode, LanguageMode, Card as ICard } from '../types';
+import { LanguageMode, Card as ICard } from '../types';
 import { buildEnglishCardDescription, trans, transEventText } from '../utils/textUtils';
 import { getEndlessChapterResult } from '../data/endlessChapterResults';
-import { getVacationEndlessChapterResult } from '../data/endlessVacationChapterResults';
-import { getEnvironmentBackgroundCss, isVacationRun } from '../data/vacationEnvironmentAssets';
 import Card from './Card';
 
 interface EndlessClearScreenProps {
   languageMode: LanguageMode;
   visualTheme?: 'elementary' | 'high-school' | 'magic';
-  appearanceMode?: CharacterAppearanceMode;
   newlyUnlockedCardName?: string;
   onReturnToTitle: () => void;
   onEnterTrueEndless: () => void;
@@ -20,7 +17,6 @@ interface EndlessClearScreenProps {
 const EndlessClearScreen: React.FC<EndlessClearScreenProps> = ({
   languageMode,
   visualTheme = 'elementary',
-  appearanceMode = 'STANDARD',
   newlyUnlockedCardName,
   onReturnToTitle,
   onEnterTrueEndless,
@@ -31,8 +27,7 @@ const EndlessClearScreen: React.FC<EndlessClearScreenProps> = ({
     return cardTemplate ? ({ ...cardTemplate, id: `endless-clear-${cardTemplate.name}` } as ICard) : null;
   }, [newlyUnlockedCardName]);
 
-  const vacation = isVacationRun(visualTheme, appearanceMode);
-  const finalRecord = vacation ? getVacationEndlessChapterResult(50, true) : getEndlessChapterResult(50);
+  const finalRecord = getEndlessChapterResult(50);
   const finalRecordTitle = languageMode === 'ENGLISH'
     ? finalRecord.englishTitle
     : languageMode === 'HIRAGANA'
@@ -50,8 +45,7 @@ const EndlessClearScreen: React.FC<EndlessClearScreenProps> = ({
   return (
     <div
       data-gamepad-initial-scope="endless-clear"
-      className="ios-edge-to-edge relative flex h-full w-full items-center justify-center overflow-hidden bg-[radial-gradient(circle_at_center,_#172554_0%,_#09090b_58%,_#000_100%)] bg-cover bg-center p-4 font-mono sm:p-8"
-      style={{ backgroundImage: vacation ? getEnvironmentBackgroundCss(visualTheme, 'actClear', appearanceMode) : undefined }}
+      className="ios-edge-to-edge relative flex h-full w-full items-center justify-center overflow-hidden bg-[radial-gradient(circle_at_center,_#172554_0%,_#09090b_58%,_#000_100%)] p-4 font-mono sm:p-8"
     >
       <div className="pointer-events-none absolute inset-0 opacity-15">
         <InfinityIcon className="absolute left-1/2 top-1/2 h-[28rem] w-[28rem] -translate-x-1/2 -translate-y-1/2 text-cyan-300" />
@@ -62,22 +56,14 @@ const EndlessClearScreen: React.FC<EndlessClearScreenProps> = ({
             <Sparkles size={16} /> {languageMode === 'ENGLISH' ? 'FINAL RECORD' : languageMode === 'HIRAGANA' ? 'さいしゅう きろく' : '最終記録'} <Sparkles size={16} />
           </div>
           <h1 className="text-3xl font-black italic tracking-tight text-white sm:text-5xl">
-            {languageMode === 'ENGLISH'
-              ? (vacation ? 'SEASIDE ENDLESS CLEARED' : 'ENDLESS MODE CLEARED')
-              : languageMode === 'HIRAGANA'
-                ? 'えんどれすもーど くりあ'
-                : (vacation ? '海辺のエンドレス旅を完走' : 'エンドレスモード クリア')}
+            {languageMode === 'ENGLISH' ? 'ENDLESS MODE CLEARED' : languageMode === 'HIRAGANA' ? 'えんどれすもーど くりあ' : 'エンドレスモード クリア'}
           </h1>
           <p className="mt-3 text-sm font-bold leading-7 text-slate-300 sm:text-base">
             {languageMode === 'ENGLISH'
-              ? (vacation
-                ? 'You crossed all 50 seaside chapters and reached the true ending. The summer route can rest here—or continue beyond its horizon.'
-                : 'You crossed all 50 chapters and reached the true ending. The record can end here—or continue beyond its boundary.')
+              ? 'You crossed all 50 chapters and reached the true ending. The record can end here—or continue beyond its boundary.'
               : languageMode === 'HIRAGANA'
                 ? 'ごじゅっしょうを こえて、しんえんでぃんぐに たどりついた。ここで おわるか、きろくの そとへ すすむかを えらべる。'
-                : (vacation
-                  ? '海辺の全50章を踏破し、真エンディングに到達した。ここで夏の記録を休ませるか、水平線の先へ進むかを選べる。'
-                  : '全50章を踏破し、真エンディングに到達した。ここで記録を終えるか、その境界の外側へ進むかを選べる.')}
+                : '全50章を踏破し、真エンディングに到達した。ここで記録を終えるか、その境界の外側へ進むかを選べる。'}
           </p>
         </div>
 

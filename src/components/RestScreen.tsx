@@ -1,13 +1,13 @@
 
 import React, { useEffect, useState } from 'react';
-import { CharacterAppearanceMode, Player, Card as ICard, LanguageMode } from '../types';
+import { Player, Card as ICard, LanguageMode } from '../types';
 import Card from './Card';
 import { BedDouble, Hammer, ArrowRight, FlaskConical, Plus, Shuffle, Check, DoorOpen, Eraser, ShoppingBag, Layers } from 'lucide-react';
 import { getUpgradedCard } from '../utils/cardUtils';
 import { trans } from '../utils/textUtils';
+import { assetUrl } from '../utils/assetPaths';
 import { CARD_ERASER_NAME, getErasableEffectOptions } from '../utils/cardEraser';
 import type { VisualThemeId } from '../data/visualThemes';
-import { getEnvironmentBackgroundCss, getVacationEnvironmentCopy, isVacationRun } from '../data/vacationEnvironmentAssets';
 
 const REST_SHORTCUT_KEYS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', 'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', 'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l'];
 
@@ -24,7 +24,6 @@ interface RestScreenProps {
   interactionDisabled?: boolean;
   interactionDisabledMessage?: string;
   visualTheme?: VisualThemeId;
-  appearanceMode?: CharacterAppearanceMode;
   /** Enabled after an endless major boss so the intermission always offers
    * the documented rest/shop/deck-organization choices. */
   endlessMajorBoss?: boolean;
@@ -32,11 +31,9 @@ interface RestScreenProps {
   onOrganizeDeck?: (deck: ICard[]) => void;
 }
 
-const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSynthesize, onSelfStudy, onLeave, languageMode, typingMode = false, scienceRoomChance = 0.5, interactionDisabled = false, interactionDisabledMessage, visualTheme = 'elementary', appearanceMode = 'STANDARD', endlessMajorBoss = false, onOpenShop, onOrganizeDeck }) => {
+const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSynthesize, onSelfStudy, onLeave, languageMode, typingMode = false, scienceRoomChance = 0.5, interactionDisabled = false, interactionDisabledMessage, visualTheme = 'elementary', endlessMajorBoss = false, onOpenShop, onOrganizeDeck }) => {
   const isMagic = visualTheme === 'magic';
-  const vacation = isVacationRun(visualTheme, appearanceMode);
-  const vacationCopy = getVacationEnvironmentCopy(visualTheme, appearanceMode);
-  const restHubMessage = vacationCopy?.restHub ?? (isMagic ? "特別結界室だ。魔力を整えて、次の出撃に備えよう。" : "放課後の校舎だ。どこへ行こう？");
+  const restHubMessage = isMagic ? "特別結界室だ。魔力を整えて、次の出撃に備えよう。" : "放課後の校舎だ。どこへ行こう？";
   const [mode, setMode] = useState<'CHOICE' | 'UPGRADE' | 'SYNTHESIS' | 'SELF_STUDY' | 'DECK' | 'ERASER_EFFECT' | 'PREVIEW_UPGRADE' | 'PREVIEW_SYNTHESIS' | 'RESULT' | 'DONE'>('CHOICE');
   const [message, setMessage] = useState(restHubMessage);
   const [selectedCard, setSelectedCard] = useState<ICard | null>(null);
@@ -151,17 +148,14 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
       onRest();
       setMode('DONE');
       setMessage(languageMode === 'ENGLISH'
-          ? (vacation ? `You rested by the seaside. Healed ${healAmount} HP!` : `You took a nap in the infirmary bed. Healed ${healAmount} HP!`)
-          : vacation ? `${isMagic ? '星砂の休息結界' : '海辺の休憩所'}でひと息ついた。HPが ${healAmount} 回復した！`
-            : isMagic ? `特別結界室で魔力を整えた。HPが ${healAmount} 回復した！` : `保健室のベッドで仮眠をとった。HPが ${healAmount} 回復した！`);
+          ? `You took a nap in the infirmary bed. Healed ${healAmount} HP!`
+          : isMagic ? `特別結界室で魔力を整えた。HPが ${healAmount} 回復した！` : `保健室のベッドで仮眠をとった。HPが ${healAmount} 回復した！`);
   };
 
   const handleSmithChoice = () => {
       if (interactionDisabled) return;
       setMode('UPGRADE');
-      setMessage(vacation
-          ? (isMagic ? "星砂の工房だ。どのカードに潮光の強化を施す？" : "夏の工房だ。どのカードに旅の工夫を加える？")
-          : isMagic ? "魔法工房だ。どのカードに星屑の強化を施す？" : "図工室だ。どの道具（カード）を改良する？");
+      setMessage(isMagic ? "魔法工房だ。どのカードに星屑の強化を施す？" : "図工室だ。どの道具（カード）を改良する？");
   };
 
   const handleSynthesizeChoice = () => {
@@ -173,11 +167,7 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
       }
       setMode('SYNTHESIS');
       setSynthCards([]);
-      setMessage(vacation
-          ? (isMagic
-            ? (isMage ? `潮汐錬金台だ。共鳴させたいカードを3枚選んで。\n(時環の錬金術師特典：3枚合成！)` : "潮汐錬金台だ。共鳴させたいカードを2枚選んで。")
-            : (isMage ? `海辺の実験テラスだ。混ぜ合わせたいカードを3枚選んでね。\n(理科クラブ部長特典：3枚合成！)` : "海辺の実験テラスだ。混ぜ合わせたいカードを2枚選んでね。"))
-          : isMagic
+      setMessage(isMagic
           ? (isMage ? `錬金結界だ。共鳴させたいカードを3枚選んで。\n(時環の錬金術師特典：3枚合成！)` : "錬金結界だ。共鳴させたいカードを2枚選んで。")
           : (isMage ? `理科室だ。混ぜ合わせたいカードを3枚選んでね。\n(理科クラブ部長特典：3枚合成！)` : "理科室だ。混ぜ合わせたいカードを2枚選んでね。"));
   };
@@ -186,9 +176,7 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
       if (interactionDisabled || !hasCardEraser) return;
       setMode('SELF_STUDY');
       setSelectedCard(null);
-      setMessage(vacation
-          ? (isMagic ? "星砂の静かなテラスだ。どのカードから乱れた魔力をほどく？" : "旅のノートを開こう。どのカードの不要な効果を消す？")
-          : isMagic ? "静かな祈りの間だ。どのカードから乱れた魔力をほどく？" : "自習だ。カード消しゴムで、どのカードの不要な効果を消す？");
+      setMessage(isMagic ? "静かな祈りの間だ。どのカードから乱れた魔力をほどく？" : "自習だ。カード消しゴムで、どのカードの不要な効果を消す？");
   };
 
   const handleDeckChoice = () => {
@@ -325,7 +313,9 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
       data-gamepad-initial-scope={`rest-${mode}`}
       className="main-rest-screen flex flex-col h-full w-full bg-gray-900 bg-cover bg-center text-white relative items-center justify-center p-4 md:p-8"
       style={{
-        backgroundImage: getEnvironmentBackgroundCss(visualTheme, 'rest', appearanceMode)
+        backgroundImage: `url(${assetUrl(visualTheme === 'magic'
+          ? 'sprites/backgrounds/learning-rogue/magic-rest-infirmary.webp'
+          : 'sprites/backgrounds/learning-rogue/rest-infirmary.webp')})`
       }}
     >
         <div className="absolute inset-0 bg-slate-950/58 pointer-events-none" />
@@ -337,7 +327,7 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
                 </div>
             )}
             <h2 className="text-3xl md:text-4xl text-orange-500 font-bold mb-4 flex items-center justify-center shrink-0">
-                <DoorOpen className="mr-3" /> {trans(vacation ? (isMagic ? "魔法リゾート休息所" : "海辺の休憩所") : (isMagic ? "特別結界室" : "放課後の探索"), languageMode)}
+                <DoorOpen className="mr-3" /> {trans(isMagic ? "特別結界室" : "放課後の探索", languageMode)}
             </h2>
             <p className="text-lg md:text-xl text-gray-300 mb-6 min-h-[3rem] shrink-0 whitespace-pre-wrap">{trans(message, languageMode)}</p>
 
@@ -354,7 +344,7 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
                             >
                                 {typingMode && <div className="absolute right-2 top-2 rounded-full border border-cyan-300 bg-cyan-950/95 px-1.5 py-0.5 text-[10px] font-black text-cyan-200">1</div>}
                                 <BedDouble size={40} className="text-green-500 group-hover:scale-110 transition-transform" />
-                                <span className="font-bold text-lg">{trans(vacation ? (isMagic ? "星砂の休息結界" : "海辺のベンチ") : "保健室", languageMode)}</span>
+                                <span className="font-bold text-lg">{trans("保健室", languageMode)}</span>
                                 <span className="text-xs text-gray-400">HP {healAmount} {trans("回復", languageMode)}</span>
                             </button>
                         </>
@@ -368,7 +358,7 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
                     >
                         {typingMode && <div className="absolute right-2 top-2 rounded-full border border-cyan-300 bg-cyan-950/95 px-1.5 py-0.5 text-[10px] font-black text-cyan-200">2</div>}
                         <Hammer size={40} className="text-yellow-500 group-hover:rotate-12 transition-transform" />
-                        <span className="font-bold text-lg">{trans(vacation ? (isMagic ? "星砂の工房" : "夏の工房") : "図工室", languageMode)}</span>
+                        <span className="font-bold text-lg">{trans("図工室", languageMode)}</span>
                         <span className="text-xs text-gray-400">{trans("カード強化", languageMode)}</span>
                     </button>
 
@@ -385,7 +375,7 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
                     >
                         {typingMode && <div className="absolute right-2 top-2 rounded-full border border-cyan-300 bg-cyan-950/95 px-1.5 py-0.5 text-[10px] font-black text-cyan-200">3</div>}
                         <FlaskConical size={40} className={`text-purple-500 ${scienceRoomAvailable ? 'group-hover:shake' : ''} transition-transform`} />
-                        <span className="font-bold text-lg">{trans(vacation ? (isMagic ? "潮汐錬金台" : "海辺の実験テラス") : "理科室", languageMode)}</span>
+                        <span className="font-bold text-lg">{trans("理科室", languageMode)}</span>
                         <span className="text-xs text-gray-400">
                             {scienceRoomAvailable 
                                 ? (isMage ? trans("3枚合成", languageMode) : trans("カード合成", languageMode)) 

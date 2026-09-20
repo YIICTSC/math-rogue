@@ -1,13 +1,13 @@
 
 import React, { useEffect, useMemo, useState, useRef } from 'react';
-import { Player, Card as ICard, Relic, Potion, CharacterAppearanceMode, LanguageMode } from '../types';
+import { Player, Card as ICard, Relic, Potion, LanguageMode } from '../types';
 import Card from './Card';
 import CardInspectionModal from './CardInspectionModal';
 import { ShoppingBag, Trash2, Coins, Gem, FlaskConical, X } from 'lucide-react';
 import { trans } from '../utils/textUtils';
+import { assetUrl } from '../utils/assetPaths';
 import { PotionIcon, RelicIcon } from './ItemIcon';
 import type { VisualThemeId } from '../data/visualThemes';
-import { getEnvironmentBackgroundCss, getVacationEnvironmentCopy } from '../data/vacationEnvironmentAssets';
 
 interface ShopScreenProps {
   player: Player;
@@ -28,13 +28,12 @@ interface ShopScreenProps {
   interactionDisabled?: boolean;
   interactionDisabledMessage?: string;
   visualTheme?: VisualThemeId;
-  appearanceMode?: CharacterAppearanceMode;
 }
 
 const REMOVE_COST = 75;
 const SHOP_SHORTCUT_KEYS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', 'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', 'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l'];
 
-const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics = [], shopPotions = [], onBuyCard, onBuyRelic, onBuyPotion, onRemoveCard, onLeave, languageMode, potionCapacity = 3, typingMode = false, priceMultiplier = 1, shopDiscountPercent = 0, removeCost, interactionDisabled = false, interactionDisabledMessage, visualTheme = 'elementary', appearanceMode = 'STANDARD' }) => {
+const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics = [], shopPotions = [], onBuyCard, onBuyRelic, onBuyPotion, onRemoveCard, onLeave, languageMode, potionCapacity = 3, typingMode = false, priceMultiplier = 1, shopDiscountPercent = 0, removeCost, interactionDisabled = false, interactionDisabledMessage, visualTheme = 'elementary' }) => {
   const [purchasedIds, setPurchasedIds] = useState<string[]>([]);
   const [removed, setRemoved] = useState(false);
   const [viewMode, setViewMode] = useState<'BUY' | 'REMOVE'>('BUY');
@@ -44,7 +43,6 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics =
   const longPressTimer = useRef<any>(null);
   const startPos = useRef({ x: 0, y: 0 });
   const currencyLabel = visualTheme === 'magic' ? '魔晶' : '円';
-  const vacationCopy = getVacationEnvironmentCopy(visualTheme, appearanceMode);
 
   const handlePointerDown = (e: React.PointerEvent, itemType: 'RELIC' | 'POTION', data: any) => {
       startPos.current = { x: e.clientX, y: e.clientY };
@@ -208,7 +206,9 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics =
       data-gamepad-initial-scope="shop-screen"
       className="main-shop-screen flex flex-col h-full w-full bg-gray-900 bg-cover bg-center text-white relative"
       style={{
-        backgroundImage: getEnvironmentBackgroundCss(visualTheme, 'shop', appearanceMode)
+        backgroundImage: `url(${assetUrl(visualTheme === 'magic'
+          ? 'sprites/backgrounds/learning-rogue/magic-shop-store.webp'
+          : 'sprites/backgrounds/learning-rogue/shop-store.webp')})`
       }}
     >
        <div className="absolute inset-0 bg-slate-950/60 pointer-events-none" />
@@ -257,8 +257,8 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics =
            <div className="flex items-center">
                <ShoppingBag size={24} className="text-yellow-500 mr-2" />
                <div>
-                   <h2 className="text-xl font-bold text-yellow-100">{trans(vacationCopy?.shopTitle ?? (visualTheme === 'magic' ? "魔法購買部" : "購買部"), languageMode)}</h2>
-                   <p className="text-xs text-gray-400">「{trans(vacationCopy?.shopDescription ?? (visualTheme === 'magic' ? "結界遠征向けの護符と魔法薬、揃ってるよ" : "いいもの揃ってるよ..."), languageMode)}」</p>
+                   <h2 className="text-xl font-bold text-yellow-100">{trans(visualTheme === 'magic' ? "魔法購買部" : "購買部", languageMode)}</h2>
+                   <p className="text-xs text-gray-400">「{trans(visualTheme === 'magic' ? "結界遠征向けの護符と魔法薬、揃ってるよ" : "いいもの揃ってるよ...", languageMode)}」</p>
                </div>
            </div>
            {shopDiscountPercent > 0 && (

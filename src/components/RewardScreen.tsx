@@ -1,14 +1,14 @@
 
 import React, { useEffect, useState, useRef } from 'react';
-import { Card as ICard, CharacterAppearanceMode, RewardItem, Potion, LanguageMode, RaceTrickCard, CoopSupportCard } from '../types';
+import { Card as ICard, RewardItem, Potion, LanguageMode, RaceTrickCard, CoopSupportCard } from '../types';
 import Card from './Card';
 import CardInspectionModal from './CardInspectionModal';
 import { Gift, Gem, Coins, FlaskConical, X, Flag, Sparkles, Users } from 'lucide-react';
 import { trans } from '../utils/textUtils';
+import { assetUrl } from '../utils/assetPaths';
 import { PotionIcon, RelicIcon } from './ItemIcon';
 import type { VisualThemeId } from '../data/visualThemes';
 import type { EndlessRewardChoice } from '../data/endlessMode';
-import { getEnvironmentBackgroundCss, getVacationEnvironmentCopy } from '../data/vacationEnvironmentAssets';
 
 interface RewardScreenProps {
   rewards: RewardItem[];
@@ -26,7 +26,6 @@ interface RewardScreenProps {
   interactionDisabled?: boolean;
   interactionDisabledMessage?: string;
   visualTheme?: VisualThemeId;
-  appearanceMode?: CharacterAppearanceMode;
   endlessFloor?: number;
   endlessBossName?: string;
   endlessBonusGold?: number;
@@ -34,13 +33,12 @@ interface RewardScreenProps {
   endlessRerollAvailable?: boolean;
 }
 
-const RewardScreen: React.FC<RewardScreenProps> = ({ rewards, onSelectReward, onSkip, isLoading, currentPotions = [], potionCapacity = 3, languageMode, typingMode = false, dummyRewards = 0, autoSkipWhenEmpty = true, skipDisabled = false, skipDisabledMessage, interactionDisabled = false, interactionDisabledMessage, visualTheme = 'elementary', appearanceMode = 'STANDARD', endlessFloor, endlessBossName, endlessBonusGold, onRerollEndlessReward, endlessRerollAvailable = false }) => {
+const RewardScreen: React.FC<RewardScreenProps> = ({ rewards, onSelectReward, onSkip, isLoading, currentPotions = [], potionCapacity = 3, languageMode, typingMode = false, dummyRewards = 0, autoSkipWhenEmpty = true, skipDisabled = false, skipDisabledMessage, interactionDisabled = false, interactionDisabledMessage, visualTheme = 'elementary', endlessFloor, endlessBossName, endlessBonusGold, onRerollEndlessReward, endlessRerollAvailable = false }) => {
   const [replaceReward, setReplaceReward] = useState<RewardItem | null>(null);
   const [inspectedItem, setInspectedItem] = useState<{ type: 'CARD' | 'RELIC' | 'POTION', data: any } | null>(null);
   const longPressTimer = useRef<any>(null);
   const startPos = useRef({ x: 0, y: 0 });
   const currencyLabel = visualTheme === 'magic' ? '魔晶' : 'ゴールド';
-  const vacationCopy = getVacationEnvironmentCopy(visualTheme, appearanceMode);
 
   const handlePointerDown = (e: React.PointerEvent, itemType: 'RELIC' | 'POTION', data: any) => {
       startPos.current = { x: e.clientX, y: e.clientY };
@@ -141,7 +139,9 @@ const RewardScreen: React.FC<RewardScreenProps> = ({ rewards, onSelectReward, on
       data-gamepad-navigation-root
       className="main-reward-screen flex flex-col items-center justify-center h-full w-full bg-gray-900 bg-cover bg-center text-white relative p-4"
       style={{
-        backgroundImage: getEnvironmentBackgroundCss(visualTheme, 'reward', appearanceMode)
+        backgroundImage: `url(${assetUrl(visualTheme === 'magic'
+          ? 'sprites/backgrounds/learning-rogue/magic-reward-sanctuary.webp'
+          : 'sprites/backgrounds/learning-rogue/reward-rooftop.webp')})`
       }}
     >
       <div className="absolute inset-0 bg-slate-950/58 pointer-events-none" />
@@ -230,7 +230,7 @@ const RewardScreen: React.FC<RewardScreenProps> = ({ rewards, onSelectReward, on
           </div>
         )}
         <h2 className="text-3xl md:text-4xl text-amber-100 font-bold mb-2 flex items-center justify-center animate-pulse drop-shadow-[0_2px_4px_rgba(0,0,0,0.95)] [text-shadow:0_0_10px_rgba(120,53,15,0.95)]">
-          <Gift className="mr-3" size={32} /> {trans(vacationCopy?.rewardTitle ?? (visualTheme === 'magic' ? "魔力回収" : "勝利"), languageMode)}
+          <Gift className="mr-3" size={32} /> {trans(visualTheme === 'magic' ? "魔力回収" : "勝利", languageMode)}
         </h2>
         {rewards.some(reward => reward.type === 'ENDLESS_REWARD') && (
           <div className="mx-auto mb-2 max-w-2xl rounded-lg border border-fuchsia-400/50 bg-fuchsia-950/40 px-3 py-2 text-xs font-black text-fuchsia-100">
@@ -239,7 +239,7 @@ const RewardScreen: React.FC<RewardScreenProps> = ({ rewards, onSelectReward, on
             {typeof endlessBonusGold === 'number' && <span className="ml-2 text-amber-200">+{endlessBonusGold}G</span>}
           </div>
         )}
-        <p className="text-white text-sm font-bold drop-shadow-[0_2px_3px_rgba(0,0,0,0.95)] [text-shadow:0_0_8px_rgba(15,23,42,0.9)]">{trans(vacationCopy?.rewardDescription ?? (visualTheme === 'magic' ? "結界に残った魔力から、次に持ち込む力を選んでください" : "欲しい報酬を選択してください"), languageMode)}</p>
+        <p className="text-white text-sm font-bold drop-shadow-[0_2px_3px_rgba(0,0,0,0.95)] [text-shadow:0_0_8px_rgba(15,23,42,0.9)]">{trans(visualTheme === 'magic' ? "結界に残った魔力から、次に持ち込む力を選んでください" : "欲しい報酬を選択してください", languageMode)}</p>
         {rewards.some(reward => reward.type === 'ENDLESS_REWARD') && onRerollEndlessReward && (
           <button
             type="button"

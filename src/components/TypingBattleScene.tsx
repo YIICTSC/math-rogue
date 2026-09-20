@@ -1053,7 +1053,6 @@ const TypingBattleScene: React.FC<TypingBattleSceneProps> = ({
                                         enemyType={enemy.enemyType}
                                         phase={enemy.phase}
                                         action={highSchoolEnemyAction}
-                                        appearanceMode={player.appearanceMode}
                                         className="relative z-10 h-full w-full drop-shadow-lg"
                                     />
                                     {!isFinisherActive && <StandardFloatingTextOverlay data={enemy.floatingText} languageMode={languageMode} />}

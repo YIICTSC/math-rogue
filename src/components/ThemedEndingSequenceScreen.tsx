@@ -1,11 +1,10 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { ChevronRight, Sparkles } from 'lucide-react';
-import type { CharacterAppearanceMode, LanguageMode } from '../types';
+import type { LanguageMode } from '../types';
 import type { NonMagicEndingTheme } from '../data/themedEndingSequences';
 import { getThemedEndingToneLabel, getThemedEndingVariants, getThemedEndingVoiceHeroId, type ThemedEndingVariant } from '../data/themedEndingSequences';
 import { assetUrl } from '../utils/assetPaths';
 import { audioService } from '../services/audioService';
-import { getEnvironmentBackgroundPath } from '../data/vacationEnvironmentAssets';
 
 interface Props {
   theme: NonMagicEndingTheme;
@@ -13,12 +12,11 @@ interface Props {
   characterName: string;
   languageMode: LanguageMode;
   variantId?: string;
-  appearanceMode?: CharacterAppearanceMode;
   onComplete: (variant: ThemedEndingVariant) => void;
 }
 
-const ThemedEndingSequenceScreen: React.FC<Props> = ({ theme, characterId, characterName, languageMode, variantId, appearanceMode = 'STANDARD', onComplete }) => {
-  const variants = useMemo(() => getThemedEndingVariants(theme, characterId, characterName, appearanceMode), [appearanceMode, characterId, characterName, theme]);
+const ThemedEndingSequenceScreen: React.FC<Props> = ({ theme, characterId, characterName, languageMode, variantId, onComplete }) => {
+  const variants = useMemo(() => getThemedEndingVariants(theme, characterId, characterName), [characterId, characterName, theme]);
   const [variantIndex] = useState(() => {
     const requestedIndex = variantId ? variants.findIndex(variant => variant.id === variantId) : -1;
     return requestedIndex >= 0 ? requestedIndex : Math.floor(Math.random() * Math.max(1, variants.length));
@@ -40,13 +38,9 @@ const ThemedEndingSequenceScreen: React.FC<Props> = ({ theme, characterId, chara
 
   const isLast = pageIndex >= variant.pages.length - 1;
   const localizedTone = getThemedEndingToneLabel(variant.tone, languageMode);
-  const fallback = appearanceMode === 'VACATION'
-    ? getEnvironmentBackgroundPath(theme, 'actClear', appearanceMode)
-    : theme === 'high-school'
-      ? 'sprites/backgrounds/learning-rogue/high-school-act-clear.webp'
-      : theme === 'magic'
-        ? 'sprites/backgrounds/learning-rogue/magic-act-clear.webp'
-        : 'sprites/backgrounds/learning-rogue/reward-rooftop.webp';
+  const fallback = theme === 'high-school'
+    ? 'sprites/backgrounds/learning-rogue/high-school-act-clear.webp'
+    : 'sprites/backgrounds/learning-rogue/reward-rooftop.webp';
   const localizedTitle = languageMode === 'ENGLISH' ? page.titleEnglish : languageMode === 'HIRAGANA' ? page.titleHiragana : page.title;
   const localizedText = languageMode === 'ENGLISH' ? page.textEnglish : languageMode === 'HIRAGANA' ? page.textHiragana : page.text;
   const handleContinue = () => {

@@ -923,40 +923,18 @@ export const getThemedHumanoidEnemySpritePath = (
   enemy: Pick<Enemy, 'name' | 'enemyType' | 'phase'>,
   theme: VisualThemeId,
   action: HighSchoolEnemyAction,
-  appearanceMode: CharacterAppearanceMode = 'STANDARD',
 ) => {
-  if (theme === 'high-school') {
-    const variant = getHighSchoolHumanoidEnemyVariant(enemy);
-    if (!variant) return null;
-    const folder = action === 'idle' ? 'vacation-humanoid-enemies' : `vacation-humanoid-enemies-${action}`;
-    return appearanceMode === 'VACATION'
-      ? assetUrl(`sprites/high-school/${folder}/${variant.imageIndex}.webp`)
-      : getHighSchoolHumanoidEnemySpritePath(enemy, action);
-  }
-  if (theme === 'magic') {
-    const variant = getMagicHumanoidEnemyVariant(enemy);
-    if (!variant) return null;
-    const folder = action === 'idle' ? 'vacation-humanoid-enemies' : `vacation-humanoid-enemies-${action}`;
-    return appearanceMode === 'VACATION'
-      ? assetUrl(`sprites/magic/${folder}/${variant.imageIndex}.webp`)
-      : getMagicHumanoidEnemySpritePath(enemy, action);
-  }
+  if (theme === 'high-school') return getHighSchoolHumanoidEnemySpritePath(enemy, action);
+  if (theme === 'magic') return getMagicHumanoidEnemySpritePath(enemy, action);
   return null;
 };
 
 export const getThemedMonsterEnemySpritePath = (
   enemy: Pick<Enemy, 'name' | 'enemyType' | 'phase'>,
   theme: VisualThemeId,
-  appearanceMode: CharacterAppearanceMode = 'STANDARD',
 ) => {
-  if (theme === 'high-school') {
-    const folder = appearanceMode === 'VACATION' ? 'vacation-enemies' : 'enemies';
-    return assetUrl(`sprites/high-school/${folder}/${getHighSchoolEnemyVariant(enemy).imageIndex}.webp`);
-  }
-  if (theme === 'magic') {
-    const folder = appearanceMode === 'VACATION' ? 'vacation-enemies' : 'enemies';
-    return assetUrl(`sprites/magic/${folder}/${getMagicEnemyVariant(enemy).imageIndex}.webp`);
-  }
+  if (theme === 'high-school') return assetUrl(`sprites/high-school/enemies/${getHighSchoolEnemyVariant(enemy).imageIndex}.webp`);
+  if (theme === 'magic') return assetUrl(`sprites/magic/enemies/${getMagicEnemyVariant(enemy).imageIndex}.webp`);
   return null;
 };
 

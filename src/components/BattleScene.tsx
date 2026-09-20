@@ -1,5 +1,5 @@
 
-import { CharacterAppearanceMode, Enemy, Player, Card as ICard, CardType, SelectionState, Potion, FloatingText, EnemyIntentType, LanguageMode, ParryState, VisualEffectInstance, CoopSupportCard, RaceTrickCard, AttackEffectKey, ActiveFamiliar } from '../types';
+import { Enemy, Player, Card as ICard, CardType, SelectionState, Potion, FloatingText, EnemyIntentType, LanguageMode, ParryState, VisualEffectInstance, CoopSupportCard, RaceTrickCard, AttackEffectKey, ActiveFamiliar } from '../types';
 import Card from './Card';
 import CardInspectionModal from './CardInspectionModal';
 import { Heart, Shield, Zap, Skull, Layers, X, Sword, AlertCircle, TrendingDown, Droplets, Hexagon, Gem, FlaskConical, Info, FileText, MoreHorizontal, Users, Sparkles, Bookmark, MessageCircle, Mic, ArrowRight, MousePointer2, ChevronsRight, ChevronDown, Flame, RotateCcw, Triangle, Settings } from 'lucide-react';
@@ -1366,7 +1366,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
         >
             {visualTheme === 'magic' && <MagicRulePanel player={player} languageMode={languageMode} />}
             {finisherCutinCard && (
-                <BattleFinisherCutinOverlay card={finisherCutinCard} languageMode={languageMode} appearanceMode={player.appearanceMode} />
+                <BattleFinisherCutinOverlay card={finisherCutinCard} languageMode={languageMode} />
             )}
 
             {/* --- BATTLE TUTORIAL OVERLAY --- */}
@@ -2191,7 +2191,6 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                                             enemyType={enemy.enemyType}
                                                             phase={enemy.phase}
                                                             action={highSchoolEnemyAction}
-                                                            appearanceMode={player.appearanceMode}
                                                             className="w-full h-full drop-shadow-[0_0_20px_rgba(255,255,255,0.5)] rotate-[6deg] scale-110"
                                                             size={24}
                                                         />
@@ -2228,7 +2227,6 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                                                     enemyType={enemy.enemyType}
                                                                     phase={enemy.phase}
                                                                     action={highSchoolEnemyAction}
-                                                                    appearanceMode={player.appearanceMode}
                                                                     className="w-full h-full"
                                                                     size={16}
                                                                 />
@@ -2240,7 +2238,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                                 )}
                                             </div>
                                         ) : (
-                                            <EnemyIllustration name={enemy.name} altText={enemyName} seed={enemy.id} aliases={enemySvgAliases} visualTheme={visualTheme} enemyType={enemy.enemyType} phase={enemy.phase} action={highSchoolEnemyAction} appearanceMode={player.appearanceMode} className="w-full h-full drop-shadow-lg relative z-10" />
+                                            <EnemyIllustration name={enemy.name} altText={enemyName} seed={enemy.id} aliases={enemySvgAliases} visualTheme={visualTheme} enemyType={enemy.enemyType} phase={enemy.phase} action={highSchoolEnemyAction} className="w-full h-full drop-shadow-lg relative z-10" />
                                         )}
                                         {!isFinisherActive && <FloatingTextOverlay data={enemy.floatingText} languageMode={languageMode} />}
                                         {!isFinisherActive && <VFXOverlay effects={activeEffects} targetId={enemy.id} />}
@@ -3137,7 +3135,7 @@ const extractIllustrationTokens = (card: ICard): string[] => {
     return [];
 };
 
-const FinisherArtPiece: React.FC<{ token: string; seed: string; languageMode: LanguageMode; card: ICard; appearanceMode?: CharacterAppearanceMode; fitMode?: 'cover' | 'contain' }> = ({ token, seed, languageMode, card, appearanceMode = 'STANDARD', fitMode = 'cover' }) => {
+const FinisherArtPiece: React.FC<{ token: string; seed: string; languageMode: LanguageMode; card: ICard; fitMode?: 'cover' | 'contain' }> = ({ token, seed, languageMode, card, fitMode = 'cover' }) => {
     const [imageIndex, setImageIndex] = useState(0);
     const [failed, setFailed] = useState(false);
     const normalized = normalizeIllustrationRefToken(token);
@@ -3265,7 +3263,7 @@ const FinisherArtPiece: React.FC<{ token: string; seed: string; languageMode: La
     return <div className="w-full h-full bg-black/30" />;
 };
 
-export const BattleFinisherCutinOverlay: React.FC<{ card: ICard; languageMode: LanguageMode; appearanceMode?: CharacterAppearanceMode }> = ({ card, languageMode, appearanceMode = 'STANDARD' }) => {
+export const BattleFinisherCutinOverlay: React.FC<{ card: ICard; languageMode: LanguageMode }> = ({ card, languageMode }) => {
     const translated = transBattle(card.name, languageMode);
     const illustrationTokens = useMemo(
         () => extractIllustrationTokens(card),
@@ -3422,7 +3420,7 @@ export const BattleFinisherCutinOverlay: React.FC<{ card: ICard; languageMode: L
             {isEnemyFinisher ? (
                 <div className="absolute inset-0 flex items-center justify-end">
                     <div className="w-[78vw] max-w-[920px] h-[46vh] max-h-[390px] animate-finish-cutin-enemy rounded-l-2xl overflow-hidden border-y-4 border-l-4 border-red-300/75 shadow-[0_0_54px_rgba(248,113,113,0.48)] bg-black/35">
-                        <FinisherArtPiece token={illustrationTokens[0] || `enemy:${card.enemyIllustrationName || card.textureRef || card.name}`} seed={`${card.id}-enemy-finisher`} languageMode={languageMode} card={card} appearanceMode={appearanceMode} />
+                        <FinisherArtPiece token={illustrationTokens[0] || `enemy:${card.enemyIllustrationName || card.textureRef || card.name}`} seed={`${card.id}-enemy-finisher`} languageMode={languageMode} card={card} />
                     </div>
                 </div>
             ) : isComposite && compositeStyleMode === 'collage' ? (
@@ -3450,7 +3448,7 @@ export const BattleFinisherCutinOverlay: React.FC<{ card: ICard; languageMode: L
                                     className="absolute inset-0 border-[2px] border-white/95 shadow-[inset_0_0_0_1px_rgba(0,0,0,0.2)] bg-black"
                                     style={{ transform: `translate(0%, 0%) scale(${panel.scale}) rotate(${panel.rot}deg)` }}
                                 >
-                                    <FinisherArtPiece token={panel.token} seed={`${card.id}-collage-${panel.index}`} languageMode={languageMode} card={card} appearanceMode={appearanceMode} />
+                                    <FinisherArtPiece token={panel.token} seed={`${card.id}-collage-${panel.index}`} languageMode={languageMode} card={card} />
                                 </div>
                             </div>
                         ))}
@@ -3487,7 +3485,7 @@ export const BattleFinisherCutinOverlay: React.FC<{ card: ICard; languageMode: L
                                         }`}
                                     style={{ animationDelay: `${panelDelays[idx] ?? idx * delayStepMs}ms` }}
                                 >
-                                    <FinisherArtPiece token={entry.token} seed={`${card.id}-stack-${idx}`} languageMode={languageMode} card={card} appearanceMode={appearanceMode} />
+                                    <FinisherArtPiece token={entry.token} seed={`${card.id}-stack-${idx}`} languageMode={languageMode} card={card} />
                                 </div>
                             </div>
                         );
@@ -3520,7 +3518,7 @@ export const BattleFinisherCutinOverlay: React.FC<{ card: ICard; languageMode: L
                                     }}
                                 >
                                     <div className="absolute inset-0 border-l border-r border-white/90 bg-black/60 shadow-[inset_0_0_16px_rgba(255,255,255,0.35)]" />
-                                    <FinisherArtPiece token={entry.token} seed={`${card.id}-strip-${idx}`} languageMode={languageMode} card={card} appearanceMode={appearanceMode} />
+                                    <FinisherArtPiece token={entry.token} seed={`${card.id}-strip-${idx}`} languageMode={languageMode} card={card} />
                                 </div>
                             );
                         })}
@@ -3551,7 +3549,7 @@ export const BattleFinisherCutinOverlay: React.FC<{ card: ICard; languageMode: L
                                     }}
                                 >
                                     <div className="w-full h-full rounded-2xl overflow-hidden border-4 border-cyan-200/80 bg-black/35 shadow-[0_0_42px_rgba(34,211,238,0.35)]">
-                                        <FinisherArtPiece token={entry.token} seed={`${card.id}-radial-${idx}`} languageMode={languageMode} card={card} appearanceMode={appearanceMode} />
+                                        <FinisherArtPiece token={entry.token} seed={`${card.id}-radial-${idx}`} languageMode={languageMode} card={card} />
                                     </div>
                                 </div>
                             );
@@ -3592,7 +3590,7 @@ export const BattleFinisherCutinOverlay: React.FC<{ card: ICard; languageMode: L
                                     }}
                                 >
                                     <div className="absolute inset-0 border-[2px] border-cyan-200/90 bg-black/45 shadow-[inset_0_0_20px_rgba(34,211,238,0.35)]" />
-                                    <FinisherArtPiece token={entry.token} seed={`${card.id}-grid-${idx}`} languageMode={languageMode} card={card} appearanceMode={appearanceMode} />
+                                    <FinisherArtPiece token={entry.token} seed={`${card.id}-grid-${idx}`} languageMode={languageMode} card={card} />
                                 </div>
                             );
                         })}
@@ -3632,7 +3630,7 @@ export const BattleFinisherCutinOverlay: React.FC<{ card: ICard; languageMode: L
                                     }}
                                 >
                                     <div className="absolute inset-0 border-[2px] border-fuchsia-200/80 bg-black/35 shadow-[0_0_24px_rgba(232,121,249,0.38)]" />
-                                        <FinisherArtPiece token={entry.token} seed={`${card.id}-diagonal-${idx}`} languageMode={languageMode} card={card} appearanceMode={appearanceMode} />
+                                    <FinisherArtPiece token={entry.token} seed={`${card.id}-diagonal-${idx}`} languageMode={languageMode} card={card} />
                                 </div>
                             );
                         })}
@@ -3662,7 +3660,7 @@ export const BattleFinisherCutinOverlay: React.FC<{ card: ICard; languageMode: L
                                     }}
                                 >
                                     <div className="w-full h-full rounded-2xl overflow-hidden border-4 border-amber-200/80 bg-black/35 shadow-[0_0_35px_rgba(251,191,36,0.42)]">
-                                        <FinisherArtPiece token={entry.token} seed={`${card.id}-burst-${idx}`} languageMode={languageMode} card={card} appearanceMode={appearanceMode} />
+                                        <FinisherArtPiece token={entry.token} seed={`${card.id}-burst-${idx}`} languageMode={languageMode} card={card} />
                                     </div>
                                 </div>
                             );
@@ -3699,7 +3697,7 @@ export const BattleFinisherCutinOverlay: React.FC<{ card: ICard; languageMode: L
                                     }}
                                 >
                                     <div className="absolute inset-0 border-l border-r border-sky-100/90 bg-black/45 shadow-[inset_0_0_18px_rgba(125,211,252,0.35)]" />
-                                    <FinisherArtPiece token={entry.token} seed={`${card.id}-wave-${idx}`} languageMode={languageMode} card={card} appearanceMode={appearanceMode} />
+                                    <FinisherArtPiece token={entry.token} seed={`${card.id}-wave-${idx}`} languageMode={languageMode} card={card} />
                                 </div>
                             );
                         })}
@@ -3708,7 +3706,7 @@ export const BattleFinisherCutinOverlay: React.FC<{ card: ICard; languageMode: L
             ) : (
                 <div className="absolute inset-0 flex items-center justify-center">
                     <div className="w-full h-full animate-finish-cutin overflow-hidden flex items-center justify-center">
-                        <FinisherArtPiece token={illustrationTokens[0] || `card:${card.name}`} seed={`${card.id}-finisher`} languageMode={languageMode} card={card} appearanceMode={appearanceMode} fitMode="contain" />
+                        <FinisherArtPiece token={illustrationTokens[0] || `card:${card.name}`} seed={`${card.id}-finisher`} languageMode={languageMode} card={card} fitMode="contain" />
                     </div>
                 </div>
             )}

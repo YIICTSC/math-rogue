@@ -1,5 +1,4 @@
 import type { VisualThemeId } from './visualThemes';
-import type { CharacterAppearanceMode } from '../types';
 import { ENDING_PAGE_COPY } from './endingSceneCopy';
 import { ENDING_PAGE_LOCALIZED_COPY } from './endingSceneLocalizedCopy';
 
@@ -27,7 +26,6 @@ export interface ThemedEndingGalleryEntry {
   characterId: string;
   characterName: string;
   variant: ThemedEndingVariant;
-  appearanceMode?: CharacterAppearanceMode;
   unlockedAt: number;
 }
 
@@ -94,46 +92,6 @@ const ENDING_TONES = [
   { id: 'cute', tone: 'かわいい' as const, title: 'みんなの秘密のお祝い', titleHiragana: 'みんなの ひみつの おいわい', titleEnglish: "Everyone's Secret Celebration", beat: '仲間たちの手作り飾りと寄せ書きに囲まれ、照れながら笑った。', beatHiragana: 'なかまたちの てづくりかざりと よせがきに かこまれ、てれながら わらった。', beatEnglish: 'Surrounded by handmade decorations and messages from friends, the hero smiled shyly.' },
   { id: 'heartfelt', tone: '感動' as const, title: '窓から差す光', titleHiragana: 'まどから さす ひかり', titleEnglish: 'Light Through the Window', beat: '守りたかった日常が戻り、誰もいない教室でその実感をかみしめた。', beatHiragana: 'まもりたかった まいにちが もどり、だれも いない きょうしつで その よろこびを かみしめた。', beatEnglish: 'Everyday life returned. In the empty classroom, the hero quietly felt the joy of what had been protected.' },
 ];
-
-const VACATION_ENDING_TONE_COPY: Record<string, {
-  title: string;
-  titleHiragana: string;
-  titleEnglish: string;
-  pageOne: string;
-  pageTwo: string;
-  pageThree: string;
-}> = {
-  serious: {
-    title: '海風を選ぶ', titleHiragana: 'うみかぜを えらぶ', titleEnglish: 'Choosing the Sea Wind',
-    pageOne: '夜の浜辺で最後の戦いを終え、誰もが帰れる道を選んだ。',
-    pageTwo: '旅で見つけた問いと仲間の言葉を、次の季節へ持ち帰ることにした。',
-    pageThree: '終わりを受け入れたからこそ、次の夏にも自分の答えを選べる。',
-  },
-  funny: {
-    title: '旅のあとしまつ', titleHiragana: 'たびの あとしまつ', titleEnglish: 'Cleanup After the Trip',
-    pageOne: '大騒ぎの夜が明ける前に、散らかった浮き輪と屋台の片づけが待っていた。',
-    pageTwo: '仲間と笑いながら、旅先で残した小さな騒動を一つずつ整理した。',
-    pageThree: '帰りの荷物に、思い出と少しの反省を詰めて、また来ようと約束した。',
-  },
-  cool: {
-    title: '次の浜へ', titleHiragana: 'つぎの はまへ', titleEnglish: 'Toward the Next Shore',
-    pageOne: '花火の消えた浜を振り返り、主人公名は静かに夜明けの方へ歩き出した。',
-    pageTwo: '旅の景色は、誰かに決められた道ではなく自分で選んだ足跡として残った。',
-    pageThree: '拍手も約束もあとでいい。開いた海岸線が、次の答えへ続いている。',
-  },
-  cute: {
-    title: 'みんなの夏祭り', titleHiragana: 'みんなの なつまつり', titleEnglish: "Everyone's Summer Festival",
-    pageOne: '夜の砂浜に仲間が集まり、手作りの飾りと寄せ書きで最後の祭りを始めた。',
-    pageTwo: '濡れたサンダルも、失敗した写真も、全員で笑える夏の宝物になった。',
-    pageThree: '帰る朝にも、次の再会を約束する小さな花火がきらきら残った。',
-  },
-  heartfelt: {
-    title: '朝の帰路', titleHiragana: 'あさの きろ', titleEnglish: 'The Way Home at Dawn',
-    pageOne: '夜明け前の海が静かになり、守りたかった仲間との時間が戻ってきた。',
-    pageTwo: '旅先で迷ったことも、誰かを大切に思ったことも、これからの日々の力になる。',
-    pageThree: '夏は終わる。だからこそ、次の朝へ帰りながら思い出を胸に抱ける。',
-  },
-};
 
 type LocalizedEndingLine = { ja: string; hira: string; en: string };
 
@@ -265,7 +223,6 @@ export const getThemedEndingVariants = (
   theme: NonMagicEndingTheme,
   characterId: string,
   characterName: string,
-  appearanceMode: CharacterAppearanceMode = 'STANDARD',
 ): ThemedEndingVariant[] => {
   const normalizedCharacterId = (characterId ?? '').trim().toUpperCase();
   const safeCharacterId = CHARACTER_PROFILE[normalizedCharacterId] ? normalizedCharacterId : 'WARRIOR';
@@ -277,8 +234,7 @@ export const getThemedEndingVariants = (
   const nameHiragana = theme === 'high-school' ? profile.highSchoolNameHiragana : profile.elementaryNameHiragana;
   const nameEnglish = theme === 'high-school' ? profile.highSchoolNameEnglish : profile.elementaryNameEnglish;
   const fallbackCharacterName = (characterName ?? '').trim() || name;
-  const isVacation = theme === 'high-school' && appearanceMode === 'VACATION';
-  const folder = isVacation ? 'high-school-vacation' : theme === 'high-school' ? 'high-school' : 'elementary';
+  const folder = theme === 'high-school' ? 'high-school' : 'elementary';
 
   return ENDING_TONES.map((ending, variantIndex) => {
     const characterScene = CHARACTER_TONE_SCENE[safeCharacterId]?.[ending.id] ?? {
@@ -290,7 +246,6 @@ export const getThemedEndingVariants = (
       ?? CHARACTER_FINALE_VOICE.WARRIOR[theme];
     const toneResolution = FINALE_TONE_RESOLUTION[theme][ending.id]
       ?? FINALE_TONE_RESOLUTION[theme].serious;
-    const vacationTone = isVacation ? VACATION_ENDING_TONE_COPY[ending.id] : null;
     const pageCopy = ENDING_PAGE_COPY[theme]?.[safeCharacterId]?.[ending.id];
     const localizedPageCopy = ENDING_PAGE_LOCALIZED_COPY[theme]?.[safeCharacterId]?.[ending.id];
     const japanesePageCopy = (pageIndex: number, fallback: string): string =>
@@ -311,30 +266,30 @@ export const getThemedEndingVariants = (
       tone: ending.tone,
       pages: [
       {
-        title: vacationTone?.title ?? ending.title,
-        titleHiragana: vacationTone?.titleHiragana ?? ending.titleHiragana,
-        titleEnglish: vacationTone?.titleEnglish ?? ending.titleEnglish,
-        text: vacationTone ? `${name || characterName}は${vacationTone.pageOne}` : japanesePageCopy(0, `${name || characterName}は校長との最後の戦いを終えた。${characterScene.ja}`),
-        textHiragana: vacationTone ? `${nameHiragana}は ${vacationTone.pageOne}` : localizedPageText(0, 'HIRAGANA', `${nameHiragana}は こうちょうとの さいごの たたかいを おえた。${characterScene.hira}`),
-        textEnglish: vacationTone ? `${nameEnglish} ${vacationTone.pageOne}` : localizedPageText(0, 'ENGLISH', `${nameEnglish} finished the final battle with the headmaster. ${characterScene.en}`),
+        title: ending.title,
+        titleHiragana: ending.titleHiragana,
+        titleEnglish: ending.titleEnglish,
+        text: japanesePageCopy(0, `${name || characterName}は校長との最後の戦いを終えた。${characterScene.ja}`),
+        textHiragana: localizedPageText(0, 'HIRAGANA', `${nameHiragana}は こうちょうとの さいごの たたかいを おえた。${characterScene.hira}`),
+        textEnglish: localizedPageText(0, 'ENGLISH', `${nameEnglish} finished the final battle with the headmaster. ${characterScene.en}`),
         imagePath: `sprites/endings/${folder}/${safeCharacterId.toLowerCase()}/ending-${variantIndex + 1}-1.webp`,
       },
       {
-        title: vacationTone ? `${fallbackCharacterName}の夏の答え` : `${fallbackCharacterName}の答え`,
+        title: `${fallbackCharacterName}の答え`,
         titleHiragana: `${nameHiragana}の こたえ`,
-        titleEnglish: vacationTone ? `${nameEnglish}'s Summer Answer` : `${nameEnglish}'s Answer`,
-        text: vacationTone ? `${role}は${vacationTone.pageTwo}` : japanesePageCopy(1, `${role}は、これまで集めた学びと仲間の言葉を自分の力に変えた。${profile.motif}が、新しい日々の記憶として残る。`),
-        textHiragana: vacationTone ? `${roleHiragana}は ${vacationTone.pageTwo}` : localizedPageText(1, 'HIRAGANA', `${roleHiragana}は、これまで あつめた まなびと なかまの ことばを じぶんの ちからに かえた。${profile.motifHiragana}が、あたらしい まいにちの きおくとして のこる。`),
-        textEnglish: vacationTone ? `${roleEnglish} ${vacationTone.pageTwo}` : localizedPageText(1, 'ENGLISH', `${roleEnglish} turned every lesson and every friend's words into personal strength. ${profile.motifEnglish} remained as a memory of the new days ahead.`),
+        titleEnglish: `${nameEnglish}'s Answer`,
+        text: japanesePageCopy(1, `${role}は、これまで集めた学びと仲間の言葉を自分の力に変えた。${profile.motif}が、新しい日々の記憶として残る。`),
+        textHiragana: localizedPageText(1, 'HIRAGANA', `${roleHiragana}は、これまで あつめた まなびと なかまの ことばを じぶんの ちからに かえた。${profile.motifHiragana}が、あたらしい まいにちの きおくとして のこる。`),
+        textEnglish: localizedPageText(1, 'ENGLISH', `${roleEnglish} turned every lesson and every friend's words into personal strength. ${profile.motifEnglish} remained as a memory of the new days ahead.`),
         imagePath: `sprites/endings/${folder}/${safeCharacterId.toLowerCase()}/ending-${variantIndex + 1}-2.webp`,
       },
       {
-        title: vacationTone ? 'そして、夏の朝へ' : 'そして、次の朝へ',
-        titleHiragana: vacationTone ? 'そして、なつの あさへ' : 'そして、つぎの あさへ',
-        titleEnglish: vacationTone ? 'And Then, Into a Summer Morning' : 'And Then, Into a New Morning',
-        text: vacationTone ? `「${vacationTone.pageThree}」——${fallbackCharacterName}は帰路へ進んだ。` : japanesePageCopy(2, `「${characterVoice.ja} ${toneResolution.ja}」——${fallbackCharacterName}は自分らしい一歩で、校門の向こうへ進んだ。`),
-        textHiragana: vacationTone ? `「${vacationTone.pageThree}」——${nameHiragana}は かえりみちへ すすんだ。` : localizedPageText(2, 'HIRAGANA', `「${characterVoice.hira} ${toneResolution.hira}」——${nameHiragana}は じぶんらしい いっぽで、こうもんの むこうへ すすんだ。`),
-        textEnglish: vacationTone ? `"${vacationTone.pageThree}" ${nameEnglish} started the journey home.` : localizedPageText(2, 'ENGLISH', `"${characterVoice.en} ${toneResolution.en}" ${nameEnglish} stepped beyond the school gate in a way only they could.`),
+        title: 'そして、次の朝へ',
+        titleHiragana: 'そして、つぎの あさへ',
+        titleEnglish: 'And Then, Into a New Morning',
+        text: japanesePageCopy(2, `「${characterVoice.ja} ${toneResolution.ja}」——${fallbackCharacterName}は自分らしい一歩で、校門の向こうへ進んだ。`),
+        textHiragana: localizedPageText(2, 'HIRAGANA', `「${characterVoice.hira} ${toneResolution.hira}」——${nameHiragana}は じぶんらしい いっぽで、こうもんの むこうへ すすんだ。`),
+        textEnglish: localizedPageText(2, 'ENGLISH', `"${characterVoice.en} ${toneResolution.en}" ${nameEnglish} stepped beyond the school gate in a way only they could.`),
         imagePath: `sprites/endings/${folder}/${safeCharacterId.toLowerCase()}/ending-${variantIndex + 1}-3.webp`,
       },
       ],
@@ -347,7 +302,6 @@ export const buildThemedEndingGalleryEntry = (
   characterId: string,
   characterName: string,
   variant: ThemedEndingVariant,
-  appearanceMode: CharacterAppearanceMode = 'STANDARD',
   unlockedAt = Date.now(),
 ): ThemedEndingGalleryEntry => ({
   id: `${theme}:${characterId}:${variant.id}`,
@@ -355,6 +309,5 @@ export const buildThemedEndingGalleryEntry = (
   characterId,
   characterName,
   variant,
-  appearanceMode,
   unlockedAt,
 });

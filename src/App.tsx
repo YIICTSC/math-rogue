@@ -216,7 +216,6 @@ import BasketballLayupShooting from './components/BasketballLayupShooting';
 import FinalBridgeScreen from './components/FinalBridgeScreen';
 import MagicRomanceEndingScreen from './components/MagicRomanceEndingScreen';
 import ThemedEndingSequenceScreen from './components/ThemedEndingSequenceScreen';
-import VacationMagicEndingSequenceScreen from './components/VacationMagicEndingSequenceScreen';
 import { buildThemedEndingGalleryEntry } from './data/themedEndingSequences';
 import EndlessEndingSequenceScreen from './components/EndlessEndingSequenceScreen';
 import EndlessClearScreen from './components/EndlessClearScreen';
@@ -276,7 +275,7 @@ import { COOP_SUPPORT_LIBRARY, getRandomCoopSupportCard } from './coopSupportCar
 import { chooseBattleBackgroundScene, getBattleBackgroundFlavor } from './data/battleBackgrounds';
 import { DAILY_PLAY_LIMIT_ENABLED, DEBUG_FEATURES_ENABLED, DISTRIBUTION_PLATFORM, OFFLINE_DISTRIBUTABLE, OFFLINE_NETWORK_FEATURE_MESSAGE, PAID_EDITION, WEB_PERFORMANCE_MODE, WEB_PRELOAD_ENABLED } from './config/runtime';
 import { getAttackEffectKeyForCard, getMultihitFrameSequence } from './data/attackEffects';
-import { getThemedCharacterSpritePath, getThemedCharacters, getThemedEnemyDisplayName, getThemedHumanoidEnemySpritePath, getThemedMonsterEnemySpritePath, MAGIC_HERO_ID_BY_CHARACTER_ID, type VisualThemeId } from './data/visualThemes';
+import { getThemedCharacters, getThemedEnemyDisplayName, getThemedHumanoidEnemySpritePath, getThemedMonsterEnemySpritePath, MAGIC_HERO_ID_BY_CHARACTER_ID, type VisualThemeId } from './data/visualThemes';
 import { getTrueBossByTheme } from './data/enemyCatalogs';
 import { getHumanoidEnemyVoiceProfile, type HumanoidEnemyVoiceAction } from './data/humanoidEnemyVoiceLines';
 import { boostMagicCardForTransformation, getMagicCardsForHero } from './data/magicCards';
@@ -292,7 +291,6 @@ import { GamepadSystemMenu } from './components/GamepadSystemMenu';
 import { CREDIT_SECTIONS } from './data/credits';
 import { getSupporterNpcEventByTitle } from './data/supporterNpcEvents';
 import { usePwaInstall } from './hooks/usePwaInstall';
-import { getEnvironmentBackgroundCss, isVacationRun } from './data/vacationEnvironmentAssets';
 
 const PARRY_WINDOW_MS = 650;
 const PARRY_PERFECT_MS = 220;
@@ -426,33 +424,26 @@ const getBgmThemeForPlayer = (
 const getBattleEnemyTransitionAssetPaths = (
     enemy: Pick<Enemy, 'name' | 'enemyType' | 'phase' | 'endlessBossId'>,
     visualTheme: VisualThemeId,
-    appearanceMode: CharacterAppearanceMode = 'STANDARD',
 ): string[] => {
     if (enemy.enemyType === 'ENDLESS_BOSS') {
         const endlessBoss = getEndlessBossById(enemy.endlessBossId);
         // Named artwork currently covers the authored C01-C50 bosses. True
         // endless uses the themed monster fallback until its next art pack.
-        if (endlessBoss && endlessBoss.floor <= 50) return [getEndlessBossSpritePath(endlessBoss, 'idle', appearanceMode)];
+        if (endlessBoss && endlessBoss.floor <= 50) return [getEndlessBossSpritePath(endlessBoss, 'idle')];
     }
     if (visualTheme === 'high-school' && enemy.enemyType === 'AZUKI') {
-        return [assetUrl(appearanceMode === 'VACATION' ? 'sprites/high-school/vacation-bosses/azuki-idle.webp' : 'sprites/high-school/azuki/idle.webp')];
+        return [assetUrl('sprites/high-school/azuki/idle.webp')];
     }
     if (visualTheme === 'high-school' && enemy.enemyType === 'DODOMEDESU') {
-        return [assetUrl(appearanceMode === 'VACATION' ? 'sprites/high-school/vacation-bosses/dodomedesu.webp' : 'enemy-illustrations/ドドメデス.webp')];
+        return [assetUrl('enemy-illustrations/ドドメデス.webp')];
     }
     if (visualTheme === 'high-school' && enemy.enemyType === 'GENZO') {
-        return [assetUrl(appearanceMode === 'VACATION' ? 'sprites/high-school/vacation-bosses/genzo.webp' : 'enemy-illustrations/ゲンゾー.webp')];
-    }
-    if (appearanceMode === 'VACATION' && enemy.enemyType === 'THE_HEART') {
-        if (visualTheme === 'magic') {
-            return [assetUrl(enemy.phase === 2 ? 'sprites/magic/vacation-bosses/star-calamity.webp' : 'sprites/magic/vacation-bosses/grand-witch.webp')];
-        }
-        return [assetUrl(enemy.phase === 2 ? 'sprites/high-school/vacation-bosses/true-kocho.webp' : 'sprites/high-school/vacation-bosses/kocho.webp')];
+        return [assetUrl('enemy-illustrations/ゲンゾー.webp')];
     }
 
-    const humanoidPath = getThemedHumanoidEnemySpritePath(enemy, visualTheme, 'idle', appearanceMode);
+    const humanoidPath = getThemedHumanoidEnemySpritePath(enemy, visualTheme, 'idle');
     if (humanoidPath) return [humanoidPath];
-    const monsterPath = getThemedMonsterEnemySpritePath(enemy, visualTheme, appearanceMode);
+    const monsterPath = getThemedMonsterEnemySpritePath(enemy, visualTheme);
     if (monsterPath) return [monsterPath];
     return getEnemyIllustrationPaths(enemy.name);
 };
@@ -8197,7 +8188,7 @@ const App: React.FC = () => {
         const battleBackgroundScene = chooseBattleBackgroundScene(NodeType.BOSS, 50, floor, theme, player.appearanceMode);
         assetPreloadService.preloadTransitionAssets([
             battleBackgroundScene.image,
-            ...getBattleEnemyTransitionAssetPaths(bossEnemy, theme, player.appearanceMode),
+            ...getBattleEnemyTransitionAssetPaths(bossEnemy, theme),
             ...player.hand.slice(0, 5).flatMap(getBattleCardTransitionAssetPaths),
         ]);
         setDebugLoadout({ deck: sourceDeck, relics: sourceRelics, potions });
@@ -8430,10 +8421,7 @@ const App: React.FC = () => {
 
         const isMagicTheme = coopSyncedVisualTheme === 'magic';
         let initialDeck: ICard[] = [];
-        let logs = [trans(
-            isVacationRun(coopSyncedVisualTheme, appearanceMode) ? "潮風の旅支度をしている..." : "旅の支度をしている...",
-            languageMode,
-        )];
+        let logs = [trans("旅の支度をしている...", languageMode)];
 
         const magicProtagonistId = char.magicProtagonistId
             ?? MAGIC_HERO_ID_BY_CHARACTER_ID[char.id]
@@ -8443,9 +8431,7 @@ const App: React.FC = () => {
                 ...card,
                 id: `${card.id}-${Date.now()}-${index}`,
             }));
-            logs = [isVacationRun(coopSyncedVisualTheme, appearanceMode)
-                ? `${getMagicRuleConfig(magicProtagonistId).name}と星海バカンスの支度を整えた。`
-                : `${getMagicRuleConfig(magicProtagonistId).name}を軸に、魔法遠征の支度を整えた。`];
+            logs = [`${getMagicRuleConfig(magicProtagonistId).name}を軸に、魔法遠征の支度を整えた。`];
         } else if (gameState.challengeMode === '1A1D') {
             const attacks = Object.values(CARDS_LIBRARY).filter(c => c.type === CardType.ATTACK && c.rarity === 'COMMON');
             const skills = Object.values(CARDS_LIBRARY).filter(c => c.type === CardType.SKILL && c.rarity === 'COMMON');
@@ -8835,10 +8821,7 @@ const App: React.FC = () => {
                     relics: [...prev.player.relics, relic],
                     deck: starterRewardCard ? [...prev.player.deck, starterRewardCard] : prev.player.deck
                 },
-                narrativeLog: [...prev.narrativeLog, ...starterRewardLog, trans(
-                    isVacationRun(prev.visualTheme || visualTheme, prev.player.appearanceMode) ? "夏の旅が始まった。" : "冒険が始まった。",
-                    languageMode,
-                )]
+                narrativeLog: [...prev.narrativeLog, ...starterRewardLog, trans("冒険が始まった。", languageMode)]
             }));
             audioService.playBGM('event');
         } else {
@@ -8851,10 +8834,7 @@ const App: React.FC = () => {
                     relics: [...prev.player.relics, relic],
                     deck: starterRewardCard ? [...prev.player.deck, starterRewardCard] : prev.player.deck
                 },
-                narrativeLog: [...prev.narrativeLog, ...starterRewardLog, trans(
-                    isVacationRun(prev.visualTheme || visualTheme, prev.player.appearanceMode) ? "夏の旅が始まった。" : "冒険が始まった。",
-                    languageMode,
-                )]
+                narrativeLog: [...prev.narrativeLog, ...starterRewardLog, trans("冒険が始まった。", languageMode)]
             }));
             audioService.playBGM('map');
         }
@@ -8884,10 +8864,7 @@ const App: React.FC = () => {
                 ...prev.narrativeLog,
                 ...starterRewardLog,
                 trans("初回のため、レリックなしで冒険を開始した。", languageMode),
-                trans(
-                    isVacationRun(prev.visualTheme || visualTheme, prev.player.appearanceMode) ? "夏の旅が始まった。" : "冒険が始まった。",
-                    languageMode,
-                )
+                trans("冒険が始まった。", languageMode)
             ]
         }));
         audioService.playBGM('map');
@@ -9195,7 +9172,7 @@ const App: React.FC = () => {
                 // browser cache is shared with the mounted scene components.
                 assetPreloadService.preloadTransitionAssets([
                     battleBackgroundScene.image,
-                    ...enemies.flatMap(enemy => getBattleEnemyTransitionAssetPaths(enemy, activeBattleVisualTheme, p.appearanceMode)),
+                    ...enemies.flatMap(enemy => getBattleEnemyTransitionAssetPaths(enemy, activeBattleVisualTheme)),
                     ...p.hand.slice(0, 5).flatMap(getBattleCardTransitionAssetPaths),
                 ]);
                 audioService.prepareBGM(
@@ -14180,10 +14157,7 @@ const App: React.FC = () => {
                     currentHp: newCurrentHp,
                     powers: newPowers,
                     strength: newStrength
-                },
-                narrativeLog: [...prev.narrativeLog, isVacationRun(prev.visualTheme || visualTheme, prev.player.appearanceMode)
-                    ? '最終橋を渡り、夏の海岸に残る最後の門へ進んだ。'
-                    : '最終橋を渡り、最後のボスへ進んだ。']
+                }
             };
         });
         audioService.playBGM('map');
@@ -14795,9 +14769,7 @@ const App: React.FC = () => {
                             endlessRewardPending: false,
                             endlessRewardRerollUsed: false,
                             newlyUnlockedCardName: unlockedEndlessChapterCard?.name,
-                            narrativeLog: [...prev.narrativeLog, isVacationRun(prev.visualTheme || visualTheme, prev.player.appearanceMode)
-                                ? 'エンドレス第50章（累計750F相当）を制覇！星海バカンスの深層記録が解放された。'
-                                : 'エンドレス第50章（累計750F相当）を制覇！黒帳機関の深層記録が解放された。'],
+                            narrativeLog: [...prev.narrativeLog, 'エンドレス第50章（累計750F相当）を制覇！黒帳機関の深層記録が解放された。'],
                         };
                     }
                     if (isMajorBoss) {
@@ -14811,9 +14783,7 @@ const App: React.FC = () => {
                             endlessRewardPending: false,
                             endlessRewardRerollUsed: false,
                             newlyUnlockedCardName: unlockedEndlessChapterCard?.name,
-                            narrativeLog: [...prev.narrativeLog, isVacationRun(prev.visualTheme || visualTheme, prev.player.appearanceMode)
-                                ? `${bossDefinition?.name || '大ボス'}撃破！体力が全回復。海辺で休息・強化を選べます。`
-                                : `${bossDefinition?.name || '大ボス'}撃破！体力が全回復。休息・強化を選べます。`],
+                            narrativeLog: [...prev.narrativeLog, `${bossDefinition?.name || '大ボス'}撃破！体力が全回復。休息・強化を選べます。`],
                         };
                     }
                     return {
@@ -14826,9 +14796,7 @@ const App: React.FC = () => {
                         endlessRewardPending: false,
                         endlessRewardRerollUsed: false,
                         newlyUnlockedCardName: unlockedEndlessChapterCard?.name,
-                        narrativeLog: [...prev.narrativeLog, isVacationRun(prev.visualTheme || visualTheme, prev.player.appearanceMode)
-                            ? `${bossDefinition?.name || 'ボス'}撃破！夏の章クリア記録を確認しよう。`
-                            : `${bossDefinition?.name || 'ボス'}撃破！章クリア記録を確認しよう。`],
+                        narrativeLog: [...prev.narrativeLog, `${bossDefinition?.name || 'ボス'}撃破！章クリア記録を確認しよう。`],
                     };
                 }
 
@@ -16529,12 +16497,7 @@ const App: React.FC = () => {
                     endlessRewardPending: false,
                     endlessRewardRerollUsed: false,
                     newlyUnlockedCardName: undefined,
-                    narrativeLog: [...prev.narrativeLog, trans(
-                        isVacationRun(prev.visualTheme || visualTheme, prev.player.appearanceMode)
-                            ? `エンドレス第${nextChapter}章へ進んだ。潮風の中で体力が全回復した！`
-                            : `エンドレス第${nextChapter}章へ進んだ。体力が全回復した！`,
-                        languageMode,
-                    )],
+                    narrativeLog: [...prev.narrativeLog, trans(`エンドレス第${nextChapter}章へ進んだ。体力が全回復した！`, languageMode)],
                     actStats: { enemiesDefeated: 0, goldGained: 0, mathCorrect: 0 },
                 };
             }
@@ -16559,12 +16522,7 @@ const App: React.FC = () => {
                     ...prev.player,
                     currentHp: prev.player.maxHp
                 },
-                narrativeLog: [...prev.narrativeLog, trans(
-                    isVacationRun(prev.visualTheme || visualTheme, prev.player.appearanceMode)
-                        ? `第${nextAct}章へ進んだ。潮風の中で体力が全回復した！`
-                        : `第${nextAct}章へ進んだ。体力が全回復した！`,
-                    languageMode,
-                )],
+                narrativeLog: [...prev.narrativeLog, trans(`第${nextAct}章へ進んだ。体力が全回復した！`, languageMode)],
                 actStats: { enemiesDefeated: 0, goldGained: 0, mathCorrect: 0 },
                 newlyUnlockedCardName: undefined // 次のアクトへ行くときにリセット
             };
@@ -19674,7 +19632,6 @@ const App: React.FC = () => {
                             newlyUnlockedCardName={gameState.newlyUnlockedCardName}
                             typingMode={gameState.challengeMode === 'TYPING'}
                             visualTheme={gameState.visualTheme || visualTheme}
-                            appearanceMode={gameState.player.appearanceMode}
                             magicHeroId={getMagicProtagonistId(gameState.player)}
                             magicRomance={gameState.player.magicRomance}
                             endlessRunRewards={gameState.endlessRunRewards}
@@ -19697,18 +19654,12 @@ const App: React.FC = () => {
                                     ?? activeRunThemedCharacters[0]?.name
                                     ?? selectedCharName}
                             languageMode={languageMode}
-                            appearanceMode={gameState.player.appearanceMode}
                             onComplete={() => {
                                 audioService.playBGM('map');
                                 setGameState(prev => ({
                                     ...prev,
                                     screen: GameScreen.MAP,
-                                    narrativeLog: [...prev.narrativeLog, trans(
-                                        isVacationRun(prev.visualTheme || visualTheme, prev.player.appearanceMode)
-                                            ? 'エンドレス第1章へ、星海の航路が開いた。'
-                                            : 'エンドレス第1章へ進んだ。',
-                                        languageMode,
-                                    )],
+                                    narrativeLog: [...prev.narrativeLog, trans('エンドレス第1章へ進んだ。', languageMode)],
                                 }));
                             }}
                         />
@@ -19728,17 +19679,11 @@ const App: React.FC = () => {
                                     ?? activeRunThemedCharacters[0]?.name
                                     ?? selectedCharName}
                             languageMode={languageMode}
-                            appearanceMode={gameState.player.appearanceMode}
                             onComplete={() => {
                                 setGameState(prev => ({
                                     ...prev,
                                     screen: GameScreen.ENDLESS_CLEAR,
-                                    narrativeLog: [...prev.narrativeLog, trans(
-                                        isVacationRun(prev.visualTheme || visualTheme, prev.player.appearanceMode)
-                                            ? '星海バカンスの真エンディングを解放した。'
-                                            : '真エンディングを解放した。',
-                                        languageMode,
-                                    )],
+                                    narrativeLog: [...prev.narrativeLog, trans('真エンディングを解放した。', languageMode)],
                                 }));
                             }}
                         />
@@ -19750,7 +19695,6 @@ const App: React.FC = () => {
                         <EndlessClearScreen
                             languageMode={languageMode}
                             visualTheme={gameState.visualTheme || visualTheme}
-                            appearanceMode={gameState.player.appearanceMode}
                             newlyUnlockedCardName={gameState.newlyUnlockedCardName}
                             onReturnToTitle={returnToTitle}
                             onEnterTrueEndless={handleEnterTrueEndless}
@@ -20089,7 +20033,6 @@ const App: React.FC = () => {
                             problemSourceAssignment={completedAssignmentProblemSource}
                             onAnswerResult={handleAssignmentAnswerResult}
                             visualTheme={visualTheme}
-                            appearanceMode={gameState.player.appearanceMode}
                         />
                     </div>
                 )}
@@ -20546,7 +20489,7 @@ const App: React.FC = () => {
 
                 {gameState.screen === GameScreen.RELIC_SELECTION && (
                     <div className="absolute inset-0">
-                        <RelicSelectionScreen relics={starterRelics} onSelect={handleRelicSelect} languageMode={languageMode} typingMode={gameState.challengeMode === 'TYPING'} visualTheme={visualTheme} appearanceMode={gameState.player.appearanceMode} />
+                        <RelicSelectionScreen relics={starterRelics} onSelect={handleRelicSelect} languageMode={languageMode} typingMode={gameState.challengeMode === 'TYPING'} visualTheme={visualTheme} />
                         {gameState.challengeMode === 'COOP' && coopAwaitingMapSync && coopSession && !coopSession.isHost && (
                             <div className="absolute inset-0 bg-black/65 backdrop-blur-[1px] flex items-center justify-center p-4 z-20">
                                 <div className="bg-slate-900 border-2 border-emerald-500 rounded-xl p-6 text-white text-center max-w-md w-full">
@@ -20560,7 +20503,7 @@ const App: React.FC = () => {
 
                 {gameState.screen === GameScreen.COMPENDIUM && (
                     <div className="absolute inset-0">
-                        <CompendiumScreen unlockedCardNames={unlockedCardNames} onBack={returnToTitle} languageMode={languageMode} isDebug={isDebugHpOne} visualTheme={visualTheme} appearanceMode={gameState.player.appearanceMode} />
+                        <CompendiumScreen unlockedCardNames={unlockedCardNames} onBack={returnToTitle} languageMode={languageMode} isDebug={isDebugHpOne} visualTheme={visualTheme} />
                     </div>
                 )}
 
@@ -20900,7 +20843,7 @@ const App: React.FC = () => {
 
                 {gameState.screen === GameScreen.REWARD && (
                     <div className="absolute inset-0">
-                        <RewardScreen rewards={gameState.rewards} onSelectReward={handleRewardSelection} onSkip={finishRewardPhase} isLoading={isLoading || coopAwaitingRewardSync} currentPotions={gameState.player.potions} potionCapacity={getPotionCapacity(gameState.player)} languageMode={languageMode} typingMode={gameState.challengeMode === 'TYPING'} dummyRewards={raceRewardDummyDisplay} autoSkipWhenEmpty={gameState.challengeMode !== 'COOP'} skipDisabled={coopRewardSkipDisabled || hasRelic(gameState.player, 'PREPAID_CARD') || hasRelic(gameState.player, 'SCHOOL_ARCHIVE') || (gameState.endlessRewardPending && gameState.rewards.some(reward => reward.type === 'ENDLESS_REWARD'))} skipDisabledMessage={gameState.endlessRewardPending && gameState.rewards.some(reward => reward.type === 'ENDLESS_REWARD') ? 'ボス報酬を1つ選んでください' : (coopAwaitingRewardSync ? 'ホストが報酬を確定するまで待っています' : ((hasRelic(gameState.player, 'PREPAID_CARD') || hasRelic(gameState.player, 'SCHOOL_ARCHIVE')) ? 'このレリックの効果でカード報酬をスキップできません' : (coopRewardSkipDisabled ? '他のプレイヤーの報酬完了を待っています' : undefined)))} interactionDisabled={coopLocalProgressInteractionDisabled} interactionDisabledMessage={coopInteractionDisabledMessage} visualTheme={gameState.visualTheme || visualTheme} appearanceMode={gameState.player.appearanceMode} endlessFloor={gameState.endlessFloor ?? gameState.floor} endlessBossName={gameState.endlessBossId ? getEndlessBoss(getEndlessArc(gameState.visualTheme || visualTheme), gameState.endlessFloor ?? gameState.floor)?.name : undefined} endlessBonusGold={gameState.endlessBossId ? (gameState.endlessFloor === 50 ? 500 : (gameState.endlessFloor && gameState.endlessFloor % 10 === 0 ? 200 : 100)) : undefined} onRerollEndlessReward={gameState.isEndless ? handleEndlessRewardReroll : undefined} endlessRerollAvailable={Boolean(gameState.isEndless && gameState.endlessRewardPending && !gameState.endlessRewardRerollUsed)} />
+                        <RewardScreen rewards={gameState.rewards} onSelectReward={handleRewardSelection} onSkip={finishRewardPhase} isLoading={isLoading || coopAwaitingRewardSync} currentPotions={gameState.player.potions} potionCapacity={getPotionCapacity(gameState.player)} languageMode={languageMode} typingMode={gameState.challengeMode === 'TYPING'} dummyRewards={raceRewardDummyDisplay} autoSkipWhenEmpty={gameState.challengeMode !== 'COOP'} skipDisabled={coopRewardSkipDisabled || hasRelic(gameState.player, 'PREPAID_CARD') || hasRelic(gameState.player, 'SCHOOL_ARCHIVE') || (gameState.endlessRewardPending && gameState.rewards.some(reward => reward.type === 'ENDLESS_REWARD'))} skipDisabledMessage={gameState.endlessRewardPending && gameState.rewards.some(reward => reward.type === 'ENDLESS_REWARD') ? 'ボス報酬を1つ選んでください' : (coopAwaitingRewardSync ? 'ホストが報酬を確定するまで待っています' : ((hasRelic(gameState.player, 'PREPAID_CARD') || hasRelic(gameState.player, 'SCHOOL_ARCHIVE')) ? 'このレリックの効果でカード報酬をスキップできません' : (coopRewardSkipDisabled ? '他のプレイヤーの報酬完了を待っています' : undefined)))} interactionDisabled={coopLocalProgressInteractionDisabled} interactionDisabledMessage={coopInteractionDisabledMessage} visualTheme={gameState.visualTheme || visualTheme} endlessFloor={gameState.endlessFloor ?? gameState.floor} endlessBossName={gameState.endlessBossId ? getEndlessBoss(getEndlessArc(gameState.visualTheme || visualTheme), gameState.endlessFloor ?? gameState.floor)?.name : undefined} endlessBonusGold={gameState.endlessBossId ? (gameState.endlessFloor === 50 ? 500 : (gameState.endlessFloor && gameState.endlessFloor % 10 === 0 ? 200 : 100)) : undefined} onRerollEndlessReward={gameState.isEndless ? handleEndlessRewardReroll : undefined} endlessRerollAvailable={Boolean(gameState.isEndless && gameState.endlessRewardPending && !gameState.endlessRewardRerollUsed)} />
                     </div>
                 )}
 
@@ -20919,7 +20862,6 @@ const App: React.FC = () => {
                             interactionDisabled={coopLocalProgressInteractionDisabled}
                             interactionDisabledMessage={coopInteractionDisabledMessage}
                             visualTheme={gameState.visualTheme || visualTheme}
-                            appearanceMode={gameState.player.appearanceMode}
                             endlessMajorBoss={Boolean(gameState.isEndless && gameState.endlessFloor && gameState.endlessFloor % 10 === 0)}
                             onOpenShop={gameState.isEndless ? handleEndlessIntermissionShop : undefined}
                             onOrganizeDeck={gameState.isEndless ? handleEndlessOrganizeDeck : undefined}
@@ -20952,7 +20894,6 @@ const App: React.FC = () => {
                             interactionDisabled={coopLocalProgressInteractionDisabled}
                             interactionDisabledMessage={coopInteractionDisabledMessage}
                             visualTheme={gameState.visualTheme || visualTheme}
-                            appearanceMode={gameState.player.appearanceMode}
                         />
                     </div>
                 )}
@@ -21014,7 +20955,6 @@ const App: React.FC = () => {
                                 : coopInteractionDisabledMessage}
                             languageMode={languageMode}
                             visualTheme={gameState.visualTheme || coopSyncedVisualTheme}
-                            appearanceMode={gameState.player.appearanceMode}
                         />
                     </div>
                 )}
@@ -21026,7 +20966,6 @@ const App: React.FC = () => {
                             onComplete={handleFinalBridgeComplete}
                             languageMode={languageMode}
                             visualTheme={gameState.visualTheme || visualTheme}
-                            appearanceMode={gameState.player.appearanceMode}
                         />
                     </div>
                 )}
@@ -21057,7 +20996,6 @@ const App: React.FC = () => {
                             resolved={gameState.challengeMode === 'COOP' ? !!coopSession?.participants.find(participant => participant.peerId === coopSelfPeerId)?.treasureResolved : false}
                             waitingForOthers={gameState.challengeMode === 'COOP' ? !!coopSession?.participants.some(participant => !participant.treasureResolved) : false}
                             visualTheme={gameState.visualTheme || visualTheme}
-                            appearanceMode={gameState.player.appearanceMode}
                         />
                     </div>
                 )}
@@ -21558,7 +21496,7 @@ const App: React.FC = () => {
 
                 {battleFinisherCutinCard && gameState.screen !== GameScreen.BATTLE && (
                     <div className="fixed inset-0 z-[300] pointer-events-none overflow-hidden">
-                        <BattleFinisherCutinOverlay card={battleFinisherCutinCard} languageMode={languageMode} appearanceMode={gameState.player.appearanceMode} />
+                        <BattleFinisherCutinOverlay card={battleFinisherCutinCard} languageMode={languageMode} />
                     </div>
                 )}
 
@@ -21566,24 +21504,17 @@ const App: React.FC = () => {
                     <div
                         className="game-over-screen w-full h-full bg-red-900 bg-cover bg-center flex flex-col items-center justify-start text-center text-white p-4 overflow-y-auto custom-scrollbar relative"
                         style={{
-                            backgroundImage: isVacationRun(gameState.visualTheme || coopSyncedVisualTheme, gameState.player.appearanceMode)
-                                ? getEnvironmentBackgroundCss(gameState.visualTheme || coopSyncedVisualTheme, 'event', gameState.player.appearanceMode)
-                                : `url(${assetUrl(
-                                    coopSyncedVisualTheme === 'magic'
-                                        ? 'sprites/backgrounds/learning-rogue/magic-event-hallway.webp'
-                                        : 'sprites/backgrounds/learning-rogue/event-hallway.webp'
-                                )})`
+                            backgroundImage: `url(${assetUrl(
+                                coopSyncedVisualTheme === 'magic'
+                                    ? 'sprites/backgrounds/learning-rogue/magic-event-hallway.webp'
+                                    : 'sprites/backgrounds/learning-rogue/event-hallway.webp'
+                            )})`
                         }}
                     >
                         <div className="absolute inset-0 bg-red-950/72 pointer-events-none" />
                         <div className="game-over-content relative z-10 my-auto w-full max-w-2xl py-8">
                             <div className="game-over-main">
-                                <h1 className="game-over-title text-6xl mb-4 font-bold">{trans(
-                                    isVacationRun(gameState.visualTheme || coopSyncedVisualTheme, gameState.player.appearanceMode)
-                                        ? (gameState.visualTheme === 'magic' ? "星海の波が荒れている…" : "夏の旅はここでひと休み…")
-                                        : "しゅくだいがふえた…",
-                                    languageMode
-                                )}</h1>
+                                <h1 className="game-over-title text-6xl mb-4 font-bold">{trans("しゅくだいがふえた…", languageMode)}</h1>
                                 <p className="game-over-subtitle mb-8 text-2xl">Act {gameState.act} - Floor {gameState.floor}</p>
                             </div>
 
@@ -21612,12 +21543,7 @@ const App: React.FC = () => {
                                         <div className="game-over-card-preview scale-100">
                                             <Card card={newlyUnlockedCard} onClick={() => { }} disabled={false} languageMode={languageMode} />
                                         </div>
-                                        <p className="text-sm text-yellow-100 font-bold">{trans(
-                                            isVacationRun(gameState.visualTheme || coopSyncedVisualTheme, gameState.player.appearanceMode)
-                                                ? "旅で得た成果が、次の挑戦から現れるようになります！"
-                                                : "新しい学習の成果が、次回の冒険から現れるようになります！",
-                                            languageMode
-                                        )}</p>
+                                        <p className="text-sm text-yellow-100 font-bold">{trans("新しい学習の成果が、次回の冒険から現れるようになります！", languageMode)}</p>
                                     </div>
                                 </div>
                             )}
@@ -21635,8 +21561,8 @@ const App: React.FC = () => {
                                 </div>
                             ) : getDifficultyConfig(gameState.difficultyLevel).legacyCardAllowed ? (
                                 <div className="game-over-legacy mb-8 p-4 bg-black/50 border border-gray-500 rounded-lg animate-in zoom-in duration-150 shrink-0">
-                                    <p className="text-gray-300 font-bold text-xl">{trans(isVacationRun(gameState.visualTheme || coopSyncedVisualTheme, gameState.player.appearanceMode) ? "旅の記憶は受け継がれた..." : "遺志は継がれた...", languageMode)}</p>
-                                    <p className="text-sm text-gray-500 mt-1">{trans(isVacationRun(gameState.visualTheme || coopSyncedVisualTheme, gameState.player.appearanceMode) ? "次の旅人が続きを歩く。" : "次の児童が拾うことになる。", languageMode)}</p>
+                                    <p className="text-gray-300 font-bold text-xl">{trans("遺志は継がれた...", languageMode)}</p>
+                                    <p className="text-sm text-gray-500 mt-1">{trans("次の児童が拾うことになる。", languageMode)}</p>
                                 </div>
                             ) : null}
                             <div className="game-over-actions flex flex-col gap-4 items-center">
@@ -21664,7 +21590,6 @@ const App: React.FC = () => {
                             ?? activeRunThemedCharacters[0]?.name
                             ?? selectedCharName}
                         languageMode={languageMode}
-                        appearanceMode={gameState.player.appearanceMode}
                         onComplete={(variant) => {
                             const characterName = activeRunThemedCharacters.find(character => character.id === gameState.player.id)?.name
                                 ?? activeRunThemedCharacters[0]?.name
@@ -21674,33 +21599,22 @@ const App: React.FC = () => {
                                 gameState.player.id,
                                 characterName,
                                 variant,
-                                gameState.player.appearanceMode,
                             ));
                             setThemedEndingSequenceComplete(true);
                         }}
                     />
                 )}
 
-                {gameState.screen === GameScreen.ENDING && activeRunVisualTheme === 'magic' && gameState.player.appearanceMode === 'VACATION' && !themedEndingSequenceComplete && (
-                    <VacationMagicEndingSequenceScreen
-                        characterName={activeRunVisualTheme === 'magic' && gameState.player.magicProtagonistGender === 'male'
-                            ? MAGIC_MALE_PROTAGONISTS.find(hero => hero.id === gameState.player.magicProtagonistId)?.name ?? selectedCharName
-                            : activeRunThemedCharacters.find(character => character.id === gameState.player.id)?.name
-                                ?? activeRunThemedCharacters[0]?.name
-                                ?? selectedCharName}
-                        languageMode={languageMode}
-                        onComplete={() => setThemedEndingSequenceComplete(true)}
-                    />
-                )}
-
-                {gameState.screen === GameScreen.ENDING && ((activeRunVisualTheme === 'magic' && (gameState.player.appearanceMode !== 'VACATION' || themedEndingSequenceComplete)) || (activeRunVisualTheme !== 'magic' && themedEndingSequenceComplete)) && (
+                {gameState.screen === GameScreen.ENDING && (activeRunVisualTheme === 'magic' || themedEndingSequenceComplete) && (
                     <div
                         data-gamepad-initial-scope="main-ending"
                         className="ending-screen w-full h-full bg-yellow-900 bg-cover bg-center flex flex-col items-center justify-start text-center text-white p-4 overflow-y-auto custom-scrollbar relative"
                         style={{
-                            backgroundImage: activeRunVisualTheme === 'magic' || isVacationRun(activeRunVisualTheme, gameState.player.appearanceMode)
-                                ? getEnvironmentBackgroundCss(activeRunVisualTheme, 'actClear', gameState.player.appearanceMode)
-                                : `url(${assetUrl('sprites/backgrounds/learning-rogue/reward-rooftop.webp')})`
+                            backgroundImage: `url(${assetUrl(
+                                activeRunVisualTheme === 'magic'
+                                    ? 'sprites/backgrounds/learning-rogue/magic-act-clear.webp'
+                                    : 'sprites/backgrounds/learning-rogue/reward-rooftop.webp'
+                            )})`
                         }}
                     >
                         <div className="absolute inset-0 bg-amber-950/62 pointer-events-none" />
@@ -21720,7 +21634,7 @@ const App: React.FC = () => {
                                         <p className="text-sm text-yellow-100 font-bold">
                                             {trans(
                                                 activeRunVisualTheme === 'high-school'
-                                                    ? (gameState.player.appearanceMode === 'VACATION' ? "夏の旅での成果が、次回の挑戦から現れるようになります！" : "新しい学園での成果が、次回の挑戦から現れるようになります！")
+                                                    ? "新しい学園での成果が、次回の挑戦から現れるようになります！"
                                                     : "新しい学習の成果が、次回の冒険から現れるようになります！",
                                                 languageMode
                                             )}
@@ -21733,9 +21647,9 @@ const App: React.FC = () => {
                                 <h1 className="ending-title text-4xl md:text-6xl mb-4 font-bold text-yellow-200 shrink-0">
                                     {trans(
                                         activeRunVisualTheme === 'high-school'
-                                            ? (gameState.player.appearanceMode === 'VACATION' ? "夏の旅、完走！" : "卒業おめでとう！")
+                                            ? "卒業おめでとう！"
                                             : activeRunVisualTheme === 'magic'
-                                                ? (gameState.player.appearanceMode === 'VACATION' ? "星海バカンスの夜明け" : "願いの夜明け")
+                                                ? "願いの夜明け"
                                                 : "ゲームクリア！",
                                         languageMode
                                     )}
@@ -21743,13 +21657,9 @@ const App: React.FC = () => {
                                 <p className="ending-message mb-8 text-lg md:text-xl shrink-0 whitespace-pre-line">
                                     {trans(
                                         activeRunVisualTheme === 'high-school'
-                                            ? (gameState.player.appearanceMode === 'VACATION'
-                                                ? "あなたは夏の旅を閉じ込めようとした支配を打ち破り、\n仲間と過ごした海辺の一日を守りました。\n帰る朝に残った思い出は、次の旅へ持っていける宝物です。"
-                                                : "あなたは真・校長の支配を打ち破り、\nこの学園に自分たちの明日を取り戻しました。\n反逆の卒業生として、その名は校内伝説に刻まれるでしょう。")
+                                            ? "あなたは真・校長の支配を打ち破り、\nこの学園に自分たちの明日を取り戻しました。\n反逆の卒業生として、その名は校内伝説に刻まれるでしょう。"
                                             : activeRunVisualTheme === 'magic'
-                                                ? (gameState.player.appearanceMode === 'VACATION'
-                                                    ? "あなたは星海リゾートを永遠の夏に封じる「願いの檻」を打ち破り、\n海を夜明けの景色へ戻しました。\n臨海研修で学び、迷い、誰かを大切にした時間は、これからもあなたの魔法を強くします。"
-                                                    : "あなたは大魔女校長が作り出した「願いの檻」を打ち破り、\n学園に自由な未来と朝の光を取り戻しました。\n学び、迷い、誰かを大切にした日々は、これからもあなたの魔法を強くしていくでしょう。")
+                                                ? "あなたは大魔女校長が作り出した「願いの檻」を打ち破り、\n学園に自由な未来と朝の光を取り戻しました。\n学び、迷い、誰かを大切にした日々は、これからもあなたの魔法を強くしていくでしょう。"
                                                 : "あなたは校長先生をせっとくし、\nでんせつの しょうがくせいとして かたりつがれることでしょう。",
                                         languageMode
                                     )}
@@ -21760,7 +21670,7 @@ const App: React.FC = () => {
                                     <p className="mb-4 text-sm text-yellow-100 font-bold">
                                         {trans(
                                             activeRunVisualTheme === 'high-school'
-                                                ? (gameState.player.appearanceMode === 'VACATION' ? "次の旅へ持っていくカードを1枚選んでください" : "次回の学園攻略に持っていくカードを1枚選んでください")
+                                                ? "次回の学園攻略に持っていくカードを1枚選んでください"
                                                 : "次回の冒険に持っていくカードを1枚選んでください",
                                             languageMode
                                         )}
@@ -21791,7 +21701,7 @@ const App: React.FC = () => {
                                     <p className="text-sm text-green-200 mt-1">
                                         {trans(
                                             activeRunVisualTheme === 'high-school'
-                                                ? (gameState.player.appearanceMode === 'VACATION' ? "次の旅の初期デッキに追加されます。" : "次の学園攻略の初期デッキに追加されます。")
+                                                ? "次の学園攻略の初期デッキに追加されます。"
                                                 : "次の冒険の初期デッキに追加されます。",
                                             languageMode
                                         )}
