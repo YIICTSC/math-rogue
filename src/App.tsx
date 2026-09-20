@@ -9222,11 +9222,11 @@ const App: React.FC = () => {
                     setGameState({ ...nextGameState, screen: GameScreen.BATTLE });
                     setCurrentNarrative(flavor);
                     audioService.playBGM(bgmType);
-                    const voicedEnemies = enemies.filter(enemy => getHumanoidEnemyVoiceProfile(activeBattleVisualTheme, enemy.name));
+                    const voicedEnemies = enemies.filter(enemy => getHumanoidEnemyVoiceProfile(activeBattleVisualTheme, enemy, p.appearanceMode));
                     voicedEnemies.forEach((enemy, index) => {
                         window.setTimeout(() => {
                             playDelayedBattleVoice(() => {
-                                audioService.playHumanoidEnemyVoice(activeBattleVisualTheme, enemy.name, 'spawn');
+                                audioService.playHumanoidEnemyVoice(activeBattleVisualTheme, enemy, 'spawn', 2600, p.appearanceMode);
                             });
                         }, 450 + index * 850);
                     });
@@ -10888,7 +10888,7 @@ const App: React.FC = () => {
                                         );
                                         if (hasOtherAliveEnemies) {
                                             playDelayedBattleVoice(() => {
-                                                audioService.playHumanoidEnemyVoice(prev.visualTheme, e.name, 'defeat');
+                                                audioService.playHumanoidEnemyVoice(prev.visualTheme, e, 'defeat', 2600, prev.player.appearanceMode);
                                             }, BATTLE_VOICE_REPLY_DELAY_MS);
                                         } else {
                                             lastDefeatedEnemyForFinisherRef.current = { ...e };
@@ -10897,7 +10897,7 @@ const App: React.FC = () => {
                                 } else if (!voicedEnemyDamageIds.has(e.id)) {
                                     voicedEnemyDamageIds.add(e.id);
                                     playDelayedBattleVoice(() => {
-                                        audioService.playHumanoidEnemyVoice(prev.visualTheme, e.name, 'damage');
+                                        audioService.playHumanoidEnemyVoice(prev.visualTheme, e, 'damage', 2600, prev.player.appearanceMode);
                                     }, BATTLE_VOICE_REPLY_DELAY_MS);
                                 }
                             }
@@ -12396,8 +12396,10 @@ const App: React.FC = () => {
             playDelayedBattleVoice(() => {
                 audioService.playHumanoidEnemyVoice(
                     stateRef.current.visualTheme,
-                    enemy.name,
+                    enemy,
                     getHumanoidEnemyVoiceActionForIntent(enemy.nextIntent),
+                    2600,
+                    stateRef.current.player.appearanceMode,
                 );
             });
             if (isAttackIntent) audioService.playBattleSound('attack');
@@ -12860,14 +12862,14 @@ const App: React.FC = () => {
                         if (e.currentHp <= 0) {
                             if (aliveEnemies.length > 0) {
                                 playDelayedBattleVoice(() => {
-                                    audioService.playHumanoidEnemyVoice(prev.visualTheme, e.name, 'defeat');
+                                    audioService.playHumanoidEnemyVoice(prev.visualTheme, e, 'defeat', 2600, prev.player.appearanceMode);
                                 }, BATTLE_VOICE_REPLY_DELAY_MS);
                             } else {
                                 lastDefeatedEnemyForFinisherRef.current = { ...e };
                             }
                         } else {
                             playDelayedBattleVoice(() => {
-                                audioService.playHumanoidEnemyVoice(prev.visualTheme, e.name, 'damage');
+                                audioService.playHumanoidEnemyVoice(prev.visualTheme, e, 'damage', 2600, prev.player.appearanceMode);
                             }, BATTLE_VOICE_REPLY_DELAY_MS);
                         }
                     }
@@ -14554,8 +14556,10 @@ const App: React.FC = () => {
                             playDelayedBattleVoice(() => {
                                 audioService.playHumanoidEnemyVoice(
                                     stateRef.current.visualTheme,
-                                    defeatedEnemyForFinisher.name,
+                                    defeatedEnemyForFinisher,
                                     'defeat',
+                                    2600,
+                                    stateRef.current.player.appearanceMode,
                                 );
                             });
                             enemyDefeatVoiceTimerRef.current = null;

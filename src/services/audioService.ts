@@ -1,7 +1,7 @@
 
-import type { AttackEffectKey, StatusEffectKey } from '../types';
+import type { AttackEffectKey, CharacterAppearanceMode, StatusEffectKey } from '../types';
 import type { VisualThemeId } from '../data/visualThemes';
-import { getHumanoidEnemyVoiceProfile, type HumanoidEnemyVoiceAction } from '../data/humanoidEnemyVoiceLines';
+import { getHumanoidEnemyVoiceProfile, type HumanoidEnemyVoiceAction, type HumanoidEnemyVoiceTarget } from '../data/humanoidEnemyVoiceLines';
 import { assetUrl } from '../utils/assetPaths';
 import { WEB_PERFORMANCE_MODE, WEB_PRELOAD_ENABLED } from '../config/runtime';
 
@@ -1995,27 +1995,29 @@ class AudioService {
 
   public playHumanoidEnemyVoice(
       theme: VisualThemeId | undefined,
-      enemyName: string | undefined,
+      enemyTarget: HumanoidEnemyVoiceTarget | undefined,
       action: HumanoidEnemyVoiceAction,
       maxDurationMs = 2600,
+      appearanceMode: CharacterAppearanceMode = 'STANDARD',
   ) {
-      const profile = getHumanoidEnemyVoiceProfile(theme, enemyName);
+      const profile = getHumanoidEnemyVoiceProfile(theme, enemyTarget, appearanceMode);
       if (!profile) return Promise.resolve(false);
       this.init();
       if (!this.ctx || !this.sfxGain || this.isMuted) return Promise.resolve(false);
       const safeAction = action.replace(/[^a-z0-9_-]/gi, '').toLowerCase();
-      const name = `enemy-voice-${profile.theme}-${profile.id}-${safeAction}`;
+      const voiceRoot = profile.voiceSet === 'vacation' ? 'sfx/enemy-voices-vacation' : 'sfx/enemy-voices';
+      const name = `enemy-voice-${profile.voiceSet ?? 'standard'}-${profile.theme}-${profile.id}-${safeAction}`;
       const generation = (this.sfxPlaybackGenerations.get(name) ?? 0) + 1;
       this.sfxPlaybackGenerations.set(name, generation);
       return this.playVoiceFile(
           name,
           [
-              assetUrl(`sfx/enemy-voices/${profile.theme}/${profile.id}/${safeAction}.ogg`),
-              assetUrl(`sfx/enemy-voices/${profile.theme}/${profile.id}/${safeAction}.wav`),
-              `/sfx/enemy-voices/${profile.theme}/${profile.id}/${safeAction}.ogg`,
-              `/sfx/enemy-voices/${profile.theme}/${profile.id}/${safeAction}.wav`,
-              `sfx/enemy-voices/${profile.theme}/${profile.id}/${safeAction}.ogg`,
-              `sfx/enemy-voices/${profile.theme}/${profile.id}/${safeAction}.wav`,
+              assetUrl(`${voiceRoot}/${profile.theme}/${profile.id}/${safeAction}.ogg`),
+              assetUrl(`${voiceRoot}/${profile.theme}/${profile.id}/${safeAction}.wav`),
+              `/${voiceRoot}/${profile.theme}/${profile.id}/${safeAction}.ogg`,
+              `/${voiceRoot}/${profile.theme}/${profile.id}/${safeAction}.wav`,
+              `${voiceRoot}/${profile.theme}/${profile.id}/${safeAction}.ogg`,
+              `${voiceRoot}/${profile.theme}/${profile.id}/${safeAction}.wav`,
           ],
           maxDurationMs,
           false,
