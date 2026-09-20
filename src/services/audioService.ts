@@ -1602,7 +1602,14 @@ class AudioService {
       this.activeHtmlSfx.delete(name);
   }
 
-  private startSfxSource(name: string, buffer: AudioBuffer, maxDurationMs: number, overlap: boolean, volume = 1) {
+  private startSfxSource(
+      name: string,
+      buffer: AudioBuffer,
+      maxDurationMs: number,
+      overlap: boolean,
+      volume = 1,
+      directOutput = false,
+  ) {
       if (!this.ctx || !this.sfxGain) return false;
       if (!overlap) this.stopActiveSfx(name);
       try {
@@ -1612,13 +1619,13 @@ class AudioService {
           if (gain) {
               gain.gain.value = Math.min(1, Math.max(0, volume));
               source.connect(gain);
-              gain.connect(this.sfxGain);
+              gain.connect(directOutput ? this.ctx.destination : this.sfxGain);
               this.sfxSourceGains.set(source, gain);
               const gains = this.activeSfxSourceGains.get(name) ?? new Set<GainNode>();
               gains.add(gain);
               this.activeSfxSourceGains.set(name, gains);
           } else {
-              source.connect(this.sfxGain);
+              source.connect(directOutput ? this.ctx.destination : this.sfxGain);
           }
           const sources = this.activeSfxSources.get(name) ?? new Set<AudioBufferSourceNode>();
           sources.add(source);
@@ -1736,14 +1743,28 @@ class AudioService {
       this.init();
       if (!this.ctx || !this.sfxGain || this.isMuted) return false;
 
-      // HTMLAudioElement.play() is frequently rejected when a voice is started
-      // from a delayed battle/event callback. Once the context is unlocked,
-      // decode the same asset and start it on the already-authorized SFX bus.
+      // Keep the pre-2026-09-20 playback behavior as the primary path. Voice
+      // clips played through HTMLAudioElement bypass the WebAudio master delay,
+      // so they start immediately and stay dry instead of gaining an echo.
+      const htmlStarted = await this.playHtmlSfx(name, paths, maxDurationMs, overlap, generation);
+      if (htmlStarted) return true;
+
+      // Some browsers reject delayed HTMLAudioElement.play() calls. Retain a
+      // WebAudio fallback for that case only, but route it directly to the
+      // destination so the fallback matches the old dry voice sound as closely
+      // as possible instead of entering the global SFX/BGM delay loop.
       const contextReady = await this.resumeAudioContext(IS_IOS_BUILD ? 3 : 1);
       if (contextReady && this.ctx?.state === 'running') {
           const buffer = await this.loadVoiceBuffer(name, paths);
           if (this.sfxPlaybackGenerations.get(name) !== generation) return true;
-          if (buffer && this.startSfxSource(name, buffer, maxDurationMs, overlap, this.getHtmlSfxVolume(name))) {
+          if (buffer && this.startSfxSource(
+              name,
+              buffer,
+              maxDurationMs,
+              overlap,
+              this.getHtmlSfxVolume(name),
+              true,
+          )) {
               if (waitForCompletion) {
                   const durationMs = Math.min(maxDurationMs, Math.max(0, buffer.duration * 1000));
                   if (durationMs > 0) {
@@ -1753,10 +1774,7 @@ class AudioService {
               return true;
           }
       }
-
-      // Keep the native media path as a fallback for browsers/builds where the
-      // file cannot be decoded by Web Audio.
-      return this.playHtmlSfx(name, paths, maxDurationMs, overlap, generation);
+      return false;
   }
 
   private isVoiceSfxName(name: string) {
