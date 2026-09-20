@@ -29,6 +29,8 @@ try {
   const hs = await server.ssrLoadModule('/src/data/highSchoolVacationEvents.ts');
   const battle = await server.ssrLoadModule('/src/data/battleBackgrounds.ts');
   const vacationRomance = await server.ssrLoadModule('/src/data/magicVacationRomanceDialogue.ts');
+  const vacationEndingCopy = await server.ssrLoadModule('/src/data/vacationEndingCopy.ts');
+  const themedEndingSequences = await server.ssrLoadModule('/src/data/themedEndingSequences.ts');
   const romanceService = await server.ssrLoadModule('/src/services/magicRomanceEventService.ts');
   const endingService = await server.ssrLoadModule('/src/services/magicEndingService.ts');
   const eventService = await server.ssrLoadModule('/src/services/eventService.ts');
@@ -122,6 +124,29 @@ try {
     }
   }
   assert(romanceCgCount === 648, `Expected 648 final Magic Vacation romance CGs, got ${romanceCgCount}`);
+
+  const vacationEndingCharacters = ['ASSASSIN', 'BARD', 'CARETAKER', 'CHEF', 'DODGEBALL', 'GARDENER', 'LIBRARIAN', 'MAGE', 'WARRIOR'];
+  const vacationEndingTones = ['serious', 'funny', 'cool', 'cute', 'heartfelt'];
+  let vacationEndingPageCount = 0;
+  for (const characterId of vacationEndingCharacters) {
+    const variants = themedEndingSequences.getThemedEndingVariants('high-school', characterId, characterId, 'VACATION');
+    assert(variants.length === vacationEndingTones.length, `Expected five Vacation ending tones for ${characterId}`);
+    for (const variant of variants) {
+      assert(variant.pages.length === 3, `Vacation ending ${characterId}/${variant.id} must have three pages`);
+      for (const page of variant.pages) {
+        assert(page.imagePath.includes('endings/high-school-vacation/'), `Vacation ending used a non-Vacation image path: ${page.imagePath}`);
+        assert(exists(page.imagePath), `Missing Vacation ending image: ${page.imagePath}`);
+        assert(page.text.length > 0 && page.dialogue && page.dialogue.length > 0, `Vacation ending copy is incomplete: ${characterId}/${variant.id}`);
+        vacationEndingPageCount += 1;
+      }
+    }
+  }
+  assert(vacationEndingPageCount === 135, `Expected 135 high-school Vacation ending pages, got ${vacationEndingPageCount}`);
+  assert(vacationEndingCopy.MAGIC_VACATION_COMMON_ENDING_PAGES.length === 3, 'Magic Vacation common ending must have three pages.');
+  vacationEndingCopy.MAGIC_VACATION_COMMON_ENDING_PAGES.forEach((page, index) => {
+    assert(exists(`sprites/endings/magic-vacation/common/ending-${index + 1}.webp`), `Missing Magic Vacation common ending image ${index + 1}`);
+    assert(page.description.ja.length > 0 && page.dialogue.ja.length > 0, `Magic Vacation common ending copy is incomplete at page ${index + 1}`);
+  });
 
   for (const characterId of allMagicCharacters) {
     for (let stage = 1; stage <= 5; stage += 1) {
@@ -220,6 +245,7 @@ try {
   console.log('High-school Vacation events: 90 / CGs: 90 / voices: 54');
   console.log('Vacation maps: 8 / battle backgrounds: 16');
   console.log('Magic Vacation romance CGs: 648 / R1-R5 voices: 85 / R6 voices: 136');
+  console.log('High-school Vacation ending pages: 135 / Magic common Vacation ending pages: 3');
 } finally {
   await server.close();
 }

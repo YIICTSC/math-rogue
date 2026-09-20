@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { ChevronRight, Sparkles } from 'lucide-react';
-import type { LanguageMode } from '../types';
+import type { CharacterAppearanceMode, LanguageMode } from '../types';
 import type { NonMagicEndingTheme } from '../data/themedEndingSequences';
 import { getThemedEndingToneLabel, getThemedEndingVariants, getThemedEndingVoiceHeroId, type ThemedEndingVariant } from '../data/themedEndingSequences';
 import { assetUrl } from '../utils/assetPaths';
@@ -12,11 +12,12 @@ interface Props {
   characterName: string;
   languageMode: LanguageMode;
   variantId?: string;
+  appearanceMode?: CharacterAppearanceMode;
   onComplete: (variant: ThemedEndingVariant) => void;
 }
 
-const ThemedEndingSequenceScreen: React.FC<Props> = ({ theme, characterId, characterName, languageMode, variantId, onComplete }) => {
-  const variants = useMemo(() => getThemedEndingVariants(theme, characterId, characterName), [characterId, characterName, theme]);
+const ThemedEndingSequenceScreen: React.FC<Props> = ({ theme, characterId, characterName, languageMode, variantId, appearanceMode = 'STANDARD', onComplete }) => {
+  const variants = useMemo(() => getThemedEndingVariants(theme, characterId, characterName, appearanceMode), [appearanceMode, characterId, characterName, theme]);
   const [variantIndex] = useState(() => {
     const requestedIndex = variantId ? variants.findIndex(variant => variant.id === variantId) : -1;
     return requestedIndex >= 0 ? requestedIndex : Math.floor(Math.random() * Math.max(1, variants.length));
@@ -29,10 +30,10 @@ const ThemedEndingSequenceScreen: React.FC<Props> = ({ theme, characterId, chara
   const completionStartedRef = useRef(false);
 
   useEffect(() => {
-    if (theme !== 'high-school' || pageIndex !== 2 || !endingVoiceName) return undefined;
+    if (theme !== 'high-school' || appearanceMode === 'VACATION' || pageIndex !== 2 || !endingVoiceName) return undefined;
     void audioService.playHighSchoolVoiceFile(voiceHeroId, endingVoiceName, 12000).catch(() => undefined);
     return () => audioService.stopHighSchoolVoices();
-  }, [endingVoiceName, pageIndex, theme, voiceHeroId]);
+  }, [appearanceMode, endingVoiceName, pageIndex, theme, voiceHeroId]);
 
   if (!variant || !page) return null;
 
@@ -79,6 +80,11 @@ const ThemedEndingSequenceScreen: React.FC<Props> = ({ theme, characterId, chara
         </div>
         <h1 className="text-xl font-black text-white sm:text-3xl">{localizedTitle}</h1>
         <p className="mt-3 max-h-[30dvh] overflow-y-auto whitespace-pre-wrap text-sm leading-relaxed text-slate-100 sm:text-lg">{localizedText}</p>
+        {page.dialogue && (
+          <p className="mt-3 border-l-4 border-amber-300/70 pl-3 text-left text-sm font-semibold italic leading-relaxed text-amber-100 sm:text-base">
+            {languageMode === 'ENGLISH' ? page.dialogueEnglish : languageMode === 'HIRAGANA' ? page.dialogueHiragana : page.dialogue}
+          </p>
+        )}
         <button
           type="button"
           data-gamepad-initial-choice

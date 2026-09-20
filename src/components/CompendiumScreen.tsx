@@ -745,6 +745,7 @@ const CompendiumScreen: React.FC<CompendiumScreenProps> = ({ unlockedCardNames, 
                         characterName={selectedThemedEnding.characterName}
                         languageMode={languageMode}
                         variantId={selectedThemedEnding.variant.id}
+                        appearanceMode={selectedThemedEnding.appearanceMode ?? 'STANDARD'}
                         onComplete={() => setSelectedThemedEnding(null)}
                     />
                     <button data-gamepad-back onClick={() => setSelectedThemedEnding(null)} className="absolute right-3 top-3 z-20 rounded-full border border-white/20 bg-black/70 p-2.5 text-white/90 hover:text-white"><X size={24} /></button>

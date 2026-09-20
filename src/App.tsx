@@ -216,6 +216,7 @@ import BasketballLayupShooting from './components/BasketballLayupShooting';
 import FinalBridgeScreen from './components/FinalBridgeScreen';
 import MagicRomanceEndingScreen from './components/MagicRomanceEndingScreen';
 import ThemedEndingSequenceScreen from './components/ThemedEndingSequenceScreen';
+import MagicVacationCommonEndingSequenceScreen from './components/MagicVacationCommonEndingSequenceScreen';
 import { buildThemedEndingGalleryEntry } from './data/themedEndingSequences';
 import EndlessEndingSequenceScreen from './components/EndlessEndingSequenceScreen';
 import EndlessClearScreen from './components/EndlessClearScreen';
@@ -1816,13 +1817,17 @@ const App: React.FC = () => {
     const [legacyCardSelected, setLegacyCardSelected] = useState<boolean>(false);
     const [newlyUnlockedCard, setNewlyUnlockedCard] = useState<ICard | null>(null); // New State
     const [themedEndingSequenceComplete, setThemedEndingSequenceComplete] = useState(false);
+    const [magicVacationCommonEndingSequenceComplete, setMagicVacationCommonEndingSequenceComplete] = useState(false);
     const [newlyUnlockedCharacters, setNewlyUnlockedCharacters] = useState<Character[]>([]);
     const [newlyUnlockedMiniGames, setNewlyUnlockedMiniGames] = useState<(typeof MINI_GAMES)[number][]>([]);
     const [vacationUnlockNotice, setVacationUnlockNotice] = useState<'high-school' | 'magic' | null>(null);
     const [originalCardBuilderUnlockNotice, setOriginalCardBuilderUnlockNotice] = useState(false);
 
     useEffect(() => {
-        if (gameState.screen !== GameScreen.ENDING) setThemedEndingSequenceComplete(false);
+        if (gameState.screen !== GameScreen.ENDING) {
+            setThemedEndingSequenceComplete(false);
+            setMagicVacationCommonEndingSequenceComplete(false);
+        }
     }, [gameState.screen]);
 
     useEffect(() => {
@@ -21590,6 +21595,7 @@ const App: React.FC = () => {
                             ?? activeRunThemedCharacters[0]?.name
                             ?? selectedCharName}
                         languageMode={languageMode}
+                        appearanceMode={gameState.player.appearanceMode ?? 'STANDARD'}
                         onComplete={(variant) => {
                             const characterName = activeRunThemedCharacters.find(character => character.id === gameState.player.id)?.name
                                 ?? activeRunThemedCharacters[0]?.name
@@ -21599,13 +21605,26 @@ const App: React.FC = () => {
                                 gameState.player.id,
                                 characterName,
                                 variant,
+                                Date.now(),
+                                gameState.player.appearanceMode ?? 'STANDARD',
                             ));
                             setThemedEndingSequenceComplete(true);
                         }}
                     />
                 )}
 
-                {gameState.screen === GameScreen.ENDING && (activeRunVisualTheme === 'magic' || themedEndingSequenceComplete) && (
+                {gameState.screen === GameScreen.ENDING && activeRunVisualTheme === 'magic' && gameState.player.appearanceMode === 'VACATION' && !magicVacationCommonEndingSequenceComplete && (
+                    <MagicVacationCommonEndingSequenceScreen
+                        languageMode={languageMode}
+                        onComplete={() => setMagicVacationCommonEndingSequenceComplete(true)}
+                    />
+                )}
+
+                {gameState.screen === GameScreen.ENDING && (
+                    activeRunVisualTheme !== 'magic'
+                        ? themedEndingSequenceComplete
+                        : gameState.player.appearanceMode !== 'VACATION' || magicVacationCommonEndingSequenceComplete
+                ) && (
                     <div
                         data-gamepad-initial-scope="main-ending"
                         className="ending-screen w-full h-full bg-yellow-900 bg-cover bg-center flex flex-col items-center justify-start text-center text-white p-4 overflow-y-auto custom-scrollbar relative"

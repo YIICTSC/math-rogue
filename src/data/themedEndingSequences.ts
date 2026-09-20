@@ -1,6 +1,8 @@
+import type { CharacterAppearanceMode } from '../types';
 import type { VisualThemeId } from './visualThemes';
 import { ENDING_PAGE_COPY } from './endingSceneCopy';
 import { ENDING_PAGE_LOCALIZED_COPY } from './endingSceneLocalizedCopy';
+import { getVacationEndingPages, type VacationEndingToneId } from './vacationEndingCopy';
 
 export type NonMagicEndingTheme = Exclude<VisualThemeId, 'magic'>;
 
@@ -11,6 +13,9 @@ export interface ThemedEndingPage {
   text: string;
   textHiragana: string;
   textEnglish: string;
+  dialogue?: string;
+  dialogueHiragana?: string;
+  dialogueEnglish?: string;
   imagePath: string;
 }
 
@@ -27,6 +32,7 @@ export interface ThemedEndingGalleryEntry {
   characterName: string;
   variant: ThemedEndingVariant;
   unlockedAt: number;
+  appearanceMode?: CharacterAppearanceMode;
 }
 
 type CharacterEndingProfile = {
@@ -223,6 +229,7 @@ export const getThemedEndingVariants = (
   theme: NonMagicEndingTheme,
   characterId: string,
   characterName: string,
+  appearanceMode: CharacterAppearanceMode = 'STANDARD',
 ): ThemedEndingVariant[] => {
   const normalizedCharacterId = (characterId ?? '').trim().toUpperCase();
   const safeCharacterId = CHARACTER_PROFILE[normalizedCharacterId] ? normalizedCharacterId : 'WARRIOR';
@@ -234,7 +241,9 @@ export const getThemedEndingVariants = (
   const nameHiragana = theme === 'high-school' ? profile.highSchoolNameHiragana : profile.elementaryNameHiragana;
   const nameEnglish = theme === 'high-school' ? profile.highSchoolNameEnglish : profile.elementaryNameEnglish;
   const fallbackCharacterName = (characterName ?? '').trim() || name;
-  const folder = theme === 'high-school' ? 'high-school' : 'elementary';
+  const folder = theme === 'high-school'
+    ? appearanceMode === 'VACATION' ? 'high-school-vacation' : 'high-school'
+    : 'elementary';
 
   return ENDING_TONES.map((ending, variantIndex) => {
     const characterScene = CHARACTER_TONE_SCENE[safeCharacterId]?.[ending.id] ?? {
@@ -246,6 +255,9 @@ export const getThemedEndingVariants = (
       ?? CHARACTER_FINALE_VOICE.WARRIOR[theme];
     const toneResolution = FINALE_TONE_RESOLUTION[theme][ending.id]
       ?? FINALE_TONE_RESOLUTION[theme].serious;
+    const vacationPages = theme === 'high-school' && appearanceMode === 'VACATION'
+      ? getVacationEndingPages(safeCharacterId, ending.id as VacationEndingToneId)
+      : undefined;
     const pageCopy = ENDING_PAGE_COPY[theme]?.[safeCharacterId]?.[ending.id];
     const localizedPageCopy = ENDING_PAGE_LOCALIZED_COPY[theme]?.[safeCharacterId]?.[ending.id];
     const japanesePageCopy = (pageIndex: number, fallback: string): string =>
@@ -261,10 +273,7 @@ export const getThemedEndingVariants = (
       const localizedName = language === 'HIRAGANA' ? nameHiragana : nameEnglish;
       return (pages?.[pageIndex] ?? fallback).replaceAll('__NAME__', localizedName);
     };
-    return {
-      id: ending.id,
-      tone: ending.tone,
-      pages: [
+    const standardPages: ThemedEndingPage[] = [
       {
         title: ending.title,
         titleHiragana: ending.titleHiragana,
@@ -292,7 +301,17 @@ export const getThemedEndingVariants = (
         textEnglish: localizedPageText(2, 'ENGLISH', `"${characterVoice.en} ${toneResolution.en}" ${nameEnglish} stepped beyond the school gate in a way only they could.`),
         imagePath: `sprites/endings/${folder}/${safeCharacterId.toLowerCase()}/ending-${variantIndex + 1}-3.webp`,
       },
-      ],
+    ];
+    const pages = vacationPages
+      ? vacationPages.map((page, pageIndex) => ({
+          ...page,
+          imagePath: `sprites/endings/${folder}/${safeCharacterId.toLowerCase()}/ending-${variantIndex + 1}-${pageIndex + 1}.webp`,
+        }))
+      : standardPages;
+    return {
+      id: ending.id,
+      tone: ending.tone,
+      pages,
     };
   });
 };
@@ -303,6 +322,7 @@ export const buildThemedEndingGalleryEntry = (
   characterName: string,
   variant: ThemedEndingVariant,
   unlockedAt = Date.now(),
+  appearanceMode: CharacterAppearanceMode = 'STANDARD',
 ): ThemedEndingGalleryEntry => ({
   id: `${theme}:${characterId}:${variant.id}`,
   theme,
@@ -310,4 +330,5 @@ export const buildThemedEndingGalleryEntry = (
   characterName,
   variant,
   unlockedAt,
+  appearanceMode,
 });
