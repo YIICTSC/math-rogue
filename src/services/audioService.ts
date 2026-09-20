@@ -2078,7 +2078,10 @@ class AudioService {
   }
 
   public stopHighSchoolVoices() {
-      for (const name of Array.from(this.activeHtmlSfx.keys())) {
+      for (const name of Array.from(new Set([
+          ...this.activeHtmlSfx.keys(),
+          ...this.activeSfxSources.keys(),
+      ]))) {
           if (name.startsWith('high-school-voice-')) {
               this.stopActiveSfx(name);
           }
