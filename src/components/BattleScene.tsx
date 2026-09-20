@@ -1804,7 +1804,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                             <div className="app-codex-selection-options flex flex-wrap justify-center gap-4 mb-4 overflow-y-auto">
                                 {codexOptions.map((card, index) => (
                                     <div key={card.id} className="scale-100 hover:scale-105 transition-transform cursor-pointer">
-                                        <Card card={card} onClick={() => onCodexSelect(card)} disabled={false} languageMode={languageMode} onInspect={onInspect} gamepadZone="battle-secret-codex-options" gamepadOrder={index} />
+                                        <Card card={card} onClick={() => onCodexSelect(card)} disabled={false} languageMode={languageMode} appearanceMode={player.appearanceMode} onInspect={onInspect} gamepadZone="battle-secret-codex-options" gamepadOrder={index} />
                                     </div>
                                 ))}
                             </div>
@@ -1859,7 +1859,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                             <Sparkles className="text-yellow-400 mb-4 animate-spin" size={48} />
                             <h2 className="text-3xl font-black text-yellow-100 mb-6 tracking-widest text-shadow-lg">{trans("友情コンボ！", languageMode)}</h2>
                             <div className="scale-125">
-                                <Card card={synthesizedCard} onClick={() => { }} disabled={false} languageMode={languageMode} onInspect={onInspect} />
+                                <Card card={synthesizedCard} onClick={() => { }} disabled={false} languageMode={languageMode} appearanceMode={player.appearanceMode} onInspect={onInspect} />
                             </div>
                         </div>
                     </div>
@@ -1889,6 +1889,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                     <CardInspectionModal
                         card={inspectedCard}
                         languageMode={languageMode}
+                        appearanceMode={player.appearanceMode}
                         onClose={() => {
                             setInspectedCard(null);
                             setFullscreenArtCard(null);
@@ -1900,6 +1901,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                     <FullscreenCardArtModal
                         card={fullscreenArtCard}
                         languageMode={languageMode}
+                        appearanceMode={player.appearanceMode}
                         onClose={() => setFullscreenArtCard(null)}
                     />
                 )}
@@ -3061,6 +3063,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                                     )
                                             }
                                             languageMode={languageMode}
+                                            appearanceMode={player.appearanceMode}
                                         />
                                     </div>
                                 </div>
@@ -3086,7 +3089,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                             <div className="grid grid-cols-3 gap-2 justify-items-center">
                                 {[...player.deck].sort((a, b) => a.type.localeCompare(b.type)).map((card) => (
                                     <div key={card.id} className="scale-75 origin-top-left w-24 h-36">
-                                        <Card card={card} onClick={() => { }} disabled={false} languageMode={languageMode} onInspect={onInspect} />
+                                        <Card card={card} onClick={() => { }} disabled={false} languageMode={languageMode} appearanceMode={player.appearanceMode} onInspect={onInspect} />
                                     </div>
                                 ))}
                             </div>
@@ -3817,7 +3820,7 @@ export const BattleFinisherCutinOverlay: React.FC<{ card: ICard; languageMode: L
     );
 };
 
-const FullscreenCardArtModal: React.FC<{ card: ICard; languageMode: LanguageMode; onClose: () => void }> = ({ card, languageMode, onClose }) => {
+const FullscreenCardArtModal: React.FC<{ card: ICard; languageMode: LanguageMode; onClose: () => void; appearanceMode?: CharacterAppearanceMode }> = ({ card, languageMode, onClose, appearanceMode = 'STANDARD' }) => {
     const translated = transBattle(card.name, languageMode);
     const magicArtUrl = getMagicCardArtUrl(card);
     const imageCandidates = useMemo(
@@ -3869,6 +3872,7 @@ const FullscreenCardArtModal: React.FC<{ card: ICard; languageMode: LanguageMode
                             seed={`${card.id}-enemy-fullscreen`}
                             aliases={enemyIllustrationNames.slice(1)}
                             visualTheme={card.visualTheme}
+                            appearanceMode={appearanceMode}
                             enemyType={card.enemyIllustrationEnemyType}
                             phase={card.enemyIllustrationPhase}
                             action={card.capture && card.visualTheme && card.visualTheme !== 'elementary' ? 'attack' : 'idle'}

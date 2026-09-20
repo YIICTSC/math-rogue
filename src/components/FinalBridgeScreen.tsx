@@ -1,19 +1,20 @@
 
 import React, { useState, useEffect } from 'react';
-import { Player, LanguageMode } from '../types';
+import { CharacterAppearanceMode, Player, LanguageMode } from '../types';
 import { trans } from '../utils/textUtils';
 import { audioService } from '../services/audioService';
 import { ChevronRight, Sparkles, BookOpen, Heart } from 'lucide-react';
-import { assetUrl } from '../utils/assetPaths';
+import { getEnvironmentBackgroundCss } from '../data/vacationEnvironmentAssets';
 
 interface FinalBridgeScreenProps {
   player: Player;
   onComplete: (upgradeType: 'HEAL' | 'APOTHEOSIS' | 'STRENGTH') => void;
   languageMode: LanguageMode;
   visualTheme?: 'elementary' | 'high-school' | 'magic';
+  appearanceMode?: CharacterAppearanceMode;
 }
 
-const FinalBridgeScreen: React.FC<FinalBridgeScreenProps> = ({ player, onComplete, languageMode, visualTheme = 'elementary' }) => {
+const FinalBridgeScreen: React.FC<FinalBridgeScreenProps> = ({ player, onComplete, languageMode, visualTheme = 'elementary', appearanceMode = 'STANDARD' }) => {
   const [step, setStep] = useState(0);
   const [showChoices, setShowChoices] = useState(false);
 
@@ -62,7 +63,7 @@ const FinalBridgeScreen: React.FC<FinalBridgeScreenProps> = ({ player, onComplet
     <div
       data-gamepad-initial-scope={`final-bridge-${showChoices ? 'choice' : `story-${step}`}`}
       className="main-final-bridge-screen w-full h-full bg-black bg-cover bg-center flex flex-col items-center justify-center p-8 relative overflow-hidden font-mono"
-      style={visualTheme === 'magic' ? { backgroundImage: `url(${assetUrl('sprites/backgrounds/learning-rogue/magic-final-bridge.webp')})` } : undefined}
+      style={{ backgroundImage: getEnvironmentBackgroundCss(visualTheme, 'finalBridge', appearanceMode) }}
     >
       {visualTheme === 'magic' && <div className="absolute inset-0 bg-slate-950/45 pointer-events-none" />}
       {/* Background Parallax Stars Effect */}

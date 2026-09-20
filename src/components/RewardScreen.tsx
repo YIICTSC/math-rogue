@@ -1,14 +1,14 @@
 
 import React, { useEffect, useState, useRef } from 'react';
-import { Card as ICard, RewardItem, Potion, LanguageMode, RaceTrickCard, CoopSupportCard } from '../types';
+import { Card as ICard, CharacterAppearanceMode, RewardItem, Potion, LanguageMode, RaceTrickCard, CoopSupportCard } from '../types';
 import Card from './Card';
 import CardInspectionModal from './CardInspectionModal';
 import { Gift, Gem, Coins, FlaskConical, X, Flag, Sparkles, Users } from 'lucide-react';
 import { trans } from '../utils/textUtils';
-import { assetUrl } from '../utils/assetPaths';
 import { PotionIcon, RelicIcon } from './ItemIcon';
 import type { VisualThemeId } from '../data/visualThemes';
 import type { EndlessRewardChoice } from '../data/endlessMode';
+import { getEnvironmentBackgroundCss } from '../data/vacationEnvironmentAssets';
 
 interface RewardScreenProps {
   rewards: RewardItem[];
@@ -26,6 +26,7 @@ interface RewardScreenProps {
   interactionDisabled?: boolean;
   interactionDisabledMessage?: string;
   visualTheme?: VisualThemeId;
+  appearanceMode?: CharacterAppearanceMode;
   endlessFloor?: number;
   endlessBossName?: string;
   endlessBonusGold?: number;
@@ -33,7 +34,7 @@ interface RewardScreenProps {
   endlessRerollAvailable?: boolean;
 }
 
-const RewardScreen: React.FC<RewardScreenProps> = ({ rewards, onSelectReward, onSkip, isLoading, currentPotions = [], potionCapacity = 3, languageMode, typingMode = false, dummyRewards = 0, autoSkipWhenEmpty = true, skipDisabled = false, skipDisabledMessage, interactionDisabled = false, interactionDisabledMessage, visualTheme = 'elementary', endlessFloor, endlessBossName, endlessBonusGold, onRerollEndlessReward, endlessRerollAvailable = false }) => {
+const RewardScreen: React.FC<RewardScreenProps> = ({ rewards, onSelectReward, onSkip, isLoading, currentPotions = [], potionCapacity = 3, languageMode, typingMode = false, dummyRewards = 0, autoSkipWhenEmpty = true, skipDisabled = false, skipDisabledMessage, interactionDisabled = false, interactionDisabledMessage, visualTheme = 'elementary', appearanceMode = 'STANDARD', endlessFloor, endlessBossName, endlessBonusGold, onRerollEndlessReward, endlessRerollAvailable = false }) => {
   const [replaceReward, setReplaceReward] = useState<RewardItem | null>(null);
   const [inspectedItem, setInspectedItem] = useState<{ type: 'CARD' | 'RELIC' | 'POTION', data: any } | null>(null);
   const longPressTimer = useRef<any>(null);
@@ -139,9 +140,7 @@ const RewardScreen: React.FC<RewardScreenProps> = ({ rewards, onSelectReward, on
       data-gamepad-navigation-root
       className="main-reward-screen flex flex-col items-center justify-center h-full w-full bg-gray-900 bg-cover bg-center text-white relative p-4"
       style={{
-        backgroundImage: `url(${assetUrl(visualTheme === 'magic'
-          ? 'sprites/backgrounds/learning-rogue/magic-reward-sanctuary.webp'
-          : 'sprites/backgrounds/learning-rogue/reward-rooftop.webp')})`
+        backgroundImage: getEnvironmentBackgroundCss(visualTheme, 'reward', appearanceMode)
       }}
     >
       <div className="absolute inset-0 bg-slate-950/58 pointer-events-none" />
@@ -151,6 +150,7 @@ const RewardScreen: React.FC<RewardScreenProps> = ({ rewards, onSelectReward, on
             <CardInspectionModal
                 card={inspectedItem.data}
                 languageMode={languageMode}
+                appearanceMode={appearanceMode}
                 onClose={() => setInspectedItem(null)}
             />
         )}
@@ -268,6 +268,7 @@ const RewardScreen: React.FC<RewardScreenProps> = ({ rewards, onSelectReward, on
                             disabled={isLoading || interactionDisabled} 
                             onInspect={(c) => setInspectedItem({ type: 'CARD', data: c })}
                             languageMode={languageMode}
+                            appearanceMode={appearanceMode}
                         />
                     </div>
                     <button data-gamepad-initial-choice data-gamepad-zone="reward-options" data-gamepad-order={rewardIndex} onClick={() => !interactionDisabled && onSelectReward(reward)} disabled={interactionDisabled} className="mt-4 bg-blue-600 px-6 py-2 text-sm font-bold rounded border hover:bg-blue-500 shadow-lg w-full disabled:cursor-not-allowed disabled:opacity-50">{trans("獲得", languageMode)}</button>

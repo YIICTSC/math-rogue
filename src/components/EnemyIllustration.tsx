@@ -3,7 +3,7 @@ import type { CharacterAppearanceMode } from '../types';
 import PixelSprite from './PixelSprite';
 import { getEnemyIllustrationPaths } from '../utils/enemyIllustration';
 import { isLegacySpriteModeEnabled } from '../utils/legacySpriteMode';
-import { getThemedHumanoidEnemySpritePath, getThemedMonsterEnemySpritePath, type HighSchoolEnemyAction, type VisualThemeId } from '../data/visualThemes';
+import { getThemedHumanoidEnemySpritePath, getThemedMajorBossEnemySpritePath, getThemedMonsterEnemySpritePath, type HighSchoolEnemyAction, type VisualThemeId } from '../data/visualThemes';
 import { assetUrl } from '../utils/assetPaths';
 import { ENDLESS_BOSSES, getEndlessBossById, getEndlessBossSpritePath } from '../data/endlessMode';
 
@@ -61,8 +61,14 @@ const EnemyIllustration: React.FC<EnemyIllustrationProps> = ({ name, seed, alias
     ? getThemedHumanoidEnemySpritePath(enemyRef, visualTheme, 'idle', appearanceMode)
     : null;
   const monsterPath = getThemedMonsterEnemySpritePath(enemyRef, visualTheme, appearanceMode);
+  const majorBossPath = getThemedMajorBossEnemySpritePath(enemyRef, visualTheme, action, appearanceMode);
+  const standardMajorBossPath = appearanceMode === 'VACATION'
+    ? getThemedMajorBossEnemySpritePath(enemyRef, visualTheme, action, 'STANDARD')
+    : null;
   const imagePaths = endlessSpritePath
     ? [endlessSpritePath, getEndlessBossSpritePath(endlessBoss!, 'idle')]
+    : majorBossPath
+    ? Array.from(new Set([majorBossPath, standardMajorBossPath].filter(Boolean) as string[]))
     : crowdfundingBossPath
     ? [crowdfundingBossPath]
     : azukiSpritePath

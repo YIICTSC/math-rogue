@@ -1,11 +1,11 @@
 
 import React, { useState, useEffect } from 'react';
 import { Archive, Key, Check } from 'lucide-react';
-import { RewardItem, LanguageMode, CoopTreasurePool } from '../types';
+import { CharacterAppearanceMode, RewardItem, LanguageMode, CoopTreasurePool } from '../types';
 import { audioService } from '../services/audioService';
 import { trans } from '../utils/textUtils';
-import { assetUrl } from '../utils/assetPaths';
 import type { VisualThemeId } from '../data/visualThemes';
+import { getEnvironmentBackgroundCss } from '../data/vacationEnvironmentAssets';
 
 interface TreasureScreenProps {
   onOpen?: () => void;
@@ -20,6 +20,7 @@ interface TreasureScreenProps {
   resolved?: boolean;
   waitingForOthers?: boolean;
   visualTheme?: VisualThemeId;
+  appearanceMode?: CharacterAppearanceMode;
 }
 
 const TreasureScreen: React.FC<TreasureScreenProps> = ({
@@ -34,7 +35,8 @@ const TreasureScreen: React.FC<TreasureScreenProps> = ({
   onClaimPool,
   resolved = false,
   waitingForOthers = false,
-  visualTheme = 'elementary'
+  visualTheme = 'elementary',
+  appearanceMode = 'STANDARD'
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const currencyLabel = visualTheme === 'magic' ? '魔晶' : 'ゴールド';
@@ -97,9 +99,7 @@ const TreasureScreen: React.FC<TreasureScreenProps> = ({
       data-gamepad-initial-scope={`treasure-${isPoolMode ? 'pool' : displayOpen ? 'opened' : 'closed'}`}
       className="main-treasure-screen flex h-full w-full flex-col items-center justify-center overflow-y-auto bg-gray-900 bg-cover bg-center p-4 pb-[calc(1rem+env(safe-area-inset-bottom))] text-white relative sm:p-8"
       style={{
-        backgroundImage: `url(${assetUrl(visualTheme === 'magic'
-          ? 'sprites/backgrounds/learning-rogue/magic-treasure-vault.webp'
-          : 'sprites/backgrounds/learning-rogue/treasure-storage.webp')})`
+        backgroundImage: getEnvironmentBackgroundCss(visualTheme, 'treasure', appearanceMode)
       }}
     >
       <div className="absolute inset-0 bg-slate-950/60 pointer-events-none" />

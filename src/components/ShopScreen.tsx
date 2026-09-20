@@ -1,13 +1,13 @@
 
 import React, { useEffect, useMemo, useState, useRef } from 'react';
-import { Player, Card as ICard, Relic, Potion, LanguageMode } from '../types';
+import { CharacterAppearanceMode, Player, Card as ICard, Relic, Potion, LanguageMode } from '../types';
 import Card from './Card';
 import CardInspectionModal from './CardInspectionModal';
 import { ShoppingBag, Trash2, Coins, Gem, FlaskConical, X } from 'lucide-react';
 import { trans } from '../utils/textUtils';
-import { assetUrl } from '../utils/assetPaths';
 import { PotionIcon, RelicIcon } from './ItemIcon';
 import type { VisualThemeId } from '../data/visualThemes';
+import { getEnvironmentBackgroundCss } from '../data/vacationEnvironmentAssets';
 
 interface ShopScreenProps {
   player: Player;
@@ -28,12 +28,13 @@ interface ShopScreenProps {
   interactionDisabled?: boolean;
   interactionDisabledMessage?: string;
   visualTheme?: VisualThemeId;
+  appearanceMode?: CharacterAppearanceMode;
 }
 
 const REMOVE_COST = 75;
 const SHOP_SHORTCUT_KEYS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', 'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', 'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l'];
 
-const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics = [], shopPotions = [], onBuyCard, onBuyRelic, onBuyPotion, onRemoveCard, onLeave, languageMode, potionCapacity = 3, typingMode = false, priceMultiplier = 1, shopDiscountPercent = 0, removeCost, interactionDisabled = false, interactionDisabledMessage, visualTheme = 'elementary' }) => {
+const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics = [], shopPotions = [], onBuyCard, onBuyRelic, onBuyPotion, onRemoveCard, onLeave, languageMode, potionCapacity = 3, typingMode = false, priceMultiplier = 1, shopDiscountPercent = 0, removeCost, interactionDisabled = false, interactionDisabledMessage, visualTheme = 'elementary', appearanceMode = 'STANDARD' }) => {
   const [purchasedIds, setPurchasedIds] = useState<string[]>([]);
   const [removed, setRemoved] = useState(false);
   const [viewMode, setViewMode] = useState<'BUY' | 'REMOVE'>('BUY');
@@ -206,9 +207,7 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics =
       data-gamepad-initial-scope="shop-screen"
       className="main-shop-screen flex flex-col h-full w-full bg-gray-900 bg-cover bg-center text-white relative"
       style={{
-        backgroundImage: `url(${assetUrl(visualTheme === 'magic'
-          ? 'sprites/backgrounds/learning-rogue/magic-shop-store.webp'
-          : 'sprites/backgrounds/learning-rogue/shop-store.webp')})`
+        backgroundImage: getEnvironmentBackgroundCss(visualTheme, 'shop', appearanceMode)
       }}
     >
        <div className="absolute inset-0 bg-slate-950/60 pointer-events-none" />
@@ -218,6 +217,7 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics =
             <CardInspectionModal
                 card={inspectedItem.data}
                 languageMode={languageMode}
+                appearanceMode={appearanceMode}
                 onClose={() => setInspectedItem(null)}
             />
         )}
@@ -453,6 +453,7 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics =
                                         disabled={isSold}
                                         onInspect={(c) => setInspectedItem({ type: 'CARD', data: c })}
                                         languageMode={languageMode}
+                                        appearanceMode={appearanceMode}
                                     />
                                     {!isSold && (
                                         <div className="absolute -bottom-4 left-1/2 -translate-x-1/2 w-full text-center z-20">
@@ -492,6 +493,7 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics =
                                     disabled={false}
                                     onInspect={(c) => setInspectedItem({ type: 'CARD', data: c })}
                                     languageMode={languageMode}
+                                    appearanceMode={appearanceMode}
                                 />
                                 <div className="absolute inset-0 bg-red-500/0 group-hover:bg-red-500/20 transition-colors flex items-center justify-center rounded-lg z-20 pointer-events-none">
                                     <Trash2 className="opacity-0 group-hover:opacity-100 text-red-500 bg-black p-2 rounded-full border border-red-500" size={32} />

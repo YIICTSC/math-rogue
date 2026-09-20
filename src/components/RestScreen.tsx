@@ -1,13 +1,13 @@
 
 import React, { useEffect, useState } from 'react';
-import { Player, Card as ICard, LanguageMode } from '../types';
+import { CharacterAppearanceMode, Player, Card as ICard, LanguageMode } from '../types';
 import Card from './Card';
 import { BedDouble, Hammer, ArrowRight, FlaskConical, Plus, Shuffle, Check, DoorOpen, Eraser, ShoppingBag, Layers } from 'lucide-react';
 import { getUpgradedCard } from '../utils/cardUtils';
 import { trans } from '../utils/textUtils';
-import { assetUrl } from '../utils/assetPaths';
 import { CARD_ERASER_NAME, getErasableEffectOptions } from '../utils/cardEraser';
 import type { VisualThemeId } from '../data/visualThemes';
+import { getEnvironmentBackgroundCss } from '../data/vacationEnvironmentAssets';
 
 const REST_SHORTCUT_KEYS = ['1', '2', '3', '4', '5', '6', '7', '8', '9', 'q', 'w', 'e', 'r', 't', 'y', 'u', 'i', 'o', 'p', 'a', 's', 'd', 'f', 'g', 'h', 'j', 'k', 'l'];
 
@@ -24,6 +24,7 @@ interface RestScreenProps {
   interactionDisabled?: boolean;
   interactionDisabledMessage?: string;
   visualTheme?: VisualThemeId;
+  appearanceMode?: CharacterAppearanceMode;
   /** Enabled after an endless major boss so the intermission always offers
    * the documented rest/shop/deck-organization choices. */
   endlessMajorBoss?: boolean;
@@ -31,7 +32,7 @@ interface RestScreenProps {
   onOrganizeDeck?: (deck: ICard[]) => void;
 }
 
-const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSynthesize, onSelfStudy, onLeave, languageMode, typingMode = false, scienceRoomChance = 0.5, interactionDisabled = false, interactionDisabledMessage, visualTheme = 'elementary', endlessMajorBoss = false, onOpenShop, onOrganizeDeck }) => {
+const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSynthesize, onSelfStudy, onLeave, languageMode, typingMode = false, scienceRoomChance = 0.5, interactionDisabled = false, interactionDisabledMessage, visualTheme = 'elementary', appearanceMode = 'STANDARD', endlessMajorBoss = false, onOpenShop, onOrganizeDeck }) => {
   const isMagic = visualTheme === 'magic';
   const restHubMessage = isMagic ? "特別結界室だ。魔力を整えて、次の出撃に備えよう。" : "放課後の校舎だ。どこへ行こう？";
   const [mode, setMode] = useState<'CHOICE' | 'UPGRADE' | 'SYNTHESIS' | 'SELF_STUDY' | 'DECK' | 'ERASER_EFFECT' | 'PREVIEW_UPGRADE' | 'PREVIEW_SYNTHESIS' | 'RESULT' | 'DONE'>('CHOICE');
@@ -313,9 +314,7 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
       data-gamepad-initial-scope={`rest-${mode}`}
       className="main-rest-screen flex flex-col h-full w-full bg-gray-900 bg-cover bg-center text-white relative items-center justify-center p-4 md:p-8"
       style={{
-        backgroundImage: `url(${assetUrl(visualTheme === 'magic'
-          ? 'sprites/backgrounds/learning-rogue/magic-rest-infirmary.webp'
-          : 'sprites/backgrounds/learning-rogue/rest-infirmary.webp')})`
+        backgroundImage: getEnvironmentBackgroundCss(visualTheme, 'rest', appearanceMode)
       }}
     >
         <div className="absolute inset-0 bg-slate-950/58 pointer-events-none" />
@@ -468,7 +467,7 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
                                     }}
                                 >
                                     {typingMode && shortcutKey && <div className="absolute right-1 top-1 z-30 rounded-full border border-cyan-300 bg-cyan-950/95 px-1.5 py-0.5 text-[10px] font-black uppercase text-cyan-200">{shortcutKey}</div>}
-                                    <Card card={card} onClick={() => handleCardClick(card)} disabled={false} languageMode={languageMode}/>
+                                    <Card card={card} onClick={() => handleCardClick(card)} disabled={false} languageMode={languageMode} appearanceMode={appearanceMode}/>
                                     {isSelected && <div className="absolute top-0 right-0 bg-purple-600 text-white rounded-full p-1"><FlaskConical size={16}/></div>}
                                 </div>
                             );
@@ -489,7 +488,7 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
             {mode === 'ERASER_EFFECT' && selectedCard && (
                 <div className="flex flex-col items-center gap-4">
                     <div className="scale-90">
-                        <Card card={selectedCard} onClick={() => {}} disabled={false} languageMode={languageMode}/>
+                        <Card card={selectedCard} onClick={() => {}} disabled={false} languageMode={languageMode} appearanceMode={appearanceMode}/>
                     </div>
                     <div className="grid w-full max-w-xl gap-3">
                         {selectedEraserOptions.map((option, index) => (
@@ -513,12 +512,12 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
                 <div className="rest-upgrade-preview flex flex-col items-center">
                     <div className="rest-upgrade-preview-cards flex items-center justify-center gap-4 md:gap-8 mb-8">
                         <div className="rest-upgrade-before scale-90 md:scale-100">
-                             <Card card={selectedCard} onClick={() => {}} disabled={false} languageMode={languageMode}/>
+                             <Card card={selectedCard} onClick={() => {}} disabled={false} languageMode={languageMode} appearanceMode={appearanceMode}/>
                              <div className="text-center mt-2 text-gray-400">{trans("強化前", languageMode)}</div>
                         </div>
                         <ArrowRight size={32} className="text-yellow-500 animate-pulse" />
                         <div className="rest-upgrade-after scale-100 md:scale-110">
-                             <Card card={getUpgradedCard(selectedCard)} onClick={() => {}} disabled={false} languageMode={languageMode}/>
+                             <Card card={getUpgradedCard(selectedCard)} onClick={() => {}} disabled={false} languageMode={languageMode} appearanceMode={appearanceMode}/>
                              <div className="text-center mt-2 text-green-400 font-bold">{trans("強化後", languageMode)}</div>
                         </div>
                     </div>
@@ -544,7 +543,7 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
                         {synthCards.map((card, idx) => (
                             <React.Fragment key={card.id}>
                                 <div className="scale-[0.65] md:scale-90 origin-center">
-                                     <Card card={card} onClick={() => {}} disabled={false} languageMode={languageMode}/>
+                                     <Card card={card} onClick={() => {}} disabled={false} languageMode={languageMode} appearanceMode={appearanceMode}/>
                                 </div>
                                 {idx < synthCards.length - 1 && <Plus size={20} className="text-gray-500" />}
                             </React.Fragment>
@@ -577,7 +576,7 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
             {mode === 'RESULT' && resultCard && (
                 <div className="flex flex-col items-center animate-in zoom-in duration-300">
                     <div className="scale-110 mb-8">
-                        <Card card={resultCard} onClick={() => {}} disabled={false} languageMode={languageMode}/>
+                        <Card card={resultCard} onClick={() => {}} disabled={false} languageMode={languageMode} appearanceMode={appearanceMode}/>
                     </div>
                     <button 
                         onClick={() => { setMode('DONE'); setResultCard(null); }}

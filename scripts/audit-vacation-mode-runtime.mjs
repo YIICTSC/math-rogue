@@ -29,12 +29,25 @@ try {
   const hs = await server.ssrLoadModule('/src/data/highSchoolVacationEvents.ts');
   const battle = await server.ssrLoadModule('/src/data/battleBackgrounds.ts');
   const visualThemes = await server.ssrLoadModule('/src/data/visualThemes.ts');
+  const vacationEnvironmentAssets = await server.ssrLoadModule('/src/data/vacationEnvironmentAssets.ts');
   const vacationRomance = await server.ssrLoadModule('/src/data/magicVacationRomanceDialogue.ts');
   const vacationEndingCopy = await server.ssrLoadModule('/src/data/vacationEndingCopy.ts');
   const themedEndingSequences = await server.ssrLoadModule('/src/data/themedEndingSequences.ts');
   const romanceService = await server.ssrLoadModule('/src/services/magicRomanceEventService.ts');
   const endingService = await server.ssrLoadModule('/src/services/magicEndingService.ts');
   const eventService = await server.ssrLoadModule('/src/services/eventService.ts');
+  const toRelativeSpritePath = (value) => String(value).replace(/^.*sprites\//, 'sprites/').split('?')[0];
+  const environmentKeys = ['shop', 'treasure', 'rest', 'reward', 'event', 'actClear', 'finalBridge', 'challengeSelect', 'challenge', 'start'];
+  for (const theme of ['high-school', 'magic']) {
+    for (const key of environmentKeys) {
+      const vacationEnvironmentPath = toRelativeSpritePath(vacationEnvironmentAssets.getEnvironmentBackgroundPath(theme, key, 'VACATION'));
+      const standardEnvironmentPath = toRelativeSpritePath(vacationEnvironmentAssets.getEnvironmentBackgroundPath(theme, key, 'STANDARD'));
+      assert(vacationEnvironmentPath.includes('vacation'), `Vacation ${theme} ${key} background did not use vacation assets: ${vacationEnvironmentPath}`);
+      assert(!standardEnvironmentPath.includes('vacation'), `Standard ${theme} ${key} background leaked vacation assets: ${standardEnvironmentPath}`);
+      assert(exists(vacationEnvironmentPath), `Missing Vacation ${theme} ${key} background: ${vacationEnvironmentPath}`);
+      assert(exists(standardEnvironmentPath), `Missing standard ${theme} ${key} background: ${standardEnvironmentPath}`);
+    }
+  }
 
   assert(hs.HIGH_SCHOOL_VACATION_EVENTS.length === 90, 'High-school Vacation events must be exactly 90.');
   hs.HIGH_SCHOOL_VACATION_EVENTS.forEach((event, index) => {
@@ -57,12 +70,20 @@ try {
   }
 
   for (const theme of ['high-school', 'magic']) {
+    for (const phase of [1, 2]) {
+      const majorBoss = { name: `${theme}-vacation-major-boss-route-check`, enemyType: 'THE_HEART', phase };
+      const vacationMajorBossPath = toRelativeSpritePath(visualThemes.getThemedMajorBossEnemySpritePath(majorBoss, theme, 'idle', 'VACATION'));
+      const standardMajorBossPath = toRelativeSpritePath(visualThemes.getThemedMajorBossEnemySpritePath(majorBoss, theme, 'idle', 'STANDARD'));
+      assert(vacationMajorBossPath.includes('/vacation-bosses/'), `Vacation ${theme} major boss path did not use vacation assets: ${vacationMajorBossPath}`);
+      assert(!standardMajorBossPath.includes('/vacation-bosses/'), `Standard ${theme} major boss path leaked Vacation assets: ${standardMajorBossPath}`);
+      assert(exists(vacationMajorBossPath), `Missing Vacation ${theme} major boss route asset: ${vacationMajorBossPath}`);
+      assert(exists(standardMajorBossPath), `Missing standard ${theme} major boss fallback asset: ${standardMajorBossPath}`);
+    }
     for (let act = 1; act <= 4; act += 1) {
       assert(exists(`sprites/backgrounds/learning-rogue/${theme}-vacation-map-act${act}.webp`), `Missing ${theme} Vacation map act ${act}`);
     }
   }
 
-  const toRelativeSpritePath = (value) => String(value).replace(/^.*sprites\//, 'sprites/').split('?')[0];
   for (const theme of ['high-school', 'magic']) {
     const monsterEnemy = { name: `${theme}-vacation-monster-route-check`, enemyType: 'GENERIC', phase: 1 };
     const humanoidEnemy = { name: `${theme}-vacation-humanoid-route-check`, enemyType: 'GUARDIAN', phase: 1 };

@@ -1187,12 +1187,12 @@ const TypingBattleScene: React.FC<TypingBattleSceneProps> = ({
                                                     zIndex: 10 - depth
                                                 }}
                                             >
-                                                <Card card={card} onClick={() => {}} disabled={false} />
+                                                <Card card={card} onClick={() => {}} disabled={false} appearanceMode={player.appearanceMode} />
                                             </div>
                                         );
                                     })}
                                     <div className="absolute left-1/2 top-1/2 z-10 origin-top -translate-x-1/2 -translate-y-1/2 scale-[0.58] md:scale-[0.64]">
-                                        <Card card={currentCard} onClick={() => {}} disabled={false} />
+                                        <Card card={currentCard} onClick={() => {}} disabled={false} appearanceMode={player.appearanceMode} />
                                     </div>
                                     {queuedHandCards.length > 0 && (
                                         <div className="absolute -right-1 -top-1 z-20 rounded-full border border-emerald-300/60 bg-emerald-950/90 px-1.5 py-0.5 text-[9px] font-black text-emerald-200">
@@ -1227,7 +1227,7 @@ const TypingBattleScene: React.FC<TypingBattleSceneProps> = ({
                                             : 'border-indigo-400/50 bg-slate-950/70'}`}
                                     >
                                         <div className="origin-top-left scale-[0.75]">
-                                            <Card card={card} onClick={() => {}} disabled={copyTargetDisabled} />
+                                            <Card card={card} onClick={() => {}} disabled={copyTargetDisabled} appearanceMode={player.appearanceMode} />
                                         </div>
                                     </button>
                                 );

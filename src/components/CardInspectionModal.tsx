@@ -1,6 +1,6 @@
 import React from 'react';
 import { X } from 'lucide-react';
-import { Card as ICard, LanguageMode } from '../types';
+import { Card as ICard, CharacterAppearanceMode, LanguageMode } from '../types';
 import { buildEnglishCardDescription, buildEnglishCardName, buildHiraganaCardDescription, trans } from '../utils/textUtils';
 import Card, { KEYWORD_DEFINITIONS } from './Card';
 import { toAge9BattleText, transBattle } from '../utils/ageRatingCopy';
@@ -10,6 +10,7 @@ interface CardInspectionModalProps {
   languageMode: LanguageMode;
   onClose: () => void;
   onOpenArt?: (card: ICard) => void;
+  appearanceMode?: CharacterAppearanceMode;
 }
 
 const getCardKeywords = (card: ICard) => {
@@ -39,7 +40,7 @@ const getProcessedDescription = (card: ICard, languageMode: LanguageMode) => {
   return toAge9BattleText(desc, languageMode);
 };
 
-const CardInspectionModal: React.FC<CardInspectionModalProps> = ({ card, languageMode, onClose, onOpenArt }) => (
+const CardInspectionModal: React.FC<CardInspectionModalProps> = ({ card, languageMode, onClose, onOpenArt, appearanceMode = 'STANDARD' }) => (
   <div
     data-gamepad-modal
     data-gamepad-initial-scope="card-inspection"
@@ -54,7 +55,7 @@ const CardInspectionModal: React.FC<CardInspectionModalProps> = ({ card, languag
       }}
       title={trans('タッチでイラスト拡大', languageMode)}
     >
-      <Card card={card} onClick={() => {}} disabled={false} languageMode={languageMode} />
+      <Card card={card} onClick={() => {}} disabled={false} languageMode={languageMode} appearanceMode={appearanceMode} />
     </div>
     <div
       className="app-modal-panel app-card-inspection-detail bg-gray-800 border-2 border-white p-4 md:p-6 rounded-lg max-w-sm w-full shadow-2xl relative max-h-[50vh] overflow-y-auto custom-scrollbar"

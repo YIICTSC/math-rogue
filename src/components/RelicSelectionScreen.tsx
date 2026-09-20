@@ -1,12 +1,12 @@
 
 
 import React, { useEffect } from 'react';
-import { LanguageMode, Relic } from '../types';
+import { CharacterAppearanceMode, LanguageMode, Relic } from '../types';
 import { Gem, MousePointer2 } from 'lucide-react';
 import { trans } from '../utils/textUtils';
-import { assetUrl } from '../utils/assetPaths';
 import { RelicIcon } from './ItemIcon';
 import type { VisualThemeId } from '../data/visualThemes';
+import { getEnvironmentBackgroundCss } from '../data/vacationEnvironmentAssets';
 
 interface RelicSelectionScreenProps {
   relics: Relic[];
@@ -14,9 +14,10 @@ interface RelicSelectionScreenProps {
   languageMode: LanguageMode;
   typingMode?: boolean;
   visualTheme?: VisualThemeId;
+  appearanceMode?: CharacterAppearanceMode;
 }
 
-const RelicSelectionScreen: React.FC<RelicSelectionScreenProps> = ({ relics, onSelect, languageMode, typingMode = false, visualTheme = 'elementary' }) => {
+const RelicSelectionScreen: React.FC<RelicSelectionScreenProps> = ({ relics, onSelect, languageMode, typingMode = false, visualTheme = 'elementary', appearanceMode = 'STANDARD' }) => {
   useEffect(() => {
     if (!typingMode) return;
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -40,9 +41,7 @@ const RelicSelectionScreen: React.FC<RelicSelectionScreenProps> = ({ relics, onS
       data-gamepad-initial-scope="relic-selection"
       className="main-relic-screen flex flex-col h-full w-full bg-gray-900 bg-cover bg-center text-white relative overflow-y-auto custom-scrollbar"
       style={{
-        backgroundImage: `url(${assetUrl(visualTheme === 'magic'
-          ? 'sprites/backgrounds/learning-rogue/magic-selection-entrance.webp'
-          : 'sprites/backgrounds/learning-rogue/selection-entrance.webp')})`
+        backgroundImage: getEnvironmentBackgroundCss(visualTheme, 'start', appearanceMode)
       }}
     >
       <div className="absolute inset-0 bg-slate-950/60 pointer-events-none" />

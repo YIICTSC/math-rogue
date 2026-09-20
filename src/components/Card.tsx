@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { Card as CardType, CardType as EnumCardType, LanguageMode } from '../types';
+import { Card as CardType, CardType as EnumCardType, CharacterAppearanceMode, LanguageMode } from '../types';
 import PixelSprite from './PixelSprite';
 import EnemyIllustration from './EnemyIllustration';
 import { buildEnglishCardDescription, buildEnglishCardName, buildHiraganaCardDescription, getEnglishFamiliarName, trans } from '../utils/textUtils';
@@ -19,6 +19,7 @@ interface CardProps {
   languageMode?: LanguageMode;
   gamepadZone?: string;
   gamepadOrder?: number;
+  appearanceMode?: CharacterAppearanceMode;
 }
 
 export const KEYWORD_DEFINITIONS: Record<string, { title: string; desc: string }> = {
@@ -89,7 +90,8 @@ const CompositeArtPiece: React.FC<{
   visualTheme?: VisualThemeId;
   enemyType?: string;
   phase?: number;
-}> = ({ refToken, seed, languageMode, visualTheme = 'elementary', enemyType, phase }) => {
+  appearanceMode?: CharacterAppearanceMode;
+}> = ({ refToken, seed, languageMode, visualTheme = 'elementary', enemyType, phase, appearanceMode = 'STANDARD' }) => {
   const [failed, setFailed] = useState(false);
   const [imageIndex, setImageIndex] = useState(0);
 
@@ -107,6 +109,7 @@ const CompositeArtPiece: React.FC<{
         altText={trans(enemyRef?.name || refToken.substring('enemy:'.length), languageMode)}
         seed={seed}
         visualTheme={resolvedVisualTheme}
+        appearanceMode={appearanceMode}
         enemyType={enemyRef?.enemyType || enemyType}
         phase={enemyRef?.phase ?? phase}
         action={resolvedVisualTheme === 'high-school' ? 'attack' : 'idle'}
@@ -222,7 +225,7 @@ const CompositeArtPiece: React.FC<{
   return <div className="w-full h-full bg-black/20" />;
 };
 
-const Card: React.FC<CardProps> = ({ card, onClick, disabled, onInspect, languageMode = 'JAPANESE', gamepadZone, gamepadOrder }) => {
+const Card: React.FC<CardProps> = ({ card, onClick, disabled, onInspect, languageMode = 'JAPANESE', gamepadZone, gamepadOrder, appearanceMode = 'STANDARD' }) => {
   const longPressTimer = useRef<any>(null);
   const isLongPressActive = useRef(false);
   const startPos = useRef({ x: 0, y: 0 });
@@ -387,6 +390,7 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled, onInspect, languag
           seed={`${card.id}-illustration`}
           languageMode={languageMode}
           visualTheme={card.visualTheme}
+          appearanceMode={appearanceMode}
           enemyType={card.enemyIllustrationEnemyType}
           phase={card.enemyIllustrationPhase}
         />
@@ -404,6 +408,7 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled, onInspect, languag
                 seed={`${card.id}-mix-${idx}`}
                 languageMode={languageMode}
                 visualTheme={card.visualTheme}
+                appearanceMode={appearanceMode}
                 enemyType={card.enemyIllustrationEnemyType}
                 phase={card.enemyIllustrationPhase}
               />
@@ -420,6 +425,7 @@ const Card: React.FC<CardProps> = ({ card, onClick, disabled, onInspect, languag
           seed={`${card.id}-enemy`}
           aliases={enemyIllustrationNames.slice(1)}
           visualTheme={card.visualTheme}
+          appearanceMode={appearanceMode}
           enemyType={card.enemyIllustrationEnemyType}
           phase={card.enemyIllustrationPhase}
           action={card.capture && card.visualTheme && card.visualTheme !== 'elementary' ? 'attack' : 'idle'}

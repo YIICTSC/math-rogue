@@ -945,6 +945,24 @@ export const getThemedMonsterEnemySpritePath = (
   return null;
 };
 
+export const getThemedMajorBossEnemySpritePath = (
+  enemy: Pick<Enemy, 'name' | 'enemyType' | 'phase'>,
+  theme: VisualThemeId,
+  action: HighSchoolEnemyAction = 'idle',
+  appearanceMode: CharacterAppearanceMode = 'STANDARD',
+) => {
+  if (enemy.enemyType !== 'THE_HEART') return null;
+  if (appearanceMode === 'VACATION') {
+    if (theme === 'high-school') {
+      return assetUrl(`sprites/high-school/vacation-bosses/${enemy.phase === 2 ? 'true-kocho' : 'kocho'}.webp`);
+    }
+    if (theme === 'magic') {
+      return assetUrl(`sprites/magic/vacation-bosses/${enemy.phase === 2 ? 'star-calamity' : 'grand-witch'}.webp`);
+    }
+  }
+  return getThemedHumanoidEnemySpritePath(enemy, theme, action, 'STANDARD');
+};
+
 export const getThemedEnemyDisplayName = (
   enemy: Pick<Enemy, 'name' | 'enemyType' | 'phase'>,
   theme: VisualThemeId,

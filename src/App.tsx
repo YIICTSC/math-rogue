@@ -276,7 +276,7 @@ import { COOP_SUPPORT_LIBRARY, getRandomCoopSupportCard } from './coopSupportCar
 import { chooseBattleBackgroundScene, getBattleBackgroundFlavor } from './data/battleBackgrounds';
 import { DAILY_PLAY_LIMIT_ENABLED, DEBUG_FEATURES_ENABLED, DISTRIBUTION_PLATFORM, OFFLINE_DISTRIBUTABLE, OFFLINE_NETWORK_FEATURE_MESSAGE, PAID_EDITION, WEB_PERFORMANCE_MODE, WEB_PRELOAD_ENABLED } from './config/runtime';
 import { getAttackEffectKeyForCard, getMultihitFrameSequence } from './data/attackEffects';
-import { getThemedCharacters, getThemedEnemyDisplayName, getThemedHumanoidEnemySpritePath, getThemedMonsterEnemySpritePath, MAGIC_HERO_ID_BY_CHARACTER_ID, type VisualThemeId } from './data/visualThemes';
+import { getThemedCharacterSpritePath, getThemedCharacters, getThemedEnemyDisplayName, getThemedHumanoidEnemySpritePath, getThemedMajorBossEnemySpritePath, getThemedMonsterEnemySpritePath, MAGIC_HERO_ID_BY_CHARACTER_ID, type VisualThemeId } from './data/visualThemes';
 import { getTrueBossByTheme } from './data/enemyCatalogs';
 import { getHumanoidEnemyVoiceProfile, type HumanoidEnemyVoiceAction } from './data/humanoidEnemyVoiceLines';
 import { boostMagicCardForTransformation, getMagicCardsForHero } from './data/magicCards';
@@ -292,6 +292,7 @@ import { GamepadSystemMenu } from './components/GamepadSystemMenu';
 import { CREDIT_SECTIONS } from './data/credits';
 import { getSupporterNpcEventByTitle } from './data/supporterNpcEvents';
 import { usePwaInstall } from './hooks/usePwaInstall';
+import { getEnvironmentBackgroundCss } from './data/vacationEnvironmentAssets';
 
 const PARRY_WINDOW_MS = 650;
 const PARRY_PERFECT_MS = 220;
@@ -442,6 +443,9 @@ const getBattleEnemyTransitionAssetPaths = (
     if (visualTheme === 'high-school' && enemy.enemyType === 'GENZO') {
         return [assetUrl(appearanceMode === 'VACATION' ? 'sprites/high-school/vacation-bosses/genzo.webp' : 'enemy-illustrations/ゲンゾー.webp')];
     }
+
+    const majorBossPath = getThemedMajorBossEnemySpritePath(enemy, visualTheme, 'idle', appearanceMode);
+    if (majorBossPath) return [majorBossPath];
 
     const humanoidPath = getThemedHumanoidEnemySpritePath(enemy, visualTheme, 'idle', appearanceMode);
     if (humanoidPath) return [humanoidPath];
@@ -19639,6 +19643,7 @@ const App: React.FC = () => {
                             newlyUnlockedCardName={gameState.newlyUnlockedCardName}
                             typingMode={gameState.challengeMode === 'TYPING'}
                             visualTheme={gameState.visualTheme || visualTheme}
+                            appearanceMode={gameState.player.appearanceMode}
                             magicHeroId={getMagicProtagonistId(gameState.player)}
                             magicRomance={gameState.player.magicRomance}
                             endlessRunRewards={gameState.endlessRunRewards}
@@ -20040,6 +20045,7 @@ const App: React.FC = () => {
                             problemSourceAssignment={completedAssignmentProblemSource}
                             onAnswerResult={handleAssignmentAnswerResult}
                             visualTheme={visualTheme}
+                            appearanceMode={gameState.player.appearanceMode}
                         />
                     </div>
                 )}
@@ -20496,7 +20502,7 @@ const App: React.FC = () => {
 
                 {gameState.screen === GameScreen.RELIC_SELECTION && (
                     <div className="absolute inset-0">
-                        <RelicSelectionScreen relics={starterRelics} onSelect={handleRelicSelect} languageMode={languageMode} typingMode={gameState.challengeMode === 'TYPING'} visualTheme={visualTheme} />
+                        <RelicSelectionScreen relics={starterRelics} onSelect={handleRelicSelect} languageMode={languageMode} typingMode={gameState.challengeMode === 'TYPING'} visualTheme={visualTheme} appearanceMode={gameState.player.appearanceMode} />
                         {gameState.challengeMode === 'COOP' && coopAwaitingMapSync && coopSession && !coopSession.isHost && (
                             <div className="absolute inset-0 bg-black/65 backdrop-blur-[1px] flex items-center justify-center p-4 z-20">
                                 <div className="bg-slate-900 border-2 border-emerald-500 rounded-xl p-6 text-white text-center max-w-md w-full">
@@ -20510,7 +20516,7 @@ const App: React.FC = () => {
 
                 {gameState.screen === GameScreen.COMPENDIUM && (
                     <div className="absolute inset-0">
-                        <CompendiumScreen unlockedCardNames={unlockedCardNames} onBack={returnToTitle} languageMode={languageMode} isDebug={isDebugHpOne} visualTheme={visualTheme} />
+                        <CompendiumScreen unlockedCardNames={unlockedCardNames} onBack={returnToTitle} languageMode={languageMode} isDebug={isDebugHpOne} visualTheme={visualTheme} appearanceMode={gameState.player.appearanceMode} />
                     </div>
                 )}
 
@@ -20850,7 +20856,7 @@ const App: React.FC = () => {
 
                 {gameState.screen === GameScreen.REWARD && (
                     <div className="absolute inset-0">
-                        <RewardScreen rewards={gameState.rewards} onSelectReward={handleRewardSelection} onSkip={finishRewardPhase} isLoading={isLoading || coopAwaitingRewardSync} currentPotions={gameState.player.potions} potionCapacity={getPotionCapacity(gameState.player)} languageMode={languageMode} typingMode={gameState.challengeMode === 'TYPING'} dummyRewards={raceRewardDummyDisplay} autoSkipWhenEmpty={gameState.challengeMode !== 'COOP'} skipDisabled={coopRewardSkipDisabled || hasRelic(gameState.player, 'PREPAID_CARD') || hasRelic(gameState.player, 'SCHOOL_ARCHIVE') || (gameState.endlessRewardPending && gameState.rewards.some(reward => reward.type === 'ENDLESS_REWARD'))} skipDisabledMessage={gameState.endlessRewardPending && gameState.rewards.some(reward => reward.type === 'ENDLESS_REWARD') ? 'ボス報酬を1つ選んでください' : (coopAwaitingRewardSync ? 'ホストが報酬を確定するまで待っています' : ((hasRelic(gameState.player, 'PREPAID_CARD') || hasRelic(gameState.player, 'SCHOOL_ARCHIVE')) ? 'このレリックの効果でカード報酬をスキップできません' : (coopRewardSkipDisabled ? '他のプレイヤーの報酬完了を待っています' : undefined)))} interactionDisabled={coopLocalProgressInteractionDisabled} interactionDisabledMessage={coopInteractionDisabledMessage} visualTheme={gameState.visualTheme || visualTheme} endlessFloor={gameState.endlessFloor ?? gameState.floor} endlessBossName={gameState.endlessBossId ? getEndlessBoss(getEndlessArc(gameState.visualTheme || visualTheme), gameState.endlessFloor ?? gameState.floor)?.name : undefined} endlessBonusGold={gameState.endlessBossId ? (gameState.endlessFloor === 50 ? 500 : (gameState.endlessFloor && gameState.endlessFloor % 10 === 0 ? 200 : 100)) : undefined} onRerollEndlessReward={gameState.isEndless ? handleEndlessRewardReroll : undefined} endlessRerollAvailable={Boolean(gameState.isEndless && gameState.endlessRewardPending && !gameState.endlessRewardRerollUsed)} />
+                        <RewardScreen rewards={gameState.rewards} onSelectReward={handleRewardSelection} onSkip={finishRewardPhase} isLoading={isLoading || coopAwaitingRewardSync} currentPotions={gameState.player.potions} potionCapacity={getPotionCapacity(gameState.player)} languageMode={languageMode} typingMode={gameState.challengeMode === 'TYPING'} dummyRewards={raceRewardDummyDisplay} autoSkipWhenEmpty={gameState.challengeMode !== 'COOP'} skipDisabled={coopRewardSkipDisabled || hasRelic(gameState.player, 'PREPAID_CARD') || hasRelic(gameState.player, 'SCHOOL_ARCHIVE') || (gameState.endlessRewardPending && gameState.rewards.some(reward => reward.type === 'ENDLESS_REWARD'))} skipDisabledMessage={gameState.endlessRewardPending && gameState.rewards.some(reward => reward.type === 'ENDLESS_REWARD') ? 'ボス報酬を1つ選んでください' : (coopAwaitingRewardSync ? 'ホストが報酬を確定するまで待っています' : ((hasRelic(gameState.player, 'PREPAID_CARD') || hasRelic(gameState.player, 'SCHOOL_ARCHIVE')) ? 'このレリックの効果でカード報酬をスキップできません' : (coopRewardSkipDisabled ? '他のプレイヤーの報酬完了を待っています' : undefined)))} interactionDisabled={coopLocalProgressInteractionDisabled} interactionDisabledMessage={coopInteractionDisabledMessage} visualTheme={gameState.visualTheme || visualTheme} appearanceMode={gameState.player.appearanceMode} endlessFloor={gameState.endlessFloor ?? gameState.floor} endlessBossName={gameState.endlessBossId ? getEndlessBoss(getEndlessArc(gameState.visualTheme || visualTheme), gameState.endlessFloor ?? gameState.floor)?.name : undefined} endlessBonusGold={gameState.endlessBossId ? (gameState.endlessFloor === 50 ? 500 : (gameState.endlessFloor && gameState.endlessFloor % 10 === 0 ? 200 : 100)) : undefined} onRerollEndlessReward={gameState.isEndless ? handleEndlessRewardReroll : undefined} endlessRerollAvailable={Boolean(gameState.isEndless && gameState.endlessRewardPending && !gameState.endlessRewardRerollUsed)} />
                     </div>
                 )}
 
@@ -20869,6 +20875,7 @@ const App: React.FC = () => {
                             interactionDisabled={coopLocalProgressInteractionDisabled}
                             interactionDisabledMessage={coopInteractionDisabledMessage}
                             visualTheme={gameState.visualTheme || visualTheme}
+                            appearanceMode={gameState.player.appearanceMode}
                             endlessMajorBoss={Boolean(gameState.isEndless && gameState.endlessFloor && gameState.endlessFloor % 10 === 0)}
                             onOpenShop={gameState.isEndless ? handleEndlessIntermissionShop : undefined}
                             onOrganizeDeck={gameState.isEndless ? handleEndlessOrganizeDeck : undefined}
@@ -20901,6 +20908,7 @@ const App: React.FC = () => {
                             interactionDisabled={coopLocalProgressInteractionDisabled}
                             interactionDisabledMessage={coopInteractionDisabledMessage}
                             visualTheme={gameState.visualTheme || visualTheme}
+                            appearanceMode={gameState.player.appearanceMode}
                         />
                     </div>
                 )}
@@ -20962,6 +20970,7 @@ const App: React.FC = () => {
                                 : coopInteractionDisabledMessage}
                             languageMode={languageMode}
                             visualTheme={gameState.visualTheme || coopSyncedVisualTheme}
+                            appearanceMode={gameState.player.appearanceMode}
                         />
                     </div>
                 )}
@@ -20973,6 +20982,7 @@ const App: React.FC = () => {
                             onComplete={handleFinalBridgeComplete}
                             languageMode={languageMode}
                             visualTheme={gameState.visualTheme || visualTheme}
+                            appearanceMode={gameState.player.appearanceMode}
                         />
                     </div>
                 )}
@@ -21003,6 +21013,7 @@ const App: React.FC = () => {
                             resolved={gameState.challengeMode === 'COOP' ? !!coopSession?.participants.find(participant => participant.peerId === coopSelfPeerId)?.treasureResolved : false}
                             waitingForOthers={gameState.challengeMode === 'COOP' ? !!coopSession?.participants.some(participant => !participant.treasureResolved) : false}
                             visualTheme={gameState.visualTheme || visualTheme}
+                            appearanceMode={gameState.player.appearanceMode}
                         />
                     </div>
                 )}
@@ -21511,11 +21522,7 @@ const App: React.FC = () => {
                     <div
                         className="game-over-screen w-full h-full bg-red-900 bg-cover bg-center flex flex-col items-center justify-start text-center text-white p-4 overflow-y-auto custom-scrollbar relative"
                         style={{
-                            backgroundImage: `url(${assetUrl(
-                                coopSyncedVisualTheme === 'magic'
-                                    ? 'sprites/backgrounds/learning-rogue/magic-event-hallway.webp'
-                                    : 'sprites/backgrounds/learning-rogue/event-hallway.webp'
-                            )})`
+                            backgroundImage: getEnvironmentBackgroundCss(coopSyncedVisualTheme, 'event', gameState.player.appearanceMode)
                         }}
                     >
                         <div className="absolute inset-0 bg-red-950/72 pointer-events-none" />
@@ -21631,11 +21638,7 @@ const App: React.FC = () => {
                         data-gamepad-initial-scope="main-ending"
                         className="ending-screen w-full h-full bg-yellow-900 bg-cover bg-center flex flex-col items-center justify-start text-center text-white p-4 overflow-y-auto custom-scrollbar relative"
                         style={{
-                            backgroundImage: `url(${assetUrl(
-                                activeRunVisualTheme === 'magic'
-                                    ? 'sprites/backgrounds/learning-rogue/magic-act-clear.webp'
-                                    : 'sprites/backgrounds/learning-rogue/reward-rooftop.webp'
-                            )})`
+                            backgroundImage: getEnvironmentBackgroundCss(activeRunVisualTheme, 'actClear', gameState.player.appearanceMode)
                         }}
                     >
                         <div className="absolute inset-0 bg-amber-950/62 pointer-events-none" />
