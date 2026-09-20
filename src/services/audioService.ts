@@ -94,7 +94,11 @@ class AudioService {
   private audioBuffers: Record<string, AudioBuffer> = {};
   private sfxBuffers: Record<string, AudioBuffer> = {};
   private sfxLoadPromises: Record<string, Promise<AudioBuffer | null> | undefined> = {};
+  private voiceBuffers: Record<string, AudioBuffer> = {};
+  private voiceLoadPromises: Record<string, Promise<AudioBuffer | null> | undefined> = {};
   private activeSfxSources: Map<string, Set<AudioBufferSourceNode>> = new Map();
+  private activeSfxSourceGains: Map<string, Set<GainNode>> = new Map();
+  private sfxSourceGains: WeakMap<AudioBufferSourceNode, GainNode> = new WeakMap();
   private activeHtmlSfx: Map<string, Set<HTMLAudioElement>> = new Map();
   private htmlSfxStopTimers: WeakMap<HTMLAudioElement, number> = new WeakMap();
   private sfxPlaybackGenerations: Map<string, number> = new Map();
@@ -177,6 +181,8 @@ class AudioService {
         this.sfxGain = null;
         this.currentSource = null;
         this.currentHtmlAudio = null;
+        this.voiceBuffers = {};
+        this.voiceLoadPromises = {};
         this.activeBgmHtmlAudios.clear();
         this.preparedBgmHtmlAudios.forEach(audio => {
             try {
@@ -477,6 +483,13 @@ class AudioService {
 
   public setVoiceVolume(volume: number) {
       this.voiceVolume = Math.max(0, Math.min(1.5, volume));
+      const voiceGain = Math.min(1, this.voiceVolume);
+      this.activeSfxSourceGains.forEach((gains, name) => {
+          if (!this.isVoiceSfxName(name) || !this.ctx) return;
+          gains.forEach(gain => {
+              gain.gain.setTargetAtTime(voiceGain, this.ctx!.currentTime, 0.05);
+          });
+      });
       this.activeHtmlSfx.forEach((audios, name) => {
           if (!this.isVoiceSfxName(name)) return;
           audios.forEach(audio => {
@@ -1480,6 +1493,35 @@ class AudioService {
       return buffer;
   }
 
+  private async loadVoiceBuffer(name: string, paths: string[]) {
+      if (this.voiceBuffers[name]) return this.voiceBuffers[name];
+      if (this.voiceLoadPromises[name]) return this.voiceLoadPromises[name];
+
+      const context = this.ctx;
+      if (!context) return null;
+
+      const promise = (async () => {
+          for (const path of paths) {
+              try {
+                  const response = await fetch(path);
+                  if (!response.ok) continue;
+                  const arrayBuffer = await response.arrayBuffer();
+                  const buffer = await context.decodeAudioData(arrayBuffer);
+                  this.voiceBuffers[name] = buffer;
+                  return buffer;
+              } catch {}
+          }
+          return null;
+      })();
+
+      this.voiceLoadPromises[name] = promise;
+      const buffer = await promise;
+      if (this.voiceLoadPromises[name] === promise) {
+          delete this.voiceLoadPromises[name];
+      }
+      return buffer;
+  }
+
   public async preloadSfx(names: string[]) {
       this.init();
       if (!this.ctx) return;
@@ -1529,11 +1571,21 @@ class AudioService {
       const sources = this.activeSfxSources.get(name);
       if (sources) {
           for (const source of sources) {
+              const sourceGain = this.findSfxSourceGain(name, source);
               try {
                   source.onended = null;
                   source.stop();
                   source.disconnect();
               } catch {}
+              if (sourceGain) {
+                  try {
+                      sourceGain.disconnect();
+                  } catch {}
+                  const gains = this.activeSfxSourceGains.get(name);
+                  gains?.delete(sourceGain);
+                  if (gains?.size === 0) this.activeSfxSourceGains.delete(name);
+                  this.sfxSourceGains.delete(source);
+              }
           }
           this.activeSfxSources.delete(name);
       }
@@ -1550,19 +1602,39 @@ class AudioService {
       this.activeHtmlSfx.delete(name);
   }
 
-  private startSfxSource(name: string, buffer: AudioBuffer, maxDurationMs: number, overlap: boolean) {
+  private startSfxSource(name: string, buffer: AudioBuffer, maxDurationMs: number, overlap: boolean, volume = 1) {
       if (!this.ctx || !this.sfxGain) return false;
       if (!overlap) this.stopActiveSfx(name);
       try {
           const source = this.ctx.createBufferSource();
           source.buffer = buffer;
-          source.connect(this.sfxGain);
+          const gain = volume === 1 ? null : this.ctx.createGain();
+          if (gain) {
+              gain.gain.value = Math.min(1, Math.max(0, volume));
+              source.connect(gain);
+              gain.connect(this.sfxGain);
+              this.sfxSourceGains.set(source, gain);
+              const gains = this.activeSfxSourceGains.get(name) ?? new Set<GainNode>();
+              gains.add(gain);
+              this.activeSfxSourceGains.set(name, gains);
+          } else {
+              source.connect(this.sfxGain);
+          }
           const sources = this.activeSfxSources.get(name) ?? new Set<AudioBufferSourceNode>();
           sources.add(source);
           this.activeSfxSources.set(name, sources);
           source.onended = () => {
               sources.delete(source);
               if (sources.size === 0) this.activeSfxSources.delete(name);
+              if (gain) {
+                  try {
+                      gain.disconnect();
+                  } catch {}
+                  const gains = this.activeSfxSourceGains.get(name);
+                  gains?.delete(gain);
+                  if (gains?.size === 0) this.activeSfxSourceGains.delete(name);
+                  this.sfxSourceGains.delete(source);
+              }
               try {
                   source.disconnect();
               } catch {}
@@ -1573,6 +1645,11 @@ class AudioService {
       } catch {
           return false;
       }
+  }
+
+  private findSfxSourceGain(name: string, source: AudioBufferSourceNode) {
+      if (!this.isVoiceSfxName(name)) return null;
+      return this.sfxSourceGains.get(source) || null;
   }
 
   private async playHtmlSfx(
@@ -1589,7 +1666,14 @@ class AudioService {
               audio.preload = 'auto';
               const htmlVolume = this.getHtmlSfxVolume(name);
               audio.volume = htmlVolume;
-              await audio.play();
+              const didStart = await Promise.race([
+                  audio.play().then(() => true).catch(() => false),
+                  new Promise<boolean>(resolve => window.setTimeout(() => resolve(false), 1500)),
+              ]);
+              if (!didStart) {
+                  audio.pause();
+                  continue;
+              }
               if (!overlap && this.sfxPlaybackGenerations.get(name) !== generation) {
                   audio.pause();
                   audio.currentTime = 0;
@@ -1639,6 +1723,40 @@ class AudioService {
           }
       }
       return false;
+  }
+
+  private async playVoiceFile(
+      name: string,
+      paths: string[],
+      maxDurationMs: number,
+      overlap: boolean,
+      generation: number,
+      waitForCompletion = false,
+  ) {
+      this.init();
+      if (!this.ctx || !this.sfxGain || this.isMuted) return false;
+
+      // HTMLAudioElement.play() is frequently rejected when a voice is started
+      // from a delayed battle/event callback. Once the context is unlocked,
+      // decode the same asset and start it on the already-authorized SFX bus.
+      const contextReady = await this.resumeAudioContext(IS_IOS_BUILD ? 3 : 1);
+      if (contextReady && this.ctx?.state === 'running') {
+          const buffer = await this.loadVoiceBuffer(name, paths);
+          if (this.sfxPlaybackGenerations.get(name) !== generation) return true;
+          if (buffer && this.startSfxSource(name, buffer, maxDurationMs, overlap, this.getHtmlSfxVolume(name))) {
+              if (waitForCompletion) {
+                  const durationMs = Math.min(maxDurationMs, Math.max(0, buffer.duration * 1000));
+                  if (durationMs > 0) {
+                      await new Promise<void>(resolve => window.setTimeout(resolve, durationMs));
+                  }
+              }
+              return true;
+          }
+      }
+
+      // Keep the native media path as a fallback for browsers/builds where the
+      // file cannot be decoded by Web Audio.
+      return this.playHtmlSfx(name, paths, maxDurationMs, overlap, generation);
   }
 
   private isVoiceSfxName(name: string) {
@@ -1801,12 +1919,11 @@ class AudioService {
       const safeHeroId = heroId.replace(/[^A-Z0-9_-]/gi, '').toUpperCase();
       const safeVoiceName = voiceName.replace(/[^a-z0-9_-]/gi, '').toLowerCase();
       if (!safeHeroId || !safeVoiceName) return Promise.resolve(false);
-      this.ctx.resume().catch(() => {});
       const voiceNameForPath = safeVoiceName;
       const name = `magic-voice-${safeHeroId}-${safeVoiceName}`;
       const generation = (this.sfxPlaybackGenerations.get(name) ?? 0) + 1;
       this.sfxPlaybackGenerations.set(name, generation);
-      return this.playHtmlSfx(
+      return this.playVoiceFile(
           name,
           [
               versionBgmPath(assetUrl(`sfx/magic-voices/${safeHeroId}/${voiceNameForPath}.ogg`)),
@@ -1839,11 +1956,10 @@ class AudioService {
       const safeHeroId = heroId.replace(/[^A-Z0-9_-]/gi, '').toUpperCase();
       const safeVoiceName = voiceName.replace(/[^a-z0-9_-]/gi, '').toLowerCase();
       if (!safeHeroId || !safeVoiceName) return Promise.resolve(false);
-      this.ctx.resume().catch(() => {});
       const name = `high-school-voice-${safeHeroId}-${safeVoiceName}`;
       const generation = (this.sfxPlaybackGenerations.get(name) ?? 0) + 1;
       this.sfxPlaybackGenerations.set(name, generation);
-      return this.playHtmlSfx(
+      return this.playVoiceFile(
           name,
           [
               versionBgmPath(assetUrl(`sfx/high-school-voices/${safeHeroId}/${safeVoiceName}.ogg`)),
@@ -1869,12 +1985,11 @@ class AudioService {
       if (!profile) return Promise.resolve(false);
       this.init();
       if (!this.ctx || !this.sfxGain || this.isMuted) return Promise.resolve(false);
-      this.ctx.resume().catch(() => {});
       const safeAction = action.replace(/[^a-z0-9_-]/gi, '').toLowerCase();
       const name = `enemy-voice-${profile.theme}-${profile.id}-${safeAction}`;
       const generation = (this.sfxPlaybackGenerations.get(name) ?? 0) + 1;
       this.sfxPlaybackGenerations.set(name, generation);
-      return this.playHtmlSfx(
+      return this.playVoiceFile(
           name,
           [
               assetUrl(`sfx/enemy-voices/${profile.theme}/${profile.id}/${safeAction}.ogg`),
@@ -1900,11 +2015,10 @@ class AudioService {
       const safeHeroId = heroId.replace(/[^A-Z0-9_-]/gi, '').toUpperCase();
       const safeLineId = lineId.replace(/[^a-z0-9_-]/gi, '').toLowerCase();
       if (!safeHeroId || !safeLineId) return false;
-      this.ctx.resume().catch(() => {});
       const name = `magic-event-voice-${safeHeroId}-${safeLineId}`;
       const generation = (this.sfxPlaybackGenerations.get(name) ?? 0) + 1;
       this.sfxPlaybackGenerations.set(name, generation);
-      return this.playHtmlSfx(
+      return this.playVoiceFile(
           name,
           [
               versionBgmPath(assetUrl(`sfx/magic-event-voices/${safeHeroId}/${safeLineId}.ogg`)),
@@ -1917,6 +2031,7 @@ class AudioService {
           12000,
           false,
           generation,
+          true,
       );
   }
 
@@ -1934,7 +2049,10 @@ class AudioService {
 
   public stopMagicEventVoices() {
       this.magicEventVoiceSequenceId += 1;
-      for (const name of Array.from(this.activeHtmlSfx.keys())) {
+      for (const name of Array.from(new Set([
+          ...this.activeHtmlSfx.keys(),
+          ...this.activeSfxSources.keys(),
+      ]))) {
           if (name.startsWith('magic-event-voice-')) {
               this.stopActiveSfx(name);
           }

@@ -422,13 +422,20 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
 
   const speakPrompt = useCallback((text: string, lang = 'ja-JP') => {
     if (!('speechSynthesis' in window) || !text || isListening) return;
-    window.speechSynthesis.cancel();
+    const synthesis = window.speechSynthesis;
+    synthesis.cancel();
+    synthesis.resume();
     const utterance = new SpeechSynthesisUtterance(text);
     utterance.lang = lang;
     utterance.rate = 0.82;
     utterance.pitch = 1.0;
     utterance.volume = 0.78;
-    window.speechSynthesis.speak(utterance);
+    const normalizedLang = lang.toLowerCase();
+    const voices = synthesis.getVoices();
+    const preferredVoice = voices.find((voice) => voice.lang.toLowerCase() === normalizedLang)
+      || voices.find((voice) => voice.lang.toLowerCase().startsWith(normalizedLang.split('-')[0]));
+    if (preferredVoice) utterance.voice = preferredVoice;
+    synthesis.speak(utterance);
   }, [isListening]);
 
   useEffect(() => {

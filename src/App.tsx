@@ -1462,6 +1462,14 @@ const App: React.FC = () => {
     useEffect(() => {
         const unlockAudioFromUserGesture = () => {
             void audioService.unlockAudio().catch(() => undefined);
+
+            // Some browsers do not populate their speech voice list until the
+            // first user gesture. Prime it here so delayed question narration
+            // is not the first speech-synthesis call on the page.
+            if ('speechSynthesis' in window) {
+                window.speechSynthesis.getVoices();
+                window.speechSynthesis.resume();
+            }
         };
 
         // iOS can suspend WKWebView audio again after an interruption or app switch.

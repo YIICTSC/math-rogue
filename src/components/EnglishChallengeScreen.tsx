@@ -57,18 +57,24 @@ const EnglishChallengeScreen: React.FC<EnglishChallengeScreenProps> = ({ onCompl
   const speakWord = useCallback((word: string) => {
     if (!('speechSynthesis' in window)) return;
     const speechGeneration = ++speechGenerationRef.current;
-    window.speechSynthesis.cancel();
+    const synthesis = window.speechSynthesis;
+    synthesis.cancel();
+    synthesis.resume();
     audioService.setBgmDuckMultiplier(ENGLISH_AUDIO_BGM_DUCK_MULTIPLIER);
     const utterance = new SpeechSynthesisUtterance(word);
     utterance.lang = 'en-US';
     utterance.rate = 0.85; 
     utterance.volume = 0.78;
+    const voices = synthesis.getVoices();
+    const preferredVoice = voices.find((voice) => voice.lang.toLowerCase() === 'en-us')
+      || voices.find((voice) => voice.lang.toLowerCase().startsWith('en-'));
+    if (preferredVoice) utterance.voice = preferredVoice;
     const restoreBgm = () => {
       if (speechGenerationRef.current === speechGeneration) audioService.setBgmDuckMultiplier(1);
     };
     utterance.onend = restoreBgm;
     utterance.onerror = restoreBgm;
-    window.speechSynthesis.speak(utterance);
+    synthesis.speak(utterance);
   }, []);
 
   const toggleVoice = () => {
