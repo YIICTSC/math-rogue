@@ -33,7 +33,7 @@ for (let index = 0; index < 22; index += 1) {
     add(`magic/${folder}/${index}.webp`);
   }
 }
-for (const file of ['azuki-howl.webp', 'azuki-idle.webp', 'azuki-pounce.webp', 'dodomedesu.webp', 'genzo.webp', 'kocho.webp', 'true-kocho.webp']) {
+for (const file of ['kocho.webp', 'true-kocho.webp']) {
   add(`high-school/vacation-bosses/${file}`);
 }
 for (const file of ['grand-witch.webp', 'star-calamity.webp']) add(`magic/vacation-bosses/${file}`);
@@ -50,7 +50,7 @@ for (let page = 1; page <= 3; page += 1) add(`endings/magic-vacation/common/endi
 const fail = (message) => {
   throw new Error(message);
 };
-if (required.length !== 487) fail(`Expected 487 world-conversion assets, got ${required.length}.`);
+if (required.length !== 482) fail(`Expected 482 world-conversion assets, got ${required.length}.`);
 if (new Set(manifest.assets.map((asset) => asset.runtimePath)).size !== manifest.assets.length) {
   fail('Manifest contains duplicate runtime paths.');
 }

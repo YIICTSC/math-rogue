@@ -47,14 +47,12 @@ const EnemyIllustration: React.FC<EnemyIllustrationProps> = ({ name, seed, alias
     : undefined;
   const endlessSpritePath = endlessBoss && endlessBoss.floor <= 50 ? getEndlessBossSpritePath(endlessBoss, action) : null;
   const azukiSpritePath = visualTheme === 'high-school' && enemyType === 'AZUKI'
-    ? appearanceMode === 'VACATION'
-      ? assetUrl(`sprites/high-school/vacation-bosses/azuki-${action === 'attack' ? 'pounce' : action === 'skill' ? 'howl' : 'idle'}.webp`)
-      : assetUrl(`sprites/high-school/azuki/${action === 'attack' ? 'pounce' : action === 'skill' ? 'howl' : 'idle'}.webp`)
+    ? assetUrl(`sprites/high-school/azuki/${action === 'attack' ? 'pounce' : action === 'skill' ? 'howl' : 'idle'}.webp`)
     : null;
   const crowdfundingBossPath = visualTheme === 'high-school' && enemyType === 'DODOMEDESU'
-    ? assetUrl(appearanceMode === 'VACATION' ? 'sprites/high-school/vacation-bosses/dodomedesu.webp' : 'enemy-illustrations/ドドメデス.webp')
+    ? assetUrl('enemy-illustrations/ドドメデス.webp')
     : visualTheme === 'high-school' && enemyType === 'GENZO'
-      ? assetUrl(appearanceMode === 'VACATION' ? 'sprites/high-school/vacation-bosses/genzo.webp' : 'enemy-illustrations/ゲンゾー.webp')
+      ? assetUrl('enemy-illustrations/ゲンゾー.webp')
       : null;
   const humanoidPath = getThemedHumanoidEnemySpritePath(enemyRef, visualTheme, action, appearanceMode);
   const humanoidIdlePath = action !== 'idle'

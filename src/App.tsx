@@ -448,13 +448,13 @@ const getBattleEnemyTransitionAssetPaths = (
         if (endlessBoss && endlessBoss.floor <= 50) return [getEndlessBossSpritePath(endlessBoss, 'idle')];
     }
     if (visualTheme === 'high-school' && enemy.enemyType === 'AZUKI') {
-        return [assetUrl(appearanceMode === 'VACATION' ? 'sprites/high-school/vacation-bosses/azuki-idle.webp' : 'sprites/high-school/azuki/idle.webp')];
+        return [assetUrl('sprites/high-school/azuki/idle.webp')];
     }
     if (visualTheme === 'high-school' && enemy.enemyType === 'DODOMEDESU') {
-        return [assetUrl(appearanceMode === 'VACATION' ? 'sprites/high-school/vacation-bosses/dodomedesu.webp' : 'enemy-illustrations/ドドメデス.webp')];
+        return [assetUrl('enemy-illustrations/ドドメデス.webp')];
     }
     if (visualTheme === 'high-school' && enemy.enemyType === 'GENZO') {
-        return [assetUrl(appearanceMode === 'VACATION' ? 'sprites/high-school/vacation-bosses/genzo.webp' : 'enemy-illustrations/ゲンゾー.webp')];
+        return [assetUrl('enemy-illustrations/ゲンゾー.webp')];
     }
 
     const majorBossPath = getThemedMajorBossEnemySpritePath(enemy, visualTheme, 'idle', appearanceMode);
@@ -14427,13 +14427,13 @@ const App: React.FC = () => {
         const isDodomedesuAlive = remainingEnemies.some(entry => entry.enemyType === 'DODOMEDESU' && entry.currentHp > 0);
         const isGenzoAlive = remainingEnemies.some(entry => entry.enemyType === 'GENZO' && entry.currentHp > 0);
         const specialFinisherIllustration = enemy.enemyType === 'AZUKI'
-            ? `asset:${appearanceMode === 'VACATION' ? 'sprites/high-school/vacation-bosses/azuki-pounce.webp' : 'sprites/high-school/azuki/pounce.webp'}`
+            ? 'asset:sprites/high-school/azuki/pounce.webp'
             : enemy.enemyType === 'DODOMEDESU' || enemy.enemyType === 'GENZO'
                 ? isDodomedesuAlive && isGenzoAlive
-                    ? `asset:${appearanceMode === 'VACATION' ? 'sprites/high-school/vacation-bosses/dodomedesu.webp' : 'enemy-illustrations/ドドメデス.webp'}`
+                    ? 'asset:enemy-illustrations/ドドメデス.webp'
                     : isDodomedesuAlive
-                        ? `asset:${appearanceMode === 'VACATION' ? 'sprites/high-school/vacation-bosses/dodomedesu.webp' : 'enemy-illustrations/ドドメデス-困惑.webp'}`
-                        : `asset:${appearanceMode === 'VACATION' ? 'sprites/high-school/vacation-bosses/genzo.webp' : 'enemy-illustrations/ゲンゾー-孤立.webp'}`
+                        ? 'asset:enemy-illustrations/ドドメデス-困惑.webp'
+                        : 'asset:enemy-illustrations/ゲンゾー-孤立.webp'
                 : undefined;
 
         return {

@@ -190,11 +190,6 @@ const buildVacationDeferredAssetPaths = (visualTheme: VisualThemeId): string[] =
                 `sprites/high-school/vacation-humanoid-enemies-attack/${index}.webp`,
                 `sprites/high-school/vacation-humanoid-enemies-skill/${index}.webp`,
             ]),
-            'sprites/high-school/vacation-bosses/azuki-idle.webp',
-            'sprites/high-school/vacation-bosses/azuki-pounce.webp',
-            'sprites/high-school/vacation-bosses/azuki-howl.webp',
-            'sprites/high-school/vacation-bosses/dodomedesu.webp',
-            'sprites/high-school/vacation-bosses/genzo.webp',
             'sprites/high-school/vacation-bosses/kocho.webp',
             'sprites/high-school/vacation-bosses/true-kocho.webp',
         ];
