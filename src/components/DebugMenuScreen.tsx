@@ -2,7 +2,7 @@
 import { CARDS_LIBRARY, RELIC_LIBRARY, POTION_LIBRARY, CHARACTERS } from '../constants';
 import { GAME_STORIES } from '../data/stories';
 import { FLAVOR_TEXTS, ENEMY_NAMES } from '../services/geminiService';
-import { AttackEffectKey, StatusEffectKey, Card as ICard, Relic, Potion, CardType, TargetType, LanguageMode, GameScreen, GameMode, MiniGameDebugPreview } from '../types';
+import { AttackEffectKey, StatusEffectKey, Card as ICard, Relic, Potion, CardType, TargetType, LanguageMode, GameScreen, GameMode, MiniGameDebugPreview, type CharacterAppearanceMode } from '../types';
 import Card from './Card';
 import CaptureCardSimulator from './CaptureCardSimulator';
 import AttackEffectSprite from './AttackEffectSprite';
@@ -15,9 +15,9 @@ import { audioService } from '../services/audioService';
 import { trans } from '../utils/textUtils';
 import { ATTACK_EFFECT_LIST } from '../data/attackEffects';
 import { STATUS_EFFECT_LIST } from '../data/statusEffects';
-import { getThemedCharacters, HIGH_SCHOOL_EVENT_THEMES, MAGIC_EVENT_THEMES, HIGH_SCHOOL_HUMANOID_ENEMY_VARIANTS, MAGIC_HUMANOID_ENEMY_VARIANTS, type HighSchoolEnemyAction, type VisualThemeId } from '../data/visualThemes';
+import { getThemedCharacters, getThemedHumanoidEnemySpritePath, HIGH_SCHOOL_EVENT_THEMES, MAGIC_EVENT_THEMES, HIGH_SCHOOL_HUMANOID_ENEMY_VARIANTS, MAGIC_HUMANOID_ENEMY_VARIANTS, type HighSchoolEnemyAction, type VisualThemeId } from '../data/visualThemes';
 import { getEnemyLibraryByTheme } from '../data/enemyCatalogs';
-import { HUMANOID_ENEMY_VOICE_PROFILES, type HumanoidEnemyVoiceGender, type HumanoidEnemyVoiceProfile } from '../data/humanoidEnemyVoiceLines';
+import { HUMANOID_ENEMY_VOICE_PROFILES, VACATION_HUMANOID_ENEMY_VOICE_PROFILES, type HumanoidEnemyVoiceAction, type HumanoidEnemyVoiceGender, type HumanoidEnemyVoiceProfile } from '../data/humanoidEnemyVoiceLines';
 import { MAGIC_HEROES, MAGIC_MALE_PROTAGONISTS } from '../data/magicHeroes';
 import { getMagicRomanceDialogue, getMagicRomanceEndingText, type MagicRomanceEndingRank } from '../data/magicRomanceDialogue';
 import { getMagicRomanceVoiceLines } from '../services/magicRomanceEventService';
@@ -88,6 +88,15 @@ const HIGH_SCHOOL_HUMANOID_ACTIONS: { key: HighSchoolEnemyAction; label: string;
     { key: 'idle', label: 'IDLE', folder: 'humanoid-enemies' },
     { key: 'attack', label: 'ATTACK', folder: 'humanoid-enemies-attack' },
     { key: 'skill', label: 'SKILL', folder: 'humanoid-enemies-skill' },
+];
+
+const HUMANOID_VOICE_ACTIONS: { key: HumanoidEnemyVoiceAction; label: string }[] = [
+    { key: 'spawn', label: '出現' },
+    { key: 'attack', label: '攻撃' },
+    { key: 'defense', label: '防御' },
+    { key: 'skill', label: 'スキル' },
+    { key: 'damage', label: '被ダメ' },
+    { key: 'defeat', label: '撃破' },
 ];
 
 const DEBUG_PROBLEM_UNIT_GROUPS = getDebugProblemUnitGroups();
@@ -336,6 +345,8 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
     const [enemyVoiceAuditTheme, setEnemyVoiceAuditTheme] = useState<'all' | 'high-school' | 'magic'>('all');
     const [enemyVoiceGenderOverrides, setEnemyVoiceGenderOverrides] = useState<Record<string, HumanoidEnemyVoiceGender>>({});
     const [enemyVoiceAuditCopied, setEnemyVoiceAuditCopied] = useState(false);
+    const [humanoidSpriteTheme, setHumanoidSpriteTheme] = useState<'high-school' | 'magic'>('high-school');
+    const [humanoidSpriteAppearanceMode, setHumanoidSpriteAppearanceMode] = useState<CharacterAppearanceMode>('STANDARD');
     const [magicArtSearchTerm, setMagicArtSearchTerm] = useState('');
     const [magicArtCategoryFilter, setMagicArtCategoryFilter] = useState<'ALL' | 'COMMON_EVENT' | 'ROMANCE_EVENT' | 'ENDING_EVENT'>('ALL');
     const [magicArtMismatchIds, setMagicArtMismatchIds] = useState<string[]>([]);
@@ -572,6 +583,15 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
         ].join('\t'));
         return [header, ...rows].join('\n');
     }, [enemyVoiceAuditRows]);
+    const humanoidSpriteVariants = humanoidSpriteTheme === 'high-school'
+        ? HIGH_SCHOOL_HUMANOID_ENEMY_VARIANTS
+        : MAGIC_HUMANOID_ENEMY_VARIANTS;
+    const humanoidSpriteVoiceProfiles = useMemo(() => (
+        (humanoidSpriteAppearanceMode === 'VACATION'
+            ? VACATION_HUMANOID_ENEMY_VOICE_PROFILES
+            : HUMANOID_ENEMY_VOICE_PROFILES)
+            .filter(profile => profile.theme === humanoidSpriteTheme)
+    ), [humanoidSpriteAppearanceMode, humanoidSpriteTheme]);
     const filteredMagicArtTargets = useMemo(() => {
         const normalizedSearch = magicArtSearchTerm.trim().toLowerCase();
         return MAGIC_ART_CONSISTENCY_TARGETS.filter(target => {
@@ -1087,7 +1107,7 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
                         <button onClick={() => setActiveTab('ENEMY_VOICE_AUDIT')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'ENEMY_VOICE_AUDIT' ? 'bg-violet-900 text-white' : 'text-violet-400 hover:bg-gray-750'}`}>敵声整合</button>
                         <button onClick={() => setActiveTab('MAGIC_ART_AUDIT')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'MAGIC_ART_AUDIT' ? 'bg-pink-900 text-white' : 'text-pink-400 hover:bg-gray-750'}`}>魔法絵不整合</button>
                         <button onClick={() => setActiveTab('EVENTS')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'EVENTS' ? 'bg-cyan-900 text-white' : 'text-cyan-400 hover:bg-gray-750'}`}>イベント</button>
-                        <button onClick={() => setActiveTab('HUMANOID_SPRITES')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'HUMANOID_SPRITES' ? 'bg-rose-900 text-white' : 'text-rose-400 hover:bg-gray-750'}`}>高校人型敵</button>
+                        <button onClick={() => setActiveTab('HUMANOID_SPRITES')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'HUMANOID_SPRITES' ? 'bg-rose-900 text-white' : 'text-rose-400 hover:bg-gray-750'}`}>人型敵確認</button>
                         <button onClick={() => setActiveTab('CHARACTER_ANIMATIONS')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'CHARACTER_ANIMATIONS' ? 'bg-cyan-900 text-white' : 'text-cyan-400 hover:bg-gray-750'}`}>{trans('キャラ動作', initialLanguageMode)}</button>
                         <button onClick={() => setActiveTab('ACTION_POSITION_AUDIT')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'ACTION_POSITION_AUDIT' ? 'bg-rose-900 text-white' : 'text-rose-400 hover:bg-gray-750'}`}>{trans('配置監査', initialLanguageMode)}</button>
                         <button onClick={() => setActiveTab('SPRITE_AUDIT')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'SPRITE_AUDIT' ? 'bg-teal-900 text-white' : 'text-teal-400 hover:bg-gray-750'}`}>{trans('スプライト確認', initialLanguageMode)}</button>
@@ -2820,39 +2840,138 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
 
                         {activeTab === 'HUMANOID_SPRITES' && (
                             <div className="space-y-4">
-                                <div className="flex items-center justify-between gap-3 border-b border-rose-700/60 pb-3">
-                                    <h3 className="text-rose-300 font-bold flex items-center">
-                                        <Skull size={18} className="mr-2" /> 高校編 人型敵スプライト確認
-                                    </h3>
-                                    <div className="text-xs text-gray-400">{HIGH_SCHOOL_HUMANOID_ENEMY_VARIANTS.length}体 / idle・attack・skill</div>
-                                </div>
-                                <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
-                                    {HIGH_SCHOOL_HUMANOID_ENEMY_VARIANTS.map(enemy => (
-                                        <div key={enemy.imageIndex} className="bg-black/35 border border-gray-700 rounded-lg p-3">
-                                            <div className="flex items-center justify-between gap-3 mb-3">
-                                                <div className="min-w-0">
-                                                    <div className="text-xs text-rose-400 font-bold">#{enemy.imageIndex}</div>
-                                                    <div className="font-bold text-white truncate">{enemy.name}</div>
-                                                </div>
-                                                <div className="text-[10px] text-gray-500 font-mono shrink-0">high-school humanoid</div>
-                                            </div>
-                                            <div className="grid grid-cols-3 gap-2">
-                                                {HIGH_SCHOOL_HUMANOID_ACTIONS.map(action => (
-                                                    <div key={action.key} className="bg-slate-950/80 border border-gray-800 rounded p-2">
-                                                        <div className="aspect-square bg-[linear-gradient(45deg,#111827_25%,#0f172a_25%,#0f172a_50%,#111827_50%,#111827_75%,#0f172a_75%)] bg-[length:16px_16px] rounded relative overflow-hidden">
-                                                            <img
-                                                                src={assetUrl(`sprites/high-school/${action.folder}/${enemy.imageIndex}.webp`)}
-                                                                alt={`${enemy.name} ${action.label}`}
-                                                                className="absolute inset-0 w-full h-full object-contain"
-                                                                draggable={false}
-                                                            />
-                                                        </div>
-                                                        <div className="mt-1 text-center text-[10px] font-bold text-gray-300">{action.label}</div>
-                                                    </div>
-                                                ))}
-                                            </div>
+                                <div className="flex flex-col gap-3 border-b border-rose-700/60 pb-3 xl:flex-row xl:items-center xl:justify-between">
+                                    <div>
+                                        <h3 className="text-rose-300 font-bold flex items-center">
+                                            <Skull size={18} className="mr-2" /> 人型敵イラスト・ボイス確認
+                                        </h3>
+                                        <div className="mt-1 text-xs text-gray-400">
+                                            {humanoidSpriteVariants.length}体 / idle・attack・skill / 出現・攻撃・防御・スキル・被ダメ・撃破
                                         </div>
-                                    ))}
+                                    </div>
+                                    <div className="flex flex-wrap gap-2">
+                                        <div className="flex overflow-hidden rounded-lg border border-rose-700/60 bg-slate-950">
+                                            {([
+                                                { id: 'high-school', label: '高校編' },
+                                                { id: 'magic', label: 'マジック編' },
+                                            ] as const).map(option => (
+                                                <button
+                                                    key={option.id}
+                                                    type="button"
+                                                    onClick={() => setHumanoidSpriteTheme(option.id)}
+                                                    className={`px-3 py-2 text-xs font-black transition-colors ${humanoidSpriteTheme === option.id ? 'bg-rose-600 text-white' : 'text-rose-200 hover:bg-slate-800'}`}
+                                                >
+                                                    {option.label}
+                                                </button>
+                                            ))}
+                                        </div>
+                                        <div className="flex overflow-hidden rounded-lg border border-amber-600/60 bg-slate-950">
+                                            {([
+                                                { id: 'STANDARD', label: 'STANDARD' },
+                                                { id: 'VACATION', label: 'VACATION' },
+                                            ] as const).map(option => (
+                                                <button
+                                                    key={option.id}
+                                                    type="button"
+                                                    onClick={() => setHumanoidSpriteAppearanceMode(option.id)}
+                                                    className={`px-3 py-2 text-xs font-black transition-colors ${humanoidSpriteAppearanceMode === option.id ? 'bg-amber-500 text-slate-950' : 'text-amber-200 hover:bg-slate-800'}`}
+                                                >
+                                                    {option.label}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+                                {humanoidSpriteAppearanceMode === 'VACATION' && (
+                                    <div className="rounded-lg border border-amber-500/40 bg-amber-950/20 px-3 py-2 text-xs font-bold text-amber-100">
+                                        Vacation専用の人型敵イラストと `enemy-voices-vacation` の音声を、実戦闘と同じルーティングで確認しています。
+                                    </div>
+                                )}
+                                <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
+                                    {humanoidSpriteVariants.map(enemy => {
+                                        const enemyTarget = {
+                                            name: enemy.name,
+                                            enemyType: 'TEACHER',
+                                            phase: undefined,
+                                        };
+                                        const voiceProfile = humanoidSpriteVoiceProfiles.find(profile => (
+                                            profile.imageIndex === enemy.imageIndex || profile.name === enemy.name
+                                        ));
+                                        return (
+                                            <div key={`${humanoidSpriteTheme}-${humanoidSpriteAppearanceMode}-${enemy.imageIndex}`} className="bg-black/35 border border-gray-700 rounded-lg p-3">
+                                                <div className="flex items-start justify-between gap-3 mb-3">
+                                                    <div className="min-w-0">
+                                                        <div className="text-xs text-rose-400 font-bold">#{enemy.imageIndex}</div>
+                                                        <div className="font-bold text-white truncate">{enemy.name}</div>
+                                                        {voiceProfile && (
+                                                            <div className="mt-1 text-[10px] text-violet-200">
+                                                                {voiceProfile.role ? `${voiceProfile.role} / ` : ''}{voiceProfile.speakerId}
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                    <div className="text-right text-[10px] text-gray-500 font-mono shrink-0">
+                                                        <div>{humanoidSpriteTheme}</div>
+                                                        <div className={humanoidSpriteAppearanceMode === 'VACATION' ? 'text-amber-300' : ''}>{humanoidSpriteAppearanceMode}</div>
+                                                    </div>
+                                                </div>
+                                                <div className="grid grid-cols-3 gap-2">
+                                                    {HIGH_SCHOOL_HUMANOID_ACTIONS.map(action => {
+                                                        const spritePath = getThemedHumanoidEnemySpritePath(
+                                                            enemyTarget,
+                                                            humanoidSpriteTheme,
+                                                            action.key,
+                                                            humanoidSpriteAppearanceMode,
+                                                        );
+                                                        return (
+                                                            <div key={action.key} className="bg-slate-950/80 border border-gray-800 rounded p-2">
+                                                                <div className="aspect-square bg-[linear-gradient(45deg,#111827_25%,#0f172a_25%,#0f172a_50%,#111827_50%,#111827_75%,#0f172a_75%)] bg-[length:16px_16px] rounded relative overflow-hidden">
+                                                                    {spritePath ? (
+                                                                        <img
+                                                                            src={spritePath}
+                                                                            alt={`${enemy.name} ${action.label} ${humanoidSpriteAppearanceMode}`}
+                                                                            className="absolute inset-0 w-full h-full object-contain"
+                                                                            draggable={false}
+                                                                        />
+                                                                    ) : (
+                                                                        <div className="absolute inset-0 flex items-center justify-center text-[10px] font-bold text-red-300">NO IMAGE</div>
+                                                                    )}
+                                                                </div>
+                                                                <div className="mt-1 text-center text-[10px] font-bold text-gray-300">{action.label}</div>
+                                                            </div>
+                                                        );
+                                                    })}
+                                                </div>
+                                                <div className="mt-3 grid grid-cols-2 gap-2 sm:grid-cols-3">
+                                                    {HUMANOID_VOICE_ACTIONS.map(action => (
+                                                        <button
+                                                            key={action.key}
+                                                            type="button"
+                                                            disabled={!voiceProfile}
+                                                            onClick={() => {
+                                                                void audioService.playHumanoidEnemyVoice(
+                                                                    humanoidSpriteTheme,
+                                                                    enemyTarget,
+                                                                    action.key,
+                                                                    5000,
+                                                                    humanoidSpriteAppearanceMode,
+                                                                );
+                                                            }}
+                                                            title={voiceProfile?.lines[action.key] ?? '音声プロファイルなし'}
+                                                            className="flex min-w-0 items-center justify-center gap-1 rounded border border-violet-700/60 bg-violet-950/60 px-2 py-2 text-[10px] font-black text-violet-100 hover:bg-violet-800 disabled:cursor-not-allowed disabled:border-slate-800 disabled:bg-slate-900 disabled:text-slate-600"
+                                                        >
+                                                            <Volume2 size={11} className="shrink-0" />
+                                                            <span className="truncate">{action.label}</span>
+                                                        </button>
+                                                    ))}
+                                                </div>
+                                                {voiceProfile && (
+                                                    <div className="mt-3 rounded border border-violet-900/50 bg-slate-950/70 p-2 text-[10px] leading-relaxed text-gray-300">
+                                                        <span className="font-black text-violet-200">出現台詞: </span>{voiceProfile.lines.spawn}
+                                                    </div>
+                                                )}
+                                            </div>
+                                        );
+                                    })}
                                 </div>
                             </div>
                         )}
