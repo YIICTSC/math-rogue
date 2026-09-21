@@ -8,7 +8,7 @@ import { assetUrl } from '../utils/assetPaths';
 import { audioService } from '../services/audioService';
 import { storageService } from '../services/storageService';
 import { RelicIcon } from './ItemIcon';
-import { getThemedCharacterIdleSpriteSheetPath, getThemedCharacterSpritePath, MAGIC_HERO_ID_BY_CHARACTER_ID, type VisualThemeId } from '../data/visualThemes';
+import { getThemedCharacterSpritePath, MAGIC_HERO_ID_BY_CHARACTER_ID, type VisualThemeId } from '../data/visualThemes';
 import { MAGIC_HEROES, MAGIC_MALE_PROTAGONISTS } from '../data/magicHeroes';
 import { getMagicRuleConfig } from '../data/magicLoadouts';
 
@@ -22,20 +22,6 @@ const MAGIC_MALE_CHARACTER_IDS = [
   'LIBRARIAN',
   'CHEF',
 ];
-
-const getVacationSelectionSheetPath = (
-  visualTheme: VisualThemeId,
-  characterId: string,
-  magicProtagonistId?: string,
-  magicProtagonistGender?: 'female' | 'male',
-) => getThemedCharacterIdleSpriteSheetPath(
-  visualTheme,
-  characterId,
-  false,
-  magicProtagonistId,
-  magicProtagonistGender,
-  'VACATION',
-);
 
 interface CharacterSelectionScreenProps {
   characters: Character[];
@@ -477,9 +463,7 @@ const CharacterSelectionScreen: React.FC<CharacterSelectionScreenProps> = ({ cha
                       appearanceMode,
                     )
                   : customImage || char.imageData;
-                const vacationSelectionSheet = appearanceMode === 'VACATION'
-                  ? getVacationSelectionSheetPath(visualTheme, char.id, char.magicProtagonistId, char.magicProtagonistGender)
-                  : null;
+                const isVacationPortrait = appearanceMode === 'VACATION' && visualTheme !== 'elementary';
                 const isCustom = !!customImage;
                 const isMagicPortrait = visualTheme === 'magic' && !isCustom;
                 const isMagicMalePortrait = visualTheme === 'magic'
@@ -532,26 +516,12 @@ const CharacterSelectionScreen: React.FC<CharacterSelectionScreenProps> = ({ cha
                         )}
 
                         <div className={`character-selection-portrait w-24 h-24 mb-4 relative drop-shadow-[0_0_15px_rgba(255,255,255,0.2)] ${visualTheme === 'elementary' ? 'character-selection-photo-enabled' : ''} ${isMagicPortrait ? 'overflow-hidden rounded-xl bg-slate-950/50' : ''}`}>
-                             {vacationSelectionSheet ? (
-                               <div
-                                 role="img"
-                                 aria-label={trans(char.name, languageMode)}
-                                 className="character-selection-vacation-sheet w-full h-full"
-                                 style={{
-                                   backgroundImage: `url(${vacationSelectionSheet})`,
-                                   backgroundPosition: '0% 0%',
-                                   backgroundRepeat: 'no-repeat',
-                                   backgroundSize: '200% 200%',
-                                 }}
-                               />
-                             ) : (
-                               <img
-                                  src={charImage}
-                                  alt={trans(char.name, languageMode)}
-                                  className={`w-full h-full ${isCustom ? 'rounded-xl object-cover' : isMagicPortrait ? `magic-character-select-portrait-image ${isMagicMalePortrait ? 'magic-character-select-portrait-image-male' : ''}` : 'pixel-art'}`}
-                                  style={{ imageRendering: isCustom || isMagicPortrait ? 'auto' : 'pixelated' }}
-                               />
-                             )}
+                             <img
+                                src={charImage}
+                                alt={trans(char.name, languageMode)}
+                                className={`w-full h-full ${isVacationPortrait ? 'character-selection-vacation-portrait-image' : isCustom ? 'rounded-xl object-cover' : isMagicPortrait ? `magic-character-select-portrait-image ${isMagicMalePortrait ? 'magic-character-select-portrait-image-male' : ''}` : 'pixel-art'}`}
+                                style={{ imageRendering: isCustom || isMagicPortrait || isVacationPortrait ? 'auto' : 'pixelated' }}
+                             />
                              {isUnlocked && visualTheme === 'elementary' && (
                                 <button
                                   type="button"
@@ -665,9 +635,7 @@ const CharacterSelectionScreen: React.FC<CharacterSelectionScreenProps> = ({ cha
                   appearanceMode,
                 )
               : customImages[char.id] || char.imageData;
-            const vacationSelectionSheet = appearanceMode === 'VACATION'
-              ? getVacationSelectionSheetPath(visualTheme, char.id, char.magicProtagonistId, char.magicProtagonistGender)
-              : null;
+            const isVacationPortrait = appearanceMode === 'VACATION' && visualTheme !== 'elementary';
             const isCustom = !!customImages[char.id];
             const isMagicPortrait = visualTheme === 'magic' && !isCustom;
 
@@ -680,26 +648,12 @@ const CharacterSelectionScreen: React.FC<CharacterSelectionScreenProps> = ({ cha
                 aria-label={trans(char.name, languageMode)}
               >
                 <span className="character-selection-thumb-frame">
-                  {vacationSelectionSheet ? (
-                    <span
-                      role="img"
-                      aria-label=""
-                      className="character-selection-thumb-img character-selection-vacation-sheet"
-                      style={{
-                        backgroundImage: `url(${vacationSelectionSheet})`,
-                        backgroundPosition: '0% 0%',
-                        backgroundRepeat: 'no-repeat',
-                        backgroundSize: '200% 200%',
-                      }}
-                    />
-                  ) : (
-                    <img
-                      src={charImage}
-                      alt=""
-                      className="character-selection-thumb-img"
-                      style={{ imageRendering: isCustom || isMagicPortrait ? 'auto' : 'pixelated' }}
-                    />
-                  )}
+                  <img
+                    src={charImage}
+                    alt=""
+                    className={`character-selection-thumb-img ${isVacationPortrait ? 'character-selection-vacation-thumb-img' : ''}`}
+                    style={{ imageRendering: isCustom || isMagicPortrait || isVacationPortrait ? 'auto' : 'pixelated' }}
+                  />
                   {!isUnlocked && <Lock size={16} className="character-selection-thumb-lock" />}
                 </span>
                 <span className="character-selection-thumb-name">{trans(char.name, languageMode)}</span>

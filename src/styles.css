@@ -10262,6 +10262,20 @@ textarea {
   display: none;
 }
 
+.main-character-screen .character-selection-vacation-portrait-image {
+  object-fit: contain;
+  object-position: center center;
+  transform: translateY(24%) scale(1.62);
+  transform-origin: center center;
+}
+
+.main-character-screen .character-selection-vacation-thumb-img {
+  object-fit: contain;
+  object-position: center center;
+  transform: translateY(18%) scale(1.45);
+  transform-origin: center center;
+}
+
 @media (orientation: portrait) and (max-width: 540px) and (max-height: 980px) {
   .main-character-screen {
     background-position: center top !important;
@@ -10400,6 +10414,13 @@ textarea {
 
   .main-character-screen .character-selection-portrait > .magic-character-select-portrait-image-male {
     transform: translateY(24%) scale(1.58) !important;
+  }
+
+  .main-character-screen .character-selection-portrait > .character-selection-vacation-portrait-image {
+    object-fit: contain !important;
+    object-position: center center !important;
+    transform: translateY(27%) scale(1.7) !important;
+    transform-origin: center center !important;
   }
 
   .main-character-screen .character-selection-summary {
