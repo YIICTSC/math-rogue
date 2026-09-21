@@ -74,6 +74,11 @@ const VACATION_ENVIRONMENT_PATHS: Record<VacationTheme, EnvironmentPathTable> = 
 export const VACATION_ENVIRONMENT_ASSET_PATHS = Object.values(VACATION_ENVIRONMENT_PATHS)
   .flatMap(table => Object.values(table));
 
+export const getVacationEnvironmentAssetPaths = (visualTheme: VisualThemeId): string[] => {
+  const theme = getEnvironmentTheme(visualTheme);
+  return theme ? Object.values(VACATION_ENVIRONMENT_PATHS[theme]) : [];
+};
+
 export const isVacationRun = (
   visualTheme: VisualThemeId | undefined,
   appearanceMode: CharacterAppearanceMode | undefined,

@@ -44,6 +44,13 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics =
   const longPressTimer = useRef<any>(null);
   const startPos = useRef({ x: 0, y: 0 });
   const currencyLabel = visualTheme === 'magic' ? '魔晶' : '円';
+  const isVacationRun = appearanceMode === 'VACATION' && (visualTheme === 'high-school' || visualTheme === 'magic');
+  const shopTitle = isVacationRun
+      ? (visualTheme === 'magic' ? '星砂の魔法露店' : '海辺の臨時売店')
+      : (visualTheme === 'magic' ? '魔法購買部' : '購買部');
+  const shopGreeting = isVacationRun
+      ? (visualTheme === 'magic' ? '海辺用の護符も、星砂の魔法薬も揃ってるよ' : '旅先で必要なもの、だいたい揃ってるよ！')
+      : (visualTheme === 'magic' ? '結界遠征向けの護符と魔法薬、揃ってるよ' : 'いいもの揃ってるよ...');
 
   const handlePointerDown = (e: React.PointerEvent, itemType: 'RELIC' | 'POTION', data: any) => {
       startPos.current = { x: e.clientX, y: e.clientY };
@@ -257,8 +264,8 @@ const ShopScreen: React.FC<ShopScreenProps> = ({ player, shopCards, shopRelics =
            <div className="flex items-center">
                <ShoppingBag size={24} className="text-yellow-500 mr-2" />
                <div>
-                   <h2 className="text-xl font-bold text-yellow-100">{trans(visualTheme === 'magic' ? "魔法購買部" : "購買部", languageMode)}</h2>
-                   <p className="text-xs text-gray-400">「{trans(visualTheme === 'magic' ? "結界遠征向けの護符と魔法薬、揃ってるよ" : "いいもの揃ってるよ...", languageMode)}」</p>
+                   <h2 className="text-xl font-bold text-yellow-100">{trans(shopTitle, languageMode)}</h2>
+                   <p className="text-xs text-gray-400">「{trans(shopGreeting, languageMode)}」</p>
                </div>
            </div>
            {shopDiscountPercent > 0 && (

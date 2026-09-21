@@ -18,6 +18,13 @@ interface RelicSelectionScreenProps {
 }
 
 const RelicSelectionScreen: React.FC<RelicSelectionScreenProps> = ({ relics, onSelect, languageMode, typingMode = false, visualTheme = 'elementary', appearanceMode = 'STANDARD' }) => {
+  const isVacationRun = appearanceMode === 'VACATION' && (visualTheme === 'high-school' || visualTheme === 'magic');
+  const heading = isVacationRun
+    ? (visualTheme === 'magic' ? '星海バカンスの旅支度' : '夏休みの旅支度')
+    : (visualTheme === 'magic' ? '契約の始まり' : '旅の始まり');
+  const description = isVacationRun
+    ? (visualTheme === 'magic' ? '星海の旅に共鳴する護符（レリック）を1つ選んでください' : '夏休みの旅を支える遺物（レリック）を1つ選んでください')
+    : (visualTheme === 'magic' ? '最初に共鳴する護符（レリック）を1つ選んでください' : '冒険の助けとなる遺物（レリック）を1つ選んでください');
   useEffect(() => {
     if (!typingMode) return;
     const handleKeyDown = (e: KeyboardEvent) => {
@@ -49,9 +56,9 @@ const RelicSelectionScreen: React.FC<RelicSelectionScreenProps> = ({ relics, onS
       <div className="z-10 flex flex-col items-center min-h-full justify-start p-4 py-12">
         <div className="text-center mb-8 shrink-0">
             <h2 className="text-3xl md:text-4xl text-yellow-400 font-bold mb-2 md:mb-4 flex items-center justify-center animate-pulse">
-            <Gem className="mr-3" size={32} /> {trans(visualTheme === 'magic' ? "契約の始まり" : "旅の始まり", languageMode)}
+            <Gem className="mr-3" size={32} /> {trans(heading, languageMode)}
             </h2>
-            <p className="text-sm md:text-xl text-gray-300">{trans(visualTheme === 'magic' ? "最初に共鳴する護符（レリック）を1つ選んでください" : "冒険の助けとなる遺物（レリック）を1つ選んでください", languageMode)}</p>
+            <p className="text-sm md:text-xl text-gray-300">{trans(description, languageMode)}</p>
         </div>
 
         <div className="flex flex-wrap justify-center gap-4 md:gap-8 pb-8">

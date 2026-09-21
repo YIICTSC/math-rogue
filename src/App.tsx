@@ -293,6 +293,19 @@ import { CREDIT_SECTIONS } from './data/credits';
 import { getSupporterNpcEventByTitle } from './data/supporterNpcEvents';
 import { usePwaInstall } from './hooks/usePwaInstall';
 import { getEnvironmentBackgroundCss } from './data/vacationEnvironmentAssets';
+import {
+    getVacationActAdvanceLog,
+    getVacationAdventureStartLog,
+    getVacationEndingMessage,
+    getVacationEndingTitle,
+    getVacationGameOverTitle,
+    getVacationLegacyCarryBody,
+    getVacationLegacyCarryTitle,
+    getVacationLegacyAddedMessage,
+    getVacationLegacyPrompt,
+    getVacationNewCardMessage,
+    isNormalVacationRun,
+} from './data/vacationNarrativeCopy';
 
 const PARRY_WINDOW_MS = 650;
 const PARRY_PERFECT_MS = 220;
@@ -1807,6 +1820,11 @@ const App: React.FC = () => {
     // their copy and artwork from the run itself, otherwise a high-school
     // image can be paired with the elementary protagonist's dialogue.
     const activeRunVisualTheme: VisualThemeId = gameState.visualTheme || coopSyncedVisualTheme;
+    const normalVacationTheme = isNormalVacationRun(
+        activeRunVisualTheme,
+        gameState.player.appearanceMode,
+        gameState.isEndless,
+    ) ? activeRunVisualTheme : null;
     const activeRunThemedCharacters = useMemo(() => getThemedCharacters(CHARACTERS, activeRunVisualTheme), [activeRunVisualTheme]);
     const [currentNarrative, setCurrentNarrative] = useState<string>("...");
     const [currentBattleBackgroundId, setCurrentBattleBackgroundId] = useState<string>('classroom');
@@ -8406,14 +8424,23 @@ const App: React.FC = () => {
                 return { ...prev, participants: resolvedParticipants };
             });
             setCoopNeedsInitialMapSync(true);
-            setGameState(prev => ({
-                ...prev,
-                screen: GameScreen.MAP,
-                map: prev.map.length > 0 ? prev.map : generateDungeonMap(prev.difficultyLevel || 1),
-                narrativeLog: prev.narrativeLog.some(log => log.includes('初回のため、レリックなしで冒険を開始した'))
+            setGameState(prev => {
+                const runTheme = prev.visualTheme || coopSyncedVisualTheme;
+                const alreadyLogged = prev.narrativeLog.some(log => log.includes('初回のため、レリックなしで冒険を開始した'));
+                const nextLogs = alreadyLogged
                     ? prev.narrativeLog
-                    : [...prev.narrativeLog, trans("初回のため、レリックなしで冒険を開始した。", languageMode)]
-            }));
+                    : [...prev.narrativeLog, trans("初回のため、レリックなしで冒険を開始した。", languageMode)];
+                if (isNormalVacationRun(runTheme, prev.player.appearanceMode, prev.isEndless)) {
+                    const vacationStartLog = getVacationAdventureStartLog(runTheme, languageMode);
+                    if (!nextLogs.includes(vacationStartLog)) nextLogs.push(vacationStartLog);
+                }
+                return {
+                    ...prev,
+                    screen: GameScreen.MAP,
+                    map: prev.map.length > 0 ? prev.map : generateDungeonMap(prev.difficultyLevel || 1),
+                    narrativeLog: nextLogs,
+                };
+            });
             audioService.playBGM('map');
         } else {
             setGameState(prev => ({
@@ -8422,7 +8449,7 @@ const App: React.FC = () => {
             }));
         }
         startGameAssetPreload();
-    }, [coopSession, gameState.challengeMode, languageMode, startGameAssetPreload]);
+    }, [coopSession, coopSyncedVisualTheme, gameState.challengeMode, languageMode, startGameAssetPreload]);
 
     const handleCharacterSelect = async (char: Character, appearanceMode: CharacterAppearanceMode = 'STANDARD') => {
         audioService.playSound('select');
@@ -8430,8 +8457,22 @@ const App: React.FC = () => {
         setUnlockCheckStartMathCorrect(totalMathCorrect);
 
         const isMagicTheme = coopSyncedVisualTheme === 'magic';
+        const selectedAppearanceMode: CharacterAppearanceMode = appearanceMode === 'VACATION' && vacationModeUnlockedForTheme
+            ? 'VACATION'
+            : 'STANDARD';
+        const selectedVacationTheme = isNormalVacationRun(coopSyncedVisualTheme, selectedAppearanceMode, false)
+            ? coopSyncedVisualTheme
+            : null;
+        const isVacationSelection = selectedVacationTheme !== null;
+        if (selectedVacationTheme) {
+            void assetPreloadService.preloadVacationRunAssets(selectedVacationTheme).catch(() => undefined);
+        }
         let initialDeck: ICard[] = [];
-        let logs = [trans("旅の支度をしている...", languageMode)];
+        let logs = [isVacationSelection
+            ? (coopSyncedVisualTheme === 'magic'
+                ? (languageMode === 'ENGLISH' ? 'Preparing for the star-sea vacation...' : languageMode === 'HIRAGANA' ? 'せいかい ばかんすの したくを している...' : '星海バカンスの支度をしている...')
+                : (languageMode === 'ENGLISH' ? 'Preparing for the summer trip...' : languageMode === 'HIRAGANA' ? 'なつやすみの たびじたくを している...' : '夏休みの旅支度をしている...'))
+            : trans("旅の支度をしている...", languageMode)];
 
         const magicProtagonistId = char.magicProtagonistId
             ?? MAGIC_HERO_ID_BY_CHARACTER_ID[char.id]
@@ -8441,7 +8482,13 @@ const App: React.FC = () => {
                 ...card,
                 id: `${card.id}-${Date.now()}-${index}`,
             }));
-            logs = [`${getMagicRuleConfig(magicProtagonistId).name}を軸に、魔法遠征の支度を整えた。`];
+            logs = [isVacationSelection
+                ? (languageMode === 'ENGLISH'
+                    ? `With ${trans(getMagicRuleConfig(magicProtagonistId).name, languageMode)} as the core, the preparations for the seaside magic vacation are complete.`
+                    : languageMode === 'HIRAGANA'
+                        ? `${trans(getMagicRuleConfig(magicProtagonistId).name, languageMode)}を じくに、せいかい ばかんすの したくを ととのえた。`
+                        : `${getMagicRuleConfig(magicProtagonistId).name}を軸に、星海バカンスの支度を整えた。`)
+                : `${getMagicRuleConfig(magicProtagonistId).name}を軸に、魔法遠征の支度を整えた。`];
         } else if (gameState.challengeMode === '1A1D') {
             const attacks = Object.values(CARDS_LIBRARY).filter(c => c.type === CardType.ATTACK && c.rarity === 'COMMON');
             const skills = Object.values(CARDS_LIBRARY).filter(c => c.type === CardType.SKILL && c.rarity === 'COMMON');
@@ -8474,7 +8521,7 @@ const App: React.FC = () => {
         const initialPlayerState = {
             ...gameState.player,
             id: char.id,
-            appearanceMode: appearanceMode === 'VACATION' && vacationModeUnlockedForTheme ? 'VACATION' as const : 'STANDARD' as const,
+            appearanceMode: selectedAppearanceMode,
             magicProtagonistId: char.magicProtagonistId,
             magicProtagonistGender: char.magicProtagonistGender,
             maxHp: char.maxHp,
@@ -8521,6 +8568,7 @@ const App: React.FC = () => {
                 selectedCharacterId: char.id,
                 magicProtagonistId: char.magicProtagonistId,
                 magicProtagonistGender: char.magicProtagonistGender,
+                appearanceMode: selectedAppearanceMode,
                 maxHp: char.maxHp,
                 currentHp: char.maxHp,
                 relicResolved: shouldSkipStarterRelic
@@ -8547,7 +8595,7 @@ const App: React.FC = () => {
                     relicResolved: shouldSkipStarterRelic,
                     magicProtagonistId: char.magicProtagonistId,
                     magicProtagonistGender: char.magicProtagonistGender,
-                    appearanceMode: appearanceMode === 'VACATION' && vacationModeUnlockedForTheme ? 'VACATION' : 'STANDARD'
+                    appearanceMode: selectedAppearanceMode
                 });
             }
             if (!coopSession.isHost || !areActiveCoopParticipantsResolved(nextParticipants, participant => !!participant.selectedCharacterId)) {
@@ -8598,22 +8646,31 @@ const App: React.FC = () => {
                 currentMapNodeId: null,
                 combatLog: [],
                 player: { ...initialPlayerState, deck: [] },
-                narrativeLog: [trans("本日の献立を考えている...", languageMode)]
+                narrativeLog: [isVacationSelection
+                    ? (languageMode === 'ENGLISH' ? 'Planning the menu for the seaside trip...' : languageMode === 'HIRAGANA' ? 'うみべの たびの こんだてを かんがえている...' : '海辺の旅の献立を考えている...')
+                    : trans("本日の献立を考えている...", languageMode)]
             }));
             return;
         }
 
         if (!isMagicTheme && char.id === 'ASSASSIN') {
             const warrior = themedCharacters.find(c => c.id === 'WARRIOR');
-            const isHighSchoolTheme = visualTheme === 'high-school';
+            const isHighSchoolTheme = coopSyncedVisualTheme === 'high-school';
             const partnerName = warrior?.name ?? (isHighSchoolTheme ? '反逆の高校生' : 'わんぱく小学生');
+            const isVacationAssassinEvent = isHighSchoolTheme && isVacationSelection;
 
             const specialEvent = {
-                title: isHighSchoolTheme ? "夕暮れの共闘宣言" : "放課後の勧誘",
+                title: isHighSchoolTheme
+                    ? (isVacationAssassinEvent ? "夕潮の共闘宣言" : "夕暮れの共闘宣言")
+                    : "放課後の勧誘",
                 description: isHighSchoolTheme
-                    ? "転入初日の放課後。昇降口を出るころには、校舎も空も赤く染まっていた。\n\n靴箱の前で足を止めると、黒い制服の少年が校門にもたれて笑う。\n\n「謎めく転入生、って噂になってるぜ。\n一人で目立つより、俺と組んだ方が面白い。どうだ？」\n\n差し出された手は乱暴そうで、けれどまっすぐだった。この学校での最初の味方になるかもしれない。"
+                    ? (isVacationAssassinEvent
+                        ? "夏休みの旅が始まった夕方。海沿いの遊歩道は夕日に染まり、潮風が少しだけ涼しくなっていた。\n\n波打ち際で足を止めると、旅支度の少年が手すりにもたれて笑う。\n\n「謎めく転入生、って噂になってるぜ。\nせっかくの夏だ。一人で回るより、俺と組んだ方が面白い。どうだ？」\n\n差し出された手は乱暴そうで、けれどまっすぐだった。この旅で最初の味方になるかもしれない。"
+                        : "転入初日の放課後。昇降口を出るころには、校舎も空も赤く染まっていた。\n\n靴箱の前で足を止めると、黒い制服の少年が校門にもたれて笑う。\n\n「謎めく転入生、って噂になってるぜ。\n一人で目立つより、俺と組んだ方が面白い。どうだ？」\n\n差し出された手は乱暴そうで、けれどまっすぐだった。この学校での最初の味方になるかもしれない。")
                     : "新しい学校、知らないクラスメート...。\n不安な気持ちで校庭の隅に立っていると、赤い帽子の少年が走ってきた。\n\n「よう！ お前、転校生だろ？\n俺と組んで『伝説の小学生』を目指さないか？」\n\n強引だが、悪い気はしない。彼の目は冒険への期待で輝いている。",
-                imageKey: isHighSchoolTheme ? 'high-school-event-54' : undefined,
+                imageKey: isHighSchoolTheme
+                    ? (isVacationAssassinEvent ? 'high-school-vacation-event-8' : 'high-school-event-54')
+                    : undefined,
                 options: [
                     {
                         label: isHighSchoolTheme ? "握手する" : "手を取る",
@@ -8624,7 +8681,7 @@ const App: React.FC = () => {
                                 name: warrior.name,
                                 maxHp: warrior.maxHp,
                                 currentHp: warrior.maxHp,
-                                imageData: appearanceMode === 'VACATION'
+                                imageData: selectedAppearanceMode === 'VACATION'
                                     ? getThemedCharacterSpritePath(
                                         visualTheme,
                                         warrior.id,
@@ -8633,7 +8690,7 @@ const App: React.FC = () => {
                                         false,
                                         warrior.magicProtagonistId,
                                         warrior.magicProtagonistGender,
-                                        appearanceMode,
+                                        selectedAppearanceMode,
                                     )
                                     : warrior.imageData,
                                 floatingText: null
@@ -8738,7 +8795,13 @@ const App: React.FC = () => {
             map: nextMap,
             currentMapNodeId: null,
             player: initialPlayerState,
-            narrativeLog: shouldSkipStarterRelic ? [...logs, trans("初回のため、レリックなしで冒険を開始した。", languageMode)] : logs,
+            narrativeLog: shouldSkipStarterRelic
+                ? [
+                    ...logs,
+                    trans("初回のため、レリックなしで冒険を開始した。", languageMode),
+                    ...(selectedVacationTheme ? [getVacationAdventureStartLog(selectedVacationTheme, languageMode)] : []),
+                ]
+                : logs,
             combatLog: [],
             activeEffects: []
         }));
@@ -8772,15 +8835,25 @@ const App: React.FC = () => {
             startGameAssetPreload();
             return;
         }
-        setGameState(prev => ({
-            ...prev,
-            screen: shouldSkipStarterRelic ? GameScreen.MAP : GameScreen.RELIC_SELECTION,
-            map: shouldSkipStarterRelic ? generateDungeonMap(prev.difficultyLevel || 1) : prev.map,
-            player: {
-                ...prev.player,
-                deck: selectedCards
-            }
-        }));
+        setGameState(prev => {
+            const runTheme = prev.visualTheme || visualTheme;
+            const directVacationStart = shouldSkipStarterRelic
+                && isNormalVacationRun(runTheme, prev.player.appearanceMode, prev.isEndless)
+                ? getVacationAdventureStartLog(runTheme, languageMode)
+                : null;
+            return {
+                ...prev,
+                screen: shouldSkipStarterRelic ? GameScreen.MAP : GameScreen.RELIC_SELECTION,
+                map: shouldSkipStarterRelic ? generateDungeonMap(prev.difficultyLevel || 1) : prev.map,
+                player: {
+                    ...prev.player,
+                    deck: selectedCards
+                },
+                narrativeLog: directVacationStart && !prev.narrativeLog.includes(directVacationStart)
+                    ? [...prev.narrativeLog, directVacationStart]
+                    : prev.narrativeLog,
+            };
+        });
         if (shouldSkipStarterRelic) audioService.playBGM('map');
         startGameAssetPreload();
     };
@@ -8821,31 +8894,43 @@ const App: React.FC = () => {
                 });
             }
 
-            setGameState(prev => ({
-                ...prev,
-                screen: GameScreen.EVENT,
-                currentEventTitle: ev.title,
-                map: map,
-                player: {
-                    ...prev.player,
-                    relics: [...prev.player.relics, relic],
-                    deck: starterRewardCard ? [...prev.player.deck, starterRewardCard] : prev.player.deck
-                },
-                narrativeLog: [...prev.narrativeLog, ...starterRewardLog, trans("冒険が始まった。", languageMode)]
-            }));
+            setGameState(prev => {
+                const runTheme = prev.visualTheme || visualTheme;
+                const adventureStartLog = isNormalVacationRun(runTheme, prev.player.appearanceMode, prev.isEndless)
+                    ? getVacationAdventureStartLog(runTheme, languageMode)
+                    : trans("冒険が始まった。", languageMode);
+                return {
+                    ...prev,
+                    screen: GameScreen.EVENT,
+                    currentEventTitle: ev.title,
+                    map: map,
+                    player: {
+                        ...prev.player,
+                        relics: [...prev.player.relics, relic],
+                        deck: starterRewardCard ? [...prev.player.deck, starterRewardCard] : prev.player.deck
+                    },
+                    narrativeLog: [...prev.narrativeLog, ...starterRewardLog, adventureStartLog]
+                };
+            });
             audioService.playBGM('event');
         } else {
-            setGameState(prev => ({
-                ...prev,
-                screen: GameScreen.MAP,
-                map: map,
-                player: {
-                    ...prev.player,
-                    relics: [...prev.player.relics, relic],
-                    deck: starterRewardCard ? [...prev.player.deck, starterRewardCard] : prev.player.deck
-                },
-                narrativeLog: [...prev.narrativeLog, ...starterRewardLog, trans("冒険が始まった。", languageMode)]
-            }));
+            setGameState(prev => {
+                const runTheme = prev.visualTheme || visualTheme;
+                const adventureStartLog = isNormalVacationRun(runTheme, prev.player.appearanceMode, prev.isEndless)
+                    ? getVacationAdventureStartLog(runTheme, languageMode)
+                    : trans("冒険が始まった。", languageMode);
+                return {
+                    ...prev,
+                    screen: GameScreen.MAP,
+                    map: map,
+                    player: {
+                        ...prev.player,
+                        relics: [...prev.player.relics, relic],
+                        deck: starterRewardCard ? [...prev.player.deck, starterRewardCard] : prev.player.deck
+                    },
+                    narrativeLog: [...prev.narrativeLog, ...starterRewardLog, adventureStartLog]
+                };
+            });
             audioService.playBGM('map');
         }
     };
@@ -8861,22 +8946,28 @@ const App: React.FC = () => {
         const starterRewardLog = starterRewardCard
             ? [trans(`${starterRewardCard.name}をカード帳から持ってきた。`, languageMode)]
             : [];
-        setGameState(prev => ({
-            ...prev,
-            screen: GameScreen.MAP,
-            map,
-            currentMapNodeId: null,
-            player: {
-                ...prev.player,
-                deck: starterRewardCard ? [...prev.player.deck, starterRewardCard] : prev.player.deck
-            },
-            narrativeLog: [
-                ...prev.narrativeLog,
-                ...starterRewardLog,
-                trans("初回のため、レリックなしで冒険を開始した。", languageMode),
-                trans("冒険が始まった。", languageMode)
-            ]
-        }));
+        setGameState(prev => {
+            const runTheme = prev.visualTheme || visualTheme;
+            const adventureStartLog = isNormalVacationRun(runTheme, prev.player.appearanceMode, prev.isEndless)
+                ? getVacationAdventureStartLog(runTheme, languageMode)
+                : trans("冒険が始まった。", languageMode);
+            return {
+                ...prev,
+                screen: GameScreen.MAP,
+                map,
+                currentMapNodeId: null,
+                player: {
+                    ...prev.player,
+                    deck: starterRewardCard ? [...prev.player.deck, starterRewardCard] : prev.player.deck
+                },
+                narrativeLog: [
+                    ...prev.narrativeLog,
+                    ...starterRewardLog,
+                    trans("初回のため、レリックなしで冒険を開始した。", languageMode),
+                    adventureStartLog
+                ]
+            };
+        });
         audioService.playBGM('map');
     };
 
@@ -9370,6 +9461,12 @@ const App: React.FC = () => {
                     p.relicCounters['TINY_CHEST_PROGRESS'] = tinyChestProgress;
                 }
                 const lastCraneAct = Number(p.relicCounters['CRANE_GAME_LAST_ACT'] || 0) || undefined;
+                const eventVisualTheme = nextState.visualTheme || visualTheme;
+                const vacationCraneEvent = isNormalVacationRun(
+                    eventVisualTheme,
+                    nextState.player.appearanceMode,
+                    nextState.isEndless,
+                );
                 if (
                     gameState.challengeMode !== 'COOP'
                     && shouldTriggerCraneEvent(Math.random(), nextState.act, lastCraneAct)
@@ -9388,13 +9485,13 @@ const App: React.FC = () => {
                         player: cranePlayer,
                         screen: GameScreen.MINI_GAME_CRANE,
                         craneGameContext: 'EVENT',
-                        currentEventTitle: '放課後ゲームセンター',
+                        currentEventTitle: vacationCraneEvent ? '海辺のゲームコーナー' : '放課後ゲームセンター',
                     });
                     audioService.playBGM('event');
                     return;
                 }
                 const unlockedCards = storageService.getUnlockedCards();
-                const activeVisualTheme = nextState.visualTheme || visualTheme;
+                const activeVisualTheme = eventVisualTheme;
                 const ev = activeVisualTheme === 'magic' && !nextState.isEndless
                     ? generateMagicRomanceSelectionEvent(
                         nextState.player,
@@ -16523,6 +16620,10 @@ const App: React.FC = () => {
             const newMap = generateDungeonMap(prev.difficultyLevel || 1);
             audioService.playBGM('map');
             const isGardener = prev.visualTheme !== 'magic' && prev.player.id === 'GARDENER';
+            const runTheme = prev.visualTheme || visualTheme;
+            const actAdvanceLog = isNormalVacationRun(runTheme, prev.player.appearanceMode, prev.isEndless)
+                ? getVacationActAdvanceLog(runTheme, nextAct, languageMode)
+                : trans(`第${nextAct}章へ進んだ。体力が全回復した！`, languageMode);
             if (prev.challengeMode === 'COOP') {
                 healCoopPartyToFull({ ...prev.player, currentHp: prev.player.maxHp, block: 0 });
             }
@@ -16537,7 +16638,7 @@ const App: React.FC = () => {
                     ...prev.player,
                     currentHp: prev.player.maxHp
                 },
-                narrativeLog: [...prev.narrativeLog, trans(`第${nextAct}章へ進んだ。体力が全回復した！`, languageMode)],
+                narrativeLog: [...prev.narrativeLog, actAdvanceLog],
                 actStats: { enemiesDefeated: 0, goldGained: 0, mathCorrect: 0 },
                 newlyUnlockedCardName: undefined // 次のアクトへ行くときにリセット
             };
@@ -21532,7 +21633,11 @@ const App: React.FC = () => {
                         <div className="absolute inset-0 bg-red-950/72 pointer-events-none" />
                         <div className="game-over-content relative z-10 my-auto w-full max-w-2xl py-8">
                             <div className="game-over-main">
-                                <h1 className="game-over-title text-6xl mb-4 font-bold">{trans("しゅくだいがふえた…", languageMode)}</h1>
+                                <h1 className="game-over-title text-6xl mb-4 font-bold">
+                                    {normalVacationTheme
+                                        ? getVacationGameOverTitle(normalVacationTheme, languageMode)
+                                        : trans("しゅくだいがふえた…", languageMode)}
+                                </h1>
                                 <p className="game-over-subtitle mb-8 text-2xl">Act {gameState.act} - Floor {gameState.floor}</p>
                             </div>
 
@@ -21561,14 +21666,22 @@ const App: React.FC = () => {
                                         <div className="game-over-card-preview scale-100">
                                             <Card card={newlyUnlockedCard} onClick={() => { }} disabled={false} languageMode={languageMode} />
                                         </div>
-                                        <p className="text-sm text-yellow-100 font-bold">{trans("新しい学習の成果が、次回の冒険から現れるようになります！", languageMode)}</p>
+                                        <p className="text-sm text-yellow-100 font-bold">
+                                            {normalVacationTheme
+                                                ? getVacationNewCardMessage(normalVacationTheme, languageMode)
+                                                : trans("新しい学習の成果が、次回の冒険から現れるようになります！", languageMode)}
+                                        </p>
                                     </div>
                                 </div>
                             )}
 
                             {getDifficultyConfig(gameState.difficultyLevel).legacyCardAllowed && !legacyCardSelected ? (
                                 <div className="game-over-legacy mb-8 shrink-0">
-                                    <p className="game-over-legacy-title mb-4 text-sm text-red-200 font-bold">{trans("次回の冒険に持っていくカードを1枚選んでください", languageMode)}</p>
+                                    <p className="game-over-legacy-title mb-4 text-sm text-red-200 font-bold">
+                                        {normalVacationTheme
+                                            ? getVacationLegacyPrompt(normalVacationTheme, languageMode)
+                                            : trans("次回の冒険に持っていくカードを1枚選んでください", languageMode)}
+                                    </p>
                                     <div className="game-over-legacy-list flex flex-wrap justify-center gap-2 max-h-60 overflow-y-auto custom-scrollbar p-2 bg-black/30 rounded border border-red-700/50">
                                         {gameState.player.deck.map(card => (
                                             <div key={card.id} className="scale-75 cursor-pointer hover:scale-90 transition-transform" onClick={() => handleLegacyCardSelect(card)}>
@@ -21579,8 +21692,16 @@ const App: React.FC = () => {
                                 </div>
                             ) : getDifficultyConfig(gameState.difficultyLevel).legacyCardAllowed ? (
                                 <div className="game-over-legacy mb-8 p-4 bg-black/50 border border-gray-500 rounded-lg animate-in zoom-in duration-150 shrink-0">
-                                    <p className="text-gray-300 font-bold text-xl">{trans("遺志は継がれた...", languageMode)}</p>
-                                    <p className="text-sm text-gray-500 mt-1">{trans("次の児童が拾うことになる。", languageMode)}</p>
+                                    <p className="text-gray-300 font-bold text-xl">
+                                        {normalVacationTheme
+                                            ? getVacationLegacyCarryTitle(languageMode)
+                                            : trans("遺志は継がれた...", languageMode)}
+                                    </p>
+                                    <p className="text-sm text-gray-500 mt-1">
+                                        {normalVacationTheme
+                                            ? getVacationLegacyCarryBody(normalVacationTheme, languageMode)
+                                            : trans("次の児童が拾うことになる。", languageMode)}
+                                    </p>
                                 </div>
                             ) : null}
                             <div className="game-over-actions flex flex-col gap-4 items-center">
@@ -21660,12 +21781,14 @@ const App: React.FC = () => {
                                             <Card card={newlyUnlockedCard} onClick={() => { }} disabled={false} languageMode={languageMode} />
                                         </div>
                                         <p className="text-sm text-yellow-100 font-bold">
-                                            {trans(
-                                                activeRunVisualTheme === 'high-school'
-                                                    ? "新しい学園での成果が、次回の挑戦から現れるようになります！"
-                                                    : "新しい学習の成果が、次回の冒険から現れるようになります！",
-                                                languageMode
-                                            )}
+                                            {normalVacationTheme
+                                                ? getVacationNewCardMessage(normalVacationTheme, languageMode)
+                                                : trans(
+                                                    activeRunVisualTheme === 'high-school'
+                                                        ? "新しい学園での成果が、次回の挑戦から現れるようになります！"
+                                                        : "新しい学習の成果が、次回の冒険から現れるようになります！",
+                                                    languageMode
+                                                )}
                                         </p>
                                     </div>
                                 </div>
@@ -21673,35 +21796,41 @@ const App: React.FC = () => {
 
                             <div className="ending-main">
                                 <h1 className="ending-title text-4xl md:text-6xl mb-4 font-bold text-yellow-200 shrink-0">
-                                    {trans(
-                                        activeRunVisualTheme === 'high-school'
-                                            ? "卒業おめでとう！"
-                                            : activeRunVisualTheme === 'magic'
-                                                ? "願いの夜明け"
-                                                : "ゲームクリア！",
-                                        languageMode
-                                    )}
+                                    {normalVacationTheme
+                                        ? getVacationEndingTitle(normalVacationTheme, languageMode)
+                                        : trans(
+                                            activeRunVisualTheme === 'high-school'
+                                                ? "卒業おめでとう！"
+                                                : activeRunVisualTheme === 'magic'
+                                                    ? "願いの夜明け"
+                                                    : "ゲームクリア！",
+                                            languageMode
+                                        )}
                                 </h1>
                                 <p className="ending-message mb-8 text-lg md:text-xl shrink-0 whitespace-pre-line">
-                                    {trans(
-                                        activeRunVisualTheme === 'high-school'
-                                            ? "あなたは真・校長の支配を打ち破り、\nこの学園に自分たちの明日を取り戻しました。\n反逆の卒業生として、その名は校内伝説に刻まれるでしょう。"
-                                            : activeRunVisualTheme === 'magic'
-                                                ? "あなたは大魔女校長が作り出した「願いの檻」を打ち破り、\n学園に自由な未来と朝の光を取り戻しました。\n学び、迷い、誰かを大切にした日々は、これからもあなたの魔法を強くしていくでしょう。"
-                                                : "あなたは校長先生をせっとくし、\nでんせつの しょうがくせいとして かたりつがれることでしょう。",
-                                        languageMode
-                                    )}
+                                    {normalVacationTheme
+                                        ? getVacationEndingMessage(normalVacationTheme, languageMode)
+                                        : trans(
+                                            activeRunVisualTheme === 'high-school'
+                                                ? "あなたは真・校長の支配を打ち破り、\nこの学園に自分たちの明日を取り戻しました。\n反逆の卒業生として、その名は校内伝説に刻まれるでしょう。"
+                                                : activeRunVisualTheme === 'magic'
+                                                    ? "あなたは大魔女校長が作り出した「願いの檻」を打ち破り、\n学園に自由な未来と朝の光を取り戻しました。\n学び、迷い、誰かを大切にした日々は、これからもあなたの魔法を強くしていくでしょう。"
+                                                    : "あなたは校長先生をせっとくし、\nでんせつの しょうがくせいとして かたりつがれることでしょう。",
+                                            languageMode
+                                        )}
                                 </p>
 
                             {getDifficultyConfig(gameState.difficultyLevel).legacyCardAllowed && !legacyCardSelected ? (
                                 <div className="ending-legacy mb-8 shrink-0">
                                     <p className="mb-4 text-sm text-yellow-100 font-bold">
-                                        {trans(
-                                            activeRunVisualTheme === 'high-school'
-                                                ? "次回の学園攻略に持っていくカードを1枚選んでください"
-                                                : "次回の冒険に持っていくカードを1枚選んでください",
-                                            languageMode
-                                        )}
+                                        {normalVacationTheme
+                                            ? getVacationLegacyPrompt(normalVacationTheme, languageMode)
+                                            : trans(
+                                                activeRunVisualTheme === 'high-school'
+                                                    ? "次回の学園攻略に持っていくカードを1枚選んでください"
+                                                    : "次回の冒険に持っていくカードを1枚選んでください",
+                                                languageMode
+                                            )}
                                     </p>
                                     <div className="flex flex-wrap justify-center gap-2 max-h-60 overflow-y-auto custom-scrollbar p-2 bg-black/30 rounded border border-yellow-700/50">
                                         {gameState.player.deck.map((card, index) => (
@@ -21727,12 +21856,14 @@ const App: React.FC = () => {
                                 <div className="ending-legacy mb-8 p-4 bg-green-900/50 border-green-500 rounded-lg animate-in zoom-in duration-150 shrink-0">
                                     <p className="text-green-400 font-bold text-xl">{trans("カードを継承しました！", languageMode)}</p>
                                     <p className="text-sm text-green-200 mt-1">
-                                        {trans(
-                                            activeRunVisualTheme === 'high-school'
-                                                ? "次の学園攻略の初期デッキに追加されます。"
-                                                : "次の冒険の初期デッキに追加されます。",
-                                            languageMode
-                                        )}
+                                        {normalVacationTheme
+                                            ? getVacationLegacyAddedMessage(normalVacationTheme, languageMode)
+                                            : trans(
+                                                activeRunVisualTheme === 'high-school'
+                                                    ? "次の学園攻略の初期デッキに追加されます。"
+                                                    : "次の冒険の初期デッキに追加されます。",
+                                                languageMode
+                                            )}
                                     </p>
                                 </div>
                             ) : null}

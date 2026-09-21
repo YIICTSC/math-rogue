@@ -6,6 +6,7 @@ import {
 import { MAGIC_ASSET_PATHS } from '../data/magicAssetManifest';
 import { HIGH_SCHOOL_CHARACTER_ANIMATION_ASSET_PATHS, HIGH_SCHOOL_IDLE_SPRITE_ASSET_PATHS, HIGH_SCHOOL_VACATION_GENERATED_ANIMATION_ASSET_PATHS, MAGIC_VACATION_GENERATED_ANIMATION_ASSET_PATHS, type VisualThemeId } from '../data/visualThemes';
 import { assetUrl } from '../utils/assetPaths';
+import { getVacationEnvironmentAssetPaths } from '../data/vacationEnvironmentAssets';
 import { WEB_PERFORMANCE_MODE, WEB_PRELOAD_ENABLED } from '../config/runtime';
 
 const ATTACK_EFFECT_KEYS = [
@@ -179,10 +180,46 @@ const buildDeferredAssetPaths = (visualTheme: VisualThemeId): string[] => {
     return [];
 };
 
+const buildVacationDeferredAssetPaths = (visualTheme: VisualThemeId): string[] => {
+    if (visualTheme === 'high-school') {
+        return [
+            ...getVacationEnvironmentAssetPaths('high-school'),
+            ...range(50).map(index => `sprites/high-school/vacation-enemies/${index}.webp`),
+            ...range(53).flatMap(index => [
+                `sprites/high-school/vacation-humanoid-enemies/${index}.webp`,
+                `sprites/high-school/vacation-humanoid-enemies-attack/${index}.webp`,
+                `sprites/high-school/vacation-humanoid-enemies-skill/${index}.webp`,
+            ]),
+            'sprites/high-school/vacation-bosses/azuki-idle.webp',
+            'sprites/high-school/vacation-bosses/azuki-pounce.webp',
+            'sprites/high-school/vacation-bosses/azuki-howl.webp',
+            'sprites/high-school/vacation-bosses/dodomedesu.webp',
+            'sprites/high-school/vacation-bosses/genzo.webp',
+            'sprites/high-school/vacation-bosses/kocho.webp',
+            'sprites/high-school/vacation-bosses/true-kocho.webp',
+        ];
+    }
+    if (visualTheme === 'magic') {
+        return [
+            ...getVacationEnvironmentAssetPaths('magic'),
+            ...range(45).map(index => `sprites/magic/vacation-enemies/${index}.webp`),
+            ...range(22).flatMap(index => [
+                `sprites/magic/vacation-humanoid-enemies/${index}.webp`,
+                `sprites/magic/vacation-humanoid-enemies-attack/${index}.webp`,
+                `sprites/magic/vacation-humanoid-enemies-skill/${index}.webp`,
+            ]),
+            'sprites/magic/vacation-bosses/grand-witch.webp',
+            'sprites/magic/vacation-bosses/star-calamity.webp',
+        ];
+    }
+    return [];
+};
+
 class AssetPreloadService {
     private imagePromises = new Map<string, Promise<void>>();
     private essentialPromises = new Map<VisualThemeId, Promise<void>>();
     private deferredPromises = new Map<VisualThemeId, Promise<void>>();
+    private vacationDeferredPromises = new Map<VisualThemeId, Promise<void>>();
     private readonly criticalPreloadConcurrency = 3;
     private readonly deferredPreloadConcurrency = 2;
 
@@ -214,6 +251,28 @@ class AssetPreloadService {
         const promise = this.waitForIdle(1200)
             .then(() => this.preloadImages(buildDeferredAssetPaths(visualTheme), this.deferredPreloadConcurrency));
         this.deferredPromises.set(visualTheme, promise);
+        return promise;
+    }
+
+    preloadVacationRunAssets(visualTheme: VisualThemeId): Promise<void> {
+        const cached = this.vacationDeferredPromises.get(visualTheme);
+        if (cached) return cached;
+
+        const environmentPaths = getVacationEnvironmentAssetPaths(visualTheme);
+        if (WEB_PERFORMANCE_MODE) {
+            if (!WEB_PRELOAD_ENABLED) {
+                const promise = Promise.resolve();
+                this.vacationDeferredPromises.set(visualTheme, promise);
+                return promise;
+            }
+            const promise = this.preloadImages(environmentPaths, this.criticalPreloadConcurrency);
+            this.vacationDeferredPromises.set(visualTheme, promise);
+            return promise;
+        }
+
+        const promise = this.waitForIdle(900)
+            .then(() => this.preloadImages(buildVacationDeferredAssetPaths(visualTheme), this.deferredPreloadConcurrency));
+        this.vacationDeferredPromises.set(visualTheme, promise);
         return promise;
     }
 

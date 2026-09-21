@@ -40,6 +40,13 @@ const RewardScreen: React.FC<RewardScreenProps> = ({ rewards, onSelectReward, on
   const longPressTimer = useRef<any>(null);
   const startPos = useRef({ x: 0, y: 0 });
   const currencyLabel = visualTheme === 'magic' ? '魔晶' : 'ゴールド';
+  const isVacationRun = appearanceMode === 'VACATION' && (visualTheme === 'high-school' || visualTheme === 'magic');
+  const rewardTitle = isVacationRun
+    ? (visualTheme === 'magic' ? '星砂の報酬' : '海辺の戦利品')
+    : (visualTheme === 'magic' ? '魔力回収' : '勝利');
+  const rewardDescription = isVacationRun
+    ? (visualTheme === 'magic' ? '波打ち際の魔法陣から、次に持ち込む力を選んでください' : '海辺で手に入れた戦利品から、欲しい報酬を選んでください')
+    : (visualTheme === 'magic' ? '結界に残った魔力から、次に持ち込む力を選んでください' : '欲しい報酬を選択してください');
 
   const handlePointerDown = (e: React.PointerEvent, itemType: 'RELIC' | 'POTION', data: any) => {
       startPos.current = { x: e.clientX, y: e.clientY };
@@ -230,7 +237,7 @@ const RewardScreen: React.FC<RewardScreenProps> = ({ rewards, onSelectReward, on
           </div>
         )}
         <h2 className="text-3xl md:text-4xl text-amber-100 font-bold mb-2 flex items-center justify-center animate-pulse drop-shadow-[0_2px_4px_rgba(0,0,0,0.95)] [text-shadow:0_0_10px_rgba(120,53,15,0.95)]">
-          <Gift className="mr-3" size={32} /> {trans(visualTheme === 'magic' ? "魔力回収" : "勝利", languageMode)}
+          <Gift className="mr-3" size={32} /> {trans(rewardTitle, languageMode)}
         </h2>
         {rewards.some(reward => reward.type === 'ENDLESS_REWARD') && (
           <div className="mx-auto mb-2 max-w-2xl rounded-lg border border-fuchsia-400/50 bg-fuchsia-950/40 px-3 py-2 text-xs font-black text-fuchsia-100">
@@ -239,7 +246,7 @@ const RewardScreen: React.FC<RewardScreenProps> = ({ rewards, onSelectReward, on
             {typeof endlessBonusGold === 'number' && <span className="ml-2 text-amber-200">+{endlessBonusGold}G</span>}
           </div>
         )}
-        <p className="text-white text-sm font-bold drop-shadow-[0_2px_3px_rgba(0,0,0,0.95)] [text-shadow:0_0_8px_rgba(15,23,42,0.9)]">{trans(visualTheme === 'magic' ? "結界に残った魔力から、次に持ち込む力を選んでください" : "欲しい報酬を選択してください", languageMode)}</p>
+        <p className="text-white text-sm font-bold drop-shadow-[0_2px_3px_rgba(0,0,0,0.95)] [text-shadow:0_0_8px_rgba(15,23,42,0.9)]">{trans(rewardDescription, languageMode)}</p>
         {rewards.some(reward => reward.type === 'ENDLESS_REWARD') && onRerollEndlessReward && (
           <button
             type="button"

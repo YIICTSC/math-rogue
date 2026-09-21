@@ -34,7 +34,25 @@ interface RestScreenProps {
 
 const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSynthesize, onSelfStudy, onLeave, languageMode, typingMode = false, scienceRoomChance = 0.5, interactionDisabled = false, interactionDisabledMessage, visualTheme = 'elementary', appearanceMode = 'STANDARD', endlessMajorBoss = false, onOpenShop, onOrganizeDeck }) => {
   const isMagic = visualTheme === 'magic';
-  const restHubMessage = isMagic ? "特別結界室だ。魔力を整えて、次の出撃に備えよう。" : "放課後の校舎だ。どこへ行こう？";
+  const isVacationRun = !endlessMajorBoss && appearanceMode === 'VACATION' && (visualTheme === 'high-school' || visualTheme === 'magic');
+  const restHubMessage = isVacationRun
+      ? (isMagic ? '星砂の休息結界だ。潮風の魔力を整えて、次の目的地に備えよう。' : '海の見える宿の休憩所だ。ひと息ついて、次の目的地に備えよう。')
+      : (isMagic ? '特別結界室だ。魔力を整えて、次の出撃に備えよう。' : '放課後の校舎だ。どこへ行こう？');
+  const restTitle = isVacationRun
+      ? (isMagic ? '星砂の休息結界' : '海辺の休憩所')
+      : (isMagic ? '特別結界室' : '放課後の探索');
+  const restOptionLabel = isVacationRun
+      ? (isMagic ? '休息結界' : '休憩スペース')
+      : '保健室';
+  const upgradeOptionLabel = isVacationRun
+      ? (isMagic ? '星砂の魔法工房' : '旅先の工作台')
+      : '図工室';
+  const synthesisOptionLabel = isVacationRun
+      ? (isMagic ? '潮光の錬金結界' : '宿の実験スペース')
+      : '理科室';
+  const selfStudyOptionLabel = isVacationRun
+      ? (isMagic ? '星砂の祈り場' : '海辺の自習席')
+      : '自習';
   const [mode, setMode] = useState<'CHOICE' | 'UPGRADE' | 'SYNTHESIS' | 'SELF_STUDY' | 'DECK' | 'ERASER_EFFECT' | 'PREVIEW_UPGRADE' | 'PREVIEW_SYNTHESIS' | 'RESULT' | 'DONE'>('CHOICE');
   const [message, setMessage] = useState(restHubMessage);
   const [selectedCard, setSelectedCard] = useState<ICard | null>(null);
@@ -148,15 +166,19 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
       if (interactionDisabled) return;
       onRest();
       setMode('DONE');
-      setMessage(languageMode === 'ENGLISH'
-          ? `You took a nap in the infirmary bed. Healed ${healAmount} HP!`
-          : isMagic ? `特別結界室で魔力を整えた。HPが ${healAmount} 回復した！` : `保健室のベッドで仮眠をとった。HPが ${healAmount} 回復した！`);
+      setMessage(isVacationRun
+          ? (isMagic ? `月光の休息結界で魔力を整えた。HPが ${healAmount} 回復した！` : `海の見える休憩室でひと息ついた。HPが ${healAmount} 回復した！`)
+          : languageMode === 'ENGLISH'
+            ? `You took a nap in the infirmary bed. Healed ${healAmount} HP!`
+            : isMagic ? `特別結界室で魔力を整えた。HPが ${healAmount} 回復した！` : `保健室のベッドで仮眠をとった。HPが ${healAmount} 回復した！`);
   };
 
   const handleSmithChoice = () => {
       if (interactionDisabled) return;
       setMode('UPGRADE');
-      setMessage(isMagic ? "魔法工房だ。どのカードに星屑の強化を施す？" : "図工室だ。どの道具（カード）を改良する？");
+      setMessage(isVacationRun
+          ? (isMagic ? '海辺の魔法工房だ。どのカードに星砂の強化を施す？' : '旅先の工作台だ。どの道具（カード）を改良する？')
+          : isMagic ? '魔法工房だ。どのカードに星屑の強化を施す？' : '図工室だ。どの道具（カード）を改良する？');
   };
 
   const handleSynthesizeChoice = () => {
@@ -168,16 +190,22 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
       }
       setMode('SYNTHESIS');
       setSynthCards([]);
-      setMessage(isMagic
-          ? (isMage ? `錬金結界だ。共鳴させたいカードを3枚選んで。\n(時環の錬金術師特典：3枚合成！)` : "錬金結界だ。共鳴させたいカードを2枚選んで。")
-          : (isMage ? `理科室だ。混ぜ合わせたいカードを3枚選んでね。\n(理科クラブ部長特典：3枚合成！)` : "理科室だ。混ぜ合わせたいカードを2枚選んでね。"));
+      setMessage(isVacationRun
+          ? (isMagic
+              ? (isMage ? `潮光の錬金結界だ。共鳴させたいカードを3枚選んで。\n(時環の錬金術師特典：3枚合成！)` : '潮光の錬金結界だ。共鳴させたいカードを2枚選んで。')
+              : (isMage ? `宿の実験スペースだ。混ぜ合わせたいカードを3枚選んでね。\n(理科クラブ部長特典：3枚合成！)` : '宿の実験スペースだ。混ぜ合わせたいカードを2枚選んでね。'))
+          : isMagic
+            ? (isMage ? `錬金結界だ。共鳴させたいカードを3枚選んで。\n(時環の錬金術師特典：3枚合成！)` : '錬金結界だ。共鳴させたいカードを2枚選んで。')
+            : (isMage ? `理科室だ。混ぜ合わせたいカードを3枚選んでね。\n(理科クラブ部長特典：3枚合成！)` : '理科室だ。混ぜ合わせたいカードを2枚選んでね。'));
   };
 
   const handleSelfStudyChoice = () => {
       if (interactionDisabled || !hasCardEraser) return;
       setMode('SELF_STUDY');
       setSelectedCard(null);
-      setMessage(isMagic ? "静かな祈りの間だ。どのカードから乱れた魔力をほどく？" : "自習だ。カード消しゴムで、どのカードの不要な効果を消す？");
+      setMessage(isVacationRun
+          ? (isMagic ? '星砂の祈り場だ。どのカードから乱れた魔力をほどく？' : '海辺の自習席だ。カード消しゴムで、どのカードの不要な効果を消す？')
+          : isMagic ? '静かな祈りの間だ。どのカードから乱れた魔力をほどく？' : '自習だ。カード消しゴムで、どのカードの不要な効果を消す？');
   };
 
   const handleDeckChoice = () => {
@@ -326,7 +354,7 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
                 </div>
             )}
             <h2 className="text-3xl md:text-4xl text-orange-500 font-bold mb-4 flex items-center justify-center shrink-0">
-                <DoorOpen className="mr-3" /> {trans(isMagic ? "特別結界室" : "放課後の探索", languageMode)}
+                <DoorOpen className="mr-3" /> {trans(restTitle, languageMode)}
             </h2>
             <p className="text-lg md:text-xl text-gray-300 mb-6 min-h-[3rem] shrink-0 whitespace-pre-wrap">{trans(message, languageMode)}</p>
 
@@ -343,7 +371,7 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
                             >
                                 {typingMode && <div className="absolute right-2 top-2 rounded-full border border-cyan-300 bg-cyan-950/95 px-1.5 py-0.5 text-[10px] font-black text-cyan-200">1</div>}
                                 <BedDouble size={40} className="text-green-500 group-hover:scale-110 transition-transform" />
-                                <span className="font-bold text-lg">{trans("保健室", languageMode)}</span>
+                                <span className="font-bold text-lg">{trans(restOptionLabel, languageMode)}</span>
                                 <span className="text-xs text-gray-400">HP {healAmount} {trans("回復", languageMode)}</span>
                             </button>
                         </>
@@ -357,7 +385,7 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
                     >
                         {typingMode && <div className="absolute right-2 top-2 rounded-full border border-cyan-300 bg-cyan-950/95 px-1.5 py-0.5 text-[10px] font-black text-cyan-200">2</div>}
                         <Hammer size={40} className="text-yellow-500 group-hover:rotate-12 transition-transform" />
-                        <span className="font-bold text-lg">{trans("図工室", languageMode)}</span>
+                        <span className="font-bold text-lg">{trans(upgradeOptionLabel, languageMode)}</span>
                         <span className="text-xs text-gray-400">{trans("カード強化", languageMode)}</span>
                     </button>
 
@@ -374,7 +402,7 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
                     >
                         {typingMode && <div className="absolute right-2 top-2 rounded-full border border-cyan-300 bg-cyan-950/95 px-1.5 py-0.5 text-[10px] font-black text-cyan-200">3</div>}
                         <FlaskConical size={40} className={`text-purple-500 ${scienceRoomAvailable ? 'group-hover:shake' : ''} transition-transform`} />
-                        <span className="font-bold text-lg">{trans("理科室", languageMode)}</span>
+                        <span className="font-bold text-lg">{trans(synthesisOptionLabel, languageMode)}</span>
                         <span className="text-xs text-gray-400">
                             {scienceRoomAvailable 
                                 ? (isMage ? trans("3枚合成", languageMode) : trans("カード合成", languageMode)) 
@@ -389,7 +417,7 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
                         >
                             {typingMode && <div className="absolute right-2 top-2 rounded-full border border-cyan-300 bg-cyan-950/95 px-1.5 py-0.5 text-[10px] font-black text-cyan-200">4</div>}
                             <Eraser size={40} className="text-cyan-300 group-hover:rotate-12 transition-transform" />
-                            <span className="font-bold text-lg">{trans("自習", languageMode)}</span>
+                            <span className="font-bold text-lg">{trans(selfStudyOptionLabel, languageMode)}</span>
                             <span className="text-xs text-gray-400">{trans("不要効果を削除", languageMode)}</span>
                         </button>
                     )}
@@ -592,7 +620,7 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
                     onClick={onLeave}
                     className="bg-orange-700 hover:bg-orange-600 text-white px-8 py-3 rounded text-xl font-bold border-2 border-white shadow-lg animate-bounce mt-8 mx-auto"
                 >
-                    {trans("出発する", languageMode)}{typingMode && ' [Enter]'}
+                    {trans(isVacationRun ? '旅を続ける' : '出発する', languageMode)}{typingMode && ' [Enter]'}
                 </button>
             )}
         </div>

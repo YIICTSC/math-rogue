@@ -42,6 +42,19 @@ const TreasureScreen: React.FC<TreasureScreenProps> = ({
   const currencyLabel = visualTheme === 'magic' ? '魔晶' : 'ゴールド';
   const isPoolMode = pools.length > 0;
   const displayOpen = opened ?? isOpen;
+  const isVacationRun = appearanceMode === 'VACATION' && (visualTheme === 'high-school' || visualTheme === 'magic');
+  const discoveryTitle = isVacationRun
+    ? (visualTheme === 'magic' ? '星砂に眠る封印宝珠を発見！' : '浜辺に流れ着いた宝箱を発見！')
+    : (visualTheme === 'magic' ? '封印宝珠を発見！' : '宝箱を発見！');
+  const poolDiscoveryTitle = isVacationRun
+    ? (visualTheme === 'magic' ? '星砂に眠る封印宝珠を発見！' : '浜辺に流れ着いた宝を発見！')
+    : (visualTheme === 'magic' ? '封印宝珠を発見！' : '宝を発見！');
+  const discoveryDescription = isVacationRun
+    ? (visualTheme === 'magic' ? '星砂の奥で、潮の魔力が静かに脈打っている。' : '波に運ばれてきた箱には、何が入っているだろうか？')
+    : (visualTheme === 'magic' ? '結界の奥で、まだ名前のない魔力が脈打っている。' : '中には何が入っているだろうか？');
+  const acquiredTitle = isVacationRun
+    ? (visualTheme === 'magic' ? '星砂の魔力を獲得！' : '旅の戦利品を獲得！')
+    : (visualTheme === 'magic' ? '魔力獲得！' : '獲得！');
 
   useEffect(() => {
     // Play suspenseful "event" music when chest is discovered
@@ -107,7 +120,7 @@ const TreasureScreen: React.FC<TreasureScreenProps> = ({
 
           {isPoolMode ? (
               <>
-                <h2 className="text-4xl text-yellow-400 font-bold mb-6">{trans(visualTheme === 'magic' ? "封印宝珠を発見！" : "宝を発見！", languageMode)}</h2>
+                <h2 className="text-4xl text-yellow-400 font-bold mb-6">{trans(poolDiscoveryTitle, languageMode)}</h2>
                 <p className="text-gray-300 mb-6">{trans(visualTheme === 'magic' ? "人数分の宝珠があります。先に触れた宝珠の魔力を獲得できます。" : "人数分の宝があります。誰でも先に取った宝を獲得できます。", languageMode)}</p>
                 {hasCursedKey && (
                   <div className="mb-4 rounded-full border border-purple-500 bg-purple-950/70 px-4 py-2 text-sm text-purple-200">
@@ -170,7 +183,7 @@ const TreasureScreen: React.FC<TreasureScreenProps> = ({
               </>
           ) : !displayOpen ? (
               <>
-                <h2 className="text-4xl text-yellow-400 font-bold mb-8 animate-pulse">{trans(visualTheme === 'magic' ? "封印宝珠を発見！" : "宝箱を発見！", languageMode)}</h2>
+                <h2 className="text-4xl text-yellow-400 font-bold mb-8 animate-pulse">{trans(discoveryTitle, languageMode)}</h2>
                 <div 
                     onClick={handleOpen}
                     className="cursor-pointer transition-transform hover:scale-110 mb-8 relative"
@@ -182,7 +195,7 @@ const TreasureScreen: React.FC<TreasureScreenProps> = ({
                         </div>
                     )}
                 </div>
-                <p className="text-gray-400 mb-8">{trans(visualTheme === 'magic' ? "結界の奥で、まだ名前のない魔力が脈打っている。" : "中には何が入っているだろうか？", languageMode)}</p>
+                <p className="text-gray-400 mb-8">{trans(discoveryDescription, languageMode)}</p>
                 <button
                     data-gamepad-initial-choice
                     onClick={handleOpen}
@@ -200,7 +213,7 @@ const TreasureScreen: React.FC<TreasureScreenProps> = ({
               </>
           ) : (
               <>
-                <h2 className="text-4xl text-yellow-400 font-bold mb-8">{trans(visualTheme === 'magic' ? "魔力獲得！" : "獲得！", languageMode)}</h2>
+                <h2 className="text-4xl text-yellow-400 font-bold mb-8">{trans(acquiredTitle, languageMode)}</h2>
                 <div className="mb-12 flex flex-col gap-4 animate-in fade-in zoom-in duration-500">
                     <Archive size={128} className="text-yellow-400 mb-4 mx-auto opacity-50" />
                     

@@ -4,6 +4,8 @@ import { ActStats, CharacterAppearanceMode, LanguageMode, Card as ICard, MagicRo
 import { GAME_STORIES } from '../data/stories';
 import { HIGH_SCHOOL_STORIES } from '../data/highSchoolStories';
 import { getMagicActStoryPart, MAGIC_STORIES } from '../data/magicStories';
+import { HIGH_SCHOOL_VACATION_STORIES } from '../data/highSchoolVacationStories';
+import { getMagicVacationActStoryPart, MAGIC_VACATION_STORIES } from '../data/magicVacationStories';
 import { ROMANCE_TARGETS } from '../data/romanceTargets';
 import { MAGIC_HEROES, isMagicMaleProtagonist } from '../data/magicHeroes';
 import { ADDITIONAL_CARDS } from '../constants1';
@@ -35,10 +37,11 @@ const FloorResultScreen: React.FC<FloorResultScreenProps> = ({ act, stats, story
   const [displayedText, setDisplayedText] = useState("");
   const [isTyping, setIsTyping] = useState(true);
   
+  const isVacationStory = appearanceMode === 'VACATION' && (visualTheme === 'high-school' || visualTheme === 'magic');
   const storyPool = visualTheme === 'high-school'
-    ? HIGH_SCHOOL_STORIES
+    ? (isVacationStory ? HIGH_SCHOOL_VACATION_STORIES : HIGH_SCHOOL_STORIES)
     : visualTheme === 'magic'
-      ? MAGIC_STORIES
+      ? (isVacationStory ? MAGIC_VACATION_STORIES : MAGIC_STORIES)
       : GAME_STORIES;
   const storySet = storyPool[storyIndex % storyPool.length] || storyPool[0];
   const closestTargetEntry = useMemo(() => {
@@ -53,9 +56,11 @@ const FloorResultScreen: React.FC<FloorResultScreenProps> = ({ act, stats, story
   }, [magicHeroId, magicRomance]);
   const currentPart = useMemo(() => {
     return visualTheme === 'magic'
-      ? getMagicActStoryPart(magicHeroId, act, closestTargetEntry?.target?.name, closestTargetEntry?.affection, storySet)
+      ? (isVacationStory
+          ? getMagicVacationActStoryPart(magicHeroId, act, closestTargetEntry?.target?.name, closestTargetEntry?.affection, storySet)
+          : getMagicActStoryPart(magicHeroId, act, closestTargetEntry?.target?.name, closestTargetEntry?.affection, storySet))
       : storySet.parts[(act - 1) % 3];
-  }, [visualTheme, magicHeroId, act, closestTargetEntry, storySet]);
+  }, [visualTheme, magicHeroId, act, closestTargetEntry, isVacationStory, storySet]);
   const displayedPart = useMemo(() => {
     if (!isEndless) return currentPart;
     if (isTrueEndless) {

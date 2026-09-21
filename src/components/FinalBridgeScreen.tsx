@@ -39,11 +39,34 @@ const FinalBridgeScreen: React.FC<FinalBridgeScreenProps> = ({ player, onComplet
     "「あなたの願いも恋も、すべて私の秩序の中に封じましょう」",
     "答えはカードと学びの中にある。最後の準備を整えよう。"
   ];
-  const storyTexts = visualTheme === 'high-school'
-    ? highSchoolStoryTexts
-    : visualTheme === 'magic'
-      ? magicStoryTexts
-      : elementaryStoryTexts;
+  const highSchoolVacationStoryTexts = [
+    "花火の余韻が残る夜の浜辺から、最終会場へ続く遊歩道へ踏み出した。",
+    "背後には、海辺の売店、夏祭り、仲間たちと駆け抜けた旅の記憶が潮風の向こうへ続いている。",
+    "前方のリゾート会場には、この夏の旅を最後まで支配しようとする『校長』が待っている。",
+    "「旅行先でも規律は必要だ。最後まで私が、全員の正解を決める」",
+    "花火が終わっても、この夏はまだ終わらない。自分の答えを守るため、最後の準備を整えよう。"
+  ];
+  const magicVacationStoryTexts = [
+    "星界化した海の上に、巨大な月へ向かう光の道が伸びている。",
+    "背後には、臨海研修、港町、夏祭り、恋と友情、そして共に越えた魔法の旅の記憶が輝いている。",
+    "前方の最終結界には、星海の魔力を一つに束ねようとする『大魔女校長』が待っている。",
+    "「海も願いも恋も、すべて私の秩序の中に封じましょう」",
+    "夜明けまでに、この星海を取り戻す。夏の旅を自分たちの手で終えるため、最後の準備を整えよう。"
+  ];
+  const isVacationRun = appearanceMode === 'VACATION' && (visualTheme === 'high-school' || visualTheme === 'magic');
+  const storyTexts = isVacationRun
+    ? (visualTheme === 'magic' ? magicVacationStoryTexts : highSchoolVacationStoryTexts)
+    : visualTheme === 'high-school'
+      ? highSchoolStoryTexts
+      : visualTheme === 'magic'
+        ? magicStoryTexts
+        : elementaryStoryTexts;
+  const awakeningTitle = isVacationRun
+    ? (visualTheme === 'magic' ? '星海の最終共鳴' : '旅の最後の支度')
+    : '最後の覚醒';
+  const awakeningDescription = isVacationRun
+    ? (visualTheme === 'magic' ? '最終結界へ持ち込む「最後の力」を一つだけ選んでください。' : '夏の最後の決戦へ持ち込む「最後の力」を一つだけ選んでください。')
+    : '決戦に持ち込む『最後の力』を一つだけ選んでください。';
 
   useEffect(() => {
     audioService.playBGM('event');
@@ -101,9 +124,9 @@ const FinalBridgeScreen: React.FC<FinalBridgeScreenProps> = ({ player, onComplet
         ) : (
           <div className="text-center animate-in slide-in-from-bottom-10 duration-700">
             <h2 className="text-3xl font-bold text-yellow-400 mb-8 tracking-widest drop-shadow-[0_0_10px_rgba(250,204,21,0.5)]">
-              <span style={{ color: "white" }}>{trans("最後の覚醒", languageMode)}</span>
+              <span style={{ color: "white" }}>{trans(awakeningTitle, languageMode)}</span>
             </h2>
-            <p className="text-gray-300 mb-12 text-sm">{trans("決戦に持ち込む『最後の力』を一つだけ選んでください。", languageMode)}</p>
+            <p className="text-gray-300 mb-12 text-sm">{trans(awakeningDescription, languageMode)}</p>
             
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6 w-full">
               <button 
