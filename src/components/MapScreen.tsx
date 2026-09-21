@@ -6,7 +6,7 @@ import { MAP_WIDTH, MAP_HEIGHT } from '../services/mapGenerator';
 import Card from './Card';
 import { trans } from '../utils/textUtils';
 import { assetUrl } from '../utils/assetPaths';
-import type { VisualThemeId } from '../data/visualThemes';
+import { getThemedCharacterIdleSpriteSheetPath, type VisualThemeId } from '../data/visualThemes';
 
 interface MapScreenProps {
     nodes: MapNode[];
@@ -214,6 +214,16 @@ const MapScreen: React.FC<MapScreenProps> = ({ nodes, currentNodeId, onNodeSelec
     const vacationTheme = player.appearanceMode === 'VACATION'
         && (visualTheme === 'high-school' || visualTheme === 'magic')
         ? visualTheme
+        : null;
+    const vacationPlayerIdleSheet = vacationTheme
+        ? getThemedCharacterIdleSpriteSheetPath(
+            vacationTheme,
+            player.id,
+            !!player.magicTransformed,
+            player.magicProtagonistId,
+            player.magicProtagonistGender,
+            player.appearanceMode,
+        )
         : null;
     const mapBackground = vacationTheme
         ? assetUrl('sprites/backgrounds/learning-rogue/' + vacationTheme + '-vacation-map-act' + vacationMapAct + '.webp')
@@ -438,12 +448,21 @@ const MapScreen: React.FC<MapScreenProps> = ({ nodes, currentNodeId, onNodeSelec
                                 {isCurrent && (
                                     <div className="absolute -top-14 left-1/2 -translate-x-1/2 w-14 h-14 z-20 animate-bounce">
                                         <div className="absolute inset-0 bg-yellow-400/20 rounded-full blur-md"></div>
-                                        <img
-                                            src={player.imageData}
-                                            className="w-full h-full pixel-art relative z-10"
-                                            alt="Player Location"
-                                            style={{ imageRendering: 'pixelated' }}
-                                        />
+                                        {vacationPlayerIdleSheet ? (
+                                            <div
+                                                role="img"
+                                                aria-label="Player Location"
+                                                className={`map-vacation-player-idle relative z-10 h-full w-full ${visualTheme === 'high-school' ? 'map-vacation-player-idle-high-school' : ''}`}
+                                                style={{ backgroundImage: `url(${vacationPlayerIdleSheet})` }}
+                                            />
+                                        ) : (
+                                            <img
+                                                src={player.imageData}
+                                                className="w-full h-full pixel-art relative z-10"
+                                                alt="Player Location"
+                                                style={{ imageRendering: 'pixelated' }}
+                                            />
+                                        )}
                                         <div className="absolute -bottom-1 left-1/2 -translate-x-1/2 w-4 h-1.5 bg-black/40 rounded-full blur-[1px]"></div>
                                     </div>
                                 )}

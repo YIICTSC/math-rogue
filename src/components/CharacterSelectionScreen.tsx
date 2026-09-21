@@ -8,7 +8,7 @@ import { assetUrl } from '../utils/assetPaths';
 import { audioService } from '../services/audioService';
 import { storageService } from '../services/storageService';
 import { RelicIcon } from './ItemIcon';
-import { getThemedCharacterSpritePath, MAGIC_HERO_ID_BY_CHARACTER_ID, type VisualThemeId } from '../data/visualThemes';
+import { getThemedCharacterIdleSpriteSheetPath, getThemedCharacterSpritePath, MAGIC_HERO_ID_BY_CHARACTER_ID, type VisualThemeId } from '../data/visualThemes';
 import { MAGIC_HEROES, MAGIC_MALE_PROTAGONISTS } from '../data/magicHeroes';
 import { getMagicRuleConfig } from '../data/magicLoadouts';
 
@@ -451,18 +451,17 @@ const CharacterSelectionScreen: React.FC<CharacterSelectionScreenProps> = ({ cha
                     ? getMagicRuleConfig(char.magicProtagonistId)
                     : null;
                 const customImage = visualTheme === 'elementary' ? customImages[char.id] : undefined;
-                const charImage = appearanceMode === 'VACATION'
-                  ? getThemedCharacterSpritePath(
+                const vacationBattleIdleSheet = appearanceMode === 'VACATION' && visualTheme !== 'elementary'
+                  ? getThemedCharacterIdleSpriteSheetPath(
                       visualTheme,
                       char.id,
-                      'idle',
-                      char.imageData,
                       false,
                       char.magicProtagonistId,
                       char.magicProtagonistGender,
                       appearanceMode,
                     )
-                  : customImage || char.imageData;
+                  : null;
+                const charImage = customImage || char.imageData;
                 const isVacationPortrait = appearanceMode === 'VACATION' && visualTheme !== 'elementary';
                 const isCustom = !!customImage;
                 const isMagicPortrait = visualTheme === 'magic' && !isCustom;
@@ -515,13 +514,22 @@ const CharacterSelectionScreen: React.FC<CharacterSelectionScreenProps> = ({ cha
                             </div>
                         )}
 
-                        <div className={`character-selection-portrait w-24 h-24 mb-4 relative drop-shadow-[0_0_15px_rgba(255,255,255,0.2)] ${visualTheme === 'elementary' ? 'character-selection-photo-enabled' : ''} ${isMagicPortrait ? 'overflow-hidden rounded-xl bg-slate-950/50' : ''}`}>
-                             <img
-                                src={charImage}
-                                alt={trans(char.name, languageMode)}
-                                className={`w-full h-full ${isVacationPortrait ? 'character-selection-vacation-portrait-image' : isCustom ? 'rounded-xl object-cover' : isMagicPortrait ? `magic-character-select-portrait-image ${isMagicMalePortrait ? 'magic-character-select-portrait-image-male' : ''}` : 'pixel-art'}`}
-                                style={{ imageRendering: isCustom || isMagicPortrait || isVacationPortrait ? 'auto' : 'pixelated' }}
-                             />
+                        <div className={`character-selection-portrait w-24 h-24 mb-4 relative drop-shadow-[0_0_15px_rgba(255,255,255,0.2)] ${visualTheme === 'elementary' ? 'character-selection-photo-enabled' : ''} ${isMagicPortrait || isVacationPortrait ? 'overflow-hidden rounded-xl bg-slate-950/50' : ''}`}>
+                             {vacationBattleIdleSheet ? (
+                               <div
+                                 role="img"
+                                 aria-label={trans(char.name, languageMode)}
+                                 className={`character-selection-vacation-battle-idle ${visualTheme === 'high-school' ? 'character-selection-vacation-battle-idle-high-school' : ''}`}
+                                 style={{ backgroundImage: `url(${vacationBattleIdleSheet})` }}
+                               />
+                             ) : (
+                               <img
+                                  src={charImage}
+                                  alt={trans(char.name, languageMode)}
+                                  className={`w-full h-full ${isCustom ? 'rounded-xl object-cover' : isMagicPortrait ? `magic-character-select-portrait-image ${isMagicMalePortrait ? 'magic-character-select-portrait-image-male' : ''}` : 'pixel-art'}`}
+                                  style={{ imageRendering: isCustom || isMagicPortrait ? 'auto' : 'pixelated' }}
+                               />
+                             )}
                              {isUnlocked && visualTheme === 'elementary' && (
                                 <button
                                   type="button"
@@ -623,18 +631,17 @@ const CharacterSelectionScreen: React.FC<CharacterSelectionScreenProps> = ({ cha
         <div className="character-selection-thumbnail-row" aria-label={trans("主人公一覧", languageMode)}>
           {displayedCharacters.map((char, index) => {
             const isUnlocked = index < unlockedCount;
-            const charImage = appearanceMode === 'VACATION'
-              ? getThemedCharacterSpritePath(
+            const vacationBattleIdleSheet = appearanceMode === 'VACATION' && visualTheme !== 'elementary'
+              ? getThemedCharacterIdleSpriteSheetPath(
                   visualTheme,
                   char.id,
-                  'idle',
-                  char.imageData,
                   false,
                   char.magicProtagonistId,
                   char.magicProtagonistGender,
                   appearanceMode,
                 )
-              : customImages[char.id] || char.imageData;
+              : null;
+            const charImage = customImages[char.id] || char.imageData;
             const isVacationPortrait = appearanceMode === 'VACATION' && visualTheme !== 'elementary';
             const isCustom = !!customImages[char.id];
             const isMagicPortrait = visualTheme === 'magic' && !isCustom;
@@ -648,12 +655,21 @@ const CharacterSelectionScreen: React.FC<CharacterSelectionScreenProps> = ({ cha
                 aria-label={trans(char.name, languageMode)}
               >
                 <span className="character-selection-thumb-frame">
-                  <img
-                    src={charImage}
-                    alt=""
-                    className={`character-selection-thumb-img ${isVacationPortrait ? 'character-selection-vacation-thumb-img' : ''}`}
-                    style={{ imageRendering: isCustom || isMagicPortrait || isVacationPortrait ? 'auto' : 'pixelated' }}
-                  />
+                  {vacationBattleIdleSheet ? (
+                    <span
+                      role="img"
+                      aria-label=""
+                      className={`character-selection-vacation-battle-thumb ${visualTheme === 'high-school' ? 'character-selection-vacation-battle-thumb-high-school' : ''}`}
+                      style={{ backgroundImage: `url(${vacationBattleIdleSheet})` }}
+                    />
+                  ) : (
+                    <img
+                      src={charImage}
+                      alt=""
+                      className="character-selection-thumb-img"
+                      style={{ imageRendering: isCustom || isMagicPortrait ? 'auto' : 'pixelated' }}
+                    />
+                  )}
                   {!isUnlocked && <Lock size={16} className="character-selection-thumb-lock" />}
                 </span>
                 <span className="character-selection-thumb-name">{trans(char.name, languageMode)}</span>
