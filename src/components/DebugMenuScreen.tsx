@@ -2924,7 +2924,7 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
                                                         );
                                                         return (
                                                             <div key={action.key} className="bg-slate-950/80 border border-gray-800 rounded p-2">
-                                                                <div className="aspect-square bg-[linear-gradient(45deg,#111827_25%,#0f172a_25%,#0f172a_50%,#111827_50%,#111827_75%,#0f172a_75%)] bg-[length:16px_16px] rounded relative overflow-hidden">
+                                                                <div className="aspect-square bg-slate-950 rounded relative overflow-hidden">
                                                                     {spritePath ? (
                                                                         <img
                                                                             src={spritePath}
