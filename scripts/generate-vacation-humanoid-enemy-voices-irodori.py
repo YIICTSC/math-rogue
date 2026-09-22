@@ -192,6 +192,12 @@ def target_seconds(text: str, action: str) -> float:
     return round(min(3.0, max(minimum, 0.62 + spoken_chars * 0.085)), 2)
 
 
+def create_reference_text(seed: dict[str, str]) -> str:
+    if seed["theme"] == "high-school":
+        return f"私は{seed['role']}。この声で、夏の浜辺を守る。"
+    return f"私は{seed['role']}。この声で、夏の魔法戦を制する。"
+
+
 def convert_to_ogg(wav_path: Path, ogg_path: Path) -> None:
     audio, sample_rate = sf.read(str(wav_path), dtype="float32")
     ogg_path.parent.mkdir(parents=True, exist_ok=True)
@@ -209,13 +215,19 @@ def main() -> None:
     seeds = parse_seeds()
     plan_lines = parse_plan_lines(seeds)
     only = {item.strip().lower() for item in args.only.split(",") if item.strip()}
+    selected_seeds = [
+        seed for seed in seeds if not only or seed["id"].lower() in only
+    ]
     jobs = [
         {**seed, "action": action, "text": plan_lines[seed["id"]][action]}
-        for seed in seeds
+        for seed in selected_seeds
         for action in ACTIONS
-        if not only or seed["id"].lower() in only
     ]
-    print(f"jobs={len(jobs)} enemies={len(seeds)} plan={PLAN_PATH.name} steps={args.steps}", flush=True)
+    print(
+        f"jobs={len(jobs)} enemies={len(selected_seeds)} plan={PLAN_PATH.name} "
+        f"speaker_refs={len(selected_seeds)} steps={args.steps}",
+        flush=True,
+    )
     if args.dry_run:
         for row in jobs[:12]:
             print(f"{row['theme']} {row['id']} {row['action']} {row['gender']}: {row['text']}")
@@ -235,9 +247,56 @@ def main() -> None:
     )
 
     wav_root = IRODORI_ROOT / "outputs" / "vacation-humanoid-voices"
+    reference_root = IRODORI_ROOT / "outputs" / "vacation-humanoid-reference-voices"
     generated = 0
     skipped = 0
     failed: list[str] = []
+    reference_paths: dict[str, Path] = {}
+
+    for index, seed in enumerate(selected_seeds, start=1):
+        reference_path = reference_root / seed["theme"] / seed["id"] / "reference.wav"
+        reference_paths[seed["id"]] = reference_path
+        reference_id = f"vacation-reference-{seed['theme']}-{seed['id']}"
+        if not args.force and reference_path.exists():
+            print(f"[reference {index}/{len(selected_seeds)}] {seed['theme']} {seed['id']} reused", flush=True)
+            continue
+        started = time.time()
+        try:
+            print(f"[reference {index}/{len(selected_seeds)}] {seed['theme']} {seed['id']}", flush=True)
+            result = runtime.synthesize(
+                SamplingRequest(
+                    text=create_reference_text(seed),
+                    caption=create_caption(seed),
+                    no_ref=True,
+                    num_candidates=1,
+                    decode_mode="sequential",
+                    seconds=2.6,
+                    num_steps=args.steps,
+                    cfg_scale_text=3.0,
+                    cfg_scale_caption=3.6,
+                    cfg_scale_speaker=0.0,
+                    cfg_guidance_mode="independent",
+                    t_schedule_mode="sway",
+                    sway_coeff=-1.0,
+                    context_kv_cache=True,
+                    seed=stable_seed(reference_id),
+                    trim_tail=True,
+                ),
+                log_fn=None,
+            )
+            reference_path.parent.mkdir(parents=True, exist_ok=True)
+            save_wav(reference_path, result.audio, result.sample_rate)
+            print(f"  reference ready {time.time() - started:.1f}s", flush=True)
+            del result
+            gc.collect()
+        except Exception as exc:  # noqa: BLE001
+            failed.append(reference_id)
+            print(f"  reference failed: {exc}", file=sys.stderr, flush=True)
+
+    if failed:
+        print("failed references:", ", ".join(failed), file=sys.stderr, flush=True)
+        raise SystemExit(1)
+
     for index, row in enumerate(jobs, start=1):
         out_dir = ROOT / "public/sfx/enemy-voices-vacation" / row["theme"] / row["id"]
         ogg_path = out_dir / f"{row['action']}.ogg"
@@ -253,14 +312,17 @@ def main() -> None:
                 SamplingRequest(
                     text=row["text"],
                     caption=create_caption(row),
-                    no_ref=True,
+                    ref_wav=str(reference_paths[row["id"]]),
+                    ref_normalize_db=-16.0,
+                    ref_ensure_max=True,
+                    no_ref=False,
                     num_candidates=1,
                     decode_mode="sequential",
                     seconds=target_seconds(row["text"], row["action"]),
                     num_steps=args.steps,
                     cfg_scale_text=3.0,
                     cfg_scale_caption=3.6,
-                    cfg_scale_speaker=0.0,
+                    cfg_scale_speaker=4.0,
                     cfg_guidance_mode="independent",
                     t_schedule_mode="sway",
                     sway_coeff=-1.0,
