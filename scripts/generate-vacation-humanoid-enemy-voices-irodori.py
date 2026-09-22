@@ -27,6 +27,50 @@ from irodori_tts.inference_runtime import (  # noqa: E402
 
 ACTIONS = ("spawn", "attack", "defense", "skill", "damage", "defeat")
 CHECKPOINT = "Aratako/Irodori-TTS-v4.1-Small-Quantized/int8-weight-only"
+PLAN_PATH = ROOT / "docs/vacation-humanoid-enemy-voice-lines-450.md"
+
+AGE_BAND_IDS = {
+    "young adult": {
+        "hs_01", "hs_08", "hs_12", "hs_15", "hs_17", "hs_20", "hs_21", "hs_24", "hs_26",
+        "hs_28", "hs_32", "hs_36", "hs_40", "hs_41", "hs_44", "hs_45", "hs_47", "hs_49",
+        "mg_00", "mg_08", "mg_11", "mg_17", "mg_19",
+    },
+    "adult": {
+        "hs_02", "hs_03", "hs_06", "hs_09", "hs_18", "hs_19", "hs_22", "hs_23", "hs_25",
+        "hs_27", "hs_30", "hs_31", "hs_34", "hs_35", "hs_37", "hs_42", "hs_43", "hs_46", "hs_48",
+        "mg_01", "mg_02", "mg_03", "mg_04", "mg_05", "mg_06", "mg_07", "mg_09", "mg_10", "mg_12",
+        "mg_14", "mg_18", "mg_21",
+    },
+    "mature": {
+        "hs_00", "hs_04", "hs_05", "hs_07", "hs_10", "hs_11", "hs_16", "hs_29", "hs_33", "hs_38",
+        "hs_39", "hs_50", "hs_51", "hs_52",
+        "mg_13", "mg_15", "mg_16", "mg_20",
+    },
+    "older": {"hs_13", "hs_14"},
+}
+AGE_BAND_BY_ID = {enemy_id: age_band for age_band, ids in AGE_BAND_IDS.items() for enemy_id in ids}
+
+SPECIAL_VOICE_DIRECTIONS = {
+    "hs_01": "成人女性として高くしすぎず、短く鋭く発声する。",
+    "hs_05": "成熟した救難隊長。太く通る男性声で指示語を強くする。",
+    "hs_13": "深めの教育者声。叱責にも余裕を持たせる。",
+    "hs_14": "重低音で速度を少し落とし、最も強い威圧感を出す。",
+    "hs_15": "明るくスポーティで、テンポを速める。",
+    "hs_20": "若く粗めのロックボーカルのように勢いを出す。",
+    "hs_26": "高めで明るく、応援声の張りを強くする。",
+    "hs_37": "学生声ではなく、低めで冷静な女性声にする。",
+    "hs_39": "中性的なくぐもった低音。男性性より重装感を優先する。",
+    "hs_42": "くぐもりと無機質さを優先し、研究兵らしさを出す。",
+    "hs_48": "中性的で演劇的。役を演じるように発声する。",
+    "hs_52": "低めの女性声で、高貴さと命令調を強める。",
+    "mg_00": "若い成人女性声で高めに元気よく、見習いらしい勢いを残す。",
+    "mg_08": "若い成人女性声。柔らかいが語尾に不気味な無邪気さを入れる。",
+    "mg_15": "低く重く、腹から響くような男性声にする。",
+    "mg_16": "低めでゆっくり。焦らず余裕のある話し方にする。",
+    "mg_17": "細く静かで息を多めにし、幽玄さを出す。",
+    "mg_20": "女性声の中でも最も威厳を強くし、低めでゆっくりにする。",
+    "mg_21": "低めで神秘的。感情を抑えた女王口調にする。",
+}
 
 
 def parse_seeds() -> list[dict[str, str]]:
@@ -57,40 +101,76 @@ def parse_seeds() -> list[dict[str, str]]:
     return rows
 
 
-def create_lines(seed: dict[str, str]) -> dict[str, str]:
-    role = seed["role"]
-    motif = seed["motif"]
-    name = seed["name"]
-    if seed["theme"] == "high-school":
-        return {
-            "spawn": f"{name}、真夏の防衛線に出る！",
-            "attack": f"{motif}、全開で叩き込む！",
-            "defense": f"{role}の鉄壁、ここで受け止める！",
-            "skill": f"{motif}、バカンス特別技――発動！",
-            "damage": f"まだ沈まない！{role}、反撃態勢！",
-            "defeat": "浜の記録はここまでだ……！",
+def parse_plan_lines(seeds: list[dict[str, str]]) -> dict[str, dict[str, str]]:
+    if not PLAN_PATH.exists():
+        raise RuntimeError(f"voice-line plan not found: {PLAN_PATH}")
+    rows: dict[str, dict[str, str]] = {}
+    theme: str | None = None
+    for raw_line in PLAN_PATH.read_text(encoding="utf-8").splitlines():
+        if raw_line.startswith("## 高校編"):
+            theme = "high-school"
+        elif raw_line.startswith("## マジック編"):
+            theme = "magic"
+        if theme is None or not raw_line.lstrip().startswith("|"):
+            continue
+        cells = [cell.strip().strip("`") for cell in raw_line.strip().strip("|").split("|")]
+        if len(cells) != 11 or not re.fullmatch(r"(?:hs|mg)_\d{2}", cells[1]):
+            continue
+        rows[cells[1]] = {
+            "theme": theme,
+            "speaker_id": cells[2],
+            "gender": cells[3],
+            "role": cells[4],
+            **{action: cells[5 + index] for index, action in enumerate(ACTIONS)},
         }
-    return {
-        "spawn": f"{name}、夏の魔導戦を始める！",
-        "attack": f"{motif}、潮騒ごと撃ち抜く！",
-        "defense": f"{role}の結界、絶対に崩さない！",
-        "skill": f"{motif}、サマーフォース解放！",
-        "damage": f"魔力はまだ燃えている！{role}、再起動！",
-        "defeat": "この夏の魔法が……ほどけていく……！",
-    }
+
+    seed_by_id = {seed["id"]: seed for seed in seeds}
+    if len(rows) != len(seeds):
+        raise RuntimeError(f"expected {len(seeds)} plan rows, found {len(rows)}")
+    if set(rows) != set(seed_by_id):
+        missing = sorted(set(seed_by_id) - set(rows))
+        extra = sorted(set(rows) - set(seed_by_id))
+        raise RuntimeError(f"plan ids do not match seeds; missing={missing} extra={extra}")
+
+    texts: list[str] = []
+    for enemy_id, row in rows.items():
+        seed = seed_by_id[enemy_id]
+        for key in ("theme", "speaker_id", "gender", "role"):
+            if row[key] != seed[key]:
+                raise RuntimeError(f"plan mismatch for {enemy_id} {key}: {row[key]!r} != {seed[key]!r}")
+        for action in ACTIONS:
+            if not row[action].strip():
+                raise RuntimeError(f"empty planned line: {enemy_id} {action}")
+            texts.append(row[action])
+    duplicates = len(texts) - len(set(texts))
+    if duplicates:
+        raise RuntimeError(f"planned voice lines contain {duplicates} duplicate texts")
+    if set(AGE_BAND_BY_ID) != set(seed_by_id):
+        raise RuntimeError("age-band mapping does not cover all vacation humanoid seeds")
+    return rows
 
 
 def create_caption(seed: dict[str, str]) -> str:
-    gender = "若い男性" if seed["gender"] == "male" else "若い女性"
+    gender = "男性" if seed["gender"] == "male" else "女性"
+    age_band = AGE_BAND_BY_ID[seed["id"]]
     if seed["theme"] == "high-school":
         world = "真夏の海辺で戦う高校生の敵"
     else:
         world = "真夏の海辺で戦う魔法学園の敵"
+    age_direction = {
+        "young adult": "若年成人らしく、明瞭で軽快にする。",
+        "adult": "成人らしく、中音から中低音で落ち着きと自信を出す。",
+        "mature": "中堅成人らしく、低めで厚みのある権威的な声にする。",
+        "older": "年長成人らしく、深く重く、間を長めに取って威厳を出す。",
+    }[age_band]
+    special_direction = SPECIAL_VOICE_DIRECTIONS.get(seed["id"], "")
     return (
-        f"テンションが非常に高い、{world}の{gender}。"
+        f"{world}の{gender}。見た目年齢は{age_band}。"
         f"役柄は{seed['role']}。"
-        "戦闘中の必殺技ボイスのように、明るく勢いよく大声で叫ぶ。"
-        "語尾を強く、スピード感を出し、日本語をはっきり発音する。"
+        f"{age_direction}"
+        "戦闘中のキャラクターボイスとして、台詞の意味に合う感情と勢いを付ける。"
+        "語尾を明瞭に、日本語をはっきり発音する。"
+        f"個別指示: {special_direction}"
     )
 
 
@@ -127,14 +207,15 @@ def main() -> None:
     args = parser.parse_args()
 
     seeds = parse_seeds()
+    plan_lines = parse_plan_lines(seeds)
     only = {item.strip().lower() for item in args.only.split(",") if item.strip()}
     jobs = [
-        {**seed, "action": action, "text": text}
+        {**seed, "action": action, "text": plan_lines[seed["id"]][action]}
         for seed in seeds
-        for action, text in create_lines(seed).items()
+        for action in ACTIONS
         if not only or seed["id"].lower() in only
     ]
-    print(f"jobs={len(jobs)} enemies={len(seeds)} steps={args.steps}", flush=True)
+    print(f"jobs={len(jobs)} enemies={len(seeds)} plan={PLAN_PATH.name} steps={args.steps}", flush=True)
     if args.dry_run:
         for row in jobs[:12]:
             print(f"{row['theme']} {row['id']} {row['action']} {row['gender']}: {row['text']}")
@@ -145,8 +226,8 @@ def main() -> None:
         RuntimeKey(
             checkpoint=checkpoint,
             model_device="cuda",
-            model_precision="fp32",
-            codec_device="cuda",
+            model_precision="bf16",
+            codec_device="cpu",
             codec_precision="fp32",
             compile_model=False,
             compile_dynamic=False,
