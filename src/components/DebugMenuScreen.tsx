@@ -30,6 +30,7 @@ import { SUBJECT_DATA, type GeneralProblem } from '../data/subjectData';
 import { ELEMENTARY_EVENT_TITLES } from '../services/eventService';
 import { HIGH_SCHOOL_SUPPORTER_NPC_EVENTS, type SupporterNpcReward } from '../data/supporterNpcEvents';
 import { DODOMEDESU_EVENT_STAGES } from '../data/dodomedesuBoss';
+import { PROTAGONIST_VOICE_AUDITIONS, type ProtagonistVoiceAuditionTheme } from '../data/protagonistVoiceAudition';
 import React, { useMemo, useState, useCallback, useEffect, useRef } from 'react';
 import TranslatedUiTree from './TranslatedUiTree';
 import ResilientAssetImage from './ResilientAssetImage';
@@ -330,7 +331,7 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
     focusedUiPreviewScreenId,
     focusedSupporterNpcEventTitle
 }) => {
-    const [activeTab, setActiveTab] = useState<'CARDS' | 'RELICS' | 'POTIONS' | 'SYNTHESIS' | 'CAPTURE_SIM' | 'SYSTEM' | 'UI_PREVIEW' | 'PROBLEM_DEBUG' | 'ILLUSTRATED_PROBLEMS' | 'EFFECTS' | 'MAGIC_VOICES' | 'ENEMY_VOICE_AUDIT' | 'MAGIC_ART_AUDIT' | 'EVENTS' | 'HUMANOID_SPRITES' | 'CHARACTER_ANIMATIONS' | 'ACTION_POSITION_AUDIT' | 'SPRITE_AUDIT' | 'TRANSLATION'>(focusedSupporterNpcEventTitle ? 'EVENTS' : focusedUiPreviewScreenId ? 'UI_PREVIEW' : 'CARDS');
+    const [activeTab, setActiveTab] = useState<'CARDS' | 'RELICS' | 'POTIONS' | 'SYNTHESIS' | 'CAPTURE_SIM' | 'SYSTEM' | 'UI_PREVIEW' | 'PROBLEM_DEBUG' | 'ILLUSTRATED_PROBLEMS' | 'EFFECTS' | 'MAGIC_VOICES' | 'PROTAGONIST_VOICE_AUDITION' | 'ENEMY_VOICE_AUDIT' | 'MAGIC_ART_AUDIT' | 'EVENTS' | 'HUMANOID_SPRITES' | 'CHARACTER_ANIMATIONS' | 'ACTION_POSITION_AUDIT' | 'SPRITE_AUDIT' | 'TRANSLATION'>(focusedSupporterNpcEventTitle ? 'EVENTS' : focusedUiPreviewScreenId ? 'UI_PREVIEW' : 'CARDS');
     const showLoadoutPanel = activeTab === 'CARDS' || activeTab === 'RELICS' || activeTab === 'POTIONS' || activeTab === 'SYNTHESIS' || activeTab === 'CAPTURE_SIM';
     const focusedUiPreviewItemRef = useRef<HTMLDivElement | null>(null);
     const focusedSupporterNpcEventRef = useRef<HTMLDivElement | null>(null);
@@ -340,6 +341,18 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
     const [copied, setCopied] = useState(false);
     const [magicVoiceHeroId, setMagicVoiceHeroId] = useState('AKARI');
     const [highSchoolVoiceHeroId, setHighSchoolVoiceHeroId] = useState('WARRIOR');
+    const [protagonistVoiceAuditionTheme, setProtagonistVoiceAuditionTheme] = useState<ProtagonistVoiceAuditionTheme>('high-school');
+    const [protagonistVoiceAuditionHeroId, setProtagonistVoiceAuditionHeroId] = useState('WARRIOR');
+    const [protagonistVoiceAuditionSelections, setProtagonistVoiceAuditionSelections] = useState<Record<string, string>>(() => {
+        if (typeof window === 'undefined') return {};
+        try {
+            const saved = JSON.parse(window.localStorage.getItem('debug-protagonist-voice-audition-selections') || '{}');
+            return saved && typeof saved === 'object' ? saved : {};
+        } catch {
+            return {};
+        }
+    });
+    const [protagonistVoiceAuditionCopied, setProtagonistVoiceAuditionCopied] = useState(false);
     const [highSchoolVoiceFixTargets, setHighSchoolVoiceFixTargets] = useState<string[]>([]);
     const [highSchoolVoiceFixCopied, setHighSchoolVoiceFixCopied] = useState(false);
     const [enemyVoiceAuditTheme, setEnemyVoiceAuditTheme] = useState<'all' | 'high-school' | 'magic'>('all');
@@ -547,6 +560,48 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
         () => HIGH_SCHOOL_VOICE_CHARACTERS.find(hero => hero.id === highSchoolVoiceHeroId) ?? HIGH_SCHOOL_VOICE_CHARACTERS[0],
         [highSchoolVoiceHeroId]
     );
+    const protagonistVoiceAuditionEntries = useMemo(
+        () => PROTAGONIST_VOICE_AUDITIONS.filter(entry => entry.theme === protagonistVoiceAuditionTheme),
+        [protagonistVoiceAuditionTheme]
+    );
+    const selectedProtagonistVoiceAudition = useMemo(
+        () => protagonistVoiceAuditionEntries.find(entry => entry.heroId === protagonistVoiceAuditionHeroId)
+            ?? protagonistVoiceAuditionEntries[0],
+        [protagonistVoiceAuditionEntries, protagonistVoiceAuditionHeroId]
+    );
+    const protagonistVoiceAuditionCopyText = useMemo(() => {
+        const header = 'theme\theroId\tname\tcandidate\tvoice\temotion\tspeed\taudio\ttext\tdirection';
+        const rows = PROTAGONIST_VOICE_AUDITIONS.flatMap(entry => {
+            const selectedKey = protagonistVoiceAuditionSelections[entry.heroId];
+            const candidate = entry.candidates.find(item => item.key === selectedKey);
+            if (!candidate) return [];
+            return [[
+                entry.theme,
+                entry.heroId,
+                entry.name,
+                candidate.label,
+                candidate.voice,
+                candidate.emotion,
+                candidate.speed,
+                `sfx/protagonist-voice-audition/${entry.theme}/${entry.heroId}/${candidate.fileName}.ogg`,
+                candidate.text,
+                candidate.direction,
+            ].join('\t')];
+        });
+        return [header, ...rows].join('\n');
+    }, [protagonistVoiceAuditionSelections]);
+    const protagonistVoiceAuditionSelectedCount = Object.keys(protagonistVoiceAuditionSelections).filter(heroId =>
+        PROTAGONIST_VOICE_AUDITIONS.some(entry => entry.heroId === heroId)
+    ).length;
+    useEffect(() => {
+        if (typeof window === 'undefined') return;
+        window.localStorage.setItem('debug-protagonist-voice-audition-selections', JSON.stringify(protagonistVoiceAuditionSelections));
+    }, [protagonistVoiceAuditionSelections]);
+    useEffect(() => {
+        if (!protagonistVoiceAuditionEntries.some(entry => entry.heroId === protagonistVoiceAuditionHeroId)) {
+            setProtagonistVoiceAuditionHeroId(protagonistVoiceAuditionEntries[0]?.heroId ?? '');
+        }
+    }, [protagonistVoiceAuditionEntries, protagonistVoiceAuditionHeroId]);
     const highSchoolVoiceFixText = useMemo(() => {
         return highSchoolVoiceFixTargets.map(key => {
             const [heroId, file] = key.split('/');
@@ -945,6 +1000,18 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
         window.setTimeout(() => setHighSchoolVoiceFixCopied(false), 1600);
     };
 
+    const selectProtagonistVoiceAuditionCandidate = (heroId: string, candidateKey: string) => {
+        setProtagonistVoiceAuditionSelections(prev => ({ ...prev, [heroId]: candidateKey }));
+        setProtagonistVoiceAuditionCopied(false);
+    };
+
+    const copyProtagonistVoiceAuditionSelections = async () => {
+        if (!protagonistVoiceAuditionCopyText) return;
+        await navigator.clipboard.writeText(protagonistVoiceAuditionCopyText);
+        setProtagonistVoiceAuditionCopied(true);
+        window.setTimeout(() => setProtagonistVoiceAuditionCopied(false), 1600);
+    };
+
     const setEnemyVoiceAuditGender = (profile: HumanoidEnemyVoiceProfile, gender: HumanoidEnemyVoiceGender) => {
         setEnemyVoiceGenderOverrides(prev => ({ ...prev, [profile.id]: gender }));
         setEnemyVoiceAuditCopied(false);
@@ -1104,6 +1171,7 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
                         <button onClick={() => setActiveTab('ILLUSTRATED_PROBLEMS')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'ILLUSTRATED_PROBLEMS' ? 'bg-teal-900 text-white' : 'text-teal-300 hover:bg-gray-750'}`}>イラスト問題</button>
                         <button onClick={() => setActiveTab('EFFECTS')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'EFFECTS' ? 'bg-orange-900 text-white' : 'text-orange-400 hover:bg-gray-750'}`}>エフェクト</button>
                         <button onClick={() => setActiveTab('MAGIC_VOICES')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'MAGIC_VOICES' ? 'bg-fuchsia-900 text-white' : 'text-fuchsia-400 hover:bg-gray-750'}`}>マジック声</button>
+                        <button onClick={() => setActiveTab('PROTAGONIST_VOICE_AUDITION')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'PROTAGONIST_VOICE_AUDITION' ? 'bg-amber-900 text-white' : 'text-amber-300 hover:bg-gray-750'}`}>主人公声オーディション</button>
                         <button onClick={() => setActiveTab('ENEMY_VOICE_AUDIT')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'ENEMY_VOICE_AUDIT' ? 'bg-violet-900 text-white' : 'text-violet-400 hover:bg-gray-750'}`}>敵声整合</button>
                         <button onClick={() => setActiveTab('MAGIC_ART_AUDIT')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'MAGIC_ART_AUDIT' ? 'bg-pink-900 text-white' : 'text-pink-400 hover:bg-gray-750'}`}>魔法絵不整合</button>
                         <button onClick={() => setActiveTab('EVENTS')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'EVENTS' ? 'bg-cyan-900 text-white' : 'text-cyan-400 hover:bg-gray-750'}`}>イベント</button>
@@ -2271,6 +2339,137 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
                                             </div>
                                         </div>
                                     </div>
+                                )}
+                            </div>
+                        )}
+
+                        {activeTab === 'PROTAGONIST_VOICE_AUDITION' && (
+                            <div className="space-y-5">
+                                <section className="rounded-xl border border-amber-700/70 bg-gradient-to-br from-amber-950/50 via-slate-950/50 to-slate-900/40 p-4">
+                                    <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:justify-between">
+                                        <div>
+                                            <h3 className="flex items-center text-lg font-black text-amber-200">
+                                                <Volume2 size={18} className="mr-2" /> 主人公ボイス再設計・5案オーディション
+                                            </h3>
+                                            <p className="mt-1 text-xs leading-relaxed text-gray-300">
+                                                立ち絵を確認しながら5候補を聞き比べ、採用する候補にチェックしてください。選択内容はこの端末に保存され、TSVでまとめてコピーできます。
+                                            </p>
+                                        </div>
+                                        <div className="flex flex-wrap items-center gap-2 text-xs font-black">
+                                            <span className="rounded-full border border-amber-700/70 bg-black/35 px-3 py-1 text-amber-200">確定 {protagonistVoiceAuditionSelectedCount}/26人</span>
+                                            <button
+                                                type="button"
+                                                onClick={copyProtagonistVoiceAuditionSelections}
+                                                className="flex items-center gap-1 rounded bg-amber-700 px-3 py-1.5 text-white hover:bg-amber-600"
+                                            >
+                                                {protagonistVoiceAuditionCopied ? <Check size={13} /> : <Copy size={13} />}
+                                                {protagonistVoiceAuditionCopied ? 'コピー済み' : '確定結果をTSVコピー'}
+                                            </button>
+                                        </div>
+                                    </div>
+                                    <div className="mt-4 flex flex-wrap gap-2">
+                                        {[
+                                            { id: 'high-school' as const, label: '高校編（9人）' },
+                                            { id: 'magic' as const, label: 'マジック編（17人）' },
+                                        ].map(option => (
+                                            <button
+                                                key={option.id}
+                                                type="button"
+                                                onClick={() => setProtagonistVoiceAuditionTheme(option.id)}
+                                                className={`rounded-lg px-3 py-2 text-xs font-black ${protagonistVoiceAuditionTheme === option.id ? 'bg-amber-500 text-slate-950' : 'bg-slate-900 text-amber-200 hover:bg-slate-800'}`}
+                                            >
+                                                {option.label}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </section>
+
+                                {selectedProtagonistVoiceAudition && (
+                                    <section className="grid grid-cols-1 gap-4 xl:grid-cols-[260px_1fr]">
+                                        <div className="space-y-3 rounded-xl border border-slate-700 bg-black/35 p-3">
+                                            <label className="block space-y-1">
+                                                <span className="text-xs font-black text-gray-400">主人公</span>
+                                                <select
+                                                    value={selectedProtagonistVoiceAudition.heroId}
+                                                    onChange={(event) => setProtagonistVoiceAuditionHeroId(event.target.value)}
+                                                    className="w-full rounded border border-amber-700/70 bg-slate-950 px-3 py-2 text-sm font-bold text-white outline-none focus:border-amber-300"
+                                                >
+                                                    {protagonistVoiceAuditionEntries.map(entry => (
+                                                        <option key={entry.heroId} value={entry.heroId}>{entry.name} / {entry.heroId}</option>
+                                                    ))}
+                                                </select>
+                                            </label>
+                                            <div className="overflow-hidden rounded-lg border border-amber-800/70 bg-slate-950/70">
+                                                <img
+                                                    src={assetUrl(selectedProtagonistVoiceAudition.imagePath)}
+                                                    alt={selectedProtagonistVoiceAudition.name}
+                                                    className="mx-auto max-h-72 w-full object-contain"
+                                                />
+                                            </div>
+                                            <div className="rounded border border-amber-900/60 bg-amber-950/20 p-3">
+                                                <div className="text-base font-black text-white">{selectedProtagonistVoiceAudition.name}</div>
+                                                <div className="mt-1 text-[10px] font-mono text-gray-500">{selectedProtagonistVoiceAudition.heroId}</div>
+                                                <div className="mt-2 text-xs leading-relaxed text-amber-100/80">{selectedProtagonistVoiceAudition.caption}</div>
+                                            </div>
+                                        </div>
+
+                                        <div className="space-y-3">
+                                            <div className="grid grid-cols-1 gap-3 md:grid-cols-2 xl:grid-cols-5">
+                                                {selectedProtagonistVoiceAudition.candidates.map(candidate => {
+                                                    const checked = protagonistVoiceAuditionSelections[selectedProtagonistVoiceAudition.heroId] === candidate.key;
+                                                    return (
+                                                        <div key={candidate.key} className={`flex flex-col rounded-xl border p-3 ${checked ? 'border-emerald-400 bg-emerald-950/35 shadow-lg shadow-emerald-950/30' : 'border-slate-700 bg-black/35'}`}>
+                                                            <div className="flex items-start justify-between gap-2">
+                                                                <div>
+                                                                    <div className="text-sm font-black text-amber-100">{candidate.label}</div>
+                                                                    <div className="mt-1 text-[10px] text-gray-400">{candidate.voice}</div>
+                                                                </div>
+                                                                {checked && <span className="rounded-full bg-emerald-500 px-2 py-0.5 text-[10px] font-black text-slate-950">確定</span>}
+                                                            </div>
+                                                            <button
+                                                                type="button"
+                                                                onClick={() => void audioService.playProtagonistVoiceAudition(selectedProtagonistVoiceAudition.theme, selectedProtagonistVoiceAudition.heroId, candidate.fileName)}
+                                                                className="mt-3 flex items-center justify-center gap-1 rounded bg-amber-700 py-2 text-xs font-black text-white hover:bg-amber-600"
+                                                            >
+                                                                <Volume2 size={13} /> 聞く
+                                                            </button>
+                                                            <label className="mt-2 flex cursor-pointer items-center justify-center gap-2 rounded border border-slate-700 bg-slate-950/70 px-2 py-1.5 text-[10px] font-black text-gray-200 hover:border-emerald-400">
+                                                                <input
+                                                                    type="checkbox"
+                                                                    checked={checked}
+                                                                    onChange={() => selectProtagonistVoiceAuditionCandidate(selectedProtagonistVoiceAudition.heroId, candidate.key)}
+                                                                    className="accent-emerald-500"
+                                                                />
+                                                                この案で確定
+                                                            </label>
+                                                            <div className="mt-2 text-[10px] leading-relaxed text-gray-300">{candidate.text}</div>
+                                                            <div className="mt-2 text-[9px] leading-relaxed text-gray-500">{candidate.emotion} / {candidate.speed}<br />{candidate.direction}</div>
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                            <div className="rounded-xl border border-emerald-800/60 bg-black/35 p-3">
+                                                <div className="flex items-center justify-between gap-2">
+                                                    <div className="text-xs font-black text-emerald-200">確定結果（全キャラクター分）</div>
+                                                    <div className="text-[10px] text-gray-400">チェックした主人公だけ表示</div>
+                                                </div>
+                                                <textarea
+                                                    value={protagonistVoiceAuditionCopyText}
+                                                    readOnly
+                                                    rows={Math.min(10, Math.max(3, protagonistVoiceAuditionSelectedCount + 1))}
+                                                    className="mt-2 w-full resize-y rounded border border-slate-700 bg-slate-950 p-2 font-mono text-[10px] leading-relaxed text-emerald-100 outline-none"
+                                                />
+                                                <button
+                                                    type="button"
+                                                    onClick={copyProtagonistVoiceAuditionSelections}
+                                                    className="mt-2 flex items-center gap-1 rounded bg-emerald-800 px-3 py-1.5 text-[10px] font-black text-white hover:bg-emerald-700"
+                                                >
+                                                    {protagonistVoiceAuditionCopied ? <Check size={12} /> : <Copy size={12} />}
+                                                    {protagonistVoiceAuditionCopied ? 'コピー済み' : 'この内容をコピー'}
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </section>
                                 )}
                             </div>
                         )}

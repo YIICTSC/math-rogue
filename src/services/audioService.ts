@@ -1778,7 +1778,7 @@ class AudioService {
   }
 
   private isVoiceSfxName(name: string) {
-      return name.startsWith('magic-voice-') || name.startsWith('magic-event-voice-') || name.startsWith('high-school-voice-') || name.startsWith('enemy-voice-');
+      return name.startsWith('magic-voice-') || name.startsWith('magic-event-voice-') || name.startsWith('high-school-voice-') || name.startsWith('enemy-voice-') || name.startsWith('protagonist-audition-');
   }
 
   private getHtmlSfxVolume(name: string) {
@@ -2085,6 +2085,50 @@ class AudioService {
           ...this.activeSfxSources.keys(),
       ]))) {
           if (name.startsWith('high-school-voice-')) {
+              this.stopActiveSfx(name);
+          }
+      }
+  }
+
+  public playProtagonistVoiceAudition(
+      theme: 'high-school' | 'magic',
+      heroId: string | undefined,
+      candidateFile: string | undefined,
+      maxDurationMs = 8000,
+  ) {
+      if (!heroId || !candidateFile) return Promise.resolve(false);
+      this.init();
+      if (!this.ctx || !this.sfxGain || this.isMuted) return Promise.resolve(false);
+      const safeTheme = theme === 'magic' ? 'magic' : 'high-school';
+      const safeHeroId = heroId.replace(/[^A-Z0-9_-]/gi, '').toUpperCase();
+      const safeCandidateFile = candidateFile.replace(/[^a-z0-9_-]/gi, '').toLowerCase();
+      if (!safeHeroId || !safeCandidateFile) return Promise.resolve(false);
+      this.stopProtagonistVoiceAuditions();
+      const name = `protagonist-audition-${safeTheme}-${safeHeroId}-${safeCandidateFile}`;
+      const generation = (this.sfxPlaybackGenerations.get(name) ?? 0) + 1;
+      this.sfxPlaybackGenerations.set(name, generation);
+      return this.playVoiceFile(
+          name,
+          [
+              versionBgmPath(assetUrl(`sfx/protagonist-voice-audition/${safeTheme}/${safeHeroId}/${safeCandidateFile}.ogg`)),
+              versionBgmPath(assetUrl(`sfx/protagonist-voice-audition/${safeTheme}/${safeHeroId}/${safeCandidateFile}.wav`)),
+              versionBgmPath(`/sfx/protagonist-voice-audition/${safeTheme}/${safeHeroId}/${safeCandidateFile}.ogg`),
+              versionBgmPath(`/sfx/protagonist-voice-audition/${safeTheme}/${safeHeroId}/${safeCandidateFile}.wav`),
+              versionBgmPath(`sfx/protagonist-voice-audition/${safeTheme}/${safeHeroId}/${safeCandidateFile}.ogg`),
+              versionBgmPath(`sfx/protagonist-voice-audition/${safeTheme}/${safeHeroId}/${safeCandidateFile}.wav`),
+          ],
+          maxDurationMs,
+          false,
+          generation,
+      );
+  }
+
+  public stopProtagonistVoiceAuditions() {
+      for (const name of Array.from(new Set([
+          ...this.activeHtmlSfx.keys(),
+          ...this.activeSfxSources.keys(),
+      ]))) {
+          if (name.startsWith('protagonist-audition-')) {
               this.stopActiveSfx(name);
           }
       }
