@@ -18,6 +18,7 @@ try {
   const { GameScreen } = await server.ssrLoadModule('/src/types.ts');
   const saveKey = 'pixel_spire_save_state_v1';
   const miniGames = [
+    GameScreen.RPG_ONLINE,
     GameScreen.MINI_GAME_STONE_GLOW,
     GameScreen.MINI_GAME_SCHOOL_TRPG,
     GameScreen.MINI_GAME_LEARNING_TCG,
@@ -40,6 +41,9 @@ try {
 
   storageService.saveGame({ screen: GameScreen.MAP, player: { currentHp: 10 }, map: [] });
   assert.equal(storageService.hasSaveFile(), true, 'a main-adventure map state should still enable Continue');
+  const mainSave = localStorage.getItem(saveKey);
+  storageService.saveGame({ screen: GameScreen.RPG_ONLINE, player: {}, map: [] });
+  assert.equal(localStorage.getItem(saveKey), mainSave, 'RPG Online must preserve the existing main adventure');
 
   console.log('Title Continue isolation passed for all added mini-games, including the crane game.');
 } finally {

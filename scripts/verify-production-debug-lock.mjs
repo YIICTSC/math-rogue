@@ -23,6 +23,8 @@ const requiredGuards = [
   'onClick={DEBUG_FEATURES_ENABLED ? handleTitleClick : undefined}',
   '{DEBUG_FEATURES_ENABLED && gameState.screen === GameScreen.DEBUG_MENU',
   '{DEBUG_FEATURES_ENABLED && gameState.screen === GameScreen.MAGIC_EVENT_SIMULATION',
+  '{!OFFLINE_DISTRIBUTABLE && isDebugModeActive && gameState.screen === GameScreen.RPG_ONLINE',
+  'if (gameState.screen === GameScreen.RPG_ONLINE)',
 ];
 for (const guard of requiredGuards) {
   if (!appSource.includes(guard)) {

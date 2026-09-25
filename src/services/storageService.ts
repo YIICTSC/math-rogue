@@ -20,6 +20,7 @@ const STORAGE_KEY_GAME_STATE = 'pixel_spire_save_state_v1';
 // validate the main-adventure resume slot.
 const NON_RESUMABLE_GAME_SCREENS = new Set<GameScreen>([
   GameScreen.START_MENU,
+  GameScreen.RPG_ONLINE,
   GameScreen.GAME_OVER,
   GameScreen.ENDING,
   GameScreen.MAGIC_ROMANCE_ENDING,

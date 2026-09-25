@@ -1,4 +1,6 @@
+import { RPG_ENGLISH } from './rpgEnglish';
 export const ENGLISH_RUNTIME_EXACT: Record<string, string> = {
+  ...RPG_ENGLISH,
   'エンドレス第1章へ進んだ。': 'You entered Endless Chapter 1.',
   '真のエンドレスモード第51章へ進んだ。': 'You entered True Endless Mode, Chapter 51.',
   'エンドレスの最初の階層へ進んだ。': 'You stepped into the first floor of Endless Mode.',

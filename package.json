@@ -10,7 +10,7 @@
     "dev": "vite --host 0.0.0.0 --port 5173",
     "predev": "node scripts/generate-relic-translations.mjs && node scripts/generate-web-asset-manifest.mjs && pnpm run generate:vacation-animation-anchors",
     "predev:debug": "node scripts/generate-relic-translations.mjs && node scripts/generate-web-asset-manifest.mjs && pnpm run generate:vacation-animation-anchors",
-    "dev:debug": "VITE_ENABLE_DEBUG_FEATURES=true vite --host 0.0.0.0 --port 5173",
+    "dev:debug": "node scripts/dev-debug.mjs",
     "generate:card-art-manifest": "node scripts/generate-card-illustration-manifest.mjs",
     "generate:expansion-cards": "node scripts/generate-expansion-cards.mjs",
     "generate:enemy-art-manifest": "node scripts/generate-enemy-illustration-manifest.mjs",
@@ -91,7 +91,10 @@
     "steam:assets": "node scripts/generate-steam-assets.mjs",
     "steam:config": "node scripts/generate-steampipe-config.mjs",
     "steam:verify": "node scripts/verify-steam-build.mjs",
-    "preview": "vite preview --host 0.0.0.0 --port 4173"
+    "preview": "vite preview --host 0.0.0.0 --port 4173",
+    "test:rpg": "node scripts/test-rpg-online.mjs",
+    "test:rpg:browser": "node scripts/test-rpg-browser.mjs",
+    "test:rpg:access": "node scripts/test-rpg-debug-access.mjs"
   },
   "build": {
     "appId": "jp.learningrogue.offline",

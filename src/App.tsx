@@ -307,6 +307,7 @@ import {
     isNormalVacationRun,
 } from './data/vacationNarrativeCopy';
 
+const RpgOnline = React.lazy(() => import('./rpg/RpgOnline'));
 const PARRY_WINDOW_MS = 650;
 const PARRY_PERFECT_MS = 220;
 const ENEMY_FINISHER_BURST_VOICE_DELAY_MS = 760;
@@ -5087,6 +5088,10 @@ const App: React.FC = () => {
 
     useEffect(() => {
         if (isDebugModeActive) return;
+        if (gameState.screen === GameScreen.RPG_ONLINE) {
+            setGameState(prev => ({ ...prev, screen: GameScreen.START_MENU, challengeMode: undefined }));
+            return;
+        }
         if (
             gameState.screen !== GameScreen.DEBUG_MENU
             && gameState.screen !== GameScreen.EVENT_SIMULATION
@@ -19190,7 +19195,24 @@ const App: React.FC = () => {
                                         <Swords className={isMobilePortrait ? 'mr-0.5' : 'mr-1'} size={isMobilePortrait ? 12 : 14} /> {trans("1A1D", languageMode)}
                                     </button>
 
-                                    {!OFFLINE_DISTRIBUTABLE && (
+                                    {!OFFLINE_DISTRIBUTABLE && isDebugModeActive && (
+                                        <button
+                                            disabled={isAssignmentChallengeOnlyLocked || isDailyLimitReached}
+                                            onClick={() => {
+                                                if (!isDebugModeActive) return;
+                                                if (redirectToAssignmentChallengeIfLocked()) return;
+                                                if (isDailyLimitReached) { setShowTimeLimitModal(true); return; }
+                                                setPendingAssignmentStartScreen(GameScreen.RPG_ONLINE);
+                                                if (showDailyAssignmentNoticeForProblemSelection()) return;
+                                                setPendingAssignmentStartScreen(null);
+                                                setGameState(prev => ({ ...prev, screen: GameScreen.RPG_ONLINE }));
+                                            }}
+                                            className="w-full py-3 px-4 text-sm font-bold border border-amber-400/60 bg-emerald-950 text-amber-100 hover:bg-emerald-900 flex items-center justify-center gap-2 disabled:opacity-40"
+                                        >
+                                            <Users size={17} /> {trans("RPGオンライン", languageMode)} <span className="text-xs opacity-70">{trans("開発中・デバッグ限定", languageMode)}</span>
+                                        </button>
+                                    )}
+                                {!OFFLINE_DISTRIBUTABLE && (
                                         <>
                                             <button
                                                 onClick={() => {
@@ -20847,6 +20869,11 @@ const App: React.FC = () => {
                     </div>
                 )}
 
+                {!OFFLINE_DISTRIBUTABLE && isDebugModeActive && gameState.screen === GameScreen.RPG_ONLINE && (
+                    <React.Suspense fallback={<div className="fixed inset-0 z-50 grid place-items-center bg-slate-950 text-amber-100">{trans("冒険の世界を準備しています…", languageMode)}</div>}>
+                        <RpgOnline languageMode={languageMode} onClose={returnToTitle} />
+                    </React.Suspense>
+                )}
                 {!OFFLINE_DISTRIBUTABLE && gameState.screen === GameScreen.COOP_SETUP && (
                     <div className="absolute inset-0">
                         {OFFLINE_DISTRIBUTABLE ? (
