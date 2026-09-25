@@ -37,6 +37,7 @@ import ResilientAssetImage from './ResilientAssetImage';
 import CharacterAnimationPreview from './CharacterAnimationPreview';
 import ActionPositionAuditPreview from './ActionPositionAuditPreview';
 import SpriteAuditPreview from './SpriteAuditPreview';
+import ProtagonistVoiceComparePanel from './ProtagonistVoiceComparePanel';
 
 interface DebugMenuScreenProps {
     onStart: (deck: ICard[], relics: Relic[], potions: Potion[]) => void;
@@ -331,7 +332,7 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
     focusedUiPreviewScreenId,
     focusedSupporterNpcEventTitle
 }) => {
-    const [activeTab, setActiveTab] = useState<'CARDS' | 'RELICS' | 'POTIONS' | 'SYNTHESIS' | 'CAPTURE_SIM' | 'SYSTEM' | 'UI_PREVIEW' | 'PROBLEM_DEBUG' | 'ILLUSTRATED_PROBLEMS' | 'EFFECTS' | 'MAGIC_VOICES' | 'PROTAGONIST_VOICE_AUDITION' | 'ENEMY_VOICE_AUDIT' | 'MAGIC_ART_AUDIT' | 'EVENTS' | 'HUMANOID_SPRITES' | 'CHARACTER_ANIMATIONS' | 'ACTION_POSITION_AUDIT' | 'SPRITE_AUDIT' | 'TRANSLATION'>(focusedSupporterNpcEventTitle ? 'EVENTS' : focusedUiPreviewScreenId ? 'UI_PREVIEW' : 'CARDS');
+    const [activeTab, setActiveTab] = useState<'CARDS' | 'RELICS' | 'POTIONS' | 'SYNTHESIS' | 'CAPTURE_SIM' | 'SYSTEM' | 'UI_PREVIEW' | 'PROBLEM_DEBUG' | 'ILLUSTRATED_PROBLEMS' | 'EFFECTS' | 'MAGIC_VOICES' | 'PROTAGONIST_VOICE_AUDITION' | 'PROTAGONIST_VOICE_COMPARE' | 'ENEMY_VOICE_AUDIT' | 'MAGIC_ART_AUDIT' | 'EVENTS' | 'HUMANOID_SPRITES' | 'CHARACTER_ANIMATIONS' | 'ACTION_POSITION_AUDIT' | 'SPRITE_AUDIT' | 'TRANSLATION'>(focusedSupporterNpcEventTitle ? 'EVENTS' : focusedUiPreviewScreenId ? 'UI_PREVIEW' : 'CARDS');
     const showLoadoutPanel = activeTab === 'CARDS' || activeTab === 'RELICS' || activeTab === 'POTIONS' || activeTab === 'SYNTHESIS' || activeTab === 'CAPTURE_SIM';
     const focusedUiPreviewItemRef = useRef<HTMLDivElement | null>(null);
     const focusedSupporterNpcEventRef = useRef<HTMLDivElement | null>(null);
@@ -1172,6 +1173,7 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
                         <button onClick={() => setActiveTab('EFFECTS')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'EFFECTS' ? 'bg-orange-900 text-white' : 'text-orange-400 hover:bg-gray-750'}`}>エフェクト</button>
                         <button onClick={() => setActiveTab('MAGIC_VOICES')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'MAGIC_VOICES' ? 'bg-fuchsia-900 text-white' : 'text-fuchsia-400 hover:bg-gray-750'}`}>マジック声</button>
                         <button onClick={() => setActiveTab('PROTAGONIST_VOICE_AUDITION')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'PROTAGONIST_VOICE_AUDITION' ? 'bg-amber-900 text-white' : 'text-amber-300 hover:bg-gray-750'}`}>主人公声オーディション</button>
+                        <button onClick={() => setActiveTab('PROTAGONIST_VOICE_COMPARE')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'PROTAGONIST_VOICE_COMPARE' ? 'bg-cyan-900 text-white' : 'text-cyan-300 hover:bg-gray-750'}`}>主人公ボイス比較</button>
                         <button onClick={() => setActiveTab('ENEMY_VOICE_AUDIT')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'ENEMY_VOICE_AUDIT' ? 'bg-violet-900 text-white' : 'text-violet-400 hover:bg-gray-750'}`}>敵声整合</button>
                         <button onClick={() => setActiveTab('MAGIC_ART_AUDIT')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'MAGIC_ART_AUDIT' ? 'bg-pink-900 text-white' : 'text-pink-400 hover:bg-gray-750'}`}>魔法絵不整合</button>
                         <button onClick={() => setActiveTab('EVENTS')} className={`flex-1 py-3 px-2 text-xs md:text-sm font-bold whitespace-nowrap ${activeTab === 'EVENTS' ? 'bg-cyan-900 text-white' : 'text-cyan-400 hover:bg-gray-750'}`}>イベント</button>
@@ -2473,6 +2475,8 @@ const DebugMenuScreen: React.FC<DebugMenuScreenProps> = ({
                                 )}
                             </div>
                         )}
+
+                        {activeTab === 'PROTAGONIST_VOICE_COMPARE' && <ProtagonistVoiceComparePanel languageMode={initialLanguageMode} />}
 
                         {activeTab === 'ENEMY_VOICE_AUDIT' && (
                             <div className="space-y-4">

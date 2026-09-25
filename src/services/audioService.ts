@@ -2067,6 +2067,17 @@ class AudioService {
       }
   }
 
+  public stopMagicBattleVoices() {
+      for (const name of Array.from(new Set([
+          ...this.activeHtmlSfx.keys(),
+          ...this.activeSfxSources.keys(),
+      ]))) {
+          if (name.startsWith('magic-voice-')) {
+              this.stopActiveSfx(name);
+          }
+      }
+  }
+
   public stopMagicEventVoices() {
       this.magicEventVoiceSequenceId += 1;
       for (const name of Array.from(new Set([
