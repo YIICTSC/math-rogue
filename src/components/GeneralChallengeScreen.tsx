@@ -176,6 +176,7 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
   const [mapSymbolImageFailed, setMapSymbolImageFailed] = useState(false);
   const [isUnitBoardOpen, setIsUnitBoardOpen] = useState(false);
   const currentProblem = problems[currentProblemIndex];
+  const currentAnswerMode = assignmentUnits?.find((unit) => unit.modes.includes(currentProblem?.sourceMode || mode))?.answerMode || answerMode;
   const shouldDuckBgmForEnglishAudio = isEnglishAudioFocusProblem(currentProblem, mode);
   const shouldUseEnglishAudioButton = languageMode === 'ENGLISH';
   const audioButtonLabel = shouldUseEnglishAudioButton ? 'Listen' : 'おとを きく';
@@ -651,13 +652,11 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
 
   const handleInputSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!currentProblem || !isNumericAnswer(currentProblem.actualCorrectAnswer)) return;
-    const normalized = normalizeNumberInput(inputAnswer);
-    if (!normalized) return;
-    submitAnswerResult(
-      Number(normalized) === Number(normalizeNumberInput(currentProblem.actualCorrectAnswer)),
-      inputAnswer,
-    );
+    if (!currentProblem || !normalize(inputAnswer)) return;
+    const isCorrect = isNumericAnswer(currentProblem.actualCorrectAnswer)
+      ? Number(normalizeNumberInput(inputAnswer)) === Number(normalizeNumberInput(currentProblem.actualCorrectAnswer))
+      : normalize(inputAnswer) === normalize(currentProblem.actualCorrectAnswer);
+    submitAnswerResult(isCorrect, inputAnswer);
   };
 
   useEffect(() => {
@@ -667,12 +666,14 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
   }, [isAnswered, currentProblemIndex]);
 
   useEffect(() => {
-    if (!currentProblem || isAnswered || answerMode !== 'INPUT' || !isNumericAnswer(currentProblem.actualCorrectAnswer)) return;
-    const normalized = normalizeNumberInput(inputAnswer);
-    if (normalized && Number(normalized) === Number(normalizeNumberInput(currentProblem.actualCorrectAnswer))) {
+    if (!currentProblem || isAnswered || currentAnswerMode !== 'INPUT' || currentProblem.speechPrompt?.freeResponse) return;
+    const isCorrect = isNumericAnswer(currentProblem.actualCorrectAnswer)
+      ? Number(normalizeNumberInput(inputAnswer)) === Number(normalizeNumberInput(currentProblem.actualCorrectAnswer))
+      : normalize(inputAnswer) === normalize(currentProblem.actualCorrectAnswer);
+    if (normalize(inputAnswer) && isCorrect) {
       submitAnswerResult(true, inputAnswer);
     }
-  }, [answerMode, currentProblem, inputAnswer, isAnswered, submitAnswerResult]);
+  }, [currentAnswerMode, currentProblem, inputAnswer, isAnswered, submitAnswerResult]);
 
   const startSpeechRecognition = useCallback(async () => {
     if (!currentProblem?.speechPrompt || isAnswered || isListening || speechStartInProgressRef.current) return;
@@ -2011,7 +2012,7 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
                 )}
             </div>
 
-            {!currentProblem.speechPrompt?.freeResponse && answerMode === 'INPUT' && isNumericAnswer(currentProblem.actualCorrectAnswer) && (
+            {!currentProblem.speechPrompt?.freeResponse && currentAnswerMode === 'INPUT' && (
             <form onSubmit={handleInputSubmit} className="general-challenge-input w-full space-y-3">
                 <input
                     ref={inputRef}
@@ -2019,14 +2020,14 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
                     onChange={(event) => setInputAnswer(event.target.value)}
                     disabled={isAnswered}
                     autoFocus
-                    inputMode="numeric"
-                    pattern="[-0-9０-９－ー―,，\s]*"
+                    inputMode={isNumericAnswer(currentProblem.actualCorrectAnswer) ? 'numeric' : 'text'}
+                    pattern={isNumericAnswer(currentProblem.actualCorrectAnswer) ? '[-0-9０-９－ー―,，\s]*' : undefined}
                     className={`w-full rounded-xl border-4 bg-white px-4 py-4 text-center text-3xl font-black text-slate-950 outline-none transition-colors ${isAnswered ? 'border-slate-400 opacity-80' : 'border-emerald-400 focus:border-yellow-300'}`}
                     placeholder={trans('答えを入力', languageMode)}
                 />
                 <button
                     type="submit"
-                    disabled={isAnswered || normalizeNumberInput(inputAnswer) === ''}
+                    disabled={isAnswered || normalize(inputAnswer) === ''}
                     className="w-full rounded-xl border-b-4 border-emerald-950 bg-emerald-600 py-3 text-xl font-bold transition-all hover:bg-emerald-500 active:translate-y-1 active:border-b-0 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                     {trans('決定', languageMode)}
@@ -2034,7 +2035,7 @@ const GeneralChallengeScreen: React.FC<GeneralChallengeScreenProps> = ({ onCompl
             </form>
             )}
 
-            {!currentProblem.speechPrompt?.freeResponse && !(answerMode === 'INPUT' && isNumericAnswer(currentProblem.actualCorrectAnswer)) && (
+            {!currentProblem.speechPrompt?.freeResponse && !(currentAnswerMode === 'INPUT') && (
             <div className="general-challenge-options w-full grid grid-cols-2 gap-2 md:gap-3 min-w-0">
                 {currentProblem.options.map((opt, idx) => {
                     const isCorrectOption = normalize(opt) === normalize(currentProblem.actualCorrectAnswer);

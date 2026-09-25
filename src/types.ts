@@ -907,6 +907,7 @@ export interface AssignmentUnit {
   name: string;
   modes: string[];
   targetCorrect: number;
+  answerMode?: AnswerMode;
   filterSchemaVersion?: number;
   filters?: AssignmentRangeFilter | null;
   filterLabel?: string;

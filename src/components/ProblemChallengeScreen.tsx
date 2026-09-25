@@ -300,7 +300,7 @@ const getAssignmentSignature = (assignmentSource: AssignmentPayload) => {
   const customProblems = assignmentSource.customProblems || [];
   return [
     assignmentSource.id,
-    assignmentSource.units.map((unit) => `${unit.id}:${unit.filterLabel || ''}:${JSON.stringify(unit.filters || null)}`).join(','),
+    assignmentSource.units.map((unit) => `${unit.id}:${unit.targetCorrect}:${unit.answerMode || assignmentSource.answerMode}:${unit.filterLabel || ''}:${JSON.stringify(unit.filters || null)}`).join(','),
     customProblems.map((problem) => problem.id).join(','),
     String(assignmentSource.customTargetCorrect || ''),
   ].join('|');
@@ -779,7 +779,11 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
   const applyAssignmentChallenge = useCallback((assignmentSource: AssignmentPayload, resetProgress: boolean) => {
     assignmentSessionRef.current = true;
     const customProblems = assignmentSource.customProblems || [];
-    const modePool = Array.from(new Set(assignmentSource.units.flatMap((unit) => unit.modes)));
+    // Complete one selected unit at a time. App.tsx removes completed units
+    // from the active payload, then this source advances to the next unit.
+    const modePool = Array.from(new Set((assignmentSource.units[0]?.modes?.length
+      ? assignmentSource.units[0].modes
+      : assignmentSource.units.flatMap((unit) => unit.modes))));
     if (modePool.length === 0 && customProblems.length === 0) return false;
     const assignmentSignature = getAssignmentSignature(assignmentSource);
     const hasCustomProblems = customProblems.length > 0;
@@ -1082,7 +1086,9 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
   if (phase === 'CHALLENGE') {
     const challengeSubMode = activeChallenge?.subMode ?? selectedSubMode;
     const challengeModePool = activeChallenge?.modePool;
-    const challengeAnswerMode = activeChallenge?.answerMode || 'CHOICE';
+    const challengeAnswerMode = activeChallenge?.assignmentUnits?.find((unit) => unit.modes.includes(challengeSubMode.mode))?.answerMode
+      || activeChallenge?.answerMode
+      || 'CHOICE';
     const ChallengeScreen = getChallengeScreenForMode(challengeSubMode.mode);
 
     return (
@@ -1123,7 +1129,7 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
               key={`${streak}-${challengeStep}`}
               mode={challengeSubMode.mode}
               answerMode={challengeAnswerMode}
-              useSavedAnswerMode
+              useSavedAnswerMode={!activeChallenge?.assignmentSignature}
               onComplete={handleCompleteOne}
               onAnswerResult={handleChallengeAnswerResult}
               reviewProblem={activeReviewProblem?.mode === challengeSubMode.mode ? activeReviewProblem : null}
@@ -1137,7 +1143,7 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
               key={`${streak}-${challengeStep}`}
               mode={challengeSubMode.mode}
               answerMode={challengeAnswerMode}
-              useSavedAnswerMode
+              useSavedAnswerMode={!activeChallenge?.assignmentSignature}
               onComplete={handleCompleteOne}
               onAnswerResult={handleChallengeAnswerResult}
               reviewProblem={activeReviewProblem?.mode === challengeSubMode.mode ? activeReviewProblem : null}
@@ -1150,6 +1156,7 @@ const ProblemChallengeScreen: React.FC<ProblemChallengeScreenProps> = ({
             <EnglishChallengeScreen
               key={`${streak}-${challengeStep}`}
               mode={challengeSubMode.mode}
+              answerMode={challengeAnswerMode}
               onComplete={handleCompleteOne}
               onAnswerResult={handleChallengeAnswerResult}
               reviewProblem={activeReviewProblem?.mode === challengeSubMode.mode ? activeReviewProblem : null}

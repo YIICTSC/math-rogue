@@ -38,6 +38,7 @@ type ManagedAssignmentUnit = {
   unitId: string;
   unitLabel: string;
   targetCorrect: number;
+  answerMode?: string | null;
   filterSchemaVersion?: number | null;
   filters?: AssignmentRangeFilter | null;
   filterLabel?: string | null;
@@ -142,7 +143,7 @@ const request = async <T>(path: string, init: RequestInit = {}, token?: string):
     ...init,
     headers: {
       'content-type': 'application/json',
-      'x-learning-rogue-assignment-schema': '2',
+      'x-learning-rogue-assignment-schema': '3',
       ...(token ? { authorization: `Bearer ${token}` } : {}),
       ...(init.headers || {}),
     },
@@ -229,6 +230,11 @@ export const toAssignmentPayload = (assignment: ManagedAssignment): AssignmentPa
       name: `${unit.unitLabel || assignment.subject}${unit.filterLabel ? `｜${unit.filterLabel}` : ''}`,
       modes: [resolveMode(unit.unitId, assignment.subject)],
       targetCorrect: Math.max(1, Number(unit.targetCorrect || 10)),
+      answerMode: (['CHOICE', 'INPUT', 'WRITING'].includes(String(unit.answerMode || '').toUpperCase())
+        ? String(unit.answerMode).toUpperCase()
+        : ['INPUT', 'WRITING'].includes(String(assignment.answerMode || '').toUpperCase())
+          ? String(assignment.answerMode).toUpperCase()
+          : 'CHOICE') as AnswerMode,
       filterSchemaVersion: unit.filterSchemaVersion ? Number(unit.filterSchemaVersion) : undefined,
       filters: unit.filters && typeof unit.filters.kind === 'string' && Array.isArray(unit.filters.values)
         ? { kind: unit.filters.kind, values: unit.filters.values.map(String) }

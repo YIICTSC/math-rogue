@@ -1,7 +1,7 @@
 import assert from 'node:assert/strict';
 import { readFile } from 'node:fs/promises';
 
-const [service, modal, inviteModal, app, types, rangeFilters, general, math, kanji, english] = await Promise.all([
+const [service, modal, inviteModal, app, types, rangeFilters, general, math, kanji, english, problemChallenge] = await Promise.all([
   readFile(new URL('../src/services/managementPortalService.ts', import.meta.url), 'utf8'),
   readFile(new URL('../src/components/AssignmentInboxModal.tsx', import.meta.url), 'utf8'),
   readFile(new URL('../src/components/LearnerGroupInviteModal.tsx', import.meta.url), 'utf8'),
@@ -12,6 +12,7 @@ const [service, modal, inviteModal, app, types, rangeFilters, general, math, kan
   readFile(new URL('../src/components/MathChallengeScreen.tsx', import.meta.url), 'utf8'),
   readFile(new URL('../src/components/KanjiChallengeScreen.tsx', import.meta.url), 'utf8'),
   readFile(new URL('../src/components/EnglishChallengeScreen.tsx', import.meta.url), 'utf8'),
+  readFile(new URL('../src/components/ProblemChallengeScreen.tsx', import.meta.url), 'utf8'),
 ]);
 
 assert.match(service, /learner-devices\/link/);
@@ -97,7 +98,14 @@ assert.match(types, /enforcementLevel\?: 'optional' \| 'required' \| 'launch_loc
 assert.doesNotMatch(types, /imageUrl\?: string/);
 assert.match(types, /filters\?: AssignmentRangeFilter/);
 assert.match(service, /filterSchemaVersion/);
-assert.match(service, /x-learning-rogue-assignment-schema': '2'/);
+assert.match(service, /x-learning-rogue-assignment-schema': '3'/);
+assert.match(service, /answerMode: \(\['CHOICE', 'INPUT', 'WRITING'\]/);
+assert.match(types, /answerMode\?: AnswerMode/);
+assert.match(problemChallenge, /assignmentSource\.units\[0\]/);
+assert.match(problemChallenge, /unit\.answerMode/);
+assert.match(general, /currentAnswerMode/);
+assert.match(general, /normalize\(currentProblem\.actualCorrectAnswer\)/);
+assert.match(english, /answerMode === 'INPUT'/);
 assert.match(service, /最新版に更新してください/);
 assert.match(service, /filterLabel/);
 for (const kind of ['multiplication_table', 'division', 'addition_subtraction', 'time', 'decimal', 'fraction', 'kanji', 'english_words', 'prefectures', 'history']) assert.match(rangeFilters, new RegExp(kind));

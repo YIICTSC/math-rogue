@@ -2,7 +2,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { CheckCircle, XCircle, Volume2, VolumeX } from 'lucide-react';
 import { audioService } from '../services/audioService';
-import { AssignmentAnswerResult, AssignmentReviewProblem, AssignmentUnit, GameMode, LanguageMode } from '../types';
+import { AnswerMode, AssignmentAnswerResult, AssignmentReviewProblem, AssignmentUnit, GameMode, LanguageMode } from '../types';
 import { storageService } from '../services/storageService';
 import { ENGLISH_DATA, EnglishProblem } from '../data/englishData';
 import RewardHintBanner from './RewardHintBanner';
@@ -13,6 +13,7 @@ import { getProblemCycleScope, selectProblemsForCycle } from '../utils/problemCy
 interface EnglishChallengeScreenProps {
   onComplete: (correctCount: number) => void;
   mode: GameMode;
+  answerMode?: AnswerMode;
   debugSkip?: boolean;
   isChallenge?: boolean;
   streak?: number;
@@ -32,11 +33,12 @@ interface ExtendedEnglishProblem extends EnglishProblem {
 
 const ENGLISH_AUDIO_BGM_DUCK_MULTIPLIER = 0.05;
 
-const EnglishChallengeScreen: React.FC<EnglishChallengeScreenProps> = ({ onComplete, mode, debugSkip, isChallenge, streak = 0, rewardHint, languageMode = 'NORMAL', onAnswerResult, reviewProblem = null, assignmentUnits }) => {
+const EnglishChallengeScreen: React.FC<EnglishChallengeScreenProps> = ({ onComplete, mode, answerMode = 'CHOICE', debugSkip, isChallenge, streak = 0, rewardHint, languageMode = 'NORMAL', onAnswerResult, reviewProblem = null, assignmentUnits }) => {
   const [problems, setProblems] = useState<ExtendedEnglishProblem[]>([]);
   const [currentProblemIndex, setCurrentProblemIndex] = useState(0);
   const [correctCount, setCorrectCount] = useState(0);
   const [selectedOption, setSelectedOption] = useState<string | null>(null);
+  const [inputAnswer, setInputAnswer] = useState('');
   const [isAnswered, setIsAnswered] = useState(false);
   const [feedback, setFeedback] = useState<'CORRECT' | 'WRONG' | null>(null);
   
@@ -231,12 +233,18 @@ const EnglishChallengeScreen: React.FC<EnglishChallengeScreenProps> = ({ onCompl
       } else if (currentProblemIndex < problems.length - 1) {
         setCurrentProblemIndex(prev => prev + 1);
         setSelectedOption(null);
+        setInputAnswer('');
         setIsAnswered(false);
         setFeedback(null);
       } else {
         onComplete(isCorrect ? correctCount + 1 : correctCount);
       }
     }, 1200);
+  };
+
+  const handleInputSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    if (inputAnswer.trim()) handleAnswer(inputAnswer);
   };
 
   if (debugSkip) return <div className="w-full h-full bg-black"></div>;
@@ -312,7 +320,19 @@ const EnglishChallengeScreen: React.FC<EnglishChallengeScreenProps> = ({ onCompl
                 )}
             </div>
 
-            <div className={`basic-challenge-options grid ${isConv ? 'grid-cols-1' : 'grid-cols-2'} gap-2 md:gap-4`}>
+            {answerMode === 'INPUT' ? <form onSubmit={handleInputSubmit} className="basic-challenge-input w-full space-y-3">
+                <input
+                  value={inputAnswer}
+                  onChange={(event) => setInputAnswer(event.target.value)}
+                  disabled={isAnswered}
+                  autoFocus
+                  inputMode="text"
+                  className={`w-full rounded-xl border-4 bg-white px-4 py-4 text-center text-xl font-black text-slate-950 outline-none transition-colors ${isAnswered ? 'border-slate-400 opacity-80' : 'border-cyan-400 focus:border-yellow-300'}`}
+                  placeholder={trans('答えを入力', languageMode)}
+                  aria-label={trans('答えを入力', languageMode)}
+                />
+                <button type="submit" disabled={isAnswered || !inputAnswer.trim()} className="w-full rounded-xl border-b-4 border-cyan-950 bg-cyan-600 py-3 text-xl font-bold transition-all hover:bg-cyan-500 active:translate-y-1 active:border-b-0 disabled:cursor-not-allowed disabled:opacity-50">{trans('決定', languageMode)}</button>
+              </form> : <div className={`basic-challenge-options grid ${isConv ? 'grid-cols-1' : 'grid-cols-2'} gap-2 md:gap-4`}>
                 {currentProblem.options.map((opt, idx) => {
                     const isCorrectOption = normalize(opt) === normalize(currentProblem.actualCorrectAnswer);
                     const isSelectedWrong = opt === selectedOption && !isCorrectOption;
@@ -339,7 +359,7 @@ const EnglishChallengeScreen: React.FC<EnglishChallengeScreenProps> = ({ onCompl
                     </button>
                     );
                 })}
-            </div>
+            </div>}
         </div>
     </div>
   );
