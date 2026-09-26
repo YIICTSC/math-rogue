@@ -11,6 +11,7 @@ import {
 
 const T = 16,
   colors = ["#e6b74d", "#7ed6dd", "#c0a0ec", "#ef8a80", "#8ee0a5", "#e7a4cb"];
+const characterImages = new Map<string, HTMLImageElement>();
 function rect(
   c: CanvasRenderingContext2D,
   x: number,
@@ -58,7 +59,14 @@ function building(
   // Roof shingles, timber framing, window panes and stone doorstep.
   for (let row = 0; row < 3; row++) {
     for (let col = 0; col < 5 - row; col++)
-      rect(c, x - 15 + row * 3 + col * 6, y - 14 - row * 5, 4, 1, boss ? "#777d94" : "#dda075");
+      rect(
+        c,
+        x - 15 + row * 3 + col * 6,
+        y - 14 - row * 5,
+        4,
+        1,
+        boss ? "#777d94" : "#dda075",
+      );
   }
   rect(c, x - 14, y - 9, 2, 22, "#897352");
   rect(c, x + 14, y - 9, 2, 22, "#897352");
@@ -71,7 +79,8 @@ function building(
     rect(c, x + 9, y - 30, 4, 12, "#86735e");
     rect(c, x + 8, y - 31, 6, 2, "#b7aa83");
     rect(c, x - 15, y + 8, 10, 5, "#58764b");
-    for (let i = 0; i < 3; i++) rect(c, x - 14 + i * 3, y + 7 + i % 2, 2, 2, "#eac795");
+    for (let i = 0; i < 3; i++)
+      rect(c, x - 14 + i * 3, y + 7 + (i % 2), 2, 2, "#eac795");
     rect(c, x + 20, y + 2, 2, 15, "#897249");
     rect(c, x + 17, y + 2, 9, 7, "#3b6962");
     rect(c, x + 20, y + 3, 2, 4, "#e1d399");
@@ -95,13 +104,33 @@ function person(
     coat = colors[p.color],
     bob = Math.sin(time / 350 + p.color) > 0.8 ? 1 : 0;
   rect(c, x + 3, y + 13, 11, 3, "#203b35");
-  rect(c, x + 5, y + 11, 3, 4, "#303345");
-  rect(c, x + 10, y + 11, 3, 4, "#303345");
-  rect(c, x + 4, y + 5 + bob, 10, 7, coat);
-  rect(c, x + 5, y + bob, 8, 6, "#f1cc97");
-  rect(c, x + 4, y - 2 + bob, 10, 4, "#624431");
-  rect(c, x + 11, y + 2 + bob, 1, 2, "#2f343a");
-  rect(c, x + 3, y + 7 + bob, 2, 4, "#f1cc97");
+  const source = p.profile?.image;
+  if (source && !characterImages.has(source)) {
+    const image = new Image();
+    image.src = source;
+    characterImages.set(source, image);
+  }
+  const sprite = source ? characterImages.get(source) : undefined;
+  if (sprite?.complete && sprite.naturalWidth > 0) {
+    const scale = Math.min(24 / sprite.naturalWidth, 28 / sprite.naturalHeight);
+    const width = sprite.naturalWidth * scale,
+      height = sprite.naturalHeight * scale;
+    c.drawImage(
+      sprite,
+      x + 8 - width / 2,
+      y + 15 - height + bob,
+      width,
+      height,
+    );
+  } else {
+    rect(c, x + 5, y + 11, 3, 4, "#303345");
+    rect(c, x + 10, y + 11, 3, 4, "#303345");
+    rect(c, x + 4, y + 5 + bob, 10, 7, coat);
+    rect(c, x + 5, y + bob, 8, 6, "#f1cc97");
+    rect(c, x + 4, y - 2 + bob, 10, 4, "#624431");
+    rect(c, x + 11, y + 2 + bob, 1, 2, "#2f343a");
+    rect(c, x + 3, y + 7 + bob, 2, 4, "#f1cc97");
+  }
   if (self) {
     rect(c, x + 6, y - 9, 6, 2, "#ffe299");
     rect(c, x + 8, y - 7, 2, 2, "#ffe299");
@@ -128,6 +157,10 @@ function landmark(c: CanvasRenderingContext2D, s: Site, time: number) {
     rect(c, x - 4, y - 9, 9, 16, "#929d87");
     rect(c, x - 2, y - 6, 5, 2, "#d8dfb0");
     rect(c, x - 2, y - 2, 5, 2, "#d8dfb0");
+    c.fillStyle = "#ffedaa";
+    c.font = "bold 12px monospace";
+    c.textAlign = "center";
+    c.fillText("?", x, y - 12);
   } else {
     const guard = s.kind === "guardian";
     rect(c, x - 7, y + 3, 15, 4, "#264940");
@@ -262,14 +295,15 @@ export default function WorldCanvas({
             y = (s.y * T - 33 - cy) * scale;
           if (x < 0 || x > sw || y < 0 || y > sh) return;
           c.fillStyle = "#112526dc";
-          const tw = c.measureText(s.name).width;
+          const label = trans(s.name, languageMode);
+          const tw = c.measureText(label).width;
           c.fillRect(x - tw / 2 - 7, y - 12, tw + 14, 20);
           c.fillStyle = s.cleared
             ? "#9db6a1"
             : s.kind === "boss"
               ? "#f1c6a6"
               : "#eee6c5";
-          c.fillText(s.name, x, y + 2);
+          c.fillText(label, x, y + 2);
         });
         Object.values(w.players).forEach((q) => {
           const x = (q.x * T + 8 - cx) * scale,
@@ -284,7 +318,7 @@ export default function WorldCanvas({
     };
     frame = requestAnimationFrame(paint);
     return () => cancelAnimationFrame(frame);
-  }, [selfId, overview]);
+  }, [selfId, overview, languageMode]);
   return (
     <canvas
       ref={ref}

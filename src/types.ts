@@ -1286,6 +1286,8 @@ export interface VisualEffectInstance {
 }
 
 export interface GameState {
+  /** Live RPG scenes never overwrite the main adventure save. */
+  rpgOnline?: boolean;
   screen: GameScreen;
   mode: GameMode;
   visualTheme?: 'elementary' | 'high-school' | 'magic';

@@ -44,6 +44,10 @@ try {
   const mainSave = localStorage.getItem(saveKey);
   storageService.saveGame({ screen: GameScreen.RPG_ONLINE, player: {}, map: [] });
   assert.equal(localStorage.getItem(saveKey), mainSave, 'RPG Online must preserve the existing main adventure');
+  for (const screen of [GameScreen.MAP, GameScreen.BATTLE, GameScreen.REST, GameScreen.REWARD]) {
+    storageService.saveGame({ screen, rpgOnline: true, player: {}, map: [] });
+    assert.equal(localStorage.getItem(saveKey), mainSave, `RPG native ${screen} must preserve the main adventure`);
+  }
 
   console.log('Title Continue isolation passed for all added mini-games, including the crane game.');
 } finally {

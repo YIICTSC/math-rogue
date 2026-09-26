@@ -60,6 +60,7 @@ const isMainAdventureResumeState = (value: unknown): value is GameState => {
   if (!value || typeof value !== 'object') return false;
   const candidate = value as Partial<GameState>;
   return typeof candidate.screen === 'string'
+    && !candidate.rpgOnline
     && !NON_RESUMABLE_GAME_SCREENS.has(candidate.screen as GameScreen)
     && candidate.challengeMode !== 'COOP'
     && Boolean(candidate.player)

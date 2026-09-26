@@ -27,12 +27,9 @@ export class RpgRoom {
   private status(message: string) {
     if (!this.closed) this.notifyStatus(message);
   }
-  practice(name: string, subject: World["subject"]) {
+  practice(name: string) {
     this.host = true;
-    this.world = createWorld(
-      crypto.getRandomValues(new Uint32Array(1))[0],
-      subject,
-    );
+    this.world = createWorld(crypto.getRandomValues(new Uint32Array(1))[0]);
     addPlayer(this.world, this.selfId, name);
     this.emit();
   }
@@ -84,7 +81,7 @@ export class RpgRoom {
     );
     return peer;
   }
-  async create(name: string, subject: World["subject"]) {
+  async create(name: string) {
     this.host = true;
     this.code = Array.from(
       crypto.getRandomValues(new Uint8Array(6)),
@@ -92,10 +89,7 @@ export class RpgRoom {
     ).join("");
     const peer = await this.open(`learning-rogue-rpg-${this.code}`);
     this.selfId = peer.id;
-    this.world = createWorld(
-      crypto.getRandomValues(new Uint32Array(1))[0],
-      subject,
-    );
+    this.world = createWorld(crypto.getRandomValues(new Uint32Array(1))[0]);
     addPlayer(this.world, this.selfId, name);
     peer.on("connection", (conn) => {
       // Bound even unauthenticated/pending channels.
@@ -112,7 +106,19 @@ export class RpgRoom {
       }, 10000);
       conn.on("data", (raw: unknown) => {
         if (!raw || typeof raw !== "object" || !this.world) return;
-        const data = raw as { type?: string; name?: string; action?: Action };
+        const data = raw as {
+          type?: string;
+          name?: string;
+          action?: Action;
+          version?: number;
+        };
+        if (data.type === "hello" && data.version !== 2) {
+          conn.send({
+            type: "error",
+            message: "同じバージョンのRPGオンラインで参加してください。",
+          });
+          return;
+        }
         if (
           data.type === "hello" &&
           typeof data.name === "string" &&
@@ -181,7 +187,7 @@ export class RpgRoom {
         15000,
       );
       conn.on("open", () =>
-        conn.send({ type: "hello", name: name.slice(0, 16) }),
+        conn.send({ type: "hello", version: 2, name: name.slice(0, 16) }),
       );
       conn.on("data", (raw: unknown) => {
         if (!raw || typeof raw !== "object") return;
@@ -198,6 +204,13 @@ export class RpgRoom {
           return;
         }
         if (data.type === "init" && data.world) {
+          if (!data.world.nativeMode) {
+            clearTimeout(timeout);
+            reject(
+              new Error("同じバージョンのRPGオンラインで参加してください。"),
+            );
+            return;
+          }
           clearTimeout(timeout);
           this.world = data.world;
           this.emit();

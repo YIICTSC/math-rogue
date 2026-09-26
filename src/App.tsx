@@ -308,6 +308,9 @@ import {
 } from './data/vacationNarrativeCopy';
 
 const RpgOnline = React.lazy(() => import('./rpg/RpgOnline'));
+import { nativeProfile, siteNode, type RpgEncounter, type RpgSnapshot } from './rpg/bridge';
+import { isSharedSite } from './rpg/engine';
+import type { RpgRoom } from './rpg/network';
 const PARRY_WINDOW_MS = 650;
 const PARRY_PERFECT_MS = 220;
 const ENEMY_FINISHER_BURST_VOICE_DELAY_MS = 760;
@@ -1635,6 +1638,18 @@ const App: React.FC = () => {
         return nextPlayer;
     };
 
+    const [rpgSnapshot, setRpgSnapshot] = useState<RpgSnapshot | null>(null);
+    const [rpgMounted, setRpgMounted] = useState(false);
+    const [rpgSceneError, setRpgSceneError] = useState('');
+    const rpgSnapshotRef = useRef<RpgSnapshot | null>(null);
+    const rpgRoomRef = useRef<RpgRoom | null>(null);
+    const rpgEncounterRef = useRef<RpgEncounter | null>(null);
+    const rpgLastTokenRef = useRef<string | null>(null);
+    const receiveRpgSnapshot = useCallback((snapshot: RpgSnapshot) => {
+        rpgSnapshotRef.current = snapshot;
+        setRpgSnapshot(snapshot);
+    }, []);
+    const attachRpgRoom = useCallback((room: RpgRoom) => { rpgRoomRef.current = room; }, []);
     const [gameState, setGameState] = useState<GameState>({
         screen: GameScreen.START_MENU,
         mode: GameMode.MULTIPLICATION,
@@ -5088,8 +5103,11 @@ const App: React.FC = () => {
 
     useEffect(() => {
         if (isDebugModeActive) return;
-        if (gameState.screen === GameScreen.RPG_ONLINE) {
-            setGameState(prev => ({ ...prev, screen: GameScreen.START_MENU, challengeMode: undefined }));
+        if (gameState.screen === GameScreen.RPG_ONLINE || gameState.rpgOnline) {
+            rpgRoomRef.current?.close();
+            rpgEncounterRef.current = null;
+            setRpgMounted(false);
+            setGameState(prev => ({ ...prev, rpgOnline: undefined, screen: GameScreen.START_MENU, challengeMode: undefined }));
             return;
         }
         if (
@@ -5100,7 +5118,7 @@ const App: React.FC = () => {
         storageService.clearDebugSettings();
         storageService.clearSave();
         setGameState(prev => ({ ...prev, screen: GameScreen.START_MENU, challengeMode: undefined }));
-    }, [gameState.screen, isDebugModeActive]);
+    }, [gameState.screen, gameState.rpgOnline, isDebugModeActive]);
 
     // C50の真エンディングへ到達した編だけ、対応するバカンス衣装を
     // 永続解禁する。デバッグメニュー中は両編を表示可能にするため、
@@ -5309,6 +5327,20 @@ const App: React.FC = () => {
     };
 
     const returnToTitle = () => {
+        if (stateRef.current.rpgOnline) {
+            rpgRoomRef.current?.close();
+            rpgRoomRef.current = null;
+            rpgEncounterRef.current = null;
+            rpgLastTokenRef.current = null;
+            rpgSnapshotRef.current = null;
+            setRpgSnapshot(null);
+            setRpgMounted(false);
+            setRpgSceneError('');
+            setIsLoading(false);
+            setGameState(prev => ({ ...prev, rpgOnline: undefined, screen: GameScreen.START_MENU }));
+            audioService.playBGM('menu');
+            return;
+        }
         if (stateRef.current.screen === GameScreen.PROBLEM_CHALLENGE && currentAssignment?.enforcementLevel === 'launch_lock') {
             launchLockedAssignmentExitRef.current = currentAssignment.id;
         }
@@ -6831,7 +6863,7 @@ const App: React.FC = () => {
         }));
     };
 
-    const launchNewAdventure = (themeOverride: VisualThemeId = visualTheme) => {
+    const launchNewAdventure = (themeOverride: VisualThemeId = visualTheme, rpgOnline = false) => {
         const adventureTheme = VISUAL_THEMES.includes(themeOverride as VisualThemeId)
             ? themeOverride as VisualThemeId
             : visualTheme;
@@ -6850,6 +6882,7 @@ const App: React.FC = () => {
         showDailyAssignmentNoticeForProblemSelection();
         setGameState({
             // A selected FREE assignment already supplies the problem source.
+            rpgOnline,
             // Skip the separate problem/mode selector and continue with the
             // adventure-specific difficulty selection instead.
             screen: shouldSkipAssignmentModeSelection
@@ -9017,7 +9050,7 @@ const App: React.FC = () => {
         await startAdventureAfterRelic(relic);
     };
 
-    const handleNodeSelect = async (node: MapNode, allowRemoteCoopSelection = false) => {
+    const handleNodeSelect = async (node: MapNode, allowRemoteCoopSelection = false, rpgEncounter?: RpgEncounter) => {
         if (gameState.challengeMode === 'COOP' && coopSession) {
             if (!coopSession.isHost) {
                 setCoopMapPendingNodeId(node.id);
@@ -9046,7 +9079,11 @@ const App: React.FC = () => {
         audioService.playSound('select');
 
         const nextFloor = node.y + 1;
-        const nextState = { ...gameState, currentMapNodeId: node.id, floor: nextFloor, endlessBossPhase: undefined };
+        const rpgAct = rpgEncounter?.site.kind === 'boss' ? 3
+            : rpgEncounter?.site.kind === 'guardian'
+                ? 1 + Math.max(0, rpgSnapshotRef.current?.world.sites.filter(s => s.kind === 'guardian').findIndex(s => s.id === rpgEncounter.site.id) ?? 0)
+                : Math.min(3, 1 + Math.floor((rpgSnapshotRef.current?.world.players[rpgSnapshotRef.current.selfId]?.completedBattles || 0) / 14));
+        const nextState = { ...gameState, ...(rpgEncounter ? { map: [node], act: rpgAct } : {}), currentMapNodeId: node.id, floor: nextFloor, endlessBossPhase: undefined };
         const endlessChapter = nextState.isEndless
             ? Math.max(1, nextState.endlessFloor ?? nextState.act)
             : undefined;
@@ -9057,7 +9094,7 @@ const App: React.FC = () => {
                 // `act` is the mode-local chapter number shown in the UI.
                 // Endless starts at Chapter 1, but its combat scaling should
                 // not fall back to normal Act 1 difficulty.
-                const actMultiplier = gameState.isEndless ? Math.max(5, gameState.act) : gameState.act;
+                const actMultiplier = nextState.isEndless ? Math.max(5, nextState.act) : nextState.act;
                 const floorDifficulty = node.y * (1 + (actMultiplier * 0.5));
 
                 let enemies: Enemy[] = [];
@@ -9196,7 +9233,9 @@ const App: React.FC = () => {
                         const hpStep = Math.max(2, Math.floor(baseHp * 0.08));
                         const hpAdjusted = Math.max(1, Math.floor(baseHp + hpOffsets[i] * hpStep));
 
-                        const name = await generateEnemyName(node.y, actMultiplier, nextState.visualTheme || visualTheme);
+                        const name = rpgEncounter?.site.kind === 'boss'
+                            ? '校長先生'
+                            : await generateEnemyName(node.y, actMultiplier, nextState.visualTheme || visualTheme);
                         const isBoss = node.type === NodeType.BOSS;
 
                         enemies.push({
@@ -9221,10 +9260,28 @@ const App: React.FC = () => {
                     });
                 }
 
+                if (rpgEncounter && isSharedSite(rpgEncounter.site)) {
+                    rpgRoomRef.current?.send({ type: 'native-ready', token: rpgEncounter.token, maxHp: enemies[0].maxHp });
+                    const deadline = Date.now() + 15000;
+                    while (!rpgSnapshotRef.current?.world.sites.find(s => s.id === rpgEncounter.site.id)?.nativeInitialized) {
+                        if (Date.now() > deadline || rpgEncounterRef.current?.token !== rpgEncounter.token)
+                            throw new Error('共有戦闘の接続が切れました。');
+                        await new Promise(resolve => window.setTimeout(resolve, 50));
+                    }
+                    const shared = rpgSnapshotRef.current!.world.sites.find(s => s.id === rpgEncounter.site.id)!;
+                    enemies[0] = { ...enemies[0], maxHp: shared.maxHp, currentHp: shared.hp };
+                    rpgEncounter.lastHp = shared.hp;
+                }
+                if (rpgEncounter && rpgEncounterRef.current?.token !== rpgEncounter.token) return;
+                if (rpgEncounter) rpgEncounter.entered = true;
                 const battleBackgroundScene = chooseBattleBackgroundScene(node.type, actMultiplier, nextState.floor, activeBattleVisualTheme, nextState.player.appearanceMode);
                 const flavor = getBattleBackgroundFlavor(battleBackgroundScene, actMultiplier * 100 + nextState.floor);
 
                 const p = preparePlayerForBattle(nextState.player, node.type);
+                if (rpgEncounter && rpgSnapshotRef.current) {
+                    const { world, selfId } = rpgSnapshotRef.current;
+                    p.strength += world.players[selfId]?.nativeScene?.teamPower || 0;
+                }
                 if (isAzukiBoss) {
                     p.turnFlags[AZUKI_BOSS_FLAG] = true;
                     delete p.turnFlags[AZUKI_ENCOUNTER_FLAG];
@@ -9569,10 +9626,80 @@ const App: React.FC = () => {
 
         } catch (e) {
             console.error(e);
+            if (rpgEncounter && rpgEncounterRef.current?.token === rpgEncounter.token) {
+                rpgEncounterRef.current = null;
+                rpgRoomRef.current?.send({ type: 'native-finish', token: rpgEncounter.token, outcome: 'complete', profile: nativeProfile(gameState.player) });
+                setRpgSceneError('シーンを開始できませんでした。部屋に入り直してください。');
+                setGameState(prev => ({ ...prev, screen: GameScreen.MAP }));
+            }
         } finally {
             setIsLoading(false);
         }
     };
+
+    // Exploration stays mounted while the original main-game scenes run.
+    useEffect(() => {
+        if (!gameState.rpgOnline || gameState.screen === GameScreen.START_MENU) {
+            if (rpgMounted) {
+                rpgRoomRef.current?.close();
+                setRpgMounted(false);
+                rpgEncounterRef.current = null;
+                rpgLastTokenRef.current = null;
+                rpgSnapshotRef.current = null;
+                setRpgSnapshot(null);
+            }
+            return;
+        }
+        if (gameState.screen === GameScreen.MAP) setRpgMounted(true);
+        const snapshot = rpgSnapshotRef.current;
+        const me = snapshot?.world.players[snapshot.selfId];
+        if (!snapshot || !me) return;
+        const encounter = rpgEncounterRef.current;
+        if (!encounter && me.nativeScene && me.nativeScene.token !== rpgLastTokenRef.current) {
+            const site = snapshot.world.sites.find(s => s.id === me.nativeScene!.siteId)!;
+            const request: RpgEncounter = { token: me.nativeScene.token, site, outcome: 'complete', entered: false, damage: 0, sequence: 0 };
+            rpgEncounterRef.current = request;
+            setRpgSceneError('');
+            rpgLastTokenRef.current = request.token;
+            void handleNodeSelect(siteNode(site, me.completedBattles || 0), false, request).then(() => {
+                request.entered = true;
+            });
+            return;
+        }
+        if (encounter?.entered && gameState.screen === GameScreen.MAP) {
+            rpgRoomRef.current?.send({ type: 'native-finish', token: encounter.token, outcome: encounter.outcome, profile: nativeProfile(gameState.player) });
+            rpgEncounterRef.current = null;
+            audioService.playBGM('map');
+        }
+    }, [gameState.screen, gameState.rpgOnline, rpgSnapshot, rpgMounted]);
+
+    useEffect(() => {
+        const encounter = rpgEncounterRef.current;
+        if (!gameState.rpgOnline || gameState.screen !== GameScreen.BATTLE || !encounter?.entered || !isSharedSite(encounter.site)) return;
+        const enemy = gameState.enemies[0];
+        if (encounter.lastHp === undefined) return;
+        // The main battle removes defeated enemies immediately, so an empty
+        // array is also the final damage update for the shared boss.
+        const localHp = enemy?.currentHp ?? 0;
+        const delta = encounter.lastHp - localHp;
+        if (delta !== 0) {
+            encounter.damage += delta;
+            encounter.sequence++;
+            encounter.lastHp = localHp;
+            rpgRoomRef.current?.send({ type: 'native-damage', token: encounter.token, total: encounter.damage, sequence: encounter.sequence });
+        }
+        const snapshot = rpgSnapshotRef.current;
+        const shared = snapshot?.world.sites.find(s => s.id === encounter.site.id);
+        const scene = snapshot?.world.players[snapshot.selfId]?.nativeScene;
+        if (!shared?.nativeInitialized || scene?.token !== encounter.token) return;
+        const pendingDamage = encounter.damage - scene.damage;
+        const hp = Math.max(0, Math.min(shared.maxHp, shared.hp - pendingDamage));
+        if (enemy && hp !== enemy.currentHp) {
+            encounter.lastHp = hp;
+            setGameState(prev => ({ ...prev, enemies: hp === 0 ? prev.enemies.slice(1)
+                : prev.enemies.map((e, i) => i === 0 ? { ...e, currentHp: hp, maxHp: shared.maxHp } : e) }));
+        }
+    }, [gameState.enemies, gameState.screen, gameState.rpgOnline, rpgSnapshot]);
 
     const handleDodgeballResult = (hit: boolean) => {
         if (hit) {
@@ -14322,6 +14449,7 @@ const App: React.FC = () => {
 
     const resolveBattleVictory = useCallback(() => {
         if (battleVictoryResolvingRef.current) return;
+        if (rpgEncounterRef.current) rpgEncounterRef.current.outcome = 'victory';
         battleVictoryResolvingRef.current = true;
         const shouldKeepBattleBgm =
             stateRef.current.challengeMode === 'COOP' &&
@@ -14462,6 +14590,13 @@ const App: React.FC = () => {
 
     const resolveBattleDefeat = useCallback(() => {
         const currentState = stateRef.current;
+        if (currentState.rpgOnline && rpgEncounterRef.current) {
+            rpgEncounterRef.current.outcome = 'defeat';
+            setGameState(prev => ({ ...prev, screen: GameScreen.MAP, enemies: [],
+                player: { ...clearBattleOnlyCardState(clearBigLadleTemp(prev.player)), currentHp: Math.ceil(prev.player.maxHp * 0.6), gold: Math.max(0, prev.player.gold - 10) } }));
+            audioService.playBGM('map');
+            return;
+        }
         if (currentState.isEndless && currentState.player.turnFlags.ENDLESS_CHEAT_DEATH && currentState.player.currentHp <= 0) {
             const turnFlags = { ...currentState.player.turnFlags };
             delete turnFlags.ENDLESS_CHEAT_DEATH;
@@ -14839,6 +14974,7 @@ const App: React.FC = () => {
                     slot.plantedCard ? { ...slot, growth: Math.min(slot.maxGrowth, slot.growth + 1) } : slot
                 );
             }
+            if (prev.rpgOnline) return { ...prev, player: nextPlayer, rewards: [], screen: GameScreen.MAP };
             const endlessChapter = Math.max(1, prev.endlessFloor ?? prev.act);
             const isEndlessChapterEnd = Boolean(
                 prev.isEndless &&
@@ -19202,10 +19338,7 @@ const App: React.FC = () => {
                                                 if (!isDebugModeActive) return;
                                                 if (redirectToAssignmentChallengeIfLocked()) return;
                                                 if (isDailyLimitReached) { setShowTimeLimitModal(true); return; }
-                                                setPendingAssignmentStartScreen(GameScreen.RPG_ONLINE);
-                                                if (showDailyAssignmentNoticeForProblemSelection()) return;
-                                                setPendingAssignmentStartScreen(null);
-                                                setGameState(prev => ({ ...prev, screen: GameScreen.RPG_ONLINE }));
+                                                launchNewAdventure(visualTheme, true);
                                             }}
                                             className="w-full py-3 px-4 text-sm font-bold border border-amber-400/60 bg-emerald-950 text-amber-100 hover:bg-emerald-900 flex items-center justify-center gap-2 disabled:opacity-40"
                                         >
@@ -20667,7 +20800,7 @@ const App: React.FC = () => {
                     </div>
                 )}
 
-                {gameState.screen === GameScreen.MAP && (
+                {gameState.screen === GameScreen.MAP && !gameState.rpgOnline && (
                     <div className="absolute inset-0">
                         <MapScreen
                             nodes={gameState.map}
@@ -20869,9 +21002,11 @@ const App: React.FC = () => {
                     </div>
                 )}
 
-                {!OFFLINE_DISTRIBUTABLE && isDebugModeActive && gameState.screen === GameScreen.RPG_ONLINE && (
+                {!OFFLINE_DISTRIBUTABLE && isDebugModeActive && gameState.rpgOnline && rpgMounted && (
                     <React.Suspense fallback={<div className="fixed inset-0 z-50 grid place-items-center bg-slate-950 text-amber-100">{trans("冒険の世界を準備しています…", languageMode)}</div>}>
-                        <RpgOnline languageMode={languageMode} onClose={returnToTitle} />
+                        <div className="absolute inset-0" style={{ display: gameState.screen === GameScreen.MAP ? undefined : 'none' }}>
+                            <RpgOnline languageMode={languageMode} player={gameState.player} active={gameState.screen === GameScreen.MAP} sceneError={rpgSceneError} onRoom={attachRpgRoom} onSnapshot={receiveRpgSnapshot} onClose={returnToTitle} />
+                        </div>
                     </React.Suspense>
                 )}
                 {!OFFLINE_DISTRIBUTABLE && gameState.screen === GameScreen.COOP_SETUP && (
