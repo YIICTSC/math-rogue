@@ -265,6 +265,28 @@
   padding: 13px 20px;
   font-weight: bold !important;
 }
+.rpg-join-button {
+  width: 100%;
+  margin: 8px 0 4px;
+  padding: 13px 14px;
+  background: #354d43;
+  border: 1px solid #8da27f;
+  border-radius: 4px;
+  color: #f5e9c4;
+  font-weight: bold;
+}
+.rpg-join-button:hover:not(:disabled) {
+  background: #476557;
+}
+.rpg-join-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.48;
+}
+.rpg-join-hint {
+  margin: -5px 0 7px;
+  color: #aebdb0;
+  font-size: 11px;
+}
 .rpg-lobby-form > .rpg-primary {
   width: 100%;
   margin: 26px 0;

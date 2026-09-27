@@ -145,7 +145,7 @@ try {
   if ((await state()) === "RELIC_SELECTION") await call("relic");
   await screen("MAP");
   assert.equal(
-    await page.getByLabel("ルームコード").inputValue(),
+    await page.getByLabel("招待コード（6文字）").inputValue(),
     "AB2CDE",
     "an invite URL pre-fills the room code",
   );

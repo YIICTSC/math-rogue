@@ -299,10 +299,12 @@ export default function RpgOnline({
                 部屋を作る
               </button>
               <label>
-                ルームコード
+                招待コード（6文字）
                 <input
                   value={code}
                   maxLength={6}
+                  placeholder="ABC123"
+                  autoComplete="off"
                   onChange={(e) => setCode(e.target.value.toUpperCase())}
                 />
               </label>
@@ -311,11 +313,17 @@ export default function RpgOnline({
                   招待URLからルームコードを読み込みました。
                 </p>
               )}
+              {!code && (
+                <p className="rpg-join-hint">
+                  6文字のコードを入力すると入室できます。
+                </p>
+              )}
               <button
+                className="rpg-join-button"
                 disabled={busy || !name.trim() || code.length !== 6}
                 onClick={() => start("join")}
               >
-                参加
+                招待コードを入力して入室する
               </button>
               <button
                 className="rpg-practice"
