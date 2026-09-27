@@ -1651,6 +1651,7 @@ const App: React.FC = () => {
         typeof window === 'undefined' ? '' : getRpgRoomCodeFromUrl(window.location.href)
     ), []);
     const rpgInviteParticipantRef = useRef(false);
+    const rpgInviteAutoLaunchAttemptedRef = useRef(false);
     const rpgInviteSetupAppliedRef = useRef(false);
     const rpgInviteAssignmentRef = useRef<AssignmentPayload | null>(null);
     const receiveRpgSnapshot = useCallback((snapshot: RpgSnapshot) => {
@@ -2576,6 +2577,11 @@ const App: React.FC = () => {
     // what activates the rest of the debug surface for the current session.
     const [isDebugMode, setIsDebugMode] = useState(false);
     const isDebugModeActive = DEBUG_FEATURES_ENABLED && isDebugMode;
+    const isRpgInviteParticipantActive = DEBUG_FEATURES_ENABLED
+        && Boolean(rpgInviteCode)
+        && rpgInviteParticipantRef.current
+        && Boolean(gameState.rpgOnline);
+    const canRunRpgOnline = isDebugModeActive || isRpgInviteParticipantActive;
     const [debugEventSimulationTheme, setDebugEventSimulationTheme] = useState<VisualThemeId>('elementary');
     const [isMathDebugSkipped, setIsMathDebugSkipped] = useState(false);
     const [isDebugHpOne, setIsDebugHpOne] = useState(false);
@@ -5137,7 +5143,7 @@ const App: React.FC = () => {
     }, []);
 
     useEffect(() => {
-        if (isDebugModeActive) return;
+        if (canRunRpgOnline) return;
         if (gameState.screen === GameScreen.RPG_ONLINE || gameState.rpgOnline) {
             rpgRoomRef.current?.close();
             rpgEncounterRef.current = null;
@@ -5156,7 +5162,7 @@ const App: React.FC = () => {
         storageService.clearDebugSettings();
         storageService.clearSave();
         setGameState(prev => ({ ...prev, screen: GameScreen.START_MENU, challengeMode: undefined }));
-    }, [gameState.screen, gameState.rpgOnline, isDebugModeActive]);
+    }, [canRunRpgOnline, gameState.screen, gameState.rpgOnline]);
 
     // C50の真エンディングへ到達した編だけ、対応するバカンス衣装を
     // 永続解禁する。デバッグメニュー中は両編を表示可能にするため、
@@ -6986,6 +6992,21 @@ const App: React.FC = () => {
             actStats: { enemiesDefeated: 0, goldGained: 0, mathCorrect: 0 }
         });
     };
+
+    // An invite URL is an explicit participant entry point. It must be able to
+    // reach the RPG lobby without activating the local debug gesture first.
+    useEffect(() => {
+        if (
+            OFFLINE_DISTRIBUTABLE
+            || !DEBUG_FEATURES_ENABLED
+            || !rpgInviteCode
+            || rpgInviteAutoLaunchAttemptedRef.current
+            || gameState.screen !== GameScreen.START_MENU
+            || gameState.rpgOnline
+        ) return;
+        rpgInviteAutoLaunchAttemptedRef.current = true;
+        launchNewAdventure(visualTheme, true);
+    }, [gameState.rpgOnline, gameState.screen, rpgInviteCode, visualTheme]);
 
     const startChallengeGame = () => {
         if (redirectToAssignmentChallengeIfLocked()) return;
@@ -21064,7 +21085,7 @@ const App: React.FC = () => {
                     </div>
                 )}
 
-                {!OFFLINE_DISTRIBUTABLE && isDebugModeActive && gameState.rpgOnline && rpgMounted && (
+                {!OFFLINE_DISTRIBUTABLE && canRunRpgOnline && gameState.rpgOnline && rpgMounted && (
                     <React.Suspense fallback={<div className="fixed inset-0 z-50 grid place-items-center bg-slate-950 text-amber-100">{trans("冒険の世界を準備しています…", languageMode)}</div>}>
                         <div className="absolute inset-0" style={{ display: gameState.screen === GameScreen.MAP ? undefined : 'none' }}>
                             <RpgOnline

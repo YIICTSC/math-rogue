@@ -23,12 +23,13 @@ const server = await createServer({
           `
     window.__rpgTest = {
       state: gameState, room: rpgRoomRef.current, snapshot: rpgSnapshotRef.current,
-      setState: setGameState, debug: () => setIsDebugMode(true),
+      setState: setGameState, debug: () => setIsDebugMode(true), debugActive: () => isDebugModeActive,
       start: () => launchNewAdventure(visualTheme, true),
       dismiss: () => { setShowAssignmentLetter(false); setShowParryTutorial(false); },
       mode: () => handleModeSelect(GameMode.MULTIPLICATION), difficulty: () => handleDifficultySelect(1),
       character: () => handleCharacterSelect(themedCharacters[0]),
       relic: () => handleRelicSelect(starterRelics[0]),
+      inviteSetup: applyRpgInviteSetup,
       play: handlePlayCard, win: resolveBattleVictory, lose: resolveBattleDefeat,
       quiz: handleMathChallengeComplete, rewards: finishRewardPhase, reward: handleRewardSelection,
       complete: handleNodeComplete, rest: handleRestAction, treasure: handleTreasureOpen,
@@ -417,9 +418,71 @@ try {
     .getByRole("heading", { name: "課題をクリアしました", exact: true })
     .waitFor();
   await page.screenshot({ path: "tmp/rpg-qa/native-assignment-complete.png" });
+
+  // Opening an invite URL is a participant entry point even before the local
+  // debug gesture. The host setup must put the participant on protagonist
+  // selection and carry the problem settings into the normal scenes.
+  const invitePage = await browser.newPage({ viewport: { width: 1440, height: 1000 } });
+  const inviteErrors = [];
+  invitePage.on("pageerror", (e) => inviteErrors.push(e.message));
+  await invitePage.addInitScript(() => {
+    localStorage.setItem("pixel_spire_seen_battle_tutorial_v1", "true");
+    localStorage.setItem("pixel_spire_seen_parry_tutorial_v1", "true");
+  });
+  await invitePage.goto("http://127.0.0.1:5196/?rpgRoom=AB2CDE", {
+    waitUntil: "domcontentloaded",
+    timeout: 120000,
+  });
+  await invitePage.waitForFunction(() => !!window.__rpgTest);
+  await invitePage.waitForFunction(
+    () => window.__rpgTest.state.screen === "MAP" && window.__rpgTest.state.rpgOnline,
+  );
+  assert.equal(
+    await invitePage.evaluate(() => window.__rpgTest.debugActive?.() ?? false),
+    false,
+    "an invite participant does not need to activate debug mode",
+  );
+  await invitePage.evaluate(() =>
+    window.__rpgTest.inviteSetup({
+      visualTheme: "high-school",
+      mode: "MIXED",
+      modePool: ["MULTIPLICATION", "UPPER_TRIVIA"],
+      answerMode: "INPUT",
+      difficultyLevel: 3,
+    }),
+  );
+  await invitePage.waitForFunction(
+    () => window.__rpgTest.state.screen === "CHARACTER_SELECTION",
+  );
+  assert.deepEqual(
+    await invitePage.evaluate(() => ({
+      mode: window.__rpgTest.state.mode,
+      modePool: window.__rpgTest.state.modePool,
+      answerMode: window.__rpgTest.state.answerMode,
+      difficultyLevel: window.__rpgTest.state.difficultyLevel,
+    })),
+    {
+      mode: "MIXED",
+      modePool: ["MULTIPLICATION", "UPPER_TRIVIA"],
+      answerMode: "INPUT",
+      difficultyLevel: 3,
+    },
+    "invite participants receive the host problem setup",
+  );
+  await invitePage.evaluate(() => window.__rpgTest.character());
+  await invitePage.waitForFunction(
+    () => window.__rpgTest.state.screen === "MAP",
+  );
+  assert.equal(
+    await invitePage.evaluate(() => window.__rpgTest.state.player.id),
+    "WARRIOR",
+    "invite participants choose a protagonist before entering the world",
+  );
+  assert.deepEqual(inviteErrors, []);
+  await invitePage.close();
   assert.deepEqual(errors, []);
   console.log(
-    "Main-scene RPG: selection, all 3 themes, original card battle, quiz/rewards, cooldowns, treasure, shared guardians/boss, defeat, main-save isolation, custom assignment answers and completion passed.",
+    "Main-scene RPG: selection, invite auto-entry/setup sync, all 3 themes, original card battle, quiz/rewards, cooldowns, treasure, shared guardians/boss, defeat, main-save isolation, custom assignment answers and completion passed.",
   );
 } catch (e) {
   console.error("SCREEN", await state(), "ERRORS", errors);
