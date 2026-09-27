@@ -8958,7 +8958,7 @@ const App: React.FC = () => {
             : [];
 
         const difficulty = getDifficultyConfig(gameState.difficultyLevel);
-        const legacyCard = (gameState.challengeMode === 'RACE' || !difficulty.legacyCardAllowed)
+        const legacyCard = (gameState.rpgOnline || gameState.challengeMode === 'RACE' || !difficulty.legacyCardAllowed)
             ? null
             : storageService.getLegacyCard(gameState.challengeMode === 'COOP' ? 'COOP' : 'NORMAL');
         if (legacyCard) {

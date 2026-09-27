@@ -129,6 +129,14 @@ try {
     return saved;
   });
   await call("debug");
+  // A saved inheritance card must not open the normal game's "忘れ物"
+  // startup event when the adventure is launched in RPG mode.
+  await page.evaluate(() =>
+    localStorage.setItem(
+      "pixel_spire_legacy_card_v1",
+      JSON.stringify({ id: "rpg-legacy-test", name: "RPG引き継ぎテストカード" }),
+    ),
+  );
   await page.evaluate(() =>
     history.replaceState({}, "", `${location.pathname}?rpgRoom=AB2CDE`),
   );
@@ -144,6 +152,7 @@ try {
   await call("character");
   if ((await state()) === "RELIC_SELECTION") await call("relic");
   await screen("MAP");
+  await page.evaluate(() => localStorage.removeItem("pixel_spire_legacy_card_v1"));
   assert.equal(
     await page.getByLabel("招待コード（6文字）").inputValue(),
     "AB2CDE",
