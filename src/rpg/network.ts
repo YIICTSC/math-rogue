@@ -7,6 +7,9 @@ import {
   type Action,
   type World,
 } from "./engine";
+import type { RpgAdventureSetup } from "./setup";
+
+const RPG_PROTOCOL_VERSION = 3;
 
 /** A single room owner validates commands and broadcasts authoritative state. */
 export class RpgRoom {
@@ -81,7 +84,7 @@ export class RpgRoom {
     );
     return peer;
   }
-  async create(name: string) {
+  async create(name: string, setup?: RpgAdventureSetup) {
     this.host = true;
     this.code = Array.from(
       crypto.getRandomValues(new Uint8Array(6)),
@@ -89,7 +92,10 @@ export class RpgRoom {
     ).join("");
     const peer = await this.open(`learning-rogue-rpg-${this.code}`);
     this.selfId = peer.id;
-    this.world = createWorld(crypto.getRandomValues(new Uint32Array(1))[0]);
+    this.world = createWorld(
+      crypto.getRandomValues(new Uint32Array(1))[0],
+      setup,
+    );
     addPlayer(this.world, this.selfId, name);
     peer.on("connection", (conn) => {
       // Bound even unauthenticated/pending channels.
@@ -112,7 +118,7 @@ export class RpgRoom {
           action?: Action;
           version?: number;
         };
-        if (data.type === "hello" && data.version !== 2) {
+        if (data.type === "hello" && data.version !== RPG_PROTOCOL_VERSION) {
           conn.send({
             type: "error",
             message: "同じバージョンのRPGオンラインで参加してください。",
@@ -187,7 +193,11 @@ export class RpgRoom {
         15000,
       );
       conn.on("open", () =>
-        conn.send({ type: "hello", version: 2, name: name.slice(0, 16) }),
+        conn.send({
+          type: "hello",
+          version: RPG_PROTOCOL_VERSION,
+          name: name.slice(0, 16),
+        }),
       );
       conn.on("data", (raw: unknown) => {
         if (!raw || typeof raw !== "object") return;

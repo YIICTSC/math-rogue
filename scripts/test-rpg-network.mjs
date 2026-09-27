@@ -38,13 +38,32 @@ try {
     window.snapshots = {};
     window.rooms = [];
     window.errors = [];
+    const setup = {
+      visualTheme: "elementary",
+      mode: "MULTIPLICATION",
+      modePool: ["MULTIPLICATION"],
+      answerMode: "CHOICE",
+      difficultyLevel: 2,
+      assignment: {
+        id: "network-assignment",
+        title: "ネットワーク課題",
+        units: [],
+        customProblems: [
+          { id: "custom-1", question: "1+1", answer: "2", options: ["1", "2"] },
+        ],
+        dueAt: "2099-01-01T00:00:00.000Z",
+        gameMode: "FREE",
+        answerMode: "CHOICE",
+        createdAt: "2098-01-01T00:00:00.000Z",
+      },
+    };
     const host = new window.RpgRoom(
       (w) => (window.snapshots.host = w),
       (m) => window.errors.push(m),
     );
     window.rooms.push(host);
     window.host = host;
-    await host.create("Host");
+    await host.create("Host", setup);
     for (let batch = 0; batch < 13; batch++)
       await Promise.all(
         Array.from({ length: 3 }, async (_, j) => {
@@ -60,6 +79,29 @@ try {
   });
   await page.waitForFunction(
     () => Object.keys(window.snapshots[38]?.players || {}).length === 40,
+  );
+  assert.deepEqual(
+    await page.evaluate(() => window.snapshots[38].setup),
+    {
+      visualTheme: "elementary",
+      mode: "MULTIPLICATION",
+      modePool: ["MULTIPLICATION"],
+      answerMode: "CHOICE",
+      difficultyLevel: 2,
+      assignment: {
+        id: "network-assignment",
+        title: "ネットワーク課題",
+        units: [],
+        customProblems: [
+          { id: "custom-1", question: "1+1", answer: "2", options: ["1", "2"] },
+        ],
+        dueAt: "2099-01-01T00:00:00.000Z",
+        gameMode: "FREE",
+        answerMode: "CHOICE",
+        createdAt: "2098-01-01T00:00:00.000Z",
+      },
+    },
+    "host adventure setup is included in the participant world",
   );
   const ids = await page.evaluate(() => {
     const host = window.host,

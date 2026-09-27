@@ -15,6 +15,37 @@ try {
     WIDTH,
     HEIGHT,
   } = await server.ssrLoadModule("/src/rpg/engine.ts");
+  const setup = {
+    visualTheme: "high-school",
+    mode: "MIXED",
+    modePool: ["MULTIPLICATION", "UPPER_TRIVIA"],
+    answerMode: "CHOICE",
+    difficultyLevel: 2,
+  };
+  const setupWorld = createWorld(7, setup);
+  assert.deepEqual(
+    setupWorld.setup,
+    setup,
+    "world keeps the host adventure setup",
+  );
+  const assignment = {
+    id: "rpg-assignment",
+    title: "オンライン課題",
+    units: [],
+    customProblems: [
+      { id: "custom-1", question: "1+1", answer: "2", options: ["1", "2"] },
+    ],
+    dueAt: "2099-01-01T00:00:00.000Z",
+    gameMode: "FREE",
+    answerMode: "CHOICE",
+    createdAt: "2098-01-01T00:00:00.000Z",
+  };
+  const assignmentWorld = createWorld(8, { ...setup, assignment });
+  assert.deepEqual(
+    assignmentWorld.setup?.assignment,
+    assignment,
+    "world keeps the host custom assignment",
+  );
   for (let seed = 0; seed < 80; seed++) {
     const generated = createWorld(seed),
       queue = [32 * WIDTH + 10],

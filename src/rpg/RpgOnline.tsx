@@ -33,6 +33,7 @@ import {
 import { RpgRoom } from "./network";
 import { nativeProfile, type RpgSnapshot } from "./bridge";
 import { buildRpgInviteUrl, getRpgRoomCodeFromUrl } from "./invite";
+import type { RpgAdventureSetup } from "./setup";
 import "./rpg.css";
 
 function nextStep(w: World, x: number, y: number, tx: number, ty: number) {
@@ -77,16 +78,22 @@ export default function RpgOnline({
   active,
   languageMode,
   sceneError,
+  adventureSetup,
+  autoJoinInvite = false,
   onRoom,
   onSnapshot,
+  onSetup,
   onClose,
 }: {
   player: Player;
   active: boolean;
   languageMode: LanguageMode;
   sceneError?: string;
+  adventureSetup?: RpgAdventureSetup;
+  autoJoinInvite?: boolean;
   onRoom: (room: RpgRoom) => void;
   onSnapshot: (snapshot: RpgSnapshot) => void;
+  onSetup: (setup: RpgAdventureSetup) => void;
   onClose: () => void;
 }) {
   const [world, setWorld] = useState<World | null>(null);
@@ -104,6 +111,7 @@ export default function RpgOnline({
     [busy, setBusy] = useState(false),
     [overview, setOverview] = useState(false);
   const room = useRef<RpgRoom | null>(null),
+    autoJoinAttempted = useRef(false),
     latest = useRef({ world, active });
   const destination = useRef<{ x: number; y: number } | null>(null);
   latest.current = { world, active };
@@ -149,13 +157,14 @@ export default function RpgOnline({
     room.current?.close();
     const r = new RpgRoom((w) => {
       setWorld(w);
+      if (w.setup) onSetup(w.setup);
       onSnapshot({ world: w, selfId: r.selfId });
     }, setError);
     room.current = r;
     onRoom(r);
     try {
       if (mode === "practice") r.practice(name);
-      else if (mode === "create") await r.create(name);
+      else if (mode === "create") await r.create(name, adventureSetup);
       else await r.join(code, name);
     } catch (e) {
       r.close();
@@ -165,6 +174,17 @@ export default function RpgOnline({
       setBusy(false);
     }
   };
+  useEffect(() => {
+    if (
+      !autoJoinInvite ||
+      !inviteCode ||
+      room.current ||
+      autoJoinAttempted.current
+    )
+      return;
+    autoJoinAttempted.current = true;
+    void start("join");
+  }, [autoJoinInvite, inviteCode]);
   const copyInviteUrl = useCallback(async () => {
     if (!inviteUrl) return;
     try {
@@ -283,6 +303,11 @@ export default function RpgOnline({
             <section className="rpg-lobby-form">
               <h1>冒険をはじめる</h1>
               <p>選択した主人公・問題・難易度で探索します。</p>
+              {autoJoinInvite && !world && (
+                <p className="rpg-invite-hint" role="status">
+                  招待された部屋へ接続しています…
+                </p>
+              )}
               <label>
                 冒険者の名前
                 <input

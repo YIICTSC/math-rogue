@@ -311,6 +311,8 @@ const RpgOnline = React.lazy(() => import('./rpg/RpgOnline'));
 import { nativeProfile, siteNode, type RpgEncounter, type RpgSnapshot } from './rpg/bridge';
 import { isSharedSite } from './rpg/engine';
 import type { RpgRoom } from './rpg/network';
+import { getRpgRoomCodeFromUrl } from './rpg/invite';
+import { isRpgAdventureSetup, type RpgAdventureSetup } from './rpg/setup';
 const PARRY_WINDOW_MS = 650;
 const PARRY_PERFECT_MS = 220;
 const ENEMY_FINISHER_BURST_VOICE_DELAY_MS = 760;
@@ -1645,6 +1647,12 @@ const App: React.FC = () => {
     const rpgRoomRef = useRef<RpgRoom | null>(null);
     const rpgEncounterRef = useRef<RpgEncounter | null>(null);
     const rpgLastTokenRef = useRef<string | null>(null);
+    const rpgInviteCode = useMemo(() => (
+        typeof window === 'undefined' ? '' : getRpgRoomCodeFromUrl(window.location.href)
+    ), []);
+    const rpgInviteParticipantRef = useRef(false);
+    const rpgInviteSetupAppliedRef = useRef(false);
+    const rpgInviteAssignmentRef = useRef<AssignmentPayload | null>(null);
     const receiveRpgSnapshot = useCallback((snapshot: RpgSnapshot) => {
         rpgSnapshotRef.current = snapshot;
         setRpgSnapshot(snapshot);
@@ -1831,6 +1839,29 @@ const App: React.FC = () => {
         ? (gameState.visualTheme || visualTheme)
         : visualTheme;
     const themedCharacters = useMemo(() => getThemedCharacters(CHARACTERS, coopSyncedVisualTheme), [coopSyncedVisualTheme]);
+    const applyRpgInviteSetup = useCallback((setup: RpgAdventureSetup) => {
+        if (!rpgInviteParticipantRef.current || rpgInviteSetupAppliedRef.current || !isRpgAdventureSetup(setup)) return;
+        rpgInviteSetupAppliedRef.current = true;
+        rpgInviteAssignmentRef.current = setup.assignment || null;
+        setVisualTheme(setup.visualTheme);
+        setGameState(prev => {
+            if (!prev.rpgOnline) return prev;
+            return {
+                ...prev,
+                visualTheme: setup.visualTheme,
+                mode: setup.mode as GameMode,
+                modePool: setup.modePool,
+                answerMode: setup.answerMode as AnswerMode,
+                difficultyLevel: setup.difficultyLevel,
+                screen: GameScreen.CHARACTER_SELECTION,
+                act: 1,
+                floor: 0,
+                turn: 0,
+                map: [],
+                currentMapNodeId: null,
+            };
+        });
+    }, []);
     // A saved run can outlive the menu theme setting (for example after a
     // theme switch or a restored save).  Ending/opening screens must resolve
     // their copy and artwork from the run itself, otherwise a high-school
@@ -2444,7 +2475,9 @@ const App: React.FC = () => {
     )) {
         assignmentProblemSourceRef.current = currentProblemSource;
     }
-    const assignmentProblemSource = currentProblemSource ? assignmentProblemSourceRef.current : null;
+    const assignmentProblemSource = rpgInviteParticipantRef.current && gameState.rpgOnline
+        ? rpgInviteAssignmentRef.current
+        : currentProblemSource ? assignmentProblemSourceRef.current : null;
     const getAssignmentProblemConfig = useCallback((assignment: AssignmentPayload | null | undefined) => {
         const assignmentModePool = assignment?.gameMode === 'FREE' ? getAssignmentModePool(assignment) : undefined;
         const assignmentHasCustomProblems = assignment?.gameMode === 'FREE' && assignment.customProblems.length > 0;
@@ -2454,11 +2487,13 @@ const App: React.FC = () => {
             answerMode: assignment?.answerMode,
         };
     }, []);
-    const localAssignmentProblemConfig = useMemo(() => (
-        assignmentProblemSource?.gameMode === 'FREE' && isAssignmentWithinDeadline
+    const localAssignmentProblemConfig = useMemo(() => {
+        const isRpgInviteAssignment = rpgInviteParticipantRef.current && gameState.rpgOnline;
+        const canUseAssignment = isRpgInviteAssignment || isAssignmentWithinDeadline;
+        return assignmentProblemSource?.gameMode === 'FREE' && canUseAssignment
             ? getAssignmentProblemConfig(assignmentProblemSource)
-            : null
-    ), [assignmentProblemSource, getAssignmentProblemConfig, isAssignmentWithinDeadline]);
+            : null;
+    }, [assignmentProblemSource, gameState.rpgOnline, getAssignmentProblemConfig, isAssignmentWithinDeadline]);
     const applyMiniGameAssignmentConfig = useCallback((screen: GameScreen, assignment: AssignmentPayload | null | undefined) => {
         const assignmentConfig = getAssignmentProblemConfig(assignment);
         setMiniGameProblemMode(assignmentConfig.mode || GameMode.UPPER_TRIVIA);
@@ -5107,6 +5142,9 @@ const App: React.FC = () => {
             rpgRoomRef.current?.close();
             rpgEncounterRef.current = null;
             setRpgMounted(false);
+            rpgInviteParticipantRef.current = false;
+            rpgInviteSetupAppliedRef.current = false;
+            rpgInviteAssignmentRef.current = null;
             setGameState(prev => ({ ...prev, rpgOnline: undefined, screen: GameScreen.START_MENU, challengeMode: undefined }));
             return;
         }
@@ -5335,6 +5373,9 @@ const App: React.FC = () => {
             rpgSnapshotRef.current = null;
             setRpgSnapshot(null);
             setRpgMounted(false);
+            rpgInviteParticipantRef.current = false;
+            rpgInviteSetupAppliedRef.current = false;
+            rpgInviteAssignmentRef.current = null;
             setRpgSceneError('');
             setIsLoading(false);
             setGameState(prev => ({ ...prev, rpgOnline: undefined, screen: GameScreen.START_MENU }));
@@ -6867,8 +6908,12 @@ const App: React.FC = () => {
         const adventureTheme = VISUAL_THEMES.includes(themeOverride as VisualThemeId)
             ? themeOverride as VisualThemeId
             : visualTheme;
-        if (redirectToAssignmentChallengeIfLocked()) return;
-        if (isDailyLimitReached) {
+        const isRpgInviteParticipant = rpgOnline && Boolean(rpgInviteCode);
+        rpgInviteParticipantRef.current = isRpgInviteParticipant;
+        rpgInviteSetupAppliedRef.current = false;
+        rpgInviteAssignmentRef.current = null;
+        if (!isRpgInviteParticipant && redirectToAssignmentChallengeIfLocked()) return;
+        if (!isRpgInviteParticipant && isDailyLimitReached) {
             audioService.playSound('wrong');
             setShowTimeLimitModal(true);
             return;
@@ -6879,15 +6924,17 @@ const App: React.FC = () => {
         const initialMode = assignmentHasCustomProblems ? GameMode.UPPER_TRIVIA : assignmentModePool ? getAssignmentRepresentativeMode(activeAssignment) : GameMode.MULTIPLICATION;
         audioService.playSound('select');
         setIsLoading(false); // Ensure loading is reset
-        showDailyAssignmentNoticeForProblemSelection();
+        if (!isRpgInviteParticipant) showDailyAssignmentNoticeForProblemSelection();
         setGameState({
             // A selected FREE assignment already supplies the problem source.
             rpgOnline,
             // Skip the separate problem/mode selector and continue with the
             // adventure-specific difficulty selection instead.
-            screen: shouldSkipAssignmentModeSelection
-                ? GameScreen.DIFFICULTY_SELECTION
-                : GameScreen.MODE_SELECTION,
+            screen: isRpgInviteParticipant
+                ? GameScreen.MAP
+                : shouldSkipAssignmentModeSelection
+                    ? GameScreen.DIFFICULTY_SELECTION
+                    : GameScreen.MODE_SELECTION,
             mode: initialMode,
             modePool: assignmentHasCustomProblems ? (assignmentModePool || []) : assignmentModePool,
             visualTheme: adventureTheme,
@@ -8502,6 +8549,7 @@ const App: React.FC = () => {
             ? coopSyncedVisualTheme
             : null;
         const isVacationSelection = selectedVacationTheme !== null;
+        const isRpgInviteParticipant = rpgInviteParticipantRef.current && gameState.rpgOnline;
         if (selectedVacationTheme) {
             void assetPreloadService.preloadVacationRunAssets(selectedVacationTheme).catch(() => undefined);
         }
@@ -8551,7 +8599,7 @@ const App: React.FC = () => {
         const commonRelics = Object.values(RELIC_LIBRARY).filter(r => r.rarity === 'COMMON' && r.id !== 'SPIRIT_POOP');
         const bonusOptions = shuffle(commonRelics).slice(0, 3);
         setStarterRelics(bonusOptions);
-        const shouldSkipStarterRelic = !storageService.hasSkippedFirstStarterRelic();
+        const shouldSkipStarterRelic = isRpgInviteParticipant || !storageService.hasSkippedFirstStarterRelic();
         if (shouldSkipStarterRelic) storageService.markFirstStarterRelicSkipped();
 
         const garden = !isMagicTheme && char.id === 'GARDENER' ? Array(9).fill(null).map(() => ({ plantedCard: null, growth: 0, maxGrowth: 0 })) : undefined;
@@ -8673,7 +8721,7 @@ const App: React.FC = () => {
             }
         }
 
-        if (char.id === 'CHEF' && gameState.challengeMode !== '1A1D') {
+        if (char.id === 'CHEF' && gameState.challengeMode !== '1A1D' && !isRpgInviteParticipant) {
             setGameState(prev => ({
                 ...prev,
                 screen: GameScreen.DECK_CONSTRUCTION,
@@ -8691,7 +8739,7 @@ const App: React.FC = () => {
             return;
         }
 
-        if (!isMagicTheme && char.id === 'ASSASSIN') {
+        if (!isMagicTheme && char.id === 'ASSASSIN' && !isRpgInviteParticipant) {
             const warrior = themedCharacters.find(c => c.id === 'WARRIOR');
             const isHighSchoolTheme = coopSyncedVisualTheme === 'high-school';
             const partnerName = warrior?.name ?? (isHighSchoolTheme ? '反逆の高校生' : 'わんぱく小学生');
@@ -8802,6 +8850,7 @@ const App: React.FC = () => {
         const nextMap = shouldSkipStarterRelic ? generateDungeonMap(gameState.difficultyLevel || 1) : [];
         if (
             shouldSkipStarterRelic &&
+            !isRpgInviteParticipant &&
             rewardCardAlbum.length > 0 &&
             gameState.challengeMode !== 'RACE' &&
             gameState.challengeMode !== 'COOP'
@@ -15744,7 +15793,20 @@ const App: React.FC = () => {
     }, []);
 
     const handleAssignmentAnswerResult = useCallback((result: AssignmentAnswerResult) => {
-        const assignment = activeAssignment ? effectiveAssignment : null;
+        const isRpgInviteAssignment = rpgInviteParticipantRef.current && gameState.rpgOnline;
+        const assignment = isRpgInviteAssignment
+            ? rpgInviteAssignmentRef.current
+            : activeAssignment ? effectiveAssignment : null;
+        const assignmentAnswers = isRpgInviteAssignment && assignment
+            ? storageService.getAssignmentAnswers().filter(answer => answer.assignmentId === assignment.id)
+            : currentAssignmentAnswers;
+        const assignmentCustomProblemIds = isRpgInviteAssignment
+            ? new Set(
+                assignmentAnswers
+                    .filter(answer => answer.correct && answer.mode === 'ASSIGNMENT_CUSTOM' && answer.problemId)
+                    .map(answer => answer.problemId as string)
+            )
+            : correctCustomAssignmentProblemIds;
         const assignmentModePool = getAssignmentModePool(assignment);
         const assignmentUnit = assignment?.units.find((unit) => unit.modes.includes(result.mode));
         const isCustomAssignmentAnswer = result.mode === 'ASSIGNMENT_CUSTOM' && (assignment?.customProblems.length || 0) > 0;
@@ -15780,7 +15842,7 @@ const App: React.FC = () => {
         if (isCustomAssignmentAnswer) {
             const customProblems = assignment.customProblems || [];
             const prevCorrectProblemIds = new Set(
-                currentAssignmentAnswers
+                assignmentAnswers
                     .filter(answer => answer.correct && answer.mode === 'ASSIGNMENT_CUSTOM' && answer.problemId)
                     .map(answer => answer.problemId as string)
             );
@@ -15789,7 +15851,7 @@ const App: React.FC = () => {
             }
             if (prevCorrectProblemIds.size >= getAssignmentCustomTargetCorrect(assignment)) {
                 const remainingUnitsAfter = assignment.units.filter(unit => {
-                    const unitCorrect = currentAssignmentAnswers.filter(answer => answer.correct && unit.modes.includes(answer.mode)).length;
+                    const unitCorrect = assignmentAnswers.filter(answer => answer.correct && unit.modes.includes(answer.mode)).length;
                     return unitCorrect < Math.max(1, Number(unit.targetCorrect || 10));
                 });
                 const isAssignmentComplete = remainingUnitsAfter.length === 0;
@@ -15820,18 +15882,18 @@ const App: React.FC = () => {
 
         if (!assignmentUnit) return;
 
-        const prevCorrect = currentAssignmentAnswers.filter(answer => answer.correct && assignmentUnit.modes.includes(answer.mode)).length;
+        const prevCorrect = assignmentAnswers.filter(answer => answer.correct && assignmentUnit.modes.includes(answer.mode)).length;
         const nextCorrect = prevCorrect + 1;
         const targetCorrect = Math.max(1, Number(assignmentUnit.targetCorrect || 10));
         if (prevCorrect < targetCorrect && nextCorrect >= targetCorrect) {
             const remainingAfter = assignment.units.filter(unit => {
                 if (unit.id === assignmentUnit.id) return false;
-                const unitCorrect = currentAssignmentAnswers.filter(answer => answer.correct && unit.modes.includes(answer.mode)).length;
+                const unitCorrect = assignmentAnswers.filter(answer => answer.correct && unit.modes.includes(answer.mode)).length;
                 return unitCorrect < Math.max(1, Number(unit.targetCorrect || 10));
             });
-            const remainingCustomAfter = correctCustomAssignmentProblemIds.size >= getAssignmentCustomTargetCorrect(assignment)
+            const remainingCustomAfter = assignmentCustomProblemIds.size >= getAssignmentCustomTargetCorrect(assignment)
                 ? []
-                : (assignment.customProblems || []).filter(problem => !correctCustomAssignmentProblemIds.has(problem.id));
+                : (assignment.customProblems || []).filter(problem => !assignmentCustomProblemIds.has(problem.id));
             const isAssignmentComplete = remainingAfter.length === 0 && remainingCustomAfter.length === 0;
             let rewardCard: ICard | undefined;
             if (isAssignmentComplete && !storageService.hasClaimedAssignmentRewardCard(assignment.id)) {
@@ -15858,7 +15920,7 @@ const App: React.FC = () => {
                 assignment: isAssignmentComplete ? assignment : undefined,
             });
         }
-    }, [activeAssignment, addMiniGameUnlockCorrectCount, correctCustomAssignmentProblemIds, createRewardCardForAssignment, currentAssignment, currentAssignmentAnswers, effectiveAssignment, languageMode, markDailyAssignmentCompleted, syncManagedAssignmentCompletion]);
+    }, [activeAssignment, addMiniGameUnlockCorrectCount, correctCustomAssignmentProblemIds, createRewardCardForAssignment, currentAssignment, currentAssignmentAnswers, effectiveAssignment, gameState.rpgOnline, languageMode, markDailyAssignmentCompleted, syncManagedAssignmentCompletion]);
 
     const removeRewardFromList = useCallback((rewards: RewardItem[], item: RewardItem) => {
         const cannotSkipCards = hasRelic(gameState.player, 'PREPAID_CARD') || hasRelic(gameState.player, 'SCHOOL_ARCHIVE');
@@ -19333,14 +19395,14 @@ const App: React.FC = () => {
 
                                     {!OFFLINE_DISTRIBUTABLE && isDebugModeActive && (
                                         <button
-                                            disabled={isAssignmentChallengeOnlyLocked || isDailyLimitReached}
+                                            disabled={!rpgInviteCode && (isAssignmentChallengeOnlyLocked || isDailyLimitReached)}
                                             onClick={() => {
                                                 if (!isDebugModeActive) return;
-                                                if (redirectToAssignmentChallengeIfLocked()) return;
-                                                if (isDailyLimitReached) { setShowTimeLimitModal(true); return; }
+                                                if (!rpgInviteCode && redirectToAssignmentChallengeIfLocked()) return;
+                                                if (!rpgInviteCode && isDailyLimitReached) { setShowTimeLimitModal(true); return; }
                                                 launchNewAdventure(visualTheme, true);
                                             }}
-                                            className="w-full py-3 px-4 text-sm font-bold border border-amber-400/60 bg-emerald-950 text-amber-100 hover:bg-emerald-900 flex items-center justify-center gap-2 disabled:opacity-40"
+                                            className={`w-full py-3 px-4 text-sm font-bold border border-amber-400/60 bg-emerald-950 text-amber-100 hover:bg-emerald-900 flex items-center justify-center gap-2 ${!rpgInviteCode && (isDailyLimitReached || isAssignmentChallengeOnlyLocked) ? 'opacity-40 cursor-not-allowed' : ''}`}
                                         >
                                             <Users size={17} /> {trans("RPGオンライン", languageMode)} <span className="text-xs opacity-70">{trans("開発中・デバッグ限定", languageMode)}</span>
                                         </button>
@@ -21005,7 +21067,27 @@ const App: React.FC = () => {
                 {!OFFLINE_DISTRIBUTABLE && isDebugModeActive && gameState.rpgOnline && rpgMounted && (
                     <React.Suspense fallback={<div className="fixed inset-0 z-50 grid place-items-center bg-slate-950 text-amber-100">{trans("冒険の世界を準備しています…", languageMode)}</div>}>
                         <div className="absolute inset-0" style={{ display: gameState.screen === GameScreen.MAP ? undefined : 'none' }}>
-                            <RpgOnline languageMode={languageMode} player={gameState.player} active={gameState.screen === GameScreen.MAP} sceneError={rpgSceneError} onRoom={attachRpgRoom} onSnapshot={receiveRpgSnapshot} onClose={returnToTitle} />
+                            <RpgOnline
+                                languageMode={languageMode}
+                                player={gameState.player}
+                                active={gameState.screen === GameScreen.MAP}
+                                sceneError={rpgSceneError}
+                                adventureSetup={{
+                                    visualTheme: gameState.visualTheme || visualTheme,
+                                    mode: gameState.mode,
+                                    modePool: gameState.modePool,
+                                    answerMode: gameState.answerMode || 'CHOICE',
+                                    difficultyLevel: gameState.difficultyLevel || 1,
+                                    assignment: !rpgInviteParticipantRef.current && assignmentProblemSource?.gameMode === 'FREE'
+                                        ? assignmentProblemSource
+                                        : undefined,
+                                }}
+                                autoJoinInvite={rpgInviteParticipantRef.current && Boolean(rpgInviteCode)}
+                                onRoom={attachRpgRoom}
+                                onSnapshot={receiveRpgSnapshot}
+                                onSetup={applyRpgInviteSetup}
+                                onClose={returnToTitle}
+                            />
                         </div>
                     </React.Suspense>
                 )}

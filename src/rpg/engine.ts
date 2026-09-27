@@ -1,3 +1,5 @@
+import { cloneRpgAdventureSetup, type RpgAdventureSetup } from "./setup";
+
 export const WIDTH = 64,
   HEIGHT = 44,
   CAPACITY = 40;
@@ -58,6 +60,7 @@ export interface Adventurer {
 export interface World {
   nativeMode: true;
   seed: number;
+  setup?: RpgAdventureSetup;
   tiles: Tile[];
   sites: Site[];
   players: Record<string, Adventurer>;
@@ -244,7 +247,7 @@ function applyNativeAction(
   }
   return false;
 }
-export function createWorld(seed: number): World {
+export function createWorld(seed: number, setup?: RpgAdventureSetup): World {
   const rng = random(seed),
     tiles: Tile[] = [];
   for (let y = 0; y < HEIGHT; y++)
@@ -321,6 +324,7 @@ export function createWorld(seed: number): World {
   return {
     nativeMode: true,
     seed,
+    ...(setup ? { setup: cloneRpgAdventureSetup(setup) } : {}),
     tiles,
     sites,
     players: {},
