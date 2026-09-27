@@ -752,6 +752,30 @@
   color: #edddaf;
   font-size: 13px;
 }
+.rpg-room-invite {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.rpg-invite-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  border: 1px solid #69806a;
+  border-radius: 4px;
+  background: #243b35;
+  color: #edddaf;
+  padding: 6px 10px;
+  font-size: 11px;
+}
+.rpg-invite-button:hover {
+  background: #355348;
+}
+.rpg-invite-hint {
+  margin: -4px 0 0;
+  color: #edddaf;
+  font-size: 11px;
+}
 .rpg-overlay {
   position: fixed;
   inset: 0;

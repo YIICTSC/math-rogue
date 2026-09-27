@@ -95,7 +95,8 @@
     "test:rpg": "node scripts/test-rpg-online.mjs",
     "test:rpg:browser": "node scripts/test-rpg-browser.mjs",
     "test:rpg:access": "node scripts/test-rpg-debug-access.mjs",
-    "test:rpg:network": "node scripts/test-rpg-network.mjs"
+    "test:rpg:network": "node scripts/test-rpg-network.mjs",
+    "test:rpg:invite": "node scripts/test-rpg-invite.mjs"
   },
   "build": {
     "appId": "jp.learningrogue.offline",

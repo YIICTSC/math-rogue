@@ -1,6 +1,10 @@
 export const ENGLISH_DEBUG_UI_EXACT: Record<string, string> = {
   'シーンを開始できませんでした。部屋に入り直してください。': 'The scene could not start. Please rejoin the room.',
   '部屋を作る': 'Create a room',
+  '招待URLをコピー': 'Copy invite URL',
+  'コピーしました': 'Copied',
+  '招待URLをコピーできませんでした。URLを選択してコピーしてください。': 'Could not copy the invite URL. Select the URL and copy it manually.',
+  '招待URLからルームコードを読み込みました。': 'The room code was loaded from the invite URL.',
   '近くのチームメンバー1人につき、戦闘開始時の攻撃力+2。': 'Start battle with +2 strength per nearby teammate.',
   '？イベント': '? Event',
   '冒険をはじめる': 'Begin an adventure',
@@ -192,6 +196,10 @@ export const ENGLISH_DEBUG_UI_EXACT: Record<string, string> = {
 export const HIRAGANA_DEBUG_UI_EXACT: Record<string, string> = {
   'シーンを開始できませんでした。部屋に入り直してください。': 'シーンを はじめられませんでした。へやに はいりなおしてください。',
   '部屋を作る': 'へやを つくる',
+  '招待URLをコピー': 'しょうたいURLを コピー',
+  'コピーしました': 'コピーしました',
+  '招待URLをコピーできませんでした。URLを選択してコピーしてください。': 'しょうたいURLを コピーできませんでした。URLを せんたくして コピーしてください。',
+  '招待URLからルームコードを読み込みました。': 'しょうたいURLから ルームコードを よみこみました。',
   '近くのチームメンバー1人につき、戦闘開始時の攻撃力+2。': 'ちかくの チームメンバー1にんにつき、バトルかいしじの こうげきりょく+2。',
   '？イベント': '？イベント',
   '冒険をはじめる': 'ぼうけんを はじめる',

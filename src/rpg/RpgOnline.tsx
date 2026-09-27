@@ -14,6 +14,8 @@ import {
   Users,
   Map,
   Crown,
+  Copy,
+  Check,
 } from "lucide-react";
 import type { LanguageMode, Player } from "../types";
 import TranslatedUiTree from "../components/TranslatedUiTree";
@@ -30,6 +32,7 @@ import {
 } from "./engine";
 import { RpgRoom } from "./network";
 import { nativeProfile, type RpgSnapshot } from "./bridge";
+import { buildRpgInviteUrl, getRpgRoomCodeFromUrl } from "./invite";
 import "./rpg.css";
 
 function nextStep(w: World, x: number, y: number, tx: number, ty: number) {
@@ -87,8 +90,16 @@ export default function RpgOnline({
   onClose: () => void;
 }) {
   const [world, setWorld] = useState<World | null>(null);
+  const inviteCode = useMemo(
+    () =>
+      typeof window === "undefined"
+        ? ""
+        : getRpgRoomCodeFromUrl(window.location.href),
+    [],
+  );
   const [name, setName] = useState("冒険者"),
-    [code, setCode] = useState("");
+    [code, setCode] = useState(inviteCode),
+    [inviteCopied, setInviteCopied] = useState(false);
   const [error, setError] = useState(""),
     [busy, setBusy] = useState(false),
     [overview, setOverview] = useState(false);
@@ -103,6 +114,14 @@ export default function RpgOnline({
   }, []);
   const selfId = room.current?.selfId || "",
     me = world?.players[selfId];
+  const roomCode = room.current?.code || "";
+  const inviteUrl = useMemo(
+    () =>
+      roomCode && typeof window !== "undefined"
+        ? buildRpgInviteUrl(window.location.href, roomCode)
+        : "",
+    [roomCode],
+  );
   const members: Adventurer[] = world ? Object.values(world.players) : [];
   const near =
     world && me
@@ -146,6 +165,33 @@ export default function RpgOnline({
       setBusy(false);
     }
   };
+  const copyInviteUrl = useCallback(async () => {
+    if (!inviteUrl) return;
+    try {
+      if (navigator.clipboard?.writeText) {
+        await navigator.clipboard.writeText(inviteUrl);
+      } else {
+        const input = document.createElement("textarea");
+        input.value = inviteUrl;
+        input.setAttribute("readonly", "true");
+        input.style.position = "fixed";
+        input.style.opacity = "0";
+        document.body.appendChild(input);
+        input.select();
+        try {
+          if (!document.execCommand("copy")) throw new Error("copy failed");
+        } finally {
+          input.remove();
+        }
+      }
+      setInviteCopied(true);
+      window.setTimeout(() => setInviteCopied(false), 2200);
+    } catch {
+      setError(
+        "招待URLをコピーできませんでした。URLを選択してコピーしてください。",
+      );
+    }
+  }, [inviteUrl]);
   const interact = useCallback(() => {
     const w = latest.current.world,
       p = w?.players[room.current?.selfId || ""];
@@ -260,6 +306,11 @@ export default function RpgOnline({
                   onChange={(e) => setCode(e.target.value.toUpperCase())}
                 />
               </label>
+              {inviteCode && (
+                <p className="rpg-invite-hint" role="status">
+                  招待URLからルームコードを読み込みました。
+                </p>
+              )}
               <button
                 disabled={busy || !name.trim() || code.length !== 6}
                 onClick={() => start("join")}
@@ -431,11 +482,21 @@ export default function RpgOnline({
             </div>
             <footer className="rpg-footer">
               <p role="status">{me.message}</p>
-              <span>
-                {room.current?.code
-                  ? `ROOM ${room.current.code}`
-                  : "ひとり練習 · 通信なし"}
-              </span>
+              {roomCode ? (
+                <div className="rpg-room-invite">
+                  <span>ROOM {roomCode}</span>
+                  <button
+                    className="rpg-invite-button"
+                    onClick={copyInviteUrl}
+                    title="招待URLをコピー"
+                  >
+                    {inviteCopied ? <Check size={14} /> : <Copy size={14} />}
+                    {inviteCopied ? "コピーしました" : "招待URLをコピー"}
+                  </button>
+                </div>
+              ) : (
+                <span>ひとり練習 · 通信なし</span>
+              )}
             </footer>
             {world.won && !me.nativeScene && (
               <div className="rpg-overlay">

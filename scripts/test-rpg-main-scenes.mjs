@@ -129,6 +129,9 @@ try {
     return saved;
   });
   await call("debug");
+  await page.evaluate(() =>
+    history.replaceState({}, "", `${location.pathname}?rpgRoom=AB2CDE`),
+  );
   await page
     .getByRole("button", { name: "RPGオンライン 開発中・デバッグ限定" })
     .click();
@@ -141,6 +144,11 @@ try {
   await call("character");
   if ((await state()) === "RELIC_SELECTION") await call("relic");
   await screen("MAP");
+  assert.equal(
+    await page.getByLabel("ルームコード").inputValue(),
+    "AB2CDE",
+    "an invite URL pre-fills the room code",
+  );
   await page.getByRole("button", { name: "まずはひとりで練習する" }).click();
   await page.waitForFunction(
     () => !!window.__rpgTest.room?.world?.players.local?.profile,

@@ -18,6 +18,8 @@ Windowsにも対応した起動スクリプトです。通常の `dev` や本番
 6. 本編の問題選択 → 難易度選択 → 主人公選択（必要に応じて初期レリック等）を行う。FREE課題が選択済みなら、本編同様に課題を問題ソースにして難易度選択から始まる。
 7. 部屋を作成・参加するか、ひとり練習を開始する。
 
+部屋を作成すると画面下部に「招待URLをコピー」が表示されます。コピーしたURLを開いた参加者は、RPGオンラインの参加画面でルームコードが自動入力された状態になります。名前を確認して「参加」を押してください。URLの参加コードはデバッグ限定画面でのみ使えます。
+
 ゲーム画面にも「開発中」を表示します。アプリを再読み込みすると既存仕様に従ってデバッグ状態は解除されます。
 
 ## 現時点で遊べる内容
@@ -57,6 +59,7 @@ pnpm run test:rpg:browser
 pnpm run test:rpg:access
 pnpm run test:production-debug-lock
 pnpm run test:title-resume-isolation
+pnpm run test:rpg:invite
 node --max-old-space-size=8192 node_modules/typescript/bin/tsc -p tsconfig.rpg.json
 pnpm run audit:english:gate
 ```
@@ -77,6 +80,7 @@ pnpm run test:rpg:network
 - 本編の画面・処理を再利用していますが、全主人公×全カード×全イベントの組み合わせを網羅した検証ではありません。RPGの部屋・進行は本編のランキングや章クリアとして登録しません。
 - 本番の認証・永続サーバー・不正対策は未導入です。参加者はルームコードを知る開発テスターを想定しています。
 - 通常公開ビルドでは入口を表示しません。デバッグフラグとアプリ内デバッグモードの両方が必要です。
+- 招待URLはルームコードを含む一時的な共有リンクです。URLを知っている開発テスターが参加でき、ホストが退出・再読み込みすると使えなくなります。
 
 ## 主なファイル
 
@@ -85,6 +89,7 @@ pnpm run test:rpg:network
 - `src/rpg/network.ts`: PeerJSのホスト権威型ルーム。
 - `src/rpg/WorldCanvas.tsx`: ドット描画・マップクリック座標。
 - `src/rpg/RpgOnline.tsx` / `rpg.css`: ロビー・探索・チーム編成。本編シーン中も接続を保持。
+- `src/rpg/invite.ts`: ルームコードのURL生成・解析。
 - `src/App.tsx`: デバッグ限定のタイトル入口・選択画面・本編シーンとの往復・共有HP反映。
 - `src/services/storageService.ts`: メインセーブからの除外。
 - `src/data/rpgEnglish.ts`: 既存翻訳処理に追加した画面コピー。
