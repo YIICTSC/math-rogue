@@ -15,6 +15,9 @@ try {
     WIDTH,
     HEIGHT,
   } = await server.ssrLoadModule("/src/rpg/engine.ts");
+  const { getEncounterEnemyNamePool } = await server.ssrLoadModule(
+    "/src/services/geminiService.ts",
+  );
   const setup = {
     visualTheme: "high-school",
     mode: "MIXED",
@@ -27,6 +30,14 @@ try {
     setupWorld.setup,
     setup,
     "world keeps the host adventure setup",
+  );
+  const enemySites = setupWorld.sites.filter((site) => site.kind === "enemy");
+  assert.equal(enemySites.length, 14, "map generates 14 ordinary encounters");
+  assert(
+    enemySites.every((site) =>
+      getEncounterEnemyNamePool("high-school").includes(site.name),
+    ),
+    "ordinary enemy labels come from the selected theme's actual encounter names",
   );
   const assignment = {
     id: "rpg-assignment",

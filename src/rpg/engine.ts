@@ -1,4 +1,5 @@
 import { cloneRpgAdventureSetup, type RpgAdventureSetup } from "./setup";
+import { getEncounterEnemyNamePool } from "../services/geminiService";
 
 export const WIDTH = 64,
   HEIGHT = 44,
@@ -283,11 +284,7 @@ export function createWorld(seed: number, setup?: RpgAdventureSetup): World {
   add("guardian", "水辺の試験官", 39, 32 + Math.floor(rng() * 4));
   add("guardian", "遺跡の試験官", 51, 9 + Math.floor(rng() * 4));
   add("boss", "校長の時計塔", 55, 5);
-  const names = {
-    enemy: ["チョークの精", "さまよう上履き", "実験失敗スライム"],
-    event: ["？イベント"],
-    treasure: ["忘れられた宝箱"],
-  };
+  const enemyNames = getEncounterEnemyNamePool(setup?.visualTheme);
   for (let i = 0; i < 23; i++) {
     const kind = i % 5 === 0 ? "treasure" : i % 4 === 0 ? "event" : "enemy";
     let x = 0,
@@ -296,7 +293,13 @@ export function createWorld(seed: number, setup?: RpgAdventureSetup): World {
       x = 4 + Math.floor(rng() * 55);
       y = 5 + Math.floor(rng() * 35);
     } while (sites.some((s) => distance(s, { x, y }) < 5));
-    add(kind, names[kind][i % names[kind].length], x, y, 0);
+    const name =
+      kind === "enemy"
+        ? enemyNames[Math.floor(rng() * enemyNames.length)]
+        : kind === "event"
+          ? "？イベント"
+          : "忘れられた宝箱";
+    add(kind, name, x, y, 0);
   }
   // A connected spanning tree gives landmarks shorter, varied paths instead
   // of parallel corridors radiating from the starting town.

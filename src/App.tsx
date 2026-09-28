@@ -9310,7 +9310,9 @@ const App: React.FC = () => {
 
                         const name = rpgEncounter?.site.kind === 'boss'
                             ? '校長先生'
-                            : await generateEnemyName(node.y, actMultiplier, nextState.visualTheme || visualTheme);
+                            : rpgEncounter?.site.kind === 'enemy'
+                                ? rpgEncounter.site.name
+                                : await generateEnemyName(node.y, actMultiplier, nextState.visualTheme || visualTheme);
                         const isBoss = node.type === NodeType.BOSS;
 
                         enemies.push({

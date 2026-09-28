@@ -61,6 +61,14 @@ export const FLAVOR_TEXTS = [
 
 const getRandom = (list: string[]) => list[Math.floor(Math.random() * list.length)];
 
+/** The same regular-enemy pool used by generateEnemyName, exposed for RPG map encounters. */
+export const getEncounterEnemyNamePool = (visualTheme: VisualThemeId = 'elementary'): string[] => {
+  if (visualTheme !== 'elementary') {
+    return [1, 2, 3].flatMap(act => getEnemyNamesByAct(visualTheme, act));
+  }
+  return [...ENEMIES_ACT1, ...ENEMIES_ACT2, ...ENEMIES_ACT3];
+};
+
 // Functions match the original signature but return instantly
 export const generateFlavorText = async (context: string): Promise<string> => {
   return getRandom(FLAVOR_TEXTS);

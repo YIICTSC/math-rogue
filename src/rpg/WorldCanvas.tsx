@@ -96,7 +96,6 @@ function building(
 function person(
   c: CanvasRenderingContext2D,
   p: Adventurer,
-  self: boolean,
   time: number,
 ) {
   const x = p.x * T,
@@ -130,10 +129,6 @@ function person(
     rect(c, x + 4, y - 2 + bob, 10, 4, "#624431");
     rect(c, x + 11, y + 2 + bob, 1, 2, "#2f343a");
     rect(c, x + 3, y + 7 + bob, 2, 4, "#f1cc97");
-  }
-  if (self) {
-    rect(c, x + 6, y - 9, 6, 2, "#ffe299");
-    rect(c, x + 8, y - 7, 2, 2, "#ffe299");
   }
   if (p.team) {
     c.strokeStyle = coat;
@@ -285,7 +280,7 @@ export default function WorldCanvas({
       w.sites.forEach((s) => landmark(c, s, time));
       Object.values(w.players)
         .sort((a, b) => a.y - b.y)
-        .forEach((q) => person(c, q, q.id === selfId, time));
+        .forEach((q) => person(c, q, time));
       c.restore();
       if (!overview) {
         c.textAlign = "center";
