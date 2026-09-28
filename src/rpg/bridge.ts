@@ -11,10 +11,15 @@ export interface RpgEncounter {
   outcome: "complete" | "victory" | "defeat";
   entered: boolean;
   lastHp?: number;
+  lastLocalHp?: number;
+  localDamage: number;
   damage: number;
   sequence: number;
 }
-export function nativeProfile(player: Player): NativeProfile {
+export function nativeProfile(
+  player: Player,
+  stats?: { correctAnswers?: number },
+): NativeProfile {
   return {
     hp: player.currentHp,
     maxHp: player.maxHp,
@@ -22,6 +27,9 @@ export function nativeProfile(player: Player): NativeProfile {
     character: player.id || "WARRIOR",
     image: player.imageData || "",
     deckSize: player.deck.length,
+    ...(stats?.correctAnswers !== undefined
+      ? { correctAnswers: Math.max(0, Math.floor(stats.correctAnswers)) }
+      : {}),
   };
 }
 export function siteNode(site: Site, battles: number): MapNode {

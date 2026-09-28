@@ -13,7 +13,7 @@ import {
   type RpgAdventureSetup,
 } from "./setup";
 
-const RPG_PROTOCOL_VERSION = 4;
+const RPG_PROTOCOL_VERSION = 5;
 
 function isNativeProfile(value: unknown): value is NativeProfile {
   if (!value || typeof value !== "object") return false;
@@ -27,7 +27,11 @@ function isNativeProfile(value: unknown): value is NativeProfile {
     Number(profile.hp) <= Number(profile.maxHp) &&
     Number(profile.gold) >= 0 &&
     typeof profile.character === "string" &&
-    typeof profile.image === "string"
+    typeof profile.image === "string" &&
+    (profile.correctAnswers === undefined ||
+      (typeof profile.correctAnswers === "number" &&
+        Number.isFinite(profile.correctAnswers) &&
+        profile.correctAnswers >= 0))
   );
 }
 
@@ -50,9 +54,9 @@ export class RpgRoom {
   private status(message: string) {
     if (!this.closed) this.notifyStatus(message);
   }
-  practice(name: string) {
+  practice(name: string, setup?: RpgAdventureSetup) {
     this.host = true;
-    this.world = createWorld(crypto.getRandomValues(new Uint32Array(1))[0]);
+    this.world = createWorld(crypto.getRandomValues(new Uint32Array(1))[0], setup);
     addPlayer(this.world, this.selfId, name);
     this.emit();
   }

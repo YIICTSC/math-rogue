@@ -1,5 +1,6 @@
 import { cloneRpgAdventureSetup, type RpgAdventureSetup } from "./setup";
 import { getEncounterEnemyNamePool } from "../services/geminiService";
+import type { VisualThemeId } from "../data/visualThemes";
 
 export const WIDTH = 64,
   HEIGHT = 44,
@@ -13,6 +14,17 @@ export type SiteKind =
   | "enemy"
   | "guardian"
   | "boss";
+export type BonusRankingKind =
+  | "BATTLES"
+  | "TREASURES"
+  | "STEPS"
+  | "INTERACTIONS";
+export const BONUS_RANKING_KINDS: BonusRankingKind[] = [
+  "BATTLES",
+  "TREASURES",
+  "STEPS",
+  "INTERACTIONS",
+];
 export interface Site {
   id: string;
   x: number;
@@ -24,6 +36,7 @@ export interface Site {
   cleared: boolean;
   raidSize?: number;
   nativeInitialized?: boolean;
+  enemyNamesByTheme?: Record<VisualThemeId, string>;
 }
 export interface NativeProfile {
   hp: number;
@@ -32,6 +45,7 @@ export interface NativeProfile {
   character: string;
   image: string;
   deckSize: number;
+  correctAnswers?: number;
 }
 export interface NativeScene {
   token: string;
@@ -55,6 +69,10 @@ export interface Adventurer {
   lastMove: number;
   profile?: NativeProfile;
   completedBattles: number;
+  totalDamage: number;
+  correctAnswers: number;
+  moveCount: number;
+  interactionCount: number;
   siteUses: Record<string, number>;
   nativeScene?: NativeScene;
 }
@@ -67,6 +85,7 @@ export interface World {
   players: Record<string, Adventurer>;
   logs: string[];
   won: boolean;
+  bonusRankingKind: BonusRankingKind;
   revision: number;
 }
 export type Action =
@@ -80,6 +99,7 @@ export type Action =
       token: string;
       outcome: "complete" | "victory" | "defeat";
       profile: NativeProfile;
+      battleDamage?: number;
     }
   | { type: "native-profile"; profile: NativeProfile };
 export function random(seed: number) {
@@ -134,19 +154,33 @@ function validProfile(profile: NativeProfile): boolean {
     profile.hp <= profile.maxHp &&
     profile.gold >= 0 &&
     typeof profile.character === "string" &&
-    typeof profile.image === "string"
+    typeof profile.image === "string" &&
+    (profile.correctAnswers === undefined ||
+      (Number.isFinite(profile.correctAnswers) && profile.correctAnswers >= 0))
   );
 }
 function rotateEnemyName(w: World, site: Site) {
-  const candidates = getEncounterEnemyNamePool(w.setup?.visualTheme).filter(
-    (name) => name !== site.name,
-  );
-  if (candidates.length === 0) return;
   const siteIndex = w.sites.indexOf(site);
-  const roll = random(
-    (w.seed + Math.imul(w.revision + 1, 0x9e3779b9) + siteIndex) >>> 0,
-  )();
-  site.name = candidates[Math.floor(roll * candidates.length)];
+  const nextNames = { ...site.enemyNamesByTheme };
+  const themes: VisualThemeId[] = ["elementary", "high-school", "magic"];
+  themes.forEach((theme, themeIndex) => {
+    const previousName = nextNames[theme] || site.name;
+    const candidates = getEncounterEnemyNamePool(theme).filter(
+      (name) => name !== previousName,
+    );
+    if (candidates.length === 0) return;
+    const roll = random(
+      (
+        w.seed +
+        Math.imul(w.revision + 1, 0x9e3779b9) +
+        siteIndex +
+        Math.imul(themeIndex + 1, 0x85ebca6b)
+      ) >>> 0,
+    )();
+    nextNames[theme] = candidates[Math.floor(roll * candidates.length)];
+  });
+  site.enemyNamesByTheme = nextNames as Record<VisualThemeId, string>;
+  site.name = site.enemyNamesByTheme[w.setup?.visualTheme || "elementary"] || site.name;
 }
 function applyNativeAction(
   w: World,
@@ -160,6 +194,11 @@ function applyNativeAction(
     p.hp = action.profile.hp;
     p.maxHp = action.profile.maxHp;
     p.gold = action.profile.gold;
+    if (action.profile.correctAnswers !== undefined)
+      p.correctAnswers = Math.max(
+        p.correctAnswers || 0,
+        Math.floor(action.profile.correctAnswers),
+      );
     w.revision++;
     return true;
   }
@@ -171,6 +210,8 @@ function applyNativeAction(
     if (["town", "rest", "event"].includes(site.kind))
       p.siteUses = { ...p.siteUses, [site.id]: p.completedBattles || 0 };
     if (site.kind === "treasure") p.claimed.push(site.id);
+    if (["town", "rest", "event", "treasure"].includes(site.kind))
+      p.interactionCount = (p.interactionCount || 0) + 1;
     if (site.kind === "boss" && !site.raidSize)
       site.raidSize = Object.keys(w.players).length;
     const teamPower = p.team
@@ -222,6 +263,7 @@ function applyNativeAction(
     const delta = action.total - scene.damage;
     scene.damage = action.total;
     scene.sequence = action.sequence;
+    p.totalDamage = (p.totalDamage || 0) + Math.max(0, Math.floor(delta));
     site.hp = Math.max(0, Math.min(site.maxHp, site.hp - delta));
     if (site.hp === 0) {
       site.cleared = true;
@@ -249,10 +291,18 @@ function applyNativeAction(
       p.x = 10;
       p.y = 32;
     }
+    if (Number.isFinite(action.battleDamage) && action.battleDamage! >= 0)
+      p.totalDamage =
+        (p.totalDamage || 0) + Math.floor(action.battleDamage!);
     p.profile = action.profile;
     p.hp = action.profile.hp;
     p.maxHp = action.profile.maxHp;
     p.gold = action.profile.gold;
+    if (action.profile.correctAnswers !== undefined)
+      p.correctAnswers = Math.max(
+        p.correctAnswers || 0,
+        Math.floor(action.profile.correctAnswers),
+      );
     delete p.nativeScene;
     return tell(
       action.outcome === "defeat" ? "町に戻りました。" : "探索を続けよう。",
@@ -277,7 +327,14 @@ export function createWorld(seed: number, setup?: RpgAdventureSetup): World {
       );
     }
   const sites: Site[] = [];
-  function add(kind: SiteKind, name: string, x: number, y: number, hp = 0) {
+  function add(
+    kind: SiteKind,
+    name: string,
+    x: number,
+    y: number,
+    hp = 0,
+    enemyNamesByTheme?: Record<VisualThemeId, string>,
+  ) {
     sites.push({
       id: `site-${sites.length}`,
       kind,
@@ -287,6 +344,7 @@ export function createWorld(seed: number, setup?: RpgAdventureSetup): World {
       hp,
       maxHp: hp,
       cleared: false,
+      ...(enemyNamesByTheme ? { enemyNamesByTheme } : {}),
     });
   }
   add("town", "木漏れ日の町", 10, 32);
@@ -296,7 +354,8 @@ export function createWorld(seed: number, setup?: RpgAdventureSetup): World {
   add("guardian", "水辺の試験官", 39, 32 + Math.floor(rng() * 4));
   add("guardian", "遺跡の試験官", 51, 9 + Math.floor(rng() * 4));
   add("boss", "校長の時計塔", 55, 5);
-  const enemyNames = getEncounterEnemyNamePool(setup?.visualTheme);
+  const activeTheme = setup?.visualTheme || "elementary";
+  const themes: VisualThemeId[] = ["elementary", "high-school", "magic"];
   for (let i = 0; i < 23; i++) {
     const kind = i % 5 === 0 ? "treasure" : i % 4 === 0 ? "event" : "enemy";
     let x = 0,
@@ -305,13 +364,15 @@ export function createWorld(seed: number, setup?: RpgAdventureSetup): World {
       x = 4 + Math.floor(rng() * 55);
       y = 5 + Math.floor(rng() * 35);
     } while (sites.some((s) => distance(s, { x, y }) < 5));
-    const name =
-      kind === "enemy"
-        ? enemyNames[Math.floor(rng() * enemyNames.length)]
-        : kind === "event"
-          ? "？イベント"
-          : "忘れられた宝箱";
-    add(kind, name, x, y, 0);
+    const enemyNamesByTheme = kind === "enemy"
+      ? Object.fromEntries(themes.map((theme) => {
+          const names = getEncounterEnemyNamePool(theme);
+          return [theme, names[Math.floor(rng() * names.length)]];
+        })) as Record<VisualThemeId, string>
+      : undefined;
+    const name = enemyNamesByTheme?.[activeTheme]
+      || (kind === "event" ? "？イベント" : "忘れられた宝箱");
+    add(kind, name, x, y, 0, enemyNamesByTheme);
   }
   // A connected spanning tree gives landmarks shorter, varied paths instead
   // of parallel corridors radiating from the starting town.
@@ -345,6 +406,8 @@ export function createWorld(seed: number, setup?: RpgAdventureSetup): World {
     players: {},
     logs: ["冒険のはじまり。3体の試験官を倒し、校長の結界を解こう。"],
     won: false,
+    bonusRankingKind:
+      BONUS_RANKING_KINDS[Math.floor(rng() * BONUS_RANKING_KINDS.length)],
     revision: 0,
   };
 }
@@ -362,6 +425,10 @@ export function addPlayer(w: World, id: string, name: string) {
     team: null,
     claimed: [],
     completedBattles: 0,
+    totalDamage: 0,
+    correctAnswers: 0,
+    moveCount: 0,
+    interactionCount: 0,
     siteUses: {},
     message: "町で準備を整え、道に沿って探索しよう。",
     lastMove: 0,
@@ -429,6 +496,7 @@ export function applyAction(
       return false;
     p.x = x;
     p.y = y;
+    p.moveCount = (p.moveCount || 0) + 1;
     p.lastMove = now;
     w.revision++;
     return true;

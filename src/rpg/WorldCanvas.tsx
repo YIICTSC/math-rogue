@@ -1,5 +1,7 @@
 import { trans } from "../utils/textUtils";
 import type { LanguageMode } from "../types";
+import type { VisualThemeId } from "../data/visualThemes";
+import { getRpgSiteDisplayName } from "./enemyNames";
 import React, { useEffect, useRef } from "react";
 import {
   HEIGHT,
@@ -186,12 +188,14 @@ export default function WorldCanvas({
   onTile,
   overview = false,
   languageMode = "JAPANESE",
+  visualTheme = world.setup?.visualTheme || "elementary",
 }: {
   world: World;
   selfId: string;
   onTile: (x: number, y: number) => void;
   overview?: boolean;
   languageMode?: LanguageMode;
+  visualTheme?: VisualThemeId;
 }) {
   const ref = useRef<HTMLCanvasElement>(null),
     camera = useRef({ x: 0, y: 0, scale: 1 }),
@@ -290,7 +294,7 @@ export default function WorldCanvas({
             y = (s.y * T - 33 - cy) * scale;
           if (x < 0 || x > sw || y < 0 || y > sh) return;
           c.fillStyle = "#112526dc";
-          const label = trans(s.name, languageMode);
+          const label = trans(getRpgSiteDisplayName(s, visualTheme), languageMode);
           const tw = c.measureText(label).width;
           c.fillRect(x - tw / 2 - 7, y - 12, tw + 14, 20);
           c.fillStyle = s.cleared
@@ -313,7 +317,7 @@ export default function WorldCanvas({
     };
     frame = requestAnimationFrame(paint);
     return () => cancelAnimationFrame(frame);
-  }, [selfId, overview, languageMode]);
+  }, [selfId, overview, languageMode, visualTheme]);
   return (
     <canvas
       ref={ref}

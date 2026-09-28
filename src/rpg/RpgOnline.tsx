@@ -29,7 +29,10 @@ import {
   siteUnavailable,
   type World,
   type Adventurer,
+  type Site,
+  type BonusRankingKind,
 } from "./engine";
+import { getRpgSiteDisplayName } from "./enemyNames";
 import { RpgRoom } from "./network";
 import { nativeProfile, type RpgSnapshot } from "./bridge";
 import { buildRpgInviteUrl, getRpgRoomCodeFromUrl } from "./invite";
@@ -73,6 +76,42 @@ function nextStep(w: World, x: number, y: number, tx: number, ty: number) {
   return { dx: (n % WIDTH) - x, dy: Math.floor(n / WIDTH) - y };
 }
 
+const BONUS_RANKING_LABELS: Record<
+  BonusRankingKind,
+  { title: string; score: (player: Adventurer) => number }
+> = {
+  BATTLES: {
+    title: "戦闘勝利数ランキング",
+    score: (player) => player.completedBattles || 0,
+  },
+  TREASURES: {
+    title: "宝箱開封数ランキング",
+    score: (player) => player.claimed?.length || 0,
+  },
+  STEPS: {
+    title: "探索歩数ランキング",
+    score: (player) => player.moveCount || 0,
+  },
+  INTERACTIONS: {
+    title: "施設利用回数ランキング",
+    score: (player) => player.interactionCount || 0,
+  },
+};
+
+function rankingRows(
+  members: Adventurer[],
+  score: (player: Adventurer) => number,
+) {
+  return members
+    .map((player) => ({ player, score: Math.max(0, Math.floor(score(player))) }))
+    .sort(
+      (a, b) =>
+        b.score - a.score ||
+        a.player.name.localeCompare(b.player.name, "ja"),
+    )
+    .slice(0, 5);
+}
+
 export default function RpgOnline({
   player,
   active,
@@ -110,6 +149,10 @@ export default function RpgOnline({
   const [inviteTheme, setInviteTheme] = useState<RpgAdventureSetup["visualTheme"]>(
     adventureSetup?.visualTheme || "elementary",
   );
+  const previewTheme = autoJoinInvite
+    ? inviteTheme
+    : adventureSetup?.visualTheme || "elementary";
+  const displaySiteName = (site: Site) => getRpgSiteDisplayName(site, previewTheme);
   const [error, setError] = useState(""),
     [busy, setBusy] = useState(false),
     [overview, setOverview] = useState(false);
@@ -118,10 +161,15 @@ export default function RpgOnline({
   const destination = useRef<{ x: number; y: number } | null>(null);
   latest.current = { world, active };
   const preview = useMemo(() => {
-    const w = createWorld(9252026);
+    const w = createWorld(9252026, {
+      visualTheme: previewTheme,
+      mode: "MULTIPLICATION",
+      answerMode: "CHOICE",
+      difficultyLevel: 1,
+    });
     addPlayer(w, "preview", "あなた");
     return w;
-  }, []);
+  }, [previewTheme]);
   const selfId = room.current?.selfId || "",
     me = world?.players[selfId];
   const roomCode = room.current?.code || "";
@@ -133,6 +181,19 @@ export default function RpgOnline({
     [roomCode],
   );
   const members: Adventurer[] = world ? Object.values(world.players) : [];
+  const bonusRanking =
+    BONUS_RANKING_LABELS[world?.bonusRankingKind || "BATTLES"];
+  const rankingDefinitions = [
+    {
+      title: "総ダメージ数ランキング",
+      score: (member: Adventurer) => member.totalDamage || 0,
+    },
+    {
+      title: "総問題正解数ランキング",
+      score: (member: Adventurer) => member.correctAnswers || 0,
+    },
+    bonusRanking,
+  ];
   const near =
     world && me
       ? world.sites
@@ -165,7 +226,7 @@ export default function RpgOnline({
     room.current = r;
     onRoom(r);
     try {
-      if (mode === "practice") r.practice(name);
+      if (mode === "practice") r.practice(name, adventureSetup);
       else if (mode === "create") await r.create(name, adventureSetup);
       else if (mode === "invite")
         await r.prepareInviteJoin(code, name, (setup) =>
@@ -294,6 +355,7 @@ export default function RpgOnline({
                 onTile={() => {}}
                 overview
                 languageMode={languageMode}
+                visualTheme={previewTheme}
               />
             </div>
             <section className="rpg-lobby-form">
@@ -406,6 +468,7 @@ export default function RpgOnline({
                       selfId={selfId}
                       overview={overview}
                       languageMode={languageMode}
+                      visualTheme={previewTheme}
                       onTile={(x, y) => {
                         destination.current = { x, y };
                       }}
@@ -458,7 +521,7 @@ export default function RpgOnline({
                     {near && (
                       <button className="rpg-interact" onClick={interact}>
                         <span>
-                          {near.name}
+                          {displaySiteName(near)}
                           <small>
                             {siteUnavailable(world, me, near) || "E 調べる"}
                           </small>
@@ -562,9 +625,29 @@ export default function RpgOnline({
             </footer>
             {world.won && !me.nativeScene && (
               <div className="rpg-overlay">
-                <section className="rpg-dialog">
+                <section className="rpg-dialog rpg-clear-dialog">
                   <h1>校長を倒しました！</h1>
                   <p>みんなの冒険は大成功！</p>
+                  <div className="rpg-ranking-grid">
+                    {rankingDefinitions.map((ranking) => (
+                      <section className="rpg-ranking-card" key={ranking.title}>
+                        <h2>{ranking.title}</h2>
+                        <ol>
+                          {rankingRows(members, ranking.score).map(
+                            ({ player: rankedPlayer, score }, index) => (
+                              <li key={rankedPlayer.id}>
+                                <span className="rpg-ranking-rank">{index + 1}</span>
+                                <span className="rpg-ranking-name">
+                                  {rankedPlayer.name}
+                                </span>
+                                <strong>{score}</strong>
+                              </li>
+                            ),
+                          )}
+                        </ol>
+                      </section>
+                    ))}
+                  </div>
                   <button onClick={close}>学習ローグへ</button>
                 </section>
               </div>

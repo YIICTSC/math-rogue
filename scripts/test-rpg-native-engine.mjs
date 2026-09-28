@@ -18,6 +18,10 @@ try {
   const { getEncounterEnemyNamePool } = await server.ssrLoadModule(
     "/src/services/geminiService.ts",
   );
+  const { getRpgSiteDisplayName } = await server.ssrLoadModule(
+    "/src/rpg/enemyNames.ts",
+  );
+  const { RpgRoom } = await server.ssrLoadModule("/src/rpg/network.ts");
   const setup = {
     visualTheme: "high-school",
     mode: "MIXED",
@@ -31,6 +35,16 @@ try {
     setup,
     "world keeps the host adventure setup",
   );
+  let practicedWorld;
+  const practiceRoom = new RpgRoom((world) => { practicedWorld = world; }, () => {});
+  practiceRoom.practice("練習", setup);
+  assert(
+    practicedWorld.sites
+      .filter((site) => site.kind === "enemy")
+      .every((site) => getEncounterEnemyNamePool("high-school").includes(site.name)),
+    "solo practice creates map enemies for the selected chapter",
+  );
+  practiceRoom.close();
   const enemySites = setupWorld.sites.filter((site) => site.kind === "enemy");
   assert.equal(enemySites.length, 14, "map generates 14 ordinary encounters");
   assert(
@@ -39,6 +53,13 @@ try {
     ),
     "ordinary enemy labels come from the selected theme's actual encounter names",
   );
+  for (const theme of ["elementary", "high-school", "magic"]) {
+    const names = getEncounterEnemyNamePool(theme);
+    assert(
+      enemySites.every((site) => names.includes(getRpgSiteDisplayName(site, theme))),
+      `map enemies display names from the ${theme} chapter`,
+    );
+  }
   const assignment = {
     id: "rpg-assignment",
     title: "オンライン課題",
@@ -125,6 +146,7 @@ try {
   const elementaryEnemyNames = getEncounterEnemyNamePool("elementary");
   for (let i = 0; i < 3; i++) {
     const defeatedName = ordinaryEnemy.name;
+    const defeatedThemeNames = { ...ordinaryEnemy.enemyNamesByTheme };
     enter(ordinaryEnemy);
     assert(p.nativeScene);
     finish("victory");
@@ -137,6 +159,17 @@ try {
       elementaryEnemyNames.includes(ordinaryEnemy.name),
       "the next map enemy is selected from the actual battle name pool",
     );
+    for (const theme of ["elementary", "high-school", "magic"]) {
+      assert.notEqual(
+        ordinaryEnemy.enemyNamesByTheme?.[theme],
+        defeatedThemeNames[theme],
+        `the ${theme} chapter enemy also rerolls after victory`,
+      );
+      assert(
+        getEncounterEnemyNamePool(theme).includes(ordinaryEnemy.enemyNamesByTheme?.[theme]),
+        `the rerolled name stays in the ${theme} chapter pool`,
+      );
+    }
   }
   assert.equal(p.completedBattles, 3);
   const unchallengedName = ordinaryEnemy.name;

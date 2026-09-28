@@ -19,6 +19,7 @@ interface MiniGameProblemChallengeProps {
   languageMode?: LanguageMode;
   assignment?: AssignmentPayload | null;
   onAnswerResult?: (result: AssignmentAnswerResult) => void;
+  problemOffset?: number;
 }
 
 const MiniGameProblemChallenge: React.FC<MiniGameProblemChallengeProps> = ({
@@ -32,6 +33,7 @@ const MiniGameProblemChallenge: React.FC<MiniGameProblemChallengeProps> = ({
   languageMode = storageService.getLanguageMode() ?? 'JAPANESE',
   assignment: assignmentOverride,
   onAnswerResult,
+  problemOffset = 0,
 }) => {
   const assignmentCandidate = assignmentOverride ?? storageService.getCurrentAssignment();
   const assignmentSignature = assignmentCandidate
@@ -118,6 +120,7 @@ const MiniGameProblemChallenge: React.FC<MiniGameProblemChallengeProps> = ({
         languageMode={languageMode}
         onAnswerResult={handleAnswerResult}
         customProblems={effectiveCustomProblems}
+        problemOffset={problemOffset}
         assignmentUnits={assignment?.units}
       />
     );

@@ -820,6 +820,69 @@
   padding: 26px;
   box-shadow: 0 25px 80px #0008;
 }
+.rpg-clear-dialog {
+  max-width: 1080px;
+}
+.rpg-clear-dialog > h1 {
+  margin: 0 0 8px;
+  color: #f2dfad;
+  font-family: "Yu Mincho", serif;
+  font-size: clamp(24px, 4vw, 36px);
+}
+.rpg-ranking-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+  margin: 22px 0;
+}
+.rpg-ranking-card {
+  min-width: 0;
+  padding: 14px;
+  background: #142526;
+  border: 1px solid #466257;
+  border-radius: 6px;
+}
+.rpg-clear-dialog .rpg-ranking-card h2 {
+  margin: 0 0 12px;
+  color: #edddaf;
+  font-size: 13px;
+  line-height: 1.4;
+}
+.rpg-ranking-card ol {
+  display: grid;
+  gap: 6px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+.rpg-ranking-card li {
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 7px;
+  min-height: 27px;
+  padding: 4px 6px;
+  border-bottom: 1px solid #2d4844;
+  color: #d4dfd2;
+  font-size: 12px;
+}
+.rpg-ranking-card li:last-child {
+  border-bottom: 0;
+}
+.rpg-ranking-rank {
+  color: #d7bd7d;
+  font-variant-numeric: tabular-nums;
+  text-align: center;
+}
+.rpg-ranking-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.rpg-ranking-card strong {
+  color: #f2dfad;
+  font-variant-numeric: tabular-nums;
+}
 .rpg-dialog > header {
   display: flex;
   justify-content: space-between;
@@ -1364,6 +1427,14 @@
   }
   .rpg-dialog {
     padding: 18px;
+  }
+  .rpg-ranking-grid {
+    grid-template-columns: 1fr;
+    gap: 9px;
+    margin: 16px 0;
+  }
+  .rpg-ranking-card {
+    padding: 11px;
   }
   .rpg-battle > header {
     padding: 12px;
