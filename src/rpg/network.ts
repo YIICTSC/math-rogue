@@ -5,11 +5,28 @@ import {
   createWorld,
   removePlayer,
   type Action,
+  type NativeProfile,
   type World,
 } from "./engine";
-import type { RpgAdventureSetup } from "./setup";
+import { isRpgAdventureSetup, type RpgAdventureSetup } from "./setup";
 
-const RPG_PROTOCOL_VERSION = 3;
+const RPG_PROTOCOL_VERSION = 4;
+
+function isNativeProfile(value: unknown): value is NativeProfile {
+  if (!value || typeof value !== "object") return false;
+  const profile = value as Partial<NativeProfile>;
+  return (
+    [profile.hp, profile.maxHp, profile.gold, profile.deckSize].every(
+      (number) => typeof number === "number" && Number.isFinite(number),
+    ) &&
+    Number(profile.maxHp) > 0 &&
+    Number(profile.hp) >= 0 &&
+    Number(profile.hp) <= Number(profile.maxHp) &&
+    Number(profile.gold) >= 0 &&
+    typeof profile.character === "string" &&
+    typeof profile.image === "string"
+  );
+}
 
 /** A single room owner validates commands and broadcasts authoritative state. */
 export class RpgRoom {
@@ -107,7 +124,7 @@ export class RpgRoom {
         return;
       }
       this.connections.set(conn.peer, conn);
-      const handshake = setTimeout(() => {
+      let handshake = setTimeout(() => {
         if (!this.world?.players[conn.peer]) conn.close();
       }, 10000);
       conn.on("data", (raw: unknown) => {
@@ -117,6 +134,8 @@ export class RpgRoom {
           name?: string;
           action?: Action;
           version?: number;
+          admission?: string;
+          profile?: unknown;
         };
         if (data.type === "hello" && data.version !== RPG_PROTOCOL_VERSION) {
           conn.send({
@@ -128,13 +147,52 @@ export class RpgRoom {
         if (
           data.type === "hello" &&
           typeof data.name === "string" &&
-          !this.world.players[conn.peer]
+          !this.world.players[conn.peer] &&
+          !this.pendingInviteNames.has(conn.peer)
         ) {
           clearTimeout(handshake);
+          const name = data.name.trim().slice(0, 16) || "冒険者";
+          if (data.admission === "prepare") {
+            if (!this.world.setup) {
+              conn.send({
+                type: "error",
+                message: "ホストの冒険設定を受け取れませんでした。",
+              });
+              return;
+            }
+            this.pendingInviteNames.set(conn.peer, name);
+            handshake = setTimeout(() => {
+              if (!this.world?.players[conn.peer]) conn.close();
+            }, 5 * 60 * 1000);
+            conn.send({
+              type: "lobby",
+              setup: this.world.setup,
+            });
+            return;
+          }
           if (!addPlayer(this.world, conn.peer, data.name)) {
             conn.send({ type: "error", message: "部屋が満員です。" });
             return;
           }
+          conn.send({ type: "init", world: this.world });
+          this.emit();
+        } else if (
+          data.type === "enter" &&
+          this.pendingInviteNames.has(conn.peer) &&
+          isNativeProfile(data.profile)
+        ) {
+          clearTimeout(handshake);
+          const name = this.pendingInviteNames.get(conn.peer)!;
+          if (!addPlayer(this.world, conn.peer, name)) {
+            conn.send({ type: "error", message: "部屋が満員です。" });
+            return;
+          }
+          this.pendingInviteNames.delete(conn.peer);
+          const participant = this.world.players[conn.peer];
+          participant.profile = data.profile;
+          participant.hp = data.profile.hp;
+          participant.maxHp = data.profile.maxHp;
+          participant.gold = data.profile.gold;
           conn.send({ type: "init", world: this.world });
           this.emit();
         } else if (
@@ -152,6 +210,7 @@ export class RpgRoom {
       });
       const drop = () => {
         clearTimeout(handshake);
+        this.pendingInviteNames.delete(conn.peer);
         this.connections.delete(conn.peer);
         this.commands.delete(conn.peer);
         if (this.world) {
@@ -245,6 +304,100 @@ export class RpgRoom {
       });
     });
   }
+  private pendingInviteNames = new Map<string, string>();
+  async prepareInviteJoin(
+    code: string,
+    name: string,
+    onSetup: (setup: RpgAdventureSetup) => void,
+  ) {
+    this.code = code.trim().toUpperCase();
+    if (!/^[A-Z2-9]{6}$/.test(this.code))
+      throw new Error("6文字のルームコードを入力してください。");
+    const peer = await this.open();
+    this.selfId = peer.id;
+    const conn = peer.connect(`learning-rogue-rpg-${this.code}`, {
+      reliable: true,
+    });
+    this.connections.set("host", conn);
+    await new Promise<void>((resolve, reject) => {
+      let settled = false;
+      const timeout = setTimeout(() => {
+        if (settled) return;
+        settled = true;
+        reject(
+          new Error(
+            "部屋が見つからないか、接続できません。ホストとコードを確認してください。",
+          ),
+        );
+      }, 15000);
+      const finish = (error?: Error) => {
+        clearTimeout(timeout);
+        if (settled) return;
+        settled = true;
+        if (error) reject(error);
+        else resolve();
+      };
+      conn.on("open", () =>
+        conn.send({
+          type: "hello",
+          version: RPG_PROTOCOL_VERSION,
+          admission: "prepare",
+          name: name.trim().slice(0, 16),
+        }),
+      );
+      conn.on("data", (raw: unknown) => {
+        if (!raw || typeof raw !== "object") return;
+        const data = raw as {
+          type: string;
+          world?: World;
+          state?: Omit<World, "tiles">;
+          setup?: unknown;
+          message?: string;
+        };
+        if (data.type === "error") {
+          const error = new Error(data.message || "接続エラー");
+          finish(error);
+          this.status(error.message);
+          return;
+        }
+        if (data.type === "lobby") {
+          if (!isRpgAdventureSetup(data.setup)) {
+            finish(new Error("ホストの冒険設定を読み込めませんでした。"));
+            return;
+          }
+          onSetup(data.setup);
+          finish();
+        }
+        if (data.type === "init" && data.world) {
+          if (!data.world.nativeMode) {
+            finish(new Error("同じバージョンのRPGオンラインで参加してください。"));
+            return;
+          }
+          this.world = data.world;
+          this.emit();
+          finish();
+        }
+        if (data.type === "state" && data.state && this.world) {
+          this.world = { ...data.state, tiles: this.world.tiles };
+          this.emit();
+        }
+      });
+      conn.on("close", () => {
+        finish(new Error("ホストとの接続が終了しました。"));
+        this.status("ホストとの接続が終了しました。この部屋の冒険は終了です。");
+        this.world = null;
+      });
+      conn.on("error", () => {
+        finish(new Error("部屋への接続に失敗しました。"));
+        this.status("ホストとの通信が途切れました。入り直してください。");
+        this.world = null;
+      });
+    });
+  }
+  enterWorld(profile: NativeProfile) {
+    if (this.closed) return;
+    this.connections.get("host")?.send({ type: "enter", profile });
+  }
   send(action: Action) {
     if (this.closed) return;
     if (this.host && this.world) {
@@ -256,6 +409,7 @@ export class RpgRoom {
     if (this.timer) clearInterval(this.timer);
     this.connections.forEach((c) => c.close());
     this.connections.clear();
+    this.pendingInviteNames.clear();
     this.peer?.destroy();
     this.world = null;
   }

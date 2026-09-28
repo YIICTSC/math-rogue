@@ -104,14 +104,13 @@ export default function RpgOnline({
         : getRpgRoomCodeFromUrl(window.location.href),
     [],
   );
-  const [name, setName] = useState("冒険者"),
+  const [name, setName] = useState(inviteCode ? "" : "冒険者"),
     [code, setCode] = useState(inviteCode),
     [inviteCopied, setInviteCopied] = useState(false);
   const [error, setError] = useState(""),
     [busy, setBusy] = useState(false),
     [overview, setOverview] = useState(false);
   const room = useRef<RpgRoom | null>(null),
-    autoJoinAttempted = useRef(false),
     latest = useRef({ world, active });
   const destination = useRef<{ x: number; y: number } | null>(null);
   latest.current = { world, active };
@@ -151,7 +150,7 @@ export default function RpgOnline({
         profile: JSON.parse(profileJson),
       });
   }, [active, selfId, !!me, !!me?.nativeScene, profileJson]);
-  const start = async (mode: "practice" | "create" | "join") => {
+  const start = async (mode: "practice" | "create" | "join" | "invite") => {
     setBusy(true);
     setError("");
     room.current?.close();
@@ -165,26 +164,18 @@ export default function RpgOnline({
     try {
       if (mode === "practice") r.practice(name);
       else if (mode === "create") await r.create(name, adventureSetup);
+      else if (mode === "invite")
+        await r.prepareInviteJoin(code, name, onSetup);
       else await r.join(code, name);
     } catch (e) {
       r.close();
+      if (room.current === r) room.current = null;
       setWorld(null);
       setError(e instanceof Error ? e.message : "接続できませんでした。");
     } finally {
       setBusy(false);
     }
   };
-  useEffect(() => {
-    if (
-      !autoJoinInvite ||
-      !inviteCode ||
-      room.current ||
-      autoJoinAttempted.current
-    )
-      return;
-    autoJoinAttempted.current = true;
-    void start("join");
-  }, [autoJoinInvite, inviteCode]);
   const copyInviteUrl = useCallback(async () => {
     if (!inviteUrl) return;
     try {
@@ -301,62 +292,82 @@ export default function RpgOnline({
               />
             </div>
             <section className="rpg-lobby-form">
-              <h1>冒険をはじめる</h1>
-              <p>選択した主人公・問題・難易度で探索します。</p>
-              {autoJoinInvite && !world && (
-                <p className="rpg-invite-hint" role="status">
-                  招待された部屋へ接続しています…
-                </p>
-              )}
+              <h1>{autoJoinInvite ? "招待に参加する" : "冒険をはじめる"}</h1>
+              <p>
+                {autoJoinInvite
+                  ? "参加名を入力してから、主人公を選んで冒険に加わります。"
+                  : "選択した主人公・問題・難易度で探索します。"}
+              </p>
               <label>
-                冒険者の名前
+                {autoJoinInvite ? "参加名" : "冒険者の名前"}
                 <input
                   value={name}
                   maxLength={16}
+                  autoComplete="nickname"
+                  placeholder={autoJoinInvite ? "参加者名を入力" : undefined}
                   onChange={(e) => setName(e.target.value)}
                 />
               </label>
-              <button
-                className="rpg-primary"
-                disabled={busy || !name.trim()}
-                onClick={() => start("create")}
-              >
-                部屋を作る
-              </button>
-              <label>
-                招待コード（6文字）
-                <input
-                  value={code}
-                  maxLength={6}
-                  placeholder="ABC123"
-                  autoComplete="off"
-                  onChange={(e) => setCode(e.target.value.toUpperCase())}
-                />
-              </label>
-              {inviteCode && (
-                <p className="rpg-invite-hint" role="status">
-                  招待URLからルームコードを読み込みました。
-                </p>
+              {autoJoinInvite ? (
+                <>
+                  <p className="rpg-invite-hint" role="status">
+                    {busy
+                      ? "招待された部屋へ接続しています…"
+                      : "参加名を決めて主人公選択へ進んでください。"}
+                  </p>
+                  <button
+                    className="rpg-join-button"
+                    disabled={busy || !name.trim() || code.length !== 6}
+                    onClick={() => start("invite")}
+                  >
+                    名前を決めて主人公選択へ
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button
+                    className="rpg-primary"
+                    disabled={busy || !name.trim()}
+                    onClick={() => start("create")}
+                  >
+                    部屋を作る
+                  </button>
+                  <label>
+                    招待コード（6文字）
+                    <input
+                      value={code}
+                      maxLength={6}
+                      placeholder="ABC123"
+                      autoComplete="off"
+                      onChange={(e) => setCode(e.target.value.toUpperCase())}
+                    />
+                  </label>
+                  {inviteCode && (
+                    <p className="rpg-invite-hint" role="status">
+                      招待URLからルームコードを読み込みました。
+                    </p>
+                  )}
+                  {!code && (
+                    <p className="rpg-join-hint">
+                      6文字のコードを入力すると入室できます。
+                    </p>
+                  )}
+                  <button
+                    className="rpg-join-button"
+                    disabled={busy || !name.trim() || code.length !== 6}
+                    onClick={() => start("join")}
+                  >
+                    招待コードを入力して入室する
+                  </button>
+                  <button
+                    className="rpg-practice"
+                    disabled={busy || !name.trim()}
+                    onClick={() => start("practice")}
+                  >
+                    まずはひとりで練習する
+                  </button>
+                </>
               )}
-              {!code && (
-                <p className="rpg-join-hint">
-                  6文字のコードを入力すると入室できます。
-                </p>
-              )}
-              <button
-                className="rpg-join-button"
-                disabled={busy || !name.trim() || code.length !== 6}
-                onClick={() => start("join")}
-              >
-                招待コードを入力して入室する
-              </button>
-              <button
-                className="rpg-practice"
-                disabled={busy || !name.trim()}
-                onClick={() => start("practice")}
-              >
-                まずはひとりで練習する
-              </button>
               <small>
                 最大40人・チームは最大4人。オンラインでは部屋を作った人の画面を開いたままにしてください。
               </small>

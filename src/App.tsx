@@ -1653,6 +1653,7 @@ const App: React.FC = () => {
     const rpgInviteParticipantRef = useRef(false);
     const rpgInviteAutoLaunchAttemptedRef = useRef(false);
     const rpgInviteSetupAppliedRef = useRef(false);
+    const rpgInviteAdmissionRequestedRef = useRef(false);
     const rpgInviteAssignmentRef = useRef<AssignmentPayload | null>(null);
     const receiveRpgSnapshot = useCallback((snapshot: RpgSnapshot) => {
         rpgSnapshotRef.current = snapshot;
@@ -2577,7 +2578,7 @@ const App: React.FC = () => {
     // what activates the rest of the debug surface for the current session.
     const [isDebugMode, setIsDebugMode] = useState(false);
     const isDebugModeActive = DEBUG_FEATURES_ENABLED && isDebugMode;
-    const isRpgInviteParticipantActive = DEBUG_FEATURES_ENABLED
+    const isRpgInviteParticipantActive = !OFFLINE_DISTRIBUTABLE
         && Boolean(rpgInviteCode)
         && rpgInviteParticipantRef.current
         && Boolean(gameState.rpgOnline);
@@ -6917,6 +6918,7 @@ const App: React.FC = () => {
         const isRpgInviteParticipant = rpgOnline && Boolean(rpgInviteCode);
         rpgInviteParticipantRef.current = isRpgInviteParticipant;
         rpgInviteSetupAppliedRef.current = false;
+        rpgInviteAdmissionRequestedRef.current = false;
         rpgInviteAssignmentRef.current = null;
         if (!isRpgInviteParticipant && redirectToAssignmentChallengeIfLocked()) return;
         if (!isRpgInviteParticipant && isDailyLimitReached) {
@@ -6993,12 +6995,11 @@ const App: React.FC = () => {
         });
     };
 
-    // An invite URL is an explicit participant entry point. It must be able to
-    // reach the RPG lobby without activating the local debug gesture first.
+    // An invite URL is an explicit participant entry point, including in
+    // production builds where the rest of the debug surface is disabled.
     useEffect(() => {
         if (
             OFFLINE_DISTRIBUTABLE
-            || !DEBUG_FEATURES_ENABLED
             || !rpgInviteCode
             || rpgInviteAutoLaunchAttemptedRef.current
             || gameState.screen !== GameScreen.START_MENU
@@ -8660,6 +8661,10 @@ const App: React.FC = () => {
             codexBuffer: [],
             magicRuleState: isMagicTheme ? createMagicRuleState(magicProtagonistId) : undefined
         };
+        if (isRpgInviteParticipant && !rpgInviteAdmissionRequestedRef.current) {
+            rpgInviteAdmissionRequestedRef.current = true;
+            rpgRoomRef.current?.enterWorld(nativeProfile(initialPlayerState));
+        }
         void audioService.setBgmTheme(getBgmThemeForPlayer(visualTheme, initialPlayerState));
 
         if (gameState.challengeMode === 'COOP' && coopSession) {
