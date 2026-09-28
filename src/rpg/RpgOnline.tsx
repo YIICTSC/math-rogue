@@ -573,6 +573,11 @@ export default function RpgOnline({
                     チーム
                   </h2>
                   <button
+                    className={`rpg-team-action ${
+                      me.team
+                        ? "rpg-team-action--leave"
+                        : "rpg-team-action--publish"
+                    }`}
                     onClick={() =>
                       room.current?.send({
                         type: "team",
@@ -583,25 +588,28 @@ export default function RpgOnline({
                     {me.team ? "チームを離れる" : "チームを公開する"}
                   </button>
                   <p>近くのチームメンバー1人につき、戦闘開始時の攻撃力+2。</p>
-                  {members
-                    .filter((p) => p.id !== selfId)
-                    .map((p) => (
-                      <div key={p.id}>
-                        <span>
-                          {p.name}
-                          {p.nativeScene ? " · 探索中" : ""}
-                        </span>
-                        {p.team && p.team !== me.team && (
-                          <button
-                            onClick={() =>
-                              room.current?.send({ type: "team", target: p.id })
-                            }
-                          >
-                            参加
-                          </button>
-                        )}
-                      </div>
-                    ))}
+                  <div className="rpg-team-member-list">
+                    {members
+                      .filter((p) => p.id !== selfId)
+                      .map((p) => (
+                        <div className="rpg-team-member-row" key={p.id}>
+                          <span>
+                            {p.name}
+                            {p.nativeScene ? " · 探索中" : ""}
+                          </span>
+                          {p.team && p.team !== me.team && (
+                            <button
+                              className="rpg-team-join-button"
+                              onClick={() =>
+                                room.current?.send({ type: "team", target: p.id })
+                              }
+                            >
+                              参加
+                            </button>
+                          )}
+                        </div>
+                      ))}
+                  </div>
                 </section>
               </aside>
             </div>
