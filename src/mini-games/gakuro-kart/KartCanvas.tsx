@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import { assetUrl } from '../../utils/assetPaths';
-import { COURSES, curvature, TRACK_LENGTH, type Race, type Racer } from './engine';
+import { COURSES, roadOffset, TRACK_LENGTH, type Race, type Racer } from './engine';
 export const HERO_SHEET = 'sprites/mini-games/crane-game/crane-game-protagonist-prizes-3x2-alpha-v1.webp';
 const colors = ['#ef785f', '#65b4eb', '#f4be59'];
 export default function KartCanvas({ world, selfId }: { world: Race; selfId: string }) {
@@ -31,8 +31,8 @@ export default function KartCanvas({ world, selfId }: { world: Race; selfId: str
       }
       const project = (z: number) => {
         const scale = 1 / (1 + z / 100), y = horizon + (height - horizon) * scale;
-        const bend = curvature(p.distance + z * .5, w.course) * z * z * .00055 * scale;
-        return { x: width / 2 + bend * width / 500 - p.x * width * .34 * scale, y, half: width * .43 * scale, scale };
+        const bend = (roadOffset(p.distance + z, w.course) - roadOffset(p.distance, w.course)) * width * .0015 * scale;
+        return { x: width / 2 + bend - p.x * width * .34 * scale, y, half: width * .43 * scale, scale };
       };
       for (let y = Math.floor(horizon); y < height; y += 2) {
         const scale = Math.max(.015, (y - horizon) / (height - horizon)), z = 100 / scale - 100, pt = project(z);

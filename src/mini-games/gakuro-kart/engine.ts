@@ -1,4 +1,24 @@
 export const TRACK_LENGTH = 3600;
+const TRACK_CURVES = [
+  [
+    { start: 550, end: 830, offset: 190, strength: 1 },
+    { start: 1200, end: 1490, offset: -190, strength: -1 },
+    { start: 2040, end: 2320, offset: 240, strength: 1.2 },
+    { start: 2810, end: 3100, offset: -240, strength: -1.2 },
+  ],
+  [
+    { start: 340, end: 620, offset: -190, strength: -1 },
+    { start: 1030, end: 1300, offset: 190, strength: 1 },
+    { start: 1780, end: 2110, offset: -220, strength: -1.15 },
+    { start: 2610, end: 2940, offset: 220, strength: 1.15 },
+  ],
+  [
+    { start: 460, end: 800, offset: 220, strength: 1.1 },
+    { start: 1130, end: 1490, offset: -220, strength: -1.1 },
+    { start: 1960, end: 2260, offset: 270, strength: 1.35 },
+    { start: 2790, end: 3180, offset: -270, strength: -1.35 },
+  ],
+];
 export const HEROES = ['小学生の主人公', '高校生の主人公', '魔法学園の主人公'];
 export const COURSES = [
   { name: '放課後スクールサーキット', subtitle: '校庭 → 校舎 → 桜並木', sky: '#a8deed', ground: '#79a765', road: '#beaa83', turn: 1 },
@@ -38,8 +58,24 @@ export function startRace(w: Race) {
   w.phase = 'countdown'; w.remaining = 3;
 }
 export function curvature(distance: number, course: number) {
-  const t = (distance % TRACK_LENGTH) / TRACK_LENGTH * Math.PI * 2;
-  return (Math.sin(t * 3) * .65 + Math.sin(t * 7) * .35) * COURSES[course].turn;
+  const position = ((distance % TRACK_LENGTH) + TRACK_LENGTH) % TRACK_LENGTH;
+  const curves = TRACK_CURVES[clamp(Math.floor(course), 0, TRACK_CURVES.length - 1)];
+  for (const curve of curves) {
+    if (position < curve.start || position > curve.end) continue;
+    const progress = (position - curve.start) / (curve.end - curve.start);
+    return Math.sin(Math.PI * progress) * curve.strength * COURSES[clamp(Math.floor(course), 0, COURSES.length - 1)].turn;
+  }
+  return 0;
+}
+export function roadOffset(distance: number, course: number) {
+  const position = ((distance % TRACK_LENGTH) + TRACK_LENGTH) % TRACK_LENGTH;
+  const curves = TRACK_CURVES[clamp(Math.floor(course), 0, TRACK_CURVES.length - 1)];
+  return curves.reduce((offset, curve) => {
+    if (position <= curve.start) return offset;
+    const progress = clamp((position - curve.start) / (curve.end - curve.start), 0, 1);
+    const eased = progress * progress * (3 - 2 * progress);
+    return offset + curve.offset * eased;
+  }, 0);
 }
 export function speedCap(correct: number, times: number[]) {
   const speedBonus = times.reduce((sum, t) => sum + clamp(1 - t / 10, 0, 1), 0);
