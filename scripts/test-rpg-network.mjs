@@ -64,6 +64,47 @@ try {
     window.rooms.push(host);
     window.host = host;
     await host.create("Host", setup);
+    const inviteHost = new window.RpgRoom(() => {}, (m) => window.errors.push(m));
+    const inviteGuest = new window.RpgRoom(() => {}, (m) => window.errors.push(m));
+    window.inviteHost = inviteHost;
+    window.inviteGuest = inviteGuest;
+    await inviteHost.create("Invite Host", {
+      ...setup,
+      visualTheme: "ELEMENTARY",
+      modePool: ["MULTIPLICATION", null, 2],
+      answerMode: "choice",
+      difficultyLevel: "2",
+    });
+    await inviteGuest.prepareInviteJoin(inviteHost.code, "Invite Guest", (s) => {
+      window.inviteReceivedSetup = s;
+    });
+    window.inviteWasUnregistered = !inviteHost.world.players[inviteGuest.selfId];
+    inviteGuest.enterWorld({
+      hp: 80,
+      maxHp: 80,
+      gold: 100,
+      deckSize: 10,
+      character: "WARRIOR",
+      image: "",
+    });
+    await new Promise((resolve, reject) => {
+      const started = Date.now();
+      const timer = window.setInterval(() => {
+        if (
+          window.inviteHost.world.players[inviteGuest.selfId]?.profile?.character ===
+          "WARRIOR"
+        ) {
+          window.clearInterval(timer);
+          resolve();
+        } else if (Date.now() - started > 5000) {
+          window.clearInterval(timer);
+          reject(new Error("invitee was not admitted after entering the world"));
+        }
+      }, 25);
+    });
+    window.inviteJoinedPlayer = inviteHost.world.players[inviteGuest.selfId];
+    inviteGuest.close();
+    inviteHost.close();
     for (let batch = 0; batch < 13; batch++)
       await Promise.all(
         Array.from({ length: 3 }, async (_, j) => {
@@ -79,6 +120,38 @@ try {
   });
   await page.waitForFunction(
     () => Object.keys(window.snapshots[38]?.players || {}).length === 40,
+  );
+  assert.deepEqual(await page.evaluate(() => window.inviteReceivedSetup), {
+    visualTheme: "elementary",
+    mode: "MULTIPLICATION",
+    modePool: ["MULTIPLICATION"],
+    answerMode: "CHOICE",
+    difficultyLevel: 2,
+    assignment: {
+      id: "network-assignment",
+      title: "ネットワーク課題",
+      units: [],
+      customProblems: [
+        { id: "custom-1", question: "1+1", answer: "2", options: ["1", "2"] },
+      ],
+      dueAt: "2099-01-01T00:00:00.000Z",
+      gameMode: "FREE",
+      answerMode: "CHOICE",
+      createdAt: "2098-01-01T00:00:00.000Z",
+    },
+  });
+  assert.equal(
+    await page.evaluate(() => window.inviteWasUnregistered),
+    true,
+    "an invitee is not registered before choosing a protagonist",
+  );
+  assert.deepEqual(
+    await page.evaluate(() => ({
+      name: window.inviteJoinedPlayer.name,
+      character: window.inviteJoinedPlayer.profile.character,
+    })),
+    { name: "Invite Guest", character: "WARRIOR" },
+    "the invitee name and selected protagonist are admitted together",
   );
   assert.deepEqual(
     await page.evaluate(() => window.snapshots[38].setup),
@@ -188,7 +261,7 @@ try {
   await page.evaluate(() => window.rooms.forEach((r) => r.close()));
   assert.deepEqual(errors, []);
   console.log(
-    "40 real WebRTC clients: native scene tokens, shared damage and replay protection, rewards/profile sync, capacity and disconnect passed.",
+    "Invite setup normalization and delayed admission passed; 40 real WebRTC clients: native scene tokens, shared damage and replay protection, rewards/profile sync, capacity and disconnect passed.",
   );
 } finally {
   await browser.close();

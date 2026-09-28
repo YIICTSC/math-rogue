@@ -8,7 +8,10 @@ import {
   type NativeProfile,
   type World,
 } from "./engine";
-import { isRpgAdventureSetup, type RpgAdventureSetup } from "./setup";
+import {
+  normalizeRpgAdventureSetup,
+  type RpgAdventureSetup,
+} from "./setup";
 
 const RPG_PROTOCOL_VERSION = 4;
 
@@ -361,11 +364,12 @@ export class RpgRoom {
           return;
         }
         if (data.type === "lobby") {
-          if (!isRpgAdventureSetup(data.setup)) {
+          const setup = normalizeRpgAdventureSetup(data.setup);
+          if (!setup) {
             finish(new Error("ホストの冒険設定を読み込めませんでした。"));
             return;
           }
-          onSetup(data.setup);
+          onSetup(setup);
           finish();
         }
         if (data.type === "init" && data.world) {

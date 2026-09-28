@@ -9,6 +9,62 @@ export interface RpgAdventureSetup {
   assignment?: AssignmentPayload;
 }
 
+/** Normalize peer payloads before applying host settings on another device. */
+export function normalizeRpgAdventureSetup(
+  value: unknown,
+): RpgAdventureSetup | null {
+  if (!value || typeof value !== "object" || Array.isArray(value)) return null;
+  const setup = value as Partial<RpgAdventureSetup> & {
+    visualTheme?: unknown;
+    mode?: unknown;
+    modePool?: unknown;
+    answerMode?: unknown;
+    difficultyLevel?: unknown;
+    assignment?: unknown;
+  };
+  const theme =
+    typeof setup.visualTheme === "string"
+      ? setup.visualTheme.trim().toLowerCase()
+      : "";
+  const visualTheme = ["elementary", "high-school", "magic"].includes(theme)
+    ? (theme as RpgAdventureSetup["visualTheme"])
+    : "elementary";
+  const mode =
+    typeof setup.mode === "string" && setup.mode.trim()
+      ? setup.mode.trim()
+      : "MULTIPLICATION";
+  const pool =
+    typeof setup.modePool === "string"
+      ? [setup.modePool]
+      : Array.isArray(setup.modePool)
+        ? setup.modePool.filter((item): item is string => typeof item === "string")
+        : undefined;
+  const answerModeValue =
+    typeof setup.answerMode === "string"
+      ? setup.answerMode.trim().toUpperCase()
+      : "";
+  const answerMode = ["CHOICE", "INPUT", "WRITING"].includes(answerModeValue)
+    ? (answerModeValue as RpgAdventureSetup["answerMode"])
+    : "CHOICE";
+  const numericDifficulty = Number(setup.difficultyLevel);
+  const difficultyLevel = Number.isFinite(numericDifficulty)
+    ? Math.min(10, Math.max(1, Math.floor(numericDifficulty)))
+    : 1;
+  const assignment =
+    setup.assignment && typeof setup.assignment === "object"
+      ? (setup.assignment as AssignmentPayload)
+      : undefined;
+
+  return {
+    visualTheme,
+    mode,
+    ...(pool ? { modePool: pool } : {}),
+    answerMode,
+    difficultyLevel,
+    ...(assignment ? { assignment } : {}),
+  };
+}
+
 export function isRpgAdventureSetup(
   value: unknown,
 ): value is RpgAdventureSetup {
