@@ -107,6 +107,9 @@ export default function RpgOnline({
   const [name, setName] = useState(inviteCode ? "" : "冒険者"),
     [code, setCode] = useState(inviteCode),
     [inviteCopied, setInviteCopied] = useState(false);
+  const [inviteTheme, setInviteTheme] = useState<RpgAdventureSetup["visualTheme"]>(
+    adventureSetup?.visualTheme || "elementary",
+  );
   const [error, setError] = useState(""),
     [busy, setBusy] = useState(false),
     [overview, setOverview] = useState(false);
@@ -165,7 +168,9 @@ export default function RpgOnline({
       if (mode === "practice") r.practice(name);
       else if (mode === "create") await r.create(name, adventureSetup);
       else if (mode === "invite")
-        await r.prepareInviteJoin(code, name, onSetup);
+        await r.prepareInviteJoin(code, name, (setup) =>
+          onSetup({ ...setup, visualTheme: inviteTheme }),
+        );
       else await r.join(code, name);
     } catch (e) {
       r.close();
@@ -310,6 +315,19 @@ export default function RpgOnline({
               </label>
               {autoJoinInvite ? (
                 <>
+                  <label>
+                    開始する編
+                    <select
+                      value={inviteTheme}
+                      onChange={(e) =>
+                        setInviteTheme(e.target.value as RpgAdventureSetup["visualTheme"])
+                      }
+                    >
+                      <option value="elementary">小学生編</option>
+                      <option value="high-school">高校編</option>
+                      <option value="magic">マジック編</option>
+                    </select>
+                  </label>
                   <p className="rpg-invite-hint" role="status">
                     {busy
                       ? "招待された部屋へ接続しています…"

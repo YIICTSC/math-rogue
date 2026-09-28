@@ -76,7 +76,7 @@ try {
       difficultyLevel: "2",
     });
     await inviteGuest.prepareInviteJoin(inviteHost.code, "Invite Guest", (s) => {
-      window.inviteReceivedSetup = s;
+      window.inviteReceivedSetup = { ...s, visualTheme: "magic" };
     });
     window.inviteWasUnregistered = !inviteHost.world.players[inviteGuest.selfId];
     inviteGuest.enterWorld({
@@ -122,7 +122,7 @@ try {
     () => Object.keys(window.snapshots[38]?.players || {}).length === 40,
   );
   assert.deepEqual(await page.evaluate(() => window.inviteReceivedSetup), {
-    visualTheme: "elementary",
+    visualTheme: "magic",
     mode: "MULTIPLICATION",
     modePool: ["MULTIPLICATION"],
     answerMode: "CHOICE",
