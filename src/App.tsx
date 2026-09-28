@@ -309,6 +309,7 @@ import {
 } from './data/vacationNarrativeCopy';
 
 const RpgOnline = React.lazy(() => import('./rpg/RpgOnline'));
+const GakuroKart = React.lazy(() => import('./mini-games/gakuro-kart/GakuroKart'));
 import { nativeProfile, siteNode, type RpgEncounter, type RpgSnapshot } from './rpg/bridge';
 import { getRpgSiteDisplayName } from './rpg/enemyNames';
 import { isSharedSite } from './rpg/engine';
@@ -19564,20 +19565,6 @@ const App: React.FC = () => {
                                         <Swords className={isMobilePortrait ? 'mr-0.5' : 'mr-1'} size={isMobilePortrait ? 12 : 14} /> {trans("1A1D", languageMode)}
                                     </button>
 
-                                    {!OFFLINE_DISTRIBUTABLE && isDebugModeActive && (
-                                        <button
-                                            disabled={!rpgInviteCode && (isAssignmentChallengeOnlyLocked || isDailyLimitReached)}
-                                            onClick={() => {
-                                                if (!isDebugModeActive) return;
-                                                if (!rpgInviteCode && redirectToAssignmentChallengeIfLocked()) return;
-                                                if (!rpgInviteCode && isDailyLimitReached) { setShowTimeLimitModal(true); return; }
-                                                launchNewAdventure(visualTheme, true);
-                                            }}
-                                            className={`w-full py-3 px-4 text-sm font-bold border border-amber-400/60 bg-emerald-950 text-amber-100 hover:bg-emerald-900 flex items-center justify-center gap-2 ${!rpgInviteCode && (isDailyLimitReached || isAssignmentChallengeOnlyLocked) ? 'opacity-40 cursor-not-allowed' : ''}`}
-                                        >
-                                            <Users size={17} /> {trans("RPGオンライン", languageMode)} <span className="text-xs opacity-70">{trans("開発中・デバッグ限定", languageMode)}</span>
-                                        </button>
-                                    )}
                                 {!OFFLINE_DISTRIBUTABLE && (
                                         <>
                                             <button
@@ -19620,6 +19607,40 @@ const App: React.FC = () => {
                                         </>
                                     )}
                                 </div>
+
+                                {!OFFLINE_DISTRIBUTABLE && isDebugModeActive && (
+                                    <div className="grid w-full grid-cols-2 gap-2">
+                                        <button
+                                            disabled={!rpgInviteCode && (isAssignmentChallengeOnlyLocked || isDailyLimitReached)}
+                                            onClick={() => {
+                                                if (!isDebugModeActive) return;
+                                                if (!rpgInviteCode && redirectToAssignmentChallengeIfLocked()) return;
+                                                if (!rpgInviteCode && isDailyLimitReached) { setShowTimeLimitModal(true); return; }
+                                                launchNewAdventure(visualTheme, true);
+                                            }}
+                                            className={`min-w-0 px-2 py-3 text-xs font-bold border border-amber-400/60 bg-emerald-950 text-amber-100 hover:bg-emerald-900 flex flex-col items-center justify-center gap-1 ${!rpgInviteCode && (isDailyLimitReached || isAssignmentChallengeOnlyLocked) ? 'opacity-40 cursor-not-allowed' : ''}`}
+                                        >
+                                            <span className="flex items-center gap-1"><Users size={15} /> {trans("RPGオンライン", languageMode)}</span>
+                                            <span className="text-[10px] opacity-70">{trans("開発中・デバッグ限定", languageMode)}</span>
+                                        </button>
+                                        <button
+                                            disabled={isAssignmentChallengeOnlyLocked || isDailyLimitReached}
+                                            onClick={() => {
+                                                if (!isDebugModeActive) return;
+                                                if (redirectToAssignmentChallengeIfLocked()) return;
+                                                if (isDailyLimitReached) { setShowTimeLimitModal(true); return; }
+                                                setPendingAssignmentStartScreen(GameScreen.GAKURO_KART);
+                                                if (showDailyAssignmentNoticeForProblemSelection()) return;
+                                                setPendingAssignmentStartScreen(null);
+                                                setGameState(prev => ({ ...prev, screen: GameScreen.GAKURO_KART }));
+                                            }}
+                                            className="min-w-0 px-2 py-3 text-xs font-bold border border-amber-400/60 bg-emerald-950 text-amber-100 hover:bg-emerald-900 flex flex-col items-center justify-center gap-1 disabled:opacity-40"
+                                        >
+                                            <span className="flex items-center gap-1"><Users size={15} /> {trans("スーパー学ロカート", languageMode)}</span>
+                                            <span className="text-[10px] opacity-70">{trans("学習カートレース", languageMode)}</span>
+                                        </button>
+                                    </div>
+                                )}
 
                                 {!isMobilePortrait && (
                                     <button
@@ -21245,6 +21266,12 @@ const App: React.FC = () => {
                         onComplete={handleRpgDefeatChallengeComplete}
                         languageMode={languageMode}
                     />
+                )}
+
+                {!OFFLINE_DISTRIBUTABLE && isDebugModeActive && gameState.screen === GameScreen.GAKURO_KART && (
+                    <React.Suspense fallback={<div className="fixed inset-0 z-50 grid place-items-center bg-slate-950 text-amber-100">{trans("コースを準備しています…", languageMode)}</div>}>
+                        <GakuroKart languageMode={languageMode} onClose={returnToTitle} />
+                    </React.Suspense>
                 )}
 
                 {!OFFLINE_DISTRIBUTABLE && canRunRpgOnline && gameState.rpgOnline && rpgMounted && (
