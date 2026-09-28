@@ -19637,7 +19637,7 @@ const App: React.FC = () => {
                                             className="min-w-0 px-2 py-3 text-xs font-bold border border-amber-400/60 bg-emerald-950 text-amber-100 hover:bg-emerald-900 flex flex-col items-center justify-center gap-1 disabled:opacity-40"
                                         >
                                             <span className="flex items-center gap-1"><Users size={15} /> {trans("スーパー学ロカート", languageMode)}</span>
-                                            <span className="text-[10px] opacity-70">{trans("学習カートレース", languageMode)}</span>
+                                            <span className="text-[10px] opacity-70">{trans("40人オンラインレース", languageMode)}</span>
                                         </button>
                                     </div>
                                 )}

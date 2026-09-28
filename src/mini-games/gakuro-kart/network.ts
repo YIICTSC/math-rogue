@@ -1,108 +1,164 @@
 import Peer, { type DataConnection, type PeerOptions } from 'peerjs';
-import { addRacer, command, createRace, startRace, tick, type Command, type Race, type Subject } from './engine';
+import { addRacer, command, createRace, MAX_RACERS, startRace, tick, type Command, type Race } from './engine';
+import { acceptRoster, decodeSnapshot, encodeSnapshot, PROTOCOL, roster, type Roster } from './protocol';
 
-/** The room owner simulates every kart and measures answer time. Clients only send controls. */
+/** Host-authoritative 60 Hz simulation, 20 Hz controls, 10 Hz compact snapshots. */
 export class KartRoom {
   selfId = 'local'; code = ''; host = false; world: Race | null = null;
   private peer: Peer | null = null;
   private channels = new Map<string, DataConnection>();
   private timer: ReturnType<typeof setInterval> | null = null;
-  private closed = false;
+  private closed = false; private sequence = 0; private lastSequence = -1; private lastRoster = -1;
+  private lastPacketAt = 0; private paused = false;
   private rates = new Map<string, { at: number; count: number }>();
   private pending = new Set<ReturnType<typeof setTimeout>>();
   constructor(private update: (world: Race | null) => void, private status: (message: string) => void) {}
+  private sendTo(c: DataConnection, data: object | ArrayBuffer) {
+    if (!c.open) return;
+    try { c.send(data instanceof ArrayBuffer ? data : JSON.stringify(data)); } catch { c.close(); }
+  }
   private emit() {
     if (this.closed || !this.world) return;
     this.update(structuredClone(this.world));
-    for (const c of this.channels.values()) if (c.open && this.world.players[c.peer]) c.send({ type: 'state', world: this.world });
+    const metadata = this.lastRoster !== this.world.revision ? roster(this.world) : null;
+    const packet = encodeSnapshot(this.world, ++this.sequence);
+    for (const c of this.channels.values()) if (c.open && this.world.players[c.peer]) {
+      if (metadata) this.sendTo(c, metadata);
+      // Drop superseded snapshots instead of building up seconds of latency.
+      if ((c.dataChannel?.bufferedAmount || 0) < 16384) this.sendTo(c, packet);
+    }
+    this.lastRoster = this.world.revision;
   }
+  private visibility = () => {
+    if (!this.host || this.closed) return;
+    this.paused = document.hidden;
+    if (this.world) this.world.paused = this.paused;
+    for (const c of this.channels.values()) this.sendTo(c, { type: 'pause', value: this.paused });
+    this.status(this.paused ? 'ホストの画面が戻るまで一時停止しています。' : '');
+  };
   private run() {
-    let previous = performance.now();
+    let previous = performance.now(), accumulator = 0, broadcast = 0;
+    document.addEventListener('visibilitychange', this.visibility);
+    this.visibility();
     this.timer = setInterval(() => {
-      const now = performance.now(), dt = (now - previous) / 1000; previous = now;
-      if (this.world) { tick(this.world, dt); this.emit(); }
-    }, 50);
+      const now = performance.now(), elapsed = Math.min(.15, (now - previous) / 1000); previous = now;
+      if (this.world && !this.paused) {
+        accumulator += elapsed;
+        while (accumulator >= 1 / 60) { tick(this.world, 1 / 60); accumulator -= 1 / 60; }
+      }
+      broadcast += elapsed;
+      if (broadcast >= .1 || this.world?.revision !== this.lastRoster) { broadcast = 0; this.emit(); }
+    }, 1000 / 60);
     this.emit();
   }
-  practice(name: string, hero: number, course: number, subject: Subject) {
-    this.host = true; this.world = createRace(course, subject, crypto.getRandomValues(new Uint32Array(1))[0]);
-    addRacer(this.world, this.selfId, name, hero);
-    for (let i = 0; i < 3; i++) addRacer(this.world, `cpu-${i}`, `CPU ${i + 1}`, i, true);
-    this.run();
+  practice(name: string, hero: number, course: number) {
+    this.host = true; this.world = createRace(course, crypto.getRandomValues(new Uint32Array(1))[0]);
+    addRacer(this.world, this.selfId, name, hero); this.run();
   }
   private async open(id?: string) {
     const env = import.meta.env;
     const options: PeerOptions = env.VITE_RPG_PEER_HOST ? { host: env.VITE_RPG_PEER_HOST, port: Number(env.VITE_RPG_PEER_PORT || 443), path: env.VITE_RPG_PEER_PATH || '/', secure: env.VITE_RPG_PEER_SECURE !== 'false' } : {};
+    if (env.VITE_KART_ICE_SERVERS) {
+      const iceServers = JSON.parse(env.VITE_KART_ICE_SERVERS);
+      if (!Array.isArray(iceServers)) throw new Error('ICE server configuration is invalid.');
+      options.config = { iceServers };
+    }
     const peer = id ? new Peer(id, options) : new Peer(options); this.peer = peer;
     await new Promise<void>((resolve, reject) => {
-      const timer = setTimeout(() => reject(new Error('接続がタイムアウトしました。')), 15000);
-      this.pending.add(timer);
-      const done = () => { clearTimeout(timer); this.pending.delete(timer); };
+      const t = setTimeout(() => { this.pending.delete(t); reject(new Error('接続がタイムアウトしました。')); }, 15000); this.pending.add(t);
+      const done = () => { clearTimeout(t); this.pending.delete(t); };
       peer.once('open', () => { done(); resolve(); });
-      peer.once('error', e => { done(); reject(new Error(`接続できませんでした (${e.type})`)); });
+      peer.once('error', e => { done(); reject(new Error(`Connection failed: ${e.type}`)); });
     });
     if (this.closed) { peer.destroy(); throw new Error('接続を終了しました。'); }
-    peer.on('error', e => { if (!this.closed) this.status(`通信エラー (${e.type})。部屋に入り直してください。`); });
-    peer.on('disconnected', () => { if (!this.closed) this.status('接続サービスから切断されました。新規参加を受け付けられません。'); });
+    peer.on('error', e => { if (!this.closed) this.status(`Network: ${e.type}`); });
+    peer.on('disconnected', () => { if (!this.closed && !peer.destroyed) peer.reconnect(); });
     this.selfId = peer.id; return peer;
   }
-  async create(name: string, hero: number, course: number, subject: Subject) {
+  private reject(c: DataConnection, message: string) {
+    const deliver = () => {
+      this.sendTo(c, { type: 'error', message });
+      const t = setTimeout(() => { c.close(); this.pending.delete(t); }, 500); this.pending.add(t);
+    };
+    if (c.open) deliver(); else c.once('open', deliver);
+  }
+  async create(name: string, hero: number, course: number) {
     this.host = true;
-    this.code = Array.from(crypto.getRandomValues(new Uint8Array(6)), n => 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'[n % 31]).join('');
-    const peer = await this.open(`gakuro-kart-${this.code}`);
-    this.world = createRace(course, subject, crypto.getRandomValues(new Uint32Array(1))[0]);
-    addRacer(this.world, this.selfId, name, hero);
+    const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+    this.code = Array.from(crypto.getRandomValues(new Uint8Array(6)), n => alphabet[n % alphabet.length]).join('');
+    const peer = await this.open(`gakuro-apex-v${PROTOCOL}-${this.code}`);
+    this.world = createRace(course, crypto.getRandomValues(new Uint32Array(1))[0]); addRacer(this.world, this.selfId, name, hero);
     peer.on('connection', c => {
       if (this.closed) { c.close(); return; }
-      if (this.channels.size >= 7 || this.world?.phase !== 'lobby') {
-        c.on('open', () => { c.send({ type: 'error', message: '満員、またはレース開始済みです。' }); const t = setTimeout(() => { c.close(); this.pending.delete(t); }, 400); this.pending.add(t); }); return;
-      }
+      if (this.channels.size >= MAX_RACERS - 1 || this.world?.phase !== 'lobby' || this.channels.has(c.peer)) { this.reject(c, '満員、またはレース開始済みです。'); return; }
       this.channels.set(c.peer, c);
-      const t = setTimeout(() => { if (!this.world?.players[c.peer]) c.close(); this.pending.delete(t); }, 10000); this.pending.add(t);
-      c.on('data', (raw: unknown) => {
-        if (!this.world || this.closed || !raw || typeof raw !== 'object') return;
-        const d = raw as { type?: string; name?: string; hero?: number; command?: unknown };
-        const now = Date.now(), rate = this.rates.get(c.peer);
-        if (!rate || now - rate.at > 1000) this.rates.set(c.peer, { at: now, count: 1 });
-        else if (++rate.count > 40) return;
-        if (d.type === 'hello' && typeof d.name === 'string' && Number.isInteger(d.hero)) {
-          if (!addRacer(this.world, c.peer, d.name, d.hero)) { c.send({ type: 'error', message: '参加できません。レース開始前に入り直してください。' }); return; }
-          clearTimeout(t); this.pending.delete(t); this.emit();
+      const timeout = setTimeout(() => { if (!this.world?.players[c.peer]) c.close(); this.pending.delete(timeout); }, 10000); this.pending.add(timeout);
+      c.on('data', raw => {
+        if (this.closed || !this.world || typeof raw !== 'string' || raw.length > 512) return;
+        let d: any; try { d = JSON.parse(raw); } catch { return; } if (!d || typeof d !== 'object') return;
+        const now = performance.now(), rate = this.rates.get(c.peer);
+        if (!rate || now - rate.at > 1000) this.rates.set(c.peer, { at: now, count: 1 }); else if (++rate.count > 35) return;
+        if (d.type === 'hello') {
+          if (d.version !== PROTOCOL || typeof d.name !== 'string' || !Number.isInteger(d.hero) || !addRacer(this.world, c.peer, d.name, d.hero)) { this.reject(c, '参加できません。レース開始前に入り直してください。'); return; }
+          clearTimeout(timeout); this.pending.delete(timeout); this.emit();
         } else if (d.type === 'command') command(this.world, c.peer, d.command);
       });
-      const drop = () => { clearTimeout(t); this.pending.delete(t); this.channels.delete(c.peer); this.rates.delete(c.peer); if (this.world) delete this.world.players[c.peer]; this.emit(); };
+      let dropped = false;
+      const drop = () => {
+        if (dropped) return; dropped = true;
+        clearTimeout(timeout); this.pending.delete(timeout); this.channels.delete(c.peer); this.rates.delete(c.peer);
+        if (this.world?.players[c.peer]) {
+          if (this.world.phase === 'lobby') delete this.world.players[c.peer];
+          else { const p = this.world.players[c.peer]; p.cpu = true; p.name = `${p.name.slice(0, 10)} [BOT]`; }
+          this.world.revision++; this.emit();
+        }
+      };
       c.on('close', drop); c.on('error', drop);
-    });
-    this.run();
+    }); this.run();
   }
   async join(code: string, name: string, hero: number) {
     this.code = code.trim().toUpperCase();
     if (!/^[A-Z2-9]{6}$/.test(this.code)) throw new Error('6文字のルームコードを入力してください。');
     const peer = await this.open();
-    const c = peer.connect(`gakuro-kart-${this.code}`, { reliable: true }); this.channels.set('host', c);
+    const c = peer.connect(`gakuro-apex-v${PROTOCOL}-${this.code}`, { reliable: true, serialization: 'raw' }); this.channels.set('host', c);
     await new Promise<void>((resolve, reject) => {
-      const t = setTimeout(() => reject(new Error('部屋が見つからないか、接続できません。')), 15000); this.pending.add(t);
-      const done = () => { clearTimeout(t); this.pending.delete(t); };
-      c.on('open', () => c.send({ type: 'hello', name: name.slice(0, 16), hero }));
-      c.on('data', (raw: unknown) => {
-        if (this.closed || !raw || typeof raw !== 'object') return;
-        const d = raw as { type: string; world?: Race; message?: string };
-        if (d.type === 'error') { done(); reject(new Error(d.message)); this.status(d.message || '参加できません。'); }
-        if (d.type === 'state' && d.world?.players?.[this.selfId]) { done(); this.world = d.world; this.update(d.world); resolve(); }
+      const timeout = setTimeout(() => { this.pending.delete(timeout); reject(new Error('部屋が見つからないか、接続できません。')); }, 15000); this.pending.add(timeout);
+      const done = () => { clearTimeout(timeout); this.pending.delete(timeout); };
+      c.on('open', () => this.sendTo(c, { type: 'hello', version: PROTOCOL, name: name.slice(0, 16), hero }));
+      c.on('data', raw => {
+        if (this.closed) return;
+        if (raw instanceof ArrayBuffer && this.world) {
+          const decoded = decodeSnapshot(raw, this.world, this.lastSequence);
+          if (decoded && decoded.world.players[this.selfId]) {
+            this.world = decoded.world; this.lastSequence = decoded.sequence; this.lastPacketAt = performance.now(); this.update(this.world); done(); resolve();
+          } return;
+        }
+        if (typeof raw !== 'string' || raw.length > 12000) return;
+        let d: any; try { d = JSON.parse(raw); } catch { return; } if (!d || typeof d !== 'object') return;
+        if (d.type === 'error') { done(); reject(new Error(typeof d.message === 'string' ? d.message : 'Connection rejected')); }
+        if (d.type === 'roster') { const next = acceptRoster(d as Roster, this.world); if (next) this.world = next; }
+        if (d.type === 'pause') this.status(d.value ? 'ホストの画面が戻るまで一時停止しています。' : '');
       });
-      const lost = () => { done(); reject(new Error('ホストとの接続が終了しました。')); if (!this.closed) { this.world = null; this.update(null); this.status('ホストとの接続が終了しました。部屋に入り直してください。'); } };
+      const lost = () => { done(); reject(new Error('ホストとの接続が終了しました。')); if (!this.closed) { this.close(); this.update(null); this.status('ホストとの接続が終了しました。部屋に入り直してください。'); } };
       c.on('close', lost); c.on('error', lost);
     });
+    this.timer = setInterval(() => { if (performance.now() - this.lastPacketAt > 12000) { this.close(); this.update(null); this.status('通信が途切れました。部屋に入り直してください。'); } }, 1000);
   }
-  start() { if (this.host && this.world) { startRace(this.world); this.emit(); } }
+  start(fill = true) { if (this.host && this.world) { startRace(this.world, fill); this.emit(); } }
+  rematch() {
+    if (!this.host || this.world?.phase !== 'result') return;
+    const old = this.world; this.world = createRace(old.course, old.seed + 1);
+    for (const p of Object.values(old.players)) if (!p.cpu) addRacer(this.world, p.id, p.name, p.hero);
+    this.world.revision = old.revision + 1; this.emit();
+  }
   send(c: Command) {
     if (this.closed) return;
     if (this.host && this.world) command(this.world, this.selfId, c);
-    else { const host = this.channels.get('host'); if (host?.open) host.send({ type: 'command', command: c }); }
+    else { const host = this.channels.get('host'); if (host?.open && (host.dataChannel?.bufferedAmount || 0) < 4096) this.sendTo(host, { type: 'command', command: c }); }
   }
   close() {
-    this.closed = true; if (this.timer) clearInterval(this.timer);
-    this.pending.forEach(clearTimeout); this.pending.clear();
-    this.channels.forEach(c => c.close()); this.channels.clear(); this.peer?.destroy(); this.world = null;
+    if (this.closed) return; this.closed = true;
+    if (this.timer) clearInterval(this.timer); document.removeEventListener('visibilitychange', this.visibility);
+    this.pending.forEach(clearTimeout); this.pending.clear(); this.channels.forEach(c => c.close()); this.channels.clear(); this.peer?.destroy(); this.world = null;
   }
 }
