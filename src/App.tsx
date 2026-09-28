@@ -1658,6 +1658,9 @@ const App: React.FC = () => {
     const rpgInviteSetupAppliedRef = useRef(false);
     const rpgInviteAdmissionRequestedRef = useRef(false);
     const rpgInviteAssignmentRef = useRef<AssignmentPayload | null>(null);
+    const rpgAwardHandledRef = useRef<string | null>(null);
+    const rpgClearBgmRef = useRef<string | null>(null);
+    const [rpgRewardClock, setRpgRewardClock] = useState(0);
     const receiveRpgSnapshot = useCallback((snapshot: RpgSnapshot) => {
         rpgSnapshotRef.current = snapshot;
         setRpgSnapshot(snapshot);
@@ -5154,6 +5157,8 @@ const App: React.FC = () => {
             rpgEncounterRef.current = null;
             setRpgMounted(false);
             rpgInviteParticipantRef.current = false;
+            rpgAwardHandledRef.current = null;
+            rpgClearBgmRef.current = null;
             rpgInviteSetupAppliedRef.current = false;
             rpgInviteAssignmentRef.current = null;
             setGameState(prev => ({ ...prev, rpgOnline: undefined, screen: GameScreen.START_MENU, challengeMode: undefined }));
@@ -6921,6 +6926,8 @@ const App: React.FC = () => {
             : visualTheme;
         const isRpgInviteParticipant = rpgOnline && Boolean(rpgInviteCode);
         rpgInviteParticipantRef.current = isRpgInviteParticipant;
+        rpgAwardHandledRef.current = null;
+        rpgClearBgmRef.current = null;
         rpgCorrectAnswersRef.current = 0;
         rpgInviteSetupAppliedRef.current = false;
         rpgInviteAdmissionRequestedRef.current = false;
@@ -9816,6 +9823,32 @@ const App: React.FC = () => {
                 : prev.enemies.map((e, i) => i === 0 ? { ...e, currentHp: hp, maxHp: shared.maxHp } : e) }));
         }
     }, [gameState.enemies, gameState.screen, gameState.rpgOnline, rpgSnapshot]);
+
+    useEffect(() => {
+        const world = rpgSnapshot?.world;
+        if (!gameState.rpgOnline || !world?.ended || world.endReason !== 'timeout') return;
+        if (gameState.screen === GameScreen.MAP || gameState.screen === GameScreen.START_MENU) return;
+        rpgEncounterRef.current = null;
+        setGameState(prev => ({
+            ...prev,
+            screen: GameScreen.MAP,
+            enemies: [],
+            rewards: [],
+            selectionState: { active: false, type: 'DISCARD', amount: 0 },
+        }));
+    }, [gameState.rpgOnline, gameState.screen, rpgSnapshot]);
+
+    useEffect(() => {
+        const world = rpgSnapshot?.world;
+        if (!gameState.rpgOnline || !world?.ended) {
+            if (!world?.ended) rpgClearBgmRef.current = null;
+            return;
+        }
+        const key = `${world.seed}:${world.endReason}:${world.endedAt || 0}`;
+        if (rpgClearBgmRef.current === key) return;
+        rpgClearBgmRef.current = key;
+        audioService.playBGM('reward');
+    }, [gameState.rpgOnline, rpgSnapshot]);
 
     const handleDodgeballResult = (hit: boolean) => {
         if (hit) {
@@ -14779,6 +14812,52 @@ const App: React.FC = () => {
         });
         audioService.playBGM('map');
     }, []);
+
+    useEffect(() => {
+        const snapshot = rpgSnapshot;
+        const world = snapshot?.world;
+        if (!gameState.rpgOnline || !world?.ended || world.rewardAt === null) return;
+        const rewardKey = `${world.seed}:${world.rewardAt}:${snapshot.selfId}`;
+        if (rpgAwardHandledRef.current === rewardKey) return;
+        const wait = world.rewardAt - Date.now();
+        if (wait > 0) {
+            const timer = window.setTimeout(() => setRpgRewardClock((value) => value + 1), Math.min(wait + 50, 2_147_000_000));
+            return () => window.clearTimeout(timer);
+        }
+        const award = world.rankingAwards?.[snapshot.selfId];
+        if (!award) return;
+        rpgAwardHandledRef.current = rewardKey;
+        const generated = createRewardCardForAssignment();
+        if (!generated) return;
+        const rankingId = award.category === 'DAMAGE'
+            ? 'rpg_total_damage'
+            : award.category === 'CORRECT'
+                ? 'rpg_correct_answers'
+                : 'rpg_bonus';
+        const rewardCard: ICard = {
+            ...generated,
+            id: `rpg-award-${world.seed}-${snapshot.selfId}-${award.category}`,
+            rewardCard: true,
+            rewardSource: 'RANKING',
+            rankingId,
+            periodId: `rpg-${world.seed.toString(16).toUpperCase()}`,
+            awardedRank: award.rank,
+            grantedAt: new Date().toISOString(),
+        };
+        storageService.saveRewardCardToAlbum(rewardCard);
+        setRewardCardAlbumVersion((version) => version + 1);
+        setRankingRewardNotices((notices) => [
+            ...notices,
+            {
+                id: rewardKey,
+                rankingId,
+                periodType: 'season',
+                periodKey: `RPG ${world.seed.toString(16).toUpperCase()}`,
+                awardedRank: award.rank,
+                card: rewardCard,
+            },
+        ]);
+    }, [createRewardCardForAssignment, gameState.rpgOnline, rpgRewardClock, rpgSnapshot]);
 
     const applyCoopAutoRevives = useCallback(() => {
         const currentState = stateRef.current;

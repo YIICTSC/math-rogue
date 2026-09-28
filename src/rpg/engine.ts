@@ -25,6 +25,13 @@ export const BONUS_RANKING_KINDS: BonusRankingKind[] = [
   "STEPS",
   "INTERACTIONS",
 ];
+export type RpgEndReason = "clear" | "timeout";
+export type RpgRankingCategory = "DAMAGE" | "CORRECT" | "BONUS";
+export interface RpgRankingAward {
+  category: RpgRankingCategory;
+  rank: number;
+  score: number;
+}
 export interface Site {
   id: string;
   x: number;
@@ -85,6 +92,13 @@ export interface World {
   players: Record<string, Adventurer>;
   logs: string[];
   won: boolean;
+  timeLimitMinutes: number;
+  deadlineAt: number;
+  ended: boolean;
+  endReason: RpgEndReason | null;
+  endedAt: number | null;
+  rewardAt: number | null;
+  rankingAwards: Record<string, RpgRankingAward>;
   bonusRankingKind: BonusRankingKind;
   revision: number;
 }
@@ -126,6 +140,8 @@ export function siteUnavailable(
   s: Site,
 ): string | null {
   if (p.nativeScene) return "現在のシーンを完了してください。";
+  if (w.ended)
+    return w.endReason === "timeout" ? "時間切れ！" : "校長を倒しました！";
   if (w.won) return "校長を倒しました！";
   if (s.cleared) return "討伐済みです。";
   if (s.kind === "treasure" && p.claimed.includes(s.id))
@@ -188,6 +204,7 @@ function applyNativeAction(
   action: Action,
   tell: (message: string) => boolean,
 ): boolean {
+  if (w.ended && action.type !== "native-finish") return false;
   if (action.type === "native-profile") {
     if (p.nativeScene || !validProfile(action.profile)) return false;
     p.profile = action.profile;
@@ -268,7 +285,10 @@ function applyNativeAction(
     if (site.hp === 0) {
       site.cleared = true;
       log(w, `${site.name}を討伐！`);
-      if (site.kind === "boss") w.won = true;
+      if (site.kind === "boss") {
+        w.won = true;
+        endWorld(w, "clear");
+      }
     }
     w.revision++;
     return true;
@@ -310,7 +330,12 @@ function applyNativeAction(
   }
   return false;
 }
-export function createWorld(seed: number, setup?: RpgAdventureSetup): World {
+export function createWorld(
+  seed: number,
+  setup?: RpgAdventureSetup,
+  timeLimitMinutes = 30,
+  now = Date.now(),
+): World {
   const rng = random(seed),
     tiles: Tile[] = [];
   for (let y = 0; y < HEIGHT; y++)
@@ -397,6 +422,10 @@ export function createWorld(seed: number, setup?: RpgAdventureSetup): World {
           s.kind === "boss" ? "stone" : "grass";
     tiles[s.y * WIDTH + s.x] = "road";
   }
+  const normalizedTimeLimit = Math.max(
+    1,
+    Math.min(180, Math.floor(Number.isFinite(timeLimitMinutes) ? timeLimitMinutes : 30)),
+  );
   return {
     nativeMode: true,
     seed,
@@ -406,6 +435,13 @@ export function createWorld(seed: number, setup?: RpgAdventureSetup): World {
     players: {},
     logs: ["冒険のはじまり。3体の試験官を倒し、校長の結界を解こう。"],
     won: false,
+    timeLimitMinutes: normalizedTimeLimit,
+    deadlineAt: now + normalizedTimeLimit * 60 * 1000,
+    ended: false,
+    endReason: null,
+    endedAt: null,
+    rewardAt: null,
+    rankingAwards: {},
     bonusRankingKind:
       BONUS_RANKING_KINDS[Math.floor(rng() * BONUS_RANKING_KINDS.length)],
     revision: 0,
@@ -466,6 +502,7 @@ export function applyAction(
     typeof action.type !== "string"
   )
     return false;
+  advanceWorld(w, now);
   const tell = (text: string) => {
     p.message = text;
     w.revision++;
@@ -473,7 +510,7 @@ export function applyAction(
   };
   if (action.type.startsWith("native-"))
     return applyNativeAction(w, p, action, tell);
-  if (w.won || p.nativeScene) return false;
+  if (w.ended || p.nativeScene) return false;
   if (action.type === "move") {
     if (
       !Number.isInteger(action.dx) ||
@@ -530,4 +567,66 @@ export function applyAction(
     return tell(`${target.name}のチームに参加しました。`);
   }
   return false;
+}
+
+function rankingScore(player: Adventurer, category: RpgRankingCategory, bonus: BonusRankingKind) {
+  if (category === "DAMAGE") return player.totalDamage || 0;
+  if (category === "CORRECT") return player.correctAnswers || 0;
+  if (bonus === "TREASURES") return player.claimed?.length || 0;
+  if (bonus === "STEPS") return player.moveCount || 0;
+  if (bonus === "INTERACTIONS") return player.interactionCount || 0;
+  return player.completedBattles || 0;
+}
+
+function finalizeRankingAwards(w: World) {
+  const players = Object.values(w.players);
+  const categories: RpgRankingCategory[] = ["DAMAGE", "CORRECT", "BONUS"];
+  const awards: Record<string, RpgRankingAward> = {};
+  for (const player of players) {
+    const playerAwards = categories.map((category) => {
+      const entries = players
+        .map((candidate) => ({
+          id: candidate.id,
+          score: Math.max(0, Math.floor(rankingScore(candidate, category, w.bonusRankingKind))),
+        }))
+        .sort((a, b) => b.score - a.score || a.id.localeCompare(b.id));
+      const index = entries.findIndex((entry) => entry.id === player.id);
+      return {
+        category,
+        rank: index < 0 ? players.length : index + 1,
+        score: index < 0 ? 0 : entries[index].score,
+      } satisfies RpgRankingAward;
+    });
+    awards[player.id] = playerAwards.sort((a, b) => a.rank - b.rank || categories.indexOf(a.category) - categories.indexOf(b.category))[0];
+  }
+  w.rankingAwards = awards;
+}
+
+function endWorld(w: World, reason: RpgEndReason, now = Date.now()) {
+  if (w.ended) return;
+  w.ended = true;
+  w.endReason = reason;
+  w.endedAt = now;
+  w.rewardAt = now + 10_000;
+  if (reason === "timeout") {
+    for (const player of Object.values(w.players)) {
+      delete player.nativeScene;
+      player.message = "時間切れ！";
+    }
+    log(w, "制限時間が終了しました。");
+  }
+  w.revision++;
+}
+
+export function advanceWorld(w: World, now = Date.now()) {
+  if (!w.ended && now >= w.deadlineAt) endWorld(w, "timeout", now);
+  if (
+    w.ended &&
+    w.rewardAt !== null &&
+    now >= w.rewardAt &&
+    Object.keys(w.rankingAwards).length === 0
+  ) {
+    finalizeRankingAwards(w);
+    w.revision++;
+  }
 }

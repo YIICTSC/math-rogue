@@ -146,6 +146,8 @@ export default function RpgOnline({
   const [name, setName] = useState(inviteCode ? "" : "冒険者"),
     [code, setCode] = useState(inviteCode),
     [inviteCopied, setInviteCopied] = useState(false);
+  const [timeLimitMinutes, setTimeLimitMinutes] = useState(30);
+  const [clockNow, setClockNow] = useState(() => Date.now());
   const [inviteTheme, setInviteTheme] = useState<RpgAdventureSetup["visualTheme"]>(
     adventureSetup?.visualTheme || "elementary",
   );
@@ -181,6 +183,9 @@ export default function RpgOnline({
     [roomCode],
   );
   const members: Adventurer[] = world ? Object.values(world.players) : [];
+  const remainingSeconds = world
+    ? Math.max(0, Math.ceil((world.deadlineAt - clockNow) / 1000))
+    : null;
   const bonusRanking =
     BONUS_RANKING_LABELS[world?.bonusRankingKind || "BATTLES"];
   const rankingDefinitions = [
@@ -201,6 +206,10 @@ export default function RpgOnline({
           .sort((a, b) => distance(a, me) - distance(b, me))[0]
       : undefined;
   useEffect(() => () => room.current?.close(), []);
+  useEffect(() => {
+    const timer = window.setInterval(() => setClockNow(Date.now()), 1000);
+    return () => window.clearInterval(timer);
+  }, []);
   const profileJson = JSON.stringify(nativeProfile(player));
   useEffect(() => {
     if (
@@ -226,8 +235,8 @@ export default function RpgOnline({
     room.current = r;
     onRoom(r);
     try {
-      if (mode === "practice") r.practice(name, adventureSetup);
-      else if (mode === "create") await r.create(name, adventureSetup);
+      if (mode === "practice") r.practice(name, adventureSetup, timeLimitMinutes);
+      else if (mode === "create") await r.create(name, adventureSetup, timeLimitMinutes);
       else if (mode === "invite")
         await r.prepareInviteJoin(code, name, (setup) =>
           onSetup({ ...setup, visualTheme: inviteTheme }),
@@ -405,6 +414,20 @@ export default function RpgOnline({
                 </>
               ) : (
                 <>
+                  <label>
+                    制限時間
+                    <input
+                      type="number"
+                      min={1}
+                      max={180}
+                      step={1}
+                      value={timeLimitMinutes}
+                      onChange={(e) => {
+                        const next = Number(e.target.value);
+                        setTimeLimitMinutes(Number.isFinite(next) ? Math.max(1, Math.min(180, Math.floor(next))) : 30);
+                      }}
+                    />
+                  </label>
                   <button
                     className="rpg-primary"
                     disabled={busy || !name.trim()}
@@ -459,7 +482,14 @@ export default function RpgOnline({
               <section className="rpg-exploration">
                 <div className="rpg-map-title">
                   <h1>木漏れ日のフロンティア</h1>
-                  <span>戦闘勝利 {me.completedBattles || 0}</span>
+                  <span>
+                    戦闘勝利 {me.completedBattles || 0}
+                    {remainingSeconds !== null && (
+                      <strong className="rpg-time-limit" aria-label="制限時間">
+                        {Math.floor(remainingSeconds / 60)}:{String(remainingSeconds % 60).padStart(2, "0")}
+                      </strong>
+                    )}
+                  </span>
                 </div>
                 <div className="rpg-map-container">
                   {active && (
@@ -631,11 +661,11 @@ export default function RpgOnline({
                 <span>ひとり練習 · 通信なし</span>
               )}
             </footer>
-            {world.won && !me.nativeScene && (
+            {world.ended && !me.nativeScene && (
               <div className="rpg-overlay">
                 <section className="rpg-dialog rpg-clear-dialog">
-                  <h1>校長を倒しました！</h1>
-                  <p>みんなの冒険は大成功！</p>
+                  <h1>{world.endReason === "timeout" ? "時間切れ！" : "校長を倒しました！"}</h1>
+                  <p>{world.endReason === "timeout" ? "制限時間が終了しました。" : "みんなの冒険は大成功！"}</p>
                   <div className="rpg-ranking-grid">
                     {rankingDefinitions.map((ranking) => (
                       <section className="rpg-ranking-card" key={ranking.title}>

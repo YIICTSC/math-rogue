@@ -369,6 +369,16 @@
   margin-top: 6px;
   letter-spacing: 0.07em;
 }
+.rpg-time-limit {
+  display: inline-block;
+  margin-left: 14px;
+  padding: 4px 9px;
+  border: 1px solid #c7a96b;
+  border-radius: 4px;
+  color: #f4d995;
+  font-variant-numeric: tabular-nums;
+  letter-spacing: 0.08em;
+}
 .rpg-map-tag {
   border: 1px solid #405148;
   border-radius: 4px;

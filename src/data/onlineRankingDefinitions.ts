@@ -21,6 +21,9 @@ export const ONLINE_RANKING_FALLBACKS: OnlineRankingDefinition[] = [
   { id: 'go_home_score', label: '帰宅ダッシュ', unit: 'pt', accent: 'yellow', description: '帰宅ダッシュの最高スコア', calculation: '期間内の帰宅ダッシュ終了スコアの最大値' },
   { id: 'growth_clear_count', label: '冒険踏破王', unit: '回', accent: 'emerald', description: '学習ローグの累計クリア回数', calculation: '端末に保存された学習ローグの累計クリア回数' },
   { id: 'growth_mastered_modes', label: '学びの達人王', unit: '分野', accent: 'mint', description: 'マスターした学習分野の数', calculation: 'タイピング系を除き、累計正解数が100問以上になった学習モードの重複しない種類数' },
+  { id: 'rpg_total_damage', label: 'RPG総ダメージ数', unit: 'ダメージ', accent: 'red', description: 'RPGオンラインで与えた総ダメージ', calculation: '冒険中に記録された総ダメージ数' },
+  { id: 'rpg_correct_answers', label: 'RPG総問題正解数', unit: '問', accent: 'cyan', description: 'RPGオンラインで正解した問題数', calculation: '冒険中に記録された総問題正解数' },
+  { id: 'rpg_bonus', label: 'RPG特別ランキング', unit: 'pt', accent: 'gold', description: 'RPGオンラインの特別ランキング', calculation: '冒険ごとに選ばれた特別集計' },
 ];
 
 export type OnlineRankingCategoryId = 'learning' | 'adventure' | 'cards' | 'minigames';

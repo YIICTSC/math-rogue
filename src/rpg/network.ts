@@ -3,6 +3,7 @@ import {
   addPlayer,
   applyAction,
   createWorld,
+  advanceWorld,
   removePlayer,
   type Action,
   type NativeProfile,
@@ -13,7 +14,7 @@ import {
   type RpgAdventureSetup,
 } from "./setup";
 
-const RPG_PROTOCOL_VERSION = 5;
+const RPG_PROTOCOL_VERSION = 6;
 
 function isNativeProfile(value: unknown): value is NativeProfile {
   if (!value || typeof value !== "object") return false;
@@ -54,10 +55,20 @@ export class RpgRoom {
   private status(message: string) {
     if (!this.closed) this.notifyStatus(message);
   }
-  practice(name: string, setup?: RpgAdventureSetup) {
+  practice(name: string, setup?: RpgAdventureSetup, timeLimitMinutes = 30) {
     this.host = true;
-    this.world = createWorld(crypto.getRandomValues(new Uint32Array(1))[0], setup);
+    this.world = createWorld(
+      crypto.getRandomValues(new Uint32Array(1))[0],
+      setup,
+      timeLimitMinutes,
+    );
     addPlayer(this.world, this.selfId, name);
+    this.timer = setInterval(() => {
+      if (!this.world) return;
+      const revision = this.world.revision;
+      advanceWorld(this.world);
+      if (this.world.revision !== revision) this.emit();
+    }, 250);
     this.emit();
   }
   private emit() {
@@ -108,7 +119,7 @@ export class RpgRoom {
     );
     return peer;
   }
-  async create(name: string, setup?: RpgAdventureSetup) {
+  async create(name: string, setup?: RpgAdventureSetup, timeLimitMinutes = 30) {
     this.host = true;
     this.code = Array.from(
       crypto.getRandomValues(new Uint8Array(6)),
@@ -119,6 +130,7 @@ export class RpgRoom {
     this.world = createWorld(
       crypto.getRandomValues(new Uint32Array(1))[0],
       setup,
+      timeLimitMinutes,
     );
     addPlayer(this.world, this.selfId, name);
     peer.on("connection", (conn) => {
@@ -229,8 +241,11 @@ export class RpgRoom {
       conn.on("error", drop);
     });
     this.timer = setInterval(() => {
-      if (!this.world || this.world.revision === this.lastRevision) return;
+      if (!this.world) return;
+      advanceWorld(this.world);
+      if (this.world.revision === this.lastRevision) return;
       this.lastRevision = this.world.revision;
+      this.emit();
       const { tiles, ...state } = this.world;
       for (const conn of this.connections.values())
         if (conn.open && this.world.players[conn.peer])
