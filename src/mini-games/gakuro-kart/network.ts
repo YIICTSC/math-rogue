@@ -147,9 +147,10 @@ export class KartRoom {
   start(fill = true) { if (this.host && this.world) { startRace(this.world, fill); this.emit(); } }
   rematch() {
     if (!this.host || this.world?.phase !== 'result') return;
-    const old = this.world; this.world = createRace(old.course, old.seed + 1);
-    for (const p of Object.values(old.players)) if (!p.cpu) addRacer(this.world, p.id, p.name, p.hero);
-    this.world.revision = old.revision + 1; this.emit();
+    const old = this.world, previousRevision = old.revision; this.world = createRace(old.course, old.seed + 1);
+    this.world.revision = previousRevision;
+    for (const p of Object.values(old.players)) addRacer(this.world, p.id, p.name, p.hero, p.cpu);
+    startRace(this.world); this.emit();
   }
   send(c: Command) {
     if (this.closed) return;

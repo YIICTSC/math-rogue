@@ -17,7 +17,7 @@ const copy: [string, string, string][] = [
   ['レースを開始 →', 'Start the race →', 'レースを かいし →'],
   ['ホストのスタートを待っています。', 'Waiting for the host to start.', 'ホストの スタートを まっています。'],
   ['全員のゴールを待っています。', 'Waiting for the rest of the grid to finish.', 'ぜんいんの ゴールを まっています。'],
-  ['もう一度レース', 'Race again', 'もういちど レース'],
+  ['もう一度レース', 'Restart the race', 'もういちど レース'],
   ['ホストの再戦を待っています。', 'Waiting for the host to restart.', 'ホストの さいせんを まっています。'],
   ['ネオン・キャンパス', 'Neon Campus', 'ネオン・キャンパス'],
   ['クラウド・ガーデン', 'Cloud Garden', 'クラウド・ガーデン'],

@@ -31,8 +31,9 @@ try {
   await page.getByRole('button', { name: /40台でレース/ }).click(); await page.getByRole('button', { name: /レースを開始/ }).click();
   await page.waitForFunction(() => window.room?.world?.phase === 'race');
   assert.equal(await page.evaluate(() => Object.keys(window.room.world.players).length), 40);
+  await page.evaluate(() => { window.room.world.players.local.x = 0; });
   await page.keyboard.down('ArrowRight'); await page.waitForTimeout(300); await page.keyboard.up('ArrowRight');
-  assert(await page.evaluate(() => window.room.world.players.local.x > -6));
+  assert(await page.evaluate(() => window.room.world.players.local.x < 0), 'Right input should steer toward screen-right.');
   await page.waitForTimeout(800); await page.screenshot({ path: path.join(root, 'race-desktop.png') });
   for (const [label, width, height] of [['phone', 390, 844], ['tablet', 820, 1180], ['landscape', 844, 390]]) {
     await page.setViewportSize({ width, height }); await page.waitForTimeout(350);
@@ -42,7 +43,7 @@ try {
       const left = await page.getByRole('button', { name: 'Steer left' }).boundingBox();
       const cdp = await page.context().newCDPSession(page);
       await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: left.x + left.width / 2, y: left.y + left.height / 2, id: 1 }, { x: drift.x + drift.width / 2, y: drift.y + drift.height / 2, id: 2 }] });
-      await page.waitForFunction(() => window.room.world.players.local.steer === -1 && window.room.world.players.local.drift);
+      await page.waitForFunction(() => window.room.world.players.local.steer === 1 && window.room.world.players.local.drift);
       await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
       await page.waitForFunction(() => window.room.world.players.local.steer === 0 && !window.room.world.players.local.drift); await cdp.detach();
     }
@@ -80,7 +81,7 @@ try {
   await hostPage.evaluate(() => { window.host.world.phase = 'result'; window.host.world.revision++; });
   await clients.waitForFunction(() => window.snapshots.filter(Boolean).slice(1).every(w => w.phase === 'result'));
   await hostPage.evaluate(() => window.host.rematch());
-  await clients.waitForFunction(() => window.snapshots.slice(1).every(w => w.phase === 'lobby' && Object.keys(w.players).length === 39));
+  await clients.waitForFunction(() => window.snapshots.slice(1).every(w => w.phase === 'countdown' && Object.keys(w.players).length === 40 && Object.values(w.players).filter(p => p.cpu).length === 1));
   await hostPage.evaluate(() => window.host.close());
   await clients.waitForFunction(() => window.snapshots.slice(1).every(w => w === null));
   }

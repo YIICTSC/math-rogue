@@ -41,7 +41,8 @@ export default function GakuroKart({ onClose, languageMode = 'JAPANESE' }: { onC
     const timer = setInterval(() => {
       if (currentPhase.current !== 'race') return;
       const pad = navigator.getGamepads?.()?.[0], axis = pad && Math.abs(pad.axes[0]) > .15 ? pad.axes[0] : 0;
-      room.current?.send({ type: 'input', steer: axis || Number(input.current.right) - Number(input.current.left), brake: input.current.brake || !!pad?.buttons[6]?.pressed, drift: input.current.drift || !!pad?.buttons[0]?.pressed });
+      // Screen-right is negative on our track-space axis, so invert stick and button inputs.
+      room.current?.send({ type: 'input', steer: -(axis || Number(input.current.right) - Number(input.current.left)), brake: input.current.brake || !!pad?.buttons[6]?.pressed, drift: input.current.drift || !!pad?.buttons[0]?.pressed });
       if (pad?.buttons[1]?.pressed && !padItem) room.current?.send({ type: 'item' }); padItem = !!pad?.buttons[1]?.pressed;
     }, 50);
     return () => { generation.current++; clearInterval(timer); window.removeEventListener('keydown', down); window.removeEventListener('keyup', up); window.removeEventListener('blur', blur); document.removeEventListener('visibilitychange', blur); room.current?.close(); audio.current?.close(); };
