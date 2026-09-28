@@ -121,12 +121,32 @@ try {
   assert.match(siteUnavailable(w, p, site("town")), /3回/);
   enter(site("town"));
   assert.equal(p.nativeScene, undefined);
+  const ordinaryEnemy = site("enemy");
+  const elementaryEnemyNames = getEncounterEnemyNamePool("elementary");
   for (let i = 0; i < 3; i++) {
-    enter(site("enemy"));
+    const defeatedName = ordinaryEnemy.name;
+    enter(ordinaryEnemy);
     assert(p.nativeScene);
     finish("victory");
+    assert.notEqual(
+      ordinaryEnemy.name,
+      defeatedName,
+      "victory rotates a regular map enemy to a different name",
+    );
+    assert(
+      elementaryEnemyNames.includes(ordinaryEnemy.name),
+      "the next map enemy is selected from the actual battle name pool",
+    );
   }
   assert.equal(p.completedBattles, 3);
+  const unchallengedName = ordinaryEnemy.name;
+  enter(ordinaryEnemy);
+  finish("complete");
+  assert.equal(
+    ordinaryEnemy.name,
+    unchallengedName,
+    "a non-victory encounter does not rotate the enemy",
+  );
   enter(site("town"));
   const token = p.nativeScene.token;
   assert.equal(applyAction(w, "a", { type: "move", dx: 1, dy: 0 }), false);

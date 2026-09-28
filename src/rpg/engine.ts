@@ -137,6 +137,17 @@ function validProfile(profile: NativeProfile): boolean {
     typeof profile.image === "string"
   );
 }
+function rotateEnemyName(w: World, site: Site) {
+  const candidates = getEncounterEnemyNamePool(w.setup?.visualTheme).filter(
+    (name) => name !== site.name,
+  );
+  if (candidates.length === 0) return;
+  const siteIndex = w.sites.indexOf(site);
+  const roll = random(
+    (w.seed + Math.imul(w.revision + 1, 0x9e3779b9) + siteIndex) >>> 0,
+  )();
+  site.name = candidates[Math.floor(roll * candidates.length)];
+}
 function applyNativeAction(
   w: World,
   p: Adventurer,
@@ -232,6 +243,7 @@ function applyNativeAction(
     ) {
       if (isSharedSite(site) && !site.cleared) return false;
       p.completedBattles = (p.completedBattles || 0) + 1;
+      if (site.kind === "enemy") rotateEnemyName(w, site);
     }
     if (action.outcome === "defeat") {
       p.x = 10;
