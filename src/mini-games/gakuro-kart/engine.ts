@@ -1,4 +1,4 @@
-import { QUIZ_GATES, QUIZ_END, answerLane, laneCenter, questionSeconds, type KartLesson } from './learning';
+import { QUIZ_APPROACH_SPEED, QUIZ_FEEDBACK_SECONDS, QUIZ_GATES, QUIZ_END, answerLane, laneCenter, quizDistance, type KartLesson } from './learning';
 import { FEATURES, getTrack, ROAD_WIDTH, sampleTrack } from './track';
 export { COURSES } from './track';
 export const MAX_RACERS = 40, LAPS = 3, RACE_LIMIT = 360;
@@ -10,7 +10,7 @@ export interface Racer {
   id: string; slot: number; name: string; hero: number; cpu: boolean;
   distance: number; x: number; speed: number; steer: number; brake: boolean; drift: boolean;
   inputAt: number; slide: number; charge: number; boost: number; shield: number; slow: number;
-  quizAnswers: number[]; quizTimes: number[]; quizCorrect: number; quizFeedbackAt: number; quizApplied: boolean; crash: number;
+  quizAnswers: number[]; quizTimes: number[]; quizCorrect: number; quizCorrectTotal: number; quizLap: number; quizFeedbackAt: number; quizApplied: boolean; crash: number;
   item: Item | null; jump: number; draft: number; finish: number; drifts: number; overtakes: number;
 }
 export interface Race {
@@ -28,7 +28,7 @@ export function addRacer(w: Race, id: string, name: string, hero = 0, cpu = fals
   const slots = new Set(Object.values(w.players).map(p => p.slot)); let slot = 0; while (slots.has(slot)) slot++;
   w.players[id] = { id, slot, name: name.trim().slice(0, 16) || 'Racer', hero: clamp(Math.floor(hero) || 0, 0, 2), cpu,
     distance: -8 - Math.floor(slot / 4) * 7, x: (slot % 4 - 1.5) * 4, speed: 0, steer: 0, brake: false, drift: false,
-    quizAnswers: [-2, -2, -2], quizTimes: [0, 0, 0], quizCorrect: 0, quizFeedbackAt: 0, quizApplied: false, crash: 0,
+    quizAnswers: [-2, -2, -2], quizTimes: [0, 0, 0], quizCorrect: 0, quizCorrectTotal: 0, quizLap: 0, quizFeedbackAt: 0, quizApplied: false, crash: 0,
     inputAt: 0, slide: 0, charge: 0, boost: 0, shield: 0, slow: 0, item: null, jump: 0, draft: 0, finish: 0, drifts: 0, overtakes: 0 };
   w.revision++; return true;
 }
@@ -43,7 +43,7 @@ export function command(w: Race, id: string, raw: unknown) {
   if (c.type === 'input' && Number.isFinite(c.steer) && typeof c.brake === 'boolean' && typeof c.drift === 'boolean') {
     p.steer = clamp(c.steer, -1, 1); p.brake = c.brake; p.drift = c.drift; p.inputAt = w.time;
   }
-  if (c.type === 'item' && p.item && !(w.lesson && p.distance < QUIZ_END) && !p.crash) {
+  if (c.type === 'item' && p.item && !(w.lesson && quizDistance(p.distance, getTrack(w.course).length) < QUIZ_END) && !p.crash) {
     if (p.item === 'nitro') p.boost = Math.max(p.boost, 2.8);
     if (p.item === 'rocket') { p.boost = Math.max(p.boost, 4.5); p.shield = Math.max(p.shield, 4.5); }
     if (p.item === 'shield') { p.shield = 6; p.slow = 0; }
@@ -63,8 +63,14 @@ export function tick(w: Race, dt: number) {
   const oldDistances = new Map(racers.map(p => [p.id, p.distance]));
   for (let place = 0; place < racers.length; place++) {
     const p = racers[place]; if (p.finish) continue;
+    const lap = Math.min(LAPS - 1, Math.floor(Math.max(0, p.distance) / length));
+    if (lap > p.quizLap) {
+      p.quizLap = lap; p.quizAnswers = [-2, -2, -2]; p.quizTimes = [0, 0, 0];
+      p.quizCorrect = 0; p.quizFeedbackAt = w.time; p.quizApplied = false;
+    }
     const turn = sampleTrack(p.distance, w.course).curve;
-    const learning = !!w.lesson && p.distance < QUIZ_END;
+    const lapDistance = quizDistance(p.distance, length);
+    const learning = !!w.lesson && lapDistance < QUIZ_END;
     const questionIndex = p.quizAnswers.findIndex(a => a === -2);
     const question = questionIndex >= 0 ? w.lesson?.questions[questionIndex] : undefined;
     if (p.cpu) {
@@ -88,24 +94,26 @@ export function tick(w: Race, dt: number) {
     }
     const off = Math.abs(p.x) > ROAD_WIDTH / 2 - 1;
     const normalCap = (58 + (p.cpu ? (p.slot % 7) - 4 : 0) + (p.boost > 0 ? 23 : 0) + (p.draft > .7 ? 8 : 0)) * (off && !p.jump ? .58 : 1) * (p.slow > 0 ? .62 : 1);
-    const previousGate = questionIndex > 0 ? QUIZ_GATES[questionIndex - 1] + 45 : 0;
-    const quizCap = question ? Math.min(18, (QUIZ_GATES[questionIndex] - previousGate) / questionSeconds(question)) : 18;
+    const quizCap = QUIZ_APPROACH_SPEED;
     const cap = p.crash > 0 ? 0 : learning ? quizCap : normalCap;
     if (learning) { p.boost = 0; p.slow = 0; p.jump = 0; p.charge = 0; }
-    p.speed = clamp(p.speed + (p.brake ? -44 : p.speed < cap ? 21 : -28) * dt, 0, Math.max(p.speed, cap));
+    if (learning) p.speed = clamp(p.speed + (p.brake ? -44 : 21) * dt, 0, quizCap);
+    else p.speed = clamp(p.speed + (p.brake ? -44 : p.speed < cap ? 21 : -28) * dt, 0, Math.max(p.speed, cap));
     const lateral = (p.crash > 0 ? 0 : p.steer) * (drifting ? 22 : 17) - turn * p.speed * p.speed * (drifting ? .1 : .15);
     p.slide += (lateral - p.slide) * Math.min(1, dt * (drifting ? 4 : 14));
     p.x += p.slide * dt * Math.min(1, p.speed / 18);
     if (Math.abs(p.x) > ROAD_WIDTH / 2 + 2) { p.x = Math.sign(p.x) * (ROAD_WIDTH / 2 + 2); p.slide *= -.3; p.speed *= Math.exp(-dt * 1.5); }
     const old = p.distance; p.distance += p.speed * dt;
-    if (w.lesson && question && old < QUIZ_GATES[questionIndex] && p.distance >= QUIZ_GATES[questionIndex]) {
+    if (w.lesson && p.quizLap === 0 && old < 0 && p.distance >= 0 && p.quizAnswers.every(a => a === -2)) p.quizFeedbackAt = w.time;
+    const oldLapDistance = quizDistance(old, length), nextLapDistance = quizDistance(p.distance, length);
+    if (w.lesson && question && oldLapDistance < QUIZ_GATES[questionIndex] && nextLapDistance >= QUIZ_GATES[questionIndex]) {
       const lane = answerLane(p.x);
       p.quizAnswers[questionIndex] = lane;
-      p.quizTimes[questionIndex] = Math.max(0, w.time - (questionIndex ? p.quizFeedbackAt + 2.5 : 0));
-      if (lane === question.correct) p.quizCorrect++;
+      p.quizTimes[questionIndex] = Math.max(0, w.time - (questionIndex ? p.quizFeedbackAt + QUIZ_FEEDBACK_SECONDS : p.quizFeedbackAt));
+      if (lane === question.correct) { p.quizCorrect++; p.quizCorrectTotal++; }
       p.quizFeedbackAt = w.time;
     }
-    if (w.lesson && !p.quizApplied && p.distance >= QUIZ_END && p.quizAnswers.every(a => a !== -2)) {
+    if (w.lesson && !p.quizApplied && nextLapDistance >= QUIZ_END && p.quizAnswers.every(a => a !== -2)) {
       p.quizApplied = true;
       if (p.quizCorrect === 3) p.boost = 6;
       else if (p.quizCorrect === 1) { p.slow = 7; p.speed *= .65; }
@@ -128,7 +136,7 @@ export function tick(w: Race, dt: number) {
   const bumps = new Map<string, number>();
   for (let i = 0; i < racers.length; i++) for (let j = i + 1; j < racers.length; j++) {
     const a = racers[i], b = racers[j];
-    if ((w.lesson && (a.distance < QUIZ_END || b.distance < QUIZ_END)) || a.crash || b.crash || a.finish || b.finish || a.jump || b.jump || Math.abs(a.distance - b.distance) > 2.4 || Math.abs(a.x - b.x) > 1.65) continue;
+    if ((w.lesson && (quizDistance(a.distance, length) < QUIZ_END || quizDistance(b.distance, length) < QUIZ_END)) || a.crash || b.crash || a.finish || b.finish || a.jump || b.jump || Math.abs(a.distance - b.distance) > 2.4 || Math.abs(a.x - b.x) > 1.65) continue;
     const sign = a.x === b.x ? (a.slot < b.slot ? -1 : 1) : Math.sign(a.x - b.x), force = sign * dt * 2;
     bumps.set(a.id, (bumps.get(a.id) || 0) + force); bumps.set(b.id, (bumps.get(b.id) || 0) - force);
   }

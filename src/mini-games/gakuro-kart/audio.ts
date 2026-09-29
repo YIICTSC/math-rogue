@@ -2,6 +2,7 @@ import type { Race } from './engine';
 /** Original synthesized engine, soundtrack and race cues. */
 export class KartAudio {
   private context: AudioContext | null = null;
+  private unlockPromise: Promise<boolean> | null = null;
   private master: GainNode | null = null;
   private motor: OscillatorNode | null = null;
   private motorGain: GainNode | null = null;
@@ -9,13 +10,13 @@ export class KartAudio {
   private skid: AudioBufferSourceNode | null = null; private skidGain: GainNode | null = null;
   private filter: BiquadFilterNode | null = null;
   private lastDistance = 0; private lastSpeed = 0; private lastCrash = false; private lastSlow = false;
-  private lastAnswers = 0; private lastLap = 0; private finished = false; private seed = -1; private lastJump = false;
+  private lastAnswers = 0; private lastQuizLap = -1; private lastLap = 0; private finished = false; private seed = -1; private lastJump = false;
   private step = 0; private nextBeat = 0; private boost = false; private countdown = 0; private item = false;
   enabled = true;
-  async unlock() {
+  async unlock(): Promise<boolean> {
     if (!this.context) {
       const AC = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-      if (!AC) return;
+      if (!AC) return false;
       this.context = new AC(); this.master = this.context.createGain(); this.master.gain.value = this.enabled ? .4 : 0; this.master.connect(this.context.destination);
       this.motor = this.context.createOscillator(); this.motor.type = 'sawtooth'; this.motorGain = this.context.createGain(); this.motorGain.gain.value = 0;
       const filter = this.context.createBiquadFilter(); filter.type = 'lowpass'; filter.frequency.value = 850; this.filter = filter;
@@ -27,7 +28,32 @@ export class KartAudio {
       this.skidGain = this.context.createGain(); this.skidGain.gain.value = 0;
       this.skid.connect(skidFilter); skidFilter.connect(this.skidGain); this.skidGain.connect(this.master); this.skid.start();
     }
-    if (this.context.state === 'suspended') await this.context.resume();
+    const context = this.context;
+    const isRunning = () => context.state === 'running';
+    if (isRunning()) return true;
+    if (this.unlockPromise) return this.unlockPromise;
+
+    // iOS WebViews can acknowledge the first resume() while still leaving the
+    // context suspended. Retry after that transition settles, as the app-wide
+    // audio service does, instead of silently leaving every kart cue muted.
+    const resume = (async () => {
+      for (let attempt = 0; attempt < 3; attempt++) {
+        if (isRunning()) return true;
+        await Promise.race([
+          context.resume().catch(() => undefined),
+          new Promise<void>(resolve => window.setTimeout(resolve, 300)),
+        ]);
+        if (isRunning()) return true;
+        if (attempt < 2) await new Promise<void>(resolve => window.setTimeout(resolve, 150 * (attempt + 1)));
+      }
+      return isRunning();
+    })();
+    this.unlockPromise = resume;
+    try {
+      return await resume;
+    } finally {
+      if (this.unlockPromise === resume) this.unlockPromise = null;
+    }
   }
   toggle() { this.enabled = !this.enabled; if (this.context && this.master) this.master.gain.setTargetAtTime(this.enabled ? .4 : 0, this.context.currentTime, .03); return this.enabled; }
   private note(frequency: number, length: number, volume: number, type: OscillatorType = 'sine') {
@@ -45,7 +71,7 @@ export class KartAudio {
   }
   update(w: Race | null, id: string) {
     if (!this.context || !this.motor || !this.motorGain) return;
-    if (w && w.seed !== this.seed) { this.seed = w.seed; this.boost = false; this.item = false; this.lastAnswers = 0; this.lastCrash = false; this.lastSlow = false; this.lastLap = 0; this.finished = false; this.lastJump = false; this.lastDistance = 0; this.lastSpeed = 0; }
+    if (w && w.seed !== this.seed) { this.seed = w.seed; this.boost = false; this.item = false; this.lastAnswers = 0; this.lastQuizLap = -1; this.lastCrash = false; this.lastSlow = false; this.lastLap = 0; this.finished = false; this.lastJump = false; this.lastDistance = 0; this.lastSpeed = 0; }
     const p = w?.players[id], racing = w?.phase === 'race' && !w.paused && p && !p.finish && !document.hidden;
     this.motor.frequency.setTargetAtTime(racing ? 52 + (p.speed % 19) * 3 + Math.floor(p.speed / 19) * 17 : 40, this.context.currentTime, .06);
     this.motorGain.gain.setTargetAtTime(racing ? (p.crash ? .035 : .13 + p.speed / 1400) : 0, this.context.currentTime, .08);
@@ -56,6 +82,7 @@ export class KartAudio {
     if (!count && this.countdown && racing) this.note(880, .5, .25); this.countdown = count;
     if (p?.finish && !this.finished && !document.hidden) { this.note(523, .3, .2); this.note(659, .5, .15); this.note(784, .8, .15); this.finished = true; }
     if (racing) {
+      if (p.quizLap !== this.lastQuizLap) { this.lastQuizLap = p.quizLap; this.lastAnswers = 0; }
       const answers = p.quizAnswers.filter(a => a !== -2).length;
       if (answers > this.lastAnswers && w?.lesson) {
         const i = answers - 1, correct = p.quizAnswers[i] === w.lesson.questions[i].correct;

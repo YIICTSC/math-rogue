@@ -1,6 +1,6 @@
 import { validLesson, type KartLesson } from './learning';
 import { createRace, MAX_RACERS, type Race, type Racer, type Item } from './engine';
-export const PROTOCOL = 3;
+export const PROTOCOL = 4;
 const phases: Race['phase'][] = ['lobby', 'countdown', 'race', 'result'];
 const items: (Item | null)[] = [null, 'nitro', 'shield', 'pulse', 'rocket'];
 const HEADER = 32, STRIDE = 56;
@@ -19,7 +19,7 @@ export function acceptRoster(r: Roster, previous: Race | null): Race | null {
   if (previous && r.revision < previous.revision) return null;
   const w = previous ? { ...previous, players: {} } : createRace(r.course, r.seed);
   w.lesson = r.lesson; w.course = r.course; w.seed = r.seed; w.revision = r.revision;
-  for (const p of r.players) w.players[p.id] = { quizAnswers: [-2, -2, -2], quizTimes: [0, 0, 0], quizCorrect: 0, quizFeedbackAt: 0, quizApplied: false, crash: 0, distance: 0, x: 0, speed: 0, steer: 0, brake: false, drift: false, inputAt: 0, slide: 0, charge: 0, boost: 0, shield: 0, slow: 0, item: null, jump: 0, draft: 0, finish: 0, drifts: 0, overtakes: 0, ...previous?.players[p.id], ...p };
+  for (const p of r.players) w.players[p.id] = { quizAnswers: [-2, -2, -2], quizTimes: [0, 0, 0], quizCorrect: 0, quizCorrectTotal: 0, quizLap: 0, quizFeedbackAt: 0, quizApplied: false, crash: 0, distance: 0, x: 0, speed: 0, steer: 0, brake: false, drift: false, inputAt: 0, slide: 0, charge: 0, boost: 0, shield: 0, slow: 0, item: null, jump: 0, draft: 0, finish: 0, drifts: 0, overtakes: 0, ...previous?.players[p.id], ...p };
   return w;
 }
 /** One 2,272-byte packet for 40 racers; names are only sent when the roster changes. */
@@ -35,6 +35,7 @@ export function encodeSnapshot(w: Race, sequence: number): ArrayBuffer {
     p.quizAnswers.forEach((v, j) => d.setInt8(o + 32 + j, v));
     d.setUint8(o + 35, p.quizCorrect); d.setFloat32(o + 36, p.quizFeedbackAt);
     d.setUint8(o + 40, Math.round(p.crash * 20)); d.setUint8(o + 41, Number(p.quizApplied));
+    d.setUint8(o + 42, p.quizLap); d.setUint8(o + 43, p.quizCorrectTotal);
     p.quizTimes.forEach((v, j) => d.setFloat32(o + 44 + j * 4, v));
     d.setUint16(o + 22, p.drifts); d.setFloat32(o + 24, p.finish); d.setUint16(o + 28, p.overtakes);
   }); return buffer;
@@ -52,11 +53,11 @@ export function decodeSnapshot(buffer: ArrayBuffer, w: Race, lastSequence: numbe
     if (!p || seen.has(slot) || d.getUint8(o + 2) >= items.length) return null;
     seen.add(slot);
     const q = { ...p, quizAnswers: [0, 1, 2].map(j => d.getInt8(o + 32 + j)), quizTimes: [0, 1, 2].map(j => d.getFloat32(o + 44 + j * 4)),
-      quizCorrect: d.getUint8(o + 35), quizFeedbackAt: d.getFloat32(o + 36), crash: d.getUint8(o + 40) / 20, quizApplied: !!d.getUint8(o + 41), brake: !!(d.getUint8(o + 1) & 1), drift: !!(d.getUint8(o + 1) & 2), item: items[d.getUint8(o + 2)], charge: d.getUint8(o + 3) / 100,
+      quizCorrect: d.getUint8(o + 35), quizFeedbackAt: d.getFloat32(o + 36), crash: d.getUint8(o + 40) / 20, quizApplied: !!d.getUint8(o + 41), quizLap: d.getUint8(o + 42), quizCorrectTotal: d.getUint8(o + 43), brake: !!(d.getUint8(o + 1) & 1), drift: !!(d.getUint8(o + 1) & 2), item: items[d.getUint8(o + 2)], charge: d.getUint8(o + 3) / 100,
       distance: d.getFloat32(o + 4), x: d.getFloat32(o + 8), speed: d.getUint16(o + 12) / 100, steer: d.getInt8(o + 14) / 100, slide: d.getInt8(o + 15) / 4,
       boost: d.getUint8(o + 16) / 20, shield: d.getUint8(o + 17) / 20, slow: d.getUint8(o + 18) / 20, jump: d.getUint8(o + 19) / 20, draft: d.getUint8(o + 20) / 20, drifts: d.getUint16(o + 22), finish: d.getFloat32(o + 24), overtakes: d.getUint16(o + 28) };
     if (![q.distance, q.x, q.finish].every(Number.isFinite) || Math.abs(q.x) > 15 || q.speed > 100) return null;
-    if (q.quizCorrect > 3 || !Number.isFinite(q.quizFeedbackAt) || q.quizAnswers.some(a => a < -2 || a > 3) || q.quizTimes.some(v => !Number.isFinite(v) || v < 0)) return null;
+    if (q.quizCorrect > 3 || q.quizCorrectTotal > 9 || q.quizLap >= 3 || !Number.isFinite(q.quizFeedbackAt) || q.quizAnswers.some(a => a < -2 || a > 3) || q.quizTimes.some(v => !Number.isFinite(v) || v < 0)) return null;
     next.players[q.id] = q;
   } return { world: next, sequence };
 }

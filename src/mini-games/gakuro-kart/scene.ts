@@ -1,4 +1,4 @@
-import { LANE_COLORS, QUIZ_GATES, QUIZ_END, laneCenter } from './learning';
+import { LANE_COLORS, QUIZ_GATES, QUIZ_END, laneCenter, quizDistance } from './learning';
 import * as T from 'three';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { COURSES, FEATURES, getTrack, sampleTrack, ROAD_WIDTH } from './track';
@@ -145,25 +145,25 @@ export class KartScene {
   private buildQuizRoad() {
     const course = this.state.course;
     for (let lane = 0; lane < 4; lane++) {
-      const material = new T.MeshBasicMaterial({ color: LANE_COLORS[lane], transparent: true, opacity: .17, depthWrite: false });
-      const center = sampleTrack(QUIZ_END / 2, course, laneCenter(lane));
-      const strip = new T.Mesh(new T.BoxGeometry(5.75, .025, QUIZ_END), material);
-      strip.position.set(center.x, center.y + .06, center.z); this.quizRoad.add(strip);
-      for (let d = 25; d < QUIZ_END; d += 30) {
-        const p = sampleTrack(d, course, laneCenter(lane));
-        const c = document.createElement('canvas'); c.width = 128; c.height = 128;
-        const ctx = c.getContext('2d')!; ctx.fillStyle = LANE_COLORS[lane]; ctx.font = '900 90px sans-serif'; ctx.textAlign = 'center'; ctx.fillText(String(lane + 1), 64, 100);
-        const texture = new T.CanvasTexture(c); texture.colorSpace = T.SRGBColorSpace; this.textures.push(texture);
-        const number = new T.Mesh(new T.PlaneGeometry(3, 3), new T.MeshBasicMaterial({ map: texture, transparent: true, depthWrite: false, side: T.DoubleSide }));
-        number.rotation.set(-Math.PI / 2, 0, Math.PI); number.position.set(p.x, p.y + .1, p.z); this.quizRoad.add(number);
-      }
-      for (const distance of QUIZ_GATES) {
-        const p = sampleTrack(distance, course, laneCenter(lane)), group = new T.Group(); group.position.set(p.x, p.y, p.z);
-        const mat = new T.MeshBasicMaterial({ color: LANE_COLORS[lane] });
-        for (const side of [-1, 1]) { const post = new T.Mesh(new T.BoxGeometry(.12, 5, .2), mat); post.position.set(side * 2.9, 2.5, 0); group.add(post); }
-        const top = new T.Mesh(new T.BoxGeometry(5.9, .2, .2), mat); top.position.y = 5; group.add(top);
-        const line = new T.Mesh(new T.BoxGeometry(5.8, .04, .6), mat); line.position.y = .12; group.add(line); this.quizRoad.add(group);
-      }
+        const material = new T.MeshBasicMaterial({ color: LANE_COLORS[lane], transparent: true, opacity: .17, depthWrite: false });
+        const center = sampleTrack(QUIZ_END / 2, course, laneCenter(lane));
+        const strip = new T.Mesh(new T.BoxGeometry(5.75, .025, QUIZ_END), material);
+        strip.position.set(center.x, center.y + .06, center.z); strip.rotation.y = Math.atan2(center.tx, center.tz); this.quizRoad.add(strip);
+        for (let d = 25; d < QUIZ_END; d += 30) {
+          const p = sampleTrack(d, course, laneCenter(lane));
+          const c = document.createElement('canvas'); c.width = 128; c.height = 128;
+          const ctx = c.getContext('2d')!; ctx.fillStyle = LANE_COLORS[lane]; ctx.font = '900 90px sans-serif'; ctx.textAlign = 'center'; ctx.fillText(String(lane + 1), 64, 100);
+          const texture = new T.CanvasTexture(c); texture.colorSpace = T.SRGBColorSpace; this.textures.push(texture);
+          const number = new T.Mesh(new T.PlaneGeometry(3, 3), new T.MeshBasicMaterial({ map: texture, transparent: true, depthWrite: false, side: T.DoubleSide }));
+          number.rotation.set(-Math.PI / 2, 0, Math.PI); number.position.set(p.x, p.y + .1, p.z); this.quizRoad.add(number);
+        }
+        for (const distance of QUIZ_GATES) {
+          const p = sampleTrack(distance, course, laneCenter(lane)), group = new T.Group(); group.position.set(p.x, p.y, p.z);
+          const mat = new T.MeshBasicMaterial({ color: LANE_COLORS[lane] });
+          for (const side of [-1, 1]) { const post = new T.Mesh(new T.BoxGeometry(.12, 5, .2), mat); post.position.set(side * 2.9, 2.5, 0); group.add(post); }
+          const top = new T.Mesh(new T.BoxGeometry(5.9, .2, .2), mat); top.position.y = 5; group.add(top);
+          const line = new T.Mesh(new T.BoxGeometry(5.8, .04, .6), mat); line.position.y = .12; group.add(line); this.quizRoad.add(group);
+        }
     }
     const barrier = new T.Mesh(new T.BoxGeometry(2.8, 1.1, .6), this.standard('#ffb74f', .25)); barrier.position.y = .8; this.crashObstacle.add(barrier);
     for (const x of [-1, 0, 1]) { const stripe = new T.Mesh(new T.BoxGeometry(.3, 1.1, .64), this.standard('#18213b')); stripe.position.set(x, .8, 0); stripe.rotation.z = -.3; this.crashObstacle.add(stripe); }
@@ -201,7 +201,7 @@ export class KartScene {
     this.frameTime += dt; this.frames++;
     if (this.frames === 180) { if (this.frameTime / this.frames > .027 && this.quality > .65) { this.quality -= .15; this.renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 1.5) * this.quality); this.size.width = 0; } this.frames = 0; this.frameTime = 0; }
     const w = this.state, me = w.players[this.selfId] || Object.values(w.players)[0]; if (!me) return;
-    this.quizRoad.visible = !!w.lesson && me.distance < QUIZ_END && !this.preview;
+    this.quizRoad.visible = !!w.lesson && quizDistance(me.distance, getTrack(w.course).length) < QUIZ_END && !this.preview;
     this.crashObstacle.visible = me.crash > 0;
     if (me.crash > 0) { const impact = sampleTrack(me.distance + 2, w.course, me.x); this.crashObstacle.position.set(impact.x, impact.y, impact.z); this.crashObstacle.rotation.y = Math.atan2(impact.tx, impact.tz); }
     const racers = Object.values(w.players), age = w.phase === 'race' && !w.paused ? Math.min(.15, (now - this.received) / 1000) : 0;

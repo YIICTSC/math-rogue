@@ -6,8 +6,16 @@ export interface KartQuestion {
 }
 export interface KartLesson { title: string; questions: KartQuestion[] }
 // Lane numbers run left to right on screen; track-space runs in the opposite direction.
-export const QUIZ_GATES = [240, 510, 780];
-export const QUIZ_END = 835;
+export const QUIZ_APPROACH_SPEED = 20;
+export const QUIZ_FEEDBACK_SECONDS = 2.5;
+// Each next question appears after the previous answer feedback (2.5s at
+// 20m/s), then has a full five seconds to reach its choice gate.
+export const QUIZ_GATES = [100, 250, 400];
+export const QUIZ_END = 450;
+export const quizDistance = (distance: number, trackLength: number) => {
+  const progress = Math.max(0, distance);
+  return trackLength > 0 ? progress % trackLength : 0;
+};
 export const LANE_COLORS = ['#53e0ff', '#ffce5b', '#ff82bf', '#98ef82'];
 export const laneCenter = (lane: number) => 9 - lane * 6;
 export const answerLane = (x: number) => Math.abs(x) <= 12 ? Math.min(3, Math.max(0, Math.floor((12 - x) / 6))) : -1;
@@ -23,4 +31,3 @@ export function validLesson(value: unknown): value is KartLesson {
     (q.visual === undefined || (!!q.visual && typeof q.visual === 'object' && typeof q.visual.kind === 'string')) &&
     (q.audioPrompt === undefined || (!!q.audioPrompt && typeof q.audioPrompt.text === 'string' && q.audioPrompt.text.length <= 12000 && (q.audioPrompt.lang === undefined || typeof q.audioPrompt.lang === 'string'))));
 }
-export const questionSeconds = (q: KartQuestion) => Math.min(45, Math.max(14, 8 + ((q.passage?.length || 0) + q.question.length + q.options.join('').length) / 18));
