@@ -9,7 +9,7 @@ try {
   assert.equal(e.addRacer(w, 'overflow', 'Overflow'), false);
   const copy = net.acceptRoster(net.roster(w), null); assert(copy);
   w.players.p0.distance = 123.456; w.players.p0.x = -3.5; w.players.p0.speed = 72; w.players.p0.item = 'rocket'; w.players.p0.boost = 2.7;
-  const packet = net.encodeSnapshot(w, 4); assert.equal(packet.byteLength, 1312);
+  const packet = net.encodeSnapshot(w, 4); assert.equal(packet.byteLength, 2272);
   const decoded = net.decodeSnapshot(packet, copy, 3); assert(decoded); assert.equal(decoded.world.players.p0.item, 'rocket'); assert.equal(decoded.world.players.p0.boost, 2.7);
   assert(Math.abs(decoded.world.players.p0.distance - 123.456) < .001);
   assert.equal(net.decodeSnapshot(packet, copy, 4), null); assert.equal(net.decodeSnapshot(packet.slice(0, 100), copy, 3), null);
@@ -28,11 +28,11 @@ try {
     const a = t.sampleTrack(0, course), b = t.sampleTrack(track.length, course); assert(Math.hypot(a.x - b.x, a.z - b.z) < .001);
     for (let i = 0; i < 40; i++) e.addRacer(world, `bot${i}`, `Bot ${i}`, i % 3, true);
     e.startRace(world); const started = performance.now();
-    for (let step = 0; step < 15000 && world.phase !== 'result'; step++) e.tick(world, 1 / 60);
+    for (let step = 0; step < 22000 && world.phase !== 'result'; step++) e.tick(world, 1 / 60);
     assert.equal(world.phase, 'result'); assert.equal(e.ranking(world).length, 40);
     const finished = e.ranking(world).filter(p => p.finish);
     assert(finished.length >= 35, `Only ${finished.length} bots finished course ${course}`);
-    assert(finished[0].finish < 180); assert(e.ranking(world).some(p => p.drifts > 0));
+    assert(finished[0].finish < 300); assert(e.ranking(world).some(p => p.drifts > 0));
     for (const p of Object.values(world.players)) { assert([p.x, p.distance, p.speed].every(Number.isFinite)); assert(Math.abs(p.x) <= 14); }
     assert(finished.every((p, i) => !i || finished[i - 1].finish <= p.finish));
     console.log(`Course ${course}: ${finished.length}/40 finish, winner ${finished[0].finish.toFixed(2)}s, simulation ${(performance.now() - started).toFixed(0)}ms`);

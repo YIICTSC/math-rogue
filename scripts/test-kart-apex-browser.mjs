@@ -8,7 +8,7 @@ import { chromium } from 'playwright';
 
 const root = path.resolve('tmp/kart-apex-qa'); await fs.mkdir(root, { recursive: true });
 await fs.writeFile(path.join(root, 'index.html'), '<html><head><meta name="viewport" content="width=device-width,initial-scale=1" /></head><body style="margin:0"><div id="root"></div><script type="module" src="./fixture.tsx"></script></body></html>');
-await fs.writeFile(path.join(root, 'fixture.tsx'), `import React from 'react';import{createRoot}from'react-dom/client';import GakuroKart from '/src/mini-games/gakuro-kart/GakuroKart.tsx';import{KartRoom}from'/src/mini-games/gakuro-kart/network.ts';window.KartRoom=KartRoom;const practice=KartRoom.prototype.practice;KartRoom.prototype.practice=function(...args){window.room=this;return practice.apply(this,args)};if(!location.search.includes('network'))createRoot(document.getElementById('root')).render(<GakuroKart onClose={()=>{window.exited=true}}/>);`);
+await fs.writeFile(path.join(root, 'fixture.tsx'), `import '/src/styles.css';import React from 'react';import{KartAudio}from'/src/mini-games/gakuro-kart/audio.ts';const unlock=KartAudio.prototype.unlock;KartAudio.prototype.unlock=function(){window.kartAudio=this;return unlock.apply(this)};import{createRoot}from'react-dom/client';import GakuroKart from '/src/mini-games/gakuro-kart/GakuroKart.tsx';import{KartRoom}from'/src/mini-games/gakuro-kart/network.ts';window.KartRoom=KartRoom;const practice=KartRoom.prototype.practice;KartRoom.prototype.practice=function(...args){window.room=this;return practice.apply(this,args)};if(!location.search.includes('network'))createRoot(document.getElementById('root')).render(<GakuroKart onClose={()=>{window.exited=true}}/>);`);
 let signaling;
 const peerServer = PeerServer({ port: 9017, path: '/kart', host: '127.0.0.1', proxied: false }, s => { signaling = s; });
 const server = await createServer({ configFile: false, cacheDir: 'node_modules/.vite-kart-apex-qa', optimizeDeps: { entries: ['tmp/kart-apex-qa/index.html'] }, plugins: [react()], logLevel: 'error',
@@ -19,7 +19,7 @@ const browser = await chromium.launch({ headless: true, args: ['--enable-webgl',
 const url = 'http://127.0.0.1:5198/tmp/kart-apex-qa/index.html', errors = [];
 try {
   const page = await browser.newPage({ viewport: { width: 1440, height: 960 } }); page.on('pageerror', e => errors.push(e.message));
-  await page.goto(url); await page.getByRole('button', { name: /40台でレース/ }).waitFor();
+  page.setDefaultTimeout(60000); await page.goto(url, { waitUntil: 'domcontentloaded', timeout: 120000 }); await page.getByRole('button', { name: /40台でレース/ }).waitFor();
   await page.waitForFunction(() => document.querySelector('canvas')?.width > 10);
   assert.equal(await page.locator('.gk-render-error').count(), 0);
   await page.screenshot({ path: path.join(root, 'garage-desktop.png') });
@@ -28,7 +28,7 @@ try {
     await page.waitForTimeout(250); assert.equal(await page.locator('.gk-render-error').count(), 0);
     await page.screenshot({ path: path.join(root, `garage-${label}.png`) });
   }
-  await page.getByRole('button', { name: /40台でレース/ }).click(); await page.getByRole('button', { name: /レースを開始/ }).click();
+  await page.getByRole('button', { name: /40台でレース/ }).click(); await page.screenshot({path:path.join(root,'lesson-picker.png')}); assert.equal(await page.getByRole('button',{name:'入力',exact:true}).count(),0); await page.getByRole('button', { name: 'この条件で開始', exact: true }).click(); await page.getByRole('button', { name: /レースを開始/ }).click();
   await page.waitForFunction(() => window.room?.world?.phase === 'race');
   assert.equal(await page.evaluate(() => Object.keys(window.room.world.players).length), 40);
   await page.evaluate(() => { window.room.world.players.local.x = 0; });
@@ -49,12 +49,43 @@ try {
     }
     await page.screenshot({ path: path.join(root, `race-${label}.png`) });
   }
+  const lesson = await page.evaluate(() => window.room.world.lesson);
+  assert.equal(lesson.questions.length, 3);
+  await page.evaluate(() => { const p=window.room.world.players.local; p.quizAnswers=[-2,-2,-2];p.quizCorrect=0;p.quizApplied=false; });
+  for(let i=0;i<3;i++) {
+    await page.evaluate(i=>{const w=window.room.world,p=w.players.local;p.distance=[240,510,780][i]-.1;p.speed=18;p.x=9-w.lesson.questions[i].correct*6;p.slide=0;p.steer=0;},i);
+    await page.waitForFunction(i=>window.room.world.players.local.quizCorrect===i+1,i);
+    await page.locator('.gk-answer-mark').filter({hasText:'〇'}).waitFor();
+    if(i===0) await page.screenshot({path:path.join(root,'quiz-correct.png')});
+  }
+  await page.evaluate(()=>{const p=window.room.world.players.local;p.distance=834.9;p.speed=18;});
+  await page.waitForFunction(()=>window.room.world.players.local.quizApplied && window.room.world.players.local.boost>0);
+  await page.locator('.gk-quiz-summary').waitFor();
+  await page.screenshot({path:path.join(root,'quiz-perfect.png')});
+  assert(await page.evaluate(()=>window.kartAudio.context.state==='running' && window.kartAudio.motorGain.gain.value>0));
+  const rms=await page.evaluate(async()=>{const a=window.kartAudio.context.createAnalyser();window.kartAudio.master.connect(a);await new Promise(r=>setTimeout(r,200));const data=new Float32Array(a.fftSize);a.getFloatTimeDomainData(data);window.kartAudio.master.disconnect(a);return Math.sqrt(data.reduce((n,v)=>n+v*v,0)/data.length);}); assert(rms>.001,`Silent race audio: ${rms}`);
+  await page.getByRole('button',{name:'Sound toggle'}).click(); await page.waitForTimeout(250); assert(await page.evaluate(()=>window.kartAudio.master.gain.value<.001));
+  await page.getByRole('button',{name:'Sound toggle'}).click();
+  await page.evaluate(()=>{window.room.world.phase='result';window.room.world.revision++;});
+  await page.getByRole('button',{name:'もう一度レース',exact:true}).click();
+  await page.waitForFunction(()=>window.room.world.phase==='countdown' && window.room.world.players.local.quizAnswers.every(a=>a===-2));
+  await page.waitForFunction(()=>window.room.world.phase==='race');
+  for(let i=0;i<3;i++) {
+    await page.evaluate(i=>{const w=window.room.world,p=w.players.local;p.distance=[240,510,780][i]-.1;p.speed=18;p.x=9-((w.lesson.questions[i].correct+1)%4)*6;p.slide=0;p.steer=0;},i);
+    await page.waitForFunction(i=>window.room.world.players.local.quizAnswers[i]!==-2,i);
+  }
+  await page.evaluate(()=>{const p=window.room.world.players.local;p.distance=834.9;p.speed=18;});
+  await page.waitForFunction(()=>window.room.world.players.local.crash>0);
+  await page.locator('.gk-quiz-summary').filter({hasText:'クラッシュ！'}).waitFor();
+  await page.waitForTimeout(200);
+  await page.screenshot({path:path.join(root,'quiz-crash.png')});
   if (!process.argv.includes('--visual-only')) {
   // Two independent pages, 40 real WebRTC peers and 39 host data channels.
   await page.close();
   const hostPage = await browser.newPage(), clients = await browser.newPage();
-  for (const p of [hostPage, clients]) { p.on('pageerror', e => errors.push(e.message)); await p.goto(`${url}?network`); await p.waitForFunction(() => !!window.KartRoom); }
+  for (const p of [hostPage, clients]) { p.on('pageerror', e => errors.push(e.message)); await p.goto(`${url}?network`, { waitUntil: 'domcontentloaded', timeout: 120000 }); await p.waitForFunction(() => !!window.KartRoom); }
   const code = await hostPage.evaluate(async () => { window.host = new window.KartRoom(w => { window.snapshot = w; }, m => { window.message = m; }); await window.host.create('Host', 0, 0); return window.host.code; });
+  await hostPage.evaluate(lesson=>window.host.setLesson(lesson),lesson);
   await clients.evaluate(async code => {
     window.rooms = []; window.snapshots = [];
     for (let batch = 0; batch < 13; batch++) await Promise.all(Array.from({ length: 3 }, async (_, j) => {
@@ -63,6 +94,7 @@ try {
   }, code);
   await clients.waitForFunction(() => window.snapshots.length === 39 && window.snapshots.every(w => Object.keys(w?.players || {}).length === 40));
   assert.equal(await hostPage.evaluate(() => Object.keys(window.host.world.players).length), 40);
+  assert(await clients.evaluate(()=>window.snapshots.every(w=>w.lesson?.questions.length===3)));
   const overflow = await clients.evaluate(async code => { const r = new window.KartRoom(() => {}, () => {}); try { await r.join(code, 'Overflow', 0); return false; } catch { return true; } finally { r.close(); } }, code); assert(overflow);
   await hostPage.evaluate(() => window.host.start(false));
   await clients.waitForFunction(() => window.snapshots.every(w => w.phase === 'race'));
@@ -75,18 +107,25 @@ try {
   await clients.waitForTimeout(300); assert.equal(await hostPage.evaluate(() => window.host.world.time), pausedAt);
   await hostPage.evaluate(() => { delete document.hidden; document.dispatchEvent(new Event('visibilitychange')); });
   await clients.waitForFunction(() => window.snapshots.every(w => !w.paused));
-  await clients.evaluate(() => { clearInterval(window.inputs); window.rooms[0].close(); });
+  await clients.evaluate(() => clearInterval(window.inputs));
+  for(let i=0;i<3;i++) {
+    await hostPage.evaluate(i=>{const w=window.host.world;for(const p of Object.values(w.players)){const lane=i<p.slot%4?w.lesson.questions[i].correct:(w.lesson.questions[i].correct+1)%4;p.distance=[240,510,780][i]-.1;p.speed=18;p.x=9-lane*6;p.slide=0;p.steer=0;}},i);
+    await clients.waitForFunction(i=>window.snapshots.every(w=>Object.values(w.players).every(p=>p.quizAnswers[i]!==-2)),i);
+  }
+  await hostPage.evaluate(()=>{for(const p of Object.values(window.host.world.players)){p.distance=834.9;p.speed=18;}});
+  await clients.waitForFunction(()=>window.snapshots.every(w=>Object.values(w.players).every(p=>p.quizApplied && p.quizCorrect===p.slot%4)));
+  await clients.evaluate(() => { window.rooms[0].close(); });
   await hostPage.waitForFunction(() => Object.values(window.host.world.players).filter(p => p.cpu).length === 1);
   // Drive a completed result through the real wire and verify a roster reset/rematch.
   await hostPage.evaluate(() => { window.host.world.phase = 'result'; window.host.world.revision++; });
   await clients.waitForFunction(() => window.snapshots.filter(Boolean).slice(1).every(w => w.phase === 'result'));
   await hostPage.evaluate(() => window.host.rematch());
-  await clients.waitForFunction(() => window.snapshots.slice(1).every(w => w.phase === 'countdown' && Object.keys(w.players).length === 40 && Object.values(w.players).filter(p => p.cpu).length === 1));
+  await clients.waitForFunction(() => window.snapshots.slice(1).every(w => w.phase === 'countdown' && w.lesson.questions.length===3 && Object.values(w.players).every(p=>p.quizAnswers.every(a=>a===-2)) && Object.keys(w.players).length === 40 && Object.values(w.players).filter(p => p.cpu).length === 1));
   await hostPage.evaluate(() => window.host.close());
   await clients.waitForFunction(() => window.snapshots.slice(1).every(w => w === null));
   }
   assert.deepEqual(errors, []);
-  console.log(process.argv.includes('--visual-only') ? 'Three course previews, desktop/phone/tablet/landscape rendering, keyboard and simultaneous touch controls passed.' : 'Responsive rendering and touch controls; 40 real WebRTC peers; 41st rejection; inputs and snapshot synchronization; pause/resume; disconnect CPU takeover; result/rematch; host departure passed.');
+  console.log(process.argv.includes('--visual-only') ? 'Three course previews, desktop/phone/tablet/landscape rendering, keyboard and simultaneous touch controls passed.' : 'Problem selection, 3 gate answers, correct feedback, boost, crash, audio signal/mute, UI restart; responsive rendering and touch controls; lesson/effect synchronization across 40 real WebRTC peers; 41st rejection; inputs and snapshot synchronization; pause/resume; disconnect CPU takeover; result/rematch; host departure passed.');
 } finally { await browser.close(); await server.close(); signaling?.close(); peerServer.emit('close'); }
 // PeerServer 1.x keeps internal maintenance timers alive after HTTP close.
 process.exit(0);

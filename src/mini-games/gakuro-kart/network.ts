@@ -1,3 +1,4 @@
+import { validLesson, type KartLesson } from './learning';
 import Peer, { type DataConnection, type PeerOptions } from 'peerjs';
 import { addRacer, command, createRace, MAX_RACERS, startRace, tick, type Command, type Race } from './engine';
 import { acceptRoster, decodeSnapshot, encodeSnapshot, PROTOCOL, roster, type Roster } from './protocol';
@@ -133,7 +134,7 @@ export class KartRoom {
             this.world = decoded.world; this.lastSequence = decoded.sequence; this.lastPacketAt = performance.now(); this.update(this.world); done(); resolve();
           } return;
         }
-        if (typeof raw !== 'string' || raw.length > 12000) return;
+        if (typeof raw !== 'string' || raw.length > 120000) return;
         let d: any; try { d = JSON.parse(raw); } catch { return; } if (!d || typeof d !== 'object') return;
         if (d.type === 'error') { done(); reject(new Error(typeof d.message === 'string' ? d.message : 'Connection rejected')); }
         if (d.type === 'roster') { const next = acceptRoster(d as Roster, this.world); if (next) this.world = next; }
@@ -144,10 +145,15 @@ export class KartRoom {
     });
     this.timer = setInterval(() => { if (performance.now() - this.lastPacketAt > 12000) { this.close(); this.update(null); this.status('通信が途切れました。部屋に入り直してください。'); } }, 1000);
   }
+  setLesson(lesson: KartLesson) {
+    if (!this.host || this.world?.phase !== 'lobby' || !validLesson(lesson)) return;
+    this.world.lesson = structuredClone(lesson); this.world.revision++; this.emit();
+  }
   start(fill = true) { if (this.host && this.world) { startRace(this.world, fill); this.emit(); } }
-  rematch() {
+  rematch(lesson?: KartLesson) {
     if (!this.host || this.world?.phase !== 'result') return;
     const old = this.world, previousRevision = old.revision; this.world = createRace(old.course, old.seed + 1);
+    this.world.lesson = lesson && validLesson(lesson) ? structuredClone(lesson) : old.lesson;
     this.world.revision = previousRevision;
     for (const p of Object.values(old.players)) addRacer(this.world, p.id, p.name, p.hero, p.cpu);
     startRace(this.world); this.emit();

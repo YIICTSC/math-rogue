@@ -16,11 +16,12 @@ export function getTrack(course: number): Track {
   course = Math.max(0, Math.min(2, Math.floor(course) || 0));
   if (cache.has(course)) return cache.get(course)!;
   const controls = [
-    [0, 0, -180], [0, 0, -60], [0, 3, 60], [85, 15, 180], [260, 25, 180], [360, 32, 70],
-    [330, 18, -70], [430, 5, -190], [380, 0, -340], [235, 16, -400], [115, 8, -310], [0, 0, -300],
+    [0, 0, -180], [0, 0, 60], [0, 0, 300], [0, 0, 540], [0, 0, 780], [0, 0, 1020],
+    [85, 15, 1140], [260, 25, 1140], [360, 32, 1030], [330, 18, 890], [430, 5, 770],
+    [380, 0, 620], [235, 16, 560], [250, 8, 300], [280, 0, -150], [180, 0, -380], [0, 0, -420], [0, 0, -300],
   ];
-  if (course === 1) { controls[6] = [410, 36, -70]; controls[9] = [200, 28, -430]; }
-  if (course === 2) { controls[5] = [325, 24, 55]; controls[6] = [240, 12, -50]; controls[7] = [430, 4, -155]; }
+  if (course === 1) { controls[9] = [410, 36, 890]; controls[12] = [200, 28, 530]; }
+  if (course === 2) { controls[8] = [325, 24, 1015]; controls[9] = [240, 12, 910]; controls[10] = [430, 4, 805]; }
   const raw: Point[] = [], lengths = [0];
   for (let i = 0; i <= 2400; i++) {
     const u = i / 2400 * controls.length, j = Math.floor(u), t = u - j;

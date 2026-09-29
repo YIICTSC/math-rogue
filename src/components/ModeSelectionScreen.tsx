@@ -25,6 +25,7 @@ interface ModeSelectionScreenProps {
   modeMasteryMap?: Record<string, boolean>;
   modeCorrectCounts?: Record<string, number>;
   visualTheme?: VisualThemeId;
+  fixedAnswerMode?: AnswerMode;
 }
 
 interface MathUnitOption {
@@ -971,6 +972,7 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
   modeMasteryMap = {},
   modeCorrectCounts = {},
   visualTheme = 'elementary',
+  fixedAnswerMode,
 }) => {
   const [selectedCategory, setSelectedCategory] = useState<SubjectCategoryConfig>(SUBJECT_CATEGORIES[0]);
   const [selectedSubModeId, setSelectedSubModeId] = useState<string>(SUBJECT_CATEGORIES[0].subModes[0]?.id || '');
@@ -1006,7 +1008,7 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
   };
   const defaultDisplayedCategory = displayedCategories[0] || SUBJECT_CATEGORIES[0];
   const isUnitCategory = selectedCategory.id === 'MATH_GRADES' || selectedCategory.id === 'KOKUGO_GRADES' || selectedCategory.id === 'ENGLISH' || selectedCategory.id === 'LIFE' || selectedCategory.id === 'SCIENCE' || selectedCategory.id === 'SOCIAL' || selectedCategory.id === 'SUMMARY' || isNativeEnglishCategory(selectedCategory.id);
-  const [answerMode, setAnswerMode] = useState<AnswerMode>('CHOICE');
+  const [answerMode, setAnswerMode] = useState<AnswerMode>(fixedAnswerMode || 'CHOICE');
   const canSelectAnswerMode = selectedCategory.id === 'MATH' || selectedCategory.id === 'UPPER_MATH' || selectedCategory.id === 'KANJI' || selectedCategory.id === 'KANKEN' || selectedCategory.id === 'HARD_KANJI';
   const canSelectWritingAnswerMode = selectedCategory.id === 'KANJI' || selectedCategory.id === 'KANKEN' || selectedCategory.id === 'HARD_KANJI';
 
@@ -1028,8 +1030,8 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
 
   const handleSelect = (mode: string, modePool?: string[]) => {
     audioService.playSound('select');
-    const selectedAnswerMode = canSelectAnswerMode ? answerMode : 'CHOICE';
-    saveAnswerModePreference(selectedAnswerMode);
+    const selectedAnswerMode = fixedAnswerMode || (canSelectAnswerMode ? answerMode : 'CHOICE');
+    if (!fixedAnswerMode) saveAnswerModePreference(selectedAnswerMode);
     onSelectMode(mode as GameMode, modePool, selectedAnswerMode);
   };
 
@@ -1117,7 +1119,7 @@ const ModeSelectionScreen: React.FC<ModeSelectionScreenProps> = ({
   };
 
   const renderAnswerModeSelector = () => {
-    if (!canSelectAnswerMode) return null;
+    if (!canSelectAnswerMode || fixedAnswerMode) return null;
 
     return (
       <div className="rounded-lg border border-slate-700 bg-slate-950/60 p-2">

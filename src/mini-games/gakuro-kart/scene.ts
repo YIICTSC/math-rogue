@@ -1,3 +1,4 @@
+import { LANE_COLORS, QUIZ_GATES, QUIZ_END, laneCenter } from './learning';
 import * as T from 'three';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { COURSES, FEATURES, getTrack, sampleTrack, ROAD_WIDTH } from './track';
@@ -10,6 +11,8 @@ export class KartScene {
   private camera = new T.PerspectiveCamera(68, 1, .2, 1700);
   private parts: InstancePart[] = [];
   private boxes: T.Object3D[] = [];
+  private quizRoad = new T.Group();
+  private crashObstacle = new T.Group();
   private particles: T.Points;
   private state: Race;
   private received = performance.now();
@@ -32,7 +35,7 @@ export class KartScene {
     const theme = COURSES[world.course]; this.scene.background = new T.Color(theme.sky); this.scene.fog = new T.Fog(theme.fog, 150, 950);
     this.scene.add(new T.HemisphereLight(world.course === 1 ? '#ecffff' : '#b7bfff', '#393452', 2.4));
     const sun = new T.DirectionalLight(world.course === 1 ? '#fff4ce' : '#ffd8bf', 3.2); sun.position.set(-160, 250, 70); this.scene.add(sun);
-    this.buildWorld(); this.buildCars();
+    this.buildWorld(); this.buildCars(); this.buildQuizRoad();
     const pos = new Float32Array(180 * 3);
     for (let i = 0; i < 180; i++) { pos[i * 3] = Math.sin(i * 17.34) * 200 + 180; pos[i * 3 + 1] = 12 + (i % 23) * 4; pos[i * 3 + 2] = Math.cos(i * 29.41) * 330 - 70; }
     const geo = new T.BufferGeometry(); geo.setAttribute('position', new T.BufferAttribute(pos, 3));
@@ -139,6 +142,33 @@ export class KartScene {
     const moon = new T.Mesh(new T.SphereGeometry(36, 24, 16), new T.MeshBasicMaterial({ color: course === 1 ? '#fff3cb' : '#ffc4a4' })); moon.position.set(-190, 220, 410); this.scene.add(moon);
     const halo = new T.Mesh(new T.TorusGeometry(53, .7, 6, 64), new T.MeshBasicMaterial({ color: theme.second })); halo.position.copy(moon.position); halo.rotation.set(.65, -.4, .5); this.scene.add(halo);
   }
+  private buildQuizRoad() {
+    const course = this.state.course;
+    for (let lane = 0; lane < 4; lane++) {
+      const material = new T.MeshBasicMaterial({ color: LANE_COLORS[lane], transparent: true, opacity: .17, depthWrite: false });
+      const center = sampleTrack(QUIZ_END / 2, course, laneCenter(lane));
+      const strip = new T.Mesh(new T.BoxGeometry(5.75, .025, QUIZ_END), material);
+      strip.position.set(center.x, center.y + .06, center.z); this.quizRoad.add(strip);
+      for (let d = 25; d < QUIZ_END; d += 30) {
+        const p = sampleTrack(d, course, laneCenter(lane));
+        const c = document.createElement('canvas'); c.width = 128; c.height = 128;
+        const ctx = c.getContext('2d')!; ctx.fillStyle = LANE_COLORS[lane]; ctx.font = '900 90px sans-serif'; ctx.textAlign = 'center'; ctx.fillText(String(lane + 1), 64, 100);
+        const texture = new T.CanvasTexture(c); texture.colorSpace = T.SRGBColorSpace; this.textures.push(texture);
+        const number = new T.Mesh(new T.PlaneGeometry(3, 3), new T.MeshBasicMaterial({ map: texture, transparent: true, depthWrite: false, side: T.DoubleSide }));
+        number.rotation.set(-Math.PI / 2, 0, Math.PI); number.position.set(p.x, p.y + .1, p.z); this.quizRoad.add(number);
+      }
+      for (const distance of QUIZ_GATES) {
+        const p = sampleTrack(distance, course, laneCenter(lane)), group = new T.Group(); group.position.set(p.x, p.y, p.z);
+        const mat = new T.MeshBasicMaterial({ color: LANE_COLORS[lane] });
+        for (const side of [-1, 1]) { const post = new T.Mesh(new T.BoxGeometry(.12, 5, .2), mat); post.position.set(side * 2.9, 2.5, 0); group.add(post); }
+        const top = new T.Mesh(new T.BoxGeometry(5.9, .2, .2), mat); top.position.y = 5; group.add(top);
+        const line = new T.Mesh(new T.BoxGeometry(5.8, .04, .6), mat); line.position.y = .12; group.add(line); this.quizRoad.add(group);
+      }
+    }
+    const barrier = new T.Mesh(new T.BoxGeometry(2.8, 1.1, .6), this.standard('#ffb74f', .25)); barrier.position.y = .8; this.crashObstacle.add(barrier);
+    for (const x of [-1, 0, 1]) { const stripe = new T.Mesh(new T.BoxGeometry(.3, 1.1, .64), this.standard('#18213b')); stripe.position.set(x, .8, 0); stripe.rotation.z = -.3; this.crashObstacle.add(stripe); }
+    this.scene.add(this.quizRoad, this.crashObstacle);
+  }
   private part(geometry: T.BufferGeometry, material: T.Material, offset: number[], scale = [1, 1, 1], rotation = [0, 0, 0], effect?: InstancePart['effect'], colored = false) {
     const mesh = new T.InstancedMesh(geometry, material, MAX_RACERS); mesh.instanceMatrix.setUsage(T.DynamicDrawUsage); mesh.frustumCulled = false; this.scene.add(mesh);
     this.parts.push({ mesh, offset: new T.Vector3(...offset), scale: new T.Vector3(...scale), rotation: new T.Euler(...rotation), effect, colored });
@@ -171,6 +201,9 @@ export class KartScene {
     this.frameTime += dt; this.frames++;
     if (this.frames === 180) { if (this.frameTime / this.frames > .027 && this.quality > .65) { this.quality -= .15; this.renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 1.5) * this.quality); this.size.width = 0; } this.frames = 0; this.frameTime = 0; }
     const w = this.state, me = w.players[this.selfId] || Object.values(w.players)[0]; if (!me) return;
+    this.quizRoad.visible = !!w.lesson && me.distance < QUIZ_END && !this.preview;
+    this.crashObstacle.visible = me.crash > 0;
+    if (me.crash > 0) { const impact = sampleTrack(me.distance + 2, w.course, me.x); this.crashObstacle.position.set(impact.x, impact.y, impact.z); this.crashObstacle.rotation.y = Math.atan2(impact.tx, impact.tz); }
     const racers = Object.values(w.players), age = w.phase === 'race' && !w.paused ? Math.min(.15, (now - this.received) / 1000) : 0;
     let ownPoint = sampleTrack(me.distance, w.course, me.x), ownDistance = me.distance;
     racers.forEach((p, index) => {
@@ -179,12 +212,12 @@ export class KartScene {
       const blend = 1 - Math.exp(-dt * 18); s.distance += (target - s.distance) * blend; s.x += (p.x - s.x) * blend; this.smoothed.set(p.id, s);
       const pt = sampleTrack(s.distance, w.course, s.x), jump = p.jump > 0 ? Math.sin(Math.PI * Math.min(1, p.jump / 1.3)) * 4.5 : 0;
       if (p.id === me.id) { ownPoint = pt; ownDistance = s.distance; }
-      this.car.position.set(pt.x, pt.y + jump + .07, pt.z); this.car.rotation.set(-Math.atan(pt.ty), Math.atan2(pt.tx, pt.tz) + p.steer * (p.drift ? .38 : .09), -p.steer * .045); this.car.updateMatrix();
+      this.car.position.set(pt.x, pt.y + jump + .07 + (p.crash > 0 ? Math.abs(Math.sin(p.crash * 8)) * .55 : 0), pt.z); this.car.rotation.set(-Math.atan(pt.ty), Math.atan2(pt.tx, pt.tz) + p.steer * (p.drift ? .38 : .09) + (p.crash > 0 ? (2.4 - p.crash) * Math.PI * 3 : 0), -p.steer * .045); this.car.updateMatrix();
       for (const part of this.parts) {
         this.dummy.position.copy(part.offset); this.dummy.rotation.copy(part.rotation); this.dummy.scale.copy(part.scale);
         if (part.effect === 'flame') this.dummy.scale.setScalar(p.boost > 0 ? .85 + Math.sin(now * .043 + index) * .15 : .001);
         if (part.effect === 'shield' && p.shield <= 0) this.dummy.scale.setScalar(.001);
-        if (part.effect === 'spark') { this.dummy.scale.setScalar(p.charge > .25 ? 1 + Math.sin(now * .07 + index) * .4 : .001); this.dummy.position.z -= (now / 90 + index) % 1.5; }
+        if (part.effect === 'spark') { this.dummy.scale.setScalar((p.charge > .25 || p.crash > 0) ? 1 + Math.sin(now * .07 + index) * .4 : .001); this.dummy.position.z -= (now / 90 + index) % 1.5; }
         if (part.effect === 'shadow') this.dummy.position.y -= jump;
         // Trailing cars must not sit between the chase camera and its driver.
         if (!this.preview && p.id !== me.id && p.distance < me.distance - 3) this.dummy.scale.setScalar(.001);
@@ -199,6 +232,7 @@ export class KartScene {
     } else {
       const p = ownPoint;
       target.set(p.x - p.tx * 10, p.y + 4.8 + (me.jump > 0 ? 1.8 : 0), p.z - p.tz * 10);
+      if (me.crash > 0) { target.x += Math.sin(now * .04) * .2; target.y += Math.cos(now * .035) * .15; }
       look.set(p.x + p.tx * 6, p.y + 1.3, p.z + p.tz * 6);
       const fov = 66 + Math.min(12, me.speed / 7) + (me.boost > 0 ? 6 : 0); this.camera.fov += (fov - this.camera.fov) * (1 - Math.exp(-dt * 5)); this.camera.updateProjectionMatrix();
     }
