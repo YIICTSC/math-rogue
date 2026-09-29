@@ -24,7 +24,10 @@ const requiredGuards = [
   '{DEBUG_FEATURES_ENABLED && gameState.screen === GameScreen.DEBUG_MENU',
   '{DEBUG_FEATURES_ENABLED && gameState.screen === GameScreen.MAGIC_EVENT_SIMULATION',
   '{!OFFLINE_DISTRIBUTABLE && canRunRpgOnline && gameState.rpgOnline && rpgMounted',
-  'const isRpgInviteParticipantActive = DEBUG_FEATURES_ENABLED',
+  'const isRpgInviteParticipantActive = !OFFLINE_DISTRIBUTABLE',
+  '(isDebugModeActive || (craftInviteOpen && Boolean(craftCode)))',
+  'allowHost={isDebugModeActive}',
+  'inviteCode={craftInviteOpen ? craftCode :',
   'if (gameState.screen === GameScreen.RPG_ONLINE || gameState.rpgOnline)',
 ];
 for (const guard of requiredGuards) {

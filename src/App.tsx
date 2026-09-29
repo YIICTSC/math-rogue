@@ -310,11 +310,13 @@ import {
 
 const RpgOnline = React.lazy(() => import('./rpg/RpgOnline'));
 const GakuroKart = React.lazy(() => import('./mini-games/gakuro-kart/GakuroKart'));
+const GakuroCraft = React.lazy(() => import('./mini-games/gakuro-craft/GakuroCraft'));
 import { nativeProfile, siteNode, type RpgEncounter, type RpgSnapshot } from './rpg/bridge';
 import { getRpgSiteDisplayName } from './rpg/enemyNames';
 import { isSharedSite } from './rpg/engine';
 import type { RpgRoom } from './rpg/network';
 import { getRpgRoomCodeFromUrl } from './rpg/invite';
+import { craftInviteCode } from './mini-games/gakuro-craft/invite';
 import { isRpgAdventureSetup, type RpgAdventureSetup } from './rpg/setup';
 const PARRY_WINDOW_MS = 650;
 const PARRY_PERFECT_MS = 220;
@@ -1654,6 +1656,8 @@ const App: React.FC = () => {
     const rpgInviteCode = useMemo(() => (
         typeof window === 'undefined' ? '' : getRpgRoomCodeFromUrl(window.location.href)
     ), []);
+    const craftCode = useMemo(() => typeof window === 'undefined' ? '' : craftInviteCode(window.location.href), []);
+    const [craftInviteOpen, setCraftInviteOpen] = useState(Boolean(craftCode));
     const rpgInviteParticipantRef = useRef(false);
     const rpgInviteAutoLaunchAttemptedRef = useRef(false);
     const rpgInviteSetupAppliedRef = useRef(false);
@@ -2585,6 +2589,16 @@ const App: React.FC = () => {
     // what activates the rest of the debug surface for the current session.
     const [isDebugMode, setIsDebugMode] = useState(false);
     const isDebugModeActive = DEBUG_FEATURES_ENABLED && isDebugMode;
+    useEffect(() => {
+        if (craftInviteOpen && !OFFLINE_DISTRIBUTABLE) {
+            setGameState(prev => prev.screen === GameScreen.GAKURO_CRAFT ? prev : { ...prev, screen: GameScreen.GAKURO_CRAFT });
+        }
+    }, [craftInviteOpen]);
+    useEffect(() => {
+        if (!isDebugModeActive && !craftInviteOpen && gameState.screen === GameScreen.GAKURO_CRAFT) {
+            setGameState(prev => ({ ...prev, screen: GameScreen.START_MENU }));
+        }
+    }, [isDebugModeActive, craftInviteOpen, gameState.screen]);
     const isRpgInviteParticipantActive = !OFFLINE_DISTRIBUTABLE
         && Boolean(rpgInviteCode)
         && rpgInviteParticipantRef.current
@@ -19609,7 +19623,7 @@ const App: React.FC = () => {
                                 </div>
 
                                 {!OFFLINE_DISTRIBUTABLE && isDebugModeActive && (
-                                    <div className="grid w-full grid-cols-2 gap-2">
+                                    <div className="start-menu-online-games grid w-full grid-cols-3 gap-2">
                                         <button
                                             disabled={!rpgInviteCode && (isAssignmentChallengeOnlyLocked || isDailyLimitReached)}
                                             onClick={() => {
@@ -19638,6 +19652,21 @@ const App: React.FC = () => {
                                         >
                                             <span className="flex items-center gap-1"><Users size={15} /> {trans("スーパー学ロカート", languageMode)}</span>
                                             <span className="text-[10px] opacity-70">{trans("40人オンラインレース", languageMode)}</span>
+                                        </button>
+                                        <button
+                                            disabled={isAssignmentChallengeOnlyLocked || isDailyLimitReached}
+                                            onClick={() => {
+                                                if (!isDebugModeActive || redirectToAssignmentChallengeIfLocked()) return;
+                                                if (isDailyLimitReached) { setShowTimeLimitModal(true); return; }
+                                                setPendingAssignmentStartScreen(GameScreen.GAKURO_CRAFT);
+                                                if (showDailyAssignmentNoticeForProblemSelection()) return;
+                                                setPendingAssignmentStartScreen(null);
+                                                setGameState(prev => ({ ...prev, screen: GameScreen.GAKURO_CRAFT }));
+                                            }}
+                                            className="min-w-0 px-2 py-3 text-xs font-bold border border-amber-400/60 bg-emerald-950 text-amber-100 hover:bg-emerald-900 flex flex-col items-center justify-center gap-1 disabled:opacity-40"
+                                        >
+                                            <span className="flex items-center gap-1"><Users size={15} /> {trans("学ロクラフト", languageMode)}</span>
+                                            <span className="text-[10px] opacity-70">{trans("40人で島づくり", languageMode)}</span>
                                         </button>
                                     </div>
                                 )}
@@ -21271,6 +21300,12 @@ const App: React.FC = () => {
                 {!OFFLINE_DISTRIBUTABLE && isDebugModeActive && gameState.screen === GameScreen.GAKURO_KART && (
                     <React.Suspense fallback={<div className="fixed inset-0 z-50 grid place-items-center bg-slate-950 text-amber-100">{trans("コースを準備しています…", languageMode)}</div>}>
                         <GakuroKart languageMode={languageMode} onClose={returnToTitle} />
+                    </React.Suspense>
+                )}
+
+                {!OFFLINE_DISTRIBUTABLE && (isDebugModeActive || (craftInviteOpen && Boolean(craftCode))) && (gameState.screen === GameScreen.GAKURO_CRAFT || craftInviteOpen) && (
+                    <React.Suspense fallback={<div className="fixed inset-0 z-[160] grid place-items-center bg-emerald-950 text-amber-100">{trans("島と問題を準備中…", languageMode)}</div>}>
+                        <GakuroCraft languageMode={languageMode} allowHost={isDebugModeActive} inviteCode={craftInviteOpen ? craftCode : ''} onClose={() => { setCraftInviteOpen(false); returnToTitle(); }} />
                     </React.Suspense>
                 )}
 

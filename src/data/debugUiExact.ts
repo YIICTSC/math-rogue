@@ -1,7 +1,9 @@
 import { KART_ENGLISH, KART_HIRAGANA } from '../mini-games/gakuro-kart/copy';
+import { CRAFT_ENGLISH, CRAFT_HIRAGANA } from '../mini-games/gakuro-craft/copy';
 
 export const ENGLISH_DEBUG_UI_EXACT: Record<string, string> = {
   ...KART_ENGLISH,
+  ...CRAFT_ENGLISH,
   'シーンを開始できませんでした。部屋に入り直してください。': 'The scene could not start. Please rejoin the room.',
   '部屋を作る': 'Create a room',
   '招待URLをコピー': 'Copy invite URL',
@@ -210,6 +212,7 @@ export const ENGLISH_DEBUG_UI_EXACT: Record<string, string> = {
 
 export const HIRAGANA_DEBUG_UI_EXACT: Record<string, string> = {
   ...KART_HIRAGANA,
+  ...CRAFT_HIRAGANA,
   'シーンを開始できませんでした。部屋に入り直してください。': 'シーンを はじめられませんでした。へやに はいりなおしてください。',
   '部屋を作る': 'へやを つくる',
   '招待URLをコピー': 'しょうたいURLを コピー',
