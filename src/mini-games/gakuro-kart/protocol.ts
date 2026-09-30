@@ -1,19 +1,21 @@
+import { COURSES } from './track';
+import { validAvatar } from './avatar';
 import { validLesson, type KartLesson } from './learning';
 import { createRace, MAX_RACERS, type Race, type Racer, type Item } from './engine';
-export const PROTOCOL = 4;
+export const PROTOCOL = 8;
 const phases: Race['phase'][] = ['lobby', 'countdown', 'race', 'result'];
 const items: (Item | null)[] = [null, 'nitro', 'shield', 'pulse', 'rocket'];
 const HEADER = 32, STRIDE = 56;
-export type Roster = { type: 'roster'; lesson: KartLesson | null; version: number; revision: number; course: number; seed: number; players: Pick<Racer, 'id' | 'slot' | 'name' | 'hero' | 'cpu'>[] };
+export type Roster = { type: 'roster'; lesson: KartLesson | null; version: number; revision: number; course: number; seed: number; players: Pick<Racer, 'id' | 'slot' | 'name' | 'hero' | 'cpu' | 'avatar'>[] };
 export function roster(w: Race): Roster {
-  return { type: 'roster', lesson: w.lesson, version: PROTOCOL, revision: w.revision, course: w.course, seed: w.seed, players: Object.values(w.players).map(({ id, slot, name, hero, cpu }) => ({ id, slot, name, hero, cpu })) };
+  return { type: 'roster', lesson: w.lesson, version: PROTOCOL, revision: w.revision, course: w.course, seed: w.seed, players: Object.values(w.players).map(({ id, slot, name, hero, cpu, avatar }) => ({ id, slot, name, hero, cpu, avatar })) };
 }
 export function acceptRoster(r: Roster, previous: Race | null): Race | null {
-  if (r.version !== PROTOCOL || !Number.isInteger(r.revision) || r.revision < 0 || !Number.isInteger(r.course) || r.course < 0 || r.course > 2 || !Array.isArray(r.players) || r.players.length > MAX_RACERS) return null;
+  if (r.version !== PROTOCOL || !Number.isInteger(r.revision) || r.revision < 0 || !Number.isInteger(r.course) || r.course < 0 || r.course >= COURSES.length || !Array.isArray(r.players) || r.players.length > MAX_RACERS) return null;
   if (r.lesson !== null && !validLesson(r.lesson)) return null;
   const slots = new Set<number>(), ids = new Set<string>();
   for (const p of r.players) {
-    if (!p || typeof p.id !== 'string' || p.id.length > 100 || typeof p.name !== 'string' || p.name.length > 16 || !Number.isInteger(p.slot) || p.slot < 0 || p.slot >= MAX_RACERS || slots.has(p.slot) || ids.has(p.id) || !Number.isInteger(p.hero) || p.hero < 0 || p.hero > 2 || typeof p.cpu !== 'boolean') return null;
+    if (!p || typeof p.id !== 'string' || p.id.length > 100 || typeof p.name !== 'string' || p.name.length > 16 || !Number.isInteger(p.slot) || p.slot < 0 || p.slot >= MAX_RACERS || slots.has(p.slot) || ids.has(p.id) || !Number.isInteger(p.hero) || p.hero < 0 || p.hero > 2 || typeof p.cpu !== 'boolean' || !validAvatar(p.avatar)) return null;
     slots.add(p.slot); ids.add(p.id);
   }
   if (previous && r.revision < previous.revision) return null;

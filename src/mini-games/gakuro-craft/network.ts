@@ -1,8 +1,10 @@
 import Peer, { type DataConnection, type PeerOptions } from 'peerjs';
-import { addPlayer, applyCommand, CAPACITY, createWorld, MATERIALS, QuizBank, SIZE, tick, type Command, type Player, type Reply, type Tile, type World } from './engine';
+import { addPlayer, applyCommand, BUILDINGS, CAPACITY, createWorld, MATERIALS, QuizBank, SIZE, tick, type Command, type Player, type Reply, type Tile, type World } from './engine';
 import type { KartQuestion } from '../gakuro-kart/learning';
 import { normalizeCraftCode } from './invite';
-export const CRAFT_PROTOCOL = 1;
+import { avatarOf, type Avatar } from './avatar';
+import { migrateProgress } from './progression';
+export const CRAFT_PROTOCOL = 4;
 type Link = { channel: DataConnection; revision: number; admitted: boolean; rateAt: number; count: number };
 export const SAVE_KEY = 'gakuro-craft-island-v1';
 type Saved = { version: 1; world: World; owner: string; player: Player };
@@ -10,13 +12,15 @@ export function loadIsland(): Saved | null {
   try {
     const raw = localStorage.getItem(SAVE_KEY); if (!raw || raw.length > 2000000) return null;
     const s = JSON.parse(raw) as Saved, w = s.world;
+    if(w){w.villageLevel=Number.isInteger(w.villageLevel)&&w.villageLevel>=0&&w.villageLevel<=4?w.villageLevel:0;w.builtSites=Array.isArray(w.builtSites)?[...new Set(w.builtSites.filter(i=>Number.isInteger(i)&&i>=0&&i<1600))]:w.tiles?.flatMap((t,i)=>t.blocks?.length?[i]:[])||[];w.residents=w.residents&&typeof w.residents==='object'&&!Array.isArray(w.residents)?w.residents:{};for(const [key,r]of Object.entries(w.residents)){if(!r||!r.bag||!MATERIALS.every(k=>Number.isFinite(r.bag[k])&&r.bag[k]>=0)||!Number.isFinite(r.coins)||r.coins<0){delete w.residents[key];continue;}r.progress=migrateProgress(r.progress);r.energy=Number.isFinite(r.energy)?Math.max(0,Math.min(100,r.energy)):100;}}
+    if(s.player?.bag){s.player.progress=migrateProgress(s.player.progress);for(const k of MATERIALS.slice(10))if(s.player.bag[k]===undefined)s.player.bag[k]=0;s.player.avatar=avatarOf(s.player.avatar,s.player.color);s.player.coins=Number.isFinite(s.player.coins)?Math.max(0,s.player.coins):0;s.player.buffUntil=Number.isFinite(s.player.buffUntil)?s.player.buffUntil:0;}
     if (s.version !== 1 || !w || !Number.isFinite(w.time) || w.time < 0 || !Number.isInteger(w.seed) || !Number.isInteger(w.revision) || !Array.isArray(w.tiles) || w.tiles.length !== SIZE * SIZE || !s.player || !MATERIALS.every(k => Number.isFinite(s.player.bag[k]) && s.player.bag[k] >= 0)) return null;
-    if (!w.tiles.every(t => ['grass', 'sand', 'water'].includes(t.ground) && [null, 'tree', 'rock'].includes(t.nature) && Array.isArray(t.blocks) && t.blocks.length <= 4 && t.blocks.every(b => ['plank', 'brick', 'flower', 'lamp', 'bench'].includes(b)) && (t.crop === null || Number.isFinite(t.crop)) && Number.isFinite(t.regrow) && Number.isInteger(t.revision))) return null;
+    if (!w.tiles.every(t => ['grass', 'sand', 'water'].includes(t.ground) && [null, 'tree', 'rock'].includes(t.nature) && Array.isArray(t.blocks) && t.blocks.length <= 4 && t.blocks.every(b => BUILDINGS.includes(b)) && (t.crop === null || Number.isFinite(t.crop)) && Number.isFinite(t.regrow) && Number.isInteger(t.revision))) return null;
     return s;
   } catch { return null; }
 }
 export class CraftRoom {
-  selfId = 'local'; code = ''; host = false; world: World | null = null; title = '';
+  profileId:string=crypto.randomUUID();selfId = 'local'; code = ''; host = false; world: World | null = null; title = '';
   private peer: Peer | null = null; private links = new Map<string, Link>(); private bank: QuizBank | null = null;
   private timer: ReturnType<typeof setInterval> | null = null; private closed = false; private lastPacket = 0; private pending = new Set<ReturnType<typeof setTimeout>>();
   private loading: World | null = null; private loadedTiles = new Set<number>(); private savedAt = 0;
@@ -26,8 +30,8 @@ export class CraftRoom {
   private cancel(t: ReturnType<typeof setTimeout>) { clearTimeout(t); this.pending.delete(t); }
   private snapshot(id: string) {
     const w = this.world!;
-    return { type: 'state', time: w.time, paused: w.paused, revision: w.revision, donated: w.donated, harvested: w.harvested, built: w.built,
-      players: Object.values(w.players).map(p => [p.id, p.name, p.color, +p.x.toFixed(3), +p.z.toFixed(3), +p.energy.toFixed(2), p.correct, p.actions]), bag: w.players[id]?.bag };
+    return { type: 'state', time: w.time, paused: w.paused, revision: w.revision, donated: w.donated, harvested: w.harvested, built: w.built,villageLevel:w.villageLevel,builtSites:w.builtSites,progress:w.players[id]?.progress,
+      players: Object.values(w.players).map(p => [p.id, p.name, p.color, +p.x.toFixed(3), +p.z.toFixed(3), +p.energy.toFixed(2), p.correct, p.actions, p.avatar, p.lastAction, p.buffUntil, p.fishing,p.indoors]), coins: w.players[id]?.coins, bag: w.players[id]?.bag };
   }
   private emit() {
     if (!this.world || this.closed) return;
@@ -50,18 +54,18 @@ export class CraftRoom {
       if (broadcast >= .15) { broadcast = 0; this.emit(); }
     }, 50); this.emit();
   }
-  private setup(name: string, color: number, questions: KartQuestion[], title: string, resume: boolean) {
-    const saved = resume ? loadIsland() : null;
+  private setup(name: string, color: number, questions: KartQuestion[], title: string, resume: boolean, avatar?: Avatar) {
+    const saved = resume ? loadIsland() : null;if(saved?.player.profileId&& /^[A-Za-z0-9-]{8,64}$/.test(saved.player.profileId))this.profileId=saved.player.profileId;
     this.world = saved ? { ...saved.world, players: {}, paused: false } : createWorld(crypto.getRandomValues(new Uint32Array(1))[0]);
-    this.title = title; this.bank = new QuizBank(questions); addPlayer(this.world, this.selfId, name, color);
+    this.title = title; this.bank = new QuizBank(questions); addPlayer(this.world, this.selfId, name, color, avatar,this.profileId);
     if (saved) {
-      const p = this.world.players[this.selfId]; p.bag = { ...saved.player.bag }; p.energy = Math.max(0, Math.min(100, saved.player.energy || 0)); p.correct = saved.player.correct || 0;
+      const p = this.world.players[this.selfId]; p.bag = { ...saved.player.bag }; p.energy = Math.max(0, Math.min(100, saved.player.energy || 0)); p.correct = saved.player.correct || 0; p.coins=saved.player.coins||0;p.progress=migrateProgress(saved.player.progress);
       // Reopened islands retain buildings; the new room owner can maintain them.
-      for (const t of this.world.tiles) if (t.owner) t.owner = this.selfId;
+      if(!Object.keys(saved.world.residents).length)for (const t of this.world.tiles) if (t.owner) t.owner = this.selfId;
     }
     this.run();
   }
-  practice(name: string, color: number, questions: KartQuestion[], title: string, resume = false) { this.host = true; this.setup(name, color, questions, title, resume); }
+  practice(name: string, color: number, questions: KartQuestion[], title: string, resume = false, avatar?: Avatar) { this.host = true; this.setup(name, color, questions, title, resume, avatar); }
   private async open(id?: string) {
     const env = import.meta.env;
     const options: PeerOptions = env.VITE_RPG_PEER_HOST ? { host: env.VITE_RPG_PEER_HOST, port: Number(env.VITE_RPG_PEER_PORT || 443), path: env.VITE_RPG_PEER_PATH || '/', secure: env.VITE_RPG_PEER_SECURE !== 'false' } : {};
@@ -75,9 +79,9 @@ export class CraftRoom {
     peer.on('error', () => { if (!this.closed) this.status('通信エラーが発生しました。'); });
     peer.on('disconnected', () => { if (!this.closed && !peer.destroyed) peer.reconnect(); }); this.selfId = peer.id; return peer;
   }
-  async create(name: string, color: number, questions: KartQuestion[], title: string, resume = false) {
+  async create(name: string, color: number, questions: KartQuestion[], title: string, resume = false, avatar?: Avatar) {
     this.host = true; const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; this.code = Array.from(crypto.getRandomValues(new Uint8Array(6)), n => alphabet[n % alphabet.length]).join('');
-    const peer = await this.open(`gakuro-craft-v${CRAFT_PROTOCOL}-${this.code}`); this.setup(name, color, questions, title, resume);
+    const peer = await this.open(`gakuro-craft-v${CRAFT_PROTOCOL}-${this.code}`); this.setup(name, color, questions, title, resume, avatar);
     peer.on('connection', channel => {
       const reject = () => { const send = () => { this.send(channel, { type: 'error', text: '部屋が満員か、参加できません。' }); this.later(() => channel.close(), 300); }; if (channel.open) send(); else channel.once('open', send); };
       if (this.closed || this.links.size >= CAPACITY - 1 || this.links.has(channel.peer)) { reject(); return; }
@@ -88,24 +92,24 @@ export class CraftRoom {
         let d: any; try { d = JSON.parse(raw); } catch { return; } if (!d || typeof d !== 'object') return;
         const now = performance.now(); if (now - link.rateAt > 1000) { link.rateAt = now; link.count = 0; } if (++link.count > 35) return;
         if (d.type === 'hello' && !link.admitted) {
-          if (d.version !== CRAFT_PROTOCOL || typeof d.name !== 'string' || !addPlayer(this.world, channel.peer, d.name, d.color)) { reject(); return; }
+          if (d.version !== CRAFT_PROTOCOL || typeof d.name !== 'string'||typeof d.profileId!=='string'||! /^[A-Za-z0-9-]{8,64}$/.test(d.profileId) || !addPlayer(this.world, channel.peer, d.name, d.color, avatarOf(d.avatar,d.color),d.profileId)) { reject(); return; }
           this.cancel(deadline); link.admitted = true;
           this.send(channel, { type: 'init', version: CRAFT_PROTOCOL, seed: this.world.seed, title: this.title });
           for (let start = 0; start < this.world.tiles.length; start += 64) this.send(channel, { type: 'tiles', entries: this.world.tiles.slice(start, start + 64).map((t, i) => [start + i, t]) });
           link.revision = this.world.revision; this.send(channel, this.snapshot(channel.peer)); this.emit();
         } else if (d.type === 'command' && link.admitted) { const reply = this.execute(channel.peer, d.command); if (reply) this.send(channel, { type: 'reply', reply }); }
       });
-      let dropped = false; const drop = () => { if (dropped) return; dropped = true; this.cancel(deadline); this.links.delete(channel.peer); this.bank?.forget(channel.peer); if (this.world) { delete this.world.players[channel.peer]; this.emit(); } };
+      let dropped = false; const drop = () => { if (dropped) return; dropped = true; this.cancel(deadline); this.links.delete(channel.peer); this.bank?.forget(channel.peer); if (this.world) { this.remember(channel.peer);delete this.world.players[channel.peer]; this.emit(); } };
       channel.on('close', drop); channel.on('error', drop);
     });
   }
-  async join(code: string, name: string, color: number) {
+  async join(code: string, name: string, color: number, avatar?: Avatar) {
     this.code = normalizeCraftCode(code); if (!this.code) throw new Error('6文字の招待コードを入力してください。');
     const peer = await this.open(), channel = peer.connect(`gakuro-craft-v${CRAFT_PROTOCOL}-${this.code}`, { reliable: true, serialization: 'raw' });
     this.links.set('host', { channel, revision: -1, admitted: true, rateAt: 0, count: 0 });
     await new Promise<void>((resolve, reject) => {
       let joined = false; const deadline = this.later(() => reject(new Error('部屋が見つからないか、接続できません。')), 20000);
-      channel.on('open', () => this.send(channel, { type: 'hello', version: CRAFT_PROTOCOL, name: name.slice(0, 16), color }));
+      channel.on('open', () => this.send(channel, { type: 'hello', version: CRAFT_PROTOCOL, name: name.slice(0, 16), color, avatar,profileId:this.profileId }));
       channel.on('data', raw => {
         if (this.closed || typeof raw !== 'string' || raw.length > 100000) return;
         let d: any; try { d = JSON.parse(raw); } catch { return; } if (!d || typeof d !== 'object') return;
@@ -117,10 +121,10 @@ export class CraftRoom {
         }
         if (d.type === 'state' && Array.isArray(d.players) && d.players.length <= CAPACITY && this.loadedTiles.size === SIZE * SIZE) {
           const world = this.loading || this.world; if (!world || !Number.isFinite(d.time) || !d.players.some((p: any) => p[0] === this.selfId)) return;
-          world.time = d.time; world.paused = !!d.paused; world.revision = d.revision; world.donated = d.donated; world.harvested = d.harvested; world.built = d.built;
+          world.time = d.time; world.paused = !!d.paused; world.revision = d.revision; world.donated = d.donated; world.harvested = d.harvested; world.built = d.built;world.villageLevel=d.villageLevel||0;world.builtSites=Array.isArray(d.builtSites)?d.builtSites:[];
           const players: Record<string, Player> = {};
-          for (const row of d.players) { const [id, name, color, x, z, energy, correct, actions] = row; if (typeof id !== 'string' || ![x, z, energy].every(Number.isFinite)) return;
-            players[id] = { id, name: String(name).slice(0, 16), color, x, z, energy, correct, actions, bag: id === this.selfId ? d.bag : Object.fromEntries(MATERIALS.map(k => [k, 0])), dx: 0, dz: 0, actionAt: 0, inputAt: 0 } as Player;
+          for (const row of d.players) { const [id, name, color, x, z, energy, correct, actions, avatar, lastAction, buffUntil, fishing,indoors] = row; if (typeof id !== 'string' || ![x, z, energy].every(Number.isFinite)) return;
+            players[id] = { id,profileId:id===this.selfId?this.profileId:'',progress:id===this.selfId?migrateProgress(d.progress):migrateProgress(null),indoors:!!indoors, name: String(name).slice(0, 16), color, x, z, energy, correct, actions, avatar:avatarOf(avatar,color),lastAction,fishing,buffUntil:buffUntil||0,coins:id===this.selfId?d.coins||0:0, bag: id === this.selfId ? d.bag : Object.fromEntries(MATERIALS.map(k => [k, 0])), dx: 0, dz: 0, actionAt: 0, inputAt: 0 } as Player;
           }
           world.players = players; this.world = world; this.loading = null; this.lastPacket = performance.now(); this.update(structuredClone(world)); this.cancel(deadline); joined = true; resolve();
         }
@@ -143,9 +147,10 @@ export class CraftRoom {
     if (this.host) { const reply = this.execute(this.selfId, command); if (reply) this.event(reply); }
     else { const link = this.links.get('host'); if (link && (link.channel.dataChannel?.bufferedAmount || 0) < 8192) this.send(link.channel, { type: 'command', command }); }
   }
+  private remember(id:string){const p=this.world?.players[id];if(p&&this.world)this.world.residents[p.profileId]={id:p.id,bag:{...p.bag},coins:p.coins,energy:p.energy,correct:p.correct,progress:structuredClone(p.progress)};}
   save() {
     if (!this.host || !this.world || !this.world.players[this.selfId]) return false;
-    try { localStorage.setItem(SAVE_KEY, JSON.stringify({ version: 1, world: { ...this.world, players: {} }, owner: this.selfId, player: this.world.players[this.selfId] })); return true; }
+    try {for(const id of Object.keys(this.world.players))this.remember(id); localStorage.setItem(SAVE_KEY, JSON.stringify({ version: 1, world: { ...this.world, players: {} }, owner: this.selfId, player: this.world.players[this.selfId] })); return true; }
     catch { this.status('島を保存できませんでした。端末の空き容量を確認してください。'); return false; }
   }
   close() {

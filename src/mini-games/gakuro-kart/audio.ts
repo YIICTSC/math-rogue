@@ -72,7 +72,7 @@ export class KartAudio {
   update(w: Race | null, id: string) {
     if (!this.context || !this.motor || !this.motorGain) return;
     if (w && w.seed !== this.seed) { this.seed = w.seed; this.boost = false; this.item = false; this.lastAnswers = 0; this.lastQuizLap = -1; this.lastCrash = false; this.lastSlow = false; this.lastLap = 0; this.finished = false; this.lastJump = false; this.lastDistance = 0; this.lastSpeed = 0; }
-    const p = w?.players[id], racing = w?.phase === 'race' && !w.paused && p && !p.finish && !document.hidden;
+    const p = w?.players[id], racing = w?.phase === 'race' && !w.paused && p && !document.hidden;
     this.motor.frequency.setTargetAtTime(racing ? 52 + (p.speed % 19) * 3 + Math.floor(p.speed / 19) * 17 : 40, this.context.currentTime, .06);
     this.motorGain.gain.setTargetAtTime(racing ? (p.crash ? .035 : .13 + p.speed / 1400) : 0, this.context.currentTime, .08);
     this.filter?.frequency.setTargetAtTime(racing ? 500 + p.speed * 14 : 450, this.context.currentTime, .08);

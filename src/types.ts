@@ -378,6 +378,7 @@ export interface MagicRuleState {
 }
 
 export interface Player {
+  rpgMutationRevision?: number;
   id?: string;
   appearanceMode?: CharacterAppearanceMode;
   magicProtagonistId?: string;

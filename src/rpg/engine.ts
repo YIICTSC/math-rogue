@@ -1,3 +1,5 @@
+import type { Card } from '../types';
+import { createActivities, advanceActivities, applyActivity, activityBusy, acceptProfile, leaveActivities, type Activities, type ActivityAction, type Mutation } from './activities';
 import { cloneRpgAdventureSetup, type RpgAdventureSetup } from "./setup";
 import { getEncounterEnemyNamePool } from "../services/geminiService";
 import type { VisualThemeId } from "../data/visualThemes";
@@ -13,7 +15,8 @@ export type SiteKind =
   | "treasure"
   | "enemy"
   | "guardian"
-  | "boss";
+  | "boss"
+  | "dungeon" | "fragment" | "secret" | "seal";
 export type BonusRankingKind =
   | "BATTLES"
   | "TREASURES"
@@ -43,6 +46,8 @@ export interface Site {
   cleared: boolean;
   raidSize?: number;
   nativeInitialized?: boolean;
+  bossPhase?: 1 | 2;
+  eventNumber?: number;
   enemyNamesByTheme?: Record<VisualThemeId, string>;
 }
 export interface NativeProfile {
@@ -53,6 +58,9 @@ export interface NativeProfile {
   image: string;
   deckSize: number;
   correctAnswers?: number;
+  deck?: Card[];
+  mutationRevision?: number;
+  visualTheme?: VisualThemeId;
 }
 export interface NativeScene {
   token: string;
@@ -82,9 +90,16 @@ export interface Adventurer {
   interactionCount: number;
   siteUses: Record<string, number>;
   nativeScene?: NativeScene;
+  mutationRevision?: number;
+  mutations?: Mutation[];
+  dungeonId?: string;
+  arcadeUses?: number;
+  arcadeResult?: string;
+  arcadePending?: {token:string;siteId:string;game:"FLIP"|"ROULETTE"|"SLOT";choice:number;roll:number};
 }
 export interface World {
   nativeMode: true;
+  activities: Activities;
   seed: number;
   setup?: RpgAdventureSetup;
   tiles: Tile[];
@@ -102,12 +117,18 @@ export interface World {
   bonusRankingKind: BonusRankingKind;
   revision: number;
 }
-export type Action =
+export type Action = ActivityAction
   | { type: "move"; dx: number; dy: number }
   | { type: "team"; target: string | null }
   | { type: "native-enter"; siteId: string }
   | { type: "native-ready"; token: string; maxHp: number }
-  | { type: "native-damage"; token: string; total: number; sequence: number }
+  | {
+      type: "native-damage";
+      token: string;
+      total: number;
+      sequence: number;
+      phase?: 1 | 2;
+    }
   | {
       type: "native-finish";
       token: string;
@@ -115,6 +136,7 @@ export type Action =
       profile: NativeProfile;
       battleDamage?: number;
     }
+  | { type: "native-learning"; correctAnswers:number }
   | { type: "native-profile"; profile: NativeProfile };
 export function random(seed: number) {
   let n = seed >>> 0;
@@ -139,7 +161,7 @@ export function siteUnavailable(
   p: Adventurer,
   s: Site,
 ): string | null {
-  if (p.nativeScene) return "現在のシーンを完了してください。";
+  if (p.nativeScene || activityBusy(w,p)) return "現在のシーンを完了してください。";
   if (w.ended)
     return w.endReason === "timeout" ? "時間切れ！" : "校長を倒しました！";
   if (w.won) return "校長を倒しました！";
@@ -159,7 +181,7 @@ export function siteUnavailable(
     return "3体の試験官を倒すと校長の結界が解除されます。";
   return null;
 }
-function validProfile(profile: NativeProfile): boolean {
+export function validProfile(profile: NativeProfile): boolean {
   return (
     !!profile &&
     [profile.hp, profile.maxHp, profile.gold, profile.deckSize].every(
@@ -169,6 +191,8 @@ function validProfile(profile: NativeProfile): boolean {
     profile.hp >= 0 &&
     profile.hp <= profile.maxHp &&
     profile.gold >= 0 &&
+    Number.isInteger(profile.deckSize) && profile.deckSize >= 0 &&
+    (profile.deck === undefined || (Array.isArray(profile.deck) && profile.deck.length === profile.deckSize && profile.deck.length <= 500 && new Set(profile.deck.map(c=>c?.id)).size === profile.deck.length && profile.deck.every(c=>c && typeof c.id==='string' && typeof c.name==='string' && typeof c.description==='string' && Number.isFinite(c.cost)))) &&
     typeof profile.character === "string" &&
     typeof profile.image === "string" &&
     (profile.correctAnswers === undefined ||
@@ -205,9 +229,13 @@ function applyNativeAction(
   tell: (message: string) => boolean,
 ): boolean {
   if (w.ended && action.type !== "native-finish") return false;
+  if(action.type === "native-learning") {
+    if(!Number.isSafeInteger(action.correctAnswers)||action.correctAnswers<p.correctAnswers)return false;
+    p.correctAnswers=action.correctAnswers;w.revision++;return true;
+  }
   if (action.type === "native-profile") {
-    if (p.nativeScene || !validProfile(action.profile)) return false;
-    p.profile = action.profile;
+    if (p.nativeScene || !validProfile(action.profile) || !acceptProfile(p,action.profile)) return false;
+    p.profile = {...action.profile,visualTheme:action.profile.visualTheme || p.profile?.visualTheme};
     p.hp = action.profile.hp;
     p.maxHp = action.profile.maxHp;
     p.gold = action.profile.gold;
@@ -221,7 +249,7 @@ function applyNativeAction(
   }
   if (action.type === "native-enter") {
     const site = w.sites.find((s) => s.id === action.siteId);
-    if (!site || distance(site, p) > 2) return false;
+    if (!site || !["enemy","guardian","boss","town","rest","event","treasure"].includes(site.kind) || distance(site, p) > 2) return false;
     const reason = siteUnavailable(w, p, site);
     if (reason) return tell(reason);
     if (["town", "rest", "event"].includes(site.kind))
@@ -262,6 +290,7 @@ function applyNativeAction(
         action.maxHp *
           (site.kind === "boss" ? Math.max(1, site.raidSize || 1) : 1),
       );
+      if (site.kind === "boss") site.bossPhase = 1;
       site.nativeInitialized = true;
     }
     w.revision++;
@@ -277,15 +306,29 @@ function applyNativeAction(
       action.sequence <= scene.sequence
     )
       return false;
+    if (site.kind === "boss" && action.phase !== site.bossPhase)
+      return false;
     const delta = action.total - scene.damage;
     scene.damage = action.total;
     scene.sequence = action.sequence;
     p.totalDamage = (p.totalDamage || 0) + Math.max(0, Math.floor(delta));
     site.hp = Math.max(0, Math.min(site.maxHp, site.hp - delta));
     if (site.hp === 0) {
-      site.cleared = true;
-      log(w, `${site.name}を討伐！`);
-      if (site.kind === "boss") {
+      if (site.kind === "boss" && site.bossPhase === 1) {
+        site.bossPhase = 2;
+        site.hp = site.maxHp;
+        for (const player of Object.values(w.players)) {
+          if (player.nativeScene?.siteId === site.id) {
+            player.nativeScene.damage = 0;
+          }
+        }
+        const headmasterTitle = w.setup?.visualTheme === "magic" ? "大魔女校長" : "校長先生";
+        log(w, `${headmasterTitle}が真の姿を現した！`);
+      } else {
+        site.cleared = true;
+        log(w, `${site.name}を討伐！`);
+      }
+      if (site.kind === "boss" && site.cleared) {
         w.won = true;
         endWorld(w, "clear");
       }
@@ -296,7 +339,7 @@ function applyNativeAction(
   if (action.type === "native-finish") {
     if (
       !validProfile(action.profile) ||
-      !["complete", "victory", "defeat"].includes(action.outcome)
+      !["complete", "victory", "defeat"].includes(action.outcome) || !acceptProfile(p,action.profile)
     )
       return false;
     if (
@@ -314,7 +357,7 @@ function applyNativeAction(
     if (Number.isFinite(action.battleDamage) && action.battleDamage! >= 0)
       p.totalDamage =
         (p.totalDamage || 0) + Math.floor(action.battleDamage!);
-    p.profile = action.profile;
+    p.profile = {...action.profile,visualTheme:action.profile.visualTheme || p.profile?.visualTheme};
     p.hp = action.profile.hp;
     p.maxHp = action.profile.maxHp;
     p.gold = action.profile.gold;
@@ -379,16 +422,26 @@ export function createWorld(
   add("guardian", "水辺の試験官", 39, 32 + Math.floor(rng() * 4));
   add("guardian", "遺跡の試験官", 51, 9 + Math.floor(rng() * 4));
   add("boss", "校長の時計塔", 55, 5);
+  add("dungeon", "森の協力ダンジョン", 18, 19);
+  add("dungeon", "星の協力ダンジョン", 47, 27);
+  add("fragment", "地図の断片", 7, 22);
+  add("fragment", "地図の断片", 27, 10);
+  add("fragment", "地図の断片", 54, 34);
+  add("secret", "封印された秘密の遺跡", 57, 21);
+  add("seal", "森の封印装置", 17, 7);
+  add("seal", "水辺の封印装置", 35, 23);
+  add("seal", "遺跡の封印装置", 48, 6);
   const activeTheme = setup?.visualTheme || "elementary";
   const themes: VisualThemeId[] = ["elementary", "high-school", "magic"];
   for (let i = 0; i < 23; i++) {
     const kind = i % 5 === 0 ? "treasure" : i % 4 === 0 ? "event" : "enemy";
-    let x = 0,
-      y = 0;
-    do {
-      x = 4 + Math.floor(rng() * 55);
-      y = 5 + Math.floor(rng() * 35);
-    } while (sites.some((s) => distance(s, { x, y }) < 5));
+    let candidates: Array<{x:number;y:number}> = [];
+    for (const spacing of [5, 3, 1]) {
+      for(let y=5;y<40;y++) for(let x=4;x<59;x++)
+        if(sites.every(s=>distance(s,{x,y})>=spacing))candidates.push({x,y});
+      if(candidates.length)break;
+    }
+    const {x,y}=candidates[Math.floor(rng()*candidates.length)];
     const enemyNamesByTheme = kind === "enemy"
       ? Object.fromEntries(themes.map((theme) => {
           const names = getEncounterEnemyNamePool(theme);
@@ -428,6 +481,7 @@ export function createWorld(
   );
   return {
     nativeMode: true,
+    activities: createActivities(),
     seed,
     ...(setup ? { setup: cloneRpgAdventureSetup(setup) } : {}),
     tiles,
@@ -475,6 +529,7 @@ export function addPlayer(w: World, id: string, name: string) {
 }
 export function removePlayer(w: World, id: string) {
   if (!w.players[id]) return;
+  leaveActivities(w,id);
   log(w, `${w.players[id].name}が退出。`);
   delete w.players[id];
   for (const p of Object.values(w.players))
@@ -510,7 +565,9 @@ export function applyAction(
   };
   if (action.type.startsWith("native-"))
     return applyNativeAction(w, p, action, tell);
-  if (w.ended || p.nativeScene) return false;
+  if (action.type.startsWith("trade-") || action.type.startsWith("dungeon-") || action.type === "arcade-play" || action.type === "arcade-finish" || action.type === "secret-search")
+    return applyActivity(w,p,action as ActivityAction,now);
+  if (w.ended || p.nativeScene || activityBusy(w,p)) return false;
   if (action.type === "move") {
     if (
       !Number.isInteger(action.dx) ||
@@ -620,6 +677,7 @@ function endWorld(w: World, reason: RpgEndReason, now = Date.now()) {
 
 export function advanceWorld(w: World, now = Date.now()) {
   if (!w.ended && now >= w.deadlineAt) endWorld(w, "timeout", now);
+  advanceActivities(w,now);
   if (
     w.ended &&
     w.rewardAt !== null &&

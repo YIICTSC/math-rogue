@@ -113,6 +113,7 @@ try {
   for (let i = 0; i < 40; i++) assert(addPlayer(capacity, `p${i}`, `P${i}`));
   assert.equal(addPlayer(capacity, "overflow", "Overflow"), false);
   const w = createWorld(26);
+  w.activities.nextEventAt = w.deadlineAt;
   addPlayer(w, "a", "A");
   addPlayer(w, "b", "B");
   const profile = {
@@ -138,7 +139,7 @@ try {
       outcome,
       profile,
     });
-  assert.equal(w.sites.length, 30);
+  assert.equal(w.sites.length, 39);
   assert.match(siteUnavailable(w, p, site("town")), /3回/);
   enter(site("town"));
   assert.equal(p.nativeScene, undefined);
@@ -293,7 +294,12 @@ try {
     token: p.nativeScene.token,
     total: 1040,
     sequence: 1,
+    phase: 1,
   });
+  assert.equal(boss.bossPhase,2);
+  assert.equal(boss.hp,1040);
+  assert.equal(w.won,false);
+  applyAction(w,"a",{type:"native-damage",token:p.nativeScene.token,total:1040,sequence:2,phase:2});
   assert(w.won);
   assert(finish("victory"), "rewards can finish after world victory");
   assert.equal(p.completedBattles, 7);

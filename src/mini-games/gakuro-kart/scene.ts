@@ -1,10 +1,14 @@
+import { createKartParts } from './kartModels';
+import { cameraRoadFloor, chaseCameraPose } from './camera';
+import { AVATAR_COLORS, BODY_COLORS, HAIR_COLORS, type KartAvatar } from './avatar';
+import { createAvatarParts, type AvatarColor } from './avatarModels';
 import { LANE_COLORS, QUIZ_GATES, QUIZ_END, laneCenter, quizDistance } from './learning';
 import * as T from 'three';
 import { RoundedBoxGeometry } from 'three/addons/geometries/RoundedBoxGeometry.js';
 import { COURSES, FEATURES, getTrack, sampleTrack, ROAD_WIDTH } from './track';
-import { MAX_RACERS, PALETTE, type Race } from './engine';
+import { MAX_RACERS, type Race } from './engine';
 
-type InstancePart = { mesh: T.InstancedMesh; offset: T.Vector3; rotation: T.Euler; scale: T.Vector3; effect?: 'flame' | 'shield' | 'spark' | 'shadow'; colored?: boolean };
+type InstancePart = { mesh: T.InstancedMesh; offset: T.Vector3; rotation: T.Euler; scale: T.Vector3; effect?: 'flame' | 'shield' | 'spark' | 'shadow'; colored?: boolean; avatarColor?: AvatarColor; visible?: (a: KartAvatar) => boolean };
 export class KartScene {
   private renderer: T.WebGLRenderer;
   private scene = new T.Scene();
@@ -33,8 +37,8 @@ export class KartScene {
     this.renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 1.5));
     this.renderer.outputColorSpace = T.SRGBColorSpace; this.renderer.toneMapping = T.ACESFilmicToneMapping; this.renderer.toneMappingExposure = 1.3;
     const theme = COURSES[world.course]; this.scene.background = new T.Color(theme.sky); this.scene.fog = new T.Fog(theme.fog, 150, 950);
-    this.scene.add(new T.HemisphereLight(world.course === 1 ? '#ecffff' : '#b7bfff', '#393452', 2.4));
-    const sun = new T.DirectionalLight(world.course === 1 ? '#fff4ce' : '#ffd8bf', 3.2); sun.position.set(-160, 250, 70); this.scene.add(sun);
+    this.scene.add(new T.HemisphereLight([1, 4, 5].includes(world.course) ? '#ecffff' : '#b7bfff', '#393452', 2.4));
+    const sun = new T.DirectionalLight([1, 4, 5].includes(world.course) ? '#fff4ce' : '#ffd8bf', 3.2); sun.position.set(-160, 250, 70); this.scene.add(sun);
     this.buildWorld(); this.buildCars(); this.buildQuizRoad();
     const pos = new Float32Array(180 * 3);
     for (let i = 0; i < 180; i++) { pos[i * 3] = Math.sin(i * 17.34) * 200 + 180; pos[i * 3 + 1] = 12 + (i % 23) * 4; pos[i * 3 + 2] = Math.cos(i * 29.41) * 330 - 70; }
@@ -58,7 +62,7 @@ export class KartScene {
       for (let y = 8; y < 512; y += 32) for (let x = 10; x < 512; x += 48) { ctx.fillStyle = (x + y) % 5 ? '#6eb5c8' : '#ebd5a4'; ctx.fillRect(x, y, 22, 14); }
     } else if (kind === 'banner') {
       ctx.fillStyle = '#0c1830'; ctx.fillRect(0, 0, 512, 128); ctx.strokeStyle = COURSES[this.state.course].accent; ctx.lineWidth = 10; ctx.strokeRect(2, 2, 508, 124);
-      ctx.fillStyle = '#f3fffe'; ctx.font = '900 55px sans-serif'; ctx.textAlign = 'center'; ctx.fillText('GAKURO / APEX', 256, 83);
+      ctx.fillStyle = '#f3fffe'; ctx.font = '900 55px sans-serif'; ctx.textAlign = 'center'; ctx.fillText('GAKURO GP', 256, 83);
     } else {
       ctx.fillStyle = '#164345'; ctx.fillRect(0, 0, 512, 512); ctx.strokeStyle = '#67ffe4'; ctx.lineWidth = 34;
       for (let y = -40; y < 560; y += 150) { ctx.beginPath(); ctx.moveTo(60, y + 90); ctx.lineTo(256, y); ctx.lineTo(452, y + 90); ctx.stroke(); }
@@ -99,8 +103,32 @@ export class KartScene {
       const p = sampleTrack(Math.floor(i / 2) / 150 * track.length, course, i % 2 ? 4 : -4); o.position.set(p.x, p.y + .025, p.z); o.rotation.y = Math.atan2(p.tx, p.tz);
     });
     const ground = new T.Mesh(new T.PlaneGeometry(4000, 4000), this.standard(theme.ground)); ground.rotation.x = -Math.PI / 2; ground.position.y = -28; this.scene.add(ground);
+    if (course === 3) {
+      // Oversized bookshelves beside the library circuit.
+      for (const [shelf, color] of ['#ce715e', '#728ccc', '#e3c378', '#79b0a4'].entries()) this.staticInstances(new T.BoxGeometry(2.4, 8, 4), this.standard(color), 32, (i, o) => {
+        const p = sampleTrack((i + .25 * shelf) / 32 * track.length, course, i % 2 ? 26 + shelf * 3 : -26 - shelf * 3); o.position.set(p.x, p.y + 4, p.z); o.rotation.y = Math.atan2(p.tx, p.tz); o.scale.y = .8 + i % 3 * .2;
+      });
+    }
+    if (course === 4) {
+      this.staticInstances(new T.ConeGeometry(9, 24, 8), this.standard('#33674e'), 100, (i, o) => { const p = sampleTrack(i / 100 * track.length, course, i % 2 ? 33 : -33); o.position.set(p.x, p.y + 12, p.z); });
+    }
+    if (course === 5) {
+      const water = new T.Mesh(new T.PlaneGeometry(4000, 4000), this.standard('#267ba8', .25, .18)); water.rotation.x = -Math.PI / 2; water.position.y = -27.8; this.scene.add(water);
+      this.staticInstances(new T.ConeGeometry(9, 15, 3), this.standard('#fff6d6'), 30, (i, o) => { const p = sampleTrack(i / 30 * track.length, course, i % 2 ? 49 : -49); o.position.set(p.x, -12, p.z); o.rotation.y = i; });
+    }
+    if (course === 6) {
+      for (const [band, color] of ['#65ffc9', '#ad8aff', '#70ceff'].entries()) {
+        const vertices: number[] = [];
+        for (let i = 0; i <= 36; i++) { const x = -250 + i * 30, z = 600 + band * 100 + Math.sin(i / 4) * 60; vertices.push(x, 130 + Math.sin(i / 5) * 25, z, x, 190 + Math.sin(i / 5) * 25, z); }
+        const geometry = new T.BufferGeometry(); geometry.setAttribute('position', new T.Float32BufferAttribute(vertices, 3)); const indices: number[] = []; for (let i = 0; i < 36; i++) { const k = i * 2; indices.push(k, k + 2, k + 1, k + 1, k + 2, k + 3); } geometry.setIndex(indices);
+        this.scene.add(new T.Mesh(geometry, new T.MeshBasicMaterial({ color, transparent: true, opacity: .32, side: T.DoubleSide, depthWrite: false })));
+      }
+    }
+    if (course === 7) {
+      this.staticInstances(new T.BoxGeometry(10, 3, 14), this.standard('#657493'), 90, (i, o) => { const p = sampleTrack(Math.floor(i / 3) / 30 * track.length, course, (i % 2 ? 1 : -1) * (28 + i % 3 * 9)); o.position.set(p.x, p.y + 2 + i % 3 * 3, p.z); o.rotation.y = Math.atan2(p.tx, p.tz); });
+    }
     const windows = this.texture('windows');
-    const buildings = this.standard(course === 1 ? '#efffff' : '#7387a2', .35); buildings.map = windows; buildings.emissiveMap = windows; buildings.emissive = new T.Color(theme.accent); buildings.emissiveIntensity = course === 1 ? .05 : .32;
+    const buildings = this.standard([1, 4, 5].includes(course) ? '#efffff' : '#7387a2', .35); buildings.map = windows; buildings.emissiveMap = windows; buildings.emissive = new T.Color(theme.accent); buildings.emissiveIntensity = [1, 4, 5].includes(course) ? .05 : .32;
     this.staticInstances(course === 2 ? new T.CylinderGeometry(.5, .5, 1, 12) : new T.BoxGeometry(1, 1, 1), buildings, 90, (i, o) => {
       const p = sampleTrack(i / 90 * track.length, course, (i % 2 ? -1 : 1) * (40 + i % 4 * 20)), h = 18 + i * 17 % 73;
       o.position.set(p.x, h / 2 - 25, p.z); o.scale.set(13 + i % 3 * 7, h, 13 + i % 4 * 6); o.rotation.y = Math.atan2(p.tx, p.tz);
@@ -111,7 +139,7 @@ export class KartScene {
     this.staticInstances(new T.CylinderGeometry(.4, .65, 7, 6), this.standard('#615161'), 90, (i, o) => {
       const p = sampleTrack(i / 90 * track.length, course, i % 2 ? 22 : -22); o.position.set(p.x, p.y + 1, p.z);
     });
-    this.staticInstances(new T.IcosahedronGeometry(4.7, 1), this.standard(course === 1 ? '#75c5a2' : course === 0 ? '#e98caf' : '#dc9b80'), 90, (i, o) => {
+    this.staticInstances(new T.IcosahedronGeometry(4.7, 1), this.standard([1, 4].includes(course) ? '#75c5a2' : course === 0 ? '#e98caf' : course === 6 ? '#98cfff' : '#dc9b80'), 90, (i, o) => {
       const p = sampleTrack(i / 90 * track.length, course, i % 2 ? 22 : -22); o.position.set(p.x, p.y + 6, p.z); o.scale.set(1, .8 + i % 3 * .1, 1); o.rotation.y = i;
     });
     for (let i = 0; i < 7; i++) {
@@ -171,21 +199,14 @@ export class KartScene {
   }
   private part(geometry: T.BufferGeometry, material: T.Material, offset: number[], scale = [1, 1, 1], rotation = [0, 0, 0], effect?: InstancePart['effect'], colored = false) {
     const mesh = new T.InstancedMesh(geometry, material, MAX_RACERS); mesh.instanceMatrix.setUsage(T.DynamicDrawUsage); mesh.frustumCulled = false; this.scene.add(mesh);
-    this.parts.push({ mesh, offset: new T.Vector3(...offset), scale: new T.Vector3(...scale), rotation: new T.Euler(...rotation), effect, colored });
+    const part: InstancePart = { mesh, offset: new T.Vector3(...offset), scale: new T.Vector3(...scale), rotation: new T.Euler(...rotation), effect, colored }; this.parts.push(part); return part;
   }
   private buildCars() {
-    const shell = new RoundedBoxGeometry(1, 1, 1, 2, .12), dark = this.standard('#0e1729', .3, .45), white = this.standard('#e6f6ff', .6, .25), paint = this.standard('#ffffff', .55, .3);
-    this.part(shell, paint, [0, .65, 0], [1.65, .6, 3.2], [0, 0, 0], undefined, true);
-    this.part(shell, white, [0, .99, .82], [.24, .06, 1.45]);
-    this.part(shell, dark, [0, .95, -.32], [1.0, .45, 1.25]);
-    this.part(shell, paint, [0, 1.2, -1.35], [2.25, .16, .48], [0, 0, 0], undefined, true);
-    for (const x of [-1, 1]) for (const z of [-.97, 1.05]) {
-      this.part(new T.CylinderGeometry(.46, .46, .43, 12), dark, [x, .43, z], [1, 1, 1], [0, 0, Math.PI / 2]);
-      this.part(new T.CylinderGeometry(.25, .25, .45, 10), white, [x, .43, z], [1, 1, 1], [0, 0, Math.PI / 2]);
+    const shell = new RoundedBoxGeometry(1, 1, 1, 2, .12);
+    for (const asset of [...createKartParts(), ...createAvatarParts()]) {
+      const part = this.part(asset.geometry, asset.material, asset.position, asset.scale, asset.rotation);
+      part.avatarColor = asset.color; part.visible = asset.visible;
     }
-    this.part(new T.SphereGeometry(.57, 14, 10), paint, [0, 1.66, -.28], [1, 1, 1], [0, 0, 0], undefined, true);
-    this.part(shell, white, [0, 1.99, -.39], [.15, .22, .8]);
-    this.part(shell, this.standard('#182c48', .8, .15), [0, 1.7, .14], [.88, .3, .28]);
     for (const x of [-.59, .59]) {
       this.part(shell, new T.MeshBasicMaterial({ color: '#ff576b' }), [x, .78, -1.64], [.32, .12, .04]);
       this.part(new T.ConeGeometry(.3, 2.7, 7), new T.MeshBasicMaterial({ color: '#7efff0', transparent: true, opacity: .9 }), [x, .53, -2.5], [1, 1, 1], [-Math.PI / 2, 0, 0], 'flame');
@@ -201,42 +222,49 @@ export class KartScene {
     this.frameTime += dt; this.frames++;
     if (this.frames === 180) { if (this.frameTime / this.frames > .027 && this.quality > .65) { this.quality -= .15; this.renderer.setPixelRatio(Math.min(devicePixelRatio || 1, 1.5) * this.quality); this.size.width = 0; } this.frames = 0; this.frameTime = 0; }
     const w = this.state, me = w.players[this.selfId] || Object.values(w.players)[0]; if (!me) return;
-    this.quizRoad.visible = !!w.lesson && quizDistance(me.distance, getTrack(w.course).length) < QUIZ_END && !this.preview;
+    this.quizRoad.visible = !!w.lesson && !me.finish && quizDistance(me.distance, getTrack(w.course).length) < QUIZ_END && !this.preview;
     this.crashObstacle.visible = me.crash > 0;
     if (me.crash > 0) { const impact = sampleTrack(me.distance + 2, w.course, me.x); this.crashObstacle.position.set(impact.x, impact.y, impact.z); this.crashObstacle.rotation.y = Math.atan2(impact.tx, impact.tz); }
     const racers = Object.values(w.players), age = w.phase === 'race' && !w.paused ? Math.min(.15, (now - this.received) / 1000) : 0;
     let ownPoint = sampleTrack(me.distance, w.course, me.x), ownDistance = me.distance;
+    for (const part of this.parts) part.mesh.count = 0;
     racers.forEach((p, index) => {
-      const target = p.distance + (p.finish ? 0 : p.speed * age), s = this.smoothed.get(p.id) || { distance: target, x: p.x };
+      const target = p.distance + p.speed * age, s = this.smoothed.get(p.id) || { distance: target, x: p.x };
       if (Math.abs(s.distance - target) > 40 || w.phase === 'lobby') { s.distance = target; s.x = p.x; }
       const blend = 1 - Math.exp(-dt * 18); s.distance += (target - s.distance) * blend; s.x += (p.x - s.x) * blend; this.smoothed.set(p.id, s);
       const pt = sampleTrack(s.distance, w.course, s.x), jump = p.jump > 0 ? Math.sin(Math.PI * Math.min(1, p.jump / 1.3)) * 4.5 : 0;
       if (p.id === me.id) { ownPoint = pt; ownDistance = s.distance; }
       this.car.position.set(pt.x, pt.y + jump + .07 + (p.crash > 0 ? Math.abs(Math.sin(p.crash * 8)) * .55 : 0), pt.z); this.car.rotation.set(-Math.atan(pt.ty), Math.atan2(pt.tx, pt.tz) + p.steer * (p.drift ? .38 : .09) + (p.crash > 0 ? (2.4 - p.crash) * Math.PI * 3 : 0), -p.steer * .045); this.car.updateMatrix();
+      // During free run, compare physical positions on the circuit across laps.
+      let gap = p.distance - me.distance;
+      if (me.finish) { const length = getTrack(w.course).length; gap = ((gap + length / 2) % length + length) % length - length / 2; }
       for (const part of this.parts) {
+        if (part.visible && !part.visible(p.avatar)) continue;
+        const partIndex = part.mesh.count++;
         this.dummy.position.copy(part.offset); this.dummy.rotation.copy(part.rotation); this.dummy.scale.copy(part.scale);
         if (part.effect === 'flame') this.dummy.scale.setScalar(p.boost > 0 ? .85 + Math.sin(now * .043 + index) * .15 : .001);
         if (part.effect === 'shield' && p.shield <= 0) this.dummy.scale.setScalar(.001);
         if (part.effect === 'spark') { this.dummy.scale.setScalar((p.charge > .25 || p.crash > 0) ? 1 + Math.sin(now * .07 + index) * .4 : .001); this.dummy.position.z -= (now / 90 + index) % 1.5; }
         if (part.effect === 'shadow') this.dummy.position.y -= jump;
-        // Trailing cars must not sit between the chase camera and its driver.
-        if (!this.preview && p.id !== me.id && p.distance < me.distance - 3) this.dummy.scale.setScalar(.001);
-        this.dummy.updateMatrix(); this.matrix.multiplyMatrices(this.car.matrix, this.dummy.matrix); part.mesh.setMatrixAt(index, this.matrix);
-        if (part.colored) part.mesh.setColorAt(index, new T.Color(PALETTE[(p.hero + (p.cpu ? p.slot : 0)) % PALETTE.length]));
+        if (!this.preview && p.id !== me.id && gap < -3) this.dummy.scale.setScalar(.001);
+        this.dummy.updateMatrix(); this.matrix.multiplyMatrices(this.car.matrix, this.dummy.matrix); part.mesh.setMatrixAt(partIndex, this.matrix);
+        if (part.colored) part.mesh.setColorAt(partIndex, new T.Color(AVATAR_COLORS[p.avatar.outfit]));
+        if (part.avatarColor) { const colors = part.avatarColor === 'body' ? BODY_COLORS : part.avatarColor === 'hair' ? HAIR_COLORS : AVATAR_COLORS; part.mesh.setColorAt(partIndex, new T.Color(colors[p.avatar[part.avatarColor]])); }
       }
     });
-    for (const part of this.parts) { part.mesh.count = racers.length; part.mesh.instanceMatrix.needsUpdate = true; if (part.mesh.instanceColor) part.mesh.instanceColor.needsUpdate = true; }
+    for (const part of this.parts) { part.mesh.instanceMatrix.needsUpdate = true; if (part.mesh.instanceColor) part.mesh.instanceColor.needsUpdate = true; }
     const target = new T.Vector3(), look = new T.Vector3();
     if (this.preview) {
-      const orbit = this.elapsed * .13, p = ownPoint; target.set(p.x + Math.sin(orbit + .65) * 11, p.y + 5, p.z - Math.cos(orbit + .65) * 11); look.set(p.x, p.y + 1.3, p.z);
+      const orbit = Math.sin(this.elapsed * .25) * .7, p = ownPoint; target.set(p.x + Math.sin(orbit + .65) * 6, p.y + 3.6, p.z + Math.cos(orbit + .65) * 6); look.set(p.x, p.y + 1.55, p.z);
     } else {
-      const p = ownPoint;
-      target.set(p.x - p.tx * 10, p.y + 4.8 + (me.jump > 0 ? 1.8 : 0), p.z - p.tz * 10);
+      const pose = chaseCameraPose(ownDistance, w.course, this.smoothed.get(me.id)?.x ?? me.x, me.jump > 0);
+      target.set(pose.position.x, pose.position.y, pose.position.z);
       if (me.crash > 0) { target.x += Math.sin(now * .04) * .2; target.y += Math.cos(now * .035) * .15; }
-      look.set(p.x + p.tx * 6, p.y + 1.3, p.z + p.tz * 6);
+      look.set(pose.look.x, pose.look.y, pose.look.z);
       const fov = 66 + Math.min(12, me.speed / 7) + (me.boost > 0 ? 6 : 0); this.camera.fov += (fov - this.camera.fov) * (1 - Math.exp(-dt * 5)); this.camera.updateProjectionMatrix();
     }
     if (!this.cameraReady) { this.camera.position.copy(target); this.cameraReady = true; } else this.camera.position.lerp(target, 1 - Math.exp(-dt * 18));
+    if (!this.preview) this.camera.position.y = Math.max(this.camera.position.y, cameraRoadFloor(this.camera.position, ownDistance, w.course));
     this.camera.lookAt(look);
     for (let i = 0; i < this.boxes.length; i++) { this.boxes[i].rotation.y = this.elapsed * 1.3; this.boxes[i].rotation.z = Math.sin(this.elapsed * 1.5 + i) * .16; }
     this.particles.position.y = Math.sin(this.elapsed * .3) * 3; this.renderer.render(this.scene, this.camera);

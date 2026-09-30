@@ -28,11 +28,12 @@ interface RestScreenProps {
   /** Enabled after an endless major boss so the intermission always offers
    * the documented rest/shop/deck-organization choices. */
   endlessMajorBoss?: boolean;
+  showShopOption?: boolean;
   onOpenShop?: () => void;
   onOrganizeDeck?: (deck: ICard[]) => void;
 }
 
-const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSynthesize, onSelfStudy, onLeave, languageMode, typingMode = false, scienceRoomChance = 0.5, interactionDisabled = false, interactionDisabledMessage, visualTheme = 'elementary', appearanceMode = 'STANDARD', endlessMajorBoss = false, onOpenShop, onOrganizeDeck }) => {
+const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSynthesize, onSelfStudy, onLeave, languageMode, typingMode = false, scienceRoomChance = 0.5, interactionDisabled = false, interactionDisabledMessage, visualTheme = 'elementary', appearanceMode = 'STANDARD', endlessMajorBoss = false, showShopOption = false, onOpenShop, onOrganizeDeck }) => {
   const isMagic = visualTheme === 'magic';
   const isVacationRun = !endlessMajorBoss && appearanceMode === 'VACATION' && (visualTheme === 'high-school' || visualTheme === 'magic');
   const restHubMessage = isVacationRun
@@ -89,6 +90,7 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
               else if (e.key === '2') { e.preventDefault(); handleSmithChoice(); }
               else if (e.key === '3') { e.preventDefault(); handleSynthesizeChoice(); }
               else if (e.key === '4' && hasCardEraser) { e.preventDefault(); handleSelfStudyChoice(); }
+              else if (e.key === '5' && onOpenShop && (endlessMajorBoss || showShopOption)) { e.preventDefault(); onOpenShop(); }
               else if (e.key === '0' || e.key === 'Enter') { e.preventDefault(); onLeave(); }
               return;
           }
@@ -160,7 +162,7 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
       };
       window.addEventListener('keydown', handleKeyDown);
       return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [typingMode, mode, selectableCards, synthCards, selectedCard, requiredCards, interactionDisabled, hasCardEraser, selectedEraserOptions, deckOrder, deckSelection]);
+  }, [typingMode, mode, selectableCards, synthCards, selectedCard, requiredCards, interactionDisabled, hasCardEraser, selectedEraserOptions, deckOrder, deckSelection, onOpenShop, endlessMajorBoss, showShopOption]);
 
   const handleRest = () => {
       if (interactionDisabled) return;
@@ -421,7 +423,7 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
                             <span className="text-xs text-gray-400">{trans("不要効果を削除", languageMode)}</span>
                         </button>
                     )}
-                    {endlessMajorBoss && onOpenShop && (
+                    {(endlessMajorBoss || showShopOption) && onOpenShop && (
                         <button
                             data-gamepad-initial-choice
                             onClick={() => { if (!interactionDisabled) onOpenShop(); }}
@@ -430,7 +432,7 @@ const RestScreen: React.FC<RestScreenProps> = ({ player, onRest, onUpgrade, onSy
                             {typingMode && <div className="absolute right-2 top-2 rounded-full border border-cyan-300 bg-cyan-950/95 px-1.5 py-0.5 text-[10px] font-black text-cyan-200">5</div>}
                             <ShoppingBag size={40} className="text-amber-400 transition-transform group-hover:scale-110" />
                             <span className="font-bold text-lg">{trans('ショップ', languageMode)}</span>
-                            <span className="text-xs text-gray-400">{trans('大ボス後の特別営業', languageMode)}</span>
+                            <span className="text-xs text-gray-400">{trans(endlessMajorBoss ? '大ボス後の特別営業' : '買い物', languageMode)}</span>
                         </button>
                     )}
                 </div>

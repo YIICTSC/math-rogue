@@ -15,6 +15,7 @@ export interface RpgEncounter {
   localDamage: number;
   damage: number;
   sequence: number;
+  phase?: 1 | 2;
 }
 export function nativeProfile(
   player: Player,
@@ -27,6 +28,8 @@ export function nativeProfile(
     character: player.id || "WARRIOR",
     image: player.imageData || "",
     deckSize: player.deck.length,
+    deck: player.deck,
+    mutationRevision: player.rpgMutationRevision || 0,
     ...(stats?.correctAnswers !== undefined
       ? { correctAnswers: Math.max(0, Math.floor(stats.correctAnswers)) }
       : {}),

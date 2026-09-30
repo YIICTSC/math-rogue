@@ -4,6 +4,15 @@ const server=await createServer({configFile:false,optimizeDeps:{noDiscovery:true
 try {
   const e=await server.ssrLoadModule('/src/mini-games/gakuro-craft/engine.ts');
   const inv=await server.ssrLoadModule('/src/mini-games/gakuro-craft/invite.ts');
+  const avatars=await server.ssrLoadModule('/src/mini-games/gakuro-craft/avatar.ts');
+  const sprite=await server.ssrLoadModule('/src/mini-games/gakuro-craft/avatarSprite.ts');
+  assert.equal(avatars.avatarOf({shirt:4,hat:1}).kind,0,'Existing human appearances stay human');
+  assert.equal(avatars.avatarOf({kind:99,hairstyle:-1,expression:NaN,accessory:Infinity}).kind,0);
+  for(const [field,choices] of [['kind',avatars.KINDS],['hairstyle',avatars.HAIRSTYLES],['expression',avatars.EXPRESSIONS],['style',avatars.OUTFITS],['hat',avatars.HATS],['accessory',avatars.ACCESSORIES]]){
+    const drawings=choices.map((_,i)=>sprite.avatarSvg(avatars.avatarOf({[field]:i})));
+    assert.equal(new Set(drawings).size,choices.length,`${field} options have distinct graphics`);
+    choices.forEach((_,i)=>assert.equal(avatars.avatarOf({[field]:i})[field],i));
+  }
   assert.equal(inv.craftInviteCode('https://example.org/game/?craftRoom=abc234'),'ABC234');
   assert.equal(inv.craftInviteCode('https://example.org/?craftRoom=wrong!'),'');
   const url=new URL(inv.craftInviteUrl('https://example.org/math-rogue/?debug=1&assignment=secret&rpgRoom=ABCDE#x','ABC234'));
@@ -27,7 +36,16 @@ try {
   act({type:'act',tool:'remove',tile});assert.equal(w.tiles[tile].blocks.length,0);
   const pre=p.bag.wood;act({type:'act',tool:'gather',tile:0});assert.equal(p.bag.wood,pre,'Remote tile actions cannot grant materials');
   w.tiles[tile].nature='rock';const stone=p.bag.stone;act({type:'act',tool:'gather',tile});assert.equal(p.bag.stone,stone+3);w.time+=181;e.tick(w,.1);assert.equal(w.tiles[tile].nature,'rock','Rock resources must regrow as rocks');
-  w.tiles[tile].nature=null;w.tiles[tile].ground='water';act({type:'act',tool:'fish',tile});assert.equal(p.bag.fish,1);
+  w.tiles[tile].nature=null;w.tiles[tile].ground='water';act({type:'act',tool:'fish',tile});assert.equal(p.bag.fish,0,'Casting alone must not grant fish');
+  w.time=p.fishing.biteAt+.2;assert.equal(e.applyCommand(w,p.id,{type:'act',tool:'fish',tile}).cue,'fish');assert.equal(p.bag.fish,2,'Perfect timing grants two fish');
+  act({type:'act',tool:'fish',tile});w.time+=.4;e.applyCommand(w,p.id,{type:'act',tool:'fish',tile});assert.equal(p.bag.fish,2,'Early reel cannot grant fish');
+  w.tiles[tile].ground='grass';w.tiles[tile].nature='tree';act({type:'act',tool:'pick',tile});assert.equal(p.bag.fruit,2);assert.equal(w.tiles[tile].nature,'tree');const fruitEnergy=p.energy;act({type:'act',tool:'pick',tile});assert.equal(p.bag.fruit,2);assert.equal(p.energy,fruitEnergy);
+  w.tiles[tile].nature=null;p.bag.crop=2;assert.match(act({type:'craft',material:'meal'}).text,/たき火/);assert.equal(p.bag.meal,0);
+  act({type:'craft',material:'campfire'});act({type:'act',tool:'build',building:'campfire',tile});assert.deepEqual(w.tiles[tile].blocks,['campfire']);
+  act({type:'craft',material:'meal'});assert.equal(p.bag.meal,1);const mealEnergy=p.energy;act({type:'eat'});assert(p.buffUntil>w.time);assert.equal(p.energy,mealEnergy,'Food must not bypass learning energy');
+  p.x=20;p.z=20;p.bag.crop=1;const coins=p.coins;act({type:'donate'});assert.equal(p.coins,coins+3);const seeds=p.bag.seed;act({type:'buy',material:'seed'});assert.equal(p.bag.seed,seeds+1);assert.equal(p.coins,coins+1);
+  act({type:'appearance',avatar:{skin:2,hair:3,shirt:4,pants:2,style:1,hat:1}});assert.equal(p.avatar.hat,1);act({type:'appearance',avatar:{skin:Infinity,shirt:-1}});assert.equal(p.avatar.skin,0);assert(p.avatar.shirt>=0);
+  const rain=e.createWorld(1);rain.time=70;const rainTile=rain.tiles.find(t=>t.ground==='grass'&&!t.nature);rainTile.crop=60;e.tick(rain,.1);assert(rainTile.watered);assert(rainTile.revision>0);
   p.energy=0;const beforeX=p.x;e.applyCommand(w,p.id,{type:'move',dx:1,dz:0});e.tick(w,.1);assert.equal(p.x,beforeX);
   const q={id:'q',mode:'ADDITION',question:'2 + 2',options:['1','2','3','4'],correct:3},bank=new e.QuizBank([q]);
   let prompt=bank.ask(w,p.id);assert.equal('correct' in prompt.question,false,'Do not send the correct index to participants');
@@ -36,5 +54,5 @@ try {
   prompt=bank.ask(w,p.id);assert.equal(bank.answer(w,p.id,prompt.token,3).correct,true);assert.equal(p.energy,30);
   assert.equal(bank.answer(w,p.id,prompt.token,3),undefined);assert.equal(p.energy,30,'Replayed answers cannot restore energy');
   p.energy=95;prompt=bank.ask(w,p.id);bank.answer(w,p.id,prompt.token,3);assert.equal(p.energy,100);
-  console.log('PASS craft: 40-player cap, authoritative actions, movement, farming, inventory, ownership, resource regrowth, fishing, quiz energy/replay, invitation isolation');
+  console.log('PASS craft: 40-player cap, authoritative actions, movement, farming/rain, building ownership, regrowth, timed fishing, fruit, cooking buffs, coins/shop, avatar validation, quiz energy/replay, invitation isolation');
 } finally {await server.close();}

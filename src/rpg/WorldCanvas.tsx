@@ -140,7 +140,14 @@ function person(
 function landmark(c: CanvasRenderingContext2D, s: Site, time: number) {
   const x = s.x * T + 8,
     y = s.y * T + 8;
-  if (s.kind === "town" || s.kind === "boss")
+  if (s.kind === "dungeon" || s.kind === "secret") {
+    rect(c,x-10,y-12,21,25,s.kind === "dungeon" ? "#777080" : "#b49a62");
+    rect(c,x-5,y-7,11,20,"#16242b");
+    rect(c,x-12,y+12,25,3,"#ccbe88");
+  } else if (s.kind === "fragment" || s.kind === "seal") {
+    rect(c,x-5,y-7,11,15,s.kind === "fragment" ? "#e8dba9" : "#a889cb");
+    rect(c,x-2,y-3,5,7,"#786990");
+  } else if (s.kind === "town" || s.kind === "boss")
     building(c, x, y, s.kind === "boss");
   else if (s.kind === "rest") {
     rect(c, x - 7, y + 2, 15, 4, "#684939");
@@ -186,6 +193,7 @@ export default function WorldCanvas({
   world,
   selfId,
   onTile,
+  onPlayer,
   overview = false,
   languageMode = "JAPANESE",
   visualTheme = world.setup?.visualTheme || "elementary",
@@ -193,6 +201,7 @@ export default function WorldCanvas({
   world: World;
   selfId: string;
   onTile: (x: number, y: number) => void;
+  onPlayer?: (id: string) => void;
   overview?: boolean;
   languageMode?: LanguageMode;
   visualTheme?: VisualThemeId;
@@ -281,7 +290,8 @@ export default function WorldCanvas({
           }
           if (tile === "forest") tree(c, px, py - 2);
         }
-      w.sites.forEach((s) => landmark(c, s, time));
+      const visibleSites = w.sites.filter(s => s.kind !== "fragment" || w.activities.secretsFound.includes(s.id) || Math.abs(s.x-p.x)+Math.abs(s.y-p.y)<=4);
+      visibleSites.forEach((s) => landmark(c, s, time));
       Object.values(w.players)
         .sort((a, b) => a.y - b.y)
         .forEach((q) => person(c, q, time));
@@ -289,7 +299,7 @@ export default function WorldCanvas({
       if (!overview) {
         c.textAlign = "center";
         c.font = "bold 12px sans-serif";
-        w.sites.forEach((s) => {
+        visibleSites.forEach((s) => {
           const x = (s.x * T + 8 - cx) * scale,
             y = (s.y * T - 33 - cy) * scale;
           if (x < 0 || x > sw || y < 0 || y > sh) return;
@@ -329,6 +339,10 @@ export default function WorldCanvas({
       onClick={(e) => {
         const r = e.currentTarget.getBoundingClientRect(),
           v = camera.current;
+        const tx = Math.floor((e.clientX-r.left)/v.scale/16+v.x/16);
+        const ty = Math.floor((e.clientY-r.top)/v.scale/16+v.y/16);
+        const target = Object.values((latest.current as World).players).find(p => p.id !== selfId && p.x === tx && p.y === ty);
+        if (target && onPlayer) { onPlayer(target.id); return; }
         onTile(
           Math.floor((e.clientX - r.left) / v.scale / 16 + v.x / 16),
           Math.floor((e.clientY - r.top) / v.scale / 16 + v.y / 16),

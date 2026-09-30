@@ -1,3 +1,4 @@
+import { defaultAvatar, validAvatar, type KartAvatar } from './avatar';
 import { validLesson, type KartLesson } from './learning';
 import Peer, { type DataConnection, type PeerOptions } from 'peerjs';
 import { addRacer, command, createRace, MAX_RACERS, startRace, tick, type Command, type Race } from './engine';
@@ -100,9 +101,10 @@ export class KartRoom {
         const now = performance.now(), rate = this.rates.get(c.peer);
         if (!rate || now - rate.at > 1000) this.rates.set(c.peer, { at: now, count: 1 }); else if (++rate.count > 35) return;
         if (d.type === 'hello') {
-          if (d.version !== PROTOCOL || typeof d.name !== 'string' || !Number.isInteger(d.hero) || !addRacer(this.world, c.peer, d.name, d.hero)) { this.reject(c, '参加できません。レース開始前に入り直してください。'); return; }
-          clearTimeout(timeout); this.pending.delete(timeout); this.emit();
-        } else if (d.type === 'command') command(this.world, c.peer, d.command);
+          if (d.version !== PROTOCOL || !validAvatar(d.avatar) || typeof d.name !== 'string' || !Number.isInteger(d.hero) || !addRacer(this.world, c.peer, d.name, d.hero)) { this.reject(c, '参加できません。レース開始前に入り直してください。'); return; }
+          this.world.players[c.peer].avatar = { ...d.avatar }; clearTimeout(timeout); this.pending.delete(timeout); this.emit();
+        } else if (d.type === 'avatar') this.applyAvatar(c.peer, d.avatar);
+        else if (d.type === 'command') command(this.world, c.peer, d.command);
       });
       let dropped = false;
       const drop = () => {
@@ -117,7 +119,7 @@ export class KartRoom {
       c.on('close', drop); c.on('error', drop);
     }); this.run();
   }
-  async join(code: string, name: string, hero: number) {
+  async join(code: string, name: string, hero: number, avatar: KartAvatar = defaultAvatar(hero)) {
     this.code = code.trim().toUpperCase();
     if (!/^[A-Z2-9]{6}$/.test(this.code)) throw new Error('6文字のルームコードを入力してください。');
     const peer = await this.open();
@@ -125,7 +127,7 @@ export class KartRoom {
     await new Promise<void>((resolve, reject) => {
       const timeout = setTimeout(() => { this.pending.delete(timeout); reject(new Error('部屋が見つからないか、接続できません。')); }, 15000); this.pending.add(timeout);
       const done = () => { clearTimeout(timeout); this.pending.delete(timeout); };
-      c.on('open', () => this.sendTo(c, { type: 'hello', version: PROTOCOL, name: name.slice(0, 16), hero }));
+      c.on('open', () => this.sendTo(c, { type: 'hello', version: PROTOCOL, name: name.slice(0, 16), hero, avatar }));
       c.on('data', raw => {
         if (this.closed) return;
         if (raw instanceof ArrayBuffer && this.world) {
@@ -145,17 +147,26 @@ export class KartRoom {
     });
     this.timer = setInterval(() => { if (performance.now() - this.lastPacketAt > 12000) { this.close(); this.update(null); this.status('通信が途切れました。部屋に入り直してください。'); } }, 1000);
   }
+  private applyAvatar(id: string, avatar: unknown) {
+    if (this.world?.phase !== 'lobby' || !this.world.players[id] || !validAvatar(avatar)) return;
+    this.world.players[id].avatar = { ...avatar }; this.world.revision++; this.emit();
+  }
+  setAvatar(avatar: KartAvatar) {
+    if (this.closed || this.world?.phase !== 'lobby' || !validAvatar(avatar)) return;
+    if (this.host) this.applyAvatar(this.selfId, avatar);
+    else { const host = this.channels.get('host'); if (host) this.sendTo(host, { type: 'avatar', avatar }); }
+  }
   setLesson(lesson: KartLesson) {
     if (!this.host || this.world?.phase !== 'lobby' || !validLesson(lesson)) return;
     this.world.lesson = structuredClone(lesson); this.world.revision++; this.emit();
   }
   start(fill = true) { if (this.host && this.world) { startRace(this.world, fill); this.emit(); } }
-  rematch(lesson?: KartLesson) {
+  rematch(lesson?: KartLesson, course = this.world?.course ?? 0) {
     if (!this.host || this.world?.phase !== 'result') return;
-    const old = this.world, previousRevision = old.revision; this.world = createRace(old.course, old.seed + 1);
+    const old = this.world, previousRevision = old.revision; this.world = createRace(course, old.seed + 1);
     this.world.lesson = lesson && validLesson(lesson) ? structuredClone(lesson) : old.lesson;
     this.world.revision = previousRevision;
-    for (const p of Object.values(old.players)) addRacer(this.world, p.id, p.name, p.hero, p.cpu);
+    for (const p of Object.values(old.players)) { addRacer(this.world, p.id, p.name, p.hero, p.cpu); this.world.players[p.id].avatar = { ...p.avatar }; }
     startRace(this.world); this.emit();
   }
   send(c: Command) {

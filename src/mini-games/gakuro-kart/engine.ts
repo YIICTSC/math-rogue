@@ -1,13 +1,15 @@
+import { defaultAvatar, type KartAvatar } from './avatar';
 import { QUIZ_APPROACH_SPEED, QUIZ_FEEDBACK_SECONDS, QUIZ_GATES, QUIZ_END, answerLane, laneCenter, quizDistance, type KartLesson } from './learning';
-import { FEATURES, getTrack, ROAD_WIDTH, sampleTrack } from './track';
+import { COURSES, FEATURES, getTrack, ROAD_WIDTH, sampleTrack } from './track';
 export { COURSES } from './track';
 export const MAX_RACERS = 40, LAPS = 3, RACE_LIMIT = 360;
 export const HEROES = ['SPARK', 'COMET', 'NOVA'];
 export const PALETTE = ['#ff657e', '#52dcff', '#ad91ff', '#ffd36b', '#58f2bf', '#ff985c'];
 export const ITEMS = { nitro: 'NITRO', shield: 'AEGIS', pulse: 'PULSE', rocket: 'COMEBACK' };
+export const ITEM_EFFECTS = { nitro: '約3秒スピードアップ', shield: '6秒間防御＋減速を解除', pulse: '前方の最大3台を減速', rocket: '約5秒加速＋攻撃を防ぐ' };
 export type Item = keyof typeof ITEMS;
 export interface Racer {
-  id: string; slot: number; name: string; hero: number; cpu: boolean;
+  id: string; slot: number; name: string; hero: number; cpu: boolean; avatar: KartAvatar;
   distance: number; x: number; speed: number; steer: number; brake: boolean; drift: boolean;
   inputAt: number; slide: number; charge: number; boost: number; shield: number; slow: number;
   quizAnswers: number[]; quizTimes: number[]; quizCorrect: number; quizCorrectTotal: number; quizLap: number; quizFeedbackAt: number; quizApplied: boolean; crash: number;
@@ -21,12 +23,12 @@ export interface Race {
 export type Command = { type: 'input'; steer: number; brake: boolean; drift: boolean } | { type: 'item' };
 export const clamp = (n: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, n));
 export function createRace(course = 0, seed = 1): Race {
-  return { lesson: null, phase: 'lobby', remaining: 3, time: 0, course: clamp(Math.floor(course) || 0, 0, 2), seed, finishAt: 0, revision: 0, paused: false, players: {} };
+  return { lesson: null, phase: 'lobby', remaining: 3, time: 0, course: clamp(Math.floor(course) || 0, 0, COURSES.length - 1), seed, finishAt: 0, revision: 0, paused: false, players: {} };
 }
 export function addRacer(w: Race, id: string, name: string, hero = 0, cpu = false) {
   if (w.phase !== 'lobby' || Object.keys(w.players).length >= MAX_RACERS || w.players[id]) return false;
   const slots = new Set(Object.values(w.players).map(p => p.slot)); let slot = 0; while (slots.has(slot)) slot++;
-  w.players[id] = { id, slot, name: name.trim().slice(0, 16) || 'Racer', hero: clamp(Math.floor(hero) || 0, 0, 2), cpu,
+  w.players[id] = { id, slot, name: name.trim().slice(0, 16) || 'Racer', hero: clamp(Math.floor(hero) || 0, 0, 2), cpu, avatar: cpu ? { ...defaultAvatar(slot), species: slot % 8, body: slot % 8, hair: slot % 6, accessory: slot % 4, hairStyle: slot % 12, kart: slot % 8, expression: slot % 8 } : defaultAvatar(hero),
     distance: -8 - Math.floor(slot / 4) * 7, x: (slot % 4 - 1.5) * 4, speed: 0, steer: 0, brake: false, drift: false,
     quizAnswers: [-2, -2, -2], quizTimes: [0, 0, 0], quizCorrect: 0, quizCorrectTotal: 0, quizLap: 0, quizFeedbackAt: 0, quizApplied: false, crash: 0,
     inputAt: 0, slide: 0, charge: 0, boost: 0, shield: 0, slow: 0, item: null, jump: 0, draft: 0, finish: 0, drifts: 0, overtakes: 0 };
@@ -39,15 +41,15 @@ export function startRace(w: Race, fill = false) {
 }
 export function command(w: Race, id: string, raw: unknown) {
   if (!raw || typeof raw !== 'object' || w.phase !== 'race') return;
-  const c = raw as Command, p = w.players[id]; if (!p || p.finish) return;
+  const c = raw as Command, p = w.players[id]; if (!p) return;
   if (c.type === 'input' && Number.isFinite(c.steer) && typeof c.brake === 'boolean' && typeof c.drift === 'boolean') {
     p.steer = clamp(c.steer, -1, 1); p.brake = c.brake; p.drift = c.drift; p.inputAt = w.time;
   }
-  if (c.type === 'item' && p.item && !(w.lesson && quizDistance(p.distance, getTrack(w.course).length) < QUIZ_END) && !p.crash) {
+  if (c.type === 'item' && p.item && !(w.lesson && !p.finish && quizDistance(p.distance, getTrack(w.course).length) < QUIZ_END) && !p.crash) {
     if (p.item === 'nitro') p.boost = Math.max(p.boost, 2.8);
     if (p.item === 'rocket') { p.boost = Math.max(p.boost, 4.5); p.shield = Math.max(p.shield, 4.5); }
     if (p.item === 'shield') { p.shield = 6; p.slow = 0; }
-    if (p.item === 'pulse') Object.values(w.players).filter(q => q.id !== id && !q.finish && q.distance > p.distance && q.distance - p.distance < 85).sort((a, b) => a.distance - b.distance).slice(0, 3).forEach(q => { if (q.shield <= 0) q.slow = 1.3; });
+    if (p.item === 'pulse') Object.values(w.players).filter(q => q.id !== id && !!q.finish === !!p.finish && q.distance > p.distance && q.distance - p.distance < 85).sort((a, b) => a.distance - b.distance).slice(0, 3).forEach(q => { if (q.shield <= 0) q.slow = 1.3; });
     p.item = null;
   }
 }
@@ -62,17 +64,17 @@ export function tick(w: Race, dt: number) {
   const racers = ranking(w), length = getTrack(w.course).length;
   const oldDistances = new Map(racers.map(p => [p.id, p.distance]));
   for (let place = 0; place < racers.length; place++) {
-    const p = racers[place]; if (p.finish) continue;
+    const p = racers[place];
     const lap = Math.min(LAPS - 1, Math.floor(Math.max(0, p.distance) / length));
-    if (lap > p.quizLap) {
+    if (!p.finish && lap > p.quizLap) {
       p.quizLap = lap; p.quizAnswers = [-2, -2, -2]; p.quizTimes = [0, 0, 0];
       p.quizCorrect = 0; p.quizFeedbackAt = w.time; p.quizApplied = false;
     }
     const turn = sampleTrack(p.distance, w.course).curve;
     const lapDistance = quizDistance(p.distance, length);
-    const learning = !!w.lesson && lapDistance < QUIZ_END;
+    const learning = !!w.lesson && !p.finish && lapDistance < QUIZ_END;
     const questionIndex = p.quizAnswers.findIndex(a => a === -2);
-    const question = questionIndex >= 0 ? w.lesson?.questions[questionIndex] : undefined;
+    const question = !p.finish && questionIndex >= 0 ? w.lesson?.questions[questionIndex] : undefined;
     if (p.cpu) {
       const cpuLane = question ? ((p.slot * 7 + questionIndex * 3 + w.seed) % 10 < 7 ? question.correct : (question.correct + 1 + p.slot % 3) % 4) : 0;
       const target = learning ? laneCenter(cpuLane) : Math.sin(p.distance / 100 + p.slot * 2.4) * 5;
@@ -84,12 +86,12 @@ export function tick(w: Race, dt: number) {
     } else if (w.time - p.inputAt > .5) { p.steer = 0; p.brake = false; p.drift = false; }
     p.crash = Math.max(0, p.crash - dt);
     p.boost = Math.max(0, p.boost - dt); p.shield = Math.max(0, p.shield - dt); p.slow = Math.max(0, p.slow - dt); p.jump = Math.max(0, p.jump - dt);
-    const drafting = !learning && racers.some(q => q.id !== p.id && !q.finish && oldDistances.get(q.id)! - oldDistances.get(p.id)! > 5 && oldDistances.get(q.id)! - oldDistances.get(p.id)! < 35 && Math.abs(q.x - p.x) < 2.4);
+    const drafting = !learning && racers.some(q => q.id !== p.id && !!q.finish === !!p.finish && oldDistances.get(q.id)! - oldDistances.get(p.id)! > 5 && oldDistances.get(q.id)! - oldDistances.get(p.id)! < 35 && Math.abs(q.x - p.x) < 2.4);
     p.draft = clamp(p.draft + (drafting ? dt : -dt * 1.8), 0, 1.5);
     const drifting = !learning && !p.crash && p.drift && Math.abs(p.steer) > .12 && p.speed > 22 && !p.jump;
     if (drifting && Math.abs(turn) > .002) p.charge = Math.min(2.4, p.charge + dt);
     if (!drifting && p.charge > 0) {
-      if (p.charge >= .6) { p.boost = Math.max(p.boost, p.charge >= 1.7 ? 2 : p.charge >= 1.1 ? 1.25 : .65); p.drifts++; }
+      if (p.charge >= .6) { p.boost = Math.max(p.boost, p.charge >= 1.7 ? 2 : p.charge >= 1.1 ? 1.25 : .65); if (!p.finish) p.drifts++; }
       p.charge = 0;
     }
     const off = Math.abs(p.x) > ROAD_WIDTH / 2 - 1;
@@ -104,16 +106,16 @@ export function tick(w: Race, dt: number) {
     p.x += p.slide * dt * Math.min(1, p.speed / 18);
     if (Math.abs(p.x) > ROAD_WIDTH / 2 + 2) { p.x = Math.sign(p.x) * (ROAD_WIDTH / 2 + 2); p.slide *= -.3; p.speed *= Math.exp(-dt * 1.5); }
     const old = p.distance; p.distance += p.speed * dt;
-    if (w.lesson && p.quizLap === 0 && old < 0 && p.distance >= 0 && p.quizAnswers.every(a => a === -2)) p.quizFeedbackAt = w.time;
+    if (!p.finish && w.lesson && p.quizLap === 0 && old < 0 && p.distance >= 0 && p.quizAnswers.every(a => a === -2)) p.quizFeedbackAt = w.time;
     const oldLapDistance = quizDistance(old, length), nextLapDistance = quizDistance(p.distance, length);
-    if (w.lesson && question && oldLapDistance < QUIZ_GATES[questionIndex] && nextLapDistance >= QUIZ_GATES[questionIndex]) {
+    if (!p.finish && w.lesson && question && oldLapDistance < QUIZ_GATES[questionIndex] && nextLapDistance >= QUIZ_GATES[questionIndex]) {
       const lane = answerLane(p.x);
       p.quizAnswers[questionIndex] = lane;
       p.quizTimes[questionIndex] = Math.max(0, w.time - (questionIndex ? p.quizFeedbackAt + QUIZ_FEEDBACK_SECONDS : p.quizFeedbackAt));
       if (lane === question.correct) { p.quizCorrect++; p.quizCorrectTotal++; }
       p.quizFeedbackAt = w.time;
     }
-    if (w.lesson && !p.quizApplied && nextLapDistance >= QUIZ_END && p.quizAnswers.every(a => a !== -2)) {
+    if (!p.finish && w.lesson && !p.quizApplied && nextLapDistance >= QUIZ_END && p.quizAnswers.every(a => a !== -2)) {
       p.quizApplied = true;
       if (p.quizCorrect === 3) p.boost = 6;
       else if (p.quizCorrect === 1) { p.slow = 7; p.speed *= .65; }
@@ -130,8 +132,8 @@ export function tick(w: Race, dt: number) {
         p.item = place > racers.length * .55 && roll < 5 ? 'rocket' : roll < 4 ? 'nitro' : roll < 7 ? 'shield' : 'pulse';
       }
     }
-    for (const q of racers) if (q.id !== p.id && !q.finish && old < oldDistances.get(q.id)! && p.distance >= q.distance) p.overtakes++;
-    if (p.distance >= length * LAPS) { p.finish = w.time - (p.distance - length * LAPS) / Math.max(1, p.speed); p.distance = length * LAPS; p.speed = 0; if (!w.finishAt) w.finishAt = w.time; }
+    for (const q of racers) if (!p.finish && q.id !== p.id && !q.finish && old < oldDistances.get(q.id)! && p.distance >= q.distance) p.overtakes++;
+    if (!p.finish && p.distance >= length * LAPS) { p.finish = w.time - (p.distance - length * LAPS) / Math.max(1, p.speed); if (!w.finishAt) w.finishAt = w.time; }
   }
   const bumps = new Map<string, number>();
   for (let i = 0; i < racers.length; i++) for (let j = i + 1; j < racers.length; j++) {

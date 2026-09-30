@@ -1,3 +1,4 @@
+import ActivitiesPanel from "./ActivitiesPanel";
 import React, {
   useCallback,
   useEffect,
@@ -135,6 +136,7 @@ export default function RpgOnline({
   onSetup: (setup: RpgAdventureSetup) => void;
   onClose: () => void;
 }) {
+  const [selectedPeer, setSelectedPeer] = useState<string | null>(null);
   const [world, setWorld] = useState<World | null>(null);
   const inviteCode = useMemo(
     () =>
@@ -210,7 +212,7 @@ export default function RpgOnline({
     const timer = window.setInterval(() => setClockNow(Date.now()), 1000);
     return () => window.clearInterval(timer);
   }, []);
-  const profileJson = JSON.stringify(nativeProfile(player));
+  const profileJson = JSON.stringify({...nativeProfile(player),visualTheme:previewTheme});
   useEffect(() => {
     if (
       active &&
@@ -287,7 +289,7 @@ export default function RpgOnline({
       .sort((a, b) => distance(a, p) - distance(b, p))[0];
     if (site) {
       destination.current = null;
-      room.current?.send({ type: "native-enter", siteId: site.id });
+      room.current?.send(site.kind === "dungeon" ? { type: "dungeon-join", siteId: site.id } : ["fragment", "secret", "seal"].includes(site.kind) ? { type: "secret-search", siteId: site.id } : { type: "native-enter", siteId: site.id });
     }
   }, []);
   useEffect(() => {
@@ -499,6 +501,7 @@ export default function RpgOnline({
                       overview={overview}
                       languageMode={languageMode}
                       visualTheme={previewTheme}
+                      onPlayer={setSelectedPeer}
                       onTile={(x, y) => {
                         destination.current = { x, y };
                       }}
@@ -565,6 +568,7 @@ export default function RpgOnline({
                 </div>
               </section>
               <aside className="rpg-sidebar">
+                <ActivitiesPanel languageMode={languageMode} world={world} selfId={selfId} selectedPeer={selectedPeer} send={action => { destination.current = null; room.current?.send(action); }} />
                 <section className="rpg-objective">
                   <h2>
                     <Crown />

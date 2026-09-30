@@ -1586,3 +1586,71 @@
     font-size: 10px;
   }
 }
+
+.rpg-activities button,.rpg-trade-dialog button {
+  background:#41645a;
+  color:#fff4d2;
+  border:2px solid #b7bb8b;
+  border-radius:7px;
+  padding:9px 12px;
+  font-weight:700;
+  cursor:pointer;
+  box-shadow:0 3px 0 #172b29;
+}
+.rpg-activities button:disabled,.rpg-trade-dialog button:disabled {
+  opacity:.45;
+  cursor:default;
+}
+.rpg-activity-buttons {
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+}
+.rpg-activities h3 {
+  margin-top:18px;
+}
+.rpg-activities progress {
+  width:100%;
+  accent-color:#e3c876;
+}
+.rpg-trade-dialog {
+  max-width:900px!important;
+  max-height:90vh;
+  overflow:auto;
+}
+.rpg-trade-columns {
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:15px;
+}
+.rpg-trade-card,.rpg-trade-deck button {
+  display:flex;
+  flex-direction:column;
+  gap:4px;
+  border:1px solid #a8b183;
+  padding:10px;
+  border-radius:6px;
+  margin:5px 0;
+}
+.rpg-trade-deck {
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(180px,1fr));
+  gap:8px;
+  max-height:35vh;
+  overflow:auto;
+}
+.rpg-trade-deck .is-selected {
+  background:#89712e;
+  outline:3px solid #f3d376;
+}
+.rpg-trade-deck span,.rpg-trade-card span {
+  font-size:12px;
+}
+.rpg-trade-dialog>button {
+  margin:10px 6px 0 0;
+}
+
+
+@media (max-width: 600px) {
+  .rpg-trade-columns { grid-template-columns: 1fr; }
+}

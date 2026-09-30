@@ -221,7 +221,11 @@ export type P2PEvent =
     | { type: 'COOP_SHOP_ACTION', action: 'BUY_CARD' | 'BUY_RELIC' | 'BUY_POTION' | 'REMOVE_CARD' | 'LEAVE', itemId?: string, replacePotionId?: string, cardId?: string, cost?: number }
     | { type: 'COOP_SUPPORT_USE', cardId: string, effectId: CoopSupportEffectId, name: string, description: string, rarity: string, targetPeerId?: string };
 
+export interface RoomTransport { id: string; peers: () => string[]; send: (data: P2PEvent, target?: string) => boolean; }
+
 class P2PService {
+    private roomTransport: RoomTransport | null = null;
+    public setRoomTransport(transport: RoomTransport | null) { this.roomTransport = transport; }
     private peer: Peer | null = null;
     private connections: Map<string, DataConnection> = new Map();
     private myId: string | null = null;
@@ -405,6 +409,7 @@ class P2PService {
     }
 
     public send(data: P2PEvent): boolean {
+        if (this.roomTransport) return this.roomTransport.send(data);
         const targets = Array.from(this.connections.values()).filter(c => c.open);
         if (targets.length === 0) {
             console.warn('Cannot send data, no open connections');
@@ -418,19 +423,23 @@ class P2PService {
     }
 
     public sendTo(peerId: string, data: P2PEvent): boolean {
+        if (this.roomTransport) return this.roomTransport.send(data,peerId);
         const conn = this.connections.get(peerId);
         return conn ? this.safeSend(conn, data) : false;
     }
 
     public getConnectedPeerIds(): string[] {
+        if (this.roomTransport) return this.roomTransport.peers();
         return Array.from(this.connections.keys());
     }
 
     public getMyId() {
+        if (this.roomTransport) return this.roomTransport.id;
         return this.myId;
     }
 
     public close(options?: { silent?: boolean }) {
+        this.roomTransport = null;
         const previousOnClose = this.onClose;
         const previousOnConnectionHealth = this.onConnectionHealth;
         if (options?.silent) {
@@ -452,6 +461,7 @@ class P2PService {
     }
 
     public isConnected() {
+        if (this.roomTransport) return this.roomTransport.peers().length > 0;
         return Array.from(this.connections.values()).some(conn => conn.open);
     }
 }

@@ -14,7 +14,7 @@ try {
   const custom = buildLesson({ mode: 'ADDITION', assignment }); assert(custom.questions.every(q => q.problemId === 'custom' && q.options.length === 4 && q.options[q.correct] === '5')); assert.equal(assignment.answerMode, 'INPUT');
   assert.throws(() => buildLesson({ mode: 'NO_SUCH_MODE' }));
   assert.deepEqual(l.QUIZ_GATES, [100, 250, 400]); assert.equal(l.QUIZ_END, 450); assert.equal(l.QUIZ_APPROACH_SPEED, 20);
-  for (let course = 0; course < 3; course++) for (let distance = 0; distance <= l.QUIZ_END; distance += 5) { const p = t.sampleTrack(distance, course); assert(Math.abs(p.curve) < .00001, `Course ${course}, distance ${distance} not straight`); assert(Math.abs(p.y) < .001); }
+  for (let course = 0; course < t.COURSES.length; course++) for (let distance = 0; distance <= l.QUIZ_END; distance += 5) { const p = t.sampleTrack(distance, course); assert(Math.abs(p.curve) < .00001, `Course ${course}, distance ${distance} not straight`); assert(Math.abs(p.y) < .001); }
   assert.deepEqual([9, 3, -3, -9].map(l.answerLane), [0, 1, 2, 3]); assert.equal(l.answerLane(13), -1);
 
   // A question appears at the start or 2.5s after the previous feedback. Its

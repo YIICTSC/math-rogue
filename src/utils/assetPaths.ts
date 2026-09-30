@@ -75,6 +75,9 @@ export const getAssetBaseUrl = (): string => {
 
 const shouldVersionAsset = (path: string): boolean =>
   path.startsWith('sprites/magic/') ||
+  // Vacation enemies switch between separate idle/attack/skill files. Keep
+  // every state on the current build instead of reusing an older cached cutout.
+  path.startsWith('sprites/high-school/vacation-') ||
   path.startsWith('sprites/high-school/events/') ||
   path.startsWith('sprites/backgrounds/learning-rogue/magic') ||
   path.startsWith('event-illustrations/magic-') ||

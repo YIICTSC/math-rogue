@@ -1,5 +1,7 @@
+import type { P2PEvent } from "../services/p2pService";
 import Peer, { type DataConnection, type PeerOptions } from "peerjs";
 import {
+  validProfile,
   addPlayer,
   applyAction,
   createWorld,
@@ -14,30 +16,41 @@ import {
   type RpgAdventureSetup,
 } from "./setup";
 
-const RPG_PROTOCOL_VERSION = 6;
+const RPG_PROTOCOL_VERSION = 8;
 
 function isNativeProfile(value: unknown): value is NativeProfile {
   if (!value || typeof value !== "object") return false;
-  const profile = value as Partial<NativeProfile>;
-  return (
-    [profile.hp, profile.maxHp, profile.gold, profile.deckSize].every(
-      (number) => typeof number === "number" && Number.isFinite(number),
-    ) &&
-    Number(profile.maxHp) > 0 &&
-    Number(profile.hp) >= 0 &&
-    Number(profile.hp) <= Number(profile.maxHp) &&
-    Number(profile.gold) >= 0 &&
-    typeof profile.character === "string" &&
-    typeof profile.image === "string" &&
-    (profile.correctAnswers === undefined ||
-      (typeof profile.correctAnswers === "number" &&
-        Number.isFinite(profile.correctAnswers) &&
-        profile.correctAnswers >= 0))
-  );
+  return validProfile(value as NativeProfile);
 }
 
 /** A single room owner validates commands and broadcasts authoritative state. */
 export class RpgRoom {
+  onDungeonEvent: ((event: P2PEvent, from: string) => void) | null = null;
+  private receiveDungeon(raw: unknown): boolean {
+    const packet = raw as { type?: string; event?: P2PEvent; from?: string };
+    if (packet?.type !== 'dungeon-event') return false;
+    if (packet.event && typeof packet.from === 'string') this.onDungeonEvent?.(packet.event,packet.from);
+    return true;
+  }
+  private relayDungeon(from: string, event: P2PEvent, target?: string): boolean {
+    const dungeon = this.world?.activities.dungeons.find(d => d.status === 'active' && d.members.includes(from));
+    if (!dungeon || !event || typeof event.type !== 'string' || !event.type.startsWith('COOP_')) return false;
+    const guestEvents = ['COOP_SELF_STATE','COOP_PLAYER_SNAPSHOT','COOP_STATE_SYNC_REQUEST','COOP_REWARD_SYNC_REQUEST','COOP_QUIZ_RESULT','COOP_BATTLE_SELECT_ENEMY','COOP_BATTLE_PLAY_CARD','COOP_BATTLE_USE_POTION','COOP_BATTLE_TURN_START','COOP_BATTLE_SELECTION_STATE','COOP_BATTLE_MODAL_RESOLVE','COOP_BATTLE_CODEX_SELECT','COOP_END_TURN','COOP_NODE_SELECT','COOP_REWARD_SELECT','COOP_REWARD_SKIP','COOP_TREASURE_OPEN','COOP_TREASURE_CLAIM','COOP_EVENT_OPTION','COOP_EVENT_CONTINUE','COOP_REST_ACTION','COOP_SHOP_ACTION','COOP_SUPPORT_USE'];
+    if (from !== dungeon.leader && !guestEvents.includes(event.type)) return false;
+    const recipients = from === dungeon.leader ? dungeon.members.filter(id=>id!==from && (!target || target===id)) : [dungeon.leader];
+    for (const id of recipients) {
+      if (id === this.selfId) this.onDungeonEvent?.(event,from);
+      else this.connections.get(id)?.send({type:'dungeon-event',event,from});
+    }
+    return true;
+  }
+  sendDungeonEvent(event: P2PEvent, target?: string): boolean {
+    if (this.closed) return false;
+    if (this.host) return this.relayDungeon(this.selfId,event,target);
+    const conn=this.connections.get('host');
+    if (!conn?.open) return false;
+    conn.send({type:'dungeon-event',event,target});return true;
+  }
   peer: Peer | null = null;
   connections = new Map<string, DataConnection>();
   world: World | null = null;
@@ -65,9 +78,8 @@ export class RpgRoom {
     addPlayer(this.world, this.selfId, name);
     this.timer = setInterval(() => {
       if (!this.world) return;
-      const revision = this.world.revision;
       advanceWorld(this.world);
-      if (this.world.revision !== revision) this.emit();
+      if (this.world.revision !== this.lastRevision) {this.lastRevision=this.world.revision;this.emit();}
     }, 250);
     this.emit();
   }
@@ -148,6 +160,11 @@ export class RpgRoom {
       }, 10000);
       conn.on("data", (raw: unknown) => {
         if (!raw || typeof raw !== "object" || !this.world) return;
+        const dungeonPacket = raw as {type?: string;event?: P2PEvent;target?: string};
+        if (dungeonPacket.type === 'dungeon-event') {
+          if (dungeonPacket.event) this.relayDungeon(conn.peer,dungeonPacket.event,dungeonPacket.target);
+          return;
+        }
         const data = raw as {
           type?: string;
           name?: string;
@@ -282,6 +299,7 @@ export class RpgRoom {
       );
       conn.on("data", (raw: unknown) => {
         if (!raw || typeof raw !== "object") return;
+        if (this.receiveDungeon(raw)) return;
         const data = raw as {
           type: string;
           world?: World;
@@ -369,6 +387,7 @@ export class RpgRoom {
       );
       conn.on("data", (raw: unknown) => {
         if (!raw || typeof raw !== "object") return;
+        if (this.receiveDungeon(raw)) return;
         const data = raw as {
           type: string;
           world?: World;
@@ -424,7 +443,9 @@ export class RpgRoom {
   send(action: Action) {
     if (this.closed) return;
     if (this.host && this.world) {
-      if (applyAction(this.world, this.selfId, action)) this.emit();
+      const revision=this.world.revision;
+      applyAction(this.world, this.selfId, action);
+      if(this.world.revision!==revision)this.emit();
     } else this.connections.get("host")?.send({ type: "action", action });
   }
   close() {
