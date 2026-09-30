@@ -386,6 +386,9 @@ interface BattleSceneProps {
     enemies: Enemy[];
     selectedEnemyId: string | null;
     onSelectEnemy: (id: string) => void;
+    rivalPlayer?: Player;
+    rivalVisualTheme?: VisualThemeId;
+    blockAttackCards?: boolean;
     onPlayCard: (card: ICard) => void;
     onPlaySynthesizedCard: (card: ICard) => void;
     onTransform?: () => void;
@@ -422,7 +425,7 @@ type DrawEntryAnimation = {
 };
 
 const BattleScene: React.FC<BattleSceneProps> = ({
-    player, companions = [], coopSelfPeerId, coopEffectOwnerPeerId, coopTurnQueue = [], coopCanAct = true, coopTurnOwnerLabel, coopSupportCards = [], onUseCoopSupport, raceTrickCards = [], raceTargets = [], onUseRaceTrickCard, selfDown = false, enemies, selectedEnemyId, onSelectEnemy, onPlayCard, onPlaySynthesizedCard, onTransform, onEndTurn, turnLog, narrative, lastActionTime, lastActionType, actingEnemyId,
+    player, companions = [], coopSelfPeerId, coopEffectOwnerPeerId, coopTurnQueue = [], coopCanAct = true, coopTurnOwnerLabel, coopSupportCards = [], onUseCoopSupport, raceTrickCards = [], raceTargets = [], onUseRaceTrickCard, blockAttackCards = false, rivalPlayer, rivalVisualTheme, selfDown = false, enemies, selectedEnemyId, onSelectEnemy, onPlayCard, onPlaySynthesizedCard, onTransform, onEndTurn, turnLog, narrative, lastActionTime, lastActionType, actingEnemyId,
     selectionState, onHandSelection, onCancelSelection, onUsePotion, combatLog, languageMode, codexOptions, onCodexSelect, parryState, onParry, showParryTutorial = false, onCloseParryTutorial, activeEffects, finisherCutinCard, hideEnemyIntents = false, onOpenSettings, battleBackgroundId, visualTheme = 'elementary', battleUiSettings
 }) => {
     const isCoopBattleView = !!coopSelfPeerId || companions.length > 0;
@@ -2242,7 +2245,7 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                                 )}
                                             </div>
                                         ) : (
-                                            <EnemyIllustration name={enemy.name} altText={enemyName} seed={enemy.id} aliases={enemySvgAliases} visualTheme={visualTheme} appearanceMode={player.appearanceMode} enemyType={enemy.enemyType} phase={enemy.phase} action={highSchoolEnemyAction} className="w-full h-full drop-shadow-lg relative z-10" />
+                                            rivalPlayer && enemy.enemyType === 'RPG_RIVAL' ? <img src={getThemedCharacterSpritePath(rivalVisualTheme || visualTheme, rivalPlayer.id, 'idle', rivalPlayer.imageData, !!rivalPlayer.magicTransformed, rivalPlayer.magicProtagonistId, rivalPlayer.magicProtagonistGender, rivalPlayer.appearanceMode)} alt={enemyName} className="w-full h-full object-contain drop-shadow-lg relative z-10" /> : <EnemyIllustration name={enemy.name} altText={enemyName} seed={enemy.id} aliases={enemySvgAliases} visualTheme={visualTheme} appearanceMode={player.appearanceMode} enemyType={enemy.enemyType} phase={enemy.phase} action={highSchoolEnemyAction} className="w-full h-full drop-shadow-lg relative z-10" />
                                         )}
                                         {!isFinisherActive && <FloatingTextOverlay data={enemy.floatingText} languageMode={languageMode} />}
                                         {!isFinisherActive && <VFXOverlay effects={activeEffects} targetId={enemy.id} />}
@@ -3055,12 +3058,12 @@ const BattleScene: React.FC<BattleSceneProps> = ({
                                             }}
                                             onInspect={onInspect}
                                             disabled={
-                                                selectionState.active
+                                                (blockAttackCards && !selectionState.active && card.type === CardType.ATTACK) || (selectionState.active
                                                     ? isCopySelectionTargetDisabled
                                                     : (isFriendshipComboSelectionMode
                                                         ? (isEnergyDisabled || !!actingEnemyId || card.unplayable || specialDisabled || selfDown || !coopCanAct)
                                                         : (player.currentEnergy < displayCard.cost || !!actingEnemyId || card.unplayable || specialDisabled || selfDown || !coopCanAct)
-                                                    )
+                                                    ))
                                             }
                                             languageMode={languageMode}
                                             appearanceMode={player.appearanceMode}

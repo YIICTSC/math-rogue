@@ -20,7 +20,7 @@ export type ActivityAction =
 
 const distance = (a: {x:number;y:number}, b: {x:number;y:number}) => Math.abs(a.x-b.x)+Math.abs(a.y-b.y);
 export const pendingMutation = (p: Adventurer) => (p.profile?.mutationRevision || 0) < (p.mutationRevision || 0);
-export const activityBusy = (w: World, p: Adventurer) => !!p.arcadePending || !!p.dungeonId || w.activities.trades.some(t => t.from === p.id || t.to === p.id) || pendingMutation(p);
+export const activityBusy = (w: World, p: Adventurer) => !!p.duelId || !!p.arcadePending || !!p.dungeonId || w.activities.trades.some(t => t.from === p.id || t.to === p.id) || pendingMutation(p);
 const available = (w: World, p: Adventurer) => !w.ended && !p.nativeScene && !activityBusy(w,p);
 function rewardCard(w:World,p:Adventurer): Card | undefined {
  const pool = Object.values(CARDS_LIBRARY).filter(c => ['COMMON','UNCOMMON','RARE'].includes(c.rarity) && (!c.visualTheme || c.visualTheme === (p.profile?.visualTheme || w.setup?.visualTheme || 'elementary')));

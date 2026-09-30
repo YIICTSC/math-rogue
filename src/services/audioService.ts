@@ -6,6 +6,12 @@ import { assetUrl } from '../utils/assetPaths';
 import { WEB_PERFORMANCE_MODE, WEB_PRELOAD_ENABLED } from '../config/runtime';
 
 export type BgmThemeId = VisualThemeId | 'magic-female' | 'magic-male';
+export type BgmPlaybackOptions = {
+  /** Pin a scene's track to the requested asset set, independent of the title setting. */
+  mode?: 'NEW' | 'OLD';
+  /** Use a specific themed track without changing the user's active theme. */
+  theme?: BgmThemeId;
+};
 
 declare const __APP_ASSET_VERSION__: string | undefined;
 
@@ -87,6 +93,8 @@ class AudioService {
   
   private bgmMode: 'OSCILLATOR' | 'NEW' | 'OLD' | 'STUDY' = 'NEW';
   private bgmTheme: BgmThemeId = 'elementary';
+  private currentBgmModeOverride: 'NEW' | 'OLD' | null = null;
+  private currentBgmThemeOverride: BgmThemeId | null = null;
   private bgmVolume: number = 1;
   private bgmDuckMultiplier: number = 1;
   private sfxVolume: number = 0.6;
@@ -271,10 +279,7 @@ class AudioService {
       
       // If currently playing, restart with new mode
       if (this.isPlayingBGM && this.currentBgmType) {
-          const type = this.currentBgmType;
-          const loop = this.isLooping;
-          this.stopBGM();
-          this.playBGM(type as any, loop);
+          void this.restartCurrentBGM();
       }
   }
 
@@ -311,7 +316,7 @@ class AudioService {
       if (!this.ctx) return;
       const needsPlaybackRetry = (
           this.isPlayingBGM
-          && this.bgmMode !== 'STUDY'
+          && (this.currentBgmModeOverride ?? this.bgmMode) !== 'STUDY'
           && !this.isBgmPaused
           && (
               (!this.currentSource && !this.currentHtmlAudio)
@@ -362,7 +367,7 @@ class AudioService {
               this.pausedForAppBackground
               && this.isPlayingBGM
               && Boolean(this.currentBgmType)
-              && this.bgmMode !== 'STUDY'
+              && (this.currentBgmModeOverride ?? this.bgmMode) !== 'STUDY'
           );
           this.pausedForAppBackground = false;
           // Wait for the background suspend request before asking iOS to resume.
@@ -391,11 +396,17 @@ class AudioService {
   }
 
   private async restartCurrentBGM() {
-      if (!this.currentBgmType || !this.isPlayingBGM || this.bgmMode === 'STUDY') return;
+      if (!this.currentBgmType || !this.isPlayingBGM || (this.currentBgmModeOverride ?? this.bgmMode) === 'STUDY') return;
       const type = this.currentBgmType;
       const loop = this.isLooping;
+      const options: BgmPlaybackOptions | undefined = this.currentBgmModeOverride || this.currentBgmThemeOverride
+          ? {
+              mode: this.currentBgmModeOverride ?? undefined,
+              theme: this.currentBgmThemeOverride ?? undefined,
+          }
+          : undefined;
       this.stopBGM();
-      await this.playBGM(type as any, loop);
+      await this.playBGM(type as any, loop, options);
   }
 
   public setBgmVolume(volume: number) {
@@ -522,6 +533,20 @@ class AudioService {
 
   public getCurrentBgmType() {
       return this.currentBgmType;
+  }
+
+  public getCurrentBgmPlayback(): { type: string; loop: boolean; options?: BgmPlaybackOptions; paused: boolean } | null {
+      if (!this.isPlayingBGM || !this.currentBgmType) return null;
+      const options: BgmPlaybackOptions = {
+          ...(this.currentBgmModeOverride ? { mode: this.currentBgmModeOverride } : {}),
+          ...(this.currentBgmThemeOverride ? { theme: this.currentBgmThemeOverride } : {}),
+      };
+      return {
+          type: this.currentBgmType,
+          loop: this.isLooping,
+          options: Object.keys(options).length ? options : undefined,
+          paused: this.isBgmPaused,
+      };
   }
 
   public getIsBgmPaused() {
@@ -1067,25 +1092,36 @@ class AudioService {
   }
 
   // --- Public API ---
-  public async playBGM(type: 'battle' | 'mid_boss' | 'boss' | 'final_boss' | 'menu' | 'map' | 'shop' | 'event' | 'rest' | 'reward' | 'victory' | 'game_over' | 'math' | 'poker_shop' | 'poker_play' | 'survivor_metal' | 'school_psyche' | 'dungeon_gym' | 'dungeon_science' | 'dungeon_music' | 'dungeon_library' | 'dungeon_roof' | 'dungeon_boss' | 'paper_plane_setup' | 'paper_plane_battle' | 'paper_plane_vacation' | 'relic_select' | 'kocho_setup' | 'kocho_battle' | 'kocho_boss' | 'random', loop: boolean = true) {
+  public async playBGM(type: 'battle' | 'mid_boss' | 'boss' | 'final_boss' | 'menu' | 'map' | 'shop' | 'event' | 'rest' | 'reward' | 'victory' | 'game_over' | 'math' | 'poker_shop' | 'poker_play' | 'survivor_metal' | 'school_psyche' | 'dungeon_gym' | 'dungeon_science' | 'dungeon_music' | 'dungeon_library' | 'dungeon_roof' | 'dungeon_boss' | 'paper_plane_setup' | 'paper_plane_battle' | 'paper_plane_vacation' | 'relic_select' | 'kocho_setup' | 'kocho_battle' | 'kocho_boss' | 'random', loop: boolean = true, options?: BgmPlaybackOptions) {
       if (type === 'random') {
           await this.playRandomBGM();
           return;
       }
-      
-      if (this.isPlayingBGM && this.currentBgmType === type) return;
+
+      const modeOverride = options?.mode ?? null;
+      const themeOverride = options?.theme ?? null;
+      if (
+          this.isPlayingBGM
+          && this.currentBgmType === type
+          && this.currentBgmModeOverride === modeOverride
+          && this.currentBgmThemeOverride === themeOverride
+      ) return;
       this.init(); 
       this.stopBGM();
       this.currentBgmType = type;
+      this.currentBgmModeOverride = modeOverride;
+      this.currentBgmThemeOverride = themeOverride;
       this.isPlayingBGM = true;
       this.isBgmPaused = false;
       this.isLooping = loop;
       const playbackGeneration = this.playbackGeneration;
       this.swing = 0; 
-      if (this.bgmMode === 'STUDY') return;
+      const playbackMode = modeOverride ?? this.bgmMode;
+      const playbackTheme = themeOverride ?? this.bgmTheme;
+      if (playbackMode === 'STUDY') return;
 
-      if (this.bgmMode === 'NEW' || this.bgmMode === 'OLD') {
-          await this.playMp3(type, loop, playbackGeneration);
+      if (playbackMode === 'NEW' || playbackMode === 'OLD') {
+          await this.playMp3(type, loop, playbackGeneration, playbackMode, playbackTheme);
       } else {
           this.playOscillatorBGM(type);
       }
@@ -1170,13 +1206,13 @@ class AudioService {
       return [opusPath, mp3Path];
   }
 
-  private async playMp3(type: string, loop: boolean, playbackGeneration: number) {
+  private async playMp3(type: string, loop: boolean, playbackGeneration: number, mode: 'NEW' | 'OLD', theme: BgmThemeId) {
       if (!this.ctx || !this.bgmGain) return;
       if (!this.isCurrentPlayback(type, playbackGeneration)) return;
-      const bgmRoot = this.bgmMode === 'NEW' ? 'bgm-new' : 'bgm';
-      const resolvedTheme = this.bgmTheme === 'magic-female' && type === 'menu'
+      const bgmRoot = mode === 'NEW' ? 'bgm-new' : 'bgm';
+      const resolvedTheme = theme === 'magic-female' && type === 'menu'
           ? 'magic'
-          : this.bgmTheme;
+          : theme;
       const themedPaths = resolvedTheme !== 'elementary'
           ? [
               assetUrl(`${bgmRoot}/${resolvedTheme}/${type}.mp3`),
@@ -1210,7 +1246,7 @@ class AudioService {
       // Keep the Web Audio decoder as a fallback for unsupported or blocked media.
       if ((IS_IOS_BUILD || WEB_PERFORMANCE_MODE) && await this.playHtmlAudioMp3(IS_IOS_BUILD ? paths : webPlaybackPaths, loop, type, playbackGeneration)) return;
       if (!this.isCurrentPlayback(type, playbackGeneration)) return;
-      const cacheKey = `${this.bgmMode}:${this.bgmTheme}:${type}`;
+      const cacheKey = `${mode}:${theme}:${type}`;
       let buffer = this.audioBuffers[cacheKey];
       if (!buffer) {
           for (const path of WEB_PERFORMANCE_MODE ? webPlaybackPaths : paths) {
@@ -1231,7 +1267,7 @@ class AudioService {
           return;
       }
       if (!this.isCurrentPlayback(type, playbackGeneration)) return;
-      if (this.bgmMode !== 'NEW' && this.bgmMode !== 'OLD') return;
+      if (mode !== 'NEW' && mode !== 'OLD') return;
 
       try {
           const source = this.ctx.createBufferSource();
@@ -1376,6 +1412,8 @@ class AudioService {
       this.isPlayingBGM = false;
       this.isBgmPaused = false;
       this.currentBgmType = null;
+      this.currentBgmModeOverride = null;
+      this.currentBgmThemeOverride = null;
   }
 
   public pauseBGM(): Promise<void> {

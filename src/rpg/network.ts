@@ -16,7 +16,13 @@ import {
   type RpgAdventureSetup,
 } from "./setup";
 
-const RPG_PROTOCOL_VERSION = 8;
+const RPG_PROTOCOL_VERSION = 10;
+// Avoid BinaryPack's recursive encoding of 16,896 individual terrain cells.
+// Retain binary transport so PeerJS can still chunk large room snapshots.
+type WireWorld = Omit<World, "tiles"> & { tiles: World["tiles"] | string };
+function unpackWorld(world: WireWorld): World {
+  return {...world,tiles:typeof world.tiles === "string" ? world.tiles.split(",") as World["tiles"] : world.tiles};
+}
 
 function isNativeProfile(value: unknown): value is NativeProfile {
   if (!value || typeof value !== "object") return false;
@@ -68,12 +74,14 @@ export class RpgRoom {
   private status(message: string) {
     if (!this.closed) this.notifyStatus(message);
   }
-  practice(name: string, setup?: RpgAdventureSetup, timeLimitMinutes = 30) {
+  practice(name: string, setup?: RpgAdventureSetup, timeLimitMinutes = 30, gameMode: World["gameMode"] = "COOP") {
     this.host = true;
     this.world = createWorld(
       crypto.getRandomValues(new Uint32Array(1))[0],
       setup,
       timeLimitMinutes,
+      Date.now(),
+      gameMode,
     );
     addPlayer(this.world, this.selfId, name);
     this.timer = setInterval(() => {
@@ -131,7 +139,7 @@ export class RpgRoom {
     );
     return peer;
   }
-  async create(name: string, setup?: RpgAdventureSetup, timeLimitMinutes = 30) {
+  async create(name: string, setup?: RpgAdventureSetup, timeLimitMinutes = 30, gameMode: World["gameMode"] = "COOP") {
     this.host = true;
     this.code = Array.from(
       crypto.getRandomValues(new Uint8Array(6)),
@@ -143,6 +151,8 @@ export class RpgRoom {
       crypto.getRandomValues(new Uint32Array(1))[0],
       setup,
       timeLimitMinutes,
+      Date.now(),
+      gameMode,
     );
     addPlayer(this.world, this.selfId, name);
     peer.on("connection", (conn) => {
@@ -210,7 +220,7 @@ export class RpgRoom {
             conn.send({ type: "error", message: "部屋が満員です。" });
             return;
           }
-          conn.send({ type: "init", world: this.world });
+          conn.send({ type: "init", world: {...this.world,tiles:this.world.tiles.join(",")} });
           this.emit();
         } else if (
           data.type === "enter" &&
@@ -229,7 +239,7 @@ export class RpgRoom {
           participant.hp = data.profile.hp;
           participant.maxHp = data.profile.maxHp;
           participant.gold = data.profile.gold;
-          conn.send({ type: "init", world: this.world });
+          conn.send({ type: "init", world: {...this.world,tiles:this.world.tiles.join(",")} });
           this.emit();
         } else if (
           data.type === "action" &&
@@ -302,7 +312,7 @@ export class RpgRoom {
         if (this.receiveDungeon(raw)) return;
         const data = raw as {
           type: string;
-          world?: World;
+          world?: WireWorld;
           state?: Omit<World, "tiles">;
           message?: string;
         };
@@ -321,7 +331,7 @@ export class RpgRoom {
             return;
           }
           clearTimeout(timeout);
-          this.world = data.world;
+          this.world = unpackWorld(data.world);
           this.emit();
           resolve();
         }
@@ -390,7 +400,7 @@ export class RpgRoom {
         if (this.receiveDungeon(raw)) return;
         const data = raw as {
           type: string;
-          world?: World;
+          world?: WireWorld;
           state?: Omit<World, "tiles">;
           setup?: unknown;
           message?: string;
@@ -415,7 +425,7 @@ export class RpgRoom {
             finish(new Error("同じバージョンのRPGオンラインで参加してください。"));
             return;
           }
-          this.world = data.world;
+          this.world = unpackWorld(data.world);
           this.emit();
           finish();
         }

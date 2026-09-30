@@ -246,8 +246,10 @@ export default function WorldCanvas({
       c.save();
       c.scale(scale, scale);
       c.translate(-cx, -cy);
-      for (let y = 0; y < HEIGHT; y++)
-        for (let x = 0; x < WIDTH; x++) {
+      const minX = Math.max(0, Math.floor(cx / T) - 2), maxX = Math.min(WIDTH, Math.ceil((cx + sw / scale) / T) + 2);
+      const minY = Math.max(0, Math.floor(cy / T) - 3), maxY = Math.min(HEIGHT, Math.ceil((cy + sh / scale) / T) + 2);
+      for (let y = minY; y < maxY; y++)
+        for (let x = minX; x < maxX; x++) {
           const tile = w.tiles[y * WIDTH + x],
             hash = (x * 173 + y * 31 + w.seed) % 19,
             px = x * T,
@@ -342,7 +344,7 @@ export default function WorldCanvas({
         const tx = Math.floor((e.clientX-r.left)/v.scale/16+v.x/16);
         const ty = Math.floor((e.clientY-r.top)/v.scale/16+v.y/16);
         const target = Object.values((latest.current as World).players).find(p => p.id !== selfId && p.x === tx && p.y === ty);
-        if (target && onPlayer) { onPlayer(target.id); return; }
+        if (target && onPlayer) onPlayer(target.id);
         onTile(
           Math.floor((e.clientX - r.left) / v.scale / 16 + v.x / 16),
           Math.floor((e.clientY - r.top) / v.scale / 16 + v.y / 16),

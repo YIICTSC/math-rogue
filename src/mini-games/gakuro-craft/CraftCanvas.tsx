@@ -1,3 +1,4 @@
+import {MAP_HEIGHT,CENTER_X,CENTER_Z} from './map';
 import React, { useEffect, useRef } from 'react';
 import { avatarOf } from './avatar';
 import { avatarSvg } from './avatarSprite';
@@ -36,14 +37,17 @@ export default function CraftCanvas({ world, selfId, selected, zoom, onSelect }:
         poly([[sx-a,sy],[sx,sy+b],[sx,sy+b-h],[sx-a,sy-h]],left);poly([[sx,sy+b],[sx+a,sy],[sx+a,sy-h],[sx,sy+b-h]],right);diamond(sx,sy-h,a,b,top);
       };
       const objects:{depth:number;draw:()=>void}[]=[];
-      for(let sum=0;sum<SIZE*2;sum++)for(let x=Math.max(0,sum-SIZE+1);x<=Math.min(SIZE-1,sum);x++){
+      // Inverse-project the padded viewport instead of scanning all9,600 tiles every frame.
+      const corners=[[-tw*2,-90*z],[width+tw*2,-90*z],[-tw*2,height+150*z],[width+tw*2,height+150*z]].map(([sx,sy])=>[(sx-ox)/tw+(sy-oy)/th,(sy-oy)/th-(sx-ox)/tw]);
+      const minX=Math.max(0,Math.floor(Math.min(...corners.map(p=>p[0])))-1),maxX=Math.min(SIZE-1,Math.ceil(Math.max(...corners.map(p=>p[0])))+1),minZ=Math.max(0,Math.floor(Math.min(...corners.map(p=>p[1])))-1),maxZ=Math.min(MAP_HEIGHT-1,Math.ceil(Math.max(...corners.map(p=>p[1])))+1);
+      for(let sum=minX+minZ;sum<=maxX+maxZ;sum++)for(let x=Math.max(minX,sum-maxZ);x<=Math.min(maxX,sum-minZ);x++){
         const zz=sum-x,i=zz*SIZE+x,t=w.tiles[i],[sx,sy]=project(x+.5,zz+.5);
         if(sx < -tw*2||sx>width+tw*2||sy< -90*z||sy>height+150*z)continue;
         const water=t.ground==='water',grass=t.ground==='grass', variation=(x*13+zz*7)%5;
         const top=water?`hsl(184 39% ${49+variation+Math.sin(now/900+x+zz)*2}%)`:grass?`hsl(${99+variation*2} 32% ${56+variation}%)`:'#ddce9a';
         cube(sx,sy,tw/2+.4,th/2+.2,water?3*z:11*z,top,water?'#529fa1':'#987e55',water?'#3c8c99':'#756b48');
         if(water && (x+zz)%3===0){ctx.strokeStyle='#b9e3d077';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(sx-9*z,sy-6*z);ctx.lineTo(sx+9*z,sy-6*z);ctx.stroke();}
-        if(!water&&Math.hypot(x-19.5,zz-19.5)<2.8)diamond(sx,sy-11*z,tw*.43,th*.43,'#c9c498');
+        if(!water&&Math.hypot(x-(CENTER_X-.5),zz-(CENTER_Z-.5))<2.8)diamond(sx,sy-11*z,tw*.43,th*.43,'#c9c498');
         if(grass&&!t.nature&&!t.blocks.length&&t.crop===null&&(i%7===0)){ctx.fillStyle='#eef5c499';ctx.fillRect(sx-5*z,sy-14*z,2*z,3*z);ctx.fillRect(sx+4*z,sy-12*z,2*z,2*z);}
         if(sel===i){ctx.save();ctx.shadowColor='#fffac2';ctx.shadowBlur=12;diamond(sx,sy-12*z,tw*.47,th*.47,'#fff6a655','#fff5be');ctx.restore();}
         if(t.homeOwner||t.nature||t.blocks.length||t.crop!==null)objects.push({depth:x+zz+1,draw:()=>{
@@ -70,9 +74,9 @@ export default function CraftCanvas({ world, selfId, selected, zoom, onSelect }:
         }});
       }
       // Shared facilities appear as the settlement grows.
-      const level=village(w).level;for(let k=0;k<level;k++){const [fx,fy]=project(18+k%2*3,18+Math.floor(k/2)*3,11*z);objects.push({depth:36+k%2*3+Math.floor(k/2)*3,draw:()=>{cube(fx,fy,13*z,7*z,16*z,'#eddbb3','#c5b890','#9f9477');cube(fx,fy-16*z,18*z,9*z,5*z,['#8bab82','#c18d76','#8b9dc5','#cba961'][k],'#7b8c83','#687c78');ctx.fillStyle='#fff8c7';ctx.font=`${15*z}px sans-serif`;ctx.textAlign='center';ctx.fillText(['🪵','🪑','🏫','🌷'][k],fx,fy-25*z);}});}
+      const level=village(w).level;for(let k=0;k<level;k++){const [fx,fy]=project(CENTER_X-2+k%2*3,CENTER_Z-2+Math.floor(k/2)*3,11*z);objects.push({depth:CENTER_X+CENTER_Z-4+k%2*3+Math.floor(k/2)*3,draw:()=>{cube(fx,fy,13*z,7*z,16*z,'#eddbb3','#c5b890','#9f9477');cube(fx,fy-16*z,18*z,9*z,5*z,['#8bab82','#c18d76','#8b9dc5','#cba961'][k],'#7b8c83','#687c78');ctx.fillStyle='#fff8c7';ctx.font=`${15*z}px sans-serif`;ctx.textAlign='center';ctx.fillText(['🪵','🪑','🏫','🌷'][k],fx,fy-25*z);}});}
       // Shared village square: a permanent parcel stand and warm beacon.
-      const [bx,by]=project(20,20,11*z);objects.push({depth:40,draw:()=>{cube(bx,by,15*z,8*z,15*z,'#e6c286','#ae8359','#8b7252');cube(bx,by-15*z,17*z,9*z,4*z,'#8aa7a0','#648b84','#557e79');ctx.fillStyle='#fff5c2';ctx.font=`bold ${12*z}px sans-serif`;ctx.textAlign='center';ctx.fillText('★',bx,by-20*z);}});
+      const [bx,by]=project(CENTER_X,CENTER_Z,11*z);objects.push({depth:CENTER_X+CENTER_Z,draw:()=>{cube(bx,by,15*z,8*z,15*z,'#e6c286','#ae8359','#8b7252');cube(bx,by-15*z,17*z,9*z,4*z,'#8aa7a0','#648b84','#557e79');ctx.fillStyle='#fff5c2';ctx.font=`bold ${12*z}px sans-serif`;ctx.textAlign='center';ctx.fillText('★',bx,by-20*z);}});
       for(const p of Object.values(w.players)){
         const pos=positions.get(p.id)!,tile=w.tiles[Math.floor(pos.z)*SIZE+Math.floor(pos.x)],h=(tile?.blocks.length||0)*13*z;
         const [sx,sy]=project(pos.x,pos.z,11*z+h);if(sx< -80||sx>width+80||sy< -80||sy>height+80)continue;
@@ -95,5 +99,5 @@ export default function CraftCanvas({ world, selfId, selected, zoom, onSelect }:
       frame=requestAnimationFrame(render);
     };frame=requestAnimationFrame(render);return()=>{running=false;cancelAnimationFrame(frame);};
   },[]);
-  return <canvas ref={canvas} className="gc-canvas" aria-label="Craft island" onPointerDown={e=>{if(e.button!==0)return;const r=e.currentTarget.getBoundingClientRect(),{ox,oy,tw,th}=transform.current,sx=e.clientX-r.left-ox,sy=e.clientY-r.top-oy+11*state.current.zoom,x=Math.floor(sx/tw+sy/th),z=Math.floor(sy/th-sx/tw);if(x>=0&&z>=0&&x<SIZE&&z<SIZE)onSelect(z*SIZE+x);}} />;
+  return <canvas ref={canvas} className="gc-canvas" aria-label="Craft island" onPointerDown={e=>{if(e.button!==0)return;const r=e.currentTarget.getBoundingClientRect(),{ox,oy,tw,th}=transform.current,sx=e.clientX-r.left-ox,sy=e.clientY-r.top-oy+11*state.current.zoom,x=Math.floor(sx/tw+sy/th),z=Math.floor(sy/th-sx/tw);if(x>=0&&z>=0&&x<SIZE&&z<MAP_HEIGHT)onSelect(z*SIZE+x);}} />;
 }

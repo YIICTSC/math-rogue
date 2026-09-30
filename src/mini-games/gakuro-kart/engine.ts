@@ -2,7 +2,7 @@ import { defaultAvatar, type KartAvatar } from './avatar';
 import { QUIZ_APPROACH_SPEED, QUIZ_FEEDBACK_SECONDS, QUIZ_GATES, QUIZ_END, answerLane, laneCenter, quizDistance, type KartLesson } from './learning';
 import { COURSES, FEATURES, getTrack, ROAD_WIDTH, sampleTrack } from './track';
 export { COURSES } from './track';
-export const MAX_RACERS = 40, LAPS = 3, RACE_LIMIT = 360;
+export const MAX_RACERS = 40, MIN_LAPS = 1, MAX_LAPS = 5, DEFAULT_LAPS = 3, LAPS = DEFAULT_LAPS, RACE_LIMIT = 360;
 export const HEROES = ['SPARK', 'COMET', 'NOVA'];
 export const PALETTE = ['#ff657e', '#52dcff', '#ad91ff', '#ffd36b', '#58f2bf', '#ff985c'];
 export const ITEMS = { nitro: 'NITRO', shield: 'AEGIS', pulse: 'PULSE', rocket: 'COMEBACK' };
@@ -18,12 +18,19 @@ export interface Racer {
 export interface Race {
   lesson: KartLesson | null;
   phase: 'lobby' | 'countdown' | 'race' | 'result'; remaining: number; time: number;
-  course: number; seed: number; finishAt: number; revision: number; paused: boolean; players: Record<string, Racer>;
+  course: number; laps: number; seed: number; finishAt: number; revision: number; paused: boolean; players: Record<string, Racer>;
 }
 export type Command = { type: 'input'; steer: number; brake: boolean; drift: boolean } | { type: 'item' };
 export const clamp = (n: number, lo: number, hi: number) => Math.max(lo, Math.min(hi, n));
-export function createRace(course = 0, seed = 1): Race {
-  return { lesson: null, phase: 'lobby', remaining: 3, time: 0, course: clamp(Math.floor(course) || 0, 0, COURSES.length - 1), seed, finishAt: 0, revision: 0, paused: false, players: {} };
+export function createRace(course = 0, seed = 1, laps = DEFAULT_LAPS): Race {
+  const selectedLaps = Number.isFinite(laps) ? clamp(Math.floor(laps), MIN_LAPS, MAX_LAPS) : DEFAULT_LAPS;
+  return { lesson: null, phase: 'lobby', remaining: 3, time: 0, course: clamp(Math.floor(course) || 0, 0, COURSES.length - 1), laps: selectedLaps, seed, finishAt: 0, revision: 0, paused: false, players: {} };
+}
+export function setRaceLaps(w: Race, laps: number) {
+  if (w.phase !== 'lobby' || !Number.isInteger(laps) || laps < MIN_LAPS || laps > MAX_LAPS || w.laps === laps) return false;
+  w.laps = laps;
+  w.revision++;
+  return true;
 }
 export function addRacer(w: Race, id: string, name: string, hero = 0, cpu = false) {
   if (w.phase !== 'lobby' || Object.keys(w.players).length >= MAX_RACERS || w.players[id]) return false;
@@ -65,7 +72,7 @@ export function tick(w: Race, dt: number) {
   const oldDistances = new Map(racers.map(p => [p.id, p.distance]));
   for (let place = 0; place < racers.length; place++) {
     const p = racers[place];
-    const lap = Math.min(LAPS - 1, Math.floor(Math.max(0, p.distance) / length));
+    const lap = Math.min(w.laps - 1, Math.floor(Math.max(0, p.distance) / length));
     if (!p.finish && lap > p.quizLap) {
       p.quizLap = lap; p.quizAnswers = [-2, -2, -2]; p.quizTimes = [0, 0, 0];
       p.quizCorrect = 0; p.quizFeedbackAt = w.time; p.quizApplied = false;
@@ -133,7 +140,7 @@ export function tick(w: Race, dt: number) {
       }
     }
     for (const q of racers) if (!p.finish && q.id !== p.id && !q.finish && old < oldDistances.get(q.id)! && p.distance >= q.distance) p.overtakes++;
-    if (!p.finish && p.distance >= length * LAPS) { p.finish = w.time - (p.distance - length * LAPS) / Math.max(1, p.speed); if (!w.finishAt) w.finishAt = w.time; }
+    if (!p.finish && p.distance >= length * w.laps) { p.finish = w.time - (p.distance - length * w.laps) / Math.max(1, p.speed); if (!w.finishAt) w.finishAt = w.time; }
   }
   const bumps = new Map<string, number>();
   for (let i = 0; i < racers.length; i++) for (let j = i + 1; j < racers.length; j++) {

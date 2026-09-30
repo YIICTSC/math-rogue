@@ -1,0 +1,35 @@
+import assert from 'node:assert/strict';
+import {createServer} from 'vite';
+const server=await createServer({optimizeDeps:{noDiscovery:true,entries:[]},server:{middlewareMode:true},appType:'custom',logLevel:'error'});
+try {
+ const {createWorld,addPlayer,removePlayer,applyAction,advanceWorld}=await server.ssrLoadModule('/src/rpg/engine.ts');
+ const {duelEnemy,resolveRivalDefense}=await server.ssrLoadModule('/src/rpg/duels.ts');
+ const now=Date.now(),cards=[{id:'attack',name:'Attack',description:'',cost:1,type:'ATTACK',damage:6,rarity:'COMMON'},{id:'guard',name:'Guard',description:'',cost:1,type:'SKILL',block:5,rarity:'COMMON'}];
+ const make=(mode='BATTLE_ROYALE')=>{const w=createWorld(42,undefined,1,now,mode);w.activities.nextEventAt=w.deadlineAt;for(const id of ['a','b','c']){addPlayer(w,id,id);applyAction(w,id,{type:'native-profile',profile:{hp:40,maxHp:80,gold:100,deckSize:2,character:'WARRIOR',image:'',deck:cards}},now);}return w;};
+ const send=(w,id,a)=>applyAction(w,id,a,now);
+ const player=()=>({id:'WARRIOR',maxHp:80,currentHp:40,maxEnergy:3,currentEnergy:3,block:0,strength:0,gold:100,deck:cards,hand:cards,drawPile:[],discardPile:[],relics:[],potions:[],powers:{},turnFlags:{},relicCounters:{},floatingText:null});
+ const begin=w=>{assert(send(w,'a',{type:'duel-request',target:'b'}));const d=w.duels.at(-1);assert.equal(send(w,'c',{type:'duel-request',target:'b'}),false);assert(send(w,'b',{type:'duel-accept',duelId:d.id}));for(const id of d.members)assert(send(w,id,{type:'duel-ready',duelId:d.id,player:player()}));assert.equal(d.status,'active');return d;};
+ const state=(w,d,id,kind,patch={})=>send(w,id,{type:'duel-state',duelId:d.id,revision:d.revision,kind,player:structuredClone(d.players[id]),opponent:duelEnemy(d,d.members.find(q=>q!==id),'Rival'),...patch});
+ const defender={...duelEnemy({players:{a:{...player(),powers:{BUFFER:1,INTANGIBLE:1,THORNS:3}}}},'a','Rival')},attacker=player();assert.equal(resolveRivalDefense(defender,10,attacker),0);assert.equal(defender.rivalPowers.BUFFER,0);assert.equal(resolveRivalDefense(defender,10,attacker),1);assert.equal(attacker.currentHp,37);
+ const w=make(),d=begin(w),first=d.first,second=d.members.find(id=>id!==first);
+ assert.equal(state(w,d,second,'start'),false);assert(state(w,d,first,'start'));
+ assert.equal(state(w,d,first,'card',{cardId:'attack'}),false,'first turn attack rejected by host');
+ assert(state(w,d,first,'card',{cardId:'guard',player:{...d.players[first],block:5}}));
+ assert(state(w,d,first,'end'));assert.equal(d.actor,second);assert.equal(d.turn,2);
+ assert(state(w,d,second,'start'));
+ const before=duelEnemy(d,first,'Rival');assert(state(w,d,second,'card',{cardId:'attack',opponent:{...before,block:0,currentHp:39}}));assert.equal(d.players[first].currentHp,39);assert.equal(w.players[second].totalDamage,1);
+ assert(state(w,d,second,'card',{cardId:'attack',opponent:{...duelEnemy(d,first,'Rival'),currentHp:0}}));
+ assert.equal(d.status,'finished');assert.equal(d.winner,second);assert.equal(w.players[second].rivalKills,1);
+ assert.equal(state(w,d,second,'card',{cardId:'attack'}),false);assert.equal(w.players[second].rivalKills,1,'no duplicate kills');
+ for(const id of d.members)assert(send(w,id,{type:'duel-return',duelId:d.id,profile:{...w.players[id].profile,hp:48,gold:50}}));assert(!w.players[first].duelId);
+ w.players[second].correctAnswers=6;advanceWorld(w,w.deadlineAt+1);advanceWorld(w,w.rewardAt+1);assert(w.ended);assert.equal(w.rankingAwards[second].category,'KILLS');
+ const bosses=make(),boss=bosses.sites.find(s=>s.kind==='boss');for(const g of bosses.sites.filter(s=>s.kind==='guardian'))g.cleared=true;
+ Object.assign(bosses.players.a,{x:boss.x,y:boss.y});assert(send(bosses,'a',{type:'native-enter',siteId:boss.id}));const token=bosses.players.a.nativeScene.token;
+ assert(send(bosses,'a',{type:'native-ready',token,maxHp:100}));assert(send(bosses,'a',{type:'native-damage',token,total:boss.maxHp,sequence:1,phase:1}));assert.equal(boss.bossPhase,2);
+ assert(send(bosses,'a',{type:'native-damage',token,total:boss.maxHp,sequence:2,phase:2}));assert(boss.cleared);assert.equal(bosses.ended,false,'battle royale continues after the headmaster');
+ const coop=make('COOP');assert.equal(send(coop,'a',{type:'duel-request',target:'b'}),false);
+ const timeout=make(),td=begin(timeout);advanceWorld(timeout,timeout.deadlineAt+1);assert.equal(td.status,'aborted');assert.equal(timeout.players.a.rivalKills,0);
+ const dropped=make(),dd=begin(dropped);removePlayer(dropped,'a');assert.equal(dd.winner,'b');assert.equal(dropped.players.b.rivalKills,1);
+ const expires=make();send(expires,'a',{type:'duel-request',target:'b'});advanceWorld(expires,now+60001);assert(!expires.players.a.duelId);
+ console.log('RPG battle royale passed: consent, exclusivity, random initiative, first-turn attack ban, shared HP/block, kills once, recovery, rankings, disconnect, timeout, cooperative isolation.');
+}finally{await server.close();}

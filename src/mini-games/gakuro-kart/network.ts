@@ -1,7 +1,7 @@
 import { defaultAvatar, validAvatar, type KartAvatar } from './avatar';
 import { validLesson, type KartLesson } from './learning';
 import Peer, { type DataConnection, type PeerOptions } from 'peerjs';
-import { addRacer, command, createRace, MAX_RACERS, startRace, tick, type Command, type Race } from './engine';
+import { addRacer, command, createRace, MAX_RACERS, setRaceLaps, startRace, tick, type Command, type Race } from './engine';
 import { acceptRoster, decodeSnapshot, encodeSnapshot, PROTOCOL, roster, type Roster } from './protocol';
 
 /** Host-authoritative 60 Hz simulation, 20 Hz controls, 10 Hz compact snapshots. */
@@ -160,10 +160,14 @@ export class KartRoom {
     if (!this.host || this.world?.phase !== 'lobby' || !validLesson(lesson)) return;
     this.world.lesson = structuredClone(lesson); this.world.revision++; this.emit();
   }
+  setLaps(laps: number) {
+    if (!this.host || !this.world || !setRaceLaps(this.world, laps)) return;
+    this.emit();
+  }
   start(fill = true) { if (this.host && this.world) { startRace(this.world, fill); this.emit(); } }
-  rematch(lesson?: KartLesson, course = this.world?.course ?? 0) {
+  rematch(lesson?: KartLesson, course = this.world?.course ?? 0, laps = this.world?.laps ?? 3) {
     if (!this.host || this.world?.phase !== 'result') return;
-    const old = this.world, previousRevision = old.revision; this.world = createRace(course, old.seed + 1);
+    const old = this.world, previousRevision = old.revision; this.world = createRace(course, old.seed + 1, laps);
     this.world.lesson = lesson && validLesson(lesson) ? structuredClone(lesson) : old.lesson;
     this.world.revision = previousRevision;
     for (const p of Object.values(old.players)) { addRacer(this.world, p.id, p.name, p.hero, p.cpu); this.world.players[p.id].avatar = { ...p.avatar }; }

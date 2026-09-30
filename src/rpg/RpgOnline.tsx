@@ -1,3 +1,4 @@
+import { findWalkingRoute } from "./walking";
 import ActivitiesPanel from "./ActivitiesPanel";
 import React, {
   useCallback,
@@ -40,42 +41,6 @@ import { buildRpgInviteUrl, getRpgRoomCodeFromUrl } from "./invite";
 import type { RpgAdventureSetup } from "./setup";
 import "./rpg.css";
 
-function nextStep(w: World, x: number, y: number, tx: number, ty: number) {
-  if (tx < 1 || ty < 1 || tx >= WIDTH - 1 || ty >= HEIGHT - 1) return null;
-  const start = y * WIDTH + x,
-    end = ty * WIDTH + tx,
-    queue = [start],
-    previous = new Map([[start, -1]]);
-  for (let i = 0; i < queue.length; i++) {
-    const n = queue[i];
-    if (n === end) break;
-    for (const [dx, dy] of [
-      [1, 0],
-      [-1, 0],
-      [0, 1],
-      [0, -1],
-    ]) {
-      const nx = (n % WIDTH) + dx,
-        ny = Math.floor(n / WIDTH) + dy,
-        k = ny * WIDTH + nx;
-      if (
-        nx < 1 ||
-        ny < 1 ||
-        nx >= WIDTH - 1 ||
-        ny >= HEIGHT - 1 ||
-        previous.has(k) ||
-        ["forest", "water"].includes(w.tiles[k])
-      )
-        continue;
-      previous.set(k, n);
-      queue.push(k);
-    }
-  }
-  if (!previous.has(end) || start === end) return null;
-  let n = end;
-  while (previous.get(n) !== start) n = previous.get(n)!;
-  return { dx: (n % WIDTH) - x, dy: Math.floor(n / WIDTH) - y };
-}
 
 const BONUS_RANKING_LABELS: Record<
   BonusRankingKind,
@@ -148,6 +113,7 @@ export default function RpgOnline({
   const [name, setName] = useState(inviteCode ? "" : "冒険者"),
     [code, setCode] = useState(inviteCode),
     [inviteCopied, setInviteCopied] = useState(false);
+  const [gameMode,setGameMode]=useState<World["gameMode"]>("COOP");
   const [timeLimitMinutes, setTimeLimitMinutes] = useState(30);
   const [clockNow, setClockNow] = useState(() => Date.now());
   const [inviteTheme, setInviteTheme] = useState<RpgAdventureSetup["visualTheme"]>(
@@ -163,6 +129,7 @@ export default function RpgOnline({
   const room = useRef<RpgRoom | null>(null),
     latest = useRef({ world, active });
   const destination = useRef<{ x: number; y: number } | null>(null);
+  const walkingRoute = useRef<Array<{x:number;y:number}>>([]);
   latest.current = { world, active };
   const preview = useMemo(() => {
     const w = createWorld(9252026, {
@@ -192,8 +159,8 @@ export default function RpgOnline({
     BONUS_RANKING_LABELS[world?.bonusRankingKind || "BATTLES"];
   const rankingDefinitions = [
     {
-      title: "総ダメージ数ランキング",
-      score: (member: Adventurer) => member.totalDamage || 0,
+      title: world?.gameMode === "BATTLE_ROYALE" ? "倒した数ランキング" : "総ダメージ数ランキング",
+      score: (member: Adventurer) => world?.gameMode === "BATTLE_ROYALE" ? member.rivalKills || 0 : member.totalDamage || 0,
     },
     {
       title: "総問題正解数ランキング",
@@ -237,8 +204,8 @@ export default function RpgOnline({
     room.current = r;
     onRoom(r);
     try {
-      if (mode === "practice") r.practice(name, adventureSetup, timeLimitMinutes);
-      else if (mode === "create") await r.create(name, adventureSetup, timeLimitMinutes);
+      if (mode === "practice") r.practice(name, adventureSetup, timeLimitMinutes,gameMode);
+      else if (mode === "create") await r.create(name, adventureSetup, timeLimitMinutes,gameMode);
       else if (mode === "invite")
         await r.prepareInviteJoin(code, name, (setup) =>
           onSetup({ ...setup, visualTheme: inviteTheme }),
@@ -328,9 +295,10 @@ export default function RpgOnline({
         target = destination.current;
       if (!latest.current.active || !w || !p || p.nativeScene || !target)
         return;
-      const step = nextStep(w, p.x, p.y, target.x, target.y);
-      if (step) room.current?.send({ type: "move", ...step });
-      else destination.current = null;
+      while(walkingRoute.current[0]?.x===p.x && walkingRoute.current[0]?.y===p.y)walkingRoute.current.shift();
+      const step=walkingRoute.current[0];
+      if(step && distance(p,step)===1)room.current?.send({type:"move",dx:step.x-p.x,dy:step.y-p.y});
+      else destination.current=null;
     }, 160);
     return () => {
       window.removeEventListener("keydown", key);
@@ -416,6 +384,7 @@ export default function RpgOnline({
                 </>
               ) : (
                 <>
+                  <label>ゲームモード<select value={gameMode} onChange={e=>setGameMode(e.target.value as World["gameMode"])}><option value="COOP">協力</option><option value="BATTLE_ROYALE">バトルロイヤル</option></select></label>
                   <label>
                     制限時間
                     <input
@@ -483,7 +452,7 @@ export default function RpgOnline({
             <div className="rpg-game-grid">
               <section className="rpg-exploration">
                 <div className="rpg-map-title">
-                  <h1>木漏れ日のフロンティア</h1>
+                  <h1>木漏れ日のフロンティア</h1><span>{world.gameMode === "BATTLE_ROYALE" ? "バトルロイヤル" : "協力"}</span>
                   <span>
                     戦闘勝利 {me.completedBattles || 0}
                     {remainingSeconds !== null && (
@@ -503,7 +472,9 @@ export default function RpgOnline({
                       visualTheme={previewTheme}
                       onPlayer={setSelectedPeer}
                       onTile={(x, y) => {
-                        destination.current = { x, y };
+                        const route=findWalkingRoute(world,me.x,me.y,x,y);
+                        walkingRoute.current=route;
+                        destination.current=route.at(-1)||null;
                       }}
                     />
                   )}
@@ -519,7 +490,7 @@ export default function RpgOnline({
                       <button
                         aria-label="上へ移動"
                         onClick={() =>
-                          room.current?.send({ type: "move", dx: 0, dy: -1 })
+                          (destination.current = null, room.current?.send({ type: "move", dx: 0, dy: -1 }))
                         }
                       >
                         <ArrowUp />
@@ -528,7 +499,7 @@ export default function RpgOnline({
                         <button
                           aria-label="左へ移動"
                           onClick={() =>
-                            room.current?.send({ type: "move", dx: -1, dy: 0 })
+                            (destination.current = null, room.current?.send({ type: "move", dx: -1, dy: 0 }))
                           }
                         >
                           <ArrowLeft />
@@ -536,7 +507,7 @@ export default function RpgOnline({
                         <button
                           aria-label="下へ移動"
                           onClick={() =>
-                            room.current?.send({ type: "move", dx: 0, dy: 1 })
+                            (destination.current = null, room.current?.send({ type: "move", dx: 0, dy: 1 }))
                           }
                         >
                           <ArrowDown />
@@ -544,7 +515,7 @@ export default function RpgOnline({
                         <button
                           aria-label="右へ移動"
                           onClick={() =>
-                            room.current?.send({ type: "move", dx: 1, dy: 0 })
+                            (destination.current = null, room.current?.send({ type: "move", dx: 1, dy: 0 }))
                           }
                         >
                           <ArrowRight />

@@ -80,7 +80,7 @@ try {
   );
   for (let seed = 0; seed < 80; seed++) {
     const generated = createWorld(seed),
-      queue = [32 * WIDTH + 10],
+      queue = [generated.sites[0].y * WIDTH + generated.sites[0].x],
       seen = new Set(queue);
     for (let i = 0; i < queue.length; i++)
       for (const [dx, dy] of [
@@ -139,6 +139,9 @@ try {
       outcome,
       profile,
     });
+  assert.equal(WIDTH * HEIGHT, 64 * 44 * 6);
+  assert.equal(w.tiles.length, WIDTH * HEIGHT);
+  assert(w.sites.some(s=>s.x>64) && w.sites.some(s=>s.y>44));
   assert.equal(w.sites.length, 39);
   assert.match(siteUnavailable(w, p, site("town")), /3回/);
   enter(site("town"));

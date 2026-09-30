@@ -1,11 +1,13 @@
+import { applyDuel, advanceDuels, leaveDuels, type Duel, type DuelAction } from "./duels";
 import type { Card } from '../types';
 import { createActivities, advanceActivities, applyActivity, activityBusy, acceptProfile, leaveActivities, type Activities, type ActivityAction, type Mutation } from './activities';
 import { cloneRpgAdventureSetup, type RpgAdventureSetup } from "./setup";
 import { getEncounterEnemyNamePool } from "../services/geminiService";
 import type { VisualThemeId } from "../data/visualThemes";
 
-export const WIDTH = 64,
-  HEIGHT = 44,
+// Three times the width and twice the height: six times the explorable area.
+export const WIDTH = 192,
+  HEIGHT = 88,
   CAPACITY = 40;
 export type Tile = "grass" | "forest" | "water" | "road" | "stone";
 export type SiteKind =
@@ -29,7 +31,7 @@ export const BONUS_RANKING_KINDS: BonusRankingKind[] = [
   "INTERACTIONS",
 ];
 export type RpgEndReason = "clear" | "timeout";
-export type RpgRankingCategory = "DAMAGE" | "CORRECT" | "BONUS";
+export type RpgRankingCategory = "KILLS" | "DAMAGE" | "CORRECT" | "BONUS";
 export interface RpgRankingAward {
   category: RpgRankingCategory;
   rank: number;
@@ -92,6 +94,8 @@ export interface Adventurer {
   nativeScene?: NativeScene;
   mutationRevision?: number;
   mutations?: Mutation[];
+  duelId?: string;
+  rivalKills: number;
   dungeonId?: string;
   arcadeUses?: number;
   arcadeResult?: string;
@@ -99,6 +103,8 @@ export interface Adventurer {
 }
 export interface World {
   nativeMode: true;
+  gameMode: "COOP" | "BATTLE_ROYALE";
+  duels: Duel[];
   activities: Activities;
   seed: number;
   setup?: RpgAdventureSetup;
@@ -117,7 +123,7 @@ export interface World {
   bonusRankingKind: BonusRankingKind;
   revision: number;
 }
-export type Action = ActivityAction
+export type Action = DuelAction | ActivityAction
   | { type: "move"; dx: number; dy: number }
   | { type: "team"; target: string | null }
   | { type: "native-enter"; siteId: string }
@@ -234,7 +240,7 @@ function applyNativeAction(
     p.correctAnswers=action.correctAnswers;w.revision++;return true;
   }
   if (action.type === "native-profile") {
-    if (p.nativeScene || !validProfile(action.profile) || !acceptProfile(p,action.profile)) return false;
+    if (p.nativeScene || p.duelId || !validProfile(action.profile) || !acceptProfile(p,action.profile)) return false;
     p.profile = {...action.profile,visualTheme:action.profile.visualTheme || p.profile?.visualTheme};
     p.hp = action.profile.hp;
     p.maxHp = action.profile.maxHp;
@@ -328,7 +334,7 @@ function applyNativeAction(
         site.cleared = true;
         log(w, `${site.name}を討伐！`);
       }
-      if (site.kind === "boss" && site.cleared) {
+      if (site.kind === "boss" && site.cleared && w.gameMode !== "BATTLE_ROYALE") {
         w.won = true;
         endWorld(w, "clear");
       }
@@ -351,8 +357,9 @@ function applyNativeAction(
       if (site.kind === "enemy") rotateEnemyName(w, site);
     }
     if (action.outcome === "defeat") {
-      p.x = 10;
-      p.y = 32;
+      const town = w.sites.find(s=>s.kind === "town")!;
+      p.x = town.x;
+      p.y = town.y;
     }
     if (Number.isFinite(action.battleDamage) && action.battleDamage! >= 0)
       p.totalDamage =
@@ -378,12 +385,13 @@ export function createWorld(
   setup?: RpgAdventureSetup,
   timeLimitMinutes = 30,
   now = Date.now(),
+  gameMode: World["gameMode"] = "COOP",
 ): World {
   const rng = random(seed),
     tiles: Tile[] = [];
   for (let y = 0; y < HEIGHT; y++)
     for (let x = 0; x < WIDTH; x++) {
-      const river = 30 + Math.round(Math.sin(y / 6) * 4);
+      const river = 90 + Math.round(Math.sin(y / 12) * 12);
       tiles.push(
         x === 0 || y === 0 || x === WIDTH - 1 || y === HEIGHT - 1
           ? "forest"
@@ -407,8 +415,8 @@ export function createWorld(
       id: `site-${sites.length}`,
       kind,
       name,
-      x,
-      y,
+      x: x * 3,
+      y: y * 2,
       hp,
       maxHp: hp,
       cleared: false,
@@ -437,7 +445,7 @@ export function createWorld(
     const kind = i % 5 === 0 ? "treasure" : i % 4 === 0 ? "event" : "enemy";
     let candidates: Array<{x:number;y:number}> = [];
     for (const spacing of [5, 3, 1]) {
-      for(let y=5;y<40;y++) for(let x=4;x<59;x++)
+      for(let y=5;y<HEIGHT-5;y++) for(let x=4;x<WIDTH-5;x++)
         if(sites.every(s=>distance(s,{x,y})>=spacing))candidates.push({x,y});
       if(candidates.length)break;
     }
@@ -450,7 +458,8 @@ export function createWorld(
       : undefined;
     const name = enemyNamesByTheme?.[activeTheme]
       || (kind === "event" ? "？イベント" : "忘れられた宝箱");
-    add(kind, name, x, y, 0, enemyNamesByTheme);
+    // Random candidates are already in expanded world coordinates.
+    add(kind, name, x / 3, y / 2, 0, enemyNamesByTheme);
   }
   // A connected spanning tree gives landmarks shorter, varied paths instead
   // of parallel corridors radiating from the starting town.
@@ -481,6 +490,8 @@ export function createWorld(
   );
   return {
     nativeMode: true,
+    gameMode,
+    duels: [],
     activities: createActivities(),
     seed,
     ...(setup ? { setup: cloneRpgAdventureSetup(setup) } : {}),
@@ -506,14 +517,15 @@ export function addPlayer(w: World, id: string, name: string) {
   w.players[id] = {
     id,
     name: name.trim().slice(0, 16) || "冒険者",
-    x: 9 + (Object.keys(w.players).length % 3),
-    y: 32 + (Math.floor(Object.keys(w.players).length / 3) % 2),
+    x: w.sites.find(s=>s.kind === "town")!.x - 1 + (Object.keys(w.players).length % 3),
+    y: w.sites.find(s=>s.kind === "town")!.y + (Math.floor(Object.keys(w.players).length / 3) % 2),
     color: Object.keys(w.players).length % 6,
     hp: 75,
     maxHp: 75,
     gold: 0,
     team: null,
     claimed: [],
+    rivalKills: 0,
     completedBattles: 0,
     totalDamage: 0,
     correctAnswers: 0,
@@ -529,6 +541,7 @@ export function addPlayer(w: World, id: string, name: string) {
 }
 export function removePlayer(w: World, id: string) {
   if (!w.players[id]) return;
+  leaveDuels(w,id);
   leaveActivities(w,id);
   log(w, `${w.players[id].name}が退出。`);
   delete w.players[id];
@@ -563,6 +576,7 @@ export function applyAction(
     w.revision++;
     return true;
   };
+  if (action.type.startsWith("duel-"))return applyDuel(w,p,action as DuelAction,now);
   if (action.type.startsWith("native-"))
     return applyNativeAction(w, p, action, tell);
   if (action.type.startsWith("trade-") || action.type.startsWith("dungeon-") || action.type === "arcade-play" || action.type === "arcade-finish" || action.type === "secret-search")
@@ -627,6 +641,7 @@ export function applyAction(
 }
 
 function rankingScore(player: Adventurer, category: RpgRankingCategory, bonus: BonusRankingKind) {
+  if (category === "KILLS") return player.rivalKills || 0;
   if (category === "DAMAGE") return player.totalDamage || 0;
   if (category === "CORRECT") return player.correctAnswers || 0;
   if (bonus === "TREASURES") return player.claimed?.length || 0;
@@ -637,7 +652,7 @@ function rankingScore(player: Adventurer, category: RpgRankingCategory, bonus: B
 
 function finalizeRankingAwards(w: World) {
   const players = Object.values(w.players);
-  const categories: RpgRankingCategory[] = ["DAMAGE", "CORRECT", "BONUS"];
+  const categories: RpgRankingCategory[] = [w.gameMode === "BATTLE_ROYALE" ? "KILLS" : "DAMAGE", "CORRECT", "BONUS"];
   const awards: Record<string, RpgRankingAward> = {};
   for (const player of players) {
     const playerAwards = categories.map((category) => {
@@ -678,6 +693,7 @@ function endWorld(w: World, reason: RpgEndReason, now = Date.now()) {
 export function advanceWorld(w: World, now = Date.now()) {
   if (!w.ended && now >= w.deadlineAt) endWorld(w, "timeout", now);
   advanceActivities(w,now);
+  advanceDuels(w,now);
   if (
     w.ended &&
     w.rewardAt !== null &&

@@ -10,6 +10,7 @@ export default function ActivitiesPanel({world,selfId,selectedPeer,send,language
  const me=world.players[selfId];
  if(!me)return null;
  const a=world.activities,e=a.event;
+ const duel=world.duels.find(d=>d.id===me.duelId);
  const trade=a.trades.find(t=>t.from===selfId||t.to===selfId);
  const dungeon=a.dungeons.find(d=>d.id===me.dungeonId);
  const town=world.sites.find(s=>s.kind==='town'&&distance(s,me)<=2);
@@ -19,7 +20,7 @@ export default function ActivitiesPanel({world,selfId,selectedPeer,send,language
  return <TranslatedUiTree mode={languageMode}>
   <section className="rpg-player-panel rpg-activities"><h2>仲間とトレード</h2><p>近くの仲間と冒険中のカードを交換できます。</p>
    {target && <p>選択中：{target.name}</p>}
-   {nearby.length===0?<p>近くに仲間がいません。</p>:nearby.map(p=><div className="rpg-team-member-row" key={p.id}><span>{p.name}</span><button disabled={!!trade||!!me.dungeonId||!!me.nativeScene||!!p.nativeScene||!!p.dungeonId||world.ended} onClick={()=>send({type:'trade-request',target:p.id})}>トレード</button></div>)}
+   {nearby.length===0?<p>近くに仲間がいません。</p>:nearby.map(p=><div className="rpg-team-member-row" key={p.id}><span>{p.name}</span><button disabled={!!trade||!!me.duelId||!!p.duelId||!!me.dungeonId||!!me.nativeScene||!!p.nativeScene||!!p.dungeonId||world.ended} onClick={()=>send({type:'trade-request',target:p.id})}>トレード</button>{world.gameMode==='BATTLE_ROYALE'&&<button disabled={!!me.duelId||!!me.dungeonId||!!me.nativeScene||!!p.duelId||!!p.dungeonId||!!p.nativeScene||world.ended} onClick={()=>send({type:'duel-request',target:p.id})}>バトル</button>}</div>)}
   </section>
   <section className="rpg-player-panel rpg-activities"><h2>ワールド共通イベント</h2><strong>{e.title}</strong><p>{e.finished?(e.completed?'達成！ 共通報酬を獲得':'次のイベントを待っています'): <>{e.progress} / {e.target} · 残り {Math.max(0,Math.ceil((e.expires-Date.now())/1000))} 秒</>}</p><progress max={e.target} value={e.progress}/><p>{e.kind==='BATTLES'?'みんなで戦闘に勝利して図書館を取り戻そう。':e.kind==='ANSWERS'?'問題に正解して知識の灯をともそう。':'各地の封印装置を調べ、校長の攻撃力を弱めよう。'}</p>
    <h3>地図の秘密</h3><p>地図の断片 {a.secretsFound.length} / 3 · 発見した断片は全員に共有されます。</p>{a.secretsFound.length>=3&&<p>秘密の遺跡が開放されました！</p>}
@@ -30,6 +31,7 @@ export default function ActivitiesPanel({world,selfId,selectedPeer,send,language
    <h3>ルーレット</h3><p>色が当たると20コインとHP20％回復。</p><div className="rpg-activity-buttons">{['赤','青','緑'].map((name,choice)=><button disabled={world.ended||me.gold<10} key={name} onClick={()=>send({type:'arcade-play',siteId:town.id,game:'ROULETTE',choice})}>{name}</button>)}</div>
    <h3>スロット</h3><p>大当たりで50コイン。</p><button disabled={world.ended||me.gold<10} onClick={()=>send({type:'arcade-play',siteId:town.id,game:'SLOT',choice:0})}>スロットを回す</button><p role="status">{me.arcadeResult}</p>
   </section>}
+  {duel?.status==='request'&&<div className="rpg-overlay"><section className="rpg-dialog rpg-trade-dialog"><h2>ライバルと対戦</h2><p>{world.players[duel.members[0]]?.name} ↔ {world.players[duel.members[1]]?.name}</p><p>先攻・後攻はランダム。先攻の最初のターンはアタックカードを使えません。</p>{selfId===duel.members[1]?<button onClick={()=>send({type:'duel-accept',duelId:duel.id})}>対戦を受ける</button>:<p>相手の承諾を待っています。</p>}<button onClick={()=>send({type:'duel-cancel',duelId:duel.id})}>キャンセル</button></section></div>}
   {trade&&<div className="rpg-overlay"><section className="rpg-dialog rpg-trade-dialog"><h2>カードトレード</h2><p>{world.players[trade.from]?.name} ↔ {world.players[trade.to]?.name}</p>
    {!trade.accepted?<><p>{trade.to===selfId?'トレードの申し込みが届きました。':'相手の承諾を待っています。'}</p>{trade.to===selfId&&<button onClick={()=>send({type:'trade-accept',tradeId:trade.id})}>申し込みを承諾</button>}</>:<>
     <div className="rpg-trade-columns">{[selfId,trade.from===selfId?trade.to:trade.from].map(owner=><div key={owner}><h3>{world.players[owner]?.name} の提示カード</h3>{trade.offers[owner].length===0&&<p>まだカードが選ばれていません。</p>}{trade.offers[owner].map(id=>{const c=card(id,owner);return c?<div className="rpg-trade-card" key={id}><CardInfo card={c} languageMode={languageMode}/></div>:null;})}</div>)}</div>

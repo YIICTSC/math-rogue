@@ -1,3 +1,4 @@
+import { duelEnemy, resolveRivalDefense } from "./rpg/duels";
 import React, { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { App as CapacitorApp } from '@capacitor/app';
 import type { PluginListenerHandle } from '@capacitor/core';
@@ -1652,6 +1653,16 @@ const App: React.FC = () => {
     const rpgRoomRef = useRef<RpgRoom | null>(null);
     const rpgEncounterRef = useRef<RpgEncounter | null>(null);
     const rpgDungeonRef = useRef<{id:string;map:MapNode[];act:number;floor:number;challengeMode:GameState['challengeMode'];visualTheme:GameState['visualTheme'];nodeId:string|null;starting:boolean}|null>(null);
+    const rpgDuelRef = useRef<{id:string;map:MapNode[];nodeId:string|null;turn:number;revision:number;ready:boolean;personalTurns:number;resolved:boolean;ending:boolean;signature:string;pending:null|{kind:'start'|'card'|'end'|'effect';revision:number;cardId?:string;consumedIds?:string[];before:string;sent:boolean}}|null>(null);
+    const [rpgDuelTick,setRpgDuelTick]=useState(0);
+    const duelSignature=(player:Player,enemies:Enemy[])=>JSON.stringify([{...player,floatingText:null},enemies.map(({floatingText,...enemy})=>enemy)]);
+    const canActInDuel=()=>{
+        const ref=rpgDuelRef.current,snapshot=rpgSnapshotRef.current;
+        const d=snapshot?.world.duels.find(d=>d.id===ref?.id);
+        return !ref || !!(d?.status==='active'&&d.actor===snapshot?.selfId&&d.started.includes(`${d.turn}`)&&!ref.pending&&!ref.ending&&!ref.resolved);
+    };
+    const currentRpgDuel=rpgSnapshot?.world.duels.find(d=>d.id===rpgDuelRef.current?.id);
+    const rpgRivalId=currentRpgDuel?.members.find(id=>id!==rpgSnapshot?.selfId)||'';
     const rpgArcadeTokenRef = useRef<string | null>(null);
     const rpgDungeonMessagesRef = useRef<Array<{event:P2PEvent;from:string}>>([]);
     const rpgCorrectAnswersRef = useRef(0);
@@ -5171,7 +5182,7 @@ const App: React.FC = () => {
     useEffect(() => {
         if (canRunRpgOnline) return;
         if (gameState.screen === GameScreen.RPG_ONLINE || gameState.rpgOnline) {
-            p2pService.setRoomTransport(null);rpgDungeonRef.current=null;rpgDungeonMessagesRef.current=[];rpgArcadeTokenRef.current=null;
+            p2pService.setRoomTransport(null);rpgDuelRef.current=null;rpgDungeonRef.current=null;rpgDungeonMessagesRef.current=[];rpgArcadeTokenRef.current=null;
             rpgRoomRef.current?.close();
             rpgEncounterRef.current = null;
             setRpgMounted(false);
@@ -5401,7 +5412,7 @@ const App: React.FC = () => {
 
     const returnToTitle = () => {
         if (stateRef.current.rpgOnline) {
-            p2pService.setRoomTransport(null);rpgDungeonRef.current=null;rpgDungeonMessagesRef.current=[];rpgArcadeTokenRef.current=null;
+            p2pService.setRoomTransport(null);rpgDuelRef.current=null;rpgDungeonRef.current=null;rpgDungeonMessagesRef.current=[];rpgArcadeTokenRef.current=null;
             rpgRoomRef.current?.close();
             rpgRoomRef.current = null;
             rpgEncounterRef.current = null;
@@ -9811,7 +9822,7 @@ const App: React.FC = () => {
     useEffect(() => {
         if (!gameState.rpgOnline || gameState.screen === GameScreen.START_MENU) {
             if (rpgMounted) {
-                p2pService.setRoomTransport(null);rpgDungeonRef.current=null;rpgDungeonMessagesRef.current=[];rpgArcadeTokenRef.current=null;
+                p2pService.setRoomTransport(null);rpgDuelRef.current=null;rpgDungeonRef.current=null;rpgDungeonMessagesRef.current=[];rpgArcadeTokenRef.current=null;
                 rpgRoomRef.current?.close();
                 setRpgMounted(false);
                 rpgEncounterRef.current = null;
@@ -9822,7 +9833,7 @@ const App: React.FC = () => {
             return;
         }
         if (gameState.screen === GameScreen.MAP) setRpgMounted(true);
-        if(rpgDungeonRef.current)return;
+        if(rpgDungeonRef.current||rpgDuelRef.current)return;
         const snapshot = rpgSnapshotRef.current;
         const me = snapshot?.world.players[snapshot.selfId];
         if (!snapshot || !me) return;
@@ -10388,6 +10399,7 @@ const App: React.FC = () => {
     };
 
     const handleUsePotion = (potion: Potion, coopActorPeerId?: string): boolean => {
+        if(!canActInDuel())return false;
         const isCoopHostRemoteAction = !!coopActorPeerId && stateRef.current.challengeMode === 'COOP' && !!coopSession?.isHost;
         const actionState = isCoopHostRemoteAction ? stateRef.current : gameState;
         if (actionState.screen !== GameScreen.BATTLE) return false;
@@ -10622,6 +10634,10 @@ const App: React.FC = () => {
     };
 
     const handlePlayCard = (card: ICard, coopActorPeerId?: string, options?: { endlessBossTaxAlreadyIncluded?: boolean }): boolean => {
+        if(rpgDuelRef.current){
+            const d=rpgSnapshotRef.current?.world.duels.find(d=>d.id===rpgDuelRef.current?.id);
+            if(!canActInDuel()||(d?.turn===1&&card.type===CardType.ATTACK))return false;
+        }
         const isCoopHostRemoteAction = !!coopActorPeerId && stateRef.current.challengeMode === 'COOP' && !!coopSession?.isHost;
         const actionState = isCoopHostRemoteAction ? stateRef.current : gameState;
         if (weatherScryModal || galaxyExpressModal || goldFishModal || dreamCatcherModal) return false;
@@ -10809,6 +10825,7 @@ const App: React.FC = () => {
             return true;
         }
 
+        if(rpgDuelRef.current)rpgDuelRef.current.pending={kind:'card',revision:rpgDuelRef.current.revision,cardId:card.id,consumedIds:(card as ICard & {_consumedIds?:string[]})._consumedIds,before:duelSignature(stateRef.current.player,stateRef.current.enemies),sent:false};
         const dungeonDamageActionId = `card-${crypto.randomUUID()}`;
         setGameState(prev => {
             const actorEntry = coopActorPeerId
@@ -11286,6 +11303,7 @@ const App: React.FC = () => {
                                         : 'あずきは通常のアタックを遊ぶようにかわした！');
                                 }
                             }
+                            damage = resolveRivalDefense(e, damage, p);
                             if (p.relicCounters['INVISIBLE_INK_ACTIVE'] === 1 && card.type === CardType.ATTACK) {
                                 p.relicCounters['INVISIBLE_INK_ACTIVE'] = 0;
                             } else if (e.block >= damage) { e.block -= damage; damage = 0; }
@@ -12572,7 +12590,7 @@ const App: React.FC = () => {
         }
 
         const pCurrent = stateRef.current.player;
-        if (pCurrent.turnFlags['VAULT_EXTRA_TURN']) {
+        if (!rpgDuelRef.current && pCurrent.turnFlags['VAULT_EXTRA_TURN']) {
             setGameState(prev => ({
                 ...prev,
                 combatLog: [...prev.combatLog, trans("> 追加ターン獲得！敵の行動をスキップします", languageMode)].slice(-100)
@@ -12829,7 +12847,7 @@ const App: React.FC = () => {
             ...prev,
             enemies: prev.enemies.map(enemy =>
                 (enemy.currentHp > 0 || (enemy.enemyType === 'THE_HEART' && enemy.phase === 1))
-                    ? { ...enemy, block: 0 }
+                    ? { ...enemy, block: rpgDuelRef.current ? enemy.block : 0 }
                     : enemy
             )
         }));
@@ -13439,7 +13457,7 @@ const App: React.FC = () => {
         setTimeout(() => {
             setGameState(prev => ({ ...prev, activeEffects: [] }));
         }, 600);
-        if (stateRef.current.challengeMode !== 'COOP') {
+        if (stateRef.current.challengeMode !== 'COOP' && !rpgDuelRef.current) {
             startPlayerTurn();
         } else {
             isEndingTurnRef.current = false;
@@ -13713,6 +13731,7 @@ const App: React.FC = () => {
     }, [activeCoopTurnSlot, coopBattleState, coopSelfPeerId, coopSession, executeQueuedTurnTransition, gameState.challengeMode, gameState.player.hand.length, gameState.screen, gameState.turn]);
 
     const handleMagicTransform = useCallback(() => {
+        if(!canActInDuel())return;
         if (stateRef.current.visualTheme !== 'magic' && visualTheme !== 'magic') return;
         setGameState(prev => {
             if (prev.screen !== GameScreen.BATTLE || prev.player.magicTransformed) return prev;
@@ -13765,6 +13784,14 @@ const App: React.FC = () => {
     }, [coopSession, sendCoopStateSync, visualTheme]);
 
     const handleEndTurnClick = () => {
+        if(rpgDuelRef.current){
+            if(!canActInDuel()||stateRef.current.selectionState.active)return;
+            const ref=rpgDuelRef.current;ref.ending=true;
+            void executeEndTurn(0).then(()=>{
+                if(rpgDuelRef.current!==ref)return;
+                ref.ending=false;ref.pending={kind:'end',revision:ref.revision,before:'',sent:false};setRpgDuelTick(n=>n+1);
+            });return;
+        }
         if (isEndingTurnRef.current) return;
         if (weatherScryModal || galaxyExpressModal || goldFishModal || dreamCatcherModal) return;
         lastPlayedCardRef.current = null;
@@ -14840,7 +14867,7 @@ const App: React.FC = () => {
 
     const resolveBattleDefeat = useCallback(() => {
         const currentState = stateRef.current;
-        if (currentState.rpgOnline && (rpgEncounterRef.current || rpgDungeonRef.current)) {
+        if (currentState.rpgOnline && (rpgEncounterRef.current || rpgDungeonRef.current || rpgDuelRef.current)) {
             if(rpgEncounterRef.current)rpgEncounterRef.current.outcome = 'defeat';
             setGameState(prev => ({
                 ...prev,
@@ -14931,7 +14958,7 @@ const App: React.FC = () => {
         rpgAwardHandledRef.current = rewardKey;
         const generated = createRewardCardForAssignment();
         if (!generated) return;
-        const rankingId = award.category === 'DAMAGE'
+        const rankingId = award.category === 'KILLS' ? 'rpg_rival_kills' : award.category === 'DAMAGE'
             ? 'rpg_total_damage'
             : award.category === 'CORRECT'
                 ? 'rpg_correct_answers'
@@ -15066,6 +15093,7 @@ const App: React.FC = () => {
             }
         }
         if (gameState.screen === GameScreen.BATTLE) {
+            if(rpgDuelRef.current)return;
             if (gameState.challengeMode === 'COOP' && coopSession && !coopSession.isHost) {
                 return;
             }
@@ -18773,6 +18801,74 @@ const App: React.FC = () => {
         };
     }, [advanceCoopAfterCharacterReady, appendCoopVfxDebugLog, applyCoopPlayerStateToPeer, applyCoopSharedState, applyCoopSupportEffect, applyHostCoopBattleSnapshot, applyRestAction, applyRewardToLocalPlayer, applySynthesizeCard, applyTreasureRewardsToPlayer, applyUpgradeCard, broadcastCoopBattleState, claimCoopTreasurePoolForPeer, coopPlayerSnapshots, coopRewardSets, coopSelfPeerId, coopSession, eventData, executeQueuedTurnTransition, gameState.challengeMode, gameState.coopBattleState, gameState.map, gameState.player, gameState.rewards, gameState.screen, handleCoopHostDisconnected, handleNodeComplete, handleNodeSelect, handleShopBuyCard, handleShopBuyPotion, handleShopBuyRelic, handleShopLeave, handleShopRemoveCard, handleTreasureOpen, localAssignmentProblemConfig, preserveLocalBattleCardZones, preserveLocalPlayerInCoopBattleState, removeRewardFromList, resolveBattleVictory, resolveCoopEventOptionForPlayer, scheduleHostCoopBattleSync, sendCoopRewardSyncToPeer, sendCoopStateSync, setCoopBattleState, shopCards, shopPotions, shopRelics, treasurePools, turnLog, upsertCoopPlayerSnapshot]);
 
+    useEffect(()=>{
+        const snapshot=rpgSnapshot;if(!gameState.rpgOnline||!snapshot)return;
+        const {world,selfId}=snapshot,me=world.players[selfId],ref=rpgDuelRef.current;
+        const d=world.duels.find(d=>d.id===(ref?.id||me?.duelId));
+        if(ref && (world.ended||!d||d.status==='aborted')){
+            rpgDuelRef.current=null;
+            setGameState(prev=>({...prev,map:ref.map,currentMapNodeId:ref.nodeId,screen:GameScreen.MAP,enemies:[],rewards:[],selectionState:{active:false,type:'DISCARD',amount:0}}));
+            if(!world.ended)rpgRoomRef.current?.send({type:'duel-return',duelId:ref.id,profile:nativeProfile(gameState.player,{correctAnswers:rpgCorrectAnswersRef.current})});
+            return;
+        }
+        if(!ref && d?.status==='preparing' && gameState.screen===GameScreen.MAP){
+            const other=d.members.find(id=>id!==selfId)!,q=world.players[other];
+            const placeholder={...d,players:{[other]:{currentHp:q.hp,maxHp:q.maxHp,block:0,strength:0,powers:{}} as Player}};
+            const enemy=duelEnemy(placeholder,other,q.name);
+            rpgDuelRef.current={id:d.id,map:gameState.map,nodeId:gameState.currentMapNodeId,turn:0,revision:-1,ready:false,personalTurns:0,resolved:false,ending:false,signature:'',pending:null};
+            const player=preparePlayerForBattle(gameState.player,NodeType.COMBAT);
+            setGameState(prev=>({...prev,player,enemies:[enemy],selectedEnemyId:enemy.id,screen:GameScreen.BATTLE,turn:1,combatLog:[],activeEffects:[],selectionState:{active:false,type:'DISCARD',amount:0}}));
+            setCurrentNarrative(trans('ライバルと対戦',languageMode));audioService.playBGM('battle');return;
+        }
+        if(!ref||!d)return;
+        if(!ref.ready&&gameState.screen===GameScreen.BATTLE){
+            ref.ready=true;rpgRoomRef.current?.send({type:'duel-ready',duelId:d.id,player:gameState.player});return;
+        }
+        if(d.status==='finished'){
+            if(!ref.resolved && ref.revision!==d.revision){
+                ref.revision=d.revision;
+                const other=d.members.find(id=>id!==selfId)!;
+                setGameState(prev=>({...prev,player:d.players[selfId],enemies:[duelEnemy(d,other,world.players[other]?.name||'')]}));return;
+            }
+            if(!ref.resolved){
+                ref.resolved=true;ref.pending=null;
+                if(d.winner===selfId)resolveBattleVictory();else resolveBattleDefeat();
+                return;
+            }
+            if(gameState.screen===GameScreen.MAP && (gameState.player.rpgMutationRevision||0)>=(me?.mutationRevision||0)){
+                rpgRoomRef.current?.send({type:'duel-return',duelId:d.id,profile:nativeProfile(gameState.player,{correctAnswers:rpgCorrectAnswersRef.current})});
+                rpgDuelRef.current=null;
+                setGameState(prev=>({...prev,map:ref.map,currentMapNodeId:ref.nodeId}));
+            }
+            return;
+        }
+        if(d.status!=='active'||gameState.screen!==GameScreen.BATTLE||ref.ending)return;
+        if(ref.pending?.sent && d.revision>ref.pending.revision)ref.pending=null;
+        if(ref.pending)return;
+        if(ref.revision!==d.revision){
+            const other=d.members.find(id=>id!==selfId)!,enemy=duelEnemy(d,other,world.players[other]?.name||'');
+            const player=d.players[selfId];ref.revision=d.revision;ref.turn=d.turn;ref.signature=duelSignature(player,[enemy]);
+            setGameState(prev=>({...prev,player,enemies:[enemy],selectedEnemyId:enemy.id}));return;
+        }
+        if(d.actor===selfId&&!d.started.includes(`${d.turn}`)){
+            ref.pending={kind:'start',revision:d.revision,before:ref.personalTurns===0?'':duelSignature(gameState.player,gameState.enemies),sent:false};
+            if(ref.personalTurns>0)startPlayerTurn();else setRpgDuelTick(n=>n+1);
+            ref.personalTurns++;
+        }
+    },[gameState.rpgOnline,gameState.screen,gameState.player,gameState.enemies,rpgSnapshot,rpgDuelTick]);
+
+    useEffect(()=>{
+        const ref=rpgDuelRef.current,snapshot=rpgSnapshotRef.current,d=snapshot?.world.duels.find(d=>d.id===ref?.id);
+        if(!ref||!d||d.status!=='active'||gameState.screen!==GameScreen.BATTLE||ref.ending||ref.resolved||d.actor!==snapshot?.selfId)return;
+        const signature=duelSignature(gameState.player,gameState.enemies);
+        if(!ref.pending && ref.revision===d.revision && d.started.includes(`${d.turn}`) && signature!==ref.signature)
+            ref.pending={kind:'effect',revision:d.revision,before:'',sent:false};
+        const pending=ref.pending;if(!pending||pending.sent||pending.before===signature)return;
+        const other=d.members.find(id=>id!==snapshot.selfId)!,opponent=gameState.enemies[0]||{...duelEnemy(d,other,snapshot.world.players[other]?.name||''),currentHp:0};
+        pending.sent=true;
+        rpgRoomRef.current?.send({type:'duel-state',duelId:ref.id,revision:pending.revision,kind:pending.kind,cardId:pending.cardId,consumedIds:pending.consumedIds,player:gameState.player,opponent});
+    },[gameState.player,gameState.enemies,gameState.screen,rpgSnapshot,rpgDuelTick]);
+
     // Existing COOP handlers above consume events relayed only to this dungeon party.
     useEffect(()=>{
         const current=rpgDungeonRef.current;
@@ -21291,7 +21387,7 @@ const App: React.FC = () => {
                             />
                         ) : (
                             <BattleScene
-                                player={gameState.player} companions={gameState.challengeMode === 'COOP' ? coopCompanions : undefined} coopSelfPeerId={gameState.challengeMode === 'COOP' ? coopSelfPeerId : undefined} coopEffectOwnerPeerId={gameState.challengeMode === 'COOP' ? coopEffectOwnerPeerId : undefined} coopTurnQueue={gameState.challengeMode === 'COOP' ? coopBattleQueueView : undefined} coopCanAct={gameState.challengeMode === 'COOP' ? coopBattleCanAct : true} coopTurnOwnerLabel={gameState.challengeMode === 'COOP' ? coopBattleTurnOwnerLabel : undefined} coopSupportCards={gameState.challengeMode === 'COOP' ? coopSupportCards : undefined} onUseCoopSupport={gameState.challengeMode === 'COOP' ? handleUseCoopSupport : undefined} raceTrickCards={gameState.challengeMode === 'RACE' ? raceTrickCards : undefined} raceTargets={gameState.challengeMode === 'RACE' ? getRaceTargetEntries().slice(0, 3) : undefined} onUseRaceTrickCard={gameState.challengeMode === 'RACE' ? handleUseRaceTrickCard : undefined} selfDown={gameState.challengeMode === 'COOP' && gameState.player.currentHp <= 0} enemies={gameState.enemies} selectedEnemyId={gameState.selectedEnemyId} onSelectEnemy={handleSelectEnemy} onPlayCard={handlePlayCard} onTransform={coopSyncedVisualTheme === 'magic' ? handleMagicTransform : undefined} onEndTurn={handleEndTurnClick} turnLog={turnLog} narrative={currentNarrative} lastActionTime={lastActionTime} lastActionType={lastActionType} actingEnemyId={actingEnemyId} selectionState={battleSelectionState} onHandSelection={handleHandSelection}
+                                rivalVisualTheme={rpgSnapshot?.world.players[rpgRivalId]?.profile?.visualTheme} rivalPlayer={currentRpgDuel?.players[rpgRivalId]} player={gameState.player} companions={gameState.challengeMode === 'COOP' ? coopCompanions : undefined} coopSelfPeerId={gameState.challengeMode === 'COOP' ? coopSelfPeerId : undefined} coopEffectOwnerPeerId={gameState.challengeMode === 'COOP' ? coopEffectOwnerPeerId : undefined} coopTurnQueue={gameState.challengeMode === 'COOP' ? coopBattleQueueView : undefined} blockAttackCards={!!rpgDuelRef.current && currentRpgDuel?.turn===1} coopCanAct={rpgDuelRef.current ? canActInDuel() : gameState.challengeMode === 'COOP' ? coopBattleCanAct : true} coopTurnOwnerLabel={rpgDuelRef.current ? (canActInDuel()?trans('あなたのターン',languageMode):trans('相手のターン',languageMode)) : gameState.challengeMode === 'COOP' ? coopBattleTurnOwnerLabel : undefined} coopSupportCards={gameState.challengeMode === 'COOP' ? coopSupportCards : undefined} onUseCoopSupport={gameState.challengeMode === 'COOP' ? handleUseCoopSupport : undefined} raceTrickCards={gameState.challengeMode === 'RACE' ? raceTrickCards : undefined} raceTargets={gameState.challengeMode === 'RACE' ? getRaceTargetEntries().slice(0, 3) : undefined} onUseRaceTrickCard={gameState.challengeMode === 'RACE' ? handleUseRaceTrickCard : undefined} selfDown={gameState.challengeMode === 'COOP' && gameState.player.currentHp <= 0} enemies={gameState.enemies} selectedEnemyId={gameState.selectedEnemyId} onSelectEnemy={handleSelectEnemy} onPlayCard={handlePlayCard} onTransform={coopSyncedVisualTheme === 'magic' ? handleMagicTransform : undefined} onEndTurn={handleEndTurnClick} turnLog={turnLog} narrative={currentNarrative} lastActionTime={lastActionTime} lastActionType={lastActionType} actingEnemyId={actingEnemyId} selectionState={battleSelectionState} onHandSelection={handleHandSelection}
                                 onUsePotion={handleUsePotion} combatLog={gameState.combatLog} languageMode={languageMode} codexOptions={gameState.codexOptions} onCodexSelect={onCodexSelect} onPlaySynthesizedCard={handlePlaySynthesizedCard}
                                 parryState={gameState.parryState} onParry={handleParryClick} showParryTutorial={showParryTutorial} onCloseParryTutorial={handleCloseParryTutorial} activeEffects={gameState.activeEffects}
                                 onCancelSelection={handleCancelSelection}
@@ -21422,6 +21518,7 @@ const App: React.FC = () => {
                     </React.Suspense>
                 )}
 
+                {gameState.rpgOnline&&rpgDuelRef.current&&gameState.screen===GameScreen.BATTLE&&<div className="fixed left-1/2 top-2 z-50 -translate-x-1/2 rounded bg-slate-900/90 px-4 py-2 text-sm text-amber-100"><span>{trans(currentRpgDuel?.turn===1?'先攻の初ターン：アタック禁止':'ライバルと対戦',languageMode)}</span><button className="ml-4 rounded border px-3 py-1" onClick={()=>rpgRoomRef.current?.send({type:'duel-forfeit',duelId:rpgDuelRef.current!.id})}>{trans('降参',languageMode)}</button></div>}
                 {gameState.rpgOnline && rpgDungeonRef.current && gameState.screen===GameScreen.MAP && (
                     <div className="absolute inset-0 z-40 flex flex-col items-center justify-center gap-5 bg-slate-950 text-amber-100">
                         <h1 className="text-2xl">{trans('協力ダンジョン',languageMode)}</h1>
@@ -21436,7 +21533,7 @@ const App: React.FC = () => {
                             <RpgOnline
                                 languageMode={languageMode}
                                 player={gameState.player}
-                                active={gameState.screen === GameScreen.MAP && !rpgDungeonRef.current}
+                                active={gameState.screen === GameScreen.MAP && !rpgDungeonRef.current && !rpgDuelRef.current}
                                 sceneError={rpgSceneError}
                                 adventureSetup={{
                                     visualTheme: gameState.visualTheme || visualTheme,

@@ -1,0 +1,60 @@
+import assert from 'node:assert/strict';
+import fs from 'node:fs/promises';
+import { createServer } from 'vite';
+import react from '@vitejs/plugin-react';
+import { chromium } from 'playwright';
+
+const root = 'tmp/kart-steering-qa';
+await fs.mkdir(root, { recursive: true });
+await fs.writeFile(`${root}/index.html`, '<html><head><meta name="viewport" content="width=device-width,initial-scale=1"></head><body style="margin:0"><div id="root"></div><script type="module" src="./fixture.tsx"></script></body></html>');
+await fs.writeFile(`${root}/fixture.tsx`, `import React,{useState}from'react';import{createRoot}from'react-dom/client';import SteeringPad from '/src/mini-games/gakuro-kart/SteeringPad.tsx';import '/src/mini-games/gakuro-kart/kart.css';function Fixture(){const[disabled,setDisabled]=useState(false);window.disablePad=setDisabled;return <main className="gk-root" style={{display:'flex',alignItems:'flex-end'}}><nav className="gk-controls" style={{width:'100%'}}><div className="gk-steering"><SteeringPad disabled={disabled} onChange={value=>{window.axis=value}}/></div><div className="gk-control-hint">AUTO ACCEL</div><button className="gk-brake" onPointerDown={()=>{window.brake=true}} onPointerUp={()=>{window.brake=false}} onPointerCancel={()=>{window.brake=false}}>BRAKE</button><button className="gk-drift">DRIFT</button><button className="gk-item">ITEM</button></nav></main>}createRoot(document.getElementById('root')).render(<Fixture/>);`);
+const server = await createServer({ configFile: false, optimizeDeps: { entries: [`${root}/index.html`] }, plugins: [react()], logLevel: 'error', server: { host: '127.0.0.1', port: 0, hmr: false } });
+await server.listen();
+const browser = await chromium.launch({ headless: true });
+try {
+  const errors = [], page = await browser.newPage({ viewport: { width: 390, height: 844 }, hasTouch: true });
+  page.on('pageerror', e => errors.push(e.message));
+  await page.goto(`http://127.0.0.1:${server.httpServer.address().port}/${root}/index.html`);
+  const pad = page.getByRole('button', { name: 'Steering stick' });
+  await pad.waitFor();
+  for (const [width, height] of [[320, 640], [390, 844], [820, 1180], [844, 390], [1280, 800]]) {
+    await page.setViewportSize({ width, height });
+    assert(await page.evaluate(() => document.querySelector('.gk-controls').scrollWidth <= innerWidth), `${width}: controls overflow`);
+    const box = await pad.boundingBox();
+    assert(box.width >= 80 && box.y + box.height <= height + 1);
+  }
+  await page.setViewportSize({ width: 390, height: 844 });
+  const box = await pad.boundingBox(), center = { x: box.x + box.width / 2, y: box.y + 27, id: 1 };
+  const brake = await page.getByRole('button', { name: 'BRAKE', exact: true }).boundingBox();
+  const second = { x: brake.x + brake.width / 2, y: brake.y + brake.height / 2, id: 2 };
+  const cdp = await page.context().newCDPSession(page);
+  const touch = (type, touchPoints) => cdp.send('Input.dispatchTouchEvent', { type, touchPoints });
+  await touch('touchStart', [center]);
+  await page.waitForFunction(() => window.axis === 0);
+  await touch('touchMove', [{ ...center, x: center.x + 16 }]);
+  await page.waitForFunction(() => window.axis > 0 && window.axis < 1);
+  await touch('touchStart', [{ ...center, x: center.x + 16 }, second]);
+  await page.waitForFunction(() => window.brake && window.axis > 0);
+  await touch('touchMove', [{ ...center, x: box.x - 15 }, second]);
+  await page.waitForFunction(() => window.axis === -1 && window.brake);
+  await touch('touchEnd', [{ ...center, x: box.x - 15 }]);
+  await page.waitForFunction(() => window.axis === 0 && window.brake);
+  await touch('touchEnd', []);
+  await page.waitForFunction(() => !window.brake);
+  await touch('touchStart', [{ ...center, x: box.x + box.width - 10 }]);
+  await page.waitForFunction(() => window.axis === 1);
+  await touch('touchCancel', []);
+  await page.waitForFunction(() => window.axis === 0);
+  await page.mouse.move(box.x + 24, center.y); await page.mouse.down();
+  await page.waitForFunction(() => window.axis === -1);
+  await page.evaluate(() => window.dispatchEvent(new Event('blur')));
+  await page.waitForFunction(() => window.axis === 0);
+  await page.mouse.up();
+  await page.mouse.move(box.x + box.width - 10, center.y); await page.mouse.down();
+  await page.waitForFunction(() => window.axis === 1);
+  await page.evaluate(() => window.disablePad(true));
+  await page.waitForFunction(() => window.axis === 0);
+  assert(await pad.isDisabled()); await page.mouse.up();
+  assert.deepEqual(errors, []);
+  console.log('PASS steering pad: analog left/right, center, multitouch braking, captured release, cancel/blur/disabled resets and 320px/phone/tablet/landscape/desktop bounds');
+} finally { await browser.close(); await server.close(); }

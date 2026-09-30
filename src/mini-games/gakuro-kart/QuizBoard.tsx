@@ -24,7 +24,7 @@ export default function QuizBoard({ world, racer, languageMode, sound }: { world
   const resultText = ['クラッシュ！', '減速…', 'そのままレースへ', '全問正解！ブースト！'][racer.quizCorrect];
   const symbol = q.visual?.kind === 'map_symbol' ? MAP_SYMBOL_ASSET_MAP[q.visual.symbol] : null;
   return <section className={`gk-quiz-board ${feedback ? correct ? 'is-correct' : 'is-wrong' : ''} ${result ? 'is-summary' : ''}`} aria-label={t('学習電光掲示板')}>
-    <div className="gk-board-top"><b>LEARNING STRAIGHT · LAP {racer.quizLap + 1}</b><span>{result ? `${racer.quizCorrect} / 3` : `${index + 1} / 3`}</span><span>{t('正解')} {racer.quizCorrect}</span></div>
+    <div className="gk-board-top"><b>LEARNING STRAIGHT · LAP {racer.quizLap + 1} / {world.laps}</b><span>{result ? `${racer.quizCorrect} / 3` : `${index + 1} / 3`}</span><span>{t('正解')} {racer.quizCorrect}</span></div>
     {result ? <div className="gk-quiz-summary" role="status"><strong>{racer.quizCorrect} / 3</strong><b>{t(resultText)}</b></div> : <>
       <div className="gk-board-content" data-allow-japanese="true">
         <div className="gk-question-copy">{q.passage && <p className="gk-passage">{q.passage}</p>}<strong><MathText text={q.question} /></strong>{q.audioPrompt && <button onClick={speak} disabled={!sound}>{t('聞く')}</button>}</div>

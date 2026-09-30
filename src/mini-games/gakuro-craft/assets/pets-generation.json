@@ -1,0 +1,88 @@
+{
+  "tool": "built-in image_gen",
+  "prompt": "Use case: stylized-concept. Asset type: transparent animation sprite sheet for a cozy quarter-view school island game. Subject: adorable small golden Shiba Inu dog, white cheeks and belly, curled tail, teal collar, consistent identity in all frames. Polished hand-painted cute 3D illustration, orthographic quarter-view looking down 30 degrees, facing screen-right. EXACTLY SIX sprites, regular THREE COLUMNS by TWO ROWS grid. Frame order row-major: 1 walking front right paw forward; 2 walking other paws forward; 3 seated grooming face with paw; 4 curled side sleeping eyes closed (belly hidden); 5 playful low crouch all paws down belly hidden; 6 lying on back showing belly and paws, happy trusting expression. Each whole animal centered in its own cell, occupies ONLY 50 percent cell width and height, at least 25 percent empty transparent padding on ALL four sides, generous gaps, paws ears tail entirely visible. Actual transparent alpha background, no floor, no scenery, no text labels, no borders, no extra objects or animals. Keep exact grid and natural anatomy.",
+  "subjects": [
+    [
+      "shiba",
+      "golden Shiba Inu"
+    ],
+    [
+      "corgi",
+      "small tricolor Welsh Corgi dog, short legs, long body, tall ears, white chest, tan eyebrows and black saddle, teal collar"
+    ],
+    [
+      "poodle",
+      "small apricot toy poodle dog, curly fluffy fur, floppy ears, round muzzle, teal collar"
+    ],
+    [
+      "calico",
+      "small calico cat, white coat with ginger and black patches, green eyes, teal collar"
+    ],
+    [
+      "tabby",
+      "small silver gray striped tabby cat, pale belly, blue eyes, teal collar"
+    ],
+    [
+      "blackCat",
+      "small black cat, silky charcoal fur, tiny white chest patch, yellow eyes, teal collar"
+    ],
+    [
+      "rabbit",
+      "small white-and-caramel lop-eared rabbit, floppy ears, pink nose, fluffy cotton tail"
+    ],
+    [
+      "hamster",
+      "small golden Syrian hamster, golden back, white belly, round ears, chubby cheeks"
+    ],
+    [
+      "panda",
+      "small cute giant panda cub, black and white fur, round black ears, black eye patches"
+    ],
+    [
+      "longTailedTit",
+      "tiny white fluffy Japanese long-tailed tit bird (shima-enaga), round snow-white head and body, tiny black eyes and beak, dark wings, long thin tail. Bird anatomy, wings instead of arms, tiny two bird feet"
+    ]
+  ],
+  "sources": [
+    {
+      "id": "shiba",
+      "source": "pet-shiba-source.png"
+    },
+    {
+      "id": "corgi",
+      "source": "pet-corgi-source.png"
+    },
+    {
+      "id": "poodle",
+      "source": "pet-poodle-source.png"
+    },
+    {
+      "id": "calico",
+      "source": "pet-calico-source.png"
+    },
+    {
+      "id": "tabby",
+      "source": "pet-tabby-source.png"
+    },
+    {
+      "id": "blackCat",
+      "source": "pet-blackCat-source.png"
+    },
+    {
+      "id": "rabbit",
+      "source": "pet-rabbit-source.png"
+    },
+    {
+      "id": "hamster",
+      "source": "pet-hamster-source.png"
+    },
+    {
+      "id": "panda",
+      "source": "pet-panda-source.png"
+    },
+    {
+      "id": "longTailedTit",
+      "source": "pet-longTailedTit-source.png"
+    }
+  ]
+}

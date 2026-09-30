@@ -2,3 +2,5 @@
 import './test-rpg-native-engine.mjs';
 
 await import('./test-rpg-activities.mjs');
+
+await import('./test-rpg-duels.mjs');

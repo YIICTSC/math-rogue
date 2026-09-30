@@ -132,7 +132,7 @@ try {
  const gid=await guest.evaluate(()=>window.__rpgTest.room.selfId);
  await page.waitForFunction(gid=>!!window.__rpgTest.room.world.players[gid]?.profile?.deck,gid);
  await page.evaluate(gid=>{const r=window.__rpgTest.room,w=r.world;w.activities.nextEventAt=w.deadlineAt;const s=w.sites.find(s=>s.kind==='dungeon');for(const id of [r.selfId,gid])Object.assign(w.players[id],{x:s.x,y:s.y});r.send({type:'dungeon-join',siteId:s.id});},gid);
- await guest.waitForFunction(()=>window.__rpgTest.snapshot.world.players[window.__rpgTest.room.selfId].x===18);
+ await guest.waitForFunction(()=>window.__rpgTest.snapshot.world.players[window.__rpgTest.room.selfId].x===54);
  await guest.evaluate(()=>{const r=window.__rpgTest.room;r.send({type:'dungeon-join',siteId:window.__rpgTest.snapshot.world.sites.find(s=>s.kind==='dungeon').id});});
  await page.waitForFunction(()=>window.__rpgTest.room.world.activities.dungeons[0].members.length===2);
  await page.getByRole('button',{name:'準備完了',exact:true}).click();await guest.getByRole('button',{name:'準備完了',exact:true}).click();

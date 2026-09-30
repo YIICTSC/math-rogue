@@ -30,9 +30,17 @@ try {
   });
   await page.locator('.gk-finished').waitFor();
   assert.match(await page.locator('.gk-finished').innerText(),/FREE RUN/);
-  assert.equal(await page.getByRole('button',{name:'Steer right'}).isEnabled(),true);
+  assert.equal(await page.getByRole('button',{name:'Steering stick'}).isEnabled(),true);
   assert.equal(await page.locator('.gk-quiz-board').count(),0);
   const result=await page.evaluate(()=>({finish:window.room.world.players.local.finish,distance:window.room.world.players.local.distance}));
+  const pad=await page.getByRole('button',{name:'Steering stick'}).boundingBox();
+  await page.mouse.move(pad.x+24,pad.y+27);await page.mouse.down();
+  await page.waitForFunction(()=>window.room.world.players.local.steer===1);
+  await page.mouse.up();await page.waitForFunction(()=>window.room.world.players.local.steer===0);
+  await page.mouse.move(pad.x+pad.width-24,pad.y+27);await page.mouse.down();
+  await page.waitForFunction(()=>window.room.world.players.local.steer===-1);
+  await page.mouse.up();await page.waitForFunction(()=>window.room.world.players.local.steer===0);
+  await page.evaluate(()=>{window.room.world.players.local.x=0;window.room.world.players.local.slide=0;});
   await page.keyboard.down('ArrowRight');await page.waitForTimeout(250);await page.keyboard.up('ArrowRight');
   assert(await page.evaluate(()=>window.room.world.players.local.x<0));
   assert(await page.evaluate(distance=>window.room.world.players.local.distance>distance,result.distance));

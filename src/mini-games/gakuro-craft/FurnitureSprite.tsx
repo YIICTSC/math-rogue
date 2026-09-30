@@ -1,0 +1,8 @@
+import React from 'react';
+import atlasA from './assets/furniture-home-a-v2.png';
+import atlasB from './assets/furniture-home-b.png';
+import atlasPlush from './assets/furniture-plush.png';
+import atlasGames from './assets/furniture-hobbies.png';
+import type {HomeItem} from './progression';
+export const FURNITURE_FRAMES:Record<HomeItem,{sheet:'a'|'b'|'plush'|'games';row:number}>={plushBear:{sheet:'plush',row:0},plushBunny:{sheet:'plush',row:1},darts:{sheet:'games',row:0},billiards:{sheet:'games',row:1},arcade:{sheet:'games',row:2},bed:{sheet:'a',row:0},sofa:{sheet:'a',row:1},desk:{sheet:'a',row:2},bookshelf:{sheet:'a',row:3},stove:{sheet:'a',row:4},workbench:{sheet:'a',row:5},wardrobe:{sheet:'a',row:6},chair:{sheet:'a',row:7},table:{sheet:'a',row:8},rug:{sheet:'a',row:9},clock:{sheet:'a',row:10},cushion:{sheet:'b',row:0},plant:{sheet:'b',row:1},painting:{sheet:'b',row:2},cabinet:{sheet:'b',row:3},bath:{sheet:'b',row:4},bench:{sheet:'b',row:5},lamp:{sheet:'b',row:6},flower:{sheet:'b',row:7},campfire:{sheet:'b',row:8},piano:{sheet:'b',row:9},aquarium:{sheet:'b',row:10}};
+export function FurnitureSprite({item,rotation=0}:{item:HomeItem;rotation?:number}){const frame=FURNITURE_FRAMES[item],column=((rotation%4)+4)%4,sheets={a:atlasA,b:atlasB,plush:atlasPlush,games:atlasGames},height={a:2112,b:2112,plush:384,games:576};return <svg data-furniture={item} data-direction={column} x={-23} y={-43} width={46} height={55.2} viewBox={`${column*160} ${frame.row*192} 160 192`} overflow="hidden" style={{pointerEvents:'none'}}><image href={sheets[frame.sheet]} x={0} y={0} width={640} height={height[frame.sheet]}/></svg>;}

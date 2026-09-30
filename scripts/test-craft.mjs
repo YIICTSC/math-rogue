@@ -24,15 +24,15 @@ try {
   e.applyCommand(w,p.id,{type:'move',dx:Infinity,dz:0});assert(Number.isFinite(p.dx));
   for(let i=0;i<10;i++)e.tick(w,.1);const stopped=p.x;e.tick(w,.1);assert.equal(p.x,stopped,'Stale input must stop movement');
   w.paused=true;const time=w.time;e.tick(w,.1);assert.equal(w.time,time);w.paused=false;
-  p.x=16.5;p.z=20.5;const tile=20*40+16;Object.assign(w.tiles[tile],{nature:null,blocks:[],crop:null,ground:'grass'});
+  p.x=56.5;p.z=40.5;const tile=40*120+56;Object.assign(w.tiles[tile],{nature:null,blocks:[],crop:null,ground:'grass'});
   assert.match(act({type:'act',tool:'plant',tile}).text,/種を/);assert.equal(p.bag.seed,5);
   assert.match(act({type:'act',tool:'water',tile}).text,/水を/);w.time+=46;assert(e.mature(w,w.tiles[tile]));
   act({type:'act',tool:'harvest',tile});assert.equal(p.bag.crop,2);assert.equal(w.harvested,1);
-  p.x=18.5;p.z=20.5;act({type:'donate'});assert.equal(w.donated,1);assert.equal(p.bag.crop,1);
+  p.x=58.5;p.z=40.5;act({type:'donate'});assert.equal(w.donated,1);assert.equal(p.bag.crop,1);
   const oldWood=p.bag.wood;act({type:'craft',material:'plank'});assert.equal(p.bag.wood,oldWood-2);
-  p.x=17.5;act({type:'act',tool:'build',building:'plank',tile});assert.deepEqual(w.tiles[tile].blocks,['plank']);
+  p.x=57.5;act({type:'act',tool:'build',building:'plank',tile});assert.deepEqual(w.tiles[tile].blocks,['plank']);
   assert.equal(w.tiles[tile].owner,p.id);assert(w.tiles[tile].revision>0);
-  w.players.p1.x=17.5;w.players.p1.z=20.5;w.time+=4;assert.match(e.applyCommand(w,'p1',{type:'act',tool:'remove',tile}).text,/ほかの/);
+  w.players.p1.x=57.5;w.players.p1.z=40.5;w.time+=4;assert.match(e.applyCommand(w,'p1',{type:'act',tool:'remove',tile}).text,/ほかの/);
   act({type:'act',tool:'remove',tile});assert.equal(w.tiles[tile].blocks.length,0);
   const pre=p.bag.wood;act({type:'act',tool:'gather',tile:0});assert.equal(p.bag.wood,pre,'Remote tile actions cannot grant materials');
   w.tiles[tile].nature='rock';const stone=p.bag.stone;act({type:'act',tool:'gather',tile});assert.equal(p.bag.stone,stone+3);w.time+=181;e.tick(w,.1);assert.equal(w.tiles[tile].nature,'rock','Rock resources must regrow as rocks');
@@ -43,7 +43,7 @@ try {
   w.tiles[tile].nature=null;p.bag.crop=2;assert.match(act({type:'craft',material:'meal'}).text,/たき火/);assert.equal(p.bag.meal,0);
   act({type:'craft',material:'campfire'});act({type:'act',tool:'build',building:'campfire',tile});assert.deepEqual(w.tiles[tile].blocks,['campfire']);
   act({type:'craft',material:'meal'});assert.equal(p.bag.meal,1);const mealEnergy=p.energy;act({type:'eat'});assert(p.buffUntil>w.time);assert.equal(p.energy,mealEnergy,'Food must not bypass learning energy');
-  p.x=20;p.z=20;p.bag.crop=1;const coins=p.coins;act({type:'donate'});assert.equal(p.coins,coins+3);const seeds=p.bag.seed;act({type:'buy',material:'seed'});assert.equal(p.bag.seed,seeds+1);assert.equal(p.coins,coins+1);
+  p.x=60;p.z=40;p.bag.crop=1;const coins=p.coins;act({type:'donate'});assert.equal(p.coins,coins+3);const seeds=p.bag.seed;act({type:'buy',material:'seed'});assert.equal(p.bag.seed,seeds+1);assert.equal(p.coins,coins+1);
   act({type:'appearance',avatar:{skin:2,hair:3,shirt:4,pants:2,style:1,hat:1}});assert.equal(p.avatar.hat,1);act({type:'appearance',avatar:{skin:Infinity,shirt:-1}});assert.equal(p.avatar.skin,0);assert(p.avatar.shirt>=0);
   const rain=e.createWorld(1);rain.time=70;const rainTile=rain.tiles.find(t=>t.ground==='grass'&&!t.nature);rainTile.crop=60;e.tick(rain,.1);assert(rainTile.watered);assert(rainTile.revision>0);
   p.energy=0;const beforeX=p.x;e.applyCommand(w,p.id,{type:'move',dx:1,dz:0});e.tick(w,.1);assert.equal(p.x,beforeX);

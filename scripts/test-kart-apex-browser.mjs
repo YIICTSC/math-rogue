@@ -72,9 +72,9 @@ try {
     assert(await page.evaluate(() => document.querySelector('.gk-root').scrollWidth <= innerWidth + 1), `${label} horizontal overflow`);
     const drift = await page.getByRole('button', { name: /DRIFT/ }).boundingBox(); assert(drift && drift.y + drift.height <= height + 1, `${label} controls clipped`);
     if (label === 'phone') {
-      const left = await page.getByRole('button', { name: 'Steer left' }).boundingBox();
+      const left = await page.getByRole('button', { name: 'Steering stick' }).boundingBox();
       const cdp = await page.context().newCDPSession(page);
-      await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: left.x + left.width / 2, y: left.y + left.height / 2, id: 1 }, { x: drift.x + drift.width / 2, y: drift.y + drift.height / 2, id: 2 }] });
+      await cdp.send('Input.dispatchTouchEvent', { type: 'touchStart', touchPoints: [{ x: left.x + 24, y: left.y + left.height / 2, id: 1 }, { x: drift.x + drift.width / 2, y: drift.y + drift.height / 2, id: 2 }] });
       await page.waitForFunction(() => window.room.world.players.local.steer === 1 && window.room.world.players.local.drift);
       await cdp.send('Input.dispatchTouchEvent', { type: 'touchEnd', touchPoints: [] });
       await page.waitForFunction(() => window.room.world.players.local.steer === 0 && !window.room.world.players.local.drift); await cdp.detach();

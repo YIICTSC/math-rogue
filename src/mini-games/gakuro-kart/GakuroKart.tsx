@@ -1,9 +1,11 @@
 import NextCoursePicker from './NextCoursePicker';
+import LapCountPicker from './LapCountPicker';
+import SteeringPad from './SteeringPad';
 import { minimapGeometry } from './minimap';
 import AvatarCreator from './AvatarCreator';
 import { AVATAR_COLORS, loadAvatar, saveAvatar, type KartAvatar } from './avatar';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { COURSES, ITEMS, ITEM_EFFECTS, LAPS, MAX_RACERS, createRace, addRacer, ranking, type Race } from './engine';
+import { COURSES, ITEMS, ITEM_EFFECTS, DEFAULT_LAPS, MAX_RACERS, createRace, addRacer, ranking, type Race } from './engine';
 import { getTrack, sampleTrack } from './track';
 import { KartRoom } from './network';
 import { KartAudio } from './audio';
@@ -17,9 +19,23 @@ import { QUIZ_END, quizDistance, type KartLesson } from './learning';
 import type { LessonSelection } from './questions';
 import { storageService } from '../../services/storageService';
 import { managementPortalService } from '../../services/managementPortalService';
-import { audioService } from '../../services/audioService';
+import { audioService, type BgmPlaybackOptions } from '../../services/audioService';
 
 const time = (n: number) => `${Math.floor(n / 60)}:${(n % 60).toFixed(2).padStart(5, '0')}`;
+type KartBgmType = Exclude<Parameters<typeof audioService.playBGM>[0], 'random'>;
+type KartBgmChoice = { type: KartBgmType; options: BgmPlaybackOptions };
+// Order follows COURSES. Each entry pins its source set: marked-old tracks use
+// OLD, while unmarked tracks use NEW regardless of the title-screen preference.
+const KART_COURSE_BGMS: readonly KartBgmChoice[] = [
+  { type: 'battle', options: { mode: 'NEW', theme: 'high-school' } },
+  { type: 'paper_plane_battle', options: { mode: 'OLD' } },
+  { type: 'survivor_metal', options: { mode: 'OLD' } },
+  { type: 'paper_plane_battle', options: { mode: 'NEW' } },
+  { type: 'paper_plane_vacation', options: { mode: 'NEW' } },
+  { type: 'map', options: { mode: 'NEW', theme: 'high-school' } },
+  { type: 'battle', options: { mode: 'OLD', theme: 'magic-female' } },
+  { type: 'final_boss', options: { mode: 'OLD', theme: 'magic-male' } },
+];
 function MiniMap({ world, self }: { world: Race; self: string }) {
   const map = useMemo(() => minimapGeometry(world.course), [world.course]);
   return <svg className="gk-map" viewBox="0 0 122 140" aria-label="Circuit map"><path d={map.path} fill="none" stroke="#ffffff30" strokeWidth="5" /><path d={map.path} fill="none" stroke="#b9e0e055" strokeWidth="1" />{Object.values(world.players).sort((a, b) => Number(a.id === self) - Number(b.id === self)).map(p => { const pt = map.project(sampleTrack(p.distance, world.course, p.x)); return <circle key={p.id} cx={pt.x} cy={pt.y} r={p.id === self ? 3.5 : 1.7} fill={p.id === self ? '#d9ff6a' : p.cpu ? '#9eafc2' : '#5fe8ef'} />; })}</svg>;
@@ -29,21 +45,26 @@ export default function GakuroKart({ onClose, languageMode = 'JAPANESE' }: { onC
   const [error, setError] = useState(''), [busy, setBusy] = useState(false), [copied, setCopied] = useState(false), [fill, setFill] = useState(true), [sound, setSound] = useState(true);
   const [avatar, setAvatar] = useState(loadAvatar);
   const [nextCourse, setNextCourse] = useState(0);
-  useEffect(() => { if (world) setNextCourse(world.course); }, [world?.course, world?.seed]);
+  const [nextLaps, setNextLaps] = useState(DEFAULT_LAPS);
+  useEffect(() => { if (world) { setNextCourse(world.course); setNextLaps(world.laps); } }, [world?.course, world?.laps, world?.seed]);
   const [picking, setPicking] = useState<'practice' | 'create' | 'edit' | null>(null);
   const selection = useRef<LessonSelection | null>(null), recorded = useRef(new Set<string>());
   const wakeAudio = () => { if (!audio.current) audio.current = new KartAudio(); void audio.current.unlock().catch(() => {}); };
   const room = useRef<KartRoom | null>(null), audio = useRef<KartAudio | null>(null), generation = useRef(0);
   const input = useRef({ left: false, right: false, brake: false, drift: false });
+  const stickInput = useRef(0);
   const currentPhase = useRef(world?.phase); currentPhase.current = world?.phase;
   const self = room.current?.selfId || 'preview', me = world?.players[self];
   const latestAudioState = useRef<{ world: Race | null; self: string }>({ world: null, self: 'preview' });
   latestAudioState.current = { world, self };
   const preview = useMemo(() => { const w = createRace(world?.course ?? course); addRacer(w, 'preview', name, hero); w.players.preview.x = 0; w.players.preview.distance = 0; w.players.preview.avatar = avatar; return w; }, [world?.course, course, name, hero, avatar]);
   const changeAvatar = (value: KartAvatar) => { if (room.current?.world && room.current.world.phase !== 'lobby') return; setAvatar(value); saveAvatar(value); room.current?.setAvatar(value); };
-  const clearInput = () => { input.current = { left: false, right: false, brake: false, drift: false }; room.current?.send({ type: 'input', steer: 0, brake: false, drift: false }); };
+  const clearInput = () => { stickInput.current = 0; input.current = { left: false, right: false, brake: false, drift: false }; room.current?.send({ type: 'input', steer: 0, brake: false, drift: false }); };
   useEffect(() => { clearInput(); }, [world?.phase]);
-  useEffect(() => { audioService.stopBGM(); }, []);
+  useEffect(() => () => {
+    audioService.setBgmDuckMultiplier(1);
+    audioService.stopBGM();
+  }, []);
   useEffect(() => {
     if (!world?.lesson || !me || me.cpu) return;
     const assignment = room.current?.host ? selection.current?.assignment : undefined;
@@ -83,7 +104,7 @@ export default function GakuroKart({ onClose, languageMode = 'JAPANESE' }: { onC
       if (currentPhase.current !== 'race') return;
       const pad = navigator.getGamepads?.()?.[0], axis = pad && Math.abs(pad.axes[0]) > .15 ? pad.axes[0] : 0;
       // Screen-right is negative on our track-space axis, so invert stick and button inputs.
-      room.current?.send({ type: 'input', steer: -(axis || Number(input.current.right) - Number(input.current.left)), brake: input.current.brake || !!pad?.buttons[6]?.pressed, drift: input.current.drift || !!pad?.buttons[0]?.pressed });
+      room.current?.send({ type: 'input', steer: -(stickInput.current || axis || Number(input.current.right) - Number(input.current.left)), brake: input.current.brake || !!pad?.buttons[6]?.pressed, drift: input.current.drift || !!pad?.buttons[0]?.pressed });
       if (pad?.buttons[1]?.pressed && !padItem) room.current?.send({ type: 'item' }); padItem = !!pad?.buttons[1]?.pressed;
     }, 50);
     return () => { generation.current++; clearInterval(timer); window.removeEventListener('keydown', down); window.removeEventListener('keyup', up); window.removeEventListener('blur', blur); window.removeEventListener('focus', resumeAudio); window.removeEventListener('pageshow', resumeAudio); document.removeEventListener('visibilitychange', visibility); room.current?.close(); audio.current?.close(); };
@@ -114,7 +135,7 @@ export default function GakuroKart({ onClose, languageMode = 'JAPANESE' }: { onC
     if (busy) return;
     wakeAudio(); setBusy(true); setError('');
     const token = generation.current;
-    try { const { buildLesson } = await import('./questions'); if (generation.current === token) room.current?.rematch(selection.current ? buildLesson(selection.current) : undefined, nextCourse); }
+    try { const { buildLesson } = await import('./questions'); if (generation.current === token) room.current?.rematch(selection.current ? buildLesson(selection.current) : undefined, nextCourse, nextLaps); }
     catch (e) { setError(e instanceof Error ? e.message : 'Problem preparation failed'); }
     finally { if (generation.current === token) setBusy(false); }
   };
@@ -125,11 +146,45 @@ export default function GakuroKart({ onClose, languageMode = 'JAPANESE' }: { onC
   });
   const order = world ? ranking(world) : [], place = order.findIndex(p => p.id === self) + 1, length = getTrack(world?.course ?? course).length;
   const quizProgress = me ? quizDistance(me.distance, length) : QUIZ_END;
+  const quizBoardVisible = Boolean(
+    world?.phase === 'race'
+    && world.lesson
+    && me
+    && !me.finish
+    && me.distance >= me.quizLap * length
+    && (!me.quizApplied || quizProgress <= QUIZ_END + 230),
+  );
+  useEffect(() => {
+    audioService.setBgmDuckMultiplier(quizBoardVisible ? 0.48 : 1);
+  }, [quizBoardVisible]);
+  useEffect(() => {
+    if (picking) {
+      void audioService.playBGM('math', true, { mode: 'NEW' });
+      return;
+    }
+    if (!world) {
+      void audioService.playBGM('paper_plane_setup', true, { mode: 'NEW' });
+      return;
+    }
+    if (world.phase === 'lobby') {
+      void audioService.playBGM('paper_plane_setup', true, { mode: 'NEW' });
+      return;
+    }
+    if (world.phase === 'countdown' || world.phase === 'race') {
+      const choice = KART_COURSE_BGMS[world.course] ?? KART_COURSE_BGMS[0];
+      void audioService.playBGM(choice.type, true, choice.options);
+      return;
+    }
+    if (world.phase === 'result') {
+      const nextCourseChanged = nextCourse !== world.course;
+      void audioService.playBGM(nextCourseChanged ? 'paper_plane_setup' : 'victory', true, { mode: 'NEW' });
+    }
+  }, [picking, world?.phase, world?.course, nextCourse]);
   const active = world?.phase === 'race' && !world.paused;
   const front = order.slice(0, 5); if (me && place > 5) front.push(me);
   if (picking) return <LessonPicker languageMode={languageMode} busy={busy} error={error} onSelect={chooseLesson} onBack={() => { generation.current++; setPicking(null); setError(''); }} />;
   return <TranslatedUiTree mode={languageMode}><main className={`gk-root ${world ? 'gk-playing' : ''}`} data-gamepad-initial-scope="gakuro-kart" onPointerDownCapture={wakeAudio} onTouchStartCapture={wakeAudio} onKeyDownCapture={wakeAudio}>
-    <header className="gk-header"><button className="gk-back" onClick={world || busy ? leave : onClose}>← <span>{world ? 'ガレージ' : '学習ローグ'}</span></button><div className="gk-brand">GAKURO<span>GP<span className="gk-brand-dot">●</span></span></div><div className="gk-header-right"><span className="gk-live">40 RACERS / 3 LAPS</span><button aria-label="Sound toggle" className="gk-sound" onClick={() => { if (!audio.current) audio.current = new KartAudio(); void audio.current.unlock().catch(() => {}); setSound(audio.current.toggle()); }}>{sound ? 'SOUND ON' : 'SOUND OFF'}</button></div></header>
+    <header className="gk-header"><button className="gk-back" onClick={world || busy ? leave : onClose}>← <span>{world ? 'ガレージ' : '学習ローグ'}</span></button><div className="gk-brand">GAKURO<span>GP<span className="gk-brand-dot">●</span></span></div><div className="gk-header-right"><span className="gk-live">40 RACERS / {world?.laps ?? DEFAULT_LAPS} LAPS</span><button aria-label="Sound toggle" className="gk-sound" onClick={() => { if (!audio.current) audio.current = new KartAudio(); void audio.current.unlock().catch(() => {}); setSound(audio.current.toggle()); }}>{sound ? 'SOUND ON' : 'SOUND OFF'}</button></div></header>
     {error && <div className="gk-error" role="alert">{error}</div>}
     {!world ? <div className="gk-garage">
       <section className="gk-preview"><KartCanvas world={preview} selfId="preview" preview /><div className="gk-preview-shade" /><div className="gk-preview-copy"><span className="gk-eyebrow">THE AFTER-SCHOOL GRAND PRIX</span><h1>BREAK<br />THE <em>LIMIT.</em></h1><p>放課後を、ぶっちぎれ。</p><div className="gk-pills"><span>FULL 3D</span><span>40 PLAYER GRID</span><span>DRIFT & BOOST</span></div></div><div className="gk-course-caption"><span>0{course + 1} / CIRCUIT</span><strong>{COURSES[course].name}</strong><span>{COURSES[course].subtitle}</span></div></section>
@@ -140,23 +195,23 @@ export default function GakuroKart({ onClose, languageMode = 'JAPANESE' }: { onC
         <div className="gk-join"><input aria-label="ルームコード" placeholder="6文字のルームコード" maxLength={6} value={code} onChange={e => setCode(e.target.value.toUpperCase())} /><button disabled={busy || code.length !== 6} onClick={() => start('join')}>参加 →</button></div>
         <p className="gk-note">{busy ? '接続中…' : 'ひとりでも39台のライバル。オンラインは最大40人。'}</p>
       </section>
-      <section className="gk-rules"><div><span>01 / CARVE</span><h3>曲がって、ためる。</h3><p>左右でハンドル。カーブでドリフトを押し続け、離してターボ。長くためるほど強く加速。</p></div><div><span>02 / CHASE</span><h3>背中を追って、抜く。</h3><p>前の車の真後ろでスリップストリーム。加速パネルとジャンプ台をつなぎ、ライバルを抜き去ろう。</p></div><div><span>03 / OVERTAKE</span><h3>最後まで、逆転。</h3><p>光るクリスタルでアイテム獲得。ニトロ、防御、前方へのパルス、追い上げロケット。勝負は3周。</p></div></section>
+      <section className="gk-rules"><div><span>01 / CARVE</span><h3>曲がって、ためる。</h3><p>左右でハンドル。カーブでドリフトを押し続け、離してターボ。長くためるほど強く加速。</p></div><div><span>02 / CHASE</span><h3>背中を追って、抜く。</h3><p>前の車の真後ろでスリップストリーム。加速パネルとジャンプ台をつなぎ、ライバルを抜き去ろう。</p></div><div><span>03 / OVERTAKE</span><h3>最後まで、逆転。</h3><p>光るクリスタルでアイテム獲得。ニトロ、防御、前方へのパルス、追い上げロケット。周回数はホストが決める。</p></div></section>
     </div> : <>
       <section className={`gk-race-view ${me?.boost ? 'is-boosting' : ''} ${world.lesson && me && !me.finish && quizProgress < QUIZ_END + 230 ? 'has-quiz' : ''} ${me?.crash ? 'is-crashing' : ''}`}><KartCanvas world={world} selfId={self} />
         <div className="gk-vignette" />{me && me.boost > 0 && active && <div className="gk-speed-streaks" />}
-        <div className="gk-hud"><div className="gk-position"><span>POSITION</span><strong>{String(place).padStart(2, '0')}<small> / {order.length}</small></strong></div><div className="gk-lap"><span>LAP</span><strong>{Math.min(LAPS, Math.max(1, Math.floor((me?.distance || 0) / length) + 1))}<small> / {LAPS}</small></strong></div><div className="gk-race-time"><span>{world.finishAt ? 'FINISH WINDOW' : 'RACE TIME'}</span><strong>{world.finishAt ? Math.ceil(world.remaining) : time(world.time)}</strong></div></div>
-        <div className="gk-leaderboard">{front.map(p => <div key={p.id} className={p.id === self ? 'is-self' : ''}><b>{order.indexOf(p) + 1}</b><i style={{ background: AVATAR_COLORS[p.avatar.outfit] }} /><span>{p.name}</span><small>{p.finish ? 'FIN' : p.id === self ? 'YOU' : `${Math.max(0, Math.round((Math.min(length * LAPS, order[0].distance) - p.distance)))}m`}</small></div>)}</div>
+        <div className="gk-hud"><div className="gk-position"><span>POSITION</span><strong>{String(place).padStart(2, '0')}<small> / {order.length}</small></strong></div><div className="gk-lap"><span>LAP</span><strong>{Math.min(world.laps, Math.max(1, Math.floor((me?.distance || 0) / length) + 1))}<small> / {world.laps}</small></strong></div><div className="gk-race-time"><span>{world.finishAt ? 'FINISH WINDOW' : 'RACE TIME'}</span><strong>{world.finishAt ? Math.ceil(world.remaining) : time(world.time)}</strong></div></div>
+        <div className="gk-leaderboard">{front.map(p => <div key={p.id} className={p.id === self ? 'is-self' : ''}><b>{order.indexOf(p) + 1}</b><i style={{ background: AVATAR_COLORS[p.avatar.outfit] }} /><span>{p.name}</span><small>{p.finish ? 'FIN' : p.id === self ? 'YOU' : `${Math.max(0, Math.round((Math.min(length * world.laps, order[0].distance) - p.distance)))}m`}</small></div>)}</div>
         {me && world.lesson && <QuizBoard world={world} racer={me} languageMode={languageMode} sound={sound} />}
         <MiniMap world={world} self={self} />
-        <div className="gk-track-label"><b>{COURSES[world.course].name}</b><span>{Math.round(Math.max(0, Math.min(1, (me?.distance || 0) / (length * LAPS))) * 100)}%</span><i style={{ width: `${Math.max(0, Math.min(100, (me?.distance || 0) / (length * LAPS) * 100))}%` }} /></div>
+        <div className="gk-track-label"><b>{COURSES[world.course].name}</b><span>{Math.round(Math.max(0, Math.min(1, (me?.distance || 0) / (length * world.laps))) * 100)}%</span><i style={{ width: `${Math.max(0, Math.min(100, (me?.distance || 0) / (length * world.laps) * 100))}%` }} /></div>
         <div className="gk-speed"><strong>{Math.round((me?.speed || 0) * 3.6)}</strong><span>KM/H</span></div>
         {active && <div className="gk-drive-feedback"><b>{me?.crash ? 'CRASH!' : world.lesson && me && !me.finish && quizProgress < QUIZ_END ? 'CHOOSE YOUR LANE' : me?.jump ? 'AIR TIME' : me?.boost ? 'BOOST!' : me && me.draft > .7 ? 'SLIPSTREAM' : me && me.charge > .6 ? 'RELEASE TO BOOST' : 'AUTO ACCEL'}</b><div className="gk-charge"><i style={{ width: `${(me?.charge || 0) / 2.4 * 100}%` }} /><span /><span /></div><small>DRIFT CHARGE</small></div>}
-        {world.phase === 'lobby' && <div className="gk-overlay"><section className="gk-card gk-ready-card"><small>GRID / READY ROOM</small><h2>スターティンググリッド</h2>{room.current?.code && <button className="gk-code" onClick={async () => { try { await navigator.clipboard.writeText(room.current!.code); setCopied(true); } catch { setError('コードを選択してコピーしてください。'); } }}>{room.current.code}<small>{copied ? 'コピー済み' : 'コピー'}</small></button>}<p>参加者 {order.filter(p => !p.cpu).length} / {MAX_RACERS}</p><div className="gk-roster">{order.map(p => <div key={p.id}><i style={{ background: AVATAR_COLORS[p.avatar.outfit] }} />{p.name}{p.id === self && <small>YOU</small>}</div>)}</div><div className="gk-avatar-preview"><KartCanvas world={preview} selfId="preview" preview /></div><AvatarCreator value={avatar} onChange={changeAvatar} languageMode={languageMode} /><p className="gk-note">ホストは画面を開いたままプレイしてください。</p>{room.current?.host ? <><div className="gk-lesson-summary"><b>3 QUESTIONS / 4 LANES</b><p>{world.lesson?.title}</p><button onClick={() => setPicking('edit')}>問題を選び直す</button></div><label className="gk-fill"><input type="checkbox" checked={fill} onChange={e => setFill(e.target.checked)} />空き枠をCPUで埋める</label><button className="gk-primary" disabled={!world.lesson} onClick={e => { wakeAudio(); e.currentTarget.blur(); room.current?.start(fill); }}>レースを開始 →</button></> : <p>ホストのスタートを待っています。</p>}<div className="gk-quick-help">← → / A D : STEER<br />SPACE / SHIFT : DRIFT　↓ / S : BRAKE　E : ITEM<br />GAMEPAD : STICK / A / LT / B</div></section></div>}
+        {world.phase === 'lobby' && <div className="gk-overlay"><section className="gk-card gk-ready-card"><small>GRID / READY ROOM</small><h2>スターティンググリッド</h2>{room.current?.code && <button className="gk-code" onClick={async () => { try { await navigator.clipboard.writeText(room.current!.code); setCopied(true); } catch { setError('コードを選択してコピーしてください。'); } }}>{room.current.code}<small>{copied ? 'コピー済み' : 'コピー'}</small></button>}<p>参加者 {order.filter(p => !p.cpu).length} / {MAX_RACERS}</p><div className="gk-roster">{order.map(p => <div key={p.id}><i style={{ background: AVATAR_COLORS[p.avatar.outfit] }} />{p.name}{p.id === self && <small>YOU</small>}</div>)}</div><div className="gk-avatar-preview"><KartCanvas world={preview} selfId="preview" preview /></div><AvatarCreator value={avatar} onChange={changeAvatar} languageMode={languageMode} /><p className="gk-note">ホストは画面を開いたままプレイしてください。</p><LapCountPicker value={world.laps} onChange={laps => room.current?.setLaps(laps)} disabled={!room.current?.host} languageMode={languageMode} />{room.current?.host ? <><div className="gk-lesson-summary"><b>3 QUESTIONS / 4 LANES</b><p>{world.lesson?.title}</p><button onClick={() => setPicking('edit')}>問題を選び直す</button></div><label className="gk-fill"><input type="checkbox" checked={fill} onChange={e => setFill(e.target.checked)} />空き枠をCPUで埋める</label><button className="gk-primary" disabled={!world.lesson} onClick={e => { wakeAudio(); e.currentTarget.blur(); room.current?.start(fill); }}>レースを開始 →</button></> : <p>ホストのスタートを待っています。</p>}<div className="gk-quick-help">← → / A D : STEER<br />SPACE / SHIFT : DRIFT　↓ / S : BRAKE　E : ITEM<br />GAMEPAD : STICK / A / LT / B</div></section></div>}
         {world.phase === 'countdown' && <div className="gk-countdown"><span>{Math.ceil(world.remaining)}</span><p>GET READY TO BREAK AWAY</p></div>}
         {world.phase === 'race' && !!me?.finish && <div className="gk-finished"><b>FREE RUN</b><span>#{place} · {time(me.finish)}</span><p>順位・タイム確定！結果がそろうまで自由に走れます。</p></div>}
-        {world.phase === 'result' && <div className="gk-overlay"><section className="gk-card gk-result-card"><small>THE AFTER-SCHOOL GRAND PRIX</small><h2>{place === 1 ? 'YOU WIN!' : `FINISH / #${place}`}</h2><div className="gk-result-stats"><div><b>{me?.finish ? time(me.finish) : 'DNF'}</b><span>TIME</span></div><div><b>{me?.drifts || 0}</b><span>DRIFT BOOSTS</span></div><div><b>{me?.overtakes || 0}</b><span>OVERTAKES</span></div></div><ol className="gk-results">{order.map((p, i) => <li key={p.id} className={p.id === self ? 'is-self' : ''}><b>{String(i + 1).padStart(2, '0')}</b><i style={{ background: AVATAR_COLORS[p.avatar.outfit] }} /><span>{p.name}<small>{p.cpu ? 'CPU' : 'PLAYER'}</small></span><strong>{p.quizCorrectTotal}/9 · {p.finish ? time(p.finish) : 'DNF'}</strong></li>)}</ol>{room.current?.host ? <><NextCoursePicker value={nextCourse} onChange={setNextCourse} disabled={busy} languageMode={languageMode} /><button className="gk-primary" disabled={busy} onClick={restart}>もう一度レース</button></> : <p>ホストの再戦を待っています。</p>}<button className="gk-secondary" onClick={leave}>ガレージへ戻る</button></section></div>}
+        {world.phase === 'result' && <div className="gk-overlay"><section className="gk-card gk-result-card"><small>THE AFTER-SCHOOL GRAND PRIX</small><h2>{place === 1 ? 'YOU WIN!' : `FINISH / #${place}`}</h2><div className="gk-result-stats"><div><b>{me?.finish ? time(me.finish) : 'DNF'}</b><span>TIME</span></div><div><b>{me?.drifts || 0}</b><span>DRIFT BOOSTS</span></div><div><b>{me?.overtakes || 0}</b><span>OVERTAKES</span></div></div><ol className="gk-results">{order.map((p, i) => <li key={p.id} className={p.id === self ? 'is-self' : ''}><b>{String(i + 1).padStart(2, '0')}</b><i style={{ background: AVATAR_COLORS[p.avatar.outfit] }} /><span>{p.name}<small>{p.cpu ? 'CPU' : 'PLAYER'}</small></span><strong>{p.quizCorrectTotal}/{3 * world.laps} · {p.finish ? time(p.finish) : 'DNF'}</strong></li>)}</ol>{room.current?.host ? <><NextCoursePicker value={nextCourse} onChange={setNextCourse} disabled={busy} languageMode={languageMode} /><LapCountPicker value={nextLaps} onChange={setNextLaps} disabled={busy} languageMode={languageMode} /><button className="gk-primary" disabled={busy} onClick={restart}>もう一度レース</button></> : <p>ホストの再戦を待っています。</p>}<button className="gk-secondary" onClick={leave}>ガレージへ戻る</button></section></div>}
       </section>
-      <nav className="gk-controls" aria-label="Race controls"><div className="gk-steering"><button aria-label="Steer left" disabled={!active} {...touch('left')}>◀<small>A / ←</small></button><button aria-label="Steer right" disabled={!active} {...touch('right')}>▶<small>D / →</small></button></div><div className="gk-control-hint">AUTO ACCEL<span>CHASE YOUR LIMIT.</span></div><button className="gk-brake" disabled={!active} {...touch('brake')}>BRAKE<small>↓ / S</small></button><button className="gk-drift" disabled={!active} {...touch('drift')}>DRIFT<small>SPACE / SHIFT</small></button><button className="gk-item" disabled={!active || !me?.item || !!(world.lesson && me && !me.finish && quizProgress < QUIZ_END)} onClick={() => room.current?.send({ type: 'item' })}><b>{me?.item ? ITEMS[me.item] : '◇'}</b><small>ITEM / E</small>{me?.item && <span className="gk-item-effect">{ITEM_EFFECTS[me.item]}</span>}</button></nav>
+      <nav className="gk-controls" aria-label="Race controls"><div className="gk-steering"><SteeringPad disabled={!active} onChange={value => { stickInput.current = value; }} /></div><div className="gk-control-hint">AUTO ACCEL<span>CHASE YOUR LIMIT.</span></div><button className="gk-brake" disabled={!active} {...touch('brake')}>BRAKE<small>↓ / S</small></button><button className="gk-drift" disabled={!active} {...touch('drift')}>DRIFT<small>SPACE / SHIFT</small></button><button className="gk-item" disabled={!active || !me?.item || !!(world.lesson && me && !me.finish && quizProgress < QUIZ_END)} onClick={() => room.current?.send({ type: 'item' })}><b>{me?.item ? ITEMS[me.item] : '◇'}</b><small>ITEM / E</small>{me?.item && <span className="gk-item-effect">{ITEM_EFFECTS[me.item]}</span>}</button></nav>
     </>}
   </main></TranslatedUiTree>;
 }

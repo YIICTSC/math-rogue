@@ -1,0 +1,9 @@
+import assert from 'node:assert/strict';import {createServer} from 'vite';
+const server=await createServer({configFile:false,optimizeDeps:{noDiscovery:true,include:[]},server:{middlewareMode:true,hmr:false},appType:'custom',logLevel:'error'});
+try{const m=await server.ssrLoadModule('/src/mini-games/gakuro-craft/touchInput.ts');const radius=40;
+ for(const [x,y,signX,signZ]of[[40,0,1,-1],[-40,0,-1,1],[0,-40,-1,-1],[0,40,1,1]]){const v=m.stickVector(x,y,radius);assert.equal(Math.sign(v.dx),signX);assert.equal(Math.sign(v.dz),signZ);assert(Math.abs(Math.hypot(v.dx,v.dz)-1)<1e-9);}
+ assert.equal(Math.hypot(...Object.values(m.stickVector(3,0,radius)).slice(2)),0);const gentle=m.stickVector(15,0,radius),full=m.stickVector(100,0,radius);assert(Math.hypot(gentle.dx,gentle.dz)<Math.hypot(full.dx,full.dz));
+ for(let a=0;a<Math.PI*2;a+=.1){const x=Math.cos(a)*60,y=Math.sin(a)*60,v=m.stickVector(x,y,radius),screenX=v.dx-v.dz,screenY=(v.dx+v.dz)/2;assert(Math.abs(screenX*y-screenY*x)<1e-8,'World motion follows the requested screen angle');assert(Math.hypot(v.dx,v.dz)<=1+1e-9);assert(Math.hypot(v.x,v.y)<=1+1e-9);}
+ assert.deepEqual(m.stickVector(NaN,0,40),{x:0,y:0,dx:0,dz:0});const store=new Map();globalThis.localStorage={getItem:k=>store.get(k)||null,setItem:(k,v)=>store.set(k,v)};assert.equal(m.loadTouchControl(),'dpad');m.saveTouchControl('stick');assert.equal(m.loadTouchControl(),'stick');store.set(m.TOUCH_CONTROL_KEY,'invalid');assert.equal(m.loadTouchControl(),'dpad');globalThis.localStorage={getItem(){throw Error('blocked');},setItem(){throw Error('blocked');}};assert.equal(m.loadTouchControl(),'dpad');assert.doesNotThrow(()=>m.saveTouchControl('stick'));
+ console.log('PASS touch input: quarter-view direction, radial dead zone, analog speed, bounded vectors and durable/fallback preferences');
+}finally{await server.close();}
