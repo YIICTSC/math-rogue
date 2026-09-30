@@ -1922,12 +1922,12 @@ class AudioService {
       this.playSfxMp3(`status-effects/${effect}`, fallbackByEffect[effect], { maxDurationMs: 1400 });
   }
 
-  public playMagicVoice(heroId: string | undefined, action: 'attack' | 'damage' | 'spell' = 'attack', variantCount = 3, spellIndex?: number, transformed = false) {
+  public playMagicVoice(heroId: string | undefined, action: 'attack' | 'damage' | 'spell' = 'attack', variantCount = 3, spellIndex?: number, transformed = false): Promise<boolean> {
       const safeAction = action.replace(/[^a-z0-9_-]/gi, '').toLowerCase();
       const voiceName = safeAction === 'spell'
           ? `spell-${Math.max(1, Math.min(3, spellIndex ?? 1))}`
           : `${safeAction}-${Math.floor(Math.random() * Math.max(1, variantCount)) + 1}`;
-      this.playMagicVoiceFile(heroId, voiceName, 2200, transformed);
+      return this.playMagicVoiceFile(heroId, voiceName, 2200, transformed);
   }
 
   public playMagicVoiceFile(heroId: string | undefined, voiceName: string | undefined, maxDurationMs = 2200, _transformed = false) {
@@ -1961,10 +1961,10 @@ class AudioService {
       heroId: string | undefined,
       action: 'attack' | 'summon' | 'block' | 'power' | 'damage' | 'item' | 'finish' | 'defeat' = 'attack',
       variantCount = 5,
-  ) {
+  ): Promise<boolean> {
       const safeAction = action.replace(/[^a-z0-9_-]/gi, '').toLowerCase();
       const voiceName = `${safeAction}-${Math.floor(Math.random() * Math.max(1, variantCount)) + 1}`;
-      this.playHighSchoolVoiceFile(heroId, voiceName, 2600);
+      return this.playHighSchoolVoiceFile(heroId, voiceName, 2600);
   }
 
   public playHighSchoolVoiceFile(heroId: string | undefined, voiceName: string | undefined, maxDurationMs = 2600) {

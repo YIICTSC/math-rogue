@@ -154,10 +154,17 @@ const createEnemyBlueprints = (theme: EnemyTheme, expectedCount: number): Charac
   });
 };
 
-const HIGH_SCHOOL_HERO_NAMES = [
-  '反逆の高校生', '生物部の先輩', '謎めく転入生', 'バスケ部エース', '放送部ディレクター',
-  '文芸部書記', '学食の料理長', '園芸部部長', '化学研究会長',
-] as const;
+const HIGH_SCHOOL_HERO_NAME_BY_ID: Record<string, string> = {
+  WARRIOR: '反逆の高校生',
+  CARETAKER: '生物部の先輩',
+  ASSASSIN: '謎めく転入生',
+  DODGEBALL: 'バスケ部エース',
+  BARD: '放送部ディレクター',
+  LIBRARIAN: '文芸部書記',
+  CHEF: '学食の料理長',
+  GARDENER: '園芸部部長',
+  MAGE: '化学研究会長',
+};
 
 // The artwork sheet follows the character roster, while the display names are
 // intentionally written in story order. Keep the mapping explicit so a card
@@ -186,7 +193,7 @@ const CHARACTER_CARD_BLUEPRINTS: CharacterCardBlueprint[] = [
     const artIndex = HIGH_SCHOOL_HERO_ART_INDEX[character.id] ?? index;
     return {
       id: `HIGH_SCHOOL_HERO_${character.id}`,
-      name: HIGH_SCHOOL_HERO_NAMES[index] || character.name,
+      name: HIGH_SCHOOL_HERO_NAME_BY_ID[character.id] || character.name,
       edition: 'HIGH_SCHOOL' as const,
       artAsset: `sprites/high-school/characters/${artIndex}.webp`,
       attackArtAsset: `sprites/high-school/characters-attack/${artIndex}.webp`,
@@ -220,7 +227,7 @@ const VACATION_CHARACTER_CARD_BLUEPRINTS: CharacterCardBlueprint[] = [
     const artIndex = HIGH_SCHOOL_HERO_ART_INDEX[character.id] ?? index;
     return {
       id: `HIGH_SCHOOL_HERO_${character.id}_VACATION`,
-      name: `${HIGH_SCHOOL_HERO_NAMES[index] || character.name}／バカンス`,
+      name: `${HIGH_SCHOOL_HERO_NAME_BY_ID[character.id] || character.name}／バカンス`,
       edition: 'HIGH_SCHOOL' as const,
       artAsset: `sprites/high-school/vacation-characters/${artIndex}.webp`,
       voiceProfile: { type: 'HIGH_SCHOOL_HERO' as const, id: character.id },

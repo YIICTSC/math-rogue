@@ -1,4 +1,4 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { LanguageMode } from '../../types';
 import type { AnswerMode, AssignmentAnswerResult, AssignmentPayload, AttackEffectKey, GameMode } from '../../types';
 import ResilientAssetImage from '../../components/ResilientAssetImage';
@@ -175,20 +175,22 @@ const playPlacementEffectSound = (card: PlacementCardDefinition | null) => {
 
 type PlacementVoiceAction = 'DEPLOY' | 'ATTACK' | 'DEFEAT' | 'FINISH';
 
-const playPlacementCardVoice = (profile: PlacementCardVoiceProfile | undefined, action: PlacementVoiceAction) => {
-  if (!profile) return;
+const playPlacementCardVoice = (profile: PlacementCardVoiceProfile | undefined, action: PlacementVoiceAction): Promise<boolean> => {
+  if (!profile) return Promise.resolve(false);
   if (profile.type === 'HIGH_SCHOOL_HERO') {
     const mapped = action === 'DEPLOY' ? 'summon' : action === 'ATTACK' ? 'attack' : action === 'FINISH' ? 'finish' : 'defeat';
-    audioService.playHighSchoolVoice(profile.id, mapped, 3);
-    return;
+    return audioService.playHighSchoolVoice(profile.id, mapped, 3);
   }
   if (profile.type === 'MAGIC_HERO') {
-    const mapped = action === 'DEPLOY' ? 'spell' : action === 'ATTACK' || action === 'FINISH' ? 'attack' : 'damage';
-    audioService.playMagicVoice(profile.id, mapped, 3, 1, profile.transformed);
-    return;
+    // The attack already uses its special-card line, so victory must not repeat a generic attack line.
+    if (action === 'FINISH') return Promise.resolve(false);
+    // Deploy uses the normal attack voice; an actual card attack uses one of the special-card voices.
+    const mapped = action === 'DEPLOY' ? 'attack' : action === 'ATTACK' ? 'spell' : 'damage';
+    const spellIndex = action === 'ATTACK' ? Math.floor(Math.random() * 3) + 1 : undefined;
+    return audioService.playMagicVoice(profile.id, mapped, 3, spellIndex, profile.transformed);
   }
   const mapped = action === 'DEPLOY' ? 'spawn' : action === 'ATTACK' || action === 'FINISH' ? 'attack' : 'defeat';
-  void audioService.playHumanoidEnemyVoice(profile.theme, profile.name, mapped);
+  return audioService.playHumanoidEnemyVoice(profile.theme, profile.name, mapped);
 };
 
 const cardAssetSource = (asset: string) => asset.startsWith('data:') || asset.startsWith('http') ? asset : assetUrl(asset);
@@ -961,9 +963,16 @@ const PlacementTcgGame: React.FC<PlacementTcgGameProps> = ({ onBack, onFinish, l
   const [activeCue, setActiveCue] = useState<PlacementActionCue | null>(null);
   const [finisherCard, setFinisherCard] = useState<PlacementCardDefinition | null>(null);
   const cueTimerRef = useRef<number | null>(null);
+  const placementVoiceQueueRef = useRef<Promise<boolean>>(Promise.resolve(false));
   const seenCueRef = useRef<number | null>(null);
   const seenWinnerRef = useRef<PlacementSideKey | null>(null);
   const discoveredPlacementCardsRef = useRef(new Set<string>());
+  const queuePlacementCardVoice = useCallback((profile: PlacementCardVoiceProfile | undefined, action: PlacementVoiceAction) => {
+    placementVoiceQueueRef.current = placementVoiceQueueRef.current
+      .catch(() => false)
+      .then(() => playPlacementCardVoice(profile, action))
+      .catch(() => false);
+  }, []);
   const markPlacementCardsDiscovered = (cardIds: string[]) => {
     cardIds.forEach(cardId => {
       if (!cardId || discoveredPlacementCardsRef.current.has(cardId)) return;
@@ -1026,14 +1035,14 @@ const PlacementTcgGame: React.FC<PlacementTcgGameProps> = ({ onBack, onFinish, l
     const card = getCard(cue.cardId);
     if (cue.type === 'ATTACK') {
       audioService.playAttackEffectSound(attackSoundForCard(card), cue.direct ? 1 : 2);
-      playPlacementCardVoice(card?.voiceProfile, 'ATTACK');
+      queuePlacementCardVoice(card?.voiceProfile, 'ATTACK');
     } else {
       playPlacementEffectSound(card);
-      playPlacementCardVoice(card?.voiceProfile, 'DEPLOY');
+      queuePlacementCardVoice(card?.voiceProfile, 'DEPLOY');
     }
-    cue.defeatedCardIds?.forEach(cardId => playPlacementCardVoice(getCard(cardId)?.voiceProfile, 'DEFEAT'));
+    cue.defeatedCardIds?.forEach(cardId => queuePlacementCardVoice(getCard(cardId)?.voiceProfile, 'DEFEAT'));
     showCue(cue);
-  }, [battle?.lastAction]);
+  }, [battle?.lastAction, queuePlacementCardVoice]);
 
   useEffect(() => {
     if (!battle?.winner) {
@@ -1046,10 +1055,10 @@ const PlacementTcgGame: React.FC<PlacementTcgGameProps> = ({ onBack, onFinish, l
     if (battle.winner === 'player' && battle.lastAction?.side === 'player') {
       const card = getCard(battle.lastAction.cardId);
       setFinisherCard(card);
-      playPlacementCardVoice(card?.voiceProfile, 'FINISH');
+      queuePlacementCardVoice(card?.voiceProfile, 'FINISH');
       window.setTimeout(() => setFinisherCard(current => current?.id === card?.id ? null : current), 1650);
     }
-  }, [battle?.winner]);
+  }, [battle?.winner, queuePlacementCardVoice]);
 
   const beginBattle = (nextRun: PlacementRun) => {
     setRun(nextRun);
