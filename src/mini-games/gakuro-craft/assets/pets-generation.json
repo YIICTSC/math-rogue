@@ -46,43 +46,43 @@
   "sources": [
     {
       "id": "shiba",
-      "source": "pet-shiba-source.png"
+      "source": "pet-shiba-source.webp"
     },
     {
       "id": "corgi",
-      "source": "pet-corgi-source.png"
+      "source": "pet-corgi-source.webp"
     },
     {
       "id": "poodle",
-      "source": "pet-poodle-source.png"
+      "source": "pet-poodle-source.webp"
     },
     {
       "id": "calico",
-      "source": "pet-calico-source.png"
+      "source": "pet-calico-source.webp"
     },
     {
       "id": "tabby",
-      "source": "pet-tabby-source.png"
+      "source": "pet-tabby-source.webp"
     },
     {
       "id": "blackCat",
-      "source": "pet-blackCat-source.png"
+      "source": "pet-blackCat-source.webp"
     },
     {
       "id": "rabbit",
-      "source": "pet-rabbit-source.png"
+      "source": "pet-rabbit-source.webp"
     },
     {
       "id": "hamster",
-      "source": "pet-hamster-source.png"
+      "source": "pet-hamster-source.webp"
     },
     {
       "id": "panda",
-      "source": "pet-panda-source.png"
+      "source": "pet-panda-source.webp"
     },
     {
       "id": "longTailedTit",
-      "source": "pet-longTailedTit-source.png"
+      "source": "pet-longTailedTit-source.webp"
     }
   ]
 }
