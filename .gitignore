@@ -96,3 +96,6 @@ android/app/src/main/assets/capacitor.config.json
 *.p12
 *.aab
 *.apk
+
+# Dedicated server build output
+server/dist/

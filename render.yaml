@@ -1,0 +1,16 @@
+services:
+  - type: web
+    name: learning-rogue-online
+    runtime: node
+    plan: free
+    region: singapore
+    branch: render-online-server
+    buildCommand: corepack enable && pnpm install --frozen-lockfile && pnpm run server:build
+    startCommand: node server/dist/index.mjs
+    healthCheckPath: /health
+    autoDeployTrigger: "off"
+    envVars:
+      - key: NODE_VERSION
+        value: 22.16.0
+      - key: ALLOWED_ORIGINS
+        sync: false

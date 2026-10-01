@@ -1,6 +1,7 @@
 {
   "name": "learning-rogue",
   "private": true,
+  "packageManager": "pnpm@11.19.0",
   "version": "1.0.7",
   "description": "学習問題とカードバトルを組み合わせた学習ローグライクゲーム",
   "author": "YIICTSC",
@@ -97,7 +98,10 @@
     "test:rpg:browser": "node scripts/test-rpg-browser.mjs",
     "test:rpg:access": "node scripts/test-rpg-debug-access.mjs",
     "test:rpg:network": "node scripts/test-rpg-network.mjs",
-    "test:rpg:invite": "node scripts/test-rpg-invite.mjs"
+    "test:rpg:invite": "node scripts/test-rpg-invite.mjs",
+    "server:build": "node server/build.mjs",
+    "server:start": "node server/dist/index.mjs",
+    "test:server": "node scripts/test-online-server.mjs"
   },
   "build": {
     "appId": "jp.learningrogue.offline",
@@ -169,16 +173,19 @@
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "three": "^0.186.1",
-    "vite": "^7.2.4"
+    "vite": "^7.2.4",
+    "ws": "^8.22.0"
   },
   "devDependencies": {
     "@capacitor/cli": "^8.4.2",
     "@types/node": "^22.14.0",
     "@types/three": "^0.186.0",
+    "@types/ws": "^8.18.2",
     "@vitejs/plugin-react": "^5.0.0",
     "autoprefixer": "^10.5.0",
     "electron": "^42.2.0",
     "electron-builder": "^26.8.1",
+    "esbuild": "^0.28.2",
     "ffmpeg-static": "^5.3.0",
     "kuroshiro": "1.2.0",
     "kuroshiro-analyzer-kuromoji": "1.1.0",
