@@ -3,16 +3,18 @@ import {createServer} from 'node:http';
 import {spawn} from 'node:child_process';
 import {chromium} from 'playwright';
 import assert from 'node:assert/strict';
-const backend=spawn(process.execPath,['server/dist/index.mjs'],{env:{...process.env,PORT:'10093',ALLOWED_ORIGINS:''},stdio:['ignore','pipe','pipe']});
-backend.stderr.on('data',data=>process.stderr.write(data));
-await new Promise((resolve,reject)=>{backend.stdout.once('data',resolve);backend.once('exit',()=>reject(Error('Server exited')));});
-const bundle=await build({stdin:{contents:'import{KartRoom}from"./src/mini-games/gakuro-kart/network.ts";import{CraftRoom,loadIsland}from"./src/mini-games/gakuro-craft/network.ts";window.KartRoom=KartRoom;window.CraftRoom=CraftRoom;window.loadIsland=loadIsland;',resolveDir:process.cwd()},bundle:true,write:false,format:'esm',define:{'import.meta.env':'{"VITE_ONLINE_SERVER_URL":"http://127.0.0.1:10093"}'}});
+const remote=process.env.TEST_ONLINE_SERVER_URL;
+const backend=remote?null:spawn(process.execPath,['server/dist/index.mjs'],{env:{...process.env,PORT:'10093',ALLOWED_ORIGINS:''},stdio:['ignore','pipe','pipe']});
+backend?.stderr.on('data',data=>process.stderr.write(data));
+if(backend)await new Promise((resolve,reject)=>{backend.stdout.once('data',resolve);backend.once('exit',()=>reject(Error('Server exited')));});
+const bundle=await build({stdin:{contents:'import{KartRoom}from"./src/mini-games/gakuro-kart/network.ts";import{CraftRoom,loadIsland}from"./src/mini-games/gakuro-craft/network.ts";window.KartRoom=KartRoom;window.CraftRoom=CraftRoom;window.loadIsland=loadIsland;',resolveDir:process.cwd()},bundle:true,write:false,format:'esm',define:{'import.meta.env':JSON.stringify({VITE_ONLINE_SERVER_URL:remote||'http://127.0.0.1:10093'})}});
 const server=createServer((req,res)=>{res.setHeader('Content-Type',req.url==='/bundle.js'?'text/javascript':'text/html');res.end(req.url==='/bundle.js'?bundle.outputFiles[0].text:'<script type="module" src="/bundle.js"></script>');});
 await new Promise(r=>server.listen(5199,'127.0.0.1',r));
 const browser=await chromium.launch({headless:true});
 try{
 const page=await browser.newPage();const errors=[];page.on('pageerror',e=>errors.push(e.message));
-await page.goto('http://127.0.0.1:5199');await page.waitForFunction(()=>window.KartRoom&&window.CraftRoom);
+if(remote){await page.route('**/__mini_test',r=>r.fulfill({contentType:'text/html',body:'<script type="module" src="/__mini_bundle.js"></script>'}));await page.route('**/__mini_bundle.js',r=>r.fulfill({contentType:'text/javascript',body:bundle.outputFiles[0].text}));}
+await page.goto(remote?'http://127.0.0.1:5173/__mini_test':'http://127.0.0.1:5199');await page.waitForFunction(()=>window.KartRoom&&window.CraftRoom);
 const result=await page.evaluate(async()=>{
 const until=async(fn,timeout=15000)=>{const end=Date.now()+timeout;while(Date.now()<end){if(fn())return;await new Promise(r=>setTimeout(r,30));}throw Error('Condition timed out');};
 const q={id:'q',mode:'ADDITION',question:'1+1',options:['1','2','3','4'],correct:1};const lesson={title:'test',questions:[q,{...q,id:'q2'},{...q,id:'q3'}]};
@@ -38,4 +40,4 @@ return {kartPlayers:40,craftPlayers:40,quiz:true,resume:true,hostTransfer:true,b
 }finally{for(const room of karts)room.close();for(const room of crafts)room.close();}
 });
 assert.deepEqual(errors,[]);console.log('PASS dedicated minigames:',JSON.stringify(result));
-}finally{await browser.close();await new Promise(r=>server.close(r));backend.kill();}
+}finally{await browser.close();await new Promise(r=>server.close(r));backend?.kill();}
