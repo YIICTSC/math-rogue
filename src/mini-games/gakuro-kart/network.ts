@@ -1,3 +1,4 @@
+import {DedicatedConnection,onlineServerUrl} from '../../services/dedicatedConnection';
 import { defaultAvatar, validAvatar, type KartAvatar } from './avatar';
 import { validLesson, type KartLesson } from './learning';
 import Peer, { type DataConnection, type PeerOptions } from 'peerjs';
@@ -7,6 +8,7 @@ import { acceptRoster, decodeSnapshot, encodeSnapshot, PROTOCOL, roster, type Ro
 /** Host-authoritative 60 Hz simulation, 20 Hz controls, 10 Hz compact snapshots. */
 export class KartRoom {
   selfId = 'local'; code = ''; host = false; world: Race | null = null;
+  private dedicated: DedicatedConnection | null = null;
   private peer: Peer | null = null;
   private channels = new Map<string, DataConnection>();
   private timer: ReturnType<typeof setInterval> | null = null;
@@ -85,6 +87,7 @@ export class KartRoom {
     if (c.open) deliver(); else c.once('open', deliver);
   }
   async create(name: string, hero: number, course: number) {
+    if(onlineServerUrl()){await this.connectDedicated({create:true,name,hero,course,avatar:defaultAvatar(hero)});return;}
     this.host = true;
     const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
     this.code = Array.from(crypto.getRandomValues(new Uint8Array(6)), n => alphabet[n % alphabet.length]).join('');
@@ -122,6 +125,7 @@ export class KartRoom {
   async join(code: string, name: string, hero: number, avatar: KartAvatar = defaultAvatar(hero)) {
     this.code = code.trim().toUpperCase();
     if (!/^[A-Z2-9]{6}$/.test(this.code)) throw new Error('6文字のルームコードを入力してください。');
+    if(onlineServerUrl()){await this.connectDedicated({code:this.code,name,hero,avatar});return;}
     const peer = await this.open();
     const c = peer.connect(`gakuro-apex-v${PROTOCOL}-${this.code}`, { reliable: true, serialization: 'raw' }); this.channels.set('host', c);
     await new Promise<void>((resolve, reject) => {
@@ -147,26 +151,41 @@ export class KartRoom {
     });
     this.timer = setInterval(() => { if (performance.now() - this.lastPacketAt > 12000) { this.close(); this.update(null); this.status('通信が途切れました。部屋に入り直してください。'); } }, 1000);
   }
+  private async connectDedicated(packet: object) {
+    this.dedicated=new DedicatedConnection(d=>{
+      if(d instanceof ArrayBuffer && this.world){const next=decodeSnapshot(d,this.world,this.lastSequence);if(next){this.world=next.world;this.lastSequence=next.sequence;this.update(this.world);return !!this.world.players[this.selfId];}}
+      if(d.type==='connected'){this.selfId=d.id;this.code=d.code;this.host=d.host;}
+      if(d.type==='host')this.host=!!d.host;
+      if(d.type==='roster'){const next=acceptRoster(d,this.world);if(next)this.world=next;}
+      return false;
+    },()=>{this.close();this.update(null);this.status('専用サーバーとの接続が終了しました。');});
+    this.status('専用サーバーに接続しています。');await this.dedicated.open('kart',packet);this.status('');
+  }
   private applyAvatar(id: string, avatar: unknown) {
     if (this.world?.phase !== 'lobby' || !this.world.players[id] || !validAvatar(avatar)) return;
     this.world.players[id].avatar = { ...avatar }; this.world.revision++; this.emit();
   }
   setAvatar(avatar: KartAvatar) {
     if (this.closed || this.world?.phase !== 'lobby' || !validAvatar(avatar)) return;
+    if(this.dedicated){this.dedicated.send({type:'avatar',avatar});return;}
     if (this.host) this.applyAvatar(this.selfId, avatar);
     else { const host = this.channels.get('host'); if (host) this.sendTo(host, { type: 'avatar', avatar }); }
   }
   setLesson(lesson: KartLesson) {
     if (!this.host || this.world?.phase !== 'lobby' || !validLesson(lesson)) return;
+    if(this.dedicated){this.dedicated.send({type:'lesson',lesson});return;}
     this.world.lesson = structuredClone(lesson); this.world.revision++; this.emit();
   }
   setLaps(laps: number) {
-    if (!this.host || !this.world || !setRaceLaps(this.world, laps)) return;
+    if (!this.host || !this.world) return;
+    if(this.dedicated){this.dedicated.send({type:'laps',laps});return;}
+    if(!setRaceLaps(this.world,laps))return;
     this.emit();
   }
-  start(fill = true) { if (this.host && this.world) { startRace(this.world, fill); this.emit(); } }
+  start(fill = true) { if(this.dedicated){if(this.host)this.dedicated.send({type:'start',fill});return;} if (this.host && this.world) { startRace(this.world, fill); this.emit(); } }
   rematch(lesson?: KartLesson, course = this.world?.course ?? 0, laps = this.world?.laps ?? 3) {
     if (!this.host || this.world?.phase !== 'result') return;
+    if(this.dedicated){this.dedicated.send({type:'rematch',lesson,course,laps});return;}
     const old = this.world, previousRevision = old.revision; this.world = createRace(course, old.seed + 1, laps);
     this.world.lesson = lesson && validLesson(lesson) ? structuredClone(lesson) : old.lesson;
     this.world.revision = previousRevision;
@@ -175,11 +194,13 @@ export class KartRoom {
   }
   send(c: Command) {
     if (this.closed) return;
+    if(this.dedicated){this.dedicated.send({type:'command',command:c});return;}
     if (this.host && this.world) command(this.world, this.selfId, c);
     else { const host = this.channels.get('host'); if (host?.open && (host.dataChannel?.bufferedAmount || 0) < 4096) this.sendTo(host, { type: 'command', command: c }); }
   }
   close() {
     if (this.closed) return; this.closed = true;
+    this.dedicated?.close();
     if (this.timer) clearInterval(this.timer); document.removeEventListener('visibilitychange', this.visibility);
     this.pending.forEach(clearTimeout); this.pending.clear(); this.channels.forEach(c => c.close()); this.channels.clear(); this.peer?.destroy(); this.world = null;
   }

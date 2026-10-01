@@ -25,7 +25,7 @@ jobs:
       - name: Setup pnpm
         uses: pnpm/action-setup@v4
         with:
-          version: 11.9.0
+          version: 11.19.0
 
       - name: Setup Node.js
         uses: actions/setup-node@v6
@@ -45,6 +45,7 @@ jobs:
           VITE_ENABLE_DEBUG_FEATURES: 'true'
           VITE_WEB_PERFORMANCE_MODE: 'true'
           VITE_WEB_PRELOAD_ENABLED: 'false'
+          VITE_ONLINE_SERVER_URL: 'https://learning-rogue-online.onrender.com'
         run: pnpm run build
 
       - name: Rebase public sprite paths for GitHub Pages

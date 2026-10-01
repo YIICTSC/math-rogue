@@ -30,6 +30,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       HAS_ANDROID_SIGNING: ${{ secrets.ANDROID_KEYSTORE_BASE64 != '' }}
+      VITE_ONLINE_SERVER_URL: 'https://learning-rogue-online.onrender.com'
     steps:
       - name: Checkout
         uses: actions/checkout@v6
@@ -51,7 +52,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          npm install --global pnpm@11.9.0
+          npm install --global pnpm@11.19.0
           pnpm install --frozen-lockfile
 
       - name: Install runtime audit browser

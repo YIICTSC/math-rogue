@@ -101,7 +101,8 @@
     "test:rpg:invite": "node scripts/test-rpg-invite.mjs",
     "server:build": "node server/build.mjs",
     "server:start": "node server/dist/index.mjs",
-    "test:server": "node scripts/test-online-server.mjs"
+    "test:server": "node scripts/test-online-server.mjs",
+    "test:server:minigames": "node scripts/test-mini-dedicated.mjs"
   },
   "build": {
     "appId": "jp.learningrogue.offline",

@@ -1,31 +1,20 @@
+import {DedicatedConnection,onlineServerUrl} from '../../services/dedicatedConnection';
 import {MAP_WIDTH,MAP_HEIGHT,MAP_TILES} from './map';
-import {expandLegacyIsland} from './mapMigration';
 import {roomTile,homeAt,publicHome} from './homeSocial';
 import Peer, { type DataConnection, type PeerOptions } from 'peerjs';
-import { addPlayer, applyCommand, BUILDINGS, CAPACITY, createWorld, MATERIALS, QuizBank, tick, type Command, type Player, type Reply, type Tile, type World } from './engine';
+import { addPlayer, applyCommand, CAPACITY, createWorld, MATERIALS, QuizBank, tick, type Command, type Player, type Reply, type Tile, type World } from './engine';
 import type { KartQuestion } from '../gakuro-kart/learning';
 import { normalizeCraftCode } from './invite';
 import { avatarOf, type Avatar } from './avatar';
 import { migrateProgress } from './progression';
+import {loadIsland,SAVE_KEY,type Saved} from './save';
+export {loadIsland,SAVE_KEY} from './save';
 export const CRAFT_PROTOCOL = 8;
 type Link = { channel: DataConnection; revision: number; admitted: boolean; rateAt: number; count: number };
-export const SAVE_KEY = 'gakuro-craft-island-v1';
-type Saved = { version: 1; world: World; owner: string; player: Player };
-export function loadIsland(): Saved | null {
-  try {
-    const raw = localStorage.getItem(SAVE_KEY); if (!raw || raw.length > 8000000) return null;
-    const s = JSON.parse(raw) as Saved, w = s.world;
-    if(s.version!==1||!w||!s.player||!Number.isInteger(w.seed)||!Number.isInteger(w.revision)||!Array.isArray(w.tiles)||!w.tiles.every(t=>t&&Array.isArray(t.blocks)))return null;
-    if(!expandLegacyIsland(s))return null;
-    if(w){w.games={};w.homeViews={};w.villageLevel=Number.isInteger(w.villageLevel)&&w.villageLevel>=0&&w.villageLevel<=4?w.villageLevel:0;w.builtSites=Array.isArray(w.builtSites)?[...new Set(w.builtSites.filter(i=>Number.isInteger(i)&&i>=0&&i<MAP_TILES))]:w.tiles?.flatMap((t,i)=>t.blocks?.length?[i]:[])||[];w.residents=w.residents&&typeof w.residents==='object'&&!Array.isArray(w.residents)?w.residents:{};for(const [key,r]of Object.entries(w.residents)){if(!r||!r.bag||!MATERIALS.every(k=>Number.isFinite(r.bag[k])&&r.bag[k]>=0)||!Number.isFinite(r.coins)||r.coins<0){delete w.residents[key];continue;}r.progress=migrateProgress(r.progress);r.energy=Number.isFinite(r.energy)?Math.max(0,Math.min(100,r.energy)):100;}}
-    if(s.player?.bag){s.player.progress=migrateProgress(s.player.progress);for(const k of MATERIALS.slice(10))if(s.player.bag[k]===undefined)s.player.bag[k]=0;s.player.avatar=avatarOf(s.player.avatar,s.player.color);s.player.coins=Number.isFinite(s.player.coins)?Math.max(0,s.player.coins):0;s.player.buffUntil=Number.isFinite(s.player.buffUntil)?s.player.buffUntil:0;}
-    if (s.version !== 1 || !w || !Number.isFinite(w.time) || w.time < 0 || !Number.isInteger(w.seed) || !Number.isInteger(w.revision) || !Array.isArray(w.tiles) || w.tiles.length !== MAP_TILES || !s.player || !MATERIALS.every(k => Number.isFinite(s.player.bag[k]) && s.player.bag[k] >= 0)) return null;
-    if (!w.tiles.every(t => ['grass', 'sand', 'water'].includes(t.ground) && [null, 'tree', 'rock'].includes(t.nature) && Array.isArray(t.blocks) && t.blocks.length <= 4 && t.blocks.every(b => BUILDINGS.includes(b)) && (t.crop === null || Number.isFinite(t.crop)) && Number.isFinite(t.regrow) && Number.isInteger(t.revision))) return null;
-    return s;
-  } catch { return null; }
-}
 export class CraftRoom {
   profileId:string=crypto.randomUUID();selfId = 'local'; code = ''; host = false; world: World | null = null; title = '';
+  private dedicated: DedicatedConnection | null = null;
+  private checkpoint: Saved | null = null;
   private peer: Peer | null = null; private links = new Map<string, Link>(); private bank: QuizBank | null = null;
   private timer: ReturnType<typeof setInterval> | null = null; private closed = false; private lastPacket = 0; private pending = new Set<ReturnType<typeof setTimeout>>();
   private loading: World | null = null; private renderedWorld:World|null=null; private renderedTiles:Tile[]=[]; private renderedRevision=-1; private savedAt = 0;
@@ -93,6 +82,7 @@ export class CraftRoom {
     peer.on('disconnected', () => { if (!this.closed && !peer.destroyed) peer.reconnect(); }); this.selfId = peer.id; return peer;
   }
   async create(name: string, color: number, questions: KartQuestion[], title: string, resume = false, avatar?: Avatar) {
+    if(onlineServerUrl()){const saved=resume?loadIsland():null;if(saved?.player.profileId)this.profileId=saved.player.profileId;await this.connectDedicated({create:true,name,color,questions,title,avatar,profileId:this.profileId,saved});return;}
     this.host = true; const alphabet = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; this.code = Array.from(crypto.getRandomValues(new Uint8Array(6)), n => alphabet[n % alphabet.length]).join('');
     const peer = await this.open(`gakuro-craft-v${CRAFT_PROTOCOL}-${this.code}`); this.setup(name, color, questions, title, resume, avatar);
     peer.on('connection', channel => {
@@ -118,6 +108,7 @@ export class CraftRoom {
   }
   async join(code: string, name: string, color: number, avatar?: Avatar) {
     this.code = normalizeCraftCode(code); if (!this.code) throw new Error('6文字の招待コードを入力してください。');
+    if(onlineServerUrl()){await this.connectDedicated({code:this.code,name,color,avatar,profileId:this.profileId});return;}
     const peer = await this.open(), channel = peer.connect(`gakuro-craft-v${CRAFT_PROTOCOL}-${this.code}`, { reliable: true, serialization: 'raw' });
     this.links.set('host', { channel, revision: -1, admitted: true, rateAt: 0, count: 0 });
     await new Promise<void>((resolve, reject) => {
@@ -148,6 +139,33 @@ export class CraftRoom {
     });
     this.timer = setInterval(() => { if (performance.now() - this.lastPacket > 15000) { this.close(); this.update(null); this.status('通信が途切れました。部屋に入り直してください。'); } }, 1000);
   }
+  private receiveDedicated(d: any) {
+    let joined=false;
+    if(d.type==='connected'){this.selfId=d.id;this.code=d.code;this.host=d.host;}
+    if(d.type==='host')this.host=!!d.host;
+    if(d.type==='checkpoint'&&this.world&&d.saved?.world?.revision===this.world.revision){this.checkpoint={...d.saved,world:{...d.saved.world,tiles:structuredClone(this.world.tiles)}};this.save();return false;}
+        if (d.type === 'init' && d.version === CRAFT_PROTOCOL&&d.width===MAP_WIDTH&&d.height===MAP_HEIGHT) { this.loading = createWorld(d.seed);  this.title = String(d.title || '').slice(0, 160); }
+        if (d.type === 'tiles' && Array.isArray(d.entries)) {
+          const world = this.loading || this.world; if (!world) return;
+          for (const entry of d.entries) if (Array.isArray(entry) && Number.isInteger(entry[0]) && entry[0] >= 0 && entry[0] < MAP_TILES && entry[1] && Array.isArray(entry[1].blocks)) { world.tiles[entry[0]] = entry[1] as Tile; }
+        }
+        if (d.type === 'state' && Array.isArray(d.players) && d.players.length <= CAPACITY && (this.loading||this.world)) {
+          const world = this.loading || this.world; if (!world || !Number.isFinite(d.time) || !d.players.some((p: any) => p[0] === this.selfId)) return;
+          world.time = d.time; world.paused = !!d.paused; world.revision = d.revision; world.donated = d.donated; world.harvested = d.harvested; world.built = d.built;world.villageLevel=d.villageLevel||0;world.builtSites=Array.isArray(d.builtSites)?d.builtSites:[];
+          const players: Record<string, Player> = {};
+          for (const row of d.players) { const [id, name, color, x, z, energy, correct, actions, avatar, lastAction, buffUntil, fishing,indoors,homeTile] = row; if (typeof id !== 'string' || ![x, z, energy].every(Number.isFinite)) return;
+            players[id] = { id,profileId:id===this.selfId?this.profileId:'',progress:id===this.selfId?migrateProgress(d.progress):migrateProgress(null),indoors:!!indoors,homeTile:Number.isInteger(homeTile)?homeTile:undefined, name: String(name).slice(0, 16), color, x, z, energy, correct, actions, avatar:avatarOf(avatar,color),lastAction,fishing,buffUntil:buffUntil||0,coins:id===this.selfId?d.coins||0:0, bag: id === this.selfId ? d.bag : Object.fromEntries(MATERIALS.map(k => [k, 0])), dx: 0, dz: 0, actionAt: 0, inputAt: 0 } as Player;
+          }
+          world.games=d.games&&typeof d.games==='object'?d.games:{};world.homeViews={};if(d.roomHome&&Number.isInteger(d.roomHome.tile))world.homeViews[d.roomHome.tile]=d.roomHome;world.players = players; this.world = world; this.loading = null; this.lastPacket = performance.now(); this.publish(world); joined = true;
+        }
+        if (d.type === 'reply' && d.reply && ['notice', 'quiz', 'answer'].includes(d.reply.type)) this.event(d.reply);
+    return joined;
+  }
+  private async connectDedicated(packet: object) {
+    this.dedicated=new DedicatedConnection(d=>this.receiveDedicated(d),()=>{this.close();this.update(null);this.status('専用サーバーとの接続が終了しました。');});
+    this.status('専用サーバーに接続しています。');
+    await this.dedicated.open('craft',packet);this.status('');
+  }
   private execute(id: string, raw: any) {
     if (!this.world || !raw || typeof raw !== 'object') return;
     if (this.world.paused && raw.type !== 'move') return { type: 'notice', text: 'ホストが戻るまで一時停止中です。' } as Reply;
@@ -157,17 +175,20 @@ export class CraftRoom {
   }
   sendCommand(command: Command) {
     if (this.closed) return;
+    if(this.dedicated){this.dedicated.send({type:'command',command});return;}
     if (this.host) { const reply = this.execute(this.selfId, command); if (reply) this.event(reply); }
     else { const link = this.links.get('host'); if (link && (link.channel.dataChannel?.bufferedAmount || 0) < 8192) this.send(link.channel, { type: 'command', command }); }
   }
   private remember(id:string){const p=this.world?.players[id];if(p&&this.world)this.world.residents[p.profileId]={id:p.id,bag:{...p.bag},coins:p.coins,energy:p.energy,correct:p.correct,progress:structuredClone(p.progress)};}
   save() {
+    if(this.dedicated){if(!this.host||!this.checkpoint)return false;try{localStorage.setItem(SAVE_KEY,JSON.stringify(this.checkpoint));return true;}catch{this.status('島を保存できませんでした。');return false;}}
     if (!this.host || !this.world || !this.world.players[this.selfId]) return false;
     try {for(const id of Object.keys(this.world.players))this.remember(id); localStorage.setItem(SAVE_KEY, JSON.stringify({ version: 1, world: { ...this.world, players: {},games:{},homeViews:{} }, owner: this.selfId, player: this.world.players[this.selfId] })); return true; }
     catch { this.status('島を保存できませんでした。端末の空き容量を確認してください。'); return false; }
   }
   close() {
     if (this.closed) return; this.save(); this.closed = true;
+    this.dedicated?.close();
     if (this.timer) clearInterval(this.timer); document.removeEventListener('visibilitychange', this.visibility); this.pending.forEach(clearTimeout); this.pending.clear();
     this.links.forEach(l => l.channel.close()); this.links.clear(); this.peer?.destroy(); this.world = null;
   }
