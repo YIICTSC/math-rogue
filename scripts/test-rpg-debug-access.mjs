@@ -12,6 +12,20 @@ try {
       server:{host:'127.0.0.1',port:5195,strictPort:true},
     });
     await server.listen();
+    const adminPage=await browser.newPage({viewport:{width:1440,height:1000}});
+    try {
+      await adminPage.goto('http://127.0.0.1:5195/?adminDebug=1', {waitUntil:'domcontentloaded',timeout:120000});
+      await adminPage.getByRole('button',{name:'小学5年生',exact:true}).click();
+      await adminPage.getByRole('button',{name:'あとで決める',exact:true}).last().click();
+      if(debug) {
+        const entry=adminPage.getByRole('button',{name:'RPGオンライン 開発中・デバッグ限定'});
+        await entry.waitFor();
+        assert.equal(await entry.isVisible(),true,'admin URL opens the title with debug enabled');
+        assert.equal(await adminPage.getByRole('button',{name:'問題デバッグ',exact:true}).count(),0,'admin URL stays on the title instead of opening the debug menu');
+      } else {
+        assert.equal(await adminPage.getByRole('button',{name:'RPGオンライン 開発中・デバッグ限定'}).count(),0,'admin URL cannot enable a production build without debug features');
+      }
+    } finally {await adminPage.close();}
     const page=await browser.newPage({viewport:{width:1440,height:1000}});
     const errors=[];page.on('pageerror',e=>errors.push(e.message));
     try {

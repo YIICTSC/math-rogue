@@ -1,5 +1,6 @@
 import { validLesson, type KartLesson, type KartQuestion } from '../gakuro-kart/learning';
 import { HOLES, distance, surface, type Point } from './course';
+import { defaultAvatar, validAvatar, type KartAvatar } from '../gakuro-kart/avatar';
 export const MAX_PLAYERS = 40;
 export const MAX_STROKES = 12;
 export const CLUBS = {
@@ -17,15 +18,17 @@ export interface Golfer {
   phase: PlayerPhase; correct: number; totalCorrect: number; shotId: number;
   lesson: KartLesson | null; answers: number[]; feedback: number | null;
   origin: Point; flightTime: number; penalty: boolean; capped: boolean;
+  avatar: KartAvatar; shotClub: Club; shotAngle: number;
 }
 export interface GolfWorld { phase: 'lobby' | 'playing' | 'result'; players: Record<string, Golfer>; seed: number; title: string; paused: boolean }
 export type GolfCommand =
+  | { type: 'avatar'; avatar: KartAvatar }
   | { type: 'quiz' }
   | { type: 'answer'; shotId: number; index: number; option: number }
   | { type: 'continue'; shotId: number; index: number }
   | { type: 'shot'; shotId: number; club: Club; angle: number; power: number }
   | { type: 'next' };
-export type PublicGolfer = Pick<Golfer, 'id' | 'name' | 'slot' | 'connected' | 'hole' | 'strokes' | 'scores' | 'x' | 'y' | 'z' | 'phase' | 'correct' | 'totalCorrect' | 'shotId' | 'penalty' | 'capped'>;
+export type PublicGolfer = Pick<Golfer, 'id' | 'name' | 'slot' | 'connected' | 'hole' | 'strokes' | 'scores' | 'x' | 'y' | 'z' | 'phase' | 'correct' | 'totalCorrect' | 'shotId' | 'penalty' | 'capped'> & Partial<Pick<Golfer, 'vx' | 'vy' | 'vz' | 'origin' | 'flightTime' | 'avatar' | 'shotClub' | 'shotAngle'>>;
 export interface GolfView {
   phase: GolfWorld['phase']; title: string; paused: boolean; players: PublicGolfer[];
   quiz: null | { shotId: number; index: number; question: Omit<KartQuestion, 'correct'>; selected: number | null; answer: number | null };
@@ -34,7 +37,7 @@ export const createGolf = (seed = 1): GolfWorld => ({ phase: 'lobby', players: O
 export function addPlayer(w: GolfWorld, id: string, name: string) {
   if (w.phase !== 'lobby' || Object.keys(w.players).length >= MAX_PLAYERS || Object.hasOwn(w.players, id) || !id || id.length > 100 || ['__proto__', 'constructor', 'prototype'].includes(id)) return false;
   const slots = new Set(Object.values(w.players).map(p => p.slot)); let slot = 0; while (slots.has(slot)) slot++;
-  w.players[id] = { id, name: name.trim().slice(0, 16) || 'Player', slot, connected: true, hole: 0, strokes: 0, scores: [], x: 0, y: 0, z: 0, vx: 0, vy: 0, vz: 0, phase: 'ready', correct: 0, totalCorrect: 0, shotId: 0, lesson: null, answers: [], feedback: null, origin: { x: 0, z: 0 }, flightTime: 0, penalty: false, capped: false }; return true;
+  w.players[id] = { id, name: name.trim().slice(0, 16) || 'Player', slot, connected: true, hole: 0, strokes: 0, scores: [], x: 0, y: 0, z: 0, vx: 0, vy: 0, vz: 0, phase: 'ready', correct: 0, totalCorrect: 0, shotId: 0, lesson: null, answers: [], feedback: null, origin: { x: 0, z: 0 }, flightTime: 0, penalty: false, capped: false, avatar: defaultAvatar(slot), shotClub: 'driver', shotAngle: 0 }; return true;
 }
 export function startGolf(w: GolfWorld, title: string) {
   if (w.phase !== 'lobby' || !title || !Object.keys(w.players).length) return false;
@@ -55,8 +58,13 @@ function settle(p: Golfer) {
 }
 function random(w: GolfWorld) { w.seed ^= w.seed << 13; w.seed ^= w.seed >>> 17; w.seed ^= w.seed << 5; return (w.seed >>> 0) / 4294967296; }
 export function command(w: GolfWorld, id: string, raw: unknown, makeLesson?: () => KartLesson): boolean {
-  if (w.phase !== 'playing' || w.paused || !raw || typeof raw !== 'object') return false;
+  if (!raw || typeof raw !== 'object') return false;
   const c = raw as GolfCommand, p = w.players[id]; if (!p?.connected) return false;
+  if (c.type === 'avatar') {
+    if (w.phase !== 'lobby' || !validAvatar(c.avatar)) return false;
+    p.avatar = { ...c.avatar }; return true;
+  }
+  if (w.phase !== 'playing' || w.paused) return false;
   if (c.type === 'quiz' && p.phase === 'ready' && makeLesson) {
     const lesson = makeLesson(); if (!validLesson(lesson)) return false;
     p.lesson = lesson; p.answers = []; p.feedback = null; p.correct = 0; p.shotId++; p.phase = 'quiz'; return true;
@@ -70,10 +78,10 @@ export function command(w: GolfWorld, id: string, raw: unknown, makeLesson?: () 
     p.feedback = null; if (p.answers.length === 3) { p.phase = 'aim'; p.lesson = null; } return true;
   }
   if (c.type === 'shot' && p.phase === 'aim' && c.shotId === p.shotId && Object.hasOwn(CLUBS, c.club) && Number.isFinite(c.angle) && Math.abs(c.angle) <= Math.PI && Number.isFinite(c.power) && c.power >= .05 && c.power <= 1) {
-    const club = CLUBS[c.club], bonus = benefits(p.correct), lie = surface(HOLES[p.hole], p);
+    const bonus = benefits(p.correct);
     const angle = c.angle + (random(w) * 2 - 1) * bonus.spread * Math.PI / 180;
-    const speed = club.speed * Math.sqrt(c.power * bonus.power) * (lie === 'sand' ? .65 : lie === 'rough' ? .82 : 1), loft = club.loft * Math.PI / 180;
-    p.origin = { x: p.x, z: p.z }; p.vx = Math.sin(angle) * speed * Math.cos(loft); p.vz = Math.cos(angle) * speed * Math.cos(loft); p.vy = Math.sin(loft) * speed;
+    Object.assign(p, shotVelocity(p, c.club, angle, c.power));
+    p.origin = { x: p.x, z: p.z }; p.shotClub = c.club; p.shotAngle = angle;
     p.strokes++; p.phase = 'moving'; p.flightTime = 0; p.penalty = false; return true;
   }
   if (c.type === 'next' && p.phase === 'holed') {
@@ -82,6 +90,13 @@ export function command(w: GolfWorld, id: string, raw: unknown, makeLesson?: () 
     finishCheck(w); return true;
   }
   return false;
+}
+/** Shared by authoritative shots and the visual preview; the preview omits random aim spread. */
+export function shotVelocity(p: Pick<PublicGolfer, 'x' | 'z' | 'hole' | 'correct'>, club: Club, angle: number, power: number) {
+  const spec = CLUBS[club], lie = surface(HOLES[p.hole], p);
+  const speed = spec.speed * Math.sqrt(power * benefits(p.correct).power) * (lie === 'sand' ? .65 : lie === 'rough' ? .82 : 1);
+  const loft = spec.loft * Math.PI / 180;
+  return { vx: Math.sin(angle) * speed * Math.cos(loft), vz: Math.cos(angle) * speed * Math.cos(loft), vy: Math.sin(loft) * speed };
 }
 export function tick(w: GolfWorld, dt: number) {
   if (w.phase !== 'playing' || w.paused || !Number.isFinite(dt) || dt <= 0 || dt > .1) return;
@@ -115,5 +130,5 @@ export function viewFor(w: GolfWorld, id: string): GolfView {
     const { correct: _secret, ...question } = p.lesson.questions[index];
     quiz = { shotId: p.shotId, index, question, selected: p.feedback === null ? null : p.answers[index], answer: p.feedback };
   }
-  return { phase: w.phase, title: w.title, paused: w.paused, quiz, players: Object.values(w.players).map(({ id, name, slot, connected, hole, strokes, scores, x, y, z, phase, correct, totalCorrect, shotId, penalty, capped }) => ({ id, name, slot, connected, hole, strokes, scores: [...scores], x, y, z, phase, correct, totalCorrect, shotId, penalty, capped })) };
+  return { phase: w.phase, title: w.title, paused: w.paused, quiz, players: Object.values(w.players).map(({ id, name, slot, connected, hole, strokes, scores, x, y, z, vx, vy, vz, origin, flightTime, avatar, shotClub, shotAngle, phase, correct, totalCorrect, shotId, penalty, capped }) => ({ id, name, slot, connected, hole, strokes, scores: [...scores], x, y, z, vx, vy, vz, origin: { ...origin }, flightTime, avatar: { ...avatar }, shotClub, shotAngle, phase, correct, totalCorrect, shotId, penalty, capped })) };
 }

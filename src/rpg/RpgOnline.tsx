@@ -20,7 +20,9 @@ import {
   Check,
 } from "lucide-react";
 import type { LanguageMode, Player } from "../types";
+import type { GameMode } from "../types";
 import TranslatedUiTree from "../components/TranslatedUiTree";
+import GoHomeDash from "../components/GoHomeDash";
 import WorldCanvas from "./WorldCanvas";
 import {
   addPlayer,
@@ -447,6 +449,78 @@ export default function RpgOnline({
               </small>
             </section>
           </div>
+        ) : !world.started ? (
+          <main className="rpg-waiting-lobby">
+            <section className="rpg-waiting-panel">
+              <div className="rpg-waiting-heading">
+                <div>
+                  <h1>冒険者集合中</h1>
+                  <p>ホストが開始すると、全員でワールドへ移動します。</p>
+                </div>
+                <strong>{members.length} / 40</strong>
+              </div>
+              <div className="rpg-waiting-roster" aria-label="部屋の参加者">
+                <h2>参加者</h2>
+                <ul>
+                  {members.map((member) => (
+                    <li key={member.id}>
+                      <span className="rpg-waiting-dot" style={{ background: `hsl(${member.color * 60}, 58%, 63%)` }} />
+                      <span>{member.name}</span>
+                      {member.id === Object.keys(world.players)[0] && <small>ホスト</small>}
+                      {member.id === selfId && <small>あなた</small>}
+                    </li>
+                  ))}
+                  {members.length < 2 && <li className="rpg-waiting-empty">仲間が参加するのを待っています…</li>}
+                </ul>
+              </div>
+              {roomCode && (
+                <div className="rpg-waiting-invite">
+                  <span>ROOM {roomCode}</span>
+                  <button className="rpg-invite-button" onClick={copyInviteUrl}>
+                    {inviteCopied ? <Check size={14} /> : <Copy size={14} />}
+                    {inviteCopied ? "コピーしました" : "招待URLをコピー"}
+                  </button>
+                </div>
+              )}
+              {room.current?.host ? (
+                <div className="rpg-waiting-start-area">
+                  <button
+                    className="rpg-primary rpg-start-adventure"
+                    disabled={busy || members.length < 2}
+                    onClick={() => room.current?.send({ type: "rpg-start" })}
+                  >
+                    ゲーム開始
+                  </button>
+                  <p>{members.length < 2 ? "参加者が2人以上集まると開始できます。" : "全員の準備ができたら開始してください。"}</p>
+                </div>
+              ) : (
+                <p className="rpg-waiting-host-message">ホストの開始を待っています。</p>
+              )}
+            </section>
+            <section className="rpg-waiting-mini-game">
+              <div className="rpg-waiting-mini-heading">
+                <div>
+                  <h2>待っている間に遊ぼう</h2>
+                  <p>帰宅ダッシュ一発アウト · HP 1</p>
+                </div>
+                <span>開始前は何度でもリトライできます</span>
+              </div>
+              <div className="rpg-waiting-mini-frame">
+                <GoHomeDash
+                  onBack={() => {}}
+                  problemMode={(adventureSetup?.mode || "MIXED") as GameMode}
+                  problemModePool={adventureSetup?.modePool}
+                  answerMode={adventureSetup?.answerMode}
+                  assignment={adventureSetup?.assignment}
+                  languageMode={languageMode}
+                  initialHp={1}
+                  initialMaxHp={1}
+                  compact
+                  exitEnabled={false}
+                />
+              </div>
+            </section>
+          </main>
         ) : (
           <>
             <div className="rpg-game-grid">

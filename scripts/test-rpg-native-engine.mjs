@@ -11,6 +11,7 @@ try {
     createWorld,
     addPlayer,
     applyAction,
+    advanceWorld,
     siteUnavailable,
     WIDTH,
     HEIGHT,
@@ -112,6 +113,18 @@ try {
   const capacity = createWorld(1);
   for (let i = 0; i < 40; i++) assert(addPlayer(capacity, `p${i}`, `P${i}`));
   assert.equal(addPlayer(capacity, "overflow", "Overflow"), false);
+  const waiting = createWorld(314, undefined, 1, 1);
+  addPlayer(waiting, "host", "Host");
+  addPlayer(waiting, "guest", "Guest");
+  waiting.started = false;
+  waiting.deadlineAt = 2;
+  advanceWorld(waiting, 60_002);
+  assert.equal(waiting.ended, false, "the room timer stays paused until the host starts");
+  assert.equal(applyAction(waiting, "guest", { type: "move", dx: 1, dy: 0 }, 60_003), false, "players cannot explore in the waiting lobby");
+  assert.equal(applyAction(waiting, "guest", { type: "rpg-start" }, 60_003), false, "only the host can start the adventure");
+  assert.equal(applyAction(waiting, "host", { type: "rpg-start" }, 60_004), true);
+  assert.equal(waiting.started, true);
+  assert.equal(waiting.deadlineAt, 120_004, "the selected time limit starts with the adventure");
   const w = createWorld(26);
   w.activities.nextEventAt = w.deadlineAt;
   addPlayer(w, "a", "A");

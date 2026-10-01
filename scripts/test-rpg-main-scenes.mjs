@@ -31,6 +31,7 @@ const server = await createServer({
       relic: () => handleRelicSelect(starterRelics[0]),
       inviteSetup: applyRpgInviteSetup,
       play: handlePlayCard, win: resolveBattleVictory, lose: resolveBattleDefeat,
+      defeatChallengeComplete: handleRpgDefeatChallengeComplete,
       quiz: handleMathChallengeComplete, rewards: finishRewardPhase, reward: handleRewardSelection,
       complete: handleNodeComplete, rest: handleRestAction, treasure: handleTreasureOpen,
       event: () => handleCoopEventOptionSelect(0), eventComplete: handleEventComplete,
@@ -159,6 +160,7 @@ try {
     "AB2CDE",
     "an invite URL pre-fills the room code",
   );
+  await page.locator(".rpg-lobby-form input").first().fill("冒険者");
   await page.getByRole("button", { name: "まずはひとりで練習する" }).click();
   await page.waitForFunction(
     () => !!window.__rpgTest.room?.world?.players.local?.profile,
@@ -294,6 +296,41 @@ try {
     await page.evaluate(() => window.__rpgTest.state.enemies[0].name),
     /校長/,
   );
+  const bossSiteId = await page.evaluate(() => {
+    const room = window.__rpgTest.room;
+    const own = room.world.players[room.selfId];
+    const site = room.world.sites.find((s) => s.kind === "boss");
+    room.send({
+      type: "native-damage",
+      token: own.nativeScene.token,
+      total: site.maxHp,
+      sequence: 1,
+      phase: 1,
+    });
+    return site.id;
+  });
+  await page.waitForFunction(
+    (id) =>
+      window.__rpgTest.room.world.sites.find((s) => s.id === id).bossPhase === 2 &&
+      window.__rpgTest.state.enemies[0]?.phase === 2,
+    bossSiteId,
+  );
+  await page.evaluate((id) => {
+    const room = window.__rpgTest.room;
+    const own = room.world.players[room.selfId];
+    const site = room.world.sites.find((s) => s.id === id);
+    room.send({
+      type: "native-damage",
+      token: own.nativeScene.token,
+      total: site.maxHp,
+      sequence: 2,
+      phase: 2,
+    });
+  }, bossSiteId);
+  await page.waitForFunction(
+    (id) => window.__rpgTest.room.world.sites.find((s) => s.id === id).cleared,
+    bossSiteId,
+  );
   await page.evaluate(() =>
     window.__rpgTest.setState((s) => ({ ...s, enemies: [] })),
   );
@@ -326,6 +363,7 @@ try {
     );
     if ((await state()) === "RELIC_SELECTION") await call("relic");
     await screen("MAP");
+    await page.locator(".rpg-lobby-form input").first().fill("冒険者");
     await page.getByRole("button", { name: "まずはひとりで練習する" }).click();
     await page.waitForFunction(
       () => !!window.__rpgTest.room?.world?.players.local?.profile,
@@ -338,6 +376,8 @@ try {
     await screen("BATTLE");
     await page.screenshot({ path: `tmp/rpg-qa/native-${theme}-battle.png` });
     await call("lose");
+    await screen("RPG_DEFEAT_CHALLENGE");
+    await call("defeatChallengeComplete");
     await screen("MAP");
     await page.waitForFunction(
       () => !window.__rpgTest.room.world.players.local.nativeScene,
@@ -396,6 +436,7 @@ try {
   );
   if ((await state()) === "RELIC_SELECTION") await call("relic");
   await screen("MAP");
+  await page.locator(".rpg-lobby-form input").first().fill("冒険者");
   await page.getByRole("button", { name: "まずはひとりで練習する" }).click();
   await page.waitForFunction(
     () => !!window.__rpgTest.room?.world?.players.local?.profile,

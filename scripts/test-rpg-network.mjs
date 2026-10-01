@@ -6,6 +6,7 @@ const server = await createServer({
   cacheDir: "node_modules/.vite-rpg-network",
   optimizeDeps: { entries: ["src/rpg/network.ts"] },
   define: {
+    "import.meta.env.VITE_ONLINE_SERVER_URL": '""',
     "import.meta.env.VITE_RPG_PEER_HOST": '"127.0.0.1"',
     "import.meta.env.VITE_RPG_PEER_PORT": '"9000"',
     "import.meta.env.VITE_RPG_PEER_PATH": '"/rpg"',
@@ -32,8 +33,20 @@ try {
   const page = await browser.newPage();
   const errors = [];
   page.on("pageerror", (e) => errors.push(e.message));
-  await page.goto("http://127.0.0.1:5197/__network");
-  await page.waitForFunction(() => !!window.RpgRoom);
+  page.on("console", (message) => {
+    if (message.type() === "error") errors.push(message.text());
+  });
+  page.on("requestfailed", (request) =>
+    errors.push(`${request.url()}: ${request.failure()?.errorText}`),
+  );
+  await page.goto("http://127.0.0.1:5197/__network", { waitUntil: "commit" });
+  await page.waitForFunction(
+    () => !!window.RpgRoom,
+    null,
+    { timeout: 120_000, polling: 250 },
+  ).catch((error) => {
+    throw new Error(`${error.message}\n${errors.join("\n")}`);
+  });
   await page.evaluate(async () => {
     window.snapshots = {};
     window.rooms = [];
@@ -121,6 +134,15 @@ try {
   await page.waitForFunction(
     () => Object.keys(window.snapshots[38]?.players || {}).length === 40,
   );
+  await page.evaluate(() => {
+    const guest = window.rooms[1];
+    guest.send({ type: "move", dx: 1, dy: 0 });
+    guest.send({ type: "rpg-start" });
+  });
+  await page.waitForTimeout(350);
+  assert.equal(await page.evaluate(() => window.host.world.started), false, "guests cannot move or start while players are gathering");
+  await page.evaluate(() => window.host.send({ type: "rpg-start" }));
+  await page.waitForFunction(() => window.host.world.started && window.rooms[1].world.started);
   assert.deepEqual(await page.evaluate(() => window.inviteReceivedSetup), {
     visualTheme: "magic",
     mode: "MULTIPLICATION",

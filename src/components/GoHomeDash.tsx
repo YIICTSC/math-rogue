@@ -167,7 +167,11 @@ const GoHomeDash: React.FC<{
     onAnswerResult?: (result: AssignmentAnswerResult) => void;
     languageMode?: LanguageMode;
     debugPreview?: MiniGameDebugPreview;
-}> = ({ onBack, problemMode = GameMode.MIXED, problemModePool, answerMode = 'CHOICE', assignment, onAnswerResult, languageMode = 'JAPANESE', debugPreview }) => {
+    initialHp?: number;
+    initialMaxHp?: number;
+    compact?: boolean;
+    exitEnabled?: boolean;
+}> = ({ onBack, problemMode = GameMode.MIXED, problemModePool, answerMode = 'CHOICE', assignment, onAnswerResult, languageMode = 'JAPANESE', debugPreview, initialHp = 3, initialMaxHp = 3, compact = false, exitEnabled = true }) => {
     const canvasRef = useRef<HTMLCanvasElement>(null);
     const guideCanvasRef = useRef<HTMLCanvasElement>(null);
     const containerRef = useRef<HTMLDivElement>(null);
@@ -251,15 +255,15 @@ const GoHomeDash: React.FC<{
     
     const [score, setScore] = useState(0);
     const [level, setLevel] = useState(1);
-    const [hp, setHp] = useState(3);
-    const [maxHp, setMaxHp] = useState(3);
+    const [hp, setHp] = useState(initialHp);
+    const [maxHp, setMaxHp] = useState(initialMaxHp);
     const [exp, setExp] = useState(0);
     const [nextLevelExp, setNextLevelExp] = useState(200);
 
     const scoreRef = useRef(0);
     const levelRef = useRef(1);
-    const hpRef = useRef(3);
-    const maxHpRef = useRef(3);
+    const hpRef = useRef(initialHp);
+    const maxHpRef = useRef(initialMaxHp);
     const expRef = useRef(0);
     const nextLevelExpRef = useRef(200);
     const frameCount = useRef(0);
@@ -272,6 +276,10 @@ const GoHomeDash: React.FC<{
     useEffect(() => {
         maxHpRef.current = maxHp;
     }, [maxHp]);
+
+    useEffect(() => () => {
+        if (compact) audioService.stopBGM();
+    }, [compact]);
 
     const playerRef = useRef({
         x: PLAYER_DEFAULT_X,
@@ -384,8 +392,8 @@ const GoHomeDash: React.FC<{
     };
 
     const initGame = () => {
-        scoreRef.current = 0; levelRef.current = 1; hpRef.current = 3; maxHpRef.current = 3; expRef.current = 0; nextLevelExpRef.current = 200;
-        setScore(0); setLevel(1); setExp(0); setHp(3); setMaxHp(3); setNextLevelExp(200);
+        scoreRef.current = 0; levelRef.current = 1; hpRef.current = initialHp; maxHpRef.current = initialMaxHp; expRef.current = 0; nextLevelExpRef.current = 200;
+        setScore(0); setLevel(1); setExp(0); setHp(initialHp); setMaxHp(initialMaxHp); setNextLevelExp(200);
         playerRef.current = {
             x: PLAYER_DEFAULT_X, y: GROUND_Y, vy: 0, isJumping: false, isFalling: false, isPressing: false, jumpCount: 0, maxJumps: 1, invulFrame: 0,
             speedBoost: 1, shootingRate: 0, shootingTimer: 0, barrier: false, barrierRegen: false, barrierTimer: 0, expMult: 1,
@@ -453,7 +461,7 @@ const GoHomeDash: React.FC<{
         const handleKeyDown = (e: KeyboardEvent) => {
             if (e.code === 'Escape') {
                 e.preventDefault();
-                onBack();
+                if (exitEnabled) onBack();
                 return;
             }
             if (e.code !== 'Space' && e.code !== 'ArrowUp' && e.code !== 'KeyW') return;
@@ -1178,7 +1186,7 @@ const GoHomeDash: React.FC<{
     };
 
     return (
-        <div className="mini-game-go-home-screen w-full h-full bg-slate-950 text-white font-mono flex flex-col items-center p-4 relative overflow-hidden touch-none select-none"
+        <div className={`mini-game-go-home-screen w-full h-full bg-slate-950 text-white font-mono flex flex-col items-center p-4 relative overflow-hidden touch-none select-none${compact ? ' rpg-go-home-compact' : ''}`}
             data-gamepad-go-home-live={gameState === 'PLAYING' ? 'true' : undefined}
             onPointerDown={handlePointerDown} onPointerUp={handlePointerUp} onPointerLeave={handlePointerUp}>
             
@@ -1228,7 +1236,7 @@ const GoHomeDash: React.FC<{
                     <div className="w-16 h-1 bg-orange-500 mb-8 rounded-full"></div>
                     <p className="text-slate-400 mb-10 text-center px-8 text-sm md:text-base leading-relaxed">{t('障害物をよけて帰宅せよ！')}<br/>{t('ミサイルやスキルを駆使してゴールを目指せ。')}</p>
                     <button data-gamepad-initial-choice onClick={(e) => { e.stopPropagation(); initGame(); audioService.playSound('select'); }} className="bg-white text-black px-12 py-5 rounded-3xl font-black text-2xl hover:bg-orange-400 hover:text-white transition-all transform hover:scale-110 shadow-[0_8px_0_#ccc] flex items-center gap-4 active:translate-y-1 active:shadow-none"><Play fill="currentColor" size={32} /> {t('START DASH')}</button>
-                    <button onClick={(e) => { e.stopPropagation(); onBack(); }} className="mt-12 text-slate-500 hover:text-white flex items-center gap-2 font-bold transition-colors"><ArrowLeft size={20}/> {t('職員室に戻る')}</button>
+                    {exitEnabled && <button onClick={(e) => { e.stopPropagation(); onBack(); }} className="mt-12 text-slate-500 hover:text-white flex items-center gap-2 font-bold transition-colors"><ArrowLeft size={20}/> {t('職員室に戻る')}</button>}
                 </div>
             )}
 
@@ -1258,7 +1266,7 @@ const GoHomeDash: React.FC<{
                     <Skull size={80} className="text-red-600 mb-6 animate-pulse" /><h2 className="text-7xl font-black text-white mb-2 italic tracking-tighter uppercase">Failed</h2><div className="text-2xl text-yellow-400 mb-12 font-black bg-black/60 px-8 py-3 rounded-full border-2 border-yellow-500/50 italic shadow-xl">DISTANCE: {score.toLocaleString()}m</div>
                     <div className="flex flex-col gap-4 w-64">
                         <button data-gamepad-initial-choice onClick={(e) => { e.stopPropagation(); initGame(); audioService.playSound('select'); }} className="w-full bg-white text-black py-4 rounded-2xl font-black text-xl shadow-[0_8px_0_#ccc] hover:bg-slate-200 transition-all active:translate-y-1 active:shadow-none">TRY AGAIN</button>
-                        <button onClick={(e) => { e.stopPropagation(); onBack(); }} className="w-full bg-slate-800 text-white py-4 rounded-2xl font-black text-xl border-2 border-white/10 hover:bg-slate-700 transition-colors">EXIT</button>
+                        {exitEnabled && <button onClick={(e) => { e.stopPropagation(); onBack(); }} className="w-full bg-slate-800 text-white py-4 rounded-2xl font-black text-xl border-2 border-white/10 hover:bg-slate-700 transition-colors">EXIT</button>}
                     </div>
                 </div>
             )}

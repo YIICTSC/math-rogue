@@ -10245,6 +10245,44 @@ textarea {
   display: none;
 }
 
+.rpg-go-home-compact {
+  padding: 0.35rem !important;
+  gap: 0.15rem;
+}
+.rpg-go-home-compact > .go-home-hud {
+  position: relative !important;
+  inset: auto !important;
+  width: 100% !important;
+  flex: none !important;
+  margin: 0 !important;
+  padding: 0 0.2rem;
+  align-items: center !important;
+  min-height: 27px;
+}
+.rpg-go-home-compact .go-home-hud-left { gap: 0.3rem !important; }
+.rpg-go-home-compact .go-home-hud-left > .flex.gap-1 svg { width: 15px; height: 15px; }
+.rpg-go-home-compact .go-home-hud-left > .w-48 { width: 6.5rem !important; padding: 0.2rem 0.35rem !important; }
+.rpg-go-home-compact .go-home-hud-left > .w-48 .text-\[10px\] { font-size: 7px !important; }
+.rpg-go-home-compact .go-home-distance { max-width: 34%; padding: 0 !important; }
+.rpg-go-home-compact .go-home-distance .text-3xl { font-size: 1rem !important; line-height: 1 !important; }
+.rpg-go-home-compact .go-home-distance .text-\[8px\] { font-size: 6px !important; }
+.rpg-go-home-compact > .flex-grow { width: 100%; flex: 1 1 0%; min-height: 0; }
+.rpg-go-home-compact > .flex-grow > .w-full { height: 100%; min-height: 0; }
+.rpg-go-home-compact > .flex-grow .relative.p-1 { height: 100%; padding: 0.1rem !important; border-width: 1px !important; border-radius: 0.55rem !important; }
+.rpg-go-home-compact canvas { display: block; max-width: 100%; max-height: 100%; border-radius: 0.4rem !important; }
+.rpg-go-home-compact .go-home-mini-guide,
+.rpg-go-home-compact > .mt-4 { display: none !important; }
+.rpg-go-home-compact > div.absolute { padding: 0.45rem !important; }
+.rpg-go-home-compact > div.absolute h2 { margin-bottom: 0.3rem !important; font-size: clamp(1rem, 4vw, 1.8rem) !important; }
+.rpg-go-home-compact > div.absolute p { margin: 0.2rem 0 0.45rem !important; padding: 0 0.4rem !important; font-size: 0.65rem !important; line-height: 1.35 !important; }
+.rpg-go-home-compact > div.absolute button { max-width: 92%; padding: 0.35rem 0.7rem !important; font-size: 0.85rem !important; }
+.rpg-go-home-compact > div.absolute .mb-10,
+.rpg-go-home-compact > div.absolute .mb-12,
+.rpg-go-home-compact > div.absolute .mb-8,
+.rpg-go-home-compact > div.absolute .mb-6 { margin-bottom: 0.4rem !important; }
+.rpg-go-home-compact > div.absolute .w-64 { width: min(80%, 16rem) !important; gap: 0.35rem !important; }
+.rpg-go-home-compact > div.absolute .text-7xl { font-size: 1.8rem !important; }
+
 .mini-game-go-home-screen .go-home-hud-left {
   flex-direction: row !important;
   align-items: center !important;

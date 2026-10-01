@@ -115,6 +115,7 @@ export interface World {
   won: boolean;
   timeLimitMinutes: number;
   deadlineAt: number;
+  started: boolean;
   ended: boolean;
   endReason: RpgEndReason | null;
   endedAt: number | null;
@@ -143,7 +144,8 @@ export type Action = DuelAction | ActivityAction
       battleDamage?: number;
     }
   | { type: "native-learning"; correctAnswers:number }
-  | { type: "native-profile"; profile: NativeProfile };
+  | { type: "native-profile"; profile: NativeProfile }
+  | { type: "rpg-start" };
 export function random(seed: number) {
   let n = seed >>> 0;
   return () => {
@@ -502,6 +504,7 @@ export function createWorld(
     won: false,
     timeLimitMinutes: normalizedTimeLimit,
     deadlineAt: now + normalizedTimeLimit * 60 * 1000,
+    started: true,
     ended: false,
     endReason: null,
     endedAt: null,
@@ -576,6 +579,17 @@ export function applyAction(
     w.revision++;
     return true;
   };
+  if (action.type === "rpg-start") {
+    if (w.started || Object.keys(w.players)[0] !== id) return false;
+    if (Object.keys(w.players).length < 2)
+      return tell("参加者が2人以上集まると開始できます。");
+    w.started = true;
+    w.deadlineAt = now + w.timeLimitMinutes * 60 * 1000;
+    log(w, "参加者が集合し、冒険が始まりました！");
+    w.revision++;
+    return true;
+  }
+  if (!w.started && action.type !== "native-profile") return false;
   if (action.type.startsWith("duel-"))return applyDuel(w,p,action as DuelAction,now);
   if (action.type.startsWith("native-"))
     return applyNativeAction(w, p, action, tell);
@@ -691,7 +705,7 @@ function endWorld(w: World, reason: RpgEndReason, now = Date.now()) {
 }
 
 export function advanceWorld(w: World, now = Date.now()) {
-  if (!w.ended && now >= w.deadlineAt) endWorld(w, "timeout", now);
+  if (w.started && !w.ended && now >= w.deadlineAt) endWorld(w, "timeout", now);
   advanceActivities(w,now);
   advanceDuels(w,now);
   if (

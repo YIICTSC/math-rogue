@@ -16,7 +16,7 @@ import {
   type RpgAdventureSetup,
 } from "./setup";
 
-const RPG_PROTOCOL_VERSION = 10;
+const RPG_PROTOCOL_VERSION = 11;
 // Avoid BinaryPack's recursive encoding of 16,896 individual terrain cells.
 // Retain binary transport so PeerJS can still chunk large room snapshots.
 type WireWorld = Omit<World, "tiles"> & { tiles: World["tiles"] | string };
@@ -191,6 +191,7 @@ export class RpgRoom {
       Date.now(),
       gameMode,
     );
+    this.world.started = false;
     addPlayer(this.world, this.selfId, name);
     peer.on("connection", (conn) => {
       // Bound even unauthenticated/pending channels.
@@ -234,6 +235,11 @@ export class RpgRoom {
           !this.pendingInviteNames.has(conn.peer)
         ) {
           clearTimeout(handshake);
+          if (this.world.started) {
+            conn.send({ type: "error", message: "冒険はすでに始まっています。" });
+            setTimeout(() => conn.close(), 300);
+            return;
+          }
           const name = data.name.trim().slice(0, 16) || "冒険者";
           if (data.admission === "prepare") {
             if (!this.world.setup) {
@@ -265,6 +271,12 @@ export class RpgRoom {
           isNativeProfile(data.profile)
         ) {
           clearTimeout(handshake);
+          if (this.world.started) {
+            this.pendingInviteNames.delete(conn.peer);
+            conn.send({ type: "error", message: "冒険はすでに始まっています。" });
+            setTimeout(() => conn.close(), 300);
+            return;
+          }
           const name = this.pendingInviteNames.get(conn.peer)!;
           if (!addPlayer(this.world, conn.peer, name)) {
             conn.send({ type: "error", message: "部屋が満員です。" });

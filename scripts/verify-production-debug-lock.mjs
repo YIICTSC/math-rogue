@@ -19,6 +19,7 @@ for (const scriptName of ['build', 'build:ios', 'build:android', 'build:steam', 
 }
 
 const requiredGuards = [
+  'const isAdminDebugLaunch = DEBUG_FEATURES_ENABLED',
   'if (!DEBUG_FEATURES_ENABLED || gamepadTestScreenOpenedRef.current',
   'onClick={DEBUG_FEATURES_ENABLED ? handleTitleClick : undefined}',
   '{DEBUG_FEATURES_ENABLED && gameState.screen === GameScreen.DEBUG_MENU',

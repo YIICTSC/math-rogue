@@ -34,6 +34,10 @@ try {
   send(host, { type: 'lesson', selection }); await wait(() => host.view.title === 'Server lesson');
   const golfers = [host]; for (let i = 1; i < 40; i++) golfers.push(await connect({ create: false, code: host.code, name: `Player ${i}` }));
   await wait(() => golfers.every(c => c.view.players.length === 40));
+  const avatar={species:4,body:4,outfit:2,hair:1,accessory:0,hairStyle:0,kart:0,expression:1};
+  send(golfers[1],{type:'command',command:{type:'avatar',avatar}});
+  await wait(()=>golfers.every(c=>c.view.players.find(p=>p.id===golfers[1].id).avatar.species===4),'avatar shared with all players');
+  assert.deepEqual(host.view.players.find(p=>p.id===golfers[1].id).avatar,avatar);
   const overflow = await connect({ create: false, code: host.code, name: 'Overflow' }); assert(overflow.errors.length || overflow.closed);
   send(golfers[1], { type: 'start' }); await wait(() => golfers[1].errors.length); assert.equal(host.view.phase, 'lobby');
   send(host, { type: 'start' }); await wait(() => golfers.every(c => c.view.phase === 'playing'));
@@ -49,6 +53,7 @@ try {
   }
   for (let n = 0; n < golfers.length; n++) { const c = golfers[n], me = c.view.players.find(p => p.id === c.id); assert.equal(me.correct, n % 4, 'server grades answers, ignoring client-supplied correct count'); send(c, { type: 'command', command: { type: 'shot', shotId: me.shotId, club: 'iron', angle: 0, power: .7 } }); send(c, { type: 'command', command: { type: 'shot', shotId: me.shotId, club: 'driver', angle: 0, power: 1 } }); }
   await wait(() => host.view.players.every(p => p.strokes === 1));
+  assert(host.view.players.every(p=>Number.isFinite(p.vx)&&Number.isFinite(p.vy)&&p.shotClub==='iron'),'kinematics and club are available for smooth rendering');
   host.socket.close(); await wait(() => golfers[1].host, 'owner handoff');
   await wait(() => golfers[1].view.players.filter(p => p.connected).every(p => p.phase === 'ready'), 'server continues after owner leaves', 15000);
   assert(golfers[1].view.players.filter(p => p.connected).every(p => p.strokes === 1 && p.z > 20));

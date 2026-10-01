@@ -35,13 +35,30 @@ try {
   await Promise.race([later.waitFor(), page.locator('.gg-root').waitFor()]);
   if (await later.isVisible()) { await later.click(); if (!await page.locator('.gg-root').count()) await page.getByRole('button', { name: 'GAKURO GOLF 40人オンラインゴルフ' }).click(); }
   console.log('Debug golf entry opened.');
+  await page.getByRole('button', { name: 'キャラクタークリエイト', exact: true }).click();
+  const creator = page.getByRole('dialog', { name: 'キャラクタークリエイト' });
+  await creator.getByRole('button', { name: 'ウサギ', exact: true }).click();
+  await creator.getByRole('button', { name: 'ウインク', exact: true }).click();
+  await page.waitForFunction(() => document.querySelector('.gg-character-preview canvas')?.dataset.golferCount === '1');
+  await page.waitForTimeout(900);
+  await page.screenshot({ path: 'tmp/golf-qa/character-create.png' });
+  await page.setViewportSize({ width: 390, height: 844 });
+  assert.equal(await creator.evaluate(el=>el.scrollWidth>el.clientWidth),false);
+  await page.screenshot({path:'tmp/golf-qa/character-mobile.png'});
+  await creator.getByRole('button', { name: '確定', exact: true }).click();
+  assert.equal(await page.evaluate(()=>JSON.parse(localStorage.getItem('gakuro-golf-avatar-v1')).species),3);
+  await page.setViewportSize({ width: 1440, height: 1000 });
   await page.getByRole('button', { name: 'ひとりで練習', exact: true }).click();
   await page.getByRole('heading', { name: 'モード選択', exact: true }).waitFor();
+  assert.equal(await page.locator('.main-mode-selection-screen').evaluate(el=>!!el.closest('.gg-root')),false,'main picker is isolated from golf theme');
   await page.screenshot({ path: 'tmp/golf-qa/lesson-picker.png' });
   // Exercise the existing unit buttons and their real onSelectMode callback.
   await page.getByRole('button', { name: /^1ケタのたし算/ }).first().click();
+  assert.equal(await page.getByRole('button', {name:/^1ケタのたし算/}).first().evaluate(el=>getComputedStyle(el).borderColor),'rgb(255, 255, 255)');
+  assert.equal(await page.locator('.mode-category-button.border-yellow-400').evaluate(el=>getComputedStyle(el).borderColor),'rgb(250, 204, 21)');
   await page.getByRole('button', { name: 'この条件で開始', exact: true }).click();
   await page.getByRole('button', { name: 'ラウンド開始', exact: true }).click();
+  assert.equal(await page.evaluate(()=>window.__golf.view.players[0].avatar.species),3);
   await page.getByRole('button', { name: '3問に挑戦', exact: true }).click();
   await page.locator('.gg-quiz').waitFor();
   await page.screenshot({ path: 'tmp/golf-qa/desktop-quiz.png' });
@@ -58,12 +75,28 @@ try {
   }
   await page.getByRole('button', { name: 'ショット！', exact: true }).waitFor();
   assert.match(await page.locator('.gg-bonus').innerText(), /100%/);
+  await page.waitForFunction(()=>Number(document.querySelector('.gg-canvas')?.dataset.trajectoryHeight)>5);
+  await page.getByRole('button',{name:'パター',exact:true}).click();
+  await page.waitForFunction(()=>Number(document.querySelector('.gg-canvas')?.dataset.trajectoryHeight)===.55);
+  await page.getByRole('button',{name:'ドライバー',exact:true}).click();
+  await page.waitForFunction(()=>Number(document.querySelector('.gg-canvas')?.dataset.trajectoryHeight)>10);
   await page.screenshot({ path: 'tmp/golf-qa/desktop-aim.png' });
+  await page.setViewportSize({width:390,height:844});
+  await page.waitForTimeout(300);
+  assert(await page.locator('.gg-stage>.gg-canvas').evaluate(el=>el.getBoundingClientRect().bottom<=document.querySelector('.gg-play-ui').getBoundingClientRect().top),'portrait controls leave the character and arc visible');
+  await page.screenshot({path:'tmp/golf-qa/mobile-aim.png'});
+  await page.setViewportSize({width:1440,height:1000});
   await page.getByRole('button', { name: 'ショット！', exact: true }).click();
   await page.waitForFunction(() => window.__golf.view.players[0].strokes === 1);
+  await page.waitForFunction(()=>Math.abs(Number(document.querySelector('.gg-canvas')?.dataset.swing))>.3);
+  await page.waitForFunction(()=>Number(document.querySelector('.gg-canvas')?.dataset.ballHeight)>4);
+  await page.screenshot({path:'tmp/golf-qa/flight.png'});
   await page.getByRole('button', { name: '3問に挑戦', exact: true }).waitFor();
   assert.equal(await page.getByRole('button', { name: 'ショット！', exact: true }).count(), 0);
   await page.evaluate(() => window.__golfApp.language('ENGLISH'));
+  await page.getByRole('button',{name:'Create your character',exact:true}).click();
+  assert.equal(await page.getByRole('dialog').getByText('Customize freely before the round starts.',{exact:true}).count(),1);
+  await page.getByRole('dialog').getByRole('button',{name:'Confirmed',exact:true}).click();
   // The existing App remounts its shell on language changes; start a fresh English practice.
   await page.getByRole('button', { name: 'Practice solo', exact: true }).click();
   await page.evaluate(() => window.__golf.selectLesson({ mode: 'ADDITION', title: 'Golf arithmetic' }));

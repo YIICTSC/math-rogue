@@ -4,6 +4,31 @@ const server = await createServer({ server: { middlewareMode: true, watch: null,
 try {
   const { createGolf, addPlayer, startGolf, command, tick, viewFor, benefits, disconnectPlayer } = await server.ssrLoadModule('/src/mini-games/gakuro-golf/engine.ts');
   const { HOLES } = await server.ssrLoadModule('/src/mini-games/gakuro-golf/course.ts');
+  const { BallMotion, BALL_RENDER_DELAY, predictShot } = await server.ssrLoadModule('/src/mini-games/gakuro-golf/motion.ts');
+  const { defaultAvatar } = await server.ssrLoadModule('/src/mini-games/gakuro-kart/avatar.ts');
+  const { validView } = await server.ssrLoadModule('/src/mini-games/gakuro-golf/protocol.ts');
+  const lobby = createGolf(); addPlayer(lobby, 'styled', 'Styled');
+  const avatar = { ...defaultAvatar(), species: 3, expression: 6, hairStyle: 4 };
+  assert(command(lobby, 'styled', { type: 'avatar', avatar }));
+  assert.equal(command(lobby, 'styled', { type: 'avatar', avatar: { ...avatar, species: 999 } }), false);
+  const styled = viewFor(lobby, 'styled'); assert(validView(styled)); assert.deepEqual(styled.players[0].avatar, avatar);
+  styled.players[0].avatar.species = 0; assert.equal(lobby.players.styled.avatar.species, 3, 'public avatar is a copy');
+  const oldView = viewFor(lobby, 'styled'); for (const k of ['avatar','vx','vy','vz','origin','flightTime','shotClub','shotAngle']) delete oldView.players[0][k];
+  assert(validView(oldView), 'old Render snapshots remain compatible');
+  startGolf(lobby, 'Test'); assert.equal(command(lobby, 'styled', { type: 'avatar', avatar }), false);
+  const player = { ...viewFor(lobby,'styled').players[0], correct: 3 };
+  const flight = predictShot(player,'driver',0,1), putt = predictShot(player,'putter',0,.7);
+  assert(Math.max(...flight.map(p=>p.y)) > 20, 'driver preview has a high arc');
+  assert(putt.every(p=>p.y === .55), 'putter preview stays on the ground');
+  assert(predictShot(player,'iron',0,.3).at(-1).z < predictShot(player,'iron',0,1).at(-1).z, 'power changes predicted range');
+  const motion = new BallMotion();
+  for (const at of [0,200,400]) { const s = at/1000; motion.push({...player,x:4*s,y:10*s-4.9*s*s,z:20*s,vx:4,vy:10-9.8*s,vz:20,phase:'moving'},at); }
+  for (let at=205;at<395;at+=1000/60) {
+    const rendered=motion.sample(at+BALL_RENDER_DELAY), s=at/1000;
+    assert(Math.abs(rendered.x-4*s)<.00001 && Math.abs(rendered.y-(10*s-4.9*s*s))<.00001, '60 Hz frames follow the curve between 5 Hz snapshots');
+  }
+  motion.push({...player,x:0,y:0,z:0,phase:'ready',penalty:true},600);
+  assert.equal(motion.sample(600+BALL_RENDER_DELAY).y,0,'penalty return clears stale flight');
   const lesson = () => ({ title: 'Test', questions: Array.from({ length: 3 }, (_, i) => ({ id: `q${i}`, mode: 'ADDITION', question: '1 + 1 = ?', options: ['2', '3', '4', '5'], correct: 0 })) });
   const setup = (count = 1) => { const w = createGolf(12345); for (let i = 0; i < count; i++) assert(addPlayer(w, `p${i}`, `Player ${i}`)); assert(startGolf(w, 'Test')); return w; };
   const solve = (w, id = 'p0', correct = 3) => {

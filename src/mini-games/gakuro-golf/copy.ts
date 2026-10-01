@@ -1,4 +1,6 @@
 const copy: [string, string, string][] = [
+  ['ラウンド開始前まで自由に変更できます。', 'Customize freely before the round starts.', 'ラウンドかいしまえまで じゆうに へんこうできます。'],
+  ['服の色', 'Outfit color', 'ふくの いろ'],
   ['サーバーが試合を進行します。ホストの離席でもプレイできます。', 'The server runs the round. Play continues when the host steps away.', 'サーバーが しあいを しんこうします。ホストの りせきでも プレイできます。'],
   ['サーバーとの接続が終了しました。部屋に入り直してください。', 'Disconnected from the server. Please rejoin the room.', 'サーバーとの せつぞくが しゅうりょうしました。へやに はいりなおしてください。'],
   ['接続先の設定が不正です。', 'Invalid server URL configuration.', 'せつぞくさきの せっていが ふせいです。'],

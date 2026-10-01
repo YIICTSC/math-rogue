@@ -1669,6 +1669,9 @@ const App: React.FC = () => {
     const rpgDungeonMessagesRef = useRef<Array<{event:P2PEvent;from:string}>>([]);
     const rpgCorrectAnswersRef = useRef(0);
     const rpgLastTokenRef = useRef<string | null>(null);
+    const isAdminDebugLaunch = DEBUG_FEATURES_ENABLED
+        && typeof window !== 'undefined'
+        && new URLSearchParams(window.location.search).get('adminDebug') === '1';
     const rpgInviteCode = useMemo(() => (
         typeof window === 'undefined' ? '' : getRpgRoomCodeFromUrl(window.location.href)
     ), []);
@@ -2602,10 +2605,10 @@ const App: React.FC = () => {
         return true;
     }, [isAssignmentChallengeOnlyLocked, totalMathCorrect]);
 
-    // GitHub Pages ships the debug code so it can be reached during QA, but it
-    // must still start as a normal game. The hidden release-note gesture is
-    // what activates the rest of the debug surface for the current session.
-    const [isDebugMode, setIsDebugMode] = useState(false);
+    // GitHub Pages ships debug tools for QA. They stay disabled on normal
+    // visits; administrators can activate them for the title screen with
+    // ?adminDebug=1. Store builds cannot use this route because the feature flag is off.
+    const [isDebugMode, setIsDebugMode] = useState(isAdminDebugLaunch);
     const isDebugModeActive = DEBUG_FEATURES_ENABLED && isDebugMode;
     useEffect(() => {
         if (craftInviteOpen && !OFFLINE_DISTRIBUTABLE) {
@@ -5181,10 +5184,14 @@ const App: React.FC = () => {
         // GitHub Pages exposes the hidden entry point, not an active debug
         // session. Store builds also clear these keys as before.
         storageService.clearDebugSettings();
-        setIsDebugMode(false);
+        setIsDebugMode(isAdminDebugLaunch);
         setIsMathDebugSkipped(false);
-        setIsDebugHpOne(false);
-        setIsMiniGameDebugUnlocked(false);
+        setIsDebugHpOne(isAdminDebugLaunch);
+        setIsMiniGameDebugUnlocked(isAdminDebugLaunch);
+        if (isAdminDebugLaunch) {
+            storageService.saveDebugHpOne(true);
+            storageService.saveDebugMiniGameUnlock(true);
+        }
         setTotalMathCorrect(storageService.getMathCorrectCount());
 
         audioService.setBgmMode(appSettings.bgmMode);
