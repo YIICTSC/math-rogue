@@ -22,6 +22,7 @@ const NON_RESUMABLE_GAME_SCREENS = new Set<GameScreen>([
   GameScreen.START_MENU,
   GameScreen.RPG_ONLINE,
   GameScreen.GAKURO_KART,
+  GameScreen.GAKURO_GOLF,
   GameScreen.GAME_OVER,
   GameScreen.ENDING,
   GameScreen.MAGIC_ROMANCE_ENDING,

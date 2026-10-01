@@ -1,0 +1,119 @@
+import { validLesson, type KartLesson, type KartQuestion } from '../gakuro-kart/learning';
+import { HOLES, distance, surface, type Point } from './course';
+export const MAX_PLAYERS = 40;
+export const MAX_STROKES = 12;
+export const CLUBS = {
+  driver: { speed: 44, loft: 38, name: 'ドライバー' },
+  iron: { speed: 30, loft: 48, name: 'アイアン' },
+  wedge: { speed: 18, loft: 58, name: 'ウェッジ' },
+  putter: { speed: 10, loft: 0, name: 'パター' },
+} as const;
+export type Club = keyof typeof CLUBS;
+export const benefits = (correct: number) => ({ power: [.55, .7, .85, 1][correct] ?? .55, spread: [9, 6, 3, .7][correct] ?? 9 });
+export type PlayerPhase = 'ready' | 'quiz' | 'aim' | 'moving' | 'holed' | 'finished';
+export interface Golfer {
+  id: string; name: string; slot: number; connected: boolean; hole: number; strokes: number; scores: number[];
+  x: number; y: number; z: number; vx: number; vy: number; vz: number;
+  phase: PlayerPhase; correct: number; totalCorrect: number; shotId: number;
+  lesson: KartLesson | null; answers: number[]; feedback: number | null;
+  origin: Point; flightTime: number; penalty: boolean; capped: boolean;
+}
+export interface GolfWorld { phase: 'lobby' | 'playing' | 'result'; players: Record<string, Golfer>; seed: number; title: string; paused: boolean }
+export type GolfCommand =
+  | { type: 'quiz' }
+  | { type: 'answer'; shotId: number; index: number; option: number }
+  | { type: 'continue'; shotId: number; index: number }
+  | { type: 'shot'; shotId: number; club: Club; angle: number; power: number }
+  | { type: 'next' };
+export type PublicGolfer = Pick<Golfer, 'id' | 'name' | 'slot' | 'connected' | 'hole' | 'strokes' | 'scores' | 'x' | 'y' | 'z' | 'phase' | 'correct' | 'totalCorrect' | 'shotId' | 'penalty' | 'capped'>;
+export interface GolfView {
+  phase: GolfWorld['phase']; title: string; paused: boolean; players: PublicGolfer[];
+  quiz: null | { shotId: number; index: number; question: Omit<KartQuestion, 'correct'>; selected: number | null; answer: number | null };
+}
+export const createGolf = (seed = 1): GolfWorld => ({ phase: 'lobby', players: Object.create(null), seed: seed >>> 0 || 1, title: '', paused: false });
+export function addPlayer(w: GolfWorld, id: string, name: string) {
+  if (w.phase !== 'lobby' || Object.keys(w.players).length >= MAX_PLAYERS || Object.hasOwn(w.players, id) || !id || id.length > 100 || ['__proto__', 'constructor', 'prototype'].includes(id)) return false;
+  const slots = new Set(Object.values(w.players).map(p => p.slot)); let slot = 0; while (slots.has(slot)) slot++;
+  w.players[id] = { id, name: name.trim().slice(0, 16) || 'Player', slot, connected: true, hole: 0, strokes: 0, scores: [], x: 0, y: 0, z: 0, vx: 0, vy: 0, vz: 0, phase: 'ready', correct: 0, totalCorrect: 0, shotId: 0, lesson: null, answers: [], feedback: null, origin: { x: 0, z: 0 }, flightTime: 0, penalty: false, capped: false }; return true;
+}
+export function startGolf(w: GolfWorld, title: string) {
+  if (w.phase !== 'lobby' || !title || !Object.keys(w.players).length) return false;
+  w.title = title.slice(0, 160); w.phase = 'playing'; return true;
+}
+function finishCheck(w: GolfWorld) {
+  if (w.phase === 'playing' && Object.values(w.players).every(p => !p.connected || p.phase === 'finished')) w.phase = 'result';
+}
+export function disconnectPlayer(w: GolfWorld, id: string) {
+  if (!w.players[id]) return;
+  if (w.phase === 'lobby') delete w.players[id]; else w.players[id].connected = false;
+  finishCheck(w);
+}
+function completeHole(p: Golfer) { p.phase = 'holed'; p.scores[p.hole] = p.strokes; p.vx = p.vy = p.vz = 0; }
+function settle(p: Golfer) {
+  p.vx = p.vy = p.vz = p.y = 0;
+  if (p.strokes >= MAX_STROKES) { p.capped = true; completeHole(p); } else p.phase = 'ready';
+}
+function random(w: GolfWorld) { w.seed ^= w.seed << 13; w.seed ^= w.seed >>> 17; w.seed ^= w.seed << 5; return (w.seed >>> 0) / 4294967296; }
+export function command(w: GolfWorld, id: string, raw: unknown, makeLesson?: () => KartLesson): boolean {
+  if (w.phase !== 'playing' || w.paused || !raw || typeof raw !== 'object') return false;
+  const c = raw as GolfCommand, p = w.players[id]; if (!p?.connected) return false;
+  if (c.type === 'quiz' && p.phase === 'ready' && makeLesson) {
+    const lesson = makeLesson(); if (!validLesson(lesson)) return false;
+    p.lesson = lesson; p.answers = []; p.feedback = null; p.correct = 0; p.shotId++; p.phase = 'quiz'; return true;
+  }
+  if (c.type === 'answer' && p.phase === 'quiz' && p.lesson && p.feedback === null && c.shotId === p.shotId && c.index === p.answers.length && Number.isInteger(c.option) && c.option >= 0 && c.option < 4) {
+    const q = p.lesson.questions[c.index]; if (!q) return false;
+    p.answers.push(c.option); p.feedback = q.correct;
+    if (c.option === q.correct) { p.correct++; p.totalCorrect++; } return true;
+  }
+  if (c.type === 'continue' && p.phase === 'quiz' && p.feedback !== null && c.shotId === p.shotId && c.index === p.answers.length - 1) {
+    p.feedback = null; if (p.answers.length === 3) { p.phase = 'aim'; p.lesson = null; } return true;
+  }
+  if (c.type === 'shot' && p.phase === 'aim' && c.shotId === p.shotId && Object.hasOwn(CLUBS, c.club) && Number.isFinite(c.angle) && Math.abs(c.angle) <= Math.PI && Number.isFinite(c.power) && c.power >= .05 && c.power <= 1) {
+    const club = CLUBS[c.club], bonus = benefits(p.correct), lie = surface(HOLES[p.hole], p);
+    const angle = c.angle + (random(w) * 2 - 1) * bonus.spread * Math.PI / 180;
+    const speed = club.speed * Math.sqrt(c.power * bonus.power) * (lie === 'sand' ? .65 : lie === 'rough' ? .82 : 1), loft = club.loft * Math.PI / 180;
+    p.origin = { x: p.x, z: p.z }; p.vx = Math.sin(angle) * speed * Math.cos(loft); p.vz = Math.cos(angle) * speed * Math.cos(loft); p.vy = Math.sin(loft) * speed;
+    p.strokes++; p.phase = 'moving'; p.flightTime = 0; p.penalty = false; return true;
+  }
+  if (c.type === 'next' && p.phase === 'holed') {
+    if (p.hole === HOLES.length - 1) p.phase = 'finished';
+    else { p.hole++; p.strokes = 0; p.x = p.y = p.z = 0; p.phase = 'ready'; p.correct = 0; p.penalty = p.capped = false; }
+    finishCheck(w); return true;
+  }
+  return false;
+}
+export function tick(w: GolfWorld, dt: number) {
+  if (w.phase !== 'playing' || w.paused || !Number.isFinite(dt) || dt <= 0 || dt > .1) return;
+  for (const p of Object.values(w.players)) {
+    if (p.phase !== 'moving' || !p.connected) continue;
+    const hole = HOLES[p.hole], previous = { x: p.x, z: p.z };
+    p.flightTime += dt;
+    if (p.y > 0 || p.vy > 0) { p.vy -= 9.8 * dt; p.vx += hole.wind.x * dt; p.vz += hole.wind.z * dt; }
+    p.x += p.vx * dt; p.z += p.vz * dt; p.y += p.vy * dt;
+    if (p.y <= 0) {
+      p.y = 0;
+      const lie = surface(hole, p);
+      if (lie === 'water' || lie === 'ob') { p.x = p.origin.x; p.z = p.origin.z; p.strokes++; p.penalty = true; settle(p); continue; }
+      const speed = Math.hypot(p.vx, p.vz), dx = p.x - previous.x, dz = p.z - previous.z;
+      const t = Math.max(0, Math.min(1, ((hole.cup.x - previous.x) * dx + (hole.cup.z - previous.z) * dz) / (dx * dx + dz * dz || 1)));
+      const near = distance(hole.cup, { x: previous.x + dx * t, z: previous.z + dz * t });
+      if (near < .9 && speed < 9 && Math.abs(p.vy) < 5) { p.x = hole.cup.x; p.z = hole.cup.z; completeHole(p); continue; }
+      if (p.vy < -2) { p.vy *= -.25; p.vx *= .72; p.vz *= .72; } else {
+        p.vy = 0; const friction = lie === 'green' ? 1.2 : lie === 'sand' ? 8 : lie === 'rough' ? 6 : 3;
+        const ratio = Math.max(0, speed - friction * dt) / (speed || 1); p.vx *= ratio; p.vz *= ratio;
+        if (speed < .15) settle(p);
+      }
+    }
+    if (p.flightTime > 30) settle(p);
+  }
+}
+export function viewFor(w: GolfWorld, id: string): GolfView {
+  const p = w.players[id]; let quiz: GolfView['quiz'] = null;
+  if (p?.phase === 'quiz' && p.lesson) {
+    const index = p.feedback === null ? p.answers.length : p.answers.length - 1;
+    const { correct: _secret, ...question } = p.lesson.questions[index];
+    quiz = { shotId: p.shotId, index, question, selected: p.feedback === null ? null : p.answers[index], answer: p.feedback };
+  }
+  return { phase: w.phase, title: w.title, paused: w.paused, quiz, players: Object.values(w.players).map(({ id, name, slot, connected, hole, strokes, scores, x, y, z, phase, correct, totalCorrect, shotId, penalty, capped }) => ({ id, name, slot, connected, hole, strokes, scores: [...scores], x, y, z, phase, correct, totalCorrect, shotId, penalty, capped })) };
+}

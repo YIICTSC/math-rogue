@@ -1,3 +1,4 @@
+import { GOLF_ENGLISH, GOLF_HIRAGANA } from '../mini-games/gakuro-golf/copy';
 import { RPG_ACTIVITY_ENGLISH, RPG_ACTIVITY_HIRAGANA } from '../rpg/activityCopy';
 import { KART_ENGLISH, KART_HIRAGANA } from '../mini-games/gakuro-kart/copy';
 import { CRAFT_ENGLISH, CRAFT_HIRAGANA } from '../mini-games/gakuro-craft/copy';
@@ -6,6 +7,7 @@ export const ENGLISH_DEBUG_UI_EXACT: Record<string, string> = {
   ...RPG_ACTIVITY_ENGLISH,
   ...KART_ENGLISH,
   ...CRAFT_ENGLISH,
+  ...GOLF_ENGLISH,
   'シーンを開始できませんでした。部屋に入り直してください。': 'The scene could not start. Please rejoin the room.',
   '部屋を作る': 'Create a room',
   '招待URLをコピー': 'Copy invite URL',
@@ -216,6 +218,7 @@ export const HIRAGANA_DEBUG_UI_EXACT: Record<string, string> = {
   ...RPG_ACTIVITY_HIRAGANA,
   ...KART_HIRAGANA,
   ...CRAFT_HIRAGANA,
+  ...GOLF_HIRAGANA,
   'シーンを開始できませんでした。部屋に入り直してください。': 'シーンを はじめられませんでした。へやに はいりなおしてください。',
   '部屋を作る': 'へやを つくる',
   '招待URLをコピー': 'しょうたいURLを コピー',

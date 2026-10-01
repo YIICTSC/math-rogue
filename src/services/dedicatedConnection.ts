@@ -7,7 +7,7 @@ export class DedicatedConnection {
   private closed = false;
   private abort = new AbortController();
   constructor(private receive: (packet: any) => boolean, private lost: () => void) {}
-  async open(game: 'kart' | 'craft', hello: object) {
+  async open(game: 'kart' | 'craft' | 'golf', hello: object) {
     const url = new URL(onlineServerUrl()!);
     url.protocol = ['http:', 'ws:'].includes(url.protocol) ? 'ws:' : 'wss:';
     url.pathname = `/${game}`; url.search = ''; url.hash = '';
